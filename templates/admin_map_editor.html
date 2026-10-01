@@ -4011,7 +4011,10 @@ function _grilleTexteTopologie(data) {
 	const t = data.topologie || {};
 	const libelle = (data.profils || {})[data.profil] || data.profil || '?';
 	const parts = [`réglage ${libelle}`];
-	if ((t.rues || []).length) parts.push(`${t.rues.length} case(s) de rue ouverte(s)`);
+	if ((t.rues || []).length) {
+		parts.push(`${t.rues.length} case(s) de rue ouverte(s)`
+			+ (t.rues_dehors ? ` dont ${t.rues_dehors} hors les murs` : ''));
+	}
 	if (t.enceinte) {
 		parts.push(t.murs_nav === false
 			? `enceinte fermée par le terrain (${(t.rempart || []).length} case(s) du pourtour passée(s) à 0)`

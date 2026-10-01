@@ -108,6 +108,11 @@ PROFILS_GRILLE = {
 		# retenue si elle couvre au moins `enceinte_part_min` de la carte.
 		"enceinte_rayon": 2,
 		"enceinte_part_min": 0.10,
+		# Cadre de parchemin (`masque_cadre`) : anneau extérieur bâti à 80 % au moins, sur
+		# 3 cases de profondeur au plus. Reims : anneau entièrement bâti ; Auxerre et
+		# Lutèce : anneau surtout libre, aucun cadre.
+		"cadre_part": 0.8,
+		"cadre_profondeur": 3,
 		# ── Rues (`tracer_rues`) ─────────────────────────────────────────────────────
 		# Une rue fait 6 à 10 px, la case 16 : la couleur MOYENNE la noie dans les toits.
 		# Elle reparaît à l'échelle de la sous-case (4 px) : sous les cases que l'auteur a
@@ -122,8 +127,15 @@ PROFILS_GRILLE = {
 		# 0,71 → 0,79, Reims 0,78 → 0,80 ; plateau large autour de ces valeurs.
 		# ⚠️ Écartés après mesure : l'ébarbage des impasses (retire plus de vraies rues que
 		# de bruit) et l'exigence de maisons de part et d'autre (aucun gain).
+		# Hors les murs (villages, faubourgs) : normalisation et coupure à part dès que le
+		# dehors compte `cases_min` cases bâties, sinon celles de l'ensemble (Lutèce : 6
+		# cases bâties dehors). Mesuré : à part ou commun, le score est le même à 0,001
+		# près (Reims 22/25 rues justes hors les murs contre 20/23 en commun ; Auxerre, peu
+		# de villages, 3/25) — ce qui a ouvert les villages de Reims, c'est le CADRE
+		# (`masque_cadre`) qui en faisait des cases intra-muros. Le réglage à part reste
+		# pour les cartes où le dehors est vaste et autrement éclairé.
 		"rues": {"rang": 1, "poids_saturation": 1.0, "decalage": 0.75, "longueur_min": 3,
-			"bord_max": 0.2},
+			"bord_max": 0.2, "cases_min": 30, "decalage_dehors": 0.75},
 	},
 	"foret": {
 		"libelle": "Forêt",
@@ -518,13 +530,19 @@ def garder_composante_principale(cells) -> list:
 SOUS_CASES = 4
 
 
-def tracer_rues(cells, fins, k, regles):
+def tracer_rues(cells, fins, k, regles, masque=None):
 	"""Ouvre (passe à 1) les cases bâties que traverse une rue trop fine pour la case.
 
 	`fins` : couleurs à plat, ligne par ligne, d'une image réduite à `cols·k × rows·k`.
 	Post-traitement : à appeler APRÈS `lisser_majorite` (qui refermerait une rue d'une case)
 	et avant la topologie (les passages raccordent ensuite ce qui reste). Ne mute pas `cells`.
 	Rend `(cells, ouvertes)`, `ouvertes` = [[x, y], …] dans l'ordre de lecture.
+
+	`masque` (enceinte, `detecter_enceinte`) : normalisation et coupure calculées À PART dedans
+	et dehors — les villages et faubourgs (rues de terre, toits épars) n'ont pas la lumière de
+	la cité, qui sinon dicterait seule le seuil. Un côté de moins de `cases_min` cases bâties
+	emprunte le réglage de l'ensemble : Otsu sur six cases ne veut rien dire. Le dehors a son
+	décalage (`decalage_dehors`). Le cadre de la carte (`masque_cadre`) n'est jamais une rue.
 	"""
 	sortie = [list(ligne) for ligne in cells]
 	reglage = (regles or {}).get("rues")
@@ -535,7 +553,9 @@ def tracer_rues(cells, fins, k, regles):
 		return sortie, []
 	largeur = W * k
 	rang = max(1, min(int(reglage.get("rang", 1)), k * k))
-	bati = [(x, y) for y in range(H) for x in range(W) if sortie[y][x] == TERRAIN_INACCESSIBLE]
+	cadre = masque_cadre(sortie, regles)
+	bati = [(x, y) for y in range(H) for x in range(W)
+		if sortie[y][x] == TERRAIN_INACCESSIBLE and not (cadre and cadre[y][x])]
 	if not bati:
 		return sortie, []
 	clarte, vivacite = {}, {}
@@ -544,13 +564,30 @@ def tracer_rues(cells, fins, k, regles):
 			saturation(fins[(y * k + j) * largeur + x * k + i]))
 			for j in range(k) for i in range(k)), reverse=True)
 		clarte[(x, y)], vivacite[(x, y)] = sous[rang - 1]
-	# Ramené aux cases bâties de CETTE image : rien d'absolu.
-	m_l, e_l = _quartiles(list(clarte.values()))
-	m_s, e_s = _quartiles(list(vivacite.values()))
 	poids = float(reglage.get("poids_saturation", 0.0))
-	score = {c: (clarte[c] - m_l) / e_l - poids * (vivacite[c] - m_s) / e_s for c in bati}
-	coupure = seuil_otsu(list(score.values()), regles.get("otsu_bacs", 64)) + float(reglage.get("decalage", 0.0))
-	candidates = {c for c in bati if score[c] >= coupure}
+	bacs = regles.get("otsu_bacs", 64)
+
+	def reglage_de(cases, decalage):
+		"""(score par case, coupure), ramenés aux cases bâties données : rien d'absolu."""
+		m_l, e_l = _quartiles([clarte[c] for c in cases])
+		m_s, e_s = _quartiles([vivacite[c] for c in cases])
+		score = {c: (clarte[c] - m_l) / e_l - poids * (vivacite[c] - m_s) / e_s for c in cases}
+		return score, seuil_otsu(list(score.values()), bacs) + decalage
+
+	decalage = float(reglage.get("decalage", 0.0))
+	commun, coupure_commune = reglage_de(bati, decalage)
+	candidates = set()
+	if masque:
+		cases_min = int(reglage.get("cases_min", 0))
+		for dedans, dec in ((True, decalage), (False, float(reglage.get("decalage_dehors", decalage)))):
+			cote = [c for c in bati if bool(masque[c[1]][c[0]]) == dedans]
+			if len(cote) >= cases_min:
+				score, coupure = reglage_de(cote, dec)
+			else:
+				score, coupure = commun, coupure_commune - decalage + dec
+			candidates |= {c for c in cote if score[c] >= coupure}
+	else:
+		candidates = {c for c in bati if commun[c] >= coupure_commune}
 
 	def libre(x, y):
 		return _dans(sortie, x, y) and sortie[y][x] == TERRAIN_LIBRE
@@ -696,6 +733,38 @@ def _eroder(masque, rayon):
 	return [[not v for v in ligne] for ligne in _dilater(inverse, rayon)]
 
 
+def masque_cadre(cells, regles) -> list:
+	"""Masque [y][x] du CADRE dessiné autour d'une carte sur parchemin (liste vide sinon).
+
+	Cadre présumé si au moins `cadre_part` des cases de l'anneau extérieur sont bâties ; il
+	comprend alors les cases bâties atteintes depuis l'anneau, de proche en proche, à moins
+	de `cadre_profondeur` cases du bord (Reims : trois rangées en haut, une ailleurs). Une
+	ville qui touche le bord (Lutèce) laisse l'anneau surtout libre : pas de cadre."""
+	H = len(cells)
+	W = len(cells[0]) if H else 0
+	if H < 3 or W < 3:
+		return []
+	anneau = [(x, y) for y in range(H) for x in range(W) if x in (0, W - 1) or y in (0, H - 1)]
+	baties = [c for c in anneau if cells[c[1]][c[0]] == TERRAIN_INACCESSIBLE]
+	if len(baties) < float(regles.get("cadre_part", 0.8)) * len(anneau):
+		return []
+	profondeur = int(regles.get("cadre_profondeur", 3))
+	masque = [[False] * W for _ in range(H)]
+	pile = list(baties)
+	for x, y in pile:
+		masque[y][x] = True
+	while pile:
+		x, y = pile.pop()
+		for dx, dy in VOISINS:
+			nx, ny = x + dx, y + dy
+			if (0 <= nx < W and 0 <= ny < H and not masque[ny][nx]
+					and cells[ny][nx] == TERRAIN_INACCESSIBLE
+					and min(nx, ny, W - 1 - nx, H - 1 - ny) < profondeur):
+				masque[ny][nx] = True
+				pile.append((nx, ny))
+	return masque
+
+
 def detecter_enceinte(cells, regles) -> list:
 	"""Masque [y][x] de l'ENCEINTE d'une ville (liste vide si aucune n'est retenue).
 
@@ -712,12 +781,21 @@ def detecter_enceinte(cells, regles) -> list:
 	if not H or not W:
 		return []
 	rayon = int(regles.get("enceinte_rayon", 2))
-	bati = [[v == TERRAIN_INACCESSIBLE for v in ligne] for ligne in cells]
+	# ⚠️ Le CADRE d'une carte sur parchemin compte comme DEHORS : sur Reims, soudé à la ville,
+	# il faisait de la carte ENTIÈRE une enceinte (4 320 cases sur 4 320).
+	cadre = masque_cadre(cells, regles)
+	bati = [[v == TERRAIN_INACCESSIBLE and not (cadre and cadre[y][x])
+		for x, v in enumerate(ligne)] for y, ligne in enumerate(cells)]
 	ferme = _eroder(_dilater(bati, rayon), rayon)
+	if cadre:
+		for y in range(H):
+			for x in range(W):
+				if cadre[y][x]:
+					ferme[y][x] = False
 	# Trous comblés : ce que le bord n'atteint pas sans traverser la masse.
 	dehors = [[False] * W for _ in range(H)]
 	pile = [(x, y) for y in range(H) for x in range(W)
-		if (x in (0, W - 1) or y in (0, H - 1)) and not ferme[y][x]]
+		if ((x in (0, W - 1) or y in (0, H - 1)) or (cadre and cadre[y][x])) and not ferme[y][x]]
 	for x, y in pile:
 		dehors[y][x] = True
 	while pile:
@@ -1120,16 +1198,20 @@ def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
 	cells = lisser_majorite(analyse["cells"])
 	nav_sortie = dict(nav or {})
 	rapport = {"passages": [], "zones_isolees": [], "poches_effacees": 0, "nav_ajoutes": 0,
-		"enceinte": False, "rempart": [], "coins": 0, "rues": [], "murs_nav": bool(murs_nav)}
+		"enceinte": False, "rempart": [], "coins": 0, "rues": [], "rues_dehors": 0,
+		"murs_nav": bool(murs_nav)}
+	# L'enceinte est cherchée AVANT les rues : elles se règlent à part dedans et dehors. Les
+	# rues ne déplacent pas la masse bâtie (une fermeture de rayon 2 les comble).
+	masque = []
+	if regles.get("enceinte") if enceinte is None else enceinte:
+		masque = detecter_enceinte(cells, regles)
 	if rues and fins:
-		cells, rapport["rues"] = tracer_rues(cells, fins, k, regles)
+		cells, rapport["rues"] = tracer_rues(cells, fins, k, regles, masque)
+		rapport["rues_dehors"] = sum(1 for x, y in rapport["rues"] if not (masque and masque[y][x]))
 	if not passages:
 		rapport["zones"] = len(zones(cells, nav_sortie)[1])
 		return {"cells": cells, "nav": nav_sortie, "profil": nom, "rapport": rapport}
 
-	masque = []
-	if regles.get("enceinte") if enceinte is None else enceinte:
-		masque = detecter_enceinte(cells, regles)
 	avant = _bits(nav_sortie)
 	coins = murs_nav and regles.get("coins", True)
 	if masque:

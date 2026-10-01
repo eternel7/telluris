@@ -715,3 +715,74 @@ def test_sans_murs_nav_l_enceinte_est_fermee_par_le_terrain():
 		for x, y in passage["cases"]:
 			assert not any(gi._dans(sortie, x + dx, y + dy) and sortie[y + dy][x + dx] == L
 				and cotes[y + dy][x + dx] != cotes[y][x] for dx, dy in gi.VOISINS)
+
+
+# ── Cadre de carte et rues hors les murs ─────────────────────────────────────────────────
+def _encadree():
+	"""La ville fortifiée, dans un cadre bâti d'une case tout autour (Reims)."""
+	cells = _ville_fortifiee()
+	H, W = len(cells), len(cells[0])
+	for y in range(H):
+		for x in range(W):
+			if x in (0, W - 1) or y in (0, H - 1):
+				cells[y][x] = B
+	return cells
+
+
+def test_un_cadre_de_parchemin_ne_fait_pas_de_la_carte_une_enceinte():
+	"""Reims : le cadre bâti se soudait à la ville, toute la carte devenait intra-muros et
+	ses villages n'avaient plus de dehors."""
+	cells = _encadree()
+	regles = _regles(enceinte_rayon=1, enceinte_part_min=0.1)
+	cadre = gi.masque_cadre(cells, regles)
+	assert cadre and cadre[0][0] and not cadre[5][6]
+	masque = gi.detecter_enceinte(cells, regles)
+	assert masque and masque[5][6] and not masque[1][1] and not masque[0][0]
+
+
+def test_un_anneau_exterieur_surtout_libre_n_est_pas_un_cadre():
+	assert gi.masque_cadre(_ville_fortifiee(), _regles()) == []
+
+
+def _cite_et_village(cols=20, rows=10):
+	"""À gauche la cité (toits terracotta, rue de pavé clair rangée 3) ; à droite un village
+	plus sombre (toits bruns, chemin de terre rangée 6, plus terne que le pavé de la cité)."""
+	k = gi.SOUS_CASES
+	cite = lambda sx: sx < (cols // 2) * k
+	# Choisies pour que le chemin du village soit à peine plus clair que les TOITS de la
+	# cité : au seuil commun il se confond avec eux.
+	toit_village, terre = (70, 50, 40), (95, 85, 75)
+	fins = []
+	for sy in range(rows * k):
+		for sx in range(cols * k):
+			if cite(sx):
+				fins.append(PAVE if sy == 3 * k + 1 else TOIT)
+			else:
+				fins.append(terre if sy == 6 * k + 1 else toit_village)
+	cells = [[L if x in (0, cols - 1) else B for x in range(cols)] for _ in range(rows)]
+	masque = [[x < cols // 2 for x in range(cols)] for _ in range(rows)]
+	return cells, fins, masque
+
+
+def test_le_chemin_d_un_village_hors_les_murs_a_son_propre_seuil():
+	"""Au seuil commun, la lumière de la cité écrase le chemin de terre du village ; réglé à
+	part hors les murs, il est ouvert."""
+	k = gi.SOUS_CASES
+	cells, fins, masque = _cite_et_village()
+	regles = _regles()
+	dehors = sum(1 for y, l in enumerate(cells) for x, v in enumerate(l) if v == B and not masque[y][x])
+	assert dehors >= regles["rues"]["cases_min"]
+	_, commun = gi.tracer_rues(cells, fins, k, regles)
+	_, par_cote = gi.tracer_rues(cells, fins, k, regles, masque)
+	village = [[x, 6] for x in range(10, 19)]
+	assert not any(c in commun for c in village)
+	assert all(c in par_cote for c in village)
+	assert all([x, 3] in par_cote for x in range(1, 10))          # la cité garde ses rues
+
+
+def test_un_cote_trop_petit_emprunte_le_seuil_commun():
+	k = gi.SOUS_CASES
+	cells, fins, masque = _cite_et_village()
+	regles = _regles()
+	regles["rues"] = dict(regles["rues"], cases_min=10 ** 6, decalage_dehors=regles["rues"]["decalage"])
+	assert gi.tracer_rues(cells, fins, k, regles, masque) == gi.tracer_rues(cells, fins, k, regles)

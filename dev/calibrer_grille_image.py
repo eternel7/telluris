@@ -97,7 +97,7 @@ def _reglages(regles):
 	if regles.get("eau", True):
 		cles.append(("eau_ecart_froideur", None))
 	if regles.get("rues"):
-		cles += [("rues", "poids_saturation"), ("rues", "decalage")]
+		cles += [("rues", "poids_saturation"), ("rues", "decalage"), ("rues", "decalage_dehors")]
 	return cles
 
 
@@ -136,13 +136,18 @@ def imprimer(lid, lieu, regles):
 		sans = grille_image.proposer(lieu["couleurs"], lieu["contours"], lieu["cols"],
 			lieu["rows"], regles=regles, passages=False)["cells"]
 		peinte = lieu["doc"]["cells"]
-		cibles = {(x, y) for y, ligne in enumerate(sans) for x, v in enumerate(ligne)
-			if v == grille_image.TERRAIN_INACCESSIBLE and peinte[y][x] == grille_image.TERRAIN_LIBRE}
-		ouvertes = {tuple(c) for c in r["rues"]}
-		justes = len(cibles & ouvertes)
-		print(f"  {'':28} rues : {len(ouvertes)} case(s) ouverte(s), {justes} peinte(s) 1"
-			f" (précision {justes / max(1, len(ouvertes)):.2f}) — rues peintes retrouvées"
-			f" {justes}/{len(cibles)} ({justes / max(1, len(cibles)):.2f})")
+		masque = grille_image.detecter_enceinte(sans, regles)
+		for nom, dedans in (("intra-muros", True), ("hors les murs", False)):
+			def du_cote(x, y):
+				return bool(masque and masque[y][x]) == dedans
+			cibles = {(x, y) for y, ligne in enumerate(sans) for x, v in enumerate(ligne)
+				if v == grille_image.TERRAIN_INACCESSIBLE and peinte[y][x] == grille_image.TERRAIN_LIBRE
+				and du_cote(x, y)}
+			ouvertes = {tuple(c) for c in r["rues"] if du_cote(*c)}
+			justes = len(cibles & ouvertes)
+			print(f"  {'':28} rues {nom} : {len(ouvertes)} case(s) ouverte(s), {justes} peinte(s) 1"
+				f" (précision {justes / max(1, len(ouvertes)):.2f}) — rues peintes retrouvées"
+				f" {justes}/{len(cibles)} ({justes / max(1, len(cibles)):.2f})")
 	print(f"  {'':28} nav peint retrouvé {nav['retrouvees']}/{nav['peintes']}"
 		f"  · {len(r['passages'])} passage(s) · {r['zones']} zone(s) praticable(s)"
 		f" dont {len(r['zones_isolees'])} isolée(s) signalée(s)"

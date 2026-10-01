@@ -254,7 +254,8 @@ def main() -> int:
 		print(f"  {valeur} {etiquettes.get(valeur, '?'):22} {n:6}  ({n * 100 / total:5.1f} %)")
 	topo = proposition["rapport"]
 	fermeture = "par nav" if topo["murs_nav"] else "par le terrain"
-	print(f"  {len(topo['rues'])} case(s) de rue ouverte(s) · enceinte "
+	print(f"  {len(topo['rues'])} case(s) de rue ouverte(s)"
+		f" (dont {topo.get('rues_dehors', 0)} hors les murs) · enceinte "
 		f"{('fermée ' + fermeture) if topo['enceinte'] else 'aucune'} · {len(topo['passages'])}"
 		f" passage(s) creusé(s) · {topo['poches_effacees']} case(s) de poche effacée(s)"
 		f" · {topo['nav_ajoutes']} bit(s) nav ajouté(s)")
