@@ -175,6 +175,24 @@ def test_outil_sans_parametre_a_dump_frais(monkeypatch):
 	assert dt.lancer("gen_grimoires", {"x": 1}, preparer=lambda o, v: {})[1][0] == 422
 
 
+def test_villes_images_relancees_sur_dump_frais(monkeypatch):
+	"""gen_villes_images : « sans lieu » se juge sur un dump FRAIS — un dump périmé réémettrait
+	une ville créée depuis, et l'import écraserait sa grille retouchée."""
+	outil = _outil("gen_villes_images")
+	assert outil["dump_frais"] and outil["sortie"] == "jsons/villes_images_a_importer.json"
+	monkeypatch.setattr(dt, "_RUN", None)
+	vu = {}
+
+	def faux_popen(argv, **kw):
+		vu["argv"] = argv
+		raise FileNotFoundError
+
+	monkeypatch.setattr(dt.subprocess, "Popen", faux_popen)
+	run, erreur = dt.lancer("gen_villes_images", None, preparer=lambda o, v: {"dump": "jsons/d.json"})
+	assert erreur is None
+	assert vu["argv"][-3:] == [os.path.join("dev", "gen_villes_images.py"), "--dump", "jsons/d.json"]
+
+
 def test_carcasses_relancees_sur_dump_frais(monkeypatch):
 	"""gen_carcasses_parties : plus de dump figé — relu sur celui que le serveur vient d'écrire,
 	et sa sortie est offerte à 📥 Importer."""

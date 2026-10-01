@@ -191,6 +191,54 @@ def imprimer_concordance(rapport: dict):
 		f" ({rapport['justes']}/{rapport['total']} cases)")
 
 
+def proposer_pour_image(chemin: str, cols: int, rows: int, doc_lieu=None, options=frozenset(),
+		profil: str = "") -> dict:
+	"""La grille proposée pour une image : `{cells, nav, rapport, profil, taille, peinte,
+	meme_taille}`. Partagée avec `gen_villes_images.py`, qui applique ainsi EXACTEMENT la même
+	passe que ce CLI (mêmes options `--sans-*`, même `--connexite`)."""
+	profil = profil or grille_image.profil_de(doc_lieu)
+	# ⚠️ Le `nav` du doc n'est repris que si la grille garde sa taille : sinon ses clés
+	# désigneraient d'autres cases.
+	peinte = (doc_lieu or {}).get("cells")
+	meme_taille = bool(peinte) and len(peinte) == rows and all(len(l) == cols for l in peinte)
+	nav_doc = ((doc_lieu or {}).get("nav") or {}) if meme_taille else {}
+
+	couleurs, contours, taille = echantillonner(chemin, cols, rows)
+	rues = "--sans-rues" not in options
+	fins = echantillonner_fins(chemin, cols, rows) if rues else None
+	proposition = grille_image.proposer(couleurs, contours, cols, rows, nav=nav_doc,
+		profil=profil, passages="--sans-passages" not in options,
+		enceinte=False if "--sans-enceinte" in options else None,
+		fins=fins, rues=rues, murs_nav="--sans-nav" not in options)
+	cells = proposition["cells"]
+	if "--connexite" in options:
+		cells = grille_image.garder_composante_principale(cells)
+	return {"cells": cells, "nav": proposition["nav"], "rapport": proposition["rapport"],
+		"profil": proposition["profil"], "taille": taille, "peinte": peinte,
+		"meme_taille": meme_taille}
+
+
+def imprimer_resume(chemin: str, proposition: dict):
+	"""Comptes par valeur, topologie (rues, enceinte, passages) et zones isolées à relier."""
+	cells, taille, topo = proposition["cells"], proposition["taille"], proposition["rapport"]
+	rows, cols = len(cells), len(cells[0])
+	print(f"{os.path.relpath(chemin, RACINE)}  {taille[0]}×{taille[1]} px"
+		f"  →  grille {cols}×{rows}  ({taille[0] / cols:.1f}×{taille[1] / rows:.1f} px/case)"
+		f"  ·  profil {proposition['profil']}")
+	total = cols * rows
+	etiquettes = {0: "inaccessible", 1: "libre", 3: "falaise", 5: "eau (très difficile)"}
+	for valeur, n in sorted(grille_image.comptes(cells).items()):
+		print(f"  {valeur} {etiquettes.get(valeur, '?'):22} {n:6}  ({n * 100 / total:5.1f} %)")
+	fermeture = "par nav" if topo["murs_nav"] else "par le terrain"
+	print(f"  {len(topo['rues'])} case(s) de rue ouverte(s)"
+		f" (dont {topo.get('rues_dehors', 0)} hors les murs) · enceinte "
+		f"{('fermée ' + fermeture) if topo['enceinte'] else 'aucune'} · {len(topo['passages'])}"
+		f" passage(s) creusé(s) · {topo['poches_effacees']} case(s) de poche effacée(s)"
+		f" · {topo['nav_ajoutes']} bit(s) nav ajouté(s)")
+	for zone in topo["zones_isolees"]:
+		print(f"  ⚠ zone isolée de {zone['taille']} case(s) en {zone['case']} — à relier à la main")
+
+
 def main() -> int:
 	args = [a for a in sys.argv[1:] if not a.startswith("--")]
 	options = {a for a in sys.argv[1:] if a.startswith("--")}
@@ -225,42 +273,13 @@ def main() -> int:
 	if profil and profil not in grille_image.PROFILS_GRILLE:
 		print(f"✗ profil inconnu : {profil} — {', '.join(grille_image.PROFILS_GRILLE)}")
 		return 2
-	profil = profil or grille_image.profil_de(doc_lieu)
-	# ⚠️ Le `nav` du doc n'est repris que si la grille garde sa taille : sinon ses clés
-	# désigneraient d'autres cases.
-	peinte = (doc_lieu or {}).get("cells")
-	meme_taille = bool(peinte) and len(peinte) == rows and all(len(l) == cols for l in peinte)
-	nav_doc = ((doc_lieu or {}).get("nav") or {}) if meme_taille else {}
-
-	couleurs, contours, taille = echantillonner(chemin, cols, rows)
-	rues = "--sans-rues" not in options
-	fins = echantillonner_fins(chemin, cols, rows) if rues else None
-	proposition = grille_image.proposer(couleurs, contours, cols, rows, nav=nav_doc,
-		profil=profil, passages="--sans-passages" not in options,
-		enceinte=False if "--sans-enceinte" in options else None,
-		fins=fins, rues=rues, murs_nav="--sans-nav" not in options)
-	cells, nav = proposition["cells"], proposition["nav"]
-	if "--connexite" in options:
-		cells = grille_image.garder_composante_principale(cells)
+	proposition = proposer_pour_image(chemin, cols, rows, doc_lieu, options, profil)
+	cells, nav, topo = proposition["cells"], proposition["nav"], proposition["rapport"]
+	peinte, meme_taille = proposition["peinte"], proposition["meme_taille"]
 
 	slug = (doc_lieu["_id"].split(":", 1)[1] if doc_lieu
 		else os.path.splitext(os.path.basename(nom_image))[0])
-	print(f"{os.path.relpath(chemin, RACINE)}  {taille[0]}×{taille[1]} px"
-		f"  →  grille {cols}×{rows}  ({taille[0] / cols:.1f}×{taille[1] / rows:.1f} px/case)"
-		f"  ·  profil {proposition['profil']}")
-	total = cols * rows
-	etiquettes = {0: "inaccessible", 1: "libre", 3: "falaise", 5: "eau (très difficile)"}
-	for valeur, n in sorted(grille_image.comptes(cells).items()):
-		print(f"  {valeur} {etiquettes.get(valeur, '?'):22} {n:6}  ({n * 100 / total:5.1f} %)")
-	topo = proposition["rapport"]
-	fermeture = "par nav" if topo["murs_nav"] else "par le terrain"
-	print(f"  {len(topo['rues'])} case(s) de rue ouverte(s)"
-		f" (dont {topo.get('rues_dehors', 0)} hors les murs) · enceinte "
-		f"{('fermée ' + fermeture) if topo['enceinte'] else 'aucune'} · {len(topo['passages'])}"
-		f" passage(s) creusé(s) · {topo['poches_effacees']} case(s) de poche effacée(s)"
-		f" · {topo['nav_ajoutes']} bit(s) nav ajouté(s)")
-	for zone in topo["zones_isolees"]:
-		print(f"  ⚠ zone isolée de {zone['taille']} case(s) en {zone['case']} — à relier à la main")
+	imprimer_resume(chemin, proposition)
 
 	ecrits = []
 	brut = os.path.join(DOSSIER_JSONS, f"{slug}_grille.json")

@@ -494,6 +494,24 @@ CATALOGUE = [
 			"comme matière (il la rachète toujours : il la produit).",
 	},
 	{
+		"id": "gen_villes_images",
+		"label": "🏙 Créer les lieux des cartes de ville sans lieu (grille depuis l'image)",
+		# Dump frais : une carte se dit « sans lieu » d'après les `image` des lieux en base — sur
+		# un dump périmé, une ville créée depuis serait réémise, et son import (PUT complet)
+		# effacerait la grille retouchée à la main.
+		"argv_fn": lambda v, f: _py("gen_villes_images.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/villes_images_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/villes_images_a_importer.json (+ un aperçu PNG "
+			"par ville). Rien en base avant 📥 Importer.",
+		"description": "Pour chaque carte de templates/resources/towns/ (*_capital, *_city, "
+			"*_start_city) qu'aucun lieu ne cite : un `lieu:*` minimal (ville / capitale, "
+			"`lieu:france` pour les cités françaises) et la grille de gen_grille_image.py, à "
+			"cases carrées de la taille de celles des villes en base. Première passe à retoucher "
+			"dans l'éditeur : les zones isolées sont signalées. Refuse tout le lot sur un `_id` "
+			"déjà pris ; sans carte orpheline, n'écrit aucun fichier. Requiert Pillow.",
+	},
+	{
 		"id": "gen_terrain_tags",
 		"label": "🌲 Générer les terrain_tags des zones d'influence",
 		"argv": _py("gen_terrain_tags.py"),
