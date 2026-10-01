@@ -1,0 +1,47 @@
+{
+  "source": "https://www.enworld.org/threads/do-you-know-your-glaive-guisarme-from-your-bohemian-earspoon.663555/",
+  "livre": "[WOIN] Archaic Equipment",
+  "note": "Armes de la liste absentes de jsons/item-20261001-212308.json, armes à poudre exclues. Liste de travail, pas un fichier d'import.",
+  "armes": [
+    {"nom": "Flamberge", "type": "epee"},
+    {"nom": "Épée double", "type": "epee"},
+    {"nom": "Machette", "type": "epee"},
+    {"nom": "Épée de cour", "type": "epee"},
+
+    {"nom": "Matraque", "type": "contondant"},
+    {"nom": "Assommoir", "type": "contondant"},
+    {"nom": "Pieu", "type": "divers"},
+    {"nom": "Faux", "type": "divers"},
+
+    {"nom": "Brandistock", "type": "hast"},
+    {"nom": "Épieu de chasse", "type": "hast"},
+    {"nom": "Hache-dague", "type": "hast"},
+    {"nom": "Guan dao", "type": "hast"},
+    {"nom": "Oreille de Bohême", "type": "hast"},
+    {"nom": "Svärdstav", "type": "hast"},
+    {"nom": "Nagamaki", "type": "hast"},
+    {"nom": "Sovnya", "type": "hast"},
+    {"nom": "Faux de guerre", "type": "hast"},
+    {"nom": "Spetum", "type": "hast"},
+    {"nom": "Hache d'armes", "type": "hast"},
+
+    {"nom": "Hanbō", "type": "asiatique"},
+    {"nom": "Jō", "type": "asiatique"},
+    {"nom": "Bō", "type": "asiatique"},
+    {"nom": "Niuweidao", "type": "asiatique"},
+    {"nom": "Sibat", "type": "asiatique"},
+    {"nom": "Hu cha", "type": "asiatique"},
+    {"nom": "Tekko-kagi", "type": "asiatique"},
+    {"nom": "Kyoketsu-shoge", "type": "asiatique"},
+    {"nom": "Urumi", "type": "asiatique"},
+    {"nom": "Épée papillon", "type": "asiatique"},
+    {"nom": "Fouet à neuf sections", "type": "asiatique"},
+    {"nom": "Tonfa", "type": "asiatique"},
+    {"nom": "Nunchaku", "type": "asiatique"},
+    {"nom": "Setsukon", "type": "asiatique"},
+    {"nom": "Shang gao", "type": "asiatique"},
+    {"nom": "Éventail de guerre", "type": "asiatique"},
+
+    {"nom": "Arbalète à répétition", "type": "tir"}
+  ]
+}
