@@ -267,8 +267,8 @@ def _nb_zones(cells, nav):
 
 
 # ── Profils ──────────────────────────────────────────────────────────────────────────────
-def test_trois_profils_et_un_repli_sur_la_ville():
-	assert set(gi.PROFILS_GRILLE) == {"ville", "foret", "catacombes"}
+def test_quatre_profils_et_un_repli_sur_la_ville():
+	assert set(gi.PROFILS_GRILLE) == {"ville", "foret", "catacombes", "pays"}
 	assert gi.regles_de("inconnu") is gi.PROFILS_GRILLE[gi.PROFIL_DEFAUT]
 	assert gi.REGLES_GRILLE is gi.PROFILS_GRILLE["ville"]
 
@@ -281,6 +281,8 @@ def test_le_profil_se_lit_sur_les_tags_souterrain_avant_foret():
 	# ⚠️ Un tag de souterrain l'emporte sur la forêt qui l'entoure.
 	assert gi.profil_de({"tags": ["foret", "sous-terrain"]}) == "catacombes"
 	assert gi.profil_de(None) == gi.PROFIL_DEFAUT
+	# Un PAYS se reconnaît à sa catégorie (`lieu:france` n'a aucun tag).
+	assert gi.profil_de({"categorie": gi.CATEGORIE_PAYS, "tags": []}) == "pays"
 
 
 def test_chaque_profil_ne_produit_que_son_vocabulaire():
@@ -786,3 +788,167 @@ def test_un_cote_trop_petit_emprunte_le_seuil_commun():
 	regles = _regles()
 	regles["rues"] = dict(regles["rues"], cases_min=10 ** 6, decalage_dehors=regles["rues"]["decalage"])
 	assert gi.tracer_rues(cells, fins, k, regles, masque) == gi.tracer_rues(cells, fins, k, regles)
+
+
+# ── Profil pays : murs nav seuls ─────────────────────────────────────────────────────────
+# Teintes mesurées sur `france.png` : la terre du parchemin, la mer, l'eau d'un fleuve (froide
+# ET sombre, cf. `PROFILS_GRILLE["pays"]`).
+TERRE = (216, 202, 155)
+MER = (40, 90, 110)
+FLEUVE = (60, 70, 68)
+# Sous-cases des échantillons fins des tests : assez pour placer `pixels_min` pixels de fleuve.
+K_PAYS = 4
+
+
+def _carte(texte):
+	"""'.' terre, '~' mer, '|' fleuve plein, ':' fleuve à peine visible (un pont dessiné) —
+	une ligne par rangée. Rend (couleurs, fins, cols, rows) : la couleur MOYENNE de chaque
+	case (le fleuve, plus fin qu'une case, n'y paraît pas) et ses `K_PAYS²` pixels."""
+	lignes = texte.strip().split("\n")
+	rows, cols, k = len(lignes), len(lignes[0]), K_PAYS
+	pixels_min = gi.PROFILS_GRILLE["pays"]["fleuves"]["pixels_min"]
+	assert pixels_min < k * k, "le test doit pouvoir placer un fleuve « à peine visible »"
+	couleurs = [MER if c == "~" else TERRE for ligne in lignes for c in ligne]
+	fins = [None] * (cols * k * rows * k)
+	for y, ligne in enumerate(lignes):
+		for x, c in enumerate(ligne):
+			n = {"|": k * k, ":": pixels_min}.get(c, 0)
+			for j in range(k):
+				for i in range(k):
+					rang = j * k + i
+					couleur = MER if c == "~" else (FLEUVE if rang < n else TERRE)
+					fins[(y * k + j) * cols * k + x * k + i] = couleur
+	return couleurs, fins, cols, rows
+
+
+def _pays(texte, nav=None, **options):
+	couleurs, fins, cols, rows = _carte(texte)
+	return gi.proposer(couleurs, [0] * len(couleurs), cols, rows, nav=nav, profil="pays",
+		fins=fins, k=K_PAYS, **options)
+
+
+# Mer en haut et en bas, un fleuve qui les relie : sans gué, la terre est coupée en deux.
+# Le fleuve se voit à peine en (6, 4) — le pont dessiné.
+FLEUVE_TRAVERSANT = """
+~~~~~~~~~~~~
+~~~~~~~~~~~~
+......|.....
+......|.....
+......:.....
+......|.....
+~~~~~~~~~~~~
+~~~~~~~~~~~~
+"""
+
+
+def test_profil_pays_cells_toutes_libres():
+	"""Seuls les nav bloquent : la mer, le fleuve, tout reste à 1 (forme de `lieu:france`)."""
+	cells = _pays(FLEUVE_TRAVERSANT)["cells"]
+	assert gi.comptes(cells) == {L: 12 * 8}
+
+
+def test_la_cote_est_muree_dans_les_deux_sens():
+	prop = _pays(FLEUVE_TRAVERSANT)
+	nav = prop["nav"]
+	for x in range(12):
+		for dx in (-1, 0, 1):
+			if 0 <= x + dx < 12:
+				assert not gi.nav_autorise(nav, x, 2, dx, -1)   # terre → mer
+				assert not gi.nav_autorise(nav, x + dx, 1, -dx, 1)   # mer → terre
+	assert prop["rapport"]["cote"] and all(y in (2, 5) for _, y in prop["rapport"]["cote"])
+
+
+def test_le_fleuve_qui_coupe_la_terre_recoit_un_seul_gue_la_ou_il_se_voit_le_moins():
+	prop = _pays(FLEUVE_TRAVERSANT)
+	rapport = prop["rapport"]
+	assert [g["cases"] for g in rapport["passages"]] == [[[6, 4]]]
+	assert rapport["zones_isolees"] == []
+	assert sorted(rapport["fleuves"]) == [[6, 2], [6, 3], [6, 4], [6, 5]]
+	# Le gué rouvre la traversée…
+	assert gi.nav_autorise(prop["nav"], 5, 4, 1, 0) and gi.nav_autorise(prop["nav"], 6, 4, 1, 0)
+	# … mais pas le reste du fleuve : ni en travers, ni le long de son cours.
+	assert not gi.nav_autorise(prop["nav"], 5, 3, 1, 0)
+	assert not gi.nav_autorise(prop["nav"], 6, 4, 0, -1)
+	assert not gi.nav_autorise(prop["nav"], 6, 4, 0, 1)
+
+
+def test_sans_passages_le_fleuve_reste_mure_et_la_rive_est_signalee():
+	rapport = _pays(FLEUVE_TRAVERSANT, passages=False)["rapport"]
+	assert rapport["passages"] == []
+	assert len(rapport["zones_isolees"]) == 1
+
+
+def test_un_fleuve_en_diagonale_ne_s_enjambe_pas_par_son_coin():
+	"""Deux cases de fleuve en diagonale : le pas diagonal entre les deux cases de terre qui
+	les flanquent passerait au-dessus du fleuve."""
+	fleuve = [[False] * 3 for _ in range(3)]
+	fleuve[0][0] = fleuve[1][1] = True
+	nav = {}
+	gi.murer_barrieres(nav, fleuve, lambda x, y: not fleuve[y][x])
+	assert not gi.nav_autorise(nav, 1, 0, -1, 1)    # (1,0) → (0,1)
+	assert gi.nav_autorise(nav, 2, 0, 0, 1)         # loin du fleuve, rien
+
+
+def test_le_nav_d_origine_n_est_jamais_retire():
+	"""Même sur la case du gué : un mur peint à la main est une intention d'auteur."""
+	nav = {"6,4": 4, "0,3": 4}
+	sortie = _pays(FLEUVE_TRAVERSANT, nav=nav)["nav"]
+	assert sortie["6,4"] & 4 and sortie["0,3"] & 4
+	assert nav == {"6,4": 4, "0,3": 4}   # l'entrée n'est pas mutée
+
+
+def test_sans_murs_nav_le_nav_rendu_est_celui_recu_profil_pays():
+	nav = {"0,3": 4}
+	assert _pays(FLEUVE_TRAVERSANT, nav=nav, murs_nav=False)["nav"] == nav
+
+
+def test_une_ile_reste_isolee_et_un_navire_redevient_mer():
+	"""On ne trace jamais de chemin sur la mer : l'île est SIGNALÉE. Une terre plus petite que
+	`ile_min` cernée d'eau est un navire dessiné : rendue à la mer, sans mur autour."""
+	ile_min = gi.PROFILS_GRILLE["pays"]["ile_min"]
+	assert ile_min > 1
+	carte = """
+............
+............
+~~~~~~~~~~~~
+~~~...~~~~~~
+~~~...~~~.~~
+~~~...~~~~~~
+~~~~~~~~~~~~
+~~~~~~~~~~~~
+"""
+	rapport = _pays(carte)["rapport"]
+	assert [z["taille"] for z in rapport["zones_isolees"]] == [9]
+	assert [9, 4] not in rapport["cote"]
+
+
+def test_le_cadre_du_parchemin_ne_relie_pas_les_cotes():
+	"""Une bande de terre d'une case le long du bord, mer derrière : c'est le cadre, pas une
+	côte — sur la France, il reliait la Corse au continent en faisant le tour de la carte."""
+	# Un continent (x 1-4) et une île (x 8-10), reliés seulement par la bande du bord (rangée 0
+	# et colonne 11).
+	carte = """
+............
+~....~~~~~~.
+~....~~~~~~.
+~....~~~....
+~....~~~....
+~....~~~....
+~~~~~~~~~~~.
+~~~~~~~~~~~.
+"""
+	prop = _pays(carte)
+	zone, _ = gi.zones(prop["cells"], prop["nav"])
+	assert zone[3][2] != zone[4][9]
+	# Sans la règle du cadre, les deux terres n'en feraient qu'une.
+	sans_cadre = _regles("pays", cadre_profondeur=0)
+	couleurs, fins, cols, rows = _carte(carte)
+	prop = gi.proposer(couleurs, [0] * len(couleurs), cols, rows, regles=sans_cadre,
+		profil="pays", fins=fins, k=K_PAYS)
+	zone, _ = gi.zones(prop["cells"], prop["nav"])
+	assert zone[3][2] == zone[4][9]
+
+
+def test_sous_cases_du_profil():
+	assert gi.sous_cases_de("pays") == gi.PROFILS_GRILLE["pays"]["sous_cases"]
+	assert gi.sous_cases_de("ville") == gi.SOUS_CASES

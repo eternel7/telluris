@@ -20,19 +20,23 @@ Usage :
   python dev/gen_grille_image.py lieu:auxerre 86 48
   python dev/gen_grille_image.py towns/paris_capital.png 88 48
   python dev/gen_grille_image.py lieu:auxerre 86 48 jsons/telluris-dump-….json
-Options : --profil=ville|foret|catacombes (défaut : lu sur les tags du lieu)
+Options : --profil=ville|foret|catacombes|pays (défaut : `pays` pour un lieu de catégorie
+            pays, sinon lu sur les tags du lieu)
           --sans-passages (ni enceinte, ni coins, ni passages)
           --sans-rues (pas de tracé des rues intra-muros)
           --sans-nav (aucun mur nav proposé ; l'enceinte est fermée par le terrain)
           --sans-enceinte · --connexite (efface les poches praticables enclavées)
           --sans-apercu
+          --nav-vide (repart d'un nav VIDE au lieu de celui du doc : pour mesurer le profil
+            contre les murs peints à la main sans les recopier — rien à importer)
 
 Sorties (dans jsons/) :
   <slug>_grille_a_importer.json   le doc lieu complet, prêt pour la carte d'import
   <slug>_grille.json              {dimensions, cells, nav} brut
   <slug>_grille_apercu.png        l'image avec la grille proposée en surimpression, les
                                   murs nav (rouge), les passages (vert vif), le rempart (orange),
-                                  les rues ouvertes (bleu clair)
+                                  les rues ouvertes (bleu clair) ; profil pays : la côte
+                                  (orange) et les fleuves (bleu clair), les gués (vert vif)
 """
 
 import glob
@@ -158,7 +162,10 @@ def ecrire_apercu(chemin_image: str, cells, cible: str, nav=None, rapport=None):
 	for x, y in rapport.get("rempart") or []:
 		dessin.rectangle([x * pas_x + 1, y * pas_y + 1, (x + 1) * pas_x - 2, (y + 1) * pas_y - 2],
 			outline=(255, 150, 30, 230), width=2)
-	for x, y in rapport.get("rues") or []:
+	for x, y in rapport.get("cote") or []:
+		dessin.rectangle([x * pas_x + 1, y * pas_y + 1, (x + 1) * pas_x - 2, (y + 1) * pas_y - 2],
+			outline=(255, 150, 30, 160), width=1)
+	for x, y in (rapport.get("rues") or []) + (rapport.get("fleuves") or []):
 		dessin.rectangle([x * pas_x + 1, y * pas_y + 1, (x + 1) * pas_x - 2, (y + 1) * pas_y - 2],
 			outline=(110, 190, 255, 230), width=2)
 	for passage in rapport.get("passages") or []:
@@ -202,20 +209,24 @@ def proposer_pour_image(chemin: str, cols: int, rows: int, doc_lieu=None, option
 	peinte = (doc_lieu or {}).get("cells")
 	meme_taille = bool(peinte) and len(peinte) == rows and all(len(l) == cols for l in peinte)
 	nav_doc = ((doc_lieu or {}).get("nav") or {}) if meme_taille else {}
+	if "--nav-vide" in options:
+		nav_doc = {}
 
 	couleurs, contours, taille = echantillonner(chemin, cols, rows)
 	rues = "--sans-rues" not in options
-	fins = echantillonner_fins(chemin, cols, rows) if rues else None
+	# Rues d'une cité : 4 px ; fleuves d'une carte de pays : le pixel (`sous_cases` du profil).
+	k = grille_image.sous_cases_de(profil)
+	fins = echantillonner_fins(chemin, cols, rows, k) if rues else None
 	proposition = grille_image.proposer(couleurs, contours, cols, rows, nav=nav_doc,
 		profil=profil, passages="--sans-passages" not in options,
 		enceinte=False if "--sans-enceinte" in options else None,
-		fins=fins, rues=rues, murs_nav="--sans-nav" not in options)
+		fins=fins, k=k, rues=rues, murs_nav="--sans-nav" not in options)
 	cells = proposition["cells"]
 	if "--connexite" in options:
 		cells = grille_image.garder_composante_principale(cells)
 	return {"cells": cells, "nav": proposition["nav"], "rapport": proposition["rapport"],
 		"profil": proposition["profil"], "taille": taille, "peinte": peinte,
-		"meme_taille": meme_taille}
+		"meme_taille": meme_taille, "nav_peint": (doc_lieu or {}).get("nav") or {}}
 
 
 def imprimer_resume(chemin: str, proposition: dict):
@@ -230,6 +241,14 @@ def imprimer_resume(chemin: str, proposition: dict):
 	for valeur, n in sorted(grille_image.comptes(cells).items()):
 		print(f"  {valeur} {etiquettes.get(valeur, '?'):22} {n:6}  ({n * 100 / total:5.1f} %)")
 	fermeture = "par nav" if topo["murs_nav"] else "par le terrain"
+	if topo.get("cote") is not None and "fleuves" in topo:
+		print(f"  {len(topo['cote'])} case(s) de côte murée(s) · {len(topo['fleuves'])} case(s)"
+			f" de fleuve murée(s) · {len(topo['passages'])} gué(s) ·"
+			f" {topo['nav_ajoutes']} bit(s) nav ajouté(s)")
+		for zone in topo["zones_isolees"]:
+			print(f"  ⚠ zone isolée de {zone['taille']} case(s) en {zone['case']} (île, ou rive"
+				" sans gué) — à relier à la main si elle doit l'être")
+		return
 	print(f"  {len(topo['rues'])} case(s) de rue ouverte(s)"
 		f" (dont {topo.get('rues_dehors', 0)} hors les murs) · enceinte "
 		f"{('fermée ' + fermeture) if topo['enceinte'] else 'aucune'} · {len(topo['passages'])}"
@@ -289,7 +308,7 @@ def main() -> int:
 		f.write("\n")
 	ecrits.append(brut)
 
-	if doc_lieu is not None:
+	if doc_lieu is not None and "--nav-vide" not in options:
 		# ⚠️ On repart du doc RELU et on n'y touche que `cells`, `nav` et `dimensions` : le PUT
 		# d'`import-bulk` est complet, toute clé absente disparaîtrait en silence. `nav` =
 		# celui du doc (jamais un bit retiré) plus les murs proposés.
@@ -303,7 +322,14 @@ def main() -> int:
 			f.write("\n")
 		ecrits.append(a_importer)
 
-		if meme_taille:
+	if doc_lieu is not None:
+		if meme_taille and proposition["profil"] == "pays":
+			# Cells toutes à 1 des deux côtés : seule la concordance des MURS dit quelque chose.
+			m = grille_image.concordance_nav(nav, proposition["nav_peint"])
+			print(f"  Murs peints à la main retrouvés (à 1 case près) : {m['retrouvees']}/"
+				f"{m['peintes']} cases ({m['rappel'] * 100:.1f} %) · {m['proposees']} case(s)"
+				" murée(s) proposée(s)")
+		elif meme_taille:
 			imprimer_concordance(grille_image.concordance(cells, peinte))
 		elif peinte:
 			print(f"  ⚠ pas de concordance calculée : la grille en base est "

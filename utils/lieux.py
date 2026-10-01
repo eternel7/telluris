@@ -579,11 +579,12 @@ async def get_grille_proposee(
 	Le seul chemin vers la base reste `update_cells` (le pinceau, ou ✔ Appliquer de l'éditeur
 	qui envoie `cells` et `nav`) et la carte d'import.
 
-	`profil` : `ville` / `foret` / `catacombes` (vide ⇒ lu sur les tags, `profil_de`).
+	`profil` : `ville` / `foret` / `catacombes` / `pays` (vide ⇒ `profil_de` : catégorie
+	`pays`, sinon les tags). `pays` : `cells` toutes à 1, murs nav de côte et de fleuves.
 	`passages=0` : ancien comportement (classer + lisser, `nav` du doc rendu tel quel).
 	`enceinte` : -1 ce que dit le profil, 0 / 1 force. Le `nav` rendu est COMPLET : celui du
 	doc (jamais un bit retiré) plus les murs proposés.
-	`rues=0` : pas de tracé des rues (sous-cases). `murs_nav=0` : aucun mur nav proposé, le
+	`rues=0` : pas de tracé des rues (sous-cases) ni des fleuves (profil `pays`). `murs_nav=0` : aucun mur nav proposé, le
 	`nav` du doc est rendu tel quel et l'enceinte est fermée par le terrain.
 
 	⚠️ Import de Pillow PARESSEUX, dans le corps : `tests/` importe `utils/*` → `routers/*`,
@@ -628,6 +629,11 @@ async def get_grille_proposee(
 
 	from PIL import Image, ImageFilter
 	from utils import grille_image
+	if profil and profil not in grille_image.PROFILS_GRILLE:
+		raise HTTPException(status_code=422, detail=f"Profil inconnu : {profil}")
+	profil = profil or grille_image.profil_de(lieu_doc)
+	# Rues d'une cité : 4 px ; fleuves d'une carte de pays : le pixel.
+	k = grille_image.sous_cases_de(profil)
 	try:
 		with Image.open(chemin) as img:
 			img.load()
@@ -639,8 +645,7 @@ async def get_grille_proposee(
 			couleurs = _pixels_a_plat(img.convert("RGB").resize((cols, rows), Image.BOX))
 			contours = _pixels_a_plat(img.convert("L").filter(ImageFilter.FIND_EDGES)
 				.resize((cols, rows), Image.BOX))
-			# Sous-cases pour le tracé des rues : une rue est plus fine qu'une case.
-			k = grille_image.SOUS_CASES
+			# Sous-cases pour le tracé des rues (ou des fleuves) : plus fins qu'une case.
 			fins = (_pixels_a_plat(img.convert("RGB").resize((cols * k, rows * k), Image.BOX))
 				if rues else None)
 	except HTTPException:
@@ -648,9 +653,6 @@ async def get_grille_proposee(
 	except Exception:
 		raise HTTPException(status_code=422, detail=f"Image illisible : {nom_image}")
 
-	if profil and profil not in grille_image.PROFILS_GRILLE:
-		raise HTTPException(status_code=422, detail=f"Profil inconnu : {profil}")
-	profil = profil or grille_image.profil_de(lieu_doc)
 	# ⚠️ Le `nav` du doc n'est repris que si la grille proposée a SA taille : après un
 	# redimensionnement de proposition, ses clés désigneraient d'autres cases.
 	peinte = lieu_doc.get("cells")
@@ -659,7 +661,7 @@ async def get_grille_proposee(
 	proposition = grille_image.proposer(couleurs, contours, cols, rows, nav=nav_doc,
 		profil=profil, passages=bool(passages),
 		enceinte=None if enceinte < 0 else bool(enceinte),
-		fins=fins, k=grille_image.SOUS_CASES, rues=bool(rues), murs_nav=bool(murs_nav))
+		fins=fins, k=k, rues=bool(rues), murs_nav=bool(murs_nav))
 	cells = proposition["cells"]
 
 	rapport = None
