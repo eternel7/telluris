@@ -7,6 +7,11 @@ description: Map editor authoring at /admin/editor (admin_map_editor.html) — t
 
 **Patron commun** — `PUT /admin/doc` et `POST /admin/import-bulk` font un PUT **COMPLET** et ne refusent rien (`_rev` rattaché en base, CLAUDE.md §11). Tout formulaire part donc du doc **RELU**, n'écrit que les champs qu'il possède (`_fusionLieu`, `_fusionConnexion`) et refuse un `_id` déjà pris **avant** l'envoi. Fusions, conventions d'`_id`, ordre des nœuds et seuils de case sont verrouillés par `dev/test_{lieu_form,connexions,portes,guilde,lot_lieux,voies,resize}_client.js` : ce qui suit garde le pourquoi et ce qu'aucun harnais n'atteint (DOM, visée, séquencement réseau). ✕ / Échap annulent sans rien écrire (CLAUDE.md §8).
 
+### Mise en page de `/admin/editor`
+- Carte en **pleine largeur** (`.main` sans `max-width`). Panneau de gauche **ancré ⇄ volant** (⧉ / ⇤, `setPanneauFlottant`) : volant = `position:fixed`, poignée `#left-panel-grip` (masquée ancré), `rendreDeplacable`/`placerPanneau` de `scripts/deplacable.js`, `max-height:80vh` (un panneau aussi haut que la fenêtre ne pourrait plus bouger). Toute bascule redessine (`renderGrid` mesure `gridCont.clientWidth`).
+- Sections du panneau en **accordéon indépendant** (`.card.accordeon` + classe `ferme`, titre = bouton). ⚠️ `display:none !important` : des enfants ont un `display` inline (`setMode`). `ferme` ≠ attribut `hidden` de `#grille-card`/`#dim-card` (« disponible pour ce lieu »).
+- État par navigateur dans `localStorage['editeur-carte.panneau']` (`{flottant,left,top,fermees}`), try/catch, défaut ancré + tout déplié.
+- Mini-outils flottants : **seulement en mode test** (le panneau ne se replie plus).
 
 ### Parts partagées et contrat `LIEUX_HOTE`
 Ligne de liste, fiche 📄, éditeurs 🧾 JSON, formulaires ✏️ lieu et 🔗 connexion vivent dans **`part-lieux-{js,css,markup}.html`**, inclus (`include`, pas `import` : `url_for`) par `/admin/editor` et `/admin/lieux`. Porte de rempart, lot, repositionnement, voies restent dans l'éditeur.
