@@ -238,12 +238,15 @@ let currentType = null;  // type actuellement chargé (clé de persistance)
 const DEFAULT_W = 150;   // largeur de colonne par défaut (px)
 const LS_KEY = 'telluris.admin_table.v1.';   // préfixe localStorage (par type)
 
-// Colonnes CALCULÉES (potentiels du simulateur, types espece/character seulement) :
-// des colonnes VIRTUELLES — les valeurs vivent dans `potentiels` (par _id), jamais dans
-// les docs, sinon un Save de l'éditeur JSON persisterait des dérivées en base.
-const VIRTUAL_COLS = ['potentiel_combat', 'potentiel_survie', 'potentiel_support'];
-let potentiels = {};        // { _id: { potentiel_combat, potentiel_support } }
-let virtualActive = false;  // vrai si le type courant a des potentiels chargés
+// Colonnes CALCULÉES : des colonnes VIRTUELLES — les valeurs vivent dans `calcules` (par
+// _id), jamais dans les docs, sinon un Save de l'éditeur JSON persisterait des dérivées en
+// base. Deux sources : les potentiels du simulateur (espece/character) et le bloc
+// `calcules` de /admin/table/data (connection → node_inexistant).
+const POTENTIEL_COLS = ['potentiel_combat', 'potentiel_survie', 'potentiel_support'];
+let virtualCols = [];       // colonnes calculées du type courant ([] = aucune)
+let calcules = {};          // { _id: { colonne: valeur } }
+let virtualActive = false;  // vrai si le type courant a des colonnes calculées chargées
+let calculesServeur = false; // vrai si elles viennent de /admin/table/data (relues après un Save)
 
 const $ = id => document.getElementById(id);
 
@@ -264,13 +267,19 @@ async function loadType() {
 		const data = await res.json();
 		docs = data.docs || [];
 		let note = '';
-		// Potentiels du simulateur (colonnes calculées) — seulement là où ils ont un sens.
-		potentiels = {}; virtualActive = false;
+		// Colonnes calculées — seulement là où elles ont un sens.
+		calcules = {}; virtualCols = []; virtualActive = false; calculesServeur = false;
+		if (data.calcules) {
+			calcules = data.calcules;
+			calculesServeur = true;
+			_declarerColonnesCalculees();
+		}
 		if (t === 'espece' || t === 'character') {
 			try {
 				const pRes = await fetch('/admin/simulateur/potentiels?type=' + encodeURIComponent(t));
 				if (pRes.ok) {
-					potentiels = ((await pRes.json()).potentiels) || {};
+					calcules = ((await pRes.json()).potentiels) || {};
+					virtualCols = POTENTIEL_COLS.slice();
 					virtualActive = true;
 				} else { note = ' (potentiels indisponibles : ' + pRes.status + ')'; }
 			} catch (e) { note = ' (potentiels indisponibles)'; }
@@ -283,7 +292,7 @@ async function loadType() {
 		// choix mémorisé de l'utilisateur (les masquer, les déplacer) fait foi.
 		if (virtualActive) {
 			const connues = new Set((stored && stored.columns) || []);
-			VIRTUAL_COLS.forEach(c => { if (!connues.has(c) && !visible.includes(c)) visible.push(c); });
+			virtualCols.forEach(c => { if (!connues.has(c) && !visible.includes(c)) visible.push(c); });
 		}
 		checked.clear();   // la sélection est transitoire (jamais persistée), comme `selected`
 		closeEditor();
@@ -305,7 +314,30 @@ function initColumns() {
 	keys.delete('_id');
 	columns = ['_id', ...Array.from(keys).sort()];
 	visible = columns.slice(0, 7);
-	if (virtualActive) VIRTUAL_COLS.forEach(c => { if (!columns.includes(c)) columns.push(c); });
+	if (virtualActive) virtualCols.forEach(c => { if (!columns.includes(c)) columns.push(c); });
+}
+
+// Colonnes servies par le bloc `calcules` de /admin/table/data : l'union de leurs clés.
+function _declarerColonnesCalculees() {
+	const cles = new Set();
+	Object.values(calcules).forEach(v => Object.keys(v || {}).forEach(k => cles.add(k)));
+	virtualCols = Array.from(cles).sort();
+	virtualActive = virtualCols.length > 0;
+}
+
+// Après un Save : une valeur calculée dépend du doc (et, pour une connexion, des AUTRES
+// docs) — on relit le seul bloc `calcules` du type, sans toucher aux lignes ni à la vue.
+async function rafraichirCalcules() {
+	if (!currentType || !calculesServeur) return;
+	const type = currentType;
+	try {
+		const res = await fetch('/admin/table/data?type=' + encodeURIComponent(type));
+		if (!res.ok) return;
+		const data = await res.json();
+		// ⚠️ Type changé pendant la relecture : ces valeurs ne décrivent plus le tableau.
+		if (currentType !== type) return;
+		if (data.calcules) { calcules = data.calcules; renderBody(); }
+	} catch (e) { /* la colonne garde sa dernière valeur */ }
 }
 
 // Fusion NON destructive après une sauvegarde : conserve l'ordre des colonnes, la
@@ -316,7 +348,7 @@ function mergeColumns() {
 	docs.forEach(d => Object.keys(d || {}).forEach(k => keys.add(k)));
 	// Les colonnes calculées ne vivent pas dans les docs : les déclarer connues, sinon
 	// la fusion les éliminerait à chaque Save.
-	if (virtualActive) VIRTUAL_COLS.forEach(c => keys.add(c));
+	if (virtualActive) virtualCols.forEach(c => keys.add(c));
 	const next = columns.filter(c => keys.has(c));   // colonnes courantes encore présentes (ordre gardé)
 	keys.forEach(k => { if (!next.includes(k)) next.push(k); });   // nouvelles clés à la fin
 	columns = next;
@@ -360,8 +392,8 @@ function restoreState(type) {
 // ── Rendu : sélecteur de colonnes (cocher = affichée ; glisser = réordonner) ──
 function renderCols() {
 	$('cols-box').innerHTML = columns.map(c => {
-		const calc = VIRTUAL_COLS.includes(c)
-			? ' <span title="Colonne calculée (potentiels du simulateur) — absente des documents">✧</span>' : '';
+		const calc = virtualCols.includes(c)
+			? ' <span title="Colonne calculée — absente des documents">✧</span>' : '';
 		return `<div class="col-item" draggable="true" data-col="${esc(c)}">
 			<span class="drag-handle" title="Glisser pour réordonner">⠿</span>
 			<label><input type="checkbox" data-col="${esc(c)}" ${visible.includes(c) ? 'checked' : ''}>${esc(c)}${calc}</label>
@@ -475,8 +507,8 @@ function renderHead() {
 // SOURCE UNIQUE du rendu, du filtre et du tri — un accès direct r.d[c] ignorerait les
 // colonnes virtuelles.
 function valDe(d, c) {
-	if (VIRTUAL_COLS.includes(c)) {
-		const p = d && d._id ? potentiels[d._id] : null;
+	if (virtualCols.includes(c)) {
+		const p = d && d._id ? calcules[d._id] : null;
 		return p ? p[c] : undefined;
 	}
 	return d ? d[c] : undefined;
@@ -627,6 +659,7 @@ $('json-save').addEventListener('click', async () => {
 		mergeColumns();                      // intègre d'éventuelles nouvelles clés SANS perdre ordre/sélection/tri/filtres/largeurs
 		renderCols(); renderHead(); renderBody(); persistState();
 		setStatus($('editor-status'), '✓ Document sauvegardé en base.', 'ok');
+		rafraichirCalcules();   // sans attendre : la colonne se met à jour quand la relecture arrive
 	} catch (e) {
 		setStatus($('editor-status'), 'Erreur réseau : ' + e.message, 'err');
 	} finally {
@@ -774,9 +807,9 @@ async function exportVisibleXlsx() {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			// Colonnes calculées exclues : les rows sont les docs bruts, une colonne
-			// « potentiel » vide dans le tableur serait un mensonge.
+			// calculée vide dans le tableur serait un mensonge.
 			body: JSON.stringify({ filename: name,
-				columns: columns.filter(c => !VIRTUAL_COLS.includes(c)), rows: out }),
+				columns: columns.filter(c => !virtualCols.includes(c)), rows: out }),
 		});
 		if (!res.ok) {
 			const err = await res.json().catch(() => ({}));

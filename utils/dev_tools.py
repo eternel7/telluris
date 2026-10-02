@@ -564,6 +564,23 @@ CATALOGUE = [
 			"sont supprimées ; une quête AUTHORÉE n'est jamais touchée.",
 	},
 	{
+		"id": "purge_connexions_simulation",
+		"label": "🧹 Connexions orphelines — SIMULATION",
+		"argv": _py("purge_connexions_orphelines.py"),
+		"ecrit": "Lecture seule (aperçu).",
+		"description": "Liste les docs type=connection dont au moins un nœud ne mène à aucun "
+			"lieu existant (même règle que la colonne node_inexistant de /admin/table).",
+	},
+	{
+		"id": "purge_connexions_appliquer",
+		"label": "🧹 Connexions orphelines — APPLIQUER (supprime en base)",
+		"argv": _py("purge_connexions_orphelines.py", "--appliquer"),
+		"ecrit": "⚠️ SUPPRIME des documents en base. Irréversible.",
+		"danger": True,
+		"description": "Supprime les connexions listées par la simulation. Fail-closed : si "
+			"l'existence des lieux ne peut pas être lue, rien n'est supprimé.",
+	},
+	{
 		"id": "audit_economy",
 		"label": "⚖️ Audit économique — recettes, rayons, marges",
 		# `--dernier` et pas un chemin figé : l'argv d'une entrée est écrit ICI, en dur, et

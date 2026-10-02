@@ -18,6 +18,7 @@ Docs d'un type en tableau (colonnes choisies/ordonnées par drag, tri, filtres, 
 
 - ⚠️ `_rev` **relu en base**, jamais celui du client. `db.delete_doc` renvoie `None` en succès comme en échec ⇒ le serveur vérifie par **relecture** → 409.
 - Préférences d'affichage **par type** dans `localStorage` (`telluris.admin_table.v1.<type>`).
+- **Colonnes calculées** (✧) : servies À CÔTÉ des docs (`calcules: {_id: {col: val}}`), jamais dedans — un Save les persisterait. Potentiels du simulateur (`espece`/`character`) ; `node_inexistant` (`connection`, `main._colonnes_calculees`, relu après un Save ; absent si l'existence des lieux est illisible). Exclues de l'export Excel.
 - **Exports** des lignes **affichées** (`computeVisibleRows` : filtres + tri) : ⬇ JSON (docs complets) et ⬇ Excel (`POST /admin/table/export.xlsx` → `utils/xlsx.py`, writer OOXML stdlib partagé avec le bestiaire ; une colonne par clé de 1er niveau, imbriqué en JSON). Nom `exportFilename(ext)` = `<type>_filtre_<col>_<val>…_AAAAMMJJ-HHMMSS`, horodatage **UTC** aligné sur les exports serveur.
 
 

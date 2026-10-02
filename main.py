@@ -303,7 +303,27 @@ def admin_table_data(
 		raise HTTPException(status_code=400, detail="Paramètre 'type' requis")
 	docs = [d for d in (find_docs({"type": t}) or [])
 			if not str(d.get("_id", "")).startswith("user:")]
-	return {"type": t, "docs": docs}
+	sortie = {"type": t, "docs": docs}
+	calcules = _colonnes_calculees(t, docs)
+	if calcules is not None:
+		sortie["calcules"] = calcules
+	return sortie
+
+def _colonnes_calculees(doc_type: str, docs: list):
+	"""Colonnes CALCULÉES de /admin/table : `{_id: {colonne: valeur}}`, servies À CÔTÉ des
+	docs, jamais dedans — un Save de l'éditeur JSON les persisterait sinon en base.
+	None = aucune pour ce type, ou non calculables (le client n'affiche alors pas la colonne
+	plutôt qu'une valeur fausse)."""
+	if doc_type != "connection":
+		return None
+	from utils import connexions_orphelines as co
+	cites = co.lieux_cites(docs)
+	trouves = find_docs({"_id": {"$in": cites}}, fields=["_id"]) if cites else []
+	if trouves is None:
+		return None   # ⚠️ existence illisible : tout marquer « inexistant » serait mentir
+	existants = {d["_id"] for d in trouves if d.get("_id")}
+	return {d["_id"]: {"node_inexistant": bool(co.noeuds_inexistants(d, existants))}
+		for d in docs if d.get("_id")}
 
 @app.put("/admin/doc")
 def admin_update_doc(
