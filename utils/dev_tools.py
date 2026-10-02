@@ -533,9 +533,8 @@ CATALOGUE = [
 		"description": "Pour chaque carte de pays de templates/resources/maps/ (liste blanche : "
 			"ni globes, ni hameau, ni fortifications) qu'aucun lieu ne cite : un `lieu:*` "
 			"minimal de catégorie pays et la grille du profil `pays` — `cells` toutes à 1, la "
-			"côte et les fleuves murés en nav, un gué là où un fleuve couperait une terre en "
-			"deux. Cases carrées de la taille de celles des pays en base. Première passe à "
-			"retoucher dans l'éditeur : îles et rives sans gué sont signalées. Refuse tout le "
+			"côte seule murée en nav (les fleuves ne bloquent rien). Cases carrées de la taille de celles des pays en base. Première passe à "
+			"retoucher dans l'éditeur : les îles sont signalées. Refuse tout le "
 			"lot sur un `_id` déjà pris ; sans carte orpheline, n'écrit aucun fichier. "
 			"Requiert Pillow.",
 	},

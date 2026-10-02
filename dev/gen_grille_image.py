@@ -36,7 +36,7 @@ Sorties (dans jsons/) :
   <slug>_grille_apercu.png        l'image avec la grille proposée en surimpression, les
                                   murs nav (rouge), les passages (vert vif), le rempart (orange),
                                   les rues ouvertes (bleu clair) ; profil pays : la côte
-                                  (orange) et les fleuves (bleu clair), les gués (vert vif)
+                                  (orange)
 """
 
 import glob
@@ -165,7 +165,7 @@ def ecrire_apercu(chemin_image: str, cells, cible: str, nav=None, rapport=None):
 	for x, y in rapport.get("cote") or []:
 		dessin.rectangle([x * pas_x + 1, y * pas_y + 1, (x + 1) * pas_x - 2, (y + 1) * pas_y - 2],
 			outline=(255, 150, 30, 160), width=1)
-	for x, y in (rapport.get("rues") or []) + (rapport.get("fleuves") or []):
+	for x, y in rapport.get("rues") or []:
 		dessin.rectangle([x * pas_x + 1, y * pas_y + 1, (x + 1) * pas_x - 2, (y + 1) * pas_y - 2],
 			outline=(110, 190, 255, 230), width=2)
 	for passage in rapport.get("passages") or []:
@@ -214,9 +214,10 @@ def proposer_pour_image(chemin: str, cols: int, rows: int, doc_lieu=None, option
 
 	couleurs, contours, taille = echantillonner(chemin, cols, rows)
 	rues = "--sans-rues" not in options
-	# Rues d'une cité : 4 px ; fleuves d'une carte de pays : le pixel (`sous_cases` du profil).
+	# Rues d'une cité, lues sur `sous_cases` du profil ; une carte de pays n'en lit pas.
 	k = grille_image.sous_cases_de(profil)
-	fins = echantillonner_fins(chemin, cols, rows, k) if rues else None
+	fins = (echantillonner_fins(chemin, cols, rows, k)
+		if rues and grille_image.regles_de(profil).get("rues") else None)
 	proposition = grille_image.proposer(couleurs, contours, cols, rows, nav=nav_doc,
 		profil=profil, passages="--sans-passages" not in options,
 		enceinte=False if "--sans-enceinte" in options else None,
@@ -241,13 +242,12 @@ def imprimer_resume(chemin: str, proposition: dict):
 	for valeur, n in sorted(grille_image.comptes(cells).items()):
 		print(f"  {valeur} {etiquettes.get(valeur, '?'):22} {n:6}  ({n * 100 / total:5.1f} %)")
 	fermeture = "par nav" if topo["murs_nav"] else "par le terrain"
-	if topo.get("cote") is not None and "fleuves" in topo:
-		print(f"  {len(topo['cote'])} case(s) de côte murée(s) · {len(topo['fleuves'])} case(s)"
-			f" de fleuve murée(s) · {len(topo['passages'])} gué(s) ·"
+	if topo.get("cote") is not None:
+		print(f"  {len(topo['cote'])} case(s) de côte murée(s) ·"
 			f" {topo['nav_ajoutes']} bit(s) nav ajouté(s)")
 		for zone in topo["zones_isolees"]:
-			print(f"  ⚠ zone isolée de {zone['taille']} case(s) en {zone['case']} (île, ou rive"
-				" sans gué) — à relier à la main si elle doit l'être")
+			print(f"  ⚠ zone isolée de {zone['taille']} case(s) en {zone['case']} (île)"
+				" — à relier à la main si elle doit l'être")
 		return
 	print(f"  {len(topo['rues'])} case(s) de rue ouverte(s)"
 		f" (dont {topo.get('rues_dehors', 0)} hors les murs) · enceinte "

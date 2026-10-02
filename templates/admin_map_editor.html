@@ -2053,8 +2053,8 @@ function renderGrid() {
 		}
 	}
 
-	// Topologie de la proposition : rues OUVERTES (sous-cases claires) et fleuves murés (profil
-	// pays) cerclés de bleu clair, cases CREUSÉES ou gués par un passage (pont, ruelle) de vert vif, pourtour de l'enceinte d'orange
+	// Topologie de la proposition : rues OUVERTES (squelette des sous-cases claires) cerclées de
+	// bleu clair, cases CREUSÉES par un passage (pont, ruelle) de vert vif, pourtour de l'enceinte d'orange
 	// — ce que l'auteur doit vérifier d'abord. Ni jaune (coupe minimale des voies) ni cyan
 	// (liseré de l'aperçu).
 	if (grilleProposee && grilleTopologie && showTerrain) {
@@ -2067,7 +2067,6 @@ function renderGrid() {
 		};
 		ctx.save();
 		cadre(grilleTopologie.rues, 'rgba(110,190,255,0.85)', 1.5);
-		cadre(grilleTopologie.fleuves, 'rgba(110,190,255,0.85)', 1.5);
 		cadre(grilleTopologie.rempart, 'rgba(255,150,30,0.9)', 1.5);
 		for (const p of grilleTopologie.passages || []) cadre(p.cases, 'rgba(170,255,60,1)', 2.5);
 		ctx.restore();
@@ -4141,10 +4140,9 @@ function _grilleTexteTopologie(data) {
 			? `enceinte fermée par le terrain (${(t.rempart || []).length} case(s) du pourtour passée(s) à 0)`
 			: 'enceinte fermée par nav');
 	}
-	if (t.fleuves) {
-		// Profil pays : aucune case n'est creusée, les « passages » sont des gués.
-		parts.push(`${(t.cote || []).length} case(s) de côte et ${t.fleuves.length} de fleuve murée(s)`);
-		parts.push(`${(t.passages || []).length} gué(s)`);
+	if (t.cote) {
+		// Profil pays : seule la côte est murée, aucune case n'est creusée.
+		parts.push(`${t.cote.length} case(s) de côte murée(s)`);
 	} else {
 		parts.push(`${(t.passages || []).length} passage(s) creusé(s)`);
 	}
