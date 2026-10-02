@@ -11,7 +11,7 @@ Quatre étages, dans cet ordre :
      PROFIL (`PROFILS_GRILLE` : ville, forêt, catacombes — `pays` est à part, ci-dessous) ;
   2. **lisser** (`lisser_majorite`) ;
   3. **rues** (`tracer_rues`, villes) : rouvrir les rues plus fines qu'une case, lues sur
-     des sous-cases de 4 px (`fins`) ;
+     des sous-cases de 4 px (`fins`) puis SQUELETTISÉES (`squelettiser`, Zhang-Suen) ;
   4. **topologie** (`proposer`) : fermer l'ENCEINTE d'une ville (par `nav`, ou par le
      terrain si les murs nav ne sont pas proposés), interdire les diagonales qui passent
      au-dessus de l'angle d'une maison (`fermer_coins`), puis RELIER les zones praticables
@@ -35,8 +35,8 @@ inaccessible, 1 libre, 3 falaise, 5 terrain très difficile). 3 n'est produit qu
 profils qui le déclarent (roche en forêt, cristaux de la mine).
 
 **Profil `pays` (`nav_seul`, `proposer_pays`)** : une carte de pays n'a QUE des murs nav,
-`cells` toutes à 1 (forme de `lieu:france`). Côte murée (mer et lacs), fleuves lus au pixel
-et murés, avec des GUÉS (`poser_gues`) pour qu'aucune rive ne reste coupée de sa terre.
+`cells` toutes à 1 (forme de `lieu:france`). Seule la côte est murée (mer et lacs) : les
+fleuves ne bloquent rien.
 
 **`nav` est produit (sauf `murs_nav=False`), mais jamais retiré.** Le `nav` existant du doc
 est une ENTRÉE : ses bits sont conservés, on n'en ajoute que. Un mur nav peint à la main est
@@ -119,18 +119,30 @@ PROFILS_GRILLE = {
 		"cadre_profondeur": 3,
 		# ── Rues (`tracer_rues`) ─────────────────────────────────────────────────────
 		# Une rue fait 6 à 10 px, la case 16 : la couleur MOYENNE la noie dans les toits.
-		# Elle reparaît à l'échelle de la sous-case (4 px) : sous les cases que l'auteur a
-		# peintes 1 dans la ville, la sous-case la plus claire vaut 182 de luminance à
-		# Auxerre contre 150 sous ses cases 0 (184 / 170 à Lutèce) — le pavé est clair et
-		# terne, le toit sombre et vif. Score = clarté de la `rang`-ième sous-case la plus
-		# claire − `poids_saturation` × sa vivacité, ramenés à l'image ; coupure Otsu +
-		# `decalage`. Un groupe de cases claires n'est ouvert que s'il touche une case libre
-		# ou fait au moins `longueur_min` cases (une cour éclairée isolée n'est pas une rue),
-		# et pas s'il longe le bord (`bord_max` : le cadre clair du parchemin de Reims).
-		# Mesuré (classification seule, F1 par valeur) : Auxerre 0,79 → 0,79, Lutèce
-		# 0,71 → 0,79, Reims 0,78 → 0,80 ; plateau large autour de ces valeurs.
-		# ⚠️ Écartés après mesure : l'ébarbage des impasses (retire plus de vraies rues que
-		# de bruit) et l'exigence de maisons de part et d'autre (aucun gain).
+		# Elle reparaît à l'échelle de la sous-case (4 px) : le pavé est clair et terne, le
+		# toit sombre et vif. Pixel de voie (sous-case) : clarté − `poids_saturation` ×
+		# vivacité, ramenées aux sous-cases du bâti ; coupure Otsu + `decalage`. Le masque
+		# des voies (plus les cases libres qui bordent le bâti, pour s'y raccorder) est
+		# refermé (`fermeture`, sous-cases : recoud une rue hachée par la moyenne), purgé
+		# des taches de moins de `aire_min` sous-cases, puis SQUELETTISÉ (Zhang-Suen) en
+		# lignes d'un pixel ; les épines de moins de `ebarbage` sous-cases sont coupées.
+		# Une case bâtie que le squelette traverse (`pixels_min` pixels) est ouverte, et
+		# un pas diagonal du squelette entre deux cases ouvre aussi une orthogonale : la
+		# rue reste 4-connexe, `fermer_coins` ne la coupe pas.
+		# Un groupe de cases n'est ouvert que s'il touche une case libre ou fait au moins
+		# `longueur_min` cases, et pas s'il longe le bord (`bord_max` : le cadre clair du
+		# parchemin de Reims).
+		# Mesuré (rues peintes dans le bâti, F1 rappel/précision) — ancienne lecture case
+		# par case : Auxerre 0,54, Lutèce 0,67, Reims 0,57 mais 29 / 26 / 18 cases ouvertes
+		# isolées et 61 / 71 / 52 zones libres ; squelette : 0,52 / 0,66 / 0,55, 0 / 0 / 1
+		# case isolée, 2 / 2 / 4 zones — le réseau sort CONTINU, et `relier_zones` creuse 8 /
+		# 7 / 4 passages au lieu de 36 / 45 / 32. Prix payé : le F1 moyen par valeur de la
+		# grille entière passe de 0,79 à 0,76 — le squelette ouvre des ruelles que les grilles
+		# peintes, plus grossières, laissent bâties (précision des rues 0,5 à 0,66). Plus de
+		# sous-cases (8) :
+		# +0,01 pour cinq fois le temps de calcul. À `decalage` 0 le toit éclairé passe
+		# pour du pavé (maillage serré), dès 0,75 les rues se hachent (6 à 9 zones) ; sans
+		# `aire_min`, 6 à 10 cases isolées reviennent.
 		# Hors les murs (villages, faubourgs) : normalisation et coupure à part dès que le
 		# dehors compte `cases_min` cases bâties, sinon celles de l'ensemble (Lutèce : 6
 		# cases bâties dehors). Mesuré : à part ou commun, le score est le même à 0,001
@@ -138,8 +150,9 @@ PROFILS_GRILLE = {
 		# de villages, 3/25) — ce qui a ouvert les villages de Reims, c'est le CADRE
 		# (`masque_cadre`) qui en faisait des cases intra-muros. Le réglage à part reste
 		# pour les cartes où le dehors est vaste et autrement éclairé.
-		"rues": {"rang": 1, "poids_saturation": 1.0, "decalage": 0.75, "longueur_min": 3,
-			"bord_max": 0.2, "cases_min": 30, "decalage_dehors": 0.75},
+		"rues": {"poids_saturation": 1.0, "decalage": 0.5, "fermeture": 1, "aire_min": 24,
+			"ebarbage": 6, "pixels_min": 1, "longueur_min": 3, "bord_max": 0.2, "cases_min": 30,
+			"decalage_dehors": 0.5},
 	},
 	"foret": {
 		"libelle": "Forêt",
@@ -220,29 +233,12 @@ PROFILS_GRILLE = {
 		"ile_min": 4,
 		# Cadre du parchemin (`masque_eau`) : une case sur `france.png`, tout autour.
 		"cadre_profondeur": 1,
-		# ── Fleuves ──────────────────────────────────────────────────────────────────
-		# Un fleuve fait 3 à 6 px, la case 16 : il se lit PIXEL par pixel (`sous_cases` = 16,
-		# une sous-case par pixel sur une carte à cases de 16 px). Sur `france.png`, l'eau de
-		# la Loire vaut (44, 53, 50) à (89, 96, 88) : FROIDE (g, b ≥ r) et SOMBRE. L'encre
-		# noire (8, 11, 0), la forêt (97, 103, 65) et la terre (216, 202, 155) sont chaudes ;
-		# la neige des Alpes est froide mais CLAIRE. Pixel de fleuve : froideur à au moins
-		# `ecart` écarts interquartiles au-dessus de la médiane de la terre, ET luminance sous
-		# la médiane de la terre. Case de fleuve : au moins `pixels_min` pixels de fleuve.
-		# Mesuré : à 1,5 / 10 la forêt des Landes passe pour un fleuve ; à 1,75 / 8 la Loire,
-		# la Seine, le Rhône, le Rhin et la Garonne sortent en chaînes continues ; à 2,5 ils
-		# s'effilochent en tronçons.
-		# `longueur_min` : un groupe (8-connexe) plus court n'est pas un fleuve — une ville,
-		# un blason. `gue_longueur_max` : un gué plus long n'est pas posé, la rive est signalée.
-		"fleuves": {"ecart": 1.75, "pixels_min": 8, "longueur_min": 4, "gue_longueur_max": 3,
-			"cout_marge": 1.0},
-		"sous_cases": 16,
 		"obstacle": {},
 		"roche": None,
 		"otsu_bacs": 64,
 		"rues": None,
 		"enceinte": False,
 		"coins": False,
-		"passages": True,
 	},
 }
 PROFIL_DEFAUT = "ville"
@@ -281,8 +277,8 @@ def catalogue_profils() -> dict:
 
 
 def sous_cases_de(profil=None, regles=None) -> int:
-	"""Sous-cases par côté de case des échantillons FINS que lit ce profil (`fins`) : 4 pour
-	les rues d'une cité, 16 (le pixel) pour les fleuves d'une carte de pays."""
+	"""Sous-cases par côté de case des échantillons FINS que lit ce profil (`fins`, le tracé
+	des rues) : `sous_cases` du profil, sinon `SOUS_CASES`."""
 	return int(regles_de(profil, regles).get("sous_cases") or SOUS_CASES)
 
 
@@ -604,6 +600,12 @@ def tracer_rues(cells, fins, k, regles, masque=None):
 	et avant la topologie (les passages raccordent ensuite ce qui reste). Ne mute pas `cells`.
 	Rend `(cells, ouvertes)`, `ouvertes` = [[x, y], …] dans l'ordre de lecture.
 
+	Au niveau de la SOUS-CASE : masque des pixels de voie (clairs et ternes, ramenés au bâti),
+	plus les cases libres qui bordent le bâti (la rue s'y raccorde) → fermeture → taches de
+	moins de `aire_min` effacées → `squelettiser` → `ebarber` → report sur les cases
+	(`_cases_du_squelette`). Lire chaque case à part rendait des cases éparses ; le squelette
+	suit la rue d'un bout à l'autre.
+
 	`masque` (enceinte, `detecter_enceinte`) : normalisation et coupure calculées À PART dedans
 	et dehors — les villages et faubourgs (rues de terre, toits épars) n'ont pas la lumière de
 	la cité, qui sinon dicterait seule le seuil. Un côté de moins de `cases_min` cases bâties
@@ -618,42 +620,75 @@ def tracer_rues(cells, fins, k, regles, masque=None):
 	if not reglage or not H or not W or k < 1 or len(fins or []) < W * k * H * k:
 		return sortie, []
 	largeur = W * k
-	rang = max(1, min(int(reglage.get("rang", 1)), k * k))
 	cadre = masque_cadre(sortie, regles)
-	bati = [(x, y) for y in range(H) for x in range(W)
-		if sortie[y][x] == TERRAIN_INACCESSIBLE and not (cadre and cadre[y][x])]
+
+	def batie(x, y):
+		return sortie[y][x] == TERRAIN_INACCESSIBLE and not (cadre and cadre[y][x])
+
+	bati = [(x, y) for y in range(H) for x in range(W) if batie(x, y)]
 	if not bati:
 		return sortie, []
+
+	def pixels(cases):
+		return [(y * k + j) * largeur + x * k + i for x, y in cases for j in range(k) for i in range(k)]
+
 	clarte, vivacite = {}, {}
-	for x, y in bati:
-		sous = sorted(((luminance(fins[(y * k + j) * largeur + x * k + i]),
-			saturation(fins[(y * k + j) * largeur + x * k + i]))
-			for j in range(k) for i in range(k)), reverse=True)
-		clarte[(x, y)], vivacite[(x, y)] = sous[rang - 1]
+	for p in pixels(bati):
+		clarte[p], vivacite[p] = luminance(fins[p]), saturation(fins[p])
 	poids = float(reglage.get("poids_saturation", 0.0))
 	bacs = regles.get("otsu_bacs", 64)
 
-	def reglage_de(cases, decalage):
-		"""(score par case, coupure), ramenés aux cases bâties données : rien d'absolu."""
-		m_l, e_l = _quartiles([clarte[c] for c in cases])
-		m_s, e_s = _quartiles([vivacite[c] for c in cases])
-		score = {c: (clarte[c] - m_l) / e_l - poids * (vivacite[c] - m_s) / e_s for c in cases}
-		return score, seuil_otsu(list(score.values()), bacs) + decalage
+	def voies_de(cases, decalage):
+		"""Pixels de voie des cases données : score et coupure ramenés à ELLES, rien d'absolu."""
+		px = pixels(cases)
+		m_l, e_l = _quartiles([clarte[p] for p in px])
+		m_s, e_s = _quartiles([vivacite[p] for p in px])
+		score = {p: (clarte[p] - m_l) / e_l - poids * (vivacite[p] - m_s) / e_s for p in px}
+		coupure = seuil_otsu(list(score.values()), bacs) + decalage
+		return score, coupure
 
 	decalage = float(reglage.get("decalage", 0.0))
-	commun, coupure_commune = reglage_de(bati, decalage)
-	candidates = set()
+	voie = set()
 	if masque:
 		cases_min = int(reglage.get("cases_min", 0))
+		commun = None
 		for dedans, dec in ((True, decalage), (False, float(reglage.get("decalage_dehors", decalage)))):
 			cote = [c for c in bati if bool(masque[c[1]][c[0]]) == dedans]
+			if not cote:
+				continue
 			if len(cote) >= cases_min:
-				score, coupure = reglage_de(cote, dec)
+				score, coupure = voies_de(cote, dec)
 			else:
-				score, coupure = commun, coupure_commune - decalage + dec
-			candidates |= {c for c in cote if score[c] >= coupure}
+				commun = commun or voies_de(bati, decalage)
+				score, coupure = commun[0], commun[1] - decalage + dec
+			voie |= {p for p in pixels(cote) if score[p] >= coupure}
 	else:
-		candidates = {c for c in bati if commun[c] >= coupure_commune}
+		score, coupure = voies_de(bati, decalage)
+		voie = {p for p, s in score.items() if s >= coupure}
+
+	trace = [[False] * largeur for _ in range(H * k)]
+	for p in voie:
+		trace[p // largeur][p % largeur] = True
+	# Les cases libres qui bordent le bâti : la rue s'y raccorde au lieu de s'arrêter à un
+	# demi-pavé de la place (le squelette rogne les bouts de ce qu'il ne touche pas).
+	for y in range(H):
+		for x in range(W):
+			if sortie[y][x] == TERRAIN_LIBRE and any(_dans(sortie, x + dx, y + dy)
+					and batie(x + dx, y + dy) for dx, dy in VOISINS):
+				for j in range(k):
+					trace[y * k + j][x * k:(x + 1) * k] = [True] * k
+	rayon = int(reglage.get("fermeture", 0))
+	if rayon > 0:
+		trace = _eroder(_dilater(trace, rayon), rayon)
+	aire_min = int(reglage.get("aire_min", 0))
+	if aire_min > 1:
+		for membres in _composantes(trace):
+			if len(membres) < aire_min:
+				for px, py in membres:
+					trace[py][px] = False
+	squelette = ebarber(squelettiser(trace), int(reglage.get("ebarbage", 0)))
+	candidates = _cases_du_squelette(squelette, k, batie, sortie,
+		int(reglage.get("pixels_min", 1)))
 
 	def libre(x, y):
 		return _dans(sortie, x, y) and sortie[y][x] == TERRAIN_LIBRE
@@ -663,20 +698,8 @@ def tracer_rues(cells, fins, k, regles, masque=None):
 
 	bord_max = float(reglage.get("bord_max", 1.0))
 	longueur_min = int(reglage.get("longueur_min", 1))
-	ouvertes, vues = [], set()
-	for depart in sorted(candidates, key=lambda c: (c[1], c[0])):
-		if depart in vues:
-			continue
-		pile, groupe = [depart], []
-		vues.add(depart)
-		while pile:
-			cx, cy = pile.pop()
-			groupe.append((cx, cy))
-			for dx, dy in VOISINS:
-				voisine = (cx + dx, cy + dy)
-				if voisine in candidates and voisine not in vues:
-					vues.add(voisine)
-					pile.append(voisine)
+	ouvertes = []
+	for groupe in _composantes([[(x, y) in candidates for x in range(W)] for y in range(H)]):
 		# Le CADRE d'une carte sur parchemin (Reims) est une bande claire le long du bord :
 		# un groupe dont plus de `bord_max` des cases touchent le bord n'est pas une rue.
 		if sum(1 for c in groupe if au_bord(*c)) > bord_max * len(groupe):
@@ -687,6 +710,143 @@ def tracer_rues(cells, fins, k, regles, masque=None):
 	for x, y in ouvertes:
 		sortie[y][x] = TERRAIN_LIBRE
 	return sortie, [[x, y] for x, y in sorted(ouvertes, key=lambda c: (c[1], c[0]))]
+
+
+def _cases_du_squelette(squelette, k, batie, cells, pixels_min):
+	"""Cases bâties ouvertes par le squelette : celles qu'il traverse sur `pixels_min` pixels,
+	plus, à chaque pas DIAGONAL du squelette d'une case à sa voisine en coin, l'orthogonale
+	intermédiaire qui en porte le plus — sinon la rue ne tiendrait que par un coin de case,
+	que `fermer_coins` ferme dès que les deux orthogonales sont bâties."""
+	Hp = len(squelette)
+	Wp = len(squelette[0]) if Hp else 0
+	compte = {}
+	for py in range(Hp):
+		for px in range(Wp):
+			if squelette[py][px]:
+				c = (px // k, py // k)
+				compte[c] = compte.get(c, 0) + 1
+	ouvertes = {c for c, n in compte.items() if n >= pixels_min and batie(*c)}
+
+	def praticable(c):
+		return cells[c[1]][c[0]] == TERRAIN_LIBRE or c in ouvertes
+
+	for py in range(Hp):
+		for px in range(Wp):
+			if not squelette[py][px]:
+				continue
+			for dx in (1, -1):
+				qx, qy = px + dx, py + 1
+				if not (0 <= qx < Wp and qy < Hp and squelette[qy][qx]):
+					continue
+				# Le pas passe déjà par un pixel orthogonal : il n'enjambe aucun coin.
+				if squelette[py][qx] or squelette[qy][px]:
+					continue
+				a, b = (qx // k, py // k), (px // k, qy // k)
+				if a[0] == px // k or b[1] == py // k or praticable(a) or praticable(b):
+					continue
+				# Départage déterministe : plus de squelette, puis bâtie (jamais l'eau).
+				choix = max((a, b), key=lambda c: (batie(*c), compte.get(c, 0)))
+				if batie(*choix):
+					ouvertes.add(choix)
+	return ouvertes
+
+
+# P2…P9 de Zhang-Suen : N, NE, E, SE, S, SW, W, NW — l'anneau des huit voisins, dans l'ordre.
+_ANNEAU = [(0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1)]
+
+
+def squelettiser(masque) -> list:
+	"""Squelette (Zhang-Suen, 1984) du masque [y][x] : des lignes d'un pixel, 8-connexes, qui
+	gardent la connexité de chaque tache. Ne mute pas la source.
+
+	Deux sous-itérations alternées effacent les pixels de bord qui ne sont ni une extrémité
+	(2 à 6 voisins), ni un pont (une seule transition fond → tache autour d'eux), côté sud-est
+	puis nord-ouest, jusqu'à stabilité. ⚠️ Pur Python, pas de numpy : on ne réexamine que les
+	voisins d'un pixel effacé (`sales`) — le résultat est celui de l'algorithme complet,
+	puisqu'un pixel dont le voisinage n'a pas bougé rend le même verdict."""
+	H = len(masque)
+	W = len(masque[0]) if H else 0
+	img = [[bool(v) for v in ligne] for ligne in masque]
+
+	def plein(x, y):
+		return 0 <= x < W and 0 <= y < H and img[y][x]
+
+	tous = {(x, y) for y in range(H) for x in range(W) if img[y][x]}
+	sales = [set(tous), set(tous)]
+	etape = 0
+	while sales[0] or sales[1]:
+		effaces = []
+		for x, y in sales[etape]:
+			if not img[y][x]:
+				continue
+			p = [plein(x + dx, y + dy) for dx, dy in _ANNEAU]
+			if not 2 <= sum(p) <= 6:
+				continue
+			if sum(1 for i in range(8) if not p[i] and p[(i + 1) % 8]) != 1:
+				continue
+			if etape == 0 and ((p[0] and p[2] and p[4]) or (p[2] and p[4] and p[6])):
+				continue
+			if etape == 1 and ((p[0] and p[2] and p[6]) or (p[0] and p[4] and p[6])):
+				continue
+			effaces.append((x, y))
+		sales[etape] = set()
+		# Effacement SIMULTANÉ : un pixel effacé en cours de passe fausserait ses voisins.
+		for x, y in effaces:
+			img[y][x] = False
+		for x, y in effaces:
+			for dx, dy in _ANNEAU:
+				if plein(x + dx, y + dy):
+					sales[0].add((x + dx, y + dy))
+					sales[1].add((x + dx, y + dy))
+		etape = 1 - etape
+	return img
+
+
+def _voisins_pleins(img, x, y):
+	H, W = len(img), len(img[0])
+	return [(x + dx, y + dy) for dx, dy in VOISINS
+		if 0 <= x + dx < W and 0 <= y + dy < H and img[y + dy][x + dx]]
+
+
+def _branches(img, x, y) -> int:
+	"""Nombre de BRANCHES qui partent d'un pixel du squelette : transitions vide → plein sur
+	l'anneau de ses huit voisins. 1 = extrémité, 2 = ligne, 3 et plus = carrefour. ⚠️ Pas le
+	nombre de voisins : à côté d'une ligne, un pixel en touche trois sans être un carrefour."""
+	H, W = len(img), len(img[0])
+	p = [0 <= x + dx < W and 0 <= y + dy < H and img[y + dy][x + dx] for dx, dy in _ANNEAU]
+	return sum(1 for i in range(8) if not p[i] and p[(i + 1) % 8])
+
+
+def ebarber(squelette, longueur) -> list:
+	"""Coupe les ÉPINES du squelette : une branche qui part d'une extrémité et atteint un
+	carrefour (`_branches` ≥ 3) en moins de `longueur` pixels — le bord d'une tache, un toit
+	éclairé collé à la rue. Une ligne qui finit sans carrefour est gardée entière : c'est
+	peut-être une rue, et le filtre de groupe de `tracer_rues` en décide. Une passe, sur le
+	squelette d'origine. Ne mute pas la source."""
+	sq = [list(ligne) for ligne in squelette]
+	H = len(sq)
+	W = len(sq[0]) if H else 0
+	if longueur < 1:
+		return sq
+	bouts = [(x, y) for y in range(H) for x in range(W)
+		if sq[y][x] and len(_voisins_pleins(squelette, x, y)) == 1]
+	for depart in bouts:
+		branche, courant, carrefour = [depart], depart, False
+		while len(branche) < longueur:
+			suivants = [v for v in _voisins_pleins(squelette, *courant) if v not in branche]
+			if not suivants:
+				break
+			if any(_branches(squelette, *v) >= 3 for v in suivants):
+				carrefour = True
+				break
+			# Marche d'escalier : le voisin orthogonal d'abord, le diagonal suivra.
+			orthogonaux = [v for v in suivants if v[0] == courant[0] or v[1] == courant[1]]
+			courant = (orthogonaux or suivants)[0]
+			branche.append(courant)
+		if carrefour:
+			for x, y in branche:
+				sq[y][x] = False
+	return sq
 
 
 # ── nav ──────────────────────────────────────────────────────────────────────────────────
@@ -1312,82 +1472,14 @@ def masque_eau(couleurs, cols, rows, regles=None, profil=None) -> list:
 	return masque
 
 
-def masque_fleuves(fins, cols, rows, k, eau, regles=None, profil=None):
-	"""`(masque [y][x], marges [y][x])` des FLEUVES, lus pixel par pixel sur `fins` (couleurs
-	à plat d'une image réduite à `cols·k × rows·k`).
-
-	Pixel de fleuve : froid ET sombre, ramenés aux pixels de la TERRE (cf. `PROFILS_GRILLE`
-	pays). Case de fleuve : au moins `pixels_min` pixels de fleuve, hors mer. Puis :
-	- le BORD de la carte n'est jamais un fleuve (le cadre du parchemin est sombre et froid) ;
-	- une case côtière (8-voisine de la mer) contient de la mer, donc « du fleuve » : elle
-	  n'est gardée que comme EMBOUCHURE, voisine d'une case de fleuve non côtière ;
-	- un groupe de moins de `longueur_min` cases n'est pas un fleuve.
-	`marge` = pixels de fleuve / `pixels_min` : là où elle est faible, le fleuve se voit mal
-	— un pont, un gué dessiné — et c'est là que `poser_gues` passe."""
-	regles = regles_de(profil, regles)
-	reglage = regles.get("fleuves") or {}
-	W, H, k = int(cols), int(rows), int(k or 0)
-	vide = ([[False] * W for _ in range(H)], [[0.0] * W for _ in range(H)])
-	if not reglage or k < 1 or len(fins or []) < W * k * H * k:
-		return vide
-	largeur = W * k
-	froids, clairs = [], []
-	for y in range(H):
-		for x in range(W):
-			if eau[y][x]:
-				continue
-			for j in range(k):
-				base = (y * k + j) * largeur + x * k
-				for i in range(k):
-					c = fins[base + i]
-					froids.append(froideur(c))
-					clairs.append(luminance(c))
-	if not froids:
-		return vide
-	m_f, e_f = _quartiles(froids)
-	m_l = mediane(clairs)
-	seuil = m_f + float(reglage.get("ecart", 1.75)) * e_f
-	pixels_min = max(1, int(reglage.get("pixels_min", 1)))
-	brut = [[False] * W for _ in range(H)]
-	marges = [[0.0] * W for _ in range(H)]
-	for y in range(H):
-		for x in range(W):
-			if eau[y][x] or x in (0, W - 1) or y in (0, H - 1):
-				continue
-			n = 0
-			for j in range(k):
-				base = (y * k + j) * largeur + x * k
-				for i in range(k):
-					c = fins[base + i]
-					if froideur(c) >= seuil and luminance(c) < m_l:
-						n += 1
-			if n >= pixels_min:
-				brut[y][x] = True
-				marges[y][x] = n / pixels_min
-
-	def cotiere(x, y):
-		return any(_dans(eau, x + dx, y + dy) and eau[y + dy][x + dx] for dx, dy in VOISINS)
-
-	interieur = [[brut[y][x] and not cotiere(x, y) for x in range(W)] for y in range(H)]
-	masque = [[interieur[y][x] or (brut[y][x] and any(_dans(interieur, x + dx, y + dy)
-		and interieur[y + dy][x + dx] for dx, dy in VOISINS)) for x in range(W)] for y in range(H)]
-	for membres in _composantes(masque):
-		if len(membres) < int(reglage.get("longueur_min", 1)):
-			for x, y in membres:
-				masque[y][x] = False
-	return masque, [[marges[y][x] if masque[y][x] else 0.0 for x in range(W)] for y in range(H)]
-
-
 def murer_barrieres(nav, barriere, franchissable) -> int:
-	"""Murs `nav` entre les cases FRANCHISSABLES et la barrière (mer, fleuve) : tout pas
-	qui entre dans la barrière, en sort ou y circule, et tout pas DIAGONAL entre deux cases
-	franchissables qui passerait au-dessus d'un coin de barrière (ses deux orthogonales
-	intermédiaires dans la barrière) — sans lui, on enjambe un fleuve qui descend en
-	diagonale. Bits posés des deux côtés (`interdire`). Mute `nav` ; rend les bits ajoutés.
+	"""Murs `nav` entre les cases FRANCHISSABLES et la barrière (la mer) : tout pas qui entre
+	dans la barrière ou en sort, et tout pas DIAGONAL entre deux cases franchissables qui
+	passerait au-dessus d'un coin de barrière (ses deux orthogonales intermédiaires dans la
+	barrière) — sans lui, on enjambe un bras de mer qui descend en diagonale. Bits posés des
+	deux côtés (`interdire`). Mute `nav` ; rend les bits ajoutés.
 
-	`franchissable(x, y)` : la case est-elle de la terre qu'on foule ? Le pas entre deux cases
-	de la barrière n'est muré que pour les fleuves (`circuler`) : un gué ouvert sur une case
-	ne doit pas ouvrir tout le cours d'eau ; la mer, elle, n'est foulée par personne."""
+	`franchissable(x, y)` : la case est-elle de la terre qu'on foule ?"""
 	ajoutes = 0
 	H = len(barriere)
 	W = len(barriere[0]) if H else 0
@@ -1406,162 +1498,31 @@ def murer_barrieres(nav, barriere, franchissable) -> int:
 	return ajoutes
 
 
-def _murer_fleuves(nav, fleuves, eau) -> int:
-	"""Chaque case de fleuve murée sur ses huit côtés, y compris vers les autres cases de
-	fleuve : un gué ouvert ne doit pas rendre tout le cours d'eau praticable.
-
-	⚠️ La barrière est la mer ET le fleuve ensemble : à une embouchure, le coin qu'enjambe un
-	pas diagonal est moitié fleuve, moitié mer."""
-	barriere = [[f or e for f, e in zip(lf, le)] for lf, le in zip(fleuves, eau)]
-	ajoutes = murer_barrieres(nav, barriere, lambda x, y: not barriere[y][x])
-	for y, ligne in enumerate(fleuves):
-		for x, v in enumerate(ligne):
-			if not v:
-				continue
-			for dx, dy in VOISINS:
-				if _dans(fleuves, x + dx, y + dy) and fleuves[y + dy][x + dx]:
-					ajoutes += interdire(nav, x, y, dx, dy)
-	return ajoutes
-
-
 def _zones_terre(nav, terre):
 	"""Zones de la TERRE (`terre[y][x]` vrai) sous la règle de marche, `cells` toutes à 1."""
 	cells = [[TERRAIN_LIBRE if v else TERRAIN_INACCESSIBLE for v in ligne] for ligne in terre]
 	return zones(cells, nav)
 
 
-def poser_gues(nav_cote, fleuves, eau, marges, regles=None, profil=None):
-	"""`(fleuves sans les gués, gués, isolées)` : rouvre les cases de fleuve qu'il faut pour
-	qu'aucune rive ne soit coupée de sa terre.
-
-	Terre de référence = composantes de la terre sous les seuls murs de la côte (`nav_cote`).
-	Tant qu'une terre se découpe en plusieurs zones une fois les fleuves murés : Dijkstra
-	multi-source depuis sa plus grande zone, PAS ORTHOGONAUX à travers les seules cases de
-	fleuve, jusqu'à la première case d'une autre zone de la même terre. Coût d'une case de
-	fleuve = 1 + `cout_marge` × marge : le gué passe là où le fleuve se voit le moins (le pont
-	dessiné). Les cases du chemin cessent d'être du fleuve. Un chemin de plus de
-	`gue_longueur_max` cases n'est pas posé : la zone est signalée (`isolées`).
-
-	⚠️ On recalcule les murs depuis le masque à chaque gué plutôt que d'en retirer : aucun bit
-	du `nav` d'origine ne peut ainsi disparaître (l'appelant fusionne). Déterministe."""
-	regles = regles_de(profil, regles)
-	reglage = regles.get("fleuves") or {}
-	H = len(fleuves)
-	W = len(fleuves[0]) if H else 0
-	fleuves = [list(ligne) for ligne in fleuves]
-	longueur_max = int(reglage.get("gue_longueur_max", 3))
-	cout_marge = float(reglage.get("cout_marge", 1.0))
-	terre_ref = [[not eau[y][x] for x in range(W)] for y in range(H)]
-	ref, _ = _zones_terre(nav_cote, terre_ref)
-	gues, isolees, exclues = [], [], set()
-	while True:
-		nav = dict(nav_cote)
-		_murer_fleuves(nav, fleuves, eau)
-		terre = [[not eau[y][x] and not fleuves[y][x] for x in range(W)] for y in range(H)]
-		zone, tailles = _zones_terre(nav, terre)
-		# Zones par terre de référence ; la principale de chaque terre = la plus grande.
-		par_terre = {}
-		for y in range(H):
-			for x in range(W):
-				z = zone[y][x]
-				if z != -1:
-					par_terre.setdefault(ref[y][x], set()).add(z)
-		travail = None
-		for t in sorted(par_terre):
-			ids = par_terre[t]
-			principale = max(ids, key=lambda z: (tailles[z], -z))
-			reste = sorted(z for z in ids if z != principale and (t, z) not in exclues)
-			if reste:
-				travail = (t, principale, set(reste))
-				break
-		if travail is None:
-			break
-		t, principale, cibles = travail
-		chemin, atteinte = _gue_le_plus_court(zone, fleuves, ref, t, principale, cibles, marges,
-			cout_marge)
-		if chemin is None or len(chemin) > longueur_max:
-			# Plus rien d'atteignable par un gué raisonnable : toutes les zones restantes de
-			# cette terre sont signalées (une seule fois chacune).
-			bloquees = cibles if chemin is None else {atteinte}
-			for z in sorted(bloquees):
-				exclues.add((t, z))
-				case = next((x, y) for y in range(H) for x in range(W) if zone[y][x] == z)
-				isolees.append({"case": [case[0], case[1]], "taille": tailles[z]})
-			continue
-		for x, y in chemin:
-			fleuves[y][x] = False
-		gues.append({"cases": [[x, y] for x, y in chemin], "traverse": ["fleuve"],
-			"longueur": len(chemin)})
-	return fleuves, gues, isolees
-
-
-def _gue_le_plus_court(zone, fleuves, ref, terre, principale, cibles, marges, cout_marge):
-	"""Dijkstra multi-source depuis la zone `principale`, à travers les cases de fleuve de la
-	même terre, jusqu'à une case d'une zone de `cibles`. `(cases de fleuve du chemin, zone
-	atteinte)` ou `(None, None)`. Départage par index de case : déterministe."""
-	H, W = len(zone), len(zone[0])
-	dist, parent, tas, fermees = {}, {}, [], set()
-	for y in range(H):
-		for x in range(W):
-			if zone[y][x] == principale:
-				dist[(x, y)] = 0.0
-				_tas_pousser(tas, (0.0, y * W + x))
-	while tas:
-		d, i = _tas_tirer(tas)
-		x, y = i % W, i // W
-		if (x, y) in fermees:
-			continue
-		fermees.add((x, y))
-		if zone[y][x] in cibles:
-			chemin, p = [], (x, y)
-			while p in parent:
-				p = parent[p]
-				if fleuves[p[1]][p[0]]:
-					chemin.append(p)
-			chemin.reverse()
-			return chemin, zone[y][x]
-		for dx, dy in ORTHOGONAUX:
-			nx, ny = x + dx, y + dy
-			if not (0 <= nx < W and 0 <= ny < H) or (nx, ny) in fermees or ref[ny][nx] != terre:
-				continue
-			if fleuves[ny][nx]:
-				pas = 1.0 + cout_marge * marges[ny][nx]
-			elif zone[ny][nx] in cibles:
-				pas = 0.0
-			else:
-				continue
-			nd = d + pas
-			if nd < dist.get((nx, ny), float("inf")):
-				dist[(nx, ny)] = nd
-				parent[(nx, ny)] = (x, y)
-				_tas_pousser(tas, (nd, ny * W + nx))
-	return None, None
-
-
-def proposer_pays(couleurs, cols, rows, nav=None, regles=None, profil=None, fins=None,
-		k=None, passages=True, murs_nav=True) -> dict:
+def proposer_pays(couleurs, cols, rows, nav=None, regles=None, profil=None,
+		murs_nav=True) -> dict:
 	"""La proposition d'une CARTE DE PAYS : `{cells, nav, profil, rapport}`, même forme que
 	`proposer`.
 
 	`cells` toutes à 1 : seuls les murs nav bloquent (forme de `lieu:france`). Murs : la côte
-	(mer et lacs, `masque_eau`), puis les fleuves (`masque_fleuves`, si `fins`) moins les gués
-	(`poser_gues`). Une île reste une zone isolée, signalée : on ne trace jamais de chemin sur
-	la mer. `passages=False` : fleuves murés sans gué. `murs_nav=False` : `nav` rendu tel quel.
-	Le `nav` d'entrée est conservé, jamais un bit retiré."""
+	SEULE (mer et lacs, `masque_eau`) — les fleuves ne sont pas murés, ils se traversent. Une
+	île reste une zone isolée, signalée : on ne trace jamais de chemin sur la mer.
+	`murs_nav=False` : `nav` rendu tel quel. Le `nav` d'entrée est conservé, jamais un bit
+	retiré."""
 	regles = regles_de(profil, regles)
 	profil = profil if profil in PROFILS_GRILLE else "pays"
 	W, H = int(cols), int(rows)
 	nav_sortie = dict(nav or {})
 	cells = [[TERRAIN_LIBRE] * W for _ in range(H)]
 	eau = masque_eau(couleurs, W, H, regles)
-	k = int(k or sous_cases_de(regles=regles))
-	fleuves, marges = (masque_fleuves(fins, W, H, k, eau, regles) if fins
-		else ([[False] * W for _ in range(H)], [[0.0] * W for _ in range(H)]))
 	rapport = {"passages": [], "zones_isolees": [], "poches_effacees": 0, "nav_ajoutes": 0,
 		"enceinte": False, "rempart": [], "coins": 0, "rues": [], "rues_dehors": 0,
-		"murs_nav": bool(murs_nav),
-		"cote": [], "fleuves": []}
-	rapport["fleuves"] = [[x, y] for y in range(H) for x in range(W) if fleuves[y][x]]
+		"murs_nav": bool(murs_nav), "cote": []}
 	rapport["cote"] = [[x, y] for y in range(H) for x in range(W) if not eau[y][x]
 		and any(_dans(eau, x + dx, y + dy) and eau[y + dy][x + dx] for dx, dy in VOISINS)]
 	if not murs_nav:
@@ -1569,19 +1530,10 @@ def proposer_pays(couleurs, cols, rows, nav=None, regles=None, profil=None, fins
 		return {"cells": cells, "nav": nav_sortie, "profil": profil, "rapport": rapport}
 
 	avant = _bits(nav_sortie)
-	nav_cote = dict(nav_sortie)
-	murer_barrieres(nav_cote, eau, lambda x, y: not eau[y][x])
-	isolees = []
-	if passages and regles.get("passages", True):
-		fleuves, rapport["passages"], isolees = poser_gues(nav_cote, fleuves, eau, marges, regles)
-	nav_sortie = dict(nav_cote)
-	_murer_fleuves(nav_sortie, fleuves, eau)
-	terre = [[not eau[y][x] and not fleuves[y][x] for x in range(W)] for y in range(H)]
+	murer_barrieres(nav_sortie, eau, lambda x, y: not eau[y][x])
+	terre = [[not v for v in ligne] for ligne in eau]
 	zone, tailles = _zones_terre(nav_sortie, terre)
-	# Zones isolées : les rives que `poser_gues` n'a pas su rejoindre, puis toute terre
-	# autre que la plus grande (une île).
-	rapport["zones_isolees"] = list(isolees)
-	deja = {tuple(z["case"]) for z in isolees}
+	# Zones isolées : toute terre autre que la plus grande (une île).
 	if tailles:
 		principale = max(range(len(tailles)), key=lambda z: (tailles[z], -z))
 		vues = {principale}
@@ -1590,8 +1542,7 @@ def proposer_pays(couleurs, cols, rows, nav=None, regles=None, profil=None, fins
 				z = zone[y][x]
 				if z != -1 and z not in vues:
 					vues.add(z)
-					if not any(zone[cy][cx] == z for cx, cy in deja):
-						rapport["zones_isolees"].append({"case": [x, y], "taille": tailles[z]})
+					rapport["zones_isolees"].append({"case": [x, y], "taille": tailles[z]})
 	rapport["nav_ajoutes"] = _bits(nav_sortie) - avant
 	rapport["zones"] = len(tailles)
 	return {"cells": cells, "nav": nav_sortie, "profil": profil, "rapport": rapport}
@@ -1615,10 +1566,10 @@ def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
 	regles = regles_de(profil, regles)
 	nom = profil if profil in PROFILS_GRILLE else PROFIL_DEFAUT
 	if regles.get("nav_seul"):
-		# Carte de pays : ni classement en 0/3/5, ni lissage — seuls des murs nav. Les
-		# échantillons fins sont ceux des FLEUVES (`sous_cases` du profil), pas des rues.
+		# Carte de pays : ni classement en 0/3/5, ni lissage, ni échantillons fins — seuls
+		# les murs nav de la côte.
 		return proposer_pays(couleurs, cols, rows, nav=nav, regles=regles, profil=nom,
-			fins=fins if rues else None, k=k, passages=passages, murs_nav=murs_nav)
+			murs_nav=murs_nav)
 	analyse = analyser(couleurs, contours, cols, rows, regles)
 	cells = lisser_majorite(analyse["cells"])
 	nav_sortie = dict(nav or {})

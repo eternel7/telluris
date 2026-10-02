@@ -593,11 +593,11 @@ async def get_grille_proposee(
 	qui envoie `cells` et `nav`) et la carte d'import.
 
 	`profil` : `ville` / `foret` / `catacombes` / `pays` (vide ⇒ `profil_de` : catégorie
-	`pays`, sinon les tags). `pays` : `cells` toutes à 1, murs nav de côte et de fleuves.
+	`pays`, sinon les tags). `pays` : `cells` toutes à 1, murs nav de la côte seule.
 	`passages=0` : ancien comportement (classer + lisser, `nav` du doc rendu tel quel).
 	`enceinte` : -1 ce que dit le profil, 0 / 1 force. Le `nav` rendu est COMPLET : celui du
 	doc (jamais un bit retiré) plus les murs proposés.
-	`rues=0` : pas de tracé des rues (sous-cases) ni des fleuves (profil `pays`). `murs_nav=0` : aucun mur nav proposé, le
+	`rues=0` : pas de tracé des rues (sous-cases, squelette). `murs_nav=0` : aucun mur nav proposé, le
 	`nav` du doc est rendu tel quel et l'enceinte est fermée par le terrain.
 
 	⚠️ Import de Pillow PARESSEUX, dans le corps : `tests/` importe `utils/*` → `routers/*`,
@@ -645,8 +645,9 @@ async def get_grille_proposee(
 	if profil and profil not in grille_image.PROFILS_GRILLE:
 		raise HTTPException(status_code=422, detail=f"Profil inconnu : {profil}")
 	profil = profil or grille_image.profil_de(lieu_doc)
-	# Rues d'une cité : 4 px ; fleuves d'une carte de pays : le pixel.
+	# Rues d'une cité, lues sur `sous_cases` du profil ; une carte de pays n'en lit pas.
 	k = grille_image.sous_cases_de(profil)
+	rues = rues and bool(grille_image.regles_de(profil).get("rues"))
 	try:
 		with Image.open(chemin) as img:
 			img.load()
@@ -658,7 +659,7 @@ async def get_grille_proposee(
 			couleurs = _pixels_a_plat(img.convert("RGB").resize((cols, rows), Image.BOX))
 			contours = _pixels_a_plat(img.convert("L").filter(ImageFilter.FIND_EDGES)
 				.resize((cols, rows), Image.BOX))
-			# Sous-cases pour le tracé des rues (ou des fleuves) : plus fins qu'une case.
+			# Sous-cases pour le tracé des rues : plus fines qu'une case.
 			fins = (_pixels_a_plat(img.convert("RGB").resize((cols * k, rows * k), Image.BOX))
 				if rues else None)
 	except HTTPException:

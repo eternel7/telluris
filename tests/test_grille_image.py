@@ -690,6 +690,113 @@ def test_sans_reglage_de_rues_ou_sans_echantillons_fins_rien_ne_change():
 	assert sans["cells"] == avec_off["cells"] and avec_off["rapport"]["rues"] == []
 
 
+def _masque(texte):
+	"""'#' plein, '.' vide — une ligne par rangée."""
+	return [[c == "#" for c in ligne] for ligne in texte.strip().split("\n")]
+
+
+def test_le_squelette_d_une_bande_epaisse_est_une_ligne_d_un_pixel_d_un_seul_tenant():
+	bande = _masque("""
+..............
+.############.
+.############.
+.############.
+..............
+""")
+	sq = gi.squelettiser(bande)
+	pleins = [(x, y) for y, l in enumerate(sq) for x, v in enumerate(l) if v]
+	assert pleins and {y for _, y in pleins} == {2}          # une seule rangée : la médiane
+	assert len(gi._composantes(sq)) == 1
+	assert all(bande[y][x] for x, y in pleins)               # jamais hors de la tache
+	assert bande[2][1] and sum(bande[2]) == 12                # la source n'est pas mutée
+
+
+def test_le_squelette_garde_la_connexite_d_un_carrefour():
+	croix = _masque("""
+.....###.....
+.....###.....
+.....###.....
+#############
+#############
+#############
+.....###.....
+.....###.....
+.....###.....
+""")
+	sq = gi.squelettiser(croix)
+	assert len(gi._composantes(sq)) == 1
+	# Quatre bras : Zhang-Suen rogne chaque bout d'environ la demi-largeur de la tache.
+	assert any(sq[y][6] for y in (0, 1, 2)) and any(sq[y][6] for y in (6, 7, 8))
+	assert any(sq[4][x] for x in (0, 1, 2)) and any(sq[4][x] for x in (10, 11, 12))
+
+
+def test_l_ebarbage_coupe_une_epine_courte_et_garde_les_vraies_branches():
+	# Une rue horizontale, une épine de 2 px vers le haut, une branche de 6 px vers le bas.
+	sq = _masque("""
+......#..........
+......#..........
+#################
+.........#.......
+.........#.......
+.........#.......
+.........#.......
+.........#.......
+.........#.......
+""")
+	sortie = gi.ebarber(sq, 4)
+	assert not sortie[0][6] and not sortie[1][6]
+	assert all(sortie[y][9] for y in range(3, 9))
+	assert all(sortie[2])                                     # la rue elle-même, entière
+	assert sq[0][6]                                          # la source n'est pas mutée
+	# Une ligne sans carrefour n'a pas d'épine : gardée entière, le filtre de groupe tranche.
+	seule = _masque("""
+.......
+.#####.
+.......
+""")
+	assert gi.ebarber(seule, 10) == seule
+
+
+def test_une_rue_diagonale_ouvre_des_cases_4_connexes():
+	"""Un pas diagonal de case à case ne tiendrait que par un coin, que `fermer_coins` ferme
+	entre deux toits : l'orthogonale intermédiaire est ouverte avec."""
+	k = gi.SOUS_CASES
+	cells = _quartier(12, 12)
+	rue = set()
+	for s in range(k, 11 * k):
+		rue |= {(s, s), (s + 1, s), (s, s + 1)}            # bande diagonale de 2-3 px
+	sortie, ouvertes = gi.tracer_rues(cells, _fins(12, 12, k, rue), k, _regles())
+	assert ouvertes
+	zone, _ = gi.zones(sortie, {})
+	assert zone[1][0] == zone[10][11] != -1
+	ouv = {tuple(c) for c in ouvertes}
+	for x, y in ouv:
+		assert any((x + dx, y + dy) in ouv or sortie[y + dy][x + dx] == L
+			for dx, dy in gi.ORTHOGONAUX if gi._dans(sortie, x + dx, y + dy))
+	nav = {}
+	gi.fermer_coins(sortie, nav)
+	zone, _ = gi.zones(sortie, nav)
+	assert zone[1][0] == zone[10][11]
+
+
+def test_une_rue_coudee_sort_continue_sans_case_isolee():
+	"""Le défaut de l'ancienne lecture case par case : des cases éparses le long d'une rue.
+	Le squelette la suit d'un bout à l'autre, coude compris."""
+	k = gi.SOUS_CASES
+	cells = _quartier(14, 10)
+	# Depuis la colonne libre de gauche, rangée 2, jusqu'à la colonne 9, puis vers le bas.
+	rue = {(sx, 2 * k + d) for sx in range(k, 9 * k + 2) for d in (1, 2)}
+	rue |= {(9 * k + d, sy) for sy in range(2 * k, 9 * k) for d in (1, 2)}
+	sortie, ouvertes = gi.tracer_rues(cells, _fins(14, 10, k, rue), k, _regles())
+	assert all([x, 2] in ouvertes for x in range(1, 9))
+	assert all([9, y] in ouvertes for y in range(3, 8))
+	# Un seul tenant 4-connexe, rattaché à la colonne libre de gauche.
+	ouv = {tuple(c) for c in ouvertes}
+	groupes = gi._composantes([[(x, y) in ouv for x in range(14)] for y in range(10)],
+		gi.ORTHOGONAUX)
+	assert len(groupes) == 1 and (1, 2) in groupes[0]
+
+
 # ── Murs nav optionnels ──────────────────────────────────────────────────────────────────
 def test_sans_murs_nav_le_nav_rendu_est_celui_recu():
 	couleurs, contours = _echantillons(_scene(8, foret=True))
@@ -792,31 +899,27 @@ def test_un_cote_trop_petit_emprunte_le_seuil_commun():
 
 # ── Profil pays : murs nav seuls ─────────────────────────────────────────────────────────
 # Teintes mesurées sur `france.png` : la terre du parchemin, la mer, l'eau d'un fleuve (froide
-# ET sombre, cf. `PROFILS_GRILLE["pays"]`).
+# ET sombre, plus fine qu'une case).
 TERRE = (216, 202, 155)
 MER = (40, 90, 110)
 FLEUVE = (60, 70, 68)
-# Sous-cases des échantillons fins des tests : assez pour placer `pixels_min` pixels de fleuve.
+# Sous-cases des échantillons fins des tests : de quoi dessiner un fleuve plus fin qu'une case.
 K_PAYS = 4
 
 
 def _carte(texte):
-	"""'.' terre, '~' mer, '|' fleuve plein, ':' fleuve à peine visible (un pont dessiné) —
-	une ligne par rangée. Rend (couleurs, fins, cols, rows) : la couleur MOYENNE de chaque
-	case (le fleuve, plus fin qu'une case, n'y paraît pas) et ses `K_PAYS²` pixels."""
+	"""'.' terre, '~' mer, '|' fleuve — une ligne par rangée. Rend (couleurs, fins, cols,
+	rows) : la couleur MOYENNE de chaque case (le fleuve, plus fin qu'une case, n'y paraît
+	pas) et ses `K_PAYS²` pixels (le fleuve y est plein)."""
 	lignes = texte.strip().split("\n")
 	rows, cols, k = len(lignes), len(lignes[0]), K_PAYS
-	pixels_min = gi.PROFILS_GRILLE["pays"]["fleuves"]["pixels_min"]
-	assert pixels_min < k * k, "le test doit pouvoir placer un fleuve « à peine visible »"
 	couleurs = [MER if c == "~" else TERRE for ligne in lignes for c in ligne]
 	fins = [None] * (cols * k * rows * k)
 	for y, ligne in enumerate(lignes):
 		for x, c in enumerate(ligne):
-			n = {"|": k * k, ":": pixels_min}.get(c, 0)
+			couleur = {"~": MER, "|": FLEUVE}.get(c, TERRE)
 			for j in range(k):
 				for i in range(k):
-					rang = j * k + i
-					couleur = MER if c == "~" else (FLEUVE if rang < n else TERRE)
 					fins[(y * k + j) * cols * k + x * k + i] = couleur
 	return couleurs, fins, cols, rows
 
@@ -827,14 +930,13 @@ def _pays(texte, nav=None, **options):
 		fins=fins, k=K_PAYS, **options)
 
 
-# Mer en haut et en bas, un fleuve qui les relie : sans gué, la terre est coupée en deux.
-# Le fleuve se voit à peine en (6, 4) — le pont dessiné.
+# Mer en haut et en bas, un fleuve qui les relie.
 FLEUVE_TRAVERSANT = """
 ~~~~~~~~~~~~
 ~~~~~~~~~~~~
 ......|.....
 ......|.....
-......:.....
+......|.....
 ......|.....
 ~~~~~~~~~~~~
 ~~~~~~~~~~~~
@@ -858,39 +960,32 @@ def test_la_cote_est_muree_dans_les_deux_sens():
 	assert prop["rapport"]["cote"] and all(y in (2, 5) for _, y in prop["rapport"]["cote"])
 
 
-def test_le_fleuve_qui_coupe_la_terre_recoit_un_seul_gue_la_ou_il_se_voit_le_moins():
+def test_un_fleuve_n_est_pas_mure_seule_la_cote_l_est():
+	"""Choix de l'auteur : le profil pays ne mure QUE le bord de mer. Le fleuve, même bien
+	visible au pixel, se traverse : la terre reste d'un seul tenant, aucun gué à poser."""
 	prop = _pays(FLEUVE_TRAVERSANT)
-	rapport = prop["rapport"]
-	assert [g["cases"] for g in rapport["passages"]] == [[[6, 4]]]
-	assert rapport["zones_isolees"] == []
-	assert sorted(rapport["fleuves"]) == [[6, 2], [6, 3], [6, 4], [6, 5]]
-	# Le gué rouvre la traversée…
-	assert gi.nav_autorise(prop["nav"], 5, 4, 1, 0) and gi.nav_autorise(prop["nav"], 6, 4, 1, 0)
-	# … mais pas le reste du fleuve : ni en travers, ni le long de son cours.
-	assert not gi.nav_autorise(prop["nav"], 5, 3, 1, 0)
-	assert not gi.nav_autorise(prop["nav"], 6, 4, 0, -1)
-	assert not gi.nav_autorise(prop["nav"], 6, 4, 0, 1)
+	rapport, nav = prop["rapport"], prop["nav"]
+	assert "fleuves" not in rapport and rapport["passages"] == []
+	assert rapport["zones_isolees"] == [] and rapport["zones"] == 1
+	for y in (3, 4):                                  # rangées sans voisine de mer
+		for x in range(12):
+			assert int(nav.get(f"{x},{y}", 0)) == 0
+	assert gi.nav_autorise(nav, 5, 3, 1, 0) and gi.nav_autorise(nav, 6, 3, 1, 0)
 
 
-def test_sans_passages_le_fleuve_reste_mure_et_la_rive_est_signalee():
-	rapport = _pays(FLEUVE_TRAVERSANT, passages=False)["rapport"]
-	assert rapport["passages"] == []
-	assert len(rapport["zones_isolees"]) == 1
-
-
-def test_un_fleuve_en_diagonale_ne_s_enjambe_pas_par_son_coin():
-	"""Deux cases de fleuve en diagonale : le pas diagonal entre les deux cases de terre qui
-	les flanquent passerait au-dessus du fleuve."""
-	fleuve = [[False] * 3 for _ in range(3)]
-	fleuve[0][0] = fleuve[1][1] = True
+def test_un_bras_de_mer_en_diagonale_ne_s_enjambe_pas_par_son_coin():
+	"""Deux cases de mer en diagonale : le pas diagonal entre les deux cases de terre qui
+	les flanquent passerait au-dessus de l'eau."""
+	mer = [[False] * 3 for _ in range(3)]
+	mer[0][0] = mer[1][1] = True
 	nav = {}
-	gi.murer_barrieres(nav, fleuve, lambda x, y: not fleuve[y][x])
+	gi.murer_barrieres(nav, mer, lambda x, y: not mer[y][x])
 	assert not gi.nav_autorise(nav, 1, 0, -1, 1)    # (1,0) → (0,1)
-	assert gi.nav_autorise(nav, 2, 0, 0, 1)         # loin du fleuve, rien
+	assert gi.nav_autorise(nav, 2, 0, 0, 1)         # loin de la mer, rien
 
 
 def test_le_nav_d_origine_n_est_jamais_retire():
-	"""Même sur la case du gué : un mur peint à la main est une intention d'auteur."""
+	"""Un mur peint à la main est une intention d'auteur, même là où l'image n'en voit pas."""
 	nav = {"6,4": 4, "0,3": 4}
 	sortie = _pays(FLEUVE_TRAVERSANT, nav=nav)["nav"]
 	assert sortie["6,4"] & 4 and sortie["0,3"] & 4
@@ -950,7 +1045,9 @@ def test_le_cadre_du_parchemin_ne_relie_pas_les_cotes():
 
 
 def test_sous_cases_du_profil():
-	assert gi.sous_cases_de("pays") == gi.PROFILS_GRILLE["pays"]["sous_cases"]
+	# Aucun profil n'en déclare aujourd'hui : repli sur `SOUS_CASES`, lu par les rues.
+	for profil, regles in gi.PROFILS_GRILLE.items():
+		assert gi.sous_cases_de(profil) == regles.get("sous_cases", gi.SOUS_CASES)
 	assert gi.sous_cases_de("ville") == gi.SOUS_CASES
 
 

@@ -4,7 +4,7 @@ proposée au profil `pays` (`utils/grille_image.proposer_pays`).
 POURQUOI : une carte déposée dans `templates/resources/maps/` n'existe en jeu que quand un doc
 `lieu:*` la cite par son champ `image`. Ce générateur crée ce doc — minimal, sur le modèle de
 `lieu:france` — et lui pose la PREMIÈRE PASSE de murs : `cells` toutes à 1 (seuls les nav
-bloquent), la côte et les fleuves murés, des gués là où un fleuve couperait une terre en deux.
+bloquent), la côte seule murée (les fleuves ne bloquent rien).
 Rien d'autre (ni zones d'influence, ni rencontres, ni ressources) : c'est du contenu à authorer.
 
 LISTE BLANCHE (`CARTES`) : `maps/` mêle des cartes de pays, des vues de globe

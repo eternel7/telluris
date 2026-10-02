@@ -122,9 +122,9 @@ utils/
   capacites.py           # capacités d'un lieu (pur) : catalogue taverne/étable/scriptorium/recrutement/guilde
   grille_image.py        # grille de terrain ET murs nav depuis l'image d'une carte (pur) : profils
                          #   ville/forêt/catacombes (`dev/calibrer_grille_image.py`), rues lues sur
-                         #   sous-cases, enceinte fermée (nav, ou terrain sans murs nav), coins de
+                         #   sous-cases et squelettisées (Zhang-Suen), enceinte fermée (nav, ou terrain sans murs nav), coins de
                          #   maison, passages reliant les zones → 0/1/3/5 ; profil `pays` (catégorie
-                         #   pays) : `cells` toutes à 1, murs nav seuls — côte, fleuves lus au pixel, gués
+                         #   pays) : `cells` toutes à 1, murs nav de la CÔTE seule (fleuves non murés)
   bois.py                # découpe du bois (pur) : tier suivant par essence, conservation du poids, outil
   pnj.py                 # PNJ de lieu (pur) : tirage de présence, arbre de dialogue, services
   acces.py               # barrière d'accès à un lieu gardée par un PNJ (pur) : conditions, laissez-passer, cycle
