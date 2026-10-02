@@ -560,6 +560,19 @@ GRILLE_DOSSIERS_IMAGE = ("templates/resources/towns", "templates/resources/battl
 	"templates/resources/maps")
 
 
+@lieu_router.get("/lieux/profils_grille")
+async def get_profils_grille(
+	current_user: Annotated[User, Depends(get_current_user)]):
+	"""Profils de `grille_image.PROFILS_GRILLE` (`{id: libellé}`), pour la liste « Réglage »
+	de l'éditeur. Import local : même module que `get_grille_proposee`, sans Pillow."""
+	if (not current_user or
+		"admin" not in current_user or
+		current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Accès réservé aux administrateurs")
+	from utils import grille_image
+	return grille_image.catalogue_profils()
+
+
 @lieu_router.get("/lieu/{lieu_id}/grille_proposee")
 async def get_grille_proposee(
 	response: Response,
@@ -672,7 +685,7 @@ async def get_grille_proposee(
 		"cells": cells,
 		"nav": proposition["nav"],
 		"profil": proposition["profil"],
-		"profils": {k: v.get("libelle", k) for k, v in grille_image.PROFILS_GRILLE.items()},
+		"profils": grille_image.catalogue_profils(),
 		"topologie": proposition["rapport"],
 		"dimensions": {"x": cols, "y": rows},
 		"image": nom_image,

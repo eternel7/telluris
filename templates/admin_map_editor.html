@@ -833,13 +833,11 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 				<b>proposition</b>, pas une vérité — une case de 16 px contient souvent un toit ET une
 				ruelle.
 			</div>
+			<!-- Profils ajoutés au chargement depuis GET /api/lieux/profils_grille
+			     (`grille_image.PROFILS_GRILLE`) : jamais recopiés ici. -->
 			<label class="nav-info" style="display:block;margin-bottom:6px;">Réglage
 				<select id="grille-profil">
 					<option value="">auto (d'après les tags du lieu)</option>
-					<option value="ville">Ville</option>
-					<option value="foret">Forêt</option>
-					<option value="catacombes">Catacombes / souterrain</option>
-					<option value="pays">Pays / carte (murs nav seuls)</option>
 				</select>
 			</label>
 			<label class="nav-info" style="display:block;margin-bottom:8px;"
@@ -4007,6 +4005,22 @@ function _navDifferences() {
 	for (const k of cles) if ((Number(navProposee[k]) || 0) !== (Number(nav[k]) || 0)) n++;
 	return n;
 }
+
+// Liste « Réglage » : les profils de `grille_image.PROFILS_GRILLE`, dans leur ordre. L'option
+// « auto » (valeur vide) est dans le markup ; un échec laisse « auto » seul, utilisable.
+(async () => {
+	if (!grilleProfilEl) return;
+	try {
+		const res = await fetch('/api/lieux/profils_grille');
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
+		for (const [id, libelle] of Object.entries(await res.json() || {})) {
+			const opt = document.createElement('option');
+			opt.value = id;
+			opt.textContent = libelle;
+			grilleProfilEl.appendChild(opt);
+		}
+	} catch (e) { console.warn('Profils de grille non chargés', e); }
+})();
 
 // Résumé de la topologie servie avec la proposition (profil, enceinte, passages, zones).
 function _grilleTexteTopologie(data) {

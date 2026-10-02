@@ -274,6 +274,12 @@ def profil_de(doc) -> str:
 	return PROFIL_DEFAUT
 
 
+def catalogue_profils() -> dict:
+	"""`{id: libellé}` de `PROFILS_GRILLE`, dans l'ordre de déclaration — la liste « Réglage »
+	de l'éditeur (`GET /api/lieux/profils_grille`) et le libellé du résumé de proposition."""
+	return {k: v.get("libelle", k) for k, v in PROFILS_GRILLE.items()}
+
+
 def sous_cases_de(profil=None, regles=None) -> int:
 	"""Sous-cases par côté de case des échantillons FINS que lit ce profil (`fins`) : 4 pour
 	les rues d'une cité, 16 (le pixel) pour les fleuves d'une carte de pays."""

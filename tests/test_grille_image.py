@@ -952,3 +952,10 @@ def test_le_cadre_du_parchemin_ne_relie_pas_les_cotes():
 def test_sous_cases_du_profil():
 	assert gi.sous_cases_de("pays") == gi.PROFILS_GRILLE["pays"]["sous_cases"]
 	assert gi.sous_cases_de("ville") == gi.SOUS_CASES
+
+
+def test_le_catalogue_des_profils_suit_PROFILS_GRILLE_dans_son_ordre():
+	# Source de la liste « Réglage » de l'éditeur : aucun profil recopié dans le template.
+	cat = gi.catalogue_profils()
+	assert list(cat) == list(gi.PROFILS_GRILLE)
+	assert all(cat[k] == v.get("libelle", k) for k, v in gi.PROFILS_GRILLE.items())
