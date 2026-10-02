@@ -643,7 +643,7 @@ async def get_grille_proposee(
 		raise HTTPException(status_code=404, detail=f"Image introuvable sur le disque : {nom_image}")
 
 	from PIL import Image, ImageFilter
-	from utils import grille_image
+	from utils import grille_image, image_bords
 	if profil and profil not in grille_image.PROFILS_GRILLE:
 		raise HTTPException(status_code=422, detail=f"Profil inconnu : {profil}")
 	profil = profil or grille_image.profil_de(lieu_doc)
@@ -664,6 +664,10 @@ async def get_grille_proposee(
 			# Sous-cases pour le tracé des rues : plus fines qu'une case.
 			fins = (_pixels_a_plat(img.convert("RGB").resize((cols * k, rows * k), Image.BOX))
 				if rues else None)
+			# Carte de pays : profils de bord, pour mettre son cadre décoratif à 0.
+			regles = grille_image.regles_de(profil)
+			bords = (image_bords.profils_bords(img, cols, rows, int(regles.get("cadre_max_cases", 0)))
+				if regles.get("cadre_enlumine") else None)
 	except HTTPException:
 		raise
 	except Exception:
@@ -677,7 +681,7 @@ async def get_grille_proposee(
 	proposition = grille_image.proposer(couleurs, contours, cols, rows, nav=nav_doc,
 		profil=profil, passages=bool(passages),
 		enceinte=None if enceinte < 0 else bool(enceinte),
-		fins=fins, k=k, rues=bool(rues), murs_nav=bool(murs_nav))
+		fins=fins, k=k, rues=bool(rues), murs_nav=bool(murs_nav), bords=bords)
 	cells = proposition["cells"]
 
 	rapport = None

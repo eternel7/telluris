@@ -158,7 +158,7 @@
 	.panel.flottant .panel-grip { display: block; }
 
 	/* Sections du panneau de gauche en ACCORDÉON (indépendantes). `ferme` = repliée ; l'attribut
-	   `hidden` de #grille-card / #dim-card reste, lui, « carte disponible pour ce lieu ». */
+	   `hidden` de #grille-card / #voies-card / #dim-card reste, lui, « carte disponible pour ce lieu ». */
 	.card.accordeon > .card-title { cursor: pointer; user-select: none; }
 	.card.accordeon > .card-title::before { content: '▾ '; }
 	.card.accordeon.ferme > .card-title::before { content: '▸ '; }
@@ -587,9 +587,8 @@
 	/* ⚠️ Le `display:flex`/`block` d'auteur l'emporterait sur le [hidden] de la feuille du
 	   navigateur (même piège que .aub-ecrivain-ligne dans play_town). */
 	#dim-card[hidden], #dim-attente[hidden] { display: none; }
-	#grille-card[hidden], #grille-attente[hidden], #voies-attente[hidden] { display: none; }
-	/* Tracé des voies : séparation des deux outils, légende en ligne. */
-	.voies-section { border-top: 1px solid var(--border); margin-top: 10px; padding-top: 10px; }
+	#grille-card[hidden], #grille-attente[hidden], #voies-card[hidden], #voies-attente[hidden] { display: none; }
+	/* Tracé des voies : légende en ligne. */
 	.voies-legende { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 6px 0; }
 	.voies-pastille { display: inline-block; width: 11px; height: 11px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
 	/* Une ligne de la matrice par ligne du bloc-notes : défilement horizontal plutôt que retour. */
@@ -614,6 +613,11 @@
 		position: sticky; top: -16px; z-index: 2;
 		background: var(--panel); margin-top: -16px; padding: 16px 0 6px;
 	}
+	/* La porte se DÉPLACE par sa barre de titre (`rendreDeplacable`), comme #conn-overlay.
+	   ⚠️ `height` et non `bottom` : le glisser remet `bottom` à auto — ancré en haut ET en
+	   bas, le panneau se serait tassé à la hauteur de son contenu au premier geste. */
+	#porte-overlay { bottom: auto; height: calc(100vh - 84px); }
+	#porte-overlay .lj-title { cursor: move; user-select: none; touch-action: none; }
 	#pt-visee-ext.cx-visee, #pt-visee-int.cx-visee {
 		border-color: var(--accent2); color: var(--accent2); background: rgba(75,143,200,0.18);
 	}
@@ -859,7 +863,7 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 		     #mode-select, comme 📐 : ce que dit l'image ne dépend d'aucun mode d'édition.
 		     ⚠️ APERÇU SEUL — la proposition ne touche JAMAIS `grid` et rien ne part en base. -->
 		<div class="card accordeon" id="grille-card" hidden>
-			<div class="card-title">🔍 Analyse d'image</div>
+			<div class="card-title">🔍 Générer grille</div>
 			<div class="nav-info" style="margin-bottom:8px;">
 				<b>Proposer une grille</b> lit l'image du lieu et propose un terrain (<b>0</b> bâti,
 				<b>1</b> libre, <b>3</b> falaise, <b>5</b> eau) et des murs <b>nav</b>. Une
@@ -905,9 +909,13 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 				<button class="btn danger" id="grille-fermer-btn">✕ Fermer l'aperçu</button>
 			</div>
 			<div class="dim-msg" id="grille-msg"></div>
-			<!-- Tracé des voies : où l'on circule VRAIMENT. ⚠️ LECTURE SEULE — ni base ni `grid`.
-			     Source = la proposition ci-dessus si elle est affichée, sinon la grille en base. -->
-			<div class="voies-section">
+		</div>
+		<!-- Tracé des voies : où l'on circule VRAIMENT. ⚠️ LECTURE SEULE — ni base ni `grid`.
+		     Source = la proposition de 🔍 Générer grille si elle est affichée, sinon la grille en base.
+		     Section À PART : elle lit la GRILLE, pas l'image, et sert aussi sans proposition. -->
+		<div class="card accordeon" id="voies-card" hidden>
+			<div class="card-title">🛤️ Tracer les voies</div>
+			<div>
 				<div class="nav-info" style="margin-bottom:8px;">
 					<b>Tracer les voies</b> montre où l'on circule vraiment : régions, goulots (trou de
 					rempart, gué, pont) ou carte de passage — sur la <b>proposition</b> si elle est
@@ -1159,7 +1167,7 @@ let grilleProposee = null;   // [y][x] | null
 // creusés, pourtour de l'enceinte, zones isolées) — dessiné pendant l'aperçu, rien d'autre.
 let navProposee = null;      // {"x,y": bitmask} | null
 let grilleTopologie = null;  // {passages, rempart, zones_isolees, …} | null
-// Tracé des voies (carte 🔍) : {regle, vue, source, signature, graphe, regions, goulots, passage, ms} | null.
+// Tracé des voies (carte 🛤️ Tracer les voies) : {regle, vue, source, signature, graphe, regions, goulots, passage, ms} | null.
 // ⚠️ LECTURE SEULE, comme `grilleProposee` : rien ne l'écrit en base ni dans `grid`.
 let voies = null;
 let voiesPerime = false;     // dernier état de péremption AFFICHÉ — le DOM ne bouge qu'au changement
@@ -1596,9 +1604,10 @@ lieuSelect.addEventListener('change', async (e) => {
 		// lieu PRÉCÉDENT, et la branche « image introuvable » de mapImg.onerror ne la rouvrira
 		// jamais — sans grille chargée, il n'y a rien à redimensionner. `_dimMaj()` la rouvre.
 		if (dimCard) dimCard.hidden = true;
-		// Même bascule pour la carte 🔍, et même raison : sans image chargée il n'y a rien à lire,
+		// Même bascule pour les cartes 🔍 et 🛤️, et même raison : sans image chargée il n'y a rien à lire,
 		// et la branche `mapImg.onerror` ne la rouvrira jamais. `_grilleMaj()` la rouvre.
 		if (grilleCard) grilleCard.hidden = true;
+		if (voiesCard) voiesCard.hidden = true;
 		imgLoaded = false;
 		mapImg.removeAttribute('src');
 		const urlTowns = `{{ url_for('towns', path='') }}${lieuData.image}`;
@@ -1946,7 +1955,7 @@ function renderGrid() {
 		ctx.stroke();
 	}
 
-	// Voies tracées (carte 🔍 Analyse d'image) : dans TOUS les modes tant qu'un tracé est actif,
+	// Voies tracées (carte 🛤️ Tracer les voies) : dans TOUS les modes tant qu'un tracé est actif,
 	// sous les bordures nav, les zones et les points de lieux, qui restent lisibles par-dessus.
 	if (voies) _voiesDessiner(cw, ch);
 
@@ -3096,6 +3105,9 @@ let _ptCable = false;
 function _ptCabler() {
 	if (_ptCable) return;
 	_ptCable = true;
+	// Panneau DÉPLAÇABLE par sa barre de titre (le ✕ y reste cliquable : `rendreDeplacable`
+	// n'amorce rien sur un bouton). La position reste d'une ouverture à l'autre.
+	rendreDeplacable(_ptEl('porte-overlay'), _ptEl('pt-poignee'));
 	_ptEl('pt-nom').addEventListener('input', () => { _ptLabelsDerives(); _ptMajApercu(); });
 	['pt-label-ext', 'pt-label-int'].forEach(id =>
 		_ptEl(id).addEventListener('input', () => { ptNomTouche = true; _ptMajApercu(); }));
@@ -4079,6 +4091,7 @@ function annulerRedimensionnement() {
 // `scheduleGridSend` ne lisent. Adopter la proposition demande un geste manuel explicite :
 // ✔ Appliquer (champ `cells` seul), ou copier le JSON du bloc-notes vers la carte d'import.
 const grilleCard	  = document.getElementById('grille-card');
+const voiesCard	  = document.getElementById('voies-card');
 const grilleAttenteEl = document.getElementById('grille-attente');
 const grilleComptesEl = document.getElementById('grille-comptes');
 const grilleMsgEl	  = document.getElementById('grille-msg');
@@ -4131,6 +4144,7 @@ function _navDifferences() {
 			opt.textContent = libelle;
 			grilleProfilEl.appendChild(opt);
 		}
+		_choixAppliquerChamp('grille-profil');   // le choix mémorisé attendait ses options
 	} catch (e) { console.warn('Profils de grille non chargés', e); }
 })();
 
@@ -4147,6 +4161,12 @@ function _grilleTexteTopologie(data) {
 		parts.push(t.murs_nav === false
 			? `enceinte fermée par le terrain (${(t.rempart || []).length} case(s) du pourtour passée(s) à 0)`
 			: 'enceinte fermée par nav');
+	}
+	if (t.cadre_cases) {
+		// Profil pays : cadre décoratif (enluminure, parchemin déchiqueté) mis à 0 depuis les bords.
+		const c = t.cadre || {};
+		parts.push(`cadre décoratif : ${t.cadre_cases} case(s) à 0 (haut ${c.haut || 0} · bas ${c.bas || 0}`
+			+ ` · gauche ${c.gauche || 0} · droite ${c.droite || 0})`);
 	}
 	if (t.cote) {
 		// Profil pays : seule la côte est murée, aucune case n'est creusée.
@@ -4182,14 +4202,16 @@ function _grilleMsg(texte, erreur) {
 	grilleMsgEl.style.color = erreur ? 'var(--danger)' : 'var(--accent)';
 }
 
-// État de la carte 🔍, sur le modèle de `_dimMaj` : une seule fonction pour la visibilité, le
-// bouton et le bandeau d'aperçu.
+// État des cartes 🔍 Générer grille et 🛤️ Tracer les voies, sur le modèle de `_dimMaj` : une
+// seule fonction pour la visibilité, les boutons et le bandeau d'aperçu (les voies lisent la
+// proposition de 🔍 : les deux états se tiennent).
 function _grilleMaj() {
 	if (!grilleCard) return;
 	// Sans lieu chargé il n'y a rien à analyser ; sans image, il n'y a rien à LIRE — le bouton
 	// est alors désactivé plutôt que masqué, pour que l'admin sache que la carte existe et
 	// pourquoi elle ne marche pas ici.
 	grilleCard.hidden = !currentLocId;
+	if (voiesCard) voiesCard.hidden = !currentLocId;
 	if (grilleAttenteEl) grilleAttenteEl.hidden = !grilleProposee;
 	// Tracer les voies ne lit pas l'image mais la GRILLE : sans `cells`, rien à tracer. Pas de
 	// garde de redimensionnement — c'est un calcul local, et l'aperçu de taille est ce qu'on voit.
@@ -6251,7 +6273,7 @@ function fermerModeDeplacement() {
 	if (grid.length) renderGrid();   // la carte reprend le rendu de son mode d'édition
 }
 
-// ⚠️ En mode test, le panneau de gauche est masqué — et avec lui la carte 🔍 « Analyse d'image ».
+// ⚠️ En mode test, le panneau de gauche est masqué — et avec lui la carte 🛤️ « Tracer les voies ».
 // Le bouton de la barre de statut, qui ne servirait plus qu'à rouvrir un test déjà ouvert, devient
 // « Tracer les voies » / « Recalculer » : sans lui, le tracé serait injoignable pendant le test.
 function _depOpenBtnMaj() {
@@ -6267,7 +6289,7 @@ function _depOpenBtnMaj() {
 
 function depOpenBtnClic() {
 	if (!modeDeplacement) { ouvrirModeDeplacement(); return; }
-	// La case de règle du tracé vit dans la carte 🔍, masquée pendant le test : on trace selon la
+	// La case de règle du tracé vit dans la carte 🛤️, masquée pendant le test : on trace selon la
 	// règle QU'APPLIQUE LE JETON, sinon les régions coloriées contrediraient les flèches.
 	if (voiesCombatEl) voiesCombatEl.checked = depReglesCombat;
 	tracerVoies();
@@ -6292,13 +6314,103 @@ function setStatus(html) {
 
 // ── RESIZE ────────────────────────────────────────────────────────────────
 window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
+
+// ── CHOIX MÉMORISÉS (localStorage) ─────────────────────────────────────────
+// Confort PAR NAVIGATEUR, comme l'état du panneau (`PANNEAU_CLE`) : dernier lieu ouvert, mode,
+// valeur du pinceau, légende réduite, réglages des cartes 🔍 / 🛤️ et du test de déplacement.
+// ⚠️ Des RÉGLAGES seulement, jamais une donnée saisie (zones, dimensions, formulaires) : un
+// champ de doc restauré d'une autre session partirait en base au prochain 💾.
+// ⚠️ Stockage indisponible (navigation privée, données bloquées) ⇒ les défauts du markup.
+// Bloc posé en FIN de script : tous les écouteurs qu'il imite ou déclenche existent déjà.
+const CHOIX_CLE = 'editeur-carte.choix';
+// Contrôles de formulaire mémorisés tels quels (case cochée ou valeur).
+const CHOIX_CHAMPS = ['grille-profil', 'grille-passages', 'grille-rues', 'grille-murs-nav',
+	'voies-regle-combat', 'voies-directions', 'voies-seuil-murs', 'voies-nb-chemins', 'dep-regle-combat'];
+function _choixLire() {
+	try { return JSON.parse(localStorage.getItem(CHOIX_CLE) || 'null') || {}; }
+	catch (e) { return {}; }
+}
+function _choixSauver(cle, valeur) {
+	const etat = _choixLire();
+	etat[cle] = valeur;
+	try { localStorage.setItem(CHOIX_CLE, JSON.stringify(etat)); } catch (e) { /* sans mémoire */ }
+}
+// Appelée aussi par le chargement de « Réglage » : ses options arrivent APRÈS ce bloc, et
+// affecter `.value` à un `<select>` sans l'option voulue ne prend pas.
+function _choixAppliquerChamp(id) {
+	const el = document.getElementById(id);
+	const champs = _choixLire().champs || {};
+	if (!el || !(id in champs)) return;
+	if (el.type === 'checkbox') el.checked = !!champs[id];
+	else if (el.tagName !== 'SELECT' || el.querySelector(`option[value="${CSS.escape(String(champs[id]))}"]`)) {
+		el.value = String(champs[id]);
+	}
+}
+function _choixSauverChamp(el) {
+	const champs = _choixLire().champs || {};
+	champs[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+	_choixSauver('champs', champs);
+}
+
+(() => {
+	const etat = _choixLire();
+
+	CHOIX_CHAMPS.forEach(id => {
+		const el = document.getElementById(id);
+		if (!el) return;
+		_choixAppliquerChamp(id);
+		el.addEventListener('change', () => _choixSauverChamp(el));
+		if (el.type === 'number') el.addEventListener('input', () => _choixSauverChamp(el));
+	});
+	// La variable du test suit sa case : elle n'est relue qu'à son `change`.
+	depReglesCombat = depCombatEl.checked;
+
+	const radios = document.querySelectorAll('input[name="voies-vue"]');
+	radios.forEach(r => {
+		if (etat.voies_vue) r.checked = (r.value === etat.voies_vue);
+		r.addEventListener('change', () => { if (r.checked) _choixSauver('voies_vue', r.value); });
+	});
+
+	// Légende : le bouton bascule, on mémorise l'état APRÈS (son écouteur passe avant le nôtre).
+	if (etat.legende_reduite && !legendCardEl.classList.contains('collapsed')) {
+		togglePanel(legendCardEl, legendToggleBtn, '▾', '▸');
+	}
+	legendToggleBtn.addEventListener('click', () =>
+		_choixSauver('legende_reduite', legendCardEl.classList.contains('collapsed')));
+
+	// Pinceau : mémorisé après chaque geste (`selectedVal` est déjà à jour), restauré par la
+	// même voie que le clic.
+	const sauverVal = () => _choixSauver('valeur', selectedVal);
+	valGrid.addEventListener('click', sauverVal);
+	miniValGrid.addEventListener('click', sauverVal);
+	customBtn.addEventListener('click', sauverVal);
+	if (Number.isInteger(etat.valeur)) {
+		selectedVal = etat.valeur;
+		marquerValActive(etat.valeur);
+	}
+
+	// Mode : mémorisé sur les seuls GESTES de l'admin. ⚠️ Jamais dans `setMode`, que le
+	// chargement d'une salle de donjon appelle seul (`setMode('terrain')`) — il écraserait le choix.
+	const sauverMode = () => _choixSauver('mode', editMode);
+	modeSelect.addEventListener('change', sauverMode);
+	miniOutilsEl.querySelectorAll('.mini-mode-btn').forEach(b => b.addEventListener('click', sauverMode));
+	if (etat.mode && modeSelect.querySelector(`option[value="${CSS.escape(etat.mode)}"]`)) setMode(etat.mode);
+
+	// Dernier lieu ouvert, rechargé par le même chemin qu'une sélection à la main. Un lieu
+	// supprimé depuis n'a plus d'option : on reste sur « Choisir un lieu ».
+	lieuSelect.addEventListener('change', () => { if (lieuSelect.value) _choixSauver('lieu', lieuSelect.value); });
+	if (etat.lieu && lieuSelect.querySelector(`option[value="${CSS.escape(etat.lieu)}"]`)) {
+		lieuSelect.value = etat.lieu;
+		lieuSelect.dispatchEvent(new Event('change'));
+	}
+})();
 </script>
 
 {% include "part-lieux-markup.html" %}
 
 <!-- PORTE DE REMPART : une PAIRE de lieux et TROIS connexions, écrites en une requête. -->
 <div id="porte-overlay" class="card pt-hidden">
-	<div class="lj-title">
+	<div class="lj-title" id="pt-poignee" title="Glisser pour déplacer">
 		<div class="card-title">🏰 <span id="pt-titre">Nouvelle porte de rempart</span></div>
 		<button type="button" class="lj-close" onclick="closePorteForm()" title="Fermer (sans enregistrer)">✕</button>
 	</div>

@@ -213,10 +213,11 @@ PROFILS_GRILLE = {
 		"cout_marge": 2.0,
 	},
 	"pays": {
-		"libelle": "Pays / carte (murs nav seuls)",
-		# ⚠️ Carte de pays : AUCUNE case n'est bloquée par le terrain, seuls les murs nav
-		# arrêtent la marche (`proposer_pays`) — c'est la forme de `lieu:france`, peinte à la
-		# main : `cells` toutes à 1, un tracé nav le long de la côte. Calibré sur ce tracé
+		"libelle": "Pays / carte (côte murée, cadre à 0)",
+		# ⚠️ Carte de pays : le terrain ne bloque que le CADRE décoratif (mis à 0 depuis les
+		# bords), ailleurs seuls les murs nav arrêtent la marche (`proposer_pays`) — c'est la
+		# forme de `lieu:france`, peinte à la main : `cells` à 1, un tracé nav le long de la
+		# côte. Calibré sur ce tracé
 		# (`concordance_nav`, tolérance 1 case) : cf. `dev/gen_grille_image.py --profil=pays`.
 		"nav_seul": True,
 		# ── Mer et lacs ──────────────────────────────────────────────────────────────
@@ -233,6 +234,23 @@ PROFILS_GRILLE = {
 		"ile_min": 4,
 		# Cadre du parchemin (`masque_eau`) : une case sur `france.png`, tout autour.
 		"cadre_profondeur": 1,
+		# ── Cadre décoratif → cases à 0 (`epaisseur_cadre`, `masque_bordure`) ───────────
+		# Enluminure (entrelacs, frise) ou bord de parchemin déchiqueté : ce n'est pas la
+		# carte, on n'y marche pas. Lu sur les PROFILS DE BORD (`utils/image_bords.py`) : par
+		# ligne de pixels parallèle au côté, la densité de contours et la part de blanc.
+		# Un cadre se ferme par un TRAIT DROIT, contour fort sur toute la longueur du côté :
+		# mesuré 130-250 contre une médiane de 20-70 sur les 11 cartes de `maps/`. Seuil =
+		# max(`cadre_trait_min`, `cadre_trait_facteur` × médiane du profil). Le trait le plus
+		# PROFOND fait l'épaisseur, arrondie à la case (Angleterre 48 px → 3, France 19 → 1).
+		"cadre_enlumine": True,
+		"cadre_trait_min": 100,
+		"cadre_trait_facteur": 2.5,
+		# Au-delà, un trait est de la carte (côte rectiligne, cartouche) : 4 cases = 64 px à
+		# 16 px, le plus épais mesuré est 57 (Égypte, droite).
+		"cadre_max_cases": 4,
+		# Papier BLANC déchiqueté (France, Islande, Afrique du Nord) : sans trait, il jure avec
+		# le papier crème — la 1re case passe à 0 dès que la ligne du bord en est à ce point.
+		"cadre_blanc_part": 0.5,
 		"obstacle": {},
 		"roche": None,
 		"otsu_bacs": 64,
@@ -1472,6 +1490,46 @@ def masque_eau(couleurs, cols, rows, regles=None, profil=None) -> list:
 	return masque
 
 
+COTES_CADRE = ("haut", "bas", "gauche", "droite")
+
+
+def epaisseur_cadre(contours, blanc, px_case, regles=None, profil=None) -> int:
+	"""Épaisseur, EN CASES, du cadre décoratif d'UN côté d'une carte de pays (0 = aucun).
+
+	`contours` / `blanc` : profils du côté, une valeur par ligne de pixels depuis le bord
+	(densité moyenne de contours ; part de pixels blancs, 0-1) ; `px_case` : pixels par case
+	perpendiculairement au côté. Le trait droit le plus PROFOND (≥ max(`cadre_trait_min`,
+	`cadre_trait_facteur` × médiane), dans `cadre_max_cases`) donne l'épaisseur, arrondie à la
+	case ; la ligne 0 — le bord de l'image lui-même, toujours contrasté — ne compte pas. Un bord
+	BLANC (`cadre_blanc_part`) vaut au moins une case."""
+	regles = regles_de(profil, regles)
+	contours = list(contours or [])
+	blanc = list(blanc or [])
+	px_case = float(px_case or 0)
+	if px_case <= 0:
+		return 0
+	max_cases = int(regles.get("cadre_max_cases", 0))
+	n = 0
+	if contours:
+		seuil = max(float(regles.get("cadre_trait_min", 0)),
+			float(regles.get("cadre_trait_facteur", 0)) * mediane(contours))
+		limite = min(len(contours), int(max_cases * px_case))
+		traits = [d for d in range(1, limite) if contours[d] >= seuil]
+		if traits:
+			n = int(round((max(traits) + 1) / px_case))
+	if blanc and blanc[0] >= float(regles.get("cadre_blanc_part", 2)):
+		n = max(n, 1)
+	return min(n, max_cases)
+
+
+def masque_bordure(cols, rows, epaisseurs) -> list:
+	"""Masque [y][x] du cadre : `epaisseurs[cote]` cases depuis chaque bord (`COTES_CADRE`)."""
+	W, H = int(cols), int(rows)
+	e = {c: int((epaisseurs or {}).get(c) or 0) for c in COTES_CADRE}
+	return [[y < e["haut"] or y >= H - e["bas"] or x < e["gauche"] or x >= W - e["droite"]
+		for x in range(W)] for y in range(H)]
+
+
 def murer_barrieres(nav, barriere, franchissable) -> int:
 	"""Murs `nav` entre les cases FRANCHISSABLES et la barrière (la mer) : tout pas qui entre
 	dans la barrière ou en sort, et tout pas DIAGONAL entre deux cases franchissables qui
@@ -1505,33 +1563,50 @@ def _zones_terre(nav, terre):
 
 
 def proposer_pays(couleurs, cols, rows, nav=None, regles=None, profil=None,
-		murs_nav=True) -> dict:
+		murs_nav=True, bords=None) -> dict:
 	"""La proposition d'une CARTE DE PAYS : `{cells, nav, profil, rapport}`, même forme que
 	`proposer`.
 
-	`cells` toutes à 1 : seuls les murs nav bloquent (forme de `lieu:france`). Murs : la côte
-	SEULE (mer et lacs, `masque_eau`) — les fleuves ne sont pas murés, ils se traversent. Une
+	`cells` à 1 : seuls les murs nav bloquent (forme de `lieu:france`) — sauf le CADRE
+	décoratif (enluminure, parchemin déchiqueté), mis à 0 depuis les bords si `bords` est
+	fourni (`{cote: {"contours", "blanc", "px_case"}}`, `utils/image_bords.py` ;
+	`epaisseur_cadre`). Murs : la côte SEULE (mer et lacs, `masque_eau`) — les fleuves ne sont
+	pas murés, ils se traversent ; aucun mur vers le cadre, qui bloque déjà par le terrain. Une
 	île reste une zone isolée, signalée : on ne trace jamais de chemin sur la mer.
-	`murs_nav=False` : `nav` rendu tel quel. Le `nav` d'entrée est conservé, jamais un bit
-	retiré."""
+	`murs_nav=False` : `nav` rendu tel quel (le cadre passe quand même à 0 : c'est `cells`).
+	Le `nav` d'entrée est conservé, jamais un bit retiré."""
 	regles = regles_de(profil, regles)
 	profil = profil if profil in PROFILS_GRILLE else "pays"
 	W, H = int(cols), int(rows)
 	nav_sortie = dict(nav or {})
 	cells = [[TERRAIN_LIBRE] * W for _ in range(H)]
-	eau = masque_eau(couleurs, W, H, regles)
+	epaisseurs = {}
+	if bords and regles.get("cadre_enlumine"):
+		epaisseurs = {c: epaisseur_cadre(b.get("contours"), b.get("blanc"), b.get("px_case"), regles)
+			for c, b in bords.items() if c in COTES_CADRE and isinstance(b, dict)}
+	cadre = masque_bordure(W, H, epaisseurs)
+	for y in range(H):
+		for x in range(W):
+			if cadre[y][x]:
+				cells[y][x] = TERRAIN_INACCESSIBLE
+	# Le cadre n'est ni de la mer ni de la terre : hors des deux masques.
+	eau = [[v and not cadre[y][x] for x, v in enumerate(ligne)]
+		for y, ligne in enumerate(masque_eau(couleurs, W, H, regles))]
 	rapport = {"passages": [], "zones_isolees": [], "poches_effacees": 0, "nav_ajoutes": 0,
 		"enceinte": False, "rempart": [], "coins": 0, "rues": [], "rues_dehors": 0,
-		"murs_nav": bool(murs_nav), "cote": []}
+		"murs_nav": bool(murs_nav), "cote": [],
+		"cadre": {c: epaisseurs.get(c, 0) for c in COTES_CADRE},
+		"cadre_cases": sum(v for ligne in cadre for v in ligne)}
 	rapport["cote"] = [[x, y] for y in range(H) for x in range(W) if not eau[y][x]
+		and not cadre[y][x]
 		and any(_dans(eau, x + dx, y + dy) and eau[y + dy][x + dx] for dx, dy in VOISINS)]
 	if not murs_nav:
 		rapport["zones"] = len(zones(cells, nav_sortie)[1])
 		return {"cells": cells, "nav": nav_sortie, "profil": profil, "rapport": rapport}
 
 	avant = _bits(nav_sortie)
-	murer_barrieres(nav_sortie, eau, lambda x, y: not eau[y][x])
-	terre = [[not v for v in ligne] for ligne in eau]
+	murer_barrieres(nav_sortie, eau, lambda x, y: not eau[y][x] and not cadre[y][x])
+	terre = [[not v and not cadre[y][x] for x, v in enumerate(ligne)] for y, ligne in enumerate(eau)]
 	zone, tailles = _zones_terre(nav_sortie, terre)
 	# Zones isolées : toute terre autre que la plus grande (une île).
 	if tailles:
@@ -1551,7 +1626,7 @@ def proposer_pays(couleurs, cols, rows, nav=None, regles=None, profil=None,
 # ── Point d'entrée ───────────────────────────────────────────────────────────────────────
 def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
 		passages=True, enceinte=None, fins=None, k=SOUS_CASES, rues=True,
-		murs_nav=True) -> dict:
+		murs_nav=True, bords=None) -> dict:
 	"""La proposition complète : `{cells, nav, profil, rapport}`.
 
 	classer → lisser → rues → enceinte (ville) → coins → passages. ⚠️ Le lissage vient AVANT
@@ -1562,14 +1637,16 @@ def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
 	seulement si le profil en déclare ; sans `fins`, rien à tracer.
 	`murs_nav=False` : AUCUN bit ajouté, `nav` rendu tel quel ; l'enceinte est alors fermée
 	par le terrain (`fermer_enceinte_terrain`), la porte dessinée passe à 0.
+	`bords` : profils de bord de l'image (`utils/image_bords.py`), lus par le seul profil
+	pays — son cadre décoratif passe à 0.
 	"""
 	regles = regles_de(profil, regles)
 	nom = profil if profil in PROFILS_GRILLE else PROFIL_DEFAUT
 	if regles.get("nav_seul"):
-		# Carte de pays : ni classement en 0/3/5, ni lissage, ni échantillons fins — seuls
-		# les murs nav de la côte.
+		# Carte de pays : ni classement en 0/3/5, ni lissage, ni échantillons fins — les murs
+		# nav de la côte, et le cadre décoratif à 0.
 		return proposer_pays(couleurs, cols, rows, nav=nav, regles=regles, profil=nom,
-			murs_nav=murs_nav)
+			murs_nav=murs_nav, bords=bords)
 	analyse = analyser(couleurs, contours, cols, rows, regles)
 	cells = lisser_majorite(analyse["cells"])
 	nav_sortie = dict(nav or {})

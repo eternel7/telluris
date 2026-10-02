@@ -12,7 +12,7 @@ fichiers. `admin_import_bulk` fait un PUT COMPLET, jamais un merge (CLAUDE.md §
 relit donc le doc depuis le DUMP, source unique, et on n'y injecte que `cells`, `nav` et
 `dimensions`. `nav` part de celui du doc : aucun mur peint à la main n'est retiré.
 
-⚠️ Pillow n'est utilisé QUE dans ce fichier, `calibrer_grille_image.py` et l'endpoint
+⚠️ Pillow n'est utilisé QUE dans ce fichier, `calibrer_grille_image.py`, `utils/image_bords.py` et l'endpoint
 `grille_proposee` ; toute la classification vit dans `utils/grille_image.py`, qui n'a aucune
 dépendance et se teste là où Pillow n'est pas installé (cf. CLAUDE.md § Running tests).
 
@@ -46,7 +46,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from utils import grille_image  # noqa: E402
+from utils import grille_image, image_bords  # noqa: E402
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOSSIER_JSONS = os.path.join(RACINE, "jsons")
@@ -218,10 +218,18 @@ def proposer_pour_image(chemin: str, cols: int, rows: int, doc_lieu=None, option
 	k = grille_image.sous_cases_de(profil)
 	fins = (echantillonner_fins(chemin, cols, rows, k)
 		if rues and grille_image.regles_de(profil).get("rues") else None)
+	# Carte de pays : profils de bord (même lecture que l'endpoint), cadre décoratif à 0.
+	regles = grille_image.regles_de(profil)
+	bords = None
+	if regles.get("cadre_enlumine"):
+		from PIL import Image
+		with Image.open(chemin) as img:
+			img.load()
+			bords = image_bords.profils_bords(img, cols, rows, int(regles.get("cadre_max_cases", 0)))
 	proposition = grille_image.proposer(couleurs, contours, cols, rows, nav=nav_doc,
 		profil=profil, passages="--sans-passages" not in options,
 		enceinte=False if "--sans-enceinte" in options else None,
-		fins=fins, k=k, rues=rues, murs_nav="--sans-nav" not in options)
+		fins=fins, k=k, rues=rues, murs_nav="--sans-nav" not in options, bords=bords)
 	cells = proposition["cells"]
 	if "--connexite" in options:
 		cells = grille_image.garder_composante_principale(cells)
@@ -245,6 +253,10 @@ def imprimer_resume(chemin: str, proposition: dict):
 	if topo.get("cote") is not None:
 		print(f"  {len(topo['cote'])} case(s) de côte murée(s) ·"
 			f" {topo['nav_ajoutes']} bit(s) nav ajouté(s)")
+		if topo.get("cadre_cases"):
+			ep = topo.get("cadre") or {}
+			print(f"  cadre décoratif à 0 : {topo['cadre_cases']} case(s) — "
+				+ " · ".join(f"{c} {ep.get(c, 0)}" for c in grille_image.COTES_CADRE))
 		for zone in topo["zones_isolees"]:
 			print(f"  ⚠ zone isolée de {zone['taille']} case(s) en {zone['case']} (île)"
 				" — à relier à la main si elle doit l'être")

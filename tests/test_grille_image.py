@@ -1044,6 +1044,107 @@ def test_le_cadre_du_parchemin_ne_relie_pas_les_cotes():
 	assert zone[3][2] == zone[4][9]
 
 
+# ── Cadre décoratif d'une carte de pays → cases à 0 ─────────────────────────────────────
+REGLES_PAYS = gi.PROFILS_GRILLE["pays"]
+PX = 16.0   # pixels par case des profils de test (les cartes de `maps/` à 88×48)
+
+
+def _profil(traits=(), longueur=None, fond=30):
+	"""Profil de contours d'un côté : `fond` partout, un trait FORT aux lignes `traits`. Le bord
+	de l'image (ligne 0) est toujours contrasté — il ne doit jamais compter."""
+	longueur = longueur or int((REGLES_PAYS["cadre_max_cases"] + 1) * PX)
+	fort = REGLES_PAYS["cadre_trait_min"] + 50
+	profil = [float(fond)] * longueur
+	profil[0] = 250.0
+	for d in traits:
+		profil[d] = float(fort)
+	return profil
+
+
+def test_epaisseur_le_trait_le_plus_profond_arrondi_a_la_case():
+	assert gi.epaisseur_cadre(_profil([10, 47]), [0.0], PX, REGLES_PAYS) == 3    # 48 px → 3
+	assert gi.epaisseur_cadre(_profil([18]), [0.0], PX, REGLES_PAYS) == 1        # 19 px → 1
+
+
+def test_epaisseur_sans_trait_ni_blanc_le_bord_seul_ne_fait_pas_de_cadre():
+	assert gi.epaisseur_cadre(_profil(), [0.0], PX, REGLES_PAYS) == 0
+
+
+def test_epaisseur_un_trait_au_dela_du_maximum_est_de_la_carte():
+	"""Une côte rectiligne ou un cartouche plus loin que `cadre_max_cases` : pas un cadre."""
+	loin = int(REGLES_PAYS["cadre_max_cases"] * PX) + 2
+	assert gi.epaisseur_cadre(_profil([loin]), [0.0], PX, REGLES_PAYS) == 0
+
+
+def test_epaisseur_seuil_relatif_a_la_mediane():
+	"""Un côté chargé (montagnes jusqu'au bord) : un « trait » à peine au-dessus du fond n'en est
+	pas un — le seuil suit `cadre_trait_facteur` × la médiane du profil."""
+	fond = REGLES_PAYS["cadre_trait_min"]   # médiane assez haute pour que le facteur l'emporte
+	profil = _profil(fond=fond)
+	profil[20] = fond * REGLES_PAYS["cadre_trait_facteur"] - 1
+	assert gi.epaisseur_cadre(profil, [0.0], PX, REGLES_PAYS) == 0
+
+
+def test_epaisseur_un_bord_blanc_vaut_une_case():
+	"""Le papier blanc déchiqueté de la France : pas de trait, mais il jure avec le parchemin."""
+	part = REGLES_PAYS["cadre_blanc_part"]
+	assert gi.epaisseur_cadre(_profil(), [part, 0.1], PX, REGLES_PAYS) == 1
+	assert gi.epaisseur_cadre(_profil(), [part - 0.01], PX, REGLES_PAYS) == 0
+
+
+def test_masque_bordure_par_cote():
+	m = gi.masque_bordure(5, 4, {"haut": 1, "gauche": 2})
+	assert [[int(v) for v in ligne] for ligne in m] == [
+		[1, 1, 1, 1, 1],
+		[1, 1, 0, 0, 0],
+		[1, 1, 0, 0, 0],
+		[1, 1, 0, 0, 0],
+	]
+
+
+def _bords(**cases):
+	"""Profils de bord dont chaque côté a un trait à `cases[cote]` cases (absent = aucun)."""
+	return {c: {"contours": _profil([int(cases[c] * PX) - 1] if cases.get(c) else []),
+		"blanc": [0.0], "px_case": PX} for c in gi.COTES_CADRE}
+
+
+def test_pays_le_cadre_passe_a_0_le_reste_a_1():
+	couleurs, fins, cols, rows = _carte(FLEUVE_TRAVERSANT)
+	prop = gi.proposer(couleurs, [0] * len(couleurs), cols, rows, profil="pays", fins=fins,
+		k=K_PAYS, bords=_bords(gauche=2, haut=1))
+	cells = prop["cells"]
+	for y in range(rows):
+		for x in range(cols):
+			assert cells[y][x] == (B if (x < 2 or y < 1) else L)
+	assert prop["rapport"]["cadre"] == {"haut": 1, "bas": 0, "gauche": 2, "droite": 0}
+	assert prop["rapport"]["cadre_cases"] == sum(1 for l in cells for v in l if v == B)
+
+
+def test_pays_aucun_mur_vers_le_cadre_et_pas_de_cote_dedans():
+	"""Le cadre bloque par le terrain : la terre qui le borde n'est pas une côte, aucun mur."""
+	couleurs, fins, cols, rows = _carte(FLEUVE_TRAVERSANT)
+	prop = gi.proposer(couleurs, [0] * len(couleurs), cols, rows, profil="pays", fins=fins,
+		k=K_PAYS, bords=_bords(gauche=2))
+	nav = prop["nav"]
+	for y in (3, 4):                     # rangées loin de la mer, au contact du cadre
+		assert gi.nav_autorise(nav, 2, y, -1, 0)
+		assert int(nav.get(f"2,{y}", 0)) == 0
+	assert all(x >= 2 for x, _ in prop["rapport"]["cote"])
+
+
+def test_pays_sans_bords_rien_ne_change():
+	"""Sans profils de bord (CLI d'avant, image illisible) : la proposition d'avant, `cells` à 1."""
+	assert gi.comptes(_pays(FLEUVE_TRAVERSANT)["cells"]) == {L: 12 * 8}
+	assert _pays(FLEUVE_TRAVERSANT)["rapport"]["cadre_cases"] == 0
+
+
+def test_pays_sans_murs_nav_le_cadre_passe_quand_meme_a_0():
+	couleurs, fins, cols, rows = _carte(FLEUVE_TRAVERSANT)
+	prop = gi.proposer(couleurs, [0] * len(couleurs), cols, rows, profil="pays", fins=fins,
+		k=K_PAYS, bords=_bords(droite=1), murs_nav=False)
+	assert all(ligne[-1] == B for ligne in prop["cells"]) and prop["nav"] == {}
+
+
 def test_sous_cases_du_profil():
 	# Aucun profil n'en déclare aujourd'hui : repli sur `SOUS_CASES`, lu par les rues.
 	for profil, regles in gi.PROFILS_GRILLE.items():

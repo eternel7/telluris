@@ -1,4 +1,4 @@
-// voies.js — TRACÉ DES VOIES d'une carte (éditeur de carte, carte « 🔍 Analyse d'image »).
+// voies.js — TRACÉ DES VOIES d'une carte (éditeur de carte, carte « 🛤️ Tracer les voies »).
 //
 // Où circule-t-on VRAIMENT ? Trois lectures d'une même grille :
 //   • les RÉGIONS connexes — une enclave injoignable, deux rives de même région (le fleuve se traverse) ;
