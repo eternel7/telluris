@@ -521,7 +521,8 @@ async def update_cells(
 		raise HTTPException(status_code=400, detail="Invalid session credentials")
 	
 	if cells_info :
-		cells = cells_info["cells"]
+		# `cells` ABSENT ⇒ jamais écrit : 🧹 Vider le nav de la carte 🔍 n'envoie que `nav`.
+		cells = cells_info.get("cells")
 		lieu_id = cells_info["_id"]
 		# Redimensionnement de la grille (éditeur de carte). ⚠️ Contrôlé AVANT la moindre lecture :
 		# une taille incohérente doit être refusée sans avoir touché à la base. Clé ABSENTE ⇒ champ
@@ -530,7 +531,8 @@ async def update_cells(
 			if "dimensions" in cells_info else None)
 		lieu_doc = get_doc(lieu_id)
 		if lieu_doc:
-			lieu_doc["cells"] = cells
+			if "cells" in cells_info:
+				lieu_doc["cells"] = cells
 			# `nav` ABSENT ⇒ jamais écrit : le ✔ Appliquer de la carte 🔍 n'envoie que `cells`.
 			# Le pinceau, lui, l'envoie toujours — son chemin est inchangé.
 			if "nav" in cells_info:

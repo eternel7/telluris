@@ -451,7 +451,11 @@ async function openConnForm(mode, connId, opts) {
 	cxIciIdx = 0;
 	cxIdTouche = false;
 	cxTypeTouche = false;
-	cxVisee = false;
+	// ⚠️ DÉSARMER, jamais `cxVisee = false` seul : pendant une visée le panneau laisse passer
+	// les clics, donc 🔗 reste cliquable — remettre l'état à zéro sans lui laissait `cx-viser`
+	// (panneau à 30 %, inerte) et le bouton « ✕ Annuler la visée ».
+	desarmerViseeConn();
+	_cxMajVisee();      // resynchronise le chrome même si `cxVisee` était déjà faux
 	cxViseeCote = 'ici';
 	// Connexion INTERNE (deux cases de cette carte) : demandée à la création, lue sur le doc en
 	// édition (juste après). Posé AVANT `_cxMajChrome`, qui en tire le titre.

@@ -886,6 +886,9 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 				<input type="checkbox" id="grille-murs-nav" checked> Proposer des murs nav
 			</label>
 			<button class="btn" id="grille-proposer-btn">🔍 Proposer une grille</button>
+			<!-- ⚠️ ÉCRIT EN BASE (après confirmation) : `nav: {}` seul, jamais `cells`. Les murs
+			     proposés s'ajoutent sans jamais rien retirer : c'est le seul geste qui les efface. -->
+			<button class="btn danger" id="grille-vider-nav-btn" style="margin-top:6px;">🧹 Vider le nav</button>
 			<div id="grille-attente" hidden>
 				<div class="dim-warn" id="grille-warn">⚠️ Aperçu seul : <b>rien n'est enregistré</b>.
 					Le pinceau continue d'écrire la grille réelle, pas celle-ci. Pour l'adopter,
@@ -2853,7 +2856,11 @@ async function openPorteForm(lieuId) {
 	closeGuildeForm();
 	ptMode = lieuId ? 'edition' : 'creation';
 	ptExistants = {};
-	ptVisee = '';
+	// ⚠️ DÉSARMER, jamais `ptVisee = ''` seul : pendant une visée le panneau laisse passer les
+	// clics, donc 🏰 de la barre latérale reste cliquable — remettre l'état à zéro sans lui
+	// laissait `cx-viser` (panneau à 30 %, inerte), le curseur en croix et « ✕ Annuler ».
+	desarmerViseePorte();
+	_ptMajVisee();      // resynchronise le chrome même si `ptVisee` était déjà vide
 	ptNomTouche = false;
 	_ptCabler();
 	_ptEl('porte-overlay').classList.remove('pt-hidden');
@@ -4081,6 +4088,7 @@ const grilleProfilEl	= document.getElementById('grille-profil');
 const grillePassagesEl	= document.getElementById('grille-passages');
 const grilleRuesEl		= document.getElementById('grille-rues');
 const grilleMursNavEl	= document.getElementById('grille-murs-nav');
+const grilleViderNavBtn	= document.getElementById('grille-vider-nav-btn');
 const voiesTracerBtn	= document.getElementById('voies-tracer-btn');
 const voiesAttenteEl	= document.getElementById('voies-attente');
 const voiesComptesEl	= document.getElementById('voies-comptes');
@@ -4195,6 +4203,16 @@ function _grilleMaj() {
 		voiesTracerBtn.disabled = sansGrille;
 		voiesTracerBtn.style.opacity = sansGrille ? 0.45 : '';
 		voiesTracerBtn.title = sansGrille ? "Ce lieu n'a pas de grille (cells) : il n'y a pas de voie à tracer." : '';
+	}
+	if (grilleViderNavBtn) {
+		// Même garde de redimensionnement que 🔍 : le 💾 de l'aperçu réécrirait le `nav` remis à
+		// l'échelle, vidé ou non. (Pas de garde « nav vide » ici : le pinceau ne repasse pas par
+		// `_grilleMaj`, l'état serait périmé — le compte est fait au clic.)
+		const bloqueNav = !!redimEnAttente;
+		grilleViderNavBtn.disabled = bloqueNav;
+		grilleViderNavBtn.style.opacity = bloqueNav ? 0.45 : '';
+		grilleViderNavBtn.title = bloqueNav ? 'Enregistrer ou annuler le redimensionnement d\'abord.'
+			: 'Efface TOUS les murs nav du lieu en base (champ nav seul, cells intact).';
 	}
 	if (!grilleProposerBtn) return;
 	// ⚠️ Refusé tant qu'un redimensionnement est en APERÇU : `cols`/`rows` ne décrivent alors
@@ -4337,7 +4355,53 @@ async function appliquerGrilleProposee() {
 	}
 }
 
+// 🧹 Vider le nav — écrit `nav: {}` et RIEN d'autre (ni `cells`, ni `dimensions`). C'est le seul
+// moyen d'effacer des murs : ✔ Appliquer fait une UNION avec le `nav` existant, si bien que les
+// murs de propositions successives s'accumulent.
+async function viderNav() {
+	if (!currentLocId || redimEnAttente) return;
+	const nbMurs = Object.keys(nav).length;
+	if (!nbMurs) { _grilleMsg('Aucun mur nav sur ce lieu : rien à vider.', false); return; }
+	if (!confirm(`Vider le nav de ${currentLocId} ?\n\n${nbMurs} masque(s) nav seront effacés en base, `
+		+ `y compris les murs peints à la main. Seul le champ nav est écrit ; cells est intact.`)) return;
+	const lieuId = currentLocId;
+	const ancienNav = nav;
+	// ⚠️ Vidé AVANT l'envoi, comme dans ✔ Appliquer : un auto-envoi du pinceau en attente
+	// (`sendGrid` envoie aussi `nav`) réécrirait sinon les anciens murs juste après.
+	nav = {};
+	if (grilleViderNavBtn) grilleViderNavBtn.disabled = true;
+	_grilleMsg('Enregistrement…', false);
+	try {
+		const res = await fetch('/api/update_cells', {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ _id: lieuId, nav: {} }),
+		});
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			throw new Error(`Nav non vidé (${err.detail || res.status})`);
+		}
+		const lieuData = await res.json();
+		if (currentLocId !== lieuId) return;
+		currentRev = lieuData._rev;
+		// Un aperçu ouvert porte les ANCIENS murs dans `navProposee` (le serveur part du `nav` du
+		// doc) : il ne décrit plus la base, on le ferme — à reproposer.
+		if (grilleProposee) fermerGrilleProposee(); else renderGrid();
+		updateLegend();
+		_grilleMsg(`✓ Nav vidé — ${nbMurs} masque(s) effacé(s).`, false);
+		setStatus(`Lieu <span>${_escHtml(lieuId)}</span> : nav vidé - ${currentRev}.`);
+	} catch (err) {
+		if (currentLocId !== lieuId) return;
+		nav = ancienNav;
+		renderGrid();
+		_grilleMsg(`✗ ${err.message}`, true);
+	} finally {
+		_grilleMaj();
+	}
+}
+
 if (grilleProposerBtn) grilleProposerBtn.addEventListener('click', proposerGrilleDepuisImage);
+if (grilleViderNavBtn) grilleViderNavBtn.addEventListener('click', viderNav);
 const grilleFermerBtn = document.getElementById('grille-fermer-btn');
 if (grilleFermerBtn) grilleFermerBtn.addEventListener('click', fermerGrilleProposee);
 const grilleAppliquerBtn = document.getElementById('grille-appliquer-btn');
