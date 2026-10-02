@@ -261,6 +261,11 @@ def imprimer_resume(chemin: str, proposition: dict):
 			print(f"  ⚠ zone isolée de {zone['taille']} case(s) en {zone['case']} (île)"
 				" — à relier à la main si elle doit l'être")
 		return
+	if topo.get("cadre_cases"):
+		ep = topo.get("cadre") or {}
+		print(f"  cadre décoratif à 0 : {topo['cadre_cases']} case(s) — "
+			+ " · ".join(f"{c} {ep.get(c, 0)}" for c in grille_image.COTES_CADRE)
+			+ " (aucun passage n'y est creusé)")
 	print(f"  {len(topo['rues'])} case(s) de rue ouverte(s)"
 		f" (dont {topo.get('rues_dehors', 0)} hors les murs) · enceinte "
 		f"{('fermée ' + fermeture) if topo['enceinte'] else 'aucune'} · {len(topo['passages'])}"

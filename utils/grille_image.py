@@ -59,6 +59,29 @@ TERRAIN_EAU = 5
 # Indices d'une case, dans cet ordre partout (poids des profils, normalisation).
 INDICES = ("luminance", "contours", "froideur", "rougeur", "verdeur", "saturation")
 
+# ── Cadre décoratif → cases à 0 (`epaisseur_cadre`, `masque_bordure`) ────────────────────
+# Réglages PARTAGÉS par les profils `pays` et `ville` (étalés dans chacun) ; mesures de la
+# ville : 16 grilles peintes sur 19 villes ont déjà ces cases à 0 — Le Caire, Lutèce, Rome,
+# Londres en laissaient quelques-unes libres le long du liseré.
+# Enluminure (entrelacs, frise) ou bord de parchemin déchiqueté : ce n'est pas la carte, on n'y
+# marche pas. Lu sur les PROFILS DE BORD (`utils/image_bords.py`) : par ligne de pixels
+# parallèle au côté, la densité de contours et la part de blanc.
+CADRE_ENLUMINE = {
+	"cadre_enlumine": True,
+	# Un cadre se ferme par un TRAIT DROIT, contour fort sur toute la longueur du côté : mesuré
+	# 130-250 contre une médiane de 20-70 sur les 11 cartes de `maps/`. Seuil =
+	# max(`cadre_trait_min`, `cadre_trait_facteur` × médiane du profil). Le trait le plus
+	# PROFOND fait l'épaisseur, arrondie à la case (Angleterre 48 px → 3, France 19 → 1).
+	"cadre_trait_min": 100,
+	"cadre_trait_facteur": 2.5,
+	# Au-delà, un trait est de la carte (côte rectiligne, cartouche, rempart) : 4 cases = 64 px
+	# à 16 px ; le plus épais mesuré est 57 (Égypte, droite), Londres touche le plafond.
+	"cadre_max_cases": 4,
+	# Papier BLANC déchiqueté (France, Islande, Afrique du Nord) : sans trait, il jure avec le
+	# papier crème — la 1re case passe à 0 dès que la ligne du bord en est à ce point.
+	"cadre_blanc_part": 0.5,
+}
+
 # ── LES PROFILS — tout se règle ici ──────────────────────────────────────────────────────
 # `obstacle` et `roche` sont des SCORES LINÉAIRES sur les indices normalisés de l'image :
 # poids positif = « plus la case a de cet indice, plus elle bloque ». La coupure est l'Otsu
@@ -117,6 +140,11 @@ PROFILS_GRILLE = {
 		# Lutèce : anneau surtout libre, aucun cadre.
 		"cadre_part": 0.8,
 		"cadre_profondeur": 3,
+		# Cadre DÉCORATIF lu sur le trait droit (`CADRE_ENLUMINE`) : mis à 0 et INTERDIT aux
+		# passages de `relier_zones` — sans quoi un passage creusé le long du bord rouvrirait
+		# un chemin autour de la ville. Distinct du `masque_cadre` ci-dessus, qui ne sert qu'à
+		# situer l'enceinte.
+		**CADRE_ENLUMINE,
 		# ── Rues (`tracer_rues`) ─────────────────────────────────────────────────────
 		# Une rue fait 6 à 10 px, la case 16 : la couleur MOYENNE la noie dans les toits.
 		# Elle reparaît à l'échelle de la sous-case (4 px) : le pavé est clair et terne, le
@@ -234,23 +262,8 @@ PROFILS_GRILLE = {
 		"ile_min": 4,
 		# Cadre du parchemin (`masque_eau`) : une case sur `france.png`, tout autour.
 		"cadre_profondeur": 1,
-		# ── Cadre décoratif → cases à 0 (`epaisseur_cadre`, `masque_bordure`) ───────────
-		# Enluminure (entrelacs, frise) ou bord de parchemin déchiqueté : ce n'est pas la
-		# carte, on n'y marche pas. Lu sur les PROFILS DE BORD (`utils/image_bords.py`) : par
-		# ligne de pixels parallèle au côté, la densité de contours et la part de blanc.
-		# Un cadre se ferme par un TRAIT DROIT, contour fort sur toute la longueur du côté :
-		# mesuré 130-250 contre une médiane de 20-70 sur les 11 cartes de `maps/`. Seuil =
-		# max(`cadre_trait_min`, `cadre_trait_facteur` × médiane du profil). Le trait le plus
-		# PROFOND fait l'épaisseur, arrondie à la case (Angleterre 48 px → 3, France 19 → 1).
-		"cadre_enlumine": True,
-		"cadre_trait_min": 100,
-		"cadre_trait_facteur": 2.5,
-		# Au-delà, un trait est de la carte (côte rectiligne, cartouche) : 4 cases = 64 px à
-		# 16 px, le plus épais mesuré est 57 (Égypte, droite).
-		"cadre_max_cases": 4,
-		# Papier BLANC déchiqueté (France, Islande, Afrique du Nord) : sans trait, il jure avec
-		# le papier crème — la 1re case passe à 0 dès que la ligne du bord en est à ce point.
-		"cadre_blanc_part": 0.5,
+		# Cadre décoratif → cases à 0 : cf. `CADRE_ENLUMINE`.
+		**CADRE_ENLUMINE,
 		"obstacle": {},
 		"roche": None,
 		"otsu_bacs": 64,
@@ -1211,7 +1224,8 @@ def _tas_tirer(tas):
 		k = m
 
 
-def relier_zones(cells, nav, marges=None, cotes=None, regles=None, profil=None, murs_nav=True):
+def relier_zones(cells, nav, marges=None, cotes=None, regles=None, profil=None, murs_nav=True,
+		interdites=None):
 	"""Relie les zones praticables disjointes d'un même CÔTÉ en creusant des passages.
 
 	`cotes[y][x]` = côté de la case (`cotes_de` ; None = un seul côté). Pour
@@ -1224,7 +1238,9 @@ def relier_zones(cells, nav, marges=None, cotes=None, regles=None, profil=None, 
 	⚠️ Pourquoi orthogonal : un escalier diagonal passerait au-dessus des angles que
 	`fermer_coins` vient de fermer ; et un passage d'une case de large tient en jeu.
 	⚠️ Interdits : changer de côté (le rempart reste fermé), un pas que `nav` refuse (un mur
-	peint à la main est une intention), la case hors carte.
+	peint à la main est une intention), la case hors carte, et toute case d'`interdites`
+	[y][x] — le cadre décoratif (`cadre_depuis_bords`) : un passage creusé le long du bord
+	rouvrirait un chemin autour de la carte.
 
 	Poches de moins de `poche_min` cases : passées à 0 avant tout (bruit — on n'invente pas de
 	ruelle vers une cour de deux cases). Passage plus long que `passage_longueur_max` : la zone
@@ -1281,7 +1297,8 @@ def relier_zones(cells, nav, marges=None, cotes=None, regles=None, profil=None, 
 		exclues = set()
 		while len(relie) + len(exclues) < len(ids):
 			chemin, cible = _plus_proche(cells, nav, zone, relie, exclues, c, cote,
-				marge, cout_creuser, cout_marge, garde_terrain=bool(cotes) and not murs_nav)
+				marge, cout_creuser, cout_marge, garde_terrain=bool(cotes) and not murs_nav,
+				interdites=interdites)
 			if chemin is None:
 				# Plus rien d'atteignable de ce côté : les autres restent isolées.
 				for z in ids:
@@ -1362,11 +1379,12 @@ def _isoler(cells, zone, z, tailles, isolee_max, rapport):
 
 
 def _plus_proche(cells, nav, zone, relie, exclues, c, cote, marge, cout_creuser, cout_marge,
-		garde_terrain=False):
+		garde_terrain=False, interdites=None):
 	"""Dijkstra multi-source depuis les zones RELIÉES du côté `c` jusqu'à la première case
 	d'une zone ni reliée ni exclue. `(chemin [(x, y)…] sans la source, zone atteinte)` ou
 	`(None, None)`. Départage des ex æquo par index de case : déterministe.
-	`garde_terrain` : refuse de creuser une case voisine d'une case libre d'un autre côté."""
+	`garde_terrain` : refuse de creuser une case voisine d'une case libre d'un autre côté.
+	`interdites[y][x]` : case jamais traversée (le cadre décoratif)."""
 	H, W = len(cells), len(cells[0])
 
 	def contre_le_mur(x, y):
@@ -1402,6 +1420,8 @@ def _plus_proche(cells, nav, zone, relie, exclues, c, cote, marge, cout_creuser,
 			if not (0 <= nx < W and 0 <= ny < H) or (nx, ny) in fermees:
 				continue
 			if cote(nx, ny) != c or not nav_autorise(nav, x, y, dx, dy):
+				continue
+			if interdites and interdites[ny][nx]:
 				continue
 			v = cells[ny][nx]
 			nz = zone[ny][nx]
@@ -1522,6 +1542,19 @@ def epaisseur_cadre(contours, blanc, px_case, regles=None, profil=None) -> int:
 	return min(n, max_cases)
 
 
+def cadre_depuis_bords(bords, cols, rows, regles=None, profil=None):
+	"""`(epaisseurs, masque)` du cadre décoratif d'après les profils de bord — pour un profil
+	qui le déclare (`cadre_enlumine`) ; sinon, ou sans `bords`, aucun cadre (masque vide de
+	vrai). Partagé par les passes `pays` et `ville`."""
+	regles = regles_de(profil, regles)
+	epaisseurs = {}
+	if bords and regles.get("cadre_enlumine"):
+		epaisseurs = {c: epaisseur_cadre(b.get("contours"), b.get("blanc"), b.get("px_case"), regles)
+			for c, b in bords.items() if c in COTES_CADRE and isinstance(b, dict)}
+	return ({c: epaisseurs.get(c, 0) for c in COTES_CADRE},
+		masque_bordure(cols, rows, epaisseurs))
+
+
 def masque_bordure(cols, rows, epaisseurs) -> list:
 	"""Masque [y][x] du cadre : `epaisseurs[cote]` cases depuis chaque bord (`COTES_CADRE`)."""
 	W, H = int(cols), int(rows)
@@ -1580,11 +1613,7 @@ def proposer_pays(couleurs, cols, rows, nav=None, regles=None, profil=None,
 	W, H = int(cols), int(rows)
 	nav_sortie = dict(nav or {})
 	cells = [[TERRAIN_LIBRE] * W for _ in range(H)]
-	epaisseurs = {}
-	if bords and regles.get("cadre_enlumine"):
-		epaisseurs = {c: epaisseur_cadre(b.get("contours"), b.get("blanc"), b.get("px_case"), regles)
-			for c, b in bords.items() if c in COTES_CADRE and isinstance(b, dict)}
-	cadre = masque_bordure(W, H, epaisseurs)
+	epaisseurs, cadre = cadre_depuis_bords(bords, W, H, regles)
 	for y in range(H):
 		for x in range(W):
 			if cadre[y][x]:
@@ -1595,8 +1624,7 @@ def proposer_pays(couleurs, cols, rows, nav=None, regles=None, profil=None,
 	rapport = {"passages": [], "zones_isolees": [], "poches_effacees": 0, "nav_ajoutes": 0,
 		"enceinte": False, "rempart": [], "coins": 0, "rues": [], "rues_dehors": 0,
 		"murs_nav": bool(murs_nav), "cote": [],
-		"cadre": {c: epaisseurs.get(c, 0) for c in COTES_CADRE},
-		"cadre_cases": sum(v for ligne in cadre for v in ligne)}
+		"cadre": epaisseurs, "cadre_cases": sum(v for ligne in cadre for v in ligne)}
 	rapport["cote"] = [[x, y] for y in range(H) for x in range(W) if not eau[y][x]
 		and not cadre[y][x]
 		and any(_dans(eau, x + dx, y + dy) and eau[y + dy][x + dx] for dx, dy in VOISINS)]
@@ -1637,8 +1665,11 @@ def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
 	seulement si le profil en déclare ; sans `fins`, rien à tracer.
 	`murs_nav=False` : AUCUN bit ajouté, `nav` rendu tel quel ; l'enceinte est alors fermée
 	par le terrain (`fermer_enceinte_terrain`), la porte dessinée passe à 0.
-	`bords` : profils de bord de l'image (`utils/image_bords.py`), lus par le seul profil
-	pays — son cadre décoratif passe à 0.
+	`bords` : profils de bord de l'image (`utils/image_bords.py`), lus par les profils qui
+	déclarent `cadre_enlumine` (pays, ville) : leur cadre décoratif passe à 0. En ville, posé
+	juste après le lissage (l'enceinte le voit comme du dehors), reposé après les rues, et
+	INTERDIT aux passages de `relier_zones` — sans quoi un passage creusé le long du bord
+	rouvrirait un chemin autour de la ville.
 	"""
 	regles = regles_de(profil, regles)
 	nom = profil if profil in PROFILS_GRILLE else PROFIL_DEFAUT
@@ -1649,10 +1680,13 @@ def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
 			murs_nav=murs_nav, bords=bords)
 	analyse = analyser(couleurs, contours, cols, rows, regles)
 	cells = lisser_majorite(analyse["cells"])
+	epaisseurs, cadre = cadre_depuis_bords(bords, cols, rows, regles)
+	_poser_cadre(cells, cadre)
 	nav_sortie = dict(nav or {})
 	rapport = {"passages": [], "zones_isolees": [], "poches_effacees": 0, "nav_ajoutes": 0,
 		"enceinte": False, "rempart": [], "coins": 0, "rues": [], "rues_dehors": 0,
-		"murs_nav": bool(murs_nav)}
+		"murs_nav": bool(murs_nav),
+		"cadre": epaisseurs, "cadre_cases": sum(v for ligne in cadre for v in ligne)}
 	# L'enceinte est cherchée AVANT les rues : elles se règlent à part dedans et dehors. Les
 	# rues ne déplacent pas la masse bâtie (une fermeture de rayon 2 les comble).
 	masque = []
@@ -1660,6 +1694,9 @@ def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
 		masque = detecter_enceinte(cells, regles)
 	if rues and fins:
 		cells, rapport["rues"] = tracer_rues(cells, fins, k, regles, masque)
+		# Une rue ne s'ouvre pas dans le cadre : il prime.
+		rapport["rues"] = [[x, y] for x, y in rapport["rues"] if not cadre[y][x]]
+		_poser_cadre(cells, cadre)
 		rapport["rues_dehors"] = sum(1 for x, y in rapport["rues"] if not (masque and masque[y][x]))
 	if not passages:
 		rapport["zones"] = len(zones(cells, nav_sortie)[1])
@@ -1676,7 +1713,7 @@ def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
 	if regles.get("passages", True):
 		cotes = cotes_de(masque) if masque else None
 		cells, nav_sortie, relie = relier_zones(cells, nav_sortie, analyse["marges"], cotes, regles,
-			murs_nav=murs_nav)
+			murs_nav=murs_nav, interdites=cadre)
 		for cle in ("passages", "zones_isolees", "poches_effacees"):
 			rapport[cle] = relie[cle]
 		if coins:
@@ -1689,6 +1726,14 @@ def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
 
 def _bits(nav) -> int:
 	return sum(bin(int(v or 0)).count("1") for v in (nav or {}).values())
+
+
+def _poser_cadre(cells, cadre) -> None:
+	"""Cases du cadre décoratif à 0 (mute `cells`)."""
+	for y, ligne in enumerate(cadre):
+		for x, v in enumerate(ligne):
+			if v:
+				cells[y][x] = TERRAIN_INACCESSIBLE
 
 
 # ── Notation contre une grille peinte à la main ──────────────────────────────────────────

@@ -443,6 +443,44 @@ def test_un_passage_trop_long_n_est_pas_creuse_et_la_zone_est_signalee():
 	assert sortie == cells
 
 
+def test_aucun_passage_n_est_creuse_dans_le_cadre():
+	"""Deux quartiers que seule la colonne du bord (le cadre) permettrait de relier : sans
+	l'interdiction, le passage longerait le bord ; avec, rien n'est creusé, la zone est signalée."""
+	cells = _grille("""
+......
+.#####
+######
+.#####
+......
+""")
+	regles = _regles(poche_min=0, poche_isolee_max=0, passage_longueur_max=3)
+	# Sans cadre : le raccourci est le bord — une seule case à percer, (0, 2).
+	_, _, rapport = gi.relier_zones(cells, {}, None, regles=regles)
+	assert [p["cases"] for p in rapport["passages"]] == [[[0, 2]]]
+	# Colonne 0 en cadre : le passage (3 cases) est creusé ailleurs, jamais dans le cadre.
+	cadre = gi.masque_bordure(6, 5, {"gauche": 1})
+	sortie, nav, rapport = gi.relier_zones(cells, {}, None, regles=regles, interdites=cadre)
+	assert len(rapport["passages"]) == 1 and rapport["passages"][0]["longueur"] == 3
+	assert all(not cadre[y][x] for p in rapport["passages"] for x, y in p["cases"])
+	assert sortie[2][0] == B
+
+
+def test_une_zone_dans_le_cadre_n_est_jamais_rejointe():
+	"""Une poche libre prise DANS le cadre (2 cases à gauche) : l'atteindre, ce serait creuser le
+	cadre — rien n'est creusé, elle reste signalée."""
+	cells = _grille("""
+......
+######
+######
+.#####
+""")
+	regles = _regles(poche_min=0, poche_isolee_max=0, passage_longueur_max=3)
+	cadre = gi.masque_bordure(6, 4, {"gauche": 2})
+	sortie, _, rapport = gi.relier_zones(cells, {}, None, regles=regles, interdites=cadre)
+	assert rapport["passages"] == [] and sortie == cells
+	assert [z["taille"] for z in rapport["zones_isolees"]] == [1]
+
+
 def test_une_petite_zone_injoignable_est_effacee_plutot_que_laissee_isolee():
 	cells = _grille("""
 ......
@@ -1136,6 +1174,29 @@ def test_pays_sans_bords_rien_ne_change():
 	"""Sans profils de bord (CLI d'avant, image illisible) : la proposition d'avant, `cells` à 1."""
 	assert gi.comptes(_pays(FLEUVE_TRAVERSANT)["cells"]) == {L: 12 * 8}
 	assert _pays(FLEUVE_TRAVERSANT)["rapport"]["cadre_cases"] == 0
+
+
+def test_ville_le_cadre_passe_a_0_et_n_est_jamais_creuse():
+	"""Le même cadre en ville : posé à 0 par `proposer`, et aucun passage, aucune rue n'y
+	rouvre de case."""
+	assert gi.PROFILS_GRILLE["ville"]["cadre_enlumine"]
+	cols, rows = 12, 8
+	couleurs = [TERRE] * (cols * rows)
+	prop = gi.proposer(couleurs, [0] * len(couleurs), cols, rows, profil="ville",
+		bords=_bords(gauche=2, bas=1))
+	cells, rapport = prop["cells"], prop["rapport"]
+	for y in range(rows):
+		assert cells[y][0] == cells[y][1] == B
+	assert all(v == B for v in cells[rows - 1])
+	assert rapport["cadre"]["gauche"] == 2 and rapport["cadre"]["bas"] == 1
+	assert all(not (x < 2 or y == rows - 1) for p in rapport["passages"] for x, y in p["cases"])
+
+
+def test_ville_sans_bords_rien_ne_change():
+	cols, rows = 12, 8
+	couleurs = [TERRE] * (cols * rows)
+	avec = gi.proposer(couleurs, [0] * len(couleurs), cols, rows, profil="ville")
+	assert avec["rapport"]["cadre_cases"] == 0
 
 
 def test_pays_sans_murs_nav_le_cadre_passe_quand_meme_a_0():

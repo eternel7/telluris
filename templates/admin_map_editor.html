@@ -587,6 +587,9 @@
 	/* ⚠️ Le `display:flex`/`block` d'auteur l'emporterait sur le [hidden] de la feuille du
 	   navigateur (même piège que .aub-ecrivain-ligne dans play_town). */
 	#dim-card[hidden], #dim-attente[hidden] { display: none; }
+	/* Erreur de chargement du lieu : masquée tant qu'elle est vide (ses trois écrivains passent
+	   par `textContent`, '' retire le nœud texte — `:empty` suit sans une ligne de JS). */
+	#load-error:empty { display: none; }
 	#grille-card[hidden], #grille-attente[hidden], #voies-card[hidden], #voies-attente[hidden] { display: none; }
 	/* Tracé des voies : légende en ligne. */
 	.voies-legende { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 6px 0; }
