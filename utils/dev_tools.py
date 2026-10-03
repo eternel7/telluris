@@ -516,7 +516,9 @@ CATALOGUE = [
 			"recettes, hors composants, livres de contenu (tick du scriptorium) et carte de "
 			"guilde. Refuse tout le lot sur une fausse feuille, un intrant sans doc, une "
 			"catégorie sans lieu, une recette de grande maison non croisée, un `_id` déjà pris "
-			"ou un orphelin sans ligne. ⚠️ `item:Chiffon` devient achetable au tissage.",
+			"ou un orphelin sans ligne. Crée aussi 4 matières brutes (lin, laine tissée, soie, "
+			"pierre), vérifiées auto-approvisionnées donc achetables au tissage, à la grande "
+			"manufacture textile, à l'armurerie, à la bijouterie et chez l'artisan.",
 	},
 	{
 		"id": "gen_villes_images",

@@ -21,16 +21,19 @@ Sortie :
   · tout intrant est déjà CONSOMMÉ ou PRODUIT par les métiers réunis de la catégorie, ou une
     vraie FEUILLE du monde (`_get_marche_map()["feuilles"]`) : jamais de fausse feuille
     (cf. telluris-economie § Armement). Une feuille neuve pour la catégorie ouvre un point de
-    vente — listé en sortie (ici `item:Chiffon` au tissage : la base n'a ni lin, ni laine
-    tissée, ni soie ; le tissu des vêtements est le chiffon, la laine les `poils`/le feutre) ;
-  · le doc de chaque intrant existe (sinon valorisé à vide) ;
+    vente — listé en sortie ;
+  · le doc de chaque intrant existe, en base ou créé par ce lot (sinon valorisé à vide) ;
+  · chaque matière BRUTE de `MATIERES` (lin, laine tissée, soie, pierre — créées par ce lot,
+    `categorie: composant`, sous-catégorie = clé) est, lot ajouté, une vraie feuille du
+    moteur, livrée par `appro_leaves_categorie` à CHAQUE catégorie qui la consomme, au débit
+    `_appro_debit_pour` > 0 — donc achetable sur place. Aucune recette ne doit la produire ;
   · la catégorie de lieu existe dans le monde (sinon la recette ne cuit nulle part) ;
   · une recette de GRANDE MAISON est croisée (`_metier_unique`, mêmes règles que
     dev/gen_magasins_superieurs.py), contrôlée APRÈS ajout du lot ;
   · le produit n'était pas une feuille (le produire couperait son approvisionnement) ;
   · tout orphelin non exclu a sa ligne dans `TABLE`, et toute ligne vise un orphelin.
 
-Idempotent : une recette déjà en base à l'identique est sautée, un `_id` occupé par autre
+Idempotent : un doc (recette ou matière) déjà en base à l'identique est sautée, un `_id` occupé par autre
 chose fait tout refuser ; un item qui a gagné une recette depuis est sauté (signalé).
 Le moteur est celui du jeu : `db.config` est rebranché sur le dump AVANT d'importer
 `utils.marche` (même procédé que dev/audit_economy.py).
@@ -52,42 +55,68 @@ EXCLUS = {
 
 CATEGORIES_EXCLUES = {"composant"}
 
+# Matières premières BRUTES créées par ce lot : auto-approvisionnées (cf. garde-fous).
+# Clé = sous-catégorie = slug d'id (`marche.matiere_item_id(cle) == "item:" + cle`).
+# `valeur` explicite : c'est le prix de la feuille, et la base du coût des pièces.
+MATIERES = {
+	"lin": {
+		"nom": "Toile de lin", "icon": "🧵", "rarete": "commun", "poids": 0.3,
+		"valeur": [{"cu": 8}],
+		"description": "Coupon de toile de lin écru, rouie, teillée et tissée au métier.",
+	},
+	"laine_tissee": {
+		"nom": "Laine tissée", "icon": "🧶", "rarete": "commun", "poids": 0.4,
+		"valeur": [{"cu": 12}],
+		"description": "Drap de laine cardée, filée puis foulée : chaud, épais, prêt à tailler.",
+	},
+	"soie": {
+		"nom": "Soie", "icon": "🎀", "rarete": "peu_commun", "poids": 0.1,
+		"valeur": [{"cu": 60}],
+		"description": "Étoffe de soie venue de loin par les routes marchandes, souple et lustrée.",
+	},
+	"pierre": {
+		"nom": "Pierre brute", "icon": "🪨", "rarete": "commun", "poids": 1.0,
+		"valeur": [{"cu": 3}],
+		"description": "Bloc de pierre de carrière, grès ou calcaire, à tailler ou à polir.",
+	},
+}
+
 # item → (lieu_categorie, [(clé matière, quantité)…], quantité produite).
 # Clé `item:…` = item précis ; sinon sous-catégorie — même forme que les recettes en base.
 TABLE = {
-	# ── Tissage : laine (poils, feutre) et tissu (chiffon) ──────────────────────────
-	"Bandeau_meditation":   ("tissage", [("item:Chiffon", 1)], 2),
+	# ── Tissage : lin, laine tissée, soie (matières de MATIERES) et feutre ──────────
+	"Bandeau_meditation":   ("tissage", [("lin", 1)], 2),
 	"Bonnet_de_clerc":      ("tissage", [("item:feutre", 1)], 1),
-	"Cagoule":              ("tissage", [("poils", 2)], 1),
-	"Cape_soie_sombre":     ("tissage", [("item:Chiffon", 4)], 1),
-	"Capuche_bordeaux":     ("tissage", [("item:Chiffon", 1)], 1),
-	"Capuche_de_laine":     ("tissage", [("poils", 2)], 1),
-	"Capuche_noire":        ("tissage", [("item:Chiffon", 1)], 1),
-	"Capuche_soie":         ("tissage", [("item:Chiffon", 1)], 1),
-	"Capuchon_de_lin":      ("tissage", [("item:Chiffon", 1)], 1),
+	"Cagoule":              ("tissage", [("laine_tissee", 1)], 1),
+	"Cape_soie_sombre":     ("tissage", [("soie", 3)], 1),
+	"Capuche_bordeaux":     ("tissage", [("laine_tissee", 1)], 1),
+	"Capuche_de_laine":     ("tissage", [("laine_tissee", 1)], 1),
+	"Capuche_noire":        ("tissage", [("laine_tissee", 1)], 1),
+	"Capuche_soie":         ("tissage", [("soie", 1)], 1),
+	"Capuchon_de_lin":      ("tissage", [("lin", 1)], 1),
 	"Chapeau_mou":          ("tissage", [("item:feutre", 1)], 1),
-	"Chausses_ajustees":    ("tissage", [("item:Chiffon", 2)], 1),
-	"Chausses_bicolores":   ("tissage", [("item:Chiffon", 2)], 1),
-	"Chausses_laine":       ("tissage", [("poils", 3)], 1),
-	"Couvre_chef_office":   ("tissage", [("item:feutre", 1), ("item:Chiffon", 1)], 1),
-	"Jupe_de_chanvre":      ("tissage", [("item:Chiffon", 2)], 1),
-	"Jupe_longue_lin":      ("tissage", [("item:Chiffon", 3)], 1),
-	"Pantalon_ajuste_noir": ("tissage", [("item:Chiffon", 2)], 1),
-	"Pantalon_ample":       ("tissage", [("item:Chiffon", 3)], 1),
-	"Pantalon_toile":       ("tissage", [("item:Chiffon", 2)], 1),
-	"Pantalon_velours":     ("tissage", [("item:Chiffon", 2), ("poils", 1)], 1),
-	"Robe_bordeaux":        ("tissage", [("item:Chiffon", 4)], 1),
-	"Robe_de_savant":       ("tissage", [("item:Chiffon", 4)], 1),
-	"Robe_laine_epaisse":   ("tissage", [("poils", 4), ("item:feutre", 1)], 1),
-	"Robe_lin_ceinturee":   ("tissage", [("item:Chiffon", 3)], 1),
-	"Robe_noire_capuche":   ("tissage", [("item:Chiffon", 4)], 1),
-	"Sous_robe_lin":        ("tissage", [("item:Chiffon", 2)], 1),
-	"Sous_robe_noire":      ("tissage", [("item:Chiffon", 2)], 1),
-	"Tunique_feuilles":     ("tissage", [("item:Chiffon", 2)], 1),
+	"Chausses_ajustees":    ("tissage", [("lin", 2)], 1),
+	"Chausses_bicolores":   ("tissage", [("laine_tissee", 1), ("lin", 1)], 1),
+	"Chausses_laine":       ("tissage", [("laine_tissee", 2)], 1),
+	"Couvre_chef_office":   ("tissage", [("item:feutre", 1), ("lin", 1)], 1),
+	"Jupe_de_chanvre":      ("tissage", [("lin", 2)], 1),
+	"Jupe_longue_lin":      ("tissage", [("lin", 3)], 1),
+	"Pantalon_ajuste_noir": ("tissage", [("laine_tissee", 2)], 1),
+	"Pantalon_ample":       ("tissage", [("lin", 3)], 1),
+	"Pantalon_toile":       ("tissage", [("lin", 2)], 1),
+	"Pantalon_velours":     ("tissage", [("soie", 2)], 1),
+	"Robe_bordeaux":        ("tissage", [("laine_tissee", 3)], 1),
+	"Robe_de_savant":       ("tissage", [("laine_tissee", 3)], 1),
+	"Robe_laine_epaisse":   ("tissage", [("laine_tissee", 4)], 1),
+	"Robe_lin_ceinturee":   ("tissage", [("lin", 3)], 1),
+	"Robe_noire_capuche":   ("tissage", [("laine_tissee", 3)], 1),
+	"Sous_robe_lin":        ("tissage", [("lin", 2)], 1),
+	"Sous_robe_noire":      ("tissage", [("lin", 2)], 1),
+	"Tunique_feuilles":     ("tissage", [("lin", 2)], 1),
 	# ── Grande manufacture textile : pièces d'apparat, croisées tissage × plumasserie ──
 	"Chapeau_large_bord":   ("grande_manufacture_textile", [("item:feutre", 1), ("plumes", 1)], 1),
-	"Pourpoint_colore":     ("grande_manufacture_textile", [("item:Chiffon", 2), ("item:parure", 1)], 1),
-	"Robe_ceremonie":       ("grande_manufacture_textile", [("item:Chiffon", 4), ("item:parure", 1)], 1),
+	"Pourpoint_colore":     ("grande_manufacture_textile", [("soie", 2), ("item:parure", 1)], 1),
+	"Robe_ceremonie":       ("grande_manufacture_textile", [("soie", 4), ("item:parure", 1)], 1),
 	# ── Cordonnerie ────────────────────────────────────────────────────────────────
 	"Sandales_lierre":      ("cordonnerie", [("item:corde", 1)], 1),
 	# ── Scriptorium : documents et grimoires d'équipement ───────────────────────────
@@ -107,20 +136,20 @@ TABLE = {
 	"Symbole_sacre":        ("bijouterie", [("metaux_precieux", 1)], 1),
 	"Miroir_de_poche":      ("bijouterie", [("metaux_precieux", 1)], 1),
 	"Petite_glace":         ("bijouterie", [("metaux_precieux", 1)], 2),
-	"Pierre_de_meditation": ("bijouterie", [("gemmes", 1)], 1),
+	"Pierre_de_meditation": ("bijouterie", [("pierre", 1)], 1),
 	# ── Corderie ───────────────────────────────────────────────────────────────────
 	"Corde_5m":             ("corderie", [("item:corde", 1)], 1),
 	"Corde_10m":            ("corderie", [("item:corde", 2)], 1),
 	"Piege_a_collet":       ("corderie", [("item:corde", 1)], 2),
 	# ── Lutherie ───────────────────────────────────────────────────────────────────
 	"Cordes_rechange":      ("lutherie", [("item:cordes_d_instrument", 2)], 1),
-	# ── Armurerie : petite serrurerie, pierre à aiguiser (débris de golem) ──────────
+	# ── Armurerie : petite serrurerie, pierre à aiguiser ───────────────────────────
 	"Crochet_serrurier":    ("armurerie", [("fer", 1)], 2),
 	"Crochets":             ("armurerie", [("fer", 1)], 2),
 	"Menottes":             ("armurerie", [("fer", 2)], 1),
-	"Pierre_a_aiguiser":    ("armurerie", [("debris_anime", 1)], 4),
-	# ── Atelier d'artisan : craie d'os ──────────────────────────────────────────────
-	"Craie":                ("atelier_d_artisan", [("ossements", 1)], 3),
+	"Pierre_a_aiguiser":    ("armurerie", [("pierre", 1)], 4),
+	# ── Atelier d'artisan : craie ──────────────────────────────────────────────────
+	"Craie":                ("atelier_d_artisan", [("pierre", 1)], 3),
 	# ── Apothicairerie : fard (pigment + graisse) ───────────────────────────────────
 	"Fard_de_scene":        ("apothicairerie", [("item:pigment", 1), ("graisse", 1)], 2),
 	# ── Salaison ───────────────────────────────────────────────────────────────────
@@ -182,6 +211,24 @@ def orphelins(docs: list) -> list:
 			sert.add(e["source"])
 	return sorted(i for i, n in noeuds.items()
 				  if n["type"] == "item" and i not in produit and i not in sert)
+
+
+def matiere_doc(cle: str) -> dict:
+	m = MATIERES[cle]
+	return {
+		"_id": "item:" + cle,
+		"type": "item",
+		"nom": m["nom"],
+		"icon": m["icon"],
+		"description": m["description"],
+		"rarete": m["rarete"],
+		"categorie": "composant",
+		"sous_categorie": cle,
+		"slots": [],
+		"tags": [],
+		"poids": m["poids"],
+		"valeur": m["valeur"],
+	}
 
 
 def recette_doc(slug: str, ligne) -> dict:
@@ -254,6 +301,20 @@ def main():
 
 	# ── Contrôles AVANT ajout (état de la base) ───────────────────────────────────
 	mm = marche._get_marche_map()
+	nouvelles_matieres, deja_matieres = [], 0
+	for cle in sorted(MATIERES):
+		doc = matiere_doc(cle)
+		existant = index.get(doc["_id"])
+		if existant is None:
+			nouvelles_matieres.append(doc)
+		elif {k: v for k, v in existant.items() if k != "_rev"} == doc:
+			deja_matieres += 1
+		else:
+			erreurs.append("%s : _id déjà pris par un autre doc" % doc["_id"])
+		if any(d.get("sous_categorie") == cle for d in docs if d["_id"] != doc["_id"]):
+			erreurs.append("%s : sous-catégorie déjà portée par un autre item" % cle)
+		if cle in {r.get("objet_final") for r in docs if r.get("type") == "recette"}:
+			erreurs.append("%s : une recette le produit — ce ne serait pas une feuille" % cle)
 	lieux_cats = {d.get("categorie") for d in docs if d["_id"].startswith("lieu:")}
 	nouveaux, deja, ouvertures = [], 0, []
 	for slug, ligne in sorted(TABLE.items()):
@@ -281,6 +342,8 @@ def main():
 		produits = marche.produits_categorie(cat)
 		for cle, _q in ligne[1]:
 			mid = marche.matiere_item_id(cle)
+			if cle in MATIERES:
+				continue                  # contrôlée après ajout du lot
 			if mid not in index:
 				erreurs.append("%s : intrant %s sans doc (%s)" % (doc["_id"], cle, mid))
 			if cle in besoins or mid in produits:
@@ -293,8 +356,27 @@ def main():
 		nouveaux.append(doc)
 
 	# ── Contrôles APRÈS ajout du lot (croisement des grandes maisons) ─────────────
-	docs.extend(nouveaux)
+	docs.extend(nouvelles_matieres + nouveaux)
 	marche.reset_prix_cache()
+	mm = marche._get_marche_map()
+	livraisons = {}
+	ids_table = {recette_doc(slug, ligne)["_id"] for slug, ligne in TABLE.items()}
+	for doc in [d for d in docs if d["_id"] in ids_table]:   # en base ET du lot
+		cat = doc["lieu_categorie"]
+		for cle, _q in marche.recette_matieres(doc):
+			if cle not in MATIERES:
+				continue
+			if cle not in mm["feuilles"]:
+				erreurs.append("%s : n'est pas une feuille une fois le lot ajouté" % cle)
+			elif cle not in marche.appro_leaves_categorie(cat):
+				erreurs.append("%s : pas livré à « %s »" % (cle, cat))
+			elif marche._appro_debit_pour(cle) <= 0:
+				erreurs.append("%s : débit d'appro nul" % cle)
+			else:
+				livraisons.setdefault(cle, set()).add(cat)
+	for cle in MATIERES:
+		if cle not in livraisons and not erreurs:
+			erreurs.append("%s : aucune recette du lot ne la consomme" % cle)
 	for doc in nouveaux:
 		cat = doc["lieu_categorie"]
 		if cat in character_stats.LIEU_CATEGORIES_FUSION:
@@ -306,6 +388,9 @@ def main():
 
 	for n in notes:
 		print("  · " + n)
+	for cle, cats in sorted(livraisons.items()):
+		print("  ✓ %s auto-approvisionné (%d/livraison) : %s"
+			  % (cle, marche._appro_debit_pour(cle), ", ".join(sorted(cats))))
 	for cat, cle in sorted(set(ouvertures)):
 		print("  ⚠ point de vente ouvert : %s au rayon de « %s »" % (cle, cat))
 	if erreurs:
@@ -313,12 +398,13 @@ def main():
 		for e in erreurs:
 			print("  ✗ " + e)
 		sys.exit(1)
-	print("%d recette(s) déjà en base, %d à importer" % (deja, len(nouveaux)))
-	if not nouveaux:
+	print("%d matière(s) et %d recette(s) déjà en base ; %d matière(s) et %d recette(s) à importer"
+		  % (deja_matieres, deja, len(nouvelles_matieres), len(nouveaux)))
+	if not nouveaux and not nouvelles_matieres:
 		print("Base à jour — aucun fichier écrit.")
 		return
 	with open(SORTIE, "w", encoding="utf-8") as f:
-		json.dump(nouveaux, f, ensure_ascii=False, indent="\t")
+		json.dump(nouvelles_matieres + nouveaux, f, ensure_ascii=False, indent="\t")
 		f.write("\n")
 	print("→ %s" % os.path.relpath(SORTIE, RACINE))
 
