@@ -57,7 +57,8 @@ vm.runInThisContext(CONSTANTES.map(extraireConst).join('\n') + '\n'
 // minerai ─2→ lingot ─1→ épée ─1→ épée_fine (forge)          lingot ─1→ casque (forge)
 // ⟨cuir⟩ ─1→ ceinture (tannerie) ; peau_loup, peau_ours ∈ ⟨cuir⟩
 // essence ─1→ potion (alchimie, sur_commande) ; herbe ─1→ tisane (auberge, terroir)
-// fantome : produit d'une recette sans doc (absent) ; galet : isolé.
+// fantome : produit d'une recette sans doc (absent) ; galet : isolé (seulement membre de
+// ⟨pierre⟩, sous-catégorie `hors_recette` : aucune recette ne la cite).
 // Cycle : cendre ─1→ braise ─1→ cendre (fourneau).
 // Sur-mesure : gemme ┄→ ⚒arme, gemme ┄→ ⚒armure, poudre ┄→ ⚒arme (arêtes `fabrication`).
 function item(id, label, categorie, extra) {
@@ -82,10 +83,11 @@ const GRAPHE = {
 		item('item:herbe', 'Herbe', 'matiere'),
 		item('item:tisane', 'Tisane', 'consommable'),
 		item('item:fantome', 'fantome', '', { rarete: '', absent: true }),
-		item('item:galet', 'Galet', 'matiere'),
+		item('item:galet', 'Galet', 'matiere', { sous_categorie: 'pierre' }),
 		item('item:cendre', 'Cendre', 'matiere'),
 		item('item:braise', 'Braise', 'matiere'),
 		{ id: 'sc:cuir', type: 'famille', label: 'cuir', icon: '', categorie: '', sous_categorie: 'cuir', rarete: '', absent: false },
+		{ id: 'sc:pierre', type: 'famille', label: 'pierre', icon: '', categorie: '', sous_categorie: 'pierre', rarete: '', absent: false, hors_recette: true },
 		item('item:gemme', 'Gemme', 'matiere', { matiere_fabrication: true, fabrication_nom: 'serti' }),
 		item('item:poudre', 'Poudre', 'matiere', { matiere_fabrication: true }),
 		{ id: 'fab:arme', type: 'piece', label: 'arme', icon: '⚒', categorie: '', sous_categorie: '', rarete: '', absent: false, pieces: ['item:epee', 'item:epee_fine'] },
@@ -99,6 +101,7 @@ const GRAPHE = {
 		rec('recette:ceinture', 0, 'sc:cuir', 'item:ceinture', 'tannerie'),
 		{ id: 'item:peau_loup>sc:cuir', source: 'item:peau_loup', target: 'sc:cuir', kind: 'membre' },
 		{ id: 'item:peau_ours>sc:cuir', source: 'item:peau_ours', target: 'sc:cuir', kind: 'membre' },
+		{ id: 'item:galet>sc:pierre', source: 'item:galet', target: 'sc:pierre', kind: 'membre' },
 		rec('recette:potion', 0, 'item:essence', 'item:potion', 'alchimie', { sur_commande: true }),
 		rec('recette:tisane', 0, 'item:herbe', 'item:tisane', 'auberge', { lieu_portee: 'lieu:val' }),
 		rec('recette:fantome', 0, 'item:herbe', 'item:fantome', 'auberge'),
@@ -396,6 +399,38 @@ test('fabrication : recherche par famille, filtre compté, URL', () => {
 	assert.strictEqual(compterFiltresActifs(f), 1);
 	const etat = { item: 'fab:arme', mode: 'voisinage', amont: 2, aval: 2, q: '', filtres: f };
 	assert.ok(etatVersUrl(etat).includes('fabr=0'));
+	assert.deepStrictEqual(urlVersEtat(etatVersUrl(etat)), etat);
+});
+
+// ── Toutes les sous-catégories (familles `hors_recette`) ──────────────────────
+test('sous-catégorie hors recette : masquée par défaut, n’en fait pas une matière « brute »', () => {
+	assert.strictEqual(roleNoeud(IDX, 'item:galet'), 'isole');
+	const g = filtrerGraphe(IDX, F());
+	assert.ok(!g.ids.includes('sc:pierre') && !g.ids.includes('item:galet'));
+	assert.ok(!voisinage(IDX, 'item:galet', 0, 2, F()).noeuds.some(n => n.id === 'sc:pierre'));
+	// Au centre, elle montre ses membres même bascule décochée.
+	assert.deepStrictEqual(ids(voisinage(IDX, 'sc:pierre', 1, 0, F())), ['item:galet', 'sc:pierre']);
+});
+
+test('toutes les sous-catégories : nœuds et liens d’appartenance affichés', () => {
+	const f = F(); f.toutesSousCategories = true;
+	const g = filtrerGraphe(IDX, f);
+	assert.ok(g.ids.includes('sc:pierre') && g.ids.includes('item:galet'));
+	assert.ok(g.aretes.includes('item:galet>sc:pierre'));
+	assert.deepStrictEqual(ids(voisinage(IDX, 'item:galet', 0, 1, f)), ['item:galet', 'sc:pierre']);
+	// …indépendamment de la bascule des familles d'entrées de recette.
+	f.familles = false;
+	assert.ok(filtrerGraphe(IDX, f).ids.includes('sc:cuir'));
+	// Un filtre de métier ne parle que de recettes : il les masque.
+	const m = F(); m.toutesSousCategories = true; m.lieux = ['forge'];
+	assert.ok(!filtrerGraphe(IDX, m).ids.includes('sc:pierre'));
+});
+
+test('toutes les sous-catégories : filtre compté, URL', () => {
+	const f = F(); f.toutesSousCategories = true;
+	assert.strictEqual(compterFiltresActifs(f), 1);
+	const etat = { item: '', mode: 'complet', amont: 2, aval: 2, q: '', filtres: f };
+	assert.ok(etatVersUrl(etat).includes('tsc=1'));
 	assert.deepStrictEqual(urlVersEtat(etatVersUrl(etat)), etat);
 });
 

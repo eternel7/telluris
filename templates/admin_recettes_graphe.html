@@ -129,6 +129,7 @@
 		.leg { display: flex; align-items: center; gap: 6px; }
 		.pastille { width: 12px; height: 12px; border-radius: 50%; flex: none; }
 		.pastille.famille { border-radius: 3px; border: 2px dashed var(--muted); background: #2a3040; }
+		.pastille.famille.hors-recette { border-style: dotted; background: transparent; }
 		.pastille.absent { transform: rotate(45deg); border-radius: 0; border: 2px solid var(--danger); background: #555; width: 10px; height: 10px; }
 		.trait { width: 18px; height: 0; border-top: 2px solid #5a6378; flex: none; }
 		.trait.membre { border-top-style: dashed; }
@@ -294,7 +295,8 @@
 // FONCTIONS PURES — aucune lecture du DOM ; exécutées par dev/test_graphe_recettes_client.js
 // (extraction par NOM : renommer l'une d'elles fait échouer le harnais, c'est voulu).
 // Le graphe vient de utils/graphe_recettes.construire_graphe : nœuds `item` / `famille`,
-// arêtes `recette` (entrée → produit) et `membre` (item → famille).
+// arêtes `recette` (entrée → produit) et `membre` (item → famille). Une famille qu'aucune
+// recette ne cite (`hors_recette`) n'est qu'une sous-catégorie : montrée sur demande.
 // ══════════════════════════════════════════════════════════════════════════════
 
 const PROFONDEUR_MAX = 5;
@@ -307,6 +309,7 @@ function filtresParDefaut() {
 	return {
 		categories: [], sousCategories: [], raretes: [], lieux: [], roles: [],
 		familles: true,        // afficher les familles (entrées données par sous-catégorie)
+		toutesSousCategories: false, // toute sous-catégorie et ses membres, citée ou non par une recette
 		fabrications: true,    // liens potentiels du sur-mesure : matière → famille de pièces
 		absentsSeuls: false,   // diagnostic : nœuds absents de la base et leurs voisins
 		surMesure: false,      // variantes générées des commandes sur mesure
@@ -353,15 +356,16 @@ function indexerGraphe(graphe) {
 
 // Rôle d'un item dans le réseau ENTIER (indépendant des filtres) : brut = rien ne le
 // produit mais il sert ; intermédiaire = produit ET sert ; fini = produit, ne sert à rien ;
-// isolé = ni l'un ni l'autre. Servir via une famille compte (arête `membre`) ; un lien de
-// FABRICATION ne compte pas : le rôle parle des recettes, une matière de sur-mesure qui
+// isolé = ni l'un ni l'autre. Servir via une famille compte (arête `membre`), sauf une
+// famille `hors_recette` (simple sous-catégorie) ; un lien de FABRICATION ne compte pas : le rôle parle des recettes, une matière de sur-mesure qui
 // n'entre dans aucune recette reste « isolée » de ce point de vue.
 function roleNoeud(idx, id) {
 	const n = idx.noeuds[id];
 	if (!n) return '';
 	if (n.type === 'famille' || n.type === 'piece') return n.type;
 	const produit = idx.entrants[id].some(e => e.kind === 'recette');
-	const sert = idx.sortants[id].some(e => e.kind !== 'fabrication');
+	const sert = idx.sortants[id].some(e => e.kind === 'recette'
+		|| (e.kind === 'membre' && !idx.noeuds[e.target].hors_recette));
 	if (produit && sert) return 'intermediaire';
 	if (produit) return 'fini';
 	if (sert) return 'brut';
@@ -382,8 +386,10 @@ function noeudVisible(n, f, idx) {
 	if (!n) return false;
 	if (n.type === 'famille') {
 		// Une famille n'a de sens que par les recettes qui la consomment : si toutes sont
-		// masquées, elle ne ferait que traîner ses membres dans la vue.
-		return f.familles && idx.sortants[n.id].some(e => areteVisible(e, f));
+		// masquées, elle ne ferait que traîner ses membres dans la vue — sauf à demander
+		// toutes les sous-catégories (qu'un filtre de métier masque, comme la fabrication).
+		if (f.toutesSousCategories && !f.lieux.length) return true;
+		return f.familles && !n.hors_recette && idx.sortants[n.id].some(e => areteVisible(e, f));
 	}
 	if (n.type === 'piece') return f.fabrications && !f.lieux.length;
 	if (f.categories.length && !f.categories.includes(n.categorie || '')) return false;
@@ -624,13 +630,13 @@ function compterFiltresActifs(f) {
 	const d = filtresParDefaut();
 	let n = 0;
 	for (const k of ['categories', 'sousCategories', 'raretes', 'lieux', 'roles']) if (f[k].length) n++;
-	for (const k of ['familles', 'fabrications', 'absentsSeuls', 'surMesure', 'terroir', 'masquerIsoles']) if (f[k] !== d[k]) n++;
+	for (const k of ['familles', 'toutesSousCategories', 'fabrications', 'absentsSeuls', 'surMesure', 'terroir', 'masquerIsoles']) if (f[k] !== d[k]) n++;
 	return n;
 }
 
 // État de la vue ↔ query-string (partage / réouverture). Seuls les écarts au défaut sont écrits.
 const _URL_LISTES = { cat: 'categories', scat: 'sousCategories', rar: 'raretes', lieu: 'lieux', role: 'roles' };
-const _URL_BOOLS = { fam: 'familles', fabr: 'fabrications', abs: 'absentsSeuls', sm: 'surMesure', terroir: 'terroir', iso: 'masquerIsoles' };
+const _URL_BOOLS = { fam: 'familles', tsc: 'toutesSousCategories', fabr: 'fabrications', abs: 'absentsSeuls', sm: 'surMesure', terroir: 'terroir', iso: 'masquerIsoles' };
 
 function etatVersUrl(etat) {
 	const p = new URLSearchParams();
@@ -726,6 +732,7 @@ function styleCy() {
 			'shape': 'round-rectangle', 'width': 34, 'height': 18, 'background-color': '#2a3040',
 			'border-width': 2, 'border-style': 'dashed', 'border-color': '#9aa3b2',
 		} },
+		{ selector: 'node[?hors_recette]', style: { 'border-style': 'dotted', 'background-color': '#1a1e28' } },
 		{ selector: 'node[?absent]', style: {
 			'shape': 'diamond', 'border-width': 3, 'border-color': '#c84b4b', 'border-style': 'solid',
 		} },
@@ -770,7 +777,7 @@ function elementsCy(ids, aretes, replies) {
 	for (const id of ids) {
 		const n = IDX.noeuds[id];
 		els.push({ group: 'nodes', data: {
-			id, type: n.type, absent: !!n.absent,
+			id, type: n.type, absent: !!n.absent, hors_recette: !!n.hors_recette,
 			couleur: n.type === 'famille' ? '#2a3040' : n.type === 'piece' ? '#3a2a1e'
 				: (n.absent ? '#555' : couleurCategorie(n.categorie)),
 			etiquette: libelleNoeud(n, replies && replies[id]),
@@ -854,6 +861,8 @@ function majLegende(ids) {
 		+ '<div class="leg"><span class="pastille absent"></span>absent de la base</div>'
 		+ '<div class="leg"><span class="trait"></span>recette</div>'
 		+ '<div class="leg"><span class="trait membre"></span>appartient à la famille</div>'
+		+ (ETAT.filtres.toutesSousCategories
+			? '<div class="leg"><span class="pastille famille hors-recette"></span>sous-catégorie citée par aucune recette</div>' : '')
 		+ (ETAT.filtres.fabrications
 			? '<div class="leg"><span class="pastille piece"></span>⚒ famille de pièces sur mesure</div>'
 			+ '<div class="leg"><span class="trait fabrication"></span>matière de fabrication</div>' : '')
@@ -1020,6 +1029,7 @@ function ouvrirFiche(id) {
 	if (n.categorie) tags.push(`<span class="tag">${escapeHtml(n.categorie)}</span>`);
 	if (n.sous_categorie && n.type === 'item') tags.push(`<span class="tag">${escapeHtml(n.sous_categorie)}</span>`);
 	if (n.rarete) tags.push(`<span class="tag">${escapeHtml(n.rarete)}</span>`);
+	if (n.hors_recette) tags.push('<span class="tag">citée par aucune recette</span>');
 	if (n.absent) tags.push(`<span class="tag alerte">${ABSENT_LIBELLE[n.type] || 'aucun doc en base'}</span>`);
 	let html = `<div class="id">${escapeHtml(id)}</div><div class="tags">${tags.join('')}</div>`
 		+ `<div class="actions"><button type="button" class="secondary" data-centrer="${escapeHtml(id)}">🎯 Centrer le graphe ici</button></div>`
@@ -1131,6 +1141,7 @@ function rendreFiltres() {
 		'<fieldset><legend>Affichage</legend>'
 		+ bascule('masquerIsoles', 'Masquer les nœuds sans lien visible')
 		+ bascule('familles', 'Afficher les familles (entrées par sous-catégorie)')
+		+ bascule('toutesSousCategories', 'Afficher toutes les sous-catégories et leurs membres (même hors recette)')
 		+ bascule('fabrications', 'Afficher les liens de fabrication sur mesure (matière → ⚒ famille de pièces)')
 		+ bascule('terroir', 'Inclure les spécialités de terroir')
 		+ bascule('surMesure', 'Inclure les variantes sur mesure')

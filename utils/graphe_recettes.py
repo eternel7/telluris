@@ -8,9 +8,12 @@
 #
 # Nœuds :
 #   - `item`    : un doc `item:*` (ou un id CITÉ par une recette sans doc → `absent`) ;
-#   - `famille` : `sc:<clé>`, une entrée de recette donnée par SOUS-CATÉGORIE (« 2 acier ») :
-#                 n'importe quel item de la famille la satisfait. Ses membres y sont reliés
-#                 par une arête `membre`, d'où le chemin membre → famille → produit.
+#   - `famille` : `sc:<clé>`, une SOUS-CATÉGORIE marchande. Citée par une recette (« 2 acier »),
+#                 n'importe quel item de la famille satisfait l'entrée. Ses membres y sont
+#                 reliés par une arête `membre`, d'où le chemin membre → famille → produit.
+#                 Toute sous-catégorie portée par un item a son nœud et ses arêtes `membre` ;
+#                 celle qu'aucune recette ne cite porte `hors_recette` (l'écran la masque
+#                 par défaut — champ absent ⇒ citée).
 #   - `piece`   : `fab:<famille>`, une famille de pièces façonnables SUR MESURE (arme, armure…).
 #                 Ses pièces sont listées (`pieces`) mais pas reliées : `arme` en compte des
 #                 centaines.
@@ -50,9 +53,9 @@ def _noeud_item(item_id: str, doc: dict | None) -> dict:
 
 def construire_graphe(recettes: list, items: list) -> dict:
 	"""{"nodes": [...], "edges": [...]} : tous les items (même isolés — le filtre « isolés »
-	de l'écran en a besoin), les familles citées, une arête par entrée de recette, une
-	arête `membre` par item d'une famille citée et une arête `fabrication` par (matière,
-	famille de pièces qu'elle ouvre)."""
+	de l'écran en a besoin), les familles (citées ou `hors_recette`), une arête par entrée de
+	recette, une arête `membre` par item ayant une sous-catégorie et une arête `fabrication`
+	par (matière, famille de pièces qu'elle ouvre)."""
 	docs = {d["_id"]: d for d in (items or []) if isinstance(d, dict) and d.get("_id")}
 	noeuds: dict[str, dict] = {i: _noeud_item(i, d) for i, d in docs.items()}
 	aretes: list[dict] = []
@@ -91,20 +94,23 @@ def construire_graphe(recettes: list, items: list) -> dict:
 			})
 
 	# Familles : membres = items dont la sous-catégorie marchande (repli sur la catégorie,
-	# comme le moteur) vaut la clé. Une famille sans aucun membre est `absent` : aucune
-	# matière ne peut satisfaire l'entrée qui la cite.
+	# comme le moteur) vaut la clé. Une famille citée sans aucun membre est `absent` : aucune
+	# matière ne peut satisfaire l'entrée qui la cite. Les sous-catégories que porte un item
+	# sans qu'aucune recette les cite entrent aussi, marquées `hors_recette`.
 	membres: dict[str, list] = {cle: [] for cle in familles}
 	for item_id, doc in docs.items():
 		sc = item_sous_categorie(doc)
-		if sc in membres:
-			membres[sc].append(item_id)
-	for cle in sorted(familles):
+		if sc:
+			membres.setdefault(sc, []).append(item_id)
+	for cle in sorted(membres):
 		fid = id_famille(cle)
 		noeuds[fid] = {
 			"id": fid, "type": "famille", "label": cle, "icon": "",
 			"categorie": "", "sous_categorie": cle, "rarete": "",
 			"absent": not membres[cle],
 		}
+		if cle not in familles:
+			noeuds[fid]["hors_recette"] = True
 		for item_id in sorted(membres[cle]):
 			aretes.append({
 				"id": f"{item_id}>{fid}", "source": item_id, "target": fid, "kind": "membre",
