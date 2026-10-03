@@ -134,11 +134,74 @@ def poser_pnj_present(character: dict, lieu_doc: dict, rand_fn=random.random,
 	present = character.get("pnj_present") or {}
 	if present.get("lieu") == lieu_id:
 		return False
+	# Compté AVANT le tirage : les `conditions` de présence voient le passage EN COURS
+	# (1 dès la première entrée).
+	compter_passage(character, lieu_id)
 	character["pnj_present"] = {
 		"lieu": lieu_id,
 		"characters": tirer_pnjs_presents(lieu_doc, rand_fn, marchand_fn, condition_fn),
 	}
 	return True
+
+
+# ---------------------------------------------------------------------------
+# Passages dans un lieu
+# ---------------------------------------------------------------------------
+# `character["passages"] = {lieu_id: n}` : nombre d'ENTRÉES dans le lieu, compté au même
+# point que le tirage de présence (`poser_pnj_present`) — donc avec sa sémantique : un
+# refresh ne compte rien, ressortir puis rentrer compte un passage, une connexion interne
+# (même lieu) n'en compte aucun. Champ absent ⇒ 0 partout (aucune migration : un personnage
+# d'avant ce champ commence à compter à sa prochaine entrée).
+# Lu par la condition `passages` = {lieu, min?, max?} (bornes INCLUSES, au moins une), dans
+# les DEUX vocabulaires : présence d'un PNJ / barrière de lieu (`utils/acces.py`) et choix de
+# dialogue (`condition_ok`). UN prédicat, `passages_ok`, partagé par les deux.
+
+PASSAGES_CLES = frozenset({"lieu", "min", "max"})
+
+
+def compter_passage(character: dict, lieu_id: str) -> int:
+	"""+1 passage dans ce lieu (mute sans save). Renvoie le nouveau compte."""
+	passages = character.get("passages")
+	if not isinstance(passages, dict):
+		passages = {}
+	n = passages.get(lieu_id)
+	n = (n if isinstance(n, int) and not isinstance(n, bool) else 0) + 1
+	passages[lieu_id] = n
+	character["passages"] = passages
+	return n
+
+
+def _borne(filtre: dict, cle: str):
+	"""(présente, valeur) d'une borne : un entier (pas un booléen), sinon invalide."""
+	if cle not in filtre:
+		return False, None
+	v = filtre[cle]
+	if isinstance(v, bool) or not isinstance(v, int):
+		raise ValueError(cle)
+	return True, v
+
+
+def passages_ok(passages, filtre) -> bool:
+	"""Le nombre de passages dans `filtre["lieu"]` est-il dans [min, max] ?
+
+	⚠️ FAIL-CLOSED, comme `lieu_visite` : `lieu` absent, sous-clé inconnue, borne non entière
+	ou AUCUNE borne ⇒ False. Un filtre sans borne serait « toujours vrai » — c'est le
+	linter qui doit le signaler, pas le moteur qui doit l'ouvrir."""
+	if not isinstance(filtre, dict) or set(filtre) - PASSAGES_CLES:
+		return False
+	lieu_id = filtre.get("lieu")
+	if not lieu_id or not isinstance(lieu_id, str):
+		return False
+	try:
+		a_min, mini = _borne(filtre, "min")
+		a_max, maxi = _borne(filtre, "max")
+	except ValueError:
+		return False
+	if not (a_min or a_max):
+		return False
+	n = (passages or {}).get(lieu_id) if isinstance(passages, dict) else 0
+	n = n if isinstance(n, int) and not isinstance(n, bool) else 0
+	return (not a_min or n >= mini) and (not a_max or n <= maxi)
 
 
 def _ids_presents(character: dict) -> list:
@@ -312,6 +375,8 @@ def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 		"placeholders": dict(placeholders or {}),
 		"quetes_reussies": set(quetes_reussies or ()),
 		"quetes_actives": set(quetes_actives or ()),
+		# Lu par la condition `passages` (cf. « Passages dans un lieu »).
+		"passages": dict((character or {}).get("passages") or {}),
 	}
 
 
@@ -320,7 +385,7 @@ def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 # exact de cet ensemble (épinglé par un test) : une clé structurée absente de la liste du
 # linter serait signalée comme flag inconnu, et l'inverse ferait passer une faute en silence.
 CONDITIONS_STRUCTUREES = frozenset({
-	"relation_min", "intro_raison", "quete_reussie", "quete_active"})
+	"relation_min", "intro_raison", "quete_reussie", "quete_active", "passages"})
 
 # Les deux conditions qui nomment une QUÊTE : même forme `{id, attendu}`, même sémantique
 # fail-closed, seul l'ensemble consulté change — d'où UN prédicat partagé plutôt que deux
@@ -367,7 +432,8 @@ def _quete_nommee_ok(filtre, ids) -> bool:
 def condition_ok(condition: dict | None, contexte: dict) -> bool:
 	"""Évalue une condition de choix. Sans condition → True. `relation_min` = OU logique
 	sur les lieux (une relation ≥ seuil suffit) ; `intro_raison` = égalité stricte ;
-	`quete_reussie` / `quete_active` = état d'une quête NOMMÉE ; toute autre clé est un **flag
+	`quete_reussie` / `quete_active` = état d'une quête NOMMÉE ; `passages` = nombre
+	d'entrées dans un lieu, entre deux bornes (`passages_ok`) ; toute autre clé est un **flag
 	booléen** du contexte (ex. `transport_offert`) — un flag absent vaut False, ce qui masque
 	le choix."""
 	if not condition:
@@ -384,6 +450,8 @@ def condition_ok(condition: dict | None, contexte: dict) -> bool:
 	for cle, source in CONDITIONS_QUETE.items():
 		if cle in condition and not _quete_nommee_ok(condition[cle], contexte.get(source)):
 			return False
+	if "passages" in condition and not passages_ok(contexte.get("passages"), condition["passages"]):
+		return False
 	flags = contexte.get("flags") or {}
 	for cle, attendu in condition.items():
 		if cle in CONDITIONS_STRUCTUREES:

@@ -66,6 +66,9 @@ from utils.characters import item_ref_id, item_ref_lieu, victoire_acquise
 # 7 à 8 crans une fois déjà). `utils.recrutement` la définit ; `utils.chasse` fait le même
 # import — on ne passe pas par lui, qui tirerait zones + quetes dans ce module minimal.
 from utils.recrutement import RANGS
+# Condition `passages` : le prédicat vit dans `utils/pnj` (module minimal : random +
+# character_stats), qui le partage avec les choix de dialogue — aucun cycle.
+from utils.pnj import PASSAGES_CLES, passages_ok
 
 
 def now_epoch() -> int:
@@ -74,7 +77,7 @@ def now_epoch() -> int:
 # Clés de condition reconnues par `conditions_remplies`. Toute autre clé fait échouer
 # `conditions_invalides` (signalée par le linter) ET `conditions_remplies` (fail-closed).
 CONDITIONS_CONNUES = {"quete_active", "quete_reussie", "quete_reussie_cite", "item",
-					  "rang_min", "combat_gagne", "lieu_visite", "ou"}
+					  "rang_min", "combat_gagne", "lieu_visite", "passages", "ou"}
 
 # Sous-filtres reconnus par condition. ⚠️ Les valider AUSSI : une clé de premier niveau
 # inconnue refuse (fail-closed, donc visible en jeu), mais un SOUS-filtre inconnu était
@@ -94,6 +97,9 @@ SOUS_FILTRES_CONNUS = {
 	"rang_min": {"cite", "rang"},
 	"combat_gagne": {"lieu", "attendu"},
 	"lieu_visite": {"lieu", "attendu"},
+	# Nombre d'ENTRÉES dans un lieu, bornes incluses — prédicat partagé avec les dialogues
+	# (`utils/pnj.passages_ok`), qui en tient la liste des sous-clés.
+	"passages": set(PASSAGES_CLES),
 	# `ou` porte une LISTE de clauses, pas un dict de sous-filtres : rien à valider ici,
 	# tout se joue par récursion dans `conditions_invalides`.
 	"ou": set(),
@@ -440,6 +446,8 @@ def _clause_remplie(character: dict, condition, get_doc_fn) -> bool:
 		return _condition_combat_gagne(character, filtre or {})
 	if cle == "lieu_visite":
 		return _condition_lieu_visite(character, filtre or {})
+	if cle == "passages":
+		return passages_ok((character or {}).get("passages"), filtre)
 	if cle == "ou":
 		if not isinstance(filtre, list) or not filtre:
 			return False

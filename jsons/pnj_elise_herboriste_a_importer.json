@@ -1,0 +1,667 @@
+[
+  {
+    "_id": "pnj:elise_herboriste",
+    "type": "pnj",
+    "nom": "Élise",
+    "race": "nain",
+    "vocation": "herboriste",
+    "portrait": "herboriste_Elise_naine_f.jpg",
+    "description": "Naine herboriste employée par l'auberge du Coq de Lutèce, un relais posé dans les faubourgs, sur la route qui entre dans la capitale et qui en sort. Elle soigne les voyageurs qui y font halte et va elle-même chercher ses plantes dans la forêt voisine, qu'elle connaît depuis des années. Elle n'a rien d'exceptionnel : une vie ordinaire dans un monde qui ne l'est pas. Elle n'a jamais cru un blessé qui prétendait aller bien.",
+    "services": {
+      "soin": {
+        "cout_cuivre": 0,
+        "fraction_pv": 0.5,
+        "noeuds": {
+          "fait": "soin_fait",
+          "sans_fonds": "soin_sans_fonds",
+          "inutile": "soin_inutile"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeud_attente": "table_vide",
+      "noeuds": {
+        "accueil": {
+          "texte": "Près de l'âtre, une naine aux manches retroussées trie des herbes séchées sur une table couverte de linges propres, de pots bouchés à la cire et de bandes roulées. Une odeur de camomille et d'eau-de-vie flotte autour d'elle.",
+          "choix": [
+            {
+              "id": "s1",
+              "label": "(Passer près de sa table, une main sur le flanc.)",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:le_coq_de_lutece",
+                  "max": 1
+                }
+              },
+              "next": "s1_01"
+            },
+            {
+              "id": "s2",
+              "label": "(Poser ton sac près de sa table.)",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:le_coq_de_lutece",
+                  "min": 2,
+                  "max": 2
+                }
+              },
+              "next": "s2_01"
+            },
+            {
+              "id": "s3",
+              "label": "(Aller la saluer.)",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:le_coq_de_lutece",
+                  "min": 3,
+                  "max": 3
+                }
+              },
+              "next": "s3_01"
+            },
+            {
+              "id": "s4",
+              "label": "(Aller la saluer.)",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:le_coq_de_lutece",
+                  "min": 4
+                }
+              },
+              "next": "s4_01"
+            },
+            {
+              "id": "soin",
+              "label": "« Vous auriez de quoi panser ça ? »",
+              "action": {
+                "service": "soin"
+              }
+            },
+            {
+              "id": "fin",
+              "label": "(La laisser à ses herbes.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "s1_01": {
+          "texte": "Elle lève les yeux, voit ta main, et pousse un tabouret du pied. « Assieds-toi. Et ne bouge pas. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je vais bien. »",
+              "next": "s1_02"
+            }
+          ]
+        },
+        "s1_02": {
+          "texte": "« Bien sûr. C'est pour ça que tu saignes sur mon plancher. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Ce n'est qu'une égratignure. »",
+              "next": "s1_03"
+            }
+          ]
+        },
+        "s1_03": {
+          "texte": "« Alors tu ne verras aucun inconvénient à ce que je la nettoie. » Elle débouche déjà un flacon.",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Vous êtes toujours aussi aimable avec les voyageurs ? »",
+              "next": "s1_04"
+            }
+          ]
+        },
+        "s1_04": {
+          "texte": "« Seulement ceux qui essaient de me convaincre qu'ils ne sont pas blessés. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je reviendrai vous remercier. »",
+              "next": "s1_05"
+            }
+          ]
+        },
+        "s1_05": {
+          "texte": "« Tu peux commencer par revenir vivant. Ce sera déjà un bon début. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je tâcherai de m'en souvenir. »",
+              "next": "s1_06"
+            }
+          ]
+        },
+        "s1_06": {
+          "texte": "« Fais donc ça. Et évite de saigner davantage sur mon plancher. »",
+          "choix": [
+            {
+              "id": "soin",
+              "label": "(La laisser faire.)",
+              "action": {
+                "service": "soin"
+              }
+            }
+          ]
+        },
+        "s2_01": {
+          "texte": "Elle n'a pas besoin de lever la tête. « Tiens donc. Encore toi. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Vous semblez déçue. »",
+              "next": "s2_02"
+            }
+          ]
+        },
+        "s2_02": {
+          "texte": "« Pas du tout. Je commençais justement à me demander combien de temps tu allais réussir à rester entier. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je fais des progrès. »",
+              "next": "s2_03"
+            }
+          ]
+        },
+        "s2_03": {
+          "texte": "« Je vois ça. Cette fois, tu n'as qu'une seule blessure. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Vous avez remarqué ? »",
+              "next": "s2_04"
+            }
+          ]
+        },
+        "s2_04": {
+          "texte": "« Je suis guérisseuse. Et tu as toujours la même façon de poser ton sac quand tu es fatigué. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Vous commencez à bien me connaître. »",
+              "next": "s2_05"
+            }
+          ]
+        },
+        "s2_05": {
+          "texte": "« Tu viens assez souvent pour ça. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Peut-être que j'aime cette auberge. »",
+              "next": "s2_06"
+            }
+          ]
+        },
+        "s2_06": {
+          "texte": "« Peut-être. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Ou peut-être que j'aime bien y trouver quelqu'un qui se souvient de mon nom. »",
+              "next": "s2_07"
+            }
+          ]
+        },
+        "s2_07": {
+          "texte": "« Alors tâche de ne pas me donner trop de raisons de m'en souvenir. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je vais essayer. »",
+              "next": "s2_08"
+            }
+          ]
+        },
+        "s2_08": {
+          "texte": "Elle pointe sur toi une pince à échardes. « Non. Tu vas vraiment essayer. »",
+          "choix": [
+            {
+              "id": "soin",
+              "label": "(Lui tendre ton bras.)",
+              "action": {
+                "service": "soin"
+              }
+            },
+            {
+              "id": "fin",
+              "label": "(Hocher la tête.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "s3_01": {
+          "texte": "Elle repose le mortier. « J'ai besoin d'une petite faveur. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Ça commence toujours comme ça. »",
+              "next": "s3_02"
+            }
+          ]
+        },
+        "s3_02": {
+          "texte": "« Je cherche une plante qui pousse près des vieux chemins forestiers. Des feuilles longues, légèrement argentées. Tu en as peut-être vu. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« À quoi ça sert ? »",
+              "next": "s3_03"
+            }
+          ]
+        },
+        "s3_03": {
+          "texte": "« À faire baisser la fièvre. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Vous n'en avez plus ? »",
+              "next": "s3_04"
+            }
+          ]
+        },
+        "s3_04": {
+          "texte": "« Presque plus. Et avec le nombre de voyageurs blessés qui passent ici, je préfère ne pas attendre la dernière feuille. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je regarderai. »",
+              "next": "s3_05"
+            }
+          ]
+        },
+        "s3_05": {
+          "texte": "« Tu n'es pas obligé. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je sais. »",
+              "next": "s3_06"
+            }
+          ]
+        },
+        "s3_06": {
+          "texte": "« Alors pourquoi accepter ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Parce que vous m'avez déjà soigné gratuitement. »",
+              "next": "s3_07"
+            }
+          ]
+        },
+        "s3_07": {
+          "texte": "« Une fois. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Deux fois. »",
+              "next": "s3_08"
+            }
+          ]
+        },
+        "s3_08": {
+          "texte": "« Trois. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Alors je vous dois trois plantes. »",
+              "next": "s3_09"
+            }
+          ]
+        },
+        "s3_09": {
+          "texte": "« Voilà qui est raisonnable. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Comment je saurai si c'est la bonne ? »",
+              "next": "s3_10"
+            }
+          ]
+        },
+        "s3_10": {
+          "texte": "« Tu ne la cueilles pas si tu n'es pas sûr. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Pourquoi ? »",
+              "next": "s3_11"
+            }
+          ]
+        },
+        "s3_11": {
+          "texte": "« Parce qu'une mauvaise herbe peut soigner beaucoup moins bien qu'une bonne. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'est tout ? »",
+              "next": "s3_12"
+            }
+          ]
+        },
+        "s3_12": {
+          "texte": "« C'est surtout une manière élégante de te dire de ne pas mourir en voulant m'aider. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je ferai attention. »",
+              "next": "s3_13"
+            }
+          ]
+        },
+        "s3_13": {
+          "texte": "« Je compte sur toi. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Lui laisser reprendre son mortier.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "s4_01": {
+          "texte": "Elle noue le cordon d'un panier vide et relève la tête. « Tu tombes bien. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Pourquoi ? »",
+              "next": "s4_02"
+            }
+          ]
+        },
+        "s4_02": {
+          "texte": "« Je pars dans la forêt. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Maintenant ? »",
+              "next": "s4_03"
+            }
+          ]
+        },
+        "s4_03": {
+          "texte": "« Oui. J'ai presque épuisé mes réserves de plantes médicinales. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je peux venir avec vous. »",
+              "next": "s4_04"
+            }
+          ]
+        },
+        "s4_04": {
+          "texte": "« Pour ramasser des feuilles ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Si vous voulez. »",
+              "next": "s4_05"
+            }
+          ]
+        },
+        "s4_05": {
+          "texte": "« Tu as mieux à faire. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Probablement. »",
+              "next": "s4_06"
+            }
+          ]
+        },
+        "s4_06": {
+          "texte": "« Alors fais-le. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Vous savez, je pourrais vraiment vous accompagner. »",
+              "next": "s4_07"
+            }
+          ]
+        },
+        "s4_07": {
+          "texte": "« Je connais cette forêt depuis des années. Je serai de retour avant le déjeuner. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Promis ? »",
+              "next": "s4_08"
+            }
+          ]
+        },
+        "s4_08": {
+          "texte": "« Promis. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Alors à tout à l'heure. »",
+              "next": "s4_09"
+            }
+          ]
+        },
+        "s4_09": {
+          "texte": "« À tout à l'heure. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Élise ? »",
+              "next": "s4_10"
+            }
+          ]
+        },
+        "s4_10": {
+          "texte": "Elle se retourne sur le seuil. « Oui ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Faites attention. »",
+              "next": "s4_11"
+            }
+          ]
+        },
+        "s4_11": {
+          "texte": "« Toujours. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "(…)",
+              "next": "depart"
+            }
+          ]
+        },
+        "depart": {
+          "texte": "Élise sourit, prend son panier et quitte l'auberge.",
+          "delai_min": 86400,
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Retourner à ta chope.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "table_vide": {
+          "texte": "La table près de l'âtre est rangée : les pots alignés, les linges pliés. Le crochet où pend d'habitude son panier est vide.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(S'éloigner.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "soin_fait": {
+          "texte": "Elle nettoie, recoud ce qui doit l'être et serre le dernier linge d'un coup sec. « Voilà. Tu peux te lever. Doucement. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Merci, Élise. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "soin_inutile": {
+          "texte": "Elle t'examine des pieds à la tête, l'air presque déçu. « Rien à recoudre. Pour une fois. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Sourire.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "soin_sans_fonds": {
+          "texte": "« Range ta bourse. On ne fait pas payer les blessés, ici. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Obéir.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:aubergiste_du_coq_de_lutece",
+    "type": "pnj",
+    "nom": "L'aubergiste",
+    "race": "humain",
+    "vocation": "aubergiste",
+    "portrait": "aubergiste_Coq_de_Lutece_humain_m.jpg",
+    "description": "Le tenancier du Coq de Lutèce. Il n'a jamais quitté son comptoir de la journée, et il ne sait pas ce qui s'est passé dans la forêt.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Derrière son comptoir, l'aubergiste essuie une chope qui n'en a plus besoin. La table près de l'âtre est vide.",
+          "choix": [
+            {
+              "id": "absente",
+              "label": "« Où est Élise ? »",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:le_coq_de_lutece",
+                  "max": 5
+                }
+              },
+              "next": "absente_01"
+            },
+            {
+              "id": "retrouvee",
+              "label": "« Des nouvelles d'Élise ? »",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:le_coq_de_lutece",
+                  "min": 6
+                }
+              },
+              "next": "retrouvee_01"
+            },
+            {
+              "id": "fin",
+              "label": "(Le laisser à son comptoir.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "absente_01": {
+          "texte": "Il repose la chope. « Elle est partie hier matin chercher des herbes dans la forêt. Elle devait être revenue depuis longtemps. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Quelqu'un est allé la chercher ? »",
+              "next": "absente_02"
+            }
+          ]
+        },
+        "absente_02": {
+          "texte": "« Des gars du relais sont partis à l'aube, avec des lanternes et le chien du palefrenier. Ils suivent les sentiers qu'elle prenait d'habitude. » Il regarde la porte. « Elle connaît cette forêt mieux que nous tous. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Attendre des nouvelles.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "retrouvee_01": {
+          "texte": "Il met longtemps à répondre. « On a retrouvé son panier près d'un sentier forestier. Quelques herbes renversées autour. » Il pose la chope. « Elle, on l'a trouvée plus loin. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Que s'est-il passé ? »",
+              "next": "retrouvee_02"
+            }
+          ]
+        },
+        "retrouvee_02": {
+          "texte": "« Je ne sais pas. Personne ne sait. Une bête, peut-être. Ou autre chose. » Il secoue la tête. « Elle était simplement partie chercher des herbes. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "(Se taire.)",
+              "next": "retrouvee_03"
+            }
+          ]
+        },
+        "retrouvee_03": {
+          "texte": "Sur la table près de l'âtre, les pots sont toujours alignés. Personne n'ose y toucher.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(S'éloigner.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:le_coq_de_lutece",
+    "type": "lieu",
+    "label": "Le Coq de Lutèce",
+    "image": "auberge_europe06.jpg",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "pnj": [
+      {
+        "character": "pnj:elise_herboriste",
+        "nom": "Élise",
+        "portrait": "herboriste_Elise_naine_f.jpg",
+        "probabilite": 1,
+        "description": "Une naine aux manches retroussées, des herbes séchées plein les mains.",
+        "conditions": [
+          {
+            "passages": {
+              "lieu": "lieu:le_coq_de_lutece",
+              "max": 4
+            }
+          }
+        ]
+      },
+      {
+        "character": "pnj:aubergiste_du_coq_de_lutece",
+        "nom": "L'aubergiste",
+        "portrait": "aubergiste_Coq_de_Lutece_humain_m.jpg",
+        "probabilite": 1,
+        "description": "Le tenancier, derrière son comptoir.",
+        "conditions": [
+          {
+            "passages": {
+              "lieu": "lieu:le_coq_de_lutece",
+              "min": 5
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

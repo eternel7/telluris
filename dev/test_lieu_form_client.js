@@ -374,17 +374,24 @@ const CONDITIONS_REELLES = {
 	'notre_dame[0,1]': [
 		{ quete_reussie: { id: 'quete:escorte_convoi_de_lutecia' } },
 	],
+	'le_coq_de_lutece[0]': [
+		{ passages: { lieu: 'lieu:le_coq_de_lutece', max: 4 } },
+	],
+	'le_coq_de_lutece[1]': [
+		{ passages: { lieu: 'lieu:le_coq_de_lutece', min: 5 } },
+	],
 };
 
 // Le vocabulaire tel que `acces.vocabulaire_conditions` le sert. ⚠️ Recopié ici comme
 // CATALOGUE, pour affirmer un comportement sur CE vocabulaire : c'est `tests/test_acces.py`
 // qui verrouille l'accord entre ce payload et le moteur.
 const VOCAB = {
-	cles: ['combat_gagne', 'item', 'lieu_visite', 'ou', 'quete_active', 'quete_reussie', 'rang_min'],
+	cles: ['combat_gagne', 'item', 'lieu_visite', 'ou', 'passages', 'quete_active', 'quete_reussie', 'rang_min'],
 	sous_filtres: {
 		quete_active: ['attendu', 'cible', 'giver_categorie', 'lieu', 'objectif_atteint', 'types'],
 		quete_reussie: ['attendu', 'id'], item: ['item', 'lieu_parent'], rang_min: ['cite', 'rang'],
 		combat_gagne: ['attendu', 'lieu'], lieu_visite: ['attendu', 'lieu'], ou: [],
+		passages: ['lieu', 'max', 'min'],
 	},
 	rangs: ['F', 'E', 'D', 'C', 'B', 'A', 'S', 'S+'],
 };
@@ -600,6 +607,16 @@ t('ce que le moteur rendrait faux POUR TOUJOURS bloque l’enregistrement', () =
 	assert.strictEqual(_clausesFautives([{ ou: [{ lieu_visite: {} }] }]).length, 1, 'enfouie dans un ou');
 	// « une quête quelconque en cours » : le seul filtre vide qui ait un sens.
 	assert.deepStrictEqual(_clausesFautives([{ quete_active: {} }]), []);
+	assert.strictEqual(_clausesFautives([{ passages: { lieu: 'lieu:x' } }]).length, 1, 'passages sans borne');
+});
+
+t('passages : une borne est un ENTIER, jamais un texte', () => {
+	assert.strictEqual(_valeurDepuisBrut('4', 'entier'), 4);
+	assert.strictEqual(_valeurDepuisBrut(' 12 ', 'entier'), 12);
+	assert.strictEqual(_valeurDepuisBrut('quatre', 'entier'), undefined);
+	assert.strictEqual(_valeurDepuisBrut('', 'entier'), undefined);
+	assert.strictEqual(_clauseRepresentable({ passages: { lieu: 'lieu:x', min: '4' } }, VOCAB), false);
+	assert.strictEqual(_clauseRepresentable({ passages: { lieu: 'lieu:x', min: 4.5 } }, VOCAB), false);
 });
 
 console.log('\n── Fusion : les tags, en édition ──');

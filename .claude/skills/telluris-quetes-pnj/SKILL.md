@@ -86,6 +86,18 @@ Contenu : `jsons/pnj_milo_cartographe_a_importer.json` (`pnj:milo_cartographe`, 
 
 Verrouillé par `tests/test_pnj.py`, `tests/test_quete_reussie.py`, `tests/test_quete_active.py`, `tests/test_indicateurs.py`, `tests/test_guillemets_insecables.py`.
 
+#### Passages dans un lieu — condition `passages`
+- `character["passages"] = {lieu_id: n}` : nombre d'ENTRÉES, compté par `pnj.poser_pnj_present` **avant** le tirage (le passage en cours compte déjà). Même sémantique que le tirage : refresh = 0, ressortir/rentrer = +1, connexion interne = 0. Champ absent ⇒ 0 (un perso compte à partir de sa prochaine entrée).
+- Condition `{"passages": {lieu, min?, max?}}`, bornes **incluses**, au moins une — **dans les deux vocabulaires** (présence `pnj[].conditions` / bloc `acces`, et `condition` d'un choix). UN prédicat : `pnj.passages_ok` (importé par `acces`). Fail-closed : `lieu` absent, borne non entière, aucune borne, sous-clé inconnue. Linter : `lint_dialogues.fautes_passages` (+ `min > max`) ; éditeur de lieux : sous-filtres `min`/`max` de genre `entier`.
+
+#### Élise, herboriste naine — scènes au fil des passages
+Contenu : `jsons/pnj_elise_herboriste_a_importer.json` (`pnj:elise_herboriste`, `pnj:aubergiste_du_coq_de_lutece`, `lieu:le_coq_de_lutece` — auberge en bas à droite de Lutecia, porte (80,40)).
+- Une scène par passage au Coq : S1 (`max 1`) · S2 · S3 (exacts) · S4 (`min 4`). Élise présente tant que `passages ≤ 4` ; l'aubergiste dès 5 — « partie hier matin » au 5ᵉ, panier et corps retrouvés à partir du 6ᵉ. Un passage où l'on ne lui parle pas **perd** sa scène (voulu : la suivante prend sa place).
+- Service `soin` gratuit (`cout_cuivre: 0`, ½ PV), en fin de S1 et depuis l'accueil. Le nœud `depart` (fin de S4) arme `delai_min` 1 j → `noeud_attente: table_vide` : elle n'est plus là si l'on rouvre le dialogue pendant ce passage.
+- Images à fournir : `pnj/herboriste_Elise_naine_f.jpg`, `pnj/aubergiste_Coq_de_Lutece_humain_m.jpg`.
+
+Verrouillé par `tests/test_passages.py`.
+
 
 ### Contrôle des dialogues PNJ (linter)
 Un arbre de dialogue est de la **donnée** : ni typé, ni exécuté à l'import. Un `next` mort, un nœud de service mal nommé ou une condition mal orthographiée ne se voient **qu'en jouant la branche** — et un choix conditionné qui ne s'affiche jamais est indiscernable d'un tirage malheureux. D'où : passer le linter sur tout doc `pnj:*` écrit ou retouché.
@@ -114,7 +126,7 @@ Verrouillé par `dev/test_dialogues_client.js` (fusion, atteignabilité, placeme
 ### Accès conditionné à un lieu — PNJ gardiens
 Un `lieu:*` peut porter un bloc `acces` — sur le lieu de **destination**, jamais sur la connexion : `{gardien, refus, cycle, conditions:[...]}`, ET logique, **fail-closed** sur toute clé ou sous-clé inconnue. Logique pure `utils/acces.py`, chokepoint `acces_autorise`.
 
-- **Clés** : `quete_active` (filtres sur une entrée de `quetes_actives` ; `objectif_atteint:false` ferme les boucles de donjon avant turn-in) · `quete_reussie` (`{id, attendu}`, quête archivée sans échec, même prédicat que la condition de dialogue ; masque les paladins d'Auxerre partis avec le convoi de Lutecia) · `quete_reussie_cite` (`{cite, attendu}`, au moins une quête **donnée dans cette cité** menée à bien — pour les quêtes générées, qu'aucun id ne nomme ; lit le `giver` que toutes les voies d'archivage recopient dans `quetes_terminees`, remonté par `lieu_parent`, ou la `cite` archivée par l'épreuve d'apport ; ⚠️ une archive d'avant ce champ ne compte pas) · `item` · `rang_min` (échelle `recrutement.RANGS`) · `combat_gagne` (victoire enregistrée sur la **salle**, pas le décor) · `ou` (seule disjonction du moteur, sert aussi à exprimer le complément d'une conjonction) · `lieu_visite` (passage à usage unique).
+- **Clés** : `quete_active` (filtres sur une entrée de `quetes_actives` ; `objectif_atteint:false` ferme les boucles de donjon avant turn-in) · `quete_reussie` (`{id, attendu}`, quête archivée sans échec, même prédicat que la condition de dialogue ; masque les paladins d'Auxerre partis avec le convoi de Lutecia) · `quete_reussie_cite` (`{cite, attendu}`, au moins une quête **donnée dans cette cité** menée à bien — pour les quêtes générées, qu'aucun id ne nomme ; lit le `giver` que toutes les voies d'archivage recopient dans `quetes_terminees`, remonté par `lieu_parent`, ou la `cite` archivée par l'épreuve d'apport ; ⚠️ une archive d'avant ce champ ne compte pas) · `item` · `rang_min` (échelle `recrutement.RANGS`) · `combat_gagne` (victoire enregistrée sur la **salle**, pas le décor) · `ou` (seule disjonction du moteur, sert aussi à exprimer le complément d'une conjonction) · `lieu_visite` (passage à usage unique) · `passages` (`{lieu, min?, max?}`, nombre d'entrées — § Passages dans un lieu).
 - **Laissez-passer** persistant lié au `cycle` du lieu, posé par le service PNJ `acces` (miroir de `services.rang`). Une salle de donjon (`categorie:"battle_map"`) n'en pose jamais : franchir sa porte ouvre directement le combat.
 - **Verrou** = lien caché (`get_lieu_links(filtrer_acces=True)`) **et** garde 403 autoritative dans `move_character` — le filtre d'affichage n'est pas le verrou.
 - Flags `acces_libere`/`acces_menace` = état du **monde** (menace éliminée ou non, survit au turn-in) ; `acces_accompli` = commission faite mais pas rapportée.

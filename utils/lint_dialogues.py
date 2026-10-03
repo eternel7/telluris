@@ -16,6 +16,7 @@
 import re
 
 from utils import acces
+from utils.pnj import PASSAGES_CLES
 
 # ── Ce que le moteur connaît ─────────────────────────────────────────────────────
 
@@ -53,7 +54,7 @@ PLACEHOLDERS_CONNUS = {
 # structurée oubliée ici serait signalée comme flag inconnu sur du contenu correct, et une
 # clé de trop laisserait passer une vraie faute.
 CONDITIONS_STRUCTUREES = {
-	"relation_min", "intro_raison", "quete_reussie", "quete_active"}
+	"relation_min", "intro_raison", "quete_reussie", "quete_active", "passages"}
 
 # Les conditions qui NOMMENT une quête. ⚠️ Miroir de `utils.pnj.CONDITIONS_QUETE` : elles
 # partagent la forme `{id, attendu}` et le même prédicat côté moteur, donc le même contrôle.
@@ -65,6 +66,30 @@ CONDITIONS_QUETE = {"quete_reussie", "quete_active"}
 # `attendus: false` mal orthographié rendrait la condition positive, et le choix qui devait
 # rester caché s'afficherait, révélant l'intrigue sans le moindre symptôme.
 QUETE_REUSSIE_CLES = {"id", "attendu"}
+
+
+def fautes_passages(filtre) -> list:
+	"""Ce qui rend une condition `passages` FAUSSE POUR TOUJOURS (cf. `pnj.passages_ok`),
+	en clair — vide si elle est bien formée."""
+	if not isinstance(filtre, dict):
+		return ["doit être un objet `{\"lieu\": \"lieu:...\", \"min\": n, \"max\": n}`"]
+	fautes = [f"sous-clé `{s}` inconnue" for s in sorted(set(filtre) - PASSAGES_CLES)]
+	lieu = filtre.get("lieu")
+	if not isinstance(lieu, str) or not lieu.startswith("lieu:"):
+		fautes.append("`lieu` doit être un id de lieu (`lieu:...`)")
+	bornes = {}
+	for cle in ("min", "max"):
+		if cle in filtre:
+			v = filtre[cle]
+			if isinstance(v, bool) or not isinstance(v, int):
+				fautes.append(f"`{cle}` doit être un entier")
+			else:
+				bornes[cle] = v
+	if "min" not in filtre and "max" not in filtre:
+		fautes.append("sans `min` ni `max`")
+	if "min" in bornes and "max" in bornes and bornes["min"] > bornes["max"]:
+		fautes.append("`min` > `max`")
+	return fautes
 FLAGS_CONNUS = {
 	"transport_offert", "transport_a_livrer", "transport_a_rapporter",
 	"transport_en_cours", "transport_accompli", "transport_mefiance",
@@ -410,6 +435,13 @@ def analyser_doc(doc: dict) -> list:
 				if "attendu" in filtre and not isinstance(filtre["attendu"], bool):
 					erreur(f"choix `{cid}` : `{cq}.attendu` doit être un "
 						   f"booléen (`true`/`false`).", nid)
+
+			# `passages` : fail-closed côté moteur (`pnj.passages_ok`) — un filtre fautif
+			# cache le choix pour toujours, sans symptôme en jeu.
+			if "passages" in conditions:
+				for faute in fautes_passages((choix.get("condition") or {}).get("passages")):
+					erreur(f"choix `{cid}` : `passages` {faute} — fail-closed, le choix "
+						   f"ne s'affichera JAMAIS.", nid)
 
 			# Hook de déplacement automatique : `"deplacer": "lieu:xxx"`. On ne peut pas
 			# vérifier que le lieu EXISTE (pas de DB ici), mais un `true`/`"bureau"`/id sans
