@@ -55,6 +55,23 @@ def test_appartenance_suit_item_sous_categorie_du_moteur():
 	assert [(e["source"], e["quantite"]) for e in aretes if e["kind"] == "recette"] == [("sc:matiere", 2)]
 
 
+def test_sous_categories_hors_recette():
+	# Toute sous-catégorie portée par un item a son nœud et ses liens `membre` ; celle
+	# qu'aucune recette ne cite est marquée `hors_recette` (la citée n'a pas le champ).
+	recettes = [{"_id": "recette:c", "type": "recette", "lieu_categorie": "l", "objet_final": "c",
+				 "matieres_premieres": [{"sous_categorie": "cuir", "quantite": 1}]}]
+	items = [_item("item:c"), _item("item:peau", sous_categorie="cuir"),
+			 _item("item:galet", categorie="matiere", sous_categorie="pierre"),
+			 _item("item:epee", categorie="arme")]   # repli sur la catégorie, comme le moteur
+	noeuds, aretes = _index(gr.construire_graphe(recettes, items))
+	assert "hors_recette" not in noeuds["sc:cuir"]
+	assert noeuds["sc:pierre"]["hors_recette"] and noeuds["sc:arme"]["hors_recette"]
+	assert not noeuds["sc:pierre"]["absent"]
+	membres = sorted((e["source"], e["target"]) for e in aretes if e["kind"] == "membre")
+	assert membres == [("item:epee", "sc:arme"), ("item:galet", "sc:pierre"), ("item:peau", "sc:cuir")]
+	assert "sc:" not in noeuds   # item:c sans catégorie : aucune famille vide
+
+
 def test_produit_resolu_par_objet_final_item_id():
 	slug, attendu = next(iter(marche._OBJET_FINAL_ITEM_ID.items()))
 	recettes = [{"_id": "recette:o", "type": "recette", "lieu_categorie": "l", "objet_final": slug,
@@ -172,3 +189,6 @@ def test_graphe_du_dump_coherent():
 	attendu_fab = sum(len({t for t in (d.get("tags") or []) if str(t).startswith(prefixe)})
 					  for d in items if fabrication.apporte(d))
 	assert sum(1 for e in g["edges"] if e["kind"] == "fabrication") == attendu_fab
+	# Une arête `membre` par item portant une sous-catégorie (repli catégorie) — RELU.
+	attendu_membres = sum(1 for d in items if d.get("sous_categorie") or d.get("categorie"))
+	assert sum(1 for e in g["edges"] if e["kind"] == "membre") == attendu_membres
