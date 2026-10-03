@@ -1,0 +1,1156 @@
+[
+  {
+    "_id": "pnj:milo_cartographe",
+    "type": "pnj",
+    "nom": "Milo",
+    "race": "hobbit",
+    "vocation": "cartographe",
+    "portrait": "cartographe_Milo_hobbit_m.jpg",
+    "description": "Jeune hobbit employé comme aide-cartographe par une compagnie de voyageurs : il porte les affaires du cartographe et recopie ses relevés. Piètre combattant, il connaît en revanche les routes, les relais et les petits chemins autour d'Auxerre, et se souvient du nom de chaque voyageur, de chaque village. Il n'a qu'une obsession : dresser la carte complète de la région. À ceux qui reviennent vivants, il demande ce qu'il y a derrière la colline.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "À une table près de la fenêtre, un jeune hobbit a déroulé un parchemin plus large que lui, coincé aux quatre coins par une chope, un encrier, une boussole et un quignon de pain. Une plume derrière l'oreille, il compare deux relevés en marmonnant des noms de relais.",
+          "choix": [
+            {
+              "id": "s4",
+              "label": "« Ne perds pas la carte » — La veille du départ du convoi.",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:escorte_convoi_de_lutecia"
+                }
+              },
+              "next": "s4_01"
+            },
+            {
+              "id": "s3",
+              "label": "« Notre carte » — Lui raconter ta dernière mission.",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre"
+                }
+              },
+              "next": "s3_01"
+            },
+            {
+              "id": "s2",
+              "label": "« Qu'est-ce qu'il y a là-bas ? » — Lui parler de la forêt au nord du relais.",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:transport_borin_premiere_mission"
+                }
+              },
+              "next": "s2_01"
+            },
+            {
+              "id": "s1",
+              "label": "« Derrière la colline » — Passer près de sa table.",
+              "next": "s1_01"
+            },
+            {
+              "id": "fin",
+              "label": "(Le laisser à sa carte.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "s1_01": {
+          "texte": "Une petite voix vous hèle depuis une table encombrée de rouleaux. « Hé ! Toi ! »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Moi ? »",
+              "next": "s1_02"
+            }
+          ]
+        },
+        "s1_02": {
+          "texte": "« Oui, toi. Tu reviens de Saint-Bris ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Oui. »",
+              "next": "s1_03"
+            }
+          ]
+        },
+        "s1_03": {
+          "texte": "« Tu es passé par la vieille route ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« La route qui longe les vignes ? »",
+              "next": "s1_04"
+            }
+          ]
+        },
+        "s1_04": {
+          "texte": "« Oui ! Celle-là. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Oui. Pourquoi ? »",
+              "next": "s1_05"
+            }
+          ]
+        },
+        "s1_05": {
+          "texte": "« Elle continue après la colline ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Évidemment. »",
+              "next": "s1_06"
+            }
+          ]
+        },
+        "s1_06": {
+          "texte": "« Non, pas « évidemment ». Elle continue jusqu'où ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Jusqu'à un relais abandonné. Après, elle devient un chemin forestier. »",
+              "next": "s1_07"
+            }
+          ]
+        },
+        "s1_07": {
+          "texte": "Il trempe sa plume et trace un trait rapide. « Ah ! »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Quoi ? »",
+              "next": "s1_08"
+            }
+          ]
+        },
+        "s1_08": {
+          "texte": "« Rien. C'est important. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Pour quoi ? »",
+              "next": "s1_09"
+            }
+          ]
+        },
+        "s1_09": {
+          "texte": "« Pour ma carte. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu dessines des cartes ? »",
+              "next": "s1_10"
+            }
+          ]
+        },
+        "s1_10": {
+          "texte": "« J'aide le cartographe de la compagnie. Enfin… surtout, je porte ses affaires et je recopie ses relevés. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Donc tu es cartographe. »",
+              "next": "s1_11"
+            }
+          ]
+        },
+        "s1_11": {
+          "texte": "« Pas encore. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et tu comptes cartographier toute la région ? »",
+              "next": "s1_12"
+            }
+          ]
+        },
+        "s1_12": {
+          "texte": "« Toute la région autour d'Auxerre. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Pourquoi ? »",
+              "next": "s1_13"
+            }
+          ]
+        },
+        "s1_13": {
+          "texte": "« Parce que personne ne l'a fait correctement. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Les cartes existent pourtant. »",
+              "next": "s1_14"
+            }
+          ]
+        },
+        "s1_14": {
+          "texte": "Il fait pivoter le parchemin vers vous et pose un doigt taché d'encre sur un grand vide. « Les cartes des routes principales, oui. Mais regarde. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Il n'y a presque rien sur cette partie. »",
+              "next": "s1_15"
+            }
+          ]
+        },
+        "s1_15": {
+          "texte": "« Exactement. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'est une forêt. »",
+              "next": "s1_16"
+            }
+          ]
+        },
+        "s1_16": {
+          "texte": "« Peut-être. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu ne sais pas ? »",
+              "next": "s1_17"
+            }
+          ]
+        },
+        "s1_17": {
+          "texte": "« C'est précisément pour ça que je pose des questions. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et qu'est-ce que tu veux savoir ? »",
+              "next": "s1_18"
+            }
+          ]
+        },
+        "s1_18": {
+          "texte": "« Si le chemin continue derrière la colline. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Il continue. »",
+              "next": "s1_19"
+            }
+          ]
+        },
+        "s1_19": {
+          "texte": "« Parfait. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'était tout ? »",
+              "next": "s1_20"
+            }
+          ]
+        },
+        "s1_20": {
+          "texte": "« Pour aujourd'hui. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu aurais pu demander à quelqu'un d'autre. »",
+              "next": "s1_21"
+            }
+          ]
+        },
+        "s1_21": {
+          "texte": "Il se replonge dans sa carte. « Oui. Mais toi, tu es revenu vivant. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "(Le laisser à sa carte.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "s2_01": {
+          "texte": "Le hobbit se redresse si vite que son tabouret manque de basculer. « Tu es revenu ! »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je vois que tu m'attendais. »",
+              "next": "s2_02"
+            }
+          ]
+        },
+        "s2_02": {
+          "texte": "« Pas du tout. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu as posé ta carte devant toi avant même que j'arrive. »",
+              "next": "s2_03"
+            }
+          ]
+        },
+        "s2_03": {
+          "texte": "« C'est une coïncidence. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Bien sûr. »",
+              "next": "s2_04"
+            }
+          ]
+        },
+        "s2_04": {
+          "texte": "« Alors ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Alors quoi ? »",
+              "next": "s2_05"
+            }
+          ]
+        },
+        "s2_05": {
+          "texte": "« La forêt. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Quelle forêt ? »",
+              "next": "s2_06"
+            }
+          ]
+        },
+        "s2_06": {
+          "texte": "« Ne fais pas ça. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Quoi ? »",
+              "next": "s2_07"
+            }
+          ]
+        },
+        "s2_07": {
+          "texte": "« Faire semblant de ne pas savoir. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Celle au nord du relais ? »",
+              "next": "s2_08"
+            }
+          ]
+        },
+        "s2_08": {
+          "texte": "« Oui ! »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Il y a un ancien chemin à l'intérieur. »",
+              "next": "s2_09"
+            }
+          ]
+        },
+        "s2_09": {
+          "texte": "« Un chemin ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Très ancien. Il part vers l'est. »",
+              "next": "s2_10"
+            }
+          ]
+        },
+        "s2_10": {
+          "texte": "« Et il mène où ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je ne sais pas. »",
+              "next": "s2_11"
+            }
+          ]
+        },
+        "s2_11": {
+          "texte": "« Tu ne l'as pas suivi ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Non. »",
+              "next": "s2_12"
+            }
+          ]
+        },
+        "s2_12": {
+          "texte": "« Pourquoi ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Parce qu'on avait une mission. »",
+              "next": "s2_13"
+            }
+          ]
+        },
+        "s2_13": {
+          "texte": "« Ah. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Mais j'ai vu quelque chose. »",
+              "next": "s2_14"
+            }
+          ]
+        },
+        "s2_14": {
+          "texte": "« Quoi ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Des pierres dressées. Une dizaine. Toutes couvertes de mousse. »",
+              "next": "s2_15"
+            }
+          ]
+        },
+        "s2_15": {
+          "texte": "« Des bornes ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Peut-être. »",
+              "next": "s2_16"
+            }
+          ]
+        },
+        "s2_16": {
+          "texte": "« Elles formaient une ligne ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Oui. »",
+              "next": "s2_17"
+            }
+          ]
+        },
+        "s2_17": {
+          "texte": "« Tu plaisantes. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Pourquoi ? »",
+              "next": "s2_18"
+            }
+          ]
+        },
+        "s2_18": {
+          "texte": "« Parce que si elles forment une ligne, elles doivent indiquer quelque chose. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Ou elles indiquent simplement que quelqu'un les a plantées là. »",
+              "next": "s2_19"
+            }
+          ]
+        },
+        "s2_19": {
+          "texte": "« C'est exactement ce que dirait quelqu'un qui n'a aucun sens de l'aventure. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et c'est exactement ce que dirait quelqu'un qui n'a aucun sens du danger. »",
+              "next": "s2_20"
+            }
+          ]
+        },
+        "s2_20": {
+          "texte": "« Touché. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu veux que je regarde la prochaine fois ? »",
+              "next": "s2_21"
+            }
+          ]
+        },
+        "s2_21": {
+          "texte": "« Oui. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Même si c'est dangereux ? »",
+              "next": "s2_22"
+            }
+          ]
+        },
+        "s2_22": {
+          "texte": "« Surtout si c'est dangereux. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Pourquoi ? »",
+              "next": "s2_23"
+            }
+          ]
+        },
+        "s2_23": {
+          "texte": "« Parce que les endroits dangereux sont toujours les moins bien cartographiés. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu sais que tu pourrais devenir aventurier. »",
+              "next": "s2_24"
+            }
+          ]
+        },
+        "s2_24": {
+          "texte": "« Certainement pas. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Pourquoi ? »",
+              "next": "s2_25"
+            }
+          ]
+        },
+        "s2_25": {
+          "texte": "« Parce que je préfère entendre parler des monstres plutôt que les rencontrer. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Sage décision. »",
+              "next": "s2_26"
+            }
+          ]
+        },
+        "s2_26": {
+          "texte": "Il trace une rangée de petits points à l'est du relais. « Et puis quelqu'un doit dessiner la carte pendant que les idiots vont voir ce qu'il y a derrière. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "(Le laisser tracer ses pierres.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "s3_01": {
+          "texte": "Il ne lève pas les yeux de son parchemin. « Tu es en retard. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Bonsoir à toi aussi. »",
+              "next": "s3_02"
+            }
+          ]
+        },
+        "s3_02": {
+          "texte": "« Deux jours. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« La mission a pris plus longtemps que prévu. »",
+              "next": "s3_03"
+            }
+          ]
+        },
+        "s3_03": {
+          "texte": "« Je sais. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Comment ? »",
+              "next": "s3_04"
+            }
+          ]
+        },
+        "s3_04": {
+          "texte": "« J'ai vu passer la caravane. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu surveilles les routes maintenant ? »",
+              "next": "s3_05"
+            }
+          ]
+        },
+        "s3_05": {
+          "texte": "« Je suis cartographe. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu es toujours aide-cartographe. »",
+              "next": "s3_06"
+            }
+          ]
+        },
+        "s3_06": {
+          "texte": "« Pour toi, peut-être. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Alors, monsieur le cartographe, qu'est-ce que j'ai à raconter ? »",
+              "next": "s3_07"
+            }
+          ]
+        },
+        "s3_07": {
+          "texte": "« Tu as trouvé le pont ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Oui. »",
+              "next": "s3_08"
+            }
+          ]
+        },
+        "s3_08": {
+          "texte": "« Il était toujours là ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« À moitié. »",
+              "next": "s3_09"
+            }
+          ]
+        },
+        "s3_09": {
+          "texte": "« À moitié ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« L'autre moitié était au fond de la rivière. »",
+              "next": "s3_10"
+            }
+          ]
+        },
+        "s3_10": {
+          "texte": "« Dommage. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu dis ça comme si c'était personnel. »",
+              "next": "s3_11"
+            }
+          ]
+        },
+        "s3_11": {
+          "texte": "« J'avais besoin de ce pont. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Pour ta carte ? »",
+              "next": "s3_12"
+            }
+          ]
+        },
+        "s3_12": {
+          "texte": "« Pour notre carte. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Notre carte ? »",
+              "next": "s3_13"
+            }
+          ]
+        },
+        "s3_13": {
+          "texte": "« Tu crois vraiment que je fais tout ça pour moi ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je croyais que ton obsession était de cartographier la région. »",
+              "next": "s3_14"
+            }
+          ]
+        },
+        "s3_14": {
+          "texte": "« C'est toujours le cas. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Alors pourquoi « notre » ? »",
+              "next": "s3_15"
+            }
+          ]
+        },
+        "s3_15": {
+          "texte": "« Parce que toi, tu vas dans les endroits où je ne peux pas aller. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et toi, tu transformes mes mauvaises décisions en lignes sur du papier. »",
+              "next": "s3_16"
+            }
+          ]
+        },
+        "s3_16": {
+          "texte": "« Exactement. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« On forme une bonne équipe. »",
+              "next": "s3_17"
+            }
+          ]
+        },
+        "s3_17": {
+          "texte": "« Une excellente équipe. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu sais, je pourrais apprendre à lire une carte. »",
+              "next": "s3_18"
+            }
+          ]
+        },
+        "s3_18": {
+          "texte": "« Tu sais déjà la lire. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Alors pourquoi tu me l'expliques à chaque fois ? »",
+              "next": "s3_19"
+            }
+          ]
+        },
+        "s3_19": {
+          "texte": "« Parce que tu la tiens toujours à l'envers. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'est faux. »",
+              "next": "s3_20"
+            }
+          ]
+        },
+        "s3_20": {
+          "texte": "Il tapote le haut du parchemin, du côté de la rose des vents. « Elle est à l'envers. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'est toi qui la tiens à l'envers. »",
+              "next": "s3_21"
+            }
+          ]
+        },
+        "s3_21": {
+          "texte": "« Tu veux vraiment me faire croire que le nord est en bas ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Dans ma tête, oui. »",
+              "next": "s3_22"
+            }
+          ]
+        },
+        "s3_22": {
+          "texte": "« Voilà pourquoi je suis indispensable. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et si un jour la carte est terminée ? »",
+              "next": "s3_23"
+            }
+          ]
+        },
+        "s3_23": {
+          "texte": "« Alors on saura enfin ce qu'il y a partout autour d'Auxerre. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et après ? »",
+              "next": "s3_24"
+            }
+          ]
+        },
+        "s3_24": {
+          "texte": "« Après ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu feras quoi ? »",
+              "next": "s3_25"
+            }
+          ]
+        },
+        "s3_25": {
+          "texte": "« Je commencerai une autre carte. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Évidemment. »",
+              "next": "s3_26"
+            }
+          ]
+        },
+        "s3_26": {
+          "texte": "« Celle de toute la France. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu es complètement fou. »",
+              "next": "s3_27"
+            }
+          ]
+        },
+        "s3_27": {
+          "texte": "« Peut-être. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et moi qui pensais que tu voulais éviter les endroits dangereux. »",
+              "next": "s3_28"
+            }
+          ]
+        },
+        "s3_28": {
+          "texte": "« Je veux les dessiner. C'est différent. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "(Vous pencher avec lui sur la carte.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "s4_01": {
+          "texte": "Le hobbit boucle une sacoche de cuir, plus grosse que lui. « Tu pars demain ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Oui. »",
+              "next": "s4_02"
+            }
+          ]
+        },
+        "s4_02": {
+          "texte": "« Avec la caravane ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Oui. »",
+              "next": "s4_03"
+            }
+          ]
+        },
+        "s4_03": {
+          "texte": "« C'est seulement jusqu'au prochain relais. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Seulement. »",
+              "next": "s4_04"
+            }
+          ]
+        },
+        "s4_04": {
+          "texte": "« Je viens avec vous. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Depuis quand les cartographes accompagnent les caravanes ? »",
+              "next": "s4_05"
+            }
+          ]
+        },
+        "s4_05": {
+          "texte": "« Depuis que les aventuriers oublient de regarder autour d'eux. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu sais te battre ? »",
+              "next": "s4_06"
+            }
+          ]
+        },
+        "s4_06": {
+          "texte": "« Non. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Courir ? »",
+              "next": "s4_07"
+            }
+          ]
+        },
+        "s4_07": {
+          "texte": "« Assez vite. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Te cacher ? »",
+              "next": "s4_08"
+            }
+          ]
+        },
+        "s4_08": {
+          "texte": "« Très bien. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Alors tu as toutes les qualités requises. »",
+              "next": "s4_09"
+            }
+          ]
+        },
+        "s4_09": {
+          "texte": "« Je savais que tu comprendrais. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu prends quoi avec toi ? »",
+              "next": "s4_10"
+            }
+          ]
+        },
+        "s4_10": {
+          "texte": "« Le nécessaire. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'est-à-dire ? »",
+              "next": "s4_11"
+            }
+          ]
+        },
+        "s4_11": {
+          "texte": "Il compte sur ses doigts. « De l'encre. Des plumes. Du papier. Une règle. Une boussole. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et ça ? »",
+              "next": "s4_12"
+            }
+          ]
+        },
+        "s4_12": {
+          "texte": "« Quoi ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Le gros rouleau. »",
+              "next": "s4_13"
+            }
+          ]
+        },
+        "s4_13": {
+          "texte": "« Ah. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Milo. »",
+              "next": "s4_14"
+            }
+          ]
+        },
+        "s4_14": {
+          "texte": "« C'est la carte. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Toute la carte ? »",
+              "next": "s4_15"
+            }
+          ]
+        },
+        "s4_15": {
+          "texte": "« Presque. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu l'emmènes vraiment ? »",
+              "next": "s4_16"
+            }
+          ]
+        },
+        "s4_16": {
+          "texte": "« Je ne vais pas laisser notre travail ici. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'est encombrant. »",
+              "next": "s4_17"
+            }
+          ]
+        },
+        "s4_17": {
+          "texte": "« Je préfère être encombré que perdre dix mois de travail. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« D'accord. Mais si quelque chose arrive, tu la laisses. »",
+              "next": "s4_18"
+            }
+          ]
+        },
+        "s4_18": {
+          "texte": "« Quoi ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« La carte. »",
+              "next": "s4_19"
+            }
+          ]
+        },
+        "s4_19": {
+          "texte": "« Tu plaisantes ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Non. »",
+              "next": "s4_20"
+            }
+          ]
+        },
+        "s4_20": {
+          "texte": "« Elle représente tout ce qu'on a découvert. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Ce n'est qu'un morceau de papier. »",
+              "next": "s4_21"
+            }
+          ]
+        },
+        "s4_21": {
+          "texte": "« Pour toi. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Milo… »",
+              "next": "s4_22"
+            }
+          ]
+        },
+        "s4_22": {
+          "texte": "« Je sais. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Promets-moi. »",
+              "next": "s4_23"
+            }
+          ]
+        },
+        "s4_23": {
+          "texte": "« Je promets de faire attention. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Ce n'est pas ce que j'ai demandé. »",
+              "next": "s4_24"
+            }
+          ]
+        },
+        "s4_24": {
+          "texte": "« Je sais. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Alors ? »",
+              "next": "s4_25"
+            }
+          ]
+        },
+        "s4_25": {
+          "texte": "Il soupire, les deux mains posées à plat sur le rouleau. « D'accord. Je la laisserai. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Bien. »",
+              "next": "s4_26"
+            }
+          ]
+        },
+        "s4_26": {
+          "texte": "« Mais seulement si je suis absolument certain qu'elle est en sécurité. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Milo. »",
+              "next": "s4_27"
+            }
+          ]
+        },
+        "s4_27": {
+          "texte": "« Quoi ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu es incorrigible. »",
+              "next": "s4_28"
+            }
+          ]
+        },
+        "s4_28": {
+          "texte": "« Et toi, tu reviens toujours. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Toujours. »",
+              "next": "s4_29"
+            }
+          ]
+        },
+        "s4_29": {
+          "texte": "« Alors à demain. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« À demain. »",
+              "next": "s4_30"
+            }
+          ]
+        },
+        "s4_30": {
+          "texte": "« Et n'oublie pas. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Quoi ? »",
+              "next": "s4_31"
+            }
+          ]
+        },
+        "s4_31": {
+          "texte": "« Si on trouve quelque chose de nouveau… »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Oui ? »",
+              "next": "s4_32"
+            }
+          ]
+        },
+        "s4_32": {
+          "texte": "« Tu me le racontes en premier. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Promis. »",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:auberge_de_la_tour_de_l_horloge",
+    "type": "lieu",
+    "label": "L'Auberge de la Tour de l'Horloge",
+    "image": "auberge_europe04.png",
+    "lieu_parent": "lieu:auxerre",
+    "categorie": "auberge",
+    "pnj": [
+      {
+        "character": "pnj:milo_cartographe",
+        "nom": "Milo",
+        "portrait": "cartographe_Milo_hobbit_m.jpg",
+        "probabilite": 1,
+        "description": "Un jeune hobbit, une carte déroulée devant lui, une plume à l'oreille.",
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_convoi_de_lutecia",
+              "attendu": false
+            }
+          }
+        ]
+      }
+    ]
+  }
+]
