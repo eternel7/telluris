@@ -3,6 +3,7 @@
 # acceptation → quête `collect` ordinaire, remise partielle puis complète, réception par un
 # AUTRE PNJ du même lieu, linter. Contenu : les feuilles d'argentine d'Élise.
 
+import glob
 import json
 import os
 
@@ -147,7 +148,14 @@ def test_contenu_elise_et_aubergiste_partagent_la_quete():
 	with open(CONTENU, encoding="utf-8") as f:
 		docs = {d["_id"]: d for d in json.load(f)}
 	spec = apport.offre_spec(docs["pnj:elise_herboriste"])
-	assert spec and spec["item"] in docs, "l'item demandé est livré avec l'import"
+	# L'item demandé n'est PAS livré par l'import : il doit déjà exister ET être récoltable
+	# à Lutecia (ressource de la cité), d'après le dump committé le plus récent.
+	dumps = sorted(glob.glob(os.path.join(os.path.dirname(CONTENU), "telluris-dump-*.json")))
+	with open(dumps[-1], encoding="utf-8") as f:
+		base = {d["_id"]: d for d in json.load(f)["docs"]}
+	assert spec and spec["item"] in base
+	assert any(r.get("ressource") == spec["item"] and r.get("zones")
+			   for r in base["lieu:lutecia"].get("ressources") or [])
 	assert apport.quete_id_de(docs["pnj:aubergiste_du_coq_de_lutece"]) == spec["id"]
 	rapport = lint_dialogues.analyser(list(docs.values()))
 	assert rapport["erreurs"] == 0 and rapport["avertissements"] == 0, rapport["trouvailles"]
