@@ -1140,6 +1140,7 @@
         "character": "pnj:milo_cartographe",
         "nom": "Milo",
         "portrait": "cartographe_Milo_hobbit_m.jpg",
+        "image": "pnj_cartographe_Milo_hobbit_m_auberge_de_la_tour_de_l_horloge.jpg",
         "probabilite": 1,
         "description": "Un jeune hobbit, une carte déroulée devant lui, une plume à l'oreille.",
         "conditions": [
@@ -1152,5 +1153,50 @@
         ]
       }
     ]
+  },
+  {
+    "_id": "lieu:restes_du_convoi_de_lutecia",
+    "type": "lieu",
+    "label": "Les restes du convoi",
+    "image": "restes_du_convoi_de_lutecia.jpg",
+    "categorie": "chemin",
+    "lieu_parent": "lieu:france",
+    "acces": {
+      "refus": "La route file entre les arbres ; rien ne retient le regard.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_reussie": {
+            "id": "quete:escorte_convoi_de_lutecia"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:france_to_restes_du_convoi_de_lutecia",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          47,
+          15
+        ],
+        "label": "Les chariots renversés"
+      },
+      {
+        "lieu": "lieu:restes_du_convoi_de_lutecia",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Reprendre la route"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
   }
 ]
