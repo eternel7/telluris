@@ -1458,6 +1458,7 @@ function _lieuxDuPnj(lieux, pnjId, lieuCourantId) {
 function _genreSousFiltre(sous) {
 	if (sous === 'attendu' || sous === 'objectif_atteint') return 'bool';
 	if (sous === 'types') return 'liste';
+	if (sous === 'min' || sous === 'max') return 'entier';
 	return 'texte';
 }
 
@@ -1478,6 +1479,8 @@ function _valeurDepuisBrut(brut, genre) {
 		const l = s.split(',').map(x => x.trim()).filter(Boolean);
 		return l.length ? l : undefined;
 	}
+	// Un entier seulement : le moteur refuse toute autre borne (fail-closed).
+	if (genre === 'entier') return /^-?\d+$/.test(s) ? parseInt(s, 10) : undefined;
 	return s ? s : undefined;
 }
 
@@ -1506,6 +1509,7 @@ function _clauseRepresentable(clause, vocab) {
 		if (genre === 'bool' && typeof v !== 'boolean') return false;
 		if (genre === 'liste' && !(Array.isArray(v) && v.every(x => typeof x === 'string'))) return false;
 		if (genre === 'texte' && typeof v !== 'string') return false;
+		if (genre === 'entier' && !Number.isInteger(v)) return false;
 		return JSON.stringify(_valeurDepuisBrut(_brutDepuisValeur(v, genre), genre)) === JSON.stringify(v);
 	});
 }
@@ -1528,6 +1532,9 @@ function _clausesFautives(conditions, prefixe) {
 		} else if (cle !== 'quete_active' && f && typeof f === 'object' && !Array.isArray(f)
 				&& !Object.keys(f).length) {
 			out.push(`${ici} : « ${cle} » sans aucun filtre rempli`);
+		} else if (cle === 'passages' && f && typeof f === 'object'
+				&& !('min' in f) && !('max' in f)) {
+			out.push(`${ici} : « passages » sans borne min ni max, toujours faux`);
 		}
 	});
 	return out;
@@ -1734,6 +1741,7 @@ const NL_AIDE_CONDITIONS = {
 	rang_min: 'rang de guilde minimal dans une cité',
 	combat_gagne: 'combat remporté dans cette salle',
 	lieu_visite: 'lieu déjà visité',
+	passages: 'nombre d’entrées dans un lieu, bornes incluses',
 	ou: 'au moins une des clauses tient',
 };
 // Suggestions par sous-filtre — des `datalist`, jamais une contrainte (`cible` peut aussi
