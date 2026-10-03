@@ -77,6 +77,13 @@ La seule escorte **GÉNÉRÉE**, et le premier canal qui la rende répétable.
 - Conditions `quete_reussie`/`quete_active` = une quête **nommée**, testable depuis n'importe quel PNJ (≠ la clause d'accès homonyme, qui filtre par critères) ; un seul prédicat fail-closed, partagé avec le linter.
 - Endpoints **stateless** `GET /api/pnj/dialogue` et `POST /api/pnj/dialogue/choix`, logique pure `utils/pnj.py`. UI `#pnj-panel`, portraits par le mount `/pnj`.
 
+#### Milo, apprenti cartographe — un PNJ narratif à scènes
+Contenu : `jsons/pnj_milo_cartographe_a_importer.json` (`pnj:milo_cartographe`, `lieu:auberge_de_la_tour_de_l_horloge` à Auxerre, `lieu:restes_du_convoi_de_lutecia` + son lien vers la carte de France en (47,15)). Pas de service : quatre scènes linéaires, une réplique de Milo = un nœud, une réplique de l'aventurier = l'unique choix.
+- **Aucun drapeau « scène vue »** : chaque scène s'ouvre sur la chaîne de quêtes d'Auxerre, dans l'accueil, la plus récente en tête, les précédentes restent rejouables — S1 libre · S2 `quete:transport_borin_premiere_mission` réussie · S3 `quete:escorte_bucherons_d_auxerre` réussie · S4 `quete:escorte_convoi_de_lutecia` **active** (la veille du départ).
+- Milo quitte l'auberge une fois le convoi réussi (sa mort est narrative : il n'est PAS protégé du convoi). Les restes du convoi apparaissent alors sur la route, et disparaissent dès la première quête rendue à Lutecia (`quete_reussie_cite`).
+- ⚠️ Renommer ou supprimer l'une de ces trois quêtes masque ses scènes **en silence** (fail-closed, aucun symptôme hors du linter, qui ne vérifie pas que l'id existe).
+- Images : portrait `pnj/cartographe_Milo_hobbit_m.jpg`, présence `towns/pnj_cartographe_Milo_hobbit_m_auberge_de_la_tour_de_l_horloge.jpg`, `towns/restes_du_convoi_de_lutecia.jpg`.
+
 Verrouillé par `tests/test_pnj.py`, `tests/test_quete_reussie.py`, `tests/test_quete_active.py`, `tests/test_indicateurs.py`, `tests/test_guillemets_insecables.py`.
 
 
@@ -107,14 +114,14 @@ Verrouillé par `dev/test_dialogues_client.js` (fusion, atteignabilité, placeme
 ### Accès conditionné à un lieu — PNJ gardiens
 Un `lieu:*` peut porter un bloc `acces` — sur le lieu de **destination**, jamais sur la connexion : `{gardien, refus, cycle, conditions:[...]}`, ET logique, **fail-closed** sur toute clé ou sous-clé inconnue. Logique pure `utils/acces.py`, chokepoint `acces_autorise`.
 
-- **Clés** : `quete_active` (filtres sur une entrée de `quetes_actives` ; `objectif_atteint:false` ferme les boucles de donjon avant turn-in) · `quete_reussie` (`{id, attendu}`, quête archivée sans échec, même prédicat que la condition de dialogue ; masque les paladins d'Auxerre partis avec le convoi de Lutecia) · `item` · `rang_min` (échelle `recrutement.RANGS`) · `combat_gagne` (victoire enregistrée sur la **salle**, pas le décor) · `ou` (seule disjonction du moteur, sert aussi à exprimer le complément d'une conjonction) · `lieu_visite` (passage à usage unique).
+- **Clés** : `quete_active` (filtres sur une entrée de `quetes_actives` ; `objectif_atteint:false` ferme les boucles de donjon avant turn-in) · `quete_reussie` (`{id, attendu}`, quête archivée sans échec, même prédicat que la condition de dialogue ; masque les paladins d'Auxerre partis avec le convoi de Lutecia) · `quete_reussie_cite` (`{cite, attendu}`, au moins une quête **donnée dans cette cité** menée à bien — pour les quêtes générées, qu'aucun id ne nomme ; lit le `giver` que toutes les voies d'archivage recopient dans `quetes_terminees`, remonté par `lieu_parent`, ou la `cite` archivée par l'épreuve d'apport ; ⚠️ une archive d'avant ce champ ne compte pas) · `item` · `rang_min` (échelle `recrutement.RANGS`) · `combat_gagne` (victoire enregistrée sur la **salle**, pas le décor) · `ou` (seule disjonction du moteur, sert aussi à exprimer le complément d'une conjonction) · `lieu_visite` (passage à usage unique).
 - **Laissez-passer** persistant lié au `cycle` du lieu, posé par le service PNJ `acces` (miroir de `services.rang`). Une salle de donjon (`categorie:"battle_map"`) n'en pose jamais : franchir sa porte ouvre directement le combat.
 - **Verrou** = lien caché (`get_lieu_links(filtrer_acces=True)`) **et** garde 403 autoritative dans `move_character` — le filtre d'affichage n'est pas le verrou.
 - Flags `acces_libere`/`acces_menace` = état du **monde** (menace éliminée ou non, survit au turn-in) ; `acces_accompli` = commission faite mais pas rapportée.
 - ⚠️ **Un bloc `acces` n'est pas une porte** : il faut aussi un doc `connection` (contrôlé par un BFS depuis la cité qui ignore les barrières).
 - Contenu de référence : `dev/gen_acces_donjon.py`. **Dette assumée** : pas encore d'objectif `eradication` multi-espèces ; le cycle de reset n'est pas câblé (crochet en place).
 
-Verrouillé par `tests/test_acces.py` et `tests/test_lieux_acces.py`, y compris le contrôle `conditions_invalides` (clé de 1er niveau vs sous-filtre).
+Verrouillé par `tests/test_acces.py`, `tests/test_lieux_acces.py` et `tests/test_quete_reussie_cite.py`, y compris le contrôle `conditions_invalides` (clé de 1er niveau vs sous-filtre).
 
 
 ### Donjons & commissions d'éradication

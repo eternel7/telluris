@@ -754,6 +754,7 @@ def archiver(character: dict, q: dict, echec: bool, now: int) -> None:
 		"rang": q.get("rang", "F"),
 		"echec": bool(echec),
 		"recompenses": {} if echec else dict(q.get("recompenses", {})),
+		"giver": q.get("giver"),   # lu par acces.quete_reussie_cite
 		"termine_at": now,
 	})
 

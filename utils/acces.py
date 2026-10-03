@@ -31,6 +31,11 @@
 #   - quete_reussie: {id, attendu?} — la quête nommée a été MENÉE À BIEN (archive sans échec,
 #     même prédicat que la condition de dialogue homonyme). L'état d'APRÈS, que `quete_active`
 #     ne voit plus : c'est ce qui retire un PNJ d'un lieu une fois sa mission accomplie.
+#   - quete_reussie_cite: {cite, attendu?} — au moins une quête DONNÉE DANS CETTE CITÉ a été
+#     menée à bien (archive sans échec dont le `giver` remonte, par `lieu_parent`, jusqu'à
+#     `cite` — ou dont la `cite` est archivée telle quelle, cas de l'épreuve d'apport). Pour
+#     les quêtes générées, qu'aucun id nommé ne couvre. ⚠️ Les archives d'AVANT ce champ n'ont
+#     ni `giver` ni `cite` : elles ne comptent pas (aucune migration).
 #   - ou: [clause, clause, …] — la SEULE clause composite : vraie dès qu'UNE des sous-clauses
 #     l'est. `conditions` restant un ET, c'est ce qui rend enfin exprimable un « A OU B ».
 #     ⚠️ Elle est née d'un besoin qu'aucune négation ne couvrait : deux docs de lieu qui se
@@ -68,8 +73,8 @@ def now_epoch() -> int:
 
 # Clés de condition reconnues par `conditions_remplies`. Toute autre clé fait échouer
 # `conditions_invalides` (signalée par le linter) ET `conditions_remplies` (fail-closed).
-CONDITIONS_CONNUES = {"quete_active", "quete_reussie", "item", "rang_min", "combat_gagne",
-					  "lieu_visite", "ou"}
+CONDITIONS_CONNUES = {"quete_active", "quete_reussie", "quete_reussie_cite", "item",
+					  "rang_min", "combat_gagne", "lieu_visite", "ou"}
 
 # Sous-filtres reconnus par condition. ⚠️ Les valider AUSSI : une clé de premier niveau
 # inconnue refuse (fail-closed, donc visible en jeu), mais un SOUS-filtre inconnu était
@@ -84,6 +89,7 @@ SOUS_FILTRES_CONNUS = {
 	# Une quête MENÉE À BIEN, nommée par son id — l'état d'APRÈS, que `quete_active` ne voit
 	# plus (la quête a quitté `quetes_actives`). Même `attendu` que partout ailleurs.
 	"quete_reussie": {"id", "attendu"},
+	"quete_reussie_cite": {"cite", "attendu"},
 	"item": {"item", "lieu_parent"},
 	"rang_min": {"cite", "rang"},
 	"combat_gagne": {"lieu", "attendu"},
@@ -364,6 +370,54 @@ def _condition_quete_reussie(character: dict, filtre: dict) -> bool:
 	return bool(quete_reussie(character, qid)) is attendu
 
 
+# Garde-fou de la remontée `lieu_parent` : une chaîne cyclique ou absurdement longue ne doit
+# jamais boucler. Aucune hiérarchie du jeu ne dépasse 3 étages (pays → cité → lieu → sous-lieu).
+_PROFONDEUR_CITE_MAX = 8
+
+
+def _lieu_dans_cite(lieu_id, cite: str, get_doc_fn) -> bool:
+	"""`lieu_id` est-il `cite`, ou un lieu dont la chaîne `lieu_parent` y remonte ?"""
+	vus = set()
+	while lieu_id and isinstance(lieu_id, str) and lieu_id not in vus \
+			and len(vus) < _PROFONDEUR_CITE_MAX:
+		if lieu_id == cite:
+			return True
+		vus.add(lieu_id)
+		lieu_id = ((get_doc_fn(lieu_id) if get_doc_fn else None) or {}).get("lieu_parent")
+	return False
+
+
+def _condition_quete_reussie_cite(character: dict, filtre: dict, get_doc_fn) -> bool:
+	"""Une quête donnée dans cette cité a-t-elle été MENÉE À BIEN ? `attendu: false` pour
+	l'inverse — c'est ainsi qu'un lieu disparaît dès la première quête faite ailleurs (les
+	restes du convoi de Lutecia, effacés par la première quête rendue à Lutecia).
+
+	Archive comptée : sans `echec`, et `cite` archivée égale, ou `giver` qui remonte jusqu'à
+	`cite`. Chaque donneur n'est résolu qu'une fois (les archives d'un même comptoir se
+	répètent). ⚠️ `cite` obligatoire et `attendu` booléen, fail-closed sinon — sous la
+	négation aussi, même règle que `quete_reussie`."""
+	cite = (filtre or {}).get("cite")
+	if not cite or not isinstance(cite, str):
+		return False
+	attendu = (filtre or {}).get("attendu", True)
+	if not isinstance(attendu, bool):
+		return False
+	givers = set()
+	trouve = False
+	for t in (character or {}).get("quetes_terminees") or []:
+		if not isinstance(t, dict) or t.get("echec"):
+			continue
+		if t.get("cite") == cite:
+			trouve = True
+			break
+		giver = t.get("giver")
+		if giver and isinstance(giver, str):
+			givers.add(giver)
+	if not trouve:
+		trouve = any(_lieu_dans_cite(g, cite, get_doc_fn) for g in sorted(givers))
+	return trouve is attendu
+
+
 def _clause_remplie(character: dict, condition, get_doc_fn) -> bool:
 	"""UNE clause du ET. ⚠️ RÉCURSIVE par `ou` — et fail-closed à chaque étage : une
 	clause qui n'est pas un dict d'EXACTEMENT une clé refuse, une clé inconnue refuse, et
@@ -376,6 +430,8 @@ def _clause_remplie(character: dict, condition, get_doc_fn) -> bool:
 		return _condition_quete_active(character, filtre or {}, get_doc_fn)
 	if cle == "quete_reussie":
 		return _condition_quete_reussie(character, filtre or {})
+	if cle == "quete_reussie_cite":
+		return _condition_quete_reussie_cite(character, filtre or {}, get_doc_fn)
 	if cle == "item":
 		return _condition_item(character, filtre or {})
 	if cle == "rang_min":
