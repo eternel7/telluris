@@ -82,7 +82,7 @@ Contenu : `jsons/pnj_milo_cartographe_a_importer.json` (`pnj:milo_cartographe`, 
 - **Aucun drapeau « scène vue »** : chaque scène s'ouvre sur la chaîne de quêtes d'Auxerre, dans l'accueil, la plus récente en tête, les précédentes restent rejouables — S1 libre · S2 `quete:transport_borin_premiere_mission` réussie · S3 `quete:escorte_bucherons_d_auxerre` réussie · S4 `quete:escorte_convoi_de_lutecia` **active** (la veille du départ).
 - Milo quitte l'auberge une fois le convoi réussi (sa mort est narrative : il n'est PAS protégé du convoi). Les restes du convoi apparaissent alors sur la route, et disparaissent dès la première quête rendue à Lutecia (`quete_reussie_cite`).
 - ⚠️ Renommer ou supprimer l'une de ces trois quêtes masque ses scènes **en silence** (fail-closed, aucun symptôme hors du linter, qui ne vérifie pas que l'id existe).
-- Images : portrait `pnj/cartographe_Milo_hobbit_m.jpg`, présence `towns/pnj_cartographe_Milo_hobbit_m_auberge_de_la_tour_de_l_horloge.jpg`, `towns/restes_du_convoi_de_lutecia.jpg`.
+- Images : portrait `pnj/cartographe_Milo_hobbit_m.jpg`, présence `towns/pnj_cartographe_Milo_hobbit_m_auberge_de_la_tour_de_l_horloge.jpg` (entrée `pnj[].image`, prime tant que Milo est présent), salle sans lui `towns/auberge_de_la_tour_de_l_horloge.jpg` (`image` du lieu), `towns/restes_du_convoi_de_lutecia.jpg`.
 
 Verrouillé par `tests/test_pnj.py`, `tests/test_quete_reussie.py`, `tests/test_quete_active.py`, `tests/test_indicateurs.py`, `tests/test_guillemets_insecables.py`.
 
