@@ -31,7 +31,7 @@
               "condition": {
                 "passages": {
                   "lieu": "lieu:le_coq_de_lutece",
-                  "min": 4
+                  "min": 8
                 }
               },
               "next": "s4_01"
@@ -42,7 +42,7 @@
               "condition": {
                 "passages": {
                   "lieu": "lieu:le_coq_de_lutece",
-                  "min": 3
+                  "min": 7
                 }
               },
               "next": "s3_01"
@@ -53,7 +53,8 @@
               "condition": {
                 "passages": {
                   "lieu": "lieu:le_coq_de_lutece",
-                  "min": 2
+                  "min": 2,
+                  "max": 6
                 }
               },
               "next": "s2_01"
@@ -546,7 +547,7 @@
               "condition": {
                 "passages": {
                   "lieu": "lieu:le_coq_de_lutece",
-                  "max": 5
+                  "max": 9
                 }
               },
               "next": "absente_01"
@@ -557,7 +558,7 @@
               "condition": {
                 "passages": {
                   "lieu": "lieu:le_coq_de_lutece",
-                  "min": 6
+                  "min": 10
                 }
               },
               "next": "retrouvee_01"
@@ -640,7 +641,7 @@
           {
             "passages": {
               "lieu": "lieu:le_coq_de_lutece",
-              "max": 4
+              "max": 8
             }
           }
         ]
@@ -655,7 +656,7 @@
           {
             "passages": {
               "lieu": "lieu:le_coq_de_lutece",
-              "min": 5
+              "min": 9
             }
           }
         ]

@@ -131,14 +131,15 @@ def _presents_au_passage(n):
 
 @pytest.mark.parametrize("n, attendu", [
 	(1, {"pnj:elise_herboriste": ["s1"]}),
-	# À partir du 2ᵉ passage, les scènes passées restent ouvertes (une scène manquée se
-	# rattrape), la plus récente EN TÊTE ; la première rencontre, elle, ne se rejoue pas.
+	# S2 se répète sur CINQ passages (2 à 6) avant S3 ; la première rencontre ne se rejoue
+	# pas, S3 reste rattrapable au passage de S4 (la plus récente EN TÊTE).
 	(2, {"pnj:elise_herboriste": ["s2"]}),
-	(3, {"pnj:elise_herboriste": ["s3", "s2"]}),
-	(4, {"pnj:elise_herboriste": ["s4", "s3", "s2"]}),
-	(5, {"pnj:aubergiste_du_coq_de_lutece": ["absente"]}),
-	(6, {"pnj:aubergiste_du_coq_de_lutece": ["retrouvee"]}),
-	(12, {"pnj:aubergiste_du_coq_de_lutece": ["retrouvee"]}),
+	(6, {"pnj:elise_herboriste": ["s2"]}),
+	(7, {"pnj:elise_herboriste": ["s3"]}),
+	(8, {"pnj:elise_herboriste": ["s4", "s3"]}),
+	(9, {"pnj:aubergiste_du_coq_de_lutece": ["absente"]}),
+	(10, {"pnj:aubergiste_du_coq_de_lutece": ["retrouvee"]}),
+	(16, {"pnj:aubergiste_du_coq_de_lutece": ["retrouvee"]}),
 ])
 def test_une_scene_par_passage(n, attendu):
 	assert _presents_au_passage(n) == attendu

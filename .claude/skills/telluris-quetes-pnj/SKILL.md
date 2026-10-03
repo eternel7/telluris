@@ -92,7 +92,7 @@ Verrouillé par `tests/test_pnj.py`, `tests/test_quete_reussie.py`, `tests/test_
 
 #### Élise, herboriste naine — scènes au fil des passages
 Contenu : `jsons/pnj_elise_herboriste_a_importer.json` (`pnj:elise_herboriste`, `pnj:aubergiste_du_coq_de_lutece`, `lieu:le_coq_de_lutece` — auberge en bas à droite de Lutecia, porte (80,40)).
-- Une scène s'ouvre par passage au Coq : S1 au 1ᵉʳ seulement (`max 1` — une première rencontre ne se rejoue pas), puis S2/S3/S4 en `min 2/3/4` : les scènes passées restent ouvertes (une scène manquée se rattrape, comme chez Milo), la plus récente **en tête**, libellés tous distincts (verrouillé). Élise présente tant que `passages ≤ 4` ; l'aubergiste dès 5 — « partie hier matin » au 5ᵉ, panier et corps retrouvés à partir du 6ᵉ.
+- Scènes par passage au Coq : S1 au 1ᵉʳ seulement (une première rencontre ne se rejoue pas) · S2 répétée du 2ᵉ au 6ᵉ (`min 2, max 6`) · S3 dès le 7ᵉ (`min 7`, rattrapable au 8ᵉ) · S4 au 8ᵉ. La plus récente **en tête**, libellés tous distincts (verrouillé). Élise présente tant que `passages ≤ 8` ; l'aubergiste dès 9 — « partie hier matin » au 9ᵉ, panier et corps retrouvés à partir du 10ᵉ. ⚠️ Ces bornes sont écrites en six endroits du JSON (choix d'Élise, de l'aubergiste, conditions de présence du lieu) : les décaler ensemble.
 - Service `soin` gratuit (`cout_cuivre: 0`, ½ PV), en fin de S1 et depuis l'accueil. Le nœud `depart` (fin de S4) arme `delai_min` 1 j → `noeud_attente: table_vide` : elle n'est plus là si l'on rouvre le dialogue pendant ce passage.
 - Images à fournir : `pnj/herboriste_Elise_naine_f.jpg`, `pnj/aubergiste_Coq_de_Lutece_humain_m.jpg`.
 
