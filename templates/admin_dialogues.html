@@ -961,7 +961,7 @@ function rendreChoix(choix) {
 				const sel = (action.service === s && !action.op) ? ' selected' : '';
 				return `<option value="${escapeHtml(s)}"${sel}>${escapeHtml(s)} (sans op)</option>`;
 			}),
-			['transport/accepter', 'escorte/accepter', 'rang/accepter', 'commission/accepter'].map(v => {
+			['transport/accepter', 'escorte/accepter', 'rang/accepter', 'commission/accepter', 'apport/accepter'].map(v => {
 				const bouts = v.split('/');
 				const sel = (action.service === bouts[0] && action.op === bouts[1]) ? ' selected' : '';
 				return `<option value="${escapeHtml(v)}"${sel}>${escapeHtml(v)}</option>`;

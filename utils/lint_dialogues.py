@@ -17,6 +17,7 @@ import re
 
 from utils import acces
 from utils.pnj import PASSAGES_CLES
+from utils import apport as apport_util
 
 # ── Ce que le moteur connaît ─────────────────────────────────────────────────────
 
@@ -45,6 +46,8 @@ PLACEHOLDERS_CONNUS = {
 	# Service `direction` : le nom SAISI par le joueur et les noms approchants proposés.
 	# ({lieu} et {direction} sont partagés avec les quêtes.)
 	"recherche", "suggestions",
+	# Quête d'APPORT ({objet}, {xp}, {prime} partagés) : quantité demandée, reste à remettre.
+	"quantite", "reste",
 }
 
 # Clés de `condition` : deux formes structurées, tout le reste est traité comme un FLAG
@@ -119,6 +122,9 @@ FLAGS_CONNUS = {
 	# sens : `condition_ok` compare `bool(flag) is not bool(attendu)`, donc
 	# `{"dialogue_en_attente": false}` est le verrou d'un choix qui doit disparaître.
 	"dialogue_en_attente",
+	# Quête d'APPORT (utils/apport.py) : offerte, en cours, remettable (une pièce portée),
+	# menée à bien.
+	"apport_offert", "apport_en_cours", "apport_possible", "apport_accompli",
 }
 
 # Nœuds de résultat que le ROUTER va chercher par leur clé. Les absents laissent le
@@ -150,6 +156,10 @@ TRANSPORT_DONNEUR = {"accepte", "trop_charge"}
 TRANSPORT_DESTINATAIRE = {"livre", "incomplet"}
 TRANSPORT_RETOUR = {"rapporte"}   # course `retour` : le donneur solde au retour
 RANG_APPORT = {"apporte"}         # épreuve d'apport : le PNJ reçoit l'objet
+# Quête d'APPORT : le donneur (`offre`) accepte, tout PNJ qui la REÇOIT (offre ou `quete`)
+# a besoin des deux nœuds de remise.
+APPORT_DONNEUR = set(apport_util.NOEUDS_DONNEUR)
+APPORT_RECEVEUR = set(apport_util.NOEUDS_RECEVEUR)
 
 # Même raisonnement pour l'escorte : `mefiance` n'a de sens que là où la CONFIANCE est la
 # porte, c'est-à-dire chez un tenancier qui déclare une progéniture. L'exiger de tous ferait
@@ -168,6 +178,7 @@ ACTIONS_A_CONDITIONNER = {
 	("rang", "apporter"):       "rang_apport_possible",
 	("commission", "rapporter"): "commission_a_rapporter",
 	("acces", "passer"):        "acces_ouvrable",
+	("apport", "remettre"):     "apport_possible",
 }
 
 # Clés du bloc `relation` d'un nœud (utils/pnj.recompense_relation_de). Tout le reste y est
@@ -519,6 +530,18 @@ def analyser_doc(doc: dict) -> list:
 				elif not items or any(not (isinstance(i, str) and i.startswith("item:")) for i in items):
 					erreur("`services.rang.apport.items` doit lister des ids `item:…` (au moins un) — "
 						   "l'épreuve serait ignorée ou ne reconnaîtrait jamais l'objet.")
+		elif service == "apport":
+			attendus = set(APPORT_RECEVEUR)
+			if (conf or {}).get("offre") is not None:
+				attendus |= APPORT_DONNEUR
+				# `apport.offre_spec` IGNORE une offre illisible : le PNJ ne proposerait rien.
+				if apport_util.offre_spec(doc) is None:
+					erreur("`services.apport.offre` illisible : `id` (`quete:…`), `item` "
+						   "(`item:…`) et `quantite` (entier ≥ 1) sont requis — l'offre "
+						   "serait ignorée.")
+			elif apport_util.quete_id_de(doc) is None:
+				erreur("`services.apport` sans `offre` ni `quete` (`quete:…`) : ce PNJ ne "
+					   "recevrait aucune remise.")
 		else:
 			attendus = NOEUDS_REQUIS.get(service, set())
 		for cle in attendus - set(declares):

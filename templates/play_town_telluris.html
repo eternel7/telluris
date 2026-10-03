@@ -10438,6 +10438,20 @@ async function choisirPnj(choixId, extra) {
 			}
 			renderFicheQuetes(data);
 		}
+		// Quête d'APPORT (`services.apport`) : prise, remise partielle, remise complète.
+		if (data.apport) {
+			if (data.apport.accepte) showToast('📜 Quête acceptée : ' + data.apport.accepte);
+			if (data.apport.depose) {
+				showToast('📜 ' + data.apport.depose + ' × ' + data.apport.objet + ' remis — encore ' + data.apport.reste + '.');
+			}
+			if (data.apport.remis) {
+				showToast('✅ ' + data.apport.titre + ' — ✨ +' + data.apport.xp + ' XP'
+					+ (data.apport.niveau_up ? ' — ⭐ Niveau supérieur !' : '')
+					+ _xpCompagnieSuffixe(data.apport.xp_compagnie));
+			}
+			if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
+			renderFicheQuetes(data);
+		}
 		// Marques « ! »/« ? » : le serveur les recalcule sur le contexte D'APRÈS l'action.
 		// Indispensable — accepter une course doit faire disparaître le « ! » du 🗣 et poser
 		// le « ? » sur la porte du destinataire, sans attendre un rechargement de page.

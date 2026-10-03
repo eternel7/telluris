@@ -96,7 +96,16 @@ Contenu : `jsons/pnj_elise_herboriste_a_importer.json` (`pnj:elise_herboriste`, 
 - Service `soin` gratuit (`cout_cuivre: 0`, ½ PV), en fin de S1 et depuis l'accueil. Le nœud `depart` (fin de S4) arme `delai_min` 1 j → `noeud_attente: table_vide` : elle n'est plus là si l'on rouvre le dialogue pendant ce passage.
 - L'aubergiste est une ELFE (texte au féminin, « L'aubergiste »/« L'elfe » en narration pour ne pas confondre avec le « Elle » d'Élise). Images : portraits `pnj/herboriste_Elise_naine_f.jpg`, `pnj/aubergiste_Coq_de_Lutece_elfe_f.jpg` (recadrés 464×580 des scènes), présences `towns/pnj_herboriste_Elise_naine_f_le_coq_de_lutece.jpg`, `towns/pnj_aubergiste_Coq_de_Lutece_elfe_f_le_coq_de_lutece.jpg`.
 
-Verrouillé par `tests/test_passages.py`.
+- **Quête d'apport « Trois plantes pour Élise »** (`quete:plantes_d_elise`, 3 × `item:Feuilles_d_argentine`, 40 XP, unique) : proposée en fin de S3 et depuis l'accueil dès le 7ᵉ passage (`apport_offert` ET `passages min 7`). Remise à Élise, ou à l'aubergiste après sa disparition (« Elle les attendait. »). ⚠️ « trois » est écrit en toutes lettres dans `apport_accepte` et `apport_remis` : changer `quantite`, c'est retoucher ces deux nœuds. ⚠️ La plante n'est récoltable qu'une fois ajoutée aux `ressources` de `lieu:lutecia` (zone `zone:foret_feuillus`, mode Ressources de l'éditeur) — l'import ne touche pas à la cité.
+
+Verrouillé par `tests/test_passages.py`, `tests/test_apport.py`.
+
+#### Quête d'APPORT confiée par un PNJ — service `apport`
+« Rapporte-moi N × cet objet. » Logique pure `utils/apport.py`, router `_resoudre_apport`. Distincte de l'épreuve d'apport de RANG (`services.rang.apport`, guilde seulement).
+- **Donneur** : `services.apport.offre = {id: "quete:…", titre, description, item: "item:…", quantite ≥ 1, unique? (défaut vrai), recompenses?: {xp, cuivre}}`, op `accepter` → nœud `accepte`. **Receveur** (tout PNJ du MÊME lieu, offre ou non) : `services.apport.quete = "quete:…"`, op `remettre` → `partiel` / `remis`.
+- La quête est une `collect` ORDINAIRE (`quetes.snapshot_quete`, `giver` = le lieu du donneur) : onglet 📜, 🎯 (biais de récolte), abandon sanctionné, `quete_reussie` — rien de neuf côté fiche.
+- Remise PARTIELLE (`quetes.deposer_collect`, principal seulement), complète ⇒ `appliquer_recompenses` (compagnie comprise) + archivage + +1 réputation du lieu. Remise refusée hors du lieu du donneur.
+- Flags `apport_offert` (« ! ») · `apport_en_cours` · `apport_possible` (« ? », une pièce portée) · `apport_accompli` ; placeholders `{objet}` `{quantite}` `{reste}` `{xp}` `{prime}`. Linter : offre illisible, receveur sans `quete`, `remettre` non conditionné par `apport_possible`.
 
 
 ### Contrôle des dialogues PNJ (linter)

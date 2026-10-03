@@ -477,12 +477,12 @@ MARQUE_RAPPORT = "?"
 # mal orthographié ici vaudrait False en silence et la marque ne s'afficherait jamais.
 FLAGS_OFFRE = frozenset({
 	"transport_offert", "escorte_offerte", "rang_offert",
-	"commission_offerte", "acces_ouvrable",
+	"commission_offerte", "acces_ouvrable", "apport_offert",
 })
 FLAGS_RAPPORT = frozenset({
 	"transport_a_livrer", "transport_a_rapporter",
 	"rang_a_rapporter", "commission_a_rapporter", "acces_accompli",
-	"rang_apport_possible",
+	"rang_apport_possible", "apport_possible",
 })
 
 
