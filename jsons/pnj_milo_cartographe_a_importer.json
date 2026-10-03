@@ -1142,7 +1142,7 @@
     "_id": "lieu:auberge_de_la_tour_de_l_horloge",
     "type": "lieu",
     "label": "L'Auberge de la Tour de l'Horloge",
-    "image": "auberge_europe04.png",
+    "image": "auberge_de_la_tour_de_l_horloge.jpg",
     "lieu_parent": "lieu:auxerre",
     "categorie": "auberge",
     "pnj": [
