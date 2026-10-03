@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<style>
+		:root {
+			--bg: #0d0f14;
+			--panel: #141720;
+			--panel2: #1a1e29;
+			--border: #2a3040;
+			--accent: #c8a84b;
+			--accent2: #4b8fc8;
+			--danger: #c84b4b;
+			--success: #4bc87a;
+			--violet: #b07fd0;
+			--teal: #4bc8b8;
+			--text: #fff;
+			--muted: #9aa3b2;
+			--tap: 38px;
+		}
+		@media (pointer: coarse) { :root { --tap: 44px; } }
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		html, body { height: 100%; }
+		body {
+			background: var(--bg); color: var(--text);
+			font-family: 'Share Tech Mono', monospace;
+			height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
+		}
+		header {
+			padding: 10px 16px; border-bottom: 1px solid var(--border);
+			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+			display: flex; align-items: center; justify-content: space-between; gap: 12px;
+		}
+		header h1 { font-size: 1.05rem; letter-spacing: 0.12em; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+		header a { color: var(--muted); font-size: 0.8rem; text-decoration: none; white-space: nowrap; }
+		header a:hover { color: var(--accent); }
+		code { color: var(--accent2); }
+
+		button, .btn {
+			min-height: var(--tap); min-width: var(--tap);
+			display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+			padding: 0 12px; border-radius: 6px; cursor: pointer;
+			font-family: inherit; font-size: 0.8rem; letter-spacing: 0.04em;
+			border: 1px solid var(--accent); background: rgba(200,168,75,0.1); color: var(--accent);
+		}
+		button:hover { background: rgba(200,168,75,0.22); }
+		button:disabled { opacity: 0.4; cursor: not-allowed; }
+		button.secondary { border-color: var(--accent2); background: rgba(75,143,200,0.1); color: var(--accent2); }
+		button.ghost { border-color: var(--border); background: transparent; color: var(--muted); }
+		button.on { background: var(--accent); color: var(--bg); }
+		input[type=search], input[type=text], select {
+			min-height: var(--tap); padding: 0 11px; border: 1px solid var(--border); border-radius: 6px;
+			background: var(--bg); color: var(--text); font-family: inherit; font-size: 16px;
+		}
+		input:focus, select:focus { outline: none; border-color: var(--accent); }
+
+		/* ── Barre d'outils ─────────────────────────────────────────── */
+		.toolbar {
+			padding: 8px 16px; border-bottom: 1px solid var(--border); background: var(--panel);
+			display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+		}
+		.search-wrap { position: relative; flex: 1 1 260px; min-width: 0; }
+		.search-wrap input { width: 100%; }
+		#suggestions {
+			position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 30;
+			background: var(--panel2); border: 1px solid var(--border); border-radius: 6px;
+			max-height: 55dvh; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,.5);
+		}
+		#suggestions[hidden] { display: none; }
+		.sugg {
+			width: 100%; justify-content: flex-start; text-align: left; border: 0; border-radius: 0;
+			background: transparent; color: var(--text); border-bottom: 1px solid var(--border);
+			padding: 6px 12px; min-height: var(--tap);
+		}
+		.sugg:hover, .sugg.actif { background: rgba(200,168,75,0.15); }
+		.sugg small { color: var(--muted); margin-left: auto; padding-left: 8px; white-space: nowrap; }
+		.sugg .nom { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+		.sugg-titre { padding: 6px 12px; font-size: .7rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+		.outils { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+		.badge {
+			display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px;
+			padding: 0 5px; border-radius: 9px; background: var(--accent); color: var(--bg); font-size: .7rem;
+		}
+		.badge[hidden] { display: none; }
+		.mode { display: inline-flex; }
+		.mode button { border-radius: 0; }
+		.mode button:first-child { border-radius: 6px 0 0 6px; }
+		.mode button:last-child { border-radius: 0 6px 6px 0; border-left: 0; }
+		.stepper { display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 6px; }
+		.stepper button { border: 0; background: transparent; color: var(--accent); min-width: var(--tap); padding: 0; }
+		.stepper span { font-size: .72rem; color: var(--muted); padding: 0 2px; white-space: nowrap; }
+		.stepper b { min-width: 14px; text-align: center; }
+		.stepper.inactif { opacity: .4; }
+
+		.surlignage {
+			padding: 4px 16px; font-size: .75rem; color: var(--muted); background: var(--panel);
+			border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+		}
+		.surlignage[hidden] { display: none; }
+		.surlignage button { min-height: 32px; min-width: 32px; padding: 0 8px; }
+
+		/* ── Zone principale : graphe + fiche ──────────────────────── */
+		.main { flex: 1; min-height: 0; display: flex; position: relative; }
+		#cy-wrap { flex: 1; min-width: 0; position: relative; }
+		#cy { position: absolute; inset: 0; }
+		#accueil {
+			position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+			justify-content: center; gap: 14px; padding: 24px; text-align: center; color: var(--muted);
+			font-size: .85rem; line-height: 1.5; overflow-y: auto;
+		}
+		#accueil[hidden] { display: none; }
+		#accueil .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 720px; }
+		#statut {
+			position: absolute; top: 8px; left: 8px; z-index: 5; font-size: .72rem; color: var(--muted);
+			background: rgba(13,15,20,.8); padding: 4px 8px; border-radius: 4px; pointer-events: none;
+		}
+		#statut.err { color: var(--danger); }
+		#legende {
+			position: absolute; bottom: 8px; left: 8px; z-index: 5; font-size: .7rem;
+			background: rgba(20,23,32,.92); border: 1px solid var(--border); border-radius: 6px;
+			max-width: min(280px, calc(100% - 16px));
+		}
+		#legende summary { cursor: pointer; padding: 6px 10px; color: var(--muted); list-style: none; }
+		#legende summary::-webkit-details-marker { display: none; }
+		#legende .contenu { padding: 0 10px 8px; display: grid; gap: 4px; }
+		.leg { display: flex; align-items: center; gap: 6px; }
+		.pastille { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+		.pastille.famille { border-radius: 3px; border: 2px dashed var(--muted); background: #2a3040; }
+		.pastille.absent { transform: rotate(45deg); border-radius: 0; border: 2px solid var(--danger); background: #555; width: 10px; height: 10px; }
+		.trait { width: 18px; height: 0; border-top: 2px solid #5a6378; flex: none; }
+		.trait.membre { border-top-style: dashed; }
+		.trait.fabrication { border-top-style: dotted; border-top-color: #e08a4f; border-top-width: 3px; }
+		.pastille.piece { border-radius: 2px; border: 2px solid #e08a4f; background: #3a2a1e; }
+		.trait.sur-mesure { border-top-color: var(--violet); }
+		.trait.terroir { border-top-color: var(--teal); }
+
+		#fiche {
+			width: 400px; flex: none; border-left: 1px solid var(--border); background: var(--panel);
+			display: flex; flex-direction: column; min-height: 0;
+		}
+		#fiche[hidden] { display: none; }
+		.fiche-tete {
+			display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--border);
+		}
+		.fiche-tete h2 { flex: 1; min-width: 0; font-size: .95rem; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+		#fiche-reduire { display: none; }
+		.fiche-corps { flex: 1; min-height: 0; overflow-y: auto; padding: 12px; font-size: .8rem; line-height: 1.5; }
+		.fiche-corps h3 { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin: 14px 0 6px; }
+		.fiche-corps .id { color: var(--accent2); font-size: .72rem; word-break: break-all; }
+		.fiche-corps .desc { color: #d6d9df; margin-top: 8px; font-style: italic; }
+		.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+		.tag { border: 1px solid var(--border); border-radius: 10px; padding: 1px 8px; font-size: .7rem; color: var(--muted); }
+		.tag.alerte { border-color: var(--danger); color: var(--danger); }
+		.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+		dl.kv { display: grid; grid-template-columns: max-content 1fr; gap: 3px 10px; }
+		dl.kv dt { color: var(--muted); }
+		dl.kv dd { word-break: break-word; }
+		.recette {
+			border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; margin-bottom: 6px;
+			background: var(--panel2);
+		}
+		.recette .lieu { color: var(--muted); font-size: .72rem; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+		.lien {
+			display: inline; min-height: 0; min-width: 0; padding: 2px 4px; border: 0; background: transparent;
+			color: var(--accent2); text-decoration: underline; font-size: .8rem; text-align: left;
+		}
+		.lien:hover { background: rgba(75,143,200,.15); }
+		.lien.absent { color: var(--danger); }
+		.fleche { color: var(--muted); }
+		details.json summary { cursor: pointer; color: var(--muted); margin-top: 14px; }
+		details.json pre { font-size: .7rem; white-space: pre-wrap; word-break: break-word; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px; margin-top: 6px; }
+		.vide { color: var(--muted); font-style: italic; }
+
+		/* ── Tiroir de filtres ─────────────────────────────────────── */
+		#filtres {
+			position: fixed; top: 0; right: 0; bottom: 0; width: min(380px, 100vw); z-index: 50;
+			background: var(--panel); border-left: 1px solid var(--border); display: flex; flex-direction: column;
+			box-shadow: -12px 0 32px rgba(0,0,0,.5);
+		}
+		#filtres[hidden] { display: none; }
+		#filtres-fond { position: fixed; inset: 0; z-index: 49; background: rgba(0,0,0,.45); }
+		#filtres-fond[hidden] { display: none; }
+		.filtres-corps { flex: 1; overflow-y: auto; padding: 12px 16px; font-size: .8rem; }
+		.filtres-corps fieldset { border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; margin-bottom: 12px; }
+		.filtres-corps legend { color: var(--accent); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; padding: 0 4px; }
+		.choix { display: flex; flex-wrap: wrap; gap: 6px; max-height: 190px; overflow-y: auto; }
+		.choix label, .bascule {
+			display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 14px;
+			padding: 4px 10px; cursor: pointer; min-height: 32px; font-size: .75rem; color: var(--muted);
+		}
+		.bascule { border: 0; padding: 4px 0; display: flex; }
+		.choix label:has(input:checked) { border-color: var(--accent); color: var(--accent); background: rgba(200,168,75,.1); }
+		.choix input { accent-color: var(--accent); }
+		.choix small { opacity: .7; }
+		.filtres-pied { padding: 10px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: space-between; }
+		.filtre-recherche { width: 100%; margin-bottom: 6px; }
+
+		/* ── Mobile : fiche en bottom-sheet, barre compacte ────────── */
+		@media (max-width: 720px) {
+			header { padding: 8px 12px; }
+			header h1 { font-size: .95rem; letter-spacing: .04em; }
+			.toolbar { padding: 8px 12px; }
+			.surlignage { padding: 4px 12px; }
+			/* La fiche PREND sa place sous le graphe (pas de recouvrement) : le cadrage reste juste. */
+			.main { flex-direction: column; }
+			#fiche {
+				width: auto; height: 46%; flex: none;
+				border-left: 0; border-top: 1px solid var(--accent); border-radius: 12px 12px 0 0;
+				box-shadow: 0 -10px 30px rgba(0,0,0,.6);
+			}
+			#fiche.reduite { height: auto; }
+			#fiche.reduite .fiche-corps { display: none; }
+			#fiche-reduire { display: inline-flex; }
+			#legende { bottom: auto; top: 34px; }
+		}
+	</style>
+</head>
+<body>
+<header>
+	<h1>🕸️ Graphe des recettes</h1>
+	<a href="/admin">← Administration</a>
+</header>
+
+<div class="toolbar">
+	<div class="search-wrap">
+		<input type="search" id="recherche" placeholder="Rechercher un item, une famille, un métier…"
+			autocomplete="off" aria-label="Rechercher" aria-controls="suggestions">
+		<div id="suggestions" role="listbox" hidden></div>
+	</div>
+	<div class="outils">
+		<button type="button" class="secondary" id="btn-filtres" title="Filtres">⚙ Filtres <span class="badge" id="badge-filtres" hidden></span></button>
+		<span class="mode" role="group" aria-label="Mode d'affichage">
+			<button type="button" id="mode-voisinage" title="Voisinage de l'item choisi">◎ Voisinage</button>
+			<button type="button" id="mode-complet" title="Tout le réseau filtré">✱ Complet</button>
+		</span>
+		<span class="stepper" id="stp-amont" title="Profondeur amont : ce qui sert à le fabriquer">
+			<button type="button" data-delta="-1" aria-label="Moins d'amont">−</button>
+			<span>⬅ amont <b id="val-amont">2</b></span>
+			<button type="button" data-delta="1" aria-label="Plus d'amont">+</button>
+		</span>
+		<span class="stepper" id="stp-aval" title="Profondeur aval : ce qu'il permet de fabriquer">
+			<button type="button" data-delta="-1" aria-label="Moins d'aval">−</button>
+			<span>aval ➡ <b id="val-aval">2</b></span>
+			<button type="button" data-delta="1" aria-label="Plus d'aval">+</button>
+		</span>
+		<button type="button" class="ghost" id="btn-recadrer" title="Recadrer la vue">⤢</button>
+	</div>
+</div>
+<div class="surlignage" id="surlignage" hidden>
+	<span id="surlignage-texte"></span>
+	<button type="button" class="ghost" id="surl-prec" aria-label="Correspondance précédente">◀</button>
+	<button type="button" class="ghost" id="surl-suiv" aria-label="Correspondance suivante">▶</button>
+</div>
+
+<div class="main">
+	<div id="cy-wrap">
+		<div id="cy"></div>
+		<div id="statut">Chargement…</div>
+		<div id="accueil" hidden></div>
+		<details id="legende">
+			<summary>Légende</summary>
+			<div class="contenu" id="legende-contenu"></div>
+		</details>
+	</div>
+	<aside id="fiche" hidden aria-label="Fiche">
+		<div class="fiche-tete">
+			<h2 id="fiche-titre"></h2>
+			<button type="button" class="ghost" id="fiche-reduire" aria-label="Réduire / agrandir la fiche">⇕</button>
+			<button type="button" class="ghost" id="fiche-fermer" aria-label="Fermer la fiche">✕</button>
+		</div>
+		<div class="fiche-corps" id="fiche-corps"></div>
+	</aside>
+</div>
+
+<div id="filtres-fond" hidden></div>
+<aside id="filtres" hidden aria-label="Filtres">
+	<div class="fiche-tete">
+		<h2>⚙ Filtres</h2>
+		<button type="button" class="ghost" id="filtres-fermer" aria-label="Fermer les filtres">✕</button>
+	</div>
+	<div class="filtres-corps" id="filtres-corps"></div>
+	<div class="filtres-pied">
+		<button type="button" class="ghost" id="filtres-reset">↺ Réinitialiser</button>
+		<button type="button" id="filtres-ok">Voir le graphe</button>
+	</div>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.2/cytoscape.min.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// FONCTIONS PURES — aucune lecture du DOM ; exécutées par dev/test_graphe_recettes_client.js
+// (extraction par NOM : renommer l'une d'elles fait échouer le harnais, c'est voulu).
+// Le graphe vient de utils/graphe_recettes.construire_graphe : nœuds `item` / `famille`,
+// arêtes `recette` (entrée → produit) et `membre` (item → famille).
+// ══════════════════════════════════════════════════════════════════════════════
+
+const PROFONDEUR_MAX = 5;
+const PROFONDEUR_DEFAUT = 2;
+// Au-delà, une famille rencontrée en remontant n'est pas dépliée (sc:carcasse en compte
+// des centaines) : elle s'affiche « +N », la toucher en fait le centre et montre tout.
+const MAX_MEMBRES_DEPLIES = 20;
+
+function filtresParDefaut() {
+	return {
+		categories: [], sousCategories: [], raretes: [], lieux: [], roles: [],
+		familles: true,        // afficher les familles (entrées données par sous-catégorie)
+		fabrications: true,    // liens potentiels du sur-mesure : matière → famille de pièces
+		absentsSeuls: false,   // diagnostic : nœuds absents de la base et leurs voisins
+		surMesure: false,      // variantes générées des commandes sur mesure
+		terroir: true,         // spécialités de terroir (`lieu_portee`)
+		masquerIsoles: true,   // nœuds sans aucun lien visible
+	};
+}
+
+function normaliserRecherche(s) {
+	return String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '')
+		.toLowerCase().replace(/[_\-:]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function indexerGraphe(graphe) {
+	const idx = { noeuds: {}, sortants: {}, entrants: {}, aretes: {}, recettes: {}, lieux: {}, norm: {} };
+	for (const n of (graphe && graphe.nodes) || []) {
+		idx.noeuds[n.id] = n;
+		idx.sortants[n.id] = [];
+		idx.entrants[n.id] = [];
+		idx.norm[n.id] = {
+			label: normaliserRecherche(n.label),
+			autres: normaliserRecherche([n.id.replace(/^(item|sc|fab):/, ''), n.sous_categorie, n.categorie].join(' ')),
+		};
+	}
+	for (const e of (graphe && graphe.edges) || []) {
+		if (!idx.noeuds[e.source] || !idx.noeuds[e.target]) continue;
+		idx.aretes[e.id] = e;
+		idx.sortants[e.source].push(e);
+		idx.entrants[e.target].push(e);
+		if (e.kind !== 'recette') continue;
+		let r = idx.recettes[e.recette];
+		if (!r) {
+			r = idx.recettes[e.recette] = {
+				id: e.recette, produit: e.target, lieu_categorie: e.lieu_categorie || '',
+				lieu_portee: e.lieu_portee || '', sur_commande: !!e.sur_commande,
+				quantite_produite: e.quantite_produite || 1, entrees: [],
+			};
+			idx.lieux[r.lieu_categorie] = (idx.lieux[r.lieu_categorie] || 0) + 1;
+		}
+		r.entrees.push({ id: e.source, quantite: e.quantite || 1 });
+	}
+	return idx;
+}
+
+// Rôle d'un item dans le réseau ENTIER (indépendant des filtres) : brut = rien ne le
+// produit mais il sert ; intermédiaire = produit ET sert ; fini = produit, ne sert à rien ;
+// isolé = ni l'un ni l'autre. Servir via une famille compte (arête `membre`) ; un lien de
+// FABRICATION ne compte pas : le rôle parle des recettes, une matière de sur-mesure qui
+// n'entre dans aucune recette reste « isolée » de ce point de vue.
+function roleNoeud(idx, id) {
+	const n = idx.noeuds[id];
+	if (!n) return '';
+	if (n.type === 'famille' || n.type === 'piece') return n.type;
+	const produit = idx.entrants[id].some(e => e.kind === 'recette');
+	const sert = idx.sortants[id].some(e => e.kind !== 'fabrication');
+	if (produit && sert) return 'intermediaire';
+	if (produit) return 'fini';
+	if (sert) return 'brut';
+	return 'isole';
+}
+
+function areteVisible(e, f) {
+	// Un lien de fabrication n'est la recette d'aucun métier : un filtre de métier le masque.
+	if (e.kind === 'fabrication') return f.fabrications && !f.lieux.length;
+	if (e.kind !== 'recette') return true;
+	if (e.sur_commande && !f.surMesure) return false;
+	if (e.lieu_portee && !f.terroir) return false;
+	if (f.lieux.length && !f.lieux.includes(e.lieu_categorie || '')) return false;
+	return true;
+}
+
+function noeudVisible(n, f, idx) {
+	if (!n) return false;
+	if (n.type === 'famille') {
+		// Une famille n'a de sens que par les recettes qui la consomment : si toutes sont
+		// masquées, elle ne ferait que traîner ses membres dans la vue.
+		return f.familles && idx.sortants[n.id].some(e => areteVisible(e, f));
+	}
+	if (n.type === 'piece') return f.fabrications && !f.lieux.length;
+	if (f.categories.length && !f.categories.includes(n.categorie || '')) return false;
+	if (f.sousCategories.length && !f.sousCategories.includes(n.sous_categorie || '')) return false;
+	if (f.raretes.length && !f.raretes.includes(n.rarete || '')) return false;
+	if (f.roles.length && !f.roles.includes(roleNoeud(idx, n.id))) return false;
+	return true;
+}
+
+// Diagnostic : ne garder que les nœuds absents et leurs voisins directs (+ le centre).
+function _restreindreAbsents(ids, aretes, idx, garder) {
+	const ok = new Set(garder ? [garder] : []);
+	for (const id of ids) if (idx.noeuds[id].absent) ok.add(id);
+	for (const e of aretes) {
+		if (idx.noeuds[e.source].absent || idx.noeuds[e.target].absent) { ok.add(e.source); ok.add(e.target); }
+	}
+	return {
+		ids: ids.filter(id => ok.has(id)),
+		aretes: aretes.filter(e => ok.has(e.source) && ok.has(e.target)),
+	};
+}
+
+// Graphe complet filtré → {ids, aretes}. `masquerIsoles` s'entend dans la vue : un nœud
+// dont tous les liens sont filtrés disparaît aussi.
+function filtrerGraphe(idx, f) {
+	let ids = Object.keys(idx.noeuds).filter(id => noeudVisible(idx.noeuds[id], f, idx));
+	const vus = new Set(ids);
+	let aretes = Object.values(idx.aretes).filter(e => vus.has(e.source) && vus.has(e.target) && areteVisible(e, f));
+	if (f.masquerIsoles) {
+		const lies = new Set();
+		for (const e of aretes) { lies.add(e.source); lies.add(e.target); }
+		ids = ids.filter(id => lies.has(id));
+	}
+	if (f.absentsSeuls) ({ ids, aretes } = _restreindreAbsents(ids, aretes, idx, null));
+	return { ids: ids.sort(), aretes: aretes.map(e => e.id).sort() };
+}
+
+// Remonte (`amont`) ou descend (`aval`) depuis `centre`. `profondeur` ne compte que les
+// arêtes de RECETTE et de FABRICATION : passer par une famille est gratuit, de sorte que
+// « A sert à faire B » reste à distance 1 même quand la recette demande « 2 acier » plutôt
+// que A lui-même. `rang` compte toutes les arêtes : il ne sert qu'à placer les colonnes.
+// En remontant, une famille trop fournie (hors centre) reste repliée. Une ⚒ famille de pièces
+// n'a pas d'arête sortante : on ne la remonte jamais hors centre.
+function _parcourir(idx, centre, sens, limite, f, maxMembres, replies) {
+	const dist = { [centre]: { p: 0, r: 0 } };
+	const file = [centre];
+	while (file.length) {
+		const cur = file.shift();
+		const d = dist[cur];
+		const liste = sens === 'amont' ? idx.entrants[cur] : idx.sortants[cur];
+		if (sens === 'amont' && cur !== centre && idx.noeuds[cur].type === 'famille') {
+			const membres = liste.filter(e => areteVisible(e, f) && noeudVisible(idx.noeuds[e.source], f, idx));
+			if (membres.length > maxMembres) { replies[cur] = membres.length; continue; }
+		}
+		for (const e of liste) {
+			if (!areteVisible(e, f)) continue;
+			const nxt = sens === 'amont' ? e.source : e.target;
+			if (nxt !== centre && !noeudVisible(idx.noeuds[nxt], f, idx)) continue;
+			const p = d.p + (e.kind === 'membre' ? 0 : 1);
+			if (p > limite) continue;
+			if (!(nxt in dist) || p < dist[nxt].p) {
+				dist[nxt] = { p, r: d.r + 1 };
+				file.push(nxt);
+			}
+		}
+	}
+	return dist;
+}
+
+function voisinage(idx, centre, amont, aval, f, maxMembres) {
+	if (!idx.noeuds[centre]) return { noeuds: [], aretes: [], replies: {} };
+	const cap = maxMembres == null ? MAX_MEMBRES_DEPLIES : maxMembres;
+	const replies = {};
+	const haut = _parcourir(idx, centre, 'amont', amont, f, cap, replies);
+	const bas = _parcourir(idx, centre, 'aval', aval, f, cap, replies);
+	const places = {};
+	for (const [id, d] of Object.entries(bas)) places[id] = { id, rang: d.r, profondeur: d.p, sens: 'aval' };
+	for (const [id, d] of Object.entries(haut)) places[id] = { id, rang: -d.r, profondeur: d.p, sens: 'amont' };
+	places[centre] = { id: centre, rang: 0, profondeur: 0, sens: 'centre' };
+	let ids = Object.keys(places);
+	const dedans = new Set(ids);
+	let aretes = [];
+	for (const id of ids) {
+		for (const e of idx.sortants[id]) {
+			if (dedans.has(e.target) && areteVisible(e, f)) aretes.push(e);
+		}
+	}
+	if (f.absentsSeuls) ({ ids, aretes } = _restreindreAbsents(ids, aretes, idx, centre));
+	for (const id of Object.keys(replies)) if (!ids.includes(id)) delete replies[id];
+	return {
+		noeuds: ids.sort().map(id => places[id]),
+		aretes: aretes.map(e => e.id).sort(),
+		replies,
+	};
+}
+
+// Colonnes par rang (amont à gauche, aval à droite), triées par catégorie puis nom ; une
+// colonne trop haute se replie en sous-colonnes. `vertical` (écran portrait) : les couches
+// deviennent des rangées, étroites (téléphone) donc repliées plus tôt. `maxParCol` force la
+// hauteur de colonne (réseau complet : des centaines de matières brutes au rang 0).
+function disposerCouches(noeuds, idx, vertical, maxParCol) {
+	const D = vertical
+		? { COL: 130, SOUS_COL: 74, LIGNE: 104, MAX: 3 }
+		: { COL: 230, SOUS_COL: 160, LIGNE: 64, MAX: 18 };
+	const COL = D.COL, SOUS_COL = D.SOUS_COL, LIGNE = D.LIGNE;
+	const MAX_PAR_COL = maxParCol || D.MAX;
+	const parRang = {};
+	for (const n of noeuds) (parRang[n.rang] = parRang[n.rang] || []).push(n.id);
+	const rangs = Object.keys(parRang).map(Number).sort((a, b) => a - b);
+	const pos = {};
+	let x = 0;
+	for (const rang of rangs) {
+		const ids = parRang[rang].sort((a, b) => {
+			const na = idx.noeuds[a], nb = idx.noeuds[b];
+			return (na.type === nb.type ? 0 : na.type === 'famille' ? -1 : 1)
+				|| String(na.categorie).localeCompare(String(nb.categorie))
+				|| String(na.label).localeCompare(String(nb.label));
+		});
+		const sousCols = Math.ceil(ids.length / MAX_PAR_COL);
+		ids.forEach((id, i) => {
+			const sc = Math.floor(i / MAX_PAR_COL);
+			const dansCol = sc < sousCols - 1 ? MAX_PAR_COL : ids.length - sc * MAX_PAR_COL;
+			const j = i - sc * MAX_PAR_COL;
+			const px = x + sc * SOUS_COL;
+			const py = (j - (dansCol - 1) / 2) * LIGNE;
+			pos[id] = vertical ? { x: py, y: px } : { x: px, y: py };
+		});
+		x += (sousCols - 1) * SOUS_COL + COL;
+	}
+	return pos;
+}
+
+// Rangs du réseau complet : plus long chemin depuis les sources (Kahn), matières brutes à
+// gauche, produits finis à droite. Les nœuds d'un cycle (aucun ordre topologique) prennent
+// 1 + le rang de leurs prédécesseurs déjà placés. Linéaire : la disposition par forces
+// figeait le navigateur plusieurs dizaines de secondes sur le réseau entier.
+function rangsGlobaux(ids, aretes) {
+	const dans = new Set(ids);
+	const deg = {}, succ = {}, pred = {}, rang = {};
+	for (const id of ids) { deg[id] = 0; succ[id] = []; pred[id] = []; }
+	for (const e of aretes) {
+		if (!dans.has(e.source) || !dans.has(e.target) || e.source === e.target) continue;
+		deg[e.target]++;
+		succ[e.source].push(e.target);
+		pred[e.target].push(e.source);
+	}
+	const file = ids.filter(id => deg[id] === 0).sort();
+	for (const id of file) rang[id] = 0;
+	for (let i = 0; i < file.length; i++) {
+		const cur = file[i];
+		for (const s of succ[cur]) {
+			rang[s] = Math.max(rang[s] || 0, rang[cur] + 1);
+			if (--deg[s] === 0) file.push(s);
+		}
+	}
+	let reste = ids.filter(id => !(id in rang)).sort();
+	while (reste.length) {
+		let avance = false;
+		for (const id of reste) {
+			const r = pred[id].filter(p => p in rang).map(p => rang[p] + 1);
+			if (r.length) { rang[id] = Math.max(...r); avance = true; }
+		}
+		if (!avance) rang[reste[0]] = 0;
+		reste = reste.filter(id => !(id in rang));
+	}
+	return ids.map(id => ({ id, rang: rang[id] }));
+}
+
+function chercherNoeuds(idx, q, parmi, limite) {
+	const qn = normaliserRecherche(q);
+	if (!qn) return [];
+	const res = [];
+	for (const id of (parmi ? [...parmi] : Object.keys(idx.noeuds))) {
+		const t = idx.norm[id];
+		if (!t) continue;
+		let score = -1;
+		if (t.label === qn) score = 0;
+		else if (t.label.startsWith(qn)) score = 1;
+		else if ((' ' + t.label).includes(' ' + qn)) score = 2;
+		else if (t.label.includes(qn)) score = 3;
+		else if (t.autres.includes(qn)) score = 4;
+		if (score >= 0) res.push([score, idx.noeuds[id]]);
+	}
+	res.sort((a, b) => a[0] - b[0] || String(a[1].label).localeCompare(String(b[1].label)));
+	const out = res.map(x => x[1]);
+	return limite ? out.slice(0, limite) : out;
+}
+
+function chercherMetiers(idx, q) {
+	const qn = normaliserRecherche(q);
+	if (!qn) return [];
+	return Object.entries(idx.lieux)
+		.filter(([lieu]) => lieu && normaliserRecherche(lieu).includes(qn))
+		.map(([lieu, n]) => ({ lieu, n }))
+		.sort((a, b) => b.n - a.n || a.lieu.localeCompare(b.lieu));
+}
+
+// Valeurs proposées par les filtres : RELUES du graphe (rien en dur), avec leurs effectifs.
+function valeursFiltres(idx) {
+	const compter = (cle) => {
+		const c = {};
+		for (const n of Object.values(idx.noeuds)) {
+			if (n.type !== 'item') continue;
+			c[n[cle] || ''] = (c[n[cle] || ''] || 0) + 1;
+		}
+		return Object.entries(c).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+	};
+	return {
+		categories: compter('categorie'),
+		sousCategories: compter('sous_categorie'),
+		raretes: compter('rarete'),
+		lieux: Object.entries(idx.lieux).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])),
+	};
+}
+
+// Recettes autour d'un nœud. `sertA` inclut celles atteintes VIA une famille (`via`).
+function recettesDe(idx, id) {
+	const toutes = Object.values(idx.recettes);
+	const parId = (a, b) => a.id.localeCompare(b.id);
+	const produitPar = toutes.filter(r => r.produit === id).sort(parId);
+	const sertA = [];
+	const direct = toutes.filter(r => r.entrees.some(x => x.id === id)).sort(parId);
+	for (const r of direct) sertA.push({ recette: r, via: null });
+	const familles = ((idx.sortants[id]) || []).filter(e => e.kind === 'membre').map(e => e.target);
+	for (const fid of familles.sort()) {
+		for (const r of toutes.filter(r => r.entrees.some(x => x.id === fid)).sort(parId)) {
+			sertA.push({ recette: r, via: fid });
+		}
+	}
+	const membres = ((idx.entrants[id]) || []).filter(e => e.kind === 'membre').map(e => e.source).sort();
+	// Sur-mesure : familles de pièces qu'une matière façonne / matières d'une famille.
+	const faconne = ((idx.sortants[id]) || []).filter(e => e.kind === 'fabrication').map(e => e.target).sort();
+	const matieresFab = ((idx.entrants[id]) || []).filter(e => e.kind === 'fabrication').map(e => e.source).sort();
+	return { produitPar, sertA, membres, faconne, matieresFab };
+}
+
+function compterFiltresActifs(f) {
+	const d = filtresParDefaut();
+	let n = 0;
+	for (const k of ['categories', 'sousCategories', 'raretes', 'lieux', 'roles']) if (f[k].length) n++;
+	for (const k of ['familles', 'fabrications', 'absentsSeuls', 'surMesure', 'terroir', 'masquerIsoles']) if (f[k] !== d[k]) n++;
+	return n;
+}
+
+// État de la vue ↔ query-string (partage / réouverture). Seuls les écarts au défaut sont écrits.
+const _URL_LISTES = { cat: 'categories', scat: 'sousCategories', rar: 'raretes', lieu: 'lieux', role: 'roles' };
+const _URL_BOOLS = { fam: 'familles', fabr: 'fabrications', abs: 'absentsSeuls', sm: 'surMesure', terroir: 'terroir', iso: 'masquerIsoles' };
+
+function etatVersUrl(etat) {
+	const p = new URLSearchParams();
+	if (etat.item) p.set('item', etat.item);
+	if (etat.mode === 'complet') p.set('mode', 'complet');
+	if (etat.amont !== PROFONDEUR_DEFAUT) p.set('amont', String(etat.amont));
+	if (etat.aval !== PROFONDEUR_DEFAUT) p.set('aval', String(etat.aval));
+	if (etat.q) p.set('q', etat.q);
+	const d = filtresParDefaut();
+	for (const [k, champ] of Object.entries(_URL_LISTES)) for (const v of etat.filtres[champ]) p.append(k, v);
+	for (const [k, champ] of Object.entries(_URL_BOOLS)) if (etat.filtres[champ] !== d[champ]) p.set(k, etat.filtres[champ] ? '1' : '0');
+	return p.toString();
+}
+
+function urlVersEtat(search) {
+	const p = new URLSearchParams(search || '');
+	const prof = (k) => {
+		const v = parseInt(p.get(k), 10);
+		return Number.isFinite(v) ? Math.max(0, Math.min(PROFONDEUR_MAX, v)) : PROFONDEUR_DEFAUT;
+	};
+	const filtres = filtresParDefaut();
+	for (const [k, champ] of Object.entries(_URL_LISTES)) filtres[champ] = p.getAll(k);
+	for (const [k, champ] of Object.entries(_URL_BOOLS)) if (p.has(k)) filtres[champ] = p.get(k) === '1';
+	return {
+		item: p.get('item') || '',
+		mode: p.get('mode') === 'complet' ? 'complet' : 'voisinage',
+		amont: prof('amont'), aval: prof('aval'),
+		q: p.get('q') || '',
+		filtres,
+	};
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// INTERFACE
+// ══════════════════════════════════════════════════════════════════════════════
+
+const $ = (id) => document.getElementById(id);
+function escapeHtml(s) {
+	return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+const PALETTE = ['#d9a441', '#5fa8d3', '#7cc47f', '#d46a6a', '#a98fd8', '#4fc1b0', '#e08a4f',
+	'#c97fb3', '#9fb54a', '#6f86d6', '#d8c75a', '#58a6a0', '#b7795b', '#8aa0b8'];
+const ROLES = [['brut', 'Matières brutes'], ['intermediaire', 'Intermédiaires'], ['fini', 'Produits finis'], ['isole', 'Isolés']];
+
+let IDX = null, CY = null, VALEURS = null, COULEURS = {};
+let ETAT = urlVersEtat(location.search);
+let MATCHS = [], MATCH_I = -1;
+let VERTICAL = false;
+const FICHES = new Map();
+
+function couleurCategorie(cat) {
+	return COULEURS[cat || ''] || '#8a93a5';
+}
+
+function libelleNoeud(n, replie) {
+	const base = n.type === 'famille' ? '⟨' + n.label + '⟩' : ((n.icon ? n.icon + ' ' : '') + n.label);
+	return replie ? base + ' (+' + replie + ')' : base;
+}
+
+function statut(txt, err) {
+	$('statut').textContent = txt;
+	$('statut').className = err ? 'err' : '';
+}
+
+function majUrl() {
+	const qs = etatVersUrl(ETAT);
+	history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+}
+
+function chargerCytoscape() {
+	if (window.cytoscape) return Promise.resolve();
+	// Repli si cdnjs est injoignable : même version publiée sur npm.
+	return new Promise((ok, ko) => {
+		const s = document.createElement('script');
+		s.src = 'https://cdn.jsdelivr.net/npm/cytoscape@3.30.2/dist/cytoscape.min.js';
+		s.onload = ok;
+		s.onerror = () => ko(new Error('Cytoscape introuvable (CDN injoignable)'));
+		document.head.appendChild(s);
+	});
+}
+
+function styleCy() {
+	return [
+		{ selector: 'node', style: {
+			'background-color': 'data(couleur)', 'label': 'data(etiquette)', 'color': '#e8e8e8',
+			'font-family': 'Share Tech Mono, monospace', 'font-size': 11, 'text-valign': 'bottom',
+			'text-margin-y': 4, 'width': 22, 'height': 22, 'text-outline-color': '#0d0f14',
+			'text-outline-width': 2, 'text-max-width': 130, 'text-wrap': 'ellipsis',
+			'min-zoomed-font-size': 7, 'border-width': 0,
+		} },
+		{ selector: 'node[type = "famille"]', style: {
+			'shape': 'round-rectangle', 'width': 34, 'height': 18, 'background-color': '#2a3040',
+			'border-width': 2, 'border-style': 'dashed', 'border-color': '#9aa3b2',
+		} },
+		{ selector: 'node[?absent]', style: {
+			'shape': 'diamond', 'border-width': 3, 'border-color': '#c84b4b', 'border-style': 'solid',
+		} },
+		// Famille de pièces façonnables sur mesure (après `absent` : elle garde sa forme,
+		// seule la bordure rouge dit qu'aucune pièce n'y entre).
+		{ selector: 'node[type = "piece"]', style: {
+			'shape': 'hexagon', 'width': 30, 'height': 26, 'background-color': '#3a2a1e',
+			'border-width': 2, 'border-style': 'solid', 'border-color': '#e08a4f', 'color': '#f0b88a',
+		} },
+		{ selector: 'node[type = "piece"][?absent]', style: { 'border-color': '#c84b4b', 'border-width': 3 } },
+		{ selector: 'node.centre', style: {
+			'width': 36, 'height': 36, 'border-width': 4, 'border-color': '#c8a84b', 'border-style': 'solid',
+			'font-size': 13, 'font-weight': 'bold', 'color': '#c8a84b', 'z-index': 10,
+		} },
+		{ selector: 'node.match', style: { 'border-width': 4, 'border-color': '#4bc87a', 'border-style': 'solid' } },
+		{ selector: 'node.courant', style: { 'overlay-color': '#4bc87a', 'overlay-opacity': 0.3, 'overlay-padding': 8 } },
+		{ selector: 'node:selected', style: { 'border-width': 4, 'border-color': '#4b8fc8', 'border-style': 'solid' } },
+		{ selector: '.estompe', style: { 'opacity': 0.18 } },
+		{ selector: 'edge', style: {
+			'curve-style': 'bezier', 'width': 1.5, 'line-color': '#4a5368', 'target-arrow-color': '#4a5368',
+			'target-arrow-shape': 'triangle', 'arrow-scale': 0.8,
+		} },
+		{ selector: 'edge[kind = "membre"]', style: {
+			'line-style': 'dashed', 'line-color': '#3a4152', 'target-arrow-color': '#3a4152', 'target-arrow-shape': 'vee',
+		} },
+		{ selector: 'edge[kind = "fabrication"]', style: {
+			'line-style': 'dotted', 'width': 2, 'line-color': '#e08a4f', 'target-arrow-color': '#e08a4f',
+			'target-arrow-shape': 'vee',
+		} },
+		{ selector: 'edge[?terroir]', style: { 'line-color': '#4bc8b8', 'target-arrow-color': '#4bc8b8' } },
+		{ selector: 'edge[?sur_commande]', style: { 'line-color': '#b07fd0', 'target-arrow-color': '#b07fd0' } },
+		{ selector: 'edge.recette-active', style: {
+			'line-color': '#c8a84b', 'target-arrow-color': '#c8a84b', 'width': 3.5, 'z-index': 9,
+			'label': 'data(etiquette)', 'font-size': 10, 'color': '#c8a84b', 'text-rotation': 'autorotate',
+			'text-outline-color': '#0d0f14', 'text-outline-width': 2,
+		} },
+	];
+}
+
+function elementsCy(ids, aretes, replies) {
+	const els = [];
+	for (const id of ids) {
+		const n = IDX.noeuds[id];
+		els.push({ group: 'nodes', data: {
+			id, type: n.type, absent: !!n.absent,
+			couleur: n.type === 'famille' ? '#2a3040' : n.type === 'piece' ? '#3a2a1e'
+				: (n.absent ? '#555' : couleurCategorie(n.categorie)),
+			etiquette: libelleNoeud(n, replies && replies[id]),
+		} });
+	}
+	for (const eid of aretes) {
+		const e = IDX.aretes[eid];
+		els.push({ group: 'edges', data: {
+			id: eid, source: e.source, target: e.target, kind: e.kind, recette: e.recette || '',
+			sur_commande: !!e.sur_commande, terroir: !!e.lieu_portee,
+			etiquette: e.kind === 'recette' ? (e.quantite + '× · ' + (e.lieu_categorie || '?')) : '',
+		} });
+	}
+	return els;
+}
+
+function rendre() {
+	majUrl();
+	majOutils();
+	CY.resize();   // la fiche a pu s'ouvrir / se fermer : cadrer sur la place réellement libre
+	CY.style().selector('node').style('text-max-width', VERTICAL ? 96 : 130).update();
+	$('accueil').hidden = true;
+	if (ETAT.mode === 'voisinage' && !IDX.noeuds[ETAT.item]) {
+		CY.elements().remove();
+		afficherAccueil();
+		statut(ETAT.item ? 'Introuvable : ' + ETAT.item : 'Choisissez un item');
+		majLegende([]);
+		return;
+	}
+	CY.elements().remove();
+	if (ETAT.mode === 'voisinage') {
+		const v = voisinage(IDX, ETAT.item, ETAT.amont, ETAT.aval, ETAT.filtres);
+		const ids = v.noeuds.map(n => n.id);
+		CY.add(elementsCy(ids, v.aretes, v.replies));
+		const pos = disposerCouches(v.noeuds, IDX, VERTICAL);
+		CY.nodes().positions(n => pos[n.id()]);
+		CY.getElementById(ETAT.item).addClass('centre');
+		CY.fit(undefined, 30);
+		statut(ids.length + ' nœuds · ' + v.aretes.length + ' liens');
+		majLegende(ids);
+	} else {
+		const g = filtrerGraphe(IDX, ETAT.filtres);
+		if (!g.ids.length) {
+			statut('Aucun nœud ne passe les filtres');
+			majLegende([]);
+			return;
+		}
+		CY.add(elementsCy(g.ids, g.aretes, null));
+		const rangs = rangsGlobaux(g.ids, g.aretes.map(id => IDX.aretes[id]));
+		const pos = disposerCouches(rangs, IDX, VERTICAL, Math.max(VERTICAL ? 3 : 18, Math.ceil(Math.sqrt(g.ids.length) * (VERTICAL ? 0.5 : 1.2))));
+		CY.nodes().positions(n => pos[n.id()]);
+		if (ETAT.item && CY.getElementById(ETAT.item).length) CY.getElementById(ETAT.item).addClass('centre');
+		CY.fit(undefined, 30);
+		statut(g.ids.length + ' nœuds · ' + g.aretes.length + ' liens');
+		majLegende(g.ids);
+	}
+	appliquerSurlignage(false);
+}
+
+function majOutils() {
+	$('mode-voisinage').classList.toggle('on', ETAT.mode === 'voisinage');
+	$('mode-complet').classList.toggle('on', ETAT.mode === 'complet');
+	$('val-amont').textContent = ETAT.amont;
+	$('val-aval').textContent = ETAT.aval;
+	for (const id of ['stp-amont', 'stp-aval']) $(id).classList.toggle('inactif', ETAT.mode !== 'voisinage');
+	const n = compterFiltresActifs(ETAT.filtres);
+	$('badge-filtres').hidden = !n;
+	$('badge-filtres').textContent = n;
+}
+
+function majLegende(ids) {
+	const c = {};
+	for (const id of ids) {
+		const n = IDX.noeuds[id];
+		if (n.type === 'item' && !n.absent) c[n.categorie || ''] = (c[n.categorie || ''] || 0) + 1;
+	}
+	const cats = Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 10);
+	$('legende-contenu').innerHTML = cats.map(([cat, k]) =>
+		`<div class="leg"><span class="pastille" style="background:${couleurCategorie(cat)}"></span>${escapeHtml(cat || '—')} <small>(${k})</small></div>`).join('')
+		+ '<div class="leg"><span class="pastille famille"></span>famille (sous-catégorie)</div>'
+		+ '<div class="leg"><span class="pastille absent"></span>absent de la base</div>'
+		+ '<div class="leg"><span class="trait"></span>recette</div>'
+		+ '<div class="leg"><span class="trait membre"></span>appartient à la famille</div>'
+		+ (ETAT.filtres.fabrications
+			? '<div class="leg"><span class="pastille piece"></span>⚒ famille de pièces sur mesure</div>'
+			+ '<div class="leg"><span class="trait fabrication"></span>matière de fabrication</div>' : '')
+		+ '<div class="leg"><span class="trait terroir"></span>spécialité de terroir</div>'
+		+ '<div class="leg"><span class="trait sur-mesure"></span>sur mesure</div>';
+}
+
+function afficherAccueil() {
+	// Points d'entrée : les items les plus reliés du réseau.
+	const top = Object.values(IDX.noeuds).filter(n => n.type === 'item')
+		.map(n => [n, IDX.entrants[n.id].length + IDX.sortants[n.id].length])
+		.sort((a, b) => b[1] - a[1]).slice(0, 12);
+	$('accueil').innerHTML = '<div>Recherchez un item (nom, id, sous-catégorie) ou un métier,<br>'
+		+ 'ou affichez le réseau <b>complet</b> filtré.</div>'
+		+ '<div class="chips">' + top.map(([n, k]) =>
+			`<button type="button" class="ghost" data-centrer="${escapeHtml(n.id)}">${escapeHtml(libelleNoeud(n))} <small>${k}</small></button>`).join('')
+		+ '</div>';
+	$('accueil').hidden = false;
+}
+
+function centrerSur(id) {
+	if (!IDX.noeuds[id]) return;
+	ETAT.item = id;
+	ETAT.mode = 'voisinage';
+	rendre();
+}
+
+// ── Recherche : suggestions + surlignage dans la vue ─────────────────────────
+let SUGG_I = -1;
+
+function majSuggestions() {
+	const q = $('recherche').value;
+	const box = $('suggestions');
+	const noeuds = chercherNoeuds(IDX, q, null, 30);
+	const metiers = chercherMetiers(IDX, q).slice(0, 6);
+	if (!q.trim()) { fermerSuggestions(); return; }
+	if (!noeuds.length && !metiers.length) {
+		box.innerHTML = '<div class="sugg-titre">Aucun résultat</div>';
+		box.hidden = false;
+		return;
+	}
+	let html = '';
+	if (noeuds.length) {
+		html += '<div class="sugg-titre">Items et familles</div>' + noeuds.map(n =>
+			`<button type="button" class="sugg" role="option" data-centrer="${escapeHtml(n.id)}">`
+			+ `<span class="nom">${escapeHtml(libelleNoeud(n))}</span>`
+			+ `<small>${escapeHtml(n.type === 'famille' ? 'famille' : n.type === 'piece' ? 'sur mesure' : (n.categorie || '—'))}${n.absent ? ' · absent' : ''}</small></button>`).join('');
+	}
+	if (metiers.length) {
+		html += '<div class="sugg-titre">Métiers (catégorie de lieu)</div>' + metiers.map(m =>
+			`<button type="button" class="sugg" role="option" data-metier="${escapeHtml(m.lieu)}">`
+			+ `<span class="nom">🏭 ${escapeHtml(m.lieu)}</span><small>${m.n} recettes</small></button>`).join('');
+	}
+	box.innerHTML = html;
+	box.hidden = false;
+	SUGG_I = -1;
+}
+
+function fermerSuggestions() { $('suggestions').hidden = true; SUGG_I = -1; }
+
+function choisirMetier(lieu) {
+	ETAT.filtres.lieux = [lieu];
+	ETAT.mode = 'complet';
+	$('recherche').value = '';
+	ETAT.q = '';
+	fermerSuggestions();
+	rendre();
+}
+
+function appliquerSurlignage(deplacer) {
+	if (!CY) return;
+	CY.elements().removeClass('match courant estompe');
+	const q = ETAT.q;
+	const affiches = new Set(CY.nodes().map(n => n.id()));
+	MATCHS = q ? chercherNoeuds(IDX, q, affiches, 0).map(n => n.id) : [];
+	if (!q || !affiches.size) { $('surlignage').hidden = true; MATCH_I = -1; return; }
+	$('surlignage').hidden = false;
+	if (!MATCHS.length) {
+		$('surlignage-texte').textContent = 'Aucune correspondance dans la vue';
+		MATCH_I = -1;
+		return;
+	}
+	const set = new Set(MATCHS);
+	CY.nodes().forEach(n => n.addClass(set.has(n.id()) ? 'match' : 'estompe'));
+	CY.edges().addClass('estompe');
+	if (MATCH_I >= MATCHS.length || MATCH_I < 0) MATCH_I = 0;
+	allerMatch(deplacer);
+}
+
+function allerMatch(deplacer) {
+	if (!MATCHS.length) return;
+	CY.nodes().removeClass('courant');
+	const n = CY.getElementById(MATCHS[MATCH_I]);
+	n.addClass('courant');
+	$('surlignage-texte').textContent = `${MATCH_I + 1} / ${MATCHS.length} correspondance${MATCHS.length > 1 ? 's' : ''} dans la vue`;
+	if (deplacer) CY.animate({ center: { eles: n }, zoom: Math.max(CY.zoom(), 1.1) }, { duration: 250 });
+}
+
+// ── Fiche ─────────────────────────────────────────────────────────────────────
+const CLES_HORS_DETAIL = new Set(['_id', '_rev', 'type', 'nom', 'icon', 'description', 'categorie',
+	'sous_categorie', 'rarete', 'poids', 'valeur']);
+
+function lienNoeud(id, quantite) {
+	const n = IDX.noeuds[id];
+	const txt = n ? libelleNoeud(n) : id;
+	return (quantite ? `<span class="fleche">${quantite}×</span> ` : '')
+		+ `<button type="button" class="lien${n && n.absent ? ' absent' : ''}" data-fiche="${escapeHtml(id)}">${escapeHtml(txt)}</button>`;
+}
+
+function blocRecette(r, via) {
+	const tags = [];
+	if (r.sur_commande) tags.push('<span class="tag">sur mesure</span>');
+	if (r.lieu_portee) tags.push(`<span class="tag">terroir : ${escapeHtml(r.lieu_portee)}</span>`);
+	if (via) tags.push(`<span class="tag">via ${escapeHtml(libelleNoeud(IDX.noeuds[via]))}</span>`);
+	return `<div class="recette"><div class="lieu">🏭 ${escapeHtml(r.lieu_categorie || '?')} ${tags.join('')}`
+		+ ` <button type="button" class="lien" data-recette="${escapeHtml(r.id)}">recette</button></div>`
+		+ r.entrees.map(x => lienNoeud(x.id, x.quantite)).join(' <span class="fleche">+</span> ')
+		+ ` <span class="fleche">→</span> ${lienNoeud(r.produit, r.quantite_produite > 1 ? r.quantite_produite : 0)}</div>`;
+}
+
+function ouvrirPanneau(titre, html) {
+	$('fiche-titre').textContent = titre;
+	$('fiche-corps').innerHTML = html;
+	$('fiche-corps').scrollTop = 0;
+	$('fiche').hidden = false;
+	$('fiche').classList.remove('reduite');
+	if (CY) CY.resize();
+}
+
+function fermerFiche() {
+	$('fiche').hidden = true;
+	if (CY) { CY.edges().removeClass('recette-active'); CY.nodes().unselect(); CY.resize(); }
+}
+
+// La fiche réduit la place du graphe : ramener le nœud touché dans la partie visible.
+function rendreVisible(id) {
+	if (!CY) return;
+	const n = CY.getElementById(id);
+	if (!n.length) return;
+	const p = n.renderedPosition();
+	if (p.x < 20 || p.y < 20 || p.x > CY.width() - 20 || p.y > CY.height() - 20) {
+		CY.animate({ center: { eles: n } }, { duration: 250 });
+	}
+}
+
+function selectionnerDansVue(id) {
+	if (!CY) return;
+	CY.edges().removeClass('recette-active');
+	CY.nodes().unselect();
+	const n = CY.getElementById(id);
+	if (n.length) n.select();
+}
+
+const ROLE_LIBELLE = { brut: 'matière brute', intermediaire: 'intermédiaire', fini: 'produit fini', isole: 'isolé', famille: 'famille', piece: 'famille de pièces sur mesure' };
+const ABSENT_LIBELLE = { famille: 'aucun item de cette sous-catégorie', piece: 'aucune pièce dans cette famille' };
+
+function ouvrirFiche(id) {
+	const n = IDX.noeuds[id];
+	if (!n) return;
+	selectionnerDansVue(id);
+	const r = recettesDe(IDX, id);
+	const tags = [];
+	tags.push(`<span class="tag">${escapeHtml(ROLE_LIBELLE[roleNoeud(IDX, id)] || '')}</span>`);
+	if (n.categorie) tags.push(`<span class="tag">${escapeHtml(n.categorie)}</span>`);
+	if (n.sous_categorie && n.type === 'item') tags.push(`<span class="tag">${escapeHtml(n.sous_categorie)}</span>`);
+	if (n.rarete) tags.push(`<span class="tag">${escapeHtml(n.rarete)}</span>`);
+	if (n.absent) tags.push(`<span class="tag alerte">${ABSENT_LIBELLE[n.type] || 'aucun doc en base'}</span>`);
+	let html = `<div class="id">${escapeHtml(id)}</div><div class="tags">${tags.join('')}</div>`
+		+ `<div class="actions"><button type="button" class="secondary" data-centrer="${escapeHtml(id)}">🎯 Centrer le graphe ici</button></div>`
+		+ (n.type === 'item' && !n.absent ? '<div id="fiche-detail" class="vide">Chargement de la fiche…</div>' : '');
+	if (n.type === 'piece') {
+		const pieces = n.pieces || [];
+		html += `<div class="desc">Pièces de catégorie ou de sous-catégorie « ${escapeHtml(n.label)} » : `
+			+ 'les matières ci-dessous peuvent les façonner sur mesure, dans toute maison qui fabrique sur mesure.</div>'
+			+ `<h3>Matières qui la façonnent (${r.matieresFab.length})</h3>`
+			+ (r.matieresFab.length ? r.matieresFab.map(m => lienNoeud(m)).join(' · ') : '<div class="vide">Aucune.</div>')
+			+ `<h3>Pièces de cette famille (${pieces.length})</h3>`
+			+ (pieces.length ? pieces.map(m => lienNoeud(m)).join(' · ') : '<div class="vide">Aucun item n’a cette catégorie ni cette sous-catégorie.</div>');
+		ouvrirPanneau(libelleNoeud(n), html);
+		rendreVisible(id);
+		return;
+	}
+	if (n.type === 'famille') {
+		html += `<h3>Membres (${r.membres.length})</h3>`
+			+ (r.membres.length ? r.membres.map(m => lienNoeud(m)).join(' · ') : '<div class="vide">Aucun item n’a cette sous-catégorie.</div>');
+	} else {
+		html += `<h3>Fabriqué par (${r.produitPar.length})</h3>`
+			+ (r.produitPar.length ? r.produitPar.map(x => blocRecette(x, null)).join('') : '<div class="vide">Aucune recette ne le produit.</div>');
+	}
+	html += `<h3>Sert à fabriquer (${r.sertA.length})</h3>`
+		+ (r.sertA.length ? r.sertA.map(x => blocRecette(x.recette, x.via)).join('') : '<div class="vide">N’entre dans aucune recette.</div>');
+	if (n.matiere_fabrication) {
+		html += '<h3>⚒ Fabrication sur mesure</h3>'
+			+ (n.fabrication_nom ? `<div>Variante « <b>${escapeHtml(n.fabrication_nom)}</b> »</div>` : '')
+			+ (r.faconne.length
+				? '<div>Façonne : ' + r.faconne.map(m => lienNoeud(m)).join(' · ') + '</div>'
+				: '<div class="vide">Aucun tag <code>fabrication_*</code> : seulement chez une maison dont le métier achète cette matière.</div>');
+	}
+	ouvrirPanneau(libelleNoeud(n), html);
+	rendreVisible(id);
+	if (n.type === 'item' && !n.absent) chargerDetail(id);
+}
+
+async function chargerDetail(id) {
+	let data = FICHES.get(id);
+	if (!data) {
+		try {
+			const res = await fetch('/admin/recettes-graphe/item?id=' + encodeURIComponent(id));
+			if (!res.ok) throw new Error('HTTP ' + res.status);
+			data = await res.json();
+			FICHES.set(id, data);
+		} catch (err) {
+			const el = $('fiche-detail');
+			if (el) el.textContent = 'Fiche illisible : ' + err.message;
+			return;
+		}
+	}
+	const el = $('fiche-detail');
+	// La fiche a pu changer pendant la requête : n'écrire que dans celle de CET item.
+	if (!el || $('fiche-corps').querySelector('.id').textContent !== id) return;
+	const doc = data.doc;
+	if (!doc) { el.textContent = 'Doc introuvable en base.'; return; }
+	const kv = [];
+	if (doc.poids != null) kv.push(['poids', doc.poids]);
+	if (data.prix) kv.push(['prix', data.prix.min === data.prix.max ? data.prix.min + ' cu' : data.prix.min + ' – ' + data.prix.max + ' cu']);
+	for (const [k, v] of Object.entries(doc)) {
+		if (CLES_HORS_DETAIL.has(k)) continue;
+		if (v == null || v === '' || (Array.isArray(v) && !v.length)) continue;
+		kv.push([k, typeof v === 'object' ? JSON.stringify(v) : v]);
+	}
+	el.className = '';
+	el.innerHTML = (doc.description ? `<div class="desc">${escapeHtml(doc.description)}</div>` : '')
+		+ '<h3>Caractéristiques</h3><dl class="kv">'
+		+ kv.map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`).join('') + '</dl>'
+		+ `<details class="json"><summary>JSON brut</summary><pre>${escapeHtml(JSON.stringify(doc, null, 2))}</pre></details>`;
+}
+
+function ouvrirRecette(rid) {
+	const r = IDX.recettes[rid];
+	if (!r) return;
+	if (CY) {
+		CY.nodes().unselect();
+		CY.edges().removeClass('recette-active');
+		CY.edges().filter(e => e.data('recette') === rid).addClass('recette-active');
+	}
+	const kv = [['lieu', r.lieu_categorie || '?'], ['quantité produite', r.quantite_produite]];
+	if (r.lieu_portee) kv.push(['portée (terroir)', r.lieu_portee]);
+	if (r.sur_commande) kv.push(['sur commande', 'oui']);
+	ouvrirPanneau('📜 Recette',
+		`<div class="id">${escapeHtml(rid)}</div>`
+		+ '<dl class="kv" style="margin-top:8px">' + kv.map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`).join('') + '</dl>'
+		+ '<h3>Entrées</h3>' + r.entrees.map(x => '<div>' + lienNoeud(x.id, x.quantite) + '</div>').join('')
+		+ '<h3>Produit</h3>' + lienNoeud(r.produit, r.quantite_produite > 1 ? r.quantite_produite : 0));
+}
+
+// ── Filtres ───────────────────────────────────────────────────────────────────
+function groupeChoix(titre, champ, valeurs, libelle) {
+	const sel = new Set(ETAT.filtres[champ]);
+	const recherche = valeurs.length > 12
+		? `<input type="search" class="filtre-recherche" data-filtre-recherche="${champ}" placeholder="Filtrer la liste…" aria-label="Filtrer ${escapeHtml(titre)}">` : '';
+	return `<fieldset><legend>${escapeHtml(titre)}</legend>${recherche}<div class="choix" data-champ="${champ}">`
+		+ valeurs.map(([v, n]) => `<label data-norm="${escapeHtml(normaliserRecherche(v))}"><input type="checkbox" value="${escapeHtml(v)}"${sel.has(v) ? ' checked' : ''}>`
+			+ `${escapeHtml(libelle ? libelle(v) : (v || '—'))}${n != null ? ` <small>${n}</small>` : ''}</label>`).join('')
+		+ '</div></fieldset>';
+}
+
+function bascule(champ, texte) {
+	return `<label class="bascule"><input type="checkbox" data-bool="${champ}"${ETAT.filtres[champ] ? ' checked' : ''}> ${escapeHtml(texte)}</label>`;
+}
+
+function rendreFiltres() {
+	const roles = ROLES.map(([v, l]) => [v, null]);
+	const libRole = Object.fromEntries(ROLES);
+	$('filtres-corps').innerHTML =
+		'<fieldset><legend>Affichage</legend>'
+		+ bascule('masquerIsoles', 'Masquer les nœuds sans lien visible')
+		+ bascule('familles', 'Afficher les familles (entrées par sous-catégorie)')
+		+ bascule('fabrications', 'Afficher les liens de fabrication sur mesure (matière → ⚒ famille de pièces)')
+		+ bascule('terroir', 'Inclure les spécialités de terroir')
+		+ bascule('surMesure', 'Inclure les variantes sur mesure')
+		+ bascule('absentsSeuls', 'Diagnostic : seulement les nœuds absents de la base et leurs voisins')
+		+ '</fieldset>'
+		+ groupeChoix('Rôle dans le réseau', 'roles', roles, v => libRole[v])
+		+ groupeChoix('Métier (catégorie de lieu de la recette)', 'lieux', VALEURS.lieux)
+		+ groupeChoix('Catégorie d’item', 'categories', VALEURS.categories)
+		+ groupeChoix('Sous-catégorie', 'sousCategories', VALEURS.sousCategories)
+		+ groupeChoix('Rareté', 'raretes', VALEURS.raretes);
+}
+
+function ouvrirFiltres() {
+	rendreFiltres();
+	$('filtres').hidden = false;
+	$('filtres-fond').hidden = false;
+}
+
+function fermerFiltres() {
+	$('filtres').hidden = true;
+	$('filtres-fond').hidden = true;
+}
+
+// ── Démarrage ─────────────────────────────────────────────────────────────────
+function brancher() {
+	$('recherche').addEventListener('input', () => {
+		ETAT.q = $('recherche').value.trim();
+		majSuggestions();
+		MATCH_I = 0;
+		appliquerSurlignage(false);
+		majUrl();
+	});
+	$('recherche').addEventListener('focus', () => { if ($('recherche').value.trim()) majSuggestions(); });
+	$('recherche').addEventListener('keydown', (ev) => {
+		const opts = [...$('suggestions').querySelectorAll('.sugg')];
+		if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+			if (!opts.length) return;
+			ev.preventDefault();
+			SUGG_I = (SUGG_I + (ev.key === 'ArrowDown' ? 1 : -1) + opts.length) % opts.length;
+			opts.forEach((o, i) => o.classList.toggle('actif', i === SUGG_I));
+			opts[SUGG_I].scrollIntoView({ block: 'nearest' });
+		} else if (ev.key === 'Enter') {
+			ev.preventDefault();
+			const o = opts[SUGG_I >= 0 ? SUGG_I : 0];
+			if (o) o.click();
+		} else if (ev.key === 'Escape') {
+			fermerSuggestions();
+		}
+	});
+	document.addEventListener('pointerdown', (ev) => {
+		if (!ev.target.closest('.search-wrap')) fermerSuggestions();
+	});
+
+	// Délégation : tout `data-centrer` / `data-fiche` / `data-recette` / `data-metier` de la page.
+	document.addEventListener('click', (ev) => {
+		const b = ev.target.closest('[data-centrer],[data-fiche],[data-recette],[data-metier]');
+		if (!b) return;
+		if (b.dataset.metier != null) return choisirMetier(b.dataset.metier);
+		if (b.dataset.recette != null) return ouvrirRecette(b.dataset.recette);
+		if (b.dataset.fiche != null) return ouvrirFiche(b.dataset.fiche);
+		if (b.dataset.centrer != null) {
+			if (b.classList.contains('sugg')) {
+				$('recherche').value = '';
+				ETAT.q = '';
+				fermerSuggestions();
+			}
+			// Fiche d'abord : le cadrage du nouveau voisinage tient compte de sa place.
+			ouvrirFiche(b.dataset.centrer);
+			centrerSur(b.dataset.centrer);
+			selectionnerDansVue(b.dataset.centrer);
+		}
+	});
+
+	$('mode-voisinage').addEventListener('click', () => { ETAT.mode = 'voisinage'; rendre(); });
+	$('mode-complet').addEventListener('click', () => { ETAT.mode = 'complet'; rendre(); });
+	for (const [id, champ] of [['stp-amont', 'amont'], ['stp-aval', 'aval']]) {
+		$(id).addEventListener('click', (ev) => {
+			const b = ev.target.closest('button');
+			if (!b) return;
+			const v = Math.max(0, Math.min(PROFONDEUR_MAX, ETAT[champ] + Number(b.dataset.delta)));
+			if (v === ETAT[champ] && ETAT.mode === 'voisinage') return;
+			ETAT[champ] = v;
+			ETAT.mode = 'voisinage';
+			rendre();
+		});
+	}
+	$('btn-recadrer').addEventListener('click', () => CY && CY.animate({ fit: { padding: 30 } }, { duration: 250 }));
+	$('surl-prec').addEventListener('click', () => { MATCH_I = (MATCH_I - 1 + MATCHS.length) % MATCHS.length; allerMatch(true); });
+	$('surl-suiv').addEventListener('click', () => { MATCH_I = (MATCH_I + 1) % MATCHS.length; allerMatch(true); });
+
+	$('fiche-fermer').addEventListener('click', fermerFiche);
+	$('fiche-reduire').addEventListener('click', () => { $('fiche').classList.toggle('reduite'); CY.resize(); });
+
+	$('btn-filtres').addEventListener('click', ouvrirFiltres);
+	$('filtres-fermer').addEventListener('click', fermerFiltres);
+	$('filtres-ok').addEventListener('click', fermerFiltres);
+	$('filtres-fond').addEventListener('click', fermerFiltres);
+	$('filtres-reset').addEventListener('click', () => { ETAT.filtres = filtresParDefaut(); rendreFiltres(); rendre(); });
+	$('filtres-corps').addEventListener('change', (ev) => {
+		const t = ev.target;
+		if (t.dataset.bool) {
+			ETAT.filtres[t.dataset.bool] = t.checked;
+		} else {
+			const box = t.closest('.choix');
+			if (!box) return;
+			ETAT.filtres[box.dataset.champ] = [...box.querySelectorAll('input:checked')].map(i => i.value);
+		}
+		rendre();
+	});
+	$('filtres-corps').addEventListener('input', (ev) => {
+		const champ = ev.target.dataset.filtreRecherche;
+		if (!champ) return;
+		const q = normaliserRecherche(ev.target.value);
+		$('filtres-corps').querySelectorAll(`.choix[data-champ="${champ}"] label`).forEach(l => {
+			l.hidden = !!q && !l.dataset.norm.includes(q);
+		});
+	});
+
+	document.addEventListener('keydown', (ev) => {
+		if (ev.key !== 'Escape') return;
+		if (!$('filtres').hidden) fermerFiltres();
+		else if (!$('suggestions').hidden) fermerSuggestions();
+		else if (!$('fiche').hidden) fermerFiche();
+	});
+
+	CY.on('tap', 'node', (ev) => ouvrirFiche(ev.target.id()));
+	CY.on('tap', 'edge', (ev) => {
+		const e = IDX.aretes[ev.target.id()];
+		if (e.kind === 'recette') ouvrirRecette(e.recette);
+		else ouvrirFiche(e.target);
+	});
+	CY.on('dbltap taphold', 'node', (ev) => { centrerSur(ev.target.id()); selectionnerDansVue(ev.target.id()); });
+
+	// Disposition portrait/paysage : ne se refait QUE si l'orientation bascule (rendu stable).
+	window.addEventListener('resize', () => {
+		const v = window.innerWidth < window.innerHeight && window.innerWidth <= 720;
+		if (v !== VERTICAL) {
+			VERTICAL = v;
+			if (ETAT.mode === 'voisinage' && IDX.noeuds[ETAT.item]) rendre();
+		}
+	});
+}
+
+async function demarrer() {
+	try {
+		const [res] = await Promise.all([fetch('/admin/recettes-graphe/data'), chargerCytoscape()]);
+		if (!res.ok) throw new Error('HTTP ' + res.status);
+		IDX = indexerGraphe(await res.json());
+	} catch (err) {
+		statut('Chargement impossible : ' + err.message, true);
+		return;
+	}
+	VALEURS = valeursFiltres(IDX);
+	VALEURS.categories.forEach(([cat], i) => { COULEURS[cat] = PALETTE[i % PALETTE.length]; });
+	VERTICAL = window.innerWidth < window.innerHeight && window.innerWidth <= 720;
+	CY = cytoscape({
+		container: $('cy'), style: styleCy(), minZoom: 0.05, maxZoom: 4,
+		wheelSensitivity: 0.3, boxSelectionEnabled: false,
+	});
+	brancher();
+	$('recherche').value = ETAT.q;
+	if (ETAT.item && IDX.noeuds[ETAT.item]) ouvrirFiche(ETAT.item);
+	rendre();
+	if (ETAT.item) selectionnerDansVue(ETAT.item);
+}
+
+demarrer();
+</script>
+</body>
+</html>
