@@ -531,10 +531,10 @@
     "_id": "pnj:aubergiste_du_coq_de_lutece",
     "type": "pnj",
     "nom": "L'aubergiste",
-    "race": "humain",
+    "race": "elfe",
     "vocation": "aubergiste",
-    "portrait": "aubergiste_Coq_de_Lutece_humain_m.jpg",
-    "description": "Le tenancier du Coq de Lutèce. Il n'a jamais quitté son comptoir de la journée, et il ne sait pas ce qui s'est passé dans la forêt.",
+    "portrait": "aubergiste_Coq_de_Lutece_elfe_f.jpg",
+    "description": "La tenancière du Coq de Lutèce, une elfe qui a vu passer plus de voyageurs qu'elle ne saurait en compter. Elle n'a pas quitté son comptoir de la journée, et elle ne sait pas ce qui s'est passé dans la forêt.",
     "dialogue": {
       "noeud_depart": "accueil",
       "noeuds": {
@@ -571,7 +571,7 @@
           ]
         },
         "absente_01": {
-          "texte": "Il repose la chope. « Elle est partie hier matin chercher des herbes dans la forêt. Elle devait être revenue depuis longtemps. »",
+          "texte": "L'aubergiste repose la chope. « Elle est partie hier matin chercher des herbes dans la forêt. Elle devait être revenue depuis longtemps. »",
           "choix": [
             {
               "id": "suite",
@@ -581,7 +581,7 @@
           ]
         },
         "absente_02": {
-          "texte": "« Des gars du relais sont partis à l'aube, avec des lanternes et le chien du palefrenier. Ils suivent les sentiers qu'elle prenait d'habitude. » Il regarde la porte. « Elle connaît cette forêt mieux que nous tous. »",
+          "texte": "« Des gars du relais sont partis à l'aube, avec des lanternes et le chien du palefrenier. Ils suivent les sentiers qu'elle prenait d'habitude. » L'elfe regarde la porte. « Elle connaît cette forêt mieux que nous tous. »",
           "choix": [
             {
               "id": "fin",
@@ -591,7 +591,7 @@
           ]
         },
         "retrouvee_01": {
-          "texte": "Il met longtemps à répondre. « On a retrouvé son panier près d'un sentier forestier. Quelques herbes renversées autour. » Il pose la chope. « Elle, on l'a trouvée plus loin. »",
+          "texte": "L'aubergiste met longtemps à répondre. « On a retrouvé son panier près d'un sentier forestier. Quelques herbes renversées autour. » La chope reste immobile entre ses mains. « Elle, on l'a trouvée plus loin. »",
           "choix": [
             {
               "id": "suite",
@@ -601,7 +601,7 @@
           ]
         },
         "retrouvee_02": {
-          "texte": "« Je ne sais pas. Personne ne sait. Une bête, peut-être. Ou autre chose. » Il secoue la tête. « Elle était simplement partie chercher des herbes. »",
+          "texte": "« Je ne sais pas. Personne ne sait. Une bête, peut-être. Ou autre chose. » L'elfe secoue la tête. « Elle était simplement partie chercher des herbes. »",
           "choix": [
             {
               "id": "suite",
@@ -635,6 +635,7 @@
         "character": "pnj:elise_herboriste",
         "nom": "Élise",
         "portrait": "herboriste_Elise_naine_f.jpg",
+        "image": "pnj_herboriste_Elise_naine_f_le_coq_de_lutece.jpg",
         "probabilite": 1,
         "description": "Une naine aux manches retroussées, des herbes séchées plein les mains.",
         "conditions": [
@@ -649,9 +650,10 @@
       {
         "character": "pnj:aubergiste_du_coq_de_lutece",
         "nom": "L'aubergiste",
-        "portrait": "aubergiste_Coq_de_Lutece_humain_m.jpg",
+        "portrait": "aubergiste_Coq_de_Lutece_elfe_f.jpg",
+        "image": "pnj_aubergiste_Coq_de_Lutece_elfe_f_le_coq_de_lutece.jpg",
         "probabilite": 1,
-        "description": "Le tenancier, derrière son comptoir.",
+        "description": "La tenancière, une elfe aux tresses piquées d'herbes, derrière son comptoir.",
         "conditions": [
           {
             "passages": {
