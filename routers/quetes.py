@@ -236,6 +236,7 @@ async def quetes_terminer(
 		"titre": q.get("titre", "—"),
 		"rang": q.get("rang", "F"),
 		"recompenses": q.get("recompenses", {}),
+		"giver": q.get("giver"),   # lu par acces.quete_reussie_cite
 		"termine_at": quetes.now_epoch(),
 	})
 	character["quetes_terminees"] = termine

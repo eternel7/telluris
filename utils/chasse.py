@@ -662,6 +662,7 @@ def solder_rang(character: dict, quete_id: str) -> dict | None:
 		"id": q.get("id") or q.get("_id"),
 		"titre": q.get("titre", "—"),
 		"rang": q.get("rang", nouveau),
+		"giver": q.get("giver"),   # lu par acces.quete_reussie_cite
 		"termine_at": quetes.now_epoch(),
 	})
 	return {"promu": nouveau, "recompenses": recap}
@@ -739,6 +740,9 @@ def solder_apport(character: dict, cite: str, spec: dict) -> dict | None:
 		"id": apport_quete_id(spec, cite),
 		"titre": spec.get("titre") or f"Épreuve de rang {promu}",
 		"rang": promu,
+		# Pas de quête active, donc pas de `giver` : la cité est connue, on l'archive telle
+		# quelle (lue par acces.quete_reussie_cite).
+		"cite": cite,
 		"termine_at": quetes.now_epoch(),
 	})
 	return {"promu": promu, "recompenses": recap}

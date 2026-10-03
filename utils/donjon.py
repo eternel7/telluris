@@ -522,6 +522,7 @@ def solder_commission(character: dict, quete_id: str) -> dict | None:
 		# inertes pour le reste du jeu, qui ne lit que `titre`/`rang`/`termine_at`.
 		"source": "commission",
 		"lieu": (q.get("objectif") or {}).get("lieu"),
+		"giver": q.get("giver"),   # lu par acces.quete_reussie_cite
 		"termine_at": quetes.now_epoch(),
 	})
 	return {"recompenses": recap}

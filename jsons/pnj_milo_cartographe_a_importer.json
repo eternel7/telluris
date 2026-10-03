@@ -1169,6 +1169,12 @@
           "quete_reussie": {
             "id": "quete:escorte_convoi_de_lutecia"
           }
+        },
+        {
+          "quete_reussie_cite": {
+            "cite": "lieu:lutecia",
+            "attendu": false
+          }
         }
       ]
     }
