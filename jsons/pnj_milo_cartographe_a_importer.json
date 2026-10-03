@@ -6,12 +6,12 @@
     "race": "hobbit",
     "vocation": "cartographe",
     "portrait": "cartographe_Milo_hobbit_m.jpg",
-    "description": "Jeune hobbit employé comme aide-cartographe par une compagnie de voyageurs : il porte les affaires du cartographe et recopie ses relevés. Piètre combattant, il connaît en revanche les routes, les relais et les petits chemins autour d'Auxerre, et se souvient du nom de chaque voyageur, de chaque village. Il n'a qu'une obsession : dresser la carte complète de la région. À ceux qui reviennent vivants, il demande ce qu'il y a derrière la colline.",
+    "description": "Jeune hobbit employé comme aide-cartographe par une compagnie de voyageurs : il porte les affaires du cartographe et recopie ses relevés. Piètre combattant, il connaît en revanche les routes, les gués et les petits chemins autour d'Auxerre, et se souvient du nom de chaque voyageur, de chaque village. Il n'a qu'une obsession : dresser la carte complète de la région. À ceux qui reviennent vivants, il demande ce qu'il y a derrière la colline.",
     "dialogue": {
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
-          "texte": "À une table près de la fenêtre, un jeune hobbit a déroulé un parchemin plus large que lui, coincé aux quatre coins par une chope, un encrier, une boussole et un quignon de pain. Une plume derrière l'oreille, il compare deux relevés en marmonnant des noms de relais.",
+          "texte": "À une table près de la fenêtre, un jeune hobbit a déroulé un parchemin plus large que lui, coincé aux quatre coins par une chope, un encrier, une boussole et un quignon de pain. Une plume derrière l'oreille, il compare deux relevés en marmonnant des noms de villages.",
           "choix": [
             {
               "id": "s4",
@@ -35,17 +35,27 @@
             },
             {
               "id": "s2",
-              "label": "« Qu'est-ce qu'il y a là-bas ? » — Lui parler de la forêt au nord du relais.",
+              "label": "— Lui parler de la forêt au-delà de la porte nord.",
               "condition": {
                 "quete_reussie": {
                   "id": "quete:transport_borin_premiere_mission"
+                },
+                "passages": {
+                  "lieu": "lieu:auberge_de_la_tour_de_l_horloge",
+                  "min": 2
                 }
               },
               "next": "s2_01"
             },
             {
               "id": "s1",
-              "label": "« Derrière la colline » — Passer près de sa table.",
+              "label": "— Passer près de sa table.",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:auberge_de_la_tour_de_l_horloge",
+                  "max": 1
+                }
+              },
               "next": "s1_01"
             },
             {
@@ -110,7 +120,7 @@
           "choix": [
             {
               "id": "suite",
-              "label": "« Jusqu'à un relais abandonné. Après, elle devient un chemin forestier. »",
+              "label": "« Jusqu'à une vieille borne de pierre. Après, elle devient un chemin forestier. »",
               "next": "s1_07"
             }
           ]
@@ -330,7 +340,7 @@
           "choix": [
             {
               "id": "suite",
-              "label": "« Celle au nord du relais ? »",
+              "label": "« Celle après la porte nord ? »",
               "next": "s2_08"
             }
           ]
@@ -516,7 +526,7 @@
           ]
         },
         "s2_26": {
-          "texte": "Il trace une rangée de petits points à l'est du relais. « Et puis quelqu'un doit dessiner la carte pendant que les idiots vont voir ce qu'il y a derrière. »",
+          "texte": "Il trace une rangée de petits points à l'est de la porte nord. « Et puis quelqu'un doit dessiner la carte pendant que les idiots vont voir ce qu'il y a derrière. »",
           "choix": [
             {
               "id": "suite",
@@ -826,7 +836,7 @@
           ]
         },
         "s4_03": {
-          "texte": "« C'est seulement jusqu'au prochain relais. »",
+          "texte": "« C'est seulement jusqu'à la prochaine ville. »",
           "choix": [
             {
               "id": "suite",
