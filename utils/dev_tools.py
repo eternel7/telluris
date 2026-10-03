@@ -503,6 +503,22 @@ CATALOGUE = [
 			"comme matière (il la rachète toujours : il la produit).",
 	},
 	{
+		"id": "gen_recettes_orphelins",
+		"label": "⊘ Recettes des items orphelins (ni produits ni utilisés)",
+		# Dump frais : un orphelin se lit d'après les recettes EN BASE — sur un dump périmé, un
+		# item qui a gagné une recette depuis en recevrait une seconde.
+		"argv_fn": lambda v, f: _py("gen_recettes_orphelins.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/recettes_orphelins_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/recettes_orphelins_a_importer.json. "
+			"Rien en base avant 📥 Importer.",
+		"description": "Écrit une recette (table du script) pour chaque orphelin du graphe des "
+			"recettes, hors composants, livres de contenu (tick du scriptorium) et carte de "
+			"guilde. Refuse tout le lot sur une fausse feuille, un intrant sans doc, une "
+			"catégorie sans lieu, une recette de grande maison non croisée, un `_id` déjà pris "
+			"ou un orphelin sans ligne. ⚠️ `item:Chiffon` devient achetable au tissage.",
+	},
+	{
 		"id": "gen_villes_images",
 		"label": "🏙 Créer les lieux des cartes de ville sans lieu (grille depuis l'image)",
 		# Dump frais : une carte se dit « sans lieu » d'après les `image` des lieux en base — sur
