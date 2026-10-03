@@ -132,6 +132,8 @@
 		.pastille.absent { transform: rotate(45deg); border-radius: 0; border: 2px solid var(--danger); background: #555; width: 10px; height: 10px; }
 		.trait { width: 18px; height: 0; border-top: 2px solid #5a6378; flex: none; }
 		.trait.membre { border-top-style: dashed; }
+		.trait.fabrication { border-top-style: dotted; border-top-color: #e08a4f; border-top-width: 3px; }
+		.pastille.piece { border-radius: 2px; border: 2px solid #e08a4f; background: #3a2a1e; }
 		.trait.sur-mesure { border-top-color: var(--violet); }
 		.trait.terroir { border-top-color: var(--teal); }
 
@@ -305,6 +307,7 @@ function filtresParDefaut() {
 	return {
 		categories: [], sousCategories: [], raretes: [], lieux: [], roles: [],
 		familles: true,        // afficher les familles (entrées données par sous-catégorie)
+		fabrications: true,    // liens potentiels du sur-mesure : matière → famille de pièces
 		absentsSeuls: false,   // diagnostic : nœuds absents de la base et leurs voisins
 		surMesure: false,      // variantes générées des commandes sur mesure
 		terroir: true,         // spécialités de terroir (`lieu_portee`)
@@ -325,7 +328,7 @@ function indexerGraphe(graphe) {
 		idx.entrants[n.id] = [];
 		idx.norm[n.id] = {
 			label: normaliserRecherche(n.label),
-			autres: normaliserRecherche([n.id.replace(/^(item|sc):/, ''), n.sous_categorie, n.categorie].join(' ')),
+			autres: normaliserRecherche([n.id.replace(/^(item|sc|fab):/, ''), n.sous_categorie, n.categorie].join(' ')),
 		};
 	}
 	for (const e of (graphe && graphe.edges) || []) {
@@ -350,13 +353,15 @@ function indexerGraphe(graphe) {
 
 // Rôle d'un item dans le réseau ENTIER (indépendant des filtres) : brut = rien ne le
 // produit mais il sert ; intermédiaire = produit ET sert ; fini = produit, ne sert à rien ;
-// isolé = ni l'un ni l'autre. Servir via une famille compte (arête `membre`).
+// isolé = ni l'un ni l'autre. Servir via une famille compte (arête `membre`) ; un lien de
+// FABRICATION ne compte pas : le rôle parle des recettes, une matière de sur-mesure qui
+// n'entre dans aucune recette reste « isolée » de ce point de vue.
 function roleNoeud(idx, id) {
 	const n = idx.noeuds[id];
 	if (!n) return '';
-	if (n.type === 'famille') return 'famille';
+	if (n.type === 'famille' || n.type === 'piece') return n.type;
 	const produit = idx.entrants[id].some(e => e.kind === 'recette');
-	const sert = idx.sortants[id].length > 0;
+	const sert = idx.sortants[id].some(e => e.kind !== 'fabrication');
 	if (produit && sert) return 'intermediaire';
 	if (produit) return 'fini';
 	if (sert) return 'brut';
@@ -364,6 +369,8 @@ function roleNoeud(idx, id) {
 }
 
 function areteVisible(e, f) {
+	// Un lien de fabrication n'est la recette d'aucun métier : un filtre de métier le masque.
+	if (e.kind === 'fabrication') return f.fabrications && !f.lieux.length;
 	if (e.kind !== 'recette') return true;
 	if (e.sur_commande && !f.surMesure) return false;
 	if (e.lieu_portee && !f.terroir) return false;
@@ -378,6 +385,7 @@ function noeudVisible(n, f, idx) {
 		// masquées, elle ne ferait que traîner ses membres dans la vue.
 		return f.familles && idx.sortants[n.id].some(e => areteVisible(e, f));
 	}
+	if (n.type === 'piece') return f.fabrications && !f.lieux.length;
 	if (f.categories.length && !f.categories.includes(n.categorie || '')) return false;
 	if (f.sousCategories.length && !f.sousCategories.includes(n.sous_categorie || '')) return false;
 	if (f.raretes.length && !f.raretes.includes(n.rarete || '')) return false;
@@ -414,9 +422,11 @@ function filtrerGraphe(idx, f) {
 }
 
 // Remonte (`amont`) ou descend (`aval`) depuis `centre`. `profondeur` ne compte que les
-// arêtes de RECETTE : passer par une famille est gratuit, de sorte que « A sert à faire B »
-// reste à distance 1 même quand la recette demande « 2 acier » plutôt que A lui-même.
-// `rang` compte toutes les arêtes : il ne sert qu'à placer les colonnes.
+// arêtes de RECETTE et de FABRICATION : passer par une famille est gratuit, de sorte que
+// « A sert à faire B » reste à distance 1 même quand la recette demande « 2 acier » plutôt
+// que A lui-même. `rang` compte toutes les arêtes : il ne sert qu'à placer les colonnes.
+// En remontant, une famille trop fournie (hors centre) reste repliée. Une ⚒ famille de pièces
+// n'a pas d'arête sortante : on ne la remonte jamais hors centre.
 function _parcourir(idx, centre, sens, limite, f, maxMembres, replies) {
 	const dist = { [centre]: { p: 0, r: 0 } };
 	const file = [centre];
@@ -432,7 +442,7 @@ function _parcourir(idx, centre, sens, limite, f, maxMembres, replies) {
 			if (!areteVisible(e, f)) continue;
 			const nxt = sens === 'amont' ? e.source : e.target;
 			if (nxt !== centre && !noeudVisible(idx.noeuds[nxt], f, idx)) continue;
-			const p = d.p + (e.kind === 'recette' ? 1 : 0);
+			const p = d.p + (e.kind === 'membre' ? 0 : 1);
 			if (p > limite) continue;
 			if (!(nxt in dist) || p < dist[nxt].p) {
 				dist[nxt] = { p, r: d.r + 1 };
@@ -604,20 +614,23 @@ function recettesDe(idx, id) {
 		}
 	}
 	const membres = ((idx.entrants[id]) || []).filter(e => e.kind === 'membre').map(e => e.source).sort();
-	return { produitPar, sertA, membres };
+	// Sur-mesure : familles de pièces qu'une matière façonne / matières d'une famille.
+	const faconne = ((idx.sortants[id]) || []).filter(e => e.kind === 'fabrication').map(e => e.target).sort();
+	const matieresFab = ((idx.entrants[id]) || []).filter(e => e.kind === 'fabrication').map(e => e.source).sort();
+	return { produitPar, sertA, membres, faconne, matieresFab };
 }
 
 function compterFiltresActifs(f) {
 	const d = filtresParDefaut();
 	let n = 0;
 	for (const k of ['categories', 'sousCategories', 'raretes', 'lieux', 'roles']) if (f[k].length) n++;
-	for (const k of ['familles', 'absentsSeuls', 'surMesure', 'terroir', 'masquerIsoles']) if (f[k] !== d[k]) n++;
+	for (const k of ['familles', 'fabrications', 'absentsSeuls', 'surMesure', 'terroir', 'masquerIsoles']) if (f[k] !== d[k]) n++;
 	return n;
 }
 
 // État de la vue ↔ query-string (partage / réouverture). Seuls les écarts au défaut sont écrits.
 const _URL_LISTES = { cat: 'categories', scat: 'sousCategories', rar: 'raretes', lieu: 'lieux', role: 'roles' };
-const _URL_BOOLS = { fam: 'familles', abs: 'absentsSeuls', sm: 'surMesure', terroir: 'terroir', iso: 'masquerIsoles' };
+const _URL_BOOLS = { fam: 'familles', fabr: 'fabrications', abs: 'absentsSeuls', sm: 'surMesure', terroir: 'terroir', iso: 'masquerIsoles' };
 
 function etatVersUrl(etat) {
 	const p = new URLSearchParams();
@@ -716,6 +729,13 @@ function styleCy() {
 		{ selector: 'node[?absent]', style: {
 			'shape': 'diamond', 'border-width': 3, 'border-color': '#c84b4b', 'border-style': 'solid',
 		} },
+		// Famille de pièces façonnables sur mesure (après `absent` : elle garde sa forme,
+		// seule la bordure rouge dit qu'aucune pièce n'y entre).
+		{ selector: 'node[type = "piece"]', style: {
+			'shape': 'hexagon', 'width': 30, 'height': 26, 'background-color': '#3a2a1e',
+			'border-width': 2, 'border-style': 'solid', 'border-color': '#e08a4f', 'color': '#f0b88a',
+		} },
+		{ selector: 'node[type = "piece"][?absent]', style: { 'border-color': '#c84b4b', 'border-width': 3 } },
 		{ selector: 'node.centre', style: {
 			'width': 36, 'height': 36, 'border-width': 4, 'border-color': '#c8a84b', 'border-style': 'solid',
 			'font-size': 13, 'font-weight': 'bold', 'color': '#c8a84b', 'z-index': 10,
@@ -730,6 +750,10 @@ function styleCy() {
 		} },
 		{ selector: 'edge[kind = "membre"]', style: {
 			'line-style': 'dashed', 'line-color': '#3a4152', 'target-arrow-color': '#3a4152', 'target-arrow-shape': 'vee',
+		} },
+		{ selector: 'edge[kind = "fabrication"]', style: {
+			'line-style': 'dotted', 'width': 2, 'line-color': '#e08a4f', 'target-arrow-color': '#e08a4f',
+			'target-arrow-shape': 'vee',
 		} },
 		{ selector: 'edge[?terroir]', style: { 'line-color': '#4bc8b8', 'target-arrow-color': '#4bc8b8' } },
 		{ selector: 'edge[?sur_commande]', style: { 'line-color': '#b07fd0', 'target-arrow-color': '#b07fd0' } },
@@ -747,7 +771,8 @@ function elementsCy(ids, aretes, replies) {
 		const n = IDX.noeuds[id];
 		els.push({ group: 'nodes', data: {
 			id, type: n.type, absent: !!n.absent,
-			couleur: n.type === 'famille' ? '#2a3040' : (n.absent ? '#555' : couleurCategorie(n.categorie)),
+			couleur: n.type === 'famille' ? '#2a3040' : n.type === 'piece' ? '#3a2a1e'
+				: (n.absent ? '#555' : couleurCategorie(n.categorie)),
 			etiquette: libelleNoeud(n, replies && replies[id]),
 		} });
 	}
@@ -829,6 +854,9 @@ function majLegende(ids) {
 		+ '<div class="leg"><span class="pastille absent"></span>absent de la base</div>'
 		+ '<div class="leg"><span class="trait"></span>recette</div>'
 		+ '<div class="leg"><span class="trait membre"></span>appartient à la famille</div>'
+		+ (ETAT.filtres.fabrications
+			? '<div class="leg"><span class="pastille piece"></span>⚒ famille de pièces sur mesure</div>'
+			+ '<div class="leg"><span class="trait fabrication"></span>matière de fabrication</div>' : '')
 		+ '<div class="leg"><span class="trait terroir"></span>spécialité de terroir</div>'
 		+ '<div class="leg"><span class="trait sur-mesure"></span>sur mesure</div>';
 }
@@ -872,7 +900,7 @@ function majSuggestions() {
 		html += '<div class="sugg-titre">Items et familles</div>' + noeuds.map(n =>
 			`<button type="button" class="sugg" role="option" data-centrer="${escapeHtml(n.id)}">`
 			+ `<span class="nom">${escapeHtml(libelleNoeud(n))}</span>`
-			+ `<small>${escapeHtml(n.type === 'famille' ? 'famille' : (n.categorie || '—'))}${n.absent ? ' · absent' : ''}</small></button>`).join('');
+			+ `<small>${escapeHtml(n.type === 'famille' ? 'famille' : n.type === 'piece' ? 'sur mesure' : (n.categorie || '—'))}${n.absent ? ' · absent' : ''}</small></button>`).join('');
 	}
 	if (metiers.length) {
 		html += '<div class="sugg-titre">Métiers (catégorie de lieu)</div>' + metiers.map(m =>
@@ -979,7 +1007,8 @@ function selectionnerDansVue(id) {
 	if (n.length) n.select();
 }
 
-const ROLE_LIBELLE = { brut: 'matière brute', intermediaire: 'intermédiaire', fini: 'produit fini', isole: 'isolé', famille: 'famille' };
+const ROLE_LIBELLE = { brut: 'matière brute', intermediaire: 'intermédiaire', fini: 'produit fini', isole: 'isolé', famille: 'famille', piece: 'famille de pièces sur mesure' };
+const ABSENT_LIBELLE = { famille: 'aucun item de cette sous-catégorie', piece: 'aucune pièce dans cette famille' };
 
 function ouvrirFiche(id) {
 	const n = IDX.noeuds[id];
@@ -991,10 +1020,22 @@ function ouvrirFiche(id) {
 	if (n.categorie) tags.push(`<span class="tag">${escapeHtml(n.categorie)}</span>`);
 	if (n.sous_categorie && n.type === 'item') tags.push(`<span class="tag">${escapeHtml(n.sous_categorie)}</span>`);
 	if (n.rarete) tags.push(`<span class="tag">${escapeHtml(n.rarete)}</span>`);
-	if (n.absent) tags.push(`<span class="tag alerte">${n.type === 'famille' ? 'aucun item de cette sous-catégorie' : 'aucun doc en base'}</span>`);
+	if (n.absent) tags.push(`<span class="tag alerte">${ABSENT_LIBELLE[n.type] || 'aucun doc en base'}</span>`);
 	let html = `<div class="id">${escapeHtml(id)}</div><div class="tags">${tags.join('')}</div>`
 		+ `<div class="actions"><button type="button" class="secondary" data-centrer="${escapeHtml(id)}">🎯 Centrer le graphe ici</button></div>`
 		+ (n.type === 'item' && !n.absent ? '<div id="fiche-detail" class="vide">Chargement de la fiche…</div>' : '');
+	if (n.type === 'piece') {
+		const pieces = n.pieces || [];
+		html += `<div class="desc">Pièces de catégorie ou de sous-catégorie « ${escapeHtml(n.label)} » : `
+			+ 'les matières ci-dessous peuvent les façonner sur mesure, dans toute maison qui fabrique sur mesure.</div>'
+			+ `<h3>Matières qui la façonnent (${r.matieresFab.length})</h3>`
+			+ (r.matieresFab.length ? r.matieresFab.map(m => lienNoeud(m)).join(' · ') : '<div class="vide">Aucune.</div>')
+			+ `<h3>Pièces de cette famille (${pieces.length})</h3>`
+			+ (pieces.length ? pieces.map(m => lienNoeud(m)).join(' · ') : '<div class="vide">Aucun item n’a cette catégorie ni cette sous-catégorie.</div>');
+		ouvrirPanneau(libelleNoeud(n), html);
+		rendreVisible(id);
+		return;
+	}
 	if (n.type === 'famille') {
 		html += `<h3>Membres (${r.membres.length})</h3>`
 			+ (r.membres.length ? r.membres.map(m => lienNoeud(m)).join(' · ') : '<div class="vide">Aucun item n’a cette sous-catégorie.</div>');
@@ -1004,6 +1045,13 @@ function ouvrirFiche(id) {
 	}
 	html += `<h3>Sert à fabriquer (${r.sertA.length})</h3>`
 		+ (r.sertA.length ? r.sertA.map(x => blocRecette(x.recette, x.via)).join('') : '<div class="vide">N’entre dans aucune recette.</div>');
+	if (n.matiere_fabrication) {
+		html += '<h3>⚒ Fabrication sur mesure</h3>'
+			+ (n.fabrication_nom ? `<div>Variante « <b>${escapeHtml(n.fabrication_nom)}</b> »</div>` : '')
+			+ (r.faconne.length
+				? '<div>Façonne : ' + r.faconne.map(m => lienNoeud(m)).join(' · ') + '</div>'
+				: '<div class="vide">Aucun tag <code>fabrication_*</code> : seulement chez une maison dont le métier achète cette matière.</div>');
+	}
 	ouvrirPanneau(libelleNoeud(n), html);
 	rendreVisible(id);
 	if (n.type === 'item' && !n.absent) chargerDetail(id);
@@ -1083,6 +1131,7 @@ function rendreFiltres() {
 		'<fieldset><legend>Affichage</legend>'
 		+ bascule('masquerIsoles', 'Masquer les nœuds sans lien visible')
 		+ bascule('familles', 'Afficher les familles (entrées par sous-catégorie)')
+		+ bascule('fabrications', 'Afficher les liens de fabrication sur mesure (matière → ⚒ famille de pièces)')
 		+ bascule('terroir', 'Inclure les spécialités de terroir')
 		+ bascule('surMesure', 'Inclure les variantes sur mesure')
 		+ bascule('absentsSeuls', 'Diagnostic : seulement les nœuds absents de la base et leurs voisins')

@@ -59,6 +59,7 @@ vm.runInThisContext(CONSTANTES.map(extraireConst).join('\n') + '\n'
 // essence ─1→ potion (alchimie, sur_commande) ; herbe ─1→ tisane (auberge, terroir)
 // fantome : produit d'une recette sans doc (absent) ; galet : isolé.
 // Cycle : cendre ─1→ braise ─1→ cendre (fourneau).
+// Sur-mesure : gemme ┄→ ⚒arme, gemme ┄→ ⚒armure, poudre ┄→ ⚒arme (arêtes `fabrication`).
 function item(id, label, categorie, extra) {
 	return Object.assign({ id, type: 'item', label, icon: '', categorie, sous_categorie: '', rarete: 'commun', absent: false }, extra || {});
 }
@@ -85,6 +86,10 @@ const GRAPHE = {
 		item('item:cendre', 'Cendre', 'matiere'),
 		item('item:braise', 'Braise', 'matiere'),
 		{ id: 'sc:cuir', type: 'famille', label: 'cuir', icon: '', categorie: '', sous_categorie: 'cuir', rarete: '', absent: false },
+		item('item:gemme', 'Gemme', 'matiere', { matiere_fabrication: true, fabrication_nom: 'serti' }),
+		item('item:poudre', 'Poudre', 'matiere', { matiere_fabrication: true }),
+		{ id: 'fab:arme', type: 'piece', label: 'arme', icon: '⚒', categorie: '', sous_categorie: '', rarete: '', absent: false, pieces: ['item:epee', 'item:epee_fine'] },
+		{ id: 'fab:armure', type: 'piece', label: 'armure', icon: '⚒', categorie: '', sous_categorie: '', rarete: '', absent: false, pieces: ['item:casque', 'item:ceinture'] },
 	],
 	edges: [
 		rec('recette:lingot', 0, 'item:minerai', 'item:lingot', 'forge', { quantite: 2 }),
@@ -99,6 +104,9 @@ const GRAPHE = {
 		rec('recette:fantome', 0, 'item:herbe', 'item:fantome', 'auberge'),
 		rec('recette:braise', 0, 'item:cendre', 'item:braise', 'fourneau'),
 		rec('recette:cendre', 0, 'item:braise', 'item:cendre', 'fourneau'),
+		{ id: 'item:gemme~fab:arme', source: 'item:gemme', target: 'fab:arme', kind: 'fabrication' },
+		{ id: 'item:gemme~fab:armure', source: 'item:gemme', target: 'fab:armure', kind: 'fabrication' },
+		{ id: 'item:poudre~fab:arme', source: 'item:poudre', target: 'fab:arme', kind: 'fabrication' },
 		// Arête vers un nœud inconnu : ignorée par l'index, jamais une exception.
 		rec('recette:orpheline', 0, 'item:inconnu', 'item:lingot', 'forge'),
 	],
@@ -225,7 +233,8 @@ test('filtres rareté / rôle / sous-catégorie, combinés', () => {
 	const r = F(); r.roles = ['fini']; r.masquerIsoles = false;
 	assert.deepStrictEqual(filtrerGraphe(IDX, r).ids,
 		// la potion reste : isolés montrés, et son rôle est global (sa recette sur mesure compte)
-		['item:casque', 'item:ceinture', 'item:epee_fine', 'item:fantome', 'item:potion', 'item:tisane', 'sc:cuir']);
+		// les nœuds de structure (familles, ⚒ pièces) ne passent pas par les filtres d'item
+		['fab:arme', 'fab:armure', 'item:casque', 'item:ceinture', 'item:epee_fine', 'item:fantome', 'item:potion', 'item:tisane', 'sc:cuir']);
 	const s = F(); s.sousCategories = ['cuir'];
 	assert.deepStrictEqual(filtrerGraphe(IDX, s).ids, ['item:peau_loup', 'item:peau_ours', 'sc:cuir']);
 	const c = F(); c.categories = ['arme']; c.raretes = ['commun'];
@@ -247,7 +256,8 @@ test('compte des filtres actifs', () => {
 
 test('valeurs de filtres relues du graphe, triées par effectif', () => {
 	const v = valeursFiltres(IDX);
-	assert.deepStrictEqual(v.categories[0], ['matiere', 9]);
+	const nbMatieres = GRAPHE.nodes.filter(n => n.type === 'item' && n.categorie === 'matiere').length;
+	assert.deepStrictEqual(v.categories[0], ['matiere', nbMatieres]);
 	assert.ok(v.categories.some(([c]) => c === ''));       // l'item absent sans catégorie
 	assert.deepStrictEqual(v.lieux[0], ['forge', 4]);
 	assert.deepStrictEqual(v.sousCategories.find(([s]) => s === 'cuir'), ['cuir', 2]);
@@ -339,6 +349,54 @@ test('disposition : hauteur de colonne forcée (réseau complet)', () => {
 	const rangs = rangsGlobaux(g.ids, g.aretes.map(id => IDX.aretes[id]));
 	const pos = disposerCouches(rangs, IDX, false, 2);
 	assert.strictEqual(new Set(Object.values(pos).map(p => p.x + ',' + p.y)).size, g.ids.length);
+});
+
+// ── Fabrication sur mesure ────────────────────────────────────────────────────
+test('fabrication : affichée par défaut, masquée par l’interrupteur', () => {
+	const g = filtrerGraphe(IDX, F());
+	assert.ok(g.aretes.includes('item:gemme~fab:arme') && g.ids.includes('fab:arme') && g.ids.includes('item:gemme'));
+	const f = F(); f.fabrications = false;
+	const h = filtrerGraphe(IDX, f);
+	assert.ok(!h.aretes.some(id => id.includes('~fab:')));
+	assert.ok(!h.ids.includes('fab:arme') && !h.ids.includes('fab:armure'));
+	assert.ok(!h.ids.includes('item:gemme'));            // plus aucun lien visible : masquée
+	assert.ok(h.ids.includes('item:lingot'));             // les recettes, elles, restent
+	const v = voisinage(IDX, 'item:gemme', 0, 2, f);
+	assert.deepStrictEqual(v.noeuds.map(n => n.id), ['item:gemme']);
+});
+
+test('fabrication : un filtre de métier masque les liens (ils ne sont la recette d’aucun métier)', () => {
+	const f = F(); f.lieux = ['forge'];
+	const g = filtrerGraphe(IDX, f);
+	assert.ok(!g.ids.includes('fab:arme') && !g.aretes.some(id => id.includes('~fab:')));
+});
+
+test('fabrication : voisinage, coût d’une profondeur, repli des matières d’une ⚒ famille', () => {
+	const v = voisinage(IDX, 'item:gemme', 0, 1, F());
+	assert.deepStrictEqual(ids(v), ['fab:arme', 'fab:armure', 'item:gemme']);
+	const p = Object.fromEntries(v.noeuds.map(n => [n.id, n.profondeur]));
+	assert.strictEqual(p['fab:arme'], 1);
+	assert.deepStrictEqual(ids(voisinage(IDX, 'item:gemme', 0, 0, F())), ['item:gemme']);
+	// Au centre, toutes ses matières, même au-delà du plafond de repli (une ⚒ famille n'a pas
+	// d'arête sortante : on ne la remonte jamais hors centre, le repli ne la concerne pas).
+	assert.deepStrictEqual(ids(voisinage(IDX, 'fab:arme', 1, 0, F(), 1)), ['fab:arme', 'item:gemme', 'item:poudre']);
+});
+
+test('fabrication : ne change pas les rôles, recettesDe expose les deux sens', () => {
+	assert.strictEqual(roleNoeud(IDX, 'item:gemme'), 'isole');
+	assert.strictEqual(roleNoeud(IDX, 'fab:arme'), 'piece');
+	assert.deepStrictEqual(recettesDe(IDX, 'item:gemme').faconne, ['fab:arme', 'fab:armure']);
+	assert.deepStrictEqual(recettesDe(IDX, 'fab:arme').matieresFab, ['item:gemme', 'item:poudre']);
+	assert.deepStrictEqual(recettesDe(IDX, 'item:lingot').faconne, []);
+});
+
+test('fabrication : recherche par famille, filtre compté, URL', () => {
+	assert.strictEqual(chercherNoeuds(IDX, 'armure')[0].id, 'fab:armure');
+	const f = F(); f.fabrications = false;
+	assert.strictEqual(compterFiltresActifs(f), 1);
+	const etat = { item: 'fab:arme', mode: 'voisinage', amont: 2, aval: 2, q: '', filtres: f };
+	assert.ok(etatVersUrl(etat).includes('fabr=0'));
+	assert.deepStrictEqual(urlVersEtat(etatVersUrl(etat)), etat);
 });
 
 // ── État ↔ URL ────────────────────────────────────────────────────────────────

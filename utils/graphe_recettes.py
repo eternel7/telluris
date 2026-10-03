@@ -11,12 +11,21 @@
 #   - `famille` : `sc:<clé>`, une entrée de recette donnée par SOUS-CATÉGORIE (« 2 acier ») :
 #                 n'importe quel item de la famille la satisfait. Ses membres y sont reliés
 #                 par une arête `membre`, d'où le chemin membre → famille → produit.
+#   - `piece`   : `fab:<famille>`, une famille de pièces façonnables SUR MESURE (arme, armure…).
+#                 Ses pièces sont listées (`pieces`) mais pas reliées : `arme` en compte des
+#                 centaines.
 # Arêtes `recette` : une par (recette, entrée), de l'entrée vers le produit.
+# Arêtes `fabrication` : matière → `fab:<famille>`, lien POTENTIEL du sur-mesure — la matière
+#   apporte quelque chose (`fabrication.apporte`) et porte le tag `fabrication_<famille>` ;
+#   les pièces d'une famille sont celles que `commande.tags_fabrication` y range (même
+#   critère que `commande.matiere_acceptee`). L'autre porte de `matiere_acceptee` (le métier
+#   de la maison achète la matière) dépend du LIEU : elle n'est pas un lien d'item.
 
-from utils import marche
+from utils import commande, fabrication, marche
 from utils.characters import item_sous_categorie
 
 PREFIXE_FAMILLE = "sc:"
+PREFIXE_PIECE = "fab:"
 
 
 def id_famille(cle: str) -> str:
@@ -34,13 +43,16 @@ def _noeud_item(item_id: str, doc: dict | None) -> dict:
 		"sous_categorie": doc.get("sous_categorie") or "",
 		"rarete": doc.get("rarete") or "",
 		"absent": not doc,
+		"matiere_fabrication": bool(doc) and fabrication.apporte(doc),
+		"fabrication_nom": fabrication.proprietes_matiere(doc)["nom"] if doc else "",
 	}
 
 
 def construire_graphe(recettes: list, items: list) -> dict:
 	"""{"nodes": [...], "edges": [...]} : tous les items (même isolés — le filtre « isolés »
-	de l'écran en a besoin), les familles citées, une arête par entrée de recette et une
-	arête `membre` par item d'une famille citée."""
+	de l'écran en a besoin), les familles citées, une arête par entrée de recette, une
+	arête `membre` par item d'une famille citée et une arête `fabrication` par (matière,
+	famille de pièces qu'elle ouvre)."""
 	docs = {d["_id"]: d for d in (items or []) if isinstance(d, dict) and d.get("_id")}
 	noeuds: dict[str, dict] = {i: _noeud_item(i, d) for i, d in docs.items()}
 	aretes: list[dict] = []
@@ -96,6 +108,32 @@ def construire_graphe(recettes: list, items: list) -> dict:
 		for item_id in sorted(membres[cle]):
 			aretes.append({
 				"id": f"{item_id}>{fid}", "source": item_id, "target": fid, "kind": "membre",
+			})
+
+	# Fabrication sur mesure : familles ouvertes par les matières, puis leurs pièces.
+	prefixe = commande.TAG_FABRICATION_PREFIXE
+	ouvertes: dict[str, list] = {}
+	for item_id, doc in sorted(docs.items()):
+		if not fabrication.apporte(doc):
+			continue
+		for tag in sorted({str(t) for t in (doc.get("tags") or []) if str(t).startswith(prefixe)}):
+			ouvertes.setdefault(tag[len(prefixe):], []).append(item_id)
+	pieces: dict[str, list] = {fam: [] for fam in ouvertes}
+	for item_id, doc in sorted(docs.items()):
+		for tag in commande.tags_fabrication(doc):
+			fam = tag[len(prefixe):]
+			if fam in pieces:
+				pieces[fam].append(item_id)
+	for fam in sorted(ouvertes):
+		pid = PREFIXE_PIECE + fam
+		noeuds[pid] = {
+			"id": pid, "type": "piece", "label": fam, "icon": "⚒",
+			"categorie": "", "sous_categorie": "", "rarete": "",
+			"absent": not pieces[fam], "pieces": pieces[fam],
+		}
+		for item_id in ouvertes[fam]:
+			aretes.append({
+				"id": f"{item_id}~{pid}", "source": item_id, "target": pid, "kind": "fabrication",
 			})
 
 	return {"nodes": sorted(noeuds.values(), key=lambda n: n["id"]), "edges": aretes}

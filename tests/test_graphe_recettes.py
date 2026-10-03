@@ -15,7 +15,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils import graphe_recettes as gr  # noqa: E402
-from utils import marche  # noqa: E402
+from utils import commande, fabrication, marche  # noqa: E402
 
 
 def _item(iid, **kw):
@@ -100,6 +100,51 @@ def test_noeuds_uniques_et_aretes_identifiees():
 	assert len({e["id"] for e in g["edges"]}) == len(g["edges"]) == 6
 
 
+_FAB = {"nom": "serti", "modificateurs": {"bonus_cc": 1}}
+
+
+def test_fabrication_matiere_vers_famille_de_pieces():
+	items = [
+		_item("item:gemme", categorie="matiere", fabrication=_FAB, tags=["fabrication_arme", "fabrication_bague", "autre"]),
+		_item("item:epee", categorie="arme"),
+		# La famille se lit sur la catégorie OU la sous-catégorie (commande.tags_fabrication).
+		_item("item:anneau", categorie="bijou", sous_categorie="bague"),
+	]
+	noeuds, aretes = _index(gr.construire_graphe([], items))
+	fab = sorted((e["source"], e["target"]) for e in aretes if e["kind"] == "fabrication")
+	assert fab == [("item:gemme", "fab:arme"), ("item:gemme", "fab:bague")]
+	assert noeuds["fab:arme"]["type"] == "piece" and noeuds["fab:arme"]["pieces"] == ["item:epee"]
+	assert noeuds["fab:bague"]["pieces"] == ["item:anneau"]
+	assert not noeuds["fab:arme"]["absent"]
+	assert noeuds["item:gemme"]["matiere_fabrication"] and noeuds["item:gemme"]["fabrication_nom"] == "serti"
+	assert not noeuds["item:epee"]["matiere_fabrication"]
+
+
+def test_fabrication_sans_tag_sans_apport_ou_sans_piece():
+	items = [
+		# Apporte mais aucun tag : seule la porte « métier de la maison » (dépend du lieu) l'ouvre.
+		_item("item:cire", fabrication=_FAB, tags=[]),
+		# Tag mais bloc vide : `fabrication.apporte` la refuse, aucun lien.
+		_item("item:caillou", fabrication={}, tags=["fabrication_arme"]),
+		# Famille ouverte sans aucune pièce : nœud signalé absent.
+		_item("item:plume", fabrication=_FAB, tags=["fabrication_arc"]),
+	]
+	noeuds, aretes = _index(gr.construire_graphe([], items))
+	assert [(e["source"], e["target"]) for e in aretes if e["kind"] == "fabrication"] == [("item:plume", "fab:arc")]
+	assert noeuds["item:cire"]["matiere_fabrication"] and not noeuds["item:caillou"]["matiere_fabrication"]
+	assert "fab:arme" not in noeuds
+	assert noeuds["fab:arc"]["absent"] and noeuds["fab:arc"]["pieces"] == []
+
+
+def test_template_compile_sous_jinja():
+	# `${{ … }}` d'un template literal JS est lu par Jinja comme une expression : la page
+	# entière tombe en 500, et `dev/check_js.js` (syntaxe JS seule) ne le voit pas.
+	import jinja2
+	chemin = os.path.join(os.path.dirname(__file__), "..", "templates", "admin_recettes_graphe.html")
+	with open(chemin, encoding="utf-8") as fh:
+		jinja2.Environment().parse(fh.read())
+
+
 def _dernier_dump():
 	dumps = sorted(glob.glob(os.path.join(os.path.dirname(__file__), "..", "jsons", "telluris-dump-*.json")))
 	if not dumps:
@@ -122,3 +167,8 @@ def test_graphe_du_dump_coherent():
 	# Une arête par entrée de recette (comptes RELUS du dump, rien en dur).
 	attendu = sum(len(marche.recette_matieres(r)) for r in recettes if r.get("objet_final"))
 	assert sum(1 for e in g["edges"] if e["kind"] == "recette") == attendu
+	# Une arête de fabrication par tag `fabrication_*` d'une matière qui apporte (RELU).
+	prefixe = commande.TAG_FABRICATION_PREFIXE
+	attendu_fab = sum(len({t for t in (d.get("tags") or []) if str(t).startswith(prefixe)})
+					  for d in items if fabrication.apporte(d))
+	assert sum(1 for e in g["edges"] if e["kind"] == "fabrication") == attendu_fab

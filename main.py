@@ -1681,7 +1681,8 @@ def admin_recettes_graphe_data(current_user: Annotated[User, Depends(get_current
 		raise HTTPException(status_code=403, detail="Admin only")
 	recettes = find_docs({"type": "recette"}) or []
 	items = find_docs({"type": "item"},
-					  fields=["_id", "nom", "icon", "categorie", "sous_categorie", "rarete"]) or []
+					  fields=["_id", "nom", "icon", "categorie", "sous_categorie", "rarete",
+							  "tags", "fabrication"]) or []
 	return graphe_recettes.construire_graphe(recettes, items)
 
 
