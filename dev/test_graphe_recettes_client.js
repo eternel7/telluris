@@ -48,8 +48,9 @@ function extraireConst(nom) {
 const FONCTIONS = ['filtresParDefaut', 'normaliserRecherche', 'indexerGraphe', 'roleNoeud',
 	'areteVisible', 'noeudVisible', '_restreindreAbsents', 'filtrerGraphe', '_parcourir',
 	'voisinage', 'disposerCouches', 'rangsGlobaux', 'chercherNoeuds', 'chercherMetiers', 'valeursFiltres',
-	'recettesDe', 'compterFiltresActifs', 'etatVersUrl', 'urlVersEtat'];
-const CONSTANTES = ['PROFONDEUR_MAX', 'PROFONDEUR_DEFAUT', 'MAX_MEMBRES_DEPLIES', '_URL_LISTES', '_URL_BOOLS'];
+	'recettesDe', 'compterFiltresActifs', 'etatVersUrl', 'urlVersEtat',
+	'estOrphelin', 'orphelins', 'rangsOrphelins'];
+const CONSTANTES = ['PROFONDEUR_MAX', 'PROFONDEUR_DEFAUT', 'MAX_MEMBRES_DEPLIES', '_URL_LISTES', '_URL_BOOLS', 'MODES', 'CHOIX_SUR_MESURE'];
 vm.runInThisContext(CONSTANTES.map(extraireConst).join('\n') + '\n'
 	+ FONCTIONS.map(n => extraire(n) + '\nglobalThis.' + n + ' = ' + n + ';').join('\n'));
 
@@ -139,6 +140,43 @@ test('rôles : brut / intermédiaire / fini / isolé / famille, membre compte co
 	assert.strictEqual(roleNoeud(IDX, 'sc:cuir'), 'famille');
 	assert.strictEqual(roleNoeud(IDX, 'item:peau_loup'), 'brut');
 	assert.strictEqual(roleNoeud(IDX, 'item:inexistant'), '');
+});
+
+// ── Orphelins ─────────────────────────────────────────────────────────────────
+// Orphelins du jeu d'essai : galet (membre d'une famille `hors_recette` seulement), gemme et
+// poudre (liens de FABRICATION seulement : le rôle ne parle que des recettes).
+const ORPHELINS = ['item:galet', 'item:gemme', 'item:poudre'];
+
+test('orphelins : items ni produits ni utilisés, jamais une famille ni un absent', () => {
+	assert.deepStrictEqual(orphelins(IDX, F()), ORPHELINS);
+	for (const id of ORPHELINS) assert.ok(estOrphelin(IDX, id), id);
+	for (const id of ['item:minerai', 'item:epee_fine', 'item:peau_loup', 'item:fantome', 'sc:pierre', 'fab:arme', 'item:inexistant']) {
+		assert.ok(!estOrphelin(IDX, id), id);
+	}
+});
+
+test('orphelins : les filtres d’item s’appliquent, ceux de recette non', () => {
+	assert.deepStrictEqual(orphelins(IDX, Object.assign(F(), { raretes: ['rare'] })), []);
+	assert.deepStrictEqual(orphelins(IDX, Object.assign(F(), { sousCategories: ['pierre'] })), ['item:galet']);
+	assert.deepStrictEqual(orphelins(IDX, Object.assign(F(), { lieux: ['forge'] })), ORPHELINS);
+});
+
+test('exergue : réseau complet + orphelins, malgré « masquer les isolés »', () => {
+	const sans = filtrerGraphe(IDX, F());
+	assert.ok(!sans.ids.includes('item:galet'));
+	const avec = filtrerGraphe(IDX, Object.assign(F(), { exergueOrphelins: true }));
+	assert.deepStrictEqual(avec.aretes, sans.aretes);
+	assert.deepStrictEqual(avec.ids, [...new Set([...sans.ids, ...ORPHELINS])].sort());
+	// Sans les liens de fabrication, gemme et poudre ne restent dans la vue que par l'exergue.
+	const f = Object.assign(F(), { fabrications: false, exergueOrphelins: true });
+	for (const id of ORPHELINS) assert.ok(filtrerGraphe(IDX, f).ids.includes(id), id);
+});
+
+test('orphelins : une colonne par catégorie, la plus fournie d’abord', () => {
+	const g = { nodes: [item('item:a', 'A', 'outil'), item('item:b', 'B', 'matiere'), item('item:c', 'C', 'matiere')], edges: [] };
+	const idx = indexerGraphe(g);
+	const r = Object.fromEntries(rangsOrphelins(idx, orphelins(idx, F())).map(n => [n.id, n.rang]));
+	assert.deepStrictEqual(r, { 'item:a': 1, 'item:b': 0, 'item:c': 0 });
 });
 
 // ── Voisinage ─────────────────────────────────────────────────────────────────
@@ -434,6 +472,48 @@ test('toutes les sous-catégories : filtre compté, URL', () => {
 	assert.deepStrictEqual(urlVersEtat(etatVersUrl(etat)), etat);
 });
 
+// ── Filtre « Fabrication sur mesure » ───────────────────────────────────────────
+// Concernés : gemme, poudre (matières) ; épée, épée fine, casque, ceinture (pièces des ⚒).
+test('sur-mesure : matières et pièces indexées, une matière reste « matiere »', () => {
+	assert.deepStrictEqual(IDX.surMesure, {
+		'item:epee': 'piece', 'item:epee_fine': 'piece', 'item:casque': 'piece', 'item:ceinture': 'piece',
+		'item:gemme': 'matiere', 'item:poudre': 'matiere',
+	});
+	const g = indexerGraphe({ nodes: [item('item:x', 'X', 'matiere', { matiere_fabrication: true }),
+		{ id: 'fab:arme', type: 'piece', label: 'arme', pieces: ['item:x', 'item:fantome_hors_graphe'] }], edges: [] });
+	assert.deepStrictEqual(g.surMesure, { 'item:x': 'matiere' });
+});
+
+test('sur-mesure : exclure / seulement filtrent les items, pas les familles ni les ⚒', () => {
+	const base = Object.assign(F(), { masquerIsoles: false });
+	const tous = filtrerGraphe(IDX, base).ids;
+	const excl = filtrerGraphe(IDX, Object.assign({}, base, { surMesureItems: 'exclure' })).ids;
+	const seul = filtrerGraphe(IDX, Object.assign({}, base, { surMesureItems: 'seulement' })).ids;
+	const concernes = Object.keys(IDX.surMesure).sort();
+	assert.deepStrictEqual(excl, tous.filter(id => !IDX.surMesure[id]));
+	assert.deepStrictEqual(seul.filter(id => id.startsWith('item:')), concernes);
+	assert.ok(seul.includes('fab:arme') && excl.includes('fab:arme'));
+	// Combiné au mode orphelins : gemme et poudre sont les orphelins sur mesure.
+	assert.deepStrictEqual(orphelins(IDX, Object.assign(F(), { surMesureItems: 'seulement' })), ['item:gemme', 'item:poudre']);
+	assert.deepStrictEqual(orphelins(IDX, Object.assign(F(), { surMesureItems: 'exclure' })), ['item:galet']);
+});
+
+test('sur-mesure : voisinage, le centre reste même exclu', () => {
+	const v = voisinage(IDX, 'item:lingot', 2, 2, Object.assign(F(), { surMesureItems: 'exclure' }));
+	assert.deepStrictEqual(ids(v), ['item:lingot', 'item:minerai']);
+});
+
+test('sur-mesure : URL et compte des filtres', () => {
+	for (const v of CHOIX_SUR_MESURE) {
+		const f = F(); f.surMesureItems = v;
+		const etat = { item: '', mode: 'voisinage', amont: PROFONDEUR_DEFAUT, aval: PROFONDEUR_DEFAUT, q: '', filtres: f };
+		assert.strictEqual(etatVersUrl(etat), v ? 'fsm=' + v : '');
+		assert.deepStrictEqual(urlVersEtat('?' + etatVersUrl(etat)), etat);
+		assert.strictEqual(compterFiltresActifs(f), v ? 1 : 0);
+	}
+	assert.strictEqual(urlVersEtat('fsm=nimporte').filtres.surMesureItems, '');
+});
+
 // ── État ↔ URL ────────────────────────────────────────────────────────────────
 test('URL : état par défaut → chaîne vide, aller-retour complet', () => {
 	const defaut = { item: '', mode: 'voisinage', amont: PROFONDEUR_DEFAUT, aval: PROFONDEUR_DEFAUT, q: '', filtres: F() };
@@ -443,6 +523,15 @@ test('URL : état par défaut → chaîne vide, aller-retour complet', () => {
 	f.categories = ['arme & armure'];
 	const etat = { item: 'item:Épée', mode: 'complet', amont: 4, aval: 0, q: 'épée', filtres: f };
 	assert.deepStrictEqual(urlVersEtat('?' + etatVersUrl(etat)), etat);
+});
+
+test('URL : mode orphelins et exergue en aller-retour', () => {
+	const f = F(); f.exergueOrphelins = true;
+	const etat = { item: '', mode: 'orphelins', amont: PROFONDEUR_DEFAUT, aval: PROFONDEUR_DEFAUT, q: '', filtres: f };
+	assert.strictEqual(etatVersUrl(etat), 'mode=orphelins&orph=1');
+	assert.deepStrictEqual(urlVersEtat('?' + etatVersUrl(etat)), etat);
+	assert.strictEqual(compterFiltresActifs(f), 1);
+	for (const m of MODES) assert.strictEqual(urlVersEtat('mode=' + m).mode, m);
 });
 
 test('URL : profondeurs bornées, valeurs invalides → défaut', () => {

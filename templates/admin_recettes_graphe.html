@@ -88,7 +88,8 @@
 		.mode { display: inline-flex; }
 		.mode button { border-radius: 0; }
 		.mode button:first-child { border-radius: 6px 0 0 6px; }
-		.mode button:last-child { border-radius: 0 6px 6px 0; border-left: 0; }
+		.mode button:last-child { border-radius: 0 6px 6px 0; }
+		.mode button + button { border-left: 0; }
 		.stepper { display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 6px; }
 		.stepper button { border: 0; background: transparent; color: var(--accent); min-width: var(--tap); padding: 0; }
 		.stepper span { font-size: .72rem; color: var(--muted); padding: 0 2px; white-space: nowrap; }
@@ -137,6 +138,7 @@
 		.pastille.piece { border-radius: 2px; border: 2px solid #e08a4f; background: #3a2a1e; }
 		.trait.sur-mesure { border-top-color: var(--violet); }
 		.trait.terroir { border-top-color: var(--teal); }
+		.pastille.orphelin { background: transparent; border: 3px solid #e0559a; }
 
 		#fiche {
 			width: 400px; flex: none; border-left: 1px solid var(--border); background: var(--panel);
@@ -236,6 +238,7 @@
 		<span class="mode" role="group" aria-label="Mode d'affichage">
 			<button type="button" id="mode-voisinage" title="Voisinage de l'item choisi">◎ Voisinage</button>
 			<button type="button" id="mode-complet" title="Tout le réseau filtré">✱ Complet</button>
+			<button type="button" id="mode-orphelins" title="Seulement les items qu’aucune recette ne produit ni n’utilise">⊘ Orphelins</button>
 		</span>
 		<span class="stepper" id="stp-amont" title="Profondeur amont : ce qui sert à le fabriquer">
 			<button type="button" data-delta="-1" aria-label="Moins d'amont">−</button>
@@ -315,6 +318,8 @@ function filtresParDefaut() {
 		surMesure: false,      // variantes générées des commandes sur mesure
 		terroir: true,         // spécialités de terroir (`lieu_portee`)
 		masquerIsoles: true,   // nœuds sans aucun lien visible
+		exergueOrphelins: false, // items orphelins (ni produits ni utilisés) ajoutés et soulignés
+		surMesureItems: '',    // '' tous · 'exclure' · 'seulement' : items concernés par le sur-mesure
 	};
 }
 
@@ -324,7 +329,7 @@ function normaliserRecherche(s) {
 }
 
 function indexerGraphe(graphe) {
-	const idx = { noeuds: {}, sortants: {}, entrants: {}, aretes: {}, recettes: {}, lieux: {}, norm: {} };
+	const idx = { noeuds: {}, sortants: {}, entrants: {}, aretes: {}, recettes: {}, lieux: {}, norm: {}, surMesure: {} };
 	for (const n of (graphe && graphe.nodes) || []) {
 		idx.noeuds[n.id] = n;
 		idx.sortants[n.id] = [];
@@ -351,6 +356,15 @@ function indexerGraphe(graphe) {
 		}
 		r.entrees.push({ id: e.source, quantite: e.quantite || 1 });
 	}
+	// Sur-mesure : matière qui façonne (`matiere_fabrication`, avec ou sans tag) ou pièce
+	// listée par une ⚒ famille de pièces. Une matière qui est aussi une pièce reste « matiere ».
+	for (const n of Object.values(idx.noeuds)) {
+		if (n.type !== 'piece') continue;
+		for (const id of n.pieces || []) if (idx.noeuds[id]) idx.surMesure[id] = 'piece';
+	}
+	for (const n of Object.values(idx.noeuds)) {
+		if (n.type === 'item' && n.matiere_fabrication) idx.surMesure[n.id] = 'matiere';
+	}
 	return idx;
 }
 
@@ -370,6 +384,29 @@ function roleNoeud(idx, id) {
 	if (produit) return 'fini';
 	if (sert) return 'brut';
 	return 'isole';
+}
+
+// Orphelin : un ITEM qu'aucune recette ne produit et qu'aucune n'utilise (rôle `isole`,
+// réseau entier, indépendant des filtres). Un nœud absent est cité par une recette : jamais
+// orphelin.
+function estOrphelin(idx, id) {
+	const n = idx.noeuds[id];
+	return !!n && n.type === 'item' && roleNoeud(idx, id) === 'isole';
+}
+
+// Les orphelins qui passent les filtres d'item (catégorie, sous-catégorie, rareté, rôle).
+function orphelins(idx, f) {
+	return Object.keys(idx.noeuds)
+		.filter(id => estOrphelin(idx, id) && noeudVisible(idx.noeuds[id], f, idx))
+		.sort();
+}
+
+// Mode « orphelins » : une colonne par catégorie d'item, la plus fournie à gauche.
+function rangsOrphelins(idx, ids) {
+	const c = {};
+	for (const id of ids) { const k = idx.noeuds[id].categorie || ''; c[k] = (c[k] || 0) + 1; }
+	const ordre = Object.keys(c).sort((a, b) => c[b] - c[a] || a.localeCompare(b));
+	return ids.map(id => ({ id, rang: ordre.indexOf(idx.noeuds[id].categorie || '') }));
 }
 
 function areteVisible(e, f) {
@@ -396,6 +433,8 @@ function noeudVisible(n, f, idx) {
 	if (f.sousCategories.length && !f.sousCategories.includes(n.sous_categorie || '')) return false;
 	if (f.raretes.length && !f.raretes.includes(n.rarete || '')) return false;
 	if (f.roles.length && !f.roles.includes(roleNoeud(idx, n.id))) return false;
+	if (f.surMesureItems === 'exclure' && idx.surMesure[n.id]) return false;
+	if (f.surMesureItems === 'seulement' && !idx.surMesure[n.id]) return false;
 	return true;
 }
 
@@ -424,6 +463,8 @@ function filtrerGraphe(idx, f) {
 		ids = ids.filter(id => lies.has(id));
 	}
 	if (f.absentsSeuls) ({ ids, aretes } = _restreindreAbsents(ids, aretes, idx, null));
+	// Exergue : les orphelins n'ont aucun lien, `masquerIsoles` les aurait retirés.
+	if (f.exergueOrphelins) ids = [...new Set([...ids, ...orphelins(idx, f)])];
 	return { ids: ids.sort(), aretes: aretes.map(e => e.id).sort() };
 }
 
@@ -630,24 +671,27 @@ function compterFiltresActifs(f) {
 	const d = filtresParDefaut();
 	let n = 0;
 	for (const k of ['categories', 'sousCategories', 'raretes', 'lieux', 'roles']) if (f[k].length) n++;
-	for (const k of ['familles', 'toutesSousCategories', 'fabrications', 'absentsSeuls', 'surMesure', 'terroir', 'masquerIsoles']) if (f[k] !== d[k]) n++;
+	for (const k of ['familles', 'toutesSousCategories', 'fabrications', 'absentsSeuls', 'surMesure', 'terroir', 'masquerIsoles', 'exergueOrphelins', 'surMesureItems']) if (f[k] !== d[k]) n++;
 	return n;
 }
 
 // État de la vue ↔ query-string (partage / réouverture). Seuls les écarts au défaut sont écrits.
 const _URL_LISTES = { cat: 'categories', scat: 'sousCategories', rar: 'raretes', lieu: 'lieux', role: 'roles' };
-const _URL_BOOLS = { fam: 'familles', tsc: 'toutesSousCategories', fabr: 'fabrications', abs: 'absentsSeuls', sm: 'surMesure', terroir: 'terroir', iso: 'masquerIsoles' };
+const _URL_BOOLS = { fam: 'familles', tsc: 'toutesSousCategories', fabr: 'fabrications', abs: 'absentsSeuls', sm: 'surMesure', terroir: 'terroir', iso: 'masquerIsoles', orph: 'exergueOrphelins' };
+const MODES = ['voisinage', 'complet', 'orphelins'];
+const CHOIX_SUR_MESURE = ['', 'exclure', 'seulement'];
 
 function etatVersUrl(etat) {
 	const p = new URLSearchParams();
 	if (etat.item) p.set('item', etat.item);
-	if (etat.mode === 'complet') p.set('mode', 'complet');
+	if (etat.mode !== 'voisinage') p.set('mode', etat.mode);
 	if (etat.amont !== PROFONDEUR_DEFAUT) p.set('amont', String(etat.amont));
 	if (etat.aval !== PROFONDEUR_DEFAUT) p.set('aval', String(etat.aval));
 	if (etat.q) p.set('q', etat.q);
 	const d = filtresParDefaut();
 	for (const [k, champ] of Object.entries(_URL_LISTES)) for (const v of etat.filtres[champ]) p.append(k, v);
 	for (const [k, champ] of Object.entries(_URL_BOOLS)) if (etat.filtres[champ] !== d[champ]) p.set(k, etat.filtres[champ] ? '1' : '0');
+	if (etat.filtres.surMesureItems) p.set('fsm', etat.filtres.surMesureItems);
 	return p.toString();
 }
 
@@ -660,9 +704,10 @@ function urlVersEtat(search) {
 	const filtres = filtresParDefaut();
 	for (const [k, champ] of Object.entries(_URL_LISTES)) filtres[champ] = p.getAll(k);
 	for (const [k, champ] of Object.entries(_URL_BOOLS)) if (p.has(k)) filtres[champ] = p.get(k) === '1';
+	if (CHOIX_SUR_MESURE.includes(p.get('fsm'))) filtres.surMesureItems = p.get('fsm');
 	return {
 		item: p.get('item') || '',
-		mode: p.get('mode') === 'complet' ? 'complet' : 'voisinage',
+		mode: MODES.includes(p.get('mode')) ? p.get('mode') : 'voisinage',
 		amont: prof('amont'), aval: prof('aval'),
 		q: p.get('q') || '',
 		filtres,
@@ -743,6 +788,8 @@ function styleCy() {
 			'border-width': 2, 'border-style': 'solid', 'border-color': '#e08a4f', 'color': '#f0b88a',
 		} },
 		{ selector: 'node[type = "piece"][?absent]', style: { 'border-color': '#c84b4b', 'border-width': 3 } },
+		// Orphelin (ni produit ni utilisé) : anneau magenta, avant `centre` / `match` qui priment.
+		{ selector: 'node[?orphelin]', style: { 'border-width': 3, 'border-color': '#e0559a', 'border-style': 'solid' } },
 		{ selector: 'node.centre', style: {
 			'width': 36, 'height': 36, 'border-width': 4, 'border-color': '#c8a84b', 'border-style': 'solid',
 			'font-size': 13, 'font-weight': 'bold', 'color': '#c8a84b', 'z-index': 10,
@@ -774,10 +821,12 @@ function styleCy() {
 
 function elementsCy(ids, aretes, replies) {
 	const els = [];
+	const souligner = ETAT.filtres.exergueOrphelins || ETAT.mode === 'orphelins';
 	for (const id of ids) {
 		const n = IDX.noeuds[id];
 		els.push({ group: 'nodes', data: {
 			id, type: n.type, absent: !!n.absent, hors_recette: !!n.hors_recette,
+			orphelin: souligner && estOrphelin(IDX, id),
 			couleur: n.type === 'famille' ? '#2a3040' : n.type === 'piece' ? '#3a2a1e'
 				: (n.absent ? '#555' : couleurCategorie(n.categorie)),
 			etiquette: libelleNoeud(n, replies && replies[id]),
@@ -818,6 +867,20 @@ function rendre() {
 		CY.fit(undefined, 30);
 		statut(ids.length + ' nœuds · ' + v.aretes.length + ' liens');
 		majLegende(ids);
+	} else if (ETAT.mode === 'orphelins') {
+		const ids = orphelins(IDX, ETAT.filtres);
+		if (!ids.length) {
+			statut('Aucun item orphelin ne passe les filtres');
+			majLegende([]);
+			return;
+		}
+		CY.add(elementsCy(ids, [], null));
+		const pos = disposerCouches(rangsOrphelins(IDX, ids), IDX, VERTICAL);
+		CY.nodes().positions(n => pos[n.id()]);
+		if (ETAT.item && CY.getElementById(ETAT.item).length) CY.getElementById(ETAT.item).addClass('centre');
+		CY.fit(undefined, 30);
+		statut(ids.length + ' item' + (ids.length > 1 ? 's' : '') + ' orphelin' + (ids.length > 1 ? 's' : '') + ' (ni produit ni utilisé par une recette)');
+		majLegende(ids);
 	} else {
 		const g = filtrerGraphe(IDX, ETAT.filtres);
 		if (!g.ids.length) {
@@ -827,6 +890,8 @@ function rendre() {
 		}
 		CY.add(elementsCy(g.ids, g.aretes, null));
 		const rangs = rangsGlobaux(g.ids, g.aretes.map(id => IDX.aretes[id]));
+		// Exergue : les orphelins à part, dans une colonne avant les matières brutes.
+		if (ETAT.filtres.exergueOrphelins) for (const r of rangs) if (estOrphelin(IDX, r.id)) r.rang = -1;
 		const pos = disposerCouches(rangs, IDX, VERTICAL, Math.max(VERTICAL ? 3 : 18, Math.ceil(Math.sqrt(g.ids.length) * (VERTICAL ? 0.5 : 1.2))));
 		CY.nodes().positions(n => pos[n.id()]);
 		if (ETAT.item && CY.getElementById(ETAT.item).length) CY.getElementById(ETAT.item).addClass('centre');
@@ -840,6 +905,7 @@ function rendre() {
 function majOutils() {
 	$('mode-voisinage').classList.toggle('on', ETAT.mode === 'voisinage');
 	$('mode-complet').classList.toggle('on', ETAT.mode === 'complet');
+	$('mode-orphelins').classList.toggle('on', ETAT.mode === 'orphelins');
 	$('val-amont').textContent = ETAT.amont;
 	$('val-aval').textContent = ETAT.aval;
 	for (const id of ['stp-amont', 'stp-aval']) $(id).classList.toggle('inactif', ETAT.mode !== 'voisinage');
@@ -859,6 +925,8 @@ function majLegende(ids) {
 		`<div class="leg"><span class="pastille" style="background:${couleurCategorie(cat)}"></span>${escapeHtml(cat || '—')} <small>(${k})</small></div>`).join('')
 		+ '<div class="leg"><span class="pastille famille"></span>famille (sous-catégorie)</div>'
 		+ '<div class="leg"><span class="pastille absent"></span>absent de la base</div>'
+		+ (ETAT.filtres.exergueOrphelins || ETAT.mode === 'orphelins'
+			? '<div class="leg"><span class="pastille orphelin"></span>orphelin : ni produit ni utilisé</div>' : '')
 		+ '<div class="leg"><span class="trait"></span>recette</div>'
 		+ '<div class="leg"><span class="trait membre"></span>appartient à la famille</div>'
 		+ (ETAT.filtres.toutesSousCategories
@@ -1025,7 +1093,7 @@ function ouvrirFiche(id) {
 	selectionnerDansVue(id);
 	const r = recettesDe(IDX, id);
 	const tags = [];
-	tags.push(`<span class="tag">${escapeHtml(ROLE_LIBELLE[roleNoeud(IDX, id)] || '')}</span>`);
+	tags.push(`<span class="tag${estOrphelin(IDX, id) ? ' alerte' : ''}">${escapeHtml(estOrphelin(IDX, id) ? 'orphelin : ni produit ni utilisé' : (ROLE_LIBELLE[roleNoeud(IDX, id)] || ''))}</span>`);
 	if (n.categorie) tags.push(`<span class="tag">${escapeHtml(n.categorie)}</span>`);
 	if (n.sous_categorie && n.type === 'item') tags.push(`<span class="tag">${escapeHtml(n.sous_categorie)}</span>`);
 	if (n.rarete) tags.push(`<span class="tag">${escapeHtml(n.rarete)}</span>`);
@@ -1130,6 +1198,14 @@ function groupeChoix(titre, champ, valeurs, libelle) {
 		+ '</div></fieldset>';
 }
 
+// Choix exclusif (boutons radio) : même allure que `groupeChoix`, une seule valeur.
+function choixUnique(titre, champ, valeurs) {
+	return `<fieldset><legend>${escapeHtml(titre)}</legend><div class="choix" data-champ="${champ}">`
+		+ valeurs.map(([v, l, n]) => `<label><input type="radio" name="${champ}" data-unique="${champ}" value="${escapeHtml(v)}"${ETAT.filtres[champ] === v ? ' checked' : ''}>`
+			+ `${escapeHtml(l)}${n != null ? ` <small>${n}</small>` : ''}</label>`).join('')
+		+ '</div></fieldset>';
+}
+
 function bascule(champ, texte) {
 	return `<label class="bascule"><input type="checkbox" data-bool="${champ}"${ETAT.filtres[champ] ? ' checked' : ''}> ${escapeHtml(texte)}</label>`;
 }
@@ -1146,8 +1222,11 @@ function rendreFiltres() {
 		+ bascule('terroir', 'Inclure les spécialités de terroir')
 		+ bascule('surMesure', 'Inclure les variantes sur mesure')
 		+ bascule('absentsSeuls', 'Diagnostic : seulement les nœuds absents de la base et leurs voisins')
+		+ bascule('exergueOrphelins', 'Mettre en exergue les items orphelins (ni produits ni utilisés par une recette)')
 		+ '</fieldset>'
 		+ groupeChoix('Rôle dans le réseau', 'roles', roles, v => libRole[v])
+		+ choixUnique('Fabrication sur mesure (matières qui façonnent, pièces façonnables)', 'surMesureItems', [
+			['', 'Tous'], ['exclure', 'Exclure'], ['seulement', 'Seulement', Object.keys(IDX.surMesure).length]])
 		+ groupeChoix('Métier (catégorie de lieu de la recette)', 'lieux', VALEURS.lieux)
 		+ groupeChoix('Catégorie d’item', 'categories', VALEURS.categories)
 		+ groupeChoix('Sous-catégorie', 'sousCategories', VALEURS.sousCategories)
@@ -1217,6 +1296,7 @@ function brancher() {
 
 	$('mode-voisinage').addEventListener('click', () => { ETAT.mode = 'voisinage'; rendre(); });
 	$('mode-complet').addEventListener('click', () => { ETAT.mode = 'complet'; rendre(); });
+	$('mode-orphelins').addEventListener('click', () => { ETAT.mode = 'orphelins'; rendre(); });
 	for (const [id, champ] of [['stp-amont', 'amont'], ['stp-aval', 'aval']]) {
 		$(id).addEventListener('click', (ev) => {
 			const b = ev.target.closest('button');
@@ -1244,6 +1324,8 @@ function brancher() {
 		const t = ev.target;
 		if (t.dataset.bool) {
 			ETAT.filtres[t.dataset.bool] = t.checked;
+		} else if (t.dataset.unique) {
+			ETAT.filtres[t.dataset.unique] = t.value;
 		} else {
 			const box = t.closest('.choix');
 			if (!box) return;
