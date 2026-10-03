@@ -1388,6 +1388,7 @@ def _vocabulaire_dialogues() -> dict:
 						   | lint_dialogues.ESCORTE_MEFIANCE),
 			acces=sorted(set(lint_dialogues.NOEUDS_REQUIS["acces"]) | {"deja"}),
 			rang=sorted(set(lint_dialogues.NOEUDS_REQUIS["rang"]) | lint_dialogues.RANG_APPORT),
+			apport=sorted(lint_dialogues.APPORT_DONNEUR | lint_dialogues.APPORT_RECEVEUR),
 		),
 		"actions": [
 			{"service": service, "op": op, "flag": flag}
@@ -1404,6 +1405,7 @@ def _vocabulaire_dialogues() -> dict:
 			"commission": sorted(f for f in lint_dialogues.FLAGS_CONNUS if f.startswith("commission_")),
 			"acces": sorted(f for f in lint_dialogues.FLAGS_CONNUS if f.startswith("acces_")),
 			"don": sorted(f for f in lint_dialogues.FLAGS_CONNUS if f.startswith("don_")),
+			"apport": sorted(f for f in lint_dialogues.FLAGS_CONNUS if f.startswith("apport_")),
 		},
 		# Même source que les conditions de présence du formulaire de lieu (`creation_options`).
 		"acces_conditions": acces.vocabulaire_conditions()["cles"],

@@ -33,6 +33,7 @@ from utils import recrutement
 from utils import montures
 from utils import escorte
 from utils import indicateurs
+from utils import apport
 from utils.combat import (
 	instantiate_monsters, build_monster_snapshot, create_combat_doc,
 	resolve_first_turns, finalize_combat,
@@ -290,6 +291,14 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			flags["acces_libere"] = libere
 			flags["acces_menace"] = not libere
 			placeholders["portail"] = lieu_label(lieu_garde)
+	# Quête d'APPORT (`services.apport`, utils/apport.py) : l'offre écrite, sa remise (par le
+	# donneur ou un autre PNJ du même lieu). `setdefault` : {xp}/{prime}/{objet} d'un autre
+	# service déjà posé gardent leur valeur.
+	if lieu_doc and (pnj_doc.get("services") or {}).get("apport"):
+		flags.update(apport.etat(character, pnj_doc, lieu_doc.get("_id")))
+		for cle, val in apport.placeholders(character, pnj_doc, lieu_doc.get("_id"),
+											_nom_item).items():
+			placeholders.setdefault(cle, val)
 	# Les quêtes MENÉES À BIEN et celles EN COURS, pour les conditions `quete_reussie` et
 	# `quete_active` : elles visent une quête NOMMÉE, donc n'importe quel PNJ peut réagir à ce
 	# qu'un autre a confié ou fait accomplir. Aucune lecture DB — `quetes_terminees` et
@@ -409,6 +418,70 @@ def _appliquer_effets_noeud(character: dict, pnj_doc: dict, lieu_doc: dict | Non
 	if save_doc(character) is not None and gain:
 		_crediter_relation(character, gain, reponse)
 	return bool(gain or armee)
+
+
+def _nom_item(item_id: str) -> str:
+	"""Nom affichable d'un item (repli : la fin de son id)."""
+	return (get_doc(item_id) or {}).get("nom") or (item_id or "").split(":", 1)[-1]
+
+
+def _resoudre_apport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
+					 reponse: dict) -> tuple[str | None, dict]:
+	"""Service `apport` (utils/apport.py) : renvoie (nœud de résultat, placeholders).
+
+	`accepter` : la quête `collect` est posée dans les actives (nœud `accepte`).
+	`remettre` : les pièces portées sont déposées jusqu'au reste à faire. Incomplète → nœud
+	             `partiel` ; complète → récompenses (XP partagée avec la compagnie, cuivre),
+	             archivage réussi, réputation du donneur (+1), nœud `remis`."""
+	noeuds = ((pnj_doc.get("services") or {}).get("apport") or {}).get("noeuds") or {}
+	lieu_id = (lieu_doc or {}).get("_id")
+
+	if op == "accepter":
+		q = apport.accepter(character, pnj_doc, lieu_id)
+		if not q:
+			raise HTTPException(status_code=422, detail="Rien à vous confier ici.")
+		if save_doc(character) is None:
+			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		reponse["apport"] = {"accepte": q.get("titre", "—")}
+		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
+		return noeuds.get("accepte"), apport.placeholders(character, pnj_doc, lieu_id, _nom_item)
+
+	if op == "remettre":
+		# ⚠️ Groupe chargé AVANT la récompense et repassé : mêmes dicts que ceux qu'on sauve.
+		groupe = recrutement.groupe_effectif(character, get_doc)
+		q, n, complete = apport.remettre(character, pnj_doc, lieu_id)
+		if not q or n <= 0:
+			raise HTTPException(status_code=422, detail="Vous n'avez rien de ce qui est demandé.")
+		dits = apport.placeholders(character, pnj_doc, lieu_id, _nom_item)
+		recap = None
+		if complete:
+			recap = quetes.appliquer_recompenses(character, q, compagnons=groupe)
+			focalisation.effacer_si_quete(character, q.get("id"))
+			apport.archiver(character, q, quetes.now_epoch())
+		if save_doc(character) is None:
+			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		reponse["inventaire_payload"] = _inventory_payload(character)
+		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
+		if not complete:
+			reponse["apport"] = {"depose": n, "reste": dits.get("reste", 0), "objet": dits.get("objet")}
+			return noeuds.get("partiel"), dits
+		# Annexes APRÈS le save autoritatif (la quête a quitté les actives : pas de double paie).
+		_sauver_compagnie(recap)
+		relation_gain = quetes.recompenser_donneur(character, lieu_doc, get_doc, save_doc)
+		reponse["apport"] = {
+			"remis": True,
+			"titre": q.get("titre", "—"),
+			"xp": recap["xp"].get("xp_gain", 0),
+			"niveau_up": recap["xp"].get("niveau_up", False),
+			"xp_compagnie": _xp_compagnie(recap),
+		}
+		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
+		reponse["vitals"] = _vitals_payload(character)
+		if relation_gain is not None:
+			reponse["relations_lieux"] = relations_lieux_payload(character)
+		return noeuds.get("remis"), dict(dits, reste=0)
+
+	raise HTTPException(status_code=422, detail="Action d'apport inconnue.")
 
 
 def _sauver_compagnie(recap: dict) -> None:
@@ -756,6 +829,11 @@ async def pnj_dialogue_choix(
 	elif action.get("service") == "acces":
 		suivant, dits = _resoudre_acces(current_user, character, pnj_doc, lieu_doc,
 										 action.get("op"), reponse)
+		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
+		contexte["placeholders"].update(dits)
+	elif action.get("service") == "apport":
+		suivant, dits = _resoudre_apport(character, pnj_doc, lieu_doc, action.get("op"), reponse)
+		# Quête prise ou remise → refiltrer les choix sur les nouveaux flags.
 		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 		contexte["placeholders"].update(dits)
 	elif action.get("service") == "direction":

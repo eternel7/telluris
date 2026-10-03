@@ -16,6 +16,24 @@
           "sans_fonds": "soin_sans_fonds",
           "inutile": "soin_inutile"
         }
+      },
+      "apport": {
+        "offre": {
+          "id": "quete:plantes_d_elise",
+          "titre": "Trois plantes pour Élise",
+          "description": "Élise, l'herboriste du Coq de Lutèce, manque de fleurs de souci pour faire baisser la fièvre des voyageurs. Le souci pousse sur les collines, au nord-est de Lutecia : une fleur orange, comme un petit soleil. Ne la cueillir que si l'on est sûr.",
+          "item": "item:Fleur_de_souci",
+          "quantite": 3,
+          "unique": true,
+          "recompenses": {
+            "xp": 40
+          }
+        },
+        "noeuds": {
+          "accepte": "apport_accepte",
+          "remis": "apport_remis",
+          "partiel": "apport_partiel"
+        }
       }
     },
     "dialogue": {
@@ -78,8 +96,83 @@
               }
             },
             {
+              "id": "apport_remettre",
+              "label": "« Voilà vos fleurs de souci. »",
+              "condition": {
+                "apport_possible": true
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
+              "id": "apport_rappel",
+              "label": "« Ces fleurs de souci… rappelez-moi. »",
+              "condition": {
+                "apport_en_cours": true,
+                "apport_possible": false
+              },
+              "next": "apport_rappel"
+            },
+            {
+              "id": "apport_proposer",
+              "label": "« Ces fleurs de souci : je peux vous les chercher. »",
+              "condition": {
+                "apport_offert": true,
+                "passages": {
+                  "lieu": "lieu:le_coq_de_lutece",
+                  "min": 7
+                }
+              },
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
               "id": "fin",
               "label": "(La laisser à ses herbes.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "apport_accepte": {
+          "texte": "Elle tire d'un pot une corolle séchée, d'un orange encore vif, et la pose dans ta paume. « Voilà à quoi elle ressemble. Il m'en faut trois. Elle pousse sur les collines, au nord-est de la ville. Et si tu n'es pas sûr… »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« … je ne la cueille pas. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "apport_rappel": {
+          "texte": "« Une fleur orange, comme un petit soleil. Sur les collines, au nord-est de la ville. Il m'en faut encore {reste}. Et pas une que tu ne sois sûr de reconnaître. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Je n'ai pas oublié. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "apport_partiel": {
+          "texte": "Elle fait tourner la fleur entre ses doigts, la sent. « C'est bien elle. » Elle la pose à sécher près de l'âtre. « Encore {reste}. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "apport_remis": {
+          "texte": "Elle examine les fleurs une à une, les fait tourner entre ses doigts, les sent. « C'est bien elle. » Elle les suspend au-dessus de l'âtre, à côté des autres bouquets. « Trois plantes. Te voilà quitte. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Sourire.)",
               "next": "fin"
             }
           ]
@@ -244,7 +337,7 @@
           ]
         },
         "s3_02": {
-          "texte": "« Je cherche une plante qui pousse près des vieux chemins forestiers. Des feuilles longues, légèrement argentées. Tu en as peut-être vu. »",
+          "texte": "« Je cherche une plante qui pousse sur les collines, au nord-est de la ville. Une fleur orange, comme un petit soleil : du souci. Tu en as peut-être vu. »",
           "choix": [
             {
               "id": "suite",
@@ -264,7 +357,7 @@
           ]
         },
         "s3_04": {
-          "texte": "« Presque plus. Et avec le nombre de voyageurs blessés qui passent ici, je préfère ne pas attendre la dernière feuille. »",
+          "texte": "« Presque plus. Et avec le nombre de voyageurs blessés qui passent ici, je préfère ne pas attendre la dernière fleur. »",
           "choix": [
             {
               "id": "suite",
@@ -356,6 +449,17 @@
         "s3_13": {
           "texte": "« Je compte sur toi. »",
           "choix": [
+            {
+              "id": "accepter",
+              "label": "« Montrez-moi à quoi elle ressemble. »",
+              "condition": {
+                "apport_offert": true
+              },
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
             {
               "id": "fin",
               "label": "(Lui laisser reprendre son mortier.)",
@@ -535,9 +639,38 @@
     "vocation": "aubergiste",
     "portrait": "aubergiste_Coq_de_Lutece_elfe_f.jpg",
     "description": "La tenancière du Coq de Lutèce, une elfe qui a vu passer plus de voyageurs qu'elle ne saurait en compter. Elle n'a pas quitté son comptoir de la journée, et elle ne sait pas ce qui s'est passé dans la forêt.",
+    "services": {
+      "apport": {
+        "quete": "quete:plantes_d_elise",
+        "noeuds": {
+          "remis": "apport_remis",
+          "partiel": "apport_partiel"
+        }
+      }
+    },
     "dialogue": {
       "noeud_depart": "accueil",
       "noeuds": {
+        "apport_partiel": {
+          "texte": "L'aubergiste regarde la fleur orange un long moment. Puis elle va la poser sur la table près de l'âtre, à côté des pots alignés, sans un mot.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(S'éloigner.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "apport_remis": {
+          "texte": "L'aubergiste regarde longtemps les fleurs de souci. Puis elle les prend avec précaution et va les déposer sur la table près de l'âtre, à côté des pots alignés. « Elle les attendait. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Se taire.)",
+              "next": "fin"
+            }
+          ]
+        },
         "accueil": {
           "texte": "Derrière son comptoir, l'aubergiste essuie une chope qui n'en a plus besoin. La table près de l'âtre est vide.",
           "choix": [
@@ -564,8 +697,19 @@
               "next": "retrouvee_01"
             },
             {
+              "id": "apport_remettre",
+              "label": "(Poser les fleurs de souci sur le comptoir.)",
+              "condition": {
+                "apport_possible": true
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
               "id": "fin",
-              "label": "(Le laisser à son comptoir.)",
+              "label": "(La laisser à son comptoir.)",
               "next": "fin"
             }
           ]
