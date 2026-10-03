@@ -63,7 +63,8 @@ from utils import grimoires as grimoires_util
 from utils import simulateur as simulateur_util
 from utils import potentiel as potentiel_util
 from utils.marche import (tick_atelier, reset_prix_cache, besoins_lieu, appro_leaves_lieu,
-						  relations_lieux_payload, flux_cite, persister_flux)
+						  relations_lieux_payload, flux_cite, persister_flux, prix_range_cuivre)
+from utils import graphe_recettes
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, cites_de_depart, lieu_router
 from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, xp_seuil_niveau, load_world_variables
@@ -1657,6 +1658,48 @@ def admin_simulateur(request: Request, current_user: Annotated[User, Depends(get
 				 # recopiée dans le template.
 				 "stats_forcables": list(simulateur_util.STATS_FORCABLES)},
 	)
+
+
+@app.get("/admin/recettes-graphe", response_class=HTMLResponse)
+def admin_recettes_graphe(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Écran « Graphe des recettes » : réseau item → recette → item, recherche, filtres, fiche."""
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_recettes_graphe.html",
+		context={"title": "Graphe des recettes"}
+	)
+
+
+@app.get("/admin/recettes-graphe/data")
+def admin_recettes_graphe_data(current_user: Annotated[User, Depends(get_current_user)]):
+	"""Graphe complet (cf. utils/graphe_recettes). ⚠️ find_docs PROJETÉ sur les items : le
+	graphe n'a besoin que de l'étiquette, la fiche relit le doc entier à la demande."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	recettes = find_docs({"type": "recette"}) or []
+	items = find_docs({"type": "item"},
+					  fields=["_id", "nom", "icon", "categorie", "sous_categorie", "rarete"]) or []
+	return graphe_recettes.construire_graphe(recettes, items)
+
+
+@app.get("/admin/recettes-graphe/item")
+def admin_recettes_graphe_item(
+	current_user: Annotated[User, Depends(get_current_user)],
+	item_id: str = Query("", alias="id"),
+):
+	"""Fiche d'un item : doc complet + fourchette de prix (calculée ici, pas pour tout le graphe)."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	if not item_id.startswith("item:"):
+		raise HTTPException(status_code=400, detail="Paramètre 'id' (item:…) requis")
+	doc = get_doc(item_id)
+	if not doc:
+		return {"doc": None, "prix": None}
+	pmin, pmax = prix_range_cuivre(doc, item_id)
+	return {"doc": doc, "prix": {"min": pmin, "max": pmax}}
 
 
 @app.post("/admin/simulateur/run")
