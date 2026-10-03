@@ -26,41 +26,6 @@
           "texte": "Près de l'âtre, une naine aux manches retroussées trie des herbes séchées sur une table couverte de linges propres, de pots bouchés à la cire et de bandes roulées. Une odeur de camomille et d'eau-de-vie flotte autour d'elle.",
           "choix": [
             {
-              "id": "s1",
-              "label": "(Passer près de sa table, une main sur le flanc.)",
-              "condition": {
-                "passages": {
-                  "lieu": "lieu:le_coq_de_lutece",
-                  "max": 1
-                }
-              },
-              "next": "s1_01"
-            },
-            {
-              "id": "s2",
-              "label": "(Poser ton sac près de sa table.)",
-              "condition": {
-                "passages": {
-                  "lieu": "lieu:le_coq_de_lutece",
-                  "min": 2,
-                  "max": 2
-                }
-              },
-              "next": "s2_01"
-            },
-            {
-              "id": "s3",
-              "label": "(Aller la saluer.)",
-              "condition": {
-                "passages": {
-                  "lieu": "lieu:le_coq_de_lutece",
-                  "min": 3,
-                  "max": 3
-                }
-              },
-              "next": "s3_01"
-            },
-            {
               "id": "s4",
               "label": "(Aller la saluer.)",
               "condition": {
@@ -70,6 +35,39 @@
                 }
               },
               "next": "s4_01"
+            },
+            {
+              "id": "s3",
+              "label": "(S'asseoir à sa table.)",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:le_coq_de_lutece",
+                  "min": 3
+                }
+              },
+              "next": "s3_01"
+            },
+            {
+              "id": "s2",
+              "label": "(Poser ton sac près de sa table.)",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:le_coq_de_lutece",
+                  "min": 2
+                }
+              },
+              "next": "s2_01"
+            },
+            {
+              "id": "s1",
+              "label": "(Passer près de sa table, une main sur le flanc.)",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:le_coq_de_lutece",
+                  "max": 1
+                }
+              },
+              "next": "s1_01"
             },
             {
               "id": "soin",

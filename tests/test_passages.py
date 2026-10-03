@@ -131,15 +131,24 @@ def _presents_au_passage(n):
 
 @pytest.mark.parametrize("n, attendu", [
 	(1, {"pnj:elise_herboriste": ["s1"]}),
+	# À partir du 2ᵉ passage, les scènes passées restent ouvertes (une scène manquée se
+	# rattrape), la plus récente EN TÊTE ; la première rencontre, elle, ne se rejoue pas.
 	(2, {"pnj:elise_herboriste": ["s2"]}),
-	(3, {"pnj:elise_herboriste": ["s3"]}),
-	(4, {"pnj:elise_herboriste": ["s4"]}),
+	(3, {"pnj:elise_herboriste": ["s3", "s2"]}),
+	(4, {"pnj:elise_herboriste": ["s4", "s3", "s2"]}),
 	(5, {"pnj:aubergiste_du_coq_de_lutece": ["absente"]}),
 	(6, {"pnj:aubergiste_du_coq_de_lutece": ["retrouvee"]}),
 	(12, {"pnj:aubergiste_du_coq_de_lutece": ["retrouvee"]}),
 ])
 def test_une_scene_par_passage(n, attendu):
 	assert _presents_au_passage(n) == attendu
+
+
+def test_scenes_ouvertes_ensemble_ont_des_libelles_distincts():
+	"""Deux libellés identiques côte à côte rendraient le menu illisible."""
+	accueil = _contenu()["pnj:elise_herboriste"]["dialogue"]["noeuds"]["accueil"]
+	labels = [c["label"] for c in accueil["choix"]]
+	assert len(labels) == len(set(labels))
 
 
 def test_le_contenu_passe_le_linter():
