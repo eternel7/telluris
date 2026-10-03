@@ -319,6 +319,7 @@ function filtresParDefaut() {
 		terroir: true,         // spécialités de terroir (`lieu_portee`)
 		masquerIsoles: true,   // nœuds sans aucun lien visible
 		exergueOrphelins: false, // items orphelins (ni produits ni utilisés) ajoutés et soulignés
+		surMesureItems: '',    // '' tous · 'exclure' · 'seulement' : items concernés par le sur-mesure
 	};
 }
 
@@ -328,7 +329,7 @@ function normaliserRecherche(s) {
 }
 
 function indexerGraphe(graphe) {
-	const idx = { noeuds: {}, sortants: {}, entrants: {}, aretes: {}, recettes: {}, lieux: {}, norm: {} };
+	const idx = { noeuds: {}, sortants: {}, entrants: {}, aretes: {}, recettes: {}, lieux: {}, norm: {}, surMesure: {} };
 	for (const n of (graphe && graphe.nodes) || []) {
 		idx.noeuds[n.id] = n;
 		idx.sortants[n.id] = [];
@@ -354,6 +355,15 @@ function indexerGraphe(graphe) {
 			idx.lieux[r.lieu_categorie] = (idx.lieux[r.lieu_categorie] || 0) + 1;
 		}
 		r.entrees.push({ id: e.source, quantite: e.quantite || 1 });
+	}
+	// Sur-mesure : matière qui façonne (`matiere_fabrication`, avec ou sans tag) ou pièce
+	// listée par une ⚒ famille de pièces. Une matière qui est aussi une pièce reste « matiere ».
+	for (const n of Object.values(idx.noeuds)) {
+		if (n.type !== 'piece') continue;
+		for (const id of n.pieces || []) if (idx.noeuds[id]) idx.surMesure[id] = 'piece';
+	}
+	for (const n of Object.values(idx.noeuds)) {
+		if (n.type === 'item' && n.matiere_fabrication) idx.surMesure[n.id] = 'matiere';
 	}
 	return idx;
 }
@@ -423,6 +433,8 @@ function noeudVisible(n, f, idx) {
 	if (f.sousCategories.length && !f.sousCategories.includes(n.sous_categorie || '')) return false;
 	if (f.raretes.length && !f.raretes.includes(n.rarete || '')) return false;
 	if (f.roles.length && !f.roles.includes(roleNoeud(idx, n.id))) return false;
+	if (f.surMesureItems === 'exclure' && idx.surMesure[n.id]) return false;
+	if (f.surMesureItems === 'seulement' && !idx.surMesure[n.id]) return false;
 	return true;
 }
 
@@ -659,7 +671,7 @@ function compterFiltresActifs(f) {
 	const d = filtresParDefaut();
 	let n = 0;
 	for (const k of ['categories', 'sousCategories', 'raretes', 'lieux', 'roles']) if (f[k].length) n++;
-	for (const k of ['familles', 'toutesSousCategories', 'fabrications', 'absentsSeuls', 'surMesure', 'terroir', 'masquerIsoles', 'exergueOrphelins']) if (f[k] !== d[k]) n++;
+	for (const k of ['familles', 'toutesSousCategories', 'fabrications', 'absentsSeuls', 'surMesure', 'terroir', 'masquerIsoles', 'exergueOrphelins', 'surMesureItems']) if (f[k] !== d[k]) n++;
 	return n;
 }
 
@@ -667,6 +679,7 @@ function compterFiltresActifs(f) {
 const _URL_LISTES = { cat: 'categories', scat: 'sousCategories', rar: 'raretes', lieu: 'lieux', role: 'roles' };
 const _URL_BOOLS = { fam: 'familles', tsc: 'toutesSousCategories', fabr: 'fabrications', abs: 'absentsSeuls', sm: 'surMesure', terroir: 'terroir', iso: 'masquerIsoles', orph: 'exergueOrphelins' };
 const MODES = ['voisinage', 'complet', 'orphelins'];
+const CHOIX_SUR_MESURE = ['', 'exclure', 'seulement'];
 
 function etatVersUrl(etat) {
 	const p = new URLSearchParams();
@@ -678,6 +691,7 @@ function etatVersUrl(etat) {
 	const d = filtresParDefaut();
 	for (const [k, champ] of Object.entries(_URL_LISTES)) for (const v of etat.filtres[champ]) p.append(k, v);
 	for (const [k, champ] of Object.entries(_URL_BOOLS)) if (etat.filtres[champ] !== d[champ]) p.set(k, etat.filtres[champ] ? '1' : '0');
+	if (etat.filtres.surMesureItems) p.set('fsm', etat.filtres.surMesureItems);
 	return p.toString();
 }
 
@@ -690,6 +704,7 @@ function urlVersEtat(search) {
 	const filtres = filtresParDefaut();
 	for (const [k, champ] of Object.entries(_URL_LISTES)) filtres[champ] = p.getAll(k);
 	for (const [k, champ] of Object.entries(_URL_BOOLS)) if (p.has(k)) filtres[champ] = p.get(k) === '1';
+	if (CHOIX_SUR_MESURE.includes(p.get('fsm'))) filtres.surMesureItems = p.get('fsm');
 	return {
 		item: p.get('item') || '',
 		mode: MODES.includes(p.get('mode')) ? p.get('mode') : 'voisinage',
@@ -1183,6 +1198,14 @@ function groupeChoix(titre, champ, valeurs, libelle) {
 		+ '</div></fieldset>';
 }
 
+// Choix exclusif (boutons radio) : même allure que `groupeChoix`, une seule valeur.
+function choixUnique(titre, champ, valeurs) {
+	return `<fieldset><legend>${escapeHtml(titre)}</legend><div class="choix" data-champ="${champ}">`
+		+ valeurs.map(([v, l, n]) => `<label><input type="radio" name="${champ}" data-unique="${champ}" value="${escapeHtml(v)}"${ETAT.filtres[champ] === v ? ' checked' : ''}>`
+			+ `${escapeHtml(l)}${n != null ? ` <small>${n}</small>` : ''}</label>`).join('')
+		+ '</div></fieldset>';
+}
+
 function bascule(champ, texte) {
 	return `<label class="bascule"><input type="checkbox" data-bool="${champ}"${ETAT.filtres[champ] ? ' checked' : ''}> ${escapeHtml(texte)}</label>`;
 }
@@ -1202,6 +1225,8 @@ function rendreFiltres() {
 		+ bascule('exergueOrphelins', 'Mettre en exergue les items orphelins (ni produits ni utilisés par une recette)')
 		+ '</fieldset>'
 		+ groupeChoix('Rôle dans le réseau', 'roles', roles, v => libRole[v])
+		+ choixUnique('Fabrication sur mesure (matières qui façonnent, pièces façonnables)', 'surMesureItems', [
+			['', 'Tous'], ['exclure', 'Exclure'], ['seulement', 'Seulement', Object.keys(IDX.surMesure).length]])
 		+ groupeChoix('Métier (catégorie de lieu de la recette)', 'lieux', VALEURS.lieux)
 		+ groupeChoix('Catégorie d’item', 'categories', VALEURS.categories)
 		+ groupeChoix('Sous-catégorie', 'sousCategories', VALEURS.sousCategories)
@@ -1299,6 +1324,8 @@ function brancher() {
 		const t = ev.target;
 		if (t.dataset.bool) {
 			ETAT.filtres[t.dataset.bool] = t.checked;
+		} else if (t.dataset.unique) {
+			ETAT.filtres[t.dataset.unique] = t.value;
 		} else {
 			const box = t.closest('.choix');
 			if (!box) return;
