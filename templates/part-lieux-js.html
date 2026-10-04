@@ -435,7 +435,8 @@ async function _cxChargerIds() {
 
 // `opts` (création seulement) : `{dest, type}` — destination présélectionnée et type proposé,
 // comme si l'admin les avait choisis au sélecteur (l'`_id` s'en dérive, rien n'est « touché »).
-// Sert au « ➕ Passage » d'un étage de donjon (section 🏰 du formulaire de lieu).
+// Sert au « ➕ Passage » d'un étage de donjon (section 🏰 du formulaire de lieu) et, sans
+// `opts`, au « ➕ Ajouter un lieu → 🔗 Connecter un lieu existant » (`_nlVersLieuExistant`).
 async function openConnForm(mode, connId, opts) {
 	const ici = LIEUX_HOTE.lieuCourant();
 	if (!ici) return;
@@ -1671,6 +1672,7 @@ function _nlMajChrome() {
 	_nlEl('nl-create-btn').disabled = false;
 	_nlEl('nl-id-fige').style.display = edition ? '' : 'none';
 	_nlEl('nl-link-field').style.display = edition ? 'none' : '';
+	_nlEl('nl-choix-existant').style.display = edition ? 'none' : '';
 }
 
 function closeLieuAdd() {
@@ -2697,6 +2699,17 @@ async function _djOuvrirPassage(connId) {
 	closeLieuAdd();
 	if (connId) await openConnForm('edition', connId);
 	else await openConnForm('creation', null, { dest: dest, type: 'passage' });
+}
+
+// ➕ Ajouter un lieu → « lieu existant » : le formulaire 🔗 prend le relais (il écrit la
+// seule connexion) ; celui-ci se ferme, après confirmation s'il porte des modifications.
+async function _nlVersLieuExistant() {
+	if (_nlDocCourantJson() !== nlInstantane
+			&& !confirm('Les modifications de ce formulaire ne sont pas enregistrées.\n\nLes abandonner pour connecter un lieu existant ?')) {
+		return;
+	}
+	closeLieuAdd();
+	await openConnForm('creation', null, {});
 }
 
 // Après l'écriture du LIEU : les docs donjon, RELUS juste avant — une autre salle a pu

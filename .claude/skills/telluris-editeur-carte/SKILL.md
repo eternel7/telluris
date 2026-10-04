@@ -12,6 +12,7 @@ description: Map editor authoring at /admin/editor (admin_map_editor.html) — t
 - Sections du panneau en **accordéon indépendant** (`.card.accordeon` + classe `ferme`, titre = bouton). ⚠️ `display:none !important` : des enfants ont un `display` inline (`setMode`). `ferme` ≠ attribut `hidden` de `#grille-card`/`#voies-card`/`#dim-card` (« disponible pour ce lieu »).
 - État par navigateur dans `localStorage['editeur-carte.panneau']` (`{flottant,left,top,fermees}`), try/catch, défaut ancré + tout déplié.
 - Mini-outils flottants : **seulement en mode test** (le panneau ne se replie plus).
+- Boutons d'écriture des sections (💾 Zones/Rencontres/Ressources, ✔ Appliquer de 🔍, 💾 de 📐) en `.section-actions` : `position:sticky; bottom:0` — collés au bas de la partie visible de leur **parent**, posés à sa fin. ⚠️ Un `overflow:hidden` ajouté sur un ancêtre (`.card`, `.panel-body`…) le casserait.
 
 ### Parts partagées et contrat `LIEUX_HOTE`
 Ligne de liste, fiche 📄, éditeurs 🧾 JSON, formulaires ✏️ lieu et 🔗 connexion vivent dans **`part-lieux-{js,css,markup}.html`**, inclus (`include`, pas `import` : `url_for`) par `/admin/editor` et `/admin/lieux`. Porte de rempart, lot, repositionnement, voies restent dans l'éditeur.
@@ -68,7 +69,7 @@ Source unique des formulaires (admin) : catégories (`lieu.categorie` ∪ `recet
 
 
 ### Formulaire de connexion
-`🔗 Connexion` (sur une ligne) → `#conn-overlay`, même géométrie que `#lj-overlay` (ouvrir l'un ferme l'autre), mais **déplaçable** par sa barre de titre (`rendreDeplacable`, `scripts/deplacable.js` chargé par les DEUX pages hôtes) — d'où `height` et non `bottom` : ancré haut et bas, il se tasserait au premier glisser. N'écrit **qu'un** `link:*` ; la ligne de liste montre `_id`, `status` et les deux positions. ⚠️ **La création générique n'existe plus** (le bouton a cédé la place à « 🏰 Ajouter une porte de rempart ») ; `openConnForm` garde son mode `'creation'`, dont l'édition se sert pour pré-remplir.
+`🔗 Connexion` (sur une ligne) → `#conn-overlay`, même géométrie que `#lj-overlay` (ouvrir l'un ferme l'autre), mais **déplaçable** par sa barre de titre (`rendreDeplacable`, `scripts/deplacable.js` chargé par les DEUX pages hôtes) — d'où `height` et non `bottom` : ancré haut et bas, il se tasserait au premier glisser. N'écrit **qu'un** `link:*` ; la ligne de liste montre `_id`, `status` et les deux positions. **Création** : depuis « ➕ Ajouter un lieu » → « 🔗 Connecter un lieu existant » (`_nlVersLieuExistant` ferme le formulaire de lieu, confirm si modifié, puis `openConnForm('creation', null, {})` — même relais que ➕ Passage), en plus de 🏰 porte, 🔀 interne et ➕ Passage ; l'édition se sert aussi du mode `'creation'` pour pré-remplir.
 
 - ⚠️ Anti-écrasement : la liste **complète** des `_id` est lue à chaque ouverture sur `GET /admin/table/data?type=connection` (`lieuxConnections` ne voit que le lieu courant), `_cxIdPropose` suffixe. Lecture échouée ⇒ le formulaire **le dit** plutôt que de laisser croire au garde-fou.
 - `_fusionConnexion` fusionne les nœuds **par position** : `champs.noeuds` dans l'ordre du doc (`cxIciIdx`). Label vidé = **supprimé** (`get_lieu_links` doit replier sur le label du lieu).

@@ -584,6 +584,16 @@
 		padding: 5px 7px; margin: 8px 0 6px;
 	}
 	.dim-msg { font-size: 0.66rem; min-height: 1em; margin-top: 6px; line-height: 1.4; }
+	/* Boutons d'écriture d'une section du panneau : collés au BAS de la partie visible de la
+	   section (sticky dans leur parent), ils reprennent leur place à sa fin. Fond plein et
+	   marges négatives = la largeur de la carte (padding 16px), sinon le contenu défile dessous à vue. */
+	.section-actions {
+		position: sticky; bottom: 0; z-index: 2;   /* sous la barre du panneau volant (sticky top, 3) */
+		background: var(--panel);
+		margin: 0 -16px; padding: 6px 16px;
+		border-top: 1px solid var(--border);
+		box-shadow: 0 -6px 10px -6px rgba(0,0,0,0.6);
+	}
 	/* ⚠️ Le `display:flex`/`block` d'auteur l'emporterait sur le [hidden] de la feuille du
 	   navigateur (même piège que .aub-ecrivain-ligne dans play_town). */
 	#dim-card[hidden], #dim-attente[hidden] { display: none; }
@@ -800,7 +810,9 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 					<div id="zone-pw-hint" style="font-size:.66rem;color:#888;margin-bottom:6px;">Sélectionnez une zone placée pour pondérer ses profils (vide = hérite du défaut du lieu).</div>
 					<div id="zone-profil-weights"></div>
 				</div>
-				<button class="btn" id="save-zones-btn" style="width:100%;">💾 Sauvegarder les zones</button>
+				<div class="section-actions">
+					<button class="btn" id="save-zones-btn" style="width:100%;">💾 Sauvegarder les zones</button>
+				</div>
 			</div>
 
 			<!-- Panneau Rencontres -->
@@ -819,7 +831,9 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 					<div style="font-size:.66rem;color:#888;margin-bottom:6px;">Poids de tirage des profils quand aucune zone active n'impose les siens (vide = tirage uniforme).</div>
 					<div id="lieu-profil-weights"></div>
 				</div>
-				<button class="btn" id="save-rencontres-btn" style="width:100%;">💾 Sauvegarder les rencontres</button>
+				<div class="section-actions">
+					<button class="btn" id="save-rencontres-btn" style="width:100%;">💾 Sauvegarder les rencontres</button>
+				</div>
 			</div>
 
 			<!-- Panneau Ressources -->
@@ -833,7 +847,9 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 				</div>
 				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Sur chaque ressource, cliquer les zones d'influence où on peut la récolter (source des quêtes de collecte).</div>
 				<div id="ressource-list" style="max-height:240px;overflow-y:auto;margin-bottom:8px;font-size:.68rem;"></div>
-				<button class="btn" id="save-ressources-btn" style="width:100%;">💾 Sauvegarder les ressources</button>
+				<div class="section-actions">
+					<button class="btn" id="save-ressources-btn" style="width:100%;">💾 Sauvegarder les ressources</button>
+				</div>
 			</div>
 
 			<!-- Panneau Navigation -->
@@ -908,8 +924,10 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 				     en HTTP sur une IP locale, où `navigator.clipboard` n'existe pas. -->
 				<textarea class="lj-area grille-json" id="grille-json" readonly wrap="off"
 					spellcheck="false" aria-label="JSON de la grille proposée"></textarea>
-				<button class="btn" id="grille-appliquer-btn" style="margin-bottom:6px;">✔ Appliquer</button>
-				<button class="btn danger" id="grille-fermer-btn">✕ Fermer l'aperçu</button>
+				<div class="section-actions">
+					<button class="btn" id="grille-appliquer-btn" style="margin-bottom:6px;">✔ Appliquer</button>
+					<button class="btn danger" id="grille-fermer-btn">✕ Fermer l'aperçu</button>
+				</div>
 			</div>
 			<div class="dim-msg" id="grille-msg"></div>
 		</div>
@@ -993,8 +1011,10 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 			<button class="btn" id="dim-appliquer-btn">↔ Appliquer (aperçu)</button>
 			<div id="dim-attente" hidden>
 				<div class="dim-warn" id="dim-warn"></div>
-				<button class="btn" id="dim-save-btn" style="margin-bottom:6px;">💾 Enregistrer la nouvelle taille</button>
-				<button class="btn danger" id="dim-annuler-btn">↺ Annuler</button>
+				<div class="section-actions">
+					<button class="btn" id="dim-save-btn" style="margin-bottom:6px;">💾 Enregistrer la nouvelle taille</button>
+					<button class="btn danger" id="dim-annuler-btn">↺ Annuler</button>
+				</div>
 			</div>
 			<div class="dim-msg" id="dim-msg"></div>
 		</div>
