@@ -7,7 +7,7 @@
 #     groupe tant qu'un porteur de « Détection des pièges » ne l'a pas repéré. Les monstres
 #     ne le déclenchent jamais : c'est leur antre.
 #   • `camp: "joueur"` — posé en combat par une compétence de pose (bloc `pose_piege`,
-#     voleur/forestier niveaux 2 → 8), en consommant un item. Le groupe le voit et ne le
+#     voleur/forestier niveaux 2 → 8, assassin 5 → 8), en consommant un item. Le groupe le voit et ne le
 #     déclenche jamais ; un monstre peut le flairer (jet) et le contourner, sinon il marche
 #     dessus.
 #

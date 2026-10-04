@@ -7,12 +7,16 @@ Sortie :
     jsons/pieges_a_importer.json   (carte d'import de /admin)
 
 CE QUE LE FICHIER CONTIENT :
-  1. Niveau 1, voleur ET forestier (une compétence = une vocation, d'où deux docs chacune) :
-     « Détection des pièges » (`effets.detection_pieges`) et « Désamorçage des pièges »
-     (`effets.desamorcage`), passives.
-  2. Niveaux 2 → 8, une compétence de POSE par niveau et par vocation (bloc `pose_piege`),
-     chacune consommant un objet DIFFÉRENT, de plus en plus dangereuse ou couvrant une zone
-     plus grande (`POSES` — la table à retoucher).
+  1. Voleur, forestier ET assassin (une compétence = une vocation, d'où un doc par
+     vocation) : « Détection des pièges » (`effets.detection_pieges`) et « Désamorçage des
+     pièges » (`effets.desamorcage`), passives — niveau 1 pour le voleur et le forestier,
+     2 et 4 pour l'assassin (`NIVEAUX_PASSIVES`).
+  2. Une compétence de POSE par niveau et par vocation (bloc `pose_piege`) — 2 → 8 pour le
+     voleur et le forestier, 5 → 8 pour l'assassin —, chacune consommant un objet
+     DIFFÉRENT, de plus en plus dangereuse ou couvrant une zone plus grande (`POSES` — la
+     table à retoucher). Les pièges de l'assassin IMMOBILISENT plus qu'ils ne tuent :
+     entraves de V (et d'Ag), dégâts symboliques (`degats` explicite) ; son métier reste le
+     coup unique au contact et le poison à distance, jamais le piège.
   3. Les objets consommés qui n'existent pas encore, et leur RECETTE dans un atelier dont les
      métiers consomment DÉJÀ chaque intrant (pas de fausse feuille). Deux objets existants
      sont réutilisés : `item:Piege_a_collet` et `item:Filet_de_capture`.
@@ -45,14 +49,22 @@ from utils import pieges  # noqa: E402  (module pur : aucune base)
 DOSSIER_JSONS = os.path.join(RACINE, "jsons")
 SORTIE = os.path.join(DOSSIER_JSONS, "pieges_a_importer.json")
 
-VOCATIONS = ("voleur", "forestier")
+VOCATIONS = ("voleur", "forestier", "assassin")
 
-# ── 1. Niveau 1 : détection et désamorçage ───────────────────────────────────
+# Niveau d'apprentissage de (détection, désamorçage) par vocation — demande explicite pour
+# l'assassin : détection au 2, désamorçage au 4.
+NIVEAUX_PASSIVES = {
+	"voleur": {"detection_des_pieges": 1, "desamorcage_des_pieges": 1},
+	"forestier": {"detection_des_pieges": 1, "desamorcage_des_pieges": 1},
+	"assassin": {"detection_des_pieges": 2, "desamorcage_des_pieges": 4},
+}
+
+# ── 1. Détection et désamorçage ──────────────────────────────────────────────
 # Bonus de compétence ajouté au seuil d100 (50 + Int|Ag + bonus − danger × 15).
 BONUS_DETECTION = 20
 BONUS_DESAMORCAGE = 20
 
-PASSIVES_N1 = {
+PASSIVES = {
 	"detection_des_pieges": {
 		"nom": "Détection des pièges", "icon": "👁️",
 		"effets": {"detection_pieges": BONUS_DETECTION},
@@ -63,6 +75,9 @@ PASSIVES_N1 = {
 			"forestier": "Une branche cassée au mauvais endroit, une terre retournée de "
 						 "frais : rien n'échappe à l'œil du traqueur. Repère les pièges à deux "
 						 "pas, et peut fouiller les environs (1 action).",
+			"assassin": "Qui pose des pièges dans l'ombre apprend vite à flairer ceux des "
+						"autres. Repère les pièges à deux pas, et peut fouiller les environs "
+						"(1 action).",
 		},
 	},
 	"desamorcage_des_pieges": {
@@ -73,13 +88,16 @@ PASSIVES_N1 = {
 					  "Désamorce un piège détecté au contact (1 action).",
 			"forestier": "Il sait quelle corde trancher et quelle branche caler. Désamorce "
 						 "un piège détecté au contact (1 action).",
+			"assassin": "Des doigts qui savent enduire une lame savent aussi retenir un "
+						"ressort. Désamorce un piège détecté au contact (1 action).",
 		},
 	},
 }
 
 # ── 2. Niveaux 2 → 8 : pose de pièges ────────────────────────────────────────
-# (niveau, slug, nom, icon, item, danger, zone, effets, description)
-# danger 1-5 → dégâts `<danger>D6` (pieges.degats_de) ; zone = rayon du carré couvert.
+# (niveau, slug, nom, icon, item, danger, zone, effets, description[, degats])
+# danger 1-5 → dégâts `<danger>D6` (pieges.degats_de) sauf `degats` explicite ; zone = rayon
+# du carré couvert.
 # Effets : `buffs` signés, `regen_pv`/`regen_pm` signées (négatif = POISON) + `duree`
 # (cf. pieges.normaliser_pose). Échelle des buffs : V 1-10 (|delta| ≤ 5), les autres ×10.
 POSES = {
@@ -123,6 +141,28 @@ POSES = {
 		(8, "mine_de_poudre", "Mine de poudre noire", "💥", "item:Mine_de_poudre_noire", 5, 2, {},
 		 "Une charge de poudre enterrée, une mèche à friction : tout saute dans un grand rayon."),
 	],
+	# Assassin : des pièges qui IMMOBILISENT. `danger` y règle surtout la discrétion (seuils
+	# de détection, de désamorçage et de flair des monstres) ; les dégâts sont fixés bas par
+	# une 10ᵉ colonne `degats` — la proie doit rester entière et sur place pour la lame ou
+	# la sarbacane. Aucun poison : il se porte au contact ou à distance, pas dans un piège.
+	"assassin": [
+		(5, "lacet_d_entrave", "Lacet d'entrave", "🧵", "item:Lacet_d_entrave", 2, 0,
+		 {"buffs": {"V": -4}, "duree": 2},
+		 "Un lacet de crin tressé, invisible dans la pénombre, qui se resserre sur la cheville "
+		 "et la cloue au sol.", "1D2"),
+		(6, "bolas_a_ressort", "Bolas à ressort", "🪀", "item:Bolas_a_ressort", 2, 1,
+		 {"buffs": {"V": -3, "Ag": -10}, "duree": 2},
+		 "Des poids lestés qu'un ressort lance au ras du sol : les jambes s'emmêlent, on tombe, "
+		 "on se relève mal.", "1D3"),
+		(7, "glu_de_nuit", "Glu de nuit", "🫙", "item:Glu_de_nuit", 3, 1,
+		 {"buffs": {"V": -5}, "duree": 3},
+		 "Une glu sombre étalée sur les dalles : qui y pose le pied n'en repart plus de "
+		 "sitôt.", "1D2"),
+		(8, "brume_de_pavot", "Brume de pavot", "😶‍🌫️", "item:Brume_de_pavot", 3, 2,
+		 {"buffs": {"V": -5, "Ag": -20}, "duree": 2},
+		 "Une vessie crevée sous le pas libère une brume lourde de pavot : les membres "
+		 "s'engourdissent, la garde tombe — juste le temps qu'il faut.", "1D3"),
+	],
 }
 
 # ── 3. Objets neufs et leurs recettes ────────────────────────────────────────
@@ -165,6 +205,18 @@ OBJETS = {
 	"item:Mine_de_poudre_noire": ("Mine de poudre noire", "💥", 3.0, "rare",
 		"Une charge de poudre en coffret, sa mèche à friction.",
 		"laboratoire_d_alchimie", [("reactif_brut", 3), ("poudre_d_os", 1), ("graisse", 1)], 1),
+	"item:Lacet_d_entrave": ("Lacet d'entrave", "🧵", 0.2, "peu_commun",
+		"Un lacet de crin noirci, tressé avec un nœud coulant à déclencheur.",
+		"armurerie", [("crins", 2), ("tendons", 1)], 2),
+	"item:Bolas_a_ressort": ("Bolas à ressort", "🪀", 1.5, "peu_commun",
+		"Trois poids de plomb, leurs cordes et une plaque à ressort qui les lance au ras du sol.",
+		"armurerie", [("plomb", 2), ("item:corde", 1), ("tendons", 1)], 1),
+	"item:Glu_de_nuit": ("Glu de nuit", "🫙", 1.0, "rare",
+		"Un pot de glu sombre tirée de la sève de chêne, qui ne sèche jamais tout à fait.",
+		"laboratoire_d_alchimie", [("item:Seve_de_chene", 2), ("reactif_brut", 1)], 1),
+	"item:Brume_de_pavot": ("Brume de pavot", "😶‍🌫️", 0.5, "rare",
+		"Une vessie fine gonflée d'une brume de pavot et de mandragore.",
+		"laboratoire_d_alchimie", [("item:Capsules_de_pavot", 2), ("item:Extrait_de_mandragore", 1)], 1),
 }
 TAG_OBJET = "piege"
 
@@ -211,17 +263,19 @@ def docs_des_autres_imports() -> dict:
 def docs_competences() -> list:
 	out = []
 	for voc in VOCATIONS:
-		for slug, spec in PASSIVES_N1.items():
+		for slug, spec in PASSIVES.items():
 			out.append({
 				"_id": f"competence:{slug}_{voc}", "type": "competence",
 				"nom": spec["nom"], "icon": spec["icon"],
 				"description": spec["description"][voc],
-				"vocation": voc, "niveau": 1, "mode": "passive",
+				"vocation": voc, "niveau": NIVEAUX_PASSIVES[voc][slug], "mode": "passive",
 				"effets": dict(spec["effets"]),
 			})
-		for niveau, slug, nom, icon, item, danger, zone, effets, desc in POSES[voc]:
+		for niveau, slug, nom, icon, item, danger, zone, effets, desc, *degats in POSES[voc]:
 			bloc = {"item": item, "danger": danger, "zone": zone, "portee": 1,
 					"nom": nom, "icon": icon}
+			if degats:
+				bloc["degats"] = degats[0]
 			if effets:
 				bloc["effets"] = effets
 			out.append({

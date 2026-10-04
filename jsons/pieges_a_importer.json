@@ -350,6 +350,134 @@
 		}
 	},
 	{
+		"_id": "competence:detection_des_pieges_assassin",
+		"type": "competence",
+		"nom": "Détection des pièges",
+		"icon": "👁️",
+		"description": "Qui pose des pièges dans l'ombre apprend vite à flairer ceux des autres. Repère les pièges à deux pas, et peut fouiller les environs (1 action).",
+		"vocation": "assassin",
+		"niveau": 2,
+		"mode": "passive",
+		"effets": {
+			"detection_pieges": 20
+		}
+	},
+	{
+		"_id": "competence:desamorcage_des_pieges_assassin",
+		"type": "competence",
+		"nom": "Désamorçage des pièges",
+		"icon": "🛠️",
+		"description": "Des doigts qui savent enduire une lame savent aussi retenir un ressort. Désamorce un piège détecté au contact (1 action).",
+		"vocation": "assassin",
+		"niveau": 4,
+		"mode": "passive",
+		"effets": {
+			"desamorcage": 20
+		}
+	},
+	{
+		"_id": "competence:pose_lacet_d_entrave",
+		"type": "competence",
+		"nom": "Pose : Lacet d'entrave",
+		"icon": "🧵",
+		"description": "Un lacet de crin tressé, invisible dans la pénombre, qui se resserre sur la cheville et la cloue au sol.",
+		"vocation": "assassin",
+		"niveau": 5,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Lacet_d_entrave",
+			"danger": 2,
+			"zone": 0,
+			"portee": 1,
+			"nom": "Lacet d'entrave",
+			"icon": "🧵",
+			"degats": "1D2",
+			"effets": {
+				"buffs": {
+					"V": -4
+				},
+				"duree": 2
+			}
+		}
+	},
+	{
+		"_id": "competence:pose_bolas_a_ressort",
+		"type": "competence",
+		"nom": "Pose : Bolas à ressort",
+		"icon": "🪀",
+		"description": "Des poids lestés qu'un ressort lance au ras du sol : les jambes s'emmêlent, on tombe, on se relève mal.",
+		"vocation": "assassin",
+		"niveau": 6,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Bolas_a_ressort",
+			"danger": 2,
+			"zone": 1,
+			"portee": 1,
+			"nom": "Bolas à ressort",
+			"icon": "🪀",
+			"degats": "1D3",
+			"effets": {
+				"buffs": {
+					"V": -3,
+					"Ag": -10
+				},
+				"duree": 2
+			}
+		}
+	},
+	{
+		"_id": "competence:pose_glu_de_nuit",
+		"type": "competence",
+		"nom": "Pose : Glu de nuit",
+		"icon": "🫙",
+		"description": "Une glu sombre étalée sur les dalles : qui y pose le pied n'en repart plus de sitôt.",
+		"vocation": "assassin",
+		"niveau": 7,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Glu_de_nuit",
+			"danger": 3,
+			"zone": 1,
+			"portee": 1,
+			"nom": "Glu de nuit",
+			"icon": "🫙",
+			"degats": "1D2",
+			"effets": {
+				"buffs": {
+					"V": -5
+				},
+				"duree": 3
+			}
+		}
+	},
+	{
+		"_id": "competence:pose_brume_de_pavot",
+		"type": "competence",
+		"nom": "Pose : Brume de pavot",
+		"icon": "😶‍🌫️",
+		"description": "Une vessie crevée sous le pas libère une brume lourde de pavot : les membres s'engourdissent, la garde tombe — juste le temps qu'il faut.",
+		"vocation": "assassin",
+		"niveau": 8,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Brume_de_pavot",
+			"danger": 3,
+			"zone": 2,
+			"portee": 1,
+			"nom": "Brume de pavot",
+			"icon": "😶‍🌫️",
+			"degats": "1D3",
+			"effets": {
+				"buffs": {
+					"V": -5,
+					"Ag": -20
+				},
+				"duree": 2
+			}
+		}
+	},
+	{
 		"_id": "item:Pieux_de_fosse",
 		"type": "item",
 		"nom": "Pieux de fosse",
@@ -737,6 +865,138 @@
 			},
 			{
 				"sous_categorie": "graisse",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Lacet_d_entrave",
+		"type": "item",
+		"nom": "Lacet d'entrave",
+		"icon": "🧵",
+		"description": "Un lacet de crin noirci, tressé avec un nœud coulant à déclencheur.",
+		"rarete": "peu_commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 0.2,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:armurerie_lacet_d_entrave",
+		"type": "recette",
+		"lieu_categorie": "armurerie",
+		"objet_final": "Lacet_d_entrave",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "crins",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Bolas_a_ressort",
+		"type": "item",
+		"nom": "Bolas à ressort",
+		"icon": "🪀",
+		"description": "Trois poids de plomb, leurs cordes et une plaque à ressort qui les lance au ras du sol.",
+		"rarete": "peu_commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 1.5,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:armurerie_bolas_a_ressort",
+		"type": "recette",
+		"lieu_categorie": "armurerie",
+		"objet_final": "Bolas_a_ressort",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "plomb",
+				"quantite": 2
+			},
+			{
+				"item": "item:corde",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Glu_de_nuit",
+		"type": "item",
+		"nom": "Glu de nuit",
+		"icon": "🫙",
+		"description": "Un pot de glu sombre tirée de la sève de chêne, qui ne sèche jamais tout à fait.",
+		"rarete": "rare",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 1.0,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:laboratoire_d_alchimie_glu_de_nuit",
+		"type": "recette",
+		"lieu_categorie": "laboratoire_d_alchimie",
+		"objet_final": "Glu_de_nuit",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Seve_de_chene",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "reactif_brut",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Brume_de_pavot",
+		"type": "item",
+		"nom": "Brume de pavot",
+		"icon": "😶‍🌫️",
+		"description": "Une vessie fine gonflée d'une brume de pavot et de mandragore.",
+		"rarete": "rare",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 0.5,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:laboratoire_d_alchimie_brume_de_pavot",
+		"type": "recette",
+		"lieu_categorie": "laboratoire_d_alchimie",
+		"objet_final": "Brume_de_pavot",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Capsules_de_pavot",
+				"quantite": 2
+			},
+			{
+				"item": "item:Extrait_de_mandragore",
 				"quantite": 1
 			}
 		]

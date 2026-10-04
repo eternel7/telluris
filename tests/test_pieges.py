@@ -671,21 +671,25 @@ def test_bonus_passifs_agrege_detection_et_desamorcage():
 
 
 @pytest.mark.parametrize("voc", gen_pieges.VOCATIONS)
-def test_detection_et_desamorcage_s_apprennent_au_niveau_1(voc):
-	attendus = {f"competence:detection_des_pieges_{voc}", f"competence:desamorcage_des_pieges_{voc}"}
-	for niveau, ok in ((0, False), (1, True)):
+@pytest.mark.parametrize("slug", sorted(gen_pieges.PASSIVES))
+def test_detection_et_desamorcage_s_apprennent_a_leur_niveau(voc, slug):
+	cid = f"competence:{slug}_{voc}"
+	requis = gen_pieges.NIVEAUX_PASSIVES[voc][slug]
+	for niveau, ok in ((requis - 1, False), (requis, True)):
 		perso = {"voc": voc, "vocations_niveaux": {voc: niveau}, "competences_connues": []}
 		ids = {c["id"] for c in competences_util.competences_apprenables(perso, _find)}
-		assert (attendus <= ids) is ok
+		assert (cid in ids) is ok
 	guerrier = {"voc": "guerrier", "vocations_niveaux": {"guerrier": 9}, "competences_connues": []}
 	assert not competences_util.competences_apprenables(guerrier, _find)
 
 
 @pytest.mark.parametrize("voc", gen_pieges.VOCATIONS)
-def test_une_pose_par_niveau_de_2_a_8_et_un_objet_different_chacune(voc):
+def test_une_pose_par_niveau_et_un_objet_different_chacune(voc):
 	poses = [competences_util.normaliser_competence(d) for d in LOT.values()
 			 if d["vocation"] == voc and d.get("pose_piege")]
-	assert sorted(c["niveau"] for c in poses) == list(range(2, 9))
+	niveaux = sorted(c["niveau"] for c in poses)
+	assert niveaux == [ligne[0] for ligne in gen_pieges.POSES[voc]]
+	assert niveaux == list(range(niveaux[0], 9))   # un palier par niveau jusqu'au 8
 	assert all(c["pose_piege"] for c in poses)
 	assert not any(competences_util.competence_utilisable_combat(c) for c in poses)
 	# Plus dangereuse OU plus large à chaque niveau (jamais les deux en baisse).
@@ -698,9 +702,32 @@ def test_une_pose_par_niveau_de_2_a_8_et_un_objet_different_chacune(voc):
 
 def test_aucun_objet_consomme_deux_fois_et_chaque_objet_neuf_a_sa_recette():
 	items = [d["pose_piege"]["item"] for d in LOT.values() if d.get("pose_piege")]
-	assert len(items) == len(set(items)) == 7 * len(gen_pieges.VOCATIONS)
+	assert len(items) == len(set(items)) == sum(len(p) for p in gen_pieges.POSES.values())
 	produits = {d["objet_final"] for d in gen_pieges.docs_objets() if d["type"] == "recette"}
 	assert {i[len("item:"):] for i in gen_pieges.OBJETS} == produits
+
+
+def test_assassin_detection_au_2_desamorcage_au_4_poses_du_5_au_8():
+	"""Demande explicite : l'échelle de l'assassin commence plus tard que celle du voleur."""
+	niveaux = {d["_id"]: d["niveau"] for d in LOT.values() if d["vocation"] == "assassin"}
+	assert niveaux.pop("competence:detection_des_pieges_assassin") == 2
+	assert niveaux.pop("competence:desamorcage_des_pieges_assassin") == 4
+	assert sorted(niveaux.values()) == [5, 6, 7, 8]
+
+
+def test_les_pieges_de_l_assassin_immobilisent_sans_tuer():
+	"""Entrave de V sur chacun, aucun poison (il se porte à la lame ou à distance), et des
+	dégâts plus faibles que ceux d'un piège ordinaire de même danger (`degats_de`)."""
+	def maxi(notation):   # dégâts maximaux d'une notation `nDm`
+		n, m = notation.upper().split("D")
+		return int(n or 1) * int(m)
+	poses = [competences_util.normaliser_competence(d)["pose_piege"] for d in LOT.values()
+			 if d["vocation"] == "assassin" and d.get("pose_piege")]
+	assert poses
+	for p in poses:
+		assert p["effets"]["buffs"]["V"] < 0 and p["effets"]["duree"] > 0
+		assert not any(p["effets"].get(k, 0) < 0 for k in ("regen_pv", "regen_pm"))
+		assert maxi(p["degats"]) < maxi(pieges.degats_de(p["danger"]))
 
 
 def test_actions_pieges_payload_compte_le_stock():
