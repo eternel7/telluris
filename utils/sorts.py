@@ -123,6 +123,8 @@ def _bonus_dict(raw) -> dict:
 	  lanceur, plafonné par `drain_max` (0 = aucun plafond) une fois par lancement.
 	- `saut`     : distance max d'une téléportation (cases). Le sort vise une CASE.
 	- `lien_vie` : {part, reduction} — cf. `_lien_vie_dict`.
+	- `detection_pieges` / `desamorcage` : PASSIVES de compétence — bonus aux seuils de
+	  `utils/pieges.py`, et droit d'agir (> 0) : repérer à l'approche, fouiller, désamorcer.
 
 	⚠️ Toutes les clés neuves sont ≥ 0 par nature : le clamp d'`_as_int` reste valide, et
 	un doc déjà en base les reçoit à leur valeur neutre (aucune migration, CLAUDE.md §4)."""
@@ -159,6 +161,11 @@ def _bonus_dict(raw) -> dict:
 		"invocation_duree": _as_int(raw.get("invocation_duree")),
 		"invocation_nombre": min(INVOCATION_NOMBRE_MAX, _as_int(raw.get("invocation_nombre"))),
 		"maintien_reduction": min(MAINTIEN_PM_MAX, _as_int(raw.get("maintien_reduction"))),
+		# PIÈGES (passives, cf. utils/pieges.py) : bonus au seuil de détection des pièges
+		# cachés — et droit de les repérer à l'approche / de fouiller — et bonus au seuil
+		# de désamorçage — et droit d'agir.
+		"detection_pieges": _as_int(raw.get("detection_pieges")),
+		"desamorcage": _as_int(raw.get("desamorcage")),
 	}
 
 

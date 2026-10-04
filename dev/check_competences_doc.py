@@ -50,7 +50,8 @@ CHAMPS_ACTIFS_SEULEMENT = ("cout_pm", "cible", "jet", "portee")
 # disparaît — la compétence part en base amputée de ce que son auteur croyait y mettre.
 CHAMPS_DOC = ("_id", "_rev", "type", "nom", "icon", "description", "vocation", "famille",
 			  "niveau", "mode", "cout_pm", "maintien", "incantation", "sensibilite_charge",
-			  "cible", "jet", "portee", "zone", "effets", "condition", "animation")
+			  "cible", "jet", "portee", "zone", "effets", "condition", "animation",
+			  "pose_piege")
 # Clés que le moteur lit sur un SORT mais jamais sur une compétence. `_bonus_dict` les
 # normalise (elles ne « disparaissent » donc pas : le contrôle n°1 ne les verrait pas), et
 # `competence_utilisable_combat` en accepte même deux — mais AUCUNE branche de

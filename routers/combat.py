@@ -31,7 +31,7 @@ from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, create_combat_doc, build_monster_snapshot,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
     verser_butin_au_sol, cle_butin, etat_charge_snapshot, bloc_charge_snapshot,
-    changer_d_etage, annoter_passages,
+    changer_d_etage, annoter_passages, vue_client,
 )
 from utils import donjon
 from utils.lieux import connexions_du_lieu
@@ -120,6 +120,11 @@ class ActionRequest(BaseModel):
     # Action « emprunter » (donjon à étages) : répartition du butin de l'étage vidé qu'on
     # quitte. Absent = pas encore décidé (le moteur renvoie les carcasses sans bouger).
     attributions: list[LootAttribution] | None = None
+    # PIÈGES : « desamorcer » vise `piege_id` ; « poser_piege » pose `competence_id` (bloc
+    # `pose_piege`) sur la case (`x`, `y`).
+    piege_id: str | None = None
+    x: int | None = None
+    y: int | None = None
 
 
 class CollectLootRequest(BaseModel):
@@ -257,7 +262,8 @@ async def get_combat(
     if combat_doc["user_id"] != current_user["_id"]:
         raise HTTPException(status_code=403, detail="Accès refusé")
 
-    return annoter_passages(combat_doc)
+    # ⚠️ `vue_client` et jamais le doc brut : il contient les pièges CACHÉS.
+    return vue_client(combat_doc)
 
 
 @combat_router.get("/combat/{combat_id}/acteur")
@@ -301,6 +307,8 @@ async def combat_acteur(
         "charge_magie": bloc_charge_snapshot(_snap) if _snap else None,
         "sorts": liste_sorts_payload(doc, get_doc, "combat", _etat_charge),
         "competences": liste_competences_payload(doc, get_doc, "combat", _etat_charge),
+        # Compétences de POSE DE PIÈGE de cet acteur, avec l'item requis et le stock du sac.
+        "poses_pieges": competences_util.poses_pieges_payload(doc, get_doc),
         # Barre d'action : les slots appartiennent à l'ACTEUR — chaque membre du groupe
         # a sa propre disposition, rechargée à chaque changement de tour.
         "slots": slots_actions.slots_payload(doc, get_doc),
@@ -565,10 +573,39 @@ async def combat_action(
         if competence_arg is None or not competence_utilisable_combat(competence_arg):
             raise HTTPException(status_code=422, detail="Compétence inutilisable en combat")
 
+    # Action « poser_piege » : la compétence est re-vérifiée (connue + bloc `pose_piege`) et
+    # SON item retiré du sac ICI, en mémoire — même séquence que les composants d'un sort :
+    # le personnage n'est sauvegardé que si le moteur accepte la pose.
+    piege_arg = None
+    if body.type == "desamorcer":
+        piege_arg = {"piege_id": body.piege_id}
+    if body.type == "poser_piege":
+        character = get_doc(acteur_id)
+        if not character:
+            raise HTTPException(status_code=404, detail="Personnage introuvable")
+        if body.competence_id not in (character.get("competences_connues") or []):
+            raise HTTPException(status_code=422, detail="Compétence inconnue du personnage")
+        comp_pose = normaliser_competence(get_doc(body.competence_id))
+        pose = (comp_pose or {}).get("pose_piege")
+        if not pose:
+            raise HTTPException(status_code=422, detail="Cette compétence ne pose pas de piège")
+        inventaire = character.get("inventaire", [])
+        ref = _take_ref(inventaire, None, pose["item"])
+        if ref is None:
+            item_requis = get_doc(pose["item"]) or {}
+            raise HTTPException(status_code=422,
+                                detail=f"Il vous faut : {item_requis.get('nom', pose['item'])}")
+        character["inventaire"] = inventaire
+        piege_arg = {"pose": pose, "competence_id": comp_pose["id"],
+                     "nom": pose.get("nom") or comp_pose["nom"],
+                     "icon": pose.get("icon") or comp_pose["icon"],
+                     "x": body.x, "y": body.y,
+                     "poids_consomme": round(item_ref_weight(ref), 2)}
+
     attributions = None if body.attributions is None else [
         {"monstre_id": a.monstre_id, "cle": a.cle, "beneficiaire_id": a.beneficiaire_id}
         for a in body.attributions]
-    action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens, body.mode, item=item_doc, sort=sort_arg, competence=competence_arg, attributions=attributions)
+    action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens, body.mode, item=item_doc, sort=sort_arg, competence=competence_arg, attributions=attributions, piege=piege_arg)
     # Donjon à étages : le passage vers un autre étage est validé par le moteur, l'étage
     # suivant (carte, monstres, passages) est chargé ICI — le moteur ne lit pas la base.
     if action_result.get("passage"):
@@ -617,12 +654,26 @@ async def combat_action(
         sorts_payload = liste_sorts_payload(
             character, get_doc, "combat", etat_charge_snapshot(_snap) if _snap else None)
 
+    # Piège posé : l'item quitte le sac pour de bon (refus ⇒ relu, rien n'a été retiré).
+    pieges_payload = None
+    if body.type == "poser_piege" and character is not None:
+        if "error" not in action_result:
+            if save_doc(character) is None:
+                print(f"poser_piege: échec de sauvegarde du personnage {character.get('_id')} (item non retiré)")
+                character = get_doc(acteur_id) or character
+        else:
+            character = get_doc(acteur_id) or character
+        pieges_payload = competences_util.poses_pieges_payload(character, get_doc)
+
     # Combat persisté : applique les récompenses au personnage (idempotent).
     if combat_doc["status"] != "active":
         finalize_combat(combat_doc)
         save_doc(combat_doc)  # persiste le flag recompense_appliquee
 
-    response = {"combat": annoter_passages(combat_doc), "action_result": action_result}
+    # ⚠️ `vue_client` et jamais le doc brut : il contient les pièges CACHÉS.
+    response = {"combat": vue_client(combat_doc), "action_result": action_result}
+    if pieges_payload is not None:
+        response["poses_pieges"] = pieges_payload
     if consommables_payload is not None:
         response["consommables"] = consommables_payload
     if sorts_payload is not None:

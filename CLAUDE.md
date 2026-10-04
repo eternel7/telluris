@@ -82,6 +82,9 @@ utils/
   charge_magie.py        # charge portée → canalisation (pur) : ratio, courbe, paliers,
                          #   sensibilité d'un sort, aide à la canalisation ; DEUX charges —
                          #   la PHYSIQUE (`charge_max_of`) reste brute, seule la MAGIQUE bouge
+  pieges.py              # pièges de combat (pur) : tag `pieges_<q>_<d>` de salle, placement loin du
+                         #   départ, seuils détection/désamorçage/flair, pose (`pose_piege`), XP ;
+                         #   ⚠️ `combat.vue_client` SEUL filtre des pièges cachés envoyés au client
   zones_effet.py         # zones d'effet des sorts/compétences (pur) : cercle, carré, rectangle, cône ;
                          #   ancre (lanceur/cible) + orientation ; miroir scripts/zones_effet.js
   jetons.py              # jetons de taille variable (pur) : emprise LxP selon le cap, distance entre
@@ -187,6 +190,7 @@ Chaque mécanique est documentée dans une compétence `.claude/skills/telluris-
 | recrutement, groupe, compagnie, contrat de mission, montures | `telluris-recrutement` |
 | propriétés du joueur (achat, location, aménagements, personnel, coffre, zones habitables) | `telluris-proprietes` |
 | sorts, compétences de vocation, zones d'effet, focalisation | `telluris-magie` |
+| pièges (cases piégées, détection, désamorçage, pose) | `telluris-combat` § Pièges |
 | journal, relations, cartes/portraits, listes scrollables, tavernes, scriptorium, toasts | `telluris-social-ui` |
 | dump, exports, `/admin/table`, écritures PUT complet, cache de requête, caches process | `telluris-db` |
 | lanceur `dev/`, générateurs de contenu, variables de monde | `telluris-admin-tools` |

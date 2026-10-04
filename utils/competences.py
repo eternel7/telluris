@@ -35,6 +35,7 @@ from utils.sorts import (
 	capacite_utilisable_exploration, famille_de, familles_exclues, part_durative,
 )
 from utils.zones_effet import normaliser_zone
+from utils import pieges
 
 MODES = ("passive", "active")
 # JETS vient de utils.sorts (source unique partagée avec les sorts) ; seul le DÉFAUT
@@ -100,6 +101,10 @@ def normaliser_competence(doc) -> dict | None:
 		# Animation de combat (doc `animation:*`), optionnelle — même liste blanche, même
 		# piège que pour les sorts : sans ce champ, la liaison n'atteint jamais le moteur.
 		"animation": str(doc.get("animation") or ""),
+		# POSE DE PIÈGE (bloc `pose_piege`, cf. utils/pieges.normaliser_pose) : la
+		# compétence n'est pas lancée par `_lancer_capacite` mais par l'action de combat
+		# `poser_piege`, qui consomme son item. None ⇒ compétence ordinaire.
+		"pose_piege": pieges.normaliser_pose(doc.get("pose_piege")),
 	}
 
 
@@ -222,6 +227,7 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 	sources: list = []
 	auras: list = []
 	regen_pv = regen_pm = esquive = 0
+	detection_pieges = desamorcage = 0
 	for comp in competences_connues_docs(character, get_doc):
 		if not est_passive(comp) or comp.get("condition"):
 			continue
@@ -242,7 +248,12 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 		regen_pv += _as_int(eff.get("regen_pv"))
 		regen_pm += _as_int(eff.get("regen_pm"))
 		esquive += _as_int(eff.get("esquive"))
+		detection_pieges += _as_int(eff.get("detection_pieges"))
+		desamorcage += _as_int(eff.get("desamorcage"))
+	# Pièges : clés lues `.get(…, 0)` partout (snapshot de combat) — un agrégat d'avant ne
+	# les porte pas, et n'en a pas besoin : apprendre la compétence le recalcule.
 	return {"buffs": buffs, "regen_pv": regen_pv, "regen_pm": regen_pm, "esquive": esquive,
+			"detection_pieges": detection_pieges, "desamorcage": desamorcage,
 			"buffs_sources": sources, "auras": auras}
 
 
@@ -393,6 +404,32 @@ def competences_depart_par_vocation(find_docs) -> dict:
 		})
 	for lst in out.values():
 		lst.sort(key=lambda c: (c["mode"], c["nom"]))
+	return out
+
+
+# ── Pose de pièges (bloc `pose_piege`, cf. utils/pieges.py) ────────────────────────
+
+def poses_pieges_payload(character: dict, get_doc) -> list:
+	"""Compétences de POSE DE PIÈGE connues du personnage, pour le bouton 🪤 du combat :
+	[{id, nom, icon, item, item_nom, stock, danger, zone, portee}], `stock` = exemplaires de
+	l'item requis au sac (0 ⇒ entrée grisée côté client ; le router refuse de toute façon).
+	Ordre : niveau puis nom (la progression du métier)."""
+	from utils.characters import item_ref_id   # paresseux : même prudence que charge_magie
+	sac = [item_ref_id(r) for r in (character or {}).get("inventaire") or []]
+	out = []
+	for comp in competences_connues_docs(character, get_doc):
+		pose = comp.get("pose_piege")
+		if not pose:
+			continue
+		item_doc = get_doc(pose["item"]) or {}
+		out.append({
+			"id": comp["id"], "nom": comp["nom"], "icon": pose.get("icon") or comp["icon"],
+			"niveau": comp["niveau"],
+			"item": pose["item"], "item_nom": item_doc.get("nom", pose["item"]),
+			"stock": sum(1 for i in sac if i == pose["item"]),
+			"danger": pose["danger"], "zone": pose["zone"], "portee": pose["portee"],
+		})
+	out.sort(key=lambda c: (c["niveau"], c["nom"]))
 	return out
 
 

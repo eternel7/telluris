@@ -156,6 +156,8 @@ Un donjon est un lieu de combat **FERMÉ** : on y descend par une porte gardée,
 - Combat par `_declencher_combat_donjon` (miroir simplifié de `start_combat`, élite garantie, aucune furtivité d'entrée). Peuplement partagé avec les étages : `donjon.monstres_de_salle`.
 - Chaîne de contenu (`dev/gen_acces_donjon.py`) : rang D à Auxerre → Borin ouvre le bureau → Gautier mandate la commission → George contrôle le principe → Armand contrôle la destination et ouvre le combat.
 
+- **Pièges** : tag codifié `pieges_<quantite>_<danger>` dans les `tags` de la SALLE (lieu `battle_map`), loin du point de départ — telluris-combat § Pièges.
+
 Verrouillé par `tests/test_donjon.py`.
 
 #### Donjon à ÉTAGES (`"mode": "etages"` sur le doc donjon)
