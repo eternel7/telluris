@@ -7,11 +7,16 @@ dans `/admin/doc` ou à rassembler dans un `jsons/*_a_importer.json` une fois la
 Vérificateur : `python dev/check_competences_doc.py` — relit ce fichier, normalise chaque bloc
 par le moteur réel et contrôle les invariants listés plus bas. Il échoue en code 1.
 
-> **Révision 5** — les **AURAS** (une passive portant une `zone`), la **charge magique**
-> (`sensibilite_charge`) et l'ouverture de `saut` / `cout_pv` / `lien_vie` / `incantation` aux
-> compétences. **33 entrées changent**, et un invariant de ce document s'inverse : une passive
-> à `zone` n'est plus une erreur, c'est une aura. Détail en fin de document, § « Ce que la
-> révision 5 a changé ».
+> **Révision 6** — le **poison** (`regen_pv` / `regen_pm` NÉGATIVES, signées partout depuis
+> la PR #66) et les **compétences de pièges** déjà livrées au forestier et au voleur (niveaux
+> 1 → 8). **5 entrées changent** : deux poisons de PV, deux poisons de PM, et le premier prix
+> PERMANENT payé en régénération. Le forestier et le voleur ne changent pas — leurs blocs sont
+> relus contre l'échelle de pièges, et **trois invariants** s'ajoutent (signe de la régén selon
+> la cible, aucun mur involontaire, aucune clé de piège). Le référentiel du vérificateur tient
+> pour **en base** tout `jsons/*_a_importer.json` : le dump committé (2 octobre) retarde sur les
+> imports. Détail en fin de document, § « Ce que la révision 6 a changé ».
+>
+> Révision 5 — les auras, la charge magique, `saut` / `cout_pv` / `lien_vie` / `incantation`.
 
 ---
 
@@ -35,10 +40,17 @@ l'état du combat bouge.
 
 ### Ce que les deux partagent (tout le reste)
 
-`cible` · `jet` · `portee` · `zone` · `cout_pm` · `maintien` · `famille` · `condition` ·
-`animation` · `niveau`, et **seize des dix-neuf clés d'`effets`** : `degats`, `pv`, `pm`,
-`regen_pv`, `regen_pm`, `buffs`, `duree`, `esquive`, `furtivite`, `degats_pm`, `drain_pv`,
-`drain_pm`, `drain_max` (+ les trois bonus de composant, sans objet ici).
+`cible` · `jet` · `portee` · `zone` · `cout_pm` · `maintien` · `incantation` · `famille` ·
+`condition` · `animation` · `niveau`, et **seize des vingt-deux clés d'`effets`** de
+`_bonus_dict` : `degats`, `pv`, `pm`, `regen_pv`, `regen_pm`, `buffs`, `duree`, `esquive`,
+`furtivite`, `degats_pm`, `drain_pv`, `drain_pm`, `drain_max`, `cout_pv`, `saut`, `lien_vie`.
+Les six autres : `canalisation` et les trois bonus de composant, **inertes** sur une
+compétence (invariant n°2) ; `detection_pieges` et `desamorcage`, clés des **seules
+compétences de pièges** (invariant n°13).
+
+⚠️ **`regen_pv` et `regen_pm` sont SIGNÉES** depuis la PR #66 (`consommables._as_signed_int`,
+dans `_bonus_dict`, `empiler_effet_competence`, `bonus_passifs`, `entree_aura`) : une valeur
+négative est un **poison**, et non plus un zéro silencieux. Cf. § « Le poison ».
 
 Vérifié en exécutant le moteur : une **siphonie pure** (`degats_pm` seul) part des deux côtés ;
 un **drain** rend au lanceur le même pourcentage des dégâts réels ; une **zone** frappe le même
@@ -51,9 +63,10 @@ nombre de cibles ; une **posture maintenue** est facturée par le même `_enregi
 | `magie` · `composants` | un sort appartient à une **école** et se renforce par des composants ; une compétence n'a ni l'une ni les autres — la vocation lui tient lieu d'école |
 | `invocation` | `normaliser_competence` ne lit pas le bloc |
 
-Et **un seul champ propre aux compétences** : `mode` (`passive` / `active`). Un sort est
-toujours actif ; une passive n'existe que côté compétences, et c'est la seule asymétrie qui
-aille dans ce sens.
+Et **deux champs propres aux compétences** : `mode` (`passive` / `active`) — un sort est
+toujours actif, une passive n'existe que côté compétences — et, depuis la PR #66,
+`pose_piege` (le bloc d'une compétence de pose, lancée par l'action `poser_piege` et non par
+`_lancer_capacite`). Aucune entrée de ce document n'en porte (cf. § « Les pièges »).
 
 ✅ **`saut`, `cout_pv`, `lien_vie` et `incantation` sont ouverts** (chokepoint de lancement
 partagé `combat._lancer_capacite`). Ce document les emploie :
@@ -153,6 +166,107 @@ Trois conséquences pour l'écriture, toutes vérifiées en exécutant le moteur
 
 Le coût se répartit en conséquence : un `cout_pm` de lancement **abaissé**, plus l'entretien.
 
+### Le poison — une régénération NÉGATIVE (révision 6)
+
+Depuis la PR #66, `regen_pv` et `regen_pm` sont **signées** de bout en bout. Une régén
+négative n'est plus ramenée à 0 : c'est un **poison**, et un poison pur (`regen_pv < 0` +
+`duree`, sans `degats`) est une **part à durée** à part entière (`part_durative`) — donc une
+active `ennemi` qui ne porte que lui est lançable des deux côtés (`effets_agissent_sur_cible`).
+
+| règle | ce qu'elle donne |
+|---|---|
+| **perte au tour du PORTEUR** (`_tick_effets_combat`) | ni jet, ni armure, ni lien de vie, ni test de concentration — un poison n'est pas un coup (même parti pris que `cout_pv`) |
+| **en combat**, plancher 0 | il peut mettre un joueur à terre et **tuer un monstre** (victoire et XP comprises) |
+| **hors combat**, plancher 1 PV | il ronge mais ne tue jamais ; un poison de PM s'arrête à 0 |
+| **non-cumul** entre effets à durée | **meilleur bonus + pire malus**, comme les buffs : une potion de régén CONTRE un poison sans l'effacer, **deux poisons ne s'additionnent pas** (le pire seul) |
+| sources **permanentes** (équipement, passives) | **additives**, et signées : une passive à régén négative est un prix que rien ne dissout |
+| zone | chaque cible de la forme reçoit SON poison (vérifié : 3 loups sous `rupture_arcanique`, −4 PM chacun) |
+
+⚠️ **Le signe dépend de la cible — trois emplois sont des erreurs** (invariant n°11) :
+
+| où | régén **négative** | régén **positive** |
+|---|---|---|
+| active `ennemi` | ✅ **poison** | ❌ elle **soignerait** la cible : `effets_agissent_sur_cible` l'accepte (vérifié), rien ne la refuserait |
+| active `soi` | ✅ un prix (aucune entrée n'en use) | ✅ soutien |
+| active `allie` | ❌ elle empoisonnerait un compagnon — les camps ne se mélangent jamais, sauf par erreur de signe | ✅ soutien |
+| passive ordinaire | ✅ **prix permanent** — une seule entrée : `ame_gagee` | ✅ régén de signature |
+| **aura** | ❌ elle empoisonnerait **tout le groupe**, montures comprises, et la meilleure aura voisine ne l'effacerait pas | ✅ |
+
+Et une régén posée sur une active **sans `duree` ni `maintien`** n'est rien : sans durée, rien
+n'est empilé (`part_durative`). Le vérificateur le refuse aussi.
+
+**Ce que le document en fait — 5 entrées.**
+
+| entrée | poison | ce qu'il remplace |
+|---|---|---|
+| `venin_de_contact` (assassin 3) | **−5 PV**/tour, 3 tours | un debuff `R −8 / F −6` qui « rendait » le poison faute de mieux |
+| `toucher_du_sepulcre` (nécromancien 3) | **−3 PV**/tour, 3 tours | une part des dés (`2D8+4` → `1D8`) |
+| `marque_du_traqueur` (répurgateur 3) | **−3 PM**/tour, 3 tours | une part de la siphonie (`2D6` → `1D6` aux PM) |
+| `rupture_arcanique` (mage 10) | **−4 PM**/tour sur toute la zone, 3 tours | `Vol −15` → `−12` |
+| `ame_gagee` (démoniste 10, passive) | **−1 PV**/tour, permanent | contrepartie de `regen_pm` 4 → 6 |
+
+⚠️ Le **journal** dit « ☠ X souffre du poison » pour toute perte de régén nette, prix de pacte
+compris : le moteur ne distingue pas un venin d'une dette. Le libellé de la chip, lui, est
+celui de la source.
+
+### Les pièges — le forestier et le voleur ont déjà une échelle (révision 6)
+
+La PR #66 a livré à ces deux vocations **neuf compétences chacune** (`dev/gen_pieges.py` →
+`jsons/pieges_a_importer.json`, tenu ici pour importé). Toutes sont des **passives** — et
+pourtant chacune a sa case de barre (`competences.action_piege`) :
+
+| niv. | forestier | voleur |
+|---|---|---|
+| 0 | `oeil_du_chasseur` (Ag +4) · `furtivite_sylvestre` · `tir_precis` (`cd`, 12 PM) | `doigts_agiles` (Ag +3 / Ch +2) · `esquive` (10) · `poudre_aveuglante` (`cc`, 8 PM) |
+| 1 | `detection_des_pieges_forestier` 👁️ · `desamorcage_des_pieges_forestier` 🛠️ · `baume_de_campagne` | `detection_des_pieges_voleur` 👁️ · `desamorcage_des_pieges_voleur` 🛠️ |
+| 2 | Collet 🪢 (danger 1, `V −3`) | Chausse-trappes 📌 (danger 1, carré r1, `V −2`) |
+| **3** | **Fosse à pieux** 🕳️ (danger 2) | **Aiguille empoisonnée** 💉 (danger 2, **−4 PV/tour**) |
+| 4 | Filet de capture 🕸️ (carré r1, `V −3`) | Fil à carreau 🎯 (danger 3) |
+| 5 | Piège à mâchoires 🦷 (danger 3, `V −2`) | Poudre aveuglante 💨 (carré r1, `Ag −15`) |
+| **6** | **Arbre-ressort** 🌳 (danger 3, carré r1) | **Mâchoire d'acier** ⚙️ (danger 4, `V −3`) |
+| 7 | Éboulis 🪨 (danger 4, carré r1) | Pot de feu grégeois 🔥 (danger 4, carré r1) |
+| 8 | Abattis piégé 🪵 (danger 5, carré r2, `V −2`) | Mine de poudre noire 💥 (danger 5, carré r2) |
+
+**Ce que ce document en tire :**
+
+1. ⚠️ **Aucune entrée ne porte `detection_pieges`, `desamorcage` ni `pose_piege`**
+   (invariant n°13). Ce n'est pas de la prudence : `action_piege` classe **toute** compétence
+   portant l'une de ces clés comme compétence de piège. Un `Pisteur` à `detection_pieges: 10`
+   — l'idée vient d'elle-même, lire une piste c'est voir le collet — recevrait une **seconde
+   case 🔎** posée d'office à l'apprentissage (`slots_actions.placer_si_libre`), et donnerait le
+   **droit** de fouiller à qui n'a pas appris la Détection (seuil `> 0`). Vérifié : la sonde
+   rend `action_piege → "fouiller"`. Un bonus de seuil sans case exigerait de séparer les deux
+   dans le moteur — à proposer, pas à contourner ici.
+2. **Le palier 3 et le palier 6 coûtent plus cher à ces deux vocations** : trois compétences
+   au lieu de deux (la passive et l'active de ce document + la pose du niveau), au tarif
+   `(niveau+1) × COMPETENCE_COUT_COEFF` chacune. Les deux échelles ne se chevauchent pas — la
+   pose donne un objet à poser, la passive d'ici un socle de caractéristiques — et c'est voulu.
+3. **La barre d'action sature.** `COMBAT_SLOTS_MAX` = 15, dont 3 cases obligatoires
+   (⚔ 🫳 🏃). Un forestier complet a **9 cases de pièges** + 2 actives de niveaux 0-1
+   (`tir_precis`, `baume_de_campagne`) + les 3 actives de ce document = **14 candidates pour
+   12 cases** ; un voleur, 9 + 1 (`poudre_aveuglante`) + 3 = **13**. `placer_si_libre`
+   ne pose rien sur une barre pleine : c'est au joueur d'arbitrer. Aucune active n'est retirée
+   d'ici pour autant — l'arbitrage fait partie du métier.
+4. **Non-cumul des entraves.** Les pièges posent leurs malus comme n'importe quel effet à
+   durée : sur la même caract, **le pire malus seul** compte. `Coup de coupe-jarret` (`V −2`)
+   n'ajoute donc rien sur une cible prise dans un collet ou une mâchoire (`V −3`) — il prend le
+   relais quand le piège expire. Même règle pour le poison de l'Aiguille (−4) face au
+   `Venin de contact` de l'assassin (−5), qui le remplace au lieu de s'y ajouter.
+5. **Les passives 3/6/10 de ces deux vocations ne changent pas** : relues contre l'échelle,
+   aucune ne double un piège, aucune n'en porte la clé.
+
+### Une active `ennemi` à zone ET maintenue est un MUR (PR #33)
+
+La règle est **dérivée**, sans clé : toute capacité **offensive à zone et maintenue** — sort
+ou compétence, `_lancer_capacite` étant partagé — laisse ses cases figées **en feu**
+(`zones_persistantes`) tant que la concentration est payée. Et le mur brûle **QUICONQUE** s'y
+tient : monstres, compagnons, montures, invocations et le lanceur lui-même — le seul tir ami
+du jeu. Vérifié : `spasme_de_furie` augmenté d'un `maintien` pose une zone persistante.
+
+**Aucune entrée de ce document n'en est un**, et le vérificateur le garde (invariant n°12) :
+les zones offensives d'ici sont toutes des coups d'un instant, pensées sans tir ami. Un mur
+de compétence se proposera comme tel, pas par accident d'un `maintien` ajouté à une frappe.
+
 ---
 
 ## Les zones d'effet
@@ -210,11 +324,21 @@ d'exclure tout un **type** (`familles_exclues` de `rules:vocations`). Le répurg
 en poser une exposerait à ce qu'une vocation la rende inapprenable sans que rien ne le signale
 à l'écriture.
 
-### Ce qu'une frappe `cc` vaut réellement
+### Ce qu'une frappe `cc` ou `cd` vaut réellement
 
-Une active `jet:"cc"` **à dés** emprunte les dés ET l'allonge de l'arme équipée — `cd` et
-`magique` en sont exclus. Le bloc `degats` d'une frappe de contact se lit donc **au-dessus** du
-`degats_cc` du porteur.
+Une active **à dés** emprunte les dés ET la portée de l'arme (`combat._profil_emprunte`, source
+unique de `_degats_competence` et `_portee_competence`) :
+
+- `jet:"cc"` → le profil de contact : le bloc `degats` se lit **au-dessus** du `degats_cc`
+  du porteur, et une arme d'hast lui prête son allonge ;
+- `jet:"cd"` (PR #31) → le profil `tir`, sinon `jet` (arme de lancer), **strictement** : les
+  dés de l'arc s'ajoutent, la portée est le **max** de celle écrite et de celle de l'arc, et
+  un tir reste un tir (interdit engagé au contact, ligne de vue exigée). ⚠️ **Sans arme à
+  distance, rien n'est emprunté** : les trois traits du forestier gardent leurs seuls dés ;
+- `magique` → jamais rien.
+
+Les portées écrites des actives `cd` du forestier (10 / 12 / 14) sont donc des **planchers** :
+un arc plus long les allonge, jamais l'inverse.
 
 ---
 
@@ -233,7 +357,10 @@ Référence en base : passive niveau 0 ≈ **+4** en une caract ; active niveau 
 | soutien `soi` / `allie` | `pv 18`, ou buffs `+12` / `duree 4` | `pv 30`, ou buffs `+18` / `duree 5` | `pv 45` + `regen_pv 5` + buffs `+20` |
 | **posture maintenue** | `8 PM + 3/round` | `12 PM + 4/round` | `18 PM + 6/round` |
 | **drain** (% des dégâts réels) | — | `drain_pv 35-50` | `drain_pv 40` + `drain_max 25` |
-| **`degats_pm`** (toujours accompagné) | `1D6` | `2D6` | `2D8` |
+| **`degats_pm`** (seuls ou accompagnés) | `1D6` | `2D6` | `2D8` |
+| **poison de PV** (`regen_pv` < 0, ennemi) | `−3…−5` / `duree 3`, dés ou entrave réduits d'autant | `−6` / `duree 3` | `−8` / `duree 4` |
+| **poison de PM** (`regen_pm` < 0, ennemi) | `−3` / `duree 3` | `−4` / `duree 3` | `−4…−6` / `duree 3`, zone décotée comprise |
+| **prix permanent** (passive, `regen_pv` < 0) | — | — | `−1`, contre un gain au-dessus de la grille |
 
 ### La décote de zone
 
@@ -249,6 +376,13 @@ action**. Elle se paie donc sur la puissance unitaire :
 Un capstone offensif mono-cible reste **le plus gros coup unitaire du document**.
 
 ⚠️ Un gros buff de `R` ou de `Vol` **re-clampe PV/PM à son expiration** (plancher `pv_max ≥ 1`).
+
+**Le poison se calibre en TOTAL, pas par tour** : `n × duree` PV, versés au tour de la victime
+et hors de toute défense. Il vaut donc un peu **plus** que les mêmes points en dés (pas de
+soustraction des PA, pas de jet raté une fois posé) et un peu **moins** en burst (il arrive
+tard, et un second poison ne s'y ajoute pas). D'où la règle retenue : **le poison prend la
+place de ce qu'il incarne** — des dés (`toucher_du_sepulcre`), une entrave (`venin_de_contact`),
+une part de siphonie (`marque_du_traqueur`) — jamais empilé par-dessus une frappe pleine.
 
 ---
 
@@ -277,6 +411,16 @@ Un capstone offensif mono-cible reste **le plus gros coup unitaire du document**
 9. Convention de `decalage` : forme orientée ancrée sur le `lanceur` ⇒ `≥ 1`, sur la `cible`
    ⇒ `0`.
 10. Aucune passive ne porte `cout_pm`, `cible`, `jet` ou `portee`.
+11. **Signe de la régén selon la cible** (révision 6) : une régén **négative** n'est admise que
+    sur une active `ennemi` (poison), une active `soi` ou une passive **non-aura** (prix) ;
+    jamais sur une active `allie` ni sur une aura. Une régén **positive** n'est jamais sur une
+    active `ennemi` (elle soignerait la cible). Une active non maintenue à régén porte une
+    `duree`.
+12. **Aucun mur involontaire** : pas d'active `ennemi` + `zone` + `maintien` — c'est une zone
+    persistante qui brûle aussi les alliés (PR #33).
+13. **Aucune clé de piège** (`detection_pieges`, `desamorcage`, `pose_piege`) : elles feraient
+    de l'entrée une compétence de piège (`action_piege`), avec sa case de barre posée d'office
+    et le droit d'agir sans la compétence dédiée.
 
 ## Guerrier ⚔️
 
@@ -427,6 +571,12 @@ sang, Vétéran, Danseur de guerre.*
 *Axe : `cd` à longue portée et furtivité de terrain. Titres : Pisteur, Franc-archer, Rôdeur,
 Éclaireur, Tireur d'élite, Chasseur de monstres.*
 
+> **Déjà en base (révision 6)** : l'échelle de pièges — Détection et Désamorçage au niveau 1,
+> une pose par niveau de 2 à 8 (**Fosse à pieux** au 3, **Arbre-ressort** au 6). Les six
+> entrées ci-dessous s'y AJOUTENT sans la doubler : aucune ne porte de clé de piège
+> (invariant n°13), et c'est délibéré pour le `Pisteur`, qui l'appelait (cf. § « Les pièges »).
+> Ses trois actives `cd` restent des tirs : sans arc, elles ne gardent que leurs propres dés.
+
 ### Niveau 3
 
 **Pisteur** 👁️ · passive
@@ -565,7 +715,7 @@ Titres : Gentilhomme, Mousquetaire, Garde, Seigneur, Maître d'armes, Exécuteur
 
 ## Assassin 🗡
 
-*Axe : furtivité, poison rendu en debuff durable, burst de contact. Titres : Espion, Surineur,
+*Axe : furtivité, poison (régénération négative), burst de contact. Titres : Espion, Surineur,
 Empoisonneur, Maître des ombres, Maître lames, Maître venins.*
 
 ### Niveau 3
@@ -579,15 +729,16 @@ Empoisonneur, Maître des ombres, Maître lames, Maître venins.*
 ```
 *Source : « Surineur » (niv. 3) — la « note petite taille » des armes n'existe pas ; rendue en maîtrise des armes légères.*
 
-**Venin de contact** 🧪 · active · 15 PM · `ennemi` / `cc` / portée 1
+**Venin de contact** 🧪 · active · 15 PM · `ennemi` / `cc` / portée 1 · ☠ poison −5 PV/tour, 3 tours
 ```json
 {"_id": "competence:venin_de_contact", "type": "competence", "nom": "Venin de contact", "icon": "🧪",
  "description": "Une goutte sur le fil, et la plaie fait le reste du travail.",
  "vocation": "assassin", "niveau": 3, "mode": "active", "cout_pm": 15, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cc", "portee": 1,
- "effets": {"degats": "1D6", "buffs": {"R": -8, "F": -6}, "duree": 3}}
+ "effets": {"degats": "1D6", "regen_pv": -5, "buffs": {"F": -4}, "duree": 3}}
 ```
-*Source : « Empoisonneur » (niv. 3) — la fabrication de poisons n'est pas une mécanique ; le poison est rendu par le seul support réel, un debuff durable.*
+*Source : « Empoisonneur » (niv. 3) — la fabrication de poisons n'est toujours pas une mécanique, mais **le poison l'est devenu** : ✅ **enfin littéral** (révision 6). La révision 5 le rendait par un debuff `R −8 / F −6` faute de mieux ; c'est maintenant une **régénération négative** — 15 PV en 3 tours, au tour de la victime, **sans jet ni armure**, et qui peut achever un monstre. Le `F −4` reste : le venin affaiblit aussi.*
+*⚠️ **Non-cumul** avec l'Aiguille empoisonnée du voleur (piège de niveau 3, −4 PV/tour) : deux poisons ne s'additionnent pas, le pire seul compte. D'où −5 et non −4 — sur une cible déjà piquée, le venin de l'assassin prend le relais au lieu de disparaître dans le non-cumul.*
 
 ### Niveau 6
 
@@ -637,6 +788,13 @@ Empoisonneur, Maître des ombres, Maître lames, Maître venins.*
 *Axe : esquive, Chance, Agilité. Titres : Tire-laine, Coupe-jarret, Escamoteur, Bandit de grands
 chemins, Grand maître de guilde, Maraudeur.*
 
+> **Déjà en base (révision 6)** : l'échelle de pièges — Détection et Désamorçage au niveau 1,
+> une pose par niveau de 2 à 8 (**Aiguille empoisonnée** au 3, **Mâchoire d'acier** au 6). Les
+> six entrées ci-dessous s'y ajoutent sans la doubler. Le voleur **empoisonne déjà** par
+> son piège (l'Aiguille, −4 PV/tour) ; il ne reçoit pas de poison ici — l'assassin
+> le porte au contact, et deux poisons ne se cumulent pas. Ses entraves (`V`, `Ag`) se
+> relaient avec celles de ses pièges au lieu de s'y additionner (pire malus seul).
+
 ### Niveau 3
 
 **Tire-laine** 🤞 · passive
@@ -657,6 +815,7 @@ chemins, Grand maître de guilde, Maraudeur.*
  "effets": {"degats": "1D8+2", "buffs": {"V": -2}, "duree": 3}}
 ```
 *Source : « Coupe-jarret » (niv. 3). `V: -2` ≈ un tiers du déplacement d'un humain — la cible garde toujours une case (`deplacement = max(1, V)`).*
+*⚠️ Révision 6 : sur une cible prise dans un Collet ou une Mâchoire d'acier (`V −3`), ce `V −2` n'ajoute rien — le pire malus seul compte. Il prend le relais quand le piège expire, et c'est sa place : le voleur entrave d'abord avec ses pièges, puis à la lame.*
 
 ### Niveau 6
 
@@ -933,17 +1092,17 @@ Inquisiteur, Tueur de démon, Rejeton ou Saint.*
 ```
 *Source : « Exalté » (niv. 3), « ajouter son bonus de Vol aux résistances ».*
 
-**Marque du traqueur** 🎯 · active · 15 PM · `ennemi` / `cc` / portée 1 · **siphonie pure** 2D6 aux PM
+**Marque du traqueur** 🎯 · active · 15 PM · `ennemi` / `cc` / portée 1 · **siphonie pure** 1D6 aux PM + ☠ −3 PM/tour, 3 tours
 ```json
 {"_id": "competence:marque_du_traqueur", "type": "competence", "nom": "Marque du traqueur", "icon": "🎯",
- "description": "Il pose sur la bête un signe qu'elle ne comprend pas. Elle ne saigne pas — elle se sent seulement coupée de ce qui la nourrissait.",
+ "description": "Il pose sur la bête un signe qu'elle ne comprend pas. Elle ne saigne pas — elle se sent seulement coupée de ce qui la nourrissait, et cela continue.",
  "vocation": "repurgateur", "niveau": 3, "mode": "active", "cout_pm": 15,
  "cible": "ennemi", "jet": "cc", "portee": 1,
- "effets": {"degats_pm": "2D6", "buffs": {"Ag": -10, "Vol": -6}, "duree": 3}}
+ "effets": {"degats_pm": "1D6", "regen_pm": -3, "buffs": {"Ag": -8, "Vol": -6}, "duree": 3}}
 ```
 *Source : « Traqueur » (niv. 3) — la détection des créatures n'est pas une compétence jouable ; rendue en marque qui coupe et entrave.*
-*✅ **Siphonie pure**, désormais autorisable. La révision 3 devait lui coller un `degats: "1D6"` décoratif pour franchir une garde qui refusait `degats_pm` seul. Les dés de PM passent de 1D6 à 2D6 : ils ne sont plus l'appoint d'un coup, ils SONT le coup. Vérifié en exécutant le moteur sur ce bloc même : `dmg = 0`, les PV de la cible ne bougent pas, et — `jet: "cc"` ou non — elle n'emprunte **aucun dé d'arme** (`_degats_competence` laisse sans dés une compétence qui n'en a pas).*
-*⚠️ Deux effets qui se renforcent, et ce n'est pas un hasard : les dégâts de PM ne subissent pas la soustraction des PA (une armure n'arrête pas une siphonie), et le `Vol: -6` abaisse le `pm_max` de la cible (`2·Vol + 2·Int`) — ce qui reclampe ses PM vers le bas en plus de ce que la siphonie lui a pris.*
+*✅ **« Coupée de ce qui la nourrissait » devient littéral** (révision 6) : `regen_pm` NÉGATIVE — la réserve fuit **à chaque tour de la bête**, au lieu de se vider d'un seul coup. Les dés de PM redescendent à 1D6 (grille du niveau 3) : 3,5 PM tout de suite, puis 9 sur trois tours. Toujours une **siphonie pure** — ni `degats`, ni dé d'arme emprunté (`_degats_competence` laisse sans dés une compétence qui n'en a pas), les PV de la cible ne bougent pas.*
+*⚠️ Trois effets qui se renforcent, et ce n'est pas un hasard : les dégâts de PM ne subissent pas la soustraction des PA, le poison de PM non plus (ni jet, ni armure), et le `Vol: -6` abaisse le `pm_max` de la cible (`2·Vol + 2·Int`) — ce qui reclampe ses PM vers le bas en plus de ce que la marque lui prend. Le poison de PM **s'arrête à 0** : il ne blesse jamais.*
 
 ### Niveau 6
 
@@ -1402,15 +1561,16 @@ Conjurateur, Archimage, Nexus, Invocateur.*
 ```
 *Le seul `regen_pm` permanent élevé du jeu — la signature du drain magique, et ce qui distingue le magicien de combat de l'élémentaliste.*
 
-**Rupture arcanique** 💥 · active · 40 PM · `ennemi` / `magique` / portée 10 · zone : disque de rayon 2
+**Rupture arcanique** 💥 · active · 40 PM · `ennemi` / `magique` / portée 10 · zone : disque de rayon 2 · ☠ −4 PM/tour, 3 tours
 ```json
 {"_id": "competence:rupture_arcanique", "type": "competence", "nom": "Rupture arcanique", "icon": "💥",
  "description": "Il ne lance pas un sort : il casse quelque chose, et laisse le monde recoller les morceaux.",
  "vocation": "mage", "niveau": 10, "mode": "active", "cout_pm": 40,
  "cible": "ennemi", "jet": "magique", "portee": 10,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 2},
- "effets": {"degats": "3D10+12", "buffs": {"Vol": -15}, "duree": 3}}
+ "effets": {"degats": "3D10+12", "regen_pm": -4, "buffs": {"Vol": -12}, "duree": 3}}
 ```
+*✅ **Révision 6** : ce que la rupture « casse », c'est le flux — `regen_pm −4` sur **chaque** cible de la zone, 3 tours. Le magicien de combat, signature du drain magique (`Cœur de Nexus`, `regen_pm 5` pour lui), devient aussi celui qui fait fuir la réserve des autres. Le `Vol` passe de −15 à −12 en contrepartie. ⚠️ Un monstre sans PM n'y perd rien : le poison de PM s'arrête à 0, et la ligne de journal ne s'écrit que sur une perte réelle.*
 
 ---
 
@@ -1496,14 +1656,15 @@ voie ultime, la Liche.*
 ```
 *Prolonge `competence:affinite_morbide` (niv. 0).*
 
-**Toucher du sépulcre** ⚰️ · active · 15 PM · `ennemi` / `magique` / portée 4
+**Toucher du sépulcre** ⚰️ · active · 15 PM · `ennemi` / `magique` / portée 4 · ☠ dépérissement −3 PV/tour, 3 tours
 ```json
 {"_id": "competence:toucher_du_sepulcre", "type": "competence", "nom": "Toucher du sépulcre", "icon": "⚰️",
- "description": "Rien de spectaculaire : la cible a seulement l'impression d'avoir vieilli de quelques années d'un coup.",
+ "description": "Rien de spectaculaire : la cible a seulement l'impression d'avoir vieilli de quelques années d'un coup — et de continuer.",
  "vocation": "necromancien", "niveau": 3, "mode": "active", "cout_pm": 15,
  "cible": "ennemi", "jet": "magique", "portee": 4,
- "effets": {"degats": "2D8+4", "buffs": {"R": -8}, "duree": 3}}
+ "effets": {"degats": "1D8", "regen_pv": -3, "buffs": {"R": -6}, "duree": 3}}
 ```
+*✅ **Le dépérissement de l'axe devient littéral** (révision 6) : une part du coup passe dans une régénération négative. `2D8+4` (13 en moyenne) → `1D8` + 9 PV sur 3 tours (13,5) ; le total est le même, mais il arrive **par-delà la défense** (un poison ne se rate pas, une fois posé) et il continue de ronger pendant que le nécromancien fait autre chose.*
 
 ### Niveau 6
 
@@ -1595,13 +1756,15 @@ Invocateur, Archimage.*
 
 ### Niveau 10 — capstone
 
-**Âme gagée** 😈 · passive
+**Âme gagée** 😈 · passive · ⚠️ prix permanent : −1 PV/tour
 ```json
 {"_id": "competence:ame_gagee", "type": "competence", "nom": "Âme gagée", "icon": "😈",
- "description": "Elle ne lui appartient plus depuis longtemps, et le loyer qu'on lui verse est confortable.",
+ "description": "Elle ne lui appartient plus depuis longtemps. Le loyer qu'on lui verse est confortable ; celui qu'il paie se prélève goutte à goutte.",
  "vocation": "demoniste", "niveau": 10, "mode": "passive",
- "effets": {"buffs": {"Int": 12, "Vol": 6}, "regen_pm": 4}}
+ "effets": {"buffs": {"Int": 12, "Vol": 6}, "regen_pm": 6, "regen_pv": -1}}
 ```
+*✅ **Révision 6 — la seule passive à régénération négative du document**, et c'est l'axe même de la vocation (« de très gros gains payés »). `regen_pm` monte de 4 à 6 — la plus forte du jeu, devant le `Cœur de Nexus` du mage —, payée d'un PV par tour. Les sources PERMANENTES s'**additionnent** (`regen_bonus`, `_tick_effets_combat`) : le prix ne se dissout pas dans le non-cumul, une potion de régén le CONTRE sans l'effacer.*
+*⚠️ Ce que le prix vaut réellement, vérifié en exécutant le moteur : **en combat** (`regen_pv_base = −1`), −1 PV à chaque tour du démoniste, plancher 0 — il peut finir à terre ; une ligne « ☠ … souffre du poison (−1 PV) » s'écrit à chaque tour, le journal ne distinguant pas un pacte d'un venin. **Hors combat**, la régénération naturelle (`ceil(R/20)`, au moins 1) l'absorbe : la régén nette baisse d'un point sans jamais passer sous zéro — le pacte se paie au combat.*
 
 **Invocation majeure** 🔯 · active · 40 PM · `soi` / portée 1
 ```json
@@ -1717,12 +1880,12 @@ Enchanteur.*
 | forme du capstone | passives | actives |
 |---|---|---|
 | gros socle de caractéristiques (+22) | guerrier, duelliste, paladin, templier, ménestrel, chaman, élémentaliste, nécromancien, lettré | — |
-| régénération de signature | barbare, moine, répurgateur, prêtre, druide (PV) · mage, démoniste (PM) | — |
+| régénération de signature | barbare, moine, répurgateur, prêtre, druide (PV) · mage, démoniste (PM — payée −1 PV/tour) | — |
 | dissimulation | assassin (`furtivite 20`), forestier (`furtivite 18` conditionnelle), illusionniste (`furtivite 18` + `esquive 10`), voleur (`esquive 20`) | — |
 | burst pur mono-cible | — | duelliste, assassin, forestier |
 | burst de zone | — | guerrier (bande), barbare (tourbillon) |
 | burst + entrave, mono-cible | — | voleur |
-| burst + entrave, de zone | — | templier, répurgateur, paladin, druide, élémentaliste, mage, illusionniste, nécromancien |
+| burst + entrave, de zone | — | templier, répurgateur, paladin, druide, élémentaliste, mage (+ fuite de PM), illusionniste, nécromancien |
 | debuff de masse | — | ménestrel |
 | soutien d'allié de zone | — | moine, prêtre |
 | métamorphose / possession de soi | — | chaman, démoniste · lettré (de zone) |
@@ -1756,6 +1919,44 @@ tableau ci-dessous ne liste que les 21 zones des capacités ACTIVES.
 **duelliste** (hors sa parade) sont les vocations du coup unique et placé, le **forestier** celle
 du tir précis, le **voleur** celle de l'esquive et du vol — leur donner une nappe effacerait ce
 qui les distingue. Elles conservent en échange les plus gros coups unitaires du document.
+Les pièges du forestier et du voleur couvrent bien des carrés (r1, r2) — mais ce sont des
+objets posés à l'avance, pas des capacités qui frappent : la règle tient.
+
+---
+
+## Ce que la révision 6 a changé
+
+Écrite après la PR #66 (pièges de combat, poison) — et en tenant pour **importés** tous les
+`jsons/*_a_importer.json` : le dump committé du 2 octobre ne contient ni les compétences de
+pièges, ni le poison de l'Aiguille. **5 entrées changent** ; les 120 `_id`, noms et paliers
+n'ont pas bougé.
+
+| | révision 5 | révision 6 |
+|---|---|---|
+| `regen_pv` / `regen_pm` | ≥ 0 (une valeur négative tombait à 0) | **signées** : négatif = poison — 2 poisons de PV, 2 de PM, 1 prix permanent |
+| assassin « Empoisonneur » | rendu par un debuff `R −8 / F −6` | **littéral** : −5 PV/tour |
+| forestier / voleur | 6 entrées chacun, seuls au monde | relus contre **9 compétences de pièges** chacun : aucune entrée ne change, la cohabitation est documentée (coût des paliers 3 et 6, barre saturée, non-cumul des entraves) |
+| `cd` | sujet absent | documenté : dés et portée de l'arc empruntés, **strictement** (PR #31) |
+| murs (PR #33) | sujet absent | documenté : `ennemi` + `zone` + `maintien` = zone persistante à tir ami ; **aucune entrée n'en est un** |
+| invariants | 10 | **13** : signe de la régén selon la cible, aucun mur involontaire, aucune clé de piège |
+
+**Vérifié en exécutant le moteur, sur les blocs du document eux-mêmes** : `venin_de_contact`
+et `toucher_du_sepulcre` posent leur poison sur le loup, qui perd respectivement 5 et 3 PV
+à son propre tour ; `marque_du_traqueur` ne touche pas un PV (`ΔPV = 0` sur un snapshot NON épinglé — le
+piège de fixture de la révision 4 a resservi : un `pv_max` épinglé à 200 faisait croire à
+−80 PV) et la réserve passe de 60 à 57 (dés), 48 (reclamp du `Vol −6`), puis 45 (poison) ;
+`rupture_arcanique` pose −4 PM sur **chacun** des trois loups de la zone ; `ame_gagee` donne
+`regen_pv_base = −1`, `regen_pm_base = 6` au snapshot, −1 PV par tour de combat, et +1 PV net
+par tour de monde (la régén naturelle l'absorbe) ; l'Aiguille (−4) puis le Venin (−5) sur le
+même loup font perdre **5**, pas 9.
+
+**Ce que la mesure a montré et que le document a dû intégrer** :
+- une régén **positive** sur une active `ennemi` est acceptée par `effets_agissent_sur_cible`
+  — elle **soignerait** la cible sans que rien ne bronche : invariant n°11 ;
+- un `maintien` ajouté à une frappe de zone (`spasme_de_furie`) suffit à poser un **mur** qui
+  brûle aussi le groupe : invariant n°12 ;
+- `detection_pieges` posée sur le `Pisteur` en fait une compétence de piège
+  (`action_piege → "fouiller"`) avec une seconde case 🔎 : invariant n°13.
 
 ---
 
@@ -1875,6 +2076,10 @@ Cette liste n'est **pas importée**. Une fois arbitrée, l'étape suivante est u
 `dev/gen_competences_vocations.py` → `jsons/competences_vocations_a_importer.json`, sur le
 patron de `dev/gen_armes_tranchantes.py` (dump figé en dur, `_id` déterministes, réimport
 idempotent), inscrit au lanceur `/admin/dev-tools` (`utils/dev_tools.py`).
+
+⚠️ Ce générateur devra relire, comme le vérificateur, les `jsons/*_a_importer.json` **en plus**
+du dump : les 18 compétences de pièges (`jsons/pieges_a_importer.json`) n'existent encore dans
+aucun dump committé, et ses `_id` ne doivent jamais les rencontrer.
 
 ⚠️ Rappel de la convention 11 : `admin_import_bulk` fait un **PUT COMPLET**, jamais un merge, et
 ne refuse rien. Les blocs de ce document sont donc des docs entiers — il ne faut jamais en

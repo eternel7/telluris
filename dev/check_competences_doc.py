@@ -11,7 +11,7 @@ passer ce genre de clé sans le moindre symptôme — jusqu'à l'import, où la 
 base et ne fait rien. Le seul contrôle qui vaille est donc de faire normaliser chaque bloc par
 le moteur RÉEL, puis de comparer ce qui entre et ce qui sort.
 
-Les dix invariants contrôlés sont énoncés dans le document lui-même (§ « Invariants contrôlés
+Les treize invariants contrôlés sont énoncés dans le document lui-même (§ « Invariants contrôlés
 par dev/check_competences_doc.py ») — ce fichier en est l'exécution, pas la source.
 
 Ce script ne lit ni n'écrit la base : il ne fait que relire un fichier markdown committé.
@@ -26,6 +26,7 @@ RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, RACINE)
 
 from utils.competences import (  # noqa: E402
+	action_piege as competence_action_piege,
 	competence_utilisable_combat,
 	est_aura,
 	competence_utilisable_exploration,
@@ -77,6 +78,12 @@ CHAMPS_INERTES_SUR_COMPETENCE = {
 	"invocation":  "réservé aux docs `sort:*` (normaliser_competence ne le lit pas)",
 }
 MAINTIEN_MAX = MAINTIEN_PM_MAX   # borne du moteur, jamais recopiée à la main
+# Clés qui font d'une compétence une compétence de PIÈGE (`competences.action_piege`) : une
+# case de barre posée d'office à l'apprentissage (`slots_actions.placer_si_libre`) et le DROIT
+# d'agir (seuil `> 0`) sans la compétence dédiée. L'échelle de pièges vit dans
+# `dev/gen_pieges.py` ; ce document n'en porte aucune (invariant n°13).
+CLES_PIEGE_EFFETS = ("detection_pieges", "desamorcage")
+CLE_PIEGE_DOC = "pose_piege"
 # Clés du bloc `zone` que `normaliser_zone` sait lire. Même liste blanche, même piège : une
 # `rayon_max` ou une `hauteur` inventée ne lève rien et ne dessine rien.
 CHAMPS_ZONE = ("forme", "origine", "orientation", "rayon", "longueur", "largeur",
@@ -93,6 +100,30 @@ def charger_blocs(chemin):
 		ligne = texte.count("\n", 0, m.start()) + 1
 		blocs.append((ligne, m.group(1)))
 	return blocs
+
+
+def competences_des_imports() -> dict:
+	"""Docs `competence:*` des `jsons/*_a_importer.json` committés, par `_id`.
+
+	⚠️ Ils sont TENUS POUR IMPORTÉS (révision 6) : le dump committé retarde sur le contenu
+	livré — celui du 2 octobre n'a aucune des 18 compétences de pièges de la PR #66. Même
+	lecture que `ids_des_imports`, mais les docs entiers : le rapport en tire l'échelle de
+	pièges du forestier et du voleur.
+	"""
+	out = {}
+	if not os.path.isdir(DOSSIER_JSONS):
+		return out
+	for nom in sorted(os.listdir(DOSSIER_JSONS)):
+		if not nom.endswith("_a_importer.json"):
+			continue
+		try:
+			contenu = json.load(open(os.path.join(DOSSIER_JSONS, nom), encoding="utf-8"))
+		except (json.JSONDecodeError, OSError):
+			continue
+		for doc in (contenu if isinstance(contenu, list) else [contenu]):
+			if isinstance(doc, dict) and str(doc.get("_id", "")).startswith("competence:"):
+				out[doc["_id"]] = doc
+	return out
 
 
 def ids_des_imports() -> set:
@@ -225,6 +256,46 @@ def main():
 				erreurs.append(f"{prefixe} : entrée MAINTENUE portant `duree` — l'entrée "
 							   f"d'effets_actifs ne se décrémente pas, la durée annoncée "
 							   f"est une échéance qui n'existe pas")
+
+		# (11) SIGNE de la régén selon la cible. Depuis la PR #66 `regen_pv`/`regen_pm` sont
+		# SIGNÉES (négatif = poison). Le moteur ne refuse AUCUN des mauvais emplois :
+		# `effets_agissent_sur_cible` accepte une régén positive sur un ennemi (elle le
+		# soignerait), une aura négative empoisonnerait tout le groupe. Mesuré, pas déduit.
+		regens = {k: eff_norm.get(k, 0) for k in ("regen_pv", "regen_pm")}
+		negatives = sorted(k for k, v in regens.items() if v < 0)
+		positives = sorted(k for k, v in regens.items() if v > 0)
+		if negatives:
+			if est_passive(comp) and doc.get("zone"):
+				erreurs.append(f"{prefixe} : AURA à régén NÉGATIVE {negatives} — elle "
+							   f"empoisonnerait tout le groupe, montures comprises")
+			if est_active(comp) and comp["cible"] == "allie":
+				erreurs.append(f"{prefixe} : active `allie` à régén NÉGATIVE {negatives} — "
+							   f"elle empoisonnerait un compagnon")
+		if positives and est_active(comp) and comp["cible"] == "ennemi":
+			erreurs.append(f"{prefixe} : active `ennemi` à régén POSITIVE {positives} — "
+						   f"elle soignerait la cible (le moteur l'accepte)")
+		if (est_active(comp) and (negatives or positives)
+				and not eff_norm.get("duree") and not doc.get("maintien")):
+			erreurs.append(f"{prefixe} : active à régén sans `duree` ni `maintien` — rien "
+						   f"ne serait empilé (part_durative)")
+
+		# (12) MUR involontaire (PR #33) : la règle est DÉRIVÉE, sans clé — toute capacité
+		# offensive à zone ET maintenue laisse une zone persistante qui brûle QUICONQUE s'y
+		# tient, alliés et lanceur compris.
+		if (est_active(comp) and comp["cible"] == "ennemi" and doc.get("zone")
+				and doc.get("maintien")):
+			erreurs.append(f"{prefixe} : active `ennemi` à `zone` ET `maintien` — c'est une "
+						   f"ZONE PERSISTANTE à tir ami (Mur de feu), pas une frappe")
+
+		# (13) aucune clé de piège : `action_piege` en ferait une compétence de piège
+		for cle in CLES_PIEGE_EFFETS:
+			if eff_norm.get(cle):
+				erreurs.append(f"{prefixe} : effet `{cle}` — l'entrée deviendrait une "
+							   f"compétence de PIÈGE (case de barre d'office, droit d'agir "
+							   f"sans la compétence dédiée)")
+		if CLE_PIEGE_DOC in doc:
+			erreurs.append(f"{prefixe} : bloc `{CLE_PIEGE_DOC}` — l'échelle des poses vit "
+						   f"dans dev/gen_pieges.py, pas dans ce document")
 
 		# (1 bis) la zone est une seconde liste blanche, avec ses propres pièges
 		zone_ecrite = doc.get("zone")
@@ -361,13 +432,29 @@ def main():
 	sensibles = [d for d in docs_bruts if d.get("sensibilite_charge") is not None]
 	if sensibles:
 		print(f"Charge magique : {len(sensibles)} entrée(s) à `sensibilite_charge` explicite")
+	poisons = [d["_id"].split(":", 1)[1] for d in docs_bruts
+			   if any(_bonus_dict(d.get("effets") or {}).get(k, 0) < 0
+					  for k in ("regen_pv", "regen_pm"))]
+	print(f"Régén négative : {len(poisons)} entrée(s) — {', '.join(poisons) or 'aucune'}")
+	# Échelle de pièges déjà livrée (imports tenus pour en base) : ce que les entrées du
+	# document côtoient au même palier, pour les vocations qui en ont une.
+	pieges = {}
+	for cdoc in competences_des_imports().values():
+		comp = normaliser_competence(cdoc)
+		if comp and competence_action_piege(comp):
+			pieges.setdefault(comp["vocation"], []).append(comp["niveau"])
+	for voc, niveaux in sorted(pieges.items()):
+		communs = sorted(set(niveaux) & set(NIVEAUX_ATTENDUS))
+		print(f"Pièges en base — {voc} : {len(niveaux)} compétence(s), niveaux "
+			  f"{min(niveaux)}→{max(niveaux)} · paliers partagés avec ce document : "
+			  f"{', '.join(map(str, communs)) or 'aucun'}")
 
 	if erreurs:
 		print(f"\n{len(erreurs)} PROBLÈME(S) :")
 		for e in erreurs:
 			print(f"  - {e}")
 		return 1
-	print("\nOK — les dix invariants tiennent.")
+	print("\nOK — les treize invariants tiennent.")
 	return 0
 
 
