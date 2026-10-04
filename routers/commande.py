@@ -435,8 +435,7 @@ async def passer_commande(
 		try:
 			item_doc, _cree = fabrication.assurer_variante(
 				resolu["base_doc"], resolu["matieres_docs"], lieu_doc, get_doc, save_doc,
-				cout_base_cuivre=resolu["detail"]["prix_base"],
-				cout_matieres_cuivre=resolu["detail"]["cout_matieres"], now=now)
+				now=now, **commande_util.prix_variante(resolu["base_doc"], resolu["matieres_docs"]))
 		except ValueError as err:
 			raise HTTPException(status_code=409, detail=str(err))
 		item_id = item_doc["_id"]
@@ -518,8 +517,7 @@ async def relancer_commande(
 		try:
 			item_doc, _cree = fabrication.assurer_variante(
 				resolu["base_doc"], resolu["matieres_docs"], lieu_doc, get_doc, save_doc,
-				cout_base_cuivre=resolu["detail"]["prix_base"],
-				cout_matieres_cuivre=resolu["detail"]["cout_matieres"], now=now)
+				now=now, **commande_util.prix_variante(resolu["base_doc"], resolu["matieres_docs"]))
 		except ValueError as err:
 			raise HTTPException(status_code=409, detail=str(err))
 		item_id = item_doc["_id"]

@@ -94,7 +94,7 @@
 		"FACTEUR": {
 			"cles": ["poids", "valeur"],
 			"forme": { "facteur": 1.0 },
-			"regle": "Multiplicatif, borné à [0.1, 10.0]. Appliqué UNE fois par matière (la quantité ne le répète pas). `poids` [min,max] : appliqué aux deux bornes. `valeur` : appliqué à la fourchette recalculée par `valeur_variante`. Forme invalide = 1.0."
+			"regle": "Multiplicatif, borné à [0.1, 10.0]. Appliqué UNE fois par matière (la quantité ne le répète pas). `poids` [min,max] : appliqué aux deux bornes. `valeur` : produit des facteurs plafonné à COMMANDE_FACTEUR_VALEUR_MAX, appliqué au seul coût du BASE et à la seule borne HAUTE de `valeur_variante` (la matière est déjà comptée à son coût). Forme invalide = 1.0."
 		},
 		"rarete": {
 			"valeurs": ["commun", "peu_commun", "rare", "tres_rare", "legendaire", "mythique", "divin"],

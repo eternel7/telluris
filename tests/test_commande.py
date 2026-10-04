@@ -633,6 +633,53 @@ def test_commander_ne_coute_jamais_le_prix_plus_les_ingredients():
 	assert commandee == rayon + int(round(rayon * character_stats.COMMANDE_FACON_PART))
 
 
+# ── Prix d'une variante : coût de revient, et jamais d'arbitrage ───────────────
+
+# Fourchettes de test (pmin, coût de revient) : le coût vaut le pmin, comme dans le moteur
+# pour un doc sans `valeur` à deux bornes (`prix_range_cuivre`).
+_PMIN = {"item:piece": 105, "item:lingot": 200_000, "item:poudre": 133, "item:relique": 100}
+
+
+def _cout(item_id, doc):
+	return _PMIN[item_id]
+
+
+def _variante(base, mats):
+	docs = [({"_id": m, "fabrication": _fab(m, valeur={"facteur": f})}, 1) for m, f in mats]
+	kw =commande.prix_variante({"_id": base}, docs, _cout, _cout)
+	return kw, fabrication.variante_doc({"_id": base, "nom": "Pièce"}, docs, **kw)
+
+
+def test_prix_variante_compte_toutes_les_matieres_au_cout():
+	# L'adamantite APPORTÉE comptait 0 : la bandoulière se revendait 7 158 cu pour 200 338 de revient.
+	kw, _doc = _variante("item:piece", [("item:lingot", 3.5), ("item:poudre", 1.3)])
+	assert kw["cout_base_cuivre"] == 105
+	assert kw["cout_matieres_cuivre"] == 200_000 + 133
+
+
+def test_plafond_de_variante_est_le_plancher_de_commande():
+	kw, _doc = _variante("item:piece", [("item:lingot", 3.5), ("item:poudre", 1.3), ("item:relique", 1.8)])
+	assert kw["plafond_cuivre"] == commande.devis(105, 200_000 + 133 + 100, 0, 3)["total"]
+
+
+@pytest.mark.parametrize("mats", [
+	[("item:lingot", 3.5)],
+	[("item:lingot", 3.5), ("item:poudre", 1.3), ("item:relique", 1.8)],
+	[("item:poudre", 1.3), ("item:relique", 1.8)],
+	[("item:relique", 10.0)],
+])
+def test_commander_puis_revendre_ne_rapporte_jamais(mats):
+	"""Invariant anti-arbitrage. La meilleure revente (relation 100, marchand à sec, donc la
+	borne HAUTE) ne dépasse jamais la commande la moins chère (relation 100 aussi, matières
+	achetées à leur pmin). Avant : une calotte commandée 441 000 cu se revendait 8,1 M."""
+	_kw, doc = _variante("item:piece", mats)
+	pmin, pmax = marche.prix_range_cuivre(doc, doc["_id"])
+	revente = marche.prix_marche({"value": 100}, doc["_id"], pmin, pmax, "vente", 0, 1)
+	piece = marche.prix_marche({"value": 100}, "item:piece", 105, 315, "achat", 0, 1)
+	commande_min = commande.devis(piece, sum(_PMIN[m] for m, _f in mats), 0, len(mats))["total"]
+	assert revente <= commande_min
+
+
 def test_matieres_apportees_valent_une_remise():
 	sans = commande.devis(100, credit_matieres=0)
 	avec = commande.devis(100, credit_matieres=40)
