@@ -438,7 +438,8 @@ def test_normaliser_pose_liste_blanche_et_defauts():
 								 "inconnu": 1})
 	assert lu["danger"] == pieges.DANGER_MAX and lu["zone"] == pieges.POSE_ZONE_MAX
 	assert lu["portee"] == 1 and lu["degats"] == pieges.degats_de(pieges.DANGER_MAX)
-	assert lu["effets"] == {"buffs": {"V": -2}, "duree": 2}   # régén négative écartée
+	# Régén négative GARDÉE : c'est un poison (perte au tour de la victime).
+	assert lu["effets"] == {"buffs": {"V": -2}, "duree": 2, "regen_pv": -3}
 	assert "inconnu" not in lu
 	assert pieges.normaliser_pose({"item": "item:x", "effets": {"buffs": {"V": -2}}})["effets"] == {}
 

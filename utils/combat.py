@@ -16,6 +16,7 @@ from utils.consommables import (
 	caracts_avec_buffs, canalisation_bonus, est_consommable, effet_instantane, effets_de,
 	esquive_bonus, regen_bonus,
 	cumul_effets, identite_source, poser_effet, _as_int as _eff_int,
+	_as_signed_int as _regen_int,
 )
 from utils import charge_magie
 from utils.sorts import (
@@ -301,8 +302,9 @@ def _empiler_effet_combat(acteur: dict, source: dict, effets: dict, tour: int) -
 		"nom": (source or {}).get("nom", "Effet"),
 		"icon": (source or {}).get("icon", "✨"),
 		"buffs": dict(eff.get("buffs") or {}),
-		"regen_pv": _eff_int(eff.get("regen_pv")),
-		"regen_pm": _eff_int(eff.get("regen_pm")),
+		# SIGNÉES : une régén négative est un POISON (perte au tour du porteur).
+		"regen_pv": _regen_int(eff.get("regen_pv")),
+		"regen_pm": _regen_int(eff.get("regen_pm")),
 		"esquive": _eff_int(eff.get("esquive")),
 		"restants": _eff_int(eff.get("duree")),
 		# Tour de la pose : le tick du même tour la saute, sinon un effet lancé pendant
@@ -732,8 +734,8 @@ def _entree_aura(aura: dict, emetteur: dict) -> dict:
 		"nom": aura.get("nom", "Aura"),
 		"icon": aura.get("icon", "✨"),
 		"buffs": dict(aura.get("buffs") or {}),
-		"regen_pv": _eff_int(aura.get("regen_pv")),
-		"regen_pm": _eff_int(aura.get("regen_pm")),
+		"regen_pv": _regen_int(aura.get("regen_pv")),
+		"regen_pm": _regen_int(aura.get("regen_pm")),
 		"esquive": _eff_int(aura.get("esquive")),
 		"restants": 0,
 	}
@@ -966,6 +968,10 @@ def _resoudre_capacite_offensive(combat_doc: dict, joueur: dict, cibles: list,
 	return principal, jet_principal
 
 
+# Ce qui tient lieu d'attaquant au POISON dans `_traiter_ko` (aucune Chance, aucun camp).
+POISON_ATTAQUANT = {"id": "poison", "nom": "Poison", "ch": 0}
+
+
 def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
 	"""Début de tour d'un acteur : régén des effets, décrément, purge, recalcul.
 
@@ -977,8 +983,8 @@ def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
 	# tour, y compris sans le moindre effet à durée en cours — sortir en tête sur `not actifs`
 	# la ferait disparaître dès qu'un focus magique est la seule source du porteur.
 	# ⚠️ `.get(..., 0)` : un combat déjà en base n'a pas ces champs (aucune migration).
-	base_pv = _eff_int(acteur.get("regen_pv_base"))
-	base_pm = _eff_int(acteur.get("regen_pm_base"))
+	base_pv = _regen_int(acteur.get("regen_pv_base"))
+	base_pm = _regen_int(acteur.get("regen_pm_base"))
 	if not actifs and not (base_pv or base_pm):
 		return
 	tour = int(combat_doc.get("tour", 0) or 0)
@@ -991,19 +997,44 @@ def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
 	cumul = cumul_effets(actifs)
 	pv = base_pv + cumul["regen_pv"]
 	pm = base_pm + cumul["regen_pm"]
-	if pv or pm:
+	# Tombé juste avant (zone persistante du même début de tour) : ni régén qui relèverait un
+	# corps à terre, ni poison sur un mort.
+	if (pv or pm) and _debout(acteur):
 		avant_pv, avant_pm = acteur.get("currentPV", 0), acteur.get("currentPM", 0)
-		acteur["currentPV"] = min(acteur.get("pv_max", avant_pv), avant_pv + pv)
-		acteur["currentPM"] = min(acteur.get("pm_max", avant_pm), avant_pm + pm)
+		# Régén NETTE signée : négative = POISON. Aucun jet, aucune armure, ni lien de vie ni
+		# test de concentration — un poison n'est pas un coup (même parti pris que `cout_pv`).
+		# Planchers 0 : en combat, le poison peut mettre à terre ou tuer.
+		acteur["currentPV"] = max(0, min(acteur.get("pv_max", avant_pv), avant_pv + pv))
+		acteur["currentPM"] = max(0, min(acteur.get("pm_max", avant_pm), avant_pm + pm))
+		d_pv = acteur["currentPV"] - avant_pv
+		d_pm = acteur["currentPM"] - avant_pm
 		gains = " / ".join(s for s in (
-			f"+{acteur['currentPV'] - avant_pv} PV" if acteur["currentPV"] != avant_pv else "",
-			f"+{acteur['currentPM'] - avant_pm} PM" if acteur["currentPM"] != avant_pm else "",
-		) if s)
+			f"+{d_pv} PV" if d_pv > 0 else "", f"+{d_pm} PM" if d_pm > 0 else "") if s)
+		pertes = " / ".join(s for s in (
+			f"−{-d_pv} PV" if d_pv < 0 else "", f"−{-d_pm} PM" if d_pm < 0 else "") if s)
+		nom = acteur.get("nom", "?")
 		if gains:
 			combat_doc.setdefault("log", []).append(_avec_etat({
-				"tour": tour, "acteur": acteur.get("nom", "?"), "kind": "sys",
-				"texte": f"{acteur.get('nom', '?')} régénère ({gains}).",
+				"tour": tour, "acteur": nom, "kind": "sys",
+				"texte": f"{nom} régénère ({gains}).",
 			}, acteur))
+		if pertes:
+			mort = acteur["currentPV"] <= 0
+			est_monstre = str(acteur.get("id") or "").startswith("monstre_")
+			if mort and est_monstre:
+				acteur["vivant"] = False
+			combat_doc.setdefault("log", []).append(_avec_etat({
+				"tour": tour, "acteur": nom, "kind": "kill" if (mort and est_monstre) else "hit",
+				"texte": (f"☠ {nom} succombe au poison !" if (mort and est_monstre)
+						  else f"☠ {nom} souffre du poison ({pertes})."),
+			}, acteur))
+			if mort:
+				if est_monstre:
+					_check_victory(combat_doc)
+				else:
+					_traiter_ko(combat_doc, acteur, POISON_ATTAQUANT)
+				# Mort du poison : plus rien à décompter, son tour ne se jouera pas.
+				return
 
 	# 2. Décrément + purge. Une entrée posée CE tour-ci est épargnée — une entrée MAINTENUE
 	# aussi, et pour toujours : sa durée n'est pas un compte à rebours mais la capacité de

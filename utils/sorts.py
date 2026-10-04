@@ -29,7 +29,7 @@
 
 from models import character_stats
 from utils.characters import item_ref_id
-from utils.consommables import _as_int, poser_effet
+from utils.consommables import _as_int, _as_signed_int, poser_effet
 from utils.zones_effet import normaliser_zone
 
 # Jet de toucher d'un effet offensif, porté par la DONNÉE. SOURCE UNIQUE, partagée avec
@@ -139,8 +139,9 @@ def _bonus_dict(raw) -> dict:
 		"degats": str(raw.get("degats") or "").strip(),
 		"pv": _as_int(raw.get("pv")),
 		"pm": _as_int(raw.get("pm")),
-		"regen_pv": _as_int(raw.get("regen_pv")),
-		"regen_pm": _as_int(raw.get("regen_pm")),
+		# SIGNÉES : une régén négative est un POISON (cf. consommables._as_signed_int).
+		"regen_pv": _as_signed_int(raw.get("regen_pv")),
+		"regen_pm": _as_signed_int(raw.get("regen_pm")),
 		"buffs": buffs,
 		"duree": _as_int(raw.get("duree")),
 		"esquive": _as_int(raw.get("esquive")),
@@ -406,8 +407,8 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 		"degats": base.get("degats", ""),
 		"pv": _as_int(base.get("pv")),
 		"pm": _as_int(base.get("pm")),
-		"regen_pv": _as_int(base.get("regen_pv")),
-		"regen_pm": _as_int(base.get("regen_pm")),
+		"regen_pv": _as_signed_int(base.get("regen_pv")),
+		"regen_pm": _as_signed_int(base.get("regen_pm")),
 		"buffs": dict(base.get("buffs") or {}),
 		"duree": _as_int(base.get("duree")),
 		"esquive": _as_int(base.get("esquive")),
@@ -429,10 +430,12 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 		out["degats_pm"] = concat_degats(out["degats_pm"], bonus.get("degats_pm", ""))
 		if bonus.get("lien_vie"):
 			out["lien_vie"] = dict(bonus["lien_vie"])
-		for key in ("pv", "pm", "regen_pv", "regen_pm", "duree", "esquive", "furtivite",
+		for key in ("pv", "pm", "duree", "esquive", "furtivite",
 					"cout_pv", "drain_pv", "drain_pm", "drain_max", "saut",
 					"invocation_duree", "invocation_nombre", "maintien_reduction"):
 			out[key] += _as_int(bonus.get(key))
+		for key in ("regen_pv", "regen_pm"):
+			out[key] += _as_signed_int(bonus.get(key))
 		for k, delta in (bonus.get("buffs") or {}).items():
 			if str(k) == "V":
 				continue
@@ -519,9 +522,10 @@ def part_durative(effets: dict) -> bool:
 	diverge entre « lançable » et « empilable » produirait un sort accepté puis sans effet.
 	"""
 	eff = effets or {}
+	# Régén SIGNÉE : un poison pur (régén négative) est une part à durée à part entière.
 	return _as_int(eff.get("duree")) > 0 and bool(
-		eff.get("buffs") or _as_int(eff.get("regen_pv")) or _as_int(eff.get("regen_pm"))
-		or _as_int(eff.get("esquive")))
+		eff.get("buffs") or _as_signed_int(eff.get("regen_pv"))
+		or _as_signed_int(eff.get("regen_pm")) or _as_int(eff.get("esquive")))
 
 
 # ── Éligibilité d'une CAPACITÉ — source unique des sorts ET des compétences ──────
@@ -640,8 +644,8 @@ def empiler_effet_sort(character: dict, sort: dict, effets: dict) -> dict | None
 		"nom": (sort or {}).get("nom", "Sort"),
 		"icon": (sort or {}).get("icon", "🔮"),
 		"buffs": dict(eff.get("buffs") or {}),
-		"regen_pv": _as_int(eff.get("regen_pv")),
-		"regen_pm": _as_int(eff.get("regen_pm")),
+		"regen_pv": _as_signed_int(eff.get("regen_pv")),
+		"regen_pm": _as_signed_int(eff.get("regen_pm")),
 		"esquive": _as_int(eff.get("esquive")),
 		"restants": _as_int(eff.get("duree")),
 	}

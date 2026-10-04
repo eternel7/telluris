@@ -283,14 +283,18 @@ def normaliser_pose(raw) -> dict | None:
 	if not item:
 		return None
 	danger = _borne(_as_int(raw.get("danger"), 1), DANGER_MIN, DANGER_MAX)
-	# ⚠️ Seuls `buffs` (signés : une entrave est un buff négatif) et `duree` passent : c'est
-	# tout ce que `combat._appliquer_effet_sur_cible` sait poser sur un monstre. Une régén
-	# négative (poison) y serait ramenée à 0 sans un mot (`consommables._as_int`).
+	# ⚠️ Seuls `buffs` (signés : une entrave est un buff négatif), `regen_pv`/`regen_pm`
+	# (signées : négatif = POISON, perte au tour de la victime) et `duree` passent : c'est ce
+	# que `combat._appliquer_effet_sur_cible` sait poser sur un monstre. Sans durée, rien.
 	brut = raw.get("effets") if isinstance(raw.get("effets"), dict) else {}
 	effets = {}
+	duree = _as_int(brut.get("duree"))
 	buffs = {str(k): _as_int(v) for k, v in (brut.get("buffs") or {}).items() if _as_int(v)}
-	if buffs and _as_int(brut.get("duree")) > 0:
-		effets = {"buffs": buffs, "duree": _as_int(brut.get("duree"))}
+	regen = {k: _as_int(brut.get(k)) for k in ("regen_pv", "regen_pm") if _as_int(brut.get(k))}
+	if (buffs or regen) and duree > 0:
+		effets = dict(regen, duree=duree)
+		if buffs:
+			effets["buffs"] = buffs
 	return {
 		"item": item,
 		"danger": danger,

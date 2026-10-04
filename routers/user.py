@@ -852,8 +852,13 @@ def _apply_world_turn_regen(character: dict) -> None:
     bonus_pv, bonus_pm = consommables.regen_bonus(character)
     regen_pv = math.ceil(caracts.get("R", 1) / 20) + bonus_pv
     regen_pm = math.ceil(caracts.get("Vol", 1) / 20) + bonus_pm
-    character["currentPV"] = min(derived.pv_max, character.get("currentPV", derived.pv_max) + regen_pv)
-    character["currentPM"] = min(derived.pm_max, character.get("currentPM", derived.pm_max) + regen_pm)
+    avant_pv = character.get("currentPV", derived.pv_max)
+    character["currentPV"] = min(derived.pv_max, avant_pv + regen_pv)
+    character["currentPM"] = max(0, min(derived.pm_max, character.get("currentPM", derived.pm_max) + regen_pm))
+    # POISON (régén nette négative) : hors combat il ronge mais ne tue jamais — plancher
+    # 1 PV (sans relever qui serait déjà plus bas). En combat, il peut mettre à terre.
+    if regen_pv < 0:
+        character["currentPV"] = max(character["currentPV"], min(avant_pv, 1))
     if consommables.tick_effets(character):
         derived = _derived_from_character(character, eq)
         character["currentPV"] = min(character["currentPV"], derived.pv_max)

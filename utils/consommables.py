@@ -21,9 +21,20 @@ def _as_int(x) -> int:
 		return 0
 
 
+def _as_signed_int(x) -> int:
+	"""Entier SIGNÉ (0 si illisible) — pour `regen_pv`/`regen_pm` SEULEMENT : une régén
+	négative est un POISON (perte de PV/PM par tour). Tout le reste (pv/pm instantanés,
+	durée, esquive) reste ≥ 0 via `_as_int`."""
+	try:
+		return int(x or 0)
+	except (TypeError, ValueError):
+		return 0
+
+
 def effets_de(item_doc) -> dict:
-	"""Champ `effets` de l'item, normalisé : pv/pm/regen_pv/regen_pm entiers ≥ 0,
-	buffs dict {caract: int}, duree entier ≥ 0. Dict aux clés toujours présentes."""
+	"""Champ `effets` de l'item, normalisé : pv/pm entiers ≥ 0, regen_pv/regen_pm entiers
+	SIGNÉS (négatif = poison), buffs dict {caract: int}, duree entier ≥ 0. Dict aux clés
+	toujours présentes."""
 	raw = (item_doc or {}).get("effets") or {}
 	buffs = {}
 	for k, v in (raw.get("buffs") or {}).items():
@@ -34,8 +45,8 @@ def effets_de(item_doc) -> dict:
 	return {
 		"pv": _as_int(raw.get("pv")),
 		"pm": _as_int(raw.get("pm")),
-		"regen_pv": _as_int(raw.get("regen_pv")),
-		"regen_pm": _as_int(raw.get("regen_pm")),
+		"regen_pv": _as_signed_int(raw.get("regen_pv")),
+		"regen_pm": _as_signed_int(raw.get("regen_pm")),
 		"buffs": buffs,
 		"duree": _as_int(raw.get("duree")),
 		"esquive": _as_int(raw.get("esquive")),
@@ -148,20 +159,24 @@ def cumul_effets(effets: list) -> dict:
 	{buffs:{code:Δ}, regen_pv, regen_pm, esquive}.
 
 	Par caractéristique : meilleur bonus + pire malus (max des positifs + min des négatifs).
-	Un buff ne peut donc pas « effacer » un malus, il le contre. Régén et esquive suivent la
-	même règle — elles sont normalisées ≥ 0, ce qui la réduit à un simple max."""
+	Un buff ne peut donc pas « effacer » un malus, il le contre. La RÉGÉN suit la même règle,
+	signée : une potion +3 CONTRE un poison −4 (net −1) sans l'effacer, deux poisons ne se
+	cumulent pas (le pire seul). Esquive et canalisation, normalisées ≥ 0, s'y réduisent à un
+	simple max."""
 	positifs, negatifs = extremes_buffs(effets)
 	buffs = dict(positifs)
 	for code, delta in negatifs.items():
 		buffs[code] = buffs.get(code, 0) + delta
-	regen_pv = regen_pm = esquive = canalisation = 0
+	esquive = canalisation = 0
+	regen = {"regen_pv": [0, 0], "regen_pm": [0, 0]}   # [meilleur bonus, pire malus]
 	for eff in effets or []:
-		regen_pv = max(regen_pv, _as_int((eff or {}).get("regen_pv")))
-		regen_pm = max(regen_pm, _as_int((eff or {}).get("regen_pm")))
+		for cle, (meilleur, pire) in list(regen.items()):
+			v = _as_signed_int((eff or {}).get(cle))
+			regen[cle] = [max(meilleur, v), min(pire, v)]
 		esquive = max(esquive, _as_int((eff or {}).get("esquive")))
 		canalisation = max(canalisation, _as_int((eff or {}).get("canalisation")))
-	return {"buffs": buffs, "regen_pv": regen_pv, "regen_pm": regen_pm, "esquive": esquive,
-			"canalisation": canalisation}
+	return {"buffs": buffs, "regen_pv": sum(regen["regen_pv"]), "regen_pm": sum(regen["regen_pm"]),
+			"esquive": esquive, "canalisation": canalisation}
 
 
 def _sources_de_buffs_detaillees(character: dict, origines: tuple = ORIGINES_BUFFS) -> list:
@@ -299,8 +314,8 @@ def regen_bonus(character: dict, origines: tuple = ORIGINES_BUFFS) -> tuple[int,
 	cumul = cumul_effets(temporaires)
 	pv, pm = cumul["regen_pv"], cumul["regen_pm"]
 	for eff in permanents:
-		pv += _as_int(eff.get("regen_pv"))
-		pm += _as_int(eff.get("regen_pm"))
+		pv += _as_signed_int(eff.get("regen_pv"))
+		pm += _as_signed_int(eff.get("regen_pm"))
 	return pv, pm
 
 

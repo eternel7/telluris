@@ -80,8 +80,8 @@ PASSIVES_N1 = {
 # ── 2. Niveaux 2 → 8 : pose de pièges ────────────────────────────────────────
 # (niveau, slug, nom, icon, item, danger, zone, effets, description)
 # danger 1-5 → dégâts `<danger>D6` (pieges.degats_de) ; zone = rayon du carré couvert.
-# Effets : `buffs` signés + `duree` SEULEMENT (cf. pieges.normaliser_pose). Échelle : V 1-10
-# (|delta| ≤ 5), les autres ×10.
+# Effets : `buffs` signés, `regen_pv`/`regen_pm` signées (négatif = POISON) + `duree`
+# (cf. pieges.normaliser_pose). Échelle des buffs : V 1-10 (|delta| ≤ 5), les autres ×10.
 POSES = {
 	"forestier": [
 		(2, "collet", "Collet", "🪢", "item:Piege_a_collet", 1, 0,
@@ -108,8 +108,8 @@ POSES = {
 		 {"buffs": {"V": -2}, "duree": 1},
 		 "Une poignée de pointes de fer semées au sol : toujours une vers le haut."),
 		(3, "aiguille_empoisonnee", "Aiguille empoisonnée", "💉", "item:Aiguille_empoisonnee", 2, 0,
-		 {"buffs": {"F": -10}, "duree": 3},
-		 "Une aiguille enduite, montée sur une plaque : la piqûre engourdit les muscles."),
+		 {"regen_pv": -4, "duree": 3},
+		 "Une aiguille enduite, montée sur une plaque : le poison ronge sa victime plusieurs tours durant."),
 		(4, "fil_a_carreau", "Fil à carreau", "🎯", "item:Fil_a_carreau", 3, 0, {},
 		 "Un fil tendu à hauteur de cheville relié à une arbalète cachée."),
 		(5, "poudre_aveuglante", "Sachet de poudre aveuglante", "💨", "item:Sachet_de_poudre_aveuglante", 2, 1,

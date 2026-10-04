@@ -1570,6 +1570,11 @@ function updateJoueur(j) {
 	renderIncantation(j.incantation);
 }
 
+// Régén SIGNÉE : négative = POISON (perte par tour) — « ☠ −n PV/tour », jamais « +-n ».
+function regenTexte(v, unite) {
+	return v < 0 ? `☠ −${-v} ${unite}/tour` : `+${v} ${unite}/tour`;
+}
+
 // Chips d'effets à durée du membre actif. Markup identique à _renderEffetsActifs de
 // play_town : un effet lancé en exploration ou en combat se lit pareil des deux côtés.
 function renderEffetsActifs(list) {
@@ -1578,8 +1583,8 @@ function renderEffetsActifs(list) {
 	el.innerHTML = (list || []).map(e => {
 		const details = [];
 		for (const [k, v] of Object.entries(e.buffs || {})) details.push(`${v > 0 ? '+' : ''}${v} ${k}`);
-		if (e.regen_pv) details.push(`+${e.regen_pv} PV/tour`);
-		if (e.regen_pm) details.push(`+${e.regen_pm} PM/tour`);
+		if (e.regen_pv) details.push(regenTexte(e.regen_pv, 'PV'));
+		if (e.regen_pm) details.push(regenTexte(e.regen_pm, 'PM'));
 		if (e.esquive) details.push(`+${e.esquive} esquive`);
 		// Un sort MAINTENU n'a pas de compte à rebours : il dure tant que son lanceur paie
 		// l'entretien. Afficher « ⏳3 » mentirait — le chiffre ne bougerait jamais. On

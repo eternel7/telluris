@@ -54,7 +54,7 @@
 		"type": "competence",
 		"nom": "Pose : Aiguille empoisonnée",
 		"icon": "💉",
-		"description": "Une aiguille enduite, montée sur une plaque : la piqûre engourdit les muscles.",
+		"description": "Une aiguille enduite, montée sur une plaque : le poison ronge sa victime plusieurs tours durant.",
 		"vocation": "voleur",
 		"niveau": 3,
 		"mode": "passive",
@@ -66,9 +66,7 @@
 			"nom": "Aiguille empoisonnée",
 			"icon": "💉",
 			"effets": {
-				"buffs": {
-					"F": -10
-				},
+				"regen_pv": -4,
 				"duree": 3
 			}
 		}

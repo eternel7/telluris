@@ -28,7 +28,7 @@
 # Logique pure (get_doc/find_docs injectés), ne sauvegarde jamais — les endpoints persistent.
 
 from models import character_stats
-from utils.consommables import _as_int, poser_effet
+from utils.consommables import _as_int, _as_signed_int, poser_effet
 from utils.sorts import (
 	CIBLE_DEFAUT, CIBLES, INCANTATION_PA_DEFAUT, INCANTATION_PA_MAX, JETS,
 	MAINTIEN_PM_MAX, _bonus_dict, _sensibilite_charge, capacite_utilisable_combat,
@@ -146,8 +146,8 @@ def entree_aura(comp: dict) -> dict:
 		"icon": comp.get("icon", "✨"),
 		"zone": dict(comp.get("zone") or {}),
 		"buffs": {str(k): int(v) for k, v in (eff.get("buffs") or {}).items()},
-		"regen_pv": _as_int(eff.get("regen_pv")),
-		"regen_pm": _as_int(eff.get("regen_pm")),
+		"regen_pv": _as_signed_int(eff.get("regen_pv")),
+		"regen_pm": _as_signed_int(eff.get("regen_pm")),
 		"esquive": _as_int(eff.get("esquive")),
 	}
 
@@ -193,8 +193,8 @@ def empiler_effet_competence(character: dict, comp: dict) -> dict | None:
 		"nom": (comp or {}).get("nom", "Compétence"),
 		"icon": (comp or {}).get("icon", "⚡"),
 		"buffs": dict(eff.get("buffs") or {}),
-		"regen_pv": _as_int(eff.get("regen_pv")),
-		"regen_pm": _as_int(eff.get("regen_pm")),
+		"regen_pv": _as_signed_int(eff.get("regen_pv")),
+		"regen_pm": _as_signed_int(eff.get("regen_pm")),
 		"esquive": _as_int(eff.get("esquive")),
 		"restants": _as_int(eff.get("duree")),
 	}
@@ -245,8 +245,8 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 				"icon":  comp.get("icon", "✨"),
 				"buffs": propres,
 			})
-		regen_pv += _as_int(eff.get("regen_pv"))
-		regen_pm += _as_int(eff.get("regen_pm"))
+		regen_pv += _as_signed_int(eff.get("regen_pv"))
+		regen_pm += _as_signed_int(eff.get("regen_pm"))
 		esquive += _as_int(eff.get("esquive"))
 		detection_pieges += _as_int(eff.get("detection_pieges"))
 		desamorcage += _as_int(eff.get("desamorcage"))
