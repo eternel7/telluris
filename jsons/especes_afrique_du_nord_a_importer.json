@@ -1,0 +1,614 @@
+[
+  {
+    "_id": "espece:aicha_kandicha",
+    "type": "espece",
+    "nom": "Aïcha Kandicha",
+    "image": "aicha_kandicha_transparent.png",
+    "description": "Dame des oasis aux pieds de chèvre cachés sous sa robe mouillée ; elle attire les voyageurs au bord de l'eau, et on ne les revoit pas.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 50,
+        "max": 80
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "esprit",
+      "aquatique",
+      "seduction",
+      "magique",
+      "humanoide"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:silat",
+    "type": "espece",
+    "nom": "Si'lat",
+    "image": "silat_transparent.png",
+    "description": "La plus rusée des djinns errants : elle prend la voix d'une parente et suit les caravanes à l'écart des feux.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 30,
+        "max": 45
+      },
+      "Cha": {
+        "min": 30,
+        "max": 55
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "humanoide",
+      "metamorphe",
+      "magique",
+      "desert",
+      "furtif"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:boukhnoun",
+    "type": "espece",
+    "nom": "Boukhnoun",
+    "image": "boukhnoun_transparent.png",
+    "description": "Ombre bossue des ravins, on l'entend renifler avant de la voir ; la peur des bergers après le couchant.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 30,
+        "max": 45
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 40,
+        "max": 60
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 15,
+        "max": 30
+      }
+    },
+    "tags": [
+      "monstre",
+      "nocturne",
+      "terreur",
+      "furtif",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:ghul_des_sables",
+    "type": "espece",
+    "nom": "Ghûl des Sables",
+    "image": "ghul_des_sables_transparent.png",
+    "description": "Charognard des pistes qui revêt l'apparence de sa dernière proie pour en attirer une autre.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 30,
+        "max": 45
+      },
+      "R": {
+        "min": 30,
+        "max": 45
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 15,
+        "max": 30
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "metamorphe",
+      "desert",
+      "predateur",
+      "humanoide"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:jann",
+    "type": "espece",
+    "nom": "Djinn des Ruines",
+    "image": "jann_transparent.png",
+    "description": "Esprit tapi dans les cités ensevelies, tour à tour vent de sable, mirage ou murmure.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 25,
+        "max": 45
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "esprit",
+      "elementaire",
+      "magique",
+      "desert",
+      "incorporel"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:ifrit",
+    "type": "espece",
+    "nom": "Ifrit",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "ifrit_transparent.png",
+    "description": "Géant de flamme et de fumée né des terres brûlées, orgueilleux et implacable.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 25,
+        "max": 40
+      },
+      "Vol": {
+        "min": 60,
+        "max": 90
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 20,
+        "max": 40
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "elementaire",
+      "feu",
+      "infernal",
+      "magique",
+      "souterrain"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:marid",
+    "type": "espece",
+    "nom": "Marid",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "marid_transparent.png",
+    "description": "Djinn des eaux profondes, souverain des grandes oasis et des mers intérieures, d'une arrogance d'empereur.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 45,
+        "max": 75
+      },
+      "R": {
+        "min": 50,
+        "max": 80
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 65,
+        "max": 95
+      },
+      "Int": {
+        "min": 45,
+        "max": 70
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "elementaire",
+      "aquatique",
+      "magique",
+      "legendaire"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:serpopard",
+    "type": "espece",
+    "nom": "Serpopard",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "serpopard_transparent.png",
+    "description": "Félin des ruines au cou de serpent démesuré, qui frappe par-dessus les murets.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 30,
+        "max": 45
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 15,
+        "max": 30
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "predateur",
+      "rapide",
+      "desert"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:ammit",
+    "type": "espece",
+    "nom": "Ammit, la Dévoreuse",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "ammit_transparent.png",
+    "description": "Gueule de crocodile, garrot de lion, croupe d'hippopotame : elle rôde dans les salles de jugement des nécropoles et dévore le cœur des indignes.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 55,
+        "max": 85
+      },
+      "Ag": {
+        "min": 25,
+        "max": 40
+      },
+      "Vol": {
+        "min": 50,
+        "max": 75
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 55
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "gardien",
+      "predateur",
+      "legendaire"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:fils_de_sobek",
+    "type": "espece",
+    "nom": "Fils de Sobek",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "fils_de_sobek_transparent.png",
+    "description": "Crocodile sacré nourri par des siècles d'offrandes, gardien des temples du fleuve.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 60,
+        "max": 90
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "aquatique",
+      "divin",
+      "gardien"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:besien",
+    "type": "espece",
+    "nom": "Bésien",
+    "image": "besien_transparent.png",
+    "description": "Petit démon trapu à la grimace de masque ; il rit, danse et mord, et pullule dans les sanctuaires profanés.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 15,
+        "max": 25
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 5,
+        "max": 15
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "demon",
+      "petite_taille",
+      "monstre"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:apep",
+    "type": "espece",
+    "nom": "Apep, Serpent du Chaos",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "apep_transparent.png",
+    "description": "Serpent primordial lové sous le monde ; sa seule présence éteint les torches et fend la pierre.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 85,
+        "max": 125
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 70,
+        "max": 100
+      },
+      "Int": {
+        "min": 40,
+        "max": 60
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "souterrain",
+      "magique",
+      "legendaire",
+      "boss",
+      "cataclysme"
+    ],
+    "proprietes": {}
+  }
+]
