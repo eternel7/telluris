@@ -718,6 +718,13 @@ Titres : Gentilhomme, Mousquetaire, Garde, Seigneur, Maître d'armes, Exécuteur
 *Axe : furtivité, poison (régénération négative), burst de contact. Titres : Espion, Surineur,
 Empoisonneur, Maître des ombres, Maître lames, Maître venins.*
 
+> **Échelle de pièges (`dev/gen_pieges.py`)** : Détection au niveau 2, Désamorçage au 4, une
+> pose par niveau de 5 à 8 (Lacet d'entrave, Bolas à ressort, **Glu de nuit**, Brume de
+> pavot). Des pièges qui **immobilisent** (V −3 à −5, Ag) pour des dégâts symboliques
+> (1D2-1D3) et **sans poison** : le coup unique au contact et le venin restent son métier.
+> Au palier 6, *Maître lames* côtoie la Bolas : la proie entravée attend la lame. Ses
+> entraves ne se cumulent pas avec celles d'un piège du voleur (pire malus seul).
+
 ### Niveau 3
 
 **Surineur** 🔪 · passive
