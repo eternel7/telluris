@@ -1,0 +1,813 @@
+[
+	{
+		"_id": "competence:detection_des_pieges_voleur",
+		"type": "competence",
+		"nom": "Détection des pièges",
+		"icon": "👁️",
+		"description": "Une dalle trop propre, un fil qui accroche la lumière : il sent le piège avant d'y poser le pied. Repère les pièges à deux pas, et peut fouiller les environs (1 action).",
+		"vocation": "voleur",
+		"niveau": 1,
+		"mode": "passive",
+		"effets": {
+			"detection_pieges": 20
+		}
+	},
+	{
+		"_id": "competence:desamorcage_des_pieges_voleur",
+		"type": "competence",
+		"nom": "Désamorçage des pièges",
+		"icon": "🛠️",
+		"description": "Une lame glissée sous la plaque, un ressort retenu du bout de l'ongle. Désamorce un piège détecté au contact (1 action).",
+		"vocation": "voleur",
+		"niveau": 1,
+		"mode": "passive",
+		"effets": {
+			"desamorcage": 20
+		}
+	},
+	{
+		"_id": "competence:pose_chausse_trappes",
+		"type": "competence",
+		"nom": "Pose : Chausse-trappes",
+		"icon": "📌",
+		"description": "Une poignée de pointes de fer semées au sol : toujours une vers le haut.",
+		"vocation": "voleur",
+		"niveau": 2,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Chausse_trappes",
+			"danger": 1,
+			"zone": 1,
+			"portee": 1,
+			"nom": "Chausse-trappes",
+			"icon": "📌",
+			"effets": {
+				"buffs": {
+					"V": -2
+				},
+				"duree": 1
+			}
+		}
+	},
+	{
+		"_id": "competence:pose_aiguille_empoisonnee",
+		"type": "competence",
+		"nom": "Pose : Aiguille empoisonnée",
+		"icon": "💉",
+		"description": "Une aiguille enduite, montée sur une plaque : le poison ronge sa victime plusieurs tours durant.",
+		"vocation": "voleur",
+		"niveau": 3,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Aiguille_empoisonnee",
+			"danger": 2,
+			"zone": 0,
+			"portee": 1,
+			"nom": "Aiguille empoisonnée",
+			"icon": "💉",
+			"effets": {
+				"regen_pv": -4,
+				"duree": 3
+			}
+		}
+	},
+	{
+		"_id": "competence:pose_fil_a_carreau",
+		"type": "competence",
+		"nom": "Pose : Fil à carreau",
+		"icon": "🎯",
+		"description": "Un fil tendu à hauteur de cheville relié à une arbalète cachée.",
+		"vocation": "voleur",
+		"niveau": 4,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Fil_a_carreau",
+			"danger": 3,
+			"zone": 0,
+			"portee": 1,
+			"nom": "Fil à carreau",
+			"icon": "🎯"
+		}
+	},
+	{
+		"_id": "competence:pose_poudre_aveuglante",
+		"type": "competence",
+		"nom": "Pose : Sachet de poudre aveuglante",
+		"icon": "💨",
+		"description": "Un sachet qui crève sous le pas et emplit l'air d'une poudre qui brûle les yeux.",
+		"vocation": "voleur",
+		"niveau": 5,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Sachet_de_poudre_aveuglante",
+			"danger": 2,
+			"zone": 1,
+			"portee": 1,
+			"nom": "Sachet de poudre aveuglante",
+			"icon": "💨",
+			"effets": {
+				"buffs": {
+					"Ag": -15
+				},
+				"duree": 2
+			}
+		}
+	},
+	{
+		"_id": "competence:pose_machoire_d_acier",
+		"type": "competence",
+		"nom": "Pose : Mâchoire d'acier",
+		"icon": "⚙️",
+		"description": "Un piège d'acier trempé, plus lourd et plus mordant qu'aucun piège de trappeur.",
+		"vocation": "voleur",
+		"niveau": 6,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Machoire_d_acier",
+			"danger": 4,
+			"zone": 0,
+			"portee": 1,
+			"nom": "Mâchoire d'acier",
+			"icon": "⚙️",
+			"effets": {
+				"buffs": {
+					"V": -3
+				},
+				"duree": 2
+			}
+		}
+	},
+	{
+		"_id": "competence:pose_feu_gregeois",
+		"type": "competence",
+		"nom": "Pose : Pot de feu grégeois",
+		"icon": "🔥",
+		"description": "Un pot de terre scellé posé sur une plaque : le feu prend et colle à tout ce qu'il touche.",
+		"vocation": "voleur",
+		"niveau": 7,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Pot_de_feu_gregeois",
+			"danger": 4,
+			"zone": 1,
+			"portee": 1,
+			"nom": "Pot de feu grégeois",
+			"icon": "🔥"
+		}
+	},
+	{
+		"_id": "competence:pose_mine_de_poudre",
+		"type": "competence",
+		"nom": "Pose : Mine de poudre noire",
+		"icon": "💥",
+		"description": "Une charge de poudre enterrée, une mèche à friction : tout saute dans un grand rayon.",
+		"vocation": "voleur",
+		"niveau": 8,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Mine_de_poudre_noire",
+			"danger": 5,
+			"zone": 2,
+			"portee": 1,
+			"nom": "Mine de poudre noire",
+			"icon": "💥"
+		}
+	},
+	{
+		"_id": "competence:detection_des_pieges_forestier",
+		"type": "competence",
+		"nom": "Détection des pièges",
+		"icon": "👁️",
+		"description": "Une branche cassée au mauvais endroit, une terre retournée de frais : rien n'échappe à l'œil du traqueur. Repère les pièges à deux pas, et peut fouiller les environs (1 action).",
+		"vocation": "forestier",
+		"niveau": 1,
+		"mode": "passive",
+		"effets": {
+			"detection_pieges": 20
+		}
+	},
+	{
+		"_id": "competence:desamorcage_des_pieges_forestier",
+		"type": "competence",
+		"nom": "Désamorçage des pièges",
+		"icon": "🛠️",
+		"description": "Il sait quelle corde trancher et quelle branche caler. Désamorce un piège détecté au contact (1 action).",
+		"vocation": "forestier",
+		"niveau": 1,
+		"mode": "passive",
+		"effets": {
+			"desamorcage": 20
+		}
+	},
+	{
+		"_id": "competence:pose_collet",
+		"type": "competence",
+		"nom": "Pose : Collet",
+		"icon": "🪢",
+		"description": "Un nœud coulant caché sous les feuilles : la proie s'y prend la patte et reste sur place.",
+		"vocation": "forestier",
+		"niveau": 2,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Piege_a_collet",
+			"danger": 1,
+			"zone": 0,
+			"portee": 1,
+			"nom": "Collet",
+			"icon": "🪢",
+			"effets": {
+				"buffs": {
+					"V": -3
+				},
+				"duree": 2
+			}
+		}
+	},
+	{
+		"_id": "competence:pose_fosse_a_pieux",
+		"type": "competence",
+		"nom": "Pose : Fosse à pieux",
+		"icon": "🕳️",
+		"description": "Quelques pieux durcis au feu, une fosse sommaire, un lit de branchages par-dessus.",
+		"vocation": "forestier",
+		"niveau": 3,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Pieux_de_fosse",
+			"danger": 2,
+			"zone": 0,
+			"portee": 1,
+			"nom": "Fosse à pieux",
+			"icon": "🕳️"
+		}
+	},
+	{
+		"_id": "competence:pose_filet_de_capture",
+		"type": "competence",
+		"nom": "Pose : Filet de capture",
+		"icon": "🕸️",
+		"description": "Un filet tendu entre deux troncs, qui tombe sur tout ce qui passe dessous.",
+		"vocation": "forestier",
+		"niveau": 4,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Filet_de_capture",
+			"danger": 1,
+			"zone": 1,
+			"portee": 1,
+			"nom": "Filet de capture",
+			"icon": "🕸️",
+			"effets": {
+				"buffs": {
+					"V": -3
+				},
+				"duree": 2
+			}
+		}
+	},
+	{
+		"_id": "competence:pose_piege_a_machoires",
+		"type": "competence",
+		"nom": "Pose : Piège à mâchoires",
+		"icon": "🦷",
+		"description": "Deux arcs de fer dentelés qu'un ressort referme sur la jambe imprudente.",
+		"vocation": "forestier",
+		"niveau": 5,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Piege_a_machoires",
+			"danger": 3,
+			"zone": 0,
+			"portee": 1,
+			"nom": "Piège à mâchoires",
+			"icon": "🦷",
+			"effets": {
+				"buffs": {
+					"V": -2
+				},
+				"duree": 2
+			}
+		}
+	},
+	{
+		"_id": "competence:pose_arbre_ressort",
+		"type": "competence",
+		"nom": "Pose : Arbre-ressort",
+		"icon": "🌳",
+		"description": "Un jeune arbre courbé jusqu'au sol, qu'un fil libère à toute volée.",
+		"vocation": "forestier",
+		"niveau": 6,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Ressort_de_branche",
+			"danger": 3,
+			"zone": 1,
+			"portee": 1,
+			"nom": "Arbre-ressort",
+			"icon": "🌳"
+		}
+	},
+	{
+		"_id": "competence:pose_eboulis",
+		"type": "competence",
+		"nom": "Pose : Éboulis",
+		"icon": "🪨",
+		"description": "Un étai retiré au bon moment, et la pente entière dégringole sur les assaillants.",
+		"vocation": "forestier",
+		"niveau": 7,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Declencheur_d_eboulis",
+			"danger": 4,
+			"zone": 1,
+			"portee": 1,
+			"nom": "Éboulis",
+			"icon": "🪨"
+		}
+	},
+	{
+		"_id": "competence:pose_abattis_piege",
+		"type": "competence",
+		"nom": "Pose : Abattis piégé",
+		"icon": "🪵",
+		"description": "Un enchevêtrement de troncs et de pointes qui s'effondre d'un bloc sur un large pan de terrain.",
+		"vocation": "forestier",
+		"niveau": 8,
+		"mode": "passive",
+		"pose_piege": {
+			"item": "item:Abattis_piege",
+			"danger": 5,
+			"zone": 2,
+			"portee": 1,
+			"nom": "Abattis piégé",
+			"icon": "🪵",
+			"effets": {
+				"buffs": {
+					"V": -2
+				},
+				"duree": 2
+			}
+		}
+	},
+	{
+		"_id": "item:Pieux_de_fosse",
+		"type": "item",
+		"nom": "Pieux de fosse",
+		"icon": "🪵",
+		"description": "Un fagot de pieux durcis au feu, de quoi garnir une fosse.",
+		"rarete": "commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 2.0,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:armurerie_pieux_de_fosse",
+		"type": "recette",
+		"lieu_categorie": "armurerie",
+		"objet_final": "Pieux_de_fosse",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "manche",
+				"quantite": 3
+			},
+			{
+				"sous_categorie": "fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Piege_a_machoires",
+		"type": "item",
+		"nom": "Piège à mâchoires",
+		"icon": "🦷",
+		"description": "Deux arcs de fer dentelés montés sur un ressort.",
+		"rarete": "commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 1.5,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:armurerie_piege_a_machoires",
+		"type": "recette",
+		"lieu_categorie": "armurerie",
+		"objet_final": "Piege_a_machoires",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "fer",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Ressort_de_branche",
+		"type": "item",
+		"nom": "Ressort de branche",
+		"icon": "🌳",
+		"description": "Cordages, cales et déclencheur pour bander un jeune arbre en piège.",
+		"rarete": "peu_commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 1.0,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:armurerie_ressort_de_branche",
+		"type": "recette",
+		"lieu_categorie": "armurerie",
+		"objet_final": "Ressort_de_branche",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "tendons",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "manche",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Declencheur_d_eboulis",
+		"type": "item",
+		"nom": "Déclencheur d'éboulis",
+		"icon": "🪨",
+		"description": "Un étai à goupille et sa corde de tirage : il suffit d'une pente.",
+		"rarete": "peu_commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 3.0,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:armurerie_declencheur_d_eboulis",
+		"type": "recette",
+		"lieu_categorie": "armurerie",
+		"objet_final": "Declencheur_d_eboulis",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "rondin",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "item:Abattis_piege",
+		"type": "item",
+		"nom": "Abattis piégé",
+		"icon": "🪵",
+		"description": "Troncs, pointes et liens d'un abattis à monter en travers d'un passage.",
+		"rarete": "rare",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 5.0,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:armurerie_abattis_piege",
+		"type": "recette",
+		"lieu_categorie": "armurerie",
+		"objet_final": "Abattis_piege",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "gros_rondin",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "petit_rondin",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "fer",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "item:Chausse_trappes",
+		"type": "item",
+		"nom": "Chausse-trappes",
+		"icon": "📌",
+		"description": "Une bourse de pointes de fer à quatre branches.",
+		"rarete": "commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 0.5,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:armurerie_chausse_trappes",
+		"type": "recette",
+		"lieu_categorie": "armurerie",
+		"objet_final": "Chausse_trappes",
+		"quantite_produite": 3,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Aiguille_empoisonnee",
+		"type": "item",
+		"nom": "Aiguille empoisonnée",
+		"icon": "💉",
+		"description": "Une plaque à ressort armée d'une aiguille enduite de suc de pavot.",
+		"rarete": "peu_commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 0.1,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:laboratoire_d_alchimie_aiguille_empoisonnee",
+		"type": "recette",
+		"lieu_categorie": "laboratoire_d_alchimie",
+		"objet_final": "Aiguille_empoisonnee",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"item": "item:Capsules_de_pavot",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "reactif_brut",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Fil_a_carreau",
+		"type": "item",
+		"nom": "Fil à carreau",
+		"icon": "🎯",
+		"description": "Une petite arbalète à déclencheur, son fil et ses carreaux.",
+		"rarete": "peu_commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 1.5,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:armurerie_fil_a_carreau",
+		"type": "recette",
+		"lieu_categorie": "armurerie",
+		"objet_final": "Fil_a_carreau",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "fer",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "manche",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Sachet_de_poudre_aveuglante",
+		"type": "item",
+		"nom": "Sachet de poudre aveuglante",
+		"icon": "💨",
+		"description": "Un sachet fin bourré d'une poudre qui brûle les yeux.",
+		"rarete": "peu_commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 0.2,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:laboratoire_d_alchimie_sachet_de_poudre_aveuglante",
+		"type": "recette",
+		"lieu_categorie": "laboratoire_d_alchimie",
+		"objet_final": "Sachet_de_poudre_aveuglante",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"item": "item:Herbes_a_bruler",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "poudre_d_os",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Machoire_d_acier",
+		"type": "item",
+		"nom": "Mâchoire d'acier",
+		"icon": "⚙️",
+		"description": "Un piège d'acier trempé à double ressort.",
+		"rarete": "rare",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 2.5,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:armurerie_machoire_d_acier",
+		"type": "recette",
+		"lieu_categorie": "armurerie",
+		"objet_final": "Machoire_d_acier",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "acier",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Pot_de_feu_gregeois",
+		"type": "item",
+		"nom": "Pot de feu grégeois",
+		"icon": "🔥",
+		"description": "Un pot de terre scellé, plein d'un feu qui ne s'éteint pas dans l'eau.",
+		"rarete": "rare",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 1.5,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:laboratoire_d_alchimie_pot_de_feu_gregeois",
+		"type": "recette",
+		"lieu_categorie": "laboratoire_d_alchimie",
+		"objet_final": "Pot_de_feu_gregeois",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "reactif_brut",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "graisse",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Mine_de_poudre_noire",
+		"type": "item",
+		"nom": "Mine de poudre noire",
+		"icon": "💥",
+		"description": "Une charge de poudre en coffret, sa mèche à friction.",
+		"rarete": "rare",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"poids": 3.0,
+		"tags": [
+			"piege"
+		]
+	},
+	{
+		"_id": "recette:laboratoire_d_alchimie_mine_de_poudre_noire",
+		"type": "recette",
+		"lieu_categorie": "laboratoire_d_alchimie",
+		"objet_final": "Mine_de_poudre_noire",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "reactif_brut",
+				"quantite": 3
+			},
+			{
+				"sous_categorie": "poudre_d_os",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "graisse",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "animation:piege_declenche",
+		"type": "animation",
+		"nom": "Piège déclenché",
+		"ancrage": "cible",
+		"actif": true,
+		"fichier": "break01.png",
+		"largeur": 704,
+		"hauteur": 64,
+		"colonnes": 11,
+		"lignes": 1,
+		"sens_lignes": "bas_haut",
+		"sens_colonnes": "gauche_droite",
+		"debut": 0,
+		"fin": 10,
+		"duree_ms": 600,
+		"echelle": 1.5,
+		"decalage_y": 0,
+		"son": "foom_0.wav",
+		"son_debut_ms": 0,
+		"son_fin_ms": 0,
+		"son_volume": 1.0
+	},
+	{
+		"_id": "animation:desamorcage_reussi",
+		"type": "animation",
+		"nom": "Désamorçage réussi",
+		"ancrage": "cible",
+		"actif": true,
+		"fichier": "sparks_effect.png",
+		"largeur": 64,
+		"hauteur": 768,
+		"colonnes": 1,
+		"lignes": 12,
+		"sens_lignes": "haut_bas",
+		"sens_colonnes": "gauche_droite",
+		"debut": 0,
+		"fin": 11,
+		"duree_ms": 600,
+		"echelle": 1.5,
+		"decalage_y": 0,
+		"son": "power_up_sound_v1.ogg",
+		"son_debut_ms": 0,
+		"son_fin_ms": 0,
+		"son_volume": 1.0
+	},
+	{
+		"_id": "animation:desamorcage_rate",
+		"type": "animation",
+		"nom": "Désamorçage raté",
+		"ancrage": "cible",
+		"actif": true,
+		"fichier": "Smoke15Frames.png",
+		"largeur": 1280,
+		"hauteur": 768,
+		"colonnes": 5,
+		"lignes": 3,
+		"sens_lignes": "haut_bas",
+		"sens_colonnes": "gauche_droite",
+		"debut": 0,
+		"fin": 14,
+		"duree_ms": 600,
+		"echelle": 1.5,
+		"decalage_y": 0,
+		"son": "swish_2.wav",
+		"son_debut_ms": 0,
+		"son_fin_ms": 0,
+		"son_volume": 1.0
+	}
+]

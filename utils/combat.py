@@ -16,6 +16,7 @@ from utils.consommables import (
 	caracts_avec_buffs, canalisation_bonus, est_consommable, effet_instantane, effets_de,
 	esquive_bonus, regen_bonus,
 	cumul_effets, identite_source, poser_effet, _as_int as _eff_int,
+	_as_signed_int as _regen_int,
 )
 from utils import charge_magie
 from utils.sorts import (
@@ -35,6 +36,7 @@ from utils import escorte as escorte_util
 from utils import animations as animations_util
 from utils import jetons
 from utils import journal
+from utils import pieges as pieges_util
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -300,8 +302,9 @@ def _empiler_effet_combat(acteur: dict, source: dict, effets: dict, tour: int) -
 		"nom": (source or {}).get("nom", "Effet"),
 		"icon": (source or {}).get("icon", "✨"),
 		"buffs": dict(eff.get("buffs") or {}),
-		"regen_pv": _eff_int(eff.get("regen_pv")),
-		"regen_pm": _eff_int(eff.get("regen_pm")),
+		# SIGNÉES : une régén négative est un POISON (perte au tour du porteur).
+		"regen_pv": _regen_int(eff.get("regen_pv")),
+		"regen_pm": _regen_int(eff.get("regen_pm")),
 		"esquive": _eff_int(eff.get("esquive")),
 		"restants": _eff_int(eff.get("duree")),
 		# Tour de la pose : le tick du même tour la saute, sinon un effet lancé pendant
@@ -731,8 +734,8 @@ def _entree_aura(aura: dict, emetteur: dict) -> dict:
 		"nom": aura.get("nom", "Aura"),
 		"icon": aura.get("icon", "✨"),
 		"buffs": dict(aura.get("buffs") or {}),
-		"regen_pv": _eff_int(aura.get("regen_pv")),
-		"regen_pm": _eff_int(aura.get("regen_pm")),
+		"regen_pv": _regen_int(aura.get("regen_pv")),
+		"regen_pm": _regen_int(aura.get("regen_pm")),
 		"esquive": _eff_int(aura.get("esquive")),
 		"restants": 0,
 	}
@@ -965,6 +968,10 @@ def _resoudre_capacite_offensive(combat_doc: dict, joueur: dict, cibles: list,
 	return principal, jet_principal
 
 
+# Ce qui tient lieu d'attaquant au POISON dans `_traiter_ko` (aucune Chance, aucun camp).
+POISON_ATTAQUANT = {"id": "poison", "nom": "Poison", "ch": 0}
+
+
 def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
 	"""Début de tour d'un acteur : régén des effets, décrément, purge, recalcul.
 
@@ -976,8 +983,8 @@ def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
 	# tour, y compris sans le moindre effet à durée en cours — sortir en tête sur `not actifs`
 	# la ferait disparaître dès qu'un focus magique est la seule source du porteur.
 	# ⚠️ `.get(..., 0)` : un combat déjà en base n'a pas ces champs (aucune migration).
-	base_pv = _eff_int(acteur.get("regen_pv_base"))
-	base_pm = _eff_int(acteur.get("regen_pm_base"))
+	base_pv = _regen_int(acteur.get("regen_pv_base"))
+	base_pm = _regen_int(acteur.get("regen_pm_base"))
 	if not actifs and not (base_pv or base_pm):
 		return
 	tour = int(combat_doc.get("tour", 0) or 0)
@@ -990,19 +997,44 @@ def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
 	cumul = cumul_effets(actifs)
 	pv = base_pv + cumul["regen_pv"]
 	pm = base_pm + cumul["regen_pm"]
-	if pv or pm:
+	# Tombé juste avant (zone persistante du même début de tour) : ni régén qui relèverait un
+	# corps à terre, ni poison sur un mort.
+	if (pv or pm) and _debout(acteur):
 		avant_pv, avant_pm = acteur.get("currentPV", 0), acteur.get("currentPM", 0)
-		acteur["currentPV"] = min(acteur.get("pv_max", avant_pv), avant_pv + pv)
-		acteur["currentPM"] = min(acteur.get("pm_max", avant_pm), avant_pm + pm)
+		# Régén NETTE signée : négative = POISON. Aucun jet, aucune armure, ni lien de vie ni
+		# test de concentration — un poison n'est pas un coup (même parti pris que `cout_pv`).
+		# Planchers 0 : en combat, le poison peut mettre à terre ou tuer.
+		acteur["currentPV"] = max(0, min(acteur.get("pv_max", avant_pv), avant_pv + pv))
+		acteur["currentPM"] = max(0, min(acteur.get("pm_max", avant_pm), avant_pm + pm))
+		d_pv = acteur["currentPV"] - avant_pv
+		d_pm = acteur["currentPM"] - avant_pm
 		gains = " / ".join(s for s in (
-			f"+{acteur['currentPV'] - avant_pv} PV" if acteur["currentPV"] != avant_pv else "",
-			f"+{acteur['currentPM'] - avant_pm} PM" if acteur["currentPM"] != avant_pm else "",
-		) if s)
+			f"+{d_pv} PV" if d_pv > 0 else "", f"+{d_pm} PM" if d_pm > 0 else "") if s)
+		pertes = " / ".join(s for s in (
+			f"−{-d_pv} PV" if d_pv < 0 else "", f"−{-d_pm} PM" if d_pm < 0 else "") if s)
+		nom = acteur.get("nom", "?")
 		if gains:
 			combat_doc.setdefault("log", []).append(_avec_etat({
-				"tour": tour, "acteur": acteur.get("nom", "?"), "kind": "sys",
-				"texte": f"{acteur.get('nom', '?')} régénère ({gains}).",
+				"tour": tour, "acteur": nom, "kind": "sys",
+				"texte": f"{nom} régénère ({gains}).",
 			}, acteur))
+		if pertes:
+			mort = acteur["currentPV"] <= 0
+			est_monstre = str(acteur.get("id") or "").startswith("monstre_")
+			if mort and est_monstre:
+				acteur["vivant"] = False
+			combat_doc.setdefault("log", []).append(_avec_etat({
+				"tour": tour, "acteur": nom, "kind": "kill" if (mort and est_monstre) else "hit",
+				"texte": (f"☠ {nom} succombe au poison !" if (mort and est_monstre)
+						  else f"☠ {nom} souffre du poison ({pertes})."),
+			}, acteur))
+			if mort:
+				if est_monstre:
+					_check_victory(combat_doc)
+				else:
+					_traiter_ko(combat_doc, acteur, POISON_ATTAQUANT)
+				# Mort du poison : plus rien à décompter, son tour ne se jouera pas.
+				return
 
 	# 2. Décrément + purge. Une entrée posée CE tour-ci est épargnée — une entrée MAINTENUE
 	# aussi, et pour toujours : sa durée n'est pas un compte à rebours mais la capacité de
@@ -1587,6 +1619,380 @@ def _bruler(combat_doc: dict, zone: dict, lanceur: dict, victime: dict) -> None:
 			return
 	_appliquer_effet_sur_cible(combat_doc, victime, zone.get("source") or {},
 							   zone.get("effets") or {}, tour)
+
+
+# ── PIÈGES (utils/pieges.py) ──────────────────────────────────────────────────
+# `combat_doc["pieges"]` : liste COMPLÈTE (cachés compris) — jamais servie telle quelle au
+# client (`vue_client`). Clé ABSENTE sur un combat déjà en base : tout lecteur sort en tête.
+#   • camp `monde`  : tiré depuis le tag `pieges_<q>_<d>` de la carte (`_poser_pieges`), à
+#     l'ouverture et à chaque étage, loin des cases de départ ; déclenché par le camp du
+#     joueur, ignoré des monstres (leur antre).
+#   • camp `joueur` : posé par l'action `poser_piege` ; ignoré du camp du joueur, déclenché
+#     par un monstre qui ne l'a pas flairé (`_flairer_pieges`, `_cases_evitees`).
+# CHOKEPOINT des pas : `_pieges_au_pas`, appelé à côté de chaque `_bruler_zones` d'un PAS
+# ou d'une arrivée (jamais au début de tour).
+
+def _pieges(combat_doc: dict) -> list:
+	return (combat_doc or {}).get("pieges") or []
+
+
+def _d100(rand_fn=None) -> int:
+	"""Jet d100. ⚠️ Défaut résolu À L'APPEL (même raison que `tirer_localisation`) : un test
+	qui remplace `random.random` doit l'atteindre."""
+	return int((rand_fn or random.random)() * 100) + 1
+
+
+def _poser_pieges(combat_doc: dict, lieu_doc: dict | None, grid: dict,
+				  point_apparition: dict | None = None, rand_fn=None) -> None:
+	"""Remplace les pièges du combat par ceux de la carte `lieu_doc` (tag `pieges_<q>_<d>`).
+
+	APPELÉ APRÈS `_place_actors` : les cases de départ sont alors connues — le point
+	d'apparition fixe d'un donjon/étage s'il existe, sinon la case de chaque membre du
+	groupe. Les pièges posés par le joueur à l'étage quitté restent en bas avec lui."""
+	params = pieges_util.parametres_du_tag((lieu_doc or {}).get("tags"))
+	if params is None and not combat_doc.get("pieges"):
+		return
+	combat_doc["pieges"] = []
+	if params is None:
+		return
+	qte, danger = params
+	if point_apparition is not None:
+		departs = [(int(point_apparition.get("x", -1)), int(point_apparition.get("y", -1)))]
+	else:
+		departs = [c for j in combat_doc["joueurs"] if j.get("pos")
+				   for c in jetons.cases_emprise(j)]
+	interdites = set(_occupied_set(combat_doc))
+	for p in (combat_doc.get("etages") or {}).get("passages") or []:
+		pos = p.get("pos") or {}
+		if pos.get("x") is not None and pos.get("y") is not None:
+			interdites.add((int(pos["x"]), int(pos["y"])))
+	serie = int(combat_doc.get("pieges_serie", 0) or 0)
+	combat_doc["pieges_serie"] = serie + 1
+	combat_doc["pieges"] = pieges_util.placer_pieges(
+		grid["cells"], grid["dims"], departs, interdites, qte, danger,
+		rand_fn=rand_fn, prefixe=f"piege_{serie}_")
+	# Le groupe arrive peut-être déjà à portée d'un piège : chaque détecteur tente sa chance.
+	for j in combat_doc["joueurs"]:
+		if _debout(j):
+			_detecter_pieges(combat_doc, j, rand_fn=rand_fn)
+
+
+def _detecter_pieges(combat_doc: dict, acteur: dict, bonus: int = 0,
+					 nouvelle_tentative: bool = False, rand_fn=None) -> list:
+	"""Jets de détection de l'acteur sur les pièges CACHÉS du monde à ≤ PIEGE_PORTEE_DETECTION.
+
+	À l'approche (`nouvelle_tentative` faux) : UN jet par (piège, détecteur), mémorisé dans
+	`tentes`. La fouille (`nouvelle_tentative`) passe outre — c'est précisément une nouvelle
+	chance. Chaque réussite rapporte XP_DETECTION au DÉTECTEUR (`xp_pieges`, son compteur
+	personnel, crédité par `_finalize_membre`). Renvoie les pièges repérés."""
+	if _eff_int(acteur.get("detection_pieges")) <= 0 or not acteur.get("pos"):
+		return []
+	emprise = jetons.cases_emprise(acteur)
+	aid = acteur.get("id", "")
+	reperes = []
+	for p in _pieges(combat_doc):
+		if p.get("camp") != pieges_util.CAMP_MONDE or p.get("etat") != pieges_util.ETAT_CACHE:
+			continue
+		if pieges_util.distance_piege(p, emprise) > pieges_util.PIEGE_PORTEE_DETECTION:
+			continue
+		if not nouvelle_tentative and aid in p.get("tentes", []):
+			continue
+		if aid not in p.setdefault("tentes", []):
+			p["tentes"].append(aid)
+		seuil = pieges_util.seuil_detection(acteur, p, bonus)
+		roll = _d100(rand_fn)
+		if roll > seuil:
+			continue
+		p["etat"] = pieges_util.ETAT_DETECTE
+		acteur["xp_pieges"] = _eff_int(acteur.get("xp_pieges")) + pieges_util.XP_DETECTION
+		reperes.append(p)
+		combat_doc.setdefault("log", []).append({
+			"tour": combat_doc.get("tour", 0), "acteur": acteur.get("nom", "?"), "kind": "sys",
+			"texte": f"🪤 {acteur.get('nom', '?')} repère un piège en [{p['x']},{p['y']}] "
+					 f"(jet {roll} / seuil {seuil}) (+{pieges_util.XP_DETECTION} XP).",
+		})
+	return reperes
+
+
+def _pieges_au_pas(combat_doc: dict, acteur: dict, rand_fn=None) -> None:
+	"""CHOKEPOINT : un acteur vient d'ARRIVER sur une case (pas, échange, saut).
+
+	Camp du joueur : détection d'abord (on repère la case où l'on pose le pied), puis
+	déclenchement des pièges du MONDE actifs sous son emprise — un piège DÉTECTÉ se déclenche
+	quand même, seul le désamorçage le neutralise. Monstre : seuls les pièges du JOUEUR.
+	Un acteur volant ne déclenche rien (aucun poids sur la plaque)."""
+	if not _pieges(combat_doc) or not acteur.get("pos") or not _debout(acteur):
+		return
+	if combat_doc.get("status", "active") != "active" or _can_fly(acteur):
+		return
+	est_monstre = str(acteur.get("id") or "").startswith("monstre_")
+	if not est_monstre:
+		_detecter_pieges(combat_doc, acteur, rand_fn=rand_fn)
+	emprise = jetons.cases_emprise(acteur)
+	camp = pieges_util.CAMP_JOUEUR if est_monstre else pieges_util.CAMP_MONDE
+	for p in list(_pieges(combat_doc)):
+		if combat_doc.get("status", "active") != "active" or not _debout(acteur):
+			return
+		if p.get("camp") != camp or not pieges_util.est_actif(p):
+			continue
+		if not pieges_util.couvre(p, emprise):
+			continue
+		p["etat"] = pieges_util.ETAT_DECLENCHE
+		if est_monstre:
+			_declencher_sur_monstres(combat_doc, p)
+		else:
+			_declencher_sur_joueur(combat_doc, p, acteur)
+
+
+def _pseudo_attaquant(piege: dict) -> dict:
+	"""Ce qui tient lieu d'attaquant à un piège dans les cascades partagées (concentration,
+	KO) : aucune Chance, aucun camp."""
+	return {"id": piege.get("id", "piege"), "nom": piege.get("nom") or "Piège", "ch": 0}
+
+
+def _declencher_sur_joueur(combat_doc: dict, piege: dict, victime: dict) -> None:
+	"""Un membre du groupe déclenche un piège du monde : dégâts AUTOMATIQUES (ni jet de
+	toucher ni armure — on ne pare pas une plaque de pression), puis la MÊME cascade qu'un
+	coup reçu (`_bruler`) : lien de vie, concentration, KO."""
+	tour = int(combat_doc.get("tour", 0) or 0)
+	attaquant = _pseudo_attaquant(piege)
+	dmg = roll_dice(piege.get("degats") or pieges_util.degats_de(piege.get("danger", 1)))
+	dmg_def, dmg_prot, protecteur = _rediriger_lien_vie(combat_doc, victime, dmg)
+	victime["currentPV"] = max(0, victime["currentPV"] - dmg_def)
+	if protecteur is not None:
+		protecteur["currentPV"] = max(0, protecteur["currentPV"] - dmg_prot)
+	combat_doc.setdefault("log", []).append(_avec_etat(_avec_vfx({
+		"tour": tour, "acteur": attaquant["nom"], "kind": "hit",
+		"texte": f"{piege.get('icon', '🪤')} {victime.get('nom', '?')} déclenche un piège : "
+				 f"{dmg} dégâts (PV : {victime['currentPV']}/{victime.get('pv_max', 0)}).",
+	}, "piege", victime.get("id", ""), pieges_util.ANIM_DECLENCHEMENT), victime))
+	if protecteur is not None:
+		combat_doc["log"].append(_avec_etat({
+			"tour": tour, "acteur": attaquant["nom"], "kind": "hit",
+			"texte": f"Le lien de vie détourne {dmg_prot} dégâts vers {protecteur['nom']} ! "
+					 f"(PV : {protecteur['currentPV']}/{protecteur['pv_max']})",
+		}, protecteur))
+	if dmg_def > 0:
+		_tester_concentration(combat_doc, victime, attaquant, dmg_def)
+	if protecteur is not None and dmg_prot > 0:
+		_tester_concentration(combat_doc, protecteur, attaquant, dmg_prot)
+	if victime["currentPV"] <= 0:
+		_traiter_ko(combat_doc, victime, attaquant)
+	if protecteur is not None and protecteur["currentPV"] <= 0:
+		_traiter_ko(combat_doc, protecteur, attaquant)
+
+
+def _declencher_sur_monstres(combat_doc: dict, piege: dict) -> None:
+	"""Un monstre déclenche un piège du joueur : CHAQUE monstre debout dans ses cases subit
+	ses dégâts (un jet par victime) puis ses effets — chemin d'un monstre brûlé (`_bruler`) :
+	`vivant`, victoire, XP conservée."""
+	tour = int(combat_doc.get("tour", 0) or 0)
+	nom_piege = piege.get("nom") or "le piège"
+	icon = piege.get("icon", "🪤")
+	premiere = True
+	for m in list(combat_doc.get("monstres") or []):
+		if not m.get("vivant") or not pieges_util.couvre(piege, jetons.cases_emprise(m)):
+			continue
+		dmg = roll_dice(piege.get("degats") or pieges_util.degats_de(piege.get("danger", 1)))
+		m["currentPV"] = max(0, m["currentPV"] - dmg)
+		entree = {"tour": tour, "acteur": nom_piege, "kind": "hit",
+				  "texte": f"{icon} {m.get('nom', '?')} déclenche {nom_piege} : {dmg} dégâts "
+						   f"(PV : {m['currentPV']}/{m.get('pv_max', 0)})."}
+		if m["currentPV"] <= 0:
+			m["vivant"] = False
+			entree["kind"] = "kill"
+			entree["texte"] = f"{icon} {m.get('nom', '?')} périt dans {nom_piege} !"
+		# Une seule animation par déclenchement : la plaque saute une fois.
+		if premiere:
+			_avec_vfx(entree, "piege", m.get("id", ""), pieges_util.ANIM_DECLENCHEMENT)
+			premiere = False
+		combat_doc.setdefault("log", []).append(_avec_etat(entree, m))
+		if not m["vivant"]:
+			_check_victory(combat_doc)
+			if combat_doc.get("status", "active") != "active":
+				return
+			continue
+		if piege.get("effets"):
+			_appliquer_effet_sur_cible(combat_doc, m, {"nom": nom_piege, "icon": icon,
+													   "id": piege.get("id", "")},
+									   piege["effets"], tour)
+
+
+def _flairer_pieges(combat_doc: dict, monstre: dict, rand_fn=None) -> None:
+	"""Début du tour d'un monstre : un jet par piège du JOUEUR actif à portée de flair qu'il
+	n'a pas encore jaugé. Réussite ⇒ il le connaît (`vu_par`) et le contournera
+	(`_cases_evitees`). Le joueur n'en voit qu'une ligne discrète et un détour."""
+	if not _pieges(combat_doc) or not monstre.get("pos") or not monstre.get("vivant"):
+		return
+	emprise = jetons.cases_emprise(monstre)
+	mid = monstre.get("id", "")
+	for p in _pieges(combat_doc):
+		if p.get("camp") != pieges_util.CAMP_JOUEUR or not pieges_util.est_actif(p):
+			continue
+		if mid in p.get("tentes", []):
+			continue
+		if pieges_util.distance_piege(p, emprise) > pieges_util.PIEGE_PORTEE_DETECTION:
+			continue
+		p.setdefault("tentes", []).append(mid)
+		if _d100(rand_fn) <= pieges_util.seuil_detection_monstre(monstre, p):
+			p.setdefault("vu_par", []).append(mid)
+			combat_doc.setdefault("log", []).append({
+				"tour": combat_doc.get("tour", 0), "acteur": monstre.get("nom", "?"),
+				"kind": "sys", "texte": f"{monstre.get('nom', '?')} flaire le piège.",
+			})
+
+
+def _cases_evitees(combat_doc: dict, monstre: dict) -> set:
+	"""Cases des pièges du joueur ACTIFS que ce monstre a flairés : il ne s'y engage pas."""
+	mid = (monstre or {}).get("id", "")
+	return {tuple(c) for p in _pieges(combat_doc)
+			if p.get("camp") == pieges_util.CAMP_JOUEUR and pieges_util.est_actif(p)
+			and mid in (p.get("vu_par") or [])
+			for c in p.get("cases") or []}
+
+
+def _garde_action(acteur: dict) -> str | None:
+	"""Une action pleine (comme une attaque) tient-elle encore dans le budget du tour ?"""
+	_refresh_actions(acteur)
+	if acteur.get("actions_restantes", 0) < 1:
+		return "Plus d'actions disponibles."
+	return None
+
+
+def _payer_action(acteur: dict) -> None:
+	acteur["attaques"] = acteur.get("attaques", 0) + 1
+	_refresh_actions(acteur)
+
+
+def _action_fouiller(combat_doc: dict, joueur: dict, rand_fn=None) -> dict:
+	"""Fouille volontaire : 1 action, nouvelle tentative (bonus PIEGE_BONUS_FOUILLE) sur les
+	pièges cachés à portée. Réservée aux porteurs de « Détection des pièges »."""
+	if _eff_int(joueur.get("detection_pieges")) <= 0:
+		return {"error": "Vous ne savez pas chercher les pièges."}
+	err = _garde_action(joueur)
+	if err:
+		return {"error": err}
+	_payer_action(joueur)
+	combat_doc["log"].append({
+		"tour": combat_doc["tour"], "acteur": joueur["nom"], "kind": "sys",
+		"texte": f"🔎 {joueur['nom']} fouille les environs.",
+	})
+	reperes = _detecter_pieges(combat_doc, joueur, bonus=pieges_util.PIEGE_BONUS_FOUILLE,
+							   nouvelle_tentative=True, rand_fn=rand_fn)
+	if not reperes:
+		# ⚠️ Sans dire s'il y avait quelque chose à trouver.
+		combat_doc["log"].append({
+			"tour": combat_doc["tour"], "acteur": joueur["nom"], "kind": "sys",
+			"texte": f"🔎 {joueur['nom']} ne trouve rien.",
+		})
+	return {"fouille": True, "reperes": [p["id"] for p in reperes]}
+
+
+def _action_desamorcer(combat_doc: dict, joueur: dict, piege_id: str | None,
+					   rand_fn=None) -> dict:
+	"""Désamorçage d'un piège DÉTECTÉ au contact : 1 action, jet d100 contre
+	`seuil_desamorcage`. Réussite ⇒ inerte (+XP_DESAMORCAGE) ; échec ⇒ il reste actif, on
+	peut retenter. Une animation + un son pour chaque issue."""
+	if _eff_int(joueur.get("desamorcage")) <= 0:
+		return {"error": "Vous ne savez pas désamorcer les pièges."}
+	piege = next((p for p in pieges_util.pieges_desamorcables(
+		_pieges(combat_doc), joueur, jetons.cases_emprise(joueur)) if p.get("id") == piege_id),
+		None)
+	if piege is None:
+		return {"error": "Aucun piège désamorçable ici."}
+	err = _garde_action(joueur)
+	if err:
+		return {"error": err}
+	_payer_action(joueur)
+	seuil = pieges_util.seuil_desamorcage(joueur, piege)
+	roll = _d100(rand_fn)
+	reussi = roll <= seuil
+	if reussi:
+		piege["etat"] = pieges_util.ETAT_DESAMORCE
+		joueur["xp_pieges"] = _eff_int(joueur.get("xp_pieges")) + pieges_util.XP_DESAMORCAGE
+		texte = (f"🛠 {joueur['nom']} désamorce le piège (jet {roll} / seuil {seuil}) "
+				 f"(+{pieges_util.XP_DESAMORCAGE} XP).")
+		anim = pieges_util.ANIM_DESAMORCAGE_REUSSI
+	else:
+		texte = f"🛠 {joueur['nom']} échoue à désamorcer le piège (jet {roll} / seuil {seuil})."
+		anim = pieges_util.ANIM_DESAMORCAGE_RATE
+	# Ancrée sur le désamorceur : le piège n'est pas un acteur, le client ne sait placer un
+	# sprite que sur un id de snapshot.
+	combat_doc["log"].append(_avec_vfx({
+		"tour": combat_doc["tour"], "acteur": joueur["nom"], "kind": "sys", "texte": texte,
+	}, "desamorcage", joueur.get("id", ""), anim))
+	return {"desamorce": reussi, "piege_id": piege["id"]}
+
+
+def _action_poser_piege(combat_doc: dict, joueur: dict, piege_arg: dict | None,
+						x, y, grid: dict) -> dict:
+	"""Pose d'un piège du JOUEUR (compétence `pose_piege`, item déjà retiré du sac par le
+	router — qui le rend si on refuse ici). 1 action ; case au sol, libre, sans piège actif,
+	à portée de l'emprise. L'emprise du piège = carré de rayon `zone`."""
+	pose = (piege_arg or {}).get("pose")
+	if not pose:
+		return {"error": "Compétence de pose invalide."}
+	if x is None or y is None:
+		return {"error": "Case manquante."}
+	x, y = int(x), int(y)
+	cells = grid["cells"]
+	if not pieges_util.case_au_sol(cells, x, y):
+		return {"error": "On ne pose pas de piège ici."}
+	if pieges_util.distance_piege({"cases": [[x, y]]}, jetons.cases_emprise(joueur)) > pose["portee"]:
+		return {"error": "Case hors de portée."}
+	if _occupied_at(combat_doc, x, y):
+		return {"error": "Case occupée."}
+	if any(pieges_util.est_actif(p) and pieges_util.couvre(p, [(x, y)])
+		   for p in _pieges(combat_doc)):
+		return {"error": "Un piège occupe déjà cette case."}
+	err = _garde_action(joueur)
+	if err:
+		return {"error": err}
+	_payer_action(joueur)
+	serie = len(_pieges(combat_doc))
+	piege = pieges_util.nouveau_piege(
+		f"piege_j{combat_doc.get('pieges_serie', 0)}_{serie}", pieges_util.CAMP_JOUEUR, x, y,
+		pose["danger"], cases=pieges_util.cases_carre(x, y, pose["zone"], cells),
+		degats=pose["degats"], effets=pose["effets"],
+		nom=pose.get("nom") or piege_arg.get("nom") or "Piège",
+		icon=pose.get("icon") or piege_arg.get("icon") or "🪤",
+		poseur_id=joueur.get("id"))
+	combat_doc.setdefault("pieges", []).append(piege)
+	# L'item posé a quitté le sac → la charge portée baisse (même séquence qu'un composant).
+	poids = float((piege_arg or {}).get("poids_consomme", 0) or 0)
+	if poids:
+		joueur["charge"] = round(max(0.0, joueur.get("charge", 0) - poids), 2)
+		_ajuster_charge_magique(joueur, -poids)
+		_recompute_player_deplacement(joueur)
+	combat_doc["log"].append({
+		"tour": combat_doc["tour"], "acteur": joueur["nom"], "kind": "sys",
+		"texte": f"{piege['icon']} {joueur['nom']} pose {piege['nom']} en [{x},{y}].",
+	})
+	return {"pose": True, "piege_id": piege["id"]}
+
+
+def vue_client(combat_doc: dict) -> dict:
+	"""Ce que le CLIENT reçoit du doc de combat — copie superficielle, le doc n'est pas muté.
+
+	⚠️ Seul filtre des pièges cachés : le doc part tel quel au navigateur, qui les lirait
+	sinon dans la console. Pose aussi ce que le client ne recalcule pas (§10) : les pièges
+	que l'ACTEUR COURANT peut désamorcer, et s'il peut fouiller."""
+	annoter_passages(combat_doc)
+	# ⚠️ Posé dans TOUS les combats, pièges ou non : un bouton « Fouiller » qui n'apparaîtrait
+	# que sur une carte piégée trahirait la carte.
+	vue = dict(combat_doc)
+	tous = _pieges(combat_doc)
+	vue["pieges"] = pieges_util.pieges_publics(tous)
+	acteur = None
+	ordre = combat_doc.get("ordre_initiative") or []
+	idx = int(combat_doc.get("acteur_courant_index", 0) or 0)
+	if 0 <= idx < len(ordre):
+		acteur = _get_joueur(combat_doc, ordre[idx])
+	vue["pieges_desamorcables"] = ([p["id"] for p in pieges_util.pieges_desamorcables(
+		tous, acteur, jetons.cases_emprise(acteur))] if acteur and acteur.get("pos") else [])
+	vue["peut_fouiller"] = bool(acteur and _eff_int(acteur.get("detection_pieges")) > 0)
+	vue["peut_desamorcer"] = bool(acteur and _eff_int(acteur.get("desamorcage")) > 0)
+	return vue
 
 
 def _effets_a_reverser(snap: dict) -> list:
@@ -2564,6 +2970,13 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		# competences.recompute_competences_bonus) : appliquées selon les positions par
 		# `_recalculer_auras`. Absent (combat d'avant) ⇒ aucune aura.
 		"auras": [dict(a) for a in ((character.get("competences_bonus") or {}).get("auras") or [])],
+		# PIÈGES (utils/pieges.py) : Int = l'œil de la détection ; bonus des passives
+		# dénormalisés par competences.recompute_competences_bonus (> 0 = droit d'agir).
+		# Absents (agrégat d'avant) ⇒ 0.
+		"int": base.int_,
+		"detection_pieges": _eff_int((character.get("competences_bonus") or {}).get("detection_pieges")),
+		"desamorcage": _eff_int((character.get("competences_bonus") or {}).get("desamorcage")),
+		"xp_pieges": 0,
 	}
 
 
@@ -3185,6 +3598,9 @@ def create_combat_doc(
 	if etages is not None:
 		combat_doc["etages"] = etages
 		_entrer_en_furtivite(combat_doc, furtivite_groupe)
+	# PIÈGES de la carte (tag `pieges_<q>_<d>`) : après le placement ET les passages, pour
+	# rester loin des cases de départ et ne jamais couvrir une sortie.
+	_poser_pieges(combat_doc, battle_map, grid, point_apparition)
 	# Auras posées dès le placement : les alliés côte à côte en profitent dès le tour 1.
 	_recalculer_auras(combat_doc, grid)
 	return combat_doc
@@ -3569,6 +3985,8 @@ def changer_d_etage(combat_doc: dict, lieu_doc: dict, point_apparition: dict,
 	grid = {"dims": lieu_doc["dimensions"], "cells": lieu_doc["cells"],
 			"nav": lieu_doc.get("nav", {})}
 	_place_actors(combat_doc, grid, point_apparition)
+	# Pièges de l'étage atteint (ceux du précédent restent en bas, posés ou non).
+	_poser_pieges(combat_doc, lieu_doc, grid, point_apparition)
 	_entrer_en_furtivite(combat_doc, bonus_par_perso)
 	joueurs_en_jeu = set(combat_doc["ordre_initiative"])
 	combat_doc["ordre_initiative"] = _ordre_par_initiative(
@@ -3718,6 +4136,7 @@ def _sauter(combat_doc: dict, lanceur: dict, sauteur: dict, effets: dict,
 	}, "sort", sauteur.get("id", "")), sauteur))
 	# Atterrir dans une zone persistante brûle, comme y entrer à pied.
 	_bruler_zones(combat_doc, sauteur)
+	_pieges_au_pas(combat_doc, sauteur)
 	return {"saut": {"acteur_id": sauteur.get("id"), "de": ancienne,
 					 "vers": {"x": nx, "y": ny}}}
 
@@ -4084,12 +4503,14 @@ def _grand_pas_vers(combat_doc: dict, acteur: dict, cible: dict, grid: dict, blo
 	acteur["cells_moved"] += 1
 	_refresh_actions(acteur)
 	_bruler_zones(combat_doc, acteur)
+	_pieges_au_pas(combat_doc, acteur)
 	return True
 
 
 def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: dict) -> bool:
 	"""Avance le monstre d'une case vers le joueur via A*. Retourne True si déplacé."""
-	blocked = _occupied_set(combat_doc, exclude=monstre)
+	# Pièges du joueur que ce monstre a flairés : il ne s'y engage pas (`_flairer_pieges`).
+	blocked = _occupied_set(combat_doc, exclude=monstre) | _cases_evitees(combat_doc, monstre)
 	if jetons.est_grand(monstre):
 		return _grand_pas_vers(combat_doc, monstre, joueur, grid, blocked)
 	mx, my = monstre["pos"]["x"], monstre["pos"]["y"]
@@ -4118,6 +4539,7 @@ def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: di
 	monstre["cells_moved"] += 1
 	_refresh_actions(monstre)
 	_bruler_zones(combat_doc, monstre)
+	_pieges_au_pas(combat_doc, monstre)
 	return True
 
 
@@ -4133,7 +4555,8 @@ def _monster_step_away(combat_doc: dict, monstre: dict, cible: dict, grid: dict,
 	autres step-functions). Grand jeton : réutilise `jetons.chemin_jeton` (déjà l'A*
 	générique de `_grand_pas_vers`) avec un but INVERSÉ : s'éloigner jusqu'à `portee`
 	(heuristique admissible, même raisonnement que `_grand_pas_vers`)."""
-	blocked = _occupied_set(combat_doc, exclude=monstre)
+	# Pièges du joueur que ce monstre a flairés : il ne s'y engage pas (`_flairer_pieges`).
+	blocked = _occupied_set(combat_doc, exclude=monstre) | _cases_evitees(combat_doc, monstre)
 	if jetons.est_grand(monstre):
 		praticable, nav_ok = _predicats_jeton(grid, monstre)
 		chemin = jetons.chemin_jeton(
@@ -4150,6 +4573,7 @@ def _monster_step_away(combat_doc: dict, monstre: dict, cible: dict, grid: dict,
 		monstre["cells_moved"] += 1
 		_refresh_actions(monstre)
 		_bruler_zones(combat_doc, monstre)
+		_pieges_au_pas(combat_doc, monstre)
 		return True
 	x, y = monstre["pos"]["x"], monstre["pos"]["y"]
 	cells, dims, nav = grid["cells"], grid["dims"], grid.get("nav", {})
@@ -4177,6 +4601,7 @@ def _monster_step_away(combat_doc: dict, monstre: dict, cible: dict, grid: dict,
 	monstre["cells_moved"] += 1
 	_refresh_actions(monstre)
 	_bruler_zones(combat_doc, monstre)
+	_pieges_au_pas(combat_doc, monstre)
 	return True
 
 
@@ -4326,7 +4751,8 @@ def _proie_la_plus_proche(combat_doc: dict, predateur: dict) -> dict | None:
 def _wander_step(combat_doc: dict, monstre: dict, grid: dict) -> bool:
 	"""Un pas d'errance : case voisine aléatoire praticable (mêmes règles que le
 	déplacement — nav bitmask, terrain, cases occupées). Retourne True si déplacé."""
-	blocked = _occupied_set(combat_doc, exclude=monstre)
+	# Pièges du joueur que ce monstre a flairés : il ne s'y engage pas (`_flairer_pieges`).
+	blocked = _occupied_set(combat_doc, exclude=monstre) | _cases_evitees(combat_doc, monstre)
 	if jetons.est_grand(monstre):
 		# Grand jeton : les pas qui tiennent (pivot compris), tirés au hasard.
 		praticable, nav_ok = _predicats_jeton(grid, monstre)
@@ -4340,6 +4766,7 @@ def _wander_step(combat_doc: dict, monstre: dict, grid: dict) -> bool:
 		monstre["cells_moved"] += 1
 		_refresh_actions(monstre)
 		_bruler_zones(combat_doc, monstre)
+		_pieges_au_pas(combat_doc, monstre)
 		return True
 	x, y = monstre["pos"]["x"], monstre["pos"]["y"]
 	cells, dims, nav = grid["cells"], grid["dims"], grid.get("nav", {})
@@ -4367,6 +4794,7 @@ def _wander_step(combat_doc: dict, monstre: dict, grid: dict) -> bool:
 	monstre["cells_moved"] += 1
 	_refresh_actions(monstre)
 	_bruler_zones(combat_doc, monstre)
+	_pieges_au_pas(combat_doc, monstre)
 	return True
 
 
@@ -4417,6 +4845,8 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 	if not monstre["vivant"] or combat_doc["status"] != "active":
 		_avancer_tour(combat_doc)
 		return
+	# PIÈGES du joueur à portée : il les flaire (ou non) avant de choisir ses pas.
+	_flairer_pieges(combat_doc, monstre)
 	profil = _profil_arme_monstre(monstre)
 	portee = max(1, int(profil.get("portee", monstre.get("portee", 1))))
 
@@ -4990,13 +5420,15 @@ def resolve_action(
 	dx: int | None = None, dy: int | None = None, sens: int | None = None,
 	mode: str | None = None, item: dict | None = None, sort: dict | None = None,
 	competence: dict | None = None, attributions: list | None = None,
+	piege: dict | None = None,
 ) -> dict:
 	"""Résout une action du joueur (cf. `_resoudre_action_joueur`), puis remet les AURAS en
 	accord avec les positions : un pas, un saut ou une invocation peut faire entrer ou
 	sortir un allié de la zone d'un porteur. Une action refusée n'a rien bougé.
-	`attributions` : répartition du butin d'étage (`emprunter`, donjon à étages)."""
+	`attributions` : répartition du butin d'étage (`emprunter`, donjon à étages).
+	`piege` : `{piege_id}` (désamorcer) ou `{pose, nom, icon, x, y}` (poser_piege)."""
 	result = _resoudre_action_joueur(combat_doc, action_type, cible_id, dx, dy, sens, mode,
-									 item, sort, competence, attributions)
+									 item, sort, competence, attributions, piege)
 	if not (result or {}).get("error"):
 		_recalculer_auras(combat_doc)
 	return result
@@ -5007,6 +5439,7 @@ def _resoudre_action_joueur(
 	dx: int | None = None, dy: int | None = None, sens: int | None = None,
 	mode: str | None = None, item: dict | None = None, sort: dict | None = None,
 	competence: dict | None = None, attributions: list | None = None,
+	piege: dict | None = None,
 ) -> dict:
 	ordre = combat_doc["ordre_initiative"]
 	actor_id = ordre[combat_doc["acteur_courant_index"]]
@@ -5100,6 +5533,10 @@ def _resoudre_action_joueur(
 		_bruler_zones(combat_doc, joueur)
 		if echange is not None:
 			_bruler_zones(combat_doc, echange)
+		# PIÈGES : même chokepoint de pas que les zones — l'échangé a bougé lui aussi.
+		_pieges_au_pas(combat_doc, joueur)
+		if echange is not None:
+			_pieges_au_pas(combat_doc, echange)
 		result = {"moved": True, "pos": joueur["pos"]}
 
 	elif action_type == "tourner":
@@ -5472,6 +5909,22 @@ def _resoudre_action_joueur(
 			_appliquer_fumble(combat_doc, joueur)
 		_check_victory(combat_doc)
 
+	elif action_type == "fouiller":
+		result = _action_fouiller(combat_doc, joueur)
+		if result.get("error"):
+			return result
+
+	elif action_type == "desamorcer":
+		result = _action_desamorcer(combat_doc, joueur, (piege or {}).get("piege_id"))
+		if result.get("error"):
+			return result
+
+	elif action_type == "poser_piege":
+		result = _action_poser_piege(combat_doc, joueur, piege, (piege or {}).get("x"),
+									 (piege or {}).get("y"), grid)
+		if result.get("error"):
+			return result
+
 	else:
 		return {"error": f"Action inconnue : {action_type}"}
 
@@ -5710,6 +6163,10 @@ def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> 
 		doc["currentPV"] = 1
 	elif status == "fuite":
 		doc["currentPV"] = max(1, joueur.get("currentPV", 0))
+	# XP des PIÈGES (détection / désamorçage) : personnelle et acquise AU GESTE, donc créditée
+	# quelle que soit l'issue — sous la même garde d'idempotence que l'XP de victoire.
+	if _eff_int(joueur.get("xp_pieges")) > 0:
+		grant_xp(doc, _eff_int(joueur.get("xp_pieges")))
 	# PM réappliqués pour TOUTES les issues (le PM n'est pas la ressource de KO ; une
 	# potion de PM bue en combat doit persister).
 	doc["currentPM"] = max(0, joueur.get("currentPM", doc.get("currentPM", 0)))

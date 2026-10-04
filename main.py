@@ -25,7 +25,7 @@ from routers.commande import commande_router
 from routers.animations import animations_router
 from utils.combat import (
 	get_combat_grid, finalize_combat, verser_butin_au_sol, etat_charge_snapshot,
-	bloc_charge_snapshot, annoter_passages,
+	bloc_charge_snapshot, annoter_passages, vue_client,
 )
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs, RequestDocCacheMiddleware
 from utils.auth import get_current_user
@@ -1198,7 +1198,8 @@ async def get_combat_page(
 		name="combat_telluris.html",
 		context={
 			"title": "Combat",
-			"combat": combat_doc,
+			# ⚠️ `vue_client` et jamais le doc brut : il contient les pièges CACHÉS.
+			"combat": vue_client(combat_doc),
 			"character": character,
 			"portrait_largeur": portrait_largeur,
 			"portrait_hauteur": portrait_hauteur,
@@ -1215,6 +1216,8 @@ async def get_combat_page(
 			# Compétences ACTIVES utilisables en combat (part instantanée degats/pv/pm/
 			# furtivité) — les passives buffent déjà le snapshot, elles n'apparaissent pas ici.
 			"competences": competences_util.liste_competences_payload(acteur, get_doc, "combat", _etat_charge),
+			# Compétences de PIÈGES de l'acteur (cases 🔎 / 🛠 / pose ; item requis, stock au sac).
+			"actions_pieges": competences_util.actions_pieges_payload(acteur, get_doc),
 			# Barre d'action : grille de slots à positions STABLES, propre à l'acteur —
 			# resynchronisée par GET /api/combat/{id}/acteur au changement de tour.
 			"slots": slots_actions.slots_payload(acteur, get_doc),

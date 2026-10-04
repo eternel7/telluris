@@ -4985,13 +4985,17 @@ function _priseText(item) {
 	if (!item || !(item.slots || []).some(s => _SLOTS_MAINS.includes(s))) return '';
 	return item.deux_mains ? '✋✋ Deux mains' : 'Une main';
 }
+// Régén SIGNÉE : négative = POISON (perte par tour) — « ☠ −n PV/tour », jamais « +-n ».
+function regenTexte(v, unite) {
+	return v < 0 ? `☠ −${-v} ${unite}/tour` : `+${v} ${unite}/tour`;
+}
 function _effetsChips(item) {
 	const e = (item && item.effets) || {};
 	const chips = [];
 	if (e.pv) chips.push(`❤️ +${e.pv} PV`);
 	if (e.pm) chips.push(`💧 +${e.pm} PM`);
-	if (e.regen_pv) chips.push(`❤️ +${e.regen_pv} PV/tour`);
-	if (e.regen_pm) chips.push(`💧 +${e.regen_pm} PM/tour`);
+	if (e.regen_pv) chips.push(e.regen_pv < 0 ? regenTexte(e.regen_pv, 'PV') : `❤️ ${regenTexte(e.regen_pv, 'PV')}`);
+	if (e.regen_pm) chips.push(e.regen_pm < 0 ? regenTexte(e.regen_pm, 'PM') : `💧 ${regenTexte(e.regen_pm, 'PM')}`);
 	for (const [k, v] of Object.entries(e.buffs || {})) chips.push(`✨ ${v > 0 ? '+' : ''}${v} ${k}`);
 	if (e.duree) chips.push(`⏳ ${e.duree} tours`);
 	return chips;
@@ -5474,8 +5478,8 @@ function _renderEffetsActifs(list) {
 	const html = (_effetsActifs || []).map(e => {
 		const details = [];
 		for (const [k, v] of Object.entries(e.buffs || {})) details.push(`${v > 0 ? '+' : ''}${v} ${k}`);
-		if (e.regen_pv) details.push(`+${e.regen_pv} PV/tour`);
-		if (e.regen_pm) details.push(`+${e.regen_pm} PM/tour`);
+		if (e.regen_pv) details.push(regenTexte(e.regen_pv, 'PV'));
+		if (e.regen_pm) details.push(regenTexte(e.regen_pm, 'PM'));
 		if (e.esquive) details.push(`+${e.esquive} esquive`);
 		// Une AURA du groupe n'a pas de compte à rebours (elle tient tant que son porteur
 		// est du groupe) : « aura » plutôt qu'un « ⏳ » qui ne bougerait jamais.
@@ -5750,8 +5754,8 @@ function _sortEffetsLabel(e, prefixeDegats) {
 	if (e.pv) parts.push(`+${e.pv} PV`);
 	if (e.pm) parts.push(`+${e.pm} PM`);
 	for (const [k, v] of Object.entries(e.buffs || {})) parts.push(`${v > 0 ? '+' : ''}${v} ${k}`);
-	if (e.regen_pv) parts.push(`+${e.regen_pv} PV/tour`);
-	if (e.regen_pm) parts.push(`+${e.regen_pm} PM/tour`);
+	if (e.regen_pv) parts.push(regenTexte(e.regen_pv, 'PV'));
+	if (e.regen_pm) parts.push(regenTexte(e.regen_pm, 'PM'));
 	if (e.esquive) parts.push(`esquive +${e.esquive}`);
 	if (e.furtivite) parts.push(`🥷 furtivité`);
 	// Les six clés d'effet du « temps magique ». ⚠️ Sans elles, un sort de drain ou de saut
@@ -6140,10 +6144,14 @@ function _renderCompetences(list) {
 	}
 	box.innerHTML = _competences.map(c => {
 		// Une passive n'a ni action ni case de barre : son bonus est permanent (inclus
-		// dans les dérivées), il n'y a rien à déclencher.
-		const pin = c.mode === 'active' ? _slotSelect('competence', c.competence_id) : '';
+		// dans les dérivées), il n'y a rien à déclencher. SAUF une passive de PIÈGE
+		// (`action_piege`) : elle ouvre une action de combat (🔎 / 🛠 / pose), dont la case
+		// de barre est le seul bouton — la détection à l'approche, elle, vaut sans case.
+		const pin = (c.mode === 'active' || c.action_piege) ? _slotSelect('competence', c.competence_id) : '';
 		const actions = c.mode === 'passive'
-			? '<span class="sh-skill-lvl" title="Bonus permanent, déjà inclus dans vos caractéristiques">🛡 passive</span>'
+			? pin + (c.action_piege
+				? '<span class="sh-skill-lvl" title="Action de combat : à placer dans la barre">⚔ combat</span>'
+				: '<span class="sh-skill-lvl" title="Bonus permanent, déjà inclus dans vos caractéristiques">🛡 passive</span>')
 			: pin + (c.utilisable
 				? `<button type="button" class="sh-drop-btn" onclick="utiliserCompetence('${c.competence_id}', this)">Utiliser</button>`
 				: '<span class="sh-skill-lvl" title="Utilisable en combat seulement">⚔ combat</span>');
@@ -6236,6 +6244,8 @@ async function apprendreCompetence(competenceId, btn) {
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
 		_syncPoints(data.attribute_points);
+		// Compétence de piège : posée d'office dans la première case libre de la barre.
+		if (data.slots) { _barreSlots = data.slots; _renderBarreSlots(); }
 		_renderCompetences(data.competences);
 		_renderCompetencesApprenables(data.competences_apprenables);
 		_renderCaractsMod(data.caracts_detail);

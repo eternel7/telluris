@@ -196,6 +196,29 @@
 	border: 1px solid rgba(255, 140, 40, 0.95);
 	box-shadow: inset 0 0 10px rgba(255, 70, 0, 0.6);
 }
+/* PIÈGES (utils/pieges.py) : le serveur ne sert que les pièges visibles du groupe
+   (`vue_client`) — détectés, déclenchés, désamorcés, et les siens. Peints sous les jetons,
+   jamais cliquables (sauf `.destination` en mode désamorçage). Rouge sombre pour ceux du
+   donjon, vert-de-gris pour ceux du groupe ; un piège neutralisé s'efface en gris. */
+.zone-case.piege {
+	display: flex; align-items: center; justify-content: center;
+	font-size: calc(var(--step) * 0.5); line-height: 1;
+	background: rgba(200, 40, 40, 0.30);
+	border: 1.5px dashed rgba(230, 70, 70, 0.95);
+	box-shadow: inset 0 0 8px rgba(160, 0, 0, 0.55);
+}
+.zone-case.piege.camp-joueur {
+	background: rgba(90, 170, 140, 0.26);
+	border-color: rgba(110, 200, 160, 0.95);
+	box-shadow: inset 0 0 8px rgba(40, 120, 90, 0.5);
+}
+.zone-case.piege.inerte {
+	background: rgba(120, 120, 120, 0.18);
+	border: 1px dotted rgba(170, 170, 170, 0.7);
+	box-shadow: none; opacity: 0.6;
+}
+/* Piège détecté que l'acteur courant peut désamorcer (au contact) : liseré doré. */
+.zone-case.piege.desamorcable { border: 2px solid var(--gold2); }
 /* Dans `.tour-header`, à DROITE du bandeau d'initiative, avant le 🔊. `margin-left: auto`
    pousse la rangée à droite ET cale le libellé et le bandeau à gauche : un bouton qui
    apparaît à son tour prend la marge libre sans décaler les badges (§17).
@@ -1281,6 +1304,12 @@ const SERVER_DATA = {
 	etages:               {{ (combat.etages or none) | tojson | safe }},
 	// Zones persistantes (Mur de feu) : [{id, nom, icon, cases: [[x, y]…], …}].
 	zones_persistantes:   {{ (combat.zones_persistantes or []) | tojson | safe }},
+	// PIÈGES visibles du groupe (jamais les cachés, filtrés par `vue_client`) + ce que
+	// l'acteur courant peut en faire — calculé au serveur, le client ne rejuge pas.
+	pieges:               {{ (combat.pieges or []) | tojson | safe }},
+	pieges_desamorcables: {{ (combat.pieges_desamorcables or []) | tojson | safe }},
+	peut_fouiller:        {{ (combat.peut_fouiller or false) | tojson | safe }},
+	peut_desamorcer:      {{ (combat.peut_desamorcer or false) | tojson | safe }},
 };
 
 // Grille de combat : statique pour toute la durée du combat (cells appartient au
@@ -1315,6 +1344,10 @@ let pendingSort = null;
 // Compétences ACTIVES utilisables en combat (part instantanée degats/pv/pm/furtivité) —
 // la liste ne change pas en combat (pas de composants, rien n'est consommé du sac).
 let COMPS = {{ competences | tojson | safe }};
+// Compétences de PIÈGES de l'acteur — leurs cases de barre : [{id, nom, icon, action:
+// fouiller|desamorcer|poser_piege, (pose) item_nom, stock, zone, portee}]. Resynchronisées
+// par `/acteur` (changement de membre) et par la réponse de `poser_piege` (stock).
+let PIEGES_COMPS = {{ (actions_pieges or []) | tojson | safe }};
 // Compétence offensive confirmée en attente de cible — même mécanisme violet que pendingSort.
 let pendingComp = null;
 
@@ -1537,6 +1570,11 @@ function updateJoueur(j) {
 	renderIncantation(j.incantation);
 }
 
+// Régén SIGNÉE : négative = POISON (perte par tour) — « ☠ −n PV/tour », jamais « +-n ».
+function regenTexte(v, unite) {
+	return v < 0 ? `☠ −${-v} ${unite}/tour` : `+${v} ${unite}/tour`;
+}
+
 // Chips d'effets à durée du membre actif. Markup identique à _renderEffetsActifs de
 // play_town : un effet lancé en exploration ou en combat se lit pareil des deux côtés.
 function renderEffetsActifs(list) {
@@ -1545,8 +1583,8 @@ function renderEffetsActifs(list) {
 	el.innerHTML = (list || []).map(e => {
 		const details = [];
 		for (const [k, v] of Object.entries(e.buffs || {})) details.push(`${v > 0 ? '+' : ''}${v} ${k}`);
-		if (e.regen_pv) details.push(`+${e.regen_pv} PV/tour`);
-		if (e.regen_pm) details.push(`+${e.regen_pm} PM/tour`);
+		if (e.regen_pv) details.push(regenTexte(e.regen_pv, 'PV'));
+		if (e.regen_pm) details.push(regenTexte(e.regen_pm, 'PM'));
 		if (e.esquive) details.push(`+${e.esquive} esquive`);
 		// Un sort MAINTENU n'a pas de compte à rebours : il dure tant que son lanceur paie
 		// l'entretien. Afficher « ⏳3 » mentirait — le chiffre ne bougerait jamais. On
@@ -2065,6 +2103,132 @@ function peindreZonesPersistantes(layer, j) {
 	});
 }
 
+// PIÈGES : `state.pieges` (déjà filtré par le serveur), repeints à chaque rendu comme les
+// zones persistantes. ⚠️ Suivent l'état FINAL : un piège révélé par une ligne de journal
+// paraît avec la réponse, pas avec la ligne. `textContent` pour l'icône (donnée de contenu).
+const _casesPieges = [];
+function peindrePieges(layer, j) {
+	while (_casesPieges.length) _casesPieges.pop().remove();
+	if (!j || !j.pos) return;
+	const desamorcables = new Set(state.pieges_desamorcables || []);
+	(state.pieges || []).forEach(p => {
+		const inerte = p.etat === 'declenche' || p.etat === 'desamorce';
+		(p.cases || [[p.x, p.y]]).forEach(c => {
+			const el = document.createElement('div');
+			el.className = 'zone-case piege camp-' + (p.camp || 'monde')
+				+ (inerte ? ' inerte' : '') + (desamorcables.has(p.id) ? ' desamorcable' : '');
+			el.title = (p.nom || 'Piège') + (inerte ? ' (neutralisé)' : '');
+			if (c[0] === p.x && c[1] === p.y) el.textContent = p.icon || '🪤';
+			_placerToken(el, c[0] - j.pos.x, c[1] - j.pos.y);
+			layer.appendChild(el);
+			_casesPieges.push(el);
+		});
+	});
+}
+
+// ── Pièges : désamorcer / poser ───────────────────────────────────
+// Même mode « on vise le SOL » que le saut : les cases cibles sont des `.zone-case
+// destination` rangées dans `_apercuZoneCases` (effacées et repeintes à chaque rendu).
+let pendingDesamorcage = false;
+let pendingPose = null;   // entrée de PIEGES_COMPS (action `poser_piege`) choisie
+
+// Case de barre d'une compétence de PIÈGE : jouable maintenant ? (budget, cible, objet)
+function piegeJouable(p, data, canAct) {
+	if (!canAct || !p) return false;
+	if (p.action === 'fouiller') return !!data.peut_fouiller;
+	if (p.action === 'desamorcer') return (data.pieges_desamorcables || []).length > 0;
+	if (p.action === 'poser_piege') return p.stock > 0;
+	return false;
+}
+
+function piegeLabel(p) {
+	if (p.action === 'fouiller') return `${p.icon} ${p.nom} — fouiller les environs (2 cases), 1 action`;
+	if (p.action === 'desamorcer') return `${p.icon} ${p.nom} — désamorcer un piège détecté au contact, 1 action`;
+	const zone = p.zone ? `, zone ${2 * p.zone + 1}×${2 * p.zone + 1}` : '';
+	return `${p.icon} ${p.nom} — ${p.item_nom} ×${p.stock}, danger ${p.danger}${zone}, 1 action`;
+}
+
+// Clic sur la case : fouiller part tout de suite ; désamorcer aussi s'il n'y a qu'un piège
+// au contact (sinon on le désigne sur la carte) ; poser passe par le choix de la case.
+// Re-cliquer la case d'un ciblage en cours l'annule.
+function activerPiege(p) {
+	if (p.action === 'fouiller') { annulerCiblagePiege(); doAction('fouiller', null); return; }
+	if (p.action === 'desamorcer') {
+		const ids = state.pieges_desamorcables || [];
+		if (!ids.length) return;
+		if (ids.length === 1) {
+			annulerCiblagePiege();
+			doAction('desamorcer', null, null, null, null, null, { piege_id: ids[0] });
+			return;
+		}
+		const deja = pendingDesamorcage;
+		annulerCiblagePiege();
+		pendingDesamorcage = !deja;
+	} else {
+		const deja = pendingPose && pendingPose.id === p.id;
+		annulerCiblagePiege();
+		pendingPose = (!deja && p.stock > 0) ? p : null;
+	}
+	renderTokens();
+}
+
+function annulerCiblagePiege() {
+	pendingPose = null;
+	pendingDesamorcage = false;
+	if (window._combatReady) renderTokens();
+}
+
+// Cases où la pose est possible — MIROIR des gardes serveur (`_action_poser_piege`),
+// jamais la seule garde : au sol, libre, sans piège actif, à portée de l'emprise.
+function casesPosePiege(pose) {
+	const j = me();
+	const g = GRID || {};
+	const dims = g.dims || {};
+	if (!j || !j.pos || !pose) return [];
+	const portee = Math.max(1, pose.portee || 1);
+	const actifs = new Set();
+	(state.pieges || []).forEach(p => {
+		if (p.etat === 'cache' || p.etat === 'detecte') (p.cases || []).forEach(c => actifs.add(c[0] + ',' + c[1]));
+	});
+	const out = [];
+	for (let wy = j.pos.y - portee; wy <= j.pos.y + portee; wy++) {
+		for (let wx = j.pos.x - portee; wx <= j.pos.x + portee; wx++) {
+			if (wx < 0 || wy < 0 || wx >= (dims.x || 0) || wy >= (dims.y || 0)) continue;
+			if (!cellWalkable(wx, wy) || cellOccupied(wx, wy) || actifs.has(wx + ',' + wy)) continue;
+			out.push([wx, wy]);
+		}
+	}
+	return out;
+}
+
+function peindreCiblesPieges() {
+	const j = me();
+	const layer = document.getElementById('tokens-layer');
+	if (!j || !j.pos || !layer) return;
+	const poser = (wx, wy) => {
+		const pose = pendingPose;
+		annulerCiblagePiege();
+		doAction('poser_piege', null, null, null, null, null, { competence_id: pose.id, x: wx, y: wy });
+	};
+	const cibles = pendingPose
+		? casesPosePiege(pendingPose).map(([x, y]) => ({ x, y, go: () => poser(x, y) }))
+		: (pendingDesamorcage
+			? (state.pieges || []).filter(p => (state.pieges_desamorcables || []).includes(p.id))
+				.map(p => ({ x: p.x, y: p.y, go: () => {
+					pendingDesamorcage = false;
+					doAction('desamorcer', null, null, null, null, null, { piege_id: p.id });
+				} }))
+			: []);
+	cibles.forEach(c => {
+		const el = document.createElement('div');
+		el.className = 'zone-case destination';
+		_placerToken(el, c.x - j.pos.x, c.y - j.pos.y);
+		el.onclick = c.go;
+		layer.appendChild(el);
+		_apercuZoneCases.push(el);
+	});
+}
+
 // Un bouton par passage EMPRUNTABLE maintenant — à son tour, le principal sur la case du
 // passage et le groupe en file derrière lui (`franchissable`, calculé par le serveur). Les
 // autres ne s'affichent pas : ils se lisent sur la carte (cases de passage). Libellé posé en
@@ -2124,6 +2288,7 @@ function renderTokens() {
 	effacerApercuZone();
 	peindrePassages(layer, j);
 	peindreZonesPersistantes(layer, j);
+	peindrePieges(layer, j);
 	// Ciblage de sort/compétence en attente : cibles violettes au lieu de l'attaque.
 	const casting = !!(pendingSort || pendingComp);
 	const capa = casting ? (pendingSort ? pendingSort.sort : pendingComp.comp) : null;
@@ -2134,7 +2299,7 @@ function renderTokens() {
 	// joueur toucherait un monstre en croyant choisir sa case d'arrivée.
 	const targetable = new Set((casting
 		? capaCibles(capa)
-		: (pendingSaut ? [] : targetableMonsters(currentMode))).map(m => m.id));
+		: ((pendingSaut || pendingPose || pendingDesamorcage) ? [] : targetableMonsters(currentMode))).map(m => m.id));
 	// ⚠️ Plus de `layer.innerHTML = ''` : les jetons SURVIVENT d'un rendu à l'autre
 	// (cf. _tokens), sans quoi rien ne pourrait glisser. Ce qui varie — classes,
 	// position, barre de PV, gestionnaire de clic — est réécrit à chaque passage ;
@@ -2244,6 +2409,7 @@ function renderTokens() {
 	// registre que l'aperçu de zone, donc elles viennent d'être balayées. Les repeindre ici
 	// est ce qui les fait suivre un pivot de caméra, comme les jetons.
 	peindreCasesSaut();
+	peindreCiblesPieges();
 }
 
 // Même recomposition que _placerToken, et pour la même raison : `rotate` AVANT le
@@ -3022,6 +3188,8 @@ function updateButtons(data) {
 	// première action jouée.
 	document.getElementById('btn-slot-assign').disabled = !slotEditing;
 	document.getElementById('btn-slot-done').disabled   = !slotEditing;
+	// Ciblage de piège en cours alors que le membre n'a plus la main : il tombe (rien d'engagé).
+	if (!canAct && (pendingPose || pendingDesamorcage)) annulerCiblagePiege();
 	renderPassages(data);
 	// Cases de la barre : en édition tout est cliquable (on réarrange, on ne joue pas).
 	const modes = modesEquipes(data);
@@ -3047,6 +3215,8 @@ function slotJouable(slot, data, canAct, modes) {
 			return canAct && !!s && sortCastable(s);
 		}
 		case 'competence': {
+			const p = slotPiege(slot);
+			if (p) return piegeJouable(p, data, canAct);
 			const c = slotComp(slot);
 			return canAct && !!c && compCastable(c);
 		}
@@ -3098,6 +3268,8 @@ async function syncActorResources() {
 		CONSOS = data.consommables || [];
 		SORTS = data.sorts || [];
 		COMPS = data.competences || [];
+		PIEGES_COMPS = data.actions_pieges || [];
+		annulerCiblagePiege();
 		// La charge appartient à l'ACTEUR aussi : chaque membre porte SON sac, donc son
 		// propre palier de canalisation et ses propres coûts PM. ⚠️ Absente ⇒ AUCUN palier,
 		// jamais celui du membre précédent.
@@ -3297,6 +3469,8 @@ function startSortCast(s, composants) {
 // updateButtons, qui réutilise tels quels les prédicats sortCastable/compCastable/…
 function slotSort(slot)  { return SORTS.find(s => s.sort_id === slot.ref); }
 function slotComp(slot)  { return COMPS.find(c => c.competence_id === slot.ref); }
+// Case de compétence qui ouvre une action de PIÈGE (passive : absente de COMPS).
+function slotPiege(slot) { return slot.type === 'competence' ? PIEGES_COMPS.find(p => p.id === slot.ref) : null; }
 function slotConso(slot) { return CONSOS.find(c => c.item_id === slot.ref); }
 
 // Libellé de survol : délègue aux labels existants quand le payload détaillé est là
@@ -3308,7 +3482,11 @@ function slotTitle(slot) {
 		if (!s) return slot.nom;
 		return sortLabel(s) + (slot.composants ? ' — avec composants' : ' — sans composants');
 	}
-	if (slot.type === 'competence')  { const c = slotComp(slot);  return c ? compLabel(c)  : slot.nom; }
+	if (slot.type === 'competence')  {
+		const p = slotPiege(slot);
+		if (p) return piegeLabel(p);
+		const c = slotComp(slot);  return c ? compLabel(c)  : slot.nom;
+	}
 	if (slot.type === 'consommable') { const c = slotConso(slot); return c ? consoLabel(c) : slot.nom + ' (épuisé)'; }
 	if (slot.type === 'attaque') return { cac: 'Attaque au corps à corps', jet: 'Attaque en jet', tir: 'Attaque au tir' }[slot.ref];
 	if (slot.type === 'ramasser') return 'Ramasser une carcasse adjacente (1 action, hors corps à corps)';
@@ -3464,6 +3642,8 @@ function activerSlot(slot) {
 			break;
 		}
 		case 'competence': {
+			const p = slotPiege(slot);
+			if (p) { closeSelectors(); activerPiege(p); break; }
 			const c = slotComp(slot);
 			if (!c || !compCastable(c)) return;
 			closeSelectors();
@@ -3610,6 +3790,8 @@ function actionsAffectables(slot) {
 		}
 	});
 	COMPS.forEach(c => opts.push({ label: `${c.icon || '⚡'} ${c.nom}`, entree: { type: 'competence', ref: c.competence_id } }));
+	// Pièges : passives qui ont leur case (🔎 / 🛠 / une par piège à poser).
+	PIEGES_COMPS.forEach(p => opts.push({ label: `${p.icon || '🪤'} ${p.nom}`, entree: { type: 'competence', ref: p.id } }));
 	// Un type d'objet une seule fois : le slot vise le TYPE, pas l'exemplaire.
 	const vus = new Set();
 	CONSOS.forEach(c => {
@@ -3716,7 +3898,8 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 				// Ramasser une carcasse ou boire une potion déplace la charge : le palier et
 				// les coûts PM des cases doivent suivre dans le même rendu.
 				if (data.charge_magie) CHARGE_MAGIE = data.charge_magie;
-				if (data.consommables || data.sorts || data.charge_magie) renderSlots();
+				if (data.actions_pieges) PIEGES_COMPS = data.actions_pieges;
+				if (data.consommables || data.sorts || data.charge_magie || data.actions_pieges) renderSlots();
 			}
 			updateUI(data.combat);
 			return data;
@@ -3771,7 +3954,12 @@ function fermerButinEtage() {
 	document.getElementById('end-close').style.display = 'none';
 	document.getElementById('end-overlay').classList.remove('visible');
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerButinEtage(); });
+document.addEventListener('keydown', e => {
+	if (e.key !== 'Escape') return;
+	fermerButinEtage();
+	// Ciblage de pose/désamorçage en cours : Échap annule sans rien engager (§8).
+	if (pendingPose || pendingDesamorcage) annulerCiblagePiege();
+});
 document.getElementById('end-overlay').addEventListener('click', e => {
 	if (e.target.id === 'end-overlay') fermerButinEtage();
 });

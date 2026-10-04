@@ -852,8 +852,13 @@ def _apply_world_turn_regen(character: dict) -> None:
     bonus_pv, bonus_pm = consommables.regen_bonus(character)
     regen_pv = math.ceil(caracts.get("R", 1) / 20) + bonus_pv
     regen_pm = math.ceil(caracts.get("Vol", 1) / 20) + bonus_pm
-    character["currentPV"] = min(derived.pv_max, character.get("currentPV", derived.pv_max) + regen_pv)
-    character["currentPM"] = min(derived.pm_max, character.get("currentPM", derived.pm_max) + regen_pm)
+    avant_pv = character.get("currentPV", derived.pv_max)
+    character["currentPV"] = min(derived.pv_max, avant_pv + regen_pv)
+    character["currentPM"] = max(0, min(derived.pm_max, character.get("currentPM", derived.pm_max) + regen_pm))
+    # POISON (régén nette négative) : hors combat il ronge mais ne tue jamais — plancher
+    # 1 PV (sans relever qui serait déjà plus bas). En combat, il peut mettre à terre.
+    if regen_pv < 0:
+        character["currentPV"] = max(character["currentPV"], min(avant_pv, 1))
     if consommables.tick_effets(character):
         derived = _derived_from_character(character, eq)
         character["currentPV"] = min(character["currentPV"], derived.pv_max)
@@ -1678,6 +1683,10 @@ async def apprendre_competence(
 	character.setdefault("competences_connues", []).append(comp["id"])
 	# Une passive apprise buffe immédiatement : re-dénormaliser AVANT le save.
 	competences_util.recompute_competences_bonus(character, get_doc)
+	# Compétence de PIÈGE : son action (🔎 / 🛠 / pose) n'a d'autre bouton que sa case de
+	# barre — posée d'office dans la première case libre (rien si la barre est pleine).
+	if competences_util.action_piege(comp):
+		slots_actions.placer_si_libre(character, {"type": "competence", "ref": comp["id"]}, get_doc)
 	# Une AURA apprise couvre tout le groupe hors combat, montures comprises : `auras_recues`
 	# reposé sur chaque membre. ⚠️ Le porteur (peut-être un compagnon) est réinjecté À SA
 	# PLACE — relu par `groupe_effectif`, ce serait un second dict du même doc, et l'une des
@@ -1700,6 +1709,7 @@ async def apprendre_competence(
 		"vitals": _vitals_payload(character),
 		"caracts_detail": _caracts_payload(character),
 		"appris": {"nom": comp["nom"], "icon": comp["icon"]},
+		"slots": slots_actions.slots_payload(character, get_doc),
 	}
 
 

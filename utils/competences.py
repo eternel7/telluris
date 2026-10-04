@@ -28,13 +28,14 @@
 # Logique pure (get_doc/find_docs injectés), ne sauvegarde jamais — les endpoints persistent.
 
 from models import character_stats
-from utils.consommables import _as_int, poser_effet
+from utils.consommables import _as_int, _as_signed_int, poser_effet
 from utils.sorts import (
 	CIBLE_DEFAUT, CIBLES, INCANTATION_PA_DEFAUT, INCANTATION_PA_MAX, JETS,
 	MAINTIEN_PM_MAX, _bonus_dict, _sensibilite_charge, capacite_utilisable_combat,
 	capacite_utilisable_exploration, famille_de, familles_exclues, part_durative,
 )
 from utils.zones_effet import normaliser_zone
+from utils import pieges
 
 MODES = ("passive", "active")
 # JETS vient de utils.sorts (source unique partagée avec les sorts) ; seul le DÉFAUT
@@ -100,6 +101,10 @@ def normaliser_competence(doc) -> dict | None:
 		# Animation de combat (doc `animation:*`), optionnelle — même liste blanche, même
 		# piège que pour les sorts : sans ce champ, la liaison n'atteint jamais le moteur.
 		"animation": str(doc.get("animation") or ""),
+		# POSE DE PIÈGE (bloc `pose_piege`, cf. utils/pieges.normaliser_pose) : la
+		# compétence n'est pas lancée par `_lancer_capacite` mais par l'action de combat
+		# `poser_piege`, qui consomme son item. None ⇒ compétence ordinaire.
+		"pose_piege": pieges.normaliser_pose(doc.get("pose_piege")),
 	}
 
 
@@ -141,8 +146,8 @@ def entree_aura(comp: dict) -> dict:
 		"icon": comp.get("icon", "✨"),
 		"zone": dict(comp.get("zone") or {}),
 		"buffs": {str(k): int(v) for k, v in (eff.get("buffs") or {}).items()},
-		"regen_pv": _as_int(eff.get("regen_pv")),
-		"regen_pm": _as_int(eff.get("regen_pm")),
+		"regen_pv": _as_signed_int(eff.get("regen_pv")),
+		"regen_pm": _as_signed_int(eff.get("regen_pm")),
 		"esquive": _as_int(eff.get("esquive")),
 	}
 
@@ -188,8 +193,8 @@ def empiler_effet_competence(character: dict, comp: dict) -> dict | None:
 		"nom": (comp or {}).get("nom", "Compétence"),
 		"icon": (comp or {}).get("icon", "⚡"),
 		"buffs": dict(eff.get("buffs") or {}),
-		"regen_pv": _as_int(eff.get("regen_pv")),
-		"regen_pm": _as_int(eff.get("regen_pm")),
+		"regen_pv": _as_signed_int(eff.get("regen_pv")),
+		"regen_pm": _as_signed_int(eff.get("regen_pm")),
 		"esquive": _as_int(eff.get("esquive")),
 		"restants": _as_int(eff.get("duree")),
 	}
@@ -222,6 +227,7 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 	sources: list = []
 	auras: list = []
 	regen_pv = regen_pm = esquive = 0
+	detection_pieges = desamorcage = 0
 	for comp in competences_connues_docs(character, get_doc):
 		if not est_passive(comp) or comp.get("condition"):
 			continue
@@ -239,10 +245,15 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 				"icon":  comp.get("icon", "✨"),
 				"buffs": propres,
 			})
-		regen_pv += _as_int(eff.get("regen_pv"))
-		regen_pm += _as_int(eff.get("regen_pm"))
+		regen_pv += _as_signed_int(eff.get("regen_pv"))
+		regen_pm += _as_signed_int(eff.get("regen_pm"))
 		esquive += _as_int(eff.get("esquive"))
+		detection_pieges += _as_int(eff.get("detection_pieges"))
+		desamorcage += _as_int(eff.get("desamorcage"))
+	# Pièges : clés lues `.get(…, 0)` partout (snapshot de combat) — un agrégat d'avant ne
+	# les porte pas, et n'en a pas besoin : apprendre la compétence le recalcule.
 	return {"buffs": buffs, "regen_pv": regen_pv, "regen_pm": regen_pm, "esquive": esquive,
+			"detection_pieges": detection_pieges, "desamorcage": desamorcage,
 			"buffs_sources": sources, "auras": auras}
 
 
@@ -396,6 +407,57 @@ def competences_depart_par_vocation(find_docs) -> dict:
 	return out
 
 
+# ── Pièges : compétences qui OUVRENT une action de combat (cf. utils/pieges.py) ────
+# Passives (jamais lancées par `_lancer_capacite`), mais elles ont une case dans la barre
+# d'action : 🔎 fouiller (détection), 🛠 désamorcer, et une case par piège à poser.
+# ⚠️ La case n'est QUE le bouton : la détection À L'APPROCHE vaut sans elle (elle lit
+# `competences_bonus`, comme toute passive).
+
+ACTIONS_PIEGES = ("fouiller", "desamorcer", "poser_piege")
+
+
+def action_piege(comp: dict) -> str | None:
+	"""Action de combat ouverte par cette compétence (normalisée), ou None. Une pose prime :
+	son bloc dit tout ; sinon le bonus de désamorçage, puis celui de détection."""
+	comp = comp or {}
+	if comp.get("pose_piege"):
+		return "poser_piege"
+	eff = comp.get("effets") or {}
+	if _as_int(eff.get("desamorcage")) > 0:
+		return "desamorcer"
+	if _as_int(eff.get("detection_pieges")) > 0:
+		return "fouiller"
+	return None
+
+
+def actions_pieges_payload(character: dict, get_doc) -> list:
+	"""Compétences de pièges connues, pour les cases de la barre de combat (et leur ⚙) :
+	[{id, nom, icon, niveau, action}] — plus, pour une pose, {item, item_nom, stock, danger,
+	zone, portee} (`stock` = exemplaires au sac ; 0 ⇒ case grisée, le router refuse de toute
+	façon). Ordre : niveau puis nom."""
+	from utils.characters import item_ref_id   # paresseux : même prudence que charge_magie
+	sac = [item_ref_id(r) for r in (character or {}).get("inventaire") or []]
+	out = []
+	for comp in competences_connues_docs(character, get_doc):
+		action = action_piege(comp)
+		if not action:
+			continue
+		entree = {"id": comp["id"], "nom": comp["nom"], "icon": comp["icon"],
+				  "niveau": comp["niveau"], "action": action}
+		pose = comp.get("pose_piege")
+		if pose:
+			item_doc = get_doc(pose["item"]) or {}
+			entree.update({
+				"icon": pose.get("icon") or comp["icon"],
+				"item": pose["item"], "item_nom": item_doc.get("nom", pose["item"]),
+				"stock": sum(1 for i in sac if i == pose["item"]),
+				"danger": pose["danger"], "zone": pose["zone"], "portee": pose["portee"],
+			})
+		out.append(entree)
+	out.sort(key=lambda c: (c["niveau"], c["nom"]))
+	return out
+
+
 # ── Payload UI ───────────────────────────────────────────────────────────────────
 
 def liste_competences_payload(character: dict, get_doc, contexte: str,
@@ -429,6 +491,8 @@ def liste_competences_payload(character: dict, get_doc, contexte: str,
 			"description": comp["description"],
 			"niveau": comp["niveau"],
 			"mode": comp["mode"],
+			# Passive de piège qui a sa case de barre (🔎 / 🛠 / pose) — cf. `action_piege`.
+			"action_piege": action_piege(comp),
 			"cout_pm": comp["cout_pm"],
 			# L'entretien par round ET les PA de lancement, comme pour les sorts : sans eux
 			# le client ne peut ni annoncer la facture, ni griser une case impayable, ni

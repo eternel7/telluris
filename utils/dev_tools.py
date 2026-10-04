@@ -539,6 +539,24 @@ CATALOGUE = [
 			"Contrôle : audit économique §7.",
 	},
 	{
+		"id": "gen_pieges",
+		"label": "🪤 Pièges : compétences voleur/forestier, objets, recettes, animations",
+		# Dump frais : l'import est un PUT complet ; sur un dump périmé, un doc retouché depuis
+		# (compétence, objet, animation réglée dans /admin/animations) serait réémis tel qu'avant.
+		"argv_fn": lambda v, f: _py("gen_pieges.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/pieges_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/pieges_a_importer.json. "
+			"Rien en base avant 📥 Importer.",
+		"description": "Niveau 1 : Détection et Désamorçage des pièges (voleur, forestier). "
+			"Niveaux 2 → 8 : une compétence de POSE par niveau et par vocation, chacune "
+			"consommant un objet différent ; les objets neufs et leur recette (intrants déjà "
+			"consommés par l'atelier) ; 3 animations sprite + son (déclenchement, désamorçage "
+			"réussi / raté). Refuse tout le lot sur un `_id` pris par un doc différent, un "
+			"objet sans recette, un intrant inconnu de l'atelier ou une vocation absente ; "
+			"un doc déjà en base à l'identique est sauté.",
+	},
+	{
 		"id": "gen_villes_images",
 		"label": "🏙 Créer les lieux des cartes de ville sans lieu (grille depuis l'image)",
 		# Dump frais : une carte se dit « sans lieu » d'après les `image` des lieux en base — sur

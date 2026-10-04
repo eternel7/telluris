@@ -171,6 +171,8 @@ def test_recompute_competences_bonus_ecrit_le_champ():
     recompute_competences_bonus(perso, _get_doc)
     assert perso["competences_bonus"] == {
         "buffs": {"F": 4}, "regen_pv": 0, "regen_pm": 0, "esquive": 0,
+        # Bonus de pièges (utils/pieges.py) : aucune passive de piège ici.
+        "detection_pieges": 0, "desamorcage": 0,
         # Détail nommé du même agrégat (tooltip « Profil modifié » de la fiche).
         "buffs_sources": [{"nom": "Maîtrise martiale", "icon": "🗡️", "buffs": {"F": 4}}],
         # Aucune passive à zone : liste d'auras vide (cf. test_competences_aura.py).

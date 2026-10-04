@@ -7,7 +7,8 @@
 # {"type": …, "ref": …} :
 #   - "attaque"     ref ∈ {"cac","jet","tir"}  — mode d'attaque
 #   - "sort"        ref = id d'un sort connu
-#   - "competence"  ref = id d'une compétence connue ACTIVE
+#   - "competence"  ref = id d'une compétence connue ACTIVE — ou d'une passive de PIÈGE,
+#                   qui ouvre une action de combat (`competences.action_piege`)
 #   - "consommable" ref = item_id (TYPE d'objet, jamais un index d'instance : le sac
 #                   bouge à chaque ramassage, un index serait périmé au tour suivant)
 #   - "ramasser" / "fuir" — sans ref
@@ -132,7 +133,8 @@ def _entree_possedee(entree: dict, character: dict, get_doc) -> bool:
 		if ref not in (character.get("competences_connues") or []):
 			return False
 		comp = competences_util.normaliser_competence(get_doc(ref))
-		return bool(comp and competences_util.est_active(comp))
+		return bool(comp and (competences_util.est_active(comp)
+							  or competences_util.action_piege(comp)))
 	if type_ == "consommable":
 		# Le TYPE doit rester un consommable utilisable en combat ; la présence d'un
 		# exemplaire est une question de disponibilité, pas d'appartenance.
@@ -272,6 +274,24 @@ def vider_slot(character: dict, position, get_doc) -> list:
 	slots[idx] = None
 	character["slots_actions"] = slots
 	return slots
+
+
+def placer_si_libre(character: dict, entree, get_doc) -> bool:
+	"""Pose `entree` dans la PREMIÈRE case libre si elle n'est pas déjà dans la barre.
+	Mute `character["slots_actions"]` SANS sauvegarder ; False si déjà là ou barre pleine
+	(rien ne bouge). Utilisé à l'apprentissage d'une compétence de piège : son action n'a
+	pas d'autre bouton que sa case."""
+	nouvelle = normaliser_entree(entree)
+	if nouvelle is None or not _entree_possedee(nouvelle, character or {}, get_doc):
+		return False
+	slots = slots_effectifs(character or {}, get_doc)
+	if any(_memes_entrees(s, nouvelle) for s in slots):
+		return False
+	libre = next((i for i, s in enumerate(slots) if s is None), None)
+	if libre is None:
+		return False
+	poser_slot(character, libre + 1, nouvelle, get_doc)
+	return True
 
 
 def deplacer_slot(character: dict, source, cible, get_doc) -> list:
