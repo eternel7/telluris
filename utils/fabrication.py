@@ -112,6 +112,26 @@ def _rang_rarete(rarete) -> float:
 	return float(character_stats.MULT_RARETE.get(str(rarete or ""), 0) or 0)
 
 
+# Une matière peut conférer UN palier de rareté de plus qu'elle n'en a (le travail l'anoblit :
+# mithril rare → pièce très rare), jamais davantage. Au-delà, sa propre rareté ment
+# (adamantite à 20 or « peu commune » qui rend une pièce légendaire).
+RARETE_ECART_MAX = 1
+
+
+def rarete_minimale_matiere(item_doc) -> str | None:
+	"""Rareté minimale cohérente du doc matière, ou None s'il est déjà cohérent (ou sans
+	rareté conférée). Échelle = ordre de `MULT_RARETE` par valeur (aucun ordre recopié)."""
+	conferee = proprietes_matiere(item_doc)["modificateurs"].get("rarete")
+	echelle = sorted(character_stats.MULT_RARETE, key=lambda r: character_stats.MULT_RARETE[r])
+	if conferee not in echelle:
+		return None
+	propre = (item_doc or {}).get("rarete")
+	if propre not in echelle:
+		return None   # rareté absente : rien d'affirmé, rien à corriger (et le prix en dépend)
+	cible = echelle[max(0, echelle.index(conferee) - RARETE_ECART_MAX)]
+	return cible if echelle.index(propre) < echelle.index(cible) else None
+
+
 def _facteur(spec) -> float:
 	"""Facteur multiplicatif d'un modificateur `{"facteur": x}`, borné. Une forme inattendue
 	vaut 1.0 (neutre) plutôt que de lever : une matière mal rédigée n'apporte rien."""
@@ -295,23 +315,56 @@ CHAMPS_HERITES = (
 )
 
 
-def valeur_variante(cout_base_cuivre: int, cout_matieres_cuivre: int) -> list:
-	"""`valeur` explicite de la variante, en cuivre, sous la forme d'une fourchette.
+def facteur_valeur_borne(facteur) -> float:
+	"""Produit des facteurs `valeur` des matières, borné à
+	`[FACTEUR_MIN, COMMANDE_FACTEUR_VALEUR_MAX]`. Sans plafond, trois matières précieuses se
+	composaient à ×8 (adamantite ×3,5 · relique ×1,8 · améthyste ×1,3)."""
+	try:
+		f = float(facteur)
+	except (TypeError, ValueError):
+		f = 1.0
+	return max(FACTEUR_MIN, min(float(character_stats.COMMANDE_FACTEUR_VALEUR_MAX), f))
+
+
+def valeur_variante(cout_base_cuivre: int, cout_matieres_cuivre: int,
+					facteur_valeur: float = 1.0, plafond_cuivre: int = 0) -> list:
+	"""`valeur` explicite de la variante, en cuivre : `[socle, haut]`.
+
+	    socle = coût du base + coût des matières                          (coût de REVIENT)
+	    haut  = (coût du base × facteur borné + coût des matières) × COMMANDE_MARGE,
+	            plafonné à `plafond_cuivre`
+
+	Les trois règles qui font un prix juste :
+	- **des COÛTS, jamais un devis** : `cout_*` sont des coûts de revient
+	  (`marche.cout_production_cuivre`), TOUTES les matières comptées, apportées ou achetées.
+	  Figer le devis du premier client faisait dépendre la valeur de sa relation, du stock du
+	  jour et de ce qu'il avait apporté (une adamantite à 20 or apportée valait 0) ;
+	- **le facteur ne touche que le base, et que la borne haute** : la matière est déjà
+	  comptée à son coût, la multiplier en plus la comptait deux fois ; le socle reste le coût
+	  brut des intrants, d'où une vraie fourchette pour la relation et le marchandage ;
+	- **`plafond_cuivre` = le moins qu'on puisse payer cette pièce à la commande**
+	  (`commande.prix_variante`) : la meilleure revente possible (borne haute) ne dépasse
+	  jamais ce que la pièce coûte à commander — commander puis revendre ne rapporte rien.
+	  0 = pas de plafond.
 
 	⚠️ Une `valeur` explicite est AUTORITATIVE pour `marche.cout_production_cuivre`, qui cesse
 	alors de propager (« prix maîtrisé à la main, pas de propagation »). C'est délibéré : sans
 	elle, le coût se recalculerait `(coût_base + matières) × MARGE_TRANSFO`, et comme le coût du
 	base est DÉJÀ le produit d'une étape à ×5, une simple épée en acier vaudrait vingt-cinq fois
 	ses intrants. Le sur-mesure a sa propre marge, `COMMANDE_MARGE`."""
-	socle = max(1, int(round((int(cout_base_cuivre or 0) + int(cout_matieres_cuivre or 0))
-							 * float(character_stats.COMMANDE_MARGE))))
-	plafond = max(socle + 1, int(round(socle * float(character_stats.PRIX_MAX_FACTEUR))))
-	return [{"cu": socle}, {"cu": plafond}]
+	cout_base, cout_matieres = int(cout_base_cuivre or 0), int(cout_matieres_cuivre or 0)
+	socle = max(1, cout_base + cout_matieres)
+	haut = max(socle, int(round((cout_base * facteur_valeur_borne(facteur_valeur) + cout_matieres)
+								* float(character_stats.COMMANDE_MARGE))))
+	if int(plafond_cuivre or 0) > 0:
+		haut = max(1, min(haut, int(plafond_cuivre)))
+		socle = min(socle, haut)
+	return [{"cu": socle}, {"cu": haut}]
 
 
 def variante_doc(base_doc: dict, matieres_docs: list, lieu_id: str = "",
 				 cout_base_cuivre: int = 0, cout_matieres_cuivre: int = 0,
-				 now: int = 0) -> dict:
+				 now: int = 0, plafond_cuivre: int = 0) -> dict:
 	"""Doc `item:*` complet de la variante. `matieres_docs` = `[(item_doc, quantite), …]`.
 
 	Le résultat conserve les caractéristiques intrinsèques du base (catégorie, emplacements,
@@ -343,11 +396,8 @@ def variante_doc(base_doc: dict, matieres_docs: list, lieu_id: str = "",
 	else:
 		doc["poids"] = round(float(poids_base or 0) * facteur_poids, 2)
 
-	valeur = valeur_variante(cout_base_cuivre, cout_matieres_cuivre)
-	facteur_valeur = facteurs.get("valeur", 1.0)
-	if facteur_valeur != 1.0:
-		valeur = [{"cu": max(1, int(round(entree["cu"] * facteur_valeur)))} for entree in valeur]
-	doc["valeur"] = valeur
+	doc["valeur"] = valeur_variante(cout_base_cuivre, cout_matieres_cuivre,
+									facteurs.get("valeur", 1.0), plafond_cuivre)
 
 	doc["fabrication"] = {
 		"base_item": (base_doc or {}).get("_id") or (base_doc or {}).get("item"),
@@ -387,7 +437,8 @@ def recette_variante_doc(base_doc: dict, matieres_docs: list, lieu_categorie: st
 
 def assurer_variante(base_doc: dict, matieres_docs: list, lieu_doc: dict,
 					 get_doc_fn, save_doc_fn, cout_base_cuivre: int = 0,
-					 cout_matieres_cuivre: int = 0, now: int = 0) -> tuple:
+					 cout_matieres_cuivre: int = 0, now: int = 0,
+					 plafond_cuivre: int = 0) -> tuple:
 	"""`(item_doc, cree)` — la définition de la variante, créée en base si elle n'y est pas.
 
 	Miroir de `scriptorium._assurer_item_livre` : **un doc déjà existant n'est JAMAIS retouché**.
@@ -408,7 +459,7 @@ def assurer_variante(base_doc: dict, matieres_docs: list, lieu_doc: dict,
 		return existant, False
 
 	doc = variante_doc(base_doc, matieres_docs, (lieu_doc or {}).get("_id", ""),
-					   cout_base_cuivre, cout_matieres_cuivre, now)
+					   cout_base_cuivre, cout_matieres_cuivre, now, plafond_cuivre)
 	recette = recette_variante_doc(base_doc, matieres_docs, (lieu_doc or {}).get("categorie", ""))
 	# L'item d'abord : une recette qui produirait un item absent serait un trou ; l'inverse est
 	# seulement une variante sans historique, récupérable au prochain passage.

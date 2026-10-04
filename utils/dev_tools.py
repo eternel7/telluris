@@ -521,6 +521,24 @@ CATALOGUE = [
 			"manufacture textile, à l'armurerie, à la bijouterie et chez l'artisan.",
 	},
 	{
+		"id": "gen_prix_variantes",
+		"label": "⚒️ Recalculer le prix des variantes sur mesure",
+		# Dump frais : l'import est un PUT complet ; sur un dump périmé, une variante retouchée
+		# depuis (ou une matière dont la rareté a bougé) serait réémise telle qu'avant.
+		"argv_fn": lambda v, f: _py("gen_prix_variantes.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/prix_variantes_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/prix_variantes_a_importer.json. "
+			"Rien en base avant 📥 Importer.",
+		"description": "Une variante ne retouche jamais sa `valeur`, figée à sa création : "
+			"celles d'avant le correctif portent le devis de leur premier client (revente "
+			"jusqu'à ×18 la commande, ou sous le coût de revient). Recalcule leur `valeur` par "
+			"la règle des commandes neuves (coûts de revient, plafond = plancher de commande) "
+			"et remonte la rareté des matières qui confèrent plus d'un palier au-dessus de la "
+			"leur. UN fichier, DIFF seul (champ `valeur` ou `rarete`) ; base à jour ⇒ vide. "
+			"Contrôle : audit économique §7.",
+	},
+	{
 		"id": "gen_villes_images",
 		"label": "🏙 Créer les lieux des cartes de ville sans lieu (grille depuis l'image)",
 		# Dump frais : une carte se dit « sans lieu » d'après les `image` des lieux en base — sur
@@ -611,10 +629,11 @@ CATALOGUE = [
 			"atteignable ne produit, part des recettes dont le produit n'entre jamais en rayon "
 			"(flux de cité compris), marge médiane d'un objet fabriqué, et les matières RACINES "
 			"que seul l'aventurier apporte (ce que chacune débloque, ce qu'on perd sans elle), "
-			"et les matières SANS SOURCE (ni recette, ni appro, ni dépeçage, ni butin, ni récolte). "
+			"les matières SANS SOURCE (ni recette, ni appro, ni dépeçage, ni butin, ni récolte), "
+			"et les variantes SUR MESURE mal cotées (revente > commande, ou sous le revient). "
 			"Rebranche `db.config` sur le dump avant d'importer `utils.marche` : les prix et "
 			"coûts de revient sortent du moteur du jeu, pas d'une réimplémentation. ⚠️ "
-			"Hypothèses de référence documentées en tête de dev/audit_economy.py (A à J) — "
+			"Hypothèses de référence documentées en tête de dev/audit_economy.py (A à K) — "
 			"notamment « en rayon » = sans le joueur ravitailleur.",
 	},
 	# ── /admin/lieux : outils PARAMÉTRÉS par la ville et les lignes affichées ──────────

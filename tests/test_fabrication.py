@@ -277,10 +277,42 @@ def test_poids_min_max_conserve_sa_forme():
 
 
 def test_valeur_explicite_figee_a_la_creation():
+	# ACIER ne porte aucun facteur `valeur` : socle = coût de revient, haut = socle × marge.
 	doc = fabrication.variante_doc(EPEE, [(ACIER, 1)], cout_base_cuivre=100, cout_matieres_cuivre=50)
-	socle = int(round(150 * character_stats.COMMANDE_MARGE))
-	assert doc["valeur"][0] == {"cu": socle}
-	assert doc["valeur"][1]["cu"] > socle
+	assert doc["valeur"][0] == {"cu": 150}
+	assert doc["valeur"][1] == {"cu": int(round(150 * character_stats.COMMANDE_MARGE))}
+
+
+def test_facteur_valeur_ne_multiplie_que_le_base():
+	# La matière est déjà comptée à son coût : la multiplier aussi la comptait deux fois
+	# (adamantite à 200 000 cu × 3,5 → une calotte revendue 8 M).
+	facteur = CRISTAL["fabrication"]["modificateurs"]["valeur"]["facteur"]
+	doc = fabrication.variante_doc(EPEE, [(CRISTAL, 1)], cout_base_cuivre=100, cout_matieres_cuivre=10_000)
+	assert doc["valeur"][0] == {"cu": 10_100}      # socle = coût brut des intrants
+	assert doc["valeur"][1] == {"cu": int(round((100 * facteur + 10_000) * character_stats.COMMANDE_MARGE))}
+
+
+def test_produit_des_facteurs_plafonne():
+	enorme = dict(CRISTAL, _id="item:Enorme", fabrication={
+		"nom": "énorme", "modificateurs": {"valeur": {"facteur": fabrication.FACTEUR_MAX}}})
+	doc = fabrication.variante_doc(EPEE, [(enorme, 1), (CRISTAL, 1)], cout_base_cuivre=100)
+	assert doc["valeur"][1] == {"cu": int(round(100 * character_stats.COMMANDE_FACTEUR_VALEUR_MAX
+												 * character_stats.COMMANDE_MARGE))}
+
+
+def test_plafond_borne_les_deux_bornes():
+	# Le plafond (moins qu'on puisse payer la pièce) gagne sur la marge ET sur le socle.
+	assert fabrication.valeur_variante(100, 50, plafond_cuivre=160) == [{"cu": 150}, {"cu": 160}]
+	assert fabrication.valeur_variante(100, 50, plafond_cuivre=120) == [{"cu": 120}, {"cu": 120}]
+	assert fabrication.valeur_variante(100, 50, plafond_cuivre=0)[1]["cu"] > 150   # 0 = sans plafond
+
+
+def test_valeur_independante_du_devis_du_client():
+	# Mêmes coûts ⇒ même valeur : la relation, le stock et ce que le client apporte n'entrent
+	# plus dans le prix d'une variante (ils faisaient varier trois anneaux de ×2,4).
+	a = fabrication.variante_doc(EPEE, [(CRISTAL, 1), (ACIER, 1)], cout_base_cuivre=100, cout_matieres_cuivre=80)
+	b = fabrication.variante_doc(EPEE, [(ACIER, 1), (CRISTAL, 1)], cout_base_cuivre=100, cout_matieres_cuivre=80)
+	assert a["valeur"] == b["valeur"]
 
 
 def test_marge_du_sur_mesure_distincte_de_marge_transfo():

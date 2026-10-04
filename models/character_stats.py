@@ -614,10 +614,16 @@ COMMANDE_MATIERES_MAX: int = 3
 # par sa quantité (`fabrication.appliquer_modificateurs`) : sans borne, « acier ×20 » donnait
 # +40 dégâts. Le client envoie toujours 1 ; ce plafond ferme la requête forgée.
 COMMANDE_QUANTITE_MAX: int = 1
-# Marge du sur-mesure, appliquée UNE fois à (coût du base + coût des matières) pour figer la
-# `valeur` de la variante. ⚠️ Délibérément distincte de MARGE_TRANSFO (×5 par étape) : l'objet
-# de base est DÉJÀ le produit d'une transformation, réutiliser la même marge le facturerait ×25.
+# Marge du sur-mesure : borne HAUTE de la `valeur` d'une variante = coût de revient × marge
+# (`fabrication.valeur_variante`), elle-même plafonnée au moins qu'on puisse payer la pièce à
+# la commande — la revente ne rapporte jamais plus que la commande n'a coûté.
+# ⚠️ Délibérément distincte de MARGE_TRANSFO (×5 par étape) : l'objet de base est DÉJÀ le
+# produit d'une transformation, réutiliser la même marge le facturerait ×25.
 COMMANDE_MARGE: float = 1.6
+# Plafond du PRODUIT des facteurs `valeur` des matières d'une variante (appliqué au seul coût
+# du base, la matière étant déjà comptée à son coût). Sans lui, trois matières précieuses se
+# composaient à ×8 ; 3.0 = l'ordre de grandeur de PRIX_MAX_FACTEUR.
+COMMANDE_FACTEUR_VALEUR_MAX: float = 3.0
 # Part du prix du base facturée en façon, même quand le client fournit tout : l'artisan vend
 # son temps. Le supplément de complexité en est un multiple, par matière au-delà de la première.
 COMMANDE_FACON_PART: float = 0.25
@@ -1020,6 +1026,7 @@ def current_world_variables() -> dict:
 		"COMMANDE_MATIERES_MAX": COMMANDE_MATIERES_MAX,
 		"COMMANDE_QUANTITE_MAX": COMMANDE_QUANTITE_MAX,
 		"COMMANDE_MARGE": COMMANDE_MARGE,
+		"COMMANDE_FACTEUR_VALEUR_MAX": COMMANDE_FACTEUR_VALEUR_MAX,
 		"COMMANDE_FACON_PART": COMMANDE_FACON_PART,
 		"COMMANDE_COMPLEXITE_PART": COMMANDE_COMPLEXITE_PART,
 		"ACCES_GARDIEN_ACTIF": ACCES_GARDIEN_ACTIF,
@@ -1099,7 +1106,7 @@ def load_world_variables() -> dict:
 	global JOURNAL_LONGUEUR_MAX, JOURNAL_ENTREES_MAX, JOURNAL_BESTIAIRE_LIEUX_MAX
 	global SCRIPTORIUM_LIVRE_LONGUEUR_MAX, SCRIPTORIUM_LIVRE_PAPIER, SCRIPTORIUM_LIVRE_ENCRE
 	global COMMANDE_DELAI_SECONDES, COMMANDE_PEREMPTION_SECONDES, COMMANDE_MATIERES_MAX, COMMANDE_QUANTITE_MAX
-	global COMMANDE_MARGE, COMMANDE_FACON_PART, COMMANDE_COMPLEXITE_PART
+	global COMMANDE_MARGE, COMMANDE_FACON_PART, COMMANDE_COMPLEXITE_PART, COMMANDE_FACTEUR_VALEUR_MAX
 	global ACCES_GARDIEN_ACTIF, INDICATEURS_ACTIFS
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	global CARCASSE_TRANCHANT_TAG, CARCASSE_DECOUPE_POIDS_MIN
@@ -1342,6 +1349,7 @@ def load_world_variables() -> dict:
 	COMMANDE_MATIERES_MAX = max(1, int(v.get("COMMANDE_MATIERES_MAX", COMMANDE_MATIERES_MAX)))
 	COMMANDE_QUANTITE_MAX = max(1, int(v.get("COMMANDE_QUANTITE_MAX", COMMANDE_QUANTITE_MAX)))
 	COMMANDE_MARGE = max(1.0, float(v.get("COMMANDE_MARGE", COMMANDE_MARGE)))
+	COMMANDE_FACTEUR_VALEUR_MAX = max(1.0, float(v.get("COMMANDE_FACTEUR_VALEUR_MAX", COMMANDE_FACTEUR_VALEUR_MAX)))
 	COMMANDE_FACON_PART = max(0.0, float(v.get("COMMANDE_FACON_PART", COMMANDE_FACON_PART)))
 	COMMANDE_COMPLEXITE_PART = max(0.0, float(v.get("COMMANDE_COMPLEXITE_PART", COMMANDE_COMPLEXITE_PART)))
 	ACCES_GARDIEN_ACTIF = bool(v.get("ACCES_GARDIEN_ACTIF", ACCES_GARDIEN_ACTIF))

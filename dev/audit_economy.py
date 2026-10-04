@@ -18,6 +18,8 @@ Indicateurs calculés sur un DUMP (jamais sur la base live) :
      et ce qu'on perd sans elle (hypothèse I).
   6. **Matières sans source** — les matières qu'aucune voie du jeu ne fait apparaître : ni
      fabriquées, ni livrées, ni dépecées, ni tombées, ni récoltées (hypothèse J).
+  7. **Prix du sur-mesure** — les variantes dont la `valeur` figée sort de
+     [coût de revient, plancher de commande], et les matières dont la rareté ment (hypothèse K).
 
 ────────────────────────────────────────────────────────────────────────────────────────
 HYPOTHÈSES DE RÉFÉRENCE (ce que « atteignable », « en rayon » et « marge » veulent dire ici)
@@ -147,6 +149,18 @@ J. **Matières sans source (§6).** Une MATIÈRE (catégorie de `CATEGORIES_INTE
    lui est rapportée à part (« rayon seulement »).
    ⚠️ Une matière sans source reste proposée au sur-mesure (catalogue du monde) : la commande
    naît `en_attente_materiaux` et ne se relance jamais. C'est le trou que ce § repère.
+
+K. **Prix du sur-mesure (§7).** Une variante (`fabrication.base_item`) porte une `valeur`
+   figée à sa création. Elle est JUSTE si :
+     · **pas à perte** — sa borne basse ≥ coût de revient (base + TOUTES ses matières,
+       `cout_production_cuivre`) : sinon l'artisan la vend sous ce qu'elle coûte ;
+     · **pas d'arbitrage** — sa borne haute (meilleure revente : relation 100, marchand à sec)
+       ≤ plancher de commande (`commande.prix_variante`, le moins qu'un client puisse payer) :
+       sinon commander puis revendre rapporte, à chaque fois.
+   Les deux bornes sont celles qu'écrit `fabrication.valeur_variante` ; une variante créée
+   avant le correctif du 04/10 s'en écarte → `dev/gen_prix_variantes.py`. S'y ajoutent les
+   matières qui confèrent plus d'un palier au-dessus de leur propre rareté
+   (`fabrication.rarete_minimale_matiere`).
 
 ────────────────────────────────────────────────────────────────────────────────────────
 
@@ -600,6 +614,35 @@ def matieres_sans_source(docs: list, *, matiere_item_id, objet_final_item_id, re
 # ou en ajoutant une recette à la catégorie plutôt qu'en écrivant un doc.
 MOTIF_INTRANTS = "intrants non ravitaillés sans le joueur"
 MOTIF_DEPECAGE = "table de dépeçage (décomposée à la vente, jamais cuite)"
+
+
+def variantes_mal_cotees(docs: list, *, prix_variante, prix_range) -> list:
+	"""Variantes hors de [revient, plancher de commande] (hypothèse K), triées par écart.
+
+	`[{"item", "pmin", "pmax", "revient", "plancher", "defaut"}, …]` — `defaut` ∈
+	`"arbitrage"` (pmax > plancher) / `"perte"` (pmin < revient). `prix_variante(base, mats)`
+	= `commande.prix_variante` ; `prix_range(doc, id)` = `marche.prix_range_cuivre`. Pur."""
+	index = {d.get("_id"): d for d in docs if isinstance(d, dict)}
+	sortie = []
+	for doc in sorted(docs, key=lambda d: d.get("_id") or ""):
+		bloc = doc.get("fabrication") if isinstance(doc, dict) else None
+		if doc.get("type") != "item" or not isinstance(bloc, dict) or not bloc.get("base_item"):
+			continue
+		base = index.get(bloc["base_item"])
+		mats = [(index.get(m.get("item")), m.get("quantite", 1)) for m in bloc.get("matieres") or []]
+		if base is None or any(m is None for m, _q in mats):
+			continue    # pièce orpheline : rien à comparer
+		kw = prix_variante(base, mats)
+		revient = kw["cout_base_cuivre"] + kw["cout_matieres_cuivre"]
+		pmin, pmax = prix_range(doc, doc["_id"])
+		ligne = {"item": doc["_id"], "pmin": pmin, "pmax": pmax, "revient": revient,
+				 "plancher": kw["plafond_cuivre"]}
+		if pmax > kw["plafond_cuivre"]:
+			sortie.append(dict(ligne, defaut="arbitrage"))
+		elif pmin < revient:
+			sortie.append(dict(ligne, defaut="perte"))
+	return sorted(sortie, key=lambda l: (-max(l["pmax"] / max(1, l["plancher"]),
+											  l["revient"] / max(1, l["pmin"])), l["item"]))
 
 
 def est_table_depecage(recette: dict) -> bool:
@@ -1122,8 +1165,36 @@ def auditer(docs: list, meta: dict, ville: str | None = None) -> None:
 		print(f"   ⚠ {o['item']:<42} " + (" ; ".join(usages) or "inutilisée"))
 	print()
 
+	# ── 7. Prix du sur-mesure ────────────────────────────────────────────────────────
+	from utils import commande
+	variantes = [d for d in tous_docs if d.get("type") == "item"
+				 and isinstance(d.get("fabrication"), dict) and d["fabrication"].get("base_item")]
+	mal = variantes_mal_cotees(tous_docs, prix_variante=commande.prix_variante,
+							   prix_range=marche.prix_range_cuivre)
+	raretes = [(d["_id"], d.get("rarete"), fabrication.rarete_minimale_matiere(d))
+			   for d in sorted(tous_docs, key=lambda d: d.get("_id") or "")
+			   if d.get("type") == "item" and fabrication.rarete_minimale_matiere(d)]
 	print("─" * larg)
-	print("Hypothèses de référence : cf. docstring en tête de ce fichier (A à J).")
+	print(f"7. PRIX DU SUR-MESURE                         {_pct(len(mal), len(variantes))}"
+		  f"   ({len(mal)} / {len(variantes)} variantes mal cotées)")
+	print("─" * larg)
+	for motif, libelle in (("arbitrage", "revente > commande (commander puis revendre rapporte)"),
+						   ("perte", "vendue sous son coût de revient")):
+		lot = [l for l in mal if l["defaut"] == motif]
+		print(f"   · {libelle:<56} ({len(lot)})")
+		for l in lot[:6]:
+			print(f"       {l['item']:<44} valeur [{l['pmin']}, {l['pmax']}]"
+				  f" / revient {l['revient']} · plancher {l['plancher']}")
+	print(f"   · matières dont la rareté ment (> {fabrication.RARETE_ECART_MAX} palier conféré)"
+		  f"       ({len(raretes)})")
+	for item_id, propre, cible in raretes:
+		print(f"       {item_id:<44} {propre} → au moins {cible}")
+	if mal or raretes:
+		print("       → dev/gen_prix_variantes.py (un seul fichier à importer)")
+	print()
+
+	print("─" * larg)
+	print("Hypothèses de référence : cf. docstring en tête de ce fichier (A à K).")
 	print("─" * larg)
 
 
