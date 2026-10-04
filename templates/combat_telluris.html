@@ -219,15 +219,6 @@
 }
 /* Piège détecté que l'acteur courant peut désamorcer (au contact) : liseré doré. */
 .zone-case.piege.desamorcable { border: 2px solid var(--gold2); }
-/* Rangée des pièges : SA ligne de grille. Vide (acteur sans compétence de piège) ⇒ hauteur
-   nulle, la barre ne bouge pas (§17). */
-.pieges-zone { grid-area: pieges; display: flex; align-items: center; gap: 8px; margin: 0 5px; }
-.pieges-row { display: inline-flex; gap: 4px; }
-.pieges-row .action-btn[hidden] { display: none; }
-#pose-piege-row { display: none; gap: 6px; align-items: center; }
-#pose-piege-select { max-width: 260px; padding: 6px 10px; background: #1a1a1a; color: #eee;
-	border: 1px solid #555; border-radius: 6px; font-size: 13px; }
-#pose-piege-row.ouvert { display: flex; }
 /* Dans `.tour-header`, à DROITE du bandeau d'initiative, avant le 🔊. `margin-left: auto`
    pousse la rangée à droite ET cale le libellé et le bandeau à gauche : un bouton qui
    apparaît à son tour prend la marge libre sans décaler les badges (§17).
@@ -707,7 +698,6 @@
 	grid-template-columns: 45px 1fr;
 	grid-template-areas:
 		"gear grid"
-		"pieges pieges"
 		"editrow editrow"
 		"targetrow targetrow";
 	align-items: end;
@@ -1105,19 +1095,6 @@
 
 		<div class="action-bar">
 			<button class="action-btn" id="btn-slots-edit" onclick="toggleSlotEdit()" title="Réorganiser le contenu de la barre — coûte 1 action. (Échanger deux cases est gratuit : clic long sur une case, puis glisser.)">⚙</button>
-			<!-- PIÈGES : boutons de l'ACTEUR COURANT. Masqués (hidden) quand il n'a pas la
-			     compétence — l'état ne change qu'au changement d'acteur ; grisés sinon. -->
-			<div class="pieges-zone">
-			<span class="pieges-row" id="pieges-row">
-				<button class="action-btn" id="btn-fouiller" hidden onclick="doAction('fouiller', null)" title="Fouiller les environs (2 cases) à la recherche de pièges — coûte 1 action.">🔎</button>
-				<button class="action-btn" id="btn-desamorcer" hidden onclick="lancerDesamorcage()" title="Désamorcer un piège détecté au contact — coûte 1 action.">🛠</button>
-				<button class="action-btn" id="btn-poser-piege" hidden onclick="basculerPosePiege()" title="Poser un piège — coûte 1 action et l'objet requis.">🪤</button>
-			</span>
-			<div id="pose-piege-row">
-				<select id="pose-piege-select" onchange="choisirPosePiege()"></select>
-				<button class="action-btn flee-btn" id="btn-pose-annuler" onclick="annulerPosePiege()" title="Annuler la pose (gratuit)">✕</button>
-			</div>
-			</div>
 			<!-- Grille de slots : rendue 100 % client (renderSlots), positions stables par
 			     personnage. C'est le SEUL accès aux sorts, compétences et consommables —
 			     ce qui n'a pas été préparé ne se joue pas, sauf à passer par ⚙ (1 action). -->
@@ -1367,9 +1344,10 @@ let pendingSort = null;
 // Compétences ACTIVES utilisables en combat (part instantanée degats/pv/pm/furtivité) —
 // la liste ne change pas en combat (pas de composants, rien n'est consommé du sac).
 let COMPS = {{ competences | tojson | safe }};
-// Compétences de POSE DE PIÈGE de l'acteur : [{id, nom, icon, item_nom, stock, zone, portee}].
-// Resynchronisées par `/acteur` (changement de membre) et par la réponse de `poser_piege`.
-let POSES_PIEGES = {{ (poses_pieges or []) | tojson | safe }};
+// Compétences de PIÈGES de l'acteur — leurs cases de barre : [{id, nom, icon, action:
+// fouiller|desamorcer|poser_piege, (pose) item_nom, stock, zone, portee}]. Resynchronisées
+// par `/acteur` (changement de membre) et par la réponse de `poser_piege` (stock).
+let PIEGES_COMPS = {{ (actions_pieges or []) | tojson | safe }};
 // Compétence offensive confirmée en attente de cible — même mécanisme violet que pendingSort.
 let pendingComp = null;
 
@@ -2147,49 +2125,51 @@ function peindrePieges(layer, j) {
 // Même mode « on vise le SOL » que le saut : les cases cibles sont des `.zone-case
 // destination` rangées dans `_apercuZoneCases` (effacées et repeintes à chaque rendu).
 let pendingDesamorcage = false;
-let pendingPose = null;   // entrée de POSES_PIEGES choisie
+let pendingPose = null;   // entrée de PIEGES_COMPS (action `poser_piege`) choisie
 
-function lancerDesamorcage() {
-	const ids = state.pieges_desamorcables || [];
-	if (!ids.length) return;
-	if (ids.length === 1) { doAction('desamorcer', null, null, null, null, null, { piege_id: ids[0] }); return; }
-	// Plusieurs pièges au contact : on désigne lequel sur la carte.
-	pendingDesamorcage = !pendingDesamorcage;
-	annulerPosePiege(true);
+// Case de barre d'une compétence de PIÈGE : jouable maintenant ? (budget, cible, objet)
+function piegeJouable(p, data, canAct) {
+	if (!canAct || !p) return false;
+	if (p.action === 'fouiller') return !!data.peut_fouiller;
+	if (p.action === 'desamorcer') return (data.pieges_desamorcables || []).length > 0;
+	if (p.action === 'poser_piege') return p.stock > 0;
+	return false;
+}
+
+function piegeLabel(p) {
+	if (p.action === 'fouiller') return `${p.icon} ${p.nom} — fouiller les environs (2 cases), 1 action`;
+	if (p.action === 'desamorcer') return `${p.icon} ${p.nom} — désamorcer un piège détecté au contact, 1 action`;
+	const zone = p.zone ? `, zone ${2 * p.zone + 1}×${2 * p.zone + 1}` : '';
+	return `${p.icon} ${p.nom} — ${p.item_nom} ×${p.stock}, danger ${p.danger}${zone}, 1 action`;
+}
+
+// Clic sur la case : fouiller part tout de suite ; désamorcer aussi s'il n'y a qu'un piège
+// au contact (sinon on le désigne sur la carte) ; poser passe par le choix de la case.
+// Re-cliquer la case d'un ciblage en cours l'annule.
+function activerPiege(p) {
+	if (p.action === 'fouiller') { annulerCiblagePiege(); doAction('fouiller', null); return; }
+	if (p.action === 'desamorcer') {
+		const ids = state.pieges_desamorcables || [];
+		if (!ids.length) return;
+		if (ids.length === 1) {
+			annulerCiblagePiege();
+			doAction('desamorcer', null, null, null, null, null, { piege_id: ids[0] });
+			return;
+		}
+		const deja = pendingDesamorcage;
+		annulerCiblagePiege();
+		pendingDesamorcage = !deja;
+	} else {
+		const deja = pendingPose && pendingPose.id === p.id;
+		annulerCiblagePiege();
+		pendingPose = (!deja && p.stock > 0) ? p : null;
+	}
 	renderTokens();
 }
 
-function basculerPosePiege() {
-	const row = document.getElementById('pose-piege-row');
-	if (row.classList.contains('ouvert')) { annulerPosePiege(); return; }
-	pendingDesamorcage = false;
-	const sel = document.getElementById('pose-piege-select');
-	sel.innerHTML = '';
-	const vide = document.createElement('option');
-	vide.value = ''; vide.textContent = '— Quel piège ? —';
-	sel.appendChild(vide);
-	POSES_PIEGES.forEach(p => {
-		const o = document.createElement('option');
-		o.value = p.id;
-		o.textContent = `${p.icon} ${p.nom} — ${p.item_nom} ×${p.stock}`;
-		o.disabled = !p.stock;
-		sel.appendChild(o);
-	});
-	row.classList.add('ouvert');
-}
-
-function choisirPosePiege() {
-	const id = document.getElementById('pose-piege-select').value;
-	pendingPose = POSES_PIEGES.find(p => p.id === id && p.stock > 0) || null;
-	renderTokens();
-}
-
-// `garderDesamorcage` : appelé depuis le mode désamorçage, qui ne doit pas s'annuler lui-même.
-function annulerPosePiege(garderDesamorcage) {
+function annulerCiblagePiege() {
 	pendingPose = null;
-	if (!garderDesamorcage) pendingDesamorcage = false;
-	const row = document.getElementById('pose-piege-row');
-	if (row) row.classList.remove('ouvert');
+	pendingDesamorcage = false;
 	if (window._combatReady) renderTokens();
 }
 
@@ -2222,7 +2202,7 @@ function peindreCiblesPieges() {
 	if (!j || !j.pos || !layer) return;
 	const poser = (wx, wy) => {
 		const pose = pendingPose;
-		annulerPosePiege();
+		annulerCiblagePiege();
 		doAction('poser_piege', null, null, null, null, null, { competence_id: pose.id, x: wx, y: wy });
 	};
 	const cibles = pendingPose
@@ -3203,19 +3183,8 @@ function updateButtons(data) {
 	// première action jouée.
 	document.getElementById('btn-slot-assign').disabled = !slotEditing;
 	document.getElementById('btn-slot-done').disabled   = !slotEditing;
-	// PIÈGES : présence = compétence de l'acteur (change au changement d'acteur seulement),
-	// disponibilité = budget + cible (pièges au contact, objet au sac).
-	const bFouiller = document.getElementById('btn-fouiller');
-	const bDesamorcer = document.getElementById('btn-desamorcer');
-	const bPoser = document.getElementById('btn-poser-piege');
-	bFouiller.hidden = !data.peut_fouiller;
-	bFouiller.disabled = !canAct;
-	bDesamorcer.hidden = !data.peut_desamorcer;
-	bDesamorcer.disabled = !canAct || !(data.pieges_desamorcables || []).length;
-	bPoser.hidden = !POSES_PIEGES.length;
-	bPoser.disabled = !canAct || !POSES_PIEGES.some(p => p.stock > 0);
-	document.getElementById('btn-pose-annuler').disabled = false;
-	if (!canAct && (pendingPose || pendingDesamorcage)) annulerPosePiege();
+	// Ciblage de piège en cours alors que le membre n'a plus la main : il tombe (rien d'engagé).
+	if (!canAct && (pendingPose || pendingDesamorcage)) annulerCiblagePiege();
 	renderPassages(data);
 	// Cases de la barre : en édition tout est cliquable (on réarrange, on ne joue pas).
 	const modes = modesEquipes(data);
@@ -3241,6 +3210,8 @@ function slotJouable(slot, data, canAct, modes) {
 			return canAct && !!s && sortCastable(s);
 		}
 		case 'competence': {
+			const p = slotPiege(slot);
+			if (p) return piegeJouable(p, data, canAct);
 			const c = slotComp(slot);
 			return canAct && !!c && compCastable(c);
 		}
@@ -3292,8 +3263,8 @@ async function syncActorResources() {
 		CONSOS = data.consommables || [];
 		SORTS = data.sorts || [];
 		COMPS = data.competences || [];
-		POSES_PIEGES = data.poses_pieges || [];
-		annulerPosePiege();
+		PIEGES_COMPS = data.actions_pieges || [];
+		annulerCiblagePiege();
 		// La charge appartient à l'ACTEUR aussi : chaque membre porte SON sac, donc son
 		// propre palier de canalisation et ses propres coûts PM. ⚠️ Absente ⇒ AUCUN palier,
 		// jamais celui du membre précédent.
@@ -3493,6 +3464,8 @@ function startSortCast(s, composants) {
 // updateButtons, qui réutilise tels quels les prédicats sortCastable/compCastable/…
 function slotSort(slot)  { return SORTS.find(s => s.sort_id === slot.ref); }
 function slotComp(slot)  { return COMPS.find(c => c.competence_id === slot.ref); }
+// Case de compétence qui ouvre une action de PIÈGE (passive : absente de COMPS).
+function slotPiege(slot) { return slot.type === 'competence' ? PIEGES_COMPS.find(p => p.id === slot.ref) : null; }
 function slotConso(slot) { return CONSOS.find(c => c.item_id === slot.ref); }
 
 // Libellé de survol : délègue aux labels existants quand le payload détaillé est là
@@ -3504,7 +3477,11 @@ function slotTitle(slot) {
 		if (!s) return slot.nom;
 		return sortLabel(s) + (slot.composants ? ' — avec composants' : ' — sans composants');
 	}
-	if (slot.type === 'competence')  { const c = slotComp(slot);  return c ? compLabel(c)  : slot.nom; }
+	if (slot.type === 'competence')  {
+		const p = slotPiege(slot);
+		if (p) return piegeLabel(p);
+		const c = slotComp(slot);  return c ? compLabel(c)  : slot.nom;
+	}
 	if (slot.type === 'consommable') { const c = slotConso(slot); return c ? consoLabel(c) : slot.nom + ' (épuisé)'; }
 	if (slot.type === 'attaque') return { cac: 'Attaque au corps à corps', jet: 'Attaque en jet', tir: 'Attaque au tir' }[slot.ref];
 	if (slot.type === 'ramasser') return 'Ramasser une carcasse adjacente (1 action, hors corps à corps)';
@@ -3660,6 +3637,8 @@ function activerSlot(slot) {
 			break;
 		}
 		case 'competence': {
+			const p = slotPiege(slot);
+			if (p) { closeSelectors(); activerPiege(p); break; }
 			const c = slotComp(slot);
 			if (!c || !compCastable(c)) return;
 			closeSelectors();
@@ -3806,6 +3785,8 @@ function actionsAffectables(slot) {
 		}
 	});
 	COMPS.forEach(c => opts.push({ label: `${c.icon || '⚡'} ${c.nom}`, entree: { type: 'competence', ref: c.competence_id } }));
+	// Pièges : passives qui ont leur case (🔎 / 🛠 / une par piège à poser).
+	PIEGES_COMPS.forEach(p => opts.push({ label: `${p.icon || '🪤'} ${p.nom}`, entree: { type: 'competence', ref: p.id } }));
 	// Un type d'objet une seule fois : le slot vise le TYPE, pas l'exemplaire.
 	const vus = new Set();
 	CONSOS.forEach(c => {
@@ -3912,8 +3893,8 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 				// Ramasser une carcasse ou boire une potion déplace la charge : le palier et
 				// les coûts PM des cases doivent suivre dans le même rendu.
 				if (data.charge_magie) CHARGE_MAGIE = data.charge_magie;
-				if (data.poses_pieges) POSES_PIEGES = data.poses_pieges;
-				if (data.consommables || data.sorts || data.charge_magie) renderSlots();
+				if (data.actions_pieges) PIEGES_COMPS = data.actions_pieges;
+				if (data.consommables || data.sorts || data.charge_magie || data.actions_pieges) renderSlots();
 			}
 			updateUI(data.combat);
 			return data;
@@ -3972,7 +3953,7 @@ document.addEventListener('keydown', e => {
 	if (e.key !== 'Escape') return;
 	fermerButinEtage();
 	// Ciblage de pose/désamorçage en cours : Échap annule sans rien engager (§8).
-	if (pendingPose || pendingDesamorcage || document.getElementById('pose-piege-row').classList.contains('ouvert')) annulerPosePiege();
+	if (pendingPose || pendingDesamorcage) annulerCiblagePiege();
 });
 document.getElementById('end-overlay').addEventListener('click', e => {
 	if (e.target.id === 'end-overlay') fermerButinEtage();

@@ -307,8 +307,8 @@ async def combat_acteur(
         "charge_magie": bloc_charge_snapshot(_snap) if _snap else None,
         "sorts": liste_sorts_payload(doc, get_doc, "combat", _etat_charge),
         "competences": liste_competences_payload(doc, get_doc, "combat", _etat_charge),
-        # Compétences de POSE DE PIÈGE de cet acteur, avec l'item requis et le stock du sac.
-        "poses_pieges": competences_util.poses_pieges_payload(doc, get_doc),
+        # Compétences de PIÈGES de cet acteur (cases 🔎 / 🛠 / pose ; item requis, stock au sac).
+        "actions_pieges": competences_util.actions_pieges_payload(doc, get_doc),
         # Barre d'action : les slots appartiennent à l'ACTEUR — chaque membre du groupe
         # a sa propre disposition, rechargée à chaque changement de tour.
         "slots": slots_actions.slots_payload(doc, get_doc),
@@ -663,7 +663,7 @@ async def combat_action(
                 character = get_doc(acteur_id) or character
         else:
             character = get_doc(acteur_id) or character
-        pieges_payload = competences_util.poses_pieges_payload(character, get_doc)
+        pieges_payload = competences_util.actions_pieges_payload(character, get_doc)
 
     # Combat persisté : applique les récompenses au personnage (idempotent).
     if combat_doc["status"] != "active":
@@ -673,7 +673,7 @@ async def combat_action(
     # ⚠️ `vue_client` et jamais le doc brut : il contient les pièges CACHÉS.
     response = {"combat": vue_client(combat_doc), "action_result": action_result}
     if pieges_payload is not None:
-        response["poses_pieges"] = pieges_payload
+        response["actions_pieges"] = pieges_payload
     if consommables_payload is not None:
         response["consommables"] = consommables_payload
     if sorts_payload is not None:

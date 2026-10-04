@@ -1678,6 +1678,10 @@ async def apprendre_competence(
 	character.setdefault("competences_connues", []).append(comp["id"])
 	# Une passive apprise buffe immédiatement : re-dénormaliser AVANT le save.
 	competences_util.recompute_competences_bonus(character, get_doc)
+	# Compétence de PIÈGE : son action (🔎 / 🛠 / pose) n'a d'autre bouton que sa case de
+	# barre — posée d'office dans la première case libre (rien si la barre est pleine).
+	if competences_util.action_piege(comp):
+		slots_actions.placer_si_libre(character, {"type": "competence", "ref": comp["id"]}, get_doc)
 	# Une AURA apprise couvre tout le groupe hors combat, montures comprises : `auras_recues`
 	# reposé sur chaque membre. ⚠️ Le porteur (peut-être un compagnon) est réinjecté À SA
 	# PLACE — relu par `groupe_effectif`, ce serait un second dict du même doc, et l'une des
@@ -1700,6 +1704,7 @@ async def apprendre_competence(
 		"vitals": _vitals_payload(character),
 		"caracts_detail": _caracts_payload(character),
 		"appris": {"nom": comp["nom"], "icon": comp["icon"]},
+		"slots": slots_actions.slots_payload(character, get_doc),
 	}
 
 

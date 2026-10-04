@@ -624,7 +624,7 @@ def test_poser_retire_exactement_un_objet(monde):
 	rep = _poser_http(monde, [{"item": ITEM["_id"], "poids": 0.5}] * 2)
 	assert rep["action_result"]["pose"] is True
 	assert len(monde["docs"]["character:test_0"]["inventaire"]) == 1
-	assert rep["poses_pieges"][0]["stock"] == 1
+	assert rep["actions_pieges"][0]["stock"] == 1
 
 
 def test_poser_sans_objet_est_refuse(monde):
@@ -702,11 +702,11 @@ def test_aucun_objet_consomme_deux_fois_et_chaque_objet_neuf_a_sa_recette():
 	assert {i[len("item:"):] for i in gen_pieges.OBJETS} == produits
 
 
-def test_poses_pieges_payload_compte_le_stock():
+def test_actions_pieges_payload_compte_le_stock():
 	perso = {"competences_connues": ["competence:pose_chausse_trappes"],
 			 "inventaire": [{"item": "item:Chausse_trappes", "poids": 0.5}, "item:Chausse_trappes",
 							{"item": "item:autre"}]}
-	[p] = competences_util.poses_pieges_payload(perso, LOT.get)
+	[p] = competences_util.actions_pieges_payload(perso, LOT.get)
 	assert p["stock"] == 2 and p["item"] == "item:Chausse_trappes"
 
 
@@ -722,11 +722,71 @@ def test_le_generateur_passe_ses_garde_fous_sur_le_dump_et_est_idempotent(tmp_pa
 	assert len(json.loads(premier)) == attendu
 
 
-def test_une_pose_n_entre_jamais_dans_la_barre_de_slots():
-	"""Passive qui ouvre l'action 🪤 : jamais épinglée, jamais une case de la barre — la
-	barre la lancerait par `_lancer_capacite`, qui ne sait pas poser un piège."""
+def test_les_competences_de_pieges_ont_leur_case_de_barre():
+	"""Passives qui ouvrent une action de combat : 🔎 fouiller, 🛠 désamorcer, une case par
+	piège à poser. Jamais épinglées d'office (la barre DÉRIVÉE reste celle d'avant)."""
 	from utils import slots_actions
-	perso = {"competences_connues": ["competence:pose_chausse_trappes"]}
+	ids = {"competence:detection_des_pieges_voleur": "fouiller",
+		   "competence:desamorcage_des_pieges_voleur": "desamorcer",
+		   "competence:pose_chausse_trappes": "poser_piege"}
+	perso = {"competences_connues": list(ids)}
+	for cid, action in ids.items():
+		assert competences_util.action_piege(competences_util.normaliser_competence(LOT[cid])) == action
+		assert slots_actions._entree_possedee({"type": "competence", "ref": cid}, perso, LOT.get)
+	assert [p["action"] for p in competences_util.actions_pieges_payload(perso, LOT.get)] \
+		== ["desamorcer", "fouiller", "poser_piege"]   # niveau puis nom
 	assert competences_util.competences_epinglees_effectives(perso, LOT.get) == []
+
+
+def test_une_passive_ordinaire_n_a_toujours_pas_de_case():
+	from utils import slots_actions
+	docs = dict(LOT, **{"competence:esquive": {"_id": "competence:esquive", "type": "competence",
+											   "vocation": "voleur", "mode": "passive",
+											   "effets": {"esquive": 10}}})
+	perso = {"competences_connues": ["competence:esquive"]}
 	assert not slots_actions._entree_possedee(
-		{"type": "competence", "ref": "competence:pose_chausse_trappes"}, perso, LOT.get)
+		{"type": "competence", "ref": "competence:esquive"}, perso, docs.get)
+
+
+def test_apprendre_une_competence_de_piege_la_pose_dans_la_premiere_case_libre():
+	from utils import slots_actions
+	cid = "competence:pose_chausse_trappes"
+	perso = {"competences_connues": [cid]}
+	entree = {"type": "competence", "ref": cid}
+	assert slots_actions.placer_si_libre(perso, entree, LOT.get) is True
+	slots = slots_actions.slots_effectifs(perso, LOT.get)
+	premiere_libre = len(slots_actions.ENTREES_DERIVEES)   # barre dérivée : socle puis libre
+	assert slots[premiere_libre] == entree
+	assert slots_actions.placer_si_libre(perso, entree, LOT.get) is False   # déjà là
+	assert sum(1 for s in slots_actions.slots_effectifs(perso, LOT.get) if s == entree) == 1
+
+
+def test_barre_pleine_rien_ne_bouge():
+	from utils import slots_actions
+	cid = "competence:pose_chausse_trappes"
+	plein = [{"type": "attaque", "ref": "cac"}, {"type": "ramasser"}, {"type": "fuir"}]
+	plein += [{"type": "attaque", "ref": "jet"}] * (slots_actions.slots_max() - len(plein))
+	perso = {"competences_connues": [cid], "slots_actions": plein}
+	avant = slots_actions.slots_effectifs(perso, LOT.get)
+	assert slots_actions.placer_si_libre(perso, {"type": "competence", "ref": cid}, LOT.get) is False
+	assert slots_actions.slots_effectifs(perso, LOT.get) == avant
+
+
+def test_la_detection_a_l_approche_vaut_sans_case_de_barre(monkeypatch):
+	"""La case n'est que le bouton de la FOUILLE : la passive agit par `competences_bonus`,
+	même retirée de la barre."""
+	from _fixtures_magie import character
+	from utils.combat import build_joueur_snapshot
+	cid = "competence:detection_des_pieges_voleur"
+	perso = character(competences_connues=[cid], voc="voleur",
+					  slots_actions=[{"type": "attaque", "ref": "cac"}, {"type": "ramasser"},
+									 {"type": "fuir"}])
+	competences_util.recompute_competences_bonus(perso, LOT.get)
+	j = build_joueur_snapshot(perso, 0)
+	j["pos"] = {"x": 3, "y": 5}
+	assert j["detection_pieges"] == gen_pieges.BONUS_DETECTION
+	_jets(monkeypatch, REUSSITE)
+	doc = combat([j], [monstre(x=10, y=8)])
+	doc["pieges"] = [piege_monde(5, 5)]
+	resolve_action(doc, "deplacer", dx=1, dy=0)
+	assert doc["pieges"][0]["etat"] == pieges.ETAT_DETECTE

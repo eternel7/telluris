@@ -407,28 +407,53 @@ def competences_depart_par_vocation(find_docs) -> dict:
 	return out
 
 
-# ── Pose de pièges (bloc `pose_piege`, cf. utils/pieges.py) ────────────────────────
+# ── Pièges : compétences qui OUVRENT une action de combat (cf. utils/pieges.py) ────
+# Passives (jamais lancées par `_lancer_capacite`), mais elles ont une case dans la barre
+# d'action : 🔎 fouiller (détection), 🛠 désamorcer, et une case par piège à poser.
+# ⚠️ La case n'est QUE le bouton : la détection À L'APPROCHE vaut sans elle (elle lit
+# `competences_bonus`, comme toute passive).
 
-def poses_pieges_payload(character: dict, get_doc) -> list:
-	"""Compétences de POSE DE PIÈGE connues du personnage, pour le bouton 🪤 du combat :
-	[{id, nom, icon, item, item_nom, stock, danger, zone, portee}], `stock` = exemplaires de
-	l'item requis au sac (0 ⇒ entrée grisée côté client ; le router refuse de toute façon).
-	Ordre : niveau puis nom (la progression du métier)."""
+ACTIONS_PIEGES = ("fouiller", "desamorcer", "poser_piege")
+
+
+def action_piege(comp: dict) -> str | None:
+	"""Action de combat ouverte par cette compétence (normalisée), ou None. Une pose prime :
+	son bloc dit tout ; sinon le bonus de désamorçage, puis celui de détection."""
+	comp = comp or {}
+	if comp.get("pose_piege"):
+		return "poser_piege"
+	eff = comp.get("effets") or {}
+	if _as_int(eff.get("desamorcage")) > 0:
+		return "desamorcer"
+	if _as_int(eff.get("detection_pieges")) > 0:
+		return "fouiller"
+	return None
+
+
+def actions_pieges_payload(character: dict, get_doc) -> list:
+	"""Compétences de pièges connues, pour les cases de la barre de combat (et leur ⚙) :
+	[{id, nom, icon, niveau, action}] — plus, pour une pose, {item, item_nom, stock, danger,
+	zone, portee} (`stock` = exemplaires au sac ; 0 ⇒ case grisée, le router refuse de toute
+	façon). Ordre : niveau puis nom."""
 	from utils.characters import item_ref_id   # paresseux : même prudence que charge_magie
 	sac = [item_ref_id(r) for r in (character or {}).get("inventaire") or []]
 	out = []
 	for comp in competences_connues_docs(character, get_doc):
-		pose = comp.get("pose_piege")
-		if not pose:
+		action = action_piege(comp)
+		if not action:
 			continue
-		item_doc = get_doc(pose["item"]) or {}
-		out.append({
-			"id": comp["id"], "nom": comp["nom"], "icon": pose.get("icon") or comp["icon"],
-			"niveau": comp["niveau"],
-			"item": pose["item"], "item_nom": item_doc.get("nom", pose["item"]),
-			"stock": sum(1 for i in sac if i == pose["item"]),
-			"danger": pose["danger"], "zone": pose["zone"], "portee": pose["portee"],
-		})
+		entree = {"id": comp["id"], "nom": comp["nom"], "icon": comp["icon"],
+				  "niveau": comp["niveau"], "action": action}
+		pose = comp.get("pose_piege")
+		if pose:
+			item_doc = get_doc(pose["item"]) or {}
+			entree.update({
+				"icon": pose.get("icon") or comp["icon"],
+				"item": pose["item"], "item_nom": item_doc.get("nom", pose["item"]),
+				"stock": sum(1 for i in sac if i == pose["item"]),
+				"danger": pose["danger"], "zone": pose["zone"], "portee": pose["portee"],
+			})
+		out.append(entree)
 	out.sort(key=lambda c: (c["niveau"], c["nom"]))
 	return out
 
@@ -466,6 +491,8 @@ def liste_competences_payload(character: dict, get_doc, contexte: str,
 			"description": comp["description"],
 			"niveau": comp["niveau"],
 			"mode": comp["mode"],
+			# Passive de piège qui a sa case de barre (🔎 / 🛠 / pose) — cf. `action_piege`.
+			"action_piege": action_piege(comp),
 			"cout_pm": comp["cout_pm"],
 			# L'entretien par round ET les PA de lancement, comme pour les sorts : sans eux
 			# le client ne peut ni annoncer la facture, ni griser une case impayable, ni

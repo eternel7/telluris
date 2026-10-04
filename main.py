@@ -1216,8 +1216,8 @@ async def get_combat_page(
 			# Compétences ACTIVES utilisables en combat (part instantanée degats/pv/pm/
 			# furtivité) — les passives buffent déjà le snapshot, elles n'apparaissent pas ici.
 			"competences": competences_util.liste_competences_payload(acteur, get_doc, "combat", _etat_charge),
-			# Compétences de POSE DE PIÈGE de l'acteur (item requis, stock au sac).
-			"poses_pieges": competences_util.poses_pieges_payload(acteur, get_doc),
+			# Compétences de PIÈGES de l'acteur (cases 🔎 / 🛠 / pose ; item requis, stock au sac).
+			"actions_pieges": competences_util.actions_pieges_payload(acteur, get_doc),
 			# Barre d'action : grille de slots à positions STABLES, propre à l'acteur —
 			# resynchronisée par GET /api/combat/{id}/acteur au changement de tour.
 			"slots": slots_actions.slots_payload(acteur, get_doc),

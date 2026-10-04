@@ -6140,10 +6140,14 @@ function _renderCompetences(list) {
 	}
 	box.innerHTML = _competences.map(c => {
 		// Une passive n'a ni action ni case de barre : son bonus est permanent (inclus
-		// dans les dérivées), il n'y a rien à déclencher.
-		const pin = c.mode === 'active' ? _slotSelect('competence', c.competence_id) : '';
+		// dans les dérivées), il n'y a rien à déclencher. SAUF une passive de PIÈGE
+		// (`action_piege`) : elle ouvre une action de combat (🔎 / 🛠 / pose), dont la case
+		// de barre est le seul bouton — la détection à l'approche, elle, vaut sans case.
+		const pin = (c.mode === 'active' || c.action_piege) ? _slotSelect('competence', c.competence_id) : '';
 		const actions = c.mode === 'passive'
-			? '<span class="sh-skill-lvl" title="Bonus permanent, déjà inclus dans vos caractéristiques">🛡 passive</span>'
+			? pin + (c.action_piege
+				? '<span class="sh-skill-lvl" title="Action de combat : à placer dans la barre">⚔ combat</span>'
+				: '<span class="sh-skill-lvl" title="Bonus permanent, déjà inclus dans vos caractéristiques">🛡 passive</span>')
 			: pin + (c.utilisable
 				? `<button type="button" class="sh-drop-btn" onclick="utiliserCompetence('${c.competence_id}', this)">Utiliser</button>`
 				: '<span class="sh-skill-lvl" title="Utilisable en combat seulement">⚔ combat</span>');
@@ -6236,6 +6240,8 @@ async function apprendreCompetence(competenceId, btn) {
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
 		_syncPoints(data.attribute_points);
+		// Compétence de piège : posée d'office dans la première case libre de la barre.
+		if (data.slots) { _barreSlots = data.slots; _renderBarreSlots(); }
 		_renderCompetences(data.competences);
 		_renderCompetencesApprenables(data.competences_apprenables);
 		_renderCaractsMod(data.caracts_detail);
