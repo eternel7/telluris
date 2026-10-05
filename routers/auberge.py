@@ -535,7 +535,9 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 
 	payload = _payload(character, lieu_doc, tables, messages)
 	payload.update({
-		"log": auberge.messages_nuit(lieu_doc, auberge.NUIT_LOG_LIGNES),
+		# Chez soi ⇔ propriété : `_acces_nuit` n'y laisse entrer que qui peut y dormir.
+		"log": auberge.messages_nuit(lieu_doc, auberge.NUIT_LOG_LIGNES,
+									 chez_soi=proprietes.est_propriete(lieu_doc)),
 		"vitals": vitals,
 		"cout": cout,
 		"magasins": magasins,

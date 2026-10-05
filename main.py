@@ -987,7 +987,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 		grid_doc, character.get("position"), est_auberge, _cat_proprietes, get_doc)
 	auberge_nuit = ({
 		"cout": 0 if dort_chez_soi else auberge_util.cout_nuit(grid_doc),
-		"log": auberge_util.messages_nuit(grid_doc, auberge_util.NUIT_LOG_LIGNES),
+		"log": auberge_util.messages_nuit(grid_doc, auberge_util.NUIT_LOG_LIGNES,
+										   chez_soi=dort_chez_soi),
 	} if (est_auberge or dort_chez_soi) else None)
 
 	# Ressource récoltable (événement de zone « ressource ») : résolue pour l'affichage initial

@@ -448,6 +448,17 @@ def test_le_log_replie_sur_le_defaut_quand_le_lieu_n_en_porte_pas():
 	assert set(sortie) <= set(auberge.MESSAGES_NUIT)
 
 
+def test_chez_soi_le_log_replie_sur_les_nuits_du_logement():
+	sortie = auberge.messages_nuit({}, 4, chez_soi=True)
+	assert len(sortie) == 4
+	assert set(sortie) <= set(auberge.MESSAGES_NUIT_LOGEMENT)
+
+
+def test_chez_soi_le_log_du_lieu_prime_encore():
+	lieu = {"nuit_messages": ["une", "deux"]}
+	assert set(auberge.messages_nuit(lieu, 2, chez_soi=True)) == {"une", "deux"}
+
+
 def test_le_log_garde_l_ordre_de_la_liste_d_origine():
 	"""⚠️ On tire QUOI montrer, pas DANS QUEL ORDRE : les lignes racontent une nuit qui
 	avance, de la salle qui se vide aux chariots d'avant l'aube."""

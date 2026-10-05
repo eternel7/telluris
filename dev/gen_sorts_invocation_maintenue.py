@@ -217,9 +217,12 @@ def construire(base: dict, autres: dict) -> tuple:
 	erreurs, avertissements, lignes, sorts = [], [], [], []
 	ecoles_pratiquees = {v.get("magie") for v in (base.get("rules:vocations") or {}).get("value") or []}
 	tous = {**autres, **base}
+	# Espèces invoquées par d'AUTRES sorts que ceux de cette table : une fois l'import fait,
+	# les nôtres sont en base, et deux lignes d'ici peuvent partager une espèce (la destinée).
+	ids_table = {"sort:" + spec[2] for spec in SORTS}
 	invoquees = {}
 	for d in tous.values():
-		if d.get("type") == "sort" and d.get("invocation"):
+		if d.get("type") == "sort" and d.get("invocation") and d["_id"] not in ids_table:
 			invoquees.setdefault((d.get("invocation") or {}).get("espece"), d["_id"])
 	# Lancement : le sort À DURÉE de même école et niveau, relu (jamais retapé).
 	a_duree = {(d.get("magie"), d.get("niveau")): d for d in tous.values()

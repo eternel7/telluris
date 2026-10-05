@@ -125,6 +125,84 @@ MESSAGES_NUIT_LOGEMENT = [
 	"Les premiers bruits de la rue commencent à revenir autour de la maison.",
 	"Une lumière grise entre peu à peu dans la pièce tandis que vous émergez du sommeil.",
 	"Le jour se lève sur votre logement, calme et silencieux après la nuit.",
+	"Une poutre semble gémir sous le poids du toit avant que la maison ne retrouve son calme.",
+	"Le bois refroidi de l'âtre laisse échapper un petit craquement sec.",
+	"Un souffle froid descend de l'escalier et traverse la pièce sans bruit.",
+	"Les rideaux bougent légèrement malgré les fenêtres fermées.",
+	"Une branche frotte contre le mur extérieur au rythme du vent.",
+	"Le toit laisse entendre quelques petits craquements tandis que la température baisse.",
+	"Un bruit sourd résonne dans la maison, sans que personne ne semble se réveiller.",
+	"Une goutte tombe du rebord d'une fenêtre et éclabousse le sol.",
+	"Le vent s'engouffre sous la porte et fait frissonner la flamme d'une chandelle.",
+	"Une chandelle oubliée achève de se consumer et laisse la pièce dans l'obscurité.",
+	"Une faible lueur de lune dessine les contours des meubles à travers les volets.",
+	"Les ombres des branches dansent un instant sur le mur avant de disparaître.",
+	"Une odeur de terre humide entre par une fenêtre mal fermée.",
+	"Quelqu'un tousse dans une maison voisine, puis la nuit reprend ses droits.",
+	"Un chien aboie une seule fois dans la rue avant de se rendormir.",
+	"Des sabots frappent brièvement les pavés, puis leur écho s'éloigne.",
+	"Un garde appelle au loin dans la rue, sa voix étouffée par les maisons.",
+	"Le tintement lointain d'une cloche marque une heure de plus dans la nuit.",
+	"Une fenêtre s'ouvre quelque part dans le voisinage, puis se referme presque aussitôt.",
+	"Une voix murmure derrière un mur avant de s'éteindre dans le silence.",
+	"Le logement craque doucement comme s'il s'éveillait avant de replonger dans le sommeil.",
+	"Le vent tourne autour de la maison et fait gémir la cheminée.",
+	"Quelques gouttes frappent le rebord de pierre de la fenêtre.",
+	"Une bourrasque soulève la poussière froide déposée près de la porte.",
+	"Le parfum du repas du soir persiste encore faiblement dans la pièce.",
+	"Une odeur de soupe refroidie et de bois brûlé flotte encore dans l'air.",
+	"Le linge suspendu près de l'âtre a refroidi pendant la nuit.",
+	"Les meubles projettent de longues silhouettes dans la faible lumière.",
+	"Une toile d'araignée tremble doucement dans un courant d'air.",
+	"Le plancher froid craque sous un mouvement à l'étage, puis tout redevient immobile.",
+	"Un bruit de vaisselle vient de la pièce voisine avant de disparaître.",
+	"Le vent soulève quelques feuilles mortes qui raclent contre la porte.",
+	"Une branche frappe trois fois contre le volet avant que le vent ne l'emporte ailleurs.",
+	"Une pluie plus forte réveille brièvement la maison avant de s'apaiser.",
+	"Le tonnerre gronde très loin, sans que l'orage ne semble se rapprocher.",
+	"Une éclaircie laisse entrer un mince rayon de lune entre deux nuages.",
+	"Le silence revient après une courte rafale qui a fait vibrer toute la maison.",
+	"Le feu éteint laisse derrière lui une chaleur faible mais encore perceptible.",
+	"Les pierres de l'âtre diffusent leurs dernières traces de chaleur dans la pièce.",
+	"Le froid de l'aube commence à remplacer doucement la chaleur de la nuit.",
+	"Une première lumière rosée apparaît derrière les volets.",
+	"Les bruits d'un voisin qui se lève annoncent que la nuit touche à sa fin.",
+	"Une porte s'ouvre dans la rue et laisse entrer un bref éclat de voix.",
+	"Un marchand prépare déjà son étal quelque part dans le quartier.",
+	"Des pas pressés commencent à résonner dans les rues encore désertes.",
+	"Une cloche sonne au loin et marque le début d'une nouvelle journée.",
+	"Les oiseaux commencent à chanter timidement derrière les toits.",
+	"Le logement s'emplit peu à peu des bruits familiers du matin.",
+	"Une odeur de pain chaud commence à flotter depuis une maison voisine.",
+	"Le jour gagne lentement la pièce et repousse les dernières ombres.",
+	"Le silence nocturne disparaît peu à peu sous les premiers bruits du quartier.",
+	"Après plusieurs heures de calme, la maison recommence doucement à vivre.",
+	
+	"Pourquoi les monstres existent-ils dans un monde où les hommes cherchent simplement à vivre en paix ?",
+    "Qui étaient réellement les trois frères qui ont découvert les premiers portails ?",
+    "Comment les anciens ont-ils appris à créer des portails sans disposer des connaissances que possèdent les Architectes aujourd'hui ?",
+    "Pourquoi certains anciens portails sont-ils encore parfaitement stables après tant de générations ?",
+    "Qu'est-ce qui a réellement provoqué la grande vague de mana ?",
+    "Pourquoi personne ne sait-il d'où venait la grande vague de mana ?",
+    "Pourquoi les cristaux de mana sont-ils si rares en dehors des donjons ?",
+    "D'où vient réellement la magie qui traverse Telluris ?",
+    "Pourquoi certains monstres semblent-ils exister depuis bien avant les premiers donjons ?",
+    "Comment les premiers hommes ont-ils survécu avant l'existence des cités fortifiées ?",
+    "Pourquoi les différentes Lignées d'Anthropes sont-elles si différentes alors qu'elles peuvent toutes avoir des enfants ensemble ?",
+    "Pourquoi les anciennes cartes comportent-elles autant de régions que personne ne semble avoir explorées ?",
+    "Que savent réellement les Templiers sur ce qui se trouve derrière les portails qu'ils gardent ?",
+    "Pourquoi les Architectes gardent-ils certains savoirs sur les portails aussi secrets ?",
+    "D'où vient la magie Sainte que les Paladins utilisent pour soigner les blessés ?",
+    "Pourquoi les peuples de Telluris racontent-ils des histoires si différentes sur les dieux ?",
+    "Les dieux interviennent-ils réellement dans la vie des Anthropes, ou est-ce seulement ce que nous voulons croire ?",
+    "Pourquoi certains anciens récits parlent-ils de royaumes qui ne figurent sur aucune carte de Telluris ?",
+    "Que pensent réellement les Templiers lorsqu'ils voient quelque chose sortir d'un portail qu'ils ne comprennent pas ?",
+    "Pourquoi certains donjons semblent-ils obéir à des règles différentes de celles de notre monde ?",
+    "Comment peut-on être certain que les frontières connues de Telluris sont réellement les limites du monde ?",
+    "Pourquoi trouve-t-on parfois dans les ruines des objets dont personne ne comprend l'usage ?",
+    "Qui a construit les premières cités et pourquoi ont-elles été établies à ces endroits précis ?",
+    "Pourquoi les anciens récits parlent-ils parfois de choses que personne ne peut plus expliquer aujourd'hui ?",
+    "Est-ce que les Architectes comprennent réellement les portails, ou savent-ils seulement reproduire ce que les anciens leur ont transmis ?",
 ]
 
 def now_epoch() -> int:
@@ -601,13 +679,18 @@ def cout_nuit(lieu_doc: dict | None = None) -> int:
 	return max(0, int(character_stats.AUBERGE_NUIT_COUT_CUIVRE))
 
 
-def messages_nuit(lieu_doc: dict | None, nombre: int = 6, rand_fn=None) -> list:
+def messages_nuit(lieu_doc: dict | None, nombre: int = 6, rand_fn=None,
+				  chez_soi: bool = False) -> list:
 	"""Le log de la nuit : `nombre` lignes tirées sans répétition. Le champ `nuit_messages` du
-	doc lieu PRIME sur `MESSAGES_NUIT` — patron du projet (défaut de code, donnée qui
-	l'emporte), pour qu'une auberge puisse raconter sa propre nuit."""
+	doc lieu PRIME sur le défaut de code — patron du projet (défaut de code, donnée qui
+	l'emporte), pour qu'une auberge ou un logis puisse raconter sa propre nuit.
+
+	Défaut : `MESSAGES_NUIT_LOGEMENT` quand on dort `chez_soi` (propriété ou chambre louée,
+	`proprietes.peut_dormir` — décidé par l'appelant, qui a déjà le lieu en main), sinon
+	`MESSAGES_NUIT` : la salle commune qui se vide n'a rien à faire dans sa propre maison."""
 	source = [str(m) for m in ((lieu_doc or {}).get("nuit_messages") or []) if str(m).strip()]
 	if not source:
-		source = list(MESSAGES_NUIT)
+		source = list(MESSAGES_NUIT_LOGEMENT if chez_soi else MESSAGES_NUIT)
 	voulu = max(1, min(int(nombre or 1), len(source)))
 	if rand_fn is None:
 		import random
