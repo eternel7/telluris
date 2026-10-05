@@ -288,7 +288,7 @@
     "type": "item",
     "nom": "Armure de cuir gravée de runes encensé Hanté en adamantite",
     "icon": "🧥",
-    "description": "Armure de cuir dont chaque pièce porte des runes gravées au fer : elles protègent le corps et aiguisent l'esprit.",
+    "description": "Armure de cuir dont chaque pièce porte des runes gravées au fer : elles protègent le corps et aiguisent l'esprit. Façonné sur mesure : Encens, Fragments d'âme, Lingot d'adamantite.",
     "categorie": "armure",
     "sous_categorie": "",
     "slots": [
@@ -348,7 +348,7 @@
     "type": "item",
     "nom": "Armure de cuir gravée de runes Bestial en adamantite vivante",
     "icon": "🧥",
-    "description": "Armure de cuir dont chaque pièce porte des runes gravées au fer : elles protègent le corps et aiguisent l'esprit.",
+    "description": "Armure de cuir dont chaque pièce porte des runes gravées au fer : elles protègent le corps et aiguisent l'esprit. Façonné sur mesure : Fiole de sang de bête, Lingot d'adamantite, Débris animés.",
     "categorie": "armure",
     "sous_categorie": "",
     "slots": [
@@ -836,7 +836,7 @@
     "type": "item",
     "nom": "Bottes de cuir épais Bestial Hanté en adamantite",
     "icon": "👢",
-    "description": "Bottes de cuir épais, imperméables et faites pour durer.",
+    "description": "Bottes de cuir épais, imperméables et faites pour durer. Façonné sur mesure : Fiole de sang de bête, Fragments d'âme, Lingot d'adamantite.",
     "categorie": "armure",
     "sous_categorie": "",
     "slots": [
@@ -1572,7 +1572,7 @@
     "type": "item",
     "nom": "Calotte de cuir runé d’Améthyste en adamantite Relique",
     "icon": "🎓",
-    "description": "Calotte de cuir gravée de runes, qui garde la tête froide et l'esprit clair.",
+    "description": "Calotte de cuir gravée de runes, qui garde la tête froide et l'esprit clair. Façonné sur mesure : Poudre d'améthyste, Lingot d'adamantite, Relique.",
     "categorie": "armure",
     "sous_categorie": "",
     "slots": [
@@ -4491,7 +4491,7 @@
     "type": "item",
     "nom": "Lance rituelle des Sépultures en adamantite vivante",
     "icon": "🔱",
-    "description": "Lance gravée de signes rituels, plus faite pour l'office que pour la guerre — mais qui sait piquer.",
+    "description": "Lance gravée de signes rituels, plus faite pour l'office que pour la guerre — mais qui sait piquer. Façonné sur mesure : Sel des sépultures, Lingot d'adamantite, Débris animés.",
     "categorie": "arme",
     "sous_categorie": "",
     "slots": [
@@ -4559,7 +4559,7 @@
     "type": "item",
     "nom": "Lance rituelle aux ferrures d'argent",
     "icon": "🔱",
-    "description": "Lance gravée de signes rituels, plus faite pour l'office que pour la guerre — mais qui sait piquer.",
+    "description": "Lance gravée de signes rituels, plus faite pour l'office que pour la guerre — mais qui sait piquer. Façonné sur mesure : Lingot d'argent.",
     "categorie": "arme",
     "sous_categorie": "",
     "slots": [
@@ -4727,7 +4727,7 @@
     "type": "item",
     "nom": "Masse d'armes à brides Empoisonné Démoniaque en mithril",
     "icon": "⚙️",
-    "description": "Masse d'armes à ailettes : là où elle frappe, l'armure se tord et les côtes plient.",
+    "description": "Masse d'armes à ailettes : là où elle frappe, l'armure se tord et les côtes plient. Façonné sur mesure : Poison de base, Sang de démon séché, Lingot de mithril.",
     "categorie": "arme",
     "sous_categorie": "",
     "slots": [
@@ -5327,7 +5327,7 @@
     "type": "item",
     "nom": "Pelta du Courage vivante en mithril",
     "icon": "🌙",
-    "description": "Petit bouclier léger en croissant, celui des tirailleurs.",
+    "description": "Petit bouclier léger en croissant, celui des tirailleurs. Façonné sur mesure : Cœur, Débris animés, Lingot de mithril.",
     "categorie": "armure",
     "sous_categorie": "bouclier",
     "slots": [
@@ -7494,7 +7494,7 @@
     "type": "item",
     "nom": "Vêtements de peau à motifs totémiques du Reflet serti d'une gemme à incrustations précieuses",
     "icon": "🐾",
-    "description": "Vêtements de peau peints de motifs totémiques, qui placent leur porteur sous la garde des esprits du clan.",
+    "description": "Vêtements de peau peints de motifs totémiques, qui placent leur porteur sous la garde des esprits du clan. Façonné sur mesure : Poudre de miroir, Gemme brute, Grenaille précieuse.",
     "categorie": "armure",
     "sous_categorie": "",
     "slots": [
@@ -7548,7 +7548,7 @@
     "type": "item",
     "nom": "Vêtements de peau à motifs totémiques d’Améthyste en orichalque Relique",
     "icon": "🐾",
-    "description": "Vêtements de peau peints de motifs totémiques, qui placent leur porteur sous la garde des esprits du clan.",
+    "description": "Vêtements de peau peints de motifs totémiques, qui placent leur porteur sous la garde des esprits du clan. Façonné sur mesure : Poudre d'améthyste, Lingot d'orichalque, Relique.",
     "categorie": "armure",
     "sous_categorie": "",
     "slots": [
@@ -7821,7 +7821,7 @@
     "type": "item",
     "nom": "Bijou Ténébreux serti d'une gemme alchimique",
     "icon": "💍",
-    "description": "Anneau de métal ouvragé, porté pour le plaisir ou pour le rang.",
+    "description": "Anneau de métal ouvragé, porté pour le plaisir ou pour le rang. Façonné sur mesure : Sel noir, Gemme brute, Poudre alchimique.",
     "categorie": "armure",
     "sous_categorie": "",
     "slots": [
@@ -8405,7 +8405,7 @@
     "type": "item",
     "nom": "Focus magique Relique",
     "icon": "🔮",
-    "description": "Pierre taillée montée sur un manche court, qui rassemble le flux et rend des forces au mage.",
+    "description": "Pierre taillée montée sur un manche court, qui rassemble le flux et rend des forces au mage. Façonné sur mesure : Relique.",
     "categorie": "catalyseur",
     "sous_categorie": "",
     "slots": [
@@ -8453,7 +8453,7 @@
     "type": "item",
     "nom": "Focus magique Alchimique Ténébreux Relique",
     "icon": "🔮",
-    "description": "Pierre taillée montée sur un manche court, qui rassemble le flux et rend des forces au mage.",
+    "description": "Pierre taillée montée sur un manche court, qui rassemble le flux et rend des forces au mage. Façonné sur mesure : Réactif brut, Sel noir, Relique.",
     "categorie": "catalyseur",
     "sous_categorie": "",
     "slots": [
@@ -8513,7 +8513,7 @@
     "type": "item",
     "nom": "Focus magique Alchimique",
     "icon": "🔮",
-    "description": "Pierre taillée montée sur un manche court, qui rassemble le flux et rend des forces au mage.",
+    "description": "Pierre taillée montée sur un manche court, qui rassemble le flux et rend des forces au mage. Façonné sur mesure : Réactif brut.",
     "categorie": "catalyseur",
     "sous_categorie": "",
     "slots": [
@@ -8555,7 +8555,7 @@
     "type": "item",
     "nom": "Focus magique Ténébreux",
     "icon": "🔮",
-    "description": "Pierre taillée montée sur un manche court, qui rassemble le flux et rend des forces au mage.",
+    "description": "Pierre taillée montée sur un manche court, qui rassemble le flux et rend des forces au mage. Façonné sur mesure : Sel noir.",
     "categorie": "catalyseur",
     "sous_categorie": "",
     "slots": [
@@ -8604,7 +8604,7 @@
     "type": "item",
     "nom": "Focus magique Démoniaque",
     "icon": "🔮",
-    "description": "Pierre taillée montée sur un manche court, qui rassemble le flux et rend des forces au mage.",
+    "description": "Pierre taillée montée sur un manche court, qui rassemble le flux et rend des forces au mage. Façonné sur mesure : Sang de démon séché.",
     "categorie": "catalyseur",
     "sous_categorie": "",
     "slots": [
@@ -9308,7 +9308,7 @@
     "type": "item",
     "nom": "Talisman béni Ténébreux vivante",
     "icon": "🧿",
-    "description": "Talisman gravé de signes protecteurs, porté au cou.",
+    "description": "Talisman gravé de signes protecteurs, porté au cou. Façonné sur mesure : Eau bénite, Sel noir, Débris animés.",
     "categorie": "armure",
     "sous_categorie": "",
     "slots": [

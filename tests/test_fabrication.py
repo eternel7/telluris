@@ -257,6 +257,21 @@ def test_variante_ne_recopie_ni_rev_ni_fabrication_du_base():
 	assert doc["fabrication"]["base_item"] == "item:Epee_longue"
 
 
+def test_description_garde_le_texte_initial_puis_nomme_les_matieres():
+	base = dict(EPEE, description="Lame droite à une main.")
+	doc = fabrication.variante_doc(base, [(CRISTAL, 1), (ACIER, 2)])
+	# Matières dans l'ordre NORMALISÉ (par id), quantité affichée au-delà de 1.
+	assert doc["description"] == \
+		"Lame droite à une main. Façonné sur mesure : Cristal de feu, Lingot d'acier ×2."
+	# Même combinaison saisie dans un autre ordre : même texte.
+	assert fabrication.variante_doc(base, [(ACIER, 2), (CRISTAL, 1)])["description"] == doc["description"]
+
+
+def test_description_sans_texte_initial_ni_matiere():
+	assert fabrication.description_variante(EPEE, [(ACIER, 1)]) == "Façonné sur mesure : Lingot d'acier."
+	assert "description" not in fabrication.variante_doc(EPEE, [])
+
+
 def test_nom_compose_dans_lordre_normalise():
 	# L'ordre d'affichage suit l'ordre des matières telles qu'on les passe : c'est l'appelant
 	# qui normalise avant d'appeler. Les deux fragments doivent être présents.

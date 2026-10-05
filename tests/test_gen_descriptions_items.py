@@ -1,8 +1,9 @@
 """dev/gen_descriptions_items.py — une description pour chaque item qui n'en a pas, jamais plus.
 
-Verrouille : un item déjà décrit n'est jamais réécrit (import PUT complet), une variante hérite
-du texte NEUF de son modèle, le bois se décrit par essence × forme, et un item qu'aucune source
-ne couvre fait échouer le lot au lieu de recevoir un texte par défaut.
+Verrouille : un item déjà décrit n'est jamais réécrit (import PUT complet), une variante suit
+`fabrication.description_variante` sur le texte NEUF de son modèle, le bois se décrit par
+essence × forme, et un item qu'aucune source ne couvre fait échouer le lot au lieu de recevoir
+un texte par défaut.
 """
 
 import os
@@ -11,12 +12,16 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dev import gen_descriptions_items as gen
+from utils import fabrication
 
 DAGUE = {"_id": "item:Dague", "_rev": "3-x", "type": "item", "nom": "Dague", "icon": "🗡️",
 		 "categorie": "arme", "sous_categorie": "", "slots": ["main_droite"], "poids": 0.3}
+MITHRIL = {"_id": "item:mithril", "type": "item", "nom": "Lingot de mithril",
+		   "description": "Texte de la matière."}
 DAGUE_MITHRIL = {"_id": "item:Dague_0123abcd", "_rev": "1-x", "type": "item",
 				 "nom": "Dague en mithril", "icon": "🗡️", "categorie": "arme",
-				 "fabrication": {"base_item": "item:Dague", "matieres": []}}
+				 "fabrication": {"base_item": "item:Dague",
+								 "matieres": [{"item": "item:mithril", "quantite": 1}]}}
 RONDIN = {"_id": "item:Rondin_de_Chene", "type": "item", "nom": "Rondin de Chêne", "icon": "🪵",
 		  "categorie": "composant", "sous_categorie": "rondin",
 		  "tags": ["bois", "a_couper", "essence_chene"]}
@@ -46,17 +51,21 @@ def test_une_description_vide_compte_comme_absente():
 	assert sortie[0]["description"] == gen.DESCRIPTIONS["Dague"]
 
 
-def test_la_variante_herite_du_texte_neuf_de_son_modele():
-	sortie, manquants, _i = gen.generer([DAGUE_MITHRIL, DAGUE])
+def test_la_variante_suit_la_regle_de_fabrication_avec_le_texte_neuf_du_modele():
+	sortie, manquants, _i = gen.generer([DAGUE_MITHRIL, DAGUE, MITHRIL])
 	assert manquants == []
 	par_id = _par_id(sortie)
-	assert par_id["item:Dague_0123abcd"]["description"] == par_id["item:Dague"]["description"]
+	attendu = fabrication.description_variante(
+		dict(DAGUE, description=gen.DESCRIPTIONS["Dague"]), [(MITHRIL, 1)])
+	assert par_id["item:Dague_0123abcd"]["description"] == attendu
+	assert attendu.startswith(gen.DESCRIPTIONS["Dague"])
+	assert "Lingot de mithril" in attendu
 
 
 def test_la_variante_reprend_la_description_deja_en_base_du_modele():
-	sortie, _m, _i = gen.generer([DAGUE_MITHRIL, dict(DAGUE, description="Texte en base.")])
+	sortie, _m, _i = gen.generer([DAGUE_MITHRIL, dict(DAGUE, description="Texte en base."), MITHRIL])
 	assert [d["_id"] for d in sortie] == ["item:Dague_0123abcd"]
-	assert sortie[0]["description"] == "Texte en base."
+	assert sortie[0]["description"].startswith("Texte en base. ")
 
 
 def test_le_bois_se_decrit_par_essence_et_forme():

@@ -303,6 +303,25 @@ def nom_variante(base_doc: dict, matieres_docs: list) -> str:
 	return " ".join([base_nom] + fragments) if fragments else base_nom
 
 
+def description_variante(base_doc: dict, matieres_docs: list) -> str:
+	"""La description INITIALE du base, suivie de la ligne de façonnage qui nomme les matières
+	(« Façonné sur mesure : Lingot de mithril, Cuir ×2. »), dans l'ordre NORMALISÉ (par id),
+	comme le nom. Sans description au base, la ligne de façonnage seule ; sans rien, ""."""
+	noms, saisie = {}, []
+	for doc, quantite in matieres_docs:
+		item_id = (doc or {}).get("_id") or (doc or {}).get("item")
+		if item_id:
+			noms[item_id] = (doc or {}).get("nom") or _slug(item_id)
+			saisie.append({"item": item_id, "quantite": quantite})
+	morceaux = []
+	for m in normaliser_matieres(saisie):
+		nom = noms[m["item"]]
+		morceaux.append("%s ×%d" % (nom, m["quantite"]) if m["quantite"] > 1 else nom)
+	initiale = str((base_doc or {}).get("description") or "").strip()
+	facon = ("Façonné sur mesure : %s." % ", ".join(morceaux)) if morceaux else ""
+	return " ".join(p for p in (initiale, facon) if p)
+
+
 # ── Construction des docs ────────────────────────────────────────────────────────
 
 # Champs du doc de base repris tels quels par la variante. ⚠️ Liste blanche elle aussi : on
@@ -311,7 +330,7 @@ def nom_variante(base_doc: dict, matieres_docs: list) -> str:
 # est recalculée et figée, cf. `valeur_variante`).
 CHAMPS_HERITES = (
 	"icon", "categorie", "sous_categorie", "slots", "tags", "deux_mains",
-	"cible", "description",
+	"cible",
 )
 
 
@@ -384,6 +403,9 @@ def variante_doc(base_doc: dict, matieres_docs: list, lieu_id: str = "",
 		if (base_doc or {}).get(cle) is not None:
 			doc[cle] = (base_doc or {}).get(cle)
 	doc.setdefault("slots", [])
+	description = description_variante(base_doc, matieres_docs)
+	if description:
+		doc["description"] = description
 	doc.update(mods)
 
 	# Poids : le base peut porter [min, max] (poids d'instance) — le facteur s'applique aux deux

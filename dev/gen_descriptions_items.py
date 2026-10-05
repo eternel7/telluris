@@ -3,9 +3,9 @@
 # Donne une `description` à tous les items du dump qui n'en ont pas.
 #
 # Trois sources, dans cet ordre :
-# - VARIANTE sur mesure (bloc `fabrication.base_item`) : la description de son modèle, comme
-#   le fait déjà `fabrication.CHAMPS_HERITES` pour une variante neuve — c'est parce que le
-#   modèle n'en avait pas que la variante n'en a pas.
+# - VARIANTE sur mesure (bloc `fabrication.base_item`) : `fabrication.description_variante`,
+#   la règle d'une variante neuve — description initiale du modèle (en base ou décidée ici)
+#   puis la ligne de façonnage qui nomme les matières.
 # - BOIS (tag `essence_<x>` + sous-catégorie de découpe) : forme × essence, cf. `FORMES_BOIS`
 #   et `ESSENCES` — 15 essences × 6 formes, une table à la main serait 86 variations d'une
 #   même phrase.
@@ -29,6 +29,10 @@ import os
 import sys
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, RACINE)
+
+from utils import fabrication  # noqa: E402
+
 SORTIE = "jsons/descriptions_items_a_importer.json"
 
 # essence (suffixe du tag `essence_<x>`) → (« d'alisier », trait du bois).
@@ -429,12 +433,18 @@ def description_de(doc: dict, items: dict, neuves: dict):
 
 	`items` = tous les items du dump (par `_id`), `neuves` = descriptions déjà décidées
 	(par `_id`) — une variante dont le modèle vient d'être décrit en hérite."""
-	base_id = (doc.get("fabrication") or {}).get("base_item")
+	fab = doc.get("fabrication") or {}
+	base_id = fab.get("base_item")
 	if base_id:
-		base = items.get(base_id) or {}
-		if a_une_description(base):
-			return base["description"]
-		return neuves.get(base_id) or DESCRIPTIONS.get(_slug(base_id))
+		base = dict(items.get(base_id) or {"_id": base_id})
+		if not a_une_description(base):
+			initiale = neuves.get(base_id) or DESCRIPTIONS.get(_slug(base_id))
+			if not initiale:
+				return None
+			base["description"] = initiale
+		matieres = [(items.get(m["item"]) or {"_id": m["item"]}, m["quantite"])
+					for m in fabrication.normaliser_matieres(fab.get("matieres"))]
+		return fabrication.description_variante(base, matieres)
 	essence = _essence(doc)
 	forme = FORMES_BOIS.get(doc.get("sous_categorie") or "")
 	if essence in ESSENCES and forme:
