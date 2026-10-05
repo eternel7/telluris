@@ -1,8 +1,9 @@
 # Compétences de vocation — niveaux 3, 6 et 10
 
-**Proposition de contenu, pas du contenu importé.** Rien de ce document n'est en base. Aucun
-code de jeu n'a été modifié. Chaque bloc `json` est un doc CouchDB **complet**, prêt à coller
-dans `/admin/doc` ou à rassembler dans un `jsons/*_a_importer.json` une fois la liste arbitrée.
+**Ce document est la SOURCE de l'import.** Chaque bloc `json` est un doc CouchDB **complet** ;
+`python dev/gen_competences_3_6_10.py` les rassemble dans
+`jsons/competences_vocations_3_6_10_a_importer.json` (carte d'import de `/admin`) — après le
+vérificateur, et rien n'est écrit s'il échoue. Retoucher ici, puis régénérer.
 
 Vérificateur : `python dev/check_competences_doc.py` — relit ce fichier, normalise chaque bloc
 par le moteur réel et contrôle les invariants listés plus bas. Il échoue en code 1.

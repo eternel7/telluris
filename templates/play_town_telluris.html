@@ -6444,10 +6444,9 @@ function blocRemainingMin(){ return Math.max(1, Math.ceil((MARCHAND.blocDeadline
 
 function setMarchandState(data) {
 	if (typeof data.relation === 'number') MARCHAND.relation = data.relation;
-	// Négociant (utils/negoce.py) : `quotes` dit s'il l'est ; la commission suit la relation et
-	// revient aussi de `sell_item` (la fidélité peut l'avoir fait bouger).
+	// Négociant (utils/negoce.py) : `quotes` dit s'il l'est. Sa commission n'est PAS montrée
+	// au joueur : elle est déjà fondue dans les prix de rachat affichés.
 	if (typeof data.negociant === 'boolean') MARCHAND.negociant = data.negociant;
-	if ('commission' in data) MARCHAND.commission = data.commission;
 	if (typeof data.bloque_jusqu === 'number') {
 		const now = (typeof data.now === 'number') ? data.now : Math.floor(Date.now() / 1000);
 		const remaining = Math.max(0, data.bloque_jusqu - now);
@@ -6917,7 +6916,6 @@ function updateRelationBadge() {
 	}
 	el.classList.remove('relation-bad');
 	el.textContent = '🤝 Relation : ' + r
-		+ (MARCHAND.negociant && typeof MARCHAND.commission === 'number' ? ' · commission ' + MARCHAND.commission + ' % (selon votre relation)' : '')
 		+ (isMarchBlocked() ? ' · marchandage bloqué (~' + blocRemainingMin() + ' min)' : '');
 }
 

@@ -744,10 +744,19 @@ def test_le_generateur_passe_ses_garde_fous_sur_le_dump_et_est_idempotent(tmp_pa
 	premier = sortie.read_text(encoding="utf-8")
 	assert gen_pieges.main(["--sortie", str(sortie)]) == 0
 	assert sortie.read_text(encoding="utf-8") == premier
-	# Pas un fichier vide : tout le lot part (rien de tout cela n'est encore en base).
-	attendu = (len(gen_pieges.docs_competences()) + len(gen_pieges.docs_objets())
-			   + len(gen_pieges.ANIMATIONS))
-	assert len(json.loads(premier)) == attendu
+	# Rien ne se perd : chaque doc du lot est soit ÉCRIT, soit déjà présent À L'IDENTIQUE
+	# (dump ou autre import) — l'idempotence le saute. ⚠️ On ne compte pas les docs écrits :
+	# le nombre dépend du dump committé (un dump pris après l'import ne laisse plus rien à
+	# écrire), et le test doit tenir quel que soit son âge.
+	base = {d["_id"]: d for d in json.load(open(gen_pieges.dernier_dump(), encoding="utf-8"))["docs"]}
+	autres = gen_pieges.docs_des_autres_imports()
+	lot = gen_pieges.docs_competences() + gen_pieges.docs_objets() + gen_pieges.docs_animations(base)
+	assert len(lot) == (len(gen_pieges.docs_competences()) + len(gen_pieges.docs_objets())
+						+ len(gen_pieges.ANIMATIONS))
+	ecrits = {d["_id"]: d for d in json.loads(premier)}
+	for doc in lot:
+		deja = base.get(doc["_id"]) or autres.get(doc["_id"])
+		assert ecrits.get(doc["_id"]) == doc or gen_pieges._sans_rev(deja) == doc, doc["_id"]
 
 
 def test_les_competences_de_pieges_ont_leur_case_de_barre():

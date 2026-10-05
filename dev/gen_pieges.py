@@ -234,6 +234,16 @@ CHAMPS_SPRITE = ("fichier", "largeur", "hauteur", "colonnes", "lignes", "sens_li
 CHAMPS_SON = ("son", "son_debut_ms", "son_fin_ms", "son_volume")
 
 
+def _affiche(chemin) -> str:
+	"""Chemin relatif au dépôt pour l'affichage. ⚠️ Sous Windows, `relpath` LÈVE si le chemin
+	est sur un autre lecteur que le dépôt (sortie dans un dossier temporaire sur C:, dépôt
+	sur Z:) : on montre alors le chemin absolu plutôt que d'échouer après avoir écrit."""
+	try:
+		return os.path.relpath(chemin, RACINE)
+	except ValueError:
+		return os.path.abspath(chemin)
+
+
 def dernier_dump() -> str:
 	dumps = sorted(glob.glob(os.path.join(DOSSIER_JSONS, "telluris-dump-*.json")))
 	if not dumps:
@@ -423,8 +433,8 @@ def main(argv=None) -> int:
 	with open(args.sortie, "w", encoding="utf-8", newline="\n") as f:
 		json.dump(a_ecrire, f, ensure_ascii=False, indent="\t")
 		f.write("\n")
-	print(f"Dump lu : {os.path.relpath(chemin, RACINE)}")
-	print(f"{len(a_ecrire)} doc(s) écrits dans {os.path.relpath(args.sortie, RACINE)}"
+	print(f"Dump lu : {_affiche(chemin)}")
+	print(f"{len(a_ecrire)} doc(s) écrits dans {_affiche(args.sortie)}"
 		  + (f", {len(sautes)} déjà en base à l'identique" if sautes else ""))
 	return 0
 

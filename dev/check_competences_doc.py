@@ -41,6 +41,9 @@ from utils.zones_effet import normaliser_zone  # noqa: E402
 
 DOC_DEFAUT = os.path.join(RACINE, "docs", "competences_vocations_3_6_10.md")
 DOSSIER_JSONS = os.path.join(RACINE, "jsons")
+# L'import que `dev/gen_competences_3_6_10.py` tire de CE document : il n'est pas un
+# référentiel — le relire ferait de chaque bloc une collision avec lui-même.
+IMPORT_DU_DOC = "competences_vocations_3_6_10_a_importer.json"
 
 NIVEAUX_ATTENDUS = (3, 6, 10)
 # Champs qui n'ont aucun effet sur une passive : les y laisser est trompeur à la relecture
@@ -114,7 +117,7 @@ def competences_des_imports() -> dict:
 	if not os.path.isdir(DOSSIER_JSONS):
 		return out
 	for nom in sorted(os.listdir(DOSSIER_JSONS)):
-		if not nom.endswith("_a_importer.json"):
+		if not nom.endswith("_a_importer.json") or nom == IMPORT_DU_DOC:
 			continue
 		try:
 			contenu = json.load(open(os.path.join(DOSSIER_JSONS, nom), encoding="utf-8"))
@@ -139,7 +142,7 @@ def ids_des_imports() -> set:
 	if not os.path.isdir(DOSSIER_JSONS):
 		return out
 	for nom in os.listdir(DOSSIER_JSONS):
-		if not nom.endswith("_a_importer.json"):
+		if not nom.endswith("_a_importer.json") or nom == IMPORT_DU_DOC:
 			continue
 		try:
 			contenu = json.load(open(os.path.join(DOSSIER_JSONS, nom), encoding="utf-8"))
