@@ -376,8 +376,7 @@
 }
 /* ⚠️ Propriétés de fond DÉTAILLÉES avec !important, jamais le raccourci `background` : le
    portrait arrive en `style` inline (image, et cadrage de fiche via applyPortraitTo) — un
-   raccourci effacerait l'image, un réglage sans !important perdrait contre le cadrage. Une
-   espèce se montre ENTIÈRE dans sa forme. */
+   raccourci effacerait l'image, un réglage sans !important perdrait contre le cadrage. */
 .gabarit .jt-portrait {
 	width: 100%; height: 100%;
 	background-size: cover !important;
@@ -385,6 +384,21 @@
 	background-repeat: no-repeat !important;
 	display: flex; align-items: center; justify-content: center;
 	font-size: 13px; font-weight: bold; color: #ffaaaa;
+}
+/* Avec une IMAGE, l'espèce se montre ENTIÈRE et DÉBORDE du jeton : `.jt-debout` n'est qu'un
+   carré du PETIT côté de l'emprise (2×2 pour une tarasque 3×2), où `cover` coupait tête et
+   queue. Boîte carrée du GRAND côté (`--jm`), image en `contain` posée au BAS (les pattes sur
+   le jeton, la barre de PV dessous) : elle dépasse sur les côtés et vers le haut.
+   `flex: none` : sinon la colonne flex la ramènerait à la taille du calque.
+   `pointer-events: none` : le débord ne vole pas le clic des cases voisines — la cible
+   reste l'emprise (`.jt-forme`). */
+.gabarit .jt-portrait[style*="background-image"] {
+	flex: none;
+	width: calc(var(--step) * var(--jm, 1));
+	height: calc(var(--step) * var(--jm, 1));
+	background-size: contain !important;
+	background-position: center bottom !important;
+	pointer-events: none;
 }
 /* Halo de ciblage : `filter` sur la BOÎTE, jamais sur la forme — une ombre posée sous un
    `clip-path` serait rognée avec elle. */
@@ -541,6 +555,10 @@
 	.enemy-panel, .character-card {
 		max-width: 280px;
 	}
+	/* Le panneau ennemi s'étire sur la hauteur de la ligne (fixée par la carte et le panneau
+	   perso) ; sous le portrait, le journal prend tout le reste. */
+	.enemy-panel { align-self: stretch; }
+	.enemy-panel > .combat-log { flex: 1 1 0; min-height: 120px; }
 }
 .character-card { grid-area: perso; display: flex; flex-direction: column; }
 .combat-center  { grid-area: center; }
@@ -585,9 +603,17 @@
 	min-width: 0;
 	border-radius: 8px;
 }
-/* ⚠️ Cadre à proportions FIXES : sa hauteur suivait celle de l'image — différente d'un monstre
-   à l'autre, et NULLE le temps qu'une nouvelle image se charge. `object-fit: cover` recadre. */
-.enemy-portrait { flex: none; aspect-ratio: 3 / 3; }
+/* Cadre aux proportions de l'IMAGE : `--portrait-ratio` (largeur / hauteur) est posé par
+   `_enemyPortraitRatio` au chargement de l'image. ⚠️ Pas de hauteur prise sur l'image
+   elle-même : elle serait NULLE le temps qu'une nouvelle image se charge — le cadre garde
+   le ratio de la précédente (carré au départ). La largeur est bornée pour que la hauteur
+   ne dépasse pas 360 px : une image haute rétrécit le cadre au lieu d'y laisser des bandes. */
+.enemy-portrait {
+	flex: none; align-self: center;
+	aspect-ratio: var(--portrait-ratio, 1);
+	width: min(100%, calc(360px * var(--portrait-ratio, 1)));
+	max-height: none;
+}
 .sheet-left-portrait img, .enemy-portrait img {
 	width: 100%; height: 100%;
 	object-fit: contain; object-position: bottom center;
@@ -778,9 +804,14 @@
 	background: var(--panel-bg);
 	border: 1.5px solid var(--border-color); border-radius: 10px;
 	box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
-	padding: 8px 10px; height: 160px;
+	padding: 8px 10px;
 	overflow-y: auto; display: flex; flex-direction: column;
 	gap: 2px; scroll-behavior: smooth;
+	/* `contain: size` : les lignes du journal ne dictent JAMAIS la hauteur — sans lui, chaque
+	   ligne ajoutée allongeait la ligne de grille (et la page) au lieu de défiler (§17).
+	   Mobile (une colonne, portrait masqué) : la hauteur est ce plancher. Bureau : il prend
+	   tout le reste du panneau, cf. media query ci-dessous. */
+	contain: size;
 	min-height: 250px;
 	width: 100%;
 	scrollbar-width: thin; /* Rend la barre plus fine */
@@ -1635,6 +1666,20 @@ function renderIncantation(inc) {
 		`${Math.max(0, Math.min(100, Math.round(investis * 100 / total)))}%`;
 }
 
+// Le cadre du portrait prend les proportions de l'image CHARGÉE (CSS `--portrait-ratio`) ;
+// une image absente ou en échec laisse le ratio précédent.
+function _enemyPortraitRatio(img) {
+	if (!img || !img.naturalWidth || !img.naturalHeight) return;
+	const cadre = document.getElementById('enemy-portrait');
+	if (cadre) cadre.style.setProperty('--portrait-ratio', (img.naturalWidth / img.naturalHeight).toFixed(4));
+}
+(function () {
+	const img = document.getElementById('enemy-portrait-img');
+	if (!img) return;
+	img.addEventListener('load', () => _enemyPortraitRatio(img));
+	if (img.complete) _enemyPortraitRatio(img);   // déjà en cache avant ce script
+})();
+
 // Panneau droit : portrait du dernier ennemi ciblé/attaquant + ses barres PV/PM.
 let lastEnemyId = null;
 function renderEnemyPortrait(data) {
@@ -2053,6 +2098,7 @@ function _placerGabarit(tok, a, j) {
 	tok.style.setProperty('--jw', e[2]);
 	tok.style.setProperty('--jh', e[3]);
 	tok.style.setProperty('--jd', Math.min(e[2], e[3]));
+	tok.style.setProperty('--jm', Math.max(e[2], e[3]));
 	tok.style.transform = `translateX(-50%) rotate(${ang}deg)`
 		+ ` translate(calc(var(--step) * ${c[0] - j.pos.x}), calc(var(--step) * ${c[1] - j.pos.y}))`;
 	const debout = tok.querySelector('.jt-debout');
