@@ -5829,11 +5829,13 @@ function _zoneLabel(capa) {
 // Étiquette d'un sort d'INVOCATION. Elle REMPLACE `_sortEffetsLabel` plutôt que de s'y
 // ajouter : une invocation n'a aucun `effets` (elle fait apparaître une créature, elle ne
 // pose rien sur personne), sa ligne de description resterait vide.
+// ⚠️ Sort MAINTENU : la créature ne décompte pas ses tours, l'entretien la tient (cf.
+// `combat._enregistrer_concentration`) — sa `duree` est inerte, l'annoncer serait faux.
 function _invocationLabel(s) {
 	const inv = s && s.invocation;
 	if (!inv) return '';
 	return `🐾 invoque ${inv.nombre > 1 ? inv.nombre + ' créatures' : 'une créature'}`
-		+ ` pendant ${inv.duree} tours`;
+		+ (s.maintien ? ' tant que vous l\'entretenez' : ` pendant ${inv.duree} tours`);
 }
 function _sortDomId(sortId) { return sortId.replace(/[^a-zA-Z0-9_-]/g, '_'); }
 

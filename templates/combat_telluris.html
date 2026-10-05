@@ -3451,7 +3451,9 @@ function sortLabel(s) {
 	if (s.effets.furtivite) parts.push('🥷 furtivité');
 	// Invocation : ses `effets` sont vides par construction (elle fait apparaître une
 	// créature, elle ne pose rien sur personne) — sans cette ligne la case n'annoncerait rien.
-	if (s.invocation) parts.push(`🐾 ×${s.invocation.nombre}, ⏳${s.invocation.duree} tours`);
+	// Maintenue : la créature reste tant que l'entretien est payé, sa `duree` est inerte.
+	if (s.invocation) parts.push(`🐾 ×${s.invocation.nombre}, `
+		+ (s.maintien ? `🔄 ${s.maintien} PM/round` : `⏳${s.invocation.duree} tours`));
 	// Zone d'effet : sur mobile c'est le SEUL endroit où elle se lit (pas de survol,
 	// donc pas d'aperçu sur la carte).
 	const zone = libelleZone(normaliserZone(s.zone), s.cible);
