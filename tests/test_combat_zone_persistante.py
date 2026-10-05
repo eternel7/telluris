@@ -124,6 +124,17 @@ def test_un_monstre_qui_commence_son_tour_dans_le_mur_brule():
 	assert any("brûle dans Mur de feu" in t for t in textes(doc))
 
 
+def test_chaque_brulure_rejoue_l_animation_du_sort():
+	loup = monstre(x=8, y=5)
+	doc = combat([joueur(pm=60)], [loup])
+	_lancer_mur(doc, animation="animation:mur_de_feu")
+	nb = len(doc["log"])
+	doc["tour"] = 2
+	_reset_turn_budget(loup, doc)
+	brulures = [e for e in doc["log"][nb:] if "brûle dans" in e["texte"]]
+	assert brulures and all(e["vfx"]["anim"] == "animation:mur_de_feu" for e in brulures)
+
+
 def test_hors_du_mur_rien_ne_brule():
 	loup, ours = monstre(x=8, y=5), monstre(idx=1, x=10, y=5)
 	doc = combat([joueur(pm=60)], [loup, ours])
