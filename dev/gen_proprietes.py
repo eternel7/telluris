@@ -200,6 +200,8 @@ CATEGORIES = {
 	"cabinet_apothicaire": ["apothicairerie"],
 	"apothicairerie": ["apothicairerie", "grande_apothicairerie"],
 	"salle_depecage": ["boucherie"],
+	# Négociant (« marchand pur », utils/negoce.py) : le poste marchand existant, Demeure et Domaine.
+	"bureau_marchand": ["negociant"],
 	"jardin": ["jardinier"],
 	"potager": ["jardinier"],
 	"verger": ["jardinier"],

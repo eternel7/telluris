@@ -22,6 +22,7 @@ import os
 
 import pytest
 
+from models import character_stats
 from utils import proprietes
 
 
@@ -447,12 +448,18 @@ def test_livre_images_presentes(livre):
 def test_livre_postes_marchands_exercables(livre):
 	"""Chaque catégorie qu'un poste marchand ouvre doit avoir, dans le dump le plus récent, son
 	marchand générique (fiche des candidats) ET au moins une recette (sans quoi l'employé ne
-	produirait rien). Les grandes maisons ne s'ouvrent qu'en Demeure ou Domaine."""
+	produirait rien). Les grandes maisons ne s'ouvrent qu'en Demeure ou Domaine.
+
+	Exception : le NÉGOCIANT (`CATEGORIES_NEGOCE`, utils/negoce.py) achète tout SANS recette ;
+	son modèle peut n'être encore que livré (`jsons/negociant_a_importer.json`)."""
 	import glob
-	dump = sorted(glob.glob(os.path.join(os.path.dirname(__file__), "..", "jsons", "telluris-dump-*.json")))[-1]
+	racine = os.path.join(os.path.dirname(__file__), "..", "jsons")
+	dump = sorted(glob.glob(os.path.join(racine, "telluris-dump-*.json")))[-1]
 	with open(dump, encoding="utf-8") as f:
 		docs = json.load(f)["docs"]
 	ids = {d["_id"] for d in docs}
+	with open(os.path.join(racine, "negociant_a_importer.json"), encoding="utf-8") as f:
+		ids |= {d["_id"] for d in json.load(f)}
 	recettes = {d.get("lieu_categorie") for d in docs if d.get("type") == "recette"}
 	fusion = next(d for d in docs if d["_id"] == "rules:world_variables")["value"]["LIEU_CATEGORIES_FUSION"]
 	cat, _ = livre
@@ -461,7 +468,7 @@ def test_livre_postes_marchands_exercables(livre):
 		for c in (a.get("activite") or {}).get("categories") or []:
 			vues += 1
 			assert proprietes.MODELE_PREFIXE + c in ids, (a["id"], c)
-			assert c in recettes, (a["id"], c)
+			assert c in recettes or c in character_stats.CATEGORIES_NEGOCE, (a["id"], c)
 			if c in fusion:
 				assert set(a["types_autorises"]) <= {"demeure", "domaine"}, (a["id"], c)
 	assert vues, "aucun poste marchand dans le catalogue livré"

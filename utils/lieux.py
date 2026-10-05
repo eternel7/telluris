@@ -7,6 +7,7 @@ from db.config import db, get_doc, save_doc, find_docs
 from utils.characters import get_selected_character
 from utils.auth import get_current_user
 from utils import acces, capacites, enseignes, pnj as pnj_util, proprietes
+from models import character_stats
 
 # Répertoires d'images servis par les mounts /towns et /pnj (cf. main.py).
 TOWNS_IMAGES_PATH = "templates/resources/towns"
@@ -399,6 +400,8 @@ async def get_creation_options(
 
 	categories = {str(d["categorie"]).strip() for d in lieux if d.get("categorie")}
 	categories |= {str(r["lieu_categorie"]).strip() for r in recettes if r.get("lieu_categorie")}
+	# Négociant (utils/negoce.py) : boutique SANS recette, proposée avant qu'un lieu la porte.
+	categories |= {str(c).strip() for c in character_stats.CATEGORIES_NEGOCE if c}
 	# Sous-catégories : celles portées en base, plus celles qui ACCORDENT une capacité — une
 	# sous-catégorie de guilde doit rester proposée même si plus aucun lieu ne la porte.
 	sous_categories = {str(d["sous_categorie"]).strip() for d in lieux if d.get("sous_categorie")}

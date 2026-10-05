@@ -550,10 +550,21 @@ def lieu_produit(lieu_doc: dict, item_doc: dict) -> bool:
 	return bool(base) and base in produits
 
 
+def est_negociant(lieu_doc: dict | None) -> bool:
+	"""« Marchand pur » (utils/negoce.py) : il achète TOUT, sans recette. Catégorie relue dans
+	`CATEGORIES_NEGOCE` (variable de monde). Vit ici et non dans `negoce` : `lieu_buys` en a
+	besoin et `negoce` importe ce module."""
+	cat = (lieu_doc or {}).get("categorie")
+	return bool(cat) and cat in character_stats.CATEGORIES_NEGOCE
+
+
 def lieu_buys(lieu_doc: dict, item_doc: dict) -> bool:
 	"""True si le marchand du lieu achète cet item : son id OU sa sous-catégorie ∈ besoins
 	(intrants des recettes, item-refs compris) **OU** c'est un bien que le lieu produit
-	(rachat à moindre coût). Portée géographique comprise (`besoins_lieu`)."""
+	(rachat à moindre coût). Portée géographique comprise (`besoins_lieu`).
+	Un NÉGOCIANT achète tout objet résolu (`est_negociant`)."""
+	if est_negociant(lieu_doc):
+		return bool(item_doc)
 	if lieu_produit(lieu_doc, item_doc):
 		return True
 	besoins = besoins_lieu(lieu_doc)

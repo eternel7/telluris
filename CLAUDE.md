@@ -108,6 +108,8 @@ utils/
   escorte.py             # escortes (pur) : personne à retrouver, à protéger, à déposer vivante
   expedition.py          # capacités MISES EN COMMUN par le groupe (pur) : membres, outil partagé, négociateur
   marche.py              # prix, stocks, tick atelier, relations de lieu
+  negoce.py              # négociant, « marchand pur » (pur) : achète TOUT sans recette, commission
+                         #   selon la relation, rayon au-dessus d'un seuil, sinon flux, sinon cuivre
   commande.py            # commande auprès d'un artisan (pur) : DEUX capacités — prendre une
                          #   commande (DÉRIVÉ : son catalogue épuré n'est pas vide) vs
                          #   fabriquer SUR MESURE (`LIEU_CATEGORIES_FUSION` OU tag

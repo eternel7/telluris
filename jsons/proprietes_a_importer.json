@@ -9,7 +9,7 @@
             "id": "chambre",
             "label": "Chambre",
             "rang": 1,
-            "image": "auberge_europe_lutecia02.jpg",
+            "image": "chambre.jpg",
             "description": "Petite unité individuelle : repos, récupération, petit espace personnel et stockage très limité.",
             "prix_cuivre": 5000,
             "revente_facteur": 0.5,
@@ -25,7 +25,7 @@
             "id": "logement",
             "label": "Logement",
             "rang": 2,
-            "image": "auberge_europe04.jpg",
+            "image": "logement.jpg",
             "description": "Petit logement indépendant : un ou deux occupants, quelques espaces simples, un PNJ accueilli ponctuellement.",
             "prix_cuivre": 20000,
             "revente_facteur": 0.6,
@@ -37,7 +37,7 @@
             "id": "maison",
             "label": "Maison",
             "rang": 3,
-            "image": "auberge_europe06.jpg",
+            "image": "maison.jpg",
             "description": "Habitation individuelle : plusieurs pièces, un véritable foyer, du personnel en nombre limité.",
             "prix_cuivre": 80000,
             "revente_facteur": 0.6,
@@ -49,7 +49,7 @@
             "id": "demeure",
             "label": "Demeure",
             "rang": 4,
-            "image": "grande_maison_des_arts_europe01.jpg",
+            "image": "demeure.jpg",
             "description": "Propriété importante : nombreuses pièces, personnel domestique, accueil d'invités.",
             "prix_cuivre": 300000,
             "revente_facteur": 0.6,
@@ -61,7 +61,7 @@
             "id": "domaine",
             "label": "Domaine",
             "rang": 5,
-            "image": "chemin_vers_les_collines_boisees01.png",
+            "image": "domaine.jpg",
             "description": "Propriété foncière : une demeure principale, des dépendances, des terrains privés et de nombreuses activités.",
             "prix_cuivre": 1000000,
             "revente_facteur": 0.6,
@@ -798,7 +798,10 @@
             },
             "activite": {
               "metier": "marchand",
-              "label": "Négoce"
+              "label": "Négoce",
+              "categories": [
+                "negociant"
+              ]
             }
           },
           {

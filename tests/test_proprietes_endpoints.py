@@ -527,3 +527,64 @@ def test_comptoir_de_commande_adresse_le_marchand_choisi(monkeypatch, monde):
 	monkeypatch.setattr(rc, "get_selected_character", lambda _u: client)
 	_, lieu = rc._acces(None)
 	assert lieu is e
+
+
+# ── Négociant (« marchand pur », utils/negoce.py) ────────────────────────────────
+
+CAILLOU = {"_id": "item:caillou", "type": "item", "nom": "Caillou", "categorie": "divers",
+		   "sous_categorie": "caillou", "slots": [], "poids": 1.0, "rarete": "commun"}
+COMPTOIR = {"_id": "lieu:comptoir", "type": "lieu", "categorie": "negociant", "label": "Le Comptoir",
+			"lieu_parent": "lieu:ville"}
+
+
+def test_negociant_de_ville_achete_tout_au_flux_ou_converti(monde):
+	from utils import negoce
+	monde["docs"].update({d["_id"]: json.loads(json.dumps(d)) for d in (CAILLOU, COMPTOIR)})
+	client = _perso(lieu=COMPTOIR["_id"], inventaire=[{"item": "item:herbe", "poids": 1}, "item:caillou"])
+	quotes = _quotes(monde, client)
+	assert quotes["negociant"] is True
+	assert quotes["commission"] == round(negoce.commission({"value": quotes["relation"]}) * 100)
+	assert sorted(v["item_id"] for v in quotes["vendables"]) == ["item:caillou", "item:herbe"]
+	attendu = next(v["prix_cuivre"] for v in quotes["vendables"] if v["item_id"] == "item:herbe")
+	assert attendu == negoce.prix_rachat(HERBE, {"value": quotes["relation"]})
+
+	avant = characters_util.money_to_cuivre(client)
+	data = _appel(monde, client, monde["ru"].sell_item, None, {"index": 0, "item_id": "item:herbe"}, module="ru")
+	assert characters_util.money_to_cuivre(client) == avant + attendu
+	assert monde["docs"]["lieu:ville"]["flux_marchand"] == {"item:herbe": 1}   # l'alchimiste en a l'usage
+	assert "commission" in data
+
+	_appel(monde, client, monde["ru"].sell_item, None, {"index": 0, "item_id": "item:caillou"}, module="ru")
+	assert monde["docs"]["lieu:ville"]["flux_marchand"] == {"item:herbe": 1}   # personne : converti
+	assert client["inventaire"] == [] and not monde["docs"][COMPTOIR["_id"]].get("stock_vente")
+
+
+def test_negociant_ne_marchande_pas_ce_qu_il_rachete(monde):
+	monde["docs"][COMPTOIR["_id"]] = json.loads(json.dumps(COMPTOIR))
+	client = _perso(lieu=COMPTOIR["_id"], inventaire=[{"item": "item:herbe", "poids": 1}])
+	with pytest.raises(HTTPException) as err:
+		_appel(monde, client, monde["ru"].marchander_item, None,
+			   {"sens": "vente", "index": 0, "item_id": "item:herbe"}, module="ru")
+	assert err.value.status_code == 403
+
+
+def test_confier_au_negociant_du_bien_caisse_ou_flux(monde):
+	from utils import negoce
+	monde["docs"][CAILLOU["_id"]] = json.loads(json.dumps(CAILLOU))
+	proprio = _perso(inventaire=["item:caillou", {"item": "item:herbe", "poids": 1}])
+	prop = _entrer(monde, proprio)
+	_marchand(monde, proprio)                       # l'alchimiste : SEUL consommateur du flux du bien
+	cand = {"id": "n1", "amenagement": "bureau_marchand", "metier": "marchand", "prenom": "Jehan",
+			"nom": "Lombard", "sex": "M", "race": "humain", "portrait": "x.jpg",
+			"categorie": "negociant", "modele": proprietes.MODELE_PREFIXE + "negociant"}
+	neg = proprietes.creer_employe(prop, cand, proprio)
+	proprietes.engager(prop, neg)
+	monde["docs"][neg["_id"]] = neg
+
+	_appel(monde, proprio, monde["rp"].atelier_donner, None,
+		   {"employe_id": neg["_id"], "index": 0, "item_id": "item:caillou"})
+	assert neg["caisse_cuivre"] == negoce.prix_conversion(CAILLOU)
+	_appel(monde, proprio, monde["rp"].atelier_donner, None,
+		   {"employe_id": neg["_id"], "index": 0, "item_id": "item:herbe"})
+	assert prop["flux_marchand"] == {"item:herbe": 1}
+	assert "flux_marchand" not in monde["docs"]["lieu:ville"]   # jamais le flux de la ville

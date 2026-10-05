@@ -22,6 +22,7 @@ from utils.characters import (
 	credit_character, tirer_poids, poids_bounds, carried_weight,
 )
 from utils.marche import debit_character
+from utils import marche as marche_util
 from utils import auberge
 from utils import recrutement
 from utils import montures
@@ -659,12 +660,17 @@ async def atelier_donner(current_user: Annotated[dict, Depends(get_current_user)
 	if pos is None:
 		raise HTTPException(status_code=404, detail="Objet absent de l'inventaire.")
 	item = resolve_item_ref(refs[pos])
-	ok, raison = proprietes.donner(atelier, item or {})
+	# Un NÉGOCIANT verse au flux du bien ce que ses autres ateliers consomment (utils/negoce).
+	flux = proprietes.flux_propriete(prop) if marche_util.est_negociant(atelier) else None
+	ok, raison = proprietes.donner(atelier, item or {}, flux,
+								   proprietes.cles_utiles_flux(prop, atelier, get_doc) if flux else None,
+								   refs[pos])
 	if not ok:
 		raise HTTPException(status_code=409, detail=raison)
 	refs.pop(pos)
 	porteur["inventaire"] = refs
 	_sauver(atelier, porteur)
+	marche_util.persister_flux(flux, save_doc)  # best-effort, seulement si le pool a bougé
 	return _payload_coffre(character, prop, cat, role)
 
 

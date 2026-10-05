@@ -170,6 +170,15 @@ CATALOGUE = [
 			"de la quête de transport.",
 	},
 	{
+		"id": "gen_negociant",
+		"label": "⚖️ Générer le tenancier du négociant (pnj:marchand_negociant)",
+		"argv": _py("gen_negociant.py"),
+		"ecrit": "Écrit jsons/negociant_a_importer.json.",
+		"description": "Le « marchand pur » n'a aucune recette, donc aucun tenancier généré par "
+			"gen_marchands : ce doc sert de modèle au poste de négociant des propriétés. Doc "
+			"neuf : refus si l'_id existe déjà dans le dump.",
+	},
+	{
 		"id": "gen_jetons_especes",
 		"label": "🐉 Gabarits des jetons de combat (espèces)",
 		"argv": _py("gen_jetons_especes.py"),

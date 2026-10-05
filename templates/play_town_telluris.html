@@ -1672,7 +1672,7 @@
 				   déplacement et plein écran. ⚠️ Ce menu n'existe que sous la condition de cette
 				   ligne (`a_ligne_actions`) — hors d'elle, la pastille ⛶ flottante reste émise
 				   (bas de page), sans quoi le plein écran disparaîtrait de ces lieux. #}
-				{% set a_ligne_actions = dimensions or achat_sous_categories or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or est_propriete or proprietes_offre or pnjs_presents %}
+				{% set a_ligne_actions = dimensions or achat_sous_categories or est_negociant or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or est_propriete or proprietes_offre or pnjs_presents %}
 				{% if a_ligne_actions %}
 				<h3 id="sub-actions-title"><span>Actions</span>
 					<span class="affichage-wrap">
@@ -1693,7 +1693,7 @@
 					   (pas de `data-sdx`) : un double clic est absorbé par la garde `isMoving`. #}
 					<li><button class="sub-loc-btn" id="btn-attendre" onclick="waitTurn()">⌛ Attendre un tour</button></li>
 					{% endif %}
-					{% if achat_sous_categories %}
+					{% if achat_sous_categories or est_negociant %}
 					<li><button class="sub-loc-btn" onclick="openSellPanel()">🏷️ Achat-Vente</button></li>
 					{% endif %}
 					{% if est_guilde %}
@@ -5379,7 +5379,8 @@ function _renderMarchandDetail(st) {
 	if (st.sens === 'vente') acts.push(`<button class="sh-drop-btn" onclick="_cardSell(${it.index},'${it.item_id}',${_cgArg(it.compagnon_id)})">Vendre</button>`);
 	else                     acts.push(`<button class="sh-equip-btn" onclick="_cardBuy('${it.item_id}')">Acheter</button>`);
 	const mIdx = st.sens === 'vente' ? it.index : 'null';
-	acts.push(`<button class="sh-marchander-btn" ${isMarchBlocked() ? 'disabled' : ''} onclick="_cardMarch(${mIdx},'${it.item_id}','${st.sens}',${_cgArg(it.compagnon_id)})" title="Marchander">🤝 Marchander</button>`);
+	// Négociant : sa commission suit la relation, il ne marchande pas ce qu'il rachète.
+	if (!(st.sens === 'vente' && MARCHAND.negociant)) acts.push(`<button class="sh-marchander-btn" ${isMarchBlocked() ? 'disabled' : ''} onclick="_cardMarch(${mIdx},'${it.item_id}','${st.sens}',${_cgArg(it.compagnon_id)})" title="Marchander">🤝 Marchander</button>`);
 	html += `<div class="item-detail-actions">${acts.join('')}</div>`;
 	return html;
 }
@@ -6423,6 +6424,10 @@ function blocRemainingMin(){ return Math.max(1, Math.ceil((MARCHAND.blocDeadline
 
 function setMarchandState(data) {
 	if (typeof data.relation === 'number') MARCHAND.relation = data.relation;
+	// Négociant (utils/negoce.py) : `quotes` dit s'il l'est ; la commission suit la relation et
+	// revient aussi de `sell_item` (la fidélité peut l'avoir fait bouger).
+	if (typeof data.negociant === 'boolean') MARCHAND.negociant = data.negociant;
+	if ('commission' in data) MARCHAND.commission = data.commission;
 	if (typeof data.bloque_jusqu === 'number') {
 		const now = (typeof data.now === 'number') ? data.now : Math.floor(Date.now() / 1000);
 		const remaining = Math.max(0, data.bloque_jusqu - now);
@@ -6891,7 +6896,9 @@ function updateRelationBadge() {
 		return;
 	}
 	el.classList.remove('relation-bad');
-	el.textContent = '🤝 Relation : ' + r + (isMarchBlocked() ? ' · marchandage bloqué (~' + blocRemainingMin() + ' min)' : '');
+	el.textContent = '🤝 Relation : ' + r
+		+ (MARCHAND.negociant && typeof MARCHAND.commission === 'number' ? ' · commission ' + MARCHAND.commission + ' % (selon votre relation)' : '')
+		+ (isMarchBlocked() ? ' · marchandage bloqué (~' + blocRemainingMin() + ' min)' : '');
 }
 
 // Sérialise l'id du PORTEUR en argument d'onclick — compagnon (`'aventurier:xxx'`) ou
@@ -7002,7 +7009,7 @@ function renderSellList(data) {
 		<span class="sell-prix">${v.negocie ? '🤝 ' : ''}${formatPrix(v.prix)}</span>
 		<span class="sh-inv-actions">
 			<button class="sh-drop-btn" onclick="sellItem(${v.index},'${v.item_id}',${_cgArg(v.compagnon_id)},this)" title="Vendre">Vendre</button>
-			${marchBtn(v.index, v.item_id, 'vente', v.compagnon_id)}
+			${MARCHAND.negociant ? '' : marchBtn(v.index, v.item_id, 'vente', v.compagnon_id)}
 		</span>
 	</li>`;
 	}).join('');
