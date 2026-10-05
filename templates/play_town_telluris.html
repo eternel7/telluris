@@ -124,8 +124,15 @@
 			flex-grow: 1;
 			display: flex;
 			flex-direction: column;
-			overflow: hidden;
+			/* Le panneau DÉFILE. `contain: size` : son contenu ne dicte plus la hauteur de la
+			   ligne de grille « map sidebar » (la grille n'a pas de hauteur définie, une longue
+			   liste allongeait la page au lieu de défiler) ; il prend celle que la carte et la
+			   fenêtre lui laissent, plancher 20vh. Annulé sur mobile (la page défile). */
+			overflow-y: auto;
+			contain: size;
 			min-height: 20vh;
+			scrollbar-width: thin;
+			scrollbar-color: var(--border-color) transparent;
 		}
 		.sub-locations-panel h3 {
 			font-size: 1rem;
@@ -136,8 +143,8 @@
 		}
 		/* Texte d'ambiance du lieu (champ `texte` du doc lieu:*), en tête du panneau, au-dessus
 		   des Actions et des Lieux. `pre-line` respecte les retours à la ligne de la donnée
-		   (listes à puces « - … »), comme #intro-texte. Il défile CHEZ LUI : le panneau est en
-		   overflow:hidden, un texte long pousserait sinon la liste des lieux hors du cadre. */
+		   (listes à puces « - … »), comme #intro-texte. Il défile CHEZ LUI : un texte long
+		   repousserait sinon Actions et Lieux tout en bas du panneau. */
 		.loc-texte {
 			font-size: 1rem;
 			line-height: 1.4;
@@ -529,6 +536,17 @@
 		/* La liste n'a plus de hauteur fixe : elle prend ce que la section lui laisse. */
 		#sell-panel .sh-inv-scroll { display: flex; height: auto; flex: 1 1 auto; min-height: 0; }
 		#sell-panel .sh-inv-box { max-height: none; flex: 1 1 auto; min-height: 0; }
+		/* ── #prop-coffre-panel : même recette — le panneau tient dans la fenêtre, les
+		   deux sacs prennent toute la hauteur restante et ce sont eux qui défilent.
+		   Sous 720px les colonnes s'empilent : chacune prend alors la moitié. */
+		#prop-coffre-panel { height: calc(100vh - 20px); min-height: 0; gap: .5rem; }
+		#prop-coffre-panel > .sell-topbar, #prop-coffre-panel > #pcf-etat { flex: 0 0 auto; }
+		#prop-coffre-panel .grp-inv-wrap { flex: 1 1 auto; min-height: 0; grid-template-rows: minmax(0, 1fr); }
+		#prop-coffre-panel .grp-inv-col { display: flex; flex-direction: column; min-height: 0; }
+		#prop-coffre-panel .grp-inv-head { flex: 0 0 auto; }
+		#prop-coffre-panel .sh-inv-scroll { display: flex; height: auto; flex: 1 1 auto; min-height: 0; }
+		#prop-coffre-panel .sh-inv-box { max-height: none; flex: 1 1 auto; min-height: 0; }
+		@media (max-width: 720px) { #prop-coffre-panel .grp-inv-wrap { grid-template-rows: repeat(2, minmax(0, 1fr)); } }
 		.sell-prix { font-weight: bold; color: var(--accent-color); white-space: nowrap; }
 		.sell-empty { opacity: .7; padding: 12px 0; }
 		.q-desc { display: block; white-space: normal; color: var(--text-card-color, #aaa); font-size: .85rem; margin: 2px 0; }
@@ -1549,6 +1567,7 @@
 			.sub-locations-panel {
 				grid-area: subloc;
 				overflow: visible;
+				contain: none;
 			}
 			.character-panel {
 				grid-area: char;
@@ -1619,6 +1638,7 @@
 			.sub-locations-panel {
 				order: 1;
 				overflow: visible;
+				contain: none;
 			}
 			.map-area {
 				height: stretch;
@@ -8622,7 +8642,16 @@ function _pcfAfficher() {
 	document.getElementById('game-container').classList.add('panel-hidden');
 	document.getElementById('prop-coffre-panel').classList.remove('panel-hidden');
 	window.scrollTo({ top: 0, behavior: 'instant' });
+	_pcfOmbres();   // masqué, le panneau n'avait aucune hauteur à mesurer
 }
+
+// Les sacs prennent la hauteur restante : l'ombre se MESURE, le compte d'objets ne dit rien.
+function _pcfOmbres() {
+	['pcf-principal', 'pcf-droite'].forEach(id => _majOmbreScroll(document.getElementById(id)?.parentElement));
+}
+window.addEventListener('resize', () => {
+	if (!document.getElementById('prop-coffre-panel').classList.contains('panel-hidden')) _pcfOmbres();
+});
 
 function closeCoffre() {
 	document.getElementById('game-container').classList.remove('panel-hidden');
@@ -8721,6 +8750,7 @@ function renderCoffre(data) {
 					: data.role === 'visiteur' ? 'Dérober' : 'Prendre', 'gauche', 'pcf_coffre');
 			}).join('')
 			: '<div class="sh-empty"><span class="sh-empty-icon">📦</span>Coffre vide</div>');
+		_pcfOmbres();
 		return;
 	}
 
@@ -8739,6 +8769,7 @@ function renderCoffre(data) {
 		`<div class="q-desc">${a.grande ? '✦ Grande maison — prend le sur-mesure' : 'Commandes simples'}</div>`
 		+ `<div class="grp-sous-titre">Au rayon</div>` + (produits || '<div class="sh-empty">Rien en rayon.</div>')
 		+ `<div class="grp-sous-titre">Matières confiées</div>` + (matieres || '<div class="sh-empty">Aucune matière.</div>'));
+	_pcfOmbres();
 }
 
 async function _pcfPost(url, body) {
