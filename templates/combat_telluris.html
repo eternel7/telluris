@@ -196,6 +196,16 @@
 	border: 1px solid rgba(255, 140, 40, 0.95);
 	box-shadow: inset 0 0 10px rgba(255, 70, 0, 0.6);
 }
+/* Animation du sort JOUÉE EN BOUCLE sur chaque case de la zone (`peindreZonesPersistantes`) :
+   posée au PIED de la case et centrée, elle peut déborder vers le haut (`echelle` > 1).
+   Enfant de la case, donc sous les jetons (z-index 0) : la créature reste lisible devant le
+   feu. Taille en `--step`, jamais mesurée : un redimensionnement la suit sans recalcul. */
+.zone-case .zone-anim {
+	position: absolute;
+	left: 50%; bottom: 0;
+	pointer-events: none;
+	background-repeat: no-repeat;
+}
 /* PIÈGES (utils/pieges.py) : le serveur ne sert que les pièges visibles du groupe
    (`vue_client`) — détectés, déclenchés, désamorcés, et les siens. Peints sous les jetons,
    jamais cliquables (sauf `.destination` en mode désamorçage). Rouge sombre pour ceux du
@@ -2136,17 +2146,82 @@ function peindrePassages(layer, j) {
 const _casesPersistantes = [];
 function peindreZonesPersistantes(layer, j) {
 	while (_casesPersistantes.length) _casesPersistantes.pop().remove();
+	_animsZones.length = 0;
 	if (!j || !j.pos) return;
 	(state.zones_persistantes || []).forEach(z => {
+		const anim = _animZone(z);
 		(z.cases || []).forEach(c => {
 			const el = document.createElement('div');
 			el.className = 'zone-case persistante';
 			el.title = z.nom || '';
+			if (anim) el.appendChild(_spriteZone(anim));
 			_placerToken(el, c[0] - j.pos.x, c[1] - j.pos.y);
 			layer.appendChild(el);
 			_casesPersistantes.push(el);
 		});
 	});
+	_lancerAnimsZones();
+}
+
+// ── Animation EN BOUCLE sur les cases d'une zone persistante ──────────────────────
+// L'animation du sort (`z.animation`, posée par le serveur avec les cases) se joue sur
+// CHAQUE case tant que le mur tient — `jouerVfx`, lui, ne sait poser un sprite que sur un
+// ACTEUR, et le feu brûle aussi les cases vides.
+// ⚠️ SANS SON : un crépitement en boucle serait insupportable ; le son du sort part déjà
+// avec l'impact (entrée de journal). ⚠️ Rien sous `prefers-reduced-motion`, comme jouerVfx.
+// ⚠️ Horloge PARTAGÉE (`performance.now()`) : les cases sont recréées à chaque rendu, une
+// horloge par sprite ferait repartir les flammes à la première image à chaque action.
+const _animsZones = [];
+let _animsZonesRaf = 0;
+
+function _animZone(z) {
+	const anim = z && z.animation && ANIMATIONS ? ANIMATIONS[z.animation] : null;
+	if (!anim || !anim.fichier) return null;
+	if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+	return anim;
+}
+
+// Image courante dans la plage `debut`→`fin` du doc — la MÊME que jouerVfx : une feuille
+// porte souvent plusieurs effets, et boucler sur toute la planche les mélangerait.
+function _imageZone(anim, maintenant) {
+	const debut = Math.max(0, parseInt(anim.debut, 10) || 0);
+	const fin = Math.max(debut, parseInt(anim.fin, 10) || 0);
+	const n = fin - debut + 1;
+	const duree = Math.max(1, parseInt(anim.duree_ms, 10) || 600);
+	return debut + Math.floor(maintenant / (duree / n)) % n;
+}
+
+function _spriteZone(anim) {
+	const el = document.createElement('div');
+	el.className = 'zone-anim';
+	const cols = Math.max(1, parseInt(anim.colonnes, 10) || 1);
+	const lgs  = Math.max(1, parseInt(anim.lignes, 10) || 1);
+	// Même gabarit que jouerVfx : largeur = `echelle` cases, hauteur au ratio d'UNE frame.
+	const fw = anim.largeur ? anim.largeur / cols : 1;
+	const fh = anim.hauteur ? anim.hauteur / lgs : 1;
+	el.style.width = `calc(var(--step) * ${parseFloat(anim.echelle) || 1})`;
+	el.style.aspectRatio = `${fw} / ${fh}`;
+	const dx = parseFloat(anim.decalage_x) || 0;
+	const dy = parseFloat(anim.decalage_y) || 0;
+	el.style.transform = `translateX(-50%) translate(calc(var(--step) * ${dx}), calc(var(--step) * ${-dy}))`;
+	el.style.backgroundImage = "url('/icons/effects/" + encodeURIComponent(anim.fichier) + "')";
+	const i = _imageZone(anim, performance.now());
+	_vfxFrame(el, anim, i);
+	_animsZones.push({ el, anim, i });
+	return el;
+}
+
+function _lancerAnimsZones() {
+	if (_animsZonesRaf || !_animsZones.length) return;
+	const tick = (maintenant) => {
+		if (!_animsZones.length) { _animsZonesRaf = 0; return; }
+		_animsZones.forEach(s => {
+			const i = _imageZone(s.anim, maintenant);
+			if (i !== s.i) { s.i = i; _vfxFrame(s.el, s.anim, i); }
+		});
+		_animsZonesRaf = requestAnimationFrame(tick);
+	};
+	_animsZonesRaf = requestAnimationFrame(tick);
 }
 
 // PIÈGES : `state.pieges` (déjà filtré par le serveur), repeints à chaque rendu comme les
