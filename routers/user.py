@@ -22,7 +22,7 @@ from utils.characters import (
 from utils.marche import (
 	debit_character, merchant_cha, prix_range_cuivre, marchander,
 	convertir_apres_achat, resolve_stock_vente, tick_atelier, lieu_buys, params_vente_lieu,
-	fiche_item_fields, flux_cite, persister_flux,
+	fiche_item_fields, flux_cite, persister_flux, est_negociant, cles_consommees,
 	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
 	compter_transaction,
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
@@ -55,6 +55,7 @@ from utils import indicateurs
 from utils import expedition
 from utils import auberge
 from utils import scriptorium
+from utils import negoce
 from utils import journal as journal_util
 from models import character_stats
 from models.character_stats import (
@@ -1997,6 +1998,20 @@ def _find_ref(refs: list, idx, item_id):
 	return None
 
 
+def _prix_vente_joueur(lieu_doc: dict, relation: dict | None, item: dict, item_id: str,
+					   ref=None) -> tuple[int, int, int]:
+	"""`(prix, pmin, pmax)` d'une vente joueur → lieu : source UNIQUE de `_marchand_vendables`
+	(prix affiché) et `sell_item` (prix appliqué). Un NÉGOCIANT paie `V × (1 − commission)`
+	selon la relation (utils/negoce.py), sans stock ni marchandage ; tout autre lieu, le prix
+	marché de sa fourchette de rachat."""
+	if est_negociant(lieu_doc):
+		pmin, pmax = negoce.bornes_rachat(item, ref)
+		return negoce.prix_rachat(item, relation, ref), pmin, pmax
+	pmin, pmax, stock_mat = params_vente_lieu(lieu_doc, item, item_id, ref)
+	cible = stock_cible_pour(lieu_doc, item)
+	return prix_marche(relation, item_id, pmin, pmax, "vente", stock_mat, cible), pmin, pmax
+
+
 def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None = None,
 						porteurs_tiers: list | None = None) -> list:
 	"""Liste des items que le marchand du lieu achète, **agrégée sur toute l'expédition** :
@@ -2021,10 +2036,9 @@ def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None =
 			if not item or not lieu_buys(lieu_doc, item):
 				continue
 			item_id = item.get("item") or item.get("_id")
-			pmin, pmax, stock_mat = params_vente_lieu(lieu_doc, item, item_id, ref)
-			cible = stock_cible_pour(lieu_doc, item)
-			prix_cuivre = prix_marche(relation, item_id, pmin, pmax, "vente", stock_mat, cible)
-			negocie = (relation or {}).get("prix_negocies", {}).get(item_id, {}).get("vente") is not None
+			prix_cuivre, pmin, pmax = _prix_vente_joueur(lieu_doc, relation, item, item_id, ref)
+			negocie = (not est_negociant(lieu_doc)
+					   and (relation or {}).get("prix_negocies", {}).get(item_id, {}).get("vente") is not None)
 			vendables.append({
 				"index": idx,
 				"compagnon_id": compagnon_id,
@@ -2078,6 +2092,10 @@ def marchand_quotes(
 		"cha_marchand": merchant_cha(lieu_doc),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 		"relation": relation_value(relation),
+		# Négociant : commission (en %) fixée par la relation, pas de marchandage côté vente.
+		"negociant": est_negociant(lieu_doc),
+		"commission": (int(round(negoce.commission(relation) * 100))
+					   if est_negociant(lieu_doc) else None),
 		"bloque_jusqu": int(relation.get("marchandage_bloque_jusqu", 0) or 0),
 		"now": now_epoch(),
 	}
@@ -2149,20 +2167,26 @@ async def sell_item(
 	# Prix appliqué = prix marché (prix courant relation/marchandage modulé par le stock du
 	# marchand en cette matière), calculé AVANT que le lieu n'absorbe l'objet.
 	item_id = item.get("item") or item.get("_id")
-	pmin, pmax, stock_mat = params_vente_lieu(lieu_doc, item, item_id, ref)
-	cible = stock_cible_pour(lieu_doc, item)
-	prix = prix_marche(relation, item_id, pmin, pmax, "vente", stock_mat, cible)
+	prix, _, _ = _prix_vente_joueur(lieu_doc, relation, item, item_id, ref)
 	purse = credit_character(principal, prix)   # l'argent va au principal, l'objet quitte le porteur
 	porteur["inventaire"] = inventaire
 
 	if proprietes.est_atelier(lieu_doc):
 		# Marchand employé d'une propriété : l'objet entre comme un objet confié, puis un tick
 		# SANS approvisionnement sur le flux de SA propriété — jamais celui de la ville (même
-		# séquence que buy_item). Le visiteur est payé comme en boutique, caisse intacte.
-		proprietes.racheter(lieu_doc, item)
+		# séquence que buy_item). Le visiteur est payé comme en boutique, caisse intacte — sauf
+		# chez un NÉGOCIANT, dont la conversion en cuivre va à la caisse (utils/negoce.py).
 		prop = get_doc(lieu_doc.get("propriete", "")) or {}
 		flux = proprietes.flux_propriete(prop) if prop else None
+		cles = proprietes.cles_utiles_flux(prop, lieu_doc, get_doc) if est_negociant(lieu_doc) else None
+		proprietes.racheter(lieu_doc, item, flux, cles, ref)
 		proprietes.produire(lieu_doc, flux, 1, proprietes.catalogue(get_doc))
+	elif est_negociant(lieu_doc):
+		# Négociant de ville : rayon si l'objet vaut cher, sinon flux de la cité (si un atelier
+		# en a l'usage), sinon converti — le cuivre part chez les PNJ (utils/negoce.py).
+		cite_id = lieu_doc.get("lieu_parent")
+		flux = flux_cite(get_doc(cite_id) if cite_id else None)
+		negoce.absorber(lieu_doc, item, flux, cles_consommees(), ref)
 	else:
 		# Le lieu absorbe l'objet acheté → matières → stock vendable (mute lieu_doc). Le flux de
 		# la cité voyage avec le tick : ce que les PNJ prennent au rayon repart chez les ateliers
@@ -2185,6 +2209,9 @@ async def sell_item(
 	payload["achetables"] = resolve_stock_vente(lieu_doc, relation)
 	payload["vendu"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(prix)}
 	payload["relation"] = relation_value(relation)
+	if est_negociant(lieu_doc):
+		# La fidélité peut avoir fait bouger la relation, donc la commission (Conventions §10).
+		payload["commission"] = int(round(negoce.commission(relation) * 100))
 	return payload
 
 
@@ -2304,6 +2331,9 @@ async def marchander_item(
 	if sens == "vente":
 		if proprietes.vend_au_proprietaire(character, lieu_doc, get_doc):
 			raise HTTPException(status_code=403, detail="Vos affaires avec lui se règlent au 📦 Coffre.")
+		if est_negociant(lieu_doc):
+			raise HTTPException(status_code=403,
+								detail="Le négociant ne marchande pas : sa commission suit votre relation.")
 		ref = _find_ref(porteur.get("inventaire", []), body.get("index"), item_id)
 		if ref is None:
 			raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")

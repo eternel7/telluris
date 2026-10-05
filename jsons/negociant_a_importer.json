@@ -1,0 +1,45 @@
+[
+  {
+    "_id": "pnj:marchand_negociant",
+    "type": "pnj",
+    "nom": "Maître Lombard",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_lettre01.jpg",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Une balance de changeur trône sur le comptoir, entre deux registres ouverts. « Bien le bonjour, {prenom}. Je prends tout, et je paie comptant. Ce qui vaut la peine finit sur mes rayons ; le reste, j'en fais mon affaire. »",
+          "choix": [
+            {
+              "id": "commission",
+              "label": "Et votre commission ?",
+              "next": "commission"
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission": {
+          "texte": "« Elle dépend de vous, {prenom}. Un client que je connais mal me coûte des précautions ; un ami de la maison, presque rien. Revenez souvent, et vous verrez la différence. Mais on ne marchande pas avec moi : mon prix est juste, et il est le même pour tout ce que vous m'apportez. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Entendu.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Au revoir.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

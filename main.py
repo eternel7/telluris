@@ -63,7 +63,8 @@ from utils import grimoires as grimoires_util
 from utils import simulateur as simulateur_util
 from utils import potentiel as potentiel_util
 from utils.marche import (tick_atelier, reset_prix_cache, besoins_lieu, appro_leaves_lieu,
-						  relations_lieux_payload, flux_cite, persister_flux, prix_range_cuivre)
+						  relations_lieux_payload, flux_cite, persister_flux, prix_range_cuivre,
+						  est_negociant)
 from utils import graphe_recettes
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, cites_de_depart, lieu_router
 from models import character_stats
@@ -1050,6 +1051,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			# de la sidebar, au-dessus des Actions et des Lieux. Champ absent = rien de rendu.
 			"lieu_texte": grid_doc.get("texte"),
 			"achat_sous_categories": besoins_lieu(grid_doc),
+			# Négociant : aucune recette, donc aucun besoin — il achète pourtant tout (utils/negoce).
+			"est_negociant": est_negociant(grid_doc),
 			"est_guilde": est_guilde,
 			"est_recrutement": est_recrutement,
 			"lieu_de_guilde": lieu_de_guilde,

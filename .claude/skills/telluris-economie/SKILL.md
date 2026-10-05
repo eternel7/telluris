@@ -45,6 +45,14 @@ Entrée d'inventaire = **string legacy** `"item:xxx"` (poids = min) **ou objet**
 Contenu : `jsons/armes_hast_a_importer.json` (armes d'hast, matières `item:hampe` + `item:argent`, recettes d'armurerie/tabletterie).
 
 
+### Négociant — le « marchand pur » (`utils/negoce.py`)
+Catégorie de lieu `negociant` (`CATEGORIES_NEGOCE`, prédicat `marche.est_negociant`) : **aucune recette**, il achète **tout** (`lieu_buys`). Boutique de ville posée à l'éditeur (`creation_options` la propose) ou employé au poste `bureau_marchand` d'une propriété (cf. `telluris-proprietes`). Verrouillé par `tests/test_negoce.py` et `tests/test_proprietes_endpoints.py` § Négociant.
+- **Rachat** = `V × (1 − commission)`, `V` = pmin, commission **linéaire** en relation (`NEGOCE_COMMISSION_MAX` 30 % à 0 → `_MIN` 10 % à 100). Ni stock ni marchandage : `/marchander` sens vente → 403. Chokepoint `routers/user._prix_vente_joueur` (affiché = appliqué). Toujours < V : anti-arbitrage.
+- **Destin** (`negoce.absorber`) : `V ≥ NEGOCE_SEUIL_REVENTE_CUIVRE` → rayon (prix de rayon normal) ; sinon flux (cité : clé dans `cles_consommees` ; propriété : besoins de ses AUTRES ateliers, `proprietes.cles_utiles_flux`) si le pool est sous `STOCK_CIBLE_DEFAUT` ; sinon **conversion** `RACHAT_FACTEUR × V × (1 + NEGOCE_BONUS_CONVERSION)` → caisse en propriété, perdue en ville. ⚠️ Conversion ≤ V (test) ; la carcasse est toujours convertie.
+- Modèle `pnj:marchand_negociant` : `dev/gen_negociant.py` (PAS `gen_marchands`, qui dérive des recettes et réécrit tous les tenanciers). Pas de transport/escorte (`transport.est_magasin` exige des recettes).
+- Client : `quotes` porte `negociant` + `commission` (%, aussi renvoyée par `sell_item`) ; 🤝 masqué côté vente ; 🏷️ affiché via `est_negociant` de `/play`.
+
+
 ### Marchandage & relations
 `prix_courant` = prix négocié ou prix de base pondéré par la relation (0-100, neutre 50) ; **prix appliqué** = `prix_marche` (re-clampé par le facteur de stock). La négociation est persistée comme **FRACTION de la fourchette**, pas comme montant fixe. Relation = doc `type:"relation"` (char × lieu), avec crit ok/fail sur `POST /api/marchander` et blocage temporaire en cas d'échec critique. Formules, fidélité (`marche.compter_transaction`, +1 relation tous les N échanges sous un seuil) et persistance sont couverts par `tests/test_marche_recettes.py` et `tests/test_quetes_relation.py`.
 

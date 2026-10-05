@@ -20,6 +20,14 @@ import random
 # Les 48 catégories à tenancier générique sont couvertes ; une catégorie absente
 # retombe sur `_tournures_repli` (bâti sur le nom de catégorie), jamais sur rien.
 TOURNURES = {
+    # — Le négociant (« marchand pur », sans recette : utils/negoce.py) —
+    "negociant": [
+        "Le Comptoir", "La Maison de Négoce", "Le Bon Change", "La Balance",
+        "Le Trébuchet", "La Bourse", "Le Change d'Or", "Le Courtier",
+        "La Lettre de Change", "Le Grand Livre", "La Pesée Juste", "Le Coffre Ferré",
+        "Le Denier", "La Caravane", "Le Marché Conclu", "Le Sceau du Marchand",
+        "La Bonne Affaire", "Le Comptoir d'Or", "La Halle aux Changes", "Le Poids du Roi"
+    ],
     # — Les trente métiers de base —
     "apothicairerie": [
         "L'Herbier", "L'Officine", "Le Mortier", "La Simple", "L'Alambic",

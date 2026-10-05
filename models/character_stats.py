@@ -243,6 +243,19 @@ MARGE_TRANSFO: float = 5.0
 # de vente, quelle que soit la relation). `RACHAT_FACTEUR` ∈ ]0,1] = plancher de la bande.
 RACHAT_FACTEUR: float = 0.6
 
+# ── Négociant (« marchand pur », utils/negoce.py) ────────────────────────────────
+# Catégories de lieu qui achètent TOUT sans recette. Rachat = V × (1 − commission), V = pmin,
+# commission LINÉAIRE en relation : MAX à 0, MIN à 100 (aucun marchandage côté vente).
+CATEGORIES_NEGOCE: list = ["negociant"]
+NEGOCE_COMMISSION_MIN: float = 0.10
+NEGOCE_COMMISSION_MAX: float = 0.30
+# Valeur (pmin, cuivre) à partir de laquelle un objet racheté part en RAYON ; en dessous il
+# part au flux (ville ou propriété), ou se convertit en cuivre s'il n'y sert à personne.
+NEGOCE_SEUIL_REVENTE_CUIVRE: int = 2000
+# Conversion = RACHAT_FACTEUR × V × (1 + bonus). ⚠️ Doit rester ≤ V (tests/test_negoce.py) :
+# au-delà, acheter à V puis confier au négociant rapporterait.
+NEGOCE_BONUS_CONVERSION: float = 0.25
+
 # ── Jets de dés (seuils de critique génériques) ──────────────────────────────────
 # Bornes de critique applicables à TOUT jet d100 (marchandage, combat, etc.) :
 # roll ≤ CRIT_REUSSITE_MAX = réussite critique ; roll ≥ CRIT_ECHEC_MIN = échec critique.
@@ -918,6 +931,11 @@ def current_world_variables() -> dict:
 		"PRIX_MAX_FACTEUR": PRIX_MAX_FACTEUR,
 		"MARGE_TRANSFO": MARGE_TRANSFO,
 		"RACHAT_FACTEUR": RACHAT_FACTEUR,
+		"CATEGORIES_NEGOCE": list(CATEGORIES_NEGOCE),
+		"NEGOCE_COMMISSION_MIN": NEGOCE_COMMISSION_MIN,
+		"NEGOCE_COMMISSION_MAX": NEGOCE_COMMISSION_MAX,
+		"NEGOCE_SEUIL_REVENTE_CUIVRE": NEGOCE_SEUIL_REVENTE_CUIVRE,
+		"NEGOCE_BONUS_CONVERSION": NEGOCE_BONUS_CONVERSION,
 		"DEPECAGE_TAGS": {k: list(v) for k, v in DEPECAGE_TAGS.items()},
 		"DEPECAGE_POIDS_REF": DEPECAGE_POIDS_REF,
 		"ATELIER_TRANSFO_PROBA": ATELIER_TRANSFO_PROBA,
@@ -1065,6 +1083,7 @@ def load_world_variables() -> dict:
 	global FACTEUR_DEGATS_ARMURE, JET_PORTEE_F_DIV, DETECTION_DISTANCE_FACTEUR, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
 	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, RACHAT_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
+	global NEGOCE_COMMISSION_MIN, NEGOCE_COMMISSION_MAX, NEGOCE_SEUIL_REVENTE_CUIVRE, NEGOCE_BONUS_CONVERSION
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION, VENTE_PNJ_REDISTRIB
 	global FLUX_SURPLUS_PART, FLUX_PART_MAX
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN, CRIT_CHANCE_DIVISEUR, COMBAT_SLOTS_MAX
@@ -1157,6 +1176,13 @@ def load_world_variables() -> dict:
 	PRIX_MAX_FACTEUR = float(v.get("PRIX_MAX_FACTEUR", PRIX_MAX_FACTEUR))
 	MARGE_TRANSFO    = float(v.get("MARGE_TRANSFO", MARGE_TRANSFO))
 	RACHAT_FACTEUR   = float(v.get("RACHAT_FACTEUR", RACHAT_FACTEUR))
+	# Liste MUTÉE EN PLACE (lue via le module par `marche.est_negociant`).
+	if isinstance(v.get("CATEGORIES_NEGOCE"), list):
+		CATEGORIES_NEGOCE[:] = [str(c) for c in v["CATEGORIES_NEGOCE"] if c]
+	NEGOCE_COMMISSION_MIN       = float(v.get("NEGOCE_COMMISSION_MIN", NEGOCE_COMMISSION_MIN))
+	NEGOCE_COMMISSION_MAX       = float(v.get("NEGOCE_COMMISSION_MAX", NEGOCE_COMMISSION_MAX))
+	NEGOCE_SEUIL_REVENTE_CUIVRE = int(v.get("NEGOCE_SEUIL_REVENTE_CUIVRE", NEGOCE_SEUIL_REVENTE_CUIVRE))
+	NEGOCE_BONUS_CONVERSION     = float(v.get("NEGOCE_BONUS_CONVERSION", NEGOCE_BONUS_CONVERSION))
 	if isinstance(v.get("CHA_MARCHAND_PAR_CATEGORIE"), dict):
 		CHA_MARCHAND_PAR_CATEGORIE.clear()
 		CHA_MARCHAND_PAR_CATEGORIE.update({k: int(x) for k, x in v["CHA_MARCHAND_PAR_CATEGORIE"].items()})

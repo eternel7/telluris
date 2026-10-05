@@ -38,6 +38,7 @@ from db.config import get_doc
 from models import character_stats
 from utils.characters import item_ref_weight, resolve_item_ref
 from utils import marche
+from utils import negoce
 from utils import zones as zones_util
 from utils import recrutement
 
@@ -830,16 +831,39 @@ def retirer_candidat(prop: dict, cid) -> None:
 
 # ── Matières confiées, produits, caisse ──────────────────────────────────────────
 
-def donner(employe: dict, item_doc: dict) -> tuple[bool, str]:
+def cles_utiles_flux(prop: dict, employe: dict, get_doc_fn=None) -> set:
+	"""Ce dont le flux d'un BIEN a l'usage : les besoins de ses AUTRES ateliers, seuls
+	consommateurs de ce flux (`produire` → `puiser_flux`). Sert au négociant (utils/negoce)."""
+	lire = get_doc_fn or get_doc
+	cles = set()
+	for eid in (prop or {}).get("employes") or []:
+		if eid == (employe or {}).get("_id"):
+			continue
+		e = lire(eid)
+		if e and est_atelier(e):
+			cles |= set(marche.besoins_lieu(e))
+	return cles
+
+
+def donner(employe: dict, item_doc: dict, flux: dict | None = None, cles_utiles=None,
+		   ref=None) -> tuple[bool, str]:
 	"""Le joueur CONFIE un objet à son marchand. Un bien que l'atelier produit va au rayon
 	(il le revendra) ; une matière de ses recettes entre dans `stock_matieres` sous la clé de
-	`marche.cle_matiere_lieu` — exactement comme une vente à une boutique, sans paiement."""
+	`marche.cle_matiere_lieu` — exactement comme une vente à une boutique, sans paiement.
+
+	NÉGOCIANT (`marche.est_negociant`) : il prend tout, et l'objet suit `negoce.absorber` —
+	rayon s'il vaut cher, sinon `flux` du bien (si `cles_utiles` en veut), sinon cuivre versé
+	à SA caisse. L'appelant persiste le flux (`marche.persister_flux`)."""
 	if not est_atelier(employe):
 		return False, "Ce PNJ ne tient pas d'atelier."
 	if not marche.lieu_buys(employe, item_doc):
 		return False, "Il n'a pas l'usage de cet objet."
 	item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")
-	if marche.lieu_produit(employe, item_doc):
+	if marche.est_negociant(employe):
+		_, cuivre = negoce.absorber(employe, item_doc, flux, cles_utiles, ref)
+		if cuivre:
+			encaisser(employe, cuivre)
+	elif marche.lieu_produit(employe, item_doc):
 		marche._stock_vente_add(employe.setdefault("stock_vente", []), item_id, 1)
 	else:
 		cle = marche.cle_matiere_lieu(employe.get("categorie"), item_doc, employe)
@@ -848,11 +872,12 @@ def donner(employe: dict, item_doc: dict) -> tuple[bool, str]:
 	return True, ""
 
 
-def racheter(employe: dict, item_doc: dict) -> tuple[bool, str]:
+def racheter(employe: dict, item_doc: dict, flux: dict | None = None, cles_utiles=None,
+			 ref=None) -> tuple[bool, str]:
 	"""Un VISITEUR vend un objet au marchand : l'atelier l'absorbe exactement comme un objet
 	confié (`donner`) — jamais `marche.convertir_apres_achat`, dont le tick approvisionne et
 	suit le flux de la cité. Le paiement (argent créé, comme en boutique) reste à l'appelant."""
-	return donner(employe, item_doc)
+	return donner(employe, item_doc, flux, cles_utiles, ref)
 
 
 def vend_au_proprietaire(character: dict, employe: dict, get_doc_fn=None) -> bool:
