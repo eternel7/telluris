@@ -1471,7 +1471,7 @@ def _payer_maintiens(combat_doc: dict, acteur: dict) -> None:
 # garde son comportement (buff posé sur les corps, pas sur les cases). État de combat seul :
 #
 #   combat_doc["zones_persistantes"] = [{id, sort_id, lanceur_id, nom, icon, cases,
-#                                        degats, jet, canal, effets, source}]
+#                                        degats, jet, canal, animation, effets, source}]
 #
 # Brûle QUICONQUE s'y trouve — monstres, compagnons, montures, escortés, invocations et le
 # lanceur lui-même (le seul tir ami du jeu, assumé : c'est un mur, pas un ciblage) :
@@ -1518,6 +1518,9 @@ def _poser_zone_persistante(combat_doc: dict, joueur: dict, monstre: dict, sdoc:
 		"degats": notation or "",
 		"jet": mode_jet,
 		"canal": canal,
+		# Animation du sort, rejouée à chaque brûlure (sans doc à relire en combat).
+		# Absente sur un mur déjà en base ⇒ défaut du canal, comme avant.
+		"animation": str(sdoc.get("animation") or ""),
 		"effets": dict(effets or {}),
 		# De quoi rejouer `_appliquer_effet_sur_cible` sans le doc : même `source_id` que la
 		# pose initiale (une brûlure RAFRAÎCHIT le débuff), même `maintien` (entrée maintenue,
@@ -1582,7 +1585,7 @@ def _bruler(combat_doc: dict, zone: dict, lanceur: dict, victime: dict) -> None:
 	def _ligne(cible: dict, texte: str, kind: str = "hit") -> None:
 		combat_doc.setdefault("log", []).append(_avec_etat(_avec_vfx({
 			"tour": tour, "acteur": lanceur.get("nom", "?"), "kind": kind, "texte": texte,
-		}, canal, cible.get("id", ""), None, lanceur.get("id", "")), cible))
+		}, canal, cible.get("id", ""), zone.get("animation"), lanceur.get("id", "")), cible))
 
 	if str(victime.get("id") or "").startswith("monstre_"):
 		victime["currentPV"] = max(0, victime["currentPV"] - dmg)
