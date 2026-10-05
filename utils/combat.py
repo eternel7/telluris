@@ -5220,12 +5220,16 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 			return {"error": "Aucune place autour de vous pour faire apparaître la créature."}, None
 		joueur["currentPM"] -= cout_pm
 		noms = ", ".join(c["nom"] for c in crees)
+		# Tenue par concentration, la créature ne décompte pas ses tours : annoncer sa
+		# `duree` serait faux (cf. `_enregistrer_concentration`).
+		tenue = ("tenu par concentration" if est_maintenu(sdoc)
+				 else f"{crees[0]['invocation_restants']} tour(s)")
 		combat_doc["log"].append(_avec_etat({
 			"tour": combat_doc["tour"],
 			"acteur": joueur["nom"],
 			"kind": "sys",
 			"texte": f"{joueur['nom']} {profil['verbe']} {nom_capacite} : {noms} "
-					 f"répond à l'appel ({crees[0]['invocation_restants']} tour(s)).",
+					 f"répond à l'appel ({tenue}).",
 		}, joueur))
 		result = {cle: nom_capacite,
 				  "invoques": [{"id": c["id"], "nom": c["nom"],
@@ -5404,6 +5408,17 @@ def _enregistrer_concentration(combat_doc: dict, joueur: dict, sdoc: dict,
 			"restants": 1, "pose_tour": int(combat_doc.get("tour", 0) or 0),
 			"maintenu": True, "maintien": entree["maintien"],
 		})
+
+	# RELANCER remplace (comme le Mur de feu) : les créatures qu'un lancement PRÉCÉDENT de
+	# ce sort tenait se dissipent. ⚠️ Sans cela, l'entrée d'entretien ci-dessus étant
+	# remplacée, chaque relance ajoutait des créatures gelées pour un seul paiement.
+	# Les créatures de CE lancement n'ont pas encore `sort_maintenu` : elles restent.
+	for invoc in list(combat_doc.get("joueurs") or []):
+		if (invoc.get("est_invocation") and not invoc.get("dissipe")
+				and invoc.get("invocateur_id") == joueur.get("id")
+				and str(invoc.get("sort_maintenu") or "") == sort_id):
+			_dissiper_invocation(combat_doc, invoc,
+								 f"{invoc['nom']} se dissipe : l'appel est relancé.")
 
 	# Les créatures que CE sort vient d'appeler cessent de compter leurs tours : c'est
 	# l'entretien qui les tient désormais (cf. `_run_invocation_turn`).

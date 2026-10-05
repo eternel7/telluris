@@ -117,7 +117,9 @@ utils/
                          #   rayon), devis, cycle de vie à statut DÉRIVÉ de l'horloge.
                          #   ⚠️ Le catalogue écarte les matières (`marche.item_commandable`,
                          #   tag `commandable` pour déroger) ; le SUR-MESURE leur reste fermé
-                         #   même dérogées (`marche.est_intermediaire`)
+                         #   même dérogées, ainsi qu'aux livres, documents, munitions, pièges,
+                         #   vivres (`marche.est_personnalisable`, tags `personnalisable` /
+                         #   `non_personnalisable`)
   fabrication.py         # variantes sur mesure (pur) : modificateurs de matière pilotés par
                          #   la DONNÉE (bloc `fabrication` d'un doc item), identité
                          #   indépendante de l'ordre des matières, item + recette déterministes

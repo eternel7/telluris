@@ -182,6 +182,39 @@ def est_intermediaire(item_doc) -> bool:
 	return (item_doc or {}).get("categorie") in character_stats.CATEGORIES_INTERMEDIAIRES
 
 
+TAG_PERSONNALISABLE = "personnalisable"
+TAG_NON_PERSONNALISABLE = "non_personnalisable"
+# Tags qui FERMENT le sur-mesure. `piege` : la compétence de pose consomme l'objet par son
+# `_id` EXACT (`pose_piege.item`) — une variante sur mesure ne pourrait plus être posée.
+TAGS_NON_PERSONNALISABLES = frozenset({TAG_NON_PERSONNALISABLE, "piege"})
+
+
+def est_personnalisable(item_doc) -> bool:
+	"""Cette pièce peut-elle être façonnée SUR MESURE ? Pur, doc en main. SOURCE UNIQUE du
+	sur-mesure côté OBJET (drapeau du catalogue et garde de `routers/commande`).
+
+	Dans l'ordre, le premier qui répond tranche :
+	1. une MATIÈRE ou un DEMI-PRODUIT ne l'est jamais (`est_intermediaire`) — aucun tag n'y
+	   déroge, pas plus que `commandable` ;
+	2. tag `non_personnalisable` ou `piege` ⇒ non ;
+	3. tag `personnalisable` ⇒ oui, dérogation aux listes ci-dessous (grimoire de pacte
+	   enluminé, écrit renforcé d'encre magique) ;
+	4. `categorie` dans `CATEGORIES_NON_PERSONNALISABLES` ou `sous_categorie` (écrite) dans
+	   `SOUS_CATEGORIES_NON_PERSONNALISABLES` ⇒ non — réglables depuis /admin.
+
+	⚠️ Indépendant de `item_commandable` : un grimoire reste au CATALOGUE de commande."""
+	doc = item_doc or {}
+	if est_intermediaire(doc):
+		return False
+	tags = set(doc.get("tags") or [])
+	if tags & TAGS_NON_PERSONNALISABLES:
+		return False
+	if TAG_PERSONNALISABLE in tags:
+		return True
+	return not (doc.get("categorie") in character_stats.CATEGORIES_NON_PERSONNALISABLES
+				or doc.get("sous_categorie") in character_stats.SOUS_CATEGORIES_NON_PERSONNALISABLES)
+
+
 def item_commandable(item_id: str, item_doc: dict | None = None) -> bool:
 	"""Cet objet peut-il figurer au CATALOGUE de commande d'un artisan ?
 

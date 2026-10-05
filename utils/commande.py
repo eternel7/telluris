@@ -15,6 +15,8 @@ DEUX capacités distinctes, et c'est la distinction qui porte tout le système :
 de Lutèce proposait « Hampe », « Cuir » et « Acier plissé » à côté de ses 133 armes et armures.
 Le tag `commandable` sur un doc item déroge à cette règle, **mais jamais au sur-mesure** : on ne
 façonne pas un lingot à la demande, fût-il remis au catalogue (`marche.est_intermediaire`).
+Plus largement, le sur-mesure ne vaut que pour une pièce `marche.est_personnalisable` : un
+livre, un document, une munition, un piège ou une miche se commandent tels quels.
 
 Ce qui donne la trichotomie voulue sans authorer un seul doc : petit magasin (rayon seul) /
 artisan (son catalogue) / grand magasin (+ le sur-mesure), la fusion de catégories élargissant

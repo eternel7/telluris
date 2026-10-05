@@ -367,6 +367,31 @@ def test_rompre_la_concentration_dissipe_la_creature(monkeypatch):
 	assert creature["currentPV"] == 0, "sa case doit redevenir libre"
 
 
+def test_relancer_une_invocation_maintenue_remplace_les_creatures(monkeypatch):
+	"""Un seul entretien ⇒ une seule portée de créatures : la relance renvoie la précédente."""
+	SERVANT = {
+		"_id": "espece:servant", "type": "espece", "nom": "Servant", "tags": [],
+		"base_attributes": {c: {"min": v, "max": v} for c, v in
+							(("V", 3), ("F", 20), ("R", 20), ("Ag", 20),
+							 ("Vol", 10), ("Int", 10), ("Cha", 10), ("Ch", 10))},
+	}
+	monkeypatch.setattr(combat_mod, "get_doc", lambda i: {"espece:servant": SERVANT}.get(i))
+	mage = joueur(pm=60)
+	doc = combat([mage], [monstre(x=9, y=5)])
+	appel = dict(cout_pm=8, maintien=4, cible="soi", _id="sort:appel", nom="Appel",
+				 invocation={"espece": "espece:servant", "nombre": 1, "duree": 5})
+	resolve_action(doc, "sort", sort=sort(**appel))
+	premiere = next(j for j in doc["joueurs"] if j.get("est_invocation"))
+	mage["actions_restantes"] = max(1, mage.get("actions_restantes", 0))
+	resolve_action(doc, "sort", sort=sort(**appel))
+
+	assert premiere["dissipe"] is True
+	tenues = [j for j in doc["joueurs"] if j.get("est_invocation") and not j.get("dissipe")]
+	assert len(tenues) == 1 and tenues[0] is not premiere
+	assert tenues[0]["sort_maintenu"] == "sort:appel"
+	assert len(mage["concentrations"]) == 1
+
+
 # ── Une COMPÉTENCE maintenue se facture comme un sort ───────────────────────────
 
 def test_une_competence_maintenue_est_bien_facturee():

@@ -185,6 +185,54 @@ def test_une_piece_derogee_reste_non_personnalisable(index_avec_demi_produit):
 
 def test_une_arme_reste_personnalisable():
 	assert marche.est_intermediaire(_DB["item:Epee_longue"]) is False
+	assert marche.est_personnalisable(_DB["item:Epee_longue"]) is True
+
+
+GRIMOIRE = {"_id": "item:grimoire_de_test", "type": "item", "nom": "Grimoire de test",
+			"categorie": "livre", "sous_categorie": "grimoire", "tags": ["grimoire"]}
+
+
+def test_un_grimoire_se_commande_mais_ne_se_personnalise_pas():
+	"""Défauts voulus (décision de conception) : un livre se commande au catalogue, mais sa
+	valeur est son contenu — la personnalisation est fermée, la commande non."""
+	assert "livre" in character_stats.CATEGORIES_NON_PERSONNALISABLES
+	assert marche.item_commandable(GRIMOIRE["_id"], GRIMOIRE) is True
+	assert marche.est_personnalisable(GRIMOIRE) is False
+
+
+def test_le_tag_personnalisable_rouvre_un_grimoire():
+	assert marche.est_personnalisable(dict(GRIMOIRE, tags=["grimoire", marche.TAG_PERSONNALISABLE])) is True
+
+
+def test_les_tags_fermants_priment_sur_personnalisable():
+	epee = _DB["item:Epee_longue"]
+	for tag in marche.TAGS_NON_PERSONNALISABLES:
+		assert marche.est_personnalisable(dict(epee, tags=[tag])) is False, tag
+		assert marche.est_personnalisable(
+			dict(epee, tags=[tag, marche.TAG_PERSONNALISABLE])) is False, tag
+
+
+def test_personnalisable_ne_rouvre_jamais_une_matiere():
+	assert marche.est_personnalisable(dict(HAMPE, tags=[marche.TAG_PERSONNALISABLE])) is False
+
+
+def test_listes_non_personnalisables_relues_et_non_recopiees(monkeypatch):
+	# Les réglages de monde sont lus à chaque appel : les vider rouvre la pièce.
+	sc = next(iter(character_stats.SOUS_CATEGORIES_NON_PERSONNALISABLES))
+	miche = {"_id": "item:miche", "categorie": "consommable", "sous_categorie": sc}
+	assert marche.est_personnalisable(miche) is False
+	monkeypatch.setattr(character_stats, "SOUS_CATEGORIES_NON_PERSONNALISABLES", set())
+	assert marche.est_personnalisable(miche) is True
+	assert marche.est_personnalisable(GRIMOIRE) is False
+	monkeypatch.setattr(character_stats, "CATEGORIES_NON_PERSONNALISABLES", set())
+	assert marche.est_personnalisable(GRIMOIRE) is True
+
+
+def test_la_sous_categorie_ne_retombe_pas_sur_la_categorie(monkeypatch):
+	"""Sans `sous_categorie` écrite, la catégorie ne doit pas être prise pour elle."""
+	cat = next(iter(character_stats.SOUS_CATEGORIES_NON_PERSONNALISABLES))
+	monkeypatch.setattr(character_stats, "CATEGORIES_NON_PERSONNALISABLES", set())
+	assert marche.est_personnalisable({"_id": "item:x", "categorie": cat}) is True
 
 
 def test_un_lieu_qui_ne_produit_que_des_matieres_ne_prend_pas_commande(monkeypatch):

@@ -5,8 +5,9 @@
 #   `commande.lieu_prend_commandes`      — son catalogue épuré n'est pas vide (tout atelier) ;
 #   `commande.lieu_fabrique_sur_mesure`  — réservé aux grandes maisons, SEULE porte vers la
 #                                          création d'un doc `item:`/`recette:` en base ;
-#   `marche.est_intermediaire`           — porte sur l'OBJET et non sur le lieu : une matière
-#                                          ou un demi-produit ne se façonne jamais sur mesure.
+#   `marche.est_personnalisable`         — porte sur l'OBJET et non sur le lieu : une matière
+#                                          ou un demi-produit ne se façonne jamais sur mesure,
+#                                          ni un livre, un document, un piège, une miche…
 # Une commande de catalogue passe chez l'armurier du coin ; la même assortie de matières
 # personnalisées ne passe qu'au Grand Arsenal ; et pas sur une hampe, même là-bas.
 # Les deux dernières sont réunies dans `_garde_sur_mesure` — elles ne vont jamais l'une sans
@@ -146,7 +147,7 @@ def _catalogue_vue(lieu_doc: dict, relation) -> list:
 			# ⚠️ Drapeau calculé ICI, jamais redérivé côté client (Convention §10) : une pièce
 			# remise au catalogue par le tag `commandable` reste une MATIÈRE, et ne doit pas
 			# afficher le bouton « ✨ Sur mesure ».
-			"sur_mesure": not marche.est_intermediaire(item),
+			"sur_mesure": marche.est_personnalisable(item),
 			**marche.fiche_item_fields(item),
 		})
 	return sorted(lignes, key=lambda l: l["nom"] or "")
@@ -219,10 +220,11 @@ def _garde_sur_mesure(lieu_doc: dict, base_doc: dict) -> None:
 
 	- la MAISON sait-elle inventer ? (`lieu_fabrique_sur_mesure`, SEULE porte vers la création
 	  d'un doc `item:`/`recette:`) ;
-	- cet OBJET se façonne-t-il ? (`est_intermediaire`, garde INDÉPENDANTE portant sur l'objet)
-	  — on ne façonne pas une hampe ou un lingot sur mesure, fût-ce au Grand Arsenal, et elle
-	  tient même quand le tag `commandable` a remis la pièce au catalogue : le tag rouvre la
-	  commande, jamais la personnalisation."""
+	- cet OBJET se façonne-t-il ? (`est_personnalisable`, garde INDÉPENDANTE portant sur
+	  l'objet) — on ne façonne pas une hampe ou un lingot sur mesure, fût-ce au Grand Arsenal,
+	  et elle tient même quand le tag `commandable` a remis la pièce au catalogue : le tag
+	  rouvre la commande, jamais la personnalisation. Un grimoire, une miche, un piège se
+	  commandent, mais ne se personnalisent pas (sauf tag `personnalisable`)."""
 	if not commande_util.lieu_fabrique_sur_mesure(lieu_doc):
 		raise HTTPException(
 			status_code=403,
@@ -231,6 +233,10 @@ def _garde_sur_mesure(lieu_doc: dict, base_doc: dict) -> None:
 		raise HTTPException(
 			status_code=422,
 			detail="On ne façonne pas une matière première sur mesure.")
+	if not marche.est_personnalisable(base_doc):
+		raise HTTPException(
+			status_code=422,
+			detail="Cette pièce se commande telle quelle : elle ne se façonne pas sur mesure.")
 
 
 @commande_router.get("/commande/matieres")

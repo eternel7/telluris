@@ -1,0 +1,1177 @@
+[
+  {
+    "_id": "sort:essaim_de_besiens",
+    "type": "sort",
+    "nom": "Essaim de besiens",
+    "icon": "🦇",
+    "description": "Une poignée de petits démons ricanants dégringole d'une fissure. Ils ne sont rien seuls ; tant que vous les nourrissez de votre volonté, ils sont partout à la fois.",
+    "magie": "Démonologie",
+    "famille": "invocation",
+    "niveau": 2,
+    "cout_pm": 14,
+    "maintien": 4,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:besien",
+      "nombre": 3,
+      "duree": 3
+    },
+    "composants": [
+      {
+        "item": "item:Sang_demon_seche",
+        "consomme": true,
+        "bonus": {
+          "invocation_nombre": 1
+        }
+      },
+      {
+        "item": "item:Sel_noir",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:songe_des_incubes",
+    "type": "sort",
+    "nom": "Songe des incubes",
+    "icon": "🌙",
+    "description": "Deux silhouettes trop belles sortent d'un rêve que personne n'a fait. Elles restent tant que vous tenez le songe — et pas une seconde de plus.",
+    "magie": "Démonologie",
+    "famille": "invocation",
+    "niveau": 4,
+    "cout_pm": 23,
+    "maintien": 3,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:incube",
+      "nombre": 2,
+      "duree": 3,
+      "profil": "profil:veteran"
+    },
+    "composants": [
+      {
+        "item": "item:Sang_demon_seche",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      },
+      {
+        "item": "item:Sel_noir",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:ifrit_enchaine",
+    "type": "sort",
+    "nom": "Ifrit enchaîné",
+    "icon": "🔥",
+    "description": "Un ifrit surgit d'une colonne de braise, une chaîne d'ombre au cou. Il hait ce lien, et c'est toute cette haine qu'il déverse sur vos ennemis.",
+    "magie": "Démonologie",
+    "famille": "invocation",
+    "niveau": 6,
+    "cout_pm": 32,
+    "maintien": 3,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:ifrit",
+      "nombre": 1,
+      "duree": 3
+    },
+    "composants": [
+      {
+        "item": "item:Sang_demon_seche",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      },
+      {
+        "item": "item:Sel_noir",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:main_de_la_destinee",
+    "type": "sort",
+    "nom": "Main de la destinée",
+    "icon": "🎲",
+    "description": "Un démon majeur de la destinée daigne poser la main sur le cours du combat. Tant que vous tenez le pacte, chaque coup qu'il porte semble écrit d'avance.",
+    "magie": "Démonologie",
+    "famille": "invocation",
+    "niveau": 8,
+    "cout_pm": 44,
+    "maintien": 5,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:demon_majeur_de_la_destinee",
+      "nombre": 1,
+      "duree": 3,
+      "profil": "profil:heros"
+    },
+    "composants": [
+      {
+        "item": "item:Sang_demon_seche",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      },
+      {
+        "item": "item:Sel_noir",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:conclave_de_la_destinee",
+    "type": "sort",
+    "nom": "Conclave de la destinée",
+    "icon": "♾️",
+    "description": "Un rituel qui se trace en plusieurs souffles, et qu'on ne peut plus interrompre. Au dernier mot, deux seigneurs de la destinée siègent à vos côtés.",
+    "magie": "Démonologie",
+    "famille": "invocation",
+    "niveau": 10,
+    "cout_pm": 75,
+    "maintien": 10,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:demon_majeur_de_la_destinee",
+      "nombre": 2,
+      "duree": 3,
+      "profil": "profil:seigneur"
+    },
+    "composants": [
+      {
+        "item": "item:Sang_demon_seche",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      },
+      {
+        "item": "item:Sel_noir",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      }
+    ],
+    "incantation": 3
+  },
+  {
+    "_id": "sort:cortege_des_fantomes",
+    "type": "sort",
+    "nom": "Cortège des fantômes",
+    "icon": "👻",
+    "description": "Des formes pâles se lèvent du sol et glissent vers l'ennemi sans toucher terre. Chaque âme que vous retenez ici grossit le cortège.",
+    "magie": "Nécromancie",
+    "famille": "invocation",
+    "niveau": 2,
+    "cout_pm": 15,
+    "maintien": 3,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:fantome",
+      "nombre": 3,
+      "duree": 3
+    },
+    "composants": [
+      {
+        "item": "item:Sel_des_sepultures",
+        "consomme": true,
+        "bonus": {
+          "invocation_nombre": 1
+        }
+      },
+      {
+        "item": "item:os",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:lamentation",
+    "type": "sort",
+    "nom": "Lamentation",
+    "icon": "😱",
+    "description": "Deux banshees répondent à votre appel en hurlant. Leur cri ne cesse que lorsque vous relâchez le fil qui les retient en ce monde.",
+    "magie": "Nécromancie",
+    "famille": "invocation",
+    "niveau": 4,
+    "cout_pm": 24,
+    "maintien": 3,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:banshee",
+      "nombre": 2,
+      "duree": 3,
+      "profil": "profil:heros"
+    },
+    "composants": [
+      {
+        "item": "item:Sel_des_sepultures",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      },
+      {
+        "item": "item:os",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:soif_liee",
+    "type": "sort",
+    "nom": "Soif liée",
+    "icon": "🧛",
+    "description": "Un vampire s'arrache à son cercueil, lié à vous par le sang. Il combat avec la faim de ceux qui n'ont plus rien à perdre — tant que vous le nourrissez.",
+    "magie": "Nécromancie",
+    "famille": "invocation",
+    "niveau": 6,
+    "cout_pm": 34,
+    "maintien": 4,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:vampire",
+      "nombre": 1,
+      "duree": 3,
+      "profil": "profil:heros"
+    },
+    "composants": [
+      {
+        "item": "item:Sel_des_sepultures",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      },
+      {
+        "item": "item:os",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:volee_funebre",
+    "type": "sort",
+    "nom": "Volée funèbre",
+    "icon": "🐦‍⬛",
+    "description": "Deux corneilles mortes, larges comme des hommes, tournoient au-dessus du champ de bataille et fondent sur qui vous désignez.",
+    "magie": "Nécromancie",
+    "famille": "invocation",
+    "niveau": 8,
+    "cout_pm": 46,
+    "maintien": 7,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:corneille_noire",
+      "nombre": 2,
+      "duree": 3,
+      "profil": "profil:champion"
+    },
+    "composants": [
+      {
+        "item": "item:Sel_des_sepultures",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      },
+      {
+        "item": "item:os",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:le_comte_s_eveille",
+    "type": "sort",
+    "nom": "Le comte s'éveille",
+    "icon": "🦇",
+    "description": "Le rituel s'étire sur plusieurs souffles, et rien ne doit l'interrompre. Puis le couvercle glisse : le comte se lève, et pour un temps il consent à vous servir.",
+    "magie": "Nécromancie",
+    "famille": "invocation",
+    "niveau": 10,
+    "cout_pm": 77,
+    "maintien": 6,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:comte_vampire",
+      "nombre": 1,
+      "duree": 3,
+      "profil": "profil:seigneur"
+    },
+    "composants": [
+      {
+        "item": "item:Sel_des_sepultures",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      },
+      {
+        "item": "item:os",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      }
+    ],
+    "incantation": 3
+  },
+  {
+    "_id": "sort:la_tarasque_domptee",
+    "type": "sort",
+    "nom": "La Tarasque domptée",
+    "icon": "🐢",
+    "description": "Comme jadis sainte Marthe, vous passez votre ceinture au cou de la bête. La Tarasque vous suit, docile, et broie ce que votre prière lui désigne.",
+    "magie": "Sainte",
+    "famille": "invocation",
+    "niveau": 5,
+    "cout_pm": 28,
+    "maintien": 5,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:tarasque",
+      "nombre": 1,
+      "duree": 3,
+      "profil": "profil:veteran"
+    },
+    "composants": [
+      {
+        "item": "item:Eau_benite",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      },
+      {
+        "item": "item:encens",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:destrier_celeste",
+    "type": "sort",
+    "nom": "Destrier céleste",
+    "icon": "🪽",
+    "description": "Un destrier ailé descend d'un rai de lumière et charge à vos côtés. Il ne reste qu'autant que dure votre ferveur.",
+    "magie": "Sainte",
+    "famille": "invocation",
+    "niveau": 9,
+    "cout_pm": 50,
+    "maintien": 10,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:monture_angelique",
+      "nombre": 1,
+      "duree": 3,
+      "profil": "profil:veteran"
+    },
+    "composants": [
+      {
+        "item": "item:Eau_benite",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      },
+      {
+        "item": "item:encens",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:fauve_totem",
+    "type": "sort",
+    "nom": "Fauve totem",
+    "icon": "🐆",
+    "description": "Vous appelez l'esprit du grand fauve, et la bête vient en chair et en griffes. Elle chasse avec vous tant que vous gardez le lien.",
+    "magie": "Nature",
+    "famille": "invocation",
+    "niveau": 5,
+    "cout_pm": 27,
+    "maintien": 4,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:fauves",
+      "nombre": 1,
+      "duree": 3,
+      "profil": "profil:champion"
+    },
+    "composants": [
+      {
+        "item": "item:Fiole_sang_bete",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      },
+      {
+        "item": "item:Branche_de_Chene",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:ciel_de_serres",
+    "type": "sort",
+    "nom": "Ciel de serres",
+    "icon": "🦅",
+    "description": "Deux grands rapaces tournoient au-dessus de vous, puis piquent ensemble. Ils resteront tant que votre regard porte sur le ciel.",
+    "magie": "Nature",
+    "famille": "invocation",
+    "niveau": 9,
+    "cout_pm": 49,
+    "maintien": 12,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:rapaces",
+      "nombre": 2,
+      "duree": 3,
+      "profil": "profil:champion"
+    },
+    "composants": [
+      {
+        "item": "item:Fiole_sang_bete",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      },
+      {
+        "item": "item:Branche_de_Chene",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_essaim_de_besiens",
+    "type": "item",
+    "nom": "Grimoire : Essaim de besiens",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Essaim de besiens », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:essaim_de_besiens"
+    ],
+    "valeur": [
+      {
+        "ag": 20
+      },
+      {
+        "ag": 60
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_essaim_de_besiens",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_essaim_de_besiens",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_songe_des_incubes",
+    "type": "item",
+    "nom": "Grimoire : Songe des incubes",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Songe des incubes », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:songe_des_incubes"
+    ],
+    "valeur": [
+      {
+        "ag": 40
+      },
+      {
+        "ag": 120
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_songe_des_incubes",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_songe_des_incubes",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_ifrit_enchaine",
+    "type": "item",
+    "nom": "Grimoire : Ifrit enchaîné",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Ifrit enchaîné », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:ifrit_enchaine"
+    ],
+    "valeur": [
+      {
+        "ag": 60
+      },
+      {
+        "ag": 180
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_ifrit_enchaine",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_ifrit_enchaine",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_main_de_la_destinee",
+    "type": "item",
+    "nom": "Grimoire : Main de la destinée",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Main de la destinée », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:main_de_la_destinee"
+    ],
+    "valeur": [
+      {
+        "ag": 80
+      },
+      {
+        "ag": 240
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_main_de_la_destinee",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_main_de_la_destinee",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_conclave_de_la_destinee",
+    "type": "item",
+    "nom": "Grimoire : Conclave de la destinée",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Conclave de la destinée », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "legendaire",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:conclave_de_la_destinee"
+    ],
+    "valeur": [
+      {
+        "ag": 100
+      },
+      {
+        "ag": 300
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_conclave_de_la_destinee",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_conclave_de_la_destinee",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_fauve_totem",
+    "type": "item",
+    "nom": "Grimoire : Fauve totem",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Fauve totem », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:fauve_totem"
+    ],
+    "valeur": [
+      {
+        "ag": 50
+      },
+      {
+        "ag": 150
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_fauve_totem",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_fauve_totem",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_ciel_de_serres",
+    "type": "item",
+    "nom": "Grimoire : Ciel de serres",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Ciel de serres », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:ciel_de_serres"
+    ],
+    "valeur": [
+      {
+        "ag": 90
+      },
+      {
+        "ag": 270
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_ciel_de_serres",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_ciel_de_serres",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_cortege_des_fantomes",
+    "type": "item",
+    "nom": "Grimoire : Cortège des fantômes",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Cortège des fantômes », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:cortege_des_fantomes"
+    ],
+    "valeur": [
+      {
+        "ag": 20
+      },
+      {
+        "ag": 60
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_cortege_des_fantomes",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_cortege_des_fantomes",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_lamentation",
+    "type": "item",
+    "nom": "Grimoire : Lamentation",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Lamentation », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:lamentation"
+    ],
+    "valeur": [
+      {
+        "ag": 40
+      },
+      {
+        "ag": 120
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_lamentation",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_lamentation",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_soif_liee",
+    "type": "item",
+    "nom": "Grimoire : Soif liée",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Soif liée », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:soif_liee"
+    ],
+    "valeur": [
+      {
+        "ag": 60
+      },
+      {
+        "ag": 180
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_soif_liee",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_soif_liee",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_volee_funebre",
+    "type": "item",
+    "nom": "Grimoire : Volée funèbre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Volée funèbre », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:volee_funebre"
+    ],
+    "valeur": [
+      {
+        "ag": 80
+      },
+      {
+        "ag": 240
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_volee_funebre",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_volee_funebre",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_le_comte_s_eveille",
+    "type": "item",
+    "nom": "Grimoire : Le comte s'éveille",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Le comte s'éveille », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "legendaire",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:le_comte_s_eveille"
+    ],
+    "valeur": [
+      {
+        "ag": 100
+      },
+      {
+        "ag": 300
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_le_comte_s_eveille",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_le_comte_s_eveille",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_la_tarasque_domptee",
+    "type": "item",
+    "nom": "Grimoire : La Tarasque domptée",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « La Tarasque domptée », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:la_tarasque_domptee"
+    ],
+    "valeur": [
+      {
+        "ag": 50
+      },
+      {
+        "ag": 150
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_la_tarasque_domptee",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_la_tarasque_domptee",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_destrier_celeste",
+    "type": "item",
+    "nom": "Grimoire : Destrier céleste",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Destrier céleste », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:destrier_celeste"
+    ],
+    "valeur": [
+      {
+        "ag": 90
+      },
+      {
+        "ag": 270
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_destrier_celeste",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_destrier_celeste",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  }
+]

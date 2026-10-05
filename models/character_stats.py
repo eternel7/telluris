@@ -159,6 +159,14 @@ MULT_RARETE: dict[str, float] = {
 # quittaient le catalogue). La catégorie, elle, classe juste : au dump du 20/09, les 438 items
 # `composant`/`metal` sont sans exception non équipables (`slots` vide).
 CATEGORIES_INTERMEDIAIRES: set = {"composant", "metal"}
+# Pièces FINIES qui se commandent au catalogue mais ne se PERSONNALISENT pas sur mesure
+# (`marche.est_personnalisable`) : leur valeur tient à leur contenu ou à leur nature, pas à
+# leur matière — un grimoire enseigne un sort, une lettre de créance identifie, une miche se
+# mange. Le tag `personnalisable` sur un doc item déroge (grimoire de pacte enluminé), le tag
+# `non_personnalisable` ferme un cas isolé. ⚠️ Ne touche PAS `item_commandable`.
+CATEGORIES_NON_PERSONNALISABLES: set = {"livre", "document", "munition"}
+# Comparées à la `sous_categorie` ÉCRITE du doc (jamais au repli sur `categorie`).
+SOUS_CATEGORIES_NON_PERSONNALISABLES: set = {"legume", "fruit", "boulangerie", "cuisine"}
 # ── Approvisionnement des ateliers (au tick) ─────────────────────────────────────
 # Ce qu'un marchand achète au joueur ET les matières « feuilles » à auto-approvisionner ne
 # sont PLUS des world-vars : ils sont DÉRIVÉS des recettes (`recette:*`, champ `lieu_categorie`
@@ -922,6 +930,8 @@ def current_world_variables() -> dict:
 		"PRIX_DERIVE_BASE": PRIX_DERIVE_BASE,
 		"MULT_RARETE": dict(MULT_RARETE),
 		"CATEGORIES_INTERMEDIAIRES": sorted(CATEGORIES_INTERMEDIAIRES),
+		"CATEGORIES_NON_PERSONNALISABLES": sorted(CATEGORIES_NON_PERSONNALISABLES),
+		"SOUS_CATEGORIES_NON_PERSONNALISABLES": sorted(SOUS_CATEGORIES_NON_PERSONNALISABLES),
 		"APPRO_DEBIT": dict(APPRO_DEBIT),
 		"APPRO_DEBIT_DEFAUT": APPRO_DEBIT_DEFAUT,
 		"APPRO_EXTRA": {k: list(v) for k, v in APPRO_EXTRA.items()},
@@ -1163,6 +1173,11 @@ def load_world_variables() -> dict:
 	if isinstance(v.get("CATEGORIES_INTERMEDIAIRES"), list):
 		CATEGORIES_INTERMEDIAIRES.clear()
 		CATEGORIES_INTERMEDIAIRES.update(str(c) for c in v["CATEGORIES_INTERMEDIAIRES"])
+	for _cle, _ens in (("CATEGORIES_NON_PERSONNALISABLES", CATEGORIES_NON_PERSONNALISABLES),
+					   ("SOUS_CATEGORIES_NON_PERSONNALISABLES", SOUS_CATEGORIES_NON_PERSONNALISABLES)):
+		if isinstance(v.get(_cle), list):
+			_ens.clear()
+			_ens.update(str(c) for c in v[_cle])
 	if isinstance(v.get("APPRO_DEBIT"), dict):
 		APPRO_DEBIT.clear()
 		APPRO_DEBIT.update({k: int(x) for k, x in v["APPRO_DEBIT"].items()})
