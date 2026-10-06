@@ -87,8 +87,8 @@
 			<div class="char-class" data-role="classe">{{ voc_icon }} {{ voc_label }} Niv.<span class="voc-niveau niveau-nb" data-role="voc-niveau">{{ voc_niveau }}</span> - <span data-role="race">{{ race }}</span> Niv.<span class="race-niveau niveau-nb" data-role="race-niveau">{{ niveau }}</span><span data-role="rang"{% if not rang %} hidden{% endif %}{% if rang_title %} title="{{ rang_title }}"{% endif %}> · Rang <span data-role="rang-val">{{ rang }}</span></span></div>
 			<div class="char-vitals">
 				<span class="pv-val" data-role="pv-val">PV <span data-role="pv">{{ pv }}</span>/<span data-role="pv-max">{{ pv_max or "—" }}</span></span>
-				{% if points is not none %}<span class="sh-card-points pts-dispo{% if points <= 0 %} is-vide{% endif %}" title="Points d'attribut à répartir (caractéristiques, vocation, sorts, écoles, compétences)">★ <span data-points>{{ points }}</span></span>{% endif %}
 				<span class="pm-val" data-role="pm-val">PM <span data-role="pm">{{ pm }}</span>/<span data-role="pm-max">{{ pm_max or "—" }}</span></span>
+				{% if points is not none %}<span class="sh-card-points pts-dispo{% if points <= 0 %} is-vide{% endif %}" title="Points d'attribut à répartir (caractéristiques, vocation, sorts, écoles, compétences)">★ <span data-points>{{ points }}</span></span>{% endif %}
 			</div>
 		</div>
 		{% endif %}
