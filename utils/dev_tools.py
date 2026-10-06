@@ -189,6 +189,17 @@ CATALOGUE = [
 			"régénération idempotente.",
 	},
 	{
+		"id": "gen_animations_capacites",
+		"label": "🎬 Animations et sons des sorts et compétences",
+		"argv": _py("gen_animations_capacites.py"),
+		"ecrit": "Écrit jsons/animations_capacites_a_importer.json.",
+		"description": "Propose une animation (image + son) aux sorts et compétences actives "
+			"qui n'en ont pas : un doc `animation:capa_<thème>` par thème (copie d'une feuille "
+			"déjà réglée + un son), puis `animation` sur chaque capacité. Table exhaustive : "
+			"échoue sur une capacité non classée. Ne touche ni une capacité déjà animée ni un "
+			"thème déjà en base. Relit le dump le plus récent : régénération idempotente.",
+	},
+	{
 		"id": "gen_equipement_humanoides",
 		"label": "⚔️ Équipement des monstres humanoïdes",
 		"argv": _py("gen_equipement_humanoides.py"),

@@ -5269,13 +5269,16 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		# `duree` serait faux (cf. `_enregistrer_concentration`).
 		tenue = ("tenu par concentration" if est_maintenu(sdoc)
 				 else f"{crees[0]['invocation_restants']} tour(s)")
-		combat_doc["log"].append(_avec_etat({
+		# Animation PROPRE au sort seulement, jouée sur le LANCEUR : canal `invocation`
+		# absent de COMBAT_ANIMATIONS_DEFAUT, donc aucun défaut ne s'y substitue — un sort
+		# sans `animation` reste muet, comme avant.
+		combat_doc["log"].append(_avec_etat(_avec_vfx({
 			"tour": combat_doc["tour"],
 			"acteur": joueur["nom"],
 			"kind": "sys",
 			"texte": f"{joueur['nom']} {profil['verbe']} {nom_capacite} : {noms} "
 					 f"répond à l'appel ({tenue}).",
-		}, joueur))
+		}, "invocation", joueur.get("id", ""), sdoc.get("animation")), joueur))
 		result = {cle: nom_capacite,
 				  "invoques": [{"id": c["id"], "nom": c["nom"],
 								"restants": c["invocation_restants"]} for c in crees]}

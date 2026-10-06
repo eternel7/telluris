@@ -253,6 +253,24 @@ def test_action_sort_invocation_refusee_sans_pm(db):
     assert len(doc["joueurs"]) == 1
 
 
+def test_l_animation_du_sort_d_invocation_se_joue_sur_le_lanceur(db):
+    lanceur = _lanceur(pm=60)
+    doc = _combat([lanceur], [_monstre()])
+    _action_invoquer(doc, _sort_invocation(animation="animation:capa_portail_infernal"))
+    entree = doc["log"][-1]
+    assert entree["vfx"] == {"anim": "animation:capa_portail_infernal", "cible": lanceur["id"]}
+
+
+def test_une_invocation_sans_animation_reste_muette_meme_avec_des_defauts(db, monkeypatch):
+    """Canal `invocation` hors de COMBAT_ANIMATIONS_DEFAUT : aucun défaut ne s'y substitue."""
+    monkeypatch.setattr(combat_mod.character_stats, "COMBAT_ANIMATIONS_DEFAUT",
+                        {"sort": "animation:defaut_sort", "buff": "animation:defaut_buff"})
+    lanceur = _lanceur(pm=60)
+    doc = _combat([lanceur], [_monstre()])
+    _action_invoquer(doc, _sort_invocation())
+    assert "vfx" not in doc["log"][-1]
+
+
 def test_invocation_n_applique_jamais_ses_effets(db):
     """Exclusif des trois autres branches : la créature EST l'effet du sort."""
     lanceur = _lanceur(pm=60)
