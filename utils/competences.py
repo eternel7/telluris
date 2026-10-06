@@ -104,6 +104,8 @@ def normaliser_competence(doc) -> dict | None:
 		# Animation de combat (doc `animation:*`), optionnelle — même liste blanche, même
 		# piège que pour les sorts : sans ce champ, la liaison n'atteint jamais le moteur.
 		"animation": str(doc.get("animation") or ""),
+		# Animation de ZONE, optionnelle — même contrat que pour les sorts.
+		"animation_zone": str(doc.get("animation_zone") or ""),
 		# POSE DE PIÈGE (bloc `pose_piege`, cf. utils/pieges.normaliser_pose) : la
 		# compétence n'est pas lancée par `_lancer_capacite` mais par l'action de combat
 		# `poser_piege`, qui consomme son item. None ⇒ compétence ordinaire.

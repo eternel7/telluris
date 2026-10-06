@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from utils.zones_effet import (  # noqa: E402
 	ANGLE_DEFAUT, RAYON_MAX, ancre_de, axe_de, axe_facing, cases_effet, cases_zone,
-	est_orientee, normaliser_zone,
+	est_orientee, normaliser_zone, placement_visuel,
 )
 
 
@@ -243,3 +243,35 @@ def test_cases_effet_ne_contourne_pas_un_angle():
 def test_cases_effet_l_ancre_survit_meme_sans_ligne_de_vue():
 	z = normaliser_zone({"forme": "cercle", "rayon": 0})
 	assert cases_effet(z, (0, 0), (6, 4), praticable=_praticable, vue=_vue) == [(6, 4)]
+
+
+# ── Placement de l'animation de zone ─────────────────────────────────────────────
+
+def test_placement_d_un_cone_au_milieu_de_son_emprise_devant_le_lanceur():
+	"""Cône de 3 anneaux vers l'est depuis (5,5) : x de 6 à 8, y de 3 à 7. Le sprite se pose au
+	MILIEU de l'emprise (7, 5) — pas au barycentre (7,27), tiré vers le bout large."""
+	zone = normaliser_zone({"forme": "cone", "origine": "lanceur", "longueur": 3,
+							"decalage": 1})
+	assert placement_visuel(zone, (5, 5), (8, 5)) == {"centre": [7.0, 5.0], "axe": [1, 0]}
+
+
+def test_placement_d_un_cercle_sur_son_ancre_avec_l_axe_vers_la_cible():
+	zone = normaliser_zone({"forme": "cercle", "rayon": 2})
+	assert placement_visuel(zone, (1, 1), (6, 1)) == {"centre": [6.0, 1.0], "axe": [1, 0]}
+
+
+def test_placement_sans_zone_rend_none():
+	assert placement_visuel(None, (1, 1), (6, 1)) is None
+
+
+def test_placement_d_un_cone_en_diagonale():
+	"""Même cas que dev/test_zones_effet_client.js (miroir `placementVisuelZone`)."""
+	zone = normaliser_zone({"forme": "cone", "origine": "lanceur", "longueur": 3,
+							"decalage": 1})
+	assert placement_visuel(zone, (5, 5), (8, 8)) == {"centre": [6.5, 6.5], "axe": [1, 1]}
+
+
+def test_placement_d_un_rectangle_de_largeur_paire():
+	zone = normaliser_zone({"forme": "rectangle", "origine": "lanceur", "longueur": 1,
+							"largeur": 2, "decalage": 1})
+	assert placement_visuel(zone, (3, 3), (3, 0)) == {"centre": [3.5, 2.0], "axe": [0, -1]}

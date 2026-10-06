@@ -168,6 +168,8 @@ Apprentissage : `POST /api/apprendre_competence`, coût `(niveau+1)×COMPETENCE_
 
 
 ### Zones d'effet — une forme, pas une case
+- **Rendu** : `animation_zone` joue UNE nappe au centre de la forme, dans son axe, avant les impacts par victime (`zones_effet.placement_visuel`, cf. `telluris-combat` § Animations de combat).
+
 Bloc `zone` d'un doc `sort:*`/`competence:*`, géométrie pure `utils/zones_effet.py`, miroir client `templates/scripts/zones_effet.js`. **Bloc absent ⇒ la seule case de la cible désignée**, à la lettre (aucune migration). Le quadrillage étant fait de CARRÉS, une zone se lit en trois temps : une **ancre** (`origine`: `cible` | `lanceur`), une **orientation** (`orientation`: `cible` = l'axe lanceur→cible ramené au huitième de tour | `facing` = l'orientation du lanceur, ⚠️ les monstres n'en ont pas), une **forme**.
 
 | `forme` | dimensions | figure |

@@ -585,6 +585,10 @@ def normaliser_sort(sort_doc) -> dict | None:
 		# normalisée à resolve_action, donc sans ce champ EXPLICITE la liaison serait
 		# perdue avant d'atteindre le moteur (cette vue est une liste blanche).
 		"animation": str(doc.get("animation") or ""),
+		# Animation de ZONE (doc `animation:*`), optionnelle : jouée UNE fois au lancement
+		# d'une capacité offensive à `zone`, au centre de la forme et dans son axe, AVANT
+		# les impacts de `animation` sur chaque victime (cf. `combat._vfx_de_zone`).
+		"animation_zone": str(doc.get("animation_zone") or ""),
 	}
 
 
