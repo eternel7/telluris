@@ -61,6 +61,10 @@ SON_POUVOIR_SOMBRE = "power_up_sound_v3.ogg"
 
 # Orienté sur l'axe lanceur → cible, sans trajectoire (cône, éclair, jet).
 ORIENTE = {"rotation_auto": True}
+# `shock_a` = HUIT éclairs de 4 images, un par rangée, chacun à un angle différent (0°, +27°,
+# 90°, −27°, puis de nouveau) : jouée en entier, la feuille fait TOURNER l'éclair. On n'en
+# garde que la 1re rangée, horizontale (axe mesuré à ±2°), donc pointée vers la droite.
+ECLAIR = {**ORIENTE, "debut": 0, "fin": 3, "duree_ms": 400}
 # Les feuilles d'ONDE (`shockwave_*`) avancent de GAUCHE À DROITE en montant un peu : axe
 # principal mesuré image par image (ACP de l'alpha) entre −15° et −30°. 20° ramènent le dessin
 # à la convention du moteur (0° = vers la droite) avant l'orientation — à affiner à la mini-scène.
@@ -76,19 +80,29 @@ THEMES = {
 	"balayage": ("Balayage : croissant de lame", "animation:hit10_a", SON_SOUFFLE, 0, 1.0, {}),
 	"poing": ("Poing : onde d'impact", "animation:splash04_a", SON_CHOC, 0, 1.0, {}),
 	"tir": ("Tir : trait qui frappe", "animation:hit_yellow_b", SON_ARC, 0, 1.0, {}),
-	"griffe": ("Griffe : lacération", "animation:hit11_a", SON_BETE, 0, 1.0, {}),
+	# `hit11` dessine sa griffe au BORD GAUCHE de la frame (centre à −0,32 frame) : sans
+	# rotation, un décalage d'écran de 0,32 × echelle la ramène sur la cible.
+	"griffe": ("Griffe : lacération", "animation:hit11_a", SON_BETE, 0, 1.0, {"decalage_x": 0.48}),
 	"poudre": ("Poudre jetée au visage", "animation:smoke15frames_a", SON_SOUFFLE_COURT, 0, 1.0, {}),
 	"garde": ("Garde fermée : cercle d'acier", "animation:circle02_a", SON_LAME, 0, 0.7, {}),
 	"lame_sacree": ("Lame sacrée : éclat doré", "animation:hit_yellow_a", SON_LAME, 0, 1.0, {}),
 	# ── Cônes : nappe jouée une fois (animation_zone) + impact muet par victime ──
+	# `echelle` = longueur du cône ÷ étendue du dessin le long de son axe, mesurée sur la frame
+	# la plus longue (pixels d'alpha > 40, percentiles 2-98, rotation appliquée) : la nappe
+	# couvre alors les `longueur` cases du cône. Étendues : onde 0,71 frame, éclair 0,92,
+	# lacérations `2_a` 0,43 (carrées : elles couvrent aussi la largeur du cône de 2) — mais
+	# la lueur de leurs traits fins, hors mesure, dépasse : 4,0 au lieu des 4,6 calculés,
+	# vérifié à la mini-scène.
 	"cone_tueur_demon": ("Cône : vague tranchante sacrée", "animation:shockwave_magic_a",
-						 SON_LAME, 0, 1.0, {**ONDE, "echelle": 2.5}),
+						 SON_LAME, 0, 1.0, {**ONDE, "echelle": 2.8}),       # cône de 2
 	"cone_souffle_feu": ("Cône : nappe de feu soufflée", "animation:shockwave_fire_a", SON_FEU, 0,
-						 0.9, {**ONDE, "echelle": 3.0}),
+						 0.9, {**ONDE, "echelle": 4.2}),                    # cône de 3
 	"cone_decharge": ("Cône : décharge en éventail", "animation:shock_a", SON_MAGIE, 0, 0.9,
-					  {**ORIENTE, "echelle": 3.0}),
-	"cone_griffe": ("Cône : griffe qui passe la main", "animation:hit11_a", SON_BETE, 0, 1.0,
-					{**ORIENTE, "echelle": 2.5}),
+					  {**ECLAIR, "echelle": 3.3}),                          # cône de 3
+	# `2_a` et non `hit11` : la griffe de `hit11` est dessinée au BORD GAUCHE de sa frame
+	# (−0,32 frame), elle tomberait sur le lanceur une fois tournée dans l'axe.
+	"cone_griffe": ("Cône : griffe qui passe la main", "animation:2_a", SON_BETE, 0, 1.0,
+					{**ORIENTE, "echelle": 4.0}),                           # cône de 2
 	"impact_brulure": ("Impact muet : brûlure", "animation:flat_effect_fire_a", None, 0, 1.0, {}),
 	"impact_etincelles": ("Impact muet : étincelles", "animation:sparks_effect_a", None, 0, 1.0, {}),
 	"impact_eclat_dore": ("Impact muet : éclat doré", "animation:hit_yellow_a", None, 0, 1.0, {}),
@@ -111,7 +125,7 @@ THEMES = {
 			ONDE),
 	"vent": ("Vent : lame d'air", "animation:14_phantom_spritesheet_a", SON_SIFFLEMENT, 0, 1.0, {}),
 	"roc": ("Roc : éclats de pierre", "animation:shards01_a", SON_CHOC, 0, 1.0, {}),
-	"foudre": ("Foudre : arc électrique", "animation:shock_a", SON_MAGIE, 0, 0.9, ORIENTE),
+	"foudre": ("Foudre : arc électrique", "animation:shock_a", SON_MAGIE, 0, 0.9, ECLAIR),
 	# ── Arcanes, illusions, ombres ───────────────────────────────────────────────
 	"arcane": ("Arcanes : implosion violette", "animation:17_implode002purple_b", SON_MAGIE, 0, 0.9,
 			   {}),

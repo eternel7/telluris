@@ -264,14 +264,14 @@ t('libelleZone : l’icône suit le camp, comme la couleur de l’aperçu', () =
 console.log('\n── Placement de la nappe (animation_zone) ──────────────────────────────────');
 
 // MÊMES cas et MÊMES valeurs que tests/test_zones_effet.py (placement_visuel).
-t('cône vers l’est : barycentre devant le lanceur, sur l’axe', () => {
+t('cône vers l’est : milieu de l’emprise devant le lanceur, sur l’axe', () => {
 	const z = normaliserZone({ forme: 'cone', origine: 'lanceur', longueur: 3, decalage: 1 });
-	assert.deepStrictEqual(placementVisuelZone(z, [5, 5], [8, 5]), { centre: [7.267, 5], axe: [1, 0] });
+	assert.deepStrictEqual(placementVisuelZone(z, [5, 5], [8, 5]), { centre: [7, 5], axe: [1, 0] });
 });
 
 t('cône en diagonale', () => {
 	const z = normaliserZone({ forme: 'cone', origine: 'lanceur', longueur: 3, decalage: 1 });
-	assert.deepStrictEqual(placementVisuelZone(z, [5, 5], [8, 8]), { centre: [6.6, 6.6], axe: [1, 1] });
+	assert.deepStrictEqual(placementVisuelZone(z, [5, 5], [8, 8]), { centre: [6.5, 6.5], axe: [1, 1] });
 });
 
 t('rectangle de largeur paire : la case de plus décale le centre', () => {

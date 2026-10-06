@@ -2798,11 +2798,13 @@ function jouerVfx(v) {
 	// même formule sert les deux cas, et `t` n'a plus aucun effet.
 	const j = me();
 	const dx = parseFloat(anim.decalage_x) || 0;
-	// Un sprite d'impact est posé par son BORD BAS sur la case (il « monte » du jeton) ; le
-	// décalage de base le recentre pour une case de haut. Une animation de ZONE doit, elle,
-	// avoir son MILIEU au centre de la forme (sinon la rotation la décentre) : on retire la
-	// part de hauteur qui dépasse une case. Nul pour un sprite d'une case de haut.
-	const recentrage = centreZone ? -((h / step) - 1) / 2 : 0;
+	// Un IMPACT est calé par le décalage de base sur le SOL de sa case (son bord bas part de
+	// la ligne de sol, la base le descend d'une demi-case). Une NAPPE doit avoir son MILIEU au
+	// centre de la case du centre de la forme — une demi-case au-dessus de la ligne de sol —,
+	// sinon la rotation la décentre : on remplace la base par ce recentrage, en gardant le
+	// réglage propre du doc (`decalage_y` effectif − base, la base voyageant dans `v`).
+	const baseY = Number.isFinite(+v.decalage_y_base) ? +v.decalage_y_base : 0;
+	const recentrage = centreZone ? 0.5 - (h / step) / 2 - baseY : 0;
 	const dy = (parseFloat(anim.decalage_y) || 0) + recentrage;
 	// CENTRES d'emprise, pas `pos` : sur un dragon 3x2, `pos` est un coin — le sprite s'y
 	// poserait à côté de la bête (scripts/jetons.js ; un 1x1 rend exactement `pos`).

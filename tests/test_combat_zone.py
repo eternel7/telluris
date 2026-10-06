@@ -209,7 +209,8 @@ def test_animation_de_zone_portee_une_seule_fois_par_la_premiere_ligne():
 	assert vz["anim"] == "animation:souffle"
 	assert vz["acteur"] == j["id"] and vz["cible"] == m0["id"]
 	assert vz["axe"] == [0, -1]                         # le cône part vers le nord
-	assert vz["centre"][0] == 3.0 and 2 < vz["centre"][1] < 5   # devant le lanceur
+	assert vz["centre"] == [3.0, 3.0]                   # milieu des 3 anneaux, devant lui
+	assert vz["decalage_y_base"] == combat_mod.animations_util.DECALAGE_Y_BASE
 	# Les impacts gardent l'animation propre, sur chaque victime.
 	impacts = [e["vfx"] for e in doc["log"] if e.get("vfx", {}).get("anim") == "animation:impact"]
 	assert {v["cible"] for v in impacts} == {m0["id"], m1["id"]}

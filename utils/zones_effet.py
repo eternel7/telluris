@@ -271,17 +271,21 @@ def cases_effet(zone: dict, lanceur: tuple, cible: tuple, facing=0,
 def placement_visuel(zone: dict, lanceur: tuple, cible: tuple, facing=0) -> dict | None:
 	"""Où poser l'animation de ZONE jouée une fois au lancement : `{centre, axe}`, ou None.
 
-	`centre` = barycentre (x, y) des cases de la forme GÉOMÉTRIQUE (`cases_zone`, sans le
-	filtre du terrain) : un mur qui rogne une boule de feu ne doit pas décentrer
-	l'explosion, et deux lancers identiques se dessinent au même endroit. Pour un cône ou
-	un rectangle partis du lanceur, c'est le milieu de la nappe, devant lui.
+	`centre` = milieu de l'EMPRISE (boîte englobante) des cases de la forme GÉOMÉTRIQUE
+	(`cases_zone`, sans le filtre du terrain) : un mur qui rogne une boule de feu ne doit pas
+	décentrer l'explosion, et deux lancers identiques se dessinent au même endroit.
+	⚠️ Emprise et non barycentre : un cône a plus de cases à son bout large, son barycentre
+	est tiré vers l'avant (2,27 cases pour un cône de 3 parti à 1 case) et une nappe posée là
+	débordait du bout du cône en laissant son premier anneau à nu. Le sprite est une boîte :
+	c'est la boîte de la forme qu'il doit couvrir.
 	`axe` = l'axe de la forme (`axe_de`) — même pour un cercle, ce qui permet d'orienter
 	le sprite vers la cible quand l'animation le demande. Forme inconnue ⇒ None.
 	"""
 	cases = cases_zone(zone, lanceur, cible, facing)
 	if not cases:
 		return None
-	n = len(cases)
-	centre = [round(sum(c[0] for c in cases) / n, 3), round(sum(c[1] for c in cases) / n, 3)]
+	xs = [c[0] for c in cases]
+	ys = [c[1] for c in cases]
+	centre = [(min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2]
 	fx, fy = axe_de(zone, lanceur, cible, facing)
 	return {"centre": centre, "axe": [fx, fy]}

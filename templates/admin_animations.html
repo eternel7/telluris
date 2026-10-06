@@ -1115,9 +1115,9 @@ function jouerScene() {
 	const ratio = fw > 0 ? fh / fw : 1;
 	el.style.width  = 'calc(var(--sstep) * ' + a.echelle + ')';
 	el.style.height = 'calc(var(--sstep) * ' + (a.echelle * ratio) + ')';
-	// NAPPE : milieu du sprite au centre de la zone — même recentrage que `jouerVfx` (la
-	// part de hauteur qui dépasse une case), nul pour un sprite d'une case de haut.
-	const recentrage = zone ? -((a.echelle * ratio) - 1) / 2 : 0;
+	// NAPPE : milieu du sprite au CENTRE de la case du centre de la zone (une demi-case
+	// au-dessus de la ligne de sol, où la base cale un impact) — même recentrage que `jouerVfx`.
+	const recentrage = zone ? 0.5 - (a.echelle * ratio) / 2 - DECALAGE_Y_BASE : 0;
 
 	// ⚠️ Décalages EFFECTIFS = base commune + réglage du doc, aux DEUX bouts, mêmes additions
 	// que `animations.decalage_x_effectif`/`_y_effectif` — c'est ce que le combat recevra

@@ -247,18 +247,12 @@ def test_cases_effet_l_ancre_survit_meme_sans_ligne_de_vue():
 
 # ── Placement de l'animation de zone ─────────────────────────────────────────────
 
-def test_placement_d_un_cone_au_barycentre_devant_le_lanceur():
-	"""Cône de 3 anneaux vers l'est depuis (5,5) : 1 + 3 + 5 cases (x = 6, 7, 8), centré sur
-	l'axe — le sprite se pose DEVANT le lanceur, pas sur lui ni sur la cible."""
+def test_placement_d_un_cone_au_milieu_de_son_emprise_devant_le_lanceur():
+	"""Cône de 3 anneaux vers l'est depuis (5,5) : x de 6 à 8, y de 3 à 7. Le sprite se pose au
+	MILIEU de l'emprise (7, 5) — pas au barycentre (7,27), tiré vers le bout large."""
 	zone = normaliser_zone({"forme": "cone", "origine": "lanceur", "longueur": 3,
 							"decalage": 1})
-	cases = cases_zone(zone, (5, 5), (8, 5))
-	place = placement_visuel(zone, (5, 5), (8, 5))
-	assert place["axe"] == [1, 0]
-	assert place["centre"][1] == 5.0
-	attendu = round(sum(c[0] for c in cases) / len(cases), 3)
-	assert place["centre"][0] == attendu
-	assert 5 < attendu < 8
+	assert placement_visuel(zone, (5, 5), (8, 5)) == {"centre": [7.0, 5.0], "axe": [1, 0]}
 
 
 def test_placement_d_un_cercle_sur_son_ancre_avec_l_axe_vers_la_cible():
@@ -274,7 +268,7 @@ def test_placement_d_un_cone_en_diagonale():
 	"""Même cas que dev/test_zones_effet_client.js (miroir `placementVisuelZone`)."""
 	zone = normaliser_zone({"forme": "cone", "origine": "lanceur", "longueur": 3,
 							"decalage": 1})
-	assert placement_visuel(zone, (5, 5), (8, 8)) == {"centre": [6.6, 6.6], "axe": [1, 1]}
+	assert placement_visuel(zone, (5, 5), (8, 8)) == {"centre": [6.5, 6.5], "axe": [1, 1]}
 
 
 def test_placement_d_un_rectangle_de_largeur_paire():

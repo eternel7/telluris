@@ -359,7 +359,8 @@ def _vfx_de_zone(joueur: dict, monstre: dict, source: dict) -> dict | None:
 	l'emprise de la cible la plus proche du lanceur).
 
 	⚠️ Aucun défaut de canal : sans `animation_zone` sur le doc, rien — comportement d'avant.
-	`acteur` et `cible` restent portés, pour un éventuel vol depuis le lanceur."""
+	`acteur` et `cible` restent portés, pour un éventuel vol depuis le lanceur.
+	`decalage_y_base` : cf. ci-dessous, le client centre la nappe sur la case."""
 	anim = str((source or {}).get("animation_zone") or "").strip()
 	zone = (source or {}).get("zone")
 	if not anim or not zone or not joueur.get("pos") or not monstre.get("pos"):
@@ -373,6 +374,10 @@ def _vfx_de_zone(joueur: dict, monstre: dict, source: dict) -> dict | None:
 	if not charge:
 		return None
 	charge.update(place)
+	# Base du décalage vertical : le payload du catalogue porte des décalages EFFECTIFS (base
+	# comprise), qui calent un IMPACT sur le sol de sa case ; une nappe se centre sur la case,
+	# et le client a besoin de la base pour retrouver le réglage propre du doc.
+	charge["decalage_y_base"] = animations_util.DECALAGE_Y_BASE
 	return charge
 
 
