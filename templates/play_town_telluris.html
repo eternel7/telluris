@@ -1047,8 +1047,6 @@
 		.sh-sort-compo { font-size: 0.75rem; color: var(--muted); background: rgba(74,74,90,0.25);
 			border: 1px solid rgba(74,74,90,0.5); border-radius: 8px; padding: 1px 7px; }
 		.sh-sort-compo.off { opacity: 0.45; text-decoration: line-through; }
-		.sh-sort-uselbl { display: flex; align-items: center; gap: 3px; font-size: 0.75rem;
-			color: var(--muted); cursor: pointer; white-space: nowrap; }
 		.sh-sort-grim { font-size: 0.8rem; flex-shrink: 0; }
 		/* Affectation à une case de la barre de combat (cf. utils/slots_actions.py) :
 		   le sélecteur remplace l'ancien 📌, qui ne disait pas OÙ l'action atterrissait. */
@@ -3131,13 +3129,16 @@
 		/* ── Choix de la cible d'un effet bénéfique (sort/compétence `cible: allie`) ──
 		   Même calque et mêmes briques de carte que les clauses : c'est aussi une
 		   décision bloquante, et refermer sans choisir ne doit RIEN lancer. */
-		#cible-allie-overlay {
+		#cible-allie-overlay, #compo-overlay {
 			position: fixed; inset: 0; z-index: 9400;
 			background: rgba(10, 8, 5, .78);
 			display: flex; align-items: center; justify-content: center; padding: 1rem;
 		}
-		#cible-allie-overlay.clauses-hidden { display: none; }
-		#cible-allie-overlay .item-detail-card { max-width: 460px; }
+		#cible-allie-overlay.clauses-hidden, #compo-overlay.clauses-hidden { display: none; }
+		#cible-allie-overlay .item-detail-card, #compo-overlay .item-detail-card { max-width: 460px; }
+		.compo-liste { margin: 0 0 .8rem; display: flex; flex-direction: column; gap: .3rem; }
+		.compo-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+		.compo-actions .sh-drop-btn { flex: 1 1 auto; margin-left: 0; padding: .45rem .6rem; }
 		.cible-allie-btn {
 			display: flex; align-items: center; gap: .6rem; width: 100%;
 			padding: .5rem .6rem; margin-bottom: .4rem; cursor: pointer;
@@ -3287,6 +3288,15 @@
 			<div id="cible-allie-body"></div>
 		</div>
 	</div><!-- /#cible-allie-overlay -->
+	{# Composants CONSOMMABLES d'un sort lancé depuis la fiche : les dépenser ou non.
+	   ✕ / Échap / clic hors carte = ANNULER le lancement, jamais « sans » par défaut. #}
+	<div id="compo-overlay" class="clauses-hidden" aria-label="Utiliser les composants ?"
+		 onclick="if(event.target===this)closeCompo()">
+		<div class="item-detail-card">
+			<button class="item-detail-close" onclick="closeCompo()" title="Annuler">✕</button>
+			<div id="compo-body"></div>
+		</div>
+	</div><!-- /#compo-overlay -->
 	{# Dépassement du maximum racial : UNIQUE et IRRÉVERSIBLE pour le personnage.
 	   ✕ / Échap / clic hors carte = annuler sans rien engager — seul le bouton
 	   « Dépasser » de la carte envoie `use_max_bonus`. #}
@@ -4253,6 +4263,8 @@ document.addEventListener('keydown', e => {
 	if (contratOv && !contratOv.classList.contains('clauses-hidden')) { _contratLaisser(); return; }
 	const cibleAllie = document.getElementById('cible-allie-overlay');
 	if (cibleAllie && !cibleAllie.classList.contains('clauses-hidden')) { closeCibleAllie(); return; }
+	const compoOv = document.getElementById('compo-overlay');
+	if (compoOv && !compoOv.classList.contains('clauses-hidden')) { closeCompo(); return; }
 	// ⚠️ Le sur-mesure attend une promesse, comme le choix de cible : Échap doit la RÉSOUDRE
 	// (à null), sinon la commande reste suspendue et son bouton désactivé pour toujours.
 	const surMesure = document.getElementById('sur-mesure-overlay');
@@ -6051,7 +6063,6 @@ function _invocationLabel(s) {
 	return `🐾 invoque ${inv.nombre > 1 ? inv.nombre + ' créatures' : 'une créature'}`
 		+ (s.maintien ? ' tant que vous l\'entretenez' : ` pendant ${inv.duree} tours`);
 }
-function _sortDomId(sortId) { return sortId.replace(/[^a-zA-Z0-9_-]/g, '_'); }
 
 // Portée d'un sort, pour la fiche dépliée des DEUX listes (connus + à apprendre).
 // ⚠️ Rien pour `cible:"soi"` : se viser soi-même n'a pas de distance — même règle que
@@ -6080,7 +6091,6 @@ function _renderSorts(list) {
 		const compos = (s.composants || []).map(c =>
 			`<span class="sh-sort-compo${c.disponible ? '' : ' off'}" title="${c.consomme ? 'Consommé au lancement' : 'Catalyseur (non consommé, il suffit de le porter)'}">${c.consomme ? '⚗️' : '💎'} ${c.icon || ''} ${c.nom}${_sortEffetsLabel(c.bonus) ? ' → ' + _sortEffetsLabel(c.bonus) : ''}</span>`
 		).join('');
-		const hasCompo = (s.composants || []).some(c => c.disponible);
 		// Deux variantes pour un sort à composants CONSOMMABLES : une qui les dépense
 		// (« + »), une qui les économise — réunies dans UN sélecteur (_slotSelectSort).
 		// Les catalyseurs partent toujours, ils ne créent donc pas de variante.
@@ -6089,8 +6099,7 @@ function _renderSorts(list) {
 			? _slotSelectSort(s.sort_id)
 			: _slotSelect('sort', s.sort_id, false, 'Case de la barre — sans dépenser de composant');
 		const actions = pin + (s.lancable
-			? `<label class="sh-sort-uselbl" title="Engager les composants disponibles (renforce le sort ; les consommés sont dépensés)"><input type="checkbox" id="sortchk-${_sortDomId(s.sort_id)}" checked ${hasCompo ? '' : 'disabled'}>compo</label>
-			   <button type="button" class="sh-drop-btn" onclick="lancerSort('${s.sort_id}', this)">Lancer</button>`
+			? `<button type="button" class="sh-drop-btn" onclick="lancerSort('${s.sort_id}', this)">Lancer</button>`
 			: _aideCombat('Utilisable en combat seulement'));
 		// Sort déjà connu → sa fiche est toujours consultable (aucun grimoire à porter). Une
 		// portée suffit à la rendre dépliable : sans ce `||`, un sort écrit sans prose n'aurait
@@ -6214,12 +6223,45 @@ function _appliquerVitauxCible(l) {
 	if (_grpEtat) _grpEtat = null;   // payload périmé : rechargé au prochain besoin
 }
 
+// Proposition des composants CONSOMMABLES au lancement depuis la fiche (la case « compo »
+// d'avant les engageait d'office). Renvoie true (les dépenser), false (s'en passer) ou
+// null (annulé : ✕ / Échap / clic hors carte — Conventions §8, la promesse est RÉSOLUE).
+let _compoResolve = null;
+function closeCompo() { _choisirCompo(null); }
+function _choisirCompo(v) {
+	document.getElementById('compo-overlay').classList.add('clauses-hidden');
+	if (_compoResolve) { const r = _compoResolve; _compoResolve = null; r(v); }
+}
+function demanderComposants(s, consos) {
+	const liste = consos.map(c => {
+		const bonus = _sortEffetsLabel(c.bonus);
+		return `<span class="sh-sort-compo">⚗️ ${c.icon || ''} ${escapeHtml(c.nom || c.item)}${bonus ? ' → ' + bonus : ''}</span>`;
+	}).join('');
+	document.getElementById('compo-body').innerHTML =
+		`<h3 style="margin:.1rem 0 .5rem; padding-right:2rem">${s.icon || '🔮'} ${s.nom} — utiliser ${consos.length > 1 ? 'les composants' : 'le composant'} ?</h3>`
+		+ `<div class="sh-skill-desc" style="margin-bottom:.4rem">Renforce le sort ; ${consos.length > 1 ? 'ils sont dépensés' : 'il est dépensé'} au lancement.</div>`
+		+ `<div class="compo-liste">${liste}</div>`
+		+ `<div class="compo-actions">
+			<button type="button" class="sh-drop-btn" onclick="_choisirCompo(true)">⚗️ Utiliser</button>
+			<button type="button" class="sh-drop-btn" onclick="_choisirCompo(false)">Sans</button>
+		</div>`;
+	document.getElementById('compo-overlay').classList.remove('clauses-hidden');
+	return new Promise(resolve => { _compoResolve = resolve; });
+}
+
 async function lancerSort(sortId, btn) {
 	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
 	const s = _sorts.find(x => x.sort_id === sortId);
-	const chk = document.getElementById('sortchk-' + _sortDomId(sortId));
-	const composants = (s && chk && chk.checked)
-		? (s.composants || []).filter(c => c.disponible).map(c => c.item) : [];
+	// Catalyseurs disponibles : toujours engagés (rien ne se dépense). Consommables
+	// disponibles : proposés au joueur — annuler arrête le lancement.
+	const dispo = s ? (s.composants || []).filter(c => c.disponible) : [];
+	const consos = dispo.filter(c => c.consomme);
+	let composants = dispo.filter(c => !c.consomme).map(c => c.item);
+	if (consos.length) {
+		const avec = await demanderComposants(s, consos);
+		if (avec === null) { if (btn) btn.disabled = false; return; }
+		if (avec) composants = composants.concat(consos.map(c => c.item));
+	}
 	// Sort d'entraide : on demande la cible AVANT d'envoyer (les PM partent à l'envoi).
 	// Annuler doit tout arrêter, y compris réactiver le bouton.
 	let cible_id = null;
@@ -6935,9 +6977,8 @@ function _capaListe(arr, cle = 'nom') {
 // Rang de chaque ligne dans la liste FUSIONNÉE compétences + sorts + modes d'attaque
 // (`c:<id>` / `s:<id>` / `a:<ref>`), posé en `order` sur la ligne : en portrait (vue Connues)
 // les trois listes passent en `display: contents` et leurs lignes deviennent des éléments
-// flex de l'onglet — UN tri pour toutes, sans dupliquer le DOM (les ids `sortchk-*` restent
-// uniques). Ailleurs, `order` est inerte (listes en bloc). Sans tri : compétences, sorts,
-// puis les modes d'attaque EN DERNIER. Rangs ≥ 1 : les lignes passent APRÈS tout ce qui
+// flex de l'onglet — UN tri pour toutes, sans dupliquer le DOM. Ailleurs, `order` est
+// inerte (listes en bloc). Sans tri : compétences, sorts, puis les modes d'attaque EN DERNIER. Rangs ≥ 1 : les lignes passent APRÈS tout ce qui
 // reste à `order: 0` (barre, en-tête).
 function _capaRangsConnus() {
 	const tous = (_competences || []).map(c => ({ k: 'c:' + c.competence_id, nom: c.nom }))
