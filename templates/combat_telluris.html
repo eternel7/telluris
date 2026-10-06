@@ -267,6 +267,32 @@
 	border: 2px solid #aa3333; box-shadow: 0 0 8px rgba(170,51,51,0.7);
 	display: flex; align-items: center; justify-content: center;
 	font-size: 13px; font-weight: bold; color: #ffaaaa;
+	position: relative;
+	background-size: 0 0;
+}
+/* Figurine debout sur le socle : haut à 0.7*0.35 + 1.25 ≈ 1.5 case du bas de la case.
+   ⚠️ −8px : le socle ne touche pas le bas de la case — barre de PV dessous (4px + 2px de
+   marge) et `bottom` compté depuis l'intérieur de la bordure (2px). */
+.monster-token .mt-portrait::before {
+	content: "";
+	position: absolute;
+	left: 50%;
+	bottom: 35%;
+	width: calc(var(--step) * 1);
+	height: calc(var(--step) * 1.25 - 8px);
+	/* -50% : centrage horizontal ; 20% de sa propre hauteur vers le bas : pieds au ras de la barre de vie */
+	transform: translate(-50%, 20%);
+	background-image: inherit;
+	background-size: contain;
+	background-position: bottom center;
+	background-repeat: no-repeat;
+	/* Halo blanc (contour net + lueur diffuse) puis ombre portée */
+	filter:
+		drop-shadow(0 0 1px rgba(255,255,255,.95))
+		drop-shadow(0 0 3px rgba(255,255,255,.6))
+		drop-shadow(0 2px 3px rgba(0,0,0,.8));
+	pointer-events: none;
+	z-index: 2;
 }
 .monster-token.adjacent .mt-portrait { border-color: #ffd700; box-shadow: 0 0 10px #ffd700; }
 /* Ciblage de sort en attente (pendingSort) : liseré violet au lieu du doré/rouge. */
@@ -553,7 +579,12 @@
 	gap: 12px;
 	width: 100%;
 }
+/* Écran moyen : carte en pleine largeur, panneaux perso/ennemis côte à côte en dessous */
 @media (min-width: 768px) {
+	.combat-layout { grid-template-columns: 1fr 1fr; grid-template-areas: "center center" "perso ennemis"; }
+}
+/* Grand écran : les 3 colonnes d'origine */
+@media (min-width: 1280px) {
 	/* ⚠️ Colonnes latérales à largeur FIXE (280 px + 2 × 10 px de marge) et non `auto` : en
 	   `auto`, chaque texte qui change (nom du membre actif, charge, chips d'effets, portrait de
 	   l'ennemi) redimensionnait sa colonne — et avec elle le centre, donc la carte, qui sautait
@@ -787,6 +818,18 @@
 .slot-btn.hidden-selecting { visibility: hidden; }
 /* Mode édition : la grille ne joue plus, on y change le CONTENU des cases. */
 .slot-grid.editing .slot-btn { cursor: pointer; opacity: 1; border-style: dashed; }
+/* Ce qu'il faut cliquer pour remplir la liste d'affectation : les cases occupées en
+   surbrillance, les cases VIDES clignotent (ce sont elles qu'on vient le plus souvent remplir). */
+.slot-grid.editing .slot-btn:not(.empty) { box-shadow: 0 0 0 2px #ffd700, 0 0 8px rgba(255, 215, 0, 0.55); }
+.slot-grid.editing .slot-btn.empty { border-color: #ffd700; animation: slot-vide-clignote 1s ease-in-out infinite; }
+@keyframes slot-vide-clignote {
+	0%, 100% { background: transparent; }
+	50%      { background: rgba(255, 215, 0, 0.35); }
+}
+/* ⚠️ APRÈS la règle d'animation (même spécificité : la dernière gagne) — fond doré fixe. */
+@media (prefers-reduced-motion: reduce) {
+	.slot-grid.editing .slot-btn.empty { animation: none; background: rgba(255, 215, 0, 0.25); }
+}
 .slot-edit-bar { grid-area: editrow; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .slot-edit-hint { font-size: 12px; color: #cbb98a; }
 #target-row {
@@ -3330,7 +3373,8 @@ function updateButtons(data) {
 	// ⚠️ Ces deux-là sont des .action-btn : doAction les désactive avec les autres, et
 	// seul ce passage les rallume. Sans ces lignes ils resteraient grisés à vie dès la
 	// première action jouée.
-	document.getElementById('btn-slot-assign').disabled = !slotEditing;
+	// « ✓ Affecter » attend en plus qu'une case ait été choisie (cf. listeAffectationEnAttente).
+	document.getElementById('btn-slot-assign').disabled = !slotEditing || slotEditPosition == null;
 	document.getElementById('btn-slot-done').disabled   = !slotEditing;
 	// Ciblage de piège en cours alors que le membre n'a plus la main : il tombe (rien d'engagé).
 	if (!canAct && (pendingPose || pendingDesamorcage)) annulerCiblagePiege();
@@ -3908,12 +3952,24 @@ async function toggleSlotEdit() {
 	document.getElementById('slot-edit-hint').textContent =
 		'Cliquez une case pour changer son contenu — autant que vous voulez, l’action est déjà payée.';
 	slotEditPosition = null;
+	listeAffectationEnAttente();
 	updateButtons(state);
+}
+
+// Liste d'affectation tant qu'aucune case n'est choisie : elle n'est remplie que par
+// ouvrirAffectation (clic sur une case). Vide, elle passait pour « aucun sort disponible » —
+// d'où ce libellé et la liste grisée (« ✓ Affecter » l'est aussi, cf. updateButtons).
+function listeAffectationEnAttente() {
+	slotAssignOptions = [];
+	const sel = document.getElementById('slot-assign-select');
+	sel.innerHTML = '<option value="">← Choisissez d’abord une case</option>';
+	sel.disabled = true;
 }
 
 function fermerModeEdition() {
 	slotEditing = false;
 	slotEditPosition = null;
+	listeAffectationEnAttente();
 	closeSelectors();
 	document.getElementById('slot-grid').classList.remove('editing');
 	document.getElementById('btn-slots-edit').classList.remove('attack-btn');
@@ -3937,7 +3993,9 @@ function actionsAffectables(slot) {
 	// Deux entrées par sort à composants consommables : dépenser ou économiser. Un sort
 	// qui n'en a aucun n'aurait qu'une variante fantôme — on ne propose alors que la
 	// version simple. (Les catalyseurs partent toujours : ils ne se consomment pas.)
-	SORTS.forEach(s => {
+	// Ordre ALPHABÉTIQUE (accents et casse ignorés) : copie triée, SORTS garde l'ordre serveur.
+	[...SORTS].sort((a, b) => (a.nom || '').localeCompare(b.nom || '', 'fr', { sensitivity: 'base' }))
+	.forEach(s => {
 		opts.push({ label: `${s.icon || '🔮'} ${s.nom}`,
 		            entree: { type: 'sort', ref: s.sort_id, composants: false } });
 		if ((s.composants || []).some(c => c.consomme)) {
@@ -3966,6 +4024,8 @@ function ouvrirAffectation(position) {
 	slotAssignOptions = actionsAffectables(slot);
 	const sel = document.getElementById('slot-assign-select');
 	sel.innerHTML = slotAssignOptions.map((o, i) => `<option value="${i}">${o.label}</option>`).join('');
+	sel.disabled = false;
+	document.getElementById('btn-slot-assign').disabled = false;
 	document.getElementById('slot-edit-row').style.display = 'flex';
 	document.getElementById('slot-edit-hint').textContent = `Case ${position}`;
 }

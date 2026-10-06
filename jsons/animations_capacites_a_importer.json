@@ -206,6 +206,31 @@
     "rotation_auto": true
   },
   {
+    "_id": "animation:capa_cone_folie",
+    "type": "animation",
+    "nom": "Cône : vague de démence violette (capacités)",
+    "fichier": "shockwave_magic.png",
+    "largeur": 512,
+    "hauteur": 630,
+    "colonnes": 4,
+    "lignes": 5,
+    "sens_lignes": "haut_bas",
+    "debut": 0,
+    "fin": 19,
+    "duree_ms": 600,
+    "echelle": 5.6,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "actif": true,
+    "sens_colonnes": "gauche_droite",
+    "son": "power_up_sound_v3.ogg",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.8,
+    "rotation_auto": true,
+    "rotation": 20
+  },
+  {
     "_id": "animation:capa_cone_griffe",
     "type": "animation",
     "nom": "Cône : griffe qui passe la main (capacités)",
@@ -4736,6 +4761,55 @@
         }
       }
     ]
+  },
+  {
+    "_id": "sort:folie_partagee",
+    "_rev": "1-76f1affaa3868cb25ebeb0953c09e8ea",
+    "type": "sort",
+    "nom": "Folie partagée",
+    "icon": "🎭",
+    "animation_zone": "animation:capa_cone_folie",
+    "description": "Un souffle de visions fait perdre la raison à tout ce qui se trouve devant l'illusionniste. La durée du délire dépend de son génie.",
+    "magie": "Illusoire",
+    "niveau": 9,
+    "cout_pm": 98,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 5,
+    "effets": {
+      "degats": "2D{Int/5}",
+      "buffs": {
+        "Int": "-{Int/3}",
+        "Ag": "-{Int/5}"
+      },
+      "duree": "1+{Int/30}"
+    },
+    "composants": [
+      {
+        "item": "item:Plume_d_oie",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "Int": -5
+          }
+        }
+      },
+      {
+        "item": "item:Poudre_de_miroir",
+        "consomme": true,
+        "bonus": {
+          "duree": 1
+        }
+      }
+    ],
+    "animation": "animation:sc_folie_partagee",
+    "zone": {
+      "forme": "cone",
+      "origine": "lanceur",
+      "orientation": "cible",
+      "longueur": 4,
+      "decalage": 1
+    }
   },
   {
     "_id": "sort:force_partagee",

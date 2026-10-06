@@ -103,6 +103,9 @@ THEMES = {
 	# (−0,32 frame), elle tomberait sur le lanceur une fois tournée dans l'axe.
 	"cone_griffe": ("Cône : griffe qui passe la main", "animation:2_a", SON_BETE, 0, 1.0,
 					{**ORIENTE, "echelle": 4.0}),                           # cône de 2
+	# Même onde violette que `cone_tueur_demon`, au son sombre des illusions.
+	"cone_folie": ("Cône : vague de démence violette", "animation:shockwave_magic_a",
+				   SON_POUVOIR_SOMBRE, 0, 0.8, {**ONDE, "echelle": 5.6}),  # cône de 4
 	"impact_brulure": ("Impact muet : brûlure", "animation:flat_effect_fire_a", None, 0, 1.0, {}),
 	"impact_etincelles": ("Impact muet : étincelles", "animation:sparks_effect_a", None, 0, 1.0, {}),
 	"impact_eclat_dore": ("Impact muet : éclat doré", "animation:hit_yellow_a", None, 0, 1.0, {}),
@@ -314,6 +317,8 @@ AFFECTATION = {
 	"sort:silhouettes_trompeuses": "double",
 	"sort:trouble_magique": "illusion",
 	"sort:zone_de_silence": "furtif",
+	# L'impact reste `animation:sc_folie_partagee` (déjà en base) : seule la nappe est posée.
+	"sort:folie_partagee": ("impact_etincelles", "cone_folie"),
 	# ── Sorts : Nature ───────────────────────────────────────────────────────────
 	**{f"sort:{s}": "appel_sauvage" for s in _INVOC_NATURE},
 	"sort:amitie_des_betes": "nature_buff",
