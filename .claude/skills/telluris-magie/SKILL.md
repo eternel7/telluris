@@ -69,6 +69,23 @@ coût effectif = arrondi_plus_proche(base × (1 + pénalité finale))
 **UI** : aucune jauge neuve, **aucun second pip** — la barre de charge encode déjà les seuils PHYSIQUES (pip à 50 %, rouge à 100 %) et les paliers magiques tombent ailleurs. Le palier est du **texte violet** (`🔮 canalisation modérée`) et les coûts s'affichent « 8 → 11 PM ». Le client porte un **miroir** de la seule multiplication finale (`coutPmCharge`, la courbe restant serveur), verrouillé par `dev/test_charge_magie_client.js`. Verrouillé côté serveur par `tests/test_charge_magie.py` et `tests/test_combat_maintien.py`.
 
 
+### Formules à caractéristiques — `{Car}` / `{Car/n}`
+Un effet lit la caract **EFFECTIVE** (buffs compris) du lanceur : `"degats": "1D{Int/5}"`, `"soin": "1D6+{Vol/10}"`, `"duree": "1+{Vol/20}"`, `"buffs": {"R": "{Vol/5}"}`, `"portee": "3+{Int/20}"`. Division entière ; caract inconnue ⇒ 0 ; taille de dé planchée à `DES_FACES_MIN`. Grammaire et chokepoint dans `utils/sorts.py`.
+- **Champs** : `degats`, `degats_pm`, `soin` (notations) ; entiers de `FORMULE_CLES_ENTIERES` + `buffs.<Car>` ; `portee` du doc (`portee_formule`, résolue par `portee_effective`). ⚠️ Pas `maintien`, `incantation`, `zone`, ni les passives (`bonus_passifs` ne résout rien).
+- `_bonus_dict` range un entier à formule dans le sous-bloc **`formules`** (le champ garde 0 + les constantes des composants) — un `_as_int` sur la chaîne l'aurait mis à 0 en silence. `fusionner_effets` concatène formules et `soin`.
+- **`resoudre_effets(effets, caracts, des_fn)` = chokepoint unique au LANCEMENT** : combat (`resolve_action`, branches `sort` ET `competence`, sur `combat.caracts_effectives(joueur)`), exploration (`lancer_sort`/`utiliser_competence`, sur `caracts_avec_buffs`), simulateur (`_resoudre_capacite`, soutiens à chaque usage). En aval tout est entier : aucun site d'application n'a changé. Sans formule ⇒ identique (aucune migration).
+- `soin` est tiré **UNE fois** et ajouté à `pv` : une zone de soin sert tout le monde du même jet.
+- ⚠️ Une **incantation longue fige** ses formules à l'ARMEMENT (comme son tarif) ; une zone persistante garde la notation résolue au lancement.
+- Prédicats : `_vue_indicative` (caracts à 100, dés à 1) fait compter un champ porté par sa seule formule.
+- Payload : `apercu_effets` envoie les valeurs résolues + `formules_texte` ; le client affiche « 1D{Int/5} → 1D8 » (`_fx` / `formuleTexte`), ne calcule rien. En combat, `caracts` du SNAPSHOT (`caracts_effectives`).
+- Verrouillé par `tests/test_sorts_caracteristiques.py`. Contenu : `jsons/sorts_caracteristiques_a_importer.json` (`dev/gen_sorts_caracteristiques.py`, `tests/test_sorts_caracteristiques_contenu.py`) — garde-fous : buff ≤ `{Car/3}`, durée ≤ 6 à 80, jamais de V par formule.
+
+### Partage de soin — `partage_soin` (%)
+Le lanceur recueille `partage_soin` % des PV **réellement rendus aux AUTRES** bénéficiaires (désigné + zone), **une fois par lancement sur la somme**, borné à son PV max. Lanceur exclu de l'assiette (dans sa zone il est déjà soigné) ; régén à durée hors assiette. Combat `_partager_soin` (ligne de journal séparée nommant le lanceur, APRÈS le débit des PM), exploration `routers/user._partager_soin_exploration`, simulateur inerte (duel sans allié). Borne `PARTAGE_SOIN_PCT_MAX`, re-clampé après fusion. `cout_pv` reste ≥ 0 : un coût négatif n'est PAS un soin. Verrouillé par `tests/test_partage_soin.py`.
+
+### Animation d'une capacité sur SOI
+La branche `soi` de `_lancer_capacite` pose le `vfx` du canal **`buff`** (vide par défaut dans `COMBAT_ANIMATIONS_DEFAUT`) : seule une capacité qui déclare son `animation` la joue sur le lanceur — avant, un sort sur soi ne s'animait jamais.
+
 ### Drain, dégâts aux PM, coût en PV — six clés d'`effets`
 Ajoutées à `_bonus_dict` (source unique du schéma, partagée sorts / compétences / armes / composants — **pas** `consommables.effets_de`) : `degats_pm`, `cout_pv`, `drain_pv`, `drain_pm`, `drain_max`, `saut`, `lien_vie`. Toutes ≥ 0, défauts neutres. `fusionner_effets` additionne les entiers et concatène `degats_pm` ; **`lien_vie` est ÉCRASÉ, jamais fusionné** (deux `part` additionnés dépasseraient 100 %), et drain/saut sont re-clampés APRÈS l'addition.
 

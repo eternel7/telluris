@@ -31,7 +31,7 @@ from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, create_combat_doc, build_monster_snapshot,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
     verser_butin_au_sol, cle_butin, etat_charge_snapshot, bloc_charge_snapshot,
-    changer_d_etage, annoter_passages, vue_client,
+    changer_d_etage, annoter_passages, vue_client, caracts_effectives,
 )
 from utils import donjon
 from utils.lieux import connexions_du_lieu
@@ -295,6 +295,7 @@ async def combat_acteur(
     _snap = next((j for j in combat_doc.get("joueurs") or []
                   if j.get("character_id") == acteur_id), None)
     _etat_charge = etat_charge_snapshot(_snap) if _snap else None
+    _caracts_snap = caracts_effectives(_snap) if _snap else None
 
     return {
         "character_id": acteur_id,
@@ -305,8 +306,8 @@ async def combat_acteur(
         # Charge → canalisation, resynchronisée à chaque changement d'acteur : chaque
         # membre du groupe porte SON sac, donc son propre palier.
         "charge_magie": bloc_charge_snapshot(_snap) if _snap else None,
-        "sorts": liste_sorts_payload(doc, get_doc, "combat", _etat_charge),
-        "competences": liste_competences_payload(doc, get_doc, "combat", _etat_charge),
+        "sorts": liste_sorts_payload(doc, get_doc, "combat", _etat_charge, _caracts_snap),
+        "competences": liste_competences_payload(doc, get_doc, "combat", _etat_charge, _caracts_snap),
         # Compétences de PIÈGES de cet acteur (cases 🔎 / 🛠 / pose ; item requis, stock au sac).
         "actions_pieges": competences_util.actions_pieges_payload(doc, get_doc),
         # Barre d'action : les slots appartiennent à l'ACTEUR — chaque membre du groupe
@@ -652,7 +653,8 @@ async def combat_action(
         _snap = next((j for j in combat_doc.get("joueurs") or []
                       if j.get("character_id") == acteur_id), None)
         sorts_payload = liste_sorts_payload(
-            character, get_doc, "combat", etat_charge_snapshot(_snap) if _snap else None)
+            character, get_doc, "combat", etat_charge_snapshot(_snap) if _snap else None,
+            caracts_effectives(_snap) if _snap else None)
 
     # Piège posé : l'item quitte le sac pour de bon (refus ⇒ relu, rien n'a été retiré).
     pieges_payload = None

@@ -27,6 +27,8 @@
 # applicables en combat) ; buffs/regen_* + duree = effet actif empilé sur
 # character["effets_actifs"] (tour monde uniquement) ; jamais de buff sur V.
 
+import re
+
 from models import character_stats
 from utils.characters import item_ref_id
 from utils.consommables import _as_int, _as_signed_int, poser_effet
@@ -93,6 +95,187 @@ MAINTIEN_PM_MAX = 20
 DRAIN_PCT_MAX = 100
 LIEN_VIE_PCT_MAX = 100
 SAUT_DISTANCE_MAX = 8
+# Part des PV RENDUS aux autres qui revient au lanceur (`partage_soin`) — même borne que le
+# drain : on ne reçoit jamais plus que ce qu'on a donné.
+PARTAGE_SOIN_PCT_MAX = 100
+
+
+# ── Formules à caractéristiques ──────────────────────────────────────────────────
+# Un effet peut lire une caractéristique du LANCEUR : `"degats": "1D{Int/5}"`,
+# `"soin": "1D6+{Vol/10}"`, `"duree": "1+{Vol/20}"`, `"buffs": {"R": "{Vol/5}"}`,
+# `"portee": "3+{Int/20}"`. Jeton `{Car}` ou `{Car/n}` = division ENTIÈRE de la caract
+# EFFECTIVE (buffs compris) au moment où la capacité PART.
+#
+# ⚠️ Un seul point de résolution, `resoudre_effets`, appelé au LANCEMENT (combat :
+# `resolve_action` ; exploration : `lancer_sort`/`utiliser_competence` ; simulateur). En
+# aval tout est redevenu entier/notation simple : aucun chokepoint d'application n'a
+# changé. Un doc sans `{` ressort IDENTIQUE — aucune migration (CLAUDE.md §4).
+# ⚠️ Les champs ENTIERS à formule vivent dans un sous-bloc `formules` de la vue normalisée
+# (le champ entier n'en garde que les bonus constants des composants) : un `_as_int` sur la
+# chaîne la ramènerait à 0 en silence. Les prédicats d'éligibilité les lisent par
+# `_vue_indicative`.
+CARACTS_FORMULE = ("V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch")
+FORMULE_CLES_ENTIERES = ("pv", "pm", "duree", "esquive", "furtivite", "cout_pv",
+						 "drain_pv", "drain_pm", "drain_max", "partage_soin",
+						 "regen_pv", "regen_pm")
+# Faces minimales d'un dé dont la taille vient d'une formule : `1D{Int/5}` à Int 4 ferait
+# un D0, et `random.randint(1, 0)` lèverait.
+DES_FACES_MIN = 2
+_RE_JETON = re.compile(r"\{\s*([A-Za-z]+)\s*(?:/\s*(\d+)\s*)?\}")
+# Caracts « indicatives » des prédicats : de quoi rendre non nul tout champ porté par une
+# formule, avec le bon signe (un malus reste un malus). Jamais un vrai lancement.
+_CARACTS_INDICATIVES = {c: 100 for c in CARACTS_FORMULE}
+
+
+def est_formule(valeur) -> bool:
+	"""La valeur est-elle une formule à caractéristiques (chaîne portant un `{`) ?"""
+	return isinstance(valeur, str) and "{" in valeur
+
+
+def _valeur_jeton(code: str, diviseur, caracts: dict) -> int:
+	if code not in CARACTS_FORMULE:
+		return 0   # jeton inconnu : neutre plutôt qu'un crash au milieu d'un combat
+	try:
+		val = max(0, int((caracts or {}).get(code, 0) or 0))
+	except (TypeError, ValueError):
+		val = 0
+	return val // max(1, int(diviseur or 1))
+
+
+def resoudre_notation(notation: str, caracts: dict) -> str:
+	"""`"1D{Int/5}+{Vol/10}"` → `"1D8+3"` pour Int 40 / Vol 30. Un nombre placé juste après
+	un `D` (la taille du dé) est planché à DES_FACES_MIN. Sans `{`, rend la notation telle
+	quelle."""
+	notation = str(notation or "")
+	if "{" not in notation:
+		return notation
+
+	def _rempl(m):
+		val = _valeur_jeton(m.group(1), m.group(2), caracts)
+		if m.string[:m.start()].rstrip().upper().endswith("D"):
+			val = max(DES_FACES_MIN, val)
+		return str(val)
+
+	return _RE_JETON.sub(_rempl, notation)
+
+
+def evaluer_formule(texte, caracts: dict) -> int:
+	"""Entier SIGNÉ d'une formule de champ entier : `"1+{Vol/20}"`, `"-{Int/10}"`. Somme
+	des entiers signés une fois les jetons remplacés (même lecture que les modificateurs
+	plats de `combat.roll_dice`) — aucun `eval`."""
+	if isinstance(texte, (int, float)):
+		return int(texte)
+	resolu = resoudre_notation(str(texte or ""), caracts).replace(" ", "")
+	return sum(int(n) for n in re.findall(r"[+-]?\d+", resolu))
+
+
+def _fusionner_formules(a: dict, b: dict) -> dict:
+	"""Deux sous-blocs `formules` réunis : même clé ⇒ formules concaténées (`+`)."""
+	out = {k: (dict(v) if isinstance(v, dict) else v) for k, v in (a or {}).items()}
+	for k, v in (b or {}).items():
+		if k == "buffs":
+			buffs = out.setdefault("buffs", {})
+			for c, f in (v or {}).items():
+				buffs[c] = concat_degats(buffs.get(c, ""), f)
+		else:
+			out[k] = concat_degats(out.get(k, ""), v)
+	return out
+
+
+def resoudre_effets(effets: dict, caracts: dict, des_fn=None) -> dict:
+	"""CHOKEPOINT de résolution d'un effet au LANCEMENT — copie, jamais de mutation.
+
+	- `degats` / `degats_pm` : jetons substitués, les dés restent à tirer (par victime) ;
+	- `soin` : tiré UNE fois (`des_fn`, `combat.roll_dice` par défaut) et ajouté à `pv` —
+	  une zone de soin sert tous ses bénéficiaires du même jet ;
+	- `formules` : chaque champ entier reçoit sa valeur, puis le sous-bloc disparaît ;
+	- re-clamps : champs non signés ≥ 0, pourcentages ≤ 100.
+	Un effet sans formule ni soin ressort à l'identique."""
+	eff = dict(effets or {})
+	formules = eff.pop("formules", None) or {}
+	soin = str(eff.get("soin") or "").strip()
+	for cle in ("degats", "degats_pm"):
+		if est_formule(eff.get(cle)):
+			eff[cle] = resoudre_notation(eff[cle], caracts)
+	if formules:
+		buffs = dict(eff.get("buffs") or {})
+		for cle, texte in formules.items():
+			if cle == "buffs":
+				for c, f in (texte or {}).items():
+					buffs[c] = int(buffs.get(c, 0) or 0) + evaluer_formule(f, caracts)
+			elif cle in FORMULE_CLES_ENTIERES:
+				eff[cle] = int(eff.get(cle, 0) or 0) + evaluer_formule(texte, caracts)
+		eff["buffs"] = {c: v for c, v in buffs.items() if v}
+		for cle in FORMULE_CLES_ENTIERES:
+			if cle in eff and cle not in ("regen_pv", "regen_pm"):
+				eff[cle] = max(0, int(eff[cle] or 0))
+		for cle, plafond in (("drain_pv", DRAIN_PCT_MAX), ("drain_pm", DRAIN_PCT_MAX),
+							 ("partage_soin", PARTAGE_SOIN_PCT_MAX)):
+			if cle in eff:
+				eff[cle] = min(plafond, eff[cle])
+	if soin:
+		if des_fn is None:
+			# Import PARESSEUX : `utils.combat` importe ce module.
+			from utils.combat import roll_dice as des_fn
+		eff["pv"] = _as_int(eff.get("pv")) + max(0, int(round(des_fn(resoudre_notation(soin, caracts)))))
+		eff["soin"] = ""
+	return eff
+
+
+def cout_pv_de(effets: dict, caracts: dict) -> int:
+	"""Coût en PV d'un effet NON résolu pour ce lanceur (constante + formule), sans rien
+	tirer d'autre — sert la garde de l'exploration, posée AVANT les composants."""
+	eff = effets or {}
+	formule = (eff.get("formules") or {}).get("cout_pv")
+	return max(0, _as_int(eff.get("cout_pv")) + (evaluer_formule(formule, caracts) if formule else 0))
+
+
+def apercu_effets(effets: dict, caracts: dict) -> dict:
+	"""Effets tels que le CLIENT doit les afficher pour CE lanceur : formules résolues,
+	`soin` laissé en notation résolue (rien n'est tiré), et `formules_texte` = les
+	formules d'origine (`{"degats": "1D{Int/5}", "buffs.R": "{Vol/5}"}`) pour l'étiquette
+	« 1D{Int/5} → 1D8 ». Sans formule, rend les effets inchangés (copie)."""
+	eff = dict(effets or {})
+	brut = {k: eff[k] for k in ("degats", "degats_pm", "soin") if est_formule(eff.get(k))}
+	for k, v in (eff.get("formules") or {}).items():
+		if k == "buffs":
+			brut.update({f"buffs.{c}": f for c, f in (v or {}).items()})
+		else:
+			brut[k] = v
+	soin = eff.get("soin") or ""
+	out = resoudre_effets({**eff, "soin": ""}, caracts)
+	out["soin"] = resoudre_notation(soin, caracts)
+	if brut:
+		out["formules_texte"] = brut
+	return out
+
+
+def _vue_indicative(effets: dict) -> dict:
+	"""Effets tels que les PRÉDICATS doivent les voir : une formule ou un `soin` comptent
+	comme un champ non nul. Sans formule ni soin, rend `effets` lui-même."""
+	eff = effets or {}
+	if not eff.get("formules") and not eff.get("soin"):
+		return eff
+	return resoudre_effets(eff, _CARACTS_INDICATIVES, des_fn=lambda _n: 1)
+
+
+def portee_effective(capacite: dict, caracts: dict | None = None) -> int:
+	"""Portée d'une capacité (vue normalisée) pour CE lanceur : sa `portee_formule` résolue
+	(plancher 1) si elle en porte une, sinon sa `portee`."""
+	cap = capacite or {}
+	formule = cap.get("portee_formule")
+	if formule:
+		return max(1, evaluer_formule(formule, caracts or {}))
+	return _as_int(cap.get("portee"))
+
+
+def _portee_de_doc(doc: dict) -> tuple:
+	"""`(portee constante, formule ou "")` du champ `portee` d'un doc sort/compétence. La
+	part constante (caracts à 0) sert de repli à tout lecteur qui ignorerait la formule."""
+	brut = (doc or {}).get("portee")
+	if est_formule(brut):
+		return max(1, evaluer_formule(brut, {})), str(brut).strip()
+	return _as_int(brut), ""
 
 
 def _bonus_dict(raw) -> dict:
@@ -129,14 +312,25 @@ def _bonus_dict(raw) -> dict:
 	⚠️ Toutes les clés neuves sont ≥ 0 par nature : le clamp d'`_as_int` reste valide, et
 	un doc déjà en base les reçoit à leur valeur neutre (aucune migration, CLAUDE.md §4)."""
 	raw = raw or {}
+	# FORMULES À CARACTÉRISTIQUES (cf. `resoudre_effets`) : un champ entier écrit
+	# `"1+{Vol/20}"` est rangé dans `formules` — `_as_int` le ramènerait à 0 en silence.
+	formules = {k: str(raw[k]).strip() for k in FORMULE_CLES_ENTIERES if est_formule(raw.get(k))}
 	buffs = {}
 	for k, v in (raw.get("buffs") or {}).items():
+		if est_formule(v):
+			formules.setdefault("buffs", {})[str(k)] = str(v).strip()
+			continue
 		try:
 			buffs[str(k)] = int(v)
 		except (TypeError, ValueError):
 			continue
-	return {
+	out = {
 		"degats": str(raw.get("degats") or "").strip(),
+		# SOIN en notation (dés + jetons) — tiré une seule fois au lancement et ajouté à `pv`.
+		"soin": str(raw.get("soin") or "").strip(),
+		# % des PV RENDUS aux AUTRES bénéficiaires qui revient au lanceur (cf. combat
+		# `_partager_soin`) — calqué sur le drain.
+		"partage_soin": min(PARTAGE_SOIN_PCT_MAX, _as_int(raw.get("partage_soin"))),
 		"pv": _as_int(raw.get("pv")),
 		"pm": _as_int(raw.get("pm")),
 		# SIGNÉES : une régén négative est un POISON (cf. consommables._as_signed_int).
@@ -168,6 +362,13 @@ def _bonus_dict(raw) -> dict:
 		"detection_pieges": _as_int(raw.get("detection_pieges")),
 		"desamorcage": _as_int(raw.get("desamorcage")),
 	}
+	# Champ entier à formule : il ne garde que sa part constante (0) — la formule fait foi.
+	for k in formules:
+		if k != "buffs":
+			out[k] = 0
+	if formules:
+		out["formules"] = formules
+	return out
 
 
 def _lien_vie_dict(raw) -> dict | None:
@@ -367,7 +568,10 @@ def normaliser_sort(sort_doc) -> dict | None:
 		# Jet de toucher (cible ennemie seulement) : `magique` par défaut — un sort de
 		# CONTACT peut demander `cc` (« au toucher » : il faut d'abord poser la main).
 		"jet": jet,
-		"portee": _as_int(doc.get("portee")),
+		# Portée : part constante + formule éventuelle (`"3+{Int/20}"`), résolue pour le
+		# lanceur par `portee_effective` — moteur ET payload.
+		"portee": _portee_de_doc(doc)[0],
+		"portee_formule": _portee_de_doc(doc)[1],
 		# Zone d'effet (ou None) : forme touchée autour de la cible désignée ou du
 		# lanceur — cf. utils/zones_effet.py. Absente ⇒ la seule case de la cible,
 		# comportement d'avant. EXPLICITE dans cette liste blanche, comme `animation`.
@@ -423,16 +627,22 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 		"invocation_duree": _as_int(base.get("invocation_duree")),
 		"invocation_nombre": _as_int(base.get("invocation_nombre")),
 		"maintien_reduction": _as_int(base.get("maintien_reduction")),
+		"soin": base.get("soin", ""),
+		"partage_soin": _as_int(base.get("partage_soin")),
 	}
+	formules = _fusionner_formules(base.get("formules"), {})
 	for bonus in bonus_list or []:
 		bonus = bonus or {}
 		out["degats"] = concat_degats(out["degats"], bonus.get("degats", ""))
 		out["degats_pm"] = concat_degats(out["degats_pm"], bonus.get("degats_pm", ""))
+		out["soin"] = concat_degats(out["soin"], bonus.get("soin", ""))
+		formules = _fusionner_formules(formules, bonus.get("formules"))
 		if bonus.get("lien_vie"):
 			out["lien_vie"] = dict(bonus["lien_vie"])
 		for key in ("pv", "pm", "duree", "esquive", "furtivite",
 					"cout_pv", "drain_pv", "drain_pm", "drain_max", "saut",
-					"invocation_duree", "invocation_nombre", "maintien_reduction"):
+					"invocation_duree", "invocation_nombre", "maintien_reduction",
+					"partage_soin"):
 			out[key] += _as_int(bonus.get(key))
 		for key in ("regen_pv", "regen_pm"):
 			out[key] += _as_signed_int(bonus.get(key))
@@ -449,6 +659,9 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 	out["drain_pv"] = min(DRAIN_PCT_MAX, out["drain_pv"])
 	out["drain_pm"] = min(DRAIN_PCT_MAX, out["drain_pm"])
 	out["saut"] = min(SAUT_DISTANCE_MAX, out["saut"])
+	out["partage_soin"] = min(PARTAGE_SOIN_PCT_MAX, out["partage_soin"])
+	if formules:
+		out["formules"] = formules
 	return out
 
 
@@ -521,7 +734,7 @@ def part_durative(effets: dict) -> bool:
 	des compétences et des consommables, et par les deux `empiler_effet_*`. Un critère qui
 	diverge entre « lançable » et « empilable » produirait un sort accepté puis sans effet.
 	"""
-	eff = effets or {}
+	eff = _vue_indicative(effets)
 	# Régén SIGNÉE : un poison pur (régén négative) est une part à durée à part entière.
 	return _as_int(eff.get("duree")) > 0 and bool(
 		eff.get("buffs") or _as_signed_int(eff.get("regen_pv"))
@@ -549,7 +762,7 @@ def effets_utilisables_combat(effets: dict) -> bool:
 	instantanément, saut, lien de vie) OU part à DURÉE. Ne dit rien des mécaniques portées
 	par le DOC (invocation, entretien) : c'est `capacite_utilisable_combat` qui les ajoute.
 	"""
-	eff = effets or {}
+	eff = _vue_indicative(effets)
 	return (bool(eff.get("degats")) or _as_int(eff.get("pv")) > 0
 			or _as_int(eff.get("pm")) > 0 or _as_int(eff.get("furtivite")) > 0
 			or bool(eff.get("degats_pm")) or _as_int(eff.get("saut")) > 0
@@ -586,7 +799,7 @@ def effets_agissent_sur_cible(effets: dict) -> bool:
 	⚠️ `degats_pm` en fait partie : une siphonie PURE, sans le moindre dégât de PV, est le
 	cœur de la famille anti-lanceur. C'est précisément la clé que la recopie des
 	compétences avait oubliée."""
-	eff = effets or {}
+	eff = _vue_indicative(effets)
 	return bool(eff.get("degats")) or bool(eff.get("degats_pm")) or part_durative(eff)
 
 
@@ -607,7 +820,7 @@ def capacite_utilisable_exploration(capacite: dict) -> bool:
 		return False
 	if (cap.get("cible") or CIBLE_DEFAUT) == "ennemi":
 		return False
-	eff = cap.get("effets") or {}
+	eff = _vue_indicative(cap.get("effets"))
 	if _as_int(eff.get("saut")) > 0 or eff.get("lien_vie"):
 		return False
 	return _as_int(eff.get("pv")) > 0 or _as_int(eff.get("pm")) > 0 or part_durative(eff)
@@ -1017,7 +1230,7 @@ def _composants_payload(sort: dict, character: dict, resolve_ref_doc) -> list:
 
 
 def liste_sorts_payload(character: dict, get_doc, contexte: str,
-						etat_charge: tuple | None = None) -> list:
+						etat_charge: tuple | None = None, caracts: dict | None = None) -> list:
 	"""Sorts connus pour l'UI (rendu initial ET resync après action) : effets de base +
 	composants avec disponibilité — le client affiche les bonus et envoie les ids engagés.
 	Contexte "combat" : seuls les sorts à part instantanée (sélecteur 🔮). Contexte
@@ -1035,6 +1248,12 @@ def liste_sorts_payload(character: dict, get_doc, contexte: str,
 
 	def _pen(capa):
 		return charge_magie.penalite_finale(_ratio, capa, _canal)
+
+	# Caracts du LANCEUR pour les formules à caractéristiques : celles du SNAPSHOT en
+	# combat (l'appelant les passe — buffs de combat compris), sinon celles du doc.
+	if caracts is None:
+		from utils.consommables import caracts_avec_buffs
+		caracts = caracts_avec_buffs(character)
 
 	out = []
 	for sort in sorts_connus_docs(character, get_doc):
@@ -1055,12 +1274,14 @@ def liste_sorts_payload(character: dict, get_doc, contexte: str,
 			"incantation": sort["incantation"],
 			"maintien": sort["maintien"],
 			"cible": sort["cible"],
-			"portee": sort["portee"],
+			# Portée et effets RÉSOLUS pour ce lanceur (formules à caractéristiques) : le
+			# client cible et affiche sans rien calculer (CLAUDE.md §10).
+			"portee": portee_effective(sort, caracts),
 			# Le client en tire l'étiquette de la case ET l'APERÇU des cases touchées
 			# pendant le ciblage (scripts/zones_effet.js) : sans ce champ, un sort de
 			# zone se lancerait à l'aveugle.
 			"zone": sort["zone"],
-			"effets": sort["effets"],
+			"effets": apercu_effets(sort["effets"], caracts),
 			# Bloc `invocation` (ou None) : le client en tire l'étiquette de la case — sans
 			# lui, un sort d'invocation s'afficherait sans le moindre effet annoncé, ses
 			# `effets` étant vides par construction.

@@ -24,7 +24,7 @@ from routers.scriptorium import scriptorium_router
 from routers.commande import commande_router
 from routers.animations import animations_router
 from utils.combat import (
-	get_combat_grid, finalize_combat, verser_butin_au_sol, etat_charge_snapshot,
+	get_combat_grid, finalize_combat, verser_butin_au_sol, etat_charge_snapshot, caracts_effectives,
 	bloc_charge_snapshot, annoter_passages, vue_client,
 )
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs, RequestDocCacheMiddleware
@@ -1152,6 +1152,9 @@ async def get_combat_page(
 	_acteur_snap = next((j for j in combat_doc.get("joueurs") or []
 						 if j.get("character_id") == acteur.get("_id")), None)
 	_etat_charge = etat_charge_snapshot(_acteur_snap) if _acteur_snap else None
+	# Caracts EFFECTIVES de l'acteur (buffs de combat compris) : les formules à
+	# caractéristiques des sorts s'affichent résolues sur elles.
+	_caracts_snap = caracts_effectives(_acteur_snap) if _acteur_snap else None
 
 	# Portraits de TOUS les membres du groupe (joueur + compagnons `aventurier:*`) :
 	# le client rend les tokens alliés et le panneau du membre actif à partir de là.
@@ -1216,10 +1219,10 @@ async def get_combat_page(
 			# Charge → canalisation de l'acteur : même bloc qu'en ville, pour que le client
 			# n'ait qu'un seul format à lire.
 			"charge_magie": bloc_charge_snapshot(_acteur_snap) if _acteur_snap else None,
-			"sorts": sorts_util.liste_sorts_payload(acteur, get_doc, "combat", _etat_charge),
+			"sorts": sorts_util.liste_sorts_payload(acteur, get_doc, "combat", _etat_charge, _caracts_snap),
 			# Compétences ACTIVES utilisables en combat (part instantanée degats/pv/pm/
 			# furtivité) — les passives buffent déjà le snapshot, elles n'apparaissent pas ici.
-			"competences": competences_util.liste_competences_payload(acteur, get_doc, "combat", _etat_charge),
+			"competences": competences_util.liste_competences_payload(acteur, get_doc, "combat", _etat_charge, _caracts_snap),
 			# Compétences de PIÈGES de l'acteur (cases 🔎 / 🛠 / pose ; item requis, stock au sac).
 			"actions_pieges": competences_util.actions_pieges_payload(acteur, get_doc),
 			# Barre d'action : grille de slots à positions STABLES, propre à l'acteur —

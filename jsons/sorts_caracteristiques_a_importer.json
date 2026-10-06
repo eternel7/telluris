@@ -1,0 +1,3025 @@
+[
+  {
+    "_id": "sort:dard_de_l_esprit",
+    "type": "sort",
+    "nom": "Dard de l'esprit",
+    "icon": "🗡️",
+    "description": "Une aiguille de pensée pure, aussi acérée que l'esprit qui la forge. Plus le mage est savant, plus le dard est long — et plus il porte loin.",
+    "magie": "Bataille",
+    "niveau": 0,
+    "cout_pm": 7,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": "3+{Int/20}",
+    "effets": {
+      "degats": "1D{Int/5}"
+    },
+    "composants": [
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      },
+      {
+        "item": "item:poudre_alchimique",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D4"
+        }
+      }
+    ],
+    "animation": "animation:sc_dard_de_l_esprit"
+  },
+  {
+    "_id": "sort:imposition_des_mains",
+    "type": "sort",
+    "nom": "Imposition des mains",
+    "icon": "🙌",
+    "description": "Les paumes posées sur la plaie, le prêtre prie. La grâce qui referme la chair de l'autre lui revient un peu, comme une chaleur dans les mains.",
+    "magie": "Sainte",
+    "niveau": 0,
+    "cout_pm": 9,
+    "cible": "allie",
+    "jet": "magique",
+    "portee": 1,
+    "effets": {
+      "soin": "1D6+{Vol/10}",
+      "partage_soin": 25
+    },
+    "composants": [
+      {
+        "item": "item:encens",
+        "consomme": false,
+        "bonus": {
+          "soin": "2"
+        }
+      },
+      {
+        "item": "item:Bougie_de_veille",
+        "consomme": false,
+        "bonus": {
+          "partage_soin": 10
+        }
+      },
+      {
+        "item": "item:Eau_benite",
+        "consomme": true,
+        "bonus": {
+          "soin": "1D6"
+        }
+      }
+    ],
+    "animation": "animation:sc_imposition_des_mains"
+  },
+  {
+    "_id": "sort:peau_de_pierre",
+    "type": "sort",
+    "nom": "Peau de pierre",
+    "icon": "🪨",
+    "description": "La peau grisonne et se fendille comme une roche au soleil. Une volonté ferme fait une pierre dure, et qui tient longtemps.",
+    "magie": "Élémentaire",
+    "niveau": 0,
+    "cout_pm": 9,
+    "cible": "soi",
+    "jet": "magique",
+    "portee": 0,
+    "effets": {
+      "buffs": {
+        "R": "{Vol/5}"
+      },
+      "duree": "1+{Vol/20}"
+    },
+    "composants": [
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "R": 5
+          }
+        }
+      },
+      {
+        "item": "item:Sel_gemme",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      }
+    ],
+    "animation": "animation:sc_peau_de_pierre"
+  },
+  {
+    "_id": "sort:lance_de_foudre",
+    "type": "sort",
+    "nom": "Lance de foudre",
+    "icon": "⚡",
+    "description": "Un trait d'éclair jeté comme une javeline. Le savoir du mage fixe la tension de l'orage qu'il emprunte.",
+    "magie": "Élémentaire",
+    "niveau": 1,
+    "cout_pm": 11,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 7,
+    "effets": {
+      "degats": "2D{Int/6}"
+    },
+    "composants": [
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      },
+      {
+        "item": "item:poudre_alchimique",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D6"
+        }
+      }
+    ],
+    "animation": "animation:sc_lance_de_foudre"
+  },
+  {
+    "_id": "sort:chatiment_du_juste",
+    "type": "sort",
+    "nom": "Châtiment du juste",
+    "icon": "☀️",
+    "description": "Une lumière tombe du ciel sur l'impie. Elle frappe d'autant plus fort que la foi qui l'appelle est inébranlable.",
+    "magie": "Sainte",
+    "niveau": 1,
+    "cout_pm": 10,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 4,
+    "effets": {
+      "degats": "1D8+{Vol/10}"
+    },
+    "composants": [
+      {
+        "item": "item:encens",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      },
+      {
+        "item": "item:Eau_benite",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D4"
+        }
+      }
+    ],
+    "animation": "animation:sc_chatiment_du_juste"
+  },
+  {
+    "_id": "sort:seve_vive",
+    "type": "sort",
+    "nom": "Sève vive",
+    "icon": "🌿",
+    "description": "La sève monte dans le corps du blessé et circule entre lui et le druide : ce qui guérit l'un nourrit un peu l'autre.",
+    "magie": "Nature",
+    "niveau": 1,
+    "cout_pm": 10,
+    "cible": "allie",
+    "jet": "magique",
+    "portee": 3,
+    "effets": {
+      "soin": "2D4+{Vol/10}",
+      "regen_pv": "{Vol/20}",
+      "duree": 3,
+      "partage_soin": "{Vol/4}"
+    },
+    "composants": [
+      {
+        "item": "item:Seve_de_chene",
+        "consomme": false,
+        "bonus": {
+          "soin": "2"
+        }
+      },
+      {
+        "item": "item:Herbes_medicinales",
+        "consomme": true,
+        "bonus": {
+          "soin": "1D6"
+        }
+      }
+    ],
+    "animation": "animation:sc_seve_vive"
+  },
+  {
+    "_id": "sort:ponction_d_ame",
+    "type": "sort",
+    "nom": "Ponction d'âme",
+    "icon": "🌑",
+    "description": "Un fil d'ombre arrache à la victime un peu de ce qui la fait vivre, et le nécromant s'en abreuve.",
+    "magie": "Nécromancie",
+    "niveau": 1,
+    "cout_pm": 11,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 5,
+    "effets": {
+      "degats": "1D{Vol/5}",
+      "drain_pv": 50
+    },
+    "composants": [
+      {
+        "item": "item:os",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      },
+      {
+        "item": "item:Fiole_de_sang_fige",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D4"
+        }
+      }
+    ],
+    "animation": "animation:sc_ponction_d_ame"
+  },
+  {
+    "_id": "sort:migraine",
+    "type": "sort",
+    "nom": "Migraine",
+    "icon": "🌀",
+    "description": "Une douleur sourde derrière les yeux, une pensée qui se dérobe. Contre un sorcier, c'est sa magie qui s'écoule.",
+    "magie": "Illusoire",
+    "niveau": 1,
+    "cout_pm": 9,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 6,
+    "effets": {
+      "degats": "1D4",
+      "degats_pm": "1D{Int/5}"
+    },
+    "composants": [
+      {
+        "item": "item:Plume_d_oie",
+        "consomme": false,
+        "bonus": {
+          "degats_pm": "1"
+        }
+      },
+      {
+        "item": "item:Poudre_de_miroir",
+        "consomme": true,
+        "bonus": {
+          "degats_pm": "1D4"
+        }
+      }
+    ],
+    "animation": "animation:sc_migraine"
+  },
+  {
+    "_id": "sort:fouet_de_domination",
+    "type": "sort",
+    "nom": "Fouet de domination",
+    "icon": "🔗",
+    "description": "Une lanière de feu noir claque, et avec elle la voix du démoniste : la victime saigne et plie.",
+    "magie": "Démonologie",
+    "niveau": 1,
+    "cout_pm": 10,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 3,
+    "effets": {
+      "degats": "1D{Vol/5}+{Cha/10}",
+      "buffs": {
+        "Vol": "-{Cha/5}"
+      },
+      "duree": 2
+    },
+    "composants": [
+      {
+        "item": "item:Sel_noir",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      },
+      {
+        "item": "item:Sang_demon_seche",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D4"
+        }
+      }
+    ],
+    "animation": "animation:sc_fouet_de_domination"
+  },
+  {
+    "_id": "sort:lame_de_l_escrimeur_mage",
+    "type": "sort",
+    "nom": "Lame de l'escrimeur-mage",
+    "icon": "🤺",
+    "description": "Une lame de force se forme au bout des doigts. Elle ne vaut que ce que vaut le poignet qui la conduit.",
+    "magie": "Bataille",
+    "niveau": 1,
+    "cout_pm": 9,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 1,
+    "effets": {
+      "degats": "1D6+{Ag/10}"
+    },
+    "composants": [
+      {
+        "item": "item:Pierre_a_aiguiser",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      },
+      {
+        "item": "item:poudre_alchimique",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D4"
+        }
+      }
+    ],
+    "animation": "animation:sc_lame_de_l_escrimeur_mage"
+  },
+  {
+    "_id": "sort:boule_de_feu_savante",
+    "type": "sort",
+    "nom": "Boule de feu savante",
+    "icon": "🔥",
+    "description": "Une sphère de flammes calculée au pouce près : l'érudit sait exactement où elle éclatera, et combien elle brûlera.",
+    "magie": "Élémentaire",
+    "niveau": 2,
+    "cout_pm": 16,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 6,
+    "effets": {
+      "degats": "1D{Int/4}+{Int/10}"
+    },
+    "composants": [
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "degats": "2"
+        }
+      },
+      {
+        "item": "item:Soufre",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D6"
+        }
+      }
+    ],
+    "animation": "animation:sc_boule_de_feu_savante",
+    "zone": {
+      "forme": "cercle",
+      "origine": "cible",
+      "rayon": 1
+    }
+  },
+  {
+    "_id": "sort:priere_de_communion",
+    "type": "sort",
+    "nom": "Prière de communion",
+    "icon": "🕯️",
+    "description": "Le prêtre prie à voix haute et tous ceux qui l'entourent sont relevés ; leur gratitude lui revient en force.",
+    "magie": "Sainte",
+    "niveau": 2,
+    "cout_pm": 15,
+    "cible": "soi",
+    "jet": "magique",
+    "portee": 0,
+    "effets": {
+      "soin": "1D6+{Vol/15}",
+      "partage_soin": 20
+    },
+    "composants": [
+      {
+        "item": "item:Bougie",
+        "consomme": false,
+        "bonus": {
+          "soin": "1"
+        }
+      },
+      {
+        "item": "item:Eau_benite",
+        "consomme": true,
+        "bonus": {
+          "soin": "1D4"
+        }
+      }
+    ],
+    "animation": "animation:sc_priere_de_communion",
+    "zone": {
+      "forme": "cercle",
+      "origine": "lanceur",
+      "rayon": 2
+    }
+  },
+  {
+    "_id": "sort:sang_pour_sang",
+    "type": "sort",
+    "nom": "Sang pour sang",
+    "icon": "🩸",
+    "description": "Le nécromant force son propre corps à se refermer. La volonté tire, la carcasse obéit — d'autant mieux qu'elle est robuste.",
+    "magie": "Nécromancie",
+    "niveau": 2,
+    "cout_pm": 14,
+    "cible": "soi",
+    "jet": "magique",
+    "portee": 0,
+    "effets": {
+      "soin": "1D{Vol/5}+{R/10}"
+    },
+    "composants": [
+      {
+        "item": "item:Poudre_os",
+        "consomme": false,
+        "bonus": {
+          "soin": "2"
+        }
+      },
+      {
+        "item": "item:sang",
+        "consomme": true,
+        "bonus": {
+          "soin": "1D6"
+        }
+      }
+    ],
+    "animation": "animation:sc_sang_pour_sang"
+  },
+  {
+    "_id": "sort:transfusion",
+    "type": "sort",
+    "nom": "Transfusion",
+    "icon": "💉",
+    "description": "Le prêtre donne de son propre sang pour sauver un compagnon. Plus sa foi est grande, plus il donne — et plus il guérit.",
+    "magie": "Sainte",
+    "niveau": 2,
+    "cout_pm": 12,
+    "cible": "allie",
+    "jet": "magique",
+    "portee": 2,
+    "effets": {
+      "soin": "2D{Vol/10}+{Vol/10}",
+      "cout_pv": "{Vol/10}"
+    },
+    "composants": [
+      {
+        "item": "item:Bougie_de_veille",
+        "consomme": false,
+        "bonus": {
+          "soin": "2"
+        }
+      },
+      {
+        "item": "item:relique",
+        "consomme": true,
+        "bonus": {
+          "soin": "1D6"
+        }
+      }
+    ],
+    "animation": "animation:sc_transfusion"
+  },
+  {
+    "_id": "sort:chaine_d_eclairs",
+    "type": "sort",
+    "nom": "Chaîne d'éclairs",
+    "icon": "🌩️",
+    "description": "L'éclair saute de corps en corps sur toute une ligne. Le mage choisit la direction ; sa science fixe la violence du courant.",
+    "magie": "Élémentaire",
+    "niveau": 3,
+    "cout_pm": 38,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 6,
+    "effets": {
+      "degats": "3D{Int/5}"
+    },
+    "composants": [
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "degats": "2"
+        }
+      },
+      {
+        "item": "item:poudre_alchimique",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D8"
+        }
+      }
+    ],
+    "animation": "animation:sc_chaine_d_eclairs",
+    "zone": {
+      "forme": "rectangle",
+      "origine": "lanceur",
+      "orientation": "cible",
+      "longueur": 5,
+      "largeur": 1,
+      "decalage": 1
+    }
+  },
+  {
+    "_id": "sort:bourgeonnement",
+    "type": "sort",
+    "nom": "Bourgeonnement",
+    "icon": "🌱",
+    "description": "Autour du druide, l'herbe pousse sur les plaies. Tout le cercle reprend vie, et lui avec.",
+    "magie": "Nature",
+    "niveau": 3,
+    "cout_pm": 36,
+    "cible": "soi",
+    "jet": "magique",
+    "portee": 0,
+    "effets": {
+      "soin": "1D8+{Vol/10}",
+      "regen_pv": "{Vol/15}",
+      "duree": 3,
+      "partage_soin": 15
+    },
+    "composants": [
+      {
+        "item": "item:Branche_de_Chene",
+        "consomme": false,
+        "bonus": {
+          "regen_pv": 1
+        }
+      },
+      {
+        "item": "item:Racine_de_mandragore",
+        "consomme": true,
+        "bonus": {
+          "regen_pv": 2
+        }
+      }
+    ],
+    "animation": "animation:sc_bourgeonnement",
+    "zone": {
+      "forme": "cercle",
+      "origine": "lanceur",
+      "rayon": 2
+    }
+  },
+  {
+    "_id": "sort:fletrissure",
+    "type": "sort",
+    "nom": "Flétrissure",
+    "icon": "🥀",
+    "description": "La chair se dessèche et continue de se dessécher. La volonté du nécromant décide combien de temps le mal ronge.",
+    "magie": "Nécromancie",
+    "niveau": 3,
+    "cout_pm": 38,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 5,
+    "effets": {
+      "degats": "2D{Int/6}",
+      "regen_pv": "-{Vol/10}",
+      "duree": "1+{Vol/25}"
+    },
+    "composants": [
+      {
+        "item": "item:Focus_ossuaire",
+        "consomme": false,
+        "bonus": {
+          "regen_pv": -1
+        }
+      },
+      {
+        "item": "item:Sel_des_sepultures",
+        "consomme": true,
+        "bonus": {
+          "duree": 1
+        }
+      }
+    ],
+    "animation": "animation:sc_fletrissure"
+  },
+  {
+    "_id": "sort:egide_du_stratege",
+    "type": "sort",
+    "nom": "Égide du stratège",
+    "icon": "🛡️",
+    "description": "Un bouclier calculé pour encaisser les coups qu'il prévoit. Plus le stratège est fin, plus la parade est solide et durable.",
+    "magie": "Bataille",
+    "niveau": 4,
+    "cout_pm": 44,
+    "cible": "allie",
+    "jet": "magique",
+    "portee": 4,
+    "effets": {
+      "buffs": {
+        "R": "{Int/4}"
+      },
+      "esquive": 10,
+      "duree": "2+{Int/20}"
+    },
+    "composants": [
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "R": 5
+          }
+        }
+      },
+      {
+        "item": "item:encens",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      }
+    ],
+    "animation": "animation:sc_egide_du_stratege"
+  },
+  {
+    "_id": "sort:effondrement_mental",
+    "type": "sort",
+    "nom": "Effondrement mental",
+    "icon": "🧠",
+    "description": "L'illusionniste fait s'écrouler les certitudes de sa cible. Sa magie fuit, son esprit vacille.",
+    "magie": "Illusoire",
+    "niveau": 4,
+    "cout_pm": 46,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 6,
+    "effets": {
+      "degats_pm": "2D{Int/5}",
+      "buffs": {
+        "Int": "-{Int/4}",
+        "Vol": "-{Int/4}"
+      },
+      "duree": 2
+    },
+    "composants": [
+      {
+        "item": "item:Miroir_de_poche",
+        "consomme": false,
+        "bonus": {
+          "degats_pm": "2"
+        }
+      },
+      {
+        "item": "item:Poudre_de_miroir",
+        "consomme": true,
+        "bonus": {
+          "degats_pm": "1D8"
+        }
+      }
+    ],
+    "animation": "animation:sc_effondrement_mental"
+  },
+  {
+    "_id": "sort:lumiere_salvatrice",
+    "type": "sort",
+    "nom": "Lumière salvatrice",
+    "icon": "🌟",
+    "description": "Deux souffles de prière, puis la lumière inonde le champ de bataille. Tous les fidèles à portée se relèvent.",
+    "magie": "Sainte",
+    "niveau": 5,
+    "cout_pm": 56,
+    "cible": "soi",
+    "jet": "magique",
+    "portee": 0,
+    "effets": {
+      "soin": "2D8+{Vol/5}",
+      "partage_soin": 10
+    },
+    "composants": [
+      {
+        "item": "item:encens",
+        "consomme": false,
+        "bonus": {
+          "soin": "3"
+        }
+      },
+      {
+        "item": "item:relique",
+        "consomme": true,
+        "bonus": {
+          "soin": "2D6"
+        }
+      }
+    ],
+    "animation": "animation:sc_lumiere_salvatrice",
+    "incantation": 2,
+    "zone": {
+      "forme": "cercle",
+      "origine": "lanceur",
+      "rayon": 3
+    }
+  },
+  {
+    "_id": "sort:pacte_de_puissance",
+    "type": "sort",
+    "nom": "Pacte de puissance",
+    "icon": "😈",
+    "description": "Le démoniste négocie pour un allié une force qui n'est pas la sienne. Le prix se paie en sang, à la hauteur de son éloquence.",
+    "magie": "Démonologie",
+    "niveau": 5,
+    "cout_pm": 54,
+    "cible": "allie",
+    "jet": "magique",
+    "portee": 3,
+    "effets": {
+      "buffs": {
+        "F": "{Cha/4}",
+        "Vol": "{Cha/4}"
+      },
+      "cout_pv": "{Cha/5}",
+      "duree": 3
+    },
+    "composants": [
+      {
+        "item": "item:Bougie_noire",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "F": 5,
+            "Vol": 5
+          }
+        }
+      },
+      {
+        "item": "item:coeur",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      }
+    ],
+    "animation": "animation:sc_pacte_de_puissance"
+  },
+  {
+    "_id": "sort:tempete_de_feu",
+    "type": "sort",
+    "nom": "Tempête de feu",
+    "icon": "🌋",
+    "description": "Trois respirations pour réunir le feu, puis un tourbillon dévore tout ce qui se tient là. La science de l'élémentaliste en fixe la fureur.",
+    "magie": "Élémentaire",
+    "niveau": 6,
+    "cout_pm": 66,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 6,
+    "effets": {
+      "degats": "4D{Int/5}+{Int/5}"
+    },
+    "composants": [
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "degats": "3"
+        }
+      },
+      {
+        "item": "item:Soufre",
+        "consomme": true,
+        "bonus": {
+          "degats": "2D6"
+        }
+      }
+    ],
+    "animation": "animation:sc_tempete_de_feu",
+    "incantation": 3,
+    "zone": {
+      "forme": "cercle",
+      "origine": "cible",
+      "rayon": 2
+    }
+  },
+  {
+    "_id": "sort:moisson_des_ames",
+    "type": "sort",
+    "nom": "Moisson des âmes",
+    "icon": "💀",
+    "description": "Une faux d'ombre passe sur un groupe entier. Le nécromant boit ce qu'elle fauche, dans la mesure de sa volonté.",
+    "magie": "Nécromancie",
+    "niveau": 7,
+    "cout_pm": 76,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 5,
+    "effets": {
+      "degats": "3D{Vol/4}",
+      "drain_pv": 40,
+      "drain_max": "{Vol/2}"
+    },
+    "composants": [
+      {
+        "item": "item:os",
+        "consomme": false,
+        "bonus": {
+          "degats": "3"
+        }
+      },
+      {
+        "item": "item:Sel_des_sepultures",
+        "consomme": true,
+        "bonus": {
+          "degats": "2D6"
+        }
+      }
+    ],
+    "animation": "animation:sc_moisson_des_ames",
+    "zone": {
+      "forme": "cercle",
+      "origine": "cible",
+      "rayon": 2
+    }
+  },
+  {
+    "_id": "sort:sanctuaire_sylvestre",
+    "type": "sort",
+    "nom": "Sanctuaire sylvestre",
+    "icon": "🌳",
+    "description": "Une clairière se lève autour du druide et y reste tant qu'il la porte. Ceux qui s'y tiennent guérissent à chaque souffle.",
+    "magie": "Nature",
+    "niveau": 7,
+    "cout_pm": 76,
+    "cible": "soi",
+    "jet": "magique",
+    "portee": 0,
+    "effets": {
+      "regen_pv": "{Vol/8}"
+    },
+    "composants": [
+      {
+        "item": "item:Seve_de_chene",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      },
+      {
+        "item": "item:Fiole_sang_bete",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      }
+    ],
+    "animation": "animation:sc_sanctuaire_sylvestre",
+    "maintien": 4,
+    "zone": {
+      "forme": "cercle",
+      "origine": "lanceur",
+      "rayon": 3
+    }
+  },
+  {
+    "_id": "sort:rempart_arcanique",
+    "type": "sort",
+    "nom": "Rempart arcanique",
+    "icon": "🏰",
+    "description": "Un dôme de force se dresse autour du mage de bataille et de ses proches, et tient tant qu'il le nourrit.",
+    "magie": "Bataille",
+    "niveau": 8,
+    "cout_pm": 86,
+    "cible": "soi",
+    "jet": "magique",
+    "portee": 0,
+    "effets": {
+      "buffs": {
+        "R": "{Int/3}"
+      },
+      "esquive": "{Int/10}"
+    },
+    "composants": [
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "R": 5
+          }
+        }
+      },
+      {
+        "item": "item:poudre_alchimique",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      }
+    ],
+    "animation": "animation:sc_rempart_arcanique",
+    "maintien": 4,
+    "zone": {
+      "forme": "cercle",
+      "origine": "lanceur",
+      "rayon": 2
+    }
+  },
+  {
+    "_id": "sort:meteore_savant",
+    "type": "sort",
+    "nom": "Météore savant",
+    "icon": "☄️",
+    "description": "Cinq respirations pour calculer la trajectoire, puis le ciel tombe. Plus le mage est savant, plus il le fait tomber loin et fort.",
+    "magie": "Élémentaire",
+    "niveau": 8,
+    "cout_pm": 88,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": "6+{Int/10}",
+    "effets": {
+      "degats": "6D{Int/5}+{Int/4}"
+    },
+    "composants": [
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "degats": "4"
+        }
+      },
+      {
+        "item": "item:Soufre",
+        "consomme": true,
+        "bonus": {
+          "degats": "2D8"
+        }
+      }
+    ],
+    "animation": "animation:sc_meteore_savant",
+    "incantation": 5,
+    "zone": {
+      "forme": "cercle",
+      "origine": "cible",
+      "rayon": 2
+    }
+  },
+  {
+    "_id": "sort:folie_partagee",
+    "type": "sort",
+    "nom": "Folie partagée",
+    "icon": "🎭",
+    "description": "Un souffle de visions fait perdre la raison à tout ce qui se trouve devant l'illusionniste. La durée du délire dépend de son génie.",
+    "magie": "Illusoire",
+    "niveau": 9,
+    "cout_pm": 98,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 5,
+    "effets": {
+      "degats": "2D{Int/5}",
+      "buffs": {
+        "Int": "-{Int/3}",
+        "Ag": "-{Int/5}"
+      },
+      "duree": "1+{Int/30}"
+    },
+    "composants": [
+      {
+        "item": "item:Plume_d_oie",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "Int": -5
+          }
+        }
+      },
+      {
+        "item": "item:Poudre_de_miroir",
+        "consomme": true,
+        "bonus": {
+          "duree": 1
+        }
+      }
+    ],
+    "animation": "animation:sc_folie_partagee",
+    "zone": {
+      "forme": "cone",
+      "origine": "lanceur",
+      "orientation": "cible",
+      "longueur": 4,
+      "decalage": 1
+    }
+  },
+  {
+    "_id": "sort:resurgence",
+    "type": "sort",
+    "nom": "Résurgence",
+    "icon": "🕊️",
+    "description": "Quatre souffles d'une prière que peu de saints connaissent, et des ailes de lumière s'ouvrent sur le champ de bataille.",
+    "magie": "Sainte",
+    "niveau": 10,
+    "cout_pm": 118,
+    "cible": "soi",
+    "jet": "magique",
+    "portee": 0,
+    "effets": {
+      "soin": "4D10+{Vol/2}",
+      "regen_pv": "{Vol/10}",
+      "duree": 3,
+      "partage_soin": "{Vol/10}"
+    },
+    "composants": [
+      {
+        "item": "item:encens",
+        "consomme": false,
+        "bonus": {
+          "soin": "5"
+        }
+      },
+      {
+        "item": "item:relique",
+        "consomme": true,
+        "bonus": {
+          "soin": "2D10"
+        }
+      }
+    ],
+    "animation": "animation:sc_resurgence",
+    "incantation": 4,
+    "zone": {
+      "forme": "cercle",
+      "origine": "lanceur",
+      "rayon": 4
+    }
+  },
+  {
+    "_id": "animation:sc_dard_de_l_esprit",
+    "type": "animation",
+    "nom": "Dard de l'esprit (spritesheet_512px_by197px_per_frame_cyan_a)",
+    "fichier": "spritesheet-512px-by197px-per-frame-cyan.png",
+    "largeur": 1536,
+    "hauteur": 394,
+    "colonnes": 3,
+    "lignes": 2,
+    "sens_lignes": "haut_bas",
+    "sens_colonnes": "gauche_droite",
+    "debut": 0,
+    "fin": 5,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "duree_trajet_ms": 300,
+    "depart_ancrage": "acteur",
+    "rotation_auto": true,
+    "son": "swish_3.wav",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.7,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_imposition_des_mains",
+    "type": "animation",
+    "nom": "Imposition des mains (light_glow_effect_a)",
+    "fichier": "light_glow_effect.png",
+    "largeur": 64,
+    "hauteur": 640,
+    "colonnes": 1,
+    "lignes": 10,
+    "sens_lignes": "haut_bas",
+    "debut": 0,
+    "fin": 9,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "power_up_sound_v0.ogg",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.7,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_peau_de_pierre",
+    "type": "animation",
+    "nom": "Peau de pierre (shards01_a)",
+    "fichier": "shards01.png",
+    "largeur": 320,
+    "hauteur": 128,
+    "colonnes": 5,
+    "lignes": 2,
+    "sens_lignes": "haut_bas",
+    "debut": 0,
+    "fin": 9,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "power_up_sound_v2.ogg",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.6,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_lance_de_foudre",
+    "type": "animation",
+    "nom": "Lance de foudre (shock_a)",
+    "fichier": "shock.png",
+    "largeur": 256,
+    "hauteur": 512,
+    "colonnes": 4,
+    "lignes": 8,
+    "sens_lignes": "haut_bas",
+    "sens_colonnes": "gauche_droite",
+    "debut": 0,
+    "fin": 31,
+    "duree_ms": 701,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "duree_trajet_ms": 250,
+    "depart_ancrage": "acteur",
+    "rotation_auto": true,
+    "son": "17.mp3",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.8,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_chatiment_du_juste",
+    "type": "animation",
+    "nom": "Châtiment du juste (16_sunburn_spritesheet_a)",
+    "fichier": "16_sunburn_spritesheet.png",
+    "largeur": 800,
+    "hauteur": 800,
+    "colonnes": 8,
+    "lignes": 8,
+    "sens_lignes": "haut_bas",
+    "debut": 0,
+    "fin": 60,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "power_up_sound_v3.ogg",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.8,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_seve_vive",
+    "type": "animation",
+    "nom": "Sève vive (green_effect_a)",
+    "fichier": "green_effect.png",
+    "largeur": 32,
+    "hauteur": 320,
+    "colonnes": 1,
+    "lignes": 10,
+    "sens_lignes": "haut_bas",
+    "debut": 0,
+    "fin": 9,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "swamp.ogg",
+    "son_debut_ms": 0,
+    "son_fin_ms": 1200,
+    "son_volume": 0.6,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_ponction_d_ame",
+    "type": "animation",
+    "nom": "Ponction d'âme (18_midnight_spritesheet_a)",
+    "fichier": "18_midnight_spritesheet.png",
+    "largeur": 800,
+    "hauteur": 800,
+    "colonnes": 8,
+    "lignes": 8,
+    "sens_lignes": "haut_bas",
+    "debut": 0,
+    "fin": 60,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "swish_2.wav",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.7,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_migraine",
+    "type": "animation",
+    "nom": "Migraine (13_vortex_spritesheet_a)",
+    "fichier": "13_vortex_spritesheet.png",
+    "largeur": 800,
+    "hauteur": 800,
+    "colonnes": 8,
+    "lignes": 8,
+    "sens_lignes": "haut_bas",
+    "debut": 0,
+    "fin": 60,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "17.mp3",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.5,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_fouet_de_domination",
+    "type": "animation",
+    "nom": "Fouet de domination (17_felspell_spritesheet_a)",
+    "fichier": "17_felspell_spritesheet.png",
+    "largeur": 1000,
+    "hauteur": 1000,
+    "colonnes": 10,
+    "lignes": 10,
+    "sens_lignes": "haut_bas",
+    "debut": 0,
+    "fin": 90,
+    "duree_ms": 2600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "swish_4.wav",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.8,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_lame_de_l_escrimeur_mage",
+    "type": "animation",
+    "nom": "Lame de l'escrimeur-mage (spritesheet_512px_by197px_per_frame_pink_a)",
+    "fichier": "spritesheet-512px-by197px-per-frame-pink.png",
+    "largeur": 1536,
+    "hauteur": 394,
+    "colonnes": 3,
+    "lignes": 2,
+    "sens_lignes": "haut_bas",
+    "sens_colonnes": "gauche_droite",
+    "debut": 0,
+    "fin": 5,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "sword sound.wav",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.8,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_boule_de_feu_savante",
+    "type": "animation",
+    "nom": "Boule de feu savante (9_brightfire_spritesheet_a)",
+    "fichier": "9_brightfire_spritesheet.png",
+    "largeur": 800,
+    "hauteur": 800,
+    "colonnes": 8,
+    "lignes": 8,
+    "sens_lignes": "haut_bas",
+    "sens_colonnes": "gauche_droite",
+    "debut": 0,
+    "fin": 60,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "duree_trajet_ms": 400,
+    "arc": 1,
+    "depart_ancrage": "acteur",
+    "rotation_auto": true,
+    "son": "foom_0.wav",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.9,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_priere_de_communion",
+    "type": "animation",
+    "nom": "Prière de communion (aura38_a)",
+    "fichier": "Aura38.png",
+    "largeur": 1024,
+    "hauteur": 512,
+    "colonnes": 8,
+    "lignes": 4,
+    "sens_lignes": "haut_bas",
+    "sens_colonnes": "gauche_droite",
+    "debut": 0,
+    "fin": 31,
+    "duree_ms": 801,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "power_up_sound_v1.ogg",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.7,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_sang_pour_sang",
+    "type": "animation",
+    "nom": "Sang pour sang (blood_hit_03_a)",
+    "fichier": "blood_hit_03.png",
+    "largeur": 512,
+    "hauteur": 512,
+    "colonnes": 4,
+    "lignes": 4,
+    "sens_lignes": "haut_bas",
+    "sens_colonnes": "gauche_droite",
+    "debut": 0,
+    "fin": 15,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "swish_2.wav",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.6,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_transfusion",
+    "type": "animation",
+    "nom": "Transfusion (17_implode002red_a)",
+    "fichier": "17 Implode002Red .png",
+    "largeur": 960,
+    "hauteur": 1344,
+    "colonnes": 5,
+    "lignes": 7,
+    "sens_lignes": "haut_bas",
+    "sens_colonnes": "gauche_droite",
+    "debut": 0,
+    "fin": 29,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "power_up_sound_v0.ogg",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.7,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_chaine_d_eclairs",
+    "type": "animation",
+    "nom": "Chaîne d'éclairs (2_magic8_spritesheet_a)",
+    "fichier": "2_magic8_spritesheet.png",
+    "largeur": 800,
+    "hauteur": 800,
+    "colonnes": 8,
+    "lignes": 8,
+    "sens_lignes": "haut_bas",
+    "debut": 0,
+    "fin": 60,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "depart_ancrage": "acteur",
+    "rotation_auto": true,
+    "son": "17.mp3",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.9,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_bourgeonnement",
+    "type": "animation",
+    "nom": "Bourgeonnement (20_magicbubbles_spritesheet_a)",
+    "fichier": "20_magicbubbles_spritesheet.png",
+    "largeur": 800,
+    "hauteur": 800,
+    "colonnes": 8,
+    "lignes": 8,
+    "sens_lignes": "haut_bas",
+    "debut": 0,
+    "fin": 60,
+    "duree_ms": 801,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "swamp.ogg",
+    "son_debut_ms": 0,
+    "son_fin_ms": 1500,
+    "son_volume": 0.6,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_fletrissure",
+    "type": "animation",
+    "nom": "Flétrissure (smoke30frames_a)",
+    "fichier": "Smoke30Frames.png",
+    "largeur": 1536,
+    "hauteur": 1279,
+    "colonnes": 6,
+    "lignes": 5,
+    "sens_lignes": "haut_bas",
+    "sens_colonnes": "gauche_droite",
+    "debut": 0,
+    "fin": 29,
+    "duree_ms": 1000,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "17.mp3",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.6,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_egide_du_stratege",
+    "type": "animation",
+    "nom": "Égide du stratège (preset_ring_blueish_a)",
+    "fichier": "preset_ring_blueish.png",
+    "largeur": 1024,
+    "hauteur": 630,
+    "colonnes": 8,
+    "lignes": 5,
+    "sens_lignes": "haut_bas",
+    "sens_colonnes": "gauche_droite",
+    "debut": 4,
+    "fin": 21,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "power_up_sound_v2.ogg",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.8,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_effondrement_mental",
+    "type": "animation",
+    "nom": "Effondrement mental (12_nebula_spritesheet_a)",
+    "fichier": "12_nebula_spritesheet.png",
+    "largeur": 800,
+    "hauteur": 800,
+    "colonnes": 8,
+    "lignes": 8,
+    "sens_lignes": "haut_bas",
+    "sens_colonnes": "gauche_droite",
+    "debut": 0,
+    "fin": 60,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0.1,
+    "ancrage": "cible",
+    "son": "17.mp3",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.8,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_lumiere_salvatrice",
+    "type": "animation",
+    "nom": "Lumière salvatrice (light_glow_effect_b)",
+    "fichier": "light_glow_effect.png",
+    "largeur": 64,
+    "hauteur": 640,
+    "colonnes": 1,
+    "lignes": 10,
+    "sens_lignes": "bas_haut",
+    "debut": 0,
+    "fin": 9,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "power_up_sound_v3.ogg",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 1.0,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_pacte_de_puissance",
+    "type": "animation",
+    "nom": "Pacte de puissance (17_implode002red_b)",
+    "fichier": "17 Implode002Red .png",
+    "largeur": 960,
+    "hauteur": 1344,
+    "colonnes": 5,
+    "lignes": 7,
+    "sens_lignes": "bas_haut",
+    "sens_colonnes": "droite_gauche",
+    "debut": 5,
+    "fin": 34,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "forging_flames.mp3",
+    "son_debut_ms": 0,
+    "son_fin_ms": 1500,
+    "son_volume": 0.7,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_tempete_de_feu",
+    "type": "animation",
+    "nom": "Tempête de feu (7_firespin_spritesheet_a)",
+    "fichier": "7_firespin_spritesheet.png",
+    "largeur": 800,
+    "hauteur": 800,
+    "colonnes": 8,
+    "lignes": 8,
+    "sens_lignes": "haut_bas",
+    "debut": 0,
+    "fin": 60,
+    "duree_ms": 801,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "foom_0.wav",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 1.0,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_moisson_des_ames",
+    "type": "animation",
+    "nom": "Moisson des âmes (14_phantom_spritesheet_a)",
+    "fichier": "14_phantom_spritesheet.png",
+    "largeur": 800,
+    "hauteur": 800,
+    "colonnes": 8,
+    "lignes": 8,
+    "sens_lignes": "haut_bas",
+    "debut": 0,
+    "fin": 60,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "17.mp3",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 0.9,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_sanctuaire_sylvestre",
+    "type": "animation",
+    "nom": "Sanctuaire sylvestre (green_effect_b)",
+    "fichier": "green_effect.png",
+    "largeur": 32,
+    "hauteur": 320,
+    "colonnes": 1,
+    "lignes": 10,
+    "sens_lignes": "bas_haut",
+    "debut": 0,
+    "fin": 9,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "swamp.ogg",
+    "son_debut_ms": 0,
+    "son_fin_ms": 2000,
+    "son_volume": 0.7,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_rempart_arcanique",
+    "type": "animation",
+    "nom": "Rempart arcanique (preset_shockwave_blueish_a)",
+    "fichier": "preset_shockwave_blueish.png",
+    "largeur": 512,
+    "hauteur": 630,
+    "colonnes": 4,
+    "lignes": 5,
+    "sens_lignes": "haut_bas",
+    "sens_colonnes": "gauche_droite",
+    "debut": 0,
+    "fin": 19,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "power_up_sound_v2.ogg",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 1.0,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_meteore_savant",
+    "type": "animation",
+    "nom": "Météore savant (explosion_fire_smoke_a)",
+    "fichier": "explosion_fire_smoke.png",
+    "largeur": 768,
+    "hauteur": 630,
+    "colonnes": 6,
+    "lignes": 5,
+    "sens_lignes": "haut_bas",
+    "sens_colonnes": "gauche_droite",
+    "debut": 0,
+    "fin": 26,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "depart_ancrage": "cible",
+    "depart_decalage_y": -4,
+    "duree_trajet_ms": 600,
+    "son": "foom_0.wav",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 1.0,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_folie_partagee",
+    "type": "animation",
+    "nom": "Folie partagée (31_000j_instaroutarea4infinity_a)",
+    "fichier": "31 000j InStarOutArea4Infinity.png",
+    "largeur": 960,
+    "hauteur": 1728,
+    "colonnes": 5,
+    "lignes": 9,
+    "sens_lignes": "haut_bas",
+    "sens_colonnes": "gauche_droite",
+    "debut": 0,
+    "fin": 44,
+    "duree_ms": 1200,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "17.mp3",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 1.0,
+    "actif": true
+  },
+  {
+    "_id": "animation:sc_resurgence",
+    "type": "animation",
+    "nom": "Résurgence (wing_part_1_a)",
+    "fichier": "wing_part_1.png",
+    "largeur": 187,
+    "hauteur": 375,
+    "colonnes": 1,
+    "lignes": 5,
+    "sens_lignes": "haut_bas",
+    "sens_colonnes": "gauche_droite",
+    "debut": 0,
+    "fin": 4,
+    "duree_ms": 600,
+    "echelle": 1.5,
+    "decalage_y": 0,
+    "ancrage": "cible",
+    "son": "power_up_sound_v3.ogg",
+    "son_debut_ms": 0,
+    "son_fin_ms": 0,
+    "son_volume": 1.0,
+    "actif": true
+  },
+  {
+    "_id": "item:grimoire_dard_de_l_esprit",
+    "type": "item",
+    "nom": "Grimoire : Dard de l'esprit",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Dard de l'esprit », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:dard_de_l_esprit"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_dard_de_l_esprit",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_dard_de_l_esprit",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_lame_de_l_escrimeur_mage",
+    "type": "item",
+    "nom": "Grimoire : Lame de l'escrimeur-mage",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Lame de l'escrimeur-mage », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:lame_de_l_escrimeur_mage"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_lame_de_l_escrimeur_mage",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_lame_de_l_escrimeur_mage",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_egide_du_stratege",
+    "type": "item",
+    "nom": "Grimoire : Égide du stratège",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Égide du stratège », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:egide_du_stratege"
+    ],
+    "valeur": [
+      {
+        "ag": 40
+      },
+      {
+        "ag": 120
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_egide_du_stratege",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_egide_du_stratege",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_rempart_arcanique",
+    "type": "item",
+    "nom": "Grimoire : Rempart arcanique",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Rempart arcanique », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:rempart_arcanique"
+    ],
+    "valeur": [
+      {
+        "ag": 80
+      },
+      {
+        "ag": 240
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_rempart_arcanique",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_rempart_arcanique",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_fouet_de_domination",
+    "type": "item",
+    "nom": "Grimoire : Fouet de domination",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Fouet de domination », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:fouet_de_domination"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_fouet_de_domination",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_fouet_de_domination",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_pacte_de_puissance",
+    "type": "item",
+    "nom": "Grimoire : Pacte de puissance",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Pacte de puissance », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:pacte_de_puissance"
+    ],
+    "valeur": [
+      {
+        "ag": 50
+      },
+      {
+        "ag": 150
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_pacte_de_puissance",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_pacte_de_puissance",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_migraine",
+    "type": "item",
+    "nom": "Grimoire : Migraine",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Migraine », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:migraine"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_migraine",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_migraine",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_effondrement_mental",
+    "type": "item",
+    "nom": "Grimoire : Effondrement mental",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Effondrement mental », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:effondrement_mental"
+    ],
+    "valeur": [
+      {
+        "ag": 40
+      },
+      {
+        "ag": 120
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_effondrement_mental",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_effondrement_mental",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_folie_partagee",
+    "type": "item",
+    "nom": "Grimoire : Folie partagée",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Folie partagée », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:folie_partagee"
+    ],
+    "valeur": [
+      {
+        "ag": 90
+      },
+      {
+        "ag": 270
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_folie_partagee",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_folie_partagee",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_seve_vive",
+    "type": "item",
+    "nom": "Grimoire : Sève vive",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Sève vive », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:seve_vive"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_seve_vive",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_seve_vive",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_bourgeonnement",
+    "type": "item",
+    "nom": "Grimoire : Bourgeonnement",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Bourgeonnement », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:bourgeonnement"
+    ],
+    "valeur": [
+      {
+        "ag": 30
+      },
+      {
+        "ag": 90
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_bourgeonnement",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_bourgeonnement",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_sanctuaire_sylvestre",
+    "type": "item",
+    "nom": "Grimoire : Sanctuaire sylvestre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Sanctuaire sylvestre », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:sanctuaire_sylvestre"
+    ],
+    "valeur": [
+      {
+        "ag": 70
+      },
+      {
+        "ag": 210
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_sanctuaire_sylvestre",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_sanctuaire_sylvestre",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_ponction_d_ame",
+    "type": "item",
+    "nom": "Grimoire : Ponction d'âme",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Ponction d'âme », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:ponction_d_ame"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_ponction_d_ame",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_ponction_d_ame",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_sang_pour_sang",
+    "type": "item",
+    "nom": "Grimoire : Sang pour sang",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Sang pour sang », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:sang_pour_sang"
+    ],
+    "valeur": [
+      {
+        "ag": 20
+      },
+      {
+        "ag": 60
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_sang_pour_sang",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_sang_pour_sang",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_fletrissure",
+    "type": "item",
+    "nom": "Grimoire : Flétrissure",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Flétrissure », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:fletrissure"
+    ],
+    "valeur": [
+      {
+        "ag": 30
+      },
+      {
+        "ag": 90
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_fletrissure",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_fletrissure",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_moisson_des_ames",
+    "type": "item",
+    "nom": "Grimoire : Moisson des âmes",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Moisson des âmes », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:moisson_des_ames"
+    ],
+    "valeur": [
+      {
+        "ag": 70
+      },
+      {
+        "ag": 210
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_moisson_des_ames",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_moisson_des_ames",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_imposition_des_mains",
+    "type": "item",
+    "nom": "Grimoire : Imposition des mains",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Imposition des mains », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:imposition_des_mains"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_imposition_des_mains",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_imposition_des_mains",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_chatiment_du_juste",
+    "type": "item",
+    "nom": "Grimoire : Châtiment du juste",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Châtiment du juste », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:chatiment_du_juste"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_chatiment_du_juste",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_chatiment_du_juste",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_priere_de_communion",
+    "type": "item",
+    "nom": "Grimoire : Prière de communion",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Prière de communion », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:priere_de_communion"
+    ],
+    "valeur": [
+      {
+        "ag": 20
+      },
+      {
+        "ag": 60
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_priere_de_communion",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_priere_de_communion",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_transfusion",
+    "type": "item",
+    "nom": "Grimoire : Transfusion",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Transfusion », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:transfusion"
+    ],
+    "valeur": [
+      {
+        "ag": 20
+      },
+      {
+        "ag": 60
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_transfusion",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_transfusion",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_lumiere_salvatrice",
+    "type": "item",
+    "nom": "Grimoire : Lumière salvatrice",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Lumière salvatrice », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:lumiere_salvatrice"
+    ],
+    "valeur": [
+      {
+        "ag": 50
+      },
+      {
+        "ag": 150
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_lumiere_salvatrice",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_lumiere_salvatrice",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_resurgence",
+    "type": "item",
+    "nom": "Grimoire : Résurgence",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Résurgence », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "legendaire",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:resurgence"
+    ],
+    "valeur": [
+      {
+        "ag": 100
+      },
+      {
+        "ag": 300
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_resurgence",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_resurgence",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_peau_de_pierre",
+    "type": "item",
+    "nom": "Grimoire : Peau de pierre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Peau de pierre », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:peau_de_pierre"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_peau_de_pierre",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_peau_de_pierre",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_lance_de_foudre",
+    "type": "item",
+    "nom": "Grimoire : Lance de foudre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Lance de foudre », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:lance_de_foudre"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_lance_de_foudre",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_lance_de_foudre",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_boule_de_feu_savante",
+    "type": "item",
+    "nom": "Grimoire : Boule de feu savante",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Boule de feu savante », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:boule_de_feu_savante"
+    ],
+    "valeur": [
+      {
+        "ag": 20
+      },
+      {
+        "ag": 60
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_boule_de_feu_savante",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_boule_de_feu_savante",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_chaine_d_eclairs",
+    "type": "item",
+    "nom": "Grimoire : Chaîne d'éclairs",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Chaîne d'éclairs », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:chaine_d_eclairs"
+    ],
+    "valeur": [
+      {
+        "ag": 30
+      },
+      {
+        "ag": 90
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_chaine_d_eclairs",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_chaine_d_eclairs",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_tempete_de_feu",
+    "type": "item",
+    "nom": "Grimoire : Tempête de feu",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Tempête de feu », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:tempete_de_feu"
+    ],
+    "valeur": [
+      {
+        "ag": 60
+      },
+      {
+        "ag": 180
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_tempete_de_feu",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_tempete_de_feu",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_meteore_savant",
+    "type": "item",
+    "nom": "Grimoire : Météore savant",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Météore savant », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:meteore_savant"
+    ],
+    "valeur": [
+      {
+        "ag": 80
+      },
+      {
+        "ag": 240
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_meteore_savant",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_meteore_savant",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  }
+]

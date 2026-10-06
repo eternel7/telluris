@@ -31,7 +31,8 @@ from models import character_stats
 from utils.consommables import _as_int, _as_signed_int, poser_effet
 from utils.sorts import (
 	CIBLE_DEFAUT, CIBLES, INCANTATION_PA_DEFAUT, INCANTATION_PA_MAX, JETS,
-	MAINTIEN_PM_MAX, _bonus_dict, _sensibilite_charge, capacite_utilisable_combat,
+	MAINTIEN_PM_MAX, _bonus_dict, _portee_de_doc, _sensibilite_charge, apercu_effets,
+	capacite_utilisable_combat, portee_effective,
 	capacite_utilisable_exploration, famille_de, familles_exclues, part_durative,
 )
 from utils.zones_effet import normaliser_zone
@@ -89,7 +90,9 @@ def normaliser_competence(doc) -> dict | None:
 		"sensibilite_charge": _sensibilite_charge(doc),
 		"cible": cible,
 		"jet": jet,
-		"portee": max(1, _as_int(doc.get("portee")) or 1),
+		"portee": max(1, _portee_de_doc(doc)[0] or 1),
+		# Formule de portée (`"2+{Ag/20}"`) — même lecture que les sorts (`portee_effective`).
+		"portee_formule": _portee_de_doc(doc)[1],
 		# Zone d'effet (ou None) — même bloc et même règle que les sorts
 		# (cf. utils/zones_effet.py). Absente ⇒ la seule case de la cible.
 		"zone": normaliser_zone(doc.get("zone")),
@@ -461,7 +464,7 @@ def actions_pieges_payload(character: dict, get_doc) -> list:
 # ── Payload UI ───────────────────────────────────────────────────────────────────
 
 def liste_competences_payload(character: dict, get_doc, contexte: str,
-							  etat_charge: tuple | None = None) -> list:
+							  etat_charge: tuple | None = None, caracts: dict | None = None) -> list:
 	"""Compétences connues pour l'UI (rendu initial ET resync après action). Contexte
 	"combat" : seules les actives à part instantanée (sélecteur ⚡). Contexte "exploration" :
 	TOUTES les compétences connues (l'onglet ⚡ est un catalogue), drapeau `utilisable` pour
@@ -478,6 +481,11 @@ def liste_competences_payload(character: dict, get_doc, contexte: str,
 
 	def _pen(capa):
 		return charge_magie.penalite_finale(_ratio, capa, _canal)
+
+	# Caracts du porteur pour les formules à caractéristiques (cf. `liste_sorts_payload`).
+	if caracts is None:
+		from utils.consommables import caracts_avec_buffs
+		caracts = caracts_avec_buffs(character)
 
 	out = []
 	for comp in competences_connues_docs(character, get_doc):
@@ -501,10 +509,10 @@ def liste_competences_payload(character: dict, get_doc, contexte: str,
 			"incantation": comp["incantation"],
 			"cible": comp["cible"],
 			"jet": comp["jet"],
-			"portee": comp["portee"],
+			"portee": max(1, portee_effective(comp, caracts) or 1),
 			# Étiquette de la case + aperçu des cases touchées, comme pour les sorts.
 			"zone": comp["zone"],
-			"effets": comp["effets"],
+			"effets": apercu_effets(comp["effets"], caracts),
 			# CHARGE PORTÉE : le coût et l'entretien RÉELLEMENT facturés ici et maintenant,
 			# à côté de leur base. Le client affiche « 12 → 14 PM » et grise sur l'effectif :
 			# sans ces clés il proposerait un sort au tarif à vide que le serveur refuserait.
