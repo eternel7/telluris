@@ -3129,16 +3129,16 @@
 		/* ── Choix de la cible d'un effet bénéfique (sort/compétence `cible: allie`) ──
 		   Même calque et mêmes briques de carte que les clauses : c'est aussi une
 		   décision bloquante, et refermer sans choisir ne doit RIEN lancer. */
-		#cible-allie-overlay, #compo-overlay {
+		#cible-allie-overlay, #choix-overlay {
 			position: fixed; inset: 0; z-index: 9400;
 			background: rgba(10, 8, 5, .78);
 			display: flex; align-items: center; justify-content: center; padding: 1rem;
 		}
-		#cible-allie-overlay.clauses-hidden, #compo-overlay.clauses-hidden { display: none; }
-		#cible-allie-overlay .item-detail-card, #compo-overlay .item-detail-card { max-width: 460px; }
-		.compo-liste { margin: 0 0 .8rem; display: flex; flex-direction: column; gap: .3rem; }
-		.compo-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
-		.compo-actions .sh-drop-btn { flex: 1 1 auto; margin-left: 0; padding: .45rem .6rem; }
+		#cible-allie-overlay.clauses-hidden, #choix-overlay.clauses-hidden { display: none; }
+		#cible-allie-overlay .item-detail-card, #choix-overlay .item-detail-card { max-width: 460px; }
+		.choix-liste { margin: 0 0 .8rem; display: flex; flex-direction: column; gap: .3rem; }
+		.choix-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+		.choix-actions .sh-drop-btn { flex: 1 1 auto; margin-left: 0; padding: .45rem .6rem; }
 		.cible-allie-btn {
 			display: flex; align-items: center; gap: .6rem; width: 100%;
 			padding: .5rem .6rem; margin-bottom: .4rem; cursor: pointer;
@@ -3288,15 +3288,16 @@
 			<div id="cible-allie-body"></div>
 		</div>
 	</div><!-- /#cible-allie-overlay -->
-	{# Composants CONSOMMABLES d'un sort lancé depuis la fiche : les dépenser ou non.
-	   ✕ / Échap / clic hors carte = ANNULER le lancement, jamais « sans » par défaut. #}
-	<div id="compo-overlay" class="clauses-hidden" aria-label="Utiliser les composants ?"
-		 onclick="if(event.target===this)closeCompo()">
+	{# Décision à quelques boutons (demanderChoix) : composants d'un sort lancé depuis la
+	   fiche, variantes d'un sort sur la barre… ✕ / Échap / clic hors carte = ANNULER,
+	   jamais un choix par défaut. #}
+	<div id="choix-overlay" class="clauses-hidden" role="dialog" aria-label="Choisir"
+		 onclick="if(event.target===this)closeChoix()">
 		<div class="item-detail-card">
-			<button class="item-detail-close" onclick="closeCompo()" title="Annuler">✕</button>
-			<div id="compo-body"></div>
+			<button class="item-detail-close" onclick="closeChoix()" title="Annuler">✕</button>
+			<div id="choix-body"></div>
 		</div>
-	</div><!-- /#compo-overlay -->
+	</div><!-- /#choix-overlay -->
 	{# Dépassement du maximum racial : UNIQUE et IRRÉVERSIBLE pour le personnage.
 	   ✕ / Échap / clic hors carte = annuler sans rien engager — seul le bouton
 	   « Dépasser » de la carte envoie `use_max_bonus`. #}
@@ -4263,8 +4264,8 @@ document.addEventListener('keydown', e => {
 	if (contratOv && !contratOv.classList.contains('clauses-hidden')) { _contratLaisser(); return; }
 	const cibleAllie = document.getElementById('cible-allie-overlay');
 	if (cibleAllie && !cibleAllie.classList.contains('clauses-hidden')) { closeCibleAllie(); return; }
-	const compoOv = document.getElementById('compo-overlay');
-	if (compoOv && !compoOv.classList.contains('clauses-hidden')) { closeCompo(); return; }
+	const choixOv = document.getElementById('choix-overlay');
+	if (choixOv && !choixOv.classList.contains('clauses-hidden')) { closeChoix(); return; }
 	// ⚠️ Le sur-mesure attend une promesse, comme le choix de cible : Échap doit la RÉSOUDRE
 	// (à null), sinon la commande reste suspendue et son bouton désactivé pour toujours.
 	const surMesure = document.getElementById('sur-mesure-overlay');
@@ -5790,9 +5791,10 @@ function _slotSelect(type, ref, composants, titre) {
 }
 // Sélecteur UNIQUE d'un sort à composants CONSOMMABLES (deux sélecteurs côte à côte ne
 // tenaient pas sur une ligne mobile) : chaque case est proposée deux fois, sans et avec
-// dépense des composants — le libellé « + compo » le dit, y compris replié. Depuis la
-// fiche, un sort occupe UNE case : choisir une variante retire l'autre (affecterSlotSort).
-// Les deux déjà posées (grille, mode ⚙ du combat) : une option non choisissable les nomme.
+// dépense des composants — le libellé « + compo » le dit, y compris replié. Poser une
+// variante quand l'autre est déjà sur la barre DEMANDE (remplacer / garder les deux,
+// affecterSlotSort) ; retirer l'une des deux propose de retirer les deux (_retirerVariantes).
+// Les deux posées : une option non choisissable les nomme.
 function _slotSelectSort(ref) {
 	const sans = _caseDe('sort', ref, false), avec = _caseDe('sort', ref, true);
 	const occupees = new Set([sans, avec].filter(Boolean).map(s => s.position));
@@ -5810,20 +5812,59 @@ function _slotSelectSort(ref) {
 		+ groupe(false, 'Sans dépenser de composant') + groupe(true, 'En dépensant les composants') + '</select>';
 }
 async function affecterSlotSort(ref, sel) {
-	const [position, compo] = sel.value.split('|');
-	if (!position) {
-		for (const c of [false, true]) {
-			const courante = _caseDe('sort', ref, c);
-			if (courante) await _postSlots('api/slot_action', { position: courante.position, entree: null });
-		}
+	const [pos, compo] = sel.value.split('|');
+	if (!pos) {
+		const sans = _caseDe('sort', ref, false), avec = _caseDe('sort', ref, true);
+		// Les deux sur la barre : retirer l'une propose de retirer les deux (_retirerVariantes).
+		if (sans && avec) { await _retirerVariantes(ref, null); _renderSorts(); return; }
+		const courante = sans || avec;
+		if (courante) await _postSlots('api/slot_action', { position: courante.position, entree: null });
 		return;
 	}
+	const position = parseInt(pos, 10);
 	const composants = compo === '1';
+	// L'autre variante est déjà ailleurs sur la barre : on DEMANDE (la remplacer, garder
+	// les deux) au lieu de décider. Sur sa propre case, la poser l'écrase : rien à demander.
+	const autre = _caseDe('sort', ref, !composants);
+	let remplacer = false;
+	if (autre && autre.position !== position) {
+		const nom = _nomSort(ref);
+		remplacer = await demanderChoix(`🎯 ${nom} est déjà dans la barre`,
+			`<div class="sh-skill-desc" style="margin-bottom:.7rem">Case ${autre.position} : ${_libVariante(!composants)}.
+			Vous posez la version ${_libVariante(composants)} en case ${position}.</div>`,
+			[{ label: `Remplacer (retirer la case ${autre.position})`, valeur: true },
+			 { label: 'Garder les deux', valeur: false }]);
+		if (remplacer === null) { _renderSorts(); return; }   // annulé : le sélecteur revient
+	}
 	const ok = await _postSlots('api/slot_action',
-		{ position: parseInt(position, 10), entree: { type: 'sort', ref, composants } });
-	// L'autre variante, si elle n'a pas été écrasée par celle-ci, quitte la barre.
-	const autre = ok && _caseDe('sort', ref, !composants);
-	if (autre) await _postSlots('api/slot_action', { position: autre.position, entree: null });
+		{ position, entree: { type: 'sort', ref, composants } });
+	const reste = ok && remplacer && _caseDe('sort', ref, !composants);
+	if (reste) await _postSlots('api/slot_action', { position: reste.position, entree: null });
+}
+function _nomSort(ref) {
+	const s = (_sorts || []).find(x => x.sort_id === ref);
+	return s ? `${s.icon || '🔮'} ${s.nom}` : 'Ce sort';
+}
+function _libVariante(composants) { return composants ? 'avec composants (+)' : 'sans composant'; }
+// Les DEUX variantes d'un sort sont sur la barre et l'on en retire une (`position`, ou
+// null depuis le sélecteur, qui ne sait pas laquelle) : proposer de retirer les deux.
+// Renvoie false si annulé.
+async function _retirerVariantes(ref, position) {
+	const sans = _caseDe('sort', ref, false), avec = _caseDe('sort', ref, true);
+	const boutons = [{ label: 'Retirer les deux', valeur: 'deux' }];
+	if (position === null) {
+		boutons.push({ label: `Seulement la case ${sans.position} (sans)`, valeur: sans.position },
+					 { label: `Seulement la case ${avec.position} (+)`, valeur: avec.position });
+	} else {
+		boutons.push({ label: `Seulement la case ${position}`, valeur: position });
+	}
+	const choix = await demanderChoix(`🎯 ${_nomSort(ref)} — retirer de la barre`,
+		`<div class="sh-skill-desc" style="margin-bottom:.7rem">Le sort occupe deux cases : ${sans.position} (${_libVariante(false)}) et ${avec.position} (${_libVariante(true)}).</div>`,
+		boutons);
+	if (choix === null) return false;
+	const cases = choix === 'deux' ? [sans.position, avec.position] : [choix];
+	for (const p of cases) await _postSlots('api/slot_action', { position: p, entree: null });
+	return true;
 }
 // « ⚔ » seul (le mot « combat » prenait la place des sélecteurs) : son explication s'ouvre
 // en bulle au toucher — le tactile n'a pas de survol pour lire le `title`.
@@ -5978,6 +6019,10 @@ function _renderModesAttaque() {
 function _viderCaseBarre(position) {
 	const slot = _barreSlots.find(s => s.position === position);
 	if (!slot || !slot.type || slot.obligatoire) return;
+	if (slot.type === 'sort' && _caseDe('sort', slot.ref, !slot.composants)) {
+		_retirerVariantes(slot.ref, position);
+		return;
+	}
 	if (!confirm(`Retirer ${slot.nom || 'cette action'} de la case ${position} ?`)) return;
 	_postSlots('api/slot_action', { position, entree: null });
 }
@@ -6223,30 +6268,41 @@ function _appliquerVitauxCible(l) {
 	if (_grpEtat) _grpEtat = null;   // payload périmé : rechargé au prochain besoin
 }
 
+// Décision bloquante à quelques boutons (#choix-overlay) : renvoie la `valeur` du bouton
+// choisi, ou null si annulé (✕ / Échap / clic hors carte — Conventions §8, la promesse
+// est RÉSOLUE, jamais laissée en suspens). Une seule question à la fois.
+let _choixResolve = null;
+let _choixValeurs = [];
+function closeChoix() { _choisir(-1); }
+function _choisir(i) {
+	document.getElementById('choix-overlay').classList.add('clauses-hidden');
+	const v = i >= 0 ? _choixValeurs[i] : null;
+	if (_choixResolve) { const r = _choixResolve; _choixResolve = null; r(v); }
+}
+function demanderChoix(titre, corps, boutons) {
+	if (_choixResolve) _choisir(-1);   // une question restée ouverte est annulée
+	_choixValeurs = boutons.map(b => b.valeur);
+	document.getElementById('choix-body').innerHTML =
+		`<h3 style="margin:.1rem 0 .5rem; padding-right:2rem">${titre}</h3>${corps || ''}`
+		+ `<div class="choix-actions">${boutons.map((b, i) =>
+			`<button type="button" class="sh-drop-btn" onclick="_choisir(${i})">${b.label}</button>`).join('')}</div>`;
+	document.getElementById('choix-overlay').classList.remove('clauses-hidden');
+	return new Promise(resolve => { _choixResolve = resolve; });
+}
+
 // Proposition des composants CONSOMMABLES au lancement depuis la fiche (la case « compo »
 // d'avant les engageait d'office). Renvoie true (les dépenser), false (s'en passer) ou
-// null (annulé : ✕ / Échap / clic hors carte — Conventions §8, la promesse est RÉSOLUE).
-let _compoResolve = null;
-function closeCompo() { _choisirCompo(null); }
-function _choisirCompo(v) {
-	document.getElementById('compo-overlay').classList.add('clauses-hidden');
-	if (_compoResolve) { const r = _compoResolve; _compoResolve = null; r(v); }
-}
+// null (annulé).
 function demanderComposants(s, consos) {
 	const liste = consos.map(c => {
 		const bonus = _sortEffetsLabel(c.bonus);
 		return `<span class="sh-sort-compo">⚗️ ${c.icon || ''} ${escapeHtml(c.nom || c.item)}${bonus ? ' → ' + bonus : ''}</span>`;
 	}).join('');
-	document.getElementById('compo-body').innerHTML =
-		`<h3 style="margin:.1rem 0 .5rem; padding-right:2rem">${s.icon || '🔮'} ${s.nom} — utiliser ${consos.length > 1 ? 'les composants' : 'le composant'} ?</h3>`
-		+ `<div class="sh-skill-desc" style="margin-bottom:.4rem">Renforce le sort ; ${consos.length > 1 ? 'ils sont dépensés' : 'il est dépensé'} au lancement.</div>`
-		+ `<div class="compo-liste">${liste}</div>`
-		+ `<div class="compo-actions">
-			<button type="button" class="sh-drop-btn" onclick="_choisirCompo(true)">⚗️ Utiliser</button>
-			<button type="button" class="sh-drop-btn" onclick="_choisirCompo(false)">Sans</button>
-		</div>`;
-	document.getElementById('compo-overlay').classList.remove('clauses-hidden');
-	return new Promise(resolve => { _compoResolve = resolve; });
+	return demanderChoix(
+		`${s.icon || '🔮'} ${s.nom} — utiliser ${consos.length > 1 ? 'les composants' : 'le composant'} ?`,
+		`<div class="sh-skill-desc" style="margin-bottom:.4rem">Renforce le sort ; ${consos.length > 1 ? 'ils sont dépensés' : 'il est dépensé'} au lancement.</div>`
+		+ `<div class="choix-liste">${liste}</div>`,
+		[{ label: '⚗️ Utiliser', valeur: true }, { label: 'Sans', valeur: false }]);
 }
 
 async function lancerSort(sortId, btn) {
