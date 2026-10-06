@@ -24,13 +24,16 @@
   bloc identité. ⚠️ Les deux valent `true` par DÉFAUT : les ajouter ne change rien aux usages
   existants. Le portrait seul (`vitaux=false, identite=false`) sert les avatars du chat de
   taverne — les PV d'un AUTRE joueur y seraient à la fois privés et faux (figés à l'envoi).
+  `points` = ★ points d'attribut dans la ligne PV/PM (carte de la FICHE seulement : `none` par
+  défaut, aucune autre carte n'en porte). `[data-points]` est réécrit par `_syncPoints`, qui suit
+  le porteur affiché — compagnon compris.
   ⚠️ `.card-footer` et `.card-actions` restent émis dans tous les cas : `renderCharacterCard`
   les résout par `_q`, qui rend `null` sans broncher si on venait à les retirer aussi.
 #}
 {% macro character_card(card_id='', porteur_id='', nom='', voc_icon='', voc_label='',
                         voc_niveau=0, race='', niveau=0, rang='', rang_title='', pv=0, pv_max=0,
                         pm=0, pm_max=0, image='', zoom=50, editable=true, classes='',
-                        vitaux=true, identite=true) %}
+                        vitaux=true, identite=true, points=none) %}
 {% set _pv_max = pv_max or 1 %}
 {% set _pm_max = pm_max or 1 %}
 {% set pv_pct = [(pv / _pv_max * 100)|int, 100]|min %}
@@ -84,6 +87,7 @@
 			<div class="char-class" data-role="classe">{{ voc_icon }} {{ voc_label }} Niv.<span class="voc-niveau niveau-nb" data-role="voc-niveau">{{ voc_niveau }}</span> - <span data-role="race">{{ race }}</span> Niv.<span class="race-niveau niveau-nb" data-role="race-niveau">{{ niveau }}</span><span data-role="rang"{% if not rang %} hidden{% endif %}{% if rang_title %} title="{{ rang_title }}"{% endif %}> · Rang <span data-role="rang-val">{{ rang }}</span></span></div>
 			<div class="char-vitals">
 				<span class="pv-val" data-role="pv-val">PV <span data-role="pv">{{ pv }}</span>/<span data-role="pv-max">{{ pv_max or "—" }}</span></span>
+				{% if points is not none %}<span class="sh-card-points pts-dispo{% if points <= 0 %} is-vide{% endif %}" title="Points d'attribut à répartir (caractéristiques, vocation, sorts, écoles, compétences)">★ <span data-points>{{ points }}</span></span>{% endif %}
 				<span class="pm-val" data-role="pm-val">PM <span data-role="pm">{{ pm }}</span>/<span data-role="pm-max">{{ pm_max or "—" }}</span></span>
 			</div>
 		</div>

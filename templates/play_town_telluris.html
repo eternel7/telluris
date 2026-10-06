@@ -9,11 +9,12 @@
 {% import "part-move-panel.html" as movepanel %}
 {# Plein écran : choix gardé d'une page à l'autre + manifeste (cf. part-plein-ecran.html). #}
 {% import "part-plein-ecran.html" as pleinecran %}
-{# ★ Points d'attribut de la fiche : posés sur l'IDENTITÉ (carte de la fiche en portrait,
-   colonne gauche en paysage), visibles au-dessus de TOUS les onglets — ils sont la bourse
-   commune des caracts, de la vocation, des sorts, des écoles et des compétences.
-   Pas d'id (deux exemplaires) : `_syncPoints` les retrouve par `data-points`. #}
-{% macro points_fiche(pts) %}<div class="sh-card-points pts-dispo{% if pts <= 0 %} is-vide{% endif %}" title="Points d'attribut à répartir (caractéristiques, vocation, sorts, écoles, compétences)">★ Points : <span data-points>{{ pts }}</span></div>{% endmacro %}
+{# ★ Points d'attribut de la fiche : dans la ligne PV/PM de l'identité (carte de la fiche en
+   portrait — paramètre `points` de la macro de carte —, colonne gauche en paysage), visibles
+   au-dessus de TOUS les onglets — ils sont la bourse commune des caracts, de la vocation,
+   des sorts, des écoles et des compétences. Pas d'id (deux exemplaires) : `_syncPoints` les
+   retrouve par `data-points`. #}
+{% macro points_fiche(pts) %}<span class="sh-card-points pts-dispo{% if pts <= 0 %} is-vide{% endif %}" title="Points d'attribut à répartir (caractéristiques, vocation, sorts, écoles, compétences)">★ <span data-points>{{ pts }}</span></span>{% endmacro %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -840,15 +841,9 @@
 		/* Pastille « points à répartir » sur les boutons 👤 Personnage / 👥 Groupe. Rendue en
 		   dur dans le markup et masquée par `hidden` : les points peuvent tomber à zéro (ou
 		   revenir) en cours de session, et `_majIndicateursPoints` n'a rien à créer. */
-		/* Compteur de la fiche (macro `points_fiche`) : grisé à zéro, rien à dépenser. */
-		.sh-card-points { font-size: .85rem; margin-top: 6px; }
-		/* Sur la carte de la fiche (portrait mobile) : épinglé en haut à droite, en face du
-		   nom — une ligne de plus sous le portrait coûtait de la hauteur à tous les onglets. */
-		.character-card[data-card="charac-sheet"] { position: relative; }
-		.character-card[data-card="charac-sheet"] > .sh-card-points {
-			position: absolute; top: 10px; right: 12px; margin: 0; white-space: nowrap;
-		}
-		.character-card[data-card="charac-sheet"] .char-name { padding-right: 6.5rem; }
+		/* Compteur ★ de la fiche, dans la ligne PV/PM (entre les deux : PM garde sa marge
+		   automatique à droite). Grisé à zéro, rien à dépenser. */
+		.sh-card-points { white-space: nowrap; }
 		.sh-card-points.is-vide { color: var(--muted); }
 		.pts-indic { margin-left: 6px; font-size: 0.9rem; line-height: 1; vertical-align: baseline; }
 		.sh-xp-header { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; font-size: 0.95rem; }
@@ -1276,6 +1271,11 @@
 			#sh-competences > .acc-section { display: none; border: 0; border-radius: 0; overflow: visible; }
 			#sh-competences[data-vue="connues"] > .acc-section[data-vue="connues"],
 			#sh-competences[data-vue="apprendre"] > .acc-section[data-vue="apprendre"] { display: block; }
+			/* Fusion compétences + sorts (cf. _capaRangsConnus) : section et enveloppes
+			   s'effacent, les lignes deviennent des éléments flex de l'onglet et `order`
+			   les range dans UN tri. ⚠️ Placée ENTRE la règle d'affichage et celles du
+			   filtre (même spécificité) : un filtre qui écarte la section l'emporte. */
+			#sh-competences[data-vue="connues"] > .acc-section[data-fusion] { display: contents; }
 			#sh-competences[data-filtre="attaque"] > .acc-section:not([data-type="attaque"]),
 			#sh-competences[data-filtre="competences"] > .acc-section:not([data-type="competences"]),
 			#sh-competences[data-filtre="magie"] > .acc-section:not([data-type="magie"]) { display: none; }
@@ -1283,6 +1283,14 @@
 			#sh-competences .acc-body > .sh-scroll { display: block; min-height: 0; }
 			#sh-competences .acc-body .sh-rel-scroll { max-height: none; overflow: visible; }
 			#sh-competences .acc-body > .sh-scroll::after { display: none; }
+			#sh-competences > .acc-section[data-fusion] > .acc-body,
+			#sh-competences > .acc-section[data-fusion] .sh-scroll,
+			#sh-competences > .acc-section[data-fusion] .sh-rel-scroll { display: contents; }
+			#sh-competences > .acc-section[data-fusion] .sh-skill { flex: 0 0 auto; }
+			/* « Aucune compétence apprise » / « Aucun sort connu » : sous les lignes. */
+			#sh-competences > .acc-section[data-fusion] .sh-empty { order: 100000; }
+			#sh-competences[data-vue="connues"] { row-gap: 0; }
+			#sh-competences[data-vue="connues"] > .capa-tete { margin-bottom: .35rem; }
 			/* L'en-tête d'accordéon devient une étiquette de groupe, inerte. */
 			#sh-competences .acc-head {
 				pointer-events: none; padding: .55rem 0 .15rem; background: none;
@@ -1952,9 +1960,9 @@
 					<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.<span id="niv-voc-left-info" class="voc-niveau niveau-nb">{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}}</span> - {{character["race"]}} Niv.<span id="niv-left-info" class="race-niveau niveau-nb">{{character.get("niveau",'0')}}</span> ·<span id="rang-left-info"{% if character.get("rangs_guilde_title") %} title="{{ character['rangs_guilde_title'] }}"{% endif %}> Rang {{character.get("rang",'aucun')}}</span></div>
 					<div class="char-vitals" style="margin-top:8px">
 						<span class="pv-val">PV {{_pv}}/<span id="stat-left-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
+						{{ points_fiche(character.get("attribute_points", 0)) }}
 						<span class="pm-val">PM {{_pm}}/<span id="stat-left-drv-pm_max">{{d.get("pm_max","—")}}</span></span>
 					</div>
-					{{ points_fiche(character.get("attribute_points", 0)) }}
 					<!-- Effets actifs (consommables) : rendu par _renderEffetsActifs. -->
 					<div id="sh-effets-actifs" class="sh-effets-chips"></div>
 				</div>
@@ -1964,7 +1972,7 @@
 				{# Carte du joueur, exemplaire de la fiche (mobile). Le mode compagnon la rebascule sur
 				   un compagnon : c'est la MÊME carte, un autre porteur (renderCharacterCard / setSujet). #}
 				<div id="personnage">
-					{% call cards.character_card(card_id="charac-sheet", **carte_joueur) %}{{ points_fiche(character.get("attribute_points", 0)) }}{% endcall %}
+					{{ cards.character_card(card_id="charac-sheet", points=character.get("attribute_points", 0), **carte_joueur) }}
 				</div>
 				<!-- Tab bar -->
 				<nav class="sheet-tab-bar" role="tablist">
@@ -2240,7 +2248,7 @@
 						{# Compétences : mêmes règles que les sorts, rendues 100 % côté client
 						   depuis _competences / _competencesApprenables — resync après
 						   utiliser/apprendre. #}
-						<section class="acc-section" data-vue="connues" data-type="competences">
+						<section class="acc-section" data-vue="connues" data-type="competences" data-fusion>
 							<button type="button" class="acc-head" id="acc-head-capa-competences" onclick="toggleOngletSection('competences', 'capa-competences')">
 								<span>⚡ Compétences</span><span class="acc-chevron">▾</span>
 							</button>
@@ -2262,7 +2270,7 @@
 						</section>
 						{# Sorts : rendus 100 % côté client depuis les payloads injectés (_sorts /
 						   _sortsApprenables), comme le sac — resync après lancer/apprendre. #}
-						<section class="acc-section" data-vue="connues" data-type="magie">
+						<section class="acc-section" data-vue="connues" data-type="magie" data-fusion>
 							<button type="button" class="acc-head" id="acc-head-capa-sorts" onclick="toggleOngletSection('competences', 'capa-sorts')">
 								<span>🔮 Sorts connus</span><span class="acc-chevron">▾</span>
 							</button>
@@ -6006,6 +6014,7 @@ function _renderSorts(list) {
 		box.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">🔮</span>Aucun sort connu.</div>';
 		return;
 	}
+	const rangs = _capaRangsConnus();
 	box.innerHTML = _capaListe(_sorts).map(s => {
 		const compos = (s.composants || []).map(c =>
 			`<span class="sh-sort-compo${c.disponible ? '' : ' off'}" title="${c.consomme ? 'Consommé au lancement' : 'Catalyseur (non consommé, il suffit de le porter)'}">${c.consomme ? '⚗️' : '💎'} ${c.icon || ''} ${c.nom}${_sortEffetsLabel(c.bonus) ? ' → ' + _sortEffetsLabel(c.bonus) : ''}</span>`
@@ -6030,7 +6039,7 @@ function _renderSorts(list) {
 		const portee = _sortPorteeTexte(s);
 		const peutVoir = !!s.description || !!portee;
 		const ouvert = peutVoir && _sortsDescOuvertes.has(s.sort_id);
-		return `<div class="sh-skill${ouvert ? ' expanded' : ''}">
+		return `<div class="sh-skill${ouvert ? ' expanded' : ''}" style="order:${rangs.get('s:' + s.sort_id) || 0}">
 			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
 			<div${_sortInfoAttrs(s.sort_id, peutVoir)}>
 				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${_pmLabel(s)}</span></div>
@@ -6315,6 +6324,7 @@ function _renderCompetences(list) {
 		box.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">⚡</span>Aucune compétence apprise.</div>';
 		return;
 	}
+	const rangs = _capaRangsConnus();
 	box.innerHTML = _capaListe(_competences).map(c => {
 		// Une passive n'a ni action ni case de barre : son bonus est permanent (inclus
 		// dans les dérivées), il n'y a rien à déclencher. SAUF une passive de PIÈGE
@@ -6339,7 +6349,7 @@ function _renderCompetences(list) {
 		const armeTitre = !arme ? ''
 			: c.jet === 'cd' ? ' title="Ces dés s\'ajoutent aux dégâts de votre arc ou arme de lancer"'
 			: ' title="Ces dés s\'ajoutent aux dégâts de votre arme"';
-		return `<div class="sh-skill">
+		return `<div class="sh-skill" style="order:${rangs.get('c:' + c.competence_id) || 0}">
 			<span class="sh-skill-icon">${c.icon || '⚡'}</span>
 			<div class="sh-skill-info">
 				<div class="sh-skill-name">${c.nom}${pm}</div>
@@ -6849,16 +6859,29 @@ function _capaTerme() {
 	const el = document.getElementById('capa-recherche');
 	return _capaPlier(el ? el.value.trim() : '');
 }
+// Tri en place selon `_capaSort` (stable : sans tri, ou à égalité, l'ordre d'origine reste).
+function _capaTrier(arr, cle) {
+	if (!_capaSort) return arr;
+	const dir = _capaSort === 'asc' ? 1 : -1;
+	return arr.sort((a, b) => dir * String(a[cle] || '')
+		.localeCompare(String(b[cle] || ''), undefined, { numeric: true, sensitivity: 'base' }));
+}
 function _capaListe(arr, cle = 'nom') {
 	const terme = _capaTerme();
-	const out = (arr || []).filter(x => !terme || _capaPlier(x[cle]).includes(terme));
-	if (_capaSort) {
-		const dir = _capaSort === 'asc' ? 1 : -1;
-		out.sort((a, b) => dir * String(a[cle] || '')
-			.localeCompare(String(b[cle] || ''), undefined, { numeric: true, sensitivity: 'base' }));
-	}
+	const out = _capaTrier((arr || []).filter(x => !terme || _capaPlier(x[cle]).includes(terme)), cle);
 	_capaPlanifierAucun();
 	return out;
+}
+// Rang de chaque ligne dans la liste FUSIONNÉE compétences + sorts (`c:<id>` / `s:<id>`),
+// posé en `order` sur la ligne : en portrait (vue Connues) les deux listes passent en
+// `display: contents` et leurs lignes deviennent des éléments flex de l'onglet — UN tri pour
+// les deux, sans dupliquer le DOM (les ids `sortchk-*` restent uniques). Ailleurs, `order`
+// est inerte (listes en bloc). Sans tri : compétences puis sorts, comme avant. Rangs ≥ 1 :
+// les lignes passent APRÈS tout ce qui reste à `order: 0` (barre, en-tête, attaques).
+function _capaRangsConnus() {
+	const tous = (_competences || []).map(c => ({ k: 'c:' + c.competence_id, nom: c.nom }))
+		.concat((_sorts || []).map(s => ({ k: 's:' + s.sort_id, nom: s.nom })));
+	return new Map(_capaTrier(tous, 'nom').map((x, i) => [x.k, i + 1]));
 }
 function cycleCapaSort() {
 	_capaSort = _cycleSort(_capaSort);
@@ -6888,7 +6911,8 @@ function _capaPlanifierAucun() {
 		const onglet = document.getElementById('sh-competences');
 		if (!el || !onglet) return;
 		const lignes = Array.from(onglet.querySelectorAll(':scope > .acc-section'))
-			.filter(sec => sec.offsetParent !== null)
+			// ⚠️ Pas `offsetParent` : une section fusionnée (`display: contents`) n'a pas de boîte.
+			.filter(sec => getComputedStyle(sec).display !== 'none')
 			.some(sec => sec.querySelector('.sh-skill'));
 		el.hidden = !_capaTerme() || lignes;
 	});
@@ -10424,11 +10448,11 @@ function _applySheetIdentite(p) {
 			+ (p.rang ? ` · Rang ${escapeHtml(p.rang)}` : '');
 		// Mêmes ids que le gabarit Jinja : _refreshDerivedStats continue d'y écrire les max.
 		const vitals = `<span class="pv-val">PV ${v.currentPV}/<span id="stat-left-drv-pv_max">${v.pv_max}</span></span>`
+			+ `<span class="sh-card-points pts-dispo" title="Points d'attribut à répartir">★ <span data-points></span></span>`
 			+ `<span class="pm-val">PM ${v.currentPM}/<span id="stat-left-drv-pm_max">${v.pm_max}</span></span>`;
 		els.gauche.innerHTML = `<div class="char-name">${p.prenom} ${p.nom}</div>`
 			+ `<div class="char-class">${classe}</div>`
 			+ `<div class="char-vitals" style="margin-top:8px">${vitals}</div>`
-			+ `<div class="sh-card-points pts-dispo" title="Points d'attribut à répartir">★ Points : <span data-points></span></div>`
 			+ `<div id="sh-effets-actifs" class="sh-effets-chips"></div>`;
 	}
 	if (els.imgGauche) els.imgGauche.src = '/characters/' + p.image;
