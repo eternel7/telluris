@@ -268,3 +268,16 @@ def test_placement_d_un_cercle_sur_son_ancre_avec_l_axe_vers_la_cible():
 
 def test_placement_sans_zone_rend_none():
 	assert placement_visuel(None, (1, 1), (6, 1)) is None
+
+
+def test_placement_d_un_cone_en_diagonale():
+	"""Même cas que dev/test_zones_effet_client.js (miroir `placementVisuelZone`)."""
+	zone = normaliser_zone({"forme": "cone", "origine": "lanceur", "longueur": 3,
+							"decalage": 1})
+	assert placement_visuel(zone, (5, 5), (8, 8)) == {"centre": [6.6, 6.6], "axe": [1, 1]}
+
+
+def test_placement_d_un_rectangle_de_largeur_paire():
+	zone = normaliser_zone({"forme": "rectangle", "origine": "lanceur", "longueur": 1,
+							"largeur": 2, "decalage": 1})
+	assert placement_visuel(zone, (3, 3), (3, 0)) == {"centre": [3.5, 2.0], "axe": [0, -1]}

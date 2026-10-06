@@ -209,6 +209,17 @@ function casesEffet(zone, lanceur, cible, facing, cells, dims) {
 //     que soit l'`origine` écrite dans la donnée (le moteur l'ancre sur le lanceur) ;
 //   • l'icône suit le camp, comme la couleur de l'aperçu : 💥 offensif, ✨ bénéfique.
 // Absent ⇒ on s'en tient à ce que dit l'`origine`, et à l'icône offensive.
+// Miroir de `zones_effet.placement_visuel` : où poser la NAPPE d'une capacité à zone
+// (`animation_zone`), `{centre, axe}` ou null. `centre` = barycentre des cases de la forme
+// GÉOMÉTRIQUE (sans terrain), arrondi au millième comme le serveur ; `axe` = celui de la forme.
+// Sert l'aperçu de /admin/animations — en combat, c'est le serveur qui envoie la position.
+function placementVisuelZone(zone, lanceur, cible, facing) {
+	const cases = casesZone(zone, lanceur, cible, facing);
+	if (!cases.length) return null;
+	const moy = i => Math.round(cases.reduce((s, c) => s + c[i], 0) / cases.length * 1000) / 1000;
+	return { centre: [moy(0), moy(1)], axe: zoneAxe(zone, lanceur, cible, facing).slice() };
+}
+
 function libelleZone(zone, cibleCapa) {
 	if (!zone) return '';
 	const surSoi = zone.origine === 'lanceur' || cibleCapa === 'soi';

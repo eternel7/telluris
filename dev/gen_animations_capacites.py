@@ -61,9 +61,10 @@ SON_POUVOIR_SOMBRE = "power_up_sound_v3.ogg"
 
 # Orienté sur l'axe lanceur → cible, sans trajectoire (cône, éclair, jet).
 ORIENTE = {"rotation_auto": True}
-# Les feuilles d'ONDE (`shockwave_*`) sont dessinées pointe en HAUT À DROITE (−45°) : 45°
-# ramènent le dessin à la convention du moteur (0° = vers la droite) avant l'orientation.
-ONDE = {"rotation_auto": True, "rotation": 45}
+# Les feuilles d'ONDE (`shockwave_*`) avancent de GAUCHE À DROITE en montant un peu : axe
+# principal mesuré image par image (ACP de l'alpha) entre −15° et −30°. 20° ramènent le dessin
+# à la convention du moteur (0° = vers la droite) avant l'orientation — à affiner à la mini-scène.
+ONDE = {"rotation_auto": True, "rotation": 20}
 
 # thème → (nom, feuille de base, son, son_fin_ms, volume, retouches)
 # `son_fin_ms = 0` = jusqu'au bout du fichier ; `son = None` = impact MUET (victime d'un cône).

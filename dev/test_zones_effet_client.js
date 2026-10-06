@@ -261,6 +261,30 @@ t('libelleZone : l’icône suit le camp, comme la couleur de l’aperçu', () =
 	assert.ok(libelleZone(z).startsWith('💥'), 'camp inconnu ⇒ offensif, comme avant');
 });
 
+console.log('\n── Placement de la nappe (animation_zone) ──────────────────────────────────');
+
+// MÊMES cas et MÊMES valeurs que tests/test_zones_effet.py (placement_visuel).
+t('cône vers l’est : barycentre devant le lanceur, sur l’axe', () => {
+	const z = normaliserZone({ forme: 'cone', origine: 'lanceur', longueur: 3, decalage: 1 });
+	assert.deepStrictEqual(placementVisuelZone(z, [5, 5], [8, 5]), { centre: [7.267, 5], axe: [1, 0] });
+});
+
+t('cône en diagonale', () => {
+	const z = normaliserZone({ forme: 'cone', origine: 'lanceur', longueur: 3, decalage: 1 });
+	assert.deepStrictEqual(placementVisuelZone(z, [5, 5], [8, 8]), { centre: [6.6, 6.6], axe: [1, 1] });
+});
+
+t('rectangle de largeur paire : la case de plus décale le centre', () => {
+	const z = normaliserZone({ forme: 'rectangle', origine: 'lanceur', longueur: 1, largeur: 2, decalage: 1 });
+	assert.deepStrictEqual(placementVisuelZone(z, [3, 3], [3, 0]), { centre: [3.5, 2], axe: [0, -1] });
+});
+
+t('cercle sur son ancre, axe vers la cible ; sans zone ⇒ null', () => {
+	assert.deepStrictEqual(placementVisuelZone(normaliserZone({ forme: 'cercle', rayon: 2 }), [1, 1], [6, 1]),
+		{ centre: [6, 1], axe: [1, 0] });
+	assert.strictEqual(placementVisuelZone(null, [1, 1], [6, 1]), null);
+});
+
 console.log('\n── Aperçu sur la carte (combat_telluris.html) ──────────────────────────────');
 
 // Le PARCOURS de l'aperçu, avec un DOM factice — comme `majFleches` dans
