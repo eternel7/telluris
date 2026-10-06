@@ -1275,6 +1275,9 @@
 			.capa-filtre[aria-pressed="true"] { border-color: var(--accent-color); color: var(--accent-color); }
 			/* ⚔ Attaque : la puce la plus à droite, comme ses lignes sont les dernières. */
 			.capa-filtre[data-filtre="attaque"] { margin-left: auto; }
+			/* … absente de « Apprendre » : rien n'y est de type attaque (les modes
+			   d'attaque suivent l'arme, ils ne s'apprennent pas). */
+			#sh-competences[data-vue="apprendre"] .capa-filtre[data-filtre="attaque"] { display: none; }
 
 			/* Sections : celles de la vue, moins celles que le filtre écarte. ⚠️ Même
 			   spécificité pour les deux règles : c'est l'ORDRE qui fait gagner le filtre. */
@@ -6998,6 +7001,8 @@ const CAPA_FILTRES = ['tout', 'attaque', 'competences', 'magie'];
 function _capaAppliquer(vue, filtre) {
 	const onglet = document.getElementById('sh-competences');
 	if (!onglet) return;
+	// ⚔ Attaque n'existe pas dans « Apprendre » (puce masquée) : y retomber sur Tout.
+	if (vue === 'apprendre' && filtre === 'attaque') filtre = 'tout';
 	onglet.dataset.vue = vue;
 	onglet.dataset.filtre = filtre;
 	onglet.querySelectorAll('.capa-vue').forEach(b =>
@@ -7088,7 +7093,7 @@ function _capaPlanifierAucun() {
 
 function _capaChoisir(vue, filtre) {
 	_capaAppliquer(vue, filtre);
-	_accLsSet(CAPA_VUE_CLE, vue + '|' + filtre);
+	_accLsSet(CAPA_VUE_CLE, vue + '|' + document.getElementById('sh-competences').dataset.filtre);
 	// Changer de vue ramène en tête : rester au milieu d'une liste qui n'est plus là
 	// ne montrerait qu'une portion arbitraire de la nouvelle.
 	const onglet = document.getElementById('sh-competences');
