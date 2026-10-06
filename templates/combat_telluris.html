@@ -1210,7 +1210,7 @@
 						{% set j_ko = ' dead' if (jp and jp.currentPV <= 0) else '' %}
 						{# Personne escortée qui SE DÉFEND (`se_defend`) : dans l'ordre, mais aux couleurs dorées d'une escortée — jamais prise pour un combattant jouable. Créature INVOQUÉE : même situation, aux couleurs violettes du sort qui l'a appelée. #}
 						{% set badge_role = 'invocation' if (jp and jp.est_invocation) else ('protege' if (jp and jp.est_protege) else 'joueur') %}
-						<div class="init-badge {{ badge_role }}{{ j_ko }} {{ active }}" id="badge-{{ actor_id }}"{% if jp and jp.est_protege %} title="{{ jp.nom }} — sous votre protection : se défend au contact, sans se déplacer."{% elif jp and jp.est_invocation %} title="{{ jp.nom }} — créature invoquée : elle joue seule, encore {{ jp.invocation_restants }} tour(s) avant de se dissiper."{% endif %}>
+						<div class="init-badge {{ badge_role }}{{ j_ko }} {{ active }}" id="badge-{{ actor_id }}"{% if jp and jp.est_protege %} title="{{ jp.nom }} — sous votre protection : se défend au contact, sans se déplacer."{% elif jp and jp.est_invocation %} title="{{ jp.nom }} — créature invoquée : elle joue seule, {% if jp.sort_maintenu %}et reste tant que {{ jp.invocateur_nom or 'son invocateur' }} entretient le sort.{% else %}encore {{ jp.invocation_restants }} tour(s) avant de se dissiper.{% endif %}"{% endif %}>
 							{% if portraits_joueurs.get(actor_id, {}).get('image') %}<div class="ib-img" id="badge-portrait-{{ actor_id }}"></div>{% else %}<div class="ib-letter">{{ jp.nom[0] | upper if jp and jp.nom else '?' }}</div>{% endif %}
 							<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">
 								<path class="vit-track" d="M21 38 A17 17 0 0 1 21 4"></path>
@@ -1805,8 +1805,13 @@ function _majBadgeVitaux(el, p) {
 // jamais en innerHTML.
 // Infobulle d'une invocation : même texte que le template, recalculé à chaque mise à
 // jour du bandeau — `invocation_restants` décroît à chaque tour.
+// ⚠️ Tenue par un sort MAINTENU (`sort_maintenu`) : plus de compte à rebours — le serveur ne
+// décompte plus ses tours (cf. combat, tour d'invocation), c'est l'entretien qui la garde là.
 function _titreInvocation(p) {
-	return `${p.nom || ''} — créature invoquée : elle joue seule, encore ${p.invocation_restants || 1} tour(s) avant de se dissiper.`;
+	const duree = p.sort_maintenu
+		? `et reste tant que ${p.invocateur_nom || 'son invocateur'} entretient le sort.`
+		: `encore ${p.invocation_restants || 1} tour(s) avant de se dissiper.`;
+	return `${p.nom || ''} — créature invoquée : elle joue seule, ${duree}`;
 }
 function _creerBadgeInvocation(p) {
 	const el = document.createElement('div');
