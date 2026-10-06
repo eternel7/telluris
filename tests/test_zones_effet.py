@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from utils.zones_effet import (  # noqa: E402
 	ANGLE_DEFAUT, RAYON_MAX, ancre_de, axe_de, axe_facing, cases_effet, cases_zone,
-	est_orientee, normaliser_zone,
+	est_orientee, normaliser_zone, placement_visuel,
 )
 
 
@@ -243,3 +243,28 @@ def test_cases_effet_ne_contourne_pas_un_angle():
 def test_cases_effet_l_ancre_survit_meme_sans_ligne_de_vue():
 	z = normaliser_zone({"forme": "cercle", "rayon": 0})
 	assert cases_effet(z, (0, 0), (6, 4), praticable=_praticable, vue=_vue) == [(6, 4)]
+
+
+# ── Placement de l'animation de zone ─────────────────────────────────────────────
+
+def test_placement_d_un_cone_au_barycentre_devant_le_lanceur():
+	"""Cône de 3 anneaux vers l'est depuis (5,5) : 1 + 3 + 5 cases (x = 6, 7, 8), centré sur
+	l'axe — le sprite se pose DEVANT le lanceur, pas sur lui ni sur la cible."""
+	zone = normaliser_zone({"forme": "cone", "origine": "lanceur", "longueur": 3,
+							"decalage": 1})
+	cases = cases_zone(zone, (5, 5), (8, 5))
+	place = placement_visuel(zone, (5, 5), (8, 5))
+	assert place["axe"] == [1, 0]
+	assert place["centre"][1] == 5.0
+	attendu = round(sum(c[0] for c in cases) / len(cases), 3)
+	assert place["centre"][0] == attendu
+	assert 5 < attendu < 8
+
+
+def test_placement_d_un_cercle_sur_son_ancre_avec_l_axe_vers_la_cible():
+	zone = normaliser_zone({"forme": "cercle", "rayon": 2})
+	assert placement_visuel(zone, (1, 1), (6, 1)) == {"centre": [6.0, 1.0], "axe": [1, 0]}
+
+
+def test_placement_sans_zone_rend_none():
+	assert placement_visuel(None, (1, 1), (6, 1)) is None

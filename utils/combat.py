@@ -25,7 +25,7 @@ from utils.sorts import (
 	est_incantation_longue, est_maintenu, pm_par_pa, seuil_concentration,
 	sorts_eligibles_espece, resoudre_effets, portee_effective,
 )
-from utils.zones_effet import cases_effet
+from utils.zones_effet import cases_effet, placement_visuel
 from utils.quetes import maj_progress_kills, maj_progress_chasse
 # `utils/zones.py` est une FEUILLE (math/random seulement) : aucun cycle possible.
 from utils.zones import profils_compatibles
@@ -347,6 +347,33 @@ def _avec_vfx(entree: dict, canal: str, cible_id: str, source_anim=None, acteur_
 	if charge:
 		entree["vfx"] = charge
 	return entree
+
+
+def _vfx_de_zone(joueur: dict, monstre: dict, source: dict) -> dict | None:
+	"""Charge de l'animation de ZONE d'une capacité offensive, ou None.
+
+	Jouée UNE fois au lancement (souffle qui part du lanceur, explosion au point d'impact),
+	avant les impacts posés sur chaque victime par `_resoudre_coup_capacite`. Il faut donc
+	une POSITION que n'a aucun acteur : `centre` (cases monde, flottantes) et `axe` viennent
+	de `zones_effet.placement_visuel`, sur la MÊME ancre que `_cases_zone_offensive` (case de
+	l'emprise de la cible la plus proche du lanceur).
+
+	⚠️ Aucun défaut de canal : sans `animation_zone` sur le doc, rien — comportement d'avant.
+	`acteur` et `cible` restent portés, pour un éventuel vol depuis le lanceur."""
+	anim = str((source or {}).get("animation_zone") or "").strip()
+	zone = (source or {}).get("zone")
+	if not anim or not zone or not joueur.get("pos") or not monstre.get("pos"):
+		return None
+	jx, jy = joueur["pos"]["x"], joueur["pos"]["y"]
+	place = placement_visuel(zone, (jx, jy), jetons.case_proche(monstre, jx, jy),
+							 joueur.get("facing", 0))
+	if not place:
+		return None
+	charge = animations_util.vfx("zone", monstre.get("id", ""), anim, joueur.get("id", ""))
+	if not charge:
+		return None
+	charge.update(place)
+	return charge
 
 
 # Champs d'un snapshot que le CLIENT PEINT, et qui doivent donc attendre la ligne de
@@ -5349,10 +5376,17 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		# donc exactement le comportement d'avant.
 		cibles_sort = cibles_de_zone(combat_doc, joueur, monstre, sdoc.get("zone"), grid)
 		notation = _notation_capacite(joueur, sdoc, effets, profil)
+		premiere_ligne = len(combat_doc.setdefault("log", []))
 		result, jet = _resoudre_capacite_offensive(
 			combat_doc, joueur, cibles_sort, sdoc, effets, notation,
 			mode_jet, cle, profil["textes"],
 			{"nom": nom_capacite, "nom_fumble": nom_capacite})
+		# ANIMATION DE ZONE : portée par la PREMIÈRE ligne du lancement (celle de la cible
+		# désignée, touchée ou non) sous `vfx_zone`, que le client joue AVANT son `vfx`.
+		# Pas de ligne à elle : le journal n'a rien à dire de plus qu'« il lance ».
+		vfx_zone = _vfx_de_zone(joueur, monstre, sdoc)
+		if vfx_zone and len(combat_doc["log"]) > premiere_ligne:
+			combat_doc["log"][premiere_ligne]["vfx_zone"] = vfx_zone
 		result[cle] = nom_capacite
 		# ZONE PERSISTANTE (Mur de feu) : posée plus bas, une fois la concentration inscrite.
 		zone_persistante = (monstre, notation, mode_jet)

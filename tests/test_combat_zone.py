@@ -189,6 +189,59 @@ def test_souffle_de_feu_s_elargit_avec_la_distance():
 	assert dos["currentPV"] == dos["pv_max"]    # dans le dos du souffleur
 
 
+# ── Animation de ZONE (jouée une fois au lancement) ─────────────────────────────
+
+def _cone_nord(**extra):
+	return _sort_zone({"forme": "cone", "origine": "lanceur", "longueur": 3, "decalage": 1},
+					  **extra)
+
+
+def test_animation_de_zone_portee_une_seule_fois_par_la_premiere_ligne():
+	m0, m1 = _monstre(0, 3, 4), _monstre(1, 1, 2)
+	j = _joueur()
+	doc = _combat(j, [m0, m1])
+	resolve_action(doc, "sort", m0["id"], sort=_cone_nord(
+		animation="animation:impact", animation_zone="animation:souffle"))
+	portees = [e for e in doc["log"] if "vfx_zone" in e]
+	assert len(portees) == 1
+	assert portees[0] is doc["log"][0]                  # celle de la cible désignée
+	vz = portees[0]["vfx_zone"]
+	assert vz["anim"] == "animation:souffle"
+	assert vz["acteur"] == j["id"] and vz["cible"] == m0["id"]
+	assert vz["axe"] == [0, -1]                         # le cône part vers le nord
+	assert vz["centre"][0] == 3.0 and 2 < vz["centre"][1] < 5   # devant le lanceur
+	# Les impacts gardent l'animation propre, sur chaque victime.
+	impacts = [e["vfx"] for e in doc["log"] if e.get("vfx", {}).get("anim") == "animation:impact"]
+	assert {v["cible"] for v in impacts} == {m0["id"], m1["id"]}
+
+
+def test_animation_de_zone_meme_quand_la_cible_designee_est_ratee(monkeypatch):
+	m0 = _monstre(0, 3, 4)
+	j = _joueur()
+	monkeypatch.setattr(combat_mod, "_resoudre_jet", lambda *a, **k: {
+		"touche": False, "fumble": False, "critique": False, "roll": 99, "mult_degats": 1})
+	doc = _combat(j, [m0])
+	resolve_action(doc, "sort", m0["id"], sort=_cone_nord(animation_zone="animation:souffle"))
+	assert doc["log"][0]["kind"] in ("miss", "fumble")
+	assert doc["log"][0]["vfx_zone"]["anim"] == "animation:souffle"
+
+
+def test_sans_animation_de_zone_aucune_cle_meme_avec_des_defauts(monkeypatch):
+	monkeypatch.setattr(combat_mod.character_stats, "COMBAT_ANIMATIONS_DEFAUT",
+						{"sort": "animation:defaut", "zone": "animation:defaut"})
+	m0 = _monstre(0, 3, 4)
+	doc = _combat(_joueur(), [m0])
+	resolve_action(doc, "sort", m0["id"], sort=_cone_nord())
+	assert all("vfx_zone" not in e for e in doc["log"])
+
+
+def test_animation_de_zone_ignoree_sans_zone():
+	m0 = _monstre(0, 3, 4)
+	doc = _combat(_joueur(), [m0])
+	resolve_action(doc, "sort", m0["id"], sort=_sort_zone(animation_zone="animation:souffle"))
+	assert all("vfx_zone" not in e for e in doc["log"])
+
+
 # ── Ce que la zone ne change pas ─────────────────────────────────────────────────
 
 def test_un_seul_debit_de_pm_et_une_seule_action_pour_toute_la_zone():

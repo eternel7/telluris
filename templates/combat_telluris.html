@@ -2753,13 +2753,17 @@ function jouerVfx(v) {
 	}
 	// Animation SON SEUL : rien à peindre, mais le tempo reste celui du document.
 	if (!anim.fichier) return Promise.resolve(dureeVue);
+	// Animation de ZONE (`vfx_zone`) : l'arrivée n'est AUCUN acteur mais le `centre` de la
+	// forme (cases monde) calculé par le serveur — l'`ancrage` du doc n'y a pas de sens.
+	const centreZone = (Array.isArray(v.centre) && v.centre.length === 2
+		&& v.centre.every(Number.isFinite)) ? v.centre : null;
 	// `ancrage` décide de QUI porte le sprite à l'ARRIVÉE : la cible du coup (défaut) ou
 	// celui qui agit — l'entrée porte les deux ids quand ils diffèrent.
-	const ancre = (anim.ancrage === 'acteur' && v.acteur) ? v.acteur : v.cible;
-	const sujet = _acteurVfx(ancre);
+	const ancre = centreZone ? '' : ((anim.ancrage === 'acteur' && v.acteur) ? v.acteur : v.cible);
+	const sujet = centreZone ? null : _acteurVfx(ancre);
 	// Cible disparue (monture retirée, snapshot inconnu) : on ne pose pas un sprite au
 	// hasard sur la carte — le son, lui, a déjà été joué.
-	if (!sujet || !sujet.pos) return Promise.resolve(dureeVue);
+	if (!centreZone && (!sujet || !sujet.pos)) return Promise.resolve(dureeVue);
 
 	// Point de DÉPART, s'il y en a un. ⚠️ Repli FAIL-SOFT sur « posé », jamais sur « rien » :
 	// départ non demandé, id absent (les canaux buff/debuff/dissipation/consommable n'ont
@@ -2768,7 +2772,9 @@ function jouerVfx(v) {
 	const idDepart = !anim.depart_ancrage ? ''
 		: (anim.depart_ancrage === 'acteur' ? (v.acteur || '') : (v.cible || ''));
 	const source = (idDepart && idDepart !== ancre) ? _acteurVfx(idDepart) : null;
-	const trajet = !!(source && source.pos);
+	// Zone : le départ est confondu avec l'arrivée quand la forme est centrée sur lui.
+	const trajet = !!(source && source.pos) && !(centreZone
+		&& centreActeur(source).every((c, i) => c === centreZone[i]));
 
 	const layer = document.getElementById('tokens-layer');
 	if (!layer) return Promise.resolve(0);
@@ -2792,10 +2798,15 @@ function jouerVfx(v) {
 	// même formule sert les deux cas, et `t` n'a plus aucun effet.
 	const j = me();
 	const dx = parseFloat(anim.decalage_x) || 0;
-	const dy = parseFloat(anim.decalage_y) || 0;
+	// Un sprite d'impact est posé par son BORD BAS sur la case (il « monte » du jeton) ; le
+	// décalage de base le recentre pour une case de haut. Une animation de ZONE doit, elle,
+	// avoir son MILIEU au centre de la forme (sinon la rotation la décentre) : on retire la
+	// part de hauteur qui dépasse une case. Nul pour un sprite d'une case de haut.
+	const recentrage = centreZone ? -((h / step) - 1) / 2 : 0;
+	const dy = (parseFloat(anim.decalage_y) || 0) + recentrage;
 	// CENTRES d'emprise, pas `pos` : sur un dragon 3x2, `pos` est un coin — le sprite s'y
 	// poserait à côté de la bête (scripts/jetons.js ; un 1x1 rend exactement `pos`).
-	const cSujet = centreActeur(sujet);
+	const cSujet = centreZone || centreActeur(sujet);
 	const cDepart = trajet ? centreActeur(source) : cSujet;
 	const ctx = {
 		ax: cDepart[0] - j.pos.x,
@@ -2817,6 +2828,13 @@ function jouerVfx(v) {
 	if (trajet) {
 		ctx.dirx = ctx.bx - ctx.ax;
 		ctx.diry = ctx.by - ctx.ay;
+	} else if (centreZone) {
+		// Zone posée sur place : l'axe de la FORME (celui du cône), pas lanceur → centre,
+		// qui s'annule sur une forme centrée sur le lanceur (tourbillon).
+		if (Array.isArray(v.axe) && v.axe.length === 2) {
+			ctx.dirx = parseFloat(v.axe[0]) || 0;
+			ctx.diry = parseFloat(v.axe[1]) || 0;
+		}
 	} else if (ctx.auto && v.acteur && v.acteur !== ancre) {
 		const autre = _acteurVfx(v.acteur);
 		if (autre && autre.pos) {
@@ -2948,7 +2966,10 @@ async function revealNext() {
 	let duree = 0;
 	try {
 		// 1. le coup se VOIT — 2. puis se lit — 3. puis se paie (jeton, PV, PM).
-		duree = entry.vfx ? await jouerVfx(entry.vfx) : 0;
+		// Animation de ZONE d'abord (une fois par lancement, au centre de la forme), puis
+		// l'impact propre à la ligne. Le rythme de la ligne compte les deux.
+		const dureeZone = entry.vfx_zone ? await jouerVfx(entry.vfx_zone) : 0;
+		duree = dureeZone + (entry.vfx ? await jouerVfx(entry.vfx) : 0);
 		_ecrireLigne(entry);
 		_appliquerEtat(entry.etat);
 	} catch (e) {

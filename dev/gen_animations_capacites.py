@@ -9,6 +9,9 @@
 #      son de `templates/resources/sounds`, plus quelques retouches (`retouches`) : trajectoire
 #      d'un projectile, orientation sur l'axe lanceur → cible, échelle d'une zone.
 #   2. AFFECTATION — `animation: "animation:capa_<thème>"` posé sur chaque capacité de la table.
+#      Un CÔNE reçoit DEUX thèmes : `(impact, zone)`. `animation_zone` se joue UNE fois au
+#      lancement, au centre du cône et dans son axe (utils/combat._vfx_de_zone) ; `animation`
+#      n'est plus qu'un impact MUET sur chaque victime — le son appartient à la nappe.
 #
 # ⚠️ LA TABLE EST EXHAUSTIVE : chaque sort et chaque compétence `active` du dump SANS
 # `animation` doit y figurer. Le script ÉCHOUE sur une capacité non classée, ou sur une entrée
@@ -58,9 +61,12 @@ SON_POUVOIR_SOMBRE = "power_up_sound_v3.ogg"
 
 # Orienté sur l'axe lanceur → cible, sans trajectoire (cône, éclair, jet).
 ORIENTE = {"rotation_auto": True}
+# Les feuilles d'ONDE (`shockwave_*`) sont dessinées pointe en HAUT À DROITE (−45°) : 45°
+# ramènent le dessin à la convention du moteur (0° = vers la droite) avant l'orientation.
+ONDE = {"rotation_auto": True, "rotation": 45}
 
 # thème → (nom, feuille de base, son, son_fin_ms, volume, retouches)
-# `son_fin_ms = 0` = jusqu'au bout du fichier.
+# `son_fin_ms = 0` = jusqu'au bout du fichier ; `son = None` = impact MUET (victime d'un cône).
 THEMES = {
 	# ── Armes et corps ───────────────────────────────────────────────────────────
 	"lame": ("Lame : estafilade et éclat", "animation:256_b", SON_LAME, 0, 0.9, {}),
@@ -73,15 +79,25 @@ THEMES = {
 	"poudre": ("Poudre jetée au visage", "animation:smoke15frames_a", SON_SOUFFLE_COURT, 0, 1.0, {}),
 	"garde": ("Garde fermée : cercle d'acier", "animation:circle02_a", SON_LAME, 0, 0.7, {}),
 	"lame_sacree": ("Lame sacrée : éclat doré", "animation:hit_yellow_a", SON_LAME, 0, 1.0, {}),
-	"tueur_demon": ("Tueur de démon : vague tranchante", "animation:shockwave_magic_a",
-					SON_LAME, 0, 1.0, ORIENTE),
+	# ── Cônes : nappe jouée une fois (animation_zone) + impact muet par victime ──
+	"cone_tueur_demon": ("Cône : vague tranchante sacrée", "animation:shockwave_magic_a",
+						 SON_LAME, 0, 1.0, {**ONDE, "echelle": 2.5}),
+	"cone_souffle_feu": ("Cône : nappe de feu soufflée", "animation:shockwave_fire_a", SON_FEU, 0,
+						 0.9, {**ONDE, "echelle": 3.0}),
+	"cone_decharge": ("Cône : décharge en éventail", "animation:shock_a", SON_MAGIE, 0, 0.9,
+					  {**ORIENTE, "echelle": 3.0}),
+	"cone_griffe": ("Cône : griffe qui passe la main", "animation:hit11_a", SON_BETE, 0, 1.0,
+					{**ORIENTE, "echelle": 2.5}),
+	"impact_brulure": ("Impact muet : brûlure", "animation:flat_effect_fire_a", None, 0, 1.0, {}),
+	"impact_etincelles": ("Impact muet : étincelles", "animation:sparks_effect_a", None, 0, 1.0, {}),
+	"impact_eclat_dore": ("Impact muet : éclat doré", "animation:hit_yellow_a", None, 0, 1.0, {}),
+	"impact_plaie": ("Impact muet : plaie", "animation:blood_hit_01_a", None, 0, 1.0, {}),
 	# ── Éléments ─────────────────────────────────────────────────────────────────
 	"feu": ("Feu : brasier qui éclate", "animation:explosion25_a", SON_FEU, 0, 0.9, {}),
 	"explosion_feu": ("Feu : explosion de zone", "animation:boom3_a", SON_FEU, 0, 1.0, {}),
 	"meteore": ("Feu : impact du ciel", "animation:exp2_0_a", SON_FEU, 0, 1.0, {"echelle": 2.2}),
-	"souffle_feu": ("Feu : nappe soufflée", "animation:shockwave_fire_a", SON_FEU, 0, 0.9, ORIENTE),
 	"soufre": ("Soufre : haleine d'en bas", "animation:shockwave_fire_smoke_a", SON_FEU, 0, 0.8,
-			   ORIENTE),
+			   ONDE),
 	# La comète est dessinée tête À GAUCHE : 180° la fait voler tête en avant.
 	"projectile_infernal": ("Feu infernal : comète lancée",
 							"animation:spritesheet_512px_by_197px_per_frame_red_a", SON_FEU, 0, 0.9,
@@ -91,7 +107,7 @@ THEMES = {
 	"givre": ("Givre : cristaux qui saisissent", "animation:19_freezing_spritesheet_a", SON_MAGIE, 0,
 			  0.8, {}),
 	"eau": ("Eau : jet sous pression", "animation:preset_shockwave_blueish_a", SON_SOUFFLE, 0, 1.0,
-			ORIENTE),
+			ONDE),
 	"vent": ("Vent : lame d'air", "animation:14_phantom_spritesheet_a", SON_SIFFLEMENT, 0, 1.0, {}),
 	"roc": ("Roc : éclats de pierre", "animation:shards01_a", SON_CHOC, 0, 1.0, {}),
 	"foudre": ("Foudre : arc électrique", "animation:shock_a", SON_MAGIE, 0, 0.9, ORIENTE),
@@ -174,7 +190,7 @@ _INVOC_SAINTE = ("descente_du_seraphin", "destrier_celeste", "gardien_du_temple"
 				 "messager_aile", "sentence_de_justice", "sentinelle_du_parvis", "temoin_celeste",
 				 "verite_gravee")
 
-# _id de capacité → thème.
+# _id de capacité → thème, ou `(thème d'impact, thème de zone)` pour un cône.
 AFFECTATION = {
 	# ── Compétences actives, par vocation ────────────────────────────────────────
 	"competence:execution": "saignee",
@@ -190,7 +206,7 @@ AFFECTATION = {
 	"competence:esprit_protecteur": "soin_nature",
 	"competence:forme_esprit_totem": "totem",
 	"competence:homme_bete": "totem",
-	"competence:griffe_du_familier": "griffe",
+	"competence:griffe_du_familier": ("impact_plaie", "cone_griffe"),
 	"competence:invocation_majeure": "portail_infernal",
 	"competence:pacte_de_sang": "rage",
 	"competence:homme_tempete": "foudre",
@@ -201,7 +217,7 @@ AFFECTATION = {
 	"competence:fente": "lame",
 	"competence:parade_de_maitre": "garde",
 	"competence:courroux_des_elements": "meteore",
-	"competence:decharge_primordiale": "foudre",
+	"competence:decharge_primordiale": ("impact_etincelles", "cone_decharge"),
 	"competence:manteau_elementaire": "manteau_feu",
 	"competence:baume_de_campagne": "soin_nature",
 	"competence:fleche_de_franc_archer": "tir",
@@ -245,7 +261,7 @@ AFFECTATION = {
 	"competence:oracle": "aura_sacree",
 	"competence:fer_de_l_inquisiteur": "lame_sacree",
 	"competence:marque_du_traqueur": "marque",
-	"competence:tueur_de_demon": "tueur_demon",
+	"competence:tueur_de_demon": ("impact_eclat_dore", "cone_tueur_demon"),
 	"competence:arme_de_justice": "aura_sacree",
 	"competence:bras_divin": "lame_sacree",
 	"competence:litanie_protectrice": "bouclier",
@@ -326,7 +342,7 @@ AFFECTATION = {
 	"sort:jet_d_eau": "eau",
 	"sort:lame_de_vent": "vent",
 	"sort:meteore": "meteore",
-	"sort:souffle_de_feu": "souffle_feu",
+	"sort:souffle_de_feu": ("impact_brulure", "cone_souffle_feu"),
 }
 
 
@@ -351,16 +367,33 @@ def _est_cible(doc: dict) -> bool:
 	return doc.get("type") == "competence" and doc.get("mode") == "active"
 
 
-def _avec_animation(doc: dict, anim_id: str) -> dict:
-	"""Copie du doc avec `animation` juste après `icon` (ou en fin de doc sans icône)."""
+def _champs_de(affectation) -> dict:
+	"""Champs à poser pour une entrée d'AFFECTATION : thème seul, ou (impact, zone)."""
+	if isinstance(affectation, tuple):
+		impact, zone = affectation
+		return {"animation": PREFIXE + impact, "animation_zone": PREFIXE + zone}
+	return {"animation": PREFIXE + affectation}
+
+
+def _themes_de(affectation) -> tuple:
+	return affectation if isinstance(affectation, tuple) else (affectation,)
+
+
+def _est_cone(doc: dict) -> bool:
+	return isinstance(doc.get("zone"), dict) and doc["zone"].get("forme") == "cone"
+
+
+def _avec_champs(doc: dict, champs: dict) -> dict:
+	"""Copie du doc avec `champs` juste après `icon` (ou en fin de doc sans icône)."""
 	out = {}
 	for cle, valeur in doc.items():
-		if cle == "animation":
+		if cle in champs:
 			continue
 		out[cle] = valeur
 		if cle == "icon":
-			out["animation"] = anim_id
-	out.setdefault("animation", anim_id)
+			out.update(champs)
+	for cle, valeur in champs.items():
+		out.setdefault(cle, valeur)
 	return out
 
 
@@ -371,9 +404,10 @@ def _doc_theme(theme: str, base: dict) -> dict:
 		"_id": PREFIXE + theme,
 		"type": "animation",
 		"nom": f"{nom} (capacités)",
-		"son": son,
+		# Muet : `son` vide (la feuille de base peut en porter un, il ne doit pas fuiter).
+		"son": son or "",
 		"son_debut_ms": 0,
-		"son_fin_ms": son_fin,
+		"son_fin_ms": son_fin if son else 0,
 		"son_volume": volume,
 		"actif": True,
 	})
@@ -384,14 +418,15 @@ def _doc_theme(theme: str, base: dict) -> dict:
 def main() -> None:
 	erreurs = []
 	for theme, (_nom, _base, son, _fin, volume, _r) in THEMES.items():
-		if not os.path.isfile(os.path.join(SONS, son)):
+		if son and not os.path.isfile(os.path.join(SONS, son)):
 			erreurs.append(f"thème {theme} : son introuvable {son}")
 		if not 0 <= volume <= 1:
 			erreurs.append(f"thème {theme} : volume hors [0,1]")
-	inconnus = sorted({t for t in AFFECTATION.values() if t not in THEMES})
+	affectes = {t for a in AFFECTATION.values() for t in _themes_de(a)}
+	inconnus = sorted(affectes - set(THEMES))
 	if inconnus:
 		erreurs.append("thèmes inconnus dans AFFECTATION : " + ", ".join(inconnus))
-	orphelins = sorted(set(THEMES) - set(AFFECTATION.values()))
+	orphelins = sorted(set(THEMES) - affectes)
 	if orphelins:
 		erreurs.append("thèmes jamais affectés : " + ", ".join(orphelins))
 
@@ -407,15 +442,27 @@ def main() -> None:
 			erreurs.append(f"thème {theme} : feuille de base inactive ou sans image ({base_id})")
 
 	capacites = {i: d for i, d in par_id.items() if _est_cible(d)}
-	a_classer = sorted(i for i, d in capacites.items() if not d.get("animation"))
+	a_classer = sorted(i for i, d in capacites.items()
+					   if not d.get("animation") or (_est_cone(d) and not d.get("animation_zone")))
 	manquantes = [i for i in a_classer if i not in AFFECTATION]
 	fantomes = sorted(i for i in AFFECTATION if i not in capacites)
+	# Un cône doit avoir SA nappe : sans elle, chaque victime rejoue tout le souffle.
+	cones_sans_zone = sorted(i for i in AFFECTATION if i in capacites
+							 and _est_cone(capacites[i]) and not isinstance(AFFECTATION[i], tuple))
+	zones_sans_cone = sorted(i for i in AFFECTATION if i in capacites
+							 and isinstance(AFFECTATION[i], tuple) and not _est_cone(capacites[i]))
 	if manquantes:
 		erreurs.append("capacités SANS animation absentes de la table (à classer) :\n   "
 					   + ", ".join(manquantes))
 	if fantomes:
 		erreurs.append("capacités de la table absentes du dump (ou passives) :\n   "
 					   + ", ".join(fantomes))
+	if cones_sans_zone:
+		erreurs.append("cônes sans thème de zone (écrire (impact, zone)) : "
+					   + ", ".join(cones_sans_zone))
+	if zones_sans_cone:
+		erreurs.append("(impact, zone) sur une capacité qui n'est pas un cône : "
+					   + ", ".join(zones_sans_cone))
 	if erreurs:
 		print("\n".join("ERREUR : " + e for e in erreurs))
 		sys.exit(1)
@@ -431,26 +478,30 @@ def main() -> None:
 	deja = 0
 	for cap_id in sorted(AFFECTATION):
 		doc = capacites[cap_id]
-		if doc.get("animation"):
+		# Un champ déjà renseigné en base l'emporte, champ par champ.
+		champs = {k: v for k, v in _champs_de(AFFECTATION[cap_id]).items() if not doc.get(k)}
+		if not champs:
 			deja += 1
 			continue
-		theme = AFFECTATION[cap_id]
-		sortie.append(_avec_animation(doc, PREFIXE + theme))
-		compte[theme] = compte.get(theme, 0) + 1
+		sortie.append(_avec_champs(doc, champs))
+		for anim_id in champs.values():
+			theme = anim_id[len(PREFIXE):]
+			compte[theme] = compte.get(theme, 0) + 1
 
 	chemin = os.path.join(RACINE, SORTIE)
 	with open(chemin, "w", encoding="utf-8") as f:
 		json.dump(sortie, f, ensure_ascii=False, indent=2)
 		f.write("\n")
+	liees = len(sortie) - len(themes_emis)
 	print(f"relu {os.path.relpath(source, RACINE)} ({len(capacites)} sorts + compétences actives)")
-	print(f"écrit {SORTIE} : {len(themes_emis)} thème(s) d'animation, "
-		  f"{sum(compte.values())} capacité(s) liée(s)")
+	print(f"écrit {SORTIE} : {len(themes_emis)} thème(s) d'animation, {liees} capacité(s) liée(s)")
 	if themes_existants:
 		print(f"   {len(themes_existants)} thème(s) déjà en base, non réécrit(s)")
 	if deja:
 		print(f"   {deja} capacité(s) de la table déjà animée(s) en base, laissée(s) telle(s)")
 	for theme in sorted(compte, key=lambda t: (-compte[t], t)):
-		print(f"   {theme:20s} {compte[theme]:3d}  ← {THEMES[theme][1]} + {THEMES[theme][2]}")
+		son = THEMES[theme][2] or "(muet)"
+		print(f"   {theme:20s} {compte[theme]:3d}  ← {THEMES[theme][1]} + {son}")
 
 
 if __name__ == "__main__":
