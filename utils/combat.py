@@ -23,7 +23,7 @@ from utils.sorts import (
 	part_durative, effets_d_arme, concat_degats, INCANTATION_PA_MAX,
 	capacite_utilisable_combat, effets_agissent_sur_cible,
 	est_incantation_longue, est_maintenu, pm_par_pa, seuil_concentration,
-	sorts_eligibles_espece,
+	sorts_eligibles_espece, resoudre_effets, portee_effective,
 )
 from utils.zones_effet import cases_effet
 from utils.quetes import maj_progress_kills, maj_progress_chasse
@@ -185,6 +185,20 @@ def _buffs_des_effets(acteur: dict) -> dict:
 	return cumul_effets(acteur.get("effets_actifs") or [])["buffs"]
 
 
+def caracts_effectives(acteur: dict) -> dict:
+	"""Caractéristiques EFFECTIVES d'un snapshot : `caracts_base` + Σ buffs de ses effets
+	vivants (non cumulatifs), clampées ≥ 0. SOURCE UNIQUE — `_refresh_snapshot_stats` en
+	tire les dérivées, les formules à caractéristiques (`sorts.resoudre_effets`) y lisent
+	le lanceur. Snapshot d'avant la feature (sans `caracts_base`) ⇒ {}."""
+	stats = dict(acteur.get("caracts_base") or {})
+	if not stats:
+		return {}
+	for code, delta in _buffs_des_effets(acteur).items():
+		if code in stats:
+			stats[code] = max(0, int(stats[code] or 0) + delta)
+	return stats
+
+
 def _refresh_snapshot_stats(acteur: dict) -> None:
 	"""Recompose les dérivées d'un snapshot depuis `caracts_base` + Σ buffs de ses effets
 	vivants. Chokepoint unique : tout ce qui ajoute ou retire un effet en combat finit ici.
@@ -196,13 +210,9 @@ def _refresh_snapshot_stats(acteur: dict) -> None:
 	  • `charge_max` — même exclusion anti-exploit qu'en exploration (charge_max_of ignore
 		les buffs) : un buff de F qui expire rendrait rétroactivement surchargé.
 	"""
-	base_caracts = acteur.get("caracts_base")
-	if not base_caracts:
+	stats = caracts_effectives(acteur)
+	if not stats:
 		return  # snapshot d'avant la feature : rien à recalculer
-	stats = dict(base_caracts)
-	for code, delta in _buffs_des_effets(acteur).items():
-		if code in stats:
-			stats[code] = max(0, int(stats[code] or 0) + delta)
 	# Volant SOUS COUVERT (`_appliquer_couvert`) : V // 3, après les buffs — c'est la vitesse
 	# effective qui est entravée, et l'entrave survit à l'expiration d'un buff.
 	if acteur.get("sous_couvert"):
@@ -618,7 +628,8 @@ def _portee_capacite(joueur: dict, doc: dict, profil: dict) -> tuple:
 	en dérive `ranged` ; un sort est « à distance » dès que sa portée dépasse 1."""
 	if profil["cle"] == "competence":
 		return _portee_competence(joueur, doc)
-	portee = max(1, int((doc or {}).get("portee", 1) or 1))
+	# Portée à FORMULE (`"3+{Int/20}"`) résolue sur les caracts effectives du lanceur.
+	portee = max(1, int(portee_effective(doc, caracts_effectives(joueur)) or 1))
 	return portee, portee > 1
 
 
@@ -703,6 +714,37 @@ def beneficiaires_de_zone(combat_doc: dict, lanceur: dict, principal: dict, zone
 			  if p is not principal and p.get("pos") and p.get("currentPV", 0) > 0
 			  and any(c in cases for c in jetons.cases_emprise(p))]
 	return [principal] + autres
+
+
+def _partager_soin(combat_doc: dict, lanceur: dict, source: dict, effets: dict,
+				   resultats: list) -> int:
+	"""PARTAGE DE SOIN (`effets.partage_soin`, %) : le lanceur recueille une part des PV
+	RÉELLEMENT rendus aux AUTRES bénéficiaires de ce lancement. Rend les PV reçus.
+
+	Calqué sur le drain : assiette = PV effectivement rendus (un allié déjà plein ne
+	rapporte rien), UNE fois par lancement sur la SOMME (jamais par bénéficiaire), crédit
+	borné à `pv_max`. ⚠️ Le lanceur est exclu de l'assiette : dans sa propre zone il est
+	déjà soigné, il ne se partage pas son soin à lui-même. ⚠️ Ligne de journal SÉPARÉE et
+	nommant le lanceur (`currentPV` est dans `CHAMPS_ETAT`), à poser APRÈS le débit des PM.
+	La régénération à durée n'est pas « rendue » au lancement : hors assiette."""
+	pct = int(effets.get("partage_soin", 0) or 0)
+	if pct <= 0:
+		return 0
+	lanceur_id = lanceur.get("id")
+	somme = sum(int(r.get("pv_rendu", 0) or 0) for r in resultats or []
+				if r and r.get("cible_id") != lanceur_id)
+	avant = int(lanceur.get("currentPV", 0) or 0)
+	lanceur["currentPV"] = min(int(lanceur.get("pv_max", avant) or avant), avant + somme * pct // 100)
+	recu = lanceur["currentPV"] - avant
+	if recu > 0:
+		combat_doc.setdefault("log", []).append(_avec_etat({
+			"tour": combat_doc["tour"],
+			"acteur": lanceur["nom"],
+			"kind": "sys",
+			"texte": f"{lanceur['nom']} recueille {recu} PV du soin partagé "
+					 f"({(source or {}).get('nom', 'le sort')}).",
+		}, lanceur))
+	return recu
 
 
 def _servir_zone_soutien(combat_doc: dict, lanceur: dict, principal: dict, source: dict,
@@ -3737,7 +3779,7 @@ def _portee_competence(joueur: dict, competence: dict) -> tuple:
 	distance : aucune migration.
 	"""
 	comp = competence or {}
-	portee = max(1, int(comp.get("portee", 1) or 1))
+	portee = max(1, int(portee_effective(comp, caracts_effectives(joueur)) or 1))
 	profil = _profil_emprunte(joueur, comp)
 	allonge = max(1, int(profil.get("portee", 1) or 1)) if profil else 1
 	portee = max(portee, allonge)
@@ -5254,6 +5296,10 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 									  sdoc.get("zone"), grid)
 		if autres:
 			result["beneficiaires"] = autres
+		# PARTAGE DE SOIN : le désigné ET la zone, le lanceur exclu de l'assiette.
+		partage = _partager_soin(combat_doc, joueur, sdoc, effets, [res_allie] + autres)
+		if partage:
+			result["partage_soin"] = partage
 		# LIEN DE VIE : le sort ne pose rien sur le désigné, il TISSE entre lui et le
 		# lanceur. Posé après le soutien, pour que la zone serve d'abord normalement.
 		_poser_lien_vie(combat_doc, joueur, allie, sdoc, effets)
@@ -5327,12 +5373,15 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 			f"+{pm_rendu} PM" if pm_rendu else "",
 			f"effet {effet_pose['restants']} tour(s)" if effet_pose else "",
 		) if s) or "aucun effet"
-		combat_doc["log"].append(_avec_etat({
+		# Animation de la capacité sur le LANCEUR, canal `buff` (déclaré dans
+		# COMBAT_ANIMATIONS_DEFAUT, vide par défaut) : sans animation propre ni défaut
+		# réglé en base, rien ne se joue — comportement d'avant.
+		combat_doc["log"].append(_avec_etat(_avec_vfx({
 			"tour": combat_doc["tour"],
 			"acteur": joueur["nom"],
 			"kind": "sys",
 			"texte": f"{joueur['nom']} {profil['verbe']} {nom_capacite} ({gains}).",
-		}, joueur))
+		}, "buff", joueur.get("id", ""), sdoc.get("animation")), joueur))
 		# Sort de dissimulation (effets.furtivite > 0) : pose l'état furtif et
 		# remet la détection de tous les monstres à zéro.
 		if int(effets.get("furtivite", 0) or 0) > 0:
@@ -5347,6 +5396,11 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 									  sdoc.get("zone"), grid)
 		if autres:
 			result["beneficiaires"] = autres
+		# PARTAGE DE SOIN : la part de ce que la zone a rendu aux AUTRES.
+		partage = _partager_soin(combat_doc, joueur, sdoc, effets, autres)
+		if partage:
+			result["partage_soin"] = partage
+			result["pv_rendu"] = joueur["currentPV"] - avant_pv
 		# SAUT sur soi : le cas courant de la téléportation tactique.
 		saut = _sauter(combat_doc, joueur, joueur, effets, dx, dy, grid)
 		if "error" in saut:
@@ -5815,7 +5869,10 @@ def _resoudre_action_joueur(
 		if not sort or not sort.get("doc"):
 			return {"error": "Sort invalide."}
 		sdoc = sort["doc"]
-		effets = sort.get("effets") or {}
+		# FORMULES À CARACTÉRISTIQUES résolues ICI, une fois : tout ce qui suit (coût en PV,
+		# incantation armée, application, zone persistante) lit des entiers. Une incantation
+		# longue fige donc sa puissance à l'ARMEMENT, comme son tarif.
+		effets = resoudre_effets(sort.get("effets") or {}, caracts_effectives(joueur))
 		cout_pm = _cout_pm_charge(joueur, sdoc)
 		# ⚠️ MÊME FONCTION que `sorts.sort_utilisable_combat`, celle qui a filtré ce sort
 		# côté router : les deux ne peuvent plus diverger. `effets` est passé à part —
@@ -5883,7 +5940,7 @@ def _resoudre_action_joueur(
 		# et se paie une seule fois, alors qu'une incantation longue traverse des tours.
 		if not competence:
 			return {"error": "Compétence invalide."}
-		effets = competence.get("effets") or {}
+		effets = resoudre_effets(competence.get("effets") or {}, caracts_effectives(joueur))
 		cout_pm = _cout_pm_charge(joueur, competence)
 		# ⚠️ MÊME FONCTION que `competences.competence_utilisable_combat`, celle qui a
 		# filtré cette compétence côté router : les deux ne peuvent plus diverger.

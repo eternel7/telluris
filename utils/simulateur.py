@@ -61,7 +61,9 @@ from utils.competences import (competence_utilisable_combat, condition_remplie,
 from utils.consommables import effet_instantane, est_consommable
 from utils.consommables import effets_de as effets_de_consommable
 from utils.slots_actions import slots_effectifs
-from utils.sorts import normaliser_sort, part_durative, sort_utilisable_combat
+from utils.sorts import (
+	normaliser_sort, part_durative, portee_effective, resoudre_effets, sort_utilisable_combat,
+)
 
 # ── Politique de duel (réglages du simulateur, PAS des world-vars : un banc d'essai
 # n'a pas à être réglable à chaud, il doit être lisible dans le code) ─────────────────
@@ -342,7 +344,16 @@ def _profil_borne(espece: dict, borne: str) -> dict:
 			"nom": borne, "niveau": 1, "attributs_modifier": mods}
 
 
-def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=(), objets: bool = True) -> dict:
+def _resoudre_capacite(capa: dict, caracts: dict) -> dict:
+	"""Capacité OFFENSIVE du banc d'essai, formules à caractéristiques résolues pour son
+	lanceur (`sorts.resoudre_effets`, `portee_effective`) — même chokepoint que le jeu,
+	sinon le simulateur mesurerait un autre sort que celui qu'on lance."""
+	return {**capa, "effets": resoudre_effets(capa["effets"], caracts),
+			"portee": max(1, int(portee_effective(capa, caracts) or 1))}
+
+
+def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=(), objets: bool = True,
+					  caracts: dict | None = None) -> dict:
 	"""Ce que le personnage ENGAGE dans le duel = sa barre d'action (slots_actions).
 	Sorts/compétences offensifs (`cible: ennemi`), soutiens (`soi`/`allie` — en duel,
 	l'allié c'est soi), consommables du sac (stock = nb d'exemplaires du TYPE). Les
@@ -370,22 +381,26 @@ def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=(), objets: bool = T
 				continue
 			eff = sort["effets"]
 			if sort["cible"] == "ennemi":
-				sorts_off.append(sort)
-			elif eff.get("pv") or eff.get("pm") or part_durative(eff):
+				sorts_off.append(_resoudre_capacite(sort, caracts or {}))
+			elif eff.get("pv") or eff.get("soin") or eff.get("pm") or part_durative(eff):
+				# Soutien : formules résolues À CHAQUE USAGE (`_utiliser_soutien`), pour
+				# que le `soin` soit retiré à chaque fois comme en jeu.
 				soutiens.append({"kind": "sort", "id": sort["id"], "label": sort["nom"],
 								 "icon": sort["icon"], "cout_pm": sort["cout_pm"],
-								 "effets": eff, "compteur": "sorts", "source": sort})
+								 "effets": eff, "caracts": caracts or {},
+								 "compteur": "sorts", "source": sort})
 		elif type_ == "competence":
 			comp = normaliser_competence(get_doc_fn(ref))
 			if not comp or not competence_utilisable_combat(comp) or not condition_remplie(comp, map_tags):
 				continue
 			eff = comp["effets"]
 			if comp["cible"] == "ennemi":
-				comps_off.append(comp)
-			elif eff.get("pv") or eff.get("pm") or part_durative(eff):
+				comps_off.append(_resoudre_capacite(comp, caracts or {}))
+			elif eff.get("pv") or eff.get("soin") or eff.get("pm") or part_durative(eff):
 				soutiens.append({"kind": "competence", "id": comp["id"], "label": comp["nom"],
 								 "icon": comp["icon"], "cout_pm": comp["cout_pm"],
-								 "effets": eff, "compteur": "competences", "source": comp})
+								 "effets": eff, "caracts": caracts or {},
+								 "compteur": "competences", "source": comp})
 		elif type_ == "consommable":
 			if not objets:
 				continue        # objets interdits pour ce duel
@@ -516,7 +531,8 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = T
 		if bonus_furtif > 0:
 			base["furtif"] = True
 			base["furtivite_bonus"] = bonus_furtif
-		arsenal = _arsenal_de_barre(character, get_doc_fn, map_tags, objets)
+		arsenal = _arsenal_de_barre(character, get_doc_fn, map_tags, objets,
+									combat.caracts_effectives(base))
 		# Stock de consommables PAR PASSE : porté par le snapshot (deepcopié avec lui),
 		# jamais par l'arsenal partagé — une passe ne doit pas vider les fioles de la
 		# suivante.
@@ -744,7 +760,8 @@ def _utiliser_soutien(actor: dict, soutien: dict, pseudo: dict) -> bool:
 		if soutien["cout_pm"] > actor.get("currentPM", 0):
 			return False
 		actor["currentPM"] = int(actor.get("currentPM", 0)) - soutien["cout_pm"]
-	eff = soutien["effets"]
+	# Formules et `soin` résolus à CET usage (un consommable n'en porte pas : inchangé).
+	eff = resoudre_effets(soutien["effets"], soutien.get("caracts") or {})
 	gains = []
 	if eff.get("pv"):
 		avant = int(actor.get("currentPV", 0))
@@ -771,7 +788,7 @@ def _tenter_soin(actor: dict, arsenal: dict, pseudo: dict) -> bool:
 	if actor.get("currentPV", 0) >= SEUIL_SOIN_PV * max(1, actor.get("pv_max", 1)):
 		return False
 	for soutien in arsenal.get("soutiens") or []:
-		if soutien["effets"].get("pv", 0) <= 0:
+		if soutien["effets"].get("pv", 0) <= 0 and not soutien["effets"].get("soin"):
 			continue
 		if _utiliser_soutien(actor, soutien, pseudo):
 			return True
@@ -783,7 +800,8 @@ def _tenter_buff_ouverture(actor: dict, arsenal: dict, pseudo: dict) -> bool:
 	avant l'engagement). Mémo `_sim_buffs_lances` porté par le snapshot (deepcopy-safe)."""
 	lances = actor.setdefault("_sim_buffs_lances", [])
 	for soutien in arsenal.get("soutiens") or []:
-		if soutien["effets"].get("pv", 0) > 0 or not part_durative(soutien["effets"]):
+		if (soutien["effets"].get("pv", 0) > 0 or soutien["effets"].get("soin")
+				or not part_durative(soutien["effets"])):
 			continue
 		if soutien["id"] in lances:
 			continue

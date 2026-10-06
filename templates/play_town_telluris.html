@@ -5768,22 +5768,32 @@ function _viderCaseBarre(position) {
 
 // `prefixeDegats` : '+' pour une compétence de corps à corps, dont les dés S'AJOUTENT à ceux
 // de l'arme (cf. combat._degats_competence). Sans lui le joueur lirait le bonus comme un total.
+// Formule à caractéristiques d'ORIGINE (`1D{Int/5}`) devant sa valeur RÉSOLUE par le
+// serveur pour ce personnage (`effets.formules_texte`, cf. sorts.apercu_effets) — le client
+// ne calcule rien. Sans formule, la valeur seule.
+function _fx(e, cle, val) {
+	const f = ((e && e.formules_texte) || {})[cle];
+	return f ? `${f} → ${val}` : `${val}`;
+}
 function _sortEffetsLabel(e, prefixeDegats) {
 	if (!e) return '';
 	const parts = [];
-	if (e.degats) parts.push(`${prefixeDegats || ''}${e.degats} dég.`);
-	if (e.pv) parts.push(`+${e.pv} PV`);
-	if (e.pm) parts.push(`+${e.pm} PM`);
-	for (const [k, v] of Object.entries(e.buffs || {})) parts.push(`${v > 0 ? '+' : ''}${v} ${k}`);
-	if (e.regen_pv) parts.push(regenTexte(e.regen_pv, 'PV'));
-	if (e.regen_pm) parts.push(regenTexte(e.regen_pm, 'PM'));
-	if (e.esquive) parts.push(`esquive +${e.esquive}`);
+	if (e.degats) parts.push(`${prefixeDegats || ''}${_fx(e, 'degats', e.degats)} dég.`);
+	if (e.soin) parts.push(`soin ${_fx(e, 'soin', e.soin)} PV`);
+	if (e.pv) parts.push(`+${_fx(e, 'pv', e.pv)} PV`);
+	if (e.pm) parts.push(`+${_fx(e, 'pm', e.pm)} PM`);
+	// Partage de soin : la part des PV rendus aux AUTRES qui revient au lanceur.
+	if (e.partage_soin) parts.push(`↺ ${_fx(e, 'partage_soin', e.partage_soin)} % au lanceur`);
+	for (const [k, v] of Object.entries(e.buffs || {})) parts.push(`${_fx(e, 'buffs.' + k, (v > 0 ? '+' : '') + v)} ${k}`);
+	if (e.regen_pv) parts.push(regenTexte(e.regen_pv, 'PV') + ((e.formules_texte || {}).regen_pv ? ` (${e.formules_texte.regen_pv})` : ''));
+	if (e.regen_pm) parts.push(regenTexte(e.regen_pm, 'PM') + ((e.formules_texte || {}).regen_pm ? ` (${e.formules_texte.regen_pm})` : ''));
+	if (e.esquive) parts.push(`esquive +${_fx(e, 'esquive', e.esquive)}`);
 	if (e.furtivite) parts.push(`🥷 furtivité`);
 	// Les six clés d'effet du « temps magique ». ⚠️ Sans elles, un sort de drain ou de saut
 	// s'afficherait sans le moindre effet annoncé — même défaut que les invocations avant
 	// `_invocationLabel`, et le TACTILE n'a pas de survol pour compenser.
-	if (e.degats_pm) parts.push(`${e.degats_pm} dég. aux PM`);
-	if (e.cout_pv) parts.push(`🩸 −${e.cout_pv} PV`);
+	if (e.degats_pm) parts.push(`${_fx(e, 'degats_pm', e.degats_pm)} dég. aux PM`);
+	if (e.cout_pv) parts.push(`🩸 −${_fx(e, 'cout_pv', e.cout_pv)} PV`);
 	if (e.drain_pv) parts.push(`🧛 drain ${e.drain_pv} % en PV`);
 	if (e.drain_pm) parts.push(`🧛 drain ${e.drain_pm} % en PM`);
 	if (e.saut) parts.push(`💨 saut ${e.saut} cases`);
@@ -5795,7 +5805,7 @@ function _sortEffetsLabel(e, prefixeDegats) {
 	if (e.invocation_nombre) parts.push(`🐾 +${e.invocation_nombre} créature${e.invocation_nombre > 1 ? 's' : ''}`);
 	if (e.invocation_duree) parts.push(`🐾 +${e.invocation_duree} tour${e.invocation_duree > 1 ? 's' : ''} d'invocation`);
 	if (e.maintien_reduction) parts.push(`🔄 −${e.maintien_reduction} PM/round d'entretien`);
-	if (e.duree) parts.push(`${e.duree} tours`);
+	if (e.duree) parts.push(`${_fx(e, 'duree', e.duree)} tours`);
 	return parts.join(', ');
 }
 
@@ -6032,6 +6042,7 @@ async function lancerSort(sortId, btn) {
 		const gains = [];
 		if (l.pv_rendu) gains.push(`+${l.pv_rendu} PV`);
 		if (l.pm_rendu > 0) gains.push(`+${l.pm_rendu} PM`);
+		if (l.partage_soin) gains.push(`↺ +${l.partage_soin} PV pour vous`);
 		if (l.effet) gains.push(`effet actif ${l.effet.restants} tours`);
 		const sur = l.cible_nom ? ` sur ${l.cible_nom}` : '';
 		showToast(`${l.icon || '🔮'} ${l.nom || 'Sort lancé'}${sur}${gains.length ? ' : ' + gains.join(', ') : ''}`);
@@ -6251,6 +6262,7 @@ async function utiliserCompetence(competenceId, btn) {
 		const gains = [];
 		if (u.pv_rendu) gains.push(`+${u.pv_rendu} PV`);
 		if (u.pm_rendu > 0) gains.push(`+${u.pm_rendu} PM`);
+		if (u.partage_soin) gains.push(`↺ +${u.partage_soin} PV pour vous`);
 		if (u.effet) gains.push(`effet actif ${u.effet.restants} tours`);
 		const sur = u.cible_nom ? ` sur ${u.cible_nom}` : '';
 		showToast(`${u.icon || '⚡'} ${u.nom || 'Compétence utilisée'}${sur}${gains.length ? ' : ' + gains.join(', ') : ''}`);

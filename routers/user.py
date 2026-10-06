@@ -1445,6 +1445,19 @@ async def consommer_item(
 	return payload
 
 
+def _partager_soin_exploration(lanceur: dict, cible: dict, effets: dict, pv_rendu: int) -> int:
+	"""PARTAGE DE SOIN hors combat (cf. `combat._partager_soin`) : le LANCEUR recueille
+	`partage_soin` % des PV réellement rendus à un AUTRE que lui, borné à son PV max.
+	Mute le lanceur (persisté par `_save_cast`) ; rend les PV reçus."""
+	pct = int(effets.get("partage_soin", 0) or 0)
+	if pct <= 0 or cible is lanceur or pv_rendu <= 0:
+		return 0
+	pv_max = _derived_from_character(lanceur, sync_equipment_bonus(lanceur)).pv_max
+	avant = int(lanceur.get("currentPV", 0) or 0)
+	lanceur["currentPV"] = min(pv_max, avant + pv_rendu * pct // 100)
+	return lanceur["currentPV"] - avant
+
+
 @user_router.post("/lancer_sort")
 async def lancer_sort(
 	current_user: Annotated[User, Depends(get_current_user)],
@@ -1482,7 +1495,10 @@ async def lancer_sort(
 	# sur le coût de BASE : un composant qui alourdirait la facture en sang ne doit pas
 	# pouvoir la faire passer d'un cheveu au-dessus des PV du lanceur après coup.
 	# ⚠️ `>` STRICT : un sort ne laisse jamais son auteur à 0 PV.
-	cout_pv_base = int((sort.get("effets") or {}).get("cout_pv", 0) or 0)
+	# Caracts EFFECTIVES du lanceur (buffs compris) : les formules à caractéristiques
+	# (`"cout_pv": "{Vol/10}"`, `"soin": "1D6+{Vol/10}"`) se résolvent sur elles.
+	caracts_lanceur = consommables.caracts_avec_buffs(character)
+	cout_pv_base = sorts_util.cout_pv_de(sort.get("effets"), caracts_lanceur)
 	if cout_pv_base and int(character.get("currentPV", 0) or 0) <= cout_pv_base:
 		raise HTTPException(status_code=409, detail="Pas assez de PV pour payer ce sort")
 
@@ -1498,7 +1514,8 @@ async def lancer_sort(
 			continue
 		engages.append(cid)
 	character["inventaire"] = inventaire
-	effets = sorts_util.effets_effectifs(sort, engages)
+	# Résolution UNIQUE des formules (et tirage du `soin`) — même chokepoint qu'en combat.
+	effets = sorts_util.resoudre_effets(sorts_util.effets_effectifs(sort, engages), caracts_lanceur)
 
 	# Cible : soi-même, ou l'allié désigné. Résolue APRÈS les gardes du lanceur pour
 	# qu'un sort inconnu ou sans PM échoue sur SA vraie cause.
@@ -1521,6 +1538,7 @@ async def lancer_sort(
 	avant_pm = int(cible.get("currentPM", 0) or 0)
 	cible["currentPV"] = min(derived.pv_max, avant_pv + effets["pv"])
 	cible["currentPM"] = min(derived.pm_max, avant_pm + effets["pm"])
+	partage = _partager_soin_exploration(character, cible, effets, cible["currentPV"] - avant_pv)
 
 	_save_cast(character, cible, principal)
 	payload = _inventory_payload(character, principal)
@@ -1533,6 +1551,7 @@ async def lancer_sort(
 		"icon": sort["icon"],
 		"pv_rendu": cible["currentPV"] - avant_pv,
 		"pm_rendu": cible["currentPM"] - avant_pm,
+		"partage_soin": partage,
 		"effet": dict(effet) if effet else None,
 		# Renseignés seulement pour un sort d'allié : le client sait alors que les PV/PM
 		# rendus ne concernent PAS la fiche ouverte, et rafraîchit la bonne carte.
@@ -1620,9 +1639,9 @@ async def utiliser_competence(
 
 	# Buff empilé AVANT le calcul des max (même règle que les consommables et les sorts),
 	# puis débit PM et part instantanée clampée aux max bufffés.
-	effets = comp["effets"]
+	effets = sorts_util.resoudre_effets(comp["effets"], consommables.caracts_avec_buffs(character))
 	cible = _cible_alliee(principal, character, body) if comp["cible"] == "allie" else character
-	effet = competences_util.empiler_effet_competence(cible, comp)
+	effet = competences_util.empiler_effet_competence(cible, {**comp, "effets": effets})
 	eq = sync_equipment_bonus(cible)
 	derived = _derived_from_character(cible, eq)
 	character["currentPM"] = max(0, int(character.get("currentPM", 0) or 0) - cout_pm)
@@ -1630,6 +1649,7 @@ async def utiliser_competence(
 	avant_pm = int(cible.get("currentPM", 0) or 0)
 	cible["currentPV"] = min(derived.pv_max, avant_pv + effets["pv"])
 	cible["currentPM"] = min(derived.pm_max, avant_pm + effets["pm"])
+	partage = _partager_soin_exploration(character, cible, effets, cible["currentPV"] - avant_pv)
 
 	_save_cast(character, cible, principal)
 	payload = _inventory_payload(character, principal)
@@ -1642,6 +1662,7 @@ async def utiliser_competence(
 		"icon": comp["icon"],
 		"pv_rendu": cible["currentPV"] - avant_pv,
 		"pm_rendu": cible["currentPM"] - avant_pm,
+		"partage_soin": partage,
 		"effet": dict(effet) if effet else None,
 		"cible_id": cible.get("_id") if cible is not character else None,
 		"cible_nom": cible.get("nom") if cible is not character else None,

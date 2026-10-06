@@ -493,6 +493,22 @@ CATALOGUE = [
 			"créer, n'écrit aucun fichier.",
 	},
 	{
+		"id": "gen_sorts_caracteristiques",
+		"label": "🧮 Générer les sorts à formules de caractéristiques",
+		# `dump_frais` : un `_id` déjà en base et retouché depuis doit faire REFUSER le lot,
+		# pas être écrasé par le PUT complet de l'import.
+		"argv_fn": lambda v, f: _py("gen_sorts_caracteristiques.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/sorts_caracteristiques_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/sorts_caracteristiques_a_importer.json. "
+			"Rien en base avant 📥 Importer.",
+		"description": "28 sorts des niveaux 0 à 10 dont la puissance lit le lanceur "
+			"(`1D{Int/5}`, `soin 1D6+{Vol/10}`, durée, buffs, portée à formule, partage de "
+			"soin), chacun avec son animation dédiée (découpe recopiée d'une animation active, "
+			"son posé), son grimoire unique et sa recette de scriptorium. Refuse tout le lot "
+			"sur un `_id` déjà pris par un doc différent ; déjà tout en base ⇒ aucun fichier.",
+	},
+	{
 		"id": "gen_grimoires_sans_plume",
 		"label": "🪶 Retirer la plume d'oie des recettes de grimoire",
 		# Même raison que gen_grimoires : l'import est un PUT complet et ces recettes sont

@@ -3518,10 +3518,18 @@ function consoLabel(c) {
 
 // ── Lancer un sort (1 action + PM) : depuis sa case, puis pour un sort offensif à
 // plusieurs cibles possibles, ciblage par badge/token (liseré violet, pendingSort).
+// Formule à caractéristiques d'ORIGINE devant sa valeur RÉSOLUE par le serveur pour CE
+// lanceur (`effets.formules_texte`, cf. sorts.apercu_effets) : « 1D{Int/5} → 1D8 ».
+function formuleTexte(e, cle, val) {
+	const f = ((e && e.formules_texte) || {})[cle];
+	return f ? `${f} → ${val}` : `${val}`;
+}
 function sortLabel(s) {
 	const parts = [];
-	if (s.effets.degats) parts.push(`${s.effets.degats} dég.`);
+	if (s.effets.degats) parts.push(`${formuleTexte(s.effets, 'degats', s.effets.degats)} dég.`);
+	if (s.effets.soin) parts.push(`soin ${formuleTexte(s.effets, 'soin', s.effets.soin)}`);
 	if (s.effets.pv) parts.push(`+${s.effets.pv} PV`);
+	if (s.effets.partage_soin) parts.push(`↺ ${s.effets.partage_soin} % au lanceur`);
 	if (s.effets.pm) parts.push(`+${s.effets.pm} PM`);
 	if (s.effets.furtivite) parts.push('🥷 furtivité');
 	// Invocation : ses `effets` sont vides par construction (elle fait apparaître une
@@ -3793,8 +3801,10 @@ function compLabel(c) {
 	// combat._degats_competence), d'où le '+' — sans lui le joueur lirait le bonus comme un
 	// total. Un tir sans arc ni arme de lancer n'emprunte rien : pas de '+'.
 	if (c.effets.degats) parts.push(
-		`${c.cible === 'ennemi' && capaProfilEmprunte(c) ? '+' : ''}${c.effets.degats} dég.`);
+		`${c.cible === 'ennemi' && capaProfilEmprunte(c) ? '+' : ''}${formuleTexte(c.effets, 'degats', c.effets.degats)} dég.`);
+	if (c.effets.soin) parts.push(`soin ${formuleTexte(c.effets, 'soin', c.effets.soin)}`);
 	if (c.effets.pv) parts.push(`+${c.effets.pv} PV`);
+	if (c.effets.partage_soin) parts.push(`↺ ${c.effets.partage_soin} % au lanceur`);
 	if (c.effets.pm) parts.push(`+${c.effets.pm} PM`);
 	if (c.effets.furtivite) parts.push('🥷 furtivité');
 	// Portée EFFECTIVE et non déclarée : une frappe `cc` emprunte l'allonge de l'arme en
