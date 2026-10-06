@@ -273,7 +273,8 @@
 /* Figurine debout sur le socle : haut à 0.7*0.35 + 1.25 ≈ 1.5 case du bas de la case.
    ⚠️ −8px : le socle ne touche pas le bas de la case — barre de PV dessous (4px + 2px de
    marge) et `bottom` compté depuis l'intérieur de la bordure (2px). */
-.monster-token .mt-portrait::before {
+.monster-token .mt-portrait::before,
+.ally-token.invocation .at-portrait::before {
 	content: "";
 	position: absolute;
 	left: 50%;
@@ -359,11 +360,13 @@
 /* Créature INVOQUÉE : anneau VIOLET — la couleur du lancement de sort dans tout ce combat,
    puisque c'est un sort qui l'a fait venir. Elle a un tour (contrairement à la monture et à
    l'escortée) mais ne se pilote pas : le violet dit « magie », l'absence de doré dit « pas
-   vous ». Image d'ESPÈCE, donc `contain` comme les deux autres. */
+   vous ». Image d'ESPÈCE : elle n'est pas peinte dans le cercle (`0 0`) mais debout dessus,
+   en FIGURINE — même `::before` que les monstres (règle `.monster-token .mt-portrait::before`). */
 .ally-token.invocation .at-portrait {
 	background-color: #efefef; border-color: #a06bd6;
 	box-shadow: 0 0 10px rgba(160,107,214,0.8); color: #d9bcf5;
-	background-size: contain;
+	position: relative;
+	background-size: 0 0;
 	background-position: center center;
 	background-repeat: no-repeat;
 }
