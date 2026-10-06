@@ -1228,6 +1228,86 @@
 			}
 			#sh-competences > .sh-barre-hint.ouverte { display: block; }
 		}
+		/* ── Onglet ⚡ en PORTRAIT mobile : trois vues + lignes compactes ──────────────
+		   Les accordéons laissaient six en-têtes se partager un écran de téléphone. Ici
+		   la vue (`data-vue`) et le filtre (`data-filtre`) de #sh-competences choisissent
+		   les sections affichées, TOUTES dépliées et à la suite : l'onglet défile d'un
+		   bloc (`overflow-y:auto` de `.sh-acc-fit`), sans scroller interne ni ombre.
+		   ⚠️ `.open` n'y joue plus — le choix d'accordéon mémorisé reste celui du desktop.
+		   Hors de ce media, `.capa-tete` est masquée et rien ne change. */
+		.capa-tete { display: none; }
+		@media (max-width: 768px) and (orientation: portrait) {
+			#sh-competences > .capa-tete {
+				display: flex; flex-direction: column; gap: .35rem;
+				position: sticky; top: 0; z-index: 20;
+				background: var(--panel-bg); padding: .25rem 0 .35rem;
+			}
+			.capa-vues { display: flex; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
+			.capa-vue {
+				flex: 1; padding: .45rem .2rem; background: transparent; border: 0;
+				color: var(--muted); font: inherit; font-size: .8rem; text-transform: uppercase;
+				letter-spacing: .03em; cursor: pointer; white-space: nowrap;
+			}
+			.capa-vue + .capa-vue { border-left: 1px solid var(--border-color); }
+			.capa-vue[aria-selected="true"] { background: var(--btn-bg); color: var(--accent-color); }
+			#capa-apprendre-compte { margin-left: .3rem; }
+			.capa-filtres { display: flex; gap: .35rem; overflow-x: auto; scrollbar-width: none; }
+			#sh-competences[data-vue="modes"] .capa-filtres { display: none; }
+			/* Barre resserrée : toujours deux rangées (cf. part-slot-bar-css), cases plus
+			   petites — la liste récupère la hauteur. */
+			#sh-competences .sh-barre-grid { --slot-max: 40px; margin: 4px 0; }
+			.capa-filtre {
+				flex: 0 0 auto; padding: .2rem .7rem; border-radius: 999px; cursor: pointer;
+				border: 1px solid var(--border-color); background: transparent;
+				color: var(--muted); font: inherit; font-size: .78rem;
+			}
+			.capa-filtre[aria-pressed="true"] { border-color: var(--accent-color); color: var(--accent-color); }
+
+			/* Sections : celles de la vue, moins celles que le filtre écarte. ⚠️ Même
+			   spécificité pour les deux règles : c'est l'ORDRE qui fait gagner le filtre. */
+			#sh-competences > .acc-section { display: none; border: 0; border-radius: 0; overflow: visible; }
+			#sh-competences[data-vue="modes"] > .acc-section[data-vue="modes"],
+			#sh-competences[data-vue="connues"] > .acc-section[data-vue="connues"],
+			#sh-competences[data-vue="apprendre"] > .acc-section[data-vue="apprendre"] { display: block; }
+			#sh-competences[data-filtre="competences"] > .acc-section[data-type="magie"],
+			#sh-competences[data-filtre="magie"] > .acc-section[data-type="competences"] { display: none; }
+			#sh-competences .acc-section > .acc-body { display: block; padding: 0; }
+			#sh-competences .acc-body > .sh-scroll { display: block; min-height: 0; }
+			#sh-competences .acc-body .sh-rel-scroll { max-height: none; overflow: visible; }
+			#sh-competences .acc-body > .sh-scroll::after { display: none; }
+			/* L'en-tête d'accordéon devient une étiquette de groupe, inerte. */
+			#sh-competences .acc-head {
+				pointer-events: none; padding: .55rem 0 .15rem; background: none;
+				border-bottom: 1px solid var(--border-color);
+				font-size: .72rem; letter-spacing: .08em; color: var(--muted);
+			}
+			#sh-competences .acc-chevron,
+			#sh-competences[data-vue="modes"] .acc-head { display: none; }
+
+			/* Ligne compacte : icône · nom (+ 1re ligne de détail, tronquée) · actions à
+			   droite. Le reste (2e ligne d'effets, composants) attend le toucher qui
+			   déplie la ligne : `.expanded` (fiche d'un sort, _toggleSortDesc) ou
+			   `.deplie` (toute autre ligne, _capaDeplier). */
+			#sh-competences .sh-skill { flex-wrap: nowrap; align-items: center; gap: 8px; padding: 6px 0; }
+			#sh-competences .sh-skill-icon { font-size: 1.1rem; width: 1.5rem; text-align: center; }
+			#sh-competences .sh-skill-info { min-width: 0; cursor: pointer; }
+			#sh-competences .sh-skill .sh-skill-name,
+			#sh-competences .sh-skill .sh-skill-desc { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+			#sh-competences .sh-skill .sh-skill-name { font-size: .95rem; margin: 0; }
+			#sh-competences .sh-skill .sh-skill-desc { font-size: .78rem; }
+			#sh-competences .sh-skill:not(.expanded):not(.deplie) .sh-skill-desc ~ .sh-skill-desc,
+			#sh-competences .sh-skill:not(.expanded):not(.deplie) .sh-sort-compos { display: none; }
+			#sh-competences .sh-skill.expanded .sh-skill-name, #sh-competences .sh-skill.deplie .sh-skill-name,
+			#sh-competences .sh-skill.expanded .sh-skill-desc, #sh-competences .sh-skill.deplie .sh-skill-desc { white-space: normal; }
+			#sh-competences .sh-skill .sh-inv-actions {
+				flex: 0 1 auto; max-width: 58%; margin: 0 0 0 auto;
+				flex-wrap: wrap; justify-content: flex-end; gap: 4px;
+			}
+			#sh-competences .sh-inv-actions .sh-drop-btn { margin-left: 0; }
+			#sh-competences .sh-slot-choice { display: none; }
+			#sh-modes-attaque { gap: 0; }
+			#sh-modes-attaque .sh-skill { flex: 1 1 100%; }
+		}
 		.sh-quest-hdr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
 		.sh-quest-rang { font-size: 0.8rem; font-weight: bold; padding: 2px 6px; background: #333; border-radius: 3px; color: var(--accent-color); }
 		.sh-quest-title { flex: 1; min-width: 200px; font-weight: bold; font-size: 1rem; }
@@ -2088,7 +2168,7 @@
 					</div>
 
 					<!-- ── COMPETENCES ── -->
-					<div class="sheet-panel sh-acc-fit" id="sh-competences">
+					<div class="sheet-panel sh-acc-fit" id="sh-competences" data-vue="connues" data-filtre="tout">
 						{# Barre de combat : la disposition se compose ICI, au calme (le mode ⚙
 						   de l'écran de combat n'en est qu'un raccourci). Rendue 100 % client
 						   par _renderBarreSlots depuis le payload `slots`. #}
@@ -2099,6 +2179,26 @@
 								onclick="toggleBarreAide(event)">ⓘ</button></div>
 						<div class="sh-barre-grid" id="sh-slot-grid"></div>
 						<div class="sh-barre-hint" id="sh-barre-hint">Clic long sur une case puis glisser pour échanger deux cases. Les actions ⚔ 🫳 🏃 se déplacent mais ne se retirent pas.</div>
+						{# ── Mobile portrait : TROIS VUES au lieu de six accordéons ──
+						   Les sections restent les mêmes (mêmes renderers, mêmes ids) ; chacune
+						   déclare sa vue (`data-vue`) et sa famille (`data-type`), et le CSS du
+						   portrait n'affiche que celles de la vue / du filtre choisis, dépliées et
+						   à la suite, l'onglet défilant d'un bloc. Desktop : barre masquée,
+						   accordéons inchangés. État : attributs de #sh-competences, posés par
+						   capaVue / capaFiltre (mémorisés par personnage). #}
+						<div class="capa-tete" id="capa-tete">
+							<div class="capa-vues" role="tablist" aria-label="Vue de l'onglet">
+								<button type="button" class="capa-vue" role="tab" data-vue="modes" onclick="capaVue('modes')">🏹 Modes</button>
+								<button type="button" class="capa-vue" role="tab" data-vue="connues" onclick="capaVue('connues')">⚡ Connues</button>
+								<button type="button" class="capa-vue" role="tab" data-vue="apprendre" onclick="capaVue('apprendre')"
+									title="Entre parenthèses : ce que vos points permettent d'apprendre maintenant">📖 Apprendre<span class="pts-dispo" id="capa-apprendre-compte" hidden></span></button>
+							</div>
+							<div class="capa-filtres" aria-label="Filtrer">
+								<button type="button" class="capa-filtre" data-filtre="tout" onclick="capaFiltre('tout')">Tout</button>
+								<button type="button" class="capa-filtre" data-filtre="competences" onclick="capaFiltre('competences')">⚡ Compétences</button>
+								<button type="button" class="capa-filtre" data-filtre="magie" onclick="capaFiltre('magie')">🔮 Magie</button>
+							</div>
+						</div>
 						{# ── Les six zones en ACCORDÉON (brique `.acc-*`, comme #sell-panel) ──
 						   Une seule ouverte à la fois, et elle prend TOUTE la hauteur restante :
 						   l'onglet tient dans la fenêtre au lieu de la faire défiler.
@@ -2110,7 +2210,7 @@
 						   poser sa case de tir : un archer restait sans bouton pour tirer.
 						   ⚠️ `#sh-modes-attaque` est ENVELOPPÉ, jamais remplacé : le renderer
 						   écrase son intérieur, et l'ombre vit dans le wrapper au-dessus. #}
-						<section class="acc-section">
+						<section class="acc-section" data-vue="modes">
 							<button type="button" class="acc-head" id="acc-head-capa-modes" onclick="toggleOngletSection('competences', 'capa-modes')">
 								<span>🏹 Modes d'attaque</span><span class="acc-chevron">▾</span>
 							</button>
@@ -2123,7 +2223,7 @@
 						{# Compétences : mêmes règles que les sorts, rendues 100 % côté client
 						   depuis _competences / _competencesApprenables — resync après
 						   utiliser/apprendre. #}
-						<section class="acc-section">
+						<section class="acc-section" data-vue="connues" data-type="competences">
 							<button type="button" class="acc-head" id="acc-head-capa-competences" onclick="toggleOngletSection('competences', 'capa-competences')">
 								<span>⚡ Compétences</span><span class="acc-chevron">▾</span>
 							</button>
@@ -2133,7 +2233,7 @@
 								</div>
 							</div>
 						</section>
-						<section class="acc-section">
+						<section class="acc-section" data-vue="apprendre" data-type="competences">
 							<button type="button" class="acc-head" id="acc-head-capa-apprentissage" onclick="toggleOngletSection('competences', 'capa-apprentissage')">
 								<span>📖 Apprentissage - compétences</span><span class="acc-chevron">▾</span>
 							</button>
@@ -2145,7 +2245,7 @@
 						</section>
 						{# Sorts : rendus 100 % côté client depuis les payloads injectés (_sorts /
 						   _sortsApprenables), comme le sac — resync après lancer/apprendre. #}
-						<section class="acc-section">
+						<section class="acc-section" data-vue="connues" data-type="magie">
 							<button type="button" class="acc-head" id="acc-head-capa-sorts" onclick="toggleOngletSection('competences', 'capa-sorts')">
 								<span>🔮 Sorts connus</span><span class="acc-chevron">▾</span>
 							</button>
@@ -2155,7 +2255,7 @@
 								</div>
 							</div>
 						</section>
-						<section class="acc-section">
+						<section class="acc-section" data-vue="apprendre" data-type="magie">
 							<button type="button" class="acc-head" id="acc-head-capa-ecoles" onclick="toggleOngletSection('competences', 'capa-ecoles')">
 								<span>🏫 Écoles de magie</span><span class="acc-chevron">▾</span>
 							</button>
@@ -2165,7 +2265,7 @@
 								</div>
 							</div>
 						</section>
-						<section class="acc-section">
+						<section class="acc-section" data-vue="apprendre" data-type="magie">
 							<button type="button" class="acc-head" id="acc-head-capa-magie" onclick="toggleOngletSection('competences', 'capa-magie')">
 								<span>📖 Apprentissage - magie</span><span class="acc-chevron">▾</span>
 							</button>
@@ -5922,6 +6022,7 @@ function _renderSorts(list) {
 
 function _renderSortsApprenables(list) {
 	if (Array.isArray(list)) _sortsApprenables = list;
+	_majCapaApprendre();
 	const box = document.getElementById('sh-sorts-apprenables');
 	if (!box) return;
 	if (!_sortsApprenables.length) {
@@ -6064,6 +6165,7 @@ async function lancerSort(sortId, btn) {
 // client depuis sorts_magies, resync après apprendre_magie / monter_magie / apprendre_sort.
 function _renderSortsMagies(payload) {
 	if (payload) _sortsMagies = payload;
+	_majCapaApprendre();
 	const box = document.getElementById('sh-sorts-magies');
 	if (!box) return;
 	const m = _sortsMagies || {};
@@ -6227,6 +6329,7 @@ function _renderCompetences(list) {
 
 function _renderCompetencesApprenables(list) {
 	if (Array.isArray(list)) _competencesApprenables = list;
+	_majCapaApprendre();
 	const box = document.getElementById('sh-competences-apprenables');
 	if (!box) return;
 	if (!_competencesApprenables.length) {
@@ -6691,6 +6794,71 @@ const SHEET_ACC = {
 	journal:     { cle: 'telluris.play.journal_section.' + REL_CHAR_ID, defaut: 'carnet',
 				   ids: ['carnet', 'bestiaire'] },
 };
+
+// ── Onglet ⚡ en portrait mobile : vue (modes / connues / apprendre) + filtre ─────
+// Deux attributs de #sh-competences, lus par le CSS du portrait ; hors portrait ils
+// n'agissent sur rien (barre `.capa-tete` masquée), d'où un état unique, sans media JS.
+const CAPA_VUE_CLE = 'telluris.play.capa_vue.' + REL_CHAR_ID;
+const CAPA_VUES = ['modes', 'connues', 'apprendre'];
+const CAPA_FILTRES = ['tout', 'competences', 'magie'];
+
+function _capaAppliquer(vue, filtre) {
+	const onglet = document.getElementById('sh-competences');
+	if (!onglet) return;
+	onglet.dataset.vue = vue;
+	onglet.dataset.filtre = filtre;
+	onglet.querySelectorAll('.capa-vue').forEach(b =>
+		b.setAttribute('aria-selected', b.dataset.vue === vue ? 'true' : 'false'));
+	onglet.querySelectorAll('.capa-filtre').forEach(b =>
+		b.setAttribute('aria-pressed', b.dataset.filtre === filtre ? 'true' : 'false'));
+}
+
+function _capaChoisir(vue, filtre) {
+	_capaAppliquer(vue, filtre);
+	_accLsSet(CAPA_VUE_CLE, vue + '|' + filtre);
+	// Changer de vue ramène en tête : rester au milieu d'une liste qui n'est plus là
+	// ne montrerait qu'une portion arbitraire de la nouvelle.
+	const onglet = document.getElementById('sh-competences');
+	if (onglet) onglet.scrollTop = 0;
+}
+
+function capaVue(vue) {
+	_capaChoisir(vue, document.getElementById('sh-competences').dataset.filtre || 'tout');
+}
+function capaFiltre(filtre) {
+	_capaChoisir(document.getElementById('sh-competences').dataset.vue || 'connues', filtre);
+}
+
+(function _capaRestaurer() {
+	const [vue, filtre] = (_accLsGet(CAPA_VUE_CLE) || '').split('|');
+	_capaAppliquer(CAPA_VUES.includes(vue) ? vue : 'connues',
+		CAPA_FILTRES.includes(filtre) ? filtre : 'tout');
+})();
+
+// Ligne compacte : toucher le nom déplie la ligne (détail complet). Les lignes de sort à
+// fiche consultable ont déjà leur bascule (`.sh-skill-toggle` → _toggleSortDesc), qui
+// survit au re-rendu ; `.deplie`, purement DOM, se perd au prochain rendu de la liste.
+document.getElementById('sh-competences')?.addEventListener('click', ev => {
+	const info = ev.target.closest('.sh-skill-info');
+	if (!info || info.classList.contains('sh-skill-toggle')) return;
+	info.closest('.sh-skill')?.classList.toggle('deplie');
+});
+
+// Compte de « 📖 Apprendre » : ce que les points permettent MAINTENANT (compétence, sort
+// dont on porte le grimoire, école à pratiquer ou à monter). Mêmes conditions que le
+// `disabled` des boutons de ces listes — le serveur reste seul juge.
+function _majCapaApprendre() {
+	const el = document.getElementById('capa-apprendre-compte');
+	if (!el) return;
+	const pts = _attributePoints || 0;
+	const m = _sortsMagies || {};
+	const n = (_competencesApprenables || []).filter(c => pts >= c.cout_points).length
+		+ (_sortsApprenables || []).filter(s => s.grimoire_ok && pts >= s.cout_points).length
+		+ (m.achetables || []).filter(e => pts >= e.cout).length
+		+ (m.peut_apprendre ? (m.pratiquees || []).filter(e => e.montable && pts >= e.cout_montee).length : 0);
+	el.textContent = n;
+	el.hidden = n <= 0;
+}
 
 // L'ombre vit dans le WRAPPER `.sh-scroll` au-dessus du scroller — c'est lui qu'on mesure.
 function _ongletOmbres(onglet) {

@@ -17,6 +17,10 @@ description: Character-sheet social tabs and shared UI — the journal (carnet +
 - **Mobile portrait** (`max-width:768px` + `portrait`) : la fiche est **bornée** à `100svh`, TOUS les onglets passent en `absolute` + `overflow-y:auto` (`overscroll-behavior: contain`) → la page ne défile plus, chaque onglet défile chez lui. ⚠️ `body` est en `min-height: 100svh` (et non `100vh`, qui vaut la fenêtre SANS barre d'adresse sur mobile et faisait défiler la page pour rien).
 - ⚠️ Une section masquée par l'attribut **`hidden`** (👥 Compagnons sans personne) : `display:flex` l'écraserait, d'où `.sh-acc-fit > .acc-section[hidden]` ; `_ongletRestaurer` retombe sur `defaut` si la section mémorisée est masquée.
 - Compteurs d'en-tête (`_ficheCompte`) : 📜 actives/terminées, 🐾 bestiaire — visibles section repliée.
+- **⚡ en portrait mobile : PAS d'accordéon.** Barre collante `.capa-tete` (vues 🏹 Modes / ⚡ Connues / 📖 Apprendre + filtres Tout / ⚡ / 🔮) ; chaque section porte `data-vue` + `data-type` (`competences`|`magie`), `#sh-competences[data-vue][data-filtre]` choisit les visibles — toutes dépliées, à la suite, l'onglet défilant d'un bloc (`.open` ignoré). `capaVue`/`capaFiltre`, mémorisés sous `telluris.play.capa_vue.<perso>`. Une section ⚡ ajoutée DOIT déclarer sa vue, sinon elle disparaît en portrait.
+  - Ligne compacte : nom + 1re `.sh-skill-desc` tronqués, actions à droite ; le reste attend le toucher (`.expanded` des sorts via `_toggleSortDesc`, sinon `.deplie`, perdu au re-rendu).
+  - Compte vert de 📖 Apprendre : `_majCapaApprendre`, mêmes conditions que les `disabled` des boutons, appelé par les trois renderers d'apprentissage.
+- **★ Points d'attribut** : macro `points_fiche` (carte de la fiche + colonne gauche paysage), seul compteur de la fiche ; `_syncPoints` écrit tous les `[data-points]`.
 
 
 ### Onglet 🤝 Relations
