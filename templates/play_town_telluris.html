@@ -841,9 +841,10 @@
 		/* Pastille « points à répartir » sur les boutons 👤 Personnage / 👥 Groupe. Rendue en
 		   dur dans le markup et masquée par `hidden` : les points peuvent tomber à zéro (ou
 		   revenir) en cours de session, et `_majIndicateursPoints` n'a rien à créer. */
-		/* Compteur ★ de la fiche, dans la ligne PV/PM (entre les deux : PM garde sa marge
-		   automatique à droite). Grisé à zéro, rien à dépenser. */
-		.sh-card-points { white-space: nowrap; }
+		/* Compteur ★ de la fiche, dans la ligne PV/PM, APRÈS les deux : PV · PM côte à côte,
+		   ★ reprend la marge automatique de PM pour se ranger à droite. Grisé à zéro. */
+		.sh-card-points { white-space: nowrap; margin-left: auto; }
+		.char-vitals:has(.sh-card-points) .pm-val { margin-left: 0; }
 		.sh-card-points.is-vide { color: var(--muted); }
 		.pts-indic { margin-left: 6px; font-size: 0.9rem; line-height: 1; vertical-align: baseline; }
 		.sh-xp-header { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; font-size: 0.95rem; }
@@ -1046,8 +1047,6 @@
 		.sh-sort-compo { font-size: 0.75rem; color: var(--muted); background: rgba(74,74,90,0.25);
 			border: 1px solid rgba(74,74,90,0.5); border-radius: 8px; padding: 1px 7px; }
 		.sh-sort-compo.off { opacity: 0.45; text-decoration: line-through; }
-		.sh-sort-uselbl { display: flex; align-items: center; gap: 3px; font-size: 0.75rem;
-			color: var(--muted); cursor: pointer; white-space: nowrap; }
 		.sh-sort-grim { font-size: 0.8rem; flex-shrink: 0; }
 		/* Affectation à une case de la barre de combat (cf. utils/slots_actions.py) :
 		   le sélecteur remplace l'ancien 📌, qui ne disait pas OÙ l'action atterrissait. */
@@ -1056,8 +1055,15 @@
 			border-radius: 5px; padding: 2px 4px; font-size: 11px; cursor: pointer;
 		}
 		.sh-slot-select.active { color: var(--accent-color); border-color: var(--accent-color); }
-		/* Marque le second sélecteur d'un sort : la variante qui DÉPENSE les composants. */
-		.sh-compo-lbl { color: #b26bff; font-weight: bold; font-size: 12px; margin-left: 3px; }
+		/* ⚔ d'une action de combat : bouton nu, son explication s'ouvre en bulle (_bulleAide). */
+		.sh-aide-combat { background: none; border: 0; padding: 2px 4px; font: inherit; font-size: .85rem; line-height: 1; cursor: help; }
+		.sh-bulle-aide {
+			position: fixed; z-index: 9500; max-width: min(260px, calc(100vw - 16px));
+			padding: .45rem .65rem; font-size: .8rem; color: var(--text-color);
+			background: var(--surface, #181818); border: 1px solid var(--accent-color);
+			border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,.6);
+		}
+		.sh-bulle-aide[hidden] { display: none; }
 		/* Aperçu éditable de la barre de combat. ⚠️ Classes préfixées `sh-barre-` et NON
 		   `sh-slot-` : `.sh-slot` désigne déjà les emplacements d'ÉQUIPEMENT du paperdoll
 		   (cf. plus haut) — réutiliser ce nom ferait fuir aspect-ratio, curseur et
@@ -1215,6 +1221,8 @@
 		   bulle sous le ⓘ ; `top` est posé par toggleBarreAide (offsetParent = le panneau). */
 		@media (max-width: 768px) {
 			.sh-barre-aide { display: inline-flex; }
+			/* Titre collé aux onglets principaux : le padding de `.sheet-body` suffit. */
+			#sh-competences > .sh-barre-titre { margin-top: 0; }
 			#sh-competences > .sh-barre-hint {
 				display: none; position: absolute; left: .5rem; right: .5rem; z-index: 30;
 				padding: .5rem .7rem; font-size: .8rem; color: var(--text-color);
@@ -1265,6 +1273,8 @@
 				color: var(--muted); font: inherit; font-size: .78rem;
 			}
 			.capa-filtre[aria-pressed="true"] { border-color: var(--accent-color); color: var(--accent-color); }
+			/* ⚔ Attaque : la puce la plus à droite, comme ses lignes sont les dernières. */
+			.capa-filtre[data-filtre="attaque"] { margin-left: auto; }
 
 			/* Sections : celles de la vue, moins celles que le filtre écarte. ⚠️ Même
 			   spécificité pour les deux règles : c'est l'ORDRE qui fait gagner le filtre. */
@@ -1289,8 +1299,12 @@
 			#sh-competences > .acc-section[data-fusion] .sh-skill { flex: 0 0 auto; }
 			/* « Aucune compétence apprise » / « Aucun sort connu » : sous les lignes. */
 			#sh-competences > .acc-section[data-fusion] .sh-empty { order: 100000; }
-			#sh-competences[data-vue="connues"] { row-gap: 0; }
-			#sh-competences[data-vue="connues"] > .capa-tete { margin-bottom: .35rem; }
+			/* ⚠️ Mêmes espacements dans LES DEUX vues, et gouttière de défilement réservée :
+			   passer de Connues à Apprendre ne doit déplacer ni la barre ni l'en-tête
+			   (un `row-gap` propre à une vue, ou une barre de défilement qui n'apparaît que
+			   dans l'une, décalait le titre et rétrécissait les cases). */
+			#sh-competences { row-gap: 0; scrollbar-gutter: stable; }
+			#sh-competences > .capa-tete { margin-bottom: .35rem; }
 			/* L'en-tête d'accordéon devient une étiquette de groupe, inerte. */
 			#sh-competences .acc-head {
 				pointer-events: none; padding: .55rem 0 .15rem; background: none;
@@ -1960,8 +1974,8 @@
 					<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.<span id="niv-voc-left-info" class="voc-niveau niveau-nb">{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}}</span> - {{character["race"]}} Niv.<span id="niv-left-info" class="race-niveau niveau-nb">{{character.get("niveau",'0')}}</span> ·<span id="rang-left-info"{% if character.get("rangs_guilde_title") %} title="{{ character['rangs_guilde_title'] }}"{% endif %}> Rang {{character.get("rang",'aucun')}}</span></div>
 					<div class="char-vitals" style="margin-top:8px">
 						<span class="pv-val">PV {{_pv}}/<span id="stat-left-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
-						{{ points_fiche(character.get("attribute_points", 0)) }}
 						<span class="pm-val">PM {{_pm}}/<span id="stat-left-drv-pm_max">{{d.get("pm_max","—")}}</span></span>
+						{{ points_fiche(character.get("attribute_points", 0)) }}
 					</div>
 					<!-- Effets actifs (consommables) : rendu par _renderEffetsActifs. -->
 					<div id="sh-effets-actifs" class="sh-effets-chips"></div>
@@ -2202,7 +2216,8 @@
 						   masqués, accordéons inchangés. État : attributs de #sh-competences,
 						   posés par capaVue / capaFiltre (mémorisés par personnage).
 						   Les modes d'attaque (🪃 Jet, 🏹 Tir) sont des lignes de « Connues »,
-						   filtrables par ⚔ Attaque (`data-type="attaque"`).
+						   filtrables par ⚔ Attaque (`data-type="attaque"`) : en DERNIER sans
+						   tri, dans le tri commun sinon (cf. _capaOrdonner).
 						   Recherche + tri (tous écrans) : lus au rendu par `_capaListe`. #}
 						<div class="capa-tete" id="capa-tete">
 							<div class="capa-vues" role="tablist" aria-label="Vue de l'onglet">
@@ -2218,9 +2233,9 @@
 							</div>
 							<div class="capa-filtres" aria-label="Filtrer">
 								<button type="button" class="capa-filtre" data-filtre="tout" onclick="capaFiltre('tout')">Tout</button>
-								<button type="button" class="capa-filtre" data-filtre="attaque" onclick="capaFiltre('attaque')">⚔ Attaque</button>
 								<button type="button" class="capa-filtre" data-filtre="competences" onclick="capaFiltre('competences')">⚡ Compétences</button>
 								<button type="button" class="capa-filtre" data-filtre="magie" onclick="capaFiltre('magie')">🔮 Magie</button>
+								<button type="button" class="capa-filtre" data-filtre="attaque" onclick="capaFiltre('attaque')">⚔ Attaque</button>
 							</div>
 						</div>
 						<div class="sh-empty capa-aucun" id="capa-aucun" hidden><span class="sh-empty-icon">🔍</span>Aucune action ne correspond à la recherche.</div>
@@ -2235,7 +2250,7 @@
 						   poser sa case de tir : un archer restait sans bouton pour tirer.
 						   ⚠️ `#sh-modes-attaque` est ENVELOPPÉ, jamais remplacé : le renderer
 						   écrase son intérieur, et l'ombre vit dans le wrapper au-dessus. #}
-						<section class="acc-section" data-vue="connues" data-type="attaque">
+						<section class="acc-section" data-vue="connues" data-type="attaque" data-fusion>
 							<button type="button" class="acc-head" id="acc-head-capa-modes" onclick="toggleOngletSection('competences', 'capa-modes')">
 								<span>🏹 Modes d'attaque</span><span class="acc-chevron">▾</span>
 							</button>
@@ -3114,13 +3129,16 @@
 		/* ── Choix de la cible d'un effet bénéfique (sort/compétence `cible: allie`) ──
 		   Même calque et mêmes briques de carte que les clauses : c'est aussi une
 		   décision bloquante, et refermer sans choisir ne doit RIEN lancer. */
-		#cible-allie-overlay {
+		#cible-allie-overlay, #choix-overlay {
 			position: fixed; inset: 0; z-index: 9400;
 			background: rgba(10, 8, 5, .78);
 			display: flex; align-items: center; justify-content: center; padding: 1rem;
 		}
-		#cible-allie-overlay.clauses-hidden { display: none; }
-		#cible-allie-overlay .item-detail-card { max-width: 460px; }
+		#cible-allie-overlay.clauses-hidden, #choix-overlay.clauses-hidden { display: none; }
+		#cible-allie-overlay .item-detail-card, #choix-overlay .item-detail-card { max-width: 460px; }
+		.choix-liste { margin: 0 0 .8rem; display: flex; flex-direction: column; gap: .3rem; }
+		.choix-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+		.choix-actions .sh-drop-btn { flex: 1 1 auto; margin-left: 0; padding: .45rem .6rem; }
 		.cible-allie-btn {
 			display: flex; align-items: center; gap: .6rem; width: 100%;
 			padding: .5rem .6rem; margin-bottom: .4rem; cursor: pointer;
@@ -3270,6 +3288,16 @@
 			<div id="cible-allie-body"></div>
 		</div>
 	</div><!-- /#cible-allie-overlay -->
+	{# Décision à quelques boutons (demanderChoix) : composants d'un sort lancé depuis la
+	   fiche, variantes d'un sort sur la barre… ✕ / Échap / clic hors carte = ANNULER,
+	   jamais un choix par défaut. #}
+	<div id="choix-overlay" class="clauses-hidden" role="dialog" aria-label="Choisir"
+		 onclick="if(event.target===this)closeChoix()">
+		<div class="item-detail-card">
+			<button class="item-detail-close" onclick="closeChoix()" title="Annuler">✕</button>
+			<div id="choix-body"></div>
+		</div>
+	</div><!-- /#choix-overlay -->
 	{# Dépassement du maximum racial : UNIQUE et IRRÉVERSIBLE pour le personnage.
 	   ✕ / Échap / clic hors carte = annuler sans rien engager — seul le bouton
 	   « Dépasser » de la carte envoie `use_max_bonus`. #}
@@ -4236,6 +4264,8 @@ document.addEventListener('keydown', e => {
 	if (contratOv && !contratOv.classList.contains('clauses-hidden')) { _contratLaisser(); return; }
 	const cibleAllie = document.getElementById('cible-allie-overlay');
 	if (cibleAllie && !cibleAllie.classList.contains('clauses-hidden')) { closeCibleAllie(); return; }
+	const choixOv = document.getElementById('choix-overlay');
+	if (choixOv && !choixOv.classList.contains('clauses-hidden')) { closeChoix(); return; }
 	// ⚠️ Le sur-mesure attend une promesse, comme le choix de cible : Échap doit la RÉSOUDRE
 	// (à null), sinon la commande reste suspendue et son bouton désactivé pour toujours.
 	const surMesure = document.getElementById('sur-mesure-overlay');
@@ -5759,6 +5789,89 @@ function _slotSelect(type, ref, composants, titre) {
 		title="${titre || 'Case de la barre de combat'}"
 		onchange="affecterSlot('${type}', '${ref}', ${arg}, this)">${html}</select>`;
 }
+// Sélecteur UNIQUE d'un sort à composants CONSOMMABLES (deux sélecteurs côte à côte ne
+// tenaient pas sur une ligne mobile) : chaque case est proposée deux fois, sans et avec
+// dépense des composants — le libellé « + compo » le dit, y compris replié. Poser une
+// variante quand l'autre est déjà sur la barre DEMANDE (remplacer / garder les deux,
+// affecterSlotSort) ; retirer l'une des deux propose de retirer les deux (_retirerVariantes).
+// Les deux posées : une option non choisissable les nomme.
+function _slotSelectSort(ref) {
+	const sans = _caseDe('sort', ref, false), avec = _caseDe('sort', ref, true);
+	const occupees = new Set([sans, avec].filter(Boolean).map(s => s.position));
+	const cases = _barreSlots.filter(s => !s.obligatoire && (!s.type || occupees.has(s.position)));
+	const seule = (sans && avec) ? null : (sans || avec);
+	const groupe = (compo, label) => `<optgroup label="${label}">` + cases.map(s => {
+		const choisie = seule && seule.position === s.position && !!seule.composants === compo;
+		return `<option value="${s.position}|${compo ? 1 : 0}" ${choisie ? 'selected' : ''}>${s.position}${compo ? ' + compo' : ''}</option>`;
+	}).join('') + '</optgroup>';
+	const deux = (sans && avec)
+		? `<option value="" selected hidden>${sans.position} · ${avec.position} + compo</option>` : '';
+	return `<select name="sh-slot-select-${ref}" class="sh-slot-select${occupees.size ? ' active' : ''}"
+		title="Case de la barre de combat — « + compo » : en dépensant les composants"
+		onchange="affecterSlotSort('${ref}', this)">${deux}<option value="">—</option>`
+		+ groupe(false, 'Sans dépenser de composant') + groupe(true, 'En dépensant les composants') + '</select>';
+}
+async function affecterSlotSort(ref, sel) {
+	const [pos, compo] = sel.value.split('|');
+	if (!pos) {
+		const sans = _caseDe('sort', ref, false), avec = _caseDe('sort', ref, true);
+		// Les deux sur la barre : retirer l'une propose de retirer les deux (_retirerVariantes).
+		if (sans && avec) { await _retirerVariantes(ref, null); _renderSorts(); return; }
+		const courante = sans || avec;
+		if (courante) await _postSlots('api/slot_action', { position: courante.position, entree: null });
+		return;
+	}
+	const position = parseInt(pos, 10);
+	const composants = compo === '1';
+	// L'autre variante est déjà ailleurs sur la barre : on DEMANDE (la remplacer, garder
+	// les deux) au lieu de décider. Sur sa propre case, la poser l'écrase : rien à demander.
+	const autre = _caseDe('sort', ref, !composants);
+	let remplacer = false;
+	if (autre && autre.position !== position) {
+		const nom = _nomSort(ref);
+		remplacer = await demanderChoix(`🎯 ${nom} est déjà dans la barre`,
+			`<div class="sh-skill-desc" style="margin-bottom:.7rem">Case ${autre.position} : ${_libVariante(!composants)}.
+			Vous posez la version ${_libVariante(composants)} en case ${position}.</div>`,
+			[{ label: `Remplacer (retirer la case ${autre.position})`, valeur: true },
+			 { label: 'Garder les deux', valeur: false }]);
+		if (remplacer === null) { _renderSorts(); return; }   // annulé : le sélecteur revient
+	}
+	const ok = await _postSlots('api/slot_action',
+		{ position, entree: { type: 'sort', ref, composants } });
+	const reste = ok && remplacer && _caseDe('sort', ref, !composants);
+	if (reste) await _postSlots('api/slot_action', { position: reste.position, entree: null });
+}
+function _nomSort(ref) {
+	const s = (_sorts || []).find(x => x.sort_id === ref);
+	return s ? `${s.icon || '🔮'} ${s.nom}` : 'Ce sort';
+}
+function _libVariante(composants) { return composants ? 'avec composants (+)' : 'sans composant'; }
+// Les DEUX variantes d'un sort sont sur la barre et l'on en retire une (`position`, ou
+// null depuis le sélecteur, qui ne sait pas laquelle) : proposer de retirer les deux.
+// Renvoie false si annulé.
+async function _retirerVariantes(ref, position) {
+	const sans = _caseDe('sort', ref, false), avec = _caseDe('sort', ref, true);
+	const boutons = [{ label: 'Retirer les deux', valeur: 'deux' }];
+	if (position === null) {
+		boutons.push({ label: `Seulement la case ${sans.position} (sans)`, valeur: sans.position },
+					 { label: `Seulement la case ${avec.position} (+)`, valeur: avec.position });
+	} else {
+		boutons.push({ label: `Seulement la case ${position}`, valeur: position });
+	}
+	const choix = await demanderChoix(`🎯 ${_nomSort(ref)} — retirer de la barre`,
+		`<div class="sh-skill-desc" style="margin-bottom:.7rem">Le sort occupe deux cases : ${sans.position} (${_libVariante(false)}) et ${avec.position} (${_libVariante(true)}).</div>`,
+		boutons);
+	if (choix === null) return false;
+	const cases = choix === 'deux' ? [sans.position, avec.position] : [choix];
+	for (const p of cases) await _postSlots('api/slot_action', { position: p, entree: null });
+	return true;
+}
+// « ⚔ » seul (le mot « combat » prenait la place des sélecteurs) : son explication s'ouvre
+// en bulle au toucher — le tactile n'a pas de survol pour lire le `title`.
+function _aideCombat(texte) {
+	return `<button type="button" class="sh-skill-lvl sh-aide-combat" title="${texte}"
+		aria-label="Combat : ${texte}" aria-expanded="false" data-aide="${texte}">⚔</button>`;
+}
 
 // Affectation depuis un sélecteur : vider l'ancienne case si l'on repasse à « — »,
 // sinon poser l'entrée à la position choisie (le serveur gère déplacement et échange).
@@ -5791,6 +5904,7 @@ async function _postSlots(url, body) {
 		_barreSlots = data.slots || _barreSlots;
 		_renderBarreSlots();
 		_renderSorts(); _renderCompetences(); _refreshInventaire();
+		return true;
 	} catch (err) { console.error('Erreur slots', err); }
 }
 
@@ -5889,7 +6003,7 @@ function _renderModesAttaque() {
 	// Recherche + tri de l'onglet (_capaListe) : comme les compétences et les sorts, à qui
 	// ces lignes se mêlent dans la vue « Connues » du portrait (filtre ⚔ Attaque).
 	const modes = _MODES_ATTAQUE.map(([ref, icon, nom, desc]) => ({ ref, icon, nom, desc }));
-	box.innerHTML = _capaListe(modes).map(({ ref, icon, nom, desc }) => `<div class="sh-skill">
+	box.innerHTML = _capaListe(modes).map(({ ref, icon, nom, desc }) => `<div class="sh-skill" data-capa="a:${ref}">
 		<span class="sh-skill-icon">${icon}</span>
 		<div class="sh-skill-info">
 			<div class="sh-skill-name">${nom}</div>
@@ -5897,6 +6011,7 @@ function _renderModesAttaque() {
 		</div>
 		<div class="sh-inv-actions"><span class='sh-slot-choice'>case: </span>${_slotSelect('attaque', ref, undefined, 'Case de la barre de combat')}</div>
 	</div>`).join('');
+	_capaOrdonner();
 }
 
 // Retire l'action d'une case, sur confirmation. Le serveur refuse déjà (422) de vider
@@ -5904,6 +6019,10 @@ function _renderModesAttaque() {
 function _viderCaseBarre(position) {
 	const slot = _barreSlots.find(s => s.position === position);
 	if (!slot || !slot.type || slot.obligatoire) return;
+	if (slot.type === 'sort' && _caseDe('sort', slot.ref, !slot.composants)) {
+		_retirerVariantes(slot.ref, position);
+		return;
+	}
 	if (!confirm(`Retirer ${slot.nom || 'cette action'} de la case ${position} ?`)) return;
 	_postSlots('api/slot_action', { position, entree: null });
 }
@@ -5989,7 +6108,6 @@ function _invocationLabel(s) {
 	return `🐾 invoque ${inv.nombre > 1 ? inv.nombre + ' créatures' : 'une créature'}`
 		+ (s.maintien ? ' tant que vous l\'entretenez' : ` pendant ${inv.duree} tours`);
 }
-function _sortDomId(sortId) { return sortId.replace(/[^a-zA-Z0-9_-]/g, '_'); }
 
 // Portée d'un sort, pour la fiche dépliée des DEUX listes (connus + à apprendre).
 // ⚠️ Rien pour `cible:"soi"` : se viser soi-même n'a pas de distance — même règle que
@@ -6014,32 +6132,27 @@ function _renderSorts(list) {
 		box.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">🔮</span>Aucun sort connu.</div>';
 		return;
 	}
-	const rangs = _capaRangsConnus();
 	box.innerHTML = _capaListe(_sorts).map(s => {
 		const compos = (s.composants || []).map(c =>
 			`<span class="sh-sort-compo${c.disponible ? '' : ' off'}" title="${c.consomme ? 'Consommé au lancement' : 'Catalyseur (non consommé, il suffit de le porter)'}">${c.consomme ? '⚗️' : '💎'} ${c.icon || ''} ${c.nom}${_sortEffetsLabel(c.bonus) ? ' → ' + _sortEffetsLabel(c.bonus) : ''}</span>`
 		).join('');
-		const hasCompo = (s.composants || []).some(c => c.disponible);
-		// Deux cases possibles pour un sort à composants CONSOMMABLES : une qui les
-		// dépense (« + »), une qui les économise. Les catalyseurs partent toujours, ils
-		// ne créent donc pas de variante. Sans composant consommable, un seul sélecteur.
+		// Deux variantes pour un sort à composants CONSOMMABLES : une qui les dépense
+		// (« + »), une qui les économise — réunies dans UN sélecteur (_slotSelectSort).
+		// Les catalyseurs partent toujours, ils ne créent donc pas de variante.
 		const aCompoConso = (s.composants || []).some(c => c.consomme);
-		const pin = _slotSelect('sort', s.sort_id, false, 'Case de la barre — sans dépenser de composant')
-			+ (aCompoConso
-				? '<span class="sh-compo-lbl sh-barre-plus " title="Variante qui dépense les composants">+</span>'
-				  + _slotSelect('sort', s.sort_id, true, 'Case de la barre — en dépensant les composants')
-				: '');
+		const pin = aCompoConso
+			? _slotSelectSort(s.sort_id)
+			: _slotSelect('sort', s.sort_id, false, 'Case de la barre — sans dépenser de composant');
 		const actions = pin + (s.lancable
-			? `<label class="sh-sort-uselbl" title="Engager les composants disponibles (renforce le sort ; les consommés sont dépensés)"><input type="checkbox" id="sortchk-${_sortDomId(s.sort_id)}" checked ${hasCompo ? '' : 'disabled'}>compo</label>
-			   <button type="button" class="sh-drop-btn" onclick="lancerSort('${s.sort_id}', this)">Lancer</button>`
-			: `<span class="sh-skill-lvl" title="Utilisable en combat seulement">⚔ combat</span>`);
+			? `<button type="button" class="sh-drop-btn" onclick="lancerSort('${s.sort_id}', this)">Lancer</button>`
+			: _aideCombat('Utilisable en combat seulement'));
 		// Sort déjà connu → sa fiche est toujours consultable (aucun grimoire à porter). Une
 		// portée suffit à la rendre dépliable : sans ce `||`, un sort écrit sans prose n'aurait
 		// aucun endroit où annoncer sa distance.
 		const portee = _sortPorteeTexte(s);
 		const peutVoir = !!s.description || !!portee;
 		const ouvert = peutVoir && _sortsDescOuvertes.has(s.sort_id);
-		return `<div class="sh-skill${ouvert ? ' expanded' : ''}" style="order:${rangs.get('s:' + s.sort_id) || 0}">
+		return `<div class="sh-skill${ouvert ? ' expanded' : ''}" data-capa="s:${s.sort_id}">
 			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
 			<div${_sortInfoAttrs(s.sort_id, peutVoir)}>
 				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${_pmLabel(s)}</span></div>
@@ -6050,6 +6163,7 @@ function _renderSorts(list) {
 			<div class="sh-inv-actions">${actions}</div>
 		</div>`;
 	}).join('');
+	_capaOrdonner();
 }
 
 function _renderSortsApprenables(list) {
@@ -6154,12 +6268,56 @@ function _appliquerVitauxCible(l) {
 	if (_grpEtat) _grpEtat = null;   // payload périmé : rechargé au prochain besoin
 }
 
+// Décision bloquante à quelques boutons (#choix-overlay) : renvoie la `valeur` du bouton
+// choisi, ou null si annulé (✕ / Échap / clic hors carte — Conventions §8, la promesse
+// est RÉSOLUE, jamais laissée en suspens). Une seule question à la fois.
+let _choixResolve = null;
+let _choixValeurs = [];
+function closeChoix() { _choisir(-1); }
+function _choisir(i) {
+	document.getElementById('choix-overlay').classList.add('clauses-hidden');
+	const v = i >= 0 ? _choixValeurs[i] : null;
+	if (_choixResolve) { const r = _choixResolve; _choixResolve = null; r(v); }
+}
+function demanderChoix(titre, corps, boutons) {
+	if (_choixResolve) _choisir(-1);   // une question restée ouverte est annulée
+	_choixValeurs = boutons.map(b => b.valeur);
+	document.getElementById('choix-body').innerHTML =
+		`<h3 style="margin:.1rem 0 .5rem; padding-right:2rem">${titre}</h3>${corps || ''}`
+		+ `<div class="choix-actions">${boutons.map((b, i) =>
+			`<button type="button" class="sh-drop-btn" onclick="_choisir(${i})">${b.label}</button>`).join('')}</div>`;
+	document.getElementById('choix-overlay').classList.remove('clauses-hidden');
+	return new Promise(resolve => { _choixResolve = resolve; });
+}
+
+// Proposition des composants CONSOMMABLES au lancement depuis la fiche (la case « compo »
+// d'avant les engageait d'office). Renvoie true (les dépenser), false (s'en passer) ou
+// null (annulé).
+function demanderComposants(s, consos) {
+	const liste = consos.map(c => {
+		const bonus = _sortEffetsLabel(c.bonus);
+		return `<span class="sh-sort-compo">⚗️ ${c.icon || ''} ${escapeHtml(c.nom || c.item)}${bonus ? ' → ' + bonus : ''}</span>`;
+	}).join('');
+	return demanderChoix(
+		`${s.icon || '🔮'} ${s.nom} — utiliser ${consos.length > 1 ? 'les composants' : 'le composant'} ?`,
+		`<div class="sh-skill-desc" style="margin-bottom:.4rem">Renforce le sort ; ${consos.length > 1 ? 'ils sont dépensés' : 'il est dépensé'} au lancement.</div>`
+		+ `<div class="choix-liste">${liste}</div>`,
+		[{ label: '⚗️ Utiliser', valeur: true }, { label: 'Sans', valeur: false }]);
+}
+
 async function lancerSort(sortId, btn) {
 	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
 	const s = _sorts.find(x => x.sort_id === sortId);
-	const chk = document.getElementById('sortchk-' + _sortDomId(sortId));
-	const composants = (s && chk && chk.checked)
-		? (s.composants || []).filter(c => c.disponible).map(c => c.item) : [];
+	// Catalyseurs disponibles : toujours engagés (rien ne se dépense). Consommables
+	// disponibles : proposés au joueur — annuler arrête le lancement.
+	const dispo = s ? (s.composants || []).filter(c => c.disponible) : [];
+	const consos = dispo.filter(c => c.consomme);
+	let composants = dispo.filter(c => !c.consomme).map(c => c.item);
+	if (consos.length) {
+		const avec = await demanderComposants(s, consos);
+		if (avec === null) { if (btn) btn.disabled = false; return; }
+		if (avec) composants = composants.concat(consos.map(c => c.item));
+	}
 	// Sort d'entraide : on demande la cible AVANT d'envoyer (les PM partent à l'envoi).
 	// Annuler doit tout arrêter, y compris réactiver le bouton.
 	let cible_id = null;
@@ -6324,7 +6482,6 @@ function _renderCompetences(list) {
 		box.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">⚡</span>Aucune compétence apprise.</div>';
 		return;
 	}
-	const rangs = _capaRangsConnus();
 	box.innerHTML = _capaListe(_competences).map(c => {
 		// Une passive n'a ni action ni case de barre : son bonus est permanent (inclus
 		// dans les dérivées), il n'y a rien à déclencher. SAUF une passive de PIÈGE
@@ -6333,11 +6490,11 @@ function _renderCompetences(list) {
 		const pin = (c.mode === 'active' || c.action_piege) ? _slotSelect('competence', c.competence_id) : '';
 		const actions = c.mode === 'passive'
 			? pin + (c.action_piege
-				? '<span class="sh-skill-lvl" title="Action de combat : à placer dans la barre">⚔ combat</span>'
+				? _aideCombat('Action de combat : à placer dans la barre')
 				: '<span class="sh-skill-lvl" title="Bonus permanent, déjà inclus dans vos caractéristiques">🛡 passive</span>')
 			: pin + (c.utilisable
 				? `<button type="button" class="sh-drop-btn" onclick="utiliserCompetence('${c.competence_id}', this)">Utiliser</button>`
-				: '<span class="sh-skill-lvl" title="Utilisable en combat seulement">⚔ combat</span>');
+				: _aideCombat('Utilisable en combat seulement'));
 		const pm = c.cout_pm ? `<span class="sh-sort-pm">${_pmLabel(c)}</span>` : '';
 		let portee = '';
 		if (c.mode === 'active' && c.cible === 'ennemi') portee = ` · portée ${c.portee}`;
@@ -6349,7 +6506,7 @@ function _renderCompetences(list) {
 		const armeTitre = !arme ? ''
 			: c.jet === 'cd' ? ' title="Ces dés s\'ajoutent aux dégâts de votre arc ou arme de lancer"'
 			: ' title="Ces dés s\'ajoutent aux dégâts de votre arme"';
-		return `<div class="sh-skill" style="order:${rangs.get('c:' + c.competence_id) || 0}">
+		return `<div class="sh-skill" data-capa="c:${c.competence_id}">
 			<span class="sh-skill-icon">${c.icon || '⚡'}</span>
 			<div class="sh-skill-info">
 				<div class="sh-skill-name">${c.nom}${pm}</div>
@@ -6359,6 +6516,7 @@ function _renderCompetences(list) {
 			<div class="sh-inv-actions">${actions}</div>
 		</div>`;
 	}).join('');
+	_capaOrdonner();
 }
 
 function _renderCompetencesApprenables(list) {
@@ -6872,16 +7030,26 @@ function _capaListe(arr, cle = 'nom') {
 	_capaPlanifierAucun();
 	return out;
 }
-// Rang de chaque ligne dans la liste FUSIONNÉE compétences + sorts (`c:<id>` / `s:<id>`),
-// posé en `order` sur la ligne : en portrait (vue Connues) les deux listes passent en
-// `display: contents` et leurs lignes deviennent des éléments flex de l'onglet — UN tri pour
-// les deux, sans dupliquer le DOM (les ids `sortchk-*` restent uniques). Ailleurs, `order`
-// est inerte (listes en bloc). Sans tri : compétences puis sorts, comme avant. Rangs ≥ 1 :
-// les lignes passent APRÈS tout ce qui reste à `order: 0` (barre, en-tête, attaques).
+// Rang de chaque ligne dans la liste FUSIONNÉE compétences + sorts + modes d'attaque
+// (`c:<id>` / `s:<id>` / `a:<ref>`), posé en `order` sur la ligne : en portrait (vue Connues)
+// les trois listes passent en `display: contents` et leurs lignes deviennent des éléments
+// flex de l'onglet — UN tri pour toutes, sans dupliquer le DOM. Ailleurs, `order` est
+// inerte (listes en bloc). Sans tri : compétences, sorts, puis les modes d'attaque EN DERNIER. Rangs ≥ 1 : les lignes passent APRÈS tout ce qui
+// reste à `order: 0` (barre, en-tête).
 function _capaRangsConnus() {
 	const tous = (_competences || []).map(c => ({ k: 'c:' + c.competence_id, nom: c.nom }))
-		.concat((_sorts || []).map(s => ({ k: 's:' + s.sort_id, nom: s.nom })));
+		.concat((_sorts || []).map(s => ({ k: 's:' + s.sort_id, nom: s.nom })))
+		.concat(_MODES_ATTAQUE.map(([ref, , nom]) => ({ k: 'a:' + ref, nom })));
 	return new Map(_capaTrier(tous, 'nom').map((x, i) => [x.k, i + 1]));
+}
+// Réapplique les rangs à TOUTES les lignes rangées (`data-capa`) de l'onglet. Appelée par
+// chacun des trois renderers : un rang dépend des trois listes (un sort appris décale les
+// modes d'attaque qui le suivent), une liste rendue seule laisserait les autres périmées.
+function _capaOrdonner() {
+	const rangs = _capaRangsConnus();
+	document.querySelectorAll('#sh-competences [data-capa]').forEach(el => {
+		el.style.order = rangs.get(el.dataset.capa) || 0;
+	});
 }
 function cycleCapaSort() {
 	_capaSort = _cycleSort(_capaSort);
@@ -6945,10 +7113,47 @@ function capaFiltre(filtre) {
 // fiche consultable ont déjà leur bascule (`.sh-skill-toggle` → _toggleSortDesc), qui
 // survit au re-rendu ; `.deplie`, purement DOM, se perd au prochain rendu de la liste.
 document.getElementById('sh-competences')?.addEventListener('click', ev => {
+	const aide = ev.target.closest('.sh-aide-combat');
+	if (aide) { _bulleAide(aide); return; }
 	const info = ev.target.closest('.sh-skill-info');
 	if (!info || info.classList.contains('sh-skill-toggle')) return;
 	info.closest('.sh-skill')?.classList.toggle('deplie');
 });
+
+// Bulle d'aide d'un ⚔ (_aideCombat) : UNE bulle, en `position: fixed` sous le bouton (au-dessus
+// faute de place), bornée à la fenêtre. Se ferme au toucher suivant ailleurs (re-toucher le
+// même ⚔ la referme), à Échap et au défilement de l'onglet.
+let _bulleAideAncre = null;
+function _fermerBulleAide() {
+	const b = document.getElementById('sh-bulle-aide');
+	if (b) b.hidden = true;
+	if (_bulleAideAncre) _bulleAideAncre.setAttribute('aria-expanded', 'false');
+	_bulleAideAncre = null;
+}
+function _bulleAide(ancre) {
+	if (_bulleAideAncre === ancre) { _fermerBulleAide(); return; }
+	_fermerBulleAide();
+	let b = document.getElementById('sh-bulle-aide');
+	if (!b) {
+		b = document.createElement('div');
+		b.id = 'sh-bulle-aide';
+		b.className = 'sh-bulle-aide';
+		b.setAttribute('role', 'tooltip');
+		document.body.appendChild(b);
+	}
+	b.textContent = ancre.dataset.aide || '';
+	b.hidden = false;
+	const r = ancre.getBoundingClientRect(), w = b.offsetWidth, h = b.offsetHeight, m = 8;
+	b.style.left = Math.max(m, Math.min(r.right - w, window.innerWidth - w - m)) + 'px';
+	b.style.top = (r.bottom + 6 + h <= window.innerHeight - m ? r.bottom + 6 : Math.max(m, r.top - 6 - h)) + 'px';
+	ancre.setAttribute('aria-expanded', 'true');
+	_bulleAideAncre = ancre;
+}
+document.addEventListener('pointerdown', ev => {
+	if (_bulleAideAncre && !ev.target.closest('.sh-aide-combat, #sh-bulle-aide')) _fermerBulleAide();
+}, true);
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') _fermerBulleAide(); });
+document.getElementById('sh-competences')?.addEventListener('scroll', _fermerBulleAide, { passive: true });
 
 // Compte de « 📖 Apprendre » : ce que les points permettent MAINTENANT (compétence, sort
 // dont on porte le grimoire, école à pratiquer ou à monter). Mêmes conditions que le
@@ -10448,8 +10653,8 @@ function _applySheetIdentite(p) {
 			+ (p.rang ? ` · Rang ${escapeHtml(p.rang)}` : '');
 		// Mêmes ids que le gabarit Jinja : _refreshDerivedStats continue d'y écrire les max.
 		const vitals = `<span class="pv-val">PV ${v.currentPV}/<span id="stat-left-drv-pv_max">${v.pv_max}</span></span>`
-			+ `<span class="sh-card-points pts-dispo" title="Points d'attribut à répartir">★ <span data-points></span></span>`
-			+ `<span class="pm-val">PM ${v.currentPM}/<span id="stat-left-drv-pm_max">${v.pm_max}</span></span>`;
+			+ `<span class="pm-val">PM ${v.currentPM}/<span id="stat-left-drv-pm_max">${v.pm_max}</span></span>`
+			+ `<span class="sh-card-points pts-dispo" title="Points d'attribut à répartir">★ <span data-points></span></span>`;
 		els.gauche.innerHTML = `<div class="char-name">${p.prenom} ${p.nom}</div>`
 			+ `<div class="char-class">${classe}</div>`
 			+ `<div class="char-vitals" style="margin-top:8px">${vitals}</div>`
