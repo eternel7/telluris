@@ -29,7 +29,8 @@ SOUNDS_PATH = "templates/resources/sounds"
 
 # Types de docs auxquels une animation peut être liée. `item` couvre les armes ET les
 # consommables — c'est le même champ, lu à deux endroits différents du combat.
-TYPES_LIABLES = ("sort", "competence", "item", "espece")
+# Source unique : les champs de liaison et les types qui les lisent (`CHAMPS_LIAISON`).
+TYPES_LIABLES = animations_util.CHAMPS_LIAISON[animations_util.CHAMP_LIAISON_DEFAUT]
 
 
 def _require_admin(current_user: dict) -> None:
@@ -232,7 +233,9 @@ async def liaisons(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	doc_type: str = Query("", alias="type"),
 ):
-	"""Docs d'un type liables, avec leur animation courante.
+	"""Docs d'un type liables, avec leurs liaisons courantes (`champs` : celles que ce type lit).
+
+	`zone` (sa seule `forme`) est rendue pour dire où `animation_zone` sert à quelque chose.
 
 	⚠️ Requête PROJETÉE (`fields`) : lister les items sans projection rapatrierait toute
 	la base d'objets pour n'en afficher que le nom."""
@@ -241,8 +244,13 @@ async def liaisons(
 	if t not in TYPES_LIABLES:
 		raise HTTPException(status_code=400,
 							detail=f"Type liable attendu parmi {', '.join(TYPES_LIABLES)}.")
-	docs = find_docs({"type": t}, fields=["_id", "nom", "icon", "animation"]) or []
-	return {"type": t, "docs": sorted(docs, key=lambda d: str(d.get("nom") or d.get("_id") or ""))}
+	champs = animations_util.champs_liables(t)
+	docs = find_docs({"type": t}, fields=["_id", "nom", "icon", "zone"] + champs) or []
+	for d in docs:
+		zone = d.pop("zone", None)
+		d["zone_forme"] = str(zone.get("forme") or "") if isinstance(zone, dict) else ""
+	return {"type": t, "champs": champs,
+			"docs": sorted(docs, key=lambda d: str(d.get("nom") or d.get("_id") or ""))}
 
 
 @animations_router.post("/admin/animations/lier")
@@ -250,7 +258,8 @@ async def lier_animation(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	payload: dict = Body(...),
 ):
-	"""Pose (ou retire) le SEUL champ `animation` sur un doc de contenu.
+	"""Pose (ou retire) UN champ de liaison (`champ` : `animation` par défaut, ou
+	`animation_zone` sur un sort / une compétence) sur un doc de contenu.
 
 	Fusion mono-champ : le doc est relu en base et réécrit tel quel à un champ près —
 	à l'opposé du PUT complet d'`admin_import_bulk`, qui obligerait à reproduire le
@@ -258,15 +267,15 @@ async def lier_animation(
 	_require_admin(current_user)
 	doc_id = str(payload.get("doc_id") or "").strip()
 	animation = str(payload.get("animation") or "").strip()
+	champ = str(payload.get("champ") or animations_util.CHAMP_LIAISON_DEFAUT).strip()
 	if not doc_id:
 		raise HTTPException(status_code=400, detail="Champ 'doc_id' requis.")
 	doc = get_doc(doc_id)
 	if not doc:
 		raise HTTPException(status_code=404, detail="Document introuvable.")
-	if animation:
-		doc["animation"] = animation
-	else:
-		doc.pop("animation", None)
+	erreur = animations_util.appliquer_liaison(doc, champ, animation)
+	if erreur:
+		raise HTTPException(status_code=400, detail=erreur)
 	if save_doc(doc) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — rechargez et réessayez.")
-	return {"saved": True, "_id": doc_id, "animation": animation}
+	return {"saved": True, "_id": doc_id, "champ": champ, "animation": animation}

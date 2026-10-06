@@ -308,6 +308,41 @@ def animation_pour(canal: str, source_anim: str | None = None) -> str:
 	return str(defauts.get(str(canal or ""), "") or "").strip()
 
 
+# Champs de liaison posables par l'écran Liaisons, et les types de docs qui les lisent.
+# `animation` : l'impact du coup (sort, compétence, arme/consommable, espèce).
+# `animation_zone` : la nappe jouée UNE fois au lancement d'une capacité à zone
+# (`combat._vfx_de_zone`) — seuls sorts et compétences ont une zone.
+CHAMPS_LIAISON = {
+	"animation": ("sort", "competence", "item", "espece"),
+	"animation_zone": ("sort", "competence"),
+}
+CHAMP_LIAISON_DEFAUT = "animation"
+
+
+def champs_liables(doc_type: str) -> list:
+	"""Champs de liaison qu'un doc de ce type sait lire, dans l'ordre d'affichage."""
+	return [c for c, types in CHAMPS_LIAISON.items() if doc_type in types]
+
+
+def appliquer_liaison(doc: dict, champ: str, animation: str) -> str | None:
+	"""Pose (ou retire, `animation` vide) UN champ de liaison sur `doc`, muté sans sauver.
+
+	Rend un message d'erreur — et ne touche à rien — si le champ est inconnu ou que le type
+	du doc ne le lit pas : un `animation_zone` posé sur une arme serait une liaison morte,
+	acceptée sans un mot et jamais jouée."""
+	champ = str(champ or CHAMP_LIAISON_DEFAUT).strip()
+	if champ not in CHAMPS_LIAISON:
+		return f"Champ de liaison inconnu : {champ}."
+	if champ not in champs_liables(str(doc.get("type") or "")):
+		return f"Un doc de type « {doc.get('type')} » ne lit pas le champ {champ}."
+	animation = str(animation or "").strip()
+	if animation:
+		doc[champ] = animation
+	else:
+		doc.pop(champ, None)
+	return None
+
+
 def defauts_canaux() -> dict:
 	"""Copie de la table des défauts par CANAL, pour l'AFFICHER (rappel de `/admin/animations`).
 

@@ -525,3 +525,37 @@ def test_journal_animation_darme_prime_sur_le_mode(monkeypatch, defauts_vierges)
             profil["animation"] = "animation:hache_a"
     combat_mod.resolve_action(combat, "attaquer", cible_id="monstre_0")
     assert _dernier_vfx(combat)["anim"] == "animation:hache_a"
+
+
+# ── Liaisons (écran /admin/animations) ───────────────────────────────────────────
+
+def test_champs_liables_selon_le_type():
+    assert anim.champs_liables("sort") == ["animation", "animation_zone"]
+    assert anim.champs_liables("competence") == ["animation", "animation_zone"]
+    assert anim.champs_liables("item") == ["animation"]
+    assert anim.champs_liables("espece") == ["animation"]
+    assert anim.champs_liables("lieu") == []
+
+
+def test_appliquer_liaison_pose_puis_retire_un_seul_champ():
+    doc = {"_id": "sort:souffle", "type": "sort", "animation": "animation:impact"}
+    assert anim.appliquer_liaison(doc, "animation_zone", " animation:nappe ") is None
+    assert doc == {"_id": "sort:souffle", "type": "sort", "animation": "animation:impact",
+                   "animation_zone": "animation:nappe"}
+    assert anim.appliquer_liaison(doc, "animation_zone", "") is None
+    assert doc == {"_id": "sort:souffle", "type": "sort", "animation": "animation:impact"}
+
+
+def test_appliquer_liaison_champ_absent_vaut_animation():
+    doc = {"_id": "item:hache", "type": "item"}
+    assert anim.appliquer_liaison(doc, "", "animation:hache_a") is None
+    assert doc["animation"] == "animation:hache_a"
+
+
+def test_appliquer_liaison_refuse_sans_rien_toucher():
+    arme = {"_id": "item:hache", "type": "item"}
+    assert anim.appliquer_liaison(arme, "animation_zone", "animation:nappe")
+    assert arme == {"_id": "item:hache", "type": "item"}
+    sort = {"_id": "sort:x", "type": "sort"}
+    assert anim.appliquer_liaison(sort, "icon", "animation:nappe")
+    assert sort == {"_id": "sort:x", "type": "sort"}

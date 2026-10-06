@@ -437,6 +437,11 @@
 				proposée. L'enregistrement part quand le champ perd le focus ou à la touche
 				Entrée ; un identifiant inconnu est signalé en rouge et <strong>rien n'est
 				écrit</strong>. Vider le champ retire la liaison.
+				<br>Sorts et compétences ont une seconde colonne, <strong>Zone</strong>
+				(<code>animation_zone</code>) : la nappe jouée <em>une seule fois</em> au
+				lancement d'une capacité à zone, au centre de la forme et dans son axe, avant
+				l'impact de la colonne <em>Animation</em> sur chaque victime. Elle n'est
+				saisissable que sur une capacité qui porte une zone (forme indiquée sous son nom).
 			</div>
 			<!-- Une SEULE liste pour toutes les lignes : elle suit DOCS et donc le chargement
 			     comme le scan. -->
@@ -453,7 +458,7 @@
 			<div class="status" id="liaison-status"></div>
 			<div class="liaison-scroll" style="margin-top:12px">
 				<table>
-					<thead><tr><th style="width:45%">Document</th><th>Animation</th></tr></thead>
+					<thead id="liaison-head"><tr><th style="width:45%">Document</th><th>Animation</th></tr></thead>
 					<tbody id="liaison-body"></tbody>
 				</table>
 			</div>
@@ -1181,8 +1186,26 @@ function animationConnue(id) {
 // `name` dérivé du `data-doc` : il rend la ligne identifiable par le navigateur (autofill,
 // gestionnaires de formulaire, extensions) et lisible dans le DOM. Les caractères hors
 // jeu sûr sont remplacés — l'autorité reste `data-doc`, qui porte l'id EXACT.
-function nomChampLiaison(docId) {
-	return 'anim_' + String(docId || '').replace(/[^A-Za-z0-9_.:-]+/g, '_');
+function nomChampLiaison(docId, champ) {
+	const prefixe = champ === 'animation_zone' ? 'anim_zone_' : 'anim_';
+	return prefixe + String(docId || '').replace(/[^A-Za-z0-9_.:-]+/g, '_');
+}
+
+// En-têtes des colonnes de liaison, dans l'ordre que rend le serveur (`champs`).
+const LIBELLES_CHAMP_LIAISON = { animation: 'Animation', animation_zone: 'Zone (une fois)' };
+
+// Une cellule de liaison. `animation_zone` n'est saisissable que sur une capacité qui porte
+// une zone — ailleurs le moteur ne la lirait jamais. Une valeur DÉJÀ posée reste éditable,
+// pour pouvoir la retirer.
+function celluleLiaison(d, champ) {
+	const val = d[champ] || '';
+	const inerte = champ === 'animation_zone' && !d.zone_forme && !val;
+	return `<td><input class="liaison-input" type="text" list="animations-list" spellcheck="false"`
+		+ ` autocomplete="off" placeholder="${inerte ? '— sans zone —' : '— aucune —'}"`
+		+ (inerte ? ' disabled' : '')
+		+ ` data-doc="${escapeHtml(d._id)}" data-champ="${escapeHtml(champ)}"`
+		+ ` name="${escapeHtml(nomChampLiaison(d._id, champ))}"`
+		+ ` value="${escapeHtml(val)}"></td>`;
 }
 
 // Un collage traîne souvent une espace ou un retour à la ligne : on nettoie AVANT de
@@ -1208,15 +1231,17 @@ async function chargerLiaisons() {
 		const data = await r.json().catch(() => ({}));
 		if (!r.ok) { setStatus($('liaison-status'), 'Échec : ' + (data.detail || r.status), 'err'); return; }
 		const docs = data.docs || [];
+		const champs = (data.champs && data.champs.length) ? data.champs : ['animation'];
 		majDatalistAnimations();
+		$('liaison-head').innerHTML = '<tr><th style="width:' + (champs.length > 1 ? 34 : 45)
+			+ '%">Document</th>' + champs.map(c =>
+				`<th>${escapeHtml(LIBELLES_CHAMP_LIAISON[c] || c)}</th>`).join('') + '</tr>';
 		$('liaison-body').innerHTML = docs.map(d =>
 			`<tr><td>${escapeHtml((d.icon ? d.icon + ' ' : '') + (d.nom || d._id))}`
-			+ `<div style="color:var(--muted);font-size:0.68rem">${escapeHtml(d._id)}</div></td>`
-			+ `<td><input class="liaison-input" type="text" list="animations-list" spellcheck="false"`
-			+ ` autocomplete="off" placeholder="— aucune —"`
-			+ ` data-doc="${escapeHtml(d._id)}" name="${escapeHtml(nomChampLiaison(d._id))}"`
-			+ ` value="${escapeHtml(d.animation || '')}"></td></tr>`
-		).join('') || '<tr><td colspan="2">— aucun document —</td></tr>';
+			+ `<div style="color:var(--muted);font-size:0.68rem">${escapeHtml(d._id)}`
+			+ (d.zone_forme ? ` · zone ${escapeHtml(d.zone_forme)}` : '') + `</div></td>`
+			+ champs.map(c => celluleLiaison(d, c)).join('') + '</tr>'
+		).join('') || `<tr><td colspan="${champs.length + 1}">— aucun document —</td></tr>`;
 		$('liaison-body').querySelectorAll('input[data-doc]').forEach(champ => {
 			_marquerLiaison(champ, champ.value);
 			// Repère en direct pendant la frappe/le collage, mais AUCUNE écriture : on
@@ -1232,7 +1257,7 @@ async function chargerLiaisons() {
 						'✗ Animation inconnue : ' + val + " — rien n'a été enregistré.", 'err');
 					return;
 				}
-				lier(champ.dataset.doc, val);
+				lier(champ.dataset.doc, champ.dataset.champ || 'animation', val);
 			});
 		});
 		setStatus($('liaison-status'), docs.length + ' document(s).', 'ok');
@@ -1241,17 +1266,19 @@ async function chargerLiaisons() {
 	}
 }
 
-async function lier(docId, animation) {
+async function lier(docId, champ, animation) {
 	setStatus($('liaison-status'), 'Enregistrement…');
 	try {
 		const r = await fetch('/admin/animations/lier', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ doc_id: docId, animation: animation }),
+			body: JSON.stringify({ doc_id: docId, champ: champ, animation: animation }),
 		});
 		const data = await r.json().catch(() => ({}));
 		if (!r.ok) { setStatus($('liaison-status'), 'Échec : ' + (data.detail || r.status), 'err'); return; }
-		setStatus($('liaison-status'), '✓ ' + docId + (animation ? ' → ' + animation : ' : liaison retirée'), 'ok');
+		const quoi = champ === 'animation_zone' ? ' (zone)' : '';
+		setStatus($('liaison-status'), '✓ ' + docId + quoi
+			+ (animation ? ' → ' + animation : ' : liaison retirée'), 'ok');
 	} catch (e) {
 		setStatus($('liaison-status'), 'Erreur réseau : ' + e.message, 'err');
 	}
