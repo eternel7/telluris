@@ -9,6 +9,11 @@
 {% import "part-move-panel.html" as movepanel %}
 {# Plein écran : choix gardé d'une page à l'autre + manifeste (cf. part-plein-ecran.html). #}
 {% import "part-plein-ecran.html" as pleinecran %}
+{# ★ Points d'attribut de la fiche : posés sur l'IDENTITÉ (carte de la fiche en portrait,
+   colonne gauche en paysage), visibles au-dessus de TOUS les onglets — ils sont la bourse
+   commune des caracts, de la vocation, des sorts, des écoles et des compétences.
+   Pas d'id (deux exemplaires) : `_syncPoints` les retrouve par `data-points`. #}
+{% macro points_fiche(pts) %}<div class="sh-card-points pts-dispo{% if pts <= 0 %} is-vide{% endif %}" title="Points d'attribut à répartir (caractéristiques, vocation, sorts, écoles, compétences)">★ Points : <span data-points>{{ pts }}</span></div>{% endmacro %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -827,14 +832,24 @@
 		}
 		.sh-derived-lbl { color: var(--muted); }
 		.sh-derived-val { font-weight: bold; color: var(--text-color); }
-		/* Points d'attribut à répartir : UNE seule couleur, partagée par les trois endroits qui
-		   en parlent (compteur de l'onglet ⚔, compteur de l'onglet 📖 et pastille des boutons
+		/* Points d'attribut à répartir : UNE seule couleur, partagée par les endroits qui
+		   en parlent (compteur de la fiche, ★ des cartes de compagnon et pastille des boutons
 		   du pied de page) — c'est ce vert qui fait le lien entre « il me reste des points »
 		   et l'endroit où on les dépense. */
 		.pts-dispo { color: #2ed573; }
 		/* Pastille « points à répartir » sur les boutons 👤 Personnage / 👥 Groupe. Rendue en
 		   dur dans le markup et masquée par `hidden` : les points peuvent tomber à zéro (ou
 		   revenir) en cours de session, et `_majIndicateursPoints` n'a rien à créer. */
+		/* Compteur de la fiche (macro `points_fiche`) : grisé à zéro, rien à dépenser. */
+		.sh-card-points { font-size: .85rem; margin-top: 6px; }
+		/* Sur la carte de la fiche (portrait mobile) : épinglé en haut à droite, en face du
+		   nom — une ligne de plus sous le portrait coûtait de la hauteur à tous les onglets. */
+		.character-card[data-card="charac-sheet"] { position: relative; }
+		.character-card[data-card="charac-sheet"] > .sh-card-points {
+			position: absolute; top: 10px; right: 12px; margin: 0; white-space: nowrap;
+		}
+		.character-card[data-card="charac-sheet"] .char-name { padding-right: 6.5rem; }
+		.sh-card-points.is-vide { color: var(--muted); }
 		.pts-indic { margin-left: 6px; font-size: 0.9rem; line-height: 1; vertical-align: baseline; }
 		.sh-xp-header { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; font-size: 0.95rem; }
 		.sh-xp-bar { height: 8px; background: #111; border-radius: 4px; overflow: hidden; }
@@ -1192,9 +1207,6 @@
 		   modes côte à côte en desktop) retrouvait un vide sous elle. */
 		.sh-acc-fit .acc-body > .sh-scroll { display: flex; flex: 1 1 auto; min-height: 4.5rem; }
 		.sh-acc-fit .acc-body > .sh-scroll > .sh-rel-scroll { max-height: none; flex: 1 1 auto; min-height: 0; }
-		/* `float` ne joue plus dans un conteneur flex : le compteur de points se range
-		   à droite de lui-même. */
-		#sh-competences > .pts-dispo { align-self: flex-end; }
 		/* ⓘ de la barre de combat : caché hors mobile, où la consigne reste affichée. */
 		.sh-barre-titre { display: flex; align-items: center; gap: .5rem; }
 		.sh-barre-aide {
@@ -1855,6 +1867,7 @@
 						<span class="pv-val">PV {{_pv}}/<span id="stat-left-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
 						<span class="pm-val">PM {{_pm}}/<span id="stat-left-drv-pm_max">{{d.get("pm_max","—")}}</span></span>
 					</div>
+					{{ points_fiche(character.get("attribute_points", 0)) }}
 					<!-- Effets actifs (consommables) : rendu par _renderEffetsActifs. -->
 					<div id="sh-effets-actifs" class="sh-effets-chips"></div>
 				</div>
@@ -1864,7 +1877,7 @@
 				{# Carte du joueur, exemplaire de la fiche (mobile). Le mode compagnon la rebascule sur
 				   un compagnon : c'est la MÊME carte, un autre porteur (renderCharacterCard / setSujet). #}
 				<div id="personnage">
-					{{ cards.character_card(card_id="charac-sheet", **carte_joueur) }}
+					{% call cards.character_card(card_id="charac-sheet", **carte_joueur) %}{{ points_fiche(character.get("attribute_points", 0)) }}{% endcall %}
 				</div>
 				<!-- Tab bar -->
 				<nav class="sheet-tab-bar" role="tablist">
@@ -1896,7 +1909,6 @@
 							     donc ce bloc est entièrement re-rendu côté client par _renderXp(). -->
 							<div class="sh-xp-header">
 								<span>XP totale : <strong id="sh-xp-total" style="color:var(--accent-color)">{{ xp_total }}</strong></span>
-								<span class="pts-dispo">Points : <span id="sh-attribute-points">{{ attribute_points }}</span></span>
 							</div>
 							<div class="val-niveau">
 								<span><span id="sh-race-label">{{character["race"]}}</span> Niv. : <strong id="sh-race-niveau" class="race-niveau niveau-nb">{{ niveau }}</strong></span>
@@ -2076,7 +2088,7 @@
 					</div>
 
 					<!-- ── COMPETENCES ── -->
-					<div class="sheet-panel sh-acc-fit" id="sh-competences"><div class="pts-dispo" style="font-size:.85rem; float: right;">Points : <span id="sh-comp-points">{{ character.get("attribute_points", 0) }}</span></div>
+					<div class="sheet-panel sh-acc-fit" id="sh-competences">
 						{# Barre de combat : la disposition se compose ICI, au calme (le mode ⚙
 						   de l'écran de combat n'en est qu'un raccourci). Rendue 100 % client
 						   par _renderBarreSlots depuis le payload `slots`. #}
@@ -4283,7 +4295,6 @@ function _renderXp() {
 }
 
 function _refreshStatBoxes() {
-	document.getElementById('sh-attribute-points').textContent = _attributePoints;
 	_renderXp();
 	for (const code of ["V","F","R","Ag","Vol","Int","Cha","Ch"]) {
 		const val  = _charStats[code] || 0;
@@ -6087,15 +6098,17 @@ function _renderSortsMagies(payload) {
 
 function _syncPoints(pts) {
 	_attributePoints = pts;
-	const a = document.getElementById('sh-attribute-points'); if (a) a.textContent = pts;
-	const b = document.getElementById('sh-comp-points');      if (b) b.textContent = pts;
+	document.querySelectorAll('[data-points]').forEach(el => {
+		el.textContent = pts;
+		el.parentElement.classList.toggle('is-vide', !(pts > 0));
+	});
 	// ⚠️ Les points sont une BOURSE COMMUNE aux caracts, à la vocation, aux sorts, aux
 	// écoles et aux compétences : DÉPENSER D'UN CÔTÉ CHANGE CE QUI EST OFFERT DE L'AUTRE.
 	// `_syncPoints` est donc le chokepoint unique de « les points ont bougé » et rafraîchit
 	// TOUS les boutons qui s'en gardent — sinon l'onglet ⚔ (bouton d'XP, ✦ Dépasser, montée
 	// de vocation) et les listes d'apprentissage restent tels quels jusqu'au prochain /play
 	// et proposent une dépense que le serveur refusera.
-	if (a) _refreshStatBoxes();
+	_refreshStatBoxes();
 	// Pastille du pied de page : les points appartiennent à celui dont la fiche est ouverte
 	// (chokepoint `_acteur` côté serveur — en mode compagnon, c'est SON doc qui a été débité).
 	// ⚠️ On ne touche PAS `_pointsCompagnons` ici : dépenser les points d'un compagnon ne dit
@@ -10165,6 +10178,7 @@ function _applySheetIdentite(p) {
 		els.gauche.innerHTML = `<div class="char-name">${p.prenom} ${p.nom}</div>`
 			+ `<div class="char-class">${classe}</div>`
 			+ `<div class="char-vitals" style="margin-top:8px">${vitals}</div>`
+			+ `<div class="sh-card-points pts-dispo" title="Points d'attribut à répartir">★ Points : <span data-points></span></div>`
 			+ `<div id="sh-effets-actifs" class="sh-effets-chips"></div>`;
 	}
 	if (els.imgGauche) els.imgGauche.src = '/characters/' + p.image;
