@@ -1020,7 +1020,7 @@
 				flex: 0 0 100%; margin-top: 10px;
 			}
 		}
-		#inv-sort-btn.active, #sol-sort-btn.active,
+		#inv-sort-btn.active, #sol-sort-btn.active, #capa-sort-btn.active,
 		#sell-sort-btn.active, #buy-sort-btn.active { border-color: var(--accent-color); color: var(--accent-color); }
 		.sh-rarity { font-size: 0.8rem; padding: 2px 5px; border-radius: 3px; background: #333; }
 		.sh-equip-row { display: flex; gap: 4px; margin-top: 4px; align-items: center; width: 100%; }
@@ -1234,9 +1234,23 @@
 		   les sections affichées, TOUTES dépliées et à la suite : l'onglet défile d'un
 		   bloc (`overflow-y:auto` de `.sh-acc-fit`), sans scroller interne ni ombre.
 		   ⚠️ `.open` n'y joue plus — le choix d'accordéon mémorisé reste celui du desktop.
-		   Hors de ce media, `.capa-tete` est masquée et rien ne change. */
-		.capa-tete { display: none; }
+		   Hors de ce media, `.capa-tete` ne montre que recherche + tri. */
+		.capa-tete { display: flex; flex-direction: column; gap: .35rem; }
+		.capa-vues, .capa-filtres { display: none; }
+		.capa-outils { display: flex; align-items: center; gap: .4rem; }
+		.capa-outils .sh-rel-filter { flex: 1 1 auto; min-width: 0; margin: 0; }
+		.capa-outils .sh-drop-btn { margin-left: 0; flex-shrink: 0; }
+		.capa-aucun { padding: .6rem 0; }
+		.capa-aucun[hidden] { display: none; }   /* `.sh-empty` est en display:flex */
+		/* Case 🏹 en BOUT de barre : pas une case d'action (ni `data-slot`, ni glisser) mais
+		   l'entrée des modes d'attaque — d'où sa bordure pointillée dorée. */
+		.sh-barre-slot.sh-barre-modes { border-style: dotted; border-color: var(--slot-oblig-border); }
 		@media (max-width: 768px) and (orientation: portrait) {
+			/* Enfoncée = vue modes affichée (portrait seulement : ailleurs la vue n'existe pas). */
+			.sh-barre-slot.sh-barre-modes[aria-pressed="true"] { border-style: solid; border-color: var(--accent-color); background: var(--slot-drag-bg); }
+			/* Titres des deux listes de « Connues » retirés : compétences et sorts s'y
+			   lisent comme UNE liste (le filtre les sépare au besoin). */
+			#acc-head-capa-competences, #acc-head-capa-sorts { display: none; }
 			#sh-competences > .capa-tete {
 				display: flex; flex-direction: column; gap: .35rem;
 				position: sticky; top: 0; z-index: 20;
@@ -1252,7 +1266,8 @@
 			.capa-vue[aria-selected="true"] { background: var(--btn-bg); color: var(--accent-color); }
 			#capa-apprendre-compte { margin-left: .3rem; }
 			.capa-filtres { display: flex; gap: .35rem; overflow-x: auto; scrollbar-width: none; }
-			#sh-competences[data-vue="modes"] .capa-filtres { display: none; }
+			#sh-competences[data-vue="modes"] .capa-filtres,
+			#sh-competences[data-vue="modes"] .capa-outils { display: none; }
 			/* Barre resserrée : toujours deux rangées (cf. part-slot-bar-css), cases plus
 			   petites — la liste récupère la hauteur. */
 			#sh-competences .sh-barre-grid { --slot-max: 40px; margin: 4px 0; }
@@ -1965,7 +1980,7 @@
 						<button class="sheet-tab-btn active" onclick="sheetTab('stats', this)"      role="tab" aria-selected="true">📊 Stats</button>
 						<button class="sheet-tab-btn"        onclick="sheetTab('inventaire', this)" role="tab">🎒 Inventaire</button>
 						<button class="sheet-tab-btn tab-principal-only" onclick="sheetTab('quetes', this)"     role="tab">📜 Quêtes</button>
-						<button class="sheet-tab-btn"        onclick="sheetTab('competences', this)" role="tab">⚡ Compétences</button>
+						<button class="sheet-tab-btn"        onclick="sheetTab('competences', this)" role="tab">⚡ Actions</button>
 						<button class="sheet-tab-btn tab-principal-only" onclick="sheetTab('relations', this)"  role="tab">🤝 Relations</button>
 						<button class="sheet-tab-btn tab-principal-only" onclick="sheetTab('journal', this)"    role="tab">📖 Journal</button>
 					</div>
@@ -2179,19 +2194,27 @@
 								onclick="toggleBarreAide(event)">ⓘ</button></div>
 						<div class="sh-barre-grid" id="sh-slot-grid"></div>
 						<div class="sh-barre-hint" id="sh-barre-hint">Clic long sur une case puis glisser pour échanger deux cases. Les actions ⚔ 🫳 🏃 se déplacent mais ne se retirent pas.</div>
-						{# ── Mobile portrait : TROIS VUES au lieu de six accordéons ──
+						{# ── Mobile portrait : VUES au lieu de six accordéons ──
 						   Les sections restent les mêmes (mêmes renderers, mêmes ids) ; chacune
 						   déclare sa vue (`data-vue`) et sa famille (`data-type`), et le CSS du
 						   portrait n'affiche que celles de la vue / du filtre choisis, dépliées et
-						   à la suite, l'onglet défilant d'un bloc. Desktop : barre masquée,
-						   accordéons inchangés. État : attributs de #sh-competences, posés par
-						   capaVue / capaFiltre (mémorisés par personnage). #}
+						   à la suite, l'onglet défilant d'un bloc. Desktop : vues et filtres
+						   masqués, accordéons inchangés. État : attributs de #sh-competences,
+						   posés par capaVue / capaFiltre (mémorisés par personnage).
+						   ⚠️ La vue « modes » n'a PAS de bouton ici : on y entre par la case 🏹
+						   en bout de barre (capaModes, rendue par _renderBarreSlots).
+						   Recherche + tri (tous écrans) : lus au rendu par `_capaListe`. #}
 						<div class="capa-tete" id="capa-tete">
 							<div class="capa-vues" role="tablist" aria-label="Vue de l'onglet">
-								<button type="button" class="capa-vue" role="tab" data-vue="modes" onclick="capaVue('modes')">🏹 Modes</button>
 								<button type="button" class="capa-vue" role="tab" data-vue="connues" onclick="capaVue('connues')">⚡ Connues</button>
 								<button type="button" class="capa-vue" role="tab" data-vue="apprendre" onclick="capaVue('apprendre')"
 									title="Entre parenthèses : ce que vos points permettent d'apprendre maintenant">📖 Apprendre<span class="pts-dispo" id="capa-apprendre-compte" hidden></span></button>
+							</div>
+							<div class="capa-outils">
+								<input id="capa-recherche" class="sh-rel-filter" type="search" placeholder="🔍 Chercher une action…"
+									autocomplete="off" aria-label="Chercher une compétence, un sort ou une école" oninput="capaRafraichir()">
+								<button type="button" id="capa-sort-btn" class="sh-drop-btn" onclick="cycleCapaSort()"
+									title="Trier par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
 							</div>
 							<div class="capa-filtres" aria-label="Filtrer">
 								<button type="button" class="capa-filtre" data-filtre="tout" onclick="capaFiltre('tout')">Tout</button>
@@ -2199,6 +2222,7 @@
 								<button type="button" class="capa-filtre" data-filtre="magie" onclick="capaFiltre('magie')">🔮 Magie</button>
 							</div>
 						</div>
+						<div class="sh-empty capa-aucun" id="capa-aucun" hidden><span class="sh-empty-icon">🔍</span>Aucune action ne correspond à la recherche.</div>
 						{# ── Les six zones en ACCORDÉON (brique `.acc-*`, comme #sell-panel) ──
 						   Une seule ouverte à la fois, et elle prend TOUTE la hauteur restante :
 						   l'onglet tient dans la fenêtre au lieu de la faire défiler.
@@ -4845,6 +4869,9 @@ function _updateSortBtn(id, state) {
 
 let _invSort = _loadSort('telluris.play.inv_sort');
 let _solSort = _loadSort('telluris.play.sol_sort');
+// Onglet ⚡ Actions (cf. _capaListe) — déclaré ICI : les renderers le lisent dès l'init.
+let _capaSort = _loadSort('telluris.play.capa_sort');
+let _capaAucunPlanifie = false;   // cf. _capaPlanifierAucun
 
 function cycleInvSort() { _invSort = _cycleSort(_invSort); _saveSort('telluris.play.inv_sort', _invSort); _refreshInventaire(); }
 function cycleSolSort() { _solSort = _cycleSort(_solSort); _saveSort('telluris.play.sol_sort', _solSort); _refreshSol(); }
@@ -5833,10 +5860,16 @@ function _renderBarreSlots() {
 			: '';
 		return `<div class="${cls}" data-slot="${s.position}" title="${titre.replace(/"/g, '&quot;')}"
 			style="${s.type && !s.disponible ? 'opacity:.4' : ''}">${s.icon || ''}${plus}${del}</div>`;
-	}).join('');
-	box.querySelectorAll('.sh-barre-slot').forEach(el => {
+	}).join('')
+		// Case 🏹 en BOUT de barre : l'entrée des modes d'attaque (capaModes). Même gabarit
+		// qu'une case, mais SANS `data-slot` — ni glisser, ni cible de dépôt (sélecteur
+		// `[data-slot]` ci-dessous), le serveur n'en sait rien.
+		+ `<button type="button" class="sh-barre-slot sh-barre-modes" onclick="capaModes()"
+			title="Modes d'attaque (jet, tir)" aria-label="Modes d'attaque"
+			aria-pressed="${_capaVueCourante() === 'modes'}">🏹</button>`;
+	box.querySelectorAll('.sh-barre-slot[data-slot]').forEach(el => {
 		const n = parseInt(el.dataset.slot, 10);
-		_attacherDragLong(el, n, '.sh-barre-slot', _deplacerSlot);
+		_attacherDragLong(el, n, '.sh-barre-slot[data-slot]', _deplacerSlot);
 		const del = el.querySelector('.sh-barre-del');
 		if (!del) return;
 		// ⚠️ La case entière écoute `pointerdown` pour armer le clic long : sans ce
@@ -5983,7 +6016,7 @@ function _renderSorts(list) {
 		box.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">🔮</span>Aucun sort connu.</div>';
 		return;
 	}
-	box.innerHTML = _sorts.map(s => {
+	box.innerHTML = _capaListe(_sorts).map(s => {
 		const compos = (s.composants || []).map(c =>
 			`<span class="sh-sort-compo${c.disponible ? '' : ' off'}" title="${c.consomme ? 'Consommé au lancement' : 'Catalyseur (non consommé, il suffit de le porter)'}">${c.consomme ? '⚗️' : '💎'} ${c.icon || ''} ${c.nom}${_sortEffetsLabel(c.bonus) ? ' → ' + _sortEffetsLabel(c.bonus) : ''}</span>`
 		).join('');
@@ -6029,7 +6062,7 @@ function _renderSortsApprenables(list) {
 		box.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">📖</span>Aucun sort à apprendre pour l\'instant.</div>';
 		return;
 	}
-	box.innerHTML = _sortsApprenables.map(s => {
+	box.innerHTML = _capaListe(_sortsApprenables).map(s => {
 		const ok = s.grimoire_ok && _attributePoints >= s.cout_points;
 		const grim = s.grimoire_ok
 			? '<span class="sh-sort-grim" title="Grimoire porté">📖✔</span>'
@@ -6169,7 +6202,7 @@ function _renderSortsMagies(payload) {
 	const box = document.getElementById('sh-sorts-magies');
 	if (!box) return;
 	const m = _sortsMagies || {};
-	const prat = (m.pratiquees || []).map(e => {
+	const prat = _capaListe(m.pratiquees, 'ecole').map(e => {
 		const tag = e.native ? '<span class="sh-skill-lvl" title="École native de votre vocation">native</span>' : '';
 		const monter = (e.montable && m.peut_apprendre)
 			? `<button type="button" class="sh-drop-btn" onclick="monterMagie('${e.ecole}', this)" ${_attributePoints >= e.cout_montee ? '' : 'disabled'}>Niv. + (${e.cout_montee} pts)</button>`
@@ -6182,7 +6215,7 @@ function _renderSortsMagies(payload) {
 			<div class="sh-inv-actions">${monter}</div>
 		</div>`;
 	}).join('');
-	const achet = (m.achetables || []).map(e =>
+	const achet = _capaListe(m.achetables, 'ecole').map(e =>
 		`<div class="sh-skill">
 			<span class="sh-skill-icon">🔓</span>
 			<div class="sh-skill-info">
@@ -6194,8 +6227,9 @@ function _renderSortsMagies(payload) {
 			</div>
 		</div>`
 	).join('');
+	// Vidée par la recherche : rien ici, le message commun (#capa-aucun) prend le relais.
 	box.innerHTML = (prat || '') + (achet || '')
-		|| '<div class="sh-empty"><span class="sh-empty-icon">🏫</span>Aucune école de magie.</div>';
+		|| (_capaTerme() ? '' : '<div class="sh-empty"><span class="sh-empty-icon">🏫</span>Aucune école de magie.</div>');
 }
 
 function _syncPoints(pts) {
@@ -6291,7 +6325,7 @@ function _renderCompetences(list) {
 		box.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">⚡</span>Aucune compétence apprise.</div>';
 		return;
 	}
-	box.innerHTML = _competences.map(c => {
+	box.innerHTML = _capaListe(_competences).map(c => {
 		// Une passive n'a ni action ni case de barre : son bonus est permanent (inclus
 		// dans les dérivées), il n'y a rien à déclencher. SAUF une passive de PIÈGE
 		// (`action_piege`) : elle ouvre une action de combat (🔎 / 🛠 / pose), dont la case
@@ -6336,7 +6370,7 @@ function _renderCompetencesApprenables(list) {
 		box.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">📖</span>Aucune compétence à apprendre pour l\'instant.</div>';
 		return;
 	}
-	box.innerHTML = _competencesApprenables.map(c => {
+	box.innerHTML = _capaListe(_competencesApprenables).map(c => {
 		const ok = _attributePoints >= c.cout_points;
 		const tag = c.mode === 'passive' ? '🛡 Passive' : '⚡ Active';
 		return `<div class="sh-skill">
@@ -6795,12 +6829,21 @@ const SHEET_ACC = {
 				   ids: ['carnet', 'bestiaire'] },
 };
 
-// ── Onglet ⚡ en portrait mobile : vue (modes / connues / apprendre) + filtre ─────
+// ── Onglet ⚡ Actions en portrait mobile : vue (modes / connues / apprendre) + filtre ──
 // Deux attributs de #sh-competences, lus par le CSS du portrait ; hors portrait ils
-// n'agissent sur rien (barre `.capa-tete` masquée), d'où un état unique, sans media JS.
+// n'agissent sur rien (vues et filtres masqués), d'où un état unique, sans media JS —
+// sauf la case 🏹 (capaModes), qui ouvre la vue modes OU l'accordéon desktop.
 const CAPA_VUE_CLE = 'telluris.play.capa_vue.' + REL_CHAR_ID;
 const CAPA_VUES = ['modes', 'connues', 'apprendre'];
 const CAPA_FILTRES = ['tout', 'competences', 'magie'];
+const CAPA_PORTRAIT = window.matchMedia('(max-width: 768px) and (orientation: portrait)');
+let _capaVuePrec = 'connues';   // vue à retrouver en quittant les modes par la case 🏹
+
+// Lu aussi par _renderBarreSlots (état de la case 🏹) : le DOM est la seule source.
+function _capaVueCourante() {
+	const onglet = document.getElementById('sh-competences');
+	return (onglet && onglet.dataset.vue) || 'connues';
+}
 
 function _capaAppliquer(vue, filtre) {
 	const onglet = document.getElementById('sh-competences');
@@ -6811,6 +6854,79 @@ function _capaAppliquer(vue, filtre) {
 		b.setAttribute('aria-selected', b.dataset.vue === vue ? 'true' : 'false'));
 	onglet.querySelectorAll('.capa-filtre').forEach(b =>
 		b.setAttribute('aria-pressed', b.dataset.filtre === filtre ? 'true' : 'false'));
+	const modes = onglet.querySelector('.sh-barre-modes');
+	if (modes) modes.setAttribute('aria-pressed', vue === 'modes' ? 'true' : 'false');
+	_capaPlanifierAucun();
+}
+
+// Case 🏹 en bout de barre. Portrait : bascule vers la vue modes, et en revient au second
+// toucher. Ailleurs : ouvre l'accordéon des modes (sans le refermer s'il l'est déjà).
+function capaModes() {
+	if (CAPA_PORTRAIT.matches) {
+		const vue = _capaVueCourante();
+		if (vue === 'modes') { capaVue(_capaVuePrec); return; }
+		_capaVuePrec = vue;
+		capaVue('modes');
+		return;
+	}
+	const tete = document.getElementById('acc-head-capa-modes');
+	if (!tete) return;
+	if (!tete.parentElement.classList.contains('open')) toggleOngletSection('competences', 'capa-modes');
+	tete.scrollIntoView({ block: 'nearest' });
+}
+
+// ── Recherche + tri de l'onglet ⚡ (tous écrans) ───────────────────────────────────
+// Ordre et filtre d'AFFICHAGE, appliqués par chaque renderer au moment de rendre : le
+// cache des listes (_sorts, _competences…) reste intact, et les boutons adressent par id.
+// Recherche sur le nom, insensible à la casse et aux accents (comme la commande) ;
+// le texte n'est pas mémorisé, le tri l'est (`_capaSort`, déclaré près de _invSort).
+function _capaPlier(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+function _capaTerme() {
+	const el = document.getElementById('capa-recherche');
+	return _capaPlier(el ? el.value.trim() : '');
+}
+function _capaListe(arr, cle = 'nom') {
+	const terme = _capaTerme();
+	const out = (arr || []).filter(x => !terme || _capaPlier(x[cle]).includes(terme));
+	if (_capaSort) {
+		const dir = _capaSort === 'asc' ? 1 : -1;
+		out.sort((a, b) => dir * String(a[cle] || '')
+			.localeCompare(String(b[cle] || ''), undefined, { numeric: true, sensitivity: 'base' }));
+	}
+	_capaPlanifierAucun();
+	return out;
+}
+function cycleCapaSort() {
+	_capaSort = _cycleSort(_capaSort);
+	_saveSort('telluris.play.capa_sort', _capaSort);
+	capaRafraichir();
+}
+function capaRafraichir() {
+	_updateSortBtn('capa-sort-btn', _capaSort);
+	_renderCompetences();
+	_renderCompetencesApprenables();
+	_renderSorts();
+	_renderSortsApprenables();
+	_renderSortsMagies();
+}
+
+// « Aucune correspondance » : UN message pour l'onglet, pas un par liste (les listes de
+// « Connues » n'ont plus de titre, deux messages identiques s'y empileraient). Mesuré
+// après rendu (une frame), sur les sections AFFICHÉES — la vue et le filtre en décident.
+// ⚠️ Ne touche qu'à `hidden` d'un nœud hors des listes observées : aucune boucle.
+function _capaPlanifierAucun() {
+	if (_capaAucunPlanifie) return;
+	_capaAucunPlanifie = true;
+	requestAnimationFrame(() => {
+		_capaAucunPlanifie = false;
+		const el = document.getElementById('capa-aucun');
+		const onglet = document.getElementById('sh-competences');
+		if (!el || !onglet) return;
+		const lignes = Array.from(onglet.querySelectorAll(':scope > .acc-section'))
+			.filter(sec => sec.offsetParent !== null && sec.dataset.vue !== 'modes')
+			.some(sec => sec.querySelector('.sh-skill'));
+		el.hidden = !_capaTerme() || lignes;
+	});
 }
 
 function _capaChoisir(vue, filtre) {
@@ -6833,6 +6949,7 @@ function capaFiltre(filtre) {
 	const [vue, filtre] = (_accLsGet(CAPA_VUE_CLE) || '').split('|');
 	_capaAppliquer(CAPA_VUES.includes(vue) ? vue : 'connues',
 		CAPA_FILTRES.includes(filtre) ? filtre : 'tout');
+	_updateSortBtn('capa-sort-btn', _capaSort);
 })();
 
 // Ligne compacte : toucher le nom déplie la ligne (détail complet). Les lignes de sort à
