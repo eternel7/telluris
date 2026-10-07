@@ -29,7 +29,7 @@ from routers.montures import _monture_view
 # Le sac d'un compagnon se sert exactement comme celui du joueur (mêmes refs, mêmes docs
 # résolus) : on réutilise le payload d'inventaire de routers/user.py plutôt que de le
 # recopier — précédent : routers/combat.py importe déjà `_take_ref` du même module.
-from routers.user import _inventory_payload
+from routers.user import _inventory_payload, _fiche_payload
 from models.character_stats import compute_character_level
 from models import character_stats
 
@@ -600,6 +600,8 @@ async def groupe_transferer(
 		"principal": _inventory_payload(character),
 		"compagnon": _inventory_payload(av, character),
 		"compagnon_id": av["_id"],
+		# Un grimoire passé d'un sac à l'autre ouvre ou ferme un sort du principal.
+		"fiche": _fiche_payload(character),
 		"transfere": {
 			"nom": (doc or {}).get("nom", "?"),
 			"icon": (doc or {}).get("icon", "📦"),

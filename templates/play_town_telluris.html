@@ -6612,6 +6612,7 @@ async function dropItem(index, itemId) {
 		const data = await res.json();
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
 		_applyInventoryPayload(data);
+		_appliquerFiche(data.fiche);   // un grimoire posé ferme son sort à l'apprentissage
 	} catch(err) { console.error('Erreur drop', err); }
 }
 
@@ -6627,6 +6628,7 @@ async function pickupItem(index, itemId) {
 		const data = await res.json();
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
 		_applyInventoryPayload(data);
+		_appliquerFiche(data.fiche);   // un grimoire ramassé ouvre son sort à l'apprentissage
 		if (data.auto_dropped && data.auto_dropped.length) {
 			showToast('Trop lourd ! Tombé au sol : ' + data.auto_dropped.join(', '));
 		}
@@ -7709,6 +7711,7 @@ async function sellItem(index, itemId, compagnonId, btn) {
 		updatePurse(data.purse);
 		renderSellList(data);
 		renderBuyList(data);
+		_appliquerFiche(data.fiche);   // grimoire cédé : « 📖 Apprendre » suit
 		if (data.vendu) showToast('Vendu : ' + data.vendu.nom + ' (' + formatPrix(data.vendu.prix) + ')' + _fideliteSuffixe(data));
 	} catch(err) { console.error('Erreur vente', err); if (btn) btn.disabled = false; }
 }
@@ -7727,6 +7730,7 @@ async function buyItem(itemId, btn) {
 		updatePurse(data.purse);
 		renderSellList(data);
 		renderBuyList(data);
+		_appliquerFiche(data.fiche);   // grimoire acheté : « 📖 Apprendre » suit
 		if (data.achete) showToast('Acheté : ' + data.achete.nom + ' (' + formatPrix(data.achete.prix) + ')' + _fideliteSuffixe(data));
 	} catch(err) { console.error('Erreur achat', err); if (btn) btn.disabled = false; }
 }
@@ -8420,6 +8424,7 @@ async function openQuetesBoard() {
 		renderQuetesActives(data);
 		renderQuetesOffres(data);
 		renderFicheQuetes(data);
+		_appliquerFiche(data.fiche);   // XP, niveau, points, objets de course
 	} catch(err) {
 		console.error('Erreur tableau de quêtes', err);
 		showToast('Le tableau des quêtes ne répond pas.');
@@ -8447,6 +8452,7 @@ async function accepterQuete(queteId, btn) {
 		renderQuetesActives(data);
 		renderQuetesOffres(data);
 		renderFicheQuetes(data);
+		_appliquerFiche(data.fiche);   // XP, niveau, points, objets de course
 		if (data.accepte) showToast('Quête acceptée : ' + data.accepte.titre);
 	} catch(err) { console.error('Erreur acceptation quête', err); if (btn) btn.disabled = false; }
 }
@@ -8464,6 +8470,7 @@ async function terminerQuete(queteId, btn) {
 		renderQuetesActives(data);
 		renderQuetesOffres(data);
 		renderFicheQuetes(data);
+		_appliquerFiche(data.fiche);   // XP, niveau, points, objets de course
 		if (data.termine) {
 			let msg = 'Quête terminée : ' + data.termine.titre + ' (+' + data.termine.xp + ' XP)';
 			if (data.termine.niveau_up) msg += ' — Niveau supérieur !';
@@ -8503,6 +8510,7 @@ async function abandonnerQuete(queteId, btn) {
 		renderQuetesActives(data);
 		renderQuetesOffres(data);
 		renderFicheQuetes(data);   // resync fiche + focalisation (via `'focalisation' in data`)
+		_appliquerFiche(data.fiche);
 		// Renoncer fâche toute la maison du donneur : même resync que la réussite.
 		if (Array.isArray(data.relations_lieux)) renderFicheRelations(data.relations_lieux);
 		showToast('Quête abandonnée' + (data.abandonne ? ' : ' + data.abandonne.titre : ''));
@@ -8523,6 +8531,7 @@ async function deposerQuete(queteId, btn) {
 		renderQuetesActives(data);
 		renderQuetesOffres(data);
 		renderFicheQuetes(data);
+		_appliquerFiche(data.fiche);   // XP, niveau, points, objets de course
 		if (data.depose) {
 			showToast('Déposé : ' + data.depose.n + ' pièce(s)' + (data.depose.complete ? ' — objectif atteint, à terminer !' : ''));
 		}
@@ -10569,6 +10578,7 @@ async function transfererItem(sens, index, itemId) {
 		_chargeMax  = data.principal.charge_max;
 		_refreshInventaire();
 		_refreshChargeGauge();
+		_appliquerFiche(data.fiche);   // un grimoire passé à un compagnon ferme son sort
 		if (_grpEtat) {
 			_grpEtat.principal = Object.assign({}, _grpEtat.principal, {
 				inventaire: data.principal.inventaire,
@@ -10696,13 +10706,19 @@ function _identiteJoueur() {
 }
 
 function _sheetRendreTout() {
-	_refreshStatBoxes();
-	_refreshDerivedStats(_derivedCur);
-	_renderCaractsMod();
 	_refreshPaperdoll();
 	_refreshInventaire();
 	_refreshSol();
 	_refreshChargeGauge();
+	_rendreFiche();
+}
+
+// Tout ce que porte le bloc `fiche` (utils/fiche.fiche_resync), SANS l'inventaire : celui-ci a
+// son propre chokepoint (`_applyInventoryPayload`), qui diffère le rendu sous le comptoir.
+function _rendreFiche() {
+	_refreshStatBoxes();
+	_refreshDerivedStats(_derivedCur);
+	_renderCaractsMod();
 	_renderEffetsActifs(_effetsActifs);
 	_renderSorts();
 	_renderSortsMagies();
@@ -10711,6 +10727,59 @@ function _sheetRendreTout() {
 	_renderCompetencesApprenables();
 	_renderBarreSlots();
 	_syncPoints(_attributePoints);
+}
+
+// Globales de la fiche depuis un bloc `fiche_resync` / `bloc_fiche` (payload d'un compagnon
+// compris). Une SEULE liste : la fiche d'un compagnon et la resync d'une action l'utilisent.
+function _affecterFiche(f) {
+	_effetsActifs = f.effets_actifs;
+	// La charge d'un compagnon est la SIENNE : `bloc_fiche` la publie pour lui aussi.
+	_chargeMagie = f.charge_magie || null;
+	_charStats = f.caracteristiques_current; _statCaps = f.stat_caps;
+	// Le dépassement racial appartient au porteur (sa race, son bonus déjà brûlé ou non) :
+	// la montée passe par le chokepoint `_acteur`, elle écrit sur SON doc.
+	_MAX_BONUS = f.max_bonus || {}; _maxBonusUsed = f.max_bonus_used || null;
+	_attributePoints = f.attribute_points; _vocNiveau = f.voc_niveau;
+	_caractsDetail = f.caracts_detail; _derivedCur = f.derived_stats;
+	_xpTotal = f.xp_total; _niveau = f.niveau;
+	_xpNivPrev = f.xp_niv_prev; _xpNivNext = f.xp_niv_next;
+	_sorts = f.sorts; _sortsApprenables = f.sorts_apprenables; _sortsMagies = f.sorts_magies;
+	_competences = f.competences; _competencesApprenables = f.competences_apprenables;
+	// La barre de combat appartient au PORTEUR : configurer depuis la fiche d'un
+	// compagnon écrit sur SON doc (chokepoint `_acteur` côté serveur).
+	_barreSlots = f.barre_slots || _barreSlots; _consosCombat = f.consommables || [];
+}
+
+// Resync de la fiche après une action (Convention §10) : achat/vente d'un grimoire, quête
+// acceptée/rendue, service de PNJ… — « 📖 Apprendre », XP, niveau et points suivent sans F5.
+// ⚠️ `f.id` dit À QUI est ce bloc (Convention §1) : appliqué à la fiche affichée seulement si
+// c'est la sienne ; celui du joueur, arrivé pendant le détour sur un compagnon, va dans
+// l'instantané que `closeCompagnonSheet` restaurera ; tout autre est ignoré.
+function _appliquerFiche(f) {
+	if (!f || !f.id) return;
+	if (f.id !== porteurActifId()) {
+		if (_sheetSnap && f.id === PRINCIPAL_ID) Object.assign(_sheetSnap, {
+			effetsActifs: f.effets_actifs, chargeMagie: f.charge_magie || null,
+			charStats: f.caracteristiques_current, statCaps: f.stat_caps,
+			maxBonus: f.max_bonus || {}, maxBonusUsed: f.max_bonus_used || null,
+			attributePoints: f.attribute_points, vocNiveau: f.voc_niveau,
+			caractsDetail: f.caracts_detail, derived: f.derived_stats,
+			xpTotal: f.xp_total, niveau: f.niveau, xpNivPrev: f.xp_niv_prev, xpNivNext: f.xp_niv_next,
+			sorts: f.sorts, sortsApprenables: f.sorts_apprenables, sortsMagies: f.sorts_magies,
+			competences: f.competences, competencesApprenables: f.competences_apprenables,
+			barreSlots: f.barre_slots || _sheetSnap.barreSlots, consosCombat: f.consommables || [],
+		});
+		return;
+	}
+	_affecterFiche(f);
+	// Niveaux affichés hors onglet Stats : cartes du porteur (barre latérale, fiche) et
+	// colonne gauche — même portée que la montée de vocation (`spend_xp_vocation`).
+	[...cartesDuPorteur(f.id), document.querySelector('.sheet-left-col')]
+		.filter(Boolean).forEach(root => {
+			root.querySelectorAll('.race-niveau').forEach(el => { el.textContent = _niveau; });
+			root.querySelectorAll('.voc-niveau').forEach(el => { el.textContent = _vocNiveau; });
+		});
+	_rendreFiche();
 }
 
 async function openCompagnonSheet(avId) {
@@ -10746,24 +10815,11 @@ async function openCompagnonSheet(avId) {
 
 		_compagnonActif = p;
 		_inventaire = p.inventaire; _slots = p.slots; _objetsAuSol = p.objets_au_sol;
-		_chargeMax = p.charge_max; _effetsActifs = p.effets_actifs;
-		// La charge d'un compagnon est la SIENNE : `bloc_fiche` la publie pour lui aussi.
-		_chargeMagie = p.charge_magie || null;
-		_charStats = p.caracteristiques_current; _statCaps = p.stat_caps;
-		// Le dépassement racial appartient au COMPAGNON (sa race, son bonus déjà brûlé ou non) :
-		// la montée passe par le chokepoint `_acteur`, elle écrit sur SON doc.
-		_MAX_BONUS = p.max_bonus || {}; _maxBonusUsed = p.max_bonus_used || null;
-		_attributePoints = p.attribute_points; _vocNiveau = p.voc_niveau;
-		_caractsDetail = p.caracts_detail; _derivedCur = p.derived_stats;
+		_chargeMax = p.charge_max;
 		_RACE_MIN = p.race_min; _RACE_MAX = p.race_max;
-		_xpTotal = p.xp_total; _niveau = p.niveau;
-		_xpNivPrev = p.xp_niv_prev; _xpNivNext = p.xp_niv_next;
 		_raceNom = p.race; _vocId = p.voc; _sexe = p.sex;
-		_sorts = p.sorts; _sortsApprenables = p.sorts_apprenables; _sortsMagies = p.sorts_magies;
-		_competences = p.competences; _competencesApprenables = p.competences_apprenables;
-		// La barre de combat appartient au PORTEUR : configurer depuis la fiche d'un
-		// compagnon écrit sur SON doc (chokepoint `_acteur` côté serveur).
-		_barreSlots = p.barre_slots || _barreSlots; _consosCombat = p.consommables || [];
+		// Bloc de fiche (bloc_fiche + identité) : MÊME affectation que la resync d'une action.
+		_affecterFiche(p);
 
 		document.body.classList.add('sheet-compagnon');
 		_applySheetIdentite(p);
@@ -10947,6 +11003,9 @@ async function choisirPnj(choixId, extra) {
 		if (data.soin) {
 			showToast('✨ +' + data.soin.pv_rendu + ' PV' + (data.soin.gratuit ? ' — offert' : ''));
 		}
+		// Fiche (XP, niveau, points, « 📖 Apprendre ») : servie dès qu'un service a bougé le
+		// personnage — course, rang, apport, don.
+		_appliquerFiche(data.fiche);
 		if (data.don) {
 			const q = data.don.quantite > 1 ? ' ×' + data.don.quantite : '';
 			showToast((data.don.icon || '🎁') + ' ' + data.don.nom + q + (data.don.gratuit ? ' — offert' : ''));
