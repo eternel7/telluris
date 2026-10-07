@@ -69,19 +69,18 @@ globalThis.sansAnimationCarte = () => { coupures++; };
 globalThis.renderTokens = () => { rendus++; };
 globalThis.updateCamera = () => {};
 
-// Vue portrait : `LIGNES_PORTRAIT` est RELU du template (jamais recopié) ; `VUE_PORTRAIT` (posé
-// par matchMedia dans la page) et `_hauteurVue` (mesure du DOM) sont remplacés par le modèle.
+// Vue portrait : `LIGNES_PORTRAIT` et `PROFONDEUR_PORTRAIT` sont RELUS du template (jamais
+// recopiés) ; `VUE_PORTRAIT` (posé par matchMedia dans la page) est remplacé par le modèle.
 const LIGNES = Number((js.match(/^const LIGNES_PORTRAIT = (\d+);/m) || [])[1]);
-const PROFONDEUR = Number((js.match(/^const PROFONDEUR_PORTRAIT = (\d+);/m) || [])[1]);
+const exprProfondeur = (js.match(/^const PROFONDEUR_PORTRAIT = ([^;]+);/m) || [])[1];
 assert.ok(LIGNES > 0, 'const LIGNES_PORTRAIT introuvable dans le template');
-assert.ok(PROFONDEUR > 0, 'const PROFONDEUR_PORTRAIT introuvable dans le template');
+assert.ok(exprProfondeur, 'const PROFONDEUR_PORTRAIT introuvable dans le template');
+const PROFONDEUR = new Function('MAX_H', 'return ' + exprProfondeur)(MAX_H);
 vm.runInThisContext([
 	'const LIGNES_PORTRAIT = ' + LIGNES + ';',
 	'const PROFONDEUR_PORTRAIT = ' + PROFONDEUR + ';',
 	'let VUE_PORTRAIT = false;',
-	'function _hauteurVue() { return globalThis.__hauteurCarte; }',
 	extraireLet('_vueResolue'), extraireLet('_stepApplique'), extraireLet('_vueAppliquee'),
-	extraireLet('_lignesAppliquees'),
 	extraire('tailleVue'), extraire('tailleVuePortrait'), extraire('_tailleCourante'),
 	extraire('_largeurVue'), extraire('_appliquerVue'),
 	extraire('syncViewSize'), extraire('_surRedimensionnement'),
@@ -90,11 +89,10 @@ vm.runInThisContext([
 // Page neuve : état du template remis à zéro (affectation des `let` existants, pas redéclaration).
 function page(opts) {
 	Object.assign(monde, { largeur: 1200, hauteur: 800, lateraux: 0, autresHauteurs: 420,
-						   barre: 17, colonneMasquee: false, portrait: false, hauteurCarte: 400 },
+						   barre: 17, colonneMasquee: false, portrait: false },
 				  opts || {});
-	vm.runInThisContext('_vueResolue = null; _stepApplique = null; _vueAppliquee = null; _lignesAppliquees = null;'
+	vm.runInThisContext('_vueResolue = null; _stepApplique = null; _vueAppliquee = null;'
 		+ ' VUE_PORTRAIT = ' + !!monde.portrait + ';');
-	globalThis.__hauteurCarte = monde.hauteurCarte;
 	ROOT.vars = {};
 	ROOT.ecritures = 0;
 	coupures = 0;
@@ -192,43 +190,39 @@ t('colonne momentanément à 0 px : l’échelle en place est gardée, rien n’
 
 console.log('\n── Vue portrait (tailleVuePortrait) ───────────────────────────────────────');
 
-t('carte DEBOUT de toute la largeur : profondeur fixe, rangées impaires dans la hauteur', () => {
-	for (let w = 200; w <= 800; w += 7) for (let h = 0; h <= 1400; h += 11) {
-		const r = tailleVuePortrait(w, h);
-		const ctx = `w=${w} h=${h}`;
-		assert.ok(Number.isInteger(r.step) && r.step >= 8, ctx);
-		assert.strictEqual(r.viewWidth, r.step * PROFONDEUR, 'profondeur non fixe : ' + ctx);
-		assert.ok(r.viewWidth <= w - 20, 'déborde en largeur : ' + ctx);
-		// Une case de plus ne tiendrait pas : la LARGEUR est remplie, quelle que soit la hauteur.
-		assert.ok(r.viewWidth + PROFONDEUR > w - 20, 'largeur non remplie : ' + ctx);
-		assert.ok(r.lignes % 2 === 1 && r.lignes >= LIGNES, 'rangées : ' + ctx);
-		// Au-dessus du plancher, la hauteur est remplie sans déborder (au plancher, la page défile).
-		if (r.lignes > LIGNES) assert.ok(r.step * r.lignes <= h, 'déborde en hauteur : ' + ctx);
-		assert.ok(r.step * (r.lignes + 2) > h, 'hauteur non remplie : ' + ctx);
-		assert.ok(r.lignes > PROFONDEUR, 'carte pas plus haute que large : ' + ctx);
+t('la vue PAYSAGE debout : mêmes cases, tournées', () => {
+	assert.strictEqual(LIGNES, 17, 'rangées de flanc ≠ colonnes du paysage (tailleVue : step × 17)');
+	assert.strictEqual(PROFONDEUR, MAX_H - 1, 'profondeur ≠ rangées du paysage (--floor vaut 0)');
+});
+
+t('la LARGEUR seule fixe le pas : profondeur pleine colonne, jamais au-delà', () => {
+	for (let w = 100; w <= 800; w++) {
+		const r = tailleVuePortrait(w);
+		assert.ok(Number.isInteger(r.step) && r.step >= 8, 'w=' + w);
+		assert.strictEqual(r.viewWidth, r.step * PROFONDEUR, 'w=' + w);
+		if (r.step > 8) {
+			assert.ok(r.viewWidth <= w - 20, 'déborde en largeur : w=' + w);
+			assert.ok(r.viewWidth + PROFONDEUR > w - 20, 'largeur non remplie : w=' + w);
+		}
 	}
 });
 
-// Le cas de la capture : colonne 373 px, ~610 px jusqu'à la barre d'action. L'ancienne échelle y
-// rendait 13 rangées × 16 cases de 22 px — une carte paysage.
-t('téléphone debout (colonne 373 px, 610 px pour la carte) : pleine largeur, jetons 2× plus gros qu’en paysage', () => {
-	const paysage = tailleVue(373), portrait = tailleVuePortrait(373, 610);
-	assert.ok(portrait.step * portrait.lignes > portrait.viewWidth, 'carte plus large que haute');
-	assert.ok(portrait.step >= 2 * paysage.step, 'jetons pas assez gros');
-	// Plus de flancs qu'en paysage (8 cases de chaque côté sur 17), un peu moins de profondeur.
-	assert.ok(PROFONDEUR - 1 <= MAX_H - 1, 'voit plus loin devant qu’en paysage');
+// Le cas de la capture : colonne de 373 px. L'ancienne échelle y rendait 13 rangées × 16 cases
+// de 22 px — une carte paysage.
+t('téléphone debout (colonne 373 px) : carte plus haute que large, jetons plus gros qu’en paysage', () => {
+	const paysage = tailleVue(373), portrait = tailleVuePortrait(373);
+	assert.ok(portrait.step * LIGNES > portrait.viewWidth, 'carte plus large que haute');
+	assert.ok(portrait.step > paysage.step, 'jetons pas plus gros qu’en paysage');
 });
 
 t('syncViewSize en portrait : idempotente, écrit la profondeur dans --view-width', () => {
-	page({ portrait: true, largeur: 390, hauteur: 2000, hauteurCarte: 420 });
+	page({ portrait: true, largeur: 390, hauteur: 2000 });
 	const r1 = syncViewSize();
 	const ecritures = ROOT.ecritures;
 	for (let i = 0; i < 5; i++) assert.deepStrictEqual(syncViewSize(), r1);
 	assert.strictEqual(ROOT.ecritures, ecritures);
-	const attendu = tailleVuePortrait(390, 420);
-	assert.deepStrictEqual(r1, { step: attendu.step, viewWidth: attendu.viewWidth });
+	assert.deepStrictEqual(r1, tailleVuePortrait(390));
 	assert.strictEqual(ROOT.vars['--view-width'], r1.viewWidth + 'px');
-	assert.strictEqual(ROOT.vars['--vue-lignes'], tailleVuePortrait(390, 420).lignes);
 });
 
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).\n`);
