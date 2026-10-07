@@ -162,6 +162,29 @@ html.vue-portrait .barres-bas > .tour-header {
 	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 0, 0, 0.5);
 }
 html.vue-portrait .barres-bas > .tour-header { padding: 2px 10px; }
+/* Fond SEMI-TRANSPARENT en portrait : la carte reste lisible sous les barres flottantes. */
+html.vue-portrait .barres-bas > .action-bar,
+html.vue-portrait .barres-bas > .tour-header { background: rgba(44, 44, 56, 0.55); }
+/* Poignée de RÉTRACTION (portrait seulement) : une seule pour les DEUX barres, collée à leur
+   bord gauche. Repliées, les barres glissent vers la droite et seule la poignée reste à
+   l'écran ; un nouveau toucher leur rend toute la largeur. Le repli est un `transform` : la
+   hauteur mesurée par _syncBarreFixe ne bouge pas (aucune rétroaction, §17). */
+.barres-poignee { display: none; }
+html.vue-portrait .barres-bas { --poignee-w: 22px; padding-left: calc(var(--poignee-w) + 4px); transition: transform 220ms ease-out; }
+html.vue-portrait .barres-poignee {
+	display: flex; align-items: center; justify-content: center;
+	position: absolute; left: 0; top: 0; bottom: 0; width: var(--poignee-w);
+	padding: 0; margin: 0;
+	background: rgba(44, 44, 56, 0.55);
+	border: 1.5px solid var(--border-color); border-radius: 8px;
+	color: var(--gold2); font-size: 14px; line-height: 1;
+	pointer-events: auto; cursor: pointer;
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+	touch-action: manipulation;
+}
+html.vue-portrait .barres-bas.repliees { transform: translateX(calc(100% - var(--poignee-w))); }
+html.vue-portrait .barres-bas.repliees > .action-bar,
+html.vue-portrait .barres-bas.repliees > .tour-header { visibility: hidden; transition: visibility 0s 220ms; }
 html.vue-portrait body { padding-bottom: calc(var(--barre-h, 0px) + 18px); }
 /* La pastille plein écran (part-plein-ecran, coin bas-gauche fixe) masquerait les barres :
    elle monte juste au-dessus. */
@@ -896,6 +919,30 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
 }
 .slot-edit-bar { grid-area: editrow; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .slot-edit-hint { font-size: 12px; color: #cbb98a; }
+/* ⓘ de la consigne d'édition : caché hors portrait, où la consigne reste en ligne. */
+.slot-edit-aide { display: none; }
+/* Vue PORTRAIT : la rangée d'édition passe à la ligne au besoin, et la consigne quitte le flux
+   pour une bulle ouverte par ⓘ (même motif que la fiche de /play, `.sh-barre-aide`). La bulle
+   s'ouvre AU-DESSUS de la barre : celle-ci est collée au bas de la fenêtre. */
+html.vue-portrait .barres-bas > .action-bar { position: relative; }
+html.vue-portrait .slot-edit-bar { flex-wrap: wrap; gap: 6px; }
+/* La liste d'affectation prend SA PROPRE LIGNE (pleine largeur) : à côté des boutons, elle
+   était tronquée (« ← Choisis… »). Les boutons et ⓘ passent à la ligne suivante. */
+html.vue-portrait #slot-assign-select { flex: 1 0 100%; min-width: 0; max-width: 100%; }
+html.vue-portrait .slot-edit-aide {
+	display: inline-flex; align-items: center; justify-content: center;
+	width: 1.6rem; height: 1.6rem; padding: 0;
+	background: transparent; color: var(--gold2);
+	border: 1px solid var(--border-color); border-radius: 50%;
+	font-size: .9rem; line-height: 1; cursor: pointer;
+}
+html.vue-portrait .slot-edit-hint {
+	display: none; position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); z-index: 5;
+	padding: .5rem .7rem; font-size: 12px;
+	background: #181818; border: 1px solid var(--gold2);
+	border-radius: 6px; box-shadow: 0 4px 14px rgba(0, 0, 0, .6);
+}
+html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 #target-row {
 	grid-area: targetrow;
 	display: none; gap: 8px; align-items: center; justify-content: center;
@@ -1244,6 +1291,8 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
 		<!-- Barres du bas : transparent hors portrait (`display: contents`) ; en vue portrait,
 		     bloc FIXE et flottant en bas de la fenêtre (bandeau de tour au-dessus de la barre). -->
 		<div class="barres-bas" id="barres-bas">
+		<!-- Poignée de rétraction des deux barres (vue portrait seulement, cf. initRepliBarres). -->
+		<button type="button" class="barres-poignee" id="barres-poignee" aria-expanded="true" title="Replier les barres vers la droite">▶</button>
 		<div class="action-bar">
 			<button class="action-btn" id="btn-slots-edit" onclick="toggleSlotEdit()" title="Réorganiser le contenu de la barre — coûte 1 action. (Échanger deux cases est gratuit : clic long sur une case, puis glisser.)">⚙</button>
 			<!-- Grille de slots : rendue 100 % client (renderSlots), positions stables par
@@ -1254,6 +1303,9 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
 				<select id="slot-assign-select"></select>
 				<button class="action-btn" id="btn-slot-assign" onclick="confirmSlotAssign()">✓ Affecter</button>
 				<button class="action-btn flee-btn" id="btn-slot-done" onclick="fermerModeEdition()" title="Quitter le mode réorganisation (gratuit)">Terminer</button>
+				<!-- Portrait : la consigne passe dans une bulle ouverte par ⓘ (cf. toggleSlotEditAide). -->
+				<button type="button" class="slot-edit-aide" id="slot-edit-aide" aria-label="Aide : réorganiser la barre"
+					aria-expanded="false" aria-controls="slot-edit-hint" onclick="toggleSlotEditAide(event)">ⓘ</button>
 				<span class="slot-edit-hint" id="slot-edit-hint"></span>
 			</div>
 			<div id="target-row">
@@ -2849,6 +2901,30 @@ function majBoutonSon() {
 // Pavé déplaçable : sa position vit dans localStorage (préférence du joueur, par navigateur,
 // comme le coupe-son) et survit donc au rechargement d'un changement d'étage. Jamais posée
 // → le CSS `flottant` décide (bas de l'écran, centré sous 768 px).
+// Repli des barres du bas (vue portrait) : préférence du joueur, par navigateur, comme le son.
+const BARRES_REPLI_CLE = 'telluris.combat.barres_repliees';
+function majRepliBarres(repliees) {
+	const barre = document.getElementById('barres-bas');
+	const btn = document.getElementById('barres-poignee');
+	if (barre) barre.classList.toggle('repliees', repliees);
+	if (btn) {
+		btn.textContent = repliees ? '◀' : '▶';
+		btn.title = repliees ? 'Déplier les barres sur toute la largeur' : 'Replier les barres vers la droite';
+		btn.setAttribute('aria-expanded', repliees ? 'false' : 'true');
+	}
+}
+(function initRepliBarres() {
+	let repliees = false;
+	try { repliees = localStorage.getItem(BARRES_REPLI_CLE) === '1'; } catch (e) { repliees = false; }
+	const btn = document.getElementById('barres-poignee');
+	if (btn) btn.onclick = () => {
+		repliees = !repliees;
+		try { localStorage.setItem(BARRES_REPLI_CLE, repliees ? '1' : '0'); } catch (e) { /* mode privé */ }
+		majRepliBarres(repliees);
+	};
+	majRepliBarres(repliees);
+})();
+
 const PAVE_POS_CLE = 'telluris.combat.pave_pos';
 (function initPaveDeplacable() {
 	const pave = document.getElementById('move-section');
@@ -4144,8 +4220,30 @@ function fermerModeEdition() {
 	document.getElementById('btn-slots-edit').classList.remove('attack-btn');
 	document.getElementById('slot-edit-row').style.display = 'none';
 	document.getElementById('slot-edit-hint').textContent = '';
+	_fermerSlotEditAide();
 	updateButtons(state);
 }
+
+// ── Consigne du mode édition : bulle ⓘ (vue portrait seulement, cf. CSS `.slot-edit-aide`) ──
+// Fermée par un 2e clic sur ⓘ, un clic ailleurs, Échap ou la sortie du mode.
+function _fermerSlotEditAide() {
+	const hint = document.getElementById('slot-edit-hint');
+	if (!hint || !hint.classList.contains('ouverte')) return;
+	hint.classList.remove('ouverte');
+	document.getElementById('slot-edit-aide').setAttribute('aria-expanded', 'false');
+}
+function toggleSlotEditAide(ev) {
+	ev.stopPropagation();
+	const hint = document.getElementById('slot-edit-hint');
+	if (hint.classList.contains('ouverte')) { _fermerSlotEditAide(); return; }
+	hint.classList.add('ouverte');
+	document.getElementById('slot-edit-aide').setAttribute('aria-expanded', 'true');
+}
+document.addEventListener('click', ev => {
+	const hint = document.getElementById('slot-edit-hint');
+	if (hint && !hint.contains(ev.target)) _fermerSlotEditAide();
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') _fermerSlotEditAide(); });
 
 // Toutes les actions affectables : les 3 modes d'attaque, puis TOUT ce que le personnage
 // connaît (sorts/compétences/consommables de combat) — c'est la soupape qui rattrape une
