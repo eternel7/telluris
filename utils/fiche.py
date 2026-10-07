@@ -111,3 +111,22 @@ def bloc_fiche(character: dict, get_doc_fn, find_docs_fn, race: dict | None = No
 		"barre_slots_max": slots_actions.slots_max(),
 		"consommables": consommables.liste_consommables_combat(character, resolve_item_ref),
 	}
+
+
+def fiche_resync(character: dict, get_doc_fn, find_docs_fn, race: dict | None = None) -> dict:
+	"""Bloc `fiche` des réponses d'action (Convention §10) : `bloc_fiche` + ce que la carte
+	d'identité de la fiche lit en plus (XP, niveau, points, profil brut, dérivées). `id` dit
+	À QUI il appartient : le client ne l'applique qu'à la fiche de ce doc-là.
+	Sans lui, un grimoire acheté ou une quête rendue laissaient « 📖 Apprendre », l'XP et
+	les points figés jusqu'au prochain /play."""
+	out = {
+		"id": character.get("_id"),
+		"xp_total": character.get("xp_total", 0),
+		"niveau": compute_character_level(character.get("xp_total", 0)),
+		"attribute_points": character.get("attribute_points", 0),
+		"voc_niveau": character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0),
+		"caracteristiques_current": dict(character.get("caracteristiques_current", {})),
+		"derived_stats": derived_de(character),
+	}
+	out.update(bloc_fiche(character, get_doc_fn, find_docs_fn, race))
+	return out

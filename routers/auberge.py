@@ -442,8 +442,8 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 	vitals = auberge.reposer(character)
 	compagnons = recrutement.groupe_effectif(character, get_doc)
 	betes = montures.montures_effectives(character, get_doc)
-	for porteur in compagnons + betes:
-		auberge.reposer(porteur)
+	# Vitaux de chaque porteur, renvoyés pour ses cartes : la fin de nuit ne recharge plus la page.
+	vitals_porteurs = {porteur["_id"]: auberge.reposer(porteur) for porteur in compagnons + betes}
 
 	# 3. Les étals de la CITÉ. Même garde qu'à la visite (`main.py`) : on ne tick que ce qui
 	#    a du stock ou un approvisionnement configuré, sinon un lieu sans commerce ne
@@ -539,6 +539,7 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 		"log": auberge.messages_nuit(lieu_doc, auberge.NUIT_LOG_LIGNES,
 									 chez_soi=proprietes.est_propriete(lieu_doc)),
 		"vitals": vitals,
+		"vitals_porteurs": vitals_porteurs,
 		"cout": cout,
 		"magasins": magasins,
 		"ateliers": ateliers,

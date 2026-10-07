@@ -63,7 +63,7 @@ vm.runInThisContext(extraireConst('_PROP_STATUTS'));
 vm.runInThisContext(extraireConst('_PROP_CATEGORIES'));
 vm.runInThisContext(extraireConst('INV_VISIBLE'));
 for (const f of ['escapeHtml', '_propCategorie', '_purseEnCuivre', '_prixTexte', '_propCaps', '_propDate',
-	'_propMesProprietes', '_propMajoration', 'renderProprietesOffre', 'renderPropriete',
+	'_propMesProprietes', '_propMajoration', 'renderProprietesOffre', 'renderPropriete', '_majSidebarPropriete',
 	'_sortedOrder', '_grpCharge', '_grpRemplirSac', '_grpRentre', '_pcfLigne', '_pcfSacGauche', '_majOmbreScroll', '_pcfOmbres', 'renderCoffre']) {
 	vm.runInThisContext(extraire(f));
 }
@@ -307,6 +307,38 @@ t('marchand employé : rien d\'offert ⇒ aucune section présente', () => {
 		_sellSectionsVisibles({ vente: false, achat: false, commande: false });
 		assert.deepStrictEqual(_sellSectionsPresentes(), []);
 	});
+});
+
+// Sidebar d'une propriété : resync des lignes 🏷️/💰 après embauche/renvoi (plus de F5). DOM
+// factice minimal : une liste de <li> où `before` insère et `remove` retire.
+t('sidebar : lignes d\'atelier reconstruites, caisse basculée, noms en texte', () => {
+	const liste = [];
+	const li = () => ({ className: '', children: [], dataset: {},
+		appendChild(c) { this.children.push(c); }, remove() { liste.splice(liste.indexOf(this), 1); },
+		addEventListener() {} });
+	const coffre = { before(x) { liste.splice(liste.indexOf(coffre), 0, x); } };
+	const caisse = { hidden: true, style: { display: 'none' } };
+	const ancien = li(); ancien.className = 'prop-atelier-li';
+	liste.push(ancien, coffre);
+	const avant = globalThis.document;
+	globalThis.document = {
+		getElementById: id => ({ 'prop-coffre-li': coffre, 'prop-caisse-li': caisse })[id] || null,
+		querySelectorAll: sel => sel === '.prop-atelier-li' ? liste.filter(x => x.className === 'prop-atelier-li') : [],
+		createElement: () => li(),
+	};
+	try {
+		_majSidebarPropriete({ ateliers: [{ id: 'employe:a', nom: '<b>Jehan</b>', metier: 'Forgeron', grande: true }],
+			caisse_accessible: true });
+		assert.strictEqual(liste.length, 2, 'ancienne ligne retirée, une nouvelle avant le coffre');
+		assert.strictEqual(liste[1], coffre);
+		const b = liste[0].children[0];
+		assert.strictEqual(b.dataset.id, 'employe:a');
+		assert.strictEqual(b.textContent, '🏷️ <b>Jehan</b> — Forgeron ✦', 'texte brut, jamais interprété');
+		assert.strictEqual(caisse.hidden, false);
+		_majSidebarPropriete({ ateliers: [], caisse_accessible: false });
+		assert.deepStrictEqual(liste, [coffre]);
+		assert.strictEqual(caisse.hidden, true);
+	} finally { globalThis.document = avant; }
 });
 
 console.log(`\n${passes} OK, ${echecs} échec(s)`);

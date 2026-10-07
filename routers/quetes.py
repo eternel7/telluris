@@ -18,6 +18,7 @@ from utils import focalisation
 from utils import recrutement
 from utils import escorte
 from utils import indicateurs
+from utils import fiche as fiche_util
 from utils.marche import debit_character
 from utils import marche
 from models import character_stats
@@ -73,6 +74,9 @@ def _fiche_payload(character: dict) -> dict:
 		# Gratuit (0 lecture, cf. utils/indicateurs) — donc republié sans arbitrage,
 		# contrairement à `relations_lieux` (Conventions §10).
 		"lieux_marques": indicateurs.marques_lieux(character),
+		# Fiche du personnage (XP, niveau, points, « 📖 Apprendre »…) : une quête rendue verse
+		# de l'XP, une course remet ou retire des objets — cf. utils/fiche.fiche_resync.
+		"fiche": fiche_util.fiche_resync(character, get_doc, find_docs),
 	}
 
 

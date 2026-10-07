@@ -54,6 +54,7 @@ from utils import escorte
 from utils import indicateurs
 from utils import expedition
 from utils import auberge
+from utils import fiche as fiche_util
 from utils import scriptorium
 from utils import negoce
 from utils import journal as journal_util
@@ -1266,6 +1267,15 @@ def _inventory_payload(character: dict, sol_doc: dict | None = None) -> dict:
 	}
 
 
+def _fiche_payload(character: dict) -> dict | None:
+	"""Bloc `fiche` d'une réponse d'action (utils/fiche.fiche_resync) : ce qu'un objet, de
+	l'XP ou des points changent sur la fiche — « 📖 Apprendre » d'abord (grimoire acquis ou
+	cédé). ⚠️ None pour une MONTURE : elle porte, elle n'a ni fiche ni sorts."""
+	if str(character.get("_id", "")).startswith("monture:"):
+		return None
+	return fiche_util.fiche_resync(character, get_doc, find_docs)
+
+
 def _take_ref(refs: list, idx, item_id):
 	"""Retire et renvoie la référence d'item ciblée. On adresse par index (deux
 	exemplaires d'un même item peuvent avoir des poids d'instance distincts), vérifié
@@ -1302,7 +1312,9 @@ async def drop_item(
 	principal["objets_au_sol"] = au_sol
 
 	_save_acteur(character, principal)
-	return _inventory_payload(character, principal)
+	payload = _inventory_payload(character, principal)
+	payload["fiche"] = _fiche_payload(character)
+	return payload
 
 
 @user_router.post("/pickup_item")
@@ -1348,6 +1360,7 @@ async def pickup_item(
 	_save_acteur(character, principal)
 	payload = _inventory_payload(character, principal)
 	payload["auto_dropped"] = auto_dropped
+	payload["fiche"] = _fiche_payload(character)
 	return payload
 
 
@@ -2229,6 +2242,8 @@ async def sell_item(
 	payload["vendables"] = _marchand_vendables(principal, lieu_doc, relation, porteurs)
 	payload["achetables"] = resolve_stock_vente(lieu_doc, relation)
 	payload["vendu"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(prix)}
+	# Céder un grimoire ferme son sort à l'apprentissage : fiche de CELUI qui a vendu.
+	payload["fiche"] = _fiche_payload(porteur)
 	payload["relation"] = relation_value(relation)
 	if est_negociant(lieu_doc):
 		# La fidélité peut avoir fait bouger la relation, donc la commission (Conventions §10).
@@ -2315,6 +2330,9 @@ async def buy_item(
 	payload["vendables"] = _marchand_vendables(character, lieu_doc, relation, recrutement.porteurs_effectifs(character, get_doc))
 	payload["achetables"] = resolve_stock_vente(lieu_doc, relation)
 	payload["achete"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(prix)}
+	# Un grimoire acheté ouvre son sort à l'apprentissage (`grimoire_ok`) : sans ce bloc,
+	# « 📖 Apprendre » resterait grisé jusqu'au prochain /play.
+	payload["fiche"] = _fiche_payload(character)
 	payload["relation"] = relation_value(relation)
 	return payload
 

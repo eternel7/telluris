@@ -727,6 +727,21 @@ def grande_maison(employe: dict) -> bool:
 	return (employe or {}).get("categorie") in (character_stats.LIEU_CATEGORIES_FUSION or {})
 
 
+def vue_sidebar(prop: dict, cat: dict, employes: list, role: str | None) -> dict:
+	"""Lignes de la SIDEBAR d'une propriété qui dépendent du personnel : un 🏷️ par marchand
+	employé, et le 💰 de la caisse. Source unique de /play (rendu Jinja) et des réponses
+	d'embauche/renvoi (resync client, Convention §10) — sans elle, embaucher exigeait un F5."""
+	ateliers = [
+		{"id": e["_id"], "nom": nom_personnage(e),
+		 "metier": (metier_def(cat, e.get("metier")) or {}).get("label", ""),
+		 "grande": grande_maison(e)}
+		for e in employes if est_atelier(e)]
+	caisse = bool(ateliers) and (
+		role == PROPRIETAIRE
+		or peut_retirer(role, prop, gardien_present(prop, cat, employes))[0])
+	return {"ateliers": ateliers, "caisse_accessible": caisse}
+
+
 def atelier_actif(character: dict, lieu_doc: dict, get_doc_fn=None) -> dict | None:
 	"""L'atelier désigné par le champ TRANSITOIRE `atelier_courant`, s'il travaille dans CETTE
 	propriété. C'est lui que le marché et les commandes traitent comme « le lieu »."""

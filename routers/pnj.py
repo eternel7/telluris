@@ -34,6 +34,7 @@ from utils import montures
 from utils import escorte
 from utils import indicateurs
 from utils import apport
+from utils import fiche as fiche_util
 from utils.combat import (
 	instantiate_monsters, build_monster_snapshot, create_combat_doc,
 	resolve_first_turns, finalize_combat,
@@ -879,6 +880,11 @@ async def pnj_dialogue_choix(
 			pnj_doc, pnj.delai_restant(character, pnj_doc.get("_id"), quetes.now_epoch()))
 		reponse["pnj_marque"] = pnj.marque_noeud(pnj_doc, depart, contexte)
 	reponse["lieux_marques"] = indicateurs.marques_lieux(character)
+	# Fiche (XP, niveau, points, « 📖 Apprendre ») : seulement quand un service a bougé le
+	# personnage (quête/course/rang → `fiche_actives`, don/remise → `inventaire_payload`) ;
+	# une réplique simple ne paie pas ce recalcul.
+	if "fiche_actives" in reponse or "inventaire_payload" in reponse:
+		reponse["fiche"] = fiche_util.fiche_resync(character, get_doc, find_docs)
 	return reponse
 
 

@@ -32,7 +32,7 @@ from utils import commande as commande_util
 # Sens d'import : `routers/proprietes` → `routers/user`, jamais l'inverse (précédent :
 # routers/auberge).
 from routers.user import _inventory_payload
-from utils.lieux import connexions_du_lieu
+from utils.lieux import connexions_du_lieu, get_lieu_links
 
 proprietes_router = APIRouter()
 
@@ -171,6 +171,8 @@ def _payload_ici(character: dict, prop: dict, cat: dict, role: str, extra: dict 
 					"raison": revente_raison, "prix": proprietes.prix_revente(tdef, prop)},
 		"mes_proprietes": _mes_proprietes(character, cat),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
+		# Lignes 🏷️/💰 de la sidebar : un renvoi ou un gardien installé les fait bouger.
+		"sidebar": proprietes.vue_sidebar(prop, cat, employes, role),
 	}
 	if extra:
 		payload.update(extra)
@@ -282,6 +284,8 @@ async def acheter(current_user: Annotated[dict, Depends(get_current_user)], body
 
 	payload = _payload_offre(character, lieu_doc, cat)
 	payload["achetee"] = _resume(prop, cat, character)
+	# La porte vient de naître sur cette case : la liste des lieux la montre sans F5.
+	payload["links"] = get_lieu_links(current_user)
 	return payload
 
 
@@ -319,6 +323,8 @@ async def louer(current_user: Annotated[dict, Depends(get_current_user)]):
 
 	payload = _payload_offre(character, lieu_doc, cat)
 	payload["louee"] = _resume(prop, cat, character)
+	# Première location : la porte de la chambre vient de naître (cf. `acheter`).
+	payload["links"] = get_lieu_links(current_user)
 	return payload
 
 
@@ -444,6 +450,8 @@ def _payload_embauche(character: dict, prop: dict, cat: dict, employes: list, ex
 		"employes": [_employe_view(cat, e) for e in employes],
 		"personnel": len(employes), "personnel_max": caps["personnel_max"], "complet": complet,
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
+		# Lignes 🏷️/💰 de la sidebar (le tableau d'embauche est réservé au propriétaire).
+		"sidebar": proprietes.vue_sidebar(prop, cat, employes, proprietes.PROPRIETAIRE),
 	}
 	if extra:
 		payload.update(extra)

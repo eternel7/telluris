@@ -225,7 +225,7 @@ Règles qui valent **partout** ; les compétences ne répètent que ce qui leur 
 
 **9 bis. Les toasts s'EMPILENT** : un appel à `showToast(msg)` = une bulle, pile plafonnée ; `{major:true}` est réservé aux moments de jeu. Détail : `telluris-social-ui`.
 
-**10. Resync de payload.** Tout endpoint qui bouge un état **renvoie le bloc recalculé** (`slots`, `relations_lieux`, `caracts_detail`, `inventaire_payload`, `links`…). Le client ne reconstruit jamais un état ; sans le bloc, l'onglet reste figé sur le dernier chargement de `/play` — symptôme difficile à relier à sa cause.
+**10. Resync de payload.** Tout endpoint qui bouge un état **renvoie le bloc recalculé** (`slots`, `relations_lieux`, `caracts_detail`, `inventaire_payload`, `links`…). Fiche (XP, points, « 📖 Apprendre ») : bloc `fiche` (`fiche.fiche_resync`) → client `_appliquerFiche`, qui ne l'applique qu'à la fiche de SON `id`. Le client ne reconstruit jamais un état ; sans le bloc, l'onglet reste figé sur le dernier chargement de `/play` — symptôme difficile à relier à sa cause.
 
 **11. Import et écriture de contenu.** Docs de contenu dans `jsons/*_a_importer.json`, chargés par la carte d'import de `/admin`. ⚠️ **`admin_import_bulk` et `PUT /admin/doc` font un PUT COMPLET, jamais un merge, et ne refusent rien** (`_rev` réattaché depuis la base) : un `_id` réutilisé écrase en silence, une clé absente disparaît. D'où les générateurs `dev/gen_*.py`, qui relisent le **dump** et n'injectent que le champ ajouté (régénération **idempotente**), et les formulaires d'admin qui fusionnent le doc **relu**. ⚠️ Avant de livrer un générateur : aucune collision d'`_id`, rejeu contre un export récent.
 
