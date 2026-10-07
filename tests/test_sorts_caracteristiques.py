@@ -236,3 +236,27 @@ def test_le_simulateur_tire_le_soin_a_chaque_usage():
 			   "compteur": "sorts", "source": {}}
 	assert simulateur._utiliser_soutien(actor, soutien, {"tour": 1, "log": []})
 	assert actor["currentPV"] == 40
+
+
+# ── Listes « 📖 Apprendre » : formules résolues pour le personnage ──────────────────
+
+def test_listes_apprenables_resolvent_les_formules():
+	"""Sans `apercu_effets`, un buff à formule (rangé dans `formules`) disparaissait de
+	l'étiquette de la liste d'apprentissage — sorts comme compétences."""
+	from utils.competences import competences_apprenables
+	perso = {"voc": "guerrier", "vocations_niveaux": {"guerrier": 1},
+			 "caracteristiques_current": dict(CARACTS)}
+	comp = {"_id": "competence:cri", "type": "competence", "nom": "Cri", "vocation": "guerrier",
+			"niveau": 1, "mode": "active", "cible": "soi", "cout_pm": 5,
+			"effets": {"buffs": {"F": "2+{Vol/10}"}, "duree": 3}}
+	[c] = competences_apprenables(perso, lambda _sel: [comp])
+	assert c["effets"]["buffs"] == {"F": 6}
+	assert c["effets"]["formules_texte"] == {"buffs.F": "2+{Vol/10}"}
+
+	rules = {"value": [{"id": "mage", "magie": "Bataille"}]}
+	mage = {"voc": "mage", "vocations_niveaux": {"mage": 1}, "caracteristiques_current": dict(CARACTS)}
+	doc = {"_id": "sort:dard", "type": "sort", "nom": "Dard", "magie": "Bataille", "niveau": 0,
+		   "cout_pm": 5, "cible": "ennemi", "effets": {"degats": "1D{Int/5}"}}
+	[s] = S.sorts_apprenables(mage, lambda _sel: [doc], lambda _r: None, rules)
+	assert s["effets"]["degats"] == "1D9"
+	assert s["effets"]["formules_texte"] == {"degats": "1D{Int/5}"}

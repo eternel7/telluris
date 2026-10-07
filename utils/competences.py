@@ -378,6 +378,8 @@ def competences_apprenables(character: dict, find_docs, rules_vocations=None) ->
 	niveau_voc = _as_int((character.get("vocations_niveaux") or {}).get(voc, 0))
 	connues = set(character.get("competences_connues") or [])
 	exclues = familles_exclues(voc, rules_vocations)
+	from utils.consommables import caracts_avec_buffs
+	caracts = caracts_avec_buffs(character)
 	out = []
 	for doc in find_docs({"type": "competence"}) or []:
 		comp = normaliser_competence(doc)
@@ -389,6 +391,8 @@ def competences_apprenables(character: dict, find_docs, rules_vocations=None) ->
 		# (l'endpoint `apprendre_competence` refait le test — la liste n'est pas la garde).
 		if comp["famille"] and comp["famille"] in exclues:
 			continue
+		# Formules à caractéristiques RÉSOLUES pour ce personnage (cf. `liste_competences_payload`).
+		comp["effets"] = apercu_effets(comp["effets"], caracts)
 		comp["cout_points"] = cout_apprentissage(comp)
 		out.append(comp)
 	out.sort(key=lambda c: (c["niveau"], c["nom"]))

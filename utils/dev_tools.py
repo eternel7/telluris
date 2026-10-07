@@ -606,6 +606,22 @@ CATALOGUE = [
 			"nom ou `_id` déjà pris) ; une compétence déjà en base n'est pas réémise.",
 	},
 	{
+		"id": "gen_competences_caracteristiques",
+		"label": "🧮 Compétences 1 → 10 à formules de caractéristiques",
+		# `dump_frais` : le doc émis est le doc RELU de la base (PUT complet) — sur un dump
+		# périmé, une retouche faite depuis en base serait écrasée.
+		"argv_fn": lambda v, f: _py("gen_competences_caracteristiques.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/competences_caracteristiques_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/competences_caracteristiques_a_importer.json et "
+			"docs/competences_caracteristiques.md. Rien en base avant 📥 Importer.",
+		"description": "Retouche les actives du lot 1 → 10 : l'effet principal (dégâts, malus, "
+			"poison, siphon, buff, soin, PM, esquive) lit une caractéristique du lanceur, "
+			"choisie par vocation et par forme d'effet (`{F/8}`, `-3-{Int/10}`…). Valeur "
+			"d'origine conservée à la référence 30 + 4 × niveau. Un doc déjà à formule est "
+			"sauté ; tout converti ⇒ aucun fichier.",
+	},
+	{
 		"id": "gen_villes_images",
 		"label": "🏙 Créer les lieux des cartes de ville sans lieu (grille depuis l'image)",
 		# Dump frais : une carte se dit « sans lieu » d'après les `image` des lieux en base — sur

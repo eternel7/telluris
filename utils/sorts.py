@@ -1127,6 +1127,8 @@ def sorts_apprenables(character: dict, find_docs, resolve_ref, rules_vocations) 
 	résolue)."""
 	connus = set((character or {}).get("sorts_connus") or [])
 	exclues = familles_exclues((character or {}).get("voc"), rules_vocations)
+	from utils.consommables import caracts_avec_buffs
+	caracts = caracts_avec_buffs(character or {})
 	out = []
 	for doc in find_docs({"type": "sort"}) or []:
 		sort = normaliser_sort(doc)
@@ -1141,6 +1143,9 @@ def sorts_apprenables(character: dict, find_docs, resolve_ref, rules_vocations) 
 		if niv is None or niv < sort["niveau"]:
 			continue
 		sort["magie"] = ecole
+		# Formules à caractéristiques RÉSOLUES pour ce personnage, comme `liste_sorts_payload` :
+		# sans quoi un buff à formule (rangé dans `formules`) disparaîtrait de l'étiquette.
+		sort["effets"] = apercu_effets(sort["effets"], caracts)
 		sort["cout_points"] = cout_apprentissage(sort)
 		sort["grimoire_ok"] = grimoire_pour(character, sort["id"], resolve_ref) is not None
 		out.append(sort)
