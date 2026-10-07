@@ -37,7 +37,7 @@ from utils.marche import (
 	debit_character, get_relation, relation_value, prix_range_cuivre,
 	prix_marche, stock_cible_pour, resolve_stock_vente,
 )
-from routers.user import _inventory_payload, _marchand_vendables
+from routers.user import _inventory_payload, _marchand_vendables, _fiche_payload
 
 commande_router = APIRouter()
 
@@ -616,6 +616,8 @@ async def retirer_commande(
 	payload = _payload_commande(character, lieu_doc, relation, now,
 								message="Retiré : %s." % (item.get("nom") or cmd.get("item")))
 	payload["retire"] = resolve_item_ref(ref)
+	# La pièce entre au sac : charge magique, consommables de la barre… (Convention §10).
+	payload["fiche"] = _fiche_payload(character)
 	return payload
 
 

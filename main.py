@@ -971,15 +971,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			if proprietes_util.produire(_e, _flux_prop, 1, _cat_proprietes)[0]:
 				save_doc(_e)
 		persister_flux(_flux_prop, save_doc)
-		proprietes_ateliers = [
-			{"id": _e["_id"], "nom": proprietes_util.nom_personnage(_e),
-			 "metier": (proprietes_util.metier_def(_cat_proprietes, _e.get("metier")) or {}).get("label", ""),
-			 "grande": proprietes_util.grande_maison(_e)}
-			for _e in _employes if proprietes_util.est_atelier(_e)]
-		caisse_accessible = bool(proprietes_ateliers) and (
-			role_propriete == proprietes_util.PROPRIETAIRE
-			or proprietes_util.peut_retirer(role_propriete, grid_doc, proprietes_util.gardien_present(
-				grid_doc, _cat_proprietes, _employes))[0])
+		# Même source que la resync d'embauche/renvoi (`routers/proprietes`, clé `sidebar`).
+		_vue = proprietes_util.vue_sidebar(grid_doc, _cat_proprietes, _employes, role_propriete)
+		proprietes_ateliers = _vue["ateliers"]
+		caisse_accessible = _vue["caisse_accessible"]
 		# La section « Commande » du panneau marchand doit exister : c'est le choix du
 		# marchand qui l'active ou non côté client (catalogue / grande maison).
 		est_commande = est_commande or bool(proprietes_ateliers)
