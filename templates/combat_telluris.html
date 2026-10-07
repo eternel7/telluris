@@ -926,7 +926,9 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
    s'ouvre AU-DESSUS de la barre : celle-ci est collée au bas de la fenêtre. */
 html.vue-portrait .barres-bas > .action-bar { position: relative; }
 html.vue-portrait .slot-edit-bar { flex-wrap: wrap; gap: 6px; }
-html.vue-portrait .slot-edit-bar > select { min-width: 0; max-width: 100%; }
+/* La liste d'affectation prend SA PROPRE LIGNE (pleine largeur) : à côté des boutons, elle
+   était tronquée (« ← Choisis… »). Les boutons et ⓘ passent à la ligne suivante. */
+html.vue-portrait #slot-assign-select { flex: 1 0 100%; min-width: 0; max-width: 100%; }
 html.vue-portrait .slot-edit-aide {
 	display: inline-flex; align-items: center; justify-content: center;
 	width: 1.6rem; height: 1.6rem; padding: 0;
