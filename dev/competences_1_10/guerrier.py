@@ -1,0 +1,77 @@
+"""Guerrier ⚔️ — encaisse et frappe lourde, tient la ligne."""
+from competences_1_10 import A, P
+
+ENTREES = [
+	# ── Niveau 1 ──
+	P(1, "Poigne d'acier", "✊", "p_carac", "Des années à serrer la garde : la main ne lâche plus rien.", stats=("F",)),
+	P(1, "Peau tannée", "🛡️", "p_carac", "Les bleus d'hier sont la cuirasse de demain.", stats=("R",)),
+	A(1, "Coup d'estoc", "🗡️", "frappe", "lame", "Une pointe sèche, portée au défaut de la garde adverse."),
+	A(1, "Bousculade", "💢", "entrave", "coup_lourd", "Un coup d'épaule qui déséquilibre et laisse l'ennemi chancelant.", malus=("Ag",)),
+	A(1, "Garde haute", "🛡️", "esquive_soi", "garde", "Le bouclier remonte, l'épée se replie : il n'offre plus que du fer.", stats=("R",)),
+	# ── Niveau 2 ──
+	P(2, "Souffle long", "🌬️", "p_carac", "Il a appris à respirer sous le heaume sans jamais manquer d'air.", stats=("Vol",)),
+	P(2, "Pas assuré", "🦶", "p_esquive", "Chaque appui est choisi : on ne le prend jamais à contre-pied."),
+	A(2, "Taille horizontale", "⚔️", "zone_rect", "balayage", "Un revers large qui fauche tout ce qui se tient devant lui."),
+	A(2, "Pommeau au visage", "👊", "entrave", "coup_lourd", "Le pommeau frappe là où la lame ne passe pas.", malus=("Int", "Ag")),
+	A(2, "Coup de taille", "⚔️", "frappe", "lame", "Un geste ample, de toute la longueur de la lame."),
+	A(2, "Charge courte", "🐂", "saut", "saut", "Trois pas d'élan et il est déjà sur la ligne adverse."),
+	A(2, "Second souffle", "💪", "buff_soi", "aura_bataille", "Il serre les dents et repart comme au premier assaut.", stats=("R", "F")),
+	# ── Niveau 3 ──
+	P(3, "Endurance du soldat", "🥾", "p_regen", "Les marches forcées ont appris à son corps à se refaire en marchant."),
+	A(3, "Fendoir", "🪓", "frappe", "coup_lourd", "Le coup tombe d'en haut, de tout son poids."),
+	A(3, "Cercle d'acier", "🌀", "zone_carre", "balayage", "Il pivote sur lui-même, lame tendue, et dégage la place."),
+	A(3, "Mur de boucliers", "🛡️", "posture", "garde", "Il plante les pieds et lève le bouclier : la ligne tiendra.", stats=("R", "Vol")),
+	A(3, "Taillade aux jarrets", "🩸", "poison", "saignee", "Une entaille basse, qui saigne longtemps."),
+	# ── Niveau 4 ──
+	P(4, "Carrure", "🏋️", "p_carac", "Des épaules faites pour porter l'acier et ceux qui tombent.", stats=("F",)),
+	P(4, "Œil du vétéran", "👁️", "p_esquive", "Il voit venir le coup avant que l'autre ne le sache."),
+	A(4, "Coup de bélier", "🐏", "entrave", "coup_lourd", "Tout le corps derrière l'épaule : l'ennemi recule et s'essouffle.", malus=("F", "Ag")),
+	A(4, "Lame lourde", "⚔️", "frappe", "lame", "Un coup sans finesse, mais qui ne s'arrête pas à l'armure."),
+	A(4, "Cri de guerre", "📣", "cri", "aura_bataille", "Un hurlement que la troupe reprend, et qui fait lever les armes.", stats=("F", "Vol")),
+	A(4, "Bond du fantassin", "🦘", "saut", "saut", "Par-dessus le fossé, par-dessus le mort, droit sur l'ennemi."),
+	A(4, "Coup du maître de corps", "🩸", "sang", "saignee", "Il paie de sa chair un coup qui ne pardonne pas."),
+	# ── Niveau 5 ──
+	P(5, "Nerfs d'acier", "🧠", "p_carac", "Le fracas autour de lui ne fait plus trembler sa main.", stats=("Vol",)),
+	P(5, "Cuir épais", "🐗", "p_carac", "Il porte ses cicatrices comme une seconde armure.", stats=("R",)),
+	A(5, "Fauchage", "🌾", "zone_rect", "balayage", "Trois adversaires, un seul geste, aucun ne reste debout indemne."),
+	A(5, "Brise-garde", "🔨", "entrave", "coup_lourd", "Il frappe l'arme plutôt que l'homme, et l'arme cède.", malus=("Ag", "R")),
+	A(5, "Estocade", "🗡️", "frappe", "lame", "La pointe entre là où la maille s'ouvre."),
+	A(5, "Rempart vivant", "🧱", "posture", "garde", "Il devient le mur derrière lequel les autres respirent.", stats=("R",)),
+	A(5, "Ordre de la ligne", "🎺", "buff_allie", "aura_bataille", "Un mot sec à un compagnon, et celui-ci retrouve sa place et son courage.", stats=("R", "Vol")),
+	# ── Niveau 6 ──
+	P(6, "Main sûre", "🎯", "p_carac", "Plus un geste perdu : chaque coup porte où il le veut.", stats=("Ag",)),
+	A(6, "Volée de taille", "🌀", "zone_carre", "balayage", "La lame tourne et ne revient qu'après avoir fait le tour des ennemis."),
+	A(6, "Coup de grâce", "💀", "frappe", "saignee", "Là où l'ennemi a déjà cédé, il achève."),
+	A(6, "Défi", "😤", "entrave", "rage", "Il appelle l'ennemi d'un geste, et celui-ci se jette sur lui sans réfléchir.", malus=("Int", "Vol")),
+	A(6, "Vague d'acier", "🌊", "zone_cone", "impact_eclat_dore/cone_tueur_demon", "Un revers en éventail qui ouvre la mêlée."),
+	# ── Niveau 7 ──
+	P(7, "Force tranquille", "🗿", "p_carac", "Il ne se presse jamais, et pourtant rien ne lui résiste.", stats=("F",)),
+	P(7, "Instinct de survie", "❤️‍🩹", "p_esquive", "Le corps esquive avant que la tête n'ait compris."),
+	A(7, "Frappe de siège", "🏰", "frappe", "coup_lourd", "Un coup qu'on réserve d'ordinaire aux portes."),
+	A(7, "Hachoir", "🪓", "sang", "saignee", "Il s'ouvre la paume sur la garde et frappe comme un forcené."),
+	A(7, "Charge du chevalier", "🐎", "saut", "saut", "D'un bond il franchit la mêlée pour tomber sur celui qui commande."),
+	A(7, "Lame tournoyante", "⚔️", "zone_rect", "balayage", "Trois coups en un, de gauche à droite et retour."),
+	A(7, "Tenue de ligne", "🛡️", "cri", "garde", "Autour de lui, les boucliers se resserrent.", stats=("R",)),
+	# ── Niveau 8 ──
+	P(8, "Ossature de chêne", "🌳", "p_carac", "Les coups glissent sur lui comme la pluie sur l'écorce.", stats=("R",)),
+	P(8, "Volonté de fer", "🔩", "p_carac", "Ni la peur ni la fatigue n'entrent plus sous son casque.", stats=("Vol",)),
+	A(8, "Tranche-armure", "⚔️", "frappe", "lame", "La lame cherche la jointure et la trouve."),
+	A(8, "Écrasement", "🔨", "entrave", "coup_lourd", "Le genou de l'ennemi cède sous le choc.", malus=("Ag", "F")),
+	A(8, "Moulinet", "🌀", "zone_carre", "balayage", "Une roue d'acier dont personne ne sort indemne.", rayon=2),
+	A(8, "Garde du capitaine", "🛡️", "posture", "garde", "Il tient le terrain comme on tient une promesse.", stats=("R", "F")),
+	A(8, "Soin de campagne", "🩹", "soin", "soin_nature", "Un bandage serré, un mot bourru : le camarade se relève.", portee=1),
+	# ── Niveau 9 ──
+	P(9, "Sang-froid", "❄️", "p_esquive", "Au cœur du chaos, il reste celui qui voit clair."),
+	P(9, "Corps de bataille", "⚙️", "p_regen", "Il guérit entre deux combats comme d'autres reprennent haleine."),
+	A(9, "Coupe-tête", "⚔️", "frappe", "saignee", "Un coup haut, porté avec la certitude du bourreau."),
+	A(9, "Ouragan d'acier", "🌪️", "zone_cone", "impact_eclat_dore/cone_tueur_demon", "La lame dessine un arc devant lui, et l'arc emporte tout."),
+	A(9, "Fracasse-bouclier", "💥", "entrave", "coup_lourd", "Le bouclier vole en éclats, et la garde avec lui.", malus=("R", "Ag")),
+	A(9, "Assaut sanglant", "🩸", "sang", "rage", "Il ne compte plus ses blessures, seulement les coups qu'il rend."),
+	A(9, "Bannière haute", "🚩", "cri", "aura_bataille", "Il lève l'étendard : toute la troupe retrouve ses forces.", stats=("F", "R"), rayon=2),
+	# ── Niveau 10 ──
+	P(10, "Légende des champs de bataille", "🏆", "p_carac", "On raconte ses batailles aux recrues ; lui ne les compte plus.", stats=("F",)),
+	A(10, "Coup du seigneur de guerre", "👑", "frappe", "coup_lourd", "Le coup qui termine les batailles."),
+	A(10, "Tempête de lames", "🌪️", "zone_carre", "balayage", "Une tourmente de fer qui ne laisse rien debout autour de lui.", rayon=2),
+	A(10, "Inébranlable", "⛰️", "posture", "garde", "Une montagne n'a pas besoin de bouger pour arrêter l'armée.", stats=("R", "Vol")),
+	A(10, "Saut du conquérant", "🦅", "saut", "saut", "Il tombe au cœur des rangs ennemis comme un aigle sur sa proie."),
+]

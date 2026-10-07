@@ -593,6 +593,19 @@ CATALOGUE = [
 			"un doc déjà en base à l'identique est sauté.",
 	},
 	{
+		"id": "gen_competences_1_10",
+		"label": "⚡ Compétences de vocation niveaux 1 → 10 (animation + son)",
+		"argv": _py("gen_competences_1_10.py"),
+		"ecrit": "Écrit jsons/competences_vocations_1_10_a_importer.json et "
+			"docs/competences_vocations_1_10.md.",
+		"description": "Complète chaque niveau 1 → 10, existantes comprises : 4 compétences "
+			"pour une vocation à magie (actives seulement), 2 passives + 5 actives sinon. "
+			"Données par vocation dans dev/competences_1_10/, valeurs tirées d'une échelle par "
+			"niveau ; chaque active pointe vers un thème animation:capa_* sonore. Refuse tout "
+			"le lot sur une garde violée (invariants de check_competences_doc, compte, thème, "
+			"nom ou `_id` déjà pris) ; une compétence déjà en base n'est pas réémise.",
+	},
+	{
 		"id": "gen_villes_images",
 		"label": "🏙 Créer les lieux des cartes de ville sans lieu (grille depuis l'image)",
 		# Dump frais : une carte se dit « sans lieu » d'après les `image` des lieux en base — sur

@@ -55,7 +55,7 @@ CHAMPS_ACTIFS_SEULEMENT = ("cout_pm", "cible", "jet", "portee")
 CHAMPS_DOC = ("_id", "_rev", "type", "nom", "icon", "description", "vocation", "famille",
 			  "niveau", "mode", "cout_pm", "maintien", "incantation", "sensibilite_charge",
 			  "cible", "jet", "portee", "zone", "effets", "condition", "animation",
-			  "pose_piege")
+			  "animation_zone", "pose_piege")
 # Clés que le moteur lit sur un SORT mais jamais sur une compétence. `_bonus_dict` les
 # normalise (elles ne « disparaissent » donc pas : le contrôle n°1 ne les verrait pas), et
 # `competence_utilisable_combat` en accepte même deux — mais AUCUNE branche de
@@ -179,6 +179,201 @@ def vocations_du_dump():
 	return dumps[-1], vocations, existantes
 
 
+def verifier_competence(doc, prefixe, ids_existants=None, vocations_connues=None,
+						niveaux=NIVEAUX_ATTENDUS) -> list:
+	"""Invariants d'UN doc (n° 1, 2, 4 et 7 à 13 du document) — liste d'erreurs, vide si OK.
+
+	Partagée par ce vérificateur et par `dev/gen_competences_1_10.py` : un lot généré passe
+	par les mêmes gardes qu'un bloc écrit à la main. `ids_existants` / `vocations_connues`
+	à None sautent le contrôle correspondant ; `niveaux` à None accepte tout niveau.
+	"""
+	erreurs = []
+	cid = doc.get("_id", "<sans _id>")
+	# (1) le moteur accepte-t-il le doc, et sans perdre de clé ?
+	comp = normaliser_competence(doc)
+	if comp is None:
+		erreurs.append(f"{prefixe} : rejeté par normaliser_competence "
+					   f"(type ≠ 'competence' ou vocation absente)")
+		return erreurs
+
+	for cle in doc:
+		if cle not in CHAMPS_DOC:
+			erreurs.append(f"{prefixe} : champ `{cle}` INCONNU de normaliser_competence — "
+						   f"il disparaîtrait silencieusement à la lecture")
+
+	# (2) Clés INERTES sur une compétence. Elles ne disparaissent pas à la
+	# normalisation — c'est bien pire : la compétence part en base, s'utilise sans la
+	# moindre erreur, et ne fait rien. Deux d'entre elles (`saut`, `lien_vie`) sont même
+	# ACCEPTÉES par `competence_utilisable_combat`.
+	for cle, pourquoi in CHAMPS_INERTES_SUR_COMPETENCE.items():
+		if cle in doc:
+			erreurs.append(f"{prefixe} : champ `{cle}` sur une COMPÉTENCE — {pourquoi}")
+	for cle, pourquoi in EFFETS_INERTES_SUR_COMPETENCE.items():
+		if (doc.get("effets") or {}).get(cle):
+			erreurs.append(f"{prefixe} : effet `{cle}` sur une COMPÉTENCE — {pourquoi}")
+
+	# (3) L'ACCORD entre le prédicat du router et le moteur. Ce contrôle remplace
+	# l'ancienne règle « `degats_pm` jamais seul », devenue sans objet : les deux
+	# gardes divergeaient (celle des compétences omettait la clé), elles appellent
+	# désormais la même fonction. Plutôt que de retirer le contrôle, on le remonte
+	# d'un cran — on ne teste plus UNE clé, on teste que les deux prédicats du moteur
+	# s'accordent sur cette entrée, quelle que soit la clé en cause.
+	eff_norm = _bonus_dict(doc.get("effets") or {})
+	if est_active(comp) and comp["cible"] == "ennemi":
+		if capacite_utilisable_combat(comp) and not effets_agissent_sur_cible(eff_norm):
+			erreurs.append(f"{prefixe} : active `ennemi` lançable en combat mais SANS "
+						   f"effet sur une cible — le router la listerait, le moteur "
+						   f"la refuserait au moment de frapper")
+
+	# (4) maintien : borne du moteur, actives seulement, et pas de `duree` trompeuse
+	if "maintien" in doc:
+		maintien = doc.get("maintien") or 0
+		if not isinstance(maintien, int) or maintien < 0 or maintien > MAINTIEN_MAX:
+			erreurs.append(f"{prefixe} : `maintien` {maintien!r} hors de [0, "
+						   f"{MAINTIEN_MAX}] (MAINTIEN_PM_MAX)")
+		if maintien and est_passive(comp):
+			erreurs.append(f"{prefixe} : PASSIVE portant `maintien` — une passive n'est "
+						   f"jamais lancée, rien ne prélèverait l'entretien")
+		if maintien and (doc.get("effets") or {}).get("duree"):
+			erreurs.append(f"{prefixe} : entrée MAINTENUE portant `duree` — l'entrée "
+						   f"d'effets_actifs ne se décrémente pas, la durée annoncée "
+						   f"est une échéance qui n'existe pas")
+
+	# (11) SIGNE de la régén selon la cible. Depuis la PR #66 `regen_pv`/`regen_pm` sont
+	# SIGNÉES (négatif = poison). Le moteur ne refuse AUCUN des mauvais emplois :
+	# `effets_agissent_sur_cible` accepte une régén positive sur un ennemi (elle le
+	# soignerait), une aura négative empoisonnerait tout le groupe. Mesuré, pas déduit.
+	regens = {k: eff_norm.get(k, 0) for k in ("regen_pv", "regen_pm")}
+	negatives = sorted(k for k, v in regens.items() if v < 0)
+	positives = sorted(k for k, v in regens.items() if v > 0)
+	if negatives:
+		if est_passive(comp) and doc.get("zone"):
+			erreurs.append(f"{prefixe} : AURA à régén NÉGATIVE {negatives} — elle "
+						   f"empoisonnerait tout le groupe, montures comprises")
+		if est_active(comp) and comp["cible"] == "allie":
+			erreurs.append(f"{prefixe} : active `allie` à régén NÉGATIVE {negatives} — "
+						   f"elle empoisonnerait un compagnon")
+	if positives and est_active(comp) and comp["cible"] == "ennemi":
+		erreurs.append(f"{prefixe} : active `ennemi` à régén POSITIVE {positives} — "
+					   f"elle soignerait la cible (le moteur l'accepte)")
+	if (est_active(comp) and (negatives or positives)
+			and not eff_norm.get("duree") and not doc.get("maintien")):
+		erreurs.append(f"{prefixe} : active à régén sans `duree` ni `maintien` — rien "
+					   f"ne serait empilé (part_durative)")
+
+	# (12) MUR involontaire (PR #33) : la règle est DÉRIVÉE, sans clé — toute capacité
+	# offensive à zone ET maintenue laisse une zone persistante qui brûle QUICONQUE s'y
+	# tient, alliés et lanceur compris.
+	if (est_active(comp) and comp["cible"] == "ennemi" and doc.get("zone")
+			and doc.get("maintien")):
+		erreurs.append(f"{prefixe} : active `ennemi` à `zone` ET `maintien` — c'est une "
+					   f"ZONE PERSISTANTE à tir ami (Mur de feu), pas une frappe")
+
+	# (13) aucune clé de piège : `action_piege` en ferait une compétence de piège
+	for cle in CLES_PIEGE_EFFETS:
+		if eff_norm.get(cle):
+			erreurs.append(f"{prefixe} : effet `{cle}` — l'entrée deviendrait une "
+						   f"compétence de PIÈGE (case de barre d'office, droit d'agir "
+						   f"sans la compétence dédiée)")
+	if CLE_PIEGE_DOC in doc:
+		erreurs.append(f"{prefixe} : bloc `{CLE_PIEGE_DOC}` — l'échelle des poses vit "
+					   f"dans dev/gen_pieges.py, pas dans ce document")
+
+	# (1 bis) la zone est une seconde liste blanche, avec ses propres pièges
+	zone_ecrite = doc.get("zone")
+	if zone_ecrite is not None:
+		for cle in zone_ecrite if isinstance(zone_ecrite, dict) else ():
+			if cle not in CHAMPS_ZONE:
+				erreurs.append(f"{prefixe} : clé de zone `{cle}` INCONNUE du moteur")
+		zone_lue = normaliser_zone(zone_ecrite)
+		if zone_lue is None:
+			erreurs.append(f"{prefixe} : bloc `zone` rejeté par normaliser_zone "
+						   f"(`forme` absente ou non reconnue) — la capacité "
+						   f"retomberait sur la seule case de sa cible")
+		else:
+			# (6) Une passive + zone n'est plus une erreur : c'est une AURA
+			# (`competences.est_aura`), ancrée sur le porteur, servie au groupe en
+			# exploration et positionnellement en combat. Restent deux gardes.
+			if est_passive(comp):
+				if not est_aura(comp):
+					erreurs.append(f"{prefixe} : passive à `zone` que `est_aura` ne "
+								   f"reconnaît pas")
+				# ⚠️ `aura + condition` est HORS PÉRIMÈTRE du moteur : une passive
+				# conditionnée sort déjà du repli permanent, et rien ne relit sa zone.
+				if comp["condition"]:
+					erreurs.append(f"{prefixe} : AURA portant une `condition` — hors "
+								   f"périmètre du moteur, elle ne serait jamais posée")
+				# Une aura qui n'offre rien est une chip vide sur ses alliés.
+				eff_a = comp["effets"]
+				if not (eff_a.get("buffs") or eff_a.get("regen_pv")
+						or eff_a.get("regen_pm") or eff_a.get("esquive")):
+					erreurs.append(f"{prefixe} : AURA sans buff, régén ni esquive — "
+								   f"elle ne donnerait rien à personne")
+			# (9) convention de `decalage`, pour les seules formes orientées
+			if zone_lue["forme"] in ("rectangle", "cone"):
+				if zone_lue["origine"] == "lanceur" and zone_lue["decalage"] < 1:
+					erreurs.append(f"{prefixe} : forme orientée ancrée sur le LANCEUR "
+								   f"avec decalage {zone_lue['decalage']} — son premier "
+								   f"cran serait la case du lanceur (attendu ≥ 1)")
+				if zone_lue["origine"] == "cible" and zone_lue["decalage"] != 0:
+					erreurs.append(f"{prefixe} : forme orientée ancrée sur la CIBLE "
+								   f"avec decalage {zone_lue['decalage']} — la cible "
+								   f"désignée serait la seule épargnée (attendu 0)")
+
+	effets_ecrits = doc.get("effets") or {}
+	effets_lus = _bonus_dict(effets_ecrits)
+	for cle in effets_ecrits:
+		if cle not in effets_lus:
+			erreurs.append(f"{prefixe} : clé d'effet `{cle}` INCONNUE du moteur — "
+						   f"elle disparaîtrait silencieusement à l'import")
+	for cle, valeur in (effets_ecrits.get("buffs") or {}).items():
+		if cle not in ("V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch"):
+			erreurs.append(f"{prefixe} : buff sur `{cle}` — caractéristique inconnue")
+		elif cle == "V" and abs(int(valeur)) > 5:
+			erreurs.append(f"{prefixe} : buff V de {valeur} — V est à l'échelle 1-10, "
+						   f"|delta| > 5 immobilise ou catapulte la cible")
+
+	# (2) pas de collision avec ce qui est déjà en base
+	if ids_existants is not None and cid in ids_existants:
+		erreurs.append(f"{prefixe} : `_id` DÉJÀ EN BASE — l'import l'écraserait "
+					   f"(admin_import_bulk fait un PUT complet)")
+
+	# (4) référentiel
+	if vocations_connues and comp["vocation"] not in vocations_connues:
+		erreurs.append(f"{prefixe} : vocation `{comp['vocation']}` absente de rules:vocations")
+	if niveaux is not None and comp["niveau"] not in niveaux:
+		erreurs.append(f"{prefixe} : niveau {comp['niveau']} hors de {tuple(niveaux)}")
+
+	if est_passive(comp):
+		# (5) une passive conditionnée n'est lue QUE pour sa furtivite
+		if comp["condition"]:
+			autres = {k: v for k, v in effets_lus.items()
+					  if k != "furtivite" and v not in ("", 0, {}, None)}
+			if autres:
+				erreurs.append(f"{prefixe} : passive avec `condition` portant "
+							   f"{sorted(autres)} — seule `furtivite` serait lue "
+							   f"(bonus_passifs exclut les passives conditionnées)")
+			if not effets_lus.get("furtivite"):
+				erreurs.append(f"{prefixe} : passive avec `condition` sans `furtivite` "
+							   f"— elle n'aurait aucun effet")
+		# (8) champs d'active sur une passive
+		for champ in CHAMPS_ACTIFS_SEULEMENT:
+			if champ in doc:
+				erreurs.append(f"{prefixe} : passive portant `{champ}` — sans effet, "
+							   f"et trompeur à la relecture")
+	elif est_active(comp):
+		combat = competence_utilisable_combat(comp)
+		exploration = competence_utilisable_exploration(comp)
+		# (7) utilisable quelque part
+		if not combat and not exploration:
+			erreurs.append(f"{prefixe} : active inutilisable en combat ET en exploration")
+		# (6) une offensive doit porter des dégâts ou une part durative
+		if comp["cible"] == "ennemi" and not combat:
+			erreurs.append(f"{prefixe} : active `ennemi` sans `degats` ni part durative "
+						   f"— resolve_action la refuserait")
+	return erreurs
+
+
 def main():
 	chemin = sys.argv[1] if len(sys.argv) > 1 else DOC_DEFAUT
 	if not os.path.exists(chemin):
@@ -210,192 +405,15 @@ def main():
 		cid = doc.get("_id", "<sans _id>")
 		prefixe = f"ligne {ligne} ({cid})"
 
-		# (1) le moteur accepte-t-il le doc, et sans perdre de clé ?
+		erreurs.extend(verifier_competence(doc, prefixe, ids_existants, vocations_connues))
 		comp = normaliser_competence(doc)
 		if comp is None:
-			erreurs.append(f"{prefixe} : rejeté par normaliser_competence "
-						   f"(type ≠ 'competence' ou vocation absente)")
 			continue
-
-		for cle in doc:
-			if cle not in CHAMPS_DOC:
-				erreurs.append(f"{prefixe} : champ `{cle}` INCONNU de normaliser_competence — "
-							   f"il disparaîtrait silencieusement à la lecture")
-
-		# (2) Clés INERTES sur une compétence. Elles ne disparaissent pas à la
-		# normalisation — c'est bien pire : la compétence part en base, s'utilise sans la
-		# moindre erreur, et ne fait rien. Deux d'entre elles (`saut`, `lien_vie`) sont même
-		# ACCEPTÉES par `competence_utilisable_combat`.
-		for cle, pourquoi in CHAMPS_INERTES_SUR_COMPETENCE.items():
-			if cle in doc:
-				erreurs.append(f"{prefixe} : champ `{cle}` sur une COMPÉTENCE — {pourquoi}")
-		for cle, pourquoi in EFFETS_INERTES_SUR_COMPETENCE.items():
-			if (doc.get("effets") or {}).get(cle):
-				erreurs.append(f"{prefixe} : effet `{cle}` sur une COMPÉTENCE — {pourquoi}")
-
-		# (3) L'ACCORD entre le prédicat du router et le moteur. Ce contrôle remplace
-		# l'ancienne règle « `degats_pm` jamais seul », devenue sans objet : les deux
-		# gardes divergeaient (celle des compétences omettait la clé), elles appellent
-		# désormais la même fonction. Plutôt que de retirer le contrôle, on le remonte
-		# d'un cran — on ne teste plus UNE clé, on teste que les deux prédicats du moteur
-		# s'accordent sur cette entrée, quelle que soit la clé en cause.
-		eff_norm = _bonus_dict(doc.get("effets") or {})
-		if est_active(comp) and comp["cible"] == "ennemi":
-			if capacite_utilisable_combat(comp) and not effets_agissent_sur_cible(eff_norm):
-				erreurs.append(f"{prefixe} : active `ennemi` lançable en combat mais SANS "
-							   f"effet sur une cible — le router la listerait, le moteur "
-							   f"la refuserait au moment de frapper")
-
-		# (4) maintien : borne du moteur, actives seulement, et pas de `duree` trompeuse
-		if "maintien" in doc:
-			maintien = doc.get("maintien") or 0
-			if not isinstance(maintien, int) or maintien < 0 or maintien > MAINTIEN_MAX:
-				erreurs.append(f"{prefixe} : `maintien` {maintien!r} hors de [0, "
-							   f"{MAINTIEN_MAX}] (MAINTIEN_PM_MAX)")
-			if maintien and est_passive(comp):
-				erreurs.append(f"{prefixe} : PASSIVE portant `maintien` — une passive n'est "
-							   f"jamais lancée, rien ne prélèverait l'entretien")
-			if maintien and (doc.get("effets") or {}).get("duree"):
-				erreurs.append(f"{prefixe} : entrée MAINTENUE portant `duree` — l'entrée "
-							   f"d'effets_actifs ne se décrémente pas, la durée annoncée "
-							   f"est une échéance qui n'existe pas")
-
-		# (11) SIGNE de la régén selon la cible. Depuis la PR #66 `regen_pv`/`regen_pm` sont
-		# SIGNÉES (négatif = poison). Le moteur ne refuse AUCUN des mauvais emplois :
-		# `effets_agissent_sur_cible` accepte une régén positive sur un ennemi (elle le
-		# soignerait), une aura négative empoisonnerait tout le groupe. Mesuré, pas déduit.
-		regens = {k: eff_norm.get(k, 0) for k in ("regen_pv", "regen_pm")}
-		negatives = sorted(k for k, v in regens.items() if v < 0)
-		positives = sorted(k for k, v in regens.items() if v > 0)
-		if negatives:
-			if est_passive(comp) and doc.get("zone"):
-				erreurs.append(f"{prefixe} : AURA à régén NÉGATIVE {negatives} — elle "
-							   f"empoisonnerait tout le groupe, montures comprises")
-			if est_active(comp) and comp["cible"] == "allie":
-				erreurs.append(f"{prefixe} : active `allie` à régén NÉGATIVE {negatives} — "
-							   f"elle empoisonnerait un compagnon")
-		if positives and est_active(comp) and comp["cible"] == "ennemi":
-			erreurs.append(f"{prefixe} : active `ennemi` à régén POSITIVE {positives} — "
-						   f"elle soignerait la cible (le moteur l'accepte)")
-		if (est_active(comp) and (negatives or positives)
-				and not eff_norm.get("duree") and not doc.get("maintien")):
-			erreurs.append(f"{prefixe} : active à régén sans `duree` ni `maintien` — rien "
-						   f"ne serait empilé (part_durative)")
-
-		# (12) MUR involontaire (PR #33) : la règle est DÉRIVÉE, sans clé — toute capacité
-		# offensive à zone ET maintenue laisse une zone persistante qui brûle QUICONQUE s'y
-		# tient, alliés et lanceur compris.
-		if (est_active(comp) and comp["cible"] == "ennemi" and doc.get("zone")
-				and doc.get("maintien")):
-			erreurs.append(f"{prefixe} : active `ennemi` à `zone` ET `maintien` — c'est une "
-						   f"ZONE PERSISTANTE à tir ami (Mur de feu), pas une frappe")
-
-		# (13) aucune clé de piège : `action_piege` en ferait une compétence de piège
-		for cle in CLES_PIEGE_EFFETS:
-			if eff_norm.get(cle):
-				erreurs.append(f"{prefixe} : effet `{cle}` — l'entrée deviendrait une "
-							   f"compétence de PIÈGE (case de barre d'office, droit d'agir "
-							   f"sans la compétence dédiée)")
-		if CLE_PIEGE_DOC in doc:
-			erreurs.append(f"{prefixe} : bloc `{CLE_PIEGE_DOC}` — l'échelle des poses vit "
-						   f"dans dev/gen_pieges.py, pas dans ce document")
-
-		# (1 bis) la zone est une seconde liste blanche, avec ses propres pièges
-		zone_ecrite = doc.get("zone")
-		if zone_ecrite is not None:
-			for cle in zone_ecrite if isinstance(zone_ecrite, dict) else ():
-				if cle not in CHAMPS_ZONE:
-					erreurs.append(f"{prefixe} : clé de zone `{cle}` INCONNUE du moteur")
-			zone_lue = normaliser_zone(zone_ecrite)
-			if zone_lue is None:
-				erreurs.append(f"{prefixe} : bloc `zone` rejeté par normaliser_zone "
-							   f"(`forme` absente ou non reconnue) — la capacité "
-							   f"retomberait sur la seule case de sa cible")
-			else:
-				# (6) Une passive + zone n'est plus une erreur : c'est une AURA
-				# (`competences.est_aura`), ancrée sur le porteur, servie au groupe en
-				# exploration et positionnellement en combat. Restent deux gardes.
-				if est_passive(comp):
-					if not est_aura(comp):
-						erreurs.append(f"{prefixe} : passive à `zone` que `est_aura` ne "
-									   f"reconnaît pas")
-					# ⚠️ `aura + condition` est HORS PÉRIMÈTRE du moteur : une passive
-					# conditionnée sort déjà du repli permanent, et rien ne relit sa zone.
-					if comp["condition"]:
-						erreurs.append(f"{prefixe} : AURA portant une `condition` — hors "
-									   f"périmètre du moteur, elle ne serait jamais posée")
-					# Une aura qui n'offre rien est une chip vide sur ses alliés.
-					eff_a = comp["effets"]
-					if not (eff_a.get("buffs") or eff_a.get("regen_pv")
-							or eff_a.get("regen_pm") or eff_a.get("esquive")):
-						erreurs.append(f"{prefixe} : AURA sans buff, régén ni esquive — "
-									   f"elle ne donnerait rien à personne")
-				# (9) convention de `decalage`, pour les seules formes orientées
-				if zone_lue["forme"] in ("rectangle", "cone"):
-					if zone_lue["origine"] == "lanceur" and zone_lue["decalage"] < 1:
-						erreurs.append(f"{prefixe} : forme orientée ancrée sur le LANCEUR "
-									   f"avec decalage {zone_lue['decalage']} — son premier "
-									   f"cran serait la case du lanceur (attendu ≥ 1)")
-					if zone_lue["origine"] == "cible" and zone_lue["decalage"] != 0:
-						erreurs.append(f"{prefixe} : forme orientée ancrée sur la CIBLE "
-									   f"avec decalage {zone_lue['decalage']} — la cible "
-									   f"désignée serait la seule épargnée (attendu 0)")
-
-		effets_ecrits = doc.get("effets") or {}
-		effets_lus = _bonus_dict(effets_ecrits)
-		for cle in effets_ecrits:
-			if cle not in effets_lus:
-				erreurs.append(f"{prefixe} : clé d'effet `{cle}` INCONNUE du moteur — "
-							   f"elle disparaîtrait silencieusement à l'import")
-		for cle, valeur in (effets_ecrits.get("buffs") or {}).items():
-			if cle not in ("V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch"):
-				erreurs.append(f"{prefixe} : buff sur `{cle}` — caractéristique inconnue")
-			elif cle == "V" and abs(int(valeur)) > 5:
-				erreurs.append(f"{prefixe} : buff V de {valeur} — V est à l'échelle 1-10, "
-							   f"|delta| > 5 immobilise ou catapulte la cible")
-
 		# (2) unicité, et pas de collision avec ce qui est déjà en base
 		if cid in vus:
 			erreurs.append(f"{prefixe} : `_id` en double (déjà ligne {vus[cid]})")
 		vus[cid] = ligne
-		if ids_existants is not None and cid in ids_existants:
-			erreurs.append(f"{prefixe} : `_id` DÉJÀ EN BASE — l'import l'écraserait "
-						   f"(admin_import_bulk fait un PUT complet)")
-
-		# (4) référentiel
-		if vocations_connues and comp["vocation"] not in vocations_connues:
-			erreurs.append(f"{prefixe} : vocation `{comp['vocation']}` absente de rules:vocations")
-		if comp["niveau"] not in NIVEAUX_ATTENDUS:
-			erreurs.append(f"{prefixe} : niveau {comp['niveau']} hors de {NIVEAUX_ATTENDUS}")
 		par_vocation.setdefault(comp["vocation"], []).append(comp)
-
-		if est_passive(comp):
-			# (5) une passive conditionnée n'est lue QUE pour sa furtivite
-			if comp["condition"]:
-				autres = {k: v for k, v in effets_lus.items()
-						  if k != "furtivite" and v not in ("", 0, {}, None)}
-				if autres:
-					erreurs.append(f"{prefixe} : passive avec `condition` portant "
-								   f"{sorted(autres)} — seule `furtivite` serait lue "
-								   f"(bonus_passifs exclut les passives conditionnées)")
-				if not effets_lus.get("furtivite"):
-					erreurs.append(f"{prefixe} : passive avec `condition` sans `furtivite` "
-								   f"— elle n'aurait aucun effet")
-			# (8) champs d'active sur une passive
-			for champ in CHAMPS_ACTIFS_SEULEMENT:
-				if champ in doc:
-					erreurs.append(f"{prefixe} : passive portant `{champ}` — sans effet, "
-								   f"et trompeur à la relecture")
-		elif est_active(comp):
-			combat = competence_utilisable_combat(comp)
-			exploration = competence_utilisable_exploration(comp)
-			# (7) utilisable quelque part
-			if not combat and not exploration:
-				erreurs.append(f"{prefixe} : active inutilisable en combat ET en exploration")
-			# (6) une offensive doit porter des dégâts ou une part durative
-			if comp["cible"] == "ennemi" and not combat:
-				erreurs.append(f"{prefixe} : active `ennemi` sans `degats` ni part durative "
-							   f"— resolve_action la refuserait")
 
 	# (3) six entrées par vocation : une passive + une active par palier
 	for voc, comps in sorted(par_vocation.items()):
