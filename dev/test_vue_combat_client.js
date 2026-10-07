@@ -71,13 +71,17 @@ globalThis.updateCamera = () => {};
 
 // Vue portrait : `LIGNES_PORTRAIT` est RELU du template (jamais recopié) ; `VUE_PORTRAIT` (posé
 // par matchMedia dans la page) et `_hauteurVue` (mesure du DOM) sont remplacés par le modèle.
-const LIGNES = Number((js.match(/^const LIGNES_PORTRAIT = (\d+);$/m) || [])[1]);
+const LIGNES = Number((js.match(/^const LIGNES_PORTRAIT = (\d+);/m) || [])[1]);
+const PROFONDEUR = Number((js.match(/^const PROFONDEUR_PORTRAIT = (\d+);/m) || [])[1]);
 assert.ok(LIGNES > 0, 'const LIGNES_PORTRAIT introuvable dans le template');
+assert.ok(PROFONDEUR > 0, 'const PROFONDEUR_PORTRAIT introuvable dans le template');
 vm.runInThisContext([
 	'const LIGNES_PORTRAIT = ' + LIGNES + ';',
+	'const PROFONDEUR_PORTRAIT = ' + PROFONDEUR + ';',
 	'let VUE_PORTRAIT = false;',
 	'function _hauteurVue() { return globalThis.__hauteurCarte; }',
 	extraireLet('_vueResolue'), extraireLet('_stepApplique'), extraireLet('_vueAppliquee'),
+	extraireLet('_lignesAppliquees'),
 	extraire('tailleVue'), extraire('tailleVuePortrait'), extraire('_tailleCourante'),
 	extraire('_largeurVue'), extraire('_appliquerVue'),
 	extraire('syncViewSize'), extraire('_surRedimensionnement'),
@@ -88,7 +92,7 @@ function page(opts) {
 	Object.assign(monde, { largeur: 1200, hauteur: 800, lateraux: 0, autresHauteurs: 420,
 						   barre: 17, colonneMasquee: false, portrait: false, hauteurCarte: 400 },
 				  opts || {});
-	vm.runInThisContext('_vueResolue = null; _stepApplique = null; _vueAppliquee = null;'
+	vm.runInThisContext('_vueResolue = null; _stepApplique = null; _vueAppliquee = null; _lignesAppliquees = null;'
 		+ ' VUE_PORTRAIT = ' + !!monde.portrait + ';');
 	globalThis.__hauteurCarte = monde.hauteurCarte;
 	ROOT.vars = {};
@@ -188,25 +192,29 @@ t('colonne momentanément à 0 px : l’échelle en place est gardée, rien n’
 
 console.log('\n── Vue portrait (tailleVuePortrait) ───────────────────────────────────────');
 
-t('la HAUTEUR borne le pas, la profondeur remplit la largeur, jamais moins de 9 cases', () => {
+t('carte DEBOUT : profondeur fixe, rangées impaires dans la hauteur, toujours plus haute que large', () => {
 	for (let w = 200; w <= 800; w += 7) for (let h = LIGNES * 8; h <= 1400; h += 11) {
 		const r = tailleVuePortrait(w, h);
 		const ctx = `w=${w} h=${h}`;
 		assert.ok(Number.isInteger(r.step) && r.step >= 8, ctx);
-		assert.ok(r.step * LIGNES <= h, 'déborde en hauteur : ' + ctx);
-		assert.ok(r.viewWidth <= w - 20, 'déborde en largeur : ' + ctx);
-		assert.ok(r.viewWidth % r.step === 0, 'case coupée : ' + ctx);
-		assert.ok(r.viewWidth / r.step >= 9, 'moins de 9 cases de profondeur : ' + ctx);
-		// Une case de plus ne tiendrait pas : la largeur est remplie.
-		assert.ok(r.viewWidth + r.step > w - 20, 'largeur non remplie : ' + ctx);
+		assert.strictEqual(r.viewWidth, r.step * PROFONDEUR, 'profondeur non fixe : ' + ctx);
+		assert.ok(r.viewWidth <= Math.max(w - 20, 8 * PROFONDEUR), 'déborde en largeur : ' + ctx);
+		assert.ok(r.lignes % 2 === 1 && r.lignes >= LIGNES, 'rangées : ' + ctx);
+		assert.ok(r.step * r.lignes <= h, 'déborde en hauteur : ' + ctx);
+		// Une rangée de flanc de plus de chaque côté ne tiendrait pas : la hauteur est remplie.
+		assert.ok(r.step * (r.lignes + 2) > h, 'hauteur non remplie : ' + ctx);
+		assert.ok(r.lignes > PROFONDEUR, 'carte pas plus haute que large : ' + ctx);
 	}
 });
 
-t('téléphone debout (colonne 370 px, 420 px pour la carte) : jetons plus gros, portée au moins égale', () => {
-	const paysage = tailleVue(370), portrait = tailleVuePortrait(370, 420);
-	// Paysage : le joueur voit MAX_H − 1 rangées devant lui ; portrait : toute la largeur moins sa case.
-	assert.ok(portrait.viewWidth / portrait.step - 1 >= MAX_H - 1, 'voit moins loin qu’en paysage');
-	assert.ok(portrait.step > paysage.step, 'jetons pas plus gros qu’en paysage');
+// Le cas de la capture : colonne 373 px, ~390 px de hauteur offerte (barre d'action et pavé
+// retirés). L'ancienne échelle y rendait 13 rangées × 15 cases de 23 px — une carte paysage.
+t('téléphone debout (colonne 373 px, 390 px pour la carte) : carte haute, jetons plus gros qu’en paysage', () => {
+	const paysage = tailleVue(373), portrait = tailleVuePortrait(373, 390);
+	assert.ok(portrait.step * portrait.lignes > portrait.viewWidth, 'carte plus large que haute');
+	assert.ok(portrait.step >= 1.5 * paysage.step, 'jetons pas assez gros');
+	// Plus de flancs qu'en paysage (8 cases de chaque côté sur 17), un peu moins de profondeur.
+	assert.ok(PROFONDEUR - 1 <= MAX_H - 1, 'voit plus loin devant qu’en paysage');
 });
 
 t('syncViewSize en portrait : idempotente, écrit la profondeur dans --view-width', () => {
@@ -215,8 +223,10 @@ t('syncViewSize en portrait : idempotente, écrit la profondeur dans --view-widt
 	const ecritures = ROOT.ecritures;
 	for (let i = 0; i < 5; i++) assert.deepStrictEqual(syncViewSize(), r1);
 	assert.strictEqual(ROOT.ecritures, ecritures);
-	assert.deepStrictEqual(r1, tailleVuePortrait(390, 420));
+	const attendu = tailleVuePortrait(390, 420);
+	assert.deepStrictEqual(r1, { step: attendu.step, viewWidth: attendu.viewWidth });
 	assert.strictEqual(ROOT.vars['--view-width'], r1.viewWidth + 'px');
+	assert.strictEqual(ROOT.vars['--vue-lignes'], tailleVuePortrait(390, 420).lignes);
 });
 
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).\n`);

@@ -128,8 +128,9 @@
 /* Tokens monstres positionnés relativement au joueur (centré) */
 #tokens-layer { position: absolute; inset: 0; z-index: 9; pointer-events: none; }
 
-/* ── Vue PORTRAIT (classe posée en JS, cf. LIGNES_PORTRAIT) ─────────────────────────────
-   Carte haute (LIGNES_PORTRAIT cases) et large de toute la colonne (--view-width) ; le joueur
+/* ── Vue PORTRAIT (classe posée en JS, cf. tailleVuePortrait) ───────────────────────────
+   Carte DEBOUT : --vue-lignes rangées de haut (impair, toute la hauteur offerte) sur
+   PROFONDEUR_PORTRAIT cases de large (--view-width), centrée dans la colonne ; le joueur
    à GAUCHE, centré en hauteur. Seules les ANCRES bougent : jetons, cases de zone et sprites
    gardent leur `left:50%; bottom:--floor` — c'est #tokens-layer, leur boîte de référence, qui
    est retaillée pour que ce point tombe sur la case du joueur (largeur = 2·floor+1 cases,
@@ -137,10 +138,11 @@
    rogné (seul .viewport coupe) ni rendu muet au clic. */
 html.vue-portrait .viewport {
 	width: var(--view-width);
-	height: calc(var(--step) * var(--vue-lignes, 13));
+	height: calc(var(--step) * var(--vue-lignes, 11));
+	align-self: center;
 }
 html.vue-portrait .viewport::after {
-	background: radial-gradient(ellipse at 34% 50%, transparent 24%, rgba(0,0,0,0.9) 96%);
+	background: radial-gradient(ellipse at 30% 50%, transparent 30%, rgba(0,0,0,0.9) 96%);
 }
 html.vue-portrait #rotation-pivot {
 	bottom: auto; top: 50%;
@@ -1514,10 +1516,12 @@ function tailleVue(largeur) {
 
 // ── Vue PORTRAIT (mobile tenu debout) ─────────────────────────────
 // La carte tourne d'un quart de tour : le joueur est à GAUCHE, centré en hauteur, et regarde
-// vers la DROITE. Les LIGNES_PORTRAIT rangées latérales prennent la hauteur ; la profondeur, elle,
-// remplit toute la largeur — on voit plus loin devant. 13 et non les 17 colonnes du paysage :
-// 6 cases de flanc au lieu de 8, contre des jetons ~30 % plus gros (29 px au lieu de 22 sur un
-// téléphone de 390×844, pour 11 cases de profondeur au lieu de 15).
+// vers la DROITE. C'est une carte DEBOUT : la profondeur est FIXE (PROFONDEUR_PORTRAIT cases, la
+// sienne comprise — un peu moins loin devant qu'en paysage) et fixe le pas sur la largeur ; les
+// rangées latérales prennent toute la hauteur offerte (nombre IMPAIR : le joueur reste au milieu),
+// jamais moins de LIGNES_PORTRAIT. Elle est donc toujours plus haute que large.
+// ⚠️ L'inverse (rangées fixes, profondeur = largeur) donnait une carte PAYSAGE dès que la hauteur
+// manquait : 13 rangées dans ~300 px → cases de 23 px → 15 cases de profondeur.
 // Tout le reste est inchangé : `angleCamera` ajoute +90° (carte, jetons, gabarits, VFX tournent
 // d'un même mouvement, les portraits restent debout par leur `rotate(-a)`), et l'ancre commune
 // des jetons (#tokens-layer) est redimensionnée pour que `left:50%; bottom:--floor` y tombe sur
@@ -1527,35 +1531,39 @@ function tailleVue(largeur) {
 // de droite, fait toujours AVANCER.
 // ⚠️ MOBILE SEULEMENT : `pointer: coarse` (écran tactile) en plus de la forme — une fenêtre de
 // bureau étroite et haute garde la vue paysage.
-const LIGNES_PORTRAIT = 13;
+const LIGNES_PORTRAIT = 11;      // plancher de rangées latérales : 5 cases de flanc
+const PROFONDEUR_PORTRAIT = 8;   // le joueur + 7 cases devant (8 en paysage)
 document.documentElement.style.setProperty('--vue-lignes', LIGNES_PORTRAIT);
 const _mqPortrait = window.matchMedia ? window.matchMedia('(max-width: 768px) and (orientation: portrait) and (pointer: coarse)') : null;
 let VUE_PORTRAIT = !!(_mqPortrait && _mqPortrait.matches);
 document.documentElement.classList.toggle('vue-portrait', VUE_PORTRAIT);
 
-// Échelle portrait : la HAUTEUR borne le pas (LIGNES_PORTRAIT rangées dans `hauteur`), la largeur
-// ne fait que le plafonner pour garder au moins 9 cases de profondeur ; la profondeur réelle
-// (`cols`) est ce qui tient dans la largeur. 20 px = les marges horizontales du `.viewport`.
+// Échelle portrait : la LARGEUR fixe le pas (PROFONDEUR_PORTRAIT cases), la hauteur ne fait que
+// le plafonner pour loger LIGNES_PORTRAIT rangées ; puis autant de rangées (impair) que la
+// hauteur en tient. 20 px = les marges horizontales du `.viewport`.
 function tailleVuePortrait(largeur, hauteur) {
 	const utile = Math.max(0, largeur - 20);
-	const step = Math.max(8, Math.min(Math.floor(utile / 9), Math.floor(hauteur / LIGNES_PORTRAIT)));
-	const cols = Math.max(1, Math.floor(utile / step));
-	return { step: step, viewWidth: step * cols };
+	const step = Math.max(8, Math.min(Math.floor(utile / PROFONDEUR_PORTRAIT),
+		Math.floor(hauteur / LIGNES_PORTRAIT)));
+	let lignes = Math.max(LIGNES_PORTRAIT, Math.floor(hauteur / step));
+	if (lignes % 2 === 0) lignes--;
+	return { step: step, viewWidth: step * PROFONDEUR_PORTRAIT, lignes: Math.max(LIGNES_PORTRAIT, lignes) };
 }
 // Hauteur offerte à la carte portrait : la fenêtre moins ce qui doit rester visible SANS défiler
-// sous elle — barre d'action, bandeau de tour — et le pavé flottant posé en bas. Aucune de ces
-// hauteurs ne dépend du pas : la mesure ne réagit pas à sa propre écriture (§17). Lue seulement
-// quand la LARGEUR est inédite (`_vueResolue`) : la barre d'adresse mobile qui se replie au
-// défilement change `innerHeight`, elle ne doit pas rééchelonner la carte.
+// — au-dessus d'elle, la barre d'action sous elle, et le pavé flottant posé en bas. Le bandeau de
+// tour et le journal passent SOUS la ligne de flottaison (la page défile) : la carte d'abord.
+// Aucune de ces hauteurs ne dépend du pas : la mesure ne réagit pas à sa propre écriture (§17).
+// Lue seulement quand la LARGEUR est inédite (`_vueResolue`) : la barre d'adresse mobile qui se
+// replie au défilement change `innerHeight`, elle ne doit pas rééchelonner la carte.
 function _hauteurVue() {
 	const vp = document.getElementById('viewport');
-	const tour = document.querySelector('.tour-header');
+	const barre = document.querySelector('.combat-center .action-bar');
 	const pave = document.getElementById('move-section');
-	if (!vp || !tour) return LIGNES_PORTRAIT * 24;
+	if (!vp || !barre) return LIGNES_PORTRAIT * 24;
 	const rv = vp.getBoundingClientRect();
 	// Au-dessus de la carte (position dans la PAGE, pas dans la fenêtre défilée) + sous elle
-	// jusqu'au bas du bandeau de tour + le pavé et son retrait du bas (10 px) + 10 px d'air.
-	const reserve = (rv.top + window.scrollY) + (tour.getBoundingClientRect().bottom - rv.bottom)
+	// jusqu'au bas de la barre d'action + le pavé et son retrait du bas (10 px) + 10 px d'air.
+	const reserve = (rv.top + window.scrollY) + (barre.getBoundingClientRect().bottom - rv.bottom)
 		+ (pave ? pave.offsetHeight + 10 : 0) + 10;
 	return Math.max(LIGNES_PORTRAIT * 8, window.innerHeight - reserve);
 }
@@ -1566,12 +1574,14 @@ function _tailleCourante(largeur) {
 let _vueResolue = null;     // { largeurs: [px mesurés], step } — la dernière résolution
 let _stepApplique = null;   // le pas réellement écrit sur :root
 let _vueAppliquee = null;   // la largeur de carte réellement écrite (--view-width)
+let _lignesAppliquees = null; // les rangées portrait réellement écrites (--vue-lignes)
 function _largeurVue() {
 	const center = document.querySelector('.combat-center');
 	return center ? center.clientWidth : window.innerWidth;
 }
 function _appliquerVue(taille) {
-	if (taille.step === _stepApplique && taille.viewWidth === _vueAppliquee) return;
+	const lignes = taille.lignes || LIGNES_PORTRAIT;
+	if (taille.step === _stepApplique && taille.viewWidth === _vueAppliquee && lignes === _lignesAppliquees) return;
 	// Le pas change TOUTES les positions : à faire sauter d'un bloc (sinon les jetons glisseraient
 	// pendant qu'on étire la fenêtre) — et seulement quand il change, pour qu'une notification sans
 	// effet ne coupe aucune animation en cours.
@@ -1579,8 +1589,10 @@ function _appliquerVue(taille) {
 	const root = document.documentElement;
 	root.style.setProperty('--step', taille.step + 'px');
 	root.style.setProperty('--view-width', taille.viewWidth + 'px');
+	root.style.setProperty('--vue-lignes', lignes);
 	_stepApplique = taille.step;
 	_vueAppliquee = taille.viewWidth;
+	_lignesAppliquees = lignes;
 }
 function syncViewSize() {
 	const w0 = _largeurVue();
