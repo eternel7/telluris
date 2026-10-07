@@ -202,11 +202,11 @@ t('la HAUTEUR borne le pas, la profondeur remplit la largeur, jamais moins de 9 
 	}
 });
 
-t('téléphone debout (colonne 370 px, 420 px pour la carte) : plus de profondeur qu’en paysage', () => {
+t('téléphone debout (colonne 370 px, 420 px pour la carte) : jetons plus gros, portée au moins égale', () => {
 	const paysage = tailleVue(370), portrait = tailleVuePortrait(370, 420);
 	// Paysage : le joueur voit MAX_H − 1 rangées devant lui ; portrait : toute la largeur moins sa case.
-	assert.ok(portrait.viewWidth / portrait.step - 1 > MAX_H - 1);
-	assert.ok(portrait.step >= paysage.step, 'jetons plus petits qu’en paysage');
+	assert.ok(portrait.viewWidth / portrait.step - 1 >= MAX_H - 1, 'voit moins loin qu’en paysage');
+	assert.ok(portrait.step > paysage.step, 'jetons pas plus gros qu’en paysage');
 });
 
 t('syncViewSize en portrait : idempotente, écrit la profondeur dans --view-width', () => {

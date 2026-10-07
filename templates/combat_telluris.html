@@ -137,7 +137,7 @@
    rogné (seul .viewport coupe) ni rendu muet au clic. */
 html.vue-portrait .viewport {
 	width: var(--view-width);
-	height: calc(var(--step) * var(--vue-lignes, 17));
+	height: calc(var(--step) * var(--vue-lignes, 13));
 }
 html.vue-portrait .viewport::after {
 	background: radial-gradient(ellipse at 34% 50%, transparent 24%, rgba(0,0,0,0.9) 96%);
@@ -1514,8 +1514,10 @@ function tailleVue(largeur) {
 
 // ── Vue PORTRAIT (mobile tenu debout) ─────────────────────────────
 // La carte tourne d'un quart de tour : le joueur est à GAUCHE, centré en hauteur, et regarde
-// vers la DROITE. Les LIGNES_PORTRAIT rangées latérales (les 17 colonnes du paysage) prennent la
-// hauteur ; la profondeur, elle, remplit toute la largeur — on voit plus loin devant.
+// vers la DROITE. Les LIGNES_PORTRAIT rangées latérales prennent la hauteur ; la profondeur, elle,
+// remplit toute la largeur — on voit plus loin devant. 13 et non les 17 colonnes du paysage :
+// 6 cases de flanc au lieu de 8, contre des jetons ~30 % plus gros (29 px au lieu de 22 sur un
+// téléphone de 390×844, pour 11 cases de profondeur au lieu de 15).
 // Tout le reste est inchangé : `angleCamera` ajoute +90° (carte, jetons, gabarits, VFX tournent
 // d'un même mouvement, les portraits restent debout par leur `rotate(-a)`), et l'ancre commune
 // des jetons (#tokens-layer) est redimensionnée pour que `left:50%; bottom:--floor` y tombe sur
@@ -1523,7 +1525,7 @@ function tailleVue(largeur) {
 // ⚠️ Le pavé est tourné du MÊME quart de tour (CSS) : ses `data-sdx/sdy` restent ceux du repère
 // paysage, donc `screenToWorld` (sans décalage) reste juste — sa flèche du haut, devenue celle
 // de droite, fait toujours AVANCER.
-const LIGNES_PORTRAIT = 17;
+const LIGNES_PORTRAIT = 13;
 document.documentElement.style.setProperty('--vue-lignes', LIGNES_PORTRAIT);
 const _mqPortrait = window.matchMedia ? window.matchMedia('(max-width: 768px) and (orientation: portrait)') : null;
 let VUE_PORTRAIT = !!(_mqPortrait && _mqPortrait.matches);
