@@ -345,3 +345,55 @@ def test_git_reel_echec_de_la_pr_n_annule_pas_le_push(depots, monkeypatch):
 	res, err = _publier(serveur, pr_fn=pr, token="jeton")
 	assert err is None and res["pr_url"] is None and "403" in res["pr_erreur"]
 	assert res["compare_url"].endswith("/compare/main...admin/dump-20260929-101500?expand=1")
+
+
+def _push_en_echec(sorties):
+	"""Exécuteur réel dont les premiers `git push` échouent avec les sorties données."""
+	restantes = list(sorties)
+
+	def run(argv, timeout=60, **kw):
+		if "push" in argv and restantes:
+			return 1, restantes.pop(0)
+		return srv.executer(argv, timeout=timeout, **kw)
+	return run
+
+
+_ERREUR_500 = ("remote: Internal Server Error\n ! [remote rejected] admin/dump-x -> "
+			   "admin/dump-x (Internal Server Error)\nerror: failed to push some refs\n")
+
+
+@pytestmark_git
+def test_git_reel_push_retente_sur_erreur_transitoire(depots, tmp_path):
+	auteur, serveur = depots
+	pauses = []
+	res, err = srv.publier_dump(b"{}", "telluris-dump-20260929-101500.json", 0,
+								run_fn=_push_en_echec([_ERREUR_500, _ERREUR_500]),
+								pr_fn=lambda *a: pytest.fail("PR sans jeton"), token="",
+								sleep=pauses.append)
+	assert err is None, err
+	assert pauses == list(srv.PAUSES_PUSH[:2])
+	assert _sortie(tmp_path / "amont.git", "rev-parse", "--verify", "admin/dump-20260929-101500")
+
+
+@pytestmark_git
+def test_git_reel_push_abandonne_retire_la_branche_locale(depots):
+	auteur, serveur = depots
+	pauses = []
+	res, err = srv.publier_dump(b"{}", "telluris-dump-20260929-101500.json", 0,
+								run_fn=_push_en_echec([_ERREUR_500] * (len(srv.PAUSES_PUSH) + 1)),
+								pr_fn=lambda *a: pytest.fail("PR"), token="", sleep=pauses.append)
+	assert res is None and err[0] == 502
+	assert f"{len(srv.PAUSES_PUSH) + 1} tentative(s)" in err[1] and "Internal Server Error" in err[1]
+	assert pauses == list(srv.PAUSES_PUSH)
+	assert _sortie(serveur, "branch", "--list", "admin/dump-20260929-101500") == ""
+
+
+@pytestmark_git
+def test_git_reel_refus_definitif_non_retente(depots):
+	auteur, serveur = depots
+	pauses = []
+	refus = "remote: Permission to o/r.git denied\nfatal: unable to access: The requested URL returned error: 403\n"
+	res, err = srv.publier_dump(b"{}", "telluris-dump-20260929-101500.json", 0,
+								run_fn=_push_en_echec([refus]),
+								pr_fn=lambda *a: pytest.fail("PR"), token="", sleep=pauses.append)
+	assert err[0] == 502 and "1 tentative(s)" in err[1] and pauses == []
