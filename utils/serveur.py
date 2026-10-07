@@ -363,6 +363,12 @@ BRANCHE_BASE = "main"
 DISTANT = "origin"
 _INDEX_TEMP = "telluris-admin-dump.index"
 _API_GITHUB = "https://api.github.com"
+# Push du dump retenté après ces pauses (s) quand l'échec est transitoire (`_push_transitoire`).
+PAUSES_PUSH = (2, 4, 8)
+_PUSH_TRANSITOIRE = ("internal server error", "bad gateway", "service unavailable",
+					 "gateway time", "rpc failed", "early eof", "unexpected disconnect",
+					 "connection reset", "connection timed out", "operation timed out",
+					 "could not resolve host", "the remote end hung up")
 
 
 def depot_github(url: str):
@@ -413,7 +419,7 @@ def creer_pr(proprietaire, depot, tete, base, titre, corps, token, timeout=30) -
 
 
 def publier_dump(contenu: bytes, nom_fichier: str, doc_count: int, run_fn=executer,
-				 pr_fn=creer_pr, token=None) -> tuple:
+				 pr_fn=creer_pr, token=None, sleep=time.sleep) -> tuple:
 	"""Commit `jsons/<nom_fichier>` sur une NOUVELLE branche partant du `main` distant, la
 	pousse, ouvre la PR vers `main`. `(résultat, erreur)` — erreur = `(statut HTTP, message)`.
 	Partage le verrou de la mise à jour : les deux écrivent dans `.git`."""
@@ -422,12 +428,19 @@ def publier_dump(contenu: bytes, nom_fichier: str, doc_count: int, run_fn=execut
 	if not _VERROU.acquire(blocking=False):
 		return None, (409, "Une opération git est déjà en cours.")
 	try:
-		return _publier_dump(contenu, nom_fichier, doc_count, run_fn, pr_fn, token)
+		return _publier_dump(contenu, nom_fichier, doc_count, run_fn, pr_fn, token, sleep)
 	finally:
 		_VERROU.release()
 
 
-def _publier_dump(contenu, nom_fichier, doc_count, run_fn, pr_fn, token):
+def _push_transitoire(sortie: str) -> bool:
+	"""Échec de push qui vaut d'être retenté : 5xx de GitHub, coupure réseau. Un refus de
+	droits ou de contenu (403, GH001, non-fast-forward) échouerait pareil : pas de reprise."""
+	bas = sortie.lower()
+	return any(m in bas for m in _PUSH_TRANSITOIRE)
+
+
+def _publier_dump(contenu, nom_fichier, doc_count, run_fn, pr_fn, token, sleep=time.sleep):
 	ok, git_dir = _ok(run_fn, "rev-parse", "--absolute-git-dir")
 	if not ok:
 		return None, (500, "git ne peut pas lire le dépôt : " + git_dir.strip()[-800:])
@@ -483,11 +496,18 @@ def _publier_dump(contenu, nom_fichier, doc_count, run_fn, pr_fn, token):
 
 	res = {"branche": branche, "fichier": chemin, "commit": commit[:12], "base": base[:12],
 		   "doc_count": doc_count, "pr_url": None, "compare_url": None, "pr_erreur": ""}
-	ok, out = _ok(run_fn, "push", "--quiet", DISTANT, f"refs/heads/{branche}:refs/heads/{branche}",
-				  timeout=180, env_extra=auth)
+	for i, pause in enumerate((0,) + PAUSES_PUSH):
+		if pause:
+			sleep(pause)
+		ok, out = _ok(run_fn, "push", "--quiet", DISTANT, f"refs/heads/{branche}:refs/heads/{branche}",
+					  timeout=180, env_extra=auth)
+		if ok or not _push_transitoire(out):
+			break
 	if not ok:
-		return None, (502, f"Commit {commit[:12]} créé sur la branche LOCALE « {branche} », mais "
-						   "git push a échoué : " + out.strip()[-800:])
+		# Branche locale retirée : le prochain export repart propre (le commit reste en objet).
+		_ok(run_fn, "branch", "-D", branche)
+		return None, (502, f"git push de la branche « {branche} » a échoué après {i + 1} "
+						   "tentative(s) : " + out.strip()[-800:])
 
 	ok, url = _ok(run_fn, "remote", "get-url", DISTANT)
 	gh = depot_github(url) if ok else None
