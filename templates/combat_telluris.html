@@ -1525,9 +1525,11 @@ function tailleVue(largeur) {
 // ⚠️ Le pavé est tourné du MÊME quart de tour (CSS) : ses `data-sdx/sdy` restent ceux du repère
 // paysage, donc `screenToWorld` (sans décalage) reste juste — sa flèche du haut, devenue celle
 // de droite, fait toujours AVANCER.
+// ⚠️ MOBILE SEULEMENT : `pointer: coarse` (écran tactile) en plus de la forme — une fenêtre de
+// bureau étroite et haute garde la vue paysage.
 const LIGNES_PORTRAIT = 13;
 document.documentElement.style.setProperty('--vue-lignes', LIGNES_PORTRAIT);
-const _mqPortrait = window.matchMedia ? window.matchMedia('(max-width: 768px) and (orientation: portrait)') : null;
+const _mqPortrait = window.matchMedia ? window.matchMedia('(max-width: 768px) and (orientation: portrait) and (pointer: coarse)') : null;
 let VUE_PORTRAIT = !!(_mqPortrait && _mqPortrait.matches);
 document.documentElement.classList.toggle('vue-portrait', VUE_PORTRAIT);
 
