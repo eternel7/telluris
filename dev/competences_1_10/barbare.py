@@ -1,0 +1,78 @@
+"""Barbare 🪓 — la rage comme ressource, frappe sauvage et corps qui encaisse."""
+from competences_1_10 import A, P
+
+ENTREES = [
+	# ── Niveau 1 ──
+	P(1, "Fils des steppes", "🏔️", "p_carac", "Le froid et la faim ont forgé ce corps bien avant les armes.", stats=("R",)),
+	P(1, "Bras noueux", "💪", "p_carac", "Des bras qui ont fendu plus de bûches que de crânes — pour l'instant.", stats=("F",)),
+	A(1, "Coup de hache", "🪓", "frappe", "coup_lourd", "Pas de technique : la hache monte, la hache tombe."),
+	A(1, "Hurlement", "😱", "entrave", "rage", "Un cri de bête qui glace le sang de ceux qui l'entendent.", malus=("Vol",)),
+	A(1, "Échauffement", "🔥", "buff_soi", "rage", "Le sang commence à battre aux tempes.", stats=("F",)),
+	A(1, "Ruée", "🐗", "saut", "saut", "Il fonce tête baissée et franchit la distance d'un seul élan."),
+	A(1, "Morsure du fer", "🩸", "sang", "saignee", "Il frappe si fort que le manche lui brûle les mains."),
+	# ── Niveau 2 ──
+	P(2, "Peau de bête", "🐻", "p_carac", "Sous les fourrures, une peau qui ne craint ni lame ni griffe.", stats=("R",)),
+	P(2, "Fureur latente", "😠", "p_regen", "La colère qui couve répare ce que les coups défont."),
+	A(2, "Fracas", "💥", "frappe", "coup_lourd", "Le métal hurle contre le métal."),
+	A(2, "Tête la première", "🐏", "entrave", "coup_lourd", "Un coup de front qui laisse l'ennemi hébété.", malus=("Int", "Ag")),
+	A(2, "Sang qui bout", "🌋", "posture", "rage", "Il laisse monter la rage et la tient au bord des lèvres.", stats=("F",)),
+	A(2, "Taille sauvage", "🪓", "zone_rect", "balayage", "Un revers aveugle qui frappe tout ce qui bouge devant lui."),
+	# ── Niveau 3 ──
+	P(3, "Sang chaud des clans", "🔥", "p_carac", "Le sang de ses ancêtres coule plus vite que celui des autres.", stats=("F",)),
+	A(3, "Fendeur de crânes", "💀", "frappe", "coup_lourd", "Un coup vertical qui ne laisse rien à recoudre."),
+	A(3, "Griffes de l'ours", "🐻", "poison", "griffe", "Il lacère comme une bête, et les plaies ne se referment pas."),
+	A(3, "Cri des ancêtres", "📣", "cri", "aura_bataille", "Le cri des morts du clan passe par sa gorge, et les vivants se lèvent.", stats=("F", "Vol")),
+	A(3, "Saignée furieuse", "🩸", "sang", "rage", "Plus il saigne, plus il frappe fort."),
+	# ── Niveau 4 ──
+	P(4, "Indomptable", "🐺", "p_carac", "Rien ne l'arrête, rien ne le plie.", stats=("Vol",)),
+	P(4, "Instinct de la meute", "🐾", "p_esquive", "Comme le loup, il sent le coup venir dans son dos."),
+	A(4, "Tourbillon sauvage", "🌀", "zone_carre", "balayage", "Il tourne sur lui-même, hache tendue, en hurlant."),
+	A(4, "Frappe du mammouth", "🦣", "entrave", "coup_lourd", "Un choc qui fait plier les genoux.", malus=("Ag", "R")),
+	A(4, "Bond du fauve", "🐆", "saut", "saut", "D'un saut il est sur sa proie, avant qu'elle ne lève son arme."),
+	A(4, "Ivresse du combat", "🍺", "buff_soi", "rage", "La douleur s'efface, il ne reste que la joie de frapper.", stats=("F", "R")),
+	A(4, "Hache rouge", "🪓", "frappe", "saignee", "La hache revient rouge à chaque passage."),
+	# ── Niveau 5 ──
+	P(5, "Cuir de troll", "🧌", "p_carac", "On dit qu'un troll a été son père. On ne le dit pas devant lui.", stats=("R",)),
+	P(5, "Muscles d'airain", "🏋️", "p_carac", "Il porte sa hache à une main, comme une branche morte.", stats=("F",)),
+	A(5, "Brise-os", "🦴", "frappe", "coup_lourd", "Le bruit de l'os qui casse couvre le fracas des armes."),
+	A(5, "Charge du sanglier", "🐗", "entrave", "griffe", "Il renverse tout sur son passage.", malus=("Ag",)),
+	A(5, "Folie sanglante", "🩸", "sang", "rage", "Il se mord jusqu'au sang et se jette en avant."),
+	A(5, "Rage partagée", "🔥", "cri", "rage", "Sa furie déborde sur ceux qui combattent à ses côtés.", stats=("F",)),
+	A(5, "Fauche", "🌾", "zone_rect", "balayage", "La hache passe à hauteur de genou, et trois ennemis tombent."),
+	# ── Niveau 6 ──
+	P(6, "Cœur de bête", "🫀", "p_esquive", "Il bouge comme un animal, sans prévenir ni réfléchir."),
+	A(6, "Massacre", "⚔️", "frappe", "saignee", "Un coup, puis un autre, jusqu'à ce que ce soit fini."),
+	A(6, "Griffe de la bête", "🐾", "zone_cone", "impact_plaie/cone_griffe", "Il lacère devant lui comme un ours debout."),
+	A(6, "Rugissement", "🦁", "entrave", "rage", "Un rugissement qui fait trembler les mains ennemies.", malus=("Vol", "F")),
+	A(6, "Peau de pierre", "🪨", "posture", "garde", "La rage durcit sa peau jusqu'à ce que les lames y rebondissent.", stats=("R",)),
+	# ── Niveau 7 ──
+	P(7, "Colosse", "🗿", "p_carac", "Il dépasse tout le monde d'une tête, et d'une hache.", stats=("F",)),
+	P(7, "Volonté du clan", "🪶", "p_carac", "Le clan entier tient debout dans sa poitrine.", stats=("Vol",)),
+	A(7, "Fendoir des montagnes", "⛰️", "frappe", "coup_lourd", "Un coup à fendre la roche, porté sur un homme."),
+	A(7, "Tornade de fer", "🌪️", "zone_carre", "balayage", "Une rotation folle dont il ne sort qu'après le dernier cri.", rayon=2),
+	A(7, "Hémorragie", "🩸", "poison", "saignee", "La plaie qu'il laisse ne se ferme pas."),
+	A(7, "Bond du berserk", "🦘", "saut", "saut", "Il saute par-dessus le mur de boucliers."),
+	A(7, "Transe sanglante", "🔥", "sang", "rage", "Il entre dans une transe où seule compte la prochaine victime."),
+	# ── Niveau 8 ──
+	P(8, "Inusable", "♾️", "p_regen", "Il guérit de blessures qui auraient tué deux hommes."),
+	P(8, "Ossature de géant", "🦴", "p_carac", "Ses os ont la densité du chêne vieux de mille ans.", stats=("R",)),
+	A(8, "Coup de tonnerre", "⚡", "frappe", "coup_lourd", "Le coup tombe comme la foudre sur l'arbre seul."),
+	A(8, "Briseur de lignes", "🧱", "zone_rect", "balayage", "Il entre dans le rang ennemi comme un coin dans une bûche."),
+	A(8, "Terreur des steppes", "😱", "entrave", "rage", "Son seul regard fait reculer les braves.", malus=("Vol", "Ag")),
+	A(8, "Furie du clan", "🔥", "cri", "aura_bataille", "Le clan hurle avec lui, et chaque bras frappe plus fort.", stats=("F", "R"), rayon=2),
+	A(8, "Griffes du grand ours", "🐻", "zone_cone", "impact_plaie/cone_griffe", "Deux revers en croix, larges comme des pattes d'ours."),
+	# ── Niveau 9 ──
+	P(9, "Fureur éternelle", "🔥", "p_carac", "La rage ne le quitte plus, même dans son sommeil.", stats=("F",)),
+	P(9, "Insensible", "🧊", "p_esquive", "Il ne sent plus les coups, il les voit seulement venir."),
+	A(9, "Décapitation", "💀", "frappe", "saignee", "Un geste ample, définitif."),
+	A(9, "Folie du massacre", "🩸", "sang", "rage", "Il sacrifie sa chair pour le coup le plus terrible de sa vie."),
+	A(9, "Séisme", "🌋", "zone_carre", "coup_lourd", "Il frappe le sol, et la terre jette ses ennemis à bas.", rayon=2),
+	A(9, "Bond de l'avalanche", "🏔️", "saut", "saut", "Il dévale sur l'ennemi comme la neige des cimes."),
+	A(9, "Berserk", "😡", "posture", "rage", "Il cesse de penser, il ne fait plus que tuer.", stats=("F", "R")),
+	# ── Niveau 10 ──
+	P(10, "Avatar de la rage", "👹", "p_carac", "Les clans le croient habité par l'esprit de la guerre.", stats=("F",)),
+	A(10, "Coup du fléau des clans", "🪓", "frappe", "coup_lourd", "Le coup dont les chants des steppes se souviendront."),
+	A(10, "Carnage", "🌪️", "zone_carre", "balayage", "Un cercle de mort, au centre duquel il hurle.", rayon=2),
+	A(10, "Cri du dernier clan", "📯", "cri", "aura_bataille", "Le cri qui a précédé chaque victoire de son peuple.", stats=("F", "Vol"), rayon=2),
+	A(10, "Sang pour sang", "🩸", "drain", "saignee", "Chaque goutte qu'il fait couler lui revient en force."),
+]

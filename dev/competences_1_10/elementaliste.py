@@ -1,0 +1,49 @@
+"""Élémentaliste 🔥 — feu, glace, foudre, roc, eau et vent (magie Élémentaire)."""
+from competences_1_10 import A
+
+ENTREES = [
+	# ── Niveau 1 ──
+	A(1, "Étincelle", "✨", "frappe", "feu", "Une étincelle claque au bout des doigts et mord la cible."),
+	A(1, "Gel des membres", "🥶", "entrave", "givre", "Le froid saisit les articulations de l'ennemi.", malus=("Ag",)),
+	A(1, "Peau de granit", "🪨", "buff_soi", "roc", "Sa peau prend le grain du granit.", stats=("R",)),
+	A(1, "Brise", "🌬️", "saut", "vent", "Le vent le soulève et le dépose plus loin."),
+	# ── Niveau 2 ──
+	A(2, "Trait de glace", "🧊", "frappe", "givre", "Une aiguille de glace qui file droit au but."),
+	A(2, "Arc électrique", "⚡", "siphon", "foudre", "Un arc qui court sur la cible et grille ses réserves."),
+	A(2, "Brûlure", "🔥", "poison", "feu", "Une flamme qui s'accroche et ne s'éteint pas."),
+	A(2, "Pluie douce", "🌧️", "regen_allie", "source", "Une ondée qui lave et apaise les plaies d'un compagnon."),
+	# ── Niveau 3 ──
+	A(3, "Gerbe de flammes", "🔥", "zone_cercle", "explosion_feu", "Le feu éclate au milieu des ennemis."),
+	A(3, "Bourrasque", "🌪️", "entrave", "vent", "Une rafale qui fait chanceler les plus solides.", malus=("Ag", "F")),
+	# ── Niveau 4 ──
+	A(4, "Lance de foudre", "⚡", "frappe", "foudre", "La foudre se fait lance et transperce."),
+	A(4, "Torrent", "🌊", "zone_rect", "eau", "Un jet d'eau furieux qui balaie le premier rang."),
+	A(4, "Givre rampant", "❄️", "poison", "givre", "Le gel gagne la chair, lentement, inexorablement."),
+	A(4, "Armure de glace", "🧊", "posture", "givre", "Une carapace de glace se forme et se reforme autour de lui.", stats=("R",)),
+	# ── Niveau 5 ──
+	A(5, "Projection de roc", "🪨", "frappe", "roc", "Un bloc arraché au sol vole vers la cible."),
+	A(5, "Langue de feu", "🔥", "zone_cone", "impact_brulure/cone_souffle_feu", "Les flammes jaillissent de ses mains en éventail."),
+	A(5, "Écho du tonnerre", "🌩️", "entrave", "foudre", "Un coup de tonnerre qui laisse l'ennemi sourd et hébété.", malus=("Int", "Ag")),
+	A(5, "Souffle des éléments", "🌀", "buff_allie", "nature_buff", "Il prête à un compagnon la force des éléments.", stats=("R", "F")),
+	# ── Niveau 6 ──
+	A(6, "Tempête de grêle", "🌨️", "zone_cercle", "givre", "La grêle s'abat sur une large zone.", rayon=2),
+	A(6, "Forme de vapeur", "♨️", "esquive_soi", "eau", "Son corps se fait brume, et les coups le traversent."),
+	# ── Niveau 7 ──
+	A(7, "Colonne de feu", "🔥", "frappe", "meteore", "Une colonne de flammes jaillit sous les pieds de la cible."),
+	A(7, "Éclair en chaîne", "⚡", "zone_cone", "impact_etincelles/cone_decharge", "La foudre bondit de cible en cible devant lui."),
+	A(7, "Sables mouvants", "🏜️", "entrave", "roc", "Le sol se dérobe sous l'ennemi.", malus=("Ag",)),
+	A(7, "Source de mana", "💧", "pm_allie", "source", "Il fait jaillir pour un compagnon une source d'énergie pure."),
+	# ── Niveau 8 ──
+	A(8, "Javelot de glace", "🧊", "frappe", "givre", "Un javelot de glace pure, lourd comme la mort."),
+	A(8, "Siphon des éléments", "🌀", "drain", "vent", "Il aspire la vie de la cible avec le vent."),
+	A(8, "Tremblement", "🌋", "zone_carre", "roc", "La terre tremble autour de lui et renverse les ennemis.", rayon=2),
+	A(8, "Rituel de la tempête", "⛈️", "rituel", "foudre", "Il invoque l'orage, et l'orage met du temps à venir."),
+	# ── Niveau 9 ──
+	A(9, "Brasier", "🔥", "poison", "feu", "Un feu qui dévore longtemps."),
+	A(9, "Raz-de-marée", "🌊", "zone_rect", "eau", "Une vague qui emporte le premier rang ennemi."),
+	A(9, "Cyclone", "🌪️", "saut", "vent", "Le vent l'emporte et le dépose où il veut."),
+	A(9, "Bouclier des quatre vents", "🛡️", "cri", "bouclier", "Les vents tournent autour du groupe et détournent les coups.", stats=("R", "Ag"), rayon=2),
+	# ── Niveau 10 ──
+	A(10, "Fureur élémentaire", "💥", "rituel", "explosion_feu", "Feu, glace, foudre et roc frappent ensemble la même cible."),
+	A(10, "Zéro absolu", "❄️", "entrave", "givre", "Le froid absolu fige la cible dans la glace.", malus=("Ag", "F")),
+]
