@@ -192,27 +192,29 @@ t('colonne momentanément à 0 px : l’échelle en place est gardée, rien n’
 
 console.log('\n── Vue portrait (tailleVuePortrait) ───────────────────────────────────────');
 
-t('carte DEBOUT : profondeur fixe, rangées impaires dans la hauteur, toujours plus haute que large', () => {
-	for (let w = 200; w <= 800; w += 7) for (let h = LIGNES * 8; h <= 1400; h += 11) {
+t('carte DEBOUT de toute la largeur : profondeur fixe, rangées impaires dans la hauteur', () => {
+	for (let w = 200; w <= 800; w += 7) for (let h = 0; h <= 1400; h += 11) {
 		const r = tailleVuePortrait(w, h);
 		const ctx = `w=${w} h=${h}`;
 		assert.ok(Number.isInteger(r.step) && r.step >= 8, ctx);
 		assert.strictEqual(r.viewWidth, r.step * PROFONDEUR, 'profondeur non fixe : ' + ctx);
-		assert.ok(r.viewWidth <= Math.max(w - 20, 8 * PROFONDEUR), 'déborde en largeur : ' + ctx);
+		assert.ok(r.viewWidth <= w - 20, 'déborde en largeur : ' + ctx);
+		// Une case de plus ne tiendrait pas : la LARGEUR est remplie, quelle que soit la hauteur.
+		assert.ok(r.viewWidth + PROFONDEUR > w - 20, 'largeur non remplie : ' + ctx);
 		assert.ok(r.lignes % 2 === 1 && r.lignes >= LIGNES, 'rangées : ' + ctx);
-		assert.ok(r.step * r.lignes <= h, 'déborde en hauteur : ' + ctx);
-		// Une rangée de flanc de plus de chaque côté ne tiendrait pas : la hauteur est remplie.
+		// Au-dessus du plancher, la hauteur est remplie sans déborder (au plancher, la page défile).
+		if (r.lignes > LIGNES) assert.ok(r.step * r.lignes <= h, 'déborde en hauteur : ' + ctx);
 		assert.ok(r.step * (r.lignes + 2) > h, 'hauteur non remplie : ' + ctx);
 		assert.ok(r.lignes > PROFONDEUR, 'carte pas plus haute que large : ' + ctx);
 	}
 });
 
-// Le cas de la capture : colonne 373 px, ~390 px de hauteur offerte (barre d'action et pavé
-// retirés). L'ancienne échelle y rendait 13 rangées × 15 cases de 23 px — une carte paysage.
-t('téléphone debout (colonne 373 px, 390 px pour la carte) : carte haute, jetons plus gros qu’en paysage', () => {
-	const paysage = tailleVue(373), portrait = tailleVuePortrait(373, 390);
+// Le cas de la capture : colonne 373 px, ~610 px jusqu'à la barre d'action. L'ancienne échelle y
+// rendait 13 rangées × 16 cases de 22 px — une carte paysage.
+t('téléphone debout (colonne 373 px, 610 px pour la carte) : pleine largeur, jetons 2× plus gros qu’en paysage', () => {
+	const paysage = tailleVue(373), portrait = tailleVuePortrait(373, 610);
 	assert.ok(portrait.step * portrait.lignes > portrait.viewWidth, 'carte plus large que haute');
-	assert.ok(portrait.step >= 1.5 * paysage.step, 'jetons pas assez gros');
+	assert.ok(portrait.step >= 2 * paysage.step, 'jetons pas assez gros');
 	// Plus de flancs qu'en paysage (8 cases de chaque côté sur 17), un peu moins de profondeur.
 	assert.ok(PROFONDEUR - 1 <= MAX_H - 1, 'voit plus loin devant qu’en paysage');
 });
