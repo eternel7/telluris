@@ -140,22 +140,32 @@ html.vue-portrait .viewport {
 	height: calc(var(--step) * var(--vue-lignes, 11));
 	align-self: center;
 }
-/* Barre d'action FIXÉE en bas de la fenêtre : la carte dépasse l'écran, la barre reste à portée.
-   Le vide de sa hauteur (--barre-h, mesurée par _syncBarreFixe) est rendu au pied de la page,
-   pour que le défilement amène tout le reste AU-DESSUS d'elle. Sous le pavé (z-index 100) et les
-   overlays de fin. */
-html.vue-portrait .combat-center .action-bar {
+/* Barres du bas (barre d'action + bandeau de tour) FIXÉES et FLOTTANTES en bas de la fenêtre :
+   la carte dépasse l'écran, les deux barres restent à portée. Hors portrait, `.barres-bas` est
+   transparent (`display: contents`) : ses deux enfants restent des items de `.combat-center`.
+   Le vide de leur hauteur (--barre-h, mesurée par _syncBarreFixe sur `.barres-bas`) est rendu
+   au pied de la page, pour que le défilement amène tout le reste AU-DESSUS d'elles. Sous le pavé
+   (z-index 100) et les overlays de fin. `column-reverse` : le bandeau de tour AU-DESSUS, la barre
+   d'action au plus près du pouce. */
+.barres-bas { display: contents; }
+html.vue-portrait .barres-bas {
+	display: flex; flex-direction: column-reverse; gap: 6px;
 	position: fixed;
-	left: 0; right: 0; bottom: 0;
-	margin: 0;
+	left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px));
 	z-index: 90;
-	border-radius: 10px 10px 0 0;
-	box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 0, 0, 0.5);
+	pointer-events: none;
 }
-html.vue-portrait body { padding-bottom: calc(var(--barre-h, 0px) + 10px); }
-/* La pastille plein écran (part-plein-ecran, coin bas-gauche fixe) masquerait le ⚙ de la barre :
+html.vue-portrait .barres-bas > .action-bar,
+html.vue-portrait .barres-bas > .tour-header {
+	margin: 0;
+	pointer-events: auto;
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+html.vue-portrait .barres-bas > .tour-header { padding: 2px 10px; }
+html.vue-portrait body { padding-bottom: calc(var(--barre-h, 0px) + 18px); }
+/* La pastille plein écran (part-plein-ecran, coin bas-gauche fixe) masquerait les barres :
    elle monte juste au-dessus. */
-html.vue-portrait .fs-fab.fs-fab-compact { bottom: calc(var(--barre-h, 0px) + 10px); }
+html.vue-portrait .fs-fab.fs-fab-compact { bottom: calc(var(--barre-h, 0px) + 18px); }
 html.vue-portrait .viewport::after {
 	background: radial-gradient(ellipse at 30% 50%, transparent 30%, rgba(0,0,0,0.9) 96%);
 }
@@ -1231,6 +1241,9 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
 			</div>
 		</div>
 
+		<!-- Barres du bas : transparent hors portrait (`display: contents`) ; en vue portrait,
+		     bloc FIXE et flottant en bas de la fenêtre (bandeau de tour au-dessus de la barre). -->
+		<div class="barres-bas" id="barres-bas">
 		<div class="action-bar">
 			<button class="action-btn" id="btn-slots-edit" onclick="toggleSlotEdit()" title="Réorganiser le contenu de la barre — coûte 1 action. (Échanger deux cases est gratuit : clic long sur une case, puis glisser.)">⚙</button>
 			<!-- Grille de slots : rendue 100 % client (renderSlots), positions stables par
@@ -1329,6 +1342,7 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
 			     (par navigateur, pas par personnage) et il coupe AUSSI le son en cours. -->
 			<button type="button" id="btn-son" class="son-btn" title="Couper / rétablir les sons de combat">🔊</button>
 		</div>
+		</div><!-- /barres-bas -->
 		</div><!-- /combat-center -->
 
 		<!-- Lecteur des sons d'animation : UN SEUL, caché. Le journal ne révèle qu'une
@@ -1534,8 +1548,8 @@ function tailleVue(largeur) {
 // profondeur —, posées debout. Le joueur est à GAUCHE, centré en hauteur, et regarde vers la
 // DROITE ; les PROFONDEUR_PORTRAIT cases remplissent la largeur (elles fixent le pas), les
 // LIGNES_PORTRAIT rangées de flanc s'empilent en hauteur, quitte à dépasser l'écran : la page
-// défile, et la barre d'action, FIXÉE en bas de la fenêtre (cf. `html.vue-portrait .action-bar`),
-// reste toujours à portée.
+// défile, et les barres d'action et de tour, FIXÉES en bas de la fenêtre (cf.
+// `html.vue-portrait .barres-bas`), restent toujours à portée.
 // Tout le reste est inchangé : `angleCamera` ajoute +90° (carte, jetons, gabarits, VFX tournent
 // d'un même mouvement, les portraits restent debout par leur `rotate(-a)`), et l'ancre commune
 // des jetons (#tokens-layer) est redimensionnée pour que `left:50%; bottom:--floor` y tombe sur
@@ -1563,13 +1577,14 @@ function _tailleCourante(largeur) {
 	return VUE_PORTRAIT ? tailleVuePortrait(largeur) : tailleVue(largeur);
 }
 
-// Barre d'action FIXE (portrait) : sortie du flux, elle recouvrirait le bas de la page. Sa hauteur
-// est donc RENDUE en vide au pied du document (`--barre-h`, padding-bottom du body) : en défilant
-// jusqu'au bout, tout ce qui est sous la carte passe au-dessus d'elle. Suivie par un
-// ResizeObserver — elle grandit en mode édition ou au ciblage. Sa hauteur ne dépend ni du pas ni
-// du padding qu'on écrit : aucune rétroaction (§17).
+// Barres du bas FIXES (portrait : barre d'action + bandeau de tour, dans `#barres-bas`) : sorties
+// du flux, elles recouvriraient le bas de la page. Leur hauteur est donc RENDUE en vide au pied du
+// document (`--barre-h`, padding-bottom du body) : en défilant jusqu'au bout, tout ce qui est sous
+// la carte passe au-dessus d'elles. Suivie par un ResizeObserver — la barre grandit en mode
+// édition ou au ciblage. Leur hauteur ne dépend ni du pas ni du padding qu'on écrit : aucune
+// rétroaction (§17).
 function _syncBarreFixe() {
-	const barre = document.querySelector('.combat-center .action-bar');
+	const barre = document.getElementById('barres-bas');
 	const h = (VUE_PORTRAIT && barre) ? Math.ceil(barre.getBoundingClientRect().height) : 0;
 	document.documentElement.style.setProperty('--barre-h', h + 'px');
 	// Le pavé posé par défaut suit le haut de la barre (qui grandit en édition, au ciblage).
@@ -2867,7 +2882,7 @@ function _placerPaveParDefaut() {
 		return;
 	}
 	const vp = document.getElementById('viewport');
-	const barre = document.querySelector('.combat-center .action-bar');
+	const barre = document.getElementById('barres-bas');
 	if (!vp) return;
 	const rv = vp.getBoundingClientRect();
 	const bas = barre ? barre.getBoundingClientRect().top : rv.bottom;
@@ -4566,7 +4581,7 @@ window._combatReady = true;
 // en vide au pied de la page, et la place du pavé au-dessus d'elle se prennent maintenant.
 _syncBarreFixe();
 if (window.ResizeObserver) {
-	const _barre = document.querySelector('.combat-center .action-bar');
+	const _barre = document.getElementById('barres-bas');
 	if (_barre) new ResizeObserver(_syncBarreFixe).observe(_barre);
 }
 if (state.status !== 'active') showEndOverlay(state.status, state.xp_gagnee);
