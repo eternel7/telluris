@@ -919,6 +919,28 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
 }
 .slot-edit-bar { grid-area: editrow; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .slot-edit-hint { font-size: 12px; color: #cbb98a; }
+/* ⓘ de la consigne d'édition : caché hors portrait, où la consigne reste en ligne. */
+.slot-edit-aide { display: none; }
+/* Vue PORTRAIT : la rangée d'édition passe à la ligne au besoin, et la consigne quitte le flux
+   pour une bulle ouverte par ⓘ (même motif que la fiche de /play, `.sh-barre-aide`). La bulle
+   s'ouvre AU-DESSUS de la barre : celle-ci est collée au bas de la fenêtre. */
+html.vue-portrait .barres-bas > .action-bar { position: relative; }
+html.vue-portrait .slot-edit-bar { flex-wrap: wrap; gap: 6px; }
+html.vue-portrait .slot-edit-bar > select { min-width: 0; max-width: 100%; }
+html.vue-portrait .slot-edit-aide {
+	display: inline-flex; align-items: center; justify-content: center;
+	width: 1.6rem; height: 1.6rem; padding: 0;
+	background: transparent; color: var(--gold2);
+	border: 1px solid var(--border-color); border-radius: 50%;
+	font-size: .9rem; line-height: 1; cursor: pointer;
+}
+html.vue-portrait .slot-edit-hint {
+	display: none; position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); z-index: 5;
+	padding: .5rem .7rem; font-size: 12px;
+	background: #181818; border: 1px solid var(--gold2);
+	border-radius: 6px; box-shadow: 0 4px 14px rgba(0, 0, 0, .6);
+}
+html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 #target-row {
 	grid-area: targetrow;
 	display: none; gap: 8px; align-items: center; justify-content: center;
@@ -1279,6 +1301,9 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
 				<select id="slot-assign-select"></select>
 				<button class="action-btn" id="btn-slot-assign" onclick="confirmSlotAssign()">✓ Affecter</button>
 				<button class="action-btn flee-btn" id="btn-slot-done" onclick="fermerModeEdition()" title="Quitter le mode réorganisation (gratuit)">Terminer</button>
+				<!-- Portrait : la consigne passe dans une bulle ouverte par ⓘ (cf. toggleSlotEditAide). -->
+				<button type="button" class="slot-edit-aide" id="slot-edit-aide" aria-label="Aide : réorganiser la barre"
+					aria-expanded="false" aria-controls="slot-edit-hint" onclick="toggleSlotEditAide(event)">ⓘ</button>
 				<span class="slot-edit-hint" id="slot-edit-hint"></span>
 			</div>
 			<div id="target-row">
@@ -4193,8 +4218,30 @@ function fermerModeEdition() {
 	document.getElementById('btn-slots-edit').classList.remove('attack-btn');
 	document.getElementById('slot-edit-row').style.display = 'none';
 	document.getElementById('slot-edit-hint').textContent = '';
+	_fermerSlotEditAide();
 	updateButtons(state);
 }
+
+// ── Consigne du mode édition : bulle ⓘ (vue portrait seulement, cf. CSS `.slot-edit-aide`) ──
+// Fermée par un 2e clic sur ⓘ, un clic ailleurs, Échap ou la sortie du mode.
+function _fermerSlotEditAide() {
+	const hint = document.getElementById('slot-edit-hint');
+	if (!hint || !hint.classList.contains('ouverte')) return;
+	hint.classList.remove('ouverte');
+	document.getElementById('slot-edit-aide').setAttribute('aria-expanded', 'false');
+}
+function toggleSlotEditAide(ev) {
+	ev.stopPropagation();
+	const hint = document.getElementById('slot-edit-hint');
+	if (hint.classList.contains('ouverte')) { _fermerSlotEditAide(); return; }
+	hint.classList.add('ouverte');
+	document.getElementById('slot-edit-aide').setAttribute('aria-expanded', 'true');
+}
+document.addEventListener('click', ev => {
+	const hint = document.getElementById('slot-edit-hint');
+	if (hint && !hint.contains(ev.target)) _fermerSlotEditAide();
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') _fermerSlotEditAide(); });
 
 // Toutes les actions affectables : les 3 modes d'attaque, puis TOUT ce que le personnage
 // connaît (sorts/compétences/consommables de combat) — c'est la soupape qui rattrape une
