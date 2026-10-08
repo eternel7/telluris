@@ -207,6 +207,7 @@ Chaque mécanique est documentée dans une compétence `.claude/skills/telluris-
 | dump, exports, `/admin/table`, écritures PUT complet, cache de requête, caches process | `telluris-db` |
 | lanceur `dev/`, générateurs de contenu, variables de monde | `telluris-admin-tools` |
 | harnais Node, `check_js`, collecte pytest | `telluris-tests` |
+| lore : canon vs propositions (`docs/lore/`), règles d'écriture de l'Auteur, cités, PNJ, trame par rang | `telluris-lore` |
 
 ## Conventions transverses
 

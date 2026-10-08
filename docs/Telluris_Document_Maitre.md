@@ -13,49 +13,36 @@
 
 ## TABLE DES MATIÈRES
 
-1. Vision générale
-2. Principes fondamentaux de l'univers
-3. Géographie et Cités-États
-4. Les Anthropes et les Lignées
-5. Le monde avant les portails
-6. Les trois frères aborigènes
-7. Transmission et dégradation du savoir
-8. La Vague de Mana
-9. Portails et Donjons
-10. Mondes extérieurs et mythologies
-11. Mana et cristaux
-12. Économie et ressources
-13. Institutions
-14. Paladins
-15. Templiers
-16. Architectes
-17. Aventuriers
-18. Guildes
-19. Religions, christianisme et magie sainte
-20. Jésus et les Révélateurs
-21. Les Grigori
-22. Cosmologie méta
-23. Progression du joueur
-24. Le Grand Mystère
-25. Personnages et intrigues
-26. Systèmes de jeu
-27. Logements et installation
-28. Colonisation
-29. Événements et ambiance
-30. Quêtes et exploration
-31. Principes narratifs
-32. Éléments à préserver
-33. Points encore ouverts
+1. Le principe général
+2. Les Anthropes
+3. Le monde avant les portails
+4. Les trois frères aborigènes
+5. La transmission du savoir
+6. La Vague de mana
+7. Les donjons
+8. Les mondes extérieurs
+9. Les cristaux de mana
+10. La nouvelle économie des donjons
+11. La naissance des Templiers
+12. Le temple
+13. Les débordements
+14. La naissance des Paladins
+15. Les monastères fortifiés
+16. Les trois institutions fondamentales
+17. Une philosophie générale de Telluris
+18. Le monothéisme dans ce cadre
+19. Jésus dans Telluris
+20. La Révélation
+21. Les Révélateurs
+22. La grande trame de Telluris
+23. Les fins possibles
+24. Le grand mystère
+25. Le principe directeur
+26. Points encore ouverts
 
 ---
 
-# 1. VISION GÉNÉRALE ET BASE DOCUMENTAIRE
-
-Voici une synthèse structurée de la discussion, en intégrant les corrections et les développements retenus.
-
-# Telluris — Synthèse du concept
-
-## 1. Le principe général
+# 1. Le principe général
 
 **Telluris** est un monde médiéval fantastique construit sur la géographie réelle de la Terre.
 
@@ -65,13 +52,14 @@ Les grandes cités historiques occupent leurs emplacements géographiques réels
 
 Les remparts constituent donc les frontières de la civilisation. Au-delà commencent les territoires sauvages, les routes dangereuses, les ruines, les donjons et les zones encore inconnues.
 
-Le monde repose sur cinq piliers :
+Le monde repose sur six piliers :
 
 - **géographie réelle** ;
-- **Cités-États et remparts** ;
-- **magie à coût physique** ;
-- **exploration et combat tactique** ;
-- **relations persistantes entre les personnages**.
+- **combat tactique** au tour par tour sur grille carrée ;
+- **Cités-États** fortifiées ;
+- **magie à coût réel** : chaque sort consomme des ressources physiques ;
+- **vocations diverses**, avec transitions entre classes ;
+- **relations vivantes** entre les personnages.
 
 ---
 
@@ -98,7 +86,9 @@ Cette absence de séparation raciale stricte est notamment renforcée par la né
 
 # 3. Le monde avant les portails
 
-Les portails **n'existaient pas à l'origine**.
+Les portails **n'existaient pas à l'origine**, à une exception près : le portail de Saint-Pierre, à Rome, est un **portail naturel** antérieur à la venue des frères aborigènes.
+
+Les monstres, eux, existaient déjà : ils rendaient les déplacements périlleux bien avant les portails, et tous ne sont pas liés aux donjons.
 
 Les Anthropes vivaient dans un monde où les distances géographiques étaient réelles et où les routes constituaient les grandes artères de civilisation.
 
@@ -181,7 +171,7 @@ Un donjon est à l'origine un ancien portail dont la destination a été transfo
 
 Et il ne possède pas nécessairement l'apparence traditionnelle d'un donjon.
 
-Le premier peut être :
+Il peut être :
 
 - un champ de céréales ;
 - une forêt ;
@@ -378,13 +368,17 @@ Le temple est précisément conçu pour ralentir cette progression et permettre 
 
 # 14. La naissance des Paladins
 
-Les **Paladins sont eux aussi antérieurs au christianisme.**
+L'ordre des **Paladins est antérieur à l'apparition des portails** — et donc aussi au monothéisme.
 
-Leur mission initiale est complètement différente :
+Leur mission est complètement différente de celle des Templiers :
 
 > **protéger les routes et les voyageurs entre les Cités-États.**
 
-Lorsque les portails se dégradent et que certaines liaisons disparaissent, les routes terrestres redeviennent indispensables.
+Ils la remplissent depuis que les Anthropes se sont réfugiés derrière des remparts.
+
+L'apparition des portails a réduit l'utilité de certaines routes, mais toutes les villes ne disposaient pas d'un portail : les Paladins ont conservé leur fonction sur les tronçons qui relient encore les Lignées.
+
+Lorsque, après la Vague, certains portails se dégradent et que des liaisons disparaissent, les routes terrestres redeviennent indispensables et l'ordre prend un nouvel essor.
 
 Les Paladins parcourent les chemins reliant :
 
@@ -395,7 +389,7 @@ Les Paladins parcourent les chemins reliant :
 
 Ils escortent les voyageurs et combattent les créatures qui infestent les routes.
 
-Ils pratiquent une forme de **magie Sainte**, principalement orientée vers :
+Ce sont des guerriers pratiquant la **magie Sainte** — la magie du soin —, principalement orientée vers :
 
 - les soins ;
 - la purification ;
@@ -408,7 +402,7 @@ Ils ne sont donc pas initialement chrétiens.
 
 # 15. Les monastères fortifiés
 
-Avec le développement du christianisme, certaines routes accueillent des **monastères fortifiés**.
+Avec l'arrivée des monothéismes, certaines auberges-relais deviennent des **monastères fortifiés**.
 
 Ces monastères remplissent une fonction comparable aux anciennes auberges-relais :
 
@@ -423,11 +417,11 @@ Ils sont ouverts à tous.
 
 Certains deviennent progressivement des **casernes de Paladins**.
 
-Ces Paladins acquièrent alors une identité chrétienne.
+Ces Paladins acquièrent alors une identité religieuse : paladins chrétiens, ou autres groupes protecteurs alliés à une religion monothéiste.
 
 Ainsi :
 
-> **le paladin existe avant le christianisme ; le paladin chrétien apparaît ensuite.**
+> **le paladin existe avant le monothéisme ; le paladin chrétien apparaît ensuite.**
 
 C'est une évolution institutionnelle et culturelle, pas une création religieuse.
 
@@ -485,9 +479,9 @@ Et au-delà :
 
 ---
 
-# 18. Le christianisme dans ce cadre
+# 18. Le monothéisme dans ce cadre
 
-Le christianisme apparaît donc dans un monde qui possède déjà :
+Les monothéismes apparaissent donc dans un monde qui possède déjà :
 
 - les Templiers ;
 - les Paladins ;
@@ -497,11 +491,11 @@ Le christianisme apparaît donc dans un monde qui possède déjà :
 - les portails ;
 - plusieurs traditions religieuses.
 
-Il ne crée pas ces institutions.
+Ils ne créent pas ces institutions.
 
-Il **s'y inscrit progressivement**.
+Ils **s'y inscrivent progressivement**.
 
-Cela permet de conserver une évolution historique proche de celle de notre monde tout en l'adaptant à Telluris.
+Le monothéisme n'est pas la majorité dans le monde de Telluris et s'intègre sans tentative de conversion par la force : il y a trop de combats à mener dans Telluris pour en rajouter un de plus, et il est plus difficile d'y justifier un miracle face à la réalité de la magie.
 
 ---
 
@@ -515,7 +509,7 @@ Jésus reste donc un personnage issu du peuple.
 
 Mais il existe une différence fondamentale avec notre monde :
 
-> **Jésus est en réalité un ancien joueur ayant atteint la fin du jeu en tant que Révélateur.**
+> **Jésus est en réalité un personnage incarné par un joueur ayant fait le choix de la révélation : il a fini le jeu en tant que Révélateur.**
 
 Il a découvert progressivement que :
 
@@ -526,7 +520,7 @@ Il a découvert progressivement que :
 
 Mais il rencontre alors un problème :
 
-> **comment expliquer une vérité que l'esprit d'un Antrophe ne possède pas les concepts nécessaires pour comprendre ?**
+> **comment expliquer une vérité que l'esprit d'un Anthrope ne possède pas les concepts nécessaires pour comprendre ?**
 
 ---
 
@@ -693,11 +687,11 @@ C'est ce qui permet à Telluris de rester à la fois un monde médiéval fantast
 
 ---
 
-# 33. POINTS ENCORE OUVERTS
+# 26. POINTS ENCORE OUVERTS
 
 Cette section est volontairement réservée aux éléments qui nécessitent encore une décision explicite. Elle ne constitue pas une liste de corrections : elle sert à empêcher le document maître de transformer automatiquement une hypothèse en canon.
 
-## 33.1 Cosmologie
+## 26.1 Cosmologie
 
 - Nature exacte de la Vague de Mana.
 - Origine ultime des monstres.
@@ -706,7 +700,7 @@ Cette section est volontairement réservée aux éléments qui nécessitent enco
 - Relation précise entre les différents mondes mythologiques.
 - Ce que signifie exactement « atteindre la fin du jeu ».
 
-## 33.2 Portails
+## 26.2 Portails
 
 - Fonctionnement technique détaillé de la création d'un portail.
 - Règles précises de stabilisation.
@@ -714,29 +708,27 @@ Cette section est volontairement réservée aux éléments qui nécessitent enco
 - Nature exacte des destinations inconnues.
 - Conditions précises de transformation d'un portail en Donjon.
 
-## 33.3 Magie
+## 26.3 Magie
 
 - Taxonomie complète des écoles de magie.
 - Coûts exacts.
-- Effet détaillé du poids porté sur la pratique magique.
 - Interaction entre mana, cristaux et magie personnelle.
 - Limites de la magie sainte.
 
-## 33.4 Sociétés
+## 26.4 Sociétés
 
 - Organisation politique détaillée des différentes Cités-États.
 - Statut juridique des cinq Lignées.
 - Relations exactes entre institutions civiles, religieuses et militaires.
 - Organisation complète des Guildes.
 
-## 33.5 Progression
+## 26.5 Progression
 
 - Arbre de progression complet.
 - Conditions des différentes fins.
 - Systèmes de réputation, richesse et influence.
-- Progression des propriétés : Chambre → Logement → Maison → Demeure → Domaine.
 
-## 33.6 Personnages et scénarios
+## 26.6 Personnages et scénarios
 
 Les personnages développés dans les discussions doivent être intégrés progressivement dans une chronologie et une base de données narrative cohérentes, sans écraser leurs versions antérieures tant qu'une version définitive n'a pas été retenue.
 
