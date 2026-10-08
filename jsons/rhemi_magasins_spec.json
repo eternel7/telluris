@@ -1,0 +1,714 @@
+{
+	"cite": "lieu:rhemi",
+	"magasins": [
+		{
+			"categorie": "apothicairerie",
+			"label": "La Coupe aux Herbes du Vieux Cloître",
+			"image": "apothicairerie_europe01.png",
+			"pos": [
+				62,
+				29
+			],
+			"nom": "Laurelin Cielazur",
+			"portrait": "marchand_elfe_f_apothicairerie.png"
+		},
+		{
+			"categorie": "apothicairerie",
+			"label": "La Réserve des Simples des Coteaux",
+			"image": "apothicairerie_europe02.png",
+			"pos": [
+				34,
+				30
+			],
+			"nom": "Jérémie Yamamoto",
+			"portrait": "marchand_humain_m_apothicairerie.png"
+		},
+		{
+			"categorie": "armurerie",
+			"label": "Le Heaume de la Porte de Mars",
+			"image": "armurerie_europe01.jpg",
+			"pos": [
+				66,
+				19
+			],
+			"nom": "Yǔxuān Becker",
+			"portrait": "marchand_humain_m_armurerie.png"
+		},
+		{
+			"categorie": "armurerie",
+			"label": "L'Enclume de la Porte de Mars",
+			"image": "armurerie_europe01.png",
+			"pos": [
+				41,
+				20
+			],
+			"nom": "Bofur Barbeforge",
+			"portrait": "marchand_nain_m_armurerie.png"
+		},
+		{
+			"categorie": "atelier_d_artisan",
+			"label": "Le Bois Taillé des Coteaux",
+			"image": "atelier_d_artisan_europe01.png",
+			"pos": [
+				54,
+				23
+			],
+			"nom": "Falco Souscolline",
+			"portrait": "marchand_hobbit_m_atelier_d_artisan.png"
+		},
+		{
+			"categorie": "atelier_d_artisan",
+			"label": "L'Ouvrage Fin de la Vesle",
+			"image": "atelier_d_artisan_europe02.png",
+			"pos": [
+				53,
+				30
+			],
+			"nom": "Dwalin Grave-Enclume",
+			"portrait": "marchand_nain_m_atelier_d_artisan.png"
+		},
+		{
+			"categorie": "atelier_de_cirier",
+			"label": "Le Cierge du Chapitre",
+			"image": "atelier_de_cirier_europe01.png",
+			"pos": [
+				62,
+				27
+			],
+			"nom": "Celebrian Lunevoile",
+			"portrait": "marchand_elfe_f_atelier_de_cirier.png"
+		},
+		{
+			"categorie": "atelier_de_cirier",
+			"label": "La Chandelle Blanche du Sacre",
+			"image": "atelier_de_cirier_europe02.png",
+			"pos": [
+				63,
+				23
+			],
+			"nom": "Patrice Fouille-Filons",
+			"portrait": "marchand_nain_m_cirier.png"
+		},
+		{
+			"categorie": "atelier_de_l_empenneur",
+			"label": "La Plume Rouge du Vieux Cloître",
+			"image": "atelier_de_l_empenneur_europe01.png",
+			"pos": [
+				29,
+				25
+			],
+			"nom": "Fabrice Douce-Amande",
+			"portrait": "marchand_hobbit_m_atelier_de_l_empeneur01.jpg"
+		},
+		{
+			"categorie": "atelier_de_l_empenneur",
+			"label": "L'Aile de la Flèche du Chapitre",
+			"image": "atelier_de_l_empenneur_europe02.png",
+			"pos": [
+				33,
+				14
+			],
+			"nom": "Kazrag Fort-Armure",
+			"portrait": "marchand_nain_m_empenneur.png"
+		},
+		{
+			"categorie": "bijouterie",
+			"label": "L'Écrin des Coteaux",
+			"image": "bijouterie_europe01.png",
+			"pos": [
+				33,
+				28
+			],
+			"nom": "Aelwen Ventelame",
+			"portrait": "marchand_elfe_f_bijouterie.png"
+		},
+		{
+			"categorie": "bijouterie",
+			"label": "Le Joyau de la Vesle",
+			"image": "bijouterie_europe02.png",
+			"pos": [
+				40,
+				22
+			],
+			"nom": "Alexia Fleurépine",
+			"portrait": "marchand_elfe_f_bijouterie01.png"
+		},
+		{
+			"categorie": "boucherie",
+			"label": "Le Quartier du Chapitre",
+			"image": "boucherie_europe01.png",
+			"pos": [
+				30,
+				22
+			],
+			"nom": "Rose Valois",
+			"portrait": "marchand_humain_f_boucherie01.jpg"
+		},
+		{
+			"categorie": "boucherie",
+			"label": "La Pièce de Viande de la Porte de Mars",
+			"image": "boucherie_europe02.png",
+			"pos": [
+				67,
+				21
+			],
+			"nom": "Tala Fouille-Filons",
+			"portrait": "marchand_nain_f_boucherie.png"
+		},
+		{
+			"categorie": "boulangerie",
+			"label": "Le Pain Chaud du Vieux Cloître",
+			"image": "boulangerie_europe01.jpg",
+			"pos": [
+				38,
+				23
+			],
+			"nom": "Ásta Astrebrillant",
+			"portrait": "marchand_elfe_f_boulangerie.jpg"
+		},
+		{
+			"categorie": "boulangerie",
+			"label": "La Bonne Miche des Crayères",
+			"image": "boulangerie_europe02.jpg",
+			"pos": [
+				35,
+				21
+			],
+			"nom": "Lithrielle Ventelame",
+			"portrait": "marchand_elfe_f_boulangerie01.jpg"
+		},
+		{
+			"categorie": "bourrellerie",
+			"label": "Le Bourrelier du Sacre",
+			"image": "bourrellerie_europe01.png",
+			"pos": [
+				55,
+				28
+			],
+			"nom": "Ludwig de Montmartre",
+			"portrait": "marchand_humain_m_bourrellerie.png"
+		},
+		{
+			"categorie": "bourrellerie",
+			"label": "La Sangle du Chapitre",
+			"image": "bourrellerie_europe02.png",
+			"pos": [
+				39,
+				25
+			],
+			"nom": "Balam Jónsson",
+			"portrait": "marchand_humain_m_bourrellerie01.png"
+		},
+		{
+			"categorie": "boyauderie",
+			"label": "Le Boyau Filé du Vieux Cloître",
+			"image": "boyauderie_europe01.png",
+			"pos": [
+				53,
+				20
+			],
+			"nom": "Wilco Pied-Léger",
+			"portrait": "marchand_hobbit_m_boyauderie.png"
+		},
+		{
+			"categorie": "boyauderie",
+			"label": "La Corde de Boyau du Chapitre",
+			"image": "boyauderie_europe02.png",
+			"pos": [
+				69,
+				21
+			],
+			"nom": "Amine Brise-Os",
+			"portrait": "marchand_ogre_m_boyauderie.png"
+		},
+		{
+			"categorie": "brosserie",
+			"label": "Le Balai Fin du Chapitre",
+			"image": "brosserie_europe01.png",
+			"pos": [
+				57,
+				26
+			],
+			"nom": "Thalion Sombrefrêne",
+			"portrait": "marchand_elfe_m_brosserie.png"
+		},
+		{
+			"categorie": "brosserie",
+			"label": "La Brosse à Cheveux des Coteaux",
+			"image": "brosserie_europe02.png",
+			"pos": [
+				42,
+				24
+			],
+			"nom": "Otieno Feuillargent",
+			"portrait": "marchand_elfe_m_brosserie01.png"
+		},
+		{
+			"categorie": "corderie",
+			"label": "Le Gros Cordage des Coteaux",
+			"image": "corderie_europe01.png",
+			"pos": [
+				62,
+				19
+			],
+			"nom": "Saku Einarsson",
+			"portrait": "marchand_humain_m_corderie.png"
+		},
+		{
+			"categorie": "corderie",
+			"label": "Le Câble de la Vesle",
+			"image": "corderie_europe02.png",
+			"pos": [
+				50,
+				24
+			],
+			"nom": "Einar Ben Ali",
+			"portrait": "marchand_humain_m_corderie01.png"
+		},
+		{
+			"categorie": "cordonnerie",
+			"label": "Le Cordon de Cuir de la Porte de Mars",
+			"image": "cordonnerie_europe01.png",
+			"pos": [
+				41,
+				13
+			],
+			"nom": "Martial Renard",
+			"portrait": "marchand_humain_m_cordonnerie.png"
+		},
+		{
+			"categorie": "cordonnerie",
+			"label": "Le Bon Pas du Chapitre",
+			"image": "cordonnerie_europe02.png",
+			"pos": [
+				41,
+				26
+			],
+			"nom": "Richard Jónsson",
+			"portrait": "marchand_humain_m_cordonnerie01.png"
+		},
+		{
+			"categorie": "cuisine",
+			"label": "La Marmite Noire des Coteaux",
+			"image": "cuisine_europe01.jpg",
+			"pos": [
+				37,
+				12
+			],
+			"nom": "Ysabeau Rondevalle",
+			"portrait": "marchand_elfe_f_cuisinie01.jpg"
+		},
+		{
+			"categorie": "cuisine",
+			"label": "La Broche Tournante du Sacre",
+			"image": "cuisine_europe02.jpg",
+			"pos": [
+				64,
+				27
+			],
+			"nom": "Edwige Douce-Amande",
+			"portrait": "marchand_hobbit_f_cuisine.png"
+		},
+		{
+			"categorie": "etable",
+			"label": "Le Licol de la Porte de Mars",
+			"image": "etable_europe01.png",
+			"pos": [
+				36,
+				23
+			],
+			"nom": "Dagna Piochefer",
+			"portrait": "marchand_nain_f_etable.png"
+		},
+		{
+			"categorie": "etable",
+			"label": "La Litière de la Porte de Mars",
+			"image": "etable_europe02.png",
+			"pos": [
+				26,
+				19
+			],
+			"nom": "Berga Rudemarteau",
+			"portrait": "marchand_nain_f_etable.png"
+		},
+		{
+			"categorie": "fletcher",
+			"label": "L'Arc Vert des Coteaux",
+			"image": "archerie_europe01.png",
+			"pos": [
+				56,
+				18
+			],
+			"nom": "Fastolf Chaud-Chaudron",
+			"portrait": "marchand_hobbit_m_archerie.png"
+		},
+		{
+			"categorie": "fletcher",
+			"label": "Le Fût d'If du Vieux Cloître",
+			"image": "archerie_europe02.png",
+			"pos": [
+				34,
+				23
+			],
+			"nom": "Rufus Basse-Vallée",
+			"portrait": "marchand_hobbit_m_archerie01.png"
+		},
+		{
+			"categorie": "fumoir",
+			"label": "Le Crochet à Viande de la Porte de Mars",
+			"image": "fumoir_europe01.png",
+			"pos": [
+				32,
+				24
+			],
+			"nom": "Léa Bouchet",
+			"portrait": "marchand_humain_f_fumoir.png"
+		},
+		{
+			"categorie": "fumoir",
+			"label": "Le Fumage Lent de la Vesle",
+			"image": "fumoir_europe02.png",
+			"pos": [
+				48,
+				24
+			],
+			"nom": "Mattia Fort-Armure",
+			"portrait": "marchand_nain_m_fumoir.png"
+		},
+		{
+			"categorie": "jardinier",
+			"label": "La Terre Fertile du Chapitre",
+			"image": "jardinier_europe01.png",
+			"pos": [
+				43,
+				21
+			],
+			"nom": "Josselin Cielazur",
+			"portrait": "marchand_elfe_m_herboriste01.jpg"
+		},
+		{
+			"categorie": "jardinier",
+			"label": "La Serpe de la Porte de Mars",
+			"image": "jardinier_europe02.png",
+			"pos": [
+				39,
+				13
+			],
+			"nom": "Florian Brise-Os",
+			"portrait": "marchand_ogre_m_jardinerie.png"
+		},
+		{
+			"categorie": "laboratoire_d_alchimie",
+			"label": "Le Cabinet des Sels de la Porte de Mars",
+			"image": "cabinet_alchimie_europe01.png",
+			"pos": [
+				46,
+				23
+			],
+			"nom": "Chenoa Cielazur",
+			"portrait": "marchand_elfe_f_laboratoire_d_alchimie.png"
+		},
+		{
+			"categorie": "laboratoire_d_alchimie",
+			"label": "L'Athanor Rouge du Chapitre",
+			"image": "cabinet_alchimie_europe02.png",
+			"pos": [
+				60,
+				27
+			],
+			"nom": "Fabien Hartmann",
+			"portrait": "marchand_humain_m_laboratoire_d_alchimie.png"
+		},
+		{
+			"categorie": "lutherie",
+			"label": "La Corde Fine de la Porte de Mars",
+			"image": "lutherie_europe01.png",
+			"pos": [
+				41,
+				28
+			],
+			"nom": "Lei Kobayashi",
+			"portrait": "marchand_humain_m_lutherie.png"
+		},
+		{
+			"categorie": "lutherie",
+			"label": "Le Chevalet des Crayères",
+			"image": "lutherie_europe02.png",
+			"pos": [
+				24,
+				21
+			],
+			"nom": "Björn Gros-Bide",
+			"portrait": "marchand_ogre_m_lutherie.png"
+		},
+		{
+			"categorie": "maroquinerie",
+			"label": "La Maison du Maroquin des Crayères",
+			"image": "maroquinerie_europe01.png",
+			"pos": [
+				49,
+				26
+			],
+			"nom": "Jeanne Brise-Mine",
+			"portrait": "marchand_nain_f_maroquinerie.png"
+		},
+		{
+			"categorie": "maroquinerie",
+			"label": "La Gaine du Sacre",
+			"image": "maroquinerie_europe01.png",
+			"pos": [
+				32,
+				21
+			],
+			"nom": "Gerd Fendroc",
+			"portrait": "marchand_nain_f_maroquinerie.png"
+		},
+		{
+			"categorie": "necromancie",
+			"label": "Le Suaire Gris des Coteaux",
+			"image": "necromancie_europe01.png",
+			"pos": [
+				38,
+				30
+			],
+			"nom": "Constance Lunevoile",
+			"portrait": "marchand_elfe_f_necromancie.png"
+		},
+		{
+			"categorie": "necromancie",
+			"label": "Le Livre des Morts de la Vesle",
+			"image": "necromancie_europe02.png",
+			"pos": [
+				48,
+				30
+			],
+			"nom": "Ahmed Bianchi",
+			"portrait": "marchand_humain_m_necromancie.png"
+		},
+		{
+			"categorie": "negociant",
+			"label": "La Maison de Négoce du Vieux Cloître",
+			"image": "negoce_europe01.jpg",
+			"pos": [
+				38,
+				20
+			],
+			"nom": "Diane García",
+			"portrait": "marchand_humaine_f_negoce.jpg"
+		},
+		{
+			"categorie": "negociant",
+			"label": "La Bonne Affaire des Coteaux",
+			"image": "negoce_europe01.jpg",
+			"pos": [
+				30,
+				20
+			],
+			"nom": "Mia Avale-Tout",
+			"portrait": "marchand_ogre_f_negoce01.jpg"
+		},
+		{
+			"categorie": "plumasserie",
+			"label": "Le Duvet Fin de la Porte de Mars",
+			"image": "plumasserie_europe01.png",
+			"pos": [
+				65,
+				22
+			],
+			"nom": "Thérèse Troisquarts",
+			"portrait": "marchand_hobbit_f_plumasserie.png"
+		},
+		{
+			"categorie": "plumasserie",
+			"label": "Le Plumail des Crayères",
+			"image": "plumasserie_europe02.png",
+			"pos": [
+				50,
+				22
+			],
+			"nom": "Elyas Brise-Os",
+			"portrait": "marchand_ogre_m_plumasserie.png"
+		},
+		{
+			"categorie": "salaison",
+			"label": "Le Muid Salé de la Porte de Mars",
+			"image": "salaison_europe01.png",
+			"pos": [
+				58,
+				30
+			],
+			"nom": "Barnabé de Villeneuve",
+			"portrait": "marchand_humain_m_salaison.png"
+		},
+		{
+			"categorie": "salaison",
+			"label": "Le Cochon Salé des Coteaux",
+			"image": "salaison_europe02.png",
+			"pos": [
+				60,
+				19
+			],
+			"nom": "Kitchi Mansouri",
+			"portrait": "marchand_humain_m_salaison.png"
+		},
+		{
+			"categorie": "savonnerie",
+			"label": "Le Chaudron à Savon des Crayères",
+			"image": "savonnerie_europe01.png",
+			"pos": [
+				46,
+				28
+			],
+			"nom": "Camille Kobayashi",
+			"portrait": "marchand_humain_f_savonnerie.png"
+		},
+		{
+			"categorie": "savonnerie",
+			"label": "Le Savon Parfumé du Chapitre",
+			"image": "savonnerie_europe02.png",
+			"pos": [
+				31,
+				16
+			],
+			"nom": "Gark Mâche-Fer",
+			"portrait": "marchand_ogre_m_savonnerie.png"
+		},
+		{
+			"categorie": "scriptorium",
+			"label": "Le Livre des Scribes des Crayères",
+			"image": "scriptorium_europe01.png",
+			"pos": [
+				45,
+				26
+			],
+			"nom": "Fabien Pech",
+			"portrait": "marchand_humain_m_scriptorium01.jpg"
+		},
+		{
+			"categorie": "scriptorium",
+			"label": "L'Encre Noire des Crayères",
+			"image": "scriptorium_europe02.png",
+			"pos": [
+				31,
+				14
+			],
+			"nom": "Yǔchén Cordier",
+			"portrait": "marchand_humain_m_scriptorium02.jpg"
+		},
+		{
+			"categorie": "tabletterie",
+			"label": "L'Ivoire Feint de la Porte de Mars",
+			"image": "tabletterie_europe01.png",
+			"pos": [
+				35,
+				28
+			],
+			"nom": "Asma Pied-Léger",
+			"portrait": "marchand_hobbit_f_tabletterie.png"
+		},
+		{
+			"categorie": "tabletterie",
+			"label": "La Boîte à Bijoux des Coteaux",
+			"image": "tabletterie_europe02.png",
+			"pos": [
+				55,
+				20
+			],
+			"nom": "Jelani Douce-Amande",
+			"portrait": "marchand_hobbit_f_tabletterie.png"
+		},
+		{
+			"categorie": "tannerie",
+			"label": "L'Écorce de Chêne du Chapitre",
+			"image": "tannerie_europe01.png",
+			"pos": [
+				35,
+				13
+			],
+			"nom": "Nyambura Cielazur",
+			"portrait": "marchand_elfe_f_tanerie.png"
+		},
+		{
+			"categorie": "tannerie",
+			"label": "La Peau Trempée du Sacre",
+			"image": "tannerie_europe02.png",
+			"pos": [
+				27,
+				24
+			],
+			"nom": "Aelthir Sombrefrêne",
+			"portrait": "marchand_elfe_m_tannerie.png"
+		},
+		{
+			"categorie": "taxidermie",
+			"label": "Le Cabinet du Chasseur du Chapitre",
+			"image": "taxidermie_europe01.png",
+			"pos": [
+				57,
+				16
+			],
+			"nom": "Flore Ventelame",
+			"portrait": "marchand_elfe_f_taxidermie.png"
+		},
+		{
+			"categorie": "taxidermie",
+			"label": "Le Cabinet du Chasseur de la Vesle",
+			"image": "taxidermie_europe02.png",
+			"pos": [
+				55,
+				25
+			],
+			"nom": "Lithrielle Rondevalle",
+			"portrait": "marchand_elfe_f_taxidermie01.jpg"
+		},
+		{
+			"categorie": "tissage",
+			"label": "Le Fil d'Or de la Porte de Mars",
+			"image": "tissage_europe01.png",
+			"pos": [
+				44,
+				23
+			],
+			"nom": "Melian Rondevalle",
+			"portrait": "marchand_elfe_f_tissage.png"
+		},
+		{
+			"categorie": "tissage",
+			"label": "La Toison du Sacre",
+			"image": "tissage_europe02.png",
+			"pos": [
+				27,
+				22
+			],
+			"nom": "Frida Piochefer",
+			"portrait": "marchand_nain_f_tisserie.png"
+		},
+		{
+			"categorie": "auberge",
+			"label": "Auberge du Sacre",
+			"image": "auberge_europe02.png",
+			"pos": [
+				65,
+				25
+			]
+		},
+		{
+			"categorie": "auberge",
+			"label": "Au Bon Vigneron",
+			"image": "auberge_europe05.png",
+			"pos": [
+				29,
+				15
+			]
+		},
+		{
+			"categorie": "auberge",
+			"label": "La Crayère",
+			"image": "auberge_europe06.jpg",
+			"pos": [
+				58,
+				20
+			]
+		}
+	]
+}
