@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	{#
+	  Catalogue d'administration des SORTS (par école) ou des COMPÉTENCES (par vocation),
+	  selon `famille` — un seul écran, deux routes (/admin/sorts, /admin/competences).
+	  ⚠️ Le texte d'une capacité sort des MÊMES fonctions que l'onglet ⚡ de /play
+	  (scripts/capacites_texte.js) : ne pas en recopier une ici, l'étendre là-bas.
+	  ⚠️ Le 💾 fait un PUT COMPLET (`PUT /admin/doc`, CLAUDE.md §11) : le JSON édité EST le doc.
+	#}
+	<style>
+		:root {
+			--bg: #0d0f14;
+			--panel: #141720;
+			--panel2: #1a1e29;
+			--border: #2a3040;
+			--accent: #c8a84b;
+			--accent2: #4b8fc8;
+			--danger: #c84b4b;
+			--success: #4bc87a;
+			--violet: #b07fd0;
+			--text: #fff;
+			--muted: #9aa3b2;
+			--tap: 36px;
+		}
+		@media (pointer: coarse) { :root { --tap: 44px; } }
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			background: var(--bg); color: var(--text);
+			font-family: 'Share Tech Mono', monospace; min-height: 100vh;
+		}
+		header {
+			padding: 12px 16px; border-bottom: 1px solid var(--border);
+			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+			display: flex; align-items: center; justify-content: space-between; gap: 12px;
+		}
+		header h1 { font-size: 1.05rem; letter-spacing: 0.12em; color: var(--accent); }
+		header a { color: var(--muted); font-size: 0.8rem; text-decoration: none; white-space: nowrap; }
+		header a:hover { color: var(--accent); }
+		.main { max-width: 980px; margin: 0 auto; padding: 14px 16px 40px; }
+		code { color: var(--accent2); }
+
+		button {
+			min-height: var(--tap); padding: 0 12px; border-radius: 6px; cursor: pointer;
+			display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+			font-family: inherit; font-size: 0.8rem; letter-spacing: 0.03em;
+			border: 1px solid var(--accent); background: rgba(200,168,75,0.1); color: var(--accent);
+		}
+		button:hover { background: rgba(200,168,75,0.22); }
+		button:disabled { opacity: 0.4; cursor: not-allowed; }
+		button.secondary { border-color: var(--accent2); background: rgba(75,143,200,0.1); color: var(--accent2); }
+		button.ghost { border-color: var(--border); background: transparent; color: var(--muted); }
+		button.danger { border-color: var(--danger); background: rgba(200,75,75,0.1); color: var(--danger); }
+		input[type=search], select {
+			min-height: var(--tap); padding: 0 10px; border: 1px solid var(--border); border-radius: 6px;
+			background: var(--bg); color: var(--text); font-family: inherit; font-size: 16px;
+		}
+		input:focus, select:focus { outline: none; border-color: var(--accent); }
+
+		/* ── Barre d'outils : recherche + tri GLOBAUX à la page ─────── */
+		.outils { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+		.outils input[type=search] { flex: 1 1 240px; min-width: 0; }
+		.compte { font-size: 0.75rem; color: var(--muted); margin: 4px 2px 12px; min-height: 1.2em; }
+		.compte.err { color: var(--danger); }
+
+		/* ── Accordéon : un groupe par école / vocation ─────────────── */
+		details.groupe {
+			background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+			margin-bottom: 10px;
+		}
+		details.groupe > summary {
+			list-style: none; cursor: pointer; user-select: none;
+			display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+			padding: 12px 14px; font-size: 0.85rem; letter-spacing: 0.08em; color: var(--accent);
+		}
+		details.groupe > summary::-webkit-details-marker { display: none; }
+		details.groupe > summary::before { content: '▸'; color: var(--muted); }
+		details.groupe[open] > summary::before { content: '▾'; }
+		details.groupe > summary:focus-visible { outline: 1px solid var(--accent); border-radius: 8px; }
+		.g-nb { color: var(--muted); font-size: 0.75rem; letter-spacing: 0; }
+		.g-detail { color: var(--muted); font-size: 0.72rem; letter-spacing: 0; text-transform: none; }
+		.g-corps { padding: 0 10px 10px; }
+
+		/* ── Une capacité : mêmes lignes que l'onglet ⚡ de /play ────── */
+		.sh-skill {
+			display: flex; gap: 10px; align-items: flex-start;
+			padding: 9px 10px; border-top: 1px solid #1b212c;
+		}
+		.sh-skill.invalide { border-left: 3px solid var(--danger); }
+		.sh-skill-icon { font-size: 1.3rem; line-height: 1.2; width: 1.6rem; text-align: center; flex: none; }
+		.sh-skill-info { flex: 1; min-width: 0; }
+		.sh-skill-name { font-size: 0.9rem; color: var(--text); }
+		.sh-sort-pm { margin-left: 8px; font-size: 0.75rem; color: var(--violet); }
+		.sh-sort-pm-charge { color: var(--danger); }
+		.sh-skill-meta { font-size: 0.7rem; color: var(--muted); margin-top: 2px; word-break: break-all; }
+		.sh-skill-meta .badge { color: var(--accent2); }
+		.sh-skill-meta .badge.err { color: var(--danger); }
+		.sh-skill-desc { font-size: 0.78rem; color: #c9cfda; margin-top: 3px; line-height: 1.45; }
+		.sh-sort-compos { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+		.sh-sort-compo {
+			font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;
+			border: 1px solid var(--border); background: var(--panel2); color: #c9cfda;
+		}
+		.sh-sort-compo.off { opacity: 0.45; }
+		.sh-skill-full-desc { font-size: 0.75rem; color: var(--muted); margin-top: 5px; line-height: 1.5; font-style: italic; }
+		.sh-sort-portee { font-style: normal; color: #c9cfda; margin-bottom: 2px; }
+		.sh-skill-actions { flex: none; display: flex; gap: 6px; }
+
+		/* ── JSON du doc : lecture, puis écriture sur demande ───────── */
+		.json-panel { margin: 0 0 8px 2.6rem; }
+		.json-panel textarea {
+			width: 100%; min-height: 260px; resize: vertical;
+			background: #0a0c11; border: 1px solid var(--border); border-radius: 6px;
+			color: var(--text); font-family: 'Share Tech Mono', monospace;
+			font-size: 0.76rem; line-height: 1.45; padding: 10px; outline: none; tab-size: 2;
+		}
+		.json-panel textarea[readonly] { color: var(--muted); cursor: default; }
+		.json-panel textarea:not([readonly]) { border-color: var(--accent); }
+		.json-panel textarea.invalid { border-color: var(--danger); }
+		.json-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; align-items: center; }
+		.json-msg { font-size: 0.75rem; color: var(--muted); }
+		.json-msg.ok { color: var(--success); }
+		.json-msg.err { color: var(--danger); }
+		.vide { font-size: 0.8rem; color: var(--muted); padding: 20px 4px; text-align: center; }
+
+		@media (max-width: 560px) {
+			.sh-skill { flex-wrap: wrap; }
+			.sh-skill-actions { width: 100%; justify-content: flex-end; }
+			.json-panel { margin-left: 0; }
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<h1>{{ title }}</h1>
+		<a href="/admin">← Administration</a>
+	</header>
+	<div class="main">
+		<div class="outils">
+			<input type="search" id="recherche" placeholder="Rechercher (nom, id, effet, description, famille…)" autocomplete="off" aria-label="Rechercher">
+			<select id="tri" aria-label="Tri">
+				<option value="niveau">Niveau ↑</option>
+				<option value="-niveau">Niveau ↓</option>
+				<option value="nom">Nom A → Z</option>
+				<option value="-nom">Nom Z → A</option>
+				<option value="pm">PM ↑</option>
+				<option value="-pm">PM ↓</option>
+			</select>
+			<button type="button" class="ghost" id="tout-ouvrir">▾ Tout ouvrir</button>
+			<button type="button" class="ghost" id="tout-fermer">▸ Tout fermer</button>
+			<button type="button" class="secondary" id="export-md" title="Exporte ce qui est affiché (recherche et tri compris)">⬇ Export .md</button>
+		</div>
+		<div class="compte" id="compte">Chargement…</div>
+		<div id="groupes"></div>
+	</div>
+
+<script src="{{ url_for('scripts', path='zones_effet.js') }}"></script>
+<script src="{{ url_for('scripts', path='capacites_texte.js') }}"></script>
+<script>
+const FAMILLE = {{ famille | tojson }};          // 'sorts' | 'competences'
+const EST_SORT = FAMILLE === 'sorts';
+const TITRE = {{ title | tojson }};
+// Aucun personnage : une formule s'affiche telle qu'écrite (cf. capacites_texte.js).
+const CAPA_FORMULES_SEULES = true;
+// Aucun porteur, donc aucune charge : le coût affiché est la base.
+function _coutPmCharge(capa) { return +(capa && capa.cout_pm) || 0; }
+
+function escapeHtml(s) {
+	return String(s == null ? '' : s)
+		.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+// Texte brut d'un fragment HTML (export .md, index de recherche).
+const _tmp = document.createElement('div');
+function texteDe(html) { _tmp.innerHTML = html || ''; return (_tmp.textContent || '').replace(/\s+/g, ' ').trim(); }
+// Recherche insensible à la casse ET aux accents.
+function plier(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+
+let groupes = [];                 // [{cle, label, icon, detail, entrees}]
+const ouverts = new Set();        // clés des groupes dépliés (hors recherche)
+let jsonOuvert = null;            // id de l'entrée dont le JSON est affiché
+let jsonEdition = false;          // … en écriture ?
+let jsonBrouillon = null;         // texte en cours d'édition (survit aux re-rendus)
+let jsonMsg = { texte: '', cls: '' };
+
+// ── Texte d'une entrée : celui de /play ─────────────────────────────────────
+function ligneDesc(e) { return EST_SORT ? _sortLigneDesc(e) : _compLigneDesc(e); }
+function pmTexte(e) {
+	if (e.invalide) return '';
+	if (EST_SORT) return _pmLabel(e);
+	return e.cout_pm ? _pmLabel(e) : '';
+}
+function metaTexte(e) {
+	const parts = [`Niv. ${e.niveau}`];
+	if (!EST_SORT && e.mode) parts.push(e.mode === 'passive' ? '🛡 passive' : 'active');
+	if (e.famille) parts.push(`famille ${e.famille}`);
+	return parts;
+}
+// Index de recherche, calculé une fois au chargement.
+function indexer(e, g) {
+	e._index = plier([e.id, e.nom, e.description, e.famille, e.mode, g.label, g.cle,
+		e.invalide ? 'invalide' : texteDe(ligneDesc(e)),
+		EST_SORT && !e.invalide ? texteDe(_sortComposHtml(e)) : ''].join(' '));
+}
+
+// ── Recherche + tri ─────────────────────────────────────────────────────────
+function terme() { return plier(document.getElementById('recherche').value.trim()); }
+function comparateur() {
+	const v = document.getElementById('tri').value;
+	const sens = v.startsWith('-') ? -1 : 1;
+	const cle = v.replace('-', '');
+	const nom = (a, b) => String(a.nom).localeCompare(String(b.nom), 'fr', { sensitivity: 'base' });
+	return (a, b) => {
+		let d = 0;
+		if (cle === 'niveau') d = (+a.niveau || 0) - (+b.niveau || 0);
+		else if (cle === 'pm') d = (+a.cout_pm || 0) - (+b.cout_pm || 0);
+		if (d) return d * sens;
+		return cle === 'nom' ? nom(a, b) * sens : nom(a, b);
+	};
+}
+// Groupes tels qu'affichés : entrées filtrées et triées, groupes vides écartés en recherche.
+function vue() {
+	const t = terme();
+	const mots = t ? t.split(/\s+/) : [];
+	const cmp = comparateur();
+	return groupes.map(g => ({
+		...g,
+		visibles: g.entrees.filter(e => mots.every(m => e._index.includes(m))).sort(cmp),
+	})).filter(g => !t || g.visibles.length);
+}
+
+// ── Rendu ──────────────────────────────────────────────────────────────────
+function entreeHtml(e) {
+	const portee = EST_SORT && !e.invalide ? _sortPorteeTexte(e) : '';
+	const compos = EST_SORT && !e.invalide ? _sortComposHtml(e) : '';
+	const desc = escapeHtml(e.description || '');
+	const meta = metaTexte(e).map(p => `<span>${escapeHtml(p)}</span>`).join(' · ');
+	const invalide = e.invalide
+		? ` · <span class="badge err">⚠ refusé par le moteur (${EST_SORT ? 'type, cout_pm > 0' : 'type, vocation'})</span>` : '';
+	const ouvert = jsonOuvert === e.id;
+	// Même ordre de lignes que /play : sort = effets, composants, puis portée + prose ;
+	// compétence = prose, puis effets.
+	const corps = e.invalide ? `<div class="sh-skill-desc">${desc}</div>`
+		: EST_SORT
+			? `<div class="sh-skill-desc">${ligneDesc(e)}</div>`
+				+ (compos ? `<div class="sh-sort-compos">${compos}</div>` : '')
+				+ ((portee || desc) ? `<div class="sh-skill-full-desc">${portee ? `<div class="sh-sort-portee">${portee}</div>` : ''}${desc}</div>` : '')
+			: `<div class="sh-skill-desc">${desc}</div>`
+				+ `<div class="sh-skill-desc"${_compArmeTitre(e)}>${ligneDesc(e)}</div>`;
+	return `<div class="sh-skill${e.invalide ? ' invalide' : ''}" data-id="${escapeHtml(e.id)}">
+		<span class="sh-skill-icon">${escapeHtml(e.icon || (EST_SORT ? '🔮' : '⚡'))}</span>
+		<div class="sh-skill-info">
+			<div class="sh-skill-name">${escapeHtml(e.nom)}<span class="sh-sort-pm">${pmTexte(e)}</span></div>
+			<div class="sh-skill-meta">${meta} · <code>${escapeHtml(e.id)}</code>${invalide}</div>
+			${corps}
+		</div>
+		<div class="sh-skill-actions">
+			<button type="button" class="${ouvert ? '' : 'ghost'}" data-action="json" title="Voir le JSON complet">${ouvert ? '✕ JSON' : '{ } JSON'}</button>
+		</div>
+	</div>${ouvert ? jsonPanelHtml(e) : ''}`;
+}
+
+function jsonPanelHtml(e) {
+	const texte = jsonEdition && jsonBrouillon !== null ? jsonBrouillon : JSON.stringify(e.doc, null, 2);
+	return `<div class="json-panel">
+		<textarea id="json-area" spellcheck="false" ${jsonEdition ? '' : 'readonly'}>${escapeHtml(texte)}</textarea>
+		<div class="json-actions">
+			${jsonEdition
+				? `<button type="button" data-action="sauver">💾 Enregistrer</button>
+				   <button type="button" class="ghost" data-action="annuler">↩ Annuler</button>`
+				: `<button type="button" class="secondary" data-action="editer">✏️ Passer en écriture</button>`}
+			<button type="button" class="ghost" data-action="copier">⧉ Copier</button>
+			<span class="json-msg ${jsonMsg.cls}" id="json-msg">${escapeHtml(jsonMsg.texte)}</span>
+		</div>
+	</div>`;
+}
+
+function rendre() {
+	const box = document.getElementById('groupes');
+	const t = terme();
+	const v = vue();
+	const total = groupes.reduce((n, g) => n + g.entrees.length, 0);
+	const nb = v.reduce((n, g) => n + g.visibles.length, 0);
+	const quoi = EST_SORT ? 'sort' : 'compétence';
+	document.getElementById('compte').className = 'compte';
+	document.getElementById('compte').textContent = t
+		? `${nb} ${quoi}${nb > 1 ? 's' : ''} sur ${total} · ${v.length} ${EST_SORT ? 'école' : 'vocation'}${v.length > 1 ? 's' : ''}`
+		: `${total} ${quoi}${total > 1 ? 's' : ''} · ${groupes.length} ${EST_SORT ? 'école' : 'vocation'}${groupes.length > 1 ? 's' : ''}`;
+	if (!v.length) {
+		box.innerHTML = `<div class="vide">${t ? 'Aucun résultat.' : 'Aucun document.'}</div>`;
+		return;
+	}
+	// En recherche, tout groupe qui a un résultat est déplié ; sinon l'état mémorisé.
+	// Le corps d'un groupe fermé n'est pas construit (1000+ compétences).
+	box.innerHTML = v.map(g => {
+		const ouvert = !!t || ouverts.has(g.cle);
+		const nbTxt = t ? `${g.visibles.length} / ${g.entrees.length}` : `${g.entrees.length}`;
+		return `<details class="groupe" data-cle="${escapeHtml(g.cle)}"${ouvert ? ' open' : ''}>
+			<summary>${escapeHtml(g.icon)} ${escapeHtml(g.label)} <span class="g-nb">(${nbTxt})</span>${g.detail ? `<span class="g-detail">${escapeHtml(g.detail)}</span>` : ''}</summary>
+			<div class="g-corps">${ouvert ? g.visibles.map(entreeHtml).join('') : ''}</div>
+		</details>`;
+	}).join('');
+}
+
+// ── Accordéon ──────────────────────────────────────────────────────────────
+// `toggle` ne bouillonne pas : écouté en phase de capture sur le conteneur.
+document.getElementById('groupes').addEventListener('toggle', ev => {
+	const d = ev.target;
+	if (!(d instanceof HTMLDetailsElement) || !d.classList.contains('groupe')) return;
+	const cle = d.dataset.cle;
+	if (terme()) return;   // en recherche, l'ouverture est dictée par les résultats
+	if (d.open === ouverts.has(cle)) return;   // re-rendu : rien n'a changé
+	d.open ? ouverts.add(cle) : ouverts.delete(cle);
+	const g = vue().find(x => x.cle === cle);
+	d.querySelector('.g-corps').innerHTML = d.open && g ? g.visibles.map(entreeHtml).join('') : '';
+}, true);
+document.getElementById('tout-ouvrir').addEventListener('click', () => {
+	groupes.forEach(g => ouverts.add(g.cle)); rendre();
+});
+document.getElementById('tout-fermer').addEventListener('click', () => {
+	ouverts.clear();
+	if (document.getElementById('recherche').value) document.getElementById('recherche').value = '';
+	rendre();
+});
+document.getElementById('recherche').addEventListener('input', rendre);
+document.getElementById('tri').addEventListener('change', rendre);
+
+// ── JSON : lecture → écriture → 💾 ─────────────────────────────────────────
+function entreeParId(id) {
+	for (const g of groupes) { const e = g.entrees.find(x => x.id === id); if (e) return e; }
+	return null;
+}
+function msgJson(texte, cls) {
+	jsonMsg = { texte, cls: cls || '' };
+	const el = document.getElementById('json-msg');
+	if (el) { el.textContent = texte; el.className = 'json-msg ' + (cls || ''); }
+}
+// Abandonner une édition en cours se confirme : le brouillon serait perdu.
+function quitterEdition() {
+	if (!jsonEdition || jsonBrouillon === null) return true;
+	const e = entreeParId(jsonOuvert);
+	if (e && jsonBrouillon === JSON.stringify(e.doc, null, 2)) return true;
+	return confirm('Abandonner les modifications non enregistrées ?');
+}
+document.getElementById('groupes').addEventListener('click', async ev => {
+	const btn = ev.target.closest('button[data-action]');
+	if (!btn) return;
+	const ligne = btn.closest('.sh-skill') || btn.closest('.json-panel').previousElementSibling;
+	const id = ligne && ligne.dataset.id;
+	const e = id && entreeParId(id);
+	if (!e) return;
+	const action = btn.dataset.action;
+	if (action === 'json') {
+		if (!quitterEdition()) return;
+		jsonOuvert = jsonOuvert === id ? null : id;
+		jsonEdition = false; jsonBrouillon = null; jsonMsg = { texte: '', cls: '' };
+		rendre();
+	} else if (action === 'editer') {
+		jsonEdition = true; jsonBrouillon = JSON.stringify(e.doc, null, 2);
+		jsonMsg = { texte: 'Écriture : 💾 remplace le document ENTIER en base.', cls: '' };
+		rendre();
+		document.getElementById('json-area').focus();
+	} else if (action === 'annuler') {
+		if (!quitterEdition()) return;
+		jsonEdition = false; jsonBrouillon = null; jsonMsg = { texte: '', cls: '' };
+		rendre();
+	} else if (action === 'copier') {
+		const area = document.getElementById('json-area');
+		try { await navigator.clipboard.writeText(area.value); msgJson('Copié.', 'ok'); }
+		catch (err) { area.select(); msgJson('Sélectionné : Ctrl+C pour copier.', ''); }
+	} else if (action === 'sauver') {
+		await sauver(e);
+	}
+});
+document.getElementById('groupes').addEventListener('input', ev => {
+	if (ev.target.id !== 'json-area') return;
+	jsonBrouillon = ev.target.value;
+	try { JSON.parse(jsonBrouillon); ev.target.classList.remove('invalid'); }
+	catch (err) { ev.target.classList.add('invalid'); }
+});
+
+async function sauver(e) {
+	let doc;
+	try { doc = JSON.parse(jsonBrouillon); }
+	catch (err) { msgJson(`JSON invalide : ${err.message}`, 'err'); return; }
+	if (!doc || typeof doc !== 'object' || Array.isArray(doc) || !doc._id) {
+		msgJson("Un objet avec un champ '_id' est requis.", 'err'); return;
+	}
+	// `PUT /admin/doc` ne refuse rien : un `_id` changé CRÉE (ou écrase) un autre doc.
+	if (doc._id !== e.id && !confirm(`L'_id a changé : ${doc._id} sera créé ou ÉCRASÉ, et ${e.id} restera en base. Continuer ?`)) return;
+	msgJson('Enregistrement…', '');
+	try {
+		const res = await fetch('/admin/doc', {
+			method: 'PUT', headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(doc),
+		});
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			msgJson(`✗ ${err.detail || res.status}`, 'err'); return;
+		}
+		// Relecture complète : l'école / la vocation, le texte et le `_rev` viennent du serveur.
+		jsonEdition = false; jsonBrouillon = null;
+		jsonOuvert = doc._id;
+		await charger();
+		msgJson('✓ Enregistré.', 'ok');
+	} catch (err) {
+		msgJson(`✗ ${err.message}`, 'err');
+	}
+}
+
+// ── Export Markdown de ce qui est affiché ──────────────────────────────────
+function mdEchapper(s) { return String(s || '').replace(/([\\`*_[\]<>|#])/g, '\\$1'); }
+function exporterMd() {
+	const t = document.getElementById('recherche').value.trim();
+	const v = vue();
+	const out = [`# ${TITRE}`, ''];
+	const nb = v.reduce((n, g) => n + g.visibles.length, 0);
+	out.push(`_Export du ${new Date().toLocaleString('fr-FR')} — ${nb} ${EST_SORT ? 'sort' : 'compétence'}${nb > 1 ? 's' : ''}`
+		+ `${t ? ` · recherche « ${mdEchapper(t)} »` : ''} · tri ${document.getElementById('tri').selectedOptions[0].text}_`, '');
+	for (const g of v) {
+		out.push(`## ${g.icon} ${mdEchapper(g.label)} (${g.visibles.length})`);
+		if (g.detail) out.push('', `_${mdEchapper(g.detail)}_`);
+		out.push('');
+		for (const e of g.visibles) {
+			const pm = texteDe(pmTexte(e));
+			out.push(`### ${e.icon || ''} ${mdEchapper(e.nom)}${pm ? ` — ${pm}` : ''}`, '');
+			out.push(`- ${metaTexte(e).join(' · ')} · \`${e.id}\`${e.invalide ? ' · ⚠ refusé par le moteur' : ''}`);
+			if (!e.invalide) {
+				const d = texteDe(ligneDesc(e));
+				if (d) out.push(`- ${mdEchapper(d)}`);
+				if (EST_SORT) {
+					for (const c of e.composants || []) {
+						out.push(`- ${mdEchapper(texteDe(_sortComposHtml({ composants: [c] })))}`);
+					}
+					const p = _sortPorteeTexte(e);
+					if (p) out.push(`- ${mdEchapper(p)}`);
+				}
+			}
+			if (e.description) out.push('', `> ${mdEchapper(e.description).replace(/\n/g, '\n> ')}`);
+			out.push('');
+		}
+	}
+	const blob = new Blob([out.join('\n')], { type: 'text/markdown;charset=utf-8' });
+	const a = document.createElement('a');
+	a.href = URL.createObjectURL(blob);
+	a.download = `${FAMILLE}-${new Date().toISOString().slice(0, 10)}.md`;
+	document.body.appendChild(a);
+	a.click();
+	a.remove();
+	setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+document.getElementById('export-md').addEventListener('click', exporterMd);
+
+// ── Chargement ─────────────────────────────────────────────────────────────
+async function charger() {
+	try {
+		const res = await fetch(`/admin/${FAMILLE}/data`);
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			throw new Error(err.detail || res.status);
+		}
+		const data = await res.json();
+		groupes = data.groupes || [];
+		groupes.forEach(g => g.entrees.forEach(e => indexer(e, g)));
+		// Un JSON ouvert garde son groupe ouvert (après un 💾, l'entrée a pu changer de groupe).
+		const e = jsonOuvert && entreeParId(jsonOuvert);
+		if (e) ouverts.add(groupes.find(g => g.entrees.includes(e)).cle);
+		else jsonOuvert = null;
+		rendre();
+	} catch (err) {
+		const c = document.getElementById('compte');
+		c.className = 'compte err';
+		c.textContent = `Chargement impossible : ${err.message}`;
+	}
+}
+charger();
+</script>
+</body>
+</html>

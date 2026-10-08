@@ -40,7 +40,8 @@ La CouchDB live est distante, NON joignable en local. Valeurs réelles des docs 
 ## Gameplay Systems
 
 ```
-main.py                  # FastAPI app, page routes (/play, /combat/{id}, /reinitialisation, /admin*, /admin/simulateur, /admin/recettes-graphe), static mounts
+main.py                  # FastAPI app, page routes (/play, /combat/{id}, /reinitialisation, /admin*, /admin/simulateur, /admin/recettes-graphe,
+                         #   /admin/sorts, /admin/competences), static mounts
 routers/
   user.py                # /api/* : auth (dont sceau oublié : mot-de-passe/oubli + /reinitialiser),
                          #   character CRUD, movement, equip/unequip, drop/pickup, spend_xp
@@ -74,6 +75,8 @@ utils/
                          #   FORMULES À CARACTÉRISTIQUES (`1D{Int/5}`, chokepoints `resoudre_effets` + `resoudre_temps`),
                          #   et les prédicats d'éligibilité PARTAGÉS avec les compétences
                          #   (capacite_utilisable_combat / effets_agissent_sur_cible / _exploration)
+  catalogue_capacites.py # /admin/sorts (par école) et /admin/competences (par vocation) (pur) : entrées au
+                         #   format du payload ⚡ de /play + doc brut ; formules gardées en texte (aucun personnage)
   grimoires.py           # grimoires manquants (pur) : grimoire UNIQUE + recette de scriptorium par sort ;
                          #   règle de couverture partagée par dev/gen_grimoires.py et l'alerte de /admin
   competences.py         # compétences de vocation (pur) : passives permanentes, AURAS (passive + zone :
@@ -172,6 +175,7 @@ templates/
                          #   jetons.js (emprise des grands jetons : portée, cases prises, dessin)
                          #   sceau_visuel.js (icône du mot de passe : /auth ↔ /reinitialisation)
                          #   deplacable.js (panneaux flottants à glisser : éditeur, 🔗 connexion ↔ pavé flottant de /play)
+                         #   capacites_texte.js (texte d'un sort/compétence connu : onglet ⚡ de /play ↔ /admin/sorts, /admin/competences)
   resources/             # assets statiques (characters, towns, maps, monsters, icons, pnj, sounds)
 dev/
   gen_*.py               # générateurs de contenu → jsons/*_a_importer.json (catalogue : telluris-admin-tools)

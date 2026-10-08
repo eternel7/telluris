@@ -60,6 +60,7 @@ from utils import lint_dialogues
 from utils import dev_tools
 from utils import serveur as serveur_util
 from utils import grimoires as grimoires_util
+from utils import catalogue_capacites
 from utils import simulateur as simulateur_util
 from utils import potentiel as potentiel_util
 from utils.marche import (tick_atelier, reset_prix_cache, besoins_lieu, appro_leaves_lieu,
@@ -1663,6 +1664,57 @@ def admin_simulateur(request: Request, current_user: Annotated[User, Depends(get
 				 # recopiée dans le template.
 				 "stats_forcables": list(simulateur_util.STATS_FORCABLES)},
 	)
+
+
+@app.get("/admin/sorts", response_class=HTMLResponse)
+def admin_sorts(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Catalogue des sorts par école : texte de l'onglet ⚡, export .md, JSON lecture/écriture."""
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_capacites.html",
+		context={"title": "Sorts par école", "famille": "sorts"}
+	)
+
+
+@app.get("/admin/competences", response_class=HTMLResponse)
+def admin_competences(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Catalogue des compétences par vocation (même écran que les sorts)."""
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_capacites.html",
+		context={"title": "Compétences par vocation", "famille": "competences"}
+	)
+
+
+@app.get("/admin/sorts/data")
+def admin_sorts_data(current_user: Annotated[User, Depends(get_current_user)]):
+	"""Sorts groupés par école (cf. utils/catalogue_capacites), docs bruts compris."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	docs = find_docs({"type": "sort"})
+	if docs is None:
+		raise HTTPException(status_code=503, detail="Base injoignable")
+	ids = catalogue_capacites.items_composants(docs)
+	items = find_docs({"_id": {"$in": ids}}, fields=["_id", "nom", "icon"]) if ids else []
+	return catalogue_capacites.catalogue_sorts(
+		docs, {d["_id"]: d for d in items or [] if d.get("_id")}, get_doc("rules:vocations"))
+
+
+@app.get("/admin/competences/data")
+def admin_competences_data(current_user: Annotated[User, Depends(get_current_user)]):
+	"""Compétences groupées par vocation (cf. utils/catalogue_capacites), docs bruts compris."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	docs = find_docs({"type": "competence"})
+	if docs is None:
+		raise HTTPException(status_code=503, detail="Base injoignable")
+	return catalogue_capacites.catalogue_competences(docs, get_doc("rules:vocations"))
 
 
 @app.get("/admin/recettes-graphe", response_class=HTMLResponse)
