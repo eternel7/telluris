@@ -63,8 +63,20 @@ def test_le_generateur_passe_toutes_ses_gardes(genere):
 	assert genere[1] == []
 
 
-def test_fichier_committe_est_la_sortie(genere, fichier):
-	assert genere[0] == fichier
+def test_fichier_committe_est_la_sortie(gen, base, fichier):
+	# Comparé à la sortie D'AVANT import : une fois le lot dans un dump plus récent, le
+	# générateur ne réémet plus rien, mais le fichier committé reste valable.
+	ids = {d["_id"] for d in fichier}
+	avant = {k: d for k, d in base.items() if k not in ids}
+	docs, erreurs = gen.generer(avant)
+	assert erreurs == []
+	# Compétences : `gen_competences_1_10` relit son propre référentiel ⇒ son lot COMPLET.
+	lot = {d["_id"]: d for d in gen.lot_1_10.construire()[0]}
+	attendus = {d["_id"]: d for d in docs if d["type"] != "competence"}
+	for doc in fichier:
+		ref = lot if doc["type"] == "competence" else attendus
+		assert doc == ref.get(doc["_id"]), doc["_id"]
+	assert set(attendus) <= ids
 
 
 def test_chaque_attaque_migree_a_son_remplacant_et_son_sort(gen, fichier):
