@@ -24,8 +24,12 @@ ENTREES = [
 	A(4, "Carapace d'os", "🦴", "posture", "tombeau", "Des os se soudent autour de lui en armure.", stats=("R",)),
 	# ── Niveau 5 ──
 	A(5, "Main du tombeau", "🖐️", "entrave", "tombeau", "Une main sort de terre et agrippe la cible.", malus=("Ag",)),
-	A(5, "Explosion de cadavre", "💥", "zone_cercle", "explosion_feu", "Un cadavre éclate au milieu des ennemis.", rayon=2),
-	A(5, "Pacte de sang noir", "🩸", "sang", "drain", "Il paie de son sang un sort de mort."),
+	L(5, "Miasme", "☠️", "poison", "Un cadavre se répand en miasme : les chairs vivantes alentour s'affaiblissent.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 21, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"buffs": {"R": "-4-{Vol/10}", "F": -4}, "duree": 4}},
+	  remplace="explosion_de_cadavre"),
+	L(5, "Armure d'ossements", "🦴", "tombeau", "Des os poussent sous la peau d'un compagnon et le cuirassent.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 21, "effets": {"buffs": {"R": "6+{Int/7}"}, "duree": 4}},
+	  remplace="pacte_de_sang_noir"),
 	A(5, "Énergie sombre", "⚫", "pm_allie", "ombre", "Il transfère de l'énergie sombre à un compagnon."),
 	# ── Niveau 6 ──
 	A(6, "Souffle de la tombe", "🌫️", "zone_cone", "impact_etincelles/cone_folie", "Un souffle froid venu d'outre-tombe."),
@@ -46,10 +50,16 @@ ENTREES = [
 	A(8, "Malédiction de la liche", "📜", "poison_pm", "ombre", "Une malédiction qui empêche toute magie."),
 	# ── Niveau 9 ──
 	A(9, "Ténèbres dévorantes", "🌑", "frappe", "ombre", "Les ténèbres dévorent la cible."),
-	A(9, "Rituel de mort", "⚰️", "rituel", "tombeau", "Un rituel long qui arrache la vie de la cible."),
-	A(9, "Nuée de spectres", "👻", "zone_carre", "spectre", "Des spectres tourbillonnent autour de lui et frappent.", rayon=2),
+	L(9, "Sursis", "⌛", "levee_morts", "La mort elle-même accorde un sursis à un compagnon : ses plaies cessent de compter.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 48, "incantation": 2, "effets": {"buffs": {"R": "7+{Int/10}"}, "regen_pv": "2+{Int/20}", "duree": 5}},
+	  remplace="rituel_de_mort"),
+	L(9, "Linceul de spectres", "👻", "spectre", "Des spectres enveloppent les ennemis et glacent leurs membres.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 37, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"buffs": {"Ag": "-6-{Vol/10}", "F": -6, "V": -1}, "duree": 3}},
+	  remplace="nuee_de_spectres"),
 	A(9, "Banquet du vampire", "🧛", "sang", "drain", "Il paie de son sang un coup qui lui en rendra davantage."),
 	# ── Niveau 10 ──
-	A(10, "Mot de mort", "💀", "frappe", "spectre", "Un mot que seuls les morts connaissent."),
+	L(10, "Mot d'effroi", "💀", "spectre", "Un mot qui n'aurait jamais dû être dit : la cible se fige d'horreur.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 40, "effets": {"buffs": {"Vol": "-10-{Vol/7}", "R": -10, "V": -2}, "duree": 2}},
+	  remplace="mot_de_mort"),
 	A(10, "Hiver éternel", "❄️", "entrave", "givre", "Le froid de la tombe fige la cible.", malus=("Ag", "F", "R")),
 ]

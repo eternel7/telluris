@@ -50,6 +50,8 @@ ENTREES = [
 	A(9, "Cyclone", "🌪️", "saut", "vent", "Le vent l'emporte et le dépose où il veut."),
 	A(9, "Bouclier des quatre vents", "🛡️", "cri", "bouclier", "Les vents tournent autour du groupe et détournent les coups.", stats=("R", "Ag"), rayon=2),
 	# ── Niveau 10 ──
-	A(10, "Fureur élémentaire", "💥", "rituel", "explosion_feu", "Feu, glace, foudre et roc frappent ensemble la même cible."),
+	L(10, "Égide élémentaire", "🔰", "bouclier", "Feu, glace, foudre et roc tournent autour de ses compagnons et les protègent.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"buffs": {"R": "7+{Vol/10}"}, "esquive": "4+{Vol/12}", "duree": 5}},
+	  remplace="fureur_elementaire"),
 	A(10, "Zéro absolu", "❄️", "entrave", "givre", "Le froid absolu fige la cible dans la glace.", malus=("Ag", "F")),
 ]

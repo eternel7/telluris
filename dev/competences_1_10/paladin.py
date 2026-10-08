@@ -45,7 +45,9 @@ ENTREES = [
 	A(7, "Rempart sacré", "🏰", "posture", "aura_sacree", "Une muraille de foi se dresse autour de lui.", stats=("R", "Vol")),
 	A(7, "Grâce restauratrice", "💫", "soin", "soin_sacre", "Une grâce qui relève les plus touchés."),
 	# ── Niveau 8 ──
-	A(8, "Colère divine", "⚡", "zone_cercle", "lumiere_zone", "La lumière tombe du ciel sur les ennemis rassemblés.", rayon=2, **MAG),
+	L(8, "Défi sacré", "📯", "aura_sacree", "Il élève sa lumière : tous les ennemis proches se détournent de ses compagnons pour lui.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 1, "cout_pm": 33, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 2}, "effets": {"provocation": 1, "duree": 3}},
+	  remplace="colere_divine"),
 	A(8, "Purge", "🔥", "poison", "lumiere", "Une flamme sacrée qui ronge l'impur.", **MAG),
 	A(8, "Vœu du protecteur", "🤝", "buff_allie", "lien", "Il jure de protéger un compagnon, et celui-ci se sent invincible.", stats=("R", "Vol")),
 	A(8, "Bond de l'ange", "👼", "saut", "descente_celeste", "Il descend sur le champ de bataille comme un ange."),

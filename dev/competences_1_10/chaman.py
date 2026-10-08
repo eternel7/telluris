@@ -18,9 +18,13 @@ ENTREES = [
 	A(3, "Ruée du sanglier-esprit", "🐗", "entrave", "griffe", "Il fonce comme le sanglier et renverse l'ennemi.", malus=("Ag",), **CC),
 	A(3, "Tambour des esprits", "🥁", "cri", "totem", "Le tambour bat, et les esprits fortifient le groupe.", stats=("Vol", "F")),
 	# ── Niveau 4 ──
-	A(4, "Foudre des ancêtres", "⚡", "frappe", "foudre", "Les ancêtres frappent du haut des nuages."),
+	L(4, "Esprit du faucon", "🦅", "totem", "L'esprit du faucon se pose sur l'épaule d'un compagnon et guide son regard.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 18, "effets": {"buffs": {"Ag": "6+{Cha/7}", "Ch": 6}, "duree": 3}},
+	  remplace="foudre_des_ancetres"),
 	A(4, "Fièvre des marais", "🤒", "poison_pm", "poison", "Un esprit de fièvre ronge la volonté de la cible."),
-	A(4, "Hurlement de la meute", "🐺", "zone_cercle", "appel_sauvage", "Un hurlement qui fait trembler tout un groupe d'ennemis."),
+	L(4, "Hurlement d'effroi", "🐺", "appel_sauvage", "Un hurlement qui glace le sang de tout un groupe d'ennemis.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 18, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"buffs": {"Vol": "-4-{Vol/10}", "F": -4}, "duree": 3}},
+	  remplace="hurlement_de_la_meute"),
 	L(4, "Transe des ancêtres", "🥁", "totem", "Il chante et les ancêtres répondent, prêtant leur force à son bras.",
 	  {"cible": "soi", "portee": 1, "cout_pm": 18, "effets": {"buffs": {"F": "3+{Cha/8}", "Vol": "2+{Cha/12}"}, "duree": 3}},
 	  remplace="veille_de_l_esprit"),
@@ -40,7 +44,9 @@ ENTREES = [
 	A(7, "Esprit du sanglier", "🐗", "frappe", "griffe", "La fureur du sanglier dans un seul coup.", **CC),
 	A(7, "Chaînes spirituelles", "⛓️", "entrave", "spectre", "Des chaînes d'esprit lient la cible.", malus=("Ag", "Vol")),
 	# ── Niveau 8 ──
-	A(8, "Orage ancestral", "⛈️", "zone_cercle", "foudre", "Les ancêtres déchaînent l'orage sur les ennemis.", rayon=2),
+	L(8, "Pluie des ancêtres", "🌧️", "soin_nature", "Une pluie tiède tombe sur ses compagnons et referme lentement leurs plaies.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 33, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"regen_pv": "2+{Cha/30}", "duree": 4}},
+	  remplace="orage_ancestral"),
 	A(8, "Danse de l'esprit", "💃", "soin_zone", "totem", "Une danse qui soigne tous ceux qui l'entourent."),
 	A(8, "Peau de l'ours", "🐻", "posture", "totem", "Il revêt la peau de l'ours-esprit.", stats=("R", "F")),
 	A(8, "Vol d'âme", "👻", "siphon", "spectre", "Il arrache un morceau d'âme à la cible."),
@@ -51,5 +57,7 @@ ENTREES = [
 	A(9, "Chant des morts", "💀", "poison_pm", "spectre", "Les morts chantent dans la tête de la cible."),
 	# ── Niveau 10 ──
 	A(10, "Avatar totémique", "🐻", "posture", "totem", "Il devient l'esprit lui-même.", stats=("F", "R")),
-	A(10, "Colère des ancêtres", "⚡", "zone_carre", "foudre", "Les ancêtres frappent tout autour de lui.", rayon=2),
+	L(10, "Marche des ancêtres", "🥁", "totem", "Les ancêtres marchent avec la troupe : chacun frappe et tient comme dix.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 40, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 2}, "effets": {"buffs": {"F": "7+{Cha/10}", "R": 7}, "duree": 5}},
+	  remplace="colere_des_ancetres"),
 ]

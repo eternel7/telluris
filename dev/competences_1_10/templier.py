@@ -28,7 +28,9 @@ ENTREES = [
 	  {"cible": "allie", "portee": 4, "cout_pm": 21, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"esquive": "2+{R/12}", "duree": 3}},
 	  remplace="mur_de_l_ordre"),
 	A(5, "Fer rouge", "🔥", "poison", "feu", "Une lame chauffée à blanc qui marque l'ennemi."),
-	A(5, "Explosion runique", "💥", "zone_cercle", "explosion_feu", "Une rune gravée explose au milieu des ennemis.", **MAG),
+	L(5, "Rune de défi", "📯", "aura_bataille", "Une rune de défi s'embrase : les ennemis proches n'ont plus d'yeux que pour lui.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 1, "cout_pm": 21, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1}, "effets": {"provocation": 1, "duree": 2}},
+	  remplace="explosion_runique"),
 	# ── Niveau 6 ──
 	A(6, "Taille du gardien des temples", "⚔️", "frappe", "lame", "Un coup appris dans le cloître, pour défendre l'autel."),
 	A(6, "Égide runique", "🛡️", "posture", "enchantement", "Des runes s'allument sur son armure et la rendent impénétrable.", stats=("R",)),
@@ -48,7 +50,9 @@ ENTREES = [
 	  remplace="dissipation"),
 	# ── Niveau 9 ──
 	A(9, "Épée de l'institution", "🗡️", "frappe", "lame", "Le coup qui fait respecter la loi."),
-	A(9, "Tempête runique", "🌩️", "zone_cercle", "foudre", "Les runes s'embrasent et la foudre tombe sur les ennemis.", rayon=2, **MAG),
+	L(9, "Sceau d'interdiction", "🚫", "marque", "Les runes de l'ordre se gravent dans le sol et brisent l'élan de ceux qui s'y tiennent.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 5, "cout_pm": 37, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"buffs": {"F": "-6-{Vol/10}", "Int": -6}, "duree": 5}},
+	  remplace="tempete_runique"),
 	A(9, "Garde inflexible", "🛡️", "posture", "garde", "Il ne bouge plus d'un pouce, quoi qu'il arrive.", stats=("R", "F")),
 	A(9, "Saut du gardien", "🦅", "saut", "saut", "Il bondit pour couvrir le point faible de la ligne."),
 	# ── Niveau 10 ──

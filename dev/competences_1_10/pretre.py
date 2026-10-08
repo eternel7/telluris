@@ -17,27 +17,37 @@ ENTREES = [
 	# ── Niveau 3 ──
 	A(3, "Cercle de guérison", "⭕", "soin_zone", "soin_vague", "Un cercle de lumière soigne tous ceux qui s'y tiennent."),
 	# ── Niveau 4 ──
-	A(4, "Éclat divin", "🌟", "frappe", "lumiere", "Un éclat de pure divinité."),
+	L(4, "Voile sacré", "⛪", "soin_sacre", "Une lueur enveloppe un compagnon : les coups glissent sur lui.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 18, "effets": {"esquive": "4+{Vol/8}", "duree": 3}},
+	  remplace="eclat_divin"),
 	A(4, "Protection divine", "🛡️", "buff_allie", "bouclier", "Un bouclier de lumière sur un compagnon.", stats=("R",)),
 	A(4, "Purification", "💧", "siphon", "lumiere", "Il purifie la magie impie de la cible."),
-	A(4, "Lumière de l'aube", "🌅", "zone_cercle", "lumiere_zone", "Une lumière aveuglante sur le groupe ennemi."),
+	L(4, "Aube éblouissante", "🌅", "eblouissant", "Une lumière d'aube aveuglante qui fait chanceler les ennemis rassemblés.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 18, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"buffs": {"Ag": "-4-{Vol/10}", "F": -4}, "duree": 3}},
+	  remplace="lumiere_de_l_aube"),
 	# ── Niveau 5 ──
 	A(5, "Guérison majeure", "❤️‍🩹", "soin", "soin_sacre", "Une prière puissante qui referme les blessures graves."),
 	A(5, "Chaînes de lumière", "⛓️", "entrave", "lumiere", "Des chaînes de lumière entravent l'ennemi.", malus=("Ag", "F")),
 	A(5, "Hymne", "🎶", "cri", "chant", "Un hymne qui fortifie tous ceux qui l'entendent.", stats=("Vol", "R")),
 	A(5, "Saut de foi", "🕊️", "saut", "aura_sacree", "Il s'en remet à la foi, et elle le porte."),
 	# ── Niveau 6 ──
-	A(6, "Colonne de lumière", "☀️", "frappe", "lumiere_zone", "Une colonne de lumière s'abat sur la cible."),
+	L(6, "Contrition", "🙏", "lumiere", "La lumière fait ployer la cible sous le poids de ses fautes.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 25, "effets": {"buffs": {"F": "-7-{Vol/7}", "Int": -7}, "duree": 4}},
+	  remplace="colonne_de_lumiere"),
 	L(6, "Martyre", "🕯️", "soin_vague", "Il donne sa propre vie pour en sauver une autre.",
 	  {"cible": "allie", "portee": 1, "cout_pm": 10, "effets": {"pv": "10+{Vol/4}", "cout_pv": 12}},
 	  remplace="source_de_grace"),
 	# ── Niveau 7 ──
 	A(7, "Exorcisme", "📿", "poison_pm", "lumiere", "Il chasse les esprits impurs, et la magie avec eux."),
 	A(7, "Prière de masse", "🙏", "soin_zone", "soin_vague", "Toute l'assemblée est soignée d'une seule prière."),
-	A(7, "Châtiment divin", "⚡", "zone_cercle", "lumiere_zone", "Le ciel frappe le groupe ennemi.", rayon=2),
+	L(7, "Halo de protection", "😇", "lumiere_zone", "Un halo descend sur ses compagnons et détourne les coups qui leur sont portés.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 29, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"esquive": "4+{Vol/12}", "duree": 4}},
+	  remplace="chatiment_divin"),
 	A(7, "Rempart de la foi", "🛡️", "posture", "aura_sacree", "Sa foi devient un rempart impénétrable.", stats=("R", "Vol")),
 	# ── Niveau 8 ──
-	A(8, "Jugement céleste", "⚖️", "frappe", "lumiere", "Le ciel juge, et le ciel frappe."),
+	L(8, "Verdict céleste", "⚖️", "descente_celeste", "Le ciel juge la cible : elle plie le genou sous le verdict.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 33, "effets": {"buffs": {"F": "-9-{Vol/7}", "Int": -9, "V": -1}, "duree": 2}},
+	  remplace="jugement_celeste"),
 	A(8, "Grâce de l'esprit", "💫", "pm_allie", "soin_sacre", "Il restaure l'énergie d'un compagnon par la prière."),
 	A(8, "Silence sacré", "🤫", "entrave", "lumiere", "Un silence qui coupe l'ennemi de ses forces.", malus=("Vol", "Int")),
 	A(8, "Bénédiction de masse", "🕊️", "cri", "aura_sacree", "Il bénit tout le groupe.", stats=("Vol", "F"), rayon=2),
@@ -48,5 +58,7 @@ ENTREES = [
 	A(9, "Vœu de lumière", "🌟", "buff_allie", "aura_sacree", "Un vœu qui rend un compagnon presque invincible.", stats=("R", "Vol")),
 	# ── Niveau 10 ──
 	A(10, "Apothéose", "👼", "soin_zone", "aura_sacree", "Une lumière divine qui relève tous les blessés."),
-	A(10, "Courroux du ciel", "⚡", "zone_cercle", "lumiere_zone", "La colère du ciel s'abat sur l'ennemi.", rayon=2),
+	L(10, "Interdit céleste", "🌩️", "lumiere_zone", "Le ciel interdit toute une zone aux impies, qui s'y traînent sans force.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"buffs": {"F": "-5-{Vol/12}", "Int": -5, "V": -1}, "duree": 3}},
+	  remplace="courroux_du_ciel"),
 ]
