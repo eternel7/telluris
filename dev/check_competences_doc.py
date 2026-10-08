@@ -35,7 +35,8 @@ from utils.competences import (  # noqa: E402
 	normaliser_competence,
 )
 from utils.sorts import (  # noqa: E402
-	MAINTIEN_PM_MAX, _bonus_dict, capacite_utilisable_combat, effets_agissent_sur_cible,
+	CARACTS_FORMULE, INCANTATION_PA_MAX, MAINTIEN_PM_MAX, _bonus_dict,
+	capacite_utilisable_combat, effets_agissent_sur_cible, est_formule, evaluer_formule,
 )
 from utils.zones_effet import normaliser_zone  # noqa: E402
 
@@ -180,12 +181,14 @@ def vocations_du_dump():
 
 
 def verifier_competence(doc, prefixe, ids_existants=None, vocations_connues=None,
-						niveaux=NIVEAUX_ATTENDUS) -> list:
+						niveaux=NIVEAUX_ATTENDUS, zone_persistante=False) -> list:
 	"""Invariants d'UN doc (n° 1, 2, 4 et 7 à 13 du document) — liste d'erreurs, vide si OK.
 
 	Partagée par ce vérificateur et par `dev/gen_competences_1_10.py` : un lot généré passe
 	par les mêmes gardes qu'un bloc écrit à la main. `ids_existants` / `vocations_connues`
 	à None sautent le contrôle correspondant ; `niveaux` à None accepte tout niveau.
+	`zone_persistante=True` = la zone persistante est VOULUE (déclarée par la donnée) : la
+	garde (12), qui ne vise que le mur involontaire, est levée pour ce doc.
 	"""
 	erreurs = []
 	cid = doc.get("_id", "<sans _id>")
@@ -225,10 +228,17 @@ def verifier_competence(doc, prefixe, ids_existants=None, vocations_connues=None
 						   f"effet sur une cible — le router la listerait, le moteur "
 						   f"la refuserait au moment de frapper")
 
-	# (4) maintien : borne du moteur, actives seulement, et pas de `duree` trompeuse
+	# (4) maintien : borne du moteur, actives seulement, et pas de `duree` trompeuse.
+	# Une FORMULE (`"5-{Vol/25}"`) est jugée sur ce qu'elle donne entre une caract à 0 et à
+	# 100 : `sorts.resoudre_temps` la bornerait en silence, l'auteur doit le savoir.
 	if "maintien" in doc:
 		maintien = doc.get("maintien") or 0
-		if not isinstance(maintien, int) or maintien < 0 or maintien > MAINTIEN_MAX:
+		if est_formule(maintien):
+			extremes = [evaluer_formule(maintien, {c: v for c in CARACTS_FORMULE}) for v in (0, 100)]
+			if min(extremes) < 1 or max(extremes) > MAINTIEN_MAX:
+				erreurs.append(f"{prefixe} : `maintien` {maintien!r} sort de [1, {MAINTIEN_MAX}] "
+							   f"entre une caract à 0 et à 100 ({extremes})")
+		elif not isinstance(maintien, int) or maintien < 0 or maintien > MAINTIEN_MAX:
 			erreurs.append(f"{prefixe} : `maintien` {maintien!r} hors de [0, "
 						   f"{MAINTIEN_MAX}] (MAINTIEN_PM_MAX)")
 		if maintien and est_passive(comp):
@@ -238,6 +248,34 @@ def verifier_competence(doc, prefixe, ids_existants=None, vocations_connues=None
 			erreurs.append(f"{prefixe} : entrée MAINTENUE portant `duree` — l'entrée "
 						   f"d'effets_actifs ne se décrémente pas, la durée annoncée "
 						   f"est une échéance qui n'existe pas")
+
+	# (4 bis) incantation FORMULÉE : mêmes bornes que le moteur, entre une caract à 0 et à 100.
+	if est_formule(doc.get("incantation")):
+		extremes = [evaluer_formule(doc["incantation"], {c: v for c in CARACTS_FORMULE})
+					for v in (0, 100)]
+		if min(extremes) < 1 or max(extremes) > INCANTATION_PA_MAX:
+			erreurs.append(f"{prefixe} : `incantation` {doc['incantation']!r} sort de [1, "
+						   f"{INCANTATION_PA_MAX}] entre une caract à 0 et à 100 ({extremes})")
+
+	# (4 ter) PROVOCATION : elle ne vaut que posée sur un MONSTRE touché, pour une durée.
+	if eff_norm.get("provocation"):
+		if not (est_active(comp) and comp["cible"] == "ennemi"):
+			erreurs.append(f"{prefixe} : `provocation` hors d'une active `ennemi` — rien ne "
+						   f"la poserait sur un monstre")
+		if not (eff_norm.get("duree") or (eff_norm.get("formules") or {}).get("duree")):
+			erreurs.append(f"{prefixe} : `provocation` sans `duree` — l'effet ne serait "
+						   f"jamais posé (part à durée)")
+
+	# (4 quinquies) ÉCHANGE DE PLACE : il permute le lanceur et la cible DÉSIGNÉE (allié ou
+	# ennemi) — sur soi ou sur une passive, il n'y aurait personne avec qui permuter.
+	if eff_norm.get("echange") and not (est_active(comp) and comp["cible"] in ("allie", "ennemi")):
+		erreurs.append(f"{prefixe} : `echange` hors d'une active `allie` ou `ennemi` — il "
+					   f"n'y aurait personne avec qui permuter")
+
+	# (4 quater) AURA à formule : `entree_aura` ne résout rien, la formule serait perdue.
+	if est_passive(comp) and doc.get("zone") and eff_norm.get("formules"):
+		erreurs.append(f"{prefixe} : AURA à formule — `competences.entree_aura` ne résout "
+					   f"aucune formule, l'aura ne donnerait que sa part constante")
 
 	# (11) SIGNE de la régén selon la cible. Depuis la PR #66 `regen_pv`/`regen_pm` sont
 	# SIGNÉES (négatif = poison). Le moteur ne refuse AUCUN des mauvais emplois :
@@ -263,9 +301,11 @@ def verifier_competence(doc, prefixe, ids_existants=None, vocations_connues=None
 
 	# (12) MUR involontaire (PR #33) : la règle est DÉRIVÉE, sans clé — toute capacité
 	# offensive à zone ET maintenue laisse une zone persistante qui brûle QUICONQUE s'y
-	# tient, alliés et lanceur compris.
+	# tient, alliés et lanceur compris. Le moteur la gère : la garde ne refuse que celle
+	# qu'on n'a pas DÉCLARÉE (`zone_persistante`), qu'un auteur aurait obtenue en voulant
+	# seulement « une frappe de zone maintenue ».
 	if (est_active(comp) and comp["cible"] == "ennemi" and doc.get("zone")
-			and doc.get("maintien")):
+			and doc.get("maintien") and not zone_persistante):
 		erreurs.append(f"{prefixe} : active `ennemi` à `zone` ET `maintien` — c'est une "
 					   f"ZONE PERSISTANTE à tir ami (Mur de feu), pas une frappe")
 

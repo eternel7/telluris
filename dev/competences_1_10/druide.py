@@ -1,5 +1,5 @@
 """Druide 🌳 — gardien des cycles naturels : plantes, bêtes et saisons (magie de la Nature)."""
-from competences_1_10 import A
+from competences_1_10 import A, L
 
 ENTREES = [
 	# ── Niveau 1 ──
@@ -10,7 +10,9 @@ ENTREES = [
 	# ── Niveau 2 ──
 	A(2, "Pollen soporifique", "🌼", "entrave", "nature_buff", "Un nuage de pollen qui alourdit les membres.", malus=("Vol", "Ag")),
 	A(2, "Sève de chêne", "🌰", "regen_allie", "soin_nature", "La sève du vieux chêne coule dans les veines d'un compagnon."),
-	A(2, "Ronces", "🥀", "poison", "griffe", "Des ronces qui griffent et empoisonnent."),
+	L(2, "Ronces mordantes", "🌵", "griffe", "Des ronces jaillissent autour des jambes de la cible et la retiennent.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 5, "cout_pm": 12, "effets": {"degats": "1D{Vol/10}", "buffs": {"V": -2}, "duree": 2}},
+	  remplace="ronces"),
 	A(2, "Bond du cerf", "🦌", "saut", "nature_buff", "Il bondit avec la grâce du cerf."),
 	# ── Niveau 3 ──
 	A(3, "Champ de ronces", "🌾", "zone_cercle", "griffe", "Le sol se couvre de ronces acérées sous les ennemis."),
@@ -24,7 +26,9 @@ ENTREES = [
 	A(5, "Fouet de liane", "🌿", "frappe", "nature_buff", "Une liane épaisse qui claque comme un fouet."),
 	A(5, "Spores étouffantes", "🍄", "zone_cercle", "poison", "Un nuage de spores qui s'abat sur les ennemis.", rayon=2),
 	A(5, "Régénération sylvestre", "🌳", "soin_zone", "soin_nature", "La forêt soigne ceux qui l'entourent."),
-	A(5, "Champignon de mana", "🍄", "siphon", "poison", "Des spores qui sapent la magie de la cible."),
+	L(5, "Sève partagée", "🌳", "soin_nature", "La sève circule entre le druide et le blessé : ce qui guérit l'un nourrit un peu l'autre.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 21, "effets": {"soin": "2D6+{Vol/10}", "partage_soin": 25}},
+	  remplace="champignon_de_mana"),
 	# ── Niveau 6 ──
 	A(6, "Colère de la forêt", "🌲", "zone_rect", "griffe", "Des branches fouettent le premier rang ennemi."),
 	A(6, "Cercle de vie", "♻️", "cri", "soin_nature", "Un cercle verdoyant qui fortifie ses alliés.", stats=("R", "Vol")),
@@ -37,7 +41,9 @@ ENTREES = [
 	A(8, "Tempête de feuilles", "🍂", "zone_cone", "impact_plaie/cone_griffe", "Des feuilles tranchantes comme des lames."),
 	A(8, "Floraison", "🌸", "soin", "soin_nature", "Une fleur s'ouvre sur la plaie et la referme."),
 	A(8, "Bouclier d'épines", "🌵", "posture", "griffe", "Une armure d'épines qui fait payer chaque coup.", stats=("R", "F")),
-	A(8, "Malédiction des saisons", "🍁", "entrave", "nature_buff", "L'automne entre dans les os de la cible.", malus=("F", "R")),
+	L(8, "Racines étouffantes", "🌿", "griffe", "Un parterre de racines qui blesse à chaque pas — même ceux qui ne sont pas visés.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 5, "cout_pm": 25, "maintien": 3, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"degats": "1D8+{Vol/15}"}},
+	  remplace="malediction_des_saisons", zone_persistante=True),
 	# ── Niveau 9 ──
 	A(9, "Courroux du chêne", "🌳", "frappe", "roc", "Le vieux chêne frappe de toute sa masse."),
 	A(9, "Rituel du cycle", "♻️", "rituel", "nature_buff", "Un rituel lent qui retourne la cible à la terre."),

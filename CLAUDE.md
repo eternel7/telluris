@@ -28,7 +28,7 @@ node dev/check_js.js               # syntaxe du JS inline des templates ET de te
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Harnais : `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
+Harnais : `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
 - ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
 - **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
@@ -70,8 +70,8 @@ utils/
   sorts.py               # sorts (pur) : normalisation, composants, écoles de magie, apprentissage,
                          #   familles exclues d'une vocation, bloc `invocation`, les TROIS notions
                          #   du temps magique (incantation PA / cout_pm / maintien), seuil de
-                         #   concentration, clés d'effet drain / degats_pm / cout_pv / saut / lien_vie / partage_soin,
-                         #   FORMULES À CARACTÉRISTIQUES (`1D{Int/5}`, chokepoint `resoudre_effets`),
+                         #   concentration, clés d'effet drain / degats_pm / cout_pv / saut / lien_vie / partage_soin / provocation / echange,
+                         #   FORMULES À CARACTÉRISTIQUES (`1D{Int/5}`, chokepoints `resoudre_effets` + `resoudre_temps`),
                          #   et les prédicats d'éligibilité PARTAGÉS avec les compétences
                          #   (capacite_utilisable_combat / effets_agissent_sur_cible / _exploration)
   grimoires.py           # grimoires manquants (pur) : grimoire UNIQUE + recette de scriptorium par sort ;

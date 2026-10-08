@@ -177,6 +177,8 @@ def test_recompute_competences_bonus_ecrit_le_champ():
         "buffs_sources": [{"nom": "Maîtrise martiale", "icon": "🗡️", "buffs": {"F": 4}}],
         # Aucune passive à zone : liste d'auras vide (cf. test_competences_aura.py).
         "auras": [],
+        # Aucune passive à formule (cf. test_capacites_formules.py).
+        "formules": {},
     }
 
 

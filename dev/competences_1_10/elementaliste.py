@@ -1,5 +1,5 @@
 """Élémentaliste 🔥 — feu, glace, foudre, roc, eau et vent (magie Élémentaire)."""
-from competences_1_10 import A
+from competences_1_10 import A, L
 
 ENTREES = [
 	# ── Niveau 1 ──
@@ -8,7 +8,9 @@ ENTREES = [
 	A(1, "Peau de granit", "🪨", "buff_soi", "roc", "Sa peau prend le grain du granit.", stats=("R",)),
 	A(1, "Brise", "🌬️", "saut", "vent", "Le vent le soulève et le dépose plus loin."),
 	# ── Niveau 2 ──
-	A(2, "Trait de glace", "🧊", "frappe", "givre", "Une aiguille de glace qui file droit au but."),
+	L(2, "Rafale tranchante", "🌪️", "vent", "Une lame d'air qui balaie tout ce qui se tient devant lui.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 1, "cout_pm": 12, "zone": {"forme": "rectangle", "origine": "lanceur", "orientation": "cible", "longueur": 1, "largeur": 3, "decalage": 1}, "effets": {"degats": "1D{Int/6}"}},
+	  remplace="trait_de_glace"),
 	A(2, "Arc électrique", "⚡", "siphon", "foudre", "Un arc qui court sur la cible et grille ses réserves."),
 	A(2, "Brûlure", "🔥", "poison", "feu", "Une flamme qui s'accroche et ne s'éteint pas."),
 	A(2, "Pluie douce", "🌧️", "regen_allie", "source", "Une ondée qui lave et apaise les plaies d'un compagnon."),
@@ -23,13 +25,17 @@ ENTREES = [
 	# ── Niveau 5 ──
 	A(5, "Projection de roc", "🪨", "frappe", "roc", "Un bloc arraché au sol vole vers la cible."),
 	A(5, "Langue de feu", "🔥", "zone_cone", "impact_brulure/cone_souffle_feu", "Les flammes jaillissent de ses mains en éventail."),
-	A(5, "Écho du tonnerre", "🌩️", "entrave", "foudre", "Un coup de tonnerre qui laisse l'ennemi sourd et hébété.", malus=("Int", "Ag")),
+	L(5, "Peau de basalte", "🪨", "roc", "Sa peau se couvre de pierre noire, et la garde tant qu'il la tient en pensée.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 12, "maintien": 2, "effets": {"buffs": {"R": "3+{Int/8}"}, "esquive": 3}},
+	  remplace="echo_du_tonnerre"),
 	A(5, "Souffle des éléments", "🌀", "buff_allie", "nature_buff", "Il prête à un compagnon la force des éléments.", stats=("R", "F")),
 	# ── Niveau 6 ──
 	A(6, "Tempête de grêle", "🌨️", "zone_cercle", "givre", "La grêle s'abat sur une large zone.", rayon=2),
 	A(6, "Forme de vapeur", "♨️", "esquive_soi", "eau", "Son corps se fait brume, et les coups le traversent."),
 	# ── Niveau 7 ──
-	A(7, "Colonne de feu", "🔥", "frappe", "meteore", "Une colonne de flammes jaillit sous les pieds de la cible."),
+	L(7, "Ligne de braise", "🔥", "explosion_feu", "Une ligne de braises jetée en travers du passage. Qui la franchit s'y brûle — ami ou ennemi.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 4, "cout_pm": 22, "maintien": 3, "zone": {"forme": "rectangle", "origine": "cible", "orientation": "cible", "longueur": 1, "largeur": 3}, "effets": {"degats": "2D6+{Int/12}"}},
+	  remplace="colonne_de_feu", zone_persistante=True),
 	A(7, "Éclair en chaîne", "⚡", "zone_cone", "impact_etincelles/cone_decharge", "La foudre bondit de cible en cible devant lui."),
 	A(7, "Sables mouvants", "🏜️", "entrave", "roc", "Le sol se dérobe sous l'ennemi.", malus=("Ag",)),
 	A(7, "Source de mana", "💧", "pm_allie", "source", "Il fait jaillir pour un compagnon une source d'énergie pure."),

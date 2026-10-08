@@ -1,5 +1,5 @@
 """Assassin 🗡 — l'ombre, le poison, la lame qui ne frappe qu'une fois."""
-from competences_1_10 import A, P
+from competences_1_10 import A, P, L
 
 OMBRE = ("sous-terrain", "catacombe", "donjon", "grotte", "couvert", "humide", "mine")
 
@@ -27,7 +27,9 @@ ENTREES = [
 	A(3, "Poudre de pavot", "💨", "entrave", "poudre", "Un nuage de poudre qui engourdit les membres.", malus=("Ag", "Int")),
 	# ── Niveau 4 ──
 	P(4, "Réflexes de vipère", "🐍", "p_esquive", "Il esquive comme frappe le serpent : avant qu'on ne bouge."),
-	A(4, "Lame de miséricorde", "🗡️", "frappe", "saignee", "La dague fine qu'on glisse dans la visière."),
+	L(4, "Coup au cœur", "🫀", "saignee", "La main trouve l'entrée, le savoir trouve l'organe.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 18, "effets": {"degats": "2D{Ag/8}+{Int/10}"}},
+	  remplace="lame_de_misericorde"),
 	A(4, "Toxine paralysante", "🧪", "entrave", "poison", "La victime sent ses jambes se dérober.", malus=("Ag", "F")),
 	A(4, "Fleur de lames", "🌸", "zone_carre", "lame", "Il tourne, et ses deux lames ouvrent une fleur sanglante."),
 	A(4, "Sang du contrat", "🩸", "sang", "saignee", "Il s'ouvre la main pour sceller la mort de la cible."),
@@ -35,7 +37,9 @@ ENTREES = [
 	# ── Niveau 5 ──
 	P(5, "Œil de nuit", "🌙", "p_carac", "Il voit dans le noir comme d'autres en plein jour.", stats=("Int",)),
 	A(5, "Égorgement", "🔪", "frappe", "saignee", "Un geste, et la gorge s'ouvre."),
-	A(5, "Ciguë", "☠️", "poison", "poison", "Le poison des philosophes, pour ceux qui parlent trop."),
+	L(5, "Venin double", "🧪", "poison", "Deux poisons mêlés dans la même entaille : l'un ronge la chair, l'autre l'esprit.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 21, "effets": {"degats": "1D6", "regen_pv": "-2-{Int/20}", "regen_pm": "-1-{Int/30}", "duree": 3}},
+	  remplace="cigue"),
 	A(5, "Essence de mandragore", "🌿", "poison_pm", "poison", "Une essence qui ronge la volonté."),
 	A(5, "Saut du chat", "🐈", "saut", "saut", "D'un toit à l'autre, d'une ombre à l'autre."),
 	A(5, "Concentration mortelle", "🎯", "posture", "marque", "Plus rien n'existe que la cible.", stats=("Ag", "F")),
@@ -59,7 +63,9 @@ ENTREES = [
 	A(8, "Éventail de dagues", "🪭", "zone_cone", "impact_plaie/cone_griffe", "Une poignée de couteaux lancés en éventail."),
 	A(8, "Oubli de la douleur", "💉", "sang", "rage", "Une drogue qui fait oublier ses blessures le temps d'un coup."),
 	# ── Niveau 9 ──
-	P(9, "Cœur de glace", "🧊", "p_carac", "Plus aucune émotion ne passe : il est la lame.", stats=("Vol",)),
+	L(9, "Cœur de glace", "🧊", None, "Un esprit froid tient le cœur en bride : plus il calcule, moins il tremble.",
+	  {"effets": {"buffs": {"Vol": "{Int/10}"}}},
+	  remplace="cur_de_glace", mode="passive"),
 	P(9, "Main de la mort", "☠️", "p_carac", "Chaque geste est économe, et chaque geste tue.", stats=("Ag",)),
 	A(9, "Exécution silencieuse", "🤫", "frappe", "saignee", "La victime meurt sans avoir crié."),
 	A(9, "Peste noire", "☠️", "poison", "poison", "Une contagion distillée dans une fiole."),

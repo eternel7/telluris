@@ -1,5 +1,5 @@
 """Guerrier ⚔️ — encaisse et frappe lourde, tient la ligne."""
-from competences_1_10 import A, P
+from competences_1_10 import A, P, L
 
 ENTREES = [
 	# ── Niveau 1 ──
@@ -14,11 +14,15 @@ ENTREES = [
 	A(2, "Taille horizontale", "⚔️", "zone_rect", "balayage", "Un revers large qui fauche tout ce qui se tient devant lui."),
 	A(2, "Pommeau au visage", "👊", "entrave", "coup_lourd", "Le pommeau frappe là où la lame ne passe pas.", malus=("Int", "Ag")),
 	A(2, "Coup de taille", "⚔️", "frappe", "lame", "Un geste ample, de toute la longueur de la lame."),
-	A(2, "Charge courte", "🐂", "saut", "saut", "Trois pas d'élan et il est déjà sur la ligne adverse."),
+	L(2, "Attention, messire !", "🛡️", "garde", "Il saisit un compagnon par l'épaule et passe devant lui : c'est sur le guerrier que tombera le coup suivant.",
+	  {"cible": "allie", "portee": 1, "cout_pm": 12, "effets": {"echange": 1}},
+	  remplace="charge_courte"),
 	A(2, "Second souffle", "💪", "buff_soi", "aura_bataille", "Il serre les dents et repart comme au premier assaut.", stats=("R", "F")),
 	# ── Niveau 3 ──
 	P(3, "Endurance du soldat", "🥾", "p_regen", "Les marches forcées ont appris à son corps à se refaire en marchant."),
-	A(3, "Fendoir", "🪓", "frappe", "coup_lourd", "Le coup tombe d'en haut, de tout son poids."),
+	L(3, "Frappe du vétéran", "⚔️", "coup_lourd", "Le coup d'un homme qui en a porté dix mille : le bras frappe, et tout le corps tient derrière.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 15, "effets": {"degats": "2D8+{F/15}+{R/15}"}},
+	  remplace="fendoir"),
 	A(3, "Cercle d'acier", "🌀", "zone_carre", "balayage", "Il pivote sur lui-même, lame tendue, et dégage la place."),
 	A(3, "Mur de boucliers", "🛡️", "posture", "garde", "Il plante les pieds et lève le bouclier : la ligne tiendra.", stats=("R", "Vol")),
 	A(3, "Taillade aux jarrets", "🩸", "poison", "saignee", "Une entaille basse, qui saigne longtemps."),
@@ -32,17 +36,25 @@ ENTREES = [
 	A(4, "Coup du maître de corps", "🩸", "sang", "saignee", "Il paie de sa chair un coup qui ne pardonne pas."),
 	# ── Niveau 5 ──
 	P(5, "Nerfs d'acier", "🧠", "p_carac", "Le fracas autour de lui ne fait plus trembler sa main.", stats=("Vol",)),
-	P(5, "Cuir épais", "🐗", "p_carac", "Il porte ses cicatrices comme une seconde armure.", stats=("R",)),
+	L(5, "Cuir épais", "🐗", None, "La volonté endurcit la peau : plus il serre les dents, moins les coups l'entament.",
+	  {"effets": {"buffs": {"R": "{Vol/15}"}}},
+	  remplace="cuir_epais", mode="passive"),
 	A(5, "Fauchage", "🌾", "zone_rect", "balayage", "Trois adversaires, un seul geste, aucun ne reste debout indemne."),
 	A(5, "Brise-garde", "🔨", "entrave", "coup_lourd", "Il frappe l'arme plutôt que l'homme, et l'arme cède.", malus=("Ag", "R")),
 	A(5, "Estocade", "🗡️", "frappe", "lame", "La pointe entre là où la maille s'ouvre."),
-	A(5, "Rempart vivant", "🧱", "posture", "garde", "Il devient le mur derrière lequel les autres respirent.", stats=("R",)),
+	L(5, "Bouclier humain", "🛡️", "lien", "Il se plante devant un compagnon et prend pour lui la moitié des coups qui lui sont destinés.",
+	  {"cible": "allie", "portee": 1, "cout_pm": 12, "maintien": "5-{Vol/30}", "effets": {"lien_vie": {"part": "30+{R/3}", "reduction": 0}}},
+	  remplace="rempart_vivant"),
 	A(5, "Ordre de la ligne", "🎺", "buff_allie", "aura_bataille", "Un mot sec à un compagnon, et celui-ci retrouve sa place et son courage.", stats=("R", "Vol")),
 	# ── Niveau 6 ──
 	P(6, "Main sûre", "🎯", "p_carac", "Plus un geste perdu : chaque coup porte où il le veut.", stats=("Ag",)),
-	A(6, "Volée de taille", "🌀", "zone_carre", "balayage", "La lame tourne et ne revient qu'après avoir fait le tour des ennemis."),
+	L(6, "Tenir jusqu'au bout", "🪖", "aura_bataille", "Il serre les dents et décide qu'il ne tombera pas. Plus la volonté est dure, plus elle dure.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 25, "effets": {"buffs": {"R": "4+{Vol/8}"}, "duree": "2+{Vol/30}"}},
+	  remplace="volee_de_taille"),
 	A(6, "Coup de grâce", "💀", "frappe", "saignee", "Là où l'ennemi a déjà cédé, il achève."),
-	A(6, "Défi", "😤", "entrave", "rage", "Il appelle l'ennemi d'un geste, et celui-ci se jette sur lui sans réfléchir.", malus=("Int", "Vol")),
+	L(6, "Défi", "📢", "rage", "Il frappe son bouclier et hurle à travers la mêlée : la bête ne voit plus que lui, le temps que sa volonté tient.",
+	  {"cible": "ennemi", "jet": "cc", "portee": "3+{Vol/30}", "cout_pm": 25, "effets": {"provocation": 1, "duree": "2+{Vol/40}"}},
+	  remplace="defi"),
 	A(6, "Vague d'acier", "🌊", "zone_cone", "impact_eclat_dore/cone_tueur_demon", "Un revers en éventail qui ouvre la mêlée."),
 	# ── Niveau 7 ──
 	P(7, "Force tranquille", "🗿", "p_carac", "Il ne se presse jamais, et pourtant rien ne lui résiste.", stats=("F",)),

@@ -1,5 +1,5 @@
 """Prêtre ✝ — guérisseur indispensable, la lumière qui relève (magie Sainte)."""
-from competences_1_10 import A
+from competences_1_10 import A, L
 
 ENTREES = [
 	# ── Niveau 1 ──
@@ -8,7 +8,9 @@ ENTREES = [
 	A(1, "Bénédiction", "🕊️", "buff_allie", "aura_sacree", "Il bénit un compagnon, qui se sent plus fort.", stats=("Vol", "R")),
 	A(1, "Réprimande", "☝️", "entrave", "lumiere", "Un mot sévère qui fait plier l'ennemi.", malus=("Vol",)),
 	# ── Niveau 2 ──
-	A(2, "Grâce", "💫", "regen_allie", "soin_sacre", "Une grâce qui soigne lentement mais sûrement."),
+	L(2, "Oraison du chevet", "🙏", "soin_sacre", "La prière du chevet des mourants, qui en ramène plus d'un.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 12, "effets": {"soin": "1D8+{Vol/8}"}},
+	  remplace="grace"),
 	A(2, "Clarté", "💡", "pm_allie", "meditation", "Il éclaire l'esprit d'un compagnon et lui rend son énergie."),
 	A(2, "Feu sacré", "🔥", "poison", "lumiere", "Une flamme sacrée qui brûle longtemps."),
 	A(2, "Sanctuaire", "⛪", "posture", "bouclier", "Il se recueille, et une lumière le protège.", stats=("R", "Vol")),
@@ -26,7 +28,9 @@ ENTREES = [
 	A(5, "Saut de foi", "🕊️", "saut", "aura_sacree", "Il s'en remet à la foi, et elle le porte."),
 	# ── Niveau 6 ──
 	A(6, "Colonne de lumière", "☀️", "frappe", "lumiere_zone", "Une colonne de lumière s'abat sur la cible."),
-	A(6, "Source de grâce", "⛲", "regen_allie", "source", "Une source de grâce qui coule sans fin."),
+	L(6, "Martyre", "🕯️", "soin_vague", "Il donne sa propre vie pour en sauver une autre.",
+	  {"cible": "allie", "portee": 1, "cout_pm": 10, "effets": {"pv": "10+{Vol/4}", "cout_pv": 12}},
+	  remplace="source_de_grace"),
 	# ── Niveau 7 ──
 	A(7, "Exorcisme", "📿", "poison_pm", "lumiere", "Il chasse les esprits impurs, et la magie avec eux."),
 	A(7, "Prière de masse", "🙏", "soin_zone", "soin_vague", "Toute l'assemblée est soignée d'une seule prière."),

@@ -31,8 +31,8 @@ from models import character_stats
 from utils.consommables import _as_int, _as_signed_int, poser_effet
 from utils.sorts import (
 	CIBLE_DEFAUT, CIBLES, INCANTATION_PA_DEFAUT, INCANTATION_PA_MAX, JETS,
-	MAINTIEN_PM_MAX, _bonus_dict, _portee_de_doc, _sensibilite_charge, apercu_effets,
-	capacite_utilisable_combat, portee_effective,
+	MAINTIEN_PM_MAX, _bonus_dict, _portee_de_doc, _sensibilite_charge, _temps_de_doc,
+	apercu_effets, capacite_utilisable_combat, concat_degats, portee_effective, resoudre_temps,
 	capacite_utilisable_exploration, famille_de, familles_exclues, part_durative,
 )
 from utils.zones_effet import normaliser_zone
@@ -74,7 +74,9 @@ def normaliser_competence(doc) -> dict | None:
 		# ENTRETIEN en PM par round — une garde qu'on tient (cf. utils/sorts, § les trois
 		# notions du temps magique). Même borne, même défaut neutre, et même piège de liste
 		# blanche que `zone` et `animation` juste en dessous.
-		"maintien": min(MAINTIEN_PM_MAX, _as_int(doc.get("maintien"))),
+		"maintien": _temps_de_doc(doc, "maintien", MAINTIEN_PM_MAX, 0)[0],
+		# Formulé (`"5-{Vol/25}"`) ⇒ résolu au lancement par `sorts.resoudre_temps`.
+		"maintien_formule": _temps_de_doc(doc, "maintien", MAINTIEN_PM_MAX, 0)[1],
 		# PA de LANCEMENT — une compétence peut elle aussi demander plusieurs tours à
 		# s'armer (une visée longue, une posture qu'on prend). Longtemps absent ici
 		# DÉLIBÉRÉMENT : la canalisation n'avait qu'un chemin de résolution, propre aux
@@ -82,8 +84,9 @@ def normaliser_competence(doc) -> dict | None:
 		# compétence qui serait partie du premier coup. Le chokepoint de lancement est
 		# désormais PARTAGÉ (`combat._lancer_capacite`), et le champ est branché des deux
 		# côtés. Défaut neutre : 1 PA ⇒ aucune migration.
-		"incantation": max(1, min(INCANTATION_PA_MAX,
-								  _as_int(doc.get("incantation")) or INCANTATION_PA_DEFAUT)),
+		"incantation": _temps_de_doc(doc, "incantation", INCANTATION_PA_MAX, INCANTATION_PA_DEFAUT)[0],
+		"incantation_formule": _temps_de_doc(doc, "incantation", INCANTATION_PA_MAX,
+											 INCANTATION_PA_DEFAUT)[1],
 		# Sensibilité à la CHARGE PORTÉE — même champ et même lecture que les sorts
 		# (`sorts._sensibilite_charge`, source unique) : le contrat est partagé, la
 		# sensibilité ne doit pas en avoir deux interprétations.
@@ -227,8 +230,16 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 	détail nommé du même agrégat (tooltip de la fiche), miroir d'EquipmentBonus.
 
 	Les AURAS (passive + `zone`) sont exclues de la somme de la même façon et listées à
-	part dans `auras` (cf. `est_aura`) : elles ne valent que pour ceux qu'elles couvrent."""
+	part dans `auras` (cf. `est_aura`) : elles ne valent que pour ceux qu'elles couvrent.
+
+	PASSIVES À FORMULE (`"buffs": {"R": "{Vol/10}"}`) : l'agrégat garde la FORMULE, jamais
+	sa valeur — sous-bloc `formules` ({buffs, regen_pv, regen_pm, esquive}, formules
+	concaténées) et `formules` par source nommée. Elle est résolue à la LECTURE par
+	`consommables.competences_bonus_resolu`, sur la caract BRUTE : l'agrégat n'étant
+	réécrit qu'à l'apprentissage, une valeur figée ici serait fausse dès la première montée
+	de caractéristique."""
 	buffs: dict = {}
+	formules: dict = {}
 	sources: list = []
 	auras: list = []
 	regen_pv = regen_pm = esquive = 0
@@ -244,12 +255,22 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 		for k, delta in (eff.get("buffs") or {}).items():
 			buffs[str(k)] = int(buffs.get(str(k), 0)) + int(delta)
 			propres[str(k)] = int(propres.get(str(k), 0)) + int(delta)
-		if propres:
-			sources.append({
+		f = eff.get("formules") or {}
+		f_buffs = {str(k): v for k, v in (f.get("buffs") or {}).items()}
+		for k, texte in f_buffs.items():
+			formules.setdefault("buffs", {})[k] = concat_degats(formules.get("buffs", {}).get(k, ""), texte)
+		for k in ("regen_pv", "regen_pm", "esquive"):
+			if f.get(k):
+				formules[k] = concat_degats(formules.get(k, ""), f[k])
+		if propres or f_buffs:
+			source = {
 				"nom":   comp.get("nom", "?"),
 				"icon":  comp.get("icon", "✨"),
 				"buffs": propres,
-			})
+			}
+			if f_buffs:
+				source["formules"] = f_buffs
+			sources.append(source)
 		regen_pv += _as_signed_int(eff.get("regen_pv"))
 		regen_pm += _as_signed_int(eff.get("regen_pm"))
 		esquive += _as_int(eff.get("esquive"))
@@ -259,7 +280,7 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 	# les porte pas, et n'en a pas besoin : apprendre la compétence le recalcule.
 	return {"buffs": buffs, "regen_pv": regen_pv, "regen_pm": regen_pm, "esquive": esquive,
 			"detection_pieges": detection_pieges, "desamorcage": desamorcage,
-			"buffs_sources": sources, "auras": auras}
+			"buffs_sources": sources, "auras": auras, "formules": formules}
 
 
 def recompute_competences_bonus(character: dict, get_doc) -> dict:
@@ -282,7 +303,9 @@ def competences_bonus_perime(character: dict) -> bool:
 	if not character.get("competences_connues"):
 		return False
 	bonus = character.get("competences_bonus") or {}
-	return "buffs_sources" not in bonus or "auras" not in bonus
+	# `formules` : clé des passives à formule — un agrégat d'avant la reconstruirait
+	# sans elles, et une passive retouchée en formule garderait son ancienne constante.
+	return "buffs_sources" not in bonus or "auras" not in bonus or "formules" not in bonus
 
 
 def furtivite_passive(character: dict, get_doc, map_tags) -> int:
@@ -378,6 +401,8 @@ def competences_apprenables(character: dict, find_docs, rules_vocations=None) ->
 	niveau_voc = _as_int((character.get("vocations_niveaux") or {}).get(voc, 0))
 	connues = set(character.get("competences_connues") or [])
 	exclues = familles_exclues(voc, rules_vocations)
+	from utils.consommables import caracts_avec_buffs
+	caracts = caracts_avec_buffs(character)
 	out = []
 	for doc in find_docs({"type": "competence"}) or []:
 		comp = normaliser_competence(doc)
@@ -389,6 +414,11 @@ def competences_apprenables(character: dict, find_docs, rules_vocations=None) ->
 		# (l'endpoint `apprendre_competence` refait le test — la liste n'est pas la garde).
 		if comp["famille"] and comp["famille"] in exclues:
 			continue
+		# Formules à caractéristiques RÉSOLUES pour ce personnage (cf. `liste_competences_payload`) ;
+		# une passive sur la caract BRUTE, comme le jeu l'appliquera.
+		comp = resoudre_temps(comp, caracts)
+		comp["effets"] = apercu_effets(comp["effets"], caracts if not est_passive(comp)
+									   else (character.get("caracteristiques_current") or {}))
 		comp["cout_points"] = cout_apprentissage(comp)
 		out.append(comp)
 	out.sort(key=lambda c: (c["niveau"], c["nom"]))
@@ -493,6 +523,8 @@ def liste_competences_payload(character: dict, get_doc, contexte: str,
 	for comp in competences_connues_docs(character, get_doc):
 		if contexte == "combat" and not competence_utilisable_combat(comp):
 			continue
+		# Entretien et PA d'incantation FORMULÉS, résolus pour ce porteur (comme la portée).
+		temps = resoudre_temps(comp, caracts)
 		out.append({
 			"utilisable": True if contexte == "combat" else competence_utilisable_exploration(comp),
 			"competence_id": comp["id"],
@@ -507,19 +539,22 @@ def liste_competences_payload(character: dict, get_doc, contexte: str,
 			# L'entretien par round ET les PA de lancement, comme pour les sorts : sans eux
 			# le client ne peut ni annoncer la facture, ni griser une case impayable, ni
 			# prévenir qu'une compétence va absorber plusieurs tours.
-			"maintien": comp["maintien"],
-			"incantation": comp["incantation"],
+			"maintien": temps["maintien"],
+			"incantation": temps["incantation"],
 			"cible": comp["cible"],
 			"jet": comp["jet"],
 			"portee": max(1, portee_effective(comp, caracts) or 1),
 			# Étiquette de la case + aperçu des cases touchées, comme pour les sorts.
 			"zone": comp["zone"],
-			"effets": apercu_effets(comp["effets"], caracts),
+			# Une PASSIVE se résout sur la caract BRUTE (cf. `consommables.competences_bonus_resolu`) :
+			# l'afficher sur les caracts buffées annoncerait une valeur que le jeu n'applique pas.
+			"effets": apercu_effets(comp["effets"], caracts if not est_passive(comp)
+									else (character.get("caracteristiques_current") or {})),
 			# CHARGE PORTÉE : le coût et l'entretien RÉELLEMENT facturés ici et maintenant,
 			# à côté de leur base. Le client affiche « 12 → 14 PM » et grise sur l'effectif :
 			# sans ces clés il proposerait un sort au tarif à vide que le serveur refuserait.
 			"sensibilite_charge": comp["sensibilite_charge"],
 			"cout_pm_effectif": charge_magie.cout_pm_effectif(comp["cout_pm"], _pen(comp)),
-			"maintien_effectif": charge_magie.maintien_effectif(comp["maintien"], _pen(comp)),
+			"maintien_effectif": charge_magie.maintien_effectif(temps["maintien"], _pen(comp)),
 		})
 	return out

@@ -1,5 +1,5 @@
 """Lettré 📜 — érudit universel, alchimiste, ingénieur et enchanteur (magie Illusoire)."""
-from competences_1_10 import A
+from competences_1_10 import A, L
 
 ENTREES = [
 	# ── Niveau 1 ──
@@ -13,7 +13,9 @@ ENTREES = [
 	A(2, "Élixir de clarté", "💧", "pm_allie", "alchimie", "Un élixir qui clarifie l'esprit et rend du mana."),
 	A(2, "Mécanisme à ressort", "⚙️", "saut", "saut", "Une semelle à ressort de son invention."),
 	# ── Niveau 3 ──
-	A(3, "Flèche alchimique", "🏹", "poison", "alchimie", "Une fléchette trempée dans une mixture corrosive."),
+	L(3, "Point faible noté", "📝", "marque", "Il a lu sur cette créature. Il sait où elle cède.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 5, "cout_pm": 15, "effets": {"buffs": {"R": "-3-{Int/8}"}, "duree": "2+{Int/40}"}},
+	  remplace="fleche_alchimique"),
 	A(3, "Glyphe protecteur", "🔰", "buff_allie", "enchantement", "Il trace un glyphe sur l'armure d'un compagnon.", stats=("R", "Vol")),
 	# ── Niveau 4 ──
 	A(4, "Éclat de savoir", "💡", "frappe", "eblouissant", "La connaissance brute, projetée comme une lame."),
@@ -26,7 +28,9 @@ ENTREES = [
 	A(5, "Transmutation", "⚗️", "drain", "alchimie", "Il transmute la vitalité de la cible en la sienne."),
 	A(5, "Mémoire du palais", "🏛️", "posture", "meditation", "Il se retire dans son palais mental, où rien ne l'atteint.", stats=("Int", "Vol")),
 	# ── Niveau 6 ──
-	A(6, "Grenade alchimique", "💣", "zone_cercle", "explosion_feu", "Un globe de verre qui éclate en flammes vertes.", rayon=2),
+	L(6, "Lecture à voix haute", "📖", "enchantement", "Il lit à voix haute un vieux texte, et ses compagnons y puisent des forces nouvelles.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 25, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"pm": "3+{Int/10}"}},
+	  remplace="grenade_alchimique"),
 	A(6, "Panacée", "💊", "soin_zone", "alchimie", "Une brume curative qui soigne tout un groupe."),
 	# ── Niveau 7 ──
 	A(7, "Verbe de pouvoir", "🗣️", "frappe", "arcane", "Un mot ancien qui frappe comme un coup de masse."),

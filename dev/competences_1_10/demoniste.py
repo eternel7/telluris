@@ -1,5 +1,5 @@
 """Démoniste 😈 — invocateur infernal ; chaque pacte consume une part de son âme (Démonologie)."""
-from competences_1_10 import A
+from competences_1_10 import A, L
 
 ENTREES = [
 	# ── Niveau 1 ──
@@ -16,7 +16,9 @@ ENTREES = [
 	A(3, "Pluie de soufre", "🌋", "zone_cercle", "soufre", "Une pluie de soufre ardent sur les ennemis."),
 	A(3, "Regard du démon", "👁️", "entrave", "demon_buff", "Le regard du démon paralyse la cible.", malus=("Ag", "Vol")),
 	# ── Niveau 4 ──
-	A(4, "Lance de l'enfer", "🔱", "frappe", "projectile_infernal", "Une lance de feu infernal."),
+	L(4, "Brasier du pacte", "🔥", "projectile_infernal", "Un feu d'en bas, que le démon fait payer en sang — moins cher à qui le tient en laisse.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 5, "cout_pm": 18, "effets": {"degats": "2D8+{Int/10}", "cout_pv": "6-{Vol/15}"}},
+	  remplace="lance_de_l_enfer"),
 	A(4, "Corruption de l'âme", "🖤", "poison_pm", "demon_buff", "Une corruption qui ronge la volonté de la cible."),
 	A(4, "Bouclier infernal", "🛡️", "posture", "demon_buff", "Un bouclier de flammes noires l'entoure.", stats=("R", "Vol")),
 	A(4, "Don du démon", "🎁", "pm_allie", "demon_buff", "Il partage avec un compagnon l'énergie de son pacte."),
@@ -27,7 +29,9 @@ ENTREES = [
 	A(5, "Fièvre infernale", "🤒", "poison", "soufre", "Une fièvre qui brûle de l'intérieur."),
 	# ── Niveau 6 ──
 	A(6, "Souffle de l'abîme", "🌋", "zone_cone", "impact_brulure/cone_souffle_feu", "Un souffle de flammes infernales."),
-	A(6, "Rapt d'âme", "👻", "drain", "drain", "Il arrache un fragment d'âme à la cible."),
+	L(6, "Soif du pacte", "😈", "drain", "Il paie le démon de son sang pour boire celui d'un autre.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 4, "cout_pm": 25, "effets": {"degats": "3D8+{Int/10}", "cout_pv": 8, "drain_pv": 50, "drain_max": "{Vol/3}"}},
+	  remplace="rapt_d_ame"),
 	# ── Niveau 7 ──
 	A(7, "Feu de l'âme", "🔥", "frappe", "projectile_infernal", "Un feu qui brûle l'âme de la cible."),
 	A(7, "Peur infernale", "😱", "entrave", "demon_buff", "Une terreur venue des enfers.", malus=("Vol", "Ag")),

@@ -117,7 +117,10 @@ PARTAGE_SOIN_PCT_MAX = 100
 CARACTS_FORMULE = ("V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch")
 FORMULE_CLES_ENTIERES = ("pv", "pm", "duree", "esquive", "furtivite", "cout_pv",
 						 "drain_pv", "drain_pm", "drain_max", "partage_soin",
-						 "regen_pv", "regen_pm")
+						 "regen_pv", "regen_pm", "saut")
+# Part du LIEN DE VIE à formule (`"lien_vie": {"part": "30+{R/3}"}`) : rangée dans
+# `formules` sous cette clé, le bloc gardant sa `reduction` et une part constante à 0.
+FORMULE_LIEN_VIE_PART = "lien_vie_part"
 # Faces minimales d'un dé dont la taille vient d'une formule : `1D{Int/5}` à Int 4 ferait
 # un D0, et `random.randint(1, 0)` lèverait.
 DES_FACES_MIN = 2
@@ -205,12 +208,18 @@ def resoudre_effets(effets: dict, caracts: dict, des_fn=None) -> dict:
 					buffs[c] = int(buffs.get(c, 0) or 0) + evaluer_formule(f, caracts)
 			elif cle in FORMULE_CLES_ENTIERES:
 				eff[cle] = int(eff.get(cle, 0) or 0) + evaluer_formule(texte, caracts)
+			elif cle == FORMULE_LIEN_VIE_PART:
+				lien = dict(eff.get("lien_vie") or {"part": 0, "reduction": 0})
+				lien["part"] = max(0, min(LIEN_VIE_PCT_MAX,
+										  _as_int(lien.get("part")) + evaluer_formule(texte, caracts)))
+				# Part résolue à 0 : lien INERTE, donc absent (même règle que `_lien_vie_dict`).
+				eff["lien_vie"] = lien if lien["part"] > 0 else None
 		eff["buffs"] = {c: v for c, v in buffs.items() if v}
 		for cle in FORMULE_CLES_ENTIERES:
 			if cle in eff and cle not in ("regen_pv", "regen_pm"):
 				eff[cle] = max(0, int(eff[cle] or 0))
 		for cle, plafond in (("drain_pv", DRAIN_PCT_MAX), ("drain_pm", DRAIN_PCT_MAX),
-							 ("partage_soin", PARTAGE_SOIN_PCT_MAX)):
+							 ("partage_soin", PARTAGE_SOIN_PCT_MAX), ("saut", SAUT_DISTANCE_MAX)):
 			if cle in eff:
 				eff[cle] = min(plafond, eff[cle])
 	if soin:
@@ -240,6 +249,8 @@ def apercu_effets(effets: dict, caracts: dict) -> dict:
 	for k, v in (eff.get("formules") or {}).items():
 		if k == "buffs":
 			brut.update({f"buffs.{c}": f for c, f in (v or {}).items()})
+		elif k == FORMULE_LIEN_VIE_PART:
+			brut["lien_vie.part"] = v
 		else:
 			brut[k] = v
 	soin = eff.get("soin") or ""
@@ -276,6 +287,40 @@ def _portee_de_doc(doc: dict) -> tuple:
 	if est_formule(brut):
 		return max(1, evaluer_formule(brut, {})), str(brut).strip()
 	return _as_int(brut), ""
+
+
+def _temps_de_doc(doc: dict, cle: str, plafond: int, plancher: int) -> tuple:
+	"""`(valeur constante, formule ou "")` d'un champ de TEMPS (`maintien`, `incantation`)
+	d'un doc sort/compétence.
+
+	⚠️ Une formule ne change jamais la NATURE de la capacité d'un lanceur à l'autre : la
+	part constante est PLANCHÉE à 1 — une capacité à `maintien` formulé reste maintenue
+	(`est_maintenu`), ce qui fixe ses éligibilités sans connaître le lanceur. La valeur
+	réelle vient de `resoudre_temps`, au LANCEMENT."""
+	brut = (doc or {}).get(cle)
+	if est_formule(brut):
+		return max(1, min(plafond, evaluer_formule(brut, {}))), str(brut).strip()
+	return max(plancher, min(plafond, _as_int(brut))), ""
+
+
+def resoudre_temps(capacite: dict, caracts: dict, effets: dict | None = None) -> dict:
+	"""Copie de la vue normalisée où `maintien` et `incantation` FORMULÉS sont résolus pour
+	ce lanceur — chokepoint unique du LANCEMENT (combat, simulateur) et des payloads.
+
+	Bornes : entretien ∈ [1, MAINTIEN_PM_MAX] (à 0 la capacité cesserait d'être maintenue),
+	incantation ∈ [1, INCANTATION_PA_MAX]. La `maintien_reduction` des composants (déjà
+	appliquée à la part constante par `doc_effectif`) est REJOUÉE sur la valeur résolue,
+	plancher 1. Sans formule, rend une copie identique (aucune migration)."""
+	cap = dict(capacite or {})
+	f_maintien = cap.pop("maintien_formule", "")
+	f_incantation = cap.pop("incantation_formule", "")
+	if f_maintien:
+		valeur = max(1, min(MAINTIEN_PM_MAX, evaluer_formule(f_maintien, caracts)))
+		cap["maintien"] = max(1, valeur - _as_int((effets or {}).get("maintien_reduction")))
+	if f_incantation:
+		cap["incantation"] = max(INCANTATION_PA_DEFAUT,
+								 min(INCANTATION_PA_MAX, evaluer_formule(f_incantation, caracts)))
+	return cap
 
 
 def _bonus_dict(raw) -> dict:
@@ -315,6 +360,14 @@ def _bonus_dict(raw) -> dict:
 	# FORMULES À CARACTÉRISTIQUES (cf. `resoudre_effets`) : un champ entier écrit
 	# `"1+{Vol/20}"` est rangé dans `formules` — `_as_int` le ramènerait à 0 en silence.
 	formules = {k: str(raw[k]).strip() for k in FORMULE_CLES_ENTIERES if est_formule(raw.get(k))}
+	# LIEN DE VIE à part formulée : le bloc est GARDÉ (part 0 + réduction) — `_lien_vie_dict`
+	# l'effacerait (part nulle ⇒ lien inerte), et les prédicats ne verraient plus de lien.
+	lien_raw = raw.get("lien_vie")
+	if isinstance(lien_raw, dict) and est_formule(lien_raw.get("part")):
+		formules[FORMULE_LIEN_VIE_PART] = str(lien_raw["part"]).strip()
+		lien_vie = {"part": 0, "reduction": min(LIEN_VIE_PCT_MAX, _as_int(lien_raw.get("reduction")))}
+	else:
+		lien_vie = _lien_vie_dict(lien_raw)
 	buffs = {}
 	for k, v in (raw.get("buffs") or {}).items():
 		if est_formule(v):
@@ -350,7 +403,15 @@ def _bonus_dict(raw) -> dict:
 		"drain_pm": min(DRAIN_PCT_MAX, _as_int(raw.get("drain_pm"))),
 		"drain_max": _as_int(raw.get("drain_max")),
 		"saut": min(SAUT_DISTANCE_MAX, _as_int(raw.get("saut"))),
-		"lien_vie": _lien_vie_dict(raw.get("lien_vie")),
+		"lien_vie": lien_vie,
+		# PROVOCATION (> 0) : posée sur un MONSTRE touché, pour la `duree` de l'effet, elle
+		# le force à viser le lanceur (cf. combat `_cible_joueur`). Part à durée à part
+		# entière (`part_durative`) : une provocation pure est un debuff.
+		"provocation": _as_int(raw.get("provocation")),
+		# ÉCHANGE DE PLACE (1) : le lanceur et la cible désignée — allié, ou ENNEMI touché par
+		# le jet — permutent leurs cases (cf. combat `_echanger`). Aucune limite de distance dans le moteur : la
+		# PORTÉE de la capacité en décide — « Attention, messire ! » s'écrit `portee: 1`.
+		"echange": min(1, _as_int(raw.get("echange"))),
 		# Renforts d'un sort qui ne pose pas d'`effets` : ils ne valent QUE comme bonus de
 		# composant, appliqués au doc par `doc_effectif` (cf. INVOCATION_* / MAINTIEN_*).
 		"invocation_duree": _as_int(raw.get("invocation_duree")),
@@ -364,7 +425,7 @@ def _bonus_dict(raw) -> dict:
 	}
 	# Champ entier à formule : il ne garde que sa part constante (0) — la formule fait foi.
 	for k in formules:
-		if k != "buffs":
+		if k in FORMULE_CLES_ENTIERES:
 			out[k] = 0
 	if formules:
 		out["formules"] = formules
@@ -450,8 +511,14 @@ def est_incantation_longue(capacite: dict) -> bool:
 
 	⚠️ À `incantation == 1` tout se passe exactement comme avant : un sort part dans
 	l'appel qui le lance. C'est ce prédicat, et lui seul, qui bascule sur la machinerie
-	de canalisation multi-round."""
-	return _as_int((capacite or {}).get("incantation")) > INCANTATION_PA_DEFAUT
+	de canalisation multi-round.
+	⚠️ Incantation FORMULÉE et non résolue (vue normalisée, avant `resoudre_temps`) : tenue
+	pour longue — une capacité qui peut demander plusieurs PA reste combat seulement, quel
+	que soit le lanceur. Au lancement, la vue résolue n'a plus la formule et tranche."""
+	cap = capacite or {}
+	if cap.get("incantation_formule"):
+		return True
+	return _as_int(cap.get("incantation")) > INCANTATION_PA_DEFAUT
 
 
 def pm_par_pa(capacite: dict) -> int:
@@ -555,10 +622,12 @@ def normaliser_sort(sort_doc) -> dict | None:
 		# se lancerait instantanément et gratuitement, sans le moindre message d'erreur.
 		# `incantation` : PA de lancement, plancher 1 — 0 n'aurait aucun sens et ferait
 		# diviser par zéro le calcul de la tranche de PM par PA.
-		"incantation": max(INCANTATION_PA_DEFAUT,
-						   min(INCANTATION_PA_MAX, _as_int(doc.get("incantation")))),
-		# `maintien` : PM par round pour rester actif, 0 = sort non maintenu.
-		"maintien": min(MAINTIEN_PM_MAX, _as_int(doc.get("maintien"))),
+		"incantation": _temps_de_doc(doc, "incantation", INCANTATION_PA_MAX, INCANTATION_PA_DEFAUT)[0],
+		"incantation_formule": _temps_de_doc(doc, "incantation", INCANTATION_PA_MAX, INCANTATION_PA_DEFAUT)[1],
+		# `maintien` : PM par round pour rester actif, 0 = sort non maintenu. Formulé ⇒
+		# résolu au lancement par `resoudre_temps` (plancher 1).
+		"maintien": _temps_de_doc(doc, "maintien", MAINTIEN_PM_MAX, 0)[0],
+		"maintien_formule": _temps_de_doc(doc, "maintien", MAINTIEN_PM_MAX, 0)[1],
 		# Sensibilité à la CHARGE PORTÉE (0 = le poids ne gêne pas, 1 = plein effet) —
 		# EXPLICITE dans cette liste blanche comme ses voisines. `None` (champ absent) est
 		# conservé tel quel : c'est ce que `charge_magie.sensibilite_de` distingue d'un 0
@@ -633,6 +702,8 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 		"maintien_reduction": _as_int(base.get("maintien_reduction")),
 		"soin": base.get("soin", ""),
 		"partage_soin": _as_int(base.get("partage_soin")),
+		"provocation": _as_int(base.get("provocation")),
+		"echange": _as_int(base.get("echange")),
 	}
 	formules = _fusionner_formules(base.get("formules"), {})
 	for bonus in bonus_list or []:
@@ -643,13 +714,19 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 		formules = _fusionner_formules(formules, bonus.get("formules"))
 		if bonus.get("lien_vie"):
 			out["lien_vie"] = dict(bonus["lien_vie"])
+			# Lien ÉCRASÉ : la part formulée du doc ne vaut plus (sinon elle s'ajouterait
+			# à la part du composant, que l'écrasement doit laisser intacte).
+			formules.pop(FORMULE_LIEN_VIE_PART, None)
+			if (bonus.get("formules") or {}).get(FORMULE_LIEN_VIE_PART):
+				formules[FORMULE_LIEN_VIE_PART] = bonus["formules"][FORMULE_LIEN_VIE_PART]
 		for key in ("pv", "pm", "duree", "esquive", "furtivite",
 					"cout_pv", "drain_pv", "drain_pm", "drain_max", "saut",
 					"invocation_duree", "invocation_nombre", "maintien_reduction",
-					"partage_soin"):
+					"partage_soin", "provocation"):
 			out[key] += _as_int(bonus.get(key))
 		for key in ("regen_pv", "regen_pm"):
 			out[key] += _as_signed_int(bonus.get(key))
+		out["echange"] = max(out["echange"], min(1, _as_int(bonus.get("echange"))))
 		for k, delta in (bonus.get("buffs") or {}).items():
 			if str(k) == "V":
 				continue
@@ -742,7 +819,8 @@ def part_durative(effets: dict) -> bool:
 	# Régén SIGNÉE : un poison pur (régén négative) est une part à durée à part entière.
 	return _as_int(eff.get("duree")) > 0 and bool(
 		eff.get("buffs") or _as_signed_int(eff.get("regen_pv"))
-		or _as_signed_int(eff.get("regen_pm")) or _as_int(eff.get("esquive")))
+		or _as_signed_int(eff.get("regen_pm")) or _as_int(eff.get("esquive"))
+		or _as_int(eff.get("provocation")))
 
 
 # ── Éligibilité d'une CAPACITÉ — source unique des sorts ET des compétences ──────
@@ -770,7 +848,8 @@ def effets_utilisables_combat(effets: dict) -> bool:
 	return (bool(eff.get("degats")) or _as_int(eff.get("pv")) > 0
 			or _as_int(eff.get("pm")) > 0 or _as_int(eff.get("furtivite")) > 0
 			or bool(eff.get("degats_pm")) or _as_int(eff.get("saut")) > 0
-			or bool(eff.get("lien_vie")) or part_durative(eff))
+			or bool(eff.get("lien_vie")) or _as_int(eff.get("echange")) > 0
+			or part_durative(eff))
 
 
 def capacite_utilisable_combat(capacite: dict, effets: dict | None = None) -> bool:
@@ -804,7 +883,20 @@ def effets_agissent_sur_cible(effets: dict) -> bool:
 	cœur de la famille anti-lanceur. C'est précisément la clé que la recopie des
 	compétences avait oubliée."""
 	eff = _vue_indicative(effets)
-	return bool(eff.get("degats")) or bool(eff.get("degats_pm")) or part_durative(eff)
+	return (bool(eff.get("degats")) or bool(eff.get("degats_pm")) or part_durative(eff)
+			or _as_int(eff.get("echange")) > 0)
+
+
+def provocation_pure(effets: dict) -> bool:
+	"""Les effets (RÉSOLUS) sont-ils une PROVOCATION sans dégâts ni aux PV ni aux PM ?
+
+	SOURCE UNIQUE de l'exception « provoquer à distance même engagé » (combat, branche
+	offensive ; miroir client `capaProvocationPure`). Restreinte aux provocations PURES : une
+	frappe à distance qui porterait aussi une provocation contournerait sinon la règle de
+	l'engagement. La ligne de vue reste exigée — on provoque qui vous voit."""
+	eff = effets or {}
+	return (_as_int(eff.get("provocation")) > 0 and not eff.get("degats")
+			and not eff.get("degats_pm"))
 
 
 def capacite_utilisable_exploration(capacite: dict) -> bool:
@@ -813,11 +905,11 @@ def capacite_utilisable_exploration(capacite: dict) -> bool:
 	NON offensive (`soi` ou `allie` — il n'y a pas de monstre à viser) ET au moins un effet
 	applicable hors combat : soin ou PM instantanés, ou part à durée.
 
-	⚠️ Cinq mécaniques sont refusées, toutes pour la même raison — il n'y a **ni round ni
+	⚠️ Six mécaniques sont refusées, toutes pour la même raison — il n'y a **ni round ni
 	grille** en exploration : l'INVOCATION (rien pour accueillir la créature), l'INCANTATION
 	de plus d'un PA (rien à quoi rattacher un PA reporté), l'ENTRETIEN (rien à prélever,
-	aucun tour ne passe), le SAUT (aucune case où atterrir) et le LIEN DE VIE (aucun coup à
-	rediriger). ⚠️ `cout_pv`, lui, reste applicable : ce n'est qu'un coût, pas une règle de
+	aucun tour ne passe), le SAUT (aucune case où atterrir), le LIEN DE VIE (aucun coup à
+	rediriger) et l'ÉCHANGE DE PLACE (aucune case à permuter). ⚠️ `cout_pv`, lui, reste applicable : ce n'est qu'un coût, pas une règle de
 	tour."""
 	cap = capacite or {}
 	if est_invocation(cap) or est_maintenu(cap) or est_incantation_longue(cap):
@@ -825,7 +917,7 @@ def capacite_utilisable_exploration(capacite: dict) -> bool:
 	if (cap.get("cible") or CIBLE_DEFAUT) == "ennemi":
 		return False
 	eff = _vue_indicative(cap.get("effets"))
-	if _as_int(eff.get("saut")) > 0 or eff.get("lien_vie"):
+	if _as_int(eff.get("saut")) > 0 or eff.get("lien_vie") or _as_int(eff.get("echange")) > 0:
 		return False
 	return _as_int(eff.get("pv")) > 0 or _as_int(eff.get("pm")) > 0 or part_durative(eff)
 
@@ -1127,6 +1219,8 @@ def sorts_apprenables(character: dict, find_docs, resolve_ref, rules_vocations) 
 	résolue)."""
 	connus = set((character or {}).get("sorts_connus") or [])
 	exclues = familles_exclues((character or {}).get("voc"), rules_vocations)
+	from utils.consommables import caracts_avec_buffs
+	caracts = caracts_avec_buffs(character or {})
 	out = []
 	for doc in find_docs({"type": "sort"}) or []:
 		sort = normaliser_sort(doc)
@@ -1141,6 +1235,10 @@ def sorts_apprenables(character: dict, find_docs, resolve_ref, rules_vocations) 
 		if niv is None or niv < sort["niveau"]:
 			continue
 		sort["magie"] = ecole
+		# Formules à caractéristiques RÉSOLUES pour ce personnage, comme `liste_sorts_payload` :
+		# sans quoi un buff à formule (rangé dans `formules`) disparaîtrait de l'étiquette.
+		sort = resoudre_temps(sort, caracts)
+		sort["effets"] = apercu_effets(sort["effets"], caracts)
 		sort["cout_points"] = cout_apprentissage(sort)
 		sort["grimoire_ok"] = grimoire_pour(character, sort["id"], resolve_ref) is not None
 		out.append(sort)
@@ -1263,6 +1361,8 @@ def liste_sorts_payload(character: dict, get_doc, contexte: str,
 	for sort in sorts_connus_docs(character, get_doc):
 		if contexte == "combat" and not sort_utilisable_combat(sort):
 			continue
+		# Entretien et PA d'incantation FORMULÉS, résolus pour ce lanceur (comme la portée).
+		temps = resoudre_temps(sort, caracts)
 		out.append({
 			"lancable": True if contexte == "combat" else sort_utilisable_exploration(sort),
 			"sort_id": sort["id"],
@@ -1275,8 +1375,8 @@ def liste_sorts_payload(character: dict, get_doc, contexte: str,
 			# tire l'étiquette de la case ET le grisage (un sort maintenu n'est lançable
 			# que si l'on peut payer le premier round). Sans elles, un joueur découvrirait
 			# la facture APRÈS avoir cliqué.
-			"incantation": sort["incantation"],
-			"maintien": sort["maintien"],
+			"incantation": temps["incantation"],
+			"maintien": temps["maintien"],
 			"cible": sort["cible"],
 			# Portée et effets RÉSOLUS pour ce lanceur (formules à caractéristiques) : le
 			# client cible et affiche sans rien calculer (CLAUDE.md §10).
@@ -1295,7 +1395,7 @@ def liste_sorts_payload(character: dict, get_doc, contexte: str,
 			# sans ces clés il proposerait un sort au tarif à vide que le serveur refuserait.
 			"sensibilite_charge": sort["sensibilite_charge"],
 			"cout_pm_effectif": charge_magie.cout_pm_effectif(sort["cout_pm"], _pen(sort)),
-			"maintien_effectif": charge_magie.maintien_effectif(sort["maintien"], _pen(sort)),
+			"maintien_effectif": charge_magie.maintien_effectif(temps["maintien"], _pen(sort)),
 			"composants": _composants_payload(sort, character, get_doc),
 		})
 	return out

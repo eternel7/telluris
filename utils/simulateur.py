@@ -62,7 +62,8 @@ from utils.consommables import effet_instantane, est_consommable
 from utils.consommables import effets_de as effets_de_consommable
 from utils.slots_actions import slots_effectifs
 from utils.sorts import (
-	normaliser_sort, part_durative, portee_effective, resoudre_effets, sort_utilisable_combat,
+	normaliser_sort, part_durative, portee_effective, resoudre_effets, resoudre_temps,
+	sort_utilisable_combat,
 )
 
 # ── Politique de duel (réglages du simulateur, PAS des world-vars : un banc d'essai
@@ -348,7 +349,7 @@ def _resoudre_capacite(capa: dict, caracts: dict) -> dict:
 	"""Capacité OFFENSIVE du banc d'essai, formules à caractéristiques résolues pour son
 	lanceur (`sorts.resoudre_effets`, `portee_effective`) — même chokepoint que le jeu,
 	sinon le simulateur mesurerait un autre sort que celui qu'on lance."""
-	return {**capa, "effets": resoudre_effets(capa["effets"], caracts),
+	return {**resoudre_temps(capa, caracts), "effets": resoudre_effets(capa["effets"], caracts),
 			"portee": max(1, int(portee_effective(capa, caracts) or 1))}
 
 

@@ -179,6 +179,44 @@ def cumul_effets(effets: list) -> dict:
 			"esquive": esquive, "canalisation": canalisation}
 
 
+def competences_bonus_resolu(character: dict) -> dict:
+	"""`competences_bonus` du personnage, PASSIVES À FORMULE résolues — seul lecteur de
+	l'agrégat qui compte (cf. `_sources_de_buffs_detaillees`), donc buffs, régén, esquive,
+	snapshot de combat et infobulle de la fiche voient tous la même valeur.
+
+	⚠️ Résolues sur `caracteristiques_current` BRUT (CLAUDE.md §3) : une passive qui lirait
+	les caracts buffées dépendrait d'elle-même (+R par la R) et d'une potion bue. Lue à
+	chaque appel, la valeur suit les montées de caractéristique sans recalcul de l'agrégat.
+	Sans formule, rend l'agrégat lui-même (aucune copie, aucune migration)."""
+	bonus = (character or {}).get("competences_bonus") or {}
+	formules = bonus.get("formules") or {}
+	if not formules:
+		return bonus
+	# Import PARESSEUX : `utils.sorts` importe ce module.
+	from utils.sorts import evaluer_formule
+	caracts = (character or {}).get("caracteristiques_current") or {}
+	out = dict(bonus)
+	buffs = dict(out.get("buffs") or {})
+	for code, texte in (formules.get("buffs") or {}).items():
+		buffs[code] = int(buffs.get(code, 0) or 0) + evaluer_formule(texte, caracts)
+	out["buffs"] = {c: v for c, v in buffs.items() if v}
+	for cle in ("regen_pv", "regen_pm"):
+		if formules.get(cle):
+			out[cle] = _as_signed_int(out.get(cle)) + evaluer_formule(formules[cle], caracts)
+	if formules.get("esquive"):
+		out["esquive"] = max(0, _as_int(out.get("esquive")) + evaluer_formule(formules["esquive"], caracts))
+	sources = []
+	for src in out.get("buffs_sources") or []:
+		if src.get("formules"):
+			propres = dict(src.get("buffs") or {})
+			for code, texte in src["formules"].items():
+				propres[code] = int(propres.get(code, 0) or 0) + evaluer_formule(texte, caracts)
+			src = {**src, "buffs": {c: v for c, v in propres.items() if v}}
+		sources.append(src)
+	out["buffs_sources"] = sources
+	return out
+
+
 def _sources_de_buffs_detaillees(character: dict, origines: tuple = ORIGINES_BUFFS) -> list:
 	"""Toutes les sources de buffs/régén, étiquetées par origine : [(origine, entrée), …].
 
@@ -208,7 +246,8 @@ def _sources_de_buffs_detaillees(character: dict, origines: tuple = ORIGINES_BUF
 	for origine, cle in (("equipement", "equipment_bonus"), ("competence", "competences_bonus")):
 		if origine not in origines:
 			continue
-		entree = character.get(cle)
+		# Passives À FORMULE résolues ici, au seul point de lecture de l'agrégat.
+		entree = competences_bonus_resolu(character) if cle == "competences_bonus" else character.get(cle)
 		if entree:
 			sources.append((origine, entree))
 	return sources

@@ -23,7 +23,8 @@ from utils.sorts import (
 	part_durative, effets_d_arme, concat_degats, INCANTATION_PA_MAX,
 	capacite_utilisable_combat, effets_agissent_sur_cible,
 	est_incantation_longue, est_maintenu, pm_par_pa, seuil_concentration,
-	sorts_eligibles_espece, resoudre_effets, portee_effective,
+	sorts_eligibles_espece, resoudre_effets, portee_effective, resoudre_temps,
+	provocation_pure,
 )
 from utils.zones_effet import cases_effet, placement_visuel
 from utils.quetes import maj_progress_kills, maj_progress_chasse
@@ -321,6 +322,10 @@ def _empiler_effet_combat(acteur: dict, source: dict, effets: dict, tour: int) -
 		# son propre tour perdrait un point avant d'avoir servi.
 		"pose_tour": int(tour or 0),
 	}
+	if _eff_int(eff.get("provocation")):
+		# PROVOCATION : le provocateur (`provocateur_id`) est timbré par l'appelant qui
+		# connaît le lanceur (`_resoudre_coup_capacite`) ; lue par `_cible_joueur`.
+		entry["provocation"] = 1
 	if maintien:
 		# ⚠️ `maintenu` fait SAUTER le décrément (cf. _tick_effets_combat) : « tant qu'il
 		# peut payer, le sort reste actif ». `duree` ne veut donc plus rien dire pour lui —
@@ -974,6 +979,11 @@ def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, sourc
 	# une cible que le même coup vient d'abattre.
 	effet_cible = _appliquer_effet_sur_cible(combat_doc, monstre, source, effets,
 											 combat_doc["tour"])
+	if effet_cible and effet_cible.get("provocation"):
+		# L'entrée EST celle des `effets_actifs` du monstre (`poser_effet` la stocke telle
+		# quelle) : la timbrer ici suffit. Relancer la même capacité la remplace — donc le
+		# dernier qui provoque avec elle devient la cible.
+		effet_cible["provocateur_id"] = joueur.get("id")
 	return {"hit": True, "dmg": dmg, "critique": jet["critique"],
 			"cible": monstre["nom"], "cible_id": monstre.get("id"),
 			"cible_pv": monstre["currentPV"],
@@ -4218,6 +4228,62 @@ def _sauter(combat_doc: dict, lanceur: dict, sauteur: dict, effets: dict,
 					 "vers": {"x": nx, "y": ny}}}
 
 
+def _verifier_echange(combat_doc: dict, lanceur: dict, allie: dict | None, grid: dict) -> dict:
+	"""L'échange de place (`effets.echange`) entre le lanceur et la cible désignée — un ALLIÉ
+	ou un ENNEMI (`allie` désigne alors le monstre) — est-il recevable ? `{}` si oui. Appelée en tête de `_lancer_capacite`, AVANT tout débit, puis
+	par `_echanger` — même règle que le saut : une capacité qui ne part pas ne se paie pas.
+
+	⚠️ Aucune DISTANCE ici : la portée de la capacité en décide (`_lancer_sur_allie`), le
+	contenu fixe le contact. Restent les règles de la PERMUTATION, celles de l'échange d'un
+	pas (`_echange_possible`) : chacun doit tenir sur la case de l'autre, vol compris.
+	⚠️ 1x1 des deux côtés — une emprise de plusieurs cases ne tient pas dans une case — et
+	aucun TIERS sur l'une des deux cases (le lanceur peut traverser une grande monture : les
+	deux se superposeraient)."""
+	if not allie or allie is lanceur:
+		return {"error": "Personne avec qui échanger sa place."}
+	if jetons.est_grand(lanceur) or jetons.est_grand(allie):
+		return {"error": "Une grande créature ne peut pas échanger sa place."}
+	if not _echange_possible(grid["cells"], lanceur, allie):
+		return {"error": "L'un de vous ne tiendrait pas sur la case de l'autre."}
+	cases = {(lanceur["pos"]["x"], lanceur["pos"]["y"]), (allie["pos"]["x"], allie["pos"]["y"])}
+	tiers = [a for a in combat_doc["joueurs"] if a.get("currentPV", 0) > 0] + \
+			[m for m in combat_doc["monstres"] if m.get("vivant")]
+	for acteur in tiers:
+		if acteur is lanceur or acteur is allie or not acteur.get("pos"):
+			continue
+		if any(jetons.couvre(acteur, x, y) for x, y in cases):
+			return {"error": "La place est prise."}
+	return {}
+
+
+def _echanger(combat_doc: dict, lanceur: dict, allie: dict, grid: dict) -> dict:
+	"""PERMUTE les cases du lanceur et de la cible désignée (allié OU ennemi).
+	`{"echange": …}` ou `{"error": …}`.
+
+	⚠️ Journal : UNE entrée `move` qui NOMME les deux corps (`_avec_etat`) — sans quoi l'un
+	des jetons suivrait l'état final tout de suite et l'autre attendrait la révélation : ils
+	ne glisseraient pas ensemble (même raison que l'échange d'un pas).
+	⚠️ Arriver sur une zone persistante ou un piège a ses effets, pour chacun — comme y
+	entrer à pied ou y atterrir d'un saut."""
+	erreur = _verifier_echange(combat_doc, lanceur, allie, grid)
+	if erreur:
+		return erreur
+	de_lanceur = dict(lanceur["pos"])
+	de_allie = dict(allie["pos"])
+	lanceur["pos"], allie["pos"] = dict(de_allie), dict(de_lanceur)
+	combat_doc.setdefault("log", []).append(_avec_etat(_avec_vfx({
+		"tour": int(combat_doc.get("tour", 0) or 0),
+		"acteur": lanceur.get("nom", "?"),
+		"kind": "move",
+		"texte": f"{lanceur.get('nom', '?')} prend la place de {allie.get('nom', '?')}.",
+	}, "sort", allie.get("id", "")), lanceur, allie))
+	for acteur in (lanceur, allie):
+		_bruler_zones(combat_doc, acteur)
+		_pieges_au_pas(combat_doc, acteur)
+	return {"echange": {"lanceur_id": lanceur.get("id"), "allie_id": allie.get("id"),
+						"lanceur_vers": dict(lanceur["pos"]), "allie_vers": dict(allie["pos"])}}
+
+
 def _rediriger_lien_vie(combat_doc: dict, defenseur: dict, dmg: int) -> tuple:
 	"""Répartit un coup entre le protégé et son protecteur. N'APPLIQUE rien.
 
@@ -4528,10 +4594,29 @@ def _combattants_vivants(combat_doc: dict) -> list:
 	return [j for j in _joueurs_vivants(combat_doc) if j.get("jouable", True)]
 
 
+def _provocateur(combat_doc: dict, monstre: dict) -> dict | None:
+	"""Le joueur qui PROVOQUE ce monstre (entrée `provocation` de ses `effets_actifs`), s'il
+	est encore debout — la provocation la plus RÉCENTE l'emporte. None sinon : provocateur
+	tombé ou parti ⇒ le monstre reprend son ciblage ordinaire, l'effet restant inerte
+	jusqu'à son expiration."""
+	vivants = {j.get("id"): j for j in _joueurs_vivants(combat_doc)}
+	for entree in reversed(monstre.get("effets_actifs") or []):
+		if entree.get("provocation") and entree.get("provocateur_id") in vivants:
+			return vivants[entree["provocateur_id"]]
+	return None
+
+
 def _cible_joueur(combat_doc: dict, monstre: dict) -> dict | None:
 	"""Cible de l'IA d'un monstre : le joueur VIVANT le plus proche (Chebyshev), en
 	excluant un joueur furtif non détecté (il ne le voit pas). None si aucun joueur
-	visible — tous furtifs non détectés (le monstre tentera une détection) ou tous KO."""
+	visible — tous furtifs non détectés (le monstre tentera une détection) ou tous KO.
+
+	PROVOCATION d'abord (`_provocateur`) : un monstre provoqué vise son provocateur, de
+	près comme de loin, même furtif — on ne provoque pas en restant caché. SEUL point de
+	choix de cible de l'IA : déplacement ET frappe passent ici."""
+	provocateur = _provocateur(combat_doc, monstre)
+	if provocateur is not None:
+		return provocateur
 	visibles = [
 		j for j in _joueurs_vivants(combat_doc)
 		if not (j.get("furtif") and not monstre.get("detecte"))
@@ -5282,6 +5367,18 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 			erreur = _verifier_saut(combat_doc, sauteur, effets, dx, dy, grid)
 			if erreur:
 				return erreur, None
+	# ÉCHANGE DE PLACE : validé lui aussi AVANT tout débit et tout soutien appliqué, avec un
+	# allié comme avec un ennemi. Une cible absente, hors de portée ou à terre est refusée
+	# plus bas par la garde de sa branche, avant que rien ne soit posé.
+	if effets.get("echange") and sdoc.get("cible") in ("allie", "ennemi"):
+		partenaire = None
+		if cible_id:
+			partenaire = (_get_joueur(combat_doc, cible_id) if sdoc.get("cible") == "allie"
+						  else _get_monstre(combat_doc, cible_id))
+		if partenaire is not None:
+			erreur = _verifier_echange(combat_doc, joueur, partenaire, grid)
+			if erreur:
+				return erreur, None
 	if invocation:
 		# INVOCATION : le sort ne vise personne, il ajoute des combattants. Testée AVANT
 		# `cible`, qui ne décrit pas ce qu'elle fait (une invocation est `soi` par défaut,
@@ -5338,6 +5435,12 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		# LIEN DE VIE : le sort ne pose rien sur le désigné, il TISSE entre lui et le
 		# lanceur. Posé après le soutien, pour que la zone serve d'abord normalement.
 		_poser_lien_vie(combat_doc, joueur, allie, sdoc, effets)
+		# ÉCHANGE DE PLACE (« Attention, messire ! ») : validé en tête, exécuté ici.
+		if effets.get("echange"):
+			echange = _echanger(combat_doc, joueur, allie, grid)
+			if "error" in echange:
+				return echange, None
+			result.update(echange)
 		# SAUT sur un allié : la case d'arrivée est celle que le joueur a désignée.
 		saut = _sauter(combat_doc, joueur, allie, effets, dx, dy, grid)
 		if "error" in saut:
@@ -5361,8 +5464,11 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		# Règles à distance identiques au jet/tir : interdit si engagé au corps à corps,
 		# et exige une ligne de vue. ⚠️ Piloté par le drapeau `ranged` et non par
 		# `portee > 1` : une hallebarde frappe à 2 cases EN MÊLÉE.
+		# EXCEPTION : une provocation PURE se lance engagé (`provocation_pure`) — c'est au
+		# contact que le garde en a besoin ; la ligne de vue, elle, reste exigée.
 		if est_a_distance:
-			if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
+			if (not provocation_pure(effets)
+					and any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"])):
 				return {"error": profil["engage"]}, None
 			if not _vue_acteurs(grid["cells"], joueur, monstre):
 				return {"error": "Ligne de vue obstruée."}, None
@@ -5376,6 +5482,12 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		# pm_def ; un sort de CONTACT marqué `cc`/`cd` (« au toucher ») exige
 		# d'abord de poser la main — jet martial contre la défense physique.
 		mode_jet = sdoc.get("jet") or ("cc" if cle == "competence" else "magique")
+		# ÉCHANGE DE PLACE à DISTANCE (cible hors contact) : le jet martial ne vaut qu'au
+		# corps à corps — à distance on ne saisit personne, l'échange se résout comme un
+		# SORT (`toucher_magique` contre `pm_def`). C'est la distance RÉELLE qui décide,
+		# pas la portée de la capacité : au contact, le jet de la donnée s'applique.
+		if effets.get("echange") and _cheby(joueur, monstre) > 1:
+			mode_jet = "magique"
 		# ZONE D'EFFET : la cible désignée d'abord, puis tout monstre pris dans la
 		# forme (cf. utils/zones_effet.py). `zone` absente ⇒ liste d'un seul élément,
 		# donc exactement le comportement d'avant.
@@ -5395,6 +5507,15 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		result[cle] = nom_capacite
 		# ZONE PERSISTANTE (Mur de feu) : posée plus bas, une fois la concentration inscrite.
 		zone_persistante = (monstre, notation, mode_jet)
+
+		# ÉCHANGE DE PLACE avec l'ENNEMI désigné : seulement s'il a été TOUCHÉ (un effet
+		# offensif passe par le jet) et s'il est encore debout — on ne prend pas la place
+		# d'un cadavre. En zone, seule la cible désignée permute. La géométrie a été validée
+		# en tête, avant le débit.
+		if effets.get("echange") and result.get("hit") and monstre["vivant"]:
+			echange = _echanger(combat_doc, joueur, monstre, grid)
+			if "error" not in echange:
+				result.update(echange)
 
 		# Incanter au contact révèle le lanceur (touché ou raté) ; à distance, seule la
 		# cible tente de le repérer — foudroyée sur place, elle n'en a même pas le temps.
@@ -5910,10 +6031,12 @@ def _resoudre_action_joueur(
 		# à DURÉE (buffs/régén/esquive), empilée sur les effets vivants du snapshot.
 		if not sort or not sort.get("doc"):
 			return {"error": "Sort invalide."}
-		sdoc = sort["doc"]
 		# FORMULES À CARACTÉRISTIQUES résolues ICI, une fois : tout ce qui suit (coût en PV,
 		# incantation armée, application, zone persistante) lit des entiers. Une incantation
-		# longue fige donc sa puissance à l'ARMEMENT, comme son tarif.
+		# longue fige donc sa puissance à l'ARMEMENT, comme son tarif. `resoudre_temps` fait
+		# de même pour l'entretien et les PA d'incantation formulés (renfort de composant
+		# rejoué sur la valeur résolue).
+		sdoc = resoudre_temps(sort["doc"], caracts_effectives(joueur), sort.get("effets"))
 		effets = resoudre_effets(sort.get("effets") or {}, caracts_effectives(joueur))
 		cout_pm = _cout_pm_charge(joueur, sdoc)
 		# ⚠️ MÊME FONCTION que `sorts.sort_utilisable_combat`, celle qui a filtré ce sort
@@ -5982,6 +6105,7 @@ def _resoudre_action_joueur(
 		# et se paie une seule fois, alors qu'une incantation longue traverse des tours.
 		if not competence:
 			return {"error": "Compétence invalide."}
+		competence = resoudre_temps(competence, caracts_effectives(joueur))
 		effets = resoudre_effets(competence.get("effets") or {}, caracts_effectives(joueur))
 		cout_pm = _cout_pm_charge(joueur, competence)
 		# ⚠️ MÊME FONCTION que `competences.competence_utilisable_combat`, celle qui a
