@@ -1,5 +1,5 @@
 """Paladin 🛡 — protecteur au-delà des remparts, arme qui brûle de lumière (magie Sainte)."""
-from competences_1_10 import A
+from competences_1_10 import A, L
 
 MAG = {"jet": "magique", "portee": 5}
 
@@ -15,9 +15,13 @@ ENTREES = [
 	A(2, "Bond du croisé", "🦅", "saut", "saut", "Il s'élance au secours d'un frère d'armes."),
 	# ── Niveau 3 ──
 	A(3, "Lumière aveuglante", "☀️", "zone_cercle", "lumiere_zone", "Un éclat sacré qui brûle les yeux des impurs.", **MAG),
-	A(3, "Serment de protection", "📜", "posture", "bouclier", "Il prête serment, et sa garde ne faiblit plus.", stats=("R", "Vol")),
+	L(3, "Mains secourables", "🙌", "soin_sacre", "Il referme la plaie d'un compagnon, et un peu de cette grâce lui revient.",
+	  {"cible": "allie", "portee": 1, "cout_pm": 15, "effets": {"soin": "1D8+{Vol/10}", "partage_soin": 30}},
+	  remplace="serment_de_protection"),
 	# ── Niveau 4 ──
-	A(4, "Masse de lumière", "🔨", "frappe", "lumiere", "La masse s'abat dans une gerbe d'étincelles dorées."),
+	L(4, "Châtiment juste", "⚖️", "lumiere", "Ce n'est pas son bras qui frappe, c'est sa foi.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 18, "effets": {"degats": "2D8+{Vol/8}"}},
+	  remplace="masse_de_lumiere"),
 	A(4, "Soins du champ de bataille", "⛑️", "regen_allie", "soin_sacre", "Il impose les mains et laisse la grâce agir."),
 	A(4, "Jugement", "⚖️", "entrave", "lame_sacree", "Un coup qui fait plier l'ennemi sous le poids de ses fautes.", malus=("F", "Vol")),
 	A(4, "Aura de courage", "🦁", "cri", "aura_sacree", "Autour de lui, plus personne ne recule.", stats=("Vol", "R")),
@@ -27,7 +31,9 @@ ENTREES = [
 	A(5, "Égide", "🛡️", "buff_allie", "bouclier", "Il étend sa protection sur un compagnon menacé.", stats=("R",)),
 	A(5, "Frappe du croisé", "✝️", "frappe", "lame_sacree", "Un coup qui porte la croix gravée dans le métal."),
 	# ── Niveau 6 ──
-	A(6, "Marteau de justice", "🔨", "zone_rect", "lame_sacree", "Un coup large qui frappe tous ceux qui se dressent devant lui."),
+	L(6, "Serment de garde", "🤝", "lien", "Il jure de garder un compagnon : sa foi amortit les coups, son corps prend le reste.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 20, "maintien": 4, "effets": {"lien_vie": {"part": 60, "reduction": 20}}},
+	  remplace="marteau_de_justice"),
 	A(6, "Mains de lumière", "🙌", "soin_zone", "soin_vague", "La lumière jaillit de ses mains et soigne ceux qui l'entourent."),
 	# ── Niveau 7 ──
 	A(7, "Lame de l'aube", "🌅", "frappe", "lumiere", "Une lame qui brille comme le soleil levant."),

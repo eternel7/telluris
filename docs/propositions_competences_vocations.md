@@ -1,6 +1,6 @@
 # Propositions — compétences de vocation : caractéristiques et mécaniques créatives
 
-**Statut : PROPOSITION, rien n'est importé.** Ce document est à relire et à trier ; ce qui sera retenu passera par un générateur (`dev/competences_1_10/<vocation>.py` ou un lot dédié), jamais à la main.
+**Statut : APPLIQUÉ** — les 54 propositions sont des entrées libres `L(...)` de `dev/competences_1_10/<vocation>.py`, chacune REMPLAÇANT une entrée existante de même vocation et de même niveau (même `_id`). Le détail à jour (descriptions de jeu, animations, compétence remplacée ♻) vit dans `docs/competences_vocations_1_10.md` ; import : `jsons/competences_vocations_1_10_a_importer.json`. Deux écarts imposés par les animations : *Rafale tranchante* frappe la bande des 3 cases devant (aucune nappe de cône « vent ») et *Fausse note* est un cône de 4 (nappe `cone_folie`). Les tableaux ci-dessous restent la trace de la proposition.
 
 Chaque compétence proposée ci-dessous a été **construite en doc et passée par les mêmes gardes que le lot 1 → 10** (`check_competences_doc.verifier_competence`, `normaliser_competence`, éligibilité au combat), plus les garde-fous des formules des sorts (buff ≤ `{Car/3}`, jamais V par formule, durée ≤ 6 à 80) et l'unicité des noms contre le dump. La colonne « à 20 → à 80 » donne la valeur résolue pour un lanceur à 20 puis à 80 dans la caractéristique (dés : moyenne).
 
@@ -17,7 +17,7 @@ Le lot `competences_caracteristiques_a_importer.json` appliquait une seule règl
 | 🧮 | caractéristique **inattendue mais justifiée** | soin du forestier sur l'Int (les plantes), malus du duelliste sur la Cha (le bon mot) |
 | ✨ | mécaniques **déjà dans le moteur, presque jamais utilisées** par les compétences | `lien_vie` (1 compétence), `partage_soin` (0), `drain_pm` (0), saut d'un ALLIÉ, zone persistante, esquive maintenue, échange PV → PM |
 
-✨ ne demande **aucun changement de moteur**. Seules les zones persistantes (marquées ⚠️) butent sur la garde (12) du lot, qui refuse `zone` + `maintien` sur une active `ennemi` pour éviter un « mur de feu » involontaire : il faudrait une exception **explicite** (par exemple une clé de donnée du générateur), le moteur, lui, les gère déjà.
+✨ ne demande **aucun changement de moteur**. Les zones persistantes (marquées ⚠️) sont DÉCLARÉES dans la donnée (`zone_persistante=True`), ce qui lève pour elles seules la garde (12) contre le mur involontaire.
 
 ## Propositions par vocation
 
@@ -189,11 +189,3 @@ Hors de portée sans développement : chacune se décide **avant** d'être écri
 | **Munition spéciale** : flèche enflammée qui consomme une flèche dédiée | forestier, assassin | les compétences n'ont pas de composants |
 | **Formules sur `maintien`, `incantation`, `saut`, `lien_vie.part`** | toutes | hors de `FORMULE_CLES_ENTIERES` ; `saut` et `lien_vie` sont bornés à part |
 | **Passives à formule** : « +{Vol/10} en R » qui grandit avec le personnage | toutes | `bonus_passifs` ne résout aucune formule |
-
-## Pour passer à l'import
-
-1. Cocher les propositions retenues (ou renommer, reniveler).
-2. Les placer en entrées de `dev/competences_1_10/<vocation>.py`. ⚠️ Le compte par niveau du lot (4 / 2 + 5) est **déjà plein** : il faut soit remplacer une entrée existante, soit en faire un lot à part, hors règle de compte.
-3. Formules et mécaniques neuves exigent d'étendre les archétypes du générateur (aujourd'hui des valeurs d'`ECHELLE` uniquement) ou un archétype « libre » qui prend ses `effets` tels quels.
-4. Pour les zones persistantes : décider de l'exception à la garde (12).
-5. Animation `animation:capa_*` sonore à choisir pour chaque active.

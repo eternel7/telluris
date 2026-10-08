@@ -35,6 +35,7 @@ n'est PAS réémis (`admin_import_bulk` fait un PUT complet : une retouche faite
 l'emporte). Régénération idempotente.
 """
 
+import copy
 import importlib
 import json
 import os
@@ -168,6 +169,9 @@ def construire_effets(entree, voc):
 	"""Champs de jeu d'une entrée (cible, jet, portée, zone, coûts, effets) — ou ValueError."""
 	n, o, prof = entree["niveau"], entree["options"], PROFILS[voc]
 	arch = entree["archetype"]
+	# ── libre : champs écrits par la donnée (cf. competences_1_10.L) ───────────────
+	if arch == "libre":
+		return copy.deepcopy(o["champs"])
 	stats = tuple(o.get("stats", prof["stats"]))
 	malus = tuple(o.get("malus", prof["malus"]))
 	# ── passives ──────────────────────────────────────────────────────────────────
@@ -351,6 +355,10 @@ def _est_magique(regle_voc):
 	return bool(str(regle_voc.get("magie") or "").strip())
 
 
+def _sans_rev(doc):
+	return {k: v for k, v in doc.items() if k != "_rev"}
+
+
 def _meme_competence(a, b):
 	return all(a.get(k) == b.get(k) for k in ("vocation", "niveau", "mode"))
 
@@ -399,10 +407,14 @@ def construire(ref=None):
 					sonore = themes[parts[-1]].get("son")
 					if not sonore:
 						erreurs.append(f"{prefixe} : thème `{parts[-1]}` MUET — l'active n'aurait pas de son")
-					if (e["archetype"] == "zone_cone") != (len(parts) == 2):
+					zone = doc.get("zone") or {}
+					if (zone.get("forme") == "cone") != (len(parts) == 2):
 						erreurs.append(f"{prefixe} : un cône exige « impact/nappe », et seul un cône")
 					if len(parts) == 2 and parts[1] not in LONGUEUR_CONE:
 						erreurs.append(f"{prefixe} : nappe de cône inconnue {parts[1]}")
+					elif len(parts) == 2 and zone.get("longueur") != LONGUEUR_CONE[parts[1]]:
+						erreurs.append(f"{prefixe} : cône de longueur {zone.get('longueur')} sous la "
+									   f"nappe {parts[1]}, réglée pour {LONGUEUR_CONE[parts[1]]}")
 			cid = doc["_id"]
 			if cid in ids_lot:
 				erreurs.append(f"{prefixe} : `_id` {cid} en double dans le lot")
@@ -412,10 +424,15 @@ def construire(ref=None):
 				erreurs.append(f"{prefixe} : `_id` {cid} DÉJÀ PRIS par une autre compétence "
 							   f"({existant.get('vocation')} niv {existant.get('niveau')}) — renommer")
 			ids_existants = {i for i in ref["competences"] if i != cid}
-			erreurs.extend(check.verifier_competence(doc, prefixe, ids_existants,
-													 set(vocations), niveaux=tuple(NIVEAUX)))
+			erreurs.extend(check.verifier_competence(
+				doc, prefixe, ids_existants, set(vocations), niveaux=tuple(NIVEAUX),
+				zone_persistante=bool(e["options"].get("zone_persistante"))))
 			lot.append(doc)
 			if existant is None:
+				a_emettre.append(doc)
+			elif e["options"].get("remplace") and _sans_rev(existant) != doc:
+				# REMPLACEMENT voulu (competences_1_10.L) : même `_id`, contenu neuf — réémis
+				# tant que la base diffère, puis plus rien (idempotent).
 				a_emettre.append(doc)
 		noms = [d["nom"] for d in docs_voc]
 		doublons = sorted({x for x in noms if noms.count(x) > 1})
@@ -469,6 +486,11 @@ def construire(ref=None):
 
 # ── Document lisible ──────────────────────────────────────────────────────────────
 
+def _signe(v):
+	"""`+3` / `-2` pour un entier, la formule telle quelle sinon."""
+	return v if isinstance(v, str) else f"{v:+d}"
+
+
 def _resume_effets(doc):
 	e = doc["effets"]
 	parts = []
@@ -476,26 +498,36 @@ def _resume_effets(doc):
 		parts.append(f"{e['degats']} dégâts")
 	if e.get("degats_pm"):
 		parts.append(f"{e['degats_pm']} aux PM")
+	if e.get("soin"):
+		parts.append(f"soin {e['soin']}")
 	if e.get("pv"):
 		parts.append(f"+{e['pv']} PV")
 	if e.get("pm"):
 		parts.append(f"+{e['pm']} PM")
 	if e.get("buffs"):
-		parts.append(" ".join(f"{k} {v:+d}" for k, v in e["buffs"].items()))
+		parts.append(" ".join(f"{k} {_signe(v)}" for k, v in e["buffs"].items()))
 	if e.get("esquive"):
 		parts.append(f"esquive {e['esquive']}")
 	if e.get("regen_pv"):
-		parts.append(f"régén PV {e['regen_pv']:+d}")
+		parts.append(f"régén PV {_signe(e['regen_pv'])}")
 	if e.get("regen_pm"):
-		parts.append(f"régén PM {e['regen_pm']:+d}")
+		parts.append(f"régén PM {_signe(e['regen_pm'])}")
 	if e.get("drain_pv"):
 		parts.append(f"drain {e['drain_pv']} %" + (f" (max {e['drain_max']})" if e.get("drain_max") else ""))
+	if e.get("drain_pm"):
+		parts.append(f"drain PM {e['drain_pm']} %" + (f" (max {e['drain_max']})" if e.get("drain_max") else ""))
+	if e.get("partage_soin"):
+		parts.append(f"↺ {e['partage_soin']} % au lanceur")
+	if e.get("lien_vie"):
+		parts.append(f"lien de vie {e['lien_vie']['part']} %"
+					 + (f" (−{e['lien_vie']['reduction']} %)" if e["lien_vie"].get("reduction") else ""))
 	if e.get("saut"):
-		parts.append(f"saut {e['saut']} cases")
+		parts.append(f"saut {e['saut']} cases" + (" (un allié)" if doc.get("cible") == "allie" else ""))
 	if e.get("cout_pv"):
 		parts.append(f"coûte {e['cout_pv']} PV")
 	if e.get("furtivite"):
-		parts.append(f"furtivité {e['furtivite']} ({', '.join(doc['condition']['battle_map_tags'])})")
+		terrains = (doc.get("condition") or {}).get("battle_map_tags")
+		parts.append(f"furtivité {e['furtivite']}" + (f" ({', '.join(terrains)})" if terrains else ""))
 	if e.get("duree"):
 		parts.append(f"{e['duree']} tours")
 	return " · ".join(parts)
@@ -523,6 +555,8 @@ def _resume_cible(doc):
 	if z:
 		dims = {k: v for k, v in z.items() if k in ("rayon", "longueur", "largeur")}
 		txt += f" · {z['forme']} " + " ".join(f"{k} {v}" for k, v in dims.items())
+		if doc["cible"] == "ennemi" and doc.get("maintien"):
+			txt += " · 🔥 zone persistante"
 	return txt
 
 
@@ -583,7 +617,9 @@ def ecrire_doc(lot, compte, ref):
 				  "| compétence | mode | coût | cible | effets | animation |", "|---|---|---|---|---|---|"]
 			for d in sorted((d for d in par_voc[voc] if d["niveau"] == niv),
 							key=lambda d: (d["mode"] != "passive", d["nom"])):
-				L.append(f"| {d['icon']} **{d['nom']}** — *{d['description']}* | {d['mode']} | "
+				ancien = (ref["competences"].get(d["_id"]) or {}).get("nom")
+				marque = f" ♻ *remplace « {ancien} »*" if ancien and ancien != d["nom"] else ""
+				L.append(f"| {d['icon']} **{d['nom']}**{marque} — *{d['description']}* | {d['mode']} | "
 						 f"{_resume_cout(d)} | {_resume_cible(d)} | {_resume_effets(d)} | "
 						 f"{_resume_anim(d, themes)} |")
 			L.append("")

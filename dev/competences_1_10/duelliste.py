@@ -1,5 +1,5 @@
 """Duelliste 🤺 — précision, vitesse et panache plutôt que robustesse."""
-from competences_1_10 import A, P
+from competences_1_10 import A, P, L
 
 ENTREES = [
 	# ── Niveau 1 ──
@@ -23,7 +23,9 @@ ENTREES = [
 	A(3, "Double attaque", "⚔️", "frappe", "lame", "Deux coups si proches qu'on n'en voit qu'un."),
 	A(3, "Désarmement", "🫳", "entrave", "garde", "D'une torsion du poignet, l'arme adverse lui échappe presque.", malus=("F", "Ag")),
 	A(3, "Danse des lames", "💃", "zone_rect", "balayage", "Un enchaînement léger qui touche trois adversaires."),
-	A(3, "Garde de soie", "🧵", "posture", "garde", "Une garde si souple qu'elle ne laisse aucune prise.", stats=("Ag",)),
+	L(3, "Garde élégante", "🤺", "garde", "Une garde si gracieuse qu'on oublie d'y chercher la faille — et qu'il tient aussi longtemps qu'on le regarde.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 15, "effets": {"esquive": "3+{Ag/10}", "duree": "1+{Cha/30}"}},
+	  remplace="garde_de_soie"),
 	# ── Niveau 4 ──
 	P(4, "Jambes de danseur", "🩰", "p_esquive", "Il ne se trouve jamais là où tombe le coup."),
 	P(4, "Coup d'œil", "🎯", "p_carac", "Il voit l'ouverture avant qu'elle n'existe.", stats=("Int",)),
@@ -43,7 +45,9 @@ ENTREES = [
 	# ── Niveau 6 ──
 	P(6, "Réflexes de chat", "🐈", "p_esquive", "Il esquive comme un chat retombe sur ses pattes."),
 	A(6, "Coup de maître", "🏅", "frappe", "lame", "Un coup qu'on ne voit qu'une fois par vie."),
-	A(6, "Feinte double", "🎭", "entrave", "double", "Il menace à gauche, puis à droite, et l'adversaire ne sait plus où se garder.", malus=("Int", "Ag")),
+	L(6, "Humiliation", "😏", "lame", "Un coup du plat de la lame et un bon mot : l'adversaire perd la face, puis le courage.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 25, "effets": {"degats": "1D6", "buffs": {"Vol": "-2-{Cha/8}"}, "duree": 3}},
+	  remplace="feinte_double"),
 	A(6, "Éventail d'acier", "🪭", "zone_cone", "impact_eclat_dore/cone_tueur_demon", "La lame se déploie en éventail devant lui."),
 	A(6, "Pas de l'ombre", "👣", "saut", "furtif", "Il glisse d'une ombre à l'autre."),
 	# ── Niveau 7 ──
@@ -61,7 +65,9 @@ ENTREES = [
 	A(8, "Tourbillon du bretteur", "🌀", "zone_carre", "balayage", "Une danse circulaire où chaque pas porte un coup.", rayon=2),
 	A(8, "Saignée d'artère", "🩸", "poison", "saignee", "Une coupure précise, là où le sang court le plus vite."),
 	A(8, "Inspiration du maître d'armes", "📖", "buff_allie", "chant", "Un conseil glissé à l'oreille d'un compagnon, qui change tout.", stats=("Ag", "F")),
-	A(8, "Pas du vent", "🌬️", "saut", "vent", "Il franchit la distance comme une bourrasque."),
+	L(8, "Danse sur le fil", "💃", "garde", "Il danse au bord de chaque coup, tant que son esprit tient la cadence.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 15, "maintien": 3, "effets": {"esquive": "4+{Ag/8}"}},
+	  remplace="pas_du_vent"),
 	# ── Niveau 9 ──
 	P(9, "Perfection du geste", "✨", "p_carac", "Pas un muscle ne se contracte en vain.", stats=("Ag",)),
 	P(9, "Aura de champion", "🏆", "p_carac", "On sait, en le voyant entrer, qui gagnera le duel.", stats=("Cha",)),

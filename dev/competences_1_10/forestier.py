@@ -1,5 +1,5 @@
 """Forestier 🏹 — l'arc, la piste et les bois ; les pièges sont déjà livrés (dev/gen_pieges.py)."""
-from competences_1_10 import A, P
+from competences_1_10 import A, P, L
 
 BOIS = ("foret", "bois", "clariere", "couvert", "chemin")
 CC = {"jet": "cc", "portee": 1}
@@ -12,7 +12,9 @@ ENTREES = [
 	A(1, "Bond du lièvre", "🐇", "saut", "saut", "Il s'éloigne d'un bond pour retrouver la bonne distance."),
 	# ── Niveau 2 ──
 	P(2, "Pas de velours", "🍂", "p_furtif", "Il marche sur les feuilles mortes sans en froisser une.", terrains=BOIS),
-	A(2, "Double flèche", "🏹", "frappe", "tir", "Deux flèches encochées ensemble, deux plaies."),
+	L(2, "Tir à longue portée", "🏹", "tir", "Une flèche qui file plus loin que l'œil ne suit — pour qui a la main assez sûre.",
+	  {"cible": "ennemi", "jet": "cd", "portee": "6+{Ag/10}", "cout_pm": 12, "effets": {"degats": "1D8+3"}},
+	  remplace="double_fleche"),
 	A(2, "Flèche barbelée", "🩸", "poison", "tir", "La pointe accroche les chairs, et la plaie saigne."),
 	A(2, "Patience du chasseur", "🧘", "buff_soi", "nature_buff", "Il retient son souffle ; le monde ralentit autour de sa cible.", stats=("Ag",)),
 	A(2, "Herbes de guérison", "🌿", "soin", "soin_nature", "Une poignée de plantes mâchées, appliquée sur la plaie."),
@@ -34,10 +36,14 @@ ENTREES = [
 	A(5, "Flèche venimeuse", "🐍", "poison", "poison", "La pointe trempée dans la sève des marais."),
 	A(5, "Pluie de flèches", "🌧️", "zone_cercle", "tir", "Le ciel s'assombrit au-dessus des ennemis.", rayon=2),
 	A(5, "Flèche longue", "🏹", "frappe", "tir", "Un tir à la limite de la portée, qui touche quand même.", portee=10),
-	A(5, "Affût", "🌲", "posture", "nature_buff", "Il se poste et ne bouge plus : chaque tir sera mortel.", stats=("Ag", "Ch")),
+	L(5, "Se fondre dans les fourrés", "🌿", "furtif", "Un pas de côté entre deux branches, et il n'est plus là.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 21, "effets": {"furtivite": "4+{Ag/10}"}},
+	  remplace="affut"),
 	A(5, "Appel du loup", "🐺", "cri", "appel_sauvage", "Un hurlement qui rend la meute — et ses compagnons — plus mordants.", stats=("Ag", "F")),
 	# ── Niveau 6 ──
-	A(6, "Flèche du pistard", "🏹", "frappe", "tir", "Il tire là où la bête sera, pas là où elle est."),
+	L(6, "Cataplasme de sente", "🌱", "soin_nature", "Quelques feuilles mâchées, un linge serré : ce que la forêt sait guérir, il le sait aussi.",
+	  {"cible": "allie", "portee": 1, "cout_pm": 25, "effets": {"soin": "1D6+{Int/10}", "regen_pv": 2, "duree": 3}},
+	  remplace="fleche_du_pistard"),
 	A(6, "Clouer au sol", "📌", "entrave", "tir", "La flèche traverse le pied et s'enfonce dans la terre.", malus=("Ag",)),
 	A(6, "Flèche épuisante", "😮‍💨", "siphon", "tir", "Une pointe qui vide la bête de ses forces."),
 	A(6, "Ombre des feuilles", "🍃", "esquive_soi", "furtif", "Il disparaît dans le feuillage le temps d'un souffle."),

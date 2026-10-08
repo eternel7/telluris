@@ -1,5 +1,5 @@
 """Moine 🥋 — le corps comme arme, l'esprit comme bouclier (magie Sainte : aucune passive neuve)."""
-from competences_1_10 import A
+from competences_1_10 import A, L
 
 MAG = {"jet": "magique", "portee": 4}
 
@@ -15,7 +15,9 @@ ENTREES = [
 	A(2, "Main apaisante", "🤲", "soin", "soin_sacre", "Une paume posée sur la blessure, et la douleur reflue.", portee=1),
 	# ── Niveau 3 ──
 	A(3, "Roue du vent", "🌀", "zone_carre", "poing", "Il tourne sur lui-même, pieds et poings en éventail."),
-	A(3, "Souffle intérieur", "🌬️", "pm_allie", "meditation", "Il partage le calme de son souffle avec un compagnon."),
+	L(3, "Poing du souffle", "👊", "poing", "Le souffle d'abord, le geste ensuite : le poing ne fait que suivre.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 15, "effets": {"degats": "2D6+{Vol/10}+{Ag/20}"}},
+	  remplace="souffle_interieur"),
 	# ── Niveau 4 ──
 	A(4, "Poing de pierre", "🪨", "frappe", "roc", "Sa main frappe comme la roche tombe."),
 	A(4, "Frappe du tigre", "🐯", "entrave", "griffe", "Les doigts en griffes, il déchire la garde.", malus=("Ag", "F")),
@@ -24,7 +26,9 @@ ENTREES = [
 	# ── Niveau 5 ──
 	A(5, "Paume de lumière", "☀️", "frappe", "lumiere", "Une paume chargée d'énergie pure.", **MAG),
 	A(5, "Coup du serpent", "🐍", "poison_pm", "poing", "Deux doigts au creux de l'épaule, et l'énergie fuit."),
-	A(5, "Pas de la brise", "🍃", "esquive_soi", "vent", "Il devient insaisissable comme une brise."),
+	L(5, "Don du souffle", "🌬️", "meditation", "La paume sur le cœur d'un compagnon, il lui donne un peu de sa propre vie, changée en souffle.",
+	  {"cible": "allie", "portee": 1, "cout_pm": 0, "effets": {"pm": "4+{Vol/6}", "cout_pv": 6}},
+	  remplace="pas_de_la_brise"),
 	A(5, "Chant du monastère", "🔔", "cri", "chant", "Un mantra grave que reprennent ceux qui l'entourent.", stats=("Vol", "R")),
 	# ── Niveau 6 ──
 	A(6, "Mille poings", "👊", "zone_rect", "poing", "Une rafale de coups si rapide qu'on n'en compte que le bruit."),
@@ -37,7 +41,9 @@ ENTREES = [
 	# ── Niveau 8 ──
 	A(8, "Onde de choc", "💥", "zone_carre", "poing", "Il frappe le sol, et l'onde renverse tout autour de lui.", rayon=2),
 	A(8, "Point de pression", "📍", "entrave", "poing", "Un doigt sur un nerf, et le bras de l'ennemi ne répond plus.", malus=("F", "Ag")),
-	A(8, "Vide intérieur", "🕳️", "siphon", "arcane", "Il fait le vide en lui — et chez l'autre.", **MAG),
+	L(8, "Corps de lotus", "🪷", "meditation", "Assis au milieu du combat, il ne bouge plus et ne cède plus. Tant que l'esprit tient, le corps se répare.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 15, "maintien": 3, "effets": {"buffs": {"R": "{Vol/6}"}, "regen_pv": 2}},
+	  remplace="vide_interieur"),
 	A(8, "Souffle de vie", "💨", "soin_zone", "soin_vague", "Un souffle qui ranime ceux qui l'entourent."),
 	# ── Niveau 9 ──
 	A(9, "Poing du ciel", "☁️", "frappe", "lumiere", "Un poing qui tombe comme la foudre du ciel."),

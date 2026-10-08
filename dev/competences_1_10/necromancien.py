@@ -1,5 +1,5 @@
 """Nécromancien 💀 — maître de la mort ; sa voie ultime mène vers la Liche (Nécromancie)."""
-from competences_1_10 import A
+from competences_1_10 import A, L
 
 ENTREES = [
 	# ── Niveau 1 ──
@@ -14,7 +14,9 @@ ENTREES = [
 	A(2, "Pas de la tombe", "🪦", "saut", "spectre", "Il disparaît dans le sol et ressort plus loin."),
 	# ── Niveau 3 ──
 	A(3, "Nuage pestilentiel", "☁️", "zone_cercle", "poison", "Un nuage de pestilence qui empoisonne le groupe."),
-	A(3, "Faiblesse", "🦴", "entrave", "ombre", "Les muscles de la cible se changent en chiffons.", malus=("F", "R")),
+	L(3, "Toucher de la tombe", "🦴", "drain", "Un toucher glacé qui arrache la vie et la rend à celui qui la prend.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 1, "cout_pm": 15, "effets": {"degats": "2D6+{Int/12}", "drain_pv": "20+{Vol/4}"}},
+	  remplace="faiblesse"),
 	# ── Niveau 4 ──
 	A(4, "Lance d'ombre", "🌑", "frappe", "ombre", "Une lance d'ombre pure qui transperce."),
 	A(4, "Vampirisme", "🧛", "drain", "drain", "Il se nourrit du sang de la cible."),
@@ -27,7 +29,9 @@ ENTREES = [
 	A(5, "Énergie sombre", "⚫", "pm_allie", "ombre", "Il transfère de l'énergie sombre à un compagnon."),
 	# ── Niveau 6 ──
 	A(6, "Souffle de la tombe", "🌫️", "zone_cone", "impact_etincelles/cone_folie", "Un souffle froid venu d'outre-tombe."),
-	A(6, "Corruption", "🦠", "poison", "poison", "Une corruption qui ronge le corps lentement."),
+	L(6, "Pacte de chair", "🩸", "ombre", "Il se taille un peu de chair et en fait du mana.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 0, "effets": {"pm": "8+{Int/5}", "cout_pv": "15-{R/10}"}},
+	  remplace="corruption"),
 	# ── Niveau 7 ──
 	A(7, "Doigt de mort", "☝️", "frappe", "ombre", "Il pointe le doigt, et la mort suit."),
 	A(7, "Moisson d'âmes", "🌾", "drain", "drain", "Il moissonne la vie de la cible."),
@@ -35,7 +39,9 @@ ENTREES = [
 	A(7, "Marche des ombres", "🌑", "saut", "ombre", "Il passe d'une ombre à l'autre."),
 	# ── Niveau 8 ──
 	A(8, "Fléau", "☠️", "zone_cercle", "poison", "Un fléau qui s'abat sur tout un groupe.", rayon=2),
-	A(8, "Vol de mana", "💀", "siphon", "spectre", "Il arrache la magie de la cible comme on arrache une âme."),
+	L(8, "Sangsue d'âme", "🌑", "spectre", "Il boit le mana de sa victime à travers ses blessures.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 4, "cout_pm": 25, "effets": {"degats": "2D8+{Int/10}", "drain_pm": 40, "drain_max": 20}},
+	  remplace="vol_de_mana"),
 	A(8, "Peau de cadavre", "🧟", "posture", "tombeau", "Sa peau devient froide et insensible.", stats=("R", "Vol")),
 	A(8, "Malédiction de la liche", "📜", "poison_pm", "ombre", "Une malédiction qui empêche toute magie."),
 	# ── Niveau 9 ──

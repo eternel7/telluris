@@ -1,5 +1,5 @@
 """Templier ⚜️ — défenseur de la cité, épée de l'institution (magie de Bataille)."""
-from competences_1_10 import A
+from competences_1_10 import A, L
 
 MAG = {"jet": "magique", "portee": 5}
 
@@ -24,7 +24,9 @@ ENTREES = [
 	A(4, "Ordre de bataille", "📯", "cri", "aura_bataille", "Il donne l'ordre, et la ligne se reforme.", stats=("R", "F")),
 	# ── Niveau 5 ──
 	A(5, "Coup de l'inquisition", "🔨", "frappe", "lame_sacree", "Un coup qui porte la sentence de l'ordre."),
-	A(5, "Mur de l'ordre", "🏰", "buff_allie", "bouclier", "Il étend sa garde sur un compagnon.", stats=("R", "Vol")),
+	L(5, "Mur de foi", "🧱", "bouclier", "L'exemple du templier tient la ligne : ceux qui l'entourent deviennent difficiles à atteindre.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 21, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"esquive": "2+{R/12}", "duree": 3}},
+	  remplace="mur_de_l_ordre"),
 	A(5, "Fer rouge", "🔥", "poison", "feu", "Une lame chauffée à blanc qui marque l'ennemi."),
 	A(5, "Explosion runique", "💥", "zone_cercle", "explosion_feu", "Une rune gravée explose au milieu des ennemis.", **MAG),
 	# ── Niveau 6 ──
@@ -37,7 +39,9 @@ ENTREES = [
 	A(7, "Restauration de l'ordre", "🩹", "soin", "soin_sacre", "Une prière de l'ordre qui remet un frère sur pied."),
 	# ── Niveau 8 ──
 	A(8, "Jugement de l'ordre", "⚖️", "frappe", "lame_sacree", "La sentence tombe sans appel."),
-	A(8, "Feu de l'autel", "🔥", "zone_cone", "impact_brulure/cone_souffle_feu", "Un souffle de flammes sacrées s'échappe de sa lame."),
+	L(8, "Bûcher purificateur", "🔥", "manteau_feu", "Une ligne de flammes bénies qui brûle tout ce qui la traverse — le juste comme l'impie.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 3, "cout_pm": 25, "maintien": 3, "zone": {"forme": "rectangle", "origine": "lanceur", "orientation": "cible", "longueur": 3, "largeur": 1, "decalage": 1}, "effets": {"degats": "2D6+{Vol/12}"}},
+	  remplace="feu_de_l_autel", zone_persistante=True),
 	A(8, "Bastion", "🏯", "cri", "bouclier", "Il fait de ses compagnons un bastion.", stats=("R", "Vol"), rayon=2),
 	A(8, "Dissipation", "✨", "siphon", "arcane", "Il défait la magie de l'ennemi fil à fil.", **MAG),
 	# ── Niveau 9 ──

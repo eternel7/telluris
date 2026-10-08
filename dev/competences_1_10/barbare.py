@@ -1,5 +1,5 @@
 """Barbare 🪓 — la rage comme ressource, frappe sauvage et corps qui encaisse."""
-from competences_1_10 import A, P
+from competences_1_10 import A, P, L
 
 ENTREES = [
 	# ── Niveau 1 ──
@@ -22,7 +22,9 @@ ENTREES = [
 	A(3, "Fendeur de crânes", "💀", "frappe", "coup_lourd", "Un coup vertical qui ne laisse rien à recoudre."),
 	A(3, "Griffes de l'ours", "🐻", "poison", "griffe", "Il lacère comme une bête, et les plaies ne se referment pas."),
 	A(3, "Cri des ancêtres", "📣", "cri", "aura_bataille", "Le cri des morts du clan passe par sa gorge, et les vivants se lèvent.", stats=("F", "Vol")),
-	A(3, "Saignée furieuse", "🩸", "sang", "rage", "Plus il saigne, plus il frappe fort."),
+	L(3, "Lancer de camarade", "🤾", "saut", "Il empoigne un compagnon par la ceinture et le jette par-dessus la mêlée.",
+	  {"cible": "allie", "portee": 1, "cout_pm": 15, "effets": {"saut": 4}},
+	  remplace="saignee_furieuse"),
 	# ── Niveau 4 ──
 	P(4, "Indomptable", "🐺", "p_carac", "Rien ne l'arrête, rien ne le plie.", stats=("Vol",)),
 	P(4, "Instinct de la meute", "🐾", "p_esquive", "Comme le loup, il sent le coup venir dans son dos."),
@@ -30,7 +32,9 @@ ENTREES = [
 	A(4, "Frappe du mammouth", "🦣", "entrave", "coup_lourd", "Un choc qui fait plier les genoux.", malus=("Ag", "R")),
 	A(4, "Bond du fauve", "🐆", "saut", "saut", "D'un saut il est sur sa proie, avant qu'elle ne lève son arme."),
 	A(4, "Ivresse du combat", "🍺", "buff_soi", "rage", "La douleur s'efface, il ne reste que la joie de frapper.", stats=("F", "R")),
-	A(4, "Hache rouge", "🪓", "frappe", "saignee", "La hache revient rouge à chaque passage."),
+	L(4, "Rage qui ronge", "😤", "rage", "Une colère qui se paie en sang — moins cher pour les plus robustes.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 18, "effets": {"degats": "3D8+{F/10}", "cout_pv": "12-{R/8}"}},
+	  remplace="hache_rouge"),
 	# ── Niveau 5 ──
 	P(5, "Cuir de troll", "🧌", "p_carac", "On dit qu'un troll a été son père. On ne le dit pas devant lui.", stats=("R",)),
 	P(5, "Muscles d'airain", "🏋️", "p_carac", "Il porte sa hache à une main, comme une branche morte.", stats=("F",)),
@@ -49,7 +53,9 @@ ENTREES = [
 	P(7, "Colosse", "🗿", "p_carac", "Il dépasse tout le monde d'une tête, et d'une hache.", stats=("F",)),
 	P(7, "Volonté du clan", "🪶", "p_carac", "Le clan entier tient debout dans sa poitrine.", stats=("Vol",)),
 	A(7, "Fendoir des montagnes", "⛰️", "frappe", "coup_lourd", "Un coup à fendre la roche, porté sur un homme."),
-	A(7, "Tornade de fer", "🌪️", "zone_carre", "balayage", "Une rotation folle dont il ne sort qu'après le dernier cri.", rayon=2),
+	L(7, "Festin du carnage", "🍖", "drain", "Il tournoie au milieu des ennemis et boit le sang de chacun : plus ils sont nombreux, mieux il se porte.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 29, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1}, "effets": {"degats": "2D8+{F/12}", "drain_pv": 30, "drain_max": "{R/4}"}},
+	  remplace="tornade_de_fer"),
 	A(7, "Hémorragie", "🩸", "poison", "saignee", "La plaie qu'il laisse ne se ferme pas."),
 	A(7, "Bond du berserk", "🦘", "saut", "saut", "Il saute par-dessus le mur de boucliers."),
 	A(7, "Transe sanglante", "🔥", "sang", "rage", "Il entre dans une transe où seule compte la prochaine victime."),

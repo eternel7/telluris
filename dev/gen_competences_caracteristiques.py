@@ -177,10 +177,16 @@ def _lire(effets, champ, caracts):
 
 def ids_du_lot():
 	"""`_id` des compétences du lot 1 → 10, relus des DONNÉES du générateur (pas de son fichier
-	de sortie, qui se vide une fois le lot importé)."""
+	de sortie, qui se vide une fois le lot importé).
+
+	⚠️ Les entrées LIBRES (`competences_1_10.L`) sont exclues : leurs effets sont écrits à la
+	main, formules comprises, et `gen_competences_1_10` les émet lui-même. Les convertir ici
+	ferait émettre DEUX contenus pour un même `_id` — le dernier importé gagnerait."""
 	out = {}
 	for voc in sorted(lot_1_10.PROFILS):
 		for e in lot_1_10.charger_entrees(voc):
+			if e["archetype"] == "libre":
+				continue
 			out[lot_1_10.construire_doc(e, voc)["_id"]] = voc
 	return out
 

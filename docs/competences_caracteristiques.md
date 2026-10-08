@@ -21,11 +21,9 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 3 | Poudre de pavot | `buffs.Ag` | `-8` | `-4-{Int/10}` | -6 | -12 |
 | 3 | Venin d'aspic | `regen_pv` | `-4` | `-2-{Int/20}` | -3 | -6 |
 | 4 | Fleur de lames | `degats` | `2D6+3` | `2D6+{Ag/15}` | 8 | 12 |
-| 4 | Lame de miséricorde | `degats` | `2D8+5` | `2D8+{Ag/8}` | 11 | 19 |
 | 4 | Sang du contrat | `degats` | `3D8+5` | `3D8+{Ag/8}` | 15.5 | 23.5 |
 | 4 | Toxine paralysante | `buffs.Ag` | `-9` | `-4-{Int/8}` | -6 | -14 |
 | 4 | Voile de fumée | `buffs.Ag` | `6` | `3+{Ag/15}` | 4 | 8 |
-| 5 | Ciguë | `regen_pv` | `-5` | `-2-{Int/15}` | -3 | -7 |
 | 5 | Concentration mortelle | `buffs.Ag` | `16` | `8+{Ag/6}` | 11 | 21 |
 | 5 | Essence de mandragore | `regen_pm` | `-3` | `-1-{Int/25}` | -1 | -4 |
 | 5 | Égorgement | `degats` | `3D8+4` | `3D8+{Ag/12}` | 14.5 | 19.5 |
@@ -66,9 +64,7 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 3 | Cri des ancêtres | `buffs.F` | `7` | `3+{R/10}` | 5 | 11 |
 | 3 | Fendeur de crânes | `degats` | `2D8+3` | `2D8+{F/12}` | 10 | 15 |
 | 3 | Griffes de l'ours | `regen_pv` | `-4` | `-2-{R/20}` | -3 | -6 |
-| 3 | Saignée furieuse | `degats` | `3D6+6` | `3D6+{F/7}` | 12.5 | 21.5 |
 | 4 | Frappe du mammouth | `buffs.Ag` | `-9` | `-4-{R/8}` | -6 | -14 |
-| 4 | Hache rouge | `degats` | `2D8+5` | `2D8+{F/8}` | 11 | 19 |
 | 4 | Ivresse du combat | `buffs.F` | `12` | `6+{R/7}` | 8 | 17 |
 | 4 | Tourbillon sauvage | `degats` | `2D6+3` | `2D6+{F/15}` | 8 | 12 |
 | 5 | Brise-os | `degats` | `3D8+4` | `3D8+{F/12}` | 14.5 | 19.5 |
@@ -82,7 +78,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 6 | Rugissement | `buffs.Vol` | `-12` | `-6-{R/8}` | -8 | -16 |
 | 7 | Fendoir des montagnes | `degats` | `3D10+7` | `3D10+{F/8}` | 18.5 | 26.5 |
 | 7 | Hémorragie | `regen_pv` | `-6` | `-3-{R/15}` | -4 | -8 |
-| 7 | Tornade de fer | `degats` | `2D8+4` | `2D8+{F/12}` | 10 | 15 |
 | 7 | Transe sanglante | `degats` | `4D10+6` | `4D10+{F/10}` | 24 | 30 |
 | 8 | Briseur de lignes | `degats` | `3D8+8` | `3D8+{F/7}` | 15.5 | 24.5 |
 | 8 | Coup de tonnerre | `degats` | `4D10+6` | `4D10+{F/10}` | 24 | 30 |
@@ -114,7 +109,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 4 | Fièvre des marais | `regen_pm` | `-3` | `-1-{Vol/20}` | -2 | -5 |
 | 4 | Foudre des ancêtres | `degats` | `2D8+5` | `2D8+{Vol/8}` | 11 | 19 |
 | 4 | Hurlement de la meute | `degats` | `2D6+5` | `2D6+{Vol/8}` | 9 | 17 |
-| 4 | Veille de l'esprit | `buffs.Vol` | `15` | `7+{Cha/6}` | 10 | 20 |
 | 5 | Crocs de l'esprit | `degats` | `3D8+4` | `3D8+{Vol/12}` | 14.5 | 19.5 |
 | 5 | Esprit guérisseur | `regen_pv` | `3` | `1+{Cha/25}` | 1 | 4 |
 | 5 | Masque des morts | `buffs.Vol` | `-10` | `-5-{Vol/10}` | -7 | -13 |
@@ -150,12 +144,10 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 4 | Bouclier infernal | `buffs.R` | `15` | `7+{Vol/6}` | 10 | 20 |
 | 4 | Corruption de l'âme | `regen_pm` | `-3` | `-1-{Vol/20}` | -2 | -5 |
 | 4 | Don du démon | `pm` | `14` | `7+{Vol/6}` | 10 | 20 |
-| 4 | Lance de l'enfer | `degats` | `2D8+5` | `2D8+{Int/8}` | 11 | 19 |
 | 5 | Chaînes de l'enfer | `buffs.Ag` | `-10` | `-5-{Vol/10}` | -7 | -13 |
 | 5 | Explosion infernale | `degats` | `2D6+5` | `2D6+{Int/10}` | 9 | 15 |
 | 5 | Fièvre infernale | `regen_pv` | `-5` | `-2-{Vol/15}` | -3 | -7 |
 | 5 | Pacte de puissance | `degats` | `3D8+8` | `3D8+{Int/6}` | 16.5 | 26.5 |
-| 6 | Rapt d'âme | `degats` | `3D8+6` | `3D8+{Int/8}` | 15.5 | 23.5 |
 | 6 | Souffle de l'abîme | `degats` | `2D8+4` | `2D8+{Int/12}` | 10 | 15 |
 | 7 | Feu de l'âme | `degats` | `3D10+7` | `3D10+{Int/8}` | 18.5 | 26.5 |
 | 7 | Forme démoniaque | `buffs.F` | `19` | `9+{Vol/6}` | 12 | 22 |
@@ -180,7 +172,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 1 | Écorce | `buffs.R` | `8` | `4+{Vol/8}` | 6 | 14 |
 | 1 | Épines | `degats` | `1D8+3` | `1D8+{Vol/10}` | 6.5 | 12.5 |
 | 2 | Pollen soporifique | `buffs.Vol` | `-7` | `-3-{Int/8}` | -5 | -13 |
-| 2 | Ronces | `regen_pv` | `-3` | `-1-{Int/15}` | -2 | -6 |
 | 2 | Sève de chêne | `regen_pv` | `2` | `1+{Vol/30}` | 1 | 3 |
 | 3 | Bénédiction des bois | `buffs.R` | `10` | `5+{Vol/8}` | 7 | 15 |
 | 3 | Champ de ronces | `degats` | `2D6+3` | `2D6+{Vol/12}` | 8 | 13 |
@@ -188,7 +179,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 4 | Peau d'écorce | `buffs.R` | `15` | `7+{Vol/6}` | 10 | 20 |
 | 4 | Racines dévorantes | `degats` | `2D8+5` | `2D8+{Vol/8}` | 11 | 19 |
 | 4 | Rosée du matin | `pm` | `14` | `7+{Vol/6}` | 10 | 20 |
-| 5 | Champignon de mana | `degats_pm` | `2D6+1` | `2D6+{Int/30}` | 7 | 9 |
 | 5 | Fouet de liane | `degats` | `3D8+4` | `3D8+{Vol/12}` | 14.5 | 19.5 |
 | 5 | Régénération sylvestre | `pv` | `16` | `8+{Vol/6}` | 11 | 21 |
 | 5 | Spores étouffantes | `degats` | `2D6+5` | `2D6+{Vol/10}` | 9 | 15 |
@@ -199,7 +189,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 7 | Étreinte du saule | `buffs.Ag` | `-13` | `-6-{Int/8}` | -8 | -16 |
 | 8 | Bouclier d'épines | `buffs.R` | `20` | `10+{Vol/6}` | 13 | 23 |
 | 8 | Floraison | `pv` | `38` | `19+{Vol/3}` | 25 | 45 |
-| 8 | Malédiction des saisons | `buffs.F` | `-14` | `-7-{Int/8}` | -9 | -17 |
 | 8 | Tempête de feuilles | `degats` | `3D8+8` | `3D8+{Vol/7}` | 15.5 | 24.5 |
 | 9 | Courroux du chêne | `degats` | `4D10+9` | `4D10+{Vol/7}` | 24 | 33 |
 | 9 | Marais | `degats` | `3D8+6` | `3D8+{Vol/10}` | 15.5 | 21.5 |
@@ -223,7 +212,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 3 | Danse des lames | `degats` | `2D6+3` | `2D6+{Ag/12}` | 8 | 13 |
 | 3 | Double attaque | `degats` | `2D8+3` | `2D8+{Ag/12}` | 10 | 15 |
 | 3 | Désarmement | `buffs.F` | `-8` | `-4-{Ag/10}` | -6 | -12 |
-| 3 | Garde de soie | `buffs.Ag` | `13` | `6+{Cha/6}` | 9 | 19 |
 | 4 | Bravade | `buffs.Cha` | `12` | `6+{Cha/7}` | 8 | 17 |
 | 4 | Coup de Jarnac | `buffs.Ag` | `-9` | `-4-{Ag/8}` | -6 | -14 |
 | 4 | Fente basse | `degats` | `2D8+5` | `2D8+{Ag/8}` | 11 | 19 |
@@ -234,7 +222,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 5 | Saignées multiples | `regen_pv` | `-5` | `-2-{Ag/15}` | -3 | -7 |
 | 5 | Salut du maître | `buffs.Ag` | `13` | `6+{Cha/7}` | 8 | 17 |
 | 6 | Coup de maître | `degats` | `3D8+6` | `3D8+{Ag/8}` | 15.5 | 23.5 |
-| 6 | Feinte double | `buffs.Int` | `-12` | `-6-{Ag/8}` | -8 | -16 |
 | 6 | Éventail d'acier | `degats` | `3D6+6` | `3D6+{Ag/8}` | 12.5 | 20.5 |
 | 7 | Assaut de grâce | `buffs.Ag` | `16` | `8+{Cha/7}` | 10 | 19 |
 | 7 | Botte secrète | `degats` | `3D10+7` | `3D10+{Ag/8}` | 18.5 | 26.5 |
@@ -264,7 +251,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 2 | Arc électrique | `degats_pm` | `1D6+1` | `1D6+{Int/30}` | 3.5 | 5.5 |
 | 2 | Brûlure | `regen_pv` | `-3` | `-1-{Int/15}` | -2 | -6 |
 | 2 | Pluie douce | `regen_pv` | `2` | `1+{Vol/30}` | 1 | 3 |
-| 2 | Trait de glace | `degats` | `2D6+3` | `2D6+{Int/12}` | 8 | 13 |
 | 3 | Bourrasque | `buffs.Ag` | `-8` | `-4-{Int/10}` | -6 | -12 |
 | 3 | Gerbe de flammes | `degats` | `2D6+3` | `2D6+{Int/12}` | 8 | 13 |
 | 4 | Armure de glace | `buffs.R` | `15` | `7+{Vol/6}` | 10 | 20 |
@@ -274,10 +260,8 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 5 | Langue de feu | `degats` | `2D6+5` | `2D6+{Int/10}` | 9 | 15 |
 | 5 | Projection de roc | `degats` | `3D8+4` | `3D8+{Int/12}` | 14.5 | 19.5 |
 | 5 | Souffle des éléments | `buffs.R` | `13` | `6+{Vol/7}` | 8 | 17 |
-| 5 | Écho du tonnerre | `buffs.Int` | `-10` | `-5-{Int/10}` | -7 | -13 |
 | 6 | Forme de vapeur | `buffs.Int` | `7` | `3+{Vol/12}` | 4 | 9 |
 | 6 | Tempête de grêle | `degats` | `2D8+4` | `2D8+{Int/12}` | 10 | 15 |
-| 7 | Colonne de feu | `degats` | `3D10+7` | `3D10+{Int/8}` | 18.5 | 26.5 |
 | 7 | Sables mouvants | `buffs.Ag` | `-13` | `-6-{Int/8}` | -8 | -16 |
 | 7 | Source de mana | `pm` | `20` | `10+{Vol/6}` | 13 | 23 |
 | 7 | Éclair en chaîne | `degats` | `2D8+6` | `2D8+{Int/10}` | 11 | 17 |
@@ -298,7 +282,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 1 | Coup de couteau | `degats` | `1D8+3` | `1D8+{Ag/10}` | 6.5 | 12.5 |
 | 1 | Flèche rapide | `degats` | `1D8+3` | `1D8+{Ag/10}` | 6.5 | 12.5 |
 | 1 | Tir aux jambes | `buffs.Ag` | `-6` | `-3-{Int/10}` | -5 | -11 |
-| 2 | Double flèche | `degats` | `2D6+3` | `2D6+{Ag/12}` | 8 | 13 |
 | 2 | Flèche barbelée | `regen_pv` | `-3` | `-1-{Int/15}` | -2 | -6 |
 | 2 | Herbes de guérison | `pv` | `18` | `9+{Ch/4}` | 14 | 29 |
 | 2 | Patience du chasseur | `buffs.Ag` | `9` | `4+{Ch/7}` | 6 | 15 |
@@ -311,13 +294,11 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 4 | Lame et pointe | `degats` | `2D6+5` | `2D6+{Ag/8}` | 9 | 17 |
 | 4 | Remède du bois | `regen_pv` | `3` | `1+{Ch/20}` | 2 | 5 |
 | 4 | Tir à l'œil | `degats` | `2D8+5` | `2D8+{Ag/8}` | 11 | 19 |
-| 5 | Affût | `buffs.Ag` | `16` | `8+{Ch/6}` | 11 | 21 |
 | 5 | Appel du loup | `buffs.Ag` | `9` | `4+{Ch/10}` | 6 | 12 |
 | 5 | Flèche longue | `degats` | `3D8+4` | `3D8+{Ag/12}` | 14.5 | 19.5 |
 | 5 | Flèche venimeuse | `regen_pv` | `-5` | `-2-{Int/15}` | -3 | -7 |
 | 5 | Pluie de flèches | `degats` | `2D6+5` | `2D6+{Ag/10}` | 9 | 15 |
 | 6 | Clouer au sol | `buffs.Ag` | `-12` | `-6-{Int/8}` | -8 | -16 |
-| 6 | Flèche du pistard | `degats` | `3D8+6` | `3D8+{Ag/8}` | 15.5 | 23.5 |
 | 6 | Flèche épuisante | `degats_pm` | `2D6+2` | `2D6+{Int/25}` | 7 | 10 |
 | 6 | Ombre des feuilles | `buffs.Ag` | `7` | `3+{Ch/12}` | 4 | 9 |
 | 7 | Pharmacopée sylvestre | `pv` | `34` | `17+{Ch/3}` | 23 | 43 |
@@ -350,7 +331,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 2 | Second souffle | `buffs.R` | `9` | `4+{Vol/7}` | 6 | 15 |
 | 2 | Taille horizontale | `degats` | `1D8+3` | `1D8+{F/12}` | 5.5 | 10.5 |
 | 3 | Cercle d'acier | `degats` | `1D8+4` | `1D8+{F/10}` | 6.5 | 12.5 |
-| 3 | Fendoir | `degats` | `2D8+3` | `2D8+{F/12}` | 10 | 15 |
 | 3 | Mur de boucliers | `buffs.R` | `13` | `6+{Vol/6}` | 9 | 19 |
 | 3 | Taillade aux jarrets | `regen_pv` | `-4` | `-2-{F/20}` | -3 | -6 |
 | 4 | Coup de bélier | `buffs.F` | `-9` | `-4-{F/8}` | -6 | -14 |
@@ -361,11 +341,9 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 5 | Estocade | `degats` | `3D8+4` | `3D8+{F/12}` | 14.5 | 19.5 |
 | 5 | Fauchage | `degats` | `2D8+5` | `2D8+{F/10}` | 11 | 17 |
 | 5 | Ordre de la ligne | `buffs.R` | `13` | `6+{Vol/7}` | 8 | 17 |
-| 5 | Rempart vivant | `buffs.R` | `16` | `8+{Vol/6}` | 11 | 21 |
 | 6 | Coup de grâce | `degats` | `3D8+6` | `3D8+{F/8}` | 15.5 | 23.5 |
 | 6 | Défi | `buffs.Int` | `-12` | `-6-{F/8}` | -8 | -16 |
 | 6 | Vague d'acier | `degats` | `3D6+6` | `3D6+{F/8}` | 12.5 | 20.5 |
-| 6 | Volée de taille | `degats` | `2D8+4` | `2D8+{F/12}` | 10 | 15 |
 | 7 | Frappe de siège | `degats` | `3D10+7` | `3D10+{F/8}` | 18.5 | 26.5 |
 | 7 | Hachoir | `degats` | `4D10+6` | `4D10+{F/10}` | 24 | 30 |
 | 7 | Lame tournoyante | `degats` | `3D8+5` | `3D8+{F/10}` | 15.5 | 21.5 |
@@ -393,7 +371,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 1 | Mirage | `buffs.Ag` | `-6` | `-3-{Cha/10}` | -5 | -11 |
 | 2 | Charme | `buffs.Cha` | `9` | `4+{Cha/7}` | 6 | 15 |
 | 2 | Couleurs dansantes | `degats` | `1D8+3` | `1D8+{Int/12}` | 5.5 | 10.5 |
-| 2 | Murmure trompeur | `regen_pm` | `-2` | `-1-{Cha/30}` | -1 | -3 |
 | 2 | Peur fantasmée | `buffs.Vol` | `-7` | `-3-{Cha/8}` | -5 | -13 |
 | 3 | Lame illusoire | `degats` | `2D8+3` | `2D8+{Int/12}` | 10 | 15 |
 | 3 | Voile | `buffs.Ag` | `13` | `6+{Cha/6}` | 9 | 19 |
@@ -402,13 +379,11 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 4 | Prisme | `degats` | `2D8+5` | `2D8+{Int/8}` | 11 | 19 |
 | 4 | Rêve apaisant | `regen_pv` | `3` | `1+{Cha/20}` | 2 | 5 |
 | 5 | Doubles multiples | `buffs.Int` | `6` | `3+{Cha/15}` | 4 | 8 |
-| 5 | Inspiration trompeuse | `buffs.Vol` | `13` | `6+{Cha/7}` | 8 | 17 |
 | 5 | Ombres hurlantes | `degats` | `2D6+5` | `2D6+{Int/10}` | 9 | 15 |
 | 5 | Vol de pensée | `degats_pm` | `2D6+1` | `2D6+{Cha/30}` | 7 | 9 |
 | 6 | Éventail de folie | `degats` | `2D6+5` | `2D6+{Int/10}` | 9 | 15 |
 | 7 | Dévoreur de rêves | `degats` | `3D10+7` | `3D10+{Int/8}` | 18.5 | 26.5 |
 | 7 | Lame de cauchemar | `degats` | `3D10+7` | `3D10+{Int/8}` | 18.5 | 26.5 |
-| 7 | Paralysie hypnotique | `buffs.Ag` | `-13` | `-6-{Cha/8}` | -8 | -16 |
 | 7 | Spectacle | `buffs.Cha` | `11` | `5+{Cha/10}` | 7 | 13 |
 | 8 | Démence | `regen_pm` | `-4` | `-2-{Cha/30}` | -2 | -4 |
 | 8 | Kaléidoscope | `degats` | `3D8+4` | `3D8+{Int/15}` | 14.5 | 18.5 |
@@ -432,7 +407,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 2 | Poudre détonante | `degats` | `1D8+3` | `1D8+{Int/12}` | 5.5 | 10.5 |
 | 2 | Somnifère | `buffs.Ag` | `-7` | `-3-{Int/8}` | -5 | -13 |
 | 2 | Élixir de clarté | `pm` | `10` | `5+{Vol/7}` | 7 | 16 |
-| 3 | Flèche alchimique | `regen_pv` | `-4` | `-2-{Int/20}` | -3 | -6 |
 | 3 | Glyphe protecteur | `buffs.R` | `10` | `5+{Vol/8}` | 7 | 15 |
 | 4 | Bombe de fumée | `buffs.Int` | `6` | `3+{Vol/15}` | 4 | 8 |
 | 4 | Dissolvant | `degats_pm` | `2D6` | `2D{Int/7}` | 3 | 12 |
@@ -442,7 +416,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 5 | Mémoire du palais | `buffs.Int` | `16` | `8+{Vol/6}` | 11 | 21 |
 | 5 | Paradoxe | `buffs.Int` | `-10` | `-5-{Int/10}` | -7 | -13 |
 | 5 | Transmutation | `degats` | `3D8+4` | `3D8+{Int/12}` | 14.5 | 19.5 |
-| 6 | Grenade alchimique | `degats` | `2D8+4` | `2D8+{Int/12}` | 10 | 15 |
 | 6 | Panacée | `pv` | `18` | `9+{Vol/6}` | 12 | 22 |
 | 7 | Enchantement d'arme | `buffs.F` | `16` | `8+{Vol/7}` | 10 | 19 |
 | 7 | Gaz innervant | `regen_pm` | `-4` | `-2-{Int/25}` | -2 | -5 |
@@ -470,7 +443,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 2 | Onde de choc arcanique | `degats` | `1D8+3` | `1D8+{Int/12}` | 5.5 | 10.5 |
 | 2 | Rayon de force | `buffs.F` | `-7` | `-3-{Int/8}` | -5 | -13 |
 | 3 | Champ de force | `buffs.R` | `13` | `6+{Int/6}` | 9 | 19 |
-| 3 | Missile guidé | `degats` | `2D8+3` | `2D8+{Int/12}` | 10 | 15 |
 | 4 | Explosion arcanique | `degats` | `2D6+5` | `2D6+{Int/8}` | 9 | 17 |
 | 4 | Lame de mana | `degats` | `2D8+5` | `2D8+{Int/8}` | 11 | 19 |
 | 4 | Ralentissement | `buffs.Ag` | `-9` | `-4-{Int/8}` | -6 | -14 |
@@ -489,7 +461,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 8 | Recharge | `pm` | `22` | `11+{Int/6}` | 14 | 24 |
 | 8 | Vide arcanique | `degats_pm` | `2D8+1` | `2D8+{Int/30}` | 9 | 11 |
 | 9 | Armure runique | `buffs.R` | `21` | `10+{Int/6}` | 13 | 23 |
-| 9 | Rayon désintégrant | `degats` | `4D10+9` | `4D10+{Int/7}` | 24 | 33 |
 | 9 | Sceau de silence | `regen_pm` | `-5` | `-2-{Int/20}` | -3 | -6 |
 | 9 | Tempête arcanique | `degats` | `5D10+10` | `5D10+{Int/7}` | 29.5 | 38.5 |
 | 10 | Lame du mage-guerrier | `degats` | `6D10+12` | `6D10+{Int/6}` | 36 | 46 |
@@ -504,15 +475,12 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 1 | Note discordante | `buffs.Vol` | `-6` | `-3-{Cha/10}` | -5 | -11 |
 | 2 | Berceuse | `buffs.Ag` | `-7` | `-3-{Cha/8}` | -5 | -13 |
 | 2 | Mélodie apaisante | `regen_pv` | `2` | `1+{Cha/30}` | 1 | 3 |
-| 2 | Pas de danse | `buffs.Cha` | `4` | `2+{Cha/15}` | 3 | 7 |
 | 2 | Satire | `regen_pm` | `-2` | `-1-{Cha/30}` | -1 | -3 |
 | 3 | Air de bravoure | `buffs.F` | `7` | `3+{Cha/10}` | 5 | 11 |
 | 3 | Cri strident | `degats` | `2D6+3` | `2D6+{Cha/12}` | 8 | 13 |
 | 4 | Accord dissonant | `degats` | `2D8+5` | `2D8+{Cha/8}` | 11 | 19 |
-| 4 | Ballade du héros | `buffs.F` | `12` | `6+{Cha/7}` | 8 | 17 |
 | 4 | Chant de repos | `pm` | `14` | `7+{Cha/6}` | 10 | 20 |
 | 4 | Charme du barde | `buffs.Int` | `-9` | `-4-{Cha/8}` | -6 | -14 |
-| 5 | Chœur | `pv` | `16` | `8+{Cha/6}` | 11 | 21 |
 | 5 | Lame du conteur | `degats` | `3D8+4` | `3D8+{Cha/12}` | 14.5 | 19.5 |
 | 5 | Requiem | `regen_pv` | `-5` | `-2-{Cha/15}` | -3 | -7 |
 | 6 | Sérénade | `pv` | `30` | `15+{Cha/4}` | 20 | 35 |
@@ -520,7 +488,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 7 | Chanson de geste | `buffs.F` | `11` | `5+{Cha/10}` | 7 | 13 |
 | 7 | Danse macabre | `buffs.Vol` | `-13` | `-6-{Cha/8}` | -8 | -16 |
 | 7 | Ritournelle | `buffs.Cha` | `19` | `9+{Cha/6}` | 12 | 22 |
-| 7 | Voix d'or | `degats_pm` | `2D8` | `2D{Cha/7}` | 3 | 12 |
 | 8 | Complainte | `regen_pm` | `-4` | `-2-{Cha/30}` | -2 | -4 |
 | 8 | Crescendo | `degats` | `4D10+6` | `4D10+{Cha/10}` | 24 | 30 |
 | 8 | Hymne de victoire | `buffs.Vol` | `17` | `8+{Cha/7}` | 10 | 19 |
@@ -542,14 +509,12 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 2 | Main apaisante | `pv` | `18` | `9+{Vol/4}` | 14 | 29 |
 | 2 | Toucher des méridiens | `degats_pm` | `1D6+1` | `1D6+{Vol/30}` | 3.5 | 5.5 |
 | 3 | Roue du vent | `degats` | `1D8+4` | `1D8+{Ag/10}` | 6.5 | 12.5 |
-| 3 | Souffle intérieur | `pm` | `12` | `6+{Vol/7}` | 8 | 17 |
 | 4 | Esprit clair | `buffs.Vol` | `12` | `6+{Vol/7}` | 8 | 17 |
 | 4 | Frappe du tigre | `buffs.Ag` | `-9` | `-4-{Vol/8}` | -6 | -14 |
 | 4 | Poing de pierre | `degats` | `2D8+5` | `2D8+{Ag/8}` | 11 | 19 |
 | 4 | Posture de la montagne | `buffs.R` | `15` | `7+{Vol/6}` | 10 | 20 |
 | 5 | Chant du monastère | `buffs.Vol` | `9` | `4+{Vol/10}` | 6 | 12 |
 | 5 | Coup du serpent | `regen_pm` | `-3` | `-1-{Vol/25}` | -1 | -4 |
-| 5 | Pas de la brise | `buffs.Vol` | `6` | `3+{Vol/15}` | 4 | 8 |
 | 5 | Paume de lumière | `degats` | `3D8+4` | `3D8+{Ag/12}` | 14.5 | 19.5 |
 | 6 | Mille poings | `degats` | `3D6+6` | `3D6+{Ag/8}` | 12.5 | 20.5 |
 | 6 | Sceau d'harmonie | `regen_pv` | `3` | `1+{Vol/25}` | 1 | 4 |
@@ -559,7 +524,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 8 | Onde de choc | `degats` | `2D8+6` | `2D8+{Ag/10}` | 11 | 17 |
 | 8 | Point de pression | `buffs.F` | `-14` | `-7-{Vol/8}` | -9 | -17 |
 | 8 | Souffle de vie | `pv` | `23` | `11+{Vol/5}` | 15 | 27 |
-| 8 | Vide intérieur | `degats_pm` | `2D8+1` | `2D8+{Vol/30}` | 9 | 11 |
 | 9 | Brise-esprit | `regen_pm` | `-5` | `-2-{Vol/20}` | -3 | -6 |
 | 9 | Danse des mille mains | `degats` | `3D8+6` | `3D8+{Ag/10}` | 15.5 | 21.5 |
 | 9 | Paix du sage | `buffs.Vol` | `13` | `6+{Vol/10}` | 8 | 14 |
@@ -577,7 +541,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 2 | Murmure des morts | `regen_pm` | `-2` | `-1-{Vol/30}` | -1 | -3 |
 | 2 | Peste | `regen_pv` | `-3` | `-1-{Vol/15}` | -2 | -6 |
 | 2 | Trait d'os | `degats` | `2D6+3` | `2D6+{Int/12}` | 8 | 13 |
-| 3 | Faiblesse | `buffs.F` | `-8` | `-4-{Vol/10}` | -6 | -12 |
 | 3 | Nuage pestilentiel | `degats` | `2D6+3` | `2D6+{Int/12}` | 8 | 13 |
 | 4 | Carapace d'os | `buffs.R` | `15` | `7+{Int/6}` | 10 | 20 |
 | 4 | Lance d'ombre | `degats` | `2D8+5` | `2D8+{Int/8}` | 11 | 19 |
@@ -587,7 +550,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 5 | Main du tombeau | `buffs.Ag` | `-10` | `-5-{Vol/10}` | -7 | -13 |
 | 5 | Pacte de sang noir | `degats` | `3D8+8` | `3D8+{Int/6}` | 16.5 | 26.5 |
 | 5 | Énergie sombre | `pm` | `16` | `8+{Int/6}` | 11 | 21 |
-| 6 | Corruption | `regen_pv` | `-5` | `-2-{Vol/15}` | -3 | -7 |
 | 6 | Souffle de la tombe | `degats` | `2D6+5` | `2D6+{Int/10}` | 9 | 15 |
 | 7 | Doigt de mort | `degats` | `3D10+7` | `3D10+{Int/8}` | 18.5 | 26.5 |
 | 7 | Moisson d'âmes | `degats` | `3D10+7` | `3D10+{Int/8}` | 18.5 | 26.5 |
@@ -595,7 +557,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 8 | Fléau | `degats` | `3D8+4` | `3D8+{Int/15}` | 14.5 | 18.5 |
 | 8 | Malédiction de la liche | `regen_pm` | `-4` | `-2-{Vol/30}` | -2 | -4 |
 | 8 | Peau de cadavre | `buffs.R` | `20` | `10+{Int/6}` | 13 | 23 |
-| 8 | Vol de mana | `degats_pm` | `2D8+1` | `2D8+{Vol/30}` | 9 | 11 |
 | 9 | Banquet du vampire | `degats` | `5D10+10` | `5D10+{Int/7}` | 29.5 | 38.5 |
 | 9 | Nuée de spectres | `degats` | `3D8+4` | `3D8+{Int/15}` | 14.5 | 18.5 |
 | 9 | Rituel de mort | `degats` | `5D10+10` | `5D10+{Int/7}` | 29.5 | 38.5 |
@@ -614,16 +575,13 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 2 | Frappe du juste | `degats` | `2D6+3` | `2D6+{F/12}` | 8 | 13 |
 | 2 | Prière de guérison | `pv` | `18` | `9+{Vol/4}` | 14 | 29 |
 | 3 | Lumière aveuglante | `degats` | `2D6+3` | `2D6+{F/12}` | 8 | 13 |
-| 3 | Serment de protection | `buffs.R` | `13` | `6+{Vol/6}` | 9 | 19 |
 | 4 | Aura de courage | `buffs.Vol` | `8` | `4+{Vol/10}` | 6 | 12 |
 | 4 | Jugement | `buffs.F` | `-9` | `-4-{Vol/8}` | -6 | -14 |
-| 4 | Masse de lumière | `degats` | `2D8+5` | `2D8+{F/8}` | 11 | 19 |
 | 4 | Soins du champ de bataille | `regen_pv` | `3` | `1+{Vol/20}` | 2 | 5 |
 | 5 | Brûlure sacrée | `regen_pv` | `-5` | `-2-{Vol/15}` | -3 | -7 |
 | 5 | Frappe du croisé | `degats` | `3D8+4` | `3D8+{F/12}` | 14.5 | 19.5 |
 | 5 | Égide | `buffs.R` | `13` | `6+{Vol/7}` | 8 | 17 |
 | 6 | Mains de lumière | `pv` | `18` | `9+{Vol/6}` | 12 | 22 |
-| 6 | Marteau de justice | `degats` | `3D6+6` | `3D6+{F/8}` | 12.5 | 20.5 |
 | 7 | Bannissement | `degats_pm` | `2D8` | `2D{Vol/7}` | 3 | 12 |
 | 7 | Grâce restauratrice | `pv` | `34` | `17+{Vol/3}` | 23 | 43 |
 | 7 | Lame de l'aube | `degats` | `3D10+7` | `3D10+{F/8}` | 18.5 | 26.5 |
@@ -648,7 +606,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 1 | Réprimande | `buffs.Vol` | `-6` | `-3-{Vol/10}` | -5 | -11 |
 | 2 | Clarté | `pm` | `10` | `5+{Vol/7}` | 7 | 16 |
 | 2 | Feu sacré | `regen_pv` | `-3` | `-1-{Vol/15}` | -2 | -6 |
-| 2 | Grâce | `regen_pv` | `2` | `1+{Vol/30}` | 1 | 3 |
 | 2 | Sanctuaire | `buffs.R` | `12` | `6+{Vol/6}` | 9 | 19 |
 | 3 | Cercle de guérison | `pv` | `12` | `6+{Vol/7}` | 8 | 17 |
 | 4 | Lumière de l'aube | `degats` | `2D6+5` | `2D6+{Vol/8}` | 9 | 17 |
@@ -659,7 +616,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 5 | Guérison majeure | `pv` | `26` | `13+{Vol/4}` | 18 | 33 |
 | 5 | Hymne | `buffs.Vol` | `9` | `4+{Vol/10}` | 6 | 12 |
 | 6 | Colonne de lumière | `degats` | `3D8+6` | `3D8+{Vol/8}` | 15.5 | 23.5 |
-| 6 | Source de grâce | `regen_pv` | `3` | `1+{Vol/25}` | 1 | 4 |
 | 7 | Châtiment divin | `degats` | `2D8+6` | `2D8+{Vol/10}` | 11 | 17 |
 | 7 | Exorcisme | `regen_pm` | `-4` | `-2-{Vol/25}` | -2 | -5 |
 | 7 | Prière de masse | `pv` | `20` | `10+{Vol/6}` | 13 | 23 |
@@ -689,14 +645,12 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 3 | Chaînes d'argent | `buffs.Ag` | `-8` | `-4-{Int/10}` | -6 | -12 |
 | 3 | Flamme noire | `degats` | `2D8+3` | `2D8+{Vol/12}` | 10 | 15 |
 | 4 | Croix renversée | `degats` | `2D8+5` | `2D8+{Vol/8}` | 11 | 19 |
-| 4 | Exorcisme mineur | `degats_pm` | `2D6` | `2D{Int/7}` | 3 | 12 |
 | 4 | Garde du chasseur | `buffs.Vol` | `15` | `7+{Vol/6}` | 10 | 20 |
 | 4 | Soufre | `degats` | `2D6+5` | `2D6+{Vol/8}` | 9 | 17 |
 | 5 | Carreau béni | `degats` | `3D8+4` | `3D8+{Vol/12}` | 14.5 | 19.5 |
 | 5 | Fouet de flammes | `degats` | `2D8+5` | `2D8+{Vol/10}` | 11 | 17 |
 | 5 | Marque d'argent | `regen_pm` | `-3` | `-1-{Int/25}` | -1 | -4 |
 | 5 | Pacte inversé | `buffs.F` | `13` | `6+{Vol/7}` | 8 | 17 |
-| 6 | Coup du tueur de monstres | `degats` | `3D8+6` | `3D8+{Vol/8}` | 15.5 | 23.5 |
 | 6 | Haleine de l'abîme | `degats` | `2D8+4` | `2D8+{Vol/12}` | 10 | 15 |
 | 7 | Brise-sortilège | `degats_pm` | `2D8` | `2D{Int/7}` | 3 | 12 |
 | 7 | Lame sanctifiée | `degats` | `3D10+7` | `3D10+{Vol/8}` | 18.5 | 26.5 |
@@ -705,7 +659,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 8 | Feu de l'enfer retourné | `degats` | `3D8+4` | `3D8+{Vol/15}` | 14.5 | 18.5 |
 | 8 | Pieu au cœur | `degats` | `4D10+6` | `4D10+{Vol/10}` | 24 | 30 |
 | 8 | Sceau d'entrave | `buffs.Ag` | `-14` | `-7-{Int/8}` | -9 | -17 |
-| 9 | Exécution du maudit | `degats` | `4D10+9` | `4D10+{Vol/7}` | 24 | 33 |
 | 9 | Purification par le feu | `regen_pv` | `-7` | `-3-{Int/15}` | -4 | -8 |
 | 9 | Rituel d'exorcisme | `degats` | `5D10+10` | `5D10+{Vol/7}` | 29.5 | 38.5 |
 | 9 | Tourbillon d'argent | `degats` | `3D8+6` | `3D8+{Vol/10}` | 15.5 | 21.5 |
@@ -732,7 +685,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 5 | Coup de l'inquisition | `degats` | `3D8+4` | `3D8+{F/12}` | 14.5 | 19.5 |
 | 5 | Explosion runique | `degats` | `2D8+5` | `2D8+{F/10}` | 11 | 17 |
 | 5 | Fer rouge | `regen_pv` | `-5` | `-2-{Vol/15}` | -3 | -7 |
-| 5 | Mur de l'ordre | `buffs.R` | `13` | `6+{R/7}` | 8 | 17 |
 | 6 | Taille du gardien des temples | `degats` | `3D8+6` | `3D8+{F/8}` | 15.5 | 23.5 |
 | 6 | Égide runique | `buffs.R` | `17` | `8+{R/6}` | 11 | 21 |
 | 7 | Interdit | `buffs.Ag` | `-13` | `-6-{Vol/8}` | -8 | -16 |
@@ -741,7 +693,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 7 | Rotation du templier | `degats` | `2D8+6` | `2D8+{F/10}` | 11 | 17 |
 | 8 | Bastion | `buffs.R` | `12` | `6+{R/10}` | 8 | 14 |
 | 8 | Dissipation | `degats_pm` | `2D8+1` | `2D8+{Vol/30}` | 9 | 11 |
-| 8 | Feu de l'autel | `degats` | `3D8+4` | `3D8+{F/15}` | 14.5 | 18.5 |
 | 8 | Jugement de l'ordre | `degats` | `4D10+6` | `4D10+{F/10}` | 24 | 30 |
 | 9 | Garde inflexible | `buffs.R` | `21` | `10+{R/6}` | 13 | 23 |
 | 9 | Tempête runique | `degats` | `3D8+6` | `3D8+{F/10}` | 15.5 | 21.5 |
@@ -757,7 +708,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 1 | Coup bas | `buffs.Ag` | `-6` | `-3-{Int/10}` | -5 | -11 |
 | 1 | Lame de poche | `degats` | `1D8+3` | `1D8+{Ag/10}` | 6.5 | 12.5 |
 | 1 | Sable aux yeux | `buffs.Ag` | `-6` | `-3-{Int/10}` | -5 | -11 |
-| 2 | Bourse lestée | `degats` | `2D6+3` | `2D6+{Ag/12}` | 8 | 13 |
 | 2 | Couteaux de lancer | `degats` | `1D8+3` | `1D8+{Ag/12}` | 5.5 | 10.5 |
 | 2 | Croc-en-jambe | `buffs.Ag` | `-7` | `-3-{Int/8}` | -5 | -13 |
 | 2 | Esquive du coupe-bourse | `buffs.Ag` | `4` | `2+{Ch/15}` | 3 | 7 |
@@ -769,12 +719,10 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 4 | Cordelette | `buffs.Ag` | `-9` | `-4-{Int/8}` | -6 | -14 |
 | 4 | Gouaille | `buffs.Cha` | `12` | `6+{Ch/7}` | 8 | 17 |
 | 4 | Lame cachée | `degats` | `2D8+5` | `2D8+{Ag/8}` | 11 | 19 |
-| 4 | Sale coup | `degats` | `3D8+5` | `3D8+{Ag/8}` | 15.5 | 23.5 |
 | 5 | Coup du lapin | `degats` | `3D8+4` | `3D8+{Ag/12}` | 14.5 | 19.5 |
 | 5 | Fiel de crapaud | `regen_pv` | `-5` | `-2-{Int/15}` | -3 | -7 |
 | 5 | Pluie de clous | `degats` | `2D8+5` | `2D8+{Ag/10}` | 11 | 17 |
 | 5 | Vol à l'arraché | `degats_pm` | `2D6+1` | `2D6+{Int/30}` | 7 | 9 |
-| 6 | Bouclier de fortune | `buffs.Ag` | `17` | `8+{Ch/6}` | 11 | 21 |
 | 6 | Cendre au visage | `buffs.Ag` | `-12` | `-6-{Int/8}` | -8 | -16 |
 | 6 | Coup de surin | `degats` | `3D8+6` | `3D8+{Ag/8}` | 15.5 | 23.5 |
 | 6 | Tourbillon de coutelas | `degats` | `2D8+4` | `2D8+{Ag/12}` | 10 | 15 |

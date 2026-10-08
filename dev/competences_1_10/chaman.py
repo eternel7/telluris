@@ -1,5 +1,5 @@
 """Chaman 🐺 — esprits totems : ours, loup, sanglier, chat sauvage, faucon (magie de la Nature)."""
-from competences_1_10 import A
+from competences_1_10 import A, L
 
 CC = {"jet": "cc", "portee": 1}
 
@@ -21,7 +21,9 @@ ENTREES = [
 	A(4, "Foudre des ancêtres", "⚡", "frappe", "foudre", "Les ancêtres frappent du haut des nuages."),
 	A(4, "Fièvre des marais", "🤒", "poison_pm", "poison", "Un esprit de fièvre ronge la volonté de la cible."),
 	A(4, "Hurlement de la meute", "🐺", "zone_cercle", "appel_sauvage", "Un hurlement qui fait trembler tout un groupe d'ennemis."),
-	A(4, "Veille de l'esprit", "👁️", "posture", "totem", "Un esprit veille sur lui et détourne les coups.", stats=("Vol", "R")),
+	L(4, "Transe des ancêtres", "🥁", "totem", "Il chante et les ancêtres répondent, prêtant leur force à son bras.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 18, "effets": {"buffs": {"F": "3+{Cha/8}", "Vol": "2+{Cha/12}"}, "duree": 3}},
+	  remplace="veille_de_l_esprit"),
 	# ── Niveau 5 ──
 	A(5, "Crocs de l'esprit", "🦷", "drain", "griffe", "L'esprit-loup mord et lui rend la vie volée.", **CC),
 	A(5, "Masque des morts", "👺", "entrave", "spectre", "Il revêt le masque des morts, et l'ennemi recule.", malus=("Vol", "F")),
@@ -29,7 +31,9 @@ ENTREES = [
 	A(5, "Transe", "🌀", "pm_allie", "totem", "Une transe qui ouvre à un compagnon la source des esprits."),
 	# ── Niveau 6 ──
 	A(6, "Griffes de l'ours-esprit", "🐻", "zone_cone", "impact_plaie/cone_griffe", "Une patte immense d'esprit lacère devant lui."),
-	A(6, "Ailes du faucon", "🦅", "saut", "vent", "Les ailes de l'esprit l'emportent."),
+	L(6, "Fardeau des esprits", "👻", "lien", "Il lie un compagnon aux esprits : ils absorbent une part des coups, le chaman porte le reste.",
+	  {"cible": "allie", "portee": 3, "cout_pm": 20, "maintien": 3, "effets": {"lien_vie": {"part": 40, "reduction": 30}}},
+	  remplace="ailes_du_faucon"),
 	# ── Niveau 7 ──
 	A(7, "Fléau des esprits", "💀", "poison", "spectre", "Les esprits hantent la cible et la consument."),
 	A(7, "Totem de guerre", "🗿", "cri", "totem", "Il plante un totem, et la troupe se bat comme une meute.", stats=("F", "Ag"), rayon=2),

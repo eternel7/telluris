@@ -1,5 +1,5 @@
 """Magicien de combat 🌀 — la magie au service de la guerre : armes enchantées, boucliers arcaniques."""
-from competences_1_10 import A
+from competences_1_10 import A, L
 
 CC = {"jet": "cc", "portee": 1}
 
@@ -15,7 +15,9 @@ ENTREES = [
 	A(2, "Brèche de mana", "🕳️", "siphon", "arcane", "Il ouvre une brèche dans la réserve de mana adverse."),
 	A(2, "Onde de choc arcanique", "💥", "zone_rect", "arcane", "Une onde violette qui repousse le premier rang."),
 	# ── Niveau 3 ──
-	A(3, "Missile guidé", "🎯", "frappe", "arcane", "Le projectile contourne la garde et frappe juste."),
+	L(3, "Projectile savant", "🔮", "arcane", "Plus le mage est savant, plus le trait est lourd et plus il porte loin.",
+	  {"cible": "ennemi", "jet": "magique", "portee": "4+{Int/15}", "cout_pm": 15, "effets": {"degats": "2D{Int/8}"}},
+	  remplace="missile_guide"),
 	A(3, "Champ de force", "🛡️", "posture", "bouclier", "Un champ de force qu'il tient à bout de volonté.", stats=("R", "Int")),
 	# ── Niveau 4 ──
 	A(4, "Lame de mana", "🔪", "frappe", "enchantement", "Une lame faite de mana pur, qui ignore le métal.", **CC),
@@ -41,7 +43,9 @@ ENTREES = [
 	A(8, "Bombardement", "☄️", "zone_cercle", "meteore", "Une pluie de projectiles s'abat sur la zone.", rayon=2),
 	A(8, "Recharge", "🔋", "pm_allie", "enchantement", "Il transfère une part de son mana à un compagnon."),
 	# ── Niveau 9 ──
-	A(9, "Rayon désintégrant", "💀", "frappe", "arcane", "Un rayon qui défait la matière."),
+	L(9, "Surcharge arcanique", "💥", "arcane", "Il force le mana au-delà de ce que son corps supporte. On le voit venir, et c'est terrible.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 45, "incantation": 3, "effets": {"degats": "6D10+{Int/5}", "cout_pv": 10}},
+	  remplace="rayon_desintegrant"),
 	A(9, "Tempête arcanique", "⛈️", "rituel", "arcane", "Il rassemble l'énergie pendant de longs instants avant de la libérer."),
 	A(9, "Armure runique", "🛡️", "posture", "enchantement", "Des runes recouvrent son armure et brillent tant qu'il les nourrit.", stats=("R", "Int")),
 	A(9, "Sceau de silence", "🤐", "poison_pm", "arcane", "Un sceau qui empêche la cible de puiser dans sa magie."),

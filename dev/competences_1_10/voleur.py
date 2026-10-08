@@ -1,5 +1,5 @@
 """Voleur 🔑 — doigts légers, coups bas, fuite élégante ; pièges déjà livrés (dev/gen_pieges.py)."""
-from competences_1_10 import A, P
+from competences_1_10 import A, P, L
 
 OMBRE = ("sous-terrain", "catacombe", "donjon", "grotte", "couvert", "humide", "mine")
 
@@ -15,7 +15,9 @@ ENTREES = [
 	A(2, "Croc-en-jambe", "🦶", "entrave", "coup_lourd", "Un pied qui traîne, et le colosse s'étale.", malus=("Ag",)),
 	A(2, "Surin", "🗡️", "frappe", "saignee", "Un coup vicieux, porté de près."),
 	A(2, "Esquive du coupe-bourse", "🤸", "esquive_soi", "furtif", "Il roule sous la table et ressort de l'autre côté."),
-	A(2, "Bourse lestée", "💰", "frappe", "poing", "Une bourse pleine de plomb, au bout d'une lanière."),
+	L(2, "Coup de veine", "🍀", "lame", "Parfois ça ne fait rien. Parfois ça tue. Il ne sait jamais d'avance, et il adore ça.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 12, "effets": {"degats": "1D{Ch/4}"}},
+	  remplace="bourse_lestee"),
 	A(2, "Couteaux de lancer", "🔪", "zone_rect", "lame", "Trois couteaux, trois cibles.", jet="cd", portee=4),
 	# ── Niveau 3 ──
 	A(3, "Coup du pavé", "🧱", "frappe", "coup_lourd", "Ce qui traîne dans la rue fait une très bonne arme."),
@@ -27,7 +29,9 @@ ENTREES = [
 	A(4, "Lame cachée", "🗡️", "frappe", "lame", "La lame sort de la manche au dernier moment."),
 	A(4, "Cordelette", "🪢", "entrave", "saignee", "Une cordelette qui entrave les chevilles.", malus=("Ag",)),
 	A(4, "Bombe fumigène", "💨", "zone_cercle", "poudre", "Un éclat de verre, un nuage âcre, et la confusion."),
-	A(4, "Sale coup", "😈", "sang", "saignee", "Il se blesse en frappant, mais le coup en vaut la peine."),
+	L(4, "Faire les poches", "👛", "drain", "Une bousculade, une main qui passe : la victime s'essouffle, le voleur repart frais.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 10, "effets": {"degats": "1D6+{Ag/15}", "drain_pm": 60}},
+	  remplace="sale_coup"),
 	A(4, "Gouaille", "😏", "buff_soi", "chant", "Un bon mot lancé au bon moment : il reprend confiance.", stats=("Cha", "Ch")),
 	# ── Niveau 5 ──
 	P(5, "Chance insolente", "🎲", "p_carac", "Les dés tombent toujours du bon côté pour lui.", stats=("Ch",)),
@@ -40,7 +44,9 @@ ENTREES = [
 	A(6, "Coup de surin", "🔪", "frappe", "saignee", "Un coup vif dans le flanc, sans prévenir."),
 	A(6, "Cendre au visage", "🌫️", "entrave", "poudre", "Une poignée de cendre chaude, en plein visage.", malus=("Ag", "Int")),
 	A(6, "Tourbillon de coutelas", "🌀", "zone_carre", "lame", "Il fait tournoyer ses lames dans la ruelle étroite."),
-	A(6, "Bouclier de fortune", "🪑", "posture", "garde", "Un tabouret, une planche, un couvercle : tout lui sert de bouclier.", stats=("Ag", "R")),
+	L(6, "Nuage de farine", "🌫️", "poudre", "Un sac crevé au sol, et toute la bande disparaît dans un nuage blanc.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 25, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1}, "effets": {"esquive": "2+{Ag/10}", "duree": 2}},
+	  remplace="bouclier_de_fortune"),
 	# ── Niveau 7 ──
 	P(7, "Feinte de rue", "🎭", "p_esquive", "Il a appris l'escrime dans les ruelles, et ça se voit."),
 	A(7, "Coup de crosse", "🔨", "entrave", "coup_lourd", "Un coup derrière l'oreille, qui fait voir trente-six chandelles.", malus=("Int", "Ag")),

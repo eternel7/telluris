@@ -1,5 +1,5 @@
 """Illusionniste 🎭 — manipulateur de perceptions (magie Illusoire)."""
-from competences_1_10 import A
+from competences_1_10 import A, L
 
 ENTREES = [
 	# ── Niveau 1 ──
@@ -8,7 +8,9 @@ ENTREES = [
 	A(1, "Image miroir", "🪞", "esquive_soi", "double", "Un reflet de lui-même attire les coups."),
 	A(1, "Pas fantôme", "👻", "saut", "spectre", "Il disparaît ici et réapparaît là-bas."),
 	# ── Niveau 2 ──
-	A(2, "Murmure trompeur", "🗣️", "poison_pm", "illusion", "Une voix dans la tête de l'ennemi qui l'épuise."),
+	L(2, "Reflet trompeur", "🪞", "double", "Un reflet de lui-même prend les coups à sa place, et tient d'autant mieux qu'il est convaincant.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 12, "effets": {"esquive": "2+{Cha/8}", "duree": "1+{Int/25}"}},
+	  remplace="murmure_trompeur"),
 	A(2, "Couleurs dansantes", "🌈", "zone_cercle", "illusion_zone", "Un tourbillon de couleurs qui étourdit le groupe ennemi."),
 	A(2, "Charme", "💕", "buff_allie", "chant", "Il donne à un compagnon une aura de séduction troublante.", stats=("Cha", "Vol")),
 	A(2, "Peur fantasmée", "😱", "entrave", "spectre", "L'ennemi voit sa pire peur se dresser devant lui.", malus=("Vol", "F")),
@@ -24,13 +26,17 @@ ENTREES = [
 	A(5, "Ombres hurlantes", "👥", "zone_cercle", "illusion_zone", "Des ombres surgissent et assaillent le groupe ennemi.", rayon=2),
 	A(5, "Vol de pensée", "🧠", "siphon", "illusion", "Il dérobe les pensées de la cible, et sa magie avec."),
 	A(5, "Doubles multiples", "👯", "esquive_soi", "double", "Trois, quatre, cinq de lui : lequel est le vrai ?"),
-	A(5, "Inspiration trompeuse", "✨", "buff_allie", "illusion", "Il fait croire à un compagnon qu'il est invincible — et ça marche.", stats=("Vol", "F")),
+	L(5, "Permutation", "🔀", "saut", "Un compagnon disparaît dans un clin d'œil et réapparaît plus loin. Personne n'a rien vu.",
+	  {"cible": "allie", "portee": 6, "cout_pm": 21, "effets": {"saut": 4}},
+	  remplace="inspiration_trompeuse"),
 	# ── Niveau 6 ──
 	A(6, "Éventail de folie", "🌀", "zone_cone", "impact_etincelles/cone_folie", "Une vague de démence qui déferle devant lui."),
 	A(6, "Pas entre les reflets", "🪞", "saut", "double", "Il passe d'un reflet à un autre."),
 	# ── Niveau 7 ──
 	A(7, "Lame de cauchemar", "🗡️", "frappe", "spectre", "Une lame forgée dans les cauchemars de la cible."),
-	A(7, "Paralysie hypnotique", "😵", "entrave", "illusion", "Un regard, et la cible ne bouge plus.", malus=("Ag", "Vol")),
+	L(7, "Terreur nocturne", "😱", "spectre", "Une vision de ce que la cible redoute le plus : la volonté se brise, le mana fuit.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 5, "cout_pm": 29, "effets": {"buffs": {"Vol": "-3-{Cha/8}"}, "regen_pm": -3, "duree": 3}},
+	  remplace="paralysie_hypnotique"),
 	A(7, "Dévoreur de rêves", "🌙", "drain", "spectre", "Il se nourrit des rêves de la cible."),
 	A(7, "Spectacle", "🎪", "cri", "illusion_zone", "Une illusion grandiose qui galvanise ses alliés.", stats=("Cha", "Vol")),
 	# ── Niveau 8 ──

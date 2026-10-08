@@ -100,3 +100,14 @@ def test_garde_fous_d_equilibrage(gen):
 def _champs_formule(effets):
 	out = [k for k, v in effets.items() if k != "buffs" and S.est_formule(v)]
 	return out + ["buffs." + c for c, v in (effets.get("buffs") or {}).items() if S.est_formule(v)]
+
+
+def test_les_entrees_libres_ne_sont_pas_converties(gen):
+	"""Une entrée libre de gen_competences_1_10 porte ses propres effets : la convertir ici
+	ferait émettre deux contenus pour un même `_id`."""
+	libres = {gen.lot_1_10.construire_doc(e, voc)["_id"]
+			  for voc in gen.lot_1_10.PROFILS for e in gen.lot_1_10.charger_entrees(voc)
+			  if e["archetype"] == "libre"}
+	assert libres
+	assert not libres & set(gen.ids_du_lot())
+	assert not libres & {d["_id"] for d in _docs()}

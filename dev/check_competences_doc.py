@@ -180,12 +180,14 @@ def vocations_du_dump():
 
 
 def verifier_competence(doc, prefixe, ids_existants=None, vocations_connues=None,
-						niveaux=NIVEAUX_ATTENDUS) -> list:
+						niveaux=NIVEAUX_ATTENDUS, zone_persistante=False) -> list:
 	"""Invariants d'UN doc (n° 1, 2, 4 et 7 à 13 du document) — liste d'erreurs, vide si OK.
 
 	Partagée par ce vérificateur et par `dev/gen_competences_1_10.py` : un lot généré passe
 	par les mêmes gardes qu'un bloc écrit à la main. `ids_existants` / `vocations_connues`
 	à None sautent le contrôle correspondant ; `niveaux` à None accepte tout niveau.
+	`zone_persistante=True` = la zone persistante est VOULUE (déclarée par la donnée) : la
+	garde (12), qui ne vise que le mur involontaire, est levée pour ce doc.
 	"""
 	erreurs = []
 	cid = doc.get("_id", "<sans _id>")
@@ -263,9 +265,11 @@ def verifier_competence(doc, prefixe, ids_existants=None, vocations_connues=None
 
 	# (12) MUR involontaire (PR #33) : la règle est DÉRIVÉE, sans clé — toute capacité
 	# offensive à zone ET maintenue laisse une zone persistante qui brûle QUICONQUE s'y
-	# tient, alliés et lanceur compris.
+	# tient, alliés et lanceur compris. Le moteur la gère : la garde ne refuse que celle
+	# qu'on n'a pas DÉCLARÉE (`zone_persistante`), qu'un auteur aurait obtenue en voulant
+	# seulement « une frappe de zone maintenue ».
 	if (est_active(comp) and comp["cible"] == "ennemi" and doc.get("zone")
-			and doc.get("maintien")):
+			and doc.get("maintien") and not zone_persistante):
 		erreurs.append(f"{prefixe} : active `ennemi` à `zone` ET `maintien` — c'est une "
 					   f"ZONE PERSISTANTE à tir ami (Mur de feu), pas une frappe")
 
