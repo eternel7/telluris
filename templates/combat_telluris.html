@@ -3844,6 +3844,8 @@ function sortLabel(s) {
 	if (s.effets.partage_soin) parts.push(`↺ ${s.effets.partage_soin} % au lanceur`);
 	if (s.effets.pm) parts.push(`+${s.effets.pm} PM`);
 	if (s.effets.furtivite) parts.push('🥷 furtivité');
+	// Provocation : le monstre touché vise le lanceur (cf. combat._cible_joueur).
+	if (s.effets.provocation) parts.push(`📢 provoque${s.effets.duree ? ` ${s.effets.duree} tours` : ''}`);
 	// Invocation : ses `effets` sont vides par construction (elle fait apparaître une
 	// créature, elle ne pose rien sur personne) — sans cette ligne la case n'annoncerait rien.
 	// Maintenue : la créature reste tant que l'entretien est payé, sa `duree` est inerte.
@@ -4119,6 +4121,8 @@ function compLabel(c) {
 	if (c.effets.partage_soin) parts.push(`↺ ${c.effets.partage_soin} % au lanceur`);
 	if (c.effets.pm) parts.push(`+${c.effets.pm} PM`);
 	if (c.effets.furtivite) parts.push('🥷 furtivité');
+	// Provocation : le monstre touché vise le porteur (cf. combat._cible_joueur).
+	if (c.effets.provocation) parts.push(`📢 provoque${c.effets.duree ? ` ${c.effets.duree} tours` : ''}`);
 	// Portée EFFECTIVE et non déclarée : une frappe `cc` emprunte l'allonge de l'arme en
 	// main, donc la même compétence ne porte pas à la même distance d'une épée à une hast.
 	// C'est le seul endroit où le joueur peut le lire.

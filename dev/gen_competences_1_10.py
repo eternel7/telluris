@@ -63,6 +63,19 @@ ACTIVES_SANS_MAGIE = 5
 # elles s'additionnent toutes dans `competences_bonus`. ~17 passives × 3,5 pts en moyenne.
 BUDGET_PASSIVES_PTS = 64
 
+# Caractéristique de référence d'une passive À FORMULE pour le budget : une valeur de
+# milieu de carrière (les races partent de 20-30, plafonnent à 50-80).
+BUDGET_REF_CARAC = 50
+
+
+def _valeur_budget(v):
+	"""Points d'une valeur de buff de passive : l'entier, ou la formule à `BUDGET_REF_CARAC`."""
+	if isinstance(v, str):
+		from utils.sorts import CARACTS_FORMULE, evaluer_formule
+		return evaluer_formule(v, {c: BUDGET_REF_CARAC for c in CARACTS_FORMULE})
+	return v
+
+
 # Longueur d'un cône selon sa NAPPE : l'`echelle` de chaque thème de cône a été réglée pour
 # couvrir exactement ce nombre de crans (cf. dev/gen_animations_capacites.py, THEMES).
 LONGUEUR_CONE = {"cone_griffe": 2, "cone_tueur_demon": 2, "cone_souffle_feu": 3,
@@ -394,7 +407,8 @@ def construire(ref=None):
 				erreurs.append(f"{prefixe} : {exc!r}")
 				continue
 			docs_voc.append(doc)
-			passif = e["archetype"] in ARCHETYPES_PASSIFS
+			passif = (e["mode"] == "passive" if e["archetype"] == "libre"
+					  else e["archetype"] in ARCHETYPES_PASSIFS)
 			if passif != (e["mode"] == "passive"):
 				erreurs.append(f"{prefixe} : archétype {e['archetype']} incompatible avec le mode")
 			# thème : présent, actif, sonore ; impact muet seulement sous une nappe de cône
@@ -438,8 +452,8 @@ def construire(ref=None):
 		doublons = sorted({x for x in noms if noms.count(x) > 1})
 		if doublons:
 			erreurs.append(f"{voc} : noms en double {doublons}")
-		# budget des passives neuves
-		pts = sum(sum(abs(v) for v in (d["effets"].get("buffs") or {}).values())
+		# budget des passives neuves — une FORMULE compte pour sa valeur à `BUDGET_REF_CARAC`
+		pts = sum(sum(abs(_valeur_budget(v)) for v in (d["effets"].get("buffs") or {}).values())
 				  for d in docs_voc if d["mode"] == "passive")
 		if pts > BUDGET_PASSIVES_PTS:
 			erreurs.append(f"{voc} : passives neuves = {pts} pts de caract > budget {BUDGET_PASSIVES_PTS}")

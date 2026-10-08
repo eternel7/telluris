@@ -6060,9 +6060,10 @@ function _sortEffetsLabel(e, prefixeDegats) {
 	if (e.cout_pv) parts.push(`🩸 −${_fx(e, 'cout_pv', e.cout_pv)} PV`);
 	if (e.drain_pv) parts.push(`🧛 drain ${e.drain_pv} % en PV`);
 	if (e.drain_pm) parts.push(`🧛 drain ${e.drain_pm} % en PM`);
-	if (e.saut) parts.push(`💨 saut ${e.saut} cases`);
+	if (e.saut) parts.push(`💨 saut ${_fx(e, 'saut', e.saut)} cases`);
+	if (e.provocation) parts.push('📢 provocation');
 	if (e.lien_vie) {
-		parts.push(`🔗 lien de vie ${e.lien_vie.part} %`
+		parts.push(`🔗 lien de vie ${_fx(e, 'lien_vie.part', e.lien_vie.part)} %`
 			+ (e.lien_vie.reduction ? ` (−${e.lien_vie.reduction} % absorbés)` : ''));
 	}
 	// Renforts de composant d'une invocation ou d'un sort maintenu (cf. sorts.doc_effectif).

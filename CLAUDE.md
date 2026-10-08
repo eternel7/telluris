@@ -70,8 +70,8 @@ utils/
   sorts.py               # sorts (pur) : normalisation, composants, écoles de magie, apprentissage,
                          #   familles exclues d'une vocation, bloc `invocation`, les TROIS notions
                          #   du temps magique (incantation PA / cout_pm / maintien), seuil de
-                         #   concentration, clés d'effet drain / degats_pm / cout_pv / saut / lien_vie / partage_soin,
-                         #   FORMULES À CARACTÉRISTIQUES (`1D{Int/5}`, chokepoint `resoudre_effets`),
+                         #   concentration, clés d'effet drain / degats_pm / cout_pv / saut / lien_vie / partage_soin / provocation,
+                         #   FORMULES À CARACTÉRISTIQUES (`1D{Int/5}`, chokepoints `resoudre_effets` + `resoudre_temps`),
                          #   et les prédicats d'éligibilité PARTAGÉS avec les compétences
                          #   (capacite_utilisable_combat / effets_agissent_sur_cible / _exploration)
   grimoires.py           # grimoires manquants (pur) : grimoire UNIQUE + recette de scriptorium par sort ;

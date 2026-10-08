@@ -342,7 +342,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 5 | Fauchage | `degats` | `2D8+5` | `2D8+{F/10}` | 11 | 17 |
 | 5 | Ordre de la ligne | `buffs.R` | `13` | `6+{Vol/7}` | 8 | 17 |
 | 6 | Coup de grâce | `degats` | `3D8+6` | `3D8+{F/8}` | 15.5 | 23.5 |
-| 6 | Défi | `buffs.Int` | `-12` | `-6-{F/8}` | -8 | -16 |
 | 6 | Vague d'acier | `degats` | `3D6+6` | `3D6+{F/8}` | 12.5 | 20.5 |
 | 7 | Frappe de siège | `degats` | `3D10+7` | `3D10+{F/8}` | 18.5 | 26.5 |
 | 7 | Hachoir | `degats` | `4D10+6` | `4D10+{F/10}` | 24 | 30 |
@@ -576,7 +575,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 2 | Prière de guérison | `pv` | `18` | `9+{Vol/4}` | 14 | 29 |
 | 3 | Lumière aveuglante | `degats` | `2D6+3` | `2D6+{F/12}` | 8 | 13 |
 | 4 | Aura de courage | `buffs.Vol` | `8` | `4+{Vol/10}` | 6 | 12 |
-| 4 | Jugement | `buffs.F` | `-9` | `-4-{Vol/8}` | -6 | -14 |
 | 4 | Soins du champ de bataille | `regen_pv` | `3` | `1+{Vol/20}` | 2 | 5 |
 | 5 | Brûlure sacrée | `regen_pv` | `-5` | `-2-{Vol/15}` | -3 | -7 |
 | 5 | Frappe du croisé | `degats` | `3D8+4` | `3D8+{F/12}` | 14.5 | 19.5 |
@@ -660,7 +658,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 8 | Pieu au cœur | `degats` | `4D10+6` | `4D10+{Vol/10}` | 24 | 30 |
 | 8 | Sceau d'entrave | `buffs.Ag` | `-14` | `-7-{Int/8}` | -9 | -17 |
 | 9 | Purification par le feu | `regen_pv` | `-7` | `-3-{Int/15}` | -4 | -8 |
-| 9 | Rituel d'exorcisme | `degats` | `5D10+10` | `5D10+{Vol/7}` | 29.5 | 38.5 |
 | 9 | Tourbillon d'argent | `degats` | `3D8+6` | `3D8+{Vol/10}` | 15.5 | 21.5 |
 | 10 | Fléau des démons | `degats` | `5D10+12` | `5D10+{Vol/6}` | 30.5 | 40.5 |
 | 10 | Pacte rompu | `degats_pm` | `3D8` | `3D{Int/8}` | 4.5 | 16.5 |
@@ -692,7 +689,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 7 | Restauration de l'ordre | `pv` | `34` | `17+{R/3}` | 23 | 43 |
 | 7 | Rotation du templier | `degats` | `2D8+6` | `2D8+{F/10}` | 11 | 17 |
 | 8 | Bastion | `buffs.R` | `12` | `6+{R/10}` | 8 | 14 |
-| 8 | Dissipation | `degats_pm` | `2D8+1` | `2D8+{Vol/30}` | 9 | 11 |
 | 8 | Jugement de l'ordre | `degats` | `4D10+6` | `4D10+{F/10}` | 24 | 30 |
 | 9 | Garde inflexible | `buffs.R` | `21` | `10+{R/6}` | 13 | 23 |
 | 9 | Tempête runique | `degats` | `3D8+6` | `3D8+{F/10}` | 15.5 | 21.5 |

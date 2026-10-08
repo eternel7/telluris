@@ -23,7 +23,9 @@ ENTREES = [
 	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 18, "effets": {"degats": "2D8+{Vol/8}"}},
 	  remplace="masse_de_lumiere"),
 	A(4, "Soins du champ de bataille", "⛑️", "regen_allie", "soin_sacre", "Il impose les mains et laisse la grâce agir."),
-	A(4, "Jugement", "⚖️", "entrave", "lame_sacree", "Un coup qui fait plier l'ennemi sous le poids de ses fautes.", malus=("F", "Vol")),
+	L(4, "Jugement", "⚖️", "lame_sacree", "Il désigne le coupable du plat de sa lame : désormais, c'est à lui que l'impie doit répondre.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 18, "effets": {"degats": "1D8+{Vol/15}", "buffs": {"F": -9}, "provocation": 1, "duree": 3}},
+	  remplace="jugement"),
 	A(4, "Aura de courage", "🦁", "cri", "aura_sacree", "Autour de lui, plus personne ne recule.", stats=("Vol", "R")),
 	# ── Niveau 5 ──
 	A(5, "Brûlure sacrée", "🔥", "poison", "lumiere", "Une lumière qui continue de brûler longtemps après le coup.", **MAG),
@@ -32,7 +34,7 @@ ENTREES = [
 	A(5, "Frappe du croisé", "✝️", "frappe", "lame_sacree", "Un coup qui porte la croix gravée dans le métal."),
 	# ── Niveau 6 ──
 	L(6, "Serment de garde", "🤝", "lien", "Il jure de garder un compagnon : sa foi amortit les coups, son corps prend le reste.",
-	  {"cible": "allie", "portee": 4, "cout_pm": 20, "maintien": 4, "effets": {"lien_vie": {"part": 60, "reduction": 20}}},
+	  {"cible": "allie", "portee": 4, "cout_pm": 20, "maintien": "6-{Vol/30}", "effets": {"lien_vie": {"part": "40+{Vol/4}", "reduction": 20}}},
 	  remplace="marteau_de_justice"),
 	A(6, "Mains de lumière", "🙌", "soin_zone", "soin_vague", "La lumière jaillit de ses mains et soigne ceux qui l'entourent."),
 	# ── Niveau 7 ──

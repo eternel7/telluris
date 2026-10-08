@@ -36,7 +36,9 @@ ENTREES = [
 	A(4, "Saut de côté", "↗️", "saut", "saut", "Il s'efface d'un bond et réapparaît dans le dos de l'adversaire."),
 	# ── Niveau 5 ──
 	P(5, "Main du prévôt", "✋", "p_carac", "La main de celui qui enseigne : jamais crispée, jamais lâche.", stats=("Ag",)),
-	P(5, "Prestance", "🎭", "p_carac", "Il se bat comme on joue sur scène, et le public le sent.", stats=("Cha",)),
+	L(5, "Prestance", "🎭", None, "La grâce du geste fait l'aura de l'homme : plus il est vif, plus on le regarde.",
+	  {"effets": {"buffs": {"Cha": "{Ag/15}"}}},
+	  remplace="prestance", mode="passive"),
 	A(5, "Coup de pointe", "📍", "frappe", "lame", "La pointe trouve le cœur de la cible comme une aiguille son chas."),
 	A(5, "Liement", "🔗", "entrave", "garde", "Il enroule sa lame autour de l'autre et l'emporte.", malus=("Ag", "F")),
 	A(5, "Saignées multiples", "🩸", "poison", "saignee", "Dix petites coupures, et aucune ne se ferme."),
@@ -66,7 +68,7 @@ ENTREES = [
 	A(8, "Saignée d'artère", "🩸", "poison", "saignee", "Une coupure précise, là où le sang court le plus vite."),
 	A(8, "Inspiration du maître d'armes", "📖", "buff_allie", "chant", "Un conseil glissé à l'oreille d'un compagnon, qui change tout.", stats=("Ag", "F")),
 	L(8, "Danse sur le fil", "💃", "garde", "Il danse au bord de chaque coup, tant que son esprit tient la cadence.",
-	  {"cible": "soi", "portee": 1, "cout_pm": 15, "maintien": 3, "effets": {"esquive": "4+{Ag/8}"}},
+	  {"cible": "soi", "portee": 1, "cout_pm": 15, "maintien": "5-{Ag/30}", "effets": {"esquive": "4+{Ag/8}"}},
 	  remplace="pas_du_vent"),
 	# ── Niveau 9 ──
 	P(9, "Perfection du geste", "✨", "p_carac", "Pas un muscle ne se contracte en vain.", stats=("Ag",)),

@@ -34,7 +34,9 @@ ENTREES = [
 	  remplace="sale_coup"),
 	A(4, "Gouaille", "😏", "buff_soi", "chant", "Un bon mot lancé au bon moment : il reprend confiance.", stats=("Cha", "Ch")),
 	# ── Niveau 5 ──
-	P(5, "Chance insolente", "🎲", "p_carac", "Les dés tombent toujours du bon côté pour lui.", stats=("Ch",)),
+	L(5, "Chance insolente", "🎲", None, "La chance sourit aux doigts rapides : plus il est vif, plus elle tourne en sa faveur.",
+	  {"effets": {"buffs": {"Ch": "{Ag/15}"}}},
+	  remplace="chance_insolente", mode="passive"),
 	A(5, "Coup du lapin", "🐇", "frappe", "coup_lourd", "Un coup sec à la nuque."),
 	A(5, "Vol à l'arraché", "🫳", "siphon", "furtif", "Il arrache à sa victime ce qui lui restait de forces."),
 	A(5, "Pluie de clous", "📌", "zone_cercle", "lame", "Il jette une poignée de clous rouillés sous les pieds ennemis."),

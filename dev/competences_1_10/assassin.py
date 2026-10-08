@@ -63,7 +63,9 @@ ENTREES = [
 	A(8, "Éventail de dagues", "🪭", "zone_cone", "impact_plaie/cone_griffe", "Une poignée de couteaux lancés en éventail."),
 	A(8, "Oubli de la douleur", "💉", "sang", "rage", "Une drogue qui fait oublier ses blessures le temps d'un coup."),
 	# ── Niveau 9 ──
-	P(9, "Cœur de glace", "🧊", "p_carac", "Plus aucune émotion ne passe : il est la lame.", stats=("Vol",)),
+	L(9, "Cœur de glace", "🧊", None, "Un esprit froid tient le cœur en bride : plus il calcule, moins il tremble.",
+	  {"effets": {"buffs": {"Vol": "{Int/10}"}}},
+	  remplace="cur_de_glace", mode="passive"),
 	P(9, "Main de la mort", "☠️", "p_carac", "Chaque geste est économe, et chaque geste tue.", stats=("Ag",)),
 	A(9, "Exécution silencieuse", "🤫", "frappe", "saignee", "La victime meurt sans avoir crié."),
 	A(9, "Peste noire", "☠️", "poison", "poison", "Une contagion distillée dans une fiole."),

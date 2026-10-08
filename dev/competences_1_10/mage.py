@@ -44,7 +44,7 @@ ENTREES = [
 	A(8, "Recharge", "🔋", "pm_allie", "enchantement", "Il transfère une part de son mana à un compagnon."),
 	# ── Niveau 9 ──
 	L(9, "Surcharge arcanique", "💥", "arcane", "Il force le mana au-delà de ce que son corps supporte. On le voit venir, et c'est terrible.",
-	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 45, "incantation": 3, "effets": {"degats": "6D10+{Int/5}", "cout_pv": 10}},
+	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 45, "incantation": "5-{Int/30}", "effets": {"degats": "6D10+{Int/5}", "cout_pv": 10}},
 	  remplace="rayon_desintegrant"),
 	A(9, "Tempête arcanique", "⛈️", "rituel", "arcane", "Il rassemble l'énergie pendant de longs instants avant de la libérer."),
 	A(9, "Armure runique", "🛡️", "posture", "enchantement", "Des runes recouvrent son armure et brillent tant qu'il les nourrit.", stats=("R", "Int")),

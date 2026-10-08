@@ -35,7 +35,8 @@ from utils.competences import (  # noqa: E402
 	normaliser_competence,
 )
 from utils.sorts import (  # noqa: E402
-	MAINTIEN_PM_MAX, _bonus_dict, capacite_utilisable_combat, effets_agissent_sur_cible,
+	CARACTS_FORMULE, INCANTATION_PA_MAX, MAINTIEN_PM_MAX, _bonus_dict,
+	capacite_utilisable_combat, effets_agissent_sur_cible, est_formule, evaluer_formule,
 )
 from utils.zones_effet import normaliser_zone  # noqa: E402
 
@@ -227,10 +228,17 @@ def verifier_competence(doc, prefixe, ids_existants=None, vocations_connues=None
 						   f"effet sur une cible — le router la listerait, le moteur "
 						   f"la refuserait au moment de frapper")
 
-	# (4) maintien : borne du moteur, actives seulement, et pas de `duree` trompeuse
+	# (4) maintien : borne du moteur, actives seulement, et pas de `duree` trompeuse.
+	# Une FORMULE (`"5-{Vol/25}"`) est jugée sur ce qu'elle donne entre une caract à 0 et à
+	# 100 : `sorts.resoudre_temps` la bornerait en silence, l'auteur doit le savoir.
 	if "maintien" in doc:
 		maintien = doc.get("maintien") or 0
-		if not isinstance(maintien, int) or maintien < 0 or maintien > MAINTIEN_MAX:
+		if est_formule(maintien):
+			extremes = [evaluer_formule(maintien, {c: v for c in CARACTS_FORMULE}) for v in (0, 100)]
+			if min(extremes) < 1 or max(extremes) > MAINTIEN_MAX:
+				erreurs.append(f"{prefixe} : `maintien` {maintien!r} sort de [1, {MAINTIEN_MAX}] "
+							   f"entre une caract à 0 et à 100 ({extremes})")
+		elif not isinstance(maintien, int) or maintien < 0 or maintien > MAINTIEN_MAX:
 			erreurs.append(f"{prefixe} : `maintien` {maintien!r} hors de [0, "
 						   f"{MAINTIEN_MAX}] (MAINTIEN_PM_MAX)")
 		if maintien and est_passive(comp):
@@ -240,6 +248,28 @@ def verifier_competence(doc, prefixe, ids_existants=None, vocations_connues=None
 			erreurs.append(f"{prefixe} : entrée MAINTENUE portant `duree` — l'entrée "
 						   f"d'effets_actifs ne se décrémente pas, la durée annoncée "
 						   f"est une échéance qui n'existe pas")
+
+	# (4 bis) incantation FORMULÉE : mêmes bornes que le moteur, entre une caract à 0 et à 100.
+	if est_formule(doc.get("incantation")):
+		extremes = [evaluer_formule(doc["incantation"], {c: v for c in CARACTS_FORMULE})
+					for v in (0, 100)]
+		if min(extremes) < 1 or max(extremes) > INCANTATION_PA_MAX:
+			erreurs.append(f"{prefixe} : `incantation` {doc['incantation']!r} sort de [1, "
+						   f"{INCANTATION_PA_MAX}] entre une caract à 0 et à 100 ({extremes})")
+
+	# (4 ter) PROVOCATION : elle ne vaut que posée sur un MONSTRE touché, pour une durée.
+	if eff_norm.get("provocation"):
+		if not (est_active(comp) and comp["cible"] == "ennemi"):
+			erreurs.append(f"{prefixe} : `provocation` hors d'une active `ennemi` — rien ne "
+						   f"la poserait sur un monstre")
+		if not (eff_norm.get("duree") or (eff_norm.get("formules") or {}).get("duree")):
+			erreurs.append(f"{prefixe} : `provocation` sans `duree` — l'effet ne serait "
+						   f"jamais posé (part à durée)")
+
+	# (4 quater) AURA à formule : `entree_aura` ne résout rien, la formule serait perdue.
+	if est_passive(comp) and doc.get("zone") and eff_norm.get("formules"):
+		erreurs.append(f"{prefixe} : AURA à formule — `competences.entree_aura` ne résout "
+					   f"aucune formule, l'aura ne donnerait que sa part constante")
 
 	# (11) SIGNE de la régén selon la cible. Depuis la PR #66 `regen_pv`/`regen_pm` sont
 	# SIGNÉES (négatif = poison). Le moteur ne refuse AUCUN des mauvais emplois :

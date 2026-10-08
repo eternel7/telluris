@@ -23,11 +23,17 @@ def P(niveau, nom, icon, archetype, description, **options):
 			"options": options}
 
 
-def L(niveau, nom, icon, theme, description, champs, remplace=None, zone_persistante=False):
-	"""Compétence ACTIVE « libre » : ses champs de jeu (`cible`, `jet`, `portee`, `cout_pm`,
+def L(niveau, nom, icon, theme, description, champs, remplace=None, zone_persistante=False,
+	  mode="active"):
+	"""Compétence « libre » : ses champs de jeu (`cible`, `jet`, `portee`, `cout_pm`,
 	`maintien`, `incantation`, `zone`, `effets`) sont ÉCRITS tels quels, formules à
 	caractéristiques comprises — pour les formes que l'échelle ne sait pas dire (lien de vie,
-	partage de soin, drain de PM, saut d'un allié, coût décroissant…). Moteur actuel seulement.
+	partage de soin, drain de PM, saut d'un allié, coût décroissant, provocation, temps
+	formulé…). Moteur actuel seulement.
+
+	`mode="passive"` : `champs` ne porte que `effets` (et `condition`), `theme` vaut None —
+	une passive n'est jamais jouée. Formules permises : résolues à la lecture sur la caract
+	BRUTE (`consommables.competences_bonus_resolu`).
 
 	`remplace` = slug (suffixe d'`_id`) d'une entrée EXISTANTE dont celle-ci prend la place :
 	même `_id`, donc les personnages qui la connaissaient reçoivent la nouvelle, et le doc
@@ -36,6 +42,6 @@ def L(niveau, nom, icon, theme, description, champs, remplace=None, zone_persist
 	options = {"champs": champs, "zone_persistante": zone_persistante}
 	if remplace:
 		options.update(id=remplace, remplace=True)
-	return {"mode": "active", "niveau": niveau, "nom": nom, "icon": icon,
+	return {"mode": mode, "niveau": niveau, "nom": nom, "icon": icon,
 			"archetype": "libre", "theme": theme, "description": description,
 			"options": options}

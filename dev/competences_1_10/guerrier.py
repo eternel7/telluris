@@ -34,12 +34,14 @@ ENTREES = [
 	A(4, "Coup du maître de corps", "🩸", "sang", "saignee", "Il paie de sa chair un coup qui ne pardonne pas."),
 	# ── Niveau 5 ──
 	P(5, "Nerfs d'acier", "🧠", "p_carac", "Le fracas autour de lui ne fait plus trembler sa main.", stats=("Vol",)),
-	P(5, "Cuir épais", "🐗", "p_carac", "Il porte ses cicatrices comme une seconde armure.", stats=("R",)),
+	L(5, "Cuir épais", "🐗", None, "La volonté endurcit la peau : plus il serre les dents, moins les coups l'entament.",
+	  {"effets": {"buffs": {"R": "{Vol/15}"}}},
+	  remplace="cuir_epais", mode="passive"),
 	A(5, "Fauchage", "🌾", "zone_rect", "balayage", "Trois adversaires, un seul geste, aucun ne reste debout indemne."),
 	A(5, "Brise-garde", "🔨", "entrave", "coup_lourd", "Il frappe l'arme plutôt que l'homme, et l'arme cède.", malus=("Ag", "R")),
 	A(5, "Estocade", "🗡️", "frappe", "lame", "La pointe entre là où la maille s'ouvre."),
 	L(5, "Bouclier humain", "🛡️", "lien", "Il se plante devant un compagnon et prend pour lui la moitié des coups qui lui sont destinés.",
-	  {"cible": "allie", "portee": 1, "cout_pm": 12, "maintien": 3, "effets": {"lien_vie": {"part": 50, "reduction": 0}}},
+	  {"cible": "allie", "portee": 1, "cout_pm": 12, "maintien": "5-{Vol/30}", "effets": {"lien_vie": {"part": "30+{R/3}", "reduction": 0}}},
 	  remplace="rempart_vivant"),
 	A(5, "Ordre de la ligne", "🎺", "buff_allie", "aura_bataille", "Un mot sec à un compagnon, et celui-ci retrouve sa place et son courage.", stats=("R", "Vol")),
 	# ── Niveau 6 ──
@@ -48,7 +50,9 @@ ENTREES = [
 	  {"cible": "soi", "portee": 1, "cout_pm": 25, "effets": {"buffs": {"R": "4+{Vol/8}"}, "duree": "2+{Vol/30}"}},
 	  remplace="volee_de_taille"),
 	A(6, "Coup de grâce", "💀", "frappe", "saignee", "Là où l'ennemi a déjà cédé, il achève."),
-	A(6, "Défi", "😤", "entrave", "rage", "Il appelle l'ennemi d'un geste, et celui-ci se jette sur lui sans réfléchir.", malus=("Int", "Vol")),
+	L(6, "Défi", "📢", "rage", "Il frappe son bouclier et hurle un nom : la bête ne voit plus que lui, le temps que sa volonté tient.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 25, "effets": {"degats": "2D6+2", "provocation": 1, "duree": "2+{Vol/40}"}},
+	  remplace="defi"),
 	A(6, "Vague d'acier", "🌊", "zone_cone", "impact_eclat_dore/cone_tueur_demon", "Un revers en éventail qui ouvre la mêlée."),
 	# ── Niveau 7 ──
 	P(7, "Force tranquille", "🗿", "p_carac", "Il ne se presse jamais, et pourtant rien ne lui résiste.", stats=("F",)),

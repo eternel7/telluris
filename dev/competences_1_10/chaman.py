@@ -32,7 +32,7 @@ ENTREES = [
 	# ── Niveau 6 ──
 	A(6, "Griffes de l'ours-esprit", "🐻", "zone_cone", "impact_plaie/cone_griffe", "Une patte immense d'esprit lacère devant lui."),
 	L(6, "Fardeau des esprits", "👻", "lien", "Il lie un compagnon aux esprits : ils absorbent une part des coups, le chaman porte le reste.",
-	  {"cible": "allie", "portee": 3, "cout_pm": 20, "maintien": 3, "effets": {"lien_vie": {"part": 40, "reduction": 30}}},
+	  {"cible": "allie", "portee": 3, "cout_pm": 20, "maintien": 3, "effets": {"lien_vie": {"part": "25+{Cha/4}", "reduction": 30}}},
 	  remplace="ailes_du_faucon"),
 	# ── Niveau 7 ──
 	A(7, "Fléau des esprits", "💀", "poison", "spectre", "Les esprits hantent la cible et la consument."),

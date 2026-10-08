@@ -63,7 +63,9 @@ ENTREES = [
 	A(8, "Couteau du dépeceur", "🔪", "drain", "saignee", "Le geste sûr de celui qui a dépecé mille bêtes.", **CC),
 	# ── Niveau 9 ──
 	P(9, "Maîtrise de l'arc", "🏹", "p_carac", "L'arc est devenu une partie de son corps.", stats=("Ag",)),
-	P(9, "Sens aiguisés", "👃", "p_esquive", "Il sent l'embuscade avant de la voir."),
+	L(9, "Sens aiguisés", "👃", None, "Il lit la forêt comme un livre : qui en sait le plus voit venir les coups de plus loin.",
+	  {"effets": {"esquive": "{Int/7}"}},
+	  remplace="sens_aiguises", mode="passive"),
 	A(9, "Flèche du roi des bois", "👑", "frappe", "tir", "La flèche que l'on garde pour le monstre de la forêt."),
 	A(9, "Tir de suppression", "🌧️", "zone_cone", "impact_etincelles/cone_decharge", "Un barrage de flèches qui force l'ennemi à se terrer."),
 	A(9, "Venin du marais", "🐸", "poison", "poison", "Un poison noir qui ronge jusqu'à l'os."),

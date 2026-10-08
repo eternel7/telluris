@@ -176,6 +176,8 @@ Le lot `competences_caracteristiques_a_importer.json` appliquait une seule règl
 | ✨ | 6 | 😈 **Soif du pacte** | ennemi / magique / portée `4` · 25 PM | `{degats: 3D8+{Int/10}, cout_pv: 8, drain_pv: 50, drain_max: {Vol/3}}` | degats 15.5 → 21.5<br>drain_max 6 → 26 | Payer en sang pour se nourrir du sang d'un autre : coût fixe, gain plafonné par la Vol. |
 ## Idées qui demanderaient du moteur neuf
 
+✅ **Réalisées depuis** : la provocation (*Défi*, *Jugement*, *Défi de l'ordre*), les formules sur `maintien` / `incantation` / `saut` / `lien_vie.part`, et les passives à formule (6 passives des vocations sans magie). Détail : compétences `telluris-magie` § Formules et `telluris-combat` § Provocation.
+
 Hors de portée sans développement : chacune se décide **avant** d'être écrite (CLAUDE.md §13).
 
 | idée | vocations | ce qui manque aujourd'hui |
@@ -183,9 +185,6 @@ Hors de portée sans développement : chacune se décide **avant** d'être écri
 | **Active conditionnée au terrain** : « Embuscade sylvestre » plus forte en forêt, « Appel des morts » au cimetière | forestier, druide, nécromancien | `condition` n'est relue que pour la furtivité des passives (`furtivite_passive`) ; `_lancer_capacite` l'ignore |
 | **Bonus selon l'état** : « Achever » (+dés si la cible est sous 25 % PV), « Rage du désespoir » (sous 50 % PV du lanceur) | assassin, barbare | aucun opérateur d'état de PV dans les effets |
 | **Repousser / attirer** une cible d'une ou deux cases | guerrier, templier, élémentaliste | le saut ne déplace que soi ou un allié |
-| **Provocation** : forcer les monstres à viser le lanceur | guerrier, templier, paladin | l'IA monstre choisit sa cible seule |
 | **Invocation par compétence** : esprit-loup du chaman, nuée du druide | chaman, druide | le bloc `invocation` n'est lu que sur un `sort:*` |
 | **Canalisation par compétence** : « Canal dégagé » du mage, qui annule la pénalité de charge 3 tours | mage, moine | `effets.canalisation` n'est pas recopié dans l'effet à durée de combat (`_empiler_effet_combat`) et ne compte pas dans `part_durative` : une active qui le porterait serait sans effet |
 | **Munition spéciale** : flèche enflammée qui consomme une flèche dédiée | forestier, assassin | les compétences n'ont pas de composants |
-| **Formules sur `maintien`, `incantation`, `saut`, `lien_vie.part`** | toutes | hors de `FORMULE_CLES_ENTIERES` ; `saut` et `lien_vie` sont bornés à part |
-| **Passives à formule** : « +{Vol/10} en R » qui grandit avec le personnage | toutes | `bonus_passifs` ne résout aucune formule |

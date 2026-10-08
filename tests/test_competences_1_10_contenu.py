@@ -150,3 +150,39 @@ def test_zone_persistante_seulement_si_declaree(gen, construit):
 	assert any("ZONE PERSISTANTE" in m for m in check.verifier_competence(mur, "x"))
 	assert not any("ZONE PERSISTANTE" in m
 				   for m in check.verifier_competence(mur, "x", zone_persistante=True))
+
+
+# ── Mécaniques du moteur étendu : le lot les EMPLOIE vraiment ──────────────────────
+
+def test_le_lot_emploie_les_mecaniques_du_moteur_etendu(construit):
+	"""Provocation, temps formulé (entretien, incantation), saut et lien de vie formulés,
+	passives à formule : chacun au moins une fois — sinon le moteur n'est éprouvé par rien."""
+	from utils.sorts import est_formule
+	lot = construit["lot"]
+	assert any((d["effets"].get("provocation")) for d in lot)
+	assert any(est_formule(d.get("maintien")) for d in lot)
+	assert any(est_formule(d.get("incantation")) for d in lot)
+	assert any(est_formule(d["effets"].get("saut")) for d in lot)
+	assert any(est_formule((d["effets"].get("lien_vie") or {}).get("part")) for d in lot)
+	passives = [d for d in lot if d["mode"] == "passive"]
+	assert any(est_formule(v) for d in passives
+			   for v in list((d["effets"].get("buffs") or {}).values()) + [d["effets"].get("esquive")])
+
+
+def test_une_provocation_du_lot_provoque_vraiment(construit, monkeypatch):
+	"""Bout en bout : le doc GÉNÉRÉ, normalisé comme en jeu, lancé par le moteur."""
+	from utils import combat as combat_mod
+	monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 50)   # touche, sans critique
+	sys.path.insert(0, os.path.join(RACINE, "tests"))
+	from _fixtures_magie import combat, joueur, monstre
+	from utils.combat import _cible_joueur, resolve_action
+	from utils.competences import normaliser_competence
+	defi = next(d for d in construit["lot"] if d["effets"].get("provocation") and not d.get("zone"))
+	garde = joueur(0, x=5, y=5, nom="Garde")
+	mage = joueur(1, x=7, y=5, nom="Mage")
+	loup = monstre(x=6, y=6)
+	doc = combat([garde, mage], [loup])
+	garde["cc"] = 200
+	res = resolve_action(doc, "competence", cible_id=loup["id"], competence=normaliser_competence(defi))
+	assert "error" not in res, res
+	assert _cible_joueur(doc, loup) is garde

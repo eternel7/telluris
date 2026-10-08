@@ -27,7 +27,7 @@ ENTREES = [
 	A(5, "Vol de pensée", "🧠", "siphon", "illusion", "Il dérobe les pensées de la cible, et sa magie avec."),
 	A(5, "Doubles multiples", "👯", "esquive_soi", "double", "Trois, quatre, cinq de lui : lequel est le vrai ?"),
 	L(5, "Permutation", "🔀", "saut", "Un compagnon disparaît dans un clin d'œil et réapparaît plus loin. Personne n'a rien vu.",
-	  {"cible": "allie", "portee": 6, "cout_pm": 21, "effets": {"saut": 4}},
+	  {"cible": "allie", "portee": 6, "cout_pm": 21, "effets": {"saut": "2+{Int/25}"}},
 	  remplace="inspiration_trompeuse"),
 	# ── Niveau 6 ──
 	A(6, "Éventail de folie", "🌀", "zone_cone", "impact_etincelles/cone_folie", "Une vague de démence qui déferle devant lui."),

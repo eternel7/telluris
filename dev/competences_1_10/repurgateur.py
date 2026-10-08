@@ -50,7 +50,9 @@ ENTREES = [
 	  remplace="execution_du_maudit"),
 	A(9, "Purification par le feu", "🔥", "poison", "feu", "Le bûcher, sans le bûcher.", **MAG),
 	A(9, "Tourbillon d'argent", "🌀", "zone_carre", "balayage", "Ses lames d'argent tournent autour de lui."),
-	A(9, "Rituel d'exorcisme", "📿", "rituel", "lumiere_zone", "Un rituel long, qui arrache le démon de sa chair.", **MAG),
+	L(9, "Rituel d'exorcisme", "📿", "lumiere_zone", "Un rite lent, qui chasse ce qui ne devrait pas être là. Une volonté ferme en abrège les versets.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 5, "cout_pm": 48, "incantation": "5-{Vol/30}", "effets": {"degats": "5D10+{Vol/6}"}},
+	  remplace="rituel_d_exorcisme"),
 	# ── Niveau 10 ──
 	A(10, "Fléau des démons", "😈", "frappe", "projectile_infernal", "La flamme qui a chassé les démons de trois provinces.", **MAG),
 	A(10, "Pacte rompu", "💔", "siphon", "demon_buff", "Il rompt le pacte qui nourrit le maudit."),

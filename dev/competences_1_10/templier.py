@@ -40,10 +40,12 @@ ENTREES = [
 	# ── Niveau 8 ──
 	A(8, "Jugement de l'ordre", "⚖️", "frappe", "lame_sacree", "La sentence tombe sans appel."),
 	L(8, "Bûcher purificateur", "🔥", "manteau_feu", "Une ligne de flammes bénies qui brûle tout ce qui la traverse — le juste comme l'impie.",
-	  {"cible": "ennemi", "jet": "magique", "portee": 3, "cout_pm": 25, "maintien": 3, "zone": {"forme": "rectangle", "origine": "lanceur", "orientation": "cible", "longueur": 3, "largeur": 1, "decalage": 1}, "effets": {"degats": "2D6+{Vol/12}"}},
+	  {"cible": "ennemi", "jet": "magique", "portee": 3, "cout_pm": 25, "maintien": "5-{Vol/30}", "zone": {"forme": "rectangle", "origine": "lanceur", "orientation": "cible", "longueur": 3, "largeur": 1, "decalage": 1}, "effets": {"degats": "2D6+{Vol/12}"}},
 	  remplace="feu_de_l_autel", zone_persistante=True),
 	A(8, "Bastion", "🏯", "cri", "bouclier", "Il fait de ses compagnons un bastion.", stats=("R", "Vol"), rayon=2),
-	A(8, "Dissipation", "✨", "siphon", "arcane", "Il défait la magie de l'ennemi fil à fil.", **MAG),
+	L(8, "Défi de l'ordre", "🛡️", "bouclier", "Il plante son étendard et appelle tout ce qui l'entoure au combat : qu'on frappe le templier, pas ses frères.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 29, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 2}, "effets": {"provocation": 1, "duree": "1+{R/30}"}},
+	  remplace="dissipation"),
 	# ── Niveau 9 ──
 	A(9, "Épée de l'institution", "🗡️", "frappe", "lame", "Le coup qui fait respecter la loi."),
 	A(9, "Tempête runique", "🌩️", "zone_cercle", "foudre", "Les runes s'embrasent et la foudre tombe sur les ennemis.", rayon=2, **MAG),

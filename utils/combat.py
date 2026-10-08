@@ -23,7 +23,7 @@ from utils.sorts import (
 	part_durative, effets_d_arme, concat_degats, INCANTATION_PA_MAX,
 	capacite_utilisable_combat, effets_agissent_sur_cible,
 	est_incantation_longue, est_maintenu, pm_par_pa, seuil_concentration,
-	sorts_eligibles_espece, resoudre_effets, portee_effective,
+	sorts_eligibles_espece, resoudre_effets, portee_effective, resoudre_temps,
 )
 from utils.zones_effet import cases_effet, placement_visuel
 from utils.quetes import maj_progress_kills, maj_progress_chasse
@@ -321,6 +321,10 @@ def _empiler_effet_combat(acteur: dict, source: dict, effets: dict, tour: int) -
 		# son propre tour perdrait un point avant d'avoir servi.
 		"pose_tour": int(tour or 0),
 	}
+	if _eff_int(eff.get("provocation")):
+		# PROVOCATION : le provocateur (`provocateur_id`) est timbré par l'appelant qui
+		# connaît le lanceur (`_resoudre_coup_capacite`) ; lue par `_cible_joueur`.
+		entry["provocation"] = 1
 	if maintien:
 		# ⚠️ `maintenu` fait SAUTER le décrément (cf. _tick_effets_combat) : « tant qu'il
 		# peut payer, le sort reste actif ». `duree` ne veut donc plus rien dire pour lui —
@@ -974,6 +978,11 @@ def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, sourc
 	# une cible que le même coup vient d'abattre.
 	effet_cible = _appliquer_effet_sur_cible(combat_doc, monstre, source, effets,
 											 combat_doc["tour"])
+	if effet_cible and effet_cible.get("provocation"):
+		# L'entrée EST celle des `effets_actifs` du monstre (`poser_effet` la stocke telle
+		# quelle) : la timbrer ici suffit. Relancer la même capacité la remplace — donc le
+		# dernier qui provoque avec elle devient la cible.
+		effet_cible["provocateur_id"] = joueur.get("id")
 	return {"hit": True, "dmg": dmg, "critique": jet["critique"],
 			"cible": monstre["nom"], "cible_id": monstre.get("id"),
 			"cible_pv": monstre["currentPV"],
@@ -4528,10 +4537,29 @@ def _combattants_vivants(combat_doc: dict) -> list:
 	return [j for j in _joueurs_vivants(combat_doc) if j.get("jouable", True)]
 
 
+def _provocateur(combat_doc: dict, monstre: dict) -> dict | None:
+	"""Le joueur qui PROVOQUE ce monstre (entrée `provocation` de ses `effets_actifs`), s'il
+	est encore debout — la provocation la plus RÉCENTE l'emporte. None sinon : provocateur
+	tombé ou parti ⇒ le monstre reprend son ciblage ordinaire, l'effet restant inerte
+	jusqu'à son expiration."""
+	vivants = {j.get("id"): j for j in _joueurs_vivants(combat_doc)}
+	for entree in reversed(monstre.get("effets_actifs") or []):
+		if entree.get("provocation") and entree.get("provocateur_id") in vivants:
+			return vivants[entree["provocateur_id"]]
+	return None
+
+
 def _cible_joueur(combat_doc: dict, monstre: dict) -> dict | None:
 	"""Cible de l'IA d'un monstre : le joueur VIVANT le plus proche (Chebyshev), en
 	excluant un joueur furtif non détecté (il ne le voit pas). None si aucun joueur
-	visible — tous furtifs non détectés (le monstre tentera une détection) ou tous KO."""
+	visible — tous furtifs non détectés (le monstre tentera une détection) ou tous KO.
+
+	PROVOCATION d'abord (`_provocateur`) : un monstre provoqué vise son provocateur, de
+	près comme de loin, même furtif — on ne provoque pas en restant caché. SEUL point de
+	choix de cible de l'IA : déplacement ET frappe passent ici."""
+	provocateur = _provocateur(combat_doc, monstre)
+	if provocateur is not None:
+		return provocateur
 	visibles = [
 		j for j in _joueurs_vivants(combat_doc)
 		if not (j.get("furtif") and not monstre.get("detecte"))
@@ -5910,10 +5938,12 @@ def _resoudre_action_joueur(
 		# à DURÉE (buffs/régén/esquive), empilée sur les effets vivants du snapshot.
 		if not sort or not sort.get("doc"):
 			return {"error": "Sort invalide."}
-		sdoc = sort["doc"]
 		# FORMULES À CARACTÉRISTIQUES résolues ICI, une fois : tout ce qui suit (coût en PV,
 		# incantation armée, application, zone persistante) lit des entiers. Une incantation
-		# longue fige donc sa puissance à l'ARMEMENT, comme son tarif.
+		# longue fige donc sa puissance à l'ARMEMENT, comme son tarif. `resoudre_temps` fait
+		# de même pour l'entretien et les PA d'incantation formulés (renfort de composant
+		# rejoué sur la valeur résolue).
+		sdoc = resoudre_temps(sort["doc"], caracts_effectives(joueur), sort.get("effets"))
 		effets = resoudre_effets(sort.get("effets") or {}, caracts_effectives(joueur))
 		cout_pm = _cout_pm_charge(joueur, sdoc)
 		# ⚠️ MÊME FONCTION que `sorts.sort_utilisable_combat`, celle qui a filtré ce sort
@@ -5982,6 +6012,7 @@ def _resoudre_action_joueur(
 		# et se paie une seule fois, alors qu'une incantation longue traverse des tours.
 		if not competence:
 			return {"error": "Compétence invalide."}
+		competence = resoudre_temps(competence, caracts_effectives(joueur))
 		effets = resoudre_effets(competence.get("effets") or {}, caracts_effectives(joueur))
 		cout_pm = _cout_pm_charge(joueur, competence)
 		# ⚠️ MÊME FONCTION que `competences.competence_utilisable_combat`, celle qui a

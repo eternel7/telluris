@@ -42,7 +42,7 @@ ENTREES = [
 	A(8, "Onde de choc", "💥", "zone_carre", "poing", "Il frappe le sol, et l'onde renverse tout autour de lui.", rayon=2),
 	A(8, "Point de pression", "📍", "entrave", "poing", "Un doigt sur un nerf, et le bras de l'ennemi ne répond plus.", malus=("F", "Ag")),
 	L(8, "Corps de lotus", "🪷", "meditation", "Assis au milieu du combat, il ne bouge plus et ne cède plus. Tant que l'esprit tient, le corps se répare.",
-	  {"cible": "soi", "portee": 1, "cout_pm": 15, "maintien": 3, "effets": {"buffs": {"R": "{Vol/6}"}, "regen_pv": 2}},
+	  {"cible": "soi", "portee": 1, "cout_pm": 15, "maintien": "5-{Vol/25}", "effets": {"buffs": {"R": "{Vol/6}"}, "regen_pv": 2}},
 	  remplace="vide_interieur"),
 	A(8, "Souffle de vie", "💨", "soin_zone", "soin_vague", "Un souffle qui ranime ceux qui l'entourent."),
 	# ── Niveau 9 ──
@@ -52,5 +52,7 @@ ENTREES = [
 	A(9, "Brise-esprit", "🧠", "poison_pm", "arcane", "Un coup au front qui trouble les pensées.", **MAG),
 	# ── Niveau 10 ──
 	A(10, "Paume du néant", "🌑", "frappe", "arcane", "Une paume qui efface ce qu'elle touche."),
-	A(10, "Ascension", "🌤️", "saut", "aura_sacree", "Il s'élève et retombe comme une feuille portée par le vent."),
+	L(10, "Ascension", "🌤️", "aura_sacree", "Il s'élève et retombe comme une feuille portée par le vent — d'autant plus loin que son corps est délié.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 40, "effets": {"saut": "3+{Ag/25}"}},
+	  remplace="ascension"),
 ]

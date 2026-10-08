@@ -41,6 +41,21 @@
 		}
 	},
 	{
+		"_id": "competence:cur_de_glace",
+		"type": "competence",
+		"nom": "Cœur de glace",
+		"icon": "🧊",
+		"description": "Un esprit froid tient le cœur en bride : plus il calcule, moins il tremble.",
+		"vocation": "assassin",
+		"niveau": 9,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Vol": "{Int/10}"
+			}
+		}
+	},
+	{
 		"_id": "competence:saignee_furieuse",
 		"type": "competence",
 		"nom": "Lancer de camarade",
@@ -55,7 +70,7 @@
 		"cible": "allie",
 		"portee": 1,
 		"effets": {
-			"saut": 4
+			"saut": "2+{F/25}"
 		}
 	},
 	{
@@ -76,6 +91,21 @@
 		"effets": {
 			"degats": "3D8+{F/10}",
 			"cout_pv": "12-{R/8}"
+		}
+	},
+	{
+		"_id": "competence:colosse",
+		"type": "competence",
+		"nom": "Colosse",
+		"icon": "🗿",
+		"description": "Sa masse fait sa force : plus le corps encaisse, plus le bras frappe.",
+		"vocation": "barbare",
+		"niveau": 7,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"F": "{R/12}"
+			}
 		}
 	},
 	{
@@ -141,7 +171,7 @@
 		"portee": 3,
 		"effets": {
 			"lien_vie": {
-				"part": 40,
+				"part": "25+{Cha/4}",
 				"reduction": 30
 			}
 		}
@@ -270,6 +300,21 @@
 		}
 	},
 	{
+		"_id": "competence:prestance",
+		"type": "competence",
+		"nom": "Prestance",
+		"icon": "🎭",
+		"description": "La grâce du geste fait l'aura de l'homme : plus il est vif, plus on le regarde.",
+		"vocation": "duelliste",
+		"niveau": 5,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Cha": "{Ag/15}"
+			}
+		}
+	},
+	{
 		"_id": "competence:feinte_double",
 		"type": "competence",
 		"nom": "Humiliation",
@@ -303,7 +348,7 @@
 		"niveau": 8,
 		"mode": "active",
 		"cout_pm": 15,
-		"maintien": 3,
+		"maintien": "5-{Ag/30}",
 		"sensibilite_charge": 0,
 		"cible": "soi",
 		"portee": 1,
@@ -442,6 +487,19 @@
 		}
 	},
 	{
+		"_id": "competence:sens_aiguises",
+		"type": "competence",
+		"nom": "Sens aiguisés",
+		"icon": "👃",
+		"description": "Il lit la forêt comme un livre : qui en sait le plus voit venir les coups de plus loin.",
+		"vocation": "forestier",
+		"niveau": 9,
+		"mode": "passive",
+		"effets": {
+			"esquive": "{Int/7}"
+		}
+	},
+	{
 		"_id": "competence:fendoir",
 		"type": "competence",
 		"nom": "Frappe du vétéran",
@@ -461,6 +519,21 @@
 		}
 	},
 	{
+		"_id": "competence:cuir_epais",
+		"type": "competence",
+		"nom": "Cuir épais",
+		"icon": "🐗",
+		"description": "La volonté endurcit la peau : plus il serre les dents, moins les coups l'entament.",
+		"vocation": "guerrier",
+		"niveau": 5,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"R": "{Vol/15}"
+			}
+		}
+	},
+	{
 		"_id": "competence:rempart_vivant",
 		"type": "competence",
 		"nom": "Bouclier humain",
@@ -471,13 +544,13 @@
 		"niveau": 5,
 		"mode": "active",
 		"cout_pm": 12,
-		"maintien": 3,
+		"maintien": "5-{Vol/30}",
 		"sensibilite_charge": 0,
 		"cible": "allie",
 		"portee": 1,
 		"effets": {
 			"lien_vie": {
-				"part": 50,
+				"part": "30+{R/3}",
 				"reduction": 0
 			}
 		}
@@ -501,6 +574,27 @@
 				"R": "4+{Vol/8}"
 			},
 			"duree": "2+{Vol/30}"
+		}
+	},
+	{
+		"_id": "competence:defi",
+		"type": "competence",
+		"nom": "Défi",
+		"icon": "📢",
+		"animation": "animation:capa_rage",
+		"description": "Il frappe son bouclier et hurle un nom : la bête ne voit plus que lui, le temps que sa volonté tient.",
+		"vocation": "guerrier",
+		"niveau": 6,
+		"mode": "active",
+		"cout_pm": 25,
+		"sensibilite_charge": 0,
+		"cible": "ennemi",
+		"jet": "cc",
+		"portee": 1,
+		"effets": {
+			"degats": "2D6+2",
+			"provocation": 1,
+			"duree": "2+{Vol/40}"
 		}
 	},
 	{
@@ -535,7 +629,7 @@
 		"cible": "allie",
 		"portee": 6,
 		"effets": {
-			"saut": 4
+			"saut": "2+{Int/25}"
 		}
 	},
 	{
@@ -632,7 +726,7 @@
 		"niveau": 9,
 		"mode": "active",
 		"cout_pm": 45,
-		"incantation": 3,
+		"incantation": "5-{Int/30}",
 		"cible": "ennemi",
 		"jet": "magique",
 		"portee": 6,
@@ -792,7 +886,7 @@
 		"niveau": 8,
 		"mode": "active",
 		"cout_pm": 15,
-		"maintien": 3,
+		"maintien": "5-{Vol/25}",
 		"cible": "soi",
 		"portee": 1,
 		"effets": {
@@ -800,6 +894,23 @@
 				"R": "{Vol/6}"
 			},
 			"regen_pv": 2
+		}
+	},
+	{
+		"_id": "competence:ascension",
+		"type": "competence",
+		"nom": "Ascension",
+		"icon": "🌤️",
+		"animation": "animation:capa_aura_sacree",
+		"description": "Il s'élève et retombe comme une feuille portée par le vent — d'autant plus loin que son corps est délié.",
+		"vocation": "moine",
+		"niveau": 10,
+		"mode": "active",
+		"cout_pm": 40,
+		"cible": "soi",
+		"portee": 1,
+		"effets": {
+			"saut": "3+{Ag/25}"
 		}
 	},
 	{
@@ -896,6 +1007,29 @@
 		}
 	},
 	{
+		"_id": "competence:jugement",
+		"type": "competence",
+		"nom": "Jugement",
+		"icon": "⚖️",
+		"animation": "animation:capa_lame_sacree",
+		"description": "Il désigne le coupable du plat de sa lame : désormais, c'est à lui que l'impie doit répondre.",
+		"vocation": "paladin",
+		"niveau": 4,
+		"mode": "active",
+		"cout_pm": 18,
+		"cible": "ennemi",
+		"jet": "cc",
+		"portee": 1,
+		"effets": {
+			"degats": "1D8+{Vol/15}",
+			"buffs": {
+				"F": -9
+			},
+			"provocation": 1,
+			"duree": 3
+		}
+	},
+	{
 		"_id": "competence:marteau_de_justice",
 		"type": "competence",
 		"nom": "Serment de garde",
@@ -906,12 +1040,12 @@
 		"niveau": 6,
 		"mode": "active",
 		"cout_pm": 20,
-		"maintien": 4,
+		"maintien": "6-{Vol/30}",
 		"cible": "allie",
 		"portee": 4,
 		"effets": {
 			"lien_vie": {
-				"part": 60,
+				"part": "40+{Vol/4}",
 				"reduction": 20
 			}
 		}
@@ -1014,6 +1148,25 @@
 		}
 	},
 	{
+		"_id": "competence:rituel_d_exorcisme",
+		"type": "competence",
+		"nom": "Rituel d'exorcisme",
+		"icon": "📿",
+		"animation": "animation:capa_lumiere_zone",
+		"description": "Un rite lent, qui chasse ce qui ne devrait pas être là. Une volonté ferme en abrège les versets.",
+		"vocation": "repurgateur",
+		"niveau": 9,
+		"mode": "active",
+		"cout_pm": 48,
+		"incantation": "5-{Vol/30}",
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 5,
+		"effets": {
+			"degats": "5D10+{Vol/6}"
+		}
+	},
+	{
 		"_id": "competence:mur_de_l_ordre",
 		"type": "competence",
 		"nom": "Mur de foi",
@@ -1047,7 +1200,7 @@
 		"niveau": 8,
 		"mode": "active",
 		"cout_pm": 25,
-		"maintien": 3,
+		"maintien": "5-{Vol/30}",
 		"cible": "ennemi",
 		"jet": "magique",
 		"portee": 3,
@@ -1061,6 +1214,30 @@
 		},
 		"effets": {
 			"degats": "2D6+{Vol/12}"
+		}
+	},
+	{
+		"_id": "competence:dissipation",
+		"type": "competence",
+		"nom": "Défi de l'ordre",
+		"icon": "🛡️",
+		"animation": "animation:capa_bouclier",
+		"description": "Il plante son étendard et appelle tout ce qui l'entoure au combat : qu'on frappe le templier, pas ses frères.",
+		"vocation": "templier",
+		"niveau": 8,
+		"mode": "active",
+		"cout_pm": 29,
+		"cible": "ennemi",
+		"jet": "cc",
+		"portee": 1,
+		"zone": {
+			"forme": "carre",
+			"origine": "lanceur",
+			"rayon": 2
+		},
+		"effets": {
+			"provocation": 1,
+			"duree": "1+{R/30}"
 		}
 	},
 	{
@@ -1100,6 +1277,21 @@
 		"effets": {
 			"degats": "1D6+{Ag/15}",
 			"drain_pm": 60
+		}
+	},
+	{
+		"_id": "competence:chance_insolente",
+		"type": "competence",
+		"nom": "Chance insolente",
+		"icon": "🎲",
+		"description": "La chance sourit aux doigts rapides : plus il est vif, plus elle tourne en sa faveur.",
+		"vocation": "voleur",
+		"niveau": 5,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Ch": "{Ag/15}"
+			}
 		}
 	},
 	{

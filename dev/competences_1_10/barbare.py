@@ -23,7 +23,7 @@ ENTREES = [
 	A(3, "Griffes de l'ours", "🐻", "poison", "griffe", "Il lacère comme une bête, et les plaies ne se referment pas."),
 	A(3, "Cri des ancêtres", "📣", "cri", "aura_bataille", "Le cri des morts du clan passe par sa gorge, et les vivants se lèvent.", stats=("F", "Vol")),
 	L(3, "Lancer de camarade", "🤾", "saut", "Il empoigne un compagnon par la ceinture et le jette par-dessus la mêlée.",
-	  {"cible": "allie", "portee": 1, "cout_pm": 15, "effets": {"saut": 4}},
+	  {"cible": "allie", "portee": 1, "cout_pm": 15, "effets": {"saut": "2+{F/25}"}},
 	  remplace="saignee_furieuse"),
 	# ── Niveau 4 ──
 	P(4, "Indomptable", "🐺", "p_carac", "Rien ne l'arrête, rien ne le plie.", stats=("Vol",)),
@@ -50,7 +50,9 @@ ENTREES = [
 	A(6, "Rugissement", "🦁", "entrave", "rage", "Un rugissement qui fait trembler les mains ennemies.", malus=("Vol", "F")),
 	A(6, "Peau de pierre", "🪨", "posture", "garde", "La rage durcit sa peau jusqu'à ce que les lames y rebondissent.", stats=("R",)),
 	# ── Niveau 7 ──
-	P(7, "Colosse", "🗿", "p_carac", "Il dépasse tout le monde d'une tête, et d'une hache.", stats=("F",)),
+	L(7, "Colosse", "🗿", None, "Sa masse fait sa force : plus le corps encaisse, plus le bras frappe.",
+	  {"effets": {"buffs": {"F": "{R/12}"}}},
+	  remplace="colosse", mode="passive"),
 	P(7, "Volonté du clan", "🪶", "p_carac", "Le clan entier tient debout dans sa poitrine.", stats=("Vol",)),
 	A(7, "Fendoir des montagnes", "⛰️", "frappe", "coup_lourd", "Un coup à fendre la roche, porté sur un homme."),
 	L(7, "Festin du carnage", "🍖", "drain", "Il tournoie au milieu des ennemis et boit le sang de chacun : plus ils sont nombreux, mieux il se porte.",
