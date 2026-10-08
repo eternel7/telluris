@@ -9063,7 +9063,10 @@ async function choisirAtelier(btn) {
 	CMD_SUR_MESURE = !!data.sur_mesure;
 	_sellSectionsVisibles({ vente: !!data.echange, achat: !!data.echange, commande: CMD_ACTIVE });
 	if (!_sellSectionsPresentes().length) {
-		showToast('Rien à traiter ici : ses affaires se gèrent depuis 📦 Coffre.');
+		// Rien à faire avec ce marchand (maître sans commande) : direct au 📦 Coffre, marchand
+		// présélectionné (`renderCoffre` retombe sur « coffre » si l'id n'y figure pas).
+		_pcfSel = btn.dataset.id;
+		openCoffre();
 		return;
 	}
 	openSellPanel();
