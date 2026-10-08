@@ -195,10 +195,17 @@ def indice_destination(giver_doc: dict, dest_id: str, find_docs_fn, get_doc_fn) 
 	}
 
 
+def groupe_direction(direction: str) -> str:
+	"""Direction cardinale précédée de sa préposition : « à l'est », « à l'ouest » (élision
+	devant une voyelle), « au nord », « au sud-est »… (`quetes._phrase_direction` fait de
+	même, en capitale initiale)."""
+	return f"à l'{direction}" if direction[0] in "eo" else f"au {direction}"
+
+
 def texte_indice(indice: dict) -> str:
 	"""Phrase d'orientation prête à insérer dans un dialogue ({direction} du gabarit)."""
 	if indice.get("meme_ville"):
-		bout = f"au {indice['direction']} d'ici" if indice.get("direction") else "à deux pas d'ici"
+		bout = f"{groupe_direction(indice['direction'])} d'ici" if indice.get("direction") else "à deux pas d'ici"
 		if indice.get("repere"):
 			bout += f", tout près de {indice['repere']}"
 		return bout

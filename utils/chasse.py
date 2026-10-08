@@ -37,7 +37,7 @@ from utils.zones import (
 )
 from utils.characters import lieu_label, item_ref_id
 from utils.recrutement import RANGS
-from utils import quetes
+from utils import accord_espece, quetes
 
 
 # Paramètres de génération du grade : « le plus haut possible » vs « juste en dessous ».
@@ -530,9 +530,9 @@ def _construire_quete_rang(comptoir_doc: dict, cite: str, lieu_doc: dict, espece
 		"source": "rang",
 		"giver": comptoir_doc.get("_id"),
 		"lieu_parent": cite,
-		"titre": f"Épreuve de rang : traquer le {nom} « {grade} »",
+		"titre": f"Épreuve de rang : traquer {accord_espece.groupe(espece_doc, 'le')} « {grade} »",
 		"description": (
-			f"Le maître d'armes exige une preuve : traquez et abattez ce {nom} « {grade} », "
+			f"Le maître d'armes exige une preuve : traquez et abattez {accord_espece.groupe(espece_doc, 'ce')} « {grade} », "
 			f"l'élite qui écume {lieu_nom}, pour prétendre au rang {rang_vise}."
 		),
 		"rang": rang_vise,

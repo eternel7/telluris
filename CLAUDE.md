@@ -98,6 +98,9 @@ utils/
   animations.py          # animations de combat (pur) : découpe d'une feuille, cascade de canaux, charge `vfx`
   quetes.py              # moteur de génération de quêtes (pur) + état joueur / progression / récompenses
   transport.py           # quêtes de transport (pur) : cargaison, délai, géographie, courses authorées
+  accord_espece.py       # accord d'une espèce (pur) : article/contraction/pronom d'après `genre`, `pluriel`,
+                         #   `nom_propre`, `h_aspire` du doc `espece:*` (posés par `dev/gen_genres_especes.py`) ;
+                         #   ⚠️ jamais de « le {nom} » en dur dans un titre généré
   chasse.py              # quêtes de chasse (pur) : élite à profil élevé, rang de guilde
   donjon.py              # donjons (pur) : salles curatées, plafond de grade, commissions d'éradication ;
                          #   donjon à ÉTAGES (`mode:"etages"`) : étages reliés par des connexions, un seul combat
