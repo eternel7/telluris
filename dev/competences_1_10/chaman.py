@@ -38,6 +38,10 @@ ENTREES = [
 	L(6, "Fardeau des esprits", "👻", "lien", "Il lie un compagnon aux esprits : ils absorbent une part des coups, le chaman porte le reste.",
 	  {"cible": "allie", "portee": 3, "cout_pm": 20, "maintien": 3, "effets": {"lien_vie": {"part": "25+{Cha/4}", "reduction": 30}}},
 	  remplace="ailes_du_faucon"),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(6, "Homme bête", "🐺", "totem", "L'esprit n'est plus un compagnon qu'il invoque : il vit à l'intérieur, et sort quand on l'y oblige.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 25, "effets": {"buffs": {"F": 12, "R": 8, "Ag": 6, "Int": -6}, "regen_pv": 1, "duree": 5, "saut": 3}},
+	  remplace="homme_bete"),
 	# ── Niveau 7 ──
 	A(7, "Fléau des esprits", "💀", "poison", "spectre", "Les esprits hantent la cible et la consument."),
 	A(7, "Totem de guerre", "🗿", "cri", "totem", "Il plante un totem, et la troupe se bat comme une meute.", stats=("F", "Ag"), rayon=2),
@@ -60,4 +64,8 @@ ENTREES = [
 	L(10, "Marche des ancêtres", "🥁", "totem", "Les ancêtres marchent avec la troupe : chacun frappe et tient comme dix.",
 	  {"cible": "soi", "portee": 1, "cout_pm": 40, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 2}, "effets": {"buffs": {"F": "7+{Cha/10}", "R": 7}, "duree": 5}},
 	  remplace="colere_des_ancetres"),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Esprit Antique", "🦣", "totem", "Le mammouth, le tigre à dents de sabre, le grand saurien. Un seul, une seule fois, et il faut ensuite s'en remettre.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 40, "effets": {"buffs": {"F": 16, "R": 10, "Ag": 6, "V": 1}, "regen_pv": 2, "duree": 5}},
+	  remplace="esprit_antique"),
 ]

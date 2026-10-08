@@ -39,6 +39,10 @@ ENTREES = [
 	  {"cible": "allie", "portee": 4, "cout_pm": 20, "maintien": "6-{Vol/30}", "effets": {"lien_vie": {"part": "40+{Vol/4}", "reduction": 20}}},
 	  remplace="marteau_de_justice"),
 	A(6, "Mains de lumière", "🙌", "soin_zone", "soin_vague", "La lumière jaillit de ses mains et soigne ceux qui l'entourent."),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(6, "Serment du martyr", "🩸", "lien", "Il prend sur lui ce qu'un autre ne peut plus porter. C'est tout le serment, et il n'en a jamais fait d'autre.",
+	  {"cible": "allie", "portee": 2, "cout_pm": 25, "maintien": 4, "effets": {"pv": 18, "buffs": {"R": 6}, "lien_vie": {"part": 50, "reduction": 10}}},
+	  remplace="serment_du_martyr"),
 	# ── Niveau 7 ──
 	A(7, "Lame de l'aube", "🌅", "frappe", "lumiere", "Une lame qui brille comme le soleil levant."),
 	A(7, "Bannissement", "🚫", "siphon", "lumiere_zone", "Il chasse la magie impie hors du corps ennemi.", **MAG),
@@ -59,4 +63,8 @@ ENTREES = [
 	# ── Niveau 10 ──
 	A(10, "Jugement dernier", "⚖️", "frappe", "lumiere", "Le coup qui pèse l'âme avant de la frapper."),
 	A(10, "Miracle", "🌟", "soin_zone", "aura_sacree", "Un miracle, et ceux qui tombaient se relèvent."),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Lumière du Purificateur", "☀️", "lumiere_zone", "Une lumière sans chaleur, dirigée. Ce qui vient du monde des morts n'y survit pas longtemps.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"degats": "2D10+8", "buffs": {"Vol": -6}, "duree": 3}},
+	  remplace="lumiere_du_purificateur"),
 ]

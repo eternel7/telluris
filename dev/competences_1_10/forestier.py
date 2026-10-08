@@ -10,6 +10,10 @@ ENTREES = [
 	A(1, "Tir aux jambes", "🦵", "entrave", "tir", "Une flèche basse qui ralentit la course de la proie.", malus=("Ag",)),
 	A(1, "Coup de couteau", "🔪", "frappe", "saignee", "Le couteau de chasse, quand la bête est trop près pour l'arc.", **CC),
 	A(1, "Bond du lièvre", "🐇", "saut", "saut", "Il s'éloigne d'un bond pour retrouver la bonne distance."),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(1, "Baume de campagne", "🌿", "soin_nature", "Deux feuilles mâchées, un linge serré, et on repart. Le forestier ne guérit pas : il rafistole assez pour tenir jusqu'au camp.",
+	  {"cible": "allie", "portee": 2, "cout_pm": 8, "effets": {"pv": 8, "regen_pv": 2, "duree": 3}},
+	  remplace="baume_de_campagne"),
 	# ── Niveau 2 ──
 	P(2, "Pas de velours", "🍂", "p_furtif", "Il marche sur les feuilles mortes sans en froisser une.", terrains=BOIS),
 	L(2, "Tir à longue portée", "🏹", "tir", "Une flèche qui file plus loin que l'œil ne suit — pour qui a la main assez sûre.",

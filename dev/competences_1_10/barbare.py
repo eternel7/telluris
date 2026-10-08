@@ -49,6 +49,10 @@ ENTREES = [
 	A(6, "Griffe de la bête", "🐾", "zone_cone", "impact_plaie/cone_griffe", "Il lacère devant lui comme un ours debout."),
 	A(6, "Rugissement", "🦁", "entrave", "rage", "Un rugissement qui fait trembler les mains ennemies.", malus=("Vol", "F")),
 	A(6, "Peau de pierre", "🪨", "posture", "garde", "La rage durcit sa peau jusqu'à ce que les lames y rebondissent.", stats=("R",)),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(6, "Annonce de sang", "🔥", "rage", "La fureur guerrière montée d'un cran. Ceux qui l'ont vue une fois changent de chemin la fois suivante.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 12, "maintien": 4, "effets": {"buffs": {"F": 18, "Ag": 6}, "regen_pv": 1}},
+	  remplace="annonce_de_sang"),
 	# ── Niveau 7 ──
 	L(7, "Colosse", "🗿", None, "Sa masse fait sa force : plus le corps encaisse, plus le bras frappe.",
 	  {"effets": {"buffs": {"F": "{R/12}"}}},
@@ -83,4 +87,8 @@ ENTREES = [
 	A(10, "Carnage", "🌪️", "zone_carre", "balayage", "Un cercle de mort, au centre duquel il hurle.", rayon=2),
 	A(10, "Cri du dernier clan", "📯", "cri", "aura_bataille", "Le cri qui a précédé chaque victoire de son peuple.", stats=("F", "Vol"), rayon=2),
 	A(10, "Sang pour sang", "🩸", "drain", "saignee", "Chaque goutte qu'il fait couler lui revient en force."),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Spasme de furie", "🪓", "coup_lourd", "Il ne frappe plus une cible : il frappe, et quelque chose se trouve devant.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 40, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1}, "effets": {"degats": "3D10+9"}},
+	  remplace="spasme_de_furie"),
 ]

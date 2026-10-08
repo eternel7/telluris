@@ -34,6 +34,10 @@ ENTREES = [
 	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 25, "zone": {"forme": "cone", "origine": "lanceur", "orientation": "cible", "decalage": 1, "longueur": 4, "angle": 90}, "effets": {"buffs": {"Int": "-5-{Cha/10}", "Vol": -5}, "duree": 4}},
 	  remplace="eventail_de_folie"),
 	A(6, "Pas entre les reflets", "🪞", "saut", "double", "Il passe d'un reflet à un autre."),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(6, "Mirage paralysant", "🌀", "illusion", "Il montre à la cible un sol qui n'existe pas. Elle cesse d'avancer, ce qui est déjà beaucoup.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 8, "cout_pm": 25, "effets": {"degats": "1D8", "buffs": {"Ag": -12, "V": -1}, "duree": 4}},
+	  remplace="mirage_paralysant"),
 	# ── Niveau 7 ──
 	L(7, "Reflets", "🪞", "double", "Trois reflets d'un compagnon dansent autour de lui ; l'ennemi frappe le mauvais.",
 	  {"cible": "allie", "portee": 4, "cout_pm": 29, "effets": {"buffs": {"Ag": "4+{Cha/12}"}, "esquive": "7+{Cha/8}", "duree": 4}},
@@ -56,4 +60,8 @@ ENTREES = [
 	# ── Niveau 10 ──
 	A(10, "Réalité brisée", "💔", "entrave", "illusion", "La cible ne sait plus ce qui est réel.", malus=("Int", "Vol", "Ag")),
 	A(10, "Fantasmagorie", "🎆", "zone_cercle", "illusion_zone", "Le monde entier semble se retourner contre l'ennemi.", rayon=2),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Théâtre des ombres", "🎭", "illusion_zone", "Il donne à voir une scène entière. Quand elle se termine, la cible ne sait plus ce qu'elle faisait.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 10, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"degats": "2D6", "buffs": {"F": -7, "Ag": -7, "Int": -4}, "duree": 3}},
+	  remplace="theatre_des_ombres"),
 ]

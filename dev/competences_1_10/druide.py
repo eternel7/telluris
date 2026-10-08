@@ -40,6 +40,10 @@ ENTREES = [
 	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 25, "zone": {"forme": "rectangle", "origine": "lanceur", "orientation": "cible", "decalage": 1, "longueur": 3, "largeur": 1}, "effets": {"buffs": {"Ag": "-5-{Int/8}", "F": -5}, "duree": 4}},
 	  remplace="colere_de_la_foret"),
 	A(6, "Cercle de vie", "♻️", "cri", "soin_nature", "Un cercle verdoyant qui fortifie ses alliés.", stats=("R", "Vol")),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(6, "Sève vive", "🌿", "soin_nature", "Il pose la main et la chair se referme comme l'écorce d'un arbre qu'on a entaillé au printemps.",
+	  {"cible": "allie", "portee": 3, "cout_pm": 25, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"pv": 14, "buffs": {"R": 3}, "regen_pv": 1, "duree": 3}},
+	  remplace="seve_vive"),
 	# ── Niveau 7 ──
 	L(7, "Greffe vivante", "🌱", "soin_nature", "Il greffe une écorce vivante sur les plaies d'un compagnon.",
 	  {"cible": "allie", "portee": 4, "cout_pm": 29, "effets": {"buffs": {"R": "5+{Vol/10}"}, "regen_pv": "2+{Vol/25}", "duree": 4}},
@@ -66,4 +70,8 @@ ENTREES = [
 	# ── Niveau 10 ──
 	A(10, "Fureur de Gaïa", "🌍", "zone_carre", "roc", "La terre elle-même se soulève contre l'ennemi.", rayon=2),
 	A(10, "Renouveau", "🌱", "soin_zone", "soin_vague", "Le printemps éclate au milieu du combat."),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Homme-tempête", "⛈️", "foudre", "Il s'est voué à la maîtrise des éléments du ciel, et le ciel a fini par répondre.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 10, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"degats": "3D10+6", "buffs": {"V": -1}, "duree": 2}},
+	  remplace="homme_tempete"),
 ]

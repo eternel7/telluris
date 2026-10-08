@@ -17,6 +17,10 @@ ENTREES = [
 	  {"cible": "ennemi", "jet": "magique", "portee": 5, "cout_pm": 15, "effets": {"buffs": {"R": "-3-{Int/8}"}, "duree": "2+{Int/40}"}},
 	  remplace="fleche_alchimique"),
 	A(3, "Glyphe protecteur", "🔰", "buff_allie", "enchantement", "Il trace un glyphe sur l'armure d'un compagnon.", stats=("R", "Vol")),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(3, "Formule de l'alchimiste", "⚗️", "alchimie", "Un filtre préparé la veille, bu sans cérémonie. Il sait ce qu'il y a dedans, c'est déjà rassurant.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 15, "effets": {"pv": 16, "regen_pv": 2, "duree": 3}},
+	  remplace="formule_de_l_alchimiste"),
 	# ── Niveau 4 ──
 	A(4, "Éclat de savoir", "💡", "frappe", "eblouissant", "La connaissance brute, projetée comme une lame."),
 	A(4, "Dissolvant", "🫗", "siphon", "alchimie", "Une fiole qui dissout la magie de la cible."),
@@ -50,4 +54,8 @@ ENTREES = [
 	# ── Niveau 10 ──
 	A(10, "Œuvre au noir", "⚫", "zone_cercle", "ombre", "Le premier stade du Grand Œuvre, libéré sur l'ennemi.", rayon=2),
 	A(10, "Savoir universel", "🌐", "posture", "enchantement", "Il embrasse toutes les connaissances, et rien ne le surprend plus.", stats=("Int", "Vol")),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Œuvre de l'Enchanteur", "💎", "enchantement", "Il a créé les objets magiques les plus puissants de ce monde. Seuls les dieux peuvent prétendre mieux, et ils ne publient pas.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 40, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1}, "effets": {"pm": 8, "buffs": {"Int": 12, "Vol": 6}, "regen_pm": 1, "duree": 5}},
+	  remplace="oeuvre_de_l_enchanteur"),
 ]

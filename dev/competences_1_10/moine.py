@@ -57,4 +57,8 @@ ENTREES = [
 	L(10, "Ascension", "🌤️", "aura_sacree", "Il s'élève et retombe comme une feuille portée par le vent — d'autant plus loin que son corps est délié.",
 	  {"cible": "soi", "portee": 1, "cout_pm": 40, "effets": {"saut": "3+{Ag/25}"}},
 	  remplace="ascension"),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Souffle du Sensei", "🌬️", "meditation", "Front contre front, une longue expiration — mais il n'y a plus de limite à ce qu'il peut céder.",
+	  {"cible": "allie", "portee": 2, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"pv": 20, "pm": 6, "buffs": {"Vol": 5}, "duree": 4}},
+	  remplace="souffle_du_sensei"),
 ]

@@ -8,6 +8,10 @@ ENTREES = [
 	A(1, "Note discordante", "🎵", "entrave", "chant", "Une note fausse qui fait grincer les dents.", malus=("Vol",)),
 	A(1, "Coup de luth", "🪕", "frappe", "poing", "Le luth sert aussi à ça.", **CC),
 	A(1, "Chanson à boire", "🍺", "buff_allie", "chant", "Un refrain joyeux qui redonne courage.", stats=("Vol", "Cha")),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(1, "Refrain de ralliement", "🎵", "chant", "Un couplet lancé par-dessus la mêlée, à l'adresse d'un seul. Celui qui l'entend redresse la garde et cesse de compter ses plaies.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 10, "effets": {"buffs": {"Vol": 8, "Cha": 4}, "regen_pv": 1, "duree": 3}},
+	  remplace="refrain_de_ralliement"),
 	# ── Niveau 2 ──
 	A(2, "Berceuse", "😴", "entrave", "chant", "Une mélodie douce qui alourdit les paupières.", malus=("Ag", "Vol")),
 	A(2, "Mélodie apaisante", "🎶", "regen_allie", "chant", "Une mélodie qui apaise les blessures."),
@@ -35,6 +39,10 @@ ENTREES = [
 	# ── Niveau 6 ──
 	A(6, "Tonnerre de tambour", "🥁", "zone_cone", "impact_etincelles/cone_folie", "Un roulement de tambour qui déferle devant lui."),
 	A(6, "Sérénade", "🌹", "soin", "chant", "Une sérénade qui soigne le cœur et le corps."),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(6, "Hymne de l'Étoile", "🌟", "chant", "Un air lancé par-dessus la mêlée. Celui qui l'entend redresse la garde et oublie de compter ses plaies.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 25, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1}, "effets": {"pv": 4, "buffs": {"Vol": 8, "Cha": 4}, "regen_pv": 1, "duree": 4}},
+	  remplace="hymne_de_l_etoile"),
 	# ── Niveau 7 ──
 	A(7, "Chanson de geste", "📯", "cri", "chant", "La chanson des grandes batailles, que tous reprennent.", stats=("F", "R"), rayon=2),
 	L(7, "Fausse note", "🎻", "impact_etincelles/cone_folie", "Une dissonance qui fait grincer les esprits et s'enfuir le mana.",
@@ -55,4 +63,8 @@ ENTREES = [
 	# ── Niveau 10 ──
 	A(10, "Cantate des héros", "🎶", "cri", "chant", "La cantate que chantent les héros avant de mourir — ou de vaincre.", stats=("F", "Vol"), rayon=2),
 	A(10, "Dernière note", "🎵", "frappe", "chant", "La note finale, qui laisse le silence derrière elle."),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Chant du Prodige", "🎼", "illusion_zone", "La virtuosité poussée jusqu'à la torpeur : ceux qui l'écoutent glissent vers quelque chose qui ressemble à l'inconscience.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 40, "incantation": 3, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"degats": "1D8", "buffs": {"F": -9, "Ag": -9, "Vol": -5}, "duree": 3}},
+	  remplace="chant_du_prodige"),
 ]

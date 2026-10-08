@@ -8,6 +8,10 @@ ENTREES = [
 	A(1, "Coup d'estoc", "🗡️", "frappe", "lame", "Une pointe sèche, portée au défaut de la garde adverse."),
 	A(1, "Bousculade", "💢", "entrave", "coup_lourd", "Un coup d'épaule qui déséquilibre et laisse l'ennemi chancelant.", malus=("Ag",)),
 	A(1, "Garde haute", "🛡️", "esquive_soi", "garde", "Le bouclier remonte, l'épée se replie : il n'offre plus que du fer.", stats=("R",)),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(1, "Cri de ralliement", "📣", "aura_bataille", "Un ordre lancé à pleine gorge. Ceux qui l'entendent resserrent les rangs et cessent de reculer.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 10, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1}, "effets": {"buffs": {"F": 7, "Vol": 3}, "duree": 3}},
+	  remplace="cri_de_ralliement"),
 	# ── Niveau 2 ──
 	P(2, "Souffle long", "🌬️", "p_carac", "Il a appris à respirer sous le heaume sans jamais manquer d'air.", stats=("Vol",)),
 	P(2, "Pas assuré", "🦶", "p_esquive", "Chaque appui est choisi : on ne le prend jamais à contre-pied."),
@@ -56,6 +60,10 @@ ENTREES = [
 	  {"cible": "ennemi", "jet": "cc", "portee": "3+{Vol/30}", "cout_pm": 25, "effets": {"provocation": 1, "duree": "2+{Vol/40}"}},
 	  remplace="defi"),
 	A(6, "Vague d'acier", "🌊", "zone_cone", "impact_eclat_dore/cone_tueur_demon", "Un revers en éventail qui ouvre la mêlée."),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(6, "Garde de fer", "🛡️", "garde", "Il ferme la garde et cesse d'avancer. Pendant quelques instants, il n'y a plus d'ouverture.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 12, "maintien": 5, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1}, "effets": {"buffs": {"R": 8}, "esquive": 3}},
+	  remplace="garde_de_fer"),
 	# ── Niveau 7 ──
 	P(7, "Force tranquille", "🗿", "p_carac", "Il ne se presse jamais, et pourtant rien ne lui résiste.", stats=("F",)),
 	P(7, "Instinct de survie", "❤️‍🩹", "p_esquive", "Le corps esquive avant que la tête n'ait compris."),

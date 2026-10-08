@@ -49,6 +49,10 @@ ENTREES = [
 	L(6, "Nuage de farine", "🌫️", "poudre", "Un sac crevé au sol, et toute la bande disparaît dans un nuage blanc.",
 	  {"cible": "soi", "portee": 1, "cout_pm": 25, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1}, "effets": {"esquive": "2+{Ag/10}", "duree": 2}},
 	  remplace="bouclier_de_fortune"),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(6, "Fuite de maraudeur", "💨", "furtif", "Il cesse de se battre et se met à ne plus être touchable. C'est un métier différent, qu'il connaît aussi.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 25, "effets": {"buffs": {"Ag": 7}, "esquive": 12, "duree": 4, "saut": 3}},
+	  remplace="fuite_de_maraudeur"),
 	# ── Niveau 7 ──
 	P(7, "Feinte de rue", "🎭", "p_esquive", "Il a appris l'escrime dans les ruelles, et ça se voit."),
 	A(7, "Coup de crosse", "🔨", "entrave", "coup_lourd", "Un coup derrière l'oreille, qui fait voir trente-six chandelles.", malus=("Int", "Ag")),

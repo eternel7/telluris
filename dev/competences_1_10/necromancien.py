@@ -36,6 +36,10 @@ ENTREES = [
 	L(6, "Pacte de chair", "🩸", "ombre", "Il se taille un peu de chair et en fait du mana.",
 	  {"cible": "soi", "portee": 1, "cout_pm": 0, "effets": {"pm": "8+{Int/5}", "cout_pv": "15-{R/10}"}},
 	  remplace="corruption"),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(6, "Drain vital", "🩸", "drain", "Il prend ce qui tient la cible debout. Ce qu'il en fait ensuite ne regarde personne.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 25, "effets": {"degats": "3D8+6", "buffs": {"F": -5}, "duree": 3, "drain_pv": 35}},
+	  remplace="drain_vital"),
 	# ── Niveau 7 ──
 	A(7, "Doigt de mort", "☝️", "frappe", "ombre", "Il pointe le doigt, et la mort suit."),
 	A(7, "Moisson d'âmes", "🌾", "drain", "drain", "Il moissonne la vie de la cible."),
@@ -62,4 +66,8 @@ ENTREES = [
 	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 40, "effets": {"buffs": {"Vol": "-10-{Vol/7}", "R": -10, "V": -2}, "duree": 2}},
 	  remplace="mot_de_mort"),
 	A(10, "Hiver éternel", "❄️", "entrave", "givre", "Le froid de la tombe fige la cible.", malus=("Ag", "F", "R")),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Étreinte du tombeau", "⚱️", "tombeau", "Le sol se souvient de tous ceux qu'il a reçus, et tend les mains vers celui qui marche dessus.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 8, "cout_pm": 40, "incantation": 3, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"degats": "3D10+8", "buffs": {"R": -4, "V": -1}, "duree": 3, "drain_pv": 25, "drain_max": 12}},
+	  remplace="etreinte_du_tombeau"),
 ]

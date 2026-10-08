@@ -63,4 +63,8 @@ ENTREES = [
 	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"buffs": {"Vol": "-5-{Vol/12}", "Ag": -5, "V": -1}, "duree": 3}},
 	  remplace="apocalypse"),
 	A(10, "Âme damnée", "💀", "entrave", "demon_buff", "Il marque l'âme de la cible pour l'enfer.", malus=("Vol", "F", "R")),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Invocation majeure", "🔯", "portail_infernal", "Il n'appelle plus une créature : il lui prête sa peau pour la durée du contrat.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 40, "effets": {"buffs": {"F": 14, "Int": 14, "R": 8}, "regen_pv": 2, "regen_pm": 2, "duree": 5, "cout_pv": 15}},
+	  remplace="invocation_majeure"),
 ]
