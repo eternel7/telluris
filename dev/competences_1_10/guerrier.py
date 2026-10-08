@@ -14,7 +14,9 @@ ENTREES = [
 	A(2, "Taille horizontale", "⚔️", "zone_rect", "balayage", "Un revers large qui fauche tout ce qui se tient devant lui."),
 	A(2, "Pommeau au visage", "👊", "entrave", "coup_lourd", "Le pommeau frappe là où la lame ne passe pas.", malus=("Int", "Ag")),
 	A(2, "Coup de taille", "⚔️", "frappe", "lame", "Un geste ample, de toute la longueur de la lame."),
-	A(2, "Charge courte", "🐂", "saut", "saut", "Trois pas d'élan et il est déjà sur la ligne adverse."),
+	L(2, "Attention, messire !", "🛡️", "garde", "Il saisit un compagnon par l'épaule et passe devant lui : c'est sur le guerrier que tombera le coup suivant.",
+	  {"cible": "allie", "portee": 1, "cout_pm": 12, "effets": {"echange": 1}},
+	  remplace="charge_courte"),
 	A(2, "Second souffle", "💪", "buff_soi", "aura_bataille", "Il serre les dents et repart comme au premier assaut.", stats=("R", "F")),
 	# ── Niveau 3 ──
 	P(3, "Endurance du soldat", "🥾", "p_regen", "Les marches forcées ont appris à son corps à se refaire en marchant."),

@@ -4228,6 +4228,61 @@ def _sauter(combat_doc: dict, lanceur: dict, sauteur: dict, effets: dict,
 					 "vers": {"x": nx, "y": ny}}}
 
 
+def _verifier_echange(combat_doc: dict, lanceur: dict, allie: dict | None, grid: dict) -> dict:
+	"""L'échange de place (`effets.echange`) entre le lanceur et l'allié désigné est-il
+	recevable ? `{}` si oui. Appelée en tête de `_lancer_capacite`, AVANT tout débit, puis
+	par `_echanger` — même règle que le saut : une capacité qui ne part pas ne se paie pas.
+
+	⚠️ Aucune DISTANCE ici : la portée de la capacité en décide (`_lancer_sur_allie`), le
+	contenu fixe le contact. Restent les règles de la PERMUTATION, celles de l'échange d'un
+	pas (`_echange_possible`) : chacun doit tenir sur la case de l'autre, vol compris.
+	⚠️ 1x1 des deux côtés — une emprise de plusieurs cases ne tient pas dans une case — et
+	aucun TIERS sur l'une des deux cases (le lanceur peut traverser une grande monture : les
+	deux se superposeraient)."""
+	if not allie or allie is lanceur:
+		return {"error": "Personne avec qui échanger sa place."}
+	if jetons.est_grand(lanceur) or jetons.est_grand(allie):
+		return {"error": "Une grande créature ne peut pas échanger sa place."}
+	if not _echange_possible(grid["cells"], lanceur, allie):
+		return {"error": "L'un de vous ne tiendrait pas sur la case de l'autre."}
+	cases = {(lanceur["pos"]["x"], lanceur["pos"]["y"]), (allie["pos"]["x"], allie["pos"]["y"])}
+	tiers = [a for a in combat_doc["joueurs"] if a.get("currentPV", 0) > 0] + \
+			[m for m in combat_doc["monstres"] if m.get("vivant")]
+	for acteur in tiers:
+		if acteur is lanceur or acteur is allie or not acteur.get("pos"):
+			continue
+		if any(jetons.couvre(acteur, x, y) for x, y in cases):
+			return {"error": "La place est prise."}
+	return {}
+
+
+def _echanger(combat_doc: dict, lanceur: dict, allie: dict, grid: dict) -> dict:
+	"""PERMUTE les cases du lanceur et de l'allié. `{"echange": …}` ou `{"error": …}`.
+
+	⚠️ Journal : UNE entrée `move` qui NOMME les deux corps (`_avec_etat`) — sans quoi l'un
+	des jetons suivrait l'état final tout de suite et l'autre attendrait la révélation : ils
+	ne glisseraient pas ensemble (même raison que l'échange d'un pas).
+	⚠️ Arriver sur une zone persistante ou un piège a ses effets, pour chacun — comme y
+	entrer à pied ou y atterrir d'un saut."""
+	erreur = _verifier_echange(combat_doc, lanceur, allie, grid)
+	if erreur:
+		return erreur
+	de_lanceur = dict(lanceur["pos"])
+	de_allie = dict(allie["pos"])
+	lanceur["pos"], allie["pos"] = dict(de_allie), dict(de_lanceur)
+	combat_doc.setdefault("log", []).append(_avec_etat(_avec_vfx({
+		"tour": int(combat_doc.get("tour", 0) or 0),
+		"acteur": lanceur.get("nom", "?"),
+		"kind": "move",
+		"texte": f"{lanceur.get('nom', '?')} prend la place de {allie.get('nom', '?')}.",
+	}, "sort", allie.get("id", "")), lanceur, allie))
+	for acteur in (lanceur, allie):
+		_bruler_zones(combat_doc, acteur)
+		_pieges_au_pas(combat_doc, acteur)
+	return {"echange": {"lanceur_id": lanceur.get("id"), "allie_id": allie.get("id"),
+						"lanceur_vers": dict(lanceur["pos"]), "allie_vers": dict(allie["pos"])}}
+
+
 def _rediriger_lien_vie(combat_doc: dict, defenseur: dict, dmg: int) -> tuple:
 	"""Répartit un coup entre le protégé et son protecteur. N'APPLIQUE rien.
 
@@ -5311,6 +5366,15 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 			erreur = _verifier_saut(combat_doc, sauteur, effets, dx, dy, grid)
 			if erreur:
 				return erreur, None
+	# ÉCHANGE DE PLACE : validé lui aussi AVANT tout débit et tout soutien appliqué. Un allié
+	# absent, hors de portée ou à terre est refusé plus bas par `_lancer_sur_allie`, avant
+	# que rien ne soit posé.
+	if effets.get("echange") and sdoc.get("cible") == "allie":
+		partenaire = _get_joueur(combat_doc, cible_id) if cible_id else None
+		if partenaire is not None:
+			erreur = _verifier_echange(combat_doc, joueur, partenaire, grid)
+			if erreur:
+				return erreur, None
 	if invocation:
 		# INVOCATION : le sort ne vise personne, il ajoute des combattants. Testée AVANT
 		# `cible`, qui ne décrit pas ce qu'elle fait (une invocation est `soi` par défaut,
@@ -5367,6 +5431,12 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		# LIEN DE VIE : le sort ne pose rien sur le désigné, il TISSE entre lui et le
 		# lanceur. Posé après le soutien, pour que la zone serve d'abord normalement.
 		_poser_lien_vie(combat_doc, joueur, allie, sdoc, effets)
+		# ÉCHANGE DE PLACE (« Attention, messire ! ») : validé en tête, exécuté ici.
+		if effets.get("echange"):
+			echange = _echanger(combat_doc, joueur, allie, grid)
+			if "error" in echange:
+				return echange, None
+			result.update(echange)
 		# SAUT sur un allié : la case d'arrivée est celle que le joueur a désignée.
 		saut = _sauter(combat_doc, joueur, allie, effets, dx, dy, grid)
 		if "error" in saut:

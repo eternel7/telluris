@@ -6062,6 +6062,7 @@ function _sortEffetsLabel(e, prefixeDegats) {
 	if (e.drain_pm) parts.push(`🧛 drain ${e.drain_pm} % en PM`);
 	if (e.saut) parts.push(`💨 saut ${_fx(e, 'saut', e.saut)} cases`);
 	if (e.provocation) parts.push('📢 provocation');
+	if (e.echange) parts.push('🔄 échange de place');
 	if (e.lien_vie) {
 		parts.push(`🔗 lien de vie ${_fx(e, 'lien_vie.part', e.lien_vie.part)} %`
 			+ (e.lien_vie.reduction ? ` (−${e.lien_vie.reduction} % absorbés)` : ''));

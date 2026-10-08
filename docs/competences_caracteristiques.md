@@ -573,7 +573,6 @@ Référentiel : `telluris-dump-20261007-160534.json`. Valeur d'origine conservé
 | 2 | Bénédiction de l'acier | `buffs.F` | `9` | `4+{Vol/7}` | 6 | 15 |
 | 2 | Frappe du juste | `degats` | `2D6+3` | `2D6+{F/12}` | 8 | 13 |
 | 2 | Prière de guérison | `pv` | `18` | `9+{Vol/4}` | 14 | 29 |
-| 3 | Lumière aveuglante | `degats` | `2D6+3` | `2D6+{F/12}` | 8 | 13 |
 | 4 | Aura de courage | `buffs.Vol` | `8` | `4+{Vol/10}` | 6 | 12 |
 | 4 | Soins du champ de bataille | `regen_pv` | `3` | `1+{Vol/20}` | 2 | 5 |
 | 5 | Brûlure sacrée | `regen_pv` | `-5` | `-2-{Vol/15}` | -3 | -7 |

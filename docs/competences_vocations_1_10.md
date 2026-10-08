@@ -869,7 +869,7 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 |---|---|---|---|---|---|
 | 🦶 **Pas assuré** — *Chaque appui est choisi : on ne le prend jamais à contre-pied.* | passive | — | permanent | esquive 3 | — |
 | 🌬️ **Souffle long** — *Il a appris à respirer sous le heaume sans jamais manquer d'air.* | passive | — | permanent | Vol +2 | — |
-| 🐂 **Charge courte** — *Trois pas d'élan et il est déjà sur la ligne adverse.* | active | 12 PM | soi / portée 1 | saut 2 cases | saut · 🔊 swish_4.wav |
+| 🛡️ **Attention, messire !** ♻ *remplace « Charge courte »* — *Il saisit un compagnon par l'épaule et passe devant lui : c'est sur le guerrier que tombera le coup suivant.* | active | 12 PM | allie / portée 1 |  | garde · 🔊 sword sound.wav |
 | ⚔️ **Coup de taille** — *Un geste ample, de toute la longueur de la lame.* | active | 12 PM | ennemi / cc / portée 1 | 2D6+3 dégâts | lame · 🔊 sword sound.wav |
 | 👊 **Pommeau au visage** — *Le pommeau frappe là où la lame ne passe pas.* | active | 12 PM | ennemi / cc / portée 1 | 1D6 dégâts · Int -7 Ag -3 · 3 tours | coup_lourd · 🔊 melee sound.wav |
 | 💪 **Second souffle** — *Il serre les dents et repart comme au premier assaut.* | active | 12 PM | soi / portée 1 | R +9 F +4 · 4 tours | aura_bataille · 🔊 power_up_sound_v0.ogg |
@@ -1502,8 +1502,8 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 
 | compétence | mode | coût | cible | effets | animation |
 |---|---|---|---|---|---|
-| ☀️ **Lumière aveuglante** — *Un éclat sacré qui brûle les yeux des impurs.* | active | 15 PM | ennemi / magique / portée 5 · cercle rayon 1 | 2D6+3 dégâts | lumiere_zone · 🔊 17.mp3 |
 | 🙌 **Mains secourables** ♻ *remplace « Serment de protection »* — *Il referme la plaie d'un compagnon, et un peu de cette grâce lui revient.* | active | 15 PM | allie / portée 1 | soin 1D8+{Vol/10} · ↺ 30 % au lanceur | soin_sacre · 🔊 power_up_sound_v1.ogg |
+| 🤝 **Sous mon égide** ♻ *remplace « Lumière aveuglante »* — *Il prend la place d'un frère d'armes et le couvre de son serment : une part des coups qui le visent revient au paladin.* | active | 15 PM + 4-{Vol/30}/round | allie / portée 1 | lien de vie 25+{Vol/4} % | lien · 🔊 power_up_sound_v1.ogg |
 
 ### Niveau 4 — 0 existante(s) + 4 neuve(s)
 

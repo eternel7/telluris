@@ -7710,29 +7710,6 @@
 		}
 	},
 	{
-		"_id": "competence:lumiere_aveuglante",
-		"type": "competence",
-		"nom": "Lumière aveuglante",
-		"icon": "☀️",
-		"animation": "animation:capa_lumiere_zone",
-		"description": "Un éclat sacré qui brûle les yeux des impurs.",
-		"vocation": "paladin",
-		"niveau": 3,
-		"mode": "active",
-		"cout_pm": 15,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 5,
-		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
-			"rayon": 1
-		},
-		"effets": {
-			"degats": "2D6+{F/12}"
-		}
-	},
-	{
 		"_id": "competence:lumiere_de_l_aube",
 		"type": "competence",
 		"nom": "Lumière de l'aube",

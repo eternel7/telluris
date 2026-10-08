@@ -266,6 +266,11 @@ def verifier_competence(doc, prefixe, ids_existants=None, vocations_connues=None
 			erreurs.append(f"{prefixe} : `provocation` sans `duree` — l'effet ne serait "
 						   f"jamais posé (part à durée)")
 
+	# (4 quinquies) ÉCHANGE DE PLACE : il permute le lanceur et l'allié DÉSIGNÉ.
+	if eff_norm.get("echange") and not (est_active(comp) and comp["cible"] == "allie"):
+		erreurs.append(f"{prefixe} : `echange` hors d'une active `allie` — il n'y aurait "
+					   f"personne avec qui permuter")
+
 	# (4 quater) AURA à formule : `entree_aura` ne résout rien, la formule serait perdue.
 	if est_passive(comp) and doc.get("zone") and eff_norm.get("formules"):
 		erreurs.append(f"{prefixe} : AURA à formule — `competences.entree_aura` ne résout "

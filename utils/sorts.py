@@ -408,6 +408,10 @@ def _bonus_dict(raw) -> dict:
 		# le force à viser le lanceur (cf. combat `_cible_joueur`). Part à durée à part
 		# entière (`part_durative`) : une provocation pure est un debuff.
 		"provocation": _as_int(raw.get("provocation")),
+		# ÉCHANGE DE PLACE (1) : le lanceur et l'allié désigné (`cible: "allie"`) permutent
+		# leurs cases (cf. combat `_echanger`). Aucune limite de distance dans le moteur : la
+		# PORTÉE de la capacité en décide — « Attention, messire ! » s'écrit `portee: 1`.
+		"echange": min(1, _as_int(raw.get("echange"))),
 		# Renforts d'un sort qui ne pose pas d'`effets` : ils ne valent QUE comme bonus de
 		# composant, appliqués au doc par `doc_effectif` (cf. INVOCATION_* / MAINTIEN_*).
 		"invocation_duree": _as_int(raw.get("invocation_duree")),
@@ -699,6 +703,7 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 		"soin": base.get("soin", ""),
 		"partage_soin": _as_int(base.get("partage_soin")),
 		"provocation": _as_int(base.get("provocation")),
+		"echange": _as_int(base.get("echange")),
 	}
 	formules = _fusionner_formules(base.get("formules"), {})
 	for bonus in bonus_list or []:
@@ -721,6 +726,7 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 			out[key] += _as_int(bonus.get(key))
 		for key in ("regen_pv", "regen_pm"):
 			out[key] += _as_signed_int(bonus.get(key))
+		out["echange"] = max(out["echange"], min(1, _as_int(bonus.get("echange"))))
 		for k, delta in (bonus.get("buffs") or {}).items():
 			if str(k) == "V":
 				continue
@@ -842,7 +848,8 @@ def effets_utilisables_combat(effets: dict) -> bool:
 	return (bool(eff.get("degats")) or _as_int(eff.get("pv")) > 0
 			or _as_int(eff.get("pm")) > 0 or _as_int(eff.get("furtivite")) > 0
 			or bool(eff.get("degats_pm")) or _as_int(eff.get("saut")) > 0
-			or bool(eff.get("lien_vie")) or part_durative(eff))
+			or bool(eff.get("lien_vie")) or _as_int(eff.get("echange")) > 0
+			or part_durative(eff))
 
 
 def capacite_utilisable_combat(capacite: dict, effets: dict | None = None) -> bool:
@@ -897,11 +904,11 @@ def capacite_utilisable_exploration(capacite: dict) -> bool:
 	NON offensive (`soi` ou `allie` — il n'y a pas de monstre à viser) ET au moins un effet
 	applicable hors combat : soin ou PM instantanés, ou part à durée.
 
-	⚠️ Cinq mécaniques sont refusées, toutes pour la même raison — il n'y a **ni round ni
+	⚠️ Six mécaniques sont refusées, toutes pour la même raison — il n'y a **ni round ni
 	grille** en exploration : l'INVOCATION (rien pour accueillir la créature), l'INCANTATION
 	de plus d'un PA (rien à quoi rattacher un PA reporté), l'ENTRETIEN (rien à prélever,
-	aucun tour ne passe), le SAUT (aucune case où atterrir) et le LIEN DE VIE (aucun coup à
-	rediriger). ⚠️ `cout_pv`, lui, reste applicable : ce n'est qu'un coût, pas une règle de
+	aucun tour ne passe), le SAUT (aucune case où atterrir), le LIEN DE VIE (aucun coup à
+	rediriger) et l'ÉCHANGE DE PLACE (aucune case à permuter). ⚠️ `cout_pv`, lui, reste applicable : ce n'est qu'un coût, pas une règle de
 	tour."""
 	cap = capacite or {}
 	if est_invocation(cap) or est_maintenu(cap) or est_incantation_longue(cap):
@@ -909,7 +916,7 @@ def capacite_utilisable_exploration(capacite: dict) -> bool:
 	if (cap.get("cible") or CIBLE_DEFAUT) == "ennemi":
 		return False
 	eff = _vue_indicative(cap.get("effets"))
-	if _as_int(eff.get("saut")) > 0 or eff.get("lien_vie"):
+	if _as_int(eff.get("saut")) > 0 or eff.get("lien_vie") or _as_int(eff.get("echange")) > 0:
 		return False
 	return _as_int(eff.get("pv")) > 0 or _as_int(eff.get("pm")) > 0 or part_durative(eff)
 

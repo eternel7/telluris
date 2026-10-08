@@ -3454,7 +3454,23 @@ function allyTargets(s) {
 	let list = (state.joueurs || []).filter(p =>
 		p.pos && p.id !== j.id && (p.currentPV || 0) > 0 && chebyJM(j, p) <= portee);
 	if (ranged) list = list.filter(p => vueActeurs(j, p));
+	// ÉCHANGE DE PLACE : seuls les alliés avec qui la permutation passera (sinon la case
+	// proposerait une cible que le serveur refuse, la capacité restant payée d'un clic).
+	if ((s.effets || {}).echange) list = list.filter(p => echangeOffert(j, p));
 	return list;
+}
+// L'échange de place (`effets.echange`) entre `j` et l'allié `p` est-il recevable ? Miroir de
+// `combat._verifier_echange` : 1x1 des deux côtés, chacun tient sur la case de l'autre (vol
+// de celui qui arrive — `echangePossible`, scripts/deplacement.js), aucun TIERS vivant sur
+// l'une des deux cases. La distance n'y figure pas : c'est la portée de la capacité.
+function echangeOffert(j, p) {
+	if (!j || !p || !j.pos || !p.pos || estGrand(j) || estGrand(p)) return false;
+	if (!echangePossible((GRID || {}).cells, { x: j.pos.x, y: j.pos.y, volant: !!j.volant },
+		{ x: p.pos.x, y: p.pos.y, volant: !!p.volant })) return false;
+	const tiers = (state.joueurs || []).filter(a => (a.currentPV || 0) > 0)
+		.concat((state.monstres || []).filter(m => m.vivant));
+	return !tiers.some(a => a.id !== j.id && a.id !== p.id && a.pos
+		&& (couvreActeur(a, j.pos.x, j.pos.y) || couvreActeur(a, p.pos.x, p.pos.y)));
 }
 // Cibles d'une capacité, quel que soit son camp — SOURCE UNIQUE des trois consommateurs
 // (slot grisé, rendu des tokens, badges d'initiative), pour qu'une case cliquable et une
@@ -3852,6 +3868,7 @@ function sortLabel(s) {
 	if (s.effets.furtivite) parts.push('🥷 furtivité');
 	// Provocation : le monstre touché vise le lanceur (cf. combat._cible_joueur).
 	if (s.effets.provocation) parts.push(`📢 provoque${s.effets.duree ? ` ${s.effets.duree} tours` : ''}`);
+	if (s.effets.echange) parts.push('🔄 échange de place');
 	// Invocation : ses `effets` sont vides par construction (elle fait apparaître une
 	// créature, elle ne pose rien sur personne) — sans cette ligne la case n'annoncerait rien.
 	// Maintenue : la créature reste tant que l'entretien est payé, sa `duree` est inerte.
@@ -4129,6 +4146,8 @@ function compLabel(c) {
 	if (c.effets.furtivite) parts.push('🥷 furtivité');
 	// Provocation : le monstre touché vise le porteur (cf. combat._cible_joueur).
 	if (c.effets.provocation) parts.push(`📢 provoque${c.effets.duree ? ` ${c.effets.duree} tours` : ''}`);
+	if (c.effets.echange) parts.push('🔄 échange de place');
+	if (c.effets.lien_vie) parts.push(`🔗 lien de vie ${formuleTexte(c.effets, 'lien_vie.part', c.effets.lien_vie.part)} %`);
 	// Portée EFFECTIVE et non déclarée : une frappe `cc` emprunte l'allonge de l'arme en
 	// main, donc la même compétence ne porte pas à la même distance d'une épée à une hast.
 	// C'est le seul endroit où le joueur peut le lire.

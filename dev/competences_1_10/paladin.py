@@ -14,7 +14,9 @@ ENTREES = [
 	A(2, "Bénédiction de l'acier", "🗡️", "buff_allie", "aura_sacree", "Il bénit l'arme d'un compagnon, qui frappe plus juste.", stats=("F", "Vol")),
 	A(2, "Bond du croisé", "🦅", "saut", "saut", "Il s'élance au secours d'un frère d'armes."),
 	# ── Niveau 3 ──
-	A(3, "Lumière aveuglante", "☀️", "zone_cercle", "lumiere_zone", "Un éclat sacré qui brûle les yeux des impurs.", **MAG),
+	L(3, "Sous mon égide", "🤝", "lien", "Il prend la place d'un frère d'armes et le couvre de son serment : une part des coups qui le visent revient au paladin.",
+	  {"cible": "allie", "portee": 1, "cout_pm": 15, "maintien": "4-{Vol/30}", "effets": {"echange": 1, "lien_vie": {"part": "25+{Vol/4}", "reduction": 0}}},
+	  remplace="lumiere_aveuglante"),
 	L(3, "Mains secourables", "🙌", "soin_sacre", "Il referme la plaie d'un compagnon, et un peu de cette grâce lui revient.",
 	  {"cible": "allie", "portee": 1, "cout_pm": 15, "effets": {"soin": "1D8+{Vol/10}", "partage_soin": 30}},
 	  remplace="serment_de_protection"),

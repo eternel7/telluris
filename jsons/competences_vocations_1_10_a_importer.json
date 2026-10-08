@@ -500,6 +500,24 @@
 		}
 	},
 	{
+		"_id": "competence:charge_courte",
+		"type": "competence",
+		"nom": "Attention, messire !",
+		"icon": "🛡️",
+		"animation": "animation:capa_garde",
+		"description": "Il saisit un compagnon par l'épaule et passe devant lui : c'est sur le guerrier que tombera le coup suivant.",
+		"vocation": "guerrier",
+		"niveau": 2,
+		"mode": "active",
+		"cout_pm": 12,
+		"sensibilite_charge": 0,
+		"cible": "allie",
+		"portee": 1,
+		"effets": {
+			"echange": 1
+		}
+	},
+	{
 		"_id": "competence:fendoir",
 		"type": "competence",
 		"nom": "Frappe du vétéran",
@@ -967,6 +985,28 @@
 			"degats": "2D8+{Int/10}",
 			"drain_pm": 40,
 			"drain_max": 20
+		}
+	},
+	{
+		"_id": "competence:lumiere_aveuglante",
+		"type": "competence",
+		"nom": "Sous mon égide",
+		"icon": "🤝",
+		"animation": "animation:capa_lien",
+		"description": "Il prend la place d'un frère d'armes et le couvre de son serment : une part des coups qui le visent revient au paladin.",
+		"vocation": "paladin",
+		"niveau": 3,
+		"mode": "active",
+		"cout_pm": 15,
+		"maintien": "4-{Vol/30}",
+		"cible": "allie",
+		"portee": 1,
+		"effets": {
+			"echange": 1,
+			"lien_vie": {
+				"part": "25+{Vol/4}",
+				"reduction": 0
+			}
 		}
 	},
 	{
