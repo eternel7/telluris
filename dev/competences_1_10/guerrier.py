@@ -64,6 +64,10 @@ ENTREES = [
 	L(6, "Garde de fer", "🛡️", "garde", "Il ferme la garde et cesse d'avancer. Pendant quelques instants, il n'y a plus d'ouverture.",
 	  {"cible": "soi", "portee": 1, "cout_pm": 12, "maintien": 5, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1}, "effets": {"buffs": {"R": 8}, "esquive": 3}},
 	  remplace="garde_de_fer"),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(6, "Protecteur", "🩹", None, "Ses cicatrices se comptent par dizaines. Chacune est une leçon que son corps a retenue.",
+	  {"zone": {"forme": "carre", "origine": "lanceur", "rayon": 1}, "effets": {"buffs": {"R": 9}}},
+	  remplace="protecteur", mode="passive"),
 	# ── Niveau 7 ──
 	P(7, "Force tranquille", "🗿", "p_carac", "Il ne se presse jamais, et pourtant rien ne lui résiste.", stats=("F",)),
 	P(7, "Instinct de survie", "❤️‍🩹", "p_esquive", "Le corps esquive avant que la tête n'ait compris."),

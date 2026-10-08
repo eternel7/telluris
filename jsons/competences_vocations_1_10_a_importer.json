@@ -1,5 +1,54 @@
 [
 	{
+		"_id": "competence:maitre_des_ombres",
+		"type": "competence",
+		"nom": "Maître des ombres",
+		"icon": "🌑",
+		"description": "Souplesse et grâce poussées au point où le regard glisse sur lui sans accrocher.",
+		"vocation": "assassin",
+		"niveau": 6,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Ag": 10
+			},
+			"esquive": 7
+		}
+	},
+	{
+		"_id": "competence:ombre_incarnee",
+		"type": "competence",
+		"nom": "Ombre incarnée",
+		"icon": "👤",
+		"description": "Il n'entre pas dans un combat : il y est déjà, et personne ne sait où.",
+		"vocation": "assassin",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"furtivite": 20,
+			"buffs": {
+				"Ag": 12
+			},
+			"esquive": 10
+		}
+	},
+	{
+		"_id": "competence:conquerant",
+		"type": "competence",
+		"nom": "Conquérant",
+		"icon": "🏔️",
+		"description": "Il a dormi dans la neige et bu l'eau des flaques. Son corps a pris l'habitude de se refaire tout seul.",
+		"vocation": "barbare",
+		"niveau": 3,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"R": 5
+			},
+			"regen_pv": 1
+		}
+	},
+	{
 		"_id": "competence:annonce_de_sang",
 		"type": "competence",
 		"nom": "Annonce de sang",
@@ -96,6 +145,27 @@
 		}
 	},
 	{
+		"_id": "competence:gardien_des_esprits",
+		"type": "competence",
+		"nom": "Gardien des esprits",
+		"icon": "👻",
+		"description": "Il en contrôle plus qu'aucun autre chaman n'en a jamais tenu, et la plupart du temps sans y penser.",
+		"vocation": "chaman",
+		"niveau": 10,
+		"mode": "passive",
+		"zone": {
+			"forme": "cercle",
+			"origine": "lanceur",
+			"rayon": 2
+		},
+		"effets": {
+			"buffs": {
+				"Vol": 10,
+				"Int": 5
+			}
+		}
+	},
+	{
 		"_id": "competence:invocation_majeure",
 		"type": "competence",
 		"nom": "Invocation majeure",
@@ -118,6 +188,24 @@
 			"regen_pm": 2,
 			"duree": 5,
 			"cout_pv": 15
+		}
+	},
+	{
+		"_id": "competence:ame_gagee",
+		"type": "competence",
+		"nom": "Âme gagée",
+		"icon": "😈",
+		"description": "Elle ne lui appartient plus depuis longtemps. Le loyer qu'on lui verse est confortable ; celui qu'il paie se prélève goutte à goutte.",
+		"vocation": "demoniste",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Int": 9,
+				"Vol": 4
+			},
+			"regen_pm": 6,
+			"regen_pv": -1
 		}
 	},
 	{
@@ -175,6 +263,27 @@
 		}
 	},
 	{
+		"_id": "competence:fils_de_la_nature",
+		"type": "competence",
+		"nom": "Fils de la nature",
+		"icon": "🌳",
+		"description": "Un état de symbiose que la nature lui rend bien, et dont il ne parle jamais.",
+		"vocation": "druide",
+		"niveau": 10,
+		"mode": "passive",
+		"zone": {
+			"forme": "cercle",
+			"origine": "lanceur",
+			"rayon": 2
+		},
+		"effets": {
+			"buffs": {
+				"R": 8
+			},
+			"regen_pv": 2
+		}
+	},
+	{
 		"_id": "competence:courroux_des_elements",
 		"type": "competence",
 		"nom": "Courroux des éléments",
@@ -220,6 +329,23 @@
 			"pv": 8,
 			"regen_pv": 2,
 			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:seigneur_des_bois",
+		"type": "competence",
+		"nom": "Seigneur des bois",
+		"icon": "🦌",
+		"description": "La forêt le reconnaît comme l'un des siens.",
+		"vocation": "forestier",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Ag": 12,
+				"Ch": 6,
+				"R": 5
+			}
 		}
 	},
 	{
@@ -277,6 +403,26 @@
 		}
 	},
 	{
+		"_id": "competence:protecteur",
+		"type": "competence",
+		"nom": "Protecteur",
+		"icon": "🩹",
+		"description": "Ses cicatrices se comptent par dizaines. Chacune est une leçon que son corps a retenue.",
+		"vocation": "guerrier",
+		"niveau": 6,
+		"mode": "passive",
+		"zone": {
+			"forme": "carre",
+			"origine": "lanceur",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"R": 9
+			}
+		}
+	},
+	{
 		"_id": "competence:mirage_paralysant",
 		"type": "competence",
 		"nom": "Mirage paralysant",
@@ -326,6 +472,23 @@
 				"Int": -4
 			},
 			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:presence_effacee",
+		"type": "competence",
+		"nom": "Présence effacée",
+		"icon": "👻",
+		"description": "Il n'est pas caché : il est simplement difficile de soutenir l'idée qu'il soit là.",
+		"vocation": "illusionniste",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"furtivite": 18,
+			"esquive": 10,
+			"buffs": {
+				"Int": 8
+			}
 		}
 	},
 	{
@@ -425,6 +588,23 @@
 		}
 	},
 	{
+		"_id": "competence:coeur_de_nexus",
+		"type": "competence",
+		"nom": "Cœur de Nexus",
+		"icon": "💠",
+		"description": "La magie ne le traverse plus : elle s'y arrête un instant, puis repart plus nombreuse.",
+		"vocation": "mage",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Vol": 8,
+				"Int": 4
+			},
+			"regen_pm": 5
+		}
+	},
+	{
 		"_id": "competence:refrain_de_ralliement",
 		"type": "competence",
 		"nom": "Refrain de ralliement",
@@ -505,6 +685,23 @@
 		}
 	},
 	{
+		"_id": "competence:vagabond",
+		"type": "competence",
+		"nom": "Vagabond",
+		"icon": "👣",
+		"description": "Voyageur habitué à se défendre. Il réagit avec la rapidité du chat, et frappe avant qu'on ait fini de décider.",
+		"vocation": "moine",
+		"niveau": 6,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Ag": 5,
+				"Vol": 4,
+				"V": 1
+			}
+		}
+	},
+	{
 		"_id": "competence:souffle_du_sensei",
 		"type": "competence",
 		"nom": "Souffle du Sensei",
@@ -529,6 +726,23 @@
 				"Vol": 5
 			},
 			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:ascete",
+		"type": "competence",
+		"nom": "Ascète",
+		"icon": "🧘",
+		"description": "Il peut survivre sans boire, sans manger, sans dormir. Sa méditation suffit à tout le reste.",
+		"vocation": "moine",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Vol": 7
+			},
+			"regen_pv": 3,
+			"regen_pm": 3
 		}
 	},
 	{
@@ -657,6 +871,21 @@
 		}
 	},
 	{
+		"_id": "competence:clerc",
+		"type": "competence",
+		"nom": "Clerc",
+		"icon": "📖",
+		"description": "Des années à lire et à recopier des piles de livres. Le savoir des grimoires lui vient plus vite qu'aux autres.",
+		"vocation": "pretre",
+		"niveau": 3,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Int": 4
+			}
+		}
+	},
+	{
 		"_id": "competence:benediction_du_prophete",
 		"type": "competence",
 		"nom": "Bénédiction du Prophète",
@@ -705,6 +934,23 @@
 				"Vol": 3
 			},
 			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:thaumaturge",
+		"type": "competence",
+		"nom": "Thaumaturge",
+		"icon": "✨",
+		"description": "Le nombre de gens morts sous ses mains se compte sur les doigts d'une seule. Il les connaît tous par leur nom.",
+		"vocation": "pretre",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Vol": 6,
+				"Int": 4
+			},
+			"regen_pv": 4
 		}
 	},
 	{

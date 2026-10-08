@@ -25,6 +25,10 @@ ENTREES = [
 	L(3, "Lancer de camarade", "🤾", "saut", "Il empoigne un compagnon par la ceinture et le jette par-dessus la mêlée.",
 	  {"cible": "allie", "portee": 1, "cout_pm": 15, "effets": {"saut": "2+{F/25}"}},
 	  remplace="saignee_furieuse"),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(3, "Conquérant", "🏔️", None, "Il a dormi dans la neige et bu l'eau des flaques. Son corps a pris l'habitude de se refaire tout seul.",
+	  {"effets": {"buffs": {"R": 5}, "regen_pv": 1}},
+	  remplace="conquerant", mode="passive"),
 	# ── Niveau 4 ──
 	P(4, "Indomptable", "🐺", "p_carac", "Rien ne l'arrête, rien ne le plie.", stats=("Vol",)),
 	P(4, "Instinct de la meute", "🐾", "p_esquive", "Comme le loup, il sent le coup venir dans son dos."),

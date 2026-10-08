@@ -20,6 +20,10 @@ ENTREES = [
 	L(3, "Main du guérisseur", "🙏", "soin_sacre", "Il améliore n'importe quel soin, qu'il soit naturel ou magique. Souvent d'assez peu, toujours d'assez.",
 	  {"cible": "allie", "portee": 2, "cout_pm": 15, "effets": {"pv": 16, "regen_pv": 2, "duree": 3}},
 	  remplace="main_du_guerisseur"),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(3, "Clerc", "📖", None, "Des années à lire et à recopier des piles de livres. Le savoir des grimoires lui vient plus vite qu'aux autres.",
+	  {"effets": {"buffs": {"Int": 4}}},
+	  remplace="clerc", mode="passive"),
 	# ── Niveau 4 ──
 	L(4, "Voile sacré", "⛪", "soin_sacre", "Une lueur enveloppe un compagnon : les coups glissent sur lui.",
 	  {"cible": "allie", "portee": 4, "cout_pm": 18, "effets": {"esquive": "4+{Vol/8}", "duree": 3}},
@@ -73,4 +77,8 @@ ENTREES = [
 	L(10, "Oracle", "👁️‍🗨️", "aura_sacree", "Ses prédictions sont complexes à décrypter et s'avèrent souvent exactes. Celui qu'il désigne ne peut plus vraiment échouer.",
 	  {"cible": "allie", "portee": 6, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"pv": 22, "pm": 5, "buffs": {"Ch": 5, "Vol": 3}, "duree": 3}},
 	  remplace="oracle"),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(10, "Thaumaturge", "✨", None, "Le nombre de gens morts sous ses mains se compte sur les doigts d'une seule. Il les connaît tous par leur nom.",
+	  {"effets": {"buffs": {"Vol": 6, "Int": 4}, "regen_pv": 4}},
+	  remplace="thaumaturge", mode="passive"),
 ]

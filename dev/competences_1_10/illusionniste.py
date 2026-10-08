@@ -64,4 +64,8 @@ ENTREES = [
 	L(10, "Théâtre des ombres", "🎭", "illusion_zone", "Il donne à voir une scène entière. Quand elle se termine, la cible ne sait plus ce qu'elle faisait.",
 	  {"cible": "ennemi", "jet": "magique", "portee": 10, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"degats": "2D6", "buffs": {"F": -7, "Ag": -7, "Int": -4}, "duree": 3}},
 	  remplace="theatre_des_ombres"),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(10, "Présence effacée", "👻", None, "Il n'est pas caché : il est simplement difficile de soutenir l'idée qu'il soit là.",
+	  {"effets": {"furtivite": 18, "esquive": 10, "buffs": {"Int": 8}}},
+	  remplace="presence_effacee", mode="passive"),
 ]

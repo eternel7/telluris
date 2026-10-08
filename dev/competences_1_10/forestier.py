@@ -76,7 +76,10 @@ ENTREES = [
 	A(9, "Vigilance du guetteur", "👁️", "posture", "nature_buff", "Il garde l'œil sur tout le champ de bataille.", stats=("Ag", "Int")),
 	A(9, "Bond de l'élan", "🦌", "saut", "saut", "Un saut puissant qui l'emporte loin de la mêlée."),
 	# ── Niveau 10 ──
-	P(10, "Seigneur des bois", "🦌", "p_carac", "La forêt le reconnaît comme l'un des siens.", stats=("Ag",)),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(10, "Seigneur des bois", "🦌", None, "La forêt le reconnaît comme l'un des siens.",
+	  {"effets": {"buffs": {"Ag": 12, "Ch": 6, "R": 5}}},
+	  remplace="seigneur_des_bois", mode="passive"),
 	A(10, "Flèche de légende", "🌠", "frappe", "tir", "La flèche dont parlent les chansons de chasse."),
 	A(10, "Ciel de flèches", "🌧️", "zone_cercle", "tir", "Il assombrit le ciel, et la pluie qui tombe est d'acier.", rayon=2),
 	A(10, "Appel de la grande chasse", "📯", "cri", "appel_sauvage", "Le cor sonne, et tout le groupe se met en chasse.", stats=("Ag", "F"), rayon=2),

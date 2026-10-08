@@ -74,4 +74,8 @@ ENTREES = [
 	L(10, "Homme-tempête", "⛈️", "foudre", "Il s'est voué à la maîtrise des éléments du ciel, et le ciel a fini par répondre.",
 	  {"cible": "ennemi", "jet": "magique", "portee": 10, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"degats": "3D10+6", "buffs": {"V": -1}, "duree": 2}},
 	  remplace="homme_tempete"),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(10, "Fils de la nature", "🌳", None, "Un état de symbiose que la nature lui rend bien, et dont il ne parle jamais.",
+	  {"zone": {"forme": "cercle", "origine": "lanceur", "rayon": 2}, "effets": {"buffs": {"R": 8}, "regen_pv": 2}},
+	  remplace="fils_de_la_nature", mode="passive"),
 ]

@@ -12,8 +12,10 @@ par le moteur réel et contrôle les invariants listés plus bas. Il échoue en 
 > `dev/gen_competences_1_10.py` tire de son échelle, 28 actives de ce document valaient de
 > ×1,3 à ×4,7 l'archétype équivalent de leur niveau (soins et cris de rayon 2, malus empilés
 > sur un drain, `V −2` en zone…). Elles sont ramenées à **~1,15 ×** cet archétype, forme et
-> identité conservées ; *Arme de justice*, en dessous, remonte. ⚠️ Ces 28 docs sont désormais
-> ÉMIS par `dev/gen_competences_1_10.py` (entrées `L(..., remplace=…)` de
+> identité conservées ; *Arme de justice*, en dessous, remonte. Puis les **passives** :
+> 13 signatures réglées sur la médiane de leur palier, pour que le cumul 1 → N de chaque
+> vocation tienne à ±3 % de celui de son groupe. ⚠️ Ces 41 docs sont désormais ÉMIS par
+> `dev/gen_competences_1_10.py` (entrées `L(..., remplace=…)` de
 > `dev/competences_1_10/<vocation>.py`) : c'est LÀ qu'on les retouche, ce document les
 > reflète. Détail en fin de document, § « Ce que la révision 7 a changé ».
 >
@@ -458,9 +460,9 @@ Seigneur de guerre, Mastodonte.*
  "description": "Ses cicatrices se comptent par dizaines. Chacune est une leçon que son corps a retenue.",
  "vocation": "guerrier", "niveau": 6, "mode": "passive",
  "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1},
- "effets": {"buffs": {"R": 8}}}
+ "effets": {"buffs": {"R": 9}}}
 ```
-*Source : « Protecteur » (niv. 5) — « +5 PV au-dessus du maximum » : `pv_max = R·3 + F`, donc +14 R vaut +42 PV. Le plafond de caract n'est pas touché (un buff s'ajoute après `compute_stat_cap`).*
+*Source : « Protecteur » (niv. 5) — « +5 PV au-dessus du maximum » : `pv_max = R·3 + F`, donc +9 R vaut +27 PV. Le plafond de caract n'est pas touché (un buff s'ajoute après `compute_stat_cap`).*
 
 **Garde de fer** 🛡️ · active · 12 PM + 5/round (posture) · `soi` / portée 1 · zone : les 8 cases autour · ⚔️ combat seulement
 ```json
@@ -509,7 +511,7 @@ sang, Vétéran, Danseur de guerre.*
 {"_id": "competence:conquerant", "type": "competence", "nom": "Conquérant", "icon": "🏔️",
  "description": "Il a dormi dans la neige et bu l'eau des flaques. Son corps a pris l'habitude de se refaire tout seul.",
  "vocation": "barbare", "niveau": 3, "mode": "passive",
- "effets": {"buffs": {"R": 6}, "regen_pv": 1}}
+ "effets": {"buffs": {"R": 5}, "regen_pv": 1}}
 ```
 *Source : « Conquérant » (niv. 3), « double les PV récupérés naturellement » → régénération permanente.*
 
@@ -756,7 +758,7 @@ Empoisonneur, Maître des ombres, Maître lames, Maître venins.*
 {"_id": "competence:maitre_des_ombres", "type": "competence", "nom": "Maître des ombres", "icon": "🌑",
  "description": "Souplesse et grâce poussées au point où le regard glisse sur lui sans accrocher.",
  "vocation": "assassin", "niveau": 6, "mode": "passive",
- "effets": {"buffs": {"Ag": 8}, "esquive": 5}}
+ "effets": {"buffs": {"Ag": 10}, "esquive": 7}}
 ```
 *Source : « Maître des ombres » (niv. 5), « +1 en Ag au-dessus du maximum ».*
 
@@ -777,9 +779,9 @@ Empoisonneur, Maître des ombres, Maître lames, Maître venins.*
 {"_id": "competence:ombre_incarnee", "type": "competence", "nom": "Ombre incarnée", "icon": "👤",
  "description": "Il n'entre pas dans un combat : il y est déjà, et personne ne sait où.",
  "vocation": "assassin", "niveau": 10, "mode": "passive",
- "effets": {"furtivite": 20}}
+ "effets": {"furtivite": 20, "buffs": {"Ag": 12}, "esquive": 10}}
 ```
-*Furtivité permanente à l'entrée de tout combat, sans condition de terrain — lue par `furtivite_passive`, prise en max avec `competence:furtivite` (niv. 0), qui reste utile pour se refondre après avoir frappé.*
+*Furtivité permanente à l'entrée de tout combat, sans condition de terrain — lue par `furtivite_passive`, prise en max avec `competence:furtivite` (niv. 0), qui reste utile pour se refondre après avoir frappé. Révision 7 : `Ag +12` et `esquive 10` — seule, la furtivité ne valait qu'un tiers d'un capstone, et elle rend inertes les furtivités plus faibles déjà apprises (pas de cumul).*
 
 **Exécution** 🗡️ · active · 40 PM · `ennemi` / `cc` / portée 1
 ```json
@@ -902,7 +904,7 @@ Sensei, Ascète.*
 {"_id": "competence:vagabond", "type": "competence", "nom": "Vagabond", "icon": "👣",
  "description": "Voyageur habitué à se défendre. Il réagit avec la rapidité du chat, et frappe avant qu'on ait fini de décider.",
  "vocation": "moine", "niveau": 6, "mode": "passive",
- "effets": {"buffs": {"Ag": 8, "Vol": 4, "V": 1}}}
+ "effets": {"buffs": {"Ag": 5, "Vol": 4, "V": 1}}}
 ```
 *Source : « Vagabond » (niv. 3) — « frappe toujours en premier » n'est pas exprimable ; rendu par l'initiative, qui dérive d'Ag et de V.*
 
@@ -923,7 +925,7 @@ Sensei, Ascète.*
 {"_id": "competence:ascete", "type": "competence", "nom": "Ascète", "icon": "🧘",
  "description": "Il peut survivre sans boire, sans manger, sans dormir. Sa méditation suffit à tout le reste.",
  "vocation": "moine", "niveau": 10, "mode": "passive",
- "effets": {"buffs": {"Vol": 10}, "regen_pv": 3, "regen_pm": 3}}
+ "effets": {"buffs": {"Vol": 7}, "regen_pv": 3, "regen_pm": 3}}
 ```
 *Source : « Ascète » (niv. 5) — les résistances typées n'existent pas ; rendues par la seule double régénération permanente du jeu.*
 
@@ -1242,7 +1244,7 @@ Oracle.*
 {"_id": "competence:clerc", "type": "competence", "nom": "Clerc", "icon": "📖",
  "description": "Des années à lire et à recopier des piles de livres. Le savoir des grimoires lui vient plus vite qu'aux autres.",
  "vocation": "pretre", "niveau": 3, "mode": "passive",
- "effets": {"buffs": {"Int": 8}}}
+ "effets": {"buffs": {"Int": 4}}}
 ```
 *Source : « Clerc » (niv. 3), « double le bonus d'Int pour l'alphabétisation » — l'Int alimente `pm_max` et le toucher magique.*
 
@@ -1284,9 +1286,9 @@ Oracle.*
 {"_id": "competence:thaumaturge", "type": "competence", "nom": "Thaumaturge", "icon": "✨",
  "description": "Le nombre de gens morts sous ses mains se compte sur les doigts d'une seule. Il les connaît tous par leur nom.",
  "vocation": "pretre", "niveau": 10, "mode": "passive",
- "effets": {"buffs": {"Vol": 8, "Int": 4}, "regen_pv": 5}}
+ "effets": {"buffs": {"Vol": 6, "Int": 4}, "regen_pv": 4}}
 ```
-*Source : « Thaumaturge » (niv. 5) — l'échec de chirurgie qui ne blesse plus n'est pas exprimable ; rendu par la plus forte régénération de PV du jeu.*
+*Source : « Thaumaturge » (niv. 5) — l'échec de chirurgie qui ne blesse plus n'est pas exprimable ; rendu par la régénération de PV permanente la plus haute du jeu (4/tour depuis la révision 7, à égalité avec Danseur de guerre et Rejeton ou saint).*
 
 **Oracle** 👁️‍🗨️ · active · 40 PM · `allie` / portée 6 · zone : croix de rayon 1
 ```json
@@ -1356,7 +1358,7 @@ Dompteur de monstres, Fils de la nature, Homme-tempête.*
  "description": "Un état de symbiose que la nature lui rend bien, et dont il ne parle jamais.",
  "vocation": "druide", "niveau": 10, "mode": "passive",
  "zone": {"forme": "cercle", "origine": "lanceur", "rayon": 2},
- "effets": {"buffs": {"R": 6}, "regen_pv": 2}}
+ "effets": {"buffs": {"R": 8}, "regen_pv": 2}}
 ```
 *Source : « Fils de la nature » (niv. 5), « +2 en résistance totale ».*
 
@@ -1427,9 +1429,9 @@ Médium, Onirologue, Homme bête, Gardien des esprits, Ancien.*
  "description": "Il en contrôle plus qu'aucun autre chaman n'en a jamais tenu, et la plupart du temps sans y penser.",
  "vocation": "chaman", "niveau": 10, "mode": "passive",
  "zone": {"forme": "cercle", "origine": "lanceur", "rayon": 2},
- "effets": {"buffs": {"Vol": 8, "Int": 4}}}
+ "effets": {"buffs": {"Vol": 10, "Int": 5}}}
 ```
-*Source : « Gardien des esprits » (niv. 5), « +1 esprit invocable par jour » — le compte d'invocations n'existe pas ; rendu en réserve magique (`pm_max = 2·Vol + 2·Int` ⇒ +44 PM).*
+*Source : « Gardien des esprits » (niv. 5), « +1 esprit invocable par jour » — le compte d'invocations n'existe pas ; rendu en réserve magique (`pm_max = 2·Vol + 2·Int` ⇒ +30 PM pour le porteur).*
 
 **Esprit Antique** 🦣 · active · 40 PM · `soi` / portée 1
 ```json
@@ -1565,7 +1567,7 @@ Conjurateur, Archimage, Nexus, Invocateur.*
 {"_id": "competence:coeur_de_nexus", "type": "competence", "nom": "Cœur de Nexus", "icon": "💠",
  "description": "La magie ne le traverse plus : elle s'y arrête un instant, puis repart plus nombreuse.",
  "vocation": "mage", "niveau": 10, "mode": "passive",
- "effets": {"buffs": {"Vol": 12, "Int": 6}, "regen_pm": 5}}
+ "effets": {"buffs": {"Vol": 8, "Int": 4}, "regen_pm": 5}}
 ```
 *Le seul `regen_pm` permanent élevé du jeu — la signature du drain magique, et ce qui distingue le magicien de combat de l'élémentaliste.*
 
@@ -1632,9 +1634,9 @@ Conjurateur, Archimage, Nexus, Invocateur.*
 {"_id": "competence:presence_effacee", "type": "competence", "nom": "Présence effacée", "icon": "👻",
  "description": "Il n'est pas caché : il est simplement difficile de soutenir l'idée qu'il soit là.",
  "vocation": "illusionniste", "niveau": 10, "mode": "passive",
- "effets": {"furtivite": 18, "esquive": 10}}
+ "effets": {"furtivite": 18, "esquive": 10, "buffs": {"Int": 8}}}
 ```
-*Sans `condition` : `furtivite` (état furtif à l'entrée du combat) **et** `esquive` (repli permanent) sont tous deux lus. C'est le seul capstone qui cumule les deux mécaniques de dissimulation.*
+*Sans `condition` : `furtivite` (état furtif à l'entrée du combat) **et** `esquive` (repli permanent) sont tous deux lus. Avec l'Ombre incarnée de l'assassin, l'un des deux capstones qui cumulent les deux mécaniques de dissimulation. Révision 7 : `Int +8` — la furtivité ne se cumule pas (`furtivite_passive` garde le MAX), elle ne suffisait pas à tenir le palier.*
 
 **Théâtre des ombres** 🎭 · active · 40 PM · `ennemi` / `magique` / portée 10 · zone : disque de rayon 2
 ```json
@@ -1769,7 +1771,7 @@ Invocateur, Archimage.*
 {"_id": "competence:ame_gagee", "type": "competence", "nom": "Âme gagée", "icon": "😈",
  "description": "Elle ne lui appartient plus depuis longtemps. Le loyer qu'on lui verse est confortable ; celui qu'il paie se prélève goutte à goutte.",
  "vocation": "demoniste", "niveau": 10, "mode": "passive",
- "effets": {"buffs": {"Int": 12, "Vol": 6}, "regen_pm": 6, "regen_pv": -1}}
+ "effets": {"buffs": {"Int": 9, "Vol": 4}, "regen_pm": 6, "regen_pv": -1}}
 ```
 *✅ **Révision 6 — la seule passive à régénération négative du document**, et c'est l'axe même de la vocation (« de très gros gains payés »). `regen_pm` monte de 4 à 6 — la plus forte du jeu, devant le `Cœur de Nexus` du mage —, payée d'un PV par tour. Les sources PERMANENTES s'**additionnent** (`regen_bonus`, `_tick_effets_combat`) : le prix ne se dissout pas dans le non-cumul, une potion de régén le CONTRE sans l'effacer.*
 *⚠️ Ce que le prix vaut réellement, vérifié en exécutant le moteur : **en combat** (`regen_pv_base = −1`), −1 PV à chaque tour du démoniste, plancher 0 — il peut finir à terre ; une ligne « ☠ … souffre du poison (−1 PV) » s'écrit à chaque tour, le journal ne distinguant pas un pacte d'un venin. **Hors combat**, la régénération naturelle (`ceil(R/20)`, au moins 1) l'absorbe : la régén nette baisse d'un point sans jamais passer sous zéro — le pacte se paie au combat.*
@@ -1949,7 +1951,7 @@ la moitié des signatures. Les écarts venaient de quatre formes : zones bénéf
 (13 ou 24 cases au lieu de 5 ou 8), buffs/soins de capstone sans décote, malus empilés sur un
 drain ou une frappe de zone, et `V −2` en zone (V fait le nombre d'actions).
 
-**Où vivent les valeurs** : ces 28 docs sont émis par `dev/gen_competences_1_10.py`, en
+**Où vivent les valeurs** : ces 28 docs (41 avec les passives, ci-dessous) sont émis par `dev/gen_competences_1_10.py`, en
 entrées libres `L(..., remplace=<slug>)` de `dev/competences_1_10/<vocation>.py` — c'est là
 qu'on les retouche. Les blocs ci-dessus les reflètent. Le même lot recalibre trois actives
 de niveau 1, hors de ce document : `baume_de_campagne` (8 PM au lieu de 6),
@@ -1991,7 +1993,48 @@ de niveau 1, hors de ce document : `baume_de_campagne` (8 PM au lieu de 6),
 référence du générateur), `double_illusoire` (sous sa posture de référence) et `souffle_partage`
 (identique à l'archétype `pm_allie`). `serment_du_martyr` mesure ×0,62 parce que la mesure
 ne chiffre pas le lien de vie maintenu : c'est lui, la signature. Les **passives** n'ont pas
-été rééquilibrées.
+été rééquilibrées dans ce premier temps — elles le sont ci-dessous.
+
+### Les passives
+
+**Mesure** : le cumul des passives apprises du niveau 1 au niveau N, en points de
+caractéristique équivalents, comparé à la médiane du groupe (sans magie : 2 passives par
+niveau ; à magie : celles des paliers 3, 6, 10). Le **niveau 0 est exclu** : c'est un choix
+unique à la création (un sort OU une compétence), il ne se cumule pas. Taux tirés de
+l'échelle du générateur, où ces passives occupent la même place au même niveau :
+1 esquive ≈ 0,65 pt · 1 furtivité ≈ 0,38 pt · 1 PV/tour ≈ 3 pts · 1 PM/tour ≈ 2 pts ·
+1 V ≈ 5 pts · aura ×1,5 · une passive de piège = une passive du même niveau.
+⚠️ **La furtivité ne se cumule pas** (`competences.furtivite_passive` garde le MAX) : une
+échelle de furtivités ne vaut que sa meilleure marche. ⚠️ **Une passive à `condition` sort
+de l'agrégat** (`bonus_passifs`) : un bonus de caractéristique posé sur elle serait mort.
+
+**Constat** : les passives GÉNÉRÉES étaient déjà identiques d'une vocation à l'autre ; tout
+l'écart venait des signatures. Au niveau 10, assassin −21 % et forestier −18 % (capstones de
+pure furtivité), illusionniste −18 % ; prêtre +22 %, mage, moine et démoniste +11 à +14 %.
+
+| entrée | révision 6 | révision 7 |
+|---|---|---|
+| `conquerant` (barbare 3) | R +6 · régén 1 | R +5 · régén 1 |
+| `protecteur` (guerrier 6, aura) | R +8 | R +9 |
+| `maitre_des_ombres` (assassin 6) | Ag +8 · esquive 5 | Ag +10 · esquive 7 |
+| `ombre_incarnee` (assassin 10) | furtivité 20 | furtivité 20 · Ag +12 · esquive 10 |
+| `seigneur_des_bois` (forestier 10, générée) | Ag +5 | Ag +12 · Ch +6 · R +5 |
+| `vagabond` (moine 6) | Ag +8 Vol +4 V +1 | Ag +5 Vol +4 V +1 |
+| `ascete` (moine 10) | Vol +10 · régén 3/3 | Vol +7 · régén 3/3 |
+| `clerc` (prêtre 3) | Int +8 | Int +4 (le prêtre a déjà son Aura sainte au palier 3) |
+| `thaumaturge` (prêtre 10) | Vol +8 Int +4 · régén 5 | Vol +6 Int +4 · régén 4 |
+| `fils_de_la_nature` (druide 10, aura) | R +6 · régén 2 | R +8 · régén 2 |
+| `gardien_des_esprits` (chaman 10, aura) | Vol +8 Int +4 | Vol +10 Int +5 |
+| `coeur_de_nexus` (mage 10) | Vol +12 Int +6 · régén PM 5 | Vol +8 Int +4 · régén PM 5 |
+| `presence_effacee` (illusionniste 10) | furtivité 18 · esquive 10 | + Int +8 |
+| `ame_gagee` (démoniste 10) | Int +12 Vol +6 · régén PM 6 · −1 PV | Int +9 Vol +4 · régén PM 6 · −1 PV |
+
+Le forestier garde un *Éclaireur* de pure furtivité de terrain (la condition lui interdit
+tout bonus de caractéristique) : son complément de palier passe sur *Seigneur des bois*.
+
+**Après** — cumul 1 → 10 : sans magie 98 à 102 (médiane 101), à magie 43 à 44,5 (médiane
+44) ; au niveau 6 : 47,8 à 49,9 et 22 à 23. Reste un écart au niveau 8 pour l'assassin
+(−2 %) et le barbare (+6 %), sans retouche.
 
 ⚠️ La mesure est une estimation (valeur des dés, d'un point de buff par tour, d'une case de
 zone) : l'esquive d'une posture, V, le lien de vie, l'échange et la provocation y sont mal

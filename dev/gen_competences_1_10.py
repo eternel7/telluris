@@ -12,6 +12,8 @@ RÈGLE DE COMPTE — existantes comprises (dump + jsons/*_a_importer.json, pièg
 chaque niveau de 1 à 10, toutes les vocations d'un même groupe finissent identiques :
   · vocation SANS magie (`rules:vocations.magie` vide) : 2 passives + 5 actives = 7 ;
   · vocation À magie : 4, et AUCUNE passive neuve (le complément est fait d'actives).
+Un REMPLACEMENT (`competences_1_10.L(..., remplace=…)`) réécrit une place existante : il
+compte comme existant, jamais comme neuf — une passive remplacée est donc admise partout.
 D'où, au plus, 2 passives neuves par niveau. Les données ne disent que CE QUI MANQUE : une
 entrée de trop ou de moins fait échouer le générateur, palier par palier.
 
@@ -324,6 +326,9 @@ def construire_doc(entree, voc):
 		for cle in ("cible", "jet", "portee", "zone"):
 			if cle in champs:
 				doc[cle] = champs.pop(cle)
+	elif "zone" in champs:
+		# passive à `zone` = AURA (competences.est_aura) : ancrée sur le porteur
+		doc["zone"] = champs.pop("zone")
 	if "condition" in champs:
 		doc["condition"] = champs.pop("condition")
 	doc["effets"] = champs.pop("effets")
@@ -399,6 +404,7 @@ def construire(ref=None):
 			erreurs.append(f"{voc} : module de données absent (dev/competences_1_10/{voc}.py)")
 			continue
 		docs_voc = []
+		ids_remplaces = set()
 		for e in entrees:
 			prefixe = f"{voc} niv {e['niveau']} « {e['nom']} »"
 			try:
@@ -437,6 +443,8 @@ def construire(ref=None):
 			if existant is not None and not _meme_competence(existant, doc):
 				erreurs.append(f"{prefixe} : `_id` {cid} DÉJÀ PRIS par une autre compétence "
 							   f"({existant.get('vocation')} niv {existant.get('niveau')}) — renommer")
+			if existant is not None and e["options"].get("remplace"):
+				ids_remplaces.add(cid)
 			ids_existants = {i for i in ref["competences"] if i != cid}
 			erreurs.extend(check.verifier_competence(
 				doc, prefixe, ids_existants, set(vocations), niveaux=tuple(NIVEAUX),
@@ -457,16 +465,20 @@ def construire(ref=None):
 				  for d in docs_voc if d["mode"] == "passive")
 		if pts > BUDGET_PASSIVES_PTS:
 			erreurs.append(f"{voc} : passives neuves = {pts} pts de caract > budget {BUDGET_PASSIVES_PTS}")
-		# cardinalités, existantes comprises (hors lot)
-		ids_voc = {d["_id"] for d in docs_voc}
+		# cardinalités, existantes comprises (hors lot). Un REMPLACEMENT (`remplace=`) réécrit
+		# une place EXISTANTE (même `_id`, même niveau et mode — `_meme_competence`) : il compte
+		# comme existant, jamais comme neuf. D'où une passive remplacée admise chez une
+		# vocation à magie, qui n'a droit à aucune passive NEUVE.
+		ids_neufs = {d["_id"] for d in docs_voc} - ids_remplaces
 		anciens = [c for i, c in ref["competences"].items()
-				   if c.get("vocation") == voc and i not in ids_voc]
+				   if c.get("vocation") == voc and i not in ids_neufs]
+		neufs = [d for d in docs_voc if d["_id"] in ids_neufs]
 		compte[voc] = {"magique": magique, "niveaux": {}}
 		for niv in NIVEAUX:
 			ex_p = sum(1 for c in anciens if c.get("niveau") == niv and c.get("mode") == "passive")
 			ex_a = sum(1 for c in anciens if c.get("niveau") == niv and c.get("mode") == "active")
-			nv_p = sum(1 for d in docs_voc if d["niveau"] == niv and d["mode"] == "passive")
-			nv_a = sum(1 for d in docs_voc if d["niveau"] == niv and d["mode"] == "active")
+			nv_p = sum(1 for d in neufs if d["niveau"] == niv and d["mode"] == "passive")
+			nv_a = sum(1 for d in neufs if d["niveau"] == niv and d["mode"] == "active")
 			compte[voc]["niveaux"][niv] = (ex_p, ex_a, nv_p, nv_a)
 			if magique:
 				if nv_p:

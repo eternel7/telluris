@@ -76,4 +76,8 @@ ENTREES = [
 	L(10, "Rupture arcanique", "💥", "arcane", "Il ne lance pas un sort : il casse quelque chose, et laisse le monde recoller les morceaux.",
 	  {"cible": "ennemi", "jet": "magique", "portee": 10, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"degats": "3D10+6", "regen_pm": -2, "buffs": {"Vol": -4}, "duree": 3}},
 	  remplace="rupture_arcanique"),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(10, "Cœur de Nexus", "💠", None, "La magie ne le traverse plus : elle s'y arrête un instant, puis repart plus nombreuse.",
+	  {"effets": {"buffs": {"Vol": 8, "Int": 4}, "regen_pm": 5}},
+	  remplace="coeur_de_nexus", mode="passive"),
 ]

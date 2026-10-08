@@ -68,4 +68,8 @@ ENTREES = [
 	L(10, "Esprit Antique", "🦣", "totem", "Le mammouth, le tigre à dents de sabre, le grand saurien. Un seul, une seule fois, et il faut ensuite s'en remettre.",
 	  {"cible": "soi", "portee": 1, "cout_pm": 40, "effets": {"buffs": {"F": 16, "R": 10, "Ag": 6, "V": 1}, "regen_pv": 2, "duree": 5}},
 	  remplace="esprit_antique"),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(10, "Gardien des esprits", "👻", None, "Il en contrôle plus qu'aucun autre chaman n'en a jamais tenu, et la plupart du temps sans y penser.",
+	  {"zone": {"forme": "cercle", "origine": "lanceur", "rayon": 2}, "effets": {"buffs": {"Vol": 10, "Int": 5}}},
+	  remplace="gardien_des_esprits", mode="passive"),
 ]

@@ -48,6 +48,10 @@ ENTREES = [
 	A(6, "Nuage toxique", "☁️", "zone_cercle", "poison", "Une fiole lancée, et le poison se répand sur le groupe."),
 	A(6, "Voler le souffle", "😮‍💨", "siphon", "ombre", "Un coup au plexus, et la victime ne peut plus rien."),
 	A(6, "Marque de mort", "💀", "entrave", "marque", "La cible sait qu'elle est condamnée, et ses forces la quittent.", malus=("Vol", "Ag")),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(6, "Maître des ombres", "🌑", None, "Souplesse et grâce poussées au point où le regard glisse sur lui sans accrocher.",
+	  {"effets": {"buffs": {"Ag": 10}, "esquive": 7}},
+	  remplace="maitre_des_ombres", mode="passive"),
 	# ── Niveau 7 ──
 	P(7, "Ombre parmi les ombres", "🌑", "p_furtif", "Dans les souterrains, il est l'obscurité même.", terrains=OMBRE),
 	A(7, "Assassinat", "💀", "frappe", "saignee", "Un seul coup, celui pour lequel on l'a payé."),
@@ -78,4 +82,8 @@ ENTREES = [
 	A(10, "Fiole du maître empoisonneur", "⚗️", "poison", "poison", "Son chef-d'œuvre : un poison sans antidote."),
 	A(10, "Fléau silencieux", "🗡️", "zone_carre", "lame", "Il traverse le groupe ennemi, et derrière lui chacun saigne.", rayon=2),
 	A(10, "Disparition", "💨", "esquive_soi", "furtif", "Il n'était jamais là."),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(10, "Ombre incarnée", "👤", None, "Il n'entre pas dans un combat : il y est déjà, et personne ne sait où.",
+	  {"effets": {"furtivite": 20, "buffs": {"Ag": 12}, "esquive": 10}},
+	  remplace="ombre_incarnee", mode="passive"),
 ]

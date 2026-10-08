@@ -31,7 +31,8 @@ def L(niveau, nom, icon, theme, description, champs, remplace=None, zone_persist
 	partage de soin, drain de PM, saut d'un allié, coût décroissant, provocation, temps
 	formulé…). Moteur actuel seulement.
 
-	`mode="passive"` : `champs` ne porte que `effets` (et `condition`), `theme` vaut None —
+	`mode="passive"` : `champs` ne porte que `effets` (et `condition`, ou `zone` pour une
+	AURA — jamais les deux : une passive à condition sort de l'agrégat), `theme` vaut None —
 	une passive n'est jamais jouée. Formules permises : résolues à la lecture sur la caract
 	BRUTE (`consommables.competences_bonus_resolu`).
 

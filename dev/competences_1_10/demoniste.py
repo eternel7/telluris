@@ -67,4 +67,8 @@ ENTREES = [
 	L(10, "Invocation majeure", "🔯", "portail_infernal", "Il n'appelle plus une créature : il lui prête sa peau pour la durée du contrat.",
 	  {"cible": "soi", "portee": 1, "cout_pm": 40, "effets": {"buffs": {"F": 14, "Int": 14, "R": 8}, "regen_pv": 2, "regen_pm": 2, "duree": 5, "cout_pv": 15}},
 	  remplace="invocation_majeure"),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(10, "Âme gagée", "😈", None, "Elle ne lui appartient plus depuis longtemps. Le loyer qu'on lui verse est confortable ; celui qu'il paie se prélève goutte à goutte.",
+	  {"effets": {"buffs": {"Int": 9, "Vol": 4}, "regen_pm": 6, "regen_pv": -1}},
+	  remplace="ame_gagee", mode="passive"),
 ]
