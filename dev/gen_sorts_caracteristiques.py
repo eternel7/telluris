@@ -24,7 +24,7 @@ GARDES — une violation arrête tout, rien n'est écrit :
   · l'école de chaque sort est la `magie` d'une vocation de `rules:vocations` ;
   · chaque composant est un `item:*` du dump ; chaque sort a un consommé ET un catalyseur ;
   · l'animation de base existe et est active ; le son existe dans templates/resources/sounds ;
-  · un `_id` déjà pris par un doc DIFFÉRENT fait tout refuser ; identique ⇒ sauté (idempotent).
+  · un `_id` déjà pris par un doc DIFFÉRENT fait tout refuser ; déjà importé (champs produits identiques, base éventuellement enrichie : ) ⇒ sauté.
 """
 
 import argparse
@@ -369,6 +369,18 @@ def animation_doc(spec: dict, base_anim: dict) -> dict:
 	return doc
 
 
+def deja_importe(genere: dict, existant: dict) -> bool:
+	"""Le doc `existant` (base ou autre import) est-il CE doc, déjà importé ? Vrai si chaque
+	champ que le générateur produit s'y retrouve à l'identique.
+
+	⚠️ Pas l'égalité stricte : la base ENRICHIT un doc importé de champs que le générateur
+	n'écrit pas (`animation`, `animation_zone` liées depuis /admin/animations). Ce n'est pas
+	une collision — et le réémettre (PUT complet) effacerait la liaison. Un champ produit
+	qui DIFFÈRE reste une collision : un autre doc a pris l'`_id`, ou la base l'a retouché."""
+	existant = existant or {}
+	return all(existant.get(k) == v for k, v in (genere or {}).items())
+
+
 def generer(base: dict) -> tuple:
 	"""`(docs, erreurs)` — docs à importer (neufs ou différents de la base), erreurs de garde."""
 	erreurs = []
@@ -402,8 +414,7 @@ def generer(base: dict) -> tuple:
 		if existant is None:
 			docs.append(doc)
 			continue
-		propre = {k: v for k, v in existant.items() if k != "_rev"}
-		if propre != doc:
+		if not deja_importe(doc, existant):
 			erreurs.append("%s existe déjà et diffère — l'import (PUT complet) l'écraserait" % doc["_id"])
 
 	# Grimoires : seulement ceux de NOS sorts (la base est réduite à ses grimoires et à ses

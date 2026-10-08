@@ -99,11 +99,13 @@ def test_chaque_sort_a_son_grimoire_et_sa_recette():
 
 
 def test_aucune_collision_d_id_avec_le_dump():
-	base = _dump()
+	"""Un `_id` déjà en base doit être CE doc, déjà importé — la base peut l'avoir enrichi
+	(animation liée depuis /admin/animations), pas changé (cf. `deja_importe`)."""
+	gen, base = _charger_generateur(), _dump()
 	for d in _docs():
 		existant = base.get(d["_id"])
 		if existant is not None:
-			assert {k: v for k, v in existant.items() if k != "_rev"} == d, d["_id"]
+			assert gen.deja_importe(d, existant), d["_id"]
 
 
 def _charger_generateur():

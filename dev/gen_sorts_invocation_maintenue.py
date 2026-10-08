@@ -41,7 +41,7 @@ GARDES — une violation arrête tout, rien n'est écrit :
   · un sort à durée de même école et même niveau existe (il fixe le lancement) ;
   · les objets de composants sont ceux qu'emploient DÉJÀ les invocations de l'école ;
   · un `_id` déjà pris (dump ou autre import) par un doc DIFFÉRENT fait tout refuser ;
-    identique ⇒ sauté (idempotent).
+    déjà importé (champs produits identiques, base éventuellement enrichie) ⇒ sauté.
 """
 
 import argparse
@@ -310,8 +310,16 @@ def construire(base: dict, autres: dict) -> tuple:
 	return sorts, lignes, erreurs, avertissements
 
 
-def _sans_rev(doc: dict) -> dict:
-	return {k: v for k, v in (doc or {}).items() if k != "_rev"}
+def deja_importe(genere: dict, existant: dict) -> bool:
+	"""Le doc `existant` (base ou autre import) est-il CE doc, déjà importé ? Vrai si chaque
+	champ que le générateur produit s'y retrouve à l'identique.
+
+	⚠️ Pas l'égalité stricte : la base ENRICHIT un doc importé de champs que le générateur
+	n'écrit pas (`animation`, `animation_zone` liées depuis /admin/animations). Ce n'est pas
+	une collision — et le réémettre (PUT complet) effacerait la liaison. Un champ produit
+	qui DIFFÈRE reste une collision : un autre doc a pris l'`_id`, ou la base l'a retouché."""
+	existant = existant or {}
+	return all(existant.get(k) == v for k, v in (genere or {}).items())
 
 
 def main(argv=None) -> int:
@@ -335,7 +343,7 @@ def main(argv=None) -> int:
 			existant = existants.get(doc["_id"])
 			if existant is None:
 				continue
-			if _sans_rev(existant) == doc:
+			if deja_importe(doc, existant):
 				sautes.append(doc["_id"])
 			else:
 				erreurs.append(f"{doc['_id']} : `_id` déjà pris ({source}) par un doc différent")
@@ -351,7 +359,7 @@ def main(argv=None) -> int:
 	# `grimoires_manquants` ne connaît que la base : un autre import peut avoir pris l'`_id`.
 	for doc in grim_docs:
 		existant = autres.get(doc["_id"])
-		if existant is not None and _sans_rev(existant) != doc:
+		if existant is not None and not deja_importe(doc, existant):
 			erreurs.append(f"{doc['_id']} : `_id` déjà pris (import) par un doc différent")
 	print("\n== Grimoires et recettes manquants")
 	for ligne in grim_lignes:
@@ -371,7 +379,7 @@ def main(argv=None) -> int:
 	print(f"\n{len(docs)} doc(s) écrits dans {_affiche(args.sortie)} — {len(neufs)} sort(s), "
 		  f"{sum(1 for d in grim_docs if d['type'] == 'item')} grimoire(s), "
 		  f"{sum(1 for d in grim_docs if d['type'] == 'recette')} recette(s)"
-		  + (f", {len(sautes)} déjà en base à l'identique" if sautes else ""))
+		  + (f", {len(sautes)} déjà importé(s) (base éventuellement enrichie)" if sautes else ""))
 	return 0
 
 

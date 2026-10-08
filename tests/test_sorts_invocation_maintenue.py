@@ -40,7 +40,7 @@ def test_le_generateur_passe_ses_gardes_et_est_idempotent(tmp_path, construits):
 	for doc in construits:
 		deja = base.get(doc["_id"]) or autres.get(doc["_id"])
 		assert ecrits.get(doc["_id"]) == doc or (
-			deja is not None and gen._sans_rev(deja) == doc), doc["_id"]
+			deja is not None and gen.deja_importe(doc, deja)), doc["_id"]
 
 
 def test_chaque_sort_est_une_invocation_maintenue_que_le_moteur_lit_sans_perte(construits):
