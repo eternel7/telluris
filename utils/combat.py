@@ -4229,8 +4229,8 @@ def _sauter(combat_doc: dict, lanceur: dict, sauteur: dict, effets: dict,
 
 
 def _verifier_echange(combat_doc: dict, lanceur: dict, allie: dict | None, grid: dict) -> dict:
-	"""L'échange de place (`effets.echange`) entre le lanceur et l'allié désigné est-il
-	recevable ? `{}` si oui. Appelée en tête de `_lancer_capacite`, AVANT tout débit, puis
+	"""L'échange de place (`effets.echange`) entre le lanceur et la cible désignée — un ALLIÉ
+	ou un ENNEMI (`allie` désigne alors le monstre) — est-il recevable ? `{}` si oui. Appelée en tête de `_lancer_capacite`, AVANT tout débit, puis
 	par `_echanger` — même règle que le saut : une capacité qui ne part pas ne se paie pas.
 
 	⚠️ Aucune DISTANCE ici : la portée de la capacité en décide (`_lancer_sur_allie`), le
@@ -4257,7 +4257,8 @@ def _verifier_echange(combat_doc: dict, lanceur: dict, allie: dict | None, grid:
 
 
 def _echanger(combat_doc: dict, lanceur: dict, allie: dict, grid: dict) -> dict:
-	"""PERMUTE les cases du lanceur et de l'allié. `{"echange": …}` ou `{"error": …}`.
+	"""PERMUTE les cases du lanceur et de la cible désignée (allié OU ennemi).
+	`{"echange": …}` ou `{"error": …}`.
 
 	⚠️ Journal : UNE entrée `move` qui NOMME les deux corps (`_avec_etat`) — sans quoi l'un
 	des jetons suivrait l'état final tout de suite et l'autre attendrait la révélation : ils
@@ -5366,11 +5367,14 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 			erreur = _verifier_saut(combat_doc, sauteur, effets, dx, dy, grid)
 			if erreur:
 				return erreur, None
-	# ÉCHANGE DE PLACE : validé lui aussi AVANT tout débit et tout soutien appliqué. Un allié
-	# absent, hors de portée ou à terre est refusé plus bas par `_lancer_sur_allie`, avant
-	# que rien ne soit posé.
-	if effets.get("echange") and sdoc.get("cible") == "allie":
-		partenaire = _get_joueur(combat_doc, cible_id) if cible_id else None
+	# ÉCHANGE DE PLACE : validé lui aussi AVANT tout débit et tout soutien appliqué, avec un
+	# allié comme avec un ennemi. Une cible absente, hors de portée ou à terre est refusée
+	# plus bas par la garde de sa branche, avant que rien ne soit posé.
+	if effets.get("echange") and sdoc.get("cible") in ("allie", "ennemi"):
+		partenaire = None
+		if cible_id:
+			partenaire = (_get_joueur(combat_doc, cible_id) if sdoc.get("cible") == "allie"
+						  else _get_monstre(combat_doc, cible_id))
 		if partenaire is not None:
 			erreur = _verifier_echange(combat_doc, joueur, partenaire, grid)
 			if erreur:
@@ -5497,6 +5501,15 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		result[cle] = nom_capacite
 		# ZONE PERSISTANTE (Mur de feu) : posée plus bas, une fois la concentration inscrite.
 		zone_persistante = (monstre, notation, mode_jet)
+
+		# ÉCHANGE DE PLACE avec l'ENNEMI désigné : seulement s'il a été TOUCHÉ (un effet
+		# offensif passe par le jet) et s'il est encore debout — on ne prend pas la place
+		# d'un cadavre. En zone, seule la cible désignée permute. La géométrie a été validée
+		# en tête, avant le débit.
+		if effets.get("echange") and result.get("hit") and monstre["vivant"]:
+			echange = _echanger(combat_doc, joueur, monstre, grid)
+			if "error" not in echange:
+				result.update(echange)
 
 		# Incanter au contact révèle le lanceur (touché ou raté) ; à distance, seule la
 		# cible tente de le repérer — foudroyée sur place, elle n'en a même pas le temps.

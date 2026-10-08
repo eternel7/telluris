@@ -408,8 +408,8 @@ def _bonus_dict(raw) -> dict:
 		# le force à viser le lanceur (cf. combat `_cible_joueur`). Part à durée à part
 		# entière (`part_durative`) : une provocation pure est un debuff.
 		"provocation": _as_int(raw.get("provocation")),
-		# ÉCHANGE DE PLACE (1) : le lanceur et l'allié désigné (`cible: "allie"`) permutent
-		# leurs cases (cf. combat `_echanger`). Aucune limite de distance dans le moteur : la
+		# ÉCHANGE DE PLACE (1) : le lanceur et la cible désignée — allié, ou ENNEMI touché par
+		# le jet — permutent leurs cases (cf. combat `_echanger`). Aucune limite de distance dans le moteur : la
 		# PORTÉE de la capacité en décide — « Attention, messire ! » s'écrit `portee: 1`.
 		"echange": min(1, _as_int(raw.get("echange"))),
 		# Renforts d'un sort qui ne pose pas d'`effets` : ils ne valent QUE comme bonus de
@@ -883,7 +883,8 @@ def effets_agissent_sur_cible(effets: dict) -> bool:
 	cœur de la famille anti-lanceur. C'est précisément la clé que la recopie des
 	compétences avait oubliée."""
 	eff = _vue_indicative(effets)
-	return bool(eff.get("degats")) or bool(eff.get("degats_pm")) or part_durative(eff)
+	return (bool(eff.get("degats")) or bool(eff.get("degats_pm")) or part_durative(eff)
+			or _as_int(eff.get("echange")) > 0)
 
 
 def provocation_pure(effets: dict) -> bool:

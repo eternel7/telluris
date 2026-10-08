@@ -1,7 +1,8 @@
 # tests/test_competences_echange.py
 #
-# ÉCHANGE DE PLACE — `effets.echange` sur une capacité `cible: "allie"` (sort OU compétence) :
-# le lanceur et l'allié désigné PERMUTENT leurs cases (« Attention, messire ! »).
+# ÉCHANGE DE PLACE — `effets.echange` sur une capacité `cible: "allie"` OU `"ennemi"` (sort OU
+# compétence) : le lanceur et la cible désignée PERMUTENT leurs cases (« Attention, messire ! »).
+# Sur un ennemi, l'échange passe par le jet de toucher et épargne les cadavres.
 #
 # Ce qui est verrouillé ici :
 #   · la permutation, et UNE ligne de journal `move` qui nomme les deux corps ;
@@ -109,6 +110,63 @@ def test_un_sort_peut_aussi_echanger():
 						 sort=sort(cible="allie", portee=1, effets={"echange": 1}))
 	assert "error" not in res, res
 	assert garde["pos"] == {"x": 4, "y": 5}
+
+
+# ── Avec un ENNEMI ──────────────────────────────────────────────────────────────
+
+def _face_a_face(**loup):
+	garde = joueur(0, x=3, y=5, nom="Garde", pm=60)
+	bete = monstre(x=4, y=5, **loup)
+	return garde, bete, combat([garde], [bete])
+
+
+def comp_ennemi(**champs):
+	return comp(**{"cible": "ennemi", "effets": {"echange": 1}, **champs})
+
+
+def test_on_peut_echanger_sa_place_avec_un_ennemi_touche():
+	garde, bete, doc = _face_a_face()
+	res = resolve_action(doc, "competence", cible_id=bete["id"], competence=comp_ennemi())
+	assert "error" not in res, res
+	assert garde["pos"] == {"x": 4, "y": 5} and bete["pos"] == {"x": 3, "y": 5}
+	assert res["echange"]["allie_id"] == bete["id"]
+
+
+def test_un_echange_rate_ne_deplace_personne_mais_se_paie():
+	"""Un effet offensif passe par le jet : raté, les PM sont partis (comme une frappe)."""
+	garde, bete, doc = _face_a_face()
+	garde["cc"] = 0
+	res = resolve_action(doc, "competence", cible_id=bete["id"], competence=comp_ennemi())
+	assert not res.get("hit") and "echange" not in res
+	assert garde["pos"] == {"x": 3, "y": 5} and bete["pos"] == {"x": 4, "y": 5}
+	assert garde["currentPM"] == 60 - 12
+
+
+def test_on_ne_prend_pas_la_place_d_un_cadavre():
+	garde, bete, doc = _face_a_face(pv=1)
+	res = resolve_action(doc, "competence", cible_id=bete["id"],
+						 competence=comp_ennemi(effets={"echange": 1, "degats": "1D6"}))
+	assert not bete["vivant"] and "echange" not in res
+	assert garde["pos"] == {"x": 3, "y": 5}
+
+
+def test_un_echange_impossible_avec_un_ennemi_ne_coute_rien():
+	garde, bete, doc = _face_a_face()
+	bete["jeton"] = {"largeur": 2, "profondeur": 2, "forme": "ellipse"}
+	bete["cap"] = "bas"
+	res = resolve_action(doc, "competence", cible_id=bete["id"], competence=comp_ennemi())
+	assert "grande créature" in res.get("error", "")
+	assert garde["currentPM"] == 60
+
+
+def test_la_garde_de_donnees_accepte_un_echange_sur_un_ennemi():
+	import os, sys
+	sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dev"))
+	import check_competences_doc as check
+	doc = {"_id": "competence:x", "type": "competence", "vocation": "guerrier", "nom": "X",
+		   "mode": "active", "cout_pm": 5, "cible": "ennemi", "portee": 1, "niveau": 2,
+		   "effets": {"echange": 1}}
+	assert not any("echange" in m for m in check.verifier_competence(doc, "x", niveaux=None))
 
 
 def test_combat_seulement():

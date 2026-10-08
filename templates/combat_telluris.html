@@ -3440,6 +3440,9 @@ function sortTargets(s) {
 		if (isEngaged() && !capaProvocationPure(s)) return [];
 		list = list.filter(m => vueActeurs(j, m));
 	}
+	// ÉCHANGE DE PLACE avec un ennemi : seuls ceux avec qui la permutation passera (même
+	// miroir que le ciblage allié — `echangeOffert`).
+	if ((s.effets || {}).echange) list = list.filter(m => echangeOffert(j, m));
 	return list;
 }
 // Cibles valides d'un sort/compétence BÉNÉFIQUE (`cible: "allie"`) : les autres membres
