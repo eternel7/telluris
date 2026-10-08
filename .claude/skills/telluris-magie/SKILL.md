@@ -17,6 +17,8 @@ Contenu : `jsons/sorts_sans_vocation_a_importer.json` (les 112 sorts de l'export
 
 **UI** : onglet ⚡ (sorts connus + 📖 Apprentissage + 🏫 Écoles) ; en combat l'accès passe par les slots, ciblage **violet**.
 
+**Catalogues d'admin** `/admin/sorts` (par école) et `/admin/competences` (par vocation) — un seul template `admin_capacites.html` : accordéon, recherche et tri globaux, export `.md` de ce qui est affiché, JSON du doc en lecture puis en écriture (💾 = `PUT /admin/doc`, PUT COMPLET). Entrées `utils/catalogue_capacites.py` (format du payload ⚡ + doc brut ; un doc refusé par le moteur reste listé, marqué `invalide`). ⚠️ Le texte vient de **`scripts/capacites_texte.js`**, partagé avec l'onglet ⚡ de /play (`_sortLigneDesc`, `_compLigneDesc`, `_sortComposHtml`, `_sortEffetsLabel`…) : un libellé neuf s'ajoute LÀ, jamais recopié. Sans personnage, `CAPA_FORMULES_SEULES` affiche la formule seule (`1D{Int/5}`) et portée/entretien/incantation formulés arrivent en chaîne. Verrouillé par `tests/test_catalogue_capacites.py`.
+
 **Sort neuf ⇒ grimoire** : sans grimoire unique ni recette de scriptorium, il ne s'apprend pas. L'alerte de `/admin` le signale ; `/admin/dev-tools` → 📖 (`gen_grimoires`) puis 📥 Importer (cf. `telluris-admin-tools`).
 
 Contenu : `jsons/sort-exemples.json`, `update_sorts.json`, `magie_naturelle_sorts.json`, `sorts_nature_elementaire_a_importer.json`, `sorts_bataille_illusoire_noire_sainte_a_importer.json`, `repurgateur_magie_noire_a_importer.json`, `sorts_invocation_a_importer.json` (échelles d'invocation 1-10 + grimoires manquants, `dev/gen_sorts_invocation.py`).
