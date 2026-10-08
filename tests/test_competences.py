@@ -16,7 +16,7 @@ from utils.competences import (
     cout_apprentissage, vocation_choisit_competence, competences_apprenables,
     competences_depart_par_vocation, liste_competences_payload,
     condition_remplie, furtivite_passive, competences_epinglees_effectives,
-    competences_bonus_perime,
+    synchroniser_competences_bonus,
 )
 from utils import combat as combat_mod
 from utils.combat import (
@@ -182,28 +182,41 @@ def test_recompute_competences_bonus_ecrit_le_champ():
     }
 
 
-def test_competences_bonus_perime_detecte_un_agregat_sans_sources():
+def test_synchroniser_repare_un_agregat_sans_sources():
     # Agrégat écrit avant `buffs_sources` : le tooltip de la fiche n'aurait aucun nom de
-    # source à afficher → à recalculer (réparation paresseuse dans get_selected_character).
+    # source à afficher → recalculé au chargement (get_selected_character).
     perso = _perso(competences_connues=["competence:maitrise"],
                    competences_bonus={"buffs": {"F": 4}, "regen_pv": 0, "regen_pm": 0,
                                       "esquive": 0})
-    assert competences_bonus_perime(perso) is True
-    recompute_competences_bonus(perso, _get_doc)
-    assert competences_bonus_perime(perso) is False
+    assert synchroniser_competences_bonus(perso, _get_doc) is True
+    assert perso["competences_bonus"]["buffs_sources"][0]["nom"] == "Maîtrise martiale"
+    assert synchroniser_competences_bonus(perso, _get_doc) is False   # à jour : rien à sauver
 
 
-def test_competences_bonus_perime_faux_sans_competence_ni_buff():
-    # Rien à recalculer pour un perso sans compétence…
-    assert competences_bonus_perime(_perso()) is False
-    # …ni pour une passive sans buff (régén seule) : l'agrégat porte quand même la clé,
-    # avec une liste de sources vide — ce n'est pas un agrégat périmé.
+def test_synchroniser_suit_une_passive_reequilibree_en_base():
+    # LE cas d'usage : la passive change en base APRÈS l'apprentissage — le personnage
+    # doit suivre au chargement suivant, sans réapprendre.
+    docs = {"competence:maitrise": _passive()}
+    perso = _perso(competences_connues=["competence:maitrise"])
+    recompute_competences_bonus(perso, docs.get)
+    assert perso["competences_bonus"]["buffs"] == {"F": 4}
+    docs["competence:maitrise"] = _passive(effets={"buffs": {"F": 2, "R": 2}})
+    assert synchroniser_competences_bonus(perso, docs.get) is True
+    assert perso["competences_bonus"]["buffs"] == {"F": 2, "R": 2}
+    assert perso["competences_bonus"]["buffs_sources"][0]["buffs"] == {"F": 2, "R": 2}
+
+
+def test_synchroniser_faux_sans_competence_ni_changement():
+    # Rien à relire pour un perso sans compétence…
+    assert synchroniser_competences_bonus(_perso(), _get_doc) is False
+    # …ni pour une passive sans buff (régén seule) déjà à jour : liste de sources vide,
+    # ce n'est pas un agrégat à réécrire.
     docs = {"competence:souffle": _passive(_id="competence:souffle", nom="Second souffle",
                                            effets={"regen_pv": 1})}
     perso = _perso(competences_connues=["competence:souffle"])
     recompute_competences_bonus(perso, docs.get)
     assert perso["competences_bonus"]["buffs_sources"] == []
-    assert competences_bonus_perime(perso) is False
+    assert synchroniser_competences_bonus(perso, docs.get) is False
 
 
 def test_passive_arrive_dans_les_caracts():

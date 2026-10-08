@@ -1,0 +1,33 @@
+[
+  {
+    "_id": "competence:maitrise_martiale",
+    "type": "competence",
+    "nom": "Maîtrise martiale",
+    "icon": "🗡️",
+    "description": "Le métier des armes, appris jusque dans les muscles : il frappe juste et encaisse sans broncher.",
+    "vocation": "guerrier",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "F": 2,
+        "R": 2
+      }
+    }
+  },
+  {
+    "_id": "competence:poigne_d_acier",
+    "type": "competence",
+    "nom": "Poigne d'acier",
+    "icon": "✊",
+    "description": "Des années à serrer la garde : la main ne lâche plus rien.",
+    "vocation": "guerrier",
+    "niveau": 1,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "F": 3
+      }
+    }
+  }
+]

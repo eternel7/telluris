@@ -16,7 +16,7 @@ from utils import combat as combat_mod
 from utils import consommables
 from utils.combat import _cible_joueur, get_combat_grid, _run_monster_turn, resolve_action
 from utils.competences import (
-	bonus_passifs, competences_bonus_perime, competence_utilisable_exploration,
+	bonus_passifs, synchroniser_competences_bonus, competence_utilisable_exploration,
 	normaliser_competence, recompute_competences_bonus,
 )
 from utils.sorts import (
@@ -255,8 +255,10 @@ def test_l_infobulle_nomme_la_valeur_resolue():
 	assert detail["buffs_sources"][0]["buffs"] == {"F": 2, "R": 6}
 
 
-def test_un_agregat_sans_formules_est_perime():
+def test_un_agregat_sans_formules_est_resynchronise():
 	perso = _perso_passif()
-	assert not competences_bonus_perime(perso)
+	get_doc = lambda i: PASSIVE if i == PASSIVE["_id"] else None
+	assert not synchroniser_competences_bonus(perso, get_doc)
 	del perso["competences_bonus"]["formules"]
-	assert competences_bonus_perime(perso)
+	assert synchroniser_competences_bonus(perso, get_doc)
+	assert perso["competences_bonus"]["formules"] == {"buffs": {"R": "{Vol/10}"}, "esquive": "{Ag/20}"}
