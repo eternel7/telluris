@@ -35,6 +35,10 @@ ENTREES = [
 	# ── Niveau 6 ──
 	A(6, "Mille poings", "👊", "zone_rect", "poing", "Une rafale de coups si rapide qu'on n'en compte que le bruit."),
 	A(6, "Sceau d'harmonie", "☯️", "regen_allie", "soin_sacre", "Il rétablit l'équilibre dans le corps d'un compagnon."),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(6, "Vagabond", "👣", None, "Voyageur habitué à se défendre. Il réagit avec la rapidité du chat, et frappe avant qu'on ait fini de décider.",
+	  {"effets": {"buffs": {"Ag": 5, "Vol": 4, "V": 1}}},
+	  remplace="vagabond", mode="passive"),
 	# ── Niveau 7 ──
 	A(7, "Frappe de l'âme", "👻", "drain", "meditation", "Le coup traverse la chair et touche l'esprit.", **MAG),
 	A(7, "Pied du phénix", "🔥", "frappe", "feu", "Un coup de pied qui laisse une traînée brûlante."),
@@ -57,4 +61,12 @@ ENTREES = [
 	L(10, "Ascension", "🌤️", "aura_sacree", "Il s'élève et retombe comme une feuille portée par le vent — d'autant plus loin que son corps est délié.",
 	  {"cible": "soi", "portee": 1, "cout_pm": 40, "effets": {"saut": "3+{Ag/25}"}},
 	  remplace="ascension"),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Souffle du Sensei", "🌬️", "meditation", "Front contre front, une longue expiration — mais il n'y a plus de limite à ce qu'il peut céder.",
+	  {"cible": "allie", "portee": 2, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"pv": 20, "pm": 6, "buffs": {"Vol": 5}, "duree": 4}},
+	  remplace="souffle_du_sensei"),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(10, "Ascète", "🧘", None, "Il peut survivre sans boire, sans manger, sans dormir. Sa méditation suffit à tout le reste.",
+	  {"effets": {"buffs": {"Vol": 7}, "regen_pv": 3, "regen_pm": 3}},
+	  remplace="ascete", mode="passive"),
 ]

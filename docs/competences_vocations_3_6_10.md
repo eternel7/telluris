@@ -8,15 +8,18 @@ vérificateur, et rien n'est écrit s'il échoue. Retoucher ici, puis régénér
 Vérificateur : `python dev/check_competences_doc.py` — relit ce fichier, normalise chaque bloc
 par le moteur réel et contrôle les invariants listés plus bas. Il échoue en code 1.
 
-> **Révision 6** — le **poison** (`regen_pv` / `regen_pm` NÉGATIVES, signées partout depuis
-> la PR #66) et les **compétences de pièges** déjà livrées au forestier et au voleur (niveaux
-> 1 → 8). **5 entrées changent** : deux poisons de PV, deux poisons de PM, et le premier prix
-> PERMANENT payé en régénération. Le forestier et le voleur ne changent pas — leurs blocs sont
-> relus contre l'échelle de pièges, et **trois invariants** s'ajoutent (signe de la régén selon
-> la cible, aucun mur involontaire, aucune clé de piège). Le référentiel du vérificateur tient
-> pour **en base** tout `jsons/*_a_importer.json` : le dump committé (2 octobre) retarde sur les
-> imports. Détail en fin de document, § « Ce que la révision 6 a changé ».
+> **Révision 7** — **rééquilibrage des signatures**. Mesurées contre les compétences que
+> `dev/gen_competences_1_10.py` tire de son échelle, 28 actives de ce document valaient de
+> ×1,3 à ×4,7 l'archétype équivalent de leur niveau (soins et cris de rayon 2, malus empilés
+> sur un drain, `V −2` en zone…). Elles sont ramenées à **~1,15 ×** cet archétype, forme et
+> identité conservées ; *Arme de justice*, en dessous, remonte. Puis les **passives** :
+> 13 signatures réglées sur la médiane de leur palier, pour que le cumul 1 → N de chaque
+> vocation tienne à ±3 % de celui de son groupe. ⚠️ Ces 41 docs sont désormais ÉMIS par
+> `dev/gen_competences_1_10.py` (entrées `L(..., remplace=…)` de
+> `dev/competences_1_10/<vocation>.py`) : c'est LÀ qu'on les retouche, ce document les
+> reflète. Détail en fin de document, § « Ce que la révision 7 a changé ».
 >
+> Révision 6 — le poison (`regen_pv` / `regen_pm` négatives) et les compétences de pièges.
 > Révision 5 — les auras, la charge magique, `saut` / `cout_pv` / `lien_vie` / `incantation`.
 
 ---
@@ -75,7 +78,7 @@ partagé `combat._lancer_capacite`). Ce document les emploie :
 | mécanique | ce qu'une compétence en fait ici |
 |---|---|
 | `effets.saut` | **3 entrées.** Téléporte son porteur sur une CASE, mur compris. Validé **avant tout débit** — une case refusée ne coûte rien. Le client offre le même ciblage de sol que pour un sort |
-| `effets.cout_pv` | **3 entrées.** Le prix du sang. Garde `>` STRICTE : ne peut pas assommer son auteur. Ce ne sont **pas** des dégâts subis (ni test de concentration, ni furtivité rompue). ⚠️ Payé APRÈS la part instantanée : l'Invocation majeure soigne de 25 puis facture 20 |
+| `effets.cout_pv` | **3 entrées.** Le prix du sang. Garde `>` STRICTE : ne peut pas assommer son auteur. Ce ne sont **pas** des dégâts subis (ni test de concentration, ni furtivité rompue). ⚠️ Payé APRÈS la part instantanée (l'Invocation majeure ne soigne plus depuis la révision 7 : elle facture 15 PV, sans rendre) |
 | `effets.lien_vie` | **1 entrée** (`serment_du_martyr`). Le bloc vit sur le PROTÉGÉ, la concentration sur le porteur — d'où le `maintien` qui l'accompagne |
 | `incantation` | **4 entrées.** S'arme sur plusieurs tours, PM versés par tranches. Le bloc mémorise son `kind`, la résolution ayant lieu des tours plus tard |
 
@@ -203,7 +206,7 @@ n'est empilé (`part_durative`). Le vérificateur le refuse aussi.
 | `venin_de_contact` (assassin 3) | **−5 PV**/tour, 3 tours | un debuff `R −8 / F −6` qui « rendait » le poison faute de mieux |
 | `toucher_du_sepulcre` (nécromancien 3) | **−3 PV**/tour, 3 tours | une part des dés (`2D8+4` → `1D8`) |
 | `marque_du_traqueur` (répurgateur 3) | **−3 PM**/tour, 3 tours | une part de la siphonie (`2D6` → `1D6` aux PM) |
-| `rupture_arcanique` (mage 10) | **−4 PM**/tour sur toute la zone, 3 tours | `Vol −15` → `−12` |
+| `rupture_arcanique` (mage 10) | **−2 PM**/tour sur toute la zone, 3 tours (−4 avant la révision 7) | `Vol −15` → `−12` (→ `−4` en révision 7) |
 | `ame_gagee` (démoniste 10, passive) | **−1 PV**/tour, permanent | contrepartie de `regen_pm` 4 → 6 |
 
 ⚠️ Le **journal** dit « ☠ X souffre du poison » pour toute perte de régén nette, prix de pacte
@@ -457,18 +460,18 @@ Seigneur de guerre, Mastodonte.*
  "description": "Ses cicatrices se comptent par dizaines. Chacune est une leçon que son corps a retenue.",
  "vocation": "guerrier", "niveau": 6, "mode": "passive",
  "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1},
- "effets": {"buffs": {"R": 8}}}
+ "effets": {"buffs": {"R": 9}}}
 ```
-*Source : « Protecteur » (niv. 5) — « +5 PV au-dessus du maximum » : `pv_max = R·3 + F`, donc +14 R vaut +42 PV. Le plafond de caract n'est pas touché (un buff s'ajoute après `compute_stat_cap`).*
+*Source : « Protecteur » (niv. 5) — « +5 PV au-dessus du maximum » : `pv_max = R·3 + F`, donc +9 R vaut +27 PV. Le plafond de caract n'est pas touché (un buff s'ajoute après `compute_stat_cap`).*
 
-**Garde de fer** 🛡️ · active · 12 PM + 4/round (posture) · `soi` / portée 1 · zone : les 8 cases autour · ⚔️ combat seulement
+**Garde de fer** 🛡️ · active · 12 PM + 5/round (posture) · `soi` / portée 1 · zone : les 8 cases autour · ⚔️ combat seulement
 ```json
 {"_id": "competence:garde_de_fer", "type": "competence", "nom": "Garde de fer", "icon": "🛡️",
  "description": "Il ferme la garde et cesse d'avancer. Pendant quelques instants, il n'y a plus d'ouverture.",
- "vocation": "guerrier", "niveau": 6, "mode": "active", "cout_pm": 12, "maintien": 4, "sensibilite_charge": 0,
+ "vocation": "guerrier", "niveau": 6, "mode": "active", "cout_pm": 12, "maintien": 5, "sensibilite_charge": 0,
  "cible": "soi", "portee": 1,
  "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1},
- "effets": {"buffs": {"R": 11}, "esquive": 5}}
+ "effets": {"buffs": {"R": 8}, "esquive": 3}}
 ```
 *Source : « Stratège » (niv. 3), tenue de ligne.*
 
@@ -508,7 +511,7 @@ sang, Vétéran, Danseur de guerre.*
 {"_id": "competence:conquerant", "type": "competence", "nom": "Conquérant", "icon": "🏔️",
  "description": "Il a dormi dans la neige et bu l'eau des flaques. Son corps a pris l'habitude de se refaire tout seul.",
  "vocation": "barbare", "niveau": 3, "mode": "passive",
- "effets": {"buffs": {"R": 6}, "regen_pv": 1}}
+ "effets": {"buffs": {"R": 5}, "regen_pv": 1}}
 ```
 *Source : « Conquérant » (niv. 3), « double les PV récupérés naturellement » → régénération permanente.*
 
@@ -540,7 +543,7 @@ sang, Vétéran, Danseur de guerre.*
  "description": "La fureur guerrière montée d'un cran. Ceux qui l'ont vue une fois changent de chemin la fois suivante.",
  "vocation": "barbare", "niveau": 6, "mode": "active", "cout_pm": 12, "maintien": 4, "sensibilite_charge": 0,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"F": 20, "Ag": 6}, "regen_pv": 3}}
+ "effets": {"buffs": {"F": 18, "Ag": 6}, "regen_pv": 1}}
 ```
 *Source : « Annonce de sang » (niv. 5).*
 
@@ -562,7 +565,7 @@ sang, Vétéran, Danseur de guerre.*
  "vocation": "barbare", "niveau": 10, "mode": "active", "cout_pm": 40, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cc", "portee": 1,
  "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1},
- "effets": {"degats": "3D10+12"}}
+ "effets": {"degats": "3D10+9"}}
 ```
 
 ---
@@ -755,7 +758,7 @@ Empoisonneur, Maître des ombres, Maître lames, Maître venins.*
 {"_id": "competence:maitre_des_ombres", "type": "competence", "nom": "Maître des ombres", "icon": "🌑",
  "description": "Souplesse et grâce poussées au point où le regard glisse sur lui sans accrocher.",
  "vocation": "assassin", "niveau": 6, "mode": "passive",
- "effets": {"buffs": {"Ag": 8}, "esquive": 5}}
+ "effets": {"buffs": {"Ag": 10}, "esquive": 7}}
 ```
 *Source : « Maître des ombres » (niv. 5), « +1 en Ag au-dessus du maximum ».*
 
@@ -776,9 +779,9 @@ Empoisonneur, Maître des ombres, Maître lames, Maître venins.*
 {"_id": "competence:ombre_incarnee", "type": "competence", "nom": "Ombre incarnée", "icon": "👤",
  "description": "Il n'entre pas dans un combat : il y est déjà, et personne ne sait où.",
  "vocation": "assassin", "niveau": 10, "mode": "passive",
- "effets": {"furtivite": 20}}
+ "effets": {"furtivite": 20, "buffs": {"Ag": 12}, "esquive": 10}}
 ```
-*Furtivité permanente à l'entrée de tout combat, sans condition de terrain — lue par `furtivite_passive`, prise en max avec `competence:furtivite` (niv. 0), qui reste utile pour se refondre après avoir frappé.*
+*Furtivité permanente à l'entrée de tout combat, sans condition de terrain — lue par `furtivite_passive`, prise en max avec `competence:furtivite` (niv. 0), qui reste utile pour se refondre après avoir frappé. Révision 7 : `Ag +12` et `esquive 10` — seule, la furtivité ne valait qu'un tiers d'un capstone, et elle rend inertes les furtivités plus faibles déjà apprises (pas de cumul).*
 
 **Exécution** 🗡️ · active · 40 PM · `ennemi` / `cc` / portée 1
 ```json
@@ -842,7 +845,7 @@ chemins, Grand maître de guilde, Maraudeur.*
  "description": "Il cesse de se battre et se met à ne plus être touchable. C'est un métier différent, qu'il connaît aussi.",
  "vocation": "voleur", "niveau": 6, "mode": "active", "cout_pm": 25, "sensibilite_charge": 0,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"Ag": 8}, "esquive": 18, "duree": 4, "saut": 4}}
+ "effets": {"buffs": {"Ag": 7}, "esquive": 12, "duree": 4, "saut": 3}}
 ```
 
 ### Niveau 10 — capstone
@@ -901,7 +904,7 @@ Sensei, Ascète.*
 {"_id": "competence:vagabond", "type": "competence", "nom": "Vagabond", "icon": "👣",
  "description": "Voyageur habitué à se défendre. Il réagit avec la rapidité du chat, et frappe avant qu'on ait fini de décider.",
  "vocation": "moine", "niveau": 6, "mode": "passive",
- "effets": {"buffs": {"Ag": 8, "Vol": 4, "V": 1}}}
+ "effets": {"buffs": {"Ag": 5, "Vol": 4, "V": 1}}}
 ```
 *Source : « Vagabond » (niv. 3) — « frappe toujours en premier » n'est pas exprimable ; rendu par l'initiative, qui dérive d'Ag et de V.*
 
@@ -922,7 +925,7 @@ Sensei, Ascète.*
 {"_id": "competence:ascete", "type": "competence", "nom": "Ascète", "icon": "🧘",
  "description": "Il peut survivre sans boire, sans manger, sans dormir. Sa méditation suffit à tout le reste.",
  "vocation": "moine", "niveau": 10, "mode": "passive",
- "effets": {"buffs": {"Vol": 10}, "regen_pv": 3, "regen_pm": 3}}
+ "effets": {"buffs": {"Vol": 7}, "regen_pv": 3, "regen_pm": 3}}
 ```
 *Source : « Ascète » (niv. 5) — les résistances typées n'existent pas ; rendues par la seule double régénération permanente du jeu.*
 
@@ -933,7 +936,7 @@ Sensei, Ascète.*
  "vocation": "moine", "niveau": 10, "mode": "active", "cout_pm": 40,
  "cible": "allie", "portee": 2,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 1},
- "effets": {"pv": 34, "pm": 15, "buffs": {"Vol": 15}, "regen_pv": 4, "duree": 5}}
+ "effets": {"pv": 20, "pm": 6, "buffs": {"Vol": 5}, "duree": 4}}
 ```
 *Source : « Sensei » (niv. 5). Prolonge `competence:souffle_partage` (niv. 1) — le don au compagnon est l'axe du moine.*
 
@@ -976,14 +979,13 @@ Purificateur.*
 ```
 *Source : « Héros » (niv. 5), « +1 PA et +2 en parade avec les boucliers » — les PA viennent de l'équipement ; rendus par la R, qui alimente `pa = R // 20`.*
 
-**Serment du martyr** 🩸 · active · 25 PM · `allie` / portée 2 · zone : croix de rayon 1
+**Serment du martyr** 🩸 · active · 25 PM + 4/round · `allie` / portée 2 · un seul protégé (révision 7)
 ```json
 {"_id": "competence:serment_du_martyr", "type": "competence", "nom": "Serment du martyr", "icon": "🩸",
  "description": "Il prend sur lui ce qu'un autre ne peut plus porter. C'est tout le serment, et il n'en a jamais fait d'autre.",
  "vocation": "paladin", "niveau": 6, "mode": "active", "cout_pm": 25, "maintien": 4,
  "cible": "allie", "portee": 2,
- "zone": {"forme": "cercle", "origine": "cible", "rayon": 1},
- "effets": {"pv": 22, "buffs": {"R": 9}, "regen_pv": 3, "lien_vie": {"part": 50, "reduction": 10}}}
+ "effets": {"pv": 18, "buffs": {"R": 6}, "lien_vie": {"part": 50, "reduction": 10}}}
 ```
 *Source : « Martyr » (niv. 3). Prolonge `competence:imposition_des_mains` (niv. 1).*
 
@@ -1006,7 +1008,7 @@ Purificateur.*
  "vocation": "paladin", "niveau": 10, "mode": "active", "cout_pm": 40,
  "cible": "ennemi", "jet": "magique", "portee": 6,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 2},
- "effets": {"degats": "2D10+8", "buffs": {"Vol": -12}, "duree": 3}}
+ "effets": {"degats": "2D10+8", "buffs": {"Vol": -6}, "duree": 3}}
 ```
 *Source : « Purificateur » (niv. 5) — l'immunité psychologique n'existe pas ; rendue en frappe sacrée à distance qui brise la volonté de la cible. `jet:"magique"` ⇒ résolution sur la `pm_def`, PA non soustraits.*
 
@@ -1034,7 +1036,7 @@ Justice, Bras divin, Gardien.*
  "description": "Il n'enchante pas sa lame : il lui rappelle pourquoi elle a été forgée.",
  "vocation": "templier", "niveau": 3, "mode": "active", "cout_pm": 8, "maintien": 3,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"F": 12}}}
+ "effets": {"buffs": {"F": 15, "Vol": 7}}}
 ```
 *Source : « Juge » (niv. 3), sort Arme de vie.*
 
@@ -1151,7 +1153,7 @@ Inquisiteur, Tueur de démon, Rejeton ou Saint.*
  "vocation": "repurgateur", "niveau": 10, "mode": "active", "cout_pm": 40,
  "cible": "ennemi", "jet": "cc", "portee": 1,
  "zone": {"forme": "cone", "origine": "lanceur", "orientation": "cible", "longueur": 2, "decalage": 1, "angle": 90},
- "effets": {"degats": "4D10+13", "buffs": {"Vol": -20}, "duree": 3}}
+ "effets": {"degats": "4D10+6", "buffs": {"Vol": -6}, "duree": 3}}
 ```
 *Source : « Tueur de démon » (niv. 5), « −1 à la sauvegarde des démons et des anges » — rendu par un debuff de Vol, qui abaisse la `pm_def` de la cible.*
 
@@ -1194,16 +1196,16 @@ Artiste, Bouffon, Étoile, Prodige, Imitateur.*
 ```
 *Source : « Artiste » (niv. 3), « +2 à l'effet des charmes ».*
 
-**Hymne de l'Étoile** 🌟 · active · 25 PM · `allie` / portée 5 · zone : les 24 cases autour
+**Hymne de l'Étoile** 🌟 · active · 25 PM · `soi` / portée 1 · zone : les 8 cases autour
 ```json
 {"_id": "competence:hymne_de_l_etoile", "type": "competence", "nom": "Hymne de l'Étoile", "icon": "🌟",
  "description": "Un air lancé par-dessus la mêlée. Celui qui l'entend redresse la garde et oublie de compter ses plaies.",
  "vocation": "menestrel", "niveau": 6, "mode": "active", "cout_pm": 25,
  "cible": "soi", "portee": 1,
- "zone": {"forme": "carre", "origine": "lanceur", "rayon": 2},
- "effets": {"pv": 10, "buffs": {"Vol": 9, "Cha": 5}, "regen_pv": 2, "duree": 5}}
+ "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1},
+ "effets": {"pv": 4, "buffs": {"Vol": 8, "Cha": 4}, "regen_pv": 1, "duree": 4}}
 ```
-*Prolonge `competence:refrain_de_ralliement` (niv. 1), qui visait UN compagnon. Passé en `cible:"soi"` + zone : un chant de ralliement rayonne autour de celui qui chante, il ne se désigne pas. Le ménestrel en profite lui-même (une zone bénéfique sert le lanceur), et elle porte aussi aux montures, aux personnes escortées et aux invocations. Décote large (−50 %) : 24 cases autour de lui.*
+*Prolonge `competence:refrain_de_ralliement` (niv. 1), qui visait UN compagnon. Passé en `cible:"soi"` + zone : un chant de ralliement rayonne autour de celui qui chante, il ne se désigne pas. Le ménestrel en profite lui-même (une zone bénéfique sert le lanceur), et elle porte aussi aux montures, aux personnes escortées et aux invocations. Révision 7 : carré de rayon **1** (8 cases autour de lui) au lieu de 2 (24) — la forme du `cri` généré, et ~1,15 × ses valeurs.*
 
 ### Niveau 10 — capstone
 
@@ -1224,7 +1226,7 @@ Artiste, Bouffon, Étoile, Prodige, Imitateur.*
  "vocation": "menestrel", "niveau": 10, "mode": "active", "cout_pm": 40, "incantation": 3,
  "cible": "ennemi", "jet": "magique", "portee": 6,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 2},
- "effets": {"degats": "1D8", "buffs": {"F": -12, "Ag": -12, "Vol": -9}, "duree": 4}}
+ "effets": {"degats": "1D8", "buffs": {"F": -9, "Ag": -9, "Vol": -5}, "duree": 3}}
 ```
 *Source : « Prodige » (niv. 5), « charme de faiblesse ». Le capstone du ménestrel n'est pas un burst mais un affaiblissement de MASSE : trois caractéristiques abattues sur un disque de rayon 2, là où les debuffs mono-cible frappent plus fort mais un seul. C'est son identité, et la zone la sert mieux que ne le faisait la version d'avant.*
 
@@ -1242,7 +1244,7 @@ Oracle.*
 {"_id": "competence:clerc", "type": "competence", "nom": "Clerc", "icon": "📖",
  "description": "Des années à lire et à recopier des piles de livres. Le savoir des grimoires lui vient plus vite qu'aux autres.",
  "vocation": "pretre", "niveau": 3, "mode": "passive",
- "effets": {"buffs": {"Int": 8}}}
+ "effets": {"buffs": {"Int": 4}}}
 ```
 *Source : « Clerc » (niv. 3), « double le bonus d'Int pour l'alphabétisation » — l'Int alimente `pm_max` et le toucher magique.*
 
@@ -1252,7 +1254,7 @@ Oracle.*
  "description": "Il améliore n'importe quel soin, qu'il soit naturel ou magique. Souvent d'assez peu, toujours d'assez.",
  "vocation": "pretre", "niveau": 3, "mode": "active", "cout_pm": 15,
  "cible": "allie", "portee": 2,
- "effets": {"pv": 18, "regen_pv": 3, "duree": 4}}
+ "effets": {"pv": 16, "regen_pv": 2, "duree": 3}}
 ```
 *Source : « Guérisseur » (niv. 3).*
 
@@ -1273,7 +1275,7 @@ Oracle.*
  "description": "Son aura de bienfaisance irradie ceux qui le suivent, qu'ils l'aient demandé ou non.",
  "vocation": "pretre", "niveau": 6, "mode": "active", "cout_pm": 25,
  "cible": "allie", "portee": 4,
- "effets": {"pv": 20, "buffs": {"R": 18, "Vol": 10}, "regen_pv": 3, "duree": 5}}
+ "effets": {"pv": 18, "buffs": {"R": 6, "Vol": 3}, "regen_pv": 1, "duree": 4}}
 ```
 *Source : « Prophète » (niv. 5), « affecte ses compagnons ».*
 
@@ -1284,20 +1286,20 @@ Oracle.*
 {"_id": "competence:thaumaturge", "type": "competence", "nom": "Thaumaturge", "icon": "✨",
  "description": "Le nombre de gens morts sous ses mains se compte sur les doigts d'une seule. Il les connaît tous par leur nom.",
  "vocation": "pretre", "niveau": 10, "mode": "passive",
- "effets": {"buffs": {"Vol": 8, "Int": 4}, "regen_pv": 5}}
+ "effets": {"buffs": {"Vol": 6, "Int": 4}, "regen_pv": 4}}
 ```
-*Source : « Thaumaturge » (niv. 5) — l'échec de chirurgie qui ne blesse plus n'est pas exprimable ; rendu par la plus forte régénération de PV du jeu.*
+*Source : « Thaumaturge » (niv. 5) — l'échec de chirurgie qui ne blesse plus n'est pas exprimable ; rendu par la régénération de PV permanente la plus haute du jeu (4/tour depuis la révision 7, à égalité avec Danseur de guerre et Rejeton ou saint).*
 
-**Oracle** 👁️‍🗨️ · active · 40 PM · `allie` / portée 6 · zone : disque de rayon 2
+**Oracle** 👁️‍🗨️ · active · 40 PM · `allie` / portée 6 · zone : croix de rayon 1
 ```json
 {"_id": "competence:oracle", "type": "competence", "nom": "Oracle", "icon": "👁️‍🗨️",
  "description": "Ses prédictions sont complexes à décrypter et s'avèrent souvent exactes. Celui qu'il désigne ne peut plus vraiment échouer.",
  "vocation": "pretre", "niveau": 10, "mode": "active", "cout_pm": 40,
  "cible": "allie", "portee": 6,
- "zone": {"forme": "cercle", "origine": "cible", "rayon": 2},
- "effets": {"pv": 27, "pm": 15, "buffs": {"Ch": 12, "Vol": 9}, "regen_pv": 3, "regen_pm": 2, "duree": 5}}
+ "zone": {"forme": "cercle", "origine": "cible", "rayon": 1},
+ "effets": {"pv": 22, "pm": 5, "buffs": {"Ch": 5, "Vol": 3}, "duree": 3}}
 ```
-*Source : « Oracle » (niv. 5), « une réussite automatique » — la réussite forcée n'existe pas ; rendue par un très fort bonus de Chance, qui rapproche les critiques.*
+*Source : « Oracle » (niv. 5), « une réussite automatique » — la réussite forcée n'existe pas ; rendue par un bonus de Chance, qui rapproche les critiques. Révision 7 : cercle de rayon 1 (au lieu de 2), soin 22 et `Ch +5` — le soin de zone le plus fort du jeu, à ~1,3 × l'archétype `soin_zone`, pas ×4,7.*
 
 ---
 
@@ -1345,7 +1347,7 @@ Dompteur de monstres, Fils de la nature, Homme-tempête.*
  "vocation": "druide", "niveau": 6, "mode": "active", "cout_pm": 25,
  "cible": "allie", "portee": 3,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 1},
- "effets": {"pv": 22, "buffs": {"R": 9}, "regen_pv": 3, "duree": 5}}
+ "effets": {"pv": 14, "buffs": {"R": 3}, "regen_pv": 1, "duree": 3}}
 ```
 
 ### Niveau 10 — capstone
@@ -1356,7 +1358,7 @@ Dompteur de monstres, Fils de la nature, Homme-tempête.*
  "description": "Un état de symbiose que la nature lui rend bien, et dont il ne parle jamais.",
  "vocation": "druide", "niveau": 10, "mode": "passive",
  "zone": {"forme": "cercle", "origine": "lanceur", "rayon": 2},
- "effets": {"buffs": {"R": 6}, "regen_pv": 2}}
+ "effets": {"buffs": {"R": 8}, "regen_pv": 2}}
 ```
 *Source : « Fils de la nature » (niv. 5), « +2 en résistance totale ».*
 
@@ -1367,9 +1369,9 @@ Dompteur de monstres, Fils de la nature, Homme-tempête.*
  "vocation": "druide", "niveau": 10, "mode": "active", "cout_pm": 40,
  "cible": "ennemi", "jet": "magique", "portee": 10,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 2},
- "effets": {"degats": "3D10+10", "buffs": {"V": -2}, "duree": 3}}
+ "effets": {"degats": "3D10+6", "buffs": {"V": -1}, "duree": 2}}
 ```
-*Source : « Homme-tempête » (niv. 5), sorts Foudre / Aiguilles de glace / Avalanche. `V: -3` immobilise presque (plancher : une case).*
+*Source : « Homme-tempête » (niv. 5), sorts Foudre / Aiguilles de glace / Avalanche. `V: -1` sur 2 tours (révision 7 ; `-2` sur 3 tours avant) : V fait le nombre d'actions, et sur un disque de rayon 2 un seul point suffit à peser.*
 
 ---
 
@@ -1415,7 +1417,7 @@ Médium, Onirologue, Homme bête, Gardien des esprits, Ancien.*
  "description": "L'esprit n'est plus un compagnon qu'il invoque : il vit à l'intérieur, et sort quand on l'y oblige.",
  "vocation": "chaman", "niveau": 6, "mode": "active", "cout_pm": 25,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"F": 18, "R": 12, "Ag": 8, "Int": -10}, "regen_pv": 3, "duree": 5, "saut": 3}}
+ "effets": {"buffs": {"F": 12, "R": 8, "Ag": 6, "Int": -6}, "regen_pv": 1, "duree": 5, "saut": 3}}
 ```
 *Source : « Homme bête » (niv. 5).*
 
@@ -1427,9 +1429,9 @@ Médium, Onirologue, Homme bête, Gardien des esprits, Ancien.*
  "description": "Il en contrôle plus qu'aucun autre chaman n'en a jamais tenu, et la plupart du temps sans y penser.",
  "vocation": "chaman", "niveau": 10, "mode": "passive",
  "zone": {"forme": "cercle", "origine": "lanceur", "rayon": 2},
- "effets": {"buffs": {"Vol": 8, "Int": 4}}}
+ "effets": {"buffs": {"Vol": 10, "Int": 5}}}
 ```
-*Source : « Gardien des esprits » (niv. 5), « +1 esprit invocable par jour » — le compte d'invocations n'existe pas ; rendu en réserve magique (`pm_max = 2·Vol + 2·Int` ⇒ +44 PM).*
+*Source : « Gardien des esprits » (niv. 5), « +1 esprit invocable par jour » — le compte d'invocations n'existe pas ; rendu en réserve magique (`pm_max = 2·Vol + 2·Int` ⇒ +30 PM pour le porteur).*
 
 **Esprit Antique** 🦣 · active · 40 PM · `soi` / portée 1
 ```json
@@ -1437,7 +1439,7 @@ Médium, Onirologue, Homme bête, Gardien des esprits, Ancien.*
  "description": "Le mammouth, le tigre à dents de sabre, le grand saurien. Un seul, une seule fois, et il faut ensuite s'en remettre.",
  "vocation": "chaman", "niveau": 10, "mode": "active", "cout_pm": 40,
  "cible": "soi", "portee": 1,
- "effets": {"pv": 30, "buffs": {"F": 25, "R": 20, "Ag": 10, "V": 1}, "regen_pv": 5, "duree": 5}}
+ "effets": {"buffs": {"F": 16, "R": 10, "Ag": 6, "V": 1}, "regen_pv": 2, "duree": 5}}
 ```
 *Source : « Ancien » (niv. 5), « coûte 30 PM et compte pour 2 esprits ». ⚠️ À l'expiration, les PV sont re-clampés sur le `pv_max` non buffé (`combat.py:148-151`) — un chaman qui sort de sa forme antique perd la part de PV qu'elle portait. C'est le comportement normal des gros buffs de R, pas un bug.*
 
@@ -1508,7 +1510,7 @@ Conjurateur, Archimage, Nexus, Invocateur.*
  "vocation": "elementaliste", "niveau": 10, "mode": "active", "cout_pm": 40, "incantation": 4,
  "cible": "ennemi", "jet": "magique", "portee": 12,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 2},
- "effets": {"degats": "3D12+12", "buffs": {"R": -15}, "duree": 3}}
+ "effets": {"degats": "3D10+8", "buffs": {"R": -8}, "duree": 3}}
 ```
 
 ---
@@ -1555,7 +1557,7 @@ Conjurateur, Archimage, Nexus, Invocateur.*
  "description": "La magie au service de la guerre, et pas l'inverse : il enchante sa propre arme et va s'en servir.",
  "vocation": "mage", "niveau": 6, "mode": "active", "cout_pm": 25,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"F": 20, "Ag": 8}, "duree": 5}}
+ "effets": {"buffs": {"F": 16, "Ag": 8}, "duree": 5}}
 ```
 
 ### Niveau 10 — capstone
@@ -1565,20 +1567,20 @@ Conjurateur, Archimage, Nexus, Invocateur.*
 {"_id": "competence:coeur_de_nexus", "type": "competence", "nom": "Cœur de Nexus", "icon": "💠",
  "description": "La magie ne le traverse plus : elle s'y arrête un instant, puis repart plus nombreuse.",
  "vocation": "mage", "niveau": 10, "mode": "passive",
- "effets": {"buffs": {"Vol": 12, "Int": 6}, "regen_pm": 5}}
+ "effets": {"buffs": {"Vol": 8, "Int": 4}, "regen_pm": 5}}
 ```
 *Le seul `regen_pm` permanent élevé du jeu — la signature du drain magique, et ce qui distingue le magicien de combat de l'élémentaliste.*
 
-**Rupture arcanique** 💥 · active · 40 PM · `ennemi` / `magique` / portée 10 · zone : disque de rayon 2 · ☠ −4 PM/tour, 3 tours
+**Rupture arcanique** 💥 · active · 40 PM · `ennemi` / `magique` / portée 10 · zone : disque de rayon 2 · ☠ −2 PM/tour, 3 tours
 ```json
 {"_id": "competence:rupture_arcanique", "type": "competence", "nom": "Rupture arcanique", "icon": "💥",
  "description": "Il ne lance pas un sort : il casse quelque chose, et laisse le monde recoller les morceaux.",
  "vocation": "mage", "niveau": 10, "mode": "active", "cout_pm": 40,
  "cible": "ennemi", "jet": "magique", "portee": 10,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 2},
- "effets": {"degats": "3D10+12", "regen_pm": -4, "buffs": {"Vol": -12}, "duree": 3}}
+ "effets": {"degats": "3D10+6", "regen_pm": -2, "buffs": {"Vol": -4}, "duree": 3}}
 ```
-*✅ **Révision 6** : ce que la rupture « casse », c'est le flux — `regen_pm −4` sur **chaque** cible de la zone, 3 tours. Le magicien de combat, signature du drain magique (`Cœur de Nexus`, `regen_pm 5` pour lui), devient aussi celui qui fait fuir la réserve des autres. Le `Vol` passe de −15 à −12 en contrepartie. ⚠️ Un monstre sans PM n'y perd rien : le poison de PM s'arrête à 0, et la ligne de journal ne s'écrit que sur une perte réelle.*
+*✅ **Révision 6** : ce que la rupture « casse », c'est le flux — `regen_pm −2` sur **chaque** cible de la zone, 3 tours (−4 en révision 6). Le magicien de combat, signature du drain magique (`Cœur de Nexus`, `regen_pm 5` pour lui), devient aussi celui qui fait fuir la réserve des autres. Le `Vol` passe de −15 à −12 en contrepartie, puis à −4 en révision 7. ⚠️ Un monstre sans PM n'y perd rien : le poison de PM s'arrête à 0, et la ligne de journal ne s'écrit que sur une perte réelle.*
 
 ---
 
@@ -1622,7 +1624,7 @@ Conjurateur, Archimage, Nexus, Invocateur.*
  "description": "Il montre à la cible un sol qui n'existe pas. Elle cesse d'avancer, ce qui est déjà beaucoup.",
  "vocation": "illusionniste", "niveau": 6, "mode": "active", "cout_pm": 25,
  "cible": "ennemi", "jet": "magique", "portee": 8,
- "effets": {"degats": "1D8", "buffs": {"Ag": -18, "V": -2}, "duree": 4}}
+ "effets": {"degats": "1D8", "buffs": {"Ag": -12, "V": -1}, "duree": 4}}
 ```
 
 ### Niveau 10 — capstone
@@ -1632,9 +1634,9 @@ Conjurateur, Archimage, Nexus, Invocateur.*
 {"_id": "competence:presence_effacee", "type": "competence", "nom": "Présence effacée", "icon": "👻",
  "description": "Il n'est pas caché : il est simplement difficile de soutenir l'idée qu'il soit là.",
  "vocation": "illusionniste", "niveau": 10, "mode": "passive",
- "effets": {"furtivite": 18, "esquive": 10}}
+ "effets": {"furtivite": 18, "esquive": 10, "buffs": {"Int": 8}}}
 ```
-*Sans `condition` : `furtivite` (état furtif à l'entrée du combat) **et** `esquive` (repli permanent) sont tous deux lus. C'est le seul capstone qui cumule les deux mécaniques de dissimulation.*
+*Sans `condition` : `furtivite` (état furtif à l'entrée du combat) **et** `esquive` (repli permanent) sont tous deux lus. Avec l'Ombre incarnée de l'assassin, l'un des deux capstones qui cumulent les deux mécaniques de dissimulation. Révision 7 : `Int +8` — la furtivité ne se cumule pas (`furtivite_passive` garde le MAX), elle ne suffisait pas à tenir le palier.*
 
 **Théâtre des ombres** 🎭 · active · 40 PM · `ennemi` / `magique` / portée 10 · zone : disque de rayon 2
 ```json
@@ -1643,7 +1645,7 @@ Conjurateur, Archimage, Nexus, Invocateur.*
  "vocation": "illusionniste", "niveau": 10, "mode": "active", "cout_pm": 40,
  "cible": "ennemi", "jet": "magique", "portee": 10,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 2},
- "effets": {"degats": "2D8", "buffs": {"F": -12, "Ag": -12, "Int": -9}, "duree": 4}}
+ "effets": {"degats": "2D6", "buffs": {"F": -7, "Ag": -7, "Int": -4}, "duree": 3}}
 ```
 
 ---
@@ -1684,15 +1686,15 @@ voie ultime, la Liche.*
  "effets": {"buffs": {"Vol": 10, "Int": 4}}}
 ```
 
-**Drain vital** 🩸 · active · 25 PM · `ennemi` / `magique` / portée 6 · drain 50 % des dégâts
+**Drain vital** 🩸 · active · 25 PM · `ennemi` / `magique` / portée 6 · drain 35 % des dégâts
 ```json
 {"_id": "competence:drain_vital", "type": "competence", "nom": "Drain vital", "icon": "🩸",
  "description": "Il prend ce qui tient la cible debout. Ce qu'il en fait ensuite ne regarde personne.",
  "vocation": "necromancien", "niveau": 6, "mode": "active", "cout_pm": 25,
  "cible": "ennemi", "jet": "magique", "portee": 6,
- "effets": {"degats": "3D8+8", "buffs": {"F": -12, "R": -8}, "duree": 3, "drain_pv": 50}}
+ "effets": {"degats": "3D8+6", "buffs": {"F": -5}, "duree": 3, "drain_pv": 35}}
 ```
-*✅ **Enfin littéral.** La révision 2 notait ici que « le drain au sens strict n'est pas exprimable » et se rabattait sur « dégâts + affaiblissement durable ». `drain_pv` existe désormais : le nécromancien récupère **50 % des dégâts RÉELLEMENT infligés** (`avant_pv − currentPV`, donc un coup mortel ne rend que ce qui restait), clampé à son propre `pv_max`. Vérifié en exécutant le moteur sur une compétence, pas seulement sur un sort.*
+*✅ **Enfin littéral.** La révision 2 notait ici que « le drain au sens strict n'est pas exprimable » et se rabattait sur « dégâts + affaiblissement durable ». `drain_pv` existe désormais : le nécromancien récupère **35 % des dégâts RÉELLEMENT infligés** (50 % avant la révision 7, qui retire aussi le `R −8` et ramène le `F` à −5 : drain ET affaiblissement complets faisaient deux compétences en une) (`avant_pv − currentPV`, donc un coup mortel ne rend que ce qui restait), clampé à son propre `pv_max`. Vérifié en exécutant le moteur sur une compétence, pas seulement sur un sort.*
 
 ### Niveau 10 — capstone
 
@@ -1704,14 +1706,14 @@ voie ultime, la Liche.*
  "effets": {"buffs": {"Vol": 16, "Int": 6}}}
 ```
 
-**Étreinte du tombeau** ⚱️ · active · 40 PM · `ennemi` / `magique` / portée 8 · zone : disque de rayon 2 · drain 40 %, plafond 25
+**Étreinte du tombeau** ⚱️ · active · 40 PM · `ennemi` / `magique` / portée 8 · zone : disque de rayon 2 · drain 25 %, plafond 12
 ```json
 {"_id": "competence:etreinte_du_tombeau", "type": "competence", "nom": "Étreinte du tombeau", "icon": "⚱️",
  "description": "Le sol se souvient de tous ceux qu'il a reçus, et tend les mains vers celui qui marche dessus.",
  "vocation": "necromancien", "niveau": 10, "mode": "active", "cout_pm": 40, "incantation": 3,
  "cible": "ennemi", "jet": "magique", "portee": 8,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 2},
- "effets": {"degats": "3D10+11", "buffs": {"R": -12, "V": -2}, "duree": 4, "drain_pv": 40, "drain_max": 25}}
+ "effets": {"degats": "3D10+8", "buffs": {"R": -4, "V": -1}, "duree": 3, "drain_pv": 25, "drain_max": 12}}
 ```
 
 ---
@@ -1769,7 +1771,7 @@ Invocateur, Archimage.*
 {"_id": "competence:ame_gagee", "type": "competence", "nom": "Âme gagée", "icon": "😈",
  "description": "Elle ne lui appartient plus depuis longtemps. Le loyer qu'on lui verse est confortable ; celui qu'il paie se prélève goutte à goutte.",
  "vocation": "demoniste", "niveau": 10, "mode": "passive",
- "effets": {"buffs": {"Int": 12, "Vol": 6}, "regen_pm": 6, "regen_pv": -1}}
+ "effets": {"buffs": {"Int": 9, "Vol": 4}, "regen_pm": 6, "regen_pv": -1}}
 ```
 *✅ **Révision 6 — la seule passive à régénération négative du document**, et c'est l'axe même de la vocation (« de très gros gains payés »). `regen_pm` monte de 4 à 6 — la plus forte du jeu, devant le `Cœur de Nexus` du mage —, payée d'un PV par tour. Les sources PERMANENTES s'**additionnent** (`regen_bonus`, `_tick_effets_combat`) : le prix ne se dissout pas dans le non-cumul, une potion de régén le CONTRE sans l'effacer.*
 *⚠️ Ce que le prix vaut réellement, vérifié en exécutant le moteur : **en combat** (`regen_pv_base = −1`), −1 PV à chaque tour du démoniste, plancher 0 — il peut finir à terre ; une ligne « ☠ … souffre du poison (−1 PV) » s'écrit à chaque tour, le journal ne distinguant pas un pacte d'un venin. **Hors combat**, la régénération naturelle (`ceil(R/20)`, au moins 1) l'absorbe : la régén nette baisse d'un point sans jamais passer sous zéro — le pacte se paie au combat.*
@@ -1780,7 +1782,7 @@ Invocateur, Archimage.*
  "description": "Il n'appelle plus une créature : il lui prête sa peau pour la durée du contrat.",
  "vocation": "demoniste", "niveau": 10, "mode": "active", "cout_pm": 40,
  "cible": "soi", "portee": 1,
- "effets": {"pv": 25, "buffs": {"F": 20, "Int": 20, "R": 15}, "regen_pv": 4, "regen_pm": 3, "duree": 5, "cout_pv": 20}}
+ "effets": {"buffs": {"F": 14, "Int": 14, "R": 8}, "regen_pv": 2, "regen_pm": 2, "duree": 5, "cout_pv": 15}}
 ```
 *Source : « Invocateur » (niv. 5), « 2 invocations simultanées » — le compte d'invocations n'existe pas ; rendu par la possession du lanceur, seule forme que le moteur sache porter. Même re-clamp de PV à l'expiration que l'Esprit Antique du chaman.*
 
@@ -1809,7 +1811,7 @@ Enchanteur.*
  "description": "Un filtre préparé la veille, bu sans cérémonie. Il sait ce qu'il y a dedans, c'est déjà rassurant.",
  "vocation": "lettre", "niveau": 3, "mode": "active", "cout_pm": 15,
  "cible": "soi", "portee": 1,
- "effets": {"pv": 18, "regen_pv": 2, "duree": 4}}
+ "effets": {"pv": 16, "regen_pv": 2, "duree": 3}}
 ```
 *Source : « Alchimiste » (niv. 3), « double le bonus d'Ag pour la compétence Potions ».*
 
@@ -1852,7 +1854,7 @@ Enchanteur.*
  "vocation": "lettre", "niveau": 10, "mode": "active", "cout_pm": 40,
  "cible": "soi", "portee": 1,
  "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1},
- "effets": {"pm": 18, "buffs": {"Int": 13, "Vol": 9}, "regen_pm": 3, "duree": 5}}
+ "effets": {"pm": 8, "buffs": {"Int": 12, "Vol": 6}, "regen_pm": 1, "duree": 5}}
 ```
 *Source : « Enchanteur » (niv. 5), « triple le bonus d'Ag pour les Objets magiques ».*
 
@@ -1929,6 +1931,114 @@ du tir précis, le **voleur** celle de l'esquive et du vol — leur donner une n
 qui les distingue. Elles conservent en échange les plus gros coups unitaires du document.
 Les pièges du forestier et du voleur couvrent bien des carrés (r1, r2) — mais ce sont des
 objets posés à l'avance, pas des capacités qui frappent : la règle tient.
+
+---
+
+## Ce que la révision 7 a changé
+
+**Rééquilibrage des signatures — 28 entrées changent** ; `_id`, noms, icônes, descriptions,
+animations, cibles et paliers ne bougent pas. Mesure : chaque active comparée à l'**archétype
+du générateur** de même forme et de même niveau (`dev/gen_competences_1_10.py`, échelle
+`ECHELLE` : `soin`, `soin_zone`, `cri`, `posture`, `buff_soi`, `entrave`, `drain`,
+`zone_cercle`…), en valeur par PM. Une incantation de 3 PA ou plus vaut +30 % (le `rituel`
+du générateur paie ce prix en PM). Cible : **~1,15 ×** — la marge que le générateur laissait
+déjà à ses signatures (« ~15 % sous l'active signature »). Médiane avant ×2,0 (jusqu'à ×4,7) ;
+après ×1,15, de ×0,62 à ×1,32.
+
+**Pourquoi** : au palier 10, la meilleure signature (Oracle) valait **six fois** la plus
+faible (Trait du chasseur de monstres) à coût égal, et les actives générées du même palier
+la moitié des signatures. Les écarts venaient de quatre formes : zones bénéfiques de rayon 2
+(13 ou 24 cases au lieu de 5 ou 8), buffs/soins de capstone sans décote, malus empilés sur un
+drain ou une frappe de zone, et `V −2` en zone (V fait le nombre d'actions).
+
+**Où vivent les valeurs** : ces 28 docs (41 avec les passives, ci-dessous) sont émis par `dev/gen_competences_1_10.py`, en
+entrées libres `L(..., remplace=<slug>)` de `dev/competences_1_10/<vocation>.py` — c'est là
+qu'on les retouche. Les blocs ci-dessus les reflètent. Le même lot recalibre trois actives
+de niveau 1, hors de ce document : `baume_de_campagne` (8 PM au lieu de 6),
+`cri_de_ralliement` (carré de rayon 1 au lieu de 2, `F +7 / Vol +3`, 10 PM) et
+`refrain_de_ralliement` (`Vol +8 / Cha +4`, régén 1, 10 PM).
+
+| entrée | révision 6 | révision 7 |
+|---|---|---|
+| `formule_de_l_alchimiste` (lettré 3) | 15 PM · pv 18 · regen_pv 2 · 4 tours | 15 PM · pv 16 · regen_pv 2 · 3 tours |
+| `main_du_guerisseur` (prêtre 3) | 15 PM · pv 18 · regen_pv 3 · 4 tours | 15 PM · pv 16 · regen_pv 2 · 3 tours |
+| `arme_de_justice` (templier 3) ↑ | 8 PM + 3/round · F +12 | 8 PM + 3/round · F +15 Vol +7 |
+| `annonce_de_sang` (barbare 6) | F +20 Ag +6 · regen_pv 3 | F +18 Ag +6 · regen_pv 1 |
+| `homme_bete` (chaman 6) | F +18 R +12 Ag +8 Int −10 · regen_pv 3 | F +12 R +8 Ag +6 Int −6 · regen_pv 1 |
+| `seve_vive` (druide 6) | croix · pv 22 · R +9 · regen_pv 3 · 5 tours | croix · pv 14 · R +3 · regen_pv 1 · 3 tours |
+| `garde_de_fer` (guerrier 6) | + 4/round · R +11 · esquive 5 | + 5/round · R +8 · esquive 3 |
+| `mirage_paralysant` (illusionniste 6) | Ag −18 V −2 | Ag −12 V −1 |
+| `lame_enchantee` (mage 6) | F +20 Ag +8 | F +16 Ag +8 |
+| `hymne_de_l_etoile` (ménestrel 6) | carré r2 · pv 10 · Vol +9 Cha +5 · regen 2 · 5 tours | carré r1 · pv 4 · Vol +8 Cha +4 · regen 1 · 4 tours |
+| `drain_vital` (nécromancien 6) | 3D8+8 · F −12 R −8 · drain 50 % | 3D8+6 · F −5 · drain 35 % |
+| `serment_du_martyr` (paladin 6) | croix · pv 22 · R +9 · regen 3 · lien 50 % | un protégé · pv 18 · R +6 · lien 50 % |
+| `benediction_du_prophete` (prêtre 6) | pv 20 · R +18 Vol +10 · regen 3 · 5 tours | pv 18 · R +6 Vol +3 · regen 1 · 4 tours |
+| `fuite_de_maraudeur` (voleur 6) | Ag +8 · esquive 18 · saut 4 | Ag +7 · esquive 12 · saut 3 |
+| `spasme_de_furie` (barbare 10) | 3D10+12 | 3D10+9 |
+| `esprit_antique` (chaman 10) | pv 30 · F +25 R +20 Ag +10 V +1 · regen 5 | F +16 R +10 Ag +6 V +1 · regen 2 |
+| `invocation_majeure` (démoniste 10) | pv 25 · F +20 Int +20 R +15 · regen 4/3 · coût 20 PV | F +14 Int +14 R +8 · regen 2/2 · coût 15 PV |
+| `homme_tempete` (druide 10) | 3D10+10 · V −2 · 3 tours | 3D10+6 · V −1 · 2 tours |
+| `courroux_des_elements` (élémentaliste 10) | 3D12+12 · R −15 | 3D10+8 · R −8 |
+| `theatre_des_ombres` (illusionniste 10) | 2D8 · F −12 Ag −12 Int −9 · 4 tours | 2D6 · F −7 Ag −7 Int −4 · 3 tours |
+| `oeuvre_de_l_enchanteur` (lettré 10) | pm 18 · Int +13 Vol +9 · regen_pm 3 | pm 8 · Int +12 Vol +6 · regen_pm 1 |
+| `rupture_arcanique` (mage 10) | 3D10+12 · regen_pm −4 · Vol −12 | 3D10+6 · regen_pm −2 · Vol −4 |
+| `chant_du_prodige` (ménestrel 10) | F −12 Ag −12 Vol −9 · 4 tours | F −9 Ag −9 Vol −5 · 3 tours |
+| `souffle_du_sensei` (moine 10) | pv 34 · pm 15 · Vol +15 · regen 4 · 5 tours | pv 20 · pm 6 · Vol +5 · 4 tours |
+| `etreinte_du_tombeau` (nécromancien 10) | 3D10+11 · R −12 V −2 · 4 tours · drain 40 / 25 | 3D10+8 · R −4 V −1 · 3 tours · drain 25 / 12 |
+| `lumiere_du_purificateur` (paladin 10) | Vol −12 | Vol −6 |
+| `oracle` (prêtre 10) | cercle r2 · pv 27 · pm 15 · Ch +12 Vol +9 · regen 3/2 · 5 tours | croix · pv 22 · pm 5 · Ch +5 Vol +3 · 3 tours |
+| `tueur_de_demon` (répurgateur 10) | 4D10+13 · Vol −20 | 4D10+6 · Vol −6 |
+
+**Laissées telles quelles** : les frappes martiales mono-cible (déjà ×1,1–1,2 — c'était la
+référence du générateur), `double_illusoire` (sous sa posture de référence) et `souffle_partage`
+(identique à l'archétype `pm_allie`). `serment_du_martyr` mesure ×0,62 parce que la mesure
+ne chiffre pas le lien de vie maintenu : c'est lui, la signature. Les **passives** n'ont pas
+été rééquilibrées dans ce premier temps — elles le sont ci-dessous.
+
+### Les passives
+
+**Mesure** : le cumul des passives apprises du niveau 1 au niveau N, en points de
+caractéristique équivalents, comparé à la médiane du groupe (sans magie : 2 passives par
+niveau ; à magie : celles des paliers 3, 6, 10). Le **niveau 0 est exclu** : c'est un choix
+unique à la création (un sort OU une compétence), il ne se cumule pas. Taux tirés de
+l'échelle du générateur, où ces passives occupent la même place au même niveau :
+1 esquive ≈ 0,65 pt · 1 furtivité ≈ 0,38 pt · 1 PV/tour ≈ 3 pts · 1 PM/tour ≈ 2 pts ·
+1 V ≈ 5 pts · aura ×1,5 · une passive de piège = une passive du même niveau.
+⚠️ **La furtivité ne se cumule pas** (`competences.furtivite_passive` garde le MAX) : une
+échelle de furtivités ne vaut que sa meilleure marche. ⚠️ **Une passive à `condition` sort
+de l'agrégat** (`bonus_passifs`) : un bonus de caractéristique posé sur elle serait mort.
+
+**Constat** : les passives GÉNÉRÉES étaient déjà identiques d'une vocation à l'autre ; tout
+l'écart venait des signatures. Au niveau 10, assassin −21 % et forestier −18 % (capstones de
+pure furtivité), illusionniste −18 % ; prêtre +22 %, mage, moine et démoniste +11 à +14 %.
+
+| entrée | révision 6 | révision 7 |
+|---|---|---|
+| `conquerant` (barbare 3) | R +6 · régén 1 | R +5 · régén 1 |
+| `protecteur` (guerrier 6, aura) | R +8 | R +9 |
+| `maitre_des_ombres` (assassin 6) | Ag +8 · esquive 5 | Ag +10 · esquive 7 |
+| `ombre_incarnee` (assassin 10) | furtivité 20 | furtivité 20 · Ag +12 · esquive 10 |
+| `seigneur_des_bois` (forestier 10, générée) | Ag +5 | Ag +12 · Ch +6 · R +5 |
+| `vagabond` (moine 6) | Ag +8 Vol +4 V +1 | Ag +5 Vol +4 V +1 |
+| `ascete` (moine 10) | Vol +10 · régén 3/3 | Vol +7 · régén 3/3 |
+| `clerc` (prêtre 3) | Int +8 | Int +4 (le prêtre a déjà son Aura sainte au palier 3) |
+| `thaumaturge` (prêtre 10) | Vol +8 Int +4 · régén 5 | Vol +6 Int +4 · régén 4 |
+| `fils_de_la_nature` (druide 10, aura) | R +6 · régén 2 | R +8 · régén 2 |
+| `gardien_des_esprits` (chaman 10, aura) | Vol +8 Int +4 | Vol +10 Int +5 |
+| `coeur_de_nexus` (mage 10) | Vol +12 Int +6 · régén PM 5 | Vol +8 Int +4 · régén PM 5 |
+| `presence_effacee` (illusionniste 10) | furtivité 18 · esquive 10 | + Int +8 |
+| `ame_gagee` (démoniste 10) | Int +12 Vol +6 · régén PM 6 · −1 PV | Int +9 Vol +4 · régén PM 6 · −1 PV |
+
+Le forestier garde un *Éclaireur* de pure furtivité de terrain (la condition lui interdit
+tout bonus de caractéristique) : son complément de palier passe sur *Seigneur des bois*.
+
+**Après** — cumul 1 → 10 : sans magie 98 à 102 (médiane 101), à magie 43 à 44,5 (médiane
+44) ; au niveau 6 : 47,8 à 49,9 et 22 à 23. Reste un écart au niveau 8 pour l'assassin
+(−2 %) et le barbare (+6 %), sans retouche.
+
+⚠️ La mesure est une estimation (valeur des dés, d'un point de buff par tour, d'une case de
+zone) : l'esquive d'une posture, V, le lien de vie, l'échange et la provocation y sont mal
+pesés. Le simulateur (`/admin/simulateur`) reste le contrôle à faire sur les capstones.
 
 ---
 

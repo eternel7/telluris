@@ -64,4 +64,8 @@ ENTREES = [
 	  {"cible": "ennemi", "jet": "magique", "portee": 5, "cout_pm": 40, "effets": {"buffs": {"Vol": "-10-{Int/7}", "Int": -10, "V": -1}, "duree": 3}},
 	  remplace="fleau_des_demons"),
 	A(10, "Pacte rompu", "💔", "siphon", "demon_buff", "Il rompt le pacte qui nourrit le maudit."),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Tueur de démon", "😈", "impact_eclat_dore/cone_tueur_demon", "Son bras terrorise les démons les plus maléfiques et défait les anges les plus purs. Il ne fait pas la différence.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 40, "zone": {"forme": "cone", "origine": "lanceur", "orientation": "cible", "longueur": 2, "decalage": 1, "angle": 90}, "effets": {"degats": "4D10+6", "buffs": {"Vol": -6}, "duree": 3}},
+	  remplace="tueur_de_demon"),
 ]

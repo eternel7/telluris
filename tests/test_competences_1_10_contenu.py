@@ -60,9 +60,16 @@ def test_chaque_vocation_a_le_meme_nombre_par_niveau(gen, construit):
 
 
 def test_les_vocations_a_magie_n_ont_que_des_actives_neuves(construit):
+	"""Une passive du lot chez une vocation à magie ne peut être qu'un REMPLACEMENT d'une
+	passive déjà en base (même `_id`, niveau et mode) : une place réécrite, jamais ajoutée."""
 	magiques = {v for v, c in construit["compte"].items() if c["magique"]}
 	assert magiques, "rules:vocations ne déclare aucune vocation à magie"
-	assert all(d["mode"] == "active" for d in construit["lot"] if d["vocation"] in magiques)
+	base = construit["ref"]["competences"]
+	for d in construit["lot"]:
+		if d["vocation"] in magiques and d["mode"] == "passive":
+			ancien = base.get(d["_id"])
+			assert ancien is not None and ancien.get("mode") == "passive" \
+				and ancien.get("niveau") == d["niveau"], d["_id"]
 
 
 def test_chaque_active_a_une_animation_sonore(gen, construit):

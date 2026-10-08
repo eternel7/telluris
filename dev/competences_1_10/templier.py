@@ -17,6 +17,10 @@ ENTREES = [
 	# ── Niveau 3 ──
 	A(3, "Ligne de l'ordre", "🧱", "zone_rect", "lame", "Une taille horizontale qui frappe le premier rang adverse."),
 	A(3, "Annulation", "🚫", "siphon", "arcane", "Une formule de l'ordre qui dissipe la magie adverse.", **MAG),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(3, "Arme de justice", "⚔️", "aura_sacree", "Il n'enchante pas sa lame : il lui rappelle pourquoi elle a été forgée.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 8, "maintien": 3, "effets": {"buffs": {"F": 15, "Vol": 7}}},
+	  remplace="arme_de_justice"),
 	# ── Niveau 4 ──
 	A(4, "Lame enflammée", "🔥", "frappe", "feu", "Une formule de bataille, et l'épée s'embrase."),
 	A(4, "Sceau de garde", "🔰", "posture", "bouclier", "Un sceau runique qui renforce la garde tant qu'il le tient.", stats=("R", "Vol")),

@@ -1,600 +1,639 @@
 [
 	{
-		"_id": "competence:foudre_des_ancetres",
+		"_id": "competence:maitre_des_ombres",
 		"type": "competence",
-		"nom": "Esprit du faucon",
-		"icon": "🦅",
-		"animation": "animation:capa_totem",
-		"description": "L'esprit du faucon se pose sur l'épaule d'un compagnon et guide son regard.",
-		"vocation": "chaman",
-		"niveau": 4,
-		"mode": "active",
-		"cout_pm": 18,
-		"cible": "allie",
-		"portee": 4,
+		"nom": "Maître des ombres",
+		"icon": "🌑",
+		"description": "Souplesse et grâce poussées au point où le regard glisse sur lui sans accrocher.",
+		"vocation": "assassin",
+		"niveau": 6,
+		"mode": "passive",
 		"effets": {
 			"buffs": {
-				"Ag": "6+{Cha/7}",
-				"Ch": 6
+				"Ag": 10
 			},
-			"duree": 3
+			"esquive": 7
 		}
 	},
 	{
-		"_id": "competence:hurlement_de_la_meute",
+		"_id": "competence:ombre_incarnee",
 		"type": "competence",
-		"nom": "Hurlement d'effroi",
-		"icon": "🐺",
-		"animation": "animation:capa_appel_sauvage",
-		"description": "Un hurlement qui glace le sang de tout un groupe d'ennemis.",
-		"vocation": "chaman",
-		"niveau": 4,
-		"mode": "active",
-		"cout_pm": 18,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
-		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
-			"rayon": 1
-		},
+		"nom": "Ombre incarnée",
+		"icon": "👤",
+		"description": "Il n'entre pas dans un combat : il y est déjà, et personne ne sait où.",
+		"vocation": "assassin",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"furtivite": 20,
+			"buffs": {
+				"Ag": 12
+			},
+			"esquive": 10
+		}
+	},
+	{
+		"_id": "competence:conquerant",
+		"type": "competence",
+		"nom": "Conquérant",
+		"icon": "🏔️",
+		"description": "Il a dormi dans la neige et bu l'eau des flaques. Son corps a pris l'habitude de se refaire tout seul.",
+		"vocation": "barbare",
+		"niveau": 3,
+		"mode": "passive",
 		"effets": {
 			"buffs": {
-				"Vol": "-4-{Vol/10}",
-				"F": -4
+				"R": 5
 			},
-			"duree": 3
+			"regen_pv": 1
 		}
 	},
 	{
-		"_id": "competence:orage_ancestral",
+		"_id": "competence:annonce_de_sang",
 		"type": "competence",
-		"nom": "Pluie des ancêtres",
-		"icon": "🌧️",
-		"animation": "animation:capa_soin_nature",
-		"description": "Une pluie tiède tombe sur ses compagnons et referme lentement leurs plaies.",
-		"vocation": "chaman",
-		"niveau": 8,
+		"nom": "Annonce de sang",
+		"icon": "🔥",
+		"animation": "animation:capa_rage",
+		"description": "La fureur guerrière montée d'un cran. Ceux qui l'ont vue une fois changent de chemin la fois suivante.",
+		"vocation": "barbare",
+		"niveau": 6,
 		"mode": "active",
-		"cout_pm": 33,
-		"cible": "allie",
-		"portee": 4,
-		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
-			"rayon": 1
-		},
+		"cout_pm": 12,
+		"maintien": 4,
+		"sensibilite_charge": 0,
+		"cible": "soi",
+		"portee": 1,
 		"effets": {
-			"regen_pv": "2+{Cha/30}",
-			"duree": 4
+			"buffs": {
+				"F": 18,
+				"Ag": 6
+			},
+			"regen_pv": 1
 		}
 	},
 	{
-		"_id": "competence:colere_des_ancetres",
+		"_id": "competence:spasme_de_furie",
 		"type": "competence",
-		"nom": "Marche des ancêtres",
-		"icon": "🥁",
-		"animation": "animation:capa_totem",
-		"description": "Les ancêtres marchent avec la troupe : chacun frappe et tient comme dix.",
-		"vocation": "chaman",
+		"nom": "Spasme de furie",
+		"icon": "🪓",
+		"animation": "animation:capa_coup_lourd",
+		"description": "Il ne frappe plus une cible : il frappe, et quelque chose se trouve devant.",
+		"vocation": "barbare",
 		"niveau": 10,
 		"mode": "active",
 		"cout_pm": 40,
-		"cible": "soi",
+		"sensibilite_charge": 0,
+		"cible": "ennemi",
+		"jet": "cc",
 		"portee": 1,
 		"zone": {
 			"forme": "carre",
 			"origine": "lanceur",
-			"rayon": 2
-		},
-		"effets": {
-			"buffs": {
-				"F": "7+{Cha/10}",
-				"R": 7
-			},
-			"duree": 5
-		}
-	},
-	{
-		"_id": "competence:pluie_de_soufre",
-		"type": "competence",
-		"nom": "Brume sulfureuse",
-		"icon": "🌫️",
-		"animation": "animation:capa_soufre",
-		"description": "Une brume jaune qui amollit les chairs de ceux qu'elle enveloppe.",
-		"vocation": "demoniste",
-		"niveau": 3,
-		"mode": "active",
-		"cout_pm": 15,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
-		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
 			"rayon": 1
 		},
 		"effets": {
-			"buffs": {
-				"R": "-3-{Vol/10}",
-				"Vol": -3
-			},
-			"duree": 3
+			"degats": "3D10+9"
 		}
 	},
 	{
-		"_id": "competence:lance_de_l_enfer",
+		"_id": "competence:homme_bete",
 		"type": "competence",
-		"nom": "Transfusion impie",
-		"icon": "🩸",
-		"animation": "animation:capa_drain",
-		"description": "Il verse son propre sang dans les plaies d'un compagnon.",
-		"vocation": "demoniste",
-		"niveau": 4,
-		"mode": "active",
-		"cout_pm": 18,
-		"cible": "allie",
-		"portee": 4,
-		"effets": {
-			"pv": "14+{Vol/3}",
-			"cout_pv": 7
-		}
-	},
-	{
-		"_id": "competence:explosion_infernale",
-		"type": "competence",
-		"nom": "Cercle de terreur",
-		"icon": "😱",
-		"animation": "animation:capa_portail_infernal",
-		"description": "Un cercle de flammes noires où l'on ne voit plus que ses propres cauchemars.",
-		"vocation": "demoniste",
-		"niveau": 5,
-		"mode": "active",
-		"cout_pm": 21,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
-		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
-			"rayon": 1
-		},
-		"effets": {
-			"buffs": {
-				"Vol": "-4-{Vol/10}",
-				"Ag": -4
-			},
-			"duree": 4
-		}
-	},
-	{
-		"_id": "competence:griffe_du_familier",
-		"type": "competence",
-		"nom": "Ombre du familier",
-		"icon": "👹",
-		"animation": "animation:capa_demon_buff",
-		"description": "Son familier se glisse dans l'ombre d'un compagnon et détourne les coups qui le visent.",
-		"vocation": "demoniste",
+		"nom": "Homme bête",
+		"icon": "🐺",
+		"animation": "animation:capa_totem",
+		"description": "L'esprit n'est plus un compagnon qu'il invoque : il vit à l'intérieur, et sort quand on l'y oblige.",
+		"vocation": "chaman",
 		"niveau": 6,
 		"mode": "active",
 		"cout_pm": 25,
-		"cible": "allie",
-		"portee": 4,
-		"effets": {
-			"buffs": {
-				"Ag": "4+{Vol/12}"
-			},
-			"esquive": "5+{Vol/8}",
-			"duree": 4
-		}
-	},
-	{
-		"_id": "competence:feu_de_l_ame",
-		"type": "competence",
-		"nom": "Marque de damnation",
-		"icon": "⛧",
-		"animation": "animation:capa_marque",
-		"description": "Une marque qui ronge la résistance de la cible : chaque coup la trouve plus tendre.",
-		"vocation": "demoniste",
-		"niveau": 7,
-		"mode": "active",
-		"cout_pm": 29,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
-		"effets": {
-			"buffs": {
-				"R": "-8-{Vol/7}",
-				"Vol": -8
-			},
-			"duree": 4
-		}
-	},
-	{
-		"_id": "competence:pacte_de_sang_majeur",
-		"type": "competence",
-		"nom": "Pacte de sang partagé",
-		"icon": "🩸",
-		"animation": "animation:capa_demon_buff",
-		"description": "Il paie de sa vie la fureur de tous ceux qui l'entourent.",
-		"vocation": "demoniste",
-		"niveau": 8,
-		"mode": "active",
-		"cout_pm": 33,
 		"cible": "soi",
 		"portee": 1,
-		"zone": {
-			"forme": "carre",
-			"origine": "lanceur",
-			"rayon": 1
-		},
 		"effets": {
 			"buffs": {
-				"Int": "7+{Vol/8}",
-				"F": 7
+				"F": 12,
+				"R": 8,
+				"Ag": 6,
+				"Int": -6
 			},
-			"cout_pv": 12,
-			"duree": 4
-		}
-	},
-	{
-		"_id": "competence:apocalypse",
-		"type": "competence",
-		"nom": "Ténèbres de l'abîme",
-		"icon": "🕳️",
-		"animation": "animation:capa_portail_infernal",
-		"description": "L'abîme s'ouvre sous les ennemis : la terreur les cloue sur place.",
-		"vocation": "demoniste",
-		"niveau": 10,
-		"mode": "active",
-		"cout_pm": 40,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
-		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
-			"rayon": 2
-		},
-		"effets": {
-			"buffs": {
-				"Vol": "-5-{Vol/12}",
-				"Ag": -5,
-				"V": -1
-			},
-			"duree": 3
-		}
-	},
-	{
-		"_id": "competence:champ_de_ronces",
-		"type": "competence",
-		"nom": "Ronces entravantes",
-		"icon": "🌿",
-		"animation": "animation:capa_nature_buff",
-		"description": "Les ronces jaillissent et s'enroulent autour des chevilles ennemies.",
-		"vocation": "druide",
-		"niveau": 3,
-		"mode": "active",
-		"cout_pm": 15,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
-		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
-			"rayon": 1
-		},
-		"effets": {
-			"buffs": {
-				"Ag": "-3-{Int/10}",
-				"F": -3
-			},
-			"duree": 3
-		}
-	},
-	{
-		"_id": "competence:fouet_de_liane",
-		"type": "competence",
-		"nom": "Liane de traction",
-		"icon": "🪢",
-		"animation": "animation:capa_nature_buff",
-		"description": "Une liane happe un compagnon et le dépose plus loin, hors de la mêlée.",
-		"vocation": "druide",
-		"niveau": 5,
-		"mode": "active",
-		"cout_pm": 21,
-		"cible": "allie",
-		"portee": 4,
-		"effets": {
+			"regen_pv": 1,
+			"duree": 5,
 			"saut": 3
 		}
 	},
 	{
-		"_id": "competence:spores_etouffantes",
+		"_id": "competence:esprit_antique",
 		"type": "competence",
-		"nom": "Spores soporifiques",
-		"icon": "🍄",
-		"animation": "animation:capa_poison",
-		"description": "Un nuage de spores qui alourdit les paupières de tous ceux qui le respirent.",
-		"vocation": "druide",
-		"niveau": 5,
+		"nom": "Esprit Antique",
+		"icon": "🦣",
+		"animation": "animation:capa_totem",
+		"description": "Le mammouth, le tigre à dents de sabre, le grand saurien. Un seul, une seule fois, et il faut ensuite s'en remettre.",
+		"vocation": "chaman",
+		"niveau": 10,
 		"mode": "active",
-		"cout_pm": 21,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
-		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
-			"rayon": 1
-		},
+		"cout_pm": 40,
+		"cible": "soi",
+		"portee": 1,
 		"effets": {
 			"buffs": {
-				"Ag": "-3-{Int/12}",
-				"F": -3,
-				"V": -1
+				"F": 16,
+				"R": 10,
+				"Ag": 6,
+				"V": 1
 			},
-			"duree": 2
+			"regen_pv": 2,
+			"duree": 5
 		}
 	},
 	{
-		"_id": "competence:colere_de_la_foret",
+		"_id": "competence:gardien_des_esprits",
 		"type": "competence",
-		"nom": "Mur de racines",
-		"icon": "🌳",
-		"animation": "animation:capa_roc",
-		"description": "Une haie de racines surgit devant lui et retient tout ce qui la traverse.",
+		"nom": "Gardien des esprits",
+		"icon": "👻",
+		"description": "Il en contrôle plus qu'aucun autre chaman n'en a jamais tenu, et la plupart du temps sans y penser.",
+		"vocation": "chaman",
+		"niveau": 10,
+		"mode": "passive",
+		"zone": {
+			"forme": "cercle",
+			"origine": "lanceur",
+			"rayon": 2
+		},
+		"effets": {
+			"buffs": {
+				"Vol": 10,
+				"Int": 5
+			}
+		}
+	},
+	{
+		"_id": "competence:invocation_majeure",
+		"type": "competence",
+		"nom": "Invocation majeure",
+		"icon": "🔯",
+		"animation": "animation:capa_portail_infernal",
+		"description": "Il n'appelle plus une créature : il lui prête sa peau pour la durée du contrat.",
+		"vocation": "demoniste",
+		"niveau": 10,
+		"mode": "active",
+		"cout_pm": 40,
+		"cible": "soi",
+		"portee": 1,
+		"effets": {
+			"buffs": {
+				"F": 14,
+				"Int": 14,
+				"R": 8
+			},
+			"regen_pv": 2,
+			"regen_pm": 2,
+			"duree": 5,
+			"cout_pv": 15
+		}
+	},
+	{
+		"_id": "competence:ame_gagee",
+		"type": "competence",
+		"nom": "Âme gagée",
+		"icon": "😈",
+		"description": "Elle ne lui appartient plus depuis longtemps. Le loyer qu'on lui verse est confortable ; celui qu'il paie se prélève goutte à goutte.",
+		"vocation": "demoniste",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Int": 9,
+				"Vol": 4
+			},
+			"regen_pm": 6,
+			"regen_pv": -1
+		}
+	},
+	{
+		"_id": "competence:seve_vive",
+		"type": "competence",
+		"nom": "Sève vive",
+		"icon": "🌿",
+		"animation": "animation:capa_soin_nature",
+		"description": "Il pose la main et la chair se referme comme l'écorce d'un arbre qu'on a entaillé au printemps.",
 		"vocation": "druide",
 		"niveau": 6,
 		"mode": "active",
 		"cout_pm": 25,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
-		"zone": {
-			"forme": "rectangle",
-			"origine": "lanceur",
-			"orientation": "cible",
-			"decalage": 1,
-			"longueur": 3,
-			"largeur": 1
-		},
-		"effets": {
-			"buffs": {
-				"Ag": "-5-{Int/8}",
-				"F": -5
-			},
-			"duree": 4
-		}
-	},
-	{
-		"_id": "competence:pieu_de_bois_vivant",
-		"type": "competence",
-		"nom": "Greffe vivante",
-		"icon": "🌱",
-		"animation": "animation:capa_soin_nature",
-		"description": "Il greffe une écorce vivante sur les plaies d'un compagnon.",
-		"vocation": "druide",
-		"niveau": 7,
-		"mode": "active",
-		"cout_pm": 29,
 		"cible": "allie",
-		"portee": 4,
-		"effets": {
-			"buffs": {
-				"R": "5+{Vol/10}"
-			},
-			"regen_pv": "2+{Vol/25}",
-			"duree": 4
-		}
-	},
-	{
-		"_id": "competence:rituel_du_cycle",
-		"type": "competence",
-		"nom": "Rituel du renouveau",
-		"icon": "♻️",
-		"animation": "animation:capa_soin_nature",
-		"description": "Un long chant qui rend à ses compagnons ce que le combat leur a pris.",
-		"vocation": "druide",
-		"niveau": 9,
-		"mode": "active",
-		"cout_pm": 48,
-		"incantation": 2,
-		"cible": "allie",
-		"portee": 4,
+		"portee": 3,
 		"zone": {
 			"forme": "cercle",
 			"origine": "cible",
 			"rayon": 1
 		},
 		"effets": {
-			"pv": "17+{Vol/4}"
+			"pv": 14,
+			"buffs": {
+				"R": 3
+			},
+			"regen_pv": 1,
+			"duree": 3
 		}
 	},
 	{
-		"_id": "competence:marais",
+		"_id": "competence:homme_tempete",
 		"type": "competence",
-		"nom": "Enlisement",
-		"icon": "🫠",
-		"animation": "animation:capa_eau",
-		"description": "Le sol se change en marais sous les ennemis, qui s'y enfoncent jusqu'aux genoux.",
+		"nom": "Homme-tempête",
+		"icon": "⛈️",
+		"animation": "animation:capa_foudre",
+		"description": "Il s'est voué à la maîtrise des éléments du ciel, et le ciel a fini par répondre.",
 		"vocation": "druide",
-		"niveau": 9,
+		"niveau": 10,
 		"mode": "active",
-		"cout_pm": 37,
+		"cout_pm": 40,
 		"cible": "ennemi",
 		"jet": "magique",
-		"portee": 6,
+		"portee": 10,
 		"zone": {
 			"forme": "cercle",
 			"origine": "cible",
 			"rayon": 2
 		},
 		"effets": {
+			"degats": "3D10+6",
 			"buffs": {
-				"Ag": "-5-{Int/12}",
-				"F": -5,
 				"V": -1
+			},
+			"duree": 2
+		}
+	},
+	{
+		"_id": "competence:fils_de_la_nature",
+		"type": "competence",
+		"nom": "Fils de la nature",
+		"icon": "🌳",
+		"description": "Un état de symbiose que la nature lui rend bien, et dont il ne parle jamais.",
+		"vocation": "druide",
+		"niveau": 10,
+		"mode": "passive",
+		"zone": {
+			"forme": "cercle",
+			"origine": "lanceur",
+			"rayon": 2
+		},
+		"effets": {
+			"buffs": {
+				"R": 8
+			},
+			"regen_pv": 2
+		}
+	},
+	{
+		"_id": "competence:courroux_des_elements",
+		"type": "competence",
+		"nom": "Courroux des éléments",
+		"icon": "🌋",
+		"animation": "animation:capa_meteore",
+		"description": "Il n'appelle plus le feu : il le laisse arriver, et s'écarte de son chemin.",
+		"vocation": "elementaliste",
+		"niveau": 10,
+		"mode": "active",
+		"cout_pm": 40,
+		"incantation": 4,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 12,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		},
+		"effets": {
+			"degats": "3D10+8",
+			"buffs": {
+				"R": -8
 			},
 			"duree": 3
 		}
 	},
 	{
-		"_id": "competence:fureur_elementaire",
+		"_id": "competence:baume_de_campagne",
 		"type": "competence",
-		"nom": "Égide élémentaire",
-		"icon": "🔰",
-		"animation": "animation:capa_bouclier",
-		"description": "Feu, glace, foudre et roc tournent autour de ses compagnons et les protègent.",
-		"vocation": "elementaliste",
-		"niveau": 10,
+		"nom": "Baume de campagne",
+		"icon": "🌿",
+		"animation": "animation:capa_soin_nature",
+		"description": "Deux feuilles mâchées, un linge serré, et on repart. Le forestier ne guérit pas : il rafistole assez pour tenir jusqu'au camp.",
+		"vocation": "forestier",
+		"niveau": 1,
 		"mode": "active",
-		"cout_pm": 40,
+		"cout_pm": 8,
+		"sensibilite_charge": 0,
 		"cible": "allie",
-		"portee": 4,
+		"portee": 2,
+		"effets": {
+			"pv": 8,
+			"regen_pv": 2,
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:seigneur_des_bois",
+		"type": "competence",
+		"nom": "Seigneur des bois",
+		"icon": "🦌",
+		"description": "La forêt le reconnaît comme l'un des siens.",
+		"vocation": "forestier",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Ag": 12,
+				"Ch": 6,
+				"R": 5
+			}
+		}
+	},
+	{
+		"_id": "competence:cri_de_ralliement",
+		"type": "competence",
+		"nom": "Cri de ralliement",
+		"icon": "📣",
+		"animation": "animation:capa_aura_bataille",
+		"description": "Un ordre lancé à pleine gorge. Ceux qui l'entendent resserrent les rangs et cessent de reculer.",
+		"vocation": "guerrier",
+		"niveau": 1,
+		"mode": "active",
+		"cout_pm": 10,
+		"sensibilite_charge": 0,
+		"cible": "soi",
+		"portee": 1,
 		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
+			"forme": "carre",
+			"origine": "lanceur",
 			"rayon": 1
 		},
 		"effets": {
 			"buffs": {
-				"R": "7+{Vol/10}"
+				"F": 7,
+				"Vol": 3
 			},
-			"esquive": "4+{Vol/12}",
-			"duree": 5
+			"duree": 3
 		}
 	},
 	{
-		"_id": "competence:eventail_de_folie",
+		"_id": "competence:garde_de_fer",
 		"type": "competence",
-		"nom": "Éventail de confusion",
+		"nom": "Garde de fer",
+		"icon": "🛡️",
+		"animation": "animation:capa_garde",
+		"description": "Il ferme la garde et cesse d'avancer. Pendant quelques instants, il n'y a plus d'ouverture.",
+		"vocation": "guerrier",
+		"niveau": 6,
+		"mode": "active",
+		"cout_pm": 12,
+		"maintien": 5,
+		"sensibilite_charge": 0,
+		"cible": "soi",
+		"portee": 1,
+		"zone": {
+			"forme": "carre",
+			"origine": "lanceur",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"R": 8
+			},
+			"esquive": 3
+		}
+	},
+	{
+		"_id": "competence:protecteur",
+		"type": "competence",
+		"nom": "Protecteur",
+		"icon": "🩹",
+		"description": "Ses cicatrices se comptent par dizaines. Chacune est une leçon que son corps a retenue.",
+		"vocation": "guerrier",
+		"niveau": 6,
+		"mode": "passive",
+		"zone": {
+			"forme": "carre",
+			"origine": "lanceur",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"R": 9
+			}
+		}
+	},
+	{
+		"_id": "competence:mirage_paralysant",
+		"type": "competence",
+		"nom": "Mirage paralysant",
 		"icon": "🌀",
-		"animation": "animation:capa_impact_etincelles",
-		"animation_zone": "animation:capa_cone_folie",
-		"description": "Une vague d'images trompeuses : devant lui, plus personne ne sait où frapper.",
+		"animation": "animation:capa_illusion",
+		"description": "Il montre à la cible un sol qui n'existe pas. Elle cesse d'avancer, ce qui est déjà beaucoup.",
 		"vocation": "illusionniste",
 		"niveau": 6,
 		"mode": "active",
 		"cout_pm": 25,
 		"cible": "ennemi",
 		"jet": "magique",
-		"portee": 6,
-		"zone": {
-			"forme": "cone",
-			"origine": "lanceur",
-			"orientation": "cible",
-			"decalage": 1,
-			"longueur": 4,
-			"angle": 90
-		},
+		"portee": 8,
 		"effets": {
+			"degats": "1D8",
 			"buffs": {
-				"Int": "-5-{Cha/10}",
-				"Vol": -5
+				"Ag": -12,
+				"V": -1
 			},
 			"duree": 4
 		}
 	},
 	{
-		"_id": "competence:lame_de_cauchemar",
+		"_id": "competence:theatre_des_ombres",
 		"type": "competence",
-		"nom": "Reflets",
-		"icon": "🪞",
-		"animation": "animation:capa_double",
-		"description": "Trois reflets d'un compagnon dansent autour de lui ; l'ennemi frappe le mauvais.",
+		"nom": "Théâtre des ombres",
+		"icon": "🎭",
+		"animation": "animation:capa_illusion_zone",
+		"description": "Il donne à voir une scène entière. Quand elle se termine, la cible ne sait plus ce qu'elle faisait.",
 		"vocation": "illusionniste",
-		"niveau": 7,
+		"niveau": 10,
 		"mode": "active",
-		"cout_pm": 29,
-		"cible": "allie",
-		"portee": 4,
-		"effets": {
-			"buffs": {
-				"Ag": "4+{Cha/12}"
-			},
-			"esquive": "7+{Cha/8}",
-			"duree": 4
-		}
-	},
-	{
-		"_id": "competence:missile_guide",
-		"type": "competence",
-		"nom": "Entrave arcanique",
-		"icon": "🔗",
-		"animation": "animation:capa_arcane",
-		"description": "Des anneaux de force enserrent l'esprit de la cible : ses sorts lui coûtent davantage d'effort.",
-		"vocation": "mage",
-		"niveau": 3,
-		"mode": "active",
-		"cout_pm": 15,
+		"cout_pm": 40,
 		"cible": "ennemi",
 		"jet": "magique",
-		"portee": 6,
-		"effets": {
-			"buffs": {
-				"Int": "-5-{Int/8}",
-				"Vol": -5
-			},
-			"duree": 3
-		}
-	},
-	{
-		"_id": "competence:explosion_arcanique",
-		"type": "competence",
-		"nom": "Onde de gravité",
-		"icon": "🌑",
-		"animation": "animation:capa_arcane",
-		"description": "Le sol pèse soudain plus lourd sous les pieds des ennemis rassemblés.",
-		"vocation": "mage",
-		"niveau": 4,
-		"mode": "active",
-		"cout_pm": 18,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
+		"portee": 10,
 		"zone": {
 			"forme": "cercle",
 			"origine": "cible",
-			"rayon": 1
+			"rayon": 2
 		},
 		"effets": {
+			"degats": "2D6",
 			"buffs": {
-				"Ag": "-4-{Int/10}",
-				"F": -4
+				"F": -7,
+				"Ag": -7,
+				"Int": -4
 			},
 			"duree": 3
 		}
 	},
 	{
-		"_id": "competence:eclair_de_bataille",
+		"_id": "competence:presence_effacee",
 		"type": "competence",
-		"nom": "Accélération",
-		"icon": "⏩",
-		"animation": "animation:capa_enchantement",
-		"description": "Il trace une rune de vitesse sur un compagnon, dont les gestes se font plus vifs.",
-		"vocation": "mage",
-		"niveau": 5,
+		"nom": "Présence effacée",
+		"icon": "👻",
+		"description": "Il n'est pas caché : il est simplement difficile de soutenir l'idée qu'il soit là.",
+		"vocation": "illusionniste",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"furtivite": 18,
+			"esquive": 10,
+			"buffs": {
+				"Int": 8
+			}
+		}
+	},
+	{
+		"_id": "competence:formule_de_l_alchimiste",
+		"type": "competence",
+		"nom": "Formule de l'alchimiste",
+		"icon": "⚗️",
+		"animation": "animation:capa_alchimie",
+		"description": "Un filtre préparé la veille, bu sans cérémonie. Il sait ce qu'il y a dedans, c'est déjà rassurant.",
+		"vocation": "lettre",
+		"niveau": 3,
 		"mode": "active",
-		"cout_pm": 21,
+		"cout_pm": 15,
+		"cible": "soi",
+		"portee": 1,
+		"effets": {
+			"pv": 16,
+			"regen_pv": 2,
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:oeuvre_de_l_enchanteur",
+		"type": "competence",
+		"nom": "Œuvre de l'Enchanteur",
+		"icon": "💎",
+		"animation": "animation:capa_enchantement",
+		"description": "Il a créé les objets magiques les plus puissants de ce monde. Seuls les dieux peuvent prétendre mieux, et ils ne publient pas.",
+		"vocation": "lettre",
+		"niveau": 10,
+		"mode": "active",
+		"cout_pm": 40,
+		"cible": "soi",
+		"portee": 1,
+		"zone": {
+			"forme": "carre",
+			"origine": "lanceur",
+			"rayon": 1
+		},
+		"effets": {
+			"pm": 8,
+			"buffs": {
+				"Int": 12,
+				"Vol": 6
+			},
+			"regen_pm": 1,
+			"duree": 5
+		}
+	},
+	{
+		"_id": "competence:lame_enchantee",
+		"type": "competence",
+		"nom": "Lame enchantée",
+		"icon": "✨",
+		"animation": "animation:capa_aura_bataille",
+		"description": "La magie au service de la guerre, et pas l'inverse : il enchante sa propre arme et va s'en servir.",
+		"vocation": "mage",
+		"niveau": 6,
+		"mode": "active",
+		"cout_pm": 25,
+		"cible": "soi",
+		"portee": 1,
+		"effets": {
+			"buffs": {
+				"F": 16,
+				"Ag": 8
+			},
+			"duree": 5
+		}
+	},
+	{
+		"_id": "competence:rupture_arcanique",
+		"type": "competence",
+		"nom": "Rupture arcanique",
+		"icon": "💥",
+		"animation": "animation:capa_arcane",
+		"description": "Il ne lance pas un sort : il casse quelque chose, et laisse le monde recoller les morceaux.",
+		"vocation": "mage",
+		"niveau": 10,
+		"mode": "active",
+		"cout_pm": 40,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 10,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		},
+		"effets": {
+			"degats": "3D10+6",
+			"regen_pm": -2,
+			"buffs": {
+				"Vol": -4
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:coeur_de_nexus",
+		"type": "competence",
+		"nom": "Cœur de Nexus",
+		"icon": "💠",
+		"description": "La magie ne le traverse plus : elle s'y arrête un instant, puis repart plus nombreuse.",
+		"vocation": "mage",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Vol": 8,
+				"Int": 4
+			},
+			"regen_pm": 5
+		}
+	},
+	{
+		"_id": "competence:refrain_de_ralliement",
+		"type": "competence",
+		"nom": "Refrain de ralliement",
+		"icon": "🎵",
+		"animation": "animation:capa_chant",
+		"description": "Un couplet lancé par-dessus la mêlée, à l'adresse d'un seul. Celui qui l'entend redresse la garde et cesse de compter ses plaies.",
+		"vocation": "menestrel",
+		"niveau": 1,
+		"mode": "active",
+		"cout_pm": 10,
 		"cible": "allie",
 		"portee": 4,
 		"effets": {
 			"buffs": {
-				"Ag": "6+{Int/7}"
+				"Vol": 8,
+				"Cha": 4
 			},
-			"duree": 4
+			"regen_pv": 1,
+			"duree": 3
 		}
 	},
 	{
-		"_id": "competence:tourbillon_arcanique",
+		"_id": "competence:hymne_de_l_etoile",
 		"type": "competence",
-		"nom": "Dôme de déviation",
-		"icon": "🫧",
-		"animation": "animation:capa_bouclier",
-		"description": "Un dôme qui fait dévier les coups portés à ceux qui se tiennent près de lui.",
-		"vocation": "mage",
+		"nom": "Hymne de l'Étoile",
+		"icon": "🌟",
+		"animation": "animation:capa_chant",
+		"description": "Un air lancé par-dessus la mêlée. Celui qui l'entend redresse la garde et oublie de compter ses plaies.",
+		"vocation": "menestrel",
 		"niveau": 6,
 		"mode": "active",
 		"cout_pm": 25,
@@ -606,120 +645,27 @@
 			"rayon": 1
 		},
 		"effets": {
-			"esquive": "5+{Int/8}",
+			"pv": 4,
+			"buffs": {
+				"Vol": 8,
+				"Cha": 4
+			},
+			"regen_pv": 1,
 			"duree": 4
 		}
 	},
 	{
-		"_id": "competence:lance_arcanique",
+		"_id": "competence:chant_du_prodige",
 		"type": "competence",
-		"nom": "Translation arcanique",
-		"icon": "🔄",
-		"animation": "animation:capa_saut",
-		"description": "Il échange sa place avec celle d'un compagnon en difficulté.",
-		"vocation": "mage",
-		"niveau": 7,
-		"mode": "active",
-		"cout_pm": 29,
-		"cible": "allie",
-		"portee": 6,
-		"effets": {
-			"echange": 1
-		}
-	},
-	{
-		"_id": "competence:decharge",
-		"type": "competence",
-		"nom": "Onde de stupeur",
-		"icon": "😵",
-		"animation": "animation:capa_impact_etincelles",
-		"animation_zone": "animation:capa_cone_decharge",
-		"description": "Une décharge sans flamme qui fige les premiers rangs une poignée d'instants.",
-		"vocation": "mage",
-		"niveau": 7,
-		"mode": "active",
-		"cout_pm": 29,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
-		"zone": {
-			"forme": "cone",
-			"origine": "lanceur",
-			"orientation": "cible",
-			"decalage": 1,
-			"longueur": 3,
-			"angle": 90
-		},
-		"effets": {
-			"buffs": {
-				"Ag": "-5-{Int/10}",
-				"Int": -5,
-				"V": -1
-			},
-			"duree": 2
-		}
-	},
-	{
-		"_id": "competence:bombardement",
-		"type": "competence",
-		"nom": "Pesanteur",
-		"icon": "⚓",
-		"animation": "animation:capa_meteore",
-		"description": "Toute une zone s'alourdit : les ennemis s'y traînent comme dans la vase.",
-		"vocation": "mage",
-		"niveau": 8,
-		"mode": "active",
-		"cout_pm": 33,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
-		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
-			"rayon": 2
-		},
-		"effets": {
-			"buffs": {
-				"Ag": "-5-{Int/12}",
-				"F": -5,
-				"V": -1
-			},
-			"duree": 2
-		}
-	},
-	{
-		"_id": "competence:tempete_arcanique",
-		"type": "competence",
-		"nom": "Bulle temporelle",
-		"icon": "⏳",
-		"animation": "animation:capa_enchantement",
-		"description": "Il plie le temps autour d'un compagnon, qui agit plus vite que le monde.",
-		"vocation": "mage",
-		"niveau": 9,
-		"mode": "active",
-		"cout_pm": 48,
-		"incantation": 2,
-		"cible": "allie",
-		"portee": 4,
-		"effets": {
-			"buffs": {
-				"Ag": "5+{Int/10}",
-				"V": 1
-			},
-			"duree": 2
-		}
-	},
-	{
-		"_id": "competence:nova_arcanique",
-		"type": "competence",
-		"nom": "Silence de masse",
-		"icon": "🤐",
-		"animation": "animation:capa_arcane",
-		"description": "Une onde qui étouffe le mana de tous les ennemis alentour.",
-		"vocation": "mage",
+		"nom": "Chant du Prodige",
+		"icon": "🎼",
+		"animation": "animation:capa_illusion_zone",
+		"description": "La virtuosité poussée jusqu'à la torpeur : ceux qui l'écoutent glissent vers quelque chose qui ressemble à l'inconscience.",
+		"vocation": "menestrel",
 		"niveau": 10,
 		"mode": "active",
 		"cout_pm": 40,
+		"incantation": 3,
 		"cible": "ennemi",
 		"jet": "magique",
 		"portee": 6,
@@ -729,227 +675,84 @@
 			"rayon": 2
 		},
 		"effets": {
+			"degats": "1D8",
 			"buffs": {
-				"Int": "-6-{Int/10}",
-				"Vol": -6
+				"F": -9,
+				"Ag": -9,
+				"Vol": -5
 			},
-			"duree": 5
+			"duree": 3
 		}
 	},
 	{
-		"_id": "competence:paume_de_lumiere",
+		"_id": "competence:vagabond",
 		"type": "competence",
-		"nom": "Paume apaisante",
-		"icon": "🤲",
-		"animation": "animation:capa_soin_sacre",
-		"description": "Une paume posée sur un compagnon, et le souffle intérieur referme ses plaies.",
+		"nom": "Vagabond",
+		"icon": "👣",
+		"description": "Voyageur habitué à se défendre. Il réagit avec la rapidité du chat, et frappe avant qu'on ait fini de décider.",
 		"vocation": "moine",
-		"niveau": 5,
-		"mode": "active",
-		"cout_pm": 21,
-		"cible": "allie",
-		"portee": 1,
-		"effets": {
-			"pv": "13+{Vol/4}"
-		}
-	},
-	{
-		"_id": "competence:explosion_de_cadavre",
-		"type": "competence",
-		"nom": "Miasme",
-		"icon": "☠️",
-		"animation": "animation:capa_poison",
-		"description": "Un cadavre se répand en miasme : les chairs vivantes alentour s'affaiblissent.",
-		"vocation": "necromancien",
-		"niveau": 5,
-		"mode": "active",
-		"cout_pm": 21,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
-		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
-			"rayon": 1
-		},
+		"niveau": 6,
+		"mode": "passive",
 		"effets": {
 			"buffs": {
-				"R": "-4-{Vol/10}",
-				"F": -4
-			},
-			"duree": 4
+				"Ag": 5,
+				"Vol": 4,
+				"V": 1
+			}
 		}
 	},
 	{
-		"_id": "competence:pacte_de_sang_noir",
+		"_id": "competence:souffle_du_sensei",
 		"type": "competence",
-		"nom": "Armure d'ossements",
-		"icon": "🦴",
-		"animation": "animation:capa_tombeau",
-		"description": "Des os poussent sous la peau d'un compagnon et le cuirassent.",
-		"vocation": "necromancien",
-		"niveau": 5,
-		"mode": "active",
-		"cout_pm": 21,
-		"cible": "allie",
-		"portee": 4,
-		"effets": {
-			"buffs": {
-				"R": "6+{Int/7}"
-			},
-			"duree": 4
-		}
-	},
-	{
-		"_id": "competence:rituel_de_mort",
-		"type": "competence",
-		"nom": "Sursis",
-		"icon": "⌛",
-		"animation": "animation:capa_levee_morts",
-		"description": "La mort elle-même accorde un sursis à un compagnon : ses plaies cessent de compter.",
-		"vocation": "necromancien",
-		"niveau": 9,
-		"mode": "active",
-		"cout_pm": 48,
-		"incantation": 2,
-		"cible": "allie",
-		"portee": 4,
-		"effets": {
-			"buffs": {
-				"R": "7+{Int/10}"
-			},
-			"regen_pv": "2+{Int/20}",
-			"duree": 5
-		}
-	},
-	{
-		"_id": "competence:nuee_de_spectres",
-		"type": "competence",
-		"nom": "Linceul de spectres",
-		"icon": "👻",
-		"animation": "animation:capa_spectre",
-		"description": "Des spectres enveloppent les ennemis et glacent leurs membres.",
-		"vocation": "necromancien",
-		"niveau": 9,
-		"mode": "active",
-		"cout_pm": 37,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
-		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
-			"rayon": 1
-		},
-		"effets": {
-			"buffs": {
-				"Ag": "-6-{Vol/10}",
-				"F": -6,
-				"V": -1
-			},
-			"duree": 3
-		}
-	},
-	{
-		"_id": "competence:mot_de_mort",
-		"type": "competence",
-		"nom": "Mot d'effroi",
-		"icon": "💀",
-		"animation": "animation:capa_spectre",
-		"description": "Un mot qui n'aurait jamais dû être dit : la cible se fige d'horreur.",
-		"vocation": "necromancien",
+		"nom": "Souffle du Sensei",
+		"icon": "🌬️",
+		"animation": "animation:capa_meditation",
+		"description": "Front contre front, une longue expiration — mais il n'y a plus de limite à ce qu'il peut céder.",
+		"vocation": "moine",
 		"niveau": 10,
 		"mode": "active",
 		"cout_pm": 40,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
-		"effets": {
-			"buffs": {
-				"Vol": "-10-{Vol/7}",
-				"R": -10,
-				"V": -2
-			},
-			"duree": 2
-		}
-	},
-	{
-		"_id": "competence:colere_divine",
-		"type": "competence",
-		"nom": "Défi sacré",
-		"icon": "📯",
-		"animation": "animation:capa_aura_sacree",
-		"description": "Il élève sa lumière : tous les ennemis proches se détournent de ses compagnons pour lui.",
-		"vocation": "paladin",
-		"niveau": 8,
-		"mode": "active",
-		"cout_pm": 33,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 1,
-		"zone": {
-			"forme": "carre",
-			"origine": "lanceur",
-			"rayon": 2
-		},
-		"effets": {
-			"provocation": 1,
-			"duree": 3
-		}
-	},
-	{
-		"_id": "competence:eclat_divin",
-		"type": "competence",
-		"nom": "Voile sacré",
-		"icon": "⛪",
-		"animation": "animation:capa_soin_sacre",
-		"description": "Une lueur enveloppe un compagnon : les coups glissent sur lui.",
-		"vocation": "pretre",
-		"niveau": 4,
-		"mode": "active",
-		"cout_pm": 18,
 		"cible": "allie",
-		"portee": 4,
-		"effets": {
-			"esquive": "4+{Vol/8}",
-			"duree": 3
-		}
-	},
-	{
-		"_id": "competence:lumiere_de_l_aube",
-		"type": "competence",
-		"nom": "Aube éblouissante",
-		"icon": "🌅",
-		"animation": "animation:capa_eblouissant",
-		"description": "Une lumière d'aube aveuglante qui fait chanceler les ennemis rassemblés.",
-		"vocation": "pretre",
-		"niveau": 4,
-		"mode": "active",
-		"cout_pm": 18,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
+		"portee": 2,
 		"zone": {
 			"forme": "cercle",
 			"origine": "cible",
 			"rayon": 1
 		},
 		"effets": {
+			"pv": 20,
+			"pm": 6,
 			"buffs": {
-				"Ag": "-4-{Vol/10}",
-				"F": -4
+				"Vol": 5
 			},
-			"duree": 3
+			"duree": 4
 		}
 	},
 	{
-		"_id": "competence:colonne_de_lumiere",
+		"_id": "competence:ascete",
 		"type": "competence",
-		"nom": "Contrition",
-		"icon": "🙏",
-		"animation": "animation:capa_lumiere",
-		"description": "La lumière fait ployer la cible sous le poids de ses fautes.",
-		"vocation": "pretre",
+		"nom": "Ascète",
+		"icon": "🧘",
+		"description": "Il peut survivre sans boire, sans manger, sans dormir. Sa méditation suffit à tout le reste.",
+		"vocation": "moine",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Vol": 7
+			},
+			"regen_pv": 3,
+			"regen_pm": 3
+		}
+	},
+	{
+		"_id": "competence:drain_vital",
+		"type": "competence",
+		"nom": "Drain vital",
+		"icon": "🩸",
+		"animation": "animation:capa_drain",
+		"description": "Il prend ce qui tient la cible debout. Ce qu'il en fait ensuite ne regarde personne.",
+		"vocation": "necromancien",
 		"niveau": 6,
 		"mode": "active",
 		"cout_pm": 25,
@@ -957,67 +760,78 @@
 		"jet": "magique",
 		"portee": 6,
 		"effets": {
+			"degats": "3D8+6",
 			"buffs": {
-				"F": "-7-{Vol/7}",
-				"Int": -7
+				"F": -5
 			},
-			"duree": 4
+			"duree": 3,
+			"drain_pv": 35
 		}
 	},
 	{
-		"_id": "competence:chatiment_divin",
+		"_id": "competence:etreinte_du_tombeau",
 		"type": "competence",
-		"nom": "Halo de protection",
-		"icon": "😇",
-		"animation": "animation:capa_lumiere_zone",
-		"description": "Un halo descend sur ses compagnons et détourne les coups qui leur sont portés.",
-		"vocation": "pretre",
-		"niveau": 7,
+		"nom": "Étreinte du tombeau",
+		"icon": "⚱️",
+		"animation": "animation:capa_tombeau",
+		"description": "Le sol se souvient de tous ceux qu'il a reçus, et tend les mains vers celui qui marche dessus.",
+		"vocation": "necromancien",
+		"niveau": 10,
 		"mode": "active",
-		"cout_pm": 29,
-		"cible": "allie",
-		"portee": 4,
+		"cout_pm": 40,
+		"incantation": 3,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 8,
 		"zone": {
 			"forme": "cercle",
 			"origine": "cible",
-			"rayon": 1
+			"rayon": 2
 		},
 		"effets": {
-			"esquive": "4+{Vol/12}",
-			"duree": 4
-		}
-	},
-	{
-		"_id": "competence:jugement_celeste",
-		"type": "competence",
-		"nom": "Verdict céleste",
-		"icon": "⚖️",
-		"animation": "animation:capa_descente_celeste",
-		"description": "Le ciel juge la cible : elle plie le genou sous le verdict.",
-		"vocation": "pretre",
-		"niveau": 8,
-		"mode": "active",
-		"cout_pm": 33,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 6,
-		"effets": {
+			"degats": "3D10+8",
 			"buffs": {
-				"F": "-9-{Vol/7}",
-				"Int": -9,
+				"R": -4,
 				"V": -1
 			},
-			"duree": 2
+			"duree": 3,
+			"drain_pv": 25,
+			"drain_max": 12
 		}
 	},
 	{
-		"_id": "competence:courroux_du_ciel",
+		"_id": "competence:serment_du_martyr",
 		"type": "competence",
-		"nom": "Interdit céleste",
-		"icon": "🌩️",
+		"nom": "Serment du martyr",
+		"icon": "🩸",
+		"animation": "animation:capa_lien",
+		"description": "Il prend sur lui ce qu'un autre ne peut plus porter. C'est tout le serment, et il n'en a jamais fait d'autre.",
+		"vocation": "paladin",
+		"niveau": 6,
+		"mode": "active",
+		"cout_pm": 25,
+		"maintien": 4,
+		"cible": "allie",
+		"portee": 2,
+		"effets": {
+			"pv": 18,
+			"buffs": {
+				"R": 6
+			},
+			"lien_vie": {
+				"part": 50,
+				"reduction": 10
+			}
+		}
+	},
+	{
+		"_id": "competence:lumiere_du_purificateur",
+		"type": "competence",
+		"nom": "Lumière du Purificateur",
+		"icon": "☀️",
 		"animation": "animation:capa_lumiere_zone",
-		"description": "Le ciel interdit toute une zone aux impies, qui s'y traînent sans force.",
-		"vocation": "pretre",
+		"description": "Une lumière sans chaleur, dirigée. Ce qui vient du monde des morts n'y survit pas longtemps.",
+		"vocation": "paladin",
 		"niveau": 10,
 		"mode": "active",
 		"cout_pm": 40,
@@ -1030,182 +844,188 @@
 			"rayon": 2
 		},
 		"effets": {
+			"degats": "2D10+8",
 			"buffs": {
-				"F": "-5-{Vol/12}",
-				"Int": -5,
-				"V": -1
+				"Vol": -6
 			},
 			"duree": 3
 		}
 	},
 	{
-		"_id": "competence:flamme_noire",
+		"_id": "competence:main_du_guerisseur",
 		"type": "competence",
-		"nom": "Huile consacrée",
-		"icon": "🫗",
-		"animation": "animation:capa_lame_sacree",
-		"description": "Il oint l'arme d'un compagnon d'une huile qui mord la chair maudite.",
-		"vocation": "repurgateur",
+		"nom": "Main du guérisseur",
+		"icon": "🙏",
+		"animation": "animation:capa_soin_sacre",
+		"description": "Il améliore n'importe quel soin, qu'il soit naturel ou magique. Souvent d'assez peu, toujours d'assez.",
+		"vocation": "pretre",
 		"niveau": 3,
 		"mode": "active",
 		"cout_pm": 15,
 		"cible": "allie",
-		"portee": 4,
+		"portee": 2,
 		"effets": {
-			"buffs": {
-				"F": "5+{Vol/8}",
-				"Vol": 5
-			},
+			"pv": 16,
+			"regen_pv": 2,
 			"duree": 3
 		}
 	},
 	{
-		"_id": "competence:soufre",
+		"_id": "competence:clerc",
 		"type": "competence",
-		"nom": "Cercle de sel",
-		"icon": "🧂",
-		"animation": "animation:capa_aura_sacree",
-		"description": "Un cercle de sel où ses compagnons tiennent mieux face aux puissances impies.",
-		"vocation": "repurgateur",
-		"niveau": 4,
+		"nom": "Clerc",
+		"icon": "📖",
+		"description": "Des années à lire et à recopier des piles de livres. Le savoir des grimoires lui vient plus vite qu'aux autres.",
+		"vocation": "pretre",
+		"niveau": 3,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Int": 4
+			}
+		}
+	},
+	{
+		"_id": "competence:benediction_du_prophete",
+		"type": "competence",
+		"nom": "Bénédiction du Prophète",
+		"icon": "🕊️",
+		"animation": "animation:capa_soin_sacre",
+		"description": "Son aura de bienfaisance irradie ceux qui le suivent, qu'ils l'aient demandé ou non.",
+		"vocation": "pretre",
+		"niveau": 6,
 		"mode": "active",
-		"cout_pm": 18,
+		"cout_pm": 25,
 		"cible": "allie",
 		"portee": 4,
-		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
-			"rayon": 1
-		},
 		"effets": {
+			"pv": 18,
 			"buffs": {
-				"Vol": "5+{Vol/8}",
-				"R": 5
+				"R": 6,
+				"Vol": 3
 			},
-			"duree": 3
-		}
-	},
-	{
-		"_id": "competence:feu_de_l_enfer_retourne",
-		"type": "competence",
-		"nom": "Sceau du proscrit",
-		"icon": "⛔",
-		"animation": "animation:capa_marque",
-		"description": "Il trace l'interdit : là, nulle magie ne se puise sans douleur.",
-		"vocation": "repurgateur",
-		"niveau": 8,
-		"mode": "active",
-		"cout_pm": 33,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 5,
-		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
-			"rayon": 1
-		},
-		"effets": {
-			"buffs": {
-				"Vol": "-6-{Int/8}",
-				"Int": -6
-			},
+			"regen_pv": 1,
 			"duree": 4
 		}
 	},
 	{
-		"_id": "competence:rituel_d_exorcisme",
+		"_id": "competence:oracle",
 		"type": "competence",
-		"nom": "Veillée du chasseur",
-		"icon": "🕯️",
-		"animation": "animation:capa_meditation",
-		"description": "Une longue prière sur un compagnon blessé, qui se relève plus ferme.",
-		"vocation": "repurgateur",
-		"niveau": 9,
+		"nom": "Oracle",
+		"icon": "👁️‍🗨️",
+		"animation": "animation:capa_aura_sacree",
+		"description": "Ses prédictions sont complexes à décrypter et s'avèrent souvent exactes. Celui qu'il désigne ne peut plus vraiment échouer.",
+		"vocation": "pretre",
+		"niveau": 10,
 		"mode": "active",
-		"cout_pm": 48,
-		"incantation": 2,
+		"cout_pm": 40,
 		"cible": "allie",
-		"portee": 4,
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
 		"effets": {
+			"pv": 22,
+			"pm": 5,
 			"buffs": {
-				"Vol": "9+{Vol/7}"
+				"Ch": 5,
+				"Vol": 3
 			},
-			"regen_pv": "2+{Vol/20}",
-			"duree": 5
+			"duree": 3
 		}
 	},
 	{
-		"_id": "competence:fleau_des_demons",
+		"_id": "competence:thaumaturge",
 		"type": "competence",
-		"nom": "Mise au ban",
-		"icon": "🔨",
-		"animation": "animation:capa_marque",
-		"description": "Il prononce le ban : la créature maudite chancelle et sa volonté se délite.",
+		"nom": "Thaumaturge",
+		"icon": "✨",
+		"description": "Le nombre de gens morts sous ses mains se compte sur les doigts d'une seule. Il les connaît tous par leur nom.",
+		"vocation": "pretre",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Vol": 6,
+				"Int": 4
+			},
+			"regen_pv": 4
+		}
+	},
+	{
+		"_id": "competence:tueur_de_demon",
+		"type": "competence",
+		"nom": "Tueur de démon",
+		"icon": "😈",
+		"animation": "animation:capa_impact_eclat_dore",
+		"animation_zone": "animation:capa_cone_tueur_demon",
+		"description": "Son bras terrorise les démons les plus maléfiques et défait les anges les plus purs. Il ne fait pas la différence.",
 		"vocation": "repurgateur",
 		"niveau": 10,
 		"mode": "active",
 		"cout_pm": 40,
 		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 5,
+		"jet": "cc",
+		"portee": 1,
+		"zone": {
+			"forme": "cone",
+			"origine": "lanceur",
+			"orientation": "cible",
+			"longueur": 2,
+			"decalage": 1,
+			"angle": 90
+		},
 		"effets": {
+			"degats": "4D10+6",
 			"buffs": {
-				"Vol": "-10-{Int/7}",
-				"Int": -10,
-				"V": -1
+				"Vol": -6
 			},
 			"duree": 3
 		}
 	},
 	{
-		"_id": "competence:explosion_runique",
+		"_id": "competence:arme_de_justice",
 		"type": "competence",
-		"nom": "Rune de défi",
-		"icon": "📯",
-		"animation": "animation:capa_aura_bataille",
-		"description": "Une rune de défi s'embrase : les ennemis proches n'ont plus d'yeux que pour lui.",
+		"nom": "Arme de justice",
+		"icon": "⚔️",
+		"animation": "animation:capa_aura_sacree",
+		"description": "Il n'enchante pas sa lame : il lui rappelle pourquoi elle a été forgée.",
 		"vocation": "templier",
-		"niveau": 5,
+		"niveau": 3,
 		"mode": "active",
-		"cout_pm": 21,
-		"cible": "ennemi",
-		"jet": "magique",
+		"cout_pm": 8,
+		"maintien": 3,
+		"cible": "soi",
 		"portee": 1,
-		"zone": {
-			"forme": "carre",
-			"origine": "lanceur",
-			"rayon": 1
-		},
 		"effets": {
-			"provocation": 1,
-			"duree": 2
+			"buffs": {
+				"F": 15,
+				"Vol": 7
+			}
 		}
 	},
 	{
-		"_id": "competence:tempete_runique",
+		"_id": "competence:fuite_de_maraudeur",
 		"type": "competence",
-		"nom": "Sceau d'interdiction",
-		"icon": "🚫",
-		"animation": "animation:capa_marque",
-		"description": "Les runes de l'ordre se gravent dans le sol et brisent l'élan de ceux qui s'y tiennent.",
-		"vocation": "templier",
-		"niveau": 9,
+		"nom": "Fuite de maraudeur",
+		"icon": "💨",
+		"animation": "animation:capa_furtif",
+		"description": "Il cesse de se battre et se met à ne plus être touchable. C'est un métier différent, qu'il connaît aussi.",
+		"vocation": "voleur",
+		"niveau": 6,
 		"mode": "active",
-		"cout_pm": 37,
-		"cible": "ennemi",
-		"jet": "magique",
-		"portee": 5,
-		"zone": {
-			"forme": "cercle",
-			"origine": "cible",
-			"rayon": 2
-		},
+		"cout_pm": 25,
+		"sensibilite_charge": 0,
+		"cible": "soi",
+		"portee": 1,
 		"effets": {
 			"buffs": {
-				"F": "-6-{Vol/10}",
-				"Int": -6
+				"Ag": 7
 			},
-			"duree": 5
+			"esquive": 12,
+			"duree": 4,
+			"saut": 3
 		}
 	}
 ]

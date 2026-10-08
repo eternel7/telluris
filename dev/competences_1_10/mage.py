@@ -38,6 +38,10 @@ ENTREES = [
 	  {"cible": "soi", "portee": 1, "cout_pm": 25, "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1}, "effets": {"esquive": "5+{Int/8}", "duree": 4}},
 	  remplace="tourbillon_arcanique"),
 	A(6, "Absorption", "🌀", "drain", "drain", "Il absorbe l'énergie vitale de la cible."),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(6, "Lame enchantée", "✨", "aura_bataille", "La magie au service de la guerre, et pas l'inverse : il enchante sa propre arme et va s'en servir.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 25, "effets": {"buffs": {"F": 16, "Ag": 8}, "duree": 5}},
+	  remplace="lame_enchantee"),
 	# ── Niveau 7 ──
 	L(7, "Translation arcanique", "🔄", "saut", "Il échange sa place avec celle d'un compagnon en difficulté.",
 	  {"cible": "allie", "portee": 6, "cout_pm": 29, "effets": {"echange": 1}},
@@ -68,4 +72,12 @@ ENTREES = [
 	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"buffs": {"Int": "-6-{Int/10}", "Vol": -6}, "duree": 5}},
 	  remplace="nova_arcanique"),
 	A(10, "Lame du mage-guerrier", "⚔️", "sang", "enchantement", "Il nourrit sa lame de sa propre vie.", **CC),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Rupture arcanique", "💥", "arcane", "Il ne lance pas un sort : il casse quelque chose, et laisse le monde recoller les morceaux.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 10, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"degats": "3D10+6", "regen_pm": -2, "buffs": {"Vol": -4}, "duree": 3}},
+	  remplace="rupture_arcanique"),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(10, "Cœur de Nexus", "💠", None, "La magie ne le traverse plus : elle s'y arrête un instant, puis repart plus nombreuse.",
+	  {"effets": {"buffs": {"Vol": 8, "Int": 4}, "regen_pm": 5}},
+	  remplace="coeur_de_nexus", mode="passive"),
 ]

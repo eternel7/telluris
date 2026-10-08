@@ -16,6 +16,14 @@ ENTREES = [
 	A(2, "Sanctuaire", "⛪", "posture", "bouclier", "Il se recueille, et une lumière le protège.", stats=("R", "Vol")),
 	# ── Niveau 3 ──
 	A(3, "Cercle de guérison", "⭕", "soin_zone", "soin_vague", "Un cercle de lumière soigne tous ceux qui s'y tiennent."),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(3, "Main du guérisseur", "🙏", "soin_sacre", "Il améliore n'importe quel soin, qu'il soit naturel ou magique. Souvent d'assez peu, toujours d'assez.",
+	  {"cible": "allie", "portee": 2, "cout_pm": 15, "effets": {"pv": 16, "regen_pv": 2, "duree": 3}},
+	  remplace="main_du_guerisseur"),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(3, "Clerc", "📖", None, "Des années à lire et à recopier des piles de livres. Le savoir des grimoires lui vient plus vite qu'aux autres.",
+	  {"effets": {"buffs": {"Int": 4}}},
+	  remplace="clerc", mode="passive"),
 	# ── Niveau 4 ──
 	L(4, "Voile sacré", "⛪", "soin_sacre", "Une lueur enveloppe un compagnon : les coups glissent sur lui.",
 	  {"cible": "allie", "portee": 4, "cout_pm": 18, "effets": {"esquive": "4+{Vol/8}", "duree": 3}},
@@ -37,6 +45,10 @@ ENTREES = [
 	L(6, "Martyre", "🕯️", "soin_vague", "Il donne sa propre vie pour en sauver une autre.",
 	  {"cible": "allie", "portee": 1, "cout_pm": 10, "effets": {"pv": "10+{Vol/4}", "cout_pv": 12}},
 	  remplace="source_de_grace"),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(6, "Bénédiction du Prophète", "🕊️", "soin_sacre", "Son aura de bienfaisance irradie ceux qui le suivent, qu'ils l'aient demandé ou non.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 25, "effets": {"pv": 18, "buffs": {"R": 6, "Vol": 3}, "regen_pv": 1, "duree": 4}},
+	  remplace="benediction_du_prophete"),
 	# ── Niveau 7 ──
 	A(7, "Exorcisme", "📿", "poison_pm", "lumiere", "Il chasse les esprits impurs, et la magie avec eux."),
 	A(7, "Prière de masse", "🙏", "soin_zone", "soin_vague", "Toute l'assemblée est soignée d'une seule prière."),
@@ -61,4 +73,12 @@ ENTREES = [
 	L(10, "Interdit céleste", "🌩️", "lumiere_zone", "Le ciel interdit toute une zone aux impies, qui s'y traînent sans force.",
 	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"buffs": {"F": "-5-{Vol/12}", "Int": -5, "V": -1}, "duree": 3}},
 	  remplace="courroux_du_ciel"),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Oracle", "👁️‍🗨️", "aura_sacree", "Ses prédictions sont complexes à décrypter et s'avèrent souvent exactes. Celui qu'il désigne ne peut plus vraiment échouer.",
+	  {"cible": "allie", "portee": 6, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"pv": 22, "pm": 5, "buffs": {"Ch": 5, "Vol": 3}, "duree": 3}},
+	  remplace="oracle"),
+	# passive rééquilibrée entre vocations (médiane de son palier)
+	L(10, "Thaumaturge", "✨", None, "Le nombre de gens morts sous ses mains se compte sur les doigts d'une seule. Il les connaît tous par leur nom.",
+	  {"effets": {"buffs": {"Vol": 6, "Int": 4}, "regen_pv": 4}},
+	  remplace="thaumaturge", mode="passive"),
 ]

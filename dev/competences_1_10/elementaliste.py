@@ -54,4 +54,8 @@ ENTREES = [
 	  {"cible": "allie", "portee": 4, "cout_pm": 40, "zone": {"forme": "cercle", "origine": "cible", "rayon": 1}, "effets": {"buffs": {"R": "7+{Vol/10}"}, "esquive": "4+{Vol/12}", "duree": 5}},
 	  remplace="fureur_elementaire"),
 	A(10, "Zéro absolu", "❄️", "entrave", "givre", "Le froid absolu fige la cible dans la glace.", malus=("Ag", "F")),
+	# signature recalibrée (~1,15 × l'archétype généré du niveau)
+	L(10, "Courroux des éléments", "🌋", "meteore", "Il n'appelle plus le feu : il le laisse arriver, et s'écarte de son chemin.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 12, "cout_pm": 40, "incantation": 4, "zone": {"forme": "cercle", "origine": "cible", "rayon": 2}, "effets": {"degats": "3D10+8", "buffs": {"R": -8}, "duree": 3}},
+	  remplace="courroux_des_elements"),
 ]
