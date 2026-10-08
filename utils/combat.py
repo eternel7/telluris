@@ -24,6 +24,7 @@ from utils.sorts import (
 	capacite_utilisable_combat, effets_agissent_sur_cible,
 	est_incantation_longue, est_maintenu, pm_par_pa, seuil_concentration,
 	sorts_eligibles_espece, resoudre_effets, portee_effective, resoudre_temps,
+	provocation_pure,
 )
 from utils.zones_effet import cases_effet, placement_visuel
 from utils.quetes import maj_progress_kills, maj_progress_chasse
@@ -5389,8 +5390,11 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		# Règles à distance identiques au jet/tir : interdit si engagé au corps à corps,
 		# et exige une ligne de vue. ⚠️ Piloté par le drapeau `ranged` et non par
 		# `portee > 1` : une hallebarde frappe à 2 cases EN MÊLÉE.
+		# EXCEPTION : une provocation PURE se lance engagé (`provocation_pure`) — c'est au
+		# contact que le garde en a besoin ; la ligne de vue, elle, reste exigée.
 		if est_a_distance:
-			if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
+			if (not provocation_pure(effets)
+					and any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"])):
 				return {"error": profil["engage"]}, None
 			if not _vue_acteurs(grid["cells"], joueur, monstre):
 				return {"error": "Ligne de vue obstruée."}, None

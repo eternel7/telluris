@@ -582,7 +582,7 @@
 		"nom": "Défi",
 		"icon": "📢",
 		"animation": "animation:capa_rage",
-		"description": "Il frappe son bouclier et hurle un nom : la bête ne voit plus que lui, le temps que sa volonté tient.",
+		"description": "Il frappe son bouclier et hurle à travers la mêlée : la bête ne voit plus que lui, le temps que sa volonté tient.",
 		"vocation": "guerrier",
 		"niveau": 6,
 		"mode": "active",
@@ -590,9 +590,8 @@
 		"sensibilite_charge": 0,
 		"cible": "ennemi",
 		"jet": "cc",
-		"portee": 1,
+		"portee": "3+{Vol/30}",
 		"effets": {
-			"degats": "2D6+2",
 			"provocation": 1,
 			"duree": "2+{Vol/40}"
 		}

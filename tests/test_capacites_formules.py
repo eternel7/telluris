@@ -97,6 +97,39 @@ def test_une_provocation_ratee_ne_pose_rien():
 	assert _cible_joueur(doc, loup) is a
 
 
+def _engage():
+	"""Bruna au contact d'un loup, un second loup à 4 cases : elle est ENGAGÉE."""
+	b = joueur(0, x=3, y=5, nom="Bruna")
+	contact, loin = monstre(0, x=4, y=5), monstre(1, x=7, y=5)
+	return b, contact, loin, combat([b], [contact, loin])
+
+
+def test_une_provocation_pure_se_lance_a_distance_meme_engage():
+	b, contact, loin, doc = _engage()
+	res = resolve_action(doc, "competence", cible_id=loin["id"],
+						 competence=comp(cible="ennemi", portee=5, effets={"provocation": 1, "duree": 2}))
+	assert "error" not in res, res
+	assert _cible_joueur(doc, loin) is b
+
+
+def test_une_provocation_qui_blesse_reste_interdite_engage():
+	"""Sinon toute frappe à distance contournerait l'engagement en portant une provocation."""
+	b, contact, loin, doc = _engage()
+	res = resolve_action(doc, "competence", cible_id=loin["id"], competence=comp(
+		cible="ennemi", jet="magique", portee=5,
+		effets={"degats": "1D6", "provocation": 1, "duree": 2}))
+	assert "corps à corps" in res.get("error", "")
+
+
+def test_une_provocation_pure_exige_la_ligne_de_vue():
+	b, contact, loin, doc = _engage()
+	for y in range(9):
+		doc["grid"]["cells"][y][5] = 0
+	res = resolve_action(doc, "competence", cible_id=loin["id"],
+						 competence=comp(cible="ennemi", portee=5, effets={"provocation": 1, "duree": 2}))
+	assert res.get("error") == "Ligne de vue obstruée."
+
+
 def test_la_provocation_est_un_debuff_a_duree():
 	"""Part à durée (`part_durative`) : une provocation PURE est lançable, et sans durée
 	elle n'aurait rien à poser."""

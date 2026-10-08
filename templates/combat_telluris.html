@@ -3426,12 +3426,18 @@ function capaProfilEmprunte(c) {
 }
 // Cibles valides d'un sort/compétence offensif : portée effective, et au-delà de l'allonge
 // mêmes règles que le tir — non engagé + ligne de vue (miroir serveur).
+// Provocation PURE (sans dégâts aux PV ni aux PM) : se lance à distance même engagé — miroir
+// de `sorts.provocation_pure`, sur les effets RÉSOLUS du payload.
+function capaProvocationPure(s) {
+	const e = (s && s.effets) || {};
+	return !!e.provocation && !e.degats && !e.degats_pm;
+}
 function sortTargets(s) {
 	const j = me();
 	const { portee, ranged } = capaPortee(s);
 	let list = state.monstres.filter(m => m.vivant && m.pos && chebyJM(j, m) <= portee);
 	if (ranged) {
-		if (isEngaged()) return [];
+		if (isEngaged() && !capaProvocationPure(s)) return [];
 		list = list.filter(m => vueActeurs(j, m));
 	}
 	return list;

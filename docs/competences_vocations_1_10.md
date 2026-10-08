@@ -915,7 +915,7 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 |---|---|---|---|---|---|
 | 🎯 **Main sûre** — *Plus un geste perdu : chaque coup porte où il le veut.* | passive | — | permanent | Ag +4 | — |
 | 💀 **Coup de grâce** — *Là où l'ennemi a déjà cédé, il achève.* | active | 25 PM | ennemi / cc / portée 1 | 3D8+6 dégâts | saignee · 🔊 sword sound.wav |
-| 📢 **Défi** — *Il frappe son bouclier et hurle un nom : la bête ne voit plus que lui, le temps que sa volonté tient.* | active | 25 PM | ennemi / cc / portée 1 | 2D6+2 dégâts · 2+{Vol/40} tours | rage · 🔊 power_up_sound_v3.ogg |
+| 📢 **Défi** — *Il frappe son bouclier et hurle à travers la mêlée : la bête ne voit plus que lui, le temps que sa volonté tient.* | active | 25 PM | ennemi / cc / portée 3+{Vol/30} | 2+{Vol/40} tours | rage · 🔊 power_up_sound_v3.ogg |
 | 🪖 **Tenir jusqu'au bout** ♻ *remplace « Volée de taille »* — *Il serre les dents et décide qu'il ne tombera pas. Plus la volonté est dure, plus elle dure.* | active | 25 PM | soi / portée 1 | R 4+{Vol/8} · 2+{Vol/30} tours | aura_bataille · 🔊 power_up_sound_v0.ogg |
 | 🌊 **Vague d'acier** — *Un revers en éventail qui ouvre la mêlée.* | active | 25 PM | ennemi / cc / portée 1 · cone longueur 2 | 3D6+6 dégâts | impact_eclat_dore + nappe cone_tueur_demon · 🔊 sword sound.wav |
 

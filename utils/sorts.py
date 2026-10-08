@@ -879,6 +879,18 @@ def effets_agissent_sur_cible(effets: dict) -> bool:
 	return bool(eff.get("degats")) or bool(eff.get("degats_pm")) or part_durative(eff)
 
 
+def provocation_pure(effets: dict) -> bool:
+	"""Les effets (RÉSOLUS) sont-ils une PROVOCATION sans dégâts ni aux PV ni aux PM ?
+
+	SOURCE UNIQUE de l'exception « provoquer à distance même engagé » (combat, branche
+	offensive ; miroir client `capaProvocationPure`). Restreinte aux provocations PURES : une
+	frappe à distance qui porterait aussi une provocation contournerait sinon la règle de
+	l'engagement. La ligne de vue reste exigée — on provoque qui vous voit."""
+	eff = effets or {}
+	return (_as_int(eff.get("provocation")) > 0 and not eff.get("degats")
+			and not eff.get("degats_pm"))
+
+
 def capacite_utilisable_exploration(capacite: dict) -> bool:
 	"""Une capacité (sort OU compétence) est-elle lançable HORS combat ?
 

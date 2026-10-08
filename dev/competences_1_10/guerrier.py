@@ -50,8 +50,8 @@ ENTREES = [
 	  {"cible": "soi", "portee": 1, "cout_pm": 25, "effets": {"buffs": {"R": "4+{Vol/8}"}, "duree": "2+{Vol/30}"}},
 	  remplace="volee_de_taille"),
 	A(6, "Coup de grâce", "💀", "frappe", "saignee", "Là où l'ennemi a déjà cédé, il achève."),
-	L(6, "Défi", "📢", "rage", "Il frappe son bouclier et hurle un nom : la bête ne voit plus que lui, le temps que sa volonté tient.",
-	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 25, "effets": {"degats": "2D6+2", "provocation": 1, "duree": "2+{Vol/40}"}},
+	L(6, "Défi", "📢", "rage", "Il frappe son bouclier et hurle à travers la mêlée : la bête ne voit plus que lui, le temps que sa volonté tient.",
+	  {"cible": "ennemi", "jet": "cc", "portee": "3+{Vol/30}", "cout_pm": 25, "effets": {"provocation": 1, "duree": "2+{Vol/40}"}},
 	  remplace="defi"),
 	A(6, "Vague d'acier", "🌊", "zone_cone", "impact_eclat_dore/cone_tueur_demon", "Un revers en éventail qui ouvre la mêlée."),
 	# ── Niveau 7 ──
