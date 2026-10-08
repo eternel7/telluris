@@ -5482,6 +5482,12 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		# pm_def ; un sort de CONTACT marqué `cc`/`cd` (« au toucher ») exige
 		# d'abord de poser la main — jet martial contre la défense physique.
 		mode_jet = sdoc.get("jet") or ("cc" if cle == "competence" else "magique")
+		# ÉCHANGE DE PLACE à DISTANCE (cible hors contact) : le jet martial ne vaut qu'au
+		# corps à corps — à distance on ne saisit personne, l'échange se résout comme un
+		# SORT (`toucher_magique` contre `pm_def`). C'est la distance RÉELLE qui décide,
+		# pas la portée de la capacité : au contact, le jet de la donnée s'applique.
+		if effets.get("echange") and _cheby(joueur, monstre) > 1:
+			mode_jet = "magique"
 		# ZONE D'EFFET : la cible désignée d'abord, puis tout monstre pris dans la
 		# forme (cf. utils/zones_effet.py). `zone` absente ⇒ liste d'un seul élément,
 		# donc exactement le comportement d'avant.

@@ -150,6 +150,32 @@ def test_on_ne_prend_pas_la_place_d_un_cadavre():
 	assert garde["pos"] == {"x": 3, "y": 5}
 
 
+def test_a_distance_l_echange_se_resout_comme_un_sort():
+	"""Hors contact, pas de jet martial : `toucher_magique` contre la défense magique."""
+	garde, bete, doc = _face_a_face()
+	bete["pos"] = {"x": 6, "y": 5}
+	garde["cc"], garde["toucher_magique"] = 0, 200           # nul au contact, fort en magie
+	res = resolve_action(doc, "competence", cible_id=bete["id"], competence=comp_ennemi(portee=3))
+	assert res.get("hit") and "echange" in res, res
+	assert garde["pos"] == {"x": 6, "y": 5} and bete["pos"] == {"x": 3, "y": 5}
+
+
+def test_a_distance_le_jet_martial_ne_sert_a_rien():
+	garde, bete, doc = _face_a_face()
+	bete["pos"] = {"x": 6, "y": 5}
+	garde["cc"], garde["toucher_magique"] = 200, 0
+	res = resolve_action(doc, "competence", cible_id=bete["id"], competence=comp_ennemi(portee=3))
+	assert not res.get("hit") and "echange" not in res
+	assert garde["pos"] == {"x": 3, "y": 5}
+
+
+def test_au_contact_le_jet_de_la_donnee_s_applique():
+	garde, bete, doc = _face_a_face()
+	garde["cc"], garde["toucher_magique"] = 200, 0
+	res = resolve_action(doc, "competence", cible_id=bete["id"], competence=comp_ennemi())
+	assert res.get("hit") and "echange" in res, res
+
+
 def test_un_echange_impossible_avec_un_ennemi_ne_coute_rien():
 	garde, bete, doc = _face_a_face()
 	bete["jeton"] = {"largeur": 2, "profondeur": 2, "forme": "ellipse"}
