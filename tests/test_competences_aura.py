@@ -13,7 +13,7 @@ from utils import combat as combat_mod
 from utils import consommables
 from utils.combat import build_joueur_snapshot
 from utils.competences import (
-	appliquer_auras_groupe, auras_du_groupe, bonus_passifs, competences_bonus_perime,
+	appliquer_auras_groupe, auras_du_groupe, bonus_passifs, synchroniser_competences_bonus,
 	est_aura, normaliser_competence, recompute_competences_bonus,
 )
 
@@ -87,10 +87,11 @@ def test_une_passive_a_zone_est_une_aura_et_sort_du_bonus_global():
 	assert bonus["auras"][0]["zone"]["forme"] == "carre"
 
 
-def test_agregat_sans_cle_auras_est_perime():
+def test_agregat_sans_cle_auras_est_resynchronise():
 	perso = _character(competences=[AURA_SAINTE["_id"]])
 	del perso["competences_bonus"]["auras"]
-	assert competences_bonus_perime(perso) is True
+	assert synchroniser_competences_bonus(perso, DOCS.get) is True
+	assert [a["id"] for a in perso["competences_bonus"]["auras"]] == [AURA_SAINTE["_id"]]
 
 
 # ── Exploration : tout le groupe ─────────────────────────────────────────────────
