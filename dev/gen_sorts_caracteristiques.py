@@ -24,7 +24,7 @@ GARDES — une violation arrête tout, rien n'est écrit :
   · l'école de chaque sort est la `magie` d'une vocation de `rules:vocations` ;
   · chaque composant est un `item:*` du dump ; chaque sort a un consommé ET un catalyseur ;
   · l'animation de base existe et est active ; le son existe dans templates/resources/sounds ;
-  · un `_id` déjà pris par un doc DIFFÉRENT fait tout refuser ; déjà importé (champs produits identiques, base éventuellement enrichie : ) ⇒ sauté.
+  · un `_id` déjà pris par un doc DIFFÉRENT fait tout refuser ; déjà importé (champs produits identiques, base éventuellement enrichie : `deja_importe`) ⇒ sauté.
 """
 
 import argparse
