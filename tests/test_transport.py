@@ -206,6 +206,22 @@ def test_direction_cardinale_huit_octants(vers, attendu):
 	assert transport.direction_cardinale((20, 20), vers) == attendu
 
 
+@pytest.mark.parametrize("direction,attendu", [
+	("nord", "au nord"),
+	("sud", "au sud"),
+	("est", "à l'est"),            # élision : jamais « au est »
+	("ouest", "à l'ouest"),
+	("nord-est", "au nord-est"),
+	("nord-ouest", "au nord-ouest"),
+	("sud-est", "au sud-est"),
+	("sud-ouest", "au sud-ouest"),
+])
+def test_groupe_direction_preposition(direction, attendu):
+	assert transport.groupe_direction(direction) == attendu
+	indice = {"meme_ville": True, "direction": direction}
+	assert transport.texte_indice(indice) == f"{attendu} d'ici"
+
+
 def test_direction_cardinale_sur_place():
 	assert transport.direction_cardinale((20, 20), (20, 20)) is None
 

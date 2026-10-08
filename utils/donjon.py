@@ -73,7 +73,7 @@ import uuid
 
 from models import character_stats
 from utils.characters import lieu_label, victoire_acquise
-from utils import acces, chasse, quetes
+from utils import accord_espece, acces, chasse, quetes
 from utils.zones import profils_compatibles
 
 
@@ -399,7 +399,6 @@ def construire_commission(bureau_doc: dict, cible: dict) -> dict | None:
 	lieu_doc = cible.get("lieu_doc") or {}
 	niv = int(profil.get("niveau", 1) or 1)
 	grade = chasse.qualificatif_de(profil)
-	nom = espece_doc.get("nom") or (espece_doc.get("_id") or "").split(":", 1)[-1]
 	lieu_nom = lieu_label(lieu_doc, cible.get("lieu") or "")
 	xp = max(1, round(quetes._xp_unitaire(espece_doc, niv) * character_stats.QUETE_CHASSE_XP_FACTEUR))
 	cuivre = max(0, round(xp * character_stats.QUETE_CUIVRE_PAR_XP))
@@ -410,10 +409,12 @@ def construire_commission(bureau_doc: dict, cible: dict) -> dict | None:
 		"source": "commission",
 		"giver": bureau_doc.get("_id"),
 		"lieu_parent": bureau_doc.get("lieu_parent"),
-		"titre": f"Commission d'éradication : le {nom} « {grade} »",
+		"titre": f"Commission d'éradication : {accord_espece.groupe(espece_doc, 'le')} « {grade} »",
 		"description": (
-			f"La Guilde mandate une compagnie pour purger {lieu_nom}. Un {nom} « {grade} » y "
-			f"tient les galeries : abattez-le, et le rapport suffira à rouvrir le chantier."
+			f"La Guilde mandate une compagnie pour purger {lieu_nom}. "
+			f"{accord_espece.majuscule(accord_espece.groupe(espece_doc, 'un'))} « {grade} » y "
+			f"tient les galeries : abattez-{accord_espece.pronom(espece_doc)}, "
+			f"et le rapport suffira à rouvrir le chantier."
 		),
 		"rang": rang_commission(bureau_doc, lieu_doc),
 		"objectif": {
@@ -424,18 +425,19 @@ def construire_commission(bureau_doc: dict, cible: dict) -> dict | None:
 			"quantite": 1,
 		},
 		"recompenses": {"xp": xp, "cuivre": cuivre, "items": []},
-		"narration": _narration_commission(nom, grade, lieu_nom),
+		"narration": _narration_commission(espece_doc, grade, lieu_nom),
 		"statut": "offerte",
 	}
 
 
-def _narration_commission(nom: str, grade: str, lieu_nom: str) -> str:
+def _narration_commission(espece_doc: dict, grade: str, lieu_nom: str) -> str:
 	"""Ambiance pré-combat à la descente dans le donjon (l'espèce variant, elle est générée
 	à la volée, pas figée dans un nœud de dialogue — même parti que `chasse._narration_rang`)."""
 	return (
 		f"L'air de {lieu_nom} est saturé de poussière de pierre. Quelque part dans le noir, "
-		f"un {nom} « {grade} » a fait des galeries son territoire — et il vous a entendus venir "
-		f"bien avant que vous ne le voyiez."
+		f"{accord_espece.groupe(espece_doc, 'un')} « {grade} » a fait des galeries son territoire — "
+		f"et {accord_espece.sujet(espece_doc)} vous a entendus venir "
+		f"bien avant que vous ne {accord_espece.pronom(espece_doc)} voyiez."
 	)
 
 

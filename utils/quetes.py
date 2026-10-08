@@ -18,7 +18,7 @@ from db.config import get_doc, find_docs, save_doc, delete_doc
 from models import character_stats
 from utils.characters import (item_ref_id, grant_xp, credit_character, cuivre_to_purse,
 							  poids_bounds, lieu_label)
-from utils import bois, marche
+from utils import accord_espece, bois, marche
 # ⚠️ Acyclique, et déjà tiré transitivement (quetes → bois → expedition → recrutement) :
 # `recrutement` n'importe que characters/consommables/montures, jamais quetes.
 from utils import recrutement
@@ -240,7 +240,8 @@ def _xp_unitaire_item(item_doc: dict, niveau: int, get_doc_fn=None) -> int:
 
 _TITRES_KILL = ["Réguler les {nom}", "Chasse aux {nom}", "Éliminer les {nom}"]
 _TITRES_COLLECT = ["Récolte : {nom}", "Rapporter du {nom}", "Collecte de {nom}"]
-_TITRES_CHASSE = ["Traquer le {nom} « {grade} »", "Abattre le {nom} « {grade} »", "La tête du {nom} « {grade} »"]
+# {le} / {du} = le nom de l'espèce AVEC son article (`accord_espece.groupe`), jamais `le {nom}` en dur.
+_TITRES_CHASSE = ["Traquer {le} « {grade} »", "Abattre {le} « {grade} »", "La tête {du} « {grade} »"]
 
 
 def _generer_chasse(guild_doc: dict, parent_doc: dict, cible, get_doc_fn=None) -> dict | None:
@@ -260,7 +261,6 @@ def _generer_chasse(guild_doc: dict, parent_doc: dict, cible, get_doc_fn=None) -
 	profil = get_doc_fn(profil_id) or {}
 	niv = int(profil.get("niveau", 1))
 	grade = chasse.qualificatif_de(profil)
-	nom = espece_doc.get("nom") or _nom_espece(espece_id)
 	lieu_nom = lieu_label(lieu_doc, lieu_id)
 
 	xp = max(1, round(_xp_unitaire(espece_doc, niv) * character_stats.QUETE_CHASSE_XP_FACTEUR))
@@ -278,10 +278,12 @@ def _generer_chasse(guild_doc: dict, parent_doc: dict, cible, get_doc_fn=None) -
 		"source": "genere",
 		"giver": guild_id,
 		"lieu_parent": (parent_doc or {}).get("_id"),
-		"titre": random.choice(_TITRES_CHASSE).format(nom=nom, grade=grade),
+		"titre": random.choice(_TITRES_CHASSE).format(
+			le=accord_espece.groupe(espece_doc, "le"), du=accord_espece.groupe(espece_doc, "du"), grade=grade),
 		"description": (
-			f"Un {nom} d'exception — un « {grade} » — écume {lieu_nom}. "
-			f"La guilde met sa tête à prix : traquez-le et abattez-le."
+			f"{accord_espece.majuscule(accord_espece.groupe(espece_doc, 'un'))} d'exception — un « {grade} » — "
+			f"écume {lieu_nom}. La guilde met sa tête à prix : "
+			f"traquez-{accord_espece.pronom(espece_doc)} et abattez-{accord_espece.pronom(espece_doc)}."
 		),
 		"rang": "F",
 		"objectif": objectif,
