@@ -1292,7 +1292,7 @@
 		"jet": "magique",
 		"portee": 5,
 		"effets": {
-			"degats": "2D8+{F/10}"
+			"degats": "2D8+{Int/10}"
 		},
 		"composants": [
 			{
@@ -1548,7 +1548,7 @@
 		"jet": "magique",
 		"portee": 5,
 		"effets": {
-			"degats": "3D8+{F/10}"
+			"degats": "3D8+{Int/10}"
 		},
 		"composants": [
 			{
@@ -2783,7 +2783,7 @@
 		"jet": "magique",
 		"portee": 4,
 		"effets": {
-			"degats": "3D8+{Ag/12}"
+			"degats": "3D8+{Vol/12}"
 		},
 		"composants": [
 			{
@@ -2887,7 +2887,7 @@
 		"jet": "magique",
 		"portee": 5,
 		"effets": {
-			"degats": "3D8+{F/15}"
+			"degats": "3D8+{Vol/15}"
 		},
 		"composants": [
 			{

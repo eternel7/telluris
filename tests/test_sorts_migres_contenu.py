@@ -6,6 +6,7 @@
 #   · chaque attaque migrée a, dans le MÊME fichier, son remplaçant de compétence (même `_id`)
 #     qui n'est plus une attaque, et son sort, son grimoire unique et sa recette ;
 #   · chaque sort : catalyseur (constante) AVANT consommé (dés), PM = origine × PM_FACTEUR ;
+#   · formules sur Int ou Vol seulement ;
 #   · effets fusionnés avec TOUS les composants résolus par le moteur ;
 #   · régénération idempotente (sorts et grimoires déjà importés ⇒ seuls restent les
 #     remplaçants, qui ont leur propre règle de réémission).
@@ -81,6 +82,13 @@ def test_chaque_attaque_migree_a_son_remplacant_et_son_sort(gen, fichier):
 		assert sort["nom"] == m["nom"]
 		assert sort["effets"] == m["effets"]
 		assert sort["cout_pm"] == round(m["cout_pm"] * gen.PM_FACTEUR)
+
+
+def test_les_sorts_ne_lisent_que_int_ou_vol(fichier):
+	"""Un sort s'apprend dans toute l'école : il lit l'esprit du lanceur, jamais son bras."""
+	for s in _par_type(fichier, "sort"):
+		caracs = {code for code, _div in S._RE_JETON.findall(json.dumps(s["effets"]) + str(s["portee"]))}
+		assert caracs <= {"Int", "Vol"}, (s["_id"], caracs)
 
 
 def test_un_grimoire_unique_et_une_recette_par_sort(fichier):
