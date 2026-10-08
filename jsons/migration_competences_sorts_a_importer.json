@@ -1,0 +1,5370 @@
+[
+	{
+		"_id": "competence:foudre_des_ancetres",
+		"type": "competence",
+		"nom": "Esprit du faucon",
+		"icon": "🦅",
+		"animation": "animation:capa_totem",
+		"description": "L'esprit du faucon se pose sur l'épaule d'un compagnon et guide son regard.",
+		"vocation": "chaman",
+		"niveau": 4,
+		"mode": "active",
+		"cout_pm": 18,
+		"cible": "allie",
+		"portee": 4,
+		"effets": {
+			"buffs": {
+				"Ag": "6+{Cha/7}",
+				"Ch": 6
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:hurlement_de_la_meute",
+		"type": "competence",
+		"nom": "Hurlement d'effroi",
+		"icon": "🐺",
+		"animation": "animation:capa_appel_sauvage",
+		"description": "Un hurlement qui glace le sang de tout un groupe d'ennemis.",
+		"vocation": "chaman",
+		"niveau": 4,
+		"mode": "active",
+		"cout_pm": 18,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"Vol": "-4-{Vol/10}",
+				"F": -4
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:orage_ancestral",
+		"type": "competence",
+		"nom": "Pluie des ancêtres",
+		"icon": "🌧️",
+		"animation": "animation:capa_soin_nature",
+		"description": "Une pluie tiède tombe sur ses compagnons et referme lentement leurs plaies.",
+		"vocation": "chaman",
+		"niveau": 8,
+		"mode": "active",
+		"cout_pm": 33,
+		"cible": "allie",
+		"portee": 4,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"regen_pv": "2+{Cha/30}",
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:colere_des_ancetres",
+		"type": "competence",
+		"nom": "Marche des ancêtres",
+		"icon": "🥁",
+		"animation": "animation:capa_totem",
+		"description": "Les ancêtres marchent avec la troupe : chacun frappe et tient comme dix.",
+		"vocation": "chaman",
+		"niveau": 10,
+		"mode": "active",
+		"cout_pm": 40,
+		"cible": "soi",
+		"portee": 1,
+		"zone": {
+			"forme": "carre",
+			"origine": "lanceur",
+			"rayon": 2
+		},
+		"effets": {
+			"buffs": {
+				"F": "7+{Cha/10}",
+				"R": 7
+			},
+			"duree": 5
+		}
+	},
+	{
+		"_id": "competence:pluie_de_soufre",
+		"type": "competence",
+		"nom": "Brume sulfureuse",
+		"icon": "🌫️",
+		"animation": "animation:capa_soufre",
+		"description": "Une brume jaune qui amollit les chairs de ceux qu'elle enveloppe.",
+		"vocation": "demoniste",
+		"niveau": 3,
+		"mode": "active",
+		"cout_pm": 15,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"R": "-3-{Vol/10}",
+				"Vol": -3
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:lance_de_l_enfer",
+		"type": "competence",
+		"nom": "Transfusion impie",
+		"icon": "🩸",
+		"animation": "animation:capa_drain",
+		"description": "Il verse son propre sang dans les plaies d'un compagnon.",
+		"vocation": "demoniste",
+		"niveau": 4,
+		"mode": "active",
+		"cout_pm": 18,
+		"cible": "allie",
+		"portee": 4,
+		"effets": {
+			"pv": "14+{Vol/3}",
+			"cout_pv": 7
+		}
+	},
+	{
+		"_id": "competence:explosion_infernale",
+		"type": "competence",
+		"nom": "Cercle de terreur",
+		"icon": "😱",
+		"animation": "animation:capa_portail_infernal",
+		"description": "Un cercle de flammes noires où l'on ne voit plus que ses propres cauchemars.",
+		"vocation": "demoniste",
+		"niveau": 5,
+		"mode": "active",
+		"cout_pm": 21,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"Vol": "-4-{Vol/10}",
+				"Ag": -4
+			},
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:griffe_du_familier",
+		"type": "competence",
+		"nom": "Ombre du familier",
+		"icon": "👹",
+		"animation": "animation:capa_demon_buff",
+		"description": "Son familier se glisse dans l'ombre d'un compagnon et détourne les coups qui le visent.",
+		"vocation": "demoniste",
+		"niveau": 6,
+		"mode": "active",
+		"cout_pm": 25,
+		"cible": "allie",
+		"portee": 4,
+		"effets": {
+			"buffs": {
+				"Ag": "4+{Vol/12}"
+			},
+			"esquive": "5+{Vol/8}",
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:feu_de_l_ame",
+		"type": "competence",
+		"nom": "Marque de damnation",
+		"icon": "⛧",
+		"animation": "animation:capa_marque",
+		"description": "Une marque qui ronge la résistance de la cible : chaque coup la trouve plus tendre.",
+		"vocation": "demoniste",
+		"niveau": 7,
+		"mode": "active",
+		"cout_pm": 29,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"buffs": {
+				"R": "-8-{Vol/7}",
+				"Vol": -8
+			},
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:pacte_de_sang_majeur",
+		"type": "competence",
+		"nom": "Pacte de sang partagé",
+		"icon": "🩸",
+		"animation": "animation:capa_demon_buff",
+		"description": "Il paie de sa vie la fureur de tous ceux qui l'entourent.",
+		"vocation": "demoniste",
+		"niveau": 8,
+		"mode": "active",
+		"cout_pm": 33,
+		"cible": "soi",
+		"portee": 1,
+		"zone": {
+			"forme": "carre",
+			"origine": "lanceur",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"Int": "7+{Vol/8}",
+				"F": 7
+			},
+			"cout_pv": 12,
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:apocalypse",
+		"type": "competence",
+		"nom": "Ténèbres de l'abîme",
+		"icon": "🕳️",
+		"animation": "animation:capa_portail_infernal",
+		"description": "L'abîme s'ouvre sous les ennemis : la terreur les cloue sur place.",
+		"vocation": "demoniste",
+		"niveau": 10,
+		"mode": "active",
+		"cout_pm": 40,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		},
+		"effets": {
+			"buffs": {
+				"Vol": "-5-{Vol/12}",
+				"Ag": -5,
+				"V": -1
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:champ_de_ronces",
+		"type": "competence",
+		"nom": "Ronces entravantes",
+		"icon": "🌿",
+		"animation": "animation:capa_nature_buff",
+		"description": "Les ronces jaillissent et s'enroulent autour des chevilles ennemies.",
+		"vocation": "druide",
+		"niveau": 3,
+		"mode": "active",
+		"cout_pm": 15,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"Ag": "-3-{Int/10}",
+				"F": -3
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:fouet_de_liane",
+		"type": "competence",
+		"nom": "Liane de traction",
+		"icon": "🪢",
+		"animation": "animation:capa_nature_buff",
+		"description": "Une liane happe un compagnon et le dépose plus loin, hors de la mêlée.",
+		"vocation": "druide",
+		"niveau": 5,
+		"mode": "active",
+		"cout_pm": 21,
+		"cible": "allie",
+		"portee": 4,
+		"effets": {
+			"saut": 3
+		}
+	},
+	{
+		"_id": "competence:spores_etouffantes",
+		"type": "competence",
+		"nom": "Spores soporifiques",
+		"icon": "🍄",
+		"animation": "animation:capa_poison",
+		"description": "Un nuage de spores qui alourdit les paupières de tous ceux qui le respirent.",
+		"vocation": "druide",
+		"niveau": 5,
+		"mode": "active",
+		"cout_pm": 21,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"Ag": "-3-{Int/12}",
+				"F": -3,
+				"V": -1
+			},
+			"duree": 2
+		}
+	},
+	{
+		"_id": "competence:colere_de_la_foret",
+		"type": "competence",
+		"nom": "Mur de racines",
+		"icon": "🌳",
+		"animation": "animation:capa_roc",
+		"description": "Une haie de racines surgit devant lui et retient tout ce qui la traverse.",
+		"vocation": "druide",
+		"niveau": 6,
+		"mode": "active",
+		"cout_pm": 25,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "rectangle",
+			"origine": "lanceur",
+			"orientation": "cible",
+			"decalage": 1,
+			"longueur": 3,
+			"largeur": 1
+		},
+		"effets": {
+			"buffs": {
+				"Ag": "-5-{Int/8}",
+				"F": -5
+			},
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:pieu_de_bois_vivant",
+		"type": "competence",
+		"nom": "Greffe vivante",
+		"icon": "🌱",
+		"animation": "animation:capa_soin_nature",
+		"description": "Il greffe une écorce vivante sur les plaies d'un compagnon.",
+		"vocation": "druide",
+		"niveau": 7,
+		"mode": "active",
+		"cout_pm": 29,
+		"cible": "allie",
+		"portee": 4,
+		"effets": {
+			"buffs": {
+				"R": "5+{Vol/10}"
+			},
+			"regen_pv": "2+{Vol/25}",
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:rituel_du_cycle",
+		"type": "competence",
+		"nom": "Rituel du renouveau",
+		"icon": "♻️",
+		"animation": "animation:capa_soin_nature",
+		"description": "Un long chant qui rend à ses compagnons ce que le combat leur a pris.",
+		"vocation": "druide",
+		"niveau": 9,
+		"mode": "active",
+		"cout_pm": 48,
+		"incantation": 2,
+		"cible": "allie",
+		"portee": 4,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"pv": "17+{Vol/4}"
+		}
+	},
+	{
+		"_id": "competence:marais",
+		"type": "competence",
+		"nom": "Enlisement",
+		"icon": "🫠",
+		"animation": "animation:capa_eau",
+		"description": "Le sol se change en marais sous les ennemis, qui s'y enfoncent jusqu'aux genoux.",
+		"vocation": "druide",
+		"niveau": 9,
+		"mode": "active",
+		"cout_pm": 37,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		},
+		"effets": {
+			"buffs": {
+				"Ag": "-5-{Int/12}",
+				"F": -5,
+				"V": -1
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:fureur_elementaire",
+		"type": "competence",
+		"nom": "Égide élémentaire",
+		"icon": "🔰",
+		"animation": "animation:capa_bouclier",
+		"description": "Feu, glace, foudre et roc tournent autour de ses compagnons et les protègent.",
+		"vocation": "elementaliste",
+		"niveau": 10,
+		"mode": "active",
+		"cout_pm": 40,
+		"cible": "allie",
+		"portee": 4,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"R": "7+{Vol/10}"
+			},
+			"esquive": "4+{Vol/12}",
+			"duree": 5
+		}
+	},
+	{
+		"_id": "competence:eventail_de_folie",
+		"type": "competence",
+		"nom": "Éventail de confusion",
+		"icon": "🌀",
+		"animation": "animation:capa_impact_etincelles",
+		"animation_zone": "animation:capa_cone_folie",
+		"description": "Une vague d'images trompeuses : devant lui, plus personne ne sait où frapper.",
+		"vocation": "illusionniste",
+		"niveau": 6,
+		"mode": "active",
+		"cout_pm": 25,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cone",
+			"origine": "lanceur",
+			"orientation": "cible",
+			"decalage": 1,
+			"longueur": 4,
+			"angle": 90
+		},
+		"effets": {
+			"buffs": {
+				"Int": "-5-{Cha/10}",
+				"Vol": -5
+			},
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:lame_de_cauchemar",
+		"type": "competence",
+		"nom": "Reflets",
+		"icon": "🪞",
+		"animation": "animation:capa_double",
+		"description": "Trois reflets d'un compagnon dansent autour de lui ; l'ennemi frappe le mauvais.",
+		"vocation": "illusionniste",
+		"niveau": 7,
+		"mode": "active",
+		"cout_pm": 29,
+		"cible": "allie",
+		"portee": 4,
+		"effets": {
+			"buffs": {
+				"Ag": "4+{Cha/12}"
+			},
+			"esquive": "7+{Cha/8}",
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:missile_guide",
+		"type": "competence",
+		"nom": "Entrave arcanique",
+		"icon": "🔗",
+		"animation": "animation:capa_arcane",
+		"description": "Des anneaux de force enserrent l'esprit de la cible : ses sorts lui coûtent davantage d'effort.",
+		"vocation": "mage",
+		"niveau": 3,
+		"mode": "active",
+		"cout_pm": 15,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"buffs": {
+				"Int": "-5-{Int/8}",
+				"Vol": -5
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:explosion_arcanique",
+		"type": "competence",
+		"nom": "Onde de gravité",
+		"icon": "🌑",
+		"animation": "animation:capa_arcane",
+		"description": "Le sol pèse soudain plus lourd sous les pieds des ennemis rassemblés.",
+		"vocation": "mage",
+		"niveau": 4,
+		"mode": "active",
+		"cout_pm": 18,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"Ag": "-4-{Int/10}",
+				"F": -4
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:eclair_de_bataille",
+		"type": "competence",
+		"nom": "Accélération",
+		"icon": "⏩",
+		"animation": "animation:capa_enchantement",
+		"description": "Il trace une rune de vitesse sur un compagnon, dont les gestes se font plus vifs.",
+		"vocation": "mage",
+		"niveau": 5,
+		"mode": "active",
+		"cout_pm": 21,
+		"cible": "allie",
+		"portee": 4,
+		"effets": {
+			"buffs": {
+				"Ag": "6+{Int/7}"
+			},
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:tourbillon_arcanique",
+		"type": "competence",
+		"nom": "Dôme de déviation",
+		"icon": "🫧",
+		"animation": "animation:capa_bouclier",
+		"description": "Un dôme qui fait dévier les coups portés à ceux qui se tiennent près de lui.",
+		"vocation": "mage",
+		"niveau": 6,
+		"mode": "active",
+		"cout_pm": 25,
+		"cible": "soi",
+		"portee": 1,
+		"zone": {
+			"forme": "carre",
+			"origine": "lanceur",
+			"rayon": 1
+		},
+		"effets": {
+			"esquive": "5+{Int/8}",
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:lance_arcanique",
+		"type": "competence",
+		"nom": "Translation arcanique",
+		"icon": "🔄",
+		"animation": "animation:capa_saut",
+		"description": "Il échange sa place avec celle d'un compagnon en difficulté.",
+		"vocation": "mage",
+		"niveau": 7,
+		"mode": "active",
+		"cout_pm": 29,
+		"cible": "allie",
+		"portee": 6,
+		"effets": {
+			"echange": 1
+		}
+	},
+	{
+		"_id": "competence:decharge",
+		"type": "competence",
+		"nom": "Onde de stupeur",
+		"icon": "😵",
+		"animation": "animation:capa_impact_etincelles",
+		"animation_zone": "animation:capa_cone_decharge",
+		"description": "Une décharge sans flamme qui fige les premiers rangs une poignée d'instants.",
+		"vocation": "mage",
+		"niveau": 7,
+		"mode": "active",
+		"cout_pm": 29,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cone",
+			"origine": "lanceur",
+			"orientation": "cible",
+			"decalage": 1,
+			"longueur": 3,
+			"angle": 90
+		},
+		"effets": {
+			"buffs": {
+				"Ag": "-5-{Int/10}",
+				"Int": -5,
+				"V": -1
+			},
+			"duree": 2
+		}
+	},
+	{
+		"_id": "competence:bombardement",
+		"type": "competence",
+		"nom": "Pesanteur",
+		"icon": "⚓",
+		"animation": "animation:capa_meteore",
+		"description": "Toute une zone s'alourdit : les ennemis s'y traînent comme dans la vase.",
+		"vocation": "mage",
+		"niveau": 8,
+		"mode": "active",
+		"cout_pm": 33,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		},
+		"effets": {
+			"buffs": {
+				"Ag": "-5-{Int/12}",
+				"F": -5,
+				"V": -1
+			},
+			"duree": 2
+		}
+	},
+	{
+		"_id": "competence:tempete_arcanique",
+		"type": "competence",
+		"nom": "Bulle temporelle",
+		"icon": "⏳",
+		"animation": "animation:capa_enchantement",
+		"description": "Il plie le temps autour d'un compagnon, qui agit plus vite que le monde.",
+		"vocation": "mage",
+		"niveau": 9,
+		"mode": "active",
+		"cout_pm": 48,
+		"incantation": 2,
+		"cible": "allie",
+		"portee": 4,
+		"effets": {
+			"buffs": {
+				"Ag": "5+{Int/10}",
+				"V": 1
+			},
+			"duree": 2
+		}
+	},
+	{
+		"_id": "competence:nova_arcanique",
+		"type": "competence",
+		"nom": "Silence de masse",
+		"icon": "🤐",
+		"animation": "animation:capa_arcane",
+		"description": "Une onde qui étouffe le mana de tous les ennemis alentour.",
+		"vocation": "mage",
+		"niveau": 10,
+		"mode": "active",
+		"cout_pm": 40,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		},
+		"effets": {
+			"buffs": {
+				"Int": "-6-{Int/10}",
+				"Vol": -6
+			},
+			"duree": 5
+		}
+	},
+	{
+		"_id": "competence:paume_de_lumiere",
+		"type": "competence",
+		"nom": "Paume apaisante",
+		"icon": "🤲",
+		"animation": "animation:capa_soin_sacre",
+		"description": "Une paume posée sur un compagnon, et le souffle intérieur referme ses plaies.",
+		"vocation": "moine",
+		"niveau": 5,
+		"mode": "active",
+		"cout_pm": 21,
+		"cible": "allie",
+		"portee": 1,
+		"effets": {
+			"pv": "13+{Vol/4}"
+		}
+	},
+	{
+		"_id": "competence:explosion_de_cadavre",
+		"type": "competence",
+		"nom": "Miasme",
+		"icon": "☠️",
+		"animation": "animation:capa_poison",
+		"description": "Un cadavre se répand en miasme : les chairs vivantes alentour s'affaiblissent.",
+		"vocation": "necromancien",
+		"niveau": 5,
+		"mode": "active",
+		"cout_pm": 21,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"R": "-4-{Vol/10}",
+				"F": -4
+			},
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:pacte_de_sang_noir",
+		"type": "competence",
+		"nom": "Armure d'ossements",
+		"icon": "🦴",
+		"animation": "animation:capa_tombeau",
+		"description": "Des os poussent sous la peau d'un compagnon et le cuirassent.",
+		"vocation": "necromancien",
+		"niveau": 5,
+		"mode": "active",
+		"cout_pm": 21,
+		"cible": "allie",
+		"portee": 4,
+		"effets": {
+			"buffs": {
+				"R": "6+{Int/7}"
+			},
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:rituel_de_mort",
+		"type": "competence",
+		"nom": "Sursis",
+		"icon": "⌛",
+		"animation": "animation:capa_levee_morts",
+		"description": "La mort elle-même accorde un sursis à un compagnon : ses plaies cessent de compter.",
+		"vocation": "necromancien",
+		"niveau": 9,
+		"mode": "active",
+		"cout_pm": 48,
+		"incantation": 2,
+		"cible": "allie",
+		"portee": 4,
+		"effets": {
+			"buffs": {
+				"R": "7+{Int/10}"
+			},
+			"regen_pv": "2+{Int/20}",
+			"duree": 5
+		}
+	},
+	{
+		"_id": "competence:nuee_de_spectres",
+		"type": "competence",
+		"nom": "Linceul de spectres",
+		"icon": "👻",
+		"animation": "animation:capa_spectre",
+		"description": "Des spectres enveloppent les ennemis et glacent leurs membres.",
+		"vocation": "necromancien",
+		"niveau": 9,
+		"mode": "active",
+		"cout_pm": 37,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"Ag": "-6-{Vol/10}",
+				"F": -6,
+				"V": -1
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:mot_de_mort",
+		"type": "competence",
+		"nom": "Mot d'effroi",
+		"icon": "💀",
+		"animation": "animation:capa_spectre",
+		"description": "Un mot qui n'aurait jamais dû être dit : la cible se fige d'horreur.",
+		"vocation": "necromancien",
+		"niveau": 10,
+		"mode": "active",
+		"cout_pm": 40,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"buffs": {
+				"Vol": "-10-{Vol/7}",
+				"R": -10,
+				"V": -2
+			},
+			"duree": 2
+		}
+	},
+	{
+		"_id": "competence:colere_divine",
+		"type": "competence",
+		"nom": "Défi sacré",
+		"icon": "📯",
+		"animation": "animation:capa_aura_sacree",
+		"description": "Il élève sa lumière : tous les ennemis proches se détournent de ses compagnons pour lui.",
+		"vocation": "paladin",
+		"niveau": 8,
+		"mode": "active",
+		"cout_pm": 33,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 1,
+		"zone": {
+			"forme": "carre",
+			"origine": "lanceur",
+			"rayon": 2
+		},
+		"effets": {
+			"provocation": 1,
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:eclat_divin",
+		"type": "competence",
+		"nom": "Voile sacré",
+		"icon": "⛪",
+		"animation": "animation:capa_soin_sacre",
+		"description": "Une lueur enveloppe un compagnon : les coups glissent sur lui.",
+		"vocation": "pretre",
+		"niveau": 4,
+		"mode": "active",
+		"cout_pm": 18,
+		"cible": "allie",
+		"portee": 4,
+		"effets": {
+			"esquive": "4+{Vol/8}",
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:lumiere_de_l_aube",
+		"type": "competence",
+		"nom": "Aube éblouissante",
+		"icon": "🌅",
+		"animation": "animation:capa_eblouissant",
+		"description": "Une lumière d'aube aveuglante qui fait chanceler les ennemis rassemblés.",
+		"vocation": "pretre",
+		"niveau": 4,
+		"mode": "active",
+		"cout_pm": 18,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"Ag": "-4-{Vol/10}",
+				"F": -4
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:colonne_de_lumiere",
+		"type": "competence",
+		"nom": "Contrition",
+		"icon": "🙏",
+		"animation": "animation:capa_lumiere",
+		"description": "La lumière fait ployer la cible sous le poids de ses fautes.",
+		"vocation": "pretre",
+		"niveau": 6,
+		"mode": "active",
+		"cout_pm": 25,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"buffs": {
+				"F": "-7-{Vol/7}",
+				"Int": -7
+			},
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:chatiment_divin",
+		"type": "competence",
+		"nom": "Halo de protection",
+		"icon": "😇",
+		"animation": "animation:capa_lumiere_zone",
+		"description": "Un halo descend sur ses compagnons et détourne les coups qui leur sont portés.",
+		"vocation": "pretre",
+		"niveau": 7,
+		"mode": "active",
+		"cout_pm": 29,
+		"cible": "allie",
+		"portee": 4,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"esquive": "4+{Vol/12}",
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:jugement_celeste",
+		"type": "competence",
+		"nom": "Verdict céleste",
+		"icon": "⚖️",
+		"animation": "animation:capa_descente_celeste",
+		"description": "Le ciel juge la cible : elle plie le genou sous le verdict.",
+		"vocation": "pretre",
+		"niveau": 8,
+		"mode": "active",
+		"cout_pm": 33,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"buffs": {
+				"F": "-9-{Vol/7}",
+				"Int": -9,
+				"V": -1
+			},
+			"duree": 2
+		}
+	},
+	{
+		"_id": "competence:courroux_du_ciel",
+		"type": "competence",
+		"nom": "Interdit céleste",
+		"icon": "🌩️",
+		"animation": "animation:capa_lumiere_zone",
+		"description": "Le ciel interdit toute une zone aux impies, qui s'y traînent sans force.",
+		"vocation": "pretre",
+		"niveau": 10,
+		"mode": "active",
+		"cout_pm": 40,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		},
+		"effets": {
+			"buffs": {
+				"F": "-5-{Vol/12}",
+				"Int": -5,
+				"V": -1
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:flamme_noire",
+		"type": "competence",
+		"nom": "Huile consacrée",
+		"icon": "🫗",
+		"animation": "animation:capa_lame_sacree",
+		"description": "Il oint l'arme d'un compagnon d'une huile qui mord la chair maudite.",
+		"vocation": "repurgateur",
+		"niveau": 3,
+		"mode": "active",
+		"cout_pm": 15,
+		"cible": "allie",
+		"portee": 4,
+		"effets": {
+			"buffs": {
+				"F": "5+{Vol/8}",
+				"Vol": 5
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:soufre",
+		"type": "competence",
+		"nom": "Cercle de sel",
+		"icon": "🧂",
+		"animation": "animation:capa_aura_sacree",
+		"description": "Un cercle de sel où ses compagnons tiennent mieux face aux puissances impies.",
+		"vocation": "repurgateur",
+		"niveau": 4,
+		"mode": "active",
+		"cout_pm": 18,
+		"cible": "allie",
+		"portee": 4,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"Vol": "5+{Vol/8}",
+				"R": 5
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:feu_de_l_enfer_retourne",
+		"type": "competence",
+		"nom": "Sceau du proscrit",
+		"icon": "⛔",
+		"animation": "animation:capa_marque",
+		"description": "Il trace l'interdit : là, nulle magie ne se puise sans douleur.",
+		"vocation": "repurgateur",
+		"niveau": 8,
+		"mode": "active",
+		"cout_pm": 33,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 5,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		},
+		"effets": {
+			"buffs": {
+				"Vol": "-6-{Int/8}",
+				"Int": -6
+			},
+			"duree": 4
+		}
+	},
+	{
+		"_id": "competence:rituel_d_exorcisme",
+		"type": "competence",
+		"nom": "Veillée du chasseur",
+		"icon": "🕯️",
+		"animation": "animation:capa_meditation",
+		"description": "Une longue prière sur un compagnon blessé, qui se relève plus ferme.",
+		"vocation": "repurgateur",
+		"niveau": 9,
+		"mode": "active",
+		"cout_pm": 48,
+		"incantation": 2,
+		"cible": "allie",
+		"portee": 4,
+		"effets": {
+			"buffs": {
+				"Vol": "9+{Vol/7}"
+			},
+			"regen_pv": "2+{Vol/20}",
+			"duree": 5
+		}
+	},
+	{
+		"_id": "competence:fleau_des_demons",
+		"type": "competence",
+		"nom": "Mise au ban",
+		"icon": "🔨",
+		"animation": "animation:capa_marque",
+		"description": "Il prononce le ban : la créature maudite chancelle et sa volonté se délite.",
+		"vocation": "repurgateur",
+		"niveau": 10,
+		"mode": "active",
+		"cout_pm": 40,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 5,
+		"effets": {
+			"buffs": {
+				"Vol": "-10-{Int/7}",
+				"Int": -10,
+				"V": -1
+			},
+			"duree": 3
+		}
+	},
+	{
+		"_id": "competence:explosion_runique",
+		"type": "competence",
+		"nom": "Rune de défi",
+		"icon": "📯",
+		"animation": "animation:capa_aura_bataille",
+		"description": "Une rune de défi s'embrase : les ennemis proches n'ont plus d'yeux que pour lui.",
+		"vocation": "templier",
+		"niveau": 5,
+		"mode": "active",
+		"cout_pm": 21,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 1,
+		"zone": {
+			"forme": "carre",
+			"origine": "lanceur",
+			"rayon": 1
+		},
+		"effets": {
+			"provocation": 1,
+			"duree": 2
+		}
+	},
+	{
+		"_id": "competence:tempete_runique",
+		"type": "competence",
+		"nom": "Sceau d'interdiction",
+		"icon": "🚫",
+		"animation": "animation:capa_marque",
+		"description": "Les runes de l'ordre se gravent dans le sol et brisent l'élan de ceux qui s'y tiennent.",
+		"vocation": "templier",
+		"niveau": 9,
+		"mode": "active",
+		"cout_pm": 37,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 5,
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		},
+		"effets": {
+			"buffs": {
+				"F": "-6-{Vol/10}",
+				"Int": -6
+			},
+			"duree": 5
+		}
+	},
+	{
+		"_id": "sort:projectile_savant",
+		"type": "sort",
+		"nom": "Projectile savant",
+		"icon": "🔮",
+		"description": "Plus le mage est savant, plus le trait est lourd et plus il porte loin.",
+		"magie": "Bataille",
+		"niveau": 3,
+		"cout_pm": 19,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": "4+{Int/15}",
+		"effets": {
+			"degats": "2D{Int/8}"
+		},
+		"composants": [
+			{
+				"item": "item:Cristal_canalisation",
+				"consomme": false,
+				"bonus": {
+					"degats": "1"
+				}
+			},
+			{
+				"item": "item:poudre_alchimique",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D6"
+				}
+			}
+		],
+		"animation": "animation:capa_arcane"
+	},
+	{
+		"_id": "sort:explosion_arcanique",
+		"type": "sort",
+		"nom": "Explosion arcanique",
+		"icon": "💥",
+		"description": "Une sphère d'énergie éclate au milieu des ennemis.",
+		"magie": "Bataille",
+		"niveau": 4,
+		"cout_pm": 22,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D6+{Int/8}"
+		},
+		"composants": [
+			{
+				"item": "item:Cristal_canalisation",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:poudre_alchimique",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_arcane",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		}
+	},
+	{
+		"_id": "sort:explosion_runique",
+		"type": "sort",
+		"nom": "Explosion runique",
+		"icon": "💥",
+		"description": "Une rune gravée explose au milieu des ennemis.",
+		"magie": "Bataille",
+		"niveau": 5,
+		"cout_pm": 26,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 5,
+		"effets": {
+			"degats": "2D8+{F/10}"
+		},
+		"composants": [
+			{
+				"item": "item:Cristal_canalisation",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:poudre_alchimique",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_explosion_feu",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		}
+	},
+	{
+		"_id": "sort:eclair_de_bataille",
+		"type": "sort",
+		"nom": "Éclair de bataille",
+		"icon": "⚡",
+		"description": "La foudre des champs de bataille, maîtrisée.",
+		"magie": "Bataille",
+		"niveau": 5,
+		"cout_pm": 26,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D8+{Int/12}"
+		},
+		"composants": [
+			{
+				"item": "item:Cristal_canalisation",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:poudre_alchimique",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_foudre"
+	},
+	{
+		"_id": "sort:tourbillon_arcanique",
+		"type": "sort",
+		"nom": "Tourbillon arcanique",
+		"icon": "🌀",
+		"description": "L'énergie tourbillonne autour de lui et frappe tout ce qu'elle touche.",
+		"magie": "Bataille",
+		"niveau": 6,
+		"cout_pm": 31,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D8+{Int/12}"
+		},
+		"composants": [
+			{
+				"item": "item:Cristal_canalisation",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:poudre_alchimique",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_arcane",
+		"zone": {
+			"forme": "carre",
+			"origine": "lanceur",
+			"rayon": 1
+		}
+	},
+	{
+		"_id": "sort:decharge",
+		"type": "sort",
+		"nom": "Décharge",
+		"icon": "⚡",
+		"description": "Une décharge en éventail qui grille les premiers rangs.",
+		"magie": "Bataille",
+		"niveau": 7,
+		"cout_pm": 36,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D8+{Int/10}"
+		},
+		"composants": [
+			{
+				"item": "item:Cristal_canalisation",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:poudre_alchimique",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_impact_etincelles",
+		"zone": {
+			"forme": "cone",
+			"origine": "lanceur",
+			"orientation": "cible",
+			"decalage": 1,
+			"longueur": 3,
+			"angle": 90
+		},
+		"animation_zone": "animation:capa_cone_decharge"
+	},
+	{
+		"_id": "sort:lance_arcanique",
+		"type": "sort",
+		"nom": "Lance arcanique",
+		"icon": "🔱",
+		"description": "Une lance de pure énergie qui transperce tout.",
+		"magie": "Bataille",
+		"niveau": 7,
+		"cout_pm": 36,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D10+{Int/8}"
+		},
+		"composants": [
+			{
+				"item": "item:Cristal_canalisation",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:poudre_alchimique",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_arcane"
+	},
+	{
+		"_id": "sort:bombardement",
+		"type": "sort",
+		"nom": "Bombardement",
+		"icon": "☄️",
+		"description": "Une pluie de projectiles s'abat sur la zone.",
+		"magie": "Bataille",
+		"niveau": 8,
+		"cout_pm": 41,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D8+{Int/15}"
+		},
+		"composants": [
+			{
+				"item": "item:Cristal_canalisation",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:poudre_alchimique",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_meteore",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:tempete_arcanique",
+		"type": "sort",
+		"nom": "Tempête arcanique",
+		"icon": "⛈️",
+		"description": "Il rassemble l'énergie pendant de longs instants avant de la libérer.",
+		"magie": "Bataille",
+		"niveau": 9,
+		"cout_pm": 60,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "5D10+{Int/7}"
+		},
+		"composants": [
+			{
+				"item": "item:Cristal_canalisation",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:poudre_alchimique",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_arcane",
+		"incantation": 3
+	},
+	{
+		"_id": "sort:tempete_runique",
+		"type": "sort",
+		"nom": "Tempête runique",
+		"icon": "🌩️",
+		"description": "Les runes s'embrasent et la foudre tombe sur les ennemis.",
+		"magie": "Bataille",
+		"niveau": 9,
+		"cout_pm": 46,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 5,
+		"effets": {
+			"degats": "3D8+{F/10}"
+		},
+		"composants": [
+			{
+				"item": "item:Cristal_canalisation",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:poudre_alchimique",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_foudre",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:nova_arcanique",
+		"type": "sort",
+		"nom": "Nova arcanique",
+		"icon": "💥",
+		"description": "Une explosion d'énergie pure tout autour de lui.",
+		"magie": "Bataille",
+		"niveau": 10,
+		"cout_pm": 50,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D8+{Int/10}"
+		},
+		"composants": [
+			{
+				"item": "item:Cristal_canalisation",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:poudre_alchimique",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_arcane",
+		"zone": {
+			"forme": "carre",
+			"origine": "lanceur",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:flamme_noire",
+		"type": "sort",
+		"nom": "Flamme noire",
+		"icon": "🔥",
+		"description": "Une flamme infernale retournée contre ses semblables.",
+		"magie": "Démonologie",
+		"niveau": 3,
+		"cout_pm": 19,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 5,
+		"effets": {
+			"degats": "2D8+{Vol/12}"
+		},
+		"composants": [
+			{
+				"item": "item:Sel_noir",
+				"consomme": false,
+				"bonus": {
+					"degats": "1"
+				}
+			},
+			{
+				"item": "item:Sang_demon_seche",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D6"
+				}
+			}
+		],
+		"animation": "animation:capa_projectile_infernal"
+	},
+	{
+		"_id": "sort:pluie_de_soufre",
+		"type": "sort",
+		"nom": "Pluie de soufre",
+		"icon": "🌋",
+		"description": "Une pluie de soufre ardent sur les ennemis.",
+		"magie": "Démonologie",
+		"niveau": 3,
+		"cout_pm": 19,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D6+{Int/12}"
+		},
+		"composants": [
+			{
+				"item": "item:Sel_noir",
+				"consomme": false,
+				"bonus": {
+					"degats": "1"
+				}
+			},
+			{
+				"item": "item:Sang_demon_seche",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D6"
+				}
+			}
+		],
+		"animation": "animation:capa_soufre",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		}
+	},
+	{
+		"_id": "sort:brasier_du_pacte",
+		"type": "sort",
+		"nom": "Brasier du pacte",
+		"icon": "🔥",
+		"description": "Un feu d'en bas, que le démon fait payer en sang — moins cher à qui le tient en laisse.",
+		"magie": "Démonologie",
+		"niveau": 4,
+		"cout_pm": 22,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 5,
+		"effets": {
+			"degats": "2D8+{Int/10}",
+			"cout_pv": "6-{Vol/15}"
+		},
+		"composants": [
+			{
+				"item": "item:Sel_noir",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Sang_demon_seche",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_projectile_infernal"
+	},
+	{
+		"_id": "sort:soufre",
+		"type": "sort",
+		"nom": "Soufre",
+		"icon": "💨",
+		"description": "Une bouffée de soufre qui suffoque tout le nid.",
+		"magie": "Démonologie",
+		"niveau": 4,
+		"cout_pm": 22,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 5,
+		"effets": {
+			"degats": "2D6+{Vol/8}"
+		},
+		"composants": [
+			{
+				"item": "item:Sel_noir",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Sang_demon_seche",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_soufre",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		}
+	},
+	{
+		"_id": "sort:explosion_infernale",
+		"type": "sort",
+		"nom": "Explosion infernale",
+		"icon": "💥",
+		"description": "Une explosion de feu noir.",
+		"magie": "Démonologie",
+		"niveau": 5,
+		"cout_pm": 26,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D6+{Int/10}"
+		},
+		"composants": [
+			{
+				"item": "item:Sel_noir",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Sang_demon_seche",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_explosion_feu",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:griffe_du_familier",
+		"type": "sort",
+		"nom": "Griffe du familier",
+		"icon": "👹",
+		"description": "Il ouvre à peine. Ce qui passe la main de l'autre côté fait le travail et repart.",
+		"magie": "Démonologie",
+		"niveau": 6,
+		"cout_pm": 31,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D10+6",
+			"drain_pv": 35
+		},
+		"composants": [
+			{
+				"item": "item:Sel_noir",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Sang_demon_seche",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_impact_plaie",
+		"zone": {
+			"forme": "cone",
+			"origine": "lanceur",
+			"orientation": "cible",
+			"longueur": 2,
+			"decalage": 1,
+			"angle": 90
+		},
+		"animation_zone": "animation:capa_cone_griffe"
+	},
+	{
+		"_id": "sort:feu_de_l_ame",
+		"type": "sort",
+		"nom": "Feu de l'âme",
+		"icon": "🔥",
+		"description": "Un feu qui brûle l'âme de la cible.",
+		"magie": "Démonologie",
+		"niveau": 7,
+		"cout_pm": 36,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D10+{Int/8}"
+		},
+		"composants": [
+			{
+				"item": "item:Sel_noir",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Sang_demon_seche",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_projectile_infernal"
+	},
+	{
+		"_id": "sort:feu_de_l_enfer_retourne",
+		"type": "sort",
+		"nom": "Feu de l'enfer retourné",
+		"icon": "🔥",
+		"description": "Il retourne le feu des démons contre leur nid.",
+		"magie": "Démonologie",
+		"niveau": 8,
+		"cout_pm": 41,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 5,
+		"effets": {
+			"degats": "3D8+{Vol/15}"
+		},
+		"composants": [
+			{
+				"item": "item:Sel_noir",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:Sang_demon_seche",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_explosion_feu",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:pacte_de_sang_majeur",
+		"type": "sort",
+		"nom": "Pacte de sang majeur",
+		"icon": "🩸",
+		"description": "Un pacte majeur, payé au prix fort.",
+		"magie": "Démonologie",
+		"niveau": 8,
+		"cout_pm": 41,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "4D10+{Int/6}",
+			"cout_pv": 12
+		},
+		"composants": [
+			{
+				"item": "item:Sel_noir",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:Sang_demon_seche",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_rage"
+	},
+	{
+		"_id": "sort:rituel_d_exorcisme",
+		"type": "sort",
+		"nom": "Rituel d'exorcisme",
+		"icon": "📿",
+		"description": "Un rite lent, qui chasse ce qui ne devrait pas être là. Une volonté ferme en abrège les versets.",
+		"magie": "Démonologie",
+		"niveau": 9,
+		"cout_pm": 60,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 5,
+		"effets": {
+			"degats": "5D10+{Vol/6}"
+		},
+		"composants": [
+			{
+				"item": "item:Sel_noir",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:Sang_demon_seche",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_lumiere_zone",
+		"incantation": "5-{Vol/30}"
+	},
+	{
+		"_id": "sort:apocalypse",
+		"type": "sort",
+		"nom": "Apocalypse",
+		"icon": "🌋",
+		"description": "Le ciel s'ouvre et le feu infernal tombe.",
+		"magie": "Démonologie",
+		"niveau": 10,
+		"cout_pm": 50,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D10+{Int/12}"
+		},
+		"composants": [
+			{
+				"item": "item:Sel_noir",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:Sang_demon_seche",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_meteore",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:fleau_des_demons",
+		"type": "sort",
+		"nom": "Fléau des démons",
+		"icon": "😈",
+		"description": "La flamme qui a chassé les démons de trois provinces.",
+		"magie": "Démonologie",
+		"niveau": 10,
+		"cout_pm": 50,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 5,
+		"effets": {
+			"degats": "5D10+{Vol/6}"
+		},
+		"composants": [
+			{
+				"item": "item:Sel_noir",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:Sang_demon_seche",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_projectile_infernal"
+	},
+	{
+		"_id": "sort:eventail_de_folie",
+		"type": "sort",
+		"nom": "Éventail de folie",
+		"icon": "🌀",
+		"description": "Une vague de démence qui déferle devant lui.",
+		"magie": "Illusoire",
+		"niveau": 6,
+		"cout_pm": 31,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D6+{Int/10}"
+		},
+		"composants": [
+			{
+				"item": "item:Plume_d_oie",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Poudre_de_miroir",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_impact_etincelles",
+		"zone": {
+			"forme": "cone",
+			"origine": "lanceur",
+			"orientation": "cible",
+			"decalage": 1,
+			"longueur": 4,
+			"angle": 90
+		},
+		"animation_zone": "animation:capa_cone_folie"
+	},
+	{
+		"_id": "sort:lame_de_cauchemar",
+		"type": "sort",
+		"nom": "Lame de cauchemar",
+		"icon": "🗡️",
+		"description": "Une lame forgée dans les cauchemars de la cible.",
+		"magie": "Illusoire",
+		"niveau": 7,
+		"cout_pm": 36,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D10+{Int/8}"
+		},
+		"composants": [
+			{
+				"item": "item:Plume_d_oie",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Poudre_de_miroir",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_spectre"
+	},
+	{
+		"_id": "sort:champ_de_ronces",
+		"type": "sort",
+		"nom": "Champ de ronces",
+		"icon": "🌾",
+		"description": "Le sol se couvre de ronces acérées sous les ennemis.",
+		"magie": "Nature",
+		"niveau": 3,
+		"cout_pm": 19,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D6+{Vol/12}"
+		},
+		"composants": [
+			{
+				"item": "item:Seve_de_chene",
+				"consomme": false,
+				"bonus": {
+					"degats": "1"
+				}
+			},
+			{
+				"item": "item:Herbes_a_bruler",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D6"
+				}
+			}
+		],
+		"animation": "animation:capa_griffe",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		}
+	},
+	{
+		"_id": "sort:foudre_des_ancetres",
+		"type": "sort",
+		"nom": "Foudre des ancêtres",
+		"icon": "⚡",
+		"description": "Les ancêtres frappent du haut des nuages.",
+		"magie": "Nature",
+		"niveau": 4,
+		"cout_pm": 22,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D8+{Vol/8}"
+		},
+		"composants": [
+			{
+				"item": "item:Seve_de_chene",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Herbes_a_bruler",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_foudre"
+	},
+	{
+		"_id": "sort:hurlement_de_la_meute",
+		"type": "sort",
+		"nom": "Hurlement de la meute",
+		"icon": "🐺",
+		"description": "Un hurlement qui fait trembler tout un groupe d'ennemis.",
+		"magie": "Nature",
+		"niveau": 4,
+		"cout_pm": 22,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D6+{Vol/8}"
+		},
+		"composants": [
+			{
+				"item": "item:Seve_de_chene",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Herbes_a_bruler",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_appel_sauvage",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		}
+	},
+	{
+		"_id": "sort:fouet_de_liane",
+		"type": "sort",
+		"nom": "Fouet de liane",
+		"icon": "🌿",
+		"description": "Une liane épaisse qui claque comme un fouet.",
+		"magie": "Nature",
+		"niveau": 5,
+		"cout_pm": 26,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D8+{Vol/12}"
+		},
+		"composants": [
+			{
+				"item": "item:Seve_de_chene",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Herbes_a_bruler",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_nature_buff"
+	},
+	{
+		"_id": "sort:spores_etouffantes",
+		"type": "sort",
+		"nom": "Spores étouffantes",
+		"icon": "🍄",
+		"description": "Un nuage de spores qui s'abat sur les ennemis.",
+		"magie": "Nature",
+		"niveau": 5,
+		"cout_pm": 26,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D6+{Vol/10}"
+		},
+		"composants": [
+			{
+				"item": "item:Seve_de_chene",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Herbes_a_bruler",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_poison",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:colere_de_la_foret",
+		"type": "sort",
+		"nom": "Colère de la forêt",
+		"icon": "🌲",
+		"description": "Des branches fouettent le premier rang ennemi.",
+		"magie": "Nature",
+		"niveau": 6,
+		"cout_pm": 31,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D6+{Vol/8}"
+		},
+		"composants": [
+			{
+				"item": "item:Seve_de_chene",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Herbes_a_bruler",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_griffe",
+		"zone": {
+			"forme": "rectangle",
+			"origine": "lanceur",
+			"orientation": "cible",
+			"decalage": 1,
+			"longueur": 1,
+			"largeur": 3
+		}
+	},
+	{
+		"_id": "sort:pieu_de_bois_vivant",
+		"type": "sort",
+		"nom": "Pieu de bois vivant",
+		"icon": "🪵",
+		"description": "Une souche jaillit du sol comme une lance.",
+		"magie": "Nature",
+		"niveau": 7,
+		"cout_pm": 36,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D10+{Vol/8}"
+		},
+		"composants": [
+			{
+				"item": "item:Seve_de_chene",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Herbes_a_bruler",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_roc"
+	},
+	{
+		"_id": "sort:orage_ancestral",
+		"type": "sort",
+		"nom": "Orage ancestral",
+		"icon": "⛈️",
+		"description": "Les ancêtres déchaînent l'orage sur les ennemis.",
+		"magie": "Nature",
+		"niveau": 8,
+		"cout_pm": 41,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D8+{Vol/15}"
+		},
+		"composants": [
+			{
+				"item": "item:Seve_de_chene",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:Herbes_a_bruler",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_foudre",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:marais",
+		"type": "sort",
+		"nom": "Marais",
+		"icon": "🐸",
+		"description": "Le sol devient un marais qui engloutit les ennemis.",
+		"magie": "Nature",
+		"niveau": 9,
+		"cout_pm": 46,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D8+{Vol/10}"
+		},
+		"composants": [
+			{
+				"item": "item:Seve_de_chene",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:Herbes_a_bruler",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_eau",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:rituel_du_cycle",
+		"type": "sort",
+		"nom": "Rituel du cycle",
+		"icon": "♻️",
+		"description": "Un rituel lent qui retourne la cible à la terre.",
+		"magie": "Nature",
+		"niveau": 9,
+		"cout_pm": 60,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "5D10+{Vol/7}"
+		},
+		"composants": [
+			{
+				"item": "item:Seve_de_chene",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:Herbes_a_bruler",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_nature_buff",
+		"incantation": 3
+	},
+	{
+		"_id": "sort:colere_des_ancetres",
+		"type": "sort",
+		"nom": "Colère des ancêtres",
+		"icon": "⚡",
+		"description": "Les ancêtres frappent tout autour de lui.",
+		"magie": "Nature",
+		"niveau": 10,
+		"cout_pm": 50,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D8+{Vol/10}"
+		},
+		"composants": [
+			{
+				"item": "item:Seve_de_chene",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:Herbes_a_bruler",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_foudre",
+		"zone": {
+			"forme": "carre",
+			"origine": "lanceur",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:explosion_de_cadavre",
+		"type": "sort",
+		"nom": "Explosion de cadavre",
+		"icon": "💥",
+		"description": "Un cadavre éclate au milieu des ennemis.",
+		"magie": "Nécromancie",
+		"niveau": 5,
+		"cout_pm": 26,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D6+{Int/10}"
+		},
+		"composants": [
+			{
+				"item": "item:os",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:sang",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_explosion_feu",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:pacte_de_sang_noir",
+		"type": "sort",
+		"nom": "Pacte de sang noir",
+		"icon": "🩸",
+		"description": "Il paie de son sang un sort de mort.",
+		"magie": "Nécromancie",
+		"niveau": 5,
+		"cout_pm": 26,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D8+{Int/6}",
+			"cout_pv": 8
+		},
+		"composants": [
+			{
+				"item": "item:os",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:sang",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_drain"
+	},
+	{
+		"_id": "sort:nuee_de_spectres",
+		"type": "sort",
+		"nom": "Nuée de spectres",
+		"icon": "👻",
+		"description": "Des spectres tourbillonnent autour de lui et frappent.",
+		"magie": "Nécromancie",
+		"niveau": 9,
+		"cout_pm": 46,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D8+{Int/15}"
+		},
+		"composants": [
+			{
+				"item": "item:os",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:sang",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_spectre",
+		"zone": {
+			"forme": "carre",
+			"origine": "lanceur",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:rituel_de_mort",
+		"type": "sort",
+		"nom": "Rituel de mort",
+		"icon": "⚰️",
+		"description": "Un rituel long qui arrache la vie de la cible.",
+		"magie": "Nécromancie",
+		"niveau": 9,
+		"cout_pm": 60,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "5D10+{Int/7}"
+		},
+		"composants": [
+			{
+				"item": "item:os",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:sang",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_tombeau",
+		"incantation": 3
+	},
+	{
+		"_id": "sort:mot_de_mort",
+		"type": "sort",
+		"nom": "Mot de mort",
+		"icon": "💀",
+		"description": "Un mot que seuls les morts connaissent.",
+		"magie": "Nécromancie",
+		"niveau": 10,
+		"cout_pm": 50,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "5D10+{Int/6}"
+		},
+		"composants": [
+			{
+				"item": "item:os",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:sang",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_spectre"
+	},
+	{
+		"_id": "sort:lumiere_de_l_aube",
+		"type": "sort",
+		"nom": "Lumière de l'aube",
+		"icon": "🌅",
+		"description": "Une lumière aveuglante sur le groupe ennemi.",
+		"magie": "Sainte",
+		"niveau": 4,
+		"cout_pm": 22,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D6+{Vol/8}"
+		},
+		"composants": [
+			{
+				"item": "item:encens",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Eau_benite",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_lumiere_zone",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 1
+		}
+	},
+	{
+		"_id": "sort:eclat_divin",
+		"type": "sort",
+		"nom": "Éclat divin",
+		"icon": "🌟",
+		"description": "Un éclat de pure divinité.",
+		"magie": "Sainte",
+		"niveau": 4,
+		"cout_pm": 22,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D8+{Vol/8}"
+		},
+		"composants": [
+			{
+				"item": "item:encens",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Eau_benite",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_lumiere"
+	},
+	{
+		"_id": "sort:paume_de_lumiere",
+		"type": "sort",
+		"nom": "Paume de lumière",
+		"icon": "☀️",
+		"description": "Une paume chargée d'énergie pure.",
+		"magie": "Sainte",
+		"niveau": 5,
+		"cout_pm": 26,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 4,
+		"effets": {
+			"degats": "3D8+{Ag/12}"
+		},
+		"composants": [
+			{
+				"item": "item:encens",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Eau_benite",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_lumiere"
+	},
+	{
+		"_id": "sort:colonne_de_lumiere",
+		"type": "sort",
+		"nom": "Colonne de lumière",
+		"icon": "☀️",
+		"description": "Une colonne de lumière s'abat sur la cible.",
+		"magie": "Sainte",
+		"niveau": 6,
+		"cout_pm": 31,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D8+{Vol/8}"
+		},
+		"composants": [
+			{
+				"item": "item:encens",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Eau_benite",
+				"consomme": true,
+				"bonus": {
+					"degats": "1D8"
+				}
+			}
+		],
+		"animation": "animation:capa_lumiere_zone"
+	},
+	{
+		"_id": "sort:chatiment_divin",
+		"type": "sort",
+		"nom": "Châtiment divin",
+		"icon": "⚡",
+		"description": "Le ciel frappe le groupe ennemi.",
+		"magie": "Sainte",
+		"niveau": 7,
+		"cout_pm": 36,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "2D8+{Vol/10}"
+		},
+		"composants": [
+			{
+				"item": "item:encens",
+				"consomme": false,
+				"bonus": {
+					"degats": "2"
+				}
+			},
+			{
+				"item": "item:Eau_benite",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_lumiere_zone",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:colere_divine",
+		"type": "sort",
+		"nom": "Colère divine",
+		"icon": "⚡",
+		"description": "La lumière tombe du ciel sur les ennemis rassemblés.",
+		"magie": "Sainte",
+		"niveau": 8,
+		"cout_pm": 41,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 5,
+		"effets": {
+			"degats": "3D8+{F/15}"
+		},
+		"composants": [
+			{
+				"item": "item:encens",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:Eau_benite",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_lumiere_zone",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:jugement_celeste",
+		"type": "sort",
+		"nom": "Jugement céleste",
+		"icon": "⚖️",
+		"description": "Le ciel juge, et le ciel frappe.",
+		"magie": "Sainte",
+		"niveau": 8,
+		"cout_pm": 41,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "4D10+{Vol/10}"
+		},
+		"composants": [
+			{
+				"item": "item:encens",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:Eau_benite",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_lumiere"
+	},
+	{
+		"_id": "sort:courroux_du_ciel",
+		"type": "sort",
+		"nom": "Courroux du ciel",
+		"icon": "⚡",
+		"description": "La colère du ciel s'abat sur l'ennemi.",
+		"magie": "Sainte",
+		"niveau": 10,
+		"cout_pm": 50,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "3D10+{Vol/12}"
+		},
+		"composants": [
+			{
+				"item": "item:encens",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:Eau_benite",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_lumiere_zone",
+		"zone": {
+			"forme": "cercle",
+			"origine": "cible",
+			"rayon": 2
+		}
+	},
+	{
+		"_id": "sort:fureur_elementaire",
+		"type": "sort",
+		"nom": "Fureur élémentaire",
+		"icon": "💥",
+		"description": "Feu, glace, foudre et roc frappent ensemble la même cible.",
+		"magie": "Élémentaire",
+		"niveau": 10,
+		"cout_pm": 65,
+		"cible": "ennemi",
+		"jet": "magique",
+		"portee": 6,
+		"effets": {
+			"degats": "6D10+{Int/6}"
+		},
+		"composants": [
+			{
+				"item": "item:Cristal_canalisation",
+				"consomme": false,
+				"bonus": {
+					"degats": "3"
+				}
+			},
+			{
+				"item": "item:Soufre",
+				"consomme": true,
+				"bonus": {
+					"degats": "2D6"
+				}
+			}
+		],
+		"animation": "animation:capa_explosion_feu",
+		"incantation": 3
+	},
+	{
+		"_id": "item:grimoire_projectile_savant",
+		"type": "item",
+		"nom": "Grimoire : Projectile savant",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Projectile savant », de l'école Bataille. Il n'est pas consumé par l'étude.",
+		"rarete": "peu_commun",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:projectile_savant"
+		],
+		"valeur": [
+			{
+				"ag": 30
+			},
+			{
+				"ag": 90
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_projectile_savant",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_projectile_savant",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_explosion_arcanique",
+		"type": "item",
+		"nom": "Grimoire : Explosion arcanique",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Explosion arcanique », de l'école Bataille. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:explosion_arcanique"
+		],
+		"valeur": [
+			{
+				"ag": 40
+			},
+			{
+				"ag": 120
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_explosion_arcanique",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_explosion_arcanique",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_eclair_de_bataille",
+		"type": "item",
+		"nom": "Grimoire : Éclair de bataille",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Éclair de bataille », de l'école Bataille. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:eclair_de_bataille"
+		],
+		"valeur": [
+			{
+				"ag": 50
+			},
+			{
+				"ag": 150
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_eclair_de_bataille",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_eclair_de_bataille",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_explosion_runique",
+		"type": "item",
+		"nom": "Grimoire : Explosion runique",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Explosion runique », de l'école Bataille. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:explosion_runique"
+		],
+		"valeur": [
+			{
+				"ag": 50
+			},
+			{
+				"ag": 150
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_explosion_runique",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_explosion_runique",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_tourbillon_arcanique",
+		"type": "item",
+		"nom": "Grimoire : Tourbillon arcanique",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Tourbillon arcanique », de l'école Bataille. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:tourbillon_arcanique"
+		],
+		"valeur": [
+			{
+				"ag": 60
+			},
+			{
+				"ag": 180
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_tourbillon_arcanique",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_tourbillon_arcanique",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_decharge",
+		"type": "item",
+		"nom": "Grimoire : Décharge",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Décharge », de l'école Bataille. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:decharge"
+		],
+		"valeur": [
+			{
+				"ag": 70
+			},
+			{
+				"ag": 210
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_decharge",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_decharge",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_lance_arcanique",
+		"type": "item",
+		"nom": "Grimoire : Lance arcanique",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Lance arcanique », de l'école Bataille. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:lance_arcanique"
+		],
+		"valeur": [
+			{
+				"ag": 70
+			},
+			{
+				"ag": 210
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_lance_arcanique",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_lance_arcanique",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_bombardement",
+		"type": "item",
+		"nom": "Grimoire : Bombardement",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Bombardement », de l'école Bataille. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:bombardement"
+		],
+		"valeur": [
+			{
+				"ag": 80
+			},
+			{
+				"ag": 240
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_bombardement",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_bombardement",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_tempete_arcanique",
+		"type": "item",
+		"nom": "Grimoire : Tempête arcanique",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Tempête arcanique », de l'école Bataille. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:tempete_arcanique"
+		],
+		"valeur": [
+			{
+				"ag": 90
+			},
+			{
+				"ag": 270
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_tempete_arcanique",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_tempete_arcanique",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_tempete_runique",
+		"type": "item",
+		"nom": "Grimoire : Tempête runique",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Tempête runique », de l'école Bataille. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:tempete_runique"
+		],
+		"valeur": [
+			{
+				"ag": 90
+			},
+			{
+				"ag": 270
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_tempete_runique",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_tempete_runique",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_nova_arcanique",
+		"type": "item",
+		"nom": "Grimoire : Nova arcanique",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Nova arcanique », de l'école Bataille. Il n'est pas consumé par l'étude.",
+		"rarete": "legendaire",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:nova_arcanique"
+		],
+		"valeur": [
+			{
+				"ag": 100
+			},
+			{
+				"ag": 300
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_nova_arcanique",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_nova_arcanique",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_flamme_noire",
+		"type": "item",
+		"nom": "Grimoire : Flamme noire",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Flamme noire », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+		"rarete": "peu_commun",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:flamme_noire"
+		],
+		"valeur": [
+			{
+				"ag": 30
+			},
+			{
+				"ag": 90
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_flamme_noire",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_flamme_noire",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_pluie_de_soufre",
+		"type": "item",
+		"nom": "Grimoire : Pluie de soufre",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Pluie de soufre », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+		"rarete": "peu_commun",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:pluie_de_soufre"
+		],
+		"valeur": [
+			{
+				"ag": 30
+			},
+			{
+				"ag": 90
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_pluie_de_soufre",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_pluie_de_soufre",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_brasier_du_pacte",
+		"type": "item",
+		"nom": "Grimoire : Brasier du pacte",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Brasier du pacte », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:brasier_du_pacte"
+		],
+		"valeur": [
+			{
+				"ag": 40
+			},
+			{
+				"ag": 120
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_brasier_du_pacte",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_brasier_du_pacte",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_soufre",
+		"type": "item",
+		"nom": "Grimoire : Soufre",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Soufre », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:soufre"
+		],
+		"valeur": [
+			{
+				"ag": 40
+			},
+			{
+				"ag": 120
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_soufre",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_soufre",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_explosion_infernale",
+		"type": "item",
+		"nom": "Grimoire : Explosion infernale",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Explosion infernale », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:explosion_infernale"
+		],
+		"valeur": [
+			{
+				"ag": 50
+			},
+			{
+				"ag": 150
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_explosion_infernale",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_explosion_infernale",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_griffe_du_familier",
+		"type": "item",
+		"nom": "Grimoire : Griffe du familier",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Griffe du familier », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:griffe_du_familier"
+		],
+		"valeur": [
+			{
+				"ag": 60
+			},
+			{
+				"ag": 180
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_griffe_du_familier",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_griffe_du_familier",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_feu_de_l_ame",
+		"type": "item",
+		"nom": "Grimoire : Feu de l'âme",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Feu de l'âme », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:feu_de_l_ame"
+		],
+		"valeur": [
+			{
+				"ag": 70
+			},
+			{
+				"ag": 210
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_feu_de_l_ame",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_feu_de_l_ame",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_feu_de_l_enfer_retourne",
+		"type": "item",
+		"nom": "Grimoire : Feu de l'enfer retourné",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Feu de l'enfer retourné », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:feu_de_l_enfer_retourne"
+		],
+		"valeur": [
+			{
+				"ag": 80
+			},
+			{
+				"ag": 240
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_feu_de_l_enfer_retourne",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_feu_de_l_enfer_retourne",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_pacte_de_sang_majeur",
+		"type": "item",
+		"nom": "Grimoire : Pacte de sang majeur",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Pacte de sang majeur », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:pacte_de_sang_majeur"
+		],
+		"valeur": [
+			{
+				"ag": 80
+			},
+			{
+				"ag": 240
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_pacte_de_sang_majeur",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_pacte_de_sang_majeur",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_rituel_d_exorcisme",
+		"type": "item",
+		"nom": "Grimoire : Rituel d'exorcisme",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Rituel d'exorcisme », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:rituel_d_exorcisme"
+		],
+		"valeur": [
+			{
+				"ag": 90
+			},
+			{
+				"ag": 270
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_rituel_d_exorcisme",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_rituel_d_exorcisme",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_apocalypse",
+		"type": "item",
+		"nom": "Grimoire : Apocalypse",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Apocalypse », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+		"rarete": "legendaire",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:apocalypse"
+		],
+		"valeur": [
+			{
+				"ag": 100
+			},
+			{
+				"ag": 300
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_apocalypse",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_apocalypse",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_fleau_des_demons",
+		"type": "item",
+		"nom": "Grimoire : Fléau des démons",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Fléau des démons », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+		"rarete": "legendaire",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:fleau_des_demons"
+		],
+		"valeur": [
+			{
+				"ag": 100
+			},
+			{
+				"ag": 300
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_fleau_des_demons",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_fleau_des_demons",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_eventail_de_folie",
+		"type": "item",
+		"nom": "Grimoire : Éventail de folie",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Éventail de folie », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:eventail_de_folie"
+		],
+		"valeur": [
+			{
+				"ag": 60
+			},
+			{
+				"ag": 180
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_eventail_de_folie",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_eventail_de_folie",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_lame_de_cauchemar",
+		"type": "item",
+		"nom": "Grimoire : Lame de cauchemar",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Lame de cauchemar », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:lame_de_cauchemar"
+		],
+		"valeur": [
+			{
+				"ag": 70
+			},
+			{
+				"ag": 210
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_lame_de_cauchemar",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_lame_de_cauchemar",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_champ_de_ronces",
+		"type": "item",
+		"nom": "Grimoire : Champ de ronces",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Champ de ronces », de l'école Nature. Il n'est pas consumé par l'étude.",
+		"rarete": "peu_commun",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:champ_de_ronces"
+		],
+		"valeur": [
+			{
+				"ag": 30
+			},
+			{
+				"ag": 90
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_champ_de_ronces",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_champ_de_ronces",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_foudre_des_ancetres",
+		"type": "item",
+		"nom": "Grimoire : Foudre des ancêtres",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Foudre des ancêtres », de l'école Nature. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:foudre_des_ancetres"
+		],
+		"valeur": [
+			{
+				"ag": 40
+			},
+			{
+				"ag": 120
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_foudre_des_ancetres",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_foudre_des_ancetres",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_hurlement_de_la_meute",
+		"type": "item",
+		"nom": "Grimoire : Hurlement de la meute",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Hurlement de la meute », de l'école Nature. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:hurlement_de_la_meute"
+		],
+		"valeur": [
+			{
+				"ag": 40
+			},
+			{
+				"ag": 120
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_hurlement_de_la_meute",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_hurlement_de_la_meute",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_fouet_de_liane",
+		"type": "item",
+		"nom": "Grimoire : Fouet de liane",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Fouet de liane », de l'école Nature. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:fouet_de_liane"
+		],
+		"valeur": [
+			{
+				"ag": 50
+			},
+			{
+				"ag": 150
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_fouet_de_liane",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_fouet_de_liane",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_spores_etouffantes",
+		"type": "item",
+		"nom": "Grimoire : Spores étouffantes",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Spores étouffantes », de l'école Nature. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:spores_etouffantes"
+		],
+		"valeur": [
+			{
+				"ag": 50
+			},
+			{
+				"ag": 150
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_spores_etouffantes",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_spores_etouffantes",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_colere_de_la_foret",
+		"type": "item",
+		"nom": "Grimoire : Colère de la forêt",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Colère de la forêt », de l'école Nature. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:colere_de_la_foret"
+		],
+		"valeur": [
+			{
+				"ag": 60
+			},
+			{
+				"ag": 180
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_colere_de_la_foret",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_colere_de_la_foret",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_pieu_de_bois_vivant",
+		"type": "item",
+		"nom": "Grimoire : Pieu de bois vivant",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Pieu de bois vivant », de l'école Nature. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:pieu_de_bois_vivant"
+		],
+		"valeur": [
+			{
+				"ag": 70
+			},
+			{
+				"ag": 210
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_pieu_de_bois_vivant",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_pieu_de_bois_vivant",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_orage_ancestral",
+		"type": "item",
+		"nom": "Grimoire : Orage ancestral",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Orage ancestral », de l'école Nature. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:orage_ancestral"
+		],
+		"valeur": [
+			{
+				"ag": 80
+			},
+			{
+				"ag": 240
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_orage_ancestral",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_orage_ancestral",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_marais",
+		"type": "item",
+		"nom": "Grimoire : Marais",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Marais », de l'école Nature. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:marais"
+		],
+		"valeur": [
+			{
+				"ag": 90
+			},
+			{
+				"ag": 270
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_marais",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_marais",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_rituel_du_cycle",
+		"type": "item",
+		"nom": "Grimoire : Rituel du cycle",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Rituel du cycle », de l'école Nature. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:rituel_du_cycle"
+		],
+		"valeur": [
+			{
+				"ag": 90
+			},
+			{
+				"ag": 270
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_rituel_du_cycle",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_rituel_du_cycle",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_colere_des_ancetres",
+		"type": "item",
+		"nom": "Grimoire : Colère des ancêtres",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Colère des ancêtres », de l'école Nature. Il n'est pas consumé par l'étude.",
+		"rarete": "legendaire",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:colere_des_ancetres"
+		],
+		"valeur": [
+			{
+				"ag": 100
+			},
+			{
+				"ag": 300
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_colere_des_ancetres",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_colere_des_ancetres",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_explosion_de_cadavre",
+		"type": "item",
+		"nom": "Grimoire : Explosion de cadavre",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Explosion de cadavre », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:explosion_de_cadavre"
+		],
+		"valeur": [
+			{
+				"ag": 50
+			},
+			{
+				"ag": 150
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_explosion_de_cadavre",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_explosion_de_cadavre",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_pacte_de_sang_noir",
+		"type": "item",
+		"nom": "Grimoire : Pacte de sang noir",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Pacte de sang noir », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:pacte_de_sang_noir"
+		],
+		"valeur": [
+			{
+				"ag": 50
+			},
+			{
+				"ag": 150
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_pacte_de_sang_noir",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_pacte_de_sang_noir",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_nuee_de_spectres",
+		"type": "item",
+		"nom": "Grimoire : Nuée de spectres",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Nuée de spectres », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:nuee_de_spectres"
+		],
+		"valeur": [
+			{
+				"ag": 90
+			},
+			{
+				"ag": 270
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_nuee_de_spectres",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_nuee_de_spectres",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_rituel_de_mort",
+		"type": "item",
+		"nom": "Grimoire : Rituel de mort",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Rituel de mort », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:rituel_de_mort"
+		],
+		"valeur": [
+			{
+				"ag": 90
+			},
+			{
+				"ag": 270
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_rituel_de_mort",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_rituel_de_mort",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_mot_de_mort",
+		"type": "item",
+		"nom": "Grimoire : Mot de mort",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Mot de mort », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+		"rarete": "legendaire",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:mot_de_mort"
+		],
+		"valeur": [
+			{
+				"ag": 100
+			},
+			{
+				"ag": 300
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_mot_de_mort",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_mot_de_mort",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_eclat_divin",
+		"type": "item",
+		"nom": "Grimoire : Éclat divin",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Éclat divin », de l'école Sainte. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:eclat_divin"
+		],
+		"valeur": [
+			{
+				"ag": 40
+			},
+			{
+				"ag": 120
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_eclat_divin",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_eclat_divin",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_lumiere_de_l_aube",
+		"type": "item",
+		"nom": "Grimoire : Lumière de l'aube",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Lumière de l'aube », de l'école Sainte. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:lumiere_de_l_aube"
+		],
+		"valeur": [
+			{
+				"ag": 40
+			},
+			{
+				"ag": 120
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_lumiere_de_l_aube",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_lumiere_de_l_aube",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_paume_de_lumiere",
+		"type": "item",
+		"nom": "Grimoire : Paume de lumière",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Paume de lumière », de l'école Sainte. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:paume_de_lumiere"
+		],
+		"valeur": [
+			{
+				"ag": 50
+			},
+			{
+				"ag": 150
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_paume_de_lumiere",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_paume_de_lumiere",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_colonne_de_lumiere",
+		"type": "item",
+		"nom": "Grimoire : Colonne de lumière",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Colonne de lumière », de l'école Sainte. Il n'est pas consumé par l'étude.",
+		"rarete": "rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:colonne_de_lumiere"
+		],
+		"valeur": [
+			{
+				"ag": 60
+			},
+			{
+				"ag": 180
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_colonne_de_lumiere",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_colonne_de_lumiere",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_chatiment_divin",
+		"type": "item",
+		"nom": "Grimoire : Châtiment divin",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Châtiment divin », de l'école Sainte. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:chatiment_divin"
+		],
+		"valeur": [
+			{
+				"ag": 70
+			},
+			{
+				"ag": 210
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_chatiment_divin",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_chatiment_divin",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_colere_divine",
+		"type": "item",
+		"nom": "Grimoire : Colère divine",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Colère divine », de l'école Sainte. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:colere_divine"
+		],
+		"valeur": [
+			{
+				"ag": 80
+			},
+			{
+				"ag": 240
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_colere_divine",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_colere_divine",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_jugement_celeste",
+		"type": "item",
+		"nom": "Grimoire : Jugement céleste",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Jugement céleste », de l'école Sainte. Il n'est pas consumé par l'étude.",
+		"rarete": "tres_rare",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:jugement_celeste"
+		],
+		"valeur": [
+			{
+				"ag": 80
+			},
+			{
+				"ag": 240
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_jugement_celeste",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_jugement_celeste",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_courroux_du_ciel",
+		"type": "item",
+		"nom": "Grimoire : Courroux du ciel",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Courroux du ciel », de l'école Sainte. Il n'est pas consumé par l'étude.",
+		"rarete": "legendaire",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:courroux_du_ciel"
+		],
+		"valeur": [
+			{
+				"ag": 100
+			},
+			{
+				"ag": 300
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_courroux_du_ciel",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_courroux_du_ciel",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "item:grimoire_fureur_elementaire",
+		"type": "item",
+		"nom": "Grimoire : Fureur élémentaire",
+		"icon": "📖",
+		"description": "Un grimoire relié qui enseigne le sort « Fureur élémentaire », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+		"rarete": "legendaire",
+		"categorie": "livre",
+		"sous_categorie": "grimoire",
+		"slots": [],
+		"tags": [
+			"grimoire"
+		],
+		"poids": 1,
+		"sorts": [
+			"sort:fureur_elementaire"
+		],
+		"valeur": [
+			{
+				"ag": 100
+			},
+			{
+				"ag": 300
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_fureur_elementaire",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_fureur_elementaire",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	}
+]
