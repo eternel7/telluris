@@ -270,19 +270,21 @@ def recompute_competences_bonus(character: dict, get_doc) -> dict:
 	return bonus
 
 
-def competences_bonus_perime(character: dict) -> bool:
-	"""L'agrégat dénormalisé date-t-il d'avant `buffs_sources` (le détail NOMMÉ de ses
-	contributeurs) ? Contrairement à `equipment_bonus`, `competences_bonus` n'est réécrit
-	qu'à la création et à l'apprentissage : un perso plus ancien porte un agrégat sans
-	`buffs_sources`, et le tooltip de la fiche affiche alors une source anonyme (« ? »).
-	Un perso sans compétence connue n'a rien à recalculer. Le repli d'un perso SANS passive
-	à buffs porte quand même la clé (liste vide) → il n'est pas périmé. Même lecture pour
-	`auras` (clé ajoutée avec les auras) : sans elle, une aura déjà apprise n'agirait pas."""
+def synchroniser_competences_bonus(character: dict, get_doc) -> bool:
+	"""Recale `competences_bonus` sur les docs ACTUELS de ses compétences connues ; True si
+	l'agrégat a changé (à persister par l'appelant). `competences_bonus` n'est réécrit qu'à
+	la création et à l'apprentissage : sans cette relecture, une passive rééquilibrée en base
+	(ou un agrégat d'avant `buffs_sources`/`auras`) resterait figé sur le personnage. Un perso
+	sans compétence connue n'a rien à relire. Coût : une lecture par compétence connue, servie
+	par le cache de requête (`competence:` est un préfixe de contenu)."""
 	character = character or {}
 	if not character.get("competences_connues"):
 		return False
-	bonus = character.get("competences_bonus") or {}
-	return "buffs_sources" not in bonus or "auras" not in bonus
+	frais = bonus_passifs(character, get_doc)
+	if character.get("competences_bonus") == frais:
+		return False
+	character["competences_bonus"] = frais
+	return True
 
 
 def furtivite_passive(character: dict, get_doc, map_tags) -> int:
