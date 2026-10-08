@@ -24,7 +24,9 @@ ENTREES = [
 	A(4, "Posture de la montagne", "⛰️", "posture", "meditation", "Il s'enracine : rien ne le déplacera.", stats=("R", "Vol")),
 	A(4, "Esprit clair", "💭", "buff_allie", "meditation", "Un mot calme, et un compagnon retrouve sa lucidité.", stats=("Vol", "Int")),
 	# ── Niveau 5 ──
-	A(5, "Paume de lumière", "☀️", "frappe", "lumiere", "Une paume chargée d'énergie pure.", **MAG),
+	L(5, "Paume apaisante", "🤲", "soin_sacre", "Une paume posée sur un compagnon, et le souffle intérieur referme ses plaies.",
+	  {"cible": "allie", "portee": 1, "cout_pm": 21, "effets": {"pv": "13+{Vol/4}"}},
+	  remplace="paume_de_lumiere"),
 	A(5, "Coup du serpent", "🐍", "poison_pm", "poing", "Deux doigts au creux de l'épaule, et l'énergie fuit."),
 	L(5, "Don du souffle", "🌬️", "meditation", "La paume sur le cœur d'un compagnon, il lui donne un peu de sa propre vie, changée en souffle.",
 	  {"cible": "allie", "portee": 1, "cout_pm": 0, "effets": {"pm": "4+{Vol/6}", "cout_pv": 6}},

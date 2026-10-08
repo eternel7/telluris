@@ -30,10 +30,14 @@ ENTREES = [
 	  {"cible": "allie", "portee": 6, "cout_pm": 21, "effets": {"saut": "2+{Int/25}"}},
 	  remplace="inspiration_trompeuse"),
 	# ── Niveau 6 ──
-	A(6, "Éventail de folie", "🌀", "zone_cone", "impact_etincelles/cone_folie", "Une vague de démence qui déferle devant lui."),
+	L(6, "Éventail de confusion", "🌀", "impact_etincelles/cone_folie", "Une vague d'images trompeuses : devant lui, plus personne ne sait où frapper.",
+	  {"cible": "ennemi", "jet": "magique", "portee": 6, "cout_pm": 25, "zone": {"forme": "cone", "origine": "lanceur", "orientation": "cible", "decalage": 1, "longueur": 4, "angle": 90}, "effets": {"buffs": {"Int": "-5-{Cha/10}", "Vol": -5}, "duree": 4}},
+	  remplace="eventail_de_folie"),
 	A(6, "Pas entre les reflets", "🪞", "saut", "double", "Il passe d'un reflet à un autre."),
 	# ── Niveau 7 ──
-	A(7, "Lame de cauchemar", "🗡️", "frappe", "spectre", "Une lame forgée dans les cauchemars de la cible."),
+	L(7, "Reflets", "🪞", "double", "Trois reflets d'un compagnon dansent autour de lui ; l'ennemi frappe le mauvais.",
+	  {"cible": "allie", "portee": 4, "cout_pm": 29, "effets": {"buffs": {"Ag": "4+{Cha/12}"}, "esquive": "7+{Cha/8}", "duree": 4}},
+	  remplace="lame_de_cauchemar"),
 	L(7, "Terreur nocturne", "😱", "spectre", "Une vision de ce que la cible redoute le plus : la volonté se brise, le mana fuit.",
 	  {"cible": "ennemi", "jet": "magique", "portee": 5, "cout_pm": 29, "effets": {"buffs": {"Vol": "-3-{Cha/8}"}, "regen_pm": -3, "duree": 3}},
 	  remplace="paralysie_hypnotique"),
