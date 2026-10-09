@@ -3321,19 +3321,19 @@
 			<div id="sur-mesure-body"></div>
 		</div>
 	</div><!-- /#sur-mesure-overlay -->
-<script src="{{ url_for('scripts', path='nav.js') }}"></script>
+<script src="{{ script_url('nav.js') }}"></script>
 {# ⚠️ APRÈS nav.js : `pasAutoriseLocal` y prend `navAllows`. Cette page-ci n'appelle que
    `majFleches`/`verrouillerFleches` (son accès lui est RÉSOLU PAR LE SERVEUR), mais le
    fichier est un tout — c'est la même règle de marche des trois côtés. #}
-<script src="{{ url_for('scripts', path='deplacement.js') }}"></script>
+<script src="{{ script_url('deplacement.js') }}"></script>
 {# `rendreDeplacable`/`placerPanneau` : la poignée du pavé flottant (partagé avec l'éditeur). #}
-<script src="{{ url_for('scripts', path='deplacable.js') }}"></script>
+<script src="{{ script_url('deplacable.js') }}"></script>
 {# `libelleZone` seulement : l'onglet ⚡ est un CATALOGUE, il annonce la forme d'une zone
    d'effet sans rien dessiner (il n'y a pas de grille hors combat). #}
-<script src="{{ url_for('scripts', path='zones_effet.js') }}"></script>
+<script src="{{ script_url('zones_effet.js') }}"></script>
 {# Libellés d'une capacité connue (onglet ⚡), partagés avec /admin/sorts et /admin/competences.
    APRÈS zones_effet.js (`libelleZone`) ; `_coutPmCharge` est défini plus bas. #}
-<script src="{{ url_for('scripts', path='capacites_texte.js') }}"></script>
+<script src="{{ script_url('capacites_texte.js') }}"></script>
 <script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
 	let LINKS = {{ links | tojson | safe }};

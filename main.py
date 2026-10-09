@@ -6,6 +6,7 @@ from fastapi import FastAPI, Request, Depends, HTTPException, Response, Body, Qu
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
+from jinja2 import pass_context
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from PIL import Image
@@ -134,6 +135,22 @@ class _ScriptsRevalides(StaticFiles):
 		return response
 
 app.mount("/scripts", _ScriptsRevalides(directory="templates/scripts"), name="scripts")
+
+SCRIPTS_PATH = "templates/scripts"
+
+@pass_context
+def script_url(ctx, path):
+	"""URL d'un script de /scripts VERSIONNÉE par son mtime (`?v=`). Le `no-cache` ne
+	vaut que pour les réponses NEUVES : une copie déjà en cache heuristique reste « fraîche »
+	et Chrome ne la redemande pas — l'en-tête n'arrive donc jamais. Une URL qui change avec
+	le fichier contourne ce cache ; le stat à chaque rendu suit un `git pull` sans redémarrage."""
+	try:
+		version = os.stat(os.path.join(SCRIPTS_PATH, path)).st_mtime_ns
+	except OSError:
+		version = 0
+	return f"{ctx['request'].url_for('scripts', path=path)}?v={version:x}"
+
+templates.env.globals["script_url"] = script_url
 app.mount("/icons", StaticFiles(directory="templates/resources/icons"), name="icons")
 CHARACTERS_IMAGES_PATH = "templates/resources/characters"
 app.mount("/characters", StaticFiles(directory=CHARACTERS_IMAGES_PATH), name="characters")

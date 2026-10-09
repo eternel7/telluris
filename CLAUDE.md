@@ -175,7 +175,8 @@ templates/
                          #   (part-character-card, part-slot-bar-css, part-move-panel,
                          #    part-lieux-{js,css,markup} : mode Lieux partagé /admin/editor ↔ /admin/lieux,
                          #    part-auth-css : carte de parchemin partagée /auth ↔ /reinitialisation)
-  scripts/               # JS partagé, servi par le mount /scripts
+  scripts/               # JS partagé, servi par le mount /scripts — ⚠️ toujours `{{ script_url('x.js') }}`
+                         #   (URL versionnée par mtime : sinon Chrome garde l'ancien fichier en cache)
                          #   battle_map.js · nav.js (bitmask nav) · deplacement.js (règles de marche)
                          #   voies.js (tracé des voies de l'éditeur : régions, goulots, passage)
                          #   zones_effet.js (géométrie des zones d'effet : APERÇU, le serveur tranche)

@@ -109,7 +109,7 @@
 
 	{% include "part-main-footer.html" without context %}
 
-	<script src="{{ url_for('scripts', path='sceau_visuel.js') }}"></script>
+	<script src="{{ script_url('sceau_visuel.js') }}"></script>
 	<script>
 		// Icône dynamique du mot de passe — scripts/sceau_visuel.js, même hachage que /auth.
 		brancherSceauxVisuels();
