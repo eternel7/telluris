@@ -122,7 +122,18 @@ app.add_middleware(RequestDocCacheMiddleware)
 templates = Jinja2Templates(directory="templates")
 templates.env.policies["json.dumps_kwargs"] = {"sort_keys": False}
 
-app.mount("/scripts", StaticFiles(directory="templates/scripts"), name="scripts")
+class _ScriptsRevalides(StaticFiles):
+	"""JS partagé (/scripts) : `no-cache` = le navigateur REVALIDE à chaque chargement
+	(ETag → 304 si rien n'a bougé). Sans en-tête, Chrome le resservait de son cache
+	heuristique après une mise à jour : la page neuve appelait une fonction absente de
+	l'ancien fichier (`accesExploration`), `updateControls` levait au chargement et
+	tout le script de la page s'arrêtait là — pavé flottant compris."""
+	async def get_response(self, path, scope):
+		response = await super().get_response(path, scope)
+		response.headers["Cache-Control"] = "no-cache"
+		return response
+
+app.mount("/scripts", _ScriptsRevalides(directory="templates/scripts"), name="scripts")
 app.mount("/icons", StaticFiles(directory="templates/resources/icons"), name="icons")
 CHARACTERS_IMAGES_PATH = "templates/resources/characters"
 app.mount("/characters", StaticFiles(directory=CHARACTERS_IMAGES_PATH), name="characters")
