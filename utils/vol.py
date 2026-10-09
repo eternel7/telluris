@@ -12,8 +12,9 @@
 #                   on ne traverse pas une maison.
 #
 # FIN DU VOL au-dessus d'une case interdite à pied ⇒ CHUTE : posé sur la case sûre la plus
-# proche, et des dégâts (`VOL_CHUTE_DEGATS`). Hors combat la chute ne tue jamais (plancher
-# 1 PV, comme le poison) ; en combat elle peut mettre à terre (`combat._atterrir`).
+# proche, et UN DÉ PAR CASE parcourue pour la rejoindre (`notation_chute`) — D20 sur une
+# falaise, D6 dans l'eau (on nage jusqu'à la terre ferme). Hors combat la chute ne tue jamais
+# (plancher 1 PV, comme le poison) ; en combat elle peut mettre à terre (`combat._atterrir`).
 #
 # ⚠️ En exploration, seul le PRINCIPAL porte la position : c'est SON vol qui compte, le groupe
 # suit (même parti pris que la surcharge, lue sur le principal seul).
@@ -21,11 +22,17 @@
 # Aucune migration (CLAUDE.md §4) : une entrée d'`effets_actifs` sans `vol` reste ce qu'elle
 # était, un personnage sans entrée `vol` marche comme avant.
 
-# Dégâts d'une chute (fin du vol au-dessus du vide). Notation de dés, tirée par `des_fn`.
-VOL_CHUTE_DEGATS = "1D6"
-
 # Seul terrain où l'on tient debout en EXPLORATION (miroir de `deplacement.js caseType1`).
 TERRAIN_SOL = 1
+# Terrains d'une chute (mêmes valeurs que `utils/grille_image` et `combat.TERRAIN_FALAISE`).
+TERRAIN_FALAISE = 3
+TERRAIN_EAU = 5
+
+# Dé de chute PAR CASE parcourue jusqu'à la case d'arrivée, selon le terrain survolé (règle
+# de l'Auteur) : une falaise fracasse (D20), l'eau épuise le nageur (D6). Tout autre terrain
+# interdit à pied (terrain difficile, en exploration) : `CHUTE_FACES_DEFAUT`.
+CHUTE_FACES = {TERRAIN_FALAISE: 20, TERRAIN_EAU: 6}
+CHUTE_FACES_DEFAUT = 6
 
 
 def vol_actif(porteur: dict | None) -> bool:
@@ -53,6 +60,22 @@ def case_la_plus_proche(x: int, y: int, largeur: int, hauteur: int, accepte) -> 
 	return None
 
 
+def faces_de_chute(terrain) -> int:
+	"""Faces du dé de chute au-dessus de `terrain`."""
+	return CHUTE_FACES.get(terrain, CHUTE_FACES_DEFAUT)
+
+
+def notation_chute(terrain, distance: int) -> str:
+	"""Notation des dégâts d'une chute : un dé par case parcourue (au moins une) —
+	`"3D20"` pour une falaise à trois cases du sol, `"1D6"` au bord de l'eau."""
+	return f"{max(1, int(distance or 0))}D{faces_de_chute(terrain)}"
+
+
+def distance_cases(a: tuple, b: tuple) -> int:
+	"""Cases parcourues de `a` à `b` : Chebyshev, la métrique des pas du jeu."""
+	return max(abs(a[0] - b[0]), abs(a[1] - b[1]))
+
+
 def sol_exploration(cells: list, x: int, y: int) -> bool:
 	"""Peut-on TENIR sur (x, y) à pied, hors combat ? Exactement le terrain 1."""
 	if not cells or y < 0 or y >= len(cells):
@@ -63,10 +86,11 @@ def sol_exploration(cells: list, x: int, y: int) -> bool:
 
 def chute_exploration(character: dict, lieu_doc: dict | None, des_fn=None) -> dict | None:
 	"""Le vol est fini et le personnage plane au-dessus d'une case interdite à pied : il CHUTE
-	sur la case de sol la plus proche et perd `VOL_CHUTE_DEGATS` PV, sans jamais descendre
-	sous 1 PV (hors combat, une chute ne tue pas). Mute sans sauver.
+	sur la case de sol la plus proche et perd un dé par case parcourue (`notation_chute` :
+	D20 depuis une falaise, D6 depuis l'eau), sans jamais descendre sous 1 PV (hors combat,
+	une chute ne tue pas). Mute sans sauver.
 
-	Renvoie `{degats, de, vers}` pour le toast, ou None : toujours en vol, lieu sans grille,
+	Renvoie `{degats, notation, eau, de, vers}` pour le toast, ou None : toujours en vol, lieu sans grille,
 	pied déjà sur le sol, ou aucune case de sol où se poser (on reste alors en place)."""
 	cells = (lieu_doc or {}).get("cells")
 	pos = (character or {}).get("position") or {}
@@ -82,9 +106,13 @@ def chute_exploration(character: dict, lieu_doc: dict | None, des_fn=None) -> di
 	if des_fn is None:
 		# Import PARESSEUX : `utils.combat` est lourd, et ce module doit rester pur.
 		from utils.combat import roll_dice as des_fn
-	degats = max(0, int(des_fn(VOL_CHUTE_DEGATS)))
+	row = cells[y] if 0 <= y < len(cells) else []
+	terrain = row[x] if 0 <= x < len(row or []) else None
+	notation = notation_chute(terrain, distance_cases((x, y), vers))
+	degats = max(0, int(des_fn(notation)))
 	avant = int(character.get("currentPV", 1) or 0)
 	character["currentPV"] = max(min(avant, 1), avant - degats)
 	character["position"] = {"x": vers[0], "y": vers[1]}
-	return {"degats": avant - character["currentPV"],
+	return {"degats": avant - character["currentPV"], "notation": notation,
+			"eau": terrain == TERRAIN_EAU,
 			"de": {"x": x, "y": y}, "vers": {"x": vers[0], "y": vers[1]}}

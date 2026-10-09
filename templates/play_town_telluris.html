@@ -3527,6 +3527,13 @@
 		root.style.setProperty('--x', x);
 		root.style.setProperty('--y', y);
 	}
+	// Récit d'une chute de fin de vol (`vol.chute_exploration` : un dé par case jusqu'au sol,
+	// D20 depuis une falaise, D6 à la nage). ⚠️ showToast écrit en textContent.
+	function _texteChute(c) {
+		const recit = c.eau ? 'vous tombez à l’eau et regagnez la terre ferme à la nage'
+			: 'vous chutez';
+		return `${recit} (${c.notation} : −${c.degats} PV).`;
+	}
 	async function move(viewDx, viewDy) {
 		if (isMoving) return;
 		isMoving = true;
@@ -3566,7 +3573,7 @@
 				VOLANT = !!rep.volant;
 				// Fin du vol au-dessus du vide : le serveur a déjà reposé le personnage (la
 				// position confirmée ci-dessus est celle d'arrivée de la chute).
-				if (rep.chute) showToast(`🪂 Votre vol prend fin : vous chutez (−${rep.chute.degats} PV).`);
+				if (rep.chute) showToast(`🪂 Votre vol prend fin : ${_texteChute(rep.chute)}`);
 				// Guidage 🧭 : à jour AVANT buildLocationslist/updateControls (exergues flèche+lien).
 				_guidage = rep.guidage || null;
 				_refreshGuidage();
@@ -10294,7 +10301,7 @@ renderFicheCompagnons(AFFINITES_INIT);
 // Vol magique éteint au-dessus du vide hors d'un pas (fin de combat) : chute paresseuse au
 // rendu (`vol.chute_exploration`), déjà persistée — ce toast ne reviendra pas.
 const CHUTE_VOL = {{ chute_vol | tojson | safe }};
-if (CHUTE_VOL) showToast(`🪂 Votre vol a pris fin : vous chutez (−${CHUTE_VOL.degats} PV).`);
+if (CHUTE_VOL) showToast(`🪂 Votre vol a pris fin : ${_texteChute(CHUTE_VOL)}`);
 // Sorts perdus : la vocation ne pratique plus leur école. Même check paresseux, même
 // rendu unique — le doc a déjà été réécrit, ce toast ne reviendra pas.
 // ⚠️ Pas d'escapeHtml : showToast écrit en textContent (CLAUDE.md §9).

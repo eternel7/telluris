@@ -4,7 +4,8 @@
 #   • combat      : franchit les falaises (3), MÊME sous couvert (lévitation, pas d'ailes) ;
 #   • exploration : la règle de case passe de `=== 1` à `>= 1` (client : `accesExploration`) ;
 #   • fin du vol au-dessus d'une case interdite à pied ⇒ CHUTE sur la case sûre la plus
-#     proche + `VOL_CHUTE_DEGATS` (jamais mortelle hors combat).
+#     proche, UN DÉ PAR CASE parcourue : D20 depuis une falaise, D6 dans l'eau (règle de
+#     l'Auteur) — jamais mortelle hors combat.
 
 import json
 import os
@@ -29,9 +30,14 @@ def _des_fixes(monkeypatch):
 	monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 50)
 
 
-def _des(valeur):
-	"""`des_fn` / `roll_dice` déterministe : toute notation vaut `valeur`."""
-	return lambda _notation: valeur
+def _des(valeur, notations=None):
+	"""`des_fn` / `roll_dice` déterministe : toute notation vaut `valeur` ; `notations`, si
+	fournie, reçoit chaque notation tirée — on affirme sur le DÉ, pas seulement le total."""
+	def tirer(notation):
+		if notations is not None:
+			notations.append(notation)
+		return valeur
+	return tirer
 
 
 def _vol(duree=3, **champs):
@@ -89,6 +95,15 @@ def test_case_la_plus_proche_none_sans_candidate():
 	assert vol_util.case_la_plus_proche(1, 1, 3, 3, lambda x, y: False) is None
 
 
+# ── Dés de chute : un dé par case, D20 falaise, D6 eau ──────────────────────────
+
+def test_notation_chute_un_de_par_case_selon_le_terrain():
+	assert vol_util.notation_chute(vol_util.TERRAIN_FALAISE, 3) == "3D20"
+	assert vol_util.notation_chute(vol_util.TERRAIN_EAU, 2) == "2D6"
+	assert vol_util.notation_chute(2, 1) == f"1D{vol_util.CHUTE_FACES_DEFAUT}"
+	assert vol_util.notation_chute(vol_util.TERRAIN_EAU, 0) == "1D6", "au moins un dé"
+
+
 # ── Exploration : chute ─────────────────────────────────────────────────────────
 
 def _lieu_riviere():
@@ -98,10 +113,29 @@ def _lieu_riviere():
 
 def test_chute_exploration_pose_sur_le_sol_et_blesse():
 	perso = character(position={"x": 2, "y": 1}, currentPV=20)
-	chute = vol_util.chute_exploration(perso, _lieu_riviere(), des_fn=_des(4))
-	assert chute == {"degats": 4, "de": {"x": 2, "y": 1}, "vers": {"x": 1, "y": 1}}
+	notations = []
+	chute = vol_util.chute_exploration(perso, _lieu_riviere(), des_fn=_des(4, notations))
+	assert chute == {"degats": 4, "notation": "1D6", "eau": True,
+					 "de": {"x": 2, "y": 1}, "vers": {"x": 1, "y": 1}}
+	assert notations == ["1D6"]
 	assert perso["position"] == {"x": 1, "y": 1}
 	assert perso["currentPV"] == 16
+
+
+def test_chute_dans_l_eau_un_d6_par_case_jusqu_a_la_terre_ferme():
+	lac = {"cells": [[1, 5, 5, 5, 5, 5, 1]]}      # milieu du lac : 3 cases de chaque rive
+	perso = character(position={"x": 3, "y": 0}, currentPV=50)
+	notations = []
+	chute = vol_util.chute_exploration(perso, lac, des_fn=_des(7, notations))
+	assert notations == ["3D6"] and chute["eau"] and perso["currentPV"] == 43
+
+
+def test_chute_d_une_falaise_en_exploration_un_d20_par_case():
+	gorge = {"cells": [[1, 3, 3, 1]]}
+	perso = character(position={"x": 1, "y": 0}, currentPV=50)
+	notations = []
+	chute = vol_util.chute_exploration(perso, gorge, des_fn=_des(12, notations))
+	assert notations == ["1D20"] and not chute["eau"] and perso["currentPV"] == 38
 
 
 def test_chute_exploration_ne_tue_jamais():
@@ -153,7 +187,8 @@ def test_le_snapshot_herite_du_vol_d_exploration():
 
 
 def test_expiration_au_dessus_d_une_falaise_chute(monkeypatch):
-	monkeypatch.setattr(combat_mod, "roll_dice", _des(5))
+	notations = []
+	monkeypatch.setattr(combat_mod, "roll_dice", _des(5, notations))
 	mage = joueur(x=4, y=5, pv=30)
 	doc = combat([mage], [monstre(x=10, y=8)])
 	_falaise_en(doc, 4, 5)
@@ -164,12 +199,27 @@ def test_expiration_au_dessus_d_une_falaise_chute(monkeypatch):
 	assert "vol_magique" not in mage
 	# Anneau 1, distance 1 : (4,4) et (3,5) ex æquo, la ligne la plus haute l'emporte.
 	assert mage["pos"] == {"x": 4, "y": 4}, "posé sur la case praticable la plus proche"
-	assert mage["currentPV"] == 25
+	assert mage["currentPV"] == 25 and notations == ["1D20"], "falaise : un D20 par case"
 	chute = [e for e in doc["log"] if "chute" in e["texte"]]
+	assert "(1D20)" in chute[0]["texte"]
 	assert len(chute) == 1 and chute[0]["kind"] == "move"
 	assert chute[0]["etat"][mage["id"]]["pos"] == {"x": 4, "y": 4}
 	assert textes(doc).index(chute[0]["texte"]) > next(
 		i for i, t in enumerate(textes(doc)) if "se dissipe" in t), "dissipation PUIS chute"
+
+
+def test_chute_au_milieu_d_un_plateau_de_falaise(monkeypatch):
+	"""Plateau de falaise 5×5, le mage au centre : trois cases jusqu'au sol, trois D20."""
+	notations = []
+	monkeypatch.setattr(combat_mod, "roll_dice", _des(10, notations))
+	mage = joueur(x=5, y=4, pv=60)
+	doc = combat([mage], [monstre(x=11, y=8)])
+	for y in range(2, 7):
+		for x in range(3, 8):
+			_falaise_en(doc, x, y)
+	_empiler_effet_combat(mage, {"_id": "sort:v", "nom": "V"}, {"vol": 1, "duree": 1}, 0)
+	_tick_effets_combat(doc, mage)
+	assert notations == ["3D20"] and mage["currentPV"] == 50
 
 
 def test_l_atterrissage_evite_une_case_occupee(monkeypatch):

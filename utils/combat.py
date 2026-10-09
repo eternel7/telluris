@@ -1862,8 +1862,9 @@ CHUTE_ATTAQUANT = {"id": "chute", "nom": "Chute", "ch": 0}
 def _atterrir(combat_doc: dict, acteur: dict) -> None:
 	"""CHOKEPOINT de la fin d'un VOL MAGIQUE (`utils/vol.py`) : l'acteur ne vole plus et son
 	emprise surplombe une case qu'il ne peut pas fouler (falaise) ⇒ il CHUTE sur la case libre
-	la plus proche (`vol.case_la_plus_proche`, emprise complète) et subit `VOL_CHUTE_DEGATS` —
-	automatiques, ni jet ni armure. Puis la cascade d'un coup reçu (lien de vie, concentration,
+	la plus proche (`vol.case_la_plus_proche`, emprise complète) et subit UN DÉ PAR CASE
+	parcourue (`vol.notation_chute` : D20 depuis une falaise — seul terrain qu'un vol ouvre en
+	combat, l'eau s'y franchit déjà) — automatiques, ni jet ni armure. Puis la cascade d'un coup reçu (lien de vie, concentration,
 	KO) pour le camp du joueur, celle d'un monstre brûlé sinon ; enfin zone persistante et
 	pièges de la case d'arrivée, comme au bout d'un saut.
 
@@ -1891,8 +1892,15 @@ def _atterrir(combat_doc: dict, acteur: dict) -> None:
 		return
 	tour = int(combat_doc.get("tour", 0) or 0)
 	nom = acteur.get("nom", "?")
+	# Terrain de la chute : le PIRE sous l'emprise (le plus de faces) parmi les cases qu'elle
+	# ne peut pas fouler — une grande créature à cheval sur une falaise s'y fracasse.
+	terrain = max((cells[cy][cx] if 0 <= cy < len(cells) and 0 <= cx < len(cells[cy]) else None
+				   for cx, cy in jetons.cases_emprise(acteur) if not _walkable(cells, cx, cy)),
+				  key=vol_util.faces_de_chute)
+	notation = vol_util.notation_chute(
+		terrain, vol_util.distance_cases((acteur["pos"]["x"], acteur["pos"]["y"]), vers))
 	acteur["pos"] = {"x": vers[0], "y": vers[1]}
-	dmg = roll_dice(vol_util.VOL_CHUTE_DEGATS)
+	dmg = roll_dice(notation)
 	est_monstre = str(acteur.get("id") or "").startswith("monstre_")
 	# ⚠️ UNE ligne `move` portant le nouvel état (position ET PV) : le jeton glisse vers sa
 	# case d'arrivée, la barre chute avec lui.
@@ -1904,7 +1912,7 @@ def _atterrir(combat_doc: dict, acteur: dict) -> None:
 		combat_doc.setdefault("log", []).append(_avec_etat({
 			"tour": tour, "acteur": nom, "kind": "kill" if mort else "move",
 			"texte": (f"🪂 {nom} s'écrase en [{vers[0]},{vers[1]}] !" if mort else
-					  f"🪂 {nom} chute en [{vers[0]},{vers[1]}] : {dmg} dégâts "
+					  f"🪂 {nom} chute en [{vers[0]},{vers[1]}] ({notation}) : {dmg} dégâts "
 					  f"(PV : {acteur['currentPV']}/{acteur.get('pv_max', 0)})."),
 		}, acteur))
 		if mort:
@@ -1917,7 +1925,7 @@ def _atterrir(combat_doc: dict, acteur: dict) -> None:
 			protecteur["currentPV"] = max(0, protecteur["currentPV"] - dmg_prot)
 		combat_doc.setdefault("log", []).append(_avec_etat({
 			"tour": tour, "acteur": nom, "kind": "move",
-			"texte": f"🪂 {nom} chute en [{vers[0]},{vers[1]}] : {dmg_def} dégâts "
+			"texte": f"🪂 {nom} chute en [{vers[0]},{vers[1]}] ({notation}) : {dmg_def} dégâts "
 					 f"(PV : {acteur['currentPV']}/{acteur.get('pv_max', 0)}).",
 		}, acteur))
 		if protecteur is not None:
