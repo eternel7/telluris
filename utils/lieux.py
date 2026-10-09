@@ -164,7 +164,8 @@ def get_lieux_ids(current_user: dict = Body(...)):
 		"type": "lieu",
 		"cells": {"$exists": True}
 	}
-	results = db.find(selector, fields=["_id","label","image"])
+	# `_find` plafonne à 25 sans `limit` : au-delà, les derniers `_id` (lieu:rhemi…) disparaissaient
+	results = db.find(selector, fields=["_id","label","image"], limit=10_000)
 	return results["docs"]
 
 @lieu_router.get("/lieu/{lieu_id}")

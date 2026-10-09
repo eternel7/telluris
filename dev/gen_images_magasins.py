@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # dev/gen_images_magasins.py
-# Façade de chaque boutique d'une cité, générée EN LOCAL par ComfyUI + Z-Image Turbo (gratuit).
-# Gabarit : docs/prompts_images.md §1 bis.
+# Façade de chaque boutique (et auberge) d'une cité. Gabarit : docs/prompts_images.md §1 bis.
+# Génération par GEMINI (défaut), le PORTRAIT du tenancier joint à la requête, avant le prompt
+# (« image 1 ») : c'est bien LE marchand de la boutique. Une auberge n'a pas de tenancier.
 #
 #   python dev/gen_images_magasins.py preparer  [--cite lieu:rhemi] [--sauf lieu:x,lieu:y]
-#   python dev/gen_images_magasins.py generer   [--seulement lieu:x,lieu:y] [--limite N] [--essai]
+#   python dev/gen_images_magasins.py essai     [--seulement …] [--limite N]  → interactif, essais/
+#   python dev/gen_images_magasins.py soumettre → lot batch Gemini (PAYANT, −50 %)
+#   python dev/gen_images_magasins.py etat | recuperer → images dans templates/resources/towns/
 #   python dev/gen_images_magasins.py appliquer → jsons/images_magasins_<cite>_a_importer.json
 #
+# Repli local gratuit : `generer [--essai]` (ComfyUI + FLUX.2 Klein, magasins seulement).
 # `generer` exige le serveur ComfyUI lancé par C:\ComfyUI_windows_portable\run_telluris.bat :
 # `--bf16-text-enc` (l'encodeur Qwen3 déborde en fp16 → NaN, image de bruit),
 # `--fp32-vae`, `--disable-smart-memory` (tout déchargé après chaque image).
@@ -23,6 +27,8 @@
 # ⚠️ `appliquer` relit le dump le plus récent et ne change QUE `image` (import = PUT complet).
 
 import argparse
+import base64
+import io
 import json
 import os
 import re
@@ -35,8 +41,10 @@ import zlib
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from dev.gen_portraits_batch import (AGES, ALLURES, CHEVEUX, CORPS, METIERS, PORTRAIT_GENERIQUE,
-	_accord, _docs, _dump_le_plus_recent, nom_libre)
+from dev.gen_portraits_batch import (AGES, ALLURES, API, CHEVEUX, CORPS, EUR_PAR_IMAGE_INTERACTIF,
+	METIERS, PORTRAIT_GENERIQUE, RATIO, REMISE_BATCH, _accord, _docs, _dump_le_plus_recent, _http,
+	afficher_etat, image_de_reponse, nom_libre, reponses_lot, soumettre_lot)
+from dev.gen_portraits_batch import MODELE as MODELE_GEMINI
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOSSIER_TOWNS = os.path.join(RACINE, "templates", "resources", "towns")
@@ -82,7 +90,8 @@ METIERS_EN = {
 	"necromancie": ("necromancer's shop", "skulls, bones, black candles, murky jars, dark grimoires"),
 	"negociant": ("merchant trading house", "chests, bales of goods, barrels, ledgers and a balance scale"),
 	"plumasserie": ("plumassier's shop", "bouquets of colorful feathers, plumed hats, feather fans"),
-	"salaison": ("salting house", "barrels of salt, hanging hams and dry sausages"),
+	# « barrels of salt » → des sacs marqués « SALT » (lot du 09/10).
+	"salaison": ("salting house", "open barrels heaped with coarse white salt, hanging hams and dry sausages"),
 	"savonnerie": ("soap maker's shop", "stacked bars of soap, cauldron, perfume flasks"),
 	"scriptorium": ("scriptorium and bookshop", "writing desks, inkwells, parchments, stacks of leather-bound books"),
 	"tabletterie": ("bone and ivory carver's shop", "carved combs, dice, chess sets, small bone boxes"),
@@ -113,7 +122,7 @@ LIGNEES_EN = {
 	"nain": ("a dwarf man", "a dwarf woman", "so short that the head only reaches the waist of the humans walking past, large head and hands for the size"),
 	"hobbit": ("a halfling man", "a halfling woman", "a grown adult with an adult face, barely reaching the hips of the humans around, barefoot with large hairy feet"),
 	"elfe": ("an elf man", "an elf woman", "ears only slightly elongated to a subtle point"),
-	"ogre": ("an ogre man", "an ogress woman", "towering head and shoulders above the humans around, massive, thick skin, dressed in work clothes"),
+	"ogre": ("an ogre man", "an ogress woman", "towering head and shoulders above the humans around, massive, thick human-toned skin never green, dressed in work clothes"),
 	"humain": ("a human man", "a human woman", ""),
 }
 
@@ -150,20 +159,28 @@ TRAITS_EN = {
 _TRAITS_ACCORDES = {_accord(fr, f): en for fr, en in TRAITS_EN.items() for f in (False, True)}
 
 # §0.2 et §0.1 traduits ; la consigne « aucun texte » DOIT être ici (pas de prompt négatif).
-# Chaque lignée avec un trait VISIBLE : la phrase nue ne donnait que des humains en photoréaliste.
+# Chaque lignée avec un trait VISIBLE : la phrase nue ne donnait que des humains.
 # Essai du 09/10 : « long pointed ears » → des oreilles en cornes ; « tiny halflings » → un bambin.
-FOULE = ("Ogres, dwarves, halflings, elves and humans go about their business in the street: slender "
-		 "elves with fine human-like faces and ears only slightly elongated to a subtle point, as in "
-		 "the Lord of the Rings films; bearded dwarves only waist-high to the humans; halflings who are "
-		 "grown men and women with adult faces, some wrinkled or bearded, the height of a human child, "
-		 "with curly hair and large hairy bare feet, never children or babies; huge thick-skinned ogres "
-		 "towering over the crowd. Everyone wears medieval clothing; no modern clothes, no glasses, "
-		 "no jeans.")
-STYLE = ("Photorealistic cinematic photograph, like a still from a medieval fantasy film shot on location: "
-		 "real materials and textures (weathered stone, aged wood, forged steel, worn leather and cloth), "
-		 "natural daylight, realistic slightly desaturated colors, detailed skin texture, believable "
-		 "proportions, photographic depth of field. Not an illustration, not a painting, not a drawing, "
-		 "not a cartoon. Every building is medieval, stone and timber-framed; nothing modern. "
+# Lot de Rhemi (09/10) : « as in the Lord of the Rings films » → costumes de film en série (hobbits
+# tous en gilet vert, elfes tous blonds, ogres tous chauves torse nu). L'auteur préfère la foule
+# d'Auxerre : chaque passant DIFFÉRENT — d'où les variations explicites par lignée.
+FOULE = ("A lively, varied crowd of ogres, dwarves, halflings, elves and humans goes about its business in "
+		 "the street, every passer-by different in age, build, hair and outfit, never the same costume "
+		 "twice: elves with fine faces and slightly pointed ears, with dark, auburn, black, silver or fair "
+		 "hair, in rich robes, travel cloaks or elegant leather armor; dwarves only waist-high to the "
+		 "humans, with red, black, grey or white beards or braids, in plate armor, smith's aprons or "
+		 "merchant clothes; halflings the height of a human child but grown adults with adult faces, "
+		 "plump or slim, young or wrinkled, barefoot with curly hair, in colorful waistcoats and skirts, "
+		 # Jamais verts (consigne de l'auteur, 09/10) : les teints restent humains, en plus rude.
+		 "never children or babies; huge ogres with human skin tones, weathered, ruddy, tanned or ashen, "
+		 "never green, in "
+		 "tunics, furs or armor, towering over the crowd; humans of every origin: adventurers, guards, "
+		 "merchants, pilgrims, peasants. Everyone wears medieval clothing; nothing modern.")
+# Style d'Auxerre (§0.1), préféré par l'auteur au photoréaliste du lot de Rhemi (09/10).
+STYLE = ("Detailed semi-realistic medieval fantasy illustration in the style of a high-end narrative 2D "
+		 "RPG: rich digital painting, warm natural light, warm earthy palette with touches of vivid color "
+		 "in clothes, awnings and banners, believable proportions, lots of lively detail. Not a photograph. "
+		 "Every building is medieval, stone and timber-framed; nothing modern. "
 		 "No text anywhere in the image: no letters, no inscription, no readable sign, no lettering on "
 		 "banners or awnings, no logo, no signature, no watermark.")
 
@@ -201,12 +218,43 @@ def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label):
 	lieu = QUARTIERS_EN[cite][t] if t else f"in a street of the walled city of {cite_nom}"
 	tenancier = ", ".join([homme if sexe == "M" else femme] + list(traits) + ([repere] if repere else []))
 	# Pas de « Telluris » : comme un nom de boutique, le mot finissait peint en enseigne (08/10).
+	# Le portrait le montre face à nous, souriant, qui vend ; la boutique le montre AU TRAVAIL :
+	# lot du 09/10, la pose du portrait était recopiée (consigne de l'auteur).
 	return (f"The person shown in image 1 is the shopkeeper: keep exactly the same face, hair, beard, "
-			f"body, skin and clothes as in image 1 ({tenancier}). Do not reuse the background of image 1. "
-			f"Show this shopkeeper standing on the threshold of the open front and market stall of a "
-			f"medieval fantasy {boutique} in the city of {cite_nom}, {lieu}. The shop fills about 80% of "
+			f"body, skin and clothes as in image 1 ({tenancier}), but NOT the same pose or expression. "
+			f"Do not reuse the background of image 1. Show this shopkeeper at work at the open front and "
+			f"market stall of a medieval fantasy {boutique} in the city of {cite_nom}, {lieu}, busy with "
+			f"the trade, absorbed in the task, not looking at the camera, not posing, not presenting "
+			f"anything to the viewer. The shop fills about 80% of "
 			f"the image, seen from the street in a three-quarter view; its goods are displayed on racks "
 			f"and tables and are immediately recognizable: {marchandises}. {FOULE} {STYLE}")
+
+
+# Auberges dont l'enseigne ne finit pas par un toponyme (`quartier_de` lit les autres).
+QUARTIERS_AUBERGES = {
+	"lieu:au_bon_vigneron": "des Coteaux",
+	"lieu:la_crayere": "des Crayères",
+}
+
+
+def prompt_auberge(cite, cite_nom, quartier):
+	"""PURE. Façade d'auberge (§1 bis sans tenancier : aucun PNJ n'y est posté). Aucun nom propre."""
+	lieu = QUARTIERS_EN.get(cite, {}).get(quartier) or f"in a street of the walled city of {cite_nom}"
+	return (f"The front of a large medieval fantasy inn and tavern in the city of {cite_nom}, {lieu}. The inn "
+			# Pas d'enseigne : « a hanging sign showing only a painted emblem » → faux texte peint ; sans
+			# enseigne, il l'a écrit sur un bandeau de façade (essais du 09/10).
+			f"fills about 80% of the image, seen from the street in a three-quarter view: a tall stone and "
+			f"timber-framed building with bare facade beams — no hanging sign, no signboard, no name board "
+			f"or plaque above the door —, wide open door and "
+			f"windows revealing a warm firelit common room with long tables, travelers eating and drinking, "
+			f"barrels and benches outside the door, a stable yard to one side. {FOULE} {STYLE}")
+
+
+def requete_gemini(prompt, image_b64=None, mime="image/jpeg"):
+	"""PURE. Corps `generateContent` : l'image jointe AVANT le texte (c'est l'« image 1 » du prompt)."""
+	parts = ([{"inlineData": {"mimeType": mime, "data": image_b64}}] if image_b64 else []) + [{"text": prompt}]
+	return {"contents": [{"parts": parts}],
+			"generationConfig": {"responseModalities": ["IMAGE"], "imageConfig": {"aspectRatio": RATIO}}}
 
 
 # Image ratée par le GPU (NaN dans le sampler) : gris uniforme ou bruit pur. Étalonné le 08/10 :
@@ -264,6 +312,40 @@ def _portraits(cite):
 		man = json.load(f)
 	prompts = {e["key"]: e.get("prompt") for e in man.get("entrees", [])}
 	return {k: (img, prompts.get(k)) for k, img in (man.get("images") or {}).items()}
+
+
+def _portrait_b64(nom):
+	"""Portrait du tenancier ramené à ~1 Mpx en JPEG puis base64 : bruts, les 62 portraits
+	(~1,2 Mo chacun) gonflaient le JSONL du lot sans rien apporter à la référence."""
+	from PIL import Image
+	im = Image.open(os.path.join(DOSSIER_PNJ, nom)).convert("RGB")
+	r = (1_000_000 / (im.width * im.height)) ** 0.5
+	if r < 1:
+		im = im.resize((round(im.width * r), round(im.height * r)), Image.LANCZOS)
+	tampon = io.BytesIO()
+	im.save(tampon, "JPEG", quality=90)
+	return base64.b64encode(tampon.getvalue()).decode("ascii")
+
+
+def _requete(e):
+	return requete_gemini(e["prompt"], _portrait_b64(e["portrait"]) if e.get("portrait") else None)
+
+
+def _chemin_requetes(cite):
+	return os.path.join(os.path.dirname(_chemin_manifeste(cite)), "requetes.jsonl")
+
+
+def _ecrire_image(dossier, base, part, pris):
+	"""Écrit l'image d'une réponse Gemini sous le prochain nom libre ; (nom, None) ou (None, motif)."""
+	octets = base64.b64decode(part["inlineData"]["data"])
+	rejet = image_degeneree(*_mesures(octets))
+	if rejet:
+		return None, f"image {rejet}"
+	ext = ".jpg" if "jpeg" in part["inlineData"].get("mimeType", "") else ".png"
+	nom = nom_libre(dossier, base, ext, pris)
+	with open(os.path.join(dossier, nom), "wb") as f:
+		f.write(octets)
+	return nom, None
 
 
 def _comfy(chemin, corps=None):
@@ -340,6 +422,12 @@ def preparer(cite, sauf):
 	for lid, lieu in sorted(lieux.items()):
 		if lieu.get("lieu_parent") != cite or lid in sauf:
 			continue
+		if lieu.get("categorie") == "auberge" and lieu.get("image"):
+			q = QUARTIERS_AUBERGES.get(lid) or quartier_de(lieu.get("label"), cite)
+			entrees.append({"key": lid, "categorie": "auberge", "quartier": q,
+							"base": base_image(lieu["image"], cite), "graine": zlib.crc32(lid.encode()),
+							"portrait": None, "prompt": prompt_auberge(cite, cite_nom, q)})
+			continue
 		pnj = (lieu.get("pnj") or [{}])[0]
 		portrait = str(pnj.get("portrait") or "")
 		m = PORTRAIT_GENERIQUE.match(portrait)
@@ -362,10 +450,21 @@ def preparer(cite, sauf):
 	ancien = None
 	if os.path.exists(_chemin_manifeste(cite)):
 		ancien = _manifeste(cite)
+		if ancien.get("batch"):
+			raise SystemExit(f"Lot en cours : {ancien['batch']} — `recuperer` avant de re-préparer.")
 	images = {k: v for k, v in ((ancien or {}).get("images") or {}).items() if k in {e["key"] for e in entrees}}
-	_manifeste(cite, {"cite": cite, "modele": MODELE, "entrees": entrees, "images": images})
-	print(f"{len(entrees)} boutiques préparées → {os.path.relpath(_chemin_manifeste(cite), RACINE)}"
+	with open(_chemin_requetes(cite), "w", encoding="utf-8") as f:
+		for e in entrees:
+			if e["key"] not in images:
+				f.write(json.dumps({"key": e["key"], "request": _requete(e)}, ensure_ascii=False) + "\n")
+	_manifeste(cite, {"cite": cite, "modele": MODELE_GEMINI, "entrees": entrees, "batch": None, "images": images})
+	reste = len(entrees) - len(images)
+	unit = EUR_PAR_IMAGE_INTERACTIF * REMISE_BATCH
+	print(f"{len(entrees)} lieux préparés ({sum(1 for e in entrees if e['categorie'] == 'auberge')} auberge(s))"
+		  f" → {os.path.relpath(_chemin_manifeste(cite), RACINE)}"
 		  f" ({len(images)} image(s) déjà générée(s) conservée(s))")
+	print(f"Lot : {reste} requête(s) → {os.path.relpath(_chemin_requetes(cite), RACINE)} ; "
+		  f"estimation {reste} × {unit:.3f} € ≈ {reste * unit:.2f} €")
 	for i in ignores:
 		print("  ignoré :", i)
 	if sans_traits:
@@ -386,7 +485,7 @@ def generer(cite, seulement, limite, essai=False):
 	if essai:
 		dossier = os.path.join(os.path.dirname(_chemin_manifeste(cite)), "essais")
 		os.makedirs(dossier, exist_ok=True)
-	a_faire = [e for e in man["entrees"] if (essai or e["key"] not in man["images"])
+	a_faire = [e for e in man["entrees"] if e.get("portrait") and (essai or e["key"] not in man["images"])
 			   and (not seulement or e["key"] in seulement)]
 	if limite:
 		a_faire = a_faire[:limite]
@@ -419,6 +518,72 @@ def generer(cite, seulement, limite, essai=False):
 		print(f"  [{i}/{len(a_faire)}] {nom} ← {e['key']} ({time.time() - t0:.0f} s)", flush=True)
 
 
+def essai(cite, seulement, limite):
+	"""Gemini INTERACTIF (~0,04 €/image) dans dev/batch/<cite>/magasins/essais/ : ni `towns/` ni
+	le manifeste ne bougent — pour juger le gabarit avant de payer le lot."""
+	man = _manifeste(cite)
+	dossier = os.path.join(os.path.dirname(_chemin_manifeste(cite)), "essais")
+	os.makedirs(dossier, exist_ok=True)
+	a_faire = [e for e in man["entrees"] if not seulement or e["key"] in seulement]
+	if limite:
+		a_faire = a_faire[:limite]
+	print(f"{len(a_faire)} essai(s), ≈ {len(a_faire) * EUR_PAR_IMAGE_INTERACTIF:.2f} €")
+	for e in a_faire:
+		t0 = time.time()
+		_, rep = _http(f"{API}/v1beta/models/{man['modele']}:generateContent", _requete(e))
+		part = image_de_reponse(json.loads(rep))
+		if not part:
+			print(f"  ✗ {e['key']} : {rep.decode('utf-8', 'replace')[:300]}", flush=True)
+			continue
+		nom, motif = _ecrire_image(dossier, e["base"], part, ())
+		print(f"  {nom or '✗ ' + motif} ← {e['key']} ({time.time() - t0:.0f} s)", flush=True)
+
+
+def soumettre(cite):
+	man = _manifeste(cite)
+	if man.get("batch"):
+		raise SystemExit(f"Déjà soumis : {man['batch']} — `etat` pour suivre.")
+	man["batch"] = soumettre_lot(_chemin_requetes(cite), man["modele"], f"magasins-{cite}")
+	_manifeste(cite, man)
+	print("Lot soumis :", man["batch"])
+
+
+def etat(cite):
+	man = _manifeste(cite)
+	if not man.get("batch"):
+		raise SystemExit("Aucun lot en cours.")
+	afficher_etat(man["batch"])
+
+
+def recuperer(cite):
+	"""Écrit les images du lot dans `towns/`. Le lot est ensuite CLOS (`lots`) : un `preparer`
+	rejoué ne remet en lot que les lieux encore sans image (échecs, images rejetées)."""
+	man = _manifeste(cite)
+	if not man.get("batch"):
+		raise SystemExit("Aucun lot en cours.")
+	par_cle = {e["key"]: e for e in man["entrees"]}
+	ecrites, erreurs = 0, []
+	for cle, part, r in reponses_lot(man["batch"]):
+		if cle in man["images"] or cle not in par_cle:
+			continue
+		if not part:
+			erreurs.append(f"{cle} : {json.dumps(r.get('error') or r)[:200]}")
+			continue
+		nom, motif = _ecrire_image(DOSSIER_TOWNS, par_cle[cle]["base"], part, set(man["images"].values()))
+		if not nom:
+			erreurs.append(f"{cle} : {motif}")
+			continue
+		man["images"][cle] = nom
+		ecrites += 1
+	man.setdefault("lots", []).append(man["batch"])
+	man["batch"] = None
+	_manifeste(cite, man)
+	print(f"{ecrites} image(s) écrite(s) dans templates/resources/towns/ ; {len(erreurs)} échec(s)"
+		  f" — {len(man['entrees']) - len(man['images'])} lieu(x) encore sans image")
+	for e in erreurs:
+		print("  ✗", e)
+
+
 def appliquer(cite):
 	man = _manifeste(cite)
 	docs = {d["_id"]: d for d in _docs(_dump_le_plus_recent())}
@@ -446,7 +611,7 @@ def main():
 	except Exception:
 		pass
 	p = argparse.ArgumentParser()
-	p.add_argument("etape", choices=["preparer", "generer", "appliquer"])
+	p.add_argument("etape", choices=["preparer", "essai", "soumettre", "etat", "recuperer", "generer", "appliquer"])
 	p.add_argument("--cite", default="lieu:rhemi")
 	p.add_argument("--sauf", default="", help="lieux à exclure, séparés par des virgules")
 	p.add_argument("--seulement", default="", help="ne générer que ces lieux, séparés par des virgules")
@@ -455,10 +620,12 @@ def main():
 	a = p.parse_args()
 	if a.etape == "preparer":
 		preparer(a.cite, {s for s in a.sauf.split(",") if s})
+	elif a.etape == "essai":
+		essai(a.cite, {s for s in a.seulement.split(",") if s}, a.limite)
 	elif a.etape == "generer":
 		generer(a.cite, {s for s in a.seulement.split(",") if s}, a.limite, a.essai)
 	else:
-		appliquer(a.cite)
+		{"soumettre": soumettre, "etat": etat, "recuperer": recuperer, "appliquer": appliquer}[a.etape](a.cite)
 
 
 if __name__ == "__main__":

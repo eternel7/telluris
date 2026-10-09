@@ -52,8 +52,9 @@ LIGNEES = {
 	"hobbit": ("Une hobbit", "Un hobbit",
 			   "de toute petite taille d'adulte, pieds nus — un humain au même plan le{a} dépasse de deux têtes"),
 	"elfe": ("Une elfe", "Un elfe", "aux oreilles longues et pointues"),
+	# Jamais vert (consigne de l'auteur, 09/10).
 	"ogre": ("Une ogresse", "Un ogre",
-			 "bien plus grand{e} et massi{ve} qu'un humain, peau épaisse — un humain au même plan lui arrive à la poitrine"),
+			 "bien plus grand{e} et massi{ve} qu'un humain, peau épaisse au teint humain, jamais verte — un humain au même plan lui arrive à la poitrine"),
 	"humain": ("Une humaine", "Un humain", ""),
 }
 AGES = ["jeune", "dans la force de l'âge", "d'âge mûr", "âgé{e}", "très âgé{e}"]
@@ -98,9 +99,21 @@ METIERS = {
 	"tissage": ("tient un atelier de tissage", "une étoffe richement tissée", "vêtements de toile fine", "métier à tisser, rouleaux d'étoffes colorées"),
 }
 
-STYLE = ("Rendu photoréaliste, comme une photo de plateau de film médiéval ; pas d'illustration, pas de "
-		 "peinture, pas de dessin. Image entièrement dépourvue d'écriture : aucun nom, aucune lettre, "
-		 "aucune signature, aucun monogramme, aucun filigrane, aucune enseigne lisible.")
+# Style d'Auxerre (§0.1), préféré par l'auteur au photoréaliste du lot de Rhemi (09/10) : même
+# rendu que les façades de dev/gen_images_magasins.py, où ce portrait part en référence.
+STYLE = ("Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de "
+		 "gamme : peinture numérique détaillée, lumière naturelle chaude, palette chaude et terreuse "
+		 "relevée de touches de couleurs vives, proportions crédibles ; pas une photographie. Image "
+		 "entièrement dépourvue d'écriture : aucun nom, aucune lettre, aucune signature, aucun "
+		 "monogramme, aucun filigrane, aucune enseigne lisible.")
+# §0.2 (phrase de l'auteur, telle quelle) + la variété de la foule d'Auxerre : sans elle, des
+# figurants identiques (lot de Rhemi, 09/10). Ogres jamais verts.
+FOULE = ("Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, "
+		 "chacun différent par l'âge, la carrure, les cheveux et la tenue : elfes bruns, roux, noirs, "
+		 "argentés ou blonds, en robe, cape de voyage ou cuir ; nains barbus ou tressés, en armure, "
+		 "tablier ou habit de marchand ; hobbits ronds ou fluets, jeunes ou ridés, en gilets colorés ; "
+		 "ogres aux teints humains, burinés, rougeauds ou hâlés, jamais verts ; humains de toutes "
+		 "origines, aventuriers, gardes, marchands, pèlerins.")
 
 
 def _accord(texte, f):
@@ -118,14 +131,14 @@ def prompt_tenancier(race, sexe, categorie, cite_nom, rng):
 					   rng.choice(CHEVEUX), rng.choice(ALLURES)])
 	il = "Elle" if f else "Il"
 	sujet = f"{une_f if f else un_m} {corps}" + (f", {_accord(marqueur, f)}" if marqueur else "")
-	return (f"Photographie cinématographique d'un personnage de fantasy médiévale, format paysage large. "
-			f"{sujet}. {il} {qui} à {cite_nom}, dans le monde médiéval fantastique de Telluris. "
+	# ⚠️ 1re phrase sans « . » interne : `gen_images_magasins.traits_du_portrait` lit la 2e.
+	return (f"Portrait illustré d'un personnage de fantasy médiévale, format paysage large. "
+			# Pas de « Telluris » : le mot finissait peint en enseigne (essai des façades, 08/10).
+			f"{sujet}. {il} {qui} à {cite_nom}, dans un monde médiéval fantastique. "
 			f"{il} se tient légèrement décalé{'e' if f else ''} du centre et regarde droit vers le spectateur "
 			f"avec l'assurance d'un{'e' if f else ''} commerçant{'e' if f else ''} ; {il.lower()} lui présente {objet}. "
 			f"Tenue de travail usée et crédible : {tenue}. Décor de part et d'autre : {decor}. "
-			f"Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. "
-			f"Lumière naturelle de jour, couleurs réalistes et désaturées, texture de peau détaillée, "
-			f"profondeur de champ photographique. {STYLE}")
+			f"{FOULE} {STYLE}")
 
 
 def nom_libre(dossier, base, ext, pris=()):
@@ -240,43 +253,36 @@ def preparer(cite, sauf):
 		  f"(batch −50 % sur le coût observé de {EUR_PAR_IMAGE_INTERACTIF:.2f} €/image)")
 
 
-def soumettre(cite):
-	man = _manifeste(cite)
-	if man.get("batch"):
-		raise SystemExit(f"Déjà soumis : {man['batch']} — `etat` pour suivre.")
-	chemin = os.path.join(_dossier(cite), "requetes.jsonl")
-	octets = open(chemin, "rb").read()
-	h, _ = _http(f"{API}/upload/v1beta/files", {"file": {"display_name": f"portraits-{cite}"}}, {
+def soumettre_lot(chemin_jsonl, modele, nom_affiche):
+	"""Envoie un fichier de requêtes JSONL à l'API batch (PAYANT) ; rend le nom du lot.
+	Partagé avec dev/gen_images_magasins.py."""
+	octets = open(chemin_jsonl, "rb").read()
+	h, _ = _http(f"{API}/upload/v1beta/files", {"file": {"display_name": nom_affiche}}, {
 		"X-Goog-Upload-Protocol": "resumable", "X-Goog-Upload-Command": "start",
 		"X-Goog-Upload-Header-Content-Length": str(len(octets)),
 		"X-Goog-Upload-Header-Content-Type": "application/jsonl"})
 	_, rep = _http(h["x-goog-upload-url"], octets, {"X-Goog-Upload-Offset": "0",
 												   "X-Goog-Upload-Command": "upload, finalize"}, brut=True)
 	fichier = json.loads(rep)["file"]["name"]
-	_, rep = _http(f"{API}/v1beta/models/{man['modele']}:batchGenerateContent",
-				   {"batch": {"display_name": f"portraits-{cite}", "input_config": {"file_name": fichier}}})
-	man["batch"] = json.loads(rep)["name"]
-	_manifeste(cite, man)
-	print("Lot soumis :", man["batch"])
+	_, rep = _http(f"{API}/v1beta/models/{modele}:batchGenerateContent",
+				   {"batch": {"display_name": nom_affiche, "input_config": {"file_name": fichier}}})
+	return json.loads(rep)["name"]
 
 
-def _statut(man):
-	_, rep = _http(f"{API}/v1beta/{man['batch']}")
+def statut_lot(lot):
+	_, rep = _http(f"{API}/v1beta/{lot}")
 	return json.loads(rep)
 
 
-def etat(cite):
-	man = _manifeste(cite)
-	if not man.get("batch"):
-		raise SystemExit("Pas encore soumis.")
-	s = _statut(man)
-	meta = s.get("metadata") or s
-	print(man["batch"], "→", meta.get("state"), "| stats :", meta.get("batchStats"))
+def image_de_reponse(reponse):
+	"""PURE. La première partie `inlineData` d'une réponse `generateContent`, ou None."""
+	return next((p for c in (reponse or {}).get("candidates", [])
+				 for p in (c.get("content") or {}).get("parts", []) if "inlineData" in p), None)
 
 
-def recuperer(cite):
-	man = _manifeste(cite)
-	s = _statut(man)
+def reponses_lot(lot):
+	"""[(clé, partie inlineData | None, ligne brute)] d'un lot terminé ; SystemExit sinon."""
+	s = statut_lot(lot)
 	meta = s.get("metadata") or {}
 	# L'API répond `BATCH_STATE_*` (constaté le 08/10/2026) ; la doc écrit `JOB_STATE_*`.
 	if meta.get("state") not in ("BATCH_STATE_SUCCEEDED", "JOB_STATE_SUCCEEDED") and not s.get("done"):
@@ -285,17 +291,43 @@ def recuperer(cite):
 	if not rep:
 		raise SystemExit("Aucun fichier de réponses : " + json.dumps(s)[:600])
 	_, brut = _http(f"{API}/download/v1beta/{rep}:download?alt=media")
+	sortie = []
+	for ligne in brut.decode("utf-8").splitlines():
+		if ligne.strip():
+			r = json.loads(ligne)
+			sortie.append((r.get("key"), image_de_reponse(r.get("response")), r))
+	return sortie
+
+
+def afficher_etat(lot):
+	s = statut_lot(lot)
+	meta = s.get("metadata") or s
+	print(lot, "→", meta.get("state"), "| stats :", meta.get("batchStats"))
+
+
+def soumettre(cite):
+	man = _manifeste(cite)
+	if man.get("batch"):
+		raise SystemExit(f"Déjà soumis : {man['batch']} — `etat` pour suivre.")
+	man["batch"] = soumettre_lot(os.path.join(_dossier(cite), "requetes.jsonl"), man["modele"], f"portraits-{cite}")
+	_manifeste(cite, man)
+	print("Lot soumis :", man["batch"])
+
+
+def etat(cite):
+	man = _manifeste(cite)
+	if not man.get("batch"):
+		raise SystemExit("Pas encore soumis.")
+	afficher_etat(man["batch"])
+
+
+def recuperer(cite):
+	man = _manifeste(cite)
 	par_cle = {e["key"]: e for e in man["entrees"]}
 	pris, ecrites, erreurs = set(man["images"].values()), 0, []
-	for ligne in brut.decode("utf-8").splitlines():
-		if not ligne.strip():
-			continue
-		r = json.loads(ligne)
-		cle = r.get("key")
+	for cle, part, r in reponses_lot(man["batch"]):
 		if cle in man["images"] or cle not in par_cle:
 			continue
-		part = next((p for c in (r.get("response") or {}).get("candidates", [])
-					 for p in (c.get("content") or {}).get("parts", []) if "inlineData" in p), None)
 		if not part:
 			erreurs.append(f"{cle} : {json.dumps(r.get('error') or r)[:200]}")
 			continue

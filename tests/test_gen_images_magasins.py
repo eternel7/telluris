@@ -1,4 +1,4 @@
-"""dev/gen_images_magasins.py — façades de boutique générées par ComfyUI.
+"""dev/gen_images_magasins.py — façades de boutique et d'auberge (Gemini, repli ComfyUI).
 
 Partie pure seulement. Verrouille ce qui ferait passer le lot à vide ou le rendrait faux en
 silence : une catégorie ou un toponyme sans traduction (KeyError au milieu du lot, ou rue
@@ -12,9 +12,11 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from dev.gen_images_magasins import (LIGNEES_EN, METIERS_EN, QUARTIERS_EN, TRAITS_EN, base_image,
-	image_degeneree, prompt_magasin, quartier_de, traits_du_portrait)
-from dev.gen_portraits_batch import AGES, ALLURES, CHEVEUX, CORPS, LIGNEES, METIERS, prompt_tenancier
+from dev.gen_images_magasins import (LIGNEES_EN, METIERS_EN, QUARTIERS_AUBERGES, QUARTIERS_EN, TRAITS_EN,
+	base_image, image_degeneree, prompt_auberge, prompt_magasin, quartier_de, requete_gemini,
+	traits_du_portrait)
+from dev.gen_portraits_batch import (AGES, ALLURES, CHEVEUX, CORPS, LIGNEES, METIERS, RATIO,
+	image_de_reponse, prompt_tenancier)
 from utils.enseignes import TOPONYMES_PAR_LIEU
 
 
@@ -49,6 +51,17 @@ def test_traits_relus_dans_un_vrai_prompt_de_portrait():
 				assert traits_du_portrait(prompt) == attendus, (race, sexe, prompt)
 
 
+def test_portrait_au_style_et_aux_regles_des_facades():
+	# Consignes de l'auteur (09/10) : style d'Auxerre, foule variée, ogres jamais verts, pas de nom.
+	prompt = prompt_tenancier("ogre", "M", "boulangerie", "Reims", random.Random(0))
+	assert "pas une photographie" in prompt
+	assert "photoréaliste" not in prompt
+	assert "Telluris" not in prompt
+	assert "jamais verts" in prompt  # la foule
+	assert "jamais verte" in prompt  # le tenancier ogre
+	assert "Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation" in prompt
+
+
 def test_prompt_meconnaissable_sans_traits():
 	assert traits_du_portrait(None) == []
 	assert traits_du_portrait("Portrait fait à la main") == []
@@ -64,6 +77,9 @@ def test_aucun_nom_propre_dans_le_prompt():
 	assert "barefoot" in prompt
 	# Pas de prompt négatif avec Z-Image Turbo : l'interdiction du texte est dans le prompt.
 	assert "No text" in prompt
+	# Le portrait vend face à nous ; la boutique le montre au travail (consigne du 09/10).
+	assert "NOT the same pose" in prompt
+	assert "not looking at the camera" in prompt
 
 
 def test_quartier_par_suffixe_du_label():
@@ -88,3 +104,40 @@ def test_base_image_propre_a_la_cite():
 	assert base_image("negoce_europe01.jpg", "lieu:rhemi") == "negoce_europe_rhemi"
 	assert base_image("armurerie_europe05.png", "lieu:rhemi") == "armurerie_europe_rhemi"
 	assert base_image("cabinet_alchimie_europe02.png", "lieu:rhemi") == "cabinet_alchimie_europe_rhemi"
+
+
+def test_requete_gemini_portrait_avant_le_texte():
+	# Le prompt désigne le tenancier comme « image 1 » : l'image doit précéder le texte.
+	r = requete_gemini("prompt", "QUJD")
+	parts = r["contents"][0]["parts"]
+	assert parts[0] == {"inlineData": {"mimeType": "image/jpeg", "data": "QUJD"}}
+	assert parts[1] == {"text": "prompt"}
+	assert r["generationConfig"]["responseModalities"] == ["IMAGE"]
+	assert r["generationConfig"]["imageConfig"]["aspectRatio"] == RATIO
+
+
+def test_requete_gemini_sans_image_pour_une_auberge():
+	assert requete_gemini("prompt")["contents"][0]["parts"] == [{"text": "prompt"}]
+
+
+def test_auberge_sans_nom_propre_et_dans_son_quartier():
+	prompt = prompt_auberge("lieu:rhemi", "Reims", QUARTIERS_AUBERGES["lieu:la_crayere"])
+	assert "Crayère" not in prompt
+	assert "Telluris" not in prompt
+	assert QUARTIERS_EN["lieu:rhemi"]["des Crayères"] in prompt
+	assert "No text" in prompt
+	assert "walled city of Reims" in prompt_auberge("lieu:rhemi", "Reims", None)
+
+
+def test_quartiers_d_auberge_connus():
+	for q in QUARTIERS_AUBERGES.values():
+		assert q in QUARTIERS_EN["lieu:rhemi"], q
+	assert quartier_de("Auberge du Sacre", "lieu:rhemi") == "du Sacre"
+
+
+def test_image_lue_dans_une_reponse_gemini():
+	part = {"inlineData": {"mimeType": "image/jpeg", "data": "QUJD"}}
+	rep = {"candidates": [{"content": {"parts": [{"text": "voici"}, part]}}]}
+	assert image_de_reponse(rep) is part
+	assert image_de_reponse({"candidates": [{"finishReason": "SAFETY"}]}) is None
+	assert image_de_reponse(None) is None

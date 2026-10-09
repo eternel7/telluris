@@ -1,0 +1,1291 @@
+[
+	{
+		"_id": "lieu:au_bon_vigneron",
+		"_rev": "1-3f236d333b1a4c1c8e3523c640a320d4",
+		"type": "lieu",
+		"label": "Au Bon Vigneron",
+		"image": "auberge_europe_rhemi01.jpg",
+		"categorie": "auberge",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "lieu:auberge_du_sacre",
+		"_rev": "1-c338798d6fd92fe269fb8f1c62fdb9e2",
+		"type": "lieu",
+		"label": "Auberge du Sacre",
+		"image": "auberge_europe_rhemi02.jpg",
+		"categorie": "auberge",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "lieu:l_aile_de_la_fleche_du_chapitre",
+		"_rev": "2-da10afaec3364c8be41f6f9c914da115",
+		"type": "lieu",
+		"label": "L'Aile de la Flèche du Chapitre",
+		"image": "atelier_de_l_empenneur_europe_rhemi01.jpg",
+		"categorie": "atelier_de_l_empenneur",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_de_l_empenneur",
+				"portrait": "marchand_nain_m_atelier_de_l_empenneur01.jpg",
+				"nom": "Kazrag Fort-Armure"
+			}
+		]
+	},
+	{
+		"_id": "lieu:l_arc_vert_des_coteaux",
+		"_rev": "2-d65899a60c7d6dcec8e872c6e013e298",
+		"type": "lieu",
+		"label": "L'Arc Vert des Coteaux",
+		"image": "archerie_europe_rhemi01.jpg",
+		"categorie": "fletcher",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_fletcher",
+				"portrait": "marchand_hobbit_m_fletcher01.jpg",
+				"nom": "Fastolf Chaud-Chaudron"
+			}
+		]
+	},
+	{
+		"_id": "lieu:l_athanor_rouge_du_chapitre",
+		"_rev": "2-4f712508be3acf5e6d43df8f7cfdaeaa",
+		"type": "lieu",
+		"label": "L'Athanor Rouge du Chapitre",
+		"image": "cabinet_alchimie_europe_rhemi01.jpg",
+		"categorie": "laboratoire_d_alchimie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_laboratoire_d_alchimie",
+				"portrait": "marchand_humain_m_laboratoire_d_alchimie01.jpg",
+				"nom": "Fabien Hartmann"
+			}
+		]
+	},
+	{
+		"_id": "lieu:l_ecorce_de_chene_du_chapitre",
+		"_rev": "2-e81da76eba353ec1ed3a718ce1315039",
+		"type": "lieu",
+		"label": "L'Écorce de Chêne du Chapitre",
+		"image": "tannerie_europe_rhemi01.jpg",
+		"categorie": "tannerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_tannerie",
+				"portrait": "marchand_elfe_f_tannerie01.jpg",
+				"nom": "Nyambura Cielazur"
+			}
+		]
+	},
+	{
+		"_id": "lieu:l_ecrin_des_coteaux",
+		"_rev": "2-c7a54a9a77a7367bbf7dbfabdad505ce",
+		"type": "lieu",
+		"label": "L'Écrin des Coteaux",
+		"image": "bijouterie_europe_rhemi01.jpg",
+		"categorie": "bijouterie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_bijouterie",
+				"portrait": "marchand_elfe_f_bijouterie03.jpg",
+				"nom": "Aelwen Ventelame"
+			}
+		]
+	},
+	{
+		"_id": "lieu:l_enclume_de_la_porte_de_mars",
+		"_rev": "3-47a78d4fe8837c418d79fffbcfdf06d8",
+		"type": "lieu",
+		"label": "L'Enclume de la Porte de Mars",
+		"image": "armurerie_europe_rhemi01.jpg",
+		"categorie": "armurerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {
+			"acier": 3,
+			"argent": 5,
+			"branche": 5,
+			"bronze": 5,
+			"debris_anime": 5,
+			"fer": 5,
+			"gros_rondin": 5,
+			"peaux": 5,
+			"petit_rondin": 5,
+			"pierre": 5,
+			"plomb": 5,
+			"poix": 5,
+			"rondin": 5
+		},
+		"stock_vente": [
+			{
+				"item_id": "item:acier",
+				"qty": 3
+			},
+			{
+				"item_id": "item:argent",
+				"qty": 5
+			},
+			{
+				"item_id": "item:branche",
+				"qty": 5
+			},
+			{
+				"item_id": "item:bronze",
+				"qty": 5
+			},
+			{
+				"item_id": "item:debris_anime",
+				"qty": 5
+			},
+			{
+				"item_id": "item:fer",
+				"qty": 5
+			},
+			{
+				"item_id": "item:gros_rondin",
+				"qty": 5
+			},
+			{
+				"item_id": "item:peaux",
+				"qty": 5
+			},
+			{
+				"item_id": "item:petit_rondin",
+				"qty": 5
+			},
+			{
+				"item_id": "item:pierre",
+				"qty": 5
+			},
+			{
+				"item_id": "item:plomb",
+				"qty": 5
+			},
+			{
+				"item_id": "item:poix",
+				"qty": 5
+			},
+			{
+				"item_id": "item:rondin",
+				"qty": 5
+			}
+		],
+		"pnj": [
+			{
+				"character": "pnj:marchand_armurerie",
+				"portrait": "marchand_nain_m_armurerie01.jpg",
+				"nom": "Bofur Barbeforge"
+			}
+		]
+	},
+	{
+		"_id": "lieu:l_encre_noire_des_crayeres",
+		"_rev": "2-d35d2173c15652987290c59ede97ed78",
+		"type": "lieu",
+		"label": "L'Encre Noire des Crayères",
+		"image": "scriptorium_europe_rhemi01.jpg",
+		"categorie": "scriptorium",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_scriptorium",
+				"portrait": "marchand_humain_m_scriptorium03.jpg",
+				"nom": "Yǔchén Cordier"
+			}
+		]
+	},
+	{
+		"_id": "lieu:l_ivoire_feint_de_la_porte_de_mars",
+		"_rev": "3-8ecc57a0570e4eb6bfdc54e443b33803",
+		"type": "lieu",
+		"label": "L'Ivoire Feint de la Porte de Mars",
+		"image": "tabletterie_europe_rhemi01.jpg",
+		"categorie": "tabletterie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {
+			"branche": 5,
+			"ossements": 5,
+			"peaux": 5,
+			"petit_rondin": 5
+		},
+		"stock_vente": [
+			{
+				"item_id": "item:branche",
+				"qty": 5
+			},
+			{
+				"item_id": "item:ossements",
+				"qty": 5
+			},
+			{
+				"item_id": "item:peaux",
+				"qty": 5
+			},
+			{
+				"item_id": "item:petit_rondin",
+				"qty": 5
+			}
+		],
+		"pnj": [
+			{
+				"character": "pnj:marchand_tabletterie",
+				"portrait": "marchand_hobbit_f_tabletterie01.jpg",
+				"nom": "Asma Pied-Léger"
+			}
+		]
+	},
+	{
+		"_id": "lieu:l_ouvrage_fin_de_la_vesle",
+		"_rev": "2-ebc8b06915653ecc59b1e1ba0d83e00f",
+		"type": "lieu",
+		"label": "L'Ouvrage Fin de la Vesle",
+		"image": "atelier_d_artisan_europe_rhemi01.jpg",
+		"categorie": "atelier_d_artisan",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_d_artisan",
+				"portrait": "marchand_nain_m_atelier_d_artisan02.jpg",
+				"nom": "Dwalin Grave-Enclume"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_boite_a_bijoux_des_coteaux",
+		"_rev": "2-2d5914969ec21a0a507ebf84bd1873c6",
+		"type": "lieu",
+		"label": "La Boîte à Bijoux des Coteaux",
+		"image": "tabletterie_europe_rhemi02.jpg",
+		"categorie": "tabletterie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_tabletterie",
+				"portrait": "marchand_hobbit_f_tabletterie02.jpg",
+				"nom": "Jelani Douce-Amande"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_bonne_affaire_des_coteaux",
+		"_rev": "2-087bff3fc4b698ee6cd312cd5f2b885d",
+		"type": "lieu",
+		"label": "La Bonne Affaire des Coteaux",
+		"image": "negoce_europe_rhemi01.jpg",
+		"categorie": "negociant",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_negociant",
+				"portrait": "marchand_ogre_f_negociant01.jpg",
+				"nom": "Mia Avale-Tout"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_bonne_miche_des_crayeres",
+		"_rev": "2-20af0fe1fff582e742dd2c9d1558ea9d",
+		"type": "lieu",
+		"label": "La Bonne Miche des Crayères",
+		"image": "boulangerie_europe_rhemi01.jpg",
+		"categorie": "boulangerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boulangerie",
+				"portrait": "marchand_elfe_f_boulangerie02.jpg",
+				"nom": "Lithrielle Ventelame"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_broche_tournante_du_sacre",
+		"_rev": "2-3566b313e4365ed175815a5c47b61d83",
+		"type": "lieu",
+		"label": "La Broche Tournante du Sacre",
+		"image": "cuisine_europe_rhemi01.jpg",
+		"categorie": "cuisine",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cuisine",
+				"portrait": "marchand_hobbit_f_cuisine02.jpg",
+				"nom": "Edwige Douce-Amande"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_brosse_a_cheveux_des_coteaux",
+		"_rev": "2-84a48a6218e6d2a016a0807671bed5a8",
+		"type": "lieu",
+		"label": "La Brosse à Cheveux des Coteaux",
+		"image": "brosserie_europe_rhemi01.jpg",
+		"categorie": "brosserie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_brosserie",
+				"portrait": "marchand_elfe_m_brosserie03.jpg",
+				"nom": "Otieno Feuillargent"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_chandelle_blanche_du_sacre",
+		"_rev": "2-4121dd74d8640fb8917748cf2989d161",
+		"type": "lieu",
+		"label": "La Chandelle Blanche du Sacre",
+		"image": "atelier_de_cirier_europe_rhemi01.jpg",
+		"categorie": "atelier_de_cirier",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_de_cirier",
+				"portrait": "marchand_nain_m_atelier_de_cirier01.jpg",
+				"nom": "Patrice Fouille-Filons"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_corde_de_boyau_du_chapitre",
+		"_rev": "2-4f5e1f45d2c3fac6b835aa86cc6224b8",
+		"type": "lieu",
+		"label": "La Corde de Boyau du Chapitre",
+		"image": "boyauderie_europe_rhemi01.jpg",
+		"categorie": "boyauderie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boyauderie",
+				"portrait": "marchand_ogre_m_boyauderie02.jpg",
+				"nom": "Amine Brise-Os"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_corde_fine_de_la_porte_de_mars",
+		"_rev": "2-c0f444d511c312d7c82f834472efad82",
+		"type": "lieu",
+		"label": "La Corde Fine de la Porte de Mars",
+		"image": "lutherie_europe_rhemi01.jpg",
+		"categorie": "lutherie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_lutherie",
+				"portrait": "marchand_humain_m_lutherie01.jpg",
+				"nom": "Lei Kobayashi"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_coupe_aux_herbes_du_vieux_cloitre",
+		"_rev": "2-d5c39083c99ff575209c1e0d6e904562",
+		"type": "lieu",
+		"label": "La Coupe aux Herbes du Vieux Cloître",
+		"image": "apothicairerie_europe_rhemi01.jpg",
+		"categorie": "apothicairerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_apothicairerie",
+				"portrait": "marchand_elfe_f_apothicairerie01.jpg",
+				"nom": "Laurelin Cielazur"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_crayere",
+		"_rev": "1-b42a4c0ff7ed4ff60c089c1c23a96de6",
+		"type": "lieu",
+		"label": "La Crayère",
+		"image": "auberge_europe_rhemi03.jpg",
+		"categorie": "auberge",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "lieu:la_gaine_du_sacre",
+		"_rev": "2-841160f53b41b1365d4423bd860215be",
+		"type": "lieu",
+		"label": "La Gaine du Sacre",
+		"image": "maroquinerie_europe_rhemi01.jpg",
+		"categorie": "maroquinerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_maroquinerie",
+				"portrait": "marchand_nain_f_maroquinerie01.jpg",
+				"nom": "Gerd Fendroc"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_litiere_de_la_porte_de_mars",
+		"_rev": "2-22da8d1017f72babb22ed2351cbc45a8",
+		"type": "lieu",
+		"label": "La Litière de la Porte de Mars",
+		"image": "etable_europe_rhemi01.jpg",
+		"categorie": "etable",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_etable",
+				"portrait": "marchand_nain_f_etable01.png",
+				"nom": "Berga Rudemarteau"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_maison_de_negoce_du_vieux_cloitre",
+		"_rev": "2-70559757aed1eaed2b75c843299d5be8",
+		"type": "lieu",
+		"label": "La Maison de Négoce du Vieux Cloître",
+		"image": "negoce_europe_rhemi02.jpg",
+		"categorie": "negociant",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_negociant",
+				"portrait": "marchand_humain_f_negociant01.jpg",
+				"nom": "Diane García"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_maison_du_maroquin_des_crayeres",
+		"_rev": "2-e5352d97b3505e403dbe5b8b4d425ac7",
+		"type": "lieu",
+		"label": "La Maison du Maroquin des Crayères",
+		"image": "maroquinerie_europe_rhemi02.jpg",
+		"categorie": "maroquinerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_maroquinerie",
+				"portrait": "marchand_nain_f_maroquinerie02.jpg",
+				"nom": "Jeanne Brise-Mine"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_marmite_noire_des_coteaux",
+		"_rev": "2-05586840be66d1fdfe1eeb9dedc65772",
+		"type": "lieu",
+		"label": "La Marmite Noire des Coteaux",
+		"image": "cuisine_europe_rhemi02.jpg",
+		"categorie": "cuisine",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cuisine",
+				"portrait": "marchand_elfe_f_cuisine01.jpg",
+				"nom": "Ysabeau Rondevalle"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_peau_trempee_du_sacre",
+		"_rev": "2-9110dad3290637e0eb68511a8de90cbf",
+		"type": "lieu",
+		"label": "La Peau Trempée du Sacre",
+		"image": "tannerie_europe_rhemi02.jpg",
+		"categorie": "tannerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_tannerie",
+				"portrait": "marchand_elfe_m_tannerie01.jpg",
+				"nom": "Aelthir Sombrefrêne"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_piece_de_viande_de_la_porte_de_mars",
+		"_rev": "2-334a9e1e070f1cbc5e6764bc50caadc0",
+		"type": "lieu",
+		"label": "La Pièce de Viande de la Porte de Mars",
+		"image": "boucherie_europe_rhemi01.jpg",
+		"categorie": "boucherie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boucherie",
+				"portrait": "marchand_nain_f_boucherie02.jpg",
+				"nom": "Tala Fouille-Filons"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_plume_rouge_du_vieux_cloitre",
+		"_rev": "2-3d7f323afe8876cfbbfba5cb793a7f38",
+		"type": "lieu",
+		"label": "La Plume Rouge du Vieux Cloître",
+		"image": "atelier_de_l_empenneur_europe_rhemi02.jpg",
+		"categorie": "atelier_de_l_empenneur",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_de_l_empenneur",
+				"portrait": "marchand_hobbit_m_atelier_de_l_empenneur01.jpg",
+				"nom": "Fabrice Douce-Amande"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_reserve_des_simples_des_coteaux",
+		"_rev": "2-4125bfea43b411e45ba53e2f5e2b422e",
+		"type": "lieu",
+		"label": "La Réserve des Simples des Coteaux",
+		"image": "apothicairerie_europe_rhemi02.jpg",
+		"categorie": "apothicairerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_apothicairerie",
+				"portrait": "marchand_humain_m_apothicairerie01.jpg",
+				"nom": "Jérémie Yamamoto"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_sangle_du_chapitre",
+		"_rev": "7-cfe221600020e1c171b52db97a329782",
+		"type": "lieu",
+		"label": "La Sangle du Chapitre",
+		"image": "bourrellerie_europe_rhemi01.jpg",
+		"categorie": "bourrellerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {
+			"peaux": 25
+		},
+		"stock_vente": [
+			{
+				"item_id": "item:peaux",
+				"qty": 25
+			}
+		],
+		"pnj": [
+			{
+				"character": "pnj:marchand_bourrellerie",
+				"portrait": "marchand_humain_m_bourrellerie03.jpg",
+				"nom": "Balam Jónsson"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_serpe_de_la_porte_de_mars",
+		"_rev": "2-bdef6d8b8de3d10a65e907c3e3bbfb98",
+		"type": "lieu",
+		"label": "La Serpe de la Porte de Mars",
+		"image": "jardinier_europe_rhemi01.jpg",
+		"categorie": "jardinier",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_jardinier",
+				"portrait": "marchand_ogre_m_jardinier01.jpg",
+				"nom": "Florian Brise-Os"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_terre_fertile_du_chapitre",
+		"_rev": "2-5cd10e72dc3cbd08845e30bbe4aeae9d",
+		"type": "lieu",
+		"label": "La Terre Fertile du Chapitre",
+		"image": "jardinier_europe_rhemi02.jpg",
+		"categorie": "jardinier",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_jardinier",
+				"portrait": "marchand_elfe_m_jardinier01.jpg",
+				"nom": "Josselin Cielazur"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_toison_du_sacre",
+		"_rev": "2-07656dcc5155b166fd6d24b90a7f5153",
+		"type": "lieu",
+		"label": "La Toison du Sacre",
+		"image": "tissage_europe_rhemi01.jpg",
+		"categorie": "tissage",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_tissage",
+				"portrait": "marchand_nain_f_tissage01.jpg",
+				"nom": "Frida Piochefer"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_balai_fin_du_chapitre",
+		"_rev": "2-5e3ca10afb50f295c6f2f031266ab277",
+		"type": "lieu",
+		"label": "Le Balai Fin du Chapitre",
+		"image": "brosserie_europe_rhemi02.jpg",
+		"categorie": "brosserie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_brosserie",
+				"portrait": "marchand_elfe_m_brosserie02.jpg",
+				"nom": "Thalion Sombrefrêne"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_bois_taille_des_coteaux",
+		"_rev": "2-7c5121ca261f22d6db1fedfc2ea9e020",
+		"type": "lieu",
+		"label": "Le Bois Taillé des Coteaux",
+		"image": "atelier_d_artisan_europe_rhemi02.jpg",
+		"categorie": "atelier_d_artisan",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_d_artisan",
+				"portrait": "marchand_hobbit_m_atelier_d_artisan01.jpg",
+				"nom": "Falco Souscolline"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_bon_pas_du_chapitre",
+		"_rev": "2-a145132ffa873c19345aac02d8692ef6",
+		"type": "lieu",
+		"label": "Le Bon Pas du Chapitre",
+		"image": "cordonnerie_europe_rhemi01.jpg",
+		"categorie": "cordonnerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cordonnerie",
+				"portrait": "marchand_humain_m_cordonnerie03.jpg",
+				"nom": "Richard Jónsson"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_bourrelier_du_sacre",
+		"_rev": "2-210e6b553c50f4dd1309e07fe4220828",
+		"type": "lieu",
+		"label": "Le Bourrelier du Sacre",
+		"image": "bourrellerie_europe_rhemi02.jpg",
+		"categorie": "bourrellerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_bourrellerie",
+				"portrait": "marchand_humain_m_bourrellerie02.jpg",
+				"nom": "Ludwig de Montmartre"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_boyau_file_du_vieux_cloitre",
+		"_rev": "2-5c678a5ed64c0f81f26b7f8fbaccaedc",
+		"type": "lieu",
+		"label": "Le Boyau Filé du Vieux Cloître",
+		"image": "boyauderie_europe_rhemi02.jpg",
+		"categorie": "boyauderie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boyauderie",
+				"portrait": "marchand_hobbit_m_boyauderie01.jpg",
+				"nom": "Wilco Pied-Léger"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_cabinet_des_sels_de_la_porte_de_mars",
+		"_rev": "2-7b56a3bc070574c300870db842f37563",
+		"type": "lieu",
+		"label": "Le Cabinet des Sels de la Porte de Mars",
+		"image": "cabinet_alchimie_europe_rhemi02.jpg",
+		"categorie": "laboratoire_d_alchimie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_laboratoire_d_alchimie",
+				"portrait": "marchand_elfe_f_laboratoire_d_alchimie01.jpg",
+				"nom": "Chenoa Cielazur"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_cabinet_du_chasseur_de_la_vesle",
+		"_rev": "2-470f8c89200dd838c22b9582cc4cf36b",
+		"type": "lieu",
+		"label": "Le Cabinet du Chasseur de la Vesle",
+		"image": "taxidermie_europe_rhemi01.jpg",
+		"categorie": "taxidermie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_taxidermie",
+				"portrait": "marchand_elfe_f_taxidermie02.jpg",
+				"nom": "Lithrielle Rondevalle"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_cabinet_du_chasseur_du_chapitre",
+		"_rev": "2-bb4b4449d9824cf18f4e8393f7d813cd",
+		"type": "lieu",
+		"label": "Le Cabinet du Chasseur du Chapitre",
+		"image": "taxidermie_europe_rhemi02.jpg",
+		"categorie": "taxidermie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_taxidermie",
+				"portrait": "marchand_elfe_f_taxidermie03.jpg",
+				"nom": "Flore Ventelame"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_cable_de_la_vesle",
+		"_rev": "2-b49fd1ffedb28a60a069ddc648a15950",
+		"type": "lieu",
+		"label": "Le Câble de la Vesle",
+		"image": "corderie_europe_rhemi01.jpg",
+		"categorie": "corderie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_corderie",
+				"portrait": "marchand_humain_m_corderie03.jpg",
+				"nom": "Einar Ben Ali"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_chaudron_a_savon_des_crayeres",
+		"_rev": "2-93fba297bdcaaac437c95181e65a7a11",
+		"type": "lieu",
+		"label": "Le Chaudron à Savon des Crayères",
+		"image": "savonnerie_europe_rhemi01.jpg",
+		"categorie": "savonnerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_savonnerie",
+				"portrait": "marchand_humain_f_savonnerie01.jpg",
+				"nom": "Camille Kobayashi"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_chevalet_des_crayeres",
+		"_rev": "2-f89883d1986278ab144b838299095503",
+		"type": "lieu",
+		"label": "Le Chevalet des Crayères",
+		"image": "lutherie_europe_rhemi02.jpg",
+		"categorie": "lutherie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_lutherie",
+				"portrait": "marchand_ogre_m_lutherie01.jpg",
+				"nom": "Björn Gros-Bide"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_cierge_du_chapitre",
+		"_rev": "2-8cfd21b0067480cf26e2868f8797c0d8",
+		"type": "lieu",
+		"label": "Le Cierge du Chapitre",
+		"image": "atelier_de_cirier_europe_rhemi02.jpg",
+		"categorie": "atelier_de_cirier",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_de_cirier",
+				"portrait": "marchand_elfe_f_atelier_de_cirier01.jpg",
+				"nom": "Celebrian Lunevoile"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_cochon_sale_des_coteaux",
+		"_rev": "2-99b67d0b982745c460027598a3f03479",
+		"type": "lieu",
+		"label": "Le Cochon Salé des Coteaux",
+		"image": "salaison_europe_rhemi01.jpg",
+		"categorie": "salaison",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_salaison",
+				"portrait": "marchand_humain_m_salaison01.jpg",
+				"nom": "Kitchi Mansouri"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_cordon_de_cuir_de_la_porte_de_mars",
+		"_rev": "2-018093724c553bb681eac1c15a743101",
+		"type": "lieu",
+		"label": "Le Cordon de Cuir de la Porte de Mars",
+		"image": "cordonnerie_europe_rhemi02.jpg",
+		"categorie": "cordonnerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cordonnerie",
+				"portrait": "marchand_humain_m_cordonnerie04.jpg",
+				"nom": "Martial Renard"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_crochet_a_viande_de_la_porte_de_mars",
+		"_rev": "2-51eb4e82842ca62726c6422b67b739b3",
+		"type": "lieu",
+		"label": "Le Crochet à Viande de la Porte de Mars",
+		"image": "fumoir_europe_rhemi01.jpg",
+		"categorie": "fumoir",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_fumoir",
+				"portrait": "marchand_humain_f_fumoir01.jpg",
+				"nom": "Léa Bouchet"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_duvet_fin_de_la_porte_de_mars",
+		"_rev": "2-9f56170fb2663b62b9cc5f958d60cc57",
+		"type": "lieu",
+		"label": "Le Duvet Fin de la Porte de Mars",
+		"image": "plumasserie_europe_rhemi01.jpg",
+		"categorie": "plumasserie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_plumasserie",
+				"portrait": "marchand_hobbit_f_plumasserie01.jpg",
+				"nom": "Thérèse Troisquarts"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_fil_d_or_de_la_porte_de_mars",
+		"_rev": "2-59a305cbbe5f3416ceaa9ec84e31b16d",
+		"type": "lieu",
+		"label": "Le Fil d'Or de la Porte de Mars",
+		"image": "tissage_europe_rhemi02.jpg",
+		"categorie": "tissage",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_tissage",
+				"portrait": "marchand_elfe_f_tissage01.jpg",
+				"nom": "Melian Rondevalle"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_fumage_lent_de_la_vesle",
+		"_rev": "2-64a8d24b1ba94c6676a62b33c37519f3",
+		"type": "lieu",
+		"label": "Le Fumage Lent de la Vesle",
+		"image": "fumoir_europe_rhemi02.jpg",
+		"categorie": "fumoir",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_fumoir",
+				"portrait": "marchand_nain_m_fumoir01.jpg",
+				"nom": "Mattia Fort-Armure"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_fut_d_if_du_vieux_cloitre",
+		"_rev": "2-ae1f6edc1f7fb7cfffff1f9f53f02239",
+		"type": "lieu",
+		"label": "Le Fût d'If du Vieux Cloître",
+		"image": "archerie_europe_rhemi02.jpg",
+		"categorie": "fletcher",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_fletcher",
+				"portrait": "marchand_hobbit_m_fletcher02.jpg",
+				"nom": "Rufus Basse-Vallée"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_gros_cordage_des_coteaux",
+		"_rev": "2-53a3b529e17ab6e72aded3b5db777737",
+		"type": "lieu",
+		"label": "Le Gros Cordage des Coteaux",
+		"image": "corderie_europe_rhemi02.jpg",
+		"categorie": "corderie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_corderie",
+				"portrait": "marchand_humain_m_corderie02.jpg",
+				"nom": "Saku Einarsson"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_heaume_de_la_porte_de_mars",
+		"_rev": "2-b4d79fda041b5f4783f81437c46d3fea",
+		"type": "lieu",
+		"label": "Le Heaume de la Porte de Mars",
+		"image": "armurerie_europe_rhemi02.jpg",
+		"categorie": "armurerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_armurerie",
+				"portrait": "marchand_humain_m_armurerie01.jpg",
+				"nom": "Yǔxuān Becker"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_joyau_de_la_vesle",
+		"_rev": "2-33dd9d7d97b819ca27b3156b60c06f1c",
+		"type": "lieu",
+		"label": "Le Joyau de la Vesle",
+		"image": "bijouterie_europe_rhemi02.jpg",
+		"categorie": "bijouterie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_bijouterie",
+				"portrait": "marchand_elfe_f_bijouterie02.jpg",
+				"nom": "Alexia Fleurépine"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_licol_de_la_porte_de_mars",
+		"_rev": "2-9050cfc36b1c3f938945a5e378b55b85",
+		"type": "lieu",
+		"label": "Le Licol de la Porte de Mars",
+		"image": "etable_europe_rhemi02.jpg",
+		"categorie": "etable",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_etable",
+				"portrait": "marchand_nain_f_etable05.jpg",
+				"nom": "Dagna Piochefer"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_livre_des_morts_de_la_vesle",
+		"_rev": "2-9e074a20e23e057f5638465a2ec030f5",
+		"type": "lieu",
+		"label": "Le Livre des Morts de la Vesle",
+		"image": "necromancie_europe_rhemi01.jpg",
+		"categorie": "necromancie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_necromancie",
+				"portrait": "marchand_humain_m_necromancie02.jpg",
+				"nom": "Ahmed Bianchi"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_livre_des_scribes_des_crayeres",
+		"_rev": "2-0112ef8dfa7f315d01761eefa7529589",
+		"type": "lieu",
+		"label": "Le Livre des Scribes des Crayères",
+		"image": "scriptorium_europe_rhemi02.jpg",
+		"categorie": "scriptorium",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_scriptorium",
+				"portrait": "marchand_humain_m_scriptorium04.jpg",
+				"nom": "Fabien Pech"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_muid_sale_de_la_porte_de_mars",
+		"_rev": "2-2e7fffdf14cf6a1ee0ae9506b96e4af0",
+		"type": "lieu",
+		"label": "Le Muid Salé de la Porte de Mars",
+		"image": "salaison_europe_rhemi02.jpg",
+		"categorie": "salaison",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_salaison",
+				"portrait": "marchand_humain_m_salaison02.jpg",
+				"nom": "Barnabé de Villeneuve"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_pain_chaud_du_vieux_cloitre",
+		"_rev": "2-73e5cdf80ddee257fee512f22b6ad81a",
+		"type": "lieu",
+		"label": "Le Pain Chaud du Vieux Cloître",
+		"image": "boulangerie_europe_rhemi02.jpg",
+		"categorie": "boulangerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boulangerie",
+				"portrait": "marchand_elfe_f_boulangerie03.jpg",
+				"nom": "Ásta Astrebrillant"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_plumail_des_crayeres",
+		"_rev": "2-7fd7b2658e73b75a49c0476a27e7e83e",
+		"type": "lieu",
+		"label": "Le Plumail des Crayères",
+		"image": "plumasserie_europe_rhemi02.jpg",
+		"categorie": "plumasserie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_plumasserie",
+				"portrait": "marchand_ogre_m_plumasserie01.jpg",
+				"nom": "Elyas Brise-Os"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_quartier_du_chapitre",
+		"_rev": "2-782a7b3d555192ec267f4538211f97c1",
+		"type": "lieu",
+		"label": "Le Quartier du Chapitre",
+		"image": "boucherie_europe_rhemi02.jpg",
+		"categorie": "boucherie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boucherie",
+				"portrait": "marchand_humain_f_boucherie02.jpg",
+				"nom": "Rose Valois"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_savon_parfume_du_chapitre",
+		"_rev": "3-d47bd085a9154df57f64f0532225969c",
+		"type": "lieu",
+		"label": "Le Savon Parfumé du Chapitre",
+		"image": "savonnerie_europe_rhemi02.jpg",
+		"categorie": "savonnerie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {
+			"cendre": 5,
+			"item:Cendres": 5,
+			"item:Chiffon": 5,
+			"item:Cire_d_abeille": 5,
+			"item:Herbes_aromatiques": 5,
+			"item:Huile_vegetale": 5,
+			"item:Miel": 5,
+			"item:Sel": 5,
+			"item:poix": 5,
+			"sel_gemme": 5
+		},
+		"stock_vente": [
+			{
+				"item_id": "item:Cendres",
+				"qty": 5
+			},
+			{
+				"item_id": "item:Chiffon",
+				"qty": 5
+			},
+			{
+				"item_id": "item:Cire_d_abeille",
+				"qty": 5
+			},
+			{
+				"item_id": "item:Herbes_aromatiques",
+				"qty": 5
+			},
+			{
+				"item_id": "item:Huile_vegetale",
+				"qty": 5
+			},
+			{
+				"item_id": "item:Miel",
+				"qty": 5
+			},
+			{
+				"item_id": "item:Sel",
+				"qty": 5
+			},
+			{
+				"item_id": "item:poix",
+				"qty": 5
+			}
+		],
+		"pnj": [
+			{
+				"character": "pnj:marchand_savonnerie",
+				"portrait": "marchand_ogre_m_savonnerie01.jpg",
+				"nom": "Gark Mâche-Fer"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_suaire_gris_des_coteaux",
+		"_rev": "2-2252fe77896ed0f56e4f69aa0e08a52b",
+		"type": "lieu",
+		"label": "Le Suaire Gris des Coteaux",
+		"image": "necromancie_europe_rhemi02.jpg",
+		"categorie": "necromancie",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_necromancie",
+				"portrait": "marchand_elfe_f_necromancie01.jpg",
+				"nom": "Constance Lunevoile"
+			}
+		]
+	}
+]
