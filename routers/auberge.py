@@ -28,6 +28,7 @@ from utils import montures
 from utils import scriptorium
 from utils import commande as commande_util
 from utils import proprietes
+from utils import fiche as fiche_util
 # ⚠️ Sens d'import : `routers/auberge` → `routers/user`, jamais l'inverse (précédent :
 # `routers/recrutement`). `routers/user` importe `utils/auberge`, pas ce module.
 from routers.user import _inventory_payload
@@ -437,11 +438,28 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 	if cout and debit_character(character, cout) is None:
 		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi payer la chambre.")
 
+	compagnons = recrutement.groupe_effectif(character, get_doc)
+	betes = montures.montures_effectives(character, get_doc)
+
+	# 1 bis. Chez soi (propriétaire) : les aménagements agissent sur les DORMEURS (personnage,
+	#    hébergés, puis compagnons tant qu'il reste une place) et les montures présentes —
+	#    malus dissipés, effets à durée posés (REMPLACÉS d'une nuit à l'autre, jamais empilés).
+	#    AVANT le repos : un buff de Résistance relève le max que `reposer` va remplir.
+	chez_soi = (proprietes.est_propriete(lieu_doc)
+				and proprietes.role_de(character, lieu_doc) == proprietes.PROPRIETAIRE)
+	cat_prop, employes, annexes, reveil = None, [], [], {}
+	if chez_soi:
+		cat_prop = proprietes.catalogue(get_doc)
+		employes = proprietes.employes_effectifs(lieu_doc, get_doc)
+		heberges = proprietes.heberges_effectifs(character, lieu_doc, get_doc)
+		logees = proprietes.montures_logees(character, lieu_doc, get_doc)
+		annexes = heberges + logees                # ne font pas la nuit, mais en profitent
+		dormeurs = proprietes.dormeurs(character, lieu_doc, cat_prop, compagnons, heberges)
+		reveil = proprietes.appliquer_reveil(lieu_doc, cat_prop, employes, dormeurs, betes + logees)
+
 	# 2. Repos — le principal, puis chaque compagnon et chaque monture. Les trois docs sont
 	#    des miroirs, `reposer` s'y applique telle quelle.
 	vitals = auberge.reposer(character)
-	compagnons = recrutement.groupe_effectif(character, get_doc)
-	betes = montures.montures_effectives(character, get_doc)
 	# Vitaux de chaque porteur, renvoyés pour ses cartes : la fin de nuit ne recharge plus la page.
 	vitals_porteurs = {porteur["_id"]: auberge.reposer(porteur) for porteur in compagnons + betes}
 
@@ -478,10 +496,7 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 	#    mais sur le flux de LA PROPRIÉTÉ (jamais celui de la ville) et sans approvisionnement
 	#    gratuit ; leurs ventes remplissent leur caisse. Le tableau d'embauche se renouvelle.
 	ateliers = 0
-	if (proprietes.est_propriete(lieu_doc)
-			and proprietes.role_de(character, lieu_doc) == proprietes.PROPRIETAIRE):
-		cat_prop = proprietes.catalogue(get_doc)
-		employes = proprietes.employes_effectifs(lieu_doc, get_doc)
+	if chez_soi:
 		flux_prop = proprietes.flux_propriete(lieu_doc)
 		for e in employes:
 			change, _gain = proprietes.produire(e, flux_prop, passes, cat_prop)
@@ -521,6 +536,9 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 	for porteur in compagnons + betes:
 		save_doc(porteur)
+	for doc in annexes:
+		if doc.get("_id") in reveil:
+			save_doc(doc)
 	for m in a_supprimer:
 		delete_doc(m)
 	efface = {x.get("_id") for x in a_supprimer}
@@ -547,5 +565,14 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 		"commandes": commandes,
 		"compagnons": len(compagnons),
 		"montures": len(betes),
+		# Effets du réveil chez soi, par bénéficiaire (bilan affiché au matin).
+		"reveil": [{"id": d["_id"], "nom": auberge.nom_affichable(d) if not montures.est_monture(d)
+					else (d.get("nom") or d.get("prenom") or "Monture"), "effets": reveil[d["_id"]]}
+				   for d in [character] + compagnons + betes + annexes if d.get("_id") in reveil],
 	})
+	if reveil:
+		# Convention §10 : effets actifs, caracts et apprentissage de chaque fiche touchée —
+		# `_appliquerFiche` ne l'applique qu'à la fiche de SON `id`.
+		payload["fiches"] = [fiche_util.fiche_resync(d, get_doc, find_docs)
+							 for d in [character] + compagnons if d.get("_id") in reveil]
 	return payload

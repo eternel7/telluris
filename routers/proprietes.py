@@ -15,11 +15,11 @@ import unicodedata
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Body
 
-from db.config import get_doc, save_doc, delete_doc
+from db.config import get_doc, save_doc, delete_doc, find_docs
 from utils.auth import get_current_user
 from utils.characters import (
 	get_selected_character, cuivre_to_purse, money_to_cuivre, resolve_item_ref,
-	credit_character, tirer_poids, poids_bounds, carried_weight,
+	credit_character, tirer_poids, poids_bounds, carried_weight, charge_max_of, item_ref_weight,
 )
 from utils.marche import debit_character
 from utils import marche as marche_util
@@ -29,6 +29,7 @@ from utils import montures
 from utils import proprietes
 from utils import escorte
 from utils import commande as commande_util
+from utils import fiche as fiche_util
 # Sens d'import : `routers/proprietes` → `routers/user`, jamais l'inverse (précédent :
 # routers/auberge).
 from routers.user import _inventory_payload
@@ -135,10 +136,16 @@ def _payload_ici(character: dict, prop: dict, cat: dict, role: str, extra: dict 
 	gere = role == proprietes.PROPRIETAIRE
 	heberges = proprietes.heberges_effectifs(character, prop, get_doc) if gere else []
 
+	actifs = {am for am, _d, _e in proprietes.effets_actifs_du_bien(prop, cat, employes)}
+
 	def am_view(am_id):
 		a = proprietes.amenagement_def(cat, am_id) or {"id": am_id, "nom": am_id}
 		return {"id": a.get("id"), "nom": a.get("nom", am_id), "categorie": a.get("categorie", ""),
-				"cout": int(a.get("cout_cuivre") or 0), "description": a.get("description", "")}
+				"cout": int(a.get("cout_cuivre") or 0), "description": a.get("description", ""),
+				# Effets lisibles ; `effets_poste` : il faut l'employé au poste pour qu'ils jouent.
+				"effets": proprietes.textes_effets(a, cat),
+				"poste_requis": bool(a.get("effets_poste")) and not proprietes.exercee(cat, employes, am_id),
+				"actif": am_id in actifs}
 
 	revente_ok, revente_raison = proprietes.revente_autorisee(
 		tdef, get_doc(prop.get("lieu_parent")) if prop.get("lieu_parent") else None)
@@ -168,7 +175,17 @@ def _payload_ici(character: dict, prop: dict, cat: dict, role: str, extra: dict 
 					  for a in proprietes.activites(prop, cat, employes)],
 		"gardien": gardien,
 		"revente": {"autorisee": gere and revente_ok and prop.get("mode") == proprietes.MODE_ACHAT,
-					"raison": revente_raison, "prix": proprietes.prix_revente(tdef, prop)},
+					"raison": revente_raison, "prix": proprietes.prix_revente(tdef, prop, cat)},
+		# Gestes ouverts par les aménagements : récoltes, registre, écurie.
+		"recoltes": proprietes.recoltes(prop, cat) if gere else [],
+		"registre": gere and proprietes.registre(prop, cat),
+		"ecurie": {
+			"places": caps["ecurie"],
+			"logees": [{"id": m["_id"], "nom": m.get("nom", "Monture")}
+					   for m in proprietes.montures_logees(character, prop, get_doc)] if gere else [],
+			"logeables": [{"id": m["_id"], "nom": m.get("nom", "Monture"), "charge": bool(m.get("inventaire"))}
+						  for m in montures.montures_effectives(character, get_doc)] if gere else [],
+		},
 		"mes_proprietes": _mes_proprietes(character, cat),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 		# Lignes 🏷️/💰 de la sidebar : un renvoi ou un gardien installé les fait bouger.
@@ -373,7 +390,7 @@ def _ceder(current_user: dict, statut: str) -> dict:
 			tdef, get_doc(prop.get("lieu_parent")) if prop.get("lieu_parent") else None)
 		if not ok:
 			raise HTTPException(status_code=409, detail=raison)
-		gain = proprietes.prix_revente(tdef, prop)
+		gain = proprietes.prix_revente(tdef, prop, cat)
 		credit_character(character, gain)
 	proprietes.ceder(character, prop, statut, employes)
 	origine = prop.get("origine") or {}
@@ -585,6 +602,11 @@ def _payload_coffre(character: dict, prop: dict, cat: dict, role: str, employes:
 									  and prop.get("mode") == proprietes.MODE_ACHAT),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 	}
+	# Bibliothèque chez soi : les grimoires du coffre comptent pour apprendre — un dépôt ou un
+	# retrait change « 📖 Apprendre » de la fiche (Convention §10 ; `_appliquerFiche` ne
+	# l'applique qu'à la fiche de son `id`).
+	if gere and proprietes.effet_actif(prop, cat, employes, "grimoires_coffre"):
+		payload["fiche"] = fiche_util.fiche_resync(character, get_doc, find_docs)
 	if extra:
 		payload.update(extra)
 	return payload
@@ -641,6 +663,12 @@ async def coffre_transferer(current_user: Annotated[dict, Depends(get_current_us
 	if not recrutement.peut_porter(porteur, refs[pos]):
 		raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage."
 							if porteur is character else "Ce porteur ne peut pas porter davantage.")
+	# Dispositifs défensifs : un voleur n'emporte qu'une fraction du coffre par fenêtre.
+	limite = proprietes.vol_limite(prop, cat, employes) if role == proprietes.VISITEUR else None
+	ok, raison = proprietes.vol_coffre_autorise(prop, limite, refs[pos])
+	if not ok:
+		raise HTTPException(status_code=403, detail=raison)
+	proprietes.noter_vol_coffre(prop, limite, refs[pos])
 	proprietes.retirer(porteur, prop, pos)
 	_sauver(prop, porteur)
 	return _payload_coffre(character, prop, cat, role, employes, {"vol": role == proprietes.VISITEUR})
@@ -734,12 +762,89 @@ async def caisse_relever(current_user: Annotated[dict, Depends(get_current_user)
 	if role != proprietes.PROPRIETAIRE and not proprietes.peut_retirer(role, prop, gardien)[0]:
 		raise HTTPException(status_code=403, detail="Cette caisse ne vous est pas accessible.")
 	ateliers = [e for e in employes if proprietes.est_atelier(e)]
-	total = proprietes.relever_caisse(ateliers)
+	# Dispositifs défensifs : un voleur n'emporte qu'une part de la caisse, une fois par fenêtre.
+	vol = role != proprietes.PROPRIETAIRE
+	limite = proprietes.vol_limite(prop, cat, employes) if vol else None
+	fraction = proprietes.fraction_caisse_volable(prop, limite)
+	total = proprietes.relever_caisse(ateliers, fraction)
 	if not total:
-		raise HTTPException(status_code=409, detail="La caisse est vide.")
+		raise HTTPException(status_code=409, detail="La caisse est vide." if fraction else
+							"Des dispositifs défensifs gardent la caisse : revenez plus tard.")
 	credit_character(character, total)
 	# Les caisses d'abord : un échec ensuite perd le relevé plutôt que de le DOUBLER (une
-	# caisse restée pleine se relèverait une seconde fois).
-	_sauver(*ateliers, character)
+	# caisse restée pleine se relèverait une seconde fois). La fenêtre de vol, avec elles.
+	_sauver(*ateliers, *([prop] if limite else []), character)
 	return _payload_coffre(character, prop, cat, role, employes,
 						   {"releve": total, "vol": role == proprietes.VISITEUR})
+
+
+# ── Gestes ouverts par les aménagements ──────────────────────────────────────────
+
+@proprietes_router.post("/proprietes/registre/relever")
+async def registre_relever(current_user: Annotated[dict, Depends(get_current_user)]):
+	"""Table ou bureau : depuis CE bien, le propriétaire relève la caisse des ateliers de tous
+	ses biens de la même cité. Caisses sauvées AVANT le personnage (jamais de double relevé)."""
+	character, prop, cat, role = _ici(current_user)
+	_exiger(role, proprietes.PROPRIETAIRE)
+	if not proprietes.registre(prop, cat):
+		raise HTTPException(status_code=403, detail="Il faut un bureau pour tenir le registre.")
+	ateliers = []
+	for bien in proprietes.biens_du_registre(character, prop, get_doc):
+		ateliers += [e for e in proprietes.employes_effectifs(bien, get_doc) if proprietes.est_atelier(e)]
+	total = proprietes.relever_caisse(ateliers)
+	if not total:
+		raise HTTPException(status_code=409, detail="Les caisses sont vides.")
+	credit_character(character, total)
+	_sauver(*ateliers, character)
+	return _payload_ici(character, prop, cat, role, {"releve": total})
+
+
+@proprietes_router.post("/proprietes/recolter")
+async def recolter(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Jardin, terrain privé : le propriétaire récolte, une fois par délai (état sur le bien).
+	Dans son sac, sous sa charge maximale — on dépose avant de récolter."""
+	character, prop, cat, role = _ici(current_user)
+	_exiger(role, proprietes.PROPRIETAIRE)
+	ok, raison, refs = proprietes.recolter(prop, cat, body.get("amenagement"), get_doc)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	if carried_weight(character) + sum(item_ref_weight(r) for r in refs) > charge_max_of(character):
+		raise HTTPException(status_code=409, detail="Trop chargé pour récolter — déposez un objet.")
+	character.setdefault("inventaire", []).extend(refs)
+	_sauver(prop, character)
+	noms = [(resolve_item_ref(r) or {}).get("nom", "?") for r in refs]
+	return _payload_ici(character, prop, cat, role,
+						{"recolte": noms, "inventaire_payload": _inventory_payload(character)})
+
+
+def _monture(monture_id) -> dict:
+	m = get_doc(monture_id) if monture_id else None
+	if not m or not montures.est_monture(m):
+		raise HTTPException(status_code=404, detail="Monture introuvable.")
+	return m
+
+
+@proprietes_router.post("/proprietes/ecurie/loger")
+async def ecurie_loger(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Laisse une monture à l'écurie du bien : elle ne suit plus le groupe mais RESTE dans le
+	plafond du troupeau (`montures.montures_possedees`)."""
+	character, prop, cat, role = _ici(current_user)
+	_exiger(role, proprietes.PROPRIETAIRE)
+	m = _monture(body.get("monture_id"))
+	ok, raison = proprietes.loger_monture(character, prop, cat, m)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	_sauver(m, prop)
+	return _payload_ici(character, prop, cat, role)
+
+
+@proprietes_router.post("/proprietes/ecurie/reprendre")
+async def ecurie_reprendre(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	character, prop, cat, role = _ici(current_user)
+	_exiger(role, proprietes.PROPRIETAIRE)
+	m = _monture(body.get("monture_id"))
+	ok, raison = proprietes.reprendre_monture(character, prop, m)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	_sauver(prop, m)
+	return _payload_ici(character, prop, cat, role)

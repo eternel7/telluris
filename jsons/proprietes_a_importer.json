@@ -104,7 +104,15 @@
             ],
             "cout_cuivre": 400,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "reveil": {
+                "duree": 15,
+                "icon": "🛏️",
+                "nom": "Bien dormi",
+                "regen_pv": 2
+              }
+            }
           },
           {
             "id": "petit_coffre",
@@ -145,7 +153,10 @@
             ],
             "cout_cuivre": 300,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "registre": true
+            }
           },
           {
             "id": "etagere",
@@ -170,7 +181,15 @@
             ],
             "cout_cuivre": 100,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "reveil": {
+                "duree": 15,
+                "icon": "🕯️",
+                "nom": "Lecture du soir",
+                "regen_pm": 2
+              }
+            }
           },
           {
             "id": "decoration",
@@ -185,7 +204,10 @@
             ],
             "cout_cuivre": 200,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "revente_bonus": 0.05
+            }
           },
           {
             "id": "chambre_amelioree",
@@ -196,7 +218,17 @@
             ],
             "cout_cuivre": 1500,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "reveil": {
+                "duree": 15,
+                "icon": "🌙",
+                "nom": "Sommeil profond",
+                "buffs": {
+                  "Vol": 2
+                }
+              }
+            }
           },
           {
             "id": "reserve",
@@ -244,7 +276,18 @@
             ],
             "cout_cuivre": 800,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "reveil": {
+                "duree": 15,
+                "icon": "🍲",
+                "nom": "Bien nourri",
+                "buffs": {
+                  "R": 2
+                },
+                "requiert_metier": "cuisinier"
+              }
+            }
           },
           {
             "id": "petite_bibliotheque",
@@ -255,7 +298,21 @@
             ],
             "cout_cuivre": 1000,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {
+              "postes": {
+                "bibliothecaire": 1
+              }
+            },
+            "activite": {
+              "metier": "bibliothecaire",
+              "label": "Bibliothèque"
+            },
+            "effets": {
+              "grimoires_coffre": true
+            },
+            "effets_poste": {
+              "scriptorium": true
+            }
           },
           {
             "id": "espace_medical",
@@ -274,6 +331,11 @@
             "activite": {
               "metier": "medecin",
               "label": "Soins"
+            },
+            "effets_poste": {
+              "dissipe_malus": [
+                "dormeurs"
+              ]
             }
           },
           {
@@ -306,6 +368,15 @@
             "activite": {
               "metier": "domestique",
               "label": "Service domestique"
+            },
+            "effets_poste": {
+              "reveil": {
+                "duree": 30,
+                "icon": "🏠",
+                "nom": "Bien logé",
+                "fidele": true,
+                "compagnons_seuls": true
+              }
             }
           },
           {
@@ -383,7 +454,18 @@
             ],
             "cout_cuivre": 2500,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "reveil": {
+                "duree": 20,
+                "icon": "🍲",
+                "nom": "Bien nourri",
+                "buffs": {
+                  "R": 3
+                },
+                "requiert_metier": "cuisinier"
+              }
+            }
           },
           {
             "id": "salon",
@@ -394,7 +476,17 @@
             ],
             "cout_cuivre": 2000,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "reveil": {
+                "duree": 20,
+                "icon": "🛋️",
+                "nom": "Esprit reposé",
+                "buffs": {
+                  "Vol": 3
+                }
+              }
+            }
           },
           {
             "id": "bibliotheque",
@@ -406,7 +498,21 @@
             ],
             "cout_cuivre": 4000,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {
+              "postes": {
+                "bibliothecaire": 1
+              }
+            },
+            "activite": {
+              "metier": "bibliothecaire",
+              "label": "Bibliothèque"
+            },
+            "effets": {
+              "grimoires_coffre": true
+            },
+            "effets_poste": {
+              "scriptorium": true
+            }
           },
           {
             "id": "cave",
@@ -438,6 +544,17 @@
             "activite": {
               "metier": "medecin",
               "label": "Soins"
+            },
+            "effets_poste": {
+              "dissipe_malus": [
+                "dormeurs"
+              ],
+              "reveil": {
+                "duree": 20,
+                "icon": "🩺",
+                "nom": "Convalescence",
+                "regen_pv": 2
+              }
             }
           },
           {
@@ -458,7 +575,10 @@
             },
             "activite": {
               "metier": "erudit",
-              "label": "Étude"
+              "label": "Étude",
+              "categories": [
+                "scriptorium"
+              ]
             }
           },
           {
@@ -471,7 +591,17 @@
             ],
             "cout_cuivre": 4500,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "reveil": {
+                "duree": 20,
+                "icon": "🏋️",
+                "nom": "Entraîné",
+                "buffs": {
+                  "F": 3
+                }
+              }
+            }
           },
           {
             "id": "petit_laboratoire",
@@ -534,7 +664,10 @@
             },
             "activite": {
               "metier": "marchand",
-              "label": "Négoce"
+              "label": "Négoce",
+              "categories": [
+                "negociant"
+              ]
             }
           },
           {
@@ -554,6 +687,15 @@
             "activite": {
               "metier": "domestique",
               "label": "Service domestique"
+            },
+            "effets_poste": {
+              "reveil": {
+                "duree": 30,
+                "icon": "🏠",
+                "nom": "Bien logé",
+                "fidele": true,
+                "compagnons_seuls": true
+              }
             }
           },
           {
@@ -565,7 +707,9 @@
             ],
             "cout_cuivre": 2500,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {
+              "ecurie": 1
+            }
           },
           {
             "id": "petit_jardin",
@@ -576,7 +720,17 @@
             ],
             "cout_cuivre": 2000,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "recolte": {
+                "items": [
+                  "item:Herbes_aromatiques",
+                  "item:Herbes_medicinales"
+                ],
+                "quantite": 2,
+                "delai_s": 86400
+              }
+            }
           },
           {
             "id": "quartiers_personnel",
@@ -596,6 +750,15 @@
             "activite": {
               "metier": "domestique",
               "label": "Service domestique"
+            },
+            "effets_poste": {
+              "reveil": {
+                "duree": 30,
+                "icon": "🏠",
+                "nom": "Bien logé",
+                "fidele": true,
+                "compagnons_seuls": true
+              }
             }
           },
           {
@@ -621,7 +784,17 @@
             ],
             "cout_cuivre": 4000,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "reveil": {
+                "duree": 20,
+                "icon": "🗺️",
+                "nom": "Plans préparés",
+                "buffs": {
+                  "Ch": 3
+                }
+              }
+            }
           },
           {
             "id": "archives",
@@ -646,7 +819,17 @@
             ],
             "cout_cuivre": 6000,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "reveil": {
+                "duree": 25,
+                "icon": "🎩",
+                "nom": "Bonne réputation",
+                "buffs": {
+                  "Cha": 4
+                }
+              }
+            }
           },
           {
             "id": "salle_medicale",
@@ -665,6 +848,17 @@
             "activite": {
               "metier": "medecin",
               "label": "Soins"
+            },
+            "effets_poste": {
+              "dissipe_malus": [
+                "dormeurs"
+              ],
+              "reveil": {
+                "duree": 25,
+                "icon": "🧪",
+                "nom": "Fortifiant",
+                "regen_pm": 3
+              }
             }
           },
           {
@@ -685,6 +879,24 @@
             "activite": {
               "metier": "medecin",
               "label": "Soins"
+            },
+            "effets_poste": {
+              "dissipe_malus": [
+                "dormeurs",
+                "montures"
+              ],
+              "reveil": {
+                "duree": 25,
+                "icon": "🩺",
+                "nom": "Convalescence",
+                "regen_pv": 3
+              },
+              "reveil_montures": {
+                "duree": 25,
+                "icon": "🩺",
+                "nom": "Convalescence",
+                "regen_pv": 3
+              }
             }
           },
           {
@@ -823,7 +1035,10 @@
             },
             "activite": {
               "metier": "erudit",
-              "label": "Recherche"
+              "label": "Recherche",
+              "categories": [
+                "scriptorium"
+              ]
             }
           },
           {
@@ -836,7 +1051,15 @@
             ],
             "cout_cuivre": 8000,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "reveil": {
+                "duree": 20,
+                "icon": "⚔️",
+                "nom": "Garde affûtée",
+                "esquive": 2
+              }
+            }
           },
           {
             "id": "cour_entrainement",
@@ -856,6 +1079,9 @@
             "activite": {
               "metier": "garde",
               "label": "Entraînement des gardes"
+            },
+            "effets": {
+              "garde": true
             }
           },
           {
@@ -891,7 +1117,9 @@
             ],
             "cout_cuivre": 3000,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {
+              "ecurie": 1
+            }
           },
           {
             "id": "ecurie_limitee",
@@ -905,11 +1133,23 @@
             "capacite": {
               "postes": {
                 "palefrenier": 1
-              }
+              },
+              "ecurie": 2
             },
             "activite": {
               "metier": "palefrenier",
               "label": "Soins aux bêtes"
+            },
+            "effets_poste": {
+              "reveil_montures": {
+                "duree": 20,
+                "icon": "🐴",
+                "nom": "Bien pansée",
+                "buffs": {
+                  "R": 3,
+                  "Ag": 3
+                }
+              }
             }
           },
           {
@@ -955,6 +1195,9 @@
             "activite": {
               "metier": "intendant",
               "label": "Administration"
+            },
+            "effets_poste": {
+              "releve_auto": true
             }
           },
           {
@@ -966,7 +1209,21 @@
             ],
             "cout_cuivre": 12000,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {
+              "postes": {
+                "bibliothecaire": 2
+              }
+            },
+            "activite": {
+              "metier": "bibliothecaire",
+              "label": "Bibliothèque"
+            },
+            "effets": {
+              "grimoires_coffre": true
+            },
+            "effets_poste": {
+              "scriptorium": true
+            }
           },
           {
             "id": "salle_gestion",
@@ -987,6 +1244,9 @@
             "activite": {
               "metier": "intendant",
               "label": "Gestion des ressources"
+            },
+            "effets_poste": {
+              "candidats_bonus": 1
             }
           },
           {
@@ -998,7 +1258,18 @@
             ],
             "cout_cuivre": 8000,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "reveil": {
+                "duree": 25,
+                "icon": "🍖",
+                "nom": "Festin",
+                "buffs": {
+                  "R": 4
+                },
+                "requiert_metier": "cuisinier"
+              }
+            }
           },
           {
             "id": "buanderie",
@@ -1017,6 +1288,16 @@
             "activite": {
               "metier": "domestique",
               "label": "Blanchisserie"
+            },
+            "effets_poste": {
+              "reveil": {
+                "duree": 20,
+                "icon": "🧺",
+                "nom": "Habits propres",
+                "buffs": {
+                  "Cha": 3
+                }
+              }
             }
           },
           {
@@ -1085,7 +1366,11 @@
             },
             "activite": {
               "metier": "erudit",
-              "label": "Consultations"
+              "label": "Consultations",
+              "categories": [
+                "cabinet_des_specimens",
+                "taxidermie"
+              ]
             }
           },
           {
@@ -1105,6 +1390,9 @@
             "activite": {
               "metier": "garde",
               "label": "Garde du domaine"
+            },
+            "effets": {
+              "garde": true
             }
           },
           {
@@ -1122,6 +1410,13 @@
               "postes": {
                 "garde": 4
               }
+            },
+            "activite": {
+              "metier": "garde",
+              "label": "Garde du domaine"
+            },
+            "effets": {
+              "garde": true
             }
           },
           {
@@ -1136,7 +1431,13 @@
               "poste_de_garde"
             ],
             "capacite": {},
-            "description": "Compatibles avec les règlements de la ville."
+            "description": "Compatibles avec les règlements de la ville.",
+            "effets": {
+              "vol_limite": {
+                "fraction": 0.25,
+                "delai_s": 86400
+              }
+            }
           },
           {
             "id": "potager",
@@ -1194,11 +1495,23 @@
             "capacite": {
               "postes": {
                 "palefrenier": 2
-              }
+              },
+              "ecurie": 4
             },
             "activite": {
               "metier": "palefrenier",
               "label": "Soins aux bêtes"
+            },
+            "effets_poste": {
+              "reveil_montures": {
+                "duree": 20,
+                "icon": "🐴",
+                "nom": "Bien pansée",
+                "buffs": {
+                  "R": 3,
+                  "Ag": 3
+                }
+              }
             }
           },
           {
@@ -1237,7 +1550,23 @@
             ],
             "cout_cuivre": 6000,
             "prerequis": [],
-            "capacite": {}
+            "capacite": {},
+            "effets": {
+              "recolte": {
+                "items": [
+                  "item:Branche_de_Alisier",
+                  "item:Branche_de_Bouleau",
+                  "item:Branche_de_Charme",
+                  "item:Branche_de_Chataignier",
+                  "item:Branche_de_Erable",
+                  "item:Branche_de_Orme",
+                  "item:Branche_de_Tilleul",
+                  "item:Branche_de_Tremble"
+                ],
+                "quantite": 3,
+                "delai_s": 86400
+              }
+            }
           }
         ],
         "metiers": [
@@ -1311,6 +1640,12 @@
             "id": "boucher",
             "label": "Boucher",
             "cout_embauche_cuivre": 800
+          },
+          {
+            "id": "bibliothecaire",
+            "label": "Bibliothécaire",
+            "cout_embauche_cuivre": 600,
+            "description": "Tient la bibliothèque : on peut y écrire comme au scriptorium."
           }
         ],
         "reglages": {

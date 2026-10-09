@@ -29,7 +29,7 @@ from utils.combat import (
 )
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs, RequestDocCacheMiddleware
 from utils.auth import get_current_user
-from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of
+from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of, credit_character
 from utils import quetes
 from utils import dump as dump_util
 from utils import bois
@@ -944,7 +944,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# Scriptorium : `est_scriptorium` conditionne le bouton « Écrire ». Aucun contrôle
 	# d'accès (comme l'auberge/l'étable) — c'est l'écriture elle-même qui demande papier,
 	# encre et plume, pas la porte.
-	est_scriptorium = scriptorium_util.lieu_est_scriptorium(grid_doc)
+	# Un bien dont la bibliothèque est tenue en est un (vue en mémoire, jamais sauvée).
+	est_scriptorium = scriptorium_util.lieu_est_scriptorium(proprietes_util.lieu_effectif(grid_doc, get_doc))
 
 	# Commande : DEUX flags, et ils ne disent pas la même chose.
 	# `est_commande` (dérivé : le lieu a-t-il des recettes ?) ouvre la section « Commande » du
@@ -969,6 +970,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# de la ville. Ils se présentent ensuite comme les PNJ d'un lieu : une ligne d'action chacun.
 	role_propriete = proprietes_util.role_de(character, grid_doc) if est_propriete else None
 	proprietes_ateliers = []
+	releve_caisse = 0
 	caisse_accessible = False
 	if est_propriete:
 		_employes = proprietes_util.employes_effectifs(grid_doc, get_doc)
@@ -977,6 +979,17 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			if proprietes_util.produire(_e, _flux_prop, 1, _cat_proprietes)[0]:
 				save_doc(_e)
 		persister_flux(_flux_prop, save_doc)
+		# Intendant au Bureau administratif : la caisse est relevée à l'arrivée du maître.
+		# Les caisses d'abord (jamais de double relevé), le personnage ensuite.
+		if (role_propriete == proprietes_util.PROPRIETAIRE
+				and proprietes_util.releve_auto(grid_doc, _cat_proprietes, _employes)):
+			_ateliers = [_e for _e in _employes if proprietes_util.est_atelier(_e)]
+			releve_caisse = proprietes_util.relever_caisse(_ateliers)
+			if releve_caisse:
+				for _e in _ateliers:
+					save_doc(_e)
+				credit_character(character, releve_caisse)
+				save_doc(character)
 		# Même source que la resync d'embauche/renvoi (`routers/proprietes`, clé `sidebar`).
 		_vue = proprietes_util.vue_sidebar(grid_doc, _cat_proprietes, _employes, role_propriete)
 		proprietes_ateliers = _vue["ateliers"]
@@ -1071,6 +1084,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"proprietes_offre": proprietes_offre,
 			"role_propriete": role_propriete,
 			"proprietes_ateliers": proprietes_ateliers,
+			"releve_caisse": releve_caisse,
 			"caisse_accessible": caisse_accessible,
 			# Compagnons connus + affinités (onglet 🤝 section 👥, rendu client) — resynchronisé
 			# après embauche/congédiement/retour de combat.

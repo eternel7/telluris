@@ -189,7 +189,16 @@ def montures_effectives(character: dict, get_doc_fn=None) -> list:
 	"""Docs des montures ACTIVES du joueur : ids de `character["montures"]` résolus,
 	filtrés sur statut `acquise` + acquises PAR CE personnage. Miroir exact de
 	`recrutement.groupe_effectif` — un doc `monture:*` n'ayant pas de `user_id`, c'est
-	la SEULE preuve d'appartenance. Un id périmé (monture morte) est ignoré."""
+	la SEULE preuve d'appartenance. Un id périmé (monture morte) est ignoré.
+	⚠️ Une monture laissée à l'ÉCURIE d'une propriété (`loge_a`) n'en fait pas partie : elle
+	ne suit pas le groupe (ni portage, ni combat, ni tour monde) — mais elle reste dans le
+	plafond du troupeau (`montures_possedees`)."""
+	return [m for m in montures_possedees(character, get_doc_fn) if not m.get("loge_a")]
+
+
+def montures_possedees(character: dict, get_doc_fn=None) -> list:
+	"""Toutes les montures du joueur, laissées à l'écurie comprises : c'est ce que compte le
+	plafond du troupeau."""
 	lire = get_doc_fn or get_doc
 	out = []
 	for mid in character.get("montures", []) or []:
@@ -200,9 +209,9 @@ def montures_effectives(character: dict, get_doc_fn=None) -> list:
 
 
 def peut_acquerir(character: dict, espece_doc: dict, get_doc_fn=None) -> tuple[bool, str]:
-	"""(ok, raison) : plafond du troupeau, puis fonds. L'ordre compte — annoncer
-	« bourse insuffisante » à quelqu'un qui a déjà son quota serait trompeur."""
-	if len(montures_effectives(character, get_doc_fn)) >= plafond_montures():
+	"""(ok, raison) : plafond du troupeau (écurie comprise), puis fonds. L'ordre compte —
+	annoncer « bourse insuffisante » à quelqu'un qui a déjà son quota serait trompeur."""
+	if len(montures_possedees(character, get_doc_fn)) >= plafond_montures():
 		return False, "Vous ne pouvez pas mener davantage de montures."
 	if money_to_cuivre(character) < prix_de(espece_doc):
 		return False, "Vous n'avez pas de quoi payer cette monture."

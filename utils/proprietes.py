@@ -36,7 +36,8 @@ import uuid
 
 from db.config import get_doc
 from models import character_stats
-from utils.characters import item_ref_weight, resolve_item_ref
+from utils.characters import item_ref_weight, resolve_item_ref, poids_bounds, tirer_poids
+from utils import consommables
 from utils import marche
 from utils import negoce
 from utils import zones as zones_util
@@ -127,6 +128,7 @@ def capacites(prop: dict, cat: dict) -> dict:
 		"occupants_max": _int(tdef.get("occupants_max")),
 		"personnel_max": _int(tdef.get("personnel_max")),
 		"stockage_kg": _int(tdef.get("stockage_kg")),
+		"ecurie": 0,
 		"postes": {},
 	}
 	for am_id in prop.get("amenagements") or []:
@@ -134,6 +136,7 @@ def capacites(prop: dict, cat: dict) -> dict:
 		c = adef.get("capacite") or {}
 		cap["occupants_max"] += _int(c.get("occupants"))
 		cap["stockage_kg"] += _int(c.get("stockage_kg"))
+		cap["ecurie"] += _int(c.get("ecurie"))
 		for metier, n in (c.get("postes") or {}).items():
 			cap["postes"][metier] = cap["postes"].get(metier, 0) + _int(n)
 	return cap
@@ -475,6 +478,8 @@ def peut_ceder(prop: dict, employes: list | None = None) -> tuple[bool, str]:
 		return False, "Videz le coffre avant de céder la propriété."
 	if prop.get("heberges"):
 		return False, "Reprenez d'abord les compagnons hébergés ici."
+	if prop.get("ecurie"):
+		return False, "Reprenez d'abord les montures laissées à l'écurie."
 	return True, ""
 
 
@@ -488,13 +493,18 @@ def revente_autorisee(tdef: dict, cite_doc: dict | None) -> tuple[bool, str]:
 	return True, ""
 
 
-def prix_revente(tdef: dict, prop: dict) -> int:
+def prix_revente(tdef: dict, prop: dict, cat: dict | None = None) -> int:
 	"""Prix PAYÉ × facteur du type : un bien acheté cher (quartier marchand, case déjà
 	occupée — cf. `prix_achat`) se revend en proportion. `prix_paye` absent ou nul (bien
 	d'avant la majoration) ⇒ prix du type. Les aménagements ne sont pas remboursés : ils
-	restent attachés au bien cédé."""
+	restent attachés au bien cédé — sauf `effets.revente_bonus` (la Décoration), ajouté au
+	facteur : le MEILLEUR seul, jamais une somme. Un type invendable (facteur 0) le reste."""
 	base = _int((prop or {}).get("prix_paye")) or _int(tdef.get("prix_cuivre"))
-	return int(round(base * float(tdef.get("revente_facteur") or 0)))
+	facteur = float(tdef.get("revente_facteur") or 0)
+	if facteur > 0 and cat:
+		bonus = [float(v) for v in valeurs_effet(prop, cat, [], "revente_bonus") if v]
+		facteur = min(1.0, facteur + max(bonus, default=0.0))
+	return int(round(base * facteur))
 
 
 def ceder(character: dict, prop: dict, statut: str, employes: list) -> None:
@@ -701,6 +711,403 @@ def activites(prop: dict, cat: dict, employes: list) -> list:
 	return out
 
 
+# ── Effets des aménagements ──────────────────────────────────────────────────────
+# Deux blocs dans la DONNÉE d'un aménagement (`dev/gen_proprietes.py`) :
+#   `effets`       actifs dès l'installation ;
+#   `effets_poste` actifs seulement si l'activité est EXERCÉE (un employé du métier au poste).
+# ⚠️ NON-CUMUL, toujours. Les effets à durée du réveil passent par `consommables.poser_effet`
+# sous la clé `amenagement:<id>` : une nuit REMPLACE l'effet de la précédente (même d'un autre
+# bien), et `cumul_effets` ne retient que le meilleur bonus par caractéristique. Tous les autres
+# effets sont des états du bien, lus comme « au moins un actif » ou « le meilleur », jamais
+# comme une somme. `effets.garde` reste lu par `gardien_present`, qui exige déjà le poste tenu.
+
+SOURCE_AMENAGEMENT = "amenagement:"
+DORMEURS = "dormeurs"
+MONTURES = "montures"
+
+
+def exercee(cat: dict, employes: list, am_id) -> bool:
+	"""Un employé tient le poste de CET aménagement, dans un métier que ce poste ouvre."""
+	postes = ((amenagement_def(cat, am_id) or {}).get("capacite") or {}).get("postes") or {}
+	return any(e.get("poste") == am_id and e.get("metier") in postes for e in employes)
+
+
+def metier_present(prop: dict, cat: dict, employes: list, metier) -> bool:
+	"""Un employé de ce métier tient le poste d'un aménagement INSTALLÉ (ex. : un cuisinier
+	en cuisine, qui fait servir les salles à manger)."""
+	installes = set(prop.get("amenagements") or [])
+	return any(e.get("metier") == metier and e.get("poste") in installes
+			   and exercee(cat, [e], e.get("poste")) for e in employes)
+
+
+def effets_actifs_du_bien(prop: dict, cat: dict, employes: list) -> list:
+	"""[(am_id, adef, effets)] des aménagements installés : `effets` toujours, `effets_poste`
+	fusionné par-dessus quand l'activité est exercée. Ordre d'installation."""
+	out = []
+	for am_id in prop.get("amenagements") or []:
+		adef = amenagement_def(cat, am_id) or {}
+		eff = dict(adef.get("effets") or {})
+		if adef.get("effets_poste") and exercee(cat, employes, am_id):
+			eff.update(adef["effets_poste"])
+		if eff:
+			out.append((am_id, adef, eff))
+	return out
+
+
+def valeurs_effet(prop: dict, cat: dict, employes: list, cle: str) -> list:
+	"""Les valeurs ACTIVES d'un effet dans ce bien — l'appelant en tire un booléen (`any`) ou
+	le meilleur (`max`), jamais une somme."""
+	return [eff[cle] for _a, _d, eff in effets_actifs_du_bien(prop, cat, employes) if eff.get(cle)]
+
+
+def effet_actif(prop: dict, cat: dict, employes: list, cle: str) -> bool:
+	return bool(valeurs_effet(prop, cat, employes, cle))
+
+
+# ── Le réveil chez soi ───────────────────────────────────────────────────────────
+
+def dormeurs(character: dict, prop: dict, cat: dict, compagnons: list, heberges: list) -> list:
+	"""Qui dort AU BIEN cette nuit : le personnage, les hébergés, puis les compagnons du groupe
+	dans leur ordre, tant qu'il reste une place (`occupants_max`). Un compagnon de trop dort
+	quand même (la nuit le soigne) mais ne profite d'aucun effet du réveil."""
+	places = capacites(prop, cat)["occupants_max"]
+	out = [character]
+	for doc in list(heberges) + list(compagnons):
+		if len(out) >= places:
+			break
+		if doc not in out:
+			out.append(doc)
+	return out
+
+
+def entree_reveil(am_id, adef: dict, bloc: dict) -> dict:
+	"""Effet à durée d'un réveil, au format d'`effets_actifs` (celui des consommables)."""
+	entry = {
+		"source_id": SOURCE_AMENAGEMENT + str(am_id),
+		"nom": bloc.get("nom") or adef.get("nom", am_id),
+		"icon": bloc.get("icon", "🌅"),
+		"buffs": {k: _int(v) for k, v in (bloc.get("buffs") or {}).items()},
+		"regen_pv": _int(bloc.get("regen_pv")),
+		"regen_pm": _int(bloc.get("regen_pm")),
+		"esquive": _int(bloc.get("esquive")),
+		"canalisation": 0,
+		"restants": _int(bloc.get("duree")),
+	}
+	if bloc.get("fidele"):
+		entry["fidele"] = True
+	return entry
+
+
+def est_malus(entry: dict) -> bool:
+	"""Effet à durée PUREMENT nuisible (poison, malédiction, affaiblissement) : au moins un
+	terme négatif, aucun positif. Un effet mixte que le joueur a choisi (Bougie noire :
+	Vol +8, Ch −5) n'en est pas un — le médecin ne le lui retire pas."""
+	e = entry or {}
+	termes = [_int(v) for v in (e.get("buffs") or {}).values()]
+	termes += [_int(e.get("regen_pv")), _int(e.get("regen_pm"))]
+	positifs = [_int(e.get("esquive")), _int(e.get("canalisation")), _int(e.get("vol"))]
+	return any(t < 0 for t in termes) and not any(t > 0 for t in termes + positifs)
+
+
+def dissiper_malus(porteur: dict) -> list:
+	"""Retire les malus à durée du porteur ; renvoie leurs noms."""
+	actifs = porteur.get("effets_actifs") or []
+	retires = [e for e in actifs if est_malus(e)]
+	if retires:
+		porteur["effets_actifs"] = [e for e in actifs if not est_malus(e)]
+	return [e.get("nom", "") for e in retires]
+
+
+def _est_compagnon(doc: dict) -> bool:
+	return (doc or {}).get("type") == "aventurier"
+
+
+def appliquer_reveil(prop: dict, cat: dict, employes: list, dormeurs_: list,
+					 montures_: list) -> dict:
+	"""Effets du réveil chez soi, sur les DORMEURS (`dormeurs`) et les montures présentes :
+	malus dissipés d'abord (médecin), puis effets à durée posés — remplacés, jamais empilés.
+	Mute les docs, sans save. Renvoie {doc_id: [libellés]} de ce qui a changé pour chacun."""
+	bilan = {}
+
+	def noter(doc, libelle):
+		bilan.setdefault(doc.get("_id"), []).append(libelle)
+
+	actifs = effets_actifs_du_bien(prop, cat, employes)
+	cibles = {DORMEURS: dormeurs_, MONTURES: montures_}
+	for _am, _adef, eff in actifs:
+		for genre in eff.get("dissipe_malus") or []:
+			for doc in cibles.get(genre, []):
+				for nom in dissiper_malus(doc):
+					noter(doc, f"✚ {nom} dissipé")
+	for am_id, adef, eff in actifs:
+		for cle, docs in (("reveil", dormeurs_), ("reveil_montures", montures_)):
+			bloc = eff.get(cle)
+			if not bloc or _int(bloc.get("duree")) <= 0:
+				continue
+			if bloc.get("requiert_metier") and not metier_present(prop, cat, employes, bloc["requiert_metier"]):
+				continue
+			for doc in docs:
+				if bloc.get("compagnons_seuls") and not _est_compagnon(doc):
+					continue
+				entry = consommables.poser_effet(doc, entree_reveil(am_id, adef, bloc))
+				noter(doc, f"{entry['icon']} {entry['nom']}")
+	return bilan
+
+
+# ── Ce que le bien OUVRE (états binaires) ────────────────────────────────────────
+
+def lieu_effectif(lieu_doc: dict, get_doc_fn=None) -> dict:
+	"""Le lieu tel que le lisent les prédicats de capacité. Pour un bien dont la bibliothèque
+	est tenue (`effets_poste.scriptorium`), une COPIE portant le tag `scriptorium` : le
+	prédicat `scriptorium.lieu_est_scriptorium` est inchangé (donc sa recopie de
+	`utils/capacites.py` aussi) et rien n'est stocké — ⚠️ ne jamais sauver cette copie."""
+	if not est_propriete(lieu_doc):
+		return lieu_doc
+	cat = catalogue(get_doc_fn)
+	if not effet_actif(lieu_doc, cat, employes_effectifs(lieu_doc, get_doc_fn), "scriptorium"):
+		return lieu_doc
+	vue = dict(lieu_doc)
+	vue["tags"] = list(lieu_doc.get("tags") or []) + ["scriptorium"]
+	return vue
+
+
+def refs_bibliotheque(character: dict, get_doc_fn=None) -> list:
+	"""Grimoires que la bibliothèque rend lisibles : le COFFRE du bien où l'on se tient, si son
+	PROPRIÉTAIRE y est et qu'une bibliothèque y est installée (`effets.grimoires_coffre`).
+	`character` = le personnage ou l'un de ses compagnons (on lit alors le lieu de son
+	employeur). [] partout ailleurs."""
+	lire = get_doc_fn or get_doc
+	principal = character
+	if _est_compagnon(character):
+		principal = lire(character.get("embauche_par", "")) or {}
+		if character.get("_id") not in (principal.get("groupe") or []):
+			return []
+	prop = lire(principal.get("lieu", "")) if principal.get("lieu") else None
+	if not est_propriete(prop) or role_de(principal, prop) != PROPRIETAIRE:
+		return []
+	if not effet_actif(prop, catalogue(get_doc_fn), [], "grimoires_coffre"):
+		return []
+	return list(prop.get("coffre") or [])
+
+
+def releve_auto(prop: dict, cat: dict, employes: list) -> bool:
+	return effet_actif(prop, cat, employes, "releve_auto")
+
+
+def registre(prop: dict, cat: dict) -> bool:
+	return effet_actif(prop, cat, [], "registre")
+
+
+def biens_du_registre(character: dict, prop: dict, get_doc_fn=None) -> list:
+	"""Les biens POSSÉDÉS du personnage dans la même cité que `prop` (lui compris)."""
+	return [p for p in proprietes_de(character, get_doc_fn)
+			if p.get("statut") == POSSEDEE and p.get("lieu_parent") == prop.get("lieu_parent")]
+
+
+# ── Vol limité (Dispositifs défensifs) ───────────────────────────────────────────
+# Sans gardien, un visiteur ne prend qu'une FRACTION du coffre (en poids, mesurée à l'ouverture
+# de la fenêtre) et de la caisse (une fois), par fenêtre de `delai_s` : le pillage ne se
+# répète pas en revenant. État : `prop.vol_fenetre`.
+
+def vol_limite(prop: dict, cat: dict, employes: list) -> dict | None:
+	vals = valeurs_effet(prop, cat, employes, "vol_limite")
+	if not vals:
+		return None
+	return min(vals, key=lambda v: float(v.get("fraction", 1)))   # le plus protecteur
+
+
+def _fenetre_vol(prop: dict, limite: dict, now: int) -> dict:
+	f = prop.get("vol_fenetre") or {}
+	if not f or now >= _int(f.get("debut")) + _int(limite.get("delai_s"), 86400):
+		f = {"debut": now, "base_kg": poids_coffre(prop), "vole_kg": 0.0, "caisse": False}
+		prop["vol_fenetre"] = f
+	return f
+
+
+def vol_coffre_autorise(prop: dict, limite: dict | None, ref, now: int | None = None) -> tuple[bool, str]:
+	if not limite:
+		return True, ""
+	now = now_epoch() if now is None else now
+	f = _fenetre_vol(prop, limite, now)
+	plafond = float(limite.get("fraction", 1)) * float(f.get("base_kg") or 0)
+	if float(f.get("vole_kg") or 0) + item_ref_weight(ref) > plafond + 1e-9:
+		return False, "Des dispositifs défensifs vous arrêtent : impossible d'emporter davantage."
+	return True, ""
+
+
+def noter_vol_coffre(prop: dict, limite: dict | None, ref, now: int | None = None) -> None:
+	if not limite:
+		return
+	f = _fenetre_vol(prop, limite, now_epoch() if now is None else now)
+	f["vole_kg"] = round(float(f.get("vole_kg") or 0) + item_ref_weight(ref), 2)
+
+
+def fraction_caisse_volable(prop: dict, limite: dict | None, now: int | None = None) -> float:
+	"""Part de la caisse qu'un voleur emporte : tout sans dispositifs ; sinon `fraction`, une
+	seule fois par fenêtre (0 ensuite). Marque la fenêtre."""
+	if not limite:
+		return 1.0
+	f = _fenetre_vol(prop, limite, now_epoch() if now is None else now)
+	if f.get("caisse"):
+		return 0.0
+	f["caisse"] = True
+	return float(limite.get("fraction", 1))
+
+
+# ── Écurie : montures laissées au bien ───────────────────────────────────────────
+# La monture laissée reste à son maître et DANS le plafond du troupeau
+# (`montures.montures_possedees`) ; elle ne suit plus le groupe (`montures_effectives`
+# l'ignore) : elle ne porte rien et ne combat pas. État : `monture.loge_a` + `prop.ecurie`.
+
+def montures_logees(character: dict, prop: dict, get_doc_fn=None) -> list:
+	lire = get_doc_fn or get_doc
+	out = []
+	for mid in prop.get("ecurie") or []:
+		m = lire(mid)
+		if (m and m.get("loge_a") == prop.get("_id") and m.get("statut") == "acquise"
+				and m.get("acquise_par") == character.get("_id")):
+			out.append(m)
+	return out
+
+
+def loger_monture(character: dict, prop: dict, cat: dict, monture: dict) -> tuple[bool, str]:
+	if role_de(character, prop) != PROPRIETAIRE:
+		return False, "Seul le propriétaire loge ses montures ici."
+	if (monture.get("statut") != "acquise" or monture.get("acquise_par") != character.get("_id")
+			or monture.get("_id") not in (character.get("montures") or []) or monture.get("loge_a")):
+		return False, "Cette monture ne vous suit pas."
+	if monture.get("inventaire"):
+		return False, "Videz son sac avant de la laisser à l'écurie."
+	if len(prop.get("ecurie") or []) >= capacites(prop, cat)["ecurie"]:
+		return False, "Il n'y a plus de place à l'écurie."
+	monture["loge_a"] = prop["_id"]
+	monture.pop("auras_recues", None)   # hors du groupe, plus d'aura
+	prop.setdefault("ecurie", []).append(monture["_id"])
+	return True, ""
+
+
+def reprendre_monture(character: dict, prop: dict, monture: dict) -> tuple[bool, str]:
+	if monture.get("_id") not in (prop.get("ecurie") or []) or monture.get("loge_a") != prop.get("_id"):
+		return False, "Cette monture n'est pas à l'écurie."
+	prop["ecurie"] = [m for m in prop.get("ecurie") or [] if m != monture["_id"]]
+	monture.pop("loge_a", None)
+	return True, ""
+
+
+# ── Récolte (jardin, terrain privé) ──────────────────────────────────────────────
+
+def recoltes(prop: dict, cat: dict, now: int | None = None) -> list:
+	"""[{amenagement, nom, pret, pret_at}] des récoltes du bien (`effets.recolte`)."""
+	now = now_epoch() if now is None else now
+	faites = prop.get("recoltes_at") or {}
+	out = []
+	for am_id, adef, eff in effets_actifs_du_bien(prop, cat, []):
+		r = eff.get("recolte")
+		if not r:
+			continue
+		pret_at = _int(faites.get(am_id)) + _int(r.get("delai_s"), 86400) if faites.get(am_id) else 0
+		out.append({"amenagement": am_id, "nom": adef.get("nom", am_id),
+					"pret": pret_at <= now, "pret_at": pret_at})
+	return out
+
+
+def recolter(prop: dict, cat: dict, am_id, get_doc_fn=None, rand=random,
+			 now: int | None = None) -> tuple[bool, str, list]:
+	"""Tire la récolte d'un aménagement : `quantite` références (poids d'instance tiré),
+	puis l'aménagement attend `delai_s`. Mute le bien ; l'appelant range les références."""
+	now = now_epoch() if now is None else now
+	entree = next((r for r in recoltes(prop, cat, now) if r["amenagement"] == am_id), None)
+	if entree is None:
+		return False, "Rien à récolter ici.", []
+	if not entree["pret"]:
+		return False, "Ce n'est pas encore le moment de récolter.", []
+	r = ((amenagement_def(cat, am_id) or {}).get("effets") or {})["recolte"]
+	lire = get_doc_fn or get_doc
+	items = [d for d in (lire(i) for i in r.get("items") or []) if d]
+	if not items:
+		return False, "Rien à récolter ici.", []
+	refs = []
+	for _ in range(max(1, _int(r.get("quantite"), 1))):
+		doc = rand.choice(items)
+		pmin, pmax = poids_bounds(doc)
+		refs.append({"item": doc["_id"], "poids": tirer_poids(doc, rand.random)} if pmax > pmin else doc["_id"])
+	prop.setdefault("recoltes_at", {})[am_id] = now
+	return True, "", refs
+
+
+# ── Texte des effets (panneau 🏠) ────────────────────────────────────────────────
+
+_CARACT_LABELS = {"V": "Vitesse", "F": "Force", "R": "Résistance", "Ag": "Agilité", "Vol": "Volonté",
+				  "Int": "Intelligence", "Cha": "Charisme", "Ch": "Chance"}
+
+
+def _periode(delai_s) -> str:
+	"""« par jour » / « toutes les 6 h » — tiré du délai, jamais écrit en dur."""
+	h = max(1, round(_int(delai_s, 86400) / 3600))
+	if h % 24 == 0:
+		return "par jour" if h == 24 else f"tous les {h // 24} jours"
+	return f"toutes les {h} h"
+
+
+def _texte_reveil(bloc: dict) -> str:
+	parts = [f"{_CARACT_LABELS.get(k, k)} {_int(v):+d}" for k, v in (bloc.get("buffs") or {}).items()]
+	for cle, lib in (("regen_pv", "régén. PV"), ("regen_pm", "régén. PM"), ("esquive", "esquive")):
+		if _int(bloc.get(cle)):
+			parts.append(f"{lib} {_int(bloc[cle]):+d}")
+	if bloc.get("fidele"):
+		parts.append("ne quitte pas le groupe")
+	return f"{', '.join(parts)} pendant {_int(bloc.get('duree'))} tours"
+
+
+def textes_effets(adef: dict, cat: dict) -> list:
+	"""Phrases courtes décrivant les effets d'un aménagement (installation puis poste)."""
+	out = []
+	# Le métier du poste : celui de l'activité, sinon le premier poste (la loge du gardien).
+	metier_poste = ((adef.get("activite") or {}).get("metier")
+					or next(iter((adef.get("capacite") or {}).get("postes") or {}), None))
+	label_poste = (metier_def(cat, metier_poste) or {}).get("label", metier_poste or "")
+	for bloc, prefixe in ((adef.get("effets") or {}, ""),
+						  (adef.get("effets_poste") or {}, f"avec un(e) {label_poste} : " if label_poste else "")):
+		for cle, val in bloc.items():
+			t = None
+			if cle == "reveil":
+				qui = "compagnons" if val.get("compagnons_seuls") else "dormeurs"
+				t = f"au réveil ({qui}) : {_texte_reveil(val)}"
+				if val.get("requiert_metier"):
+					t += f" — s'il y a un(e) {(metier_def(cat, val['requiert_metier']) or {}).get('label', val['requiert_metier'])} en cuisine"
+			elif cle == "reveil_montures":
+				t = f"au réveil (montures) : {_texte_reveil(val)}"
+			elif cle == "dissipe_malus":
+				t = "la nuit, retire les malus à durée" + (" (montures comprises)" if MONTURES in val else "")
+			elif cle == "garde":
+				# Lu par `gardien_present`, qui exige le poste tenu : jamais actif à vide.
+				t = (f"avec un(e) {label_poste} au poste : " if label_poste and not prefixe else "") \
+					+ "protège le coffre et la caisse du vol"
+			elif cle == "vol_limite":
+				t = (f"sans gardien, un voleur n'emporte que {int(float(val.get('fraction', 1)) * 100)} %"
+					 f" {_periode(val.get('delai_s'))}")
+			elif cle == "revente_bonus":
+				t = f"revente +{int(round(float(val) * 100))} %"
+			elif cle == "registre":
+				t = "relève d'ici les caisses de vos biens de la cité"
+			elif cle == "grimoires_coffre":
+				t = "les grimoires du coffre comptent comme portés pour apprendre"
+			elif cle == "scriptorium":
+				t = "on peut y écrire comme au scriptorium"
+			elif cle == "releve_auto":
+				t = "la caisse des ateliers est relevée à votre arrivée"
+			elif cle == "candidats_bonus":
+				t = f"+{_int(val)} candidat(s) par poste à l'embauche"
+			elif cle == "recolte":
+				t = f"récolte {_int(val.get('quantite'), 1)} objet(s) {_periode(val.get('delai_s'))}"
+			if t:
+				out.append(prefixe + t)
+	ec = _int((adef.get("capacite") or {}).get("ecurie"))
+	if ec:
+		out.append(f"{ec} place(s) d'écurie")
+	return out
+
+
 # ── Ateliers : PNJ marchands employés ────────────────────────────────────────────
 # Un employé dont le poste ouvre des `activite.categories` exerce une catégorie de BOUTIQUE :
 # il produit à partir de ce qu'on lui confie et du flux de SA propriété (jamais celui de la
@@ -788,11 +1195,18 @@ def generer_candidats(prop: dict, cat: dict, employes: list, get_doc_fn=None,
 					  portraits=None, rand=random) -> list:
 	"""Un candidat par poste libre — et, pour un poste marchand, un par catégorie ouverte dont
 	le marchand générique `pnj:marchand_<cat>` existe : le candidat en reprend le portrait et
-	la race, mais porte un nom TIRÉ (deux joueurs n'embauchent pas le même Maître Fromond)."""
-	return _candidats_pour(postes_libres(prop, cat, employes), cat, get_doc_fn, portraits, rand)
+	la race, mais porte un nom TIRÉ (deux joueurs n'embauchent pas le même Maître Fromond).
+	Une Salle de gestion tenue (`effets_poste.candidats_bonus`) ajoute des candidats par poste."""
+	return _candidats_pour(postes_libres(prop, cat, employes), cat, get_doc_fn, portraits, rand,
+						   candidats_par_poste(prop, cat, employes))
 
 
-def _candidats_pour(postes: list, cat: dict, get_doc_fn, portraits, rand) -> list:
+def candidats_par_poste(prop: dict, cat: dict, employes: list) -> int:
+	"""1 + le MEILLEUR `candidats_bonus` actif (non cumulatif : deux salles ne doublent rien)."""
+	return 1 + max([_int(v) for v in valeurs_effet(prop, cat, employes, "candidats_bonus")], default=0)
+
+
+def _candidats_pour(postes: list, cat: dict, get_doc_fn, portraits, rand, n: int = 1) -> list:
 	lire = get_doc_fn or get_doc
 	out = []
 	for p in postes:
@@ -801,15 +1215,16 @@ def _candidats_pour(postes: list, cat: dict, get_doc_fn, portraits, rand) -> lis
 			continue
 		adef = amenagement_def(cat, p["amenagement"]) or {}
 		cats = categories_du_poste(adef, p["metier"])
-		if cats:
-			for c in cats:
-				modele = lire(MODELE_PREFIXE + c)
-				if modele:
-					out.append(_candidat(p["amenagement"], mdef, modele.get("race") or RACE_PERSONNEL,
-										 modele.get("portrait", ""), rand, c, modele["_id"]))
-		else:
-			portrait = rand.choice(portraits) if portraits else ""
-			out.append(_candidat(p["amenagement"], mdef, RACE_PERSONNEL, portrait, rand))
+		for _ in range(max(1, n)):
+			if cats:
+				for c in cats:
+					modele = lire(MODELE_PREFIXE + c)
+					if modele:
+						out.append(_candidat(p["amenagement"], mdef, modele.get("race") or RACE_PERSONNEL,
+											 modele.get("portrait", ""), rand, c, modele["_id"]))
+			else:
+				portrait = rand.choice(portraits) if portraits else ""
+				out.append(_candidat(p["amenagement"], mdef, RACE_PERSONNEL, portrait, rand))
 	return out
 
 
@@ -826,7 +1241,7 @@ def rafraichir_candidats(prop: dict, cat: dict, employes: list, get_doc_fn=None,
 		gardes = [c for c in prop["candidats"] if (c.get("amenagement"), c.get("metier")) in libres]
 		couverts = {(c.get("amenagement"), c.get("metier")) for c in gardes}
 		gardes += _candidats_pour([p for p in postes if (p["amenagement"], p["metier"]) not in couverts],
-								  cat, get_doc_fn, portraits, rand)
+								  cat, get_doc_fn, portraits, rand, candidats_par_poste(prop, cat, employes))
 		if gardes == prop["candidats"]:
 			return False
 		prop["candidats"] = gardes
@@ -973,13 +1388,16 @@ def encaisser(employe: dict, cuivre: int) -> None:
 	employe["caisse_cuivre"] = _int(employe.get("caisse_cuivre")) + int(cuivre)
 
 
-def relever_caisse(employes: list) -> int:
-	"""Vide la caisse de chaque atelier ; renvoie le total. L'appelant crédite qui relève."""
+def relever_caisse(employes: list, fraction: float = 1.0) -> int:
+	"""Vide la caisse de chaque atelier ; renvoie le total. L'appelant crédite qui relève.
+	`fraction` < 1 : un voleur arrêté par les Dispositifs défensifs n'en prend qu'une part."""
 	total = 0
 	for e in employes:
-		total += _int(e.get("caisse_cuivre"))
-		if e.get("caisse_cuivre"):
-			e["caisse_cuivre"] = 0
+		caisse = _int(e.get("caisse_cuivre"))
+		pris = caisse if fraction >= 1 else int(caisse * max(0.0, float(fraction)))
+		total += pris
+		if pris:
+			e["caisse_cuivre"] = caisse - pris
 	return total
 
 

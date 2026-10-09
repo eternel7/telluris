@@ -111,7 +111,9 @@ utils/
   proprietes.py          # propriétés résidentielles (pur) : type FIGÉ, aménagements contraints
                          #   par type (`rules:proprietes`), capacités dérivées, personnel à poste,
                          #   gardien/vol, location inviolable, zones habitables peintes ;
-                         #   ATELIERS : PNJ marchands employés (flux du bien, jamais de la ville ; caisse)
+                         #   ATELIERS : PNJ marchands employés (flux du bien, jamais de la ville ; caisse) ;
+                         #   EFFETS des aménagements (`effets` / `effets_poste`) : réveil à durée NON
+                         #   cumulatif, médecin, écurie (plafond conservé), bibliothèque → scriptorium par vue
   auberge.py             # tavernes (pur) : tables-chatrooms, tableau d'information, nuit
   scriptorium.py         # scriptorium (pur) : écrit personnel transportable + livres de contenu générés au tick d'atelier
   escorte.py             # escortes (pur) : personne à retrouver, à protéger, à déposer vivante

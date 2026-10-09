@@ -63,7 +63,7 @@ vm.runInThisContext(extraireConst('_PROP_STATUTS'));
 vm.runInThisContext(extraireConst('_PROP_CATEGORIES'));
 vm.runInThisContext(extraireConst('INV_VISIBLE'));
 for (const f of ['escapeHtml', '_propCategorie', '_purseEnCuivre', '_prixTexte', '_propCaps', '_propDate',
-	'_propMesProprietes', '_propMajoration', 'renderProprietesOffre', 'renderPropriete', '_majSidebarPropriete',
+	'_propMesProprietes', '_propMajoration', '_propEffets', '_propQuotidien', 'renderProprietesOffre', 'renderPropriete', '_majSidebarPropriete',
 	'_sortedOrder', '_grpCharge', '_grpRemplirSac', '_grpRentre', '_pcfLigne', '_pcfSacGauche', '_majOmbreScroll', '_pcfOmbres', 'renderCoffre']) {
 	vm.runInThisContext(extraire(f));
 }
@@ -132,6 +132,51 @@ t('activité inactive sans PNJ', () => {
 	renderPropriete(ici('proprietaire', { activites: [{ amenagement: 'x', nom: 'Labo',
 		label: 'Alchimie', metier: 'alchimiste', exercee: false, employe: '' }] }));
 	assert.ok(cible.innerHTML.includes('inactive'));
+});
+
+t('effets : textes affichés, effet de poste en attente de personnel', () => {
+	renderPropriete(ici('proprietaire', {
+		installes: [
+			{ id: 'salon', nom: 'Salon', categorie: 'vie', effets: ['au réveil (dormeurs) : Volonté +3 pendant 20 tours'], actif: true, poste_requis: false },
+			{ id: 'infirmerie', nom: 'Infirmerie', categorie: 'service', effets: ['avec un(e) Médecin : ' + XSS], actif: false, poste_requis: true },
+		],
+		disponibles: [{ id: 'cave', nom: 'Cave', categorie: 'vie', cout: 2500, effets: ['+60 kg'] }],
+	}));
+	const h = cible.innerHTML;
+	assert.ok(h.includes('Volonté +3 pendant 20 tours') && h.includes('— actif'), 'effet actif non affiché');
+	assert.ok(h.includes('en attente de personnel'), 'effet de poste sans employé non signalé');
+	assert.ok(h.includes('✨ +60 kg'), 'effet d\'un aménagement disponible absent');
+	assert.ok(!h.includes(XSS), 'texte d\'effet non échappé');
+});
+
+t('au quotidien : récolte, registre et écurie, ids en data-*', () => {
+	renderPropriete(ici('proprietaire', {
+		recoltes: [{ amenagement: 'petit_jardin', nom: 'Petit jardin', pret: true, pret_at: 0 },
+			{ amenagement: 'terrain_prive', nom: 'Terrain privé', pret: false, pret_at: 1700000000 }],
+		registre: true,
+		ecurie: { places: 2, logees: [{ id: 'monture:a', nom: XSS }],
+			logeables: [{ id: 'monture:b', nom: 'Mulet', charge: false }, { id: 'monture:c', nom: 'Âne', charge: true }] },
+	}));
+	const h = cible.innerHTML;
+	assert.ok(h.includes('Au quotidien'));
+	assert.ok(/data-am="petit_jardin"  onclick="propRecolter/.test(h), 'récolte prête grisée');
+	assert.ok(/data-am="terrain_prive" disabled/.test(h), 'récolte en attente non grisée');
+	assert.ok(h.includes('propRegistre()'));
+	assert.ok(h.includes('Écurie (1/2)'));
+	assert.ok(h.includes(`data-mt="monture:a" onclick="propEcurie(this, 'reprendre')"`));
+	assert.ok(h.includes(`data-mt="monture:b"  onclick="propEcurie(this, 'loger')"`));
+	assert.ok(/data-mt="monture:c" disabled/.test(h), 'monture chargée laissable');
+	assert.ok(!h.includes(XSS));
+});
+
+t('au quotidien : écurie pleine ⇒ rien à laisser ; rien d\'ouvert ⇒ pas de section', () => {
+	renderPropriete(ici('proprietaire', { ecurie: { places: 1, logees: [{ id: 'monture:a', nom: 'Rosse' }],
+		logeables: [{ id: 'monture:b', nom: 'Mulet', charge: false }] } }));
+	assert.ok(!cible.innerHTML.includes("'loger'"), 'écurie pleine mais monture laissable');
+	renderPropriete(ici('proprietaire'));
+	assert.ok(!cible.innerHTML.includes('Au quotidien'), 'section vide affichée');
+	renderPropriete(ici('visiteur', { disponibles: [], registre: true, recoltes: [{ amenagement: 'x', nom: 'x', pret: true }] }));
+	assert.ok(!cible.innerHTML.includes('Au quotidien'), 'gestes du quotidien offerts au visiteur');
 });
 
 t('offre : types de la zone et chambre à louer', () => {

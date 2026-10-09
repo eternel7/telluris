@@ -980,11 +980,14 @@ def est_grimoire(item_doc) -> bool:
 	return bool(item_doc) and item_doc.get("sous_categorie") == "grimoire"
 
 
-def grimoire_pour(character: dict, sort_id: str, resolve_ref) -> dict | None:
+def grimoire_pour(character: dict, sort_id: str, resolve_ref, refs_extra=None) -> dict | None:
 	"""Premier grimoire porté (sac puis équipé) qui enseigne `sort_id`
-	(item `sous_categorie:"grimoire"` dont le champ `sorts` contient l'id)."""
+	(item `sous_categorie:"grimoire"` dont le champ `sorts` contient l'id). `refs_extra` :
+	références lisibles sans être portées — le coffre d'une bibliothèque chez soi
+	(`proprietes.refs_bibliotheque`), fourni par l'appelant."""
 	refs = list((character or {}).get("inventaire") or [])
 	refs += [ref for ref in ((character or {}).get("slots") or {}).values() if ref]
+	refs += list(refs_extra or [])
 	for ref in refs:
 		doc = resolve_ref(ref)
 		if est_grimoire(doc) and sort_id in (doc.get("sorts") or []):
@@ -1219,7 +1222,7 @@ def apprentissage_magies_payload(character: dict, rules_vocations) -> dict:
 	}
 
 
-def sorts_apprenables(character: dict, find_docs, resolve_ref, rules_vocations) -> list:
+def sorts_apprenables(character: dict, find_docs, resolve_ref, rules_vocations, refs_extra=None) -> list:
 	"""Sorts achetables par le personnage : école pratiquée (native ou achetée), niveau
 	d'école suffisant, famille non exclue par la vocation, pas déjà connu. Chaque entrée est
 	enrichie de `cout_points`, `grimoire_ok` (grimoire enseignant porté) et `magie` (école
@@ -1247,7 +1250,7 @@ def sorts_apprenables(character: dict, find_docs, resolve_ref, rules_vocations) 
 		sort = resoudre_temps(sort, caracts)
 		sort["effets"] = apercu_effets(sort["effets"], caracts)
 		sort["cout_points"] = cout_apprentissage(sort)
-		sort["grimoire_ok"] = grimoire_pour(character, sort["id"], resolve_ref) is not None
+		sort["grimoire_ok"] = grimoire_pour(character, sort["id"], resolve_ref, refs_extra) is not None
 		out.append(sort)
 	out.sort(key=lambda s: (s.get("magie") or "", s["niveau"], s["nom"]))
 	return out
