@@ -277,11 +277,16 @@ def _sorts_du_contenu():
 
 
 def test_le_json_est_la_sortie_du_generateur(tmp_path):
-	"""Le fichier committé ne dérive pas de son générateur (relu sur le dump committé)."""
+	"""Le fichier committé ne dérive pas de son générateur.
+
+	⚠️ Relu sur un dump FIXE, antérieur à l'import des sorts de vol : sur un dump qui les
+	contient déjà, le générateur (idempotent) ne rend plus rien et le test échouait dès
+	qu'un nouvel export arrivait dans jsons/ (constaté sur le dump du 09/10)."""
 	sys.path.insert(0, os.path.join(RACINE, "dev"))
 	import gen_sorts_vol as gen
 	sortie = tmp_path / "vol.json"
-	assert gen.main(["--sortie", str(sortie)]) == 0
+	dump = os.path.join(RACINE, "jsons", "telluris-dump-20261008-204335.json")
+	assert gen.main(["--dump", dump, "--sortie", str(sortie)]) == 0
 	assert json.loads(sortie.read_text(encoding="utf-8")) == _contenu()
 
 

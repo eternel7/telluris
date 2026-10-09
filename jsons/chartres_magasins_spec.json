@@ -1,0 +1,723 @@
+{
+	"cite": "lieu:chartres",
+	"magasins": [
+		{
+			"categorie": "apothicairerie",
+			"label": "Le Jardin des Simples des Épars",
+			"image": "apothicairerie_europe01.png",
+			"pos": [
+				46,
+				27
+			],
+			"nom": "Liesel Fleurépine",
+			"portrait": "marchand_elfe_f_apothicairerie.png"
+		},
+		{
+			"categorie": "apothicairerie",
+			"label": "Le Mortier d'Or de la Basse-Ville",
+			"image": "apothicairerie_europe02.png",
+			"pos": [
+				33,
+				29
+			],
+			"nom": "Leonor Lunevoile",
+			"portrait": "marchand_elfe_f_apothicairerie01.jpg"
+		},
+		{
+			"categorie": "armurerie",
+			"label": "La Lame du Tertre",
+			"image": "armurerie_europe01.jpg",
+			"pos": [
+				31,
+				27
+			],
+			"nom": "Takumi Soleil-Levant",
+			"portrait": "marchand_humain_m_armurerie.png"
+		},
+		{
+			"categorie": "armurerie",
+			"label": "La Lame d'Acier du Pont Bouju",
+			"image": "armurerie_europe01.png",
+			"pos": [
+				34,
+				31
+			],
+			"nom": "Qiang de Périgord",
+			"portrait": "marchand_humain_m_armurerie01.jpg"
+		},
+		{
+			"categorie": "atelier_d_artisan",
+			"label": "Le Rabot de la Basse-Ville",
+			"image": "atelier_d_artisan_europe01.png",
+			"pos": [
+				36,
+				16
+			],
+			"nom": "Olo Fouilleterre",
+			"portrait": "marchand_hobbit_m_atelier_d_artisan.png"
+		},
+		{
+			"categorie": "atelier_d_artisan",
+			"label": "Le Compas du Pont Bouju",
+			"image": "atelier_d_artisan_europe02.png",
+			"pos": [
+				30,
+				33
+			],
+			"nom": "Podo Chaud-Chaudron",
+			"portrait": "marchand_hobbit_m_atelier_d_artisan01.jpg"
+		},
+		{
+			"categorie": "atelier_de_cirier",
+			"label": "La Cire Fondue de l'Eure",
+			"image": "atelier_de_cirier_europe01.png",
+			"pos": [
+				58,
+				23
+			],
+			"nom": "María Ventelame",
+			"portrait": "marchand_elfe_f_atelier_de_cirier.png"
+		},
+		{
+			"categorie": "atelier_de_cirier",
+			"label": "Le Flambeau de l'Eure",
+			"image": "atelier_de_cirier_europe02.png",
+			"pos": [
+				63,
+				19
+			],
+			"nom": "Melian Feuillargent",
+			"portrait": "marchand_elfe_f_atelier_de_cirier01.jpg"
+		},
+		{
+			"categorie": "atelier_de_l_empenneur",
+			"label": "L'Empenneur de l'Eure",
+			"image": "atelier_de_l_empenneur_europe01.png",
+			"pos": [
+				47,
+				30
+			],
+			"nom": "Rodrigo Troisquarts",
+			"portrait": "marchand_hobbit_m_atelier_de_l_empeneur01.jpg"
+		},
+		{
+			"categorie": "atelier_de_l_empenneur",
+			"label": "Le Plumier du Chasseur de l'Eure",
+			"image": "atelier_de_l_empenneur_europe02.png",
+			"pos": [
+				54,
+				23
+			],
+			"nom": "Rufus Troisquarts",
+			"portrait": "marchand_hobbit_m_atelier_de_l_empenneur01.jpg"
+		},
+		{
+			"categorie": "bijouterie",
+			"label": "Le Cabinet des Gemmes du Cloître",
+			"image": "bijouterie_europe01.png",
+			"pos": [
+				42,
+				23
+			],
+			"nom": "Melian Briseflammes",
+			"portrait": "marchand_elfe_f_bijouterie.png"
+		},
+		{
+			"categorie": "bijouterie",
+			"label": "L'Écrin du Cloître",
+			"image": "bijouterie_europe02.png",
+			"pos": [
+				39,
+				22
+			],
+			"nom": "Marianne Astrebrillant",
+			"portrait": "marchand_elfe_f_bijouterie01.png"
+		},
+		{
+			"categorie": "boucherie",
+			"label": "Le Billot Noir de la Porte Guillaume",
+			"image": "boucherie_europe01.png",
+			"pos": [
+				41,
+				30
+			],
+			"nom": "Lydie Morvan",
+			"portrait": "marchand_humain_f_boucherie01.jpg"
+		},
+		{
+			"categorie": "boucherie",
+			"label": "La Hampe de la Porte Guillaume",
+			"image": "boucherie_europe02.png",
+			"pos": [
+				55,
+				26
+			],
+			"nom": "Peta Wambui",
+			"portrait": "marchand_humain_f_boucherie02.jpg"
+		},
+		{
+			"categorie": "boulangerie",
+			"label": "Le Levain Royal de Saint-André",
+			"image": "boulangerie_europe01.jpg",
+			"pos": [
+				53,
+				27
+			],
+			"nom": "Celebrian Cielazur",
+			"portrait": "marchand_elfe_f_boulangerie.jpg"
+		},
+		{
+			"categorie": "boulangerie",
+			"label": "La Bonne Miche du Tertre",
+			"image": "boulangerie_europe02.jpg",
+			"pos": [
+				31,
+				24
+			],
+			"nom": "Galadriel Briseflammes",
+			"portrait": "marchand_elfe_f_boulangerie01.jpg"
+		},
+		{
+			"categorie": "bourrellerie",
+			"label": "La Sangle du Pont Bouju",
+			"image": "bourrellerie_europe01.png",
+			"pos": [
+				63,
+				21
+			],
+			"nom": "Armand Bouazizi",
+			"portrait": "marchand_humain_m_bourrellerie.png"
+		},
+		{
+			"categorie": "bourrellerie",
+			"label": "Le Porte-Selle du Cloître",
+			"image": "bourrellerie_europe02.png",
+			"pos": [
+				50,
+				29
+			],
+			"nom": "Carlo Campbell",
+			"portrait": "marchand_humain_m_bourrellerie01.png"
+		},
+		{
+			"categorie": "boyauderie",
+			"label": "Le Fil Tendu de l'Eure",
+			"image": "boyauderie_europe01.png",
+			"pos": [
+				35,
+				21
+			],
+			"nom": "Kan Souscolline",
+			"portrait": "marchand_hobbit_m_boyauderie.png"
+		},
+		{
+			"categorie": "boyauderie",
+			"label": "La Baudruche Fine du Cloître",
+			"image": "boyauderie_europe02.png",
+			"pos": [
+				38,
+				15
+			],
+			"nom": "Bingo Basse-Vallée",
+			"portrait": "marchand_hobbit_m_boyauderie01.jpg"
+		},
+		{
+			"categorie": "brosserie",
+			"label": "L'Époussette de la Basse-Ville",
+			"image": "brosserie_europe01.png",
+			"pos": [
+				60,
+				21
+			],
+			"nom": "Jun Feuillargent",
+			"portrait": "marchand_elfe_m_brosserie.png"
+		},
+		{
+			"categorie": "brosserie",
+			"label": "La Soie et le Manche des Épars",
+			"image": "brosserie_europe02.png",
+			"pos": [
+				35,
+				28
+			],
+			"nom": "Haldir Sombrefrêne",
+			"portrait": "marchand_elfe_m_brosserie01.png"
+		},
+		{
+			"categorie": "corderie",
+			"label": "La Corde Marine du Tertre",
+			"image": "corderie_europe01.png",
+			"pos": [
+				40,
+				24
+			],
+			"nom": "Thibaut de Normandie",
+			"portrait": "marchand_humain_m_corderie.png"
+		},
+		{
+			"categorie": "corderie",
+			"label": "Le Cordage Fort de Saint-André",
+			"image": "corderie_europe02.png",
+			"pos": [
+				56,
+				24
+			],
+			"nom": "Albrecht Zhao",
+			"portrait": "marchand_humain_m_corderie01.png"
+		},
+		{
+			"categorie": "cordonnerie",
+			"label": "La Bonne Chaussure de la Basse-Ville",
+			"image": "cordonnerie_europe01.png",
+			"pos": [
+				64,
+				24
+			],
+			"nom": "Guang de la Forge",
+			"portrait": "marchand_humain_m_cordonnerie.png"
+		},
+		{
+			"categorie": "cordonnerie",
+			"label": "Le Cordon de l'Eure",
+			"image": "cordonnerie_europe02.png",
+			"pos": [
+				26,
+				28
+			],
+			"nom": "Qiang de Meaux",
+			"portrait": "marchand_humain_m_cordonnerie01.png"
+		},
+		{
+			"categorie": "cuisine",
+			"label": "Le Pot au Feu du Cloître",
+			"image": "cuisine_europe01.jpg",
+			"pos": [
+				29,
+				30
+			],
+			"nom": "Aelwen Astrebrillant",
+			"portrait": "marchand_elfe_f_cuisine01.jpg"
+		},
+		{
+			"categorie": "cuisine",
+			"label": "La Cuillère de Bois de l'Eure",
+			"image": "cuisine_europe02.jpg",
+			"pos": [
+				37,
+				23
+			],
+			"nom": "Galadriel Astrebrillant",
+			"portrait": "marchand_elfe_f_cuisinie01.jpg"
+		},
+		{
+			"categorie": "etable",
+			"label": "Le Sabot Ferré de la Basse-Ville",
+			"image": "etable_europe01.png",
+			"pos": [
+				38,
+				25
+			],
+			"nom": "Elsa Fouille-Filons",
+			"portrait": "marchand_nain_f_etable.png"
+		},
+		{
+			"categorie": "etable",
+			"label": "Le Sabot du Tertre",
+			"image": "etable_europe02.png",
+			"pos": [
+				31,
+				31
+			],
+			"nom": "Helga Lourde-Hache",
+			"portrait": "marchand_nain_f_etable01.png"
+		},
+		{
+			"categorie": "fletcher",
+			"label": "La Bonne Flèche de Saint-André",
+			"image": "archerie_europe01.png",
+			"pos": [
+				47,
+				23
+			],
+			"nom": "Kukulkan Bonpré",
+			"portrait": "marchand_hobbit_m_archerie.png"
+		},
+		{
+			"categorie": "fletcher",
+			"label": "La Flèche de la Porte Guillaume",
+			"image": "archerie_europe02.png",
+			"pos": [
+				37,
+				19
+			],
+			"nom": "Grimbert Fouilleterre",
+			"portrait": "marchand_hobbit_m_archerie01.png"
+		},
+		{
+			"categorie": "fumoir",
+			"label": "La Fumée Douce du Cloître",
+			"image": "fumoir_europe01.png",
+			"pos": [
+				33,
+				34
+			],
+			"nom": "Nelly Kariuki",
+			"portrait": "marchand_humain_f_fumoir.png"
+		},
+		{
+			"categorie": "fumoir",
+			"label": "Le Fumoir des Halles du Cloître",
+			"image": "fumoir_europe02.png",
+			"pos": [
+				59,
+				19
+			],
+			"nom": "Charline Harrison",
+			"portrait": "marchand_humain_f_fumoir01.jpg"
+		},
+		{
+			"categorie": "jardinier",
+			"label": "Le Carré Vert du Cloître",
+			"image": "jardinier_europe01.png",
+			"pos": [
+				35,
+				18
+			],
+			"nom": "Félix Lunevoile",
+			"portrait": "marchand_elfe_m_herboriste01.jpg"
+		},
+		{
+			"categorie": "jardinier",
+			"label": "Le Verger de l'Eure",
+			"image": "jardinier_europe02.png",
+			"pos": [
+				39,
+				27
+			],
+			"nom": "Ahyoka Feuillargent",
+			"portrait": "marchand_elfe_m_jardinier01.jpg"
+		},
+		{
+			"categorie": "laboratoire_d_alchimie",
+			"label": "Le Feu Secret de la Porte Guillaume",
+			"image": "cabinet_alchimie_europe01.png",
+			"pos": [
+				51,
+				26
+			],
+			"nom": "Ragnheiður Lunevoile",
+			"portrait": "marchand_elfe_f_laboratoire_d_alchimie.png"
+		},
+		{
+			"categorie": "laboratoire_d_alchimie",
+			"label": "Le Mortier Alchimique du Cloître",
+			"image": "cabinet_alchimie_europe02.png",
+			"pos": [
+				49,
+				24
+			],
+			"nom": "Nimloth Cielazur",
+			"portrait": "marchand_elfe_f_laboratoire_d_alchimie01.jpg"
+		},
+		{
+			"categorie": "lutherie",
+			"label": "Le Manche du Tertre",
+			"image": "lutherie_europe01.png",
+			"pos": [
+				50,
+				22
+			],
+			"nom": "Jocelyn Fernández",
+			"portrait": "marchand_humain_m_lutherie.png"
+		},
+		{
+			"categorie": "lutherie",
+			"label": "L'Éclisse des Épars",
+			"image": "lutherie_europe02.png",
+			"pos": [
+				29,
+				22
+			],
+			"nom": "Jean-Marie Trabelsi",
+			"portrait": "marchand_humain_m_lutherie01.jpg"
+		},
+		{
+			"categorie": "maroquinerie",
+			"label": "La Maison du Maroquin de Saint-André",
+			"image": "maroquinerie_europe01.png",
+			"pos": [
+				43,
+				26
+			],
+			"nom": "Runa Lourde-Hache",
+			"portrait": "marchand_nain_f_maroquinerie.png"
+		},
+		{
+			"categorie": "maroquinerie",
+			"label": "Le Cuir Fin de la Porte Guillaume",
+			"image": "maroquinerie_europe_rhemi01.jpg",
+			"pos": [
+				40,
+				20
+			],
+			"nom": "Nadia Cœur-d'Acier",
+			"portrait": "marchand_nain_f_maroquinerie01.jpg"
+		},
+		{
+			"categorie": "necromancie",
+			"label": "Le Crâne Noir de Saint-André",
+			"image": "necromancie_europe01.png",
+			"pos": [
+				61,
+				26
+			],
+			"nom": "Yavielle Écorcelune",
+			"portrait": "marchand_elfe_f_necromancie.png"
+		},
+		{
+			"categorie": "necromancie",
+			"label": "La Pierre Tombale des Épars",
+			"image": "necromancie_europe02.png",
+			"pos": [
+				44,
+				30
+			],
+			"nom": "Margot Briseflammes",
+			"portrait": "marchand_elfe_f_necromancie01.jpg"
+		},
+		{
+			"categorie": "negociant",
+			"label": "La Halle aux Changes des Épars",
+			"image": "negoce_europe01.jpg",
+			"pos": [
+				56,
+				16
+			],
+			"nom": "Jane Takahashi",
+			"portrait": "marchand_humain_f_negociant01.jpg"
+		},
+		{
+			"categorie": "negociant",
+			"label": "Le Comptoir d'Or de Saint-André",
+			"image": "negoce_europe_rhemi01.jpg",
+			"pos": [
+				52,
+				21
+			],
+			"nom": "Isabel Ek",
+			"portrait": "marchand_humaine_f_negoce.jpg"
+		},
+		{
+			"categorie": "plumasserie",
+			"label": "La Coiffe à Plumes du Tertre",
+			"image": "plumasserie_europe01.png",
+			"pos": [
+				57,
+				19
+			],
+			"nom": "Lobelia Troisquarts",
+			"portrait": "marchand_hobbit_f_plumasserie.png"
+		},
+		{
+			"categorie": "plumasserie",
+			"label": "Le Duvet du Pont Bouju",
+			"image": "plumasserie_europe02.png",
+			"pos": [
+				54,
+				19
+			],
+			"nom": "Kotoha Chaud-Chaudron",
+			"portrait": "marchand_hobbit_f_plumasserie01.jpg"
+		},
+		{
+			"categorie": "salaison",
+			"label": "Le Sel et la Viande des Épars",
+			"image": "salaison_europe01.png",
+			"pos": [
+				48,
+				28
+			],
+			"nom": "Wicasa Huang",
+			"portrait": "marchand_humain_m_salaison.png"
+		},
+		{
+			"categorie": "salaison",
+			"label": "La Saumure de Saint-André",
+			"image": "salaison_europe02.png",
+			"pos": [
+				42,
+				34
+			],
+			"nom": "Ran Ferrant",
+			"portrait": "marchand_humain_m_salaison01.jpg"
+		},
+		{
+			"categorie": "savonnerie",
+			"label": "La Buanderie du Pont Bouju",
+			"image": "savonnerie_europe01.png",
+			"pos": [
+				58,
+				26
+			],
+			"nom": "Clara Baker",
+			"portrait": "marchand_humain_f_savonnerie.png"
+		},
+		{
+			"categorie": "savonnerie",
+			"label": "Le Bain Parfumé du Cloître",
+			"image": "savonnerie_europe02.png",
+			"pos": [
+				37,
+				29
+			],
+			"nom": "Adélaïde Rossi",
+			"portrait": "marchand_humain_f_savonnerie01.jpg"
+		},
+		{
+			"categorie": "scriptorium",
+			"label": "Le Livre Relié du Pont Bouju",
+			"image": "scriptorium_europe01.png",
+			"pos": [
+				65,
+				21
+			],
+			"nom": "Marin Foster",
+			"portrait": "marchand_humain_m_scriptorium01.jpg"
+		},
+		{
+			"categorie": "scriptorium",
+			"label": "Le Parchemin des Épars",
+			"image": "scriptorium_europe02.png",
+			"pos": [
+				33,
+				20
+			],
+			"nom": "Frédéric Jaziri",
+			"portrait": "marchand_humain_m_scriptorium02.jpg"
+		},
+		{
+			"categorie": "tabletterie",
+			"label": "Le Jeton des Épars",
+			"image": "tabletterie_europe01.png",
+			"pos": [
+				28,
+				25
+			],
+			"nom": "Amel Petit-Pas",
+			"portrait": "marchand_hobbit_f_tabletterie.png"
+		},
+		{
+			"categorie": "tabletterie",
+			"label": "Le Coffret d'Os du Pont Bouju",
+			"image": "tabletterie_europe02.png",
+			"pos": [
+				31,
+				21
+			],
+			"nom": "Lobelia Verte-Herbe",
+			"portrait": "marchand_hobbit_f_tabletterie01.jpg"
+		},
+		{
+			"categorie": "tannerie",
+			"label": "La Fosse de Saint-André",
+			"image": "tannerie_europe01.png",
+			"pos": [
+				39,
+				33
+			],
+			"nom": "Galadriel Cielazur",
+			"portrait": "marchand_elfe_f_tanerie.png"
+		},
+		{
+			"categorie": "tannerie",
+			"label": "Le Bain de Tan de la Basse-Ville",
+			"image": "tannerie_europe02.png",
+			"pos": [
+				53,
+				16
+			],
+			"nom": "Clémentine Fleurépine",
+			"portrait": "marchand_elfe_f_tannerie01.jpg"
+		},
+		{
+			"categorie": "taxidermie",
+			"label": "Le Bestiaire du Tertre",
+			"image": "taxidermie_europe01.png",
+			"pos": [
+				44,
+				24
+			],
+			"nom": "Imani Fleurépine",
+			"portrait": "marchand_elfe_f_taxidermie.png"
+		},
+		{
+			"categorie": "taxidermie",
+			"label": "Le Cerf et le Sanglier de l'Eure",
+			"image": "taxidermie_europe02.png",
+			"pos": [
+				52,
+				14
+			],
+			"nom": "Tinuviel Lunevoile",
+			"portrait": "marchand_elfe_f_taxidermie01.jpg"
+		},
+		{
+			"categorie": "tissage",
+			"label": "Le Lissier du Cloître",
+			"image": "tissage_europe01.png",
+			"pos": [
+				36,
+				25
+			],
+			"nom": "Élisabeth Sombrefrêne",
+			"portrait": "marchand_elfe_f_tissage.png"
+		},
+		{
+			"categorie": "tissage",
+			"label": "Le Tissage Fin de Saint-André",
+			"image": "tissage_europe02.png",
+			"pos": [
+				36,
+				35
+			],
+			"nom": "Akinyi Écorcelune",
+			"portrait": "marchand_elfe_f_tissage01.jpg"
+		},
+		{
+			"categorie": "auberge",
+			"label": "Aux Deux Flèches",
+			"image": "auberge_europe01.png",
+			"pos": [
+				59,
+				16
+			]
+		},
+		{
+			"categorie": "auberge",
+			"label": "Le Relais de l'Eure",
+			"image": "auberge_europe03.png",
+			"pos": [
+				46,
+				33
+			]
+		},
+		{
+			"categorie": "auberge",
+			"label": "Au Grenier de Beauce",
+			"image": "auberge_europe04.png",
+			"pos": [
+				36,
+				32
+			]
+		},
+		{
+			"categorie": "auberge",
+			"label": "La Halte des Pèlerins",
+			"image": "auberge_europe07.jpg",
+			"pos": [
+				40,
+				15
+			]
+		}
+	]
+}

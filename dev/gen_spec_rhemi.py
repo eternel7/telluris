@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 # dev/gen_spec_rhemi.py
-# Peuplement de Rhemi : écrit la SPEC d'un lot de magasins (2 par métier de base + 3 auberges),
-# à passer ensuite à `dev/gen_magasins.py`, qui valide et produit l'import.
+# Peuplement d'une cité (Rhemi, puis Chartres) : écrit la SPEC d'un lot de magasins (2 par
+# métier de base + ses auberges), à passer ensuite à `dev/gen_magasins.py`, qui valide et
+# produit l'import. Réglages par cité : `VILLES`.
 #
-#   python dev/gen_spec_rhemi.py                        → jsons/rhemi_magasins_spec.json
-#   python dev/gen_magasins.py --dump <dump> --spec jsons/rhemi_magasins_spec.json
+#   python dev/gen_spec_rhemi.py [--cite lieu:chartres]  → jsons/<cité>_magasins_spec.json
+#   python dev/gen_magasins.py --dump <dump> --spec jsons/<cité>_magasins_spec.json
+#
+# ⚠️ CITÉ SANS PORTES (Chartres au 09/10) : l'enceinte est un polygone RELEVÉ SUR LA CARTE
+# (`VILLES[cite]["enceinte"]`, en cases de 16 px), et « joignable à pied » = la plus grande
+# composante de terrain 1 en 8-voisins (le pavé de marche a 8 directions) dans ce polygone.
 #
 # ⚠️ « À L'INTÉRIEUR DES PORTES » : l'enceinte de Rhemi n'est PAS murée dans la grille (`nav`
 # quasi vide, un remplissage des cases 1 depuis une porte intérieure sort de la ville). Le dedans
@@ -38,7 +43,6 @@ if RACINE not in sys.path:
 from utils import enseignes  # noqa: E402  (module pur, n'importe que `random`)
 
 CITE = "lieu:rhemi"
-SORTIE = os.path.join("jsons", "rhemi_magasins_spec.json")
 DOSSIER_PNJ = os.path.join(RACINE, "templates", "resources", "pnj")
 DOSSIER_TOWNS = os.path.join(RACINE, "templates", "resources", "towns")
 GRAINE = 20261008
@@ -49,6 +53,29 @@ AUBERGES = [
 	("Au Bon Vigneron", "auberge_europe05.png"),
 	("La Crayère", "auberge_europe06.jpg"),
 ]
+
+# Par cité : auberges (label, image), graine, et l'enceinte quand la cité n'a pas de portes.
+VILLES = {
+	"lieu:rhemi": {"auberges": AUBERGES, "graine": GRAINE, "enceinte": None},
+	"lieu:chartres": {
+		"auberges": [
+			("Aux Deux Flèches", "auberge_europe01.png"),       # les deux flèches de la cathédrale
+			("Le Relais de l'Eure", "auberge_europe03.png"),
+			("Au Grenier de Beauce", "auberge_europe04.png"),   # la Beauce, grenier à blé de Chartres
+			("La Halte des Pèlerins", "auberge_europe07.jpg"),
+		],
+		"graine": 20261009,
+		# Remparts de chartres_city.png (1408×768, cases de 16 px), relevés tour par tour le 09/10 :
+		# porte ouest, nord-ouest, front nord sous la cathédrale, angle nord-est, front est,
+		# pointe sud-est, front sud au-dessus de l'Eure, sud-ouest, ouest.
+		"enceinte": [(26.5, 20.6), (34.7, 14.4), (52.5, 12.2), (60, 13), (66, 18.7), (66, 26),
+					 (58.7, 28.7), (52, 31.5), (46, 35), (39, 37.5), (28.7, 34), (24.7, 28.7)],
+	},
+}
+
+
+def sortie_de(cite):
+	return os.path.join("jsons", f"{cite.split(':', 1)[-1]}_magasins_spec.json")
 
 # Jeton de métier écrit dans un nom de portrait → catégorie de lieu.
 ALIAS_METIER = {
@@ -179,6 +206,33 @@ def cases_interieures(cells: list, portes: list, marge: float = 1.0) -> list:
 				  key=lambda c: (c[1], c[0]))
 
 
+def cases_dans_enceinte(cells: list, enceinte: list, marge: float = 1.0) -> list:
+	"""Cité SANS portes : cases de terrain 1 dans le polygone `enceinte`, à `marge` du bord, de
+	la plus grande composante 8-connexe (le pavé de marche a 8 directions). Triées (y, x)."""
+	h, w = len(cells), len(cells[0]) if cells else 0
+	dedans = {(x, y) for y in range(h) for x in range(w)
+			  if cells[y][x] == 1 and dans_polygone(x, y, enceinte)}
+	vues, meilleure = set(), []
+	for depart in sorted(dedans, key=lambda c: (c[1], c[0])):
+		if depart in vues:
+			continue
+		vues.add(depart)
+		comp, file = [], [depart]
+		while file:
+			x, y = file.pop()
+			comp.append((x, y))
+			for dx in (-1, 0, 1):
+				for dy in (-1, 0, 1):
+					c = (x + dx, y + dy)
+					if c in dedans and c not in vues:
+						vues.add(c)
+						file.append(c)
+		if len(comp) > len(meilleure):
+			meilleure = comp
+	return sorted((c for c in meilleure if distance_au_bord(c[0], c[1], enceinte) >= marge),
+				  key=lambda c: (c[1], c[0]))
+
+
 def etaler(candidats: list, n: int) -> list:
 	"""`n` cases distinctes, tirées au point le plus éloigné des cases déjà prises (départ : la
 	plus proche du barycentre). Déterministe : ex æquo départagés par l'ordre (y, x)."""
@@ -251,23 +305,24 @@ def images_de(categorie: str, fichiers_towns: list) -> list:
 
 
 def construire_spec(docs: list, fichiers_pnj: list, fichiers_towns: list, fusion: dict,
-					repertoire: dict) -> tuple:
-	"""PURE. Rend (spec, rapport)."""
+					repertoire: dict, cite_id: str = CITE, auberges: list = AUBERGES,
+					graine: int = GRAINE, enceinte: list = None) -> tuple:
+	"""PURE. Rend (spec, rapport). `enceinte` (polygone en cases) remplace les portes."""
 	par_id = {d.get("_id"): d for d in docs if isinstance(d, dict) and d.get("_id")}
-	cite = par_id.get(CITE)
+	cite = par_id.get(cite_id)
 	if not cite or not cite.get("cells"):
-		raise SystemExit(f"ERREUR : {CITE} absent du dump ou sans grille.")
+		raise SystemExit(f"ERREUR : {cite_id} absent du dump ou sans grille.")
 
 	portes = []
 	for c in docs:
 		if not isinstance(c, dict) or c.get("type") != "connection":
 			continue
 		nodes = c.get("nodes") or []
-		ici = next((n for n in nodes if n.get("lieu") == CITE), None)
-		la = next((n for n in nodes if n.get("lieu") != CITE), None)
+		ici = next((n for n in nodes if n.get("lieu") == cite_id), None)
+		la = next((n for n in nodes if n.get("lieu") != cite_id), None)
 		if ici and la and str(la.get("lieu", "")).endswith("_interieur"):
 			portes.append(tuple(ici["pos"]))
-	if len(portes) < 3:
+	if not enceinte and len(portes) < 3:
 		raise SystemExit(f"ERREUR : {len(portes)} porte(s) intérieure(s) — impossible de borner la ville.")
 
 	metiers = sorted(i.split("marchand_", 1)[1] for i in par_id
@@ -280,10 +335,11 @@ def construire_spec(docs: list, fichiers_pnj: list, fichiers_towns: list, fusion
 			sans_portrait and "aucun portrait générique pour " + ", ".join(sans_portrait),
 			sans_image and "aucune image de lieu pour " + ", ".join(sans_image)])))
 
-	candidats = cases_interieures(cite["cells"], portes)
-	total = len(metiers) * PAR_METIER + len(AUBERGES)
+	candidats = (cases_dans_enceinte(cite["cells"], enceinte) if enceinte
+				 else cases_interieures(cite["cells"], portes))
+	total = len(metiers) * PAR_METIER + len(auberges)
 	cases = etaler(candidats, total)
-	rng = random.Random(GRAINE)
+	rng = random.Random(graine)
 	rng.shuffle(cases)
 
 	labels_pris = {d.get("label") for d in docs if isinstance(d, dict) and d.get("type") == "lieu"}
@@ -292,7 +348,7 @@ def construire_spec(docs: list, fichiers_pnj: list, fichiers_towns: list, fusion
 
 	magasins, rapport = [], []
 	for metier in metiers:
-		labels = enseignes.tirer_labels(metier, PAR_METIER, CITE, exclus=labels_pris,
+		labels = enseignes.tirer_labels(metier, PAR_METIER, cite_id, exclus=labels_pris,
 										rand_fn=rng.shuffle)
 		images = images_de(metier, fichiers_towns)
 		dispo = portraits[metier]
@@ -304,15 +360,16 @@ def construire_spec(docs: list, fichiers_pnj: list, fichiers_towns: list, fusion
 			magasins.append({"categorie": metier, "label": label, "image": images[k % len(images)],
 							 "pos": [x, y], "nom": nom, "portrait": fichier})
 			rapport.append(f"  {metier:24} {label:40} [{x:2},{y:2}]  {nom} ({fichier})")
-	for label, image in AUBERGES:
+	for label, image in auberges:
 		if label in labels_pris:
 			raise SystemExit(f"ERREUR : l'auberge « {label} » existe déjà.")
 		x, y = cases.pop()
 		magasins.append({"categorie": "auberge", "label": label, "image": image, "pos": [x, y]})
 		rapport.append(f"  {'auberge':24} {label:40} [{x:2},{y:2}]")
-	rapport.insert(0, f"{len(portes)} portes intérieures, {len(candidats)} cases candidates, "
-					  f"{len(magasins)} lieux ({len(metiers)} métiers × {PAR_METIER} + {len(AUBERGES)} auberges)")
-	return {"cite": CITE, "magasins": magasins}, rapport
+	borne = "enceinte relevée sur la carte" if enceinte else f"{len(portes)} portes intérieures"
+	rapport.insert(0, f"{borne}, {len(candidats)} cases candidates, "
+					  f"{len(magasins)} lieux ({len(metiers)} métiers × {PAR_METIER} + {len(auberges)} auberges)")
+	return {"cite": cite_id, "magasins": magasins}, rapport
 
 
 def main() -> int:
@@ -320,20 +377,27 @@ def main() -> int:
 		sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 	except Exception:
 		pass
+	import argparse
+	p = argparse.ArgumentParser()
+	p.add_argument("--cite", default=CITE, choices=sorted(VILLES))
+	cite = p.parse_args().cite
+	reglages = VILLES[cite]
 	source = _dump_le_plus_recent()
 	fusion = constantes_source(os.path.join(RACINE, "models", "character_stats.py"),
 							   {"LIEU_CATEGORIES_FUSION"})["LIEU_CATEGORIES_FUSION"]
 	repertoire = constantes_source(os.path.join(RACINE, "utils", "recrutement.py"),
 								   {"PRENOMS", "NOMS", "PRENOM_RACE_MUTUALISEE", "PRENOM_MUTUALISE_PROBA"})
 	spec, rapport = construire_spec(charger(source), os.listdir(DOSSIER_PNJ),
-									os.listdir(DOSSIER_TOWNS), fusion, repertoire)
-	with open(os.path.join(RACINE, SORTIE), "w", encoding="utf-8") as f:
+									os.listdir(DOSSIER_TOWNS), fusion, repertoire, cite,
+									reglages["auberges"], reglages["graine"], reglages["enceinte"])
+	sortie = sortie_de(cite)
+	with open(os.path.join(RACINE, sortie), "w", encoding="utf-8") as f:
 		json.dump(spec, f, ensure_ascii=False, indent="\t")
 		f.write("\n")
 	print(f"relu {os.path.relpath(source, RACINE)}")
 	for ligne in rapport:
 		print(ligne)
-	print("→ " + SORTIE.replace("\\", "/"))
+	print("→ " + sortie.replace("\\", "/"))
 	return 0
 
 

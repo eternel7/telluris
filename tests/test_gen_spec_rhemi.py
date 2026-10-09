@@ -102,6 +102,28 @@ def test_nom_jamais_redonne():
 		g.tirer_nom("nain", "F", random.Random(1), REPERTOIRE, pris)
 
 
+def test_enceinte_sans_portes_garde_la_plus_grande_composante_en_diagonale():
+	"""Chartres : pas de portes. Une rue en escalier (liée par des diagonales) compte comme un
+	seul réseau ; un îlot isolé est écarté ; le dehors du polygone aussi."""
+	cells = _grille(valeur=0)
+	for k in range(3, 12):
+		cells[k][k] = 1                       # diagonale : 8-connexe, pas 4-connexe
+	cells[3][10] = 1                          # îlot isolé
+	cells[0][0] = 1                           # hors enceinte
+	enceinte = [(2, 2), (12, 2), (12, 12), (2, 12)]
+	cases = g.cases_dans_enceinte(cells, enceinte, marge=0.5)
+	assert (7, 7) in cases and (4, 4) in cases
+	assert (10, 3) not in cases
+	assert (0, 0) not in cases
+
+
+def test_chaque_cite_a_ses_reglages():
+	for cite, r in g.VILLES.items():
+		assert r["auberges"], cite
+		assert r["enceinte"] is None or len(r["enceinte"]) >= 3, cite
+	assert g.sortie_de("lieu:chartres").endswith("chartres_magasins_spec.json")
+
+
 def test_prenom_mutualise_garde_le_nom_de_la_race():
 	rep = dict(REPERTOIRE, PRENOM_MUTUALISE_PROBA=1.0)
 	assert g.tirer_nom("nain", "M", random.Random(1), rep, set()) == "Jean Barbeforge"

@@ -369,6 +369,10 @@ TOPONYMES_PAR_LIEU = {
 		"du Sacre", "de la Vesle", "des Coteaux", "de la Porte de Mars", "du Chapitre",
 		"des Crayères", "du Vieux Cloître",
 	],
+	"lieu:chartres": [
+		"de la Porte Guillaume", "de l'Eure", "de la Basse-Ville", "du Cloître", "du Tertre",
+		"de Saint-André", "du Pont Bouju", "des Épars",
+	],
 }
 
 TOPONYMES_DEFAUT = [

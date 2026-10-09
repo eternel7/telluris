@@ -113,6 +113,19 @@ QUARTIERS_EN = {
 		"des Crayères": "near the entrances of chalk cellars dug into white chalk",
 		"du Vieux Cloître": "beside the arcades of an old romanesque cloister",
 	},
+	"lieu:chartres": {
+		"de la Porte Guillaume": ("beside the Porte Guillaume, a fortified city gate flanked by two round "
+								  "towers, its bridge crossing the river Eure"),
+		"de l'Eure": "on a quay along the river Eure, wash-houses and small wooden footbridges over the water",
+		"de la Basse-Ville": ("in a steep lane of the lower town, stone stairways climbing toward the "
+							  "great cathedral of Chartres on its hill"),
+		"du Cloître": ("in the close at the foot of the great gothic cathedral of Chartres, its two "
+					   "mismatched spires, one plain and one ornate, rising behind"),
+		"du Tertre": "on a steep stepped street running down the hillside, roofs of the lower town below",
+		"de Saint-André": "beside a large old romanesque church on the bank of the river Eure",
+		"du Pont Bouju": "beside an old stone bridge with low arches over the river Eure",
+		"des Épars": "on a wide market square at the edge of the town, near the ramparts",
+	},
 }
 
 # Lignée : (homme, femme, repère d'échelle) — repère reconnaissable, jamais une règle de corps.
@@ -234,6 +247,10 @@ def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label):
 QUARTIERS_AUBERGES = {
 	"lieu:au_bon_vigneron": "des Coteaux",
 	"lieu:la_crayere": "des Crayères",
+	"lieu:aux_deux_fleches": "du Cloître",
+	"lieu:le_relais_de_l_eure": "de l'Eure",
+	"lieu:au_grenier_de_beauce": "de la Porte Guillaume",
+	"lieu:la_halte_des_pelerins": "de la Basse-Ville",
 }
 
 

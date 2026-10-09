@@ -30,7 +30,8 @@ def test_chaque_lignee_du_portrait_a_sa_traduction():
 
 def test_chaque_toponyme_de_reims_a_son_decor():
 	# Relu dans enseignes : un toponyme ajouté sans décor casserait ce test, pas le lot.
-	assert set(QUARTIERS_EN["lieu:rhemi"]) == set(TOPONYMES_PAR_LIEU["lieu:rhemi"])
+	for cite in ("lieu:rhemi", "lieu:chartres"):
+		assert set(QUARTIERS_EN[cite]) == set(TOPONYMES_PAR_LIEU[cite]), cite
 
 
 def test_chaque_trait_tire_a_sa_traduction():
@@ -130,8 +131,9 @@ def test_auberge_sans_nom_propre_et_dans_son_quartier():
 
 
 def test_quartiers_d_auberge_connus():
+	toponymes = {t for q in QUARTIERS_EN.values() for t in q}
 	for q in QUARTIERS_AUBERGES.values():
-		assert q in QUARTIERS_EN["lieu:rhemi"], q
+		assert q in toponymes, q
 	assert quartier_de("Auberge du Sacre", "lieu:rhemi") == "du Sacre"
 
 
