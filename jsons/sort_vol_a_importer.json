@@ -13,7 +13,10 @@
     "portee": 0,
     "effets": {
       "vol": 1,
-      "duree": "2+{Int/20}"
+      "duree": "2+{Int/20}",
+      "buffs": {
+        "V": 1
+      }
     },
     "composants": [
       {
@@ -29,6 +32,555 @@
         "bonus": {
           "duree": 2
         }
+      }
+    ]
+  },
+  {
+    "_id": "sort:ailes_de_dedale",
+    "type": "sort",
+    "nom": "Ailes de Dédale",
+    "icon": "🪶",
+    "animation": "animation:capa_illusion",
+    "description": "Dédale, dit-on, sut voler sans se brûler parce qu'il ne lâcha jamais son ouvrage des yeux. Ces ailes d'illusion tiennent tant que la volonté du mage les tient — qu'elle vacille sous un coup, et le ciel se dérobe.",
+    "magie": "Illusoire",
+    "niveau": 6,
+    "cout_pm": 30,
+    "cible": "soi",
+    "portee": 0,
+    "maintien": 4,
+    "effets": {
+      "vol": 1,
+      "buffs": {
+        "V": 2
+      }
+    },
+    "composants": [
+      {
+        "item": "item:Plume_d_oie",
+        "consomme": false,
+        "bonus": {
+          "maintien_reduction": 1
+        }
+      },
+      {
+        "item": "item:Poudre_de_miroir",
+        "consomme": true,
+        "bonus": {
+          "maintien_reduction": 2
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:talonnieres_de_persee",
+    "type": "sort",
+    "nom": "Talonnières de Persée",
+    "icon": "👟",
+    "animation": "animation:capa_arcane",
+    "description": "Des ailes de force pure poussent aux chevilles, comme aux sandales que Persée reçut pour aller trancher la Gorgone. Le combattant bondit d'un à-pic à l'autre, plus vif et plus difficile à toucher.",
+    "magie": "Bataille",
+    "niveau": 4,
+    "cout_pm": 28,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "vol": 1,
+      "duree": "2+{Int/20}",
+      "esquive": 5,
+      "buffs": {
+        "V": 1
+      }
+    },
+    "composants": [
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "duree": 1
+        }
+      },
+      {
+        "item": "item:poudre_alchimique",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:manteau_de_freyja",
+    "type": "sort",
+    "nom": "Manteau de Freyja",
+    "icon": "🦅",
+    "animation": "animation:capa_meditation",
+    "description": "Les skaldes chantent la cape de plumes de faucon qu'une déesse prêtait à qui devait franchir les mondes. Le druide en revêt l'esprit : il prend l'air, et l'aisance du rapace avec.",
+    "magie": "Nature",
+    "niveau": 5,
+    "cout_pm": 32,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "vol": 1,
+      "duree": "3+{Vol/20}",
+      "buffs": {
+        "Ag": 5,
+        "V": 2
+      }
+    },
+    "composants": [
+      {
+        "item": "item:Os_de_totem",
+        "consomme": false,
+        "bonus": {
+          "duree": 1
+        }
+      },
+      {
+        "item": "item:Fiole_sang_bete",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:plume_de_maat",
+    "type": "sort",
+    "nom": "Plume de Maât",
+    "icon": "🪶",
+    "animation": "animation:capa_meditation",
+    "description": "Sur les rives du Nil, on pesait les cœurs contre une plume : le juste était plus léger qu'elle. La prière rend au fidèle cette légèreté — il s'élève, et ses plaies se referment tant qu'il demeure en l'air.",
+    "magie": "Sainte",
+    "niveau": 5,
+    "cout_pm": 32,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "vol": 1,
+      "duree": "2+{Vol/20}",
+      "regen_pv": 2,
+      "buffs": {
+        "V": 2
+      }
+    },
+    "composants": [
+      {
+        "item": "item:encens",
+        "consomme": false,
+        "bonus": {
+          "duree": 1
+        }
+      },
+      {
+        "item": "item:Eau_benite",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:ailes_de_pazuzu",
+    "type": "sort",
+    "nom": "Ailes de Pazuzu",
+    "icon": "🦇",
+    "animation": "animation:capa_arcane",
+    "description": "Les vieilles tablettes de Babylone montrent un démon des vents à quatre ailes. Ses ailes se prêtent, elles ne se donnent pas : le démoniste les paie de son propre sang.",
+    "magie": "Démonologie",
+    "niveau": 6,
+    "cout_pm": 24,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "vol": 1,
+      "duree": "3+{Int/20}",
+      "cout_pv": 8,
+      "buffs": {
+        "V": 2
+      }
+    },
+    "composants": [
+      {
+        "item": "item:Sel_noir",
+        "consomme": false,
+        "bonus": {
+          "duree": 1
+        }
+      },
+      {
+        "item": "item:Sang_demon_seche",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:envol_du_ba",
+    "type": "sort",
+    "nom": "Envol du Ba",
+    "icon": "🕊️",
+    "animation": "animation:capa_spectre",
+    "description": "Les embaumeurs d'Égypte disaient que l'âme quitte la tombe sous la forme d'un oiseau à tête humaine. Le nécromancien détache un peu de la sienne : le corps suit, longtemps, comme s'il ne pesait déjà plus rien.",
+    "magie": "Nécromancie",
+    "niveau": 6,
+    "cout_pm": 36,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "vol": 1,
+      "duree": "4+{Int/30}",
+      "buffs": {
+        "V": 2
+      }
+    },
+    "composants": [
+      {
+        "item": "item:os",
+        "consomme": false,
+        "bonus": {
+          "duree": 1
+        }
+      },
+      {
+        "item": "item:Sel_des_sepultures",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_talonnieres_de_persee",
+    "type": "item",
+    "nom": "Grimoire : Talonnières de Persée",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Talonnières de Persée », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:talonnieres_de_persee"
+    ],
+    "valeur": [
+      {
+        "ag": 40
+      },
+      {
+        "ag": 120
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_talonnieres_de_persee",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_talonnieres_de_persee",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_ailes_de_pazuzu",
+    "type": "item",
+    "nom": "Grimoire : Ailes de Pazuzu",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Ailes de Pazuzu », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:ailes_de_pazuzu"
+    ],
+    "valeur": [
+      {
+        "ag": 60
+      },
+      {
+        "ag": 180
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_ailes_de_pazuzu",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_ailes_de_pazuzu",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_voile_d_icare",
+    "type": "item",
+    "nom": "Grimoire : Voile d'Icare",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Voile d'Icare », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:voile_d_icare"
+    ],
+    "valeur": [
+      {
+        "ag": 30
+      },
+      {
+        "ag": 90
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_voile_d_icare",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_voile_d_icare",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_ailes_de_dedale",
+    "type": "item",
+    "nom": "Grimoire : Ailes de Dédale",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Ailes de Dédale », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:ailes_de_dedale"
+    ],
+    "valeur": [
+      {
+        "ag": 60
+      },
+      {
+        "ag": 180
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_ailes_de_dedale",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_ailes_de_dedale",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_manteau_de_freyja",
+    "type": "item",
+    "nom": "Grimoire : Manteau de Freyja",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Manteau de Freyja », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:manteau_de_freyja"
+    ],
+    "valeur": [
+      {
+        "ag": 50
+      },
+      {
+        "ag": 150
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_manteau_de_freyja",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_manteau_de_freyja",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_envol_du_ba",
+    "type": "item",
+    "nom": "Grimoire : Envol du Ba",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Envol du Ba », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:envol_du_ba"
+    ],
+    "valeur": [
+      {
+        "ag": 60
+      },
+      {
+        "ag": 180
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_envol_du_ba",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_envol_du_ba",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_plume_de_maat",
+    "type": "item",
+    "nom": "Grimoire : Plume de Maât",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Plume de Maât », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:plume_de_maat"
+    ],
+    "valeur": [
+      {
+        "ag": 50
+      },
+      {
+        "ag": 150
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_plume_de_maat",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_plume_de_maat",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
       }
     ]
   }
