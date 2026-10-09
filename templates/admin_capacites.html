@@ -158,8 +158,8 @@
 		<div id="groupes"></div>
 	</div>
 
-<script src="{{ url_for('scripts', path='zones_effet.js') }}"></script>
-<script src="{{ url_for('scripts', path='capacites_texte.js') }}"></script>
+<script src="{{ script_url('zones_effet.js') }}"></script>
+<script src="{{ script_url('capacites_texte.js') }}"></script>
 <script>
 const FAMILLE = {{ famille | tojson }};          // 'sorts' | 'competences'
 const EST_SORT = FAMILLE === 'sorts';

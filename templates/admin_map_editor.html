@@ -1150,12 +1150,12 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
      BIDIRECTIONNELLE (source ET cible). Cette page recopiait jusqu'ici la table `VALID_MOVES`
      sous le nom `NAV_DIRS` pour le seul redimensionnement ; les règles de MARCHE, elles, ne
      sont écrites qu'une fois — dans deplacement.js, partagé avec play_town et le combat. -->
-<script src="{{ url_for('scripts', path='nav.js') }}"></script>
-<script src="{{ url_for('scripts', path='deplacement.js') }}"></script>
+<script src="{{ script_url('nav.js') }}"></script>
+<script src="{{ script_url('deplacement.js') }}"></script>
 <!-- voies.js APRÈS deplacement.js : le tracé des voies ne recopie aucune règle, il prend `pasAutoriseRegle`. -->
-<script src="{{ url_for('scripts', path='voies.js') }}"></script>
+<script src="{{ script_url('voies.js') }}"></script>
 <!-- `rendreDeplacable` (mini-outils, pavé du test) : partagé avec le pavé flottant de play_town. -->
-<script src="{{ url_for('scripts', path='deplacable.js') }}"></script>
+<script src="{{ script_url('deplacable.js') }}"></script>
 <!-- Mode Lieux PARTAGÉ avec /admin/lieux (ligne de liste, fiche, JSON, formulaires de lieu et de
      connexion). ⚠️ AVANT le script de la page : c'est lui qui déclare `LIEUX_HOTE`. -->
 {% include "part-lieux-js.html" %}

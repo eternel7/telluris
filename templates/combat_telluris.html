@@ -1473,18 +1473,18 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 	</div>
 </div>
 
-<script src="{{ url_for('scripts', path='nav.js') }}"></script>
+<script src="{{ script_url('nav.js') }}"></script>
 {# ⚠️ APRÈS nav.js, dont dépend `pasAutoriseLocal`. Le combat n'en consomme que
    `caseFranchissable` et `majFleches` : sa règle de portée et de budget lui reste propre. #}
-<script src="{{ url_for('scripts', path='deplacement.js') }}"></script>
+<script src="{{ script_url('deplacement.js') }}"></script>
 {# Géométrie des zones d'effet — MIROIR de utils/zones_effet.py. Sert à l'APERÇU des cases
    touchées pendant le ciblage violet ; le serveur reste seul juge de qui encaisse. #}
-<script src="{{ url_for('scripts', path='zones_effet.js') }}"></script>
+<script src="{{ script_url('zones_effet.js') }}"></script>
 {# Emprise des jetons de taille variable — MIROIR de utils/jetons.py. Portées, cases prises,
    ancre de zone et dessin des grands acteurs ; le serveur reste seul juge. #}
-<script src="{{ url_for('scripts', path='jetons.js') }}"></script>
+<script src="{{ script_url('jetons.js') }}"></script>
 {# `rendreDeplacable`/`placerPanneau` : la poignée du pavé (partagé avec play_town et l'éditeur). #}
-<script src="{{ url_for('scripts', path='deplacable.js') }}"></script>
+<script src="{{ script_url('deplacable.js') }}"></script>
 <script>
 // ─── State ────────────────────────────────────────────────────────
 const SERVER_DATA = {
