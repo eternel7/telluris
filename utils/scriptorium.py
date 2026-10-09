@@ -278,6 +278,36 @@ def _recette_virtuelle(item_id: str) -> dict:
 	}
 
 
+# Sujets documentables d'un lieu_parent, mémoïsés par process : leur calcul relit TOUS les lieux
+# de la cité (3 `find_docs`) et chaque objet en rayon de chacun (un `get_doc` par entrée), et
+# le tick d'un scriptorium le refaisait à CHAQUE achat. Même TTL court que
+# `focalisation.charger_graphe` : un grimoire mis en rayon ailleurs, une boutique ajoutée,
+# apparaissent au plus tard après `_SUJETS_TTL`. Le TIRAGE, lui, reste fait à chaque appel.
+_SUJETS_TTL = 60.0
+_sujets_cache: dict = {}
+
+
+def reset_sujets_cache() -> None:
+	_sujets_cache.clear()
+
+
+def _sujets_documentables(lieu_parent_id: str, find_docs_fn, get_doc_fn) -> tuple:
+	"""(sorts, recettes, lieux) documentables autour de `lieu_parent_id`, mémoïsés. Un
+	résultat entièrement vide n'est PAS mémorisé : il peut venir d'une base injoignable."""
+	now = time.time()
+	memo = _sujets_cache.get(lieu_parent_id)
+	if memo is not None and now - memo[0] < _SUJETS_TTL:
+		return memo[1]
+	sujets = (
+		sorts_documentables(lieu_parent_id, find_docs_fn, get_doc_fn),
+		recettes_documentables(lieu_parent_id, find_docs_fn),
+		lieux_documentables(lieu_parent_id, find_docs_fn),
+	)
+	if any(sujets):
+		_sujets_cache[lieu_parent_id] = (now, sujets)
+	return sujets
+
+
 def recettes_virtuelles(lieu_doc: dict, find_docs_fn, get_doc_fn, save_doc_fn) -> list[dict]:
 	"""Recettes de production virtuelles pour CE scriptorium, scopées à son `lieu_parent`.
 
@@ -292,8 +322,8 @@ def recettes_virtuelles(lieu_doc: dict, find_docs_fn, get_doc_fn, save_doc_fn) -
 		return []
 
 	out: list[dict] = []
+	sorts, recettes, lieux = _sujets_documentables(lieu_parent_id, find_docs_fn, get_doc_fn)
 
-	sorts = sorts_documentables(lieu_parent_id, find_docs_fn, get_doc_fn)
 	if sorts:
 		sort_id = random.choice(sorts)
 		slug = sort_id[len("sort:"):] if sort_id.startswith("sort:") else sort_id
@@ -301,7 +331,6 @@ def recettes_virtuelles(lieu_doc: dict, find_docs_fn, get_doc_fn, save_doc_fn) -
 		_assurer_item_livre(item_id, "sort", sort_id, get_doc_fn, save_doc_fn)
 		out.append(_recette_virtuelle(item_id))
 
-	recettes = recettes_documentables(lieu_parent_id, find_docs_fn)
 	if recettes:
 		recette_id = random.choice(recettes)
 		slug = recette_id[len("recette:"):] if recette_id.startswith("recette:") else recette_id
@@ -309,7 +338,6 @@ def recettes_virtuelles(lieu_doc: dict, find_docs_fn, get_doc_fn, save_doc_fn) -
 		_assurer_item_livre(item_id, "recette", recette_id, get_doc_fn, save_doc_fn)
 		out.append(_recette_virtuelle(item_id))
 
-	lieux = lieux_documentables(lieu_parent_id, find_docs_fn)
 	if lieux:
 		choix = random.choice(lieux)
 		lieu_id = choix.get("id", "")

@@ -1222,22 +1222,26 @@
 		@media (max-width: 768px) {
 			.sh-barre-aide { display: inline-flex; }
 			/* Titre collé aux onglets principaux : le padding de `.sheet-body` suffit. */
-			#sh-competences > .sh-barre-titre { margin-top: 0; }
-			#sh-competences > .sh-barre-hint {
+			#sh-competences .sh-barre-titre { margin-top: 0; }
+			#sh-competences .sh-barre-hint {
 				display: none; position: absolute; left: .5rem; right: .5rem; z-index: 30;
 				padding: .5rem .7rem; font-size: .8rem; color: var(--text-color);
 				background: var(--surface, #181818); border: 1px solid var(--accent-color);
 				border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,.6);
 			}
-			#sh-competences > .sh-barre-hint.ouverte { display: block; }
+			#sh-competences .sh-barre-hint.ouverte { display: block; }
 		}
-		/* ── Onglet ⚡ en PORTRAIT mobile : trois vues + lignes compactes ──────────────
-		   Les accordéons laissaient six en-têtes se partager un écran de téléphone. Ici
-		   la vue (`data-vue`) et le filtre (`data-filtre`) de #sh-competences choisissent
-		   les sections affichées, TOUTES dépliées et à la suite : l'onglet défile d'un
-		   bloc (`overflow-y:auto` de `.sh-acc-fit`), sans scroller interne ni ombre.
-		   ⚠️ `.open` n'y joue plus — le choix d'accordéon mémorisé reste celui du desktop.
-		   Hors de ce media, `.capa-tete` ne montre que recherche + tri. */
+		/* ── Onglet ⚡ : VUES au lieu d'accordéons (portrait mobile ET paysage) ─────────
+		   Les accordéons laissaient six en-têtes se partager l'onglet. Ici la vue
+		   (`data-vue`) et le filtre (`data-filtre`) de #sh-competences choisissent les
+		   sections affichées, TOUTES dépliées et à la suite : l'onglet défile d'un bloc
+		   (`overflow-y:auto` de `.sh-acc-fit`), sans scroller interne ni ombre.
+		   ⚠️ `.open` n'y joue plus — le choix d'accordéon mémorisé ne sert qu'aux écrans
+		   hors de ces media (desktop en portrait large).
+		   Trois étages : la STRUCTURE (portrait mobile + paysage), les LIGNES COMPACTES
+		   (portrait mobile seul : sur un écran large, tronquer ne cache que pour rien), et
+		   en paysage haut l'en-tête COLLÉ (barre comprise). Une seule liste partout.
+		   Hors de ces media, `.capa-tete` ne montre que recherche + tri. */
 		.capa-tete { display: flex; flex-direction: column; gap: .35rem; }
 		.capa-vues, .capa-filtres { display: none; }
 		.capa-outils { display: flex; align-items: center; gap: .4rem; }
@@ -1245,11 +1249,16 @@
 		.capa-outils .sh-drop-btn { margin-left: 0; flex-shrink: 0; }
 		.capa-aucun { padding: .6rem 0; }
 		.capa-aucun[hidden] { display: none; }   /* `.sh-empty` est en display:flex */
-		@media (max-width: 768px) and (orientation: portrait) {
+		/* Enveloppe de la barre + de `.capa-tete`, TRANSPARENTE partout sauf en paysage haut
+		   (où elle colle en haut) : `display:contents` laisse ses enfants être des éléments
+		   flex de l'onglet — le `sticky` de `.capa-tete` en portrait en dépend (un `sticky`
+		   ne colle que dans la boîte de son parent). */
+		.capa-entete { display: contents; }
+		@media (max-width: 768px) and (orientation: portrait), (orientation: landscape) {
 			/* Titres des trois listes de « Connues » retirés : attaques, compétences et
 			   sorts s'y lisent comme UNE liste (le filtre les sépare au besoin). */
 			#acc-head-capa-modes, #acc-head-capa-competences, #acc-head-capa-sorts { display: none; }
-			#sh-competences > .capa-tete {
+			#sh-competences .capa-tete {
 				display: flex; flex-direction: column; gap: .35rem;
 				position: sticky; top: 0; z-index: 20;
 				background: var(--panel-bg); padding: .25rem 0 .35rem;
@@ -1264,9 +1273,6 @@
 			.capa-vue[aria-selected="true"] { background: var(--btn-bg); color: var(--accent-color); }
 			#capa-apprendre-compte { margin-left: .3rem; }
 			.capa-filtres { display: flex; gap: .35rem; overflow-x: auto; scrollbar-width: none; }
-			/* Barre resserrée : toujours deux rangées (cf. part-slot-bar-css), cases plus
-			   petites — la liste récupère la hauteur. */
-			#sh-competences .sh-barre-grid { --slot-max: 40px; margin: 4px 0; }
 			.capa-filtre {
 				flex: 0 0 auto; padding: .2rem .7rem; border-radius: 999px; cursor: pointer;
 				border: 1px solid var(--border-color); background: transparent;
@@ -1300,6 +1306,11 @@
 			#sh-competences > .acc-section[data-fusion] .sh-scroll,
 			#sh-competences > .acc-section[data-fusion] .sh-rel-scroll { display: contents; }
 			#sh-competences > .acc-section[data-fusion] .sh-skill { flex: 0 0 auto; }
+			/* Un mode d'attaque est une ligne comme les autres de la liste fusionnée : sans
+			   le cadre qu'il porte en accordéon desktop (deux modes côte à côte). */
+			#sh-competences #sh-modes-attaque .sh-skill {
+				border: 0; border-bottom: 1px solid rgba(74,74,90,0.3); padding: 8px 0;
+			}
 			/* « Aucune compétence apprise » / « Aucun sort connu » : sous les lignes. */
 			#sh-competences > .acc-section[data-fusion] .sh-empty { order: 100000; }
 			/* ⚠️ Mêmes espacements dans LES DEUX vues, et gouttière de défilement réservée :
@@ -1307,7 +1318,10 @@
 			   (un `row-gap` propre à une vue, ou une barre de défilement qui n'apparaît que
 			   dans l'une, décalait le titre et rétrécissait les cases). */
 			#sh-competences { row-gap: 0; scrollbar-gutter: stable; }
-			#sh-competences > .capa-tete { margin-bottom: .35rem; }
+			/* Barre de défilement de l'ONGLET (c'est lui qui défile, d'un bloc) : celle des
+			   listes de la fiche (`.sh-inv-box, .sh-rel-scroll`) — fine, sombre, translucide. */
+			#sh-competences { scrollbar-width: thin; scrollbar-color: rgba(0, 0, 0, 0.2) transparent; }
+			#sh-competences .capa-tete { margin-bottom: .35rem; }
 			/* L'en-tête d'accordéon devient une étiquette de groupe, inerte. */
 			#sh-competences .acc-head {
 				pointer-events: none; padding: .55rem 0 .15rem; background: none;
@@ -1315,6 +1329,11 @@
 				font-size: .72rem; letter-spacing: .08em; color: var(--muted);
 			}
 			#sh-competences .acc-chevron { display: none; }
+		}
+		@media (max-width: 768px) and (orientation: portrait) {
+			/* Barre resserrée : toujours deux rangées (cf. part-slot-bar-css), cases plus
+			   petites — la liste récupère la hauteur. */
+			#sh-competences .sh-barre-grid { --slot-max: 40px; margin: 4px 0; }
 
 			/* Ligne compacte : icône · nom (+ 1re ligne de détail, tronquée) · actions à
 			   droite. Le reste (2e ligne d'effets, composants) attend le toucher qui
@@ -1339,6 +1358,26 @@
 			#sh-competences .sh-slot-choice { display: none; }
 			#sh-modes-attaque { gap: 0; }
 			#sh-modes-attaque .sh-skill { flex: 1 1 100%; }
+		}
+		/* Paysage HAUT (desktop) : la barre de combat COLLE en haut avec vues, recherche et
+		   filtres — on compose la barre en parcourant la liste. L'enveloppe colle d'un bloc,
+		   `.capa-tete` n'a plus à coller seule. Paysage BAS (téléphone couché, ≤ 600 px) :
+		   barre + en-tête mangeraient l'écran, seule `.capa-tete` colle (règle ci-dessus).
+		   ⚠️ Positionnée, l'enveloppe devient l'offsetParent du bouton ⓘ ET de sa bulle :
+		   `toggleBarreAide` calcule donc toujours dans un seul repère. */
+		/* Paysage : une marge à droite, les boutons d'une ligne ne collent plus à la barre
+		   de défilement (une SEULE liste : deux colonnes laissaient filer la seconde dessous). */
+		@media (orientation: landscape) {
+			#sh-competences { padding-right: .6rem; }
+		}
+		@media (orientation: landscape) and (min-height: 601px) {
+			#sh-competences .capa-entete {
+				display: block;
+				position: sticky; top: 0; z-index: 20;
+				background: var(--panel-bg); padding-bottom: .35rem; margin-bottom: .35rem;
+				border-bottom: 1px solid var(--border-color);
+			}
+			#sh-competences .capa-entete .capa-tete { position: static; padding-bottom: 0; margin-bottom: 0; }
 		}
 		.sh-quest-hdr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
 		.sh-quest-rang { font-size: 0.8rem; font-weight: bold; padding: 2px 6px; background: #333; border-radius: 3px; color: var(--accent-color); }
@@ -2206,6 +2245,9 @@
 						   par _renderBarreSlots depuis le payload `slots`. #}
 						{# Mobile : la consigne passe dans une bulle ouverte par ⓘ (place gagnée
 						   pour les accordéons) ; le bouton n'existe visuellement qu'en mobile. #}
+						{# En-tête de l'onglet (barre + vues/recherche/filtres) : enveloppe transparente
+						   sauf en paysage haut, où elle colle en haut d'un bloc (cf. `.capa-entete`). #}
+						<div class="capa-entete">
 						<div class="sh-section sh-barre-titre">🎯 Barre de combat<button type="button" class="sh-barre-aide" id="sh-barre-aide"
 								aria-label="Aide : composer la barre de combat" aria-expanded="false" aria-controls="sh-barre-hint"
 								onclick="toggleBarreAide(event)">ⓘ</button></div>
@@ -2240,6 +2282,7 @@
 								<button type="button" class="capa-filtre" data-filtre="magie" onclick="capaFiltre('magie')">🔮 Magie</button>
 								<button type="button" class="capa-filtre" data-filtre="attaque" onclick="capaFiltre('attaque')">⚔ Attaque</button>
 							</div>
+						</div>
 						</div>
 						<div class="sh-empty capa-aucun" id="capa-aucun" hidden><span class="sh-empty-icon">🔍</span>Aucune action ne correspond à la recherche.</div>
 						{# ── Les six zones en ACCORDÉON (brique `.acc-*`, comme #sell-panel) ──

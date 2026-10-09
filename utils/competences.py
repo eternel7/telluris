@@ -407,6 +407,11 @@ def competences_apprenables(character: dict, find_docs, rules_vocations=None) ->
 	caracts = caracts_avec_buffs(character)
 	out = []
 	for doc in find_docs({"type": "competence"}) or []:
+		# Filtre AVANT la normalisation, sur les champs bruts qu'elle recopie tels quels
+		# (`vocation`, `_id` → `id`) : normaliser le millier de compétences de toutes les
+		# vocations à chaque payload de fiche était le gros du calcul d'un achat.
+		if (doc or {}).get("vocation") != voc or (doc or {}).get("_id") in connues:
+			continue
 		comp = normaliser_competence(doc)
 		if not comp or comp["id"] in connues or comp["vocation"] != voc:
 			continue

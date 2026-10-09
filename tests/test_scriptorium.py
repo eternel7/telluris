@@ -34,6 +34,15 @@ ETABLE = {"_id": "lieu:etable", "type": "lieu", "categorie": "etable",
 		  "lieu_parent": "lieu:auxerre"}
 
 
+@pytest.fixture(autouse=True)
+def _sujets_frais():
+	"""Le mémo process des sujets documentables est clé par lieu_parent : sans remise à zéro,
+	un test hériterait des sujets d'« Auxerre » calculés par le précédent sur d'autres docs."""
+	scriptorium.reset_sujets_cache()
+	yield
+	scriptorium.reset_sujets_cache()
+
+
 def _perso(**champs):
 	base = {
 		"_id": "character:u_1", "type": "character", "lieu": "lieu:scriptorium",
@@ -283,6 +292,44 @@ def test_recettes_virtuelles_ne_recree_jamais_un_item_existant(monkeypatch):
 	out = scriptorium.recettes_virtuelles(scripto, find_docs_fn, docs.get, appels_save.append)
 	assert len(out) == 1
 	assert appels_save == []  # déjà là : jamais recréé
+
+
+def test_recettes_virtuelles_memoise_les_sujets_mais_retire_a_chaque_appel(monkeypatch):
+	"""Les sujets d'une cité ne sont relus qu'une fois par `_SUJETS_TTL` (le tick d'un
+	scriptorium tournait à chaque achat) ; le délai écoulé, ils sont relus."""
+	docs = _base_docs()
+	appels = {"find": 0}
+	base_find = _fake_find_docs(docs)
+
+	def find_docs_fn(selector, fields=None):
+		appels["find"] += 1
+		return base_find(selector, fields)
+
+	monkeypatch.setattr("utils.marche._all_recettes", lambda: [RECETTE_PAIN])
+	monkeypatch.setattr("utils.marche._recettes_par_lieu", None)
+	monkeypatch.setattr("utils.focalisation._graphe_cache", {"at": 0.0, "graphe": None})
+	horloge = {"t": 1000.0}
+	monkeypatch.setattr(scriptorium.time, "time", lambda: horloge["t"])
+	save = lambda d: docs.__setitem__(d["_id"], d) or d
+
+	assert len(scriptorium.recettes_virtuelles(SCRIPTORIUM, find_docs_fn, docs.get, save)) == 3
+	premier = appels["find"]
+	assert premier > 0
+	assert len(scriptorium.recettes_virtuelles(SCRIPTORIUM, find_docs_fn, docs.get, save)) == 3
+	assert appels["find"] == premier  # mémoïsé : aucune relecture de la cité
+
+	horloge["t"] += scriptorium._SUJETS_TTL + 1
+	scriptorium.recettes_virtuelles(SCRIPTORIUM, find_docs_fn, docs.get, save)
+	assert appels["find"] > premier  # périmé : relu
+
+
+def test_recettes_virtuelles_ne_memorise_pas_un_resultat_vide(monkeypatch):
+	"""Une base injoignable rend `find_docs` → None : ne pas figer « rien à documenter »."""
+	monkeypatch.setattr("utils.marche._all_recettes", lambda: [])
+	monkeypatch.setattr("utils.marche._recettes_par_lieu", None)
+	monkeypatch.setattr("utils.focalisation._graphe_cache", {"at": 0.0, "graphe": None})
+	assert scriptorium.recettes_virtuelles(SCRIPTORIUM, lambda *a, **k: None, {}.get, lambda d: d) == []
+	assert scriptorium._sujets_cache == {}
 
 
 def test_recettes_effectives_hors_scriptorium_inchange(monkeypatch):

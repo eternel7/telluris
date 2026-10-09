@@ -17,7 +17,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Body
 
-from db.config import get_doc, save_doc, delete_doc, find_docs
+from db.config import get_doc, save_doc, save_docs, delete_doc, find_docs
 from models import character_stats
 from utils.auth import get_current_user
 from utils.characters import get_selected_character, cuivre_to_purse, money_to_cuivre
@@ -475,6 +475,9 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 	# lu une fois et sauvé au plus une fois — un `find_docs` de voisins par écoulement aurait
 	# coûté ~60 × N requêtes sur cet endpoint, déjà le plus lourd du jeu.
 	flux = flux_cite(get_doc(parent_id) if parent_id else None)
+	# Les étals qui ont bougé partent en UNE écriture groupée (`save_docs`) : un `save_doc` par
+	# boutique faisait l'essentiel des ~15 s de la nuit. Best-effort, comme avant.
+	a_sauver = []
 	for boutique in voisins:
 		if not (boutique.get("stock_matieres") or boutique.get("stock_vente")
 				or appro_leaves_lieu(boutique)):
@@ -488,8 +491,9 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 		for _ in range(passes):
 			recettes = scriptorium.recettes_effectives(boutique, find_docs, get_doc, save_doc)
 			change = tick_atelier(boutique, recettes, flux) or change
-		if change and save_doc(boutique) is not None:
-			magasins += 1
+		if change:
+			a_sauver.append(boutique)
+	magasins = sum(save_docs(a_sauver))
 	persister_flux(flux, save_doc)
 
 	# 3 bis. Chez soi : les marchands employés travaillent la nuit comme les étals de la cité,
@@ -517,9 +521,10 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 	for voisin in voisins:
 		if not recrutement.lieu_recrute(voisin):
 			continue
-		for av in recrutement.recrues_du_giver(voisin.get("_id", "")):
+		perimees = recrutement.recrues_du_giver(voisin.get("_id", ""))
+		for av in perimees:
 			av["expire_at"] = auberge.now_epoch() - 1
-			save_doc(av)
+		save_docs(perimees)      # une écriture groupée, AVANT de remplir le tableau
 		recrues += len(recrutement.remplir_tableau_recrues(voisin, character))
 
 	# 4 bis. Les commandes EN FABRICATION sont prêtes au réveil. Elles vivent sur le doc

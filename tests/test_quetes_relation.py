@@ -371,6 +371,17 @@ def test_le_gain_suit_la_consolidation(perso, db, monkeypatch):
 
 # ── Affichage : les 4 lignes du Bastion montrent la MÊME cote ────────────────────
 
+def _find_lieux_et_relations(docs, relations):
+	"""Faux `find_docs` : la recherche groupée des lieux (`_id` en `$in`) lit `docs`, celle des
+	relations rend `relations`."""
+	def find_docs(selector, fields=None):
+		ids = ((selector or {}).get("_id") or {}).get("$in")
+		if ids is not None:
+			return [docs[i] for i in ids if i in docs]
+		return list(relations)
+	return find_docs
+
+
 def test_les_lieux_consolides_affichent_la_meme_valeur(perso, monkeypatch):
 	"""Sans passer par `lieu_de_relation`, la façade / la réception / le bureau afficheraient
 	la valeur neutre pendant que le comptoir en montre une autre."""
@@ -380,8 +391,7 @@ def test_les_lieux_consolides_affichent_la_meme_valeur(perso, monkeypatch):
 	relation = {"_id": rel_id, "type": "relation", "character_id": perso["_id"],
 				"lieu_id": COMPTOIR["_id"], "value": 55}
 
-	monkeypatch.setattr(marche, "get_doc", lambda doc_id: docs.get(doc_id))
-	monkeypatch.setattr(marche, "find_docs", lambda selector: [relation])
+	monkeypatch.setattr(marche, "find_docs", _find_lieux_et_relations(docs, [relation]))
 
 	perso["lieux_visites"] = [FACADE_C["_id"], RECEPTION_C["_id"], COMPTOIR["_id"],
 							  BUREAU_C["_id"], BOUCHERIE["_id"]]
@@ -405,8 +415,7 @@ def test_une_ligne_sans_label_s_intitule_par_son_slug_jamais_par_son_id(perso, m
 	docs = {muet["_id"]: muet, "lieu:nulle_part": {"_id": "lieu:nulle_part", "type": "lieu",
 													"categorie": "ville"}}
 
-	monkeypatch.setattr(marche, "get_doc", lambda doc_id: docs.get(doc_id))
-	monkeypatch.setattr(marche, "find_docs", lambda selector: [])
+	monkeypatch.setattr(marche, "find_docs", _find_lieux_et_relations(docs, []))
 
 	perso["lieux_visites"] = [muet["_id"]]
 	ligne = marche.relations_lieux_payload(perso)[0]
@@ -414,3 +423,34 @@ def test_une_ligne_sans_label_s_intitule_par_son_slug_jamais_par_son_id(perso, m
 	assert ligne["nom"] == "sans_enseigne"
 	assert ligne["parent_nom"] == "nulle_part"
 	assert "lieu:" not in ligne["nom"]
+
+
+def test_l_onglet_relations_lit_les_lieux_en_deux_requetes_sans_get_doc(perso, monkeypatch):
+	"""/play lisait chaque lieu connu par un `get_doc` (104 allers-retours au relevé du 09/10) :
+	une requête groupée pour les lieux, une pour leurs parents absents, aucune lecture unitaire.
+	Une grille (`cells`) masque l'image, comme avant."""
+	monkeypatch.setattr(character_stats, "RELATION_INITIALE", 50)
+	ville = {"_id": "lieu:cite", "type": "lieu", "categorie": "ville", "label": "Cité",
+			 "image": "cite.png", "cells": [[1]]}
+	echoppe = {"_id": "lieu:echoppe", "type": "lieu", "categorie": "boucherie",
+			   "label": "Échoppe", "lieu_parent": "lieu:cite"}
+	docs = {d["_id"]: d for d in (ville, echoppe)}
+	requetes = []
+	base = _find_lieux_et_relations(docs, [])
+
+	def find_docs(selector, fields=None):
+		requetes.append(selector)
+		return base(selector, fields)
+
+	def interdit(doc_id):
+		raise AssertionError(f"get_doc({doc_id}) : lecture unitaire")
+
+	monkeypatch.setattr(marche, "find_docs", find_docs)
+	monkeypatch.setattr(marche, "get_doc", interdit)
+	perso["lieux_visites"] = [echoppe["_id"]]
+	ligne = marche.relations_lieux_payload(perso)[0]
+
+	assert ligne["nom"] == "Échoppe" and ligne["parent_nom"] == "Cité"
+	assert ligne["image"] is None
+	lieux = [r for r in requetes if "_id" in r]
+	assert len(lieux) == 2 and all(r["type"] == "lieu" for r in lieux)

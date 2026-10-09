@@ -160,6 +160,16 @@ def construire(base: dict) -> tuple:
 	return neufs + grim_docs, erreurs
 
 
+def _affiche(chemin) -> str:
+	"""Chemin relatif au dépôt pour l'affichage. ⚠️ Sous Windows, `relpath` LÈVE si le chemin
+	est sur un autre lecteur que le dépôt (sortie dans un dossier temporaire sur C:, dépôt
+	sur Z:) : on montre alors le chemin absolu plutôt que d'échouer après avoir écrit."""
+	try:
+		return os.path.relpath(chemin, RACINE)
+	except ValueError:
+		return os.path.abspath(chemin)
+
+
 def main(argv=None) -> int:
 	try:
 		sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -181,7 +191,7 @@ def main(argv=None) -> int:
 	with open(args.sortie, "w", encoding="utf-8", newline="\n") as f:
 		json.dump(docs, f, ensure_ascii=False, indent=2)
 		f.write("\n")
-	print(f"{len(docs)} doc(s) écrits dans {os.path.relpath(args.sortie, RACINE)} — "
+	print(f"{len(docs)} doc(s) écrits dans {_affiche(args.sortie)} — "
 		  f"{sum(1 for d in docs if d['type'] == 'sort')} sort(s), "
 		  f"{sum(1 for d in docs if d['type'] == 'item')} grimoire(s), "
 		  f"{sum(1 for d in docs if d['type'] == 'recette')} recette(s).")

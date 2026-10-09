@@ -84,6 +84,9 @@ def monde(monkeypatch):
 		monkeypatch.setattr(mod, "save_doc", save_doc_fn, raising=False)
 		monkeypatch.setattr(mod, "find_docs", find_docs_fn, raising=False)
 		monkeypatch.setattr(mod, "delete_doc", delete_doc_fn, raising=False)
+		# Écriture groupée (`db.config.save_docs`) : même base en mémoire, un booléen par doc.
+		monkeypatch.setattr(mod, "save_docs", lambda ds: [bool(save_doc_fn(d)) for d in ds],
+							raising=False)
 	return {"docs": docs, "supprimes": supprimes, "ra": ra}
 
 

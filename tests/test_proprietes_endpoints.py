@@ -91,6 +91,8 @@ def monde(monkeypatch):
 		monkeypatch.setattr(mod, "save_doc", save_doc_fn, raising=False)
 		monkeypatch.setattr(mod, "find_docs", find_docs_fn, raising=False)
 		monkeypatch.setattr(mod, "delete_doc", delete_doc_fn, raising=False)
+		monkeypatch.setattr(mod, "save_docs", lambda ds: [bool(save_doc_fn(d)) for d in ds],
+							raising=False)
 	# Vue `reseau/liens_cases` en mémoire : connexions dont un nœud est sur le lieu.
 	monkeypatch.setattr(rp, "connexions_du_lieu", lambda lieu_id: [
 		d for d in list(docs.values()) if d.get("type") == "connection"

@@ -18,11 +18,15 @@ Gabarits de prompts pour générer les illustrations du jeu (Gemini). Chaque gab
 
 **`gemini-3.1-flash-lite-image`** (Flash Lite) par défaut : le moins cher, celui qu'utilise l'auteur. `gemini-2.5-flash-image` a servi aux essais v1-v3 de Berga.
 
+**En local (gratuit)** : ComfyUI portable AMD (`C:\ComfyUI_windows_portable`, lancer **`run_telluris.bat`**, `http://127.0.0.1:8188`) + **Z-Image Turbo** (`z_image_turbo_bf16` chargé en **fp8** + encodeur `qwen_3_4b_fp8_mixed` + VAE `ae`) : 8 pas, CFG 1, `res_multistep`/`simple`, décalage AuraFlow 3 ; ~5-6 min l'image sur la Radeon 890M.
+- ⚠️ Radeon 890M : `--bf16-text-enc` obligatoire (Qwen3 en fp16 → NaN → image de bruit) ; la mémoire « VRAM » plafonne à 14,4 Go et le pilote annonce 0 Go libre dès ~10 Go tenus → modèle en fp8 + `--disable-smart-memory`, sinon la 2e image sort en bruit ou en gris. Ne pas lancer d'autre gros travail en parallèle : la RAM est partagée. Prompt **anglais, en phrases** ; **aucun prompt négatif** (CFG 1) → l'interdiction du texte s'écrit dans le prompt. Aucune image de référence : un personnage se **décrit**, il ne se reprend pas. Sert les magasins (§1 bis, `dev/gen_images_magasins.py`).
+- ⚠️ DreamShaper XL Lightning (SDXL, installé aussi) **écarté** le 08/10/2026 : lignées ignorées (une ogresse rendue en humaine), foule de Telluris jamais dessinée, faux texte sur les bannières.
+
 ### 0.3 Formats
 
 | Type | Format | Dossier | Nom de fichier |
 |---|---|---|---|
-| Magasin | paysage 4:3 | `templates/resources/towns/` | `<categorie>_<region>NN.png` (ex. `fletcher_europe04.png`) |
+| Magasin | **paysage 16:9** (1408×768, comme 233 des 294 images de `towns/`) | `templates/resources/towns/` | `<categorie>_<region>NN.png` (ex. `fletcher_europe04.png`) ; propre à une cité : `<base>_<cite>NN.png` (ex. `archerie_europe_rhemi01.png`, cf. `auberge_europe_lutecia*`) |
 | Tenancier | **paysage 16:9** (comme les portraits existants, ~1408×768) | `templates/resources/pnj/` | `marchand_<race>_<m\|f>_<categorie>NN.png` |
 | Monstre | carré 1:1 | `templates/resources/monsters/` | `<slug_espece>_transparent.png` (fond retiré après génération) |
 | Porte (ext./int.) | paysage 16:9 | `templates/resources/towns/` | `<slug_porte>.png` |
@@ -71,6 +75,16 @@ Chaque image générée est écrite **directement dans son dossier cible** (cf. 
 > Façade et étal d'une boutique de **{metier}** nommée « {nom_magasin} », dans la cité de **{cite}**, dans le monde médiéval fantastique de Telluris. {precision_lieu}. {repere_cite}. La boutique occupe environ 80 % de l'image, vue de face ou de trois-quarts depuis la rue ; ses marchandises sont exposées et immédiatement reconnaissables comme celles d'un {metier}. Le tenancier, {tenancier}, un·e {race} {signe_physique}, se tient sur le seuil. [0.2] [0.1]
 
 **Exemple (rempli depuis l'Excel)** : boutique d'archerie « L'Arc et la Corde de la Cité », Lutèce, tenue par Nicolas Piedléger, un hobbit aux cheveux blonds bouclés et au regard vif ; `{precision_lieu}` = « dans un petit village à l'extérieur des remparts de Lutèce, avec vue sur la capitale ».
+
+### 1 bis. Magasin — version locale (ComfyUI + Z-Image Turbo)
+
+Script : `dev/gen_images_magasins.py` (`preparer` → `generer [--essai]` → `appliquer`), serveur lancé par `C:\ComfyUI_windows_portable\run_telluris.bat`. Le §1 traduit, **sans aucun nom** — ni boutique, ni tenancier, **ni « Telluris »** (essai du 08/10 : le mot est sorti peint sur une enseigne) :
+
+> The open front and market stall of a medieval fantasy {boutique} in the city of {cite}, {quartier}. The shop fills about 80% of the image, seen from the street in a three-quarter view; its goods are displayed on racks and tables and are immediately recognizable: {marchandises}. The shopkeeper stands on the threshold: {lignee}, {traits}, {repere_lignee}. [0.2 en anglais] [0.1 en anglais + « No text anywhere in the image… »]
+
+- `{boutique}`, `{marchandises}` : `METIERS_EN`, une ligne par catégorie (mêmes clés que les portraits).
+- `{quartier}` = `{precision_lieu}` + `{repere_cite}`, lu sur le **toponyme qui termine l'enseigne** (`utils/enseignes.TOPONYMES_PAR_LIEU`) : à Reims, « du Sacre » → parvis de la cathédrale, « de la Porte de Mars » → l'arc romain, « des Crayères » → caves de craie… (`QUARTIERS_EN`).
+- `{traits}` : ceux tirés pour le **portrait** du tenancier (âge, corps, cheveux, allure), relus dans `dev/batch/<cite>/manifeste.json` — seulement si le portrait en base est celui de ce manifeste. Le modèle ne reprend pas un visage : même silhouette, pas le même personnage.
 
 ---
 

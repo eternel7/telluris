@@ -1016,6 +1016,23 @@ def _lieu_image_route(lieu_doc: dict) -> tuple[str | None, str | None]:
 	return _image_route_memo[img]
 
 
+# Champs d'un doc lieu que lit l'onglet 🤝 (`lieu_label`, `lieu_de_relation`,
+# `_lieu_image_route`, `cells` pour masquer l'image d'une grille).
+_CHAMPS_RELATION_LIEU = ["_id", "label", "nom", "categorie", "image", "lieu_parent",
+						 "relation_lieu", "cells"]
+
+
+def _lieux_par_id(ids: list, fields: list) -> dict:
+	"""{_id: doc projeté} des lieux `ids`, en UNE requête. `type` dans le sélecteur : l'index
+	`idx-tables` (["type"]) borne le parcours aux seuls lieux — un `$in` nu sur `_id` peut
+	balayer toute la base. Un id absent de la base est simplement absent du résultat."""
+	ids = [i for i in dict.fromkeys(ids) if i]
+	if not ids:
+		return {}
+	docs = find_docs({"type": "lieu", "_id": {"$in": ids}}, fields=fields) or []
+	return {d.get("_id"): d for d in docs if d.get("_id")}
+
+
 def relations_lieux_payload(character: dict) -> list[dict]:
 	"""Tous les lieux CONNUS du personnage (`lieux_visites`, complété des lieux ayant déjà
 	un doc relation) pour l'onglet 🤝 de la fiche, sous forme de liste à plat. Le client
@@ -1044,10 +1061,17 @@ def relations_lieux_payload(character: dict) -> list[dict]:
 			seen.add(lid)
 			lieu_ids.append(lid)
 
-	parent_cache: dict[str, dict | None] = {}
+	# Les lieux connus ET leurs parents en DEUX requêtes projetées, au lieu d'un `get_doc` par
+	# lieu (104 allers-retours sur /play au relevé du 09/10, chacun rapatriant `nav`, stocks,
+	# PNJ…). `cells` reste projeté : sa présence décide de l'image (une grille n'en montre pas).
+	lieux = _lieux_par_id(lieu_ids, _CHAMPS_RELATION_LIEU)
+	parent_ids = [p for p in dict.fromkeys(d.get("lieu_parent") for d in lieux.values())
+				  if p and p not in lieux]
+	parent_cache: dict[str, dict | None] = dict(lieux)
+	parent_cache.update(_lieux_par_id(parent_ids, _CHAMPS_RELATION_LIEU))
 	relations = []
 	for lieu_id in lieu_ids:
-		lieu_doc = get_doc(lieu_id)
+		lieu_doc = lieux.get(lieu_id)
 		if not lieu_doc:
 			continue
 		# ⚠️ Via le lieu PORTEUR : un lieu qui délègue (`relation_lieu`) afficherait sinon la
@@ -1058,9 +1082,7 @@ def relations_lieux_payload(character: dict) -> list[dict]:
 		parent_id = lieu_doc.get("lieu_parent")
 		parent_nom = parent_img = parent_route = None
 		if parent_id:
-			if parent_id not in parent_cache:
-				parent_cache[parent_id] = get_doc(parent_id)
-			pdoc = parent_cache[parent_id]
+			pdoc = parent_cache.get(parent_id)
 			if pdoc:
 				parent_nom = lieu_label(pdoc, parent_id)
 				parent_img, parent_route = _lieu_image_route(pdoc)
