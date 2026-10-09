@@ -34,6 +34,7 @@ from utils import quetes
 from utils import dump as dump_util
 from utils import bois
 from utils import consommables
+from utils import vol as vol_util
 from utils import sorts as sorts_util
 from utils import competences as competences_util
 from utils import slots_actions
@@ -797,6 +798,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	_vocations = get_doc("rules:vocations")
 	sorts_perdus = sorts_util.purger_sorts_hors_ecole(character, get_doc, _vocations)
 	change |= bool(sorts_perdus)
+	# VOL MAGIQUE éteint au-dessus de l'eau ou d'une falaise hors d'un pas (fin de combat —
+	# la position d'exploration est celle d'avant la rencontre) : chute PARESSEUSE, ici.
+	chute_vol = vol_util.chute_exploration(character, grid_doc)
+	change |= bool(chute_vol)
 	_compagnons = recrutement_util.groupe_effectif(character, get_doc)
 	_a_sauver = []
 	for _av in _compagnons:
@@ -1040,6 +1045,9 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"dim_x": dim_x,
 			"dim_y": dim_y,
 			"access" : access,
+			# Règle de marche du pavé : `>= 1` en vol, `=== 1` à pied (scripts/deplacement.js).
+			"volant": vol_util.vol_actif(character),
+			"chute_vol": chute_vol,
 			# stat_caps, xp_coeff/xp_voc_coeff, xp_niv_prev/next, effets_actifs,
 			# caracts_detail, sorts*, competences* — cf. utils/fiche.bloc_fiche.
 			**fiche_bloc,

@@ -1,0 +1,35 @@
+[
+  {
+    "_id": "sort:voile_d_icare",
+    "type": "sort",
+    "nom": "Voile d'Icare",
+    "icon": "🪽",
+    "animation": "animation:capa_illusion",
+    "description": "Un mirage tissé autour du corps le porte au-dessus du sol : on foule l'air des rivières et des à-pics tant que l'illusion tient. Qu'elle se dissipe au-dessus du vide, et la chute, elle, est bien réelle.",
+    "magie": "Illusoire",
+    "niveau": 3,
+    "cout_pm": 20,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "vol": 1,
+      "duree": "2+{Int/20}"
+    },
+    "composants": [
+      {
+        "item": "item:Plume_d_oie",
+        "consomme": false,
+        "bonus": {
+          "duree": 1
+        }
+      },
+      {
+        "item": "item:Poudre_de_miroir",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      }
+    ]
+  }
+]

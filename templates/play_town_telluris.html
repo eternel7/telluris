@@ -3367,6 +3367,10 @@
 		if (el) el.innerHTML = _marquePastille(m);
 	}
 	let ACCESS = {{ access | tojson | safe }};
+	// VOL MAGIQUE du principal (utils/vol.py) : élargit la règle de case du pavé
+	// (`accesExploration`). Resynchronisé par chaque réponse qui peut le changer — pas,
+	// sort ou compétence lancés hors combat (`rep.volant`).
+	let VOLANT = {{ volant | tojson | safe }};
 	// Ressource récoltable (événement de zone « ressource ») : posée par le serveur au
 	// déplacement, transitoire (remplacée/effacée au déplacement suivant, consommée à la récolte).
 	let _ressourceRecoltable = {{ ressource_recoltable | tojson | safe }};
@@ -3559,6 +3563,10 @@
 				_majLieuxMarques(rep);
 				POSITIONS = {"x" : rep.position["x"], "y": rep.position["y"]};
 				ACCESS = rep.access;
+				VOLANT = !!rep.volant;
+				// Fin du vol au-dessus du vide : le serveur a déjà reposé le personnage (la
+				// position confirmée ci-dessus est celle d'arrivée de la chute).
+				if (rep.chute) showToast(`🪂 Votre vol prend fin : vous chutez (−${rep.chute.degats} PV).`);
 				// Guidage 🧭 : à jour AVANT buildLocationslist/updateControls (exergues flèche+lien).
 				_guidage = rep.guidage || null;
 				_refreshGuidage();
@@ -3687,10 +3695,11 @@
 		const surcharge = (typeof _currentCharge === 'function' && typeof _chargeMax !== 'undefined')
 			&& _currentCharge() > _chargeMax + 1e-6;
 		majFleches(controls, {
-			// ⚠️ `loc_access !== 1` : en exploration on ne marche PAS sur le terrain difficile,
-			// contrairement au guidage 🧭 et au voile du mode Lieux de l'éditeur (`>= 1`).
+			// ⚠️ À pied (`=== 1`), on ne marche PAS sur le terrain difficile, contrairement au
+			// guidage 🧭 et au voile du mode Lieux de l'éditeur (`>= 1`) ; EN VOL, si
+			// (`accesExploration`, scripts/deplacement.js — eau et falaises comprises).
 			autorise: (dx, dy) => !surcharge
-				&& access[dy + 1][dx + 1] === 1
+				&& accesExploration(access[dy + 1][dx + 1], VOLANT)
 				&& (nav & DIR_BIT[`${dx},${dy}`]) !== 0,
 			// Guidage 🧭 : la flèche du premier pas vers la cible est mise en exergue.
 			exergue: (dx, dy) => !!(_guidage && _guidage.direction
@@ -5668,6 +5677,7 @@ function _renderEffetsActifs(list) {
 		if (e.regen_pv) details.push(regenTexte(e.regen_pv, 'PV'));
 		if (e.regen_pm) details.push(regenTexte(e.regen_pm, 'PM'));
 		if (e.esquive) details.push(`+${e.esquive} esquive`);
+		if (e.vol) details.push('🪽 vol');
 		// Une AURA du groupe n'a pas de compte à rebours (elle tient tant que son porteur
 		// est du groupe) : « aura » plutôt qu'un « ⏳ » qui ne bougerait jamais.
 		const suffixe = e.aura ? 'aura' : `⏳${e.restants}`;
@@ -6237,6 +6247,8 @@ async function lancerSort(sortId, btn) {
 		// Vitaux du PORTEUR (un compagnon boit ses propres potions) — pas ceux du joueur.
 		updateVitals(data.vitals, porteurActifId());
 		_renderEffetsActifs(data.effets_actifs);
+		// Vol magique lancé (ou relancé) hors combat : le pavé change de règle de case.
+		if ('volant' in data) { VOLANT = !!data.volant; updateControls(); }
 		_renderCaractsMod(data.caracts_detail);
 		_renderSorts(data.sorts);
 		const l = data.lance || {};
@@ -6453,6 +6465,8 @@ async function utiliserCompetence(competenceId, btn) {
 		// Vitaux du PORTEUR (un compagnon boit ses propres potions) — pas ceux du joueur.
 		updateVitals(data.vitals, porteurActifId());
 		_renderEffetsActifs(data.effets_actifs);
+		// Vol magique lancé (ou relancé) hors combat : le pavé change de règle de case.
+		if ('volant' in data) { VOLANT = !!data.volant; updateControls(); }
 		_renderCaractsMod(data.caracts_detail);
 		_renderCompetences(data.competences);
 		const u = data.utilisee || {};
@@ -10277,6 +10291,10 @@ async function reprendreAventurier(avId) {
 const AFFINITES_INIT = {{ affinites_detail | tojson | safe }};
 renderFicheCompagnons(AFFINITES_INIT);
 {{ compagnons_partis | tojson | safe }}.forEach(n => showToast('👋 ' + n + ' a quitté le groupe.'));
+// Vol magique éteint au-dessus du vide hors d'un pas (fin de combat) : chute paresseuse au
+// rendu (`vol.chute_exploration`), déjà persistée — ce toast ne reviendra pas.
+const CHUTE_VOL = {{ chute_vol | tojson | safe }};
+if (CHUTE_VOL) showToast(`🪂 Votre vol a pris fin : vous chutez (−${CHUTE_VOL.degats} PV).`);
 // Sorts perdus : la vocation ne pratique plus leur école. Même check paresseux, même
 // rendu unique — le doc a déjà été réécrit, ce toast ne reviendra pas.
 // ⚠️ Pas d'escapeHtml : showToast écrit en textContent (CLAUDE.md §9).

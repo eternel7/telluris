@@ -69,6 +69,7 @@ function _sortEffetsLabel(e, prefixeDegats) {
 	if (e.saut) parts.push(`💨 saut ${_fx(e, 'saut', e.saut)} cases`);
 	if (e.provocation) parts.push('📢 provocation');
 	if (e.echange) parts.push('🔄 échange de place');
+	if (e.vol) parts.push('🪽 vol (eau, falaises)');
 	if (e.lien_vie) {
 		parts.push(`🔗 lien de vie ${_fx(e, 'lien_vie.part', e.lien_vie.part)} %`
 			+ (e.lien_vie.reduction ? ` (−${e.lien_vie.reduction} % absorbés)` : ''));
