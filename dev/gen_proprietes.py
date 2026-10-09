@@ -184,6 +184,8 @@ metiers = [
 	{"id": "jardinier", "label": "Jardinier", "cout_embauche_cuivre": 300},
 	{"id": "palefrenier", "label": "Palefrenier", "cout_embauche_cuivre": 300},
 	{"id": "boucher", "label": "Boucher", "cout_embauche_cuivre": 800},
+	{"id": "bibliothecaire", "label": "Bibliothécaire", "cout_embauche_cuivre": 600,
+	 "description": "Tient la bibliothèque : on peut y écrire comme au scriptorium."},
 ]
 
 # Postes MARCHANDS : catégories de boutique qu'un employé peut y exercer. Les grandes maisons
@@ -205,14 +207,140 @@ CATEGORIES = {
 	"jardin": ["jardinier"],
 	"potager": ["jardinier"],
 	"verger": ["jardinier"],
+	# Érudits : copistes (scriptorium) et naturalistes ; le bureau « professionnel » de la
+	# Maison reçoit le négociant, comme le Bureau de marchand.
+	"salle_etude": ["scriptorium"],
+	"salle_recherche": ["scriptorium"],
+	"cabinets_specialistes": ["cabinet_des_specimens", "taxidermie"],
+	"bureau_professionnel": ["negociant"],
 }
 GRANDES = {"grand_laboratoire_alchimique", "grande_maison_des_arts", "institut_medico_alchimique",
-		   "grande_apothicairerie"}
+		   "grande_apothicairerie", "cabinet_des_specimens"}
 for a in amenagements:
 	if a["id"] in CATEGORIES:
 		a["activite"]["categories"] = CATEGORIES[a["id"]]
 		if GRANDES & set(CATEGORIES[a["id"]]):
 			assert set(a["types_autorises"]) <= {D, Do}, a["id"]
+
+
+# ── Effets des aménagements (utils/proprietes.py § Effets) ──────────────────────────
+# `effets`       : actifs dès l'installation.
+# `effets_poste` : actifs seulement si un employé du métier tient le poste (activité exercée).
+# ⚠️ NON-CUMUL. Les effets à durée posés au réveil (`reveil`, `reveil_montures`) passent par
+# `consommables.poser_effet` sous la clé `amenagement:<id>` : une nuit REMPLACE la précédente,
+# et `cumul_effets` ne retient que le meilleur bonus par caractéristique — d'où une
+# caractéristique DISTINCTE par aménagement d'un même type de bien. Les autres effets sont des
+# états binaires du bien (actif ou non), jamais une somme.
+def reveil(duree, nom=None, icon="🌅", buffs=None, regen_pv=0, regen_pm=0, esquive=0, **extra):
+	d = {"duree": duree, "icon": icon}
+	if nom:
+		d["nom"] = nom
+	if buffs:
+		d["buffs"] = buffs
+	for cle, val in (("regen_pv", regen_pv), ("regen_pm", regen_pm), ("esquive", esquive)):
+		if val:
+			d[cle] = val
+	d.update(extra)
+	return d
+
+
+# Barème : petite +2 / 15 tours, normale +3 / 20, grande +4 / 25 (tours monde = déplacements).
+EFFETS = {
+	"lit_ameliore": {"reveil": reveil(15, "Bien dormi", "🛏️", regen_pv=2)},
+	"eclairage": {"reveil": reveil(15, "Lecture du soir", "🕯️", regen_pm=2)},
+	"chambre_amelioree": {"reveil": reveil(15, "Sommeil profond", "🌙", buffs={"Vol": 2})},
+	# Les salles à manger ne nourrissent que si un cuisinier tient une cuisine du bien.
+	"petite_salle_a_manger": {"reveil": reveil(15, "Bien nourri", "🍲", buffs={"R": 2}, requiert_metier="cuisinier")},
+	"salle_a_manger": {"reveil": reveil(20, "Bien nourri", "🍲", buffs={"R": 3}, requiert_metier="cuisinier")},
+	"grande_salle_a_manger": {"reveil": reveil(25, "Festin", "🍖", buffs={"R": 4}, requiert_metier="cuisinier")},
+	"salle_entrainement": {"reveil": reveil(20, "Entraîné", "🏋️", buffs={"F": 3})},
+	"salon": {"reveil": reveil(20, "Esprit reposé", "🛋️", buffs={"Vol": 3})},
+	"salle_armes": {"reveil": reveil(20, "Garde affûtée", "⚔️", esquive=2)},
+	"salon_reception": {"reveil": reveil(25, "Bonne réputation", "🎩", buffs={"Cha": 4})},
+	"salle_reunion": {"reveil": reveil(20, "Plans préparés", "🗺️", buffs={"Ch": 3})},
+	# Défense : le métier `garde` protège le coffre comme le gardien de la loge.
+	"poste_de_garde": {"garde": True},
+	"cour_entrainement": {"garde": True},
+	"quartiers_gardes": {"garde": True},
+	"dispositifs_defensifs": {"vol_limite": {"fraction": 0.25, "delai_s": 86400}},
+	# Bien lui-même.
+	"decoration": {"revente_bonus": 0.05},
+	"bureau": {"registre": True},
+	"petite_bibliotheque": {"grimoires_coffre": True},
+	"bibliotheque": {"grimoires_coffre": True},
+	"grande_bibliotheque": {"grimoires_coffre": True},
+	"petit_jardin": {"recolte": {"items": ["item:Herbes_aromatiques", "item:Herbes_medicinales"],
+								 "quantite": 2, "delai_s": 86400}},
+	"terrain_prive": {"recolte": {"items": [f"item:Branche_de_{e}" for e in (
+		"Alisier", "Bouleau", "Charme", "Chataignier", "Erable", "Orme", "Tilleul", "Tremble")],
+								  "quantite": 3, "delai_s": 86400}},
+}
+DISSIPE = {"dissipe_malus": ["dormeurs"]}
+EFFETS_POSTE = {
+	"buanderie": {"reveil": reveil(20, "Habits propres", "🧺", buffs={"Cha": 3})},
+	# Médecins : la nuit soigne déjà PV et PM — eux retirent ce qu'elle laisse (poisons, malus).
+	"espace_medical": dict(DISSIPE),
+	"salle_de_soins": dict(DISSIPE, reveil=reveil(20, "Convalescence", "🩺", regen_pv=2)),
+	# Régén. PM et non PV : l'Infirmerie, ouverte AUSSI à la Demeure, donne déjà les PV.
+	"salle_medicale": dict(DISSIPE, reveil=reveil(25, "Fortifiant", "🧪", regen_pm=3)),
+	"infirmerie": {"dissipe_malus": ["dormeurs", "montures"],
+				   "reveil": reveil(25, "Convalescence", "🩺", regen_pv=3),
+				   "reveil_montures": reveil(25, "Convalescence", "🩺", regen_pv=3)},
+	# Domestiques : un compagnon bien logé ne quitte pas le groupe de lui-même.
+	"coin_resident": {"reveil": reveil(30, "Bien logé", "🏠", fidele=True, compagnons_seuls=True)},
+	"chambre_domestique": {"reveil": reveil(30, "Bien logé", "🏠", fidele=True, compagnons_seuls=True)},
+	"quartiers_personnel": {"reveil": reveil(30, "Bien logé", "🏠", fidele=True, compagnons_seuls=True)},
+	# Intendants.
+	"bureau_administratif": {"releve_auto": True},
+	"salle_gestion": {"candidats_bonus": 1},
+	# Bibliothécaires : le bien devient un scriptorium (`scriptorium.lieu_est_scriptorium`).
+	"petite_bibliotheque": {"scriptorium": True},
+	"bibliotheque": {"scriptorium": True},
+	"grande_bibliotheque": {"scriptorium": True},
+	# Palefreniers.
+	"ecurie_limitee": {"reveil_montures": reveil(20, "Bien pansée", "🐴", buffs={"R": 3, "Ag": 3})},
+	"ecuries": {"reveil_montures": reveil(20, "Bien pansée", "🐴", buffs={"R": 3, "Ag": 3})},
+}
+# Écurie : places où LAISSER une monture (elle reste comptée dans le plafond du troupeau).
+ECURIE = {"cour_interieure": 1, "cour": 1, "ecurie_limitee": 2, "ecuries": 4}
+# Postes et activités ajoutés : bibliothécaires, et l'activité qui manquait aux Quartiers des gardes.
+POSTES = {"petite_bibliotheque": ("bibliothecaire", 1, "Bibliothèque"),
+		  "bibliotheque": ("bibliothecaire", 1, "Bibliothèque"),
+		  "grande_bibliotheque": ("bibliothecaire", 2, "Bibliothèque")}
+for a in amenagements:
+	if a["id"] in POSTES:
+		metier, n, label = POSTES[a["id"]]
+		a["capacite"]["postes"] = {metier: n}
+		a["activite"] = {"metier": metier, "label": label}
+	if a["id"] == "quartiers_gardes":
+		a["activite"] = {"metier": "garde", "label": "Garde du domaine"}
+	if a["id"] in ECURIE:
+		a["capacite"]["ecurie"] = ECURIE[a["id"]]
+	if a["id"] in EFFETS:
+		a["effets"] = dict(a.get("effets") or {}, **EFFETS[a["id"]])
+	if a["id"] in EFFETS_POSTE:
+		a["effets_poste"] = EFFETS_POSTE[a["id"]]
+		assert a.get("activite"), a["id"]           # un effet de poste exige un poste à tenir
+assert set(EFFETS) | set(EFFETS_POSTE) | set(ECURIE) <= {a["id"] for a in amenagements}
+
+
+def termes_reveil(bloc):
+	"""Ce qu'un réveil modifie : une caractéristique, une régén, l'esquive, la fidélité."""
+	return set(bloc.get("buffs") or {}) | {k for k in ("regen_pv", "regen_pm", "esquive", "fidele") if bloc.get(k)}
+
+
+# NON-CUMUL : dans un même type de bien, deux aménagements ne touchent jamais le même terme
+# au réveil — sinon le meilleur seul compterait et l'autre serait payé pour rien.
+for t in TOUS:
+	for cle in ("reveil", "reveil_montures"):
+		vus = {}
+		for a in amenagements:
+			if t not in a["types_autorises"]:
+				continue
+			for bloc in (a.get("effets") or {}, a.get("effets_poste") or {}):
+				for terme in termes_reveil(bloc.get(cle) or {}):
+					assert terme not in vus, (t, cle, terme, vus.get(terme), a["id"])
+					vus[terme] = a["id"]
 
 reglages = {"candidats_duree_s": 86400,
 			"vente_auto": {"proba": 0.5, "fraction": 0.34, "reserve": 1},
@@ -235,6 +363,10 @@ for a in amenagements:
 		assert a["activite"]["metier"] in (a["capacite"].get("postes") or {}), a["id"]
 	for p in a["prerequis"]:
 		assert set(a["types_autorises"]) <= set(par_id[p]["types_autorises"]), (a["id"], p)
+	for bloc in (a.get("effets") or {}, a.get("effets_poste") or {}):
+		for cle in ("reveil", "reveil_montures"):
+			if cle in bloc and "requiert_metier" in bloc[cle]:
+				assert bloc[cle]["requiert_metier"] in mids, (a["id"], cle)
 
 zones = [{
 	"_id": f"zone:habitable_{t['id']}",

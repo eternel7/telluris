@@ -1609,7 +1609,8 @@ async def apprendre_sort(
 		raise HTTPException(status_code=422, detail="École de magie non pratiquée ou niveau insuffisant")
 	if sorts_util.apprentissage_exclu(sort, character.get("voc"), vocations):
 		raise HTTPException(status_code=422, detail="Votre vocation ne pratique pas ce type de sort")
-	if sorts_util.grimoire_pour(character, sort["id"], resolve_item_ref) is None:
+	if sorts_util.grimoire_pour(character, sort["id"], resolve_item_ref,
+								proprietes.refs_bibliotheque(character, get_doc)) is None:
 		raise HTTPException(status_code=409, detail="Grimoire requis pour apprendre ce sort")
 
 	cout = sorts_util.cout_apprentissage(sort)
@@ -1626,7 +1627,7 @@ async def apprendre_sort(
 		"attribute_points": character["attribute_points"],
 		"sorts_connus": list(character["sorts_connus"]),
 		"sorts": sorts_util.liste_sorts_payload(character, get_doc, "exploration"),
-		"apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref, vocations),
+		"apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref, vocations, proprietes.refs_bibliotheque(character, get_doc)),
 		"sorts_magies": sorts_util.apprentissage_magies_payload(character, vocations),
 		"appris": {"nom": sort["nom"], "icon": sort["icon"]},
 	}
@@ -1790,7 +1791,7 @@ async def apprendre_magie(
 	return {
 		"attribute_points": character["attribute_points"],
 		"sorts_magies": sorts_util.apprentissage_magies_payload(character, vocations),
-		"apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref, vocations),
+		"apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref, vocations, proprietes.refs_bibliotheque(character, get_doc)),
 		"apprise": {"ecole": ecole},
 	}
 
@@ -1824,7 +1825,7 @@ async def monter_magie(
 	return {
 		"attribute_points": character["attribute_points"],
 		"sorts_magies": sorts_util.apprentissage_magies_payload(character, vocations),
-		"apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref, vocations),
+		"apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref, vocations, proprietes.refs_bibliotheque(character, get_doc)),
 		"ecole": {"ecole": ecole, "niveau": niveau + 1},
 	}
 

@@ -22,6 +22,7 @@ from utils.characters import (
 	get_selected_character, carried_weight, charge_max_of, item_ref_weight, resolve_item_ref,
 )
 from utils import auberge
+from utils import proprietes
 from utils import scriptorium
 # ⚠️ Sens d'import : `routers/scriptorium` → `routers/user`, jamais l'inverse (précédent :
 # `routers/auberge` → `routers/user`). `routers/user` n'importe pas ce module.
@@ -36,7 +37,9 @@ def _acces_scriptorium(current_user: dict) -> tuple[dict, dict]:
 	character = get_selected_character(current_user)
 	if not character:
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
-	lieu_doc = get_doc(character.get("lieu", ""))
+	# Un bien dont la bibliothèque est tenue se lit comme un scriptorium : VUE en mémoire
+	# (`proprietes.lieu_effectif`), jamais sauvée — ce router ne sauve aucun lieu.
+	lieu_doc = proprietes.lieu_effectif(get_doc(character.get("lieu", "")), get_doc)
 	if not lieu_doc or not scriptorium.lieu_est_scriptorium(lieu_doc):
 		raise HTTPException(status_code=403, detail="Il n'y a pas de scriptorium ici.")
 	return character, lieu_doc

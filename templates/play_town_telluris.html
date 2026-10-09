@@ -8706,8 +8706,10 @@ function closeRecrutementPanel() {
 function renderEtable(data) {
 	const plafondEl = document.getElementById('mnt-plafond');
 	const possedees = data.montures || [];
-	if (plafondEl) plafondEl.textContent = `${possedees.length}/${data.plafond}`;
-	const full = possedees.length >= (data.plafond || 0);
+	// Une monture laissée à l'écurie d'un bien compte dans le troupeau (`a_l_ecurie`).
+	const troupeau = possedees.length + (data.a_l_ecurie || 0);
+	if (plafondEl) plafondEl.textContent = `${troupeau}/${data.plafond}`;
+	const full = troupeau >= (data.plafond || 0);
 	const bourse = _purseEnCuivre(data.purse);
 
 	_rendreCartesMontures(document.getElementById('mnt-possedees-list'), possedees,
@@ -8945,14 +8947,17 @@ function renderPropriete(data) {
 
 	html += `<section class="prop-section"><h3>🛠️ Aménagements installés</h3><div class="prop-liste">`
 		+ (data.installes.map(a => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(a.nom)}</strong>
-			<span class="q-desc">${_propCategorie(a.categorie)}</span></div></div>`).join('')
+			<span class="q-desc">${_propCategorie(a.categorie)}</span>${_propEffets(a, true)}</div></div>`).join('')
 		|| '<div class="sell-empty">Aucun aménagement.</div>') + `</div></section>`;
+
+	if (gere) html += _propQuotidien(data);
 
 	if (gere) {
 		const bourse = _purseEnCuivre(data.purse);
 		html += `<section class="prop-section"><h3>🧰 Aménagements disponibles</h3><div class="prop-liste">`
 			+ (data.disponibles.map(a => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(a.nom)}</strong>
 				<span class="q-desc">${_propCategorie(a.categorie)}${a.description ? ' · ' + escapeHtml(a.description) : ''}</span>
+				${_propEffets(a, false)}
 				<span class="sell-prix">💰 ${_prixTexte(a.cout)}</span></div>
 				<button class="sh-drop-btn" data-am="${escapeHtml(a.id)}" ${a.cout > bourse ? 'disabled' : ''} onclick="propInstaller(this)">Installer</button></div>`).join('')
 			|| '<div class="sell-empty">Rien de plus à installer dans ce type de bien.</div>') + `</div></section>`;
@@ -8981,6 +8986,56 @@ function renderPropriete(data) {
 
 	html += _propMesProprietes(data.mes_proprietes);
 	document.getElementById('prop-contenu').innerHTML = html;
+}
+
+// Effets d'un aménagement (textes du serveur, `proprietes.textes_effets`). Installé : on dit
+// s'il joue — un effet de poste attend l'employé (`poste_requis`).
+function _propEffets(a, installe) {
+	if (!(a.effets || []).length) return '';
+	const etat = !installe ? ''
+		: a.poste_requis ? ' <span class="prop-etat-off">— en attente de personnel</span>'
+		: a.actif ? ' <span class="prop-etat-on">— actif</span>' : '';
+	return `<span class="q-desc">✨ ${a.effets.map(escapeHtml).join(' · ')}${etat}</span>`;
+}
+
+// Gestes ouverts par les aménagements : récoltes, registre des caisses, écurie.
+// Ids adressés par data-* (Convention §9), noms échappés.
+function _propQuotidien(data) {
+	const rec = data.recoltes || [], ec = data.ecurie || { places: 0, logees: [], logeables: [] };
+	if (!rec.length && !data.registre && !ec.places) return '';
+	let html = `<section class="prop-section"><h3>🌿 Au quotidien</h3><div class="prop-liste">`;
+	html += rec.map(r => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(r.nom)}</strong>
+		<span class="q-desc">${r.pret ? 'Prêt à récolter.' : 'Prochaine récolte le ' + _propDate(r.pret_at) + '.'}</span></div>
+		<button class="sh-drop-btn" data-am="${escapeHtml(r.amenagement)}" ${r.pret ? '' : 'disabled'} onclick="propRecolter(this)">Récolter</button></div>`).join('');
+	if (data.registre) html += `<div class="prop-ligne"><div class="prop-txt"><strong>📒 Registre</strong>
+		<span class="q-desc">Relever la caisse de tous vos biens de la cité.</span></div>
+		<button class="sh-drop-btn" onclick="propRegistre()">Relever</button></div>`;
+	if (ec.places) {
+		html += `<div class="prop-ligne"><div class="prop-txt"><strong>🐴 Écurie (${ec.logees.length}/${ec.places})</strong>
+			<span class="q-desc">Une monture laissée ici ne suit plus le groupe, mais compte toujours dans votre troupeau.</span></div></div>`;
+		html += ec.logees.map(m => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(m.nom)}</strong>
+			<span class="q-desc">à l'écurie</span></div>
+			<button class="sh-drop-btn" data-mt="${escapeHtml(m.id)}" onclick="propEcurie(this, 'reprendre')">Reprendre</button></div>`).join('');
+		if (ec.logees.length < ec.places) html += ec.logeables.map(m => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(m.nom)}</strong>
+			<span class="q-desc">vous suit${m.charge ? ' · sac à vider d\'abord' : ''}</span></div>
+			<button class="sh-drop-btn" data-mt="${escapeHtml(m.id)}" ${m.charge ? 'disabled' : ''} onclick="propEcurie(this, 'loger')">Laisser ici</button></div>`).join('');
+	}
+	return html + `</div></section>`;
+}
+
+async function propRecolter(btn) {
+	const data = await _propPost('api/proprietes/recolter', { amenagement: btn.dataset.am });
+	if (data && data.recolte) showToast(`🌿 Récolté : ${data.recolte.join(', ')}.`);
+}
+
+async function propRegistre() {
+	const data = await _propPost('api/proprietes/registre/relever', {});
+	if (data && data.releve) showToast(`💰 Caisses relevées : ${_prixTexte(data.releve)}.`);
+}
+
+async function propEcurie(btn, geste) {
+	const data = await _propPost(`api/proprietes/ecurie/${geste}`, { monture_id: btn.dataset.mt });
+	if (data) showToast(geste === 'loger' ? '🐴 Monture laissée à l\'écurie.' : '🐴 La monture reprend la route avec vous.');
 }
 
 // Liste des lieux depuis le `links` d'une réponse (même source que `move_character`).
@@ -9236,7 +9291,11 @@ function renderCoffre(data) {
 
 async function _pcfPost(url, body) {
 	const data = await _aubFetch(url, body);
-	if (data) _pcfAppliquer(data);
+	if (data) {
+		_pcfAppliquer(data);
+		// Bibliothèque chez soi : un grimoire rangé ou repris change « 📖 Apprendre » (§10).
+		_appliquerFiche(data.fiche);
+	}
 	return data;
 }
 
@@ -9964,6 +10023,15 @@ async function passerLaNuit() {
 	el.textContent = '— ' + bilan.join(' · ');
 	if (log) log.appendChild(el);
 	requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('vue')));
+	// Chez soi : ce que les aménagements ont fait à chacun (effets du réveil, malus dissipés).
+	// textContent : noms saisis et libellés de contenu, rien à interpréter.
+	(data.reveil || []).forEach(r => {
+		const ligne = document.createElement('div');
+		ligne.className = 'aub-nuit-ligne';
+		ligne.textContent = `🌅 ${r.nom} : ${(r.effets || []).join(', ')}`;
+		if (log) log.appendChild(ligne);
+		requestAnimationFrame(() => requestAnimationFrame(() => ligne.classList.add('vue')));
+	});
 }
 
 // Réponse de la nuit, gardée pour le réveil : c'est `fermerNuit` qui l'applique.
@@ -9980,6 +10048,9 @@ function fermerNuit() {
 	if (btn) btn.disabled = false;
 	if (!data) return;
 	if (data.purse) updatePurse(data.purse);
+	// Effets du réveil chez soi (Convention §10) : chaque bloc ne s'applique qu'à SA fiche.
+	// AVANT les vitaux : un buff de Résistance relève le max que ces vitaux remplissent.
+	(data.fiches || []).forEach(f => _appliquerFiche(f));
 	updateVitals(data.vitals);
 	Object.entries(data.vitals_porteurs || {}).forEach(([id, v]) => updateVitals(v, id));
 	// Salle commune ouverte : rendu complet (ses tables ont été fermées pour ce dormeur) et
@@ -10298,6 +10369,10 @@ async function reprendreAventurier(avId) {
 const AFFINITES_INIT = {{ affinites_detail | tojson | safe }};
 renderFicheCompagnons(AFFINITES_INIT);
 {{ compagnons_partis | tojson | safe }}.forEach(n => showToast('👋 ' + n + ' a quitté le groupe.'));
+// Intendant au Bureau administratif : la caisse des ateliers a été relevée à l'arrivée
+// (`proprietes.releve_auto`, déjà créditée et persistée — ce toast ne reviendra pas).
+const RELEVE_CAISSE = {{ releve_caisse | tojson | safe }};
+if (RELEVE_CAISSE) showToast(`💰 Votre intendant vous remet la caisse : ${_prixTexte(RELEVE_CAISSE)}.`);
 // Vol magique éteint au-dessus du vide hors d'un pas (fin de combat) : chute paresseuse au
 // rendu (`vol.chute_exploration`), déjà persistée — ce toast ne reviendra pas.
 const CHUTE_VOL = {{ chute_vol | tojson | safe }};

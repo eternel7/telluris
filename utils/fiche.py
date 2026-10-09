@@ -20,6 +20,7 @@ from utils import charge_magie
 from utils import sorts as sorts_util
 from utils import competences as competences_util
 from utils import slots_actions
+from utils import proprietes
 
 
 CARACTS = ["V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch"]
@@ -97,8 +98,10 @@ def bloc_fiche(character: dict, get_doc_fn, find_docs_fn, race: dict | None = No
 			consommables.canalisation_bonus(character),
 		),
 		"sorts": sorts_util.liste_sorts_payload(character, get_doc_fn, "exploration"),
+		# Bibliothèque chez soi : les grimoires du coffre comptent (`proprietes.refs_bibliotheque`).
 		"sorts_apprenables": sorts_util.sorts_apprenables(
-			character, find_docs_fn, resolve_item_ref, vocations
+			character, find_docs_fn, resolve_item_ref, vocations,
+			proprietes.refs_bibliotheque(character, get_doc_fn),
 		),
 		"sorts_magies": sorts_util.apprentissage_magies_payload(character, vocations),
 		"competences": competences_util.liste_competences_payload(character, get_doc_fn, "exploration"),

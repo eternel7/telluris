@@ -1292,11 +1292,17 @@ def departs_volontaires(character: dict, get_doc_fn=None) -> list:
 
 	⚠️ Un compagnon PERMANENT ne part JAMAIS de lui-même : l'engagement l'emporte sur
 	l'humeur, et seul le joueur peut rompre (`congedier`). Sans cette exception, le flag
-	quitterait le groupe avec lui et un ré-engagement serait gratuit."""
+	quitterait le groupe avec lui et un ré-engagement serait gratuit.
+	⚠️ Un compagnon « Bien logé » (effet à durée `fidele`, posé au réveil par un domestique de
+	propriété — `proprietes.appliquer_reveil`) ne part pas non plus tant que l'effet dure.
+	Le test vit ici et non dans `utils/proprietes` : ce module-là importe celui-ci."""
 	seuil = int(character_stats.AFFINITE_SEUIL_DEPART)
 	partis = []
 	for av in groupe_effectif(character, get_doc_fn):
 		if av.get("permanent"):
+			continue
+		if any((e or {}).get("fidele") and int((e or {}).get("restants") or 0) > 0
+			   for e in av.get("effets_actifs") or []):
 			continue
 		if affinite_de(character, av["_id"]) < seuil:
 			character["groupe"].remove(av["_id"])

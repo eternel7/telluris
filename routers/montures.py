@@ -81,6 +81,10 @@ def _payload(character: dict, lieu_doc: dict | None = None) -> dict:
 	payload = {
 		"montures": [_monture_view(m) for m in montures.montures_effectives(character, get_doc)],
 		"plafond": montures.plafond_montures(),
+		# Laissées à l'écurie d'une propriété : hors de la liste (elles ne suivent pas), mais
+		# dans le plafond — le compteur du panneau les ajoute.
+		"a_l_ecurie": (len(montures.montures_possedees(character, get_doc))
+					   - len(montures.montures_effectives(character, get_doc))),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 	}
 	if lieu_doc is not None:

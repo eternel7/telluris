@@ -588,3 +588,118 @@ def test_confier_au_negociant_du_bien_caisse_ou_flux(monde):
 		   {"employe_id": neg["_id"], "index": 0, "item_id": "item:herbe"})
 	assert prop["flux_marchand"] == {"item:herbe": 1}
 	assert "flux_marchand" not in monde["docs"]["lieu:ville"]   # jamais le flux de la ville
+
+
+# ── Effets des aménagements ──────────────────────────────────────────────────────
+
+def test_nuit_chez_soi_pose_le_reveil_et_resynchronise_la_fiche(monde):
+	"""Le salon pose son effet à durée au réveil ; une seconde nuit le REMPLACE. La réponse
+	porte le bilan et la fiche du dormeur (Convention §10)."""
+	char = _perso()
+	_entrer(monde, char)
+	_appel(monde, char, monde["rp"].installer, None, {"amenagement": "salon"})
+	data = _appel(monde, char, monde["ra"].passer_la_nuit, None, module="ra")
+	assert [e.get("source_id") for e in char["effets_actifs"]] == ["amenagement:salon"]
+	assert data["reveil"][0]["id"] == char["_id"] and data["reveil"][0]["effets"]
+	assert data["fiches"][0]["id"] == char["_id"]
+	assert any(e.get("source_id") == "amenagement:salon" for e in data["fiches"][0]["effets_actifs"])
+	_appel(monde, char, monde["ra"].passer_la_nuit, None, module="ra")
+	assert len(char["effets_actifs"]) == 1
+
+
+def test_nuit_le_medecin_dissipe_le_poison(monde):
+	char = _perso(effets_actifs=[{"sort_id": "sort:venin", "nom": "Venin", "regen_pv": -3, "restants": 9}])
+	_entrer(monde, char)
+	_appel(monde, char, monde["rp"].installer, None, {"amenagement": "salle_de_soins"})
+	_engager(monde, char, "medecin")
+	data = _appel(monde, char, monde["ra"].passer_la_nuit, None, module="ra")
+	assert [e.get("source_id") or e.get("sort_id") for e in char["effets_actifs"]] == ["amenagement:salle_de_soins"]
+	assert any("Venin" in t for t in data["reveil"][0]["effets"])
+
+
+def test_nuit_ailleurs_aucun_reveil(monde):
+	char = _perso(lieu="lieu:auberge")
+	data = _appel(monde, char, monde["ra"].passer_la_nuit, None, module="ra")
+	assert data["reveil"] == [] and "fiches" not in data and not char.get("effets_actifs")
+
+
+def test_recolter_au_jardin_puis_attendre(monde):
+	for i in ("item:Herbes_aromatiques", "item:Herbes_medicinales"):
+		monde["docs"][i] = {"_id": i, "type": "item", "nom": i.split(":")[1], "poids": 0.1, "slots": []}
+	char = _perso()
+	_entrer(monde, char)
+	_appel(monde, char, monde["rp"].installer, None, {"amenagement": "petit_jardin"})
+	data = _appel(monde, char, monde["rp"].recolter, None, {"amenagement": "petit_jardin"})
+	assert len(char["inventaire"]) == len(data["recolte"]) > 0
+	assert data["recoltes"][0]["pret"] is False and data["inventaire_payload"]
+	with pytest.raises(HTTPException) as e:
+		_appel(monde, char, monde["rp"].recolter, None, {"amenagement": "petit_jardin"})
+	assert e.value.status_code == 409
+
+
+def test_registre_releve_les_caisses_du_bien(monde):
+	char = _perso()
+	_entrer(monde, char)
+	marchand = _marchand(monde, char)
+	marchand["caisse_cuivre"] = 30
+	with pytest.raises(HTTPException) as e:
+		_appel(monde, char, monde["rp"].registre_relever, None)
+	assert e.value.status_code == 403                 # sans bureau, pas de registre
+	_appel(monde, char, monde["rp"].installer, None, {"amenagement": "bureau"})
+	avant = characters_util.money_to_cuivre(char)
+	data = _appel(monde, char, monde["rp"].registre_relever, None)
+	assert data["releve"] == 30 and characters_util.money_to_cuivre(char) == avant + 30
+	assert marchand["caisse_cuivre"] == 0
+
+
+def test_ecurie_laisser_puis_reprendre_une_monture(monde):
+	bete = {"_id": "monture:a", "type": "monture", "statut": "acquise", "acquise_par": "character:a",
+			"nom": "Rosse", "inventaire": [], "caracteristiques_current": dict(CARACTS)}
+	monde["docs"][bete["_id"]] = bete
+	char = _perso(montures=["monture:a"])
+	_entrer(monde, char)
+	with pytest.raises(HTTPException):
+		_appel(monde, char, monde["rp"].ecurie_loger, None, {"monture_id": "monture:a"})   # pas d'écurie
+	_appel(monde, char, monde["rp"].installer, None, {"amenagement": "cour_interieure"})
+	data = _appel(monde, char, monde["rp"].ecurie_loger, None, {"monture_id": "monture:a"})
+	assert bete["loge_a"] == char["lieu"] and [m["id"] for m in data["ecurie"]["logees"]] == ["monture:a"]
+	assert data["ecurie"]["logeables"] == []
+	data = _appel(monde, char, monde["rp"].ecurie_reprendre, None, {"monture_id": "monture:a"})
+	assert "loge_a" not in bete and data["ecurie"]["logees"] == []
+
+
+def test_coffre_de_la_bibliotheque_resynchronise_la_fiche(monde):
+	char = _perso(inventaire=[{"item": "item:herbe", "poids": 1}])
+	_entrer(monde, char)
+	data = _appel(monde, char, monde["rp"].coffre_transferer, None,
+				  {"sens": "vers_coffre", "index": 0, "item_id": "item:herbe"})
+	assert "fiche" not in data
+	_appel(monde, char, monde["rp"].installer, None, {"amenagement": "bibliotheque"})
+	data = _appel(monde, char, monde["rp"].coffre_transferer, None,
+				  {"sens": "vers_principal", "index": 0, "item_id": "item:herbe"})
+	assert data["fiche"]["id"] == char["_id"]
+
+
+def test_bibliothecaire_ouvre_le_scriptorium(monkeypatch, monde):
+	from routers import scriptorium as rs
+	char = _perso()
+	prop = _entrer(monde, char)
+	monkeypatch.setattr(rs, "get_doc", monde["docs"].get)
+	monkeypatch.setattr(rs, "get_selected_character", lambda _u: char)
+	with pytest.raises(HTTPException) as e:
+		rs._acces_scriptorium(None)
+	assert e.value.status_code == 403
+	_appel(monde, char, monde["rp"].installer, None, {"amenagement": "bibliotheque"})
+	_engager(monde, char, "bibliothecaire")
+	_c, lieu = rs._acces_scriptorium(None)
+	assert "scriptorium" in lieu["tags"] and "tags" not in monde["docs"][prop["_id"]]
+
+
+def test_revente_suit_la_decoration(monde):
+	char = _perso()
+	_entrer(monde, char)
+	sans = _appel(monde, char, monde["rp"].ici, None)["revente"]["prix"]
+	data = _appel(monde, char, monde["rp"].installer, None, {"amenagement": "decoration"})
+	assert data["revente"]["prix"] > sans
+	deco = next(a for a in data["installes"] if a["id"] == "decoration")
+	assert deco["effets"] and deco["actif"] is True and deco["poste_requis"] is False
