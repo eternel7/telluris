@@ -37,6 +37,7 @@ from utils import bois
 from utils import carcasse
 from utils import consommables
 from utils import charge_magie
+from utils import vol as vol_util
 from utils import sorts as sorts_util
 from utils import competences as competences_util
 from utils import slots_actions
@@ -758,6 +759,12 @@ async def move_character(
 					xp_partage += int(escorte_maj["depose"].get("xp") or 0)
 				compagnons, montures_groupe = _auras_du_groupe(character_to_update)
 				_apply_world_turn_regen(character_to_update)
+				# VOL MAGIQUE (utils/vol.py) : le tour de monde a pu l'éteindre au-dessus de l'eau
+				# ou d'une falaise — chute sur la case de sol la plus proche. APRÈS le tick, donc
+				# un vol à 1 tour restant porte encore ce pas-ci et lâche son porteur à l'arrivée.
+				chute = vol_util.chute_exploration(character_to_update, lieu_doc)
+				if chute:
+					access = get_lieu_directions(current_user, lieu_doc, character_to_update["position"])
 				save_doc(character_to_update)
 				# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage. Un pas ne
 				# rapporte pas d'XP — seule une conclusion d'intro peut en partager ici.
@@ -772,7 +779,7 @@ async def move_character(
 				# docs relation + un doc lieu complet par lieu connu).
 				relations_lieux = (relations_lieux_payload(character_to_update)
 								   if (transports_echoues or escorte_maj["depose"]) else None)
-				return {"transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "lieux_marques": indicateurs.marques_lieux(character_to_update), "access": access, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp, "proprietes_offre": proprietes.offre_ici(lieu_doc, character_to_update["position"], auberge.lieu_est_taverne(lieu_doc), proprietes.catalogue(get_doc), get_doc)}
+				return {"transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "lieux_marques": indicateurs.marques_lieux(character_to_update), "access": access, "volant": vol_util.vol_actif(character_to_update), "chute": chute, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp, "proprietes_offre": proprietes.offre_ici(lieu_doc, character_to_update["position"], auberge.lieu_est_taverne(lieu_doc), proprietes.catalogue(get_doc), get_doc)}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 
@@ -1559,6 +1566,8 @@ async def lancer_sort(
 	payload["effets_actifs"] = consommables.effets_actifs_payload(character)
 	payload["caracts_detail"] = _caracts_payload(character)
 	payload["sorts"] = sorts_util.liste_sorts_payload(character, get_doc, "exploration")
+	# Règle de marche du pavé : seul le vol du PRINCIPAL compte (il porte la position).
+	payload["volant"] = vol_util.vol_actif(principal)
 	payload["lance"] = {
 		"nom": sort["nom"],
 		"icon": sort["icon"],
@@ -1670,6 +1679,7 @@ async def utiliser_competence(
 	payload["effets_actifs"] = consommables.effets_actifs_payload(character)
 	payload["caracts_detail"] = _caracts_payload(character)
 	payload["competences"] = competences_util.liste_competences_payload(character, get_doc, "exploration")
+	payload["volant"] = vol_util.vol_actif(principal)
 	payload["utilisee"] = {
 		"nom": comp["nom"],
 		"icon": comp["icon"],

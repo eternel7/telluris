@@ -38,6 +38,7 @@ from utils import animations as animations_util
 from utils import jetons
 from utils import journal
 from utils import pieges as pieges_util
+from utils import vol as vol_util
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -211,6 +212,14 @@ def _refresh_snapshot_stats(acteur: dict) -> None:
 	  • `charge_max` — même exclusion anti-exploit qu'en exploration (charge_max_of ignore
 		les buffs) : un buff de F qui expire rendrait rétroactivement surchargé.
 	"""
+	# VOL MAGIQUE (utils/vol.py) : DÉRIVÉ des effets vivants, jamais stocké à part — posé
+	# AVANT la sortie en tête, un vieux snapshot sans `caracts_base` lévite aussi. Clé ABSENTE
+	# sans vol : un snapshot ordinaire reste celui d'avant, à la lettre (lue par `_can_fly`
+	# et, côté client, par `acteurVole`).
+	if vol_util.vol_actif(acteur):
+		acteur["vol_magique"] = True
+	else:
+		acteur.pop("vol_magique", None)
 	stats = caracts_effectives(acteur)
 	if not stats:
 		return  # snapshot d'avant la feature : rien à recalculer
@@ -322,6 +331,9 @@ def _empiler_effet_combat(acteur: dict, source: dict, effets: dict, tour: int) -
 		# son propre tour perdrait un point avant d'avoir servi.
 		"pose_tour": int(tour or 0),
 	}
+	if _eff_int(eff.get("vol")):
+		# VOL MAGIQUE : `_refresh_snapshot_stats` (ci-dessous) en dérive `vol_magique`.
+		entry["vol"] = 1
 	if _eff_int(eff.get("provocation")):
 		# PROVOCATION : le provocateur (`provocateur_id`) est timbré par l'appelant qui
 		# connaît le lanceur (`_resoudre_coup_capacite`) ; lue par `_cible_joueur`.
@@ -1147,6 +1159,9 @@ def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
 			"texte": f"{eff.get('icon', '✨')} {eff.get('nom', 'Effet')} se dissipe "
 					 f"({acteur.get('nom', '?')}).",
 		}, "dissipation", acteur.get("id", "")), acteur))
+	# Fin d'un VOL au-dessus d'une falaise : chute (APRÈS la ligne de dissipation).
+	if any(eff.get("vol") for eff in expires):
+		_atterrir(combat_doc, acteur)
 
 
 # ── Grille de combat ─────────────────────────────────────────────────────────
@@ -1161,8 +1176,11 @@ TERRAIN_FALAISE = 3
 
 
 def _can_fly(actor: dict) -> bool:
-	"""L'acteur peut-il franchir les falaises ? `volant`, posé par `_appliquer_couvert`."""
-	return bool(actor.get("volant"))
+	"""L'acteur peut-il franchir les falaises ? `volant` (ailes d'une espèce, posé par
+	`_appliquer_couvert`) OU `vol_magique` (sort de vol, dérivé de ses effets vivants par
+	`_refresh_snapshot_stats`). ⚠️ La lévitation ignore le COUVERT : seules les ailes s'y
+	replient."""
+	return bool(actor.get("volant") or actor.get("vol_magique"))
 
 
 # ── Vol et couvert ───────────────────────────────────────────────────────────
@@ -1478,6 +1496,7 @@ def _rompre_concentration(combat_doc: dict, acteur: dict, entree: dict, texte: s
 	porteurs = ([acteur] + list(combat_doc.get("joueurs") or [])
 				+ list(combat_doc.get("monstres") or []))
 	vus = set()
+	retombes = []
 	for porteur in porteurs:
 		if id(porteur) in vus:
 			continue
@@ -1487,6 +1506,8 @@ def _rompre_concentration(combat_doc: dict, acteur: dict, entree: dict, texte: s
 		if len(restants) != len(avant):
 			porteur["effets_actifs"] = restants
 			_refresh_snapshot_stats(porteur)
+			if any(e.get("vol") for e in avant if e not in restants):
+				retombes.append(porteur)
 
 	# 2. Les créatures qu'il tenait. ⚠️ `_dissiper_invocation` et jamais un marquage à la
 	# main : elle pose aussi `currentPV = 0`, que lisent `_joueurs_vivants` et `_occupied_set`.
@@ -1512,6 +1533,9 @@ def _rompre_concentration(combat_doc: dict, acteur: dict, entree: dict, texte: s
 		"kind": "sys",
 		"texte": texte,
 	}, "dissipation", acteur.get("id", "")), acteur))
+	# 5. Un VOL maintenu qui tombe : ses porteurs suspendus au-dessus d'une falaise chutent.
+	for porteur in retombes:
+		_atterrir(combat_doc, porteur)
 
 
 def _payer_maintiens(combat_doc: dict, acteur: dict) -> None:
@@ -1829,6 +1853,98 @@ def _pieges_au_pas(combat_doc: dict, acteur: dict, rand_fn=None) -> None:
 			_declencher_sur_monstres(combat_doc, p)
 		else:
 			_declencher_sur_joueur(combat_doc, p, acteur)
+
+
+# Ce qui tient lieu d'attaquant à une CHUTE dans les cascades partagées (concentration, KO).
+CHUTE_ATTAQUANT = {"id": "chute", "nom": "Chute", "ch": 0}
+
+
+def _atterrir(combat_doc: dict, acteur: dict) -> None:
+	"""CHOKEPOINT de la fin d'un VOL MAGIQUE (`utils/vol.py`) : l'acteur ne vole plus et son
+	emprise surplombe une case qu'il ne peut pas fouler (falaise) ⇒ il CHUTE sur la case libre
+	la plus proche (`vol.case_la_plus_proche`, emprise complète) et subit UN DÉ PAR CASE
+	parcourue (`vol.notation_chute` : D20 depuis une falaise — seul terrain qu'un vol ouvre en
+	combat, l'eau s'y franchit déjà) — automatiques, ni jet ni armure. Puis la cascade d'un coup reçu (lien de vie, concentration,
+	KO) pour le camp du joueur, celle d'un monstre brûlé sinon ; enfin zone persistante et
+	pièges de la case d'arrivée, comme au bout d'un saut.
+
+	Appelé par les deux sorties d'un vol : expiration (`_tick_effets_combat`) et rupture d'un
+	vol maintenu (`_rompre_concentration`). Sans grille (simulateur), acteur à terre, encore en
+	vol (ailes d'espèce) ou pied déjà sur une case praticable ⇒ rien. Aucune case libre ⇒ il
+	reste en place, sans dégât : il n'y a nulle part où tomber."""
+	grid = combat_doc.get("grid") or {}
+	cells, dims = grid.get("cells"), grid.get("dims") or {}
+	if not cells or not acteur.get("pos") or not _debout(acteur) or _can_fly(acteur):
+		return
+	if all(_walkable(cells, cx, cy) for cx, cy in jetons.cases_emprise(acteur)):
+		return
+	occupees = _occupied_set(combat_doc, exclude=acteur)
+	largeur, hauteur = int(dims.get("x", 0) or 0), int(dims.get("y", 0) or 0)
+	_x0, _y0, w, h = jetons.emprise(acteur)
+
+	def _tient(cx: int, cy: int) -> bool:
+		return all(0 <= px < largeur and 0 <= py < hauteur and _walkable(cells, px, py)
+				   and (px, py) not in occupees for px, py in jetons.cases_rect(cx, cy, w, h))
+
+	vers = vol_util.case_la_plus_proche(acteur["pos"]["x"], acteur["pos"]["y"],
+										largeur, hauteur, _tient)
+	if vers is None:
+		return
+	tour = int(combat_doc.get("tour", 0) or 0)
+	nom = acteur.get("nom", "?")
+	# Terrain de la chute : le PIRE sous l'emprise (le plus de faces) parmi les cases qu'elle
+	# ne peut pas fouler — une grande créature à cheval sur une falaise s'y fracasse.
+	terrain = max((cells[cy][cx] if 0 <= cy < len(cells) and 0 <= cx < len(cells[cy]) else None
+				   for cx, cy in jetons.cases_emprise(acteur) if not _walkable(cells, cx, cy)),
+				  key=vol_util.faces_de_chute)
+	notation = vol_util.notation_chute(
+		terrain, vol_util.distance_cases((acteur["pos"]["x"], acteur["pos"]["y"]), vers))
+	acteur["pos"] = {"x": vers[0], "y": vers[1]}
+	dmg = roll_dice(notation)
+	est_monstre = str(acteur.get("id") or "").startswith("monstre_")
+	# ⚠️ UNE ligne `move` portant le nouvel état (position ET PV) : le jeton glisse vers sa
+	# case d'arrivée, la barre chute avec lui.
+	if est_monstre:
+		acteur["currentPV"] = max(0, acteur["currentPV"] - dmg)
+		mort = acteur["currentPV"] <= 0
+		if mort:
+			acteur["vivant"] = False
+		combat_doc.setdefault("log", []).append(_avec_etat({
+			"tour": tour, "acteur": nom, "kind": "kill" if mort else "move",
+			"texte": (f"🪂 {nom} s'écrase en [{vers[0]},{vers[1]}] !" if mort else
+					  f"🪂 {nom} chute en [{vers[0]},{vers[1]}] ({notation}) : {dmg} dégâts "
+					  f"(PV : {acteur['currentPV']}/{acteur.get('pv_max', 0)})."),
+		}, acteur))
+		if mort:
+			_check_victory(combat_doc)
+			return
+	else:
+		dmg_def, dmg_prot, protecteur = _rediriger_lien_vie(combat_doc, acteur, dmg)
+		acteur["currentPV"] = max(0, acteur["currentPV"] - dmg_def)
+		if protecteur is not None:
+			protecteur["currentPV"] = max(0, protecteur["currentPV"] - dmg_prot)
+		combat_doc.setdefault("log", []).append(_avec_etat({
+			"tour": tour, "acteur": nom, "kind": "move",
+			"texte": f"🪂 {nom} chute en [{vers[0]},{vers[1]}] ({notation}) : {dmg_def} dégâts "
+					 f"(PV : {acteur['currentPV']}/{acteur.get('pv_max', 0)}).",
+		}, acteur))
+		if protecteur is not None:
+			combat_doc["log"].append(_avec_etat({
+				"tour": tour, "acteur": nom, "kind": "hit",
+				"texte": f"Le lien de vie détourne {dmg_prot} dégâts vers {protecteur['nom']} ! "
+						 f"(PV : {protecteur['currentPV']}/{protecteur['pv_max']})",
+			}, protecteur))
+		if dmg_def > 0:
+			_tester_concentration(combat_doc, acteur, CHUTE_ATTAQUANT, dmg_def)
+		if protecteur is not None and dmg_prot > 0:
+			_tester_concentration(combat_doc, protecteur, CHUTE_ATTAQUANT, dmg_prot)
+		if acteur["currentPV"] <= 0:
+			_traiter_ko(combat_doc, acteur, CHUTE_ATTAQUANT)
+		if protecteur is not None and protecteur["currentPV"] <= 0:
+			_traiter_ko(combat_doc, protecteur, CHUTE_ATTAQUANT)
+	# La case d'arrivée vaut comme un pas : zone persistante, pièges.
+	_bruler_zones(combat_doc, acteur)
+	_pieges_au_pas(combat_doc, acteur)
 
 
 def _pseudo_attaquant(piege: dict) -> dict:
@@ -3064,6 +3180,9 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"detection_pieges": _eff_int((character.get("competences_bonus") or {}).get("detection_pieges")),
 		"desamorcage": _eff_int((character.get("competences_bonus") or {}).get("desamorcage")),
 		"xp_pieges": 0,
+		# VOL MAGIQUE lancé en exploration et encore actif : dérivé de `effets_actifs`, comme
+		# le fait `_refresh_snapshot_stats` (clé absente sinon).
+		**({"vol_magique": True} if vol_util.vol_actif(character) else {}),
 	}
 
 

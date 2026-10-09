@@ -74,6 +74,27 @@ t('les deux règles DIVERGENT bien sur le terrain difficile — c’est tout l�
 	assert.strictEqual(caseFranchissable(CELLS, 1, 1), true);
 });
 
+console.log('\n── Vol magique : règle d’exploration et acteur volant ─────────────────────');
+
+t('accesExploration : === 1 à pied, >= 1 en vol (eau, falaise, terrain difficile)', () => {
+	assert.strictEqual(accesExploration(1, false), true);
+	for (const v of [2, 3, 5]) {
+		assert.strictEqual(accesExploration(v, false), false, `terrain ${v} fermé à pied`);
+		assert.strictEqual(accesExploration(v, true), true, `terrain ${v} survolé`);
+	}
+	for (const v of [0, -1, undefined]) {
+		assert.strictEqual(accesExploration(v, true), false, `mur ${v} jamais traversé`);
+	}
+});
+
+t('acteurVole : ailes d’espèce OU sort de vol (miroir de combat._can_fly)', () => {
+	assert.strictEqual(acteurVole({ volant: true }), true);
+	assert.strictEqual(acteurVole({ vol_magique: true }), true);
+	assert.strictEqual(acteurVole({ volant: false, vol_magique: true }), true, 'lévitation sous couvert');
+	assert.strictEqual(acteurVole({}), false);
+	assert.strictEqual(acteurVole(null), false);
+});
+
 console.log('\n── echangePossible : chacun doit tenir sur la case de l’autre ──────────────');
 
 // Miroir de `combat._echange_possible`. Ferme la classe de bug « la monture se retrouve

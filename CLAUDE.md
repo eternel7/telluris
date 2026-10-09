@@ -71,7 +71,7 @@ utils/
   sorts.py               # sorts (pur) : normalisation, composants, écoles de magie, apprentissage,
                          #   familles exclues d'une vocation, bloc `invocation`, les TROIS notions
                          #   du temps magique (incantation PA / cout_pm / maintien), seuil de
-                         #   concentration, clés d'effet drain / degats_pm / cout_pv / saut / lien_vie / partage_soin / provocation / echange,
+                         #   concentration, clés d'effet drain / degats_pm / cout_pv / saut / lien_vie / partage_soin / provocation / echange / vol,
                          #   FORMULES À CARACTÉRISTIQUES (`1D{Int/5}`, chokepoints `resoudre_effets` + `resoudre_temps`),
                          #   et les prédicats d'éligibilité PARTAGÉS avec les compétences
                          #   (capacite_utilisable_combat / effets_agissent_sur_cible / _exploration)
@@ -89,6 +89,8 @@ utils/
   pieges.py              # pièges de combat (pur) : tag `pieges_<q>_<d>` de salle, placement loin du
                          #   départ, seuils détection/désamorçage/flair, pose (`pose_piege`), XP ;
                          #   ⚠️ `combat.vue_client` SEUL filtre des pièges cachés envoyés au client
+  vol.py                 # vol magique (pur) : `effets.vol`, case d'atterrissage, chute en exploration ;
+                         #   combat : `_can_fly` lit `vol_magique`, chute par `combat._atterrir`
   zones_effet.py         # zones d'effet des sorts/compétences (pur) : cercle, carré, rectangle, cône ;
                          #   ancre (lanceur/cible) + orientation ; miroir scripts/zones_effet.js
   jetons.py              # jetons de taille variable (pur) : emprise LxP selon le cap, distance entre

@@ -206,6 +206,8 @@ def empiler_effet_competence(character: dict, comp: dict) -> dict | None:
 		"esquive": _as_int(eff.get("esquive")),
 		"restants": _as_int(eff.get("duree")),
 	}
+	if _as_int(eff.get("vol")):
+		entry["vol"] = 1
 	return poser_effet(character, entry)
 
 

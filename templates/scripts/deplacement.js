@@ -27,6 +27,15 @@ function caseType1(cells, x, y) {
 	return !!row && row[x] === 1;
 }
 
+// Règle de case d'EXPLORATION d'une valeur de terrain, VOL compris — celle des flèches de
+// play_town (matrice `ACCESS.access` résolue par le serveur). À pied : exactement 1
+// (`caseType1`). En VOL MAGIQUE (utils/vol.py) : tout terrain praticable (>= 1) — eau,
+// falaise, terrain difficile. Jamais un mur (0 / -1), et les murs `nav` restent à la charge
+// de l'appelant : on survole un obstacle naturel, on ne traverse pas une maison.
+function accesExploration(v, volant) {
+	return volant ? v >= 1 : v === 1;
+}
+
 // Miroir de `combat._walkable` : praticable (>= 1) et, sauf vol, pas une falaise.
 // C'est la règle du COMBAT et celle du flood fill de placement (`_reachable_region`).
 function caseFranchissable(cells, x, y, volant) {
@@ -34,6 +43,14 @@ function caseFranchissable(cells, x, y, volant) {
 	const row = cells[y];
 	if (!row || !(row[x] >= 1)) return false;
 	return !!volant || row[x] !== TERRAIN_FALAISE;
+}
+
+// L'acteur de combat (snapshot) VOLE-t-il ? Miroir de `combat._can_fly` : `volant` = ailes
+// d'une espèce taguée `vol` (`_appliquer_couvert`, retirées sous couvert), `vol_magique` =
+// sort de vol vivant (dérivé de ses effets par `_refresh_snapshot_stats`, insensible au
+// couvert). Un acteur absent ne vole pas.
+function acteurVole(a) {
+	return !!(a && (a.volant || a.vol_magique));
 }
 
 // Deux acteurs peuvent-ils PERMUTER leurs cases ? Chacun doit pouvoir TENIR sur celle de

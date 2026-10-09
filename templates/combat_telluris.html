@@ -1860,6 +1860,7 @@ function renderEffetsActifs(list) {
 		if (e.regen_pv) details.push(regenTexte(e.regen_pv, 'PV'));
 		if (e.regen_pm) details.push(regenTexte(e.regen_pm, 'PM'));
 		if (e.esquive) details.push(`+${e.esquive} esquive`);
+		if (e.vol) details.push('🪽 vol');
 		// Un sort MAINTENU n'a pas de compte à rebours : il dure tant que son lanceur paie
 		// l'entretien. Afficher « ⏳3 » mentirait — le chiffre ne bougerait jamais. On
 		// annonce donc la FACTURE par round, seule chose qui décide de sa survie.
@@ -3468,8 +3469,8 @@ function allyTargets(s) {
 // l'une des deux cases. La distance n'y figure pas : c'est la portée de la capacité.
 function echangeOffert(j, p) {
 	if (!j || !p || !j.pos || !p.pos || estGrand(j) || estGrand(p)) return false;
-	if (!echangePossible((GRID || {}).cells, { x: j.pos.x, y: j.pos.y, volant: !!j.volant },
-		{ x: p.pos.x, y: p.pos.y, volant: !!p.volant })) return false;
+	if (!echangePossible((GRID || {}).cells, { x: j.pos.x, y: j.pos.y, volant: acteurVole(j) },
+		{ x: p.pos.x, y: p.pos.y, volant: acteurVole(p) })) return false;
 	const tiers = (state.joueurs || []).filter(a => (a.currentPV || 0) > 0)
 		.concat((state.monstres || []).filter(m => m.vivant));
 	return !tiers.some(a => a.id !== j.id && a.id !== p.id && a.pos
@@ -3552,13 +3553,12 @@ function seeThroughCell(x, y) {
 // une falaise. ⚠️ La RÈGLE elle-même vit dans `scripts/deplacement.js` (`caseFranchissable`),
 // partagée avec le mode test de l'éditeur — elle était écrite deux fois. Ce qui reste ici est
 // ce qui est PROPRE au combat : les bornes lues sur `GRID.dims` et le vol de l'acteur actif.
-// `volant` est posé par le serveur (`combat._appliquer_couvert`) sur les espèces taguées `vol`,
-// retiré sous couvert — un joueur n'en a pas, mais le prédicat lit l'acteur, pas son camp.
+// Le vol de l'acteur vient de `acteurVole` (scripts/deplacement.js) : ailes d'espèce ou sort.
 function cellWalkable(x, y) {
 	const g = GRID;
 	if (!g || !g.cells) return true;
 	if (x < 0 || x >= g.dims.x || y < 0 || y >= g.dims.y) return false;
-	return caseFranchissable(g.cells, x, y, !!(me() || {}).volant);
+	return caseFranchissable(g.cells, x, y, acteurVole(me()));
 }
 function cellOccupied(x, y) {
 	// Toutes les cases de chaque emprise VIVANTE bloquent (miroir serveur _occupied_set), sauf
@@ -3581,8 +3581,8 @@ function occupantEchangeable(j, nx, ny) {
 	if (state.joueurs.some(p => p.id !== j.id && p.id !== a.id && (p.currentPV || 0) > 0
 		&& p.pos && couvreActeur(p, j.pos.x, j.pos.y))) return false;
 	return echangePossible((GRID || {}).cells,
-		{ x: j.pos.x, y: j.pos.y, volant: !!j.volant },
-		{ x: nx, y: ny, volant: !!a.volant });
+		{ x: j.pos.x, y: j.pos.y, volant: acteurVole(j) },
+		{ x: nx, y: ny, volant: acteurVole(a) });
 }
 function moveApUsedFor(j, cells) {
 	const dep = Math.max(1, j.deplacement || 1);

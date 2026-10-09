@@ -412,6 +412,9 @@ def _bonus_dict(raw) -> dict:
 		# le jet — permutent leurs cases (cf. combat `_echanger`). Aucune limite de distance dans le moteur : la
 		# PORTÉE de la capacité en décide — « Attention, messire ! » s'écrit `portee: 1`.
 		"echange": min(1, _as_int(raw.get("echange"))),
+		# VOL MAGIQUE (1) : part à DURÉE (`part_durative`) — le porteur lévite tant que l'entrée
+		# vit : falaises en combat, eau/falaise/terrain difficile en exploration (utils/vol.py).
+		"vol": min(1, _as_int(raw.get("vol"))),
 		# Renforts d'un sort qui ne pose pas d'`effets` : ils ne valent QUE comme bonus de
 		# composant, appliqués au doc par `doc_effectif` (cf. INVOCATION_* / MAINTIEN_*).
 		"invocation_duree": _as_int(raw.get("invocation_duree")),
@@ -704,6 +707,7 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 		"partage_soin": _as_int(base.get("partage_soin")),
 		"provocation": _as_int(base.get("provocation")),
 		"echange": _as_int(base.get("echange")),
+		"vol": min(1, _as_int(base.get("vol"))),
 	}
 	formules = _fusionner_formules(base.get("formules"), {})
 	for bonus in bonus_list or []:
@@ -727,6 +731,7 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 		for key in ("regen_pv", "regen_pm"):
 			out[key] += _as_signed_int(bonus.get(key))
 		out["echange"] = max(out["echange"], min(1, _as_int(bonus.get("echange"))))
+		out["vol"] = max(out["vol"], min(1, _as_int(bonus.get("vol"))))
 		for k, delta in (bonus.get("buffs") or {}).items():
 			if str(k) == "V":
 				continue
@@ -809,7 +814,7 @@ def doc_effectif(sort: dict, effets: dict) -> dict:
 
 def part_durative(effets: dict) -> bool:
 	"""Vrai si `effets` porte quelque chose à empiler sur la durée : une `duree` > 0 ET
-	au moins un bénéfice prolongé (buffs de caract, régén, esquive).
+	au moins un bénéfice prolongé (buffs de caract, régén, esquive, provocation, vol).
 
 	SOURCE UNIQUE de ce test — utilisée par les éligibilités combat/exploration des sorts,
 	des compétences et des consommables, et par les deux `empiler_effet_*`. Un critère qui
@@ -820,7 +825,7 @@ def part_durative(effets: dict) -> bool:
 	return _as_int(eff.get("duree")) > 0 and bool(
 		eff.get("buffs") or _as_signed_int(eff.get("regen_pv"))
 		or _as_signed_int(eff.get("regen_pm")) or _as_int(eff.get("esquive"))
-		or _as_int(eff.get("provocation")))
+		or _as_int(eff.get("provocation")) or _as_int(eff.get("vol")))
 
 
 # ── Éligibilité d'une CAPACITÉ — source unique des sorts ET des compétences ──────
@@ -958,6 +963,8 @@ def empiler_effet_sort(character: dict, sort: dict, effets: dict) -> dict | None
 		"esquive": _as_int(eff.get("esquive")),
 		"restants": _as_int(eff.get("duree")),
 	}
+	if _as_int(eff.get("vol")):
+		entry["vol"] = 1
 	return poser_effet(character, entry)
 
 
