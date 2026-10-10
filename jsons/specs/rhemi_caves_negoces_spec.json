@@ -1,0 +1,49 @@
+{
+	"cite": "lieu:rhemi",
+	"magasins": [
+		{
+			"categorie": "cave",
+			"label": "Le Foudre des Crayères",
+			"image": "cave_europe01.jpg",
+			"pos": [
+				26,
+				19
+			],
+			"nom": "Chaac Pommeverte",
+			"portrait": "marchand_humain_m_cave01.jpg"
+		},
+		{
+			"categorie": "cave",
+			"label": "La Barrique du Vieux Cloître",
+			"image": "cave_europe01.jpg",
+			"pos": [
+				34,
+				17
+			],
+			"nom": "Lydie Troisquarts",
+			"portrait": "marchand_hobbit_f_cave01.jpg"
+		},
+		{
+			"categorie": "cave",
+			"label": "Le Bouchon du Chapitre",
+			"image": "cave_europe01.jpg",
+			"pos": [
+				64,
+				17
+			],
+			"nom": "Sakura Brise-Os",
+			"portrait": "marchand_ogre_f_cave01.jpg"
+		},
+		{
+			"categorie": "cave",
+			"label": "Le Fût en Perce de la Vesle",
+			"image": "cave_europe01.jpg",
+			"pos": [
+				34,
+				20
+			],
+			"nom": "Lionel Valois",
+			"portrait": "marchand_humain_m_cave01.jpg"
+		}
+	]
+}

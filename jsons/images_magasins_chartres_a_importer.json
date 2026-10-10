@@ -1,19 +1,37 @@
 [
 	{
-		"_id": "lieu:le_sabot_du_tertre",
-		"_rev": "2-e7e4abb80d3402652902e79bcb118995",
+		"_id": "lieu:la_cuve_du_tertre",
+		"_rev": "2-b696a71de3026dd54c506feb1226df5a",
 		"type": "lieu",
-		"label": "Le Sabot du Tertre",
-		"image": "etable_europe_chartres03.jpg",
-		"categorie": "etable",
+		"label": "La Cuve du Tertre",
+		"image": "cave_europe_chartres01.jpg",
+		"categorie": "cave",
 		"lieu_parent": "lieu:chartres",
 		"stock_matieres": {},
 		"stock_vente": [],
 		"pnj": [
 			{
-				"character": "pnj:marchand_etable",
-				"portrait": "marchand_nain_m_etable01.jpg",
-				"nom": "Kazrag Lourde-Hache"
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_hobbit_m_cave01.jpg",
+				"nom": "Fastolf Basse-Vallée"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_tonneau_de_la_basse_ville",
+		"_rev": "2-f7fcc048c35062256fa17420fbb8bd6f",
+		"type": "lieu",
+		"label": "Le Tonneau de la Basse-Ville",
+		"image": "cave_europe_chartres02.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_elfe_f_cave02.jpg",
+				"nom": "Henriette Briseflammes"
 			}
 		]
 	}

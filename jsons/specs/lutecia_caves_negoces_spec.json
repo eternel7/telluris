@@ -1,0 +1,104 @@
+{
+	"cite": "lieu:lutecia",
+	"magasins": [
+		{
+			"categorie": "cave",
+			"label": "Le Pressoir du Palais",
+			"image": "cave_europe01.jpg",
+			"pos": [
+				21,
+				20
+			],
+			"nom": "Morg Pousse-Rocs",
+			"portrait": "marchand_ogre_m_cave01.jpg"
+		},
+		{
+			"categorie": "cave",
+			"label": "La Cuve de la Cité",
+			"image": "cave_europe01.jpg",
+			"pos": [
+				36,
+				12
+			],
+			"nom": "Chiara Rondevalle",
+			"portrait": "marchand_elfe_f_cave01.jpg"
+		},
+		{
+			"categorie": "cave",
+			"label": "Le Bouchon des Halles",
+			"image": "cave_europe01.jpg",
+			"pos": [
+				38,
+				27
+			],
+			"nom": "Yasmine Croque-Pierre",
+			"portrait": "marchand_ogre_f_cave01.jpg"
+		},
+		{
+			"categorie": "cave",
+			"label": "Le Chai du Petit-Pont",
+			"image": "cave_europe01.jpg",
+			"pos": [
+				32,
+				26
+			],
+			"nom": "Wilhelmine Lourde-Hache",
+			"portrait": "marchand_nain_f_cave01.jpg"
+		},
+		{
+			"categorie": "cave",
+			"label": "La Grappe des Faubourgs",
+			"image": "cave_europe01.jpg",
+			"pos": [
+				27,
+				32
+			],
+			"nom": "Lobelia Bonpré",
+			"portrait": "marchand_hobbit_f_cave01.jpg"
+		},
+		{
+			"categorie": "cave",
+			"label": "Le Verre Plein des Écoles",
+			"image": "cave_europe01.jpg",
+			"pos": [
+				17,
+				24
+			],
+			"nom": "Angèle Sigurðsson",
+			"portrait": "marchand_humain_f_cave01.jpg"
+		},
+		{
+			"categorie": "negociant",
+			"label": "La Maison de Négoce de la Grève",
+			"image": "negoce_europe01.jpg",
+			"pos": [
+				39,
+				8
+			],
+			"nom": "Xavier Piedléger",
+			"portrait": "marchand_humain_m_negociant01.jpg"
+		},
+		{
+			"categorie": "negociant",
+			"label": "La Pesée Juste de la Montagne",
+			"image": "negoce_europe01.jpg",
+			"pos": [
+				62,
+				31
+			],
+			"nom": "Kotoha Douce-Amande",
+			"portrait": "marchand_hobbit_f_negociant01.jpg"
+		},
+		{
+			"categorie": "negociant",
+			"label": "Le Poids du Roi du Parvis",
+			"image": "negoce_europe01.jpg",
+			"pos": [
+				20,
+				14
+			],
+			"nom": "Louis Petit-Pas",
+			"portrait": "marchand_hobbit_m_negociant01.jpg"
+		}
+	]
+}

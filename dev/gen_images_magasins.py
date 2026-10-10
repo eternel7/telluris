@@ -5,6 +5,7 @@
 # (−50 % du prix interactif, résultat sous 24 h).
 #
 #   python dev/gen_images_magasins.py preparer  --cite lieu:chartres [--sauf lieu:x,lieu:y]
+#   python dev/gen_images_magasins.py preparer  --cite lieu:auxerre --lot jsons/caves_negoces_a_importer.json  → ses seules boutiques
 #   python dev/gen_images_magasins.py avancer   --cite …  → l'étape suivante, quelle qu'elle soit (PAYANT)
 #   python dev/gen_images_magasins.py essai     --cite … [--seulement …] [--limite N]  → interactif, essais/
 #   python dev/gen_images_magasins.py soumettre | etat | recuperer --cite …
@@ -79,7 +80,7 @@ LIGNEES = {
 	"elfe": ("Une elfe", "Un elfe", "aux oreilles longues et pointues"),
 	# Jamais vert (consigne de l'auteur, 09/10).
 	"ogre": ("Une ogresse", "Un ogre",
-			 "bien plus grand{e} et massi{ve} qu'un humain, peau épaisse au teint humain, jamais verte — un humain au même plan lui arrive à la poitrine"),
+			 "bien plus grand{e} et massi{ve} qu'un humain, peau épaisse au teint humain, jamais verte ni gris-vert, sans crocs — un humain au même plan lui arrive à la poitrine"),
 	"humain": ("Une humaine", "Un humain", ""),
 }
 # Lot de Lutecia (10/10) : des tenanciers trop vieux par défaut (consigne de l'auteur) — huit âges
@@ -114,7 +115,10 @@ STYLE_FR = ("Illustration de fantasy médiévale semi-réaliste, dans le style d
 			"gamme : peinture numérique détaillée, lumière naturelle chaude, palette chaude et terreuse "
 			"relevée de touches de couleurs vives, proportions crédibles ; pas une photographie. Image "
 			"entièrement dépourvue d'écriture : aucun nom, aucune lettre, aucune signature, aucun "
-			"monogramme, aucun filigrane, aucune enseigne lisible.")
+			"monogramme, aucun filigrane, aucune enseigne lisible. Bouteilles, bocaux, pots, tonneaux, "
+			# Lot des caves (10/10) : « Moutarde d'Auxerre » sur un bocal, étiquettes de bouteilles.
+			"caisses et papiers ne portent aucune étiquette écrite ; aucun écriteau, aucune pancarte ni "
+			"aucun panneau au mur ou au-dessus d'une porte.")
 # §0.2 (phrase de l'auteur, telle quelle) + la variété de la foule d'Auxerre : sans elle, des
 # figurants identiques (lot de Rhemi, 09/10). Ogres jamais verts. Répartition ÉGALE entre les cinq
 # Lignées (consigne de l'auteur, 10/10) : avec un tenancier humain, le modèle peuplait la rue d'humains.
@@ -125,7 +129,9 @@ FOULE_FR = ("Des ogres, des nains, des hobbits, des elfes et des humains vaquent
 			"elfes bruns, roux, noirs, argentés ou blonds, en robe, cape de voyage ou cuir ; nains barbus, "
 			"naines imberbes aux cheveux tressés, en armure, tablier ou habit de marchand ; hobbits ronds ou "
 			"fluets, jeunes ou ridés, en gilets colorés ; ogres aux teints humains, burinés, rougeauds ou "
-			"hâlés, jamais verts ; humains de toutes origines, aventuriers, gardes, marchands, pèlerins.")
+			"hâlés, jamais verts ni gris-vert — ce ne sont ni des orcs ni des trolls, et ils n'ont pas de "
+			"crocs ; humains de toutes origines, aventuriers, gardes, marchands, pèlerins. Tout le monde, "
+			"elfes compris, a un teint de peau humain naturel.")
 
 
 # Créativité laissée au modèle (consigne de l'auteur, 10/10) : les exemples du métier ne sont pas
@@ -203,12 +209,16 @@ def prompt_tenancier(race, sexe, categorie, cite_nom, tirage, variante=0, client
 	if race in ("hobbit", "nain"):
 		echelle = (f"Garde sa petite taille dans la boutique : le comptoir lui arrive à la poitrine, le "
 				   f"mobilier et les outils sont faits pour des humains et paraissent grands à côté "
-				   f"{"d'elle" if f else "de lui"}, et tout humain présent {'la' if f else 'le'} dépasse nettement. ")
+				   f"{"d'elle" if f else "de lui"}, et tout humain présent {'la' if f else 'le'} dépasse nettement. "
+				   f"{il} n'a PAS une taille humaine : debout, {il.lower()} n'arrive qu'à la hauteur d'un "
+				   f"enfant humain de {'dix' if race == 'nain' else 'huit'} ans. ")
 		if client in TAILLES:
 			echelle += comparatif_client(race, client, f)
 	return (f"Portrait illustré d'un personnage de fantasy médiévale, format paysage large. "
 			# Pas de « Telluris » : le mot finissait peint en enseigne (essai des façades, 08/10).
-			f"{sujet}. {age}{il} {qui} à {cite_nom}, dans un monde médiéval fantastique. "
+			# Ni le nom de la cité : « Caves de Reims » et « LUTECIA TRADE CO. » peints en écriteau (lot des
+			# caves, 10/10) — `cite_nom` reste dans la signature pour les appelants.
+			f"{sujet}. {age}{il} {qui} dans une cité fortifiée d'un monde médiéval fantastique. "
 			# Lot de Lutecia (10/10) : des tenanciers peints au milieu de la rue (consigne de l'auteur).
 			f"La scène se passe À L'INTÉRIEUR de sa boutique, jamais dans la rue : {il.lower()} se tient "
 			f"derrière son comptoir, légèrement décalé{'e' if f else ''} du centre, et regarde droit vers le "
@@ -265,6 +275,19 @@ QUARTIERS_EN = {
 		"de Saint-André": "beside a large old romanesque church on the bank of the river Eure",
 		"du Pont Bouju": "beside an old stone bridge with low arches over the river Eure",
 		"des Épars": "on a wide market square at the edge of the town, near the ramparts",
+	},
+	"lieu:auxerre": {
+		"du Rempart": "in a street running along the inner side of the town ramparts, a round tower nearby",
+		"de l'Yonne": ("on a quay along the river Yonne, the town climbing the hillside behind, "
+					   "crowned by a great gothic cathedral"),
+		"de Sainte-Colombe": "in a quiet lane of old stone houses near a small romanesque chapel",
+		"du Pont": "at the foot of an old stone bridge with low arches crossing the river Yonne",
+		"de Saint-Germain": "beside the high walls and bell tower of an old romanesque abbey above the river",
+		"du Vieux Quai": "on an old wharf of the Yonne, barrels and timber unloaded from river boats",
+		"de la Tour de l'Horloge": ("beside a tall old gate tower with a large ornate clock face, "
+									"the street passing under its arch"),
+		"des Fossés": "on a street following the old filled-in moat at the foot of the ramparts",
+		"du Faubourg": "in a street just outside the town walls, vineyards on the slopes beyond the houses",
 	},
 }
 
@@ -337,16 +360,19 @@ FOULE = ("A lively, varied crowd of ogres, dwarves, halflings, elves and humans 
 		 "but grown adults with adult faces, plump or slim, young or wrinkled, barefoot with curly hair, in "
 		 "colorful waistcoats and skirts; "
 		 # Jamais verts (consigne de l'auteur, 09/10) : les teints restent humains, en plus rude.
-		 "huge ogres with human skin tones, weathered, ruddy, tanned or ashen, never green, in tunics, furs "
+		 "huge ogres with human skin tones, weathered, ruddy, tanned or ashen, never green or grey-green — "
+		 "they are not orcs, goblins or trolls, and have no tusks —, in tunics, furs "
 		 "or armor, towering over the crowd; humans of every origin: adventurers, guards, merchants, "
-		 "pilgrims, peasants. Everyone wears medieval clothing; nothing modern.")
+		 "pilgrims, peasants. Everyone, elves included, has a natural human skin tone. Everyone wears "
+		 "medieval clothing; nothing modern.")
 # Style d'Auxerre (§0.1), préféré par l'auteur au photoréaliste du lot de Rhemi (09/10).
 STYLE = ("Detailed semi-realistic medieval fantasy illustration in the style of a high-end narrative 2D "
 		 "RPG: rich digital painting, warm natural light, warm earthy palette with touches of vivid color "
 		 "in clothes, awnings and banners, believable proportions, lots of lively detail. Not a photograph. "
 		 "Every building is medieval, stone and timber-framed; nothing modern. "
 		 "No text anywhere in the image: no letters, no inscription, no readable sign, no lettering on "
-		 "banners or awnings, no logo, no signature, no watermark.")
+		 "banners or awnings, no logo, no signature, no watermark. Bottles, jars, pots, barrels, crates and "
+		 "papers carry no written label at all; no plaque, placard or board on any wall or above any door.")
 
 # Auberges dont l'enseigne ne finit pas par un toponyme (`quartier_de` lit les autres).
 QUARTIERS_AUBERGES = {
@@ -414,7 +440,11 @@ def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label, variant
 			f"presenting anything to the viewer. The shop is a solid, permanent town house of two or "
 			f"three storeys, built of stone and timber framing, with its own walls, roof and upper "
 			f"floors — never a market stall, booth, tent, cart or makeshift lean-to. It fills about 80% "
-			f"of the image, seen from the street in a three-quarter view. "
+			# Lot des caves (10/10) : la vue de trois-quarts donnait encore des maisons d'angle ouvertes
+			# sur deux rues, une banne sur chaque pan — vue de face, pans latéraux murés.
+			f"of the image, seen from the street facing the viewer or at a slight angle, never as a "
+			f"corner building with two street sides. The side walls of the house are closed masonry with "
+			f"no opening, no counter and no awning; at most ONE awning, over the single shop window. "
 			# Lot de Lutecia (10/10) : boutiques ouvertes sur deux pans de mur (consigne de l'auteur).
 			f"Its street wall stays a real wall of stone and timber with a door and ONE shop window "
 			f"whose wooden shutter is folded down to serve as the sales counter; the shopkeeper works "
@@ -984,15 +1014,34 @@ def noms_manquants(lieux, cite, entrees, repertoire, tirer_nom):
 	return noms, inconnus
 
 
-def preparer(cite, sauf, doublons=False, refaire=(), source=None, ecraser=False, facade_seule=False):
+def lieux_du_lot(docs_lot, cite):
+	"""PURE. Ids des lieux de `cite` dans un import de boutiques (`--lot`)."""
+	return {d["_id"] for d in docs_lot
+			if isinstance(d, dict) and d.get("type") == "lieu" and d.get("lieu_parent") == cite}
+
+
+def preparer(cite, sauf, doublons=False, refaire=(), source=None, ecraser=False, facade_seule=False,
+			 lot=None):
 	lieux = _lieux(source)
 	# Boutiques pas encore importées : complétées depuis l'import du peuplement (le dump prime).
-	imp = os.path.join(RACINE, "jsons", f"{_slug(cite)}_magasins_a_importer.json")
+	# `lot` (un import d'ajouts à une cité déjà peuplée) restreint AUSSI le lot à ses boutiques :
+	# sans cela, une cité sans manifeste régénérerait toutes les siennes.
+	imp = lot or os.path.join(RACINE, "jsons", f"{_slug(cite)}_magasins_a_importer.json")
+	seulement = None
 	if os.path.exists(imp):
-		for d in _docs(imp):
+		docs_imp = _docs(imp)
+		for d in docs_imp:
 			if d.get("type") == "lieu":
 				lieux.setdefault(d["_id"], d)
+		if lot:
+			seulement = lieux_du_lot(docs_imp, cite)
+	elif lot:
+		raise SystemExit(f"ERREUR : {lot} introuvable.")
 	cite_nom = (lieux.get(cite) or {}).get("label") or NOMS_CITES.get(cite) or _slug(cite).capitalize()
+	if seulement is not None:
+		if not seulement:
+			raise SystemExit(f"Aucune boutique de {cite} dans {lot}.")
+		sauf = set(sauf) | {k for k, v in lieux.items() if v.get("lieu_parent") == cite and k not in seulement}
 	conserves = {"portraits": {}, "images": {}}
 	if doublons or refaire:
 		entrees, conserves, ignores = (entrees_doublons(lieux, cite, cite_nom) if doublons
@@ -1309,12 +1358,15 @@ def main():
 				   help="preparer --refaire : portrait ET façade refaits, réécrits sous leurs noms actuels")
 	p.add_argument("--refaire", default="",
 				   help="preparer : boutiques à refaire (façade ; portrait aussi s'il n'est pas marchand_*), séparées par des virgules")
+	p.add_argument("--lot", default="",
+				   help="preparer : import de boutiques à ajouter (ex. jsons/caves_negoces_a_importer.json) — seules les siennes sont préparées")
 	p.add_argument("--doublons", action="store_true",
 				   help="preparer : seulement les façades/portraits de marchands partagés avec un autre lieu")
 	a = p.parse_args()
 	if a.etape == "preparer":
 		preparer(a.cite, {s for s in a.sauf.split(",") if s}, a.doublons,
-				 {s for s in a.refaire.split(",") if s}, a.source or None, a.ecraser, a.facade_seule)
+				 {s for s in a.refaire.split(",") if s}, a.source or None, a.ecraser, a.facade_seule,
+				 a.lot or None)
 	elif a.etape == "essai":
 		essai(a.cite, {s for s in a.seulement.split(",") if s}, a.limite)
 	elif a.etape == "portrait_facade":

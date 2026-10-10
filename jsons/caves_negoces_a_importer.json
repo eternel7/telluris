@@ -1,0 +1,740 @@
+[
+	{
+		"_id": "lieu:le_foudre_des_crayeres",
+		"type": "lieu",
+		"label": "Le Foudre des Crayères",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_humain_m_cave01.jpg",
+				"nom": "Chaac Pommeverte"
+			}
+		]
+	},
+	{
+		"_id": "link:cave01_to_rhemi",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:rhemi",
+				"pos": [
+					26,
+					19
+				]
+			},
+			{
+				"lieu": "lieu:le_foudre_des_crayeres",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_barrique_du_vieux_cloitre",
+		"type": "lieu",
+		"label": "La Barrique du Vieux Cloître",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_hobbit_f_cave01.jpg",
+				"nom": "Lydie Troisquarts"
+			}
+		]
+	},
+	{
+		"_id": "link:cave02_to_rhemi",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:rhemi",
+				"pos": [
+					34,
+					17
+				]
+			},
+			{
+				"lieu": "lieu:la_barrique_du_vieux_cloitre",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_bouchon_du_chapitre",
+		"type": "lieu",
+		"label": "Le Bouchon du Chapitre",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_ogre_f_cave01.jpg",
+				"nom": "Sakura Brise-Os"
+			}
+		]
+	},
+	{
+		"_id": "link:cave03_to_rhemi",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:rhemi",
+				"pos": [
+					64,
+					17
+				]
+			},
+			{
+				"lieu": "lieu:le_bouchon_du_chapitre",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_fut_en_perce_de_la_vesle",
+		"type": "lieu",
+		"label": "Le Fût en Perce de la Vesle",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:rhemi",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_humain_m_cave01.jpg",
+				"nom": "Lionel Valois"
+			}
+		]
+	},
+	{
+		"_id": "link:cave04_to_rhemi",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:rhemi",
+				"pos": [
+					34,
+					20
+				]
+			},
+			{
+				"lieu": "lieu:le_fut_en_perce_de_la_vesle",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_tastevin_de_saint_germain",
+		"type": "lieu",
+		"label": "Le Tastevin de Saint-Germain",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_elfe_m_cave01.jpg",
+				"nom": "Sylvarel Écorcelune"
+			}
+		]
+	},
+	{
+		"_id": "link:cave01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					31,
+					15
+				]
+			},
+			{
+				"lieu": "lieu:le_tastevin_de_saint_germain",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:l_alambic_du_cellier_des_fosses",
+		"type": "lieu",
+		"label": "L'Alambic du Cellier des Fossés",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_humain_m_cave01.jpg",
+				"nom": "Hubert Suzuki"
+			}
+		]
+	},
+	{
+		"_id": "link:cave02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					46,
+					16
+				]
+			},
+			{
+				"lieu": "lieu:l_alambic_du_cellier_des_fosses",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_treille_de_l_yonne",
+		"type": "lieu",
+		"label": "La Treille de l'Yonne",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_ogre_m_cave01.jpg",
+				"nom": "Hakan Avale-Tout"
+			}
+		]
+	},
+	{
+		"_id": "link:cave03_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					34,
+					25
+				]
+			},
+			{
+				"lieu": "lieu:la_treille_de_l_yonne",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_cuve_du_tertre",
+		"type": "lieu",
+		"label": "La Cuve du Tertre",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_hobbit_m_cave01.jpg",
+				"nom": "Fastolf Basse-Vallée"
+			}
+		]
+	},
+	{
+		"_id": "link:cave01_to_chartres",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:chartres",
+				"pos": [
+					45,
+					33
+				]
+			},
+			{
+				"lieu": "lieu:la_cuve_du_tertre",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_tonneau_de_la_basse_ville",
+		"type": "lieu",
+		"label": "Le Tonneau de la Basse-Ville",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_elfe_f_cave01.jpg",
+				"nom": "Henriette Briseflammes"
+			}
+		]
+	},
+	{
+		"_id": "link:cave02_to_chartres",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:chartres",
+				"pos": [
+					42,
+					23
+				]
+			},
+			{
+				"lieu": "lieu:le_tonneau_de_la_basse_ville",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_pressoir_du_palais",
+		"type": "lieu",
+		"label": "Le Pressoir du Palais",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:lutecia",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_ogre_m_cave01.jpg",
+				"nom": "Morg Pousse-Rocs"
+			}
+		]
+	},
+	{
+		"_id": "link:cave01_to_lutecia",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:lutecia",
+				"pos": [
+					21,
+					20
+				]
+			},
+			{
+				"lieu": "lieu:le_pressoir_du_palais",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_cuve_de_la_cite",
+		"type": "lieu",
+		"label": "La Cuve de la Cité",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:lutecia",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_elfe_f_cave01.jpg",
+				"nom": "Chiara Rondevalle"
+			}
+		]
+	},
+	{
+		"_id": "link:cave02_to_lutecia",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:lutecia",
+				"pos": [
+					36,
+					12
+				]
+			},
+			{
+				"lieu": "lieu:la_cuve_de_la_cite",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_bouchon_des_halles",
+		"type": "lieu",
+		"label": "Le Bouchon des Halles",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:lutecia",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_ogre_f_cave01.jpg",
+				"nom": "Yasmine Croque-Pierre"
+			}
+		]
+	},
+	{
+		"_id": "link:cave03_to_lutecia",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:lutecia",
+				"pos": [
+					38,
+					27
+				]
+			},
+			{
+				"lieu": "lieu:le_bouchon_des_halles",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_chai_du_petit_pont",
+		"type": "lieu",
+		"label": "Le Chai du Petit-Pont",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:lutecia",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_nain_f_cave01.jpg",
+				"nom": "Wilhelmine Lourde-Hache"
+			}
+		]
+	},
+	{
+		"_id": "link:cave04_to_lutecia",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:lutecia",
+				"pos": [
+					32,
+					26
+				]
+			},
+			{
+				"lieu": "lieu:le_chai_du_petit_pont",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_grappe_des_faubourgs",
+		"type": "lieu",
+		"label": "La Grappe des Faubourgs",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:lutecia",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_hobbit_f_cave01.jpg",
+				"nom": "Lobelia Bonpré"
+			}
+		]
+	},
+	{
+		"_id": "link:cave05_to_lutecia",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:lutecia",
+				"pos": [
+					27,
+					32
+				]
+			},
+			{
+				"lieu": "lieu:la_grappe_des_faubourgs",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_verre_plein_des_ecoles",
+		"type": "lieu",
+		"label": "Le Verre Plein des Écoles",
+		"image": "cave_europe01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:lutecia",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_humain_f_cave01.jpg",
+				"nom": "Angèle Sigurðsson"
+			}
+		]
+	},
+	{
+		"_id": "link:cave06_to_lutecia",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:lutecia",
+				"pos": [
+					17,
+					24
+				]
+			},
+			{
+				"lieu": "lieu:le_verre_plein_des_ecoles",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_maison_de_negoce_de_la_greve",
+		"type": "lieu",
+		"label": "La Maison de Négoce de la Grève",
+		"image": "negoce_europe01.jpg",
+		"categorie": "negociant",
+		"lieu_parent": "lieu:lutecia",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_negociant",
+				"portrait": "marchand_humain_m_negociant01.jpg",
+				"nom": "Xavier Piedléger"
+			}
+		]
+	},
+	{
+		"_id": "link:negociant02_to_lutecia",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:lutecia",
+				"pos": [
+					39,
+					8
+				]
+			},
+			{
+				"lieu": "lieu:la_maison_de_negoce_de_la_greve",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "negociant",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_pesee_juste_de_la_montagne",
+		"type": "lieu",
+		"label": "La Pesée Juste de la Montagne",
+		"image": "negoce_europe01.jpg",
+		"categorie": "negociant",
+		"lieu_parent": "lieu:lutecia",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_negociant",
+				"portrait": "marchand_hobbit_f_negociant01.jpg",
+				"nom": "Kotoha Douce-Amande"
+			}
+		]
+	},
+	{
+		"_id": "link:negociant03_to_lutecia",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:lutecia",
+				"pos": [
+					62,
+					31
+				]
+			},
+			{
+				"lieu": "lieu:la_pesee_juste_de_la_montagne",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "negociant",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_poids_du_roi_du_parvis",
+		"type": "lieu",
+		"label": "Le Poids du Roi du Parvis",
+		"image": "negoce_europe01.jpg",
+		"categorie": "negociant",
+		"lieu_parent": "lieu:lutecia",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_negociant",
+				"portrait": "marchand_hobbit_m_negociant01.jpg",
+				"nom": "Louis Petit-Pas"
+			}
+		]
+	},
+	{
+		"_id": "link:negociant04_to_lutecia",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:lutecia",
+				"pos": [
+					20,
+					14
+				]
+			},
+			{
+				"lieu": "lieu:le_poids_du_roi_du_parvis",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "negociant",
+			"status": "ouvert"
+		}
+	}
+]

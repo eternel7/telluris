@@ -1,0 +1,320 @@
+[
+  {
+    "_id": "item:Cassis",
+    "type": "item",
+    "nom": "Cassis",
+    "description": "Petites baies noires et luisantes, cueillies en grappes au bord des vignes. Crues, elles font grimacer ; il faut du sucre et de la patience pour en tirer quelque chose.",
+    "icon": "🫐",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "baie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.5,
+    "valeur": [
+      {
+        "cu": 8
+      },
+      {
+        "cu": 22
+      }
+    ]
+  },
+  {
+    "_id": "item:Vin_de_Chablis",
+    "type": "item",
+    "nom": "Vin de Chablis",
+    "description": "Vin blanc sec et vif des coteaux de l'Yonne, qui sent la pierre à fusil. Les gens d'Auxerre le boivent frais, et jurent qu'il éclaircit les idées.",
+    "icon": "🥂",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "boisson",
+    "slots": [],
+    "tags": [],
+    "poids": 1.0,
+    "effets": {
+      "pm": 14,
+      "duree": 6,
+      "buffs": {
+        "Int": 3
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_vin_de_chablis",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:auxerre",
+    "objet_final": "Vin_de_Chablis",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Raisin",
+        "quantite": 4
+      }
+    ]
+  },
+  {
+    "_id": "item:Vin_d_Irancy",
+    "type": "item",
+    "nom": "Vin d'Irancy",
+    "description": "Rouge léger d'un village de vignerons blotti dans un creux de l'Yonne, entre les cerisiers. Il se boit jeune, avant que les monstres n'aient le temps de le voler.",
+    "icon": "🍷",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "boisson",
+    "slots": [],
+    "tags": [],
+    "poids": 1.0,
+    "effets": {
+      "pv": 10,
+      "duree": 6,
+      "buffs": {
+        "F": 3
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_vin_d_irancy",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:auxerre",
+    "objet_final": "Vin_d_Irancy",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Raisin",
+        "quantite": 4
+      }
+    ]
+  },
+  {
+    "_id": "item:Marc_de_Bourgogne",
+    "type": "item",
+    "nom": "Marc de Bourgogne",
+    "description": "Ce qui reste au fond du pressoir, peaux et pépins, repassé au feu de l'alambic. Les convoyeurs de cristaux en emportent une flasque pour la route de Lutecia.",
+    "icon": "🥃",
+    "rarete": "rare",
+    "categorie": "consommable",
+    "sous_categorie": "boisson",
+    "slots": [],
+    "tags": [],
+    "poids": 0.7,
+    "effets": {
+      "pm": 18,
+      "duree": 8,
+      "buffs": {
+        "Vol": 4
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_marc_de_bourgogne",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:auxerre",
+    "objet_final": "Marc_de_Bourgogne",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Raisin",
+        "quantite": 3
+      },
+      {
+        "item": "item:Eau_de_vie",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Creme_de_cassis",
+    "type": "item",
+    "nom": "Crème de cassis",
+    "description": "Liqueur épaisse et pourpre, de baies de cassis macérées dans l'eau-de-vie et sucrées sans compter. Une cuillerée dans un verre de blanc, et la conversation se délie.",
+    "icon": "🫐",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "boisson",
+    "slots": [],
+    "tags": [],
+    "poids": 0.6,
+    "effets": {
+      "pm": 12,
+      "duree": 6,
+      "buffs": {
+        "Cha": 3
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_creme_de_cassis",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:auxerre",
+    "objet_final": "Creme_de_cassis",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Cassis",
+        "quantite": 3
+      },
+      {
+        "item": "item:Eau_de_vie",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sucre",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Hypocras",
+    "type": "item",
+    "nom": "Hypocras",
+    "description": "Vin miellé et épicé, filtré à travers une chausse de drap. On le sert aux banquets de la capitale, où personne ne s'accorde sur le savant qui lui aurait donné son nom.",
+    "icon": "🍷",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "boisson",
+    "slots": [],
+    "tags": [],
+    "poids": 1.0,
+    "effets": {
+      "pm": 14,
+      "duree": 6,
+      "buffs": {
+        "Cha": 3
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_hypocras",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:lutecia",
+    "objet_final": "Hypocras",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Vin_de_pays",
+        "quantite": 2
+      },
+      {
+        "item": "item:Miel",
+        "quantite": 1
+      },
+      {
+        "item": "item:epices_douces",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Vin_de_Montmartre",
+    "type": "item",
+    "nom": "Vin de Montmartre",
+    "description": "Petit vin des vignes qui grimpent la butte jusqu'aux casernes des paladins. Il est aigrelet, mais les paladins le bénissent, dit-on, avant chaque garde.",
+    "icon": "🍇",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boisson",
+    "slots": [],
+    "tags": [],
+    "poids": 1.0,
+    "effets": {
+      "pv": 8,
+      "duree": 6,
+      "buffs": {
+        "Vol": 2
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_vin_de_montmartre",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:lutecia",
+    "objet_final": "Vin_de_Montmartre",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Raisin",
+        "quantite": 4
+      }
+    ]
+  },
+  {
+    "_id": "item:Cervoise",
+    "type": "item",
+    "nom": "Cervoise",
+    "description": "Bière d'orge trouble et sans houblon, brassée dans les caves des Halles. Elle nourrit presque autant qu'elle désaltère, et les porteurs n'en boivent pas d'autre.",
+    "icon": "🍺",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boisson",
+    "slots": [],
+    "tags": [],
+    "poids": 1.0,
+    "effets": {
+      "pv": 10,
+      "duree": 6,
+      "buffs": {
+        "R": 2
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_cervoise",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:lutecia",
+    "objet_final": "Cervoise",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "item": "item:grain_d_orge",
+        "quantite": 3
+      },
+      {
+        "item": "item:Eau_de_source",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Vinaigre_de_Lutece",
+    "type": "item",
+    "nom": "Vinaigre de Lutèce",
+    "description": "Vinaigre des vinaigriers de la capitale, qui crient leur marchandise au petit matin en poussant leur tonneau sur une brouette. Piquant, clair, il relève tout.",
+    "icon": "🫙",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "condiment",
+    "slots": [],
+    "tags": [],
+    "poids": 0.8,
+    "valeur": [
+      {
+        "cu": 12
+      },
+      {
+        "cu": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:specialite_vinaigre_de_lutece",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:lutecia",
+    "objet_final": "Vinaigre_de_Lutece",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "item": "item:Vin_de_pays",
+        "quantite": 2
+      }
+    ]
+  }
+]

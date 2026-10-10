@@ -233,15 +233,23 @@ def cases_dans_enceinte(cells: list, enceinte: list, marge: float = 1.0) -> list
 				  key=lambda c: (c[1], c[0]))
 
 
-def etaler(candidats: list, n: int) -> list:
+def etaler(candidats: list, n: int, deja: list = None) -> list:
 	"""`n` cases distinctes, tirées au point le plus éloigné des cases déjà prises (départ : la
-	plus proche du barycentre). Déterministe : ex æquo départagés par l'ordre (y, x)."""
+	plus proche du barycentre ; avec `deja` — seuils déjà posés d'une cité peuplée —, la plus
+	éloignée d'eux). Déterministe : ex æquo départagés par l'ordre (y, x)."""
 	if n > len(candidats):
 		raise ValueError(f"{n} cases demandées, {len(candidats)} disponibles")
-	cx = sum(c[0] for c in candidats) / len(candidats)
-	cy = sum(c[1] for c in candidats) / len(candidats)
-	choisies = [min(candidats, key=lambda c: ((c[0] - cx) ** 2 + (c[1] - cy) ** 2, c[1], c[0]))]
-	dmin = {c: (c[0] - choisies[0][0]) ** 2 + (c[1] - choisies[0][1]) ** 2 for c in candidats}
+	if n <= 0:
+		return []
+	if deja:
+		dmin = {c: min((c[0] - d[0]) ** 2 + (c[1] - d[1]) ** 2 for d in deja) for c in candidats}
+		choisies = [max(candidats, key=lambda c: (dmin[c], -c[1], -c[0]))]
+	else:
+		cx = sum(c[0] for c in candidats) / len(candidats)
+		cy = sum(c[1] for c in candidats) / len(candidats)
+		choisies = [min(candidats, key=lambda c: ((c[0] - cx) ** 2 + (c[1] - cy) ** 2, c[1], c[0]))]
+		dmin = {c: float("inf") for c in candidats}
+	dmin = {c: min(dmin[c], (c[0] - choisies[0][0]) ** 2 + (c[1] - choisies[0][1]) ** 2) for c in candidats}
 	while len(choisies) < n:
 		suivante = max(candidats, key=lambda c: (dmin[c], -c[1], -c[0]))
 		choisies.append(suivante)

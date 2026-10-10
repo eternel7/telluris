@@ -1,0 +1,56 @@
+[
+	{
+		"_id": "lieu:l_alambic_du_cellier_des_fosses",
+		"_rev": "2-90e597ca5495cc70bce964864b91ce9e",
+		"type": "lieu",
+		"label": "L'Alambic du Cellier des Fossés",
+		"image": "cave_europe_auxerre01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_humain_m_cave03.jpg",
+				"nom": "Hubert Suzuki"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_treille_de_l_yonne",
+		"_rev": "2-11ebb4146d23c9f68f4faa3e8c307284",
+		"type": "lieu",
+		"label": "La Treille de l'Yonne",
+		"image": "cave_europe_auxerre02.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_ogre_m_cave02.jpg",
+				"nom": "Hakan Avale-Tout"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_tastevin_de_saint_germain",
+		"_rev": "2-6a9a99babf39db111ff560012dcf52c1",
+		"type": "lieu",
+		"label": "Le Tastevin de Saint-Germain",
+		"image": "cave_europe_auxerre03.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_elfe_m_cave01.jpg",
+				"nom": "Sylvarel Écorcelune"
+			}
+		]
+	}
+]

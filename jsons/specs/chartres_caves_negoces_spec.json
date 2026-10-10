@@ -1,0 +1,27 @@
+{
+	"cite": "lieu:chartres",
+	"magasins": [
+		{
+			"categorie": "cave",
+			"label": "La Cuve du Tertre",
+			"image": "cave_europe01.jpg",
+			"pos": [
+				45,
+				33
+			],
+			"nom": "Fastolf Basse-Vallée",
+			"portrait": "marchand_hobbit_m_cave01.jpg"
+		},
+		{
+			"categorie": "cave",
+			"label": "Le Tonneau de la Basse-Ville",
+			"image": "cave_europe01.jpg",
+			"pos": [
+				42,
+				23
+			],
+			"nom": "Henriette Briseflammes",
+			"portrait": "marchand_elfe_f_cave01.jpg"
+		}
+	]
+}

@@ -59,6 +59,15 @@ def test_etaler_rend_des_cases_distinctes_et_deterministes():
 		g.etaler(cases, len(cases) + 1)
 
 
+def test_etaler_fuit_les_seuils_deja_poses():
+	cases = g.cases_interieures(_grille(), PORTES)
+	deja = [(4, 4)]
+	premiere = g.etaler(cases, 1, deja)[0]
+	loin = max((c[0] - 4) ** 2 + (c[1] - 4) ** 2 for c in cases)
+	assert (premiere[0] - 4) ** 2 + (premiere[1] - 4) ** 2 == loin
+	assert g.etaler(cases, 0, deja) == []
+
+
 @pytest.mark.parametrize("fichier,attendu", [
 	("marchand_elfe_f_apothicairerie.png", ("elfe", "F", "apothicairerie")),
 	("marchand_humaine_f_negoce.jpg", ("humain", "F", "negociant")),

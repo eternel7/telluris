@@ -14,7 +14,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dev.gen_images_magasins import (AGES, ALLURES, CHEVEUX, CORPS, LIGNEES, LIGNEES_EN, METIERS,
-	METIERS_EN, QUARTIERS_AUBERGES, QUARTIERS_EN, RATIO, TRAITS_EN, base_image, entrees_a_refaire, entrees_de_cite, entrees_doublons, lignee_du_tenancier, noms_manquants,
+	METIERS_EN, QUARTIERS_AUBERGES, QUARTIERS_EN, RATIO, TRAITS_EN, base_image, entrees_a_refaire, entrees_de_cite, entrees_doublons, lieux_du_lot, lignee_du_tenancier, noms_manquants,
 	image_de_reponse, image_degeneree, prompt_auberge, prompt_magasin, prompt_tenancier, quartier_de,
 	requete_gemini, requetes_faisables, tirage_tenancier, traits_en)
 from utils.enseignes import TOPONYMES_PAR_LIEU
@@ -30,7 +30,7 @@ def test_chaque_lignee_du_portrait_a_sa_traduction():
 
 def test_chaque_toponyme_de_reims_a_son_decor():
 	# Relu dans enseignes : un toponyme ajouté sans décor casserait ce test, pas le lot.
-	for cite in ("lieu:rhemi", "lieu:chartres"):
+	for cite in ("lieu:rhemi", "lieu:chartres", "lieu:auxerre"):
 		assert set(QUARTIERS_EN[cite]) == set(TOPONYMES_PAR_LIEU[cite]), cite
 
 
@@ -425,3 +425,11 @@ def test_boutique_hors_les_murs_facade_seule_ecrasee():
 	p = e["image"]["prompt"]
 	assert "same small hamlet outside the walls of Chartres" in p and "in the city of Chartres" not in p
 	assert "small size inside the shop" in p and "no beard at all" in p
+
+
+def test_lot_restreint_aux_boutiques_de_la_cite():
+	lot = [{"_id": "lieu:a", "type": "lieu", "lieu_parent": "lieu:auxerre"},
+		   {"_id": "link:a", "type": "connection"},
+		   {"_id": "lieu:b", "type": "lieu", "lieu_parent": "lieu:lutecia"}]
+	assert lieux_du_lot(lot, "lieu:auxerre") == {"lieu:a"}
+	assert lieux_du_lot(lot, "lieu:rhemi") == set()
