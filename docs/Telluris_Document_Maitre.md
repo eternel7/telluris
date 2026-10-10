@@ -118,6 +118,8 @@ Leur technique utilise notamment une **bolas**, dont la rotation permet de dépl
 
 Ils parcourent le monde et construisent progressivement un réseau reliant différents lieux de Telluris.
 
+Le **portail de Notre-Dame**, à Lutecia, est l'un des vestiges les mieux préservés de leur œuvre : intact grâce au faible mana de la cité, c'est un portail **programmable** qui relie n'importe quel lieu du monde connu — Mu compris (cf. § 16).
+
 Les premiers portails sont :
 
 - stables ;
