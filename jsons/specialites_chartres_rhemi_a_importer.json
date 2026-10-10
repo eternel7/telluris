@@ -1,0 +1,1018 @@
+[
+  {
+    "_id": "item:Sucre",
+    "type": "item",
+    "nom": "Sucre",
+    "description": "Pain de sucre roux, cassé au marteau et vendu au poids. Il vient de loin, et cela se sent au prix.",
+    "icon": "🧂",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "sucre",
+    "slots": [],
+    "tags": [],
+    "poids": 0.5,
+    "valeur": [
+      {
+        "cu": 20
+      },
+      {
+        "cu": 50
+      }
+    ]
+  },
+  {
+    "_id": "item:Raisin",
+    "type": "item",
+    "nom": "Raisin",
+    "description": "Grappes cueillies du matin, à presser avant le soir : passé un jour, le jus tourne.",
+    "icon": "🍇",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "raisin",
+    "slots": [],
+    "tags": [],
+    "poids": 1.0,
+    "valeur": [
+      {
+        "cu": 8
+      },
+      {
+        "cu": 20
+      }
+    ]
+  },
+  {
+    "_id": "item:Graines_de_moutarde",
+    "type": "item",
+    "nom": "Graines de moutarde",
+    "description": "Petites graines brunes qui piquent le nez dès qu'on les écrase.",
+    "icon": "🌱",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "moutarde",
+    "slots": [],
+    "tags": [],
+    "poids": 0.2,
+    "valeur": [
+      {
+        "cu": 6
+      },
+      {
+        "cu": 16
+      }
+    ]
+  },
+  {
+    "_id": "item:Truffe",
+    "type": "item",
+    "nom": "Truffe",
+    "description": "Tubercule noir déterré au pied des chênes. Son parfum traverse le papier qui l'enveloppe et la moitié de la boutique.",
+    "icon": "🍄",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "truffe",
+    "slots": [],
+    "tags": [],
+    "poids": 0.1,
+    "valeur": [
+      {
+        "cu": 60
+      },
+      {
+        "cu": 160
+      }
+    ]
+  },
+  {
+    "_id": "item:Pate_de_Chartres",
+    "type": "item",
+    "nom": "Pâté de Chartres",
+    "description": "Pâté en croûte garni de gibier — faisan, perdreau ou lièvre selon la chasse — et relevé de truffe. Les cuisiniers de Chartres le dorent à l'œuf et ne le coupent que froid.",
+    "icon": "🥧",
+    "rarete": "rare",
+    "categorie": "consommable",
+    "sous_categorie": "cuisine",
+    "slots": [],
+    "tags": [],
+    "poids": 0.9,
+    "effets": {
+      "pv": 36,
+      "pm": 8,
+      "duree": 10,
+      "buffs": {
+        "F": 4
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_pate_de_chartres",
+    "type": "recette",
+    "lieu_categorie": "cuisine",
+    "lieu_portee": "lieu:chartres",
+    "objet_final": "Pate_de_Chartres",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:viande",
+        "quantite": 3
+      },
+      {
+        "item": "item:foie",
+        "quantite": 1
+      },
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 2
+      },
+      {
+        "item": "item:motte_de_beurre",
+        "quantite": 1
+      },
+      {
+        "item": "item:oeufs_de_ferme",
+        "quantite": 1
+      },
+      {
+        "item": "item:Truffe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Mentchikoff",
+    "type": "item",
+    "nom": "Mentchikoff",
+    "description": "Bonbon au cœur de praliné, enrobé d'une fine coque blanche qui imite la meringue. On l'offre par cornets entiers, et on en garde un pour soi.",
+    "icon": "🍬",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.05,
+    "effets": {
+      "pm": 12,
+      "duree": 6,
+      "buffs": {
+        "Cha": 3
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_mentchikoff",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "lieu_portee": "lieu:chartres",
+    "objet_final": "Mentchikoff",
+    "quantite_produite": 6,
+    "matieres_premieres": [
+      {
+        "item": "item:Amandes",
+        "quantite": 2
+      },
+      {
+        "item": "item:Sucre",
+        "quantite": 3
+      },
+      {
+        "item": "item:oeufs_de_ferme",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Sable_de_Beauce",
+    "type": "item",
+    "nom": "Sablé de Beauce",
+    "description": "Biscuit sec et croustillant de farine de Beauce et de beurre frais. Il voyage bien et s'émiette dans la poche.",
+    "icon": "🍪",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.1,
+    "effets": {
+      "pv": 12,
+      "duree": 6,
+      "buffs": {
+        "R": 2
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_sable_de_beauce",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "lieu_portee": "lieu:chartres",
+    "objet_final": "Sable_de_Beauce",
+    "quantite_produite": 6,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 2
+      },
+      {
+        "item": "item:motte_de_beurre",
+        "quantite": 2
+      },
+      {
+        "item": "item:Sucre",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Hydromel_de_Beauce",
+    "type": "item",
+    "nom": "Hydromel de Beauce",
+    "description": "Miel de Beauce laissé à fermenter des mois en tonneau. Doux à la première gorgée, traître à la troisième.",
+    "icon": "🍯",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "boisson",
+    "slots": [],
+    "tags": [],
+    "poids": 1.0,
+    "effets": {
+      "pm": 15,
+      "duree": 6,
+      "buffs": {
+        "Vol": 3
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_hydromel_de_beauce",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:chartres",
+    "objet_final": "Hydromel_de_Beauce",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Miel",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:Eure_et_Liqueur",
+    "type": "item",
+    "nom": "Eure-et-Liqueur",
+    "description": "Liqueur au miel de Beauce, montée à l'eau-de-vie et aux épices. Le nom fait sourire les Chartrains ; la boisson, beaucoup moins après le deuxième verre.",
+    "icon": "🥃",
+    "rarete": "rare",
+    "categorie": "consommable",
+    "sous_categorie": "boisson",
+    "slots": [],
+    "tags": [],
+    "poids": 0.7,
+    "effets": {
+      "pm": 20,
+      "duree": 8,
+      "buffs": {
+        "Vol": 4
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_eure_et_liqueur",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:chartres",
+    "objet_final": "Eure_et_Liqueur",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Miel",
+        "quantite": 2
+      },
+      {
+        "item": "item:Eau_de_vie",
+        "quantite": 1
+      },
+      {
+        "item": "item:epices_douces",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Biscuit_rose_de_Reims",
+    "type": "item",
+    "nom": "Biscuit rose de Reims",
+    "description": "Biscuit cuillère léger comme l'air, teinté de rose et poudré de sucre. On le trempe dans le champagne ou le ratafia, et il ne s'en remet pas.",
+    "icon": "🌸",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.05,
+    "effets": {
+      "pv": 10,
+      "pm": 8,
+      "duree": 6,
+      "buffs": {
+        "Cha": 3
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_biscuit_rose_de_reims",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "lieu_portee": "lieu:rhemi",
+    "objet_final": "Biscuit_rose_de_Reims",
+    "quantite_produite": 6,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 1
+      },
+      {
+        "item": "item:oeufs_de_ferme",
+        "quantite": 3
+      },
+      {
+        "item": "item:Sucre",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Jambon_de_Reims",
+    "type": "item",
+    "nom": "Jambon de Reims",
+    "description": "Jambon cuit et désossé, mariné au bouillon et au vin blanc, puis moulé au persil dans une gelée parfumée. Il se tranche fin et se garde au frais.",
+    "icon": "🍖",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "salaison",
+    "slots": [],
+    "tags": [],
+    "poids": 1.2,
+    "effets": {
+      "pv": 28,
+      "duree": 8,
+      "buffs": {
+        "R": 4
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_jambon_de_reims",
+    "type": "recette",
+    "lieu_categorie": "salaison",
+    "lieu_portee": "lieu:rhemi",
+    "objet_final": "Jambon_de_Reims",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:viande",
+        "quantite": 3
+      },
+      {
+        "item": "item:Vin_de_pays",
+        "quantite": 1
+      },
+      {
+        "item": "item:herbes_de_fournil",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sel",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Pieds_de_cochon_a_la_Sainte_Menehould",
+    "type": "item",
+    "nom": "Pieds de cochon à la Sainte-Menehould",
+    "description": "Pieds de porc bouillis si longtemps que l'os se mange, puis panés et grillés jusqu'à craquer sous la dent.",
+    "icon": "🐖",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "cuisine",
+    "slots": [],
+    "tags": [],
+    "poids": 0.8,
+    "effets": {
+      "pv": 26,
+      "duree": 8,
+      "buffs": {
+        "F": 3
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_pieds_de_cochon_a_la_sainte_menehould",
+    "type": "recette",
+    "lieu_categorie": "cuisine",
+    "lieu_portee": "lieu:rhemi",
+    "objet_final": "Pieds_de_cochon_a_la_Sainte_Menehould",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:viande",
+        "quantite": 2
+      },
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 1
+      },
+      {
+        "item": "item:motte_de_beurre",
+        "quantite": 1
+      },
+      {
+        "item": "item:oeufs_de_ferme",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sel",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Champagne",
+    "type": "item",
+    "nom": "Champagne",
+    "description": "Vin blanc effervescent des coteaux de Rhemi, repris en bouteille pour y faire sa mousse. Le bouchon part tout seul, et parfois avec un doigt.",
+    "icon": "🍾",
+    "rarete": "rare",
+    "categorie": "consommable",
+    "sous_categorie": "boisson",
+    "slots": [],
+    "tags": [],
+    "poids": 1.5,
+    "effets": {
+      "pm": 20,
+      "duree": 8,
+      "buffs": {
+        "Cha": 5
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_champagne",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:rhemi",
+    "objet_final": "Champagne",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Raisin",
+        "quantite": 4
+      },
+      {
+        "item": "item:Sucre",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Ratafia_de_Champagne",
+    "type": "item",
+    "nom": "Ratafia de Champagne",
+    "description": "Jus de raisin arrêté net dans sa fermentation par une rasade d'eau-de-vie. Sucré, fort, et servi en petits verres.",
+    "icon": "🍷",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "boisson",
+    "slots": [],
+    "tags": [],
+    "poids": 0.8,
+    "effets": {
+      "pm": 15,
+      "duree": 6,
+      "buffs": {
+        "Ch": 3
+      }
+    }
+  },
+  {
+    "_id": "recette:specialite_ratafia_de_champagne",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:rhemi",
+    "objet_final": "Ratafia_de_Champagne",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Raisin",
+        "quantite": 3
+      },
+      {
+        "item": "item:Eau_de_vie",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Vinaigre_de_Reims",
+    "type": "item",
+    "nom": "Vinaigre de Reims",
+    "description": "Vinaigre tiré du vin de Champagne, piquant et clair. Les caves de Rhemi en font avec ce qui n'a pas pris sa mousse.",
+    "icon": "🫙",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "condiment",
+    "slots": [],
+    "tags": [],
+    "poids": 0.8,
+    "valeur": [
+      {
+        "cu": 12
+      },
+      {
+        "cu": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:specialite_vinaigre_de_reims",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:rhemi",
+    "objet_final": "Vinaigre_de_Reims",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "item": "item:Champagne",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Moutarde_de_Reims",
+    "type": "item",
+    "nom": "Moutarde de Reims",
+    "description": "Graines broyées au vinaigre de Reims. Elle monte au nez avant d'arriver à la langue.",
+    "icon": "🟡",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "condiment",
+    "slots": [],
+    "tags": [],
+    "poids": 0.4,
+    "valeur": [
+      {
+        "cu": 18
+      },
+      {
+        "cu": 45
+      }
+    ]
+  },
+  {
+    "_id": "recette:specialite_moutarde_de_reims",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:rhemi",
+    "objet_final": "Moutarde_de_Reims",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "item": "item:Graines_de_moutarde",
+        "quantite": 3
+      },
+      {
+        "item": "item:Vinaigre_de_Reims",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sel",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Eau_de_vie",
+    "type": "item",
+    "nom": "Eau-de-vie",
+    "description": "Vin passé à l'alambic jusqu'à n'en garder que le feu. Les caves la gardent pour monter leurs liqueurs, rarement pour la boire pure.",
+    "icon": "⚗️",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "alcool",
+    "slots": [],
+    "tags": [],
+    "poids": 0.6,
+    "valeur": [
+      {
+        "cu": 45
+      },
+      {
+        "cu": 110
+      }
+    ]
+  },
+  {
+    "_id": "recette:specialite_eau_de_vie",
+    "type": "recette",
+    "lieu_categorie": "cave",
+    "lieu_portee": "lieu:france",
+    "objet_final": "Eau_de_vie",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Vin_de_pays",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "pnj:marchand_cave",
+    "type": "pnj",
+    "nom": "Maître Clotaire",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_lettre01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
+        }
+      },
+      "escorte": {
+        "noeuds": {
+          "accepte": "escorte_acceptee",
+          "mefiance": "escorte_mefiance"
+        }
+      },
+      "direction": {
+        "noeuds": {
+          "trouve": "direction_trouve",
+          "proche": "direction_proche",
+          "inconnu": "direction_inconnu"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Des fûts en perce s'alignent sous la voûte ; l'air sent la lie et le miel. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
+              "id": "escorte_offre",
+              "label": "Quelque chose vous tracasse ?",
+              "next": "escorte_propose",
+              "condition": {
+                "escorte_offerte": true
+              }
+            },
+            {
+              "id": "escorte_refus",
+              "label": "Quelque chose vous tracasse ?",
+              "next": "escorte_mefiance",
+              "condition": {
+                "escorte_mefiance": true
+              }
+            },
+            {
+              "id": "escorte_relance",
+              "label": "Au sujet de {protege}…",
+              "next": "escorte_relance",
+              "condition": {
+                "escorte_en_cours": true
+              }
+            },
+            {
+              "id": "escorte_attente",
+              "label": "Au sujet de {protege}…",
+              "next": "escorte_attente",
+              "condition": {
+                "escorte_progeniture_en_cours": true
+              }
+            },
+            {
+              "id": "escorte_merci",
+              "label": "Comment va votre famille ?",
+              "next": "escorte_merci",
+              "condition": {
+                "escorte_accomplie": true
+              }
+            },
+            {
+              "id": "direction",
+              "label": "Vous sauriez m'indiquer un lieu ?",
+              "next": "direction_demande"
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        },
+        "escorte_propose": {
+          "texte": "« Vous tombez mal, {prenom}. » Le regard va vers la porte, puis revient sur vous. « Je suis sans nouvelles de {protege} depuis hier matin. On l'a vu prendre le chemin qui sort de {lieu_rencontre}, et personne ne l'a revu depuis. »",
+          "choix": [
+            {
+              "id": "escorte_details",
+              "label": "Où faut-il chercher ?",
+              "next": "escorte_details"
+            },
+            {
+              "id": "escorte_refuser",
+              "label": "Je ne peux rien pour vous.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_details": {
+          "texte": "« {direction}. » Un doigt trace une ligne sur le comptoir. « Ramenez-moi mon enfant vivant, {prenom}, et je ne l'oublierai pas. {xp} points d'expérience et {prime} pièces de cuivre — et vous serez toujours le bienvenu sous ce toit. »",
+          "choix": [
+            {
+              "id": "escorte_accepter",
+              "label": "J'y vais.",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "escorte_refuser",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_acceptee": {
+          "texte": "« Que les dieux vous entendent. » Une main serre la vôtre, un peu trop fort. « {protege} n'a pas d'arme et ne sait pas courir : s'il faut se battre, battez-vous à sa place. Ramenez-moi mon enfant ici, à : {destination}. »",
+          "choix": [
+            {
+              "id": "partir",
+              "label": "Je pars maintenant.",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Encore une chose…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_relance": {
+          "texte": "« Toujours rien ? » Les mains s'essuient machinalement sur le tablier. « Cherchez {direction}. Et si {protege} est déjà avec vous, ne perdez pas votre temps ici : ramenez-moi mon enfant. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "J'y retourne.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Je m'en occupe.",
+              "next": "fin"
+            }
+          ]
+        },
+        "escorte_attente": {
+          "texte": "« La guilde m'a fait dire que quelqu'un s'en chargeait. C'est vous ? » Un silence. « Alors allez-y, {prenom}. Cherchez {direction}, et ramenez-moi {protege}. Je ne dors plus depuis que ce chemin existe. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Je vous le ramènerai.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "J'y vais.",
+              "next": "fin"
+            }
+          ]
+        },
+        "escorte_merci": {
+          "texte": "« Vous ? » Le visage s'éclaire d'un coup, et l'ouvrage reste en plan. « Vous m'avez rendu mon enfant, {prenom}. Ici, vous êtes chez vous — et ce que vous cherchez, si je ne l'ai pas, je le trouverai. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "C'était la moindre des choses.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Portez-vous bien.",
+              "next": "fin"
+            }
+          ]
+        },
+        "escorte_mefiance": {
+          "texte": "« Ce qui me tracasse ne vous regarde pas, {prenom}. » Le ton reste poli et la porte reste close. « On ne confie pas ces choses-là à un visage qu'on connaît mal. Revenez — achetez, vendez, tenez parole — et nous verrons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Comme vous voudrez.",
+              "next": "fin"
+            }
+          ]
+        },
+        "direction_demande": {
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? »",
+          "choix": [
+            {
+              "id": "direction_chercher",
+              "label": "Demander",
+              "saisie": true,
+              "action": {
+                "service": "direction"
+              }
+            },
+            {
+              "id": "direction_annuler",
+              "label": "Laissez, ce n'est rien.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "direction_trouve": {
+          "texte": "« {lieu} ? C'est {direction}. Impossible de vous tromper. »",
+          "choix": [
+            {
+              "id": "direction_encore",
+              "label": "Et un autre lieu ?",
+              "next": "direction_demande"
+            },
+            {
+              "id": "direction_merci",
+              "label": "Merci bien.",
+              "next": "fin"
+            }
+          ]
+        },
+        "direction_proche": {
+          "texte": "« “{recherche}” ? Connais pas. » Un temps de réflexion. « Vous ne voulez pas plutôt dire {suggestions} ? »",
+          "choix": [
+            {
+              "id": "direction_encore",
+              "label": "Et un autre lieu ?",
+              "next": "direction_demande"
+            },
+            {
+              "id": "direction_merci",
+              "label": "Merci bien.",
+              "next": "fin"
+            }
+          ]
+        },
+        "direction_inconnu": {
+          "texte": "« “{recherche}” ? » Une moue perplexe. « Je ne connais rien de ce nom-là par ici, {prenom}. »",
+          "choix": [
+            {
+              "id": "direction_encore",
+              "label": "Et un autre lieu ?",
+              "next": "direction_demande"
+            },
+            {
+              "id": "direction_merci",
+              "label": "Merci bien.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

@@ -48,6 +48,8 @@ METIERS = {
 	"bijouterie":           ("Maître Orfeo", "le bijoutier", "Une loupe pend au-dessus d'un plateau de pierres."),
 	"boucherie":            ("Maître Barnabé", "le boucher", "Les quartiers de viande pendent aux crocs."),
 	"boulangerie":          ("Maître Fromond", "le boulanger", "La chaleur du four vous prend au visage dès le seuil."),
+	# Métier ouvert par dev/gen_specialites_chartres_rhemi.py (qui bâtit son tenancier seul).
+	"cave":                 ("Maître Clotaire", "le caviste", "Des fûts en perce s'alignent sous la voûte ; l'air sent la lie et le miel."),
 	"bourrellerie":         ("Maître Guerric", "le bourrelier", "Harnais et colliers de trait sèchent sur des tréteaux."),
 	"boyauderie":           ("Dame Mahaut", "la boyaudière", "Des boyaux tendus sèchent sur des perches."),
 	"brosserie":            ("Le vieux Colin", "le brossier", "Des touffes de soies attendent d'être montées."),

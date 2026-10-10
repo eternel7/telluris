@@ -86,6 +86,14 @@ TOURNURES = {
         "La Fournée", "Le Gros Pain", "La Miche Chaude", "Le Pain de Seigle",
         "Le Levain Royal", "La Belle Croûte", "Le Four à Bois"
     ],
+    # Métier ouvert par dev/gen_specialites_chartres_rhemi.py (boissons et condiments).
+    "cave": [
+        "Le Cellier", "La Cave Voûtée", "Le Tonneau", "La Barrique", "Le Fût en Perce",
+        "La Treille", "Le Pressoir", "La Bonde", "Le Cep", "La Grappe",
+        "Le Foudre", "La Cuve", "Le Chai", "La Chantepleure", "Le Bouchon",
+        "La Lie Dorée", "Le Verre Plein", "L'Alambic du Cellier", "La Vigne Haute",
+        "Le Tastevin"
+    ],
     "bourrellerie": [
         "Le Harnais", "La Bricole", "Le Collier", "La Sangle", "L'Attelage",
         "Le Licol", "Le Bât", "La Bride", "La Rênette", "Le Trait",
