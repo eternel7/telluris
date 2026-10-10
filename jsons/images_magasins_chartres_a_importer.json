@@ -1,0 +1,1162 @@
+[
+	{
+		"_id": "lieu:au_grenier_de_beauce",
+		"_rev": "1-364510fff6d276966c2dc3fa3e618c3a",
+		"type": "lieu",
+		"label": "Au Grenier de Beauce",
+		"image": "auberge_europe_chartres01.jpg",
+		"categorie": "auberge",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "lieu:aux_deux_fleches",
+		"_rev": "1-5441d3a5a895345c86babd30934ef5d3",
+		"type": "lieu",
+		"label": "Aux Deux Flèches",
+		"image": "auberge_europe_chartres02.jpg",
+		"categorie": "auberge",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "lieu:l_eclisse_des_epars",
+		"_rev": "1-4921bdc730823c6497b02f6e49200c2e",
+		"type": "lieu",
+		"label": "L'Éclisse des Épars",
+		"image": "lutherie_europe_chartres01.jpg",
+		"categorie": "lutherie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_lutherie",
+				"portrait": "marchand_humain_m_lutherie02.jpg",
+				"nom": "Jean-Marie Trabelsi"
+			}
+		]
+	},
+	{
+		"_id": "lieu:l_ecrin_du_cloitre",
+		"_rev": "1-430e9297d591f5787eee106c42270dba",
+		"type": "lieu",
+		"label": "L'Écrin du Cloître",
+		"image": "bijouterie_europe_chartres01.jpg",
+		"categorie": "bijouterie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_bijouterie",
+				"portrait": "marchand_elfe_f_bijouterie04.jpg",
+				"nom": "Marianne Astrebrillant"
+			}
+		]
+	},
+	{
+		"_id": "lieu:l_empenneur_de_l_eure",
+		"_rev": "1-4410792e3db70a1f98d0b67dc753a46f",
+		"type": "lieu",
+		"label": "L'Empenneur de l'Eure",
+		"image": "atelier_de_l_empenneur_europe_chartres01.jpg",
+		"categorie": "atelier_de_l_empenneur",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_de_l_empenneur",
+				"portrait": "marchand_hobbit_m_atelier_de_l_empenneur02.jpg",
+				"nom": "Rodrigo Troisquarts"
+			}
+		]
+	},
+	{
+		"_id": "lieu:l_epoussette_de_la_basse_ville",
+		"_rev": "1-16b2bca5bf92cd65a1caf75e85744fc5",
+		"type": "lieu",
+		"label": "L'Époussette de la Basse-Ville",
+		"image": "brosserie_europe_chartres01.jpg",
+		"categorie": "brosserie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_brosserie",
+				"portrait": "marchand_elfe_m_brosserie04.jpg",
+				"nom": "Jun Feuillargent"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_baudruche_fine_du_cloitre",
+		"_rev": "1-44b94d0070c335cff15312802b2db421",
+		"type": "lieu",
+		"label": "La Baudruche Fine du Cloître",
+		"image": "boyauderie_europe_chartres01.jpg",
+		"categorie": "boyauderie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boyauderie",
+				"portrait": "marchand_hobbit_m_boyauderie02.jpg",
+				"nom": "Bingo Basse-Vallée"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_bonne_chaussure_de_la_basse_ville",
+		"_rev": "1-65ee8fa648fed5cee1131ab41d5076c2",
+		"type": "lieu",
+		"label": "La Bonne Chaussure de la Basse-Ville",
+		"image": "cordonnerie_europe_chartres01.jpg",
+		"categorie": "cordonnerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cordonnerie",
+				"portrait": "marchand_humain_m_cordonnerie05.jpg",
+				"nom": "Guang de la Forge"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_bonne_fleche_de_saint_andre",
+		"_rev": "1-2cca23f07de57ee0f764736774428acc",
+		"type": "lieu",
+		"label": "La Bonne Flèche de Saint-André",
+		"image": "archerie_europe_chartres01.jpg",
+		"categorie": "fletcher",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_fletcher",
+				"portrait": "marchand_hobbit_m_fletcher03.jpg",
+				"nom": "Kukulkan Bonpré"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_bonne_miche_du_tertre",
+		"_rev": "1-872ef42cbe99bc1cffdde17acd930fcf",
+		"type": "lieu",
+		"label": "La Bonne Miche du Tertre",
+		"image": "boulangerie_europe_chartres01.jpg",
+		"categorie": "boulangerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boulangerie",
+				"portrait": "marchand_elfe_f_boulangerie04.jpg",
+				"nom": "Galadriel Briseflammes"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_buanderie_du_pont_bouju",
+		"_rev": "1-9ae3cfdd037bf84412aec71059aa26d8",
+		"type": "lieu",
+		"label": "La Buanderie du Pont Bouju",
+		"image": "savonnerie_europe_chartres01.jpg",
+		"categorie": "savonnerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_savonnerie",
+				"portrait": "marchand_humain_f_savonnerie02.jpg",
+				"nom": "Clara Baker"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_cire_fondue_de_l_eure",
+		"_rev": "1-70bcec61f10836e559ff1cf8e548bfcd",
+		"type": "lieu",
+		"label": "La Cire Fondue de l'Eure",
+		"image": "atelier_de_cirier_europe_chartres01.jpg",
+		"categorie": "atelier_de_cirier",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_de_cirier",
+				"portrait": "marchand_elfe_f_atelier_de_cirier02.jpg",
+				"nom": "María Ventelame"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_coiffe_a_plumes_du_tertre",
+		"_rev": "1-16f38d622117425a3276b644645bed5b",
+		"type": "lieu",
+		"label": "La Coiffe à Plumes du Tertre",
+		"image": "plumasserie_europe_chartres01.jpg",
+		"categorie": "plumasserie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_plumasserie",
+				"portrait": "marchand_hobbit_f_plumasserie02.jpg",
+				"nom": "Lobelia Troisquarts"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_corde_marine_du_tertre",
+		"_rev": "1-b89621d9a94096c98cfb522e649e5d00",
+		"type": "lieu",
+		"label": "La Corde Marine du Tertre",
+		"image": "corderie_europe_chartres01.jpg",
+		"categorie": "corderie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_corderie",
+				"portrait": "marchand_humain_m_corderie04.jpg",
+				"nom": "Thibaut de Normandie"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_cuillere_de_bois_de_l_eure",
+		"_rev": "1-e4d95ff4f853b3057bfa4e6859afa658",
+		"type": "lieu",
+		"label": "La Cuillère de Bois de l'Eure",
+		"image": "cuisine_europe_chartres01.jpg",
+		"categorie": "cuisine",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cuisine",
+				"portrait": "marchand_elfe_f_cuisine02.jpg",
+				"nom": "Galadriel Astrebrillant"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_fleche_de_la_porte_guillaume",
+		"_rev": "1-f142bc0bea02359ad45eef9d89511c13",
+		"type": "lieu",
+		"label": "La Flèche de la Porte Guillaume",
+		"image": "archerie_europe_chartres02.jpg",
+		"categorie": "fletcher",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_fletcher",
+				"portrait": "marchand_hobbit_m_fletcher04.jpg",
+				"nom": "Grimbert Fouilleterre"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_fosse_de_saint_andre",
+		"_rev": "1-7f06f71c7a7c944ec7a366019a07e0a1",
+		"type": "lieu",
+		"label": "La Fosse de Saint-André",
+		"image": "tannerie_europe_chartres01.jpg",
+		"categorie": "tannerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_tannerie",
+				"portrait": "marchand_elfe_f_tannerie02.jpg",
+				"nom": "Galadriel Cielazur"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_fumee_douce_du_cloitre",
+		"_rev": "1-e501f222d97e07703d07c1beadd936ff",
+		"type": "lieu",
+		"label": "La Fumée Douce du Cloître",
+		"image": "fumoir_europe_chartres01.jpg",
+		"categorie": "fumoir",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_fumoir",
+				"portrait": "marchand_humain_f_fumoir02.jpg",
+				"nom": "Nelly Kariuki"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_halle_aux_changes_des_epars",
+		"_rev": "1-9870ca4c5fa08fc05acd4ddb7f46920e",
+		"type": "lieu",
+		"label": "La Halle aux Changes des Épars",
+		"image": "negoce_europe_chartres01.jpg",
+		"categorie": "negociant",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_negociant",
+				"portrait": "marchand_humain_f_negociant02.jpg",
+				"nom": "Jane Takahashi"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_halte_des_pelerins",
+		"_rev": "1-45a89c12df6b8311c9056c9a4978eec8",
+		"type": "lieu",
+		"label": "La Halte des Pèlerins",
+		"image": "auberge_europe_chartres03.jpg",
+		"categorie": "auberge",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "lieu:la_hampe_de_la_porte_guillaume",
+		"_rev": "1-8fc79c91972277707d20390d0b024446",
+		"type": "lieu",
+		"label": "La Hampe de la Porte Guillaume",
+		"image": "boucherie_europe_chartres01.jpg",
+		"categorie": "boucherie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boucherie",
+				"portrait": "marchand_humain_f_boucherie03.jpg",
+				"nom": "Peta Wambui"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_lame_d_acier_du_pont_bouju",
+		"_rev": "1-fef2b00323c74ec0b28e3ffec6640982",
+		"type": "lieu",
+		"label": "La Lame d'Acier du Pont Bouju",
+		"image": "armurerie_europe_chartres01.jpg",
+		"categorie": "armurerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_armurerie",
+				"portrait": "marchand_humain_m_armurerie02.jpg",
+				"nom": "Qiang de Périgord"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_lame_du_tertre",
+		"_rev": "1-5036b740c36b961f748bca7986be6658",
+		"type": "lieu",
+		"label": "La Lame du Tertre",
+		"image": "armurerie_europe_chartres02.jpg",
+		"categorie": "armurerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_armurerie",
+				"portrait": "marchand_humain_m_armurerie03.jpg",
+				"nom": "Takumi Soleil-Levant"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_maison_du_maroquin_de_saint_andre",
+		"_rev": "1-515a61d04bb0d2c7e3c6dc78e0f05e4c",
+		"type": "lieu",
+		"label": "La Maison du Maroquin de Saint-André",
+		"image": "maroquinerie_europe_chartres01.jpg",
+		"categorie": "maroquinerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_maroquinerie",
+				"portrait": "marchand_nain_f_maroquinerie03.jpg",
+				"nom": "Runa Lourde-Hache"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_pierre_tombale_des_epars",
+		"_rev": "1-ce2b86c0301d2fa455316db7f8480424",
+		"type": "lieu",
+		"label": "La Pierre Tombale des Épars",
+		"image": "necromancie_europe_chartres01.jpg",
+		"categorie": "necromancie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_necromancie",
+				"portrait": "marchand_elfe_f_necromancie02.jpg",
+				"nom": "Margot Briseflammes"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_sangle_du_pont_bouju",
+		"_rev": "1-e5110d4bdc762c6260b5a1ad604a1fcf",
+		"type": "lieu",
+		"label": "La Sangle du Pont Bouju",
+		"image": "bourrellerie_europe_chartres01.jpg",
+		"categorie": "bourrellerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_bourrellerie",
+				"portrait": "marchand_humain_m_bourrellerie04.jpg",
+				"nom": "Armand Bouazizi"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_saumure_de_saint_andre",
+		"_rev": "1-7721829e482c47468afd3062195eae17",
+		"type": "lieu",
+		"label": "La Saumure de Saint-André",
+		"image": "salaison_europe_chartres01.jpg",
+		"categorie": "salaison",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_salaison",
+				"portrait": "marchand_humain_m_salaison03.jpg",
+				"nom": "Ran Ferrant"
+			}
+		]
+	},
+	{
+		"_id": "lieu:la_soie_et_le_manche_des_epars",
+		"_rev": "1-6559482d8afae32d56bd2c4b4e186a34",
+		"type": "lieu",
+		"label": "La Soie et le Manche des Épars",
+		"image": "brosserie_europe_chartres02.jpg",
+		"categorie": "brosserie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_brosserie",
+				"portrait": "marchand_elfe_m_brosserie05.jpg",
+				"nom": "Haldir Sombrefrêne"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_bain_de_tan_de_la_basse_ville",
+		"_rev": "1-7ebab4d45455f6d06c88b8fe1b4b97a6",
+		"type": "lieu",
+		"label": "Le Bain de Tan de la Basse-Ville",
+		"image": "tannerie_europe_chartres02.jpg",
+		"categorie": "tannerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_tannerie",
+				"portrait": "marchand_elfe_f_tannerie03.jpg",
+				"nom": "Clémentine Fleurépine"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_bain_parfume_du_cloitre",
+		"_rev": "1-d32fd6b4d09ce225a6cd97229eec00c1",
+		"type": "lieu",
+		"label": "Le Bain Parfumé du Cloître",
+		"image": "savonnerie_europe_chartres02.jpg",
+		"categorie": "savonnerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_savonnerie",
+				"portrait": "marchand_humain_f_savonnerie03.jpg",
+				"nom": "Adélaïde Rossi"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_bestiaire_du_tertre",
+		"_rev": "1-cb10734a8f67bb85580d413d4f15772d",
+		"type": "lieu",
+		"label": "Le Bestiaire du Tertre",
+		"image": "taxidermie_europe_chartres01.jpg",
+		"categorie": "taxidermie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_taxidermie",
+				"portrait": "marchand_elfe_f_taxidermie04.jpg",
+				"nom": "Imani Fleurépine"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_billot_noir_de_la_porte_guillaume",
+		"_rev": "1-6268f2cde189f999187107e5739d2aac",
+		"type": "lieu",
+		"label": "Le Billot Noir de la Porte Guillaume",
+		"image": "boucherie_europe_chartres02.jpg",
+		"categorie": "boucherie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boucherie",
+				"portrait": "marchand_humain_f_boucherie04.jpg",
+				"nom": "Lydie Morvan"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_cabinet_des_gemmes_du_cloitre",
+		"_rev": "1-5d32028788540e8b6242bb56b51edbd5",
+		"type": "lieu",
+		"label": "Le Cabinet des Gemmes du Cloître",
+		"image": "bijouterie_europe_chartres02.jpg",
+		"categorie": "bijouterie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_bijouterie",
+				"portrait": "marchand_elfe_f_bijouterie05.jpg",
+				"nom": "Melian Briseflammes"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_carre_vert_du_cloitre",
+		"_rev": "1-114875bf165266d1966c468c6a7ead7a",
+		"type": "lieu",
+		"label": "Le Carré Vert du Cloître",
+		"image": "jardinier_europe_chartres01.jpg",
+		"categorie": "jardinier",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_jardinier",
+				"portrait": "marchand_elfe_m_jardinier02.jpg",
+				"nom": "Félix Lunevoile"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_cerf_et_le_sanglier_de_l_eure",
+		"_rev": "1-7cdbbfc36bb6570db79b7bb6795e291b",
+		"type": "lieu",
+		"label": "Le Cerf et le Sanglier de l'Eure",
+		"image": "taxidermie_europe_chartres02.jpg",
+		"categorie": "taxidermie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_taxidermie",
+				"portrait": "marchand_elfe_f_taxidermie05.jpg",
+				"nom": "Tinuviel Lunevoile"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_coffret_d_os_du_pont_bouju",
+		"_rev": "1-f617038b882d31146bdeb0c42c03bf0c",
+		"type": "lieu",
+		"label": "Le Coffret d'Os du Pont Bouju",
+		"image": "tabletterie_europe_chartres01.jpg",
+		"categorie": "tabletterie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_tabletterie",
+				"portrait": "marchand_hobbit_f_tabletterie03.jpg",
+				"nom": "Lobelia Verte-Herbe"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_compas_du_pont_bouju",
+		"_rev": "1-62ba81ba7c054038934af6fb8c13980f",
+		"type": "lieu",
+		"label": "Le Compas du Pont Bouju",
+		"image": "atelier_d_artisan_europe_chartres01.jpg",
+		"categorie": "atelier_d_artisan",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_d_artisan",
+				"portrait": "marchand_hobbit_m_atelier_d_artisan02.jpg",
+				"nom": "Podo Chaud-Chaudron"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_comptoir_d_or_de_saint_andre",
+		"_rev": "1-f9fcacf69a7de9bcb9f7f8a066ff5230",
+		"type": "lieu",
+		"label": "Le Comptoir d'Or de Saint-André",
+		"image": "negoce_europe_rhemi_chartres01.jpg",
+		"categorie": "negociant",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_negociant",
+				"portrait": "marchand_humain_f_negociant03.jpg",
+				"nom": "Isabel Ek"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_cordage_fort_de_saint_andre",
+		"_rev": "1-1c7de0d54fb368c9143040320c38b4a4",
+		"type": "lieu",
+		"label": "Le Cordage Fort de Saint-André",
+		"image": "corderie_europe_chartres02.jpg",
+		"categorie": "corderie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_corderie",
+				"portrait": "marchand_humain_m_corderie05.jpg",
+				"nom": "Albrecht Zhao"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_cordon_de_l_eure",
+		"_rev": "1-c944756d9085bba68fe837046ee2430a",
+		"type": "lieu",
+		"label": "Le Cordon de l'Eure",
+		"image": "cordonnerie_europe_chartres02.jpg",
+		"categorie": "cordonnerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cordonnerie",
+				"portrait": "marchand_humain_m_cordonnerie06.jpg",
+				"nom": "Qiang de Meaux"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_crane_noir_de_saint_andre",
+		"_rev": "1-fd0cac7c784b9d8828a59f49a6831427",
+		"type": "lieu",
+		"label": "Le Crâne Noir de Saint-André",
+		"image": "necromancie_europe_chartres02.jpg",
+		"categorie": "necromancie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_necromancie",
+				"portrait": "marchand_elfe_f_necromancie03.jpg",
+				"nom": "Yavielle Écorcelune"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_cuir_fin_de_la_porte_guillaume",
+		"_rev": "1-448775789b4132cdacc8a2c0b5e21ab0",
+		"type": "lieu",
+		"label": "Le Cuir Fin de la Porte Guillaume",
+		"image": "maroquinerie_europe_rhemi_chartres01.jpg",
+		"categorie": "maroquinerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_maroquinerie",
+				"portrait": "marchand_nain_f_maroquinerie04.jpg",
+				"nom": "Nadia Cœur-d'Acier"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_duvet_du_pont_bouju",
+		"_rev": "1-178fb2011775776e61d3cd8cef64674e",
+		"type": "lieu",
+		"label": "Le Duvet du Pont Bouju",
+		"image": "plumasserie_europe_chartres02.jpg",
+		"categorie": "plumasserie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_plumasserie",
+				"portrait": "marchand_hobbit_f_plumasserie03.jpg",
+				"nom": "Kotoha Chaud-Chaudron"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_feu_secret_de_la_porte_guillaume",
+		"_rev": "1-06d40ea541fed5292d78797598d33b3f",
+		"type": "lieu",
+		"label": "Le Feu Secret de la Porte Guillaume",
+		"image": "cabinet_alchimie_europe_chartres01.jpg",
+		"categorie": "laboratoire_d_alchimie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_laboratoire_d_alchimie",
+				"portrait": "marchand_elfe_f_laboratoire_d_alchimie02.jpg",
+				"nom": "Ragnheiður Lunevoile"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_fil_tendu_de_l_eure",
+		"_rev": "1-7891d164be47e948f401a29ebf70d0a3",
+		"type": "lieu",
+		"label": "Le Fil Tendu de l'Eure",
+		"image": "boyauderie_europe_chartres02.jpg",
+		"categorie": "boyauderie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boyauderie",
+				"portrait": "marchand_hobbit_m_boyauderie03.jpg",
+				"nom": "Kan Souscolline"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_flambeau_de_l_eure",
+		"_rev": "1-c0e83d6573526a66c41efed77f675615",
+		"type": "lieu",
+		"label": "Le Flambeau de l'Eure",
+		"image": "atelier_de_cirier_europe_chartres02.jpg",
+		"categorie": "atelier_de_cirier",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_de_cirier",
+				"portrait": "marchand_elfe_f_atelier_de_cirier03.jpg",
+				"nom": "Melian Feuillargent"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_fumoir_des_halles_du_cloitre",
+		"_rev": "1-0cfc981d5d0d15a7c70934bf4c8d28ff",
+		"type": "lieu",
+		"label": "Le Fumoir des Halles du Cloître",
+		"image": "fumoir_europe_chartres02.jpg",
+		"categorie": "fumoir",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_fumoir",
+				"portrait": "marchand_humain_f_fumoir03.jpg",
+				"nom": "Charline Harrison"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_jardin_des_simples_des_epars",
+		"_rev": "1-97254724c61df26fce2088d42d6b9caa",
+		"type": "lieu",
+		"label": "Le Jardin des Simples des Épars",
+		"image": "apothicairerie_europe_chartres01.jpg",
+		"categorie": "apothicairerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_apothicairerie",
+				"portrait": "marchand_elfe_f_apothicairerie02.jpg",
+				"nom": "Liesel Fleurépine"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_jeton_des_epars",
+		"_rev": "1-2dc95cd0f2bdd22c62620944c0577c9b",
+		"type": "lieu",
+		"label": "Le Jeton des Épars",
+		"image": "tabletterie_europe_chartres02.jpg",
+		"categorie": "tabletterie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_tabletterie",
+				"portrait": "marchand_hobbit_f_tabletterie04.jpg",
+				"nom": "Amel Petit-Pas"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_levain_royal_de_saint_andre",
+		"_rev": "1-b8ffc339ba899d5df199dc06f3b23dfa",
+		"type": "lieu",
+		"label": "Le Levain Royal de Saint-André",
+		"image": "boulangerie_europe_chartres02.jpg",
+		"categorie": "boulangerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boulangerie",
+				"portrait": "marchand_elfe_f_boulangerie05.jpg",
+				"nom": "Celebrian Cielazur"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_lissier_du_cloitre",
+		"_rev": "1-eb239bfdd46c2120fd5336acb4a88656",
+		"type": "lieu",
+		"label": "Le Lissier du Cloître",
+		"image": "tissage_europe_chartres01.jpg",
+		"categorie": "tissage",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_tissage",
+				"portrait": "marchand_elfe_f_tissage02.jpg",
+				"nom": "Élisabeth Sombrefrêne"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_livre_relie_du_pont_bouju",
+		"_rev": "1-2a5072fe2a5c39b7312689ff9ffaac13",
+		"type": "lieu",
+		"label": "Le Livre Relié du Pont Bouju",
+		"image": "scriptorium_europe_chartres01.jpg",
+		"categorie": "scriptorium",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_scriptorium",
+				"portrait": "marchand_humain_m_scriptorium05.jpg",
+				"nom": "Marin Foster"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_manche_du_tertre",
+		"_rev": "1-3dff7551322576553b8f0f0340b66cdd",
+		"type": "lieu",
+		"label": "Le Manche du Tertre",
+		"image": "lutherie_europe_chartres02.jpg",
+		"categorie": "lutherie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_lutherie",
+				"portrait": "marchand_humain_m_lutherie03.jpg",
+				"nom": "Jocelyn Fernández"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_mortier_alchimique_du_cloitre",
+		"_rev": "1-a07c1f17272c13790b4c9f565e811939",
+		"type": "lieu",
+		"label": "Le Mortier Alchimique du Cloître",
+		"image": "cabinet_alchimie_europe_chartres02.jpg",
+		"categorie": "laboratoire_d_alchimie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_laboratoire_d_alchimie",
+				"portrait": "marchand_elfe_f_laboratoire_d_alchimie03.jpg",
+				"nom": "Nimloth Cielazur"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_mortier_d_or_de_la_basse_ville",
+		"_rev": "1-e1ac80161d62e18ded191a2d09a4c641",
+		"type": "lieu",
+		"label": "Le Mortier d'Or de la Basse-Ville",
+		"image": "apothicairerie_europe_chartres02.jpg",
+		"categorie": "apothicairerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_apothicairerie",
+				"portrait": "marchand_elfe_f_apothicairerie03.jpg",
+				"nom": "Leonor Lunevoile"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_parchemin_des_epars",
+		"_rev": "1-1657372e1dbcb214c09ca18da2b0e7eb",
+		"type": "lieu",
+		"label": "Le Parchemin des Épars",
+		"image": "scriptorium_europe_chartres02.jpg",
+		"categorie": "scriptorium",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_scriptorium",
+				"portrait": "marchand_humain_m_scriptorium06.jpg",
+				"nom": "Frédéric Jaziri"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_plumier_du_chasseur_de_l_eure",
+		"_rev": "1-0282cde7d06999e20b913f7d389568c9",
+		"type": "lieu",
+		"label": "Le Plumier du Chasseur de l'Eure",
+		"image": "atelier_de_l_empenneur_europe_chartres02.jpg",
+		"categorie": "atelier_de_l_empenneur",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_de_l_empenneur",
+				"portrait": "marchand_hobbit_m_atelier_de_l_empenneur03.jpg",
+				"nom": "Rufus Troisquarts"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_porte_selle_du_cloitre",
+		"_rev": "1-51d87c2647ca0bdc261b3a6849c8cde8",
+		"type": "lieu",
+		"label": "Le Porte-Selle du Cloître",
+		"image": "bourrellerie_europe_chartres02.jpg",
+		"categorie": "bourrellerie",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_bourrellerie",
+				"portrait": "marchand_humain_m_bourrellerie05.jpg",
+				"nom": "Carlo Campbell"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_pot_au_feu_du_cloitre",
+		"_rev": "1-1bec8b1337153188b336d4460ede63ba",
+		"type": "lieu",
+		"label": "Le Pot au Feu du Cloître",
+		"image": "cuisine_europe_chartres02.jpg",
+		"categorie": "cuisine",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cuisine",
+				"portrait": "marchand_elfe_f_cuisine03.jpg",
+				"nom": "Aelwen Astrebrillant"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_rabot_de_la_basse_ville",
+		"_rev": "1-45d88df1d2a52e1a0f8eaa2ff6c39ccf",
+		"type": "lieu",
+		"label": "Le Rabot de la Basse-Ville",
+		"image": "atelier_d_artisan_europe_chartres02.jpg",
+		"categorie": "atelier_d_artisan",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_d_artisan",
+				"portrait": "marchand_hobbit_m_atelier_d_artisan03.jpg",
+				"nom": "Olo Fouilleterre"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_relais_de_l_eure",
+		"_rev": "1-f555698d6481e2411b14de96be6f169c",
+		"type": "lieu",
+		"label": "Le Relais de l'Eure",
+		"image": "auberge_europe_chartres04.jpg",
+		"categorie": "auberge",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "lieu:le_sabot_du_tertre",
+		"_rev": "1-21b3f1cf79f2168d592fd5172781c4c2",
+		"type": "lieu",
+		"label": "Le Sabot du Tertre",
+		"image": "etable_europe_chartres01.jpg",
+		"categorie": "etable",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_etable",
+				"portrait": "marchand_nain_f_etable06.jpg",
+				"nom": "Helga Lourde-Hache"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_sabot_ferre_de_la_basse_ville",
+		"_rev": "1-ac8139dcb83ff898fef88b84bb6d66a8",
+		"type": "lieu",
+		"label": "Le Sabot Ferré de la Basse-Ville",
+		"image": "etable_europe_chartres02.jpg",
+		"categorie": "etable",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_etable",
+				"portrait": "marchand_nain_f_etable07.jpg",
+				"nom": "Elsa Fouille-Filons"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_sel_et_la_viande_des_epars",
+		"_rev": "1-3518153a836bb859f99758b830181d84",
+		"type": "lieu",
+		"label": "Le Sel et la Viande des Épars",
+		"image": "salaison_europe_chartres02.jpg",
+		"categorie": "salaison",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_salaison",
+				"portrait": "marchand_humain_m_salaison04.jpg",
+				"nom": "Wicasa Huang"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_tissage_fin_de_saint_andre",
+		"_rev": "1-a41ba230003ae3c7f57b5bbc9c3936a2",
+		"type": "lieu",
+		"label": "Le Tissage Fin de Saint-André",
+		"image": "tissage_europe_chartres02.jpg",
+		"categorie": "tissage",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_tissage",
+				"portrait": "marchand_elfe_f_tissage03.jpg",
+				"nom": "Akinyi Écorcelune"
+			}
+		]
+	},
+	{
+		"_id": "lieu:le_verger_de_l_eure",
+		"_rev": "1-3e7decfad6093600d9254b8ccf213e0f",
+		"type": "lieu",
+		"label": "Le Verger de l'Eure",
+		"image": "jardinier_europe_chartres02.jpg",
+		"categorie": "jardinier",
+		"lieu_parent": "lieu:chartres",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_jardinier",
+				"portrait": "marchand_elfe_m_jardinier03.jpg",
+				"nom": "Ahyoka Feuillargent"
+			}
+		]
+	}
+]
