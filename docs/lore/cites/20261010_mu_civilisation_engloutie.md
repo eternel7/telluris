@@ -16,7 +16,7 @@ Sa particularité : Mu représente une piste majeure pour comprendre les origine
 
 ## Mu et Lutecia — Le perfectionnement des Architectes
 
-Lutecia entretient un lien privilégié avec Mu, une civilisation ancienne dont les connaissances magiques dépassent encore celles des peuples actuels. Grâce à des contacts établis par un réseau de portails particulièrement rare, la cité envoie régulièrement ses Architectes les plus prometteurs auprès des maîtres de Mu.
+Lutecia entretient un lien privilégié avec Mu, une civilisation ancienne dont les connaissances magiques dépassent encore celles des peuples actuels. Lutecia n'a pas de grandes écoles de magie, la magie y étant faible : ses écoles sont des instituts d'architectes, qui forment aux portails. Grâce au portail programmable de Notre-Dame, vestige préservé de l'un des trois frères aborigènes, la cité envoie régulièrement ses Architectes les plus prometteurs auprès des maîtres de Mu.
 
 Ces séjours constituent l'aboutissement de leur formation : les apprentis y approfondissent leur compréhension des portails, apprennent des techniques de stabilisation oubliées et découvrent des méthodes de manipulation du mana que les écoles de Lutecia ne maîtrisent pas encore.
 
@@ -29,4 +29,4 @@ Mu n'est donc pas simplement une école supérieure : c'est le gardien d'un savo
 ## Précisions de l'Auteur (10/10/2026, même séance)
 
 - Lutecia est **sans grandes écoles de magie** : la magie y est faible. Ses « écoles » sont des **instituts d'architectes** : elles forment aux portails, et **Mu parachève** cette formation.
-- Le lien Lutecia ↔ Mu est assuré par le **portail programmable de Notre-Dame**, vestige préservé de l'un des trois frères aborigènes (et non par un « réseau de portails particulièrement rare » distinct).
+- Le lien Lutecia ↔ Mu est assuré par le **portail programmable de Notre-Dame**, vestige préservé de l'un des trois frères aborigènes.
