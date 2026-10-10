@@ -6,12 +6,13 @@
     "image": "caserne_europe01.png",
     "categorie": "bastion_paladin",
     "lieu_parent": "lieu:lutecia",
-    "texte": "Une cour fortifiée au flanc de la butte, à quelques pas de la Porte Montmartre. Plus haut, les paladins de la basilique veillent sur le ciel de la capitale ; ici, on veille sur les routes. Des chevaux attendent près d'un chariot chargé de ballots, un marchand discute avec un garde, et sous un auvent de toile, un greffier tient le registre des convois qui partent vers les cités de France.",
+    "texte": "Au pied des grands escaliers qui montent vers la basilique, un chemin boueux mène à une cour fortifiée, à quelques pas de la Porte Montmartre. Plus haut, les paladins de la basilique veillent sur le ciel de la capitale ; ici, on veille sur les routes. Des chevaux attendent près d'un chariot chargé de ballots, un marchand discute avec un garde, et sous un auvent de toile, un greffier tient le registre des convois qui partent vers les cités de France.",
     "pnj": [
       {
-        "character": "pnj:gautier_de_montfaucon",
-        "nom": "Gautier de Montfaucon",
-        "portrait": "paladin_Gautier_de_Montfaucon_nain_m.jpg",
+        "character": "pnj:bouchard_de_clignancourt",
+        "nom": "Bouchard de Clignancourt",
+        "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+        "image": "pnj_paladin_Bouchard_de_Clignancourt_nain_m_montmartre.jpg",
         "probabilite": 1,
         "description": "Un paladin nain en tunique ivoire, qui vérifie les sangles d'un paquetage.",
         "conditions": [
@@ -24,9 +25,10 @@
         ]
       },
       {
-        "character": "pnj:gautier_de_montfaucon_reims",
-        "nom": "Gautier de Montfaucon",
-        "portrait": "paladin_Gautier_de_Montfaucon_nain_m.jpg",
+        "character": "pnj:bouchard_de_clignancourt_reims",
+        "nom": "Bouchard de Clignancourt",
+        "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+        "image": "pnj_paladin_Bouchard_de_Clignancourt_nain_m_montmartre.jpg",
         "probabilite": 1,
         "description": "Le paladin nain, penché sur le registre des convois, ses deux nattes de barbe glissées sous le manteau.",
         "conditions": [
@@ -44,9 +46,10 @@
         ]
       },
       {
-        "character": "pnj:gautier_de_montfaucon_route_silencieuse",
-        "nom": "Gautier de Montfaucon",
-        "portrait": "paladin_Gautier_de_Montfaucon_nain_m.jpg",
+        "character": "pnj:bouchard_de_clignancourt_route_silencieuse",
+        "nom": "Bouchard de Clignancourt",
+        "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+        "image": "pnj_paladin_Bouchard_de_Clignancourt_nain_m_montmartre.jpg",
         "probabilite": 1,
         "description": "Le paladin nain, debout près de la porte fortifiée, les yeux sur la route du nord.",
         "conditions": [
@@ -135,19 +138,19 @@
     }
   },
   {
-    "_id": "pnj:gautier_de_montfaucon",
+    "_id": "pnj:bouchard_de_clignancourt",
     "type": "pnj",
-    "nom": "Gautier de Montfaucon",
+    "nom": "Bouchard de Clignancourt",
     "race": "nain",
     "vocation": "paladin",
-    "portrait": "paladin_Gautier_de_Montfaucon_nain_m.jpg",
+    "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
     "description": "Paladin des routes, responsable des escortes terrestres au départ de Montmartre. Un nain de stature compacte, aux épaules larges, dont la barbe châtain striée de gris descend en deux nattes tenues par des anneaux de fer. Une vieille cicatrice traverse son sourcil gauche et se perd dans sa barbe ; ses yeux gris regardent les gens comme il examine une route, en cherchant ce qui pourrait mal tourner. Cotte de mailles sous une tunique ivoire renforcée de cuir sombre, manteau bleu nuit frappé d'une route blanche traversant un bouclier, épée longue et bouclier de marche entretenus mais usés. Ses mains larges et calleuses portent les petites brûlures de sa magie sainte. Il n'a rien d'un héros de légende : il ressemble à quelqu'un qui a passé des décennies à ramener des gens chez eux.",
     "services": {
       "escorte": {
         "offre": {
           "id": "quete:escorte_montmartre_convoi_de_chartres",
           "titre": "Le convoi de Chartres",
-          "description": "Gautier de Montfaucon confie à votre garde un petit convoi de marchandises et deux voyageurs en partance pour Chartres, par la route du sud-ouest. Surveillez les abords, tenez le rythme du plus lent, et ne laissez personne seul en arrière. Amenez-les tous vivants au Relais de l'Eure.",
+          "description": "Bouchard de Clignancourt confie à votre garde un petit convoi de marchandises et deux voyageurs en partance pour Chartres, par la route du sud-ouest. Surveillez les abords, tenez le rythme du plus lent, et ne laissez personne seul en arrière. Amenez-les tous vivants au Relais de l'Eure.",
           "destination": "lieu:le_relais_de_l_eure",
           "proteges": [
             {
@@ -266,7 +269,7 @@
           ]
         },
         "rencontre_reponse": {
-          "texte": "« C'est une réponse acceptable. À condition que quelqu'un couvre les autres pendant ce temps. Une escorte ne se gagne pas en accumulant les cadavres. Elle se gagne quand tout le monde arrive à destination. » Il observe brièvement votre équipement, puis tend sa large main. « Gautier de Montfaucon. Je coordonne les escortes terrestres au départ de Montmartre. Je ne vous demanderai pas de me raconter votre vie. Je vous demanderai de respecter les consignes et de ne pas abandonner les personnes que vous aurez accepté de protéger. »",
+          "texte": "« C'est une réponse acceptable. À condition que quelqu'un couvre les autres pendant ce temps. Une escorte ne se gagne pas en accumulant les cadavres. Elle se gagne quand tout le monde arrive à destination. » Il observe brièvement votre équipement, puis tend sa large main. « Bouchard de Clignancourt. Je coordonne les escortes terrestres au départ de Montmartre. Je ne vous demanderai pas de me raconter votre vie. Je vous demanderai de respecter les consignes et de ne pas abandonner les personnes que vous aurez accepté de protéger. »",
           "choix": [
             {
               "id": "danger",
@@ -276,7 +279,7 @@
           ]
         },
         "rencontre_retraite": {
-          "texte": "« Alors nous décidons si nous pouvons continuer, si nous devons nous retrancher ou si nous devons battre en retraite. Un ordre d'escorte n'est pas un ordre de mourir. » Un silence passe. Gautier jette un regard vers la porte fortifiée, où un garde vient de faire entrer un cavalier couvert de poussière. « Justement. J'ai deux départs à organiser. Un convoi doit rejoindre Reims, et un autre Chartres. Nous manquons de bras fiables pour les prochains trajets. Vous pouvez commencer par une mission courte. Elle vous permettra de découvrir notre manière de travailler. Si vous faites preuve de sérieux, je vous confierai des escortes plus longues. »",
+          "texte": "« Alors nous décidons si nous pouvons continuer, si nous devons nous retrancher ou si nous devons battre en retraite. Un ordre d'escorte n'est pas un ordre de mourir. » Un silence passe. Bouchard jette un regard vers la porte fortifiée, où un garde vient de faire entrer un cavalier couvert de poussière. « Justement. J'ai deux départs à organiser. Un convoi doit rejoindre Reims, et un autre Chartres. Nous manquons de bras fiables pour les prochains trajets. Vous pouvez commencer par une mission courte. Elle vous permettra de découvrir notre manière de travailler. Si vous faites preuve de sérieux, je vous confierai des escortes plus longues. »",
           "choix": [
             {
               "id": "commencer",
@@ -312,7 +315,7 @@
           ]
         },
         "chartres_registre": {
-          "texte": "Sous l'auvent, un greffier aux doigts tachés d'encre fait glisser le registre vers vous et suit les lignes de l'ongle. « Pour Reims, il faut que la Guilde réponde de vous. Pour Chartres, non : c'est par là qu'on commence. Un chariot de draps et de sel, et deux voyageurs : {protege}. Arrivée : {destination}, {direction}. » Il tourne la page. « {xp} points d'expérience et {prime} pièces de cuivre, payés quand tout le monde est arrivé. Tout le monde. » Derrière vous, sans lever les yeux de ses sangles, Gautier ajoute : « Le chariot avance au pas du plus lent. Pas au vôtre. »",
+          "texte": "Sous l'auvent, un greffier aux doigts tachés d'encre fait glisser le registre vers vous et suit les lignes de l'ongle. « Pour Reims, il faut que la Guilde réponde de vous. Pour Chartres, non : c'est par là qu'on commence. Un chariot de draps et de sel, et deux voyageurs : {protege}. Arrivée : {destination}, {direction}. » Il tourne la page. « {xp} points d'expérience et {prime} pièces de cuivre, payés quand tout le monde est arrivé. Tout le monde. » Derrière vous, sans lever les yeux de ses sangles, Bouchard ajoute : « Le chariot avance au pas du plus lent. Pas au vôtre. »",
           "choix": [
             {
               "id": "accepter",
@@ -335,7 +338,7 @@
           ]
         },
         "chartres_accepte": {
-          "texte": "Le greffier écrit votre nom au bas de la ligne, souffle sur l'encre. Gautier vient serrer une dernière sangle, puis se tourne vers vous. « Le marchand connaît la route, et c'est bien ce qui m'inquiète : il croit qu'elle n'a pas changé depuis la dernière fois. La voyageuse s'écartera pour cueillir des herbes au bord du chemin. Ne la laissez pas faire seule. » Il recule d'un pas. « Ramenez-moi des nouvelles de Chartres, {prenom}. Et regardez derrière vous. »",
+          "texte": "Le greffier écrit votre nom au bas de la ligne, souffle sur l'encre. Bouchard vient serrer une dernière sangle, puis se tourne vers vous. « Le marchand connaît la route, et c'est bien ce qui m'inquiète : il croit qu'elle n'a pas changé depuis la dernière fois. La voyageuse s'écartera pour cueillir des herbes au bord du chemin. Ne la laissez pas faire seule. » Il recule d'un pas. « Ramenez-moi des nouvelles de Chartres, {prenom}. Et regardez derrière vous. »",
           "choix": [
             {
               "id": "ok",
@@ -345,7 +348,7 @@
           ]
         },
         "chartres_relance": {
-          "texte": "Gautier lève à peine les yeux de son paquetage. « {protege}. » Il désigne la porte du menton. « Chartres n'a pas bougé, {prenom}. {destination} non plus. Une escorte qui traîne à Montmartre, c'est une escorte qui n'a pas encore commencé. »",
+          "texte": "Bouchard lève à peine les yeux de son paquetage. « {protege}. » Il désigne la porte du menton. « Chartres n'a pas bougé, {prenom}. {destination} non plus. Une escorte qui traîne à Montmartre, c'est une escorte qui n'a pas encore commencé. »",
           "choix": [
             {
               "id": "ok",
@@ -388,13 +391,13 @@
     }
   },
   {
-    "_id": "pnj:gautier_de_montfaucon_reims",
+    "_id": "pnj:bouchard_de_clignancourt_reims",
     "type": "pnj",
-    "nom": "Gautier de Montfaucon",
+    "nom": "Bouchard de Clignancourt",
     "race": "nain",
     "vocation": "paladin",
-    "portrait": "paladin_Gautier_de_Montfaucon_nain_m.jpg",
-    "description": "Paladin des routes, responsable des escortes terrestres au départ de Montmartre. Le convoi de Chartres est arrivé entier : Gautier vous confie désormais des escortes plus longues.",
+    "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+    "description": "Paladin des routes, responsable des escortes terrestres au départ de Montmartre. Le convoi de Chartres est arrivé entier : Bouchard vous confie désormais des escortes plus longues.",
     "services": {
       "escorte": {
         "offre": {
@@ -456,7 +459,7 @@
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
-          "texte": "Gautier est penché sur le registre, sous l'auvent, à côté du greffier. Il vous voit venir de loin et referme le volume sur son pouce. « {prenom}. Le Relais de l'Eure m'a fait savoir que mon chariot était arrivé. Avec tout le monde dedans. » Il hoche la tête une seule fois. « C'est ce que j'attendais. Ce n'est pas si fréquent. »",
+          "texte": "Bouchard est penché sur le registre, sous l'auvent, à côté du greffier. Il vous voit venir de loin et referme le volume sur son pouce. « {prenom}. Le Relais de l'Eure m'a fait savoir que mon chariot était arrivé. Avec tout le monde dedans. » Il hoche la tête une seule fois. « C'est ce que j'attendais. Ce n'est pas si fréquent. »",
           "choix": [
             {
               "id": "reims_offre",
@@ -548,7 +551,7 @@
           ]
         },
         "reims_accepte": {
-          "texte": "Le greffier inscrit votre nom. Les trois pèlerins se lèvent du banc où ils attendaient : l'ogre charge les provisions sans un mot, l'elfe serre son châle, et la vieille femme vous adresse un sourire qui ne dit rien de ses pieds. Gautier vous retient d'une main sur le bras. « Faites des haltes avant qu'elles soient nécessaires. Et souvenez-vous : regardez derrière vous. »",
+          "texte": "Le greffier inscrit votre nom. Les trois pèlerins se lèvent du banc où ils attendaient : l'ogre charge les provisions sans un mot, l'elfe serre son châle, et la vieille femme vous adresse un sourire qui ne dit rien de ses pieds. Bouchard vous retient d'une main sur le bras. « Faites des haltes avant qu'elles soient nécessaires. Et souvenez-vous : regardez derrière vous. »",
           "choix": [
             {
               "id": "ok",
@@ -606,13 +609,13 @@
     }
   },
   {
-    "_id": "pnj:gautier_de_montfaucon_route_silencieuse",
+    "_id": "pnj:bouchard_de_clignancourt_route_silencieuse",
     "type": "pnj",
-    "nom": "Gautier de Montfaucon",
+    "nom": "Bouchard de Clignancourt",
     "race": "nain",
     "vocation": "paladin",
-    "portrait": "paladin_Gautier_de_Montfaucon_nain_m.jpg",
-    "description": "Paladin des routes, responsable des escortes terrestres au départ de Montmartre. Les pèlerins sont arrivés à Rhemi : Gautier vous confie désormais ce que les escortes ordinaires ne peuvent plus porter.",
+    "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+    "description": "Paladin des routes, responsable des escortes terrestres au départ de Montmartre. Les pèlerins sont arrivés à Rhemi : Bouchard vous confie désormais ce que les escortes ordinaires ne peuvent plus porter.",
     "services": {
       "escorte": {
         "offre": {
@@ -665,7 +668,7 @@
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
-          "texte": "Gautier n'est pas sous l'auvent. Il se tient près de la porte fortifiée, les bras croisés, les yeux sur la route du nord. Il vous entend venir sans se retourner. « {prenom}. Les pèlerins sont arrivés à Rhemi. Tous les trois. » Un temps. « Il y a une autre escorte qui devait y arriver. Elle n'y est jamais arrivée. »",
+          "texte": "Bouchard n'est pas sous l'auvent. Il se tient près de la porte fortifiée, les bras croisés, les yeux sur la route du nord. Il vous entend venir sans se retourner. « {prenom}. Les pèlerins sont arrivés à Rhemi. Tous les trois. » Un temps. « Il y a une autre escorte qui devait y arriver. Elle n'y est jamais arrivée. »",
           "choix": [
             {
               "id": "route_offre",
@@ -768,7 +771,7 @@
           ]
         },
         "route_accepte": {
-          "texte": "Gautier ouvre sa sacoche et en sort deux fioles de purification qu'il fait tourner entre ses doigts, puis les remet à leur place. « Si vous les trouvez blessés par quelque chose de souillé de mana, ne perdez pas de temps à me les décrire. Ramenez-les, je ferai le reste. » Il se tourne de nouveau vers le nord. « Et cette fois plus que jamais, {prenom}. Regardez derrière vous. »",
+          "texte": "Bouchard ouvre sa sacoche et en sort deux fioles de purification qu'il fait tourner entre ses doigts, puis les remet à leur place. « Si vous les trouvez blessés par quelque chose de souillé de mana, ne perdez pas de temps à me les décrire. Ramenez-les, je ferai le reste. » Il se tourne de nouveau vers le nord. « Et cette fois plus que jamais, {prenom}. Regardez derrière vous. »",
           "choix": [
             {
               "id": "ok",
@@ -803,7 +806,7 @@
           ]
         },
         "route_rapport": {
-          "texte": "Gautier a tout écouté sans vous interrompre une seule fois : les ornières, la borne, le feu mal éteint, les deux survivants derrière l'éboulis. Puis il s'est agenouillé près de la paladine, a posé ses larges mains sur son flanc, et une lumière pâle a laissé sur ses paumes une brûlure de plus. Quand il se relève, il a l'air plus vieux. « Deux. Sur six. » Il le dit sans détour, comme on note un chiffre au registre. « Et sans vous, aucun. Vous avez regardé au lieu de poursuivre. C'est pour cela que vous êtes là, et c'est pour cela qu'eux sont revenus. »",
+          "texte": "Bouchard a tout écouté sans vous interrompre une seule fois : les ornières, la borne, le feu mal éteint, les deux survivants derrière l'éboulis. Puis il s'est agenouillé près de la paladine, a posé ses larges mains sur son flanc, et une lumière pâle a laissé sur ses paumes une brûlure de plus. Quand il se relève, il a l'air plus vieux. « Deux. Sur six. » Il le dit sans détour, comme on note un chiffre au registre. « Et sans vous, aucun. Vous avez regardé au lieu de poursuivre. C'est pour cela que vous êtes là, et c'est pour cela qu'eux sont revenus. »",
           "choix": [
             {
               "id": "suite",
