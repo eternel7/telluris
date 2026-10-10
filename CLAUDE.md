@@ -107,7 +107,7 @@ utils/
   donjon.py              # donjons (pur) : salles curatées, plafond de grade, commissions d'éradication ;
                          #   donjon à ÉTAGES (`mode:"etages"`) : étages reliés par des connexions, un seul combat
   recrutement.py         # recrutement (pur) : recrues, tableau, groupe, affinités, parts, compagnie
-  montures.py            # montures (pur) : étable, charge multipliée, troupeau
+  montures.py            # montures (pur) : étable, charge multipliée, troupeau, harnachement (slots propres)
   proprietes.py          # propriétés résidentielles (pur) : type FIGÉ, aménagements contraints
                          #   par type (`rules:proprietes`), capacités dérivées, personnel à poste,
                          #   gardien/vol, location inviolable, zones habitables peintes ;

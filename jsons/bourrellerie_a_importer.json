@@ -1,0 +1,872 @@
+[
+	{
+		"_id": "item:Barde_de_cuir_bouilli",
+		"type": "item",
+		"nom": "Barde de cuir bouilli",
+		"icon": "🛡️",
+		"description": "Un poitrail de cuir durci sur courroies poissées, qui couvre le cou et la poitrine de la bête contre griffes et crocs.",
+		"rarete": "peu_commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"monture_poitrail"
+		],
+		"tags": [
+			"harnachement"
+		],
+		"poids": 8.0,
+		"bonus_pa": 6,
+		"bonus_pv": 5,
+		"restriction": {
+			"F": 35
+		}
+	},
+	{
+		"_id": "item:Bat_de_portage",
+		"type": "item",
+		"nom": "Bât de portage",
+		"icon": "📦",
+		"description": "Deux panneaux rembourrés reliés par des arcs, avec crochets et sangles de charge. Une selle porte un homme, un bât porte un convoi.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"monture_dos"
+		],
+		"tags": [
+			"harnachement"
+		],
+		"poids": 6.0,
+		"monture": {
+			"charge_pct": 35
+		}
+	},
+	{
+		"_id": "item:Boucle_de_fer",
+		"type": "item",
+		"nom": "Boucles de fer",
+		"icon": "🔗",
+		"description": "Boucles à ardillon tirées d'un lingot, par poignées. Une sangle sans boucle n'est qu'une lanière.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.05
+	},
+	{
+		"_id": "item:Bourrelet_de_crin",
+		"type": "item",
+		"nom": "Bourrelet de crin",
+		"icon": "🧶",
+		"description": "Boudin de toile bourré de crin tassé, que l'on coud sous ce qui porte ou ce qui frotte. Le métier tient son nom de lui.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.3
+	},
+	{
+		"_id": "item:Bricole_de_portefaix",
+		"type": "item",
+		"nom": "Bricole de portefaix",
+		"icon": "🎽",
+		"description": "Le harnais des porteurs de halle : une courroie de poitrail rembourrée qui reporte la charge des reins sur les épaules.",
+		"rarete": "peu_commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"epaules"
+		],
+		"tags": [],
+		"poids": 1.2,
+		"bonus_pa": 1,
+		"bonus": {
+			"F": 2
+		}
+	},
+	{
+		"_id": "item:Bride_de_route",
+		"type": "item",
+		"nom": "Bride de route",
+		"icon": "🐴",
+		"description": "Têtière, frontal et rênes de courroie poissée, mors doux. Une bête qu'on ne tiraille pas accepte une charge de plus.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"monture_tete"
+		],
+		"tags": [
+			"harnachement"
+		],
+		"poids": 0.6,
+		"monture": {
+			"charge_pct": 5
+		}
+	},
+	{
+		"_id": "item:Brigandine_de_courroyeur",
+		"type": "item",
+		"nom": "Brigandine de courroyeur",
+		"icon": "🦺",
+		"description": "Une cuirasse de cuir bouilli doublée d'une veste souple et d'un bourrelet de crin aux épaules. Elle encaisse comme du fer et se porte des jours entiers.",
+		"rarete": "peu_commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"torse"
+		],
+		"tags": [],
+		"poids": [
+			5,
+			8
+		],
+		"bonus_pa": 10,
+		"bonus": {
+			"Ag": -2,
+			"R": 1
+		}
+	},
+	{
+		"_id": "item:Carquois_de_cuir_bouilli",
+		"type": "item",
+		"nom": "Carquois de cuir bouilli",
+		"icon": "🏹",
+		"description": "Un étui rigide qui ne s'écrase pas sous la pluie ni dans les chutes ; les traits restent droits et viennent à la main.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"ceinture"
+		],
+		"tags": [],
+		"poids": 0.8,
+		"bonus_pa": 1,
+		"bonus_initiative": 2
+	},
+	{
+		"_id": "item:Casque_de_cuir_bouilli",
+		"type": "item",
+		"nom": "Casque de cuir bouilli",
+		"icon": "⛑️",
+		"description": "Une calotte moulée d'une seule pièce, jugulaire bouclée. Plus léger que le fer, moins bruyant aussi.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"tete"
+		],
+		"tags": [],
+		"poids": 0.8,
+		"bonus_pa": 2
+	},
+	{
+		"_id": "item:Chanfrein_de_cuir_bouilli",
+		"type": "item",
+		"nom": "Chanfrein de cuir bouilli",
+		"icon": "🐴",
+		"description": "Une plaque moulée qui couvre le front et le nez de la monture, sanglée sous la ganache.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"monture_tete"
+		],
+		"tags": [
+			"harnachement"
+		],
+		"poids": 1.5,
+		"bonus_pa": 2
+	},
+	{
+		"_id": "item:Collier_d_attelage",
+		"type": "item",
+		"nom": "Collier d'attelage",
+		"icon": "⭕",
+		"description": "Le gros bourrelet rembourré passé à l'encolure : la bête tire de l'épaule et non plus de la gorge, et sa charge ne l'étouffe plus.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"monture_poitrail"
+		],
+		"tags": [
+			"harnachement"
+		],
+		"poids": 3.0,
+		"monture": {
+			"charge_pct": 15
+		}
+	},
+	{
+		"_id": "item:Courroie_poissee",
+		"type": "item",
+		"nom": "Courroie poissée",
+		"icon": "🪢",
+		"description": "Deux sangles cousues l'une sur l'autre au fil poissé : la pluie n'y entre pas et la couture ne cède pas.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.1
+	},
+	{
+		"_id": "item:Cuir_bouilli",
+		"type": "item",
+		"nom": "Cuir bouilli",
+		"icon": "🟫",
+		"description": "Peau trempée dans la poix chaude puis mise en forme sur un moule de bois. En refroidissant, elle devient dure comme de la corne.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.4
+	},
+	{
+		"_id": "item:Cuirasse_de_cuir_bouilli",
+		"type": "item",
+		"nom": "Cuirasse de cuir bouilli",
+		"icon": "🦺",
+		"description": "Plastron et dossière de cuir durci, réunis aux flancs par des sangles bouclées. On la serre comme on sangle une selle.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"torse"
+		],
+		"tags": [],
+		"poids": [
+			4,
+			6
+		],
+		"bonus_pa": 8,
+		"bonus": {
+			"Ag": -3
+		}
+	},
+	{
+		"_id": "item:Fourreau_de_dos",
+		"type": "item",
+		"nom": "Fourreau de dos",
+		"icon": "🗡️",
+		"description": "Fourreau de cuir bouilli monté sur courroies croisées, la poignée au-dessus de l'épaule : la lame sort d'un seul geste.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"epaules"
+		],
+		"tags": [],
+		"poids": 0.7,
+		"bonus_initiative": 3
+	},
+	{
+		"_id": "item:Gorgerin_de_cuir_bouilli",
+		"type": "item",
+		"nom": "Gorgerin de cuir bouilli",
+		"icon": "🧣",
+		"description": "Un col dur qui couvre la gorge et le haut des clavicules, là où frappent les crocs.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"cou"
+		],
+		"tags": [],
+		"poids": 0.5,
+		"bonus_pa": 1
+	},
+	{
+		"_id": "item:Guetres_de_route",
+		"type": "item",
+		"nom": "Guêtres de route",
+		"icon": "🥾",
+		"description": "Jambières de peau fermées par une rangée de boucles, contre la boue, les ronces et les morsures basses.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"jambes"
+		],
+		"tags": [],
+		"poids": 0.5,
+		"bonus_pa": 1,
+		"bonus": {
+			"Ag": 1
+		}
+	},
+	{
+		"_id": "item:Jambieres_de_cuir_bouilli",
+		"type": "item",
+		"nom": "Jambières de cuir bouilli",
+		"icon": "🦵",
+		"description": "Cuissots et genouillères de cuir moulé, tenus par trois sangles chacun.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"jambes"
+		],
+		"tags": [],
+		"poids": 1.4,
+		"bonus_pa": 3,
+		"bonus": {
+			"Ag": -1
+		}
+	},
+	{
+		"_id": "item:Sacoche_de_ceinture",
+		"type": "item",
+		"nom": "Sacoche de ceinture",
+		"icon": "👝",
+		"description": "Une poche de cuir à rabat bouclé, pendue à la hanche. Ce qu'on y range se trouve sans quitter l'ennemi des yeux.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"ceinture"
+		],
+		"tags": [],
+		"poids": 0.5,
+		"bonus_initiative": 2
+	},
+	{
+		"_id": "item:Sangle_de_cuir",
+		"type": "item",
+		"nom": "Sangles de cuir",
+		"icon": "🎗️",
+		"description": "Bandes de peau refendues au couteau à pied et lissées à l'os : le premier ouvrage du bourrelier, et celui qui sert à tout le reste.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.15
+	},
+	{
+		"_id": "item:Selle_a_sacoches",
+		"type": "item",
+		"nom": "Selle à sacoches",
+		"icon": "🐎",
+		"description": "Une selle de voyage à laquelle on a cousu deux sacs de maroquinier, bouclés sur les flancs. Elle charge presque autant qu'un bât et protège mieux.",
+		"rarete": "peu_commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"monture_dos"
+		],
+		"tags": [
+			"harnachement"
+		],
+		"poids": 5.0,
+		"bonus_pa": 1,
+		"monture": {
+			"charge_pct": 25
+		}
+	},
+	{
+		"_id": "item:Selle_de_voyage",
+		"type": "item",
+		"nom": "Selle de voyage",
+		"icon": "🐎",
+		"description": "Arçon garni de crin, quartiers de peau, sangle et contre-sangle bouclées. La bête porte son cavalier sans se blesser le garrot.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"monture_dos"
+		],
+		"tags": [
+			"harnachement"
+		],
+		"poids": 4.0,
+		"bonus_pa": 1,
+		"monture": {
+			"charge_pct": 10
+		}
+	},
+	{
+		"_id": "item:Targe_a_enarmes",
+		"type": "item",
+		"nom": "Targe à énarmes",
+		"icon": "🛡️",
+		"description": "Petit bouclier de bois ferré, doublé de cuir bouilli. Les énarmes de courroie poissée le lient à l'avant-bras : il suit le geste au lieu de le freiner.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"main_gauche"
+		],
+		"tags": [],
+		"poids": [
+			1.5,
+			3
+		],
+		"bonus_pa": 6,
+		"bonus": {
+			"Ag": -1
+		},
+		"restriction": {
+			"F": 15
+		}
+	},
+	{
+		"_id": "recette:bourrellerie_barde_de_cuir_bouilli",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Barde_de_cuir_bouilli",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Cuir_bouilli",
+				"quantite": 6
+			},
+			{
+				"item": "item:Courroie_poissee",
+				"quantite": 3
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 6
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_bat_de_portage",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Bat_de_portage",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "peaux",
+				"quantite": 2
+			},
+			{
+				"item": "item:Bourrelet_de_crin",
+				"quantite": 2
+			},
+			{
+				"item": "item:Sangle_de_cuir",
+				"quantite": 3
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 4
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_boucle_de_fer",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Boucle_de_fer",
+		"quantite_produite": 8,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_bourrelet_de_crin",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Bourrelet_de_crin",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "crins",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "lin",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_bricole_de_portefaix",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Bricole_de_portefaix",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Courroie_poissee",
+				"quantite": 2
+			},
+			{
+				"item": "item:Bourrelet_de_crin",
+				"quantite": 1
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_bride_de_route",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Bride_de_route",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Courroie_poissee",
+				"quantite": 2
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grande_manufacture_du_cuir_brigandine_de_courroyeur",
+		"type": "recette",
+		"lieu_categorie": "grande_manufacture_du_cuir",
+		"objet_final": "Brigandine_de_courroyeur",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Cuirasse_de_cuir_bouilli",
+				"quantite": 1
+			},
+			{
+				"item": "item:Veste_cuir_souple",
+				"quantite": 1
+			},
+			{
+				"item": "item:Bourrelet_de_crin",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:atelier_de_l_empenneur_carquois_de_cuir_bouilli",
+		"type": "recette",
+		"lieu_categorie": "atelier_de_l_empenneur",
+		"objet_final": "Carquois_de_cuir_bouilli",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Cuir_bouilli",
+				"quantite": 1
+			},
+			{
+				"item": "item:Courroie_poissee",
+				"quantite": 1
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_casque_de_cuir_bouilli",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Casque_de_cuir_bouilli",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Cuir_bouilli",
+				"quantite": 1
+			},
+			{
+				"item": "item:Sangle_de_cuir",
+				"quantite": 1
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_chanfrein_de_cuir_bouilli",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Chanfrein_de_cuir_bouilli",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Cuir_bouilli",
+				"quantite": 2
+			},
+			{
+				"item": "item:Sangle_de_cuir",
+				"quantite": 1
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_collier_d_attelage",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Collier_d_attelage",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Bourrelet_de_crin",
+				"quantite": 2
+			},
+			{
+				"item": "item:Cuir_bouilli",
+				"quantite": 1
+			},
+			{
+				"item": "item:Sangle_de_cuir",
+				"quantite": 2
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_courroie_poissee",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Courroie_poissee",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"item": "item:Sangle_de_cuir",
+				"quantite": 2
+			},
+			{
+				"item": "item:Fil_poisse",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_cuir_bouilli",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Cuir_bouilli",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "peaux",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "poix",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_cuirasse_de_cuir_bouilli",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Cuirasse_de_cuir_bouilli",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Cuir_bouilli",
+				"quantite": 4
+			},
+			{
+				"item": "item:Sangle_de_cuir",
+				"quantite": 2
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 4
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_fourreau_de_dos",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Fourreau_de_dos",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Cuir_bouilli",
+				"quantite": 1
+			},
+			{
+				"item": "item:Courroie_poissee",
+				"quantite": 2
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_gorgerin_de_cuir_bouilli",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Gorgerin_de_cuir_bouilli",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Cuir_bouilli",
+				"quantite": 1
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:cordonnerie_guetres_de_route",
+		"type": "recette",
+		"lieu_categorie": "cordonnerie",
+		"objet_final": "Guetres_de_route",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "peaux",
+				"quantite": 1
+			},
+			{
+				"item": "item:Sangle_de_cuir",
+				"quantite": 1
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_jambieres_de_cuir_bouilli",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Jambieres_de_cuir_bouilli",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Cuir_bouilli",
+				"quantite": 2
+			},
+			{
+				"item": "item:Sangle_de_cuir",
+				"quantite": 2
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_sacoche_de_ceinture",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Sacoche_de_ceinture",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Sangle_de_cuir",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "peaux",
+				"quantite": 1
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_sangle_de_cuir",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Sangle_de_cuir",
+		"quantite_produite": 3,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "peaux",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:grande_manufacture_du_cuir_selle_a_sacoches",
+		"type": "recette",
+		"lieu_categorie": "grande_manufacture_du_cuir",
+		"objet_final": "Selle_a_sacoches",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Selle_de_voyage",
+				"quantite": 1
+			},
+			{
+				"item": "item:sac",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:bourrellerie_selle_de_voyage",
+		"type": "recette",
+		"lieu_categorie": "bourrellerie",
+		"objet_final": "Selle_de_voyage",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "peaux",
+				"quantite": 3
+			},
+			{
+				"item": "item:Bourrelet_de_crin",
+				"quantite": 1
+			},
+			{
+				"item": "item:Sangle_de_cuir",
+				"quantite": 2
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:armurerie_targe_a_enarmes",
+		"type": "recette",
+		"lieu_categorie": "armurerie",
+		"objet_final": "Targe_a_enarmes",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "fer",
+				"quantite": 1
+			},
+			{
+				"item": "item:Cuir_bouilli",
+				"quantite": 2
+			},
+			{
+				"item": "item:Courroie_poissee",
+				"quantite": 2
+			}
+		]
+	}
+]

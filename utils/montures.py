@@ -28,7 +28,8 @@ from db.config import get_doc
 from models import character_stats
 from models.character_stats import BaseStats, compute_derived_stats
 from utils.characters import (
-	carried_weight, charge_max_of, item_ref_weight, money_to_cuivre, sync_equipment_bonus,
+	carried_weight, charge_max_of, item_ref_id, item_ref_weight, money_to_cuivre,
+	sync_equipment_bonus,
 )
 from utils.consommables import caracts_avec_buffs
 
@@ -93,10 +94,60 @@ def charge_max_monture(monture: dict, get_doc_fn=None) -> int:
 	"""Capacité d'emport d'une monture — SOURCE UNIQUE, à utiliser partout où l'on
 	comparerait sinon à `charge_max_of`. Le multiplicateur est relu sur le doc espèce
 	à chaque appel (jamais dénormalisé sur la monture) : régler `charge_mult` en base
-	prend effet immédiatement, comme pour toute donnée d'équilibrage."""
+	prend effet immédiatement, comme pour toute donnée d'équilibrage. Le HARNACHEMENT
+	(`bonus_charge_pct`) s'y ajoute, relu de même sur les docs item."""
 	lire = get_doc_fn or get_doc
 	espece = lire(monture.get("espece", "")) if monture.get("espece") else None
-	return int(charge_max_of(monture) * charge_mult(espece))
+	pct = bonus_charge_pct(monture, lire)
+	return int(charge_max_of(monture) * charge_mult(espece) * (1 + pct / 100))
+
+
+# ── Harnachement ─────────────────────────────────────────────────────────────────
+#
+# Une monture équipe SES emplacements, jamais ceux d'un personnage, et inversement :
+# `slot_admis` est le garde de /equip. Le dos porte la selle OU le bât (une bête n'a qu'un
+# dos), d'où trois emplacements et non quatre.
+#
+# Un objet de harnachement agit par deux canaux :
+#   · les champs d'équipement ordinaires (`bonus_pa`, `bonus_pv`, `bonus`…) — repliés par
+#     `sync_equipment_bonus`, donc lus tels quels par le snapshot de combat (une barde
+#     protège la bête comme une armure protège un personnage) ;
+#   · le bloc `monture: {"charge_pct": n}` — PROPRE aux montures, il augmente la capacité
+#     d'emport (`charge_max_monture`). Ce n'est pas un buff de caractéristique (CLAUDE.md §3
+#     reste vrai : la Force brute seule fixe `charge_max_of`) mais l'outil du portage, comme
+#     un sac l'est pour un homme. Lu SEULEMENT sur les emplacements de monture.
+
+SLOTS_MONTURE = ("monture_dos", "monture_tete", "monture_poitrail")
+
+
+def slot_admis(porteur: dict, slot: str) -> bool:
+	"""Une monture n'équipe que `SLOTS_MONTURE`, un personnage jamais."""
+	return (slot in SLOTS_MONTURE) == est_monture(porteur)
+
+
+def bonus_charge_pct(monture: dict, get_doc_fn=None) -> int:
+	"""Somme des `monture.charge_pct` du harnachement porté (plancher 0 : un objet mal
+	saisi n'ampute pas la bête)."""
+	lire = get_doc_fn or get_doc
+	total = 0
+	slots = monture.get("slots") or {}
+	for slot in SLOTS_MONTURE:
+		ref = slots.get(slot)
+		if not ref:
+			continue
+		item = lire(item_ref_id(ref)) or {}
+		try:
+			total += max(0, int((item.get("monture") or {}).get("charge_pct", 0) or 0))
+		except (TypeError, ValueError):
+			continue
+	return total
+
+
+def harnachement_tient(monture: dict, get_doc_fn=None) -> bool:
+	"""Ce que porte la bête tient-il dans sa capacité ? Garde d'equip/unequip : ôter un bât
+	ne change pas le POIDS porté (il passe du dos au sac) mais réduit la capacité — sans ce
+	refus, la monture serait surchargée et bloquerait le groupe."""
+	return carried_weight(monture) <= charge_max_monture(monture, get_doc_fn) + 1e-6
 
 
 # ── Création ─────────────────────────────────────────────────────────────────────
@@ -131,8 +182,8 @@ def creer_monture(espece_doc: dict, lieu_doc: dict, acheteur: dict) -> dict | No
 
 	Le doc porte le SOUS-ENSEMBLE des champs d'un character qui rend opérants
 	compute_derived_stats / carried_weight / build_joueur_snapshot /
-	_apply_world_turn_regen. `slots` reste vide : une monture n'équipe rien (mais le
-	champ doit exister — `carried_weight` le somme).
+	_apply_world_turn_regen. `slots` naît vide (le champ doit exister — `carried_weight`
+	le somme) et ne reçoit que du harnachement (`SLOTS_MONTURE`).
 
 	⚠️ Les `tags` de l'espèce ne sont PAS recopiés : plusieurs montures portent `proie`
 	ou `predateur`, qui pilotent l'IA de prédation en furtivité. Celle-ci ne scanne que
@@ -236,9 +287,12 @@ def acquerir(character: dict, monture: dict) -> tuple[bool, str]:
 def relacher(character: dict, monture: dict) -> tuple[bool, str]:
 	"""Rend sa liberté à une monture (miroir de `recrutement.congedier`, autorisé
 	partout). REFUSE tant qu'elle porte quelque chose : la relâcher chargée ferait
-	disparaître le butin sans que rien ne le signale. Mute les deux docs, sans save."""
+	disparaître le butin sans que rien ne le signale — harnachement compris. Mute les deux
+	docs, sans save."""
 	if monture.get("inventaire"):
 		return False, "Videz son sac avant de la relâcher."
+	if any((monture.get("slots") or {}).values()):
+		return False, "Ôtez son harnachement avant de la relâcher."
 	monture["statut"] = "relachee"
 	monture.pop("acquise_par", None)
 	monture.pop("auras_recues", None)   # hors du troupeau, plus d'aura
@@ -251,9 +305,12 @@ def relacher(character: dict, monture: dict) -> tuple[bool, str]:
 def tuer(character: dict, monture: dict) -> list:
 	"""Mort définitive : la monture quitte le troupeau et rend sa cargaison, qui sera
 	déversée au sol par l'appelant (elle ne doit pas disparaître avec elle). Mute les
-	deux docs, sans save. Renvoie les références d'items qu'elle portait."""
-	cargaison = list(monture.get("inventaire") or [])
+	deux docs, sans save. Renvoie les références d'items qu'elle portait, harnachement
+	compris (sac d'abord, puis ce qu'elle avait sur le dos)."""
+	slots = monture.get("slots") or {}
+	cargaison = list(monture.get("inventaire") or []) + [r for r in slots.values() if r]
 	monture["inventaire"] = []
+	monture["slots"] = {s: None for s in slots}
 	monture["statut"] = "morte"
 	monture["currentPV"] = 0
 	monture.pop("acquise_par", None)

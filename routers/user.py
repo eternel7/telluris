@@ -831,7 +831,7 @@ _VALID_STATS = {"V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch"}
 _VALID_SLOTS = {
     "main_droite", "main_gauche", "torse", "tete", "epaules", "jambes",
     "pieds", "mains", "anneau_1", "anneau_2", "cou", "ceinture",
-}
+} | set(montures.SLOTS_MONTURE)   # harnachement : admis selon le porteur (`montures.slot_admis`)
 
 
 def _derived_from_character(character: dict, equipment: EquipmentBonus) -> DerivedStats:
@@ -1131,6 +1131,10 @@ async def equip_item(
 		raise HTTPException(status_code=422, detail="Paramètres invalides")
 
 	character, _principal = _acteur(current_user, body)
+	if not montures.slot_admis(character, slot):
+		raise HTTPException(status_code=422, detail=(
+			"Seul le harnachement va sur une monture." if montures.est_monture(character)
+			else "Ce harnachement se pose sur une monture."))
 
 	inventaire = character.get("inventaire", [])
 	# Référence correspondant à l'item (chaîne legacy ou objet {item, poids}). L'`index` vise
@@ -1189,17 +1193,35 @@ async def equip_item(
 	inventaire.remove(ref)
 	character["slots"]      = slots
 	character["inventaire"] = inventaire
+	_garde_harnachement(character)
 
 	eq_bonus = sync_equipment_bonus(character)
 	save_doc(character)
 
 	derived = _derived_from_character(character, eq_bonus)
+	return _reponse_equipement(character, slots, inventaire, derived)
+
+
+def _garde_harnachement(porteur: dict) -> None:
+	"""Une monture dont on change le harnachement doit rester sous sa capacité : remplacer
+	un bât par une selle, ou l'ôter, réduit ce qu'elle peut porter sans rien changer à ce
+	qu'elle porte. 409 AVANT le save — le doc muté en mémoire est abandonné."""
+	if montures.est_monture(porteur) and not montures.harnachement_tient(porteur, get_doc):
+		raise HTTPException(status_code=409, detail=(
+			f"{porteur.get('nom', 'La monture')} porte trop pour cela — allégez son sac d'abord."))
+
+
+def _reponse_equipement(character: dict, slots: dict, inventaire: list, derived) -> dict:
+	"""Réponse partagée d'equip/unequip. `charge`/`charge_max` : le harnachement d'une
+	monture déplace sa capacité, que le panneau 👥 recopie pour griser ses flèches."""
 	return {
 		"slots":           {s: resolve_item_ref(v) if v else None for s, v in slots.items()},
 		"inventaire":      [d for r in inventaire if (d := resolve_item_ref(r))],
 		"equipment_bonus": character["equipment_bonus"],
 		"derived_stats":   derived.model_dump(),
 		"caracts_detail":  consommables.caracts_detail(character),
+		"charge":          round(carried_weight(character), 2),
+		"charge_max":      montures.charge_max_porteur(character),
 	}
 
 
@@ -1225,18 +1247,13 @@ async def unequip_item(
 	slots[slot] = None
 	character["slots"]      = slots
 	character["inventaire"] = inventaire
+	_garde_harnachement(character)
 
 	eq_bonus = sync_equipment_bonus(character)
 	save_doc(character)
 
 	derived = _derived_from_character(character, eq_bonus)
-	return {
-		"slots":           {s: resolve_item_ref(v) if v else None for s, v in slots.items()},
-		"inventaire":      [d for r in inventaire if (d := resolve_item_ref(r))],
-		"equipment_bonus": character["equipment_bonus"],
-		"derived_stats":   derived.model_dump(),
-		"caracts_detail":  consommables.caracts_detail(character),
-	}
+	return _reponse_equipement(character, slots, inventaire, derived)
 
 
 def _inventory_payload(character: dict, sol_doc: dict | None = None) -> dict:

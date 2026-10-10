@@ -175,6 +175,8 @@ MATIERES = {
 	# Lourde et sourde : elle frappe fort et se porte mal. Le poids EST le contrepoids.
 	"item:plomb": _matiere("plombé", 1, {"bonus_degats": 2, "poids": _val(1.4), "valeur": _val(0.8)}),
 	"item:cuir": _matiere("à garniture de cuir", 1, {"bonus_pa": 1, "poids": _val(0.95)}),
+	# Demi-produit de bourrellerie (dev/gen_bourrellerie.py) : durcit une pièce PORTÉE.
+	"item:Cuir_bouilli": _matiere("en cuir bouilli", 1, {"bonus_pa": 1, "poids": _val(1.05)}, [TAG_ARMURE]),
 	"item:tendons": _matiere("à ligature de tendons", 1, {"bonus_degats": 1, "poids": _val(0.95)}),
 	"item:os": _matiere("à poignée d'os", 1, {"bonus_degats": 1, "poids": _val(0.9)}),
 	"item:cuir_brut": _matiere("de la Peau", 1, {"bonus_pv": 1, "bonus": {"R": 1}, "poids": _val(0.95),

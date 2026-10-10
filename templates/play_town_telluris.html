@@ -2750,6 +2750,8 @@
 							<select id="grp-inv-select" onchange="onGroupeInvSelect(this.value)"></select>
 							<span class="sh-inv-poids" id="grp-inv-charge-compagnon"></span>
 						</div>
+						{# Harnachement : seulement quand le porteur choisi est une MONTURE. #}
+						<div id="grp-harnachement" class="grp-harn" style="display:none"></div>
 						<div class="sh-inv-scroll sh-scroll"><div id="grp-inv-compagnon" class="sh-inv-box"></div></div>
 					</div>
 				</div>
@@ -2797,6 +2799,13 @@
 		.grp-move-btn:hover:not(:disabled) { background: var(--accent, #b98c4a); color: #1c1710; }
 		.grp-move-btn:disabled { opacity: .3; cursor: not-allowed; }
 		.grp-charge-over { color: #e06c5a; }
+		/* Harnachement d'une monture : trois emplacements au-dessus de son sac. */
+		.grp-harn { display: flex; flex-direction: column; gap: .2rem; margin-bottom: .45rem;
+			padding: .35rem .5rem; border: 1px solid var(--border-color, #6b5836); border-radius: 6px; }
+		.grp-harn-ligne { display: flex; align-items: center; gap: .5rem; min-width: 0; }
+		.grp-harn-slot { flex: 0 0 4.5rem; opacity: .75; font-size: .85rem; }
+		.grp-harn-obj { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+		.grp-harn-vide { opacity: .5; font-style: italic; }
 		/* ── Montures ─────────────────────────────────────────────────────────── */
 		/* Sous-titre du regroupement en fin de liste des compagnons. */
 		.grp-sous-titre {
@@ -4919,6 +4928,12 @@ const SLOT_LABELS = {
 	anneau_1: "Anneau 1", anneau_2: "Anneau 2", ceinture: "Ceinture",
 	jambes: "Jambes", main_droite: "Main D.", main_gauche: "Main G."
 };
+// Harnachement d'une monture (`montures.SLOTS_MONTURE`) : HORS de SLOT_LABELS à dessein —
+// tout ce qui filtre `s in SLOT_LABELS` (paperdoll, « Équiper » de la fiche) ignore ainsi
+// un objet de monture. Il s'équipe depuis le panneau 👥 (`_grpHarnachement`).
+const SLOTS_MONTURE_LABELS = {
+	monture_dos: "Dos", monture_tete: "Tête", monture_poitrail: "Poitrail"
+};
 
 let _inventaire   = {{ character.get("inventaire", []) | tojson | safe }};
 let _slots        = {{ character.get("slots", {}) | tojson | safe }};
@@ -5198,6 +5213,7 @@ const _CMP_ATTRS = [
 	{ label: 'Toucher dist.',get: it => +(it.bonus_cd || 0),          better: 1,  fmt: v => '+' + v },
 	{ label: 'Dégâts',       get: it => +(it.bonus_degats || 0),      better: 1,  fmt: v => '+' + v },
 	{ label: 'Initiative',   get: it => +(it.bonus_initiative || 0),  better: 1,  fmt: v => '+' + v },
+	{ label: '🐴 Charge',    get: it => +((it.monture || {}).charge_pct || 0), better: 1, fmt: v => '+' + v + ' %' },
 	// V porté par l'objet : `bonus.V` + `bonus_malus_depl` (delta négatif des armures
 	// lourdes), les deux se cumulant sur la même caract. Plus haut = mieux.
 	{ label: 'Vitesse (V)',  get: it => +((it.bonus || {}).V || 0) + +(it.bonus_malus_depl || 0),
@@ -5232,6 +5248,11 @@ const _SLOTS_MAINS = ['main_droite', 'main_gauche'];
 function _priseText(item) {
 	if (!item || !(item.slots || []).some(s => _SLOTS_MAINS.includes(s))) return '';
 	return item.deux_mains ? '✋✋ Deux mains' : 'Une main';
+}
+// Emplacement de monture d'un objet de harnachement ; vide pour tout le reste.
+function _harnachementText(item) {
+	return ((item && item.slots) || []).filter(s => s in SLOTS_MONTURE_LABELS)
+		.map(s => SLOTS_MONTURE_LABELS[s]).join(' · ');
 }
 // → templates/scripts/capacites_texte.js (partagé avec /admin/sorts et /admin/competences)
 function _effetsChips(item) {
@@ -5354,6 +5375,7 @@ function _renderCmpTable(left, right, roleLeft, roleRight) {
 	rows += _textRow('🏫 École', _magiesText(left), compare ? _magiesText(right) : null, compare);
 	rows += _textRow('Mode', _weaponModeText(left), compare ? _weaponModeText(right) : null, compare);
 	rows += _textRow('Prise', _priseText(left), compare ? _priseText(right) : null, compare);
+	rows += _textRow('🐴 Harnachement', _harnachementText(left), compare ? _harnachementText(right) : null, compare);
 	rows += _numRows(left, right, compare);
 	rows += _textRow('Dés de dégâts', left && _diceText(left.bonus_degats_dice),
 		compare ? (right && _diceText(right.bonus_degats_dice)) : null, compare);
@@ -5473,6 +5495,13 @@ function _renderMono(st) {
 		acts.push(`<button class="sh-equip-btn" ${rentre ? '' : 'disabled'}
 			title="${rentre ? 'Transférer' : 'Trop lourd — le destinataire est à sa charge maximale'}"
 			onclick="_cardTransferer('${st.source}',${st.idx},'${item._id}')">${fleche} Transférer</button>`);
+		// Dans le sac d'une monture, un objet de harnachement s'y pose directement.
+		const slotM = st.source === 'grp_compagnon' && ((_grpEtat || {}).sacs || {})[_grpSelId]?.harnachement
+			? (item.slots || []).find(s => s in SLOTS_MONTURE_LABELS) : null;
+		if (slotM) acts.push(`<button class="sh-equip-btn" onclick="closeItemDetail(); harnacher(${st.idx},'${item._id}','${slotM}')">🐴 Harnacher</button>`);
+	}
+	else if (st.source === 'grp_harn') {
+		acts.push(`<button class="sh-drop-btn" onclick="closeItemDetail(); desharnacher('${st.idx}')">✕ Ôter</button>`);
 	}
 	if (acts.length) html += `<div class="item-detail-actions">${acts.join('')}</div>`;
 	return html;
@@ -5533,6 +5562,8 @@ function openItemDetail(source, idx) {
 	// Sacs de l'onglet 🎒 Inventaire du groupe : fiche en mono, sans comparaison — l'équipement
 	// porté est celui du JOUEUR, comparer le sac d'un compagnon avec mentirait.
 	else if (source in _GRP_SENS) item = (_grpPorteurs(source).src.inventaire || [])[idx];
+	// Harnachement de la monture choisie au panneau 👥 : idx = clé d'emplacement de monture.
+	else if (source === 'grp_harn') item = ((((_grpEtat || {}).sacs || {})[_grpSelId] || {}).harnachement || {})[idx];
 	// Panneau coffre : fiche en lecture seule (mono, sans action — le transfert reste sur la flèche).
 	// 'pcf_sac' : idx = position dans le sac de gauche (vous ou un porteur) ; 'pcf_coffre' : idx = `idx` réel de l'objet du coffre.
 	else if (source === 'pcf_sac')    item = (_pcfSacGauche(_pcfEtat).inventaire || [])[idx];
@@ -10578,7 +10609,70 @@ function renderGroupeInventaire() {
 	_grpCharge('grp-inv-charge-principal', principal);
 	_grpCharge('grp-inv-charge-compagnon', compagnon);
 	_grpRemplirSac('grp-inv-principal', principal.inventaire, _grpSac(principal.inventaire, compagnon, 'vers_compagnon'));
-	_grpRemplirSac('grp-inv-compagnon', compagnon.inventaire, _grpSac(compagnon.inventaire, principal, 'vers_principal'));
+	_grpRemplirSac('grp-inv-compagnon', compagnon.inventaire,
+		_grpSac(compagnon.inventaire, principal, 'vers_principal', !!compagnon.harnachement));
+	_grpHarnachement(compagnon.harnachement);
+}
+
+// Harnachement de la monture choisie (`harnachement` n'est servi que pour une monture) :
+// un emplacement par ligne, ✕ pour l'ôter. On harnache depuis SON sac (bouton 🐴 des lignes) :
+// l'objet doit d'abord passer sur la bête, comme tout ce qu'elle porte.
+function _grpHarnachement(harn) {
+	const box = document.getElementById('grp-harnachement');
+	if (!box) return;
+	if (!harn) { box.style.display = 'none'; box.innerHTML = ''; return; }
+	box.style.display = '';
+	box.innerHTML = Object.entries(SLOTS_MONTURE_LABELS).map(([slot, label]) => {
+		const it = harn[slot];
+		const obj = it
+			? `<span class="grp-harn-obj sh-inv-open" onclick="openItemDetail('grp_harn','${slot}')" title="Voir la fiche">${it.icon || '📦'} ${it.nom || '—'}</span>
+				<button class="grp-move-btn" title="Ôter (repasse dans son sac)" onclick="desharnacher('${slot}')">✕</button>`
+			: `<span class="grp-harn-obj grp-harn-vide">— vide —</span>`;
+		return `<div class="grp-harn-ligne"><span class="grp-harn-slot">🐴 ${label}</span>${obj}</div>`;
+	}).join('');
+}
+
+// Bouton 🐴 d'une ligne du sac d'une monture : seulement pour un objet de harnachement.
+function _grpBtnHarnacher(item, idx) {
+	const slot = (item.slots || []).find(s => s in SLOTS_MONTURE_LABELS);
+	if (!slot) return '';
+	return `<button class="grp-move-btn" title="Harnacher (${SLOTS_MONTURE_LABELS[slot]})"
+		onclick="harnacher(${idx},'${item._id}','${slot}')">🐴</button>`;
+}
+
+async function harnacher(index, itemId, slot) {
+	await _grpEquipement('api/equip', { item_id: itemId, slot, index });
+}
+async function desharnacher(slot) {
+	await _grpEquipement('api/unequip', { slot });
+}
+// equip/unequip au nom de la monture choisie (`compagnon_id` : CLAUDE.md §1). La réponse
+// porte ses slots, son sac et sa capacité (le harnachement la déplace) : on resynchronise
+// en place le sac, le bloc de harnachement et le pied de sa carte.
+async function _grpEquipement(url, corps) {
+	const mid = _grpSelId;
+	try {
+		const res = await fetch(url, {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify(Object.assign({ compagnon_id: mid }, corps))
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		if (!_grpEtat) return;
+		const harn = {};
+		Object.keys(SLOTS_MONTURE_LABELS).forEach(s => { harn[s] = (data.slots || {})[s] || null; });
+		(_grpEtat.sacs || {})[mid] = {
+			inventaire: data.inventaire, charge: data.charge, charge_max: data.charge_max,
+			harnachement: harn,
+		};
+		const mnt = (_grpEtat.montures || []).find(m => m.id === mid);
+		if (mnt) {
+			mnt.charge = data.charge;
+			mnt.charge_max = data.charge_max;
+			_majPiedMonture(mnt);
+		}
+		renderGroupeInventaire();
+	} catch (err) { console.error('Erreur harnachement', err); }
 }
 
 // Un sac du panneau Groupe : même bascule comptée que le sac de la fiche et que le
@@ -10621,7 +10715,7 @@ function _grpRentre(item, dest) {
 // Icône + nom ouvrent la fiche de l'objet, comme dans le sac de la fiche perso.
 // Affichage trié par nom via `_sortedOrder` : l'index d'origine est conservé pour l'adressage
 // serveur (transfert + fiche objet).
-function _grpSac(items, dest, sens) {
+function _grpSac(items, dest, sens, harnachable) {
 	items = items || [];
 	if (!items.length) return '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>';
 	const source = _GRP_SOURCE[sens];
@@ -10637,7 +10731,9 @@ function _grpSac(items, dest, sens) {
 		const row = `<span class="sh-inv-name sh-inv-open" onclick="openItemDetail('${source}',${idx})" title="Voir la fiche">${item.icon || '📦'} ${item.nom || '—'}</span>
 			<span class="sh-inv-poids">${poids.toFixed(1)} kg</span>`;
 		// Le bouton se place du côté où part l'objet : à droite pour →, à gauche pour ←.
-		return `<div class="sh-inv-item">${sens === 'vers_principal' ? btn + row : row + btn}</div>`;
+		// Sac d'une monture : 🐴 en bout de ligne pour un objet de harnachement.
+		const harn = harnachable ? _grpBtnHarnacher(item, idx) : '';
+		return `<div class="sh-inv-item">${sens === 'vers_principal' ? btn + row + harn : row + btn}</div>`;
 	}).join('');
 }
 
@@ -10667,10 +10763,12 @@ async function transfererItem(sens, index, itemId) {
 				inventaire: data.principal.inventaire,
 				charge: data.principal.charge, charge_max: data.principal.charge_max,
 			});
-			(_grpEtat.sacs || {})[data.compagnon_id] = {
+			// Object.assign : garde le `harnachement` d'une monture, que le transfert ne touche pas.
+			const sacs = _grpEtat.sacs || {};
+			sacs[data.compagnon_id] = Object.assign({}, sacs[data.compagnon_id], {
 				inventaire: data.compagnon.inventaire,
 				charge: data.compagnon.charge, charge_max: data.compagnon.charge_max,
-			};
+			});
 			// La carte d'une monture affiche sa charge en pied : sans cette resynchro elle
 			// resterait figée sur l'état d'avant le transfert jusqu'à la réouverture du panneau.
 			const mnt = (_grpEtat.montures || []).find(m => m.id === data.compagnon_id);

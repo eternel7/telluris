@@ -479,6 +479,16 @@ def _charge_view(porteur: dict) -> dict:
 			"charge_max": montures.charge_max_porteur(porteur)}
 
 
+def _harnachement_view(porteur: dict) -> dict:
+	"""Emplacements de harnachement d'une MONTURE (résolus, vides compris : le panneau les
+	affiche tous) ; rien pour un compagnon, dont l'équipement vit dans sa fiche."""
+	if not montures.est_monture(porteur):
+		return {}
+	slots = porteur.get("slots") or {}
+	return {"harnachement": {s: (resolve_item_ref(slots[s]) if slots.get(s) else None)
+							 for s in montures.SLOTS_MONTURE}}
+
+
 @recrutement_router.get("/groupe")
 async def groupe_etat(current_user: Annotated[dict, Depends(get_current_user)]):
 	"""État du groupe pour le panneau 👥, disponible PARTOUT (contrairement au board de
@@ -504,6 +514,7 @@ async def groupe_etat(current_user: Annotated[dict, Depends(get_current_user)]):
 		p["_id"]: {
 			**_charge_view(p),
 			"inventaire": [d for r in p.get("inventaire", []) if (d := resolve_item_ref(r))],
+			**_harnachement_view(p),
 		}
 		for p in _porteurs_du_groupe(character)
 	}
