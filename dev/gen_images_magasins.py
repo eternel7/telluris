@@ -180,7 +180,7 @@ METIERS_EN = {
 	"atelier_de_cirier": ("chandler's workshop", "bunches of hanging candles, large wax tapers, vats of wax, honeycombs"),
 	"atelier_de_l_empenneur": ("fletcher's workshop", "bundles of arrows, sheaves of feathers, straight wooden shafts"),
 	"bijouterie": ("jeweler's shop", "counter with open jewel cases, rings, necklaces, small precision scale"),
-	"boucherie": ("butcher's shop", "meat hanging from hooks, wooden chopping block, cuts of meat on the stall"),
+	"boucherie": ("butcher's shop", "meat hanging from hooks, wooden chopping block, cuts of meat on the counter"),
 	"boulangerie": ("bakery", "baskets of golden loaves and brioches, bread oven glowing inside"),
 	"bourrellerie": ("saddler's and harness maker's shop", "saddles, harnesses, horse collars and straps hanging on the walls"),
 	"boyauderie": ("gut-string maker's workshop", "gut strings drying on poles, soaking tubs"),
@@ -290,9 +290,9 @@ FOULE = ("A lively, varied crowd of ogres, dwarves, halflings, elves and humans 
 		 "hair, in rich robes, travel cloaks or elegant leather armor; dwarves only waist-high to the "
 		 "humans, with red, black, grey or white beards or braids, in plate armor, smith's aprons or "
 		 "merchant clothes; halflings the height of a human child but grown adults with adult faces, "
-		 "plump or slim, young or wrinkled, barefoot with curly hair, in colorful waistcoats and skirts, "
+		 "plump or slim, young or wrinkled, barefoot with curly hair, in colorful waistcoats and skirts; "
 		 # Jamais verts (consigne de l'auteur, 09/10) : les teints restent humains, en plus rude.
-		 "never children or babies; huge ogres with human skin tones, weathered, ruddy, tanned or ashen, "
+		 "huge ogres with human skin tones, weathered, ruddy, tanned or ashen, "
 		 "never green, in "
 		 "tunics, furs or armor, towering over the crowd; humans of every origin: adventurers, guards, "
 		 "merchants, pilgrims, peasants. Everyone wears medieval clothing; nothing modern.")
@@ -341,12 +341,16 @@ def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label):
 	# lot du 09/10, la pose du portrait était recopiée (consigne de l'auteur).
 	return (f"The person shown in image 1 is the shopkeeper: keep exactly the same face, hair, beard, "
 			f"body, skin and clothes as in image 1 ({tenancier}), but NOT the same pose or expression. "
-			f"Do not reuse the background of image 1. Show this shopkeeper at work at the open front and "
-			f"market stall of a medieval fantasy {boutique} in the city of {cite_nom}, {lieu}, busy with "
-			f"the trade, absorbed in the task, not looking at the camera, not posing, not presenting "
-			f"anything to the viewer. The shop fills about 80% of "
-			f"the image, seen from the street in a three-quarter view; its goods are displayed on racks "
-			f"and tables and are immediately recognizable: {marchandises}. {FOULE} {STYLE}")
+			f"Do not reuse the background of image 1. Show this shopkeeper at work in the wide open "
+			f"ground-floor shopfront of a medieval fantasy {boutique} in the city of {cite_nom}, {lieu}, "
+			f"busy with the trade, absorbed in the task, not looking at the camera, not posing, not "
+			# « open front and market stall » donnait de toutes petites échoppes (lot de Chartres, 10/10).
+			f"presenting anything to the viewer. The shop is a solid, permanent town house of two or "
+			f"three storeys, built of stone and timber framing, with its own walls, roof and upper "
+			f"floors — never a market stall, booth, tent, cart or makeshift lean-to. It fills about 80% "
+			f"of the image, seen from the street in a three-quarter view; its goods are displayed on "
+			f"racks, shelves and counters inside the shop and at its open shop window, and are "
+			f"immediately recognizable: {marchandises}. {FOULE} {STYLE}")
 
 
 def prompt_auberge(cite, cite_nom, quartier):

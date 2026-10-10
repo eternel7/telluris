@@ -449,6 +449,24 @@
 	}
 	.zchip:hover { border-color: var(--accent2); }
 	.zchip.on { border-color: var(--accent); background: rgba(200,168,75,0.18); color: var(--accent); }
+	.chips-filtre-wrap { position: relative; margin-bottom: 4px; }
+	.chips-filtre {
+		display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px;
+		scrollbar-width: thin; scrollbar-color: rgba(42,48,64,0.7) transparent;
+	}
+	.chips-filtre::-webkit-scrollbar { height: 3px; }
+	.chips-filtre::-webkit-scrollbar-track { background: transparent; }
+	.chips-filtre::-webkit-scrollbar-thumb { background: rgba(42,48,64,0.7); border-radius: 2px; }
+	.chips-filtre::-webkit-scrollbar-thumb:hover { background: rgba(200,168,75,0.45); }
+	.chips-filtre .zchip { flex-shrink: 0; white-space: nowrap; }
+	/* Ombre à droite tant que des chips restent cachées hors de la zone (classe `.plus`, posée en JS). */
+	.chips-filtre-wrap::after {
+		content: ''; position: absolute; top: 0; right: 0; bottom: 4px; width: 22px;
+		background: linear-gradient(to right, rgba(20,23,32,0), var(--panel) 85%);
+		box-shadow: inset -6px 0 6px -4px rgba(0,0,0,0.6);
+		pointer-events: none; opacity: 0; transition: opacity .15s;
+	}
+	.chips-filtre-wrap.plus::after { opacity: 1; }
 
 	/* --- CANVAS AREA --- */
 	.canvas-wrap {
@@ -839,6 +857,8 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 			<!-- Panneau Ressources -->
 			<div id="panel-ressources" style="display:none;">
 				<label for="ressource-select" style="font-size:.7rem;color:var(--accent);">Ressource (item)</label>
+				<div class="chips-filtre-wrap"><div id="ressource-chips-cat" class="chips-filtre"></div></div>
+				<div class="chips-filtre-wrap"><div id="ressource-chips-sc" class="chips-filtre"></div></div>
 				<div style="display:flex;gap:6px;margin-bottom:8px;">
 					<select id="ressource-select" style="flex:1;min-width:0;background:#1c1c28;color:var(--text);border:1px solid var(--accent);border-radius:4px;padding:4px;">
 						<option value="" disabled selected>-- Choisir un item --</option>
@@ -1571,6 +1591,73 @@ let lieuProfilWeights = {}; // distribution de grades par défaut du lieu { prof
 // ── RESSOURCES STATE ───────────────────────────────────────────────────────────
 let itemsDefs = {};        // { "item:x": { nom, icon, ... } }
 let ressources = [];       // [ { ressource: "item:x", zones: ["zone::a", ...] } ]
+let ressourceItemsTries = [];          // items triés par nom, source du <select>
+const ressourceFiltreCat = new Set();  // vide = « Tout »
+const ressourceFiltreSc  = new Set();
+
+// Chips de filtre du picker : catégories, puis sous-catégories des items retenus
+// par les catégories. Multi-sélection par clic ; « Tout » vide la sélection.
+function _chipsFiltreHtml(valeurs, actives) {
+	const chip = (v, label, on) =>
+		`<span class="zchip${on ? ' on' : ''}" data-v="${_escAttr(v)}">${_escHtml(label)}</span>`;
+	return chip('', 'Tout', actives.size === 0)
+		+ valeurs.map(v => chip(v, v, actives.has(v))).join('');
+}
+// Ombre droite (`.plus` sur le wrapper) tant que la rangée n'est pas défilée jusqu'au bout.
+function _ombreChipsFiltre(el) {
+	el.parentElement.classList.toggle('plus', el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+}
+['ressource-chips-cat', 'ressource-chips-sc'].forEach(id => {
+	const el = document.getElementById(id);
+	el.addEventListener('scroll', () => _ombreChipsFiltre(el), { passive: true });
+	// Le panneau est masqué au chargement : la mesure se refait quand il apparaît / se redimensionne.
+	new ResizeObserver(() => _ombreChipsFiltre(el)).observe(el);
+});
+function renderRessourceFiltres() {
+	const cats = [...new Set(ressourceItemsTries.map(it => it.categorie).filter(Boolean))]
+		.sort((a, b) => a.localeCompare(b));
+	const parCat = ressourceItemsTries.filter(it =>
+		ressourceFiltreCat.size === 0 || ressourceFiltreCat.has(it.categorie));
+	const scs = [...new Set(parCat.map(it => it.sous_categorie).filter(Boolean))]
+		.sort((a, b) => a.localeCompare(b));
+	// Une sous-catégorie sortie du périmètre des catégories ne filtre plus rien d'invisible.
+	[...ressourceFiltreSc].forEach(sc => { if (!scs.includes(sc)) ressourceFiltreSc.delete(sc); });
+	const blocs = [
+		['ressource-chips-cat', cats, ressourceFiltreCat],
+		['ressource-chips-sc',  scs,  ressourceFiltreSc],
+	];
+	blocs.forEach(([id, valeurs, actives]) => {
+		const el = document.getElementById(id);
+		const defilement = el.scrollLeft;  // le re-rendu ne doit pas ramener la rangée au début
+		el.parentElement.style.display = valeurs.length ? '' : 'none';
+		el.innerHTML = _chipsFiltreHtml(valeurs, actives);
+		el.scrollLeft = defilement;
+		_ombreChipsFiltre(el);
+		el.querySelectorAll('.zchip').forEach(c => c.addEventListener('click', () => {
+			const v = c.dataset.v;
+			if (!v) actives.clear();
+			else if (actives.has(v)) actives.delete(v);
+			else actives.add(v);
+			renderRessourceFiltres();
+		}));
+	});
+	renderRessourceSelect();
+}
+function renderRessourceSelect() {
+	const choisi = ressourceSelect.value;
+	ressourceSelect.querySelectorAll('option[value]:not([value=""])').forEach(o => o.remove());
+	ressourceItemsTries
+		.filter(it => (ressourceFiltreCat.size === 0 || ressourceFiltreCat.has(it.categorie))
+			&& (ressourceFiltreSc.size === 0 || ressourceFiltreSc.has(it.sous_categorie)))
+		.forEach(it => {
+			const opt = document.createElement('option');
+			opt.value = it._id;
+			opt.textContent = (it.icon ? it.icon + ' ' : '') + (it.nom || it._id);
+			ressourceSelect.appendChild(opt);
+		});
+	ressourceSelect.value = choisi;
+	if (ressourceSelect.selectedIndex < 0) ressourceSelect.value = '';
+}
 
 // Load items (pour le picker de ressources) on page load
 (async () => {
@@ -1578,15 +1665,10 @@ let ressources = [];       // [ { ressource: "item:x", zones: ["zone::a", ...] }
 		const res = await fetch('/api/items');
 		if (res.ok) {
 			const list = await res.json();
-			(list || [])
-				.sort((a, b) => (a.nom || a._id).localeCompare(b.nom || b._id))
-				.forEach(it => {
-					itemsDefs[it._id] = it;
-					const opt = document.createElement('option');
-					opt.value = it._id;
-					opt.textContent = (it.icon ? it.icon + ' ' : '') + (it.nom || it._id);
-					ressourceSelect.appendChild(opt);
-				});
+			ressourceItemsTries = (list || [])
+				.sort((a, b) => (a.nom || a._id).localeCompare(b.nom || b._id));
+			ressourceItemsTries.forEach(it => { itemsDefs[it._id] = it; });
+			renderRessourceFiltres();
 		}
 	} catch (e) { console.warn('Items non chargés', e); }
 })();
@@ -2397,7 +2479,8 @@ canvas.addEventListener('mousemove', e => {
 		} else if (c) setStatus(`Cellule [${c.cx}, ${c.cy}] = ${_txt} - ${currentRev}.`);
 		return;
 	}
-	if (editMode === 'lieux') return; // click-only, pas de sélection au drag
+	// Clic seul : un glisser poserait une zone par case traversée.
+	if (editMode === 'lieux' || editMode === 'zones') return;
 	paintEtTest(e);
 });
 canvas.addEventListener('mouseup',		() => { isPainting = false; });
@@ -2405,7 +2488,7 @@ canvas.addEventListener('mouseleave', () => { isPainting = false; hoverCell = nu
 
 // Touch support
 canvas.addEventListener('touchstart', e => { if (voiesVisee) { e.preventDefault(); _voiesViser(e.touches[0]); return; } if (modeDeplacement && !editionPendantTest()) return; e.preventDefault(); isPainting = true; paintEtTest(e.touches[0]); }, {passive:false});
-canvas.addEventListener('touchmove',	e => { if (modeDeplacement && !editionPendantTest()) return; e.preventDefault(); if (editMode === 'lieux') return; paintEtTest(e.touches[0]); }, {passive:false});
+canvas.addEventListener('touchmove',	e => { if (modeDeplacement && !editionPendantTest()) return; e.preventDefault(); if (editMode === 'lieux' || editMode === 'zones') return; paintEtTest(e.touches[0]); }, {passive:false});
 canvas.addEventListener('touchend',	 () => { isPainting = false; });
 
 // ── VALUE SELECTION ────────────────────────────────────────────────────────
