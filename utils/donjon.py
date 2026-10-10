@@ -530,7 +530,32 @@ def solder_commission(character: dict, quete_id: str) -> dict | None:
 	return {"recompenses": recap}
 
 
-def donjon_purge(character: dict, lieu_id: str) -> bool:
+def _deja_purge(character: dict, lieu_id: str) -> bool:
+	"""Une victoire dans la salle, ou l'archive d'une commission soldée qui la visait."""
+	if victoire_acquise(character, lieu_id):
+		return True
+	return any(t.get("source") == "commission" and t.get("lieu") == lieu_id
+			   for t in (character or {}).get("quetes_terminees") or [])
+
+
+def _commission_en_cours(character: dict, lieu_id: str) -> bool:
+	"""Une commission visant cette salle est prise et son élite encore debout."""
+	q = commission_active_pour_lieu(character, lieu_id)
+	return bool(q) and not quetes.objectif_atteint(character, q)
+
+
+def donjon_reinfeste(character: dict, lieu_doc: dict | None) -> bool:
+	"""La salle, déjà nettoyée une fois, est-elle de nouveau infestée ? Seulement pour une salle
+	qui porte `reinfestation: true` : elle redevient menacée dès qu'une NOUVELLE commission la
+	vise, jusqu'à ce que l'élite de celle-ci tombe. C'est le joueur qui l'apprend en acceptant
+	la commission — aucune horloge (CLAUDE.md §5). Le gardien y gagne sa réplique « ça remonte »."""
+	lieu_id = (lieu_doc or {}).get("_id")
+	if not lieu_id or not (lieu_doc or {}).get("reinfestation"):
+		return False
+	return _commission_en_cours(character, lieu_id) and _deja_purge(character, lieu_id)
+
+
+def donjon_purge(character: dict, lieu_id: str, lieu_doc: dict | None = None) -> bool:
 	"""La menace de CETTE salle a-t-elle été éliminée — que le rapport soit rendu ou non ?
 
 	Deux traces possibles : la commission encore active dont l'objectif est atteint (le joueur
@@ -541,7 +566,13 @@ def donjon_purge(character: dict, lieu_id: str) -> bool:
 	fonction reste vraie APRÈS. ⚠️ Une commission soldée avant l'ajout de `lieu` à l'archive
 	n'est pas détectable — dégradation gracieuse assumée (le gardien parle alors comme si la
 	mine était encore infestée), aucune migration.
+
+	`lieu_doc` portant `reinfestation: true` : la salle n'est libérée que jusqu'à la PROCHAINE
+	commission acceptée (`donjon_reinfeste`). Champ absent ⇒ libérée à vie, comme avant — la
+	grotte aux loups, événement de récit qui n'a lieu qu'une fois.
 	"""
+	if donjon_reinfeste(character, lieu_doc):
+		return False
 	# Une VICTOIRE remportée dans la salle est, littéralement, la menace éliminée. C'est la
 	# trace la plus directe des trois, et la seule qui ne suppose aucune commission : elle
 	# rend `acces_libere` / `acces_menace` utilisables par TOUT lieu gardé, pas seulement par

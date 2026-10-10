@@ -139,6 +139,7 @@ Un `lieu:*` peut porter un bloc `acces` — sur le lieu de **destination**, jama
 - **Laissez-passer** persistant lié au `cycle` du lieu, posé par le service PNJ `acces` (miroir de `services.rang`). Une salle de donjon (`categorie:"battle_map"`) n'en pose jamais : franchir sa porte ouvre directement le combat.
 - **Verrou** = lien caché (`get_lieu_links(filtrer_acces=True)`) **et** garde 403 autoritative dans `move_character` — le filtre d'affichage n'est pas le verrou.
 - Flags `acces_libere`/`acces_menace` = état du **monde** (menace éliminée ou non, survit au turn-in) ; `acces_accompli` = commission faite mais pas rapportée.
+- **Ré-infestation** — champ `reinfestation: true` sur la salle gardée (absent ⇒ libérée à vie, la grotte aux loups) : libérée seulement jusqu'à la **prochaine commission acceptée**, de nouveau dès que son élite tombe (`donjon.donjon_reinfeste`, `donjon_purge(…, lieu_doc)`). Flag `acces_reinfeste` (sous-cas d'`acces_menace`) → réplique « ça remonte » d'Armand de Vaucremont. Seule porteuse : la mine aux cristaux (`dev/gen_reinfestation_mine.py`). Verrouillé par `tests/test_donjon.py` § Ré-infestation.
 - ⚠️ **Un bloc `acces` n'est pas une porte** : il faut aussi un doc `connection` (contrôlé par un BFS depuis la cité qui ignore les barrières).
 - Contenu de référence : `dev/gen_acces_donjon.py`. **Dette assumée** : pas encore d'objectif `eradication` multi-espèces ; le cycle de reset n'est pas câblé (crochet en place).
 

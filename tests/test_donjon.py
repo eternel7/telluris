@@ -613,6 +613,66 @@ def test_donjon_purge_archive_ancienne_sans_lieu():
 	assert not donjon.donjon_purge(character, "lieu:mine")
 
 
+# ---------------------------------------------------------------------------
+# Ré-infestation — `reinfestation: true` sur la salle : libérée jusqu'à la PROCHAINE commission
+# ---------------------------------------------------------------------------
+
+MINE_REINFESTEE = {"_id": "lieu:mine", "reinfestation": True}
+
+
+def _purgee_puis_reprise(character):
+	"""Une commission menée à bien et soldée, puis une nouvelle acceptée sur la même salle."""
+	q = donjon.accepter_commission(character, _offre())
+	q["progress"] = 1
+	donjon.solder_commission(character, q["id"])
+	return donjon.accepter_commission(character, _offre())
+
+
+def test_sans_le_champ_la_salle_reste_liberee_a_vie():
+	# Comportement d'avant (la grotte aux loups) : une nouvelle commission n'y change rien.
+	character = _character()
+	_purgee_puis_reprise(character)
+	assert donjon.donjon_purge(character, "lieu:mine", {"_id": "lieu:mine"})
+	assert donjon.donjon_purge(character, "lieu:mine")
+	assert not donjon.donjon_reinfeste(character, {"_id": "lieu:mine"})
+
+
+def test_reinfestee_des_la_commission_suivante_acceptee():
+	character = _character()
+	q = donjon.accepter_commission(character, _offre())
+	q["progress"] = 1
+	donjon.solder_commission(character, q["id"])
+	assert donjon.donjon_purge(character, "lieu:mine", MINE_REINFESTEE)   # entre deux commissions
+	assert not donjon.donjon_reinfeste(character, MINE_REINFESTEE)
+	donjon.accepter_commission(character, _offre())
+	assert not donjon.donjon_purge(character, "lieu:mine", MINE_REINFESTEE)
+	assert donjon.donjon_reinfeste(character, MINE_REINFESTEE)
+
+
+def test_de_nouveau_liberee_quand_l_elite_retombe():
+	character = _character()
+	q = _purgee_puis_reprise(character)
+	q["progress"] = 1
+	assert donjon.donjon_purge(character, "lieu:mine", MINE_REINFESTEE)
+	assert not donjon.donjon_reinfeste(character, MINE_REINFESTEE)
+
+
+def test_la_premiere_infestation_n_est_pas_une_reinfestation():
+	# Jamais nettoyée : la menace est celle des premiers jours, pas « ça remonte ».
+	character = _character()
+	donjon.accepter_commission(character, _offre())
+	assert not donjon.donjon_purge(character, "lieu:mine", MINE_REINFESTEE)
+	assert not donjon.donjon_reinfeste(character, MINE_REINFESTEE)
+
+
+def test_une_victoire_seule_compte_comme_nettoyage_passe():
+	character = _character(battle_maps_gagnees=["lieu:mine"])
+	assert donjon.donjon_purge(character, "lieu:mine", MINE_REINFESTEE)
+	donjon.accepter_commission(character, _offre())
+	assert donjon.donjon_reinfeste(character, MINE_REINFESTEE)
+	assert not donjon.donjon_purge(character, "lieu:mine", MINE_REINFESTEE)
+
+
 def test_solder_commission_quete_introuvable():
 	assert donjon.solder_commission(_character(), "quete:inexistante") is None
 

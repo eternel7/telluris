@@ -288,9 +288,13 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			# négation (une condition doit être VRAIE pour afficher son choix), donc « la
 			# menace court toujours » a besoin de son propre flag pour porter la variante
 			# inverse du même dialogue.
-			libere = donjon.donjon_purge(character, lieu_garde["_id"])
+			libere = donjon.donjon_purge(character, lieu_garde["_id"], lieu_garde)
 			flags["acces_libere"] = libere
 			flags["acces_menace"] = not libere
+			# Salle à `reinfestation` reprise par une nouvelle commission : la menace est REVENUE
+			# (sous-cas de `acces_menace`) — le gardien dit « ça remonte » plutôt que de réciter
+			# l'attente des premiers jours.
+			flags["acces_reinfeste"] = donjon.donjon_reinfeste(character, lieu_garde)
 			placeholders["portail"] = lieu_label(lieu_garde)
 	# Quête d'APPORT (`services.apport`, utils/apport.py) : l'offre écrite, sa remise (par le
 	# donneur ou un autre PNJ du même lieu). `setdefault` : {xp}/{prime}/{objet} d'un autre

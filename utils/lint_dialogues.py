@@ -117,6 +117,8 @@ FLAGS_CONNUS = {
 	"acces_ouvrable", "acces_refuse", "acces_ouvert", "acces_accompli",
 	# Complémentaires : l'un ou l'autre, jamais les deux (cf. `_contexte`).
 	"acces_libere", "acces_menace",
+	# Sous-cas de `acces_menace` : salle à `reinfestation` reprise par une nouvelle commission.
+	"acces_reinfeste",
 	"commission_offerte", "commission_en_cours", "commission_a_rapporter",
 	# Délai de réouverture d'un dialogue (`delai_min` sur un nœud). Se teste dans les DEUX
 	# sens : `condition_ok` compare `bool(flag) is not bool(attendu)`, donc

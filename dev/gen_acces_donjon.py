@@ -211,6 +211,8 @@ ARMAND = {
 					# Même question, deux réponses selon l'état du LIEU (pas de la quête) :
 					# les flags `acces_menace`/`acces_libere` sont complémentaires, donc le
 					# joueur ne voit jamais qu'une seule de ces deux lignes.
+					# ⚠️ En base, ce choix est réservé à la PREMIÈRE infestation et a un jumeau
+					# `mineurs_remontes` : dev/gen_reinfestation_mine.py — à relancer après celui-ci.
 					{"id": "mineurs", "label": "« Et ces mineurs qui attendent ? »",
 					 "condition": {"acces_menace": True}, "next": "mineurs"},
 					{"id": "mineurs_libres", "label": "« Et ces mineurs qui attendent ? »",
