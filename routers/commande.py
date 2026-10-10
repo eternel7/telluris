@@ -379,10 +379,14 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 	recette = commande_util.recette_pour(lieu_doc, item_id)
 	besoins_recette = list(marche.recette_matieres(recette)) if recette else []
 	# `atelier=True` : ce que le joueur n'apporte pas, l'artisan le prend dans SA réserve, dans
-	# son rayon, puis dans le pool de la cité (la commande passe AVANT le flux), sans rien
-	# facturer — c'est déjà payé par le prix de la pièce.
+	# son rayon, dans le pool de la cité (la commande passe AVANT le flux), au rayon d'une
+	# boutique sœur, ou le fabrique — sans rien facturer : c'est déjà payé par le prix de la
+	# pièce. Jamais les voisines pour l'atelier d'une propriété, qui vit sur SON bien.
+	voisins = ([] if proprietes.est_atelier(lieu_doc)
+			   else commande_util.voisins_cite(lieu_doc, find_docs))
 	src_recette = commande_util.sourcer(besoins_recette, porteurs, lieu_doc, get_doc,
-										retenus=retenus, atelier=True, flux=flux)
+										retenus=retenus, atelier=True, flux=flux,
+										voisins=voisins)
 
 	besoins_sur_mesure = [(e["item"], e["quantite"]) for e in matieres_demandees]
 	src_sur_mesure = commande_util.sourcer(besoins_sur_mesure, porteurs, lieu_doc, get_doc,

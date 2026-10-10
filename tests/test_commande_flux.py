@@ -186,6 +186,160 @@ def test_puis_du_rayon_d_une_boutique_qui_la_produit():
 
 
 def test_nulle_part_la_commande_d_etable_attend():
-	res = commande.sourcer_revente("item:selle", _flux(cuir=4), [_bourrelier()], _get)
+	# 2 cuirs au pool pour une selle qui en demande 3 : la voisine ne peut pas la fabriquer.
+	res = commande.sourcer_revente("item:selle", _flux(cuir=2), [_bourrelier()], _get)
 	assert res["manquantes"] == [{"cle": "item:selle", "quantite": 1}]
 	assert res["atelier"] == []
+
+
+# ── Option A : l'artisan FABRIQUE l'intermédiaire qui manque ────────────────────
+
+def test_l_artisan_fabrique_l_intermediaire_manquant():
+	"""Harnais = 2 ceintures, aucune en rayon : il les cuit avec le cuir de sa réserve."""
+	lieu = _bourrelier(stock_matieres={"cuir": 2})
+	res = commande.sourcer([("item:ceinture", 2)], [], lieu, _get, atelier=True)
+	assert res["manquantes"] == []
+	fab = res["atelier"][0]["fabrique"]
+	assert fab["produit"] == "item:ceinture" and fab["fois"] == 2 and fab["surplus"] == 0
+	assert fab["intrants"][0]["reserve"] == 2
+
+	commande.consommer_atelier(lieu, res["atelier"])
+	assert "cuir" not in lieu["stock_matieres"]
+	assert _qty(lieu, "item:ceinture") == 0, "la pièce part à la commande, pas en rayon"
+
+
+def test_le_rayon_sert_avant_la_fabrication():
+	lieu = _bourrelier(stock_matieres={"cuir": 5},
+					   stock_vente=[{"item_id": "item:ceinture", "qty": 1}])
+	res = commande.sourcer([("item:ceinture", 2)], [], lieu, _get, atelier=True)
+	part = res["atelier"][0]
+	assert part["rayon"] == 1 and part["fabrique"]["fois"] == 1
+
+
+def test_fabrication_impossible_rien_n_est_promis():
+	"""Un seul cuir pour deux ceintures : échec, et le cuir reste libre pour la clé suivante."""
+	lieu = _bourrelier(stock_matieres={"cuir": 1})
+	res = commande.sourcer([("item:ceinture", 2), ("cuir", 1)], [], lieu, _get, atelier=True)
+	assert res["manquantes"] == [{"cle": "item:ceinture", "quantite": 2}]
+	assert res["atelier"][0]["cle"] == "cuir" and res["atelier"][0]["reserve"] == 1
+
+
+def test_une_matiere_ne_sert_pas_deux_fois():
+	"""Les ceintures fabriquées prennent les deux cuirs : la clé `cuir` suivante manque."""
+	lieu = _bourrelier(stock_matieres={"cuir": 2})
+	res = commande.sourcer([("item:ceinture", 2), ("cuir", 1)], [], lieu, _get, atelier=True)
+	assert res["manquantes"] == [{"cle": "cuir", "quantite": 1}]
+
+
+def test_la_fabrication_puise_aussi_au_pool():
+	lieu = _bourrelier()
+	flux = _flux(cuir=2)
+	res = commande.sourcer([("item:ceinture", 2)], [], lieu, _get, atelier=True, flux=flux)
+	assert res["manquantes"] == []
+	commande.consommer_atelier(lieu, res["atelier"], flux)
+	assert flux["pool"] == {} and flux["change"] is True
+
+
+def test_profondeur_nulle_aucune_fabrication(monkeypatch):
+	monkeypatch.setattr(commande, "COMMANDE_PROFONDEUR", 0)
+	res = commande.sourcer([("item:ceinture", 2)], [], _bourrelier(stock_matieres={"cuir": 2}),
+						   _get, atelier=True)
+	assert res["manquantes"] == [{"cle": "item:ceinture", "quantite": 2}]
+
+
+def test_le_surplus_d_un_lot_va_en_rayon(monkeypatch):
+	recettes = [dict(r, quantite_produite=3) if r["_id"] == "recette:ceinture" else r
+				for r in RECETTES]
+	monkeypatch.setattr(marche, "_all_recettes", lambda: recettes)
+	marche.reset_prix_cache()
+	lieu = _bourrelier(stock_matieres={"cuir": 1})
+	res = commande.sourcer([("item:ceinture", 2)], [], lieu, _get, atelier=True)
+	assert res["atelier"][0]["fabrique"]["surplus"] == 1
+	commande.consommer_atelier(lieu, res["atelier"])
+	assert _qty(lieu, "item:ceinture") == 1
+
+
+def test_l_etable_fait_fabriquer_la_piece_chez_le_bourrelier():
+	voisin = _bourrelier(stock_matieres={"cuir": 3})
+	res = commande.sourcer_revente("item:selle", None, [voisin], _get)
+	assert res["manquantes"] == []
+	part = res["atelier"][0]
+	assert part["fabrique_chez"] == "lieu:bourrelier"
+
+	mutes = commande.consommer_atelier(_etable(), res["atelier"], None, [voisin])
+	assert mutes == [voisin]
+	assert "cuir" not in voisin["stock_matieres"]
+	assert _qty(voisin, "item:selle") == 0
+
+
+def test_l_etable_fabrique_sur_deux_niveaux():
+	"""Harnais (2 ceintures ← 2 cuirs) : la voisine cuit les ceintures puis le harnais."""
+	voisin = _bourrelier(stock_matieres={"cuir": 2})
+	res = commande.sourcer_revente("item:harnais", None, [voisin], _get)
+	assert res["manquantes"] == []
+	assert res["atelier"][0]["fabrique"]["intrants"][0]["fabrique"]["produit"] == "item:ceinture"
+
+
+# ── Le rayon des boutiques sœurs ────────────────────────────────────────────────
+
+def _boucher(**extra):
+	doc = {"_id": "lieu:boucher", "type": "lieu", "categorie": "boucherie_test",
+		   "lieu_parent": "lieu:cite", "stock_vente": [{"item_id": "item:cuir", "qty": 25}]}
+	doc.update(extra)
+	return doc
+
+
+def test_l_artisan_prend_au_rayon_d_une_voisine():
+	boucher = _boucher()
+	lieu = _bourrelier()
+	res = commande.sourcer([("cuir", 3)], [], lieu, _get, atelier=True, voisins=[boucher])
+	assert res["manquantes"] == []
+	assert res["atelier"][0]["boutiques"] == [{"lieu": "lieu:boucher", "item_id": "item:cuir",
+											   "quantite": 3}]
+	mutes = commande.consommer_atelier(lieu, res["atelier"], None, [boucher])
+	assert mutes == [boucher] and _qty(boucher, "item:cuir") == 22
+
+
+def test_la_voisine_sert_avant_la_fabrication():
+	"""Une ceinture en rayon chez la voisine : on la prend plutôt que de la cuire."""
+	voisine = _bourrelier("lieu:bourrelier_2", stock_vente=[{"item_id": "item:ceinture", "qty": 2}])
+	res = commande.sourcer([("item:ceinture", 2)], [], _bourrelier(stock_matieres={"cuir": 5}),
+						   _get, atelier=True, voisins=[voisine])
+	part = res["atelier"][0]
+	assert "fabrique" not in part and part["boutiques"][0]["lieu"] == "lieu:bourrelier_2"
+
+
+def test_la_fabrication_puise_au_rayon_des_voisines():
+	"""Harnais : ceintures à cuire, cuir pris chez le boucher."""
+	boucher = _boucher()
+	lieu = _bourrelier()
+	res = commande.sourcer([("item:ceinture", 2)], [], lieu, _get, atelier=True, voisins=[boucher])
+	assert res["manquantes"] == []
+	commande.consommer_atelier(lieu, res["atelier"], None, [boucher])
+	assert _qty(boucher, "item:cuir") == 23
+
+
+def test_ni_soi_ni_un_revendeur_ne_sont_des_voisines():
+	lieu = _bourrelier(stock_vente=[{"item_id": "item:cuir", "qty": 0}])
+	etable = _etable(stock_vente=[{"item_id": "item:cuir", "qty": 9}])
+	res = commande.sourcer([("cuir", 1)], [], lieu, _get, atelier=True, voisins=[lieu, etable])
+	assert res["manquantes"] == [{"cle": "cuir", "quantite": 1}]
+
+
+def test_le_rayon_d_une_voisine_ne_sert_pas_deux_fois():
+	boucher = _boucher(stock_vente=[{"item_id": "item:cuir", "qty": 3}])
+	res = commande.sourcer([("cuir", 3), ("item:cuir", 1)], [], _bourrelier(), _get,
+						   atelier=True, voisins=[boucher])
+	assert res["manquantes"] == [{"cle": "item:cuir", "quantite": 1}]
+
+
+def test_l_etable_fait_fabriquer_avec_la_matiere_du_boucher():
+	boucher = _boucher()
+	bourrelier = _bourrelier()
+	voisins = [boucher, bourrelier]
+	res = commande.sourcer_revente("item:selle", None, voisins, _get)
+	assert res["manquantes"] == []
+	assert res["atelier"][0]["fabrique_chez"] == "lieu:bourrelier"
+	mutes = commande.consommer_atelier(_etable(), res["atelier"], None, voisins)
+	assert _qty(boucher, "item:cuir") == 22
+	assert {m["_id"] for m in mutes} == {"lieu:boucher", "lieu:bourrelier"}

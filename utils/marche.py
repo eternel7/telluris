@@ -1470,14 +1470,28 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None,
 		for r in recettes
 		if recette_matieres(r)
 	]
+	# ⚠️ **Un intermédiaire que le lieu consomme lui-même est plafonné** à
+	# `STOCK_INTERMEDIAIRE_MAX` en rayon : il ne part jamais au flux (garde `besoins_lieu` du
+	# déversement), donc quand la recette aval manque d'un autre intrant, l'amont — seule recette
+	# applicable — empilait sans fin (858 boucles de fer à Chartres). Recompté à chaque cuisson.
+	plafond_inter = max(1, int(character_stats.STOCK_INTERMEDIAIRE_MAX))
+
+	def _plafonne(p: dict) -> bool:
+		if _cle_cible(p["item_id"])[0] not in consommables:
+			return False
+		deja = sum(int(e.get("qty", 0)) for e in stock_vente if e.get("item_id") == p["item_id"])
+		return deja >= plafond_inter
+
 	produits: dict[str, int] = {}
 	fired = 0
 	while fired < _CONVERSION_CAP:
 		# Une recette est applicable seulement si TOUTES ses matières sont disponibles (stock
-		# matières + surplus du rayon) et qu'elle n'a pas atteint son `max_par_passe`.
+		# matières + surplus du rayon), qu'elle n'a pas atteint son `max_par_passe` et que son
+		# produit, s'il est un intermédiaire du lieu, n'est pas à son plafond.
 		applicable = [p for p in prepared
 					  if (p["max"] is None or p["cuites"] < int(p["max"]))
-					  and all(_dispo(sc) >= qm for (sc, qm) in p["inputs"])]
+					  and all(_dispo(sc) >= qm for (sc, qm) in p["inputs"])
+					  and not _plafonne(p)]
 		if not applicable:
 			break
 		chosen = random.choices(applicable, weights=[_poids_tirage(p) for p in applicable])[0]
@@ -1734,7 +1748,7 @@ def _crediter_flux(flux: dict | None, ecoules: list) -> bool:
 	return change
 
 
-def _deverser_surplus_flux(lieu_doc: dict, flux: dict | None) -> bool:
+def _deverser_surplus_flux(lieu_doc: dict, flux: dict | None, reserve: bool = False) -> bool:
 	"""Verse au pool de la cité le surplus de rayon de ce lieu — **ce qui dépasse le
 	`stock_cible`**, sans tirage ni arrondi, à la part `FLUX_SURPLUS_PART`. Mute `lieu_doc` et
 	le contexte ; True si le pool a bougé.
@@ -1759,20 +1773,49 @@ def _deverser_surplus_flux(lieu_doc: dict, flux: dict | None) -> bool:
 	- **Plafond par clé à `STOCK_CIBLE_DEFAUT`**, comme le crédit PNJ : ce qui ne rentre pas
 	  reste en rayon, où les PNJ le reprendront. Auto-régulé, aucun réservoir non borné.
 
-	⚠️ Le rayon ne descend jamais sous sa cible : le joueur trouve toujours de quoi acheter."""
+	⚠️ Le rayon ne descend jamais sous sa cible : le joueur trouve toujours de quoi acheter.
+
+	**`reserve=True` — la RÉSERVE MORTE part aussi** : une clé de `stock_matieres` qu'aucune
+	recette du lieu ne consomme (les crins de la boucherie, issus du dépeçage) ne se mettait en
+	rayon qu'au déclenchement d'une passe de production (`ATELIER_TRANSFO_PROBA`) ; elle va
+	désormais au pool à chaque tick, mêmes gardes et même plafond. Réservé aux boutiques de
+	ville (`tick_detaille`, `appro=True`) : la réserve d'un marchand de propriété est ce que son
+	propriétaire lui a confié."""
 	if not flux or not lieu_doc:
 		return False
 	part = _clamp(float(character_stats.FLUX_SURPLUS_PART), 0.0, 1.0)
 	if part <= 0:
 		return False
 	rayon = (lieu_doc or {}).get("stock_vente") or []
-	if not rayon:
+	stock_mat = (lieu_doc or {}).get("stock_matieres") or {}
+	if not rayon and not (reserve and stock_mat):
 		return False
 	consommees = cles_consommees()
 	besoins = set(besoins_lieu(lieu_doc))
 	plafond = max(1, int(character_stats.STOCK_CIBLE_DEFAUT))
 	pool = flux["pool"]
 	change = False
+	for cle in (list(stock_mat) if reserve else ()):
+		qty = int(stock_mat.get(cle, 0) or 0)
+		if qty <= 0 or cle in besoins:
+			continue
+		item_id = cle if cle.startswith("item:") else matiere_item_id(cle)
+		item = resolve_item_ref(item_id)
+		if not item:
+			continue   # `carcasse` et consorts : aucun doc, la clé ne circule jamais
+		sous_cat = item_sous_categorie(item)
+		if sous_cat in besoins or not ({cle, item_id, sous_cat} & consommees):
+			continue
+		avant = int(pool.get(item_id, 0))
+		verse = min(int(qty * part), plafond - avant)
+		if verse <= 0:
+			continue
+		if verse >= qty:
+			del stock_mat[cle]
+		else:
+			stock_mat[cle] = qty - verse
+		pool[item_id] = avant + verse
+		change = True
 	for entry in rayon:
 		item_id = entry.get("item_id")
 		qty = int(entry.get("qty", 0))
@@ -1931,7 +1974,7 @@ def tick_detaille(lieu_doc: dict, recettes: list | None = None, flux: dict | Non
 	produits = tenter_production(lieu_doc, recettes)
 	ecoules = (ecouler or ecouler_produits_pnj)(lieu_doc)
 	_crediter_flux(flux, ecoules)
-	deverse = _deverser_surplus_flux(lieu_doc, flux)
+	deverse = _deverser_surplus_flux(lieu_doc, flux, reserve=appro)
 	return bool(puise or approvisionne or produits or ecoules or deverse), ecoules
 
 
