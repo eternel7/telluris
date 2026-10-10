@@ -90,7 +90,8 @@ Une ligne par cité ; portails, monuments et décisions de l'Auteur : [reference
 - **Rome** — la pieuse (Saint-Pierre, portail **naturel** vers le Paradis, gardé par le pape-Templier) et la pécheresse (orgies, Colisée).
 - **Reykjavik** — guidée en secret par un **dragon empereur** antérieur aux Anthropes ; Hallgrímskirkja. **Akureyri** — cité fortifiée sœur ; gouffre de l'**Hekla** vers l'Enfer de Lucifer.
 - **Égypte** coupée en deux : **Alexandrie** (savoir, magie) au nord, royaume mort-vivant de **Néfertiti** (lamia) à **Abou Simbel** au sud, maître du barrage d'Assouan.
-- **Venise**, **Gênes**, **Bruges**, **Aix-la-Chapelle**, **Cordoue**, **Constantinople**, **Babylone**, **Jérusalem**, **Mu**, **Atlantis** : voir la référence.
+- **Mu** — civilisation légendaire **engloutie**, antérieure aux Cités-États et au savoir des trois frères ; existence incertaine, catastrophe de nature inconnue (jamais tranchée). Gardienne d'un savoir que Lutecia ne maîtrise pas : ses Architectes y **parachèvent** leur formation, par le **portail programmable de Notre-Dame**. Enseignements avancés réservés aux dignes ; certains reviennent transformés, d'autres jamais.
+- **Venise**, **Gênes**, **Bruges**, **Aix-la-Chapelle**, **Cordoue**, **Constantinople**, **Babylone**, **Jérusalem**, **Atlantis** : voir la référence.
 
 
 ### Contradictions ouvertes

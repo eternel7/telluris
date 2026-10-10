@@ -98,6 +98,14 @@ Les auberges-relais fortifiées ont joué un rôle essentiel.
 
 Elles permettent aux voyageurs de traverser les espaces sauvages en bénéficiant d'étapes sécurisées.
 
+### Mu, la civilisation engloutie
+
+Mu est une terre légendaire disparue, dont l'existence demeure incertaine dans les archives de Telluris. Cette civilisation aurait prospéré bien avant les grandes Cités-États, avant de sombrer dans une catastrophe dont nul ne connaît la véritable nature.
+
+Elle aurait maîtrisé une forme de magie aujourd'hui oubliée, **antérieure même au savoir des trois frères aborigènes**. Ses ruines, enfouies sous les océans ou dissimulées derrière des portails altérés par la Vague de mana, renfermeraient des vestiges d'une technologie magique dépassant les connaissances des Architectes.
+
+Mu est une piste majeure pour comprendre l'origine de la magie : les Anthropes ne sont peut-être pas les premiers à avoir tenté de maîtriser les frontières du monde, et la Vague de mana n'est peut-être pas le premier bouleversement cosmique de Telluris. Ces points restent **volontairement non tranchés**.
+
 ---
 
 # 4. Les trois frères aborigènes
@@ -109,6 +117,8 @@ Trois frères aborigènes australiens découvrent et maîtrisent une forme parti
 Leur technique utilise notamment une **bolas**, dont la rotation permet de déplacer le point d'arrivée du portail.
 
 Ils parcourent le monde et construisent progressivement un réseau reliant différents lieux de Telluris.
+
+Le **portail de Notre-Dame**, à Lutecia, est l'un des vestiges les mieux préservés de leur œuvre : intact grâce au faible mana de la cité, c'est un portail **programmable** qui relie n'importe quel lieu du monde connu — Mu compris (cf. § 16).
 
 Les premiers portails sont :
 
@@ -457,6 +467,10 @@ Profession rare et prestigieuse chargée de :
 
 Ils détiennent probablement une partie des connaissances les plus précieuses de Telluris.
 
+**Lutecia et Mu.** Lutecia n'a pas de grandes écoles de magie (la magie y est faible) : ses écoles sont des **instituts d'architectes**, qui forment aux portails. Leur formation est **parachevée à Mu** : la cité y envoie ses Architectes les plus prometteurs, par le **portail programmable de Notre-Dame**, vestige préservé de l'un des trois frères aborigènes. Ils y apprennent des techniques de stabilisation oubliées et des manipulations du mana que Lutecia ne maîtrise pas encore, et reviennent très recherchés pour réparer les portails anciens, résoudre les anomalies et concevoir des passages d'une stabilité exceptionnelle.
+
+Mu ne transmet pas tout : les enseignements les plus avancés sont réservés à ceux que ses maîtres jugent dignes. Certains Architectes reviennent transformés, d'autres ne reviennent jamais. Mu est le gardien d'un savoir ancien dont Lutecia dépend pour sa suprématie dans l'art des portails.
+
 ---
 
 # 17. Une philosophie générale de Telluris
@@ -698,6 +712,7 @@ Cette section est volontairement réservée aux éléments qui nécessitent enco
 - Nature exacte des entités extérieures.
 - Limites réelles du pouvoir des Révélateurs.
 - Relation précise entre les différents mondes mythologiques.
+- Nature de la catastrophe qui a englouti Mu, et lien éventuel avec la Vague de mana.
 - Ce que signifie exactement « atteindre la fin du jeu ».
 
 ## 26.2 Portails
@@ -706,6 +721,7 @@ Cette section est volontairement réservée aux éléments qui nécessitent enco
 - Règles précises de stabilisation.
 - Classification définitive des anomalies.
 - Nature exacte des destinations inconnues.
+- Ce que Mu enseigne réellement aux Architectes, et le sort de ceux qui n'en reviennent pas.
 - Conditions précises de transformation d'un portail en Donjon.
 
 ## 26.3 Magie

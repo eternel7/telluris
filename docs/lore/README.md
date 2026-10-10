@@ -33,6 +33,7 @@ Les 50 séances de travail sur le monde de Telluris (récupérées le 08/10/2026
 - [Décrire Aix-la-Chapelle](cites/20260824_decrire_aix_la_chapelle.md) — 24/08/2026 — Décrit l'histoire de la cité d'Aix-la-Chapelle (Aachen), capitale symbolique de l'Occident. Choisie par Charlemagne comme résidence principa…
 - [Bastion paladin aérien](cites/20260917_bastion_paladin_aerien.md) — 17/09/2026 — La basilique du sacré coeur, au nord de Lutecia, est un bastion paladins. Ils s'y entraîne à la défense anti aérienne et son la protection c…
 - [La Cour des Arches](cites/20261010_cour_des_arches_lutecia.md) — 10/10/2026 — Institut des Architectes de Lutecia, installé dans l'ancien ensemble des Invalides : esplanade, cour, archives des seuils, ateliers de convergence ; lieu où le joueur retrouve Aélis de Montfaucon.
+- [Mu — La civilisation engloutie](cites/20261010_mu_civilisation_engloutie.md) — 10/10/2026 — civilisation disparue antérieure aux trois frères, savoir ancien gardé par ses maîtres ; Lutecia y envoie ses meilleurs Architectes pour leur perfectionnement.
 
 ## 🎭 Personnages, scénarios et quêtes
 

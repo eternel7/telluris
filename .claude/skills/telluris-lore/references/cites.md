@@ -13,7 +13,7 @@ France : Lutecia · Auxerre · Rhemi — Italie : Rome · Venise · Gênes — N
 - **Influence magique faible** : c'est la force de la cité et sa faiblesse.
 	- Force : la Vague ne l'a presque pas touchée. Le portail, inchangé, est une œuvre d'art étudiée par tous les maîtres des portails. Il connecte **n'importe quel lieu du monde connu** pour un coût dérisoire (gemme de mana violette de 250 g — cf. contradiction « cristal jaune »).
 	- Faiblesse : les grandes écoles de magie se sont installées ailleurs en Europe.
-- Centre d'étude des portails, elle fournit les **maîtres des portails** (institut des architectes).
+- Centre d'étude des portails, elle fournit les **maîtres des portails** (institut des architectes). Ses meilleurs apprentis parachèvent leur formation à **Mu** (cf. § Mu et Atlantis).
 - Murailles efficaces contre les monstres terrestres.
 - **Institut des Architectes de Lutecia** (nom du dump) — lieu **« la Cour des Arches »**, dans l'ancien ensemble des **Invalides**, près de la Seine [cites/20261010_cour_des_arches_lutecia.md] (ajouté à la demande de l'Auteur ; pas encore de `lieu:*` au dump). Institution **savante**, ni caserne ni temple : enseigne, préserve et partage le savoir des portails, accueille les Architectes itinérants, centralise les connaissances des donjons. Quatre parties : Esplanade des Architectes · Cour des Arches · Archives des Seuils · Ateliers de Convergence. **Aélis de Montfaucon** (`pnj:aelis_de_montfaucon`, humaine, architecte) y est retrouvée par le joueur ; la retrouvaille mène à une mission (décision de l'Auteur).
 - **Montmartre** est un observatoire paladin et le centre de la défense **anti-aérienne**, où se perfectionne la Lance de lumière. La **basilique du Sacré-Cœur** est un bastion paladin : entraînement anti-aérien, et missions d'**escorte** de la capitale vers les lieux éloignés de France.
@@ -200,6 +200,12 @@ Rien dans les séances. Peuplée en jeu (62 marchands, 3 auberges — commit `a0
 - Tableau (26/08) :
 	- **Mu** : portails surveillés, échanges secrets avec la surface, passages « au-delà de toute carte » ;
 	- **Atlantis** : jamais devenue un centre du réseau, par **isolement volontaire**.
+- **Mu — la civilisation engloutie** (Auteur, 10/10/2026) [cites/20261010_mu_civilisation_engloutie.md] :
+	- Terre **légendaire disparue**, existence **incertaine** dans les archives ; prospère bien avant les Cités-États, détruite par une catastrophe **de nature inconnue**.
+	- Magie **oubliée, antérieure** au savoir des trois frères ; ruines sous les océans ou derrière des **portails altérés par la Vague** ; technologie magique dépassant celle des Architectes. Piste majeure sur l'origine de la magie : les Anthropes **ne sont pas les premiers** à avoir tenté de maîtriser les frontières du monde, la Vague n'est **peut-être pas le premier** bouleversement cosmique (mystère à garder ouvert).
+	- **Lutecia ↔ Mu** : lien assuré par le **portail programmable de Notre-Dame** (vestige préservé de l'un des trois frères) ; Lutecia y envoie ses Architectes les plus prometteurs, **aboutissement de leur formation** (stabilisation oubliée, manipulation du mana inconnue des écoles de Lutecia). Rentrés, ils sont recherchés (portails anciens, anomalies, passages très stables).
+	- Mu **ne livre pas tout** : enseignements avancés réservés aux dignes ; certains reviennent **transformés**, d'autres **jamais**. Mu = gardien d'un savoir dont dépend la suprématie de Lutecia dans l'art des portails.
+	- Tranché (Auteur) : Lutecia n'a **pas** de grandes écoles de magie (magie faible) ; ses écoles sont des **instituts d'architectes** qui forment aux portails, Mu **parachève** cette formation.
 
 **Proposé** : ordre de fondation Mu → Atlantis → Abou Simbel → Jérusalem → Cordoue → Constantinople → Aix → Venise → Reykjavik → Gênes → Bruges → Akureyri → Auxerre → Lutecia. Distinguer la **fondation du site** de la **fondation de la Cité-État** fortifiée.
 
