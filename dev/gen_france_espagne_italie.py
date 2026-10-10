@@ -1,56 +1,65 @@
-"""Relie la France à l'Espagne et à l'Italie, et pose Rome sur la carte d'Italie.
+"""France ↔ Espagne et Italie, Rome posée sur l'Italie — et la frontière des Pyrénées.
 
-MÊME MÉTHODE que `gen_plaine_europeenne.py` (on ne change de carte QUE par une connexion ; le
-bord d'une carte est une borne) :
-  · France ↔ Espagne : côté France, sa rangée SUD accessible (`FRANCE_Y_SUD`, sud fermé par
-    les murs nav peints) ; côté Espagne, sa limite NORD accessible — la côte cantabrique
-    (case murée au nord) ou, à l'est, le haut de la carte. ⚠️ Cases FIXÉES sur l'image et non
-    calculées : la grille de l'Espagne a toutes ses cases à 1 et sa mer est dans la zone
-    principale, « la plus au nord » tomberait en pleine mer Cantabrique.
-  · France ↔ Italie : côté France, sa colonne EST accessible (`FRANCE_X_EST`, est fermé) ;
-    côté Italie, la case de la zone principale la plus à l'OUEST de la rangée correspondante.
-  · Italie ↔ Rome : sur l'Italie, la case de Rome et ses voisines (une par lien) ; dans
-    Rome, une sortie par route qui quitte la carte (case libre la plus proche du point visé).
-  Chaque case est éprouvée dans la zone principale de SA carte (`zone_principale`, règle de
-  marche d'exploration, grille et nav DU DUMP) : sinon lot refusé.
+Bibliothèque de `dev/gen_voisins_france.py` (qui écrit le fichier à importer unique) ; pas de
+point d'entrée propre. Même règle que `gen_plaine_europeenne` : le territoire du voisin que
+montre une carte est mis à 0, la connexion se pose SUR la frontière, du côté accessible.
 
-`lieu:rome` reçoit `lieu_parent: "lieu:italie"` : le doc est RELU du dump et réémis entier
-avec ce seul champ ajouté (import = PUT complet, CLAUDE.md §11) — dump frais exigé.
-
-REJOUABLE : toutes les connexions déjà en base et Rome déjà rattachée ⇒ AUCUN fichier ; une
-partie seulement des `_id` déjà prise ⇒ lot refusé.
-
-Usage :
-  python dev/gen_france_espagne_italie.py [--dump jsons/telluris-dump-….json]
-
-Sortie : jsons/france_espagne_italie_a_importer.json
+  · ESPAGNE — nav repris pour n'en faire que le TOUR : grille du profil `pays` repartie d'un
+    nav VIDE (côte seule ; l'ancien nav murait aussi les fleuves). Puis la France qu'elle
+    montre au nord des Pyrénées (`FRONTIERE_ESPAGNE`) est mise à 0, et les murs posés sur ces
+    cases retirés, ainsi que ceux des neiges de la crête (`NEIGES_PYRENEES`).
+    ⚠️ Repris UNE fois : si la frontière est déjà posée en base, le doc relu est gardé tel
+    quel (une retouche de ses murs survit au rejeu).
+  · FRANCE — l'Espagne qu'elle montre au sud des Pyrénées (`FRONTIERE_FRANCE`) mise à 0 ;
+    les murs peints ne perdent aucun bit (inertes sur une case à 0).
+  · France ↔ Espagne : les cols des Pyrénées (`PASSAGES_ESPAGNE`), de part et d'autre de la
+    crête — AVANT la limite des murs nav de la France (rangée 47).
+  · France ↔ Italie : colonne est accessible de la France ↔ case la plus à l'ouest de la
+    terre italienne (`case_au_bord`).
+  · Italie ↔ Rome : la cité dessinée sur l'Italie et ses voisines ↔ une sortie par route ;
+    `lieu:rome` reçoit `lieu_parent: "lieu:italie"`.
 """
 
-import json
+import copy
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from dev import gen_grille_image as ggi  # noqa: E402
 from dev.gen_plaine_europeenne import (  # noqa: E402
-	FRANCE, cases_autour, case_proche, connexion, zone_principale)
-
-RACINE = ggi.RACINE
-SORTIE = os.path.join(ggi.DOSSIER_JSONS, "france_espagne_italie_a_importer.json")
+	ANCRE_FRANCE, FRANCE, cases_autour, cases_frontiere, case_proche, connexion, fermer,
+	lien_vise, sans_rev, zone_de)
 
 ESPAGNE = "lieu:espagne"
 ITALIE = "lieu:italie"
 ROME = "lieu:rome"
 
-# Bords accessibles de la France (murs nav peints : rangée 47 fermée au sud, colonne 86 à l'est).
-FRANCE_Y_SUD = 47
+ANCRE_ESPAGNE = (40, 24)   # Tolède
+
+# Colonne est accessible de la France (murs nav peints : est fermé).
 FRANCE_X_EST = 86
 
-# France ↔ Espagne : (x sur la France, case sur l'Espagne), d'ouest en est — Asturies et
-# Cantabrie (côte murée au nord), Navarre et Catalogne (haut de la carte, sous le cadre de
-# parchemin des rangées 0-1, resté à 1 dans `cells`).
-PASSAGES_ESPAGNE = ((8, (24, 4)), (20, (40, 5)), (32, (56, 2)), (44, (68, 2)))
+# L'ESPAGNE sur la carte de France, mise à 0 : (x_min, x_max, y) ⇒ cases y ≥ `y`.
+# À l'ouest de la Bidassoa (x ≤ 25), toute la terre sous la côte cantabrique ; puis la crête
+# des Pyrénées jusqu'à la Méditerranée (x 48).
+FRONTIERE_FRANCE = ((0, 25, 38), (26, 29, 41), (30, 48, 42))
+
+# La FRANCE sur la carte d'Espagne, mise à 0 : (x_min, x_max, y) ⇒ cases y ≤ `y`.
+# Béarn et Roussillon au nord de la crête enneigée (golfe de Gascogne en x 52 → cap Creus en
+# x 73), puis le Languedoc et la Provence au-dessus du golfe du Lion.
+FRONTIERE_ESPAGNE = ((52, 53, 6), (54, 60, 7), (61, 73, 8), (74, 87, 6))
+
+# Les NEIGES des Pyrénées, claires et froides, sont lues comme de l'eau par `masque_eau` et
+# murées comme une côte : une seconde frontière, parasite, juste sous la crête. Leurs murs
+# sont retirés (x_min, x_max, y_min, y_max) — entre la côte de Biscaye (x ≤ 53) et celle
+# du cap Creus (x ≥ 72), qui restent murées.
+NEIGES_PYRENEES = (54, 71, 8, 13)
+
+# France ↔ Espagne : (case visée sur la France, case visée sur l'Espagne), d'ouest en est —
+# Bidassoa, Roncevaux, Somport, Le Perthus. Chacune ramenée à la case accessible la plus
+# proche de sa carte : juste au nord de la bande à 0 sur la France, juste au sud sur l'Espagne.
+PASSAGES_ESPAGNE = (((27, 40), (53, 7)), ((32, 41), (57, 8)), ((39, 41), (63, 9)),
+	((46, 41), (71, 9)))
 
 # France ↔ Italie : (y sur la France, y sur l'Italie), du nord au sud — Valais, Savoie,
 # Dauphiné, comté de Nice. Le cadre de `italie.png` est déjà à 0.
@@ -62,60 +71,86 @@ POSITION_ROME = (47, 25)
 SORTIES_ROME = {"ouest": (3, 27), "nord": (32, 6), "est": (84, 30), "sud": (40, 44)}
 
 
-def case_au_bord(principale, *, colonne=None, rangee=None, vers, borne=None):
+def case_au_bord(principale, *, colonne=None, rangee=None, vers):
 	"""Case de `principale` la plus loin dans la direction `vers` ('nord', 'sud', 'est',
-	'ouest') sur la colonne (nord/sud) ou la rangée (est/ouest) donnée, ou None.
-	`borne` : coordonnée minimale (nord/ouest) ou maximale (sud/est) admise."""
+	'ouest') sur la colonne (nord/sud) ou la rangée (est/ouest) donnée, ou None."""
 	if vers in ("nord", "sud"):
 		valeurs = [y for x, y in principale if x == colonne]
 	else:
 		valeurs = [x for x, y in principale if y == rangee]
-	if borne is not None:
-		valeurs = [v for v in valeurs if (v >= borne if vers in ("nord", "ouest") else v <= borne)]
 	if not valeurs:
 		return None
 	v = min(valeurs) if vers in ("nord", "ouest") else max(valeurs)
 	return (colonne, v) if vers in ("nord", "sud") else (v, rangee)
 
 
-def connexions_pays(principale_france, principale_pays, pays_id, passages, cote_france,
-		vers_pays=None):
-	"""(docs, refus) des liens France ↔ pays voisin.
+def frontiere_posee(cells, cases) -> bool:
+	return all(cells[y][x] == 0 for x, y in cases if 0 <= y < len(cells) and 0 <= x < len(cells[y]))
 
-	`cote_france` : 'sud' (rangée FRANCE_Y_SUD, passages = (x France, …)) ou 'est' (colonne
-	FRANCE_X_EST, passages = (y France, …)). Côté pays, une case `(x, y)` FIXÉE (éprouvée dans
-	la zone principale), ou la colonne / rangée dont on prend la case la plus loin vers
-	`vers_pays`, le bord du pays tourné vers la France."""
-	slug = pays_id.split(":", 1)[1]
+
+def preparer_espagne(espagne, proposer_fn):
+	"""Le doc de l'Espagne (copie, `_rev` retiré) : tour repris et France mise à 0, sauf si la
+	frontière est déjà posée. `proposer_fn(doc) -> {cells, nav}` : profil pays, nav VIDE."""
+	doc = sans_rev(copy.deepcopy(espagne))
+	dims = doc["dimensions"]
+	cases = cases_frontiere(FRONTIERE_ESPAGNE, "nord", dims["x"], dims["y"])
+	if frontiere_posee(doc.get("cells") or [], cases):
+		return doc
+	prop = proposer_fn(doc)
+	doc["cells"], doc["nav"] = prop["cells"], dict(prop["nav"])
+	fermer(doc["cells"], cases)
+	x_min, x_max, y_min, y_max = NEIGES_PYRENEES
+	neiges = {(x, y) for x in range(x_min, x_max + 1) for y in range(y_min, y_max + 1)}
+	for x, y in cases | neiges:
+		doc["nav"].pop(f"{x},{y}", None)
+	return doc
+
+
+def preparer_france(france):
+	"""Le doc de la France (copie, `_rev` retiré), l'Espagne qu'elle montre mise à 0."""
+	doc = sans_rev(copy.deepcopy(france))
+	dims = doc["dimensions"]
+	fermer(doc["cells"], cases_frontiere(FRONTIERE_FRANCE, "sud", dims["x"], dims["y"]))
+	return doc
+
+
+def connexions_espagne(zone_france, zone_espagne):
 	docs, refus = [], []
-	for i, (a, b) in enumerate(passages, start=1):
-		pos_fr = (a, FRANCE_Y_SUD) if cote_france == "sud" else (FRANCE_X_EST, a)
-		if pos_fr not in principale_france:
-			refus.append(f"{FRANCE} : la case {list(pos_fr)} n'est pas dans sa zone principale")
-			continue
-		if isinstance(b, tuple):
-			pos_pays = b if b in principale_pays else None
-		elif vers_pays in ("nord", "sud"):
-			pos_pays = case_au_bord(principale_pays, colonne=b, vers=vers_pays)
+	for i, (cible_fr, cible_es) in enumerate(PASSAGES_ESPAGNE, start=1):
+		doc, r = lien_vise(f"link:france_to_espagne_{i:02d}",
+			FRANCE, zone_france, cible_fr, ESPAGNE, zone_espagne, cible_es)
+		if r:
+			refus.append(r)
 		else:
-			pos_pays = case_au_bord(principale_pays, rangee=b, vers=vers_pays)
-		if pos_pays is None:
-			refus.append(f"{pays_id} : aucune case de la zone principale pour le passage {i}")
-			continue
-		docs.append(connexion(f"link:france_to_{slug}_{i:02d}", FRANCE, pos_fr, pays_id, pos_pays))
+			docs.append(doc)
 	return docs, refus
 
 
-def connexions_rome(principale_italie, principale_rome):
+def connexions_italie(zone_france, zone_italie):
+	docs, refus = [], []
+	for i, (y_fr, y_it) in enumerate(PASSAGES_ITALIE, start=1):
+		pos_fr = (FRANCE_X_EST, y_fr)
+		if pos_fr not in zone_france:
+			refus.append(f"{FRANCE} : la case {list(pos_fr)} n'est pas dans sa zone de terre")
+			continue
+		pos_it = case_au_bord(zone_italie, rangee=y_it, vers="ouest")
+		if pos_it is None:
+			refus.append(f"{ITALIE} : aucune case de terre en rangée {y_it}")
+			continue
+		docs.append(connexion(f"link:france_to_italie_{i:02d}", FRANCE, pos_fr, ITALIE, pos_it))
+	return docs, refus
+
+
+def connexions_rome(zone_italie, zone_rome):
 	"""(docs, refus) des liens Italie ↔ Rome."""
-	if POSITION_ROME not in principale_italie:
-		return [], [f"{ITALIE} : la case {list(POSITION_ROME)} n'est pas dans sa zone principale"]
-	cases = cases_autour(principale_italie, POSITION_ROME, len(SORTIES_ROME))
+	if POSITION_ROME not in zone_italie:
+		return [], [f"{ITALIE} : la case {list(POSITION_ROME)} n'est pas dans sa zone de terre"]
+	cases = cases_autour(zone_italie, POSITION_ROME, len(SORTIES_ROME))
 	if not cases:
 		return [], [f"{ITALIE} : pas {len(SORTIES_ROME)} cases libres autour de {list(POSITION_ROME)}"]
 	docs, refus = [], []
 	for (nom, cible), pos_italie in zip(SORTIES_ROME.items(), cases):
-		pos_rome = case_proche(principale_rome, cible)
+		pos_rome = case_proche(zone_rome, cible)
 		if pos_rome is None:
 			refus.append(f"{ROME} : aucune case de sa zone principale pour la sortie {nom}")
 			continue
@@ -124,78 +159,29 @@ def connexions_rome(principale_italie, principale_rome):
 
 
 def rome_rattachee(rome_doc):
-	"""Le doc de Rome relu, `_rev` retiré, avec `lieu_parent` — None s'il l'a déjà."""
-	if (rome_doc or {}).get("lieu_parent") == ITALIE:
-		return None
-	doc = {k: v for k, v in rome_doc.items() if k != "_rev"}
+	"""Le doc de Rome relu, `_rev` retiré, avec `lieu_parent: lieu:italie`."""
+	doc = sans_rev(copy.deepcopy(rome_doc))
 	doc["lieu_parent"] = ITALIE
 	return doc
 
 
-def a_ecrire(docs, liens, rome):
-	"""(sortants, refus) : rien si tout est déjà en base ; refus si une partie seulement l'est."""
-	ids = {d.get("_id") for d in docs}
-	pris = [l["_id"] for l in liens if l["_id"] in ids]
-	if len(pris) == len(liens):
-		return ([rome] if rome else []), []
-	if pris:
-		return [], [f"{i} : `_id` déjà pris" for i in pris]
-	return ([rome] if rome else []) + liens, []
-
-
-def main() -> int:
-	args = sys.argv[1:]
-	chemin_dump = None
-	if "--dump" in args:
-		i = args.index("--dump")
-		if i + 1 >= len(args):
-			print("✗ --dump attend un chemin.")
-			return 2
-		chemin_dump = args[i + 1]
-	docs = ggi.charger_dump(chemin_dump)
-	if not docs:
-		print("✗ aucun dump : passer --dump ou exporter un telluris-dump-*.json dans jsons/.")
-		return 1
+def construire(docs, proposer_espagne_fn):
+	"""(lieux, liens, refus) : France et Espagne frontière posée, Rome rattachée, et les liens.
+	`lieux` = docs complets, émis par l'appelant s'ils diffèrent du dump."""
 	par_id = {d.get("_id"): d for d in docs}
 	manquants = [i for i in (FRANCE, ESPAGNE, ITALIE, ROME) if not (par_id.get(i) or {}).get("cells")]
 	if manquants:
-		print(f"✗ absent(s) du dump ou sans grille : {', '.join(manquants)}")
-		return 1
-	principales = {i: zone_principale(par_id[i]["cells"], par_id[i].get("nav") or {})
-		for i in (FRANCE, ESPAGNE, ITALIE, ROME)}
+		return [], [], [f"absent(s) du dump ou sans grille : {', '.join(manquants)}"]
+	france = preparer_france(par_id[FRANCE])
+	espagne = preparer_espagne(par_id[ESPAGNE], proposer_espagne_fn)
+	italie, rome = par_id[ITALIE], par_id[ROME]
+	zone_france = zone_de(france["cells"], france.get("nav") or {}, ANCRE_FRANCE)
+	zone_espagne = zone_de(espagne["cells"], espagne.get("nav") or {}, ANCRE_ESPAGNE)
+	zone_italie = zone_de(italie["cells"], italie.get("nav") or {})
+	zone_rome = zone_de(rome["cells"], rome.get("nav") or {})
 
-	liens, refus = connexions_pays(principales[FRANCE], principales[ESPAGNE], ESPAGNE,
-		PASSAGES_ESPAGNE, "sud")
-	d, r = connexions_pays(principales[FRANCE], principales[ITALIE], ITALIE,
-		PASSAGES_ITALIE, "est", "ouest")
-	liens += d
-	refus += r
-	d, r = connexions_rome(principales[ITALIE], principales[ROME])
-	liens += d
-	refus += r
-	sortants, r = a_ecrire(docs, liens, rome_rattachee(par_id[ROME]))
-	refus += r
-	for r in refus:
-		print(f"✗ {r}")
-	if refus:
-		print("✗ lot refusé : rien n'est écrit.")
-		return 1
-	if not sortants:
-		print("Connexions déjà en base et Rome déjà rattachée à l'Italie : rien à créer.")
-		return 0
-	for doc in sortants:
-		if doc.get("type") == "connection":
-			a, b = doc["nodes"]
-			print(f"  🔗 {doc['_id']} : {a['lieu']} {a['pos']} ↔ {b['lieu']} {b['pos']}")
-		else:
-			print(f"  🏛 {doc['_id']} : lieu_parent = {doc['lieu_parent']}")
-
-	with open(SORTIE, "w", encoding="utf-8") as f:
-		json.dump(sortants, f, ensure_ascii=False, indent=2)
-		f.write("\n")
-	print(f"\n✎ {os.path.relpath(SORTIE, RACINE)} — {len(sortants)} doc(s)")
-	return 0
-
-
-if __name__ == "__main__":
-	raise SystemExit(main())
+	liens, refus = connexions_espagne(zone_france, zone_espagne)
+	for d, r in (connexions_italie(zone_france, zone_italie), connexions_rome(zone_italie, zone_rome)):
+		liens += d
+		refus += r
+	return [france, espagne, rome_rattachee(rome)], liens, refus

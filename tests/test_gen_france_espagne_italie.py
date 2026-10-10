@@ -1,8 +1,9 @@
-"""dev/gen_france_espagne_italie.py — liens France ↔ Espagne / Italie, Rome posée sur l'Italie.
+"""dev/gen_france_espagne_italie.py — frontière des Pyrénées, liens France ↔ Espagne / Italie,
+Rome posée sur l'Italie.
 
-Partie pure seulement. Verrouille ce qu'un import PUT COMPLET rendrait silencieux : une porte
-hors de la zone principale serait inatteignable sans erreur, un lien réémis écraserait sa
-retouche, et Rome doit garder tout son doc en recevant son parent.
+Partie pure seulement (`proposer_espagne_fn` injecté). Verrouille ce qu'un import PUT COMPLET
+rendrait silencieux : une frontière ouverte laisserait passer sans connexion, un tour repris à
+chaque rejeu effacerait les murs retouchés, Rome doit garder tout son doc.
 """
 
 import os
@@ -11,15 +12,26 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dev import gen_france_espagne_italie as gfei  # noqa: E402
-from dev.gen_plaine_europeenne import zone_principale  # noqa: E402
+from dev.gen_plaine_europeenne import cases_frontiere, zone_de  # noqa: E402
 
 
 def _grille(cols=88, rows=48, valeur=1):
 	return [[valeur] * cols for _ in range(rows)]
 
 
-def _principale(cells=None):
-	return zone_principale(cells or _grille(), {})
+def _lieu(_id, **extra):
+	return {"_id": _id, "_rev": "1-x", "type": "lieu", "dimensions": {"x": 88, "y": 48},
+		"cells": _grille(), "nav": {}, **extra}
+
+
+def _docs():
+	return [_lieu(gfei.FRANCE, nav={"30,47": 56}), _lieu(gfei.ESPAGNE, nav={"10,10": 255}),
+		_lieu(gfei.ITALIE), _lieu(gfei.ROME, label="Rome")]
+
+
+def _proposer_tour(doc):
+	# Le tour proposé : un mur de côte, plus des murs sur la France et sur les neiges.
+	return {"cells": _grille(), "nav": {"20,20": 1, "60,2": 4, "60,10": 16}}
 
 
 def test_case_au_bord_dans_les_quatre_sens():
@@ -28,69 +40,76 @@ def test_case_au_bord_dans_les_quatre_sens():
 	assert gfei.case_au_bord(p, colonne=3, vers="sud") == (3, 9)
 	assert gfei.case_au_bord(p, rangee=4, vers="ouest") == (0, 4)
 	assert gfei.case_au_bord(p, rangee=4, vers="est") == (6, 4)
-	assert gfei.case_au_bord(p, colonne=3, vers="nord", borne=2) == (3, 5)
 	assert gfei.case_au_bord(p, colonne=7, vers="nord") is None
 
 
-def test_france_sud_vers_espagne_cases_fixees():
-	docs, refus = gfei.connexions_pays(_principale(), _principale(), gfei.ESPAGNE,
-		gfei.PASSAGES_ESPAGNE, "sud")
-	assert refus == [] and len(docs) == len(gfei.PASSAGES_ESPAGNE)
-	for doc, (x_fr, pos_es) in zip(docs, gfei.PASSAGES_ESPAGNE):
-		fr, es = doc["nodes"]
-		assert fr == {"lieu": gfei.FRANCE, "pos": [x_fr, gfei.FRANCE_Y_SUD]}
-		assert es == {"lieu": gfei.ESPAGNE, "pos": list(pos_es)}
+def test_frontieres_posees_des_deux_cotes():
+	lieux, _, refus = gfei.construire(_docs(), _proposer_tour)
+	assert refus == []
+	par_id = {d["_id"]: d for d in lieux}
+	france, espagne = par_id[gfei.FRANCE], par_id[gfei.ESPAGNE]
+	for x, y in cases_frontiere(gfei.FRONTIERE_FRANCE, "sud", 88, 48):
+		assert france["cells"][y][x] == 0
+	for x, y in cases_frontiere(gfei.FRONTIERE_ESPAGNE, "nord", 88, 48):
+		assert espagne["cells"][y][x] == 0
+	assert france["nav"] == {"30,47": 56}  # murs peints de la France : aucun bit retiré
 
 
-def test_case_fixee_hors_zone_principale_refusee():
-	cells = _grille()
-	x, y = gfei.PASSAGES_ESPAGNE[0][1]
-	cells[y][x] = 0
-	docs, refus = gfei.connexions_pays(_principale(), _principale(cells), gfei.ESPAGNE,
-		gfei.PASSAGES_ESPAGNE, "sud")
-	assert len(docs) == len(gfei.PASSAGES_ESPAGNE) - 1 and len(refus) == 1
+def test_tour_de_l_espagne_repris_murs_de_frontiere_et_de_neige_retires():
+	lieux, _, _ = gfei.construire(_docs(), _proposer_tour)
+	espagne = next(d for d in lieux if d["_id"] == gfei.ESPAGNE)
+	assert espagne["nav"] == {"20,20": 1}  # l'ancien nav (10,10) est oublié
+
+
+def test_tour_non_repris_si_la_frontiere_est_deja_posee():
+	docs = _docs()
+	espagne = docs[1]
+	for x, y in cases_frontiere(gfei.FRONTIERE_ESPAGNE, "nord", 88, 48):
+		espagne["cells"][y][x] = 0
+
+	def interdit(doc):
+		raise AssertionError("tour repris alors que la frontière est posée")
+
+	lieux, _, refus = gfei.construire(docs, interdit)
+	assert refus == []
+	assert next(d for d in lieux if d["_id"] == gfei.ESPAGNE)["nav"] == {"10,10": 255}
+
+
+def test_cols_des_pyrenees_de_part_et_d_autre_de_la_crete():
+	_, liens, _ = gfei.construire(_docs(), _proposer_tour)
+	par_id = {l["_id"]: l for l in liens}
+	for i, (cible_fr, cible_es) in enumerate(gfei.PASSAGES_ESPAGNE, start=1):
+		fr, es = par_id[f"link:france_to_espagne_{i:02d}"]["nodes"]
+		assert fr == {"lieu": gfei.FRANCE, "pos": list(cible_fr)}
+		assert es == {"lieu": gfei.ESPAGNE, "pos": list(cible_es)}
+		assert fr["pos"][1] < 47  # avant la limite des murs nav de la France
 
 
 def test_france_est_vers_la_limite_ouest_de_l_italie():
 	italie = _grille()
 	for y in range(48):
-		italie[y][0] = italie[y][1] = 0  # cadre : la limite ouest accessible est la colonne 2
-	docs, refus = gfei.connexions_pays(_principale(), _principale(italie), gfei.ITALIE,
-		gfei.PASSAGES_ITALIE, "est", "ouest")
+		italie[y][0] = italie[y][1] = 0  # cadre : la limite ouest est la colonne 2
+	docs, refus = gfei.connexions_italie(zone_de(_grille(), {}), zone_de(italie, {}))
 	assert refus == [] and len(docs) == len(gfei.PASSAGES_ITALIE)
 	for doc, (y_fr, y_it) in zip(docs, gfei.PASSAGES_ITALIE):
 		fr, it = doc["nodes"]
 		assert fr["pos"] == [gfei.FRANCE_X_EST, y_fr] and it["pos"] == [2, y_it]
 
 
-def test_case_france_hors_zone_principale_refusee():
-	france = _grille()
-	france[gfei.FRANCE_Y_SUD][gfei.PASSAGES_ESPAGNE[0][0]] = 0
-	_, refus = gfei.connexions_pays(_principale(france), _principale(), gfei.ESPAGNE,
-		gfei.PASSAGES_ESPAGNE, "sud")
-	assert len(refus) == 1 and gfei.FRANCE in refus[0]
-
-
 def test_rome_sorties_et_cases_italie_distinctes():
-	docs, refus = gfei.connexions_rome(_principale(), _principale())
+	docs, refus = gfei.connexions_rome(zone_de(_grille(), {}), zone_de(_grille(), {}))
 	assert refus == [] and len(docs) == len(gfei.SORTIES_ROME)
 	poses = [tuple(d["nodes"][0]["pos"]) for d in docs]
 	assert poses[0] == gfei.POSITION_ROME and len(set(poses)) == len(poses)
-	assert all(d["nodes"][1]["lieu"] == gfei.ROME for d in docs)
 
 
 def test_rome_rattachee_garde_tout_son_doc():
-	rome = {"_id": gfei.ROME, "_rev": "1-x", "cells": [[1]], "nav": {"0,0": 1}, "label": "Rome"}
+	rome = _lieu(gfei.ROME, label="Rome")
 	doc = gfei.rome_rattachee(rome)
-	assert doc == {"_id": gfei.ROME, "cells": [[1]], "nav": {"0,0": 1}, "label": "Rome",
-		"lieu_parent": gfei.ITALIE}
-	assert gfei.rome_rattachee(doc) is None
+	assert "_rev" not in doc and doc["lieu_parent"] == gfei.ITALIE and doc["label"] == "Rome"
+	assert "lieu_parent" not in rome
 
 
-def test_a_ecrire_rejeu():
-	liens = [{"_id": "link:a"}, {"_id": "link:b"}]
-	rome = {"_id": gfei.ROME}
-	assert gfei.a_ecrire([], liens, rome) == ([rome] + liens, [])
-	assert gfei.a_ecrire([{"_id": "link:a"}, {"_id": "link:b"}], liens, None) == ([], [])
-	sortants, refus = gfei.a_ecrire([{"_id": "link:a"}], liens, None)
-	assert sortants == [] and refus == ["link:a : `_id` déjà pris"]
+def test_lieu_manquant_refuse():
+	lieux, liens, refus = gfei.construire(_docs()[:3], _proposer_tour)
+	assert lieux == [] and liens == [] and gfei.ROME in refus[0]

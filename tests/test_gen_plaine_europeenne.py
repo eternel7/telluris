@@ -1,9 +1,11 @@
-"""dev/gen_plaine_europeenne.py — plaine européenne, Bruges, Aix-la-Chapelle et leurs connexions.
+"""dev/gen_plaine_europeenne.py — plaine européenne, Bruges, Aix-la-Chapelle, et les outils de
+frontière partagés.
 
 Partie pure seulement : les grilles viennent de `gen_grille_image.proposer_pour_image` (Pillow),
-testé par `test_grille_image.py`. Verrouille ce qu'un import PUT COMPLET rendrait silencieux :
-une plaine réémise écraserait ses murs retouchés, une porte hors de la zone principale serait
-inatteignable sans erreur.
+testé par `test_grille_image.py` ; ici `proposer_fn` est une grille uniforme. Verrouille ce qu'un
+import PUT COMPLET rendrait silencieux : une plaine réémise écraserait ses murs retouchés, une
+porte hors de la terre serait inatteignable sans erreur, une frontière ouverte laisserait
+changer de carte sans connexion.
 """
 
 import os
@@ -14,97 +16,92 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dev import gen_plaine_europeenne as gpe  # noqa: E402
 
 TAILLES = {gpe.IMAGE_PLAINE: (1408, 768), **{nom: (1408, 768) for nom in gpe.IMAGES_CITES}}
-BASE = [
-	{"_id": "lieu:france", "type": "lieu", "categorie": "pays", "image": "france.png",
-		"dimensions": {"x": 88, "y": 48}},
-]
 
 
-def _grille(cols, rows, valeur=1):
+def _grille(cols=88, rows=48, valeur=1):
 	return [[valeur] * cols for _ in range(rows)]
 
 
-def test_trois_lieux_cites_rattachees_a_la_plaine():
-	plaine, cites, refus = gpe.lieux_a_creer(BASE, TAILLES.get)
-	assert refus == []
-	assert plaine["_id"] == gpe.PLAINE and plaine["categorie"] == "pays"
-	assert {c["_id"] for c in cites} == set(gpe.POSITIONS_PLAINE)
-	assert all(c["lieu_parent"] == gpe.PLAINE and c["categorie"] == "ville" for c in cites)
-	assert {c["_id"]: c["label"] for c in cites}["lieu:aix_la_chapelle"] == "Aix-la-Chapelle"
+def _france():
+	return {"_id": gpe.FRANCE, "type": "lieu", "categorie": "pays", "image": "france.png",
+		"dimensions": {"x": 88, "y": 48}, "cells": _grille(), "nav": {}}
 
 
-def test_plaine_deja_en_base_rien_a_creer():
-	docs = BASE + [{"_id": gpe.PLAINE, "type": "lieu", "image": gpe.IMAGE_PLAINE}]
-	assert gpe.lieux_a_creer(docs, TAILLES.get) == (None, [], [])
+def _proposer(doc, profil):
+	return {"cells": _grille(doc["dimensions"]["x"], doc["dimensions"]["y"]), "nav": {}, "rapport": {}}
 
 
-def test_cite_deja_prise_refuse_le_lot():
-	docs = BASE + [{"_id": "lieu:bruges", "type": "lieu", "image": "bruges_city.jpg"}]
-	plaine, cites, refus = gpe.lieux_a_creer(docs, TAILLES.get)
-	assert plaine is None and cites == [] and any("lieu:bruges" in r for r in refus)
-
-
-def test_zone_principale_suit_la_marche():
-	cells = _grille(5, 3)
+def test_zone_de_suit_l_ancre_puis_la_plus_grande():
+	cells = _grille(6, 3)
 	for y in range(3):
-		cells[y][2] = 0  # colonne pleine : deux zones, 6 cases à gauche contre 6 à droite
-	cells[0][3] = 0
-	principale = gpe.zone_principale(cells, {})
-	assert principale == {(x, y) for x in (0, 1) for y in range(3)}
+		cells[y][2] = 0  # colonne pleine : 6 cases à gauche, 9 à droite
+	assert gpe.zone_de(cells, {}) == {(x, y) for x in (3, 4, 5) for y in range(3)}
+	assert gpe.zone_de(cells, {}, (0, 0)) == {(x, y) for x in (0, 1) for y in range(3)}
+	assert gpe.zone_de(cells, {}, (2, 0)) == set()
 
 
-def test_france_rangee_nord_vers_la_limite_sud_de_la_plaine():
-	plaine = _grille(88, 48)
-	for x in range(88):
-		plaine[47][x] = 0  # cadre du bas : la limite sud accessible est la rangée 46
-	principale = gpe.zone_principale(plaine, {})
-	france = {"_id": gpe.FRANCE, "cells": _grille(88, 48)}
-	docs, refus = gpe.connexions_france(france, principale)
-	assert refus == [] and len(docs) == len(gpe.PASSAGES_FRANCE)
-	for doc, (x_fr, x_pl) in zip(docs, gpe.PASSAGES_FRANCE):
-		fr, pl = doc["nodes"]
-		assert fr == {"lieu": gpe.FRANCE, "pos": [x_fr, gpe.FRANCE_Y]}
-		assert pl == {"lieu": gpe.PLAINE, "pos": [x_pl, 46]}
-		assert doc["type"] == "connection" and doc["metadata"]["status"] == "ouvert"
+def test_cases_frontiere_et_fermer():
+	cases = gpe.cases_frontiere(((1, 2, 3),), "sud", 5, 5)
+	assert cases == {(x, y) for x in (1, 2) for y in (3, 4)}
+	assert gpe.cases_frontiere(((0, 0, 1),), "nord", 5, 5) == {(0, 0), (0, 1)}
+	cells = _grille(5, 5)
+	assert gpe.fermer(cells, cases) == 4 and gpe.fermer(cells, cases) == 0
+	assert cells[3][1] == 0 and cells[2][1] == 1
 
 
-def test_france_case_inaccessible_refusee():
-	x_fr = gpe.PASSAGES_FRANCE[0][0]
-	cells = _grille(88, 48)
-	cells[gpe.FRANCE_Y][x_fr] = 0
-	_, refus = gpe.connexions_france({"cells": cells}, gpe.zone_principale(_grille(88, 48), {}))
-	assert len(refus) == 1 and f"[{x_fr}, {gpe.FRANCE_Y}]" in refus[0]
+def test_trois_lieux_neufs_frontiere_posee_et_cites_rattachees():
+	lieux, liens, refus, propositions = gpe.construire([_france()], TAILLES.get, _proposer, _france())
+	assert refus == []
+	par_id = {d["_id"]: d for d in lieux}
+	assert set(par_id) == {gpe.PLAINE} | set(gpe.POSITIONS_PLAINE) == set(propositions)
+	assert all(par_id[c]["lieu_parent"] == gpe.PLAINE for c in gpe.POSITIONS_PLAINE)
+	assert par_id["lieu:aix_la_chapelle"]["label"] == "Aix-la-Chapelle"
+	cells = par_id[gpe.PLAINE]["cells"]
+	for x, y in gpe.cases_frontiere(gpe.FRONTIERE_PLAINE, "sud", 88, 48):
+		assert cells[y][x] == 0
+	attendus = {f"link:france_to_plaine_europeenne_{i:02d}" for i in range(1, len(gpe.PASSAGES_PLAINE) + 1)}
+	attendus |= {f"link:plaine_europeenne_to_{c.split(':')[1]}_{nom}"
+		for c, sorties in gpe.SORTIES_CITES.items() for nom in sorties}
+	assert {l["_id"] for l in liens} == attendus
 
 
-def test_sorties_de_cite_dans_la_zone_principale_et_cases_plaine_distinctes():
-	cite = _grille(88, 48)
-	for y in range(48):
-		for x in range(88):
-			if x < 3 or y < 3:
-				cite[y][x] = 0  # cadre : la sortie ouest se replie sur la colonne 3
-	principale_cite = gpe.zone_principale(cite, {})
-	principale_plaine = gpe.zone_principale(_grille(88, 48), {})
-	for cite_id, sorties in gpe.SORTIES_CITES.items():
-		docs, refus = gpe.connexions_cite(cite_id, principale_cite, principale_plaine)
-		assert refus == [] and len(docs) == len(sorties)
-		poses_plaine = [tuple(d["nodes"][0]["pos"]) for d in docs]
-		assert len(set(poses_plaine)) == len(poses_plaine)
-		assert poses_plaine[0] == gpe.POSITIONS_PLAINE[cite_id]
-		for d in docs:
-			assert tuple(d["nodes"][1]["pos"]) in principale_cite
-			assert d["nodes"][1]["lieu"] == cite_id
+def test_passage_france_plaine_juste_au_nord_de_la_frontiere():
+	lieux, liens, _, _ = gpe.construire([_france()], TAILLES.get, _proposer, _france())
+	plaine = next(d for d in lieux if d["_id"] == gpe.PLAINE)
+	par_id = {l["_id"]: l for l in liens}
+	for i, (cible_fr, cible_pl) in enumerate(gpe.PASSAGES_PLAINE, start=1):
+		fr, pl = par_id[f"link:france_to_plaine_europeenne_{i:02d}"]["nodes"]
+		assert fr == {"lieu": gpe.FRANCE, "pos": list(cible_fr)}
+		x, y = pl["pos"]
+		assert pl["lieu"] == gpe.PLAINE and plaine["cells"][y][x] == 1
+		assert plaine["cells"][y + 1][x] == 0  # la case au sud est déjà la France, fermée
 
 
-def test_cite_hors_zone_principale_de_la_plaine_refusee():
-	plaine = _grille(88, 48)
-	x, y = gpe.POSITIONS_PLAINE["lieu:bruges"]
-	plaine[y][x] = 0
-	docs, refus = gpe.connexions_cite("lieu:bruges", gpe.zone_principale(_grille(88, 48), {}),
-		gpe.zone_principale(plaine, {}))
+def test_lieux_deja_en_base_relus_et_non_reproposes():
+	plaine = {"_id": gpe.PLAINE, "_rev": "3-x", "type": "lieu", "image": gpe.IMAGE_PLAINE,
+		"categorie": "pays", "dimensions": {"x": 88, "y": 48}, "cells": _grille(), "nav": {},
+		"zone_influences": ["retouche"]}
+	cites = [{"_id": c, "type": "lieu", "image": f"{c.split(':')[1]}_city.jpg",
+		"dimensions": {"x": 88, "y": 48}, "cells": _grille(), "nav": {}, "lieu_parent": gpe.PLAINE}
+		for c in gpe.POSITIONS_PLAINE]
+	lieux, _, refus, propositions = gpe.construire([_france(), plaine] + cites, TAILLES.get,
+		_proposer, _france())
+	assert refus == [] and propositions == {}
+	relue = next(d for d in lieux if d["_id"] == gpe.PLAINE)
+	assert "_rev" not in relue and relue["zone_influences"] == ["retouche"]
+	assert plaine["cells"][47][0] == 1  # le doc du dump n'est pas muté
+
+
+def test_cite_hors_terre_de_la_plaine_refusee():
+	zone = gpe.zone_de(_grille(), {})
+	zone.discard(gpe.POSITIONS_PLAINE["lieu:bruges"])
+	docs, refus = gpe.connexions_cite("lieu:bruges", gpe.zone_de(_grille(), {}), zone)
 	assert docs == [] and len(refus) == 1
 
 
-def test_ids_deja_pris():
-	sortants = [{"_id": "link:france_to_plaine_europeenne_01"}, {"_id": "lieu:neuf"}]
-	assert gpe.ids_deja_pris([{"_id": "link:france_to_plaine_europeenne_01"}], sortants) == [
-		"link:france_to_plaine_europeenne_01"]
+def test_lien_vise_ramene_dans_la_zone():
+	zone = {(5, 5), (9, 9)}
+	doc, refus = gpe.lien_vise("link:x", "lieu:a", zone, (4, 4), "lieu:b", zone, (10, 10))
+	assert refus is None and [n["pos"] for n in doc["nodes"]] == [[5, 5], [9, 9]]
+	doc, refus = gpe.lien_vise("link:x", "lieu:a", set(), (4, 4), "lieu:b", zone, (10, 10))
+	assert doc is None and "lieu:a" in refus

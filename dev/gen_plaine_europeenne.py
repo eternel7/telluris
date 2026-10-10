@@ -1,33 +1,26 @@
-"""La Plaine européenne, Bruges et Aix-la-Chapelle : trois lieux, leurs grilles et leurs connexions.
+"""La Plaine européenne, Bruges et Aix-la-Chapelle — et les outils de FRONTIÈRE partagés.
 
-POURQUOI UN GÉNÉRATEUR DÉDIÉ : `gen_cartes_pays.py` et `gen_villes_images.py` créent chacun
-un lieu par image orpheline, sans parent hors de France et sans connexion. Ici les trois lieux
-vont ensemble : les deux cités sont POSÉES sur la plaine (`lieu_parent` + connexions) et la
-plaine est rattachée à `lieu:france`. On ne recopie rien : docs minimaux par
-`cartes_a_creer` / `villes_a_creer`, grilles par `gen_grille_image.proposer_pour_image`
-(profil `pays` : côte murée en nav ; profil ville : `cells` + `nav`).
+Bibliothèque de `dev/gen_voisins_france.py` (qui écrit le fichier à importer unique) ; pas de
+point d'entrée propre.
 
-CONNEXIONS — on ne passe d'une carte à l'autre QUE par elles (le bord d'une carte est une
-borne, pas un passage) :
-  · France ↔ plaine : côté France, la rangée `FRANCE_Y` — la dernière accessible (les murs
-    nav peints de la rangée 1 ferment le nord) ; côté plaine, la case de la zone principale
-    la plus au SUD de la colonne correspondante (limite sud accessible).
+TROIS LIEUX : les deux cités sont POSÉES sur la plaine (`lieu_parent` + connexions) et la
+plaine est rattachée à `lieu:france`. Docs minimaux par `cartes_a_creer` / `villes_a_creer`,
+grilles par `gen_grille_image.proposer_pour_image` (profil `pays` : côte murée en nav ; profil
+ville : `cells` + `nav`). Déjà en base ⇒ le doc RELU du dump sert de base (retouches gardées).
+
+RÈGLE DES FRONTIÈRES — on ne passe d'une carte à l'autre QUE par une connexion :
+  · le territoire du VOISIN que montre une carte est mis à 0 (`FRONTIERE_*`, bandes lues sur
+    l'image) : il ne se traverse plus, le joueur doit prendre la connexion ;
+  · les connexions se posent SUR la frontière, du côté accessible — avant la limite des murs
+    nav quand la carte montre plus loin que la frontière.
   · cité ↔ plaine : sur la plaine, la case de la cité et ses voisines (une case par lien, le
-    schéma de Reims ↔ France) ; dans la cité, une sortie par route qui quitte la carte : la
-    case libre de la zone principale la plus proche du point visé.
-  Chaque case est éprouvée sur la grille PROPOSÉE (`grille_image.zones`, règle de marche
-  d'exploration) : hors zone principale ⇒ lot refusé, plutôt qu'une porte inatteignable.
-
-REJOUABLE : si `lieu:plaine_europeenne` est déjà dans le dump, rien à créer et AUCUN fichier
-écrit ; un seul des `_id` visés déjà pris (lieu ou connexion) ⇒ lot refusé.
-
-Usage :
-  python dev/gen_plaine_europeenne.py [--dump jsons/telluris-dump-….json] [--sans-apercu]
-
-Sortie : jsons/plaine_europeenne_a_importer.json (+ jsons/<slug>_grille_apercu.png)
+    schéma de Reims ↔ France) ; dans la cité, une sortie par route qui quitte la carte.
+  Chaque case visée est ramenée à la case libre la plus proche DANS LA ZONE de la terre de sa
+  carte (`zone_de`, ancrée sur un point de terre : sur une carte de pays la mer est une zone à
+  part, parfois plus grande que la terre) ; aucune case ⇒ lot refusé.
 """
 
-import json
+import copy
 import os
 import sys
 
@@ -35,16 +28,17 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dev import gen_grille_image as ggi  # noqa: E402
 from dev.gen_cartes_pays import cartes_a_creer  # noqa: E402
-from dev.gen_villes_images import _taille_image, poser_grille, villes_a_creer  # noqa: E402
+from dev.gen_villes_images import poser_grille, villes_a_creer  # noqa: E402
 from utils import grille_image  # noqa: E402
-
-RACINE = ggi.RACINE
-SORTIE = os.path.join(ggi.DOSSIER_JSONS, "plaine_europeenne_a_importer.json")
 
 IMAGE_PLAINE = "plaine_europeenne.jpg"
 PLAINE = "lieu:plaine_europeenne"
 FRANCE = "lieu:france"
 IMAGES_CITES = ("bruges_city.jpg", "aix_la_chapelle_city.jpg")
+
+# Un point de TERRE par carte de pays : la zone qui le contient est celle où l'on marche.
+ANCRE_PLAINE = (41, 29)    # Aix-la-Chapelle
+ANCRE_FRANCE = (45, 25)    # Massif central
 
 # Place des cités sur la plaine (lue sur l'image, 88×48 cases de 16 px) :
 #   Bruges — le château dessiné sur le delta de l'Escaut, au débouché du Zwin ;
@@ -61,10 +55,16 @@ SORTIES_CITES = {
 	"lieu:aix_la_chapelle": {"nord": (53, 1), "ouest": (4, 22), "est": (83, 20), "sud": (55, 43)},
 }
 
-# France ↔ plaine : (x sur la France, x sur la plaine), d'ouest en est — Flandres, Ardenne,
-# Moselle, Rhin. La France, peinte à la main, se lit sur sa rangée 1 : nord fermé par nav.
-FRANCE_Y = 1
-PASSAGES_FRANCE = ((49, 12), (56, 26), (64, 36), (76, 46))
+# Le NORD DE LA FRANCE sur la plaine, mis à 0 : (x_min, x_max, y) ⇒ cases y ≥ `y` à 0.
+# Côte picarde, puis la frontière au sud de l'Ardenne, la Lorraine et l'Alsace jusqu'au Rhin ;
+# au-delà (x ≥ 56) le bas de la carte est l'Empire, pas la France.
+FRONTIERE_PLAINE = ((0, 12, 38), (13, 20, 39), (21, 34, 41), (35, 44, 43), (45, 55, 45))
+
+# France ↔ plaine : (case visée sur la France, case visée sur la plaine), d'ouest en est —
+# Flandres, Ardenne, Luxembourg, Rhin. Sur la France, la rangée 1 peinte (nord fermé par nav)
+# EST la frontière ; sur la plaine, la case juste au nord de la bande mise à 0.
+PASSAGES_PLAINE = (((49, 1), (16, 38)), ((56, 1), (28, 40)), ((64, 1), (39, 42)),
+	((76, 1), (50, 44)))
 
 METADATA = {"type": "chemin", "status": "ouvert"}
 
@@ -72,12 +72,20 @@ METADATA = {"type": "chemin", "status": "ouvert"}
 VOISINES = ((0, 0), (1, 0), (0, 1), (1, 1), (-1, 0), (0, -1), (-1, -1), (1, -1), (-1, 1))
 
 
-def zone_principale(cells, nav):
-	"""Ensemble des cases `(x, y)` de la plus grande zone sous la règle de marche."""
+# ── Outils de frontière (partagés avec gen_france_espagne_italie) ────────────────────────────
+def zone_de(cells, nav, ancre=None):
+	"""Cases `(x, y)` de la zone de `ancre` sous la règle de marche, ou de la plus grande zone
+	sans ancre. Ancre hors de toute zone ⇒ ensemble vide."""
 	zone, tailles = grille_image.zones(cells, nav)
 	if not tailles:
 		return set()
-	z = max(range(len(tailles)), key=tailles.__getitem__)
+	if ancre is not None:
+		x, y = ancre
+		z = zone[y][x] if grille_image._dans(cells, x, y) else -1
+		if z == -1:
+			return set()
+	else:
+		z = max(range(len(tailles)), key=tailles.__getitem__)
 	return {(x, y) for y, ligne in enumerate(zone) for x, v in enumerate(ligne) if v == z}
 
 
@@ -89,17 +97,32 @@ def case_proche(principale, cible):
 	return min(principale, key=lambda c: ((c[0] - cx) ** 2 + (c[1] - cy) ** 2, c[1], c[0]))
 
 
-def case_la_plus_au_sud(principale, x):
-	"""La case de `principale` de la colonne `x` la plus au sud, ou None."""
-	ys = [cy for cx, cy in principale if cx == x]
-	return (x, max(ys)) if ys else None
-
-
 def cases_autour(principale, centre, n):
 	"""`n` cases distinctes de `principale` autour de `centre` (lui d'abord), ou None."""
 	cases = [(centre[0] + dx, centre[1] + dy) for dx, dy in VOISINES]
 	cases = [c for c in cases if c in principale]
 	return cases[:n] if len(cases) >= n else None
+
+
+def cases_frontiere(bandes, sens, cols, rows):
+	"""Cases mises à 0 par `bandes` = ((x_min, x_max, y), …) : y ≥ `y` si `sens` est 'sud',
+	y ≤ `y` si 'nord'."""
+	cases = set()
+	for x_min, x_max, borne in bandes:
+		for x in range(max(0, x_min), min(cols - 1, x_max) + 1):
+			ys = range(borne, rows) if sens == "sud" else range(0, min(rows - 1, borne) + 1)
+			cases.update((x, y) for y in ys)
+	return cases
+
+
+def fermer(cells, cases) -> int:
+	"""Met `cases` à 0 dans `cells` (muté) ; rend le nombre de cases changées."""
+	n = 0
+	for x, y in cases:
+		if grille_image._dans(cells, x, y) and cells[y][x] != 0:
+			cells[y][x] = 0
+			n += 1
+	return n
 
 
 def connexion(_id, lieu_a, pos_a, lieu_b, pos_b):
@@ -108,19 +131,51 @@ def connexion(_id, lieu_a, pos_a, lieu_b, pos_b):
 		"metadata": dict(METADATA)}
 
 
-def connexions_cite(cite_id, principale_cite, principale_plaine):
+def lien_vise(_id, lieu_a, zone_a, cible_a, lieu_b, zone_b, cible_b):
+	"""(doc, refus) : chaque bout ramené à la case de sa zone la plus proche du point visé."""
+	pos_a, pos_b = case_proche(zone_a, cible_a), case_proche(zone_b, cible_b)
+	if pos_a is None or pos_b is None:
+		manque = lieu_a if pos_a is None else lieu_b
+		return None, f"{_id} : aucune case accessible sur {manque}"
+	return connexion(_id, lieu_a, pos_a, lieu_b, pos_b), None
+
+
+def sans_rev(doc):
+	return {k: v for k, v in doc.items() if k != "_rev"}
+
+
+# ── La plaine et ses cités ───────────────────────────────────────────────────────────────
+def lieux_a_creer(docs, taille_fn):
+	"""(plaine, [cités], refus) — docs SANS grille des lieux ABSENTS du dump."""
+	ids = {d.get("_id") for d in docs}
+	plaines, cites, refus = [], [], []
+	if PLAINE not in ids:
+		plaines, refus = cartes_a_creer([IMAGE_PLAINE], docs, taille_fn)
+		if not plaines and not refus:
+			refus.append(f"{IMAGE_PLAINE} : déjà citée par un autre lieu, ou absente de CARTES")
+	manquantes = [nom for nom in IMAGES_CITES
+		if f"lieu:{os.path.splitext(nom)[0].rsplit('_city', 1)[0]}" not in ids]
+	if manquantes:
+		cites, refus_c = villes_a_creer(manquantes, docs, taille_fn)
+		refus += refus_c
+	for cite in cites:
+		cite["lieu_parent"] = PLAINE
+	return (plaines[0] if plaines else None), sorted(cites, key=lambda c: c["_id"]), refus
+
+
+def connexions_cite(cite_id, zone_cite, zone_plaine):
 	"""(docs, refus) des liens plaine ↔ cité."""
 	slug = cite_id.split(":", 1)[1]
 	sorties = SORTIES_CITES[cite_id]
 	centre = POSITIONS_PLAINE[cite_id]
-	if centre not in principale_plaine:
-		return [], [f"{cite_id} : la case {list(centre)} de la plaine n'est pas dans sa zone principale"]
-	cases_plaine = cases_autour(principale_plaine, centre, len(sorties))
+	if centre not in zone_plaine:
+		return [], [f"{cite_id} : la case {list(centre)} de la plaine n'est pas dans sa zone de terre"]
+	cases_plaine = cases_autour(zone_plaine, centre, len(sorties))
 	if not cases_plaine:
 		return [], [f"{cite_id} : pas {len(sorties)} cases libres autour de {list(centre)} sur la plaine"]
 	docs, refus = [], []
 	for (nom, cible), pos_plaine in zip(sorties.items(), cases_plaine):
-		pos_cite = case_proche(principale_cite, cible)
+		pos_cite = case_proche(zone_cite, cible)
 		if pos_cite is None:
 			refus.append(f"{cite_id} : aucune case de sa zone principale pour la sortie {nom}")
 			continue
@@ -129,117 +184,54 @@ def connexions_cite(cite_id, principale_cite, principale_plaine):
 	return docs, refus
 
 
-def connexions_france(france_doc, principale_plaine):
-	"""(docs, refus) des liens France ↔ plaine."""
-	cells = (france_doc or {}).get("cells") or []
+def connexions_france_plaine(zone_france, zone_plaine):
+	"""(docs, refus) des liens France ↔ plaine (`PASSAGES_PLAINE`)."""
 	docs, refus = [], []
-	for i, (x_fr, x_pl) in enumerate(PASSAGES_FRANCE, start=1):
-		if not grille_image._dans(cells, x_fr, FRANCE_Y) or cells[FRANCE_Y][x_fr] < 1:
-			refus.append(f"{FRANCE} : la case [{x_fr}, {FRANCE_Y}] n'est pas accessible")
-			continue
-		pos_pl = case_la_plus_au_sud(principale_plaine, x_pl)
-		if pos_pl is None:
-			refus.append(f"{PLAINE} : aucune case de la zone principale en colonne {x_pl}")
-			continue
-		docs.append(connexion(f"link:france_to_plaine_europeenne_{i:02d}",
-			FRANCE, (x_fr, FRANCE_Y), PLAINE, pos_pl))
+	for i, (cible_fr, cible_pl) in enumerate(PASSAGES_PLAINE, start=1):
+		doc, r = lien_vise(f"link:france_to_plaine_europeenne_{i:02d}",
+			FRANCE, zone_france, cible_fr, PLAINE, zone_plaine, cible_pl)
+		if r:
+			refus.append(r)
+		else:
+			docs.append(doc)
 	return docs, refus
 
 
-def lieux_a_creer(docs, taille_fn):
-	"""(plaine, [cités], refus) — docs SANS grille. Plaine déjà en base ⇒ (None, [], [])."""
-	ids = {d.get("_id") for d in docs}
-	if PLAINE in ids:
-		return None, [], []
-	plaines, refus = cartes_a_creer([IMAGE_PLAINE], docs, taille_fn)
-	cites, refus_c = villes_a_creer(list(IMAGES_CITES), docs, taille_fn)
-	refus = refus + refus_c
-	if not plaines:
-		refus.append(f"{IMAGE_PLAINE} : déjà citée par un lieu, ou absente de CARTES")
-	attendus = set(POSITIONS_PLAINE)
-	trouves = {c["_id"] for c in cites}
-	for manquant in sorted(attendus - trouves):
-		refus.append(f"{manquant} : non créé (image déjà citée ou `_id` pris)")
+def construire(docs, taille_fn, proposer_fn, france):
+	"""(lieux, liens, refus, propositions) de la plaine, de ses cités et des liens France ↔ plaine.
+
+	`proposer_fn(doc, profil) -> {cells, nav, rapport}` : grille d'un lieu NEUF (Pillow côté
+	CLI). Lieu déjà en base : son doc relu, seule la frontière y est appliquée.
+	`lieux` = docs complets (`_rev` retiré), émis par l'appelant s'ils diffèrent du dump.
+	`france` : le doc de la France TEL QU'IL SERA ÉCRIT (frontière espagnole posée par
+	`gen_france_espagne_italie`) — lu ici, jamais modifié."""
+	par_id = {d.get("_id"): d for d in docs}
+	plaine_neuve, cites_neuves, refus = lieux_a_creer(docs, taille_fn)
 	if refus:
-		return None, [], refus
-	for cite in cites:
-		cite["lieu_parent"] = PLAINE
-	return plaines[0], sorted(cites, key=lambda c: c["_id"]), []
+		return [], [], refus, {}
+	propositions = {}
+	lieux = []
+	neufs = ([plaine_neuve] if plaine_neuve else []) + cites_neuves
+	for doc in neufs:
+		prop = proposer_fn(doc, "pays" if doc["_id"] == PLAINE else "")
+		propositions[doc["_id"]] = prop
+		lieux.append(poser_grille(doc, prop))
+	ids_neufs = {d["_id"] for d in lieux}
+	for _id in [PLAINE] + sorted(POSITIONS_PLAINE):
+		if _id not in ids_neufs:
+			lieux.append(sans_rev(copy.deepcopy(par_id[_id])))
+	par_lieu = {d["_id"]: d for d in lieux}
 
+	plaine = par_lieu[PLAINE]
+	dims = plaine["dimensions"]
+	fermer(plaine["cells"], cases_frontiere(FRONTIERE_PLAINE, "sud", dims["x"], dims["y"]))
+	zone_plaine = zone_de(plaine["cells"], plaine.get("nav") or {}, ANCRE_PLAINE)
+	zone_france = zone_de(france.get("cells") or [], france.get("nav") or {}, ANCRE_FRANCE)
 
-def ids_deja_pris(docs, sortants):
-	ids = {d.get("_id") for d in docs}
-	return [d["_id"] for d in sortants if d["_id"] in ids]
-
-
-def main() -> int:
-	args = sys.argv[1:]
-	chemin_dump = None
-	if "--dump" in args:
-		i = args.index("--dump")
-		if i + 1 >= len(args):
-			print("✗ --dump attend un chemin.")
-			return 2
-		chemin_dump = args[i + 1]
-	docs = ggi.charger_dump(chemin_dump)
-	if not docs:
-		print("✗ aucun dump : passer --dump ou exporter un telluris-dump-*.json dans jsons/.")
-		return 1
-	france = next((d for d in docs if d.get("_id") == FRANCE), None)
-	if not france:
-		print(f"✗ {FRANCE} absent du dump : impossible d'y rattacher la plaine.")
-		return 1
-
-	plaine, cites, refus = lieux_a_creer(docs, _taille_image)
-	for r in refus:
-		print(f"✗ {r}")
-	if refus:
-		print("✗ lot refusé : rien n'est écrit.")
-		return 1
-	if plaine is None:
-		print(f"{PLAINE} est déjà en base : rien à créer.")
-		return 0
-
-	lieux, principales = [], {}
-	for doc, profil in [(plaine, "pays")] + [(c, "") for c in cites]:
-		chemin = ggi.trouver_image(doc["image"])
-		dim = doc["dimensions"]
-		proposition = ggi.proposer_pour_image(chemin, dim["x"], dim["y"], doc, profil=profil)
-		print(f"{doc['_id']} — {doc['label']}"
-			f"{' (' + doc['lieu_parent'] + ')' if doc.get('lieu_parent') else ''}")
-		ggi.imprimer_resume(chemin, proposition)
-		if "--sans-apercu" not in args:
-			slug = doc["_id"].split(":", 1)[1]
-			apercu = os.path.join(ggi.DOSSIER_JSONS, f"{slug}_grille_apercu.png")
-			ggi.ecrire_apercu(chemin, proposition["cells"], apercu, proposition["nav"],
-				proposition["rapport"])
-			print(f"  ✎ {os.path.relpath(apercu, RACINE)}")
-		print()
-		lieux.append(poser_grille(doc, proposition))
-		principales[doc["_id"]] = zone_principale(proposition["cells"], proposition["nav"])
-
-	liens, refus = connexions_france(france, principales[PLAINE])
-	for cite in cites:
-		d, r = connexions_cite(cite["_id"], principales[cite["_id"]], principales[PLAINE])
+	liens, refus = connexions_france_plaine(zone_france, zone_plaine)
+	for cite_id in sorted(POSITIONS_PLAINE):
+		cite = par_lieu[cite_id]
+		d, r = connexions_cite(cite_id, zone_de(cite["cells"], cite.get("nav") or {}), zone_plaine)
 		liens += d
 		refus += r
-	sortants = lieux + liens
-	refus += [f"{i} : `_id` déjà pris" for i in ids_deja_pris(docs, sortants)]
-	for r in refus:
-		print(f"✗ {r}")
-	if refus:
-		print("✗ lot refusé : rien n'est écrit.")
-		return 1
-	for lien in liens:
-		a, b = lien["nodes"]
-		print(f"  🔗 {lien['_id']} : {a['lieu']} {a['pos']} ↔ {b['lieu']} {b['pos']}")
-
-	with open(SORTIE, "w", encoding="utf-8") as f:
-		json.dump(sortants, f, ensure_ascii=False, indent=2)
-		f.write("\n")
-	print(f"\n✎ {os.path.relpath(SORTIE, RACINE)} — {len(lieux)} lieu(x), {len(liens)} connexion(s)")
-	return 0
-
-
-if __name__ == "__main__":
-	raise SystemExit(main())
+	return lieux, liens, refus, propositions

@@ -658,37 +658,22 @@ CATALOGUE = [
 			"Requiert Pillow.",
 	},
 	{
-		"id": "gen_plaine_europeenne",
-		"label": "🌍 Créer la Plaine européenne, Bruges et Aix-la-Chapelle (grilles + connexions)",
-		# Dump frais, même raison que gen_cartes_pays : rejoué sur un dump périmé, il réémettrait
-		# les trois lieux et son import (PUT complet) effacerait les grilles retouchées.
-		"argv_fn": lambda v, f: _py("gen_plaine_europeenne.py", "--dump", f["dump"]),
+		"id": "gen_voisins_france",
+		"label": "🧭 La France et ses voisins : plaine européenne, Bruges, Aix, Espagne, Italie, Rome",
+		# Dump frais : `lieu:france`, `lieu:espagne` et `lieu:rome` sont réémis ENTIERS (PUT
+		# complet) ; sur un dump périmé, une retouche faite depuis à leur grille serait effacée.
+		"argv_fn": lambda v, f: _py("gen_voisins_france.py", "--dump", f["dump"]),
 		"dump_frais": True,
-		"sortie": "jsons/plaine_europeenne_a_importer.json",
-		"ecrit": "Régénère un dump, écrit jsons/plaine_europeenne_a_importer.json (+ un aperçu "
-			"PNG par lieu). Rien en base avant 📥 Importer.",
-		"description": "`lieu:plaine_europeenne` (pays, côte murée en nav), `lieu:bruges` et "
-			"`lieu:aix_la_chapelle` (villes posées sur la plaine, grille depuis l'image), les "
-			"liens cité ↔ plaine (une sortie par route qui quitte la carte) et 4 liens France "
-			"(rangée nord accessible) ↔ plaine (limite sud accessible). Toute case hors de la "
-			"zone principale ou tout `_id` pris refuse le lot ; plaine déjà en base ⇒ aucun "
-			"fichier. Requiert Pillow.",
-	},
-	{
-		"id": "gen_france_espagne_italie",
-		"label": "🧭 Relier la France à l'Espagne et à l'Italie, poser Rome sur l'Italie",
-		# Dump frais : `lieu:rome` est réémis ENTIER (PUT complet) avec `lieu_parent` ; sur un
-		# dump périmé, il effacerait une retouche faite depuis à la grille de Rome.
-		"argv_fn": lambda v, f: _py("gen_france_espagne_italie.py", "--dump", f["dump"]),
-		"dump_frais": True,
-		"sortie": "jsons/france_espagne_italie_a_importer.json",
-		"ecrit": "Régénère un dump, écrit jsons/france_espagne_italie_a_importer.json. Rien en "
-			"base avant 📥 Importer.",
-		"description": "4 liens France (rangée sud accessible) ↔ Espagne (limite nord : côte "
-			"cantabrique, haut de la carte), 4 liens France (colonne est accessible) ↔ Italie "
-			"(case la plus à l'ouest de la zone principale), 4 liens Italie (Rome dessinée) ↔ "
-			"Rome (une sortie par route), et `lieu:rome` rattachée à l'Italie. Toute case hors "
-			"de la zone principale refuse le lot ; tout déjà en base ⇒ aucun fichier.",
+		"sortie": "jsons/voisins_france_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/voisins_france_a_importer.json (+ un aperçu "
+			"PNG par lieu émis). Rien en base avant 📥 Importer.",
+		"description": "Un seul fichier : la plaine européenne et ses cités Bruges et "
+			"Aix-la-Chapelle (créées avec leur grille si absentes), l'Espagne (nav repris : la "
+			"côte seule), et les connexions France ↔ plaine / Espagne / Italie et Italie ↔ Rome. "
+			"Le territoire du voisin que montre une carte est mis à 0 (cells) : on ne change "
+			"de carte que par les connexions, posées sur la frontière. N'émet que ce qui "
+			"diffère du dump ; toute case hors de la terre de sa carte refuse le lot. Requiert "
+			"Pillow.",
 	},
 	{
 		"id": "gen_terrain_tags",
