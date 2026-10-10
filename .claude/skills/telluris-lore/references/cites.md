@@ -203,9 +203,9 @@ Rien dans les séances. Peuplée en jeu (62 marchands, 3 auberges — commit `a0
 - **Mu — la civilisation engloutie** (Auteur, 10/10/2026) [cites/20261010_mu_civilisation_engloutie.md] :
 	- Terre **légendaire disparue**, existence **incertaine** dans les archives ; prospère bien avant les Cités-États, détruite par une catastrophe **de nature inconnue**.
 	- Magie **oubliée, antérieure** au savoir des trois frères ; ruines sous les océans ou derrière des **portails altérés par la Vague** ; technologie magique dépassant celle des Architectes. Piste majeure sur l'origine de la magie : les Anthropes **ne sont pas les premiers** à avoir tenté de maîtriser les frontières du monde, la Vague n'est **peut-être pas le premier** bouleversement cosmique (mystère à garder ouvert).
-	- **Lutecia ↔ Mu** : réseau de portails **particulièrement rare** ; Lutecia y envoie ses Architectes les plus prometteurs, **aboutissement de leur formation** (stabilisation oubliée, manipulation du mana inconnue des écoles de Lutecia). Rentrés, ils sont recherchés (portails anciens, anomalies, passages très stables).
+	- **Lutecia ↔ Mu** : lien assuré par le **portail programmable de Notre-Dame** (vestige préservé de l'un des trois frères) ; Lutecia y envoie ses Architectes les plus prometteurs, **aboutissement de leur formation** (stabilisation oubliée, manipulation du mana inconnue des écoles de Lutecia). Rentrés, ils sont recherchés (portails anciens, anomalies, passages très stables).
 	- Mu **ne livre pas tout** : enseignements avancés réservés aux dignes ; certains reviennent **transformés**, d'autres **jamais**. Mu = gardien d'un savoir dont dépend la suprématie de Lutecia dans l'art des portails.
-	- ⚠️ À concilier avec « Lutecia sans grandes écoles de magie » : ses écoles forment aux portails, Mu les parachève.
+	- Tranché (Auteur) : Lutecia n'a **pas** de grandes écoles de magie (magie faible) ; ses écoles sont des **instituts d'architectes** qui forment aux portails, Mu **parachève** cette formation.
 
 **Proposé** : ordre de fondation Mu → Atlantis → Abou Simbel → Jérusalem → Cordoue → Constantinople → Aix → Venise → Reykjavik → Gênes → Bruges → Akureyri → Auxerre → Lutecia. Distinguer la **fondation du site** de la **fondation de la Cité-État** fortifiée.
 
