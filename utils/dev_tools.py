@@ -675,6 +675,22 @@ CATALOGUE = [
 			"fichier. Requiert Pillow.",
 	},
 	{
+		"id": "gen_france_espagne_italie",
+		"label": "🧭 Relier la France à l'Espagne et à l'Italie, poser Rome sur l'Italie",
+		# Dump frais : `lieu:rome` est réémis ENTIER (PUT complet) avec `lieu_parent` ; sur un
+		# dump périmé, il effacerait une retouche faite depuis à la grille de Rome.
+		"argv_fn": lambda v, f: _py("gen_france_espagne_italie.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/france_espagne_italie_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/france_espagne_italie_a_importer.json. Rien en "
+			"base avant 📥 Importer.",
+		"description": "4 liens France (rangée sud accessible) ↔ Espagne (limite nord : côte "
+			"cantabrique, haut de la carte), 4 liens France (colonne est accessible) ↔ Italie "
+			"(case la plus à l'ouest de la zone principale), 4 liens Italie (Rome dessinée) ↔ "
+			"Rome (une sortie par route), et `lieu:rome` rattachée à l'Italie. Toute case hors "
+			"de la zone principale refuse le lot ; tout déjà en base ⇒ aucun fichier.",
+	},
+	{
 		"id": "gen_terrain_tags",
 		"label": "🌲 Générer les terrain_tags des zones d'influence",
 		"argv": _py("gen_terrain_tags.py"),
