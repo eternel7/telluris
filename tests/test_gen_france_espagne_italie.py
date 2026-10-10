@@ -34,15 +34,6 @@ def _proposer_tour(doc):
 	return {"cells": _grille(), "nav": {"20,20": 1, "60,2": 4, "60,10": 16}}
 
 
-def test_case_au_bord_dans_les_quatre_sens():
-	p = {(3, 1), (3, 5), (3, 9), (0, 4), (6, 4)}
-	assert gfei.case_au_bord(p, colonne=3, vers="nord") == (3, 1)
-	assert gfei.case_au_bord(p, colonne=3, vers="sud") == (3, 9)
-	assert gfei.case_au_bord(p, rangee=4, vers="ouest") == (0, 4)
-	assert gfei.case_au_bord(p, rangee=4, vers="est") == (6, 4)
-	assert gfei.case_au_bord(p, colonne=7, vers="nord") is None
-
-
 def test_frontieres_posees_des_deux_cotes():
 	lieux, _, refus = gfei.construire(_docs(), _proposer_tour)
 	assert refus == []
@@ -85,15 +76,34 @@ def test_cols_des_pyrenees_de_part_et_d_autre_de_la_crete():
 		assert fr["pos"][1] < 47  # avant la limite des murs nav de la France
 
 
-def test_france_est_vers_la_limite_ouest_de_l_italie():
-	italie = _grille()
-	for y in range(48):
-		italie[y][0] = italie[y][1] = 0  # cadre : la limite ouest est la colonne 2
-	docs, refus = gfei.connexions_italie(zone_de(_grille(), {}), zone_de(italie, {}))
-	assert refus == [] and len(docs) == len(gfei.PASSAGES_ITALIE)
-	for doc, (y_fr, y_it) in zip(docs, gfei.PASSAGES_ITALIE):
-		fr, it = doc["nodes"]
-		assert fr["pos"] == [gfei.FRANCE_X_EST, y_fr] and it["pos"] == [2, y_it]
+def test_frontieres_alpines_et_balkaniques_de_l_italie():
+	lieux, _, refus = gfei.construire(_docs(), _proposer_tour)
+	assert refus == []
+	par_id = {d["_id"]: d for d in lieux}
+	france, italie = par_id[gfei.FRANCE], par_id[gfei.ITALIE]
+	for x, y in cases_frontiere(gfei.FRONTIERE_FRANCE_ITALIE, "est", 88, 48):
+		assert france["cells"][y][x] == 0
+	assert france["cells"][44][82] == 1  # la Corse, au large, reste française
+	for bandes, sens in ((gfei.FRONTIERE_ITALIE_FRANCE, "ouest"),
+			(gfei.FRONTIERE_ITALIE_PANNONIE, "est"), (gfei.FRONTIERE_ITALIE_TYROL, "nord")):
+		for x, y in cases_frontiere(bandes, sens, 88, 48):
+			assert italie["cells"][y][x] == 0
+	assert italie["cells"][gfei.ANCRE_ITALIE[1]][gfei.ANCRE_ITALIE[0]] == 1
+
+
+def test_cols_des_alpes_de_part_et_d_autre_de_la_crete():
+	_, liens, _ = gfei.construire(_docs(), _proposer_tour)
+	par_id = {l["_id"]: l for l in liens}
+	for i, (cible_fr, cible_it) in enumerate(gfei.PASSAGES_ITALIE, start=1):
+		fr, it = par_id[f"link:france_to_italie_{i:02d}"]["nodes"]
+		assert fr == {"lieu": gfei.FRANCE, "pos": list(cible_fr)}
+		assert it == {"lieu": gfei.ITALIE, "pos": list(cible_it)}
+
+
+def test_rome_reste_atteignable_depuis_l_italie_bordee():
+	_, liens, refus = gfei.construire(_docs(), _proposer_tour)
+	assert refus == []
+	assert sum(1 for l in liens if l["_id"].startswith("link:italie_to_rome_")) == len(gfei.SORTIES_ROME)
 
 
 def test_rome_sorties_et_cases_italie_distinctes():

@@ -105,13 +105,20 @@ def cases_autour(principale, centre, n):
 
 
 def cases_frontiere(bandes, sens, cols, rows):
-	"""Cases mises à 0 par `bandes` = ((x_min, x_max, y), …) : y ≥ `y` si `sens` est 'sud',
-	y ≤ `y` si 'nord'."""
+	"""Cases mises à 0 par `bandes`.
+
+	'sud' / 'nord' : bandes de COLONNES ((x_min, x_max, y), …) ⇒ y ≥ `y` / y ≤ `y`.
+	'est' / 'ouest' : bandes de RANGÉES ((y_min, y_max, x), …) ⇒ x ≥ `x` / x ≤ `x`."""
 	cases = set()
-	for x_min, x_max, borne in bandes:
-		for x in range(max(0, x_min), min(cols - 1, x_max) + 1):
-			ys = range(borne, rows) if sens == "sud" else range(0, min(rows - 1, borne) + 1)
-			cases.update((x, y) for y in ys)
+	for a_min, a_max, borne in bandes:
+		if sens in ("sud", "nord"):
+			for x in range(max(0, a_min), min(cols - 1, a_max) + 1):
+				ys = range(borne, rows) if sens == "sud" else range(0, min(rows - 1, borne) + 1)
+				cases.update((x, y) for y in ys)
+		else:
+			for y in range(max(0, a_min), min(rows - 1, a_max) + 1):
+				xs = range(borne, cols) if sens == "est" else range(0, min(cols - 1, borne) + 1)
+				cases.update((x, y) for x in xs)
 	return cases
 
 

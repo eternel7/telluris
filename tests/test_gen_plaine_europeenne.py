@@ -44,6 +44,8 @@ def test_cases_frontiere_et_fermer():
 	cases = gpe.cases_frontiere(((1, 2, 3),), "sud", 5, 5)
 	assert cases == {(x, y) for x in (1, 2) for y in (3, 4)}
 	assert gpe.cases_frontiere(((0, 0, 1),), "nord", 5, 5) == {(0, 0), (0, 1)}
+	assert gpe.cases_frontiere(((1, 1, 3),), "est", 5, 5) == {(3, 1), (4, 1)}
+	assert gpe.cases_frontiere(((0, 1, 0),), "ouest", 5, 5) == {(0, 0), (0, 1)}
 	cells = _grille(5, 5)
 	assert gpe.fermer(cells, cases) == 4 and gpe.fermer(cells, cases) == 0
 	assert cells[3][1] == 0 and cells[2][1] == 1

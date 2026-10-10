@@ -14,8 +14,13 @@ montre une carte est mis à 0, la connexion se pose SUR la frontière, du côté
     les murs peints ne perdent aucun bit (inertes sur une case à 0).
   · France ↔ Espagne : les cols des Pyrénées (`PASSAGES_ESPAGNE`), de part et d'autre de la
     crête — AVANT la limite des murs nav de la France (rangée 47).
-  · France ↔ Italie : colonne est accessible de la France ↔ case la plus à l'ouest de la
-    terre italienne (`case_au_bord`).
+  · ITALIE — la France qu'elle montre à l'ouest des Alpes (`FRONTIERE_ITALIE_FRANCE`), les
+    Balkans à l'est de l'Adriatique et le Tyrol au-dessus de la crête
+    (`FRONTIERE_ITALIE_PANNONIE`, `FRONTIERE_ITALIE_TYROL` : le territoire de
+    `lieu:pannonie`) mis à 0. Côté France, l'Italie au sud-est des Alpes
+    (`FRONTIERE_FRANCE_ITALIE`).
+  · France ↔ Italie : les cols des Alpes et la corniche (`PASSAGES_ITALIE`), de part et
+    d'autre de la crête.
   · Italie ↔ Rome : la cité dessinée sur l'Italie et ses voisines ↔ une sortie par route ;
     `lieu:rome` reçoit `lieu_parent: "lieu:italie"`.
 """
@@ -36,13 +41,29 @@ ROME = "lieu:rome"
 
 ANCRE_ESPAGNE = (40, 24)   # Tolède
 
-# Colonne est accessible de la France (murs nav peints : est fermé).
-FRANCE_X_EST = 86
+ANCRE_ITALIE = (47, 25)    # Rome
 
 # L'ESPAGNE sur la carte de France, mise à 0 : (x_min, x_max, y) ⇒ cases y ≥ `y`.
 # À l'ouest de la Bidassoa (x ≤ 25), toute la terre sous la côte cantabrique ; puis la crête
 # des Pyrénées jusqu'à la Méditerranée (x 48).
 FRONTIERE_FRANCE = ((0, 25, 38), (26, 29, 41), (30, 48, 42))
+
+# L'ITALIE sur la carte de France, mise à 0 : (y_min, y_max, x) ⇒ cases x ≥ `x`.
+# Au sud-est de la crête des Alpes : Val d'Aoste et lacs (Majeur, Côme), Piémont, Ligurie,
+# jusqu'à la côte (y 36). La Suisse, au nord de la crête, et la Corse, au large, restent.
+FRONTIERE_FRANCE_ITALIE = ((25, 26, 77), (27, 36, 73))
+
+# La FRANCE sur la carte d'Italie, mise à 0 : (y_min, y_max, x) ⇒ cases x ≤ `x`.
+# Savoie, Dauphiné et Provence, à l'ouest de l'arc enneigé des Alpes, jusqu'à Menton.
+FRONTIERE_ITALIE_FRANCE = ((0, 21, 17),)
+
+# Les BALKANS sur la carte d'Italie (le territoire de `lieu:pannonie`), mis à 0 :
+# (y_min, y_max, x) ⇒ cases x ≥ `x`. Slovénie et Istrie à l'est de l'Isonzo, puis la côte
+# dalmate qui descend en diagonale, l'Albanie et la Grèce au-delà du canal d'Otrante.
+FRONTIERE_ITALIE_PANNONIE = ((0, 14, 53), (15, 16, 56), (17, 18, 59), (19, 20, 63),
+	(21, 22, 67), (23, 24, 71), (25, 29, 76), (30, 47, 81))
+# Le TYROL au-dessus de la crête des Alpes : (x_min, x_max, y) ⇒ cases y ≤ `y`.
+FRONTIERE_ITALIE_TYROL = ((26, 52, 2),)
 
 # La FRANCE sur la carte d'Espagne, mise à 0 : (x_min, x_max, y) ⇒ cases y ≤ `y`.
 # Béarn et Roussillon au nord de la crête enneigée (golfe de Gascogne en x 52 → cap Creus en
@@ -61,27 +82,15 @@ NEIGES_PYRENEES = (54, 71, 8, 13)
 PASSAGES_ESPAGNE = (((27, 40), (53, 7)), ((32, 41), (57, 8)), ((39, 41), (63, 9)),
 	((46, 41), (71, 9)))
 
-# France ↔ Italie : (y sur la France, y sur l'Italie), du nord au sud — Valais, Savoie,
-# Dauphiné, comté de Nice. Le cadre de `italie.png` est déjà à 0.
-PASSAGES_ITALIE = ((22, 5), (27, 9), (31, 13), (35, 17))
+# France ↔ Italie : (case visée sur la France, case visée sur l'Italie), du nord au sud —
+# Petit-Saint-Bernard, Mont-Cenis, Montgenèvre, la corniche de Menton.
+PASSAGES_ITALIE = (((72, 26), (18, 6)), ((72, 29), (18, 10)), ((72, 32), (18, 14)),
+	((72, 34), (18, 19)))
 
 # Rome sur `italie.png` : la cité dessinée sur la rive du Tibre, au-dessus de la côte tyrrhénienne.
 POSITION_ROME = (47, 25)
 # Sorties de Rome : nom → point visé (une route qui quitte la carte, hors du cadre).
 SORTIES_ROME = {"ouest": (3, 27), "nord": (32, 6), "est": (84, 30), "sud": (40, 44)}
-
-
-def case_au_bord(principale, *, colonne=None, rangee=None, vers):
-	"""Case de `principale` la plus loin dans la direction `vers` ('nord', 'sud', 'est',
-	'ouest') sur la colonne (nord/sud) ou la rangée (est/ouest) donnée, ou None."""
-	if vers in ("nord", "sud"):
-		valeurs = [y for x, y in principale if x == colonne]
-	else:
-		valeurs = [x for x, y in principale if y == rangee]
-	if not valeurs:
-		return None
-	v = min(valeurs) if vers in ("nord", "ouest") else max(valeurs)
-	return (colonne, v) if vers in ("nord", "sud") else (v, rangee)
 
 
 def frontiere_posee(cells, cases) -> bool:
@@ -107,10 +116,22 @@ def preparer_espagne(espagne, proposer_fn):
 
 
 def preparer_france(france):
-	"""Le doc de la France (copie, `_rev` retiré), l'Espagne qu'elle montre mise à 0."""
+	"""Le doc de la France (copie, `_rev` retiré), l'Espagne et l'Italie qu'elle montre à 0."""
 	doc = sans_rev(copy.deepcopy(france))
 	dims = doc["dimensions"]
 	fermer(doc["cells"], cases_frontiere(FRONTIERE_FRANCE, "sud", dims["x"], dims["y"]))
+	fermer(doc["cells"], cases_frontiere(FRONTIERE_FRANCE_ITALIE, "est", dims["x"], dims["y"]))
+	return doc
+
+
+def preparer_italie(italie):
+	"""Le doc de l'Italie (copie, `_rev` retiré), la France, les Balkans et le Tyrol qu'elle
+	montre à 0 ; ses murs peints ne perdent aucun bit."""
+	doc = sans_rev(copy.deepcopy(italie))
+	dims = doc["dimensions"]
+	for bandes, sens in ((FRONTIERE_ITALIE_FRANCE, "ouest"), (FRONTIERE_ITALIE_PANNONIE, "est"),
+			(FRONTIERE_ITALIE_TYROL, "nord")):
+		fermer(doc["cells"], cases_frontiere(bandes, sens, dims["x"], dims["y"]))
 	return doc
 
 
@@ -128,16 +149,13 @@ def connexions_espagne(zone_france, zone_espagne):
 
 def connexions_italie(zone_france, zone_italie):
 	docs, refus = [], []
-	for i, (y_fr, y_it) in enumerate(PASSAGES_ITALIE, start=1):
-		pos_fr = (FRANCE_X_EST, y_fr)
-		if pos_fr not in zone_france:
-			refus.append(f"{FRANCE} : la case {list(pos_fr)} n'est pas dans sa zone de terre")
-			continue
-		pos_it = case_au_bord(zone_italie, rangee=y_it, vers="ouest")
-		if pos_it is None:
-			refus.append(f"{ITALIE} : aucune case de terre en rangée {y_it}")
-			continue
-		docs.append(connexion(f"link:france_to_italie_{i:02d}", FRANCE, pos_fr, ITALIE, pos_it))
+	for i, (cible_fr, cible_it) in enumerate(PASSAGES_ITALIE, start=1):
+		doc, r = lien_vise(f"link:france_to_italie_{i:02d}",
+			FRANCE, zone_france, cible_fr, ITALIE, zone_italie, cible_it)
+		if r:
+			refus.append(r)
+		else:
+			docs.append(doc)
 	return docs, refus
 
 
@@ -166,22 +184,23 @@ def rome_rattachee(rome_doc):
 
 
 def construire(docs, proposer_espagne_fn):
-	"""(lieux, liens, refus) : France et Espagne frontière posée, Rome rattachée, et les liens.
-	`lieux` = docs complets, émis par l'appelant s'ils diffèrent du dump."""
+	"""(lieux, liens, refus) : France, Espagne et Italie frontières posées, Rome rattachée, et
+	les liens. `lieux` = docs complets, émis par l'appelant s'ils diffèrent du dump ; l'Italie
+	en sort telle qu'elle sera écrite (lue ensuite par `gen_pannonie`)."""
 	par_id = {d.get("_id"): d for d in docs}
 	manquants = [i for i in (FRANCE, ESPAGNE, ITALIE, ROME) if not (par_id.get(i) or {}).get("cells")]
 	if manquants:
 		return [], [], [f"absent(s) du dump ou sans grille : {', '.join(manquants)}"]
 	france = preparer_france(par_id[FRANCE])
 	espagne = preparer_espagne(par_id[ESPAGNE], proposer_espagne_fn)
-	italie, rome = par_id[ITALIE], par_id[ROME]
+	italie, rome = preparer_italie(par_id[ITALIE]), par_id[ROME]
 	zone_france = zone_de(france["cells"], france.get("nav") or {}, ANCRE_FRANCE)
 	zone_espagne = zone_de(espagne["cells"], espagne.get("nav") or {}, ANCRE_ESPAGNE)
-	zone_italie = zone_de(italie["cells"], italie.get("nav") or {})
+	zone_italie = zone_de(italie["cells"], italie.get("nav") or {}, ANCRE_ITALIE)
 	zone_rome = zone_de(rome["cells"], rome.get("nav") or {})
 
 	liens, refus = connexions_espagne(zone_france, zone_espagne)
 	for d, r in (connexions_italie(zone_france, zone_italie), connexions_rome(zone_italie, zone_rome)):
 		liens += d
 		refus += r
-	return [france, espagne, rome_rattachee(rome)], liens, refus
+	return [france, espagne, italie, rome_rattachee(rome)], liens, refus
