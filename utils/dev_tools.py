@@ -659,9 +659,9 @@ CATALOGUE = [
 	},
 	{
 		"id": "gen_voisins_france",
-		"label": "🧭 La France et ses voisins : plaine européenne, Bruges, Aix, Espagne, Italie, Rome, Pannonie, Roumanie",
-		# Dump frais : `lieu:france`, `lieu:italie`, `lieu:espagne`, `lieu:roumanie` et
-		# `lieu:rome` sont réémis ENTIERS (PUT complet) ; sur un dump périmé, une retouche faite
+		"label": "🧭 La France et ses voisins : plaine européenne, Bruges, Aix, Espagne, Italie, Rome, Pannonie, Roumanie, Bucarest",
+		# Dump frais : `lieu:france`, `lieu:italie`, `lieu:espagne`, `lieu:roumanie`, `lieu:rome`
+		# et `lieu:bucarest` sont réémis ENTIERS (PUT complet) ; sur un dump périmé, une retouche faite
 		# depuis à leur grille serait effacée.
 		"argv_fn": lambda v, f: _py("gen_voisins_france.py", "--dump", f["dump"]),
 		"dump_frais": True,
@@ -671,9 +671,9 @@ CATALOGUE = [
 		"description": "Un seul fichier : la plaine européenne et ses cités Bruges et "
 			"Aix-la-Chapelle, la Pannonie (créées avec leur grille si absentes), l'Espagne (nav "
 			"repris : la côte seule), et les connexions France ↔ plaine / Espagne / Italie, "
-			"Italie ↔ Rome / Pannonie, Pannonie ↔ Roumanie. Le territoire du voisin que montre "
-			"une carte est mis à 0 (cells) : on ne change de carte que par les connexions, "
-			"posées sur la frontière. N'émet que ce qui diffère du dump ; toute case hors de la "
+			"Italie ↔ Rome / Pannonie, Pannonie ↔ Roumanie, Roumanie ↔ Bucarest. Le territoire "
+			"du voisin que montre une carte est mis à 0 (cells) : on ne change de carte que par "
+			"les connexions, posées sur la frontière et NOMMÉES (« Col de Roncevaux — Espagne »). N'émet que ce qui diffère du dump ; toute case hors de la "
 			"terre de sa carte refuse le lot. Requiert Pillow.",
 	},
 	{

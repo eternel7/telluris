@@ -12,7 +12,11 @@ RÈGLE DES FRONTIÈRES — on ne passe d'une carte à l'autre QUE par une connex
   · le territoire du VOISIN que montre une carte est mis à 0 (`FRONTIERE_*`, bandes lues sur
     l'image) : il ne se traverse plus, le joueur doit prendre la connexion ;
   · les connexions se posent SUR la frontière, du côté accessible — avant la limite des murs
-    nav quand la carte montre plus loin que la frontière.
+    nav quand la carte montre plus loin que la frontière ;
+  · chaque passage est NOMMÉ (col, gué, route…) : un nœud porte « <passage> — <son lieu> ».
+    Le bouton du jeu affiche le libellé du nœud de DESTINATION (`buildLocationslist`) : le
+    joueur lit le passage ET le pays où il mène. Côté cité, le nœud de la cité porte
+    « <cité> — par l'ouest » : sur la carte du pays, ses liens sont sur des cases voisines.
   · cité ↔ plaine : sur la plaine, la case de la cité et ses voisines (une case par lien, le
     schéma de Reims ↔ France) ; dans la cité, une sortie par route qui quitte la carte.
   Chaque case visée est ramenée à la case libre la plus proche DANS LA ZONE de la terre de sa
@@ -60,11 +64,23 @@ SORTIES_CITES = {
 # au-delà (x ≥ 56) le bas de la carte est l'Empire, pas la France.
 FRONTIERE_PLAINE = ((0, 12, 38), (13, 20, 39), (21, 34, 41), (35, 44, 43), (45, 55, 45))
 
-# France ↔ plaine : (case visée sur la France, case visée sur la plaine), d'ouest en est —
-# Flandres, Ardenne, Luxembourg, Rhin. Sur la France, la rangée 1 peinte (nord fermé par nav)
-# EST la frontière ; sur la plaine, la case juste au nord de la bande mise à 0.
-PASSAGES_PLAINE = (((49, 1), (16, 38)), ((56, 1), (28, 40)), ((64, 1), (39, 42)),
-	((76, 1), (50, 44)))
+# France ↔ plaine : (nom, case visée sur la France, case visée sur la plaine). Sur la France,
+# la rangée 1 peinte (nord fermé par nav) EST la frontière, et la côte picarde en (45, 2) ;
+# sur la plaine, la case juste au nord de la bande mise à 0.
+# ⚠️ Ordre = suffixe d'`_id` (`_01`…) : un passage s'AJOUTE en fin, jamais au milieu — sinon
+# les `_id` déjà en base désigneraient un autre passage.
+PASSAGES_PLAINE = (
+	("Route des Flandres", (49, 1), (16, 38)),
+	("Vallée de la Meuse", (56, 1), (28, 40)),
+	("Route du Luxembourg", (64, 1), (39, 42)),
+	("Pont du Rhin", (76, 1), (50, 44)),
+	("Chemin de la côte picarde", (45, 2), (12, 37)),
+	("Route de la Sarre", (70, 1), (45, 44)),
+)
+
+# Libellé d'une sortie de cité, d'après sa clé dans `SORTIES_*`.
+SORTIES_LIBELLES = {"nord": "par le nord", "sud": "par le sud", "est": "par l'est",
+	"ouest": "par l'ouest", "nord_est": "par le nord-est"}
 
 METADATA = {"type": "chemin", "status": "ouvert"}
 
@@ -147,6 +163,30 @@ def lien_vise(_id, lieu_a, zone_a, cible_a, lieu_b, zone_b, cible_b):
 	return connexion(_id, lieu_a, pos_a, lieu_b, pos_b), None
 
 
+def liens_nommes(prefixe, lieu_a, zone_a, lieu_b, zone_b, passages, libelles):
+	"""(docs, refus) : un lien `<prefixe>_NN` par passage (nom, cible_a, cible_b), chaque
+	nœud libellé « <nom> — <libellé de son lieu> » (`libelles` : _id → label)."""
+	docs, refus = [], []
+	for i, (nom, cible_a, cible_b) in enumerate(passages, start=1):
+		doc, r = lien_vise(f"{prefixe}_{i:02d}", lieu_a, zone_a, cible_a, lieu_b, zone_b, cible_b)
+		if r:
+			refus.append(r)
+			continue
+		for noeud in doc["nodes"]:
+			noeud["label"] = f"{nom} — {libelles.get(noeud['lieu'], noeud['lieu'])}"
+		docs.append(doc)
+	return docs, refus
+
+
+def libelle_sortie(cite_label, nom):
+	return f"{cite_label} — {SORTIES_LIBELLES.get(nom, nom)}"
+
+
+def libelles_de(*listes):
+	"""_id → label des docs donnés (les derniers gagnent)."""
+	return {d["_id"]: d.get("label") or d["_id"] for liste in listes for d in liste if d.get("_id")}
+
+
 def sans_rev(doc):
 	return {k: v for k, v in doc.items() if k != "_rev"}
 
@@ -170,8 +210,8 @@ def lieux_a_creer(docs, taille_fn):
 	return (plaines[0] if plaines else None), sorted(cites, key=lambda c: c["_id"]), refus
 
 
-def connexions_cite(cite_id, zone_cite, zone_plaine):
-	"""(docs, refus) des liens plaine ↔ cité."""
+def connexions_cite(cite_id, zone_cite, zone_plaine, cite_label=None):
+	"""(docs, refus) des liens plaine ↔ cité ; le nœud de la cité libellé par sa sortie."""
 	slug = cite_id.split(":", 1)[1]
 	sorties = SORTIES_CITES[cite_id]
 	centre = POSITIONS_PLAINE[cite_id]
@@ -186,22 +226,16 @@ def connexions_cite(cite_id, zone_cite, zone_plaine):
 		if pos_cite is None:
 			refus.append(f"{cite_id} : aucune case de sa zone principale pour la sortie {nom}")
 			continue
-		docs.append(connexion(f"link:plaine_europeenne_to_{slug}_{nom}",
-			PLAINE, pos_plaine, cite_id, pos_cite))
+		doc = connexion(f"link:plaine_europeenne_to_{slug}_{nom}", PLAINE, pos_plaine, cite_id, pos_cite)
+		doc["nodes"][1]["label"] = libelle_sortie(cite_label or cite_id, nom)
+		docs.append(doc)
 	return docs, refus
 
 
-def connexions_france_plaine(zone_france, zone_plaine):
+def connexions_france_plaine(zone_france, zone_plaine, libelles):
 	"""(docs, refus) des liens France ↔ plaine (`PASSAGES_PLAINE`)."""
-	docs, refus = [], []
-	for i, (cible_fr, cible_pl) in enumerate(PASSAGES_PLAINE, start=1):
-		doc, r = lien_vise(f"link:france_to_plaine_europeenne_{i:02d}",
-			FRANCE, zone_france, cible_fr, PLAINE, zone_plaine, cible_pl)
-		if r:
-			refus.append(r)
-		else:
-			docs.append(doc)
-	return docs, refus
+	return liens_nommes("link:france_to_plaine_europeenne", FRANCE, zone_france, PLAINE,
+		zone_plaine, PASSAGES_PLAINE, libelles)
 
 
 def construire(docs, taille_fn, proposer_fn, france):
@@ -235,10 +269,12 @@ def construire(docs, taille_fn, proposer_fn, france):
 	zone_plaine = zone_de(plaine["cells"], plaine.get("nav") or {}, ANCRE_PLAINE)
 	zone_france = zone_de(france.get("cells") or [], france.get("nav") or {}, ANCRE_FRANCE)
 
-	liens, refus = connexions_france_plaine(zone_france, zone_plaine)
+	libelles = libelles_de(docs, lieux, [france])
+	liens, refus = connexions_france_plaine(zone_france, zone_plaine, libelles)
 	for cite_id in sorted(POSITIONS_PLAINE):
 		cite = par_lieu[cite_id]
-		d, r = connexions_cite(cite_id, zone_de(cite["cells"], cite.get("nav") or {}), zone_plaine)
+		d, r = connexions_cite(cite_id, zone_de(cite["cells"], cite.get("nav") or {}), zone_plaine,
+			libelles[cite_id])
 		liens += d
 		refus += r
 	return lieux, liens, refus, propositions

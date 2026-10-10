@@ -33,7 +33,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dev.gen_plaine_europeenne import (  # noqa: E402
 	ANCRE_FRANCE, FRANCE, cases_autour, cases_frontiere, case_proche, connexion, fermer,
-	lien_vise, sans_rev, zone_de)
+	libelle_sortie, libelles_de, liens_nommes, sans_rev, zone_de)
 
 ESPAGNE = "lieu:espagne"
 ITALIE = "lieu:italie"
@@ -76,16 +76,24 @@ FRONTIERE_ESPAGNE = ((52, 53, 6), (54, 60, 7), (61, 73, 8), (74, 87, 6))
 # du cap Creus (x ≥ 72), qui restent murées.
 NEIGES_PYRENEES = (54, 71, 8, 13)
 
-# France ↔ Espagne : (case visée sur la France, case visée sur l'Espagne), d'ouest en est —
-# Bidassoa, Roncevaux, Somport, Le Perthus. Chacune ramenée à la case accessible la plus
-# proche de sa carte : juste au nord de la bande à 0 sur la France, juste au sud sur l'Espagne.
-PASSAGES_ESPAGNE = (((27, 40), (53, 7)), ((32, 41), (57, 8)), ((39, 41), (63, 9)),
-	((46, 41), (71, 9)))
+# France ↔ Espagne : (nom, case visée sur la France, case visée sur l'Espagne), d'ouest en
+# est. Chacune ramenée à la case accessible la plus proche de sa carte : juste au nord de la
+# bande à 0 sur la France, juste au sud sur l'Espagne.
+# ⚠️ Ordre = suffixe d'`_id` : un passage s'ajoute en FIN (cf. gen_plaine_europeenne).
+PASSAGES_ESPAGNE = (
+	("Gué de la Bidassoa", (27, 40), (53, 7)),
+	("Col de Roncevaux", (32, 41), (57, 8)),
+	("Col du Somport", (39, 41), (63, 9)),
+	("Col du Perthus", (46, 41), (71, 9)),
+)
 
-# France ↔ Italie : (case visée sur la France, case visée sur l'Italie), du nord au sud —
-# Petit-Saint-Bernard, Mont-Cenis, Montgenèvre, la corniche de Menton.
-PASSAGES_ITALIE = (((72, 26), (18, 6)), ((72, 29), (18, 10)), ((72, 32), (18, 14)),
-	((72, 34), (18, 19)))
+# France ↔ Italie : (nom, case visée sur la France, case visée sur l'Italie), du nord au sud.
+PASSAGES_ITALIE = (
+	("Col du Petit-Saint-Bernard", (72, 26), (18, 6)),
+	("Col du Mont-Cenis", (72, 29), (18, 10)),
+	("Col de Montgenèvre", (72, 32), (18, 14)),
+	("Corniche de Menton", (72, 34), (18, 19)),
+)
 
 # Rome sur `italie.png` : la cité dessinée sur la rive du Tibre, au-dessus de la côte tyrrhénienne.
 POSITION_ROME = (47, 25)
@@ -135,32 +143,18 @@ def preparer_italie(italie):
 	return doc
 
 
-def connexions_espagne(zone_france, zone_espagne):
-	docs, refus = [], []
-	for i, (cible_fr, cible_es) in enumerate(PASSAGES_ESPAGNE, start=1):
-		doc, r = lien_vise(f"link:france_to_espagne_{i:02d}",
-			FRANCE, zone_france, cible_fr, ESPAGNE, zone_espagne, cible_es)
-		if r:
-			refus.append(r)
-		else:
-			docs.append(doc)
-	return docs, refus
+def connexions_espagne(zone_france, zone_espagne, libelles):
+	return liens_nommes("link:france_to_espagne", FRANCE, zone_france, ESPAGNE, zone_espagne,
+		PASSAGES_ESPAGNE, libelles)
 
 
-def connexions_italie(zone_france, zone_italie):
-	docs, refus = [], []
-	for i, (cible_fr, cible_it) in enumerate(PASSAGES_ITALIE, start=1):
-		doc, r = lien_vise(f"link:france_to_italie_{i:02d}",
-			FRANCE, zone_france, cible_fr, ITALIE, zone_italie, cible_it)
-		if r:
-			refus.append(r)
-		else:
-			docs.append(doc)
-	return docs, refus
+def connexions_italie(zone_france, zone_italie, libelles):
+	return liens_nommes("link:france_to_italie", FRANCE, zone_france, ITALIE, zone_italie,
+		PASSAGES_ITALIE, libelles)
 
 
-def connexions_rome(zone_italie, zone_rome):
-	"""(docs, refus) des liens Italie ↔ Rome."""
+def connexions_rome(zone_italie, zone_rome, rome_label="Rome"):
+	"""(docs, refus) des liens Italie ↔ Rome ; le nœud de Rome libellé par sa sortie."""
 	if POSITION_ROME not in zone_italie:
 		return [], [f"{ITALIE} : la case {list(POSITION_ROME)} n'est pas dans sa zone de terre"]
 	cases = cases_autour(zone_italie, POSITION_ROME, len(SORTIES_ROME))
@@ -172,7 +166,9 @@ def connexions_rome(zone_italie, zone_rome):
 		if pos_rome is None:
 			refus.append(f"{ROME} : aucune case de sa zone principale pour la sortie {nom}")
 			continue
-		docs.append(connexion(f"link:italie_to_rome_{nom}", ITALIE, pos_italie, ROME, pos_rome))
+		doc = connexion(f"link:italie_to_rome_{nom}", ITALIE, pos_italie, ROME, pos_rome)
+		doc["nodes"][1]["label"] = libelle_sortie(rome_label, nom)
+		docs.append(doc)
 	return docs, refus
 
 
@@ -199,8 +195,10 @@ def construire(docs, proposer_espagne_fn):
 	zone_italie = zone_de(italie["cells"], italie.get("nav") or {}, ANCRE_ITALIE)
 	zone_rome = zone_de(rome["cells"], rome.get("nav") or {})
 
-	liens, refus = connexions_espagne(zone_france, zone_espagne)
-	for d, r in (connexions_italie(zone_france, zone_italie), connexions_rome(zone_italie, zone_rome)):
+	libelles = libelles_de(docs)
+	liens, refus = connexions_espagne(zone_france, zone_espagne, libelles)
+	for d, r in (connexions_italie(zone_france, zone_italie, libelles),
+			connexions_rome(zone_italie, zone_rome, libelles[ROME])):
 		liens += d
 		refus += r
 	return [france, espagne, italie, rome_rattachee(rome)], liens, refus

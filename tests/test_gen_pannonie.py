@@ -21,12 +21,15 @@ def _grille(cols=88, rows=48, valeur=1):
 
 
 def _italie():
-	return {"_id": gpa.ITALIE, "dimensions": {"x": 88, "y": 48}, "cells": _grille(), "nav": {}}
+	return {"_id": gpa.ITALIE, "label": "Italie", "dimensions": {"x": 88, "y": 48},
+		"cells": _grille(), "nav": {}}
 
 
 def _docs():
-	return [{"_id": gpa.ROUMANIE, "_rev": "1-x", "type": "lieu", "dimensions": {"x": 88, "y": 48},
-		"cells": _grille(), "nav": {"40,40": 3}}]
+	return [{"_id": gpa.ROUMANIE, "_rev": "1-x", "type": "lieu", "label": "Roumanie",
+		"dimensions": {"x": 88, "y": 48}, "cells": _grille(), "nav": {"40,40": 3}},
+		{"_id": gpa.BUCAREST, "_rev": "402-x", "type": "lieu", "label": "Bucarest",
+		"dimensions": {"x": 88, "y": 48}, "cells": _grille(), "nav": {}, "intro": {"titre": "t"}}]
 
 
 # Un mur dans le cadre de l'Adriatique, un faux rivage dans la plaine hongroise.
@@ -80,9 +83,45 @@ def test_liens_italie_pannonie_roumanie_sur_les_frontieres():
 	for prefixe, a, b, passages in (
 			("link:italie_to_pannonie", gpa.ITALIE, gpa.PANNONIE, gpa.PASSAGES_ITALIE),
 			("link:pannonie_to_roumanie", gpa.PANNONIE, gpa.ROUMANIE, gpa.PASSAGES_ROUMANIE)):
-		for i, (cible_a, cible_b) in enumerate(passages, start=1):
+		for i, (nom, cible_a, cible_b) in enumerate(passages, start=1):
 			na, nb = par_id[f"{prefixe}_{i:02d}"]["nodes"]
-			assert na == {"lieu": a, "pos": list(cible_a)} and nb == {"lieu": b, "pos": list(cible_b)}
+			assert na["lieu"] == a and na["pos"] == list(cible_a) and na["label"].startswith(f"{nom} — ")
+			assert nb["lieu"] == b and nb["pos"] == list(cible_b) and nb["label"].startswith(f"{nom} — ")
+
+
+def test_bucarest_posee_sur_la_roumanie():
+	lieux, liens, refus, _ = _construire()
+	assert refus == []
+	bucarest = next(d for d in lieux if d["_id"] == gpa.BUCAREST)
+	assert bucarest["lieu_parent"] == gpa.ROUMANIE and bucarest["intro"] == {"titre": "t"}
+	assert "_rev" not in bucarest
+	sorties = [l for l in liens if l["_id"].startswith("link:roumanie_to_bucarest_")]
+	assert len(sorties) == len(gpa.SORTIES_BUCAREST)
+	assert sorties[0]["nodes"][0]["pos"] == list(gpa.POSITION_BUCAREST)
+	assert len({tuple(l["nodes"][0]["pos"]) for l in sorties}) == len(sorties)
+	for l, (nom, (cible, _)) in zip(sorties, gpa.SORTIES_BUCAREST.items()):
+		assert l["nodes"][1] == {"lieu": gpa.BUCAREST, "pos": list(cible),
+			"label": gpa.libelle_sortie("Bucarest", nom)}
+
+
+def test_sortie_de_bucarest_dans_l_exterieur_vise():
+	docs = _docs()
+	cells = docs[1]["cells"]
+	# Un rempart plein en x 66 : la cible « sud » (64, 44) tombe à l'OUEST, son ancre (68, 34) à
+	# l'EST. Sans l'ancre, la plus grande zone (l'ouest) garderait la cible telle quelle.
+	mur = 66
+	for y in range(48):
+		cells[y][mur] = 0
+	_, liens, refus, _ = _construire(docs)
+	assert refus == []
+	vus = set()
+	for l in liens:
+		if l["_id"].startswith("link:roumanie_to_bucarest_"):
+			nom = l["_id"].rsplit("_to_bucarest_", 1)[1]
+			x = l["nodes"][1]["pos"][0]
+			assert (x > mur) == (gpa.SORTIES_BUCAREST[nom][1][0] > mur)
+			vus.add(nom)
+	assert vus == set(gpa.SORTIES_BUCAREST)
 
 
 def test_pannonie_deja_en_base_relue_sans_reproposer():

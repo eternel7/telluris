@@ -25,8 +25,9 @@ def _lieu(_id, **extra):
 
 
 def _docs():
-	return [_lieu(gfei.FRANCE, nav={"30,47": 56}), _lieu(gfei.ESPAGNE, nav={"10,10": 255}),
-		_lieu(gfei.ITALIE), _lieu(gfei.ROME, label="Rome")]
+	return [_lieu(gfei.FRANCE, nav={"30,47": 56}, label="France"),
+		_lieu(gfei.ESPAGNE, nav={"10,10": 255}, label="Espagne"), _lieu(gfei.ITALIE, label="Italie"),
+		_lieu(gfei.ROME, label="Rome")]
 
 
 def _proposer_tour(doc):
@@ -69,10 +70,10 @@ def test_tour_non_repris_si_la_frontiere_est_deja_posee():
 def test_cols_des_pyrenees_de_part_et_d_autre_de_la_crete():
 	_, liens, _ = gfei.construire(_docs(), _proposer_tour)
 	par_id = {l["_id"]: l for l in liens}
-	for i, (cible_fr, cible_es) in enumerate(gfei.PASSAGES_ESPAGNE, start=1):
+	for i, (nom, cible_fr, cible_es) in enumerate(gfei.PASSAGES_ESPAGNE, start=1):
 		fr, es = par_id[f"link:france_to_espagne_{i:02d}"]["nodes"]
-		assert fr == {"lieu": gfei.FRANCE, "pos": list(cible_fr)}
-		assert es == {"lieu": gfei.ESPAGNE, "pos": list(cible_es)}
+		assert fr == {"lieu": gfei.FRANCE, "pos": list(cible_fr), "label": f"{nom} — France"}
+		assert es == {"lieu": gfei.ESPAGNE, "pos": list(cible_es), "label": f"{nom} — Espagne"}
 		assert fr["pos"][1] < 47  # avant la limite des murs nav de la France
 
 
@@ -94,10 +95,10 @@ def test_frontieres_alpines_et_balkaniques_de_l_italie():
 def test_cols_des_alpes_de_part_et_d_autre_de_la_crete():
 	_, liens, _ = gfei.construire(_docs(), _proposer_tour)
 	par_id = {l["_id"]: l for l in liens}
-	for i, (cible_fr, cible_it) in enumerate(gfei.PASSAGES_ITALIE, start=1):
+	for i, (nom, cible_fr, cible_it) in enumerate(gfei.PASSAGES_ITALIE, start=1):
 		fr, it = par_id[f"link:france_to_italie_{i:02d}"]["nodes"]
-		assert fr == {"lieu": gfei.FRANCE, "pos": list(cible_fr)}
-		assert it == {"lieu": gfei.ITALIE, "pos": list(cible_it)}
+		assert fr == {"lieu": gfei.FRANCE, "pos": list(cible_fr), "label": f"{nom} — France"}
+		assert it == {"lieu": gfei.ITALIE, "pos": list(cible_it), "label": f"{nom} — Italie"}
 
 
 def test_rome_reste_atteignable_depuis_l_italie_bordee():

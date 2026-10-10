@@ -23,7 +23,7 @@ def _grille(cols=88, rows=48, valeur=1):
 
 
 def _france():
-	return {"_id": gpe.FRANCE, "type": "lieu", "categorie": "pays", "image": "france.png",
+	return {"_id": gpe.FRANCE, "type": "lieu", "label": "France", "categorie": "pays", "image": "france.png",
 		"dimensions": {"x": 88, "y": 48}, "cells": _grille(), "nav": {}}
 
 
@@ -71,12 +71,23 @@ def test_passage_france_plaine_juste_au_nord_de_la_frontiere():
 	lieux, liens, _, _ = gpe.construire([_france()], TAILLES.get, _proposer, _france())
 	plaine = next(d for d in lieux if d["_id"] == gpe.PLAINE)
 	par_id = {l["_id"]: l for l in liens}
-	for i, (cible_fr, cible_pl) in enumerate(gpe.PASSAGES_PLAINE, start=1):
+	for i, (nom, cible_fr, cible_pl) in enumerate(gpe.PASSAGES_PLAINE, start=1):
 		fr, pl = par_id[f"link:france_to_plaine_europeenne_{i:02d}"]["nodes"]
-		assert fr == {"lieu": gpe.FRANCE, "pos": list(cible_fr)}
+		assert fr == {"lieu": gpe.FRANCE, "pos": list(cible_fr), "label": f"{nom} — France"}
+		assert pl["label"] == f"{nom} — Plaine européenne"
 		x, y = pl["pos"]
 		assert pl["lieu"] == gpe.PLAINE and plaine["cells"][y][x] == 1
 		assert plaine["cells"][y + 1][x] == 0  # la case au sud est déjà la France, fermée
+
+
+def test_passages_nommes_distincts_et_sorties_de_cite_libellees():
+	noms = [nom for nom, _, _ in gpe.PASSAGES_PLAINE]
+	assert len(set(noms)) == len(noms)
+	_, liens, _, _ = gpe.construire([_france()], TAILLES.get, _proposer, _france())
+	bruges = [l for l in liens if l["_id"].startswith("link:plaine_europeenne_to_bruges_")]
+	assert {l["nodes"][1]["label"] for l in bruges} == {
+		gpe.libelle_sortie("Bruges", nom) for nom in gpe.SORTIES_CITES["lieu:bruges"]}
+	assert all("label" not in l["nodes"][0] for l in bruges)  # côté plaine : « Plaine européenne »
 
 
 def test_lieux_deja_en_base_relus_et_non_reproposes():

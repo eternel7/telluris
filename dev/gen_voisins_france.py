@@ -1,5 +1,5 @@
 """La France et ses voisins : UN fichier à importer pour la plaine européenne, Bruges,
-Aix-la-Chapelle, l'Espagne, l'Italie, Rome, la Pannonie, la Roumanie et leurs connexions.
+Aix-la-Chapelle, l'Espagne, l'Italie, Rome, la Pannonie, la Roumanie, Bucarest et leurs connexions.
 
 Assemble `gen_france_espagne_italie.construire`, `gen_plaine_europeenne.construire` et
 `gen_pannonie.construire` (le détail des règles y est). Règle commune : le territoire du voisin que montre une carte est
@@ -9,7 +9,8 @@ mis à 0, la connexion se pose SUR la frontière ; on ne change de carte que par
 proposée, un lieu présent est relu et ne reçoit que la frontière / le parent ; une connexion
 identique en base n'est pas réémise. Rejeu sur un dump à jour ⇒ AUCUN fichier.
 ⚠️ Import = PUT COMPLET (CLAUDE.md §11) : `lieu:france` et `lieu:italie` (peintes à la main),
-`lieu:espagne`, `lieu:roumanie` et `lieu:rome` partent ENTIERS depuis le dump — dump frais exigé.
+`lieu:espagne`, `lieu:roumanie`, `lieu:rome` et `lieu:bucarest` partent ENTIERS depuis le dump —
+dump frais exigé.
 
 Usage :
   python dev/gen_voisins_france.py [--dump jsons/telluris-dump-….json] [--sans-apercu]
