@@ -1,0 +1,856 @@
+[
+  {
+    "_id": "lieu:montmartre",
+    "type": "lieu",
+    "label": "Montmartre",
+    "image": "montmartre.jpg",
+    "categorie": "bastion_paladin",
+    "lieu_parent": "lieu:lutecia",
+    "texte": "Au pied des grands escaliers qui montent vers la basilique, un chemin boueux mène à une cour fortifiée, à quelques pas de la Porte Montmartre. Plus haut, les paladins de la basilique veillent sur le ciel de la capitale ; ici, on veille sur les routes. Des chevaux attendent près d'un chariot chargé de ballots, un marchand discute avec un garde, et sous un auvent de toile, un greffier tient le registre des convois qui partent vers les cités de France.",
+    "pnj": [
+      {
+        "character": "pnj:bouchard_de_clignancourt",
+        "nom": "Bouchard de Clignancourt",
+        "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+        "image": "pnj_paladin_Bouchard_de_Clignancourt_nain_m_montmartre.jpg",
+        "probabilite": 1,
+        "description": "Un paladin nain en tunique ivoire, qui vérifie les sangles d'un paquetage.",
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_montmartre_convoi_de_chartres",
+              "attendu": false
+            }
+          }
+        ]
+      },
+      {
+        "character": "pnj:bouchard_de_clignancourt_reims",
+        "nom": "Bouchard de Clignancourt",
+        "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+        "image": "pnj_paladin_Bouchard_de_Clignancourt_nain_m_montmartre.jpg",
+        "probabilite": 1,
+        "description": "Le paladin nain, penché sur le registre des convois, ses deux nattes de barbe glissées sous le manteau.",
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_montmartre_convoi_de_chartres"
+            }
+          },
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_montmartre_pelerins_de_reims",
+              "attendu": false
+            }
+          }
+        ]
+      },
+      {
+        "character": "pnj:bouchard_de_clignancourt_route_silencieuse",
+        "nom": "Bouchard de Clignancourt",
+        "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+        "image": "pnj_paladin_Bouchard_de_Clignancourt_nain_m_montmartre.jpg",
+        "probabilite": 1,
+        "description": "Le paladin nain, debout près de la porte fortifiée, les yeux sur la route du nord.",
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_montmartre_pelerins_de_reims"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "_id": "link:montmartre_to_lutecia",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:lutecia",
+        "pos": [
+          41,
+          2
+        ],
+        "label": "Montmartre"
+      },
+      {
+        "lieu": "lieu:montmartre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Redescendre vers la Porte Montmartre"
+      }
+    ],
+    "metadata": {
+      "type": "bastion_paladin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:route_silencieuse",
+    "type": "lieu",
+    "label": "La route silencieuse",
+    "image": "chemin_vers_les_collines02.png",
+    "categorie": "chemin",
+    "lieu_parent": "lieu:france",
+    "texte": "La route de Rhemi s'enfonce entre deux collines. Une borne renversée, des ornières qui quittent le chemin, une roue de chariot abandonnée dans l'herbe haute. Plus loin, à l'abri d'un éboulis, un feu mal éteint fume encore.",
+    "acces": {
+      "refus": "La route de Rhemi file entre les collines ; rien ne retient le regard.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "escorte"
+            ],
+            "cible": "lieu:montmartre"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:france_to_route_silencieuse",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          49,
+          10
+        ],
+        "label": "Des ornières qui quittent la route"
+      },
+      {
+        "lieu": "lieu:route_silencieuse",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Reprendre la route"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "pnj:bouchard_de_clignancourt",
+    "type": "pnj",
+    "nom": "Bouchard de Clignancourt",
+    "race": "nain",
+    "vocation": "paladin",
+    "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+    "description": "Paladin des routes, responsable des escortes terrestres au départ de Montmartre. Un nain de stature compacte, aux épaules larges, dont la barbe châtain striée de gris descend en deux nattes tenues par des anneaux de fer. Une vieille cicatrice traverse son sourcil gauche et se perd dans sa barbe ; ses yeux gris regardent les gens comme il examine une route, en cherchant ce qui pourrait mal tourner. Cotte de mailles sous une tunique ivoire renforcée de cuir sombre, manteau bleu nuit frappé d'une route blanche traversant un bouclier, épée longue et bouclier de marche entretenus mais usés. Ses mains larges et calleuses portent les petites brûlures de sa magie sainte. Il n'a rien d'un héros de légende : il ressemble à quelqu'un qui a passé des décennies à ramener des gens chez eux.",
+    "services": {
+      "escorte": {
+        "offre": {
+          "id": "quete:escorte_montmartre_convoi_de_chartres",
+          "titre": "Le convoi de Chartres",
+          "description": "Bouchard de Clignancourt confie à votre garde un petit convoi de marchandises et deux voyageurs en partance pour Chartres, par la route du sud-ouest. Surveillez les abords, tenez le rythme du plus lent, et ne laissez personne seul en arrière. Amenez-les tous vivants au Relais de l'Eure.",
+          "destination": "lieu:le_relais_de_l_eure",
+          "proteges": [
+            {
+              "prenom": "Jehan",
+              "nom": "Cordelier",
+              "race": "humain",
+              "sex": "M",
+              "description": "Marchand de draps et de sel, propriétaire du chariot. Il connaît la route de Chartres par cœur, ce qui le rend imprudent.",
+              "inventaire": [
+                "item:Sel",
+                "item:Vin_de_pays"
+              ]
+            },
+            {
+              "prenom": "Bertille",
+              "nom": "Rousseau",
+              "race": "hobbit",
+              "sex": "F",
+              "description": "Voyageuse qui rejoint sa sœur à Chartres. Elle marche vite, parle peu, et s'éloigne volontiers du chariot pour cueillir ce qui pousse au bord du chemin."
+            }
+          ],
+          "unique": true,
+          "proba": 1,
+          "recompenses": {
+            "xp": 30,
+            "cuivre": 5000
+          }
+        },
+        "noeuds": {
+          "accepte": "chartres_accepte"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Une cour fortifiée, tout près de la porte. Des chevaux attendent près d'un chariot chargé de ballots ; un marchand discute avec un garde. Un paladin nain vérifie les sangles d'un paquetage. Quand vous approchez, l'homme en tunique ivoire relève la tête. « Vous cherchez quelqu'un, ou vous cherchez du travail ? »",
+          "choix": [
+            {
+              "id": "travail",
+              "label": "« Du travail. On m'a dit que les paladins de Montmartre organisaient des escortes vers les cités voisines. »",
+              "next": "rencontre_destinations"
+            },
+            {
+              "id": "registre",
+              "label": "Passer sous l'auvent, consulter le registre des convois.",
+              "condition": {
+                "escorte_offerte": true
+              },
+              "next": "chartres_registre"
+            },
+            {
+              "id": "chartres_relance",
+              "label": "« Au sujet de {protege}… »",
+              "condition": {
+                "escorte_en_cours": true
+              },
+              "next": "chartres_relance"
+            },
+            {
+              "id": "principes",
+              "label": "« Vos consignes, encore une fois ? »",
+              "next": "principes"
+            },
+            {
+              "id": "lignee",
+              "label": "« On dit que les Nains ont le pied sûr sur les routes. »",
+              "next": "lignee"
+            },
+            {
+              "id": "mains",
+              "label": "« Vos mains… ces brûlures ? »",
+              "next": "magie"
+            },
+            {
+              "id": "rien",
+              "label": "« Personne. Je passais. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rencontre_destinations": {
+          "texte": "« On vous a bien renseigné. Reims par la route du nord, Chartres par celle du sud-ouest. Des destinations ordinaires, si l'on s'en tient aux cartes. » Il désigne le chariot derrière lui. « Sur le terrain, c'est une autre affaire. Les bornes disparaissent, les chemins changent, et certaines créatures ont appris à attendre qu'un voyageur s'éloigne de ses compagnons avant de l'attaquer. »",
+          "choix": [
+            {
+              "id": "combattants",
+              "label": "« Vous avez besoin de combattants ? »",
+              "next": "rencontre_question"
+            }
+          ]
+        },
+        "rencontre_question": {
+          "texte": "« J'ai besoin de gens capables de faire la différence entre combattre et protéger. Ce n'est pas toujours la même chose. » Il pose la main sur le bouclier appuyé contre le mur. « Si trois bêtes surgissent devant votre groupe pendant qu'une quatrième contourne le chariot, que faites-vous ? »",
+          "choix": [
+            {
+              "id": "contourner",
+              "label": "« Je m'occupe de celle qui contourne le chariot. »",
+              "next": "rencontre_reponse"
+            },
+            {
+              "id": "abattre",
+              "label": "« J'abats les trois de devant, vite, avant qu'elles ne se dispersent. »",
+              "next": "rencontre_trophees"
+            }
+          ]
+        },
+        "rencontre_trophees": {
+          "texte": "Il ne hausse pas le ton. « Et pendant ce temps, la quatrième est dans le chariot. » Il tapote un ballot du plat de la main. « Ce qu'il y a là-dedans, ce sont les économies d'une famille. Et derrière, il y a quelqu'un qui n'a pas d'épée. » Il vous laisse un instant. « Recommençons. Trois devant, une qui contourne. Que faites-vous ? »",
+          "choix": [
+            {
+              "id": "contourner",
+              "label": "« Je m'occupe de celle qui contourne le chariot. »",
+              "next": "rencontre_reponse"
+            }
+          ]
+        },
+        "rencontre_reponse": {
+          "texte": "« C'est une réponse acceptable. À condition que quelqu'un couvre les autres pendant ce temps. Une escorte ne se gagne pas en accumulant les cadavres. Elle se gagne quand tout le monde arrive à destination. » Il observe brièvement votre équipement, puis tend sa large main. « Bouchard de Clignancourt. Je coordonne les escortes terrestres au départ de Montmartre. Je ne vous demanderai pas de me raconter votre vie. Je vous demanderai de respecter les consignes et de ne pas abandonner les personnes que vous aurez accepté de protéger. »",
+          "choix": [
+            {
+              "id": "danger",
+              "label": "« Et si la situation devient trop dangereuse ? »",
+              "next": "rencontre_retraite"
+            }
+          ]
+        },
+        "rencontre_retraite": {
+          "texte": "« Alors nous décidons si nous pouvons continuer, si nous devons nous retrancher ou si nous devons battre en retraite. Un ordre d'escorte n'est pas un ordre de mourir. » Un silence passe. Bouchard jette un regard vers la porte fortifiée, où un garde vient de faire entrer un cavalier couvert de poussière. « Justement. J'ai deux départs à organiser. Un convoi doit rejoindre Reims, et un autre Chartres. Nous manquons de bras fiables pour les prochains trajets. Vous pouvez commencer par une mission courte. Elle vous permettra de découvrir notre manière de travailler. Si vous faites preuve de sérieux, je vous confierai des escortes plus longues. »",
+          "choix": [
+            {
+              "id": "commencer",
+              "label": "« Qu'est-ce que je dois faire pour commencer ? »",
+              "next": "rencontre_registre"
+            }
+          ]
+        },
+        "rencontre_registre": {
+          "texte": "« Allez voir le responsable du registre, sous l'auvent près de la porte. Il vous indiquera les convois qui attendent une escorte, leur destination et le nombre de personnes à protéger. Vous choisirez ensuite une mission adaptée à vos capacités. » Il reprend son inspection du chariot, puis ajoute sans lever les yeux : « Et une dernière chose. Quand vous prendrez la route, regardez derrière vous de temps en temps. Les voyageurs regardent toujours devant. C'est souvent pour cela qu'ils ne voient pas le danger arriver. »",
+          "choix": [
+            {
+              "id": "registre",
+              "label": "Passer sous l'auvent, consulter le registre des convois.",
+              "condition": {
+                "escorte_offerte": true
+              },
+              "next": "chartres_registre"
+            },
+            {
+              "id": "registre_en_cours",
+              "label": "« J'ai déjà un convoi à conduire. »",
+              "condition": {
+                "escorte_en_cours": true
+              },
+              "next": "chartres_relance"
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Je reviendrai. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "chartres_registre": {
+          "texte": "Sous l'auvent, un greffier aux doigts tachés d'encre fait glisser le registre vers vous et suit les lignes de l'ongle. « Pour Reims, il faut que la Guilde réponde de vous. Pour Chartres, non : c'est par là qu'on commence. Un chariot de draps et de sel, et deux voyageurs : {protege}. Arrivée : {destination}, {direction}. » Il tourne la page. « {xp} points d'expérience et {prime} pièces de cuivre, payés quand tout le monde est arrivé. Tout le monde. » Derrière vous, sans lever les yeux de ses sangles, Bouchard ajoute : « Le chariot avance au pas du plus lent. Pas au vôtre. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« J'inscris mon nom. Je les conduis à Chartres. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "principes",
+              "label": "« Quelles sont vos consignes ? »",
+              "next": "principes"
+            },
+            {
+              "id": "refus",
+              "label": "« Pas encore. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "chartres_accepte": {
+          "texte": "Le greffier écrit votre nom au bas de la ligne, souffle sur l'encre. Bouchard vient serrer une dernière sangle, puis se tourne vers vous. « Le marchand connaît la route, et c'est bien ce qui m'inquiète : il croit qu'elle n'a pas changé depuis la dernière fois. La voyageuse s'écartera pour cueillir des herbes au bord du chemin. Ne la laissez pas faire seule. » Il recule d'un pas. « Ramenez-moi des nouvelles de Chartres, {prenom}. Et regardez derrière vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Ce sera fait. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "chartres_relance": {
+          "texte": "Bouchard lève à peine les yeux de son paquetage. « {protege}. » Il désigne la porte du menton. « Chartres n'a pas bougé, {prenom}. {destination} non plus. Une escorte qui traîne à Montmartre, c'est une escorte qui n'a pas encore commencé. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y vais. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "principes": {
+          "texte": "Il compte sur ses gros doigts, sans se presser. « Un : une escorte n'est pas une chasse aux monstres. La priorité, ce sont les personnes qu'on vous a confiées. Deux : une route sûre se mérite. Connaître le terrain, surveiller les traces, savoir quand battre en retraite. » Il replie le troisième doigt plus lentement que les autres. « Trois : on juge un paladin à ceux qu'il ramène. Pas à ceux qu'il tue. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "lignee": {
+          "texte": "Il a un bref sourire dans la barbe. « On dit beaucoup de choses sur les Nains. » Il tape du talon sur le pavé. « J'ai les jambes courtes et le souffle long, c'est vrai. Mais savoir qu'un pont va céder, qu'un talus va s'effondrer sous un chariot chargé, qu'il faut ménager ses forces pour la dernière lieue plutôt que pour la première… ça, je l'ai appris. En marchant. Et j'ai connu des Nains qui ne voyaient pas un fossé avant d'y tomber. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "magie": {
+          "texte": "Il regarde ses paumes comme s'il les découvrait. « La magie sainte. Elle referme certaines plaies, elle purifie celles que le mana a souillées, elle remet debout un voyageur épuisé. » Il referme les mains. « Elle ne rend personne invincible, et elle ne sauve pas tout le monde. Elle laisse des marques, aussi. Je préfère ces marques-là à celles qu'on ne soigne pas. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:bouchard_de_clignancourt_reims",
+    "type": "pnj",
+    "nom": "Bouchard de Clignancourt",
+    "race": "nain",
+    "vocation": "paladin",
+    "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+    "description": "Paladin des routes, responsable des escortes terrestres au départ de Montmartre. Le convoi de Chartres est arrivé entier : Bouchard vous confie désormais des escortes plus longues.",
+    "services": {
+      "escorte": {
+        "offre": {
+          "id": "quete:escorte_montmartre_pelerins_de_reims",
+          "titre": "Les pèlerins de Reims",
+          "description": "Trois pèlerins quittent Montmartre pour Rhemi par la route du nord, chargés d'offrandes et de provisions. Les plus vulnérables imposent leur rythme : gérez la fatigue du groupe, ne laissez personne derrière, et amenez-les tous vivants à l'Auberge du Sacre.",
+          "destination": "lieu:auberge_du_sacre",
+          "proteges": [
+            {
+              "prenom": "Guillemette",
+              "nom": "Barbier",
+              "race": "humain",
+              "sex": "F",
+              "description": "Pèlerine âgée, la plus lente du groupe. Elle ne se plaint jamais, ce qui oblige à la surveiller.",
+              "inventaire": [
+                "item:Cierge",
+                "item:Encens"
+              ]
+            },
+            {
+              "prenom": "Oudard",
+              "nom": "Lefèvre",
+              "race": "ogre",
+              "sex": "M",
+              "description": "Pèlerin ogre, qui porte sur son dos les provisions de tout le groupe et refuse qu'on l'en soulage.",
+              "inventaire": [
+                "item:pain_seigle",
+                "item:pain_seigle"
+              ]
+            },
+            {
+              "prenom": "Sidonie",
+              "nom": "Marchal",
+              "race": "elfe",
+              "sex": "F",
+              "description": "Jeune pèlerine elfe, à peine remise d'une fièvre. Elle tient à marcher, et s'épuise avant les autres.",
+              "inventaire": [
+                "item:Cierge"
+              ]
+            }
+          ],
+          "unique": true,
+          "proba": 1,
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "E"
+          },
+          "recompenses": {
+            "xp": 60,
+            "cuivre": 15000
+          }
+        },
+        "noeuds": {
+          "accepte": "reims_accepte"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Bouchard est penché sur le registre, sous l'auvent, à côté du greffier. Il vous voit venir de loin et referme le volume sur son pouce. « {prenom}. Le Relais de l'Eure m'a fait savoir que mon chariot était arrivé. Avec tout le monde dedans. » Il hoche la tête une seule fois. « C'est ce que j'attendais. Ce n'est pas si fréquent. »",
+          "choix": [
+            {
+              "id": "reims_offre",
+              "label": "« Vous parliez d'escortes plus longues. »",
+              "condition": {
+                "escorte_offerte": true
+              },
+              "next": "reims_propose"
+            },
+            {
+              "id": "reims_rang",
+              "label": "« Vous parliez d'escortes plus longues. »",
+              "condition": {
+                "escorte_rang_insuffisant": true
+              },
+              "next": "reims_rang_insuffisant"
+            },
+            {
+              "id": "reims_relance",
+              "label": "« Au sujet de {protege}… »",
+              "condition": {
+                "escorte_en_cours": true
+              },
+              "next": "reims_relance"
+            },
+            {
+              "id": "principes",
+              "label": "« Vos consignes, encore une fois ? »",
+              "next": "principes"
+            },
+            {
+              "id": "lignee",
+              "label": "« On dit que les Nains ont le pied sûr sur les routes. »",
+              "next": "lignee"
+            },
+            {
+              "id": "rien",
+              "label": "« Rien aujourd'hui. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "reims_propose": {
+          "texte": "Il rouvre le registre à une page cornée. « Reims, par la route du nord. Trois pèlerins : {protege}. Ils portent des offrandes et leurs provisions, et ils n'ont pas l'habitude de marcher. » Il pose le doigt sur la ligne. « Chartres, c'était apprendre à surveiller. Ici, il s'agit d'apprendre à attendre. Le groupe ira au pas de la plus fatiguée, et la plus fatiguée ne vous le dira pas. »",
+          "choix": [
+            {
+              "id": "fatigue",
+              "label": "« Comment savoir qu'ils n'en peuvent plus ? »",
+              "next": "reims_fatigue"
+            },
+            {
+              "id": "instructions",
+              "label": "« Où dois-je les conduire ? »",
+              "next": "reims_instructions"
+            },
+            {
+              "id": "refus",
+              "label": "« Pas cette fois. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "reims_fatigue": {
+          "texte": "« Regardez leurs pieds, pas leurs visages. Un pèlerin sourit jusqu'au moment où il tombe. » Il tire sur une de ses nattes, pensif. « Quand quelqu'un commence à traîner, le groupe s'étire. Quand le groupe s'étire, il y a un trou. Et ce qui guette au bord de la route attend précisément ce trou-là. Mieux vaut perdre une heure à faire une halte que perdre quelqu'un à gagner une lieue. »",
+          "choix": [
+            {
+              "id": "instructions",
+              "label": "« Où dois-je les conduire ? »",
+              "next": "reims_instructions"
+            }
+          ]
+        },
+        "reims_instructions": {
+          "texte": "« {destination}, {direction}. Le tenancier les attend, et il me fera savoir qui est arrivé. » Il referme le registre. « {xp} points d'expérience et {prime} pièces de cuivre. Et, si tout se passe bien, je saurai que je peux vous confier ce qui ne se passe pas bien. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je les conduirai à Reims. Tous. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "refus",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "reims_accepte": {
+          "texte": "Le greffier inscrit votre nom. Les trois pèlerins se lèvent du banc où ils attendaient : l'ogre charge les provisions sans un mot, l'elfe serre son châle, et la vieille femme vous adresse un sourire qui ne dit rien de ses pieds. Bouchard vous retient d'une main sur le bras. « Faites des haltes avant qu'elles soient nécessaires. Et souvenez-vous : regardez derrière vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Ce sera fait. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "reims_rang_insuffisant": {
+          "texte": "Il secoue la tête, sans dureté. « La route du nord est plus longue, et les pèlerins plus fragiles que des ballots de draps. Pour celle-là, il faut que la Guilde réponde de vous à Lutecia. Montez au rang {rang_requis} au Grand Relais, et revenez me voir. » Il tapote le registre. « Les pèlerins attendront. Ils ont l'habitude d'attendre. Moi, je n'ai pas l'habitude d'enterrer. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« J'y travaillerai. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je reviendrai. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "reims_relance": {
+          "texte": "Il fronce un sourcil, celui que traverse la cicatrice. « {protege}. Ils sont encore ici ? » Il regarde vers le nord. « Plus on attend, plus la route est longue. C'est une chose que les cartes ne disent pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Nous partons. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "principes": {
+          "texte": "« Toujours les mêmes. » Il compte sur ses doigts. « Une escorte n'est pas une chasse aux monstres. Une route sûre se mérite. On juge un paladin à ceux qu'il ramène, pas à ceux qu'il tue. » Il hausse les épaules. « Je n'en ai pas trouvé de meilleurs en quarante ans de route. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "lignee": {
+          "texte": "« Le pied sûr, je l'ai gagné en marchant. » Il tape du talon sur le pavé. « J'ai les jambes courtes et le souffle long, c'est vrai. Mais reconnaître un chemin qui va s'effondrer ou un pont qui ne portera pas le chariot, ça ne s'hérite pas. J'ai connu des Nains qui ne voyaient pas un fossé avant d'y tomber, et des Elfes qui lisaient une route mieux que moi. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:bouchard_de_clignancourt_route_silencieuse",
+    "type": "pnj",
+    "nom": "Bouchard de Clignancourt",
+    "race": "nain",
+    "vocation": "paladin",
+    "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+    "description": "Paladin des routes, responsable des escortes terrestres au départ de Montmartre. Les pèlerins sont arrivés à Rhemi : Bouchard vous confie désormais ce que les escortes ordinaires ne peuvent plus porter.",
+    "services": {
+      "escorte": {
+        "offre": {
+          "id": "quete:escorte_montmartre_route_silencieuse",
+          "titre": "La route silencieuse",
+          "description": "Une escorte partie de Montmartre vers Rhemi n'est jamais arrivée. Suivez la route du nord, retrouvez les traces du convoi et les survivants s'il en reste, et ramenez-les vivants à Montmartre. La priorité est de recueillir des informations, pas de poursuivre aveuglément les assaillants.",
+          "destination": "lieu:montmartre",
+          "rencontre": {
+            "lieu": "lieu:route_silencieuse"
+          },
+          "proteges": [
+            {
+              "prenom": "Isabeau",
+              "nom": "Ferrand",
+              "race": "humain",
+              "sex": "F",
+              "description": "Paladine de Montmartre, seule de l'escorte encore debout. Blessée au flanc, elle tient son épée et refuse de lâcher le marchand des yeux.",
+              "se_defend": true,
+              "equipement": {
+                "torse": "item:Cotte_de_mailles",
+                "main_droite": "item:Epee_longue_ordre",
+                "main_gauche": "item:Bouclier_ordre"
+              }
+            },
+            {
+              "prenom": "Colin",
+              "nom": "Mercier",
+              "race": "hobbit",
+              "sex": "M",
+              "description": "Marchand du convoi disparu. Il a vu ce qui les a attaqués, et ne parvient pas à le raconter dans l'ordre."
+            }
+          ],
+          "unique": true,
+          "proba": 1,
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "D"
+          },
+          "recompenses": {
+            "xp": 120,
+            "cuivre": 30000
+          }
+        },
+        "noeuds": {
+          "accepte": "route_accepte"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Bouchard n'est pas sous l'auvent. Il se tient près de la porte fortifiée, les bras croisés, les yeux sur la route du nord. Il vous entend venir sans se retourner. « {prenom}. Les pèlerins sont arrivés à Rhemi. Tous les trois. » Un temps. « Il y a une autre escorte qui devait y arriver. Elle n'y est jamais arrivée. »",
+          "choix": [
+            {
+              "id": "route_offre",
+              "label": "« Racontez-moi. »",
+              "condition": {
+                "escorte_offerte": true
+              },
+              "next": "route_propose"
+            },
+            {
+              "id": "route_rang",
+              "label": "« Racontez-moi. »",
+              "condition": {
+                "escorte_rang_insuffisant": true
+              },
+              "next": "route_rang_insuffisant"
+            },
+            {
+              "id": "route_relance",
+              "label": "« Au sujet de la route du nord… »",
+              "condition": {
+                "escorte_en_cours": true
+              },
+              "next": "route_relance"
+            },
+            {
+              "id": "route_rapport",
+              "label": "« Ceux que je vous ai ramenés… »",
+              "condition": {
+                "escorte_accomplie": true
+              },
+              "next": "route_rapport"
+            },
+            {
+              "id": "preparation",
+              "label": "« Pourquoi insistez-vous tant sur la préparation ? »",
+              "condition": {
+                "escorte_accomplie": true
+              },
+              "next": "passe"
+            },
+            {
+              "id": "principes",
+              "label": "« Vos consignes, encore une fois ? »",
+              "next": "principes"
+            },
+            {
+              "id": "rien",
+              "label": "« Je repasserai. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "route_propose": {
+          "texte": "« Deux chariots, un marchand, trois paladins de chez nous. Partis il y a six jours par la route du nord. Rhemi ne les a jamais vus. » Il décroise les bras. « Ce matin, un cavalier a trouvé des ornières qui quittent la route entre deux collines, et une borne renversée. Il n'est pas allé plus loin, et il a eu raison. » Il vous regarde enfin. « Je veux savoir ce qui s'est passé. Et s'il reste quelqu'un à ramener, je veux qu'on le ramène. »",
+          "choix": [
+            {
+              "id": "priorite",
+              "label": "« Et ceux qui les ont attaqués ? »",
+              "next": "route_priorite"
+            },
+            {
+              "id": "instructions",
+              "label": "« Où dois-je chercher ? »",
+              "next": "route_instructions"
+            },
+            {
+              "id": "refus",
+              "label": "« Ce n'est pas pour moi. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "route_priorite": {
+          "texte": "« Vous ne les poursuivez pas. » Il l'a dit sans élever la voix, et c'est ce qui le rend net. « Ce qui a eu raison de trois paladins n'attend qu'une chose : qu'un quatrième lui coure après. Votre travail, c'est de regarder. Les traces, le nombre, la direction. Ce que vous rapporterez me servira à décider si cette route reste ouverte. Une vengeance ne me servira à rien. »",
+          "choix": [
+            {
+              "id": "instructions",
+              "label": "« Où dois-je chercher ? »",
+              "next": "route_instructions"
+            }
+          ]
+        },
+        "route_instructions": {
+          "texte": "« Sortez par la route de Rhemi. Entre deux collines, cherchez les ornières qui quittent le chemin. » Il dessine la forme du terrain du bout de son gros doigt sur le bois de la porte. « S'ils ont survécu, ils se seront mis à l'abri d'une pente ou d'un éboulis. Un paladin de chez nous sait se retrancher. Ramenez-les ici, à Montmartre. {xp} points d'expérience et {prime} pièces de cuivre, et ma dette en plus. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je pars ce matin. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "refus",
+              "label": "« Laissez-moi me préparer. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "route_accepte": {
+          "texte": "Bouchard ouvre sa sacoche et en sort deux fioles de purification qu'il fait tourner entre ses doigts, puis les remet à leur place. « Si vous les trouvez blessés par quelque chose de souillé de mana, ne perdez pas de temps à me les décrire. Ramenez-les, je ferai le reste. » Il se tourne de nouveau vers le nord. « Et cette fois plus que jamais, {prenom}. Regardez derrière vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Je reviendrai avec eux. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "route_rang_insuffisant": {
+          "texte": "Il secoue lentement la tête. « Pas vous. Pas encore. » Il n'y a pas de reproche dans sa voix. « Ce qui est arrivé à ce convoi a eu raison de trois paladins. Je n'envoie sur cette route que quelqu'un dont la Guilde répond au rang {rang_requis}. Revenez quand le Grand Relais vous l'aura accordé. Si quelqu'un vit encore là-bas, il vaut mieux qu'il attende un jour de plus qu'un sauveteur qu'il faudra sauver. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« J'y travaillerai. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je reviendrai. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "route_relance": {
+          "texte": "Il ne quitte pas la route des yeux. « {protege}. » Sa mâchoire se serre sous la barbe. « Chaque jour qui passe, la piste refroidit et les survivants faiblissent. Allez-y, {prenom}. Et ne poursuivez personne. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "route_rapport": {
+          "texte": "Bouchard a tout écouté sans vous interrompre une seule fois : les ornières, la borne, le feu mal éteint, les deux survivants derrière l'éboulis. Puis il s'est agenouillé près de la paladine, a posé ses larges mains sur son flanc, et une lumière pâle a laissé sur ses paumes une brûlure de plus. Quand il se relève, il a l'air plus vieux. « Deux. Sur six. » Il le dit sans détour, comme on note un chiffre au registre. « Et sans vous, aucun. Vous avez regardé au lieu de poursuivre. C'est pour cela que vous êtes là, et c'est pour cela qu'eux sont revenus. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et maintenant ? »",
+              "next": "route_suite"
+            },
+            {
+              "id": "fin",
+              "label": "« Je vous laisse les soigner. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "route_suite": {
+          "texte": "« Maintenant, j'ai des convois que je ne confie pas à n'importe qui. » Il regarde le registre, sous l'auvent, sans s'en approcher. « Des cargaisons qui comptent, des voyageurs qu'on ne peut pas perdre, des routes devenues trop dangereuses pour les escortes ordinaires. » Il revient à vous. « Je ne fais pas confiance aux promesses, {prenom}. Je fais confiance à ceux qui ramènent les gens. Vous en faites partie. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Messire. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "passe": {
+          "texte": "Il reste longtemps silencieux. « Il y a des années, je conduisais un convoi de marchands. Une route ordinaire, des destinations ordinaires. J'étais pressé, et j'étais sûr de moi. » Il passe le pouce sur la cicatrice de son sourcil. « Je ne les ai pas tous ramenés. Pas même la moitié. » Il remet ses mains derrière son dos. « Depuis, je prépare. Je fais préparer. Et je regarde derrière moi. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Ne rien ajouter.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "principes": {
+          "texte": "« Vous les connaissez mieux que moi, maintenant. » Il les dit quand même, un doigt après l'autre. « Une escorte n'est pas une chasse aux monstres. Une route sûre se mérite. On juge un paladin à ceux qu'il ramène, pas à ceux qu'il tue. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  }
+]
