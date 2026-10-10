@@ -212,8 +212,8 @@ RECETTES = {
 }
 
 
-def item_doc(slug: str) -> dict:
-	d = dict(ITEMS[slug])
+def item_doc(slug: str, table: dict = None) -> dict:
+	d = dict((table or ITEMS)[slug])
 	doc = {"_id": "item:" + slug, "type": "item", "nom": d.pop("nom"), "icon": d.pop("icon"),
 		   "description": d.pop("description"), "rarete": d.pop("rarete"),
 		   "categorie": d.pop("categorie"), "sous_categorie": "", "slots": d.pop("slots"),
@@ -222,8 +222,8 @@ def item_doc(slug: str) -> dict:
 	return doc
 
 
-def recette_doc(slug: str) -> dict:
-	categorie, matieres, produite = RECETTES[slug]
+def recette_doc(slug: str, table: dict = None) -> dict:
+	categorie, matieres, produite = (table or RECETTES)[slug]
 	return {
 		"_id": "recette:%s_%s" % (categorie, slug.lower()),
 		"type": "recette",
@@ -268,7 +268,10 @@ def villes_par_categorie(docs: list) -> dict:
 	return out
 
 
-def main():
+def main(items: dict = None, recettes: dict = None, sortie: str = None):
+	"""Contrôle puis écrit un lot items + recettes. Paramétré pour être rejoué par les
+	générateurs frères (dev/gen_brosserie.py) : mêmes garde-fous, autre table."""
+	items, recettes, sortie = items or ITEMS, recettes or RECETTES, sortie or SORTIE
 	try:
 		sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 	except Exception:
@@ -287,8 +290,8 @@ def main():
 	from utils import montures
 
 	erreurs, nouveaux, deja = [], [], 0
-	lot_items = [item_doc(s) for s in sorted(ITEMS)]
-	lot_recettes = [recette_doc(s) for s in sorted(RECETTES)]
+	lot_items = [item_doc(s, items) for s in sorted(items)]
+	lot_recettes = [recette_doc(s, recettes) for s in sorted(recettes)]
 	erreurs += controler_items(lot_items, montures.SLOTS_MONTURE)
 
 	# ── Contrôles AVANT ajout (état de la base) ──────────────────────────────
@@ -303,7 +306,7 @@ def main():
 		else:
 			erreurs.append("%s : _id déjà pris par un autre doc" % doc["_id"])
 	ids_lot = {d["_id"] for d in lot_items}
-	for slug, (cat, matieres, _q) in sorted(RECETTES.items()):
+	for slug, (cat, matieres, _q) in sorted(recettes.items()):
 		if "item:" + slug not in ids_lot and "item:" + slug not in index:
 			erreurs.append("item:%s : produit sans doc" % slug)
 		if cat not in lieux_cats:
@@ -320,7 +323,7 @@ def main():
 	marche.reset_prix_cache()
 	villes = villes_par_categorie(docs)
 	ventes, flux = set(), set()
-	for slug, (cat, matieres, _q) in sorted(RECETTES.items()):
+	for slug, (cat, matieres, _q) in sorted(recettes.items()):
 		feuilles_livrees = set(marche.appro_leaves_categorie(cat))
 		produits = marche.produits_categorie(cat)
 		for cle, _n in matieres:
@@ -339,7 +342,7 @@ def main():
 			erreurs.append("%s (%s) : %s n'arrive ni par l'appro, ni par l'atelier, ni par le flux "
 						   "de %s — FAUSSE FEUILLE" % (slug, cat, cle, ", ".join(sorted(manque)) or "aucune cité"))
 		if cat in character_stats.LIEU_CATEGORIES_FUSION:
-			seul = _metier_unique(marche, cat, [c for c, _n in marche.recette_matieres(recette_doc(slug))])
+			seul = _metier_unique(marche, cat, [c for c, _n in marche.recette_matieres(recette_doc(slug, recettes))])
 			if seul:
 				erreurs.append("%s : « %s » fournit seul tous les intrants — recette non croisée" % (slug, seul))
 
@@ -358,10 +361,10 @@ def main():
 	if not nouveaux:
 		print("Base à jour — aucun fichier écrit.")
 		return
-	with open(SORTIE, "w", encoding="utf-8") as f:
+	with open(sortie, "w", encoding="utf-8") as f:
 		json.dump(nouveaux, f, ensure_ascii=False, indent="\t")
 		f.write("\n")
-	print("→ %s" % os.path.relpath(SORTIE, RACINE))
+	print("→ %s" % os.path.relpath(sortie, RACINE))
 
 
 if __name__ == "__main__":

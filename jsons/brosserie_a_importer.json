@@ -1,0 +1,604 @@
+[
+	{
+		"_id": "item:Aspersoir_de_sauge",
+		"type": "item",
+		"nom": "Aspersoir de sauge",
+		"icon": "🌿",
+		"description": "Un faisceau de poils lié à de la sauge séchée, que l'on trempe et secoue sur les plaies et les seuils. L'odeur seule apaise.",
+		"rarete": "commun",
+		"categorie": "catalyseur",
+		"sous_categorie": "",
+		"slots": [
+			"main_gauche"
+		],
+		"tags": [],
+		"poids": 0.3,
+		"bonus_pm": 1,
+		"effets": {
+			"regen_pv": 1
+		},
+		"restriction": {
+			"Vol": 20
+		}
+	},
+	{
+		"_id": "item:Chandelle_de_glyphes",
+		"type": "item",
+		"nom": "Chandelle de glyphes",
+		"icon": "🕯️",
+		"description": "Une chandelle dont la cire porte des signes peints au pinceau. Tant qu'elle brûle, l'esprit se ferme aux distractions.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.2,
+		"effets": {
+			"duree": 8,
+			"regen_pm": 2,
+			"buffs": {
+				"Vol": 3
+			}
+		}
+	},
+	{
+		"_id": "item:Chasse_mouches_de_crin",
+		"type": "item",
+		"nom": "Chasse-mouches de crin",
+		"icon": "🪄",
+		"description": "Une queue de crin frisé sur un manche d'os bagué de fer. Celui qui le tient ne chasse pas les mouches : il fait savoir qui commande.",
+		"rarete": "peu_commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"main_gauche"
+		],
+		"tags": [],
+		"poids": 0.3,
+		"bonus": {
+			"Cha": 3
+		}
+	},
+	{
+		"_id": "item:Crin_frise",
+		"type": "item",
+		"nom": "Crin frisé",
+		"icon": "🧶",
+		"description": "Crin bouilli, tordu en corde puis détordu après séchage : il garde une frisure élastique qui ne se tasse jamais.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.1
+	},
+	{
+		"_id": "item:Faisceau_de_poils",
+		"type": "item",
+		"nom": "Faisceau de poils",
+		"icon": "🖌️",
+		"description": "Poils triés à la main, dégraissés, égalisés à la pointe et liés en botte serrée.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.05
+	},
+	{
+		"_id": "item:Fut_de_brosse",
+		"type": "item",
+		"nom": "Fûts de brosse",
+		"icon": "🪵",
+		"description": "Montures de bois fendu, poncées et percées de rangées de trous où l'on noue les touffes. Le brossier en taille des paniers entiers.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.1
+	},
+	{
+		"_id": "item:Jaque_de_crin",
+		"type": "item",
+		"nom": "Jaque de crin",
+		"icon": "🦺",
+		"description": "Plusieurs épaisseurs de toile piquées sur un garnissage de crin frisé. Le crin ne se tasse pas : la jaque amortit encore au centième coup.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"torse"
+		],
+		"tags": [],
+		"poids": [
+			3,
+			5
+		],
+		"bonus_pa": 6,
+		"bonus": {
+			"Ag": -2
+		}
+	},
+	{
+		"_id": "item:Manteau_de_ratine",
+		"type": "item",
+		"nom": "Manteau de ratine",
+		"icon": "🧥",
+		"description": "Un drap de laine gratté à la brosse jusqu'à friser : le poil retient l'air et rejette la pluie.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"epaules"
+		],
+		"tags": [],
+		"poids": 1.0,
+		"bonus_pa": 1,
+		"bonus": {
+			"R": 1
+		}
+	},
+	{
+		"_id": "item:Meche_d_archet",
+		"type": "item",
+		"nom": "Mèches d'archet",
+		"icon": "🎻",
+		"description": "Crins de queue choisis un à un, de même longueur et sans nœud, prêts à être tendus sur la baguette d'un archet.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.02
+	},
+	{
+		"_id": "item:Miniature_peinte",
+		"type": "item",
+		"nom": "Miniature peinte",
+		"icon": "🖼️",
+		"description": "Un portrait grand comme l'ongle, peint au pinceau d'un seul poil et serti d'un cadre de métal. On le porte pour qu'on le regarde.",
+		"rarete": "peu_commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"cou"
+		],
+		"tags": [],
+		"poids": 0.1,
+		"bonus_pm": 1,
+		"bonus": {
+			"Cha": 2
+		}
+	},
+	{
+		"_id": "item:Peigne_d_os",
+		"type": "item",
+		"nom": "Peigne d'os",
+		"icon": "🪮",
+		"description": "Un peigne taillé dans un os plat et poli, planté dans la chevelure une fois la coiffure faite.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"tete"
+		],
+		"tags": [],
+		"poids": 0.05,
+		"bonus": {
+			"Cha": 2
+		}
+	},
+	{
+		"_id": "item:Perruque_d_apparat",
+		"type": "item",
+		"nom": "Perruque d'apparat",
+		"icon": "🎩",
+		"description": "Une coiffe de crin frisé montée sur soie et rehaussée d'une parure de plumes. On la porte aux audiences, jamais sur la route.",
+		"rarete": "peu_commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"tete"
+		],
+		"tags": [],
+		"poids": 0.3,
+		"bonus": {
+			"Cha": 4
+		}
+	},
+	{
+		"_id": "item:Pinceau_de_glyphes",
+		"type": "item",
+		"nom": "Pinceau de glyphes",
+		"icon": "🖌️",
+		"description": "Un pinceau à pointe fine bagué de fer, dont on trace dans l'air les signes d'un sort avant de le lancer. La main sûre gaspille moins.",
+		"rarete": "commun",
+		"categorie": "catalyseur",
+		"sous_categorie": "",
+		"slots": [
+			"main_gauche"
+		],
+		"tags": [],
+		"poids": 0.1,
+		"bonus_pm": 2,
+		"bonus": {
+			"Int": 1
+		},
+		"restriction": {
+			"Int": 20
+		}
+	},
+	{
+		"_id": "item:Plumeau_d_augure",
+		"type": "item",
+		"nom": "Plumeau d'augure",
+		"icon": "🪶",
+		"description": "Des pennes montées en éventail sur un fût passé à la résine. On y lit le vent, et l'on y fait passer ce que l'on ne retient plus.",
+		"rarete": "peu_commun",
+		"categorie": "catalyseur",
+		"sous_categorie": "",
+		"slots": [
+			"main_gauche"
+		],
+		"tags": [],
+		"poids": 0.2,
+		"bonus_pm": 2,
+		"effets": {
+			"canalisation": 1
+		},
+		"restriction": {
+			"Vol": 25
+		}
+	},
+	{
+		"_id": "item:Toilette_de_marchand",
+		"type": "item",
+		"nom": "Toilette de marchand",
+		"icon": "🧼",
+		"description": "Savon, brosse à habits et eau parfumée : une heure d'apprêt avant d'entrer chez qui l'on veut convaincre. Le marchand juge d'abord sur la mine.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.3,
+		"effets": {
+			"duree": 20,
+			"buffs": {
+				"Cha": 8
+			}
+		}
+	},
+	{
+		"_id": "item:Viole_d_archet",
+		"type": "item",
+		"nom": "Viole d'archet",
+		"icon": "🎻",
+		"description": "Une viole à six cordes jouée à l'archet. Sa plainte grave engourdit les membres de qui l'écoute de trop près.",
+		"rarete": "peu_commun",
+		"categorie": "arme",
+		"sous_categorie": "instrument",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac"
+		],
+		"poids": 2.5,
+		"portee": 1,
+		"deux_mains": true,
+		"bonus_degats_dice": 2,
+		"bonus": {
+			"Cha": 6,
+			"Vol": 1
+		},
+		"restriction": {
+			"Cha": 35
+		},
+		"effets": {
+			"buffs": {
+				"Ag": -3
+			},
+			"duree": 2
+		},
+		"cible": "ennemi"
+	},
+	{
+		"_id": "recette:brosserie_aspersoir_de_sauge",
+		"type": "recette",
+		"lieu_categorie": "brosserie",
+		"objet_final": "Aspersoir_de_sauge",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Fut_de_brosse",
+				"quantite": 1
+			},
+			{
+				"item": "item:Faisceau_de_poils",
+				"quantite": 2
+			},
+			{
+				"item": "item:Herbes_aromatiques",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:atelier_de_cirier_chandelle_de_glyphes",
+		"type": "recette",
+		"lieu_categorie": "atelier_de_cirier",
+		"objet_final": "Chandelle_de_glyphes",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Cire_d_abeille",
+				"quantite": 2
+			},
+			{
+				"item": "item:Meche",
+				"quantite": 1
+			},
+			{
+				"item": "item:pinceau",
+				"quantite": 1
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:brosserie_chasse_mouches_de_crin",
+		"type": "recette",
+		"lieu_categorie": "brosserie",
+		"objet_final": "Chasse_mouches_de_crin",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Crin_frise",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "ossements",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:brosserie_crin_frise",
+		"type": "recette",
+		"lieu_categorie": "brosserie",
+		"objet_final": "Crin_frise",
+		"quantite_produite": 3,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "crins",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:brosserie_faisceau_de_poils",
+		"type": "recette",
+		"lieu_categorie": "brosserie",
+		"objet_final": "Faisceau_de_poils",
+		"quantite_produite": 3,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "poils",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:brosserie_fut_de_brosse",
+		"type": "recette",
+		"lieu_categorie": "brosserie",
+		"objet_final": "Fut_de_brosse",
+		"quantite_produite": 4,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "branche",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:tissage_jaque_de_crin",
+		"type": "recette",
+		"lieu_categorie": "tissage",
+		"objet_final": "Jaque_de_crin",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "lin",
+				"quantite": 3
+			},
+			{
+				"item": "item:Crin_frise",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:tissage_manteau_de_ratine",
+		"type": "recette",
+		"lieu_categorie": "tissage",
+		"objet_final": "Manteau_de_ratine",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "laine_tissee",
+				"quantite": 3
+			},
+			{
+				"item": "item:brosse",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:brosserie_meche_d_archet",
+		"type": "recette",
+		"lieu_categorie": "brosserie",
+		"objet_final": "Meche_d_archet",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "crins",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:bijouterie_miniature_peinte",
+		"type": "recette",
+		"lieu_categorie": "bijouterie",
+		"objet_final": "Miniature_peinte",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:pinceau",
+				"quantite": 1
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "metaux_precieux",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:brosserie_peigne_d_os",
+		"type": "recette",
+		"lieu_categorie": "brosserie",
+		"objet_final": "Peigne_d_os",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "ossements",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:grande_manufacture_textile_perruque_d_apparat",
+		"type": "recette",
+		"lieu_categorie": "grande_manufacture_textile",
+		"objet_final": "Perruque_d_apparat",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Crin_frise",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "soie",
+				"quantite": 1
+			},
+			{
+				"item": "item:parure",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:brosserie_pinceau_de_glyphes",
+		"type": "recette",
+		"lieu_categorie": "brosserie",
+		"objet_final": "Pinceau_de_glyphes",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Fut_de_brosse",
+				"quantite": 1
+			},
+			{
+				"item": "item:Faisceau_de_poils",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:brosserie_plumeau_d_augure",
+		"type": "recette",
+		"lieu_categorie": "brosserie",
+		"objet_final": "Plumeau_d_augure",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Fut_de_brosse",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "plumes",
+				"quantite": 3
+			},
+			{
+				"sous_categorie": "poix",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:savonnerie_toilette_de_marchand",
+		"type": "recette",
+		"lieu_categorie": "savonnerie",
+		"objet_final": "Toilette_de_marchand",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:savon",
+				"quantite": 1
+			},
+			{
+				"item": "item:brosse",
+				"quantite": 1
+			},
+			{
+				"item": "item:Herbes_aromatiques",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:lutherie_viole_d_archet",
+		"type": "recette",
+		"lieu_categorie": "lutherie",
+		"objet_final": "Viole_d_archet",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Table_d_harmonie",
+				"quantite": 3
+			},
+			{
+				"item": "item:cordes_d_instrument",
+				"quantite": 5
+			},
+			{
+				"item": "item:Meche_d_archet",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "poix",
+				"quantite": 1
+			}
+		]
+	}
+]
