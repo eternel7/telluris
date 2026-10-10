@@ -1,9 +1,10 @@
-"""dev/gen_images_magasins.py — façades de boutique et d'auberge (Gemini, repli ComfyUI).
+"""dev/gen_images_magasins.py — portraits des tenanciers, façades de boutique et d'auberge
+(Gemini, repli ComfyUI).
 
 Partie pure seulement. Verrouille ce qui ferait passer le lot à vide ou le rendrait faux en
 silence : une catégorie ou un toponyme sans traduction (KeyError au milieu du lot, ou rue
 générique), un nom propre dans le prompt (peint en enseigne), une base d'image qui écraserait
-une image générique partagée.
+une image générique partagée, une façade soumise avant le portrait qu'elle joint.
 """
 
 import os
@@ -12,11 +13,10 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from dev.gen_images_magasins import (LIGNEES_EN, METIERS_EN, QUARTIERS_AUBERGES, QUARTIERS_EN, TRAITS_EN,
-	base_image, image_degeneree, prompt_auberge, prompt_magasin, quartier_de, requete_gemini,
-	traits_du_portrait)
-from dev.gen_portraits_batch import (AGES, ALLURES, CHEVEUX, CORPS, LIGNEES, METIERS, RATIO,
-	image_de_reponse, prompt_tenancier)
+from dev.gen_images_magasins import (AGES, ALLURES, CHEVEUX, CORPS, LIGNEES, LIGNEES_EN, METIERS,
+	METIERS_EN, QUARTIERS_AUBERGES, QUARTIERS_EN, RATIO, TRAITS_EN, base_image, entrees_de_cite,
+	image_de_reponse, image_degeneree, prompt_auberge, prompt_magasin, prompt_tenancier, quartier_de,
+	requete_gemini, requetes_faisables, tirage_tenancier, traits_en)
 from utils.enseignes import TOPONYMES_PAR_LIEU
 
 
@@ -40,21 +40,9 @@ def test_chaque_trait_tire_a_sa_traduction():
 			assert gabarit in TRAITS_EN, gabarit
 
 
-def test_traits_relus_dans_un_vrai_prompt_de_portrait():
-	for race in LIGNEES:
-		for sexe in ("M", "F"):
-			for graine in range(20):
-				rng = random.Random(graine)
-				prompt = prompt_tenancier(race, sexe, "fletcher", "Reims", random.Random(graine))
-				# Même tirage, même ordre que prompt_tenancier : âge, corps, cheveux, allure.
-				attendus = [TRAITS_EN[rng.choice(AGES)], TRAITS_EN[rng.choice(CORPS)],
-							TRAITS_EN[rng.choice(CHEVEUX)], TRAITS_EN[rng.choice(ALLURES)]]
-				assert traits_du_portrait(prompt) == attendus, (race, sexe, prompt)
-
-
 def test_portrait_au_style_et_aux_regles_des_facades():
 	# Consignes de l'auteur (09/10) : style d'Auxerre, foule variée, ogres jamais verts, pas de nom.
-	prompt = prompt_tenancier("ogre", "M", "boulangerie", "Reims", random.Random(0))
+	prompt = prompt_tenancier("ogre", "M", "boulangerie", "Reims", tirage_tenancier(random.Random(0)))
 	assert "pas une photographie" in prompt
 	assert "photoréaliste" not in prompt
 	assert "Telluris" not in prompt
@@ -63,9 +51,15 @@ def test_portrait_au_style_et_aux_regles_des_facades():
 	assert "Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation" in prompt
 
 
-def test_prompt_meconnaissable_sans_traits():
-	assert traits_du_portrait(None) == []
-	assert traits_du_portrait("Portrait fait à la main") == []
+def test_portrait_accorde_au_sexe():
+	tirage = ["âgé{e}", "bedonnant{e}", "aux cheveux gris", "l'air rusé"]
+	assert "Une naine âgée, bedonnante, aux cheveux gris, l'air rusé" in prompt_tenancier("nain", "F", "etable", "Chartres", tirage)
+	assert "Un nain âgé, bedonnant, aux cheveux gris, l'air rusé" in prompt_tenancier("nain", "M", "etable", "Chartres", tirage)
+
+
+def test_traits_inconnus_ignores():
+	assert traits_en(["jeune", "trait inventé"]) == ["young"]
+	assert traits_en(None) == []
 
 
 def test_aucun_nom_propre_dans_le_prompt():
@@ -143,3 +137,47 @@ def test_image_lue_dans_une_reponse_gemini():
 	assert image_de_reponse(rep) is part
 	assert image_de_reponse({"candidates": [{"finishReason": "SAFETY"}]}) is None
 	assert image_de_reponse(None) is None
+
+
+def _lieux():
+	return {
+		"lieu:la_lame_du_tertre": {"lieu_parent": "lieu:chartres", "categorie": "armurerie",
+			"label": "La Lame du Tertre", "image": "armurerie_europe01.jpg",
+			"pnj": [{"nom": "Gorm", "portrait": "marchand_humain_m_armurerie.png"}]},
+		"lieu:aux_deux_fleches": {"lieu_parent": "lieu:chartres", "categorie": "auberge",
+			"label": "Aux Deux Flèches", "image": "auberge_europe01.png"},
+		"lieu:portrait_fait_main": {"lieu_parent": "lieu:chartres", "categorie": "armurerie",
+			"label": "X", "image": "a.png", "pnj": [{"portrait": "Elise.jpg"}]},
+		"lieu:ailleurs": {"lieu_parent": "lieu:rhemi", "categorie": "auberge", "image": "a.png"},
+	}
+
+
+def test_entrees_portrait_et_facade_de_la_meme_personne():
+	entrees, ignores = entrees_de_cite(_lieux(), "lieu:chartres", "Chartres")
+	assert [e["key"] for e in entrees] == ["lieu:aux_deux_fleches", "lieu:la_lame_du_tertre"]
+	assert len(ignores) == 1 and "portrait_fait_main" in ignores[0]
+	auberge, boutique = entrees
+	assert auberge["portrait"] is None
+	assert auberge["image"]["base"] == "auberge_europe_chartres"
+	assert QUARTIERS_EN["lieu:chartres"]["du Cloître"] in auberge["image"]["prompt"]
+	assert boutique["portrait"]["base"] == "marchand_humain_m_armurerie"
+	assert boutique["image"]["base"] == "armurerie_europe_chartres"
+	# Les traits tirés pour le portrait sont ceux que la façade redit.
+	assert ", ".join(boutique["tirage"]).replace("{e}", "").replace("{he}", "") in boutique["portrait"]["prompt"]
+	assert ", ".join(traits_en(boutique["tirage"])) in boutique["image"]["prompt"]
+	assert "Gorm" not in boutique["portrait"]["prompt"] + boutique["image"]["prompt"]
+	# Graine propre au lieu : re-préparer, même avec une cité autrement peuplée, redonne le même tirage.
+	seul = {"lieu:la_lame_du_tertre": _lieux()["lieu:la_lame_du_tertre"]}
+	assert entrees_de_cite(seul, "lieu:chartres", "Chartres")[0][0]["tirage"] == boutique["tirage"]
+
+
+def test_facade_d_une_boutique_attend_son_portrait():
+	entrees, _ = entrees_de_cite(_lieux(), "lieu:chartres", "Chartres")
+	man = {"entrees": entrees, "portraits": {}, "images": {}}
+	assert [c for c, _, _ in requetes_faisables(man)] == [
+		"image|lieu:aux_deux_fleches", "portrait|lieu:la_lame_du_tertre"]
+	man["images"]["lieu:aux_deux_fleches"] = "auberge_europe_chartres01.jpg"
+	man["portraits"]["lieu:la_lame_du_tertre"] = "marchand_humain_m_armurerie01.jpg"
+	assert [c for c, _, _ in requetes_faisables(man)] == ["image|lieu:la_lame_du_tertre"]
+	man["images"]["lieu:la_lame_du_tertre"] = "armurerie_europe_chartres01.jpg"
+	assert requetes_faisables(man) == []

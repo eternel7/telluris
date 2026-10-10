@@ -1,36 +1,47 @@
 #!/usr/bin/env python
 # dev/gen_images_magasins.py
-# Façade de chaque boutique (et auberge) d'une cité. Gabarit : docs/prompts_images.md §1 bis.
-# Génération par GEMINI (défaut), le PORTRAIT du tenancier joint à la requête, avant le prompt
-# (« image 1 ») : c'est bien LE marchand de la boutique. Une auberge n'a pas de tenancier.
+# Images d'une cité, d'un seul tenant : PORTRAIT de chaque tenancier (§2), FAÇADE de chaque
+# boutique (§1 bis) et de chaque auberge. Gabarits : docs/prompts_images.md. API BATCH de Gemini
+# (−50 % du prix interactif, résultat sous 24 h).
 #
-#   python dev/gen_images_magasins.py preparer  [--cite lieu:rhemi] [--sauf lieu:x,lieu:y]
-#   python dev/gen_images_magasins.py essai     [--seulement …] [--limite N]  → interactif, essais/
-#   python dev/gen_images_magasins.py soumettre → lot batch Gemini (PAYANT, −50 %)
-#   python dev/gen_images_magasins.py etat | recuperer → images dans templates/resources/towns/
-#   python dev/gen_images_magasins.py appliquer → jsons/images_magasins_<cite>_a_importer.json
+#   python dev/gen_images_magasins.py preparer  --cite lieu:chartres [--sauf lieu:x,lieu:y]
+#   python dev/gen_images_magasins.py avancer   --cite …  → l'étape suivante, quelle qu'elle soit (PAYANT)
+#   python dev/gen_images_magasins.py essai     --cite … [--seulement …] [--limite N]  → interactif, essais/
+#   python dev/gen_images_magasins.py soumettre | etat | recuperer --cite …
+#   python dev/gen_images_magasins.py appliquer --cite … → jsons/images_magasins_<cite>_a_importer.json
 #
-# Repli local gratuit : `generer [--essai]` (ComfyUI + FLUX.2 Klein, magasins seulement).
-# `generer` exige le serveur ComfyUI lancé par C:\ComfyUI_windows_portable\run_telluris.bat :
-# `--bf16-text-enc` (l'encodeur Qwen3 déborde en fp16 → NaN, image de bruit),
-# `--fp32-vae`, `--disable-smart-memory` (tout déchargé après chaque image).
-# Tout l'état vit dans dev/batch/<cite>/magasins/manifeste.json, sauvé après CHAQUE image :
-# une interruption ne perd rien, le rejeu reprend où il s'était arrêté.
+# DEUX lots, enchaînés : la façade joint le portrait de SON tenancier, avant le prompt (« image 1 »),
+# il faut donc que ce portrait existe. Chaque soumission envoie tout ce qui est faisable À CE
+# MOMENT (`requetes_faisables`) : lot 1 = portraits + auberges (sans tenancier) ; `recuperer`
+# réécrit alors requetes.jsonl avec le lot 2 = façades des boutiques. `avancer`, rejoué jusqu'à
+# « terminé », soumet / suit / récupère / resoumet sans qu'on ait à savoir où on en est.
+# Une requête échouée ou une image rejetée repart dans le lot suivant.
 #
-# ⚠️ Prompt en ANGLAIS, en phrases (encodeur Qwen3) ; Z-Image Turbo n'a PAS de prompt négatif
-# (CFG 1) : les exclusions — aucun texte — s'écrivent dans le prompt lui-même.
-# ⚠️ Aucun NOM dans le prompt, ni boutique ni tenancier : le modèle le peint en enseigne.
-# ⚠️ Le modèle ne reprend pas un personnage d'une image : le tenancier est DÉCRIT par les traits
-# tirés pour son portrait (dev/batch/<cite>/manifeste.json), relus seulement si le portrait
-# en base est bien celui de ce manifeste.
-# ⚠️ Aucune image existante n'est écrasée : prochain `…NN` libre (`nom_libre`).
-# ⚠️ `appliquer` relit le dump le plus récent et ne change QUE `image` (import = PUT complet).
+# Repli local gratuit : `generer [--essai]` (ComfyUI + FLUX.2 Klein, façades seulement, une fois
+# les portraits récupérés). `generer` exige le serveur ComfyUI lancé par
+# C:\ComfyUI_windows_portable\run_telluris.bat : `--bf16-text-enc` (l'encodeur Qwen3 déborde en
+# fp16 → NaN, image de bruit), `--fp32-vae`, `--disable-smart-memory` (tout déchargé après chaque image).
+# Tout l'état vit dans dev/batch/<cite>/images/manifeste.json, sauvé après CHAQUE image : une
+# interruption ne perd rien, le rejeu reprend où il s'était arrêté. (Rhemi a été fait avant la
+# fusion : dev/batch/rhemi/manifeste.json + magasins/, archives d'un autre format.)
+#
+# ⚠️ Aucun NOM dans un prompt, ni boutique ni tenancier, ni « Telluris » : le modèle le peint en
+# enseigne ou en signature.
+# ⚠️ Le portrait montre le tenancier face à nous, qui vend ; la façade le montre AU TRAVAIL
+# (consigne de l'auteur, 09/10). Les traits tirés pour le portrait sont REDITS dans la façade.
+# ⚠️ Aucune image existante n'est écrasée : prochain `…NN` libre (`nom_libre`). Format natif du
+# modèle (Flash Lite → .jpg).
+# ⚠️ `appliquer` relit le dump le plus récent et ne change QUE `pnj[0].portrait` et `image`
+# (import = PUT complet, CLAUDE.md §11).
+# La clé GEMINI_API_KEY est lue dans l'environnement (ou le registre Windows), jamais affichée.
 
 import argparse
 import base64
+import glob
 import io
 import json
 import os
+import random
 import re
 import sys
 import time
@@ -39,30 +50,127 @@ import urllib.parse
 import urllib.request
 import zlib
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from dev.gen_portraits_batch import (AGES, ALLURES, API, CHEVEUX, CORPS, EUR_PAR_IMAGE_INTERACTIF,
-	METIERS, PORTRAIT_GENERIQUE, RATIO, REMISE_BATCH, _accord, _docs, _dump_le_plus_recent, _http,
-	afficher_etat, image_de_reponse, nom_libre, reponses_lot, soumettre_lot)
-from dev.gen_portraits_batch import MODELE as MODELE_GEMINI
-
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DOSSIER_TOWNS = os.path.join(RACINE, "templates", "resources", "towns")
-
-COMFY = "http://127.0.0.1:8188"
 DOSSIER_PNJ = os.path.join(RACINE, "templates", "resources", "pnj")
-# FLUX.2 Klein 4B distillé, graphe du modèle officiel ComfyUI `image_flux2_klein_image_edit_4b_
-# distilled` : le PORTRAIT du tenancier part en image de référence (`ReferenceLatent`), pour que
-# ce soit bien LE marchand de la boutique. Écartés : DreamShaper XL (08/10, lignées ignorées,
-# foule absente) et Z-Image Turbo (09/10, bon rendu mais sans image de référence possible).
-# Poids fp8 (~4 Go) : l'iGPU plafonne à 14,4 Go et annonce 0 Go libre dès qu'on en tient ~10
-# (`torch.cuda.mem_get_info`, mesuré le 08/10).
-MODELE = "flux-2-klein-4b-fp8.safetensors"
-ENCODEUR = "qwen_3_4b_fp8_mixed.safetensors"
-VAE = "flux2-vae.safetensors"
-# 16:9, la taille des images de `towns/`.
-LARGEUR, HAUTEUR = 1408, 768
-PAS, CFG, SAMPLER = 4, 1.0, "euler"
+DOSSIER_TOWNS = os.path.join(RACINE, "templates", "resources", "towns")
+API = "https://generativelanguage.googleapis.com"
+MODELE_GEMINI = "gemini-3.1-flash-lite-image"
+RATIO = "16:9"
+
+# Coût réellement observé le 08/10/2026 : 0,16 € pour 4 portraits interactifs → ~0,04 €
+# l'image ; le batch en coûte la moitié.
+EUR_PAR_IMAGE_INTERACTIF = 0.04
+REMISE_BATCH = 0.5
+
+PORTRAIT_GENERIQUE = re.compile(r"^marchand_(elfe|hobbit|humaine?|nain|ogre)_([mf])_")
+
+# Cités dont le doc `lieu:*` n'a pas de label.
+NOMS_CITES = {"lieu:rhemi": "Reims"}
+
+
+# ══ Portrait du tenancier (§2, en français) ═══════════════════════════════════════
+
+# Lignée : repère reconnaissable, jamais une règle de corps (docs/prompts_images.md §2).
+LIGNEES = {
+	"nain": ("Une naine", "Un nain",
+			 "nettement plus petit{e} qu'un humain — un humain se tient au même plan, et {il} lui arrive à peine à la taille —, tête et mains grandes pour sa taille"),
+	"hobbit": ("Une hobbit", "Un hobbit",
+			   "de toute petite taille d'adulte, pieds nus — un humain au même plan le{a} dépasse de deux têtes"),
+	"elfe": ("Une elfe", "Un elfe", "aux oreilles longues et pointues"),
+	# Jamais vert (consigne de l'auteur, 09/10).
+	"ogre": ("Une ogresse", "Un ogre",
+			 "bien plus grand{e} et massi{ve} qu'un humain, peau épaisse au teint humain, jamais verte — un humain au même plan lui arrive à la poitrine"),
+	"humain": ("Une humaine", "Un humain", ""),
+}
+AGES = ["jeune", "dans la force de l'âge", "d'âge mûr", "âgé{e}", "très âgé{e}"]
+CORPS = ["maigre", "sec{he}", "de corpulence ordinaire", "solide", "fort{e}", "bedonnant{e}", "voûté{e}"]
+ALLURES = ["le regard vif", "l'air bourru", "le sourire facile", "l'œil méfiant", "l'air las mais aimable",
+		   "le regard franc", "l'air rusé"]
+CHEVEUX = ["aux cheveux noirs", "aux cheveux châtains", "aux cheveux roux", "aux cheveux blonds",
+		   "aux cheveux gris", "aux cheveux blancs", "au crâne rasé", "aux cheveux tressés"]
+
+# Métier : (qui il est, objet présenté, tenue, décor). Une ligne par catégorie de base.
+METIERS = {
+	"apothicairerie": ("tient une apothicairerie", "un petit flacon de remède ambré", "longue blouse tachée d'herbes, sacoche de simples", "étagères de bocaux, bouquets d'herbes séchées, mortier et pilon"),
+	"armurerie": ("tient une armurerie", "une épée fraîchement forgée", "tablier de cuir roussi, avant-bras nus couverts de suie", "enclume, forge rougeoyante, râteliers d'armes et de cottes de mailles"),
+	"atelier_d_artisan": ("tient un atelier d'artisan", "un coffret de bois sculpté", "tablier de travail plein de copeaux", "établi, outils de menuisier, objets ouvragés en exposition"),
+	"atelier_de_cirier": ("tient un atelier de cirier", "un grand cierge de cire blonde", "tablier constellé de gouttes de cire", "cuves de cire, grappes de chandelles suspendues, rayons de miel"),
+	"atelier_de_l_empenneur": ("tient un atelier d'empenneur", "une flèche finement empennée", "tablier, plumes piquées au col", "faisceaux de flèches, bottes de plumes, fûts de bois droits"),
+	"bijouterie": ("tient une bijouterie", "une bague sertie d'une pierre", "vêtements fins, loupe de bijoutier au cou", "comptoir garni d'écrins, balance de précision, petits bijoux"),
+	"boucherie": ("tient une boucherie", "un beau quartier de viande", "tablier taché, couperet à la ceinture", "crochets de viandes suspendues, billot de bois, étal"),
+	"boulangerie": ("tient une boulangerie", "une miche de pain doré", "tablier enfariné, manches retroussées", "four à pain, corbeilles de pains et de brioches"),
+	"bourrellerie": ("tient une bourrellerie", "un collier de cheval en cuir", "tablier de cuir, alêne à la ceinture", "harnais, selles et sangles pendus aux murs"),
+	"boyauderie": ("tient une boyauderie", "un écheveau de corde de boyau", "tablier de cuir humide", "bacs de trempage, cordes de boyau qui sèchent sur des perches"),
+	"brosserie": ("tient une brosserie", "une brosse à poils de sanglier", "tablier de toile", "brosses, balais et pinceaux de toutes tailles"),
+	"corderie": ("tient une corderie", "un rouleau de corde de chanvre", "vêtements de toile, mains calleuses", "rouet de cordier, rouleaux de cordages"),
+	"cordonnerie": ("tient une cordonnerie", "une paire de bottes neuves", "tablier de cuir, marteau de cordonnier", "formes à chaussures, établi, bottes alignées"),
+	"cuisine": ("tient une cuisine", "un bol de ragoût fumant", "tablier noué, torchon sur l'épaule", "marmites sur le feu, broche, tables de voyageurs"),
+	"etable": ("tient une étable", "un licol de cuir neuf aux boucles de laiton", "tablier de cuir, manches retroussées, brins de paille", "stalles de bois, bottes de foin, une mule et un poney"),
+	"fletcher": ("tient une archerie", "un arc long de bois d'if", "brassard de cuir, carquois à l'épaule", "arcs suspendus, flèches en faisceaux, cibles de paille"),
+	"fumoir": ("tient un fumoir", "un jambon fumé", "tablier noirci par la fumée", "viandes et poissons pendus dans la fumée, foyer couvant"),
+	"jardinier": ("tient une jardinerie", "un panier de légumes frais", "chapeau de paille, tablier de toile terreux", "pots de plantes, semis, outils de jardin"),
+	"laboratoire_d_alchimie": ("tient un laboratoire d'alchimie", "une fiole au liquide luminescent", "robe tachée, lunettes de protection relevées sur le front", "alambics, cornues, grimoires ouverts"),
+	"lutherie": ("tient une lutherie", "un luth au bois verni", "tablier de luthier, copeaux fins", "instruments suspendus, gabarits, pots de vernis"),
+	"maroquinerie": ("tient une maroquinerie", "une sacoche de cuir ouvragé", "tablier de cuir, aiguilles à la ceinture", "bourses, ceintures, sacoches en exposition"),
+	"necromancie": ("tient une boutique de nécromancie", "un crâne gravé de runes", "robe sombre, amulettes d'os", "ossements, bougies noires, bocaux troubles, grimoires"),
+	"negociant": ("tient une maison de négoce", "une bourse pleine et une balance", "vêtements de marchand aisé, chaîne au cou", "coffres, ballots de marchandises, registres de comptes"),
+	"plumasserie": ("tient une plumasserie", "un éventail de plumes chatoyantes", "vêtements soignés, plume au chapeau", "plumes multicolores en bouquets, chapeaux ornés"),
+	"salaison": ("tient une salaison", "un saucisson sec", "tablier, mains rougies par le sel", "tonneaux de sel, jambons et saucissons pendus"),
+	"savonnerie": ("tient une savonnerie", "un pain de savon parfumé", "tablier clair, manches retroussées", "pains de savon empilés, chaudron, fioles de parfum"),
+	"scriptorium": ("tient un scriptorium", "un livre relié de cuir", "robe de scribe, doigts tachés d'encre", "pupitres, encriers, parchemins, piles de livres"),
+	"tabletterie": ("tient une tabletterie", "un jeu d'échecs en os et ivoire", "tablier fin, loupe", "petits objets d'os et d'ivoire, peignes, dés, boîtes"),
+	"tannerie": ("tient une tannerie", "une peau tannée souple", "tablier de cuir épais, bottes hautes", "peaux tendues sur des cadres, cuves de tan"),
+	"taxidermie": ("tient un cabinet de taxidermie", "un renard naturalisé", "blouse de travail, outils fins", "animaux naturalisés, têtes de cerfs, bocaux de spécimens"),
+	"tissage": ("tient un atelier de tissage", "une étoffe richement tissée", "vêtements de toile fine", "métier à tisser, rouleaux d'étoffes colorées"),
+}
+
+# Style d'Auxerre (§0.1), préféré par l'auteur au photoréaliste du lot de Rhemi (09/10) : même
+# rendu que les façades, où ce portrait part en référence.
+STYLE_FR = ("Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de "
+			"gamme : peinture numérique détaillée, lumière naturelle chaude, palette chaude et terreuse "
+			"relevée de touches de couleurs vives, proportions crédibles ; pas une photographie. Image "
+			"entièrement dépourvue d'écriture : aucun nom, aucune lettre, aucune signature, aucun "
+			"monogramme, aucun filigrane, aucune enseigne lisible.")
+# §0.2 (phrase de l'auteur, telle quelle) + la variété de la foule d'Auxerre : sans elle, des
+# figurants identiques (lot de Rhemi, 09/10). Ogres jamais verts.
+FOULE_FR = ("Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, "
+			"chacun différent par l'âge, la carrure, les cheveux et la tenue : elfes bruns, roux, noirs, "
+			"argentés ou blonds, en robe, cape de voyage ou cuir ; nains barbus ou tressés, en armure, "
+			"tablier ou habit de marchand ; hobbits ronds ou fluets, jeunes ou ridés, en gilets colorés ; "
+			"ogres aux teints humains, burinés, rougeauds ou hâlés, jamais verts ; humains de toutes "
+			"origines, aventuriers, gardes, marchands, pèlerins.")
+
+
+def _accord(texte, f):
+	return (texte.replace("{e}", "e" if f else "").replace("{he}", "he" if f else "")
+			.replace("{ve}", "ve" if f else "f").replace("{il}", "elle" if f else "il")
+			.replace("{a}", "a" if f else ""))
+
+
+def tirage_tenancier(rng):
+	"""PURE. Traits d'un tenancier, gabarits français NON accordés : [âge, corps, cheveux, allure].
+	Servent au portrait ET, traduits (`traits_en`), à la façade — c'est la même personne."""
+	return [rng.choice(AGES), rng.choice(CORPS), rng.choice(CHEVEUX), rng.choice(ALLURES)]
+
+
+def prompt_tenancier(race, sexe, categorie, cite_nom, tirage):
+	"""PURE. Prompt du gabarit §2 pour un tenancier (aucun nom propre)."""
+	f = sexe == "F"
+	une_f, un_m, marqueur = LIGNEES.get(race, LIGNEES["humain"])
+	qui, objet, tenue, decor = METIERS[categorie]
+	corps = ", ".join(_accord(t, f) for t in tirage)
+	il = "Elle" if f else "Il"
+	sujet = f"{une_f if f else un_m} {corps}" + (f", {_accord(marqueur, f)}" if marqueur else "")
+	return (f"Portrait illustré d'un personnage de fantasy médiévale, format paysage large. "
+			# Pas de « Telluris » : le mot finissait peint en enseigne (essai des façades, 08/10).
+			f"{sujet}. {il} {qui} à {cite_nom}, dans un monde médiéval fantastique. "
+			f"{il} se tient légèrement décalé{'e' if f else ''} du centre et regarde droit vers le spectateur "
+			f"avec l'assurance d'un{'e' if f else ''} commerçant{'e' if f else ''} ; {il.lower()} lui présente {objet}. "
+			f"Tenue de travail usée et crédible : {tenue}. Décor de part et d'autre : {decor}. "
+			f"{FOULE_FR} {STYLE_FR}")
+
+
+# ══ Façade de boutique ou d'auberge (§1 bis, en anglais) ═══════════════════════════
 
 # Métier : (boutique, marchandises exposées). Mêmes catégories que `METIERS` (verrouillé par test).
 METIERS_EN = {
@@ -139,7 +247,7 @@ LIGNEES_EN = {
 	"humain": ("a human man", "a human woman", ""),
 }
 
-# Traits du portrait (gabarits de `gen_portraits_batch`, accordés aux deux sexes à la lecture).
+# Traduction des gabarits de `tirage_tenancier` (NON accordés : la façade est en anglais).
 TRAITS_EN = {
 	"jeune": "young",
 	"dans la force de l'âge": "in the prime of life",
@@ -169,7 +277,6 @@ TRAITS_EN = {
 	"le regard franc": "frank gaze",
 	"l'air rusé": "cunning look",
 }
-_TRAITS_ACCORDES = {_accord(fr, f): en for fr, en in TRAITS_EN.items() for f in (False, True)}
 
 # §0.2 et §0.1 traduits ; la consigne « aucun texte » DOIT être ici (pas de prompt négatif).
 # Chaque lignée avec un trait VISIBLE : la phrase nue ne donnait que des humains.
@@ -197,20 +304,20 @@ STYLE = ("Detailed semi-realistic medieval fantasy illustration in the style of 
 		 "No text anywhere in the image: no letters, no inscription, no readable sign, no lettering on "
 		 "banners or awnings, no logo, no signature, no watermark.")
 
+# Auberges dont l'enseigne ne finit pas par un toponyme (`quartier_de` lit les autres).
+QUARTIERS_AUBERGES = {
+	"lieu:au_bon_vigneron": "des Coteaux",
+	"lieu:la_crayere": "des Crayères",
+	"lieu:aux_deux_fleches": "du Cloître",
+	"lieu:le_relais_de_l_eure": "de l'Eure",
+	"lieu:au_grenier_de_beauce": "de la Porte Guillaume",
+	"lieu:la_halte_des_pelerins": "de la Basse-Ville",
+}
 
-# ── Partie pure ─────────────────────────────────────────────────────────────────
 
-def traits_du_portrait(prompt_fr):
-	"""PURE. Traits anglais relus dans un prompt de portrait (`gen_portraits_batch.prompt_tenancier`) :
-	sa 2e phrase est « {Un nain} {âge}, {corps}, {cheveux}, {allure}[, repère] ». Un trait inconnu
-	est ignoré ; un prompt méconnaissable (portrait fait à la main) rend []."""
-	phrases = (prompt_fr or "").split(". ")
-	if len(phrases) < 2:
-		return []
-	sujet = phrases[1].split(" ", 2)
-	if len(sujet) < 3:
-		return []
-	return [_TRAITS_ACCORDES[p] for p in sujet[2].split(", ") if p in _TRAITS_ACCORDES]
+def traits_en(tirage):
+	"""PURE. Les traits du portrait, en anglais, pour la façade (inconnus ignorés)."""
+	return [TRAITS_EN[t] for t in tirage or [] if t in TRAITS_EN]
 
 
 def quartier_de(label, cite):
@@ -230,7 +337,6 @@ def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label):
 	t = quartier_de(label, cite)
 	lieu = QUARTIERS_EN[cite][t] if t else f"in a street of the walled city of {cite_nom}"
 	tenancier = ", ".join([homme if sexe == "M" else femme] + list(traits) + ([repere] if repere else []))
-	# Pas de « Telluris » : comme un nom de boutique, le mot finissait peint en enseigne (08/10).
 	# Le portrait le montre face à nous, souriant, qui vend ; la boutique le montre AU TRAVAIL :
 	# lot du 09/10, la pose du portrait était recopiée (consigne de l'auteur).
 	return (f"The person shown in image 1 is the shopkeeper: keep exactly the same face, hair, beard, "
@@ -241,17 +347,6 @@ def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label):
 			f"anything to the viewer. The shop fills about 80% of "
 			f"the image, seen from the street in a three-quarter view; its goods are displayed on racks "
 			f"and tables and are immediately recognizable: {marchandises}. {FOULE} {STYLE}")
-
-
-# Auberges dont l'enseigne ne finit pas par un toponyme (`quartier_de` lit les autres).
-QUARTIERS_AUBERGES = {
-	"lieu:au_bon_vigneron": "des Coteaux",
-	"lieu:la_crayere": "des Crayères",
-	"lieu:aux_deux_fleches": "du Cloître",
-	"lieu:le_relais_de_l_eure": "de l'Eure",
-	"lieu:au_grenier_de_beauce": "de la Porte Guillaume",
-	"lieu:la_halte_des_pelerins": "de la Basse-Ville",
-}
 
 
 def prompt_auberge(cite, cite_nom, quartier):
@@ -267,11 +362,65 @@ def prompt_auberge(cite, cite_nom, quartier):
 			f"barrels and benches outside the door, a stable yard to one side. {FOULE} {STYLE}")
 
 
+# ══ Lot ═══════════════════════════════════════════════════════════════════════════
+
 def requete_gemini(prompt, image_b64=None, mime="image/jpeg"):
 	"""PURE. Corps `generateContent` : l'image jointe AVANT le texte (c'est l'« image 1 » du prompt)."""
 	parts = ([{"inlineData": {"mimeType": mime, "data": image_b64}}] if image_b64 else []) + [{"text": prompt}]
 	return {"contents": [{"parts": parts}],
 			"generationConfig": {"responseModalities": ["IMAGE"], "imageConfig": {"aspectRatio": RATIO}}}
+
+
+def entrees_de_cite(lieux, cite, cite_nom, sauf=()):
+	"""PURE. (entrées du manifeste, lieux ignorés) pour les boutiques et auberges de `cite`.
+	Lignée et sexe lus sur le portrait générique actuel ; traits tirés par une graine propre au
+	lieu (re-préparer redonne les mêmes, quel que soit le contenu de la cité)."""
+	entrees, ignores = [], []
+	for lid, lieu in sorted(lieux.items()):
+		if lieu.get("lieu_parent") != cite or lid in sauf:
+			continue
+		cat, label = lieu.get("categorie"), lieu.get("label")
+		if cat == "auberge" and lieu.get("image"):
+			q = QUARTIERS_AUBERGES.get(lid) or quartier_de(label, cite)
+			entrees.append({"key": lid, "categorie": cat, "quartier": q, "portrait": None,
+							"image": {"base": base_image(lieu["image"], cite), "prompt": prompt_auberge(cite, cite_nom, q)}})
+			continue
+		pnj = (lieu.get("pnj") or [{}])[0]
+		m = PORTRAIT_GENERIQUE.match(str(pnj.get("portrait") or ""))
+		if not m or cat not in METIERS or not lieu.get("image"):
+			ignores.append(f"{lid} ({cat}, portrait {pnj.get('portrait') or '—'}, image {lieu.get('image') or '—'})")
+			continue
+		race = "humain" if m.group(1) == "humaine" else m.group(1)
+		sexe = m.group(2).upper()
+		tirage = tirage_tenancier(random.Random(zlib.crc32(lid.encode())))
+		entrees.append({
+			"key": lid, "categorie": cat, "race": race, "sexe": sexe, "tenancier": pnj.get("nom"),
+			"quartier": quartier_de(label, cite), "tirage": tirage,
+			"portrait": {"base": f"marchand_{race}_{sexe.lower()}_{cat}",
+						 "prompt": prompt_tenancier(race, sexe, cat, cite_nom, tirage)},
+			"image": {"base": base_image(lieu["image"], cite),
+					  "prompt": prompt_magasin(cat, race, sexe, traits_en(tirage), cite, cite_nom, label)},
+		})
+	return entrees, ignores
+
+
+def requetes_faisables(man):
+	"""PURE. [(clé du lot, entrée, genre)] de ce qui peut partir MAINTENANT : un portrait
+	manquant ; une façade manquante dont le portrait existe (ou qui n'en a pas : auberge)."""
+	sortie = []
+	for e in man["entrees"]:
+		k = e["key"]
+		if e.get("portrait") and k not in man["portraits"]:
+			sortie.append((f"portrait|{k}", e, "portrait"))
+		if k not in man["images"] and (not e.get("portrait") or k in man["portraits"]):
+			sortie.append((f"image|{k}", e, "image"))
+	return sortie
+
+
+def image_de_reponse(reponse):
+	"""PURE. La première partie `inlineData` d'une réponse `generateContent`, ou None."""
+	return next((p for c in (reponse or {}).get("candidates", [])
+				 for p in (c.get("content") or {}).get("parts", []) if "inlineData" in p), None)
 
 
 # Image ratée par le GPU (NaN dans le sampler) : gris uniforme ou bruit pur. Étalonné le 08/10 :
@@ -296,16 +445,71 @@ def base_image(image, cite):
 	return f"{tige}_{cite.split(':', 1)[-1]}"
 
 
+def nom_libre(dossier, base, ext, pris=()):
+	"""Prochain `base01.ext`, `base02.ext`… dont le NOM SANS EXTENSION est absent du disque ET
+	de `pris` : `…01.png` existant interdit aussi `…01.jpg` (jamais d'écrasement, jamais deux
+	fichiers au même nom)."""
+	tiges = {os.path.splitext(f)[0] for f in os.listdir(dossier)} | {os.path.splitext(p)[0] for p in pris}
+	n = 1
+	while f"{base}{n:02d}" in tiges:
+		n += 1
+	return f"{base}{n:02d}{ext}"
+
+
 # ── E/S ─────────────────────────────────────────────────────────────────────────
 
 def _slug(cite):
 	return cite.split(":", 1)[-1]
 
 
-def _chemin_manifeste(cite):
-	d = os.path.join(RACINE, "dev", "batch", _slug(cite), "magasins")
+def _dump_le_plus_recent():
+	dumps = sorted(glob.glob(os.path.join(RACINE, "jsons", "telluris-dump-*.json")))
+	if not dumps:
+		raise SystemExit("ERREUR : aucun jsons/telluris-dump-*.json.")
+	return dumps[-1]
+
+
+def _docs(chemin):
+	with open(chemin, encoding="utf-8") as f:
+		d = json.load(f)
+	return d["docs"] if isinstance(d, dict) and "docs" in d else d
+
+
+def _cle():
+	k = os.environ.get("GEMINI_API_KEY")
+	if not k and sys.platform == "win32":
+		import winreg
+		with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as h:
+			k = winreg.QueryValueEx(h, "GEMINI_API_KEY")[0]
+	if not k:
+		raise SystemExit("ERREUR : GEMINI_API_KEY absente.")
+	return k
+
+
+def _http(url, corps=None, entetes=None, methode=None, brut=False):
+	donnees = corps if isinstance(corps, (bytes, type(None))) else json.dumps(corps).encode()
+	h = {"x-goog-api-key": _cle(), **({"Content-Type": "application/json"} if donnees and not brut else {}),
+		 **(entetes or {})}
+	req = urllib.request.Request(url, data=donnees, headers=h, method=methode or ("POST" if donnees else "GET"))
+	try:
+		with urllib.request.urlopen(req, timeout=300) as r:
+			return r.headers, r.read()
+	except urllib.error.HTTPError as e:
+		raise SystemExit(f"HTTP {e.code} : {e.read().decode('utf-8', 'replace')[:800]}")
+
+
+def _dossier(cite):
+	d = os.path.join(RACINE, "dev", "batch", _slug(cite), "images")
 	os.makedirs(d, exist_ok=True)
-	return os.path.join(d, "manifeste.json")
+	return d
+
+
+def _chemin_manifeste(cite):
+	return os.path.join(_dossier(cite), "manifeste.json")
+
+
+def _chemin_requetes(cite):
+	return os.path.join(_dossier(cite), "requetes.jsonl")
 
 
 def _manifeste(cite, nouveau=None):
@@ -320,22 +524,11 @@ def _manifeste(cite, nouveau=None):
 		return json.load(f)
 
 
-def _portraits(cite):
-	"""Manifeste des portraits (gen_portraits_batch) : {lieu: (image, prompt)}."""
-	chemin = os.path.join(RACINE, "dev", "batch", _slug(cite), "manifeste.json")
-	if not os.path.exists(chemin):
-		return {}
-	with open(chemin, encoding="utf-8") as f:
-		man = json.load(f)
-	prompts = {e["key"]: e.get("prompt") for e in man.get("entrees", [])}
-	return {k: (img, prompts.get(k)) for k, img in (man.get("images") or {}).items()}
-
-
-def _portrait_b64(nom):
+def _portrait_b64(chemin):
 	"""Portrait du tenancier ramené à ~1 Mpx en JPEG puis base64 : bruts, les 62 portraits
 	(~1,2 Mo chacun) gonflaient le JSONL du lot sans rien apporter à la référence."""
 	from PIL import Image
-	im = Image.open(os.path.join(DOSSIER_PNJ, nom)).convert("RGB")
+	im = Image.open(chemin).convert("RGB")
 	r = (1_000_000 / (im.width * im.height)) ** 0.5
 	if r < 1:
 		im = im.resize((round(im.width * r), round(im.height * r)), Image.LANCZOS)
@@ -344,12 +537,44 @@ def _portrait_b64(nom):
 	return base64.b64encode(tampon.getvalue()).decode("ascii")
 
 
-def _requete(e):
-	return requete_gemini(e["prompt"], _portrait_b64(e["portrait"]) if e.get("portrait") else None)
+def _requete(e, genre, chemin_portrait=None):
+	"""Corps de la requête : le portrait seul, ou la façade qui joint `chemin_portrait` (auberge : rien)."""
+	if genre == "portrait":
+		return requete_gemini(e["portrait"]["prompt"])
+	return requete_gemini(e["image"]["prompt"], _portrait_b64(chemin_portrait) if chemin_portrait else None)
 
 
-def _chemin_requetes(cite):
-	return os.path.join(os.path.dirname(_chemin_manifeste(cite)), "requetes.jsonl")
+def _ecrire_requetes(cite, man):
+	"""Réécrit requetes.jsonl avec ce qui peut partir maintenant ; rend le nombre de requêtes."""
+	faisables = requetes_faisables(man)
+	with open(_chemin_requetes(cite), "w", encoding="utf-8") as f:
+		for cle, e, genre in faisables:
+			nom = man["portraits"].get(e["key"]) if genre == "image" else None
+			requete = _requete(e, genre, os.path.join(DOSSIER_PNJ, nom) if nom else None)
+			f.write(json.dumps({"key": cle, "request": requete}, ensure_ascii=False) + "\n")
+	return len(faisables)
+
+
+def _resume_lot(cite, man):
+	faisables = requetes_faisables(man)
+	n_p = sum(1 for _, _, g in faisables if g == "portrait")
+	n_i = len(faisables) - n_p
+	attente = sum(1 for e in man["entrees"] if e.get("portrait") and e["key"] not in man["portraits"])
+	unit = EUR_PAR_IMAGE_INTERACTIF * REMISE_BATCH
+	print(f"Prochain lot : {n_p} portrait(s) + {n_i} façade(s) → {os.path.relpath(_chemin_requetes(cite), RACINE)}"
+		  f" ; ≈ {len(faisables) * unit:.2f} €")
+	if attente:
+		print(f"  puis {attente} façade(s) de boutique, au lot suivant (≈ {attente * unit:.2f} €) :"
+			  " elles joignent le portrait de leur tenancier.")
+
+
+def _mesures(octets):
+	"""(écart-type, écart moyen entre voisins horizontaux) de l'image en niveaux de gris."""
+	from PIL import Image, ImageChops, ImageStat
+	g = Image.open(io.BytesIO(octets)).convert("L")
+	w, h = g.size
+	voisins = ImageChops.difference(g.crop((0, 0, w - 1, h)), g.crop((1, 0, w, h)))
+	return ImageStat.Stat(g).stddev[0], ImageStat.Stat(voisins).mean[0]
 
 
 def _ecrire_image(dossier, base, part, pris):
@@ -365,21 +590,72 @@ def _ecrire_image(dossier, base, part, pris):
 	return nom, None
 
 
+def soumettre_lot(chemin_jsonl, modele, nom_affiche):
+	"""Envoie un fichier de requêtes JSONL à l'API batch (PAYANT) ; rend le nom du lot."""
+	octets = open(chemin_jsonl, "rb").read()
+	h, _ = _http(f"{API}/upload/v1beta/files", {"file": {"display_name": nom_affiche}}, {
+		"X-Goog-Upload-Protocol": "resumable", "X-Goog-Upload-Command": "start",
+		"X-Goog-Upload-Header-Content-Length": str(len(octets)),
+		"X-Goog-Upload-Header-Content-Type": "application/jsonl"})
+	_, rep = _http(h["x-goog-upload-url"], octets, {"X-Goog-Upload-Offset": "0",
+												   "X-Goog-Upload-Command": "upload, finalize"}, brut=True)
+	fichier = json.loads(rep)["file"]["name"]
+	_, rep = _http(f"{API}/v1beta/models/{modele}:batchGenerateContent",
+				   {"batch": {"display_name": nom_affiche, "input_config": {"file_name": fichier}}})
+	return json.loads(rep)["name"]
+
+
+def statut_lot(lot):
+	_, rep = _http(f"{API}/v1beta/{lot}")
+	return json.loads(rep)
+
+
+# L'API répond `BATCH_STATE_*` (constaté le 08/10/2026) ; la doc écrit `JOB_STATE_*`.
+ETATS_REUSSIS = ("BATCH_STATE_SUCCEEDED", "JOB_STATE_SUCCEEDED")
+ETATS_ECHOUES = ("BATCH_STATE_FAILED", "BATCH_STATE_CANCELLED", "BATCH_STATE_EXPIRED",
+				 "JOB_STATE_FAILED", "JOB_STATE_CANCELLED", "JOB_STATE_EXPIRED")
+
+
+def reponses_lot(lot):
+	"""[(clé, partie inlineData | None, ligne brute)] d'un lot terminé ; SystemExit sinon."""
+	s = statut_lot(lot)
+	meta = s.get("metadata") or {}
+	if meta.get("state") not in ETATS_REUSSIS and not s.get("done"):
+		raise SystemExit(f"Lot pas terminé : {meta.get('state')}")
+	rep = (s.get("response") or {}).get("responsesFile") or ((meta.get("output") or {}).get("responsesFile"))
+	if not rep:
+		raise SystemExit("Aucun fichier de réponses : " + json.dumps(s)[:600])
+	_, brut = _http(f"{API}/download/v1beta/{rep}:download?alt=media")
+	sortie = []
+	for ligne in brut.decode("utf-8").splitlines():
+		if ligne.strip():
+			r = json.loads(ligne)
+			sortie.append((r.get("key"), image_de_reponse(r.get("response")), r))
+	return sortie
+
+
+# ── ComfyUI (repli local, façades seulement) ────────────────────────────────────
+
+COMFY = "http://127.0.0.1:8188"
+# FLUX.2 Klein 4B distillé, graphe du modèle officiel ComfyUI `image_flux2_klein_image_edit_4b_
+# distilled` : le PORTRAIT du tenancier part en image de référence (`ReferenceLatent`), pour que
+# ce soit bien LE marchand de la boutique. Écartés : DreamShaper XL (08/10, lignées ignorées,
+# foule absente) et Z-Image Turbo (09/10, bon rendu mais sans image de référence possible).
+# Poids fp8 (~4 Go) : l'iGPU plafonne à 14,4 Go et annonce 0 Go libre dès qu'on en tient ~10
+# (`torch.cuda.mem_get_info`, mesuré le 08/10).
+MODELE_COMFY = "flux-2-klein-4b-fp8.safetensors"
+ENCODEUR = "qwen_3_4b_fp8_mixed.safetensors"
+VAE = "flux2-vae.safetensors"
+# 16:9, la taille des images de `towns/`.
+LARGEUR, HAUTEUR = 1408, 768
+PAS, CFG, SAMPLER = 4, 1.0, "euler"
+
+
 def _comfy(chemin, corps=None):
 	req = urllib.request.Request(COMFY + chemin, data=json.dumps(corps).encode() if corps is not None else None,
 								 headers={"Content-Type": "application/json"} if corps is not None else {})
 	with urllib.request.urlopen(req, timeout=30) as r:
 		return r.read()
-
-
-def _mesures(png):
-	"""(écart-type, écart moyen entre voisins horizontaux) de l'image en niveaux de gris."""
-	import io
-	from PIL import Image, ImageChops, ImageStat
-	g = Image.open(io.BytesIO(png)).convert("L")
-	w, h = g.size
-	voisins = ImageChops.difference(g.crop((0, 0, w - 1, h)), g.crop((1, 0, w, h)))
-	return ImageStat.Stat(g).stddev[0], ImageStat.Stat(voisins).mean[0]
 
 
 def _liberer():
@@ -403,23 +679,23 @@ def _envoyer_portrait(nom):
 		return json.loads(r.read())["name"]
 
 
-def _workflow(e, portrait):
+def _workflow(prompt, graine, portrait):
 	return {
-		"1": {"class_type": "UNETLoader", "inputs": {"unet_name": MODELE, "weight_dtype": "default"}},
+		"1": {"class_type": "UNETLoader", "inputs": {"unet_name": MODELE_COMFY, "weight_dtype": "default"}},
 		"2": {"class_type": "CLIPLoader", "inputs": {"clip_name": ENCODEUR, "type": "flux2", "device": "default"}},
 		"3": {"class_type": "VAELoader", "inputs": {"vae_name": VAE}},
 		"4": {"class_type": "LoadImage", "inputs": {"image": portrait}},
 		"5": {"class_type": "ImageScaleToTotalPixels", "inputs": {"image": ["4", 0], "upscale_method": "nearest-exact",
 			"megapixels": 1.0, "resolution_steps": 1}},
 		"6": {"class_type": "VAEEncode", "inputs": {"pixels": ["5", 0], "vae": ["3", 0]}},
-		"7": {"class_type": "CLIPTextEncode", "inputs": {"text": e["prompt"], "clip": ["2", 0]}},
+		"7": {"class_type": "CLIPTextEncode", "inputs": {"text": prompt, "clip": ["2", 0]}},
 		"8": {"class_type": "ConditioningZeroOut", "inputs": {"conditioning": ["7", 0]}},
 		"9": {"class_type": "ReferenceLatent", "inputs": {"conditioning": ["7", 0], "latent": ["6", 0]}},
 		"10": {"class_type": "ReferenceLatent", "inputs": {"conditioning": ["8", 0], "latent": ["6", 0]}},
 		"11": {"class_type": "CFGGuider", "inputs": {"model": ["1", 0], "positive": ["9", 0], "negative": ["10", 0], "cfg": CFG}},
 		"12": {"class_type": "KSamplerSelect", "inputs": {"sampler_name": SAMPLER}},
 		"13": {"class_type": "Flux2Scheduler", "inputs": {"steps": PAS, "width": LARGEUR, "height": HAUTEUR}},
-		"14": {"class_type": "RandomNoise", "inputs": {"noise_seed": e["graine"]}},
+		"14": {"class_type": "RandomNoise", "inputs": {"noise_seed": graine}},
 		"15": {"class_type": "EmptyFlux2LatentImage", "inputs": {"width": LARGEUR, "height": HAUTEUR, "batch_size": 1}},
 		"16": {"class_type": "SamplerCustomAdvanced", "inputs": {"noise": ["14", 0], "guider": ["11", 0],
 			"sampler": ["12", 0], "sigmas": ["13", 0], "latent_image": ["15", 0]}},
@@ -431,67 +707,157 @@ def _workflow(e, portrait):
 # ── Étapes ──────────────────────────────────────────────────────────────────────
 
 def preparer(cite, sauf):
-	docs = _docs(_dump_le_plus_recent())
-	lieux = {d["_id"]: d for d in docs if d.get("type") == "lieu"}
-	cite_nom = (lieux.get(cite) or {}).get("label") or _slug(cite).capitalize()
-	portraits = _portraits(cite)
-	entrees, ignores, sans_traits = [], [], []
-	for lid, lieu in sorted(lieux.items()):
-		if lieu.get("lieu_parent") != cite or lid in sauf:
-			continue
-		if lieu.get("categorie") == "auberge" and lieu.get("image"):
-			q = QUARTIERS_AUBERGES.get(lid) or quartier_de(lieu.get("label"), cite)
-			entrees.append({"key": lid, "categorie": "auberge", "quartier": q,
-							"base": base_image(lieu["image"], cite), "graine": zlib.crc32(lid.encode()),
-							"portrait": None, "prompt": prompt_auberge(cite, cite_nom, q)})
-			continue
-		pnj = (lieu.get("pnj") or [{}])[0]
-		portrait = str(pnj.get("portrait") or "")
-		m = PORTRAIT_GENERIQUE.match(portrait)
-		cat = lieu.get("categorie")
-		if (not m or cat not in METIERS_EN or not lieu.get("image")
-				or not os.path.exists(os.path.join(DOSSIER_PNJ, portrait))):
-			ignores.append(f"{lid} ({cat}, portrait {portrait or '—'}, image {lieu.get('image') or '—'})")
-			continue
-		race = "humain" if m.group(1) == "humaine" else m.group(1)
-		sexe = m.group(2).upper()
-		img_portrait, prompt_fr = portraits.get(lid, (None, None))
-		traits = traits_du_portrait(prompt_fr) if img_portrait == portrait else []
-		if not traits:
-			sans_traits.append(lid)
-		prompt = prompt_magasin(cat, race, sexe, traits, cite, cite_nom, lieu.get("label"))
-		entrees.append({"key": lid, "categorie": cat, "race": race, "sexe": sexe,
-						"quartier": quartier_de(lieu.get("label"), cite),
-						"base": base_image(lieu["image"], cite), "graine": zlib.crc32(lid.encode()),
-						"portrait": portrait, "prompt": prompt})
-	ancien = None
+	lieux = {d["_id"]: d for d in _docs(_dump_le_plus_recent()) if d.get("type") == "lieu"}
+	# Boutiques pas encore importées : complétées depuis l'import du peuplement (le dump prime).
+	imp = os.path.join(RACINE, "jsons", f"{_slug(cite)}_magasins_a_importer.json")
+	if os.path.exists(imp):
+		for d in _docs(imp):
+			if d.get("type") == "lieu":
+				lieux.setdefault(d["_id"], d)
+	cite_nom = (lieux.get(cite) or {}).get("label") or NOMS_CITES.get(cite) or _slug(cite).capitalize()
+	entrees, ignores = entrees_de_cite(lieux, cite, cite_nom, sauf)
+	ancien = {}
 	if os.path.exists(_chemin_manifeste(cite)):
 		ancien = _manifeste(cite)
 		if ancien.get("batch"):
 			raise SystemExit(f"Lot en cours : {ancien['batch']} — `recuperer` avant de re-préparer.")
-	images = {k: v for k, v in ((ancien or {}).get("images") or {}).items() if k in {e["key"] for e in entrees}}
-	with open(_chemin_requetes(cite), "w", encoding="utf-8") as f:
-		for e in entrees:
-			if e["key"] not in images:
-				f.write(json.dumps({"key": e["key"], "request": _requete(e)}, ensure_ascii=False) + "\n")
-	_manifeste(cite, {"cite": cite, "modele": MODELE_GEMINI, "entrees": entrees, "batch": None, "images": images})
-	reste = len(entrees) - len(images)
-	unit = EUR_PAR_IMAGE_INTERACTIF * REMISE_BATCH
-	print(f"{len(entrees)} lieux préparés ({sum(1 for e in entrees if e['categorie'] == 'auberge')} auberge(s))"
+	cles = {e["key"] for e in entrees}
+	# Images déjà générées conservées : seules les manquantes repartent.
+	man = {"cite": cite, "modele": MODELE_GEMINI, "entrees": entrees, "batch": None,
+		   "portraits": {k: v for k, v in (ancien.get("portraits") or {}).items() if k in cles},
+		   "images": {k: v for k, v in (ancien.get("images") or {}).items() if k in cles},
+		   "lots": ancien.get("lots") or []}
+	_ecrire_requetes(cite, man)
+	_manifeste(cite, man)
+	n_aub = sum(1 for e in entrees if not e.get("portrait"))
+	print(f"{len(entrees)} lieux préparés ({len(entrees) - n_aub} boutique(s), {n_aub} auberge(s))"
 		  f" → {os.path.relpath(_chemin_manifeste(cite), RACINE)}"
-		  f" ({len(images)} image(s) déjà générée(s) conservée(s))")
-	print(f"Lot : {reste} requête(s) → {os.path.relpath(_chemin_requetes(cite), RACINE)} ; "
-		  f"estimation {reste} × {unit:.3f} € ≈ {reste * unit:.2f} €")
+		  f" ({len(man['portraits'])} portrait(s), {len(man['images'])} façade(s) déjà générés)")
+	_resume_lot(cite, man)
 	for i in ignores:
 		print("  ignoré :", i)
-	if sans_traits:
-		print(f"  {len(sans_traits)} sans traits de portrait (lignée seule) :", ", ".join(sans_traits))
+
+
+def soumettre(cite):
+	man = _manifeste(cite)
+	if man.get("batch"):
+		raise SystemExit(f"Déjà soumis : {man['batch']} — `etat` pour suivre.")
+	n = _ecrire_requetes(cite, man)
+	if not n:
+		raise SystemExit("Rien à soumettre : toutes les images sont générées — `appliquer`.")
+	man["batch"] = soumettre_lot(_chemin_requetes(cite), man["modele"], f"images-{cite}-{len(man['lots']) + 1}")
+	_manifeste(cite, man)
+	print(f"Lot soumis ({n} requête(s)) :", man["batch"])
+
+
+def etat(cite):
+	man = _manifeste(cite)
+	if not man.get("batch"):
+		raise SystemExit("Aucun lot en cours.")
+	s = statut_lot(man["batch"])
+	meta = s.get("metadata") or s
+	print(man["batch"], "→", meta.get("state"), "| stats :", meta.get("batchStats"))
+	return meta.get("state"), s.get("done")
+
+
+def recuperer(cite):
+	"""Écrit portraits (pnj/) et façades (towns/) du lot, CLÔT le lot (`lots`) et réécrit
+	requetes.jsonl avec la suite : les façades dont le portrait vient d'arriver, et les échecs."""
+	man = _manifeste(cite)
+	if not man.get("batch"):
+		raise SystemExit("Aucun lot en cours.")
+	par_cle = {e["key"]: e for e in man["entrees"]}
+	ecrites, erreurs = 0, []
+	for cle, part, r in reponses_lot(man["batch"]):
+		genre, _, lid = (cle or "").partition("|")
+		e = par_cle.get(lid)
+		cible = {"portrait": man["portraits"], "image": man["images"]}.get(genre)
+		if e is None or cible is None or lid in cible:
+			continue
+		if not part:
+			erreurs.append(f"{cle} : {json.dumps(r.get('error') or r)[:200]}")
+			continue
+		dossier = DOSSIER_PNJ if genre == "portrait" else DOSSIER_TOWNS
+		nom, motif = _ecrire_image(dossier, e[genre]["base"], part, set(cible.values()))
+		if not nom:
+			erreurs.append(f"{cle} : {motif}")
+			continue
+		cible[lid] = nom
+		ecrites += 1
+	man["lots"].append(man["batch"])
+	man["batch"] = None
+	_ecrire_requetes(cite, man)
+	_manifeste(cite, man)
+	print(f"{ecrites} image(s) écrite(s) ; {len(erreurs)} échec(s) — "
+		  f"{len(man['portraits'])} portrait(s), {len(man['images'])}/{len(man['entrees'])} façade(s)")
+	for e in erreurs:
+		print("  ✗", e)
+	_resume_lot(cite, man)
+
+
+def avancer(cite):
+	"""L'étape suivante, quelle qu'elle soit : soumettre (PAYANT), suivre, récupérer puis
+	resoumettre la suite. À rejouer jusqu'à « terminé »."""
+	man = _manifeste(cite)
+	if man.get("batch"):
+		state, done = etat(cite)
+		if state in ETATS_ECHOUES:
+			print("⚠ Lot en échec : retiré, ses requêtes repartiront au prochain `avancer`.")
+			man["lots"].append(man["batch"])
+			man["batch"] = None
+			_manifeste(cite, man)
+			return
+		if state not in ETATS_REUSSIS and not done:
+			print("En cours — rejouer `avancer` plus tard.")
+			return
+		recuperer(cite)
+		man = _manifeste(cite)
+	if requetes_faisables(man):
+		soumettre(cite)
+	else:
+		print("Terminé : toutes les images sont générées — `appliquer`.")
+
+
+def essai(cite, seulement, limite):
+	"""Gemini INTERACTIF (~0,04 €/image) dans dev/batch/<cite>/images/essais/ : ni pnj/, ni towns/,
+	ni le manifeste ne bougent — pour juger les gabarits avant de payer le lot. Une boutique coûte
+	deux images : son portrait, puis sa façade qui le joint."""
+	man = _manifeste(cite)
+	dossier = os.path.join(_dossier(cite), "essais")
+	os.makedirs(dossier, exist_ok=True)
+	a_faire = [e for e in man["entrees"] if not seulement or e["key"] in seulement]
+	if limite:
+		a_faire = a_faire[:limite]
+	n = sum(2 if e.get("portrait") else 1 for e in a_faire)
+	print(f"{n} essai(s), ≈ {n * EUR_PAR_IMAGE_INTERACTIF:.2f} €")
+
+	def _un(requete, base):
+		t0 = time.time()
+		_, rep = _http(f"{API}/v1beta/models/{man['modele']}:generateContent", requete)
+		part = image_de_reponse(json.loads(rep))
+		if not part:
+			print(f"  ✗ {base} : {rep.decode('utf-8', 'replace')[:300]}", flush=True)
+			return None
+		nom, motif = _ecrire_image(dossier, base, part, ())
+		print(f"  {nom or '✗ ' + motif} ({time.time() - t0:.0f} s)", flush=True)
+		return nom
+
+	for e in a_faire:
+		print(e["key"])
+		portrait = None
+		if e.get("portrait"):
+			portrait = _un(_requete(e, "portrait"), e["portrait"]["base"])
+			if not portrait:
+				continue
+		_un(_requete(e, "image", os.path.join(dossier, portrait) if portrait else None), e["image"]["base"])
 
 
 def generer(cite, seulement, limite, essai=False):
-	"""`essai` : écrit dans dev/batch/<cite>/magasins/essais/, ignore et ne touche pas le
-	manifeste (`images`) — pour régler le gabarit sans rien poser dans `towns/`."""
+	"""Façades par ComfyUI, pour les boutiques dont le portrait est récupéré. `essai` : écrit dans
+	dev/batch/<cite>/images/essais/, sans toucher au manifeste ni à `towns/`."""
 	man = _manifeste(cite)
+	if man.get("batch"):
+		raise SystemExit(f"Lot en cours : {man['batch']} — `recuperer` d'abord.")
 	try:
 		_comfy("/system_stats")
 	except (urllib.error.URLError, OSError):
@@ -500,16 +866,17 @@ def generer(cite, seulement, limite, essai=False):
 	_liberer()
 	dossier = DOSSIER_TOWNS
 	if essai:
-		dossier = os.path.join(os.path.dirname(_chemin_manifeste(cite)), "essais")
+		dossier = os.path.join(_dossier(cite), "essais")
 		os.makedirs(dossier, exist_ok=True)
-	a_faire = [e for e in man["entrees"] if e.get("portrait") and (essai or e["key"] not in man["images"])
-			   and (not seulement or e["key"] in seulement)]
+	a_faire = [e for e in man["entrees"] if e["key"] in man["portraits"]
+			   and (essai or e["key"] not in man["images"]) and (not seulement or e["key"] in seulement)]
 	if limite:
 		a_faire = a_faire[:limite]
 	print(f"{len(a_faire)} image(s) à générer")
 	for i, e in enumerate(a_faire, 1):
 		t0 = time.time()
-		pid = json.loads(_comfy("/prompt", {"prompt": _workflow(e, _envoyer_portrait(e["portrait"]))}))["prompt_id"]
+		wf = _workflow(e["image"]["prompt"], zlib.crc32(e["key"].encode()), _envoyer_portrait(man["portraits"][e["key"]]))
+		pid = json.loads(_comfy("/prompt", {"prompt": wf}))["prompt_id"]
 		while True:
 			h = json.loads(_comfy(f"/history/{pid}")).get(pid)
 			if h:
@@ -526,92 +893,31 @@ def generer(cite, seulement, limite, essai=False):
 		if rejet:
 			print(f"  ✗ {e['key']} : image {rejet} (GPU), non écrite — relancer `generer`", flush=True)
 			continue
-		nom = nom_libre(dossier, e["base"], ".png", () if essai else set(man["images"].values()))
+		nom = nom_libre(dossier, e["image"]["base"], ".png", () if essai else set(man["images"].values()))
 		with open(os.path.join(dossier, nom), "wb") as f:
 			f.write(png)
 		if not essai:
 			man["images"][e["key"]] = nom
+			_ecrire_requetes(cite, man)
 			_manifeste(cite, man)
 		print(f"  [{i}/{len(a_faire)}] {nom} ← {e['key']} ({time.time() - t0:.0f} s)", flush=True)
 
 
-def essai(cite, seulement, limite):
-	"""Gemini INTERACTIF (~0,04 €/image) dans dev/batch/<cite>/magasins/essais/ : ni `towns/` ni
-	le manifeste ne bougent — pour juger le gabarit avant de payer le lot."""
-	man = _manifeste(cite)
-	dossier = os.path.join(os.path.dirname(_chemin_manifeste(cite)), "essais")
-	os.makedirs(dossier, exist_ok=True)
-	a_faire = [e for e in man["entrees"] if not seulement or e["key"] in seulement]
-	if limite:
-		a_faire = a_faire[:limite]
-	print(f"{len(a_faire)} essai(s), ≈ {len(a_faire) * EUR_PAR_IMAGE_INTERACTIF:.2f} €")
-	for e in a_faire:
-		t0 = time.time()
-		_, rep = _http(f"{API}/v1beta/models/{man['modele']}:generateContent", _requete(e))
-		part = image_de_reponse(json.loads(rep))
-		if not part:
-			print(f"  ✗ {e['key']} : {rep.decode('utf-8', 'replace')[:300]}", flush=True)
-			continue
-		nom, motif = _ecrire_image(dossier, e["base"], part, ())
-		print(f"  {nom or '✗ ' + motif} ← {e['key']} ({time.time() - t0:.0f} s)", flush=True)
-
-
-def soumettre(cite):
-	man = _manifeste(cite)
-	if man.get("batch"):
-		raise SystemExit(f"Déjà soumis : {man['batch']} — `etat` pour suivre.")
-	man["batch"] = soumettre_lot(_chemin_requetes(cite), man["modele"], f"magasins-{cite}")
-	_manifeste(cite, man)
-	print("Lot soumis :", man["batch"])
-
-
-def etat(cite):
-	man = _manifeste(cite)
-	if not man.get("batch"):
-		raise SystemExit("Aucun lot en cours.")
-	afficher_etat(man["batch"])
-
-
-def recuperer(cite):
-	"""Écrit les images du lot dans `towns/`. Le lot est ensuite CLOS (`lots`) : un `preparer`
-	rejoué ne remet en lot que les lieux encore sans image (échecs, images rejetées)."""
-	man = _manifeste(cite)
-	if not man.get("batch"):
-		raise SystemExit("Aucun lot en cours.")
-	par_cle = {e["key"]: e for e in man["entrees"]}
-	ecrites, erreurs = 0, []
-	for cle, part, r in reponses_lot(man["batch"]):
-		if cle in man["images"] or cle not in par_cle:
-			continue
-		if not part:
-			erreurs.append(f"{cle} : {json.dumps(r.get('error') or r)[:200]}")
-			continue
-		nom, motif = _ecrire_image(DOSSIER_TOWNS, par_cle[cle]["base"], part, set(man["images"].values()))
-		if not nom:
-			erreurs.append(f"{cle} : {motif}")
-			continue
-		man["images"][cle] = nom
-		ecrites += 1
-	man.setdefault("lots", []).append(man["batch"])
-	man["batch"] = None
-	_manifeste(cite, man)
-	print(f"{ecrites} image(s) écrite(s) dans templates/resources/towns/ ; {len(erreurs)} échec(s)"
-		  f" — {len(man['entrees']) - len(man['images'])} lieu(x) encore sans image")
-	for e in erreurs:
-		print("  ✗", e)
-
-
 def appliquer(cite):
+	"""Un seul import : `pnj[0].portrait` et `image` de chaque lieu, relus du dump le plus récent."""
 	man = _manifeste(cite)
 	docs = {d["_id"]: d for d in _docs(_dump_le_plus_recent())}
 	sortie, absents = [], []
-	for cle, nom in sorted(man["images"].items()):
+	for cle in sorted(set(man["portraits"]) | set(man["images"])):
 		doc = docs.get(cle)
 		if not doc:
 			absents.append(cle)
 			continue
 		doc = json.loads(json.dumps(doc))
-		doc["image"] = nom
+		if cle in man["portraits"]:
+			doc["pnj"][0]["portrait"] = man["portraits"][cle]
+		if cle in man["images"]:
+			doc["image"] = man["images"][cle]
 		sortie.append(doc)
 	chemin = os.path.join(RACINE, "jsons", f"images_magasins_{_slug(cite)}_a_importer.json")
 	with open(chemin, "w", encoding="utf-8") as f:
@@ -628,12 +934,13 @@ def main():
 	except Exception:
 		pass
 	p = argparse.ArgumentParser()
-	p.add_argument("etape", choices=["preparer", "essai", "soumettre", "etat", "recuperer", "generer", "appliquer"])
-	p.add_argument("--cite", default="lieu:rhemi")
+	p.add_argument("etape", choices=["preparer", "avancer", "essai", "soumettre", "etat", "recuperer",
+									 "generer", "appliquer"])
+	p.add_argument("--cite", required=True, help="ex. lieu:chartres")
 	p.add_argument("--sauf", default="", help="lieux à exclure, séparés par des virgules")
 	p.add_argument("--seulement", default="", help="ne générer que ces lieux, séparés par des virgules")
-	p.add_argument("--limite", type=int, default=0, help="nombre maximal d'images à générer")
-	p.add_argument("--essai", action="store_true", help="générer dans dev/batch/<cite>/magasins/essais/")
+	p.add_argument("--limite", type=int, default=0, help="nombre maximal de lieux à générer")
+	p.add_argument("--essai", action="store_true", help="générer dans dev/batch/<cite>/images/essais/")
 	a = p.parse_args()
 	if a.etape == "preparer":
 		preparer(a.cite, {s for s in a.sauf.split(",") if s})
@@ -642,7 +949,8 @@ def main():
 	elif a.etape == "generer":
 		generer(a.cite, {s for s in a.seulement.split(",") if s}, a.limite, a.essai)
 	else:
-		{"soumettre": soumettre, "etat": etat, "recuperer": recuperer, "appliquer": appliquer}[a.etape](a.cite)
+		{"avancer": avancer, "soumettre": soumettre, "etat": etat, "recuperer": recuperer,
+		 "appliquer": appliquer}[a.etape](a.cite)
 
 
 if __name__ == "__main__":

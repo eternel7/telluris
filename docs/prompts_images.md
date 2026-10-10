@@ -78,7 +78,7 @@ Chaque image générée est écrite **directement dans son dossier cible** (cf. 
 
 ### 1 bis. Magasin — portrait du tenancier en référence (Gemini)
 
-Script : `dev/gen_images_magasins.py` — `preparer` → `essai --limite N` (interactif, `essais/`) → `soumettre` → `etat` → `recuperer` → `appliquer`. Lot batch Gemini (−50 %) ; le **portrait du tenancier** (`pnj[0].portrait`, ramené à ~1 Mpx) part dans la requête **avant** le texte : c'est l'« image 1 » du prompt (§0.5). Repli local gratuit : `generer [--essai]` (ComfyUI + FLUX.2 Klein, `run_telluris.bat`). Le §1 traduit, **sans aucun nom** — ni boutique, ni tenancier, **ni « Telluris »** (essai du 08/10 : le mot est sorti peint sur une enseigne) :
+Script : `dev/gen_images_magasins.py --cite lieu:<cite>` — **un seul générateur pour les portraits (§2) ET les façades** : `preparer` → `essai --limite N` (interactif, `essais/`, portrait puis façade) → `avancer` rejoué jusqu'à « terminé » (soumet / suit / récupère / resoumet) → `appliquer` (un seul import : `pnj[0].portrait` + `image`). Deux lots batch Gemini (−50 %), enchaînés : **lot 1** = portraits + auberges, **lot 2** = façades des boutiques, écrit par `recuperer` du lot 1 ; état dans `dev/batch/<cite>/images/manifeste.json`. Le **portrait du tenancier** (`pnj[0].portrait`, ramené à ~1 Mpx) part dans la requête **avant** le texte : c'est l'« image 1 » du prompt (§0.5). Repli local gratuit : `generer [--essai]` (ComfyUI + FLUX.2 Klein, `run_telluris.bat`). Le §1 traduit, **sans aucun nom** — ni boutique, ni tenancier, **ni « Telluris »** (essai du 08/10 : le mot est sorti peint sur une enseigne) :
 
 > The person shown in image 1 is the shopkeeper: keep exactly the same face, hair, beard, body, skin and clothes as in image 1 ({lignee}, {traits}, {repere_lignee}), but NOT the same pose or expression. Do not reuse the background of image 1. Show this shopkeeper at work at the open front and market stall of a medieval fantasy {boutique} in the city of {cite}, {quartier}, busy with the trade, absorbed in the task, not looking at the camera, not posing, not presenting anything to the viewer. The shop fills about 80% of the image, seen from the street in a three-quarter view; its goods are displayed on racks and tables and are immediately recognizable: {marchandises}. [0.2 en anglais] [0.1 en anglais + « No text anywhere in the image… »]
 
@@ -88,7 +88,7 @@ Script : `dev/gen_images_magasins.py` — `preparer` → `essai --limite N` (int
 
 - `{boutique}`, `{marchandises}` : `METIERS_EN`, une ligne par catégorie (mêmes clés que les portraits).
 - `{quartier}` = `{precision_lieu}` + `{repere_cite}`, lu sur le **toponyme qui termine l'enseigne** (`utils/enseignes.TOPONYMES_PAR_LIEU`) : à Reims, « du Sacre » → parvis de la cathédrale, « de la Porte de Mars » → l'arc romain, « des Crayères » → caves de craie… (`QUARTIERS_EN`).
-- `{traits}` : ceux tirés pour le **portrait** du tenancier (âge, corps, cheveux, allure), relus dans `dev/batch/<cite>/manifeste.json` — seulement si le portrait en base est celui de ce manifeste. Le modèle ne reprend pas un visage : même silhouette, pas le même personnage.
+- `{traits}` : ceux tirés pour le **portrait** du tenancier (âge, corps, cheveux, allure — `tirage` de l'entrée du manifeste, graine propre au lieu), traduits par `TRAITS_EN`.
 
 ---
 
