@@ -6495,7 +6495,7 @@ function _renderCompetences(list) {
 			<div class="sh-skill-info">
 				<div class="sh-skill-name">${c.nom}${pm}</div>
 				<div class="sh-skill-desc">${c.description || ''}</div>
-				<div class="sh-skill-desc"${_compArmeTitre(c)}>${_compLigneDesc(c)}</div>
+				<div class="sh-skill-desc"${_compArmeTitre(c)}>${_compLigneDesc(c)}${_compJetLabel(c)}</div>
 			</div>
 			<div class="sh-inv-actions">${actions}</div>
 		</div>`;
@@ -6519,7 +6519,7 @@ function _renderCompetencesApprenables(list) {
 			<span class="sh-skill-icon">${c.icon || '⚡'}</span>
 			<div class="sh-skill-info">
 				<div class="sh-skill-name">${c.nom}<span class="sh-skill-lvl">${tag}</span></div>
-				<div class="sh-skill-desc">Niv. ${c.niveau} · ${_sortEffetsLabel(c.effets)}</div>
+				<div class="sh-skill-desc">Niv. ${c.niveau} · ${_sortEffetsLabel(c.effets)}${_compJetLabel(c)}</div>
 			</div>
 			<div class="sh-inv-actions">
 				<button type="button" class="sh-drop-btn" onclick="apprendreCompetence('${c.id}', this)" ${ok ? '' : 'disabled'}>Apprendre (${c.cout_points} pts)</button>

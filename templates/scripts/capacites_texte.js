@@ -162,6 +162,19 @@ function _compArmeTitre(c) {
 		: c.jet === 'cd' ? ' title="Ces dés s\'ajoutent aux dégâts de votre arc ou arme de lancer"'
 		: ' title="Ces dés s\'ajoutent aux dégâts de votre arme"';
 }
+// Type de JET d'une compétence offensive (`cc` / `cd` / `magique`, cf. combat._resoudre_toucher) :
+// deux compétences aux mêmes dés peuvent se résoudre tout autrement — défense opposée,
+// armure, arme empruntée. Vide pour une passive ou une compétence d'entraide, sans jet.
+const COMP_JETS = {
+	cc: ['⚔️ jet de corps à corps', 'Contre l\'Agilité et l\'esquive de la cible ; son armure réduit les dégâts'],
+	cd: ['🏹 jet à distance', 'Contre l\'Agilité et l\'esquive de la cible ; son armure réduit les dégâts'],
+	magique: ['🔮 jet magique', 'Contre la défense magique de la cible ; l\'armure ne compte pas'],
+};
+function _compJetLabel(c) {
+	if (!c || c.mode !== 'active' || c.cible !== 'ennemi') return '';
+	const j = COMP_JETS[c.jet];
+	return j ? ` · <span title="${j[1]}">${j[0]}</span>` : '';
+}
 // Ligne d'effets d'une compétence connue, sous sa description.
 function _compLigneDesc(c) {
 	let portee = '';
