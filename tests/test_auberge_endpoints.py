@@ -532,6 +532,22 @@ def test_la_nuit_remet_les_points_et_debite_la_chambre(monde):
 	assert data["log"]
 
 
+def test_la_nuit_renvoie_un_recit_NEUF_pour_la_suivante(monde, monkeypatch):
+	"""Le client égrène `nuit_log` au prochain clic : sans ce tirage neuf dans la réponse, il
+	rejouait le log figé de `/play` nuit après nuit."""
+	ra = monde["ra"]
+	appels = []
+	vrai = ra.auberge.messages_nuit
+	monkeypatch.setattr(ra.auberge, "messages_nuit",
+						lambda *a, **k: appels.append(k.get("chez_soi")) or vrai(*a, **k))
+	data = _appel(monde, _perso(), ra.passer_la_nuit, None)
+	# Un tirage pour le récit de CETTE nuit, un autre pour la suivante — hors « chez soi ».
+	assert appels.count(False) >= 2
+	assert data["nuit_log"]
+	assert set(data["nuit_log"]) <= set(ra.auberge.MESSAGES_NUIT)
+	assert len(data["nuit_log"]) == min(ra.auberge.NUIT_LOG_LIGNES, len(ra.auberge.MESSAGES_NUIT))
+
+
 def test_sans_argent_la_nuit_est_refusee_ET_NE_SOIGNE_PAS(monde):
 	"""⚠️ Le débit passe après les gardes : un refus ne doit rien laisser derrière lui."""
 	from fastapi import HTTPException
@@ -604,6 +620,7 @@ def test_apres_la_nuit_on_ne_peut_plus_se_rasseoir_a_SA_table(monde):
 
 def test_la_nuit_relance_les_etals_du_LIEU_PARENT(monde, monkeypatch):
 	"""Les magasins de la cité sont tickés `AUBERGE_NUIT_PASSES_ATELIER` fois chacun —
+	l'étable aussi, sans stock ni appro (elle puise au flux le harnachement qu'elle revend) —
 	et l'auberge elle-même n'est pas un magasin."""
 	ra = monde["ra"]
 	boutique = {"_id": "lieu:forge", "type": "lieu", "categorie": "armurerie",
@@ -617,8 +634,9 @@ def test_la_nuit_relance_les_etals_du_LIEU_PARENT(monde, monkeypatch):
 	monkeypatch.setattr(ra, "appro_leaves_lieu", lambda lieu_doc: [])
 
 	data = _appel(monde, _perso(), ra.passer_la_nuit, None)
-	assert appels == ["lieu:forge"] * int(character_stats.AUBERGE_NUIT_PASSES_ATELIER)
-	assert data["magasins"] == 1
+	passes = int(character_stats.AUBERGE_NUIT_PASSES_ATELIER)
+	assert sorted(appels) == sorted([ETABLE["_id"]] * passes + ["lieu:forge"] * passes)
+	assert data["magasins"] == 2
 
 
 def test_la_nuit_PERIME_les_recrues_avant_de_repeupler(monde, monkeypatch):

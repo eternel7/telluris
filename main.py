@@ -757,9 +757,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# Atelier : chaque visite du lieu lance un tick marché (approvisionnement + production +
 	# écoulement PNJ des produits finis), comme à chaque vente. On ne déclenche que s'il y a de la
 	# matière/produits en stock OU un approvisionnement configuré pour la catégorie (sinon le lieu
-	# ne pourrait jamais s'amorcer) ; on ne persiste que si quelque chose a changé.
+	# ne pourrait jamais s'amorcer) ; on ne persiste que si quelque chose a changé. Une étable,
+	# sans recette ni appro, s'amorce aussi : elle puise au flux le harnachement qu'elle revend.
 	if grid_doc and (grid_doc.get("stock_matieres") or grid_doc.get("stock_vente")
-			or appro_leaves_lieu(grid_doc)):
+			or appro_leaves_lieu(grid_doc) or montures_util.lieu_vend_montures(grid_doc)):
 		# Recettes passées explicitement, comme sell_item / convertir_apres_achat. Un
 		# scriptorium y ajoute son petit lot de recettes VIRTUELLES (sort/recette/carte),
 		# scopées à SON lieu_parent — cf. utils/scriptorium.recettes_effectives.

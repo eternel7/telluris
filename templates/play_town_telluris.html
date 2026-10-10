@@ -1876,7 +1876,8 @@
 					   (pas de `data-sdx`) : un double clic est absorbé par la garde `isMoving`. #}
 					<li><button class="sub-loc-btn" id="btn-attendre" onclick="waitTurn()">⌛ Attendre un tour</button></li>
 					{% endif %}
-					{% if achat_sous_categories or est_negociant %}
+					{# Une étable n'a aucun besoin : elle revend le harnachement (marche.puiser_revente). #}
+					{% if achat_sous_categories or est_negociant or est_etable %}
 					<li><button class="sub-loc-btn" onclick="openSellPanel()">🏷️ Achat-Vente</button></li>
 					{% endif %}
 					{% if est_guilde %}
@@ -10074,6 +10075,13 @@ async function passerLaNuit() {
 
 	const [data] = await Promise.all([_aubFetch('api/auberge/nuit', {}), recit]);
 	_nuitData = data;
+	// Récit de la PROCHAINE nuit : la réponse en porte un tirage neuf (`nuit_log` du payload de
+	// salle). Sans cela, une nuit prise depuis la sidebar, salle fermée, rejouait à chaque fois
+	// le log figé de `/play` (ou le dernier `_aubEtat`) — mêmes lignes, nuit après nuit.
+	if (data && Array.isArray(data.nuit_log)) {
+		AUBERGE_NUIT.log = data.nuit_log;
+		if (_aubEtat) _aubEtat.nuit_log = data.nuit_log;
+	}
 	if (fin) fin.disabled = false;
 	if (!data) {                                   // refus (fonds, conflit) : on referme
 		if (overlay) overlay.classList.add('clauses-hidden');

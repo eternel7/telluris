@@ -12,6 +12,7 @@ from collections import Counter
 from db.config import get_doc, find_docs, save_doc
 from models import character_stats
 from utils import fabrication
+from utils import montures
 from utils.characters import (
 	resolve_item_ref,
 	money_to_cuivre, cuivre_to_purse,
@@ -606,6 +607,35 @@ def lieu_buys(lieu_doc: dict, item_doc: dict) -> bool:
 		return True
 	sc = item_sous_categorie(item_doc)
 	return bool(sc) and sc in besoins
+
+
+# ── Revendeur : l'étable et le harnachement ──────────────────────────────────────
+# Une étable n'a aucune recette : elle REVEND le harnachement de monture fabriqué par les
+# artisans de sa cité, puisé au flux (`puiser_revente`) et posé directement en RAYON — jamais
+# en réserve, elle ne transforme rien. Elle le vend `REVENTE_MAJORATION` × la fourchette de
+# l'artisan (`prix_achat_lieu`) : acheter à la source reste moins cher. Elle n'en rachète
+# pas au joueur (`lieu_buys` inchangé : ni besoin, ni produit).
+
+def item_revendable(item_doc: dict | None) -> bool:
+	"""Objet qui s'équipe sur une monture (un de ses `slots` ∈ `montures.SLOTS_MONTURE`)."""
+	return bool(set((item_doc or {}).get("slots") or ()) & set(montures.SLOTS_MONTURE))
+
+
+def lieu_revend(lieu_doc: dict | None, item_doc: dict | None) -> bool:
+	"""Ce lieu revend-il cet objet ? Une étable (`montures.lieu_vend_montures`) et du
+	harnachement."""
+	return montures.lieu_vend_montures(lieu_doc) and item_revendable(item_doc)
+
+
+def prix_achat_lieu(lieu_doc: dict | None, item_doc: dict, item_id: str) -> tuple[int, int]:
+	"""Fourchette du côté ACHAT (lieu→joueur) chez CE lieu : `prix_range_cuivre`, majorée de
+	`REVENTE_MAJORATION` (plancher 1) quand le lieu revend l'objet. Source unique de
+	`resolve_stock_vente`, `buy_item` et `marchander` (sens achat) : affiché = appliqué."""
+	pmin, pmax = prix_range_cuivre(item_doc, item_id)
+	if not lieu_revend(lieu_doc, item_doc):
+		return pmin, pmax
+	m = max(1.0, float(character_stats.REVENTE_MAJORATION))
+	return max(1, int(round(pmin * m))), max(1, int(round(pmax * m)))
 
 
 def cle_matiere_lieu(categorie: str, item_doc: dict, lieu_doc: dict | None = None) -> str:
@@ -1688,7 +1718,8 @@ def _crediter_flux(flux: dict | None, ecoules: list) -> bool:
 		item = resolve_item_ref(item_id)
 		if not item:
 			continue
-		if item_id not in consommees and item_sous_categorie(item) not in consommees:
+		if (item_id not in consommees and item_sous_categorie(item) not in consommees
+				and not item_revendable(item)):
 			continue
 		verse = int(round(qty * part))
 		if verse <= 0:
@@ -1751,9 +1782,12 @@ def _deverser_surplus_flux(lieu_doc: dict, flux: dict | None) -> bool:
 		if not item:
 			continue
 		sous_cat = item_sous_categorie(item)
-		if item_id not in consommees and sous_cat not in consommees:
+		if item_id not in consommees and sous_cat not in consommees and not item_revendable(item):
 			continue
 		if item_id in besoins or sous_cat in besoins:
+			continue
+		# Miroir de la garde précédente : un revendeur ne renvoie pas à la ville ce qu'il y a pris.
+		if lieu_revend(lieu_doc, item):
 			continue
 		excedent = qty - stock_cible_pour(lieu_doc, item)
 		if excedent <= 0:
@@ -1826,6 +1860,43 @@ def puiser_flux(lieu_doc: dict, flux: dict | None) -> bool:
 	return pris
 
 
+def puiser_revente(lieu_doc: dict, flux: dict | None) -> bool:
+	"""Un revendeur (étable) prend au pool de sa cité le harnachement qu'il revend et le pose
+	en RAYON (`stock_vente`). Mute `lieu_doc` et le contexte ; True si quelque chose a été pris.
+
+	Même part que `puiser_flux` (`FLUX_PART_MAX`, plancher d'une unité : le pool est un bien
+	commun), et le rayon n'est regarni **que jusqu'au `stock_cible`** — comme la vitrine
+	d'`approvisionner` : au-delà, le surplus irait aux PNJ et l'étable viderait la ville."""
+	if not flux or not lieu_doc or not montures.lieu_vend_montures(lieu_doc):
+		return False
+	pool = flux["pool"]
+	part = _clamp(float(character_stats.FLUX_PART_MAX), 0.0, 1.0)
+	if not pool or part <= 0:
+		return False
+	rayon = lieu_doc.setdefault("stock_vente", [])
+	pris = False
+	for item_id in list(pool):
+		qty = int(pool.get(item_id, 0))
+		if qty <= 0:
+			continue
+		item = resolve_item_ref(item_id)
+		if not item or not item_revendable(item):
+			continue
+		actuel = next((int(e.get("qty", 0)) for e in rayon if e.get("item_id") == item_id), 0)
+		prend = min(qty, max(1, int(qty * part)), stock_cible_pour(lieu_doc, item) - actuel)
+		if prend <= 0:
+			continue
+		_stock_vente_add(rayon, item_id, prend)
+		if prend >= qty:
+			del pool[item_id]
+		else:
+			pool[item_id] = qty - prend
+		pris = True
+	if pris:
+		flux["change"] = True
+	return pris
+
+
 def tick_atelier(lieu_doc: dict, recettes: list | None = None, flux: dict | None = None) -> bool:
 	"""Tick marché à appeler à chaque vente/visite : puise au flux de la cité, approvisionne le
 	lieu selon sa catégorie, tente une passe de production puis un écoulement PNJ des produits
@@ -1855,6 +1926,7 @@ def tick_detaille(lieu_doc: dict, recettes: list | None = None, flux: dict | Non
 	de boutique (qui n'écoule que l'EXCÉDENT au-dessus d'une cible de 25 : un marchand à
 	domicile ne vendrait jamais rien) ; même contrat `lieu_doc -> [{item_id, qty}]`."""
 	puise = puiser_flux(lieu_doc, flux)
+	puise = puiser_revente(lieu_doc, flux) or puise
 	approvisionne = approvisionner(lieu_doc) if appro else False
 	produits = tenter_production(lieu_doc, recettes)
 	ecoules = (ecouler or ecouler_produits_pnj)(lieu_doc)
@@ -1911,7 +1983,7 @@ def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> lis
 		item = resolve_item_ref(item_id)
 		if not item:
 			continue
-		pmin, pmax = prix_range_cuivre(item, item_id)
+		pmin, pmax = prix_achat_lieu(lieu_doc, item, item_id)
 		cible = stock_cible_pour(lieu_doc, item)
 		prix_cuivre = prix_marche(relation_doc, item_id, pmin, pmax, "achat", qty, cible)
 		negocie = (relation_doc or {}).get("prix_negocies", {}).get(item_id, {}).get("achat") is not None

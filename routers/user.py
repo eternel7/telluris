@@ -20,7 +20,7 @@ from utils.characters import (
 	nettoyer_nom_objet, renommer_ref,
 )
 from utils.marche import (
-	debit_character, merchant_cha, prix_range_cuivre, marchander,
+	debit_character, merchant_cha, prix_achat_lieu, marchander,
 	convertir_apres_achat, resolve_stock_vente, tick_atelier, lieu_buys, params_vente_lieu,
 	fiche_item_fields, flux_cite, persister_flux, est_negociant, cles_consommees,
 	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
@@ -2307,7 +2307,7 @@ async def buy_item(
 
 	# Prix marché à l'achat (relation/marchandage modulé par le stock en rayon de ce produit),
 	# calculé avant le décrément du stock.
-	pmin, pmax = prix_range_cuivre(item, item_id)
+	pmin, pmax = prix_achat_lieu(lieu_doc, item, item_id)
 	cible = stock_cible_pour(lieu_doc, item)
 	prix = prix_marche(relation, item_id, pmin, pmax, "achat", int(entry.get("qty", 0)), cible)
 
@@ -2417,7 +2417,7 @@ async def marchander_item(
 		item = resolve_item_ref(item_id)
 		if not item:
 			raise HTTPException(status_code=422, detail="Objet introuvable")
-		pmin, pmax = prix_range_cuivre(item, item_id)
+		pmin, pmax = prix_achat_lieu(lieu_doc, item, item_id)
 
 	seuil_bonus = _relation_seuil_bonus(relation_value(relation))
 	nego, nego_cha, nego_compagnon = _negociateur(character)

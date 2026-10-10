@@ -480,7 +480,7 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 	a_sauver = []
 	for boutique in voisins:
 		if not (boutique.get("stock_matieres") or boutique.get("stock_vente")
-				or appro_leaves_lieu(boutique)):
+				or appro_leaves_lieu(boutique) or montures.lieu_vend_montures(boutique)):
 			continue
 		# `lieu_recettes` est mémoïsé par process : les dizaines d'appels touchent le mémo.
 		# Un scriptorium y ajoute son petit lot de recettes virtuelles (sort/recette/carte),
@@ -557,10 +557,14 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 	tables, messages = _purger_tables_vides(tables, messages)
 
 	payload = _payload(character, lieu_doc, tables, messages)
+	chez_soi = proprietes.est_propriete(lieu_doc)
 	payload.update({
 		# Chez soi ⇔ propriété : `_acces_nuit` n'y laisse entrer que qui peut y dormir.
-		"log": auberge.messages_nuit(lieu_doc, auberge.NUIT_LOG_LIGNES,
-									 chez_soi=proprietes.est_propriete(lieu_doc)),
+		"log": auberge.messages_nuit(lieu_doc, auberge.NUIT_LOG_LIGNES, chez_soi=chez_soi),
+		# Récit de la PROCHAINE nuit, tiré à neuf : le client le garde pour l'égrener au prochain
+		# clic (sinon il rejouait le log figé de `/play`). Remplace celui de `_payload`, qui
+		# ignore le « chez soi ».
+		"nuit_log": auberge.messages_nuit(lieu_doc, auberge.NUIT_LOG_LIGNES, chez_soi=chez_soi),
 		"vitals": vitals,
 		"vitals_porteurs": vitals_porteurs,
 		"cout": cout,
