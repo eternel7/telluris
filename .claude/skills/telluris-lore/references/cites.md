@@ -15,6 +15,7 @@ France : Lutecia · Auxerre · Rhemi — Italie : Rome · Venise · Gênes — N
 	- Faiblesse : les grandes écoles de magie se sont installées ailleurs en Europe.
 - Centre d'étude des portails, elle fournit les **maîtres des portails** (institut des architectes).
 - Murailles efficaces contre les monstres terrestres.
+- **Institut des Architectes de Lutecia** (nom du dump) — lieu **« la Cour des Arches »**, dans l'ancien ensemble des **Invalides**, près de la Seine [cites/20261010_cour_des_arches_lutecia.md] (ajouté à la demande de l'Auteur ; pas encore de `lieu:*` au dump). Institution **savante**, ni caserne ni temple : enseigne, préserve et partage le savoir des portails, accueille les Architectes itinérants, centralise les connaissances des donjons. Quatre parties : Esplanade des Architectes · Cour des Arches · Archives des Seuils · Ateliers de Convergence. **Aélis de Montfaucon** (`pnj:aelis_de_montfaucon`, humaine, architecte) y est retrouvée par le joueur ; la retrouvaille mène à une mission (décision de l'Auteur).
 - **Montmartre** est un observatoire paladin et le centre de la défense **anti-aérienne**, où se perfectionne la Lance de lumière. La **basilique du Sacré-Cœur** est un bastion paladin : entraînement anti-aérien, et missions d'**escorte** de la capitale vers les lieux éloignés de France.
 - **Sous-sol** : anciennes carrières et catacombes, peuplées de :
 	- gargouilles éveillées (statues de calcaire animées) ;
