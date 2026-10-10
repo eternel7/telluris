@@ -82,48 +82,31 @@ LIGNEES = {
 			 "bien plus grand{e} et massi{ve} qu'un humain, peau épaisse au teint humain, jamais verte — un humain au même plan lui arrive à la poitrine"),
 	"humain": ("Une humaine", "Un humain", ""),
 }
-AGES = ["jeune", "dans la force de l'âge", "d'âge mûr", "âgé{e}", "très âgé{e}"]
-CORPS = ["maigre", "sec{he}", "de corpulence ordinaire", "solide", "fort{e}", "bedonnant{e}", "voûté{e}"]
+# Lot de Lutecia (10/10) : des tenanciers trop vieux par défaut (consigne de l'auteur) — huit âges
+# ADULTES, la vieillesse n'en est plus qu'un ; plus de « très âgé » ni de « voûté », un seul gris.
+AGES = ["d'une vingtaine d'années", "jeune adulte", "d'une trentaine d'années", "dans la force de l'âge",
+		"d'une quarantaine d'années", "d'âge mûr", "grisonnant{e}, la cinquantaine", "âgé{e}"]
+CORPS = ["maigre", "sec{he}", "de corpulence ordinaire", "solide", "fort{e}", "bedonnant{e}",
+		 "élancé{e}", "trapu{e}"]
 ALLURES = ["le regard vif", "l'air bourru", "le sourire facile", "l'œil méfiant", "l'air las mais aimable",
 		   "le regard franc", "l'air rusé"]
 CHEVEUX = ["aux cheveux noirs", "aux cheveux châtains", "aux cheveux roux", "aux cheveux blonds",
-		   "aux cheveux gris", "aux cheveux blancs", "au crâne rasé", "aux cheveux tressés"]
+		   "aux cheveux gris", "aux cheveux bouclés", "au crâne rasé", "aux cheveux tressés",
+		   "aux cheveux courts"]
 
-# Métier : (qui il est, objet présenté, tenue, décor). Une ligne par catégorie de base.
-METIERS = {
-	"apothicairerie": ("tient une apothicairerie", "un petit flacon de remède ambré", "longue blouse tachée d'herbes, sacoche de simples", "étagères de bocaux, bouquets d'herbes séchées, mortier et pilon"),
-	"armurerie": ("tient une armurerie", "une épée fraîchement forgée", "tablier de cuir roussi, avant-bras nus couverts de suie", "enclume, forge rougeoyante, râteliers d'armes et de cottes de mailles"),
-	"atelier_d_artisan": ("tient un atelier d'artisan", "un coffret de bois sculpté", "tablier de travail plein de copeaux", "établi, outils de menuisier, objets ouvragés en exposition"),
-	"atelier_de_cirier": ("tient un atelier de cirier", "un grand cierge de cire blonde", "tablier constellé de gouttes de cire", "cuves de cire, grappes de chandelles suspendues, rayons de miel"),
-	"atelier_de_l_empenneur": ("tient un atelier d'empenneur", "une flèche finement empennée", "tablier, plumes piquées au col", "faisceaux de flèches, bottes de plumes, fûts de bois droits"),
-	"bijouterie": ("tient une bijouterie", "une bague sertie d'une pierre", "vêtements fins, loupe de bijoutier au cou", "comptoir garni d'écrins, balance de précision, petits bijoux"),
-	"boucherie": ("tient une boucherie", "un beau quartier de viande", "tablier taché, couperet à la ceinture", "crochets de viandes suspendues, billot de bois, étal"),
-	"boulangerie": ("tient une boulangerie", "une miche de pain doré", "tablier enfariné, manches retroussées", "four à pain, corbeilles de pains et de brioches"),
-	"grande_boulangerie": ("tient une grande boulangerie", "une couronne de pain festonnée", "tablier enfariné de maître boulanger, toque de toile", "plusieurs fours à pain, mitrons au travail, paniers de pains et de pâtisseries"),
-	"bourrellerie": ("tient une bourrellerie", "un collier de cheval en cuir", "tablier de cuir, alêne à la ceinture", "harnais, selles et sangles pendus aux murs"),
-	"boyauderie": ("tient une boyauderie", "un écheveau de corde de boyau", "tablier de cuir humide", "bacs de trempage, cordes de boyau qui sèchent sur des perches"),
-	"brosserie": ("tient une brosserie", "une brosse à poils de sanglier", "tablier de toile", "brosses, balais et pinceaux de toutes tailles"),
-	"corderie": ("tient une corderie", "un rouleau de corde de chanvre", "vêtements de toile, mains calleuses", "rouet de cordier, rouleaux de cordages"),
-	"cordonnerie": ("tient une cordonnerie", "une paire de bottes neuves", "tablier de cuir, marteau de cordonnier", "formes à chaussures, établi, bottes alignées"),
-	"cuisine": ("tient une cuisine", "un bol de ragoût fumant", "tablier noué, torchon sur l'épaule", "marmites sur le feu, broche, tables de voyageurs"),
-	"etable": ("tient une étable", "un licol de cuir neuf aux boucles de laiton", "tablier de cuir, manches retroussées, brins de paille", "stalles de bois, bottes de foin, une mule et un poney"),
-	"fletcher": ("tient une archerie", "un arc long de bois d'if", "brassard de cuir, carquois à l'épaule", "arcs suspendus, flèches en faisceaux, cibles de paille"),
-	"fumoir": ("tient un fumoir", "un jambon fumé", "tablier noirci par la fumée", "viandes et poissons pendus dans la fumée, foyer couvant"),
-	"jardinier": ("tient une jardinerie", "un panier de légumes frais", "chapeau de paille, tablier de toile terreux", "pots de plantes, semis, outils de jardin"),
-	"laboratoire_d_alchimie": ("tient un laboratoire d'alchimie", "une fiole au liquide luminescent", "robe tachée, lunettes de protection relevées sur le front", "alambics, cornues, grimoires ouverts"),
-	"lutherie": ("tient une lutherie", "un luth au bois verni", "tablier de luthier, copeaux fins", "instruments suspendus, gabarits, pots de vernis"),
-	"maroquinerie": ("tient une maroquinerie", "une sacoche de cuir ouvragé", "tablier de cuir, aiguilles à la ceinture", "bourses, ceintures, sacoches en exposition"),
-	"necromancie": ("tient une boutique de nécromancie", "un crâne gravé de runes", "robe sombre, amulettes d'os", "ossements, bougies noires, bocaux troubles, grimoires"),
-	"negociant": ("tient une maison de négoce", "une bourse pleine et une balance", "vêtements de marchand aisé, chaîne au cou", "coffres, ballots de marchandises, registres de comptes"),
-	"plumasserie": ("tient une plumasserie", "un éventail de plumes chatoyantes", "vêtements soignés, plume au chapeau", "plumes multicolores en bouquets, chapeaux ornés"),
-	"salaison": ("tient une salaison", "un saucisson sec", "tablier, mains rougies par le sel", "tonneaux de sel, jambons et saucissons pendus"),
-	"savonnerie": ("tient une savonnerie", "un pain de savon parfumé", "tablier clair, manches retroussées", "pains de savon empilés, chaudron, fioles de parfum"),
-	"scriptorium": ("tient un scriptorium", "un livre relié de cuir", "robe de scribe, doigts tachés d'encre", "pupitres, encriers, parchemins, piles de livres"),
-	"tabletterie": ("tient une tabletterie", "un jeu d'échecs en os et ivoire", "tablier fin, loupe", "petits objets d'os et d'ivoire, peignes, dés, boîtes"),
-	"tannerie": ("tient une tannerie", "une peau tannée souple", "tablier de cuir épais, bottes hautes", "peaux tendues sur des cadres, cuves de tan"),
-	"taxidermie": ("tient un cabinet de taxidermie", "un renard naturalisé", "blouse de travail, outils fins", "animaux naturalisés, têtes de cerfs, bocaux de spécimens"),
-	"tissage": ("tient un atelier de tissage", "une étoffe richement tissée", "vêtements de toile fine", "métier à tisser, rouleaux d'étoffes colorées"),
-}
+# Métier : (qui il est, objet présenté, tenue, décor) — 10 VARIANTES par métier dans
+# dev/gabarits_metiers.py (consigne de l'auteur, 10/10). `METIERS` garde la forme d'avant (1re
+# variante) pour les appelants qui ne lisent que « qui » ou les clés.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from gabarits_metiers import FACADE as FACADE_VARIANTES, PORTRAIT as PORTRAIT_VARIANTES  # noqa: E402
+
+METIERS = {cat: (qui, *variantes[0]) for cat, (qui, variantes) in PORTRAIT_VARIANTES.items()}
+NB_VARIANTES = 10
+
+
+def variante_de(lid):
+	"""PURE. Indice de variante de métier d'un lieu : graine propre au lieu, stable d'un rejeu à l'autre."""
+	return zlib.crc32(("variante|" + str(lid)).encode()) % NB_VARIANTES
 
 # Style d'Auxerre (§0.1), préféré par l'auteur au photoréaliste du lot de Rhemi (09/10) : même
 # rendu que les façades, où ce portrait part en référence.
@@ -133,13 +116,57 @@ STYLE_FR = ("Illustration de fantasy médiévale semi-réaliste, dans le style d
 			"entièrement dépourvue d'écriture : aucun nom, aucune lettre, aucune signature, aucun "
 			"monogramme, aucun filigrane, aucune enseigne lisible.")
 # §0.2 (phrase de l'auteur, telle quelle) + la variété de la foule d'Auxerre : sans elle, des
-# figurants identiques (lot de Rhemi, 09/10). Ogres jamais verts.
+# figurants identiques (lot de Rhemi, 09/10). Ogres jamais verts. Répartition ÉGALE entre les cinq
+# Lignées (consigne de l'auteur, 10/10) : avec un tenancier humain, le modèle peuplait la rue d'humains.
 FOULE_FR = ("Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, "
-			"chacun différent par l'âge, la carrure, les cheveux et la tenue : elfes bruns, roux, noirs, "
-			"argentés ou blonds, en robe, cape de voyage ou cuir ; nains barbus, naines imberbes aux cheveux tressés, en armure, "
-			"tablier ou habit de marchand ; hobbits ronds ou fluets, jeunes ou ridés, en gilets colorés ; "
-			"ogres aux teints humains, burinés, rougeauds ou hâlés, jamais verts ; humains de toutes "
-			"origines, aventuriers, gardes, marchands, pèlerins.")
+			"en proportions égales : à peu près autant d'ogres que de nains, de hobbits, d'elfes et "
+			"d'humains, bien mêlés — les humains ne sont pas plus nombreux que les autres, même si le "
+			"tenancier est humain. Chacun est différent par l'âge, la carrure, les cheveux et la tenue : "
+			"elfes bruns, roux, noirs, argentés ou blonds, en robe, cape de voyage ou cuir ; nains barbus, "
+			"naines imberbes aux cheveux tressés, en armure, tablier ou habit de marchand ; hobbits ronds ou "
+			"fluets, jeunes ou ridés, en gilets colorés ; ogres aux teints humains, burinés, rougeauds ou "
+			"hâlés, jamais verts ; humains de toutes origines, aventuriers, gardes, marchands, pèlerins.")
+
+
+# Créativité laissée au modèle (consigne de l'auteur, 10/10) : les exemples du métier ne sont pas
+# une tenue de rigueur, sinon deux tenanciers du même métier se ressemblent trait pour trait.
+LIBERTE_FR = ("Compose librement le cadrage, la lumière, la posture, les accessoires et les couleurs : "
+			  "ce tenancier doit avoir une allure qui n'appartient qu'à lui, jamais une tenue type du métier.")
+LIBERTE = ("Compose the framing, light, colors and details freely: this shop should have a character of "
+		   "its own, never a stock look shared by every shop of the trade.")
+
+
+# Taille de chaque Lignée en fraction d'un humain (repères du §2 : un nain arrive à la taille d'un
+# humain, un hobbit est dépassé de deux têtes, un ogre fait une tête et demie de plus).
+TAILLES = {"humain": 1.0, "elfe": 1.05, "nain": 0.6, "hobbit": 0.5, "ogre": 1.6}
+CLIENTS = {"humain": "un client humain", "elfe": "un client elfe", "nain": "un client nain",
+		   "hobbit": "un client hobbit", "ogre": "un client ogre au teint humain, jamais vert"}
+
+
+def _fois(x):
+	return f"{x:.1f}".replace(".", ",")
+
+
+def client_de(lid):
+	"""PURE. Lignée du client posté à côté d'un petit tenancier : graine propre au lieu, chances égales."""
+	return random.Random(zlib.crc32(("client|" + str(lid)).encode())).choice(LIGNEES_TIRAGE)
+
+
+def comparatif_client(race, client, f):
+	"""PURE. Phrase d'échelle CONCRÈTE (consigne de l'auteur, 10/10 : hobbit peint à taille humaine) :
+	un client de lignée `client` debout à côté du tenancier, les deux tailles en fois celle d'un
+	humain, puis le repère visible (où arrive la tête du plus petit)."""
+	t, c = TAILLES.get(race, 1.0), TAILLES.get(client, 1.0)
+	pres, qui = ("d'elle", "la tenancière") if f else ("de lui", "le tenancier")
+	debut = (f"Juste à côté {pres}, debout au comptoir, se tient {CLIENTS[client]} : {qui} mesure "
+			 f"environ {_fois(t)} fois la taille d'un humain, le client environ {_fois(c)} fois")
+	if abs(t - c) < 0.05:
+		return debut + " — ils sont donc exactement de la même taille. "
+	de_qui = "de la tenancière" if f else "du tenancier"
+	petit, grand, r = (de_qui, "du client", t / c) if t < c else ("du client", de_qui, c / t)
+	repere = ("à mi-cuisse" if r <= 0.35 else "à la ceinture" if r <= 0.6 else
+			  "à la poitrine" if r <= 0.85 else "aux épaules")
+	return debut + f" : la tête {petit} arrive {repere} {grand}, pas plus haut. "
 
 
 def _accord(texte, f):
@@ -156,65 +183,49 @@ def tirage_tenancier(rng):
 	return [rng.choice(AGES), rng.choice(CORPS), rng.choice(CHEVEUX), rng.choice(ALLURES)]
 
 
-def prompt_tenancier(race, sexe, categorie, cite_nom, tirage):
-	"""PURE. Prompt du gabarit §2 pour un tenancier (aucun nom propre)."""
+def prompt_tenancier(race, sexe, categorie, cite_nom, tirage, variante=0, client=None):
+	"""PURE. Prompt du gabarit §2 pour un tenancier (aucun nom propre) ; `variante` choisit
+	l'exemple d'objet, de tenue et de décor du métier."""
 	f = sexe == "F"
 	une_f, un_m, marqueur = LIGNEES.get(race, LIGNEES["humain"])
-	qui, objet, tenue, decor = METIERS[categorie]
+	qui, variantes = PORTRAIT_VARIANTES[categorie]
+	objet, tenue, decor = variantes[variante % len(variantes)]
 	corps = ", ".join(_accord(t, f) for t in tirage)
 	il = "Elle" if f else "Il"
 	sujet = (une_f if f else un_m) + (f" {corps}" if corps else "") + (f", {_accord(marqueur, f)}" if marqueur else "")
+	# Lot de Lutecia (10/10) : des tenanciers trop vieux, SURTOUT les humains — sans repère de lignée,
+	# le modèle les vieillit (consigne de l'auteur). L'âge tiré est donc redit, en interdiction.
+	age = (f"Son âge — {_accord(tirage[0], f)} — doit se lire clairement : ne le vieillis pas, aucune "
+		   f"ride ni aucun cheveu blanc que cet âge ne justifie pas. ") if tirage else ""
+	# Lot de Chartres (10/10) : hobbit et naine peints à taille humaine DANS leur boutique — le seul
+	# repère « un humain au même plan » ne suffit pas sans humain à côté (pendant de la façade).
+	echelle = ""
+	if race in ("hobbit", "nain"):
+		echelle = (f"Garde sa petite taille dans la boutique : le comptoir lui arrive à la poitrine, le "
+				   f"mobilier et les outils sont faits pour des humains et paraissent grands à côté "
+				   f"{"d'elle" if f else "de lui"}, et tout humain présent {'la' if f else 'le'} dépasse nettement. ")
+		if client in TAILLES:
+			echelle += comparatif_client(race, client, f)
 	return (f"Portrait illustré d'un personnage de fantasy médiévale, format paysage large. "
 			# Pas de « Telluris » : le mot finissait peint en enseigne (essai des façades, 08/10).
-			f"{sujet}. {il} {qui} à {cite_nom}, dans un monde médiéval fantastique. "
+			f"{sujet}. {age}{il} {qui} à {cite_nom}, dans un monde médiéval fantastique. "
 			# Lot de Lutecia (10/10) : des tenanciers peints au milieu de la rue (consigne de l'auteur).
 			f"La scène se passe À L'INTÉRIEUR de sa boutique, jamais dans la rue : {il.lower()} se tient "
 			f"derrière son comptoir, légèrement décalé{'e' if f else ''} du centre, et regarde droit vers le "
 			f"spectateur avec l'assurance d'un{'e' if f else ''} commerçant{'e' if f else ''} ; "
-			f"{il.lower()} lui présente {objet}. "
-			f"Tenue de travail usée et crédible : {tenue}. Tout autour, l'intérieur de la boutique : {decor}. "
+			f"{il.lower()} lui présente un produit de son métier — {objet}, par exemple, ou tout autre qui "
+			f"te paraît plus parlant. {echelle}Tenue de travail usée et crédible, à inventer : on pourrait y voir "
+			f"{tenue}, mais rien n'est imposé. Tout autour, l'intérieur de la boutique, par exemple : {decor}. "
+			f"{LIBERTE_FR} "
 			f"La rue n'apparaît qu'au fond, petite, à travers la porte ou la vitrine. "
 			f"{FOULE_FR} {STYLE_FR}")
 
 
 # ══ Façade de boutique ou d'auberge (§1 bis, en anglais) ═══════════════════════════
 
-# Métier : (boutique, marchandises exposées). Mêmes catégories que `METIERS` (verrouillé par test).
-METIERS_EN = {
-	"apothicairerie": ("apothecary shop", "shelves of jars and vials, bunches of dried herbs, mortar and pestle"),
-	"armurerie": ("armorer's forge and shop", "racks of swords and spears, chainmail shirts, helmets, glowing forge"),
-	"atelier_d_artisan": ("woodcarver's workshop", "carved wooden boxes, bowls and chairs, workbench with tools"),
-	"atelier_de_cirier": ("chandler's workshop", "bunches of hanging candles, large wax tapers, vats of wax, honeycombs"),
-	"atelier_de_l_empenneur": ("fletcher's workshop", "bundles of arrows, sheaves of feathers, straight wooden shafts"),
-	"bijouterie": ("jeweler's shop", "counter with open jewel cases, rings, necklaces, small precision scale"),
-	"boucherie": ("butcher's shop", "meat hanging from hooks, wooden chopping block, cuts of meat on the counter"),
-	"boulangerie": ("bakery", "baskets of golden loaves and brioches, bread oven glowing inside"),
-	"grande_boulangerie": ("large master bakery", "several glowing bread ovens, bakers' boys at work, piles of loaves, pastries and festive bread crowns"),
-	"bourrellerie": ("saddler's and harness maker's shop", "saddles, harnesses, horse collars and straps hanging on the walls"),
-	"boyauderie": ("gut-string maker's workshop", "gut strings drying on poles, soaking tubs"),
-	"brosserie": ("brush maker's shop", "brushes, brooms and paintbrushes of every size"),
-	"corderie": ("rope maker's workshop", "coils of hemp rope, rope-making wheel"),
-	"cordonnerie": ("cobbler's shop", "rows of leather boots and shoes, shoe lasts, workbench"),
-	"cuisine": ("cookshop", "pots on the fire, roasting spit, steaming stew bowls, tables for travelers"),
-	"etable": ("stable", "wooden stalls, hay bales, a mule and a pony, harnesses"),
-	"fletcher": ("bowyer and fletcher shop", "longbows hanging, bundles of arrows, quivers, straw targets"),
-	"fumoir": ("smokehouse", "hams, sausages and fish hanging in the smoke, smoldering hearth"),
-	"jardinier": ("gardener's shop", "potted plants, seedlings, baskets of vegetables, garden tools"),
-	"laboratoire_d_alchimie": ("alchemist's laboratory", "alembics, retorts, glowing vials, open grimoires"),
-	"lutherie": ("luthier's workshop", "lutes, fiddles and harps hanging, varnish pots"),
-	"maroquinerie": ("leather goods shop", "leather bags, purses, belts and satchels on display"),
-	"necromancie": ("necromancer's shop", "skulls, bones, black candles, murky jars, dark grimoires"),
-	"negociant": ("merchant trading house", "chests, bales of goods, barrels, ledgers and a balance scale"),
-	"plumasserie": ("plumassier's shop", "bouquets of colorful feathers, plumed hats, feather fans"),
-	# « barrels of salt » → des sacs marqués « SALT » (lot du 09/10).
-	"salaison": ("salting house", "open barrels heaped with coarse white salt, hanging hams and dry sausages"),
-	"savonnerie": ("soap maker's shop", "stacked bars of soap, cauldron, perfume flasks"),
-	"scriptorium": ("scriptorium and bookshop", "writing desks, inkwells, parchments, stacks of leather-bound books"),
-	"tabletterie": ("bone and ivory carver's shop", "carved combs, dice, chess sets, small bone boxes"),
-	"tannerie": ("tannery", "hides stretched on frames, tanning vats"),
-	"taxidermie": ("taxidermist's cabinet", "stuffed animals, deer heads, specimen jars"),
-	"tissage": ("weaver's workshop", "loom, rolls of colorful fabric"),
-}
+# Métier : (boutique, marchandises exposées), 10 variantes de marchandises (dev/gabarits_metiers.py).
+# Mêmes catégories que `METIERS` (verrouillé par test).
+METIERS_EN = {cat: (boutique, variantes[0]) for cat, (boutique, variantes) in FACADE_VARIANTES.items()}
 
 # Toponymes d'enseigne → décor de la rue (`{precision_lieu}` + `{repere_cite}` du §1). Clés =
 # `TOPONYMES_PAR_LIEU[cite]` (verrouillé par test). Repères réels, aucun symbole religieux.
@@ -275,6 +286,15 @@ TRAITS_EN = {
 	"d'âge mûr": "middle-aged",
 	"âgé{e}": "old",
 	"très âgé{e}": "very old",
+	"d'une vingtaine d'années": "in their twenties",
+	"jeune adulte": "young adult",
+	"d'une trentaine d'années": "in their thirties",
+	"d'une quarantaine d'années": "in their forties",
+	"grisonnant{e}, la cinquantaine": "greying, about fifty",
+	"élancé{e}": "slender",
+	"trapu{e}": "stocky",
+	"aux cheveux bouclés": "curly hair",
+	"aux cheveux courts": "short hair",
 	"maigre": "skinny",
 	"sec{he}": "wiry",
 	"de corpulence ordinaire": "of average build",
@@ -305,18 +325,21 @@ TRAITS_EN = {
 # Lot de Rhemi (09/10) : « as in the Lord of the Rings films » → costumes de film en série (hobbits
 # tous en gilet vert, elfes tous blonds, ogres tous chauves torse nu). L'auteur préfère la foule
 # d'Auxerre : chaque passant DIFFÉRENT — d'où les variations explicites par lignée.
+# Répartition ÉGALE entre les cinq Lignées (consigne de l'auteur, 10/10) — cf. FOULE_FR.
 FOULE = ("A lively, varied crowd of ogres, dwarves, halflings, elves and humans goes about its business in "
-		 "the street, every passer-by different in age, build, hair and outfit, never the same costume "
+		 "the street, in EQUAL numbers: roughly as many ogres as dwarves, halflings, elves and humans, "
+		 "evenly mixed — humans are no more numerous than any other people, even when the shopkeeper is "
+		 "human. Every passer-by is different in age, build, hair and outfit, never the same costume "
 		 "twice: elves with fine faces and slightly pointed ears, with dark, auburn, black, silver or fair "
 		 "hair, in rich robes, travel cloaks or elegant leather armor; dwarves only waist-high to the "
-		 "humans, the men with red, black, grey or white beards, the women always beardless with braided hair, in plate armor, smith's aprons or "
-		 "merchant clothes; halflings the height of a human child but grown adults with adult faces, "
-		 "plump or slim, young or wrinkled, barefoot with curly hair, in colorful waistcoats and skirts; "
+		 "humans, the men with red, black, grey or white beards, the women always beardless with braided "
+		 "hair, in plate armor, smith's aprons or merchant clothes; halflings the height of a human child "
+		 "but grown adults with adult faces, plump or slim, young or wrinkled, barefoot with curly hair, in "
+		 "colorful waistcoats and skirts; "
 		 # Jamais verts (consigne de l'auteur, 09/10) : les teints restent humains, en plus rude.
-		 "huge ogres with human skin tones, weathered, ruddy, tanned or ashen, "
-		 "never green, in "
-		 "tunics, furs or armor, towering over the crowd; humans of every origin: adventurers, guards, "
-		 "merchants, pilgrims, peasants. Everyone wears medieval clothing; nothing modern.")
+		 "huge ogres with human skin tones, weathered, ruddy, tanned or ashen, never green, in tunics, furs "
+		 "or armor, towering over the crowd; humans of every origin: adventurers, guards, merchants, "
+		 "pilgrims, peasants. Everyone wears medieval clothing; nothing modern.")
 # Style d'Auxerre (§0.1), préféré par l'auteur au photoréaliste du lot de Rhemi (09/10).
 STYLE = ("Detailed semi-realistic medieval fantasy illustration in the style of a high-end narrative 2D "
 		 "RPG: rich digital painting, warm natural light, warm earthy palette with touches of vivid color "
@@ -349,13 +372,17 @@ def quartier_de(label, cite):
 	return None
 
 
-def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label):
+def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label, variante=0, lid=None):
 	"""PURE. Prompt du gabarit §1 bis, en phrases. Ni le nom de la boutique ni celui du tenancier.
 	Le tenancier EST la personne de l'image 1 (son portrait, joint en référence) ; lignée et traits
 	— ceux qui ont servi à générer ce portrait — ne font que la confirmer."""
-	boutique, marchandises = METIERS_EN[categorie]
+	boutique, variantes = FACADE_VARIANTES[categorie]
+	marchandises = variantes[variante % len(variantes)]
 	t = quartier_de(label, cite)
 	lieu = QUARTIERS_EN[cite][t] if t else f"in a street of the walled city of {cite_nom}"
+	# Boutique HORS LES MURS (`HORS_LES_MURS`) : son hameau remplace la rue de la cité.
+	situation = (f"near the city of {cite_nom}, {HORS_LES_MURS[lid]}" if lid in HORS_LES_MURS
+				 else f"in the city of {cite_nom}, {lieu}")
 	# `race` None : tenancier d'un portrait EXISTANT dont on ignore la lignée (mode doublons) — la
 	# référence seule le décrit, toute précision risquerait de la contredire.
 	if race:
@@ -366,6 +393,9 @@ def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label):
 	else:
 		desc = list(traits)
 	tenancier = f" ({', '.join(desc)})" if desc else ""
+	# L'âge tiré pour le portrait est redit (consigne de l'auteur, 10/10 : tenanciers vieillis).
+	if traits:
+		tenancier += "; the shopkeeper looks exactly the age stated, never older"
 	# Petites lignées : sans humain à côté, le modèle les grandissait à l'intérieur de la boutique
 	# (hobbit de « La Besogne des Halles », 10/10) — l'échelle doit tenir AUSSI derrière le comptoir.
 	echelle = ""
@@ -378,7 +408,7 @@ def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label):
 	return (f"The person shown in image 1 is the shopkeeper: keep exactly the same face, hair, facial hair, "
 			f"body, skin and clothes as in image 1{tenancier}, but NOT the same pose or expression. "
 			f"Do not reuse the background of image 1. Show this shopkeeper at work in the ground-floor "
-			f"shop of a medieval fantasy {boutique} in the city of {cite_nom}, {lieu}, "
+			f"shop of a medieval fantasy {boutique} {situation}, "
 			f"busy with the trade, absorbed in the task, not looking at the camera, not posing, not "
 			# « open front and market stall » donnait de toutes petites échoppes (lot de Chartres, 10/10).
 			f"presenting anything to the viewer. The shop is a solid, permanent town house of two or "
@@ -393,14 +423,39 @@ def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label):
 			# Lot de Lutecia (10/10) : un faux nom peint sur l'écriteau de « L'Herbier de la Grève ».
 			f"No hanging shop sign, no signboard, no name board or plaque above the door or window. "
 			f"The goods are displayed on shelves, racks and counters seen through the window and the "
-			f"door, and on the shutter counter, and are immediately recognizable: {marchandises}."
+			f"door, and on the shutter counter, and are immediately recognizable — for instance "
+			f"{marchandises}, or any other goods of the trade you find more telling. {LIBERTE}"
 			f"{echelle} {FOULE} {STYLE}")
 
 
-def prompt_auberge(cite, cite_nom, quartier):
-	"""PURE. Façade d'auberge (§1 bis sans tenancier : aucun PNJ n'y est posté). Aucun nom propre."""
-	lieu = QUARTIERS_EN.get(cite, {}).get(quartier) or f"in a street of the walled city of {cite_nom}"
-	return (f"The front of a large medieval fantasy inn and tavern in the city of {cite_nom}, {lieu}. The inn "
+# Lieux HORS LES MURS : leur décor remplace la rue de la cité (consigne de l'auteur, 10/10 :
+# « Le Relais de l'Eure » est un relais de hameau, pas une auberge de ville).
+HORS_LES_MURS = {
+	"lieu:le_relais_de_l_eure": ("in a small hamlet outside the walls of Chartres, on the road along the "
+								 "river Eure: a handful of farmhouses, a stone well, fields and a few trees "
+								 "around, the city's ramparts and the two cathedral spires far in the distance"),
+	# Même hameau que le relais (consigne de l'auteur, 10/10).
+	"lieu:le_sabot_ferre_de_la_basse_ville": (
+		"in the same small hamlet outside the walls of Chartres as the roadside coaching inn, on the "
+		"road along the river Eure: the inn's stable yard nearby, a few farmhouses, fields and paddocks, "
+		"the city's ramparts and the two cathedral spires far in the distance"),
+	# Devant une porte de rempart, côté extérieur (consigne de l'auteur, 10/10).
+	"lieu:le_sabot_du_tertre": (
+		"just outside a fortified gate of Chartres, outside the city walls: the gate flanked by two round "
+		"towers rises right behind the stable, the ramparts stretch away on both sides, the road runs in "
+		"through the gate, and the cathedral spires rise above the walls"),
+}
+
+
+def prompt_auberge(cite, cite_nom, quartier, lid=None):
+	"""PURE. Façade d'auberge (§1 bis sans tenancier : aucun PNJ n'y est posté). Aucun nom propre.
+	`lid` dans `HORS_LES_MURS` : relais de hameau, hors de la cité."""
+	if lid in HORS_LES_MURS:
+		cadre = f"a roadside coaching inn {HORS_LES_MURS[lid]}"
+	else:
+		lieu = QUARTIERS_EN.get(cite, {}).get(quartier) or f"in a street of the walled city of {cite_nom}"
+		cadre = f"inn and tavern in the city of {cite_nom}, {lieu}"
+	return (f"The front of a large medieval fantasy {cadre}. The inn "
 			# Pas d'enseigne : « a hanging sign showing only a painted emblem » → faux texte peint ; sans
 			# enseigne, il l'a écrit sur un bandeau de façade (essais du 09/10).
 			f"fills about 80% of the image, seen from the street in a three-quarter view: a tall stone and "
@@ -431,7 +486,7 @@ def entrees_de_cite(lieux, cite, cite_nom, sauf=()):
 		if cat == "auberge" and lieu.get("image"):
 			q = QUARTIERS_AUBERGES.get(lid) or quartier_de(label, cite)
 			entrees.append({"key": lid, "categorie": cat, "quartier": q, "portrait": None,
-							"image": {"base": base_image(lieu["image"], cite), "prompt": prompt_auberge(cite, cite_nom, q)}})
+							"image": {"base": base_image(lieu["image"], cite), "prompt": prompt_auberge(cite, cite_nom, q, lid)}})
 			continue
 		pnj = (lieu.get("pnj") or [{}])[0]
 		m = PORTRAIT_GENERIQUE.match(str(pnj.get("portrait") or ""))
@@ -441,13 +496,14 @@ def entrees_de_cite(lieux, cite, cite_nom, sauf=()):
 		race = "humain" if m.group(1) == "humaine" else m.group(1)
 		sexe = m.group(2).upper()
 		tirage = tirage_tenancier(random.Random(zlib.crc32(lid.encode())))
+		v = variante_de(lid)
 		entrees.append({
 			"key": lid, "categorie": cat, "race": race, "sexe": sexe, "tenancier": pnj.get("nom"),
-			"quartier": quartier_de(label, cite), "tirage": tirage,
+			"quartier": quartier_de(label, cite), "tirage": tirage, "variante": v,
 			"portrait": {"base": f"marchand_{race}_{sexe.lower()}_{cat}",
-						 "prompt": prompt_tenancier(race, sexe, cat, cite_nom, tirage)},
+						 "prompt": prompt_tenancier(race, sexe, cat, cite_nom, tirage, v, client_de(lid))},
 			"image": {"base": base_image(lieu["image"], cite),
-					  "prompt": prompt_magasin(cat, race, sexe, traits_en(tirage), cite, cite_nom, label)},
+					  "prompt": prompt_magasin(cat, race, sexe, traits_en(tirage), cite, cite_nom, label, v)},
 		})
 	return entrees, ignores
 
@@ -474,20 +530,26 @@ def _entree_refaite(lid, lieu, cite, cite_nom, refaire_por, refaire_img, conserv
 		conserves["portraits"][lid] = por
 	if not refaire_img:
 		conserves["images"][lid] = lieu.get("image")
+	v = variante_de(lid)
 	return {"key": lid, "categorie": cat, "race": race, "sexe": sexe, "tenancier": pnj.get("nom"),
-			"quartier": quartier_de(label, cite), "tirage": tirage if refaire_por else None,
+			"quartier": quartier_de(label, cite), "tirage": tirage if refaire_por else None, "variante": v,
 			"doublon": [x for x, oui in (("portrait", refaire_por), ("image", refaire_img)) if oui],
 			"portrait": {"base": f"marchand_{race or 'humain'}_{(sexe or 'm').lower()}_{cat}",
-						 "prompt": prompt_tenancier(race, sexe, cat, cite_nom, tirage) if refaire_por else None},
+						 "prompt": prompt_tenancier(race, sexe, cat, cite_nom, tirage, v, client_de(lid))
+						 if refaire_por else None},
 			"image": {"base": base_image(lieu.get("image"), cite),
 					  "prompt": prompt_magasin(cat, race, sexe, traits_en(tirage) if refaire_por else [],
-											   cite, cite_nom, label)}}
+											   cite, cite_nom, label, v, lid)}}
 
 
-def entrees_a_refaire(lieux, cite, cite_nom, cles):
+def entrees_a_refaire(lieux, cite, cite_nom, cles, ecraser=False, facade_seule=False):
 	"""PURE. (entrées, conservés, ignorés) pour des boutiques DÉSIGNÉES (revue de l'auteur) : la
 	façade est toujours refaite ; le portrait aussi s'il n'est pas un portrait de marchand
-	(`marchand_*`) — un guerrier ou un clerc pris dans le fonds des personnages."""
+	(`marchand_*`) — un guerrier ou un clerc pris dans le fonds des personnages.
+	`ecraser` (demande EXPLICITE de l'auteur, 10/10 : naine barbue, hobbit à taille humaine) :
+	portrait ET façade refaits, et réécrits SOUS LEURS NOMS ACTUELS (`ecrase`) — seule exception à
+	« jamais d'écrasement », le lieu n'a alors rien à réimporter. `facade_seule` : seule la façade
+	est écrasée, le portrait est gardé et joint (règle ordinaire pour un portrait non marchand)."""
 	entrees, ignores = [], []
 	conserves = {"portraits": {}, "images": {}}
 	for lid in sorted(cles):
@@ -495,11 +557,23 @@ def entrees_a_refaire(lieux, cite, cite_nom, cles):
 		if not lieu or lieu.get("lieu_parent") != cite:
 			ignores.append(f"{lid} (absent de {cite})")
 			continue
+		if lieu.get("categorie") == "auberge":
+			# Pas de tenancier : seule la façade est refaite, au prochain nom libre (l'ancienne reste).
+			q = QUARTIERS_AUBERGES.get(lid) or quartier_de(lieu.get("label"), cite)
+			entrees.append({"key": lid, "categorie": "auberge", "quartier": q, "portrait": None,
+							"doublon": ["image"],
+							"image": {"base": base_image(lieu.get("image"), cite),
+									  "prompt": prompt_auberge(cite, cite_nom, q, lid)}})
+			continue
 		if lieu.get("categorie") not in METIERS:
 			ignores.append(f"{lid} ({lieu.get('categorie')} : métier sans gabarit)")
 			continue
 		por = str(((lieu.get("pnj") or [{}])[0]).get("portrait") or "")
-		entrees.append(_entree_refaite(lid, lieu, cite, cite_nom, not por.startswith("marchand_"), True, conserves))
+		refait_por = (ecraser and not facade_seule) or not por.startswith("marchand_")
+		e = _entree_refaite(lid, lieu, cite, cite_nom, refait_por, True, conserves)
+		if ecraser:
+			e["ecrase"] = {"image": lieu.get("image")} | ({"portrait": por} if refait_por else {})
+		entrees.append(e)
 	return entrees, conserves, ignores
 
 
@@ -739,14 +813,15 @@ def _mesures(octets):
 	return ImageStat.Stat(g).stddev[0], ImageStat.Stat(voisins).mean[0]
 
 
-def _ecrire_image(dossier, base, part, pris):
-	"""Écrit l'image d'une réponse Gemini sous le prochain nom libre ; (nom, None) ou (None, motif)."""
+def _ecrire_image(dossier, base, part, pris, nom_force=None):
+	"""Écrit l'image d'une réponse Gemini sous le prochain nom libre — ou sous `nom_force` (mode
+	`--ecraser`, qui REMPLACE le fichier) ; (nom, None) ou (None, motif)."""
 	octets = base64.b64decode(part["inlineData"]["data"])
 	rejet = image_degeneree(*_mesures(octets))
 	if rejet:
 		return None, f"image {rejet}"
 	ext = ".jpg" if "jpeg" in part["inlineData"].get("mimeType", "") else ".png"
-	nom = nom_libre(dossier, base, ext, pris)
+	nom = nom_force or nom_libre(dossier, base, ext, pris)
 	with open(os.path.join(dossier, nom), "wb") as f:
 		f.write(octets)
 	return nom, None
@@ -909,7 +984,7 @@ def noms_manquants(lieux, cite, entrees, repertoire, tirer_nom):
 	return noms, inconnus
 
 
-def preparer(cite, sauf, doublons=False, refaire=(), source=None):
+def preparer(cite, sauf, doublons=False, refaire=(), source=None, ecraser=False, facade_seule=False):
 	lieux = _lieux(source)
 	# Boutiques pas encore importées : complétées depuis l'import du peuplement (le dump prime).
 	imp = os.path.join(RACINE, "jsons", f"{_slug(cite)}_magasins_a_importer.json")
@@ -923,7 +998,7 @@ def preparer(cite, sauf, doublons=False, refaire=(), source=None):
 		entrees, conserves, ignores = (entrees_doublons(lieux, cite, cite_nom) if doublons
 									   else ([], {"portraits": {}, "images": {}}, []))
 		# `--refaire` l'emporte : l'entrée désignée REMPLACE celle des doublons.
-		e_r, c_r, i_r = entrees_a_refaire(lieux, cite, cite_nom, refaire)
+		e_r, c_r, i_r = entrees_a_refaire(lieux, cite, cite_nom, refaire, ecraser, facade_seule)
 		entrees = [e for e in entrees if e["key"] not in refaire] + e_r
 		for genre in conserves:
 			conserves[genre] = {k: v for k, v in conserves[genre].items() if k not in refaire} | c_r[genre]
@@ -1001,7 +1076,8 @@ def recuperer(cite):
 			erreurs.append(f"{cle} : {json.dumps(r.get('error') or r)[:200]}")
 			continue
 		dossier = DOSSIER_PNJ if genre == "portrait" else DOSSIER_TOWNS
-		nom, motif = _ecrire_image(dossier, e[genre]["base"], part, set(cible.values()))
+		nom, motif = _ecrire_image(dossier, e[genre]["base"], part, set(cible.values()),
+								   (e.get("ecrase") or {}).get(genre))
 		if not nom:
 			erreurs.append(f"{cle} : {motif}")
 			continue
@@ -1227,6 +1303,10 @@ def main():
 	p.add_argument("--categorie", default="", help="portrait_facade : métier (clé de METIERS)")
 	p.add_argument("--source", default="",
 				   help="preparer/appliquer : export de lieux plus frais que le dump (il le remplace pour ces lieux)")
+	p.add_argument("--facade-seule", action="store_true",
+				   help="preparer --refaire --ecraser : n'écraser que la façade, garder le portrait")
+	p.add_argument("--ecraser", action="store_true",
+				   help="preparer --refaire : portrait ET façade refaits, réécrits sous leurs noms actuels")
 	p.add_argument("--refaire", default="",
 				   help="preparer : boutiques à refaire (façade ; portrait aussi s'il n'est pas marchand_*), séparées par des virgules")
 	p.add_argument("--doublons", action="store_true",
@@ -1234,7 +1314,7 @@ def main():
 	a = p.parse_args()
 	if a.etape == "preparer":
 		preparer(a.cite, {s for s in a.sauf.split(",") if s}, a.doublons,
-				 {s for s in a.refaire.split(",") if s}, a.source or None)
+				 {s for s in a.refaire.split(",") if s}, a.source or None, a.ecraser, a.facade_seule)
 	elif a.etape == "essai":
 		essai(a.cite, {s for s in a.seulement.split(",") if s}, a.limite)
 	elif a.etape == "portrait_facade":

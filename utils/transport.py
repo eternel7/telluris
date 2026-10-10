@@ -235,12 +235,25 @@ def nettoyer_recherche_lieu(brut) -> str:
 	return " ".join(texte.split())[:RECHERCHE_LIEU_MAX]
 
 
+_ARTICLES_TETE = ("les ", "le ", "la ", "l'")
+
+
+def _sans_article(cle: str) -> str:
+	"""Clé casefoldée privée de son article de tête : le joueur dit « Relais de l'Eure »
+	pour l'enseigne « Le Relais de l'Eure »."""
+	cle = cle.replace("’", "'")
+	for art in _ARTICLES_TETE:
+		if cle.startswith(art) and len(cle) > len(art):
+			return cle[len(art):].lstrip()
+	return cle
+
+
 def chercher_lieu_nomme(nom: str, giver_doc: dict, find_docs_fn) -> dict:
 	"""Cherche `nom` parmi les lieux du même `lieu_parent` que `giver_doc` — un marchand ne
 	connaît que sa ville, seule échelle où `indice_destination` donne une direction.
-	`giver_doc` lui-même est exclu. Renvoie {"exact": (id, nom)} (casse ignorée),
-	{"suggestions": [nom, …]} (au plus SUGGESTIONS_MAX, les plus ressemblants d'abord),
-	ou {} si rien n'approche."""
+	`giver_doc` lui-même est exclu. Renvoie {"exact": (id, nom)} (casse ignorée ; article de
+	tête ignoré si un SEUL lieu correspond), {"suggestions": [nom, …]} (au plus
+	SUGGESTIONS_MAX, les plus ressemblants d'abord), ou {} si rien n'approche."""
 	parent_id = (giver_doc or {}).get("lieu_parent")
 	if not nom or not parent_id:
 		return {}
@@ -252,12 +265,33 @@ def chercher_lieu_nomme(nom: str, giver_doc: dict, find_docs_fn) -> dict:
 	for lieu_id, label in candidats:
 		if label.casefold() == cle:
 			return {"exact": (lieu_id, label)}
+	# Article de tête omis ou différent : exact seulement s'il est sans ambiguïté.
+	nu = _sans_article(cle)
+	sans_art = [(lieu_id, label) for lieu_id, label in candidats
+				if _sans_article(label.casefold()) == nu]
+	if len(sans_art) == 1:
+		return {"exact": sans_art[0]}
 	# Comparaison sans casse, puis on rend les libellés tels qu'écrits sur l'enseigne.
 	par_cle = {}
 	for _, label in candidats:
 		par_cle.setdefault(label.casefold(), label)
 	proches = difflib.get_close_matches(cle, list(par_cle), n=SUGGESTIONS_MAX)
 	return {"suggestions": [par_cle[p] for p in proches]} if proches else {}
+
+
+def choix_suggestions(noms: list, noeud_id: str, choix_id: str) -> list:
+	"""Une réplique cliquable du joueur par nom suggéré, au format des choix de
+	`pnj.noeud_client`. `rejouer` = le choix de saisie qui a mené ici (`noeud_id`/`choix_id`)
+	et le nom EXACT de l'enseigne : le client le renvoie tel quel, le serveur revalide ce
+	choix et la recherche aboutit sur `trouve`. Aucun contenu à écrire dans les dialogues."""
+	return [{
+		"id": choix_id,
+		"label": f"Oui, {nom}.",
+		"action": False,
+		"marque": None,
+		"saisie": False,
+		"rejouer": {"noeud": noeud_id, "saisie": nom},
+	} for nom in noms]
 
 
 # ---------------------------------------------------------------------------

@@ -304,3 +304,124 @@ def test_noms_manquants_selon_la_lignee_et_jamais_un_nom_pris():
 	noms, inconnus = noms_manquants(lieux, "lieu:lutecia", entrees, {}, tirer)
 	assert noms == {"lieu:a": "nain-F", "lieu:b": "ogre-M"} and inconnus == []
 	assert lignee_du_tenancier(lieux["lieu:b"]) is None
+
+
+def test_le_metier_suggere_sans_imposer():
+	"""Consigne de l'auteur (10/10) : trois jardinières au même chapeau et au même panier. Objet,
+	tenue et marchandises du métier sont des EXEMPLES, et la liberté de composition est dite."""
+	p = prompt_tenancier("humain", "F", "jardinier", "Lutecia", ["jeune", "solide", "aux cheveux roux", "le regard vif"])
+	assert "par exemple" in p and "rien n'est imposé" in p and "allure qui n'appartient qu'à lui" in p
+	f = prompt_magasin("jardinier", "humain", "F", [], "lieu:lutecia", "Lutecia", "X")
+	assert "for instance" in f and "character of its own" in f
+
+
+def test_dix_variantes_par_metier_tirees_par_lieu():
+	"""Consigne de l'auteur (10/10) : 10 variantes par gabarit de métier, chacune DIFFÉRENTE ; un
+	lieu garde la sienne d'un rejeu à l'autre, deux jardineries n'ont pas forcément la même."""
+	from dev.gabarits_metiers import FACADE, PORTRAIT
+	from dev.gen_images_magasins import NB_VARIANTES, variante_de
+	assert set(PORTRAIT) == set(FACADE) == set(METIERS)
+	for cat, (_qui, variantes) in PORTRAIT.items():
+		assert len(variantes) == NB_VARIANTES and len(set(variantes)) == NB_VARIANTES, cat
+		assert len({v[0] for v in variantes}) == NB_VARIANTES, cat   # l'objet présenté change
+	for cat, (_b, variantes) in FACADE.items():
+		assert len(variantes) == NB_VARIANTES and len(set(variantes)) == NB_VARIANTES, cat
+	assert variante_de("lieu:x") == variante_de("lieu:x")
+	assert len({variante_de(f"lieu:jardin_{i}") for i in range(30)}) > 5
+	tirage = ["jeune", "solide", "aux cheveux roux", "le regard vif"]
+	objets = {PORTRAIT["jardinier"][1][v][0] for v in range(NB_VARIANTES)}
+	for v in range(NB_VARIANTES):
+		p = prompt_tenancier("humain", "F", "jardinier", "Lutecia", tirage, v)
+		assert [o for o in objets if o in p] == [PORTRAIT["jardinier"][1][v][0]]
+		assert FACADE["jardinier"][1][v] in prompt_magasin("jardinier", "humain", "F", [], "lieu:lutecia", "Lutecia", "X", v)
+
+
+def test_tenanciers_adultes_de_tous_ages_et_foule_a_parts_egales():
+	"""Consigne de l'auteur (10/10) : tenanciers trop vieux par défaut ; foule à parts ÉGALES entre
+	les cinq Lignées, même quand le tenancier est humain (elle était alors trop humaine)."""
+	vieux = [a for a in AGES if "âgé" in a]
+	assert len(vieux) == 1 and len(AGES) >= 8 and "très âgé{e}" not in AGES
+	assert "voûté{e}" not in CORPS
+	for a in AGES + CORPS + CHEVEUX:
+		assert a in TRAITS_EN, a
+	ages = [tirage_tenancier(random.Random(i))[0] for i in range(400)]
+	assert sum(a in vieux for a in ages) / len(ages) < 0.25
+	f = prompt_magasin("boucherie", "humain", "M", [], "lieu:lutecia", "Lutecia", "X")
+	assert "EQUAL numbers" in f and "even when the shopkeeper is human" in f
+	p = prompt_tenancier("humain", "M", "boucherie", "Lutecia", ["jeune adulte"])
+	assert "proportions égales" in p and "même si le tenancier est humain" in p
+
+
+def test_l_age_tire_est_redit_pour_ne_pas_vieillir_le_tenancier():
+	"""Consigne de l'auteur (10/10) : tenanciers trop vieux, surtout les humains."""
+	tirage = ["d'une trentaine d'années", "solide", "aux cheveux noirs", "le regard vif"]
+	p = prompt_tenancier("humain", "M", "boucherie", "Lutecia", tirage)
+	assert "Son âge — d'une trentaine d'années — doit se lire clairement : ne le vieillis pas" in p
+	f = prompt_magasin("boucherie", "humain", "M", traits_en(tirage), "lieu:lutecia", "Lutecia", "X")
+	assert "in their thirties" in f and "never older" in f
+	assert "never older" not in prompt_magasin("boucherie", None, None, [], "lieu:lutecia", "Lutecia", "X")
+
+
+def test_ecraser_refait_portrait_et_facade_sous_leurs_noms():
+	"""Demande de l'auteur (10/10) : naine barbue, hobbit à taille humaine — on remplace les fichiers."""
+	lieux = {d["_id"]: d for d in (
+		_boutique("lieu:m", "lieu:chartres", "maroquinerie_europe_chartres01.jpg", "marchand_nain_f_maroquinerie03.jpg",
+				  "maroquinerie", "pnj:marchand_maroquinerie"),
+	)}
+	(e,), conserves, _ = entrees_a_refaire(lieux, "lieu:chartres", "Chartres", {"lieu:m"}, ecraser=True)
+	assert e["doublon"] == ["portrait", "image"] and conserves == {"portraits": {}, "images": {}}
+	assert (e["race"], e["sexe"]) == ("nain", "F")   # lignée relue sur le fichier écrasé
+	assert e["ecrase"] == {"portrait": "marchand_nain_f_maroquinerie03.jpg", "image": "maroquinerie_europe_chartres01.jpg"}
+	assert "sans aucune barbe" in e["portrait"]["prompt"] and "no beard at all" in e["image"]["prompt"]
+	(e2,), _, _ = entrees_a_refaire(lieux, "lieu:chartres", "Chartres", {"lieu:m"})
+	assert "ecrase" not in e2 and e2["doublon"] == ["image"]
+
+
+def test_relais_hors_les_murs_refait_sans_ecraser():
+	"""Consigne de l'auteur (10/10) : « Le Relais de l'Eure » est dans un hameau hors de Chartres ;
+	l'image existante est gardée (nouvelle façade au prochain nom libre, rien d'écrasé)."""
+	lieux = {"lieu:le_relais_de_l_eure": {"_id": "lieu:le_relais_de_l_eure", "type": "lieu",
+										  "lieu_parent": "lieu:chartres", "categorie": "auberge",
+										  "label": "Le Relais de l'Eure", "image": "auberge_europe_chartres04.jpg"}}
+	(e,), conserves, ignores = entrees_a_refaire(lieux, "lieu:chartres", "Chartres", {"lieu:le_relais_de_l_eure"})
+	assert ignores == [] and e["portrait"] is None and "ecrase" not in e
+	assert e["image"]["base"] == "auberge_europe_chartres"
+	assert "hamlet outside the walls of Chartres" in e["image"]["prompt"]
+	assert "in the city of Chartres" not in e["image"]["prompt"]
+	assert "in the city of Chartres" in prompt_auberge("lieu:chartres", "Chartres", None, "lieu:autre")
+
+
+def test_portrait_garde_la_petite_taille_des_hobbits_et_des_nains():
+	"""Lot de Chartres (10/10) : hobbit et naine à taille humaine dans leur portrait."""
+	t = ["jeune adulte", "solide", "aux cheveux noirs", "le regard vif"]
+	assert "Garde sa petite taille dans la boutique" in prompt_tenancier("hobbit", "M", "boyauderie", "Chartres", t)
+	assert "tout humain présent la dépasse" in prompt_tenancier("nain", "F", "maroquinerie", "Chartres", t)
+	assert "petite taille" not in prompt_tenancier("ogre", "F", "boucherie", "Chartres", t)
+
+
+def test_client_a_cote_du_petit_tenancier_avec_comparatif_explicite():
+	"""Consigne de l'auteur (10/10) : échelle CONCRÈTE, client de lignée variable ; entre deux
+	hobbits, comparatif explicite en fois la taille d'un humain."""
+	from dev.gen_images_magasins import client_de, comparatif_client
+	assert "la tête du tenancier arrive à la ceinture du client" in comparatif_client("hobbit", "humain", False)
+	meme = comparatif_client("hobbit", "hobbit", True)
+	assert "0,5 fois la taille d'un humain" in meme and "même taille" in meme and "la tenancière" in meme
+	assert client_de("lieu:x") == client_de("lieu:x")
+	t = ["jeune adulte", "solide", "aux cheveux noirs", "le regard vif"]
+	p = prompt_tenancier("hobbit", "M", "boyauderie", "Chartres", t, 0, "ogre")
+	assert "un client ogre" in p and "1,6 fois" in p
+	assert "Juste à côté" not in prompt_tenancier("humain", "M", "boyauderie", "Chartres", t, 0, "ogre")
+
+
+def test_boutique_hors_les_murs_facade_seule_ecrasee():
+	"""Demande de l'auteur (10/10) : « Le Sabot Ferré de la Basse-Ville » — tenancière naine peinte en
+	géante ; façade refaite dans le hameau du Relais de l'Eure, portrait gardé, fichier écrasé."""
+	lid = "lieu:le_sabot_ferre_de_la_basse_ville"
+	lieux = {lid: _boutique(lid, "lieu:chartres", "etable_europe_chartres02.jpg", "marchand_nain_f_etable07.jpg",
+							"etable", "pnj:marchand_etable")}
+	(e,), conserves, _ = entrees_a_refaire(lieux, "lieu:chartres", "Chartres", {lid}, ecraser=True, facade_seule=True)
+	assert e["doublon"] == ["image"] and e["ecrase"] == {"image": "etable_europe_chartres02.jpg"}
+	assert conserves["portraits"] == {lid: "marchand_nain_f_etable07.jpg"}
+	p = e["image"]["prompt"]
+	assert "same small hamlet outside the walls of Chartres" in p and "in the city of Chartres" not in p
+	assert "small size inside the shop" in p and "no beard at all" in p

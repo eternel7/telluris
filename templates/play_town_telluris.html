@@ -11067,6 +11067,7 @@ async function closeCompagnonSheet() {
 // Panneau plein écran (pattern quêtes/marché). Navigation stateless : chaque choix
 // renvoie le nœud suivant déjà filtré/substitué côté serveur ; `noeud: null` = fin.
 let _pnjNoeudCourant = null;
+let _pnjChoix = [];
 // À QUI l'on parle : les présences étant CUMULABLES, plusieurs boutons 🗣 coexistent et chaque
 // requête nomme son interlocuteur (sans quoi le serveur retomberait sur le premier présent).
 let _pnjCourant = null;
@@ -11111,7 +11112,12 @@ function renderPnjNoeud(noeud) {
 	// pour toi ». Elle est dérivée de la CONDITION du choix côté serveur, donc exacte.
 	// Choix à SAISIE LIBRE : champ texte + bouton ; la valeur part en `saisie` avec le choix.
 	// ⚠️ `maxlength` = transport.RECHERCHE_LIEU_MAX (le serveur borne de toute façon).
-	liste.innerHTML = (noeud.choix || []).map(c => c.saisie
+	// Réplique `rejouer` (nom suggéré par le service direction) : renvoie un AUTRE nœud/choix
+	// avec une saisie toute faite ; lue par index dans `_pnjChoix`, jamais dans l'onclick.
+	_pnjChoix = noeud.choix || [];
+	liste.innerHTML = _pnjChoix.map((c, i) => c.rejouer
+		? `<li><button class="sub-loc-btn" onclick="choisirPnjRejouer(${i})">${escapeHtml(c.label)}</button></li>`
+		: c.saisie
 		? `<li class="pnj-saisie"><input type="text" id="pnj-saisie-${c.id}" maxlength="80"
 				placeholder="Nom du lieu…" onkeydown="if(event.key==='Enter'){choisirPnjSaisie('${c.id}');}">
 			<button class="sub-loc-btn" onclick="choisirPnjSaisie('${c.id}')">${c.label}</button></li>`
@@ -11126,6 +11132,13 @@ function choisirPnjSaisie(choixId) {
 	const valeur = champ ? champ.value.trim() : '';
 	if (!valeur) { if (champ) champ.focus(); return; }
 	choisirPnj(choixId, { saisie: valeur });
+}
+
+function choisirPnjRejouer(index) {
+	const c = _pnjChoix[index];
+	if (!c || !c.rejouer) return;
+	// `noeud` écrase le nœud courant dans le corps envoyé : on rejoue le choix de saisie.
+	choisirPnj(c.id, { noeud: c.rejouer.noeud, saisie: c.rejouer.saisie });
 }
 
 // `btn` = le bouton 🗣 cliqué ; son `data-pnj` dit à qui l'on parle. Sans bouton, le serveur

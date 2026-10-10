@@ -261,6 +261,26 @@ def test_nom_exact_trouve_sans_tenir_compte_de_la_casse():
 		"exact": ("lieu:salaison", "Le Saloir")}
 
 
+def test_article_de_tete_omis_ou_change_trouve_le_lieu():
+	# Le joueur dit « Saloir » ou « la saloir » pour l'enseigne « Le Saloir ».
+	for saisie in ("Saloir", "la saloir", "Les Saloir"):
+		assert transport.chercher_lieu_nomme(saisie, BOUCHERIE, find_docs) == {
+			"exact": ("lieu:salaison", "Le Saloir")}
+	# Élision, apostrophe typographique comprise.
+	assert transport.chercher_lieu_nomme("Étal", SALAISON, find_docs) == {
+		"exact": ("lieu:boucherie", "L'Étal")}
+	assert transport.chercher_lieu_nomme("l’étal", SALAISON, find_docs) == {
+		"exact": ("lieu:boucherie", "L'Étal")}
+
+
+def test_article_omis_ambigu_reste_une_suggestion():
+	lieux = [{"_id": "lieu:a", "type": "lieu", "label": "Le Relais", "lieu_parent": "lieu:ville"},
+			 {"_id": "lieu:b", "type": "lieu", "label": "La Relais", "lieu_parent": "lieu:ville"}]
+	res = transport.chercher_lieu_nomme("Relais", BOUCHERIE, lambda sel: lieux)
+	assert "exact" not in res
+	assert set(res["suggestions"]) == {"Le Relais", "La Relais"}
+
+
 def test_nom_approchant_propose_des_suggestions():
 	res = transport.chercher_lieu_nomme("Le Salloir", BOUCHERIE, find_docs)
 	assert "exact" not in res
@@ -314,9 +334,29 @@ def test_resoudre_direction_reprend_la_phrase_des_courses(monkeypatch):
 	assert suivant == "n_proche"
 	assert dits["recherche"] == "Le Salloir"
 	assert dits["suggestions"].startswith("Le Saloir")
+	assert dits["_noms"][0] == "Le Saloir"
 
 	suivant, dits = rp._resoudre_direction(doc, BOUCHERIE, "Qwxz")
 	assert (suivant, dits) == ("n_inconnu", {"recherche": "Qwxz"})
+
+
+def test_suggestion_cliquable_rejoue_la_saisie_et_trouve_le_lieu(monkeypatch):
+	"""Chaque nom suggéré devient une réplique qui rejoue le choix de saisie d'origine avec
+	le nom EXACT de l'enseigne — ce qui aboutit sur `trouve`."""
+	from routers import pnj as rp
+	monkeypatch.setattr(rp, "get_doc", get_doc)
+	monkeypatch.setattr(rp, "find_docs", find_docs)
+	doc = {"_id": "pnj:marchand_boucherie", "services": {"direction": {"noeuds": {
+		"trouve": "n_trouve", "proche": "n_proche", "inconnu": "n_inconnu"}}}}
+	_, dits = rp._resoudre_direction(doc, BOUCHERIE, "Le Salloir")
+	choix = transport.choix_suggestions(dits["_noms"], "n_demande", "chercher")
+	assert len(choix) == len(dits["_noms"])
+	c = choix[0]
+	assert c["id"] == "chercher" and not c["saisie"] and not c["action"]
+	assert c["rejouer"] == {"noeud": "n_demande", "saisie": "Le Saloir"}
+	assert "Le Saloir" in c["label"]
+	suivant, dits = rp._resoudre_direction(doc, BOUCHERIE, c["rejouer"]["saisie"])
+	assert suivant == "n_trouve" and dits["lieu"] == "Le Saloir"
 
 
 # ── Choix de la destination & de la cargaison ────────────────────────────────────

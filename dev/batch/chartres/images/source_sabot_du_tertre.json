@@ -4,7 +4,7 @@
 		"_rev": "2-e7e4abb80d3402652902e79bcb118995",
 		"type": "lieu",
 		"label": "Le Sabot du Tertre",
-		"image": "etable_europe_chartres03.jpg",
+		"image": "etable_europe_chartres01.jpg",
 		"categorie": "etable",
 		"lieu_parent": "lieu:chartres",
 		"stock_matieres": {},

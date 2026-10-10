@@ -1,0 +1,91 @@
+[
+  {
+    "_id": "item:Cuir_bouilli",
+    "type": "item",
+    "nom": "Cuir bouilli",
+    "icon": "🟫",
+    "description": "Peau trempée dans la poix chaude puis mise en forme sur un moule de bois. En refroidissant, elle devient dure comme de la corne.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [
+      "fabrication_armure"
+    ],
+    "poids": 0.4,
+    "fabrication": {
+      "nom": "en cuir bouilli",
+      "modificateurs": {
+        "bonus_pa": 1,
+        "poids": {
+          "facteur": 1.05
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:Empennage_de_maitre",
+    "type": "item",
+    "nom": "Empennage de maître",
+    "description": "Plumes triées à la parure, refendues et collées trois par trois. La flèche part droite même quand la main tremble.",
+    "icon": "🪶",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [
+      "fabrication_arbalete",
+      "fabrication_arc"
+    ],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "de la Maîtrise",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus_cc": 2,
+        "bonus_initiative": 2,
+        "poids": {
+          "facteur": 0.95
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:Graine_sacree",
+    "type": "item",
+    "nom": "Graine sacrée",
+    "sous_categorie": "",
+    "icon": "🌱",
+    "description": "Graine bénie, recueillie dans un jardin de sanctuaire ; elle porte la vie en germe.",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.01,
+    "fabrication": {
+      "nom": "Sacrée",
+      "modificateurs": {
+        "bonus_pv": 2,
+        "bonus": {
+          "Vol": 1
+        },
+        "effets": {
+          "pv": 5,
+          "regen_pv": 1,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    },
+    "tags": [
+      "fabrication_armure",
+      "fabrication_consommable"
+    ]
+  }
+]

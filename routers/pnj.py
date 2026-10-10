@@ -609,7 +609,8 @@ def _resoudre_direction(pnj_doc: dict, lieu_doc: dict, saisie) -> tuple[str | No
 	if trouve.get("suggestions"):
 		noms = trouve["suggestions"]
 		liste = noms[0] if len(noms) == 1 else ", ".join(noms[:-1]) + " ou " + noms[-1]
-		return noeuds.get("proche"), {"recherche": nom, "suggestions": liste}
+		# `_noms` n'est pas un placeholder : le router le retire pour bâtir les répliques.
+		return noeuds.get("proche"), {"recherche": nom, "suggestions": liste, "_noms": noms}
 	return noeuds.get("inconnu"), {"recherche": nom}
 
 
@@ -720,6 +721,7 @@ async def pnj_dialogue_choix(
 
 	soin = pnj.soin_effectif(pnj_doc, contexte)
 	reponse: dict = {}
+	suggestions_direction: list = []
 	if echues:
 		# Sanction d'une course périmée en cours de dialogue. Un service `transport` qui solde
 		# ensuite une livraison réécrira ce champ avec un payload encore plus frais.
@@ -840,6 +842,10 @@ async def pnj_dialogue_choix(
 	elif action.get("service") == "direction":
 		# Simple consultation : aucun état ne bouge, donc aucun flag à refiltrer.
 		suivant, dits = _resoudre_direction(pnj_doc, lieu_doc, body.get("saisie"))
+		# Les noms suggérés (nœud `proche`) deviennent des répliques cliquables, ajoutées au
+		# nœud rendu plus bas : elles rejouent CE choix de saisie avec le nom exact.
+		suggestions_direction = transport.choix_suggestions(
+			dits.pop("_noms", []), noeud_id, body.get("choix_id"))
 		contexte["placeholders"].update(dits)
 	else:
 		suivant = choix.get("next")
@@ -871,6 +877,8 @@ async def pnj_dialogue_choix(
 		reponse["noeud"] = None
 	else:
 		reponse["noeud"] = pnj.noeud_client(pnj_doc, suivant, contexte, soin)
+		if reponse["noeud"] and suggestions_direction:
+			reponse["noeud"]["choix"] = suggestions_direction + reponse["noeud"]["choix"]
 	# Badge du 🗣 et marques de lieux, sur le contexte DÉJÀ reconstruit par les branches de
 	# service ci-dessus : aucune lecture supplémentaire. Indispensable — accepter une course
 	# doit faire DISPARAÎTRE le « ! » quand le joueur ferme le panneau, sinon le badge paraît
