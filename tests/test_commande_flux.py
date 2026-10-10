@@ -343,3 +343,33 @@ def test_l_etable_fait_fabriquer_avec_la_matiere_du_boucher():
 	mutes = commande.consommer_atelier(_etable(), res["atelier"], None, voisins)
 	assert _qty(boucher, "item:cuir") == 22
 	assert {m["_id"] for m in mutes} == {"lieu:boucher", "lieu:bourrelier"}
+
+
+# ── Fabrication chez la voisine qui a la recette ────────────────────────────────
+
+def test_l_intermediaire_d_un_autre_metier_se_fabrique_chez_la_voisine(monkeypatch):
+	"""Le cas de la bride : le fil poissé est une recette du CIRIER, pas du bourrelier."""
+	fil = {"_id": "item:fil", "type": "item", "nom": "Fil poissé", "categorie": "composant",
+		   "sous_categorie": "fil", "slots": [], "poids": 0.1, "rarete": "commun"}
+	monkeypatch.setitem(CATALOGUE, "item:fil", fil)
+	recettes = RECETTES + [
+		{"_id": "recette:fil", "type": "recette", "lieu_categorie": "cirier_test",
+		 "objet_final": "fil", "quantite_produite": 1,
+		 "matieres_premieres": [{"sous_categorie": "cuir", "quantite": 2}]},
+		{"_id": "recette:bride", "type": "recette", "lieu_categorie": "bourrellerie_test",
+		 "objet_final": "harnais", "quantite_produite": 1,
+		 "matieres_premieres": [{"item": "item:fil", "quantite": 1}]},
+	]
+	monkeypatch.setattr(marche, "_all_recettes", lambda: recettes)
+	marche.reset_prix_cache()
+	cirier = {"_id": "lieu:cirier", "type": "lieu", "categorie": "cirier_test",
+			  "lieu_parent": "lieu:cite", "stock_matieres": {"cuir": 2}, "stock_vente": []}
+	# Le bourrelier a lui aussi 2 cuirs : par lieu, ils ne se décomptent pas l'un l'autre.
+	lieu = _bourrelier(stock_matieres={"cuir": 2})
+	res = commande.sourcer([("item:fil", 1), ("cuir", 2)], [], lieu, _get, atelier=True,
+						   voisins=[cirier])
+	assert res["manquantes"] == []
+	assert res["atelier"][0]["fabrique_chez"] == "lieu:cirier"
+	mutes = commande.consommer_atelier(lieu, res["atelier"], None, [cirier])
+	assert mutes == [cirier]
+	assert "cuir" not in cirier["stock_matieres"] and "cuir" not in lieu["stock_matieres"]

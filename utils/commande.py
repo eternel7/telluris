@@ -445,11 +445,12 @@ COMMANDE_PROFONDEUR = 3
 
 
 def _registre() -> dict:
-	"""Ce qu'une même résolution a déjà promis — réserve (par clé), rayon et pool (par id) —
-	pour qu'une matière ne serve pas deux fois : les sangles d'un bât et celles de ses
-	courroies puisent dans la même réserve de peaux. `voisins` : rayon des boutiques sœurs, par
-	`(lieu, item_id)`."""
-	return {"reserve": {}, "rayon": {}, "flux": {}, "voisins": {}}
+	"""Ce qu'une même résolution a déjà promis — réserve par `(lieu, clé)`, rayon par
+	`(lieu, item_id)`, pool par id — pour qu'une matière ne serve pas deux fois : les sangles
+	d'un bât et celles de ses courroies puisent dans la même réserve de peaux. Indexé PAR LIEU
+	depuis que la fabrication passe d'une boutique à l'autre (le fil poissé chez le cirier) :
+	sans quoi les crins du cirier et ceux du bourrelier se décompteraient l'un l'autre."""
+	return {"reserve": {}, "rayon": {}, "flux": {}}
 
 
 def _copie(registre: dict) -> dict:
@@ -465,7 +466,7 @@ def _restaurer(registre: dict, copie: dict) -> None:
 def _dans_les_rayons(voisins, soi, cle, reste, get_doc_fn, registre) -> list:
 	"""Réserve `reste` unités de `cle` au RAYON des boutiques sœurs (`voisins`, `soi` et les
 	revendeurs exclus) — ce que le joueur pourrait y acheter lui-même. Rend
-	`[{"lieu", "item_id", "quantite"}]` ; le registre (`voisins`) est mis à jour."""
+	`[{"lieu", "item_id", "quantite"}]` ; le registre (`rayon`) est mis à jour."""
 	pris = []
 	for v in voisins or ():
 		if reste <= 0:
@@ -477,7 +478,7 @@ def _dans_les_rayons(voisins, soi, cle, reste, get_doc_fn, registre) -> list:
 			if reste <= 0:
 				break
 			item_id = entree.get("item_id")
-			qty = int(entree.get("qty", 0) or 0) - registre["voisins"].get((lid, item_id), 0)
+			qty = int(entree.get("qty", 0) or 0) - registre["rayon"].get((lid, item_id), 0)
 			if not item_id or qty <= 0:
 				continue
 			if not (item_id == cle or marche.matiere_item_id(cle) == item_id
@@ -485,7 +486,7 @@ def _dans_les_rayons(voisins, soi, cle, reste, get_doc_fn, registre) -> list:
 				continue
 			q = min(qty, reste)
 			pris.append({"lieu": lid, "item_id": item_id, "quantite": q})
-			registre["voisins"][(lid, item_id)] = registre["voisins"].get((lid, item_id), 0) + q
+			registre["rayon"][(lid, item_id)] = registre["rayon"].get((lid, item_id), 0) + q
 			reste -= q
 	return pris
 
@@ -493,28 +494,43 @@ def _dans_les_rayons(voisins, soi, cle, reste, get_doc_fn, registre) -> list:
 def _source_atelier(lieu_doc, cle, reste, get_doc_fn, flux, registre, chemin, profondeur,
 					voisins=()):
 	"""Une clé de recette, `reste` unités, aux frais de l'artisan : réserve, rayon, pool de la
-	cité, rayon des boutiques sœurs (`voisins`), puis fabrication (`_fabriquer`). Rend l'entrée
-	d'`atelier`, ou None — le registre étant alors restauré tel qu'à l'entrée."""
+	cité, rayon des boutiques sœurs (`voisins`), fabrication chez lui (`_fabriquer`), puis chez
+	la sœur qui en a la recette (`fabrique_chez`). Rend l'entrée d'`atelier`, ou None — le
+	registre étant alors restauré tel qu'à l'entrée."""
 	copie = _copie(registre)
+	soi = (lieu_doc or {}).get("_id")
 	reserve, item_id, en_rayon = dispo_atelier(lieu_doc, cle, get_doc_fn)
-	reserve = max(0, reserve - registre["reserve"].get(cle, 0))
-	en_rayon = max(0, en_rayon - registre["rayon"].get(item_id, 0)) if item_id else 0
+	reserve = max(0, reserve - registre["reserve"].get((soi, cle), 0))
+	en_rayon = max(0, en_rayon - registre["rayon"].get((soi, item_id), 0)) if item_id else 0
 	pris_reserve = min(reserve, reste)
 	pris_rayon = min(en_rayon, reste - pris_reserve)
 	if pris_reserve:
-		registre["reserve"][cle] = registre["reserve"].get(cle, 0) + pris_reserve
+		registre["reserve"][(soi, cle)] = registre["reserve"].get((soi, cle), 0) + pris_reserve
 	if pris_rayon:
-		registre["rayon"][item_id] = registre["rayon"].get(item_id, 0) + pris_rayon
+		registre["rayon"][(soi, item_id)] = registre["rayon"].get((soi, item_id), 0) + pris_rayon
 	du_flux = _prendre(dispo_flux(flux, cle, get_doc_fn, registre["flux"]),
 					   reste - pris_reserve - pris_rayon, registre["flux"])
 	manque = reste - pris_reserve - pris_rayon - sum(p["quantite"] for p in du_flux)
-	boutiques = _dans_les_rayons(voisins, (lieu_doc or {}).get("_id"), cle, manque,
+	boutiques = _dans_les_rayons(voisins, soi, cle, manque,
 								 get_doc_fn, registre) if manque > 0 else []
 	manque -= sum(b["quantite"] for b in boutiques)
-	fabrique = None
+	fabrique, chez = None, None
 	if manque > 0:
 		fabrique = _fabriquer(lieu_doc, cle, manque, get_doc_fn, flux, registre, chemin,
 							  profondeur, voisins)
+		# Pas sa recette : la sœur qui l'a la fabrique (le fil poissé d'une bride, chez le
+		# cirier). Filtre par `produits_lieu` (mémoïsé) avant de balayer ses recettes.
+		for v in (voisins or ()) if fabrique is None else ():
+			if v.get("_id") == soi or lieu_commande_revente(v):
+				continue
+			produits = marche.produits_lieu(v)
+			if cle not in produits and marche.matiere_item_id(cle) not in produits:
+				continue
+			fabrique = _fabriquer(v, cle, manque, get_doc_fn, flux, registre, chemin,
+								  profondeur, voisins)
+			if fabrique is not None:
+				chez = v.get("_id")
+				break
 		if fabrique is None:
 			_restaurer(registre, copie)
 			return None
@@ -529,6 +545,8 @@ def _source_atelier(lieu_doc, cle, reste, get_doc_fn, flux, registre, chemin, pr
 		part["boutiques"] = boutiques
 	if fabrique:
 		part["fabrique"] = fabrique
+	if chez:
+		part["fabrique_chez"] = chez
 	return part
 
 
