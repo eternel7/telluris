@@ -268,7 +268,21 @@ SLOT_ZONE = {slot: zone for zone, slot in ZONE_SLOT.items()}
 # Catégories dont le champ `effets` est consommé AILLEURS et ne doit donc jamais être
 # replié dans le bonus d'équipement : `consommable` (effet de la potion, appliqué à
 # l'ingestion) et `arme` (effet du coup, appliqué à la CIBLE — cf. utils/sorts.effets_d_arme).
+# ⚠️ Exception : une ARME dont `effets` n'a PAS de `duree` n'a aucun effet de coup
+# (`sorts.part_durative` est faux) — son bloc est alors celui d'une pièce portée
+# (`arme_effets_portes`) : la baguette qui régénère les PM de son porteur.
 CATEGORIES_EFFETS_A_L_USAGE = ("arme", "consommable")
+
+
+def arme_effets_portes(item: dict) -> bool:
+	"""Vrai si le bloc `effets` de cette ARME se lit comme celui d'une pièce PORTÉE
+	(`regen_*`, `esquive`, `canalisation` au porteur) : aucune `duree`, donc aucun effet de
+	coup à poser sur la cible. Avec une `duree`, le bloc reste l'effet du coup (bolas,
+	poison) et ne touche jamais le porteur."""
+	effets = (item or {}).get("effets")
+	if str((item or {}).get("categorie") or "") != "arme" or not isinstance(effets, dict):
+		return False
+	return _effet_int(effets.get("duree")) <= 0
 
 
 def _effet_int(val) -> int:
@@ -359,7 +373,8 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 		# `arme` c'est l'effet porté par le coup, dont la cible par DÉFAUT est l'ENNEMI
 		# (utils/sorts.effets_d_arme) — replier les bolas ici donnerait à leur porteur un
 		# −2 en V permanent. D'où la liste d'exclusion, et elle seule.
-		if str(item.get("categorie") or "") not in CATEGORIES_EFFETS_A_L_USAGE:
+		if (str(item.get("categorie") or "") not in CATEGORIES_EFFETS_A_L_USAGE
+				or arme_effets_portes(item)):
 			effets_portes = item.get("effets") or {}
 			bonus.regen_pv += _effet_int(effets_portes.get("regen_pv"))
 			bonus.regen_pm += _effet_int(effets_portes.get("regen_pm"))

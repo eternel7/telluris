@@ -55,7 +55,13 @@ POTION = {  # consommable : son `effets` s'applique à l'ingestion
 	"slots": [], "poids": 0.2, "effets": {"pv": 15, "duree": 5, "regen_pv": 3},
 }
 
-CATALOGUE = {d["_id"]: d for d in (FOCUS, AMULETTE, BOLAS, POTION, CAPE_FAUTIVE)}
+BAGUETTE = {  # arme SANS `duree` : aucun effet de coup, son bloc est celui d'une pièce portée
+	"_id": "item:Baguette_ouvragee", "type": "item", "nom": "Baguette ouvragée", "categorie": "arme",
+	"slots": ["main_droite"], "poids": 0.8, "tags": ["cac"], "bonus_degats_dice": 2,
+	"effets": {"regen_pm": 2},
+}
+
+CATALOGUE = {d["_id"]: d for d in (FOCUS, AMULETTE, BOLAS, POTION, CAPE_FAUTIVE, BAGUETTE)}
 
 
 @pytest.fixture(autouse=True)
@@ -111,6 +117,23 @@ def test_une_arme_ne_donne_jamais_sa_regen_a_son_porteur():
 	bonus = recompute_equipment_bonus({"main_droite": "item:Bolas"})
 	assert (bonus.regen_pv, bonus.regen_pm) == (0, 0)
 	assert "V" not in bonus.buffs
+
+
+def test_une_arme_sans_duree_regenere_son_porteur():
+	# Sans `duree`, `part_durative` est faux : aucun effet de coup n'existe, le bloc se lit
+	# comme celui d'une pièce portée.
+	bonus = recompute_equipment_bonus({"main_droite": "item:Baguette_ouvragee"})
+	assert (bonus.regen_pv, bonus.regen_pm) == (0, 2)
+	assert characters_mod.arme_effets_portes(BAGUETTE)
+	assert not characters_mod.arme_effets_portes(BOLAS)
+
+
+def test_une_arme_sans_duree_ne_pose_rien_sur_la_cible():
+	# Le profil d'arme n'emporte aucun effet de coup : la régén reste au porteur.
+	joueur = build_joueur_snapshot(_character(slots={"main_droite": "item:Baguette_ouvragee"}))
+	profil = next(p for p in joueur["attaque_profils"] if p.get("item_id") == "item:Baguette_ouvragee")
+	assert "effets" not in profil and "effets_source_id" not in profil
+	assert joueur["regen_pm_base"] == 2
 
 
 def test_un_consommable_equipe_ne_donne_pas_sa_regen():

@@ -719,6 +719,40 @@ CATALOGUE = [
 			"Hypothèses de référence documentées en tête de dev/audit_economy.py (A à K) — "
 			"notamment « en rayon » = sans le joueur ravitailleur.",
 	},
+	{
+		"id": "gen_analyse_armes_armures",
+		"label": "🗡️ Analyse des armes et armures — prix, rareté, restrictions",
+		# `--dernier`, comme l'audit économique : lecture seule, le rapport nomme le dump lu.
+		"argv": _py("gen_analyse_armes_armures.py", "--dernier"),
+		"ecrit": "Lecture seule. Lit le dump le plus récent de jsons/, jamais la base.",
+		"description": "Compare les armes et armures à leurs pareilles (mêlée 1/2 mains, hast, "
+			"jet, tir, bouclier, une famille par zone du corps, bijou, harnachement) : "
+			"puissance en équivalent dégâts, prix du jeu (moteur de marché branché sur le dump), "
+			"corrélation prix↔puissance et prix↔poids, pièces trop chères ou bradées, rareté "
+			"inversée, restrictions inertes ou mal ciblées, champs que le moteur lit autrement "
+			"(effets inertes, portée/tags, deux mains, barème PA × poids), trous de gamme. "
+			"Variantes sur mesure exclues. Pondérations et hypothèses en tête du script.",
+	},
+	{
+		"id": "gen_corrections_armes_armures",
+		"label": "🛡️ Corrections d'équilibrage des armes et armures (10/10)",
+		# `dump_frais` : l'import est un PUT complet, relire un dump périmé réémettrait des
+		# pièces retouchées depuis.
+		"argv_fn": lambda v, f: _py("gen_corrections_armes_armures.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/corrections_armes_armures_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/corrections_armes_armures_a_importer.json. "
+			"Rien en base avant 📥 Importer.",
+		"description": "Armes de départ sans restriction (et communes, sauf l'Épée d'argent), "
+			"malus de vitesse des armes allégé d'un cran, malus des armures lourdes selon le poids "
+			"(≥ 14 kg : −1), pièces hors barème PA × poids alourdies, régénération de PM de la "
+			"Baguette ouvragée et du Sceptre d'apparat, petits bonus des vêtements nus, raretés "
+			"revues, Arc du Grand Atelier tagué `tir`, Chasse-mouches en insigne (Cha +5), "
+			"restrictions relevées de +5 au total, réparties (plafonnées au minimum des espèces qui portent la pièce), "
+			"armes de jet sans bonus de corps à corps. Tables "
+			"figées : relancé sur une base déjà corrigée, il n'écrit rien. Le fichier ne porte que "
+			"le DIFF ; un id absent refuse tout le lot.",
+	},
 	# ── /admin/lieux : outils PARAMÉTRÉS par la ville et les lignes affichées ──────────
 	# Absents de /admin/dev-tools (qui ne sait pas saisir de paramètre, cf. `catalogue_payload`).
 	# Tous `dump_frais` : le dump relu est écrit par le serveur à l'instant du lancement.
