@@ -47,10 +47,10 @@ FRANCE = "lieu:france"
 IMAGES_CITES = ("bruges_city.jpg", "aix_la_chapelle_city.jpg")
 
 # Place des cités sur la plaine (lue sur l'image, 88×48 cases de 16 px) :
-#   Bruges — en retrait de la côte du Zwin, à l'ouest du delta de l'Escaut ;
+#   Bruges — le château dessiné sur le delta de l'Escaut, au débouché du Zwin ;
 #   Aix-la-Chapelle — entre Meuse et Rhin, au nord des forêts de l'Ardenne et de l'Eifel.
 POSITIONS_PLAINE = {
-	"lieu:bruges": (23, 29),
+	"lieu:bruges": (28, 25),
 	"lieu:aix_la_chapelle": (41, 29),
 }
 
