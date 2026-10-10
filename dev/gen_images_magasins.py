@@ -9,7 +9,7 @@
 #   python dev/gen_images_magasins.py avancer   --cite …  → l'étape suivante, quelle qu'elle soit (PAYANT)
 #   python dev/gen_images_magasins.py essai     --cite … [--seulement …] [--limite N]  → interactif, essais/
 #   python dev/gen_images_magasins.py soumettre | etat | recuperer --cite …
-#   python dev/gen_images_magasins.py appliquer --cite … → jsons/images_magasins_<cite>_a_importer.json
+#   python dev/gen_images_magasins.py appliquer --cite lieu:a,lieu:b,… → UN SEUL jsons/images_magasins_a_importer.json (une cité : …_<cite>_…)
 #
 # DEUX lots, enchaînés : la façade joint le portrait de SON tenancier, avant le prompt (« image 1 »),
 # il faut donc que ce portrait existe. Chaque soumission envoie tout ce qui est faisable À CE
@@ -80,7 +80,7 @@ LIGNEES = {
 	"elfe": ("Une elfe", "Un elfe", "aux oreilles longues et pointues"),
 	# Jamais vert (consigne de l'auteur, 09/10).
 	"ogre": ("Une ogresse", "Un ogre",
-			 "bien plus grand{e} et massi{ve} qu'un humain, peau épaisse au teint humain, jamais verte ni gris-vert, sans crocs — un humain au même plan lui arrive à la poitrine"),
+			 "bien plus grand{e} et massi{ve} qu'un humain, peau épaisse au teint humain, jamais verte ni gris-vert, parfois de petits crocs pointant de la lèvre inférieure — un humain au même plan lui arrive à la poitrine"),
 	"humain": ("Une humaine", "Un humain", ""),
 }
 # Lot de Lutecia (10/10) : des tenanciers trop vieux par défaut (consigne de l'auteur) — huit âges
@@ -129,8 +129,8 @@ FOULE_FR = ("Des ogres, des nains, des hobbits, des elfes et des humains vaquent
 			"elfes bruns, roux, noirs, argentés ou blonds, en robe, cape de voyage ou cuir ; nains barbus, "
 			"naines imberbes aux cheveux tressés, en armure, tablier ou habit de marchand ; hobbits ronds ou "
 			"fluets, jeunes ou ridés, en gilets colorés ; ogres aux teints humains, burinés, rougeauds ou "
-			"hâlés, jamais verts ni gris-vert — ce ne sont ni des orcs ni des trolls, et ils n'ont pas de "
-			"crocs ; humains de toutes origines, aventuriers, gardes, marchands, pèlerins. Tout le monde, "
+			"hâlés, jamais verts ni gris-vert — ce ne sont ni des orcs ni des trolls ; certains ont de petits "
+			"crocs pointant de la lèvre inférieure ; humains de toutes origines, aventuriers, gardes, marchands, pèlerins. Tout le monde, "
 			"elfes compris, a un teint de peau humain naturel.")
 
 
@@ -361,7 +361,7 @@ FOULE = ("A lively, varied crowd of ogres, dwarves, halflings, elves and humans 
 		 "colorful waistcoats and skirts; "
 		 # Jamais verts (consigne de l'auteur, 09/10) : les teints restent humains, en plus rude.
 		 "huge ogres with human skin tones, weathered, ruddy, tanned or ashen, never green or grey-green — "
-		 "they are not orcs, goblins or trolls, and have no tusks —, in tunics, furs "
+		 "they are not orcs, goblins or trolls; some have small tusks jutting up from the lower lip —, in tunics, furs "
 		 "or armor, towering over the crowd; humans of every origin: adventurers, guards, merchants, "
 		 "pilgrims, peasants. Everyone, elves included, has a natural human skin tone. Everyone wears "
 		 "medieval clothing; nothing modern.")
@@ -1293,10 +1293,26 @@ def portrait_facade(cite, facade, race, sexe, categorie):
 	print(f"{nom} ← {facade} (réserve : {os.path.relpath(fichier, RACINE)})")
 
 
-def appliquer(cite, source=None):
-	"""Un seul import : `pnj[0].portrait`, `image` et — marchand de la cité qui n'en a pas —
-	`pnj[0].nom`, sur des lieux relus de `source` (export frais) sinon du dump le plus récent.
-	⚠️ PUT complet : un doc relu trop vieux écraserait les stocks d'entre-temps."""
+def appliquer(cites, source=None):
+	"""UN SEUL import pour toutes les `cites` (liste ou chaîne « a,b ») — consigne de l'auteur
+	(10/10) : le moins de fichiers à importer possible. `pnj[0].portrait`, `image` et — marchand de
+	la cité qui n'en a pas — `pnj[0].nom`, sur des lieux relus de `source` (export frais) sinon du
+	dump le plus récent. ⚠️ PUT complet : un doc relu trop vieux écraserait les stocks d'entre-temps."""
+	cites = [c for c in (cites.split(",") if isinstance(cites, str) else cites) if c]
+	sortie = []
+	for cite in cites:
+		sortie += _maj_de_cite(cite, source)
+	nom = (f"images_magasins_{_slug(cites[0])}_a_importer.json" if len(cites) == 1
+		   else "images_magasins_a_importer.json")
+	chemin = os.path.join(RACINE, "jsons", nom)
+	with open(chemin, "w", encoding="utf-8") as f:
+		json.dump(sortie, f, ensure_ascii=False, indent="\t")
+		f.write("\n")
+	print(f"{len(sortie)} lieu(x) → {os.path.relpath(chemin, RACINE)}")
+
+
+def _maj_de_cite(cite, source=None):
+	"""Les lieux mis à jour d'une cité (cf. `appliquer`)."""
 	man = _manifeste(cite)
 	source = source or man.get("source")
 	lieux = _lieux(source)
@@ -1324,13 +1340,9 @@ def appliquer(cite, source=None):
 		  f"({len(cite_lieux)} lieux de la cité) ; {len(noms)} nom(s) de tenancier ajouté(s)")
 	for lid in inconnus:
 		print(f"  ⚠ {lid} : lignée du tenancier inconnue, pas de nom")
-	chemin = os.path.join(RACINE, "jsons", f"images_magasins_{_slug(cite)}_a_importer.json")
-	with open(chemin, "w", encoding="utf-8") as f:
-		json.dump(sortie, f, ensure_ascii=False, indent="\t")
-		f.write("\n")
-	print(f"{len(sortie)} lieu(x) → {os.path.relpath(chemin, RACINE)}")
 	if absents:
-		print(f"⚠ {len(absents)} lieu(x) absents du dump : exporter un dump puis relancer.")
+		print(f"⚠ {cite} : {len(absents)} lieu(x) absents du dump : exporter un dump puis relancer.")
+	return sortie
 
 
 def main():
@@ -1341,7 +1353,7 @@ def main():
 	p = argparse.ArgumentParser()
 	p.add_argument("etape", choices=["preparer", "avancer", "essai", "soumettre", "etat", "recuperer",
 									 "generer", "appliquer", "portrait_facade"])
-	p.add_argument("--cite", required=True, help="ex. lieu:chartres")
+	p.add_argument("--cite", required=True, help="ex. lieu:chartres ; appliquer : plusieurs, séparées par des virgules → UN fichier")
 	p.add_argument("--sauf", default="", help="lieux à exclure, séparés par des virgules")
 	p.add_argument("--seulement", default="", help="ne générer que ces lieux, séparés par des virgules")
 	p.add_argument("--limite", type=int, default=0, help="nombre maximal de lieux à générer")

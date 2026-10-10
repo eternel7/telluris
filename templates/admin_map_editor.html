@@ -521,6 +521,27 @@
 		cursor: crosshair;
 	}
 
+	/* Porte en cours de repositionnement : un anneau HTML animé en CSS par-dessus le canvas,
+	   plutôt qu'une boucle qui repeindrait toute la grille à chaque image. `pointer-events:none` :
+	   le clic de visée doit atteindre le canvas, y compris sur la case de la porte. */
+	.repos-pulse {
+		position: absolute;
+		display: none;
+		pointer-events: none;
+		border-radius: 50%;
+		border: 3px solid #ffd54a;
+		box-shadow: 0 0 14px 4px rgba(255, 213, 74, 0.85), inset 0 0 8px 2px rgba(255, 213, 74, 0.6);
+		transform: translate(-50%, -50%);
+		animation: repos-pulse 0.9s ease-in-out infinite;
+	}
+	@keyframes repos-pulse {
+		0%, 100% { transform: translate(-50%, -50%) scale(1);   opacity: 1; }
+		50%      { transform: translate(-50%, -50%) scale(1.7); opacity: 0.25; }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.repos-pulse { animation-duration: 1.6s; }
+	}
+
 	/* Status bar — conteneur flex : le texte à gauche, le bouton du mode test à droite. */
 	.status-bar {
 		font-size: 0.68rem;
@@ -1052,6 +1073,8 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 		<div class="grid-container" id="grid-container">
 			<img id="map-img" src="" alt="battlemap">
 			<canvas id="grid-canvas"></canvas>
+			<!-- Porte en cours de repositionnement (🎯) : anneau qui pulse, placé par `_reposPulseMaj`. -->
+			<div id="repos-pulse" class="repos-pulse" aria-hidden="true"></div>
 		</div>
 
 		<!-- ⚠️ `.status-bar` est un CONTENEUR, `#status` la zone de texte. `setStatus` y écrit
@@ -1537,7 +1560,7 @@ const LIEUX_HOTE = {
 	repositionnement: {
 		actif: connId => !!(lieuxRepos && lieuxRepos.connId === connId),
 		// Sans re-rendu : l'appelant repeint lui-même (cf. `closeLieuJson`).
-		oublier: () => { lieuxRepos = null; canvas.style.cursor = ''; },
+		oublier: () => { lieuxRepos = null; canvas.style.cursor = ''; _reposPulseMaj(); },
 	},
 };
 
@@ -2284,6 +2307,8 @@ function renderGrid() {
 			ctx.restore();
 		});
 	}
+
+	_reposPulseMaj(cw, ch);
 
 	// File du LOT — un carré numéroté par case empilée au shift+clic. Dessiné APRÈS les
 	// disques de connexion : une case peut porter les deux (rien n'interdit d'ouvrir une
@@ -5014,6 +5039,24 @@ function selectionnerLieuxCase(cx, cy) {
 	lieuxSelectedCell = { cx, cy };
 	renderLieuxConnList();
 	if (grid.length) renderGrid();
+}
+
+// Anneau pulsant sur la porte en cours de repositionnement (🎯) : on voit QUELLE porte va bouger.
+// Appelé par `renderGrid` (qui fournit la taille de case) ; sans argument, ne fait que masquer.
+// Visible seulement en mode Lieux, outil armé, porte trouvée sur la carte courante.
+function _reposPulseMaj(cw, ch) {
+	const el = document.getElementById('repos-pulse');
+	if (!el) return;
+	const conn = (cw && editMode === 'lieux' && lieuxRepos)
+		? lieuxConnections.find(c => c._id === lieuxRepos.connId) : null;
+	const node = conn && (conn.nodes || []).find(n => n.lieu === currentLocId && n.pos);
+	if (!node) { el.style.display = 'none'; return; }
+	// Diamètre = celui du disque de la porte (r = 0,4 case) + une marge, pour l'entourer.
+	const d = 2 * Math.max(5, Math.min(cw, ch) * 0.4) + 8;
+	el.style.left = (node.pos[0] * cw + cw / 2) + 'px';
+	el.style.top = (node.pos[1] * ch + ch / 2) + 'px';
+	el.style.width = el.style.height = d + 'px';
+	el.style.display = 'block';
 }
 
 function armerRepositionnement(connId, destId) {

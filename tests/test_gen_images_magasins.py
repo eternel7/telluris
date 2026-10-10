@@ -433,3 +433,20 @@ def test_lot_restreint_aux_boutiques_de_la_cite():
 		   {"_id": "lieu:b", "type": "lieu", "lieu_parent": "lieu:lutecia"}]
 	assert lieux_du_lot(lot, "lieu:auxerre") == {"lieu:a"}
 	assert lieux_du_lot(lot, "lieu:rhemi") == set()
+
+
+def test_lot_des_caves_ni_ecriteau_ni_orc_ni_naine_a_taille_humaine():
+	"""Revue du lot des caves (10/10) : « Caves de Reims » / « LUTECIA TRADE CO. » peints (le nom de la
+	cité était dans le prompt du portrait), étiquettes lisibles, ogres verts dans la foule, naine à
+	taille humaine, boutiques d'angle ouvertes sur deux rues."""
+	portrait = prompt_tenancier("nain", "F", "cave", "Reims", ["jeune"])
+	assert "Reims" not in portrait
+	assert "aucune étiquette écrite" in portrait and "aucun écriteau" in portrait
+	assert "ni des orcs ni des trolls" in portrait
+	assert "enfant humain de dix ans" in portrait
+	assert "enfant humain de huit ans" in prompt_tenancier("hobbit", "M", "cave", "Reims", [])
+	assert "enfant humain" not in prompt_tenancier("ogre", "M", "cave", "Reims", [])
+	facade = prompt_magasin("cave", "ogre", "M", [], "lieu:lutecia", "Lutecia", "Le Chai du Petit-Pont")
+	assert "no written label" in facade
+	assert "not orcs, goblins or trolls" in facade
+	assert "never as a corner building" in facade and "side walls of the house are closed masonry" in facade
