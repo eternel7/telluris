@@ -1,0 +1,173 @@
+[
+  {
+    "_id": "pnj:aelis_de_montfaucon_cour_des_arches",
+    "type": "pnj",
+    "nom": "Aélis de Montfaucon",
+    "race": "humain",
+    "vocation": "lettre",
+    "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+    "description": "Jeune architecte et chercheuse, spécialiste des cristaux de mana et de leur emploi dans la structure des bâtiments. Arrivée à Lutecia avec le dernier convoi de cristaux d'Auxerre, elle poursuit ses recherches à l'Institut des Architectes, dans la Cour des Arches, sur le portail de Notre-Dame.",
+    "dialogue": {
+      "noeud_depart": "retrouvailles_01",
+      "noeud_attente": "accueil_suivant",
+      "noeuds": {
+        "retrouvailles_01": {
+          "texte": "Au milieu de la cour, près d'une table où plusieurs apprentis examinent des tracés, une jeune femme penche la tête sur un plan déroulé, un compas dans une main, un carnet épais calé sous le bras. Elle se redresse pour changer de feuille, vous voit, et reste figée une seconde, le compas en l'air. Puis elle pose tout sur la table sans regarder où, et vient droit vers vous.",
+          "choix": [
+            {
+              "id": "saluer",
+              "label": "« Aélis de Montfaucon. »",
+              "next": "retrouvailles_02"
+            }
+          ]
+        },
+        "retrouvailles_02": {
+          "texte": "« Vous. » Elle s'arrête à un pas, et on la sent chercher la formule exacte avant de se décider pour la plus courte. « Vous êtes venu jusqu'ici. Je n'étais pas certaine que les gens qui sortent d'une grotte reviennent voir ceux qu'ils en ont sortis. » Un coup d'œil derrière elle, vers la table. « Ne faites pas attention aux apprentis. Ils croient que je mesure l'esplanade. Je mesure l'esplanade, en réalité. Mais pas pour la raison qu'ils pensent. »",
+          "choix": [
+            {
+              "id": "gardee",
+              "label": "« Alors l'Institut vous a gardée. »",
+              "next": "retrouvailles_03"
+            },
+            {
+              "id": "ici",
+              "label": "« Que faites-vous, exactement, ici ? »",
+              "next": "retrouvailles_04"
+            }
+          ]
+        },
+        "retrouvailles_03": {
+          "texte": "« Gardée, réclamée, installée : choisissez le verbe, ils sont tous exacts. » L'ombre d'un sourire. « Le premier soir, j'ai mesuré l'autel d'ancrage du portail avant même d'avoir retiré mon manteau. On m'a donné une table le lendemain. » Elle caresse la couverture de son carnet. « Les Architectes ne sont à Lutecia que pour ce portail. Un Frère Aborigène l'a bâti, la grande vague ne l'a pas dérangé, et personne depuis n'a su en faire un pareil. Quand on étudie la pierre, on finit par vouloir voir la maison. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et vous apprenez quoi, ici ? »",
+              "next": "retrouvailles_04"
+            },
+            {
+              "id": "espoir",
+              "label": "« Que comptez-vous en faire ? »",
+              "next": "retrouvailles_05"
+            }
+          ]
+        },
+        "retrouvailles_04": {
+          "texte": "« Tout ce qui permet de dire à une porte où elle va. » Elle compte sur ses doigts, sans y mettre d'emphase. « La cour, pour présenter ses travaux et se faire démolir par plus savant que soi. Les Archives des Seuils, où l'on garde les relevés de portails, les plans anciens, les descriptions de donjons — la moitié est incomplète, alors on compare les copies jusqu'à reconstituer une méthode oubliée. Et les Ateliers de Convergence : des cristaux, des instruments, des portails en réduction. Les vrais portails, on ne les touche pas sans y être autorisé. » Elle ajoute, plus bas : « Les cristaux, c'est ce que je savais déjà. Le reste, je l'apprends. »",
+          "choix": [
+            {
+              "id": "espoir",
+              "label": "« Et après ? Que voulez-vous en faire ? »",
+              "next": "retrouvailles_05"
+            }
+          ]
+        },
+        "retrouvailles_05": {
+          "texte": "Elle prend le temps de répondre. « Comprendre ce que ses bâtisseurs savaient et n'ont écrit nulle part. » Elle lève la main avant que vous ne répondiez. « Il y a deux écoles, ici. Pour les uns, ils ne l'ont pas écrit parce que cela leur paraissait trop évident pour être écrit. Pour les autres, ils l'ont écrit, et c'est la page qui a disparu. » Elle hausse une épaule. « Je ne tranche pas. Je mesure. C'est la seule chose que je sois sûre de savoir faire correctement. »",
+          "choix": [
+            {
+              "id": "conclure",
+              "label": "« Vous avez trouvé votre place. »",
+              "next": "retrouvailles_fin"
+            }
+          ]
+        },
+        "retrouvailles_fin": {
+          "texte": "« Une place, non. Un point de départ. » Elle reprend son compas sur la table et le fait tourner entre ses doigts, comme pour vérifier qu'il est resté droit. « Vous, vous allez dehors, vous voyez des portails, des donjons, des choses que je ne connais que par des relevés. Quand vous en reviendrez, passez par la Cour. Ici, on a de quoi écouter, et je préférerais l'entendre de quelqu'un qui y était plutôt que de l'apprendre dans un rapport. » Elle tend la main, brièvement, comme on scelle un accord de métier. « {prenom}. Merci. Pour la grotte. Je n'ai pas encore trouvé comment le dire en moins de mots. »",
+          "delai_min": 315360000,
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Je repasserai. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "accueil_suivant": {
+          "texte": "Aélis lève les yeux d'un plan couvert de cotes à l'encre, un compas toujours entre deux doigts. « Ah. C'est vous. » Elle repousse une mèche de son poignet sans lâcher son outil. « Entrez dans la lumière, vous faites de l'ombre sur mes chiffres. »",
+          "choix": [
+            {
+              "id": "travaux",
+              "label": "« Les travaux avancent ? »",
+              "next": "suivant_travaux"
+            },
+            {
+              "id": "derange",
+              "label": "« Je ne vous dérange pas ? »",
+              "next": "suivant_derange"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "suivant_travaux": {
+          "texte": "« Elles avancent. » Elle tapote le plan du bout du compas. « Une cote de plus que ce matin, et une erreur de moins que ce matin. Dans ce métier, c'est une bonne journée. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil_suivant"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "suivant_derange": {
+          "texte": "« Vous me dérangez si peu que j'ai failli ne pas lever la tête. » Elle se reprend, un coin de la bouche relevé. « Ce qui est, de ma part, plutôt une politesse. Restez le temps que vous voulez : la cour est ouverte. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil_suivant"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:la_cour_des_arches",
+    "type": "lieu",
+    "label": "La Cour des Arches",
+    "image": "institut_des_architectes_lutecia01.jpg",
+    "categorie": "institut_des_architectes",
+    "lieu_parent": "lieu:lutecia",
+    "pnj": [
+      {
+        "character": "pnj:aelis_de_montfaucon_cour_des_arches",
+        "nom": "Aélis",
+        "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+        "probabilite": 0.4,
+        "description": "Une jeune architecte penchée sur un plan, un compas dans une main et un carnet épais sous le bras."
+      }
+    ]
+  },
+  {
+    "_id": "link:la_cour_des_arches_to_lutecia",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:lutecia",
+        "pos": [46, 37]
+      },
+      {
+        "lieu": "lieu:la_cour_des_arches",
+        "pos": [0, 0]
+      }
+    ],
+    "metadata": {
+      "type": "institut_des_architectes",
+      "status": "ouvert"
+    }
+  }
+]
