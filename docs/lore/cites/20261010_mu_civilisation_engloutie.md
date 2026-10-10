@@ -25,8 +25,3 @@ Cette relation fait de Lutecia un centre majeur du savoir architectural de Tellu
 Toutefois, Mu ne transmet pas librement l'intégralité de ses connaissances. Les enseignements les plus avancés demeurent réservés à ceux que ses maîtres jugent dignes de les recevoir. Certains Architectes reviennent transformés par leur séjour ; d'autres ne reviennent jamais.
 
 Mu n'est donc pas simplement une école supérieure : c'est le gardien d'un savoir ancien dont Lutecia dépend pour maintenir sa suprématie dans l'art des portails.
-
-## Précisions de l'Auteur (10/10/2026, même séance)
-
-- Lutecia est **sans grandes écoles de magie** : la magie y est faible. Ses « écoles » sont des **instituts d'architectes** : elles forment aux portails, et **Mu parachève** cette formation.
-- Le lien Lutecia ↔ Mu est assuré par le **portail programmable de Notre-Dame**, vestige préservé de l'un des trois frères aborigènes.
