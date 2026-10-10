@@ -981,7 +981,12 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# panneau marchand — tout atelier refait ce qu'il sait faire. `est_sur_mesure` n'ouvre que
 	# le bouton « Sur mesure » : chez un artisan ordinaire il ne doit pas exister du tout,
 	# sans quoi l'interface laisserait croire qu'on peut y faire inventer quelque chose.
-	est_commande = commande_util.lieu_prend_commandes(grid_doc, get_doc)
+	# Une étable prend commande du harnachement que fabriquent les boutiques de SA cité : elle
+	# seule paie la lecture des voisines (`lieu:` hors cache de requête).
+	est_commande = commande_util.lieu_prend_commandes(
+		grid_doc, get_doc,
+		commande_util.voisins_cite(grid_doc, find_docs)
+		if commande_util.lieu_commande_revente(grid_doc) else None)
 	est_sur_mesure = commande_util.lieu_fabrique_sur_mesure(grid_doc)
 	# « Passer la nuit » est une action de la SIDEBAR, pas du panneau : elle doit donc être
 	# servie ici. Le log part avec — le client l'égrène PENDANT que le POST est en vol, et

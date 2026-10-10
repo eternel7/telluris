@@ -18,6 +18,15 @@ façonne pas un lingot à la demande, fût-il remis au catalogue (`marche.est_in
 Plus largement, le sur-mesure ne vaut que pour une pièce `marche.est_personnalisable` : un
 livre, un document, une munition, un piège ou une miche se commandent tels quels.
 
+⚠️ **La commande passe AVANT le flux de la cité.** Ce que l'artisan n'a ni en réserve ni en
+rayon, il le prend dans le pool `flux_marchand` de sa ville — en entier, sans la part
+`FLUX_PART_MAX` que subissent les ateliers au tick, et même s'il produit lui-même la matière.
+
+⚠️ **L'étable prend commande sans rien produire** (`lieu_commande_revente`) : son catalogue est
+le harnachement que les boutiques de SA cité fabriquent, et la pièce vient du pool de la cité
+puis du rayon de l'une d'elles (`sourcer_revente`) — jamais de son propre rayon, où le joueur
+l'achèterait directement.
+
 Ce qui donne la trichotomie voulue sans authorer un seul doc : petit magasin (rayon seul) /
 artisan (son catalogue) / grand magasin (+ le sur-mesure), la fusion de catégories élargissant
 déjà mécaniquement le catalogue ET les matières acceptées d'une grande maison.
@@ -40,7 +49,7 @@ import time
 import uuid
 
 from models import character_stats
-from utils import fabrication, marche
+from utils import fabrication, marche, montures
 from utils.characters import (
 	item_ref_id, item_sous_categorie, poids_bounds, tirer_poids, resolve_item_ref,
 )
@@ -79,7 +88,7 @@ def now_epoch() -> int:
 
 # ── Les deux capacités ──────────────────────────────────────────────────────────
 
-def lieu_prend_commandes(lieu_doc: dict, get_doc_fn=None) -> bool:
+def lieu_prend_commandes(lieu_doc: dict, get_doc_fn=None, voisins=None) -> bool:
 	"""Cet atelier accepte-t-il une commande ? DÉRIVÉ : son catalogue ÉPURÉ n'est pas vide.
 
 	⚠️ Pas de prédicat « categorie OU tag » ici, contrairement aux six capacités de
@@ -90,8 +99,28 @@ def lieu_prend_commandes(lieu_doc: dict, get_doc_fn=None) -> bool:
 	⚠️ « Son catalogue n'est pas vide » et non « il a des recettes » : une boucherie en a
 	seize et ne produit que des matières (viande, foie, os, tendons). Quinze boutiques du
 	dump sont dans ce cas — onze boucheries et quatre tanneries — et leur section Commande
-	n'aurait rien à montrer."""
-	return bool(catalogue_commandable(lieu_doc, get_doc_fn))
+	n'aurait rien à montrer.
+
+	`voisins` : les boutiques de la cité, pour une étable seulement (`catalogue_commandable`)."""
+	return bool(catalogue_commandable(lieu_doc, get_doc_fn, voisins))
+
+
+def lieu_commande_revente(lieu_doc: dict | None) -> bool:
+	"""Ce lieu prend-il commande de ce qu'il REVEND sans le produire ? L'étable, pour le
+	harnachement (même prédicat que `marche.puiser_revente`)."""
+	return montures.lieu_vend_montures(lieu_doc)
+
+
+def voisins_cite(lieu_doc: dict | None, find_docs_fn) -> list:
+	"""Les boutiques de la cité de ce lieu (lui exclu) — à n'appeler QUE pour un revendeur :
+	`lieu:` est hors du cache de requête, un `find_docs` par rendu de chaque boutique serait
+	payé pour rien. Même requête que la nuit d'auberge."""
+	parent = (lieu_doc or {}).get("lieu_parent")
+	if not parent or not find_docs_fn:
+		return []
+	soi = (lieu_doc or {}).get("_id")
+	return [v for v in (find_docs_fn({"type": "lieu", "lieu_parent": parent}) or [])
+			if v.get("_id") != soi]
 
 
 def lieu_fabrique_sur_mesure(lieu_doc: dict) -> bool:
@@ -110,7 +139,7 @@ def lieu_fabrique_sur_mesure(lieu_doc: dict) -> bool:
 
 # ── Ce que l'atelier sait faire ─────────────────────────────────────────────────
 
-def catalogue_commandable(lieu_doc: dict, get_doc_fn=None) -> list:
+def catalogue_commandable(lieu_doc: dict, get_doc_fn=None, voisins=None) -> list:
 	"""Item_ids que ce lieu sait produire **et qu'on peut lui commander**, triés. Fusion de
 	catégories et portée de terroir comprises (`marche.produits_lieu` prend le doc).
 
@@ -120,9 +149,20 @@ def catalogue_commandable(lieu_doc: dict, get_doc_fn=None) -> list:
 	dérogation explicite par le tag `commandable` sur son doc item.
 
 	`get_doc_fn` optionnel : sans lui, `marche.item_commandable` lit la base lui-même
-	(mémoïsé). Les appelants qui tiennent déjà `get_doc` le passent."""
+	(mémoïsé). Les appelants qui tiennent déjà `get_doc` le passent.
+
+	**Étable** (`lieu_commande_revente`) : le harnachement (`marche.item_revendable`) que
+	produit au moins une des `voisins` — sans eux, catalogue vide (comportement d'avant). Les
+	autres revendeurs sont écartés : une étable ne commande pas chez sa voisine."""
 	if not lieu_doc:
 		return []
+	if lieu_commande_revente(lieu_doc):
+		produits = set().union(*(marche.produits_lieu(v) for v in (voisins or [])
+								 if not lieu_commande_revente(v)))
+		def garde(i):
+			doc = get_doc_fn(i) if get_doc_fn else resolve_item_ref(i)
+			return marche.item_revendable(doc) and marche.item_commandable(i, doc)
+		return sorted(i for i in produits if garde(i))
 	produits = marche.produits_lieu(lieu_doc)
 	return sorted(i for i in produits
 				  if marche.item_commandable(i, get_doc_fn(i) if get_doc_fn else None))
@@ -370,8 +410,36 @@ def dispo_atelier(lieu_doc: dict, cle: str, get_doc_fn) -> tuple:
 	return reserve, item_id, en_rayon
 
 
+def dispo_flux(flux: dict | None, cle: str, get_doc_fn, deja=None) -> list:
+	"""`[(item_id, qty), …]` — les lignes du pool de la cité qui répondent à cette clé
+	(`correspond`), moins ce que `deja` (`{item_id: qty}`) en a déjà réservé dans la même
+	résolution. Lecture seule ; `flux=None` (hors d'une ville) ⇒ `[]`."""
+	lignes = []
+	for item_id, qty in ((flux or {}).get("pool") or {}).items():
+		qty = int(qty or 0) - int((deja or {}).get(item_id, 0))
+		if qty <= 0:
+			continue
+		if (item_id == cle or marche.matiere_item_id(cle) == item_id
+				or correspond(item_id, get_doc_fn(item_id), cle)):
+			lignes.append((item_id, qty))
+	return lignes
+
+
+def _prendre(lignes, reste: int, deja: dict) -> list:
+	"""Réserve `reste` unités sur `lignes` dans l'ordre ; rend `[{"item_id", "quantite"}]`."""
+	pris = []
+	for item_id, qty in lignes:
+		if reste <= 0:
+			break
+		q = min(qty, reste)
+		pris.append({"item_id": item_id, "quantite": q})
+		deja[item_id] = deja.get(item_id, 0) + q
+		reste -= q
+	return pris
+
+
 def sourcer(besoins, porteurs, lieu_doc, get_doc_fn, prix_fn=None, retenus=None,
-			atelier=False) -> dict:
+			atelier=False, flux=None) -> dict:
 	"""Les trois cas du §7 : ce que le joueur fournit, ce que l'artisan met, ce qui manque.
 
 	DEUX modes, parce que les deux familles de matières ne se facturent pas pareil :
@@ -388,21 +456,32 @@ def sourcer(besoins, porteurs, lieu_doc, get_doc_fn, prix_fn=None, retenus=None,
 
 	Une clé manquante ne fait pas échouer : la commande naîtra `en_attente_materiaux`.
 
-	`retenus` : voir `emplacements_fournis` — à passer d'une passe à l'autre."""
+	`retenus` : voir `emplacements_fournis` — à passer d'une passe à l'autre.
+
+	`flux` (mode atelier) : contexte de flux de la cité (`marche.flux_cite`). Après réserve et
+	rayon, l'artisan prend ce qui manque dans le pool — **la commande a priorité sur le flux** :
+	la ligne entière si besoin (pas de `FLUX_PART_MAX`), et sans la garde `lieu_produit` du
+	tick (elle empêche un manège de PNJ, pas un client d'être servi). Rendu dans `flux` de
+	l'entrée ; rien n'est retiré ici (`consommer_atelier`)."""
 	trouves, manquants = emplacements_fournis(besoins, porteurs, get_doc_fn, retenus)
 	achetees, fournies_atelier, introuvables = [], [], []
+	pris_flux = {}
 	for manque in manquants:
 		cle, reste = manque["cle"], int(manque["quantite"])
 		if atelier:
 			reserve, item_id, en_rayon = dispo_atelier(lieu_doc, cle, get_doc_fn)
-			if reserve + en_rayon < reste:
+			lignes = dispo_flux(flux, cle, get_doc_fn, pris_flux)
+			if reserve + en_rayon + sum(q for _, q in lignes) < reste:
 				introuvables.append({"cle": cle, "quantite": reste})
 				continue
 			pris_reserve = min(reserve, reste)
+			pris_rayon = min(en_rayon, reste - pris_reserve)
+			du_flux = _prendre(lignes, reste - pris_reserve - pris_rayon, pris_flux)
+			item_id = item_id or (du_flux[0]["item_id"] if du_flux else None)
 			doc = get_doc_fn(item_id) if item_id else None
 			fournies_atelier.append({
 				"cle": cle, "item_id": item_id, "quantite": reste,
-				"reserve": pris_reserve, "rayon": reste - pris_reserve,
+				"reserve": pris_reserve, "rayon": pris_rayon, "flux": du_flux,
 				"nom": (doc or {}).get("nom") or item_id or cle,
 			})
 			continue
@@ -424,6 +503,41 @@ def sourcer(besoins, porteurs, lieu_doc, get_doc_fn, prix_fn=None, retenus=None,
 	}
 
 
+def sourcer_revente(item_id: str, flux, voisins, get_doc_fn) -> dict:
+	"""Sourçage d'une commande à l'ÉTABLE : la pièce elle-même, une unité — d'abord le pool de
+	la cité, puis le rayon des boutiques sœurs qui la PRODUISENT (`marche.lieu_produit`, les
+	revendeurs écartés). Même forme que `sourcer`, l'entrée unique dans `atelier` portant
+	`flux` et `boutiques` (`[{"lieu", "quantite"}]`, ids seulement : le devis part au client).
+
+	⚠️ Ni le sac du joueur (on ne lui commande pas ce qu'il porte), ni le rayon de l'étable
+	(il l'y achèterait directement). Rien n'est retiré ici (`consommer_atelier`)."""
+	doc = get_doc_fn(item_id) or {}
+	reste = 1
+	du_flux = _prendre(dispo_flux(flux, item_id, get_doc_fn), reste, {})
+	reste -= sum(p["quantite"] for p in du_flux)
+	boutiques = []
+	for v in voisins or []:
+		if reste <= 0:
+			break
+		if lieu_commande_revente(v) or not marche.lieu_produit(v, dict(doc, item=item_id)):
+			continue
+		qty = next((int(e.get("qty", 0) or 0) for e in v.get("stock_vente") or []
+					if e.get("item_id") == item_id), 0)
+		if qty > 0:
+			q = min(qty, reste)
+			boutiques.append({"lieu": v.get("_id"), "quantite": q})
+			reste -= q
+	if reste > 0:
+		return {"fournies": [], "atelier": [], "achetees": [], "cout_matieres": 0,
+				"manquantes": [{"cle": item_id, "quantite": reste}]}
+	return {
+		"fournies": [], "achetees": [], "manquantes": [], "cout_matieres": 0,
+		"atelier": [{"cle": item_id, "item_id": item_id, "quantite": 1,
+					 "reserve": 0, "rayon": 0, "flux": du_flux, "boutiques": boutiques,
+					 "nom": doc.get("nom") or item_id}],
+	}
+
+
 def retirer_du_rayon(lieu_doc: dict, achetees) -> None:
 	"""Décrémente `stock_vente` des matières achetées à l'artisan — même geste que `buy_item`,
 	lignes vidées purgées. Mute `lieu_doc` sans le sauver (commodité monde, best-effort)."""
@@ -437,13 +551,32 @@ def retirer_du_rayon(lieu_doc: dict, achetees) -> None:
 	lieu_doc["stock_vente"] = [e for e in stock if int(e.get("qty", 0) or 0) > 0]
 
 
-def consommer_atelier(lieu_doc: dict, fournies_atelier) -> None:
+def consommer_atelier(lieu_doc: dict, fournies_atelier, flux=None, voisins=None) -> list:
 	"""L'artisan consomme ce qu'il a mis de lui-même : réserve d'abord, rayon ensuite —
-	exactement l'ordre de `marche._executer_production_batch._consommer`. Mute `lieu_doc` sans
-	le sauver (commodité monde, best-effort comme le reste du stock)."""
-	reserve = (lieu_doc or {}).setdefault("stock_matieres", {})
+	exactement l'ordre de `marche._executer_production_batch._consommer` —, puis le pool de la
+	cité (`flux`, marqué `change` : l'appelant referme par `persister_flux`) et le rayon des
+	boutiques sœurs (étable). Mute sans sauver (commodité monde, best-effort comme le reste du
+	stock) ; rend les `voisins` dont le rayon a bougé, à sauver par l'appelant."""
+	pool = (flux or {}).get("pool")
+	par_id = {v.get("_id"): v for v in voisins or []}
+	mutes = {}
 	for part in fournies_atelier:
+		for p in part.get("flux") or []:
+			if pool is None:
+				continue
+			restant = int(pool.get(p["item_id"], 0)) - int(p["quantite"])
+			if restant > 0:
+				pool[p["item_id"]] = restant
+			else:
+				pool.pop(p["item_id"], None)
+			flux["change"] = True
+		for b in part.get("boutiques") or []:
+			voisin = par_id.get(b["lieu"])
+			if voisin is not None:
+				retirer_du_rayon(voisin, [{"item_id": part["item_id"], "quantite": b["quantite"]}])
+				mutes[b["lieu"]] = voisin
 		if part.get("reserve"):
+			reserve = lieu_doc.setdefault("stock_matieres", {})
 			restant = int(reserve.get(part["cle"], 0) or 0) - int(part["reserve"])
 			if restant > 0:
 				reserve[part["cle"]] = restant
@@ -451,6 +584,7 @@ def consommer_atelier(lieu_doc: dict, fournies_atelier) -> None:
 				reserve.pop(part["cle"], None)
 		if part.get("rayon") and part.get("item_id"):
 			retirer_du_rayon(lieu_doc, [{"item_id": part["item_id"], "quantite": part["rayon"]}])
+	return list(mutes.values())
 
 
 # ── Prix (§9 : le détail est conservé) ──────────────────────────────────────────

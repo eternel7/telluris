@@ -2525,7 +2525,9 @@
 		</section>
 		{# ── Commande ──────────────────────────────────────────────────────────────
 		   Servie par `est_commande`, DÉRIVÉ côté serveur de « ce lieu a-t-il des recettes ? ».
-		   Un comptoir de revente n'a donc pas ces sections du tout — il n'a rien à fabriquer.
+		   Un comptoir de revente n'a donc pas ces sections du tout — il n'a rien à fabriquer —,
+		   sauf l'étable : elle fait venir le harnachement fabriqué dans sa cité
+		   (`commande.lieu_commande_revente`).
 		   ⚠️ `est_sur_mesure` est un flag SÉPARÉ : il n'ouvre que le bouton « Sur mesure ».
 		   Chez un artisan ordinaire ce bouton ne doit pas exister, sans quoi l'interface
 		   laisserait croire qu'on peut y faire inventer une pièce. #}

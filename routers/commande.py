@@ -21,7 +21,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Body
 
-from db.config import get_doc, save_doc
+from db.config import get_doc, save_doc, find_docs
 from models import character_stats
 from utils.auth import get_current_user
 from utils.characters import (
@@ -55,9 +55,37 @@ def _acces(current_user: dict) -> tuple[dict, dict]:
 	# simple pour tous, sur mesure pour une grande maison — ce que les deux prédicats
 	# ci-dessous tranchent déjà sur le doc de l'employé.
 	lieu_doc = proprietes.atelier_actif(character, lieu_doc, get_doc) or lieu_doc
-	if not lieu_doc or not commande_util.lieu_prend_commandes(lieu_doc, get_doc):
+	if not lieu_doc or not commande_util.lieu_prend_commandes(lieu_doc, get_doc, _voisins(lieu_doc)):
 		raise HTTPException(status_code=403, detail="On ne prend pas de commande ici.")
 	return character, lieu_doc
+
+
+def _voisins(lieu_doc: dict) -> list | None:
+	"""Les boutiques de la cité — pour une étable SEULEMENT (`find_docs` hors cache)."""
+	if not commande_util.lieu_commande_revente(lieu_doc):
+		return None
+	return commande_util.voisins_cite(lieu_doc, find_docs)
+
+
+def _flux(lieu_doc: dict):
+	"""Le pool de la cité où la commande puise en priorité — jamais pour l'atelier d'une
+	propriété, qui vit sur le flux de SON bien (`telluris-proprietes`), pas sur celui de la
+	ville. `flux_cite` rend None hors d'une ville."""
+	if proprietes.est_atelier(lieu_doc):
+		return None
+	cite_id = (lieu_doc or {}).get("lieu_parent")
+	return marche.flux_cite(get_doc(cite_id) if cite_id else None)
+
+
+def _consommer(lieu_doc: dict, resolu: dict) -> None:
+	"""Dépense de l'artisan (réserve, rayon, pool de la cité, rayon des voisines) PUIS les
+	écritures monde, toutes best-effort : le personnage est déjà sauvé, c'est lui qui fait foi."""
+	mutes = commande_util.consommer_atelier(lieu_doc, resolu["source"]["atelier"],
+											resolu["flux"], resolu["voisins"])
+	save_doc(lieu_doc)   # best-effort : le rayon du lieu est une commodité monde
+	for voisin in mutes:
+		save_doc(voisin)
+	marche.persister_flux(resolu["flux"], save_doc)
 
 
 def _garde_relation(character: dict, lieu_doc: dict) -> dict:
@@ -84,8 +112,10 @@ def _prix_piece(relation, lieu_doc, item_doc, item_id) -> int:
 
 	⚠️ `stock=0` n'est pas un raccourci : c'est exactement la situation — l'objet n'est pas en
 	rayon, c'est pour cela qu'on le commande. Le facteur de rareté de `prix_marche` renchérit
-	alors la pièce, ce qui est le comportement voulu et déjà éprouvé côté vitrine."""
-	pmin, pmax = prix_range_cuivre(item_doc, item_id)
+	alors la pièce, ce qui est le comportement voulu et déjà éprouvé côté vitrine.
+
+	Fourchette de `prix_achat_lieu` : celle du rayon, majorée chez un revendeur (étable)."""
+	pmin, pmax = marche.prix_achat_lieu(lieu_doc, item_doc, item_id)
 	cible = stock_cible_pour(lieu_doc, item_doc)
 	return prix_marche(relation, item_id, pmin, pmax, "achat", 0, cible)
 
@@ -124,7 +154,7 @@ def _vue_commandes(character: dict, now: int, lieu_id: str) -> list:
 	return sorted(vues, key=lambda v: (v["statut"] != commande_util.ETAT_TERMINEE, v["pret_dans"]))
 
 
-def _catalogue_vue(lieu_doc: dict, relation) -> list:
+def _catalogue_vue(lieu_doc: dict, relation, voisins=None) -> list:
 	"""Le catalogue commandable, résolu pour le client (nom, icône, prix indicatif).
 
 	⚠️ Le prix annoncé est celui d'une commande où le joueur n'apporte RIEN : pièce + façon.
@@ -132,7 +162,9 @@ def _catalogue_vue(lieu_doc: dict, relation) -> list:
 	autrement demanderait de sourcer les sacs du groupe pour chaque ligne du catalogue, soit
 	un balayage complet de l'inventaire par objet fabricable. Le devis, lui, est exact."""
 	lignes = []
-	for item_id in commande_util.catalogue_commandable(lieu_doc, get_doc):
+	if voisins is None:
+		voisins = _voisins(lieu_doc)
+	for item_id in commande_util.catalogue_commandable(lieu_doc, get_doc, voisins):
 		item = resolve_item_ref(item_id)
 		if not item:
 			continue
@@ -254,7 +286,8 @@ def matieres_sur_mesure(
 
 	`def` et non `async def` : lecture PURE, comme le comptoir."""
 	character, lieu_doc = _acces(current_user)
-	if not item_id or item_id not in commande_util.catalogue_commandable(lieu_doc, get_doc):
+	if not item_id or item_id not in commande_util.catalogue_commandable(
+			lieu_doc, get_doc, _voisins(lieu_doc)):
 		raise HTTPException(status_code=422, detail="Cet artisan ne sait pas fabriquer cet objet.")
 	base_doc = get_doc(item_id)
 	if not base_doc:
@@ -271,18 +304,37 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 
 	Partagé par `devis` (qui s'arrête là) et `passer` (qui enchaîne sur la dépense) : les deux
 	doivent voir exactement la même chose, sinon le prix affiché ne serait pas celui débité.
-	Rend `{item_id, item_doc, base_doc, matieres_docs, besoins, source, detail, poids}`."""
+	Rend `{item_id, base_doc, matieres_docs, matieres, source, detail, porteurs, flux, voisins}`
+	— `flux` et `voisins` LUS ici, consommés par `_consommer` : le pool qui a validé la
+	commande est celui qu'on entame."""
 	item_id = (body or {}).get("item_id")
 	if not item_id:
 		raise HTTPException(status_code=422, detail="Aucun objet demandé")
-	if item_id not in commande_util.catalogue_commandable(lieu_doc, get_doc):
+	voisins = _voisins(lieu_doc)
+	if item_id not in commande_util.catalogue_commandable(lieu_doc, get_doc, voisins):
 		raise HTTPException(status_code=422, detail="Cet artisan ne sait pas fabriquer cet objet.")
 
 	base_doc = get_doc(item_id)
 	if not base_doc:
 		raise HTTPException(status_code=422, detail="Objet introuvable")
 
+	flux = _flux(lieu_doc)
 	matieres_demandees = fabrication.normaliser_matieres((body or {}).get("matieres"))
+	if commande_util.lieu_commande_revente(lieu_doc):
+		# Étable : elle ne fabrique rien, elle fait venir la pièce telle quelle — pool de la
+		# cité, puis rayon d'une boutique qui la produit. Rien à apporter, rien à façonner.
+		if matieres_demandees:
+			raise HTTPException(status_code=403,
+								detail="Ici, on fait venir la pièce telle quelle, sans la façonner.")
+		source = commande_util.sourcer_revente(item_id, flux, voisins, get_doc)
+		source["credit_matieres"] = 0
+		detail = commande_util.devis(_prix_piece(relation, lieu_doc, base_doc, item_id))
+		return {
+			"item_id": item_id, "base_doc": base_doc, "matieres_docs": [], "matieres": [],
+			"source": source, "detail": detail, "porteurs": [character],
+			"flux": flux, "voisins": voisins,
+		}
+
 	if matieres_demandees:
 		_garde_sur_mesure(lieu_doc, base_doc)
 	if len(matieres_demandees) > int(character_stats.COMMANDE_MATIERES_MAX):
@@ -326,10 +378,11 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 
 	recette = commande_util.recette_pour(lieu_doc, item_id)
 	besoins_recette = list(marche.recette_matieres(recette)) if recette else []
-	# `atelier=True` : ce que le joueur n'apporte pas, l'artisan le prend dans SA réserve puis
-	# dans son rayon, sans rien facturer — c'est déjà payé par le prix de la pièce.
+	# `atelier=True` : ce que le joueur n'apporte pas, l'artisan le prend dans SA réserve, dans
+	# son rayon, puis dans le pool de la cité (la commande passe AVANT le flux), sans rien
+	# facturer — c'est déjà payé par le prix de la pièce.
 	src_recette = commande_util.sourcer(besoins_recette, porteurs, lieu_doc, get_doc,
-										retenus=retenus, atelier=True)
+										retenus=retenus, atelier=True, flux=flux)
 
 	besoins_sur_mesure = [(e["item"], e["quantite"]) for e in matieres_demandees]
 	src_sur_mesure = commande_util.sourcer(besoins_sur_mesure, porteurs, lieu_doc, get_doc,
@@ -354,7 +407,7 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 	return {
 		"item_id": item_id, "base_doc": base_doc, "matieres_docs": matieres_docs,
 		"matieres": matieres_demandees, "source": source,
-		"detail": detail, "porteurs": porteurs,
+		"detail": detail, "porteurs": porteurs, "flux": flux, "voisins": voisins,
 	}
 
 
@@ -459,7 +512,6 @@ async def passer_commande(
 	# un échec de save laisse les sacs intacts en base.
 	commande_util.retirer_fournitures(source["fournies"])
 	commande_util.retirer_du_rayon(lieu_doc, source["achetees"])
-	commande_util.consommer_atelier(lieu_doc, source["atelier"])
 
 	enr = commande_util.nouvelle_commande(
 		lieu_doc, item_id, resolu["detail"], now=now, base_item=base_item,
@@ -470,7 +522,7 @@ async def passer_commande(
 
 	mutes = {id(f["porteur"]): f["porteur"] for f in source["fournies"]}
 	_save_porteurs(character, list(mutes.values()))
-	save_doc(lieu_doc)   # best-effort : le rayon du lieu est une commodité monde
+	_consommer(lieu_doc, resolu)
 
 	return _payload_commande(character, lieu_doc, relation, now, purse=purse,
 							 message="Commande passée : %s." % (item_doc.get("nom") or item_id))
@@ -538,7 +590,6 @@ async def relancer_commande(
 
 	commande_util.retirer_fournitures(source["fournies"])
 	commande_util.retirer_du_rayon(lieu_doc, source["achetees"])
-	commande_util.consommer_atelier(lieu_doc, source["atelier"])
 
 	# L'entrée est REMPLACÉE à la même place : le délai de fabrication court à partir de
 	# maintenant, puisque c'est maintenant que l'artisan s'y met.
@@ -554,7 +605,7 @@ async def relancer_commande(
 
 	mutes = {id(f["porteur"]): f["porteur"] for f in source["fournies"]}
 	_save_porteurs(character, list(mutes.values()))
-	save_doc(lieu_doc)
+	_consommer(lieu_doc, resolu)
 
 	return _payload_commande(character, lieu_doc, relation, now, purse=purse,
 							 message="L'artisan s'y met : %s." % (item_doc.get("nom") or item_id))
