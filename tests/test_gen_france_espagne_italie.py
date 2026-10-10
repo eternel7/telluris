@@ -14,6 +14,17 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dev import gen_france_espagne_italie as gfei  # noqa: E402
 from dev.gen_plaine_europeenne import cases_frontiere, zone_de  # noqa: E402
 
+VOISINES = ((1, 0), (-1, 0), (0, 1), (0, -1))
+
+
+def _touche(pos, bandes, sens):
+	cases = cases_frontiere(bandes, sens, 88, 48)
+	return any((pos[0] + dx, pos[1] + dy) in cases for dx, dy in VOISINES)
+
+
+def _liens(liens, prefixe):
+	return sorted((l for l in liens if l["_id"].startswith(prefixe)), key=lambda l: l["_id"])
+
 
 def _grille(cols=88, rows=48, valeur=1):
 	return [[valeur] * cols for _ in range(rows)]
@@ -36,7 +47,7 @@ def _proposer_tour(doc):
 
 
 def test_frontieres_posees_des_deux_cotes():
-	lieux, _, refus = gfei.construire(_docs(), _proposer_tour)
+	lieux, _, refus, _ = gfei.construire(_docs(), _proposer_tour)
 	assert refus == []
 	par_id = {d["_id"]: d for d in lieux}
 	france, espagne = par_id[gfei.FRANCE], par_id[gfei.ESPAGNE]
@@ -48,7 +59,7 @@ def test_frontieres_posees_des_deux_cotes():
 
 
 def test_tour_de_l_espagne_repris_murs_de_frontiere_et_de_neige_retires():
-	lieux, _, _ = gfei.construire(_docs(), _proposer_tour)
+	lieux, _, _, _ = gfei.construire(_docs(), _proposer_tour)
 	espagne = next(d for d in lieux if d["_id"] == gfei.ESPAGNE)
 	assert espagne["nav"] == {"20,20": 1}  # l'ancien nav (10,10) est oublié
 
@@ -62,23 +73,30 @@ def test_tour_non_repris_si_la_frontiere_est_deja_posee():
 	def interdit(doc):
 		raise AssertionError("tour repris alors que la frontière est posée")
 
-	lieux, _, refus = gfei.construire(docs, interdit)
+	lieux, _, refus, _ = gfei.construire(docs, interdit)
 	assert refus == []
 	assert next(d for d in lieux if d["_id"] == gfei.ESPAGNE)["nav"] == {"10,10": 255}
 
 
 def test_cols_des_pyrenees_de_part_et_d_autre_de_la_crete():
-	_, liens, _ = gfei.construire(_docs(), _proposer_tour)
-	par_id = {l["_id"]: l for l in liens}
-	for i, (nom, cible_fr, cible_es) in enumerate(gfei.PASSAGES_ESPAGNE, start=1):
-		fr, es = par_id[f"link:france_to_espagne_{i:02d}"]["nodes"]
-		assert fr == {"lieu": gfei.FRANCE, "pos": list(cible_fr), "label": f"{nom} — France"}
-		assert es == {"lieu": gfei.ESPAGNE, "pos": list(cible_es), "label": f"{nom} — Espagne"}
+	_, liens, _, _ = gfei.construire(_docs(), _proposer_tour)
+	cols = _liens(liens, "link:france_to_espagne_")
+	assert [l["_id"] for l in cols] == [f"link:france_to_espagne_{i:02d}"
+		for i in range(1, len(gfei.PASSAGES_ESPAGNE) + 1)]
+	for l, nom in zip(cols, gfei.PASSAGES_ESPAGNE):
+		fr, es = l["nodes"]
+		assert fr["lieu"] == gfei.FRANCE and fr["label"] == f"{nom} — France"
+		assert es["lieu"] == gfei.ESPAGNE and es["label"] == f"{nom} — Espagne"
+		assert _touche(fr["pos"], gfei.FRONTIERE_FRANCE, "sud")
+		assert _touche(es["pos"], gfei.FRONTIERE_ESPAGNE, "nord")
+		x_min, x_max, _, _ = gfei.CRETE_ESPAGNE
+		assert x_min <= es["pos"][0] <= x_max  # la crête, pas les golfes
 		assert fr["pos"][1] < 47  # avant la limite des murs nav de la France
+	assert [l["nodes"][0]["pos"][0] for l in cols] == sorted(l["nodes"][0]["pos"][0] for l in cols)
 
 
 def test_frontieres_alpines_et_balkaniques_de_l_italie():
-	lieux, _, refus = gfei.construire(_docs(), _proposer_tour)
+	lieux, _, refus, _ = gfei.construire(_docs(), _proposer_tour)
 	assert refus == []
 	par_id = {d["_id"]: d for d in lieux}
 	france, italie = par_id[gfei.FRANCE], par_id[gfei.ITALIE]
@@ -93,16 +111,21 @@ def test_frontieres_alpines_et_balkaniques_de_l_italie():
 
 
 def test_cols_des_alpes_de_part_et_d_autre_de_la_crete():
-	_, liens, _ = gfei.construire(_docs(), _proposer_tour)
-	par_id = {l["_id"]: l for l in liens}
-	for i, (nom, cible_fr, cible_it) in enumerate(gfei.PASSAGES_ITALIE, start=1):
-		fr, it = par_id[f"link:france_to_italie_{i:02d}"]["nodes"]
-		assert fr == {"lieu": gfei.FRANCE, "pos": list(cible_fr), "label": f"{nom} — France"}
-		assert it == {"lieu": gfei.ITALIE, "pos": list(cible_it), "label": f"{nom} — Italie"}
+	_, liens, _, _ = gfei.construire(_docs(), _proposer_tour)
+	cols = _liens(liens, "link:france_to_italie_")
+	assert len(cols) == len(gfei.PASSAGES_ITALIE)
+	for l, nom in zip(cols, gfei.PASSAGES_ITALIE):
+		fr, it = l["nodes"]
+		assert fr["lieu"] == gfei.FRANCE and fr["label"] == f"{nom} — France"
+		assert it["lieu"] == gfei.ITALIE and it["label"] == f"{nom} — Italie"
+		assert _touche(fr["pos"], gfei.FRONTIERE_FRANCE_ITALIE, "est")
+		assert _touche(it["pos"], gfei.FRONTIERE_ITALIE_FRANCE, "ouest")
+	# Du nord au sud des deux côtés.
+	assert [l["nodes"][1]["pos"][1] for l in cols] == sorted(l["nodes"][1]["pos"][1] for l in cols)
 
 
 def test_rome_reste_atteignable_depuis_l_italie_bordee():
-	_, liens, refus = gfei.construire(_docs(), _proposer_tour)
+	_, liens, refus, _ = gfei.construire(_docs(), _proposer_tour)
 	assert refus == []
 	assert sum(1 for l in liens if l["_id"].startswith("link:italie_to_rome_")) == len(gfei.SORTIES_ROME)
 
@@ -122,5 +145,5 @@ def test_rome_rattachee_garde_tout_son_doc():
 
 
 def test_lieu_manquant_refuse():
-	lieux, liens, refus = gfei.construire(_docs()[:3], _proposer_tour)
+	lieux, liens, refus, _ = gfei.construire(_docs()[:3], _proposer_tour)
 	assert lieux == [] and liens == [] and gfei.ROME in refus[0]

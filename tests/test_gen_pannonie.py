@@ -53,7 +53,7 @@ def _construire(docs=None):
 
 
 def test_pannonie_creee_faux_rivages_retires_adriatique_fermee():
-	lieux, _, refus, propositions = _construire()
+	lieux, _, refus, propositions, _ = _construire()
 	assert refus == [] and set(propositions) == {gpa.PANNONIE}
 	pannonie = next(d for d in lieux if d["_id"] == gpa.PANNONIE)
 	assert pannonie["label"] == "Pannonie" and pannonie["categorie"] == "pays"
@@ -62,7 +62,7 @@ def test_pannonie_creee_faux_rivages_retires_adriatique_fermee():
 
 
 def test_frontieres_de_la_pannonie_et_de_la_roumanie():
-	lieux, _, _, _ = _construire()
+	lieux, _, _, _, _ = _construire()
 	par_id = {d["_id"]: d for d in lieux}
 	pannonie, roumanie = par_id[gpa.PANNONIE], par_id[gpa.ROUMANIE]
 	for bandes, sens in ((gpa.FRONTIERE_PANNONIE_ITALIE, "ouest"),
@@ -77,20 +77,28 @@ def test_frontieres_de_la_pannonie_et_de_la_roumanie():
 
 
 def test_liens_italie_pannonie_roumanie_sur_les_frontieres():
-	_, liens, refus, _ = _construire()
+	_, liens, refus, _, _ = _construire()
 	assert refus == []
 	par_id = {l["_id"]: l for l in liens}
 	for prefixe, a, b, passages in (
 			("link:italie_to_pannonie", gpa.ITALIE, gpa.PANNONIE, gpa.PASSAGES_ITALIE),
 			("link:pannonie_to_roumanie", gpa.PANNONIE, gpa.ROUMANIE, gpa.PASSAGES_ROUMANIE)):
-		for i, (nom, cible_a, cible_b) in enumerate(passages, start=1):
+		assert sum(1 for i in par_id if i.startswith(prefixe + "_")) == len(passages)
+		for i, nom in enumerate(passages, start=1):
 			na, nb = par_id[f"{prefixe}_{i:02d}"]["nodes"]
-			assert na["lieu"] == a and na["pos"] == list(cible_a) and na["label"].startswith(f"{nom} — ")
-			assert nb["lieu"] == b and nb["pos"] == list(cible_b) and nb["label"].startswith(f"{nom} — ")
+			assert na["lieu"] == a and na["label"].startswith(f"{nom} — ")
+			assert nb["lieu"] == b and nb["label"].startswith(f"{nom} — ")
+	# Côté Italie, la frontière terrestre seule : jamais la côte adriatique.
+	_, _, y_min, y_max = gpa.TERRE_ITALIE
+	assert all(y_min <= l["nodes"][0]["pos"][1] <= y_max for i, l in par_id.items()
+		if i.startswith("link:italie_to_pannonie_"))
+	# Pannonie ↔ Roumanie : jamais au sud du Danube.
+	assert all(n["pos"][1] <= gpa.DANUBE[3] for i, l in par_id.items()
+		if i.startswith("link:pannonie_to_roumanie_") for n in l["nodes"])
 
 
 def test_bucarest_posee_sur_la_roumanie():
-	lieux, liens, refus, _ = _construire()
+	lieux, liens, refus, _, _ = _construire()
 	assert refus == []
 	bucarest = next(d for d in lieux if d["_id"] == gpa.BUCAREST)
 	assert bucarest["lieu_parent"] == gpa.ROUMANIE and bucarest["intro"] == {"titre": "t"}
@@ -112,7 +120,7 @@ def test_sortie_de_bucarest_dans_l_exterieur_vise():
 	mur = 66
 	for y in range(48):
 		cells[y][mur] = 0
-	_, liens, refus, _ = _construire(docs)
+	_, liens, refus, _, _ = _construire(docs)
 	assert refus == []
 	vus = set()
 	for l in liens:
@@ -131,7 +139,7 @@ def test_pannonie_deja_en_base_relue_sans_reproposer():
 	def interdit(*_):
 		raise AssertionError("grille reproposée alors que la Pannonie est en base")
 
-	lieux, _, refus, propositions = gpa.construire(_docs() + [relue], TAILLES.get, interdit,
+	lieux, _, refus, propositions, _ = gpa.construire(_docs() + [relue], TAILLES.get, interdit,
 		interdit, _italie())
 	assert refus == [] and propositions == {}
 	pannonie = next(d for d in lieux if d["_id"] == gpa.PANNONIE)

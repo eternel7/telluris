@@ -13,6 +13,9 @@ RÈGLE DES FRONTIÈRES — on ne passe d'une carte à l'autre QUE par une connex
     l'image) : il ne se traverse plus, le joueur doit prendre la connexion ;
   · les connexions se posent SUR la frontière, du côté accessible — avant la limite des murs
     nav quand la carte montre plus loin que la frontière ;
+  · entre deux PAYS, UNE CASE SUR DEUX de la frontière porte un passage (`ligne_frontiere`,
+    `liens_frontiere`) : la ligne est relue sur la grille, les noms comptés pour son côté le
+    plus long — l'autre, plus court, porte parfois deux passages sur une case ;
   · chaque passage est NOMMÉ (col, gué, route…) : un nœud porte « <passage> — <son lieu> ».
     Le bouton du jeu affiche le libellé du nœud de DESTINATION (`buildLocationslist`) : le
     joueur lit le passage ET le pays où il mène. Côté cité, le nœud de la cité porte
@@ -64,18 +67,27 @@ SORTIES_CITES = {
 # au-delà (x ≥ 56) le bas de la carte est l'Empire, pas la France.
 FRONTIERE_PLAINE = ((0, 12, 38), (13, 20, 39), (21, 34, 41), (35, 44, 43), (45, 55, 45))
 
-# France ↔ plaine : (nom, case visée sur la France, case visée sur la plaine). Sur la France,
-# la rangée 1 peinte (nord fermé par nav) EST la frontière, et la côte picarde en (45, 2) ;
-# sur la plaine, la case juste au nord de la bande mise à 0.
-# ⚠️ Ordre = suffixe d'`_id` (`_01`…) : un passage s'AJOUTE en fin, jamais au milieu — sinon
-# les `_id` déjà en base désigneraient un autre passage.
+# France ↔ plaine, une case sur deux de la frontière (`liens_frontiere`). Sur la France, la
+# rangée 1 peinte (nord fermé par nav) EST la frontière, et la côte picarde en (45, 2) : ses
+# cases touchent l'au-delà `NORD_FRANCE` (x_min, x_max, y_min, y_max — les cases hors de la
+# terre). Sur la plaine, la case juste au nord de la bande mise à 0. Lignes lues d'OUEST en
+# EST depuis `DEPART_*`.
+NORD_FRANCE = (45, 87, 0, 1)
+DEPART_FRANCE_NORD = (45, 2)
+DEPART_PLAINE = (0, 37)
+
+# Noms, d'ouest en est (Manche → Flandre → Hainaut → Ardenne → Lorraine → Rhin) : un par
+# poste de la plaine (55 cases ⇒ 28 ; la France, 42 cases, en porte deux sur certaines).
+# ⚠️ Rang = suffixe d'`_id` (`_01`…) : réordonner fait désigner un autre passage aux `_id`
+# en base ; la grille bouge ⇒ `liens_frontiere` avertit que le compte ne tombe plus juste.
 PASSAGES_PLAINE = (
-	("Route des Flandres", (49, 1), (16, 38)),
-	("Vallée de la Meuse", (56, 1), (28, 40)),
-	("Route du Luxembourg", (64, 1), (39, 42)),
-	("Pont du Rhin", (76, 1), (50, 44)),
-	("Chemin de la côte picarde", (45, 2), (12, 37)),
-	("Route de la Sarre", (70, 1), (45, 44)),
+	"Chemin de la côte picarde", "Grève de Malo", "Route de Furnes", "Gué de l'Yser",
+	"Route des Flandres", "Gué de la Lys", "Route de Lille à Courtrai", "Pont de Tournai",
+	"Route de Valenciennes à Mons", "Gué de la Sambre", "Bois de Chimay", "Route de Rocroi",
+	"Vallée de la Meuse", "Gué de la Semois", "Route de Bouillon", "Route de Montmédy",
+	"Gué de la Chiers", "Route du Luxembourg", "Gué de la Moselle", "Route de Thionville",
+	"Route de la Sarre", "Pont de Sarrebruck", "Passage de Bitche", "Route de Wissembourg",
+	"Gué de la Lauter", "Pont du Rhin", "Bac de Seltz", "Pont de Kehl",
 )
 
 # Libellé d'une sortie de cité, d'après sa clé dans `SORTIES_*`.
@@ -83,6 +95,9 @@ SORTIES_LIBELLES = {"nord": "par le nord", "sud": "par le sud", "est": "par l'es
 	"ouest": "par l'ouest", "nord_est": "par le nord-est"}
 
 METADATA = {"type": "chemin", "status": "ouvert"}
+
+# Grille de toutes les cartes de pays (88 × 48 cases de 16 px).
+DIMS = {"x": 88, "y": 48}
 
 # Voisines d'une case, dans l'ordre où les liens les prennent (la case elle-même d'abord).
 VOISINES = ((0, 0), (1, 0), (0, 1), (1, 1), (-1, 0), (0, -1), (-1, -1), (1, -1), (-1, 1))
@@ -163,19 +178,70 @@ def lien_vise(_id, lieu_a, zone_a, cible_a, lieu_b, zone_b, cible_b):
 	return connexion(_id, lieu_a, pos_a, lieu_b, pos_b), None
 
 
-def liens_nommes(prefixe, lieu_a, zone_a, lieu_b, zone_b, passages, libelles):
-	"""(docs, refus) : un lien `<prefixe>_NN` par passage (nom, cible_a, cible_b), chaque
-	nœud libellé « <nom> — <libellé de son lieu> » (`libelles` : _id → label)."""
-	docs, refus = [], []
-	for i, (nom, cible_a, cible_b) in enumerate(passages, start=1):
-		doc, r = lien_vise(f"{prefixe}_{i:02d}", lieu_a, zone_a, cible_a, lieu_b, zone_b, cible_b)
-		if r:
-			refus.append(r)
-			continue
+def bande(bandes, sens, dims):
+	"""`cases_frontiere` sur les dimensions d'un doc."""
+	return cases_frontiere(bandes, sens, dims["x"], dims["y"])
+
+
+def ligne_frontiere(zone, au_dela, depart, cadre=None):
+	"""Cases de `zone` qui touchent (orthogonalement) une case d'`au_dela`, en CHAÎNE : depuis
+	la plus proche de `depart`, chaque pas va à la plus proche non encore prise (Chebyshev,
+	puis Manhattan, puis y, puis x) — l'escalier d'une bande se suit marche par marche.
+	`cadre` (x_min, x_max, y_min, y_max) : seules ces cases (une bande qui borde aussi la mer
+	n'est une frontière que sur sa partie terrestre)."""
+	x_min, x_max, y_min, y_max = cadre or (0, 10 ** 9, 0, 10 ** 9)
+	restantes = {(x, y) for x, y in zone if x_min <= x <= x_max and y_min <= y <= y_max
+		and any((x + dx, y + dy) in au_dela for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))}
+	if not restantes:
+		return []
+
+	def pres(c, d):
+		ex, ey = abs(c[0] - d[0]), abs(c[1] - d[1])
+		return (max(ex, ey), ex + ey, c[1], c[0])
+
+	ligne = [min(restantes, key=lambda c: pres(c, depart))]
+	restantes.discard(ligne[0])
+	while restantes:
+		suivante = min(restantes, key=lambda c: pres(c, ligne[-1]))
+		restantes.discard(suivante)
+		ligne.append(suivante)
+	return ligne
+
+
+def postes(ligne, n):
+	"""`n` cases de `ligne`, prises parmi une case sur deux (`ligne[0::2]`), réparties d'un bout
+	à l'autre : exactement `ligne[0::2]` quand il y en a `n` ; moins ⇒ une case porte deux
+	liens ; plus ⇒ des postes sautés."""
+	pairs = ligne[0::2]
+	if not pairs or n <= 0:
+		return []
+	if n == 1:
+		return [pairs[0]]
+	return [pairs[round(i * (len(pairs) - 1) / (n - 1))] for i in range(n)]
+
+
+def liens_frontiere(prefixe, lieu_a, ligne_a, lieu_b, ligne_b, noms, libelles):
+	"""(docs, refus, avertissements) : un lien `<prefixe>_NN` par nom de `noms` (ordonnés comme
+	les deux lignes), posés UNE CASE SUR DEUX le long de la frontière (`postes`), chaque nœud
+	libellé « <nom> — <libellé de son lieu> ».
+
+	Les noms sont comptés pour le côté le PLUS LONG (`ceil(len / 2)`) : l'autre côté, plus
+	court, porte parfois deux liens sur une case. Compte qui ne tombe pas juste ⇒ avertissement
+	(la grille a bougé : la liste de noms est à revoir), le lot reste posable."""
+	if not ligne_a or not ligne_b:
+		manque = lieu_a if not ligne_a else lieu_b
+		return [], [f"{prefixe} : aucune case de frontière sur {manque}"], []
+	n = len(noms)
+	attendu = max((len(ligne_a) + 1) // 2, (len(ligne_b) + 1) // 2)
+	avert = [] if n == attendu else [f"{prefixe} : {n} nom(s) pour {attendu} poste(s) — "
+		f"frontière de {len(ligne_a)} case(s) sur {lieu_a}, {len(ligne_b)} sur {lieu_b}"]
+	docs = []
+	for i, (nom, pos_a, pos_b) in enumerate(zip(noms, postes(ligne_a, n), postes(ligne_b, n)), start=1):
+		doc = connexion(f"{prefixe}_{i:02d}", lieu_a, pos_a, lieu_b, pos_b)
 		for noeud in doc["nodes"]:
 			noeud["label"] = f"{nom} — {libelles.get(noeud['lieu'], noeud['lieu'])}"
 		docs.append(doc)
-	return docs, refus
+	return docs, [], avert
 
 
 def libelle_sortie(cite_label, nom):
@@ -233,13 +299,17 @@ def connexions_cite(cite_id, zone_cite, zone_plaine, cite_label=None):
 
 
 def connexions_france_plaine(zone_france, zone_plaine, libelles):
-	"""(docs, refus) des liens France ↔ plaine (`PASSAGES_PLAINE`)."""
-	return liens_nommes("link:france_to_plaine_europeenne", FRANCE, zone_france, PLAINE,
-		zone_plaine, PASSAGES_PLAINE, libelles)
+	"""(docs, refus, avertissements) des liens France ↔ plaine (`PASSAGES_PLAINE`)."""
+	x_min, x_max, y_min, y_max = NORD_FRANCE
+	au_dela = {(x, y) for x in range(x_min, x_max + 1) for y in range(y_min, y_max + 1)} - zone_france
+	return liens_frontiere("link:france_to_plaine_europeenne",
+		FRANCE, ligne_frontiere(zone_france, au_dela, DEPART_FRANCE_NORD),
+		PLAINE, ligne_frontiere(zone_plaine, bande(FRONTIERE_PLAINE, "sud", DIMS), DEPART_PLAINE),
+		PASSAGES_PLAINE, libelles)
 
 
 def construire(docs, taille_fn, proposer_fn, france):
-	"""(lieux, liens, refus, propositions) de la plaine, de ses cités et des liens France ↔ plaine.
+	"""(lieux, liens, refus, propositions, avertissements) de la plaine, de ses cités et des liens France ↔ plaine.
 
 	`proposer_fn(doc, profil) -> {cells, nav, rapport}` : grille d'un lieu NEUF (Pillow côté
 	CLI). Lieu déjà en base : son doc relu, seule la frontière y est appliquée.
@@ -249,7 +319,7 @@ def construire(docs, taille_fn, proposer_fn, france):
 	par_id = {d.get("_id"): d for d in docs}
 	plaine_neuve, cites_neuves, refus = lieux_a_creer(docs, taille_fn)
 	if refus:
-		return [], [], refus, {}
+		return [], [], refus, {}, []
 	propositions = {}
 	lieux = []
 	neufs = ([plaine_neuve] if plaine_neuve else []) + cites_neuves
@@ -270,11 +340,11 @@ def construire(docs, taille_fn, proposer_fn, france):
 	zone_france = zone_de(france.get("cells") or [], france.get("nav") or {}, ANCRE_FRANCE)
 
 	libelles = libelles_de(docs, lieux, [france])
-	liens, refus = connexions_france_plaine(zone_france, zone_plaine, libelles)
+	liens, refus, avert = connexions_france_plaine(zone_france, zone_plaine, libelles)
 	for cite_id in sorted(POSITIONS_PLAINE):
 		cite = par_lieu[cite_id]
 		d, r = connexions_cite(cite_id, zone_de(cite["cells"], cite.get("nav") or {}), zone_plaine,
 			libelles[cite_id])
 		liens += d
 		refus += r
-	return lieux, liens, refus, propositions
+	return lieux, liens, refus, propositions, avert

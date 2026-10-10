@@ -23,8 +23,10 @@ def _grille(cols=88, rows=48, valeur=1):
 
 
 def _france():
+	cells = _grille()
+	cells[0] = [0] * 88  # le nord hors de la terre : la rangée 1 est la frontière
 	return {"_id": gpe.FRANCE, "type": "lieu", "label": "France", "categorie": "pays", "image": "france.png",
-		"dimensions": {"x": 88, "y": 48}, "cells": _grille(), "nav": {}}
+		"dimensions": {"x": 88, "y": 48}, "cells": cells, "nav": {}}
 
 
 def _proposer(doc, profil):
@@ -52,7 +54,7 @@ def test_cases_frontiere_et_fermer():
 
 
 def test_trois_lieux_neufs_frontiere_posee_et_cites_rattachees():
-	lieux, liens, refus, propositions = gpe.construire([_france()], TAILLES.get, _proposer, _france())
+	lieux, liens, refus, propositions, _ = gpe.construire([_france()], TAILLES.get, _proposer, _france())
 	assert refus == []
 	par_id = {d["_id"]: d for d in lieux}
 	assert set(par_id) == {gpe.PLAINE} | set(gpe.POSITIONS_PLAINE) == set(propositions)
@@ -68,22 +70,24 @@ def test_trois_lieux_neufs_frontiere_posee_et_cites_rattachees():
 
 
 def test_passage_france_plaine_juste_au_nord_de_la_frontiere():
-	lieux, liens, _, _ = gpe.construire([_france()], TAILLES.get, _proposer, _france())
+	lieux, liens, _, _, _ = gpe.construire([_france()], TAILLES.get, _proposer, _france())
 	plaine = next(d for d in lieux if d["_id"] == gpe.PLAINE)
 	par_id = {l["_id"]: l for l in liens}
-	for i, (nom, cible_fr, cible_pl) in enumerate(gpe.PASSAGES_PLAINE, start=1):
+	for i, nom in enumerate(gpe.PASSAGES_PLAINE, start=1):
 		fr, pl = par_id[f"link:france_to_plaine_europeenne_{i:02d}"]["nodes"]
-		assert fr == {"lieu": gpe.FRANCE, "pos": list(cible_fr), "label": f"{nom} — France"}
+		assert fr["lieu"] == gpe.FRANCE and fr["label"] == f"{nom} — France"
+		assert fr["pos"][1] <= 2  # la rangée du nord de la France
 		assert pl["label"] == f"{nom} — Plaine européenne"
 		x, y = pl["pos"]
 		assert pl["lieu"] == gpe.PLAINE and plaine["cells"][y][x] == 1
-		assert plaine["cells"][y + 1][x] == 0  # la case au sud est déjà la France, fermée
+		# Une voisine est déjà la France, fermée (au sud, ou à l'ouest sur une marche de l'escalier).
+		assert 0 in (plaine["cells"][y + 1][x], plaine["cells"][y][x - 1])
 
 
 def test_passages_nommes_distincts_et_sorties_de_cite_libellees():
-	noms = [nom for nom, _, _ in gpe.PASSAGES_PLAINE]
+	noms = list(gpe.PASSAGES_PLAINE)
 	assert len(set(noms)) == len(noms)
-	_, liens, _, _ = gpe.construire([_france()], TAILLES.get, _proposer, _france())
+	_, liens, _, _, _ = gpe.construire([_france()], TAILLES.get, _proposer, _france())
 	bruges = [l for l in liens if l["_id"].startswith("link:plaine_europeenne_to_bruges_")]
 	assert {l["nodes"][1]["label"] for l in bruges} == {
 		gpe.libelle_sortie("Bruges", nom) for nom in gpe.SORTIES_CITES["lieu:bruges"]}
@@ -97,7 +101,7 @@ def test_lieux_deja_en_base_relus_et_non_reproposes():
 	cites = [{"_id": c, "type": "lieu", "image": f"{c.split(':')[1]}_city.jpg",
 		"dimensions": {"x": 88, "y": 48}, "cells": _grille(), "nav": {}, "lieu_parent": gpe.PLAINE}
 		for c in gpe.POSITIONS_PLAINE]
-	lieux, _, refus, propositions = gpe.construire([_france(), plaine] + cites, TAILLES.get,
+	lieux, _, refus, propositions, _ = gpe.construire([_france(), plaine] + cites, TAILLES.get,
 		_proposer, _france())
 	assert refus == [] and propositions == {}
 	relue = next(d for d in lieux if d["_id"] == gpe.PLAINE)
@@ -118,3 +122,40 @@ def test_lien_vise_ramene_dans_la_zone():
 	assert refus is None and [n["pos"] for n in doc["nodes"]] == [[5, 5], [9, 9]]
 	doc, refus = gpe.lien_vise("link:x", "lieu:a", set(), (4, 4), "lieu:b", zone, (10, 10))
 	assert doc is None and "lieu:a" in refus
+
+
+def test_ligne_frontiere_suit_l_escalier_d_une_bande():
+	# Bande « sud » en escalier : y ≥ 3 pour x ≤ 2, y ≥ 4 pour x ≥ 3 ; tout le reste est terre.
+	au_dela = gpe.cases_frontiere(((0, 2, 3), (3, 5, 4)), "sud", 6, 6)
+	zone = {(x, y) for x in range(6) for y in range(6)} - au_dela
+	assert gpe.ligne_frontiere(zone, au_dela, (0, 0)) == [
+		(0, 2), (1, 2), (2, 2), (3, 3), (4, 3), (5, 3)]
+	assert gpe.ligne_frontiere(zone, au_dela, (9, 0))[0] == (5, 3)  # parcourue depuis l'autre bout
+	assert gpe.ligne_frontiere(zone, au_dela, (0, 0), (2, 4, 0, 9)) == [(2, 2), (3, 3), (4, 3)]
+	assert gpe.ligne_frontiere(set(), au_dela, (0, 0)) == []
+
+
+def test_postes_une_case_sur_deux():
+	ligne = list(range(7))
+	assert gpe.postes(ligne, 4) == [0, 2, 4, 6]  # compte juste : une case sur deux, exactement
+	plus = gpe.postes(ligne, 6)  # côté court : une case porte deux liens, aucune impaire
+	assert len(plus) == 6 and set(plus) == {0, 2, 4, 6} and plus == sorted(plus)
+	assert gpe.postes(ligne, 1) == [0] and gpe.postes([], 3) == []
+
+
+def test_liens_frontiere_nommes_et_compte_verifie():
+	ligne_a = [(x, 0) for x in range(5)]   # 3 postes
+	ligne_b = [(x, 9) for x in range(3)]   # 2 postes : l'un porte deux liens
+	libelles = {"lieu:a": "A", "lieu:b": "B"}
+	docs, refus, avert = gpe.liens_frontiere("link:a_to_b", "lieu:a", ligne_a, "lieu:b", ligne_b,
+		("Col 1", "Col 2", "Col 3"), libelles)
+	assert refus == [] and avert == []
+	assert [d["_id"] for d in docs] == ["link:a_to_b_01", "link:a_to_b_02", "link:a_to_b_03"]
+	assert [d["nodes"][0]["pos"] for d in docs] == [[0, 0], [2, 0], [4, 0]]
+	assert {tuple(d["nodes"][1]["pos"]) for d in docs} == {(0, 9), (2, 9)}
+	assert docs[1]["nodes"] == [{"lieu": "lieu:a", "pos": [2, 0], "label": "Col 2 — A"},
+		{"lieu": "lieu:b", "pos": [docs[1]["nodes"][1]["pos"][0], 9], "label": "Col 2 — B"}]
+	_, _, avert = gpe.liens_frontiere("link:a_to_b", "lieu:a", ligne_a, "lieu:b", ligne_b,
+		("Col 1", "Col 2"), libelles)
+	assert len(avert) == 1  # la grille a bougé : la liste de noms est à revoir
+	assert gpe.liens_frontiere("link:a_to_b", "lieu:a", [], "lieu:b", ligne_b, ("Col 1",), libelles)[1]
