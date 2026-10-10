@@ -658,6 +658,23 @@ CATALOGUE = [
 			"Requiert Pillow.",
 	},
 	{
+		"id": "gen_plaine_europeenne",
+		"label": "🌍 Créer la Plaine européenne, Bruges et Aix-la-Chapelle (grilles + connexions)",
+		# Dump frais, même raison que gen_cartes_pays : rejoué sur un dump périmé, il réémettrait
+		# les trois lieux et son import (PUT complet) effacerait les grilles retouchées.
+		"argv_fn": lambda v, f: _py("gen_plaine_europeenne.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/plaine_europeenne_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/plaine_europeenne_a_importer.json (+ un aperçu "
+			"PNG par lieu). Rien en base avant 📥 Importer.",
+		"description": "`lieu:plaine_europeenne` (pays, côte murée en nav), `lieu:bruges` et "
+			"`lieu:aix_la_chapelle` (villes posées sur la plaine, grille depuis l'image), les "
+			"liens cité ↔ plaine (une sortie par route qui quitte la carte) et 4 liens France "
+			"(rangée nord accessible) ↔ plaine (limite sud accessible). Toute case hors de la "
+			"zone principale ou tout `_id` pris refuse le lot ; plaine déjà en base ⇒ aucun "
+			"fichier. Requiert Pillow.",
+	},
+	{
 		"id": "gen_terrain_tags",
 		"label": "🌲 Générer les terrain_tags des zones d'influence",
 		"argv": _py("gen_terrain_tags.py"),

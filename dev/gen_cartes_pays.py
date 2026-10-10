@@ -51,6 +51,7 @@ CARTES = {
 	"france.png": ("France", "pays"),
 	"islande.png": ("Islande", "pays"),
 	"italie.png": ("Italie", "pays"),
+	"plaine_europeenne.jpg": ("Plaine européenne", "region"),
 	"roumanie.png": ("Roumanie", "pays"),
 	"world.png": ("Monde", "monde"),
 }

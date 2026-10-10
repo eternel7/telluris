@@ -41,6 +41,7 @@ EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp")
 
 # Libellés qui ne se déduisent pas du nom de fichier (exonyme, accent) ; sinon slug capitalisé.
 LIBELLES = {
+	"aix_la_chapelle": "Aix-la-Chapelle",
 	"cairo": "Le Caire",
 	"london": "Londres",
 	"lutecia_capital": "Lutecia",
