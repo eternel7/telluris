@@ -3,7 +3,7 @@
     "_id": "lieu:montmartre",
     "type": "lieu",
     "label": "Montmartre",
-    "image": "caserne_europe01.png",
+    "image": "montmartre.jpg",
     "categorie": "bastion_paladin",
     "lieu_parent": "lieu:lutecia",
     "texte": "Au pied des grands escaliers qui montent vers la basilique, un chemin boueux mène à une cour fortifiée, à quelques pas de la Porte Montmartre. Plus haut, les paladins de la basilique veillent sur le ciel de la capitale ; ici, on veille sur les routes. Des chevaux attendent près d'un chariot chargé de ballots, un marchand discute avec un garde, et sous un auvent de toile, un greffier tient le registre des convois qui partent vers les cités de France.",
