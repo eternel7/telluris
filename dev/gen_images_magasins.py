@@ -73,7 +73,7 @@ NOMS_CITES = {"lieu:rhemi": "Reims"}
 # Lignée : repère reconnaissable, jamais une règle de corps (docs/prompts_images.md §2).
 LIGNEES = {
 	"nain": ("Une naine", "Un nain",
-			 "nettement plus petit{e} qu'un humain — un humain se tient au même plan, et {il} lui arrive à peine à la taille —, tête et mains grandes pour sa taille"),
+			 "nettement plus petit{e} qu'un humain — un humain se tient au même plan, et {il} lui arrive à peine à la taille —, tête et mains grandes pour sa taille{imberbe}"),
 	"hobbit": ("Une hobbit", "Un hobbit",
 			   "de toute petite taille d'adulte, pieds nus — un humain au même plan le{a} dépasse de deux têtes"),
 	"elfe": ("Une elfe", "Un elfe", "aux oreilles longues et pointues"),
@@ -99,6 +99,7 @@ METIERS = {
 	"bijouterie": ("tient une bijouterie", "une bague sertie d'une pierre", "vêtements fins, loupe de bijoutier au cou", "comptoir garni d'écrins, balance de précision, petits bijoux"),
 	"boucherie": ("tient une boucherie", "un beau quartier de viande", "tablier taché, couperet à la ceinture", "crochets de viandes suspendues, billot de bois, étal"),
 	"boulangerie": ("tient une boulangerie", "une miche de pain doré", "tablier enfariné, manches retroussées", "four à pain, corbeilles de pains et de brioches"),
+	"grande_boulangerie": ("tient une grande boulangerie", "une couronne de pain festonnée", "tablier enfariné de maître boulanger, toque de toile", "plusieurs fours à pain, mitrons au travail, paniers de pains et de pâtisseries"),
 	"bourrellerie": ("tient une bourrellerie", "un collier de cheval en cuir", "tablier de cuir, alêne à la ceinture", "harnais, selles et sangles pendus aux murs"),
 	"boyauderie": ("tient une boyauderie", "un écheveau de corde de boyau", "tablier de cuir humide", "bacs de trempage, cordes de boyau qui sèchent sur des perches"),
 	"brosserie": ("tient une brosserie", "une brosse à poils de sanglier", "tablier de toile", "brosses, balais et pinceaux de toutes tailles"),
@@ -135,7 +136,7 @@ STYLE_FR = ("Illustration de fantasy médiévale semi-réaliste, dans le style d
 # figurants identiques (lot de Rhemi, 09/10). Ogres jamais verts.
 FOULE_FR = ("Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, "
 			"chacun différent par l'âge, la carrure, les cheveux et la tenue : elfes bruns, roux, noirs, "
-			"argentés ou blonds, en robe, cape de voyage ou cuir ; nains barbus ou tressés, en armure, "
+			"argentés ou blonds, en robe, cape de voyage ou cuir ; nains barbus, naines imberbes aux cheveux tressés, en armure, "
 			"tablier ou habit de marchand ; hobbits ronds ou fluets, jeunes ou ridés, en gilets colorés ; "
 			"ogres aux teints humains, burinés, rougeauds ou hâlés, jamais verts ; humains de toutes "
 			"origines, aventuriers, gardes, marchands, pèlerins.")
@@ -144,7 +145,9 @@ FOULE_FR = ("Des ogres, des nains, des hobbits, des elfes et des humains vaquent
 def _accord(texte, f):
 	return (texte.replace("{e}", "e" if f else "").replace("{he}", "he" if f else "")
 			.replace("{ve}", "ve" if f else "f").replace("{il}", "elle" if f else "il")
-			.replace("{a}", "a" if f else ""))
+			.replace("{a}", "a" if f else "")
+			# Les naines n'ont JAMAIS de barbe (consigne de l'auteur, 10/10).
+			.replace("{imberbe}", ", visage parfaitement imberbe, sans aucune barbe" if f else ""))
 
 
 def tirage_tenancier(rng):
@@ -160,13 +163,17 @@ def prompt_tenancier(race, sexe, categorie, cite_nom, tirage):
 	qui, objet, tenue, decor = METIERS[categorie]
 	corps = ", ".join(_accord(t, f) for t in tirage)
 	il = "Elle" if f else "Il"
-	sujet = f"{une_f if f else un_m} {corps}" + (f", {_accord(marqueur, f)}" if marqueur else "")
+	sujet = (une_f if f else un_m) + (f" {corps}" if corps else "") + (f", {_accord(marqueur, f)}" if marqueur else "")
 	return (f"Portrait illustré d'un personnage de fantasy médiévale, format paysage large. "
 			# Pas de « Telluris » : le mot finissait peint en enseigne (essai des façades, 08/10).
 			f"{sujet}. {il} {qui} à {cite_nom}, dans un monde médiéval fantastique. "
-			f"{il} se tient légèrement décalé{'e' if f else ''} du centre et regarde droit vers le spectateur "
-			f"avec l'assurance d'un{'e' if f else ''} commerçant{'e' if f else ''} ; {il.lower()} lui présente {objet}. "
-			f"Tenue de travail usée et crédible : {tenue}. Décor de part et d'autre : {decor}. "
+			# Lot de Lutecia (10/10) : des tenanciers peints au milieu de la rue (consigne de l'auteur).
+			f"La scène se passe À L'INTÉRIEUR de sa boutique, jamais dans la rue : {il.lower()} se tient "
+			f"derrière son comptoir, légèrement décalé{'e' if f else ''} du centre, et regarde droit vers le "
+			f"spectateur avec l'assurance d'un{'e' if f else ''} commerçant{'e' if f else ''} ; "
+			f"{il.lower()} lui présente {objet}. "
+			f"Tenue de travail usée et crédible : {tenue}. Tout autour, l'intérieur de la boutique : {decor}. "
+			f"La rue n'apparaît qu'au fond, petite, à travers la porte ou la vitrine. "
 			f"{FOULE_FR} {STYLE_FR}")
 
 
@@ -182,6 +189,7 @@ METIERS_EN = {
 	"bijouterie": ("jeweler's shop", "counter with open jewel cases, rings, necklaces, small precision scale"),
 	"boucherie": ("butcher's shop", "meat hanging from hooks, wooden chopping block, cuts of meat on the counter"),
 	"boulangerie": ("bakery", "baskets of golden loaves and brioches, bread oven glowing inside"),
+	"grande_boulangerie": ("large master bakery", "several glowing bread ovens, bakers' boys at work, piles of loaves, pastries and festive bread crowns"),
 	"bourrellerie": ("saddler's and harness maker's shop", "saddles, harnesses, horse collars and straps hanging on the walls"),
 	"boyauderie": ("gut-string maker's workshop", "gut strings drying on poles, soaking tubs"),
 	"brosserie": ("brush maker's shop", "brushes, brooms and paintbrushes of every size"),
@@ -220,6 +228,19 @@ QUARTIERS_EN = {
 		"du Chapitre": "in a narrow lane of old canons' houses at the foot of the gothic cathedral of Reims",
 		"des Crayères": "near the entrances of chalk cellars dug into white chalk",
 		"du Vieux Cloître": "beside the arcades of an old romanesque cloister",
+	},
+	"lieu:lutecia": {
+		"de la Seine": "on a quay along the river Seine, barges moored at the bank and a stone bridge nearby",
+		"du Parvis": ("on the wide square in front of the great gothic cathedral of Notre-Dame on its island, "
+					  "its two square towers rising behind"),
+		"des Halles": "beside the great covered market halls, crowded with stalls, carts and porters",
+		"de la Cité": "in a narrow lane of the island in the middle of the Seine, tall timber-framed houses packed close",
+		"du Petit-Pont": "at the foot of a short stone bridge lined with houses, crossing an arm of the Seine",
+		"des Écoles": "in a steep street of the schools quarter on the left bank, scholars in long robes carrying books",
+		"de la Grève": "on a sloping riverside square of sand and gravel, boats unloading wood and grain on the bank",
+		"du Palais": "beside the royal palace on the island, its round towers with pointed roofs rising behind",
+		"des Faubourgs": "in a street just outside the city ramparts, gardens and orchards between the houses",
+		"de la Montagne": "on a steep hill street climbing above the left bank, old stone walls at the top",
 	},
 	"lieu:chartres": {
 		"de la Porte Guillaume": ("beside the Porte Guillaume, a fortified city gate flanked by two round "
@@ -288,7 +309,7 @@ FOULE = ("A lively, varied crowd of ogres, dwarves, halflings, elves and humans 
 		 "the street, every passer-by different in age, build, hair and outfit, never the same costume "
 		 "twice: elves with fine faces and slightly pointed ears, with dark, auburn, black, silver or fair "
 		 "hair, in rich robes, travel cloaks or elegant leather armor; dwarves only waist-high to the "
-		 "humans, with red, black, grey or white beards or braids, in plate armor, smith's aprons or "
+		 "humans, the men with red, black, grey or white beards, the women always beardless with braided hair, in plate armor, smith's aprons or "
 		 "merchant clothes; halflings the height of a human child but grown adults with adult faces, "
 		 "plump or slim, young or wrinkled, barefoot with curly hair, in colorful waistcoats and skirts; "
 		 # Jamais verts (consigne de l'auteur, 09/10) : les teints restent humains, en plus rude.
@@ -333,24 +354,47 @@ def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label):
 	Le tenancier EST la personne de l'image 1 (son portrait, joint en référence) ; lignée et traits
 	— ceux qui ont servi à générer ce portrait — ne font que la confirmer."""
 	boutique, marchandises = METIERS_EN[categorie]
-	homme, femme, repere = LIGNEES_EN.get(race, LIGNEES_EN["humain"])
 	t = quartier_de(label, cite)
 	lieu = QUARTIERS_EN[cite][t] if t else f"in a street of the walled city of {cite_nom}"
-	tenancier = ", ".join([homme if sexe == "M" else femme] + list(traits) + ([repere] if repere else []))
+	# `race` None : tenancier d'un portrait EXISTANT dont on ignore la lignée (mode doublons) — la
+	# référence seule le décrit, toute précision risquerait de la contredire.
+	if race:
+		homme, femme, repere = LIGNEES_EN.get(race, LIGNEES_EN["humain"])
+		desc = [homme if sexe == "M" else femme] + list(traits) + ([repere] if repere else [])
+		if race == "nain" and sexe == "F":   # jamais de barbe (consigne de l'auteur, 10/10)
+			desc.append("completely beardless smooth face, no beard at all")
+	else:
+		desc = list(traits)
+	tenancier = f" ({', '.join(desc)})" if desc else ""
+	# Petites lignées : sans humain à côté, le modèle les grandissait à l'intérieur de la boutique
+	# (hobbit de « La Besogne des Halles », 10/10) — l'échelle doit tenir AUSSI derrière le comptoir.
+	echelle = ""
+	if race in ("hobbit", "nain"):
+		echelle = (" Keep the shopkeeper's small size inside the shop too: the counter reaches the "
+				   "shopkeeper's chest, the furniture and tools are made for humans and look large "
+				   "next to the shopkeeper, and any human customer at the window is twice as tall.")
 	# Le portrait le montre face à nous, souriant, qui vend ; la boutique le montre AU TRAVAIL :
 	# lot du 09/10, la pose du portrait était recopiée (consigne de l'auteur).
-	return (f"The person shown in image 1 is the shopkeeper: keep exactly the same face, hair, beard, "
-			f"body, skin and clothes as in image 1 ({tenancier}), but NOT the same pose or expression. "
-			f"Do not reuse the background of image 1. Show this shopkeeper at work in the wide open "
-			f"ground-floor shopfront of a medieval fantasy {boutique} in the city of {cite_nom}, {lieu}, "
+	return (f"The person shown in image 1 is the shopkeeper: keep exactly the same face, hair, facial hair, "
+			f"body, skin and clothes as in image 1{tenancier}, but NOT the same pose or expression. "
+			f"Do not reuse the background of image 1. Show this shopkeeper at work in the ground-floor "
+			f"shop of a medieval fantasy {boutique} in the city of {cite_nom}, {lieu}, "
 			f"busy with the trade, absorbed in the task, not looking at the camera, not posing, not "
 			# « open front and market stall » donnait de toutes petites échoppes (lot de Chartres, 10/10).
 			f"presenting anything to the viewer. The shop is a solid, permanent town house of two or "
 			f"three storeys, built of stone and timber framing, with its own walls, roof and upper "
 			f"floors — never a market stall, booth, tent, cart or makeshift lean-to. It fills about 80% "
-			f"of the image, seen from the street in a three-quarter view; its goods are displayed on "
-			f"racks, shelves and counters inside the shop and at its open shop window, and are "
-			f"immediately recognizable: {marchandises}. {FOULE} {STYLE}")
+			f"of the image, seen from the street in a three-quarter view. "
+			# Lot de Lutecia (10/10) : boutiques ouvertes sur deux pans de mur (consigne de l'auteur).
+			f"Its street wall stays a real wall of stone and timber with a door and ONE shop window "
+			f"whose wooden shutter is folded down to serve as the sales counter; the shopkeeper works "
+			f"behind that window or just inside the open door. Never two open walls, never a corner "
+			f"shop open on two sides, never a front entirely open onto the street. "
+			# Lot de Lutecia (10/10) : un faux nom peint sur l'écriteau de « L'Herbier de la Grève ».
+			f"No hanging shop sign, no signboard, no name board or plaque above the door or window. "
+			f"The goods are displayed on shelves, racks and counters seen through the window and the "
+			f"door, and on the shutter counter, and are immediately recognizable: {marchandises}."
+			f"{echelle} {FOULE} {STYLE}")
 
 
 def prompt_auberge(cite, cite_nom, quartier):
@@ -408,6 +452,117 @@ def entrees_de_cite(lieux, cite, cite_nom, sauf=()):
 	return entrees, ignores
 
 
+# Lignée d'un tenancier nouveau : chances ÉGALES (consigne de l'auteur, 10/10).
+LIGNEES_TIRAGE = ["humain", "elfe", "nain", "hobbit", "ogre"]
+
+
+def _entree_refaite(lid, lieu, cite, cite_nom, refaire_por, refaire_img, conserves):
+	"""PURE. Entrée du manifeste pour UNE boutique dont on refait le portrait et/ou la façade ; la
+	partie gardée est inscrite dans `conserves` (fichier actuel, jamais régénéré). Lignée et sexe :
+	ceux du portrait générique s'il l'était, sinon tirés par une graine propre au lieu — à chances
+	ÉGALES (consigne de l'auteur, 10/10) — quand le portrait est refait, inconnus sinon."""
+	pnj = (lieu.get("pnj") or [{}])[0]
+	cat, label, por = lieu.get("categorie"), lieu.get("label"), pnj.get("portrait") or ""
+	rng = random.Random(zlib.crc32(lid.encode()))
+	tirage = tirage_tenancier(rng)
+	m = PORTRAIT_GENERIQUE.match(por)
+	race = ("humain" if m.group(1) == "humaine" else m.group(1)) if m else None
+	sexe = m.group(2).upper() if m else None
+	if refaire_por and not m:
+		race, sexe = rng.choice(LIGNEES_TIRAGE), rng.choice("MF")
+	if not refaire_por:
+		conserves["portraits"][lid] = por
+	if not refaire_img:
+		conserves["images"][lid] = lieu.get("image")
+	return {"key": lid, "categorie": cat, "race": race, "sexe": sexe, "tenancier": pnj.get("nom"),
+			"quartier": quartier_de(label, cite), "tirage": tirage if refaire_por else None,
+			"doublon": [x for x, oui in (("portrait", refaire_por), ("image", refaire_img)) if oui],
+			"portrait": {"base": f"marchand_{race or 'humain'}_{(sexe or 'm').lower()}_{cat}",
+						 "prompt": prompt_tenancier(race, sexe, cat, cite_nom, tirage) if refaire_por else None},
+			"image": {"base": base_image(lieu.get("image"), cite),
+					  "prompt": prompt_magasin(cat, race, sexe, traits_en(tirage) if refaire_por else [],
+											   cite, cite_nom, label)}}
+
+
+def entrees_a_refaire(lieux, cite, cite_nom, cles):
+	"""PURE. (entrées, conservés, ignorés) pour des boutiques DÉSIGNÉES (revue de l'auteur) : la
+	façade est toujours refaite ; le portrait aussi s'il n'est pas un portrait de marchand
+	(`marchand_*`) — un guerrier ou un clerc pris dans le fonds des personnages."""
+	entrees, ignores = [], []
+	conserves = {"portraits": {}, "images": {}}
+	for lid in sorted(cles):
+		lieu = lieux.get(lid)
+		if not lieu or lieu.get("lieu_parent") != cite:
+			ignores.append(f"{lid} (absent de {cite})")
+			continue
+		if lieu.get("categorie") not in METIERS:
+			ignores.append(f"{lid} ({lieu.get('categorie')} : métier sans gabarit)")
+			continue
+		por = str(((lieu.get("pnj") or [{}])[0]).get("portrait") or "")
+		entrees.append(_entree_refaite(lid, lieu, cite, cite_nom, not por.startswith("marchand_"), True, conserves))
+	return entrees, conserves, ignores
+
+
+def entrees_doublons(lieux, cite, cite_nom):
+	"""PURE. (entrées, conservés, ignorés) pour les boutiques de `cite` dont la FAÇADE ou le
+	PORTRAIT est un doublon — fichier aussi posé sur un autre lieu, n'importe où.
+
+	Le PROPRIÉTAIRE d'un fichier partagé le garde : un lieu hors de `cite` d'abord (Auxerre a
+	précédé Lutecia : c'est la copie qu'on remplace), sinon le premier de `cite` par id. Tous les
+	autres porteurs de `cite` sont refaits — seulement la partie en doublon :
+	  · portrait refait → façade refaite aussi seulement si elle est elle-même en doublon ;
+	  · façade seule → elle joint le portrait EXISTANT (`conserves["portraits"]`), sans redire
+	    des traits qu'on ignore ;
+	  · portrait seul → la façade existante est gardée (`conserves["images"]`).
+	Seuls les marchands (`pnj:marchand_*`) : un portrait de PNJ nommé n'est pas un doublon à
+	refaire. Lignée et sexe d'un portrait refait : ceux du portrait générique s'il l'était,
+	sinon tirés par une graine propre au lieu (c'est un nouveau tenancier)."""
+	usage_img, usage_por = {}, {}
+	for lid, lieu in lieux.items():
+		if lieu.get("image"):
+			usage_img.setdefault(lieu["image"], []).append(lid)
+		for p in lieu.get("pnj") or []:
+			if p.get("portrait"):
+				usage_por.setdefault(p["portrait"], []).append(lid)
+
+	def proprietaire(porteurs):
+		hors = sorted(p for p in porteurs if (lieux.get(p) or {}).get("lieu_parent") != cite)
+		return hors[0] if hors else sorted(porteurs)[0]
+
+	def doublon(usage, fichier, lid):
+		porteurs = usage.get(fichier) or []
+		return len(porteurs) > 1 and proprietaire(porteurs) != lid
+
+	entrees, ignores = [], []
+	conserves = {"portraits": {}, "images": {}}
+	for lid, lieu in sorted(lieux.items()):
+		if lieu.get("lieu_parent") != cite:
+			continue
+		pnj = (lieu.get("pnj") or [{}])[0]
+		if not str(pnj.get("character") or "").startswith("pnj:marchand_"):
+			continue
+		cat, label, por = lieu.get("categorie"), lieu.get("label"), pnj.get("portrait") or ""
+		refaire_img = doublon(usage_img, lieu.get("image"), lid)
+		refaire_por = bool(por) and doublon(usage_por, por, lid)
+		if not (refaire_img or refaire_por):
+			continue
+		if cat not in METIERS:
+			ignores.append(f"{lid} ({cat} : métier sans gabarit)")
+			continue
+		entrees.append(_entree_refaite(lid, lieu, cite, cite_nom, refaire_por, refaire_img, conserves))
+	return entrees, conserves, ignores
+
+
+def prompt_tenancier_depuis_facade(race, sexe, categorie, cite_nom):
+	"""PURE. Portrait (§2) du tenancier VISIBLE sur une façade déjà générée, jointe en image 1 :
+	la façade est gardée pour un lieu ultérieur (consigne de l'auteur, 10/10), il lui faut son
+	marchand. Mêmes règles que `prompt_tenancier` ; les traits sont ceux de l'image, pas tirés."""
+	f = sexe == "F"
+	return (f"La personne au travail dans la boutique de l'image 1 est le sujet de ce portrait : garde "
+			f"exactement son visage, ses cheveux, sa carrure, sa peau et sa tenue, mais PAS sa pose, et ne "
+			f"reprends pas le décor de l'image 1. " + prompt_tenancier(race, sexe, categorie, cite_nom, []))
+
+
 def requetes_faisables(man):
 	"""PURE. [(clé du lot, entrée, genre)] de ce qui peut partir MAINTENANT : un portrait
 	manquant ; une façade manquante dont le portrait existe (ou qui n'en a pas : auberge)."""
@@ -446,7 +601,9 @@ def image_degeneree(ecart_type, ecart_voisins):
 def base_image(image, cite):
 	"""PURE. `archerie_europe01.png` → `archerie_europe_rhemi` (cf. `auberge_europe_lutecia*`)."""
 	tige = re.sub(r"\d*$", "", os.path.splitext(image or "")[0]).rstrip("_")
-	return f"{tige}_{cite.split(':', 1)[-1]}"
+	suffixe = f"_{cite.split(':', 1)[-1]}"
+	# Image déjà générée pour la cité (`…_lutecia01.jpg`) : sans ce garde, `…_lutecia_lutecia`.
+	return tige if tige.endswith(suffixe) else tige + suffixe
 
 
 def nom_libre(dossier, base, ext, pris=()):
@@ -563,7 +720,8 @@ def _resume_lot(cite, man):
 	faisables = requetes_faisables(man)
 	n_p = sum(1 for _, _, g in faisables if g == "portrait")
 	n_i = len(faisables) - n_p
-	attente = sum(1 for e in man["entrees"] if e.get("portrait") and e["key"] not in man["portraits"])
+	attente = sum(1 for e in man["entrees"] if e.get("portrait") and e["key"] not in man["portraits"]
+				  and e["key"] not in man["images"])
 	unit = EUR_PAR_IMAGE_INTERACTIF * REMISE_BATCH
 	print(f"Prochain lot : {n_p} portrait(s) + {n_i} façade(s) → {os.path.relpath(_chemin_requetes(cite), RACINE)}"
 		  f" ; ≈ {len(faisables) * unit:.2f} €")
@@ -710,8 +868,49 @@ def _workflow(prompt, graine, portrait):
 
 # ── Étapes ──────────────────────────────────────────────────────────────────────
 
-def preparer(cite, sauf):
+def _lieux(source=None):
+	"""Lieux du dump le plus récent, ÉCRASÉS par ceux de `source` (export `/admin/exports` plus
+	frais) : l'import est un PUT complet, il doit repartir de l'état réellement en base."""
 	lieux = {d["_id"]: d for d in _docs(_dump_le_plus_recent()) if d.get("type") == "lieu"}
+	if source:
+		lieux.update({d["_id"]: d for d in _docs(source) if d.get("type") == "lieu"})
+	return lieux
+
+
+def lignee_du_tenancier(lieu, entree=None):
+	"""PURE. (race, sexe) du tenancier : celle de l'entrée du manifeste si son portrait est
+	refait, sinon lue sur le portrait générique ; None si inconnue."""
+	if entree and "portrait" in (entree.get("doublon") or ["portrait"]) and entree.get("race"):
+		return entree["race"], entree["sexe"]
+	m = PORTRAIT_GENERIQUE.match(str(((lieu.get("pnj") or [{}])[0]).get("portrait") or ""))
+	if not m:
+		return None
+	return ("humain" if m.group(1) == "humaine" else m.group(1)), m.group(2).upper()
+
+
+def noms_manquants(lieux, cite, entrees, repertoire, tirer_nom):
+	"""PURE (`tirer_nom` injecté). {lieu: nom} pour chaque marchand de `cite` sans `nom` :
+	prénom + nom du répertoire du recrutement selon sa lignée, graine propre au lieu, jamais un
+	nom déjà porté par un PNJ d'un lieu. Les tenanciers de lignée inconnue sont rendus à part."""
+	par_cle = {e["key"]: e for e in entrees}
+	pris = {p.get("nom") for l in lieux.values() for p in (l.get("pnj") or []) if p.get("nom")}
+	noms, inconnus = {}, []
+	for lid, lieu in sorted(lieux.items()):
+		pnj = (lieu.get("pnj") or [{}])[0]
+		if (lieu.get("lieu_parent") != cite or pnj.get("nom")
+				or not str(pnj.get("character") or "").startswith("pnj:marchand_")):
+			continue
+		lignee = lignee_du_tenancier(lieu, par_cle.get(lid))
+		if not lignee:
+			inconnus.append(lid)
+			continue
+		noms[lid] = tirer_nom(lignee[0], lignee[1], random.Random(zlib.crc32(("nom|" + lid).encode())),
+							  repertoire, pris)
+	return noms, inconnus
+
+
+def preparer(cite, sauf, doublons=False, refaire=(), source=None):
+	lieux = _lieux(source)
 	# Boutiques pas encore importées : complétées depuis l'import du peuplement (le dump prime).
 	imp = os.path.join(RACINE, "jsons", f"{_slug(cite)}_magasins_a_importer.json")
 	if os.path.exists(imp):
@@ -719,17 +918,37 @@ def preparer(cite, sauf):
 			if d.get("type") == "lieu":
 				lieux.setdefault(d["_id"], d)
 	cite_nom = (lieux.get(cite) or {}).get("label") or NOMS_CITES.get(cite) or _slug(cite).capitalize()
-	entrees, ignores = entrees_de_cite(lieux, cite, cite_nom, sauf)
+	conserves = {"portraits": {}, "images": {}}
+	if doublons or refaire:
+		entrees, conserves, ignores = (entrees_doublons(lieux, cite, cite_nom) if doublons
+									   else ([], {"portraits": {}, "images": {}}, []))
+		# `--refaire` l'emporte : l'entrée désignée REMPLACE celle des doublons.
+		e_r, c_r, i_r = entrees_a_refaire(lieux, cite, cite_nom, refaire)
+		entrees = [e for e in entrees if e["key"] not in refaire] + e_r
+		for genre in conserves:
+			conserves[genre] = {k: v for k, v in conserves[genre].items() if k not in refaire} | c_r[genre]
+		ignores += i_r
+		entrees = [e for e in entrees if e["key"] not in sauf]
+	else:
+		entrees, ignores = entrees_de_cite(lieux, cite, cite_nom, sauf)
 	ancien = {}
 	if os.path.exists(_chemin_manifeste(cite)):
 		ancien = _manifeste(cite)
 		if ancien.get("batch"):
 			raise SystemExit(f"Lot en cours : {ancien['batch']} — `recuperer` avant de re-préparer.")
 	cles = {e["key"] for e in entrees}
-	# Images déjà générées conservées : seules les manquantes repartent.
-	man = {"cite": cite, "modele": MODELE_GEMINI, "entrees": entrees, "batch": None,
-		   "portraits": {k: v for k, v in (ancien.get("portraits") or {}).items() if k in cles},
-		   "images": {k: v for k, v in (ancien.get("images") or {}).items() if k in cles},
+	# Une boutique à REFAIRE perd ce qu'un lot précédent lui avait généré : la partie refaite
+	# repart, la partie gardée revient au fichier actuel (`conserves`).
+	for genre in ("portraits", "images"):
+		for k in refaire:
+			(ancien.get(genre) or {}).pop(k, None)
+	# Images déjà générées conservées : seules les manquantes repartent. Mode doublons : la partie
+	# qui n'est PAS en doublon compte comme acquise (fichier actuel), donc jamais régénérée.
+	man = {"cite": cite, "modele": MODELE_GEMINI, "entrees": entrees, "batch": None, "source": source,
+		   "portraits": {**{k: v for k, v in conserves["portraits"].items() if k in cles},
+						 **{k: v for k, v in (ancien.get("portraits") or {}).items() if k in cles}},
+		   "images": {**{k: v for k, v in conserves["images"].items() if k in cles},
+					  **{k: v for k, v in (ancien.get("images") or {}).items() if k in cles}},
 		   "lots": ancien.get("lots") or []}
 	_ecrire_requetes(cite, man)
 	_manifeste(cite, man)
@@ -832,7 +1051,10 @@ def essai(cite, seulement, limite):
 	a_faire = [e for e in man["entrees"] if not seulement or e["key"] in seulement]
 	if limite:
 		a_faire = a_faire[:limite]
-	n = sum(2 if e.get("portrait") else 1 for e in a_faire)
+	def _refait_portrait(e):
+		return bool(e.get("portrait")) and "portrait" in (e.get("doublon") or ["portrait"])
+
+	n = sum(2 if _refait_portrait(e) else 1 for e in a_faire)
 	print(f"{n} essai(s), ≈ {n * EUR_PAR_IMAGE_INTERACTIF:.2f} €")
 
 	def _un(requete, base):
@@ -848,12 +1070,15 @@ def essai(cite, seulement, limite):
 
 	for e in a_faire:
 		print(e["key"])
-		portrait = None
-		if e.get("portrait"):
+		chemin = None
+		if _refait_portrait(e):
 			portrait = _un(_requete(e, "portrait"), e["portrait"]["base"])
 			if not portrait:
 				continue
-		_un(_requete(e, "image", os.path.join(dossier, portrait) if portrait else None), e["image"]["base"])
+			chemin = os.path.join(dossier, portrait)
+		elif man["portraits"].get(e["key"]):   # portrait conservé : c'est lui que la façade joint
+			chemin = os.path.join(DOSSIER_PNJ, man["portraits"][e["key"]])
+		_un(_requete(e, "image", chemin), e["image"]["base"])
 
 
 def generer(cite, seulement, limite, essai=False):
@@ -907,22 +1132,73 @@ def generer(cite, seulement, limite, essai=False):
 		print(f"  [{i}/{len(a_faire)}] {nom} ← {e['key']} ({time.time() - t0:.0f} s)", flush=True)
 
 
-def appliquer(cite):
-	"""Un seul import : `pnj[0].portrait` et `image` de chaque lieu, relus du dump le plus récent."""
+def _repertoire_noms():
+	"""Répertoire du recrutement et tirage de dev/gen_spec_rhemi.py (même règle que Rhemi et
+	Chartres : prénom mutualisé compris), relus du SOURCE sans importer `utils` (base)."""
+	sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+	from gen_spec_rhemi import constantes_source, tirer_nom
+	rep = constantes_source(os.path.join(RACINE, "utils", "recrutement.py"),
+							{"PRENOMS", "NOMS", "PRENOM_RACE_MUTUALISEE", "PRENOM_MUTUALISE_PROBA"})
+	return rep, tirer_nom
+
+
+def portrait_facade(cite, facade, race, sexe, categorie):
+	"""Gemini INTERACTIF (~0,04 €) : portrait du tenancier d'une façade de `towns/` GARDÉE pour un
+	lieu ultérieur. Écrit dans `pnj/` (prochain nom libre) et inscrit la paire dans
+	dev/batch/<cite>/images/reserve.json — aucun lieu n'y est rattaché, aucun import."""
+	chemin = os.path.join(DOSSIER_TOWNS, facade)
+	if not os.path.exists(chemin):
+		raise SystemExit(f"ERREUR : {facade} absente de towns/.")
+	cite_nom = (_lieux().get(cite) or {}).get("label") or NOMS_CITES.get(cite) or _slug(cite).capitalize()
+	requete = requete_gemini(prompt_tenancier_depuis_facade(race, sexe.upper(), categorie, cite_nom),
+							 _portrait_b64(chemin))
+	_, rep = _http(f"{API}/v1beta/models/{MODELE_GEMINI}:generateContent", requete)
+	part = image_de_reponse(json.loads(rep))
+	if not part:
+		raise SystemExit(f"✗ {rep.decode('utf-8', 'replace')[:300]}")
+	nom, motif = _ecrire_image(DOSSIER_PNJ, f"marchand_{race}_{sexe.lower()}_{categorie}", part, ())
+	if not nom:
+		raise SystemExit(f"✗ {motif}")
+	fichier = os.path.join(_dossier(cite), "reserve.json")
+	reserve = json.load(open(fichier, encoding="utf-8")) if os.path.exists(fichier) else []
+	reserve.append({"facade": facade, "portrait": nom, "race": race, "sexe": sexe.upper(),
+					"categorie": categorie, "cite": cite})
+	with open(fichier, "w", encoding="utf-8") as f:
+		json.dump(reserve, f, ensure_ascii=False, indent="\t")
+	print(f"{nom} ← {facade} (réserve : {os.path.relpath(fichier, RACINE)})")
+
+
+def appliquer(cite, source=None):
+	"""Un seul import : `pnj[0].portrait`, `image` et — marchand de la cité qui n'en a pas —
+	`pnj[0].nom`, sur des lieux relus de `source` (export frais) sinon du dump le plus récent.
+	⚠️ PUT complet : un doc relu trop vieux écraserait les stocks d'entre-temps."""
 	man = _manifeste(cite)
-	docs = {d["_id"]: d for d in _docs(_dump_le_plus_recent())}
-	sortie, absents = [], []
+	source = source or man.get("source")
+	lieux = _lieux(source)
+	cite_lieux = {k: v for k, v in lieux.items() if v.get("lieu_parent") == cite}
+	# Portraits et façades du manifeste posés AVANT de nommer : la lignée se lit sur le portrait.
+	maj = {}
 	for cle in sorted(set(man["portraits"]) | set(man["images"])):
-		doc = docs.get(cle)
-		if not doc:
-			absents.append(cle)
+		if cle not in lieux:
 			continue
-		doc = json.loads(json.dumps(doc))
+		doc = json.loads(json.dumps(lieux[cle]))
 		if cle in man["portraits"]:
 			doc["pnj"][0]["portrait"] = man["portraits"][cle]
 		if cle in man["images"]:
 			doc["image"] = man["images"][cle]
-		sortie.append(doc)
+		maj[cle] = doc
+	repertoire, tirer = _repertoire_noms()
+	noms, inconnus = noms_manquants({**lieux, **maj}, cite, man["entrees"], repertoire, tirer)
+	for lid, nom in noms.items():
+		doc = maj.get(lid) or json.loads(json.dumps(lieux[lid]))
+		doc["pnj"][0]["nom"] = nom
+		maj[lid] = doc
+	absents = sorted((set(man["portraits"]) | set(man["images"])) - set(lieux))
+	sortie = [maj[k] for k in sorted(maj)]
+	print(f"source : {os.path.relpath(source, RACINE) if source else 'dump le plus récent'} "
+		  f"({len(cite_lieux)} lieux de la cité) ; {len(noms)} nom(s) de tenancier ajouté(s)")
+	for lid in inconnus:
+		print(f"  ⚠ {lid} : lignée du tenancier inconnue, pas de nom")
 	chemin = os.path.join(RACINE, "jsons", f"images_magasins_{_slug(cite)}_a_importer.json")
 	with open(chemin, "w", encoding="utf-8") as f:
 		json.dump(sortie, f, ensure_ascii=False, indent="\t")
@@ -939,22 +1215,39 @@ def main():
 		pass
 	p = argparse.ArgumentParser()
 	p.add_argument("etape", choices=["preparer", "avancer", "essai", "soumettre", "etat", "recuperer",
-									 "generer", "appliquer"])
+									 "generer", "appliquer", "portrait_facade"])
 	p.add_argument("--cite", required=True, help="ex. lieu:chartres")
 	p.add_argument("--sauf", default="", help="lieux à exclure, séparés par des virgules")
 	p.add_argument("--seulement", default="", help="ne générer que ces lieux, séparés par des virgules")
 	p.add_argument("--limite", type=int, default=0, help="nombre maximal de lieux à générer")
 	p.add_argument("--essai", action="store_true", help="générer dans dev/batch/<cite>/images/essais/")
+	p.add_argument("--facade", default="", help="portrait_facade : image de towns/ dont on tire le tenancier")
+	p.add_argument("--race", default="", help="portrait_facade : lignée du tenancier (humain, elfe, nain, hobbit, ogre)")
+	p.add_argument("--sexe", default="", help="portrait_facade : M ou F")
+	p.add_argument("--categorie", default="", help="portrait_facade : métier (clé de METIERS)")
+	p.add_argument("--source", default="",
+				   help="preparer/appliquer : export de lieux plus frais que le dump (il le remplace pour ces lieux)")
+	p.add_argument("--refaire", default="",
+				   help="preparer : boutiques à refaire (façade ; portrait aussi s'il n'est pas marchand_*), séparées par des virgules")
+	p.add_argument("--doublons", action="store_true",
+				   help="preparer : seulement les façades/portraits de marchands partagés avec un autre lieu")
 	a = p.parse_args()
 	if a.etape == "preparer":
-		preparer(a.cite, {s for s in a.sauf.split(",") if s})
+		preparer(a.cite, {s for s in a.sauf.split(",") if s}, a.doublons,
+				 {s for s in a.refaire.split(",") if s}, a.source or None)
 	elif a.etape == "essai":
 		essai(a.cite, {s for s in a.seulement.split(",") if s}, a.limite)
+	elif a.etape == "portrait_facade":
+		if a.race not in LIGNEES or a.sexe.upper() not in ("M", "F") or a.categorie not in METIERS:
+			raise SystemExit("ERREUR : --race, --sexe (M/F) et --categorie (clé de METIERS) requis.")
+		portrait_facade(a.cite, a.facade, a.race, a.sexe, a.categorie)
 	elif a.etape == "generer":
 		generer(a.cite, {s for s in a.seulement.split(",") if s}, a.limite, a.essai)
 	else:
-		{"avancer": avancer, "soumettre": soumettre, "etat": etat, "recuperer": recuperer,
-		 "appliquer": appliquer}[a.etape](a.cite)
+		if a.etape == "appliquer":
+			appliquer(a.cite, a.source or None)
+		else:
+			{"avancer": avancer, "soumettre": soumettre, "etat": etat, "recuperer": recuperer}[a.etape](a.cite)
 
 
 if __name__ == "__main__":

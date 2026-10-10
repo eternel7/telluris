@@ -14,7 +14,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dev.gen_images_magasins import (AGES, ALLURES, CHEVEUX, CORPS, LIGNEES, LIGNEES_EN, METIERS,
-	METIERS_EN, QUARTIERS_AUBERGES, QUARTIERS_EN, RATIO, TRAITS_EN, base_image, entrees_de_cite,
+	METIERS_EN, QUARTIERS_AUBERGES, QUARTIERS_EN, RATIO, TRAITS_EN, base_image, entrees_a_refaire, entrees_de_cite, entrees_doublons, lignee_du_tenancier, noms_manquants,
 	image_de_reponse, image_degeneree, prompt_auberge, prompt_magasin, prompt_tenancier, quartier_de,
 	requete_gemini, requetes_faisables, tirage_tenancier, traits_en)
 from utils.enseignes import TOPONYMES_PAR_LIEU
@@ -181,3 +181,126 @@ def test_facade_d_une_boutique_attend_son_portrait():
 	assert [c for c, _, _ in requetes_faisables(man)] == ["image|lieu:la_lame_du_tertre"]
 	man["images"]["lieu:la_lame_du_tertre"] = "armurerie_europe_chartres01.jpg"
 	assert requetes_faisables(man) == []
+
+
+# ── Mode doublons (Lutecia, 10/10) ───────────────────────────────────────────────
+
+def _boutique(lid, cite, image, portrait, cat="boucherie", character="pnj:marchand_boucherie"):
+	return {"_id": lid, "type": "lieu", "lieu_parent": cite, "categorie": cat,
+			"label": "Le Billot du Parvis", "image": image,
+			"pnj": [{"character": character, "portrait": portrait}]}
+
+
+def test_doublons_seule_la_copie_est_refaite():
+	"""Le porteur HORS de la cité garde son fichier ; dans la cité, le premier par id. Seule la
+	partie en doublon est refaite, l'autre est conservée telle quelle."""
+	lieux = {d["_id"]: d for d in (
+		_boutique("lieu:auxerre_b", "lieu:auxerre", "boucherie_europe01.png", "marchand_aelis_boucherie.png"),
+		_boutique("lieu:b_facade", "lieu:lutecia", "boucherie_europe01.png", "marchand_ogre_f_boucherie.png"),
+		_boutique("lieu:a_portrait", "lieu:lutecia", "boucherie_unique.png", "marchand_aelis_boucherie.png"),
+		_boutique("lieu:c_garde", "lieu:lutecia", "cuisine01.jpg", "marchand_elfe_m_cuisine.png", "cuisine"),
+		_boutique("lieu:d_copie", "lieu:lutecia", "cuisine01.jpg", "marchand_elfe_m_cuisine2.png", "cuisine"),
+		# Un PNJ nommé (pas un marchand) ne se refait pas, même partagé.
+		_boutique("lieu:e_archi", "lieu:lutecia", "cuisine01.jpg", "x.jpg", "cuisine", "pnj:aelis"),
+	)}
+	entrees, conserves, ignores = entrees_doublons(lieux, "lieu:lutecia", "Lutecia")
+	par = {e["key"]: e for e in entrees}
+	assert set(par) == {"lieu:b_facade", "lieu:a_portrait", "lieu:d_copie"} and ignores == []
+	assert par["lieu:b_facade"]["doublon"] == ["image"]
+	assert conserves["portraits"]["lieu:b_facade"] == "marchand_ogre_f_boucherie.png"
+	assert par["lieu:a_portrait"]["doublon"] == ["portrait"]
+	assert conserves["images"]["lieu:a_portrait"] == "boucherie_unique.png"
+	assert par["lieu:d_copie"]["doublon"] == ["image"]
+
+
+def test_doublon_de_facade_seule_ne_redit_pas_un_tenancier_inconnu():
+	"""Portrait conservé et non générique : sa lignée est inconnue, la façade s'en remet à la
+	référence — aucune description entre parenthèses qui pourrait la contredire."""
+	lieux = {d["_id"]: d for d in (
+		_boutique("lieu:auxerre_b", "lieu:auxerre", "boucherie_europe01.png", "marchand_aelis_boucherie.png"),
+		_boutique("lieu:lut_b", "lieu:lutecia", "boucherie_europe01.png", "marchand_garin_boucherie.png"),
+	)}
+	(e,), _, _ = entrees_doublons(lieux, "lieu:lutecia", "Lutecia")
+	assert e["race"] is None and "image 1, but NOT" in e["image"]["prompt"]
+	assert "Garin" not in e["image"]["prompt"] and "Lutecia" in e["image"]["prompt"]
+
+
+def test_doublons_metier_sans_gabarit_signale():
+	lieux = {d["_id"]: d for d in (
+		_boutique("lieu:a", "lieu:auxerre", "x01.png", "p.png", "grand_arsenal", "pnj:marchand_grand_arsenal"),
+		_boutique("lieu:b", "lieu:lutecia", "x01.png", "q.png", "grand_arsenal", "pnj:marchand_grand_arsenal"),
+	)}
+	entrees, _, ignores = entrees_doublons(lieux, "lieu:lutecia", "Lutecia")
+	assert entrees == [] and len(ignores) == 1
+
+
+def test_une_naine_n_a_jamais_de_barbe():
+	"""Consigne de l'auteur (10/10) : portrait, façade ET foule le disent."""
+	tirage = ["jeune", "solide", "aux cheveux roux", "le regard vif"]
+	assert "sans aucune barbe" in prompt_tenancier("nain", "F", "maroquinerie", "Lutecia", tirage)
+	assert "sans aucune barbe" not in prompt_tenancier("nain", "M", "maroquinerie", "Lutecia", tirage)
+	assert "no beard at all" in prompt_magasin("maroquinerie", "nain", "F", [], "lieu:lutecia", "Lutecia", "X")
+	assert "no beard at all" not in prompt_magasin("maroquinerie", "nain", "M", [], "lieu:lutecia", "Lutecia", "X")
+	assert "imberbes" in prompt_tenancier("humain", "M", "boucherie", "Lutecia", tirage)
+	assert "always beardless" in prompt_auberge("lieu:lutecia", "Lutecia", None)
+
+
+def test_refaire_portrait_seulement_s_il_n_est_pas_un_marchand():
+	"""Revue de l'auteur (10/10) : façade toujours refaite ; portrait refait s'il vient du fonds des
+	personnages (guerrier, clerc) — un portrait de marchand est gardé et joint à la façade."""
+	lieux = {d["_id"]: d for d in (
+		_boutique("lieu:guerrier", "lieu:lutecia", "j01.png", "Gaspard_Briselame.jpg", "jardinier",
+				  "pnj:marchand_jardinier"),
+		_boutique("lieu:marchand", "lieu:lutecia", "a01.png", "marchand_hobbit_m_atelier_d_artisan.png",
+				  "atelier_d_artisan", "pnj:marchand_atelier_d_artisan"),
+	)}
+	entrees, conserves, ignores = entrees_a_refaire(lieux, "lieu:lutecia", "Lutecia",
+												   {"lieu:guerrier", "lieu:marchand", "lieu:ailleurs"})
+	par = {e["key"]: e for e in entrees}
+	assert par["lieu:guerrier"]["doublon"] == ["portrait", "image"]
+	assert par["lieu:marchand"]["doublon"] == ["image"]
+	assert conserves == {"portraits": {"lieu:marchand": "marchand_hobbit_m_atelier_d_artisan.png"}, "images": {}}
+	assert len(ignores) == 1
+
+
+def test_facade_une_seule_vitrine_sans_enseigne_et_a_l_echelle():
+	"""Revue de l'auteur (10/10) : boutiques ouvertes sur deux pans de mur, faux nom sur un
+	écriteau, hobbit trop grand dans sa boutique."""
+	p = prompt_magasin("atelier_d_artisan", "hobbit", "M", [], "lieu:lutecia", "Lutecia", "La Besogne des Halles")
+	assert "ONE shop window" in p and "Never two open walls" in p
+	assert "No hanging shop sign" in p
+	assert "small size inside the shop" in p
+	assert "small size inside the shop" not in prompt_magasin("boucherie", "ogre", "F", [], "lieu:lutecia", "Lutecia", "X")
+
+
+def test_image_deja_localisee_ne_double_pas_la_cite():
+	assert base_image("atelier_d_artisan_europe_lutecia01.jpg", "lieu:lutecia") == "atelier_d_artisan_europe_lutecia"
+	assert base_image("archerie_europe01.png", "lieu:rhemi") == "archerie_europe_rhemi"
+
+
+def test_portrait_dans_la_boutique_pas_dans_la_rue():
+	"""Lot de Lutecia (10/10) : tenanciers peints au milieu de la rue (consigne de l'auteur)."""
+	p = prompt_tenancier("hobbit", "M", "boucherie", "Lutecia", ["jeune", "solide", "aux cheveux roux", "le regard vif"])
+	assert "INTÉRIEUR de sa boutique" in p and "derrière son comptoir" in p
+	assert "Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation" in p
+
+
+def test_noms_manquants_selon_la_lignee_et_jamais_un_nom_pris():
+	lieux = {d["_id"]: d for d in (
+		_boutique("lieu:a", "lieu:lutecia", "x.png", "marchand_nain_f_boucherie01.png"),
+		_boutique("lieu:b", "lieu:lutecia", "y.png", "Gaspard_Briselame.jpg"),
+		_boutique("lieu:c", "lieu:lutecia", "z.png", "marchand_elfe_m_cuisine.png"),
+		_boutique("lieu:d", "lieu:auxerre", "w.png", "marchand_elfe_m_cuisine.png"),
+	)}
+	lieux["lieu:c"]["pnj"][0]["nom"] = "Déjà Nommé"
+	appels = []
+
+	def tirer(race, sexe, rng, rep, pris):
+		appels.append((race, sexe))
+		assert "Déjà Nommé" in pris
+		return f"{race}-{sexe}"
+
+	entrees = [{"key": "lieu:b", "doublon": ["portrait", "image"], "race": "ogre", "sexe": "M"}]
+	noms, inconnus = noms_manquants(lieux, "lieu:lutecia", entrees, {}, tirer)
+	assert noms == {"lieu:a": "nain-F", "lieu:b": "ogre-M"} and inconnus == []
+	assert lignee_du_tenancier(lieux["lieu:b"]) is None

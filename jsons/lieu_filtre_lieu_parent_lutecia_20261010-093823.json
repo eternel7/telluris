@@ -1,0 +1,8646 @@
+[
+  {
+    "_id": "lieu:l_herbier_de_la_greve",
+    "_rev": "47-29f1f4e1a5cd3d097b5c671f1eac8737",
+    "type": "lieu",
+    "label": "L'Herbier de la Grève",
+    "image": "apothicairerie_europe01.png",
+    "categorie": "apothicairerie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Fleur_de_souci": 3,
+      "item:Seve_de_chene": 4,
+      "item:Ail_des_moines": 120,
+      "item:Pomme_de_verger": 99,
+      "item:Prunelles_de_haie": 97
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Tisane_de_souci",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Tisane_du_marcheur",
+        "qty": 2
+      },
+      {
+        "item_id": "item:remede",
+        "qty": 84
+      },
+      {
+        "item_id": "item:huile",
+        "qty": 34
+      },
+      {
+        "item_id": "item:onguent",
+        "qty": 18
+      },
+      {
+        "item_id": "item:Compote_fortifiante",
+        "qty": 18
+      },
+      {
+        "item_id": "item:Emplatre_d_ail",
+        "qty": 8
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_apothicairerie",
+        "portrait": "marchand_elfe_f_apothicairerie.png"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:l_enclume_de_la_montagne",
+    "_rev": "69-a88781e50eeb605f479f754e295cb485",
+    "type": "lieu",
+    "label": "L'Enclume de la Montagne",
+    "image": "armurerie_europe01.jpg",
+    "categorie": "armurerie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "argent": 521,
+      "branche": 514,
+      "bronze": 432,
+      "gros_rondin": 490,
+      "petit_rondin": 513,
+      "plomb": 595,
+      "poix": 482,
+      "rondin": 520,
+      "debris_anime": 240,
+      "pierre": 126,
+      "acier": 3,
+      "fer": 5,
+      "peaux": 5
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:acier",
+        "qty": 25
+      },
+      {
+        "item_id": "item:argent",
+        "qty": 25
+      },
+      {
+        "item_id": "item:bronze",
+        "qty": 25
+      },
+      {
+        "item_id": "item:debris_anime",
+        "qty": 25
+      },
+      {
+        "item_id": "item:fer",
+        "qty": 25
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:plomb",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Epaulieres_benies",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Armure_plates_surcoat",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Cotte_de_mailles",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Gantelets_cuir",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Bottes_de_plates",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Armure_cuir_runee",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Heaume_de_plates",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Gantelets_de_plates",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Epaulieres_cuir_bouilli",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Jambières_de_plates",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Mantelet_de_mailles",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Epaulieres_de_bronze",
+        "qty": 13
+      },
+      {
+        "item_id": "item:Pelta",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Cuirasse_cuir_noir",
+        "qty": 7
+      },
+      {
+        "item_id": "item:acier_plisse",
+        "qty": 134
+      },
+      {
+        "item_id": "item:Heaume_de_fer",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Heaume_ouvert_grave",
+        "qty": 5
+      },
+      {
+        "item_id": "item:manche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:hampe",
+        "qty": 50
+      },
+      {
+        "item_id": "item:Shuriken",
+        "qty": 52
+      },
+      {
+        "item_id": "item:Falarique",
+        "qty": 39
+      },
+      {
+        "item_id": "item:Dague_de_scene",
+        "qty": 60
+      },
+      {
+        "item_id": "item:Masse_cannelee_perse",
+        "qty": 13
+      },
+      {
+        "item_id": "item:Rondelles_d_epaule",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Targe",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Epaulieres_cuir_cloutees",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Pourpoint_cuir_renf",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Ecu_de_joute",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Bouclier_ordre",
+        "qty": 10
+      },
+      {
+        "item_id": "item:armure_de_cuir",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Epaulieres_acier_gravees",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Epaulieres_de_plates",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Bouclier_normand",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Plumbata",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Morgenstern",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Nzappa_zap",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Cuirasse_cuir_brut",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Hache_de_bucheron",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Camail_de_mailles",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Gantelets_acier",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Bouclier_chauffe",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Francisque",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Jambières_cuir",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Pavois",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Rondache",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Lance_rituelle",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Bocle",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Faucharde",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Cotte_mailles_benie",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Armure_cuir_souple_N",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Calotte_cuir_rune",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Gants_runiques",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Bouclier_sacre",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Arc_court",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Angon",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Bouclier_cerf_volant",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Bottes_de_fer",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Jambières_cuir_renf",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Epaulieres_de_fer",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Ecu",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Poincon_de_jet",
+        "qty": 33
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:gros_rondin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:pierre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:rondin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Abattis_piege",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Armure_de_bataille",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Attrape_coquin",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Armure_d_ecailles",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Menottes",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Harnois_complet",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Armure_a_bandes",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Chausse_trappes",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Armure_annelee",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Brigandine",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Clibanion",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Bassinet",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Machoire_d_acier",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Armure_de_cuir_cloutee",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Hache_de_jet",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Pierre_a_aiguiser",
+        "qty": 51
+      },
+      {
+        "item_id": "item:Khopesh",
+        "qty": 18
+      },
+      {
+        "item_id": "item:Cabillot",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Bardiche",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Lance_de_cavalerie_moyenne",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Macuahuitl",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Guisarme_vouge",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Armure_de_plates_en_bronze",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Lance_de_cavalerie_legere",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Corseque",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Glaive",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Lance_longue",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Lance",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Esponton",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Glaive_guisarme",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Lance_de_joute",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Drusus",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Doloire",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Epee_a_deux_mains",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Vouge",
+        "qty": 1
+      },
+      {
+        "item_id": "item:No_dachi",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Katar",
+        "qty": 1
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_armurerie",
+        "portrait": "remi_de_belleville_armurier.jpg",
+        "nom": "Rémi de Belleville"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_besogne_des_halles",
+    "_rev": "57-ad1dd9b28a450b86d5ece05d50ec121a",
+    "type": "lieu",
+    "label": "La Besogne des Halles",
+    "image": "atelier_d_artisan_europe_lutecia01.jpg",
+    "categorie": "atelier_d_artisan",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "ossements": 60,
+      "pierre": 60
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:ossements",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Poudre_os",
+        "qty": 25
+      },
+      {
+        "item_id": "item:bijou",
+        "qty": 403
+      },
+      {
+        "item_id": "item:pierre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Craie",
+        "qty": 222
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_atelier_d_artisan",
+        "portrait": "marchand_hobbit_m_atelier_d_artisan.png"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_cierge_du_parvis",
+    "_rev": "68-9c568b5b7f8d8df9fcbd6fa17c948c6b",
+    "type": "lieu",
+    "label": "Le Cierge du Parvis",
+    "image": "atelier_d_artisan_europe_lutecia02.jpg",
+    "categorie": "atelier_de_cirier",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "branche": 290,
+      "item:Chiffon": 183,
+      "item:Herbes_aromatiques": 552,
+      "item:Reactif_brut": 551,
+      "petit_rondin": 538,
+      "poix": 215,
+      "sang": 11,
+      "item:Soufre": 10,
+      "item:Sel_noir": 2,
+      "item:Poudre_de_miroir": 12,
+      "poudre_d_os": 2,
+      "poils": 15,
+      "graisse": 13,
+      "item:Cire_d_abeille": 105
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Chiffon",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Cire_d_abeille",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Herbes_aromatiques",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Reactif_brut",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Bougie",
+        "qty": 92
+      },
+      {
+        "item_id": "item:Torche",
+        "qty": 384
+      },
+      {
+        "item_id": "item:Poupee_de_cire",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Huile_entretien",
+        "qty": 64
+      },
+      {
+        "item_id": "item:Tablette_de_cire",
+        "qty": 86
+      },
+      {
+        "item_id": "item:Meche",
+        "qty": 141
+      },
+      {
+        "item_id": "item:Cire_a_cacheter",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Bougie_rouge",
+        "qty": 37
+      },
+      {
+        "item_id": "item:Bougie_arcanique",
+        "qty": 69
+      },
+      {
+        "item_id": "item:Bougie_parfumee",
+        "qty": 78
+      },
+      {
+        "item_id": "item:Cierge",
+        "qty": 53
+      },
+      {
+        "item_id": "item:Encens",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Bougie_noire",
+        "qty": 4
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_atelier_de_cirier",
+        "portrait": "marchand_elfe_f_atelier_de_cirier04.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_penne_du_parvis",
+    "_rev": "59-7bccc7fd4cdf9ae144cc975005749a9a",
+    "type": "lieu",
+    "label": "La Penne du Parvis",
+    "image": "atelier_d_artisan_europe03.png",
+    "categorie": "atelier_de_l_empenneur",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "argent": 548,
+      "bronze": 264,
+      "fer": 275,
+      "plomb": 555,
+      "branche": 252,
+      "petit_rondin": 255,
+      "boyaux": 1,
+      "poix": 145
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:argent",
+        "qty": 25
+      },
+      {
+        "item_id": "item:bronze",
+        "qty": 25
+      },
+      {
+        "item_id": "item:fer",
+        "qty": 25
+      },
+      {
+        "item_id": "item:plomb",
+        "qty": 25
+      },
+      {
+        "item_id": "item:manche",
+        "qty": 28
+      },
+      {
+        "item_id": "item:Darts_de_cavalerie",
+        "qty": 723
+      },
+      {
+        "item_id": "item:Lancelette",
+        "qty": 380
+      },
+      {
+        "item_id": "item:cordes_d_arc",
+        "qty": 13
+      },
+      {
+        "item_id": "item:Javelot_ethiopien",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Javelot_polynesien",
+        "qty": 1
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 25
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_atelier_de_l_empenneur",
+        "portrait": "Frère_Goram_de_la_Porte_d_Acier.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:au_lion_d_or",
+    "_rev": "3-2668ba37defbb01b5e3a79ccc688a1c2",
+    "type": "lieu",
+    "label": "Au Lion d'Or",
+    "image": "auberge_europe04.jpg",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:auberge_de_la_cite",
+    "_rev": "1-80e5dd6b27298e83fe375e1163c2b07a",
+    "type": "lieu",
+    "label": "Auberge de la Cité",
+    "image": "auberge_europe01.png",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:auberge_de_la_greve",
+    "_rev": "2-e8baf57d8cbf137f53acfaececb644a2",
+    "type": "lieu",
+    "label": "Auberge de la Grève",
+    "image": "auberge_europe07.jpg",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:auberge_de_la_seine",
+    "_rev": "2-ed3a6271d20676bdbdaeed5ca49ce5df",
+    "type": "lieu",
+    "label": "Auberge de la Seine",
+    "image": "auberge_europe_lutecia08.jpg",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:auberge_des_ecoles",
+    "_rev": "2-3e5bc13ecd234bf1921f9a21884b3bac",
+    "type": "lieu",
+    "label": "Auberge des Écoles",
+    "image": "auberge_europe08.jpg",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:auberge_des_halles",
+    "_rev": "2-403a7b4a9d05527bb771343402af2fb0",
+    "type": "lieu",
+    "label": "Auberge des Halles",
+    "image": "auberge_europe_lutecia01.jpg",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:auberge_du_palais",
+    "_rev": "2-54f31644ee6744a4e766bdcaf9fb6615",
+    "type": "lieu",
+    "label": "Auberge du Palais",
+    "image": "auberge_europe09.jpg",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:auberge_du_parvis",
+    "_rev": "3-0fc9caf4d43c5e9e659c021b0e0662a9",
+    "type": "lieu",
+    "label": "Auberge du Parvis",
+    "image": "auberge_europe_lutecia04.jpg",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:auberge_du_petit_pont",
+    "_rev": "1-989b647acea53af8f0924e12c10d654d",
+    "type": "lieu",
+    "label": "Auberge du Petit-Pont",
+    "image": "auberge_europe05.jpg",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:le_coq_de_lutece",
+    "_rev": "3-f348b742926f21e9c71ba15457760364",
+    "type": "lieu",
+    "label": "Le Coq de Lutèce",
+    "image": "auberge_europe06.jpg",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "pnj": [
+      {
+        "character": "pnj:elise_herboriste",
+        "nom": "Élise",
+        "portrait": "herboriste_Elise_naine_f.jpg",
+        "image": "pnj_herboriste_Elise_naine_f_le_coq_de_lutece.jpg",
+        "probabilite": 1,
+        "description": "Une naine aux manches retroussées, des herbes séchées plein les mains.",
+        "conditions": [
+          {
+            "passages": {
+              "lieu": "lieu:le_coq_de_lutece",
+              "max": 8
+            }
+          }
+        ]
+      },
+      {
+        "character": "pnj:aubergiste_du_coq_de_lutece",
+        "nom": "L'aubergiste",
+        "portrait": "aubergiste_Coq_de_Lutece_elfe_f.jpg",
+        "image": "pnj_aubergiste_Coq_de_Lutece_elfe_f_le_coq_de_lutece.jpg",
+        "probabilite": 1,
+        "description": "La tenancière, une elfe aux tresses piquées d'herbes, derrière son comptoir.",
+        "conditions": [
+          {
+            "passages": {
+              "lieu": "lieu:le_coq_de_lutece",
+              "min": 9
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "_id": "lieu:montmartre",
+    "_rev": "1-40221e874167d1d09679c2e29eee93b3",
+    "type": "lieu",
+    "label": "Montmartre",
+    "image": "montmartre.jpg",
+    "categorie": "bastion_paladin",
+    "lieu_parent": "lieu:lutecia",
+    "texte": "Au pied des grands escaliers qui montent vers la basilique, un chemin boueux mène à une cour fortifiée, à quelques pas de la Porte Montmartre. Plus haut, les paladins de la basilique veillent sur le ciel de la capitale ; ici, on veille sur les routes. Des chevaux attendent près d'un chariot chargé de ballots, un marchand discute avec un garde, et sous un auvent de toile, un greffier tient le registre des convois qui partent vers les cités de France.",
+    "pnj": [
+      {
+        "character": "pnj:bouchard_de_clignancourt",
+        "nom": "Bouchard de Clignancourt",
+        "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+        "image": "pnj_paladin_Bouchard_de_Clignancourt_nain_m_montmartre.jpg",
+        "probabilite": 1,
+        "description": "Un paladin nain en tunique ivoire, qui vérifie les sangles d'un paquetage.",
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_montmartre_convoi_de_chartres",
+              "attendu": false
+            }
+          }
+        ]
+      },
+      {
+        "character": "pnj:bouchard_de_clignancourt_reims",
+        "nom": "Bouchard de Clignancourt",
+        "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+        "image": "pnj_paladin_Bouchard_de_Clignancourt_nain_m_montmartre.jpg",
+        "probabilite": 1,
+        "description": "Le paladin nain, penché sur le registre des convois, ses deux nattes de barbe glissées sous le manteau.",
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_montmartre_convoi_de_chartres"
+            }
+          },
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_montmartre_pelerins_de_reims",
+              "attendu": false
+            }
+          }
+        ]
+      },
+      {
+        "character": "pnj:bouchard_de_clignancourt_route_silencieuse",
+        "nom": "Bouchard de Clignancourt",
+        "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+        "image": "pnj_paladin_Bouchard_de_Clignancourt_nain_m_montmartre.jpg",
+        "probabilite": 1,
+        "description": "Le paladin nain, debout près de la porte fortifiée, les yeux sur la route du nord.",
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_montmartre_pelerins_de_reims"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_sertissure_des_faubourgs",
+    "_rev": "65-93cbff0d5765ce8924532045f91aa27a",
+    "type": "lieu",
+    "label": "La Sertissure des Faubourgs",
+    "image": "bijouterie_europe02.png",
+    "categorie": "bijouterie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "perles": 215,
+      "gemmes": 116,
+      "metaux_precieux": 60,
+      "ossements": 181,
+      "pierre": 138
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:gemmes",
+        "qty": 25
+      },
+      {
+        "item_id": "item:metaux_precieux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:ossements",
+        "qty": 25
+      },
+      {
+        "item_id": "item:perles",
+        "qty": 25
+      },
+      {
+        "item_id": "item:sautoir",
+        "qty": 68
+      },
+      {
+        "item_id": "item:diademe",
+        "qty": 56
+      },
+      {
+        "item_id": "item:chevaliere",
+        "qty": 32
+      },
+      {
+        "item_id": "item:bague",
+        "qty": 23
+      },
+      {
+        "item_id": "item:epingle_cheveux",
+        "qty": 15
+      },
+      {
+        "item_id": "item:bracelet",
+        "qty": 14
+      },
+      {
+        "item_id": "item:pendentif",
+        "qty": 25
+      },
+      {
+        "item_id": "item:bijou",
+        "qty": 148
+      },
+      {
+        "item_id": "item:anneau",
+        "qty": 9
+      },
+      {
+        "item_id": "item:talisman",
+        "qty": 117
+      },
+      {
+        "item_id": "item:amulette",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Poudre_amethyste",
+        "qty": 444
+      },
+      {
+        "item_id": "item:pierre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Miroir_de_poche",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Orbe_arcanique",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Petite_glace",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Pierre_de_meditation",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Symbole_sacre",
+        "qty": 4
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_bijouterie",
+        "portrait": "marchand_humain_f_bijouterie02.jpg",
+        "nom": "Maëlys Dubois"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_bonne_decoupe_de_la_greve",
+    "_rev": "2-bb39a40b3ebc419f13a5b19a087ef859",
+    "type": "lieu",
+    "label": "La Bonne Découpe de la Grève",
+    "image": "boucherie_europe_lutecia01.jpg",
+    "categorie": "boucherie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": [],
+    "pnj": [
+      {
+        "character": "pnj:marchand_boucherie",
+        "portrait": "marchand_humain_f_boucherie01.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_hampe_des_ecoles",
+    "_rev": "2-ecd9bb4ab006cb66efcd89df11129c19",
+    "type": "lieu",
+    "label": "La Hampe des Écoles",
+    "image": "boucherie_europe07.jpg",
+    "categorie": "boucherie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": [],
+    "pnj": [
+      {
+        "character": "pnj:marchand_boucherie",
+        "portrait": "marchand_ogre_m_boucherie02.jpg",
+        "nom": "Gérard Grosbois"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_hampe_des_halles",
+    "_rev": "19-50d75fac0e6fd09e9f11ddafff03fc38",
+    "type": "lieu",
+    "label": "La Hampe des Halles",
+    "image": "boucherie_europe04.png",
+    "categorie": "boucherie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": [],
+    "pnj": [
+      {
+        "character": "pnj:marchand_boucherie",
+        "portrait": "marchand_ogre_m_boucherie01.jpg",
+        "nom": "Nicolas des Halles"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_piece_de_viande_de_la_montagne",
+    "_rev": "22-1e05675ab8e5abf00ac73e2a5c58aadb",
+    "type": "lieu",
+    "label": "La Pièce de Viande de la Montagne",
+    "image": "boucherie_europe_lutecia02.jpg",
+    "categorie": "boucherie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": [
+      {
+        "item_id": "item:viande",
+        "qty": 25
+      },
+      {
+        "item_id": "item:os",
+        "qty": 25
+      },
+      {
+        "item_id": "item:sang",
+        "qty": 25
+      },
+      {
+        "item_id": "item:graisse",
+        "qty": 25
+      },
+      {
+        "item_id": "item:tendons",
+        "qty": 25
+      },
+      {
+        "item_id": "item:boyaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:foie",
+        "qty": 25
+      },
+      {
+        "item_id": "item:crane",
+        "qty": 25
+      },
+      {
+        "item_id": "item:cuir_brut",
+        "qty": 25
+      },
+      {
+        "item_id": "item:crocs",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poils",
+        "qty": 25
+      },
+      {
+        "item_id": "item:coeur",
+        "qty": 25
+      },
+      {
+        "item_id": "item:crins",
+        "qty": 25
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_boucherie",
+        "portrait": "marchand_hobbit_f_boucherie01.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_billot_de_la_cite",
+    "_rev": "148-23881840032f5ff218415040d44de841",
+    "type": "lieu",
+    "label": "Le Billot de la Cité",
+    "image": "boucherie_europe05.jpg",
+    "categorie": "boucherie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "viande": 80,
+      "coeur": 42,
+      "os": 80,
+      "sang": 42,
+      "graisse": 42,
+      "tendons": 42,
+      "boyaux": 42,
+      "foie": 42,
+      "crane": 42,
+      "cuir_brut": 42,
+      "crocs": 34,
+      "poils": 34,
+      "plumes": 1,
+      "griffes": 1,
+      "item:Poison_de_base": 2
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:viande",
+        "qty": 25
+      },
+      {
+        "item_id": "item:os",
+        "qty": 25
+      },
+      {
+        "item_id": "item:sang",
+        "qty": 25
+      },
+      {
+        "item_id": "item:graisse",
+        "qty": 25
+      },
+      {
+        "item_id": "item:tendons",
+        "qty": 25
+      },
+      {
+        "item_id": "item:boyaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:crane",
+        "qty": 25
+      },
+      {
+        "item_id": "item:cuir_brut",
+        "qty": 25
+      },
+      {
+        "item_id": "item:crocs",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poils",
+        "qty": 25
+      },
+      {
+        "item_id": "item:foie",
+        "qty": 25
+      },
+      {
+        "item_id": "item:plumes",
+        "qty": 10
+      },
+      {
+        "item_id": "item:griffes",
+        "qty": 8
+      },
+      {
+        "item_id": "item:yeux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:coeur",
+        "qty": 25
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_boucherie",
+        "portrait": "marchand_nain_f_boucherie01.png",
+        "nom": "Alix Fournier"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_billot_des_ecoles",
+    "_rev": "48-bb122fcf99de6b156d5b730bb03d03db",
+    "type": "lieu",
+    "label": "Le Billot des Écoles",
+    "image": "boucherie_europe06.jpg",
+    "categorie": "boucherie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": [
+      {
+        "item_id": "item:viande",
+        "qty": 25
+      },
+      {
+        "item_id": "item:os",
+        "qty": 25
+      },
+      {
+        "item_id": "item:sang",
+        "qty": 25
+      },
+      {
+        "item_id": "item:graisse",
+        "qty": 25
+      },
+      {
+        "item_id": "item:tendons",
+        "qty": 25
+      },
+      {
+        "item_id": "item:boyaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:foie",
+        "qty": 25
+      },
+      {
+        "item_id": "item:crane",
+        "qty": 25
+      },
+      {
+        "item_id": "item:cuir_brut",
+        "qty": 25
+      },
+      {
+        "item_id": "item:yeux",
+        "qty": 14
+      },
+      {
+        "item_id": "item:crocs",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poils",
+        "qty": 25
+      },
+      {
+        "item_id": "item:crins",
+        "qty": 25
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_boucherie",
+        "portrait": "marchand_humain_f_boucherie05.jpg",
+        "nom": "Alix Boucher"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_billot_noir_du_petit_pont",
+    "_rev": "2-493bf602c542edbabfbc44096057be57",
+    "type": "lieu",
+    "label": "Le Billot Noir du Petit-Pont",
+    "image": "boucherie_europe_lutecia03.jpg",
+    "categorie": "boucherie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": [],
+    "pnj": [
+      {
+        "character": "pnj:marchand_boucherie",
+        "portrait": "marchand_nain_m_boucherie01.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_couperet_du_parvis",
+    "_rev": "3-bb925af63a602b6392b1d821a445faf4",
+    "type": "lieu",
+    "label": "Le Couperet du Parvis",
+    "image": "boucherie_europe_lutecia04.jpg",
+    "categorie": "boucherie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": [
+      {
+        "item_id": "item:griffes",
+        "qty": 1
+      },
+      {
+        "item_id": "item:boyaux",
+        "qty": 1
+      },
+      {
+        "item_id": "item:cuir_brut",
+        "qty": 1
+      },
+      {
+        "item_id": "item:poils",
+        "qty": 1
+      },
+      {
+        "item_id": "item:tendons",
+        "qty": 1
+      },
+      {
+        "item_id": "item:sang",
+        "qty": 1
+      },
+      {
+        "item_id": "item:foie",
+        "qty": 1
+      },
+      {
+        "item_id": "item:graisse",
+        "qty": 1
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_boucherie",
+        "portrait": "marchand_hobbit_f_boucherie02.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_croute_d_or_de_la_cite",
+    "_rev": "50-ffde418535ae6aa44484eeb7e6462574",
+    "type": "lieu",
+    "label": "La Croûte d'Or de la Cité",
+    "image": "boulangerie_europe_lutecia03.jpg",
+    "categorie": "boulangerie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Amandes": 477,
+      "item:Creme": 480,
+      "item:Sel": 349,
+      "item:cerneaux_de_noix": 434,
+      "item:epices_douces": 391,
+      "item:herbes_de_fournil": 416,
+      "item:levain_de_chef": 357,
+      "item:miel_de_bruyere": 323,
+      "item:motte_de_beurre": 466,
+      "item:oeufs_de_ferme": 453,
+      "item:raisins_secs": 428,
+      "item:grain_d_orge": 105,
+      "item:grain_de_froment": 48,
+      "item:grain_de_seigle": 54,
+      "item:Poire_de_verger": 416,
+      "item:Pomme_de_verger": 58
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Amandes",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Creme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Sel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:cerneaux_de_noix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:epices_douces",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_d_orge",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_de_froment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_de_seigle",
+        "qty": 25
+      },
+      {
+        "item_id": "item:herbes_de_fournil",
+        "qty": 25
+      },
+      {
+        "item_id": "item:levain_de_chef",
+        "qty": 25
+      },
+      {
+        "item_id": "item:miel_de_bruyere",
+        "qty": 25
+      },
+      {
+        "item_id": "item:motte_de_beurre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:oeufs_de_ferme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:raisins_secs",
+        "qty": 25
+      },
+      {
+        "item_id": "item:farine_d_orge",
+        "qty": 27
+      },
+      {
+        "item_id": "item:farine_de_froment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:farine_de_seigle",
+        "qty": 26
+      },
+      {
+        "item_id": "item:petit_pain",
+        "qty": 69
+      },
+      {
+        "item_id": "item:Pain_d_epices",
+        "qty": 45
+      },
+      {
+        "item_id": "item:galette_fruits_secs",
+        "qty": 51
+      },
+      {
+        "item_id": "item:pain_orge",
+        "qty": 114
+      },
+      {
+        "item_id": "item:pain_epices_miel",
+        "qty": 41
+      },
+      {
+        "item_id": "item:pain_herbes",
+        "qty": 81
+      },
+      {
+        "item_id": "item:tourte_pommes",
+        "qty": 4
+      },
+      {
+        "item_id": "item:pain_noix",
+        "qty": 20
+      },
+      {
+        "item_id": "item:pain_meteil",
+        "qty": 20
+      },
+      {
+        "item_id": "item:galette_cereales",
+        "qty": 47
+      },
+      {
+        "item_id": "item:fouace_miel",
+        "qty": 4
+      },
+      {
+        "item_id": "item:tourte_poires",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Galette_des_Rois",
+        "qty": 2
+      },
+      {
+        "item_id": "item:pain_seigle",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Pain_de_campagne",
+        "qty": 2
+      },
+      {
+        "item_id": "item:brioche_miel",
+        "qty": 4
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_boulangerie",
+        "portrait": "marchand_elfe_f_boulangerie06.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_maison_des_epis",
+    "_rev": "59-9c259c68dc4a709af8f962f82b5e3c64",
+    "type": "lieu",
+    "label": "La Maison des Épis",
+    "image": "boulangerie_europe_lutecia01.jpg",
+    "categorie": "boulangerie",
+    "pnj": [
+      {
+        "character": "pnj:marchand_boulangerie",
+        "nom": "Jeanne Vautrin",
+        "portrait": "marchand_elfe_f_boulangerie.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Amandes": 552,
+      "item:Creme": 551,
+      "item:Sel": 410,
+      "item:cerneaux_de_noix": 509,
+      "item:epices_douces": 470,
+      "item:grain_d_orge": 108,
+      "item:grain_de_froment": 129,
+      "item:grain_de_seigle": 123,
+      "item:herbes_de_fournil": 493,
+      "item:levain_de_chef": 431,
+      "item:miel_de_bruyere": 410,
+      "item:motte_de_beurre": 536,
+      "item:oeufs_de_ferme": 525,
+      "item:raisins_secs": 507,
+      "item:Poire_de_verger": 80,
+      "item:lard_sale": 6,
+      "item:Pomme_de_verger": 5
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Amandes",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Creme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Sel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:cerneaux_de_noix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:epices_douces",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_d_orge",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_de_froment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_de_seigle",
+        "qty": 25
+      },
+      {
+        "item_id": "item:herbes_de_fournil",
+        "qty": 25
+      },
+      {
+        "item_id": "item:levain_de_chef",
+        "qty": 25
+      },
+      {
+        "item_id": "item:miel_de_bruyere",
+        "qty": 25
+      },
+      {
+        "item_id": "item:motte_de_beurre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:oeufs_de_ferme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:raisins_secs",
+        "qty": 25
+      },
+      {
+        "item_id": "item:farine_de_seigle",
+        "qty": 26
+      },
+      {
+        "item_id": "item:farine_de_froment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:farine_d_orge",
+        "qty": 25
+      },
+      {
+        "item_id": "item:pain_orge",
+        "qty": 137
+      },
+      {
+        "item_id": "item:galette_fruits_secs",
+        "qty": 46
+      },
+      {
+        "item_id": "item:pain_epices_miel",
+        "qty": 28
+      },
+      {
+        "item_id": "item:pain_herbes",
+        "qty": 89
+      },
+      {
+        "item_id": "item:petit_pain",
+        "qty": 60
+      },
+      {
+        "item_id": "item:Pain_d_epices",
+        "qty": 51
+      },
+      {
+        "item_id": "item:pain_noix",
+        "qty": 22
+      },
+      {
+        "item_id": "item:galette_cereales",
+        "qty": 108
+      },
+      {
+        "item_id": "item:brioche_miel",
+        "qty": 8
+      },
+      {
+        "item_id": "item:tourte_poires",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Galette_des_Rois",
+        "qty": 2
+      },
+      {
+        "item_id": "item:fouace_miel",
+        "qty": 4
+      },
+      {
+        "item_id": "item:pain_seigle",
+        "qty": 12
+      },
+      {
+        "item_id": "item:pain_froment",
+        "qty": 4
+      },
+      {
+        "item_id": "item:pain_meteil",
+        "qty": 6
+      },
+      {
+        "item_id": "item:tourte_pommes",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Quiche_lorraine",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Croissant",
+        "qty": 4
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_miche_chaude_de_la_montagne",
+    "_rev": "96-cd8f69df487dff8cecfb7151e7a434e3",
+    "type": "lieu",
+    "label": "La Miche Chaude de la Montagne",
+    "image": "boulangerie_europe_lutecia04.jpg",
+    "categorie": "boulangerie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Amandes": 701,
+      "item:Creme": 710,
+      "item:Sel": 511,
+      "item:cerneaux_de_noix": 638,
+      "item:epices_douces": 585,
+      "item:herbes_de_fournil": 642,
+      "item:levain_de_chef": 538,
+      "item:miel_de_bruyere": 491,
+      "item:motte_de_beurre": 673,
+      "item:oeufs_de_ferme": 675,
+      "item:raisins_secs": 626,
+      "item:Poire_de_verger": 16,
+      "item:Pomme_de_verger": 5,
+      "item:grain_d_orge": 92,
+      "item:grain_de_froment": 113,
+      "item:grain_de_seigle": 107
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Amandes",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Creme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Sel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:cerneaux_de_noix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:epices_douces",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_d_orge",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_de_froment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_de_seigle",
+        "qty": 25
+      },
+      {
+        "item_id": "item:herbes_de_fournil",
+        "qty": 25
+      },
+      {
+        "item_id": "item:levain_de_chef",
+        "qty": 25
+      },
+      {
+        "item_id": "item:miel_de_bruyere",
+        "qty": 25
+      },
+      {
+        "item_id": "item:motte_de_beurre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:oeufs_de_ferme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:raisins_secs",
+        "qty": 25
+      },
+      {
+        "item_id": "item:farine_de_froment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:farine_d_orge",
+        "qty": 32
+      },
+      {
+        "item_id": "item:farine_de_seigle",
+        "qty": 26
+      },
+      {
+        "item_id": "item:tourte_poires",
+        "qty": 4
+      },
+      {
+        "item_id": "item:galette_fruits_secs",
+        "qty": 58
+      },
+      {
+        "item_id": "item:pain_orge",
+        "qty": 183
+      },
+      {
+        "item_id": "item:galette_cereales",
+        "qty": 126
+      },
+      {
+        "item_id": "item:Pain_d_epices",
+        "qty": 74
+      },
+      {
+        "item_id": "item:pain_herbes",
+        "qty": 84
+      },
+      {
+        "item_id": "item:pain_noix",
+        "qty": 30
+      },
+      {
+        "item_id": "item:pain_froment",
+        "qty": 8
+      },
+      {
+        "item_id": "item:pain_meteil",
+        "qty": 20
+      },
+      {
+        "item_id": "item:petit_pain",
+        "qty": 72
+      },
+      {
+        "item_id": "item:pain_seigle",
+        "qty": 16
+      },
+      {
+        "item_id": "item:Croissant",
+        "qty": 16
+      },
+      {
+        "item_id": "item:fouace_miel",
+        "qty": 6
+      },
+      {
+        "item_id": "item:pain_epices_miel",
+        "qty": 38
+      },
+      {
+        "item_id": "item:Galette_des_Rois",
+        "qty": 6
+      },
+      {
+        "item_id": "item:tourte_pommes",
+        "qty": 3
+      },
+      {
+        "item_id": "item:brioche_miel",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Brioche_parisienne",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Pain_de_campagne",
+        "qty": 2
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_boulangerie",
+        "portrait": "marchand_elfe_f_boulangerie07.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_miche_de_la_cite",
+    "_rev": "80-727d7cc3907036b70e53d9695301d561",
+    "type": "lieu",
+    "label": "La Miche de la Cité",
+    "image": "boulangerie_europe02.jpg",
+    "categorie": "boulangerie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Amandes": 746,
+      "item:Creme": 755,
+      "item:Sel": 471,
+      "item:cerneaux_de_noix": 665,
+      "item:epices_douces": 607,
+      "item:herbes_de_fournil": 641,
+      "item:levain_de_chef": 512,
+      "item:miel_de_bruyere": 485,
+      "item:motte_de_beurre": 730,
+      "item:oeufs_de_ferme": 714,
+      "item:raisins_secs": 635,
+      "item:Poire_de_verger": 6,
+      "item:Pomme_de_verger": 1,
+      "item:grain_d_orge": 2,
+      "item:grain_de_froment": 2,
+      "item:grain_de_seigle": 2
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Amandes",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Creme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Sel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:cerneaux_de_noix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:epices_douces",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_d_orge",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_de_froment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_de_seigle",
+        "qty": 25
+      },
+      {
+        "item_id": "item:herbes_de_fournil",
+        "qty": 25
+      },
+      {
+        "item_id": "item:levain_de_chef",
+        "qty": 25
+      },
+      {
+        "item_id": "item:miel_de_bruyere",
+        "qty": 25
+      },
+      {
+        "item_id": "item:motte_de_beurre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:oeufs_de_ferme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:raisins_secs",
+        "qty": 25
+      },
+      {
+        "item_id": "item:farine_de_seigle",
+        "qty": 26
+      },
+      {
+        "item_id": "item:farine_de_froment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:farine_d_orge",
+        "qty": 25
+      },
+      {
+        "item_id": "item:pain_seigle",
+        "qty": 25
+      },
+      {
+        "item_id": "item:pain_meteil",
+        "qty": 22
+      },
+      {
+        "item_id": "item:galette_fruits_secs",
+        "qty": 102
+      },
+      {
+        "item_id": "item:pain_epices_miel",
+        "qty": 49
+      },
+      {
+        "item_id": "item:galette_cereales",
+        "qty": 158
+      },
+      {
+        "item_id": "item:petit_pain",
+        "qty": 160
+      },
+      {
+        "item_id": "item:pain_herbes",
+        "qty": 131
+      },
+      {
+        "item_id": "item:pain_orge",
+        "qty": 246
+      },
+      {
+        "item_id": "item:Galette_des_Rois",
+        "qty": 6
+      },
+      {
+        "item_id": "item:biscuits_voyage",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Pain_d_epices",
+        "qty": 80
+      },
+      {
+        "item_id": "item:pain_noix",
+        "qty": 30
+      },
+      {
+        "item_id": "item:fouace_miel",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Pain_de_campagne",
+        "qty": 4
+      },
+      {
+        "item_id": "item:brioche_miel",
+        "qty": 6
+      },
+      {
+        "item_id": "item:tourte_poires",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Croissant",
+        "qty": 8
+      },
+      {
+        "item_id": "item:pain_froment",
+        "qty": 6
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_boulangerie",
+        "portrait": "marchand_nain_f_boulangerie01.jpg",
+        "nom": "Agnès Fournier"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_sangle_de_la_greve",
+    "_rev": "57-a1d7555c64d28a4fb9f610f05f481776",
+    "type": "lieu",
+    "label": "La Sangle de la Grève",
+    "image": "bourrellerie_europe_lutecia01.jpg",
+    "categorie": "bourrellerie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "peaux": 2
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:harnais",
+        "qty": 126
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_bourrellerie",
+        "portrait": "marchand_humain_m_bourrellerie06.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_baudruche_des_halles",
+    "_rev": "2-dccb86c44dd5345b4d89c8eb7ab682ab",
+    "type": "lieu",
+    "label": "La Baudruche des Halles",
+    "image": "boyauderie_europe_lutecia01.jpg",
+    "categorie": "boyauderie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": [],
+    "pnj": [
+      {
+        "character": "pnj:marchand_boyauderie",
+        "portrait": "marchand_hobbit_m_boyauderie04.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:l_epoussette_du_petit_pont",
+    "_rev": "3-8efb07d8a2981819ddf22252bcebf5ae",
+    "type": "lieu",
+    "label": "L'Époussette du Petit-Pont",
+    "image": "brosserie_europe03.png",
+    "categorie": "brosserie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": [],
+    "pnj": [
+      {
+        "character": "pnj:marchand_brosserie",
+        "portrait": "marchand_ogre_f_brosserie01.jpg",
+        "nom": "Alienor de Brévannes"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_grand_relais_des_frontieres_bureau_du_maitre",
+    "_rev": "1-d62c9cfdba409a4815e0cc07a854478a",
+    "type": "lieu",
+    "label": "Le Grand Relais des Frontières - bureau du maître",
+    "image": "guilde_bureau_maitre_de_guilde_europe02.png",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:lutecia",
+    "relation_lieu": "lieu:le_grand_relais_des_frontieres_comptoir",
+    "acces": {
+      "refus": "Le réceptionniste barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "lieu:le_cabinet_des_specimens",
+    "_rev": "86-86b8dcce6672cd875b8a0a39096e3329",
+    "type": "lieu",
+    "label": "Le Cabinet des Spécimens",
+    "image": "cabinet_des_specimens_europe01.jpg",
+    "categorie": "cabinet_des_specimens",
+    "pnj": [
+      {
+        "character": "pnj:marchand_cabinet_des_specimens",
+        "nom": "Gundar de la Butte",
+        "portrait": "marchand_ogre_m_cabinet_de_specimen01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "peaux": 376,
+      "petit_rondin": 745,
+      "sang": 123,
+      "os": 10,
+      "branche": 75,
+      "ossements": 75
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:ossements",
+        "qty": 25
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:trophee",
+        "qty": 97
+      },
+      {
+        "item_id": "item:Couronne_branchages",
+        "qty": 253
+      },
+      {
+        "item_id": "item:manche",
+        "qty": 26
+      },
+      {
+        "item_id": "item:de",
+        "qty": 173
+      },
+      {
+        "item_id": "item:oreiller",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Mantelet_de_plumes",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Chapeau_a_plume",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Coiffe_plumes",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Specimen_monte",
+        "qty": 110
+      },
+      {
+        "item_id": "item:aiguille",
+        "qty": 61
+      },
+      {
+        "item_id": "item:Brassards_os",
+        "qty": 24
+      },
+      {
+        "item_id": "item:Epaulieres_d_os",
+        "qty": 28
+      },
+      {
+        "item_id": "item:peigne",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Harnais_d_ossements",
+        "qty": 41
+      },
+      {
+        "item_id": "item:flute",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Bracelets_os",
+        "qty": 12
+      },
+      {
+        "item_id": "item:dague_rituelle",
+        "qty": 47
+      },
+      {
+        "item_id": "item:Vitrine_d_etude",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Os_de_totem",
+        "qty": 12
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Specimen_monte": 3,
+        "item:Coiffe_de_specimen": 3,
+        "item:Vitrine_d_etude": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:le_museum_du_parvis",
+    "_rev": "67-9b345aa65e23f9474632586274fd033a",
+    "type": "lieu",
+    "label": "Le Muséum du Parvis",
+    "image": "cabinet_des_specimens_europe02.jpg",
+    "categorie": "cabinet_des_specimens",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "peaux": 343,
+      "petit_rondin": 575,
+      "sang": 3,
+      "branche": 25,
+      "ossements": 25
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:ossements",
+        "qty": 25
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:trophee",
+        "qty": 25
+      },
+      {
+        "item_id": "item:de",
+        "qty": 139
+      },
+      {
+        "item_id": "item:Couronne_branchages",
+        "qty": 231
+      },
+      {
+        "item_id": "item:Harnais_d_ossements",
+        "qty": 6
+      },
+      {
+        "item_id": "item:dague_rituelle",
+        "qty": 5
+      },
+      {
+        "item_id": "item:peigne",
+        "qty": 1
+      },
+      {
+        "item_id": "item:manche",
+        "qty": 26
+      },
+      {
+        "item_id": "item:Specimen_monte",
+        "qty": 92
+      },
+      {
+        "item_id": "item:Brassards_os",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Epaulieres_d_os",
+        "qty": 3
+      },
+      {
+        "item_id": "item:flute",
+        "qty": 1
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:aiguille",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Vitrine_d_etude",
+        "qty": 8
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_cabinet_des_specimens",
+        "portrait": "marchand_humain_f_cabinet_de_specimen01.png",
+        "nom": "Perrine de Beaumont"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_marmite_de_la_seine",
+    "_rev": "90-e54aaa36d61065be24228c26aba3d7db",
+    "type": "lieu",
+    "label": "La Marmite de la Seine",
+    "image": "cuisine_europe01.jpg",
+    "categorie": "cuisine",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Sel": 795,
+      "item:herbes_de_fournil": 415,
+      "item:Panais_de_sillon": 478,
+      "item:Chou_pomme": 237,
+      "item:viande": 2,
+      "item:Vin_de_pays": 20,
+      "item:Volaille": 20
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Sel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Vin_de_pays",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Volaille",
+        "qty": 25
+      },
+      {
+        "item_id": "item:herbes_de_fournil",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Coq_au_vin",
+        "qty": 576
+      },
+      {
+        "item_id": "item:Pate_de_campagne",
+        "qty": 10
+      },
+      {
+        "item_id": "item:mets_rare",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Pot_au_feu",
+        "qty": 30
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_cuisine",
+        "portrait": "marchand_hobbit_m_cuisine01.png",
+        "nom": "Hervé Pommeverte"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_fourneau_du_petit_pont",
+    "_rev": "51-94e1dd17a68d32e5ab79bb6536a924c8",
+    "type": "lieu",
+    "label": "Le Fourneau du Petit-Pont",
+    "image": "cuisine_europe_lutecia01.jpg",
+    "categorie": "cuisine",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Panais_de_sillon": 67,
+      "item:viande": 145,
+      "item:foie": 62,
+      "item:Sel": 420,
+      "item:herbes_de_fournil": 243,
+      "item:Vin_de_pays": 1,
+      "item:Volaille": 1,
+      "item:Chou_pomme": 1
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Sel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Vin_de_pays",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Volaille",
+        "qty": 25
+      },
+      {
+        "item_id": "item:herbes_de_fournil",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Pot_au_feu",
+        "qty": 79
+      },
+      {
+        "item_id": "item:Coq_au_vin",
+        "qty": 403
+      },
+      {
+        "item_id": "item:Pate_de_campagne",
+        "qty": 58
+      },
+      {
+        "item_id": "item:mets_rare",
+        "qty": 20
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_cuisine",
+        "portrait": "marchand_nain_m_cuisine01.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_grand_fourneau_de_la_greve",
+    "_rev": "61-9dce211ca9a5042fa120bd6753897c60",
+    "type": "lieu",
+    "label": "Le Grand Fourneau de la Grève",
+    "image": "cuisine_europe02.jpg",
+    "categorie": "cuisine",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:viande": 30,
+      "item:Sel": 517,
+      "item:herbes_de_fournil": 265,
+      "item:Panais_de_sillon": 10,
+      "item:graisse": 6,
+      "item:foie": 1,
+      "item:Chou_pomme": 1,
+      "item:Vin_de_pays": 5,
+      "item:Volaille": 5
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Sel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Vin_de_pays",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Volaille",
+        "qty": 25
+      },
+      {
+        "item_id": "item:herbes_de_fournil",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Pate_de_campagne",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Coq_au_vin",
+        "qty": 395
+      },
+      {
+        "item_id": "item:Pot_au_feu",
+        "qty": 9
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_cuisine",
+        "portrait": "marchand_elfe_f_cuisinie01.jpg",
+        "nom": "Ysabeau de Mirecourt"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_foin_dore_des_ecoles",
+    "_rev": "2-d9b2cf7978c1daa52c90543abf235eed",
+    "type": "lieu",
+    "label": "Le Foin Doré des Écoles",
+    "image": "etable_europe_lutecia01.jpg",
+    "categorie": "etable",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": [],
+    "pnj": [
+      {
+        "character": "pnj:marchand_etable",
+        "portrait": "marchand_ogre_f_etable01.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_licol_des_ecoles",
+    "_rev": "3-e55b9f8e970062cbd169727f41f81882",
+    "type": "lieu",
+    "label": "Le Licol des Écoles",
+    "image": "etable_europe06.png",
+    "categorie": "etable",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": [],
+    "pnj": [
+      {
+        "character": "pnj:marchand_etable",
+        "portrait": "marchand_nain_f_etable.png",
+        "nom": "Mélisande Ferrand",
+        "montures": [
+          "espece:ane",
+          "espece:cheval",
+          "espece:cheval_de_trait",
+          "espece:cheval_normand",
+          "espece:grand_sanglier",
+          "espece:loup_geant",
+          "espece:mulet",
+          "espece:poney",
+          "espece:sanglier_apprivoise"
+        ]
+      }
+    ]
+  },
+  {
+    "_id": "lieu:l_arc_et_la_corde_de_la_cite",
+    "_rev": "60-f58c0bd02104ffa1b0db23700e098b2f",
+    "type": "lieu",
+    "label": "L'Arc et la Corde de la Cité",
+    "image": "archerie_europe03.png",
+    "categorie": "fletcher",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "argent": 535,
+      "bronze": 410,
+      "fer": 402,
+      "plomb": 550,
+      "boyaux": 17,
+      "branche": 358,
+      "petit_rondin": 362,
+      "peaux": 140,
+      "poix": 140,
+      "tendons": 15
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:argent",
+        "qty": 25
+      },
+      {
+        "item_id": "item:bronze",
+        "qty": 25
+      },
+      {
+        "item_id": "item:fer",
+        "qty": 25
+      },
+      {
+        "item_id": "item:plomb",
+        "qty": 25
+      },
+      {
+        "item_id": "item:manche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Darts_de_cavalerie",
+        "qty": 321
+      },
+      {
+        "item_id": "item:Lancelette",
+        "qty": 244
+      },
+      {
+        "item_id": "item:cordes_d_arc",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Javelot_ethiopien",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Javelot_polynesien",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Arc",
+        "qty": 20
+      },
+      {
+        "item_id": "item:Arc_court",
+        "qty": 24
+      },
+      {
+        "item_id": "item:Arc_long",
+        "qty": 3
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 25
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_fletcher",
+        "portrait": "marchand_hobbit_m_archerie03.jpg",
+        "nom": "Nicolas Piedléger"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_haloir_des_ecoles",
+    "_rev": "2-b7f2b0f38b26ee70206686c51326e5ea",
+    "type": "lieu",
+    "label": "Le Haloir des Écoles",
+    "image": "fumoir_europe_lutecia01.jpg",
+    "categorie": "fumoir",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": [],
+    "pnj": [
+      {
+        "character": "pnj:marchand_fumoir",
+        "portrait": "marchand_humain_f_fumoir04.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:l_arsenal_de_lutecia",
+    "_rev": "185-e4392419c01af1a47f7390f98431984e",
+    "type": "lieu",
+    "label": "L'Arsenal de Lutèce",
+    "image": "grand_arsenal_europe01.jpg",
+    "categorie": "grand_arsenal",
+    "pnj": [
+      {
+        "character": "pnj:marchand_grand_arsenal",
+        "nom": "Grimbert de la Forge",
+        "portrait": "marchand_nain_m_grand_arsenal01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "argent": 1005,
+      "branche": 855,
+      "bronze": 762,
+      "gros_rondin": 1071,
+      "petit_rondin": 905,
+      "plomb": 1187,
+      "poix": 1039,
+      "rondin": 1099,
+      "debris_anime": 262,
+      "cuir_brut": 209,
+      "crocs": 22,
+      "pierre": 329,
+      "item:Seve_de_chene": 1,
+      "item:adamantite": 16,
+      "item:orichalque": 16,
+      "acier": 42,
+      "fer": 70,
+      "item:mithril": 14,
+      "peaux": 70
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:acier",
+        "qty": 25
+      },
+      {
+        "item_id": "item:argent",
+        "qty": 25
+      },
+      {
+        "item_id": "item:bronze",
+        "qty": 25
+      },
+      {
+        "item_id": "item:debris_anime",
+        "qty": 25
+      },
+      {
+        "item_id": "item:fer",
+        "qty": 25
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:plomb",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Cuirasse_cuir_noir",
+        "qty": 21
+      },
+      {
+        "item_id": "item:Epaulieres_acier_gravees",
+        "qty": 18
+      },
+      {
+        "item_id": "item:harnais",
+        "qty": 8
+      },
+      {
+        "item_id": "item:manche",
+        "qty": 26
+      },
+      {
+        "item_id": "item:Epaulieres_de_bronze",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Epaulieres_de_fer",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Heaume_ouvert_grave",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Bottes_de_fer",
+        "qty": 8
+      },
+      {
+        "item_id": "item:armure_de_cuir",
+        "qty": 16
+      },
+      {
+        "item_id": "item:acier_plisse",
+        "qty": 218
+      },
+      {
+        "item_id": "item:Jambières_de_plates",
+        "qty": 11
+      },
+      {
+        "item_id": "item:Armure_cuir_runee",
+        "qty": 20
+      },
+      {
+        "item_id": "item:Cuirasse_cuir_brut",
+        "qty": 21
+      },
+      {
+        "item_id": "item:Bocle",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Cotte_mailles_benie",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Cotte_de_mailles",
+        "qty": 23
+      },
+      {
+        "item_id": "item:Pourpoint_cuir_renf",
+        "qty": 19
+      },
+      {
+        "item_id": "item:Jambières_cuir_renf",
+        "qty": 13
+      },
+      {
+        "item_id": "item:Rondelles_d_epaule",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Armure_plates_surcoat",
+        "qty": 24
+      },
+      {
+        "item_id": "item:Epaulieres_cuir_bouilli",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Heaume_de_fer",
+        "qty": 16
+      },
+      {
+        "item_id": "item:Poincon_de_jet",
+        "qty": 79
+      },
+      {
+        "item_id": "item:Shuriken",
+        "qty": 112
+      },
+      {
+        "item_id": "item:hampe",
+        "qty": 40
+      },
+      {
+        "item_id": "item:Gantelets_cuir",
+        "qty": 13
+      },
+      {
+        "item_id": "item:Pelta",
+        "qty": 11
+      },
+      {
+        "item_id": "item:Lancelette",
+        "qty": 52
+      },
+      {
+        "item_id": "item:Hache_de_bucheron",
+        "qty": 11
+      },
+      {
+        "item_id": "item:Morgenstern",
+        "qty": 24
+      },
+      {
+        "item_id": "item:Francisque",
+        "qty": 11
+      },
+      {
+        "item_id": "item:Masse_cannelee_perse",
+        "qty": 27
+      },
+      {
+        "item_id": "item:Nzappa_zap",
+        "qty": 17
+      },
+      {
+        "item_id": "item:Darts_de_cavalerie",
+        "qty": 358
+      },
+      {
+        "item_id": "item:Falarique",
+        "qty": 35
+      },
+      {
+        "item_id": "item:Rondache",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Ecu_de_joute",
+        "qty": 16
+      },
+      {
+        "item_id": "item:Dague_de_scene",
+        "qty": 77
+      },
+      {
+        "item_id": "item:Gants_runiques",
+        "qty": 14
+      },
+      {
+        "item_id": "item:Gantelets_de_plates",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Epaulieres_cuir_cloutees",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Bottes_de_plates",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Epaulieres_benies",
+        "qty": 17
+      },
+      {
+        "item_id": "item:Bouclier_ordre",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Calotte_cuir_rune",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Azagay",
+        "qty": 1
+      },
+      {
+        "item_id": "item:cordes_d_arc",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Arc_court",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Gantelets_acier",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Pavois",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Bouclier_normand",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Mantelet_de_mailles",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Armure_cuir_souple_N",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Camail_de_mailles",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Bouclier_cerf_volant",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Jambières_cuir",
+        "qty": 11
+      },
+      {
+        "item_id": "item:Plumbata",
+        "qty": 24
+      },
+      {
+        "item_id": "item:Javelot_ethiopien",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Ecu",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Trident_barbele",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Bouclier_sacre",
+        "qty": 10
+      },
+      {
+        "item_id": "item:cuir",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Epaulieres_de_plates",
+        "qty": 17
+      },
+      {
+        "item_id": "item:Heaume_de_plates",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Arbalete_de_poing",
+        "qty": 2
+      },
+      {
+        "item_id": "item:ligatures",
+        "qty": 21
+      },
+      {
+        "item_id": "item:Lance_rituelle",
+        "qty": 23
+      },
+      {
+        "item_id": "item:Bouclier_chauffe",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Angon",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Targe",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Faucharde",
+        "qty": 4
+      },
+      {
+        "item_id": "item:adamantite",
+        "qty": 108
+      },
+      {
+        "item_id": "item:orichalque",
+        "qty": 108
+      },
+      {
+        "item_id": "item:mithril",
+        "qty": 114
+      },
+      {
+        "item_id": "item:Arc",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Arbalete_legere",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Yari",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Rungu",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Boomerang_de_chasse",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Sarbacane",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Naginata",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Javelot_polynesien",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Rapiere",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Chakram",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Tomahawk",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Dague",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Kestros",
+        "qty": 14
+      },
+      {
+        "item_id": "item:Baton_de_combat",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Couteau_de_chasse",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Lame_courte",
+        "qty": 3
+      },
+      {
+        "item_id": "item:fourreau",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Epee_une_main_benie",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Lance_rituelle_e6cf4b19",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Epee_courte_rune",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Kpinga",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Pilum",
+        "qty": 1
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:gros_rondin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:pierre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:rondin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Armure_de_plates",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Bardiche",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Armure_a_bandes",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Lance_longue",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Armure_de_bataille",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Clibanion",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Grand_heaume",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Chaine_de_combat",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Armure_de_plates_en_bronze",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Trident",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Glaive",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Pierre_a_aiguiser",
+        "qty": 56
+      },
+      {
+        "item_id": "item:Khopesh",
+        "qty": 23
+      },
+      {
+        "item_id": "item:Macuahuitl",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Cabillot",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Epee_courte",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Gladius",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Fourche_de_guerre",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Partisane",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Glaive_guisarme",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Harnois_complet",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Armure_de_cuir_cloutee",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Guisarme_vouge",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Katar",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Corseque",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Crochet_serrurier",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Abattis_piege",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Armure_annelee",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Flechettes",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Armure_d_ecailles",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Ressort_de_branche",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Arc_court_composite",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Declencheur_d_eboulis",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Brigandine",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Fourche_fauchard",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Lance_de_cavalerie_lourde",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Estoc",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Daikyu",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Arc_long_composite",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Hache_de_jet",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Dague_de_parade",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Epee_longue",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Drusus",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Epee_a_deux_mains",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Epee_batarde",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Doloire",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Marteau_de_lucerne",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Vouge",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Lance_de_cavalerie_moyenne",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Bassinet",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Wakizashi",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Crochets",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Hunga_munga",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Menottes",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Kanabo",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Faucille",
+        "qty": 1
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Harnois_du_grand_arsenal": 3,
+        "item:Baudrier_de_l_arsenal": 3,
+        "item:Fagot_de_traits_lestes": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:le_grand_atelier_d_empennage",
+    "_rev": "98-96f3d57ca74df1928ed4799920571896",
+    "type": "lieu",
+    "label": "Le Grand Atelier d'Empennage",
+    "image": "grand_atelier_d_empennage_europe01.jpg",
+    "categorie": "grand_atelier_d_empennage",
+    "pnj": [
+      {
+        "character": "pnj:marchand_grand_atelier_d_empennage",
+        "nom": "Émeline Renard",
+        "portrait": "marchand_hobbit_f_grand_atelier_d_empennage01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "argent": 800,
+      "bronze": 800,
+      "fer": 800,
+      "peaux": 800,
+      "plomb": 800,
+      "branche": 100,
+      "petit_rondin": 60,
+      "poix": 145,
+      "tendons": 1
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:argent",
+        "qty": 25
+      },
+      {
+        "item_id": "item:bronze",
+        "qty": 25
+      },
+      {
+        "item_id": "item:fer",
+        "qty": 25
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:plomb",
+        "qty": 25
+      },
+      {
+        "item_id": "item:manche",
+        "qty": 1107
+      },
+      {
+        "item_id": "item:cordes_d_arc",
+        "qty": 107
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 25
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Empennage_de_maitre": 3,
+        "item:Arc_du_grand_atelier": 3,
+        "item:Carquois_emplume": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:le_grand_athanor",
+    "_rev": "181-d2faed7303f19a74a54737808eccd443",
+    "type": "lieu",
+    "label": "Le Grand Athanor",
+    "image": "grand_laboratoire_alchimique_europe01.jpg",
+    "categorie": "grand_laboratoire_alchimique",
+    "pnj": [
+      {
+        "character": "pnj:marchand_grand_laboratoire_alchimique",
+        "nom": "Nimiel de Montreuil",
+        "portrait": "marchand_elfe_m_grand_laboratoire_alchimique01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "debris_anime": 353,
+      "gemmes": 518,
+      "item:Reactif_brut": 1160,
+      "ossements": 719,
+      "residu_spectral": 734,
+      "perles": 486,
+      "os": 77,
+      "foie": 22,
+      "item:Ail_des_moines": 58,
+      "item:Pomme_de_verger": 85,
+      "item:Fleur_de_souci": 10,
+      "pierre": 335,
+      "yeux": 1,
+      "crocs": 1,
+      "item:Prunelles_de_haie": 1,
+      "metaux_precieux": 20,
+      "reactif_brut": 20
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:debris_anime",
+        "qty": 25
+      },
+      {
+        "item_id": "item:gemmes",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Reactif_brut",
+        "qty": 25
+      },
+      {
+        "item_id": "item:metaux_precieux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:ossements",
+        "qty": 25
+      },
+      {
+        "item_id": "item:perles",
+        "qty": 25
+      },
+      {
+        "item_id": "item:residu_spectral",
+        "qty": 25
+      },
+      {
+        "item_id": "item:talisman",
+        "qty": 122
+      },
+      {
+        "item_id": "item:sautoir",
+        "qty": 96
+      },
+      {
+        "item_id": "item:Sang_demon_seche",
+        "qty": 86
+      },
+      {
+        "item_id": "item:epingle_cheveux",
+        "qty": 23
+      },
+      {
+        "item_id": "item:poudre_alchimique",
+        "qty": 114
+      },
+      {
+        "item_id": "item:diademe",
+        "qty": 91
+      },
+      {
+        "item_id": "item:reactif_magique",
+        "qty": 77
+      },
+      {
+        "item_id": "item:bracelet",
+        "qty": 38
+      },
+      {
+        "item_id": "item:catalyseur_magique",
+        "qty": 282
+      },
+      {
+        "item_id": "item:Cristal_canalisation",
+        "qty": 56
+      },
+      {
+        "item_id": "item:bague",
+        "qty": 40
+      },
+      {
+        "item_id": "item:bijou",
+        "qty": 208
+      },
+      {
+        "item_id": "item:Sel_noir",
+        "qty": 82
+      },
+      {
+        "item_id": "item:anneau",
+        "qty": 20
+      },
+      {
+        "item_id": "item:chevaliere",
+        "qty": 58
+      },
+      {
+        "item_id": "item:pendentif",
+        "qty": 26
+      },
+      {
+        "item_id": "item:Soufre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Poudre_de_miroir",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Eau_de_prunelle",
+        "qty": 42
+      },
+      {
+        "item_id": "item:cataplasme",
+        "qty": 1
+      },
+      {
+        "item_id": "item:elixir_revigorant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:huile",
+        "qty": 24
+      },
+      {
+        "item_id": "item:Emplatre_d_ail",
+        "qty": 32
+      },
+      {
+        "item_id": "item:composant_rituel",
+        "qty": 8
+      },
+      {
+        "item_id": "item:collier",
+        "qty": 2
+      },
+      {
+        "item_id": "item:onguent",
+        "qty": 8
+      },
+      {
+        "item_id": "item:potion",
+        "qty": 12
+      },
+      {
+        "item_id": "item:remede",
+        "qty": 72
+      },
+      {
+        "item_id": "item:Compote_fortifiante",
+        "qty": 35
+      },
+      {
+        "item_id": "item:Athanor_portatif",
+        "qty": 31
+      },
+      {
+        "item_id": "item:Fiole_sang_bete",
+        "qty": 16
+      },
+      {
+        "item_id": "item:Poudre_amethyste",
+        "qty": 114
+      },
+      {
+        "item_id": "item:sautoir_97719116",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Extrait_de_mandragore",
+        "qty": 32
+      },
+      {
+        "item_id": "item:Vinaigre_des_quatre_voleurs",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Poison_de_base",
+        "qty": 2
+      },
+      {
+        "item_id": "item:pierre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Symbole_sacre",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Petite_glace",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Orbe_arcanique",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Aiguille_empoisonnee",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Pierre_de_meditation",
+        "qty": 24
+      },
+      {
+        "item_id": "item:Pot_de_feu_gregeois",
+        "qty": 4
+      },
+      {
+        "item_id": "item:potion_de_vision",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Absinthe_verte",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Miroir_de_poche",
+        "qty": 2
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Athanor_portatif": 3,
+        "item:Anneau_de_transmutation": 3,
+        "item:Philtre_du_grand_oeuvre": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:le_grand_scriptorium_de_la_cite",
+    "_rev": "122-04581bddd47f9c4251229e9a98ebe0af",
+    "type": "lieu",
+    "label": "Le Grand Scriptorium de la Cité",
+    "image": "grand_scriptorium_europe02.jpg",
+    "categorie": "grand_scriptorium",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "branche": 515,
+      "chiffon": 452,
+      "item:Chiffon": 449,
+      "item:Herbes_aromatiques": 627,
+      "item:Reactif_brut": 679,
+      "petit_rondin": 574,
+      "poix": 381,
+      "residu_spectral": 651,
+      "item:Soufre": 47,
+      "item:Sel_noir": 9,
+      "item:Cire_d_abeille": 17,
+      "item:Poudre_de_miroir": 4
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Chiffon",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Cire_d_abeille",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Herbes_aromatiques",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Reactif_brut",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:residu_spectral",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Torche",
+        "qty": 357
+      },
+      {
+        "item_id": "item:pigment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Tablette_de_cire",
+        "qty": 227
+      },
+      {
+        "item_id": "item:Poupee_de_cire",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Papier",
+        "qty": 87
+      },
+      {
+        "item_id": "item:Meche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Huile_entretien",
+        "qty": 22
+      },
+      {
+        "item_id": "item:Cire_a_cacheter",
+        "qty": 205
+      },
+      {
+        "item_id": "item:Bougie",
+        "qty": 15
+      },
+      {
+        "item_id": "item:grimoire_seigneurie_du_sang",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_souffle_de_feu",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_pacte_de_sang",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Encre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Sceau_ordre",
+        "qty": 73
+      },
+      {
+        "item_id": "item:Cierge",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Bougie_parfumee",
+        "qty": 125
+      },
+      {
+        "item_id": "item:Bougie_arcanique",
+        "qty": 89
+      },
+      {
+        "item_id": "item:Encens",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Chandelle_d_etude",
+        "qty": 33
+      },
+      {
+        "item_id": "item:Ecritoire_de_voyage",
+        "qty": 45
+      },
+      {
+        "item_id": "item:grimoire_sommeil_pesant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Livre_prieres",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_ciel_de_serres",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_conclave_de_la_destinee",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_cortege_des_fantomes",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_destrier_celeste",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_essaim_de_besiens",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_fauve_totem",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_ifrit_enchaine",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_la_tarasque_domptee",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_le_comte_s_eveille",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_main_de_la_destinee",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_songe_des_incubes",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_volee_funebre",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Grimoire_necromancie",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Grimoire_pactes",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Manuel_creatures",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_formule_de_clairvoyance",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Grimoire_base",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_hurlement_de_la_meute",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_antidote_sylvestre",
+        "qty": 1
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_grand_scriptorium",
+        "portrait": "marchand_elfe_m_grand_scriptorium01.jpg",
+        "nom": "Aelwen de Montmartre"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_grand_scriptorium_de_lutecia",
+    "_rev": "177-3c780b727b045a2be1e1f2e3c0a1128d",
+    "type": "lieu",
+    "label": "Le Grand Scriptorium",
+    "image": "grand_scriptorium_europe01.jpg",
+    "categorie": "grand_scriptorium",
+    "pnj": [
+      {
+        "character": "pnj:marchand_grand_scriptorium",
+        "nom": "Ysabeau de Mirecourt",
+        "portrait": "marchand_elfe_f_grand_scriptorium01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "branche": 548,
+      "item:Herbes_aromatiques": 799,
+      "item:Reactif_brut": 1060,
+      "petit_rondin": 982,
+      "item:Chiffon": 378,
+      "poix": 432,
+      "residu_spectral": 881,
+      "chiffon": 338,
+      "item:Soufre": 28,
+      "item:Sel_noir": 4,
+      "item:Poudre_de_miroir": 9,
+      "item:Cire_d_abeille": 35
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Chiffon",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Cire_d_abeille",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Herbes_aromatiques",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Reactif_brut",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:residu_spectral",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Tablette_de_cire",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Cire_a_cacheter",
+        "qty": 72
+      },
+      {
+        "item_id": "item:pigment",
+        "qty": 24
+      },
+      {
+        "item_id": "item:Meche",
+        "qty": 124
+      },
+      {
+        "item_id": "item:Papier",
+        "qty": 150
+      },
+      {
+        "item_id": "item:Torche",
+        "qty": 648
+      },
+      {
+        "item_id": "item:Sceau_ordre",
+        "qty": 148
+      },
+      {
+        "item_id": "item:Cierge",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Bougie_parfumee",
+        "qty": 200
+      },
+      {
+        "item_id": "item:Ecritoire_de_voyage",
+        "qty": 85
+      },
+      {
+        "item_id": "item:Chandelle_d_etude",
+        "qty": 88
+      },
+      {
+        "item_id": "item:Encre",
+        "qty": 23
+      },
+      {
+        "item_id": "item:livre_carte_le_grand_fournil_de_lutecia",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Bougie_arcanique",
+        "qty": 38
+      },
+      {
+        "item_id": "item:livre_carte_la_maison_des_conserves",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_recette_grimoire_ordre_sanglant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_recette_arme_hache_apparat_amerindienne",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_carte_au_lion_d_or",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_anneaux_du_serpent_geant",
+        "qty": 2
+      },
+      {
+        "item_id": "item:livre_sort_flammerole",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_benediction_martiale",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_amitie_des_betes",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_recette_residu_spectral_reactif_magique_laboratoire_d_alchimie",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Poupee_de_cire",
+        "qty": 10
+      },
+      {
+        "item_id": "item:grimoire_lame_de_vent",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_leurre_spectral",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_armure_de_givre",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_serres_de_l_aigle_geant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_eclat_eblouissant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_formule_de_clairvoyance",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_feu_purificateur",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_jugement_sacre",
+        "qty": 2
+      },
+      {
+        "item_id": "item:livre_sort_lame_de_vent",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_maladresse",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_carte_le_licol_des_ecoles",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_eclat_rocheux",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_sort_charge_du_sanglier",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_carte_lutecia_porte_nord_exterieur",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_aura_de_devotion",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_contrat_mineur",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_carte_auberge_de_la_seine",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_sort_serres_de_l_aigle_geant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Livre_prieres",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_souffle_de_soufre",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_sceau_de_protection",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_soif_du_nosferatu",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_soif_liee",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_tempete_de_feu",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_toucher_devitalisant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_trait_mortifere",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_transe_du_totem",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_transfusion",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_trouble_magique",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_vague_de_soin",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_verdict_de_lumiere",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_vigueur_demoniaque",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_ponction_d_ame",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_priere_de_communion",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_rempart_arcanique",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_resurgence",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_voile_d_icare",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_pacte_du_servant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_explosion_runique",
+        "qty": 1
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Registre_scelle": 3,
+        "item:Ecritoire_de_voyage": 3,
+        "item:Chandelle_d_etude": 3
+      }
+    },
+    "tags": [
+      "scriptorium"
+    ]
+  },
+  {
+    "_id": "lieu:la_grande_officine_de_lutecia",
+    "_rev": "113-7065197f5bbfc2a2efadbbd6268ca6a8",
+    "type": "lieu",
+    "label": "La Grande Officine",
+    "image": "grande_apothicairerie_europe01.jpg",
+    "categorie": "grande_apothicairerie",
+    "pnj": [
+      {
+        "character": "pnj:marchand_grande_apothicairerie",
+        "nom": "Mahaut de Villiers",
+        "portrait": "marchand_ogre_f_grande_apothicairerie02.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "poudre_d_os": 6,
+      "graines": 58
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:graines",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Chou_pomme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Feves_de_carreau",
+        "qty": 353
+      },
+      {
+        "item_id": "item:Pomme_de_verger",
+        "qty": 73
+      },
+      {
+        "item_id": "item:Fleur_de_souci",
+        "qty": 59
+      },
+      {
+        "item_id": "item:Prunelles_de_haie",
+        "qty": 43
+      },
+      {
+        "item_id": "item:Panais_de_sillon",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Feuilles_d_absinthe",
+        "qty": 54
+      },
+      {
+        "item_id": "item:Bandages",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Poire_de_verger",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Ail_des_moines",
+        "qty": 257
+      },
+      {
+        "item_id": "item:Capsules_de_pavot",
+        "qty": 37
+      },
+      {
+        "item_id": "item:Racine_de_mandragore",
+        "qty": 20
+      },
+      {
+        "item_id": "item:Compote_fortifiante",
+        "qty": 182
+      },
+      {
+        "item_id": "item:Tisane_de_souci",
+        "qty": 2
+      },
+      {
+        "item_id": "item:remede",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Tisane_du_marcheur",
+        "qty": 2
+      },
+      {
+        "item_id": "item:engrais",
+        "qty": 25
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Elixir_des_simples_royaux": 3,
+        "item:Baume_de_mandragore": 3,
+        "item:Panier_de_l_herboriste": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:le_fournil_royal_de_la_cite",
+    "_rev": "50-41cb425d9ef2773433986854dc0ba23b",
+    "type": "lieu",
+    "label": "Le Fournil Royal de la Cité",
+    "image": "boulangerie_europe_lutecia02.jpg",
+    "categorie": "grande_boulangerie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Panais_de_sillon": 26,
+      "item:viande": 35,
+      "item:foie": 13,
+      "item:Amandes": 474,
+      "item:Creme": 480,
+      "item:Sel": 330,
+      "item:cerneaux_de_noix": 419,
+      "item:epices_douces": 396,
+      "item:grain_de_froment": 66,
+      "item:grain_de_seigle": 60,
+      "item:herbes_de_fournil": 211,
+      "item:levain_de_chef": 369,
+      "item:miel_de_bruyere": 319,
+      "item:motte_de_beurre": 463,
+      "item:oeufs_de_ferme": 454,
+      "item:raisins_secs": 402,
+      "item:Vin_de_pays": 42,
+      "item:Volaille": 42,
+      "item:grain_d_orge": 48,
+      "item:Chou_pomme": 1
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Amandes",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Creme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Sel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Vin_de_pays",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Volaille",
+        "qty": 25
+      },
+      {
+        "item_id": "item:cerneaux_de_noix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:epices_douces",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_d_orge",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_de_froment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_de_seigle",
+        "qty": 25
+      },
+      {
+        "item_id": "item:herbes_de_fournil",
+        "qty": 25
+      },
+      {
+        "item_id": "item:levain_de_chef",
+        "qty": 25
+      },
+      {
+        "item_id": "item:miel_de_bruyere",
+        "qty": 25
+      },
+      {
+        "item_id": "item:motte_de_beurre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:oeufs_de_ferme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:raisins_secs",
+        "qty": 25
+      },
+      {
+        "item_id": "item:farine_de_froment",
+        "qty": 27
+      },
+      {
+        "item_id": "item:Coq_au_vin",
+        "qty": 384
+      },
+      {
+        "item_id": "item:Pot_au_feu",
+        "qty": 27
+      },
+      {
+        "item_id": "item:farine_d_orge",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Pate_de_campagne",
+        "qty": 24
+      },
+      {
+        "item_id": "item:farine_de_seigle",
+        "qty": 25
+      },
+      {
+        "item_id": "item:pain_orge",
+        "qty": 132
+      },
+      {
+        "item_id": "item:galette_fruits_secs",
+        "qty": 75
+      },
+      {
+        "item_id": "item:galette_cereales",
+        "qty": 91
+      },
+      {
+        "item_id": "item:Pain_d_epices",
+        "qty": 54
+      },
+      {
+        "item_id": "item:petit_pain",
+        "qty": 46
+      },
+      {
+        "item_id": "item:pain_meteil",
+        "qty": 10
+      },
+      {
+        "item_id": "item:pain_epices_miel",
+        "qty": 30
+      },
+      {
+        "item_id": "item:pain_herbes",
+        "qty": 64
+      },
+      {
+        "item_id": "item:pain_noix",
+        "qty": 22
+      },
+      {
+        "item_id": "item:brioche_miel",
+        "qty": 4
+      },
+      {
+        "item_id": "item:fouace_miel",
+        "qty": 6
+      },
+      {
+        "item_id": "item:pain_seigle",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Brioche_parisienne",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Galette_des_Rois",
+        "qty": 4
+      },
+      {
+        "item_id": "item:mets_rare",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Croissant",
+        "qty": 4
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_grande_boulangerie",
+        "portrait": "marchand_hobbit_m_grande_boulangerie01.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_grand_fournil_de_lutecia",
+    "_rev": "82-16bb3ecbe6f70634bbff2c10f166b1e1",
+    "type": "lieu",
+    "label": "Le Grand Fournil",
+    "image": "grande_boulangerie01.jpg",
+    "categorie": "grande_boulangerie",
+    "pnj": [
+      {
+        "character": "pnj:marchand_grande_boulangerie",
+        "nom": "Perrin Bonpain",
+        "portrait": "marchand_hobbit_m_grande_boulangerie02.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Amandes": 701,
+      "item:Creme": 725,
+      "item:Sel": 454,
+      "item:cerneaux_de_noix": 635,
+      "item:epices_douces": 587,
+      "item:herbes_de_fournil": 260,
+      "item:levain_de_chef": 499,
+      "item:miel_de_bruyere": 464,
+      "item:motte_de_beurre": 697,
+      "item:oeufs_de_ferme": 674,
+      "item:raisins_secs": 597,
+      "item:Panais_de_sillon": 3,
+      "item:viande": 11,
+      "item:grain_d_orge": 11,
+      "item:grain_de_froment": 11,
+      "item:grain_de_seigle": 11,
+      "item:Vin_de_pays": 11,
+      "item:Volaille": 11
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Amandes",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Creme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Sel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Vin_de_pays",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Volaille",
+        "qty": 25
+      },
+      {
+        "item_id": "item:cerneaux_de_noix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:epices_douces",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_d_orge",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_de_froment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_de_seigle",
+        "qty": 25
+      },
+      {
+        "item_id": "item:herbes_de_fournil",
+        "qty": 25
+      },
+      {
+        "item_id": "item:levain_de_chef",
+        "qty": 25
+      },
+      {
+        "item_id": "item:miel_de_bruyere",
+        "qty": 25
+      },
+      {
+        "item_id": "item:motte_de_beurre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:oeufs_de_ferme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:raisins_secs",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Coq_au_vin",
+        "qty": 513
+      },
+      {
+        "item_id": "item:farine_d_orge",
+        "qty": 26
+      },
+      {
+        "item_id": "item:farine_de_seigle",
+        "qty": 25
+      },
+      {
+        "item_id": "item:farine_de_froment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:brioche_miel",
+        "qty": 8
+      },
+      {
+        "item_id": "item:galette_fruits_secs",
+        "qty": 97
+      },
+      {
+        "item_id": "item:pain_herbes",
+        "qty": 130
+      },
+      {
+        "item_id": "item:pain_orge",
+        "qty": 191
+      },
+      {
+        "item_id": "item:petit_pain",
+        "qty": 125
+      },
+      {
+        "item_id": "item:Pain_d_epices",
+        "qty": 80
+      },
+      {
+        "item_id": "item:galette_cereales",
+        "qty": 144
+      },
+      {
+        "item_id": "item:pain_seigle",
+        "qty": 25
+      },
+      {
+        "item_id": "item:pain_epices_miel",
+        "qty": 47
+      },
+      {
+        "item_id": "item:pain_noix",
+        "qty": 26
+      },
+      {
+        "item_id": "item:pain_meteil",
+        "qty": 22
+      },
+      {
+        "item_id": "item:pain_froment",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Pot_au_feu",
+        "qty": 18
+      },
+      {
+        "item_id": "item:Pate_de_campagne",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Galette_des_Rois",
+        "qty": 16
+      },
+      {
+        "item_id": "item:fouace_miel",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Brioche_parisienne",
+        "qty": 3
+      },
+      {
+        "item_id": "item:biscuits_voyage",
+        "qty": 5
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Tourte_de_banquet": 3,
+        "item:Pain_de_voyage_renforce": 3,
+        "item:Fouace_des_maitres": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:la_grande_corderie_de_lutecia",
+    "_rev": "18-2c7232856993d60d6a106da0b2986c4e",
+    "type": "lieu",
+    "label": "La Grande Corderie",
+    "image": "grande_corderie_europe01.jpg",
+    "categorie": "grande_corderie",
+    "pnj": [
+      {
+        "character": "pnj:marchand_grande_corderie",
+        "nom": "Thibaut Leclerc",
+        "portrait": "marchand_humain_m_grande_corderie01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "viande": 18,
+      "laine_tissee": 40,
+      "lin": 40,
+      "soie": 40
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:laine_tissee",
+        "qty": 25
+      },
+      {
+        "item_id": "item:lin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:soie",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Chausses_laine",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Robe_lin_ceinturee",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Capuche_de_laine",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Chausses_bicolores",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Robe_bordeaux",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Jupe_longue_lin",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Chausses_ajustees",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Robe_de_savant",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Robe_laine_epaisse",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Sous_robe_noire",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Pantalon_velours",
+        "qty": 17
+      },
+      {
+        "item_id": "item:Capuche_noire",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Cape_soie_sombre",
+        "qty": 19
+      },
+      {
+        "item_id": "item:Capuche_soie",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Pantalon_toile",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Pantalon_ample",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Bandeau_meditation",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Tunique_feuilles",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Jupe_de_chanvre",
+        "qty": 2
+      },
+      {
+        "item_id": "item:boyaux_pour_saucisses",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Robe_noire_capuche",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Cagoule",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Capuche_bordeaux",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Sous_robe_lin",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Pantalon_ajuste_noir",
+        "qty": 1
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Cordage_de_marine": 3,
+        "item:Filet_de_capture": 3,
+        "item:Sangle_rembourree": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:la_maison_des_arts",
+    "_rev": "79-27dd50171266d11c5dbed0ebbeabddae",
+    "type": "lieu",
+    "label": "La Maison des Arts",
+    "image": "grande_maison_des_arts_europe01.jpg",
+    "categorie": "grande_maison_des_arts",
+    "pnj": [
+      {
+        "character": "pnj:marchand_grande_maison_des_arts",
+        "nom": "Béatrice de Montargis",
+        "portrait": "marchand_humain_f_grande_maison_des_arts01.png"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "gemmes": 281,
+      "peaux": 711,
+      "perles": 314,
+      "petit_rondin": 715,
+      "crane": 9,
+      "branche": 191,
+      "ossements": 97,
+      "pierre": 110,
+      "metaux_precieux": 5
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:gemmes",
+        "qty": 25
+      },
+      {
+        "item_id": "item:metaux_precieux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:ossements",
+        "qty": 25
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:perles",
+        "qty": 25
+      },
+      {
+        "item_id": "item:diademe",
+        "qty": 70
+      },
+      {
+        "item_id": "item:bijou",
+        "qty": 177
+      },
+      {
+        "item_id": "item:Poudre_os",
+        "qty": 75
+      },
+      {
+        "item_id": "item:sautoir",
+        "qty": 67
+      },
+      {
+        "item_id": "item:chevaliere",
+        "qty": 29
+      },
+      {
+        "item_id": "item:Couronne_branchages",
+        "qty": 166
+      },
+      {
+        "item_id": "item:talisman",
+        "qty": 96
+      },
+      {
+        "item_id": "item:bague",
+        "qty": 28
+      },
+      {
+        "item_id": "item:pendentif",
+        "qty": 25
+      },
+      {
+        "item_id": "item:epingle_cheveux",
+        "qty": 7
+      },
+      {
+        "item_id": "item:bracelet",
+        "qty": 17
+      },
+      {
+        "item_id": "item:manche",
+        "qty": 72
+      },
+      {
+        "item_id": "item:anneau",
+        "qty": 15
+      },
+      {
+        "item_id": "item:de",
+        "qty": 166
+      },
+      {
+        "item_id": "item:Reliquaire_ouvrage",
+        "qty": 38
+      },
+      {
+        "item_id": "item:Brassards_os",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Epaulieres_d_os",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Poudre_amethyste",
+        "qty": 65
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:pierre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Pierre_de_meditation",
+        "qty": 11
+      },
+      {
+        "item_id": "item:Miroir_de_poche",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Parure_d_atelier",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Craie",
+        "qty": 57
+      },
+      {
+        "item_id": "item:peigne",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Orbe_arcanique",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Petite_glace",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Symbole_sacre",
+        "qty": 1
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Reliquaire_ouvrage": 3,
+        "item:Baguette_ouvragee": 3,
+        "item:Parure_d_atelier": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:la_grande_megisserie",
+    "_rev": "110-5b2acd68328b3160a2fdec942f3caf96",
+    "type": "lieu",
+    "label": "La Grande Mégisserie",
+    "image": "grande_manufacture_du_cuir_europe01.jpg",
+    "categorie": "grande_manufacture_du_cuir",
+    "pnj": [
+      {
+        "character": "pnj:marchand_grande_manufacture_du_cuir",
+        "nom": "Armand Taillefort",
+        "portrait": "marchand_ogre_m_grande_manufacture_du_cuir01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "poix": 817,
+      "plomb": 136,
+      "item:Chiffon": 50,
+      "peaux": 50
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Chiffon",
+        "qty": 25
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Bottes_de_voyage",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Chaussons_cuir",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Bottes_noires",
+        "qty": 19
+      },
+      {
+        "item_id": "item:Bandages_de_poing",
+        "qty": 276
+      },
+      {
+        "item_id": "item:gants",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Gants_fins",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Etole_de_fourrure",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Vetements_totémiques",
+        "qty": 14
+      },
+      {
+        "item_id": "item:Manteau_de_loup",
+        "qty": 16
+      },
+      {
+        "item_id": "item:Gants_cuir_epais",
+        "qty": 10
+      },
+      {
+        "item_id": "item:bottes",
+        "qty": 16
+      },
+      {
+        "item_id": "item:harnais",
+        "qty": 26
+      },
+      {
+        "item_id": "item:Chausses_cuir",
+        "qty": 14
+      },
+      {
+        "item_id": "item:Bottes_silencieuses",
+        "qty": 14
+      },
+      {
+        "item_id": "item:Mocassins",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Bandouliere_a_fioles",
+        "qty": 11
+      },
+      {
+        "item_id": "item:Bottes_lacees",
+        "qty": 16
+      },
+      {
+        "item_id": "item:Gants_sans_doigts",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Bottes_de_chasse",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Mantelet_de_chasse",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Bottes_cuir_epais",
+        "qty": 14
+      },
+      {
+        "item_id": "item:Gants_peau_noire",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Gants_archer",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Gants_fins_noirs",
+        "qty": 11
+      },
+      {
+        "item_id": "item:Sandales_moine",
+        "qty": 8
+      },
+      {
+        "item_id": "item:ceinture",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Veste_cuir_souple",
+        "qty": 11
+      },
+      {
+        "item_id": "item:Braies_fourrure",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Pelerine_de_cuir",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Bandeau_de_cuir",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Pantalon_cuir",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Baudrier_de_cuir",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Jupe_lanieres_cuir",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Gants_prestidigi",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Souliers_cuir",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Bottines_de_scene",
+        "qty": 7
+      },
+      {
+        "item_id": "item:fil_resistant",
+        "qty": 38
+      },
+      {
+        "item_id": "item:Bottines_legeres",
+        "qty": 5
+      },
+      {
+        "item_id": "item:cuir",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Chaussons_silencieux",
+        "qty": 4
+      },
+      {
+        "item_id": "item:sac",
+        "qty": 10
+      },
+      {
+        "item_id": "item:outres",
+        "qty": 60
+      },
+      {
+        "item_id": "item:Vetements_totémiques_3542abff",
+        "qty": 1
+      },
+      {
+        "item_id": "item:plomb",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Armure_de_peau",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Armure_matelassee",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Chat_a_neuf_queues",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Martinet",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Fouet",
+        "qty": 2
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Equipage_de_marche_ferre": 3,
+        "item:Ceinturon_de_maitre_sellier": 3,
+        "item:Gants_de_courroyeur": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:la_manufacture_des_toiles",
+    "_rev": "87-44f370dfdf4b89c5fa92fc85dea311bd",
+    "type": "lieu",
+    "label": "La Manufacture des Toiles",
+    "image": "grande_manufacture_textile_europe01.jpg",
+    "categorie": "grande_manufacture_textile",
+    "pnj": [
+      {
+        "character": "pnj:marchand_grande_manufacture_textile",
+        "nom": "Yves Grosmarché",
+        "portrait": "marchand_ogre_m_grande_manufacture_textile01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "peaux": 755,
+      "laine_tissee": 35,
+      "lin": 35,
+      "soie": 35
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:laine_tissee",
+        "qty": 25
+      },
+      {
+        "item_id": "item:lin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:soie",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Capuche_soie",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Pantalon_toile",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Sous_robe_lin",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Chausses_laine",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Robe_laine_epaisse",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Jupe_de_chanvre",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Robe_lin_ceinturee",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Tunique_feuilles",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Cagoule",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Capuche_de_laine",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Chausses_bicolores",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Sous_robe_noire",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Pantalon_ample",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Cape_soie_sombre",
+        "qty": 20
+      },
+      {
+        "item_id": "item:Chausses_ajustees",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Robe_noire_capuche",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Pantalon_velours",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Robe_bordeaux",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Pantalon_ajuste_noir",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Capuchon_de_lin",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Jupe_longue_lin",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Robe_de_savant",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Bandeau_meditation",
+        "qty": 2
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Manteau_de_cour_double": 3,
+        "item:Chaperon_emplume": 3,
+        "item:Necessaire_de_toilette": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:l_orfevrerie_royale",
+    "_rev": "105-d41c7870f7fcbde06285f4cd0df2e4e7",
+    "type": "lieu",
+    "label": "L'Orfèvrerie Royale",
+    "image": "grand_orfevrerie_europe01.jpg",
+    "categorie": "grande_orfevrerie",
+    "pnj": [
+      {
+        "character": "pnj:marchand_grande_orfevrerie",
+        "nom": "Adèle de Rochefort",
+        "portrait": "marchand_humain_f_grand_orfevrerie01.png"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "gemmes": 155,
+      "peaux": 808,
+      "perles": 268,
+      "petit_rondin": 840,
+      "branche": 176,
+      "crane": 25,
+      "pierre": 110,
+      "metaux_precieux": 33,
+      "ossements": 30
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:gemmes",
+        "qty": 25
+      },
+      {
+        "item_id": "item:metaux_precieux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:ossements",
+        "qty": 25
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:perles",
+        "qty": 25
+      },
+      {
+        "item_id": "item:talisman",
+        "qty": 160
+      },
+      {
+        "item_id": "item:Couronne_branchages",
+        "qty": 181
+      },
+      {
+        "item_id": "item:manche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:diademe",
+        "qty": 25
+      },
+      {
+        "item_id": "item:epingle_cheveux",
+        "qty": 14
+      },
+      {
+        "item_id": "item:sautoir",
+        "qty": 73
+      },
+      {
+        "item_id": "item:de",
+        "qty": 349
+      },
+      {
+        "item_id": "item:bague",
+        "qty": 38
+      },
+      {
+        "item_id": "item:bijou",
+        "qty": 111
+      },
+      {
+        "item_id": "item:pendentif",
+        "qty": 25
+      },
+      {
+        "item_id": "item:chevaliere",
+        "qty": 41
+      },
+      {
+        "item_id": "item:bracelet",
+        "qty": 35
+      },
+      {
+        "item_id": "item:anneau",
+        "qty": 20
+      },
+      {
+        "item_id": "item:Diademe_d_orfevre",
+        "qty": 63
+      },
+      {
+        "item_id": "item:Ecrin_de_tabletier",
+        "qty": 60
+      },
+      {
+        "item_id": "item:peigne",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Harnais_d_ossements",
+        "qty": 8
+      },
+      {
+        "item_id": "item:aiguille",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Brassards_os",
+        "qty": 15
+      },
+      {
+        "item_id": "item:Epaulieres_d_os",
+        "qty": 9
+      },
+      {
+        "item_id": "item:flute",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Sceptre_d_apparat",
+        "qty": 9
+      },
+      {
+        "item_id": "item:dague_rituelle",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Bracelets_os",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Poudre_amethyste",
+        "qty": 184
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      },
+      {
+        "item_id": "item:pierre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Pierre_de_meditation",
+        "qty": 30
+      },
+      {
+        "item_id": "item:Orbe_arcanique",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Symbole_sacre",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Miroir_de_poche",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Os_de_totem",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Petite_glace",
+        "qty": 2
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Diademe_d_orfevre": 3,
+        "item:Sceptre_d_apparat": 3,
+        "item:Ecrin_de_tabletier": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:les_grandes_halles",
+    "_rev": "104-3d8f300feb25679a1dd21c1d4a9dd98f",
+    "type": "lieu",
+    "label": "Les Grandes Halles",
+    "image": "grandes_halles_alimentaires_europe01.jpg",
+    "categorie": "grandes_halles_alimentaires",
+    "pnj": [
+      {
+        "character": "pnj:marchand_grandes_halles_alimentaires",
+        "nom": "Robin Champfleuri",
+        "portrait": "marchand_hobbit_m_grandes_halles_alimentaires01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:herbes_de_fournil": 435,
+      "item:Chou_pomme": 231,
+      "item:Panais_de_sillon": 310,
+      "item:Sel": 36,
+      "item:Vin_de_pays": 35,
+      "item:Volaille": 35
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Sel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Vin_de_pays",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Volaille",
+        "qty": 25
+      },
+      {
+        "item_id": "item:herbes_de_fournil",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Coq_au_vin",
+        "qty": 561
+      },
+      {
+        "item_id": "item:saumure",
+        "qty": 535
+      },
+      {
+        "item_id": "item:foie",
+        "qty": 7
+      },
+      {
+        "item_id": "item:griffes",
+        "qty": 1
+      },
+      {
+        "item_id": "item:coeur_confit",
+        "qty": 24
+      },
+      {
+        "item_id": "item:Viande_sechee",
+        "qty": 6
+      },
+      {
+        "item_id": "item:repas_cuisine",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Ration_de_voyage",
+        "qty": 36
+      },
+      {
+        "item_id": "item:lard_sale",
+        "qty": 9
+      },
+      {
+        "item_id": "item:viande_fumee",
+        "qty": 17
+      },
+      {
+        "item_id": "item:saucisses",
+        "qty": 30
+      },
+      {
+        "item_id": "item:mets_rare",
+        "qty": 18
+      },
+      {
+        "item_id": "item:plat_raffine",
+        "qty": 30
+      },
+      {
+        "item_id": "item:os",
+        "qty": 25
+      },
+      {
+        "item_id": "item:sang",
+        "qty": 25
+      },
+      {
+        "item_id": "item:tendons",
+        "qty": 25
+      },
+      {
+        "item_id": "item:boyaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:crane",
+        "qty": 25
+      },
+      {
+        "item_id": "item:cuir_brut",
+        "qty": 25
+      },
+      {
+        "item_id": "item:crins",
+        "qty": 25
+      },
+      {
+        "item_id": "item:crocs",
+        "qty": 4
+      },
+      {
+        "item_id": "item:poils",
+        "qty": 4
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Salaison_de_grand_festin": 3,
+        "item:Conserve_de_campagne": 3,
+        "item:Terrine_des_halles": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:le_grand_relais_des_frontieres_interieur",
+    "_rev": "3-0e7f3433a001c5b45acfb8f7c1067aa9",
+    "type": "lieu",
+    "label": "Le Grand Relais des Frontières - réception",
+    "image": "guilde_aventuriers_interieur_europe02.png",
+    "categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:lutecia",
+    "sous_categorie": "guilde_aventurier",
+    "tags": [
+      "recrutement"
+    ],
+    "relation_lieu": "lieu:le_grand_relais_des_frontieres_comptoir"
+  },
+  {
+    "_id": "lieu:le_grand_relais_des_frontieres_comptoir",
+    "_rev": "5-97c1fae05cd8f0cbc1e453e473589e43",
+    "type": "lieu",
+    "label": "Le Grand Relais des Frontières - comptoir",
+    "image": "guilde_aventuriers_interieur_receptioniste_europe_lutecia01.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "lieu_parent": "lieu:lutecia",
+    "sous_categorie": "guilde_aventurier",
+    "pnj": [
+      {
+        "character": "pnj:eleonore_de_vaugirard",
+        "portrait": "humain_f_receptioniste01.jpg",
+        "probabilite": 1,
+        "description": "Derrière le comptoir en chêne poli se tient Éléonore de Vaugirard, une humaine aux cheveux bruns coiffés en chignon. Souriante et assurée, elle porte une veste bleu marine aux revers dorés et le médaillon de la Guilde des Aventuriers de Lutecia. Plume blanche en main, elle accueille depuis plusieurs années recrues et vétérans, connaissant la réputation de chacun des aventuriers ayant fréquenté le Grand Relais."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_grand_relais_des_frontieres_exterieur",
+    "_rev": "2-e0120cebf6e03721bb5520ac432b6f9a",
+    "type": "lieu",
+    "label": "Le Grand Relais des Frontières - Extérieur",
+    "image": "guilde_aventuriers_exterieur_europe02.png",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:lutecia",
+    "relation_lieu": "lieu:le_grand_relais_des_frontieres_comptoir"
+  },
+  {
+    "_id": "lieu:l_institut_de_thanaturgie",
+    "_rev": "209-b1be4950bb2a096132d67adf5d86b5a0",
+    "type": "lieu",
+    "label": "L'Institut de Thanaturgie",
+    "image": "institut_de_thanaturgie_europe01.jpg",
+    "categorie": "institut_de_thanaturgie",
+    "pnj": [
+      {
+        "character": "pnj:marchand_institut_de_thanaturgie",
+        "nom": "Rémi de Belleville",
+        "portrait": "marchand_elfe_m_institut_de_thanaturgie01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Reactif_brut": 1276,
+      "item:Herbes_medicinales": 1,
+      "poils": 34,
+      "item:Prunelles_de_haie": 1,
+      "item:Ail_des_moines": 54,
+      "debris_anime": 373,
+      "reactif_brut": 155,
+      "residu_spectral": 166,
+      "ossements": 54,
+      "crane": 6,
+      "coeur": 7
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:debris_anime",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Reactif_brut",
+        "qty": 25
+      },
+      {
+        "item_id": "item:ossements",
+        "qty": 25
+      },
+      {
+        "item_id": "item:residu_spectral",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Sang_demon_seche",
+        "qty": 37
+      },
+      {
+        "item_id": "item:focus_magique",
+        "qty": 141
+      },
+      {
+        "item_id": "item:poudre_alchimique",
+        "qty": 81
+      },
+      {
+        "item_id": "item:relique",
+        "qty": 28
+      },
+      {
+        "item_id": "item:catalyseur_magique",
+        "qty": 215
+      },
+      {
+        "item_id": "item:reactif_magique",
+        "qty": 62
+      },
+      {
+        "item_id": "item:Poudre_de_miroir",
+        "qty": 25
+      },
+      {
+        "item_id": "item:composant_rituel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Cristal_canalisation",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Soufre",
+        "qty": 49
+      },
+      {
+        "item_id": "item:Sel_noir",
+        "qty": 26
+      },
+      {
+        "item_id": "item:Focus_ossuaire",
+        "qty": 64
+      },
+      {
+        "item_id": "item:Reliquaire_de_thanaturge",
+        "qty": 68
+      },
+      {
+        "item_id": "item:potion",
+        "qty": 14
+      },
+      {
+        "item_id": "item:Sel_des_sepultures",
+        "qty": 21
+      },
+      {
+        "item_id": "item:Eau_de_prunelle",
+        "qty": 28
+      },
+      {
+        "item_id": "item:Fragments_ame",
+        "qty": 90
+      },
+      {
+        "item_id": "item:focus_magique_ac016f8b",
+        "qty": 1
+      },
+      {
+        "item_id": "item:focus_magique_a7f6c682",
+        "qty": 1
+      },
+      {
+        "item_id": "item:focus_magique_f107ad29",
+        "qty": 1
+      },
+      {
+        "item_id": "item:focus_magique_33fef40d",
+        "qty": 1
+      },
+      {
+        "item_id": "item:focus_magique_b1af97b5",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Reliquaire_de_thanaturge_2d4c4def",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Reliquaire_de_thanaturge_6408ded9",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Reliquaire_de_thanaturge_8b4b2cd3",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Reliquaire_de_thanaturge_09e4ead5",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Reliquaire_de_thanaturge_b8adba2b",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Pot_de_feu_gregeois",
+        "qty": 13
+      },
+      {
+        "item_id": "item:Fiole_sang_bete",
+        "qty": 8
+      },
+      {
+        "item_id": "item:potion_de_vision",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Fetiche_envoutement",
+        "qty": 4
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Reliquaire_de_thanaturge": 3,
+        "item:Sel_des_sepultures": 3,
+        "item:Focus_ossuaire": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:la_cour_des_arches",
+    "_rev": "1-02f554e6a5e5c582c98a72822a178758",
+    "type": "lieu",
+    "label": "La Cour des Arches",
+    "image": "institut_des_architectes_lutecia01.jpg",
+    "categorie": "institut_des_architectes",
+    "lieu_parent": "lieu:lutecia",
+    "pnj": [
+      {
+        "character": "pnj:aelis_de_montfaucon_cour_des_arches",
+        "nom": "Aélis",
+        "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+        "probabilite": 0.4,
+        "description": "Une jeune architecte penchée sur un plan, un compas dans une main et un carnet épais sous le bras."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:l_institut_des_humeurs",
+    "_rev": "128-aeb25e5c8751a85729a47a0f0094b372",
+    "type": "lieu",
+    "label": "L'Institut des Humeurs",
+    "image": "institut_medico_alchimique_europe01.jpg",
+    "categorie": "institut_medico_alchimique",
+    "pnj": [
+      {
+        "character": "pnj:marchand_institut_medico_alchimique",
+        "nom": "Aelwen de Montmartre",
+        "portrait": "marchand_elfe_m_institut_medico_alchimique01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Reactif_brut": 924,
+      "item:Fleur_de_souci": 3,
+      "debris_anime": 233,
+      "residu_spectral": 447,
+      "item:Herbes_a_bruler": 2,
+      "item:Pomme_de_verger": 38,
+      "item:Ail_des_moines": 11,
+      "foie": 1,
+      "reactif_brut": 35,
+      "item:Prunelles_de_haie": 1
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:debris_anime",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Reactif_brut",
+        "qty": 25
+      },
+      {
+        "item_id": "item:residu_spectral",
+        "qty": 25
+      },
+      {
+        "item_id": "item:catalyseur_magique",
+        "qty": 239
+      },
+      {
+        "item_id": "item:Sang_demon_seche",
+        "qty": 100
+      },
+      {
+        "item_id": "item:Sel_noir",
+        "qty": 69
+      },
+      {
+        "item_id": "item:Cristal_canalisation",
+        "qty": 63
+      },
+      {
+        "item_id": "item:reactif_magique",
+        "qty": 89
+      },
+      {
+        "item_id": "item:Poudre_de_miroir",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poudre_alchimique",
+        "qty": 120
+      },
+      {
+        "item_id": "item:Soufre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:remede",
+        "qty": 48
+      },
+      {
+        "item_id": "item:composant_rituel",
+        "qty": 6
+      },
+      {
+        "item_id": "item:potion",
+        "qty": 2
+      },
+      {
+        "item_id": "item:encens",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Fiole_sang_bete",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Philtre_de_songe",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Extrait_de_mandragore",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Vinaigre_des_quatre_voleurs",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Salpetre",
+        "qty": 1
+      },
+      {
+        "item_id": "item:reactif_alchimique",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Compote_fortifiante",
+        "qty": 14
+      },
+      {
+        "item_id": "item:Eau_de_prunelle",
+        "qty": 2
+      },
+      {
+        "item_id": "item:potion_de_vision",
+        "qty": 1
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Serum_de_l_institut": 3,
+        "item:Onguent_alchimique": 3,
+        "item:Fiole_de_sang_fige": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:la_bonne_graine_du_petit_pont",
+    "_rev": "52-87af0351dfd67aeb8fda2e7e996e2b8a",
+    "type": "lieu",
+    "label": "La Bonne Graine du Petit-Pont",
+    "image": "jardinier_europe_lutecia01.jpg",
+    "categorie": "jardinier",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "poudre_d_os": 14,
+      "graines": 70
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:graines",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Prunelles_de_haie",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Feves_de_carreau",
+        "qty": 171
+      },
+      {
+        "item_id": "item:Panais_de_sillon",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Pomme_de_verger",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Poire_de_verger",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Chou_pomme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Fleur_de_souci",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Feuilles_d_absinthe",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Ail_des_moines",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Racine_de_mandragore",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Capsules_de_pavot",
+        "qty": 25
+      },
+      {
+        "item_id": "item:engrais",
+        "qty": 47
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_jardinier",
+        "portrait": "Gaspard_Briselame.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_jardin_clos_de_la_seine",
+    "_rev": "50-210a5babe8ee7bcdd1b4c09b4273a0b6",
+    "type": "lieu",
+    "label": "Le Jardin Clos de la Seine",
+    "image": "jardinier_europe_lutecia02.jpg",
+    "categorie": "jardinier",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "graines": 25
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:graines",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Prunelles_de_haie",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Feves_de_carreau",
+        "qty": 224
+      },
+      {
+        "item_id": "item:Poire_de_verger",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Panais_de_sillon",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Ail_des_moines",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Feuilles_d_absinthe",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Chou_pomme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Fleur_de_souci",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Pomme_de_verger",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Capsules_de_pavot",
+        "qty": 16
+      },
+      {
+        "item_id": "item:Racine_de_mandragore",
+        "qty": 8
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_jardinier",
+        "portrait": "Set329-AND1-Male-Android-Nephilim-Cleric-06.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_verger_des_ecoles",
+    "_rev": "50-4ebd847db0c7574f6d4689b6fd5886cb",
+    "type": "lieu",
+    "label": "Le Verger des Écoles",
+    "image": "jardinier_europe_lutecia04.jpg",
+    "categorie": "jardinier",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "graines": 115
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:graines",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Prunelles_de_haie",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Fleur_de_souci",
+        "qty": 16
+      },
+      {
+        "item_id": "item:Pomme_de_verger",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Capsules_de_pavot",
+        "qty": 20
+      },
+      {
+        "item_id": "item:Ail_des_moines",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Chou_pomme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Feves_de_carreau",
+        "qty": 137
+      },
+      {
+        "item_id": "item:Panais_de_sillon",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Poire_de_verger",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Feuilles_d_absinthe",
+        "qty": 16
+      },
+      {
+        "item_id": "item:Racine_de_mandragore",
+        "qty": 11
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_jardinier",
+        "portrait": "marchand_hobbit_f_jardinier01.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_verger_fleuri_de_la_cite",
+    "_rev": "51-fc7aee1b0b57cc42e05746b06f17ce82",
+    "type": "lieu",
+    "label": "Le Verger Fleuri de la Cité",
+    "image": "jardinier_europe_lutecia03.jpg",
+    "categorie": "jardinier",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "graines": 35
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:graines",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Chou_pomme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Panais_de_sillon",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Feuilles_d_absinthe",
+        "qty": 24
+      },
+      {
+        "item_id": "item:Feves_de_carreau",
+        "qty": 172
+      },
+      {
+        "item_id": "item:Ail_des_moines",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Poire_de_verger",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Pomme_de_verger",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Prunelles_de_haie",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Fleur_de_souci",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Capsules_de_pavot",
+        "qty": 20
+      },
+      {
+        "item_id": "item:Racine_de_mandragore",
+        "qty": 6
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_jardinier",
+        "portrait": "Set329-Seralyndra-Female-Half-Elf-Cleric-06.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_mortier_alchimique_des_ecoles",
+    "_rev": "67-1fc0c95dcc18a514c6ceacb456018bcb",
+    "type": "lieu",
+    "label": "Le Mortier Alchimique des Écoles",
+    "image": "cabinet_alchimie_europe_lutecia01.jpg",
+    "categorie": "laboratoire_d_alchimie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Reactif_brut": 547,
+      "item:Ail_des_moines": 93,
+      "item:Prunelles_de_haie": 64,
+      "item:Capsules_de_pavot": 4,
+      "debris_anime": 215,
+      "reactif_brut": 215,
+      "residu_spectral": 215,
+      "item:Racine_de_mandragore": 5,
+      "item:Feuilles_d_absinthe": 4,
+      "yeux": 3
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:debris_anime",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Reactif_brut",
+        "qty": 25
+      },
+      {
+        "item_id": "item:residu_spectral",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Eau_de_prunelle",
+        "qty": 35
+      },
+      {
+        "item_id": "item:Cristal_canalisation",
+        "qty": 35
+      },
+      {
+        "item_id": "item:Soufre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Sel_noir",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Sang_demon_seche",
+        "qty": 41
+      },
+      {
+        "item_id": "item:reactif_magique",
+        "qty": 52
+      },
+      {
+        "item_id": "item:catalyseur_magique",
+        "qty": 160
+      },
+      {
+        "item_id": "item:poudre_alchimique",
+        "qty": 64
+      },
+      {
+        "item_id": "item:Poudre_de_miroir",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Vinaigre_des_quatre_voleurs",
+        "qty": 2
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_laboratoire_d_alchimie",
+        "portrait": "marchand_humain_f_laboratoire_d_alchimie01.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_table_sonore_du_parvis",
+    "_rev": "51-fd53a967d701099b0d91ed3ee8c46442",
+    "type": "lieu",
+    "label": "La Table Sonore du Parvis",
+    "image": "lutherie_europe_lutecia01.jpg",
+    "categorie": "lutherie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "peaux": 247,
+      "petit_rondin": 174,
+      "poix": 245,
+      "os": 6,
+      "bronze": 7,
+      "branche": 5
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:bronze",
+        "qty": 25
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Chalemie",
+        "qty": 208
+      },
+      {
+        "item_id": "item:Cliquettes",
+        "qty": 525
+      },
+      {
+        "item_id": "item:Table_d_harmonie",
+        "qty": 173
+      },
+      {
+        "item_id": "item:Tambourin",
+        "qty": 376
+      },
+      {
+        "item_id": "item:cordes_d_instrument",
+        "qty": 22
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_lutherie",
+        "portrait": "marchand_humain_m_lutherie04.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_maison_des_conserves",
+    "_rev": "122-800925642f81cbf0b9fb6f6fce99a1c8",
+    "type": "lieu",
+    "label": "La Maison des Conserves",
+    "image": "maison_des_conserves_europe01.jpg",
+    "categorie": "maison_des_conserves",
+    "pnj": [
+      {
+        "character": "pnj:marchand_maison_des_conserves",
+        "nom": "Colombe Mercier",
+        "portrait": "marchand_hobbit_f_maison_des_conserves01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Amandes": 899,
+      "item:Creme": 910,
+      "item:cerneaux_de_noix": 817,
+      "item:epices_douces": 765,
+      "item:herbes_de_fournil": 802,
+      "item:levain_de_chef": 683,
+      "item:miel_de_bruyere": 640,
+      "item:motte_de_beurre": 883,
+      "item:oeufs_de_ferme": 854,
+      "item:raisins_secs": 806,
+      "item:grain_d_orge": 167,
+      "item:grain_de_seigle": 161,
+      "graisse": 1,
+      "item:Poire_de_verger": 271,
+      "item:grain_de_froment": 110,
+      "item:Sel": 169,
+      "item:Pomme_de_verger": 11
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Amandes",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Creme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Sel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:cerneaux_de_noix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:epices_douces",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_d_orge",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_de_froment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:grain_de_seigle",
+        "qty": 25
+      },
+      {
+        "item_id": "item:herbes_de_fournil",
+        "qty": 25
+      },
+      {
+        "item_id": "item:levain_de_chef",
+        "qty": 25
+      },
+      {
+        "item_id": "item:miel_de_bruyere",
+        "qty": 25
+      },
+      {
+        "item_id": "item:motte_de_beurre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:oeufs_de_ferme",
+        "qty": 25
+      },
+      {
+        "item_id": "item:raisins_secs",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Viande_sechee",
+        "qty": 51
+      },
+      {
+        "item_id": "item:farine_de_froment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:farine_de_seigle",
+        "qty": 25
+      },
+      {
+        "item_id": "item:viande_fumee",
+        "qty": 40
+      },
+      {
+        "item_id": "item:saucisses",
+        "qty": 119
+      },
+      {
+        "item_id": "item:farine_d_orge",
+        "qty": 27
+      },
+      {
+        "item_id": "item:saumure",
+        "qty": 226
+      },
+      {
+        "item_id": "item:lard_sale",
+        "qty": 49
+      },
+      {
+        "item_id": "item:os",
+        "qty": 25
+      },
+      {
+        "item_id": "item:sang",
+        "qty": 25
+      },
+      {
+        "item_id": "item:tendons",
+        "qty": 25
+      },
+      {
+        "item_id": "item:boyaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:foie",
+        "qty": 25
+      },
+      {
+        "item_id": "item:crane",
+        "qty": 25
+      },
+      {
+        "item_id": "item:cuir_brut",
+        "qty": 25
+      },
+      {
+        "item_id": "item:crocs",
+        "qty": 17
+      },
+      {
+        "item_id": "item:poils",
+        "qty": 25
+      },
+      {
+        "item_id": "item:galette_fruits_secs",
+        "qty": 94
+      },
+      {
+        "item_id": "item:pain_froment",
+        "qty": 6
+      },
+      {
+        "item_id": "item:pain_herbes",
+        "qty": 114
+      },
+      {
+        "item_id": "item:petit_pain",
+        "qty": 104
+      },
+      {
+        "item_id": "item:pain_orge",
+        "qty": 225
+      },
+      {
+        "item_id": "item:pain_noix",
+        "qty": 43
+      },
+      {
+        "item_id": "item:galette_cereales",
+        "qty": 159
+      },
+      {
+        "item_id": "item:Pain_d_epices",
+        "qty": 88
+      },
+      {
+        "item_id": "item:pain_meteil",
+        "qty": 24
+      },
+      {
+        "item_id": "item:pain_epices_miel",
+        "qty": 51
+      },
+      {
+        "item_id": "item:pain_seigle",
+        "qty": 20
+      },
+      {
+        "item_id": "item:Galette_des_Rois",
+        "qty": 14
+      },
+      {
+        "item_id": "item:brioche_miel",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Quiche_lorraine",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Pain_de_campagne",
+        "qty": 4
+      },
+      {
+        "item_id": "item:crins",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Baril_de_saumure",
+        "qty": 17
+      },
+      {
+        "item_id": "item:fouace_miel",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Croissant",
+        "qty": 8
+      },
+      {
+        "item_id": "item:tourte_pommes",
+        "qty": 2
+      },
+      {
+        "item_id": "item:tourte_poires",
+        "qty": 2
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Panier_de_provisions": 3,
+        "item:Tourte_a_la_viande": 3,
+        "item:Baril_de_saumure": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:la_manufacture_des_instruments",
+    "_rev": "84-34516df3fbdd3ded8a7494d7f2db6a78",
+    "type": "lieu",
+    "label": "La Manufacture des Instruments",
+    "image": "manufacture_des_instruments_europe01.jpg",
+    "categorie": "manufacture_des_instruments",
+    "pnj": [
+      {
+        "character": "pnj:marchand_manufacture_des_instruments",
+        "nom": "Orik Barbeforte",
+        "portrait": "marchand_nain_m_manufacture_des_instruments01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "peaux": 381,
+      "poix": 390,
+      "os": 54,
+      "viande": 122,
+      "petit_rondin": 106,
+      "branche": 46,
+      "bronze": 45
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:bronze",
+        "qty": 25
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Chalemie",
+        "qty": 222
+      },
+      {
+        "item_id": "item:Cliquettes",
+        "qty": 956
+      },
+      {
+        "item_id": "item:Table_d_harmonie",
+        "qty": 527
+      },
+      {
+        "item_id": "item:Tambourin",
+        "qty": 422
+      },
+      {
+        "item_id": "item:Tambour_rituel",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Archet",
+        "qty": 2
+      },
+      {
+        "item_id": "item:boyaux_pour_saucisses",
+        "qty": 4
+      },
+      {
+        "item_id": "item:fil_de_boyau",
+        "qty": 6
+      },
+      {
+        "item_id": "item:cordes_d_instrument",
+        "qty": 4
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Vielle_de_maitre": 3,
+        "item:Tambour_de_parade": 3,
+        "item:Cordes_de_concert": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:la_maison_des_parfums",
+    "_rev": "141-f8b15eb79d6e29ae15a8379ba2243d92",
+    "type": "lieu",
+    "label": "La Maison des Parfums",
+    "image": "manufacture_des_savons_et_parfums_europe01.jpg",
+    "categorie": "manufacture_des_savons_et_parfums",
+    "pnj": [
+      {
+        "character": "pnj:marchand_manufacture_des_savons_et_parfums",
+        "nom": "Isaline de Charny",
+        "portrait": "marchand_elfe_f_manufacture_des_savons_et_parfums01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "branche": 825,
+      "item:Miel": 1015,
+      "item:Reactif_brut": 994,
+      "item:Sel": 916,
+      "item:poix": 925,
+      "petit_rondin": 941,
+      "poix": 746,
+      "item:Cendres": 824,
+      "item:Huile_vegetale": 766,
+      "sel_gemme": 824,
+      "item:Ail_des_moines": 69,
+      "cendre": 755,
+      "item:Chiffon": 645,
+      "item:Cire_d_abeille": 292,
+      "item:Herbes_aromatiques": 142,
+      "item:Poudre_de_miroir": 134,
+      "sang": 44,
+      "crins": 1,
+      "item:Capsules_de_pavot": 31,
+      "item:Soufre": 86,
+      "item:Fleur_de_souci": 16,
+      "poudre_d_os": 43,
+      "item:Prunelles_de_haie": 50,
+      "item:Sel_noir": 13,
+      "item:Feuilles_d_absinthe": 34
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Cendres",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Chiffon",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Cire_d_abeille",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Herbes_aromatiques",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Huile_vegetale",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Miel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Reactif_brut",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Sel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Parfum_solide",
+        "qty": 148
+      },
+      {
+        "item_id": "item:Lessive_de_cendres",
+        "qty": 177
+      },
+      {
+        "item_id": "item:Cire_a_cacheter",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Pate_a_polir",
+        "qty": 220
+      },
+      {
+        "item_id": "item:Meche",
+        "qty": 27
+      },
+      {
+        "item_id": "item:Tablette_de_cire",
+        "qty": 129
+      },
+      {
+        "item_id": "item:Sachet_parfume",
+        "qty": 295
+      },
+      {
+        "item_id": "item:Cire_a_cheveux",
+        "qty": 136
+      },
+      {
+        "item_id": "item:Huile_parfumee",
+        "qty": 76
+      },
+      {
+        "item_id": "item:Torche",
+        "qty": 225
+      },
+      {
+        "item_id": "item:Savon_d_huile",
+        "qty": 99
+      },
+      {
+        "item_id": "item:Cire_pour_bois",
+        "qty": 130
+      },
+      {
+        "item_id": "item:Poudre_a_lessiver",
+        "qty": 146
+      },
+      {
+        "item_id": "item:Eau_parfumee",
+        "qty": 168
+      },
+      {
+        "item_id": "item:Cierge",
+        "qty": 26
+      },
+      {
+        "item_id": "item:Bougie_parfumee",
+        "qty": 91
+      },
+      {
+        "item_id": "item:remede",
+        "qty": 48
+      },
+      {
+        "item_id": "item:Fil_poisse",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Poupee_de_cire",
+        "qty": 22
+      },
+      {
+        "item_id": "item:Bougie_arcanique",
+        "qty": 31
+      },
+      {
+        "item_id": "item:Parfum_de_cour",
+        "qty": 49
+      },
+      {
+        "item_id": "item:Cire_pour_cuir",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Huile_entretien",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Pommade_corporelle",
+        "qty": 2
+      },
+      {
+        "item_id": "item:savon",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Tisane_du_marcheur",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Bougie_de_veille",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Compote_fortifiante",
+        "qty": 25
+      },
+      {
+        "item_id": "item:sirop_de_seve",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Emplatre_d_ail",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Encens",
+        "qty": 4
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Parfum_de_cour": 3,
+        "item:Savon_de_l_apothicaire": 3,
+        "item:Bougie_de_veille": 3
+      }
+    }
+  },
+  {
+    "_id": "lieu:l_etui_a_dague_du_petit_pont",
+    "_rev": "52-9a007585675a578be0d6f517c869f05b",
+    "type": "lieu",
+    "label": "L'Étui à Dague du Petit-Pont",
+    "image": "maroquinerie_auxerre_lutecia01.jpg",
+    "categorie": "maroquinerie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "poix": 478,
+      "plomb": 142,
+      "item:Chiffon": 60,
+      "peaux": 60
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Chiffon",
+        "qty": 25
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Mantelet_de_chasse",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Gants_archer",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Manteau_de_loup",
+        "qty": 19
+      },
+      {
+        "item_id": "item:Vetements_totémiques",
+        "qty": 17
+      },
+      {
+        "item_id": "item:Etole_de_fourrure",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Jupe_lanieres_cuir",
+        "qty": 17
+      },
+      {
+        "item_id": "item:Gants_cuir_epais",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Gants_prestidigi",
+        "qty": 9
+      },
+      {
+        "item_id": "item:gants",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Pelerine_de_cuir",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Veste_cuir_souple",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Baudrier_de_cuir",
+        "qty": 7
+      },
+      {
+        "item_id": "item:ceinture",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Pantalon_cuir",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Gants_peau_noire",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Gants_sans_doigts",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Gants_fins_noirs",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Braies_fourrure",
+        "qty": 20
+      },
+      {
+        "item_id": "item:Chausses_cuir",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Bandouliere_a_fioles",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Bandages_de_poing",
+        "qty": 185
+      },
+      {
+        "item_id": "item:Gants_fins",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Bandeau_de_cuir",
+        "qty": 4
+      },
+      {
+        "item_id": "item:plomb",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Fouet",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Chat_a_neuf_queues",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Martinet",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Fronde",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Armure_matelassee",
+        "qty": 2
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_maroquinerie",
+        "portrait": "marchand_nain_f_maroquinerie05.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_sceau_des_morts_de_la_montagne",
+    "_rev": "53-4283e7219b8e1ecb9695597a417094a0",
+    "type": "lieu",
+    "label": "Le Sceau des Morts de la Montagne",
+    "image": "necromancie_europe_lutecia01.jpg",
+    "categorie": "necromancie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Poupee_de_cire": 19,
+      "item:Sel_noir": 6,
+      "debris_anime": 137,
+      "ossements": 11,
+      "residu_spectral": 11
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:debris_anime",
+        "qty": 25
+      },
+      {
+        "item_id": "item:ossements",
+        "qty": 25
+      },
+      {
+        "item_id": "item:residu_spectral",
+        "qty": 25
+      },
+      {
+        "item_id": "item:focus_magique",
+        "qty": 242
+      },
+      {
+        "item_id": "item:composant_rituel",
+        "qty": 26
+      },
+      {
+        "item_id": "item:relique",
+        "qty": 62
+      },
+      {
+        "item_id": "item:Fetiche_envoutement",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Fragments_ame",
+        "qty": 116
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_necromancie",
+        "portrait": "marchand_elfe_f_necromancie04.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:a_la_main_d_or",
+    "_rev": "24-236dd89b83fe38d988cc930e31139b7f",
+    "type": "lieu",
+    "label": "A la Main d'Or",
+    "image": "negoce_europe01.jpg",
+    "categorie": "negociant",
+    "pnj": [
+      {
+        "character": "pnj:marchand_negociant",
+        "nom": "Georgette Main d'Or",
+        "portrait": "marchand_ogre_f_negoce01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "stock_vente": [
+      {
+        "item_id": "item:Arc_court",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Rapiere",
+        "qty": 1
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_duvet_des_ecoles",
+    "_rev": "50-378a5007e9ea98da81c3c4163203324b",
+    "type": "lieu",
+    "label": "Le Duvet des Écoles",
+    "image": "plumasserie_europe_lutecia01.jpg",
+    "categorie": "plumasserie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "peaux": 480
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_plumasserie",
+        "portrait": "marchand_hobbit_f_plumasserie04.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:notre_dame_portail",
+    "_rev": "1-8aee695f7c0e41f5c3d143f78d832279",
+    "type": "lieu",
+    "label": "Le portail de Notre-Dame",
+    "image": "portail_de_temple_notre_dame.png",
+    "categorie": "portail",
+    "sous_categorie": "temple",
+    "lieu_parent": "lieu:lutecia",
+    "texte": "Sous les voûtes de Notre-Dame, au fond de la nef, une arche de pierre ouvragée s'ouvre dans le jubé sur un vortex d'un blanc bleuté qui ne cesse jamais de tourner. Un bourdonnement grave monte des dalles et fait trembler la flamme des cierges ; à intervalles irréguliers, un claquement sec et une odeur d'orage annoncent un voyageur venu de l'autre bout du monde connu.\nDevant l'arche, l'autel d'ancrage — une grande roue de pierre gravée de runes — porte en son cœur la gemme de mana violette qui alimente le passage : deux cent cinquante grammes, et le chemin demeure. Depuis les tribunes, des maîtres de l'Institut des Architectes entretiennent l'ancrage, tandis que les templiers tiennent le cercle autour de l'autel et contrôlent ceux qui en reviennent.",
+    "acces": {
+      "gardien": "pnj:templier_florian_bouzereau",
+      "refus": "Un templier ogre barre les portes de la nef : le portail de Notre-Dame n'est ouvert qu'aux aventuriers de rang A de la guilde de Lutecia.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "item": {
+            "item": "item:carte_aventurier",
+            "lieu_parent": "lieu:lutecia"
+          }
+        },
+        {
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "A"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "lieu:lutecia_porte_d_issy_exterieur",
+    "_rev": "2-2925464344e28539b21061d0d4724566",
+    "type": "lieu",
+    "label": "Porte d'Issy — extérieur",
+    "image": "porte_de_ville_exterieure06.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_d_issy_interieur",
+    "_rev": "2-0e041fc8536866bcba2b08aa8ad8e0cb",
+    "type": "lieu",
+    "label": "Porte d'Issy — intérieur",
+    "image": "porte_de_ville_interieure06.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_de_clichy_exterieur",
+    "_rev": "5-69999013cfc239024089c0a4f1ba5398",
+    "type": "lieu",
+    "label": "Porte de Clichy — extérieur",
+    "image": "porte_de_ville_exterieur10.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_de_clichy_interieur",
+    "_rev": "5-9ec600def8693c378a24dd91b7f817cf",
+    "type": "lieu",
+    "label": "Porte de Clichy — intérieur",
+    "image": "porte_de_ville_interieur10.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_de_vanves_exterieur",
+    "_rev": "3-f59be1c8f64a6c88f8e761102080ba9d",
+    "type": "lieu",
+    "label": "Porte de Vanves — extérieur",
+    "image": "porte_de_ville_exterieur02.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_de_vanves_interieur",
+    "_rev": "3-caf53605e73e65a7163f10777c49baf8",
+    "type": "lieu",
+    "label": "Porte de Vanves — intérieur",
+    "image": "porte_de_ville_interieure02.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_des_lilas_exterieur",
+    "_rev": "9-c773f7d09e014f9eb2bd42bba18d08c2",
+    "type": "lieu",
+    "label": "Porte des Lilas — extérieur",
+    "image": "porte_de_ville_exterieur13.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_des_lilas_interieur",
+    "_rev": "8-f1647f7bcfc88cef175a0efcb9efa691",
+    "type": "lieu",
+    "label": "Porte des Lilas — intérieur",
+    "image": "porte_de_ville_interieur13.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_maillot_exterieur",
+    "_rev": "2-374c27ef8008c46f5217e35c2564e554",
+    "type": "lieu",
+    "label": "Porte Maillot — extérieur",
+    "image": "porte_de_ville_lutece_exterieur.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_maillot_interieur",
+    "_rev": "2-8990718060c3431b12a47359d91c9b46",
+    "type": "lieu",
+    "label": "Porte Maillot — intérieur",
+    "image": "porte_de_ville_lutece_interieur.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_montmartre_exterieur",
+    "_rev": "3-3c22435a4eba5b305f7f6b3be76fcffe",
+    "type": "lieu",
+    "label": "Porte Montmartre — extérieur",
+    "image": "porte_de_ville_exterieur04.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_montmartre_interieur",
+    "_rev": "3-90ca2498b90a46a36c437e4fa21f1f13",
+    "type": "lieu",
+    "label": "Porte Montmartre — intérieur",
+    "image": "porte_de_ville_interieure04.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_nord_exterieur",
+    "_rev": "6-e6f4e12c9ed7cf4823856662bae454cd",
+    "type": "lieu",
+    "label": "Porte de la Chapelle — extérieur",
+    "image": "porte_de_ville_exterieur14.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_nord_interieur",
+    "_rev": "6-fa58c6b749a56d741b2184cf1889db13",
+    "type": "lieu",
+    "label": "Porte de la Chapelle — intérieur",
+    "image": "porte_de_ville_interieur14.png",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_ouest_exterieur",
+    "_rev": "6-ca60b3a56646eacadd54a4752ac51441",
+    "type": "lieu",
+    "label": "Porte de Vincennes - extérieur",
+    "image": "porte_de_ville_exterieur11.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_ouest_interieur",
+    "_rev": "5-40ccbd9ec7007ff2ea5555a460f65eed",
+    "type": "lieu",
+    "label": "Porte de Vincennes - intérieur",
+    "image": "porte_de_ville_interieur11.png",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_sud_de_versaille_exterieur",
+    "_rev": "5-0993060a66740e67a1dcf94866935e9d",
+    "type": "lieu",
+    "label": "Porte de Versailles — extérieur",
+    "image": "porte_de_ville_exterieure07.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_sud_de_versaille_interieur",
+    "_rev": "5-225e40b06dbaea631e1703b68d46e1fd",
+    "type": "lieu",
+    "label": "Porte de Versailles — intérieur",
+    "image": "porte_de_ville_interieure07.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_sud_est_exterieur",
+    "_rev": "3-dda5b82425e11c406cf9a21d13f018e6",
+    "type": "lieu",
+    "label": "Porte d'Italie — extérieur",
+    "image": "porte_de_ville_exterieure09.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_sud_est_interieur",
+    "_rev": "3-d42212a917b9647bf02283b5281f87ec",
+    "type": "lieu",
+    "label": "Porte d'Italie — intérieur",
+    "image": "porte_de_ville_interieure09.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_sud_exterieur",
+    "_rev": "3-f285d64a8a51984b5b48e368244c70e3",
+    "type": "lieu",
+    "label": "Porte d'Orléans — extérieur",
+    "image": "porte_de_ville_exterieur03.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:lutecia_porte_sud_interieur",
+    "_rev": "3-fa2296111766a8db6620fc33c34b3aa5",
+    "type": "lieu",
+    "label": "Porte d'Orléans — intérieur",
+    "image": "porte_de_ville_interieure03.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:porte_de_rempart",
+    "_rev": "2-4c9e1ecf597491cb3fd11f2a3c85136f",
+    "type": "lieu",
+    "label": "Porte de rempart",
+    "image": "porte_de_ville_route_interieur01.png",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:porte_de_rempart01",
+    "_rev": "4-2f9c66ea9954f5b240c49b391227f419",
+    "type": "lieu",
+    "label": "Porte De Rempart",
+    "image": "porte_de_ville_douves_exterieur01.png",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:porte_de_rempart011",
+    "_rev": "2-b59e99d2cac4b427196609abeb3877aa",
+    "type": "lieu",
+    "label": "Porte de rempart",
+    "image": "porte_de_ville_pont_exterieur07.png",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:porte_de_rempart02",
+    "_rev": "3-6fc6ac5ef62bf7231e5959162af12037",
+    "type": "lieu",
+    "label": "Porte nord est - Lutécia - intérieur",
+    "image": "porte_de_ville_route_interieur01.png",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:porte_de_rempart021",
+    "_rev": "5-ef1356a099cf60a5236c2c99c7de57d5",
+    "type": "lieu",
+    "label": "Porte nord est - Lutécia - extérieur",
+    "image": "porte_de_ville_exterieur01.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:porte_de_rempart_du_petit_pont",
+    "_rev": "2-11d2793b4ad3c2ddd9d7d5f875d4fd0e",
+    "type": "lieu",
+    "label": "Porte De Rempart",
+    "image": "porte_de_ville_douves_exterieur01.png",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:le_bac_a_saumure_du_palais",
+    "_rev": "50-c1239d469c98416b288c795688159383",
+    "type": "lieu",
+    "label": "Le Bac à Saumure du Palais",
+    "image": "salaison_europe_lutecia01.jpg",
+    "categorie": "salaison",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "graisse": 1,
+      "item:Sel": 90
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Sel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:saucisses",
+        "qty": 24
+      },
+      {
+        "item_id": "item:saumure",
+        "qty": 345
+      },
+      {
+        "item_id": "item:jambon_de_montagne",
+        "qty": 17
+      },
+      {
+        "item_id": "item:coeur_confit",
+        "qty": 2
+      },
+      {
+        "item_id": "item:lard_sale",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Viande_sechee",
+        "qty": 3
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_salaison",
+        "portrait": "marchand_ogre_m_salaison01.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:l_huile_et_la_cendre_de_la_montagne",
+    "_rev": "50-6e142b6b6fa19b83316c6f4d343bf4f9",
+    "type": "lieu",
+    "label": "L'Huile et la Cendre de la Montagne",
+    "image": "savonnerie_europe_lutecia01.jpg",
+    "categorie": "savonnerie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "item:Chiffon": 419,
+      "item:Miel": 480,
+      "item:Sel": 425,
+      "item:poix": 367,
+      "cendre": 220,
+      "item:Cendres": 265,
+      "item:Cire_d_abeille": 118,
+      "item:Huile_vegetale": 210,
+      "sel_gemme": 265,
+      "item:Herbes_aromatiques": 10
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Cendres",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Chiffon",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Cire_d_abeille",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Herbes_aromatiques",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Huile_vegetale",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Miel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Sel",
+        "qty": 25
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Pate_a_polir",
+        "qty": 360
+      },
+      {
+        "item_id": "item:Eau_parfumee",
+        "qty": 110
+      },
+      {
+        "item_id": "item:Sachet_parfume",
+        "qty": 149
+      },
+      {
+        "item_id": "item:Parfum_solide",
+        "qty": 93
+      },
+      {
+        "item_id": "item:Lessive_de_cendres",
+        "qty": 270
+      },
+      {
+        "item_id": "item:Cire_pour_bois",
+        "qty": 191
+      },
+      {
+        "item_id": "item:Bougie_parfumee",
+        "qty": 63
+      },
+      {
+        "item_id": "item:Savon_d_huile",
+        "qty": 135
+      },
+      {
+        "item_id": "item:Cire_a_cheveux",
+        "qty": 191
+      },
+      {
+        "item_id": "item:Huile_parfumee",
+        "qty": 64
+      },
+      {
+        "item_id": "item:Cire_pour_cuir",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Pommade_corporelle",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Poudre_a_lessiver",
+        "qty": 93
+      },
+      {
+        "item_id": "item:savon",
+        "qty": 4
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_savonnerie",
+        "portrait": "marchand_humain_f_savonnerie04.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_velin_de_la_seine",
+    "_rev": "89-361b409253d4bd726a001c944fb0b7a9",
+    "type": "lieu",
+    "label": "Le Vélin de la Seine",
+    "image": "scriptorium_europe05.png",
+    "categorie": "scriptorium",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "residu_spectral": 490,
+      "item:Cire_a_cacheter": 218,
+      "chiffon": 51
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Chiffon",
+        "qty": 25
+      },
+      {
+        "item_id": "item:residu_spectral",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Papier",
+        "qty": 245
+      },
+      {
+        "item_id": "item:pigment",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Encre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:livre_recette_arme_woludo",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_carte_l_herbier_de_la_greve",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_serres_de_l_aigle_geant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_murmure_de_la_succube",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_saut",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_ailes_de_charogne",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_flammerole",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_eclat_de_givre",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_regain_sylvestre",
+        "qty": 3
+      },
+      {
+        "item_id": "item:grimoire_legion_de_l_abime",
+        "qty": 3
+      },
+      {
+        "item_id": "item:grimoire_feu_purificateur",
+        "qty": 3
+      },
+      {
+        "item_id": "item:grimoire_ecailles_du_servant",
+        "qty": 3
+      },
+      {
+        "item_id": "item:grimoire_jugement_sacre",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_charge_du_sanglier",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_benediction_martiale",
+        "qty": 3
+      },
+      {
+        "item_id": "item:grimoire_flegme_demoniaque",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_faim_de_la_goule",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Sceau_ordre",
+        "qty": 179
+      },
+      {
+        "item_id": "item:grimoire_incarnation_divine",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_toucher_devitalisant",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_sentinelle_du_parvis",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_seigneurie_du_sang",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_aura_de_devotion",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_tetes_de_l_hydre",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_zone_de_silence",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_regard_glacial",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_flamme_infernale",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_gardien_du_temple",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_messager_aile",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_garde_parfaite",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_force_partagee",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_silhouettes_trompeuses",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_maladresse",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_lien_du_paladin",
+        "qty": 3
+      },
+      {
+        "item_id": "item:grimoire_gardien_des_portes",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_meute_grise",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_contrat_mineur",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_malediction_mineure",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_anneaux_du_serpent_geant",
+        "qty": 3
+      },
+      {
+        "item_id": "item:grimoire_pacte_du_servant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_sort_eclat_de_givre",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_eclat_rocheux",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_horde_des_fosses",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_guerison_des_animaux",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_sceau_de_protection",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_eclat_eblouissant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_marche_des_mammouths",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_levee_des_ossements",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_meteore",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_souffle_ancestral",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_bandelettes_du_tombeau",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_recette_046c28d7-e798-4ed6-8d84-2ffd6185fbfb",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_main_de_l_ordre",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_ecuries_de_l_abime",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_trait_de_flamme",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_vague_de_soin",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_hurlement_du_loup",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_boule_de_feu",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_visage_de_l_horreur",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_couronne_de_l_enfer",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_pacte_de_sang",
+        "qty": 2
+      },
+      {
+        "item_id": "item:livre_sort_descente_du_seraphin",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_baume_de_seve",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_formule_de_clairvoyance",
+        "qty": 3
+      },
+      {
+        "item_id": "item:grimoire_temoin_celeste",
+        "qty": 2
+      },
+      {
+        "item_id": "item:livre_carte_l_etui_a_dague_du_petit_pont",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_transe_du_totem",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_verite_gravee",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_fer_et_priere",
+        "qty": 3
+      },
+      {
+        "item_id": "item:livre_sort_lien_du_paladin",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_baiser_du_vampire",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_trait_mortifere",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_etreinte_sepulcrale",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_soin_mineur",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_reveil_de_l_ours",
+        "qty": 3
+      },
+      {
+        "item_id": "item:grimoire_lumiere_purificatrice",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_morsure_totemique",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_oeil_de_la_chouette",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_projectile_arcanique",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_ordre_sanglant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_soin_regenerant",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_source_vive",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_morsure_de_ronces",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_jet_d_eau",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_envol_du_griffon",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_revigore",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_sort_incarnation_divine",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_rupture_du_sceau",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_eveil_de_l_homme_arbre",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_vigueur_demoniaque",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_couvee_infernale",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_souffle_de_feu",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_mur_de_feu",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_soif_du_nosferatu",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_souffle_de_soufre",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_eclair_siphonnant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_recette_boulangerie_galette_fruits_secs",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_trouble_magique",
+        "qty": 2
+      },
+      {
+        "item_id": "item:grimoire_serment_du_demon_guerrier",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_carte_lutecia_porte_nord_exterieur",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_anatheme",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_carte_la_sangle_de_la_greve",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_licorne_immaculee",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_sort_charge_du_sanglier",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_descente_du_seraphin",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_carte_la_penne_du_parvis",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_recette_96307e4f-f1b0-4cb6-970d-b8c2782ceed2",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_sort_couronne_de_l_enfer",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_chant_de_la_lhamia",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_sommeil_pesant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_carte_le_coq_de_lutece",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_sort_mur_de_feu",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_recette_c953f9d3-a65c-45eb-b06c-a6a9aa10d66b",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Carnet_illusionniste",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_recette_add2e_sai",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_carte_les_grandes_halles",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Dico_des_langues",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_fauve_totem",
+        "qty": 1
+      },
+      {
+        "item_id": "item:livre_carte_le_haloir_des_ecoles",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_bouclier_arcanique",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Carnet_chansons",
+        "qty": 4
+      },
+      {
+        "item_id": "item:grimoire_effondrement_mental",
+        "qty": 1
+      },
+      {
+        "item_id": "item:grimoire_grace_divine",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Livre_prieres",
+        "qty": 2
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_scriptorium",
+        "portrait": "marchand_humain_m_scriptorium02.jpg",
+        "nom": "Oudin de Montfaucon"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_plaquette_du_petit_pont",
+    "_rev": "54-3a73996440ad589fc23c110856648d32",
+    "type": "lieu",
+    "label": "La Plaquette du Petit-Pont",
+    "image": "tabletterie_europe_lutecia01.jpg",
+    "categorie": "tabletterie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "peaux": 484,
+      "petit_rondin": 500,
+      "sang": 5,
+      "crane": 9,
+      "ossements": 93,
+      "branche": 70
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:ossements",
+        "qty": 25
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Couronne_branchages",
+        "qty": 178
+      },
+      {
+        "item_id": "item:manche",
+        "qty": 173
+      },
+      {
+        "item_id": "item:de",
+        "qty": 679
+      },
+      {
+        "item_id": "item:Brassards_os",
+        "qty": 5
+      },
+      {
+        "item_id": "item:peigne",
+        "qty": 2
+      },
+      {
+        "item_id": "item:aiguille",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Harnais_d_ossements",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Epaulieres_d_os",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Os_de_totem",
+        "qty": 1
+      },
+      {
+        "item_id": "item:flute",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Bracelets_os",
+        "qty": 1
+      },
+      {
+        "item_id": "item:branche",
+        "qty": 25
+      },
+      {
+        "item_id": "item:petit_rondin",
+        "qty": 25
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_tabletterie",
+        "portrait": "marchand_hobbit_f_tabletterie05.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_corroi_du_parvis",
+    "_rev": "2-09e3e81928a040fbcde811202293f454",
+    "type": "lieu",
+    "label": "Le Corroi du Parvis",
+    "image": "tannerie_europe02.png",
+    "categorie": "tannerie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": [],
+    "pnj": [
+      {
+        "character": "pnj:marchand_tannerie",
+        "portrait": "marchand_elfe_m_tannerie02.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_cuir_brun_de_la_greve",
+    "_rev": "2-24138c9618b5950153ae9747e5a1d10d",
+    "type": "lieu",
+    "label": "Le Cuir Brun de la Grève",
+    "image": "tannerie_europe_lutecia01.jpg",
+    "categorie": "tannerie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": [],
+    "pnj": [
+      {
+        "character": "pnj:marchand_tannerie",
+        "portrait": "marchand_elfe_m_tannerie03.jpg"
+      }
+    ]
+  },
+  {
+    "_id": "lieu:notre_dame",
+    "_rev": "6-77198e1dacb35f9052ff06c37c5ebfde",
+    "type": "lieu",
+    "label": "Notre dame",
+    "image": "temple_notre_dame_europe01.png",
+    "categorie": "temple_portail",
+    "pnj": [
+      {
+        "character": "pnj:dame_eleonore_de_rochefort_lutecia",
+        "nom": "Dame Éléonore de Rochefort",
+        "portrait": "paladin_Dame_Eleonore_de_Rochefort_elfe_f.jpg",
+        "probabilite": 0.25,
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_convoi_de_lutecia"
+            }
+          }
+        ],
+        "description": "Une paladine en haubert clair, au pied des marches de la nef."
+      },
+      {
+        "character": "pnj:frere_martin_de_clairvaux_lutecia",
+        "nom": "Frère Martin de Clairvaux",
+        "portrait": "paladin_Frere_Martin_de_Clairvaux_hobbit_m.jpg",
+        "probabilite": 0.25,
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_convoi_de_lutecia"
+            }
+          }
+        ],
+        "description": "Un paladin hobbit assis sur la dernière marche du parvis, un carnet de sceaux sur les genoux."
+      },
+      {
+        "character": "pnj:templier_florian_bouzereau",
+        "nom": "Templier Florian Bouzereau",
+        "portrait": "templier_ogre_m_garde_temple02.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:lutecia",
+    "texte": "Une immense cathédrale gothique en pierre sombre s'élève sous un ciel crépusculaire, illuminée par de douces lueurs d'aurores boréales et des volutes de nébuleuses magiques.\nSur le parvis pavé et animé, de nombreux voyageurs, marchands et personnages fantastiques circulent autour de étals de marché éclairés par des lanternes.\nLa façade principale met en valeur :\nLe portail central : L'entrée ouverte laisse entrevoir un vortex tourbillonnant d'énergie violette et sombre, agissant comme une faille spatiale.\nLes gardiens : Deux statues massives de chevaliers en armure intégrale encadrent l'entrée, brandissant des épées monumentales crépitant d'une puissante électricité bleue.\nLes vitraux : Des rosaces et des fenêtres ogivales diffusent une lumière iridescente et multicolore, révélant la magie qui imprègne l'édifice."
+  }
+]
