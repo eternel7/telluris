@@ -26,6 +26,34 @@ Le portail du temple mène à un **donjon-mine** de cristaux et de minéraux rar
 
 La guilde d'Auxerre se nomme le **Bastion de l'Yonne**. Son maître est **Gautier de Valcroix**, et c'est le nain **Borin Barbe-de-Jais** qui accueille les nouveaux venus.
 
+### Rhemi, la cité du Sacre
+
+Rhemi n'est pas une capitale, et elle n'a jamais eu de portail. C'est pourtant là que l'on reconnaît ceux qui gouvernent.
+
+À l'Âge des Remparts, le peuple des **Rèmes** élève sur la craie, au bord de la Vesle, l'enceinte ronde de **Durocortorum**. Leur trait est de ne pas résister : ils s'allient. Ils envoient des ambassadeurs plutôt que de fermer leurs portes, parce qu'aucune cité ne tient seule.
+
+À l'Âge des Portails, des Architectes venus de Rome bâtissent la **Porte de Mars** pour relier Rhemi à leur cité. Elle ne s'est jamais allumée : la craie de Rhemi boit le mana. Le monument est resté un portail mort-né, même si certains jurent qu'il a fonctionné une fois. Rhemi demeure une cité de routes, un carrefour paladin vers Aix et Bruges, et l'on creuse les **crayères** pour en tirer la pierre.
+
+Vers la fin de cet âge, une colombe apporte à **Remi** une ampoule pleine d'une huile qui ne s'épuise pas. Il en oint un chef des Francs : c'est le premier **Sacre**, le rite par lequel les cités voisines reconnaissent celui qui gouverne. D'où vient l'Ampoule ? Les uns parlent d'un portail ouvert un instant dans le ciel, d'autres d'un don des Grigori, d'autres encore d'un objet venu du Paradis par Saint-Pierre.
+
+N'ayant aucun portail à pervertir, Rhemi traverse la Vague sans dommage. Elle devient un refuge, et dans le chaos le Sacre prend tout son poids : un siècle plus tard, les héritiers de Charlemagne y sont sacrés, et Rhemi est connue de toutes les Cités-États. Sa cathédrale est bâtie autour de l'Ampoule, et non d'un portail.
+
+Aujourd'hui, les crayères gardent le vin et les cristaux à l'abri du mana. Le « vin du diable » des Coteaux fait éclater ses fûts. Et sur la façade de la cathédrale, l'**Ange au Sourire** serait, selon certains, le portrait d'un Grigori.
+
+### Chartres, le labyrinthe, l'école et le grenier
+
+Chartres non plus n'est pas une capitale. Elle juge et elle enseigne.
+
+Bien avant les remparts, sur le Tertre, il y a un puits et une grotte où se dresse une **Dame noire** que nul ne se souvient d'avoir sculptée. C'est le lieu consacré des **Carnutes**. À l'Âge des Remparts, les sages des cités prennent l'habitude de s'y réunir chaque année pour arbitrer leurs différends : Chartres devient un terrain neutre, où l'on règle les conflits par la parole.
+
+À l'Âge des Portails, **Dédale**, ou l'un de ses disciples, trace un **labyrinthe** autour du puits : une tentative de portail par le chemin plutôt que par la bolas. Les Architectes n'y voient qu'une figure d'école. Des pèlerins disent pourtant être arrivés « ailleurs ».
+
+Le puits lui-même est un **portail horizontal** : on y entre en descendant. À la Vague, il change de couleur et ouvre sur un labyrinthe habité par un **Minotaure**. Les premiers qui y descendent, ceux que l'on appelle **les Forts**, n'en reviennent pas. Les Templiers s'installent dans la crypte, et la cathédrale devient leur temple.
+
+Après Charlemagne naît l'**école de Chartres**, dont la devise veut que ses élèves soient « des nains juchés sur des épaules de géants ». Telluris la prend à la lettre : on la représente par des nains sur des épaules d'ogres. L'école forme des lettrés, pas des magiciens.
+
+Aujourd'hui, le **bleu de Chartres**, un verre teinté de poudre de cristal, a perdu son secret. Ses deux flèches servent de vigies. La **Beauce** nourrit Lutecia, et les convois de grain partent sous escorte par la porte de Lutecia. Les pèlerins de toutes croyances parcourent le labyrinthe, et les tanneurs travaillent dans la Basse-Ville, au bord de l'Eure.
+
 ## En Italie
 
 ### Rome, la ville aux deux visages
@@ -122,8 +150,8 @@ Atlantis est aussi ancienne que Mu, et elle existe encore. Elle n'est jamais dev
 
 ## Les cités qui attendent leur histoire
 
-**Rhemi**, la Reims de Telluris, est habitée et marchande, mais son histoire reste à écrire. Il en va de même pour bien des cités du monde : le lore ne couvre encore qu'une partie de l'Europe et de la Méditerranée, et les terres lointaines restent, pour l'instant, le domaine des légendes.
+Bien des cités du monde attendent leur histoire : le lore ne couvre encore qu'une partie de l'Europe et de la Méditerranée, et les terres lointaines restent, pour l'instant, le domaine des légendes.
 
 ---
 
-Sources : [Lutecia](../cites/20260820_decrire_l_histoire_de_lutecia.md) · [Bastion paladin aérien](../cites/20260917_bastion_paladin_aerien.md) · [La Cour des Arches](../cites/20261010_cour_des_arches_lutecia.md) · [Quêtes d'Auxerre à Lutecia](../personnages/20260821_quetes_d_auxerre_a_lutecia.md) · [Rome](../cites/20260820_decrire_rome_dans_telluris.md) · [Venise](../cites/20260822_decrire_venise_dans_telluris.md) · [Gênes](../cites/20260822_decrire_l_histoire_de_genes.md) · [Bruges](../cites/20260823_decrire_bruges_telluris.md) · [Aix-la-Chapelle](../cites/20260824_decrire_aix_la_chapelle.md) · [Reykjavik](../cites/20260820_decrire_l_histoire_de_reykjavik.md) · [Akureyri](../cites/20260820_decrire_akureyri_fortifiee.md) · [Constantinople](../cites/20260824_decrit_constantinople_telluris.md) · [Cordoue](../cites/20260824_decrire_l_histoire_de_cordoue.md) · [Alexandrie](../cites/20260819_decrire_alexandrie_occulte.md) · [Abou Simbel](../cites/20260821_decrire_abou_simbel_fantastique.md) · [Babylone](../cites/20260819_histoire_de_babylone.md) · [Mu](../cites/20261010_mu_civilisation_engloutie.md) · [Frise chronologique fusionnée](../monde/20261011_frise_chronologique_fusionnee.md)
+Sources : [Lutecia](../cites/20260820_decrire_l_histoire_de_lutecia.md) · [Bastion paladin aérien](../cites/20260917_bastion_paladin_aerien.md) · [La Cour des Arches](../cites/20261010_cour_des_arches_lutecia.md) · [Quêtes d'Auxerre à Lutecia](../personnages/20260821_quetes_d_auxerre_a_lutecia.md) · [Rome](../cites/20260820_decrire_rome_dans_telluris.md) · [Venise](../cites/20260822_decrire_venise_dans_telluris.md) · [Gênes](../cites/20260822_decrire_l_histoire_de_genes.md) · [Bruges](../cites/20260823_decrire_bruges_telluris.md) · [Aix-la-Chapelle](../cites/20260824_decrire_aix_la_chapelle.md) · [Reykjavik](../cites/20260820_decrire_l_histoire_de_reykjavik.md) · [Akureyri](../cites/20260820_decrire_akureyri_fortifiee.md) · [Constantinople](../cites/20260824_decrit_constantinople_telluris.md) · [Cordoue](../cites/20260824_decrire_l_histoire_de_cordoue.md) · [Alexandrie](../cites/20260819_decrire_alexandrie_occulte.md) · [Abou Simbel](../cites/20260821_decrire_abou_simbel_fantastique.md) · [Babylone](../cites/20260819_histoire_de_babylone.md) · [Mu](../cites/20261010_mu_civilisation_engloutie.md) · [Rhemi et Chartres](../cites/20261011_rhemi_et_chartres.md) · [Frise chronologique fusionnée](../monde/20261011_frise_chronologique_fusionnee.md)

@@ -682,8 +682,9 @@
 						if (j) fond.appendChild(ligneAC(a, -G.bande + 30, a, cMax, { stroke: 'rgba(154,163,178,0.10)', 'stroke-dasharray': '4 4' }));
 						graduer(a + 2, r.libelle);
 					});
-					// Axe « brisé » : durée inconnue dans l'antédiluvien, rangs ailleurs.
-					if (s.i === 0) fondA.appendChild(texteAC(s.debut + s.longueur - 16, -4, '≈', { class: 'ere' }));
+					// Axe « brisé » : durée inconnue dans les ères ordinales de tête (antédiluvien,
+					// Âge des Remparts), rangs ailleurs (temps du joueur).
+					if (echelle.segments.every(x => x.i >= s.i || x.ere.type === 'ordinal')) fondA.appendChild(texteAC(s.debut + s.longueur - 16, -4, '≈', { class: 'ere' }));
 				} else {
 					const span = Math.abs(e.debut - e.fin), pas = chronoPas(s.longueur / span);
 					const futur = e.type === 'futur';

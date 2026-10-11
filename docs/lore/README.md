@@ -8,11 +8,11 @@ Les 50 séances de travail sur le monde de Telluris (récupérées le 08/10/2026
 
 Prose tirée du seul canon (dump, messages de l'Auteur, réponses adoptées) ; un point non tranché y est marqué *(proposé, non tranché)*. Ces textes ne font pas foi contre la parole de l'Auteur.
 
-- [Le monde de Telluris et ses trois ères](redige/01_le_monde_et_ses_eres.md) — 11/10/2026 — Géographie réelle, Cités-États et remparts, absence de guerre, mythes déformés ; l'antédiluvien, avant la Vague, après la Vague.
+- [Le monde de Telluris et ses quatre ères](redige/01_le_monde_et_ses_eres.md) — 11/10/2026 — Géographie réelle, Cités-États et remparts, absence de guerre, mythes déformés ; l'antédiluvien jusqu'au Déluge, l'Âge des Remparts (Gilgamesh), l'Âge des Portails, l'Âge des Donjons.
 - [Les Anthropes et leurs cinq Lignées](redige/02_anthropes_et_lignees.md) — 11/10/2026 — Un seul sang, cinq Lignées interfécondes, leurs tendances ; la Lignée est secondaire.
 - [Les portails, la Vague et les donjons](redige/03_portails_vague_donjons.md) — 11/10/2026 — Les trois frères, les portails plus anciens qu'eux, la dégradation du savoir, la Vague, les donjons, les cristaux violet et jaune.
 - [Les institutions de Telluris](redige/04_institutions.md) — 11/10/2026 — Paladins, Templiers, Architectes, Guilde des Aventuriers et ses rangs, monothéismes et monastères-relais.
-- [Les Cités-États](redige/05_cites_etats.md) — 11/10/2026 — Lutecia, Auxerre, Rome, Venise, Gênes, Bruges, Aix, l'Islande, Constantinople, Cordoue, l'Égypte, Jérusalem, Babylone, Mu, Atlantis.
+- [Les Cités-États](redige/05_cites_etats.md) — 11/10/2026 — Lutecia, Auxerre, Rhemi, Chartres, Rome, Venise, Gênes, Bruges, Aix, l'Islande, Constantinople, Cordoue, l'Égypte, Jérusalem, Babylone, Mu, Atlantis.
 - [Le chemin de l'aventurier](redige/06_personnages_et_trame.md) — 11/10/2026 — D'Auxerre à Lutecia, les PNJ (Aélis, Maëlys, Milo, Élise…), la trame des rangs D à S+, les trois fins.
 - [Les mystères et la cosmologie](redige/07_mysteres_et_cosmologie.md) — 11/10/2026 — Mondes divins, Lilith, Grigori, la vérité méta des Révélateurs, et la liste de ce qui ne sera pas tranché.
 - [La magie, les vocations et la vie de l'aventurier](redige/08_magie_et_vie_quotidienne.md) — 11/10/2026 — Magie à coût réel, vocations, guilde et contrats, auberges, logis, artisans.
@@ -28,7 +28,7 @@ Prose tirée du seul canon (dump, messages de l'Auteur, réponses adoptées) ; u
 - [Reformulation monothéiste](monde/20260831_reformulation_monotheiste.md) — 31/08/2026 — J'ai reformulé : <div class="card-desc"><strong>Évolution chrétienne :</strong><p>Le christianisme s'intègre plus tard à ces structures exis…
 - [Introduit les Grigori](monde/20261004_introduit_les_grigori.md) — 04/10/2026 — introduit les **Grigori** (du grec ancien *egrḗgoroi*, signifiant **« les Veilleurs »** ou « ceux qui sont éveillés ») dans la mythologie de…
 - [Générer documentation maître](monde/20261008_generer_documentation_maitre.md) — 08/10/2026 — Est-ce que tu peux générer un gros fichier .md de toute notre discussion relatif à ce projet ?
-- [Frise chronologique fusionnée](monde/20261011_frise_chronologique_fusionnee.md) — 11/10/2026 — Fusion des frises du 19/08 et du 21/08 en trois ères (antédiluvien / avant la Vague / après la Vague) + quatre arbitrages de l'Auteur (Vague il y a 7-8 siècles, Templiers gardiens des remparts puis des temples, cristaux violet/jaune, Mu, monastères-relais, avènement) ; chronologie des cités avec Rome, colonne Jérusalem et Hārūt et Mārūt corrigés ; Grigori à l'Âge des Remparts et Romulus/Rémus/la Louve/la porte de Saint-Pierre (adoptés) ; voyages violet (monde) / jaune (Mu).
+- [Frise chronologique fusionnée](monde/20261011_frise_chronologique_fusionnee.md) — 11/10/2026 — Fusion des frises du 19/08 et du 21/08, en quatre ères depuis le septième arbitrage (antédiluvien jusqu'au Déluge / Âge des Remparts ouvert par Gilgamesh / Âge des Portails / Âge des Donjons) + arbitrages de l'Auteur (Vague il y a 7-8 siècles, Templiers gardiens des remparts puis des temples, cristaux violet/jaune, Mu, monastères-relais, avènement) ; chronologie des cités avec Rome, colonne Jérusalem et Hārūt et Mārūt corrigés ; Grigori à l'Âge des Remparts et Romulus/Rémus/la Louve/la porte de Saint-Pierre (adoptés) ; voyages violet (monde) / jaune (Mu).
 - **Chronologie** (`docs/lore/chronologie.json`, hors de cet index) — 11/10/2026 — Source formalisée de tous les éléments datés du lore (dates ou périodes, incertitudes, autorité, tags, sources citées), lue par la frise 🕰 de `/admin/lore/chronologie`.
 
 ## 🏰 Cités-États et lieux
@@ -49,6 +49,7 @@ Prose tirée du seul canon (dump, messages de l'Auteur, réponses adoptées) ; u
 - [Bastion paladin aérien](cites/20260917_bastion_paladin_aerien.md) — 17/09/2026 — La basilique du sacré coeur, au nord de Lutecia, est un bastion paladins. Ils s'y entraîne à la défense anti aérienne et son la protection c…
 - [La Cour des Arches](cites/20261010_cour_des_arches_lutecia.md) — 10/10/2026 — Institut des Architectes de Lutecia, installé dans l'ancien ensemble des Invalides : esplanade, cour, archives des seuils, ateliers de convergence ; lieu où le joueur retrouve Aélis de Montfaucon.
 - [Mu — La civilisation engloutie](cites/20261010_mu_civilisation_engloutie.md) — 10/10/2026 — civilisation disparue antérieure aux trois frères, savoir ancien gardé par ses maîtres ; Lutecia y envoie ses meilleurs Architectes pour leur perfectionnement.
+- [Rhemi et Chartres](cites/20261011_rhemi_et_chartres.md) — 11/10/2026 — Chronologies et particularités de deux villes qui ne sont pas des capitales : Rhemi, la cité du Sacre, sans portail (craie qui boit le mana, Porte de Mars, Ampoule) ; Chartres, le labyrinthe, le puits-portail horizontal du Minotaure, l'école et le grenier. Propositions adoptées par l'Auteur ; Jumièges hors de l'histoire.
 
 ## 🎭 Personnages, scénarios et quêtes
 

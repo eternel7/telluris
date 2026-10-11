@@ -1,7 +1,7 @@
 # Frise chronologique fusionnée de Telluris
 
 - **Source :** fusion, par Claude Code (session du 11/10/2026, à la demande de l'Auteur), des deux frises ChatGPT — [frise du 19/08](20260819_frise_chronologique_de_telluris.md) (avec sa colonne Jérusalem) et [frise du 21/08](20260821_frise_chronologique_de_telluris.md) —, confrontées aux messages de l'Auteur, à la [chronologie des cités](20260826_chronologie_des_cites_telluris.md), aux séances des cités et au [document maître](../../Telluris_Document_Maitre.md).
-- **Créée :** 11/10/2026 · **révisée :** 11/10/2026, après six arbitrages de l'Auteur (§ 1).
+- **Créée :** 11/10/2026 · **révisée :** 11/10/2026, après sept arbitrages de l'Auteur (§ 1) ; quatre ères depuis le septième (§ 11).
 - **Statut :** **document de travail.** Les décisions du § 1 sont de l'Auteur. Tout ce qui porte 💬 ou « proposé » reste une proposition. Les points du § 8 attendent encore un arbitrage.
 
 **Légende des sources**
@@ -84,6 +84,17 @@ Décisions de l'Auteur, après lecture de la première version de cette fusion :
 27. **Atlantis existe encore, isolée** : civilisation antédiluvienne toujours debout aujourd'hui, restée à l'écart du réseau des portails par choix.
 28. **Rang A+ = palier dans le rang A** : la fin du rang A (Mythril), sans nouveau métal ; le tableau des rangs du 12/08 reste tel quel.
 
+### ✍️ Auteur — 11/10/2026 (septième arbitrage)
+
+> « Pourquoi trois ères dans le monde de Telluris ? Moi je vois - antédiluvien - l'âge des remparts - l'âge des portails - l'âge des donjons. Les points clés étant Gilgamesh, les trois frères et la grande vague. »
+
+Après la réponse de Claude Code (§ 11) : « Ok pour le nouveau découpage le rôle de Gilgamesh et tes autres propositions. »
+
+29. **Quatre ères** remplacent les trois du § 1.1 : **antédiluvien** (jusqu'au Déluge) · **Âge des Remparts** (de Gilgamesh aux trois frères) · **Âge des Portails** (des trois frères à la Vague) · **Âge des Donjons** (de la Vague à aujourd'hui).
+30. **Gilgamesh** est la charnière entre l'antédiluvien et l'Âge des Remparts : premier roi d'après le Déluge, il bâtit les **remparts d'Uruk** (§ 11).
+31. **Le Déluge** clôt l'antédiluvien. Sa nature reste inconnue ; les théories contradictoires du § 11 sont adoptées comme telles.
+32. **Jumièges** appartient au **jeu** (quête du rang C), pas à l'histoire de Telluris : il n'est jamais cité comme exemple dans un texte d'histoire ([Rhemi et Chartres](../cites/20261011_rhemi_et_chartres.md) § 1).
+
 ---
 
 ## 2. Citations demandées
@@ -130,6 +141,8 @@ Le § 7 (« Les donjons ») prolonge cette idée : « Avant la vague : **Portail
 > Aucun de ces portails — ceux des frères et de leurs héritiers — ne mène alors **vers un autre monde**. Les portails naturels sont soit **inconnus**, soit **pas encore apparus** : certains se manifestent bien plus tard, comme celui de Jumièges. Seul celui de Saint-Pierre, à Rome, est connu des Occidentaux.
 
 Au § 7 : « Avant la vague, pour les portails des frères et de leurs héritiers : **Portail = déplacement.** »
+
+L'exemple de Jumièges en a été retiré depuis (§ 1.32) : « certains se manifestent bien plus tard. »
 
 ---
 
@@ -185,45 +198,52 @@ Les Templiers existent **bien avant Jésus**, ce qui respecte « antérieurs au 
 
 ## 4. La frise fusionnée (révisée)
 
-Les âges reprennent l'ordre de la frise du 21/08. Ils sont regroupés dans les **trois ères** de l'Auteur (§ 1.1). Les âges d'une même ère se **chevauchent** plus qu'ils ne se succèdent, surtout après la Vague.
+Les âges reprennent l'ordre de la frise du 21/08. Ils sont regroupés dans les **quatre ères** de l'Auteur (§ 1.29, qui remplace les trois ères du § 1.1). Les âges d'une même ère se **chevauchent** plus qu'ils ne se succèdent, surtout après la Vague.
 
 ```text
- ═══════ ANTÉDILUVIEN ═══════╗╔═══════════ AVANT LA VAGUE ═══════════╗╔══════ APRÈS LA VAGUE ══════
-  Origines · Mu · Remparts    ║║  Trois frères · Portails · Salomon     ║║  Donjons · Temples · Guildes
-  Paladins · auberges-relais  ║║  Dégradation du savoir · monothéismes  ║║  Charlemagne · ère actuelle
-                    ◄ ? ►     ╚╝   ≈ deux millénaires                   ╚╝   ≈ sept à huit siècles (🔧)
+ ══ ANTÉDILUVIEN ══╗╔══ ÂGE DES REMPARTS ══╗╔══════ ÂGE DES PORTAILS ══════╗╔═══ ÂGE DES DONJONS ═══
+  Origines · Mu     ║║  Gilgamesh · Uruk     ║║  Trois frères · Salomon       ║║  Vague · Temples
+  Atlantis · Nil    ║║  Paladins · Templiers ║║  Dégradation du savoir        ║║  Charlemagne · Guildes
+  → le Déluge       ║║  Romulus · Grigori    ║║  monothéismes                 ║║  ère actuelle
+         ◄ ? ►      ╚╝        ◄ ? ►         ╚╝  ≈ deux millénaires          ╚╝  ≈ sept à huit siècles
 ```
 
-### Ère antédiluvienne — avant les trois frères
+### Antédiluvien — jusqu'au Déluge
 
 | # | Âge | Telluris | Figures et cités | Sources |
 |---|---|---|---|---|
 | **0** | **Avant les Anthropes** | Les flux magiques baignent le monde « depuis les origines » ; les monstres rôdent déjà. | Le **dragon empereur** de l'Islande est antérieur aux premiers Anthropes. | ✍️ 21/08 · ✍️ 20/08 |
-| **I** | **Les Premiers Âges** | Les cinq Lignées se dispersent dans un monde sauvage. Petits établissements fortifiés, pistes dangereuses. | **Mu** prospère, avec une magie antérieure au savoir des frères. **Atlantis** (💬26, sans décision). Au sud de l'Égypte commence la **dynastie** dont émergeront Néfertiti et Akhénaton, avant les pyramides ; elle consacre des siècles à l'immortalité. **Gilgamesh** (💬21). Les premiers établissements de Jérusalem et de Babylone (💬19, 💬). | ✍️ 10/10 · ✍️ 11/10 · ✍️ 21/08 · 💬 |
+| **I** | **Les Premiers Âges** | Les cinq Lignées se dispersent dans un monde sauvage. Petits établissements fortifiés, pistes dangereuses. | **Mu** prospère, avec une magie antérieure au savoir des frères. **Atlantis** (💬26, sans décision). Au sud de l'Égypte commence la **dynastie** dont émergeront Néfertiti et Akhénaton, avant les pyramides ; elle consacre des siècles à l'immortalité. Les premiers établissements de Jérusalem et de Babylone (💬19, 💬). | ✍️ 10/10 · ✍️ 11/10 · ✍️ 21/08 · 💬 |
 | — | *Portails sans âge* | Le portail **naturel** de **Saint-Pierre** précède les frères, et **Rome elle-même** : c'est un portail sans origine, au fond d'une grotte, sur une butte. C'est la **seule exception que connaissent les Occidentaux**. L'**Hekla**, la brèche originelle de **Cordoue** et les portails de **Mu** ne sont **pas datés** : nul ne sait s'ils sont plus anciens ou plus jeunes que les autres. | — | ✍️ 20/08 · ✍️ 21/08 · ✍️ 24/08 · ✍️ 11/10 |
-| **II** | **L'Âge des Remparts** | Les Anthropes se réfugient derrière des murailles, et les **Cités-États** naissent. Des **auberges-relais** fortifiées jalonnent les routes. | Naissance de l'**ordre des Paladins**, dont la magie Sainte soigne, pour garder les routes. Naissance des **Templiers**, pour garder les remparts et ce qu'ils enferment. **Romulus** trace l'enceinte de Rome, tandis que le groupe de la porte se forme autour de **Rémus** et de la **Louve** (🔧 § 10). Les **Grigori** s'éveillent (🔧 § 9). La dynastie de Néfertiti cherche l'immortalité. | ✍️ 21/08 · ✍️ 11/10 · 📘 § 3, § 14 · 🔧 |
+| — | **Le Déluge** | Une catastrophe de nature inconnue clôt l'antédiluvien (§ 11). | **Utnapishtim** y survit. Théories contradictoires : Mu engloutie à ce moment-là ; une première vague de mana. | ✍️ 11/10 |
+
+### Âge des Remparts — de Gilgamesh aux trois frères
+
+| # | Âge | Telluris | Figures et cités | Sources |
+|---|---|---|---|---|
+| **II** | **Les premières murailles** | Les Anthropes se réfugient derrière des murailles, et les **Cités-États** naissent. Des **auberges-relais** fortifiées jalonnent les routes. | **Gilgamesh**, premier roi d'après le Déluge, bâtit les remparts d'**Uruk** (✍️ 11/10, § 11). Naissance de l'**ordre des Paladins**, dont la magie Sainte soigne, pour garder les routes. Naissance des **Templiers**, pour garder les remparts et ce qu'ils enferment. **Romulus** trace l'enceinte de Rome, tandis que le groupe de la porte se forme autour de **Rémus** et de la **Louve** (🔧 § 10). Les **Grigori** s'éveillent (🔧 § 9). La dynastie de Néfertiti cherche l'immortalité. Établissement de **Rhemi** (les Rèmes) et de **Chartres** (l'assemblée des sages). | ✍️ 21/08 · ✍️ 11/10 · 📘 § 3, § 14 · 🔧 |
 | **III** | **Les Routes gardées** | Les routes sont balisées et protégées. Aucune cité ne survit seule. | Les traditions paladines grossissent les exploits de leurs héros. | 💬21 |
 
-### Ère avant la Vague — des trois frères à la Vague
+### Âge des Portails — des trois frères à la Vague
 
 | # | Âge | Telluris | Figures et cités | Sources |
 |---|---|---|---|---|
 | **IV** | **Les Trois Frères** | Trois frères aborigènes **apportent au monde** le portail transversal, dont une **bolas** déplace la destination. Ces portails sont stables, relient **seulement** des lieux de Telluris et fonctionnent **sans cristaux**. On bâtit monuments et temples **autour** des portails. | **Notre-Dame** : Lutecia naît autour de ce portail, dans une cité **qui existe déjà**. **Chapelle Palatine** d'Aix : 5 portes à destination fixe (Sydney, Tokyo, Teotihuacan, Machu Picchu, Abou Simbel). **Sainte-Sophie ↔ Rome**, « stable depuis des millénaires », bien avant l'édifice de Justinien. | ✍️ 12/08 · ✍️ 19/08 · ✍️ 20/08 · ✍️ 24/08 · ✍️ 11/10 |
 | **V** | **Le Premier Âge des Portails** | Le réseau des portes s'étend. Toutes les cités n'ont pas de portail : les Paladins **gardent les tronçons restants**. Le savoir se transmet aux **Architectes**. Les Templiers gardent les portails ouverts dans leurs remparts. | Panthéon (plus ancien que Saint-Ange). | ✍️ 21/08 · ✍️ 20/08 · ✍️ 11/10 |
 | **VI** | **L'Âge des Grandes Cités** | Les cités situées aux nœuds du réseau deviennent des centres de commerce et de savoir. | **Salomon** vit après les trois frères : l'« héritage de Salomon » est le portail de Jérusalem, ancien et mal compris. David reconnu roi par Jérusalem (§ 6). **Hārūt et Mārūt** à Babylone (💬, corrigé au § 7). | ✍️ 19/08 · ✍️ 26/08 · ✍️ 11/10 · 💬 |
-| **VII** | **L'Âge des Savoirs** | Les Architectes tentent de reproduire l'œuvre des frères, et le savoir glisse : **science → artisanat → tradition**. La maîtrise ancienne, peut-être plus innée, ou portée par une magie plus intense, s'étiole. | **Dédale**, Architecte des passages et des labyrinthes (💬21). Des écoles rivales se disputent l'héritage des frères (💬21). | ✍️ 19/08 · ✍️ 11/10 · 📘 § 5 · 💬21 |
-| **VIII** | **La Dégradation du Savoir** | On entretient les portails sans comprendre pourquoi ils marchent, et les nouvelles portes sont fragiles. | **Jésus**, Révélateur, se situerait ici (🔧 § 3 ; jamais nommé comme tel en jeu). Le groupe de Saint-Pierre le voit venir. Les **monothéismes** commencent à transformer des auberges-relais en **monastères-relais**. Justinien, et les églises-portails du Grand Palais. | ✍️ 19/08 · ✍️ 31/08 · ✍️ 11/10 · 🔧 |
+| **VII** | **L'Âge des Savoirs** | Les Architectes tentent de reproduire l'œuvre des frères, et le savoir glisse : **science → artisanat → tradition**. La maîtrise ancienne, peut-être plus innée, ou portée par une magie plus intense, s'étiole. | **Dédale**, Architecte des passages et des labyrinthes (💬21) ; le labyrinthe de **Chartres** (✍️ 11/10). La **Porte de Mars** de Rhemi, portail mort-né (✍️ 11/10). Des écoles rivales se disputent l'héritage des frères (💬21). | ✍️ 19/08 · ✍️ 11/10 · 📘 § 5 · 💬21 |
+| **VIII** | **La Dégradation du Savoir** | On entretient les portails sans comprendre pourquoi ils marchent, et les nouvelles portes sont fragiles. | **Jésus**, Révélateur, se situerait ici (🔧 § 3 ; jamais nommé comme tel en jeu). Le groupe de Saint-Pierre le voit venir. Les **monothéismes** commencent à transformer des auberges-relais en **monastères-relais**. Justinien, et les églises-portails du Grand Palais. À **Rhemi**, Remi reçoit l'Ampoule : premier Sacre (✍️ 11/10). | ✍️ 19/08 · ✍️ 31/08 · ✍️ 11/10 · 🔧 |
 
-### Ère après la Vague — *il y a quelques siècles* (🔧 sept à huit)
+### Âge des Donjons — de la Vague à aujourd'hui (✍️ sept à huit siècles)
 
 | # | Âge | Telluris | Figures et cités | Sources |
 |---|---|---|---|---|
-| **IX** | **La Grande Vague de mana** | Une vague d'origine inconnue balaie Telluris. Les portails mal créés ou mal entretenus **changent de couleur**. | Lutecia est presque épargnée (mana faible). La Chapelle Palatine reste intacte, comme la **Notre-Dame de Bruges**. Au Grand Palais de Constantinople, **plus de la moitié** des portails deviennent des donjons. Le portail Akureyri ↔ Reykjavik est altéré. | ✍️ 19/08 · ✍️ 20/08 · ✍️ 23-24/08 · ✍️ 26/08 |
+| **IX** | **La Grande Vague de mana** | Une vague d'origine inconnue balaie Telluris. Les portails mal créés ou mal entretenus **changent de couleur**. | Lutecia est presque épargnée (mana faible). La Chapelle Palatine reste intacte, comme la **Notre-Dame de Bruges**. Au Grand Palais de Constantinople, **plus de la moitié** des portails deviennent des donjons. Le portail Akureyri ↔ Reykjavik est altéré. **Rhemi**, sans portail, est épargnée ; le puits de **Chartres**, portail horizontal, ouvre sur le Minotaure (✍️ 11/10). | ✍️ 19/08 · ✍️ 20/08 · ✍️ 23-24/08 · ✍️ 26/08 |
 | **X** | **La Naissance des Donjons** | Les premiers voyageurs entrent dans les portails transformés : un champ de céréales, une forêt… ou un autre monde. Certains donjons mènent à des mines de cristaux, et l'on en trouve dans les carcasses. Les cristaux deviennent ce qui permet aux Architectes de tenir les portails : le **violet** apporte la **puissance pure de mana**, le **jaune** **stabilise les effets des portails**. | **Orphée**, **Ulysse** : précurseurs légendaires des aventuriers (💬21). | ✍️ 19/08 · ✍️ 11/10 · 💬21 |
 | **XI** | **L'Âge des Temples** | Templiers et Paladins « **se développent à cette époque** ». Les Templiers se **recentrent sur les temples** : ils **protègent** les portails pervertis (donjons) et **gèrent** les portails de déplacement qui fonctionnent encore. Les Paladins **rouvrent les routes**. Les temples deviennent des forteresses-portails (garde extérieure, garde intérieure, muraille, chaires). | Le **pape**, grand maître des Templiers, garde Saint-Pierre. Le temple-mine d'**Auxerre**. | ✍️ 19/08 · ✍️ 11/10 · ✍️ 12/08 · 📘 § 11-14 |
 | **XII** | **Le renouveau carolingien** — *un siècle après la Vague* | Les cités germaniques reconstruisent un réseau de portails et se portent secours. | **Charlemagne** fait d'Aix la tête du réseau carolingien. Les portails de l'Hôtel de Ville, postérieurs à la Vague, ne mènent à aucun donjon. | ✍️ 24/08 |
 | **XIII** | **L'Âge des Aventuriers et des Cristaux** | L'exploration des donjons s'organise : naissent les **Guildes**. Le cristal de mana devient une ressource stratégique. | **Jason**, chef d'expédition (💬21). La **Banque de Saint-Georges** de Gênes naît du commerce des cristaux. Venise et Gênes se disputent la mer « pendant plusieurs siècles », sans guerre. **Marco Polo**, sauvé d'un dragon des mers par Gênes. Averroès à Cordoue. | ✍️ 22/08 · ✍️ 24/08 · 💬21 |
-| **XIV** | **L'ère actuelle — les Cités reliées** | Les Cités-États construisent les murs, les Paladins protègent les chemins, les Templiers gardent les portes, les Architectes entretiennent les passages, les Aventuriers franchissent les frontières. Les cités rivalisent par le commerce et l'influence, **jamais par la guerre**. Une bonne partie des relais sont des **monastères-relais**, mais le monothéisme reste minoritaire. Des portails **se manifestent encore spontanément** : **Jumièges** en est l'exemple le plus récent. | **Mu**, continent englouti (§ 4.1). Néfertiti règne toujours. Le dragon empereur guide Reykjavik. | ✍️ 12/08 · ✍️ 31/08 · ✍️ 11/10 · 📘 § 16 |
+| **XIV** | **L'ère actuelle — les Cités reliées** | Les Cités-États construisent les murs, les Paladins protègent les chemins, les Templiers gardent les portes, les Architectes entretiennent les passages, les Aventuriers franchissent les frontières. Les cités rivalisent par le commerce et l'influence, **jamais par la guerre**. Une bonne partie des relais sont des **monastères-relais**, mais le monothéisme reste minoritaire. Des portails **se manifestent encore spontanément**. | **Mu**, continent englouti (§ 4.1). Néfertiti règne toujours. Le dragon empereur guide Reykjavik. | ✍️ 12/08 · ✍️ 31/08 · ✍️ 11/10 · 📘 § 16 |
 
 L'« Âge du Grand Mystère » de 💬21 n'est **pas repris** : il décrit la quête du joueur, pas le passé du monde, et il nomme les Révélateurs, que le joueur ne doit pas découvrir tôt.
 
@@ -251,7 +271,7 @@ Les cités sont **classées par avènement** ; l'ordre à l'intérieur d'une mê
 | — | **Mu** | antédiluvien | — | ✍️ Antérieure aux frères ; aujourd'hui continent englouti, lieu révéré des Architectes. Ce n'est pas une Cité-État. |
 | — | **Atlantis** | antédiluvien (💬26) | — | 💬 Jamais devenue un centre du réseau, par isolement volontaire (✍️ tableau 26/08). |
 | 1 | **Abou Simbel** | antédiluvien | antédiluvien | ✍️ Royaume de Néfertiti, « avant les pyramides et avant les frères ». |
-| 2 | **Rome** | antédiluvien | antédiluvien (🔧 § 10) | ✍️ Antérieure aux frères ; Saint-Pierre existe avant Rome (11/10). Panthéon, portail transversal plus ancien que Saint-Ange. 🔧 Avènement : Romulus trace l'enceinte à l'Âge des Remparts. |
+| 2 | **Rome** | antédiluvien | Âge des Remparts (✍️ § 10) | ✍️ Antérieure aux frères ; Saint-Pierre existe avant Rome (11/10). Panthéon, portail transversal plus ancien que Saint-Ange. 🔧 Avènement : Romulus trace l'enceinte à l'Âge des Remparts. |
 | 3 | **Jérusalem** | antédiluvien (💬19) | avant la Vague | ✍️ Salomon après les frères ; David reconnu roi par la cité (✍️ 11/10). |
 | 4 | **Constantinople** | avant la Vague | avant la Vague | ✍️ Portail de Sainte-Sophie millénaire, autour duquel l'édifice de Justinien a été bâti ; Grand Palais antérieur à la Vague. |
 | 5 | **Aix-la-Chapelle** | avant la Vague | après la Vague | ✍️ 5 portes d'un frère avant Charlemagne ; Charlemagne transforme la cité un siècle après la Vague. |
@@ -262,9 +282,11 @@ Les cités sont **classées par avènement** ; l'ordre à l'intérieur d'une mê
 | 10 | **Bruges** | avant la Vague | après la Vague | ✍️ La Notre-Dame de Bruges a résisté à la Vague. |
 | 11 | **Akureyri** | avant la Vague | après la Vague | ✍️ Portail vers Reykjavik altéré par la Vague. Avènement après celui de Reykjavik (💬26). |
 | 12 | **Auxerre** | avant la Vague | après la Vague | ✍️ Temple-mine bâti sur un portail devenu donjon. |
+| 12 bis | **Rhemi** | Âge des Remparts | après la Vague | ✍️ Les Rèmes ; la Porte de Mars, portail mort-né ; l'Ampoule et le Sacre ; épargnée par la Vague, sacre des héritiers de Charlemagne ([Rhemi et Chartres](../cites/20261011_rhemi_et_chartres.md)). |
+| 12 ter | **Chartres** | Âge des Remparts | après la Vague | ✍️ Lieu consacré des Carnutes, labyrinthe, puits-portail du Minotaure ; avènement avec son école, après Charlemagne ([Rhemi et Chartres](../cites/20261011_rhemi_et_chartres.md)). |
 | 13 | **Lutecia** | avant la Vague, au plus tard à l'époque des frères | après la Vague, **en dernier** | ✍️ Naît autour de Notre-Dame dans une cité qui existe déjà et prend son nom en dernier (11/10). 🔧 Son avènement suivrait la Vague : intact quand tant d'autres s'altèrent, Notre-Dame devient la « capitale du passage ». |
 
-Absentes, faute de séance qui les date : Alexandrie, Babylone, Rhemi.
+Absentes, faute de séance qui les date : Alexandrie, Babylone.
 
 ---
 
@@ -304,7 +326,7 @@ La séance d'origine n'est pas modifiée : c'est un échange de travail. La corr
 
 ## 8. Points encore ouverts
 
-Tous les points ouverts par cette fusion sont tranchés (§ 1, quatrième à sixième arbitrages). Restent les mystères **volontairement** ouverts du lore : nature de la Vague, origine ultime des monstres, père des jumeaux, nature de la Louve, fin des Grigori, Jumièges.
+Tous les points ouverts par cette fusion sont tranchés (§ 1, quatrième à sixième arbitrages). Restent les mystères **volontairement** ouverts du lore : nature du Déluge et de la Vague, origine ultime des monstres, père des jumeaux, nature de la Louve, fin des Grigori, origine de l'Ampoule de Rhemi.
 
 ---
 
@@ -359,3 +381,35 @@ Le scribe **Hénoch** consigne leur histoire, et leur langue passe pour celle de
 8. **Rome aux deux visages** (✍️ 20/08). En latin, *lupa* veut dire « louve » et aussi « prostituée » : c'est l'origine de *lupanar*. Rome tient de sa Louve la pieuse, gardienne du seuil, et la pécheresse.
 
 **Ce qui reste ouvert** : le père des jumeaux (« fils de Mars », dit la tradition ; nul ne sait d'où il venait), la nature de la Louve, et la fin de Romulus, disparu dans un orage.
+
+---
+
+## 11. Quatre ères, le Déluge et Gilgamesh (✍️ 11/10, proposition adoptée)
+
+**Pourquoi quatre ères.** Les trois ères du § 1.1 suivaient l'histoire des portails : sans portails, avec des portails, avec des portails pervertis. Mais « antédiluvien » veut dire « avant le Déluge », et aucun déluge ne fermait cette ère. Elle mélangeait aussi deux mondes : le monde **sauvage** (les Lignées dispersées, Mu, Atlantis, le dragon) et le monde **fortifié**, où naissent toutes les institutions de la formule de l'univers (Cités-États, Paladins, Templiers, l'enceinte de Romulus, les Grigori). Les quatre ères se définissent chacune par une façon de faire face au monde : **rien, les murs, les portes, les donjons**.
+
+| Ère | Bornes | Charnière qui l'ouvre |
+|---|---|---|
+| **Antédiluvien** | des origines au Déluge — durée inconnue | — |
+| **Âge des Remparts** | du Déluge aux trois frères — durée inconnue | **Gilgamesh** |
+| **Âge des Portails** | des trois frères à la Vague — environ deux millénaires | **les trois frères** |
+| **Âge des Donjons** | de la Vague à aujourd'hui — sept à huit siècles | **la Grande Vague** |
+
+**Ancrage réel.**
+- *L'Épopée de Gilgamesh* contient le plus ancien récit connu du Déluge : **Utnapishtim**, averti, bâtit un bateau et survit ; les dieux lui donnent l'immortalité.
+- La liste royale sumérienne sépare les rois d'**avant** et d'**après** le Déluge.
+- L'épopée s'ouvre et se ferme sur l'éloge des **remparts d'Uruk**, que Gilgamesh a bâtis.
+- Après la mort de son ami **Enkidu**, Gilgamesh part chercher l'immortalité auprès d'Utnapishtim. Il rapporte une plante de jouvence, qu'un **serpent** lui vole pendant qu'il se baigne.
+
+**Adaptation à Telluris**
+- **Le Déluge** clôt l'antédiluvien. Sa nature reste **inconnue**, comme celle de la Vague. Les personnages en portent des **théories contradictoires** :
+	- Mu aurait été engloutie à ce moment-là — une théorie parmi d'autres, la catastrophe de Mu n'étant jamais tranchée ;
+	- certains Architectes affirment que le Déluge était déjà une vague de mana, et que la Grande Vague en est la seconde ; d'autres le nient.
+- **Utnapishtim** a survécu au Déluge. Où il vit, s'il vit encore, nul ne le sait.
+- **Gilgamesh**, premier roi d'après le Déluge, bâtit les **remparts d'Uruk** : c'est l'entrée dans l'Âge des Remparts. Il est celui qui comprend qu'une cité ne survit qu'en contrôlant son territoire immédiat (💬21).
+- **Sa quête d'immortalité échoue.** Elle fait écho à la dynastie du Nil, qui cherche la même chose et finit par la trouver avec Néfertiti, et à la question que posent les **Grigori**, à la même époque : qu'est-ce qui dure au-delà de la mort ?
+
+**Ce qui change dans la chronologie**
+- Passent de l'antédiluvien à l'**Âge des Remparts** : Gilgamesh, les remparts, les Paladins, les Templiers, les auberges-relais, les Grigori, Romulus et Rémus, le groupe de la porte de Saint-Pierre, les routes gardées.
+- Restent **antédiluviens** : le dragon empereur, les Lignées, Mu, Atlantis, l'origine de la dynastie du Nil, les portails sans âge (Saint-Pierre, l'Hekla, la brèche de Cordoue).
+- « Avant la Vague » et « après la Vague » restent des repères justes : ce sont l'Âge des Portails et l'Âge des Donjons.
