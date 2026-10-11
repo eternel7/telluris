@@ -236,7 +236,7 @@ La trame principale peut n'en exploiter qu'une partie.
 
 La transformation des portails crée également une nouvelle économie.
 
-Certains donjons contiennent des **cristaux de mana**, parfois de couleurs différentes : le **violet** est un cristal de **puissance pure de mana**, le **jaune** un cristal de **stabilisation des effets des portails**.
+Certains donjons contiennent des **cristaux de mana**, parfois de couleurs différentes : le **violet** est un cristal de **puissance pure de mana**, le **jaune** un cristal de **stabilisation des effets des portails**. Par Notre-Dame, on voyage vers le monde connu avec une gemme violette, vers **Mu** avec un cristal jaune.
 
 Avant la vague, les portails fonctionnaient **sans cristaux** — la magie était peut-être plus intense, ou sa maîtrise plus innée. Les cristaux sont l'une des choses qui permettent aux Architectes de maîtriser les portails de nos jours.
 

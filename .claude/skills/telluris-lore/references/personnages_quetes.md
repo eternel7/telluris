@@ -54,7 +54,7 @@ L'Auteur veut des événements **traumatiques** : la mort d'un PNJ amical.
 
 ## Trame des quêtes par rang — [personnages/20260924_idees_de_quetes_a_lutecia.md], [personnages/20260924_etoffer_l_intrigue_des_catacombes.md]
 **Auteur** :
-- La France d'abord (escortes depuis Montmartre), le monde après le **rang A** : Notre-Dame, un voyage par cristal jaune.
+- La France d'abord (escortes depuis Montmartre), le monde après le **rang A** : Notre-Dame : gemme violette vers le reste du monde, cristal jaune vers Mu (11/10).
 - À partir du rang A, les quêtes **quittent Lutecia** (Mu ou ailleurs). Elles servent à faire **miroir des mythologies**, plutôt qu'à parler des portails et de leurs malfaçons.
 - L'Auteur aurait voulu des quêtes plus ancrées dans les cités déjà décrites. Il a pourtant décidé : « On va garder ta dernière version ».
 

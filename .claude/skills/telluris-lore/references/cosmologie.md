@@ -32,7 +32,7 @@ Rebelle contre les dieux, accusée d'être à l'origine de tous les monstres.
 - **Jésus**, s'il a existé, était un **joueur** ayant choisi la **révélation**. Il a fini le jeu en **Révélateur**.
 	- Comme la Vérité philosophique de Platon, que l'homme ne peut saisir directement, la vérité du Divin a dû être **vulgarisée** pour les Anthropes.
 	- Fils de charpentier ou plus haut dignitaire de Jérusalem ? Question posée ; la synthèse retient le **fils de charpentier**.
-- **Grigori** (« les Veilleurs », *egrḗgoroi*) : « les éveillés de **bien avant JC** » (04/10), placés à l'**Âge des Remparts**, peut-être à l'époque de la dynastie dont émergera Néfertiti (11/10). Proposition (Hermon, hénochien, question de l'immortalité transmise au Nil, fin ouverte) : `docs/lore/monde/20261011_frise_chronologique_fusionnee.md` § 9.
+- **Grigori** (« les Veilleurs », *egrḗgoroi*) : « les éveillés de **bien avant JC** » (04/10), placés à l'**Âge des Remparts**, peut-être à l'époque de la dynastie dont émergera Néfertiti (11/10). Proposition **adoptée** le 11/10 (Hermon, hénochien, question de l'immortalité transmise au Nil, fin ouverte) : `docs/lore/monde/20261011_frise_chronologique_fusionnee.md` § 9.
 
 ### Monothéisme (31/08, reformulation de l'Auteur)
 « Les monothéismes s'intègrent plus tard à ces structures existantes, transformant certaines auberges-relais en monastères fortifiés et donnant naissance aux paladins chrétiens ou autres groupes protecteurs alliés à une religion monothéiste. Le monothéisme n'est pas la majorité dans le monde de Telluris et s'intègre sans tentative de conversion par la force. Trop de combats à mener dans Telluris pour en rajouter un de plus et plus de difficulté à justifier tout miracle face à la réalité de la magie. »

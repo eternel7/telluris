@@ -1,7 +1,7 @@
 # Frise chronologique fusionnée de Telluris
 
 - **Source :** fusion, par Claude Code (session du 11/10/2026, à la demande de l'Auteur), des deux frises ChatGPT — [frise du 19/08](20260819_frise_chronologique_de_telluris.md) (avec sa colonne Jérusalem) et [frise du 21/08](20260821_frise_chronologique_de_telluris.md) —, confrontées aux messages de l'Auteur, à la [chronologie des cités](20260826_chronologie_des_cites_telluris.md), aux séances des cités et au [document maître](../../Telluris_Document_Maitre.md).
-- **Créée :** 11/10/2026 · **révisée :** 11/10/2026, après trois arbitrages de l'Auteur (§ 1).
+- **Créée :** 11/10/2026 · **révisée :** 11/10/2026, après quatre arbitrages de l'Auteur (§ 1).
 - **Statut :** **document de travail.** Les décisions du § 1 sont de l'Auteur. Tout ce qui porte 💬 ou « proposé » reste une proposition. Les points du § 8 attendent encore un arbitrage.
 
 **Légende des sources**
@@ -66,6 +66,14 @@ Décisions de l'Auteur, après lecture de la première version de cette fusion :
 18. **Cristaux.** Le **violet** est un cristal de **puissance pure de mana**. Le **jaune** est un cristal de **stabilisation des effets des portails**.
 19. **Grigori** : à placer à l'**Âge des Remparts**, peut-être à la même époque que la **dynastie dont Néfertiti finira par émerger**. Proposition au § 9.
 20. **Rome** date d'**avant les trois frères**, et **Saint-Pierre existe avant même Rome**. Proposition demandée : relier **Romulus, Rémus, la Louve**, le portail du Paradis en dessous (qu'**ils n'empruntent pas**) et la **naissance du groupe de Templiers** protecteurs de la porte du Paradis (§ 10).
+
+### ✍️ Auteur — 11/10/2026 (quatrième arbitrage)
+
+21. **Charlemagne** : **un siècle après la Vague**.
+22. **Cristaux et voyages par Notre-Dame.** La gemme **violette** alimente le passage ; le cristal **jaune** le stabilise vers les destinations lointaines. Les deux citations (20/08 et 24/09) décrivent **deux voyages différents** : **jaune pour Mu, violet pour le reste du monde**.
+23. **Grigori** : proposition du § 9 **validée**.
+24. **Romulus** : proposition du § 10 **validée**. L'inversion avec l'ordre réel n'est pas gênante : « **toute inversion ou toute divergence par rapport à la réalité de notre histoire n'est pas gênante** ». Lutecia montre déjà des monuments très tardifs dans notre histoire.
+25. **Avènement** (retenu) : le moment où le lieu **prend son essor** et est **connu des autres Cités-États**. **Établissement** : le site **prend racine** et ne bouge plus ; avant, il peut y avoir des établissements temporaires, des passages, des nomades qui y vivent selon les saisons.
 
 ---
 
@@ -137,7 +145,7 @@ Au § 7 : « Avant la vague, pour les portails des frères et de leurs héritier
 
 **Estimation** : si l'on garde l'écart réel entre ces figures, Charlemagne règne **six à sept siècles** avant l'ère actuelle. La Vague daterait donc d'**environ sept à huit siècles**.
 
-**Placement de Charlemagne (🔧)** : le garder **un siècle après la Vague**, comme le dit déjà la séance d'Aix (✍️ 24/08).
+**Placement de Charlemagne** : **un siècle après la Vague** (✍️ 24/08, confirmé le 11/10).
 - Avec deux siècles, la Vague reculerait vers l'époque de Justinien. Les églises-portails du Grand Palais, que la Vague doit trouver déjà bâties, n'auraient plus le temps de se multiplier.
 - Avec un siècle, la Vague tombe **un siècle et demi après Justinien**, et Charlemagne règne il y a environ **six siècles et demi**.
 
@@ -224,8 +232,8 @@ L'« Âge du Grand Mystère » de 💬21 n'est **pas repris** : il décrit la qu
 ## 5. Chronologie des cités (révisée)
 
 Le mot « fondée » est remplacé par **deux moments**, ce qui règle le cas de Lutecia (§ 1.9) :
-- **Établissement** (🔧) : le site est habité ; la cité existe, sous un autre nom, ou sans rempart ni rang.
-- **Avènement** (✍️ 11/10, retenu) : la cité **prend son nom** et son rang de **Cité-État**.
+- **Établissement** (✍️ 11/10) : le site **prend racine** et ne change plus d'emplacement. Avant, il peut déjà y avoir des établissements temporaires, des passages, des nomades qui y vivent selon les saisons.
+- **Avènement** (✍️ 11/10) : la cité **prend son essor**, son nom et son rang de **Cité-État**, et elle est **connue des autres Cités-États**.
 
 Les cités sont **classées par avènement** ; l'ordre à l'intérieur d'une même ère est indicatif. Toute période terrestre est retirée.
 
@@ -287,18 +295,11 @@ La séance d'origine n'est pas modifiée : c'est un échange de travail. La corr
 
 ## 8. Points encore ouverts
 
-1. **Charlemagne** : un siècle après la Vague (🔧 § 3) ou deux, à confirmer.
-2. **Le coût d'un voyage par Notre-Dame.** Les couleurs sont fixées : violet = puissance de mana, jaune = stabilisation (§ 1.18). Il reste à savoir ce qu'on paie.
-	- Le 20/08 : « une gemme **violette** de 250 g suffit ».
-	- Le 24/09 : « un voyage par cristal **jaune** » au rang A.
-	- 🔧 Une piste : la gemme violette **alimente** le passage, et le cristal jaune le **stabilise** vers les destinations lointaines ou instables que le rang A ouvre (le monde, Mu). Les deux citations décriraient alors deux voyages différents. **À trancher.**
-3. **Grigori** : valider ou ajuster la proposition (§ 9).
-4. **Rome, Romulus et Rémus** : valider ou ajuster la proposition (§ 10). Romulus avant les frères est-il, comme Néfertiti avant les pyramides, une **inversion voulue** de l'ordre réel, où il vient après Salomon ?
-5. **« Établissement »** : seul « avènement » est retenu ; le terme du premier moment reste à confirmer (§ 5).
+Tous les points ouverts par cette fusion sont tranchés (§ 1, quatrième arbitrage). Restent les mystères **volontairement** ouverts du lore : nature de la Vague, origine ultime des monstres, père des jumeaux, nature de la Louve, fin des Grigori, Jumièges.
 
 ---
 
-## 9. Proposition — les Grigori à l'Âge des Remparts 🔧
+## 9. Les Grigori à l'Âge des Remparts (✍️ 11/10, proposition adoptée)
 
 **Ancrage réel.** Dans le *Livre d'Hénoch*, les **Veilleurs** (*egrḗgoroi*) sont deux cents. Ils descendent sur le **mont Hermon** et enseignent aux humains des arts jusque-là cachés :
 - la métallurgie, les armes et les parures (Azazel) ;
@@ -318,7 +319,7 @@ Le scribe **Hénoch** consigne leur histoire, et leur langue passe pour celle de
 
 ---
 
-## 10. Proposition — Rome, Romulus et Rémus, la Louve et la Porte 🔧
+## 10. Rome, Romulus et Rémus, la Louve et la Porte (✍️ 11/10, proposition adoptée)
 
 **Le mythe réel, résumé.**
 - Rhéa Silvia, une **vestale**, donne naissance à des jumeaux, qu'on dit fils de **Mars**. Le roi Amulius les fait jeter dans le Tibre.

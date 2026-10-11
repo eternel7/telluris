@@ -26,7 +26,7 @@ Répétées en tête de presque chaque séance : elles valent pour **tout** text
 
 - **Aucune guerre sur Telluris.** « Déplacer une armée sur des territoires hostiles revient à perdre toute guerre à l'avance. » Les rivalités sont commerciales, politiques, d'influence (Gênes et Venise « sans jamais en venir aux mains officiellement »). L'adversaire est la faune, la flore, la magie, l'inconnu.
 - **Ne pas comparer** l'histoire de la Terre à celle de Telluris. Raconter Telluris, où **depuis les origines** les flux magiques baignent le monde et les monstres rôdent.
-- **Adapter plutôt qu'inventer** : s'appuyer sur les personnages historiques et mythiques réels (Charlemagne, Néfertiti, Salomon, Marco Polo, Averroès…). Les mythes terrestres **ont eu lieu** sur Telluris, mais sont parvenus **déformés** par les siècles. Pour l'Auteur, Telluris est une excuse pour faire découvrir les mythes réels — inventer à leur place va contre le projet.
+- **Adapter plutôt qu'inventer** : s'appuyer sur les personnages historiques et mythiques réels (Charlemagne, Néfertiti, Salomon, Marco Polo, Averroès…). Les mythes terrestres **ont eu lieu** sur Telluris, mais sont parvenus **déformés** par les siècles. Pour l'Auteur, Telluris est une excuse pour faire découvrir les mythes réels — inventer à leur place va contre le projet. **Toute inversion ou divergence avec l'ordre réel de notre histoire est admise** (Auteur, 11/10) : Néfertiti avant les pyramides, Romulus avant les trois frères, monuments très tardifs à Lutecia.
 - **Ni dates terrestres, ni électricité, ni référence au christianisme** dans l'histoire d'une cité. Les édifices gardent leur nom réel (basilique, cathédrale, pape) mais leur **fonction** est tellurienne : un portail, une garnison. Le pape est grand maître des Templiers, **sans lien** avec le christianisme.
 - **Mers dangereuses** : serpents géants, dragons de mer, pieuvres et poulpes géants ; **plusieurs** Charybde et Scylla peuplent les côtes méditerranéennes.
 - **Mystère jamais résolu** : « toujours des réponses non définitives ». Des personnages portent des **théories contradictoires** ; le joueur construit sa propre compréhension (Aélis est l'une d'eux).
@@ -80,7 +80,7 @@ Fuit son village (pillage, famine, monstres…) → refuge derrière les rempart
 
 **Trois fins** (Auteur) : devenir **maître d'une guilde** · **découvrir le pot aux roses** sur l'origine des monstres · devenir **une armée à soi tout seul**.
 
-Échelle (Auteur, 24/09) : France d'abord (escortes depuis Montmartre), le **monde après le rang A** — Notre-Dame lui ouvre alors ses portes, **un voyage par cristal de mana jaune**, cristaux trouvés au fond des catacombes. Trame des quêtes par rang, Lilith/Échidna, mondes divins : [references/personnages_quetes.md](references/personnages_quetes.md).
+Échelle (Auteur, 24/09) : France d'abord (escortes depuis Montmartre), le **monde après le rang A** — Notre-Dame lui ouvre alors ses portes, voyages par Notre-Dame : **gemme violette** (puissance) vers le reste du monde, **cristal jaune** (stabilisation) vers **Mu** — cristaux jaunes trouvés au fond des catacombes (Auteur, 11/10). Trame des quêtes par rang, Lilith/Échidna, mondes divins : [references/personnages_quetes.md](references/personnages_quetes.md).
 
 Le joueur ne doit pas apprendre tôt la vérité méta : **Jésus était un joueur** ayant fini le jeu en **Révélateur**, et qui a dû **vulgariser** une vérité inconcevable pour un Anthrope (Platon). Au bout de la route : dieux et aventuriers sont les marionnettes des **joueurs** et des êtres qui ont fait de Telluris leur terrain de jeu. Détail et propositions (Grigori, Hārūt et Mārūt, Hekla) : [references/cosmologie.md](references/cosmologie.md).
 
@@ -100,7 +100,6 @@ Une ligne par cité ; portails, monuments et décisions de l'Auteur : [reference
 ### Contradictions ouvertes
 À signaler si un texte en dépend, jamais à trancher seul :
 
-- **Coût d'un voyage par Notre-Dame** : « une gemme de mana **violette** de 250 g suffit » (20/08) vs « un voyage par cristal de mana **jaune** » (24/09). Couleurs fixées (11/10) : violet = **puissance pure de mana**, jaune = **stabilisation des effets des portails** ; ce que coûte un voyage reste à trancher.
 - ~~Auberge d'Élise~~ : tranché — le dump la place au **Coq de Lutèce**, dans les **faubourgs** de Lutecia (et pas sur la route d'Auxerre).
 - **Origine des Paladins** : nés après la Vague (19/08) vs **antérieurs aux portails** (21/08) — retenir le 21/08.
 - **Rang A+** absent du tableau des rangs.
