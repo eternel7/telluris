@@ -200,12 +200,13 @@ t('couloirs : éléments disjoints → un seul couloir', () => {
 const FACETTES = {
 	couche: [{ id: 'histoire', libelle: 'Histoire' }, { id: 'trame', libelle: 'Trame' }],
 	lieux: [{ id: 'rome', libelle: 'Rome' }, { id: 'lutecia', libelle: 'Lutécia' }],
-	peuples: [{ id: 'elfes', libelle: 'Elfes' }]
+	peuples: [{ id: 'elfes', libelle: 'Elfes' }],
+	origine: [{ id: 'italie', libelle: 'Péninsule italienne' }, { id: 'gaule', libelle: 'Gaule' }]
 };
 const EVS = [
-	point('a', borne(1.5), { couche: 'histoire', autorite: 'auteur', eres: ['p1'], tags: { lieux: ['rome'] }, titre: 'Fondation', resume: 'Les élèves' }),
-	point('b', borne(2.5), { couche: 'histoire', autorite: 'proposition', eres: ['p2'], tags: { lieux: ['lutecia'], peuples: ['elfes'] } }),
-	point('c', borne(3.5), { couche: 'trame', autorite: 'auteur', eres: ['jeu'], tags: {}, contradictions: [{ texte: '?' }] })
+	point('a', borne(1.5), { couche: 'histoire', autorite: 'auteur', eres: ['p1'], origine: ['italie'], tags: { lieux: ['rome'] }, titre: 'Fondation', resume: 'Les élèves' }),
+	point('b', borne(2.5), { couche: 'histoire', autorite: 'proposition', eres: ['p2'], origine: ['gaule', 'italie'], tags: { lieux: ['lutecia'], peuples: ['elfes'] } }),
+	point('c', borne(3.5), { couche: 'trame', autorite: 'auteur', eres: ['jeu'], origine: ['gaule'], tags: {}, contradictions: [{ texte: '?' }] })
 ];
 const ids = s => [...s].sort();
 
@@ -231,6 +232,14 @@ t('grouper : une valeur par couloir, multi-valeurs dupliquées, (sans) en dernie
 	assert.deepStrictEqual(multi.map(x => x.cle), ['rome', 'lutecia']);
 	assert.deepStrictEqual(F.chronoGrouper(EVS, '', FACETTES).map(x => x.evenements.length), [3]);
 	assert.deepStrictEqual(F.chronoGrouper(EVS, 'couche', FACETTES).map(x => x.cle), ['histoire', 'trame']);
+});
+
+t('origine : champ liste, filtrée, cherchée et regroupée comme une facette à plusieurs valeurs', () => {
+	assert.deepStrictEqual(ids(F.chronoFiltrer(EVS, { choix: { origine: new Set(['italie']) } }, FACETTES)), ['a', 'b']);
+	assert.deepStrictEqual(ids(F.chronoFiltrer(EVS, { choix: { origine: new Set(['gaule']), couche: new Set(['trame']) } }, FACETTES)), ['c']);
+	assert.deepStrictEqual(ids(F.chronoFiltrer(EVS, { texte: 'peninsule', choix: {} }, FACETTES)), ['a', 'b']);
+	const g = F.chronoGrouper(EVS, 'origine', FACETTES);
+	assert.deepStrictEqual(g.map(x => [x.cle, x.evenements.map(e => e.id)]), [['italie', ['a', 'b']], ['gaule', ['b', 'c']]]);
 });
 
 // ── Contemporanéité ─────────────────────────────────────────────────────────

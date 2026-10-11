@@ -24,13 +24,14 @@ E = chrono._Eres(ERES)
 
 
 def _source(*evenements):
-	return {"eres": copy.deepcopy(ERES), "vocabulaire": {"lieux": {"rome": "Rome"}}, "evenements": list(evenements)}
+	return {"eres": copy.deepcopy(ERES), "origines": {"monde": "Monde", "italie": "Italie"},
+			"vocabulaire": {"lieux": {"rome": "Rome"}}, "evenements": list(evenements)}
 
 
 def _ev(eid="a", quand=None, **extra):
 	ev = {"id": eid, "titre": eid.upper(), "resume": "r", "quand": quand or {"moment": {"ere": "p2", "ans": 100}},
 		  "couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
-		  "sources": [{"fichier": "README.md"}]}
+		  "origine": ["monde"], "sources": [{"fichier": "README.md"}]}
 	ev.update(extra)
 	return ev
 
@@ -119,11 +120,14 @@ def test_erreurs_detectees():
 		_ev("d", liens=["fantome"], couche="ailleurs"),
 		_ev("e", quand={"moment": {"ere": "p1", "ans": 900}}, apres=["a"]),  # 900 ans < « après » 100 ans
 		_ev("f", quand={"moment": {"ere": "p2", "ans": 1}, "de": {"ere": "p2", "ans": 1}}),
+		_ev("g", origine=["atlantide"]),
+		_ev("h", origine=[]),
 	)
 	msgs = "\n".join(_valide(data))
 	for attendu in ("a : id en double", "b : date : `de` postérieur à `a`", "c : tag lieux:'mars'",
 					"c : source hors du lore", "d : `liens` vers un id inconnu", "d : `couche` 'ailleurs'",
-					"e : déclaré après 'a' mais daté avant lui", "f : date : `quand` = moment OU de/a"):
+					"e : déclaré après 'a' mais daté avant lui", "f : date : `quand` = moment OU de/a",
+					"g : origine 'atlantide' absente", "h : `origine` manquante"):
 		assert attendu in msgs, (attendu, msgs)
 
 
@@ -148,6 +152,8 @@ def test_payload_brut_intact_et_calculs():
 	assert e["sources"][0]["url"] == lore.URL_LORE + "README.md"
 	rome = next(v for v in p["facettes"]["lieux"] if v["id"] == "rome")
 	assert rome["n"] == 1
+	assert e["origine"] == ["monde"]
+	assert {v["id"]: v["n"] for v in p["facettes"]["origine"]} == {"monde": 1, "italie": 0}
 	assert "evenements" not in p["entete"] and p["entete"]["eres"] == data["eres"]
 
 

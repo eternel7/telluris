@@ -170,6 +170,7 @@
 							<option value="">— aucun —</option>
 							<option value="couche">couche</option>
 							<option value="categorie">catégorie</option>
+							<option value="origine">origine</option>
 							<option value="autorite">autorité</option>
 							<option value="peuples">peuple</option>
 							<option value="lieux">lieu</option>
@@ -220,10 +221,10 @@
 	const CHRONO_GLISSE = 10;
 	const PICTO = { evenement: '◆', figure: '⚔', cite: '🏰', institution: '⚜', portail: '◎', mythe: '✦', quete: '✧' };
 	const COULEUR = { auteur: '#c8a84b', synthese: '#4b8fc8', proposition: '#b07fd0' };
-	const FACETTES_PUCES = ['couche', 'autorite', 'ere', 'categorie', 'visibilite'];
+	const FACETTES_PUCES = ['couche', 'autorite', 'ere', 'categorie', 'origine', 'visibilite'];
 	const FACETTES_LISTES = ['peuples', 'lieux', 'institutions', 'themes'];
 	const NOMS_FACETTES = {
-		couche: 'Couche', autorite: 'Autorité', ere: 'Ère', categorie: 'Catégorie', visibilite: 'Visibilité',
+		couche: 'Couche', autorite: 'Autorité', ere: 'Ère', categorie: 'Catégorie', origine: 'Origine', visibilite: 'Visibilité',
 		peuples: 'Peuples', lieux: 'Lieux', institutions: 'Institutions', themes: 'Thèmes'
 	};
 	// Géométrie par orientation : `axe` = marge avant le temps, `bande` = graduations,
@@ -344,13 +345,14 @@
 				let valeurs;
 				if (f === 'ere') valeurs = ev.eres || [];
 				else if (f in (ev.tags || {}) || FACETTES_LISTES.includes(f)) valeurs = (ev.tags || {})[f] || [];
-				else valeurs = [ev[f]];
+				else valeurs = Array.isArray(ev[f]) ? ev[f] : [ev[f]];
 				if (!valeurs.some(v => voulu.has(v))) { garde = false; break; }
 			}
 			if (garde && filtres.incoherence && !((ev.contradictions || []).length || (ev.erreurs || []).length)) garde = false;
 			if (garde && mots.length) {
 				const tags = [];
 				for (const f in (ev.tags || {})) for (const v of ev.tags[f]) tags.push(libelles[f + ':' + v] || v);
+				for (const v of (ev.origine || [])) tags.push(libelles['origine:' + v] || v);
 				const foin = _sansAccent([ev.id, ev.titre, ev.titre_court, ev.resume, ev.notation, tags.join(' ')].join(' '));
 				garde = mots.every(m => foin.includes(m));
 			}
@@ -368,7 +370,7 @@
 		const groupes = new Map();
 		const sans = [];
 		for (const ev of evenements) {
-			const valeurs = FACETTES_LISTES.includes(facette) ? ((ev.tags || {})[facette] || []) : [ev[facette]].filter(Boolean);
+			const valeurs = FACETTES_LISTES.includes(facette) ? ((ev.tags || {})[facette] || []) : [].concat(ev[facette] || []).filter(Boolean);
 			if (!valeurs.length) sans.push(ev);
 			for (const v of valeurs) {
 				if (!groupes.has(v)) groupes.set(v, []);
@@ -871,7 +873,7 @@
 			d.appendChild(el('div', { class: 'quand' }, ev.notation));
 			const lib = (f, v) => ((CHRONO.facettes[f] || []).find(x => x.id === v) || {}).libelle || v;
 			d.appendChild(el('div', { class: 'petit' }, 'date : ' + lib('autorite', ev.quand_autorite) + (ev.quand_note ? ' — ' + ev.quand_note : '')));
-			d.appendChild(el('div', { class: 'petit' }, [lib('couche', ev.couche), lib('categorie', ev.categorie), 'autorité : ' + lib('autorite', ev.autorite), lib('visibilite', ev.visibilite)].join(' · ')));
+			d.appendChild(el('div', { class: 'petit' }, [lib('couche', ev.couche), lib('categorie', ev.categorie), (ev.origine || []).map(v => lib('origine', v)).join(', '), 'autorité : ' + lib('autorite', ev.autorite), lib('visibilite', ev.visibilite)].join(' · ')));
 			d.appendChild(el('p', {}, ev.resume));
 			const tags = el('div', { class: 'tags' });
 			for (const f of FACETTES_LISTES) for (const v of (ev.tags[f] || [])) tags.appendChild(el('span', {}, lib(f, v)));
