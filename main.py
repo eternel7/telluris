@@ -126,6 +126,16 @@ app.add_middleware(RequestDocCacheMiddleware)
 templates = Jinja2Templates(directory="templates")
 templates.env.policies["json.dumps_kwargs"] = {"sort_keys": False}
 
+@pass_context
+def url_relative(ctx, name, /, **path_params):
+	"""`url_for` des templates rendu en CHEMIN seul (`/icons/favicon.svg`), sans schéma ni
+	hôte : le navigateur le résout avec ceux de la page. L'`url_for` de Starlette rend une
+	URL absolue au schéma vu par uvicorn — `http` derrière un proxy TLS, donc des ressources
+	bloquées en contenu mixte sur la page HTTPS."""
+	return ctx["request"].url_for(name, **path_params).path
+
+templates.env.globals["url_for"] = url_relative
+
 class _ScriptsRevalides(StaticFiles):
 	"""JS partagé (/scripts) : `no-cache` = le navigateur REVALIDE à chaque chargement
 	(ETag → 304 si rien n'a bougé). Sans en-tête, Chrome le resservait de son cache
@@ -151,7 +161,7 @@ def script_url(ctx, path):
 		version = os.stat(os.path.join(SCRIPTS_PATH, path)).st_mtime_ns
 	except OSError:
 		version = 0
-	return f"{ctx['request'].url_for('scripts', path=path)}?v={version:x}"
+	return f"{ctx['request'].url_for('scripts', path=path).path}?v={version:x}"
 
 templates.env.globals["script_url"] = script_url
 app.mount("/icons", StaticFiles(directory="templates/resources/icons"), name="icons")
@@ -641,7 +651,7 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 		for filename in os.listdir(CHARACTERS_IMAGES_PATH):
 			full_path = os.path.join(CHARACTERS_IMAGES_PATH, filename)
 			if (os.path.isfile(full_path) and filename.lower().endswith(valid_extensions)):
-				file_url = request.url_for("characters", path=filename)
+				file_url = request.url_for("characters", path=filename).path
 				race = filename[filename.rfind("_")+1:-6]
 				characters_images.append({
 					"name": filename,
@@ -654,7 +664,7 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 	# partagée avec la garde d'`add_character`) — la page n'ajoute que l'URL servable, qui
 	# demande le `Request` et n'a donc pas sa place dans le helper.
 	towns_images = [
-		{**c, "blurb": c["label"], "url": str(request.url_for("towns", path=c["filename"]))}
+		{**c, "blurb": c["label"], "url": request.url_for("towns", path=c["filename"]).path}
 		for c in cites_de_depart(get_doc)
 	]
 	return templates.TemplateResponse(
