@@ -50,6 +50,12 @@ Décisions de l'Auteur, après lecture de la première version de cette fusion :
 11. **Néfertiti** reste **volontairement** antérieure aux pyramides.
 12. **Sainte-Sophie.** Le portail est bien plus vieux que l'édifice de Justinien. La plupart du temps, temples et monuments ont été **construits autour d'un portail** : c'est le cas de Notre-Dame comme de l'édifice de Justinien.
 
+### ✍️ Auteur — 11/10/2026 (second arbitrage)
+
+13. **Document maître § 4.** « Aucun portail vers un autre monde » visait les portails **des trois frères et de leurs héritiers**. Les portails naturels étaient alors **inconnus**, ou **pas encore apparus** (comme Jumièges, récent). Reformulation au § 2.3.
+14. **Avènement** est retenu pour le moment où une cité prend son nom et son rang de Cité-État.
+15. **Templiers.** Le rôle des Paladins avant les portails est évident : protéger les routes terrestres. La question posée est celle du **rôle des Templiers avant les portails** (pistes au § 3.1).
+
 ---
 
 ## 2. Citations demandées
@@ -92,10 +98,10 @@ Pour mémoire, la frise ChatGPT du **19/08** (💬19) suit l'Auteur : sa ligne �
 
 Le § 7 (« Les donjons ») prolonge cette idée : « Avant la vague : **Portail = déplacement.** Après la vague : **Portail = possibilité d'inconnu.** »
 
-🔧 **Pistes de reformulation**, à revoir avec l'Auteur. Le document maître n'est pas modifié tant qu'il n'a pas choisi.
-- **A** : « Les portails des frères ne mènent alors à aucun autre monde. Seuls de rares portails plus anciens, que nul n'a bâtis — Saint-Pierre est le seul que connaissent les Occidentaux —, ouvrent sur l'au-delà. »
-- **B** : « Aucun portail **construit** ne mène alors vers un autre monde. »
-- Au § 7, il faudrait alors écrire : « Avant la vague, pour les Anthropes : **Portail = déplacement.** »
+**Reformulation appliquée au document maître** (selon le § 1.13) :
+> Aucun de ces portails — ceux des frères et de leurs héritiers — ne mène alors **vers un autre monde**. Les portails naturels sont soit **inconnus**, soit **pas encore apparus** : certains se manifestent bien plus tard, comme celui de Jumièges. Seul celui de Saint-Pierre, à Rome, est connu des Occidentaux.
+
+Au § 7 : « Avant la vague, pour les portails des frères et de leurs héritiers : **Portail = déplacement.** »
 
 ---
 
@@ -138,6 +144,27 @@ Le § 7 (« Les donjons ») prolonge cette idée : « Avant la vague : **Portail
 - Jésus vient alors **avant** la Vague. L'Auteur a dit les Templiers « **antérieurs à la naissance du christianisme** » (✍️ 19/08).
 - Les Templiers doivent donc **exister avant la Vague**, comme le propose 💬21. Le « se sont développés à cette époque » de l'Auteur se lit alors comme un **essor**, sur le modèle des Paladins : nés avant les portails, ils rouvrent les routes après la Vague.
 - Pour garder les Templiers nés **après** la Vague, il faudrait une Vague **antérieure à Jésus**, à plus d'un millénaire et demi. Cela n'est compatible avec Charlemagne « un siècle après » que si l'on renonce à cet appui.
+- ⚠️ La contrainte est « **avant Jésus** », pas « avant les portails ». Les Templiers peuvent naître **après** les trois frères, à l'Âge des Portails : c'est la proposition 💬21. Ils n'ont un rôle « avant les portails » que si l'on veut les faire remonter plus haut (§ 3.1).
+
+### 3.1 Rôle des Templiers avant la Vague — pistes 🔧
+
+Trois pistes, de la plus ancienne à la plus récente. Chacune garde la mission constante de l'ordre : **garder une porte**, quand les Paladins gardent la route.
+
+1. **Les gardiens de Saint-Pierre — avant les portails** (recommandée).
+	- Avant les frères, le seul portail connu des Occidentaux est celui de Saint-Pierre, naturel et mal compris. Un ordre naît à Rome pour l'**enclore** et en **régler l'accès**. Son chef deviendra le **pape**, qui est **déjà** grand maître des Templiers (✍️ 20/08).
+	- Ancrage réel à adapter : le **templum** latin est d'abord un **espace découpé et consacré** par l'augure, avant d'être un édifice. Les premiers Templiers seraient les gardiens de cette **enceinte**, et non d'un bâtiment.
+	- Quand les frères apportent leurs portails, l'ordre étend sa garde aux nouvelles portes. Après la Vague, il bâtit les temples-forteresses autour des portails devenus donjons.
+	- Cela explique pourquoi Rome commande l'ordre, et pourquoi il est le seul à savoir ce qu'on fait de Saint-Pierre. Le mystère reste entier : on ne sait pas ce que gardaient vraiment les premiers.
+2. **Les gardiens des portes transversales — à l'Âge des Portails** (💬21).
+	- L'ordre naît avec le réseau des frères pour protéger les installations, filtrer les passages et empêcher qu'un monstre emprunte une porte.
+	- C'est la piste la plus simple : elle suffit à le rendre antérieur à Jésus, avec une Vague il y a sept à huit siècles.
+	- Elle ne donne aucun rôle « avant les portails ».
+3. **Les gardiens des enceintes intérieures — à l'Âge des Remparts.**
+	- Pendant que les Paladins tiennent les routes, les Templiers tiennent ce qui est **à l'intérieur** des murs : sanctuaires, réserves, sources, trésors de cité.
+	- Les portails, apparus ensuite au cœur des cités, leur reviennent naturellement.
+	- Moins de mystère, mais une belle symétrie : **le Paladin dehors, le Templier dedans**.
+
+Les pistes 1 et 2 se combinent : un noyau romain autour de Saint-Pierre, puis un ordre qui s'étend avec le réseau des frères.
 
 ---
 
@@ -198,11 +225,9 @@ L'« Âge du Grand Mystère » de 💬21 n'est **pas repris** : il décrit la qu
 
 ## 5. Chronologie des cités (révisée)
 
-Le mot « fondée » est remplacé par **deux moments**, ce qui règle le cas de Lutecia (§ 1.9). 🔧 Termes proposés :
-- **Établissement** : le site est habité ; la cité existe, sous un autre nom, ou sans rempart ni rang.
-- **Avènement** : la cité **prend son nom** et son rang de **Cité-État**.
-
-Autres formules possibles pour l'avènement : « prise de nom », « érection en Cité-État ». « Consécration » et « baptême » sont à éviter, pour leur connotation religieuse.
+Le mot « fondée » est remplacé par **deux moments**, ce qui règle le cas de Lutecia (§ 1.9) :
+- **Établissement** (🔧) : le site est habité ; la cité existe, sous un autre nom, ou sans rempart ni rang.
+- **Avènement** (✍️ 11/10, retenu) : la cité **prend son nom** et son rang de **Cité-État**.
 
 Les cités sont **classées par avènement** ; l'ordre à l'intérieur d'une même ère est indicatif. Toute période terrestre est retirée.
 
@@ -264,15 +289,16 @@ La séance d'origine n'est pas modifiée : c'est un échange de travail. La corr
 
 ## 8. Points encore ouverts
 
-1. **Templiers : nés avant ou après la Vague ?** (§ 2.1, § 3)
-	- Avec une Vague il y a sept à huit siècles, et des Templiers « antérieurs au christianisme », les Templiers doivent naître **avant** la Vague (💬21). Le « se sont développés » du 19/08 serait alors un essor.
-	- Le document maître § 11 (« ils apparaissent après la transformation des portails ») serait à corriger.
-	- Le nœud demeure : un temple est bâti autour d'un **portail de donjon**, et il n'y a pas de donjons avant la Vague. Avant elle, les Templiers garderaient les portes transversales.
-2. **Date de la Vague** : l'estimation 🔧 « sept à huit siècles » est à valider, ou à remplacer par un millénaire en déplaçant Charlemagne (§ 3).
-3. **Document maître § 4 et § 7** : choisir une reformulation (§ 2.3).
-4. **Violet ou jaune** (contradiction ouverte de la compétence lore) :
+1. **Templiers : naissance et rôle d'avant la Vague** (§ 2.1, § 3, § 3.1).
+	- Avec une Vague il y a sept à huit siècles, et des Templiers « antérieurs au christianisme » (✍️ 19/08), l'ordre doit naître **avant Jésus**. C'est **au plus tard à l'Âge des Portails** ; pas forcément avant les portails.
+	- Le « se sont développés à cette époque » du 19/08 se lit alors comme un **essor** après la Vague.
+	- Trois pistes de rôle : gardiens de Saint-Pierre avant les frères (recommandée), gardiens des portes transversales, ou gardiens des enceintes intérieures. **À choisir.**
+	- Le document maître § 11 (« ils apparaissent après la transformation des portails ») sera à corriger selon le choix.
+2. **Date de la Vague** : l'estimation 🔧 « sept à huit siècles » est à valider. Un millénaire imposerait de déplacer Charlemagne, aujourd'hui « un siècle après » (§ 3).
+3. **Violet ou jaune** (contradiction ouverte de la compétence lore) :
 	- « une gemme de mana **violette** de 250 g suffit » pour Notre-Dame (✍️ 20/08) ;
 	- « un voyage par cristal **jaune** » (✍️ 24/09).
 	- Le jaune = maîtrise du portail (§ 1.2) pourrait les concilier, par exemple un cristal violet de mana et un cristal jaune de maîtrise. Ce n'est pas tranché.
-5. **Grigori** : « bien avant JC » (✍️ 04/10) ne suffit pas à les placer dans une ère.
-6. **Rome** : établissement antédiluvien proposé (§ 5), à confirmer.
+4. **Grigori** : « bien avant JC » (✍️ 04/10) ne suffit pas à les placer dans une ère.
+5. **Rome** : établissement antédiluvien proposé (§ 5), à confirmer.
+6. **« Établissement »** : seul « avènement » est retenu ; le terme du premier moment reste à confirmer (§ 5).

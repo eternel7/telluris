@@ -127,7 +127,7 @@ Les premiers portails sont :
 - relativement fiables ;
 - exclusivement reliés à d'autres lieux de Telluris.
 
-Il n'existe alors **aucun portail vers un autre monde**.
+Aucun de ces portails — ceux des frères et de leurs héritiers — ne mène alors **vers un autre monde**. Les portails naturels sont soit **inconnus**, soit **pas encore apparus** : certains se manifestent bien plus tard, comme celui de Jumièges. Seul celui de Saint-Pierre, à Rome, est connu des Occidentaux.
 
 ---
 
@@ -198,7 +198,7 @@ D'autres encore ouvrent sur **d'autres mondes**.
 
 Cette découverte bouleverse la compréhension du cosmos.
 
-Avant la vague :
+Avant la vague, pour les portails des frères et de leurs héritiers :
 
 > **Portail = déplacement.**
 
