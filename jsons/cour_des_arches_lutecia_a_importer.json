@@ -22,7 +22,7 @@
           ]
         },
         "retrouvailles_02": {
-          "texte": "« Vous. » Elle s'arrête à un pas, et on la sent chercher la formule exacte avant de se décider pour la plus courte. « Vous êtes venu jusqu'ici. Je n'étais pas certaine que les gens qui sortent d'une grotte reviennent voir ceux qu'ils en ont sortis. » Un coup d'œil derrière elle, vers la table. « Ne faites pas attention aux apprentis. Ils croient que je mesure l'esplanade. Je mesure l'esplanade, en réalité. Mais pas pour la raison qu'ils pensent. »",
+          "texte": "« Vous. » Elle s'arrête à un pas, et on la sent chercher la formule exacte avant de se décider pour la plus courte. « Vous avez fait tout ce chemin. Je n'étais pas certaine que les gens qui sortent d'une grotte reviennent voir ceux qu'ils en ont sortis. » Un coup d'œil derrière elle, vers la table. « Ne faites pas attention aux apprentis. Ils croient que je mesure l'esplanade. Je mesure l'esplanade, en réalité. Mais pas pour la raison qu'ils pensent. »",
           "choix": [
             {
               "id": "gardee",

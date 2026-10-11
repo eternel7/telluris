@@ -290,7 +290,7 @@
           ]
         },
         "rang_c_rapporte": {
-          "texte": "Maëlys vous écoute sans vous interrompre : la Seine, les deux tours, la nef, ce qui est sorti du portail et la façon dont c'est tombé. Elle ne prend aucune note. Quand vous vous taisez, elle ouvre le registre des rangs, y trace une ligne, puis fait glisser vers vous {prime} pièces de cuivre. « Rang C. » Elle referme le registre. « L'Institut m'a écrit ce matin. Leur architecte est rentrée avec plus de questions qu'elle n'en avait en partant. Chez eux, c'est un compliment. » Un temps. « Chez moi aussi. »",
+          "texte": "Maëlys vous écoute sans vous interrompre : la Seine, les deux tours, la nef, ce qui est sorti du portail et la façon dont c'est tombé. Elle ne prend aucune note. Quand vous parlez de la lueur violette, d'aucune couleur qu'Aélis connaisse, sa main s'arrête un instant sur la couverture du registre. Quand vous vous taisez, elle l'ouvre, y trace une ligne, puis fait glisser vers vous {prime} pièces de cuivre. « Rang C. » Elle referme le registre. « L'Institut m'a écrit ce matin. Leur architecte est rentrée avec plus de questions qu'elle n'en avait en partant. Chez eux, c'est un compliment. » Un temps. « Chez moi aussi. » Puis, plus bas, les yeux sur le mur de cartes : « Celui qui tenait ce bureau avant moi est parti un matin voir un portail qui avait changé de couleur. Il n'est pas revenu. » Elle se tourne de nouveau vers vous. « Vous, vous êtes là. Continuez comme ça. »",
           "choix": [
             {
               "id": "ok",
@@ -374,7 +374,7 @@
           ]
         },
         "retrouvailles_02": {
-          "texte": "« Vous. » Elle s'arrête à un pas, et on la sent chercher la formule exacte avant de se décider pour la plus courte. « Vous êtes venu jusqu'ici. Je n'étais pas certaine que les gens qui sortent d'une grotte reviennent voir ceux qu'ils en ont sortis. » Un coup d'œil derrière elle, vers la table. « Ne faites pas attention aux apprentis. Ils croient que je mesure l'esplanade. Je mesure l'esplanade, en réalité. Mais pas pour la raison qu'ils pensent. »",
+          "texte": "« Vous. » Elle s'arrête à un pas, et on la sent chercher la formule exacte avant de se décider pour la plus courte. « Vous avez fait tout ce chemin. Je n'étais pas certaine que les gens qui sortent d'une grotte reviennent voir ceux qu'ils en ont sortis. » Un coup d'œil derrière elle, vers la table. « Ne faites pas attention aux apprentis. Ils croient que je mesure l'esplanade. Je mesure l'esplanade, en réalité. Mais pas pour la raison qu'ils pensent. »",
           "choix": [
             {
               "id": "gardee",

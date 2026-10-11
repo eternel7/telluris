@@ -224,7 +224,10 @@ def maelys(doc: dict) -> dict:
 			"choix": [{"id": "ok", "label": "« Elle le sera. »", "next": "fin"}],
 		},
 		"rang_c_rapporte": {
-			"texte": "Maëlys vous écoute sans vous interrompre : la Seine, les deux tours, la nef, ce qui est sorti du portail et la façon dont c'est tombé. Elle ne prend aucune note. Quand vous vous taisez, elle ouvre le registre des rangs, y trace une ligne, puis fait glisser vers vous {prime} pièces de cuivre. « Rang C. » Elle referme le registre. « L'Institut m'a écrit ce matin. Leur architecte est rentrée avec plus de questions qu'elle n'en avait en partant. Chez eux, c'est un compliment. » Un temps. « Chez moi aussi. »",
+			# La lueur « d'aucune couleur connue » rappelle à Maëlys le portail qui a changé de
+			# couleur et dont son prédécesseur, le vieil elfe, n'est pas revenu (lore : fiche de
+			# Maëlys, arbitrage du 11/10). Elle n'en dit pas plus : l'enquête reste secrète.
+			"texte": "Maëlys vous écoute sans vous interrompre : la Seine, les deux tours, la nef, ce qui est sorti du portail et la façon dont c'est tombé. Elle ne prend aucune note. Quand vous parlez de la lueur violette, d'aucune couleur qu'Aélis connaisse, sa main s'arrête un instant sur la couverture du registre. Quand vous vous taisez, elle l'ouvre, y trace une ligne, puis fait glisser vers vous {prime} pièces de cuivre. « Rang C. » Elle referme le registre. « L'Institut m'a écrit ce matin. Leur architecte est rentrée avec plus de questions qu'elle n'en avait en partant. Chez eux, c'est un compliment. » Un temps. « Chez moi aussi. » Puis, plus bas, les yeux sur le mur de cartes : « Celui qui tenait ce bureau avant moi est parti un matin voir un portail qui avait changé de couleur. Il n'est pas revenu. » Elle se tourne de nouveau vers vous. « Vous, vous êtes là. Continuez comme ça. »",
 			"choix": [{"id": "ok", "label": "« Merci, maîtresse. »", "next": "fin"}],
 		},
 		"rang_c_souvenir": {
@@ -270,6 +273,11 @@ def aelis_cour(doc: dict) -> dict:
 		"noeuds": {"accepte": "mission_acceptee"},
 	}
 	noeuds = doc["dialogue"]["noeuds"]
+	# L'aventurier peut être une femme (règle de l'Auteur) : aucun accord au masculin. Le doc
+	# vient du DUMP, d'où la retouche à chaque régénération (idempotente).
+	r02 = noeuds.get("retrouvailles_02")
+	if r02:
+		r02["texte"] = r02["texte"].replace("« Vous êtes venu jusqu'ici.", "« Vous avez fait tout ce chemin.")
 	choix_mission = [
 		{"id": "lettre", "label": "Lui tendre le pli scellé de la Guilde.",
 		 "condition": {"transport_a_livrer": True},
