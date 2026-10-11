@@ -4,6 +4,19 @@ Les 50 séances de travail sur le monde de Telluris (récupérées le 08/10/2026
 
 > ⚠️ Ce sont des **échanges de travail**, pas un canon : les messages de l'**Auteur** font foi ; les réponses de ChatGPT sont des propositions, retenues seulement si une décision les a adoptées. La synthèse canonique vit dans `../Telluris_Document_Maitre.md`.
 
+## ✒️ Le lore rédigé
+
+Prose tirée du seul canon (dump, messages de l'Auteur, réponses adoptées) ; un point non tranché y est marqué *(proposé, non tranché)*. Ces textes ne font pas foi contre la parole de l'Auteur.
+
+- [Le monde de Telluris et ses trois ères](redige/01_le_monde_et_ses_eres.md) — 11/10/2026 — Géographie réelle, Cités-États et remparts, absence de guerre, mythes déformés ; l'antédiluvien, avant la Vague, après la Vague.
+- [Les Anthropes et leurs cinq Lignées](redige/02_anthropes_et_lignees.md) — 11/10/2026 — Un seul sang, cinq Lignées interfécondes, leurs tendances ; la Lignée est secondaire.
+- [Les portails, la Vague et les donjons](redige/03_portails_vague_donjons.md) — 11/10/2026 — Les trois frères, les portails plus anciens qu'eux, la dégradation du savoir, la Vague, les donjons, les cristaux violet et jaune.
+- [Les institutions de Telluris](redige/04_institutions.md) — 11/10/2026 — Paladins, Templiers, Architectes, Guilde des Aventuriers et ses rangs, monothéismes et monastères-relais.
+- [Les Cités-États](redige/05_cites_etats.md) — 11/10/2026 — Lutecia, Auxerre, Rome, Venise, Gênes, Bruges, Aix, l'Islande, Constantinople, Cordoue, l'Égypte, Jérusalem, Babylone, Mu, Atlantis.
+- [Le chemin de l'aventurier](redige/06_personnages_et_trame.md) — 11/10/2026 — D'Auxerre à Lutecia, les PNJ (Aélis, Maëlys, Milo, Élise…), la trame des rangs D à S+, les trois fins.
+- [Les mystères et la cosmologie](redige/07_mysteres_et_cosmologie.md) — 11/10/2026 — Mondes divins, Lilith, Grigori, la vérité méta des Révélateurs, et la liste de ce qui ne sera pas tranché.
+- [La magie, les vocations et la vie de l'aventurier](redige/08_magie_et_vie_quotidienne.md) — 11/10/2026 — Magie à coût réel, vocations, guilde et contrats, auberges, logis, artisans.
+
 ## 🌍 Monde, cosmologie et chronologie
 
 - [Monde médiéval fantastique](monde/20260812_monde_medieval_fantastique.md) — 12/08/2026 — J'invente un monde médiéval fantastique basé sur notre géographie. En voici de multiples speech. "Le monde de Telluris Un monde vivant, au-d…

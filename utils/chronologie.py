@@ -233,6 +233,7 @@ def verifier(data: dict, chemin_de=lore.chemin_de) -> list:
 	err = [(None, m) for m in _verifier_vocabulaire(data)]
 	eres = _Eres(data.get("eres"))
 	voc = data.get("vocabulaire") or {}
+	origines = data.get("origines") or {}
 	evenements = [e for e in data.get("evenements") or [] if isinstance(e, dict)]
 	ids, calc = set(), {}
 	for ev in evenements:
@@ -249,6 +250,13 @@ def verifier(data: dict, chemin_de=lore.chemin_de) -> list:
 		for champ, permis in (("couche", COUCHES), ("categorie", CATEGORIES), ("autorite", AUTORITES), ("visibilite", VISIBILITES)):
 			if ev.get(champ) not in permis:
 				err.append((eid, f"`{champ}` {ev.get(champ)!r} inconnu"))
+		origine = ev.get("origine")
+		if not isinstance(origine, list) or not origine:
+			err.append((eid, "`origine` manquante (liste d'au moins une région)"))
+		else:
+			for o in origine:
+				if o not in origines:
+					err.append((eid, f"origine {o!r} absente de `origines`"))
 		q = ev.get("quand") if isinstance(ev.get("quand"), dict) else {}
 		if q.get("autorite") is not None and q["autorite"] not in AUTORITES:
 			err.append((eid, f"autorité de la date {q['autorite']!r} inconnue"))
@@ -342,6 +350,7 @@ def payload(data: dict, chemin_de=lore.chemin_de) -> dict:
 			"resume": ev.get("resume", ""),
 			"couche": ev.get("couche"),
 			"categorie": ev.get("categorie"),
+			"origine": list(ev.get("origine") or []),
 			"autorite": ev.get("autorite"),
 			"visibilite": ev.get("visibilite", "public"),
 			"tags": {f: list(v) for f, v in (ev.get("tags") or {}).items()},
@@ -360,6 +369,7 @@ def payload(data: dict, chemin_de=lore.chemin_de) -> dict:
 	facettes = {
 		"couche": COUCHES, "autorite": AUTORITES, "categorie": CATEGORIES, "visibilite": VISIBILITES,
 		"ere": {e["id"]: e.get("libelle", e["id"]) for e in eres.liste},
+		"origine": dict(data.get("origines") or {}),
 	}
 	facettes.update({f: dict((data.get("vocabulaire") or {}).get(f, {})) for f in FACETTES_TAGS})
 	comptes = {f: {k: 0 for k in v} for f, v in facettes.items()}
@@ -369,6 +379,9 @@ def payload(data: dict, chemin_de=lore.chemin_de) -> dict:
 				comptes[f][ev[f]] += 1
 		for e in ev["eres"]:
 			comptes["ere"][e] = comptes["ere"].get(e, 0) + 1
+		for o in ev["origine"]:
+			if o in comptes["origine"]:
+				comptes["origine"][o] += 1
 		for f in FACETTES_TAGS:
 			for v in ev["tags"].get(f, []):
 				if v in comptes[f]:

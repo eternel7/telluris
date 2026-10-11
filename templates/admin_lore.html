@@ -78,6 +78,7 @@
 		a.fichier .d { color: var(--muted); font-size: 0.72rem; margin-left: 8px; white-space: nowrap; }
 		a.fichier .r { display: block; color: var(--muted); font-size: 0.74rem; line-height: 1.45; margin-top: 3px; }
 		a.fichier.canon .t { color: var(--accent); }
+		a.fichier.redige .t { color: #efe6c8; }
 		.badge {
 			font-size: 0.65rem; border: 1px solid var(--accent); color: var(--accent);
 			border-radius: 4px; padding: 0 5px; margin-left: 6px; letter-spacing: 0.05em;
@@ -192,6 +193,26 @@
 			text-decoration: none; opacity: 0.85;
 		}
 
+		/* ── Lecture à voix haute (speechSynthesis) ────────────────── */
+		.lecteur {
+			display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+			background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+			padding: 8px 12px; margin-bottom: 10px; font-size: 0.78rem; color: var(--muted);
+		}
+		.lecteur button {
+			min-height: var(--tap); padding: 0 12px; border: 1px solid var(--border); border-radius: 6px;
+			background: var(--bg); color: var(--text); font-family: inherit; font-size: 0.8rem; cursor: pointer;
+		}
+		.lecteur button.principal { border-color: var(--accent); color: var(--accent); }
+		.lecteur button:disabled { opacity: 0.4; cursor: default; }
+		.lecteur label { display: inline-flex; align-items: center; gap: 6px; }
+		.lecteur[hidden], .lecteur [hidden] { display: none; }
+		.lecteur select {
+			min-height: var(--tap); max-width: 220px; background: var(--bg); color: var(--text);
+			border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.78rem;
+		}
+		.md .en-lecture { background: rgba(200,168,75,0.14); box-shadow: -6px 0 0 rgba(200,168,75,0.6); border-radius: 2px; }
+		.md.lecture-active > *, .md.lecture-active li, .md.lecture-active tr { cursor: pointer; }
 		@media (max-width: 820px) {
 			.lecture { grid-template-columns: minmax(0, 1fr); }
 			.sommaire { position: static; max-height: 50vh; }
@@ -231,9 +252,9 @@
 		<section class="groupe" data-groupe>
 			<h2>{{ libelle }} <span class="nb">{{ entrees|length }}</span></h2>
 			{% for e in entrees %}
-			<a class="fichier{{ ' canon' if e.canon }}" href="/admin/lore/{{ e.cle }}"
+			<a class="fichier{{ ' canon' if e.canon }}{{ ' redige' if e.redige }}" href="/admin/lore/{{ e.cle }}"
 			   data-texte="{{ (e.titre ~ ' ' ~ e.resume ~ ' ' ~ e.date ~ ' ' ~ e.cle)|lower }}">
-				<span class="t">{{ e.titre }}</span>{% if e.canon %}<span class="badge">CANON</span>{% endif %}
+				<span class="t">{{ e.titre }}</span>{% if e.canon %}<span class="badge">CANON</span>{% endif %}{% if e.redige %}<span class="badge">RÉDIGÉ</span>{% endif %}
 				{% if e.date %}<span class="d">{{ e.date }}</span>{% endif %}
 				{% if e.resume %}<span class="r">{{ e.resume }}</span>{% endif %}
 			</a>
@@ -243,6 +264,7 @@
 	{% else %}
 		<div class="meta">
 			{% if entree.canon %}<span class="badge">CANON</span>{% endif %}
+			{% if entree.redige %}<span class="badge">RÉDIGÉ</span>{% endif %}
 			{{ entree.section_label }}{% if entree.date %} · {{ entree.date }}{% endif %}
 			· <code>docs/{{ entree.chemin }}</code>
 		</div>
@@ -256,6 +278,14 @@
 				</ol>
 			</details>
 			<div>
+				<div class="lecteur" id="lecteur" hidden>
+					<button type="button" class="principal" id="lire-btn">▶ Lire</button>
+					<button type="button" id="pause-btn" disabled>⏸ Pause</button>
+					<button type="button" id="stop-btn" disabled>⏹ Arrêter</button>
+					<label>Voix <select id="voix" aria-label="Voix de lecture"></select></label>
+					<label>Vitesse <input type="range" id="vitesse" min="0.7" max="1.5" step="0.1" value="1" aria-label="Vitesse de lecture"> <span id="vitesse-val">1.0</span></label>
+					<label id="auteur-seul-lab" hidden><input type="checkbox" id="auteur-seul"> Auteur seulement</label>
+				</div>
 				<article class="md" id="corps">{{ corps|safe }}</article>
 				<div class="pied">
 					{% if precedent %}<a href="/admin/lore/{{ precedent.cle }}"><small>← Précédent</small>{{ precedent.titre }}</a>{% else %}<span class="vide"></span>{% endif %}
@@ -267,6 +297,53 @@
 	{% endif %}
 	</div>
 	<script>
+	// ── Lecture à voix haute : fonctions pures (dev/test_lecture_lore_client.js) ──
+
+	/** Texte à prononcer : pictogrammes retirés, en-têtes des séances lus en clair. */
+	function lectureNettoyer(texte) {
+		return String(texte || '')
+			.replace(/✍️?\s*Auteur/g, "L'Auteur")
+			.replace(/🤖\s*ChatGPT/g, 'ChatGPT')
+			.replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}]/gu, '')
+			.replace(/[←→↔▸▾·•|#*_`]/g, ' ')
+			.replace(/\s+/g, ' ')
+			.trim();
+	}
+
+	/** Énoncés d'au plus `max` caractères, coupés aux fins de phrase puis aux virgules
+	 *  (Chrome interrompt un énoncé trop long). Un mot plus long que `max` reste entier. */
+	function lectureDecouper(texte, max) {
+		const out = [];
+		const ajouter = morceau => {
+			morceau = morceau.trim();
+			if (!morceau) return;
+			if (out.length && (out[out.length - 1] + ' ' + morceau).length <= max) out[out.length - 1] += ' ' + morceau;
+			else out.push(morceau);
+		};
+		for (const phrase of String(texte || '').match(/[^.!?…;:]+[.!?…;:]*\s*/g) || []) {
+			if (phrase.trim().length <= max) { ajouter(phrase); continue; }
+			let courant = '';
+			for (const mot of phrase.split(/(?<=,)\s+|\s+/)) {
+				if (courant && (courant + ' ' + mot).length > max) { ajouter(courant); courant = mot; }
+				else courant = courant ? courant + ' ' + mot : mot;
+			}
+			ajouter(courant);
+		}
+		return out;
+	}
+
+	/** Indices des blocs à lire. `blocs` = [{h2: bool, auteur: bool}] dans l'ordre du texte.
+	 *  « Auteur seulement » : tout ce qui suit un h2 de l'Auteur, jusqu'au h2 suivant. */
+	function lectureSelection(blocs, auteurSeul) {
+		const out = [];
+		let dedans = false;
+		blocs.forEach((b, i) => {
+			if (b.h2) dedans = !!b.auteur;
+			if (!auteurSeul || dedans) out.push(i);
+		});
+		return out;
+	}
+
 	(function () {
 		const recherche = document.getElementById('recherche');
 		if (recherche) {
@@ -318,10 +395,118 @@
 				if (t.startsWith('✍️') || t.startsWith('✍')) h.classList.add('auteur');
 				else if (t.startsWith('🤖')) h.classList.add('chatgpt');
 			}
+			lecteurVocal(corps);
 			const sommaire = document.getElementById('sommaire');
 			// Petit écran : sommaire fermé (il passerait AU-DESSUS du texte) ; vide : masqué.
 			if (!sommaire.querySelector('li')) sommaire.hidden = true;
 			else if (window.matchMedia('(max-width: 820px)').matches) sommaire.open = false;
+		}
+
+		/** Barre ▶ / ⏸ / ⏹ : un énoncé à la fois, enchaînés sur `onend` ; le bloc lu est surligné,
+		 *  un clic sur un bloc pendant la lecture reprend de là. */
+		function lecteurVocal(corps) {
+			const synth = window.speechSynthesis;
+			const barre = document.getElementById('lecteur');
+			if (!synth || typeof SpeechSynthesisUtterance === 'undefined' || !barre) return;
+			barre.hidden = false;
+			const $ = id => document.getElementById(id);
+			const PREF = 'telluris.lore_lecture.v1';
+			let pref = {};
+			try { pref = JSON.parse(localStorage.getItem(PREF) || '{}') || {}; } catch (e) { pref = {}; }
+			const sauver = () => { try { localStorage.setItem(PREF, JSON.stringify(pref)); } catch (e) { /* mode privé */ } };
+
+			const elements = Array.from(corps.querySelectorAll('h1,h2,h3,h4,h5,h6,p,li,tr')).filter(e => !e.closest('pre'));
+			const texteDe = e => {
+				if (e.tagName === 'TR') return Array.from(e.cells).map(c => c.textContent.trim()).filter(Boolean).join('. ');
+				if (e.tagName === 'LI') {
+					const c = e.cloneNode(true);
+					for (const l of c.querySelectorAll('ul,ol,p')) l.remove();
+					return c.textContent;
+				}
+				return e.textContent;
+			};
+			const aAuteur = elements.some(e => e.tagName === 'H2' && e.classList.contains('auteur'));
+			$('auteur-seul-lab').hidden = !aAuteur;
+			$('auteur-seul').checked = aAuteur && !!pref.auteur;
+			$('vitesse').value = pref.vitesse || 1;
+			$('vitesse-val').textContent = Number($('vitesse').value).toFixed(1);
+
+			const voixSel = $('voix');
+			let voix = [];
+			const remplirVoix = () => {
+				voix = synth.getVoices().filter(v => /^fr/i.test(v.lang));
+				voixSel.textContent = '';
+				voixSel.appendChild(new Option('par défaut', ''));
+				for (const v of voix) voixSel.appendChild(new Option(v.name + (v.localService ? '' : ' ☁'), v.name));
+				voixSel.value = voix.some(v => v.name === pref.voix) ? pref.voix : '';
+			};
+			remplirVoix();
+			synth.addEventListener && synth.addEventListener('voiceschanged', remplirVoix);
+
+			let file = [], pos = 0, morceaux = [], k = 0, actif = false, jeton = 0, courant = null;
+			const marquer = e => {
+				if (courant) courant.classList.remove('en-lecture');
+				courant = e;
+				if (e) { e.classList.add('en-lecture'); e.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+			};
+			const boutons = () => {
+				$('pause-btn').disabled = $('stop-btn').disabled = !actif;
+				$('pause-btn').textContent = synth.paused ? '▶ Reprendre' : '⏸ Pause';
+				corps.classList.toggle('lecture-active', actif);
+			};
+			const arreter = () => {
+				jeton++; actif = false;
+				synth.cancel();
+				marquer(null);
+				boutons();
+			};
+			const dire = j => {
+				if (j !== jeton) return;
+				while (k >= morceaux.length) {
+					if (pos >= file.length) { arreter(); return; }
+					const e = elements[file[pos++]];
+					morceaux = lectureDecouper(lectureNettoyer(texteDe(e)), 200);
+					k = 0;
+					if (morceaux.length) marquer(e);
+				}
+				const u = new SpeechSynthesisUtterance(morceaux[k++]);
+				u.lang = 'fr-FR';
+				u.rate = Number($('vitesse').value) || 1;
+				const v = voix.find(x => x.name === voixSel.value);
+				if (v) u.voice = v;
+				u.onend = () => dire(j);
+				u.onerror = ev => { if (ev.error !== 'interrupted' && ev.error !== 'canceled') dire(j); };
+				synth.speak(u);
+			};
+			const lireDepuis = indexElement => {
+				arreter();
+				const blocs = elements.map(e => ({ h2: e.tagName === 'H2', auteur: e.classList.contains('auteur') }));
+				file = lectureSelection(blocs, $('auteur-seul').checked).filter(i => i >= indexElement);
+				pos = 0; morceaux = []; k = 0; actif = true;
+				boutons();
+				dire(jeton);
+			};
+
+			$('lire-btn').addEventListener('click', () => lireDepuis(0));
+			$('stop-btn').addEventListener('click', arreter);
+			$('pause-btn').addEventListener('click', () => {
+				if (synth.paused) synth.resume(); else synth.pause();
+				boutons();
+			});
+			$('vitesse').addEventListener('input', e => {
+				$('vitesse-val').textContent = Number(e.target.value).toFixed(1);
+				pref.vitesse = Number(e.target.value); sauver();
+			});
+			voixSel.addEventListener('change', () => { pref.voix = voixSel.value; sauver(); });
+			$('auteur-seul').addEventListener('change', e => { pref.auteur = e.target.checked; sauver(); });
+			corps.addEventListener('click', e => {
+				if (!actif || e.target.closest('a')) return;
+				const bloc = e.target.closest('h1,h2,h3,h4,h5,h6,p,li,tr');
+				const i = elements.indexOf(bloc);
+				if (i >= 0) lireDepuis(i);
+			});
+			window.addEventListener('pagehide', () => synth.cancel());
+			synth.cancel();  // un énoncé resté d'une page précédente
 		}
 	})();
 	</script>

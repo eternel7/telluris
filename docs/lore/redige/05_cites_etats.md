@@ -1,0 +1,129 @@
+# Les Cités-États
+
+Chaque grande cité de Telluris est un monde en soi, avec ses murs, ses portails, ses ordres et ses secrets. Voici celles que le lore a décrites, de la Gaule aux confins du monde connu.
+
+## En Gaule
+
+### Lutecia, la capitale du passage
+
+Lutecia est née autour du **portail de Notre-Dame**, l'œuvre de l'un des trois frères. Il y avait déjà une cité sur la Seine quand le portail a été bâti ; elle n'a pris le nom de Lutecia que bien plus tard, en dernier.
+
+Le mana y est **faible**, et c'est à la fois sa force et sa faiblesse. Sa force, parce que la Vague ne l'a presque pas touchée : le portail de Notre-Dame est resté intact, et c'est aujourd'hui une œuvre que tous les maîtres des portails viennent étudier. Il mène à n'importe quel lieu du monde connu pour un coût dérisoire : une gemme violette pour le reste du monde, un cristal jaune pour Mu. Sa faiblesse, parce que les grandes écoles de magie se sont installées ailleurs. Les écoles de Lutecia sont des **instituts d'architectes**, et la cité forme les meilleurs maîtres des portails du monde.
+
+L'**Institut des Architectes** occupe la **Cour des Arches**, dans l'ancien ensemble des Invalides, près de la Seine. Ce n'est ni une caserne ni un temple, mais un lieu de savoir : on y enseigne, on y conserve et on y partage ce que l'on sait des portails et des donjons. Ses **Archives des Seuils** gardent la mémoire des passages.
+
+Au nord, sur la butte de **Montmartre**, les Paladins tiennent la basilique du **Sacré-Cœur** : c'est leur bastion de défense aérienne, où se perfectionne la Lance de lumière, et le point de départ des escortes vers la France lointaine. Les murailles de Lutecia arrêtent les monstres terrestres ; ce sont les monstres du ciel qu'il faut guetter.
+
+Sous la ville s'étendent d'anciennes **carrières et catacombes**. Gargouilles éveillées, goules des ossuaires, un grand chat noir aveugle qui attire les imprudents vers les effondrements, un basilic de calcaire au regard pétrifiant y rôdent. Les catacombes sont un donjon, et c'est tout au fond que l'on trouve les cristaux jaunes.
+
+La guilde de Lutecia siège au **Grand Relais des Frontières**. Sa maîtresse, **Maëlys de Valombre**, est une naine d'âge mûr, ancienne aventurière, qui a succédé à un vieil elfe aujourd'hui porté disparu.
+
+### Auxerre, la ville du départ
+
+Auxerre n'a pas de portail transversal. On y arrive par la route, à travers des forêts denses. Son plus grand monument est le **temple des Paladins**, où l'on entrepose les marchandises et d'où partent les convois vers Lutecia.
+
+Le portail du temple mène à un **donjon-mine** de cristaux et de minéraux rares, qui se renouvelle de lui-même à intervalles réguliers. Les jeunes aventuriers le nettoient d'abord de ses araignées et de ses rats géants, puis des gobelins chamaniques. Les cristaux qu'on en tire partent vers Lutecia sous escorte paladine.
+
+La guilde d'Auxerre se nomme le **Bastion de l'Yonne**. Son maître est **Gautier de Valcroix**, et c'est le nain **Borin Barbe-de-Jais** qui accueille les nouveaux venus.
+
+## En Italie
+
+### Rome, la ville aux deux visages
+
+Rome est plus ancienne que les trois frères, et le portail de **Saint-Pierre** est plus ancien que Rome. Avant la ville, il y avait une butte au bord du Tibre, et au fond de sa grotte un portail que personne n'avait bâti. Ceux qui dormaient à l'entrée faisaient des rêves qui s'accomplissaient ; on appela la butte d'après eux, les devins.
+
+Une **louve** immense gardait la grotte. Elle recueillit deux jumeaux que le fleuve avait déposés là, **Romulus et Rémus**, et les éleva sur le seuil sans jamais les laisser franchir la porte. Devenus hommes, ils choisirent chacun leur vocation. Romulus traça l'enceinte de la ville, de l'autre côté du fleuve, et ses compagnons en tinrent les murs. Rémus franchit le sillon vers l'extérieur et resta garder la porte ; Rome raconta ce départ comme une mort. Autour de lui naquirent les frères de la Louve, le groupe de Templiers qui garde le seuil depuis lors. Leur chef prit le titre de **pontife**, celui qui fait le pont. C'est aujourd'hui le **pape**, grand maître des Templiers.
+
+Le portail de Saint-Pierre mène à la **porte du Paradis**, gardée par saint Pierre. Le Paradis est le monde des anges, qui ne sont pas tous de doux agneaux : ils y combattent les démons pour les âmes des Anthropes. Seuls les plus hauts dignitaires savent ce que l'on fait de ce portail, et quiconque tente d'en révéler la vérité s'embrase sur-le-champ.
+
+C'est que Rome a deux visages. La pieuse, celle du pape et de Saint-Pierre. Et la pécheresse, celle des orgies de l'aristocratie et du **Colisée**, où des gladiateurs affrontent les pires monstres. Personne ne sait pourquoi la cité s'est pervertie. La Rome d'aujourd'hui semble ivre de son passé.
+
+Deux portails transversaux la relient au monde : le **Panthéon**, le plus ancien, aux mains des institutions romaines, et le **Château Saint-Ange**, que la papauté a ouvert pour s'affranchir d'une aristocratie déclinante. Rome est aussi reliée à Constantinople par Sainte-Sophie.
+
+### Venise, la Sérénissime
+
+Venise est une république stable : un **Doge** élu à vie, un Grand Conseil, et le redouté **Conseil des Dix**. Elle règne sur la Méditerranée orientale et détient tout le savoir sur les mœurs des monstres marins.
+
+Son **Arsenal** produit une galère complète en quelques heures, grâce au travail à la chaîne, aux magiciens élémentaires et à des spécialistes dont on ne dit rien. Les paladins maritimes y résident. Au sud de la lagune, des protections magiques retiennent les monstres et les flux erratiques de l'Adriatique.
+
+La **basilique Saint-Marc** abrite un portail diplomatique ; les Frari et San Zanipolo, des portails commerçants et voyageurs. Venise est le pont entre l'Occident et Byzance, et la rivale de Gênes.
+
+### Gênes, la Superba
+
+Gênes est bâtie en amphithéâtre face à la mer. Ses ruelles étroites, les **caruggi**, piègent les monstres échappés des portails ou passés par-dessus les murs. La cité est partagée entre les quartiers fortifiés de quatre grandes familles, **Doria, Fieschi, Spinola et Grimaldi**, chacune avec ses tours, ses temples à portail et ses places privées. Seul le portail principal, à **San Lorenzo**, échappe à leur autorité.
+
+La **Banque de Saint-Georges** est née du commerce des cristaux. Au Palazzo San Giorgio fut emprisonné **Marco Polo** : Gênes l'avait sauvé d'un dragon des mers, puis ses pamphlets contre la cité l'avaient mené en cellule, où il dicta ses récits.
+
+La rivalité avec Venise est purement commerciale, et elle est rude : le Conseil des Dix a souvent nui à Gênes, et des personnes clés sont passées à Venise après des « rencontres inopinées ». Jamais pourtant les deux cités n'en sont venues aux mains.
+
+## Au nord
+
+### Bruges, la Venise du Nord
+
+Le chenal du **Zwin** est piégé, protégé et balisé par la magie, et seuls les navigateurs de Bruges savent y guider les navires. La cité est la capitale de la draperie : la laine d'Angleterre et les **cuirs de monstres** y deviennent des vêtements imprégnés de magie. Elle abrite le seul comptoir de la Hanse hors du monde germanique et scandinave, et sa **Bourse** fait battre le commerce du Nord.
+
+Du haut du **Beffroi**, les cloches sonnent l'alerte contre les attaques aériennes. La **Notre-Dame de Bruges** abrite un portail commercial qui a résisté à la Vague. Les Paladins tiennent l'Hôpital Saint-Jean, et le **Béguinage** réunit un ordre commun aux Templiers et aux Paladins : les sœurs du Calvaire, qui soignent, et les sœurs de Bataille, qui combattent. On passe de l'un à l'autre sans qu'on vous pose de question.
+
+### Aix-la-Chapelle, le cœur carolingien
+
+Un siècle après la Vague, **Charlemagne** fit d'Aix sa résidence et la tête d'un réseau de cités germaniques qui se portent secours. Plus de trente rois y ont été couronnés, et l'on vient de loin pour ses thermes sulfurés et ses reliques, dont des nécromants ont validé la plupart.
+
+La **Chapelle Palatine** abrite cinq portails en pentagramme, l'œuvre d'un des frères, restés intacts après la Vague. Les portails de l'**Hôtel de Ville**, plus récents, relient les cités sœurs ; aucun ne mène à un donjon. La tour Granus guette le ciel.
+
+### Reykjavik et Akureyri, l'Islande des dragons
+
+L'Islande regorge de dragons et de grands monstres volants. Reykjavik est guidée en secret par un **dragon empereur**, plus ancien que les premiers Anthropes. Il souffle des prémonitions aux gouverneurs dans leurs rêves et arrange leurs rencontres. Ses motifs sont inconnus, mais il agit toujours au profit des Islandais. Le maître de la guilde est en contact constant avec lui. La **Hallgrímskirkja** abrite le portail vers le reste du monde, partagée entre les Templiers et les Paladins.
+
+**Akureyri**, cité fortifiée, commerce avec Reykjavik par un portail que la Vague a altéré. Dans ses grottes profondes s'ouvre le gouffre de l'**Hekla**, le pendant de Saint-Pierre : une porte vers l'**Enfer de Lucifer**, l'ancien ange de lumière.
+
+## Autour de la Méditerranée et en Orient
+
+### Constantinople, la Reine des Villes
+
+C'est la plus grande et la plus riche cité d'Europe. **Sainte-Sophie** abrite un portail vers Rome, stable depuis des millénaires. Le **Grand Palais** comptait un portail par église ; plus de la moitié sont devenus des donjons à la Vague.
+
+Les remparts de Théodose sont ornés de basilics et de cockatrices pétrifiés par des archimages anciens. La **Corne d'Or** se ferme par une chaîne de fer météoritique. Le **feu grégeois** est un secret d'État, apprécié des mages pour son faible coût en mana. À l'**Hippodrome**, les Bleus et les Verts font la valeur des coursiers des routes, et l'on étudie depuis des siècles les migrations des monstres marins du Bosphore.
+
+### Cordoue, le Nœud des Mille Portails
+
+Capitale d'Al-Andalus, Cordoue est la plus grande métropole d'Occident, avec une bibliothèque de quatre cent mille volumes. **Averroès**, Maïmonide et Al-Zahrawi y ont enseigné.
+
+Sa **Mezquita** est le « Nœud des Mille Portails » : ses arches bicolores résonnent vers d'autres cités, et son chœur central scelle une **brèche originelle**, un donjon abyssal qui descend sans fin. Hors des remparts, la citadelle de **Madinat al-Zahra** abrite les mages de guerre et les maîtres des portails. La Guilde des Savants-Runiques y étudie les grimoires, l'anatomie des monstres et les fluides qui stabilisent les portails.
+
+### Alexandrie et Abou Simbel, l'Égypte coupée en deux
+
+Au nord, **Alexandrie** est la cité du savoir et de la maîtrise de la magie, tournée vers l'ésotérisme ; son phare est célèbre. Mais elle dépend du Sud pour le Nil, dont le barrage d'Assouan règle les eaux.
+
+Au sud règne un royaume **mort-vivant** immémorial, celui de **Néfertiti**. Une lignée pharaonique a consacré des siècles à l'immortalité, avant même les pyramides, et Néfertiti en est la preuve : une lamia, qui a partagé son don avec sa cour, ses nobles, puis son peuple. Son époux **Akhénaton** fut le premier à le recevoir, et l'un des premiers à se lasser de la non-vie ; elle ne s'est jamais remise de sa perte. Les morts-vivants intelligents sont sujets à l'ennui, et beaucoup finissent par en finir.
+
+Le Nord paie le Sud d'une étrange monnaie : il lui offre ses aristocrates défunts, contre la promesse de la vie éternelle. Entre les deux circulent aussi la contrebande et, dans les hautes sphères, le savoir et les objets magiques. Le **Grand Temple d'Abou Simbel** est une forteresse-nécropole taillée dans la falaise, gardée par des momies, des spectres de prêtres et des squelettes caparaçonnés d'or. Il est relié à Aix-la-Chapelle par la Chapelle Palatine.
+
+### Jérusalem
+
+Jérusalem a reconnu **David** comme son roi, et la cité est devenue le centre politique et sacré des cités des collines qui la suivaient. **Salomon** lui a succédé, après l'œuvre des trois frères, et le Temple a été édifié autour du portail. Puis les cités voisines ont pris leurs distances, et Jérusalem est restée le cœur de celles qui lui demeuraient liées. Son portail, l'« héritage de Salomon », est ancien, coûteux et mal compris : il n'ouvre pas librement sur les capitales.
+
+### Babylone
+
+Babylone, sa tour et ses jardins suspendus attendent encore leur histoire. Les séances proposent d'y placer **Hārūt et Mārūt**, deux anges venus à l'époque de Salomon enseigner une magie dangereuse comme une épreuve *(proposé, non tranché)*.
+
+## Les terres légendaires
+
+### Mu, la civilisation engloutie
+
+Mu prospérait bien avant les Cités-États, et bien avant les trois frères, avec une magie que personne ne maîtrise plus. Une catastrophe dont nul ne connaît la nature l'a fait disparaître : c'est aujourd'hui un **continent englouti**.
+
+Pour presque tout Telluris, Mu n'est qu'une légende incertaine. Mais à Lutecia, les grands Architectes et les Templiers de Notre-Dame savent qu'elle existe, et que l'on y va par Notre-Dame, avec un cristal jaune. Ailleurs, tous les Architectes la révèrent comme un lieu sacré de leur métier.
+
+Lutecia y envoie ses Architectes les plus prometteurs pour achever leur formation. Mu ne livre pas tout : ses enseignements les plus avancés sont réservés à ceux que ses maîtres jugent dignes. Certains reviennent transformés, d'autres ne reviennent jamais. Ceux qui reviennent en disent peu. Ce n'est pas un interdit ; c'est que cela ne s'explique pas. « Je suis allé à Mu, un continent englouti sous la mer. Je ne sais pas trop où c'est, parce qu'au fond, on n'en sort pas. »
+
+### Atlantis
+
+Atlantis est aussi ancienne que Mu, et elle existe encore. Elle n'est jamais devenue un centre du réseau des portails : elle s'en tient à l'écart, par choix.
+
+## Les cités qui attendent leur histoire
+
+**Rhemi**, la Reims de Telluris, est habitée et marchande, mais son histoire reste à écrire. Il en va de même pour bien des cités du monde : le lore ne couvre encore qu'une partie de l'Europe et de la Méditerranée, et les terres lointaines restent, pour l'instant, le domaine des légendes.
+
+---
+
+Sources : [Lutecia](../cites/20260820_decrire_l_histoire_de_lutecia.md) · [Bastion paladin aérien](../cites/20260917_bastion_paladin_aerien.md) · [La Cour des Arches](../cites/20261010_cour_des_arches_lutecia.md) · [Quêtes d'Auxerre à Lutecia](../personnages/20260821_quetes_d_auxerre_a_lutecia.md) · [Rome](../cites/20260820_decrire_rome_dans_telluris.md) · [Venise](../cites/20260822_decrire_venise_dans_telluris.md) · [Gênes](../cites/20260822_decrire_l_histoire_de_genes.md) · [Bruges](../cites/20260823_decrire_bruges_telluris.md) · [Aix-la-Chapelle](../cites/20260824_decrire_aix_la_chapelle.md) · [Reykjavik](../cites/20260820_decrire_l_histoire_de_reykjavik.md) · [Akureyri](../cites/20260820_decrire_akureyri_fortifiee.md) · [Constantinople](../cites/20260824_decrit_constantinople_telluris.md) · [Cordoue](../cites/20260824_decrire_l_histoire_de_cordoue.md) · [Alexandrie](../cites/20260819_decrire_alexandrie_occulte.md) · [Abou Simbel](../cites/20260821_decrire_abou_simbel_fantastique.md) · [Babylone](../cites/20260819_histoire_de_babylone.md) · [Mu](../cites/20261010_mu_civilisation_engloutie.md) · [Frise chronologique fusionnée](../monde/20261011_frise_chronologique_fusionnee.md)
