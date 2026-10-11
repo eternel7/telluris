@@ -701,3 +701,42 @@ def test_quete_detail_ne_propose_pas_de_carte_sans_position(monkeypatch):
 	detail = quetes.quete_detail(character, q)
 	assert "carte" not in detail
 	assert detail["objectif"]["type"] == "chasse"
+
+
+# ── Protégés laissés à la porte (`proteges_restent_dehors`) ──────────────────────────────
+
+def test_proteges_admis_sauf_salle_qui_les_laisse_dehors():
+	assert donjon.proteges_admis({"_id": "lieu:mine"})
+	assert donjon.proteges_admis(None)
+	assert not donjon.proteges_admis({"_id": "lieu:nef", "proteges_restent_dehors": True})
+
+
+@pytest.mark.parametrize("dehors, attendu", [(False, ["protege:aelis"]), (True, [])])
+def test_combat_de_salle_gardee_sans_les_proteges_si_la_salle_le_dit(monkeypatch, dehors, attendu):
+	"""Le combat ouvert par le gardien n'embarque pas les personnes escortées quand la salle
+	les laisse dehors ; sans le champ, elles entrent comme avant."""
+	from routers import pnj as rp
+	salle = {"_id": "lieu:nef", "categorie": "battle_map", "tags": [], "image": "nef.jpg"}
+	if dehors:
+		salle["proteges_restent_dehors"] = True
+	captures = {}
+
+	def faux_combat(character, monstres, tags, image, **kw):
+		captures["proteges"] = kw.get("proteges")
+		return {"_id": "combat:x", "status": "active"}
+
+	monkeypatch.setattr(rp, "find_docs", lambda q: [])
+	monkeypatch.setattr(rp.donjon, "donjon_de_lieu", lambda lid, f: {"_id": "donjon:x"})
+	monkeypatch.setattr(rp.donjon, "especes_de_salle", lambda d, lid, g: [{"_id": "espece:x"}])
+	monkeypatch.setattr(rp.donjon, "monstres_de_salle", lambda *a, **k: [{"id": "m1"}])
+	monkeypatch.setattr(rp.donjon, "commission_active_pour_lieu", lambda c, lid: None)
+	monkeypatch.setattr(rp.recrutement, "groupe_effectif", lambda c, g: [])
+	monkeypatch.setattr(rp.montures, "montures_effectives", lambda c, g: [])
+	monkeypatch.setattr(rp.escorte, "proteges_effectifs", lambda c, g: ["protege:aelis"])
+	monkeypatch.setattr(rp, "create_combat_doc", faux_combat)
+	monkeypatch.setattr(rp, "resolve_first_turns", lambda d: None)
+	monkeypatch.setattr(rp, "save_doc", lambda d: d)
+
+	character = {"_id": "character:x", "user_id": "user:x"}
+	assert rp._declencher_combat_donjon(character, salle) == "combat:x"
+	assert captures["proteges"] == attendu

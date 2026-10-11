@@ -1,0 +1,1787 @@
+[
+  {
+    "_id": "pnj:maelys",
+    "type": "pnj",
+    "nom": "Maëlys de Valombre",
+    "race": "nain",
+    "vocation": "maitre_de_guilde",
+    "portrait": "maitresse_de_guilde_Maelys_naine_f.jpg",
+    "description": "Maîtresse de la Guilde des Aventuriers de Lutecia, au Grand Relais des Frontières. Une naine solidement bâtie, aux épaules larges et à la démarche assurée ; ses cheveux auburn, striés de quelques mèches grises, sont noués en une tresse courte qui ne gêne jamais ses mouvements. Ses yeux gris clair semblent peser chaque parole. Une fine cicatrice part de sa tempe gauche et disparaît dans sa chevelure : elle ne la cache pas, mais ne raconte jamais comment elle l'a obtenue. Veste de cuir sombre renforcée aux épaules, chemise de lin de belle facture et, sur la poitrine, la broche d'argent en forme de porte ouverte, emblème de la Guilde de Lutecia. À sa ceinture, une vieille épée courte qu'elle porte par habitude, et qu'elle préfère ne jamais avoir à dégainer. Ancienne aventurière sans naissance ni fortune — Valombre n'est que le nom du hameau dont elle vient —, elle a gravi la Guilde de la vérification des contrats jusqu'à sa direction, le jour où son prédécesseur, un vieil elfe, n'est pas revenu de l'enquête qu'il menait sur un portail.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le bureau sent la cire, le vélin et le cuir. Entre la grande table couverte de registres et le mur tapissé de cartes, une naine se tient debout, une main posée sur sa ceinture. Elle vous a vu franchir le seuil avant même que vous ayez fini de pousser la porte. Ses yeux gris clair vous détaillent un long moment, sans hâte. « {prenom}. Éléonore m'a parlé de vous. Entrez — et fermez derrière vous. »",
+          "choix": [
+            {
+              "id": "auxerre",
+              "label": "« Je viens d'Auxerre. Gautier de Valcroix m'a recommandé. »",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:le_grand_relais_des_frontieres_bureau_du_maitre",
+                  "max": 1
+                }
+              },
+              "next": "auxerre"
+            },
+            {
+              "id": "qui",
+              "label": "« C'est vous qui dirigez la Guilde ? »",
+              "next": "qui"
+            },
+            {
+              "id": "broche",
+              "label": "« Cette broche… une porte ? »",
+              "next": "broche"
+            },
+            {
+              "id": "cicatrice",
+              "label": "« Cette cicatrice, à la tempe… »",
+              "next": "cicatrice"
+            },
+            {
+              "id": "epee",
+              "label": "« Vous portez encore l'épée ? »",
+              "next": "epee"
+            },
+            {
+              "id": "rang_c_offre",
+              "label": "« On dit que l'épreuve du rang C, c'est vous qui la donnez. »",
+              "condition": {
+                "transport_offert": true
+              },
+              "next": "rang_c_propose"
+            },
+            {
+              "id": "rang_c_relance",
+              "label": "« Au sujet de la lettre pour l'Institut… »",
+              "condition": {
+                "transport_en_cours": true
+              },
+              "next": "rang_c_relance"
+            },
+            {
+              "id": "rang_c_attente",
+              "label": "« La lettre est remise. »",
+              "condition": {
+                "transport_a_rapporter": true,
+                "quete_reussie": {
+                  "id": "quete:escorte_aelis_abbaye_de_jumieges",
+                  "attendu": false
+                }
+              },
+              "next": "rang_c_pas_encore"
+            },
+            {
+              "id": "rang_c_rapport",
+              "label": "« L'architecte est rentrée à la Cour des Arches, saine et sauve. »",
+              "condition": {
+                "transport_a_rapporter": true,
+                "quete_reussie": {
+                  "id": "quete:escorte_aelis_abbaye_de_jumieges"
+                }
+              },
+              "action": {
+                "service": "transport",
+                "op": "rapporter"
+              }
+            },
+            {
+              "id": "rang_c_souvenir",
+              "label": "« Jumièges… »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_c_lettre_a_l_institut"
+                }
+              },
+              "next": "rang_c_souvenir"
+            },
+            {
+              "id": "rien",
+              "label": "« Rien. Je voulais vous rencontrer. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "qui": {
+          "texte": "« Diriger. » Elle laisse le mot en suspens, comme pour en vérifier le poids. « Je ne commande personne, {prenom}. Je décide qui part, où, et avec qui. Ce qui arrive ensuite, ce sont les routes qui en décident. » Elle désigne le mur de cartes d'un mouvement du menton. « Mon métier, c'est que la route se trompe le moins souvent possible. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "broche": {
+          "texte": "Elle effleure l'argent du bout des doigts. « Une porte ouverte. Vous l'avez vue sculptée au-dessus de l'entrée : “Toute porte s'ouvre. Toute route a son prix.” » Un temps. « Les Templiers gardent les portes, les Architectes les entretiennent. Nous, nous les franchissons — et c'est nous qui payons le prix. Ils ne reviennent pas tous. Mais la porte, elle, reste ouverte pour ceux qui reviennent. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "cicatrice": {
+          "texte": "Elle ne détourne pas le visage, ne porte pas la main à sa tempe. Elle vous regarde, simplement, assez longtemps pour que la question vous paraisse de trop. « Une vieille histoire. » Puis, d'un ton égal : « Revenez me la demander le jour où vous en aurez une meilleure à me raconter. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "epee": {
+          "texte": "Sa main se pose sur la poignée usée, sans la serrer. « Par habitude. Elle a connu plus de routes que d'ennemis, et c'est très bien ainsi. » Elle retire sa main. « Une lame qu'on doit tirer, c'est une décision qu'on a prise trop tard. Si je fais bien mon travail, vous dégainerez moins souvent qu'on ne vous l'a promis à l'auberge. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "conge": {
+          "texte": "Elle hoche la tête, une fois. « Revenez quand vous aurez quelque chose à me dire, {prenom}. Pas avant, pas après. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "auxerre": {
+          "texte": "Elle tire un pli du coin de la table, le cachet de cire du Bastion de l'Yonne déjà rompu. « Valcroix. Il m'écrit que vous savez tenir un engagement. » Elle repose la lettre. « Il recommande peu. C'est une bonne chose pour vous. Mais ici, une recommandation ne vaut rien tant que je ne vous ai pas vu revenir. » Elle ouvre le registre. « Votre rang dit que vous savez vous battre. Ce qui m'intéresse, c'est de savoir si vous serez encore capable de me donner votre nom quand vous reviendrez de votre première mission ici. »",
+          "choix": [
+            {
+              "id": "pourquoi",
+              "label": "« Vous ne me demandez pas pourquoi je fais ce métier ? »",
+              "next": "pourquoi"
+            },
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "pourquoi": {
+          "texte": "« Je pourrais. Mais les gens ont toujours une bonne raison de prendre des risques. La faim, l'argent, la vengeance, la curiosité… Parfois même l'ennui. » Elle trempe sa plume. « Les contrats qui partent de ce bureau ne sont pas ceux du tableau d'en bas. Lisez-les attentivement. Si vous avez une question, posez-la avant de partir, pas quand les choses commencent à vous dévorer. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "rang_c_propose": {
+          "texte": "Maëlys ne s'assied pas. Elle tire d'un casier un pli déjà scellé — la cire porte la porte ouverte de la Guilde — et le pose à plat sur la table, entre vous. « Le rang C, {prenom}, ne se gagne pas sur une bête abattue. Il se gagne le jour où je peux confier à quelqu'un la vie d'une personne qui ne sait pas se défendre, et le regarder partir sans compter les jours. » Elle tapote le pli du bout de l'index. « L'Institut des Architectes me demande une escorte. En Normandie, en aval de Rouen, dans les ruines de l'abbaye de Jumièges, un portail s'est ouvert. Personne ne l'a bâti. Ils envoient l'une des leurs l'examiner : Aélis de Montfaucon. Je crois que vous la connaissez. Portez-lui cette lettre à {destination}, faites ce qu'elle vous demandera, ramenez-la vivante. Ensuite seulement, revenez ici. »",
+          "choix": [
+            {
+              "id": "rang_c_infos",
+              "label": "« Que sait-on de ce portail ? »",
+              "next": "rang_c_infos"
+            },
+            {
+              "id": "rang_c_accepter",
+              "label": "« Donnez-moi cette lettre. »",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "rang_c_plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "rang_c_infos": {
+          "texte": "« Ce qu'en dit un berger, et ce qu'en devinent trois maîtres de la Cour qui ne l'ont pas vu. » Elle hausse une épaule. « De la lumière dans la nef, la nuit. Des choses qui bougent sur les dalles. Pour le reste, l'abbaye est sur une boucle de la Seine, deux tours encore debout : suivez le fleuve vers la mer, vous ne la manquerez pas. » Elle vous regarde droit dans les yeux. « Ce qui sort d'un portail que personne n'a bâti, je ne le sais pas. C'est précisément pour cela que je n'y envoie pas n'importe qui. Et ne traînez pas avec la lettre : l'Institut attend ma réponse avant de faire partir quelqu'un d'autre. »",
+          "choix": [
+            {
+              "id": "rang_c_accepter",
+              "label": "« Donnez-moi cette lettre. »",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "rang_c_plus_tard",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "rang_c_accepte": {
+          "texte": "Elle vous tend le pli. Il ne pèse rien ; elle le retient pourtant un instant avant de le lâcher. « {destination}. En main propre. » Puis, déjà retournée vers ses cartes : « Et, {prenom} — là-bas, c'est elle qui décide quand on s'approche. Vous, vous décidez quand on recule. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_trop_charge": {
+          "texte": "Maëlys regarde votre sac, puis vous. « Une lettre, {prenom}. Une seule. Si vous ne pouvez plus la glisser dans votre barda, vous ne pourrez pas non plus courir quand il le faudra. Allégez-vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Je reviens plus léger. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_relance": {
+          "texte": "« Le pli n'est pas arrivé. » Ce n'est pas une question. « {destination}. L'Institut n'enverra personne à Jumièges tant qu'il n'aura pas ma réponse — et le portail, lui, n'attend personne. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y vais. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_pas_encore": {
+          "texte": "Elle lève les yeux de ses registres. « Remise, oui. On me l'a fait savoir. » Un temps. « Je ne vous ai pas envoyé porter une lettre, {prenom}. Je vous ai envoyé ramener quelqu'un. Revenez quand l'architecte sera de retour à la Cour des Arches — pas avant. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Elle le sera. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_rapporte": {
+          "texte": "Maëlys vous écoute sans vous interrompre : la Seine, les deux tours, la nef, ce qui est sorti du portail et la façon dont c'est tombé. Elle ne prend aucune note. Quand vous vous taisez, elle ouvre le registre des rangs, y trace une ligne, puis fait glisser vers vous {prime} pièces de cuivre. « Rang C. » Elle referme le registre. « L'Institut m'a écrit ce matin. Leur architecte est rentrée avec plus de questions qu'elle n'en avait en partant. Chez eux, c'est un compliment. » Un temps. « Chez moi aussi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Merci, maîtresse. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_souvenir": {
+          "texte": "« Jumièges. » Maëlys hoche la tête, une fois. « La Cour y a renvoyé des relevés. Le portail est toujours là, et personne ne sait encore vers où il ouvre. Ceux qui prétendent le savoir ne sont pas d'accord entre eux — ce qui, d'ordinaire, est bon signe : ils cherchent encore. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        }
+      }
+    },
+    "services": {
+      "transport": {
+        "offre": {
+          "id": "quete:rang_c_lettre_a_l_institut",
+          "destination": "lieu:la_cour_des_arches",
+          "cargaison": [
+            {
+              "item": "item:lettre_de_mission_de_la_guilde",
+              "quantite": 1,
+              "poids": 0.05
+            }
+          ],
+          "duree": 172800,
+          "proba": 1,
+          "unique": true,
+          "retour": true,
+          "rang": "C",
+          "titre": "Rang C : le portail de Jumièges",
+          "description": "Maëlys, maîtresse de la Guilde, vous confie un pli scellé pour l'Institut des Architectes, à la Cour des Arches. L'architecte qui le recevra part pour les ruines de l'abbaye de Jumièges, en Normandie, où un portail s'est ouvert : escortez-la, ramenez-la vivante, puis revenez rendre compte au bureau de la maîtresse. Le rang C est au bout.",
+          "recompenses": {
+            "xp": 150,
+            "cuivre": 20000,
+            "rang_guilde": "C"
+          }
+        },
+        "noeuds": {
+          "propose": "rang_c_propose",
+          "infos": "rang_c_infos",
+          "accepte": "rang_c_accepte",
+          "trop_charge": "rang_c_trop_charge",
+          "rapporte": "rang_c_rapporte"
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:aelis_de_montfaucon_cour_des_arches",
+    "type": "pnj",
+    "nom": "Aélis de Montfaucon",
+    "race": "humain",
+    "vocation": "lettre",
+    "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+    "description": "Jeune architecte et chercheuse, spécialiste des cristaux de mana et de leur emploi dans la structure des bâtiments. Arrivée à Lutecia avec le dernier convoi de cristaux d'Auxerre, elle poursuit ses recherches à l'Institut des Architectes, dans la Cour des Arches, sur le portail de Notre-Dame.",
+    "dialogue": {
+      "noeud_depart": "retrouvailles_01",
+      "noeud_attente": "accueil_suivant",
+      "noeuds": {
+        "retrouvailles_01": {
+          "texte": "Au milieu de la cour, près d'une table où plusieurs apprentis examinent des tracés, une jeune femme penche la tête sur un plan déroulé, un compas dans une main, un carnet épais calé sous le bras. Elle se redresse pour changer de feuille, vous voit, et reste figée une seconde, le compas en l'air. Puis elle pose tout sur la table sans regarder où, et vient droit vers vous.",
+          "choix": [
+            {
+              "id": "saluer",
+              "label": "« Aélis de Montfaucon. »",
+              "next": "retrouvailles_02"
+            }
+          ]
+        },
+        "retrouvailles_02": {
+          "texte": "« Vous. » Elle s'arrête à un pas, et on la sent chercher la formule exacte avant de se décider pour la plus courte. « Vous êtes venu jusqu'ici. Je n'étais pas certaine que les gens qui sortent d'une grotte reviennent voir ceux qu'ils en ont sortis. » Un coup d'œil derrière elle, vers la table. « Ne faites pas attention aux apprentis. Ils croient que je mesure l'esplanade. Je mesure l'esplanade, en réalité. Mais pas pour la raison qu'ils pensent. »",
+          "choix": [
+            {
+              "id": "gardee",
+              "label": "« Alors l'Institut vous a gardée. »",
+              "next": "retrouvailles_03"
+            },
+            {
+              "id": "ici",
+              "label": "« Que faites-vous, exactement, ici ? »",
+              "next": "retrouvailles_04"
+            }
+          ]
+        },
+        "retrouvailles_03": {
+          "texte": "« Gardée, réclamée, installée : choisissez le verbe, ils sont tous exacts. » L'ombre d'un sourire. « Le premier soir, j'ai mesuré l'autel d'ancrage du portail avant même d'avoir retiré mon manteau. On m'a donné une table le lendemain. » Elle caresse la couverture de son carnet. « Les Architectes ne sont à Lutecia que pour ce portail. Un Frère Aborigène l'a bâti, la grande vague ne l'a pas dérangé, et personne depuis n'a su en faire un pareil. Quand on étudie la pierre, on finit par vouloir voir la maison. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et vous apprenez quoi, ici ? »",
+              "next": "retrouvailles_04"
+            },
+            {
+              "id": "espoir",
+              "label": "« Que comptez-vous en faire ? »",
+              "next": "retrouvailles_05"
+            }
+          ]
+        },
+        "retrouvailles_04": {
+          "texte": "« Tout ce qui permet de dire à une porte où elle va. » Elle compte sur ses doigts, sans y mettre d'emphase. « La cour, pour présenter ses travaux et se faire démolir par plus savant que soi. Les Archives des Seuils, où l'on garde les relevés de portails, les plans anciens, les descriptions de donjons — la moitié est incomplète, alors on compare les copies jusqu'à reconstituer une méthode oubliée. Et les Ateliers de Convergence : des cristaux, des instruments, des portails en réduction. Les vrais portails, on ne les touche pas sans y être autorisé. » Elle ajoute, plus bas : « Les cristaux, c'est ce que je savais déjà. Le reste, je l'apprends. »",
+          "choix": [
+            {
+              "id": "espoir",
+              "label": "« Et après ? Que voulez-vous en faire ? »",
+              "next": "retrouvailles_05"
+            }
+          ]
+        },
+        "retrouvailles_05": {
+          "texte": "Elle prend le temps de répondre. « Comprendre ce que ses bâtisseurs savaient et n'ont écrit nulle part. » Elle lève la main avant que vous ne répondiez. « Il y a deux écoles, ici. Pour les uns, ils ne l'ont pas écrit parce que cela leur paraissait trop évident pour être écrit. Pour les autres, ils l'ont écrit, et c'est la page qui a disparu. » Elle hausse une épaule. « Je ne tranche pas. Je mesure. C'est la seule chose que je sois sûre de savoir faire correctement. »",
+          "choix": [
+            {
+              "id": "conclure",
+              "label": "« Vous avez trouvé votre place. »",
+              "next": "retrouvailles_fin"
+            }
+          ]
+        },
+        "retrouvailles_fin": {
+          "texte": "« Une place, non. Un point de départ. » Elle reprend son compas sur la table et le fait tourner entre ses doigts, comme pour vérifier qu'il est resté droit. « Vous, vous allez dehors, vous voyez des portails, des donjons, des choses que je ne connais que par des relevés. Quand vous en reviendrez, passez par la Cour. Ici, on a de quoi écouter, et je préférerais l'entendre de quelqu'un qui y était plutôt que de l'apprendre dans un rapport. » Elle tend la main, brièvement, comme on scelle un accord de métier. « {prenom}. Merci. Pour la grotte. Je n'ai pas encore trouvé comment le dire en moins de mots. »",
+          "delai_min": 315360000,
+          "choix": [
+            {
+              "id": "lettre",
+              "label": "Lui tendre le pli scellé de la Guilde.",
+              "condition": {
+                "transport_a_livrer": true
+              },
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              }
+            },
+            {
+              "id": "jumieges",
+              "label": "« Quand partons-nous pour Jumièges ? »",
+              "condition": {
+                "escorte_offerte": true,
+                "transport_a_livrer": false,
+                "quete_active": {
+                  "id": "quete:rang_c_lettre_a_l_institut"
+                }
+              },
+              "next": "mission_01"
+            },
+            {
+              "id": "fin",
+              "label": "« Je repasserai. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "accueil_suivant": {
+          "texte": "Aélis lève les yeux d'un plan couvert de cotes à l'encre, un compas toujours entre deux doigts. « Ah. C'est vous. » Elle repousse une mèche de son poignet sans lâcher son outil. « Entrez dans la lumière, vous faites de l'ombre sur mes chiffres. »",
+          "choix": [
+            {
+              "id": "lettre",
+              "label": "Lui tendre le pli scellé de la Guilde.",
+              "condition": {
+                "transport_a_livrer": true
+              },
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              }
+            },
+            {
+              "id": "jumieges",
+              "label": "« Quand partons-nous pour Jumièges ? »",
+              "condition": {
+                "escorte_offerte": true,
+                "transport_a_livrer": false,
+                "quete_active": {
+                  "id": "quete:rang_c_lettre_a_l_institut"
+                }
+              },
+              "next": "mission_01"
+            },
+            {
+              "id": "travaux",
+              "label": "« Les travaux avancent ? »",
+              "next": "suivant_travaux"
+            },
+            {
+              "id": "derange",
+              "label": "« Je ne vous dérange pas ? »",
+              "next": "suivant_derange"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "suivant_travaux": {
+          "texte": "« Elles avancent. » Elle tapote le plan du bout du compas. « Une cote de plus que ce matin, et une erreur de moins que ce matin. Dans ce métier, c'est une bonne journée. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil_suivant"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "suivant_derange": {
+          "texte": "« Vous me dérangez si peu que j'ai failli ne pas lever la tête. » Elle se reprend, un coin de la bouche relevé. « Ce qui est, de ma part, plutôt une politesse. Restez le temps que vous voulez : la cour est ouverte. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil_suivant"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "lettre_lue": {
+          "texte": "Aélis reconnaît le sceau avant même d'avoir le pli en main — la porte ouverte de la Guilde. Elle le rompt de l'ongle du pouce et lit debout, vite, puis une seconde fois, lentement. « {donneur} vous envoie. » Elle replie la lettre en quatre et la glisse dans son carnet. « J'avais demandé quelqu'un de sûr. Je n'avais pas osé demander quelqu'un que je connaisse. »",
+          "choix": [
+            {
+              "id": "mission",
+              "label": "« De quoi s'agit-il ? »",
+              "next": "mission_01"
+            }
+          ]
+        },
+        "lettre_absente": {
+          "texte": "Aélis tend la main, puis la laisse retomber. « Le pli de la Guilde ? Vous ne l'avez plus. » Elle fronce les sourcils, plus inquiète que fâchée. « Retrouvez-le. Sans lui, l'Institut ne me laissera pas partir avec vous. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Je reviens avec. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "mission_01": {
+          "texte": "Elle déroule sur la table un relevé couvert de cotes, d'une écriture qui n'est pas la sienne. « Jumièges. Une abbaye sur une boucle de la Seine, en aval de Rouen, en ruine depuis plus longtemps que la Cour ne tient de registres. Il y a vingt jours, un berger a vu de la lumière dans la nef. Un portail. » Elle pose le doigt sur un carré, au flanc nord du chœur. « Là. Où il n'y a ni autel d'ancrage, ni cristal, ni rien de ce que nous savons poser pour en faire tenir un. »",
+          "choix": [
+            {
+              "id": "qui",
+              "label": "« Qui l'a bâti ? »",
+              "next": "mission_02"
+            }
+          ]
+        },
+        "mission_02": {
+          "texte": "« Personne. C'est tout le problème. » Elle s'interdit de sourire, et n'y parvient qu'à moitié. « Ou quelqu'un, il y a si longtemps que la pierre a oublié son nom. Ou la Vague, qui n'a pas fini de remuer ce qu'elle a remué. Trois maîtres de la Cour, trois réponses, et pas un ne veut aller voir. » Elle roule le relevé. « Moi, je veux aller voir. L'Institut m'y autorise si la Guilde m'accompagne. Il faut que j'approche à moins de dix pas pour mesurer — et le berger dit que quelque chose bouge sur les dalles, la nuit. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je vous y conduis. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "attendre",
+              "label": "« Laissez-moi me préparer. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "mission_acceptee": {
+          "texte": "Aélis ferme son carnet, glisse son compas à sa ceinture et cale trois rouleaux de vélin sous son bras. « Je suis prête. Je l'étais depuis vingt jours. » Elle marque un temps. « Je ne sais pas me battre, {prenom}. Vous le savez. Sur la route, vous m'empêchez de mourir ; là-bas, je mesure. C'est un partage honnête. » Puis, plus bas, avec un regard vers la table des apprentis : « Ils vont croire que je fugue. Laissons-les croire. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« En route. »",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    },
+    "services": {
+      "transport": {
+        "noeuds": {
+          "livre": "lettre_lue",
+          "incomplet": "lettre_absente"
+        }
+      },
+      "escorte": {
+        "offre": {
+          "id": "quete:escorte_aelis_abbaye_de_jumieges",
+          "titre": "Le portail de Jumièges",
+          "description": "L'Institut des Architectes envoie Aélis de Montfaucon examiner un portail ouvert dans les ruines de l'abbaye de Jumièges, en Normandie, sur une boucle de la Seine en aval de Rouen. Conduisez-la jusqu'à l'abbaye, inspectez la nef avant qu'elle n'y entre, puis ramenez-la vivante aux Archives des Seuils, à la Cour des Arches. Elle ne sait pas se battre.",
+          "destination": "lieu:les_archives_des_seuils",
+          "proteges": [
+            {
+              "prenom": "Aélis",
+              "nom": "de Montfaucon",
+              "race": "humain",
+              "sex": "F",
+              "image": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+              "description": "Architecte de l'Institut, chercheuse en cristaux de mana. Elle part mesurer le portail de Jumièges, un carnet, un compas et trois rouleaux de vélin pour tout bagage. Elle ne sait pas se battre."
+            }
+          ],
+          "unique": true,
+          "proba": 1,
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "D"
+          },
+          "recompenses": {
+            "xp": 120,
+            "cuivre": 10000
+          }
+        },
+        "noeuds": {
+          "accepte": "mission_acceptee"
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:la_cour_des_arches",
+    "type": "lieu",
+    "label": "La Cour des Arches",
+    "image": "institut_des_architectes_lutecia01.jpg",
+    "categorie": "institut_des_architectes",
+    "lieu_parent": "lieu:lutecia",
+    "pnj": [
+      {
+        "character": "pnj:aelis_de_montfaucon_cour_des_arches",
+        "nom": "Aélis",
+        "portrait": "architecte_Aélis_de_Montfaucon_cour_des_arches.jpg",
+        "probabilite": 1,
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_aelis_abbaye_de_jumieges",
+              "attendu": false
+            }
+          },
+          {
+            "quete_active": {
+              "types": [
+                "escorte"
+              ],
+              "cible": "lieu:les_archives_des_seuils",
+              "attendu": false
+            }
+          }
+        ],
+        "description": "Une jeune architecte penchée sur un plan, un compas dans une main et un carnet épais sous le bras."
+      }
+    ]
+  },
+  {
+    "_id": "item:lettre_de_mission_de_la_guilde",
+    "type": "item",
+    "nom": "Lettre de mission de la Guilde",
+    "sous_categorie": "",
+    "icon": "✉️",
+    "description": "Pli scellé à la porte ouverte, le sceau de la maîtresse de la Guilde de Lutecia, adressé à l'Institut des Architectes.",
+    "rarete": "commun",
+    "categorie": "document",
+    "slots": [],
+    "poids": 0.05
+  },
+  {
+    "_id": "lieu:les_archives_des_seuils",
+    "type": "lieu",
+    "label": "Les Archives des Seuils",
+    "image": "archives_des_seuils_lutecia01.jpg",
+    "categorie": "institut_des_architectes",
+    "lieu_parent": "lieu:lutecia",
+    "acces": {
+      "refus": "Un archiviste referme la porte vitrée devant vous, poliment mais sans appel : les Archives des Seuils ne s'ouvrent qu'aux Architectes, et à ceux qui reviennent d'un seuil avec eux.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "combat_gagne": {
+            "lieu": "lieu:nef_de_l_abbaye_de_jumieges"
+          }
+        }
+      ]
+    },
+    "pnj": [
+      {
+        "character": "pnj:aelis_de_montfaucon_archives",
+        "nom": "Aélis",
+        "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+        "probabilite": 1,
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_aelis_abbaye_de_jumieges"
+            }
+          }
+        ],
+        "description": "Une jeune architecte au milieu de relevés étalés, une plume entre les dents et un compas à la main."
+      }
+    ]
+  },
+  {
+    "_id": "link:la_cour_des_arches_to_les_archives_des_seuils",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_cour_des_arches",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Retourner dans la cour"
+      },
+      {
+        "lieu": "lieu:les_archives_des_seuils",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Monter aux Archives des Seuils"
+      }
+    ],
+    "metadata": {
+      "type": "institut_des_architectes",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "pnj:aelis_de_montfaucon_archives",
+    "type": "pnj",
+    "nom": "Aélis de Montfaucon",
+    "race": "humain",
+    "vocation": "lettre",
+    "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+    "description": "Jeune architecte de l'Institut, rentrée de Jumièges avec un carnet plein de mesures qu'aucune théorie n'explique entièrement.",
+    "dialogue": {
+      "noeud_depart": "retour_01",
+      "noeud_attente": "accueil",
+      "noeuds": {
+        "retour_01": {
+          "texte": "Les Archives des Seuils montent sur trois étages de galeries, sous une coupole peinte. Aélis a fait vider une table entière : ses relevés de Jumièges y sont étalés, tenus aux coins par des presse-papiers de cristal. Autour, des architectes de toutes les Lignées se penchent, discutent, se contredisent. Elle vous aperçoit et, sans un mot, vous fait signe d'approcher.",
+          "choix": [
+            {
+              "id": "disent",
+              "label": "« Qu'en disent-ils ? »",
+              "next": "retour_02"
+            }
+          ]
+        },
+        "retour_02": {
+          "texte": "« Ce que disent toujours les gens savants : trois choses incompatibles, chacune avec certitude. » Elle compte sur ses doigts. « Le vieux maître des Seuils jure qu'un portail des Frères dormait sous l'abbaye, et que la Vague l'a réveillé. Ses élèves répondent que les Frères n'ont rien bâti si loin de leurs routes, et qu'un portail peut naître seul, comme celui de Rome. Et l'archiviste en chef rappelle que personne n'a jamais vu un portail naître seul — il en conclut que quelqu'un l'a ouvert, et qu'il l'a ouvert exprès. »",
+          "choix": [
+            {
+              "id": "vous",
+              "label": "« Et vous ? »",
+              "next": "retour_03"
+            }
+          ]
+        },
+        "retour_03": {
+          "texte": "Elle regarde longtemps son carnet ouvert. « Moi, j'ai mesuré. Les trois hypothèses tiennent dans mes chiffres, et aucune ne les explique tous. » Elle le referme. « La Cour a écrit aux Templiers ; quelqu'un gardera la nef. J'y retournerai un jour, avec de meilleurs instruments — et, si vous le voulez bien, avec vous. » Puis, d'un ton plus léger : « Allez voir la Guilde, {prenom}. La maîtresse attend votre récit, et je crois savoir ce que vous y gagnerez. »",
+          "delai_min": 315360000,
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« À bientôt, Aélis. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "accueil": {
+          "texte": "Aélis lève les yeux d'une pile de relevés de Jumièges, une plume entre les dents qu'elle retire pour parler. « Vous. Asseyez-vous, si vous trouvez une chaise qui ne porte pas de vélin. »",
+          "choix": [
+            {
+              "id": "nouveau",
+              "label": "« Du nouveau sur le portail ? »",
+              "next": "nouveau"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "nouveau": {
+          "texte": "« Du nouveau, non. Du différent, toujours. » Elle tourne une feuille vers vous : deux tracés presque identiques. « Le même portail, relevé à dix jours d'écart. Il a changé d'une ligne. Un vivant aurait grandi ; une pierre aurait bougé. Je ne sais pas encore lequel des deux il est. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:abbaye_de_jumieges",
+    "type": "lieu",
+    "label": "Les ruines de l'abbaye de Jumièges",
+    "image": "abbaye_de_jumieges.jpg",
+    "categorie": "chemin",
+    "lieu_parent": "lieu:france",
+    "pnj": [
+      {
+        "character": "pnj:aelis_de_montfaucon_jumieges",
+        "nom": "Aélis",
+        "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+        "probabilite": 1,
+        "conditions": [
+          {
+            "quete_active": {
+              "types": [
+                "escorte"
+              ],
+              "cible": "lieu:les_archives_des_seuils"
+            }
+          }
+        ],
+        "description": "Aélis, au bord du sentier, son carnet ouvert sur les ruines."
+      }
+    ]
+  },
+  {
+    "_id": "link:abbaye_de_jumieges_to_france",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          37,
+          11
+        ],
+        "label": "Les ruines de Jumièges"
+      },
+      {
+        "lieu": "lieu:abbaye_de_jumieges",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Reprendre la route"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "pnj:aelis_de_montfaucon_jumieges",
+    "type": "pnj",
+    "nom": "Aélis de Montfaucon",
+    "race": "humain",
+    "vocation": "lettre",
+    "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+    "description": "Aélis, devant les ruines de Jumièges, entre son carnet et le portail.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:nef_de_l_abbaye_de_jumieges",
+        "noeuds": {
+          "ouvre": "nef_ouverte",
+          "refus": "nef_close"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Les deux tours de l'abbaye tiennent encore, ouvertes au ciel. Le chemin monte entre les haies jusqu'au portail effondré de la nef. Aélis s'est arrêtée au bord du sentier, carnet ouvert, et compte à mi-voix. « Quarante-deux pas de la porte à la croisée, d'après les vieux relevés. » Elle lève le menton vers les ruines. « Écoutez. »",
+          "choix": [
+            {
+              "id": "ecouter",
+              "label": "Tendre l'oreille.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "next": "seuil"
+            },
+            {
+              "id": "apres",
+              "label": "« C'est fini. Vous avez vos mesures ? »",
+              "condition": {
+                "acces_libere": true
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(S'éloigner des ruines.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "seuil": {
+          "texte": "Rien, d'abord. Puis un bourdonnement très bas, qui ne vient d'aucune direction et vous serre les dents. Entre les arcs du chœur, une lueur violette pulse, lente comme une respiration. Aélis a pâli, mais sa main n'a pas lâché le crayon. « Il n'a pas la couleur d'un portail entretenu. Il n'a la couleur d'aucun portail que je connaisse. » Quelque chose racle les dalles, dans la nef. Plusieurs choses. « Ils sont sortis de là. Il faut que j'approche à moins de dix pas. »",
+          "choix": [
+            {
+              "id": "entrer",
+              "label": "« Veuillez rester dehors, nous allons inspecter les lieux. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "attendre",
+              "label": "« Pas encore. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "nef_ouverte": {
+          "texte": "« À moins de dix pas, j'ai dit… » Aélis s'arrête pourtant sur le seuil, le carnet serré contre elle. Vous entrez sans elle. Vos pas sonnent sur les dalles de la nef. Trois silhouettes se retournent ensemble, cornes basses, et la lueur du portail allume dans leurs yeux un reflet de braise. Derrière vous, depuis la porte, la voix d'Aélis, très basse : « Des démons. Ils ne s'éloignent pas du portail. Ils le gardent. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Tirer votre arme.",
+              "next": "fin"
+            }
+          ]
+        },
+        "nef_close": {
+          "texte": "Aélis secoue la tête sans quitter la nef des yeux. « Pas maintenant. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Reculer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "La nef enfin sûre, Aélis y est entrée sans attendre qu'on l'y invite. Elle est assise sur une marche du chœur, à dix pas du portail, le carnet couvert de chiffres jusque dans les marges. La lueur violette n'a pas faibli ; elle respire toujours. « J'ai mes mesures. J'en ai même trop : aucune ne ressemble à ce qu'on m'a appris. » Elle referme le carnet sur son crayon. « Il est stable. Pas d'ancrage, pas de cristal, personne pour l'entretenir — et il est stable. » Elle se lève, s'époussette. « Merci de m'avoir fait attendre. Je ne l'aurais pas dit avant. Ramenez-moi à la Cour, {prenom}. Il faut que je pose tout cela à plat aux Archives avant de ne plus me souvenir que de ce que j'ai noté. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« En route pour Lutecia. »",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:nef_de_l_abbaye_de_jumieges",
+    "type": "lieu",
+    "label": "La nef de l'abbaye de Jumièges",
+    "image": "abbaye_de_jumieges_nef.jpg",
+    "categorie": "battle_map",
+    "dimensions": {
+      "x": 19,
+      "y": 36
+    },
+    "cells": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        3,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        3,
+        0,
+        1,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        3,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        0
+      ],
+      [
+        0,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        3,
+        1,
+        3,
+        3,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        3,
+        3,
+        1,
+        0,
+        3,
+        1,
+        1,
+        3,
+        1,
+        0,
+        1,
+        1,
+        3,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        3,
+        3,
+        3,
+        1,
+        3,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        3,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        3,
+        1,
+        0,
+        3,
+        1,
+        1,
+        3,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        3,
+        1,
+        1,
+        1,
+        3,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        3,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        3,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        3,
+        3,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "nav": {},
+    "tags": [
+      "ruines",
+      "abbaye",
+      "portail",
+      "donjon"
+    ],
+    "proteges_restent_dehors": true,
+    "acces": {
+      "gardien": "pnj:aelis_de_montfaucon_jumieges",
+      "refus": "La nef est silencieuse. Le portail respire dans le chœur, et rien ne vous y attend.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "escorte"
+            ],
+            "cible": "lieu:les_archives_des_seuils"
+          }
+        },
+        {
+          "combat_gagne": {
+            "lieu": "lieu:nef_de_l_abbaye_de_jumieges",
+            "attendu": false
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "donjon:abbaye_de_jumieges",
+    "type": "donjon",
+    "nom": "Le portail de Jumièges",
+    "description": "Dans le chœur en ruine de l'abbaye de Jumièges, un portail s'est ouvert sans que personne l'ait bâti. Trois démons mineurs en sont sortis, et ne s'en éloignent pas.",
+    "portail": "lieu:abbaye_de_jumieges",
+    "niveau_min": 4,
+    "niveau_max": 5,
+    "battle_maps": [
+      {
+        "lieu": "lieu:nef_de_l_abbaye_de_jumieges",
+        "especes": [
+          "espece:demon_mineur"
+        ],
+        "nb_monstres": 3,
+        "niveau_min": 4,
+        "niveau_max": 5
+      }
+    ]
+  }
+]

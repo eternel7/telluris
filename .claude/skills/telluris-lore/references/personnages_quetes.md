@@ -13,7 +13,7 @@
 | `pnj:dame_eleonore_de_rochefort` (+ `_lutecia`) | Dame Éléonore de Rochefort | **elfe** · paladine, commandante des convois de cristaux d'Auxerre | escorte vers Lutecia ; attend ensuite ses ordres sur le parvis de Notre-Dame |
 | `pnj:frere_martin_de_clairvaux` (+ `_lutecia`) | Frère Martin de Clairvaux | **hobbit** · paladin, second de l'escorte | « comparse hobbit » de la paladine |
 | `pnj:eleonore_de_vaugirard` | Éléonore de Vaugirard | humaine · réceptionniste du Grand Relais des Frontières (Lutecia) | accueil à Lutecia |
-| `pnj:maelys` | Maëlys **de Valombre** (Valombre = son hameau, pas un titre) | **naine** · maîtresse de la Guilde de Lutecia (bureau du Grand Relais) | remplace le « vieux elfe » (Auteur, 11/10) ; cicatrice jamais racontée ; ancienne aventurière ; prédécesseur = le **vieil elfe**, sans nom, **porté disparu** (enquête secrète sur un portail hors de Lutecia) ; première rencontre **au bureau, au rang D**, sur recommandation de Gautier de Valcroix ; secret : **même lieu** dans des donjons de portails différents — tour inclinée (**Babel**), arbre mort (**Yggdrasil**), porte rouge, inscription en **hénochien** (piste Grigori), mystère ouvert. Arbitrage de l'Auteur : [personnages/20261011_maelys_maitresse_de_guilde.md] |
+| `pnj:maelys` | Maëlys **de Valombre** (Valombre = son hameau, pas un titre) | **naine** · maîtresse de la Guilde de Lutecia (bureau du Grand Relais) | remplace le « vieux elfe » (Auteur, 11/10) ; cicatrice jamais racontée ; ancienne aventurière ; prédécesseur = le **vieil elfe**, sans nom, **porté disparu** (enquête secrète sur un portail hors de Lutecia) ; première rencontre **au bureau, au rang D**, sur recommandation de Gautier de Valcroix ; donne l'**épreuve du rang C** (portail de Jumièges, escorte d'Aélis) ; secret : **même lieu** dans des donjons de portails différents — tour inclinée (**Babel**), arbre mort (**Yggdrasil**), porte rouge, inscription en **hénochien** (piste Grigori), mystère ouvert. Arbitrage de l'Auteur : [personnages/20261011_maelys_maitresse_de_guilde.md] |
 | `pnj:milo_cartographe` | Milo | hobbit · aide-cartographe d'une compagnie de voyageurs (Auxerre) | arc de deuil n° 1 |
 | `pnj:elise_herboriste` | Élise | **naine** · herboriste du **Coq de Lutèce** (faubourgs de Lutecia) | arc de deuil n° 2 |
 | `pnj:reverend_malakor` | Révérend Malakor | ogre · prêtre (temple de Saint-Eusèbe, Auxerre) | — |
@@ -29,7 +29,7 @@ Les noms de marchands suivent le gabarit **Maître / Dame / Frère / Docte / Le 
 
 ## Aélis — [personnages/20260916_ecrire_deux_histoires_d_aelis.md], [personnages/20260924_etoffer_l_intrigue_des_catacombes.md]
 **Auteur**
-- **Retrouvailles** à l'**institut des architectes de Lutecia**, qui **mènent à une mission**.
+- **Retrouvailles** à l'**institut des architectes de Lutecia**, qui **mènent à une mission** — écrite (11/10/2026) : Maëlys, pour le **rang C**, envoie l'aventurier escorter Aélis jusqu'au portail des ruines de **Jumièges** ; elle revient aux **Archives des Seuils** avec trois théories et aucune réponse.
 - **Plus tard** : on lui offre d'approfondir sa formation à **Mu**, et elle veut que l'aventurier l'accompagne.
 - La relation n'est **pas ambiguë**. L'aventurier peut être une femme. Ce qui compte, c'est la **confiance** et le **regard extérieur** que l'aventurier apporte à l'architecte.
 - Elle est l'une des personnes qui portent des **théories contradictoires** sur le mystère.

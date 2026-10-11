@@ -243,6 +243,7 @@ Elle n'en a parlé ni aux Templiers ni aux Architectes : elle craint que les pre
 ### Ce qui en découle en jeu (`jsons/maelys_maitresse_de_guilde_a_importer.json`, import en attente)
 - `pnj:maelys` : `nom` → **« Maëlys de Valombre »** ; description complétée (hameau, ascension, prédécesseur elfe disparu).
 - Dialogue : choix « Je viens d'Auxerre. Gautier de Valcroix m'a recommandé. » → nœud `auxerre` puis `pourquoi` (la scène ci-dessus), proposé **à la première entrée dans le bureau seulement** (condition `passages` `max 1` ; rouvrir le dialogue pendant ce passage le garde, ressortir puis revenir l'efface) ; la broche cite la devise sculptée ; nom affiché dans le bureau : « Maëlys de Valombre ». Linter : 0 erreur.
+- **Épreuve du rang C** (`quete:rang_c_lettre_a_l_institut`, `jsons/quete_rang_c_abbaye_de_jumieges_a_importer.json`, généré par `dev/gen_quete_rang_c_jumieges.py` à partir de ce fichier) : Maëlys confie une lettre pour l'Institut ; Aélis part examiner le portail que personne n'a bâti à **Jumièges** ; rapport au bureau, rang C. C'est le rôle « au rang D — responsable des contrats importants ». Le générateur relit ce fichier : le nom complet, la devise et le choix d'Auxerre survivent à sa réexécution.
 - Prénom « Maëlys » dans la liste des recrues (`utils/recrutement.py`) : **laissé**, comme « Aélis » et « Éléonore » déjà présents — une homonymie de recrue est tolérée.
 
 ### Restent ouverts (non arbitrés)

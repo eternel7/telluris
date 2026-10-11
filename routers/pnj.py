@@ -1290,7 +1290,9 @@ def _declencher_combat_donjon(character: dict, lieu_garde: dict) -> str | None:
 
 	compagnons = recrutement.groupe_effectif(character, get_doc)
 	montures_groupe = montures.montures_effectives(character, get_doc)
-	proteges_groupe = escorte.proteges_effectifs(character, get_doc)
+	# Une salle peut laisser les personnes escortées à la porte (`proteges_restent_dehors`).
+	proteges_groupe = (escorte.proteges_effectifs(character, get_doc)
+					   if donjon.proteges_admis(lieu_garde) else [])
 	# Espèces, fourchette de grade (vaut pour TOUTE la salle, escorte de l'élite comprise) et
 	# effectif (écrit, sinon un monstre de plus par tranche de deux compagnons — ni montures
 	# ni personnes escortées, qui ne combattent pas) : règle partagée avec les étages.
