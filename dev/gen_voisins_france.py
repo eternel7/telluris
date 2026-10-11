@@ -73,16 +73,18 @@ def main() -> int:
 		couleurs, _, _ = ggi.echantillonner(ggi.trouver_image(doc["image"]), dim["x"], dim["y"])
 		return grille_image.masque_eau(couleurs, dim["x"], dim["y"], grille_image.regles_de("pays"))
 
-	lieux_sud, liens_sud, refus = sud.construire(docs, lambda d: proposer(d, "pays"))
+	lieux_sud, liens_sud, refus, avert = sud.construire(docs, lambda d: proposer(d, "pays"))
 	france = next((d for d in lieux_sud if d["_id"] == plaine.FRANCE), None)
-	lieux_pl, liens_pl, refus_pl, propositions = ([], [], [], {}) if refus else \
+	lieux_pl, liens_pl, refus_pl, propositions, avert_pl = ([], [], [], {}, []) if refus else \
 		plaine.construire(docs, _taille_image, proposer, france)
 	refus += refus_pl
 	italie = next((d for d in lieux_sud if d["_id"] == pannonie.ITALIE), None)
-	lieux_pa, liens_pa, refus_pa, prop_pa = ([], [], [], {}) if refus else \
+	lieux_pa, liens_pa, refus_pa, prop_pa, avert_pa = ([], [], [], {}, []) if refus else \
 		pannonie.construire(docs, _taille_image, proposer, eau, italie)
 	refus += refus_pa
 	propositions.update(prop_pa)
+	for a in avert + avert_pl + avert_pa:
+		print(f"⚠ {a}")
 	emis, r = a_emettre(docs, lieux_sud + lieux_pl + lieux_pa + liens_sud + liens_pl + liens_pa)
 	refus += r
 	for r in refus:
