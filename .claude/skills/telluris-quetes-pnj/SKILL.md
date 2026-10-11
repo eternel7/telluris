@@ -48,7 +48,7 @@ La réussite dépend de ce que le joueur **EMPÊCHE**, pas de ce qu'il tue ou po
 
 - Offre **ÉCRITE** (`services.escorte.offre`, n'importe quel PNJ), `rang_min` optionnel dérivé par la même source unique que les commissions de donjon (`acces.rang_de_quete`).
 - Doc `protege:*` = miroir du character (stats de base raciales, aucun point dépensé) ; index `character["proteges"]` séparé — un protégé n'est **pas** un porteur.
-- En combat, le protégé se comporte **comme une monture** : `jouable:False`, ciblable, hors `ordre_initiative` et hors `_combattants_vivants`.
+- En combat, le protégé se comporte **comme une monture** : `jouable:False`, ciblable, hors `ordre_initiative` et hors `_combattants_vivants`. Exception : une salle gardée qui porte `proteges_restent_dehors: true` le laisse à la porte (`donjon.proteges_admis`, lu par `_declencher_combat_donjon` seulement — la route l'embarque toujours).
 - Trois formes de rendez-vous (chez le donneur, à l'entrée d'un lieu, zone 3×3 comme une chasse), résolues **à la génération** et figées dans le snapshot. ⚠️ Un rendez-vous se place toujours **derrière** la menace du combat de la mission (barrière `acces.combat_gagne` sur le lieu de rendez-vous), jamais devant.
 - Échec (mort en combat ou abandon) ⇒ sanction du donneur et de sa maison, **sans consommer l'unicité**.
 - **Focalisation 🎯 interdite** : une escorte ne biaise aucun tirage (même raison que le transport).
@@ -86,6 +86,16 @@ Contenu : `jsons/pnj_milo_cartographe_a_importer.json` (`pnj:milo_cartographe`, 
 
 Verrouillé par `tests/test_pnj.py`, `tests/test_quete_reussie.py`, `tests/test_quete_active.py`, `tests/test_indicateurs.py`, `tests/test_guillemets_insecables.py`.
 
+#### Épreuve du rang C de Lutecia — le portail de Jumièges
+Contenu : `dev/gen_quete_rang_c_jumieges.py` → **un seul** fichier d'import `jsons/quete_rang_c_abbaye_de_jumieges_a_importer.json` (docs neufs ET retouchés, recopiés dans `maelys_…` / `cour_des_arches_…`). 100 % donnée.
+- Chaîne : Maëlys (bureau, rang D) confie `quete:rang_c_lettre_a_l_institut` (transport `retour`, `rang_guilde: "C"` — c'est LUI qui promeut) → Aélis la reçoit à la Cour des Arches (destinataire NON marchand : `livre`/`incomplet`) et offre `quete:escorte_aelis_abbaye_de_jumieges` → voix d'Aélis devant `lieu:abbaye_de_jumieges` (France (37,11)), service `acces` (« Veuillez rester dehors… ») → combat de la nef SANS Aélis (`proteges_restent_dehors`, `donjon:abbaye_de_jumieges`, 3 démons mineurs, grade 4-5) → dépose aux Archives des Seuils → `rapporter` chez Maëlys.
+- ⚠️ Le `rapporter` exige AUSSI `quete_reussie` de l'escorte : renommer l'escorte bloque le rang C en silence (verrouillé : `test_les_ids_de_quete_sont_ceux_des_offres`).
+- ⚠️ Destination = `lieu:les_archives_des_seuils`, fermées par `combat_gagne` de la nef : impossible de déposer Aélis sans Jumièges. Une seule Aélis présente à la fois (Cour → abbaye → Archives), présences filtrées par `cible` (les barrières n'ont pas de filtre `id`).
+- Image d'Aélis devant l'Institut = **portrait** de l'entrée `pnj` de la Cour, pas `image` : la Cour garde son image sans elle.
+- Linter : le rôle de DONNEUR de transport n'est exigé que d'une `offre` écrite ou d'un `pnj:marchand_*` ; déclarer `livre` exige `incomplet`.
+
+Verrouillé par `tests/test_quete_rang_c_jumieges.py`.
+
 #### Passages dans un lieu — condition `passages`
 - `character["passages"] = {lieu_id: n}` : nombre d'ENTRÉES, compté par `pnj.poser_pnj_present` **avant** le tirage (le passage en cours compte déjà). Même sémantique que le tirage : refresh = 0, ressortir/rentrer = +1, connexion interne = 0. Champ absent ⇒ 0 (un perso compte à partir de sa prochaine entrée).
 - Condition `{"passages": {lieu, min?, max?}}`, bornes **incluses**, au moins une — **dans les deux vocabulaires** (présence `pnj[].conditions` / bloc `acces`, et `condition` d'un choix). UN prédicat : `pnj.passages_ok` (importé par `acces`). Fail-closed : `lieu` absent, borne non entière, aucune borne, sous-clé inconnue. Linter : `lint_dialogues.fautes_passages` (+ `min > max`) ; éditeur de lieux : sous-filtres `min`/`max` de genre `entier`.
@@ -115,7 +125,7 @@ Un arbre de dialogue est de la **donnée** : ni typé, ni exécuté à l'import.
 - `analyser(payload)` → `{analyses, ignores, erreurs, avertissements, trouvailles[]}` ; un doc sans bloc `dialogue` est *ignoré*, pas fautif.
 - **Erreurs** : `noeud_depart` absent/introuvable · `next` vers un nœud inexistant · nœud **inatteignable** · nœud sans choix · deux choix de même `id` dans un nœud (`choix_valide` renvoie le premier, le second est mort) · nœud de service déclaré mais absent · placeholder hors liste · **condition inconnue du moteur** (flag absent = False → le choix ne s'affiche JAMAIS) · action `livrer`/`rapporter` non conditionnée par son flag · nom de PNJ en dur dans un `pnj:marchand_*` · bloc **`relation`** fautif (clé hors `RELATION_CLES`, `delta` nul ou illisible, `lieu` sans préfixe `lieu:`, `unique` non textuel) · **`relation_reinit`** qui ne lève rien — ⚠️ le plus coûteux à diagnostiquer : la récompense reste fermée pour toujours alors que le dialogue se déroule normalement.
 - **Avertissements** : choix sans `next` ni `action` (ferme le dialogue comme `fin`, idiome valide) · nœud de service manquant (sauf `accepte` d'une escorte dont CHAQUE acceptation porte `deplacer` : le client quitte le dialogue, le nœud ne serait jamais lu).
-- ⚠️ **Le transport a deux rôles**, presque jamais tenus par le même PNJ : **donneur** (`accepte`/`trop_charge`, + `rapporte` si `offre.retour`), que n'importe quel PNJ peut être ; **destinataire** (`livre`/`incomplet`), en pratique un `pnj:marchand_*`. Les exiger de tous ferait crier au défaut sur un donneur correct.
+- ⚠️ **Le transport a deux rôles**, presque jamais tenus par le même PNJ : **donneur** (`accepte`/`trop_charge`, + `rapporte` si `offre.retour`), que n'importe quel PNJ peut être ; **destinataire** (`livre`/`incomplet`), en pratique un `pnj:marchand_*`, ou tout PNJ qui déclare `livre` (Aélis). Le linter n'exige les nœuds de donneur que d'une `offre` écrite ou d'un tenancier générique ; les exiger de tous ferait crier au défaut sur un PNJ correct.
 - ⚠️ Les listes de référence (`PLACEHOLDERS_CONNUS`, `FLAGS_CONNUS`, `NOEUDS_REQUIS`, `ACTIONS_A_CONDITIONNER`, `SOUS_FILTRES_CONNUS`) décrivent ce que `routers/pnj.py` consomme **réellement** : les tenir à jour avec tout nouveau service ou flag, sinon le linter signalera du code correct.
 
 
@@ -154,7 +164,7 @@ Un donjon est un lieu de combat **FERMÉ** : on y descend par une porte gardée,
 - `niveau_max`/`niveau_min` bornent le grade de l'élite **et** de l'escorte, en cascade salle → donjon → aucune (le plancher cède au plafond en cas de conflit).
 - `nb_monstres` fixe l'effectif **sans** bonus au nombre de compagnons, pour que les répliques narratives qui comptent les ennemis restent exactes.
 - La commission est une quête `chasse` **ordinaire** (`source:"commission"`, hook générique, répétable, sans `unique`) ; son rang dérive de la barrière la plus stricte à franchir pour l'obtenir (`acces.rang_de_quete`, source unique partagée avec les escortes).
-- Combat par `_declencher_combat_donjon` (miroir simplifié de `start_combat`, élite garantie, aucune furtivité d'entrée). Peuplement partagé avec les étages : `donjon.monstres_de_salle`.
+- Combat par `_declencher_combat_donjon` (miroir simplifié de `start_combat`, élite garantie, aucune furtivité d'entrée). `proteges_restent_dehors: true` sur la salle = les personnes escortées attendent à la porte. Peuplement partagé avec les étages : `donjon.monstres_de_salle`.
 - Chaîne de contenu (`dev/gen_acces_donjon.py`) : rang D à Auxerre → Borin ouvre le bureau → Gautier mandate la commission → George contrôle le principe → Armand contrôle la destination et ouvre le combat.
 
 - **Pièges** : tag codifié `pieges_<quantite>_<danger>` dans les `tags` de la SALLE (lieu `battle_map`), loin du point de départ — telluris-combat § Pièges.

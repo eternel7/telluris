@@ -29,7 +29,7 @@ Les noms de marchands suivent le gabarit **Maître / Dame / Frère / Docte / Le 
 
 ## Aélis — [personnages/20260916_ecrire_deux_histoires_d_aelis.md], [personnages/20260924_etoffer_l_intrigue_des_catacombes.md]
 **Auteur**
-- **Retrouvailles** à l'**institut des architectes de Lutecia**, qui **mènent à une mission**.
+- **Retrouvailles** à l'**institut des architectes de Lutecia**, qui **mènent à une mission** — écrite (11/10/2026) : Maëlys, pour le **rang C**, envoie l'aventurier escorter Aélis jusqu'au portail des ruines de **Jumièges** ; elle revient aux **Archives des Seuils** avec trois théories et aucune réponse.
 - **Plus tard** : on lui offre d'approfondir sa formation à **Mu**, et elle veut que l'aventurier l'accompagne.
 - La relation n'est **pas ambiguë**. L'aventurier peut être une femme. Ce qui compte, c'est la **confiance** et le **regard extérieur** que l'aventurier apporte à l'architecte.
 - Elle est l'une des personnes qui portent des **théories contradictoires** sur le mystère.

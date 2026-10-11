@@ -113,6 +113,15 @@ def donjon_de_lieu(lieu_id: str, find_docs_fn) -> dict | None:
 	return None
 
 
+def proteges_admis(lieu_doc: dict | None) -> bool:
+	"""Les personnes ESCORTÉES entrent-elles dans le combat de cette salle gardée ? Non quand
+	la salle porte `proteges_restent_dehors: true` : le joueur les laisse à la porte (Aélis
+	attend sur le seuil de la nef de Jumièges). Champ absent ⇒ oui, comportement d'avant.
+	Ne vaut QUE pour la salle gardée : les rencontres de la route embarquent toujours les
+	protégés, sinon l'escorte n'en serait plus une."""
+	return not (lieu_doc or {}).get("proteges_restent_dehors")
+
+
 MODE_ETAGES = "etages"
 
 
