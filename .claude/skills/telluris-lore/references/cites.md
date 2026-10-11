@@ -190,7 +190,7 @@ Rien dans les séances. Peuplée en jeu (62 marchands, 3 auberges — commit `a0
 **Proposé** : deux anges venus au temps de **Salomon**, enseignant une magie dangereuse comme une épreuve (« Le sort n'est pas coupable. Celui qui le lance répond de son intention. »). Voir cosmologie.
 
 ## Jérusalem — [monde/20260819_frise_chronologique_de_telluris.md]
-**Auteur** : **Salomon a vécu après les trois frères** et le début de l'ère des portails.
+**Auteur** : **Salomon a vécu après les trois frères** et le début de l'ère des portails. David est **reconnu par Jérusalem comme son roi** (pas de prise) ; « le royaume se divise » → « les cités avoisinantes diminuent leurs relations » ; réduire « royaume » au profit de « Cité-État » (11/10). Colonne réécrite : `monde/20261011_frise_chronologique_fusionnee.md` § 6.
 
 **Tableau (26/08)** : « héritage de Salomon », portail ancien, coûteux, mal compris, pas un passage libre.
 
@@ -208,7 +208,9 @@ Rien dans les séances. Peuplée en jeu (62 marchands, 3 auberges — commit `a0
 	- Mu **ne livre pas tout** : enseignements avancés réservés aux dignes ; certains reviennent **transformés**, d'autres **jamais**. Mu = gardien d'un savoir dont dépend la suprématie de Lutecia dans l'art des portails.
 	- Tranché (Auteur) : Lutecia n'a **pas** de grandes écoles de magie (magie faible) ; ses écoles sont des **instituts d'architectes** qui forment aux portails, Mu **parachève** cette formation.
 
-**Proposé** : ordre de fondation Mu → Atlantis → Abou Simbel → Jérusalem → Cordoue → Constantinople → Aix → Venise → Reykjavik → Gênes → Bruges → Akureyri → Auxerre → Lutecia. Distinguer la **fondation du site** de la **fondation de la Cité-État** fortifiée.
+**Auteur (11/10)** : Mu **avant les trois frères** ; aujourd'hui continent englouti, révéré des Architectes (cf. SKILL.md § Cités-États). Quasiment toutes les cités existaient **avant la Vague** ; **Rome** entre dans la chronologie ; aucune période terrestre. **Lutecia** naît autour du portail d'un frère dans une cité qui existait déjà, et **prend son nom en dernier** — « fondée » ne convient pas.
+
+**Proposé** : deux moments, **établissement** (site habité) / **avènement** (la cité prend son nom et son rang de Cité-État) ; tableau révisé avec Rome : `monde/20261011_frise_chronologique_fusionnee.md` § 5. (L'ordre de fondation du 26/08 en périodes terrestres est abandonné.)
 
 ## Réseau des portails — [systemes/20260826_completer_le_tableau.md], [monde/20260826_creer_un_systeme_de_portails.md]
 **Auteur** : tableau du 26/08 (repris ci-dessus cité par cité). Lutecia relie par Notre-Dame **toutes** les cités munies d'un portail transversal.

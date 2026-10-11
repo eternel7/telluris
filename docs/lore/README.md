@@ -15,7 +15,7 @@ Les 50 séances de travail sur le monde de Telluris (récupérées le 08/10/2026
 - [Reformulation monothéiste](monde/20260831_reformulation_monotheiste.md) — 31/08/2026 — J'ai reformulé : <div class="card-desc"><strong>Évolution chrétienne :</strong><p>Le christianisme s'intègre plus tard à ces structures exis…
 - [Introduit les Grigori](monde/20261004_introduit_les_grigori.md) — 04/10/2026 — introduit les **Grigori** (du grec ancien *egrḗgoroi*, signifiant **« les Veilleurs »** ou « ceux qui sont éveillés ») dans la mythologie de…
 - [Générer documentation maître](monde/20261008_generer_documentation_maitre.md) — 08/10/2026 — Est-ce que tu peux générer un gros fichier .md de toute notre discussion relatif à ce projet ?
-- [Frise chronologique fusionnée](monde/20261011_frise_chronologique_fusionnee.md) — 11/10/2026 — Fusion des frises du 19/08 et du 21/08 (colonne Jérusalem comprise), sources marquées Auteur / proposition ; problématiques révélées (date des Templiers, place du monothéisme, après-Vague comprimé, portails antérieurs aux frères) et incohérences avec les cités, Babylone et le document maître, à arbitrer.
+- [Frise chronologique fusionnée](monde/20261011_frise_chronologique_fusionnee.md) — 11/10/2026 — Fusion des frises du 19/08 et du 21/08 en trois ères (antédiluvien / avant la Vague / après la Vague) + arbitrage de l'Auteur (cristaux, Mu aujourd'hui, auberges- et monastères-relais, portails antérieurs aux frères, Lutecia) ; citations Templiers 19/08 ↔ 21/08, datation proposée de la Vague, chronologie des cités révisée avec Rome, colonne Jérusalem et Hārūt et Mārūt corrigés ; points encore ouverts.
 
 ## 🏰 Cités-États et lieux
 

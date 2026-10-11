@@ -1,8 +1,8 @@
 # Frise chronologique fusionnée de Telluris
 
-- **Source :** fusion, par Claude Code (session du 11/10/2026, à la demande de l'Auteur), des deux frises ChatGPT — [frise du 19/08](20260819_frise_chronologique_de_telluris.md) (avec sa colonne Jérusalem) et [frise du 21/08](20260821_frise_chronologique_de_telluris.md) — confrontées aux messages de l'Auteur, à la [chronologie des cités](20260826_chronologie_des_cites_telluris.md), aux séances des cités et au [document maître](../../Telluris_Document_Maitre.md).
-- **Créée :** 11/10/2026
-- **Statut :** **document de travail, pas un canon.** Les deux frises sont des réponses ChatGPT ; seules les lignes marquées ✍️ reposent sur une décision de l'Auteur. Les points du § 3 et du § 4 attendent un arbitrage.
+- **Source :** fusion, par Claude Code (session du 11/10/2026, à la demande de l'Auteur), des deux frises ChatGPT — [frise du 19/08](20260819_frise_chronologique_de_telluris.md) (avec sa colonne Jérusalem) et [frise du 21/08](20260821_frise_chronologique_de_telluris.md) —, confrontées aux messages de l'Auteur, à la [chronologie des cités](20260826_chronologie_des_cites_telluris.md), aux séances des cités et au [document maître](../../Telluris_Document_Maitre.md).
+- **Créée :** 11/10/2026 · **révisée :** 11/10/2026, après l'arbitrage de l'Auteur (§ 1).
+- **Statut :** **document de travail.** Les décisions du § 1 sont de l'Auteur. Tout ce qui porte 💬 ou « proposé » reste une proposition. Les points du § 8 attendent encore un arbitrage.
 
 **Légende des sources**
 
@@ -10,183 +10,269 @@
 |---|---|---|
 | ✍️ | message de l'Auteur (date) | décision |
 | 📘 | document maître (synthèse corrigée le 08/10) | synthèse |
-| 💬19 | frise ChatGPT du 19/08 | proposition |
-| 💬21 | frise ChatGPT du 21/08 | proposition |
-| 💬26 | chronologie des cités ChatGPT du 26/08 | proposition |
+| 💬19 · 💬21 · 💬26 | frises ChatGPT du 19/08 et du 21/08, chronologie des cités du 26/08 | proposition |
 | 💬 | autre réponse ChatGPT (séance citée) | proposition |
+| 🔧 | proposition de Claude Code (11/10) | proposition |
 
 ---
 
-## 1. Ossature retenue
+## 1. ✍️ Auteur — 11/10/2026 (arbitrage)
 
-Les deux frises racontent la même suite de bouleversements, mais pas dans le même ordre. La frise du 21/08 prend en compte la décision de l'Auteur du même jour (**Paladins antérieurs aux portails**) ; celle du 19/08 non. La fusion suit donc l'ordre du 21/08 et y verse ce que seule la frise du 19/08 apportait : la colonne Jérusalem, et la place de Salomon fixée par l'Auteur.
+Décisions de l'Auteur, après lecture de la première version de cette fusion :
 
-Deux repères seulement sont **datés** par l'Auteur :
-- la **Vague de mana** : « **il y a quelques siècles** » (✍️ 19/08) ;
-- **Charlemagne** transforme Aix-la-Chapelle « **un siècle après la grande vague** » (✍️ 24/08).
+1. **Les trois ères.** On parle d'**antédiluvien** pour ce qui précède les trois frères. Viennent ensuite la période **avant la Vague**, puis la période **après la Vague**. Aucun texte n'emploie de période terrestre (« Antiquité », « Moyen Âge »…).
+2. **Cristaux.** « Les portails fonctionnaient avant la vague **sans cristaux**. » Anciennement, la magie était peut-être plus intense, ou sa maîtrise plus innée. Les cristaux sont l'une des choses qui ont permis aux Architectes de maîtriser les portails **de nos jours** : ils apportent du **mana** ou de la **maîtrise**. Le **cristal jaune** est « assez synonyme de **maîtrise du portail** ».
+3. **Portails antérieurs aux frères.**
+	- Saint-Pierre est la **seule exception connue des Occidentaux**.
+	- L'Hekla n'est **pas daté** : personne ne sait s'il est plus vieux ou plus jeune que d'autres portails. Il en va de même pour les autres brèches : Cordoue, Mu.
+	- Les frères ont **apporté au monde** la connaissance des portails, mais il en existait avant eux. Il y a même des **créations spontanées**.
+	- **Jumièges est très récent** : dans la quête, on va voir un portail qui s'est manifesté.
+4. **Document maître § 4.** « Aucun portail vers un autre monde » s'oppose au concept même des portails vers les mondes divins (Yggdrasil mène à plusieurs mondes). Formulation à revoir (citation au § 2.3).
+5. **Mu.**
+	- Mu est placée **avant les trois frères**.
+	- Aujourd'hui, c'est un **continent englouti**.
+		- À Lutecia, seuls les **grands Architectes** et les **Templiers de Notre-Dame** le connaissent.
+		- Ailleurs, **tous les Architectes** le connaissent : c'est avant tout une **image révérée**, un lieu auquel les Architectes **vouent un culte**.
+	- Les Architectes formés à Mu sont ensuite **répartis de par le monde**, à des **postes très élevés** des Cités-États.
+	- Ils parlent peu de ce qu'ils y ont vu, ni même de l'existence de Mu. Ce n'est **pas un interdit**, c'est un secret parce que **ça ne s'explique pas**. C'est du même ordre que les **Révélateurs** et la **caverne de Platon**.
+	- Ce qu'ils en disent tient en peu de mots : « je suis allé à Mu, un continent englouti sous la mer. Je ne sais pas trop où c'est, parce qu'au final on n'en sort pas. J'y ai découvert des choses intellectuellement **euphorisantes** sur la maîtrise de la magie des portails. »
+6. **Auberges-relais et monastères.** « Auberge-relais » est le terme employé **avant les monothéismes**. Depuis que ceux-ci se sont mis en place, une bonne partie des auberges-relais sont devenues des **monastères-relais**. De par le monde, le monothéisme n'est **pas obligatoirement la norme**.
+7. **Jérusalem.**
+	- David est **reconnu par Jérusalem comme son roi**.
+	- « Le royaume se divise » devient « les **cités avoisinantes diminuent leurs relations** ».
+	- Le terme « royaume » est à réduire au profit de « **Cité-État** » (proposition au § 6).
+8. **Hārūt et Mārūt.** La découverte des portails est **antérieure à Salomon** : ce sont toujours les trois frères qui ont apporté au monde la connaissance des portails (correction au § 7).
+9. **Lutecia.**
+	- Elle naît autour du portail d'un des frères, mais il y avait **déjà une cité**.
+	- Elle **prend son nom de Lutecia en dernier**.
+	- Le mot « fondée » ne convient pas : à remplacer (proposition au § 5).
+10. **Cités et Vague.** Quasiment toutes les villes ont dû exister **avant la Vague**, ce qui repose la question de sa date. **Rome** est ajoutée à la chronologie des cités.
+11. **Néfertiti** reste **volontairement** antérieure aux pyramides.
+12. **Sainte-Sophie.** Le portail est bien plus vieux que l'édifice de Justinien. La plupart du temps, temples et monuments ont été **construits autour d'un portail** : c'est le cas de Notre-Dame comme de l'édifice de Justinien.
 
-Le reste n'a qu'un **ordre relatif**. La fusion le reprend sans dates, en respectant la règle de l'Auteur (pas de dates terrestres).
+---
+
+## 2. Citations demandées
+
+### 2.1 Templiers : 19/08 et 21/08 en regard
+
+⚠️ La naissance des Templiers **avant** la Vague ne vient **que de ChatGPT** (frise du 21/08). Le message de l'Auteur du 21/08 ne parle que des **Paladins**.
+
+| ✍️ Auteur — 19/08 (séance fondatrice) | 💬21 — frise ChatGPT du 21/08 |
+|---|---|
+| « Les Templiers et les paladins ne sont pas associés au christianisme. Ce sont deux ordres **antérieurs à la naissance du christianisme**. » | Période V, *Le Premier Âge des Portails* : « **Les Architectes** deviennent une caste professionnelle majeure. Les **Templiers** sont créés pour surveiller les portails et protéger leurs installations. Ils ne remplacent pas les Paladins : **les Paladins gardent les routes, les Templiers gardent les portes**. » |
+| « Il y a quelques siècles, une vague de mana a balayée Telluris. […] Les premiers voyageurs ont alors pénétrés dans les premiers donjons. […] **C'est à cette époque que l'ordre des Templiers et celui des Paladins ce sont développés.** L'un protégeant des dangers des portails, l'autre rouvrant les routes redevenues nécessaires. » | Résumé de la même frise : « **Trois Frères → premiers portails → Architectes → Templiers → réseau des portes** », sous le titre *Après l'apparition des portails* (donc **avant** la Vague). |
+| — | Période XI, *L'Âge des Temples* (après la Vague) : « **Les Templiers prennent une importance nouvelle** […] Les Templiers établissent des **temples-forteresses** autour des portes les plus instables. » |
+
+Pour mémoire, la frise ChatGPT du **19/08** (💬19) suit l'Auteur : sa ligne « **Naissance des Templiers** » vient **après** la Grande Vague et la Naissance des Donjons.
+
+### 2.2 Auberges-relais et monastères : les deux placements
+
+| 💬19 — frise du 19/08 : **après la Vague** | 💬21 — frise du 21/08 : **avant les portails** |
+|---|---|
+| *Le Temps des Routes* : « Les portails ne permettent plus de relier efficacement toutes les régions. Les anciennes routes redeviennent essentielles. **Les auberges-relais fortifiées apparaissent ou sont renforcées.** » | Période II, *L'Âge des Remparts* : « **Les auberges relais fortifiées et les premiers monastères de route apparaissent** comme des refuges ouverts aux voyageurs de toutes les Lignées. » |
+| *Essor des monastères fortifiés* (après les Templiers et les Paladins, avant le christianisme) : « Certains anciens relais sont **transformés en monastères fortifiés** ouverts à tous. D'autres deviennent des établissements militaires de Paladins. » | — |
+
+**Tranché par l'Auteur (§ 1.6)** : les auberges-relais datent de l'**Âge des Remparts**, comme dans 💬21, mais **sans** monastères. Les monastères-relais naissent de la transformation d'auberges-relais **à partir des monothéismes**.
+
+### 2.3 Document maître, § 4 « Les trois frères aborigènes », en contexte
+
+> Ils parcourent le monde et construisent progressivement un réseau reliant différents lieux de Telluris.
+>
+> Le **portail de Notre-Dame**, à Lutecia, est l'un des vestiges les mieux préservés de leur œuvre : intact grâce au faible mana de la cité, c'est un portail **programmable** qui relie n'importe quel lieu du monde connu — Mu compris (cf. § 16).
+>
+> Les premiers portails sont :
+>
+> - stables ;
+> - prévisibles ;
+> - relativement fiables ;
+> - exclusivement reliés à d'autres lieux de Telluris.
+>
+> **Il n'existe alors aucun portail vers un autre monde.**
+
+Le § 7 (« Les donjons ») prolonge cette idée : « Avant la vague : **Portail = déplacement.** Après la vague : **Portail = possibilité d'inconnu.** »
+
+🔧 **Pistes de reformulation**, à revoir avec l'Auteur. Le document maître n'est pas modifié tant qu'il n'a pas choisi.
+- **A** : « Les portails des frères ne mènent alors à aucun autre monde. Seuls de rares portails plus anciens, que nul n'a bâtis — Saint-Pierre est le seul que connaissent les Occidentaux —, ouvrent sur l'au-delà. »
+- **B** : « Aucun portail **construit** ne mène alors vers un autre monde. »
+- Au § 7, il faudrait alors écrire : « Avant la vague, pour les Anthropes : **Portail = déplacement.** »
+
+---
+
+## 3. Datation de la Vague — estimation
+
+🔧 Proposition de Claude Code, en durées relatives (aucune date terrestre). La durée n'a d'intérêt que pour garder les figures réelles dans un ordre cohérent ; dans un texte du monde, on peut garder « il y a quelques siècles » ou « il y a plus de sept siècles ».
+
+**Les repères de l'Auteur qui contraignent la date**
+- **Avant la Vague** :
+	- les églises du **Grand Palais** de Constantinople, dont plus de la moitié des portails deviennent donjons à la Vague ;
+	- l'édifice de **Justinien** (Sainte-Sophie) ;
+	- la **Notre-Dame de Bruges** ;
+	- le portail d'**Akureyri** ;
+	- presque toutes les cités (§ 1.10).
+- **Un siècle après la Vague** : **Charlemagne** (✍️ 24/08).
+- **Après Charlemagne, jusqu'à aujourd'hui** :
+	- Averroès et Maïmonide (Cordoue) ;
+	- Marco Polo (Gênes) ;
+	- les ducs de Bourgogne (Bruges) ;
+	- la Hanse ;
+	- le pèlerinage d'Aix, « il y a quelques siècles ».
+
+**Estimation** : si l'on garde l'écart réel entre ces figures, Charlemagne règne **six à sept siècles** avant l'ère actuelle. La Vague daterait donc d'**environ sept à huit siècles**.
+
+**Un millénaire est trop**, tant que Charlemagne reste « un siècle après la Vague ». Avec une Vague il y a mille ans, Charlemagne régnerait il y a neuf siècles. Les figures qu'on veut contemporaines, comme Marco Polo, les ducs de Bourgogne ou la Hanse, glisseraient alors vers le passé, ou l'ère actuelle deviendrait plus tardive que son décor médiéval.
+
+**En revanche, un millénaire suffit largement** pour loger l'après-Vague : donjons, temples, guildes, cristaux, renouveau carolingien. Sept à huit siècles suffisent aussi.
+
+**Repères dérivés**, dans le même ordre de grandeur :
+
+| Repère | Ordre de grandeur avant l'ère actuelle | Appui |
+|---|---|---|
+| Les trois frères | **deux millénaires et demi à trois** | entre Néfertiti (✍️ antérieure aux frères) et Salomon (✍️ postérieur) ; Sainte-Sophie ↔ Rome « depuis des millénaires » |
+| Salomon | environ deux millénaires et demi à trois | ✍️ 19/08 |
+| Jésus (Révélateur) | environ un millénaire et demi | ordre réel des figures : après Salomon, avant Justinien |
+| La Vague | **sept à huit siècles** | Charlemagne un siècle après |
+| Charlemagne | six à sept siècles | ✍️ 24/08 |
+
+**Conséquence pour les Templiers** (cf. § 8.1) :
+- Jésus vient alors **avant** la Vague. L'Auteur a dit les Templiers « **antérieurs à la naissance du christianisme** » (✍️ 19/08).
+- Les Templiers doivent donc **exister avant la Vague**, comme le propose 💬21. Le « se sont développés à cette époque » de l'Auteur se lit alors comme un **essor**, sur le modèle des Paladins : nés avant les portails, ils rouvrent les routes après la Vague.
+- Pour garder les Templiers nés **après** la Vague, il faudrait une Vague **antérieure à Jésus**, à plus d'un millénaire et demi. Cela n'est compatible avec Charlemagne « un siècle après » que si l'on renonce à cet appui.
+
+---
+
+## 4. La frise fusionnée (révisée)
+
+Les âges reprennent l'ordre de la frise du 21/08. Ils sont regroupés dans les **trois ères** de l'Auteur (§ 1.1). Les âges d'une même ère se **chevauchent** plus qu'ils ne se succèdent, surtout après la Vague.
 
 ```text
- ORIGINES ──► REMPARTS ──► ROUTES GARDÉES ──► TROIS FRÈRES ──► ÂGE DES PORTAILS ──► DÉGRADATION DU SAVOIR
- (millénaires, durée inconnue)                                                                        │
-                                                                                                      ▼
-                                   ÈRE ACTUELLE ◄── GUILDES ◄── TEMPLES ◄── DONJONS ◄── VAGUE DE MANA
-                                         ◄────────────── « quelques siècles » ──────────────►
+ ═══════ ANTÉDILUVIEN ═══════╗╔═══════════ AVANT LA VAGUE ═══════════╗╔══════ APRÈS LA VAGUE ══════
+  Origines · Mu · Remparts    ║║  Trois frères · Portails · Salomon     ║║  Donjons · Temples · Guildes
+  Paladins · auberges-relais  ║║  Dégradation du savoir · monothéismes  ║║  Charlemagne · ère actuelle
+                    ◄ ? ►     ╚╝   ≈ deux millénaires                   ╚╝   ≈ sept à huit siècles (🔧)
 ```
 
----
-
-## 2. La frise fusionnée
+### Ère antédiluvienne — avant les trois frères
 
 | # | Âge | Telluris | Figures et cités | Sources |
 |---|---|---|---|---|
 | **0** | **Avant les Anthropes** | Les flux magiques baignent le monde « depuis les origines » ; les monstres rôdent déjà. | Le **dragon empereur** de l'Islande est antérieur aux premiers Anthropes. | ✍️ 21/08 · ✍️ 20/08 |
-| **I** | **Les Premiers Âges** | Les cinq Lignées se dispersent dans un monde sauvage. Petits établissements fortifiés, pistes dangereuses. | **Mu** prospère, avec une magie antérieure au savoir des frères (existence incertaine). **Atlantis** (💬26, sans décision). Au sud de l'Égypte, le royaume de **Néfertiti** et d'**Akhénaton** existe déjà, « avant les pyramides et avant les frères ». **Gilgamesh** (💬21). Premiers établissements de **Jérusalem** et de **Babylone** (💬19, 💬). | ✍️ 10/10 (Mu) · ✍️ 21/08 (Néfertiti) · 💬19 · 💬21 · 💬26 |
-| — | *Portails hors de l'histoire* | Le portail de **Saint-Pierre** (Rome) est **naturel** et antérieur aux frères. Le gouffre de l'**Hekla** en est le « pendant » (date non fixée). | — | ✍️ 20/08 · ✍️ 21/08 |
-| **II** | **L'Âge des Remparts** | Les Anthropes se réfugient derrière des murailles : naissance des **Cités-États**. Des **auberges-relais fortifiées** jalonnent les routes. | Naissance de l'**ordre des Paladins**, dont la magie Sainte soigne. | ✍️ 21/08 · 📘 § 3, § 14 |
+| **I** | **Les Premiers Âges** | Les cinq Lignées se dispersent dans un monde sauvage. Petits établissements fortifiés, pistes dangereuses. | **Mu** prospère, avec une magie antérieure au savoir des frères. **Atlantis** (💬26, sans décision). Au sud de l'Égypte, le règne de **Néfertiti** et d'**Akhénaton** a commencé, avant les pyramides. **Gilgamesh** (💬21). Les premiers établissements de Jérusalem et de Babylone (💬19, 💬). | ✍️ 10/10 · ✍️ 11/10 · ✍️ 21/08 · 💬 |
+| — | *Portails sans âge* | Le portail **naturel** de **Saint-Pierre** (Rome) précède les frères : c'est la **seule exception que connaissent les Occidentaux**. L'**Hekla**, la brèche originelle de **Cordoue** et les portails de **Mu** ne sont **pas datés** : nul ne sait s'ils sont plus anciens ou plus jeunes que les autres. | — | ✍️ 20/08 · ✍️ 21/08 · ✍️ 24/08 · ✍️ 11/10 |
+| **II** | **L'Âge des Remparts** | Les Anthropes se réfugient derrière des murailles, et les **Cités-États** naissent. Des **auberges-relais** fortifiées jalonnent les routes. | Naissance de l'**ordre des Paladins**, dont la magie Sainte soigne. | ✍️ 21/08 · ✍️ 11/10 · 📘 § 3, § 14 |
 | **III** | **Les Routes gardées** | Les routes sont balisées et protégées. Aucune cité ne survit seule. | Les traditions paladines grossissent les exploits de leurs héros. | 💬21 |
-| **IV** | **Les Trois Frères** | Trois frères aborigènes inventent le **portail transversal**, dont une **bolas** déplace la destination. Ces portails sont stables et relient **seulement** des lieux de Telluris. | **Notre-Dame** : Lutecia naît de ce portail. **Chapelle Palatine** d'Aix : 5 portes à destination fixe (Sydney, Tokyo, Teotihuacan, Machu Picchu, Abou Simbel). Jérusalem existe déjà (💬19). | ✍️ 12/08 · ✍️ 19/08 · ✍️ 20/08 · ✍️ 24/08 |
-| **V** | **Le Premier Âge des Portails** | Le réseau des portes s'étend. Toutes les cités n'ont pas de portail : les Paladins **gardent les tronçons restants**. Le savoir se transmet aux **Architectes**. | **Sainte-Sophie ↔ Rome**, « stable depuis des millénaires ». Panthéon (plus ancien que Saint-Ange). Les **Templiers** naîtraient ici (💬21 ; ⚠️ cf. § 3.1). | ✍️ 21/08 · ✍️ 20/08 · ✍️ 24/08 · 💬21 |
-| **VI** | **L'Âge des Grandes Cités** | Les cités situées aux nœuds du réseau deviennent des centres de commerce et de savoir. | **Salomon** vit après les trois frères et après le début de l'ère des portails : c'est l'« héritage de Salomon », le portail de Jérusalem, ancien et mal compris. Le Temple de Jérusalem (💬19). **Hārūt et Mārūt** à Babylone (💬 10/09). | ✍️ 19/08 · ✍️ 26/08 (tableau) · 💬19 · 💬 |
-| **VII** | **L'Âge des Savoirs** | Les Architectes tentent de reproduire l'œuvre des frères, et le savoir glisse : **science → artisanat → tradition**. | **Dédale**, Architecte des passages et des labyrinthes (💬21). Des écoles rivales se disputent l'héritage des frères (💬21). | ✍️ 19/08 · 📘 § 5 · 💬21 |
-| **VIII** | **La Dégradation du Savoir** | On entretient les portails sans comprendre pourquoi ils marchent, et les nouvelles portes sont fragiles. | — | ✍️ 19/08 · 💬19 · 💬21 |
-| **IX** | **La Grande Vague de mana** — *il y a quelques siècles* | Une vague d'origine inconnue balaie Telluris. Les portails mal créés ou mal entretenus **changent de couleur**. | Lutecia est presque épargnée (mana faible). La Chapelle Palatine reste intacte, comme la **Notre-Dame de Bruges**. Au Grand Palais de Constantinople, **plus de la moitié** des portails deviennent des donjons. Le portail Akureyri ↔ Reykjavik est altéré. | ✍️ 19/08 · ✍️ 20/08 · ✍️ 23-24/08 · ✍️ 26/08 |
-| **X** | **La Naissance des Donjons** | Les premiers voyageurs entrent dans les portails transformés : un champ de céréales, une forêt… ou un autre monde. Des mines de cristaux y apparaissent, et l'on trouve des cristaux dans les carcasses. Entretenir un portail coûte désormais plus cher, et le cristal est la ressource la plus efficace pour le faire. | **Orphée**, **Ulysse** : précurseurs légendaires des aventuriers (💬21). Le **Chœur-Donjon** de Cordoue scelle une « brèche originelle ». | ✍️ 19/08 · ✍️ 24/08 · 💬21 |
-| **XI** | **L'Âge des Temples** | Les Templiers et les Paladins « **se développent à cette époque** » : les premiers protègent des dangers des portails, les seconds **rouvrent les routes** redevenues nécessaires. Les temples deviennent des forteresses-portails (garde extérieure, garde intérieure, muraille, chaires). | Le **pape**, grand maître des Templiers, garde Saint-Pierre. Le temple-mine d'**Auxerre**. | ✍️ 19/08 · ✍️ 12/08 · 📘 § 11-14 |
-| **XII** | **Le renouveau carolingien** — *un siècle après la Vague* | Les cités germaniques reconstruisent un réseau de portails et se portent secours. | **Charlemagne** fait d'Aix la tête du réseau carolingien : les portails de l'Hôtel de Ville, postérieurs à la Vague, ne mènent à aucun donjon. | ✍️ 24/08 |
-| **XIII** | **L'Âge des Aventuriers et des Cristaux** | L'exploration des donjons s'organise : naissent les **Guildes**. Le cristal de mana devient une ressource stratégique. | **Jason**, chef d'expédition (💬21). La **Banque de Saint-Georges** de Gênes naît du commerce des cristaux. Venise et Gênes se disputent la mer « pendant plusieurs siècles », sans guerre. **Marco Polo**, sauvé d'un dragon des mers par Gênes. | ✍️ 22/08 · 💬19 · 💬21 |
-| **XIV** | **Les monothéismes** — *position non fixée* | Les monothéismes « s'intègrent **plus tard** » aux structures existantes. Des auberges-relais deviennent des **monastères fortifiés** ouverts à tous, et des Paladins se rattachent à une foi monothéiste. Ces religions restent minoritaires et ne convertissent pas par la force. | Le pèlerinage aux reliques d'Aix date d'« il y a quelques siècles » (✍️ 24/08). | ✍️ 19/08 · ✍️ 31/08 |
-| **XV** | **L'ère actuelle — les Cités reliées** | Les Cités-États construisent les murs, les Paladins protègent les chemins, les Templiers gardent les portes, les Architectes entretiennent les passages, les Aventuriers franchissent les frontières. Les cités rivalisent par le commerce et l'influence, **jamais par la guerre**. | Notre-Dame relie tout le monde connu, **Mu** comprise : les Architectes de Lutecia y achèvent leur formation. Néfertiti règne toujours. Le dragon empereur guide Reykjavik. | ✍️ 12/08 · ✍️ 10/10 · 📘 § 16 |
 
-> La période XV de la frise du 21/08 (« L'Âge du Grand Mystère ») n'est **pas reprise** comme un âge historique : elle décrit la **quête du joueur**, pas le passé du monde (cf. § 3.8).
+### Ère avant la Vague — des trois frères à la Vague
 
----
+| # | Âge | Telluris | Figures et cités | Sources |
+|---|---|---|---|---|
+| **IV** | **Les Trois Frères** | Trois frères aborigènes **apportent au monde** le portail transversal, dont une **bolas** déplace la destination. Ces portails sont stables, relient **seulement** des lieux de Telluris et fonctionnent **sans cristaux**. On bâtit monuments et temples **autour** des portails. | **Notre-Dame** : Lutecia naît autour de ce portail, dans une cité **qui existe déjà**. **Chapelle Palatine** d'Aix : 5 portes à destination fixe (Sydney, Tokyo, Teotihuacan, Machu Picchu, Abou Simbel). **Sainte-Sophie ↔ Rome**, « stable depuis des millénaires », bien avant l'édifice de Justinien. | ✍️ 12/08 · ✍️ 19/08 · ✍️ 20/08 · ✍️ 24/08 · ✍️ 11/10 |
+| **V** | **Le Premier Âge des Portails** | Le réseau des portes s'étend. Toutes les cités n'ont pas de portail : les Paladins **gardent les tronçons restants**. Le savoir se transmet aux **Architectes**. | Panthéon (plus ancien que Saint-Ange). Les **Templiers** naîtraient ici (💬21, ⚠️ § 8.1). | ✍️ 21/08 · ✍️ 20/08 · 💬21 |
+| **VI** | **L'Âge des Grandes Cités** | Les cités situées aux nœuds du réseau deviennent des centres de commerce et de savoir. | **Salomon** vit après les trois frères : l'« héritage de Salomon » est le portail de Jérusalem, ancien et mal compris. David reconnu roi par Jérusalem (§ 6). **Hārūt et Mārūt** à Babylone (💬, corrigé au § 7). | ✍️ 19/08 · ✍️ 26/08 · ✍️ 11/10 · 💬 |
+| **VII** | **L'Âge des Savoirs** | Les Architectes tentent de reproduire l'œuvre des frères, et le savoir glisse : **science → artisanat → tradition**. La maîtrise ancienne, peut-être plus innée, ou portée par une magie plus intense, s'étiole. | **Dédale**, Architecte des passages et des labyrinthes (💬21). Des écoles rivales se disputent l'héritage des frères (💬21). | ✍️ 19/08 · ✍️ 11/10 · 📘 § 5 · 💬21 |
+| **VIII** | **La Dégradation du Savoir** | On entretient les portails sans comprendre pourquoi ils marchent, et les nouvelles portes sont fragiles. | **Jésus**, Révélateur, se situerait ici (🔧 § 3 ; jamais nommé comme tel en jeu). Les **monothéismes** commencent à transformer des auberges-relais en **monastères-relais**. Justinien, et les églises-portails du Grand Palais. | ✍️ 19/08 · ✍️ 31/08 · ✍️ 11/10 · 🔧 |
 
-## 3. Problématiques que la fusion met au jour
+### Ère après la Vague — *il y a quelques siècles* (🔧 sept à huit)
 
-### 3.1 Les Templiers : nés avant ou après la Vague ?
-- ✍️ 19/08 : Templiers et Paladins « se sont développés à cette époque » (celle de la Vague), et sont « antérieurs à la naissance du christianisme ».
-- 📘 § 11 : les Templiers « apparaissent **après** la transformation des portails ».
-- 💬21 (période V) : les Templiers sont **créés au Premier Âge des Portails**, avant la Vague, puis prennent « une importance nouvelle » (période XI).
-- 💬19 : « Naissance des Templiers » **après** la Vague.
-- **Le nœud** : un temple est une forteresse bâtie « autour d'un **portail de donjon** » (✍️ 12/08). Or les donjons n'existent qu'après la Vague. Des Templiers d'avant la Vague ne garderaient que des portails transversaux.
-- **Ce qui en dépend** : la garde de Saint-Pierre avant la Vague, alors que le pape est le grand maître des Templiers ; la datation des monothéismes (§ 3.2).
-- **Pistes** : « se développer » peut désigner un **essor** et non une naissance ; c'est cette lecture que le document maître applique déjà aux Paladins. Sinon, retenir le 19/08 à la lettre : naissance après la Vague. **À trancher.**
+| # | Âge | Telluris | Figures et cités | Sources |
+|---|---|---|---|---|
+| **IX** | **La Grande Vague de mana** | Une vague d'origine inconnue balaie Telluris. Les portails mal créés ou mal entretenus **changent de couleur**. | Lutecia est presque épargnée (mana faible). La Chapelle Palatine reste intacte, comme la **Notre-Dame de Bruges**. Au Grand Palais de Constantinople, **plus de la moitié** des portails deviennent des donjons. Le portail Akureyri ↔ Reykjavik est altéré. | ✍️ 19/08 · ✍️ 20/08 · ✍️ 23-24/08 · ✍️ 26/08 |
+| **X** | **La Naissance des Donjons** | Les premiers voyageurs entrent dans les portails transformés : un champ de céréales, une forêt… ou un autre monde. Certains donjons mènent à des mines de cristaux, et l'on en trouve dans les carcasses. Les **cristaux** deviennent l'**apport de mana ou de maîtrise** qui permet aux Architectes de tenir les portails. Le **jaune** est celui de la maîtrise du portail. | **Orphée**, **Ulysse** : précurseurs légendaires des aventuriers (💬21). | ✍️ 19/08 · ✍️ 11/10 · 💬21 |
+| **XI** | **L'Âge des Temples** | Templiers et Paladins « **se développent à cette époque** » : les premiers protègent des dangers des portails, les seconds **rouvrent les routes** redevenues nécessaires. Les temples deviennent des forteresses-portails (garde extérieure, garde intérieure, muraille, chaires). | Le **pape**, grand maître des Templiers, garde Saint-Pierre. Le temple-mine d'**Auxerre**. | ✍️ 19/08 · ✍️ 12/08 · 📘 § 11-14 |
+| **XII** | **Le renouveau carolingien** — *un siècle après la Vague* | Les cités germaniques reconstruisent un réseau de portails et se portent secours. | **Charlemagne** fait d'Aix la tête du réseau carolingien. Les portails de l'Hôtel de Ville, postérieurs à la Vague, ne mènent à aucun donjon. | ✍️ 24/08 |
+| **XIII** | **L'Âge des Aventuriers et des Cristaux** | L'exploration des donjons s'organise : naissent les **Guildes**. Le cristal de mana devient une ressource stratégique. | **Jason**, chef d'expédition (💬21). La **Banque de Saint-Georges** de Gênes naît du commerce des cristaux. Venise et Gênes se disputent la mer « pendant plusieurs siècles », sans guerre. **Marco Polo**, sauvé d'un dragon des mers par Gênes. Averroès à Cordoue. | ✍️ 22/08 · ✍️ 24/08 · 💬21 |
+| **XIV** | **L'ère actuelle — les Cités reliées** | Les Cités-États construisent les murs, les Paladins protègent les chemins, les Templiers gardent les portes, les Architectes entretiennent les passages, les Aventuriers franchissent les frontières. Les cités rivalisent par le commerce et l'influence, **jamais par la guerre**. Une bonne partie des relais sont des **monastères-relais**, mais le monothéisme reste minoritaire. Des portails **se manifestent encore spontanément** : **Jumièges** en est l'exemple le plus récent. | **Mu**, continent englouti (§ 4.1). Néfertiti règne toujours. Le dragon empereur guide Reykjavik. | ✍️ 12/08 · ✍️ 31/08 · ✍️ 11/10 · 📘 § 16 |
 
-### 3.2 Où placer le monothéisme, et donc Jésus ?
-- ✍️ 19/08 : Templiers et Paladins sont « antérieurs à la naissance du christianisme ». Si les Templiers naissent après la Vague (§ 3.1), le christianisme a **moins de quelques siècles**.
-- 💬19 place d'ailleurs le christianisme **après** la Vague, après les Templiers, les Paladins et les monastères.
-- Mais d'autres décisions de l'Auteur exigent un christianisme **antérieur** à la Vague, ou contemporain :
-	- **Charlemagne**, un siècle après la Vague, règne sur une Aix riche de **reliques chrétiennes** (robe de la Vierge, couches de l'Enfant Jésus) ;
-	- au **Grand Palais** de Constantinople, chaque **église** renferme un portail, et plus de la moitié sont devenus donjons « lors de la grande vague » : les églises existaient donc **avant** elle ;
-	- **Sainte-Sophie** est « consacrée sous Justinien » ;
-	- la **Notre-Dame de Bruges** « a résisté à la vague ».
-- La règle « nom réel, fonction tellurienne » sauve les noms des édifices (une basilique peut n'être qu'un portail), mais **pas les reliques** d'Aix.
-- **Jésus** est un Révélateur (✍️) ; les **Grigori** sont « les éveillés de bien avant JC » (✍️ 04/10). Aucune des deux frises ne situe Jésus. Selon l'ordre réel des figures, il vient **après Salomon**, donc dans l'Âge des Portails ou plus tard.
-- **À trancher** : Jésus est-il antérieur à la Vague ? Si oui, « antérieurs au christianisme » impose que les Templiers soient nés **avant** la Vague, ce qui donne raison à 💬21 contre 📘 § 11.
+L'« Âge du Grand Mystère » de 💬21 n'est **pas repris** : il décrit la quête du joueur, pas le passé du monde, et il nomme les Révélateurs, que le joueur ne doit pas découvrir tôt.
 
-### 3.3 Les monastères fortifiés avant les portails ?
-- 💬21 (période II) : « les premiers **monastères de route** apparaissent » dès l'Âge des Remparts.
-- ✍️ 31/08 : les monothéismes « s'intègrent **plus tard** à ces structures existantes, transformant certaines auberges-relais en monastères fortifiés ».
-- Le monastère est donc une **transformation tardive** de l'auberge-relais. La fusion ne garde que les auberges-relais en période II ; la mention de 💬21 est à **écarter**.
+### 4.1 Mu aujourd'hui (✍️ 11/10)
 
-### 3.4 Auberges-relais : avant les portails ou après la Vague ?
-- 💬19 : les auberges-relais « apparaissent ou sont renforcées » au Temps des Routes, après la Vague.
-- ✍️ 21/08 et 📘 § 3 : elles sont **antérieures** aux portails. Elles ont été **renforcées** après la Vague, pas créées. La fusion suit l'Auteur.
-
-### 3.5 Paladins : la frise du 19/08 est périmée
-- 💬19 place l'« Organisation des Paladins » après la Vague, conformément à ✍️ 19/08 (« l'autre rouvrant les routes »).
-- ✍️ 21/08 corrige : l'ordre est **antérieur aux portails**.
-- Les deux messages se concilient : les Paladins **naissent** à l'Âge des Remparts, et **reprennent leur essor** après la Vague, quand ils rouvrent les routes. C'est la lecture du document maître (§ 14), reprise ici. La partie « Paladins » de la frise du 19/08 ne doit plus être citée.
-
-### 3.6 Un après-Vague très court pour beaucoup d'histoire
-- La Vague date de « quelques siècles ». Dans ce délai doivent tenir six âges de la frise du 21/08 (IX à XIV) : donjons, temples, guildes, cristaux, cités reliées.
-- S'y ajoutent les figures réelles placées après la Vague par l'Auteur ou par les séances des cités : **Charlemagne**, les **ducs de Bourgogne** (Bruges), **Marco Polo**, la rivalité « de plusieurs siècles » entre Venise et Gênes, le pèlerinage d'Aix.
-- Avant la Vague, au contraire, s'étendent des **millénaires** (Sainte-Sophie, le dragon, Néfertiti).
-- **Conséquence pour l'écriture** : les âges IX à XIV se **chevauchent**, ils ne se succèdent pas. Il ne faut pas les présenter comme des ères distinctes et longues.
-- **À trancher** : faut-il fixer un ordre de grandeur, par exemple « trois à cinq siècles » ?
-
-### 3.7 Les cristaux avant la Vague
-- ✍️ 19/08 : après la Vague, l'entretien des portails « nécessita plus de ressources », dont la plus efficace reste le cristal de mana. Les cristaux se trouvent dans les donjons et dans les carcasses.
-- 📘 § 9 : les cristaux servent aussi à **créer** les portails.
-- **Ouvert** : comment les frères et les premiers Architectes alimentaient-ils leurs portails avant que les donjons existent ? Par une science sans cristaux, devenue la perte que dit « science → artisanat → tradition » ? Par les seules carcasses de monstres, qui existaient déjà ? Le texte de l'Auteur suggère la première réponse sans la poser. **À laisser ouvert, ou à trancher.**
-
-### 3.8 « L'Âge du Grand Mystère » et les Révélateurs
-- 💬21 (période XV) fait des « **anciens Révélateurs** » des figures centrales de l'histoire publique.
-- Or la vérité méta (Jésus Révélateur, joueurs) ne doit **pas** être apprise tôt par le joueur. Une frise destinée à être lue en jeu ne peut pas nommer les Révélateurs comme une catégorie connue.
-- Cette période décrit d'ailleurs le **fil rouge du joueur**, pas un âge du monde : elle est retirée de la fusion.
-
-### 3.9 Portails antérieurs aux frères : une exception, ou plusieurs ?
-- 📘 § 3 : Saint-Pierre est « l'**exception** », le seul portail antérieur aux frères.
-- La fusion en fait apparaître d'autres :
-	- le gouffre de l'**Hekla**, « pendant » de Saint-Pierre (✍️ 21/08), sans date ;
-	- la « **brèche originelle** » de Cordoue (✍️ 24/08) ;
-	- **Mu**, dont la magie est antérieure aux frères et qui a des « portails surveillés » (✍️ 26/08, 10/10) ;
-	- le portail de **Jumièges**, « que personne n'a bâti » (décision du 11/10 : mystère volontairement ouvert, à ne pas trancher) ;
-	- la « Porte des Dieux » de Babylone, mais ce n'est qu'un **nom** (💬).
-- **Contradiction franche** : 📘 § 4 dit qu'à l'époque des frères « il n'existe **aucun portail vers un autre monde** ». Or Saint-Pierre, antérieur aux frères, mène au Paradis. Il faut lire « aucun portail **construit** vers un autre monde ». **Correction du document maître à valider.**
-
-### 3.10 Mu : un passé qui n'est pas passé
-- Aucune des deux frises ne mentionne Mu. La chronologie des cités la place « avant l'Âge des Portails » (💬26), mais la décision du 10/10 la rend **accessible aujourd'hui** par Notre-Dame, avec des maîtres qui enseignent.
-- Mu doit donc figurer **deux fois** : période I (civilisation disparue) et période XV (destination des Architectes).
-- ⚠️ **« Ère antédiluvienne »** (💬26) suppose un **Déluge**, ce qui tranche la catastrophe de Mu que l'Auteur veut « de nature inconnue ». Le terme est **à proscrire**.
+| Qui | Ce qu'il sait de Mu |
+|---|---|
+| **Grands Architectes** et **Templiers de Notre-Dame** (Lutecia) | Mu existe : c'est un continent englouti sous la mer, que l'on atteint par Notre-Dame. |
+| **Tous les Architectes**, ailleurs | Mu est une **image révérée**, le lieu d'un **culte** propre à leur métier. |
+| **Architectes formés à Mu** | Ils occupent de **très hauts postes** dans les Cités-États et parlent peu de Mu. Ce n'est pas un interdit : **cela ne s'explique pas**, comme pour les Révélateurs ou la caverne de Platon. « On n'en sort pas » : ils ne savent pas où se trouve Mu. |
+| Le reste de Telluris | Une légende incertaine, absente ou douteuse dans les archives (✍️ 10/10). |
 
 ---
 
-## 4. Incohérences avec le reste du lore
+## 5. Chronologie des cités (révisée)
 
-### 4.1 La colonne Jérusalem (frise du 19/08) enfreint les règles d'écriture
-- **Guerre** : « **David prend Jérusalem** et en fait sa capitale », « le royaume se divise », « Âges des grands royaumes ». Prise de cité et royaume divisé vont contre « **aucune guerre sur Telluris** » (✍️ 21/08, répété ensuite). Il faut une prise **sans conquête** : un pacte, ou une cité sauvée des monstres.
-- **Christianisme** : la colonne en fait un « des principaux centres du christianisme ». C'est interdit (✍️ 21/08), et le texte doit dire « monothéisme » (✍️ 31/08).
-- **Comparaison avec la Terre** : « telle qu'elle est connue dans les récits bibliques ». Interdit (✍️ 21/08).
-- **Royaume** et **Cités-États** : la colonne parle d'un « royaume d'Israël » et d'un « royaume de Juda ». Le monde est fait de Cités-États ; le seul royaume établi est celui de Néfertiti. Un royaume à plusieurs cités suppose des territoires tenus entre les remparts, ce qui reste à justifier.
-- **Portails** : la colonne fait de Jérusalem une cité qui « entre progressivement dans le réseau ». Le tableau de l'Auteur (26/08) dit au contraire : « pas un passage libre vers une capitale », portail « ancien, coûteux, mal compris ». C'est compatible, mais à préciser.
+Le mot « fondée » est remplacé par **deux moments**, ce qui règle le cas de Lutecia (§ 1.9). 🔧 Termes proposés :
+- **Établissement** : le site est habité ; la cité existe, sous un autre nom, ou sans rempart ni rang.
+- **Avènement** : la cité **prend son nom** et son rang de **Cité-État**.
 
-### 4.2 Hārūt et Mārūt (séance Babylone, 10/09) placent les portails après Salomon
-- Le texte situe les anges « à l'époque de Salomon », puis ajoute : « **lorsque les générations suivantes découvriront les portails**, les Architectes ne partiront pas de zéro ».
-- C'est contraire à ✍️ 19/08 : **Salomon vit après les trois frères** et après le début de l'ère des portails.
-- La proposition doit être corrigée avant tout usage : les tablettes babyloniennes **éclairent** des portails qui existent déjà, elles ne les **précèdent** pas.
+Autres formules possibles pour l'avènement : « prise de nom », « érection en Cité-État ». « Consécration » et « baptême » sont à éviter, pour leur connotation religieuse.
 
-### 4.3 La chronologie des cités (26/08) contredit l'Auteur
-| Cité | Rang proposé | Ce que dit l'Auteur | Problème |
-|---|---|---|---|
-| **Lutecia** | 14ᵉ et dernière, « réorganisation tardive » | Lutecia « a pour source le portail de Notre-Dame », fait par **un des frères** (✍️ 20/08) | Elle existe au plus tard à la période IV, avant Jérusalem et Salomon. La « refondation tardive » n'a aucun appui. |
-| **Aix-la-Chapelle** | 7ᵉ, « Haut Moyen Âge » | 5 portes de la Chapelle Palatine faites par **un frère**, « avant l'avènement de Charlemagne » (✍️ 24/08) | Le site existe à la période IV. Seule la Cité-État carolingienne date de la période XII. |
-| **Reykjavik** | 9ᵉ, « Moyen Âge nordique », après Aix | Le dragon oriente les lignées islandaises « **depuis des millénaires** » (✍️ 12/08) | Un peuplement millénaire ne tient pas après Charlemagne, donc après la Vague. |
-| **Akureyri** | 12ᵉ, « postérieure à Reykjavik » | Son portail vers Reykjavik est « **altéré par la Vague** » (✍️ 26/08) | Le portail existait avant la Vague, donc la cité aussi, au moins comme site. |
-| **Bruges** | 11ᵉ, « Moyen Âge central » | La Notre-Dame de Bruges « a **résisté** à la vague » (✍️ 23/08) | Même problème : la cité est antérieure à la Vague. |
-| **Abou Simbel** | 3ᵉ, après Mu et Atlantis | « avant les pyramides et avant les frères » (✍️ 21/08) | Compatible, mais l'ordre par rapport à Mu et Atlantis est arbitraire. |
-| **Rome**, **Alexandrie**, **Babylone**, **Rhemi** | absentes | Rome a le seul portail naturel admis (Saint-Pierre) | Rome est la cité la plus ancienne en matière de portails, et elle est oubliée. |
+Les cités sont **classées par avènement** ; l'ordre à l'intérieur d'une même ère est indicatif. Toute période terrestre est retirée.
 
-- **Périodisation terrestre** : « Antiquité », « Haut Moyen Âge », « Moyen Âge nordique », « antédiluvienne ». Cela contrevient à « ne compare pas l'histoire de la Terre à celle de Telluris » (✍️ 21/08). Les cités doivent être datées par les âges de cette frise (I à XV).
-- La table ne vaut que si l'on retient la distinction **fondation du site / fondation de la Cité-État** qu'elle propose elle-même. Même ainsi, Lutecia, Aix, Bruges, Akureyri et Reykjavik ont, d'après l'Auteur, un site antérieur à la Vague.
+| # | Cité | Établissement | Avènement | Repères |
+|---:|---|---|---|---|
+| — | **Mu** | antédiluvien | — | ✍️ Antérieure aux frères ; aujourd'hui continent englouti, lieu révéré des Architectes. Ce n'est pas une Cité-État. |
+| — | **Atlantis** | antédiluvien (💬26) | — | 💬 Jamais devenue un centre du réseau, par isolement volontaire (✍️ tableau 26/08). |
+| 1 | **Abou Simbel** | antédiluvien | antédiluvien | ✍️ Royaume de Néfertiti, « avant les pyramides et avant les frères ». |
+| 2 | **Rome** | antédiluvien (🔧) | avant la Vague | ✍️ Saint-Pierre, portail naturel antérieur aux frères ; Panthéon, portail transversal plus ancien que Saint-Ange. 🔧 Le site est habité avant les frères, puisque Saint-Pierre y est déjà connu. |
+| 3 | **Jérusalem** | antédiluvien (💬19) | avant la Vague | ✍️ Salomon après les frères ; David reconnu roi par la cité (✍️ 11/10). |
+| 4 | **Constantinople** | avant la Vague | avant la Vague | ✍️ Portail de Sainte-Sophie millénaire, autour duquel l'édifice de Justinien a été bâti ; Grand Palais antérieur à la Vague. |
+| 5 | **Aix-la-Chapelle** | avant la Vague | après la Vague | ✍️ 5 portes d'un frère avant Charlemagne ; Charlemagne transforme la cité un siècle après la Vague. |
+| 6 | **Venise** | avant la Vague | après la Vague | 🔧 Doge, Arsenal, rivalité « de plusieurs siècles » avec Gênes. |
+| 7 | **Cordoue** | avant la Vague | après la Vague | ✍️ Brèche originelle non datée ; Averroès, Maïmonide. |
+| 8 | **Reykjavik** | avant la Vague | après la Vague | ✍️ Le dragon guide les lignées islandaises « depuis des millénaires ». |
+| 9 | **Gênes** | avant la Vague | après la Vague | ✍️ La Banque de Saint-Georges naît du commerce des cristaux. |
+| 10 | **Bruges** | avant la Vague | après la Vague | ✍️ La Notre-Dame de Bruges a résisté à la Vague. |
+| 11 | **Akureyri** | avant la Vague | après la Vague | ✍️ Portail vers Reykjavik altéré par la Vague. Avènement après celui de Reykjavik (💬26). |
+| 12 | **Auxerre** | avant la Vague | après la Vague | ✍️ Temple-mine bâti sur un portail devenu donjon. |
+| 13 | **Lutecia** | avant la Vague, au plus tard à l'époque des frères | après la Vague, **en dernier** | ✍️ Naît autour de Notre-Dame dans une cité qui existe déjà et prend son nom en dernier (11/10). 🔧 Son avènement suivrait la Vague : intact quand tant d'autres s'altèrent, Notre-Dame devient la « capitale du passage ». |
 
-### 4.4 Néfertiti « avant les pyramides »
-- ✍️ 21/08 place Néfertiti avant les pyramides. C'est l'**inverse** de l'ordre réel, où les pyramides précèdent de loin Akhénaton.
-- La règle des mythes « parvenus déformés » le permet, mais c'est la seule inversion **assumée** d'une chronologie réelle. Il faut la garder délibérée et ne pas la propager : les autres figures (Gilgamesh, Salomon, Dédale, Charlemagne) suivent l'ordre réel.
-
-### 4.5 Sainte-Sophie : un portail millénaire dans un édifice de Justinien
-- ✍️ 24/08 : Sainte-Sophie est « consacrée sous Justinien », et son portail la relie à Rome « de manière stable **depuis des millénaires** ».
-- Le portail est donc **plus ancien** que l'édifice. Ce n'est pas faux (l'édifice a été bâti autour du portail), mais il faut le dire. Justinien est ainsi une figure **d'avant la Vague** de la frise, ce que rien ne dit ailleurs.
-
-### 4.6 Origine des monstres et Lilith
-- Les deux frises disent, conformément à l'Auteur, que les monstres **précèdent** les portails.
-- La trame (Lilith/Échidna, « accusée d'être à l'origine de tous les monstres ») n'est pas contradictoire : c'est **ce que croient** les personnages, pas un fait.
-- Une frise publique ne doit donc **pas** dater l'apparition des monstres, ni l'attribuer à quiconque.
-
-### 4.7 Grigori
-- ✍️ 04/10 : les Grigori sont « les éveillés de bien avant JC ». La proposition 💬 du 04/10 en fait une source indirecte du savoir des frères, donc des Grigori **antérieurs** aux frères.
-- Aucune frise ne les situe. Ils restent hors frise tant que l'Auteur n'a pas fixé plus que « bien avant JC ». Les placer avant les frères ferait d'eux une **cause** de l'invention des portails, ce qui n'a pas été décidé.
+Absentes, faute de séance qui les date : Alexandrie, Babylone, Rhemi.
 
 ---
 
-## 5. Décisions attendues de l'Auteur
+## 6. Colonne Jérusalem réécrite (frise du 19/08)
 
-1. **Templiers** : naissance avant la Vague (💬21) ou après (✍️ 19/08, 📘 § 11) ? (§ 3.1)
-2. **Monothéisme et Jésus** : avant ou après la Vague ? La réponse découle du point 1. (§ 3.2)
-3. **Durée de l'après-Vague** : faut-il un ordre de grandeur ? (§ 3.6)
-4. **Cristaux avant la Vague** : à laisser ouvert ou à trancher ? (§ 3.7)
-5. **Portails antérieurs aux frères** : Saint-Pierre seul, ou aussi l'Hekla et la brèche de Cordoue ? Faut-il corriger le 📘 § 4 (« aucun portail vers un autre monde ») ? (§ 3.9)
-6. **Jérusalem** : réécrire David « sans conquête », et « royaume » en « Cité-État » ? (§ 4.1)
-7. **Chronologie des cités** : la refaire sur les âges de cette frise, avec deux colonnes (site / Cité-État) ? (§ 4.3)
+Réécriture 🔧 selon le § 1.7, alignée sur les âges du § 4. Le mot « royaume » disparaît : il n'en reste qu'une occurrence, pour Néfertiti, seul royaume établi du lore.
+
+| Âge (§ 4) | Avant (💬19) | Proposé |
+|---|---|---|
+| I | « Premiers royaumes » (titre d'époque) | **Premières cités** |
+| I | « Les premières communautés s'établissent dans les collines de Judée. » | inchangé |
+| II | « Une communauté fortifiée s'implante sur les hauteurs de Jérusalem. » | inchangé |
+| IV | « Jérusalem existe déjà comme cité ancienne, mais reste encore relativement éloignée des grands réseaux de portails. » | inchangé |
+| V | « Jérusalem entre progressivement dans le réseau des grandes cités reliées par les portails. » | « Jérusalem obtient un portail ancien, coûteux et mal compris, qui n'ouvre pas librement sur les capitales. » (✍️ tableau 26/08) |
+| VI | « Règne de David » — « **David prend Jérusalem et en fait sa capitale.** La cité devient le centre politique du **royaume d'Israël**. » | « David, roi de Jérusalem » — « **Jérusalem reconnaît David comme son roi.** La Cité-État devient le centre politique et sacré des cités des collines de Judée qui la suivent. » |
+| VI | « Salomon succède à David. Jérusalem connaît une période de prospérité et de grands travaux. Le Temple est édifié et devient le cœur religieux de la cité. » | « Salomon succède à David. […] Le Temple est **édifié autour du portail** et devient le cœur de la cité. » (✍️ 11/10 : monuments bâtis autour des portails) |
+| VI | « **Le royaume se divise.** Jérusalem demeure le centre politique et religieux du **royaume de Juda** et conserve son prestige. » | « **Les cités avoisinantes diminuent leurs relations avec Jérusalem.** La Cité-État reste le centre politique et sacré de celles qui lui demeurent liées, et conserve son prestige. » |
+| VI-VII | « Âges des grands royaumes » — « Jérusalem traverse plusieurs périodes de prospérité et de déclin. La cité est régulièrement agrandie, reconstruite et renforcée. » | « **Âge des grandes Cités-États** » — texte inchangé. |
+| VIII | « Développement du christianisme » — « Jérusalem devient l'un des principaux centres du christianisme. » | « **Les monothéismes** » — « Jérusalem devient l'un des grands centres des monothéismes, qui s'ajoutent aux cultes plus anciens de la cité. » |
+| — | « telle qu'elle est connue dans les récits bibliques » (commentaire de la frise) | supprimé (comparaison avec la Terre) |
+
+---
+
+## 7. Hārūt et Mārūt — correction
+
+Source : [séance Babylone, réponse du 10/09](../cites/20260819_histoire_de_babylone.md).
+
+**Passage fautif** (💬, § *La place chronologique de Hārūt et Mārūt*) :
+> « → **bien avant la grande vague de mana et l'apparition des donjons.** Ainsi, **lorsque les générations suivantes découvriront les portails**, les Architectes ne partiront pas de zéro. Une partie des connaissances anciennes sur les flux, les liens et les forces invisibles existe déjà dans les tablettes babyloniennes. »
+
+**Réécriture proposée** (🔧, selon le § 1.8) :
+> « → **après l'œuvre des trois frères**, qui ont apporté au monde la connaissance des portails → à l'époque de Salomon → **bien avant la grande vague de mana et l'apparition des donjons.** Ainsi, quand le savoir des frères commencera à se dégrader, les Architectes ne repartiront pas de zéro : une partie des connaissances anciennes sur les flux, les liens et les forces invisibles reste consignée dans les tablettes babyloniennes. »
+
+La séance d'origine n'est pas modifiée : c'est un échange de travail. La correction vaut pour tout texte qui reprendrait la proposition.
+
+---
+
+## 8. Points encore ouverts
+
+1. **Templiers : nés avant ou après la Vague ?** (§ 2.1, § 3)
+	- Avec une Vague il y a sept à huit siècles, et des Templiers « antérieurs au christianisme », les Templiers doivent naître **avant** la Vague (💬21). Le « se sont développés » du 19/08 serait alors un essor.
+	- Le document maître § 11 (« ils apparaissent après la transformation des portails ») serait à corriger.
+	- Le nœud demeure : un temple est bâti autour d'un **portail de donjon**, et il n'y a pas de donjons avant la Vague. Avant elle, les Templiers garderaient les portes transversales.
+2. **Date de la Vague** : l'estimation 🔧 « sept à huit siècles » est à valider, ou à remplacer par un millénaire en déplaçant Charlemagne (§ 3).
+3. **Document maître § 4 et § 7** : choisir une reformulation (§ 2.3).
+4. **Violet ou jaune** (contradiction ouverte de la compétence lore) :
+	- « une gemme de mana **violette** de 250 g suffit » pour Notre-Dame (✍️ 20/08) ;
+	- « un voyage par cristal **jaune** » (✍️ 24/09).
+	- Le jaune = maîtrise du portail (§ 1.2) pourrait les concilier, par exemple un cristal violet de mana et un cristal jaune de maîtrise. Ce n'est pas tranché.
+5. **Grigori** : « bien avant JC » (✍️ 04/10) ne suffit pas à les placer dans une ère.
+6. **Rome** : établissement antédiluvien proposé (§ 5), à confirmer.
