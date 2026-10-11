@@ -127,7 +127,7 @@ Les premiers portails sont :
 - relativement fiables ;
 - exclusivement reliés à d'autres lieux de Telluris.
 
-Aucun de ces portails — ceux des frères et de leurs héritiers — ne mène alors **vers un autre monde**. Les portails naturels sont soit **inconnus**, soit **pas encore apparus** : certains se manifestent bien plus tard, comme celui de Jumièges. Seul celui de Saint-Pierre, à Rome, est connu des Occidentaux.
+Aucun de ces portails — ceux des frères et de leurs héritiers — ne mène alors **vers un autre monde**. Les portails naturels sont soit **inconnus**, soit **pas encore apparus** : certains se manifestent bien plus tard. Seul celui de Saint-Pierre, à Rome, est connu des Occidentaux.
 
 ---
 

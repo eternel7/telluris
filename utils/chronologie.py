@@ -2,8 +2,8 @@
 frise SVG de `/admin/lore/chronologie`.
 
 Modèle de temps — aucune date terrestre :
-- des ÈRES dans l'ordre de l'axe ; `ordinal` (repérée par rangs : l'antédiluvien, le temps
-  du joueur), `passe` (« ans avant l'ère actuelle », décroissant) ou `futur` (« dans N ans ») ;
+- des ÈRES dans l'ordre de l'axe ; `ordinal` (repérée par rangs : l'antédiluvien, l'Âge des
+  Remparts, le temps du joueur), `passe` (« ans avant l'ère actuelle », décroissant) ou `futur` (« dans N ans ») ;
 - une BORNE = `{"ere": …}` + UNE clé parmi `ans` · `entre` [plus_ancien, plus_recent] ·
   `dans` · `entre_dans` [plus_proche, plus_lointain] · `rang` · `entre_rangs` [premier, dernier]
   · `inconnu` · `ouvert` ;
@@ -11,7 +11,7 @@ Modèle de temps — aucune date terrestre :
 
 Le serveur réduit chaque borne à un intervalle de TEMPS NORMALISÉ `t` = indice de l'ère +
 fraction dans l'ère (0 → 1, dans le sens de l'axe). `t` est continu d'une ère numérique à
-l'autre (750 ans = fin d'« avant la Vague » = début d'« après la Vague ») et ne dépend
+l'autre (750 ans = fin de l'Âge des Portails = début de l'Âge des Donjons) et ne dépend
 d'aucun zoom : le client ne fait que projeter `t` en pixels (`chronoEchelle`), il ne
 recalcule jamais une date — une seule vérité, ici.
 """

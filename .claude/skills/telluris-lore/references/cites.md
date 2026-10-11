@@ -3,7 +3,7 @@
 Chaque entrée sépare **Auteur** (décision, niveau 2) et **Proposé** (réponse ChatGPT non adoptée, niveau 4). Source : le fichier entre crochets dans `docs/lore/`. Lieux réellement en jeu : `lieu:*` du dump (catégories `ville`, `pays`, `portail`, `temple`, `guilde_aventurier`).
 
 ## Sommaire
-France : Lutecia · Auxerre · Rhemi — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem — Mythiques : Mu · Atlantis — Réseau des portails
+France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem — Mythiques : Mu · Atlantis — Réseau des portails
 
 ---
 
@@ -45,8 +45,26 @@ Devise (Auteur, 11/10) : **« Toute porte s'ouvre. Toute route a son prix. »**,
 
 **En jeu** : temple de Saint-Eusèbe (Révérend Malakor, ogre prêtre) ; temple-portail de Saint-Austrelin ; Templiers Armand de Vaucremont, Florian Bouzereau, George Dourdan.
 
-## Rhemi (Reims) — `lieu:rhemi`
-Rien dans les séances. Peuplée en jeu (62 marchands, 3 auberges — commit `a01812a`). Lore à écrire → règles d'écriture + histoire réelle de Reims (sacres, cathédrale, champagne) adaptée.
+## Rhemi (Reims) — `lieu:rhemi` · [cites/20261011_rhemi_et_chartres.md]
+Peuplée en jeu ; quartiers lus sur les enseignes (`enseignes.TOPONYMES_PAR_LIEU`) : Sacre, Vesle, Coteaux, Porte de Mars, Chapitre, Crayères, Vieux Cloître.
+**Auteur** (11/10, proposition de Claude Code adoptée) — **pas une capitale** ; « Rhemi sacre, Chartres juge et enseigne » :
+- **Antédiluvien** : plateau de craie au bord de la Vesle, nomades saisonniers.
+- **Âge des Remparts — établissement** : les **Rèmes** élèvent l'enceinte ronde de **Durocortorum** ; ils **s'allient** plutôt que de résister (ambassadeurs, aucune cité ne tient seule).
+- **Âge des Portails** : des Architectes de Rome bâtissent la **Porte de Mars** pour relier Rhemi à Rome ; elle ne s'allume jamais — **la craie boit le mana** (« portail mort-né » ; certains jurent qu'elle a marché une fois). Rhemi reste une cité de routes, carrefour paladin vers Aix et Bruges ; on creuse les **crayères**.
+- **Fin de l'Âge des Portails** : une colombe apporte à **Remi** l'**Ampoule** (huile qui ne s'épuise pas) ; il oint un chef des Francs → **premier Sacre**, rite par lequel les cités voisines reconnaissent celui qui gouverne. Origine de l'Ampoule : théories contradictoires (portail ouvert un instant dans le ciel, don des Grigori, objet venu du Paradis par Saint-Pierre) — **jamais Jumièges** en exemple.
+- **Âge des Donjons — avènement** : sans portail, Rhemi est **épargnée par la Vague** ; refuge, le Sacre prend son poids ; les héritiers de Charlemagne y sont sacrés. Cathédrale bâtie **autour de l'Ampoule**, pas d'un portail.
+- **Aujourd'hui** : crayères qui gardent vin et cristaux à l'abri du mana ; « **vin du diable** » des Coteaux (fûts qui éclatent) ; l'**Ange au Sourire**, portrait d'un Grigori selon certains. Pistes : escorter l'Ampoule, enquêter sur la Porte de Mars.
+
+## Chartres — `lieu:chartres` · [cites/20261011_rhemi_et_chartres.md]
+Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tertre, Saint-André, Pont Bouju, Épars ; auberges *Aux Deux Flèches*, *La Halte des Pèlerins*, *Au Grenier de Beauce*, *Le Relais de l'Eure* ; porte de Lutecia.
+**Auteur** (11/10, proposition de Claude Code adoptée, deux corrections) — **pas une capitale** :
+- **Antédiluvien** : sur le Tertre, un puits et une grotte où se dresse une **Dame noire** sculptée on ne sait par qui ; « lieu consacré » des **Carnutes**.
+- **Âge des Remparts — établissement** : chaque année, les sages des cités s'y réunissent pour **arbitrer leurs différends** (terrain neutre, la parole et non les armes).
+- **Âge des Portails** : **Dédale** ou un disciple trace le **labyrinthe** autour du puits — un portail par le chemin plutôt que par la bolas ; figure d'école pour les Architectes, des pèlerins disent être arrivés « ailleurs ».
+- **Âge des Donjons** : **le puits est un portail horizontal** (on y entre en descendant) ; à la Vague il change de couleur et ouvre sur un labyrinthe habité par un **Minotaure**. Les premiers à y descendre, **les Forts**, n'en reviennent pas ; Templiers dans la crypte, la cathédrale devient leur temple. ⚠️ **Pas de Thésée** (Auteur, 11/10).
+- **Avènement**, après Charlemagne : l'**école de Chartres** — « **des nains juchés sur des épaules de géants** », à la lettre (nains sur des épaules d'ogres) ; elle forme des **lettrés**, pas des magiciens.
+- **Aujourd'hui** : le **bleu de Chartres**, verre teinté de poudre de cristal au secret perdu ; les **deux flèches** servent de vigies ; la **Beauce** nourrit Lutecia (convois de grain escortés par la porte de Lutecia) ; pèlerins de toutes croyances sur le labyrinthe ; tanneurs de la Basse-Ville au bord de l'Eure. Pistes : grain vers Lutecia, pèlerins, secret du bleu.
+- Écartés : le Voile de la Vierge et le baptême de Clovis comme tel (christianisme).
 
 ## Rome — `lieu:rome` · [cites/20260820_decrire_rome_dans_telluris.md], [monde/20260821_portail_des_profondeurs.md]
 **Auteur**

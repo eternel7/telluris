@@ -12,7 +12,7 @@ Les frères ont parcouru le monde et laissé leur œuvre derrière eux. Le **por
 
 Les frères n'ont pas inventé les portails : ils ont apporté au monde la façon de les **créer**. Il en existait avant eux. Le portail de **Saint-Pierre**, à Rome, est naturel et plus ancien que Rome elle-même ; c'est la seule exception connue des Occidentaux. D'autres, comme le gouffre de l'**Hekla** en Islande, la brèche originelle de **Cordoue** ou les portes de **Mu**, n'ont pas d'âge connu : nul ne sait s'ils sont plus vieux ou plus jeunes que les autres.
 
-Et des portails naissent encore seuls. Celui qui s'est manifesté dans le chœur ruiné de l'abbaye de **Jumièges** est très récent. Personne ne l'a bâti.
+Et des portails naissent encore seuls, sans que personne les ait bâtis.
 
 ## Bâtir autour d'une porte
 

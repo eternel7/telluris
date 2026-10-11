@@ -32,6 +32,7 @@ Rebelle contre les dieux, accusée d'être à l'origine de tous les monstres.
 - **Jésus**, s'il a existé, était un **joueur** ayant choisi la **révélation**. Il a fini le jeu en **Révélateur**.
 	- Comme la Vérité philosophique de Platon, que l'homme ne peut saisir directement, la vérité du Divin a dû être **vulgarisée** pour les Anthropes.
 	- Fils de charpentier ou plus haut dignitaire de Jérusalem ? Question posée ; la synthèse retient le **fils de charpentier**.
+- **Le Déluge** (11/10, adopté) : clôt l'antédiluvien ; nature **inconnue**, comme la Vague. **Utnapishtim** y survit (où il vit, s'il vit encore : nul ne sait). Théories contradictoires portées par des personnages : Mu engloutie à ce moment-là ; le Déluge était déjà une vague de mana, la Grande Vague en serait la seconde — d'autres le nient. **Gilgamesh**, premier roi d'après le Déluge, bâtit les remparts d'**Uruk** et ouvre l'Âge des Remparts ; sa quête d'immortalité échoue (le serpent), en écho à la dynastie du Nil et à la question des Grigori (frise fusionnée § 11).
 - **Grigori** (« les Veilleurs », *egrḗgoroi*) : « les éveillés de **bien avant JC** » (04/10), placés à l'**Âge des Remparts**, peut-être à l'époque de la dynastie dont émergera Néfertiti (11/10). Proposition **adoptée** le 11/10 (Hermon, hénochien, question de l'immortalité transmise au Nil, fin ouverte) : `docs/lore/monde/20261011_frise_chronologique_fusionnee.md` § 9.
 
 ### Monothéisme (31/08, reformulation de l'Auteur)
