@@ -86,6 +86,16 @@ Contenu : `jsons/pnj_milo_cartographe_a_importer.json` (`pnj:milo_cartographe`, 
 
 Verrouillé par `tests/test_pnj.py`, `tests/test_quete_reussie.py`, `tests/test_quete_active.py`, `tests/test_indicateurs.py`, `tests/test_guillemets_insecables.py`.
 
+#### Épreuve du rang C de Lutecia — le portail de Jumièges
+Contenu : `dev/gen_quete_rang_c_jumieges.py` → **un seul** fichier d'import `jsons/quete_rang_c_abbaye_de_jumieges_a_importer.json` (docs neufs ET retouchés, recopiés dans `maelys_…` / `cour_des_arches_…`). 100 % donnée.
+- Chaîne : Maëlys (bureau, rang D) confie `quete:rang_c_lettre_a_l_institut` (transport `retour`, `rang_guilde: "C"` — c'est LUI qui promeut) → Aélis la reçoit à la Cour des Arches (destinataire NON marchand : `livre`/`incomplet`) et offre `quete:escorte_aelis_abbaye_de_jumieges` → voix d'Aélis devant `lieu:abbaye_de_jumieges` (France (37,11)), service `acces` → combat de la nef (`donjon:abbaye_de_jumieges`, 3 démons mineurs, grade 4-5) → dépose aux Archives des Seuils → `rapporter` chez Maëlys.
+- ⚠️ Le `rapporter` exige AUSSI `quete_reussie` de l'escorte : renommer l'escorte bloque le rang C en silence (verrouillé : `test_les_ids_de_quete_sont_ceux_des_offres`).
+- ⚠️ Destination = `lieu:les_archives_des_seuils`, fermées par `combat_gagne` de la nef : impossible de déposer Aélis sans Jumièges. Une seule Aélis présente à la fois (Cour → abbaye → Archives), présences filtrées par `cible` (les barrières n'ont pas de filtre `id`).
+- Image d'Aélis devant l'Institut = **portrait** de l'entrée `pnj` de la Cour, pas `image` : la Cour garde son image sans elle.
+- Linter : le rôle de DONNEUR de transport n'est exigé que d'une `offre` écrite ou d'un `pnj:marchand_*` ; déclarer `livre` exige `incomplet`.
+
+Verrouillé par `tests/test_quete_rang_c_jumieges.py`.
+
 #### Passages dans un lieu — condition `passages`
 - `character["passages"] = {lieu_id: n}` : nombre d'ENTRÉES, compté par `pnj.poser_pnj_present` **avant** le tirage (le passage en cours compte déjà). Même sémantique que le tirage : refresh = 0, ressortir/rentrer = +1, connexion interne = 0. Champ absent ⇒ 0 (un perso compte à partir de sa prochaine entrée).
 - Condition `{"passages": {lieu, min?, max?}}`, bornes **incluses**, au moins une — **dans les deux vocabulaires** (présence `pnj[].conditions` / bloc `acces`, et `condition` d'un choix). UN prédicat : `pnj.passages_ok` (importé par `acces`). Fail-closed : `lieu` absent, borne non entière, aucune borne, sous-clé inconnue. Linter : `lint_dialogues.fautes_passages` (+ `min > max`) ; éditeur de lieux : sous-filtres `min`/`max` de genre `entier`.
@@ -115,7 +125,7 @@ Un arbre de dialogue est de la **donnée** : ni typé, ni exécuté à l'import.
 - `analyser(payload)` → `{analyses, ignores, erreurs, avertissements, trouvailles[]}` ; un doc sans bloc `dialogue` est *ignoré*, pas fautif.
 - **Erreurs** : `noeud_depart` absent/introuvable · `next` vers un nœud inexistant · nœud **inatteignable** · nœud sans choix · deux choix de même `id` dans un nœud (`choix_valide` renvoie le premier, le second est mort) · nœud de service déclaré mais absent · placeholder hors liste · **condition inconnue du moteur** (flag absent = False → le choix ne s'affiche JAMAIS) · action `livrer`/`rapporter` non conditionnée par son flag · nom de PNJ en dur dans un `pnj:marchand_*` · bloc **`relation`** fautif (clé hors `RELATION_CLES`, `delta` nul ou illisible, `lieu` sans préfixe `lieu:`, `unique` non textuel) · **`relation_reinit`** qui ne lève rien — ⚠️ le plus coûteux à diagnostiquer : la récompense reste fermée pour toujours alors que le dialogue se déroule normalement.
 - **Avertissements** : choix sans `next` ni `action` (ferme le dialogue comme `fin`, idiome valide) · nœud de service manquant (sauf `accepte` d'une escorte dont CHAQUE acceptation porte `deplacer` : le client quitte le dialogue, le nœud ne serait jamais lu).
-- ⚠️ **Le transport a deux rôles**, presque jamais tenus par le même PNJ : **donneur** (`accepte`/`trop_charge`, + `rapporte` si `offre.retour`), que n'importe quel PNJ peut être ; **destinataire** (`livre`/`incomplet`), en pratique un `pnj:marchand_*`. Les exiger de tous ferait crier au défaut sur un donneur correct.
+- ⚠️ **Le transport a deux rôles**, presque jamais tenus par le même PNJ : **donneur** (`accepte`/`trop_charge`, + `rapporte` si `offre.retour`), que n'importe quel PNJ peut être ; **destinataire** (`livre`/`incomplet`), en pratique un `pnj:marchand_*`, ou tout PNJ qui déclare `livre` (Aélis). Le linter n'exige les nœuds de donneur que d'une `offre` écrite ou d'un tenancier générique ; les exiger de tous ferait crier au défaut sur un PNJ correct.
 - ⚠️ Les listes de référence (`PLACEHOLDERS_CONNUS`, `FLAGS_CONNUS`, `NOEUDS_REQUIS`, `ACTIONS_A_CONDITIONNER`, `SOUS_FILTRES_CONNUS`) décrivent ce que `routers/pnj.py` consomme **réellement** : les tenir à jour avec tout nouveau service ou flag, sinon le linter signalera du code correct.
 
 

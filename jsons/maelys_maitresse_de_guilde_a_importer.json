@@ -34,6 +34,58 @@
               "next": "epee"
             },
             {
+              "id": "rang_c_offre",
+              "label": "« On dit que l'épreuve du rang C, c'est vous qui la donnez. »",
+              "condition": {
+                "transport_offert": true
+              },
+              "next": "rang_c_propose"
+            },
+            {
+              "id": "rang_c_relance",
+              "label": "« Au sujet de la lettre pour l'Institut… »",
+              "condition": {
+                "transport_en_cours": true
+              },
+              "next": "rang_c_relance"
+            },
+            {
+              "id": "rang_c_attente",
+              "label": "« La lettre est remise. »",
+              "condition": {
+                "transport_a_rapporter": true,
+                "quete_reussie": {
+                  "id": "quete:escorte_aelis_abbaye_de_jumieges",
+                  "attendu": false
+                }
+              },
+              "next": "rang_c_pas_encore"
+            },
+            {
+              "id": "rang_c_rapport",
+              "label": "« L'architecte est rentrée à la Cour des Arches, saine et sauve. »",
+              "condition": {
+                "transport_a_rapporter": true,
+                "quete_reussie": {
+                  "id": "quete:escorte_aelis_abbaye_de_jumieges"
+                }
+              },
+              "action": {
+                "service": "transport",
+                "op": "rapporter"
+              }
+            },
+            {
+              "id": "rang_c_souvenir",
+              "label": "« Jumièges… »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_c_lettre_a_l_institut"
+                }
+              },
+              "next": "rang_c_souvenir"
+            },
+            {
               "id": "rien",
               "label": "« Rien. Je voulais vous rencontrer. »",
               "next": "conge"
@@ -109,6 +161,146 @@
               "next": "fin"
             }
           ]
+        },
+        "rang_c_propose": {
+          "texte": "Maëlys ne s'assied pas. Elle tire d'un casier un pli déjà scellé — la cire porte la porte ouverte de la Guilde — et le pose à plat sur la table, entre vous. « Le rang C, {prenom}, ne se gagne pas sur une bête abattue. Il se gagne le jour où je peux confier à quelqu'un la vie d'une personne qui ne sait pas se défendre, et le regarder partir sans compter les jours. » Elle tapote le pli du bout de l'index. « L'Institut des Architectes me demande une escorte. En Normandie, en aval de Rouen, dans les ruines de l'abbaye de Jumièges, un portail s'est ouvert. Personne ne l'a bâti. Ils envoient l'une des leurs l'examiner : Aélis de Montfaucon. Je crois que vous la connaissez. Portez-lui cette lettre à {destination}, faites ce qu'elle vous demandera, ramenez-la vivante. Ensuite seulement, revenez ici. »",
+          "choix": [
+            {
+              "id": "rang_c_infos",
+              "label": "« Que sait-on de ce portail ? »",
+              "next": "rang_c_infos"
+            },
+            {
+              "id": "rang_c_accepter",
+              "label": "« Donnez-moi cette lettre. »",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "rang_c_plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "rang_c_infos": {
+          "texte": "« Ce qu'en dit un berger, et ce qu'en devinent trois maîtres de la Cour qui ne l'ont pas vu. » Elle hausse une épaule. « De la lumière dans la nef, la nuit. Des choses qui bougent sur les dalles. Pour le reste, l'abbaye est sur une boucle de la Seine, deux tours encore debout : suivez le fleuve vers la mer, vous ne la manquerez pas. » Elle vous regarde droit dans les yeux. « Ce qui sort d'un portail que personne n'a bâti, je ne le sais pas. C'est précisément pour cela que je n'y envoie pas n'importe qui. Et ne traînez pas avec la lettre : l'Institut attend ma réponse avant de faire partir quelqu'un d'autre. »",
+          "choix": [
+            {
+              "id": "rang_c_accepter",
+              "label": "« Donnez-moi cette lettre. »",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "rang_c_plus_tard",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "rang_c_accepte": {
+          "texte": "Elle vous tend le pli. Il ne pèse rien ; elle le retient pourtant un instant avant de le lâcher. « {destination}. En main propre. » Puis, déjà retournée vers ses cartes : « Et, {prenom} — là-bas, c'est elle qui décide quand on s'approche. Vous, vous décidez quand on recule. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_trop_charge": {
+          "texte": "Maëlys regarde votre sac, puis vous. « Une lettre, {prenom}. Une seule. Si vous ne pouvez plus la glisser dans votre barda, vous ne pourrez pas non plus courir quand il le faudra. Allégez-vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Je reviens plus léger. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_relance": {
+          "texte": "« Le pli n'est pas arrivé. » Ce n'est pas une question. « {destination}. L'Institut n'enverra personne à Jumièges tant qu'il n'aura pas ma réponse — et le portail, lui, n'attend personne. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y vais. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_pas_encore": {
+          "texte": "Elle lève les yeux de ses registres. « Remise, oui. On me l'a fait savoir. » Un temps. « Je ne vous ai pas envoyé porter une lettre, {prenom}. Je vous ai envoyé ramener quelqu'un. Revenez quand l'architecte sera de retour à la Cour des Arches — pas avant. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Elle le sera. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_rapporte": {
+          "texte": "Maëlys vous écoute sans vous interrompre : la Seine, les deux tours, la nef, ce qui est sorti du portail et la façon dont c'est tombé. Elle ne prend aucune note. Quand vous vous taisez, elle ouvre le registre des rangs, y trace une ligne, puis fait glisser vers vous {prime} pièces de cuivre. « Rang C. » Elle referme le registre. « L'Institut m'a écrit ce matin. Leur architecte est rentrée avec plus de questions qu'elle n'en avait en partant. Chez eux, c'est un compliment. » Un temps. « Chez moi aussi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Merci, maîtresse. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_souvenir": {
+          "texte": "« Jumièges. » Maëlys hoche la tête, une fois. « La Cour y a renvoyé des relevés. Le portail est toujours là, et personne ne sait encore vers où il ouvre. Ceux qui prétendent le savoir ne sont pas d'accord entre eux — ce qui, d'ordinaire, est bon signe : ils cherchent encore. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        }
+      }
+    },
+    "services": {
+      "transport": {
+        "offre": {
+          "id": "quete:rang_c_lettre_a_l_institut",
+          "destination": "lieu:la_cour_des_arches",
+          "cargaison": [
+            {
+              "item": "item:lettre_de_mission_de_la_guilde",
+              "quantite": 1,
+              "poids": 0.05
+            }
+          ],
+          "duree": 172800,
+          "proba": 1,
+          "unique": true,
+          "retour": true,
+          "rang": "C",
+          "titre": "Rang C : le portail de Jumièges",
+          "description": "Maëlys, maîtresse de la Guilde, vous confie un pli scellé pour l'Institut des Architectes, à la Cour des Arches. L'architecte qui le recevra part pour les ruines de l'abbaye de Jumièges, en Normandie, où un portail s'est ouvert : escortez-la, ramenez-la vivante, puis revenez rendre compte au bureau de la maîtresse. Le rang C est au bout.",
+          "recompenses": {
+            "xp": 150,
+            "cuivre": 20000,
+            "rang_guilde": "C"
+          }
+        },
+        "noeuds": {
+          "propose": "rang_c_propose",
+          "infos": "rang_c_infos",
+          "accepte": "rang_c_accepte",
+          "trop_charge": "rang_c_trop_charge",
+          "rapporte": "rang_c_rapporte"
         }
       }
     }

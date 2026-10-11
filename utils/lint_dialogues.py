@@ -490,12 +490,17 @@ def analyser_doc(doc: dict) -> list:
 				erreur(f"`services.{service}.noeuds.{cle}` désigne `{nid}`, qui n'existe pas "
 					   f"dans le dialogue.")
 		if service == "transport":
-			attendus = set(TRANSPORT_DONNEUR)
 			offre = (conf or {}).get("offre")
+			# DONNEUR : une course ÉCRITE, ou le tenancier générique (course tirée au hasard).
+			# Un PNJ qui ne déclare que `livre`/`incomplet` est un destinataire pur (Aélis
+			# reçoit la lettre de la Guilde) : il ne confie rien.
+			donneur = bool(offre) or doc_id.startswith("pnj:marchand_")
+			attendus = set(TRANSPORT_DONNEUR) if donneur else set()
 			if offre and offre.get("retour"):
 				attendus |= TRANSPORT_RETOUR
-			# Destinataire : réservé aux tenanciers de magasin (cf. commentaire plus haut).
-			if doc_id.startswith("pnj:marchand_"):
+			# Destinataire : le tenancier de magasin (cf. commentaire plus haut), ou tout PNJ
+			# qui déclare en recevoir une (`livre`) — il lui faut alors aussi `incomplet`.
+			if doc_id.startswith("pnj:marchand_") or "livre" in declares:
 				attendus |= TRANSPORT_DESTINATAIRE
 		elif service == "escorte":
 			attendus = set(NOEUDS_REQUIS["escorte"])

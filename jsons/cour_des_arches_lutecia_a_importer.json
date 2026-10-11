@@ -76,6 +76,29 @@
           "delai_min": 315360000,
           "choix": [
             {
+              "id": "lettre",
+              "label": "Lui tendre le pli scellé de la Guilde.",
+              "condition": {
+                "transport_a_livrer": true
+              },
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              }
+            },
+            {
+              "id": "jumieges",
+              "label": "« Quand partons-nous pour Jumièges ? »",
+              "condition": {
+                "escorte_offerte": true,
+                "transport_a_livrer": false,
+                "quete_active": {
+                  "id": "quete:rang_c_lettre_a_l_institut"
+                }
+              },
+              "next": "mission_01"
+            },
+            {
               "id": "fin",
               "label": "« Je repasserai. »",
               "next": "fin"
@@ -85,6 +108,29 @@
         "accueil_suivant": {
           "texte": "Aélis lève les yeux d'un plan couvert de cotes à l'encre, un compas toujours entre deux doigts. « Ah. C'est vous. » Elle repousse une mèche de son poignet sans lâcher son outil. « Entrez dans la lumière, vous faites de l'ombre sur mes chiffres. »",
           "choix": [
+            {
+              "id": "lettre",
+              "label": "Lui tendre le pli scellé de la Guilde.",
+              "condition": {
+                "transport_a_livrer": true
+              },
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              }
+            },
+            {
+              "id": "jumieges",
+              "label": "« Quand partons-nous pour Jumièges ? »",
+              "condition": {
+                "escorte_offerte": true,
+                "transport_a_livrer": false,
+                "quete_active": {
+                  "id": "quete:rang_c_lettre_a_l_institut"
+                }
+              },
+              "next": "mission_01"
+            },
             {
               "id": "travaux",
               "label": "« Les travaux avancent ? »",
@@ -131,6 +177,103 @@
               "next": "fin"
             }
           ]
+        },
+        "lettre_lue": {
+          "texte": "Aélis reconnaît le sceau avant même d'avoir le pli en main — la porte ouverte de la Guilde. Elle le rompt de l'ongle du pouce et lit debout, vite, puis une seconde fois, lentement. « {donneur} vous envoie. » Elle replie la lettre en quatre et la glisse dans son carnet. « J'avais demandé quelqu'un de sûr. Je n'avais pas osé demander quelqu'un que je connaisse. »",
+          "choix": [
+            {
+              "id": "mission",
+              "label": "« De quoi s'agit-il ? »",
+              "next": "mission_01"
+            }
+          ]
+        },
+        "lettre_absente": {
+          "texte": "Aélis tend la main, puis la laisse retomber. « Le pli de la Guilde ? Vous ne l'avez plus. » Elle fronce les sourcils, plus inquiète que fâchée. « Retrouvez-le. Sans lui, l'Institut ne me laissera pas partir avec vous. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Je reviens avec. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "mission_01": {
+          "texte": "Elle déroule sur la table un relevé couvert de cotes, d'une écriture qui n'est pas la sienne. « Jumièges. Une abbaye sur une boucle de la Seine, en aval de Rouen, en ruine depuis plus longtemps que la Cour ne tient de registres. Il y a vingt jours, un berger a vu de la lumière dans la nef. Un portail. » Elle pose le doigt sur un carré, au flanc nord du chœur. « Là. Où il n'y a ni autel d'ancrage, ni cristal, ni rien de ce que nous savons poser pour en faire tenir un. »",
+          "choix": [
+            {
+              "id": "qui",
+              "label": "« Qui l'a bâti ? »",
+              "next": "mission_02"
+            }
+          ]
+        },
+        "mission_02": {
+          "texte": "« Personne. C'est tout le problème. » Elle s'interdit de sourire, et n'y parvient qu'à moitié. « Ou quelqu'un, il y a si longtemps que la pierre a oublié son nom. Ou la Vague, qui n'a pas fini de remuer ce qu'elle a remué. Trois maîtres de la Cour, trois réponses, et pas un ne veut aller voir. » Elle roule le relevé. « Moi, je veux aller voir. L'Institut m'y autorise si la Guilde m'accompagne. Il faut que j'approche à moins de dix pas pour mesurer — et le berger dit que quelque chose bouge sur les dalles, la nuit. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je vous y conduis. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "attendre",
+              "label": "« Laissez-moi me préparer. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "mission_acceptee": {
+          "texte": "Aélis ferme son carnet, glisse son compas à sa ceinture et cale trois rouleaux de vélin sous son bras. « Je suis prête. Je l'étais depuis vingt jours. » Elle marque un temps. « Je ne sais pas me battre, {prenom}. Vous le savez. Là-bas, je mesure ; vous, vous m'empêchez de mourir pendant que je mesure. C'est un partage honnête. » Puis, plus bas, avec un regard vers la table des apprentis : « Ils vont croire que je fugue. Laissons-les croire. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« En route. »",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    },
+    "services": {
+      "transport": {
+        "noeuds": {
+          "livre": "lettre_lue",
+          "incomplet": "lettre_absente"
+        }
+      },
+      "escorte": {
+        "offre": {
+          "id": "quete:escorte_aelis_abbaye_de_jumieges",
+          "titre": "Le portail de Jumièges",
+          "description": "L'Institut des Architectes envoie Aélis de Montfaucon examiner un portail ouvert dans les ruines de l'abbaye de Jumièges, en Normandie, sur une boucle de la Seine en aval de Rouen. Conduisez-la jusqu'à la nef, protégez-la pendant qu'elle mesure, puis ramenez-la vivante aux Archives des Seuils, à la Cour des Arches. Elle ne sait pas se battre.",
+          "destination": "lieu:les_archives_des_seuils",
+          "proteges": [
+            {
+              "prenom": "Aélis",
+              "nom": "de Montfaucon",
+              "race": "humain",
+              "sex": "F",
+              "image": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+              "description": "Architecte de l'Institut, chercheuse en cristaux de mana. Elle part mesurer le portail de Jumièges, un carnet, un compas et trois rouleaux de vélin pour tout bagage. Elle ne sait pas se battre."
+            }
+          ],
+          "unique": true,
+          "proba": 1,
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "D"
+          },
+          "recompenses": {
+            "xp": 120,
+            "cuivre": 10000
+          }
+        },
+        "noeuds": {
+          "accepte": "mission_acceptee"
         }
       }
     }
@@ -146,8 +289,25 @@
       {
         "character": "pnj:aelis_de_montfaucon_cour_des_arches",
         "nom": "Aélis",
-        "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
-        "probabilite": 0.4,
+        "portrait": "architecte_Aélis_de_Montfaucon_cour_des_arches.jpg",
+        "probabilite": 1,
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_aelis_abbaye_de_jumieges",
+              "attendu": false
+            }
+          },
+          {
+            "quete_active": {
+              "types": [
+                "escorte"
+              ],
+              "cible": "lieu:les_archives_des_seuils",
+              "attendu": false
+            }
+          }
+        ],
         "description": "Une jeune architecte penchée sur un plan, un compas dans une main et un carnet épais sous le bras."
       }
     ]
@@ -158,11 +318,17 @@
     "nodes": [
       {
         "lieu": "lieu:lutecia",
-        "pos": [46, 37]
+        "pos": [
+          46,
+          37
+        ]
       },
       {
         "lieu": "lieu:la_cour_des_arches",
-        "pos": [0, 0]
+        "pos": [
+          0,
+          0
+        ]
       }
     ],
     "metadata": {
