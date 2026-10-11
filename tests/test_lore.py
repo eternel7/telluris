@@ -113,11 +113,20 @@ def test_corpus_complet_rendu_et_liste():
 	entrees = lore.lister()
 	sur_disque = {p.relative_to(lore.RACINE).as_posix() for p in (lore.RACINE / "lore").rglob("*.md")}
 	assert {e["chemin"] for e in entrees} == sur_disque | {lore.DOCUMENT_MAITRE}
-	assert entrees[0]["chemin"] == lore.DOCUMENT_MAITRE and entrees[0]["canon"]
+	reference = [e for e in entrees if e["section"] == lore.REFERENCE]
+	assert reference[0]["chemin"] == lore.DOCUMENT_MAITRE and reference[0]["canon"]
 	for e in entrees:
 		assert lore.chemin_de(e["cle"]) == e["chemin"]
 		html, _ = lore.rendre_fichier(e["chemin"])
 		assert html and "<script" not in html, e["chemin"]
+
+
+def test_lore_redige_en_tete_dans_l_ordre_de_ses_fichiers():
+	entrees = lore.lister()
+	redige = [e for e in entrees if e["redige"]]
+	assert redige and entrees[:len(redige)] == redige
+	assert [e["chemin"] for e in redige] == sorted(e["chemin"] for e in redige)
+	assert all(e["section"] == lore.REDIGE for e in redige)
 
 
 def test_liens_du_readme_menent_a_des_pages_existantes():

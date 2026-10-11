@@ -20,10 +20,13 @@ RACINE = Path(__file__).resolve().parent.parent / "docs"
 DOCUMENT_MAITRE = "Telluris_Document_Maitre.md"
 URL_LORE = "/admin/lore/"
 
-# Groupe « référence » (Document maître + README) puis les dossiers de docs/lore, dans
-# cet ordre. Un dossier absent d'ici s'affiche quand même, sous son nom capitalisé.
+# Le lore RÉDIGÉ (`docs/lore/redige/`, prose tirée du seul canon) en tête, puis le groupe
+# « référence » (Document maître + README) et les dossiers de matière brute, dans cet ordre.
+# Un dossier absent d'ici s'affiche quand même, sous son nom capitalisé.
+REDIGE = "redige"
 REFERENCE = "reference"
 SECTIONS = {
+	REDIGE: "✒️ Le lore rédigé",
 	REFERENCE: "📜 Référence",
 	"monde": "🌍 Monde, cosmologie et chronologie",
 	"cites": "🏰 Cités-États et lieux",
@@ -108,6 +111,7 @@ def lister(racine: Path = RACINE) -> list:
 			"date": f"{m.group(3)}/{m.group(2)}/{m.group(1)}" if m else "",
 			"resume": resumes.get(chemin, ""),
 			"canon": chemin == DOCUMENT_MAITRE,
+			"redige": section == REDIGE,
 		})
 
 	def cle(e):

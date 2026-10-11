@@ -395,7 +395,7 @@
 			"resume": "Cinq portails en pentagramme, œuvre d'un frère, à destination fixe : Sydney, Tokyo, Teotihuacan, Machu Picchu, Abou Simbel. Intacts après la Vague.",
 			"quand": {"de": {"ere": "avant_vague", "entre": [3000, 2500]}, "a": {"ere": "apres_vague", "ouvert": true}, "autorite": "auteur"},
 			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
-			"origine": ["rhenanie", "egypte"],
+			"origine": ["rhenanie"],
 			"tags": {"peuples": ["aborigenes", "carolingiens"], "lieux": ["aix", "abou_simbel"], "themes": ["portails"]},
 			"sources": [{"fichier": "cites/20260824_decrire_aix_la_chapelle.md", "date": "2026-08-24", "citation": "5 portails vers le monde créé par un des frères aborigènes avant l'avènement de Charlemagne"}],
 			"apres": ["trois_freres"],
