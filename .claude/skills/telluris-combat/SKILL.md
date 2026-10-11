@@ -106,6 +106,8 @@ Item `categorie:"consommable"` + champ `effets` : `pv`/`pm` instantanés, `buffs
 #### En combat — le snapshot est RECALCULABLE
 `build_joueur_snapshot`/`build_monster_snapshot` portent `caracts_base` + `effets_actifs` vivants ; `_refresh_snapshot_stats` recompose toutes les dérivées à chaque effet posé/expiré, sauf trois valeurs **figées à l'entrée** (`actions_max`, `charge_max`, `attaque_profils` — anti-exploit et coût de relecture). Durée comptée en **tours du porteur** (`_tick_effets_combat`, hooké dans `_reset_turn_budget`), effets entrants tickent aussi, effets restants remontent sur le doc personnage en fin de combat (écrasement, jamais `extend`). Couvert par `tests/test_combat_effets.py`.
 
+**Image d'un monstre** (`utils/images_monstres.py`, figée au snapshot) : variantes `<base>_transparent<suffixe>.png` lues dans le dossier. Un suffixe à mots (`_arc`) n'est retenu que si une arme équipée porte chaque mot (id, `sous_categorie`, tag) : c'est l'évidente. Sinon, tirage à poids égaux parmi les variantes sans suffixe ou numérotées (`01`). `_monture` n'est donc jamais tiré. Verrouillé par `tests/test_images_monstres.py`.
+
 UI : chips ✨ `#joueur-effets` (`renderEffetsActifs`). ⚠️ **Hors périmètre** : le client n'affiche les chips que pour le joueur — un ennemi debuffé ne se voit que dans le log.
 
 #### Sur PLUSIEURS cibles — zones d'effet

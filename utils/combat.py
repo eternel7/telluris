@@ -1,5 +1,6 @@
 import re
 import math
+import os
 import random
 import uuid
 from db.config import get_doc, save_doc, find_docs
@@ -39,6 +40,7 @@ from utils import jetons
 from utils import journal
 from utils import pieges as pieges_util
 from utils import vol as vol_util
+from utils import images_monstres
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -3302,6 +3304,19 @@ def roll_monster_equipment(espece: dict) -> dict:
 	return slots
 
 
+MONSTERS_IMAGES_PATH = "templates/resources/monsters"
+
+
+def _fichiers_monstres() -> list[str]:
+	"""Images du dossier /monsters, relues à chaque création de monstre (≈ 120 fichiers,
+	un combat est rare) : une image déposée sert sans redémarrage. Erreur d'OS → []
+	(repli sur `espece.image`)."""
+	try:
+		return os.listdir(MONSTERS_IMAGES_PATH)
+	except OSError:
+		return []
+
+
 def roll_monster_sorts(espece: dict, niveau: int) -> list[str]:
 	"""Sorts ATTRIBUÉS à un monstre humanoïde à sa création : X = niveau du profil,
 	borné au nombre de sorts éligibles (`sorts.sorts_eligibles_espece`), tirés SANS
@@ -3372,7 +3387,11 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 		"regen_pm_base": 0,
 		"effets_actifs": [],
 		"profil_id": profil_id,
-		"image": espece.get("image", ""),
+		# Variante d'image de l'espèce, FIGÉE au snapshot : l'arme équipée désigne
+		# l'évidente (`_arc`), sinon tirage à poids égaux (cf. utils/images_monstres).
+		"image": images_monstres.choisir_image(
+			espece.get("image", ""), _fichiers_monstres(),
+			[d for d in (get_doc(i) for i in slots_monstre.values()) if d and d.get("categorie") == "arme"]),
 		# Animation d'impact des attaques de CETTE espèce (vide = repli sur le canal
 		# `monstre`). Copiée au snapshot : le doc `espece:*` n'est plus relu ensuite.
 		"animation": str(espece.get("animation") or ""),

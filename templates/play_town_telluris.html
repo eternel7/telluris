@@ -1178,8 +1178,9 @@
 		/* Chips d'effets actifs (consommables) — colonne gauche de la fiche + onglet stats. */
 		.sh-effets-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 		.sh-effets-chips:not(:empty) { margin-top: 8px; }
-		.sh-effet-chip { font-size: 0.8rem; padding: 3px 8px; background: var(--btn-bg); border: 1px solid var(--border-color); border-radius: 12px; white-space: nowrap; }
-		.sh-effet-chip .sh-effet-restants { color: var(--muted); margin-left: 4px; }
+		.sh-effet-chip { font-size: 0.8rem; padding: 3px 8px; background: var(--btn-bg); border: 1px solid var(--border-color); border-radius: 12px; white-space: normal; overflow-wrap: break-word; max-width: 100%; box-sizing: border-box; }
+		/* Le compteur (« 🔄4 PM/round », « 2 rounds ») reste d'un bloc : seul le libellé se replie. */
+		.sh-effet-chip .sh-effet-restants { color: var(--muted); margin-left: 4px; white-space: nowrap; }
 		.sh-quest { padding: 10px; background: var(--btn-bg); border: 1px solid var(--border-color); margin-bottom: 8px; }
 		/* ── Accordéon d'ONGLET de la fiche (⚡ 🤝 📜 📖) : `.sh-acc-fit` ─────────────
 		   En-têtes à hauteur naturelle, UNE section ouverte qui prend la place de son
@@ -1558,7 +1559,10 @@
 			overflow: hidden;
 		}
 
-		img#bg-image {
+		/* `#carte-calque` (voile + passages d'une carte de pays) PARTAGE cette règle : même
+		   taille, même transform, même transition — les deux couches ne peuvent pas glisser
+		   l'une par rapport à l'autre pendant un pas. */
+		img#bg-image, #carte-calque {
 			position: absolute;
 			display: block;
 			top: 0;
@@ -1584,7 +1588,56 @@
 			will-change: transform;
 		}
 		@media (prefers-reduced-motion: reduce) {
-			img#bg-image { transition: none; }
+			img#bg-image, #carte-calque { transition: none; }
+		}
+		/* Sous le jeton (10) et le pavé (20) ; n'intercepte rien (survol de la carte). */
+		#carte-calque { z-index: 5; pointer-events: none; }
+		#carte-voile { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+		/* Passage : un point de lumière bleue sur la case (aucune icône, la carte reste lisible),
+		   et un chevron translucide tourné vers la frontière qu'il franchit (`--angle`, posé par
+		   `directionFrontiere`). Une seule teinte, `--passage-rgb`, déclinée en opacités. */
+		.passage-marque {
+			--passage-rgb: 110, 185, 255;
+			position: absolute;
+			left: calc(var(--px) * var(--cell-w));
+			top: calc(var(--py) * var(--cell-h));
+			width: var(--cell-w); height: var(--cell-h);
+			pointer-events: auto;   /* le calque est transparent aux clics, pas son infobulle */
+			cursor: help;
+		}
+		/* Seuls les passages à ≤ RAYON_PASSAGE du personnage sont montrés (`.proche`). */
+		.passage-marque:not(.proche) { display: none; }
+		.passage-marque::before {
+			content: '';
+			position: absolute; inset: 32%;
+			border-radius: 50%;
+			background: radial-gradient(circle, rgba(var(--passage-rgb), 0.95) 0 35%, rgba(var(--passage-rgb), 0.35) 70%, transparent 100%);
+			box-shadow: 0 0 calc(var(--cell-w) * 0.25) rgba(var(--passage-rgb), 0.55);
+		}
+		.passage-fleche {
+			position: absolute;
+			left: 50%; top: 50%;
+			width: calc(var(--cell-w) * 0.6); height: calc(var(--cell-h) * 0.6);
+			/* Centre du chevron porté à ~0.9 case du centre de la case, dans la direction voulue. */
+			transform: translate(-50%, -50%) rotate(var(--angle)) translateX(calc(var(--cell-w) * 0.9));
+			background: rgba(var(--passage-rgb), 0.5);
+			clip-path: polygon(0 0, 100% 50%, 0 100%, 35% 50%);
+			filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+		}
+		.passage-marque.proche::before { animation: passage-pouls 1.6s ease-in-out infinite; }
+		.passage-marque.proche .passage-fleche { animation: passage-elan 1.6s ease-in-out infinite; }
+		@keyframes passage-pouls {
+			0%, 100% { box-shadow: 0 0 calc(var(--cell-w) * 0.2) 0 rgba(var(--passage-rgb), 0.5); }
+			50%      { box-shadow: 0 0 calc(var(--cell-w) * 0.6) calc(var(--cell-w) * 0.2) rgba(var(--passage-rgb), 0.85); }
+		}
+		/* Le chevron « respire » vers la frontière : il dit où aller, pas seulement où est le passage. */
+		@keyframes passage-elan {
+			0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) rotate(var(--angle)) translateX(calc(var(--cell-w) * 0.9)); }
+			50%      { opacity: 1;    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(calc(var(--cell-w) * 1.2)); }
+		}
+		@media (prefers-reduced-motion: reduce) {
+			.passage-marque.proche::before { animation: none; box-shadow: 0 0 calc(var(--cell-w) * 0.5) calc(var(--cell-w) * 0.15) rgba(var(--passage-rgb), 0.8); }
+			.passage-marque.proche .passage-fleche { animation: none; background: rgba(var(--passage-rgb), 0.85); }
 		}
 		img#bg-image-fit {
 			width : 56vw;
@@ -1849,6 +1902,7 @@
 			<div class="grid-placeholder">
 				<div class="viewport" id="swipe-zone">
 					<img id="bg-image" src="{{ url_for(image_route, path=image) }}">
+					{% if carte_voile is not none %}<div id="carte-calque"><canvas id="carte-voile"></canvas></div>{% endif %}
 					<div class="token"></div>
 					<!-- Pavé de déplacement : markup et CSS viennent de part-move-panel.html, partagés
 					     avec la page de combat et le mode test de l'éditeur. Ici il est posé SUR la
@@ -3590,7 +3644,8 @@
 	}
 
 	// SOURCE UNIQUE d'écriture de la position de carte. `--x`/`--y` n'ont qu'un seul
-	// consommateur : le transform de #bg-image (la transition `--map-anim` porte sur sa
+	// consommateur : le transform de #bg-image — et de `#carte-calque`, qui partage sa règle CSS
+	// (carte de pays) — (la transition `--map-anim` porte sur sa
 	// valeur CALCULÉE). Réécrire la MÊME valeur ne relance aucune transition — c'est ce
 	// qui rend la confirmation serveur visuellement gratuite quand la prédiction était juste.
 	function _ecrireCarte(x, y) {
@@ -3648,6 +3703,7 @@
 				_guidage = rep.guidage || null;
 				_refreshGuidage();
 				buildLocationslist();
+				_majHaloPassages();
 				updateControls();
 				updateVitals(rep.vitals);
 				_notifierTransportsEchoues(rep);
@@ -3751,6 +3807,97 @@
 		}).join('') || `<li>Aucun</li>`;
 	}
 	buildLocationslist();
+
+	// ── Carte de PAYS : voile du hors-pays + marqueurs de passage ──────────────
+	// Le serveur ne les envoie que pour une carte de `categorie` pays (main.py, /play) :
+	// `CARTE_VOILE` = une chaîne par ligne, « 1 » = case à 0 (hors pays, cadre) ; `PASSAGES` =
+	// toutes les connexions de la carte, filtrées comme la liste des sous-lieux. Calque STATIQUE :
+	// changer de lieu recharge la page. Seul le halo suit la position (`_majHaloPassages`).
+	const CARTE_VOILE = {{ carte_voile | tojson | safe }};
+	const PASSAGES = {{ passages | tojson | safe }} || [];
+	// Rayon de VISIBILITÉ d'un passage, en cases (Tchebychev) : un marqueur n'apparaît (et ne
+	// pulse) que sur les cases voisines du personnage — le joueur découvre les passages en
+	// longeant la frontière, la carte n'en est pas constellée.
+	const RAYON_PASSAGE = 1;
+	// Portée de recherche de la frontière autour d'un passage, en cases. Au-delà, le passage
+	// est intérieur au pays (entrée de ville) : pas de chevron.
+	const RAYON_FRONTIERE = 4;
+	// Pure (harnais dev/test_passages_client.js) : les passages à ≤ `rayon` cases de (x, y).
+	function passagesProches(passages, x, y, rayon) {
+		return (passages || []).filter(p => Math.max(Math.abs(p.x - x), Math.abs(p.y - y)) <= rayon);
+	}
+	// Pure (même harnais) : angle en degrés (0 = est, 90 = sud, repère écran) vers la frontière
+	// la plus proche de (x, y) — cases voilées (« 1 ») ET hors carte, pondérées en 1/d² pour
+	// que la plus proche l'emporte. `null` si rien dans `rayon` ou si tout s'annule.
+	function directionFrontiere(voile, x, y, rayon) {
+		if (!Array.isArray(voile) || !voile.length) return null;
+		const H = voile.length, W = voile[0].length;
+		let sx = 0, sy = 0, vu = false;
+		for (let dy = -rayon; dy <= rayon; dy++) {
+			for (let dx = -rayon; dx <= rayon; dx++) {
+				if (!dx && !dy) continue;
+				const cx = x + dx, cy = y + dy;
+				const dehors = cx < 0 || cy < 0 || cx >= W || cy >= H;
+				if (!dehors && voile[cy][cx] !== '1') continue;
+				const d2 = dx * dx + dy * dy;
+				sx += dx / d2; sy += dy / d2; vu = true;
+			}
+		}
+		if (!vu || Math.hypot(sx, sy) < 1e-6) return null;
+		return Math.atan2(sy, sx) * 180 / Math.PI;
+	}
+	function _dessinerVoile() {
+		const cv = document.getElementById('carte-voile');
+		if (!cv || !Array.isArray(CARTE_VOILE) || !CARTE_VOILE.length) return;
+		cv.width = CARTE_VOILE[0].length; cv.height = CARTE_VOILE.length;
+		const ctx = cv.getContext('2d');
+		ctx.fillStyle = 'rgba(10, 8, 6, 0.55)';
+		CARTE_VOILE.forEach((ligne, y) => {
+			for (let x = 0; x < ligne.length; x++) if (ligne[x] === '1') ctx.fillRect(x, y, 1, 1);
+		});
+	}
+	function _poserPassages() {
+		const calque = document.getElementById('carte-calque');
+		if (!calque) return;
+		PASSAGES.forEach((p, i) => {
+			const m = document.createElement('div');
+			m.className = 'passage-marque';
+			m.dataset.i = i;
+			m.style.setProperty('--px', p.x);
+			m.style.setProperty('--py', p.y);
+			m.title = p.label || '';   // propriété DOM : rien à échapper
+			const angle = directionFrontiere(CARTE_VOILE, p.x, p.y, RAYON_FRONTIERE);
+			if (angle !== null) {
+				const f = document.createElement('span');
+				f.className = 'passage-fleche';
+				m.style.setProperty('--angle', angle + 'deg');
+				m.appendChild(f);
+			}
+			calque.appendChild(m);
+		});
+	}
+	const _passagesAnnonces = new Set();
+	function _majHaloPassages() {
+		const calque = document.getElementById('carte-calque');
+		if (!calque) return;
+		const proches = new Set(passagesProches(PASSAGES, POSITIONS.x, POSITIONS.y, RAYON_PASSAGE));
+		calque.querySelectorAll('.passage-marque').forEach(m => {
+			const p = PASSAGES[m.dataset.i];
+			const proche = proches.has(p);
+			m.classList.toggle('proche', proche);
+			// Une annonce par destination et par chargement de page ; la case même du passage
+			// n'en a pas besoin, il est déjà dans la liste « Lieux ».
+			const cle = p.link_id + '|' + p.label;
+			if (proche && !_passagesAnnonces.has(cle) && (p.x !== POSITIONS.x || p.y !== POSITIONS.y)) {
+				_passagesAnnonces.add(cle);
+				showToast(`Un passage est proche : ${p.label || 'route'}`);
+			}
+		});
+	}
+	_dessinerVoile();
+	_poserPassages();
+	// Après le chargement : `showToast` est défini dans un script plus bas.
+	window.addEventListener('load', _majHaloPassages);
 	// Les deux fonctions ci-dessous ne font plus que POSER LEURS PRÉDICATS : le parcours du
 	// DOM vit dans `templates/scripts/deplacement.js`, partagé avec le combat et le mode test
 	// de l'éditeur (cf. CLAUDE.md § Pavé de déplacement partagé).
@@ -3965,7 +4112,7 @@ let _vitalsJoueur = {
 // Sujet cadré = son image, son cadrage persisté, et le doc sur lequel l'enregistrer.
 const SUJET_JOUEUR = {
 	image: {{ character["image"] | tojson | safe }},
-	portrait_zoom: {{ character.get("portrait_zoom", 100) | tojson | safe }},
+	portrait_zoom: {{ character.get("portrait_zoom") | tojson | safe }},   // null = jamais cadré → zoomCover
 	portrait_translate: {{ character.get("portrait_translate", 0) | tojson | safe }},
 	compagnon_id: null,
 };
@@ -4008,6 +4155,9 @@ function makePortraitViewport(card) {
 	// Zoom auquel l'image ENTIÈRE tient dans la fenêtre (aperçu au survol d'un portrait non
 	// éditable : c'est ainsi qu'on voit qui l'on embauche, plutôt qu'un fragment d'image).
 	const zoomFit = () => Math.max(1, 100 * Math.min(W1 / W, H1 / H));
+	// Zoom auquel l'image REMPLIT la fenêtre (son côté le plus court la couvre) : défaut d'un
+	// portrait jamais cadré. Arrondi au-dessus pour ne laisser aucune bande vide.
+	const zoomCover = () => Math.max(1, Math.ceil(100 * Math.max(W1 / W, H1 / H)));
 
 	// Bornes de défilement sur un axe. Image plus grande que la fenêtre : elle défile de 0 à son
 	// débord. Image plus PETITE (cas du dézoom) : elle ne défile pas, on la CENTRE — offset
@@ -4091,6 +4241,9 @@ function makePortraitViewport(card) {
 		H = img.naturalHeight || H1;
 		const cadrer = editable || !!sujet.cadre;
 		if (!cadrer) zoomPct = zoomFit();
+		else if (!parseInt(sujet.portrait_zoom, 10)) zoomPct = zoomCover();   // jamais cadré
+		if (zoomVal)    zoomVal.textContent = zoomPct + '%';
+		if (zoomSlider) zoomSlider.value    = zoomPct;
 		const d = cadrer ? defaultOffset() : { x: 0, y: 0 };     // hors cadrage : `bornes` centre
 		applyOffset(d.x, d.y, false);
 		applyScale();

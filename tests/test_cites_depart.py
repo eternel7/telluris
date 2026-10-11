@@ -15,8 +15,10 @@ from utils.lieux import cites_de_depart, est_cite_de_depart
 
 # Getter permissif : TOUT doc demandé existe. C'est donc le disque seul qui décide, ce qui
 # rend le test indépendant du contenu réellement importé en base.
-TOUT_EXISTE = lambda doc_id: {"_id": doc_id, "type": "lieu"}
+TOUT_EXISTE = lambda doc_id: {"_id": doc_id, "type": "lieu", "intro": {"texte": "…"}}
 RIEN_EXISTE = lambda doc_id: None
+# Le doc existe mais n'est pas alimenté (Orléans, Sydney… : une coquille sans intro).
+SANS_INTRO = lambda doc_id: {"_id": doc_id, "type": "lieu"}
 
 
 def test_une_cite_de_depart_a_une_image_start_et_un_doc_lieu():
@@ -31,6 +33,14 @@ def test_sans_doc_lieu_aucune_cite_nest_proposee():
 	"""L'image ne suffit pas : le doc `lieu:<nom>` doit exister. Sinon la création
 	enverrait le personnage dans un lieu introuvable."""
 	assert cites_de_depart(RIEN_EXISTE) == []
+
+
+def test_une_cite_sans_bloc_intro_nest_pas_proposee():
+	"""Image `_start_` et doc présents ne suffisent pas : sans `intro`, la cité n'est qu'une
+	coquille non alimentée — ni proposée, ni acceptée par la garde serveur."""
+	assert cites_de_depart(SANS_INTRO) == []
+	for c in cites_de_depart(TOUT_EXISTE):
+		assert est_cite_de_depart(c["id"], SANS_INTRO) is False
 
 
 def test_le_client_et_le_serveur_proposent_la_MEME_liste():

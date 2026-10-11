@@ -1160,9 +1160,11 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 .sh-effets-actifs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
 .sh-effet-chip {
 	font-size: 0.75rem; padding: 2px 7px; background: #1b1b22;
-	border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; white-space: nowrap;
+	border: 1px solid rgba(255,255,255,0.10); border-radius: 12px;
+	white-space: normal; overflow-wrap: break-word; max-width: 100%; min-width: 0; box-sizing: border-box;
 }
-.sh-effet-chip .sh-effet-restants { color: #8d8878; margin-left: 4px; }
+/* Le compteur (« 🔄4 PM/round ») reste d'un bloc : seul le libellé se replie. */
+.sh-effet-chip .sh-effet-restants { color: #8d8878; margin-left: 4px; white-space: nowrap; }
 /* Sort MAINTENU : liseré violet (la couleur de la magie) — il se distingue d'un effet à
    durée ordinaire parce qu'il COÛTE chaque round et qu'on peut le relâcher. */
 .sh-effet-chip.maintenu { border-color: rgba(178,107,255,0.45); cursor: pointer; }

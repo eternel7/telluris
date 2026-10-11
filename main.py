@@ -72,7 +72,9 @@ from utils.marche import (tick_atelier, reset_prix_cache, besoins_lieu, appro_le
 						  relations_lieux_payload, flux_cite, persister_flux, prix_range_cuivre,
 						  est_negociant)
 from utils import graphe_recettes
-from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, cites_de_depart, lieu_router
+from utils.lieux import (get_lieu_links, get_lieu_directions, get_lieux_ids, cites_de_depart, lieu_router,
+						 connexions_du_lieu, noeud_ferme, passages_carte, voile_hors_pays)
+from utils.grille_image import CATEGORIE_PAYS
 from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, xp_seuil_niveau, load_world_variables
 
@@ -921,6 +923,15 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 
 	access = get_lieu_directions(current_user, grid_doc, position)
 
+	# Carte de PAYS : voile sur le hors-pays (cases à 0) et marqueurs de toutes ses connexions,
+	# filtrées comme la liste des sous-lieux. Les autres lieux n'en portent pas.
+	carte_voile = passages = None
+	if grid_doc.get("categorie") == CATEGORIE_PAYS and grid_doc.get("cells"):
+		carte_voile = voile_hors_pays(grid_doc["cells"])
+		passages = passages_carte(connexions_du_lieu(lieu), lieu,
+			lambda conn: any(noeud_ferme(character, lieu, n.get("lieu"), get_doc(n.get("lieu")))
+				for n in conn.get("nodes") or []))
+
 	# Dérivées bufées (équipement, passives, consommables/sorts), charge max exceptée : elle
 	# reste brute, c'est la limite réellement appliquée par la garde de surcharge. Les stats
 	# BRUTES restent la référence des plafonds/coûts d'XP (stat_caps, dans bloc_fiche).
@@ -1109,6 +1120,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"dim_x": dim_x,
 			"dim_y": dim_y,
 			"access" : access,
+			"carte_voile": carte_voile,
+			"passages": passages,
 			# Règle de marche du pavé : `>= 1` en vol, `=== 1` à pied (scripts/deplacement.js).
 			"volant": vol_util.vol_actif(character),
 			"chute_vol": chute_vol,

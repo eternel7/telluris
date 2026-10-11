@@ -48,14 +48,7 @@ def get_lieu_links(current_user: dict = Body(...), filtrer_acces: bool = True):
 		ferme = False
 		for node in conn["nodes"]:
 			doc = get_doc(node["lieu"])
-			if (filtrer_acces and node["lieu"] != lieu
-					and not acces.acces_autorise(character, doc, get_doc)[0]):
-				ferme = True
-			# Propriété de joueur : une chambre LOUÉE n'apparaît qu'à son locataire (les
-			# propriétés achetées, elles, sont visibles de tous). Même idiome d'affichage,
-			# la garde 403 est dans move_character.
-			if (filtrer_acces and node["lieu"] != lieu and proprietes.est_propriete(doc)
-					and not proprietes.acces_propriete(character, doc)[0]):
+			if filtrer_acces and noeud_ferme(character, lieu, node["lieu"], doc):
 				ferme = True
 			doc.pop("cells",None)
 			doc.pop("_rev",None)
@@ -67,7 +60,60 @@ def get_lieu_links(current_user: dict = Body(...), filtrer_acces: bool = True):
 			out.append(conn)
 
 	return out
-	
+
+
+def noeud_ferme(character: dict, lieu_courant: str, noeud_lieu: str, doc, get_doc_fn=get_doc) -> bool:
+	"""Ce nœud (de doc `doc`) est-il CACHÉ à ce personnage ? Filtre d'AFFICHAGE partagé par la
+	liste des sous-lieux (`get_lieu_links`) et les marqueurs de passage d'une carte de pays
+	(`passages_carte`) : un portail gardé n'apparaît pas plus sur la carte que dans la liste.
+	Le lieu courant n'est jamais fermé (on ne s'expulse pas soi-même)."""
+	if noeud_lieu == lieu_courant:
+		return False
+	if not acces.acces_autorise(character, doc, get_doc_fn)[0]:
+		return True
+	# Propriété de joueur : une chambre LOUÉE n'apparaît qu'à son locataire (les
+	# propriétés achetées, elles, sont visibles de tous). Même idiome d'affichage,
+	# la garde 403 est dans move_character.
+	return bool(proprietes.est_propriete(doc) and not proprietes.acces_propriete(character, doc)[0])
+
+
+def voile_hors_pays(cells) -> list[str]:
+	"""Voile d'une CARTE DE PAYS : une chaîne par ligne, `"1"` sur les cases à 0 (hors pays et
+	cadre décoratif, cf. `grille_image.proposer_pays`), `"0"` ailleurs. La mer, à 1 mais murée
+	par `nav`, n'est PAS voilée : l'image la montre déjà. Rien n'est ajouté au terrain (pas de
+	valeur -1, qui veut déjà dire « hors carte » dans `get_lieu_directions`)."""
+	return ["".join("1" if v == 0 else "0" for v in ligne) for ligne in (cells or [])]
+
+
+def passages_carte(connexions, lieu_id: str, est_fermee, get_doc_fn=get_doc) -> list[dict]:
+	"""Marqueurs de passage d'une carte : `[{x, y, link_id, type, label}]`, un par nœud de
+	`connexions` posé sur `lieu_id` avec un `pos`. `label` = celui du nœud DESTINATION
+	(`noeud_destination`, vu depuis la case du marqueur), sinon le libellé de son lieu ;
+	`type` = `metadata.type` (ville, chemin, pays…). Une connexion interne pose un marqueur
+	à chaque extrémité. `est_fermee(conn)` écarte ce que la liste des sous-lieux cache.
+	Dédoublonné par case et libellé (plusieurs liens vers la même ville depuis une case)."""
+	out, vus = [], set()
+	for conn in connexions or []:
+		if est_fermee(conn):
+			continue
+		for node in conn.get("nodes") or []:
+			pos = list((node or {}).get("pos") or [])
+			if node.get("lieu") != lieu_id or len(pos) < 2:
+				continue
+			x, y = pos[0], pos[1]
+			dest, _interne = noeud_destination(conn, lieu_id, {"x": x, "y": y})
+			if dest is None:
+				continue
+			label = dest.get("label") or ((get_doc_fn(dest.get("lieu")) or {}).get("label")) or ""
+			cle = (x, y, label)
+			if cle in vus:
+				continue
+			vus.add(cle)
+			out.append({"x": x, "y": y, "link_id": conn.get("_id"),
+				"type": (conn.get("metadata") or {}).get("type"), "label": label})
+	return out
+
+
 def noeud_destination(conn: dict, lieu_courant: str, position: dict) -> tuple[dict | None, bool]:
 	"""Le nœud où mène `conn` pour qui se tient à `position` dans `lieu_courant`, et si la
 	connexion est INTERNE (ses deux nœuds sur ce même lieu : escalier, trappe, passage entre
@@ -345,6 +391,9 @@ def cites_de_depart(get_doc_fn=get_doc) -> list[dict]:
 	de villes, ET un doc `lieu:<nom>` qui existe réellement en base. L'image sans le doc
 	(ou l'inverse) ne propose rien — c'est ce qui rend l'ouverture d'une cité de départ
 	purement déclarative : déposer l'image et importer le lieu suffit, sans une ligne de code.
+	⚠️ Le doc doit aussi porter un bloc `intro` (celui qu'`intro.demarrer` joue à la création) :
+	une cité sans accueil n'est pas encore alimentée — c'est ce qui écarte les coquilles
+	(Orléans, Akureyri, Sydney…) tant que leur contenu n'est pas importé.
 
 	Renvoie `[{id, label, filename}]`, trié par nom de fichier (`_lister_images`).
 	⚠️ Aucune URL : la construire demande le `Request` de la requête (`url_for`), qui n'a
@@ -357,7 +406,7 @@ def cites_de_depart(get_doc_fn=get_doc) -> list[dict]:
 			continue
 		label = filename[:filename.index("_")]
 		lieu_id = "lieu:" + label
-		if get_doc_fn(lieu_id):
+		if (get_doc_fn(lieu_id) or {}).get("intro"):
 			cites.append({"id": lieu_id, "label": label, "filename": filename})
 	return cites
 
