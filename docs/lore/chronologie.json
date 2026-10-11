@@ -63,12 +63,6 @@
 	],
 	"vocabulaire": {
 		"peuples": {
-			"humains": "Humains",
-			"elfes": "Elfes",
-			"nains": "Nains",
-			"ogres": "Ogres",
-			"hobbits": "Hobbits",
-			"lignees": "Toutes les Lignées",
 			"aborigenes": "Aborigènes",
 			"egyptiens": "Égyptiens",
 			"romains": "Romains",
@@ -141,7 +135,7 @@
 			"resume": "Telluris n'a jamais connu d'âge sans magie : les flux de mana baignent le monde et les monstres rôdent depuis toujours. Ils précèdent les portails ; tous ne viennent pas des donjons.",
 			"quand": {"de": {"ere": "antediluvien", "ouvert": true}, "a": {"ere": "apres_vague", "ouvert": true}, "autorite": "auteur"},
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
-			"tags": {"peuples": ["lignees"], "themes": ["mystere"]},
+			"tags": {"themes": ["mystere"]},
 			"sources": [{"fichier": "monde/20260821_frise_chronologique_de_telluris.md", "date": "2026-08-21", "citation": "Décrit celle de Telluris où depuis les origines, les flux magiques baignent le monde et les monstres rôdent."}]
 		},
 		{
@@ -162,7 +156,7 @@
 			"resume": "Humains, elfes, nains, ogres et hobbits — un même sang façonné par la magie brute — se dispersent dans un monde sauvage, en petits établissements fortifiés.",
 			"quand": {"moment": {"ere": "antediluvien", "rang": "premiers_ages"}, "autorite": "synthese"},
 			"couche": "histoire", "categorie": "evenement", "autorite": "synthese", "visibilite": "public",
-			"tags": {"peuples": ["lignees", "humains", "elfes", "nains", "ogres", "hobbits"]},
+			"tags": {},
 			"sources": [{"fichier": "monde/20260821_frise_chronologique_de_telluris.md", "date": "2026-08-21", "citation": "Les cinq Lignées — Humains, Elfes, Nains, Ogres et Hobbits — se dispersent dans un monde où les flux de mana sont omniprésents."}]
 		},
 		{
@@ -244,7 +238,7 @@
 			"resume": "Les cités se ferment derrière leurs murailles et deviennent des Cités-États ; les routes entre elles deviennent essentielles et mortelles.",
 			"quand": {"moment": {"ere": "antediluvien", "rang": "remparts"}, "autorite": "auteur"},
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
-			"tags": {"peuples": ["lignees"], "themes": ["remparts"]},
+			"tags": {"themes": ["remparts"]},
 			"sources": [{"fichier": "monde/20260821_frise_chronologique_de_telluris.md", "date": "2026-08-21", "citation": "depuis que les anthropes se sont réfugiés derrière des remparts"}]
 		},
 		{
@@ -254,7 +248,7 @@
 			"resume": "Antérieurs aux portails, ils protègent les routes entre les cités et pratiquent la magie Sainte. Les portails réduisent leur rôle, la Vague le relance : ils rouvrent les routes.",
 			"quand": {"de": {"ere": "antediluvien", "rang": "remparts"}, "a": {"ere": "apres_vague", "ouvert": true}, "autorite": "auteur"},
 			"couche": "histoire", "categorie": "institution", "autorite": "auteur", "visibilite": "public",
-			"tags": {"peuples": ["lignees"], "institutions": ["paladins"], "themes": ["remparts"]},
+			"tags": {"institutions": ["paladins"], "themes": ["remparts"]},
 			"sources": [{"fichier": "monde/20260821_frise_chronologique_de_telluris.md", "date": "2026-08-21", "citation": "L'ordre des Paladins date d'avant l'apparition des portails."}, {"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-19", "citation": "l'autre rouvrant les routes redevenues nécessaires"}],
 			"liens": ["templiers", "auberges_relais"]
 		},
@@ -265,7 +259,7 @@
 			"resume": "À l'origine, ils gardent les remparts et ce qu'ils enferment : le Paladin dehors, le Templier dedans. Après la Vague, ils se recentrent sur les temples.",
 			"quand": {"de": {"ere": "antediluvien", "rang": "remparts"}, "a": {"ere": "apres_vague", "ouvert": true}, "autorite": "auteur"},
 			"couche": "histoire", "categorie": "institution", "autorite": "auteur", "visibilite": "public",
-			"tags": {"peuples": ["lignees"], "institutions": ["templiers"], "themes": ["remparts"]},
+			"tags": {"institutions": ["templiers"], "themes": ["remparts"]},
 			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "À l'origine, les Templiers gardent les remparts et les lieux derrière le rempart"}],
 			"liens": ["paladins", "groupe_saint_pierre", "templiers_temples"]
 		},
@@ -276,7 +270,7 @@
 			"resume": "Étapes sécurisées sur les routes, ouvertes à toutes les Lignées. Depuis les monothéismes, une bonne partie sont devenues des monastères-relais.",
 			"quand": {"de": {"ere": "antediluvien", "rang": "remparts"}, "a": {"ere": "apres_vague", "ouvert": true}, "autorite": "auteur"},
 			"couche": "histoire", "categorie": "institution", "autorite": "auteur", "visibilite": "public",
-			"tags": {"peuples": ["lignees"], "institutions": ["paladins"], "themes": ["remparts"]},
+			"tags": {"institutions": ["paladins"], "themes": ["remparts"]},
 			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "« Auberge-relais » est le terme employé avant les monothéismes."}],
 			"liens": ["monasteres_relais"]
 		},
@@ -287,7 +281,7 @@
 			"resume": "Des Anthropes de toutes les Lignées s'éveillent sur le mont Hermon et enseignent aux cités de quoi tenir derrière leurs murs. Ils posent la question de ce qui dure : elle parvient à la dynastie du Nil. Leur fin reste ouverte.",
 			"quand": {"moment": {"ere": "antediluvien", "rang": "remparts"}, "autorite": "auteur", "note": "Âge des Remparts, à l'époque de la dynastie dont émergera Néfertiti (Auteur, 11/10)."},
 			"couche": "histoire", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
-			"tags": {"peuples": ["lignees"], "lieux": ["hermon"], "themes": ["mythes", "savoir", "immortalite", "mystere"]},
+			"tags": {"lieux": ["hermon"], "themes": ["mythes", "savoir", "immortalite", "mystere"]},
 			"sources": [{"fichier": "monde/20261004_introduit_les_grigori.md", "date": "2026-10-04", "citation": "Pour moi ce sont les éveillés de bien avant JC."}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Grigori : proposition du § 9 validée."}],
 			"liens": ["dynastie_nefertiti"]
 		},
@@ -503,7 +497,7 @@
 			"resume": "Une vague d'origine inconnue balaie Telluris : les portails mal créés ou mal entretenus changent de couleur. Lutecia est presque épargnée ; au Grand Palais, plus de la moitié des portails deviennent des donjons.",
 			"quand": {"moment": {"ere": "apres_vague", "entre": [800, 700]}, "autorite": "auteur", "note": "Sept à huit siècles (Auteur, 11/10)."},
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
-			"tags": {"peuples": ["lignees"], "lieux": ["lutecia", "constantinople", "bruges", "aix", "akureyri"], "themes": ["vague", "portails", "mystere"]},
+			"tags": {"lieux": ["lutecia", "constantinople", "bruges", "aix", "akureyri"], "themes": ["vague", "portails", "mystere"]},
 			"sources": [{"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-19", "citation": "Il y a quelques siècles, une vague de mana a balayée Telluris."}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Date de la Vague : sept à huit siècles, retenu."}],
 			"apres": ["justinien"]
 		},
@@ -559,7 +553,7 @@
 			"resume": "L'exploration des donjons s'organise : la Guilde devient le seul chemin légal vers la fortune pour les non-nobles, et le lieu du plus grand brassage des Lignées.",
 			"quand": {"de": {"ere": "apres_vague", "entre": [700, 450]}, "a": {"ere": "apres_vague", "ouvert": true}, "autorite": "proposition"},
 			"couche": "histoire", "categorie": "institution", "autorite": "synthese", "visibilite": "public",
-			"tags": {"peuples": ["lignees"], "institutions": ["guilde"], "themes": ["donjons", "cristaux"]},
+			"tags": {"institutions": ["guilde"], "themes": ["donjons", "cristaux"]},
 			"sources": [{"fichier": "monde/20260821_frise_chronologique_de_telluris.md", "date": "2026-08-21", "citation": "Les Guildes apparaissent pour financer les expéditions"}, {"fichier": "monde/20260812_monde_medieval_fantastique.md", "date": "2026-08-12", "citation": "La Guilde est le seul chemin légal vers la fortune pour les non-nobles."}],
 			"apres": ["premiers_donjons"]
 		},
@@ -775,7 +769,7 @@
 			"resume": "Parti enquêter sur un portail hors de Lutecia dont la couleur avait changé, il est porté disparu. Maëlys garde pour elle ce qu'il cherchait.",
 			"quand": {"moment": {"ere": "apres_vague", "entre": [20, 1]}, "autorite": "proposition", "note": "Avant l'arrivée du joueur ; durée non fixée."},
 			"couche": "present", "categorie": "evenement", "autorite": "auteur", "visibilite": "secret",
-			"tags": {"peuples": ["elfes"], "lieux": ["lutecia"], "institutions": ["guilde"], "themes": ["portails", "mystere"]},
+			"tags": {"lieux": ["lutecia"], "institutions": ["guilde"], "themes": ["portails", "mystere"]},
 			"sources": [{"fichier": "personnages/20261011_maelys_maitresse_de_guilde.md", "date": "2026-10-11", "citation": "Officiellement, il est porté disparu."}],
 			"liens": ["maelys_rang_d"]
 		},
@@ -807,7 +801,7 @@
 			"resume": "Ils complètent ensemble la carte de la région. Une escorte de caravane banale tourne mal : Milo meurt en voulant récupérer sa carte. Une région reste vierge.",
 			"quand": {"moment": {"ere": "jeu", "entre_rangs": ["F", "D"]}, "autorite": "proposition", "note": "Arc d'Auxerre ; rang de la mort non fixé."},
 			"couche": "present", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
-			"tags": {"peuples": ["hobbits"], "lieux": ["auxerre"], "themes": ["deuil"]},
+			"tags": {"lieux": ["auxerre"], "themes": ["deuil"]},
 			"sources": [{"fichier": "personnages/20261003_ecrire_dialogues_de_milo.md", "date": "2026-10-03", "citation": "Milo"}]
 		},
 		{
@@ -817,7 +811,7 @@
 			"resume": "Dernière quête d'Auxerre : les bûcherons sont retrouvés dans une grotte avec Aélis, jeune architecte, pendant que trois loups géants rôdent. Puis le voyage vers Lutecia sous escorte paladine.",
 			"quand": {"moment": {"ere": "jeu", "rang": "E"}, "autorite": "proposition", "note": "Dernière quête propre à Auxerre."},
 			"couche": "present", "categorie": "quete", "autorite": "auteur", "visibilite": "public",
-			"tags": {"peuples": ["humains", "nains", "ogres", "elfes", "hobbits"], "lieux": ["auxerre", "lutecia"], "institutions": ["paladins", "guilde", "architectes"], "themes": ["cristaux"]},
+			"tags": {"lieux": ["auxerre", "lutecia"], "institutions": ["paladins", "guilde", "architectes"], "themes": ["cristaux"]},
 			"sources": [{"fichier": "personnages/20260831_scenario_mission_auxerre.md", "date": "2026-08-31", "citation": "Les bûcherons disparus"}],
 			"apres": ["fuite_village"]
 		},
@@ -828,7 +822,7 @@
 			"resume": "Quatre visites, une familiarité ; puis elle part chercher des herbes dans une forêt qu'elle connaît depuis des années, et ne revient pas. « À tout à l'heure. »",
 			"quand": {"moment": {"ere": "jeu", "entre_rangs": ["E", "C"]}, "autorite": "proposition", "note": "Après l'arrivée à Lutecia ; rang non fixé."},
 			"couche": "present", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
-			"tags": {"peuples": ["nains"], "lieux": ["lutecia"], "themes": ["deuil"]},
+			"tags": {"lieux": ["lutecia"], "themes": ["deuil"]},
 			"sources": [{"fichier": "personnages/20261003_scenario_d_elise.md", "date": "2026-10-03", "citation": "Élise"}],
 			"apres": ["bucherons"]
 		},
@@ -839,7 +833,7 @@
 			"resume": "Au rang D, Éléonore de Vaugirard fait monter le personnage ; Maëlys a lu la recommandation de Gautier de Valcroix.",
 			"quand": {"moment": {"ere": "jeu", "rang": "D"}, "autorite": "auteur"},
 			"couche": "present", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
-			"tags": {"peuples": ["nains"], "lieux": ["lutecia"], "institutions": ["guilde"]},
+			"tags": {"lieux": ["lutecia"], "institutions": ["guilde"]},
 			"sources": [{"fichier": "personnages/20261011_maelys_maitresse_de_guilde.md", "date": "2026-10-11", "citation": "La première rencontre a lieu au bureau, au rang D"}],
 			"apres": ["bucherons"]
 		},
@@ -850,7 +844,7 @@
 			"resume": "Épreuve du rang C confiée par Maëlys : Aélis revient aux Archives des Seuils avec trois théories et aucune réponse.",
 			"quand": {"moment": {"ere": "jeu", "rang": "C"}, "autorite": "auteur"},
 			"couche": "present", "categorie": "quete", "autorite": "auteur", "visibilite": "public",
-			"tags": {"peuples": ["humains"], "lieux": ["jumieges", "lutecia"], "institutions": ["architectes", "guilde"], "themes": ["portails", "mystere"]},
+			"tags": {"lieux": ["jumieges", "lutecia"], "institutions": ["architectes", "guilde"], "themes": ["portails", "mystere"]},
 			"sources": [{"fichier": "personnages/20261011_maelys_maitresse_de_guilde.md", "date": "2026-10-11", "citation": "Jumièges"}],
 			"apres": ["maelys_rang_d"]
 		},
@@ -861,7 +855,7 @@
 			"resume": "Plus tard, on offre à Aélis d'approfondir sa formation à Mu ; elle veut que l'aventurier l'accompagne.",
 			"quand": {"moment": {"ere": "jeu", "rang": "A"}, "autorite": "proposition", "note": "« Plus tard » ; Mu s'ouvre au rang A."},
 			"couche": "present", "categorie": "evenement", "autorite": "auteur", "visibilite": "secret",
-			"tags": {"peuples": ["humains"], "lieux": ["mu", "lutecia"], "institutions": ["architectes"], "themes": ["portails", "cristaux"]},
+			"tags": {"lieux": ["mu", "lutecia"], "institutions": ["architectes"], "themes": ["portails", "cristaux"]},
 			"sources": [{"fichier": "personnages/20260916_ecrire_deux_histoires_d_aelis.md", "date": "2026-09-16", "citation": "Aélis"}],
 			"apres": ["jumieges_rang_c"]
 		},
