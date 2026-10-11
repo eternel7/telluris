@@ -9,7 +9,7 @@ import glob
 import json
 import os
 
-from utils import acces, chasse, lint_dialogues, transport
+from utils import acces, chasse, lint_dialogues, pnj, transport
 from utils import donjon as donjon_util
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -192,3 +192,19 @@ def test_le_rapport_a_maelys_monte_au_rang_c():
 	assert transport.retour_attendu(c, BUREAU) is q
 	transport.rapporter_transport(c, q, get, lambda d: d)
 	assert chasse.rang_de(c, "lieu:lutecia") == "C"
+
+
+def test_l_epreuve_se_lance_a_toute_visite_du_bureau():
+	"""Le choix « Je viens d'Auxerre » (première entrée dans le bureau seulement) ne doit
+	jamais masquer l'offre du rang C : visible à la 1re visite comme aux suivantes, dans le
+	fichier d'import ET dans le fichier source de Maëlys, et l'acceptation reste un choix."""
+	for chemin in (CONTENU, SOURCES[0]):
+		maelys = next(d for d in _charger(chemin) if d["_id"] == "pnj:maelys")
+		for n in (1, 2, 9):
+			ctx = {"flags": {"transport_offert": True}, "passages": {BUREAU: n}}
+			ids = [c["id"] for c in pnj.noeud_client(maelys, "accueil", ctx)["choix"]]
+			assert "rang_c_offre" in ids, (chemin, n)
+			assert ("auxerre" in ids) == (n == 1), (chemin, n)
+		propose = pnj.noeud_client(maelys, "rang_c_propose", {})
+		assert any(c["id"] == "rang_c_accepter" and c["action"] for c in propose["choix"])
+		assert transport.offre_spec(maelys)["id"] == LETTRE

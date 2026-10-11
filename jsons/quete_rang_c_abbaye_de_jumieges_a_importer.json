@@ -2,17 +2,28 @@
   {
     "_id": "pnj:maelys",
     "type": "pnj",
-    "nom": "Maëlys",
+    "nom": "Maëlys de Valombre",
     "race": "nain",
     "vocation": "maitre_de_guilde",
     "portrait": "maitresse_de_guilde_Maelys_naine_f.jpg",
-    "description": "Maîtresse de la Guilde des Aventuriers de Lutecia, au Grand Relais des Frontières. Une naine solidement bâtie, aux épaules larges et à la démarche assurée ; ses cheveux auburn, striés de quelques mèches grises, sont noués en une tresse courte qui ne gêne jamais ses mouvements. Ses yeux gris clair semblent peser chaque parole. Une fine cicatrice part de sa tempe gauche et disparaît dans sa chevelure : elle ne la cache pas, mais ne raconte jamais comment elle l'a obtenue. Veste de cuir sombre renforcée aux épaules, chemise de lin de belle facture et, sur la poitrine, la broche d'argent en forme de porte ouverte, emblème de la Guilde de Lutecia. À sa ceinture, une vieille épée courte qu'elle porte par habitude, et qu'elle préfère ne jamais avoir à dégainer.",
+    "description": "Maîtresse de la Guilde des Aventuriers de Lutecia, au Grand Relais des Frontières. Une naine solidement bâtie, aux épaules larges et à la démarche assurée ; ses cheveux auburn, striés de quelques mèches grises, sont noués en une tresse courte qui ne gêne jamais ses mouvements. Ses yeux gris clair semblent peser chaque parole. Une fine cicatrice part de sa tempe gauche et disparaît dans sa chevelure : elle ne la cache pas, mais ne raconte jamais comment elle l'a obtenue. Veste de cuir sombre renforcée aux épaules, chemise de lin de belle facture et, sur la poitrine, la broche d'argent en forme de porte ouverte, emblème de la Guilde de Lutecia. À sa ceinture, une vieille épée courte qu'elle porte par habitude, et qu'elle préfère ne jamais avoir à dégainer. Ancienne aventurière sans naissance ni fortune — Valombre n'est que le nom du hameau dont elle vient —, elle a gravi la Guilde de la vérification des contrats jusqu'à sa direction, le jour où son prédécesseur, un vieil elfe, n'est pas revenu de l'enquête qu'il menait sur un portail.",
     "dialogue": {
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
           "texte": "Le bureau sent la cire, le vélin et le cuir. Entre la grande table couverte de registres et le mur tapissé de cartes, une naine se tient debout, une main posée sur sa ceinture. Elle vous a vu franchir le seuil avant même que vous ayez fini de pousser la porte. Ses yeux gris clair vous détaillent un long moment, sans hâte. « {prenom}. Éléonore m'a parlé de vous. Entrez — et fermez derrière vous. »",
           "choix": [
+            {
+              "id": "auxerre",
+              "label": "« Je viens d'Auxerre. Gautier de Valcroix m'a recommandé. »",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:le_grand_relais_des_frontieres_bureau_du_maitre",
+                  "max": 1
+                }
+              },
+              "next": "auxerre"
+            },
             {
               "id": "qui",
               "label": "« C'est vous qui dirigez la Guilde ? »",
@@ -108,7 +119,7 @@
           ]
         },
         "broche": {
-          "texte": "Elle effleure l'argent du bout des doigts. « Une porte ouverte. Les Templiers gardent les portes, les Architectes les entretiennent. Nous, nous les franchissons. » Un temps. « Et nous la laissons ouverte derrière nous, pour ceux qui reviennent. Ils ne reviennent pas tous. Mais la porte, elle, reste ouverte. »",
+          "texte": "Elle effleure l'argent du bout des doigts. « Une porte ouverte. Vous l'avez vue sculptée au-dessus de l'entrée : “Toute porte s'ouvre. Toute route a son prix.” » Un temps. « Les Templiers gardent les portes, les Architectes les entretiennent. Nous, nous les franchissons — et c'est nous qui payons le prix. Ils ne reviennent pas tous. Mais la porte, elle, reste ouverte pour ceux qui reviennent. »",
           "choix": [
             {
               "id": "retour",
@@ -159,6 +170,41 @@
               "id": "ok",
               "label": "(Prendre congé.)",
               "next": "fin"
+            }
+          ]
+        },
+        "auxerre": {
+          "texte": "Elle tire un pli du coin de la table, le cachet de cire du Bastion de l'Yonne déjà rompu. « Valcroix. Il m'écrit que vous savez tenir un engagement. » Elle repose la lettre. « Il recommande peu. C'est une bonne chose pour vous. Mais ici, une recommandation ne vaut rien tant que je ne vous ai pas vu revenir. » Elle ouvre le registre. « Votre rang dit que vous savez vous battre. Ce qui m'intéresse, c'est de savoir si vous serez encore capable de me donner votre nom quand vous reviendrez de votre première mission ici. »",
+          "choix": [
+            {
+              "id": "pourquoi",
+              "label": "« Vous ne me demandez pas pourquoi je fais ce métier ? »",
+              "next": "pourquoi"
+            },
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "pourquoi": {
+          "texte": "« Je pourrais. Mais les gens ont toujours une bonne raison de prendre des risques. La faim, l'argent, la vengeance, la curiosité… Parfois même l'ennui. » Elle trempe sa plume. « Les contrats qui partent de ce bureau ne sont pas ceux du tableau d'en bas. Lisez-les attentivement. Si vous avez une question, posez-la avant de partir, pas quand les choses commencent à vous dévorer. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
             }
           ]
         },
@@ -244,7 +290,7 @@
           ]
         },
         "rang_c_rapporte": {
-          "texte": "Maëlys vous écoute sans vous interrompre : la Seine, les deux tours, la nef, ce qui est sorti du portail et la façon dont c'est tombé. Elle ne prend aucune note. Quand vous vous taisez, elle ouvre le registre des rangs, y trace une ligne, puis fait glisser vers vous {prime} pièces de cuivre. « Rang C. » Elle referme le registre. « L'Institut m'a écrit ce matin. Leur architecte est rentrée avec plus de questions qu'elle n'en avait en partant. Chez eux, c'est un compliment. » Un temps. « Chez moi aussi. »",
+          "texte": "Maëlys vous écoute sans vous interrompre : la Seine, les deux tours, la nef, ce qui est sorti du portail et la façon dont c'est tombé. Elle ne prend aucune note. Quand vous parlez de la lueur violette, d'aucune couleur qu'Aélis connaisse, sa main s'arrête un instant sur la couverture du registre. Quand vous vous taisez, elle l'ouvre, y trace une ligne, puis fait glisser vers vous {prime} pièces de cuivre. « Rang C. » Elle referme le registre. « L'Institut m'a écrit ce matin. Leur architecte est rentrée avec plus de questions qu'elle n'en avait en partant. Chez eux, c'est un compliment. » Un temps. « Chez moi aussi. » Puis, plus bas, les yeux sur le mur de cartes : « Celui qui tenait ce bureau avant moi est parti un matin voir un portail qui avait changé de couleur. Il n'est pas revenu. » Elle se tourne de nouveau vers vous. « Vous, vous êtes là. Continuez comme ça. »",
           "choix": [
             {
               "id": "ok",
@@ -328,7 +374,7 @@
           ]
         },
         "retrouvailles_02": {
-          "texte": "« Vous. » Elle s'arrête à un pas, et on la sent chercher la formule exacte avant de se décider pour la plus courte. « Vous êtes venu jusqu'ici. Je n'étais pas certaine que les gens qui sortent d'une grotte reviennent voir ceux qu'ils en ont sortis. » Un coup d'œil derrière elle, vers la table. « Ne faites pas attention aux apprentis. Ils croient que je mesure l'esplanade. Je mesure l'esplanade, en réalité. Mais pas pour la raison qu'ils pensent. »",
+          "texte": "« Vous. » Elle s'arrête à un pas, et on la sent chercher la formule exacte avant de se décider pour la plus courte. « Vous avez fait tout ce chemin. Je n'étais pas certaine que les gens qui sortent d'une grotte reviennent voir ceux qu'ils en ont sortis. » Un coup d'œil derrière elle, vers la table. « Ne faites pas attention aux apprentis. Ils croient que je mesure l'esplanade. Je mesure l'esplanade, en réalité. Mais pas pour la raison qu'ils pensent. »",
           "choix": [
             {
               "id": "gardee",
