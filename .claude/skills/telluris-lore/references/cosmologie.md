@@ -18,9 +18,9 @@ Sources principales : [monde/20260812_monde_medieval_fantastique.md] (séance fo
 - Chaque partie du monde est **personnalisée** pour refléter la culture de joueurs potentiels.
 - L'histoire de Telluris s'axe sur **deux pendants** : l'influence de la magie, et l'émergence des Cités-États. Pas de conquêtes.
 
-### Lilith / Échidna
-Rebelle contre les dieux, accusée d'être à l'origine de tous les monstres.
-- **L'Enfer** est le donjon qui éveille le personnage. Deux formes envisagées : celui de **Dante**, avec Lucifer en boss final, ou celui des **Grecs**, avec **Hadès** dans la dernière salle.
+### Échidna (anciennement « Lilith / Échidna »)
+Rebelle contre les dieux, accusée d'être à l'origine de tous les monstres. **À Mu, Échidna seule, jamais Lilith** (Auteur, 11/10) : mère des monstres grecs (Cerbère, Hydre, Chimère, Orthos…) ; **prise sous Mu** quand la **porte des Enfers d'Hadès** (le portail vorace) fut scellée, alors qu'elle soignait Cerbère, **resté de l'autre côté**. Les **Naga** sont fils de **Kadru** (Inde), ont parcouru les océans ; ceux de Mu voient en Échidna une image de mère (`docs/lore/cites/20261011_histoire_de_mu_chatgpt.md` § 7). **Deux mondes distincts** (Auteur, 11/10) : les Enfers d'**Hadès** (porte scellée sous Mu) et l'Enfer de **Lucifer** (porte de l'Hekla). Les mentions « Lilith » ci-dessous datent d'avant cet arbitrage.
+- **L'Enfer** est le donjon qui éveille le personnage. Deux formes envisagées : celui de **Dante**, avec Lucifer en boss final, ou celui des **Grecs**, avec **Hadès** dans la dernière salle. ⚠️ Depuis le 11/10, les **deux existent** comme mondes distincts : Enfer de Lucifer (Hekla), Enfers d'Hadès (porte scellée sous Mu) ; **l'un ou l'autre** peut éveiller le personnage (Auteur, 11/10). **Plusieurs portes peuvent mener au même autre monde**.
 - Si le personnage comprend qu'elles **ne sont pas les monstres qu'on décrit**, ou s'il les élimine, il apprend que **les dieux jouent avec les Lignées d'Anthropes**.
 - Suit une série de donjons contre les dieux :
 	- **Yggdrasil** = de multiples portes vers les mondes qu'il relie, chacune un donjon ;
@@ -32,7 +32,7 @@ Rebelle contre les dieux, accusée d'être à l'origine de tous les monstres.
 - **Jésus**, s'il a existé, était un **joueur** ayant choisi la **révélation**. Il a fini le jeu en **Révélateur**.
 	- Comme la Vérité philosophique de Platon, que l'homme ne peut saisir directement, la vérité du Divin a dû être **vulgarisée** pour les Anthropes.
 	- Fils de charpentier ou plus haut dignitaire de Jérusalem ? Question posée ; la synthèse retient le **fils de charpentier**.
-- **Le Déluge** (11/10, adopté) : clôt l'antédiluvien ; nature **inconnue**, comme la Vague. **Utnapishtim** y survit (où il vit, s'il vit encore : nul ne sait). Théories contradictoires portées par des personnages : Mu engloutie à ce moment-là ; le Déluge était déjà une vague de mana, la Grande Vague en serait la seconde — d'autres le nient. **Gilgamesh**, premier roi d'après le Déluge, bâtit les remparts d'**Uruk** et ouvre l'Âge des Remparts ; sa quête d'immortalité échoue (le serpent), en écho à la dynastie du Nil et à la question des Grigori (frise fusionnée § 11).
+- **Le Déluge** (11/10, adopté) : clôt l'antédiluvien ; nature **inconnue**, comme la Vague. **Utnapishtim** y survit (où il vit, s'il vit encore : nul ne sait). Théories portées par des personnages : le Déluge était déjà une vague de mana, la Grande Vague en serait la seconde — d'autres le nient. **Gilgamesh**, premier roi d'après le Déluge, bâtit les remparts d'**Uruk** et ouvre l'Âge des Remparts ; sa quête d'immortalité échoue (le serpent), en écho à la dynastie du Nil et à la question des Grigori (frise fusionnée § 11). Le Déluge **n'a pas** englouti Mu, qui sombre à la Vague (Auteur, 11/10).
 - **Grigori** (« les Veilleurs », *egrḗgoroi*) : « les éveillés de **bien avant JC** » (04/10), placés à l'**Âge des Remparts**, peut-être à l'époque de la dynastie dont émergera Néfertiti (11/10). Proposition **adoptée** le 11/10 (Hermon, hénochien, question de l'immortalité transmise au Nil, fin ouverte) : `docs/lore/monde/20261011_frise_chronologique_fusionnee.md` § 9.
 
 ### Monothéisme (31/08, reformulation de l'Auteur)

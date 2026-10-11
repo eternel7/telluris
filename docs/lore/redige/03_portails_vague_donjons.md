@@ -4,7 +4,7 @@
 
 Pendant des âges, on ne se déplaçait que par la route. Puis vinrent **trois frères aborigènes**, venus de l'autre bout du monde, des jumeaux dit-on. Ils apportèrent aux Anthropes un savoir que personne ne possédait : celui du **portail transversal**, une porte qui relie deux lieux de Telluris.
 
-Leur portail avait une particularité : on en déplaçait la destination en faisant tourner une **bolas**. Ces premières portes étaient stables, prévisibles, fiables. Elles fonctionnaient **sans cristaux**, peut-être parce que la magie était alors plus intense, peut-être parce que sa maîtrise était plus innée. Et elles ne reliaient que des lieux de Telluris : aucune ne menait à un autre monde.
+Leur portail avait une particularité : on en déplaçait la destination en faisant tourner une **bolas**. Ces premières portes étaient stables, prévisibles, fiables. Elles fonctionnaient presque toujours **sans cristaux**, peut-être parce que la magie était alors plus intense, peut-être parce que sa maîtrise était plus innée. Et elles ne reliaient que des lieux de Telluris : aucune ne menait à un autre monde.
 
 Les frères ont parcouru le monde et laissé leur œuvre derrière eux. Le **portail de Notre-Dame**, à Lutecia, en est le vestige le mieux préservé : un portail programmable qui peut mener à n'importe quel lieu du monde connu. Les cinq portes de la **Chapelle Palatine** d'Aix-la-Chapelle, disposées en pentagramme, en sont une autre trace : leurs destinations sont fixes, et lointaines, jusqu'à Sydney, Tokyo, Teotihuacan, Machu Picchu et Abou Simbel.
 
@@ -42,7 +42,7 @@ Certains portails mènent plus loin encore, vers des mondes que nos mythes ont n
 
 On trouve dans certains donjons des mines de **cristaux de mana**, et l'on en tire aussi des carcasses de monstres. Sur Telluris même, ils sont rares. Ils sont de couleurs variées, et chacune a son usage.
 
-Depuis la Vague, ce sont eux qui permettent aux Architectes de tenir les portails : ils apportent le mana ou la maîtrise qui manque désormais. Le cristal **violet** est une puissance pure de mana. Le cristal **jaune** stabilise les effets d'un portail ; on le trouve, entre autres, tout au fond des catacombes de Lutecia.
+Les portails des frères s'en passent presque toujours ; ceux de leurs héritiers, dès les premiers, en demandent. Depuis la Vague, ce sont eux qui permettent aux Architectes de tenir les portails : ils apportent le mana ou la maîtrise qui manque désormais. Le cristal **violet** est une puissance pure de mana. Le cristal **jaune** stabilise les effets d'un portail ; on le trouve, entre autres, tout au fond des catacombes de Lutecia.
 
 Ainsi s'est formée une économie : le portail donne accès au donjon, le donjon livre ses monstres et ses cristaux, les cristaux entretiennent les portails, et les portails enrichissent les cités.
 

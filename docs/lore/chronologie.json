@@ -208,13 +208,13 @@
 			"id": "mu",
 			"titre": "Mu, la civilisation engloutie",
 			"titre_court": "Mu",
-			"resume": "Antérieure aux trois frères, Mu maîtrise une magie oubliée avant de sombrer dans une catastrophe de nature inconnue. Continent englouti, elle enseigne toujours, par Notre-Dame, les meilleurs Architectes.",
-			"quand": {"de": {"ere": "antediluvien", "entre_rangs": ["origines", "premiers_ages"]}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "auteur", "note": "Avant les trois frères (Auteur, 11/10) ; aujourd'hui continent englouti."},
+			"resume": "Antérieure aux trois frères et en avance sur son temps — murailles, gardiens des routes, savoir rassemblé —, Mu apprend les portails d'un des frères puis sombre au moment de la Vague. Sa cité survit sous la mer et parachève, par Notre-Dame, la formation des meilleurs Architectes. Son histoire, méconnue, n'est citée par aucune autre cité.",
+			"quand": {"de": {"ere": "antediluvien", "entre_rangs": ["origines", "premiers_ages"]}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "auteur", "note": "Avant les trois frères (Auteur, 11/10) ; le Déluge ne l'a pas engloutie ; continent perdu à la Vague, cité habitée sous la mer."},
 			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "secret",
 			"origine": ["mu"],
 			"tags": {"peuples": ["mu"], "lieux": ["mu"], "institutions": ["architectes"], "themes": ["portails", "savoir", "mystere"]},
-			"sources": [{"fichier": "cites/20261010_mu_civilisation_engloutie.md", "date": "2026-10-10", "citation": "Mu pourrait être liée à une civilisation ayant maîtrisé une forme de magie aujourd'hui oubliée, antérieure même au savoir transmis par les trois frères aborigènes."}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Mu est placée avant les trois frères."}],
-			"liens": ["notre_dame", "aelis_mu"]
+			"sources": [{"fichier": "cites/20261010_mu_civilisation_engloutie.md", "date": "2026-10-10", "citation": "Mu pourrait être liée à une civilisation ayant maîtrisé une forme de magie aujourd'hui oubliée, antérieure même au savoir transmis par les trois frères aborigènes."}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Mu est placée avant les trois frères."}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "Mu est en avance sur son temps."}],
+			"liens": ["notre_dame", "aelis_mu", "mu_portails", "mu_engloutie", "trame_a"]
 		},
 		{
 			"id": "atlantis",
@@ -242,13 +242,13 @@
 			"id": "deluge",
 			"titre": "Le Déluge",
 			"titre_court": "Déluge",
-			"resume": "Une catastrophe de nature inconnue clôt l'antédiluvien ; Utnapishtim y survit. Les uns disent que Mu fut engloutie alors, certains Architectes que ce fut une première vague de mana ; d'autres le nient.",
+			"resume": "Une catastrophe de nature inconnue clôt l'antédiluvien ; Utnapishtim y survit. Certains Architectes affirment que ce fut une première vague de mana ; d'autres le nient. Mu, elle, n'y a pas sombré.",
 			"quand": {"moment": {"ere": "antediluvien", "rang": "deluge"}, "autorite": "auteur"},
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"peuples": ["sumeriens"], "themes": ["mythes", "mystere"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Le Déluge clôt l'antédiluvien."}],
-			"liens": ["gilgamesh", "mu", "vague"]
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Le Déluge clôt l'antédiluvien."}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "le déluge n'a pas enseveli Mu"}],
+			"liens": ["gilgamesh", "vague"]
 		},
 		{
 			"id": "gilgamesh",
@@ -417,6 +417,19 @@
 			"sources": [{"fichier": "cites/20260820_decrire_l_histoire_de_lutecia.md", "date": "2026-08-20", "citation": "Lutecia est une ville ayant pour source le portail de Notre-Dame. Il a été fait par l'un des frères aborigènes."}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Jaune pour Mu, violet pour le reste du monde."}],
 			"apres": ["trois_freres"],
 			"liens": ["cite_lutecia", "mu"]
+		},
+		{
+			"id": "mu_portails",
+			"titre": "Mu apprend les portails d'un des frères",
+			"titre_court": "Mu et les portails",
+			"resume": "Riche d'une longue tradition de pierres dressées qui canalisent le mana — le temps des Tables de Pierre et des Sept Sages —, Mu apprend les portails d'un des trois frères et devient un nœud du réseau. Ra-Mu, titre de qui tient l'équilibre des assemblées, que la surface déformera en « Empereur du Soleil levant ».",
+			"quand": {"de": {"ere": "portails", "entre": [3000, 2500]}, "a": {"ere": "portails", "ans": 750}, "autorite": "auteur", "note": "Après les trois frères ; jusqu'à la Vague."},
+			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "secret",
+			"origine": ["mu"],
+			"tags": {"peuples": ["mu", "aborigenes"], "lieux": ["mu"], "institutions": ["architectes"], "themes": ["portails", "savoir", "cristaux"]},
+			"sources": [{"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "Mu a appris les portails d'un des trois frères."}],
+			"apres": ["trois_freres"],
+			"liens": ["mu", "mu_engloutie"]
 		},
 		{
 			"id": "chapelle_palatine",
@@ -591,6 +604,18 @@
 			"apres": ["justinien"]
 		},
 		{
+			"id": "mu_engloutie",
+			"titre": "Mu sacrifie son continent",
+			"titre_court": "Mu sombre",
+			"resume": "Au moment de la Vague, le continent de Mu s'effondre sous la mer ; sa cité, Mu-la-Centrale, descend sous un dôme de lumière dorée et survit. Vérité que presque nul ne connaît : Mu a sacrifié un continent pour fermer un portail naturel dont la voracité menaçait le monde, une porte des Enfers d'Hadès ; Échidna, qui soignait Cerbère, est restée prise dessous, Cerbère de l'autre côté — même à Mu, une hypothèse parmi tant d'autres.",
+			"quand": {"moment": {"ere": "donjons", "entre": [800, 700]}, "autorite": "auteur", "note": "« au moment de la grande vague » (Auteur, 11/10)."},
+			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "secret",
+			"origine": ["mu"],
+			"tags": {"peuples": ["mu"], "lieux": ["mu"], "institutions": ["architectes", "templiers"], "themes": ["vague", "portails", "mystere"]},
+			"sources": [{"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "Elle a sombré au moment de la grande vague."}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "La vérité et que Mu a sauvé Telluris en sacrifiant un continent pour fermer un portail naturel dont la voracité menacé le monde."}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "Echidna a été bloquée sous le continent de Mu lorsque la porte des enfers à été célée."}],
+			"liens": ["mu", "vague", "trame_a"]
+		},
+		{
 			"id": "premiers_donjons",
 			"titre": "Les premiers donjons",
 			"titre_court": "Premiers donjons",
@@ -606,13 +631,13 @@
 			"id": "cristaux",
 			"titre": "Les cristaux de mana, violet et jaune",
 			"titre_court": "Cristaux",
-			"resume": "Inutiles avant la Vague (les portails fonctionnaient sans), ils deviennent l'apport qui permet aux Architectes de tenir les portails : violet = puissance pure de mana, jaune = stabilisation.",
-			"quand": {"de": {"ere": "donjons", "entre": [800, 650]}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "auteur"},
+			"resume": "Les portails des frères s'en passent presque toujours ; ceux de leurs héritiers en demandent. Depuis la Vague, ils sont l'apport qui permet aux Architectes de tenir les portails : violet = puissance pure de mana, jaune = stabilisation.",
+			"quand": {"de": {"ere": "portails", "entre": [2900, 2400]}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "auteur", "note": "Dès les héritiers des frères (Auteur, 11/10) ; ressource stratégique après la Vague."},
 			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
 			"origine": ["monde"],
 			"tags": {"institutions": ["architectes"], "themes": ["cristaux", "portails", "commerce"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Le violet est un cristal de puissance pure de mana. Le jaune est un cristal de stabilisation des effets des portails."}],
-			"apres": ["premiers_donjons"]
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Le violet est un cristal de puissance pure de mana. Le jaune est un cristal de stabilisation des effets des portails."}, {"fichier": "cites/20261011_histoire_de_mu_chatgpt.md", "date": "2026-10-11", "citation": "les portails créé par les héritiers des trois frères demandent des cristaux. Rarement les portails originaux."}],
+			"apres": ["architectes"]
 		},
 		{
 			"id": "templiers_temples",
@@ -1116,9 +1141,9 @@
 		},
 		{
 			"id": "trame_a",
-			"titre": "« Le serpent sous la cité » — Lilith/Échidna",
-			"titre_court": "Lilith à Mu",
-			"resume": "À Mu, rencontre avec Lilith/Échidna, accusée d'être la mère des monstres : la combattre ou parler. « Vous appelez monstres mes enfants. »",
+			"titre": "« Le serpent sous la cité » — Échidna",
+			"titre_court": "Échidna à Mu",
+			"resume": "Sous Mu, rencontre avec Échidna, mère des monstres des Grecs, prise sous le continent, séparée de Cerbère, quand la porte des Enfers d'Hadès fut scellée ; les Naga de Mu voient en elle une mère. Accusée d'être la mère de tous les monstres : la combattre ou parler. « Vous appelez monstres mes enfants. »",
 			"quand": {"moment": {"ere": "jeu", "rang": "A"}, "autorite": "auteur"},
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "meta",
 			"origine": ["mu"],

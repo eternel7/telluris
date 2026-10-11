@@ -106,6 +106,8 @@ Elle aurait maîtrisé une forme de magie aujourd'hui oubliée, **antérieure m�
 
 Mu est une piste majeure pour comprendre l'origine de la magie : les Anthropes ne sont peut-être pas les premiers à avoir tenté de maîtriser les frontières du monde, et la Vague de mana n'est peut-être pas le premier bouleversement cosmique de Telluris. Ces points restent **volontairement non tranchés**.
 
+**Précisé par l'Auteur (11/10/2026)** : Mu, en avance sur son temps, apprend les portails d'un des trois frères et **sombre au moment de la Vague** (pas au Déluge) ; sa cité survit sous la mer. Vérité du monde, inconnue de presque tous : elle a sacrifié un continent pour fermer un portail naturel vorace. Détail : `docs/lore/cites/20261011_histoire_de_mu_chatgpt.md`.
+
 ---
 
 # 4. Les trois frères aborigènes
@@ -716,7 +718,7 @@ Cette section est volontairement réservée aux éléments qui nécessitent enco
 - Nature exacte des entités extérieures.
 - Limites réelles du pouvoir des Révélateurs.
 - Relation précise entre les différents mondes mythologiques.
-- Nature de la catastrophe qui a englouti Mu, et lien éventuel avec la Vague de mana.
+- Ce que les personnages croient de la catastrophe de Mu (elle a eu lieu à la Vague ; sa vérité n'est jamais confirmée en jeu).
 - Ce que signifie exactement « atteindre la fin du jeu ».
 
 ## 26.2 Portails
