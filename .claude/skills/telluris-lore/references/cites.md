@@ -50,6 +50,7 @@ Rien dans les séances. Peuplée en jeu (62 marchands, 3 auberges — commit `a0
 
 ## Rome — `lieu:rome` · [cites/20260820_decrire_rome_dans_telluris.md], [monde/20260821_portail_des_profondeurs.md]
 **Auteur**
+- **Avant les trois frères** ; le portail de Saint-Pierre existe **avant Rome**, au fond d'une grotte sur une butte (11/10). Un groupe spécialisé de Templiers le garde avant Jésus. **Proposé** : Romulus, Rémus et la Louve — Rémus et les Luperques fondent la garde de la porte, Romulus et ses Celeres celle du rempart (frise fusionnée § 10).
 - **La ville aux deux visages.**
 	- La pieuse : le pape et Saint-Pierre.
 	- La pécheresse : orgies de l'aristocratie, gladiateurs contre les pires monstres au **Colisée**. Personne ne sait pourquoi elle s'est pervertie ; « la Rome actuelle semble ivre de son passé ».
