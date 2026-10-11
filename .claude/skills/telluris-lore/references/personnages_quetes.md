@@ -13,6 +13,7 @@
 | `pnj:dame_eleonore_de_rochefort` (+ `_lutecia`) | Dame Éléonore de Rochefort | **elfe** · paladine, commandante des convois de cristaux d'Auxerre | escorte vers Lutecia ; attend ensuite ses ordres sur le parvis de Notre-Dame |
 | `pnj:frere_martin_de_clairvaux` (+ `_lutecia`) | Frère Martin de Clairvaux | **hobbit** · paladin, second de l'escorte | « comparse hobbit » de la paladine |
 | `pnj:eleonore_de_vaugirard` | Éléonore de Vaugirard | humaine · réceptionniste du Grand Relais des Frontières (Lutecia) | accueil à Lutecia |
+| `pnj:maelys` | Maëlys | **naine** · maîtresse de la Guilde de Lutecia (bureau du Grand Relais) | remplace le « vieux elfe » (Auteur, 11/10) ; cicatrice jamais racontée |
 | `pnj:milo_cartographe` | Milo | hobbit · aide-cartographe d'une compagnie de voyageurs (Auxerre) | arc de deuil n° 1 |
 | `pnj:elise_herboriste` | Élise | **naine** · herboriste du **Coq de Lutèce** (faubourgs de Lutecia) | arc de deuil n° 2 |
 | `pnj:reverend_malakor` | Révérend Malakor | ogre · prêtre (temple de Saint-Eusèbe, Auxerre) | — |
