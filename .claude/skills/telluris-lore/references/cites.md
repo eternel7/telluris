@@ -236,8 +236,8 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 	- Aujourd'hui : cité habitée, Templiers aux passages « au-delà de toute carte », Paladins dans les tunnels ; maîtres plus savants que tous mais **bien moins que leurs prédécesseurs**.
 	- **Seuil unique** par Notre-Dame (œuvre d'un frère, cristal jaune ; la « porte naturelle » de ChatGPT est rejetée). Archives de Mu ; **ceux qui reviennent** / **ceux qui restent** (« on n'en sort pas » est figuré).
 	- Guildes : moins on en parle, plus elles s'y intéressent ; prix du voyage connu dès le rang A.
-	- **Vérité du monde** : Mu a sacrifié un continent pour fermer un **portail naturel vorace**, une **porte des Enfers** (§ 7) — inconnue de presque tous, hypothèse parmi d'autres même à Mu.
-	- **Échidna** (jamais Lilith à Mu ; mère des monstres grecs — Cerbère, Hydre, Chimère… ; **prisonnière** sous Mu depuis que la porte des Enfers fut scellée, alors qu'elle soignait Cerbère ; les **Naga**, fils de **Kadru** venus par les océans, voient en elle une **image de mère**), « mère des serpents », vit sous Mu-la-Centrale près de la porte fermée .
+	- **Vérité du monde** : Mu a sacrifié un continent pour fermer un **portail naturel vorace**, une **porte des Enfers d'Hadès** (§ 7-8 ; l'Hekla est celle de Lucifer, autre monde) — inconnue de presque tous, hypothèse parmi d'autres même à Mu.
+	- **Échidna** (jamais Lilith à Mu ; mère des monstres grecs — Cerbère, Hydre, Chimère… ; **prisonnière** sous Mu depuis que la porte des Enfers fut scellée, alors qu'elle soignait Cerbère, resté de l'autre côté ; les **Naga**, fils de **Kadru** venus par les océans, voient en elle une **image de mère**), « mère des serpents », vit sous Mu-la-Centrale près de la porte fermée .
 
 **Auteur (11/10)** : Mu **avant les trois frères** ; aujourd'hui continent englouti, révéré des Architectes (cf. SKILL.md § Cités-États). Quasiment toutes les cités existaient **avant la Vague** ; **Rome** entre dans la chronologie ; aucune période terrestre. **Lutecia** naît autour du portail d'un frère dans une cité qui existait déjà, et **prend son nom en dernier** — « fondée » ne convient pas.
 

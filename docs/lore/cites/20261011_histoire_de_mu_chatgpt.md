@@ -584,6 +584,15 @@ Les Naga sont les fils de Kadru. Ils ont parcouru les océans. Echidna a été b
 - **Kadru** (*Mahābhārata*) : fille de Daksha, épouse du sage **Kashyapa**, elle demande à son époux mille fils serpents : les Naga. Sa sœur **Vinatā** enfante **Garuda**, l'oiseau ennemi des serpents. Kadru gagne un pari contre Vinatā par une ruse et la réduit en servitude : d'où la haine de Garuda pour les Naga.
 - **Cerbère** (Hésiode) : fils d'Échidna et de Typhon, le chien aux têtes multiples qui garde la porte d'Hadès, laisse entrer les morts et n'en laisse sortir aucun.
 
-**Points ouverts (signalés par Claude Code, non tranchés).**
-- **Quelle « porte des Enfers » ?** Telluris a déjà l'**Enfer** de **Lucifer**, dont la porte est le gouffre de l'**Hekla** ; la porte scellée sous Mu, gardée par Cerbère, est celle des **Enfers grecs** (Hadès). Même monde par deux portes, ou deux mondes distincts ?
-- **Où est Cerbère ?** Du côté d'Échidna, sous Mu, ou de l'autre côté de la porte scellée ?
+**Points ouverts** : tranchés au § 8.
+
+## ✍️ Auteur
+
+Cerbère est resté de l'autre côté de la porte. C'est l'enfer d'Hadès. Hekla est celui de Lucifer.
+
+---
+
+## 8. Quatrième arbitrage de l'Auteur (11/10/2026)
+
+1. **Cerbère est resté de l'autre côté** de la porte scellée : Échidna, prisonnière sous Mu, est **séparée** de son préféré.
+2. La porte scellée sous Mu mène aux **Enfers d'Hadès**. Le gouffre de l'**Hekla** mène à l'**Enfer de Lucifer**. Ce sont **deux mondes distincts**.

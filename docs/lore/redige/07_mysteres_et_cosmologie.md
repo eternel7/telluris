@@ -6,11 +6,11 @@ Ce chapitre rassemble ce que Telluris cache. Une partie relève de la vérité d
 
 Les portails ne mènent pas tous à des lieux de Telluris. Certains ouvrent sur des mondes que nos mythes ont nommés, et chaque région du monde a les siens, adaptés à sa culture.
 
-Le **Paradis** est le monde des anges, qui ne sont pas tous de doux agneaux. On y accède par Saint-Pierre, à Rome. L'**Enfer** abrite la cohorte des démons, menée par **Lucifer**, l'ancien ange de lumière ; sa porte est le gouffre de l'Hekla, en Islande. Anges et démons se disputent les âmes des Anthropes. Plus au nord, **Yggdrasil** relie de multiples mondes, et chacune de ses portes est un donjon.
+Le **Paradis** est le monde des anges, qui ne sont pas tous de doux agneaux. On y accède par Saint-Pierre, à Rome. L'**Enfer** abrite la cohorte des démons, menée par **Lucifer**, l'ancien ange de lumière ; sa porte est le gouffre de l'Hekla, en Islande. Les **Enfers d'Hadès** sont un autre monde ; leur porte, sous Mu, est scellée. Anges et démons se disputent les âmes des Anthropes. Plus au nord, **Yggdrasil** relie de multiples mondes, et chacune de ses portes est un donjon.
 
 ## Échidna
 
-On l'accuse d'être à l'origine de tous les monstres. Elle s'est rebellée contre les dieux. Les Grecs lui prêtent Cerbère, l'Hydre ou la Chimère. Elle prenait soin de Cerbère, son préféré, quand Mu scella la porte des Enfers en sacrifiant son continent, et elle resta prise dessous. L'aventurier la rencontre là, sous la cité engloutie ; les Naga de Mu, fils de Kadru, voient en elle une image de mère. Il a le choix : la combattre, ou lui parler. S'il comprend qu'elle n'est pas le monstre que l'on décrit, ou s'il l'élimine, il apprend une chose qui change tout : **les dieux jouent avec les Lignées d'Anthropes**.
+On l'accuse d'être à l'origine de tous les monstres. Elle s'est rebellée contre les dieux. Les Grecs lui prêtent Cerbère, l'Hydre ou la Chimère. Elle prenait soin de Cerbère, son préféré, quand Mu scella la porte des Enfers d'Hadès en sacrifiant son continent : Cerbère resta de l'autre côté, elle resta prise dessous. L'aventurier la rencontre là, sous la cité engloutie ; les Naga de Mu, fils de Kadru, voient en elle une image de mère. Il a le choix : la combattre, ou lui parler. S'il comprend qu'elle n'est pas le monstre que l'on décrit, ou s'il l'élimine, il apprend une chose qui change tout : **les dieux jouent avec les Lignées d'Anthropes**.
 
 Commence alors une série de donjons contre les dieux eux-mêmes. Mais chaque réponse ouvre deux questions. Échidna dit que les dieux ont créé les monstres ; les dieux répondent qu'ils en ont hérité.
 
