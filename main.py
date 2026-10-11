@@ -63,6 +63,7 @@ from utils import dev_tools
 from utils import serveur as serveur_util
 from utils import grimoires as grimoires_util
 from utils import catalogue_capacites
+from utils import lore as lore_util
 from utils import simulateur as simulateur_util
 from utils import potentiel as potentiel_util
 from utils.marche import (tick_atelier, reset_prix_cache, besoins_lieu, appro_leaves_lieu,
@@ -1745,6 +1746,42 @@ def admin_competences(request: Request, current_user: Annotated[User, Depends(ge
 		request=request,
 		name="admin_capacites.html",
 		context={"title": "Compétences par vocation", "famille": "competences"}
+	)
+
+
+@app.get("/admin/lore", response_class=HTMLResponse)
+def admin_lore(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Index du lore (docs/lore + Document maître), lu RENDU dans la page — utils/lore.py."""
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_lore.html",
+		context={"title": "Lore de Telluris", "groupes": lore_util.grouper(lore_util.lister())}
+	)
+
+
+@app.get("/admin/lore/{cle:path}", response_class=HTMLResponse)
+def admin_lore_fichier(cle: str, request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Un fichier du lore rendu en HTML. ⚠️ Liste blanche (`lore.chemin_de`) : 404 hors périmètre."""
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	chemin = lore_util.chemin_de(cle)
+	if chemin is None:
+		raise HTTPException(status_code=404, detail="Fichier de lore inconnu")
+	entrees = lore_util.lister()
+	entree = next(e for e in entrees if e["chemin"] == chemin)
+	voisins = [e for e in entrees if e["section"] == entree["section"]]
+	k = voisins.index(entree)
+	corps, sommaire = lore_util.rendre_fichier(chemin)
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_lore.html",
+		context={"title": entree["titre"], "entree": entree, "corps": corps, "sommaire": sommaire,
+				 "precedent": voisins[k - 1] if k > 0 else None,
+				 "suivant": voisins[k + 1] if k + 1 < len(voisins) else None}
 	)
 
 

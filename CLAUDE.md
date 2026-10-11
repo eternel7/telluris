@@ -41,7 +41,7 @@ La CouchDB live est distante, NON joignable en local. Valeurs réelles des docs 
 
 ```
 main.py                  # FastAPI app, page routes (/play, /combat/{id}, /reinitialisation, /admin*, /admin/simulateur, /admin/recettes-graphe,
-                         #   /admin/sorts, /admin/competences), static mounts
+                         #   /admin/sorts, /admin/competences, /admin/lore), static mounts
 routers/
   user.py                # /api/* : auth (dont sceau oublié : mot-de-passe/oubli + /reinitialiser),
                          #   character CRUD, movement, equip/unequip, drop/pickup, spend_xp
@@ -77,6 +77,8 @@ utils/
                          #   (capacite_utilisable_combat / effets_agissent_sur_cible / _exploration)
   catalogue_capacites.py # /admin/sorts (par école) et /admin/competences (par vocation) (pur) : entrées au
                          #   format du payload ⚡ de /play + doc brut ; formules gardées en texte (aucun personnage)
+  lore.py                # /admin/lore (pur) : liste blanche docs/lore + Document maître, rendu Markdown
+                         #   stdlib (texte ÉCHAPPÉ avant balisage), liens .md réécrits vers leur page
   grimoires.py           # grimoires manquants (pur) : grimoire UNIQUE + recette de scriptorium par sort ;
                          #   règle de couverture partagée par dev/gen_grimoires.py et l'alerte de /admin
   competences.py         # compétences de vocation (pur) : passives permanentes, AURAS (passive + zone :
