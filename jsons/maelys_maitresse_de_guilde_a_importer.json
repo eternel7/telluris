@@ -16,6 +16,12 @@
             {
               "id": "auxerre",
               "label": "« Je viens d'Auxerre. Gautier de Valcroix m'a recommandé. »",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:le_grand_relais_des_frontieres_bureau_du_maitre",
+                  "max": 1
+                }
+              },
               "next": "auxerre"
             },
             {
@@ -528,7 +534,7 @@
     "pnj": [
       {
         "character": "pnj:maelys",
-        "nom": "Maëlys",
+        "nom": "Maëlys de Valombre",
         "portrait": "maitresse_de_guilde_Maelys_naine_f.jpg",
         "image": "pnj_maitresse_de_guilde_Maelys_naine_f_grand_relais_bureau.jpg",
         "probabilite": 1,
