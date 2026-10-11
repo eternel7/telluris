@@ -25,9 +25,9 @@ France : Lutecia · Auxerre · Rhemi — Italie : Rome · Venise · Gênes — N
 	- Gardiens de la Voie (Dvergrs ou gobelins des roches, poseurs de pièges).
 - Les catacombes sont un donjon où l'on chasse goules et squelettes ; les **cristaux de mana jaunes** s'y trouvent, tout au fond.
 - **Rang A** : Notre-Dame ouvre ses portes à l'aventurier, **un voyage par cristal jaune**.
-- Guilde : **Le Grand Relais des Frontières** (`lieu:le_grand_relais_des_frontieres_interieur`, nom adopté). Réceptionniste **Éléonore de Vaugirard**, humaine (`pnj:eleonore_de_vaugirard`). Maître de guilde : un **vieux elfe** (portrait fourni par l'Auteur : costume rayé noir, chaîne d'or, médaillon).
+- Guilde : **Le Grand Relais des Frontières** (`lieu:le_grand_relais_des_frontieres_interieur`, nom adopté). Réceptionniste **Éléonore de Vaugirard**, humaine (`pnj:eleonore_de_vaugirard`). Maîtresse de guilde : **Maëlys**, une **naine** d'âge mûr (décision de l'Auteur, 11/10/2026 — elle **remplace le vieil elfe** de la séance du 13/09) : cheveux auburn striés de gris en tresse courte, yeux gris clair, fine cicatrice de la tempe gauche à la chevelure (jamais racontée), veste de cuir sombre renforcée, broche d'argent en **porte ouverte** = emblème de la Guilde de Lutecia, vieille épée courte qu'elle préfère ne jamais dégainer. `pnj:maelys`, dans `lieu:le_grand_relais_des_frontieres_bureau_du_maitre` ; Éléonore la nomme quand on lui demande qui dirige [personnages/20261011_maelys_maitresse_de_guilde.md]. La bijoutière homonyme de La Sertissure des Faubourgs est rebaptisée « Aude Clairmont ».
 
-**Proposé** : maître de guilde « Aldebrand de Montfaucon » (≈ 370 ans, absent du dump) ; devise « Là où s'arrête la route, commence notre métier ».
+**Proposé** : devise « Là où s'arrête la route, commence notre métier ».
 
 **Auberges en jeu** : de la Grève, de la Seine, des Écoles, des Halles, du Palais, du Parvis de Saint-Sulpice, du Petit-Pont, et l'aubergiste du **Coq de Lutèce** (`pnj:aubergiste_du_coq_de_lutece`). Chaque auberge a un détail parisien [systemes/20260913_ajout_de_prompts_json.md].
 
