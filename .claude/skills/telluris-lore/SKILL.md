@@ -110,7 +110,7 @@ Une ligne par cité ; portails, monuments et décisions de l'Auteur : [reference
 - ~~Auberge d'Élise~~ : tranché — le dump la place au **Coq de Lutèce**, dans les **faubourgs** de Lutecia (et pas sur la route d'Auxerre).
 - **Origine des Paladins** : nés après la Vague (19/08) vs **antérieurs aux portails** (21/08) — retenir le 21/08.
 - ~~Rang A+~~ : tranché — palier de fin du rang A (Auteur, 11/10).
-- ~~Atlantis~~ : tranché — antédiluvienne, **existe encore**, isolée du réseau par choix (Auteur, 11/10).
+- ~~Atlantis~~ : tranché — antédiluvienne, **existe encore**, isolée du réseau par choix (Auteur, 11/10) ; image `towns/atlantis_capital.jpg`.
 - Points ouverts listés par l'Auteur ou le document maître : nature de la Vague, origine ultime des monstres, limites des Révélateurs, sens de « finir le jeu », règles de stabilisation des portails, taxonomie des écoles de magie, organisation politique de chaque cité, statut juridique des Lignées.
 
 
