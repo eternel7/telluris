@@ -71,7 +71,7 @@ Répétées en tête de presque chaque séance : elles valent pour **tout** text
 | Orichalque | S | 61 – 80 |
 | Adamantite | S+ | 81 + |
 
-Les quêtes SSS+ engagent la survie d'une cité-État. ⚠️ « A+ » apparaît dans la trame retenue des quêtes mais **pas** dans ce tableau.
+Les quêtes SSS+ engagent la survie d'une cité-État. **A+** (trame des quêtes) = palier de **fin du rang A**, sans nouveau métal (Auteur, 11/10).
 
 - Formule de l'univers (synthèse adoptée) : *les Cités-États construisent les murs, les Paladins protègent les chemins, les Templiers gardent les portes, les Architectes entretiennent les passages, les Aventuriers franchissent les frontières.*
 - Vocations citées par l'Auteur : guerrier, magicien, ménestrel (magie de support), paladin, répurgateur (≈ inquisiteur), lettré, forestier (distance + pistage), nécromancien, chaman — **transitions entre classes** possibles. Liste réelle en jeu : le dump (`rules:*`), pas le lore.
@@ -104,7 +104,8 @@ Une ligne par cité ; portails, monuments et décisions de l'Auteur : [reference
 
 - ~~Auberge d'Élise~~ : tranché — le dump la place au **Coq de Lutèce**, dans les **faubourgs** de Lutecia (et pas sur la route d'Auxerre).
 - **Origine des Paladins** : nés après la Vague (19/08) vs **antérieurs aux portails** (21/08) — retenir le 21/08.
-- **Rang A+** absent du tableau des rangs.
+- ~~Rang A+~~ : tranché — palier de fin du rang A (Auteur, 11/10).
+- ~~Atlantis~~ : tranché — antédiluvienne, **existe encore**, isolée du réseau par choix (Auteur, 11/10).
 - Points ouverts listés par l'Auteur ou le document maître : nature de la Vague, origine ultime des monstres, limites des Révélateurs, sens de « finir le jeu », règles de stabilisation des portails, taxonomie des écoles de magie, organisation politique de chaque cité, statut juridique des Lignées.
 
 

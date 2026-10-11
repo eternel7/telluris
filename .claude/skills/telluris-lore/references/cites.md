@@ -202,6 +202,7 @@ Rien dans les séances. Peuplée en jeu (62 marchands, 3 auberges — commit `a0
 - Tableau (26/08) :
 	- **Mu** : portails surveillés, échanges secrets avec la surface, passages « au-delà de toute carte » ;
 	- **Atlantis** : jamais devenue un centre du réseau, par **isolement volontaire**.
+- **Atlantis existe encore**, isolée du réseau par choix (Auteur, 11/10) [monde/20261011_frise_chronologique_fusionnee.md § 1.27].
 - **Mu — la civilisation engloutie** (Auteur, 10/10/2026) [cites/20261010_mu_civilisation_engloutie.md] :
 	- Terre **légendaire disparue**, existence **incertaine** dans les archives ; prospère bien avant les Cités-États, détruite par une catastrophe **de nature inconnue**.
 	- Magie **oubliée, antérieure** au savoir des trois frères ; ruines sous les océans ou derrière des **portails altérés par la Vague** ; technologie magique dépassant celle des Architectes. Piste majeure sur l'origine de la magie : les Anthropes **ne sont pas les premiers** à avoir tenté de maîtriser les frontières du monde, la Vague n'est **peut-être pas le premier** bouleversement cosmique (mystère à garder ouvert).

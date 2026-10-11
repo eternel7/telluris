@@ -1,7 +1,7 @@
 # Frise chronologique fusionnée de Telluris
 
 - **Source :** fusion, par Claude Code (session du 11/10/2026, à la demande de l'Auteur), des deux frises ChatGPT — [frise du 19/08](20260819_frise_chronologique_de_telluris.md) (avec sa colonne Jérusalem) et [frise du 21/08](20260821_frise_chronologique_de_telluris.md) —, confrontées aux messages de l'Auteur, à la [chronologie des cités](20260826_chronologie_des_cites_telluris.md), aux séances des cités et au [document maître](../../Telluris_Document_Maitre.md).
-- **Créée :** 11/10/2026 · **révisée :** 11/10/2026, après cinq arbitrages de l'Auteur (§ 1).
+- **Créée :** 11/10/2026 · **révisée :** 11/10/2026, après six arbitrages de l'Auteur (§ 1).
 - **Statut :** **document de travail.** Les décisions du § 1 sont de l'Auteur. Tout ce qui porte 💬 ou « proposé » reste une proposition. Les points du § 8 attendent encore un arbitrage.
 
 **Légende des sources**
@@ -78,6 +78,11 @@ Décisions de l'Auteur, après lecture de la première version de cette fusion :
 ### ✍️ Auteur — 11/10/2026 (cinquième arbitrage)
 
 26. **Colonne Jérusalem (§ 6) et correction de Hārūt et Mārūt (§ 7) validées** : les réécritures proposées sont retenues telles quelles. David est reconnu roi par Jérusalem, sans conquête ; les portails précèdent Salomon et Hārūt et Mārūt.
+
+### ✍️ Auteur — 11/10/2026 (sixième arbitrage)
+
+27. **Atlantis existe encore, isolée** : civilisation antédiluvienne toujours debout aujourd'hui, restée à l'écart du réseau des portails par choix.
+28. **Rang A+ = palier dans le rang A** : la fin du rang A (Mythril), sans nouveau métal ; le tableau des rangs du 12/08 reste tel quel.
 
 ---
 
@@ -299,7 +304,7 @@ La séance d'origine n'est pas modifiée : c'est un échange de travail. La corr
 
 ## 8. Points encore ouverts
 
-Tous les points ouverts par cette fusion sont tranchés (§ 1, quatrième et cinquième arbitrages). Restent les mystères **volontairement** ouverts du lore : nature de la Vague, origine ultime des monstres, père des jumeaux, nature de la Louve, fin des Grigori, Jumièges.
+Tous les points ouverts par cette fusion sont tranchés (§ 1, quatrième à sixième arbitrages). Restent les mystères **volontairement** ouverts du lore : nature de la Vague, origine ultime des monstres, père des jumeaux, nature de la Louve, fin des Grigori, Jumièges.
 
 ---
 
