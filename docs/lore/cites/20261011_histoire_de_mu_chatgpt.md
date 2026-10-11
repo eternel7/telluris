@@ -521,7 +521,7 @@ Explicite la problématique Ra-Mu et Empereur.
 
 ## 4. Mu et Échidna — le lien explicite
 
-> Corrigé par le second arbitrage (§ 6) : à Mu, **Échidna seule**, jamais Lilith ; les **Naga** sont ses fils.
+> Corrigé par le second arbitrage (§ 6) : à Mu, **Échidna seule**, jamais Lilith. Puis par le troisième (§ 7) : les **Naga** sont les fils de **Kadru**, pas d'Échidna ; Échidna, prisonnière sous Mu depuis que la porte des Enfers a été scellée, est pour les Naga de Mu une **figure de mère**. Les quatre lectures ci-dessous sont **remplacées** par § 7.
 
 - La trame du rang A ([idées de quêtes](../personnages/20260924_idees_de_quetes_a_lutecia.md)) place à Mu « **Le serpent sous la cité** » : l'aventurier y rencontre **Échidna**, que l'on accuse d'être la mère de tous les monstres. « Vous appelez monstres mes enfants. »
 - Les traditions de Mu parlent depuis toujours de **Naga**, de **Maîtres-serpents** et de grandes créatures gardiennes, sans les ranger parmi les dieux ni parmi les monstres. Elles parlent aussi d'une **mère des serpents** : c'est elle que la surface nomme Échidna — la mère des monstres des Grecs, mi-femme mi-serpent. Les **Naga** sont ses fils (§ 6).
@@ -557,12 +557,33 @@ Voici la nouvelle image.
 ## 6. Second arbitrage de l'Auteur (11/10/2026)
 
 1. **À Mu, Échidna — pas Lilith.** Partout où il s'agit de Mu (rang A, « Le serpent sous la cité »), on nomme **Échidna** seule.
-2. **Les Naga sont les fils d'Échidna**, rattachés à leur mythologie terrestre (Inde) : des fils **plus spirituels** que ses enfants les plus connus, les monstres de la mythologie grecque.
+2. ~~**Les Naga sont les fils d'Échidna**~~ (corrigé au § 7 : fils de **Kadru**), rattachés à leur mythologie terrestre (Inde) : des êtres **plus spirituels** que les enfants les plus connus d'Échidna, les monstres de la mythologie grecque.
 3. **Sept Sages = apkallu** : adopté ; l'origine du mythe est racontée en **note** du texte rédigé.
 4. **Nouvelle image** de la Mu actuelle : elle remplace la première (§ 5).
 
 **Ancrage réel retenu (Claude Code).**
 - **Échidna** (Hésiode, *Théogonie*) : mi-nymphe aux beaux yeux, mi-serpent, immortelle et sans âge, vivant dans une caverne sous la terre. De Typhon, elle enfante **Orthos**, **Cerbère**, l'**Hydre de Lerne**, la **Chimère** ; selon les auteurs, aussi le **Lion de Némée**, la **Sphinx**, **Ladon**, l'aigle du Caucase, **Scylla**.
 - **Naga** (traditions de l'Inde) : êtres-serpents à demi divins, parfois mi-hommes, vivant sous la terre (Pātāla) et dans les eaux, gardiens des sources, de la pluie et des trésors ; leurs rois **Vāsuki** et **Shesha**.
-- ⚠️ **À trancher** : dans la mythologie indienne, la mère des Naga est **Kadru**, épouse du sage Kashyapa. Lecture possible, dans l'esprit des mythes « parvenus déformés » : Kadru serait le nom que l'Orient a donné à Échidna *(proposé, non tranché)*.
+- ~~À trancher : Kadru serait le nom que l'Orient a donné à Échidna~~ — **rejeté** par l'Auteur (§ 7) : Kadru et Échidna sont deux mères distinctes.
 - **Apkallu** : voir la note du texte rédigé ([Les Cités-États](../redige/05_cites_etats.md), § Mu).
+
+## ✍️ Auteur
+
+Les Naga sont les fils de Kadru. Ils ont parcouru les océans. Echidna a été bloquée sous le continent de Mu lorsque la porte des enfers à été célée. Elle prenait alors soin de son toutou préféré. Des Naga de Mu ont rencontré Echidna qui a pour eux une image de mère.
+
+---
+
+## 7. Troisième arbitrage de l'Auteur (11/10/2026)
+
+1. **Les Naga sont les fils de Kadru**, pas d'Échidna (corrige § 6.2). Ils ont **parcouru les océans** ; certains se sont établis à Mu.
+2. **Le portail naturel vorace** que Mu a fermé (arbitrage 8, § 1) est **une porte des Enfers**. Quand elle a été **scellée**, **Échidna** est restée **bloquée sous le continent de Mu** : elle prenait alors soin de son « toutou » préféré, **Cerbère**, le chien qui garde la porte des Enfers.
+3. **Des Naga de Mu ont rencontré Échidna** : elle est pour eux une **image de mère**, sans être leur mère.
+4. Les quatre lectures de § 4 (ce qui a voulu passer, ce qui est passé avant, gardienne, prisonnière) sont **remplacées** : Échidna est une **prisonnière** de la fermeture, par accident.
+
+**Ancrage réel retenu (Claude Code).**
+- **Kadru** (*Mahābhārata*) : fille de Daksha, épouse du sage **Kashyapa**, elle demande à son époux mille fils serpents : les Naga. Sa sœur **Vinatā** enfante **Garuda**, l'oiseau ennemi des serpents. Kadru gagne un pari contre Vinatā par une ruse et la réduit en servitude : d'où la haine de Garuda pour les Naga.
+- **Cerbère** (Hésiode) : fils d'Échidna et de Typhon, le chien aux têtes multiples qui garde la porte d'Hadès, laisse entrer les morts et n'en laisse sortir aucun.
+
+**Points ouverts (signalés par Claude Code, non tranchés).**
+- **Quelle « porte des Enfers » ?** Telluris a déjà l'**Enfer** de **Lucifer**, dont la porte est le gouffre de l'**Hekla** ; la porte scellée sous Mu, gardée par Cerbère, est celle des **Enfers grecs** (Hadès). Même monde par deux portes, ou deux mondes distincts ?
+- **Où est Cerbère ?** Du côté d'Échidna, sous Mu, ou de l'autre côté de la porte scellée ?

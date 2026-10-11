@@ -10,7 +10,7 @@ Le **Paradis** est le monde des anges, qui ne sont pas tous de doux agneaux. On 
 
 ## Échidna
 
-On l'accuse d'être à l'origine de tous les monstres. Elle s'est rebellée contre les dieux. Les Grecs lui prêtent Cerbère, l'Hydre ou la Chimère ; ses fils les Naga sont plus spirituels. L'aventurier la rencontre à Mu, sous la cité engloutie, au plus près de la porte que Mu a fermée en sacrifiant son continent ; les traditions de Mu l'appellent la mère des serpents. Il a le choix : la combattre, ou lui parler. S'il comprend qu'elle n'est pas le monstre que l'on décrit, ou s'il l'élimine, il apprend une chose qui change tout : **les dieux jouent avec les Lignées d'Anthropes**.
+On l'accuse d'être à l'origine de tous les monstres. Elle s'est rebellée contre les dieux. Les Grecs lui prêtent Cerbère, l'Hydre ou la Chimère. Elle prenait soin de Cerbère, son préféré, quand Mu scella la porte des Enfers en sacrifiant son continent, et elle resta prise dessous. L'aventurier la rencontre là, sous la cité engloutie ; les Naga de Mu, fils de Kadru, voient en elle une image de mère. Il a le choix : la combattre, ou lui parler. S'il comprend qu'elle n'est pas le monstre que l'on décrit, ou s'il l'élimine, il apprend une chose qui change tout : **les dieux jouent avec les Lignées d'Anthropes**.
 
 Commence alors une série de donjons contre les dieux eux-mêmes. Mais chaque réponse ouvre deux questions. Échidna dit que les dieux ont créé les monstres ; les dieux répondent qu'ils en ont hérité.
 
