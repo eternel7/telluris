@@ -127,7 +127,7 @@ Les premiers portails sont :
 - relativement fiables ;
 - exclusivement reliés à d'autres lieux de Telluris.
 
-Il n'existe alors **aucun portail vers un autre monde**.
+Aucun de ces portails — ceux des frères et de leurs héritiers — ne mène alors **vers un autre monde**. Les portails naturels sont soit **inconnus**, soit **pas encore apparus** : certains se manifestent bien plus tard, comme celui de Jumièges. Seul celui de Saint-Pierre, à Rome, est connu des Occidentaux.
 
 ---
 
@@ -155,7 +155,7 @@ La création d'un nouveau portail devient progressivement un art extrêmement co
 
 # 6. La vague de mana
 
-Quelques siècles avant l'époque actuelle, une immense **vague de mana** traverse Telluris.
+Quelques siècles avant l'époque actuelle — **sept à huit siècles** —, une immense **vague de mana** traverse Telluris.
 
 Son origine reste inconnue.
 
@@ -198,7 +198,7 @@ D'autres encore ouvrent sur **d'autres mondes**.
 
 Cette découverte bouleverse la compréhension du cosmos.
 
-Avant la vague :
+Avant la vague, pour les portails des frères et de leurs héritiers :
 
 > **Portail = déplacement.**
 
@@ -236,7 +236,9 @@ La trame principale peut n'en exploiter qu'une partie.
 
 La transformation des portails crée également une nouvelle économie.
 
-Certains donjons contiennent des **cristaux de mana**, parfois de couleurs différentes.
+Certains donjons contiennent des **cristaux de mana**, parfois de couleurs différentes : le **violet** est un cristal de **puissance pure de mana**, le **jaune** un cristal de **stabilisation des effets des portails**. Par Notre-Dame, on voyage vers le monde connu avec une gemme violette, vers **Mu** avec un cristal jaune.
+
+Avant la vague, les portails fonctionnaient **sans cristaux** — la magie était peut-être plus intense, ou sa maîtrise plus innée. Les cristaux sont l'une des choses qui permettent aux Architectes de maîtriser les portails de nos jours.
 
 On peut les trouver :
 
@@ -301,11 +303,13 @@ Les **Templiers sont antérieurs au christianisme**.
 
 Ils ne sont donc pas à l'origine un ordre religieux chrétien.
 
-Ils apparaissent après la transformation des portails.
+Leur mission originelle est de **garder les remparts et les lieux derrière le rempart** : les Paladins gardent les routes, les Templiers ce que les murs enferment.
 
-Leur mission originelle est :
+Un groupe spécialisé de Templiers veille, **avant même la fondation de Rome**, sur le portail sans origine qui s'ouvre au fond d'une grotte, sur la butte qui deviendra le site de Saint-Pierre. Il y est encore à la venue de Jésus et voit monter le monothéisme chrétien.
 
-> **protéger et réglementer les portails devenus dangereux.**
+Après la transformation des portails, l'ordre se **recentre sur les temples** :
+
+> **protéger les portails pervertis par la vague (les donjons), et gérer les portails de déplacement qui continuent de fonctionner.**
 
 Les Templiers gardent les structures qui deviendront les **temples**.
 

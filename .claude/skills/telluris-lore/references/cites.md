@@ -11,7 +11,7 @@ France : Lutecia · Auxerre · Rhemi — Italie : Rome · Venise · Gênes — N
 **Auteur**
 - Née du **portail de Notre-Dame**, construit par l'un des frères aborigènes.
 - **Influence magique faible** : c'est la force de la cité et sa faiblesse.
-	- Force : la Vague ne l'a presque pas touchée. Le portail, inchangé, est une œuvre d'art étudiée par tous les maîtres des portails. Il connecte **n'importe quel lieu du monde connu** pour un coût dérisoire (gemme de mana violette de 250 g — cf. contradiction « cristal jaune »).
+	- Force : la Vague ne l'a presque pas touchée. Le portail, inchangé, est une œuvre d'art étudiée par tous les maîtres des portails. Il connecte **n'importe quel lieu du monde connu** pour un coût dérisoire (gemme de mana **violette** de 250 g ; vers **Mu**, un cristal **jaune**, qui stabilise — Auteur, 11/10).
 	- Faiblesse : les grandes écoles de magie se sont installées ailleurs en Europe.
 - Centre d'étude des portails, elle fournit les **maîtres des portails** (institut des architectes). Ses meilleurs apprentis parachèvent leur formation à **Mu** (cf. § Mu et Atlantis).
 - Murailles efficaces contre les monstres terrestres.
@@ -25,7 +25,7 @@ France : Lutecia · Auxerre · Rhemi — Italie : Rome · Venise · Gênes — N
 	- **Basilic de calcaire** (pétrifie d'un regard) ;
 	- Gardiens de la Voie (Dvergrs ou gobelins des roches, poseurs de pièges).
 - Les catacombes sont un donjon où l'on chasse goules et squelettes ; les **cristaux de mana jaunes** s'y trouvent, tout au fond.
-- **Rang A** : Notre-Dame ouvre ses portes à l'aventurier, **un voyage par cristal jaune**.
+- **Rang A** : Notre-Dame ouvre ses portes à l'aventurier — violet pour le reste du monde, **cristal jaune pour Mu** (11/10).
 - Guilde : **Le Grand Relais des Frontières** (`lieu:le_grand_relais_des_frontieres_interieur`, nom adopté). Réceptionniste **Éléonore de Vaugirard**, humaine (`pnj:eleonore_de_vaugirard`). Maîtresse de guilde : **Maëlys de Valombre**, une **naine** d'âge mûr (décision de l'Auteur, 11/10/2026 — elle **succède au vieil elfe** de la séance du 13/09, porté disparu, sans nom) : cheveux auburn striés de gris en tresse courte, yeux gris clair, fine cicatrice de la tempe gauche à la chevelure (jamais racontée), veste de cuir sombre renforcée, broche d'argent en **porte ouverte** = emblème de la Guilde de Lutecia, vieille épée courte qu'elle préfère ne jamais dégainer. `pnj:maelys`, dans `lieu:le_grand_relais_des_frontieres_bureau_du_maitre` ; Éléonore la nomme quand on lui demande qui dirige [personnages/20261011_maelys_maitresse_de_guilde.md]. La bijoutière homonyme de La Sertissure des Faubourgs est rebaptisée « Aude Clairmont ».
 
 Devise (Auteur, 11/10) : **« Toute porte s'ouvre. Toute route a son prix. »**, sculptée avec une porte au-dessus de l'entrée ; remplace la proposition non adoptée du 13/09 (« Là où s'arrête la route, commence notre métier »). Elle se lit « à son prix » : bureau fermé avant le rang D, Notre-Dame avant le rang A. Emplacement : au débouché des rues commerçantes, sur la grande voie des portes. Espaces : salle commune, tableau des contrats (commandes, transports, chasses, escortes, commissions de donjon, urgences à part), bureau de Maëlys, **archives** (dossiers du secret, notes du prédécesseur elfe), **infirmerie** — seuls réception, comptoir et bureau existent en jeu.
@@ -50,6 +50,7 @@ Rien dans les séances. Peuplée en jeu (62 marchands, 3 auberges — commit `a0
 
 ## Rome — `lieu:rome` · [cites/20260820_decrire_rome_dans_telluris.md], [monde/20260821_portail_des_profondeurs.md]
 **Auteur**
+- **Avant les trois frères** ; le portail de Saint-Pierre existe **avant Rome**, au fond d'une grotte sur une butte (11/10). Un groupe spécialisé de Templiers le garde avant Jésus. **Adopté (11/10)** : Romulus, Rémus et la Louve — la Louve garde la grotte du Vatican, les jumeaux ne franchissent pas la porte, Rémus et les Luperques fondent la garde de la porte, Romulus et ses Celeres celle du rempart ; le chef de l'ordre devient **pontife** (frise fusionnée § 10).
 - **La ville aux deux visages.**
 	- La pieuse : le pape et Saint-Pierre.
 	- La pécheresse : orgies de l'aristocratie, gladiateurs contre les pires monstres au **Colisée**. Personne ne sait pourquoi elle s'est pervertie ; « la Rome actuelle semble ivre de son passé ».
@@ -190,7 +191,7 @@ Rien dans les séances. Peuplée en jeu (62 marchands, 3 auberges — commit `a0
 **Proposé** : deux anges venus au temps de **Salomon**, enseignant une magie dangereuse comme une épreuve (« Le sort n'est pas coupable. Celui qui le lance répond de son intention. »). Voir cosmologie.
 
 ## Jérusalem — [monde/20260819_frise_chronologique_de_telluris.md]
-**Auteur** : **Salomon a vécu après les trois frères** et le début de l'ère des portails.
+**Auteur** : **Salomon a vécu après les trois frères** et le début de l'ère des portails. David est **reconnu par Jérusalem comme son roi** (pas de prise) ; « le royaume se divise » → « les cités avoisinantes diminuent leurs relations » ; réduire « royaume » au profit de « Cité-État » (11/10). Colonne réécrite : `monde/20261011_frise_chronologique_fusionnee.md` § 6.
 
 **Tableau (26/08)** : « héritage de Salomon », portail ancien, coûteux, mal compris, pas un passage libre.
 
@@ -208,7 +209,9 @@ Rien dans les séances. Peuplée en jeu (62 marchands, 3 auberges — commit `a0
 	- Mu **ne livre pas tout** : enseignements avancés réservés aux dignes ; certains reviennent **transformés**, d'autres **jamais**. Mu = gardien d'un savoir dont dépend la suprématie de Lutecia dans l'art des portails.
 	- Tranché (Auteur) : Lutecia n'a **pas** de grandes écoles de magie (magie faible) ; ses écoles sont des **instituts d'architectes** qui forment aux portails, Mu **parachève** cette formation.
 
-**Proposé** : ordre de fondation Mu → Atlantis → Abou Simbel → Jérusalem → Cordoue → Constantinople → Aix → Venise → Reykjavik → Gênes → Bruges → Akureyri → Auxerre → Lutecia. Distinguer la **fondation du site** de la **fondation de la Cité-État** fortifiée.
+**Auteur (11/10)** : Mu **avant les trois frères** ; aujourd'hui continent englouti, révéré des Architectes (cf. SKILL.md § Cités-États). Quasiment toutes les cités existaient **avant la Vague** ; **Rome** entre dans la chronologie ; aucune période terrestre. **Lutecia** naît autour du portail d'un frère dans une cité qui existait déjà, et **prend son nom en dernier** — « fondée » ne convient pas.
+
+Deux moments (Auteur, 11/10) : **établissement** (le site prend racine et ne bouge plus ; avant, campements temporaires, passages, nomades saisonniers) ; **avènement** (la cité prend son essor, son nom, son rang de Cité-État, et devient connue des autres) ; tableau révisé avec Rome : `monde/20261011_frise_chronologique_fusionnee.md` § 5. (L'ordre de fondation du 26/08 en périodes terrestres est abandonné.)
 
 ## Réseau des portails — [systemes/20260826_completer_le_tableau.md], [monde/20260826_creer_un_systeme_de_portails.md]
 **Auteur** : tableau du 26/08 (repris ci-dessus cité par cité). Lutecia relie par Notre-Dame **toutes** les cités munies d'un portail transversal.

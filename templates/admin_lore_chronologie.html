@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — Chronologie du lore</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	{#
+	  Frise du lore (/admin/lore/chronologie) — source : docs/lore/chronologie.json, lue et
+	  validée par utils/chronologie.py. Le serveur réduit chaque date à un TEMPS NORMALISÉ `t`
+	  (indice d'ère + fraction) : ici on ne fait que projeter `t` en pixels, jamais recalculer
+	  une date. Paysage = frise horizontale, portrait = verticale (mise en page commune, seul
+	  le rendu transpose). Tout texte du JSON passe par textContent (CLAUDE.md §9).
+	#}
+	<style>
+		:root {
+			--bg: #0d0f14;
+			--panel: #141720;
+			--panel2: #1a1e29;
+			--border: #2a3040;
+			--accent: #c8a84b;
+			--accent2: #4b8fc8;
+			--violet: #b07fd0;
+			--text: #fff;
+			--muted: #9aa3b2;
+			--alerte: #e0794b;
+			--tap: 36px;
+		}
+		@media (pointer: coarse) { :root { --tap: 44px; } }
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			background: var(--bg); color: var(--text);
+			font-family: 'Share Tech Mono', monospace; min-height: 100vh;
+		}
+		header {
+			padding: 12px 16px; border-bottom: 1px solid var(--border);
+			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+			display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+		}
+		header h1 { font-size: 1.05rem; letter-spacing: 0.12em; color: var(--accent); }
+		header nav { display: flex; gap: 14px; }
+		header a { color: var(--muted); font-size: 0.8rem; text-decoration: none; white-space: nowrap; }
+		header a:hover { color: var(--accent); }
+		.main { padding: 10px 16px 24px; }
+		button, select, input[type=search] {
+			font-family: inherit; color: var(--text); background: var(--panel2);
+			border: 1px solid var(--border); border-radius: 6px; min-height: var(--tap);
+		}
+		button { padding: 0 10px; cursor: pointer; font-size: 0.8rem; }
+		button:hover { border-color: var(--accent); }
+		input[type=search] { padding: 0 10px; font-size: 16px; flex: 1 1 220px; min-width: 0; background: var(--bg); }
+		select { padding: 0 6px; font-size: 0.8rem; }
+
+		/* ── Incohérences ─────────────────────────────────────────── */
+		#incoherences { margin-bottom: 8px; border: 1px solid var(--alerte); border-radius: 8px; background: rgba(224,121,75,0.07); }
+		#incoherences summary { cursor: pointer; padding: 8px 12px; color: var(--alerte); font-size: 0.8rem; }
+		#incoherences ul { list-style: none; padding: 0 8px 8px; max-height: 30vh; overflow: auto; }
+		#incoherences li button {
+			width: 100%; text-align: left; min-height: 0; padding: 6px 8px; margin-top: 4px;
+			font-size: 0.75rem; line-height: 1.4; background: var(--panel);
+		}
+		#incoherences li.globale { color: var(--alerte); font-size: 0.75rem; padding: 4px 8px; }
+
+		/* ── Filtres ──────────────────────────────────────────────── */
+		#filtres { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
+		#filtres > summary { cursor: pointer; padding: 8px 12px; color: var(--accent); font-size: 0.8rem; letter-spacing: 0.08em; }
+		.filtres-corps { padding: 0 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+		.ligne { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+		.ligne label { font-size: 0.75rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+		.facette { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+		.facette > .nom { font-size: 0.7rem; color: var(--muted); min-width: 84px; text-transform: uppercase; letter-spacing: 0.08em; }
+		.puce {
+			min-height: 28px; padding: 0 9px; border-radius: 14px; font-size: 0.74rem;
+			background: var(--bg); color: var(--muted);
+		}
+		.puce[aria-pressed=true] { background: rgba(200,168,75,0.18); border-color: var(--accent); color: var(--text); }
+		.puce .n { opacity: 0.6; margin-left: 4px; }
+		.puce.alerte[aria-pressed=true] { border-color: var(--alerte); background: rgba(224,121,75,0.18); }
+		.listes { display: flex; flex-wrap: wrap; gap: 6px; }
+		details.liste { position: relative; }
+		details.liste > summary {
+			list-style: none; cursor: pointer; font-size: 0.75rem; padding: 6px 10px; border: 1px solid var(--border);
+			border-radius: 6px; background: var(--bg); color: var(--muted); min-height: 30px;
+		}
+		details.liste[data-actif] > summary { border-color: var(--accent); color: var(--text); }
+		details.liste > div {
+			position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; min-width: 220px; max-height: 50vh;
+			overflow: auto; background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 6px;
+		}
+		details.liste label { display: flex; gap: 6px; align-items: center; font-size: 0.78rem; padding: 4px; cursor: pointer; }
+		details.liste label .n { color: var(--muted); margin-left: auto; font-size: 0.7rem; }
+
+		/* ── Barre d'outils, légende ──────────────────────────────── */
+		.outils { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 6px; }
+		.outils .compte { font-size: 0.75rem; color: var(--muted); margin-right: auto; }
+		#legende-bloc > summary { cursor: pointer; font-size: 0.72rem; color: var(--muted); margin-bottom: 4px; }
+		.legende { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.7rem; color: var(--muted); margin-bottom: 6px; }
+		.legende span { display: inline-flex; align-items: center; gap: 4px; }
+		.legende svg { width: 34px; height: 14px; }
+
+		/* ── Frise ────────────────────────────────────────────────── */
+		.frise-zone { display: flex; flex-direction: column; gap: 6px; }
+		.frise-zone.v { flex-direction: row; }
+		#minicarte { display: block; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; touch-action: none; flex-shrink: 0; }
+		#defileur {
+			overflow: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--panel);
+			height: calc(100vh - 250px); min-height: 280px; flex: 1 1 auto; min-width: 0;
+		}
+		.frise-zone.v #defileur { height: calc(100vh - 150px); }
+		/* La bande des graduations (ères, « il y a N ans ») reste collée au bord en défilant :
+		   même repère de coordonnées que la frise, seul le viewBox diffère. */
+		#axe { display: block; position: sticky; top: 0; z-index: 2; flex-shrink: 0; }
+		.frise-zone.v #defileur { display: flex; align-items: flex-start; }
+		.frise-zone.v #axe { top: auto; left: 0; }
+		#frise { flex-shrink: 0; }
+		#frise { display: block; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+
+		/* ── Détail ───────────────────────────────────────────────── */
+		#detail {
+			position: fixed; right: 12px; top: 64px; width: min(380px, calc(100vw - 24px)); max-height: calc(100vh - 80px);
+			overflow: auto; background: var(--panel2); border: 1px solid var(--accent); border-radius: 8px;
+			padding: 12px 14px; z-index: 30; font-size: 0.8rem; line-height: 1.45; box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+		}
+		#detail[hidden] { display: none; }
+		@media (orientation: portrait) {
+			#detail { top: auto; bottom: 0; right: 0; left: 0; width: auto; max-height: 55vh; border-radius: 12px 12px 0 0; }
+		}
+		#detail h2 { font-size: 0.95rem; color: var(--accent); padding-right: 36px; font-weight: normal; }
+		#detail .fermer { position: absolute; top: 8px; right: 8px; min-height: 30px; width: 30px; padding: 0; }
+		#detail .quand { color: var(--text); margin-top: 4px; }
+		#detail .petit { color: var(--muted); font-size: 0.72rem; }
+		#detail p { margin-top: 8px; font-family: Georgia, serif; font-size: 0.88rem; color: #e6e1d3; }
+		#detail h3 { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 10px; font-weight: normal; }
+		#detail ul { list-style: none; margin-top: 4px; }
+		#detail li { margin-top: 3px; }
+		#detail a { color: var(--accent2); overflow-wrap: anywhere; }
+		#detail .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+		#detail .tags span { font-size: 0.68rem; border: 1px solid var(--border); border-radius: 10px; padding: 1px 7px; color: var(--muted); }
+		#detail .alerte { color: var(--alerte); }
+		#detail .saut { min-height: 0; padding: 2px 6px; font-size: 0.72rem; margin: 2px 4px 0 0; }
+		#detail cite { display: block; color: var(--muted); font-size: 0.72rem; }
+
+		/* ── JSON (appui long) ────────────────────────────────────── */
+		#json-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center; padding: 16px; }
+		#json-overlay[hidden] { display: none; }
+		#json-overlay .boite { background: var(--panel2); border: 1px solid var(--accent); border-radius: 8px; width: min(760px, 100%); max-height: 90vh; display: flex; flex-direction: column; }
+		#json-overlay .tete { display: flex; gap: 8px; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+		#json-overlay .tete strong { margin-right: auto; color: var(--accent); font-weight: normal; font-size: 0.85rem; overflow-wrap: anywhere; }
+		#json-overlay pre { tab-size: 3; overflow: auto; padding: 10px 12px; font-size: 0.75rem; line-height: 1.4; color: #e6e1d3; white-space: pre-wrap; overflow-wrap: anywhere; }
+	</style>
+</head>
+<body>
+	<header>
+		<h1>🕰 Chronologie du lore</h1>
+		<nav><a href="/admin/lore">← Lore</a><a href="/admin">← Administration</a></nav>
+	</header>
+	<div class="main">
+		<details id="incoherences" hidden>
+			<summary id="incoherences-titre"></summary>
+			<ul id="incoherences-liste"></ul>
+		</details>
+
+		<details id="filtres" open>
+			<summary id="filtres-titre">Filtres</summary>
+			<div class="filtres-corps">
+				<div class="ligne">
+					<input type="search" id="recherche" placeholder="Rechercher (titre, résumé, date, tag…)" autocomplete="off" aria-label="Rechercher">
+					<label>Regrouper par
+						<select id="grouper">
+							<option value="">— aucun —</option>
+							<option value="couche">couche</option>
+							<option value="categorie">catégorie</option>
+							<option value="autorite">autorité</option>
+							<option value="peuples">peuple</option>
+							<option value="lieux">lieu</option>
+							<option value="institutions">institution</option>
+							<option value="themes">thème</option>
+						</select>
+					</label>
+					<label><input type="checkbox" id="estomper"> estomper au lieu de masquer</label>
+					<button type="button" id="reinitialiser">Réinitialiser</button>
+				</div>
+				<div id="puces"></div>
+				<div class="listes" id="listes"></div>
+			</div>
+		</details>
+
+		<div class="outils">
+			<span class="compte" id="compte"></span>
+			<button type="button" id="zoom-moins" aria-label="Dézoomer">−</button>
+			<button type="button" id="zoom-plus" aria-label="Zoomer">+</button>
+			<button type="button" id="export-svg">⬇ SVG</button>
+			<button type="button" id="export-json">⬇ JSON</button>
+		</div>
+		<details id="legende-bloc" open><summary>Légende</summary><div class="legende" id="legende"></div></details>
+
+		<div class="frise-zone" id="zone">
+			<svg id="minicarte" aria-label="Mini-carte des ères"></svg>
+			<div id="defileur"><svg id="axe" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg><svg id="frise" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Frise chronologique"></svg></div>
+		</div>
+	</div>
+
+	<aside id="detail" hidden aria-live="polite"></aside>
+
+	<div id="json-overlay" hidden>
+		<div class="boite" role="dialog" aria-modal="true" aria-labelledby="json-titre">
+			<div class="tete">
+				<strong id="json-titre"></strong>
+				<button type="button" id="json-copier">Copier</button>
+				<button type="button" id="json-fermer" aria-label="Fermer">✕</button>
+			</div>
+			<pre id="json-pre"></pre>
+		</div>
+	</div>
+
+	<script>
+	const CHRONO = {{ payload_json }};
+
+	const CHRONO_DELAI_LONG = 500;
+	const CHRONO_GLISSE = 10;
+	const PICTO = { evenement: '◆', figure: '⚔', cite: '🏰', institution: '⚜', portail: '◎', mythe: '✦', quete: '✧' };
+	const COULEUR = { auteur: '#c8a84b', synthese: '#4b8fc8', proposition: '#b07fd0' };
+	const FACETTES_PUCES = ['couche', 'autorite', 'ere', 'categorie', 'visibilite'];
+	const FACETTES_LISTES = ['peuples', 'lieux', 'institutions', 'themes'];
+	const NOMS_FACETTES = {
+		couche: 'Couche', autorite: 'Autorité', ere: 'Ère', categorie: 'Catégorie', visibilite: 'Visibilité',
+		peuples: 'Peuples', lieux: 'Lieux', institutions: 'Institutions', themes: 'Thèmes'
+	};
+	// Géométrie par orientation : `axe` = marge avant le temps, `bande` = graduations,
+	// `couloir` = épaisseur d'un couloir, `titre` = en-tête de groupe (h) / marge des titres (v).
+	const GEO = {
+		h: { bande: 48, axe: 24, couloir: 30, titre: 20, ecartGroupe: 8, car: 6.6 },
+		v: { bande: 92, axe: 34, couloir: 176, titre: 0, ecartGroupe: 10, car: 6.2 }
+	};
+
+	// ── Fonctions pures (dev/test_chronologie_client.js) ─────────────────────────
+
+	/** Segments de l'axe : une ère = [debut, debut + longueur[ en pixels, sans trou. */
+	function chronoEchelle(eres, zoom) {
+		const segments = [];
+		let pos = 0;
+		eres.forEach((e, i) => {
+			let L = e.type === 'ordinal'
+				? (e.px_rang || 120) * (e.rangs || []).length * zoom
+				: Math.abs(e.debut - e.fin) / 100 * (e.px_siecle || 40) * zoom;
+			L = Math.max(80, Math.round(L));
+			segments.push({ id: e.id, i: i, debut: pos, longueur: L, ere: e });
+			pos += L;
+		});
+		return { segments: segments, total: pos };
+	}
+
+	/** Temps normalisé → pixel sur l'axe (continu aux frontières d'ères). */
+	function chronoPx(t, ech) {
+		const n = ech.segments.length;
+		if (!n) return 0;
+		const i = Math.max(0, Math.min(n - 1, Math.floor(t)));
+		const s = ech.segments[i];
+		return s.debut + Math.max(0, Math.min(1, t - i)) * s.longueur;
+	}
+
+	/** Ce qu'il faut dessiner d'un événement, en pixels sur l'axe. */
+	function chronoGeometrie(ev, ech) {
+		const c = ev.calc, d = c.debut, f = c.fin;
+		const px = t => chronoPx(t, ech);
+		const flou = g => g === 'incertain' || g === 'inconnu';
+		const centre = b => (px(b.t[0]) + px(b.t[1])) / 2;
+		const g = { forme: c.forme, genreDebut: d.genre, genreFin: f.genre, flous: [], solide: null, fleche: false, jalons: [] };
+		if (c.forme === 'point') {
+			const p0 = px(d.t[0]), p1 = px(d.t[1]);
+			g.marque = centre(d);
+			if (flou(d.genre)) g.flous.push([p0, p1]);
+			g.a0 = Math.min(p0, g.marque - 6);
+			g.a1 = Math.max(p1, g.marque + 6);
+		} else {
+			const s0 = flou(d.genre) ? px(d.t[1]) : centre(d);
+			const s1 = Math.max(s0, flou(f.genre) ? px(f.t[0]) : centre(f));
+			g.solide = [s0, s1];
+			if (flou(d.genre)) g.flous.push([px(d.t[0]), px(d.t[1])]);
+			if (flou(f.genre)) g.flous.push([px(f.t[0]), px(f.t[1])]);
+			g.fleche = f.genre === 'ouvert';
+			g.marque = Math.min(s0, px(d.t[0]));
+			g.a0 = px(d.t[0]);
+			g.a1 = px(f.t[1]) + (g.fleche ? 8 : 0);
+		}
+		g.jalons = (c.jalons || []).map(j => ({
+			libelle: j.libelle, notation: j.notation, genre: j.genre,
+			p0: px(j.t[0]), p1: px(j.t[1]), p: (px(j.t[0]) + px(j.t[1])) / 2
+		}));
+		return g;
+	}
+
+	/** Étendue sur l'axe réservée par un élément, libellé compris. */
+	function chronoEtendue(geo, libelle, o) {
+		if (o === 'h') {
+			const L = (libelle.length + 2) * GEO.h.car + 10;
+			const ancre = geo.forme === 'point' ? geo.marque + 9 : geo.a0;
+			return [Math.min(geo.a0, ancre), Math.max(geo.a1, ancre + L)];
+		}
+		const ancre = geo.forme === 'point' ? geo.marque - 12 : geo.a0;
+		return [Math.min(geo.a0, ancre), Math.max(geo.a1, ancre + 26)];
+	}
+
+	/** Empilement glouton : [{a0, a1}] → couloir de chaque élément (même ordre) + nombre. */
+	function chronoCouloirs(items, ecart) {
+		const ordre = items.map((it, k) => k).sort((x, y) => items[x].a0 - items[y].a0 || items[x].a1 - items[y].a1);
+		const fins = [];
+		const couloir = new Array(items.length);
+		for (const k of ordre) {
+			let c = fins.findIndex(f => f + ecart <= items[k].a0);
+			if (c < 0) { c = fins.length; fins.push(0); }
+			fins[c] = items[k].a1;
+			couloir[k] = c;
+		}
+		return { couloir: couloir, n: fins.length };
+	}
+
+	function _sansAccent(s) {
+		return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+	}
+
+	/** Ids retenus : ET entre facettes, OU dans une facette ; une facette vide ne filtre pas. */
+	function chronoFiltrer(evenements, filtres, facettes) {
+		const mots = _sansAccent(filtres.texte || '').split(/\s+/).filter(Boolean);
+		const libelles = {};
+		for (const f in (facettes || {})) for (const v of facettes[f]) libelles[f + ':' + v.id] = v.libelle;
+		const ok = new Set();
+		for (const ev of evenements) {
+			let garde = true;
+			for (const f in (filtres.choix || {})) {
+				const voulu = filtres.choix[f];
+				if (!voulu || !voulu.size) continue;
+				let valeurs;
+				if (f === 'ere') valeurs = ev.eres || [];
+				else if (f in (ev.tags || {}) || FACETTES_LISTES.includes(f)) valeurs = (ev.tags || {})[f] || [];
+				else valeurs = [ev[f]];
+				if (!valeurs.some(v => voulu.has(v))) { garde = false; break; }
+			}
+			if (garde && filtres.incoherence && !((ev.contradictions || []).length || (ev.erreurs || []).length)) garde = false;
+			if (garde && mots.length) {
+				const tags = [];
+				for (const f in (ev.tags || {})) for (const v of ev.tags[f]) tags.push(libelles[f + ':' + v] || v);
+				const foin = _sansAccent([ev.id, ev.titre, ev.titre_court, ev.resume, ev.notation, tags.join(' ')].join(' '));
+				garde = mots.every(m => foin.includes(m));
+			}
+			if (garde) ok.add(ev.id);
+		}
+		return ok;
+	}
+
+	/** Couloirs étiquetés par valeur de facette ; un élément multi-valeurs est dans chacun. */
+	function chronoGrouper(evenements, facette, facettes) {
+		if (!facette) return [{ cle: '', libelle: '', evenements: evenements.slice() }];
+		const ordre = (facettes[facette] || []).map(v => v.id);
+		const lib = {};
+		for (const v of (facettes[facette] || [])) lib[v.id] = v.libelle;
+		const groupes = new Map();
+		const sans = [];
+		for (const ev of evenements) {
+			const valeurs = FACETTES_LISTES.includes(facette) ? ((ev.tags || {})[facette] || []) : [ev[facette]].filter(Boolean);
+			if (!valeurs.length) sans.push(ev);
+			for (const v of valeurs) {
+				if (!groupes.has(v)) groupes.set(v, []);
+				groupes.get(v).push(ev);
+			}
+		}
+		const cles = [...groupes.keys()].sort((a, b) => {
+			const ia = ordre.indexOf(a), ib = ordre.indexOf(b);
+			return (ia < 0 ? 1e9 : ia) - (ib < 0 ? 1e9 : ib);
+		});
+		const out = cles.map(k => ({ cle: k, libelle: lib[k] || k, evenements: groupes.get(k) }));
+		if (sans.length) out.push({ cle: '∅', libelle: '(sans)', evenements: sans });
+		return out;
+	}
+
+	/** Ce qui a pu coïncider avec `ev`, incertitudes comprises : ponctuels vs durables. */
+	function chronoContemporains(ev, evenements) {
+		const lo = ev.calc.debut.t[0], hi = ev.calc.fin.t[1];
+		const ponctuels = [], durables = [];
+		for (const o of evenements) {
+			if (o.id === ev.id) continue;
+			const olo = o.calc.debut.t[0], ohi = o.calc.fin.t[1];
+			if (olo > hi + 1e-9 || ohi < lo - 1e-9) continue;
+			(o.calc.forme === 'periode' && o.calc.fin.genre === 'ouvert' ? durables : ponctuels).push(o.id);
+		}
+		return { ponctuels: ponctuels, durables: durables };
+	}
+
+	/** Le sous-ensemble exporté a le format de la source : en-tête + événements BRUTS retenus. */
+	function chronoSousEnsemble(entete, evenements, ids) {
+		const garde = new Set(ids);
+		return Object.assign({}, entete, {
+			evenements: evenements.filter(ev => garde.has(ev.id)).map(ev => ev.brut)
+		});
+	}
+
+	/** Pointeur : clic / appui long / glissement, sans DOM. Rend { etat, action }. */
+	function chronoAppuiLong(etat, evt) {
+		const repos = { phase: 'repos' };
+		switch (evt.type) {
+			case 'down':
+				return { etat: { phase: 'appui', t0: evt.t, x0: evt.x, y0: evt.y, id: evt.id }, action: null };
+			case 'move':
+				if (etat.phase === 'appui' && Math.hypot(evt.x - etat.x0, evt.y - etat.y0) > CHRONO_GLISSE) return { etat: repos, action: null };
+				return { etat: etat, action: null };
+			case 'tick':
+				if (etat.phase === 'appui' && evt.t - etat.t0 >= CHRONO_DELAI_LONG)
+					return { etat: Object.assign({}, etat, { phase: 'long' }), action: { type: 'long', id: etat.id } };
+				return { etat: etat, action: null };
+			case 'up':
+				if (etat.phase === 'appui')
+					return { etat: repos, action: { type: evt.t - etat.t0 >= CHRONO_DELAI_LONG ? 'long' : 'clic', id: etat.id } };
+				return { etat: repos, action: null };
+			default:
+				return { etat: repos, action: null };
+		}
+	}
+
+	/** Coordonnées écran d'un point (a sur l'axe, c en travers) selon l'orientation. */
+	function chronoXY(o, a, c) {
+		const g = GEO[o];
+		return o === 'h' ? [g.axe + a, g.bande + c] : [g.bande + c, g.axe + a];
+	}
+
+	/** Pas des graduations numériques : le plus petit qui laisse ≥ 70 px entre deux. */
+	function chronoPas(pxParAn) {
+		for (const p of [25, 50, 100, 250, 500, 1000, 2500]) if (p * pxParAn >= 70) return p;
+		return 5000;
+	}
+
+	// ── Page ──────────────────────────────────────────────────────────────────────
+	(function () {
+		const SVGNS = 'http://www.w3.org/2000/svg';
+		const EVS = CHRONO.evenements;
+		const PAR_ID = Object.fromEntries(EVS.map(ev => [ev.id, ev]));
+		const etat = { zoom: 1, choix: {}, texte: '', incoherence: false, groupe: '', estomper: false, sel: null, positions: {} };
+		let echelle = null, orientation = 'h';
+
+		const $ = id => document.getElementById(id);
+		const el = (tag, attrs, texte) => {
+			const n = document.createElement(tag);
+			for (const k in (attrs || {})) n.setAttribute(k, attrs[k]);
+			if (texte != null) n.textContent = texte;
+			return n;
+		};
+		const sv = (tag, attrs, texte) => {
+			const n = document.createElementNS(SVGNS, tag);
+			for (const k in (attrs || {})) n.setAttribute(k, attrs[k]);
+			if (texte != null) n.textContent = texte;
+			return n;
+		};
+		const incoherent = ev => (ev.contradictions || []).length + (ev.erreurs || []).length > 0;
+		const libelleEv = ev => (PICTO[ev.categorie] || '•') + ' ' + ev.titre_court
+			+ (ev.visibilite === 'secret' ? ' 🔒' : ev.visibilite === 'meta' ? ' ⟡' : '') + (incoherent(ev) ? ' ⚠' : '');
+		const fmt = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+		// ── Filtres ─────────────────────────────────────────────────────────────
+		function construireFiltres() {
+			const puces = $('puces');
+			for (const f of FACETTES_PUCES) {
+				const ligne = el('div', { class: 'facette' });
+				ligne.appendChild(el('span', { class: 'nom' }, NOMS_FACETTES[f]));
+				for (const v of CHRONO.facettes[f] || []) {
+					if (!v.n) continue;
+					const b = el('button', { type: 'button', class: 'puce', 'aria-pressed': 'false', 'data-f': f, 'data-v': v.id }, v.libelle);
+					b.appendChild(el('span', { class: 'n' }, String(v.n)));
+					b.addEventListener('click', () => basculer(f, v.id, b));
+					ligne.appendChild(b);
+				}
+				puces.appendChild(ligne);
+			}
+			const ligne = el('div', { class: 'facette' });
+			ligne.appendChild(el('span', { class: 'nom' }, 'À arbitrer'));
+			const nInc = EVS.filter(incoherent).length;
+			const b = el('button', { type: 'button', class: 'puce alerte', 'aria-pressed': 'false', id: 'puce-incoherence' }, '⚠ avec incohérence');
+			b.appendChild(el('span', { class: 'n' }, String(nInc)));
+			b.addEventListener('click', () => { etat.incoherence = !etat.incoherence; b.setAttribute('aria-pressed', String(etat.incoherence)); appliquer(); });
+			ligne.appendChild(b);
+			puces.appendChild(ligne);
+
+			const listes = $('listes');
+			for (const f of FACETTES_LISTES) {
+				const d = el('details', { class: 'liste', 'data-f': f });
+				const s = el('summary', {}, NOMS_FACETTES[f] + ' ▾');
+				d.appendChild(s);
+				const corps = el('div');
+				for (const v of CHRONO.facettes[f] || []) {
+					if (!v.n) continue;
+					const lab = el('label');
+					const cb = el('input', { type: 'checkbox', 'data-f': f, 'data-v': v.id });
+					cb.addEventListener('change', () => basculer(f, v.id, null, d, s));
+					lab.appendChild(cb);
+					lab.appendChild(document.createTextNode(v.libelle));
+					lab.appendChild(el('span', { class: 'n' }, String(v.n)));
+					corps.appendChild(lab);
+				}
+				d.appendChild(corps);
+				listes.appendChild(d);
+			}
+			// Une seule liste ouverte à la fois ; un clic ailleurs les referme.
+			document.addEventListener('click', e => {
+				for (const d of document.querySelectorAll('details.liste[open]')) if (!d.contains(e.target)) d.open = false;
+			});
+		}
+
+		function basculer(f, v, bouton, details, summary) {
+			const s = etat.choix[f] || (etat.choix[f] = new Set());
+			if (s.has(v)) s.delete(v); else s.add(v);
+			if (bouton) bouton.setAttribute('aria-pressed', String(s.has(v)));
+			if (details) {
+				if (s.size) details.setAttribute('data-actif', ''); else details.removeAttribute('data-actif');
+				summary.textContent = NOMS_FACETTES[f] + (s.size ? ' (' + s.size + ')' : '') + ' ▾';
+			}
+			appliquer();
+		}
+
+		function reinitialiser() {
+			etat.choix = {}; etat.texte = ''; etat.incoherence = false;
+			$('recherche').value = '';
+			for (const b of document.querySelectorAll('.puce')) b.setAttribute('aria-pressed', 'false');
+			for (const cb of document.querySelectorAll('details.liste input')) cb.checked = false;
+			for (const d of document.querySelectorAll('details.liste')) {
+				d.removeAttribute('data-actif');
+				d.querySelector('summary').textContent = NOMS_FACETTES[d.dataset.f] + ' ▾';
+			}
+			appliquer();
+		}
+
+		function retenus() {
+			return chronoFiltrer(EVS, { texte: etat.texte, choix: etat.choix, incoherence: etat.incoherence }, CHRONO.facettes);
+		}
+
+		function appliquer() {
+			dessiner();
+		}
+
+		// ── Légende ─────────────────────────────────────────────────────────────
+		function construireLegende() {
+			const leg = $('legende');
+			const ajouter = (dessin, texte) => {
+				const s = el('span');
+				const svg = sv('svg', { viewBox: '0 0 34 14' });
+				dessin(svg);
+				s.appendChild(svg);
+				s.appendChild(document.createTextNode(texte));
+				leg.appendChild(s);
+			};
+			ajouter(s => s.appendChild(sv('circle', { cx: 17, cy: 7, r: 4.5, fill: COULEUR.auteur })), 'date exacte');
+			ajouter(s => s.appendChild(sv('rect', { x: 13, y: 3, width: 8, height: 8, fill: COULEUR.auteur })), 'dans un âge / un rang');
+			ajouter(s => {
+				s.appendChild(sv('line', { x1: 3, y1: 7, x2: 31, y2: 7, stroke: COULEUR.auteur, 'stroke-dasharray': '3 2' }));
+				s.appendChild(sv('path', { d: 'M5 2 L2 7 L5 12 M29 2 L32 7 L29 12', stroke: COULEUR.auteur, fill: 'none' }));
+				s.appendChild(sv('path', { d: 'M17 2 L22 7 L17 12 L12 7 Z', stroke: COULEUR.auteur, fill: '#141720' }));
+			}, '? date incertaine ⟨ ⟩');
+			ajouter(s => s.appendChild(sv('rect', { x: 2, y: 4, width: 30, height: 6, fill: COULEUR.auteur })), 'période');
+			ajouter(s => {
+				s.appendChild(defsHachures(s, 'leg-h'));
+				s.appendChild(sv('rect', { x: 2, y: 4, width: 12, height: 6, fill: 'url(#leg-h)' }));
+				s.appendChild(sv('rect', { x: 14, y: 4, width: 18, height: 6, fill: COULEUR.auteur }));
+			}, '~ borne incertaine');
+			ajouter(s => {
+				s.appendChild(sv('rect', { x: 2, y: 4, width: 22, height: 6, fill: COULEUR.auteur }));
+				s.appendChild(sv('path', { d: 'M24 2 L32 7 L24 12 Z', fill: COULEUR.auteur }));
+			}, '→ jusqu\'à aujourd\'hui');
+			ajouter(s => s.appendChild(sv('path', { d: 'M17 3 L22 11 L12 11 Z', fill: '#e6e1d3' })), 'jalon');
+			for (const a of ['auteur', 'synthese', 'proposition'])
+				ajouter(s => s.appendChild(sv('rect', { x: 9, y: 3, width: 16, height: 8, rx: 2, fill: COULEUR[a] })),
+					(CHRONO.facettes.autorite.find(v => v.id === a) || {}).libelle || a);
+			const p = el('span', {}, Object.entries(PICTO).map(([k, v]) => v + ' ' + ((CHRONO.facettes.categorie.find(c => c.id === k) || {}).libelle || k)).join(' · ') + ' · 🔒 secret · ⟡ méta · ⚠ à arbitrer');
+			leg.appendChild(p);
+		}
+
+		function defsHachures(svg, id) {
+			const defs = sv('defs');
+			const p = sv('pattern', { id: id, width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' });
+			p.appendChild(sv('rect', { width: 6, height: 6, fill: 'rgba(200,168,75,0.10)' }));
+			p.appendChild(sv('line', { x1: 0, y1: 0, x2: 0, y2: 6, stroke: '#c8a84b', 'stroke-width': 2.5, 'stroke-opacity': 0.75 }));
+			defs.appendChild(p);
+			return defs;
+		}
+
+		// ── Dessin ──────────────────────────────────────────────────────────────
+		function dessiner() {
+			orientation = window.matchMedia('(orientation: landscape)').matches ? 'h' : 'v';
+			const o = orientation, G = GEO[o];
+			$('zone').classList.toggle('v', o === 'v');
+			echelle = chronoEchelle(CHRONO.eres, etat.zoom);
+			const ok = retenus();
+			const visibles = etat.estomper ? EVS : EVS.filter(ev => ok.has(ev.id));
+			$('compte').textContent = ok.size + ' / ' + EVS.length + ' éléments' + (etat.sel ? ' · sélection : ' + PAR_ID[etat.sel].titre_court : '');
+			$('filtres-titre').textContent = 'Filtres · ' + ok.size + ' / ' + EVS.length;
+
+			const groupes = chronoGrouper(visibles, etat.groupe, CHRONO.facettes);
+			let travers = 0;
+			const blocs = [];
+			for (const gr of groupes) {
+				const items = gr.evenements.map(ev => {
+					const geo = chronoGeometrie(ev, echelle);
+					const [a0, a1] = chronoEtendue(geo, libelleEv(ev), o);
+					return { ev: ev, geo: geo, a0: a0, a1: a1 };
+				});
+				const lanes = chronoCouloirs(items, 6);
+				const debut = travers + (gr.libelle ? G.titre : 0);
+				blocs.push({ gr: gr, items: items, lanes: lanes, debut: debut, tete: travers });
+				travers = debut + Math.max(1, lanes.n) * G.couloir + G.ecartGroupe;
+			}
+			const longueurAxe = echelle.total + G.axe * 2;
+			const W = o === 'h' ? longueurAxe : G.bande + travers + 10;
+			const H = o === 'h' ? G.bande + travers + 10 : longueurAxe;
+			const svg = $('frise'), axe = $('axe');
+			for (const n of [svg, axe]) while (n.firstChild) n.removeChild(n.firstChild);
+			// Un seul repère (chronoXY) ; la frise montre tout sauf la bande, l'axe que la bande.
+			const vbF = o === 'h' ? [0, G.bande, W, H - G.bande] : [G.bande, 0, W - G.bande, H];
+			const vbA = o === 'h' ? [0, 0, W, G.bande] : [0, 0, G.bande, H];
+			for (const [n, vb] of [[svg, vbF], [axe, vbA]]) {
+				n.setAttribute('width', vb[2]); n.setAttribute('height', vb[3]);
+				n.setAttribute('viewBox', vb.join(' '));
+			}
+			const style = sv('style', {}, 'text{font-family:"Share Tech Mono",monospace;fill:#e6e1d3}.lib{font-size:11px}.grad{font-size:9px;fill:#9aa3b2}.ere{font-size:12px;fill:#c8a84b}.sous{font-size:9px;fill:#9aa3b2}.grp{font-size:11px;fill:#4b8fc8}.ev{cursor:pointer}.ev.terne{opacity:.18}.ev.loin{opacity:.22}.ev .rappel{fill:#9aa3b2;font-size:10px}.ev.sel .lib{fill:#fff;font-weight:bold}.ev:focus{outline:none}.ev:focus .lib{text-decoration:underline}');
+			svg.appendChild(style);
+			axe.appendChild(style.cloneNode(true));
+			svg.appendChild(defsHachures(svg, 'hach'));
+			svg.appendChild(sv('rect', { x: vbF[0], y: vbF[1], width: vbF[2], height: vbF[3], fill: '#141720' }));
+			axe.appendChild(sv('rect', { x: 0, y: 0, width: vbA[2], height: vbA[3], fill: '#10131b' }));
+
+			const rectAC = (a0, a1, c0, c1, attrs) => {
+				const [x0, y0] = chronoXY(o, Math.min(a0, a1), Math.min(c0, c1));
+				const [x1, y1] = chronoXY(o, Math.max(a0, a1), Math.max(c0, c1));
+				return sv('rect', Object.assign({ x: x0, y: y0, width: Math.max(1, x1 - x0), height: Math.max(1, y1 - y0) }, attrs));
+			};
+			const ligneAC = (a0, c0, a1, c1, attrs) => {
+				const [x1, y1] = chronoXY(o, a0, c0), [x2, y2] = chronoXY(o, a1, c1);
+				return sv('line', Object.assign({ x1: x1, y1: y1, x2: x2, y2: y2 }, attrs));
+			};
+			const texteAC = (a, c, txt, attrs) => {
+				const [x, y] = chronoXY(o, a, c);
+				return sv('text', Object.assign({ x: x, y: y }, attrs || {}), txt);
+			};
+			const cMax = travers;
+
+			// Fonds d'ères, graduations, en-têtes.
+			const fond = sv('g'), fondA = sv('g');
+			echelle.segments.forEach((s, k) => {
+				const teinte = { fill: k % 2 ? 'rgba(255,255,255,0.025)' : 'rgba(75,143,200,0.035)' };
+				fond.appendChild(rectAC(s.debut, s.debut + s.longueur, -G.bande, cMax, teinte));
+				fondA.appendChild(rectAC(s.debut, s.debut + s.longueur, -G.bande, 0, teinte));
+				fond.appendChild(ligneAC(s.debut, -G.bande, s.debut, cMax, { stroke: '#2a3040' }));
+				fondA.appendChild(ligneAC(s.debut, -G.bande, s.debut, 0, { stroke: '#2a3040' }));
+				const e = s.ere;
+				if (o === 'h') {
+					fondA.appendChild(texteAC(s.debut + 6, -G.bande + 14, e.libelle, { class: 'ere' }));
+					fondA.appendChild(texteAC(s.debut + 6, -G.bande + 26, e.sous_titre || '', { class: 'sous' }));
+				} else {
+					const [x, y] = chronoXY(o, s.debut + 6, -G.bande + 12);
+					fondA.appendChild(sv('text', { x: x, y: y, class: 'ere', transform: 'rotate(90 ' + x + ' ' + y + ')' }, e.libelle + ' — ' + (e.sous_titre || '')));
+				}
+				const graduer = (a, txt) => {
+					fond.appendChild(ligneAC(a, -10, a, cMax, { stroke: 'rgba(154,163,178,0.12)' }));
+					fondA.appendChild(ligneAC(a, -10, a, 0, { stroke: '#9aa3b2' }));
+					fondA.appendChild(o === 'h' ? texteAC(a + 3, -12, txt, { class: 'grad' }) : texteAC(a + 3, -G.bande + 26, txt, { class: 'grad' }));
+				};
+				if (e.type === 'ordinal') {
+					const n = e.rangs.length;
+					e.rangs.forEach((r, j) => {
+						const a = s.debut + s.longueur * j / n;
+						if (j) fond.appendChild(ligneAC(a, -G.bande + 30, a, cMax, { stroke: 'rgba(154,163,178,0.10)', 'stroke-dasharray': '4 4' }));
+						graduer(a + 2, r.libelle);
+					});
+					// Axe « brisé » : durée inconnue dans l'antédiluvien, rangs ailleurs.
+					if (k === 0) fondA.appendChild(texteAC(s.debut + s.longueur - 16, -4, '≈', { class: 'ere' }));
+				} else {
+					const span = Math.abs(e.debut - e.fin), pas = chronoPas(s.longueur / span);
+					const futur = e.type === 'futur';
+					for (let v = Math.ceil(Math.min(e.debut, e.fin) / pas) * pas; v <= Math.max(e.debut, e.fin); v += pas) {
+						const a = s.debut + s.longueur * Math.abs(v - e.debut) / span;
+						if (k && a < s.debut + 60) continue;   // la graduation de frontière appartient à l'ère précédente
+						graduer(a, v === 0 ? "aujourd'hui" : (futur ? 'dans ' : 'il y a ') + fmt(v));
+					}
+				}
+			});
+			svg.appendChild(fond);
+			axe.appendChild(fondA);
+
+			// Bande de contemporanéité (sous les éléments).
+			const sel = etat.sel && PAR_ID[etat.sel];
+			let contemp = null;
+			if (sel) {
+				contemp = chronoContemporains(sel, EVS);
+				const a0 = chronoPx(sel.calc.debut.t[0], echelle), a1 = chronoPx(sel.calc.fin.t[1], echelle);
+				svg.appendChild(rectAC(a0, Math.max(a1, a0 + 3), -G.bande + 30, cMax, { fill: 'rgba(200,168,75,0.10)', stroke: 'rgba(200,168,75,0.5)', 'stroke-dasharray': '4 3' }));
+			}
+			const proches = contemp ? new Set([...contemp.ponctuels, ...contemp.durables, sel.id]) : null;
+
+			etat.positions = {};
+			for (const b of blocs) {
+				if (b.gr.libelle) {
+					if (o === 'h') {
+						for (let a = 0; a < echelle.total; a += 1400)
+							svg.appendChild(texteAC(a + 4, b.tete + 14, '▸ ' + b.gr.libelle + ' (' + b.gr.evenements.length + ')', { class: 'grp' }));
+						svg.appendChild(ligneAC(0, b.tete, echelle.total, b.tete, { stroke: 'rgba(75,143,200,0.35)' }));
+					} else {
+						const [x, y] = chronoXY(o, -G.axe + 14, b.tete + 4);
+						svg.appendChild(sv('text', { x: x, y: y, class: 'grp' }, ('▾ ' + b.gr.libelle).slice(0, 26)));
+						svg.appendChild(ligneAC(-G.axe, b.tete, echelle.total, b.tete, { stroke: 'rgba(75,143,200,0.35)' }));
+					}
+				}
+				b.items.forEach((it, k) => {
+					const c0 = b.debut + b.lanes.couloir[k] * G.couloir;
+					const g = dessinerEvenement(it, c0, { rectAC, ligneAC, texteAC, o, G });
+					if (etat.estomper && !ok.has(it.ev.id)) g.classList.add('terne');
+					if (sel) g.classList.add(it.ev.id === sel.id ? 'sel' : (proches.has(it.ev.id) ? 'proche' : 'loin'));
+					svg.appendChild(g);
+					if (!(it.ev.id in etat.positions)) etat.positions[it.ev.id] = chronoXY(o, it.geo.marque, c0);
+				});
+			}
+			dessinerMinicarte();
+			majIncoherences(ok);
+		}
+
+		function dessinerEvenement(it, c0, f) {
+			const { rectAC, ligneAC, texteAC, o, G } = f;
+			const ev = it.ev, geo = it.geo, col = COULEUR[ev.autorite] || '#9aa3b2';
+			const g = sv('g', { class: 'ev', 'data-id': ev.id, tabindex: 0, role: 'button' });
+			g.setAttribute('aria-label', ev.titre + ' — ' + ev.notation);
+			g.appendChild(sv('title', {}, ev.titre + '\n' + ev.notation));
+			const axeC = o === 'h' ? c0 + 20 : c0 + 10;   // ligne du marqueur, en travers
+			const ep = 7;                                  // épaisseur d'une barre
+			const pointille = ev.autorite === 'proposition' ? { 'stroke-dasharray': '3 2' } : {};
+			// Zone de saisie généreuse (doigt) : tout le couloir sur l'étendue réservée.
+			g.appendChild(rectAC(it.a0, it.a1, c0 + 2, c0 + G.couloir - 2, { fill: 'transparent' }));
+			for (const [p0, p1] of geo.flous) {
+				if (geo.forme === 'point') {
+					g.appendChild(ligneAC(p0, axeC, p1, axeC, Object.assign({ stroke: col, 'stroke-width': 1.5, 'stroke-dasharray': '4 3' })));
+					g.appendChild(ligneAC(p0, axeC - 6, p0, axeC + 6, { stroke: col, 'stroke-width': 1.5 }));
+					g.appendChild(ligneAC(p1, axeC - 6, p1, axeC + 6, { stroke: col, 'stroke-width': 1.5 }));
+				} else {
+					g.appendChild(rectAC(p0, p1, axeC - ep / 2, axeC + ep / 2, { fill: 'url(#hach)' }));
+				}
+			}
+			if (geo.forme === 'periode') {
+				g.appendChild(rectAC(geo.solide[0], Math.max(geo.solide[1], geo.solide[0] + 2), axeC - ep / 2, axeC + ep / 2,
+					Object.assign({ fill: col, 'fill-opacity': ev.autorite === 'proposition' ? 0.55 : 0.9, stroke: col }, pointille)));
+				if (geo.fleche) {
+					const a = geo.solide[1];
+					const pts = [[a, axeC - 6], [a + 8, axeC], [a, axeC + 6]].map(([pa, pc]) => chronoXY(o, pa, pc).join(',')).join(' ');
+					g.appendChild(sv('polygon', { points: pts, fill: col }));
+				}
+			} else {
+				const [x, y] = chronoXY(o, geo.marque, axeC);
+				if (geo.genreDebut === 'exact') g.appendChild(sv('circle', Object.assign({ cx: x, cy: y, r: 5, fill: col }, pointille)));
+				else if (geo.genreDebut === 'rang') g.appendChild(sv('rect', Object.assign({ x: x - 4.5, y: y - 4.5, width: 9, height: 9, fill: col }, pointille)));
+				else {
+					g.appendChild(sv('path', { d: `M${x} ${y - 6} L${x + 6} ${y} L${x} ${y + 6} L${x - 6} ${y} Z`, fill: '#141720', stroke: col, 'stroke-width': 1.5 }));
+					g.appendChild(sv('text', { x: x - 2.5, y: y + 3, class: 'grad', fill: col }, '?'));
+				}
+			}
+			for (const j of geo.jalons) {
+				const pts = [[j.p, axeC - ep / 2 - 1], [j.p - 5, axeC - ep / 2 - 9], [j.p + 5, axeC - ep / 2 - 9]];
+				const tri = sv('polygon', { points: pts.map(([pa, pc]) => chronoXY(o, pa, pc).join(',')).join(' '), fill: '#e6e1d3' });
+				tri.appendChild(sv('title', {}, j.libelle + ' — ' + j.notation));
+				g.appendChild(tri);
+			}
+			const lib = libelleEv(ev);
+			// Rappel du libellé le long d'une longue période : son début a souvent défilé hors de vue.
+			if (geo.forme === 'periode') {
+				const pas = o === 'h' ? 900 : 600, court = (PICTO[ev.categorie] || '') + ' ' + ev.titre_court;
+				for (let a = geo.solide[0] + pas; a < geo.solide[1] - pas / 3; a += pas)
+					g.appendChild(o === 'h' ? texteAC(a, axeC - 7, court, { class: 'lib rappel' }) : texteAC(a, c0 + 20, court.slice(0, Math.floor((G.couloir - 24) / G.car)), { class: 'lib rappel' }));
+			}
+			if (o === 'h') {
+				const a = geo.forme === 'point' ? geo.marque + 9 : geo.a0;
+				g.appendChild(texteAC(a, geo.forme === 'point' ? axeC + 4 : axeC - 7, lib, { class: 'lib' }));
+			} else {
+				const a = geo.forme === 'point' ? geo.marque + 4 : geo.a0 + 10;
+				const max = Math.floor((G.couloir - 24) / G.car);
+				g.appendChild(texteAC(a, c0 + 20, lib.length > max ? lib.slice(0, max - 1) + '…' : lib, { class: 'lib' }));
+			}
+			return g;
+		}
+
+		// ── Mini-carte ──────────────────────────────────────────────────────────
+		function dessinerMinicarte() {
+			const mini = $('minicarte'), o = orientation, def = $('defileur');
+			while (mini.firstChild) mini.removeChild(mini.firstChild);
+			const long = o === 'h' ? def.clientWidth : def.clientHeight;
+			const epais = 30;
+			const W = o === 'h' ? long : epais, H = o === 'h' ? epais : long;
+			mini.setAttribute('width', W); mini.setAttribute('height', H);
+			mini.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+			const k = long / (echelle.total + GEO[o].axe * 2);
+			const r = (a0, a1, attrs) => sv('rect', Object.assign(o === 'h'
+				? { x: a0 * k, y: 0, width: Math.max(1, (a1 - a0) * k), height: epais }
+				: { x: 0, y: a0 * k, width: epais, height: Math.max(1, (a1 - a0) * k) }, attrs));
+			echelle.segments.forEach((s, i) => {
+				mini.appendChild(r(GEO[o].axe + s.debut, GEO[o].axe + s.debut + s.longueur, { fill: i % 2 ? '#1a1e29' : '#17202d', stroke: '#2a3040' }));
+				const t = sv('text', o === 'h' ? { x: (GEO[o].axe + s.debut) * k + 3, y: 11, class: 'grad', fill: '#c8a84b', 'font-size': 9 } : { x: 2, y: (GEO[o].axe + s.debut) * k + 10, fill: '#c8a84b', 'font-size': 8 }, o === 'h' ? s.ere.libelle : s.ere.libelle.slice(0, 5));
+				mini.appendChild(t);
+			});
+			const ok = retenus();
+			for (const ev of EVS) {
+				if (!ok.has(ev.id)) continue;
+				const a = (GEO[o].axe + chronoPx(ev.calc.debut.t[0], echelle)) * k;
+				mini.appendChild(sv('rect', Object.assign(o === 'h'
+					? { x: a, y: 17, width: 1.5, height: 10 }
+					: { x: 17, y: a, width: 10, height: 1.5 }, { fill: COULEUR[ev.autorite] || '#9aa3b2', 'fill-opacity': 0.85 })));
+			}
+			const vue = r(0, 0, { id: 'mini-vue', fill: 'rgba(255,255,255,0.08)', stroke: '#e6e1d3', 'stroke-width': 1.5 });
+			mini.appendChild(vue);
+			majVue();
+		}
+
+		function majVue() {
+			const vue = $('mini-vue');
+			if (!vue || !echelle) return;
+			const o = orientation, def = $('defileur');
+			const total = o === 'h' ? def.scrollWidth : def.scrollHeight;
+			const long = o === 'h' ? def.clientWidth : def.clientHeight;
+			const pos = o === 'h' ? def.scrollLeft : def.scrollTop;
+			const k = long / Math.max(1, total);
+			if (o === 'h') { vue.setAttribute('x', pos * k); vue.setAttribute('width', Math.max(4, long * k)); }
+			else { vue.setAttribute('y', pos * k); vue.setAttribute('height', Math.max(4, long * k)); }
+		}
+
+		function sauterMini(e) {
+			const mini = $('minicarte'), def = $('defileur'), o = orientation;
+			const r = mini.getBoundingClientRect();
+			const frac = o === 'h' ? (e.clientX - r.left) / r.width : (e.clientY - r.top) / r.height;
+			const total = o === 'h' ? def.scrollWidth : def.scrollHeight;
+			const long = o === 'h' ? def.clientWidth : def.clientHeight;
+			const cible = Math.max(0, frac * total - long / 2);
+			if (o === 'h') def.scrollLeft = cible; else def.scrollTop = cible;
+		}
+
+		// ── Sélection, détail, JSON ─────────────────────────────────────────────
+		function selectionner(id, defiler) {
+			etat.sel = id;
+			dessiner();
+			afficherDetail(id ? PAR_ID[id] : null);
+			if (id && defiler) defilerVers(id);
+		}
+
+		function defilerVers(id) {
+			const p = etat.positions[id];
+			if (!p) return;
+			const def = $('defileur');
+			def.scrollTo({ left: Math.max(0, p[0] - def.clientWidth / 3), top: Math.max(0, p[1] - def.clientHeight / 3), behavior: 'smooth' });
+		}
+
+		function afficherDetail(ev) {
+			const d = $('detail');
+			while (d.firstChild) d.removeChild(d.firstChild);
+			if (!ev) { d.hidden = true; return; }
+			const fermer = el('button', { type: 'button', class: 'fermer', 'aria-label': 'Fermer' }, '✕');
+			fermer.addEventListener('click', () => selectionner(null));
+			d.appendChild(fermer);
+			d.appendChild(el('h2', {}, (PICTO[ev.categorie] || '') + ' ' + ev.titre));
+			d.appendChild(el('div', { class: 'quand' }, ev.notation));
+			const lib = (f, v) => ((CHRONO.facettes[f] || []).find(x => x.id === v) || {}).libelle || v;
+			d.appendChild(el('div', { class: 'petit' }, 'date : ' + lib('autorite', ev.quand_autorite) + (ev.quand_note ? ' — ' + ev.quand_note : '')));
+			d.appendChild(el('div', { class: 'petit' }, [lib('couche', ev.couche), lib('categorie', ev.categorie), 'autorité : ' + lib('autorite', ev.autorite), lib('visibilite', ev.visibilite)].join(' · ')));
+			d.appendChild(el('p', {}, ev.resume));
+			const tags = el('div', { class: 'tags' });
+			for (const f of FACETTES_LISTES) for (const v of (ev.tags[f] || [])) tags.appendChild(el('span', {}, lib(f, v)));
+			d.appendChild(tags);
+			const alertes = [...(ev.contradictions || []).map(c => c.texte), ...(ev.erreurs || [])];
+			if (alertes.length) {
+				d.appendChild(el('h3', { class: 'alerte' }, '⚠ À arbitrer'));
+				const ul = el('ul');
+				for (const a of alertes) ul.appendChild(el('li', { class: 'alerte' }, a));
+				d.appendChild(ul);
+			}
+			if ((ev.sources || []).length) {
+				d.appendChild(el('h3', {}, 'Sources'));
+				const ul = el('ul');
+				for (const s of ev.sources) {
+					const li = el('li');
+					if (s.url) li.appendChild(el('a', { href: s.url }, s.fichier)); else li.appendChild(el('span', {}, s.fichier));
+					if (s.date) li.appendChild(document.createTextNode(' · ' + s.date));
+					if (s.citation) li.appendChild(el('cite', {}, '« ' + s.citation + ' »'));
+					ul.appendChild(li);
+				}
+				d.appendChild(ul);
+			}
+			const sauts = (titre, ids) => {
+				const ids2 = ids.filter(i => PAR_ID[i]);
+				if (!ids2.length) return;
+				d.appendChild(el('h3', {}, titre));
+				const div = el('div');
+				for (const i of ids2) {
+					const b = el('button', { type: 'button', class: 'saut' }, (PICTO[PAR_ID[i].categorie] || '') + ' ' + PAR_ID[i].titre_court);
+					b.addEventListener('click', () => selectionner(i, true));
+					div.appendChild(b);
+				}
+				d.appendChild(div);
+			};
+			sauts('Liens', ev.liens || []);
+			sauts('Après', ev.apres || []);
+			const c = chronoContemporains(ev, EVS);
+			sauts('Au même moment', c.ponctuels);
+			sauts('En cours à ce moment', c.durables);
+			d.appendChild(el('div', { class: 'petit', style: 'margin-top:10px' }, 'Appui long (ou clic droit) sur un élément : son JSON complet.'));
+			d.hidden = false;
+		}
+
+		let jsonCourant = '';
+		function ouvrirJson(id) {
+			const ev = PAR_ID[id];
+			if (!ev) return;
+			jsonCourant = JSON.stringify(ev.brut, null, '\t');
+			$('json-titre').textContent = ev.id;
+			$('json-pre').textContent = jsonCourant;
+			$('json-overlay').hidden = false;
+			$('json-fermer').focus();
+		}
+		function fermerJson() { $('json-overlay').hidden = true; }
+
+		// ── Pointeur : clic / appui long ────────────────────────────────────────
+		let pointeur = { phase: 'repos' }, minuterie = null;
+		function agir(r) {
+			pointeur = r.etat;
+			if (!r.action) return;
+			if (r.action.type === 'clic') selectionner(r.action.id === etat.sel ? null : r.action.id);
+			else if (r.action.type === 'long') ouvrirJson(r.action.id);
+		}
+		function brancherPointeur() {
+			const svg = $('frise');
+			svg.addEventListener('pointerdown', e => {
+				if (e.button !== 0) return;
+				const g = e.target.closest('g.ev');
+				if (!g) { pointeur = { phase: 'repos' }; return; }
+				agir(chronoAppuiLong(pointeur, { type: 'down', t: e.timeStamp, x: e.clientX, y: e.clientY, id: g.dataset.id }));
+				clearTimeout(minuterie);
+				minuterie = setTimeout(() => agir(chronoAppuiLong(pointeur, { type: 'tick', t: pointeur.t0 + CHRONO_DELAI_LONG })), CHRONO_DELAI_LONG);
+			});
+			svg.addEventListener('pointermove', e => agir(chronoAppuiLong(pointeur, { type: 'move', x: e.clientX, y: e.clientY })));
+			svg.addEventListener('pointerup', e => {
+				clearTimeout(minuterie);
+				const vide = pointeur.phase === 'repos' && !e.target.closest('g.ev');
+				agir(chronoAppuiLong(pointeur, { type: 'up', t: e.timeStamp }));
+				if (vide && etat.sel && e.button === 0) selectionner(null);
+			});
+			svg.addEventListener('pointercancel', () => { clearTimeout(minuterie); agir(chronoAppuiLong(pointeur, { type: 'cancel' })); });
+			svg.addEventListener('contextmenu', e => {
+				const g = e.target.closest('g.ev');
+				if (!g) return;
+				e.preventDefault();
+				clearTimeout(minuterie);
+				pointeur = { phase: 'repos' };
+				ouvrirJson(g.dataset.id);
+			});
+			svg.addEventListener('keydown', e => {
+				const g = e.target.closest && e.target.closest('g.ev');
+				if (!g) return;
+				if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectionner(g.dataset.id); }
+				else if (e.key === 'j' || e.key === 'J') { e.preventDefault(); ouvrirJson(g.dataset.id); }
+			});
+		}
+
+		// ── Incohérences ────────────────────────────────────────────────────────
+		function majIncoherences() {
+			const liste = $('incoherences-liste');
+			while (liste.firstChild) liste.removeChild(liste.firstChild);
+			let n = 0;
+			for (const m of CHRONO.erreurs_globales || []) { liste.appendChild(el('li', { class: 'globale' }, '⚠ ' + m)); n++; }
+			for (const ev of EVS) {
+				for (const a of [...(ev.contradictions || []).map(c => c.texte), ...(ev.erreurs || [])]) {
+					const li = el('li');
+					const b = el('button', { type: 'button' }, '⚠ ' + ev.titre_court + ' — ' + a);
+					b.addEventListener('click', () => selectionner(ev.id, true));
+					li.appendChild(b);
+					liste.appendChild(li);
+					n++;
+				}
+			}
+			$('incoherences').hidden = !n;
+			$('incoherences-titre').textContent = '⚠ ' + n + ' point' + (n > 1 ? 's' : '') + ' à arbitrer';
+		}
+
+		// ── Exports ─────────────────────────────────────────────────────────────
+		function telecharger(nom, type, contenu) {
+			const url = URL.createObjectURL(new Blob([contenu], { type: type }));
+			const a = el('a', { href: url, download: nom });
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+			setTimeout(() => URL.revokeObjectURL(url), 1000);
+		}
+		function exporterSvg() {
+			// Un seul SVG pour l'export : la bande d'axe et la frise partagent le même repère.
+			const frise = $('frise'), axe = $('axe');
+			const vf = frise.getAttribute('viewBox').split(' ').map(Number), va = axe.getAttribute('viewBox').split(' ').map(Number);
+			const W = Math.max(vf[0] + vf[2], va[2]), H = Math.max(vf[1] + vf[3], va[3]);
+			const clone = sv('svg', { xmlns: SVGNS, width: W, height: H, viewBox: '0 0 ' + W + ' ' + H });
+			for (const n of frise.childNodes) clone.appendChild(n.cloneNode(true));
+			for (const n of axe.childNodes) clone.appendChild(n.cloneNode(true));
+			const leg = sv('g', { transform: 'translate(12,' + (H + 16) + ')' });
+			const entrees = [['auteur', 'Auteur'], ['synthese', 'Synthèse'], ['proposition', 'Proposition']];
+			entrees.forEach(([k, t], i) => {
+				leg.appendChild(sv('rect', { x: i * 130, y: 0, width: 14, height: 9, fill: COULEUR[k] }));
+				leg.appendChild(sv('text', { x: i * 130 + 20, y: 9, class: 'lib' }, t));
+			});
+			leg.appendChild(sv('text', { x: 0, y: 28, class: 'grad' }, '● date exacte · ■ âge/rang · ◇⟨ ⟩ date incertaine · barre = période · hachures ~ = borne incertaine · ▶ jusqu\'à aujourd\'hui · ▼ jalon · 🔒 secret · ⟡ méta · ⚠ à arbitrer'));
+			clone.appendChild(sv('rect', { x: 0, y: H, width: W, height: 44, fill: '#141720' }));
+			clone.appendChild(leg);
+			clone.setAttribute('height', H + 44);
+			clone.setAttribute('viewBox', '0 0 ' + W + ' ' + (H + 44));
+			telecharger('chronologie_telluris.svg', 'image/svg+xml', new XMLSerializer().serializeToString(clone));
+		}
+		function exporterJson() {
+			const ok = retenus();
+			const ids = EVS.filter(ev => ok.has(ev.id)).map(ev => ev.id);
+			telecharger('chronologie_filtree.json', 'application/json', JSON.stringify(chronoSousEnsemble(CHRONO.entete, EVS, ids), null, '\t') + '\n');
+		}
+
+		// ── Branchements ────────────────────────────────────────────────────────
+		construireFiltres();
+		construireLegende();
+		brancherPointeur();
+		$('recherche').addEventListener('input', e => { etat.texte = e.target.value; appliquer(); });
+		$('grouper').addEventListener('change', e => { etat.groupe = e.target.value; appliquer(); });
+		$('estomper').addEventListener('change', e => { etat.estomper = e.target.checked; appliquer(); });
+		$('reinitialiser').addEventListener('click', reinitialiser);
+		$('zoom-plus').addEventListener('click', () => { etat.zoom = Math.min(6, etat.zoom * 1.5); dessiner(); });
+		$('zoom-moins').addEventListener('click', () => { etat.zoom = Math.max(0.25, etat.zoom / 1.5); dessiner(); });
+		$('export-svg').addEventListener('click', exporterSvg);
+		$('export-json').addEventListener('click', exporterJson);
+		$('defileur').addEventListener('scroll', majVue, { passive: true });
+		let glisseMini = false;
+		$('minicarte').addEventListener('pointerdown', e => { glisseMini = true; $('minicarte').setPointerCapture(e.pointerId); sauterMini(e); });
+		$('minicarte').addEventListener('pointermove', e => { if (glisseMini) sauterMini(e); });
+		$('minicarte').addEventListener('pointerup', () => { glisseMini = false; });
+		$('json-fermer').addEventListener('click', fermerJson);
+		$('json-overlay').addEventListener('click', e => { if (e.target === $('json-overlay')) fermerJson(); });
+		$('json-copier').addEventListener('click', () => {
+			if (navigator.clipboard) navigator.clipboard.writeText(jsonCourant).then(() => { $('json-copier').textContent = 'Copié ✓'; setTimeout(() => { $('json-copier').textContent = 'Copier'; }, 1200); });
+		});
+		document.addEventListener('keydown', e => {
+			if (e.key !== 'Escape') return;
+			if (!$('json-overlay').hidden) fermerJson();
+			else if (etat.sel) selectionner(null);
+		});
+		const mq = window.matchMedia('(orientation: landscape)');
+		// Petit écran ou portrait : filtres et légende repliés, la frise d'abord.
+		if (!mq.matches || window.innerHeight < 860) $('filtres').open = false;
+		if (!mq.matches) $('legende-bloc').open = false;
+		mq.addEventListener('change', () => dessiner());
+		window.addEventListener('resize', () => dessinerMinicarte());
+		dessiner();
+	})();
+	</script>
+</body>
+</html>

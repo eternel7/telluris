@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import pass_context
+from jinja2.utils import htmlsafe_json_dumps
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from PIL import Image
@@ -64,6 +65,7 @@ from utils import serveur as serveur_util
 from utils import grimoires as grimoires_util
 from utils import catalogue_capacites
 from utils import lore as lore_util
+from utils import chronologie as chronologie_util
 from utils import simulateur as simulateur_util
 from utils import potentiel as potentiel_util
 from utils.marche import (tick_atelier, reset_prix_cache, besoins_lieu, appro_leaves_lieu,
@@ -1759,6 +1761,22 @@ def admin_lore(request: Request, current_user: Annotated[User, Depends(get_curre
 		request=request,
 		name="admin_lore.html",
 		context={"title": "Lore de Telluris", "groupes": lore_util.grouper(lore_util.lister())}
+	)
+
+
+@app.get("/admin/lore/chronologie", response_class=HTMLResponse)
+def admin_lore_chronologie(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Frise SVG du lore (docs/lore/chronologie.json, utils/chronologie.py). ⚠️ Déclarée AVANT
+	`/admin/lore/{cle:path}`, qui la capterait sinon (404 « fichier de lore inconnu »)."""
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_lore_chronologie.html",
+		# JSON sérialisé ICI, sans `|tojson` : ce filtre trie les clés, et l'appui long doit
+		# montrer chaque élément dans l'ordre de sa source. Même échappement HTML que `tojson`.
+		context={"payload_json": htmlsafe_json_dumps(chronologie_util.payload(chronologie_util.charger()), ensure_ascii=False)}
 	)
 
 
