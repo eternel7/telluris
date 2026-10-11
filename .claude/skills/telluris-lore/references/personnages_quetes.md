@@ -65,7 +65,7 @@ Trame **retenue** (D–B de la première version, A–S+ de la version gardée) 
 | D | « Les rats de la crypte » | catacombes de Lutecia | ouvriers disparus, crypte rouverte, objet au symbole de portail ancien |
 | C | « La route de Saint-Denis » | route nord, avec un paladin du Sacré-Cœur | les monstres **précèdent** les donjons |
 | B | « La porte qui ne devait pas s'ouvrir » | temple templier près de Lutecia | l'extraction de cristaux **modifie** un donjon |
-| A | Mu : « Le serpent sous la cité » | Mu | rencontre avec **Lilith/Échidna** : la combattre ou parler. « Vous appelez monstres mes enfants. » |
+| A | Mu : « Le serpent sous la cité » | Mu | rencontre avec **Lilith/Échidna**, « mère des serpents » des traditions de Mu, sous Mu-la-Centrale près de la porte fermée (11/10) : la combattre ou parler. « Vous appelez monstres mes enfants. » |
 | A+ | Rome → **Paradis** | Rome | des anges aux réponses ambiguës (« Vos dieux vous ont menti. » — est-ce vrai ?) |
 | S | **Yggdrasil** | cité nordique | Asgard, Midgard, Jötunheim, Hel ; les mondes précèdent-ils les récits ? |
 | S+ | « Celui qui était avant » | hors de toute mythologie | quatre hypothèses, **le jeu ne tranche pas** |

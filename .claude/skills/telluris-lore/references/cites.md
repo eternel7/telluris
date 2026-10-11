@@ -222,11 +222,22 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 	- **Atlantis** : jamais devenue un centre du réseau, par **isolement volontaire**.
 - **Atlantis existe encore**, isolée du réseau par choix (Auteur, 11/10) [monde/20261011_frise_chronologique_fusionnee.md § 1.27].
 - **Mu — la civilisation engloutie** (Auteur, 10/10/2026) [cites/20261010_mu_civilisation_engloutie.md] :
-	- Terre **légendaire disparue**, existence **incertaine** dans les archives ; prospère bien avant les Cités-États, détruite par une catastrophe **de nature inconnue**.
+	- Terre **légendaire disparue**, existence **incertaine** dans les archives ; prospère bien avant les Cités-États, détruite par une catastrophe **de nature inconnue** (précisé le 11/10 : à la Vague, cf. ci-dessous).
 	- Magie **oubliée, antérieure** au savoir des trois frères ; ruines sous les océans ou derrière des **portails altérés par la Vague** ; technologie magique dépassant celle des Architectes. Piste majeure sur l'origine de la magie : les Anthropes **ne sont pas les premiers** à avoir tenté de maîtriser les frontières du monde, la Vague n'est **peut-être pas le premier** bouleversement cosmique (mystère à garder ouvert).
 	- **Lutecia ↔ Mu** : lien assuré par le **portail programmable de Notre-Dame** (vestige préservé de l'un des trois frères) ; Lutecia y envoie ses Architectes les plus prometteurs, **aboutissement de leur formation** (stabilisation oubliée, manipulation du mana inconnue des écoles de Lutecia). Rentrés, ils sont recherchés (portails anciens, anomalies, passages très stables).
 	- Mu **ne livre pas tout** : enseignements avancés réservés aux dignes ; certains reviennent **transformés**, d'autres **jamais**. Mu = gardien d'un savoir dont dépend la suprématie de Lutecia dans l'art des portails.
 	- Tranché (Auteur) : Lutecia n'a **pas** de grandes écoles de magie (magie faible) ; ses écoles sont des **instituts d'architectes** qui forment aux portails, Mu **parachève** cette formation.
+
+- **Histoire de Mu** (ChatGPT, **adoptée avec l'arbitrage de l'Auteur**, 11/10) [cites/20261011_histoire_de_mu_chatgpt.md § 1-5] — l'arbitrage l'emporte sur le texte :
+	- Continent du **Grand Océan** ; cité de routes, sans conquête ; **en avance sur son temps** (refuges fortifiés, chaussées, Paladins avant Gilgamesh) mais **jamais citée** par les autres cités.
+	- **Temps des Tables de Pierre** (pas un « Âge » : réservé aux ères) et **Sept Sages de Mu** ; **Ra-Mu** = titre de l'arbitre des assemblées, « **Empereur du Soleil levant** » = déformation de la surface (Mu n'a jamais eu d'empire ; écho de Ra d'Égypte laissé ouvert) ; **Couronne de Mu** (stabilisation).
+	- Apprend les portails **d'un des frères** ; ses portails d'héritiers demandent des cristaux ; **lent dérèglement** ; les structures « retenaient quelque chose ».
+	- **Sombre au moment de la Vague** ; **Mu-la-Centrale** descend sous une enveloppe de stabilisation (dôme doré de l'image). Donjons de l'ancien continent, dont les **Retours**.
+	- Aujourd'hui : cité habitée, Templiers aux passages « au-delà de toute carte », Paladins dans les tunnels ; maîtres plus savants que tous mais **bien moins que leurs prédécesseurs**.
+	- **Seuil unique** par Notre-Dame (œuvre d'un frère, cristal jaune ; la « porte naturelle » de ChatGPT est rejetée). Archives de Mu ; **ceux qui reviennent** / **ceux qui restent** (« on n'en sort pas » est figuré).
+	- Guildes : moins on en parle, plus elles s'y intéressent ; prix du voyage connu dès le rang A.
+	- **Vérité du monde** : Mu a sacrifié un continent pour fermer un **portail naturel vorace** — inconnue de presque tous, hypothèse parmi d'autres même à Mu.
+	- **Lilith/Échidna**, « mère des serpents », vit sous Mu-la-Centrale près de la porte fermée ; son rapport à la porte : quatre lectures **non tranchées**.
 
 **Auteur (11/10)** : Mu **avant les trois frères** ; aujourd'hui continent englouti, révéré des Architectes (cf. SKILL.md § Cités-États). Quasiment toutes les cités existaient **avant la Vague** ; **Rome** entre dans la chronologie ; aucune période terrestre. **Lutecia** naît autour du portail d'un frère dans une cité qui existait déjà, et **prend son nom en dernier** — « fondée » ne convient pas.
 

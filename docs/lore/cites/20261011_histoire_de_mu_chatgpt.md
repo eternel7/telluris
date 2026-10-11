@@ -2,7 +2,7 @@
 
 - **Source :** deux réponses de ChatGPT, transmises par l'Auteur (séance Claude Code du 11/10/2026). Les messages de l'Auteur qui les ont suscitées n'ont pas été transmis.
 - **Créée :** 11/10/2026
-- **Statut :** **proposition, non adoptée**. Matière brute en attente d'arbitrage : plusieurs points contredisent des décisions de l'Auteur (Mu antérieure aux trois frères, catastrophe de nature inconnue, Notre-Dame œuvre d'un frère, portails sans cristaux avant la Vague). Ne fait pas foi contre [Mu — La civilisation engloutie](20261010_mu_civilisation_engloutie.md) ni contre la [frise fusionnée](../monde/20261011_frise_chronologique_fusionnee.md) § 5 et § 4.1. Pas de `lieu:*` correspondant au dump.
+- **Statut :** **adoptée par l'Auteur, corrigée par son arbitrage** (§ 1, à la fin du fichier) : l'arbitrage l'emporte sur le texte de ChatGPT partout où ils diffèrent (« porte naturelle » de Notre-Dame, route à plusieurs seuils, catastrophe tranchée…). Il complète [Mu — La civilisation engloutie](20261010_mu_civilisation_engloutie.md) et **corrige** la [frise fusionnée](../monde/20261011_frise_chronologique_fusionnee.md) sur la date de l'engloutissement (Vague, et non Déluge). Image de la Mu actuelle : `templates/resources/towns/mu_capital.jpg` (fournie par l'Auteur). Pas de `lieu:*` correspondant au dump.
 
 ---
 
@@ -439,3 +439,103 @@ Dans les milieux d'Architectes, on dit ainsi qu'un grand maître connaît les po
 Un Architecte formé à Lutecia connaît les routes qui relient les cités.
 
 Mais celui qui revient de Mu sait que les portes ont elles aussi une mémoire.
+
+## 🤖 Claude Code
+
+Évaluation contre le canon (frise fusionnée § 5 et § 4.1, Mu du 10/10, SKILL telluris-lore). Huit contradictions soumises à l'Auteur :
+
+1. **Date de l'engloutissement** : canon = Mu antédiluvienne, catastrophe inconnue, théorie « engloutie au Déluge » ; ChatGPT = Mu entre dans l'Âge des Portails et sombre à la Vague. (a) garder le canon, ChatGPT devient une tradition de Mu ; (b) adopter ChatGPT.
+2. **Sens de la transmission** : canon = magie de Mu antérieure aux frères, Lutecia dépend de Mu ; ChatGPT = Mu reçoit les portails de l'extérieur.
+3. **Notre-Dame** : canon = œuvre d'un frère, programmable, cristal jaune ; ChatGPT = « porte naturelle » et « route » de plusieurs seuils.
+4. **Cristaux avant la Vague** : canon = portails sans cristaux avant la Vague ; ChatGPT = ancrages réclamant « davantage de cristaux » pendant le lent dérèglement.
+5. **Remparts et Paladins avant Gilgamesh** : Mu antédiluvienne a déjà murailles et Paladins.
+6. **Qui connaît Mu** : canon = grands Architectes et Templiers de Notre-Dame ; ChatGPT = « grandes Guildes », aventurier ordinaire, Lutecia qui « transmet ».
+7. **Savoir des maîtres de Mu** : « dépasse » le savoir actuel vs « ne comprennent plus entièrement ».
+8. **Catastrophe presque expliquée** (sacrifice volontaire, porte sous Mu).
+
+Points mineurs : noms nouveaux (Âge des Tables de Pierre, Mu-la-Centrale, Couronne de Mu, Retours, Sept Sages), Ra-Mu et « Empereur », lien implicite avec Lilith/Échidna (rang A), « on n'en sort pas » figuré ou littéral.
+
+## ✍️ Auteur
+
+Voici l'image de la Mu actuelle.
+
+Pour tes questions :
+1-b le déluge n'a pas enseveli Mu.
+2- Mu a appris les portails d'un des trois frères. Elle a sombré au moment de la grande vague.
+3- Notre-Dame œuvre un des frères. On garde le lore existant. Route en un seul seuil.
+4- les portails créé par les héritiers des trois frères demandent des cristaux. Rarement les portails originaux.
+
+5- Mu est en avance sur son temps.vson histoire méconnu n'est pas cité en référence par mes autres cités.
+
+6- moins on parle d'une destination, plus les guildes d'aventuriers s'y intéressent. Le prix du voyage depuis Lutecia est connu des aventuriers de rang A et plus.
+
+7- les maîtres de Mu en savent plus que tout le monde, mais bien moins que leurs prédécesseurs.
+
+8- presqu'une réponse. Inconnue de quasiment tout le monde. La vérité et que Mu a sauvé Telluris en sacrifiant un continent pour fermer un portail naturel dont la voracité menacé le monde. De nos jours même pour les habitants de Mu, cela n'est qu'une hypothèse parmis tant d'autres.
+
+Nouveaux noms à intégrer avec s'il le faut des modifications pour desambiguation.
+
+Liens explicite avec Echidna.
+
+La phrase reste figurée.
+
+Explicite la problématique Ra-Mu et Empereur.
+
+---
+
+## 1. Arbitrage de l'Auteur (11/10/2026)
+
+1. **Chronologie (option b)** : le Déluge **n'a pas** englouti Mu. Mu naît dans l'antédiluvien, entre dans l'Âge des Portails, et **sombre au moment de la Grande Vague**. La théorie « Mu engloutie au Déluge » ([frise fusionnée](../monde/20261011_frise_chronologique_fusionnee.md) § 11) est **retirée**.
+2. **Portails** : Mu **a appris les portails d'un des trois frères**. Elle est antérieure aux frères (la cité), pas son art des portails.
+3. **Notre-Dame** : œuvre d'un des frères, le lore existant est conservé (programmable, cristal **jaune** vers Mu). La « porte naturelle » de ChatGPT est **rejetée**. **Route en un seul seuil** : on passe Notre-Dame, on est à Mu — pas de chaîne de relais.
+4. **Cristaux** : les portails créés par les **héritiers** des trois frères demandent des cristaux ; les portails **originaux**, rarement (corrige « avant la Vague, sans cristaux » : la règle tient pour les portails des frères, pas pour ceux de leurs héritiers).
+5. **Mu en avance sur son temps** : ses murailles, ses gardiens des routes et ses institutions précèdent l'Âge des Remparts. Son histoire, méconnue, **n'est citée en référence par aucune autre cité** : Gilgamesh reste celui qui ouvre l'Âge des Remparts pour le reste du monde.
+6. **Les guildes** : moins on parle d'une destination, plus les guildes d'aventuriers s'y intéressent. Le **prix du voyage depuis Lutecia** est connu des aventuriers de **rang A et plus**.
+7. **Les maîtres de Mu** en savent plus que tout le monde, mais **bien moins que leurs prédécesseurs**.
+8. **La vérité** (vérité du monde, inconnue de quasiment tous) : **Mu a sauvé Telluris en sacrifiant un continent pour fermer un portail naturel dont la voracité menaçait le monde.** Aujourd'hui, même pour les habitants de Mu, ce n'est qu'**une hypothèse parmi tant d'autres**.
+9. **Noms nouveaux** : intégrés, désambiguïsés au besoin (§ 2).
+10. **Lilith/Échidna** : le lien avec Mu devient **explicite** (§ 4).
+11. « On n'en sort pas » reste une phrase **figurée** : ceux qui restent à Mu le font par vocation.
+12. **Ra-Mu et l'Empereur** : problématique à expliciter (§ 3).
+
+## 2. Noms nouveaux — désambiguïsation (Claude Code)
+
+| Nom de ChatGPT | Retenu | Pourquoi |
+|---|---|---|
+| Âge des Tables de Pierre | **le temps des Tables de Pierre** | « Âge » est réservé aux quatre ères de Telluris (Remparts, Portails, Donjons) ; c'est une époque propre à Mu. |
+| Sept Sages | **les Sept Sages de Mu** | distingue des sept sages de la Grèce ; écho assumé des sept *apkallu* sumériens, sages antédiluviens venus de la mer *(rapprochement proposé, non tranché)*. |
+| Mu-la-Centrale | **Mu-la-Centrale** | la cité, quand il faut la distinguer du continent ; « Mu » seul désigne l'un ou l'autre. |
+| Couronne de Mu | **la Couronne de Mu** | aucun homonyme (l'auberge « La Couronne de la Cité » est à Lutèce, sans lien). |
+| les Retours | **les Retours** (donjons) | les Architectes « de retour » du second texte deviennent **ceux qui reviennent**, pour ne pas confondre. |
+| route de Mu | **le seuil de Mu** | la route tient en un seul seuil (arbitrage 3). |
+| Empereur du Soleil levant / Ra-Mu | voir § 3 | — |
+
+## 3. Ra-Mu et l'« Empereur » — la problématique
+
+- **D'où viennent ces noms.** Mu n'est pas un mythe antique : c'est une légende **moderne**. Augustus Le Plongeon la tire d'une lecture fautive d'un codex maya ; James Churchward en fait un continent du Pacifique, « l'Empire du Soleil », gouverné par **Ra-Mu**, roi-prêtre. « Soleil levant » ajoute un écho de l'Extrême-Orient.
+- **Ce qui heurte Telluris.**
+	- **« Empereur » / « empire »** suppose une domination sur d'autres peuples. Mu est gouvernée par des **assemblées** (lignées, temples, guildes, maîtres Architectes), sans conquête, et Telluris ne connaît **aucune guerre**.
+	- **« Ra »** est aussi le dieu-soleil d'Égypte : le nom crée un lien entre Mu et la dynastie du Nil que le lore n'a pas décidé.
+- **Lecture retenue dans le texte rédigé.** Ra-Mu est un **titre**, pas un homme : celui qui tient l'équilibre entre les assemblées, les routes et les communautés de Mu. « Empereur du Soleil levant » est la **déformation** que lui ont donnée les récits de la surface, qui ne concevaient pas une puissance sans empire. C'est la règle de Telluris : le mythe a eu lieu, il est arrivé déformé.
+- **Laissé ouvert** : la ressemblance avec le Ra d'Égypte — emprunt, coïncidence, ou trace d'un ancien contact — reste une question que les personnages se posent, sans réponse.
+
+## 4. Mu et Lilith/Échidna — le lien explicite
+
+- La trame du rang A ([idées de quêtes](../personnages/20260924_idees_de_quetes_a_lutecia.md)) place à Mu « **Le serpent sous la cité** » : l'aventurier y rencontre **Lilith**, ou **Échidna**, que l'on accuse d'être la mère de tous les monstres. « Vous appelez monstres mes enfants. »
+- Les traditions de Mu parlent depuis toujours de **Naga**, de **Maîtres-serpents** et de grandes créatures gardiennes, sans les ranger parmi les dieux ni parmi les monstres. Elles parlent aussi d'une **mère des serpents** : c'est elle que la surface nomme Échidna — la mère des monstres des Grecs, mi-femme mi-serpent — ou Lilith.
+- Elle se trouve **sous Mu-la-Centrale**, au plus près de la porte que Mu a fermée. Ce qu'elle est pour cette porte, nul ne le sait ; les habitants de Mu en débattent (*théories, aucune n'est vraie par décision*) :
+	- elle est ce qui a voulu passer, et qu'on a arrêté au seuil ;
+	- elle est venue **avant** la fermeture, et ses enfants sont les monstres que la Vague a semés ;
+	- elle **garde** la porte, et Mu ne l'a jamais compris ;
+	- elle est prisonnière de l'enveloppe, comme la cité.
+- La vérité du monde (arbitrage 8) ne dit rien d'elle : la porte était **vorace**, elle n'est pas dite habitée.
+
+## 5. La Mu actuelle — l'image de l'Auteur
+
+`templates/resources/towns/mu_capital.jpg` (1408 × 768).
+
+- Au fond d'une fosse océanique, la cité est posée sur un reste de terre, sous un **dôme de lumière dorée** piqueté d'éclats : l'enveloppe de stabilisation.
+- **Murailles concentriques**, séparées par des **canaux** circulaires ; quartiers denses aux toits serrés ; ports et quais intérieurs.
+- Au centre, un **temple à colonnes** surmonté d'un **trident d'or** ; à côté, un édifice à **coupole**.
+- Hors du dôme, des **quartiers noyés**, couverts d'algues ; des **arches** d'aqueduc en ruine sur le fond ; une **tour enlacée de tentacules**.
+- Autour : **sirènes** (ou peuple de la mer), raies manta, bancs de poissons, une pieuvre géante, un serpent de mer près de l'abîme.

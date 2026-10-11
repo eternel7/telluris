@@ -28,11 +28,11 @@ Le temps de Telluris ne se découpe pas en antiquité ou en moyen âge. Il se di
 
 C'est tout ce qui précède le Déluge. Personne n'en connaît la durée.
 
-Avant même les premiers Anthropes, un **dragon empereur** veille déjà sur l'Islande. Puis les cinq Lignées se dispersent dans un monde sauvage, en petits établissements reliés par des pistes dangereuses. Loin de tous, **Mu** prospère avec une magie que nul ne maîtrise plus aujourd'hui. **Atlantis** vit déjà, à l'écart. Au sud de l'Égypte commence la dynastie dont émergera **Néfertiti**, qui consacrera des siècles à la recherche de l'immortalité.
+Avant même les premiers Anthropes, un **dragon empereur** veille déjà sur l'Islande. Puis les cinq Lignées se dispersent dans un monde sauvage, en petits établissements reliés par des pistes dangereuses. Loin de tous, **Mu** prospère, en avance sur son temps : elle a déjà ses murailles et ses gardiens des routes, mais personne ailleurs ne connaît son histoire. **Atlantis** vit déjà, à l'écart. Au sud de l'Égypte commence la dynastie dont émergera **Néfertiti**, qui consacrera des siècles à la recherche de l'immortalité.
 
 Quelques portails existent déjà, sans que personne les ait bâtis. Le plus connu des Occidentaux est celui de **Saint-Pierre**, au fond d'une grotte, sur une butte au bord du Tibre, avant même que Rome existe. D'autres, comme le gouffre de l'Hekla en Islande ou la brèche de Cordoue, n'ont pas d'âge connu.
 
-L'ère se ferme sur le **Déluge**. Nul ne sait ce qu'il fut. Un homme, **Utnapishtim**, y a survécu ; où il vit, s'il vit encore, personne ne le sait. Les uns disent que Mu fut engloutie à ce moment-là. Certains Architectes affirment que le Déluge était déjà une vague de mana, et que la Grande Vague n'est que la seconde ; d'autres le nient.
+L'ère se ferme sur le **Déluge**. Nul ne sait ce qu'il fut. Un homme, **Utnapishtim**, y a survécu ; où il vit, s'il vit encore, personne ne le sait. Mu, elle, n'y a pas sombré. Certains Architectes affirment que le Déluge était déjà une vague de mana, et que la Grande Vague n'est que la seconde ; d'autres le nient.
 
 ### L'Âge des Remparts
 
@@ -42,13 +42,13 @@ Partout, les Anthropes se réfugient derrière des murailles, et naissent les Ci
 
 ### L'Âge des Portails
 
-L'ère s'ouvre avec les **trois frères aborigènes**, qui apportent au monde la connaissance du portail transversal. Le réseau des portes s'étend, les cités situées à ses nœuds grandissent, le savoir passe aux **Architectes**. **Salomon** vit à cette époque, après les frères.
+L'ère s'ouvre avec les **trois frères aborigènes**, qui apportent au monde la connaissance du portail transversal. Le réseau des portes s'étend, les cités situées à ses nœuds grandissent, le savoir passe aux **Architectes**, dont les portails, plus fragiles que ceux des frères, demandent des cristaux. Mu apprend les portails de l'un des frères et devient un nœud du réseau. **Salomon** vit à cette époque, après les frères.
 
 Puis le savoir se dégrade lentement : on entretient les portails sans plus comprendre pourquoi ils fonctionnent. Les **monothéismes** apparaissent et transforment peu à peu des auberges-relais en monastères-relais.
 
 ### L'Âge des Donjons
 
-Il y a sept à huit siècles, une **vague de mana** d'origine inconnue balaie Telluris. Les portails mal créés ou mal entretenus changent de couleur, et les premiers voyageurs qui les franchissent découvrent les premiers **donjons**. Les Templiers se recentrent sur les temples, les Paladins rouvrent les routes, les **cristaux de mana** deviennent la ressource dont tout dépend.
+Il y a sept à huit siècles, une **vague de mana** d'origine inconnue balaie Telluris. Les portails mal créés ou mal entretenus changent de couleur, et les premiers voyageurs qui les franchissent découvrent les premiers **donjons**. Le continent de **Mu** sombre sous le Grand Océan ; sa cité survit sous les eaux. Les Templiers se recentrent sur les temples, les Paladins rouvrent les routes, les **cristaux de mana** deviennent la ressource dont tout dépend.
 
 Un siècle après la Vague, **Charlemagne** fait d'Aix-la-Chapelle la tête d'un réseau de cités qui se portent secours. Puis naissent les **Guildes d'Aventuriers**, Gênes fonde sa banque sur le commerce des cristaux, et Marco Polo, Averroès ou les ducs de Bourgogne marquent les siècles qui mènent à aujourd'hui.
 
