@@ -58,7 +58,7 @@ function extraireConst(nom) {
 }
 
 const CONSTS = ['CHRONO_DELAI_LONG', 'CHRONO_GLISSE', 'FACETTES_LISTES', 'GEO'];
-const FONCTIONS = ['chronoEchelle', 'chronoPx', 'chronoGeometrie', 'chronoEtendue', 'chronoCouloirs', '_sansAccent',
+const FONCTIONS = ['chronoEchelle', 'chronoEresVisibles', 'chronoPx', 'chronoGeometrie', 'chronoEtendue', 'chronoCouloirs', '_sansAccent',
 	'chronoFiltrer', 'chronoGrouper', 'chronoContemporains', 'chronoSousEnsemble', 'chronoAppuiLong', 'chronoXY', 'chronoPas'];
 // `var` plutôt que `const` : les déclarations restent visibles de ce realm après runInThisContext.
 vm.runInThisContext(CONSTS.map(n => extraireConst(n).replace(/^const /, 'var ')).join('\n') + '\n'
@@ -100,6 +100,25 @@ t('échelle : le zoom multiplie les longueurs (plancher compris)', () => {
 	const a = F.chronoEchelle(ERES, 1), b = F.chronoEchelle(ERES, 2);
 	a.segments.forEach((s, i) => assert.strictEqual(b.segments[i].longueur, Math.max(80, Math.round(s.longueur * 2))));
 	assert.ok(F.chronoEchelle(ERES, 0.01).segments.every(s => s.longueur === 80));
+});
+
+t('échelle : une ère non gardée se replie (longueur 0), l\'axe reste continu et rétrécit', () => {
+	const tout = F.chronoEchelle(ERES, 1), e = F.chronoEchelle(ERES, 1, new Set(['p1', 'p2']));
+	assert.deepStrictEqual(e.segments.filter(s => s.cache).map(s => s.id), ['anc', 'jeu', 'fut']);
+	assert.ok(e.segments.filter(s => s.cache).every(s => s.longueur === 0));
+	assert.strictEqual(e.total, tout.segments[1].longueur + tout.segments[2].longueur, 'la place des ères repliées est rendue');
+	e.segments.forEach((s, i) => { if (i) assert.strictEqual(s.debut, e.segments[i - 1].debut + e.segments[i - 1].longueur); });
+	assert.strictEqual(F.chronoPx(1, e), 0, 'le début de la première ère gardée est au bord');
+	assert.strictEqual(F.chronoPx(4.5, e), e.total, 'un temps dans une ère repliée tombe sur sa frontière');
+	let avant = -1;
+	for (let k = 0; k <= 500; k++) { const p = F.chronoPx(k / 100, e); assert.ok(p >= avant); avant = p; }
+});
+
+t('ères visibles : union des ères des éléments retenus, null si rien n\'est retenu', () => {
+	const evs = [point('a', borne(1.5), { eres: ['p1'] }), point('b', borne(4.5), { eres: ['fut'] }), periode('c', borne(0.5), borne(3, 3, 'ouvert'), { eres: ['anc', 'p1', 'p2'] })];
+	assert.deepStrictEqual([...F.chronoEresVisibles(evs, new Set(['a', 'b']))].sort(), ['fut', 'p1']);
+	assert.deepStrictEqual([...F.chronoEresVisibles(evs, new Set(['c']))].sort(), ['anc', 'p1', 'p2']);
+	assert.strictEqual(F.chronoEresVisibles(evs, new Set()), null);
 });
 
 t('t → px : continu aux frontières, monotone, borné', () => {

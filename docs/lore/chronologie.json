@@ -46,7 +46,7 @@
 				{"id": "C", "libelle": "Or · C"},
 				{"id": "B", "libelle": "Platine · B"},
 				{"id": "A", "libelle": "Mythril · A"},
-				{"id": "A+", "libelle": "A+"},
+				{"id": "A+", "libelle": "Mythril · A+ (fin de A)"},
 				{"id": "S", "libelle": "Orichalque · S"},
 				{"id": "S+", "libelle": "Adamantite · S+"}
 			]
@@ -179,12 +179,11 @@
 		{
 			"id": "atlantis",
 			"titre": "Atlantis",
-			"resume": "Grande civilisation insulaire, contemporaine ou postérieure à Mu selon la proposition ; jamais devenue un centre du réseau, par isolement volontaire.",
-			"quand": {"de": {"ere": "antediluvien", "entre_rangs": ["origines", "premiers_ages"]}, "a": {"ere": "apres_vague", "ouvert": true}, "autorite": "proposition"},
-			"couche": "histoire", "categorie": "cite", "autorite": "proposition", "visibilite": "public",
+			"resume": "Grande civilisation insulaire, contemporaine ou postérieure à Mu selon la proposition ; antédiluvienne, elle existe encore aujourd'hui, jamais devenue un centre du réseau, par isolement volontaire.",
+			"quand": {"de": {"ere": "antediluvien", "entre_rangs": ["origines", "premiers_ages"]}, "a": {"ere": "apres_vague", "ouvert": true}, "autorite": "auteur", "note": "Toujours debout et isolée (Auteur, 11/10)."},
+			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
 			"tags": {"lieux": ["atlantis"], "themes": ["mythes", "mystere"]},
-			"sources": [{"fichier": "monde/20260826_chronologie_des_cites_telluris.md", "date": "2026-08-26", "citation": "Grande civilisation insulaire mythique, postérieure ou contemporaine de Mu selon la tradition tellurienne."}, {"fichier": "systemes/20260826_completer_le_tableau.md", "date": "2026-08-26", "citation": "jamais devenue un centre du réseau"}],
-			"contradictions": [{"texte": "« Ère antédiluvienne » (26/08) pour sa fondation, mais le tableau des portails la dit « jamais devenue un centre du réseau », donc existante à l'ère des portails : survit-elle ? Non tranché.", "sources": ["monde/20260826_chronologie_des_cites_telluris.md"]}]
+			"sources": [{"fichier": "monde/20260826_chronologie_des_cites_telluris.md", "date": "2026-08-26", "citation": "Grande civilisation insulaire mythique, postérieure ou contemporaine de Mu selon la tradition tellurienne."}, {"fichier": "systemes/20260826_completer_le_tableau.md", "date": "2026-08-26", "citation": "jamais devenue un centre du réseau"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Atlantis existe encore, isolée"}]
 		},
 		{
 			"id": "dynastie_nefertiti",
@@ -403,9 +402,8 @@
 			"quand": {"moment": {"ere": "avant_vague", "entre": [2850, 2450]}, "autorite": "proposition", "note": "Juste avant Salomon."},
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"tags": {"peuples": ["hebreux"], "lieux": ["jerusalem"]},
-			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "David est reconnu par Jérusalem comme son roi."}],
-			"apres": ["trois_freres"],
-			"contradictions": [{"texte": "La frise ChatGPT du 19/08 écrit « David prend Jérusalem » et « le royaume se divise » : guerre et royaume, contraires aux règles de l'Auteur ; réécrit le 11/10 (frise fusionnée § 6).", "sources": ["monde/20260819_frise_chronologique_de_telluris.md"]}]
+			"sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "David est reconnu par Jérusalem comme son roi."}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Colonne Jérusalem (§ 6) et correction de Hārūt et Mārūt (§ 7) validées"}],
+			"apres": ["trois_freres"]
 		},
 		{
 			"id": "salomon",
@@ -427,9 +425,8 @@
 			"quand": {"moment": {"ere": "avant_vague", "entre": [2800, 2400]}, "autorite": "proposition", "note": "À l'époque de Salomon."},
 			"couche": "histoire", "categorie": "mythe", "autorite": "proposition", "visibilite": "public",
 			"tags": {"peuples": ["babyloniens", "anges_demons"], "lieux": ["babylone"], "themes": ["mythes", "savoir"]},
-			"sources": [{"fichier": "cites/20260819_histoire_de_babylone.md", "date": "2026-09-10", "citation": "C'est également l'époque de Salomon."}],
-			"apres": ["trois_freres"],
-			"contradictions": [{"texte": "Le texte d'origine (10/09) dit « lorsque les générations suivantes découvriront les portails » : portails APRÈS Salomon, contraire à l'Auteur. Correction proposée (frise fusionnée § 7).", "sources": ["cites/20260819_histoire_de_babylone.md"]}]
+			"sources": [{"fichier": "cites/20260819_histoire_de_babylone.md", "date": "2026-09-10", "citation": "C'est également l'époque de Salomon."}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "La découverte des portails est antérieure à Salomon"}],
+			"apres": ["trois_freres"]
 		},
 		{
 			"id": "dedale",
@@ -930,10 +927,9 @@
 			"quand": {"moment": {"ere": "jeu", "rang": "A+"}, "autorite": "auteur"},
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "meta",
 			"tags": {"peuples": ["anges_demons"], "lieux": ["rome", "paradis"], "themes": ["mondes_divins", "mythes"]},
-			"sources": [{"fichier": "personnages/20260924_idees_de_quetes_a_lutecia.md", "date": "2026-09-24", "citation": "Paradis"}],
+			"sources": [{"fichier": "personnages/20260924_idees_de_quetes_a_lutecia.md", "date": "2026-09-24", "citation": "Paradis"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Rang A+ = palier dans le rang A"}],
 			"apres": ["trame_a"],
-			"liens": ["portail_saint_pierre"],
-			"contradictions": [{"texte": "Le rang « A+ » figure dans la trame retenue mais pas dans le tableau des rangs de l'Auteur (12/08). Non tranché.", "sources": ["monde/20260812_monde_medieval_fantastique.md"]}]
+			"liens": ["portail_saint_pierre"]
 		},
 		{
 			"id": "trame_s",

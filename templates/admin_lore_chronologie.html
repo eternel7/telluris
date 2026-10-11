@@ -235,19 +235,30 @@
 
 	// ── Fonctions pures (dev/test_chronologie_client.js) ─────────────────────────
 
-	/** Segments de l'axe : une ère = [debut, debut + longueur[ en pixels, sans trou. */
-	function chronoEchelle(eres, zoom) {
+	/** Segments de l'axe : une ère = [debut, debut + longueur[ en pixels, sans trou.
+	 *  `garder` (Set d'ids d'ères, facultatif) : une ère absente est REPLIÉE — longueur 0,
+	 *  `cache` —, l'axe reste continu et la place est rendue aux ères affichées. */
+	function chronoEchelle(eres, zoom, garder) {
 		const segments = [];
 		let pos = 0;
 		eres.forEach((e, i) => {
+			const cache = !!garder && !garder.has(e.id);
 			let L = e.type === 'ordinal'
 				? (e.px_rang || 120) * (e.rangs || []).length * zoom
 				: Math.abs(e.debut - e.fin) / 100 * (e.px_siecle || 40) * zoom;
-			L = Math.max(80, Math.round(L));
-			segments.push({ id: e.id, i: i, debut: pos, longueur: L, ere: e });
+			L = cache ? 0 : Math.max(80, Math.round(L));
+			segments.push({ id: e.id, i: i, debut: pos, longueur: L, ere: e, cache: cache });
 			pos += L;
 		});
 		return { segments: segments, total: pos };
+	}
+
+	/** Ères à afficher : celles que touche au moins un élément retenu ; `null` (toutes) si
+	 *  aucun n'est retenu, pour ne jamais rendre un axe vide. */
+	function chronoEresVisibles(evenements, ids) {
+		const garder = new Set();
+		for (const ev of evenements) if (ids.has(ev.id)) for (const e of ev.eres || []) garder.add(e);
+		return garder.size ? garder : null;
 	}
 
 	/** Temps normalisé → pixel sur l'axe (continu aux frontières d'ères). */
@@ -584,8 +595,9 @@
 			orientation = window.matchMedia('(orientation: landscape)').matches ? 'h' : 'v';
 			const o = orientation, G = GEO[o];
 			$('zone').classList.toggle('v', o === 'v');
-			echelle = chronoEchelle(CHRONO.eres, etat.zoom);
 			const ok = retenus();
+			// Filtrer, c'est gagner la place : une ère sans élément retenu se replie (estomper la garde).
+			echelle = chronoEchelle(CHRONO.eres, etat.zoom, etat.estomper ? null : chronoEresVisibles(EVS, ok));
 			const visibles = etat.estomper ? EVS : EVS.filter(ev => ok.has(ev.id));
 			$('compte').textContent = ok.size + ' / ' + EVS.length + ' éléments' + (etat.sel ? ' · sélection : ' + PAR_ID[etat.sel].titre_court : '');
 			$('filtres-titre').textContent = 'Filtres · ' + ok.size + ' / ' + EVS.length;
@@ -604,7 +616,9 @@
 				blocs.push({ gr: gr, items: items, lanes: lanes, debut: debut, tete: travers });
 				travers = debut + Math.max(1, lanes.n) * G.couloir + G.ecartGroupe;
 			}
-			const longueurAxe = echelle.total + G.axe * 2;
+			// Un libellé peut déborder la dernière ère affichée (surtout quand les suivantes sont repliées).
+			const finLibelles = Math.max(echelle.total, ...blocs.flatMap(b => b.items.map(it => it.a1)));
+			const longueurAxe = finLibelles + G.axe * 2;
 			const W = o === 'h' ? longueurAxe : G.bande + travers + 10;
 			const H = o === 'h' ? G.bande + travers + 10 : longueurAxe;
 			const svg = $('frise'), axe = $('axe');
@@ -640,7 +654,7 @@
 
 			// Fonds d'ères, graduations, en-têtes.
 			const fond = sv('g'), fondA = sv('g');
-			echelle.segments.forEach((s, k) => {
+			echelle.segments.filter(s => !s.cache).forEach((s, k) => {
 				const teinte = { fill: k % 2 ? 'rgba(255,255,255,0.025)' : 'rgba(75,143,200,0.035)' };
 				fond.appendChild(rectAC(s.debut, s.debut + s.longueur, -G.bande, cMax, teinte));
 				fondA.appendChild(rectAC(s.debut, s.debut + s.longueur, -G.bande, 0, teinte));
@@ -667,7 +681,7 @@
 						graduer(a + 2, r.libelle);
 					});
 					// Axe « brisé » : durée inconnue dans l'antédiluvien, rangs ailleurs.
-					if (k === 0) fondA.appendChild(texteAC(s.debut + s.longueur - 16, -4, '≈', { class: 'ere' }));
+					if (s.i === 0) fondA.appendChild(texteAC(s.debut + s.longueur - 16, -4, '≈', { class: 'ere' }));
 				} else {
 					const span = Math.abs(e.debut - e.fin), pas = chronoPas(s.longueur / span);
 					const futur = e.type === 'futur';
@@ -791,7 +805,7 @@
 			const r = (a0, a1, attrs) => sv('rect', Object.assign(o === 'h'
 				? { x: a0 * k, y: 0, width: Math.max(1, (a1 - a0) * k), height: epais }
 				: { x: 0, y: a0 * k, width: epais, height: Math.max(1, (a1 - a0) * k) }, attrs));
-			echelle.segments.forEach((s, i) => {
+			echelle.segments.filter(s => !s.cache).forEach((s, i) => {
 				mini.appendChild(r(GEO[o].axe + s.debut, GEO[o].axe + s.debut + s.longueur, { fill: i % 2 ? '#1a1e29' : '#17202d', stroke: '#2a3040' }));
 				const t = sv('text', o === 'h' ? { x: (GEO[o].axe + s.debut) * k + 3, y: 11, class: 'grad', fill: '#c8a84b', 'font-size': 9 } : { x: 2, y: (GEO[o].axe + s.debut) * k + 10, fill: '#c8a84b', 'font-size': 8 }, o === 'h' ? s.ere.libelle : s.ere.libelle.slice(0, 5));
 				mini.appendChild(t);

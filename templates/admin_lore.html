@@ -83,6 +83,34 @@
 			border-radius: 4px; padding: 0 5px; margin-left: 6px; letter-spacing: 0.05em;
 		}
 
+		/* ── Tête de l'index : chronologie + synthèse du concept ─── */
+		.tete-lore { margin-bottom: 18px; }
+		.card {
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: 8px; padding: 20px;
+		}
+		.card-title {
+			display: block; font-size: 0.75rem; letter-spacing: 0.15em; color: var(--accent);
+			text-transform: uppercase; margin-bottom: 6px;
+		}
+		.card-desc { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+		.card-desc p { margin-top: 4px; }
+		a.chrono-carte {
+			display: block; max-width: 560px; margin: 0 auto 16px; text-align: center; text-decoration: none;
+			border-color: var(--accent); box-shadow: 0 0 0 1px rgba(200,168,75,0.25), 0 6px 24px rgba(200,168,75,0.10);
+		}
+		a.chrono-carte:hover, a.chrono-carte:focus-visible { background: var(--panel2); outline: none; }
+		a.chrono-carte .card-title { font-size: 1.05rem; }
+		a.chrono-carte .card-desc { margin-bottom: 0; }
+		.synthese { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; align-items: start; }
+		/* Cards repliables : l'en-tête (PREMIER .card-title) bascule l'état, mémorisé en localStorage. */
+		.synthese .card > .card-title:first-child { cursor: pointer; user-select: none; outline: none; }
+		.synthese .card > .card-title:first-child::after { content: '▾'; float: right; color: var(--muted); }
+		.synthese .card > .card-title:first-child:focus-visible { text-decoration: underline; }
+		.synthese .card.closed > .card-title:first-child { margin-bottom: 0; }
+		.synthese .card.closed > .card-title:first-child::after { content: '▸'; }
+		.synthese .card.closed > :not(:first-child) { display: none; }
+
 		/* ── Lecture ───────────────────────────────────────────────── */
 		.lecture { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 20px; align-items: start; }
 		.sommaire {
@@ -176,13 +204,22 @@
 	<header id="haut">
 		<h1>{{ '📚 ' if not entree }}{{ title }}</h1>
 		<nav>
-			<a href="/admin/lore/chronologie" class="chrono">🕰 Chronologie</a>
-			{% if entree %}<a href="/admin/lore">← Lore</a>{% endif %}
+			{% if entree %}<a href="/admin/lore/chronologie" class="chrono">🕰 Chronologie</a>
+			<a href="/admin/lore">← Lore</a>{% endif %}
 			<a href="/admin">← Administration</a>
 		</nav>
 	</header>
 	<div class="main">
 	{% if not entree %}
+		<div class="tete-lore">
+			<a class="card chrono-carte" href="/admin/lore/chronologie">
+				<span class="card-title">🕰 Chronologie du lore</span>
+				<span class="card-desc">Frise filtrable de tout ce qui est daté — ères, figures, cités, portails, trame du joueur — et points à arbitrer.</span>
+			</a>
+			<div class="synthese">
+				{% include 'part-lore-synthese.html' %}
+			</div>
+		</div>
 		<div class="intro">
 			Les séances de travail sur le monde (une par fichier de <code>docs/lore/</code>) et la synthèse
 			du <strong>Document maître</strong>. ⚠️ Ce sont des échanges : les messages de l'<strong>Auteur</strong>
@@ -251,6 +288,27 @@
 			};
 			recherche.addEventListener('input', filtrer);
 			filtrer();
+		}
+		// Cards de synthèse repliables (état par navigateur ; clé = texte de l'en-tête).
+		const CLE = 'telluris.lore_cards.v1';
+		const lire = () => { try { return JSON.parse(localStorage.getItem(CLE) || '{}') || {}; } catch (e) { return {}; } };
+		for (const card of document.querySelectorAll('.synthese > .card')) {
+			const head = card.firstElementChild;
+			if (!head || !head.classList.contains('card-title')) continue;
+			const cle = head.textContent.trim();
+			const appliquer = ferme => { card.classList.toggle('closed', ferme); head.setAttribute('aria-expanded', ferme ? 'false' : 'true'); };
+			const basculer = () => {
+				const ferme = !card.classList.contains('closed');
+				appliquer(ferme);
+				const etat = lire();
+				if (ferme) etat[cle] = true; else delete etat[cle];
+				try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch (e) { /* mode privé */ }
+			};
+			head.setAttribute('role', 'button');
+			head.setAttribute('tabindex', '0');
+			appliquer(!!lire()[cle]);
+			head.addEventListener('click', basculer);
+			head.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); basculer(); } });
 		}
 		const corps = document.getElementById('corps');
 		if (corps) {

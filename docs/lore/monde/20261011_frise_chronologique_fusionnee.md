@@ -1,7 +1,7 @@
 # Frise chronologique fusionnée de Telluris
 
 - **Source :** fusion, par Claude Code (session du 11/10/2026, à la demande de l'Auteur), des deux frises ChatGPT — [frise du 19/08](20260819_frise_chronologique_de_telluris.md) (avec sa colonne Jérusalem) et [frise du 21/08](20260821_frise_chronologique_de_telluris.md) —, confrontées aux messages de l'Auteur, à la [chronologie des cités](20260826_chronologie_des_cites_telluris.md), aux séances des cités et au [document maître](../../Telluris_Document_Maitre.md).
-- **Créée :** 11/10/2026 · **révisée :** 11/10/2026, après quatre arbitrages de l'Auteur (§ 1).
+- **Créée :** 11/10/2026 · **révisée :** 11/10/2026, après six arbitrages de l'Auteur (§ 1).
 - **Statut :** **document de travail.** Les décisions du § 1 sont de l'Auteur. Tout ce qui porte 💬 ou « proposé » reste une proposition. Les points du § 8 attendent encore un arbitrage.
 
 **Légende des sources**
@@ -74,6 +74,15 @@ Décisions de l'Auteur, après lecture de la première version de cette fusion :
 23. **Grigori** : proposition du § 9 **validée**.
 24. **Romulus** : proposition du § 10 **validée**. L'inversion avec l'ordre réel n'est pas gênante : « **toute inversion ou toute divergence par rapport à la réalité de notre histoire n'est pas gênante** ». Lutecia montre déjà des monuments très tardifs dans notre histoire.
 25. **Avènement** (retenu) : le moment où le lieu **prend son essor** et est **connu des autres Cités-États**. **Établissement** : le site **prend racine** et ne bouge plus ; avant, il peut y avoir des établissements temporaires, des passages, des nomades qui y vivent selon les saisons.
+
+### ✍️ Auteur — 11/10/2026 (cinquième arbitrage)
+
+26. **Colonne Jérusalem (§ 6) et correction de Hārūt et Mārūt (§ 7) validées** : les réécritures proposées sont retenues telles quelles. David est reconnu roi par Jérusalem, sans conquête ; les portails précèdent Salomon et Hārūt et Mārūt.
+
+### ✍️ Auteur — 11/10/2026 (sixième arbitrage)
+
+27. **Atlantis existe encore, isolée** : civilisation antédiluvienne toujours debout aujourd'hui, restée à l'écart du réseau des portails par choix.
+28. **Rang A+ = palier dans le rang A** : la fin du rang A (Mythril), sans nouveau métal ; le tableau des rangs du 12/08 reste tel quel.
 
 ---
 
@@ -259,9 +268,9 @@ Absentes, faute de séance qui les date : Alexandrie, Babylone, Rhemi.
 
 ---
 
-## 6. Colonne Jérusalem réécrite (frise du 19/08)
+## 6. Colonne Jérusalem réécrite (frise du 19/08) (✍️ 11/10, proposition adoptée)
 
-Réécriture 🔧 selon le § 1.7, alignée sur les âges du § 4. Le mot « royaume » disparaît : il n'en reste qu'une occurrence, pour Néfertiti, seul royaume établi du lore.
+Réécriture 🔧 selon le § 1.7, adoptée au § 1.26, alignée sur les âges du § 4. Le mot « royaume » disparaît : il n'en reste qu'une occurrence, pour Néfertiti, seul royaume établi du lore.
 
 | Âge (§ 4) | Avant (💬19) | Proposé |
 |---|---|---|
@@ -279,14 +288,14 @@ Réécriture 🔧 selon le § 1.7, alignée sur les âges du § 4. Le mot « roy
 
 ---
 
-## 7. Hārūt et Mārūt — correction
+## 7. Hārūt et Mārūt — correction (✍️ 11/10, proposition adoptée)
 
 Source : [séance Babylone, réponse du 10/09](../cites/20260819_histoire_de_babylone.md).
 
 **Passage fautif** (💬, § *La place chronologique de Hārūt et Mārūt*) :
 > « → **bien avant la grande vague de mana et l'apparition des donjons.** Ainsi, **lorsque les générations suivantes découvriront les portails**, les Architectes ne partiront pas de zéro. Une partie des connaissances anciennes sur les flux, les liens et les forces invisibles existe déjà dans les tablettes babyloniennes. »
 
-**Réécriture proposée** (🔧, selon le § 1.8) :
+**Réécriture retenue** (🔧 adoptée, § 1.8 et § 1.26) :
 > « → **après l'œuvre des trois frères**, qui ont apporté au monde la connaissance des portails → à l'époque de Salomon → **bien avant la grande vague de mana et l'apparition des donjons.** Ainsi, quand le savoir des frères commencera à se dégrader, les Architectes ne repartiront pas de zéro : une partie des connaissances anciennes sur les flux, les liens et les forces invisibles reste consignée dans les tablettes babyloniennes. »
 
 La séance d'origine n'est pas modifiée : c'est un échange de travail. La correction vaut pour tout texte qui reprendrait la proposition.
@@ -295,7 +304,7 @@ La séance d'origine n'est pas modifiée : c'est un échange de travail. La corr
 
 ## 8. Points encore ouverts
 
-Tous les points ouverts par cette fusion sont tranchés (§ 1, quatrième arbitrage). Restent les mystères **volontairement** ouverts du lore : nature de la Vague, origine ultime des monstres, père des jumeaux, nature de la Louve, fin des Grigori, Jumièges.
+Tous les points ouverts par cette fusion sont tranchés (§ 1, quatrième à sixième arbitrages). Restent les mystères **volontairement** ouverts du lore : nature de la Vague, origine ultime des monstres, père des jumeaux, nature de la Louve, fin des Grigori, Jumièges.
 
 ---
 
