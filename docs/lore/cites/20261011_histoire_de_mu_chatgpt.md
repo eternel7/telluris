@@ -596,3 +596,14 @@ Cerbère est resté de l'autre côté de la porte. C'est l'enfer d'Hadès. Hekla
 
 1. **Cerbère est resté de l'autre côté** de la porte scellée : Échidna, prisonnière sous Mu, est **séparée** de son préféré.
 2. La porte scellée sous Mu mène aux **Enfers d'Hadès**. Le gouffre de l'**Hekla** mène à l'**Enfer de Lucifer**. Ce sont **deux mondes distincts**.
+
+## ✍️ Auteur
+
+Les deux enfers peuvent jouer ce rôle. Et plusieurs portes peuvent mener au même autre monde.
+
+---
+
+## 9. Cinquième arbitrage de l'Auteur (11/10/2026)
+
+1. **Les deux Enfers** — celui de Lucifer et celui d'Hadès — peuvent être le donjon qui **éveille le personnage**.
+2. **Plusieurs portes peuvent mener au même autre monde.** Hekla et la porte scellée de Mu mènent à deux mondes distincts, mais un monde n'a pas forcément une seule porte.

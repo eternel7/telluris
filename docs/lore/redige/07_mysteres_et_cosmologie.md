@@ -6,7 +6,7 @@ Ce chapitre rassemble ce que Telluris cache. Une partie relève de la vérité d
 
 Les portails ne mènent pas tous à des lieux de Telluris. Certains ouvrent sur des mondes que nos mythes ont nommés, et chaque région du monde a les siens, adaptés à sa culture.
 
-Le **Paradis** est le monde des anges, qui ne sont pas tous de doux agneaux. On y accède par Saint-Pierre, à Rome. L'**Enfer** abrite la cohorte des démons, menée par **Lucifer**, l'ancien ange de lumière ; sa porte est le gouffre de l'Hekla, en Islande. Les **Enfers d'Hadès** sont un autre monde ; leur porte, sous Mu, est scellée. Anges et démons se disputent les âmes des Anthropes. Plus au nord, **Yggdrasil** relie de multiples mondes, et chacune de ses portes est un donjon.
+Le **Paradis** est le monde des anges, qui ne sont pas tous de doux agneaux. On y accède par Saint-Pierre, à Rome. L'**Enfer** abrite la cohorte des démons, menée par **Lucifer**, l'ancien ange de lumière ; sa porte est le gouffre de l'Hekla, en Islande. Les **Enfers d'Hadès** sont un autre monde ; leur porte, sous Mu, est scellée. Un monde peut avoir plusieurs portes : celles que l'on connaît ne sont peut-être pas les seules. Anges et démons se disputent les âmes des Anthropes. Plus au nord, **Yggdrasil** relie de multiples mondes, et chacune de ses portes est un donjon.
 
 ## Échidna
 
