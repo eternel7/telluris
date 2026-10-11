@@ -5,6 +5,8 @@ description: The world of Telluris — canon vs proposals (author decisions in d
 
 Lore de Telluris. Matière brute : **`docs/lore/`** (50 séances de travail avec ChatGPT, une par fichier, index `docs/lore/README.md`). Synthèse : `docs/Telluris_Document_Maitre.md` (26 sections, corrigée le 08/10/2026 contre les messages de l'Auteur). Elle ne couvre ni les cités, ni les PNJ, ni les quêtes : ne pas la croire exhaustive. Mécanique des dialogues/quêtes en jeu : **telluris-quetes-pnj** ; prompts d'images : `docs/prompts_images.md`.
 
+Lecture rendue dans le navigateur : **`/admin/lore`** (carte 📚 Lore de « Concepts de Telluris », `utils/lore.py`) — tout `.md` déposé sous `docs/lore/` y apparaît sans autre déclaration ; libellé de dossier dans `lore.SECTIONS`, résumé relu du README.
+
 
 ### Qui fait foi
 Les séances sont des **échanges de travail, pas un canon**. Ordre d'autorité, du plus fort au plus faible :

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	{#
+	  Lecture du lore (/admin/lore) : INDEX (sans `entree`) ou LECTURE d'un fichier (avec).
+	  ⚠️ `corps` est le HTML de utils/lore.py `rendre`, qui ÉCHAPPE tout le texte du .md avant
+	  d'y poser ses balises : c'est ce qui autorise le `|safe` — ne jamais y injecter autre chose.
+	#}
+	<style>
+		:root {
+			--bg: #0d0f14;
+			--panel: #141720;
+			--panel2: #1a1e29;
+			--border: #2a3040;
+			--accent: #c8a84b;
+			--accent2: #4b8fc8;
+			--violet: #b07fd0;
+			--text: #fff;
+			--lecture: #e6e1d3;
+			--muted: #9aa3b2;
+			--tap: 36px;
+		}
+		@media (pointer: coarse) { :root { --tap: 44px; } }
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			background: var(--bg); color: var(--text);
+			font-family: 'Share Tech Mono', monospace; min-height: 100vh;
+		}
+		header {
+			padding: 12px 16px; border-bottom: 1px solid var(--border);
+			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+			display: flex; align-items: center; justify-content: space-between; gap: 12px;
+		}
+		header h1 { font-size: 1.05rem; letter-spacing: 0.12em; color: var(--accent); min-width: 0; overflow-wrap: anywhere; }
+		header nav { display: flex; gap: 14px; flex-shrink: 0; }
+		header a { color: var(--muted); font-size: 0.8rem; text-decoration: none; white-space: nowrap; }
+		header a:hover { color: var(--accent); }
+		.main { max-width: 1180px; margin: 0 auto; padding: 14px 16px 40px; }
+		a { color: var(--accent2); }
+
+		/* ── Index ─────────────────────────────────────────────────── */
+		.intro {
+			font-size: 0.8rem; color: var(--muted); line-height: 1.5;
+			border-left: 3px solid var(--accent); padding: 8px 12px; margin-bottom: 14px;
+			background: var(--panel);
+		}
+		.intro strong { color: var(--text); }
+		input[type=search] {
+			width: 100%; min-height: var(--tap); padding: 0 10px; border: 1px solid var(--border);
+			border-radius: 6px; background: var(--bg); color: var(--text);
+			font-family: inherit; font-size: 16px;
+		}
+		input:focus { outline: none; border-color: var(--accent); }
+		.compte { font-size: 0.75rem; color: var(--muted); margin: 6px 2px 12px; min-height: 1.2em; }
+		.groupe {
+			background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+			margin-bottom: 12px; padding: 4px 0;
+		}
+		.groupe h2 {
+			font-size: 0.8rem; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase;
+			padding: 10px 14px 6px; font-weight: normal;
+		}
+		.groupe h2 .nb { color: var(--muted); font-size: 0.7rem; margin-left: 6px; }
+		a.fichier {
+			display: block; padding: 8px 14px; text-decoration: none; color: var(--text);
+			border-top: 1px solid var(--border);
+		}
+		a.fichier:hover, a.fichier:focus-visible { background: var(--panel2); outline: none; }
+		a.fichier .t { font-size: 0.88rem; }
+		a.fichier .d { color: var(--muted); font-size: 0.72rem; margin-left: 8px; white-space: nowrap; }
+		a.fichier .r { display: block; color: var(--muted); font-size: 0.74rem; line-height: 1.45; margin-top: 3px; }
+		a.fichier.canon .t { color: var(--accent); }
+		.badge {
+			font-size: 0.65rem; border: 1px solid var(--accent); color: var(--accent);
+			border-radius: 4px; padding: 0 5px; margin-left: 6px; letter-spacing: 0.05em;
+		}
+
+		/* ── Lecture ───────────────────────────────────────────────── */
+		.lecture { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 20px; align-items: start; }
+		.sommaire {
+			position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto;
+			background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+			font-size: 0.74rem;
+		}
+		.sommaire summary {
+			cursor: pointer; padding: 10px 12px; color: var(--accent); letter-spacing: 0.1em;
+			text-transform: uppercase; font-size: 0.72rem; user-select: none;
+		}
+		.sommaire ol { list-style: none; padding: 0 8px 10px; }
+		.sommaire li a {
+			display: block; padding: 4px 6px; color: var(--muted); text-decoration: none;
+			border-radius: 4px; line-height: 1.35;
+		}
+		.sommaire li a:hover { color: var(--text); background: var(--panel2); }
+		.sommaire li.n1 a { color: var(--text); }
+		.sommaire li.n3 a { padding-left: 18px; }
+		.meta { font-size: 0.75rem; color: var(--muted); margin-bottom: 10px; overflow-wrap: anywhere; }
+		.meta .badge { margin-left: 0; margin-right: 6px; }
+
+		article.md {
+			background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+			padding: 22px 28px; color: var(--lecture);
+			font-family: Georgia, 'Times New Roman', serif; font-size: 1rem; line-height: 1.65;
+			overflow-wrap: break-word;
+		}
+		.md > * + * { margin-top: 0.8em; }
+		.md h1, .md h2, .md h3, .md h4, .md h5, .md h6 {
+			font-family: 'Share Tech Mono', monospace; color: var(--accent); line-height: 1.3;
+			margin-top: 1.4em; scroll-margin-top: 12px; font-weight: normal; letter-spacing: 0.04em;
+		}
+		.md h1 { font-size: 1.5rem; margin-top: 0; }
+		.md h2 { font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+		.md h3 { font-size: 1.05rem; color: #dcc27a; }
+		.md h4, .md h5, .md h6 { font-size: 0.95rem; color: var(--text); }
+		/* Séances de travail : le message de l'Auteur fait foi, celui de ChatGPT propose. */
+		.md h2.auteur { color: var(--accent); border-left: 4px solid var(--accent); padding-left: 10px; border-bottom: none; }
+		.md h2.chatgpt { color: var(--violet); border-left: 4px solid var(--violet); padding-left: 10px; border-bottom: none; }
+		.md strong { color: #fff; }
+		.md em { color: #efe6c8; }
+		.md ul, .md ol { padding-left: 1.6em; }
+		.md li + li, .md li > ul, .md li > ol { margin-top: 0.25em; }
+		.md hr { border: none; border-top: 1px solid var(--border); margin: 1.6em 0; }
+		.md blockquote {
+			border-left: 3px solid var(--accent2); background: rgba(75,143,200,0.07);
+			padding: 6px 14px; color: var(--muted);
+		}
+		.md blockquote > * + * { margin-top: 0.6em; }
+		.md code {
+			font-family: 'Share Tech Mono', monospace; font-size: 0.88em; color: var(--accent2);
+			background: var(--bg); border-radius: 3px; padding: 0 3px;
+		}
+		.md pre {
+			background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+			padding: 10px 12px; overflow-x: auto; line-height: 1.35;
+		}
+		.md pre code { background: none; padding: 0; color: var(--lecture); font-size: 0.82rem; white-space: pre; }
+		.table-wrap { overflow-x: auto; }
+		.md table { border-collapse: collapse; font-size: 0.88rem; min-width: 60%; }
+		.md th, .md td { border: 1px solid var(--border); padding: 5px 9px; vertical-align: top; text-align: left; }
+		.md th { background: var(--panel2); color: var(--accent); font-family: 'Share Tech Mono', monospace; font-weight: normal; }
+		.md tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+
+		.pied { display: flex; justify-content: space-between; gap: 12px; margin-top: 14px; font-size: 0.8rem; }
+		.pied a {
+			flex: 1 1 0; min-width: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px;
+			background: var(--panel); text-decoration: none; color: var(--text);
+		}
+		.pied a:hover { border-color: var(--accent); }
+		.pied a small { display: block; color: var(--muted); font-size: 0.7rem; }
+		.pied .suiv { text-align: right; }
+		.pied .vide { flex: 1 1 0; }
+		.haut {
+			position: fixed; right: 16px; bottom: 16px; width: var(--tap); height: var(--tap);
+			border-radius: 50%; border: 1px solid var(--accent); background: var(--panel);
+			color: var(--accent); display: flex; align-items: center; justify-content: center;
+			text-decoration: none; opacity: 0.85;
+		}
+
+		@media (max-width: 820px) {
+			.lecture { grid-template-columns: minmax(0, 1fr); }
+			.sommaire { position: static; max-height: 50vh; }
+			article.md { padding: 16px 14px; font-size: 0.96rem; }
+			header { flex-wrap: wrap; }
+		}
+	</style>
+</head>
+<body>
+	<header id="haut">
+		<h1>{{ '📚 ' if not entree }}{{ title }}</h1>
+		<nav>
+			{% if entree %}<a href="/admin/lore">← Lore</a>{% endif %}
+			<a href="/admin">← Administration</a>
+		</nav>
+	</header>
+	<div class="main">
+	{% if not entree %}
+		<div class="intro">
+			Les séances de travail sur le monde (une par fichier de <code>docs/lore/</code>) et la synthèse
+			du <strong>Document maître</strong>. ⚠️ Ce sont des échanges : les messages de l'<strong>Auteur</strong>
+			font foi, les réponses de ChatGPT sont des propositions, retenues seulement si une décision les a adoptées.
+		</div>
+		<input type="search" id="recherche" placeholder="Filtrer (titre, résumé, date…)" autocomplete="off" aria-label="Filtrer le lore">
+		<div class="compte" id="compte"></div>
+		{% for section, libelle, entrees in groupes %}
+		<section class="groupe" data-groupe>
+			<h2>{{ libelle }} <span class="nb">{{ entrees|length }}</span></h2>
+			{% for e in entrees %}
+			<a class="fichier{{ ' canon' if e.canon }}" href="/admin/lore/{{ e.cle }}"
+			   data-texte="{{ (e.titre ~ ' ' ~ e.resume ~ ' ' ~ e.date ~ ' ' ~ e.cle)|lower }}">
+				<span class="t">{{ e.titre }}</span>{% if e.canon %}<span class="badge">CANON</span>{% endif %}
+				{% if e.date %}<span class="d">{{ e.date }}</span>{% endif %}
+				{% if e.resume %}<span class="r">{{ e.resume }}</span>{% endif %}
+			</a>
+			{% endfor %}
+		</section>
+		{% endfor %}
+	{% else %}
+		<div class="meta">
+			{% if entree.canon %}<span class="badge">CANON</span>{% endif %}
+			{{ entree.section_label }}{% if entree.date %} · {{ entree.date }}{% endif %}
+			· <code>docs/{{ entree.chemin }}</code>
+		</div>
+		<div class="lecture">
+			<details class="sommaire" id="sommaire" open>
+				<summary>Sommaire</summary>
+				<ol>
+				{% for t in sommaire if t.niveau <= 3 %}
+					<li class="n{{ t.niveau }}"><a href="#{{ t.id }}">{{ t.texte }}</a></li>
+				{% endfor %}
+				</ol>
+			</details>
+			<div>
+				<article class="md" id="corps">{{ corps|safe }}</article>
+				<div class="pied">
+					{% if precedent %}<a href="/admin/lore/{{ precedent.cle }}"><small>← Précédent</small>{{ precedent.titre }}</a>{% else %}<span class="vide"></span>{% endif %}
+					{% if suivant %}<a class="suiv" href="/admin/lore/{{ suivant.cle }}"><small>Suivant →</small>{{ suivant.titre }}</a>{% else %}<span class="vide"></span>{% endif %}
+				</div>
+			</div>
+		</div>
+		<a class="haut" href="#haut" title="Haut de page" aria-label="Haut de page">↑</a>
+	{% endif %}
+	</div>
+	<script>
+	(function () {
+		const recherche = document.getElementById('recherche');
+		if (recherche) {
+			const fichiers = Array.from(document.querySelectorAll('a.fichier'));
+			const compte = document.getElementById('compte');
+			const total = fichiers.length;
+			const filtrer = () => {
+				const mots = recherche.value.toLowerCase().split(/\s+/).filter(Boolean);
+				let n = 0;
+				for (const a of fichiers) {
+					const ok = mots.every(m => a.dataset.texte.includes(m));
+					a.hidden = !ok;
+					if (ok) n++;
+				}
+				for (const g of document.querySelectorAll('[data-groupe]')) {
+					g.hidden = !g.querySelector('a.fichier:not([hidden])');
+				}
+				compte.textContent = mots.length ? `${n} / ${total} fichiers` : `${total} fichiers`;
+			};
+			recherche.addEventListener('input', filtrer);
+			filtrer();
+		}
+		const corps = document.getElementById('corps');
+		if (corps) {
+			// Séances de travail : distinguer l'Auteur (fait foi) de ChatGPT (propose).
+			for (const h of corps.querySelectorAll('h2')) {
+				const t = h.textContent.trim();
+				if (t.startsWith('✍️') || t.startsWith('✍')) h.classList.add('auteur');
+				else if (t.startsWith('🤖')) h.classList.add('chatgpt');
+			}
+			const sommaire = document.getElementById('sommaire');
+			// Petit écran : sommaire fermé (il passerait AU-DESSUS du texte) ; vide : masqué.
+			if (!sommaire.querySelector('li')) sommaire.hidden = true;
+			else if (window.matchMedia('(max-width: 820px)').matches) sommaire.open = false;
+		}
+	})();
+	</script>
+</body>
+</html>
