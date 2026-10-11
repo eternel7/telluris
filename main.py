@@ -110,12 +110,16 @@ app.add_middleware(
 	allow_methods=["*"],
 	allow_headers=["*"],
 )
-# SameSite=none required for Apple's cross-site POST callback; fine for Google/Facebook too
+# SameSite=none required for Apple's cross-site POST callback; fine for Google/Facebook too.
+# ⚠️ Un cookie SameSite=none SANS `Secure` est rejeté par le navigateur : la session (le
+# `state` OAuth) ne revient jamais → `mismatching_state`. En HTTPS (`APP_BASE_URL`) : none +
+# Secure ; en HTTP local : lax, qui suffit au retour GET de Google/Facebook.
+_SESSION_HTTPS = os.getenv("APP_BASE_URL", "").startswith("https://")
 app.add_middleware(
 	SessionMiddleware,
 	secret_key=os.getenv("SESSION_SECRET", os.getenv("SECRET_KEY")),
-	same_site="none",
-	https_only=False,
+	same_site="none" if _SESSION_HTTPS else "lax",
+	https_only=_SESSION_HTTPS,
 )
 # Cache de `get_doc` à portée requête + instrumentation des accès base (cf. db/config.py).
 # Middleware ASGI PUR : BaseHTTPMiddleware exécuterait l'aval dans une tâche anyio distincte

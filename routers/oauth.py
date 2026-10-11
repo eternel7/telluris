@@ -1,4 +1,5 @@
 import json
+import os
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from db.config import get_doc, save_doc
@@ -42,6 +43,15 @@ def upsert_user(provider: str, sub: str, email: str | None, email_verified: bool
     return user_id
 
 
+def _redirect_uri(request: Request, name: str) -> str:
+    """Adresse de retour du fournisseur. `APP_BASE_URL` D'ABORD : derrière un proxy TLS,
+    `request.url_for` rend du `http`, que le fournisseur refuse (`redirect_uri_mismatch`)."""
+    base = os.getenv("APP_BASE_URL")
+    if base:
+        return base.rstrip("/") + request.app.url_path_for(name)
+    return str(request.url_for(name))
+
+
 def _auth_redirect(user_id: str) -> RedirectResponse:
     token = create_access_token({"user_id": user_id})
     response = RedirectResponse(url="/embleme")
@@ -55,7 +65,7 @@ def _auth_redirect(user_id: str) -> RedirectResponse:
 async def login_google(request: Request):
     if "google" not in ENABLED_PROVIDERS:
         return RedirectResponse(url="/auth")
-    redirect_uri = request.url_for("auth_google")
+    redirect_uri = _redirect_uri(request, "auth_google")
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 
@@ -81,7 +91,7 @@ async def auth_google(request: Request):
 async def login_facebook(request: Request):
     if "facebook" not in ENABLED_PROVIDERS:
         return RedirectResponse(url="/auth")
-    redirect_uri = request.url_for("auth_facebook")
+    redirect_uri = _redirect_uri(request, "auth_facebook")
     return await oauth.facebook.authorize_redirect(request, redirect_uri)
 
 
@@ -108,7 +118,7 @@ async def auth_facebook(request: Request):
 async def login_apple(request: Request):
     if "apple" not in ENABLED_PROVIDERS:
         return RedirectResponse(url="/auth")
-    redirect_uri = str(request.url_for("auth_apple"))
+    redirect_uri = _redirect_uri(request, "auth_apple")
     return await oauth.apple.authorize_redirect(request, redirect_uri, response_mode="form_post")
 
 
