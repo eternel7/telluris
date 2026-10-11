@@ -503,7 +503,7 @@ Explicite la problématique Ra-Mu et Empereur.
 | Nom de ChatGPT | Retenu | Pourquoi |
 |---|---|---|
 | Âge des Tables de Pierre | **le temps des Tables de Pierre** | « Âge » est réservé aux quatre ères de Telluris (Remparts, Portails, Donjons) ; c'est une époque propre à Mu. |
-| Sept Sages | **les Sept Sages de Mu** | distingue des sept sages de la Grèce ; écho assumé des sept *apkallu* sumériens, sages antédiluviens venus de la mer *(rapprochement proposé, non tranché)*. |
+| Sept Sages | **les Sept Sages de Mu** | distingue des sept sages de la Grèce ; ce sont les sept **apkallu** de Mésopotamie, sages antédiluviens venus des eaux (adopté par l'Auteur, § 6 ; origine du mythe en note du texte rédigé). |
 | Mu-la-Centrale | **Mu-la-Centrale** | la cité, quand il faut la distinguer du continent ; « Mu » seul désigne l'un ou l'autre. |
 | Couronne de Mu | **la Couronne de Mu** | aucun homonyme (l'auberge « La Couronne de la Cité » est à Lutèce, sans lien). |
 | les Retours | **les Retours** (donjons) | les Architectes « de retour » du second texte deviennent **ceux qui reviennent**, pour ne pas confondre. |
@@ -519,10 +519,12 @@ Explicite la problématique Ra-Mu et Empereur.
 - **Lecture retenue dans le texte rédigé.** Ra-Mu est un **titre**, pas un homme : celui qui tient l'équilibre entre les assemblées, les routes et les communautés de Mu. « Empereur du Soleil levant » est la **déformation** que lui ont donnée les récits de la surface, qui ne concevaient pas une puissance sans empire. C'est la règle de Telluris : le mythe a eu lieu, il est arrivé déformé.
 - **Laissé ouvert** : la ressemblance avec le Ra d'Égypte — emprunt, coïncidence, ou trace d'un ancien contact — reste une question que les personnages se posent, sans réponse.
 
-## 4. Mu et Lilith/Échidna — le lien explicite
+## 4. Mu et Échidna — le lien explicite
 
-- La trame du rang A ([idées de quêtes](../personnages/20260924_idees_de_quetes_a_lutecia.md)) place à Mu « **Le serpent sous la cité** » : l'aventurier y rencontre **Lilith**, ou **Échidna**, que l'on accuse d'être la mère de tous les monstres. « Vous appelez monstres mes enfants. »
-- Les traditions de Mu parlent depuis toujours de **Naga**, de **Maîtres-serpents** et de grandes créatures gardiennes, sans les ranger parmi les dieux ni parmi les monstres. Elles parlent aussi d'une **mère des serpents** : c'est elle que la surface nomme Échidna — la mère des monstres des Grecs, mi-femme mi-serpent — ou Lilith.
+> Corrigé par le second arbitrage (§ 6) : à Mu, **Échidna seule**, jamais Lilith ; les **Naga** sont ses fils.
+
+- La trame du rang A ([idées de quêtes](../personnages/20260924_idees_de_quetes_a_lutecia.md)) place à Mu « **Le serpent sous la cité** » : l'aventurier y rencontre **Échidna**, que l'on accuse d'être la mère de tous les monstres. « Vous appelez monstres mes enfants. »
+- Les traditions de Mu parlent depuis toujours de **Naga**, de **Maîtres-serpents** et de grandes créatures gardiennes, sans les ranger parmi les dieux ni parmi les monstres. Elles parlent aussi d'une **mère des serpents** : c'est elle que la surface nomme Échidna — la mère des monstres des Grecs, mi-femme mi-serpent. Les **Naga** sont ses fils (§ 6).
 - Elle se trouve **sous Mu-la-Centrale**, au plus près de la porte que Mu a fermée. Ce qu'elle est pour cette porte, nul ne le sait ; les habitants de Mu en débattent (*théories, aucune n'est vraie par décision*) :
 	- elle est ce qui a voulu passer, et qu'on a arrêté au seuil ;
 	- elle est venue **avant** la fermeture, et ses enfants sont les monstres que la Vague a semés ;
@@ -532,10 +534,35 @@ Explicite la problématique Ra-Mu et Empereur.
 
 ## 5. La Mu actuelle — l'image de l'Auteur
 
-`templates/resources/towns/mu_capital.jpg` (1408 × 768).
+`templates/resources/towns/mu_capital.jpg` (1408 × 768) — **seconde image**, qui remplace la première (§ 6).
 
-- Au fond d'une fosse océanique, la cité est posée sur un reste de terre, sous un **dôme de lumière dorée** piqueté d'éclats : l'enveloppe de stabilisation.
-- **Murailles concentriques**, séparées par des **canaux** circulaires ; quartiers denses aux toits serrés ; ports et quais intérieurs.
-- Au centre, un **temple à colonnes** surmonté d'un **trident d'or** ; à côté, un édifice à **coupole**.
-- Hors du dôme, des **quartiers noyés**, couverts d'algues ; des **arches** d'aqueduc en ruine sur le fond ; une **tour enlacée de tentacules**.
-- Autour : **sirènes** (ou peuple de la mer), raies manta, bancs de poissons, une pieuvre géante, un serpent de mer près de l'abîme.
+- Au fond de la mer, la cité repose sous un **dôme** de lumière irisée, bleutée au sommet, **dorée** à sa base : l'enveloppe de stabilisation.
+- De **grands temples pyramidaux à degrés**, aux parois ornées, couronnés de **soleils d'or rayonnants** ; d'autres temples à gradins plus bas, à l'arrière.
+- Un réseau de **canaux** en damier, des barques, des quais et des jardins ; au centre, une **place lumineuse** d'où partent les allées en étoile.
+- Hors du dôme, les **anciens quartiers noyés** : colonnades et édifices en ruine, couverts de coraux et d'algues.
+- Autour : **méduses** luminescentes, **raies manta**, bancs de poissons phosphorescents, récifs de corail.
+
+*Première image (remplacée)* : murailles concentriques et canaux circulaires, temple surmonté d'un **trident d'or**, tour enlacée de tentacules, sirènes. Le trident et les anneaux évoquaient l'Atlantide de Platon (temple de Poséidon) ; la nouvelle image lève la question.
+
+## ✍️ Auteur
+
+Pour Mu ne cite pas Lilith mais Echidna. Les Naga que l'on doit rattacher à leur mythologie Terrienne, sont les fils d'Echidna (plus spirituel, elle a enfanté de bien plus connus monstres dans la mythologie grecque).
+
+Ok pour les apkallu, mais raconte l'origine de cette citation en parenthèse, annotation ou pied de page du texte.
+
+Voici la nouvelle image.
+
+---
+
+## 6. Second arbitrage de l'Auteur (11/10/2026)
+
+1. **À Mu, Échidna — pas Lilith.** Partout où il s'agit de Mu (rang A, « Le serpent sous la cité »), on nomme **Échidna** seule.
+2. **Les Naga sont les fils d'Échidna**, rattachés à leur mythologie terrestre (Inde) : des fils **plus spirituels** que ses enfants les plus connus, les monstres de la mythologie grecque.
+3. **Sept Sages = apkallu** : adopté ; l'origine du mythe est racontée en **note** du texte rédigé.
+4. **Nouvelle image** de la Mu actuelle : elle remplace la première (§ 5).
+
+**Ancrage réel retenu (Claude Code).**
+- **Échidna** (Hésiode, *Théogonie*) : mi-nymphe aux beaux yeux, mi-serpent, immortelle et sans âge, vivant dans une caverne sous la terre. De Typhon, elle enfante **Orthos**, **Cerbère**, l'**Hydre de Lerne**, la **Chimère** ; selon les auteurs, aussi le **Lion de Némée**, la **Sphinx**, **Ladon**, l'aigle du Caucase, **Scylla**.
+- **Naga** (traditions de l'Inde) : êtres-serpents à demi divins, parfois mi-hommes, vivant sous la terre (Pātāla) et dans les eaux, gardiens des sources, de la pluie et des trésors ; leurs rois **Vāsuki** et **Shesha**.
+- ⚠️ **À trancher** : dans la mythologie indienne, la mère des Naga est **Kadru**, épouse du sage Kashyapa. Lecture possible, dans l'esprit des mythes « parvenus déformés » : Kadru serait le nom que l'Orient a donné à Échidna *(proposé, non tranché)*.
+- **Apkallu** : voir la note du texte rédigé ([Les Cités-États](../redige/05_cites_etats.md), § Mu).

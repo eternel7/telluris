@@ -1141,9 +1141,9 @@
 		},
 		{
 			"id": "trame_a",
-			"titre": "« Le serpent sous la cité » — Lilith/Échidna",
-			"titre_court": "Lilith à Mu",
-			"resume": "À Mu, rencontre avec Lilith/Échidna, accusée d'être la mère des monstres : la combattre ou parler. « Vous appelez monstres mes enfants. »",
+			"titre": "« Le serpent sous la cité » — Échidna",
+			"titre_court": "Échidna à Mu",
+			"resume": "Sous Mu, rencontre avec Échidna, mère des Naga et des monstres des Grecs, accusée d'être la mère de tous les monstres : la combattre ou parler. « Vous appelez monstres mes enfants. »",
 			"quand": {"moment": {"ere": "jeu", "rang": "A"}, "autorite": "auteur"},
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "meta",
 			"origine": ["mu"],

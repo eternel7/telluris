@@ -35,7 +35,7 @@ Telluris n'épargne pas ceux que l'on aime, et leurs morts sont banales.
 - **Rang D — Les rats de la crypte.** Dans les catacombes de Lutecia, des ouvriers disparaissent. Une crypte a été rouverte, et l'on y trouve un objet frappé du symbole d'un portail ancien.
 - **Rang C — La route de Saint-Denis.** Sur la route du nord, aux côtés d'un paladin du Sacré-Cœur, l'aventurier comprend que les monstres sont plus anciens que les donjons.
 - **Rang B — La porte qui ne devait pas s'ouvrir.** Dans un temple templier près de Lutecia, l'extraction des cristaux transforme un donjon.
-- **Rang A — Le serpent sous la cité.** Notre-Dame ouvre enfin ses portes. À Mu, l'aventurier rencontre **Lilith**, ou Échidna, que l'on accuse d'être la mère de tous les monstres. Il peut la combattre, ou lui parler. « Vous appelez monstres mes enfants. »
+- **Rang A — Le serpent sous la cité.** Notre-Dame ouvre enfin ses portes. À Mu, l'aventurier rencontre **Échidna**, mère des Naga et des monstres des Grecs, que l'on accuse d'être la mère de tous les monstres. Il peut la combattre, ou lui parler. « Vous appelez monstres mes enfants. »
 - **Fin du rang A — Le Paradis.** Par Rome, l'aventurier franchit la porte de Saint-Pierre. Les anges lui répondent d'une façon ambiguë : « Vos dieux vous ont menti. » Est-ce vrai ?
 - **Rang S — Yggdrasil.** Dans une cité nordique, l'arbre-monde ouvre sur Asgard, Midgard, Jötunheim et Hel. Les mondes précèdent-ils les récits qu'on en fait ?
 - **Rang S+ — Celui qui était avant.** Hors de toute mythologie, quatre hypothèses, et le jeu ne tranche pas.
