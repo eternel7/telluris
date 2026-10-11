@@ -172,21 +172,80 @@ Maëlys de Valombre est ainsi à la fois une figure de confiance, une responsabl
 
 ---
 
-## ⚠️ Incohérences relevées (Claude, 11/10/2026) — à arbitrer par l'Auteur
+## ✍️ Auteur — 11/10/2026 (arbitrage des incohérences)
 
-Confrontation avec le dump du 11/10, `jsons/maelys_maitresse_de_guilde_a_importer.json` et les séances. Rien n'est tranché ici ; chaque point porte une correction proposée.
+Claude a confronté la fiche au dump du 11/10, à l'import en attente et aux séances, puis proposé une correction par point. L'Auteur a retenu :
 
-1. **Première rencontre — le personnage n'est pas une recrue à Lutecia.** Le fil rouge (Auteur) le fait entrer à la Guilde à **Auxerre** (Bastion de l'Yonne, Gautier de Valcroix) ; il arrive à Lutecia avec le convoi de cristaux, déjà inscrit et classé. « Je souhaite devenir aventurier » et « trois contrats adaptés aux débutants » ne tiennent pas.
-	- *Correction proposée :* le personnage se présente comme venant d'Auxerre ; Maëlys a lu la lettre de Gautier ou le rapport de Dame Éléonore de Rochefort sur les bûcherons : « Valcroix vous recommande. Il recommande peu. Ici, ça ne vaut rien tant que je ne vous ai pas vu revenir. » La réplique sur le nom à rapporter de la « première mission » devient « première mission **ici** ».
-2. **Première rencontre — lieu et rôle.** Le comptoir et ses registres sont le poste d'**Éléonore de Vaugirard**, réceptionniste en jeu ; le bureau de Maëlys est **fermé avant le rang D** (`acces.rang_min` de `lieu:le_grand_relais_des_frontieres_bureau_du_maitre`), et le dialogue déjà écrit de `pnj:maelys` ouvre dans le bureau (« Éléonore m'a parlé de vous »), comme l'image fournie par l'Auteur (seule dans son bureau).
-	- *Correction proposée, au choix :* (a) garder la scène au comptoir comme une **apparition** — Maëlys vérifie elle-même les contrats d'un nouvel arrivant (cohérent avec son passé de « vérification des contrats »), Éléonore restant la réceptionniste ; (b) déplacer la rencontre au **bureau au rang D**, ce qui suit le jeu actuel mais retarde Maëlys et contredit « Au début — la responsable des contrats ».
-3. **Devise.** La séance du 13/09 proposait « Là où s'arrête la route, commence notre métier » (**jamais adoptée**). La nouvelle devise de l'Auteur la remplace. Nuance : « Toute porte s'ouvre » sonne faux à côté du Templier de Notre-Dame qui ne laisse passer qu'au rang A et du bureau fermé avant le rang D — à assumer comme une ironie, ou à lire comme « toute porte s'ouvre… à son prix ».
-4. **Emplacement du Grand Relais.** « À proximité des rues commerçantes » vs « non loin des grandes voies menant aux portes de la cité » (13/09, proposition ChatGPT, seul le **nom** est adopté). Pas de contradiction forte ; *proposé :* « au débouché des rues commerçantes, sur la grande voie qui mène aux portes ».
-5. **Le prédécesseur disparu.** Le « vieil elfe » de la séance du 13/09 (nom « Aldebrand de Montfaucon » abandonné) a laissé un portrait et une silhouette. *Proposé :* en faire le **prédécesseur porté disparu**, sans nom — le portrait peut servir à un indice ou à une apparition. ⚠️ Le portail « dont la couleur avait changé » ne peut pas être celui de **Notre-Dame**, intact grâce au mana faible ; le situer hors de Lutecia (portail de route, d'une autre cité de la région). Un changement de couleur **aujourd'hui** est la naissance d'un donjon : un événement que Templiers et Architectes connaîtraient forcément — c'est l'enquête, pas le changement, qui doit rester secrète.
-6. **« Que les Templiers ferment les portails concernés ».** Le lore ne dit nulle part qu'un portail de donjon se **ferme** : un donjon non entretenu **déborde**. Les Templiers **réglementent l'accès** et **scellent** des passages instables (Akureyri). *Correction proposée :* « que les premiers en **interdisent l'accès** ou les fassent **sceller** ».
-7. **Le lieu récurrent — ancrer dans le mythe réel** (règle « adapter plutôt qu'inventer »). *Proposé, non tranché :* tour inclinée → **Babel** (Babylone est une cité du lore) ; arbre mort → **Yggdrasil** (cité nordique de la trame rang S, « mondes reliés, chacun un donjon ») ; inscription inconnue → l'**hénochien**, langue « des anges », qui ouvre une piste vers les **Grigori** sans rien révéler. Le mystère reste ouvert (illusion, mêmes lieux, portails reliés : trois théories que Maëlys garde côte à côte).
-8. **Particule « de Valombre ».** Maëlys n'est « ni de grands marchands ni d'une lignée de héros », et la Guilde est le chemin des **non-nobles**. *Proposé :* « de Valombre » est un **nom de lieu** (le hameau d'origine), pas un titre — ou bien un nom pris en devenant maîtresse de guilde. Valombre n'est pas un toponyme réel (comme Valcroix) : accepté, mais à signaler.
-9. **Nom en jeu.** `pnj:maelys` porte `nom: "Maëlys"` dans l'import en attente : *proposé* `"Maëlys de Valombre"`, et la description peut reprendre le passé d'aventurière. Le prénom **Maëlys** figure aussi dans la liste des prénoms de recrues (`utils/recrutement.py`) : une recrue homonyme reste possible — même cas que la bijoutière rebaptisée.
-10. **Lieux de la Guilde.** Archives et infirmerie n'existent pas en jeu (réception, comptoir, bureau seulement). Pas une incohérence : un ajout possible. Le « tableau des contrats » (ordinaires, escortes, explorations, urgences) ne correspond pas aux catégories en jeu (guilde, transport, chasse, escorte, donjon) — à lire comme une description d'ambiance.
+1. Le personnage **se présente comme venant d'Auxerre** ; Maëlys a déjà lu la **recommandation de Gautier de Valcroix**.
+2. La première rencontre a lieu **au bureau, au rang D** (l'accès en jeu), quitte à contredire « Au début — la responsable des contrats ».
+3. Les Templiers **interdiraient l'accès** aux portails concernés ou les feraient **sceller** — un portail de donjon ne se « ferme » pas : non entretenu, il déborde.
+4. Ce qui reste secret, c'est **l'enquête** du prédécesseur, pas le changement de couleur. Le prédécesseur disparu est **le vieil elfe** de la séance du 13/09, **sans nom** (« Aldebrand de Montfaucon » reste abandonné).
+5. Le lieu récurrent : la tour inclinée = **Babel**, l'arbre mort = **Yggdrasil**, l'inscription = **hénochien**, la langue « des anges », qui mène discrètement aux **Grigori**. Le mystère reste ouvert.
+6. « de Valombre » = le **nom de son hameau d'origine**, pas une particule noble. Valombre n'est pas un lieu réel (comme Valcroix).
 
-**Sans incohérence :** relations Templiers / Architectes / Paladins (conformes aux institutions) ; « alliée politique » au haut niveau = la fin « devenir maître d'une guilde » et la compagnie du joueur ; « la Lignée ne l'intéresse pas » = la règle de la Lignée secondaire ; compagnons perdus à cause de relevés inexacts — écho naturel de Milo le cartographe ; vêtements de bonne facture (Auteur : « haut niveau social »).
+> « Adapte aussi les points secondaires. »
+
+---
+
+## Version adaptée (canon, après arbitrage)
+
+Seuls les passages touchés par l'arbitrage sont réécrits ; le reste de la fiche ci-dessus vaut tel quel.
+
+### Identité
+- **Nom :** Maëlys de Valombre — Valombre est le hameau dont elle vient. Sa naissance est modeste ; le nom de lieu n'est pas un titre.
+
+### Son histoire — le prédécesseur
+Son prédécesseur était un **vieil elfe**, maître de la Guilde pendant plus longtemps que quiconque ne s'en souvient. Il est parti enquêter sur un portail **hors de Lutecia** dont la couleur avait changé sans raison apparente. Le changement de couleur, Templiers et Architectes l'ont constaté comme tout le monde ; ce que Maëlys garde pour elle, c'est **ce qu'il cherchait** et les notes qu'il a laissées. Officiellement, il est porté disparu. Maëlys n'est pas convaincue qu'il soit mort. On ne prononce plus son nom au Grand Relais ; son portrait n'a jamais été décroché.
+
+### La Guilde de Lutecia — points secondaires
+- **Emplacement :** au débouché des rues commerçantes, sur la grande voie qui mène aux portes de la cité (concilie la fiche et la séance du 13/09).
+- **Devise :** « Toute porte s'ouvre. Toute route a son prix. » Elle remplace la proposition du 13/09, jamais adoptée. Elle se lit avec sa seconde moitié : le bureau fermé avant le rang D, Notre-Dame fermée avant le rang A — la porte s'ouvre **à son prix**.
+- **Tableau des contrats :** commandes de la Guilde, transports, chasses, escortes et commissions de donjon (les catégories en jeu), avec les urgences affichées à part.
+- **Archives et infirmerie :** existent dans le bâtiment, **pas** encore comme lieux du jeu (réception, comptoir, bureau). Les archives sont la réserve naturelle des dossiers du secret.
+
+### Sa première rencontre avec le personnage principal (au bureau, rang D)
+Le personnage connaît déjà la salle commune et le comptoir d'**Éléonore de Vaugirard**, qui lui a remis ses contrats jusqu'ici. Au rang D, Éléonore le fait monter. Maëlys n'a toujours aucune raison de le croire exceptionnel.
+
+Le bureau sent la cire, le vélin et le cuir. Maëlys termine le document qu'elle lisait avant de lever les yeux.
+
+> **Le personnage :** « Je viens d'Auxerre. Gautier de Valcroix m'a recommandé. »
+
+Elle tire un pli du coin de la table, le cachet du Bastion de l'Yonne déjà rompu.
+
+> **Maëlys :** « Valcroix. Il m'écrit que vous savez tenir un engagement. Il recommande peu. C'est une bonne chose pour vous. Mais ici, une recommandation ne vaut rien tant que je ne vous ai pas vu revenir. »
+
+Elle ouvre le registre.
+
+> **Maëlys :** « Votre rang dit que vous savez vous battre. Ce qui m'intéresse, c'est de savoir si vous serez encore capable de me donner votre nom quand vous reviendrez de votre première mission ici. »
+>
+> **Le personnage :** « Vous ne me demandez pas pourquoi je fais ce métier ? »
+>
+> **Maëlys :** « Je pourrais. Mais les gens ont toujours une bonne raison de prendre des risques. La faim, l'argent, la vengeance, la curiosité… Parfois même l'ennui. Les contrats qui partent de ce bureau ne sont pas ceux du tableau d'en bas. Lisez-les attentivement. Si vous avez une question, posez-la avant de partir, pas quand les choses commencent à vous dévorer. »
+
+La réplique sur le dragon et le mannequin (« Vous savez vous battre ? — Je me débrouille. ») n'a plus sa place face à un aventurier de rang D ; elle reste disponible pour une recrue d'Auxerre ou un dialogue d'Éléonore.
+
+### Son rôle dans la progression du jeu
+- **Avant le rang D — la présence lointaine.** Elle ne reçoit pas les recrues. Elle passe par Éléonore, qui lui lit chaque soir la liste des noms et des exploits (déjà en jeu). Le personnage sait qu'elle l'observe sans la voir.
+- **Au rang D — la responsable des contrats importants.** Elle confie les contrats qui partent du bureau, évalue le personnage et lui apprend les règles pratiques du métier à ce niveau. Sa confiance se gagne par la ponctualité, la prudence et le respect des engagements.
+- **Au milieu — la source d'informations**, et **à haut niveau — l'alliée politique** : inchangés.
+
+### Le secret de Maëlys — le lieu récurrent
+Les rapports décrivent, dans des donjons reliés à des portails différents :
+- une **tour inclinée**, inachevée, dont le sommet se perd — **Babel** ;
+- un **arbre mort** immense, aux racines plongeant hors de vue — **Yggdrasil** ;
+- une **porte rouge** ;
+- une **inscription** dans une langue inconnue — de l'**hénochien**, la langue « des anges », que personne au Grand Relais ne sait nommer. Aucun lettré d'Alexandrie ne l'a jamais lue ; un érudit pourrait un jour rapprocher l'écriture des **Veilleurs** (Grigori).
+
+Ni Maëlys ni le joueur n'apprennent ce que sont ces lieux. Trois théories restent côte à côte : les lieux sont **identiques**, les portails se **rejoignent** d'une manière inconnue, ou les témoins ont été **trompés par une illusion**.
+
+Elle n'en a parlé ni aux Templiers ni aux Architectes : elle craint que les premiers **en interdisent l'accès ou les fassent sceller**, et que les seconds tentent de les étudier sans les précautions nécessaires. Les dossiers dorment aux archives, avec les notes du vieil elfe.
+
+### Ce qui en découle en jeu (`jsons/maelys_maitresse_de_guilde_a_importer.json`, import en attente)
+- `pnj:maelys` : `nom` → **« Maëlys de Valombre »** ; description complétée (hameau, ascension, prédécesseur elfe disparu).
+- Dialogue : choix « Je viens d'Auxerre. Gautier de Valcroix m'a recommandé. » → nœud `auxerre` puis `pourquoi` (la scène ci-dessus) ; la broche cite la devise sculptée. Linter : 0 erreur.
+- Prénom « Maëlys » dans la liste des recrues (`utils/recrutement.py`) : **laissé**, comme « Aélis » et « Éléonore » déjà présents — une homonymie de recrue est tolérée.
+
+### Restent ouverts (non arbitrés)
+- L'**inscription en hénochien** : l'hénochien terrestre est une langue révélée tardivement (Dee et Kelley) ; sur Telluris, elle serait la langue des Veilleurs, parvenue déformée. À confirmer si un dialogue doit la nommer.
+- La **porte rouge** n'est rattachée à aucun mythe ; *pistes* : la porte de l'Enfer (lien avec l'Hekla), un torii, la porte d'Ishtar de Babylone (bleue sur Terre).
+- **Qui** a vu ces lieux : faire des témoins des aventuriers d'Auxerre, de Rome ou de Reykjavik donnerait des quêtes de recherche.
