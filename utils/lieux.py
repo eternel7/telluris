@@ -304,11 +304,12 @@ def _lister_images(chemin: str) -> list[str]:
 	dans templates/resources/pnj/."""
 	if not os.path.exists(chemin):
 		return []
-	return sorted(
-		f for f in os.listdir(chemin)
-		if os.path.isfile(os.path.join(chemin, f))
-		and f.lower().endswith(IMAGE_EXTENSIONS)
-	)
+	# `scandir` : le type vient de la lecture du dossier, sans un stat par fichier.
+	with os.scandir(chemin) as entrees:
+		return sorted(
+			e.name for e in entrees
+			if e.name.lower().endswith(IMAGE_EXTENSIONS) and e.is_file()
+		)
 
 # Origines SERVABLES d'une image de lieu, dans l'ORDRE où le jeu les résout (`/play` dans
 # main.py, `marche._IMAGE_ROUTES` pour les relations) : un nom présent dans deux dossiers

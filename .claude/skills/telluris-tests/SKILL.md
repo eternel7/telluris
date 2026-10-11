@@ -10,6 +10,11 @@ for f in dev/check_js.js dev/test_*_client.js; do out=$("/c/Program Files/nodejs
 ```
 Annoncer le nombre de tests passés avant de clore (CLAUDE.md §14).
 
+### Groupe `lent` (pytest.ini : `addopts = -m "not lent"`)
+- Hors défaut : vrai corpus (`test_chronologie` `test_vraie_source_*` / citations, `test_lore` corpus + liens du README) et vrais dépôts git (`test_serveur` : `pytestmark_git`, `verifier_code_du_depot`).
+- `-m ""` = toute la suite ; `-m lent` = les lents seuls. Un nouveau test > ~1 s porte `@pytest.mark.lent`.
+- ⚠️ `Z:` est un partage réseau : un `stat` y coûte 2-3 ms. Lister par `os.scandir`/`os.walk` (type sans stat), jamais `listdir` + `isfile` ni `rglob` + `is_file` — c'est ce qui faisait 86 s de chronologie. bcrypt de fixture : `gensalt(rounds=4)`.
+
 
 ### Collecte pytest en local
 `tests/` importe `utils/*` → `routers/*` : il faut `pytest` + `fastapi Jinja2 couchdb2 bcrypt pyjwt[crypto] authlib httpx itsdangerous` (la ligne du `docker-compose.yml` **sans `uvicorn` ni `Pillow`**). L'exe pytest vit hors `PATH` (`~/AppData/Roaming/Python/Python314/Scripts`) → `python -m pytest`.

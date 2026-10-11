@@ -5,6 +5,8 @@ import sys
 import os
 import re
 
+import pytest
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils import lore  # noqa: E402
@@ -109,6 +111,7 @@ def test_liste_blanche():
 
 # ── Vrai corpus ────────────────────────────────────────────────────────────────
 
+@pytest.mark.lent
 def test_corpus_complet_rendu_et_liste():
 	entrees = lore.lister()
 	sur_disque = {p.relative_to(lore.RACINE).as_posix() for p in (lore.RACINE / "lore").rglob("*.md")}
@@ -129,6 +132,7 @@ def test_lore_redige_en_tete_dans_l_ordre_de_ses_fichiers():
 	assert all(e["section"] == lore.REDIGE for e in redige)
 
 
+@pytest.mark.lent
 def test_liens_du_readme_menent_a_des_pages_existantes():
 	html, _ = lore.rendre_fichier("lore/README.md")
 	cles = re.findall(r'href="/admin/lore/([^"#]+)', html)

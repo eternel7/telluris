@@ -179,7 +179,7 @@ def base(monkeypatch):
 	docs = {
 		"user:a@b.c": {"_id": "user:a@b.c", "type": "user", "email": "a@b.c",
 					   "username": "Gwendal",
-					   "password": bcrypt.hashpw(b"Ancien1!", bcrypt.gensalt()).decode()},
+					   "password": bcrypt.hashpw(b"Ancien1!", bcrypt.gensalt(rounds=4)).decode()},  # coût minimal : 0,25 s par test sinon
 	}
 	envois = []
 

@@ -6,6 +6,8 @@ import os
 import re
 import sys
 
+import pytest
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils import chronologie as chrono, lore  # noqa: E402
@@ -165,10 +167,12 @@ def test_payload_garde_les_erreurs_par_element():
 
 # ── Vraie source ───────────────────────────────────────────────────────────────
 
+@pytest.mark.lent
 def test_vraie_source_valide():
 	assert chrono.valider(chrono.charger()) == []
 
 
+@pytest.mark.lent
 def test_citations_presentes_dans_leur_source():
 	"""Chaque citation se retrouve dans le fichier cité (espaces et emphases ignorés)."""
 	norm = lambda s: re.sub(r"\s+", " ", s.replace("*", "")).strip().lower()  # noqa: E731
@@ -181,6 +185,7 @@ def test_citations_presentes_dans_leur_source():
 				assert norm(s["citation"]) in norm(f.read()), (ev["id"], s["fichier"], s["citation"])
 
 
+@pytest.mark.lent
 def test_vraie_source_payload_complet():
 	data = chrono.charger()
 	p = chrono.payload(data)

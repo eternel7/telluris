@@ -154,13 +154,19 @@ def test_verifier_code_signale_une_erreur_de_syntaxe(tmp_path):
 	assert len(erreurs) == 1 and erreurs[0].startswith(os.path.join("pkg", "ko.py"))
 
 
+@pytest.mark.lent
 def test_verifier_code_du_depot_est_propre():
 	assert srv.verifier_code() == []
 
 
 # ── Vrai dépôt git ───────────────────────────────────────────────────────────
 
-pytestmark_git = pytest.mark.skipif(shutil.which("git") is None, reason="git absent")
+_git_absent = pytest.mark.skipif(shutil.which("git") is None, reason="git absent")
+
+
+def pytestmark_git(test):
+	"""Vrais dépôts git en sous-processus : sautés si git manque, et `lent` (hors défaut)."""
+	return pytest.mark.lent(_git_absent(test))
 
 
 def _g(cwd, *args):

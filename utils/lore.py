@@ -11,6 +11,7 @@ les chemins relatifs deviennent des liens ; le reste reste du texte.
 """
 
 import html
+import os
 import posixpath
 import re
 import unicodedata
@@ -47,8 +48,13 @@ def _chemins(racine: Path) -> list:
 	if (racine / DOCUMENT_MAITRE).is_file():
 		out.append(DOCUMENT_MAITRE)
 	lore = racine / "lore"
-	if lore.is_dir():
-		out.extend(sorted(p.relative_to(racine).as_posix() for p in lore.rglob("*.md") if p.is_file()))
+	# `os.walk` et non `rglob` + `is_file()` : le type vient du scandir, sans un stat par
+	# fichier (2-3 ms pièce sur un partage réseau, × 6000 appels par validation de la chronologie).
+	lieux = []
+	for dossier, _sous, fichiers in os.walk(lore):
+		rel = Path(dossier).relative_to(racine).as_posix()
+		lieux.extend(f"{rel}/{nom}" for nom in fichiers if nom.endswith(".md"))
+	out.extend(sorted(lieux))
 	return out
 
 

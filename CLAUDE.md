@@ -23,7 +23,8 @@ FastAPI sur `http://localhost:8000`, CouchDB sur `http://localhost:5984`. Le com
 ## Running tests
 
 ```bash
-python -m pytest tests/            # logique Python pure, aucune dépendance base
+python -m pytest tests/            # logique Python pure, aucune dépendance base — SANS les `lent` (pytest.ini)
+python -m pytest tests/ -m ""      # toute la suite, `lent` compris (vrai corpus du lore, vrais dépôts git)
 node dev/check_js.js               # syntaxe du JS inline des templates ET de templates/scripts/*.js
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
@@ -250,7 +251,7 @@ Règles qui valent **partout** ; les compétences ne répètent que ce qui leur 
 
 **13. Discipline de périmètre.** Implémenter exactement ce qui est demandé : pas de repli, de nouvel opérateur de condition, ni de lecture défensive depuis un autre type de doc sans demande explicite. Un mécanisme jugé nécessaire se propose et attend une réponse.
 
-**14. La suite de tests clôt la tâche.** Après toute modification du moteur, du simulateur ou d'un payload client, relancer `pytest` (et les harnais Node concernés si du JS a bougé) et annoncer le nombre de tests passés ; si le comportement change, les tests sont mis à jour dans la même passe. ⚠️ Pièges déjà pris : un `random` non contrôlé dans un test (le hasard passe par un `rand_fn`/`des_fn` injecté) et un compagnon de fixture sans `caracteristiques_current`. ⚠️ **Aucune valeur en dur sans justification** : une taille de catalogue, un seuil ou un compte dérivé du contenu se RELIT depuis le module (`len(enseignes.TOURNURES[…])`) — sinon enrichir le contenu casse le test, ou pire le fait passer à vide ; une constante voulue porte son commentaire.
+**14. La suite de tests clôt la tâche.** Après toute modification du moteur, du simulateur ou d'un payload client, relancer `pytest` (et les harnais Node concernés si du JS a bougé) et annoncer le nombre de tests passés — passe par défaut, **sans les `lent`** ; `-m ""` seulement si la modif touche ce qu'ils couvrent (`utils/lore.py`, `utils/chronologie.py`, `docs/lore/`, `utils/serveur.py`) ; si le comportement change, les tests sont mis à jour dans la même passe. ⚠️ Pièges déjà pris : un `random` non contrôlé dans un test (le hasard passe par un `rand_fn`/`des_fn` injecté) et un compagnon de fixture sans `caracteristiques_current`. ⚠️ **Aucune valeur en dur sans justification** : une taille de catalogue, un seuil ou un compte dérivé du contenu se RELIT depuis le module (`len(enseignes.TOURNURES[…])`) — sinon enrichir le contenu casse le test, ou pire le fait passer à vide ; une constante voulue porte son commentaire.
 
 **15. Vérifier le rendu après une modif template/CSS/JS**, pas seulement la relire. Pièges déjà pris : un calque `pointer-events:none` qui avale les clics d'un enfant (`telluris-combat` § Sur un ALLIÉ) ; un `const` capturé par `getElementById` avant que son markup existe (`telluris-map-movement` § mode test de déplacement) ; un sondage qui redessine un champ en cours de frappe (`telluris-social-ui` § Tavernes).
 
