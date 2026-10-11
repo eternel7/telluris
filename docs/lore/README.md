@@ -16,6 +16,7 @@ Les 50 séances de travail sur le monde de Telluris (récupérées le 08/10/2026
 - [Introduit les Grigori](monde/20261004_introduit_les_grigori.md) — 04/10/2026 — introduit les **Grigori** (du grec ancien *egrḗgoroi*, signifiant **« les Veilleurs »** ou « ceux qui sont éveillés ») dans la mythologie de…
 - [Générer documentation maître](monde/20261008_generer_documentation_maitre.md) — 08/10/2026 — Est-ce que tu peux générer un gros fichier .md de toute notre discussion relatif à ce projet ?
 - [Frise chronologique fusionnée](monde/20261011_frise_chronologique_fusionnee.md) — 11/10/2026 — Fusion des frises du 19/08 et du 21/08 en trois ères (antédiluvien / avant la Vague / après la Vague) + quatre arbitrages de l'Auteur (Vague il y a 7-8 siècles, Templiers gardiens des remparts puis des temples, cristaux violet/jaune, Mu, monastères-relais, avènement) ; chronologie des cités avec Rome, colonne Jérusalem et Hārūt et Mārūt corrigés ; Grigori à l'Âge des Remparts et Romulus/Rémus/la Louve/la porte de Saint-Pierre (adoptés) ; voyages violet (monde) / jaune (Mu).
+- **Chronologie** (`docs/lore/chronologie.json`, hors de cet index) — 11/10/2026 — Source formalisée de tous les éléments datés du lore (dates ou périodes, incertitudes, autorité, tags, sources citées), lue par la frise 🕰 de `/admin/lore/chronologie`.
 
 ## 🏰 Cités-États et lieux
 

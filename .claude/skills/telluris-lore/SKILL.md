@@ -7,6 +7,8 @@ Lore de Telluris. Matière brute : **`docs/lore/`** (50 séances de travail avec
 
 Lecture rendue dans le navigateur : **`/admin/lore`** (carte 📚 Lore de « Concepts de Telluris », `utils/lore.py`) — tout `.md` déposé sous `docs/lore/` y apparaît sans autre déclaration ; libellé de dossier dans `lore.SECTIONS`, résumé relu du README.
 
+**Chronologie** (`/admin/lore/chronologie`, bouton 🕰 de `/admin/lore`) : frise SVG filtrable lue dans **`docs/lore/chronologie.json`**, la source FORMALISÉE de tout ce qui est daté — ères (antédiluvien · avant la Vague · après la Vague · temps du joueur par rang · futur), bornes `ans` / `entre` / `rang` / `entre_rangs` / `inconnu` / `ouvert` / `dans`, autorité de l'élément ET de sa date, tags par facette, sources CITÉES (`tests/test_chronologie.py` vérifie que chaque citation figure dans son fichier), `contradictions` à arbitrer. ⚠️ Une décision qui date ou déplace un événement se reporte AUSSI dans ce JSON (relancer `pytest tests/test_chronologie.py`).
+
 
 ### Qui fait foi
 Les séances sont des **échanges de travail, pas un canon**. Ordre d'autorité, du plus fort au plus faible :
