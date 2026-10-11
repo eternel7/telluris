@@ -227,7 +227,7 @@
           ]
         },
         "mission_acceptee": {
-          "texte": "Aélis ferme son carnet, glisse son compas à sa ceinture et cale trois rouleaux de vélin sous son bras. « Je suis prête. Je l'étais depuis vingt jours. » Elle marque un temps. « Je ne sais pas me battre, {prenom}. Vous le savez. Là-bas, je mesure ; vous, vous m'empêchez de mourir pendant que je mesure. C'est un partage honnête. » Puis, plus bas, avec un regard vers la table des apprentis : « Ils vont croire que je fugue. Laissons-les croire. »",
+          "texte": "Aélis ferme son carnet, glisse son compas à sa ceinture et cale trois rouleaux de vélin sous son bras. « Je suis prête. Je l'étais depuis vingt jours. » Elle marque un temps. « Je ne sais pas me battre, {prenom}. Vous le savez. Sur la route, vous m'empêchez de mourir ; là-bas, je mesure. C'est un partage honnête. » Puis, plus bas, avec un regard vers la table des apprentis : « Ils vont croire que je fugue. Laissons-les croire. »",
           "choix": [
             {
               "id": "ok",
@@ -249,7 +249,7 @@
         "offre": {
           "id": "quete:escorte_aelis_abbaye_de_jumieges",
           "titre": "Le portail de Jumièges",
-          "description": "L'Institut des Architectes envoie Aélis de Montfaucon examiner un portail ouvert dans les ruines de l'abbaye de Jumièges, en Normandie, sur une boucle de la Seine en aval de Rouen. Conduisez-la jusqu'à la nef, protégez-la pendant qu'elle mesure, puis ramenez-la vivante aux Archives des Seuils, à la Cour des Arches. Elle ne sait pas se battre.",
+          "description": "L'Institut des Architectes envoie Aélis de Montfaucon examiner un portail ouvert dans les ruines de l'abbaye de Jumièges, en Normandie, sur une boucle de la Seine en aval de Rouen. Conduisez-la jusqu'à l'abbaye, inspectez la nef avant qu'elle n'y entre, puis ramenez-la vivante aux Archives des Seuils, à la Cour des Arches. Elle ne sait pas se battre.",
           "destination": "lieu:les_archives_des_seuils",
           "proteges": [
             {

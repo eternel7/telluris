@@ -48,7 +48,7 @@ La réussite dépend de ce que le joueur **EMPÊCHE**, pas de ce qu'il tue ou po
 
 - Offre **ÉCRITE** (`services.escorte.offre`, n'importe quel PNJ), `rang_min` optionnel dérivé par la même source unique que les commissions de donjon (`acces.rang_de_quete`).
 - Doc `protege:*` = miroir du character (stats de base raciales, aucun point dépensé) ; index `character["proteges"]` séparé — un protégé n'est **pas** un porteur.
-- En combat, le protégé se comporte **comme une monture** : `jouable:False`, ciblable, hors `ordre_initiative` et hors `_combattants_vivants`.
+- En combat, le protégé se comporte **comme une monture** : `jouable:False`, ciblable, hors `ordre_initiative` et hors `_combattants_vivants`. Exception : une salle gardée qui porte `proteges_restent_dehors: true` le laisse à la porte (`donjon.proteges_admis`, lu par `_declencher_combat_donjon` seulement — la route l'embarque toujours).
 - Trois formes de rendez-vous (chez le donneur, à l'entrée d'un lieu, zone 3×3 comme une chasse), résolues **à la génération** et figées dans le snapshot. ⚠️ Un rendez-vous se place toujours **derrière** la menace du combat de la mission (barrière `acces.combat_gagne` sur le lieu de rendez-vous), jamais devant.
 - Échec (mort en combat ou abandon) ⇒ sanction du donneur et de sa maison, **sans consommer l'unicité**.
 - **Focalisation 🎯 interdite** : une escorte ne biaise aucun tirage (même raison que le transport).
@@ -88,7 +88,7 @@ Verrouillé par `tests/test_pnj.py`, `tests/test_quete_reussie.py`, `tests/test_
 
 #### Épreuve du rang C de Lutecia — le portail de Jumièges
 Contenu : `dev/gen_quete_rang_c_jumieges.py` → **un seul** fichier d'import `jsons/quete_rang_c_abbaye_de_jumieges_a_importer.json` (docs neufs ET retouchés, recopiés dans `maelys_…` / `cour_des_arches_…`). 100 % donnée.
-- Chaîne : Maëlys (bureau, rang D) confie `quete:rang_c_lettre_a_l_institut` (transport `retour`, `rang_guilde: "C"` — c'est LUI qui promeut) → Aélis la reçoit à la Cour des Arches (destinataire NON marchand : `livre`/`incomplet`) et offre `quete:escorte_aelis_abbaye_de_jumieges` → voix d'Aélis devant `lieu:abbaye_de_jumieges` (France (37,11)), service `acces` → combat de la nef (`donjon:abbaye_de_jumieges`, 3 démons mineurs, grade 4-5) → dépose aux Archives des Seuils → `rapporter` chez Maëlys.
+- Chaîne : Maëlys (bureau, rang D) confie `quete:rang_c_lettre_a_l_institut` (transport `retour`, `rang_guilde: "C"` — c'est LUI qui promeut) → Aélis la reçoit à la Cour des Arches (destinataire NON marchand : `livre`/`incomplet`) et offre `quete:escorte_aelis_abbaye_de_jumieges` → voix d'Aélis devant `lieu:abbaye_de_jumieges` (France (37,11)), service `acces` (« Veuillez rester dehors… ») → combat de la nef SANS Aélis (`proteges_restent_dehors`, `donjon:abbaye_de_jumieges`, 3 démons mineurs, grade 4-5) → dépose aux Archives des Seuils → `rapporter` chez Maëlys.
 - ⚠️ Le `rapporter` exige AUSSI `quete_reussie` de l'escorte : renommer l'escorte bloque le rang C en silence (verrouillé : `test_les_ids_de_quete_sont_ceux_des_offres`).
 - ⚠️ Destination = `lieu:les_archives_des_seuils`, fermées par `combat_gagne` de la nef : impossible de déposer Aélis sans Jumièges. Une seule Aélis présente à la fois (Cour → abbaye → Archives), présences filtrées par `cible` (les barrières n'ont pas de filtre `id`).
 - Image d'Aélis devant l'Institut = **portrait** de l'entrée `pnj` de la Cour, pas `image` : la Cour garde son image sans elle.
@@ -164,7 +164,7 @@ Un donjon est un lieu de combat **FERMÉ** : on y descend par une porte gardée,
 - `niveau_max`/`niveau_min` bornent le grade de l'élite **et** de l'escorte, en cascade salle → donjon → aucune (le plancher cède au plafond en cas de conflit).
 - `nb_monstres` fixe l'effectif **sans** bonus au nombre de compagnons, pour que les répliques narratives qui comptent les ennemis restent exactes.
 - La commission est une quête `chasse` **ordinaire** (`source:"commission"`, hook générique, répétable, sans `unique`) ; son rang dérive de la barrière la plus stricte à franchir pour l'obtenir (`acces.rang_de_quete`, source unique partagée avec les escortes).
-- Combat par `_declencher_combat_donjon` (miroir simplifié de `start_combat`, élite garantie, aucune furtivité d'entrée). Peuplement partagé avec les étages : `donjon.monstres_de_salle`.
+- Combat par `_declencher_combat_donjon` (miroir simplifié de `start_combat`, élite garantie, aucune furtivité d'entrée). `proteges_restent_dehors: true` sur la salle = les personnes escortées attendent à la porte. Peuplement partagé avec les étages : `donjon.monstres_de_salle`.
 - Chaîne de contenu (`dev/gen_acces_donjon.py`) : rang D à Auxerre → Borin ouvre le bureau → Gautier mandate la commission → George contrôle le principe → Armand contrôle la destination et ouvre le combat.
 
 - **Pièges** : tag codifié `pieges_<quantite>_<danger>` dans les `tags` de la SALLE (lieu `battle_map`), loin du point de départ — telluris-combat § Pièges.

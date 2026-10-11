@@ -259,7 +259,7 @@ def aelis_cour(doc: dict) -> dict:
 		"offre": {
 			"id": ESCORTE,
 			"titre": "Le portail de Jumièges",
-			"description": "L'Institut des Architectes envoie Aélis de Montfaucon examiner un portail ouvert dans les ruines de l'abbaye de Jumièges, en Normandie, sur une boucle de la Seine en aval de Rouen. Conduisez-la jusqu'à la nef, protégez-la pendant qu'elle mesure, puis ramenez-la vivante aux Archives des Seuils, à la Cour des Arches. Elle ne sait pas se battre.",
+			"description": "L'Institut des Architectes envoie Aélis de Montfaucon examiner un portail ouvert dans les ruines de l'abbaye de Jumièges, en Normandie, sur une boucle de la Seine en aval de Rouen. Conduisez-la jusqu'à l'abbaye, inspectez la nef avant qu'elle n'y entre, puis ramenez-la vivante aux Archives des Seuils, à la Cour des Arches. Elle ne sait pas se battre.",
 			"destination": ARCHIVES,
 			"proteges": [dict(PROTEGEE)],
 			"unique": True,
@@ -307,7 +307,7 @@ def aelis_cour(doc: dict) -> dict:
 			],
 		},
 		"mission_acceptee": {
-			"texte": "Aélis ferme son carnet, glisse son compas à sa ceinture et cale trois rouleaux de vélin sous son bras. « Je suis prête. Je l'étais depuis vingt jours. » Elle marque un temps. « Je ne sais pas me battre, {prenom}. Vous le savez. Là-bas, je mesure ; vous, vous m'empêchez de mourir pendant que je mesure. C'est un partage honnête. » Puis, plus bas, avec un regard vers la table des apprentis : « Ils vont croire que je fugue. Laissons-les croire. »",
+			"texte": "Aélis ferme son carnet, glisse son compas à sa ceinture et cale trois rouleaux de vélin sous son bras. « Je suis prête. Je l'étais depuis vingt jours. » Elle marque un temps. « Je ne sais pas me battre, {prenom}. Vous le savez. Sur la route, vous m'empêchez de mourir ; là-bas, je mesure. C'est un partage honnête. » Puis, plus bas, avec un regard vers la table des apprentis : « Ils vont croire que je fugue. Laissons-les croire. »",
 			"choix": [{"id": "ok", "label": "« En route. »", "next": "fin"}],
 		},
 	})
@@ -474,14 +474,14 @@ def docs_neufs() -> list:
 					"seuil": {
 						"texte": "Rien, d'abord. Puis un bourdonnement très bas, qui ne vient d'aucune direction et vous serre les dents. Entre les arcs du chœur, une lueur violette pulse, lente comme une respiration. Aélis a pâli, mais sa main n'a pas lâché le crayon. « Il n'a pas la couleur d'un portail entretenu. Il n'a la couleur d'aucun portail que je connaisse. » Quelque chose racle les dalles, dans la nef. Plusieurs choses. « Ils sont sortis de là. Il faut que j'approche à moins de dix pas. »",
 						"choix": [
-							{"id": "entrer", "label": "« Restez derrière moi. On entre. »",
+							{"id": "entrer", "label": "« Veuillez rester dehors, nous allons inspecter les lieux. »",
 							 "condition": {"acces_ouvrable": True},
 							 "action": {"service": "acces", "op": "passer"}},
 							{"id": "attendre", "label": "« Pas encore. »", "next": "accueil"},
 						],
 					},
 					"nef_ouverte": {
-						"texte": "Vous franchissez le seuil effondré. Trois silhouettes se retournent ensemble, cornes basses, et la lueur du portail allume dans leurs yeux un reflet de braise. « Des démons », souffle Aélis — puis, parce qu'elle ne peut pas s'en empêcher : « Ils ne s'éloignent pas du portail. Ils le gardent. »",
+						"texte": "« À moins de dix pas, j'ai dit… » Aélis s'arrête pourtant sur le seuil, le carnet serré contre elle. Vous entrez sans elle. Vos pas sonnent sur les dalles de la nef. Trois silhouettes se retournent ensemble, cornes basses, et la lueur du portail allume dans leurs yeux un reflet de braise. Derrière vous, depuis la porte, la voix d'Aélis, très basse : « Des démons. Ils ne s'éloignent pas du portail. Ils le gardent. »",
 						"choix": [{"id": "ok", "label": "Tirer votre arme.", "next": "fin"}],
 					},
 					"nef_close": {
@@ -489,7 +489,7 @@ def docs_neufs() -> list:
 						"choix": [{"id": "ok", "label": "Reculer.", "next": "fin"}],
 					},
 					"apres": {
-						"texte": "Aélis est assise sur une marche du chœur, à dix pas du portail, le carnet couvert de chiffres jusque dans les marges. La lueur violette n'a pas faibli ; elle respire toujours. « J'ai mes mesures. J'en ai même trop : aucune ne ressemble à ce qu'on m'a appris. » Elle referme le carnet sur son crayon. « Il est stable. Pas d'ancrage, pas de cristal, personne pour l'entretenir — et il est stable. » Elle se lève, s'époussette. « Ramenez-moi à la Cour, {prenom}. Il faut que je pose tout cela à plat aux Archives avant de ne plus me souvenir que de ce que j'ai noté. »",
+						"texte": "La nef enfin sûre, Aélis y est entrée sans attendre qu'on l'y invite. Elle est assise sur une marche du chœur, à dix pas du portail, le carnet couvert de chiffres jusque dans les marges. La lueur violette n'a pas faibli ; elle respire toujours. « J'ai mes mesures. J'en ai même trop : aucune ne ressemble à ce qu'on m'a appris. » Elle referme le carnet sur son crayon. « Il est stable. Pas d'ancrage, pas de cristal, personne pour l'entretenir — et il est stable. » Elle se lève, s'époussette. « Merci de m'avoir fait attendre. Je ne l'aurais pas dit avant. Ramenez-moi à la Cour, {prenom}. Il faut que je pose tout cela à plat aux Archives avant de ne plus me souvenir que de ce que j'ai noté. »",
 						"choix": [{"id": "ok", "label": "« En route pour Lutecia. »", "next": "fin"}],
 					},
 				},
@@ -505,6 +505,9 @@ def docs_neufs() -> list:
 			"cells": cells_nef(),
 			"nav": {},
 			"tags": ["ruines", "abbaye", "portail", "donjon"],
+			# Aélis ouvre la nef mais reste sur le seuil : les protégés n'entrent pas dans ce
+			# combat (`donjon.proteges_admis`), seulement dans ceux de la route.
+			"proteges_restent_dehors": True,
 			"acces": {
 				"gardien": AELIS_JUMIEGES,
 				"refus": "La nef est silencieuse. Le portail respire dans le chœur, et rien ne vous y attend.",

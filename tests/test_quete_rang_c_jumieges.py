@@ -10,6 +10,7 @@ import json
 import os
 
 from utils import acces, chasse, lint_dialogues, transport
+from utils import donjon as donjon_util
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JSONS = os.path.join(RACINE, "jsons")
@@ -127,6 +128,8 @@ def test_la_nef_est_une_salle_de_donjon_jouable():
 	assert donjon["portail"] == "lieu:abbaye_de_jumieges"
 	assert [b["lieu"] for b in donjon["battle_maps"]] == [NEF]
 	assert docs["pnj:aelis_de_montfaucon_jumieges"]["services"]["acces"]["lieu"] == NEF
+	# Aélis ouvre la nef mais attend sur le seuil : elle n'est pas dans ce combat.
+	assert not donjon_util.proteges_admis(nef)
 	base = _dump()
 	for b in donjon["battle_maps"]:
 		assert all(e in base for e in b["especes"])
