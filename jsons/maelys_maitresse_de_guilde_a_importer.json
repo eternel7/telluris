@@ -495,5 +495,117 @@
         "description": "Une naine à la tresse auburn, une broche d'argent en porte ouverte sur la poitrine, debout près de sa table."
       }
     ]
+  },
+  {
+    "_id": "lieu:la_sertissure_des_faubourgs",
+    "type": "lieu",
+    "label": "La Sertissure des Faubourgs",
+    "image": "bijouterie_europe02.png",
+    "categorie": "bijouterie",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {
+      "perles": 215,
+      "gemmes": 116,
+      "metaux_precieux": 60,
+      "ossements": 181,
+      "pierre": 138
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:gemmes",
+        "qty": 25
+      },
+      {
+        "item_id": "item:metaux_precieux",
+        "qty": 25
+      },
+      {
+        "item_id": "item:ossements",
+        "qty": 25
+      },
+      {
+        "item_id": "item:perles",
+        "qty": 25
+      },
+      {
+        "item_id": "item:sautoir",
+        "qty": 68
+      },
+      {
+        "item_id": "item:diademe",
+        "qty": 56
+      },
+      {
+        "item_id": "item:chevaliere",
+        "qty": 32
+      },
+      {
+        "item_id": "item:bague",
+        "qty": 23
+      },
+      {
+        "item_id": "item:epingle_cheveux",
+        "qty": 15
+      },
+      {
+        "item_id": "item:bracelet",
+        "qty": 14
+      },
+      {
+        "item_id": "item:pendentif",
+        "qty": 25
+      },
+      {
+        "item_id": "item:bijou",
+        "qty": 148
+      },
+      {
+        "item_id": "item:anneau",
+        "qty": 9
+      },
+      {
+        "item_id": "item:talisman",
+        "qty": 117
+      },
+      {
+        "item_id": "item:amulette",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Poudre_amethyste",
+        "qty": 444
+      },
+      {
+        "item_id": "item:pierre",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Miroir_de_poche",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Orbe_arcanique",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Petite_glace",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Pierre_de_meditation",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Symbole_sacre",
+        "qty": 4
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_bijouterie",
+        "portrait": "marchand_humain_f_bijouterie02.jpg",
+        "nom": "Aude Clairmont"
+      }
+    ]
   }
 ]

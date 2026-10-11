@@ -27,4 +27,4 @@ L'image la présente seule dans son bureau, regardant dans notre direction alors
 - **Portrait** : `templates/resources/pnj/maitresse_de_guilde_Maelys_naine_f.jpg` (recadré 464×580) ; **présence** dans le bureau : `templates/resources/towns/pnj_maitresse_de_guilde_Maelys_naine_f_grand_relais_bureau.jpg` (image Gemini fournie par l'Auteur).
 - **Éléonore de Vaugirard** parle désormais de « la maîtresse de la Guilde » et la nomme quand on lui demande qui dirige.
 - La **cicatrice reste un mystère** : Maëlys ne la raconte pas, même au joueur (règle « mystère jamais résolu »).
-- ⚠️ Homonyme : « Maëlys Dubois », bijoutière humaine de Lutecia (tenancière tirée au hasard).
+- La bijoutière de La Sertissure des Faubourgs (`lieu:la_sertissure_des_faubourgs`), jusqu'ici « Maëlys Dubois », est rebaptisée **« Aude Clairmont »** pour éviter l'homonymie (même import).
