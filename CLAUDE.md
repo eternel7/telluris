@@ -259,6 +259,10 @@ Règles qui valent **partout** ; les compétences ne répètent que ce qui leur 
 
 **17. Rendu stable.** Sans action de l'utilisateur, deux rendus ou ticks successifs ne font varier aucune dimension : une taille calculée depuis une mesure du DOM est idempotente — sa propre écriture ne doit jamais relancer sa mesure (verrouillé pour le combat par `test_vue_combat_client`).
 
+**18. Un seul fichier à importer par demande.** Quand l'utilisateur demande de générer du contenu à importer, produire **UN SEUL** `jsons/*_a_importer.json` (fusionner les générateurs/lots dans ce fichier), jamais plusieurs à charger l'un après l'autre.
+
+**19. Lien de téléchargement systématique.** Tout fichier à importer généré est **envoyé dans l'interface** (`SendUserFile`, `display:"attach"`) ET cité dans la réponse avec son lien GitHub brut `https://github.com/eternel7/telluris/raw/<sha>/jsons/<fichier>` (sha du commit poussé) — l'utilisateur doit pouvoir le télécharger en un clic.
+
 ## Core Design Patterns
 
 ### CouchDB document IDs
