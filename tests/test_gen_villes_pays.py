@@ -44,7 +44,9 @@ def test_aucun_refus(construit):
 
 
 def _liens_cites(liens):
-	return [l for l in liens if not l["_id"].startswith("link:afrique_du_nord_to_egypte_")]
+	interieurs = set(gvp.INTERIEURS)
+	return [l for l in liens if not l["_id"].startswith("link:afrique_du_nord_to_egypte_")
+		and not interieurs & {n["lieu"] for n in l["nodes"]}]
 
 
 def test_un_lien_par_sortie_chaque_bout_dans_sa_zone(dump, construit):
@@ -213,3 +215,34 @@ def test_abou_simbel_reste_praticable_et_sa_route_y_mene(construit):
 	plus_proche = min(passages, key=lambda l: (l["nodes"][0]["pos"][0] - cible[0]) ** 2
 		+ (l["nodes"][0]["pos"][1] - cible[1]) ** 2)
 	assert plus_proche["nodes"][0]["label"] == "Route d'Abou Simbel — Afrique du Nord"
+
+
+# ── Grand Temple d'Abou Simbel ────────────────────────────────────────────────────────────
+def test_grand_temple_cree_et_relie_a_la_porte_du_temple(dump, construit):
+	lieux, liens = construit[0], construit[1]
+	spec = gvp.INTERIEURS["lieu:grand_temple_d_abou_simbel"]
+	lien = next(l for l in liens if l["_id"] == "link:abou_simbel_to_grand_temple_d_abou_simbel")
+	(n_ville, n_temple) = lien["nodes"]
+	assert (n_ville["lieu"], tuple(n_ville["pos"])) == ("lieu:abou_simbel", spec["pos_parent"])
+	assert (n_temple["lieu"], tuple(n_temple["pos"])) == ("lieu:grand_temple_d_abou_simbel", spec["pos"])
+	assert lien["metadata"] == {"type": "temple", "status": "ouvert"}
+	if any(d.get("_id") == "lieu:grand_temple_d_abou_simbel" for d in dump):
+		pytest.skip("Grand Temple déjà en base")
+	temple = next(d for d in lieux if d["_id"] == "lieu:grand_temple_d_abou_simbel")
+	assert (temple["cells"], temple["nav"]) == spec["grille"]()
+	assert temple["lieu_parent"] == "lieu:abou_simbel" and temple["categorie"] == "temple"
+
+
+def test_interieur_deja_en_base_garde_sa_grille():
+	"""Le lieu relu n'est pas réémis ; seule la connexion l'est, bouts vérifiés."""
+	spec = gvp.INTERIEURS["lieu:grand_temple_d_abou_simbel"]
+	(px, py), (tx, ty) = spec["pos_parent"], spec["pos"]
+	ville = {"_id": "lieu:abou_simbel", "cells": [[0] * 50 for _ in range(82)]}
+	temple = {"_id": "lieu:grand_temple_d_abou_simbel", "cells": [[0] * 88 for _ in range(48)]}
+	ville["cells"][py][px] = temple["cells"][ty][tx] = 1
+	propositions = {}
+	docs, refus = gvp.interieurs({d["_id"]: d for d in (ville, temple)}, propositions)
+	assert refus == [] and propositions == {} and [d["type"] for d in docs] == ["connection"]
+	temple["cells"][ty][tx] = 0
+	_, refus = gvp.interieurs({d["_id"]: d for d in (ville, temple)}, {})
+	assert len(refus) == 1 and "non libre" in refus[0]

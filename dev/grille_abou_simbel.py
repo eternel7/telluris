@@ -77,6 +77,9 @@ BATI = (
 	# Châtelet : tours et corps de porte.
 	(17, 46, 21, 59), (29, 46, 33, 59), (22, 48, 28, 56))
 
+# Case de la porte du Grand Temple où se pose la connexion vers son intérieur.
+PORTE_DU_TEMPLE = (25, 13)
+
 # Rouvert à 1 APRÈS le bâti et la face de la terrasse.
 OUVERTURES = (
 	(25, 12, 26, 17),          # porte du Grand Temple
