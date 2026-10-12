@@ -27,6 +27,18 @@ relu est gardé tel quel (une retouche faite depuis dans l'éditeur survit au re
 règle que France ↔ plaine européenne ; les cités d'Égypte sont posées sur la carte d'Égypte
 TELLE QU'ELLE SERA ÉCRITE.
 
+ABOU SIMBEL : `lieu:abou_simbel` créé depuis `towns/abou_simbel_capital.jpg` (même voie
+qu'Atlantis), mais sa grille est DESSINÉE (`GRILLES_DESSINEES`, `dev/grille_abou_simbel.py` :
+la vue cavalière trompe la proposition, dont seule l'eau est reprise), puis posé sur la carte
+d'Afrique du Nord — le temple sur le Nil, au sud de l'Égypte —, sortie par le pont.
+
+GRAND TEMPLE D'ABOU SIMBEL (`INTERIEURS`) : `lieu:grand_temple_d_abou_simbel`, l'intérieur du
+temple (`towns/grand_temple_abou_simbel.jpg`, une COUPE : salle hypostyle, tombeaux, chambres,
+salle du trône), catégorie `temple`, parent Abou Simbel, grille DESSINÉE
+(`dev/grille_grand_temple_abou_simbel.py`) ; relié à la porte du temple sur l'esplanade
+(`grille_abou_simbel.PORTE_DU_TEMPLE`) ↔ la porte du fond de la salle hypostyle (`ENTREE`, en
+haut de l'image). Créé UNE fois : un lieu déjà en base garde sa grille (retouches de l'éditeur).
+
 ATLANTIS ET MU : `lieu:*` minimaux depuis `towns/atlantis_capital.jpg` et `towns/mu_capital.jpg`
 (`gen_villes_images.villes_a_creer`, grille de `gen_grille_image.proposer_pour_image`), SANS
 connexion : aucune carte de pays ne les montre, et le lore n'y mène que par la mer (Atlantis,
@@ -51,6 +63,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dev import gen_egypte_afrique_du_nord as egypte  # noqa: E402
 from dev import gen_grille_image as ggi  # noqa: E402
+from dev import grille_abou_simbel  # noqa: E402
+from dev import grille_grand_temple_abou_simbel as grand_temple  # noqa: E402
 from dev.gen_plaine_europeenne import (  # noqa: E402
 	case_proche, cases_autour, connexion, libelle_sortie, libelles_de, sans_rev, zone_de)
 from dev.gen_villes_images import _taille_image, poser_grille, villes_a_creer  # noqa: E402
@@ -59,8 +73,29 @@ from dev.gen_voisins_france import a_emettre  # noqa: E402
 RACINE = ggi.RACINE
 SORTIE = os.path.join(ggi.DOSSIER_JSONS, "villes_pays_a_importer.json")
 
-# Cartes de cité sans lieu à créer (sans connexion, cf. docstring).
-IMAGES_NOUVELLES = ("atlantis_capital.jpg", "mu_capital.jpg")
+# Cartes de cité sans lieu à créer (Atlantis et Mu sans connexion, cf. docstring).
+IMAGES_NOUVELLES = ("abou_simbel_capital.jpg", "atlantis_capital.jpg", "mu_capital.jpg")
+
+# Cités NEUVES dont la grille est dessinée : `fn(cells proposées) -> (cells, nav)`.
+GRILLES_DESSINEES = {"lieu:abou_simbel": grille_abou_simbel.grille}
+
+# Lieux INTÉRIEURS à créer depuis leur image, avec leur grille dessinée (`grille() -> (cells,
+# nav)`), et leur connexion à leur parent : (case du parent, case du lieu, libellés).
+INTERIEURS = {
+	"lieu:grand_temple_d_abou_simbel": {
+		"label": "Le Grand Temple d'Abou Simbel",
+		"image": "grand_temple_abou_simbel.jpg",
+		"categorie": "temple",
+		"dimensions": dict(grand_temple.DIMS),
+		"grille": grand_temple.grille,
+		"parent": "lieu:abou_simbel",
+		"pos_parent": grille_abou_simbel.PORTE_DU_TEMPLE,
+		"pos": grand_temple.ENTREE,
+		"label_parent": "Le Grand Temple d'Abou Simbel",
+		"label_lieu": "Ressortir sur l'esplanade",
+		"metadata": {"type": "temple", "status": "ouvert"},
+	},
+}
 
 # Un point de TERRE par carte de pays : la zone qui le contient est celle où l'on marche.
 ANCRES_PAYS = {
@@ -69,6 +104,7 @@ ANCRES_PAYS = {
 	"lieu:islande": (45, 32),     # hautes terres
 	"lieu:australie": (40, 25),   # Regio Deserta
 	"lieu:egypte": (40, 30),      # désert occidental
+	"lieu:afrique_du_nord": (40, 30),  # Sahara, sous le Hoggar
 }
 
 # Cités dont la grille est refaite : options de `gen_grille_image.proposer_pour_image` et
@@ -122,6 +158,10 @@ CITES = {
 	# Le Caire — à la pointe du delta.
 	"lieu:cairo": {"pays": "lieu:egypte", "position": (53, 16), "sorties": {
 		"nord": ((60, 4), None), "est": ((86, 20), None), "sud": ((75, 44), None)}},
+	# Abou Simbel — le temple dessiné sur le Nil, au sud de l'Égypte (case relue dans
+	# `gen_egypte_afrique_du_nord`) ; seule sortie : le pont, puis la route murée de la rive.
+	"lieu:abou_simbel": {"pays": "lieu:afrique_du_nord", "position": egypte.ABOU_SIMBEL_AFRIQUE, "sorties": {
+		"sud": ((48, 80), None)}},
 }
 
 
@@ -198,20 +238,30 @@ def construire(docs, taille_fn, proposer_fn):
 	nav, rapport}` : grille d'une cité NEUVE ou REFAITE (Pillow côté CLI). `lieux` = docs complets, émis par
 	l'appelant s'ils diffèrent du dump."""
 	par_id = {d.get("_id"): d for d in docs}
-	manquants = [i for i in sorted(set(ANCRES_PAYS) | set(CITES)) if not (par_id.get(i) or {}).get("cells")]
+	nouvelles, refus = villes_a_creer(IMAGES_NOUVELLES, docs, taille_fn)
+	ids_neufs = {d["_id"] for d in nouvelles}
+	manquants = [i for i in sorted(set(ANCRES_PAYS) | set(CITES))
+		if i not in ids_neufs and not (par_id.get(i) or {}).get("cells")]
 	if manquants:
 		return [], [], [f"absent(s) du dump ou sans grille : {', '.join(manquants)}"], {}, []
-	nouvelles, refus = villes_a_creer(IMAGES_NOUVELLES, docs, taille_fn)
 	if refus:
 		return [], [], refus, {}, []
-	libelles = libelles_de(docs)
+	libelles = libelles_de(docs, nouvelles)
 	lieux, liens, refus, avert = egypte.construire(docs, libelles)
 	# Les cités d'Égypte se posent sur la carte TELLE QU'ELLE SERA ÉCRITE.
 	par_id.update({d["_id"]: d for d in lieux})
 	propositions = {}
 	for doc in nouvelles:
-		propositions[doc["_id"]] = proposer_fn(doc, frozenset())
-		lieux.append(poser_grille(doc, propositions[doc["_id"]]))
+		proposition = proposer_fn(doc, frozenset())
+		if doc["_id"] in GRILLES_DESSINEES:
+			cells, nav = GRILLES_DESSINEES[doc["_id"]](proposition["cells"])
+			proposition = {**proposition, "cells": cells, "nav": nav, "dessinee": True}
+		propositions[doc["_id"]] = proposition
+		doc = poser_grille(doc, proposition)
+		if doc["_id"] in CITES:
+			par_id[doc["_id"]] = doc  # émise par la boucle des cités, parent posé
+		else:
+			lieux.append(doc)
 	for cite_id in sorted(GRILLES_REFAITES):
 		doc, proposition = grille_refaite(par_id[cite_id], proposer_fn)
 		par_id[cite_id] = doc
@@ -226,7 +276,39 @@ def construire(docs, taille_fn, proposer_fn):
 		liens += d
 		refus += r
 		lieux.append(rattachee(par_id[cite_id], pays))
+	d, r = interieurs(par_id, propositions)
+	lieux += [doc for doc in d if doc.get("type") == "lieu"]
+	liens += [doc for doc in d if doc.get("type") == "connection"]
+	refus += r
 	return lieux, liens, refus, propositions, avert
+
+
+def interieurs(par_id, propositions):
+	"""(docs, refus) : chaque lieu d'`INTERIEURS` absent de `par_id` (grille dessinée, notée
+	dans `propositions`) et sa connexion au parent ; les deux bouts sur une case libre."""
+	docs, refus = [], []
+	for lieu_id, spec in sorted(INTERIEURS.items()):
+		doc = par_id.get(lieu_id)
+		if doc is None:
+			cells, nav = spec["grille"]()
+			doc = {"_id": lieu_id, "type": "lieu", "label": spec["label"], "image": spec["image"],
+				"categorie": spec["categorie"], "dimensions": spec["dimensions"], "cells": cells,
+				"nav": nav, "tags": [], "lieu_parent": spec["parent"]}
+			propositions[lieu_id] = {"cells": cells, "nav": nav, "dessinee": True}
+			docs.append(doc)
+		parent = par_id.get(spec["parent"])
+		for lieu, pos in ((parent, spec["pos_parent"]), (doc, spec["pos"])):
+			x, y = pos
+			if not lieu or not lieu.get("cells") or lieu["cells"][y][x] != 1:
+				refus.append(f"{lieu_id} : case {list(pos)} non libre sur "
+					f"{(lieu or {}).get('_id') or spec['parent']}")
+		lien = connexion(f"link:{slug(spec['parent'])}_to_{slug(lieu_id)}", spec["parent"],
+			spec["pos_parent"], lieu_id, spec["pos"])
+		lien["nodes"][0]["label"] = spec["label_parent"]
+		lien["nodes"][1]["label"] = spec["label_lieu"]
+		lien["metadata"] = dict(spec["metadata"])
+		docs.append(lien)
+	return docs, refus
 
 
 def main() -> int:
@@ -275,11 +357,17 @@ def main() -> int:
 			f"{' · parent ' + doc['lieu_parent'] if doc.get('lieu_parent') else ''}")
 		if neuf:
 			chemin = ggi.trouver_image(doc["image"])
-			ggi.imprimer_resume(chemin, propositions[doc["_id"]])
+			proposition = propositions[doc["_id"]]
+			if proposition.get("dessinee"):
+				comptes = ggi.grille_image.comptes(doc["cells"])
+				print("    grille dessinée : " + " · ".join(f"{v} × {n}" for v, n in sorted(comptes.items()))
+					+ f" · {len(doc['nav'])} case(s) nav")
+			else:
+				ggi.imprimer_resume(chemin, proposition)
 			if "--sans-apercu" not in args:
 				apercu = os.path.join(ggi.DOSSIER_JSONS, f"{slug(doc['_id'])}_grille_apercu.png")
 				ggi.ecrire_apercu(chemin, doc["cells"], apercu, doc.get("nav"),
-					propositions[doc["_id"]]["rapport"])
+					None if proposition.get("dessinee") else proposition["rapport"])
 				print(f"    aperçu : {os.path.relpath(apercu, RACINE)}")
 
 	with open(SORTIE, "w", encoding="utf-8") as f:
