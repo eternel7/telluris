@@ -46,6 +46,12 @@ Le canon contenait déjà **Néfertiti, lamia** (lignée pharaonique, Akhénaton
 
 > Dictée vocale : « accord de serpent » = **au corps de serpent** ; « la vie wyvern » = **la wyvern**.
 
+## ✍️ Auteur — pourquoi les paladins se sont relevés
+
+En fait, les paladins se sont relevés parce que le sang de la lamia a été répandu sur leurs cadavres frais et a contaminé leur corps. Et leur foi leur a permis de ne pas avoir l'ensemble des travers d'une lamia.
+
+> « La lamia » désigne ici la **lamie** vampire sortie du carrosse, non la femme-serpent du bestiaire.
+
 ---
 
 ## 1. Arbitrage
@@ -62,6 +68,7 @@ Le canon contenait déjà **Néfertiti, lamia** (lignée pharaonique, Akhénaton
 | Dragons de sang déchus | les **Chevaliers du Sang** et **Seigneurs du Sang** du bestiaire | Auteur |
 | Reine Lamia | règne aujourd'hui depuis **Novgorod** ; sa libération reste un **mystère** | Auteur |
 | Nuit du carrosse | le paladin le plus pieux et l'auberge-relais restent **anonymes** | Auteur |
+| Pourquoi ils se relèvent | le **sang de la lamie**, répandu sur leurs cadavres frais, a contaminé leurs corps ; leur **foi** leur a épargné l'ensemble des travers d'une lamie | Auteur |
 | Lamia (bestiaire) | la **Lamia libyenne** des Grecs : femme-serpent **morte-vivante** du désert, dévoreuse, qui charme et peut ôter ses yeux ; **légende déformée**, sans lien de sang avec les lamies | Auteur |
 | Vouivre (bestiaire) | écho de **Mélusine** : belle femme au corps de serpent, **vivante** | Auteur |
 | Serpent ailé animal | la **wyvern**, pas la vouivre | Auteur |
@@ -142,7 +149,7 @@ Comme toujours, ce sont des **théories de savants** : personne en jeu ne les ti
 
 ## 5. Les dragons de sang — l'Ordre du Dragon
 
-**Le récit (Auteur)** — dans une **auberge-relais**, des paladins voient arriver à la tombée de la nuit un carrosse au rideau baissé, mené par un cocher **parcheminé**. Au dernier rayon, une lamia en sort et tue les paladins un à un. Le plus pieux la combat par la foi et l'épée, tombe… et se relève ; puis d'autres se relèvent. À la fin, tous sont tombés au moins une fois ; la lamia et son cocher sont morts. Ceux qui gardent la foi **ne craignent pas le soleil** ; les dévoyés, devenus le versant sombre, n'en ressentent qu'une **gêne**. Aujourd'hui, ils se partagent à peu près **à parts égales**. Ces paladins formaient l'**Ordre du Dragon**, dont était le père de Vlad.
+**Le récit (Auteur)** — dans une **auberge-relais**, des paladins voient arriver à la tombée de la nuit un carrosse au rideau baissé, mené par un cocher **parcheminé**. Au dernier rayon, une lamie en sort et tue les paladins un à un. Le plus pieux la combat par la foi et l'épée, tombe… et se relève ; puis d'autres se relèvent. À la fin, tous sont tombés au moins une fois ; la lamie et son cocher sont morts. Ceux qui gardent la foi **ne craignent pas le soleil** ; les dévoyés, devenus le versant sombre, n'en ressentent qu'une **gêne**. Aujourd'hui, ils se partagent à peu près **à parts égales**. Ces paladins formaient l'**Ordre du Dragon**, dont était le père de Vlad.
 
 **C'est bien une touche tellurienne**, mais elle a des échos réels :
 
@@ -156,7 +163,7 @@ Comme toujours, ce sont des **théories de savants** : personne en jeu ne les ti
 - **La date** : le mot « auberge-relais » situe la nuit du carrosse **avant les monothéismes** (après, elles deviennent des monastères-relais). Les dragons de sang sont donc **bien plus anciens** que Dracula ; **Vlad II est l'un d'eux** (Auteur).
 - **La foi** : celle des paladins, la **magie Sainte**. Le fidèle la garde ; le déchu la perd, et c'est elle qui le tenait au soleil.
 - **Anonymes** (Auteur) : le nom du paladin le plus pieux et le lieu de l'auberge-relais ne sont pas transmis. Chaque auberge des Carpates prétend être la bonne ; le nom du premier relevé, seuls les dragons de sang le connaissent, et ils le taisent. *(détail proposé)*
-- **Pourquoi ils se sont relevés** : jamais tranché. Le sang de la lamia, versé au milieu de la cour, mêlé au leur ? La foi du plus pieux, qui a retenu son esprit et appelé celui des autres ? Les dieux ?
+- **Pourquoi ils se sont relevés** (Auteur) : le **sang de la lamie**, répandu au fil du combat sur leurs cadavres encore frais, a contaminé leurs corps ; c'est lui qui les a relevés. Leur **foi** leur a épargné l'ensemble des travers d'une lamie — à commencer par le soleil, qui ne sépare plus l'esprit d'un corps que la foi retient. Le déchu, en perdant la foi, retrouve une part de ces travers : la gêne au soleil, la soif. *(ces deux derniers liens : lecture proposée)*
 - **Les déchus** (Auteur) : ce sont les **Chevaliers du Sang** ; les **Seigneurs du Sang**, les plus anciens d'entre eux, les commandent.
 - **En jeu** : `espece:dragon_de_sang` (fidèle) ; les déchus sont `espece:chevalier_du_sang` et `espece:seigneur_du_sang` (description reprise), et le sort *Ordre sanglant* les dit parjures de l'Ordre du Dragon.
 
@@ -193,7 +200,6 @@ Tout est tranché. Restent **ouverts par choix de l'Auteur**, comme mystères du
 
 - **Qui a libéré Lamia** de son emmurement, et quand.
 - **Le nom** du paladin le plus pieux, et le lieu de l'auberge-relais.
-- **Pourquoi** les paladins se sont relevés.
 
 ## 8. Prompts d'image à produire
 
