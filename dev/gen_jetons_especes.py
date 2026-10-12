@@ -81,7 +81,6 @@ TABLE = {
 	"dragnard": ("1x2", "ellipse"),
 	"dragon": ("3x2", "triangle"),
 	"dragon_de_sang": None,
-	"dragon_de_sang_dechu": None,
 	"dragon_empereur": ("3x2", "triangle"),
 	"dragon_zombie": ("3x2", "triangle"),
 	"dryade": None,

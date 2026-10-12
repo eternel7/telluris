@@ -104,10 +104,6 @@ TABLE = {
 		"Epee_une_main_benie", "Masse_benie", "Bouclier_sacre",
 		"Cotte_mailles_benie", "Epaulieres_de_fer", "Heaume_ouvert_grave",
 	],
-	"dragon_de_sang_dechu": [
-		"Epee_longue", "Morgenstern", "Bouclier_normand",
-		"Cotte_de_mailles", "Heaume_de_plates", "Gantelets_de_plates",
-	],
 	"familier": None,
 	"geant_ou_titan": [
 		"Kanabo", "Rungu",

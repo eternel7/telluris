@@ -2,7 +2,7 @@
 
 - **Source :** séance Claude Code du 12/10/2026. L'Auteur décrit cinq types de vampires (aristocrates de Dracula, Strigoï, Nosferatu, dragons de sang, lamies) et demande de les projeter sur les mythes terrestres et la littérature (Stoker, Anne Rice) ; Claude Code propose des ancrages, l'Auteur arbitre en mode plan.
 - **Créée :** 12/10/2026
-- **Statut :** les récits de l'Auteur (§ Auteur) et ses trois réponses (§ 1) **font foi** ; tout le reste — noms, lieux, ancrages, datations — est **proposé, non tranché** tant que l'Auteur ne l'a pas repris. Bestiaire en jeu : `dev/gen_vampires.py` → `jsons/vampires_a_importer.json`.
+- **Statut :** les récits de l'Auteur (§ Auteur) et ses deux arbitrages (§ 1) **font foi** ; tout le reste — noms, lieux, ancrages, datations — est **proposé, non tranché** tant que l'Auteur ne l'a pas repris. Bestiaire en jeu : `dev/gen_vampires.py` → `jsons/vampires_a_importer.json`.
 
 ---
 
@@ -28,6 +28,15 @@ Le canon contenait déjà **Néfertiti, lamia** (lignée pharaonique, Akhénaton
 - **Nosferatu** : élèves de **Hārūt et Mārūt**.
 - **Dragons de sang** : oui, l'**Ordre du Dragon** ; le père de Vlad en était.
 
+## ✍️ Auteur — second arbitrage
+
+- **Vlad II** : un **dragon de sang immortel**.
+- **Néfertiti** : « La cour de Néfertiti ne contient pas de vampire elle est avant tout avec des morts-vivants de style zombie mais plutôt en bon état, squelette, momie. Les lamis elles ont fui la zone de la Mésopotamie et se sont réfugiés plus au nord vers la Russie c'est là qu'elle c'est depuis la Russie qu'elle se sont répandues sur le monde elle reste avant tout féminine par réaction par rapport à la trahison initiale du mari de leur reine » — Néfertiti elle-même : **morte-vivante, pas vampire**.
+- **Refuge des lamies** : **Novgorod**.
+- **Lamies masculins** : « Oui très rare exactement comme tu l'as dit quelques-uns d'une beauté anthrope frappante toléré mais jamais au premier rang la méfiance envers les hommes vient de la trahison exactement ils sont souvent utilisés plutôt comme esclave, servant, serviteur. Cela peut des fois être des amants car depuis le temps les nouvelles lamia non pas tout à fait les mêmes critères que la reine elle-même. »
+- **Les deux sœurs sorcières** : **aucun lien** avec Hārūt et Mārūt.
+- **Chevaliers du Sang et Seigneurs du Sang** (bestiaire) : ce sont les **dragons de sang déchus**.
+
 ---
 
 ## 1. Arbitrage
@@ -36,6 +45,12 @@ Le canon contenait déjà **Néfertiti, lamia** (lignée pharaonique, Akhénaton
 |---|---|---|
 | Cinq types | aristocrates de Dracula · Strigoï · Nosferatu · dragons de sang · lamies | Auteur |
 | Lamia ↔ Néfertiti | Lamia la première ; **trahie tôt par son mari**, **emmurée vivante** longtemps ; pendant ce temps, Néfertiti trouve **une autre méthode** d'immortalité | Auteur |
+| Néfertiti | **morte-vivante, pas vampire** ; sa cour : morts-vivants bien conservés, squelettes, momies — **aucun vampire** | Auteur |
+| Exode des lamies | de la Mésopotamie vers le nord, refuge à **Novgorod**, puis le monde entier | Auteur |
+| Lamies masculins | très rares, d'une beauté anthrope frappante, tolérés, jamais au premier rang ; esclaves, servants, serviteurs, parfois amants | Auteur |
+| Sœurs sorcières | aucun lien avec Hārūt et Mārūt | Auteur |
+| Vlad II | un **dragon de sang immortel** | Auteur |
+| Dragons de sang déchus | les **Chevaliers du Sang** et **Seigneurs du Sang** du bestiaire | Auteur |
 | Nosferatu | élèves de Hārūt et Mārūt (Babylone) | Auteur |
 | Dragons de sang | paladins de l'**Ordre du Dragon** ; **Vlad II**, père de Dracula, en était | Auteur |
 | Monde polythéiste | Vlad maudit **les dieux**, et les dieux le punissent | Auteur |
@@ -73,6 +88,7 @@ Comme toujours, ce sont des **théories de savants** : personne en jeu ne les ti
 - **L'empaleur sans guerre** : Vlad rentre de sa chasse en plantant sur des pieux, le long de la route, les **carcasses de la horde** qui accompagnait le balaur. La faune évite encore cette route ; les voyageurs, des siècles plus tard, racontent qu'il empalait des hommes — le mythe déformé.
 - **Le faux message** : envoyé par **Radu** (§ 3) — ce qui donne à la torture son motif.
 - **Les dieux maudits** : parmi eux **Zalmoxis**, le dieu dace qui promettait l'immortalité aux siens. Punition ironique : Vlad l'aura, mais **sans passage**.
+- **Fils d'un dragon de sang** (Auteur) : Vlad II, son père, est l'un des paladins de la nuit du carrosse, immortel. La malédiction du fils répond à la foi du père : l'un a gardé ses dieux par-delà la mort, l'autre les a maudits. *(lecture proposée)*
 - **Ce qu'il transmet** : la malédiction — d'où des vampires **séducteurs, d'apparence anthrope, bons en épée comme en magie, souvent masculins**. En jeu : `espece:vampire` et `espece:comte_vampire` (ses aînés), dont la description est reprise.
 
 ## 3. Les Strigoï — la lignée du traître
@@ -122,10 +138,11 @@ Comme toujours, ce sont des **théories de savants** : personne en jeu ne les ti
 **Adaptations :**
 
 - **Le nom** : « dragon de sang » risque la confusion avec les vrais dragons du jeu (dragon empereur, dragons de mer, bestiaire). L'Ordre du Dragon la règle : le nom vient de **l'ordre**, pas d'une créature. *(proposé)*
-- **La date** : le mot « auberge-relais » situe la nuit du carrosse **avant les monothéismes** (après, elles deviennent des monastères-relais). Les dragons de sang sont donc **bien plus anciens** que Dracula, et Vlad II est l'un d'eux, ou l'un de leurs écuyers mortels — **point ouvert** (§ 7).
+- **La date** : le mot « auberge-relais » situe la nuit du carrosse **avant les monothéismes** (après, elles deviennent des monastères-relais). Les dragons de sang sont donc **bien plus anciens** que Dracula ; **Vlad II est l'un d'eux** (Auteur).
 - **La foi** : celle des paladins, la **magie Sainte**. Le fidèle la garde ; le déchu la perd, et c'est elle qui le tenait au soleil.
 - **Pourquoi ils se sont relevés** : jamais tranché. Le sang de la lamia, versé au milieu de la cour, mêlé au leur ? La foi du plus pieux, qui a retenu son esprit et appelé celui des autres ? Les dieux ?
-- **En jeu** : `espece:dragon_de_sang` (fidèle) et `espece:dragon_de_sang_dechu`.
+- **Les déchus** (Auteur) : ce sont les **Chevaliers du Sang** ; les **Seigneurs du Sang**, les plus anciens d'entre eux, les commandent.
+- **En jeu** : `espece:dragon_de_sang` (fidèle) ; les déchus sont `espece:chevalier_du_sang` et `espece:seigneur_du_sang` (description reprise), et le sort *Ordre sanglant* les dit parjures de l'Ordre du Dragon.
 
 ## 6. Les lamies — la reine Lamia
 
@@ -144,7 +161,9 @@ Comme toujours, ce sont des **théories de savants** : personne en jeu ne les ti
 - **La cité** : **Suse**, en Élam, à la lisière de la Mésopotamie — ou une des cités antédiluviennes de la liste royale sumérienne (Eridu, Larak, Sippar).
 - **L'esprit** : un **lilû**, un esprit du vent. Les savants qui y croient en font l'origine du nom de **Lilith** — d'autres le nient.
 - **L'emmurement** : l'époux, épouvanté par ce qu'elle est devenue, la fait murer vivante. Inerte au jour, éveillée la nuit, elle attend. Combien de temps, et qui l'a libérée : **mystère**.
-- **Néfertiti** : sa lignée cherchait depuis des siècles ; Lamia avait prouvé que c'était possible. Emmurée, elle ne pouvait plus rien donner — Néfertiti a trouvé **seule** une autre voie. Laquelle ? Les savants d'Alexandrie se disputent : certains disent qu'elle a bu le sang de la reine murée, d'autres qu'elle n'a jamais approché sa tombe. La parenté est de **principe** — la preuve que c'était possible —, pas forcément de sang.
+- **Néfertiti** (Auteur) : **morte-vivante, pas vampire**. Sa lignée cherchait depuis des siècles ; Lamia avait prouvé que c'était possible. Emmurée, elle ne pouvait plus rien donner — Néfertiti a trouvé une **autre voie**, celle du Nil : la non-vie sans le sang. Sa cour ne compte **aucun vampire** : des morts-vivants bien conservés, des squelettes, des momies. La parenté n'est que de **principe**.
+- **L'exode** (Auteur) : les lamies fuient la Mésopotamie vers le nord et trouvent refuge à **Novgorod** ; c'est de là qu'elles se répandent sur le monde, par les routes marchandes du Nord. Échos proposés : l'*upyr* russe, les *roussalki*, belles noyées qui séduisent les vivants.
+- **Avant tout féminines** (Auteur), par réaction à la trahison du mari de leur reine. Les **masculins** sont très rares, d'une beauté anthrope frappante, tolérés mais jamais au premier rang : le plus souvent esclaves, servants ou serviteurs, parfois amants — les nouvelles lamies n'ont plus tout à fait les critères de la reine.
 - **Les mythes grecs déformés** : la Lamia de Libye, et les **lhamias** mi-femmes mi-serpents du bestiaire, seraient des souvenirs défigurés de la reine et de ses filles.
 - **En jeu** : `espece:lamie` (féminin, séduction, magie). La reine elle-même n'est pas une espèce.
 
@@ -152,16 +171,15 @@ Comme toujours, ce sont des **théories de savants** : personne en jeu ne les ti
 
 ## 7. Points ouverts
 
-- **Vlad II**, l'un des paladins de l'auberge-relais, donc un dragon de sang immortel — ou un chevalier mortel d'un Ordre qui accueille aussi des écuyers vivants ?
+Tranchés par le second arbitrage : Vlad II, Néfertiti, les deux sœurs, les Chevaliers et Seigneurs du Sang. Restent :
+
 - **Le nom** du paladin le plus pieux, et le lieu de l'auberge-relais.
-- **Lamies et Néfertiti** : les vampires de la cour d'Abou Simbel sont-ils des lamies, ou une **sixième** lignée née de « l'autre méthode » ?
-- **Les deux sœurs** : ont-elles un lien avec l'école de Hārūt et Mārūt, et donc avec les Nosferatu ?
-- `espece:chevalier_du_sang` et `espece:seigneur_du_sang` (« fidèles à un serment prêté à un roi mort ») pourraient être des **dragons de sang déchus** ou les chevaliers de Dracula : non rattachés.
+- **Qui a libéré Lamia** de son emmurement, et quand.
+- **Où vit la reine** aujourd'hui : Novgorod, ou ailleurs.
 
 ## 8. Prompts d'image à produire
 
 - **Strigoï** (`strigoi_transparent.png`) : vampire bestial à quatre pattes, os brisés mal ressoudés, crâne enfoncé, mâchoire déboîtée, griffes, haillons ; fond transparent, pas de texte visible.
 - **Lamie** (`lamie_transparent.png`) : vampire d'une grande beauté, aristocrate antique, parures d'or et de lapis, peau très pâle, regard hypnotique ; fond transparent, pas de texte visible.
 - **Dragon de sang** (`dragon_de_sang_transparent.png`) : paladin en armure, visage anthrope apaisé, pupilles rouges, emblème d'un dragon enroulé sur le tabard, lumière dorée de la magie Sainte ; fond transparent, pas de texte visible.
-- **Dragon de sang déchu** (`dragon_de_sang_dechu_transparent.png`) : même armure, ternie, emblème du dragon griffé, ombre au visage, crocs visibles ; fond transparent, pas de texte visible.
 - **Nosferatu** (`nosferatu_transparent.png`, à remplacer) : mage chauve, livide, oreilles pointues, doigts immenses, robe de savant, rats à ses pieds, ombre démesurée ; fond transparent, pas de texte visible.

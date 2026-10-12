@@ -49,7 +49,7 @@ MASCULINS = {
 	"chevalier_du_sang", "comte_vampire", "coursier_elfique", "coursier_persan", "crocodile",
 	"cupidon", "cyclope", "demon_guerrier", "demon_majeur_de_la_destinee",
 	"demon_majeur_de_la_destruction", "demon_mineur", "demon_servant", "doppleganger", "dragnard",
-	"dragon", "dragon_de_sang", "dragon_de_sang_dechu", "dragon_empereur", "dragon_zombie",
+	"dragon", "dragon_de_sang", "dragon_empereur", "dragon_zombie",
 	"ecureuil", "familier", "fantome",
 	"fils_de_sobek", "geant_ou_titan", "genie", "ghul_des_sables", "gnome", "gobelin",
 	"gobelin_chamanique", "gobelin_des_marais", "golem_de_chair", "golem_de_fer",

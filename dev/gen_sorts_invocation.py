@@ -133,8 +133,9 @@ SORTS = [
 	 "Une silhouette voûtée se déplie dans l'ombre, les os de travers et les crocs déjà découverts. Le strigoï frappe vite et sans bruit, comme la bête qu'on a faite de lui."),
 	("necromancien", 8, "seigneurie_du_sang", "Seigneurie du sang", "🩸", "seigneur_du_sang", "seigneur", 1, 5, 92,  # ~4515 / 4486
 	 "Un seigneur du sang répond à votre appel comme on répond à un vassal : de haut. Il combat pourtant, parce que le sang versé ici lui revient."),
+	# Chevaliers du sang = dragons de sang déchus (Auteur, 12/10 — `dev/gen_vampires.py`).
 	("necromancien", 9, "ordre_sanglant", "Ordre sanglant", "⚔️", "chevalier_du_sang", "heros", 3, 3, 104,  # ~5643 / 5832
-	 "Trois chevaliers du sang se lèvent dans leurs armures rouillées, fidèles à un serment prêté à un roi mort. Aujourd'hui, c'est vous qu'ils servent."),
+	 "Trois chevaliers du sang se lèvent dans leurs armures rouillées : ils ont renié le serment de l'Ordre du Dragon, pas l'habitude d'obéir. Aujourd'hui, c'est vous qu'ils servent."),
 	("necromancien", 10, "ailes_de_charogne", "Ailes de charogne", "🐉", "dragon_zombie", "seigneur", 1, 5, 118,  # ~7370 / 7582
 	 "Le ciel s'assombrit sous des ailes percées. Un dragon mort depuis des siècles s'abat sur le champ de bataille, et ses os gardent la mémoire de la chasse."),
 

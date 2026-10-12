@@ -67,7 +67,7 @@
     "nom": "Lamie",
     "genre": "f",
     "image": "",
-    "description": "Vampire d'une beauté souveraine, fille de la reine Lamia ; elle séduit avant de boire, et le soleil la laisse inerte comme une statue.",
+    "description": "Vampire d'une beauté souveraine, fille de la reine Lamia, venue de Novgorod ; elle séduit avant de boire, et le soleil la laisse inerte comme une statue.",
     "base_attributes": {
       "V": {
         "min": 5,
@@ -203,78 +203,6 @@
     "poids": 11.5,
     "description": "Ossements et reliquats récupérés sur Dragon de sang après sa destruction.",
     "source_espece": "espece:dragon_de_sang",
-    "loot_defaut": true
-  },
-  {
-    "_id": "espece:dragon_de_sang_dechu",
-    "type": "espece",
-    "nom": "Dragon de sang déchu",
-    "genre": "m",
-    "image": "",
-    "description": "Dragon de sang qui a perdu la foi ; le soleil le gêne, et de son serment il ne lui reste que la soif.",
-    "base_attributes": {
-      "V": {
-        "min": 6,
-        "max": 8
-      },
-      "F": {
-        "min": 50,
-        "max": 75
-      },
-      "R": {
-        "min": 45,
-        "max": 70
-      },
-      "Ag": {
-        "min": 35,
-        "max": 55
-      },
-      "Vol": {
-        "min": 45,
-        "max": 65
-      },
-      "Int": {
-        "min": 30,
-        "max": 45
-      },
-      "Cha": {
-        "min": 20,
-        "max": 35
-      },
-      "Ch": {
-        "min": 25,
-        "max": 40
-      }
-    },
-    "tags": [
-      "undead",
-      "non_mort",
-      "guerrier",
-      "nocturne",
-      "humanoide"
-    ],
-    "items": [
-      "item:Epee_longue",
-      "item:Morgenstern",
-      "item:Bouclier_normand",
-      "item:Cotte_de_mailles",
-      "item:Heaume_de_plates",
-      "item:Gantelets_de_plates"
-    ],
-    "proprietes": {}
-  },
-  {
-    "_id": "item:dragon_de_sang_dechu",
-    "type": "item",
-    "nom": "Ossements de Dragon de sang déchu",
-    "sous_categorie": "ossements",
-    "icon": "🦴",
-    "rarete": "peu_commun",
-    "categorie": "composant",
-    "slots": [],
-    "poids": 12.5,
-    "description": "Ossements et reliquats récupérés sur Dragon de sang déchu après sa destruction.",
-    "source_espece": "espece:dragon_de_sang_dechu",
     "loot_defaut": true
   },
   {
@@ -442,6 +370,152 @@
       "item:Gants_fins_noirs"
     ],
     "proprietes": {}
+  },
+  {
+    "_id": "espece:chevalier_du_sang",
+    "type": "espece",
+    "nom": "Chevalier du Sang",
+    "genre": "m",
+    "image": "chevalier_du_sang_transparent.png",
+    "description": "Dragon de sang déchu : un paladin de l'Ordre du Dragon qui a perdu la foi. Le soleil le gêne, et de son serment il ne lui reste que la soif.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "guerrier"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:seigneur_du_sang",
+    "type": "espece",
+    "nom": "Seigneur du Sang",
+    "genre": "m",
+    "image": "seigneur_du_sang_transparent.png",
+    "description": "Dragon de sang déchu parmi les plus anciens, qui commande ses semblables avec une autorité née de siècles de carnage.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 55,
+        "max": 85
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 30,
+        "max": 45
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 70
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "guerrier",
+      "boss",
+      "humanoide"
+    ],
+    "items": [
+      "item:Epee_longue",
+      "item:Schiavona",
+      "item:Morgenstern",
+      "item:Bouclier_normand",
+      "item:Cotte_de_mailles",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates",
+      "item:Jambières_de_plates",
+      "item:Bottes_de_fer"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "sort:ordre_sanglant",
+    "type": "sort",
+    "nom": "Ordre sanglant",
+    "icon": "⚔️",
+    "animation": "animation:capa_levee_morts",
+    "description": "Trois chevaliers du sang se lèvent dans leurs armures rouillées : ils ont renié le serment de l'Ordre du Dragon, pas l'habitude d'obéir. Aujourd'hui, c'est vous qu'ils servent.",
+    "magie": "Nécromancie",
+    "famille": "invocation",
+    "niveau": 9,
+    "cout_pm": 104,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:chevalier_du_sang",
+      "nombre": 3,
+      "duree": 5,
+      "profil": "profil:heros"
+    },
+    "composants": [
+      {
+        "item": "item:Fiole_de_sang_fige",
+        "consomme": true,
+        "bonus": {
+          "invocation_duree": 2
+        }
+      },
+      {
+        "item": "item:Focus_ossuaire",
+        "consomme": false,
+        "bonus": {
+          "invocation_duree": 1
+        }
+      }
+    ]
   },
   {
     "_id": "sort:soif_du_nosferatu",

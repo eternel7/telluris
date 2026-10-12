@@ -10,8 +10,11 @@
 #     garde les caractéristiques de l'ancien nosferatu, le budget de l'invocation ne bouge pas
 #     (`dev/gen_sorts_invocation.py`). L'`_id` du sort reste, des personnages le connaissent ;
 #   - `espece:vampire` / `espece:comte_vampire` : description seule (lignée de Dracula) ;
-#   - `espece:lamie`, `espece:dragon_de_sang`, `espece:dragon_de_sang_dechu` (NOUVEAUX), sans
-#     image (`image: ""`, prompts au § 8 de la séance) ;
+#   - `espece:lamie`, `espece:dragon_de_sang` (NOUVEAUX), sans image (`image: ""`, prompts au
+#     § 8 de la séance) ;
+#   - les dragons de sang DÉCHUS sont les `espece:chevalier_du_sang` / `espece:seigneur_du_sang`
+#     déjà en jeu (Auteur, 12/10) : description seule, comme `sort:ordre_sanglant` (texte miroir
+#     de `dev/gen_sorts_invocation.py`) ;
 #   - un `item:<espece>` d'ossements par espèce neuve, `item:nosferatu` au poids recalculé —
 #     même forme que ceux du dump (poids = F moyenne / 5).
 #
@@ -65,6 +68,19 @@ MODIFS = {
 		"description": "Aîné de la lignée de Dracula, noble et ancien ; son influence et sa puissance "
 					   "dépassent largement celles de ses cadets.",
 	},
+	"espece:chevalier_du_sang": {
+		"description": "Dragon de sang déchu : un paladin de l'Ordre du Dragon qui a perdu la foi. Le "
+					   "soleil le gêne, et de son serment il ne lui reste que la soif.",
+	},
+	"espece:seigneur_du_sang": {
+		"description": "Dragon de sang déchu parmi les plus anciens, qui commande ses semblables avec "
+					   "une autorité née de siècles de carnage.",
+	},
+	"sort:ordre_sanglant": {
+		"description": "Trois chevaliers du sang se lèvent dans leurs armures rouillées : ils ont renié "
+					   "le serment de l'Ordre du Dragon, pas l'habitude d'obéir. Aujourd'hui, c'est vous "
+					   "qu'ils servent.",
+	},
 	"sort:soif_du_nosferatu": {
 		"nom": "Soif du strigoï",
 		"description": "Une silhouette voûtée se déplie dans l'ombre, les os de travers et les crocs "
@@ -86,8 +102,8 @@ NOUVELLES = {
 	},
 	"lamie": {
 		"nom": "Lamie", "genre": "f",
-		"description": "Vampire d'une beauté souveraine, fille de la reine Lamia ; elle séduit avant de "
-					   "boire, et le soleil la laisse inerte comme une statue.",
+		"description": "Vampire d'une beauté souveraine, fille de la reine Lamia, venue de Novgorod ; "
+					   "elle séduit avant de boire, et le soleil la laisse inerte comme une statue.",
 		"base_attributes": _attrs((5, 7), (30, 50), (30, 50), (45, 70), (45, 70), (45, 70), (60, 90), (0, 0)),
 		"tags": ["undead", "non_mort", "magique", "seduction", "humanoide"],
 	},
@@ -97,13 +113,6 @@ NOUVELLES = {
 					   "soleil ne peut rien contre lui, et il protège encore les routes.",
 		"base_attributes": _attrs((6, 8), (45, 70), (45, 70), (35, 55), (60, 85), (35, 55), (35, 55), (20, 35)),
 		"tags": ["undead", "non_mort", "guerrier", "magique", "humanoide"],
-	},
-	"dragon_de_sang_dechu": {
-		"nom": "Dragon de sang déchu", "genre": "m",
-		"description": "Dragon de sang qui a perdu la foi ; le soleil le gêne, et de son serment il ne "
-					   "lui reste que la soif.",
-		"base_attributes": _attrs((6, 8), (50, 75), (45, 70), (35, 55), (45, 65), (30, 45), (20, 35), (25, 40)),
-		"tags": ["undead", "non_mort", "guerrier", "nocturne", "humanoide"],
 	},
 }
 
