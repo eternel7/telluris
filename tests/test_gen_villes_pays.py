@@ -188,3 +188,15 @@ def test_liens_des_cites_sur_l_afrique_du_nord_signales(dump, construit):
 		and any(n.get("lieu") == gea.AFRIQUE and tuple(n.get("pos") or ())
 			in gea.bande(gea.FRONTIERE_AFRIQUE, "est", {"x": 88, "y": 48}) for n in d.get("nodes") or [])]
 	assert coupes and all(any(a.startswith(c + " :") for a in construit[4]) for c in coupes)
+
+
+def test_abou_simbel_reste_praticable_et_sa_route_y_mene(construit):
+	"""Abou Simbel n'est pas sur la carte d'Égypte : elle reste dans la terre de l'Afrique du
+	Nord, et le passage le plus proche d'elle est celui qui porte son nom."""
+	afr = next(d for d in construit[0] if d["_id"] == gea.AFRIQUE)
+	cible = gea.ABOU_SIMBEL_AFRIQUE
+	assert cible in zone_de(afr["cells"], afr.get("nav") or {}, gea.ANCRE_AFRIQUE)
+	passages = [l for l in construit[1] if l["_id"].startswith("link:afrique_du_nord_to_egypte_")]
+	plus_proche = min(passages, key=lambda l: (l["nodes"][0]["pos"][0] - cible[0]) ** 2
+		+ (l["nodes"][0]["pos"][1] - cible[1]) ** 2)
+	assert plus_proche["nodes"][0]["label"] == "Route d'Abou Simbel — Afrique du Nord"

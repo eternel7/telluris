@@ -62378,7 +62378,7 @@
           72,
           28
         ],
-        "label": "Route d'Abou Simbel — Afrique du Nord"
+        "label": "Piste de Kourkour — Afrique du Nord"
       },
       {
         "lieu": "lieu:egypte",
@@ -62386,7 +62386,7 @@
           51,
           44
         ],
-        "label": "Route d'Abou Simbel — Égypte"
+        "label": "Piste de Kourkour — Égypte"
       }
     ],
     "metadata": {
@@ -62404,7 +62404,7 @@
           74,
           28
         ],
-        "label": "Gué d'Edfou — Afrique du Nord"
+        "label": "Route d'Esna — Afrique du Nord"
       },
       {
         "lieu": "lieu:egypte",
@@ -62412,7 +62412,7 @@
           59,
           44
         ],
-        "label": "Gué d'Edfou — Égypte"
+        "label": "Route d'Esna — Égypte"
       }
     ],
     "metadata": {
@@ -62430,7 +62430,7 @@
           76,
           28
         ],
-        "label": "Ouadi Hammamat — Afrique du Nord"
+        "label": "Route d'Abou Simbel — Afrique du Nord"
       },
       {
         "lieu": "lieu:egypte",
@@ -62438,7 +62438,7 @@
           67,
           44
         ],
-        "label": "Ouadi Hammamat — Égypte"
+        "label": "Route d'Abou Simbel — Égypte"
       }
     ],
     "metadata": {

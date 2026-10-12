@@ -59,6 +59,11 @@ TRONCONS = {
 # Noms par tronçon — l'ouest du nord au sud le long du 25e méridien, le sud d'ouest en est le
 # long du bas de la carte d'Égypte (vers 25° N) : un par poste de l'Afrique du Nord.
 # ⚠️ Rang = suffixe d'`_id`, numérotés à la suite (cf. gen_plaine_europeenne.PASSAGES_PLAINE).
+# ABOU SIMBEL n'est PAS sur la carte d'Égypte (elle s'arrête sous Louxor) : elle est dessinée
+# sur l'Afrique du Nord en (76, 32), au bord du Nil, au sud du territoire mis à 0. Le passage
+# posé au plus près du Nil (8e du sud : Afrique du Nord x 76, Égypte x 67 sous Louxor) porte
+# donc son nom — c'est la route qui y mène.
+ABOU_SIMBEL_AFRIQUE = (76, 32)
 PASSAGES = {
 	"ouest": (
 		"Port de Sollum", "Col d'Halfaya", "Piste de Jaghboub", "Oasis de Siwa",
@@ -67,8 +72,8 @@ PASSAGES = {
 	),
 	"sud": (
 		"Lisière sud de la Grande Mer de Sable", "Piste d'Abou Ballas", "Oasis de Dakhla",
-		"Oasis de Kharga", "Darb el-Arbaïn", "Route d'Abou Simbel", "Gué d'Edfou",
-		"Ouadi Hammamat", "Route de Bérénice",
+		"Oasis de Kharga", "Darb el-Arbaïn", "Piste de Kourkour", "Route d'Esna",
+		"Route d'Abou Simbel", "Route de Bérénice",
 	),
 }
 
