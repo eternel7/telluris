@@ -127,8 +127,10 @@ SORTS = [
 	 "Un chant sans souffle monte d'une crypte oubliée. La lhamia répond, mi-femme mi-serpent, et enserre de ses anneaux morts ce qu'on lui livre."),
 	("necromancien", 6, "visage_de_l_horreur", "Visage de l'horreur", "😱", "horreur", "heros", 1, 5, 68,  # ~2770 / 2655
 	 "Vous tirez du néant une chose que personne ne sait nommer. Même vos alliés évitent de la regarder en face ; vos ennemis, eux, n'ont pas le choix."),
-	("necromancien", 7, "soif_du_nosferatu", "Soif du nosferatu", "🦇", "nosferatu", "champion", 1, 6, 80,  # ~3534 / 3451
-	 "Une silhouette voûtée se déplie dans l'ombre, les crocs déjà découverts. Le nosferatu frappe vite et sans bruit, comme la bête qu'il est resté."),
+	# `_id` historique : la bête s'appelait nosferatu avant que les vampires soient répartis en
+	# lignées (`dev/gen_vampires.py`) — le strigoï en garde les caractéristiques, donc le budget.
+	("necromancien", 7, "soif_du_nosferatu", "Soif du strigoï", "🦇", "strigoi", "champion", 1, 6, 80,  # ~3534 / 3451
+	 "Une silhouette voûtée se déplie dans l'ombre, les os de travers et les crocs déjà découverts. Le strigoï frappe vite et sans bruit, comme la bête qu'on a faite de lui."),
 	("necromancien", 8, "seigneurie_du_sang", "Seigneurie du sang", "🩸", "seigneur_du_sang", "seigneur", 1, 5, 92,  # ~4515 / 4486
 	 "Un seigneur du sang répond à votre appel comme on répond à un vassal : de haut. Il combat pourtant, parce que le sang versé ici lui revient."),
 	("necromancien", 9, "ordre_sanglant", "Ordre sanglant", "⚔️", "chevalier_du_sang", "heros", 3, 3, 104,  # ~5643 / 5832

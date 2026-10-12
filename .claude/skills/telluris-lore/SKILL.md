@@ -105,6 +105,17 @@ Une ligne par cité ; portails, monuments et décisions de l'Auteur : [reference
 - **Venise**, **Gênes**, **Bruges**, **Aix-la-Chapelle**, **Cordoue**, **Constantinople**, **Babylone**, **Jérusalem** : voir la référence.
 
 
+### Vampires
+Cinq lignées (Auteur, 12/10) — séance `docs/lore/monde/20261012_les_vampires_de_telluris.md` (récits de l'Auteur, ancrages terrestres, points ouverts) ; bestiaire : `dev/gen_vampires.py`.
+
+- **Aristocrates de Dracula** — Vlad, prince d'une cité-État, combat au dehors un monstre qui ravage ses terres ; un faux message de mort pousse sa femme à se jeter de la plus haute tour devant lui ; il **maudit les dieux** (polythéisme), qui le punissent par le vampirisme. Séducteurs, d'apparence anthrope, bons en épée et en magie (`espece:vampire`, `espece:comte_vampire`).
+- **Strigoï** — un proche de Dracula tente de le renverser ; torturé, os brisés, tête fracassée, abandonné au soleil levant, il disparaît ; difforme, il déforme chaque cadavre avant de le relever. Bestiaux, corps à corps (`espece:strigoi`, ex-`nosferatu` bestial ; sort *Soif du strigoï*).
+- **Nosferatu** — élèves de **Hārūt et Mārūt** (Babylone) ; chauves, laids, impossibles à prendre pour des Anthropes ; mages de très haut niveau (`espece:nosferatu`, réécrit en mage).
+- **Dragons de sang** — paladins de l'**Ordre du Dragon** (Vlad II, père de Dracula, en était), relevés lors de la nuit du carrosse dans une **auberge-relais** (donc avant les monothéismes) ; fidèles : insensibles au soleil ; déchus : simple gêne ; à parts égales aujourd'hui.
+- **Lamies** — la reine **Lamia**, d'une cité proche de la Mésopotamie : deux sœurs sorcières piègent en elle un esprit dompté ; le soleil sépare l'esprit du corps → **inerte** ; séduction, très hautes aristocrates. **Trahie tôt par son mari, emmurée vivante** longtemps : pendant ce temps, **Néfertiti** trouve une **autre méthode** d'immortalité.
+- Proposé, non tranché : le nom « lamies », Radu le Beau (le traître), le balaur et le donjon qui déborde, Zalmoxis, Suse, l'esprit lilû, la règle « ce qui retient l'esprit décide de la faiblesse au soleil ». Une lamie n'est pas une **lhamia** (mi-femme mi-serpent du bestiaire).
+
+
 ### Contradictions ouvertes
 À signaler si un texte en dépend, jamais à trancher seul :
 

@@ -1,0 +1,497 @@
+[
+  {
+    "_id": "espece:strigoi",
+    "type": "espece",
+    "nom": "Strigoï",
+    "genre": "m",
+    "image": "",
+    "description": "Vampire difforme aux os mal ressoudés et au crâne enfoncé : son maître a brisé son cadavre avant de le relever par le sang. Il ne ruse pas, il fond sur sa proie.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "bestial"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:strigoi",
+    "type": "item",
+    "nom": "Ossements de Strigoï",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 11.5,
+    "description": "Ossements et reliquats récupérés sur Strigoï après sa destruction.",
+    "source_espece": "espece:strigoi",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:lamie",
+    "type": "espece",
+    "nom": "Lamie",
+    "genre": "f",
+    "image": "",
+    "description": "Vampire d'une beauté souveraine, fille de la reine Lamia ; elle séduit avant de boire, et le soleil la laisse inerte comme une statue.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 30,
+        "max": 50
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 45,
+        "max": 70
+      },
+      "Cha": {
+        "min": 60,
+        "max": 90
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "magique",
+      "seduction",
+      "humanoide"
+    ],
+    "items": [
+      "item:Rapiere",
+      "item:Dague",
+      "item:Robe_bordeaux",
+      "item:Cape_soie_sombre",
+      "item:Bottines_legeres",
+      "item:Gants_fins_noirs"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:lamie",
+    "type": "item",
+    "nom": "Ossements de Lamie",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 8.0,
+    "description": "Ossements et reliquats récupérés sur Lamie après sa destruction.",
+    "source_espece": "espece:lamie",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:dragon_de_sang",
+    "type": "espece",
+    "nom": "Dragon de sang",
+    "genre": "m",
+    "image": "",
+    "description": "Paladin de l'Ordre du Dragon relevé par le sang ; tant qu'il garde la foi, le soleil ne peut rien contre lui, et il protège encore les routes.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 60,
+        "max": 85
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 35,
+        "max": 55
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "guerrier",
+      "magique",
+      "humanoide"
+    ],
+    "items": [
+      "item:Epee_une_main_benie",
+      "item:Masse_benie",
+      "item:Bouclier_sacre",
+      "item:Cotte_mailles_benie",
+      "item:Epaulieres_de_fer",
+      "item:Heaume_ouvert_grave"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:dragon_de_sang",
+    "type": "item",
+    "nom": "Ossements de Dragon de sang",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 11.5,
+    "description": "Ossements et reliquats récupérés sur Dragon de sang après sa destruction.",
+    "source_espece": "espece:dragon_de_sang",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:dragon_de_sang_dechu",
+    "type": "espece",
+    "nom": "Dragon de sang déchu",
+    "genre": "m",
+    "image": "",
+    "description": "Dragon de sang qui a perdu la foi ; le soleil le gêne, et de son serment il ne lui reste que la soif.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 50,
+        "max": 75
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 45,
+        "max": 65
+      },
+      "Int": {
+        "min": 30,
+        "max": 45
+      },
+      "Cha": {
+        "min": 20,
+        "max": 35
+      },
+      "Ch": {
+        "min": 25,
+        "max": 40
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "guerrier",
+      "nocturne",
+      "humanoide"
+    ],
+    "items": [
+      "item:Epee_longue",
+      "item:Morgenstern",
+      "item:Bouclier_normand",
+      "item:Cotte_de_mailles",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:dragon_de_sang_dechu",
+    "type": "item",
+    "nom": "Ossements de Dragon de sang déchu",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 12.5,
+    "description": "Ossements et reliquats récupérés sur Dragon de sang déchu après sa destruction.",
+    "source_espece": "espece:dragon_de_sang_dechu",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:nosferatu",
+    "type": "espece",
+    "nom": "Nosferatu",
+    "genre": "m",
+    "image": "nosferatu_transparent.png",
+    "description": "Vampire chauve et livide aux doigts trop longs, que nul ne prendrait pour un Anthrope ; héritier de la sorcellerie de Babylone, il manie une magie que peu de vivants atteignent.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 60,
+        "max": 85
+      },
+      "Int": {
+        "min": 60,
+        "max": 90
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "magique",
+      "nocturne"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:vampire",
+    "type": "espece",
+    "nom": "Vampire",
+    "genre": "m",
+    "image": "vampire_transparent.png",
+    "description": "Vampire aristocrate de la lignée de Dracula : d'apparence toute anthrope, séducteur, aussi habile à l'épée qu'en magie, il craint le soleil.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 35,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 60
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 40,
+        "max": 65
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "magique",
+      "humanoide"
+    ],
+    "items": [
+      "item:Rapiere",
+      "item:Epee_longue",
+      "item:Dague_de_parade",
+      "item:Cape_soie_sombre",
+      "item:Pantalon_ajuste_noir",
+      "item:Bottes_noires",
+      "item:Gants_fins_noirs"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:comte_vampire",
+    "type": "espece",
+    "nom": "Comte Vampire",
+    "genre": "m",
+    "image": "comte_vampire_transparent.png",
+    "description": "Aîné de la lignée de Dracula, noble et ancien ; son influence et sa puissance dépassent largement celles de ses cadets.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 50,
+        "max": 80
+      },
+      "Ag": {
+        "min": 50,
+        "max": 80
+      },
+      "Vol": {
+        "min": 60,
+        "max": 90
+      },
+      "Int": {
+        "min": 50,
+        "max": 75
+      },
+      "Cha": {
+        "min": 55,
+        "max": 85
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "magique",
+      "boss",
+      "humanoide"
+    ],
+    "items": [
+      "item:Rapiere",
+      "item:Epee_longue",
+      "item:Dague_de_parade",
+      "item:Manteau_de_cour_double",
+      "item:Pantalon_velours",
+      "item:Bottes_noires",
+      "item:Gants_fins_noirs"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "sort:soif_du_nosferatu",
+    "type": "sort",
+    "nom": "Soif du strigoï",
+    "icon": "🦇",
+    "animation": "animation:capa_levee_morts",
+    "description": "Une silhouette voûtée se déplie dans l'ombre, les os de travers et les crocs déjà découverts. Le strigoï frappe vite et sans bruit, comme la bête qu'on a faite de lui.",
+    "magie": "Nécromancie",
+    "famille": "invocation",
+    "niveau": 7,
+    "cout_pm": 80,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:strigoi",
+      "nombre": 1,
+      "duree": 8,
+      "profil": "profil:champion"
+    },
+    "composants": [
+      {
+        "item": "item:Fiole_de_sang_fige",
+        "consomme": true,
+        "bonus": {
+          "invocation_duree": 2
+        }
+      },
+      {
+        "item": "item:Focus_ossuaire",
+        "consomme": false,
+        "bonus": {
+          "invocation_duree": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "item:nosferatu",
+    "type": "item",
+    "nom": "Ossements de Nosferatu",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 6.5,
+    "description": "Ossements et reliquats récupérés sur Nosferatu après sa destruction.",
+    "source_espece": "espece:nosferatu",
+    "loot_defaut": true
+  }
+]

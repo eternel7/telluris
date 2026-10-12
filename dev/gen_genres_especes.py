@@ -37,7 +37,7 @@ FEMININS = {
 	"aicha_kandicha", "ammit", "araignee", "araignee_geante", "banshee", "bete_de_l_apocalypse",
 	"bete_du_gevaudan", "chauve_souris", "chauve_souris_geante", "chimere", "cockatrice",
 	"corneille_noire", "dryade", "fee", "gargouille", "gorgone", "goule", "harpie", "horreur",
-	"hydre", "lhamia", "liche", "licorne", "manticore", "momie", "monture_angelique",
+	"hydre", "lamie", "lhamia", "liche", "licorne", "manticore", "momie", "monture_angelique",
 	"monture_demoniaque", "monture_squelette", "naiade", "nereide", "oceanide", "oreade",
 	"reine_lhamia", "sirene", "succube", "tarasque", "vouivre", "wyvern",
 }
@@ -49,7 +49,8 @@ MASCULINS = {
 	"chevalier_du_sang", "comte_vampire", "coursier_elfique", "coursier_persan", "crocodile",
 	"cupidon", "cyclope", "demon_guerrier", "demon_majeur_de_la_destinee",
 	"demon_majeur_de_la_destruction", "demon_mineur", "demon_servant", "doppleganger", "dragnard",
-	"dragon", "dragon_empereur", "dragon_zombie", "ecureuil", "familier", "fantome",
+	"dragon", "dragon_de_sang", "dragon_de_sang_dechu", "dragon_empereur", "dragon_zombie",
+	"ecureuil", "familier", "fantome",
 	"fils_de_sobek", "geant_ou_titan", "genie", "ghul_des_sables", "gnome", "gobelin",
 	"gobelin_chamanique", "gobelin_des_marais", "golem_de_chair", "golem_de_fer",
 	"golem_de_pierre", "grand_dragon", "grand_faucon", "grand_phenix", "grand_sanglier",
@@ -59,7 +60,8 @@ MASCULINS = {
 	"petit_dragon", "petits_animaux_divers", "phenix", "polar_kraken", "poney", "prince_demon",
 	"rat_geant", "rejeton_demoniaque", "renard", "revenant", "roi_des_tombes", "roi_liche",
 	"sanglier", "sanglier_apprivoise", "satyre", "seigneur_du_sang", "seraphin", "serpent",
-	"serpent_geant", "serpopard", "silat", "spectre", "sphinx", "squelette", "taureau", "triton",
+	"serpent_geant", "serpopard", "silat", "spectre", "sphinx", "squelette", "strigoi", "taureau",
+	"triton",
 	"troglodyte", "troll", "vampire", "zombie",
 	# Noms de groupe : masculins, mais au pluriel (voir PLURIELS).
 	"elementaux", "fauves", "oiseaux_de_proies", "poissons_mammiferes_marins", "rapaces",
