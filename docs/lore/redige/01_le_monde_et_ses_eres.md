@@ -42,7 +42,7 @@ Partout, les Anthropes se réfugient derrière des murailles, et naissent les Ci
 
 ### L'Âge des Portails
 
-L'ère s'ouvre avec les **trois frères aborigènes**, qui apportent au monde la connaissance du portail transversal. Le réseau des portes s'étend, les cités situées à ses nœuds grandissent, le savoir passe aux **Architectes**, dont les portails, plus fragiles que ceux des frères, demandent des cristaux. Mu apprend les portails de l'un des frères et devient un nœud du réseau. **Salomon** vit à cette époque, après les frères.
+L'ère s'ouvre avec les **trois frères aborigènes**, qui apportent au monde la connaissance du portail transversal. Le réseau des portes s'étend, les cités situées à ses nœuds grandissent, le savoir passe aux **Architectes**, dont les portails, plus fragiles que ceux des frères, demandent des cristaux. Mu apprend les portails de l'un des frères et devient un nœud du réseau. **Atlantis**, elle, refuse la visite de l'un d'eux : pour ses prêtres, la mer est le seul chemin. Elle est la première, et sûrement la seule, à avoir dit non. **Salomon** vit à cette époque, après les frères.
 
 Puis le savoir se dégrade lentement : on entretient les portails sans plus comprendre pourquoi ils fonctionnent. Les **monothéismes** apparaissent et transforment peu à peu des auberges-relais en monastères-relais.
 
