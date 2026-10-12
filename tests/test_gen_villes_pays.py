@@ -20,7 +20,7 @@ def _taille(_nom):
 	return (1408, 768)
 
 
-def _proposer(doc):
+def _proposer(doc, _options=frozenset()):
 	dim = doc["dimensions"]
 	return {"cells": [[1] * dim["x"] for _ in range(dim["y"])], "nav": {}, "rapport": {}}
 
@@ -86,6 +86,44 @@ def test_parent_pose_s_il_manque_jamais_reecrit():
 	assert gvp.rattachee({"_id": "lieu:x", "lieu_parent": "lieu:q"}, "lieu:p")["lieu_parent"] == "lieu:q"
 
 
+def test_trace_d_un_pont_pas_orthogonaux():
+	cases = gvp.trace((12, 26), (17, 25))
+	assert cases[0] == (12, 26) and cases[-1] == (17, 25)
+	assert all(abs(a[0] - b[0]) + abs(a[1] - b[1]) == 1 for a, b in zip(cases, cases[1:]))
+
+
+def test_lyon_grille_refaite_ponts_ouverts(construit):
+	"""Proposition demandée sans enceinte et nav vide, puis les ponts posés à 1 par-dessus."""
+	vus = []
+
+	def proposer(doc, options):
+		vus.append(options)
+		dim = doc["dimensions"]
+		return {"cells": [[5] * dim["x"] for _ in range(dim["y"])], "nav": {"0,0": 1}, "rapport": {}}
+
+	lyon = {"_id": "lieu:lyon", "_rev": "3-a", "dimensions": {"x": 88, "y": 48},
+		"cells": [[1] * 88 for _ in range(48)], "nav": {"9,9": 4}}
+	for x, y in gvp.cases_des_ponts(gvp.GRILLES_REFAITES["lieu:lyon"]["ponts"]):
+		lyon["cells"][y][x] = 5
+	doc, prop = gvp.grille_refaite(lyon, proposer)
+	assert prop and vus == [gvp.GRILLES_REFAITES["lieu:lyon"]["options"]]
+	assert {"--nav-vide", "--sans-enceinte"} <= vus[0]
+	assert "_rev" not in doc and doc["nav"] == {"0,0": 1}
+	ponts = set(gvp.cases_des_ponts(gvp.GRILLES_REFAITES["lieu:lyon"]["ponts"]))
+	assert all(doc["cells"][y][x] == (1 if (x, y) in ponts else 5) for y in range(48) for x in range(88))
+
+
+def test_lyon_refaite_une_seule_fois():
+	"""Tous les ponts déjà à 1 en base : le doc relu est gardé (retouches de l'éditeur sauves)."""
+	lyon = {"_id": "lieu:lyon", "_rev": "4-b", "cells": [[1] * 88 for _ in range(48)], "nav": {"1,1": 2}}
+
+	def interdit(*_):
+		raise AssertionError("ponts déjà ouverts : rien à reproposer")
+
+	doc, prop = gvp.grille_refaite(lyon, interdit)
+	assert prop is None and doc == {"_id": "lieu:lyon", "cells": lyon["cells"], "nav": {"1,1": 2}}
+
+
 def test_rejeu_sur_dump_a_jour_n_emet_rien(dump, construit):
 	lieux, liens = construit[0], construit[1]
 	emis, refus = a_emettre(dump, lieux + liens)
@@ -95,7 +133,7 @@ def test_rejeu_sur_dump_a_jour_n_emet_rien(dump, construit):
 	rejeu = list(par_id.values())
 
 	def interdit(*_):
-		raise AssertionError("Atlantis et Mu sont en base : aucune grille à proposer")
+		raise AssertionError("Atlantis, Mu et Lyon refaite sont en base : aucune grille à proposer")
 
 	l2, d2, r2, _, _ = gvp.construire(rejeu, _taille, interdit)
 	assert r2 == [] and a_emettre(rejeu, l2 + d2) == ([], [])

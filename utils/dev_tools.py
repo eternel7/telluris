@@ -679,7 +679,7 @@ CATALOGUE = [
 	{
 		"id": "gen_villes_pays",
 		"label": "📍 Poser chaque cité sur la carte de son pays, frontière Égypte ↔ Afrique du Nord (+ lieux d'Atlantis et de Mu)",
-		# Dump frais : une cité qui reçoit son `lieu_parent`, `lieu:egypte` et
+		# Dump frais : une cité qui reçoit son `lieu_parent` ou sa grille, `lieu:egypte` et
 		# `lieu:afrique_du_nord` sont réémis ENTIERS (PUT complet) ; sur un dump périmé, une
 		# retouche faite depuis à leur grille serait effacée.
 		"argv_fn": lambda v, f: _py("gen_villes_pays.py", "--dump", f["dump"]),
@@ -694,7 +694,8 @@ CATALOGUE = [
 			"manque. Frontière Égypte ↔ Afrique du Nord comme France ↔ plaine : territoire du "
 			"voisin mis à 0, 17 passages nommés (côte de Sollum → mer Rouge), une case sur deux "
 			"côté Afrique du Nord ; une connexion en base tombée dans le territoire mis à 0 est "
-			"signalée, à retirer à la main. Crée aussi `lieu:atlantis` et `lieu:mu` (grille depuis l'image), sans "
+			"signalée, à retirer à la main. Refait la grille de Lyon (sans enceinte, nav "
+			"vide, ponts ouverts), une seule fois. Crée aussi `lieu:atlantis` et `lieu:mu` (grille depuis l'image), sans "
 			"connexion. N'émet que ce qui diffère du dump ; toute case hors de sa zone refuse "
 			"le lot. Requiert Pillow.",
 	},

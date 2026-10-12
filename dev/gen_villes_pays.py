@@ -16,6 +16,13 @@ cités dont le pays a pourtant sa carte. Ce générateur les y pose, sur le sch�
     jamais réécrit : Alexandrie et Le Caire, aussi reliées à l'Afrique du Nord, prennent
     l'Égypte).
 
+LYON — GRILLE REFAITE (`GRILLES_REFAITES`) : la première passe faisait de la rive gauche du
+Rhône, des collines de l'ouest et du faubourg sud-ouest trois zones isolées (une « enceinte »
+lue à tort au bord du Rhône). Nouvelle proposition SANS enceinte, nav repartant de VIDE
+(`--nav-vide --sans-enceinte`), puis les PONTS dessinés ouverts (`1`) : la proposition les
+lit comme de l'eau. ⚠️ Refaite UNE fois : si tous les ponts sont déjà à 1 en base, le doc
+relu est gardé tel quel (une retouche faite depuis dans l'éditeur survit au rejeu).
+
 ÉGYPTE ↔ AFRIQUE DU NORD : `gen_egypte_afrique_du_nord.construire` (le détail y est) — même
 règle que France ↔ plaine européenne ; les cités d'Égypte sont posées sur la carte d'Égypte
 TELLE QU'ELLE SERA ÉCRITE.
@@ -26,8 +33,9 @@ connexion : aucune carte de pays ne les montre, et le lore n'y mène que par la 
 dès le rang A) ou par le portail de Notre-Dame (Mu) — c'est à l'Auteur de les relier.
 
 ÉMIS = ce qui DIFFÈRE DU DUMP (`gen_voisins_france.a_emettre`) : rejeu sur un dump à jour ⇒
-AUCUN fichier. ⚠️ Import = PUT COMPLET (CLAUDE.md §11) : une cité qui reçoit son parent,
-`lieu:egypte` et `lieu:afrique_du_nord` partent ENTIERS depuis le dump — dump frais exigé.
+AUCUN fichier. ⚠️ Import = PUT COMPLET (CLAUDE.md §11) : une cité qui reçoit son parent ou sa
+grille, `lieu:egypte` et `lieu:afrique_du_nord` partent ENTIERS depuis le dump — dump frais
+exigé.
 
 Usage :
   python dev/gen_villes_pays.py [--dump jsons/telluris-dump-….json] [--sans-apercu]
@@ -63,16 +71,31 @@ ANCRES_PAYS = {
 	"lieu:egypte": (40, 30),      # désert occidental
 }
 
+# Cités dont la grille est refaite : options de `gen_grille_image.proposer_pour_image` et
+# ponts ouverts après coup — ((x, y) de départ, (x, y) d'arrivée), tracés case à case (lus sur
+# l'image, de rive à rive).
+GRILLES_REFAITES = {
+	"lieu:lyon": {
+		"options": frozenset({"--nav-vide", "--sans-enceinte"}),
+		"ponts": (
+			((15, 15), (18, 15)),   # Saône, au pied des Monts d'Or
+			((12, 26), (17, 25)),   # Saône, vers Saint-Paul
+			((21, 40), (28, 37)),   # Saône, vers la presqu'île
+			((63, 27), (72, 28)),   # Rhône, pont du nord
+			((57, 34), (68, 36)),   # Rhône, pont du sud
+		),
+	},
+}
+
 # Cité → son pays, sa place SUR LA CARTE DU PAYS (lue sur l'image) et ses sorties :
 # nom → (point visé dans la cité, ancre de la zone visée ou None = la plus grande zone).
 # Les sorties visent une route qui quitte la carte de la cité ; leur nombre = le nombre de
 # cases prises autour de `position` sur le pays.
 CITES = {
-	# Lyon — au confluent du Rhône et de la Saône, au pied du Jura ; la rive gauche du Rhône
-	# est une zone à part de la grille (aucun pont n'y passe) : est et sud y mènent.
+	# Lyon — au confluent du Rhône et de la Saône, au pied du Jura.
 	"lieu:lyon": {"pays": "lieu:france", "position": (57, 28), "sorties": {
 		"nord": ((30, 3), None), "ouest": ((2, 27), None),
-		"est": ((86, 22), (80, 25)), "sud": ((75, 45), (80, 25))}},
+		"est": ((86, 22), None), "sud": ((75, 45), None)}},
 	# Orléans — le château au sommet de la boucle de la Loire.
 	"lieu:orleans": {"pays": "lieu:france", "position": (43, 17), "sorties": {
 		"nord": ((17, 1), None), "est": ((80, 1), None), "ouest": ((1, 36), None),
@@ -128,6 +151,40 @@ def connexions_cite(cite_id, cite, zone_pays, cite_label):
 	return docs, refus
 
 
+def trace(a, b):
+	"""Cases de `a` à `b`, chaque pas ORTHOGONAL (un pont se traverse sans diagonale)."""
+	(x0, y0), (x1, y1) = a, b
+	n = max(abs(x1 - x0), abs(y1 - y0))
+	cases = [a]
+	for i in range(1, n + 1):
+		x, y = round(x0 + (x1 - x0) * i / n), round(y0 + (y1 - y0) * i / n)
+		px, py = cases[-1]
+		if x != px and y != py:
+			cases.append((x, py))
+		cases.append((x, y))
+	return cases
+
+
+def cases_des_ponts(ponts):
+	return [c for a, b in ponts for c in trace(a, b)]
+
+
+def grille_refaite(doc, proposer_fn):
+	"""(doc, proposition | None) : le doc relu (`_rev` retiré) avec sa grille REFAITE, ou tel
+	quel si tous ses ponts sont déjà à 1 (refaite une fois)."""
+	spec = GRILLES_REFAITES[doc["_id"]]
+	doc = sans_rev(doc)
+	ponts = cases_des_ponts(spec["ponts"])
+	if all(doc["cells"][y][x] == 1 for x, y in ponts):
+		return doc, None
+	proposition = proposer_fn(doc, spec["options"])
+	cells = [list(ligne) for ligne in proposition["cells"]]
+	for x, y in ponts:
+		cells[y][x] = 1
+	doc["cells"], doc["nav"] = cells, dict(proposition["nav"])
+	return doc, proposition
+
+
 def rattachee(cite_doc, pays):
 	"""Le doc de la cité relu, `_rev` retiré, `lieu_parent` posé s'il manque."""
 	doc = sans_rev(cite_doc)
@@ -137,8 +194,8 @@ def rattachee(cite_doc, pays):
 
 
 def construire(docs, taille_fn, proposer_fn):
-	"""(lieux, liens, refus, propositions, avertissements). `proposer_fn(doc) -> {cells, nav,
-	rapport}` : grille d'une cité NEUVE (Pillow côté CLI). `lieux` = docs complets, émis par
+	"""(lieux, liens, refus, propositions, avertissements). `proposer_fn(doc, options) -> {cells,
+	nav, rapport}` : grille d'une cité NEUVE ou REFAITE (Pillow côté CLI). `lieux` = docs complets, émis par
 	l'appelant s'ils diffèrent du dump."""
 	par_id = {d.get("_id"): d for d in docs}
 	manquants = [i for i in sorted(set(ANCRES_PAYS) | set(CITES)) if not (par_id.get(i) or {}).get("cells")]
@@ -153,8 +210,13 @@ def construire(docs, taille_fn, proposer_fn):
 	par_id.update({d["_id"]: d for d in lieux})
 	propositions = {}
 	for doc in nouvelles:
-		propositions[doc["_id"]] = proposer_fn(doc)
+		propositions[doc["_id"]] = proposer_fn(doc, frozenset())
 		lieux.append(poser_grille(doc, propositions[doc["_id"]]))
+	for cite_id in sorted(GRILLES_REFAITES):
+		doc, proposition = grille_refaite(par_id[cite_id], proposer_fn)
+		par_id[cite_id] = doc
+		if proposition:
+			propositions[cite_id] = proposition
 
 	zones_pays = {p: zone_de(par_id[p]["cells"], par_id[p].get("nav") or {}, a)
 		for p, a in ANCRES_PAYS.items()}
@@ -181,13 +243,15 @@ def main() -> int:
 		print("✗ aucun dump : passer --dump ou exporter un telluris-dump-*.json dans jsons/.")
 		return 1
 
-	def proposer(doc):
+	def proposer(doc, options):
 		dim = doc["dimensions"]
-		return ggi.proposer_pour_image(ggi.trouver_image(doc["image"]), dim["x"], dim["y"], doc)
+		return ggi.proposer_pour_image(ggi.trouver_image(doc["image"]), dim["x"], dim["y"], doc,
+			options=options)
 
 	lieux, liens, refus, propositions, avert = construire(docs, _taille_image, proposer)
 	for a in avert:
 		print(f"⚠ {a}")
+	deja = {d.get("_id") for d in docs}
 	emis, r = a_emettre(docs, lieux + liens)
 	refus += r
 	for r in refus:
@@ -205,7 +269,9 @@ def main() -> int:
 			print(f"  🔗 {doc['_id']} : {a['lieu']} {a['pos']} ↔ {b['lieu']} {b['pos']}")
 			continue
 		neuf = doc["_id"] in propositions
-		print(f"  {'✚' if neuf else '✎'} {doc['_id']} — {doc.get('label')}"
+		cree = doc["_id"] not in deja
+		print(f"  {'✚' if cree else '✎'} {doc['_id']} — {doc.get('label')}"
+			f"{' · grille refaite' if neuf and not cree else ''}"
 			f"{' · parent ' + doc['lieu_parent'] if doc.get('lieu_parent') else ''}")
 		if neuf:
 			chemin = ggi.trouver_image(doc["image"])
