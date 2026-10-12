@@ -190,7 +190,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 
 ## Abou Simbel / Égypte du Sud — [cites/20260821_decrire_abou_simbel_fantastique.md]
 **Auteur**
-- Royaume **mort-vivant** immémorial, gouverné par **Néfertiti**, **lamia** (vampire) inspirée de la *Reine des damnés* d'Anne Rice.
+- Royaume **mort-vivant** immémorial, gouverné par **Néfertiti**, **morte-vivante, pas vampire** (Auteur, 12/10 — corrige « lamia ») ; sa cour ne compte aucun vampire : morts-vivants bien conservés, squelettes, momies. L'inspiration de la *Reine des damnés* d'Anne Rice passe à la reine **Lamia** (séance vampires).
 - Présente **avant les pyramides et avant les frères**. Une lignée pharaonique a consacré des siècles à l'immortalité, et Néfertiti en est la preuve. Elle a partagé ce don avec sa cour, ses nobles puis son peuple.
 - **Akhénaton**, son époux, fut le premier à recevoir le don et l'un des premiers à se **lasser** de la non-vie : sa perte l'a traumatisée. Aucun de ses amants n'a pris sa place.
 - Les morts-vivants intelligents sont sujets à l'**ennui et au suicide** : les défunts du Nord renouvellent la population.

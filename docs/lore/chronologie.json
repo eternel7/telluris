@@ -120,6 +120,8 @@
 		},
 		"lieux": {
 			"lutecia": "Lutecia",
+			"valachie": "Valachie",
+			"novgorod": "Novgorod",
 			"auxerre": "Auxerre",
 			"rome": "Rome",
 			"jerusalem": "Jérusalem",
@@ -150,7 +152,8 @@
 			"templiers": "Templiers",
 			"architectes": "Architectes",
 			"guilde": "Guilde des Aventuriers",
-			"papaute": "Papauté"
+			"papaute": "Papauté",
+			"ordre_dragon": "Ordre du Dragon"
 		},
 		"themes": {
 			"portails": "Portails",
@@ -166,7 +169,8 @@
 			"deuil": "Deuils",
 			"mondes_divins": "Mondes divins",
 			"mystere": "Mystère ouvert",
-			"commerce": "Commerce"
+			"commerce": "Commerce",
+			"vampires": "Vampires"
 		}
 	},
 	"evenements": [
@@ -278,16 +282,28 @@
 			"liens": ["atlantis"]
 		},
 		{
+			"id": "lamia_reine",
+			"titre": "La reine Lamia, première des lamies",
+			"titre_court": "Reine Lamia",
+			"resume": "Reine d'une cité proche de la Mésopotamie, elle veut l'immortalité : deux sœurs sorcières piègent en elle un esprit dompté. Le soleil la rend inerte. Trahie tôt par son mari, elle reste longtemps emmurée vivante ; elle convertit surtout de très hautes aristocrates d'une grande beauté. Ses lamies fuient vers le nord et se répandent depuis Novgorod, d'où elle règne aujourd'hui ; qui l'a libérée reste un mystère.",
+			"quand": {"moment": {"ere": "antediluvien", "rang": "premiers_ages"}, "autorite": "synthese", "note": "Avant Néfertiti, qui trouve une autre voie pendant l'emmurement de Lamia (Auteur, 12/10) ; Néfertiti est elle-même d'avant les pyramides et les frères."},
+			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
+			"origine": ["mesopotamie", "europe_est"],
+			"tags": {"lieux": ["novgorod"], "themes": ["vampires", "immortalite", "mythes"]},
+			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Donc Lamia était une reine dans un pays proche de la Mésopotamie"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "c'est pendant cette période où elle est enfermée vivante que Néfertiti va découvrir à une autre méthode pour devenir immortel"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Les lamis elles ont fui la zone de la Mésopotamie et se sont réfugiés plus au nord vers la Russie"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "elle règne aujourd'hui depuis Novgorod"}],
+			"liens": ["dynastie_nefertiti", "dragons_de_sang"]
+		},
+		{
 			"id": "dynastie_nefertiti",
 			"titre": "La dynastie du Nil et le don de Néfertiti",
 			"titre_court": "Dynastie de Néfertiti",
-			"resume": "Une lignée pharaonique consacre des siècles à l'immortalité ; Néfertiti, lamia, en est la preuve vivante. Akhénaton reçoit le don le premier et s'en lasse. Elle règne toujours à Abou Simbel.",
+			"resume": "Une lignée pharaonique consacre des siècles à l'immortalité ; Néfertiti, morte-vivante et non vampire, en est la preuve vivante. Akhénaton reçoit le don le premier et s'en lasse. Elle règne toujours à Abou Simbel.",
 			"quand": {"de": {"ere": "antediluvien", "rang": "premiers_ages"}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "auteur", "note": "« avant que les pyramides ne fussent érigées et avant que les frères aborigènes ne parcourent le Monde » — inversion voulue."},
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["egypte"],
 			"tags": {"peuples": ["egyptiens"], "lieux": ["abou_simbel", "alexandrie"], "themes": ["immortalite", "mythes"]},
 			"sources": [{"fichier": "cites/20260821_decrire_abou_simbel_fantastique.md", "date": "2026-08-21", "citation": "Elle était présente avant que le pyramides ne futent érigées et avant que les frères aborigènes ne parcours le Monde."}],
-			"liens": ["grigori", "cite_abou_simbel"]
+			"liens": ["grigori", "cite_abou_simbel", "lamia_reine"]
 		},
 		{
 			"id": "deluge",
@@ -569,6 +585,32 @@
 			"apres": ["trois_freres"]
 		},
 		{
+			"id": "nosferatu_babylone",
+			"titre": "Les Nosferatu, élèves de Hārūt et Mārūt",
+			"titre_court": "Nosferatu",
+			"resume": "Des élèves des deux anges de Babylone cherchent dans leur sorcellerie ce qui dure. Ils deviennent des vampires chauves et livides, impossibles à prendre pour des Anthropes, mages d'un très haut niveau ; la magie leur a mangé le visage.",
+			"quand": {"moment": {"ere": "portails", "entre": [2800, 2400]}, "autorite": "proposition", "note": "Celle de l'enseignement de Hārūt et Mārūt."},
+			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
+			"origine": ["mesopotamie"],
+			"tags": {"peuples": ["babyloniens"], "lieux": ["babylone"], "themes": ["vampires", "immortalite", "savoir"]},
+			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Ne peuvent pas passer pour des humains."}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "élèves de Hārūt et Mārūt"}],
+			"apres": ["harut_marut"],
+			"liens": ["harut_marut", "grigori"]
+		},
+		{
+			"id": "dragons_de_sang",
+			"titre": "La nuit du carrosse : les dragons de sang",
+			"titre_court": "Dragons de sang",
+			"resume": "Dans une auberge-relais, une lamie sortie d'un carrosse au rideau baissé tue les paladins de l'Ordre du Dragon ; son sang, répandu sur leurs cadavres frais, les relève jusqu'à la vaincre. Ceux qui gardent la foi ne craignent pas le soleil ; les déchus, Chevaliers et Seigneurs du Sang, n'en ressentent qu'une gêne. Ils sont aujourd'hui à parts égales.",
+			"quand": {"moment": {"ere": "portails", "inconnu": true}, "autorite": "synthese", "note": "« Auberge-relais » : avant les monothéismes ; l'ère elle-même n'est pas fixée (les paladins existent dès l'Âge des Remparts). Vlad II, père de Dracula, en est (Auteur, 12/10)."},
+			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
+			"origine": ["europe_est"],
+			"tags": {"institutions": ["paladins", "ordre_dragon"], "themes": ["vampires", "remparts"]},
+			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "des paladins qui étaient dans une auberge relais ont vu un soir arriver un carrosse au rideau baissé"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "le sang de la lamia a été répandu sur leurs cadavres frais et a contaminé leur corps"}],
+			"apres": ["paladins"],
+			"liens": ["lamia_reine", "auberges_relais", "dracula"]
+		},
+		{
 			"id": "dedale",
 			"titre": "Dédale, Architecte des passages",
 			"titre_court": "Dédale",
@@ -714,6 +756,32 @@
 			"sources": [{"fichier": "cites/20260824_decrire_aix_la_chapelle.md", "date": "2026-08-24", "citation": "Charlemagne qui transformala cité un siècle après la grande vague."}],
 			"apres": ["vague"],
 			"liens": ["cite_aix", "chapelle_palatine"]
+		},
+		{
+			"id": "dracula",
+			"titre": "Vlad, fils du Dragon, maudit les dieux",
+			"titre_court": "Dracula",
+			"resume": "Prince d'une cité-État, Vlad part combattre un monstre qui ravage ses terres. Un message annonce sa mort : sa femme se jette de la plus haute tour du donjon et s'écrase devant lui. Il maudit les dieux, qui le punissent par le vampirisme. Ses héritiers : des aristocrates séducteurs, d'apparence anthrope.",
+			"quand": {"moment": {"ere": "donjons", "inconnu": true}, "autorite": "proposition", "note": "Proposé : le monstre serait un balaur échappé d'un donjon qui déborde. Son père, Vlad II, est un dragon de sang immortel (Auteur, 12/10)."},
+			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
+			"origine": ["europe_est"],
+			"tags": {"lieux": ["valachie"], "institutions": ["ordre_dragon"], "themes": ["vampires", "deuil", "donjons"]},
+			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Cette malédiction est punie par les dieux, par le vampirisme."}],
+			"apres": ["dragons_de_sang"],
+			"liens": ["dragons_de_sang", "strigoi_radu"]
+		},
+		{
+			"id": "strigoi_radu",
+			"titre": "Le traître brisé et les Strigoï",
+			"titre_court": "Strigoï",
+			"resume": "Un proche de Dracula tente de le renverser ; torturé, os brisés et tête fracassée, il est abandonné au soleil levant — et disparaît. Difforme, il déforme chaque cadavre avant de le relever par le sang : des vampires bestiaux, faits pour le corps à corps.",
+			"quand": {"moment": {"ere": "donjons", "inconnu": true}, "autorite": "synthese", "note": "Après la malédiction de Dracula. Proposé : le traître serait Radu le Beau."},
+			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
+			"origine": ["europe_est"],
+			"tags": {"lieux": ["valachie"], "themes": ["vampires", "mystere"]},
+			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "c'est un proche de Dracula qui a tenté, on va dire, de le renverser"}],
+			"apres": ["dracula"],
+			"liens": ["dracula"]
 		},
 		{
 			"id": "guildes",

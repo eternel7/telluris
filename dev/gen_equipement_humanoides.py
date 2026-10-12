@@ -100,6 +100,10 @@ TABLE = {
 		"Dague", "Rapiere", "Dague_de_jet",
 		"Veste_cuir_souple", "Capuche_noire", "Gants_fins_noirs", "Bottes_silencieuses",
 	],
+	"dragon_de_sang": [
+		"Epee_une_main_benie", "Masse_benie", "Bouclier_sacre",
+		"Cotte_mailles_benie", "Epaulieres_de_fer", "Heaume_ouvert_grave",
+	],
 	"familier": None,
 	"geant_ou_titan": [
 		"Kanabo", "Rungu",
@@ -128,6 +132,10 @@ TABLE = {
 	"incube": [
 		"Rapiere", "Dague",
 		"Pourpoint_colore", "Pantalon_ajuste_noir", "Bottes_noires", "Gants_fins_noirs",
+	],
+	"lamie": [
+		"Rapiere", "Dague",
+		"Robe_bordeaux", "Cape_soie_sombre", "Bottines_legeres", "Gants_fins_noirs",
 	],
 	"leprechaun": [
 		"Canne_ferree", "Bolas",
