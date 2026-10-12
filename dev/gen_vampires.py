@@ -16,7 +16,8 @@
 #     déjà en jeu (Auteur, 12/10) : description seule, comme `sort:ordre_sanglant` (texte miroir
 #     de `dev/gen_sorts_invocation.py`) ;
 #   - `espece:lhamia` (morte-vivante, Lamia libyenne) et `espece:vouivre` (vivante, Mélusine) :
-#     description seule, pour que les deux femmes-serpents ne se confondent plus ;
+#     description, pour que les deux femmes-serpents ne se confondent plus ; graphie « Lamia »
+#     (GRAPHIE) sur les noms de l'espèce, de sa reine et des docs qui les citent ;
 #   - un `item:<espece>` d'ossements par espèce neuve, `item:nosferatu` au poids recalculé —
 #     même forme que ceux du dump (poids = F moyenne / 5).
 #
@@ -85,6 +86,7 @@ MODIFS = {
 	},
 	# Femmes-serpents distinguées (Auteur, 12/10) : la lhamia est morte-vivante, la vouivre vivante.
 	"espece:lhamia": {
+		"nom": "Lamia",
 		"description": "Femme-serpent morte-vivante des déserts de Libye : elle charme ses proies avant "
 					   "de les dévorer, et peut ôter ses yeux pour veiller pendant qu'elle dort.",
 	},
@@ -92,6 +94,12 @@ MODIFS = {
 		"description": "Femme d'une grande beauté au corps de serpent, bien vivante, héritière des "
 					   "légendes de Mélusine ; elle hante sources et rivières, et malheur à qui la surprend "
 					   "au bain.",
+	},
+	"espece:reine_lhamia": {
+		# Pas « Reine Lamia » : c'est le nom propre de la reine des lamies VAMPIRES.
+		"nom": "Reine des lamias",
+		"description": "Lamia ayant atteint un rang souverain, son venin et son charme sont également "
+					   "mortels.",
 	},
 	"sort:soif_du_nosferatu": {
 		"nom": "Soif du strigoï",
@@ -127,6 +135,20 @@ NOUVELLES = {
 		"tags": ["undead", "non_mort", "guerrier", "magique", "humanoide"],
 	},
 }
+
+# Graphie « lamia » (Auteur, 12/10) : les NOMS affichés changent, les `_id` (`lhamia`) restent —
+# rencontres, sorts appris, recettes et images y renvoient. Remplacements dans `nom` et
+# `description` des docs qui citent l'espèce.
+GRAPHIE = [("Reine Lhamia", "Reine des lamias"), ("Lhamia", "Lamia"), ("lhamia", "lamia")]
+RENOMMES = ("item:lhamia", "item:reine_lhamia", "sort:chant_de_la_lhamia",
+			"item:grimoire_chant_de_la_lhamia", "item:livre_sort_chant_de_la_lhamia")
+
+
+def _graphie(texte):
+	for avant, apres in GRAPHIE:
+		texte = texte.replace(avant, apres)
+	return texte
+
 
 # Invocation retargetée : même sort, la bête porte désormais son vrai nom.
 INVOCATION = ("sort:soif_du_nosferatu", "espece:strigoi")
@@ -223,6 +245,17 @@ def main() -> None:
 		doc.update(copy.deepcopy(champs))
 		if i == INVOCATION[0]:
 			doc["invocation"] = {**(doc.get("invocation") or {}), "espece": INVOCATION[1]}
+		docs.append(doc)
+
+	for i in RENOMMES:
+		if i not in base:
+			continue
+		doc = _sans_rev(base[i])
+		neuf = {k: _graphie(doc[k]) for k in ("nom", "description") if isinstance(doc.get(k), str)}
+		if all(doc.get(k) == v for k, v in neuf.items()):
+			deja.append(i)
+			continue
+		doc.update(neuf)
 		docs.append(doc)
 
 	# Ossements du nosferatu : poids recalculé sur sa nouvelle Force.

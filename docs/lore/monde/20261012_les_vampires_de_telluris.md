@@ -39,8 +39,8 @@ Le canon contenait déjà **Néfertiti, lamia** (lignée pharaonique, Akhénaton
 
 ## ✍️ Auteur — troisième arbitrage
 
-- **Lhamia et Vouivre** : « La Vouivre est bien un écho de Mélusine. Elle diffère des lamia surtout parce que elle elle est vivante. C'est une belle femme accord de serpent pour la partie basse. La lamia est bien la lamia libyenne des Grecs femme serpent mort vivante du désert dévoreuse qui charme et peut ôter ses yeux. La Vouivre dont tu parles animal est en fait la vie wyvern ou une orthographe approchante. »
-- **Lhamias et lamies** : une **légende déformée** — aucun lien de sang.
+- **Lamia et Vouivre** : « La Vouivre est bien un écho de Mélusine. Elle diffère des lamia surtout parce que elle elle est vivante. C'est une belle femme accord de serpent pour la partie basse. La lamia est bien la lamia libyenne des Grecs femme serpent mort vivante du désert dévoreuse qui charme et peut ôter ses yeux. La Vouivre dont tu parles animal est en fait la vie wyvern ou une orthographe approchante. »
+- **Lamias et lamies** : une **légende déformée** — aucun lien de sang.
 - **La reine Lamia** : elle règne aujourd'hui **depuis Novgorod** ; qui l'a libérée de son emmurement reste un **mystère**.
 - **Le paladin le plus pieux et l'auberge-relais** : **anonymes**, la légende reste ouverte.
 
@@ -62,9 +62,10 @@ Le canon contenait déjà **Néfertiti, lamia** (lignée pharaonique, Akhénaton
 | Dragons de sang déchus | les **Chevaliers du Sang** et **Seigneurs du Sang** du bestiaire | Auteur |
 | Reine Lamia | règne aujourd'hui depuis **Novgorod** ; sa libération reste un **mystère** | Auteur |
 | Nuit du carrosse | le paladin le plus pieux et l'auberge-relais restent **anonymes** | Auteur |
-| Lhamia (bestiaire) | la **Lamia libyenne** des Grecs : femme-serpent **morte-vivante** du désert, dévoreuse, qui charme et peut ôter ses yeux ; **légende déformée**, sans lien de sang avec les lamies | Auteur |
+| Lamia (bestiaire) | la **Lamia libyenne** des Grecs : femme-serpent **morte-vivante** du désert, dévoreuse, qui charme et peut ôter ses yeux ; **légende déformée**, sans lien de sang avec les lamies | Auteur |
 | Vouivre (bestiaire) | écho de **Mélusine** : belle femme au corps de serpent, **vivante** | Auteur |
 | Serpent ailé animal | la **wyvern**, pas la vouivre | Auteur |
+| Graphie | la femme-serpent s'écrit **lamia** (ex-« Lhamia » du bestiaire ; `_id` `lhamia` inchangés), sa reine **Reine des lamias** — pas « Reine Lamia », nom propre de la reine des lamies vampires | Auteur (graphie) ; « Reine des lamias » proposé |
 | Nosferatu | élèves de Hārūt et Mārūt (Babylone) | Auteur |
 | Dragons de sang | paladins de l'**Ordre du Dragon** ; **Vlad II**, père de Dracula, en était | Auteur |
 | Monde polythéiste | Vlad maudit **les dieux**, et les dieux le punissent | Auteur |
@@ -180,8 +181,8 @@ Comme toujours, ce sont des **théories de savants** : personne en jeu ne les ti
 - **L'exode** (Auteur) : les lamies fuient la Mésopotamie vers le nord et trouvent refuge à **Novgorod** ; c'est de là qu'elles se répandent sur le monde, par les routes marchandes du Nord. Échos proposés : l'*upyr* russe, les *roussalki*, belles noyées qui séduisent les vivants.
 - **Avant tout féminines** (Auteur), par réaction à la trahison du mari de leur reine. Les **masculins** sont très rares, d'une beauté anthrope frappante, tolérés mais jamais au premier rang : le plus souvent esclaves, servants ou serviteurs, parfois amants — les nouvelles lamies n'ont plus tout à fait les critères de la reine.
 - **La reine aujourd'hui** (Auteur) : elle règne sur les lamies **depuis Novgorod**. Qui l'a libérée de son emmurement, nul ne le sait — ses premières filles, un tremblement de terre, un pilleur de tombes : les théories circulent *(proposées)*, aucune ne l'emporte.
-- **Une légende déformée** (Auteur) : les Grecs ont mêlé deux souvenirs. Leur *Lamia*, reine de Libye, emprunte son nom et sa royauté à la reine vampire, et son corps aux **lhamias** — les femmes-serpents **mortes-vivantes** des déserts de Libye, qui charment, dévorent et peuvent **ôter leurs yeux** pour veiller pendant qu'elles dorment. Lhamias et lamies n'ont **aucun lien de sang** ; les savants confondent les noms, et le joueur peut s'y tromper.
-- **Ni lhamia, ni vouivre, ni wyvern** (Auteur) : la **vouivre**, écho de **Mélusine**, est une belle femme au corps de serpent, mais **vivante** — elle hante sources et rivières, et malheur à qui la surprend au bain *(détail proposé)*. Le serpent ailé animal est la **wyvern**.
+- **Une légende déformée** (Auteur) : les Grecs ont mêlé deux souvenirs. Leur *Lamia*, reine de Libye, emprunte son nom et sa royauté à la reine vampire, et son corps aux **lamias** — les femmes-serpents **mortes-vivantes** des déserts de Libye, qui charment, dévorent et peuvent **ôter leurs yeux** pour veiller pendant qu'elles dorment. Lamias et lamies n'ont **aucun lien de sang** ; les savants confondent les noms, et le joueur peut s'y tromper.
+- **Ni lamia, ni vouivre, ni wyvern** (Auteur) : la **vouivre**, écho de **Mélusine**, est une belle femme au corps de serpent, mais **vivante** — elle hante sources et rivières, et malheur à qui la surprend au bain *(détail proposé)*. Le serpent ailé animal est la **wyvern**.
 - **En jeu** : `espece:lamie` (féminin, séduction, magie). La reine elle-même n'est pas une espèce.
 
 ---

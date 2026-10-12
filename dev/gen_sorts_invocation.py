@@ -123,8 +123,8 @@ SORTS = [
 	 "Des bandelettes jaunies se déroulent d'elles-mêmes autour du corps d'un ancien gardien de tombeau. La momie avance lentement, mais elle a gardé les gestes de celui qui défendait les rois."),
 	("necromancien", 4, "horde_des_fosses", "Horde des fosses", "🪦", "zombie", "champion", 3, 3, 48,  # ~1710 / 1571
 	 "La fosse commune se vide d'un coup. Trois cadavres encore sanglés dans leurs vieilles armures titubent vers l'ennemi : de vieux soldats, qui n'ont pas oublié comment on frappe."),
-	("necromancien", 5, "chant_de_la_lhamia", "Chant de la lhamia", "🐍", "lhamia", "champion", 1, 5, 58,  # ~2000 / 2042
-	 "Un chant sans souffle monte d'une crypte oubliée. La lhamia répond, mi-femme mi-serpent, et enserre de ses anneaux morts ce qu'on lui livre."),
+	("necromancien", 5, "chant_de_la_lhamia", "Chant de la lamia", "🐍", "lhamia", "champion", 1, 5, 58,  # ~2000 / 2042
+	 "Un chant sans souffle monte d'une crypte oubliée. La lamia répond, mi-femme mi-serpent, et enserre de ses anneaux morts ce qu'on lui livre."),
 	("necromancien", 6, "visage_de_l_horreur", "Visage de l'horreur", "😱", "horreur", "heros", 1, 5, 68,  # ~2770 / 2655
 	 "Vous tirez du néant une chose que personne ne sait nommer. Même vos alliés évitent de la regarder en face ; vos ennemis, eux, n'ont pas le choix."),
 	# `_id` historique : la bête s'appelait nosferatu avant que les vampires soient répartis en

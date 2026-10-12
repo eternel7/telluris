@@ -520,7 +520,7 @@
   {
     "_id": "espece:lhamia",
     "type": "espece",
-    "nom": "Lhamia",
+    "nom": "Lamia",
     "genre": "f",
     "jeton": {
       "taille": "1x2",
@@ -623,6 +623,68 @@
     "proprietes": {}
   },
   {
+    "_id": "espece:reine_lhamia",
+    "type": "espece",
+    "nom": "Reine des lamias",
+    "genre": "f",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "reine_lhamia_transparent.png",
+    "description": "Lamia ayant atteint un rang souverain, son venin et son charme sont également mortels.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 55,
+        "max": 85
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 50,
+        "max": 75
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "hybride",
+      "boss",
+      "humanoide"
+    ],
+    "items": [
+      "item:Naginata",
+      "item:Jian",
+      "item:Chakram",
+      "item:Manteau_de_cour_double",
+      "item:Diademe_d_orfevre",
+      "item:Gants_fins"
+    ],
+    "proprietes": {}
+  },
+  {
     "_id": "sort:soif_du_nosferatu",
     "type": "sort",
     "nom": "Soif du strigoï",
@@ -658,6 +720,108 @@
         }
       }
     ]
+  },
+  {
+    "_id": "item:lhamia",
+    "type": "item",
+    "nom": "Ossements de Lamia",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 8.0,
+    "description": "Ossements et reliquats récupérés sur Lamia après sa destruction.",
+    "source_espece": "espece:lhamia",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:reine_lhamia",
+    "type": "item",
+    "nom": "Ossements de Reine des lamias",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 10.5,
+    "description": "Ossements et reliquats récupérés sur Reine des lamias après sa destruction.",
+    "source_espece": "espece:reine_lhamia",
+    "loot_defaut": true
+  },
+  {
+    "_id": "sort:chant_de_la_lhamia",
+    "type": "sort",
+    "nom": "Chant de la lamia",
+    "icon": "🐍",
+    "animation": "animation:capa_levee_morts",
+    "description": "Un chant sans souffle monte d'une crypte oubliée. La lamia répond, mi-femme mi-serpent, et enserre de ses anneaux morts ce qu'on lui livre.",
+    "magie": "Nécromancie",
+    "famille": "invocation",
+    "niveau": 5,
+    "cout_pm": 58,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {},
+    "invocation": {
+      "espece": "espece:lhamia",
+      "nombre": 1,
+      "duree": 7,
+      "profil": "profil:champion"
+    },
+    "composants": [
+      {
+        "item": "item:Sel_des_sepultures",
+        "consomme": true,
+        "bonus": {
+          "invocation_duree": 2
+        }
+      },
+      {
+        "item": "item:os",
+        "consomme": false,
+        "bonus": {
+          "invocation_duree": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_chant_de_la_lhamia",
+    "type": "item",
+    "nom": "Grimoire : Chant de la lamia",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Chant de la lamia », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:chant_de_la_lhamia"
+    ],
+    "valeur": [
+      {
+        "ag": 50
+      },
+      {
+        "ag": 150
+      }
+    ]
+  },
+  {
+    "_id": "item:livre_sort_chant_de_la_lhamia",
+    "type": "item",
+    "nom": "Traité : Chant de la lamia",
+    "icon": "📘",
+    "categorie": "livre",
+    "sous_categorie": "livre_sort",
+    "slots": [],
+    "poids": 0.4,
+    "description": "Un chant sans souffle monte d'une crypte oubliée. La lamia répond, mi-femme mi-serpent, et enserre de ses anneaux morts ce qu'on lui livre.\n\nÉcole : Nécromancie\nNiveau : 5\nCoût : 58 PM\nCible : soi\nPortée : 0"
   },
   {
     "_id": "item:nosferatu",
