@@ -15,6 +15,8 @@
 #   - les dragons de sang DÉCHUS sont les `espece:chevalier_du_sang` / `espece:seigneur_du_sang`
 #     déjà en jeu (Auteur, 12/10) : description seule, comme `sort:ordre_sanglant` (texte miroir
 #     de `dev/gen_sorts_invocation.py`) ;
+#   - `espece:lhamia` (morte-vivante, Lamia libyenne) et `espece:vouivre` (vivante, Mélusine) :
+#     description seule, pour que les deux femmes-serpents ne se confondent plus ;
 #   - un `item:<espece>` d'ossements par espèce neuve, `item:nosferatu` au poids recalculé —
 #     même forme que ceux du dump (poids = F moyenne / 5).
 #
@@ -80,6 +82,16 @@ MODIFS = {
 		"description": "Trois chevaliers du sang se lèvent dans leurs armures rouillées : ils ont renié "
 					   "le serment de l'Ordre du Dragon, pas l'habitude d'obéir. Aujourd'hui, c'est vous "
 					   "qu'ils servent.",
+	},
+	# Femmes-serpents distinguées (Auteur, 12/10) : la lhamia est morte-vivante, la vouivre vivante.
+	"espece:lhamia": {
+		"description": "Femme-serpent morte-vivante des déserts de Libye : elle charme ses proies avant "
+					   "de les dévorer, et peut ôter ses yeux pour veiller pendant qu'elle dort.",
+	},
+	"espece:vouivre": {
+		"description": "Femme d'une grande beauté au corps de serpent, bien vivante, héritière des "
+					   "légendes de Mélusine ; elle hante sources et rivières, et malheur à qui la surprend "
+					   "au bain.",
 	},
 	"sort:soif_du_nosferatu": {
 		"nom": "Soif du strigoï",

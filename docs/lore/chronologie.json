@@ -285,12 +285,12 @@
 			"id": "lamia_reine",
 			"titre": "La reine Lamia, première des lamies",
 			"titre_court": "Reine Lamia",
-			"resume": "Reine d'une cité proche de la Mésopotamie, elle veut l'immortalité : deux sœurs sorcières piègent en elle un esprit dompté. Le soleil la rend inerte. Trahie tôt par son mari, elle reste longtemps emmurée vivante ; elle convertit surtout de très hautes aristocrates d'une grande beauté. Ses lamies fuient vers le nord et se répandent depuis Novgorod.",
+			"resume": "Reine d'une cité proche de la Mésopotamie, elle veut l'immortalité : deux sœurs sorcières piègent en elle un esprit dompté. Le soleil la rend inerte. Trahie tôt par son mari, elle reste longtemps emmurée vivante ; elle convertit surtout de très hautes aristocrates d'une grande beauté. Ses lamies fuient vers le nord et se répandent depuis Novgorod, d'où elle règne aujourd'hui ; qui l'a libérée reste un mystère.",
 			"quand": {"moment": {"ere": "antediluvien", "rang": "premiers_ages"}, "autorite": "synthese", "note": "Avant Néfertiti, qui trouve une autre voie pendant l'emmurement de Lamia (Auteur, 12/10) ; Néfertiti est elle-même d'avant les pyramides et les frères."},
 			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
 			"origine": ["mesopotamie", "europe_est"],
 			"tags": {"lieux": ["novgorod"], "themes": ["vampires", "immortalite", "mythes"]},
-			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Donc Lamia était une reine dans un pays proche de la Mésopotamie"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "c'est pendant cette période où elle est enfermée vivante que Néfertiti va découvrir à une autre méthode pour devenir immortel"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Les lamis elles ont fui la zone de la Mésopotamie et se sont réfugiés plus au nord vers la Russie"}],
+			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Donc Lamia était une reine dans un pays proche de la Mésopotamie"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "c'est pendant cette période où elle est enfermée vivante que Néfertiti va découvrir à une autre méthode pour devenir immortel"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "Les lamis elles ont fui la zone de la Mésopotamie et se sont réfugiés plus au nord vers la Russie"}, {"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "elle règne aujourd'hui depuis Novgorod"}],
 			"liens": ["dynastie_nefertiti", "dragons_de_sang"]
 		},
 		{

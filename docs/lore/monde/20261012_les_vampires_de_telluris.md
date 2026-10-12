@@ -37,6 +37,15 @@ Le canon contenait déjà **Néfertiti, lamia** (lignée pharaonique, Akhénaton
 - **Les deux sœurs sorcières** : **aucun lien** avec Hārūt et Mārūt.
 - **Chevaliers du Sang et Seigneurs du Sang** (bestiaire) : ce sont les **dragons de sang déchus**.
 
+## ✍️ Auteur — troisième arbitrage
+
+- **Lhamia et Vouivre** : « La Vouivre est bien un écho de Mélusine. Elle diffère des lamia surtout parce que elle elle est vivante. C'est une belle femme accord de serpent pour la partie basse. La lamia est bien la lamia libyenne des Grecs femme serpent mort vivante du désert dévoreuse qui charme et peut ôter ses yeux. La Vouivre dont tu parles animal est en fait la vie wyvern ou une orthographe approchante. »
+- **Lhamias et lamies** : une **légende déformée** — aucun lien de sang.
+- **La reine Lamia** : elle règne aujourd'hui **depuis Novgorod** ; qui l'a libérée de son emmurement reste un **mystère**.
+- **Le paladin le plus pieux et l'auberge-relais** : **anonymes**, la légende reste ouverte.
+
+> Dictée vocale : « accord de serpent » = **au corps de serpent** ; « la vie wyvern » = **la wyvern**.
+
 ---
 
 ## 1. Arbitrage
@@ -51,6 +60,11 @@ Le canon contenait déjà **Néfertiti, lamia** (lignée pharaonique, Akhénaton
 | Sœurs sorcières | aucun lien avec Hārūt et Mārūt | Auteur |
 | Vlad II | un **dragon de sang immortel** | Auteur |
 | Dragons de sang déchus | les **Chevaliers du Sang** et **Seigneurs du Sang** du bestiaire | Auteur |
+| Reine Lamia | règne aujourd'hui depuis **Novgorod** ; sa libération reste un **mystère** | Auteur |
+| Nuit du carrosse | le paladin le plus pieux et l'auberge-relais restent **anonymes** | Auteur |
+| Lhamia (bestiaire) | la **Lamia libyenne** des Grecs : femme-serpent **morte-vivante** du désert, dévoreuse, qui charme et peut ôter ses yeux ; **légende déformée**, sans lien de sang avec les lamies | Auteur |
+| Vouivre (bestiaire) | écho de **Mélusine** : belle femme au corps de serpent, **vivante** | Auteur |
+| Serpent ailé animal | la **wyvern**, pas la vouivre | Auteur |
 | Nosferatu | élèves de Hārūt et Mārūt (Babylone) | Auteur |
 | Dragons de sang | paladins de l'**Ordre du Dragon** ; **Vlad II**, père de Dracula, en était | Auteur |
 | Monde polythéiste | Vlad maudit **les dieux**, et les dieux le punissent | Auteur |
@@ -140,6 +154,7 @@ Comme toujours, ce sont des **théories de savants** : personne en jeu ne les ti
 - **Le nom** : « dragon de sang » risque la confusion avec les vrais dragons du jeu (dragon empereur, dragons de mer, bestiaire). L'Ordre du Dragon la règle : le nom vient de **l'ordre**, pas d'une créature. *(proposé)*
 - **La date** : le mot « auberge-relais » situe la nuit du carrosse **avant les monothéismes** (après, elles deviennent des monastères-relais). Les dragons de sang sont donc **bien plus anciens** que Dracula ; **Vlad II est l'un d'eux** (Auteur).
 - **La foi** : celle des paladins, la **magie Sainte**. Le fidèle la garde ; le déchu la perd, et c'est elle qui le tenait au soleil.
+- **Anonymes** (Auteur) : le nom du paladin le plus pieux et le lieu de l'auberge-relais ne sont pas transmis. Chaque auberge des Carpates prétend être la bonne ; le nom du premier relevé, seuls les dragons de sang le connaissent, et ils le taisent. *(détail proposé)*
 - **Pourquoi ils se sont relevés** : jamais tranché. Le sang de la lamia, versé au milieu de la cour, mêlé au leur ? La foi du plus pieux, qui a retenu son esprit et appelé celui des autres ? Les dieux ?
 - **Les déchus** (Auteur) : ce sont les **Chevaliers du Sang** ; les **Seigneurs du Sang**, les plus anciens d'entre eux, les commandent.
 - **En jeu** : `espece:dragon_de_sang` (fidèle) ; les déchus sont `espece:chevalier_du_sang` et `espece:seigneur_du_sang` (description reprise), et le sort *Ordre sanglant* les dit parjures de l'Ordre du Dragon.
@@ -164,18 +179,20 @@ Comme toujours, ce sont des **théories de savants** : personne en jeu ne les ti
 - **Néfertiti** (Auteur) : **morte-vivante, pas vampire**. Sa lignée cherchait depuis des siècles ; Lamia avait prouvé que c'était possible. Emmurée, elle ne pouvait plus rien donner — Néfertiti a trouvé une **autre voie**, celle du Nil : la non-vie sans le sang. Sa cour ne compte **aucun vampire** : des morts-vivants bien conservés, des squelettes, des momies. La parenté n'est que de **principe**.
 - **L'exode** (Auteur) : les lamies fuient la Mésopotamie vers le nord et trouvent refuge à **Novgorod** ; c'est de là qu'elles se répandent sur le monde, par les routes marchandes du Nord. Échos proposés : l'*upyr* russe, les *roussalki*, belles noyées qui séduisent les vivants.
 - **Avant tout féminines** (Auteur), par réaction à la trahison du mari de leur reine. Les **masculins** sont très rares, d'une beauté anthrope frappante, tolérés mais jamais au premier rang : le plus souvent esclaves, servants ou serviteurs, parfois amants — les nouvelles lamies n'ont plus tout à fait les critères de la reine.
-- **Les mythes grecs déformés** : la Lamia de Libye, et les **lhamias** mi-femmes mi-serpents du bestiaire, seraient des souvenirs défigurés de la reine et de ses filles.
+- **La reine aujourd'hui** (Auteur) : elle règne sur les lamies **depuis Novgorod**. Qui l'a libérée de son emmurement, nul ne le sait — ses premières filles, un tremblement de terre, un pilleur de tombes : les théories circulent *(proposées)*, aucune ne l'emporte.
+- **Une légende déformée** (Auteur) : les Grecs ont mêlé deux souvenirs. Leur *Lamia*, reine de Libye, emprunte son nom et sa royauté à la reine vampire, et son corps aux **lhamias** — les femmes-serpents **mortes-vivantes** des déserts de Libye, qui charment, dévorent et peuvent **ôter leurs yeux** pour veiller pendant qu'elles dorment. Lhamias et lamies n'ont **aucun lien de sang** ; les savants confondent les noms, et le joueur peut s'y tromper.
+- **Ni lhamia, ni vouivre, ni wyvern** (Auteur) : la **vouivre**, écho de **Mélusine**, est une belle femme au corps de serpent, mais **vivante** — elle hante sources et rivières, et malheur à qui la surprend au bain *(détail proposé)*. Le serpent ailé animal est la **wyvern**.
 - **En jeu** : `espece:lamie` (féminin, séduction, magie). La reine elle-même n'est pas une espèce.
 
 ---
 
 ## 7. Points ouverts
 
-Tranchés par le second arbitrage : Vlad II, Néfertiti, les deux sœurs, les Chevaliers et Seigneurs du Sang. Restent :
+Tout est tranché. Restent **ouverts par choix de l'Auteur**, comme mystères du monde :
 
-- **Le nom** du paladin le plus pieux, et le lieu de l'auberge-relais.
 - **Qui a libéré Lamia** de son emmurement, et quand.
-- **Où vit la reine** aujourd'hui : Novgorod, ou ailleurs.
+- **Le nom** du paladin le plus pieux, et le lieu de l'auberge-relais.
+- **Pourquoi** les paladins se sont relevés.
 
 ## 8. Prompts d'image à produire
 

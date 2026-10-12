@@ -518,6 +518,111 @@
     ]
   },
   {
+    "_id": "espece:lhamia",
+    "type": "espece",
+    "nom": "Lhamia",
+    "genre": "f",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "lhamia_transparent.png",
+    "description": "Femme-serpent morte-vivante des déserts de Libye : elle charme ses proies avant de les dévorer, et peut ôter ses yeux pour veiller pendant qu'elle dort.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 30,
+        "max": 50
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "hybride"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:vouivre",
+    "type": "espece",
+    "nom": "Vouivre",
+    "genre": "f",
+    "image": "vouivre_transparent.png",
+    "description": "Femme d'une grande beauté au corps de serpent, bien vivante, héritière des légendes de Mélusine ; elle hante sources et rivières, et malheur à qui la surprend au bain.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 45,
+        "max": 75
+      },
+      "Ag": {
+        "min": 40,
+        "max": 70
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 40,
+        "max": 85
+      },
+      "Cha": {
+        "min": 60,
+        "max": 90
+      },
+      "Ch": {
+        "min": 30,
+        "max": 55
+      }
+    },
+    "tags": [
+      "humanoide",
+      "seduction"
+    ],
+    "items": [
+      "item:Jian",
+      "item:Naginata",
+      "item:Cape_soie_sombre",
+      "item:Gants_fins"
+    ],
+    "proprietes": {}
+  },
+  {
     "_id": "sort:soif_du_nosferatu",
     "type": "sort",
     "nom": "Soif du strigoï",
