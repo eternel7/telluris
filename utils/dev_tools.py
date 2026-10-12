@@ -678,7 +678,7 @@ CATALOGUE = [
 	},
 	{
 		"id": "gen_villes_pays",
-		"label": "📍 Poser chaque cité sur la carte de son pays, frontière Égypte ↔ Afrique du Nord (+ lieux d'Atlantis et de Mu)",
+		"label": "📍 Poser chaque cité sur la carte de son pays, frontière Égypte ↔ Afrique du Nord (+ lieux d'Abou Simbel, d'Atlantis et de Mu)",
 		# Dump frais : une cité qui reçoit son `lieu_parent` ou sa grille, `lieu:egypte` et
 		# `lieu:afrique_du_nord` sont réémis ENTIERS (PUT complet) ; sur un dump périmé, une
 		# retouche faite depuis à leur grille serait effacée.
@@ -696,7 +696,8 @@ CATALOGUE = [
 			"côté Afrique du Nord ; une connexion en base tombée dans le territoire mis à 0 est "
 			"signalée, à retirer à la main. Refait la grille de Lyon (sans enceinte, nav "
 			"vide, ponts ouverts), une seule fois. Crée aussi `lieu:atlantis` et `lieu:mu` (grille depuis l'image), sans "
-			"connexion. N'émet que ce qui diffère du dump ; toute case hors de sa zone refuse "
+			"connexion, et `lieu:abou_simbel` (grille DESSINÉE, eau seule reprise de l'image), "
+			"posé sur l'Afrique du Nord, sortie par le pont. N'émet que ce qui diffère du dump ; toute case hors de sa zone refuse "
 			"le lot. Requiert Pillow.",
 	},
 	{

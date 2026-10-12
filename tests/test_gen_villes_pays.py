@@ -16,8 +16,8 @@ from dev.gen_plaine_europeenne import zone_de  # noqa: E402
 from dev.gen_voisins_france import a_emettre  # noqa: E402
 
 
-def _taille(_nom):
-	return (1408, 768)
+def _taille(nom):
+	return (800, 1306) if nom == "abou_simbel_capital.jpg" else (1408, 768)
 
 
 def _proposer(doc, _options=frozenset()):
@@ -29,7 +29,7 @@ def _proposer(doc, _options=frozenset()):
 def dump():
 	docs = ggi.charger_dump()
 	ids = {d.get("_id") for d in docs}
-	if not (set(gvp.CITES) | set(gvp.ANCRES_PAYS)) <= ids:
+	if not (set(gvp.CITES) - set(gvp.GRILLES_DESSINEES) | set(gvp.ANCRES_PAYS)) <= ids:
 		pytest.skip("aucun dump committé avec ces cités et ces pays")
 	return docs
 
@@ -72,13 +72,26 @@ def test_cases_du_pays_distinctes_par_cite(construit):
 		assert len(poses) == len(set(poses))
 
 
-def test_atlantis_et_mu_creees_sans_connexion(construit):
+def test_atlantis_et_mu_creees_sans_connexion(dump, construit):
+	"""Créées par ce lot, ou déjà en base (lot importé) : jamais reliées par lui."""
 	lieux, liens = construit[0], construit[1]
-	neufs = {d["_id"]: d for d in lieux if d["_id"] in ("lieu:atlantis", "lieu:mu")}
-	assert set(neufs) == {"lieu:atlantis", "lieu:mu"}
-	assert {d["image"] for d in neufs.values()} == set(gvp.IMAGES_NOUVELLES)
-	assert all(d["categorie"] == "ville" and d["cells"] for d in neufs.values())
-	assert not any(n["lieu"] in neufs for l in liens for n in l["nodes"])
+	par_id = {d["_id"]: d for d in dump if d.get("_id") in ("lieu:atlantis", "lieu:mu")}
+	par_id.update({d["_id"]: d for d in lieux if d["_id"] in ("lieu:atlantis", "lieu:mu")})
+	assert set(par_id) == {"lieu:atlantis", "lieu:mu"}
+	assert {d["image"] for d in par_id.values()} == {"atlantis_capital.jpg", "mu_capital.jpg"}
+	assert all(d["categorie"] == "ville" and d["cells"] for d in par_id.values())
+	assert not any(n["lieu"] in par_id for l in liens for n in l["nodes"])
+
+
+def test_abou_simbel_grille_dessinee_posee_sur_l_afrique_du_nord(dump, construit):
+	"""Créée avec la grille DESSINÉE (pas la proposition), parent = la carte qui la montre."""
+	if any(d.get("_id") == "lieu:abou_simbel" for d in dump):
+		pytest.skip("Abou Simbel déjà en base")
+	doc = next(d for d in construit[0] if d["_id"] == "lieu:abou_simbel")
+	cells, nav = gvp.GRILLES_DESSINEES["lieu:abou_simbel"](_proposer(doc)["cells"])
+	assert doc["cells"] == cells and doc["nav"] == nav
+	assert doc["lieu_parent"] == "lieu:afrique_du_nord" and doc["image"] == "abou_simbel_capital.jpg"
+	assert sum(1 for d in construit[0] if d["_id"] == "lieu:abou_simbel") == 1
 
 
 def test_parent_pose_s_il_manque_jamais_reecrit():
@@ -127,13 +140,13 @@ def test_lyon_refaite_une_seule_fois():
 def test_rejeu_sur_dump_a_jour_n_emet_rien(dump, construit):
 	lieux, liens = construit[0], construit[1]
 	emis, refus = a_emettre(dump, lieux + liens)
-	assert refus == [] and emis
+	assert refus == []
 	par_id = {d["_id"]: d for d in dump}
 	par_id.update({d["_id"]: d for d in emis})
 	rejeu = list(par_id.values())
 
 	def interdit(*_):
-		raise AssertionError("Atlantis, Mu et Lyon refaite sont en base : aucune grille à proposer")
+		raise AssertionError("Abou Simbel, Atlantis, Mu et Lyon refaite sont en base : aucune grille à proposer")
 
 	l2, d2, r2, _, _ = gvp.construire(rejeu, _taille, interdit)
 	assert r2 == [] and a_emettre(rejeu, l2 + d2) == ([], [])
