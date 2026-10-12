@@ -678,9 +678,10 @@ CATALOGUE = [
 	},
 	{
 		"id": "gen_villes_pays",
-		"label": "📍 Poser chaque cité sur la carte de son pays (+ lieux d'Atlantis et de Mu)",
-		# Dump frais : une cité qui reçoit son `lieu_parent` est réémise ENTIÈRE (PUT complet) ;
-		# sur un dump périmé, une retouche faite depuis à sa grille serait effacée.
+		"label": "📍 Poser chaque cité sur la carte de son pays, frontière Égypte ↔ Afrique du Nord (+ lieux d'Atlantis et de Mu)",
+		# Dump frais : une cité qui reçoit son `lieu_parent`, `lieu:egypte` et
+		# `lieu:afrique_du_nord` sont réémis ENTIERS (PUT complet) ; sur un dump périmé, une
+		# retouche faite depuis à leur grille serait effacée.
 		"argv_fn": lambda v, f: _py("gen_villes_pays.py", "--dump", f["dump"]),
 		"dump_frais": True,
 		"sortie": "jsons/villes_pays_a_importer.json",
@@ -690,7 +691,10 @@ CATALOGUE = [
 			"(Angleterre), Reykjavík, Akureyri (Islande), Sydney, Melbourne (Australie), "
 			"Alexandrie et Le Caire (Égypte) : la cité dessinée sur la carte du pays ↔ une "
 			"sortie par route, libellée « <cité> — par l'ouest » ; `lieu_parent` posé s'il "
-			"manque. Crée aussi `lieu:atlantis` et `lieu:mu` (grille depuis l'image), sans "
+			"manque. Frontière Égypte ↔ Afrique du Nord comme France ↔ plaine : territoire du "
+			"voisin mis à 0, 17 passages nommés (côte de Sollum → mer Rouge), une case sur deux "
+			"côté Afrique du Nord ; une connexion en base tombée dans le territoire mis à 0 est "
+			"signalée, à retirer à la main. Crée aussi `lieu:atlantis` et `lieu:mu` (grille depuis l'image), sans "
 			"connexion. N'émet que ce qui diffère du dump ; toute case hors de sa zone refuse "
 			"le lot. Requiert Pillow.",
 	},

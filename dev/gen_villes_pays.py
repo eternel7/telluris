@@ -1,4 +1,5 @@
-"""Chaque cité posée sur la carte de SON pays, et les lieux d'Atlantis et de Mu.
+"""Chaque cité posée sur la carte de SON pays, la frontière Égypte ↔ Afrique du Nord, et les
+lieux d'Atlantis et de Mu.
 
 POURQUOI : une cité sans connexion n'est atteignable de nulle part. Les liens pays ↔ cité qui
 existaient (France, Italie, plaine européenne, Roumanie, Afrique du Nord) laissaient isolées les
@@ -15,14 +16,18 @@ cités dont le pays a pourtant sa carte. Ce générateur les y pose, sur le sch�
     jamais réécrit : Alexandrie et Le Caire, aussi reliées à l'Afrique du Nord, prennent
     l'Égypte).
 
+ÉGYPTE ↔ AFRIQUE DU NORD : `gen_egypte_afrique_du_nord.construire` (le détail y est) — même
+règle que France ↔ plaine européenne ; les cités d'Égypte sont posées sur la carte d'Égypte
+TELLE QU'ELLE SERA ÉCRITE.
+
 ATLANTIS ET MU : `lieu:*` minimaux depuis `towns/atlantis_capital.jpg` et `towns/mu_capital.jpg`
 (`gen_villes_images.villes_a_creer`, grille de `gen_grille_image.proposer_pour_image`), SANS
 connexion : aucune carte de pays ne les montre, et le lore n'y mène que par la mer (Atlantis,
 dès le rang A) ou par le portail de Notre-Dame (Mu) — c'est à l'Auteur de les relier.
 
 ÉMIS = ce qui DIFFÈRE DU DUMP (`gen_voisins_france.a_emettre`) : rejeu sur un dump à jour ⇒
-AUCUN fichier. ⚠️ Import = PUT COMPLET (CLAUDE.md §11) : une cité qui reçoit son parent part
-ENTIÈRE depuis le dump — dump frais exigé.
+AUCUN fichier. ⚠️ Import = PUT COMPLET (CLAUDE.md §11) : une cité qui reçoit son parent,
+`lieu:egypte` et `lieu:afrique_du_nord` partent ENTIERS depuis le dump — dump frais exigé.
 
 Usage :
   python dev/gen_villes_pays.py [--dump jsons/telluris-dump-….json] [--sans-apercu]
@@ -36,6 +41,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from dev import gen_egypte_afrique_du_nord as egypte  # noqa: E402
 from dev import gen_grille_image as ggi  # noqa: E402
 from dev.gen_plaine_europeenne import (  # noqa: E402
 	case_proche, cases_autour, connexion, libelle_sortie, libelles_de, sans_rev, zone_de)
@@ -131,32 +137,34 @@ def rattachee(cite_doc, pays):
 
 
 def construire(docs, taille_fn, proposer_fn):
-	"""(lieux, liens, refus, propositions). `proposer_fn(doc) -> {cells, nav, rapport}` : grille
-	d'une cité NEUVE (Pillow côté CLI). `lieux` = docs complets, émis par l'appelant s'ils
-	diffèrent du dump."""
+	"""(lieux, liens, refus, propositions, avertissements). `proposer_fn(doc) -> {cells, nav,
+	rapport}` : grille d'une cité NEUVE (Pillow côté CLI). `lieux` = docs complets, émis par
+	l'appelant s'ils diffèrent du dump."""
 	par_id = {d.get("_id"): d for d in docs}
 	manquants = [i for i in sorted(set(ANCRES_PAYS) | set(CITES)) if not (par_id.get(i) or {}).get("cells")]
 	if manquants:
-		return [], [], [f"absent(s) du dump ou sans grille : {', '.join(manquants)}"], {}
+		return [], [], [f"absent(s) du dump ou sans grille : {', '.join(manquants)}"], {}, []
 	nouvelles, refus = villes_a_creer(IMAGES_NOUVELLES, docs, taille_fn)
 	if refus:
-		return [], [], refus, {}
-	propositions, lieux = {}, []
+		return [], [], refus, {}, []
+	libelles = libelles_de(docs)
+	lieux, liens, refus, avert = egypte.construire(docs, libelles)
+	# Les cités d'Égypte se posent sur la carte TELLE QU'ELLE SERA ÉCRITE.
+	par_id.update({d["_id"]: d for d in lieux})
+	propositions = {}
 	for doc in nouvelles:
 		propositions[doc["_id"]] = proposer_fn(doc)
 		lieux.append(poser_grille(doc, propositions[doc["_id"]]))
 
 	zones_pays = {p: zone_de(par_id[p]["cells"], par_id[p].get("nav") or {}, a)
 		for p, a in ANCRES_PAYS.items()}
-	libelles = libelles_de(docs)
-	liens = []
 	for cite_id in sorted(CITES):
 		pays = CITES[cite_id]["pays"]
 		d, r = connexions_cite(cite_id, par_id[cite_id], zones_pays[pays], libelles[cite_id])
 		liens += d
 		refus += r
 		lieux.append(rattachee(par_id[cite_id], pays))
-	return lieux, liens, refus, propositions
+	return lieux, liens, refus, propositions, avert
 
 
 def main() -> int:
@@ -177,7 +185,9 @@ def main() -> int:
 		dim = doc["dimensions"]
 		return ggi.proposer_pour_image(ggi.trouver_image(doc["image"]), dim["x"], dim["y"], doc)
 
-	lieux, liens, refus, propositions = construire(docs, _taille_image, proposer)
+	lieux, liens, refus, propositions, avert = construire(docs, _taille_image, proposer)
+	for a in avert:
+		print(f"⚠ {a}")
 	emis, r = a_emettre(docs, lieux + liens)
 	refus += r
 	for r in refus:
