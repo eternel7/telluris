@@ -38,6 +38,7 @@ from utils import carcasse
 from utils import consommables
 from utils import charge_magie
 from utils import vol as vol_util
+from utils import traversee as traversee_util
 from utils import sorts as sorts_util
 from utils import competences as competences_util
 from utils import slots_actions
@@ -561,6 +562,96 @@ def _ouvrir_donjon_a_etages(character: dict, donjon_doc: dict, lieu_doc: dict,
 	save_doc(combat_doc)
 	return combat_doc["_id"]
 
+
+def _effets_arrivee(character: dict, destination: str, destination_pos: dict,
+					lieu_doc: dict) -> dict:
+	"""Arrivée RÉELLE dans un autre lieu, et tout ce qu'elle entraîne : quêtes de visite,
+	focalisation atteinte, XP de découverte, sol vidé, événement de zone, intro, courses,
+	escortes, taverne, tour de monde — puis le save et les docs du groupe. Partagée par la
+	branche « lien » de `move_character` et le DÉBARQUEMENT d'une traversée
+	(`routers/traversee.py`) : arriver au port par la mer, c'est arriver comme par la porte.
+	Renvoie le payload `{"moved": 1, …}` de la branche lien."""
+	character["lieu"] = destination
+	character["position"] = destination_pos
+	# Progression des quêtes « aller en X » (persistée avec le déplacement).
+	quetes.maj_progress_visite(character, destination)
+	# Focalisation : arrivée au lieu guidé → effacée + toast côté client.
+	focus_atteint = focalisation.effacer_si_lieu_atteint(character, destination)
+	xp_gain = 0
+	niveau_up = False
+	niveau_new = compute_character_level(character.get("xp_total", 0))
+	lieux_visites = character.get("lieux_visites", [])
+	# Propriété de joueur : découvrir le bien d'AUTRUI rapporte l'XP d'un lieu
+	# (une fois, comme tout lieu) ; le sien, jamais — chaque achat en crée un.
+	if destination not in lieux_visites and not (
+			proprietes.est_propriete(lieu_doc)
+			and lieu_doc.get("proprietaire") == character.get("_id")):
+		lieux_visites.append(destination)
+		character["lieux_visites"] = lieux_visites
+		xp_gain = lieu_doc.get("xp_decouverte", character_stats.XP_DECOUVERTE_LIEU)
+		# XP + montée de niveau : règle partagée avec les combats.
+		info = grant_xp(character, xp_gain)
+		niveau_up = info["niveau_up"]
+		niveau_new = info["niveau_apres"]
+	# Changement de lieu : le sol (objets posés) est transitoire et perdu, et le
+	# marchand choisi dans une propriété ne suit pas (champ transitoire).
+	character["objets_au_sol"] = []
+	character.pop("atelier_courant", None)
+	# Événement de zone résolu AVANT le save pour persister la ressource récoltable.
+	zone_event = None
+	if lieu_doc.get("zone_influences"):
+		zone_defs = load_zone_defs_for_lieu(lieu_doc, get_doc)
+		zone_event = resolve_zone_event(
+			destination_pos["x"], destination_pos["y"],
+			lieu_doc["zone_influences"], zone_defs,
+			boost=focalisation.boost_zone_event(character, lieu_doc)
+		)
+	_set_ressource_recoltable(character, zone_event, lieu_doc,
+		favori=focalisation.favori_recolte(character))
+	# Intro : une arrivée par porte peut déposer directement en zone
+	# sûre de la cité (le reload affichera la conclusion via sessionStorage).
+	intro_terminee = intro.conclure_si_en_securite(character, lieu_doc)
+	xp_partage = xp_gain
+	if intro_terminee and intro_terminee.get("xp"):
+		info = grant_xp(character, intro_terminee["xp"])
+		niveau_up = niveau_up or info["niveau_up"]
+		niveau_new = info["niveau_apres"]
+		xp_partage += int(intro_terminee["xp"] or 0)
+	# Courses de transport échues (expiration paresseuse : pas de tick de fond).
+	transports_echoues = transport.traiter_expirations(
+		character, quetes.now_epoch(), get_doc, save_doc)
+	# ESCORTES (même motif : traitement paresseux à chaque point de
+	# passage). C'est CETTE branche qui solde la dépose — la seule qui
+	# change de lieu. Les docs `protege:*` et `relation` sont ANNEXES et
+	# persistés par le chokepoint ; le personnage reste autoritatif.
+	escorte_maj = escorte.traiter_deplacement(
+		character, lieu_doc, destination_pos,
+		get_doc, save_doc, find_docs)
+	# Taverne : sortir de l'auberge, c'est se lever de table — ses messages
+	# partent avec lui et la table s'efface si elle se vide. ⚠️ Coût NUL sans le
+	# marqueur `taverne_table` : la quasi-totalité des déplacements sort aussitôt.
+	auberge.traiter_deplacement(
+		character, get_doc, save_doc, delete_doc, find_docs)
+	if escorte_maj["depose"]:
+		# ⚠️ L'XP de la dépose est créditée au principal par
+		# `appliquer_recompenses(compagnons=[])` ; elle est PARTAGÉE avec la
+		# compagnie par `_apply_world_turn_groupe`, seul endroit du chemin
+		# de déplacement qui charge ET sauve les docs compagnons.
+		xp_partage += int(escorte_maj["depose"].get("xp") or 0)
+		niveau_up = niveau_up or bool(escorte_maj["depose"].get("niveau_up"))
+		niveau_new = compute_character_level(character.get("xp_total", 0))
+	compagnons, montures_groupe = _auras_du_groupe(character)
+	_apply_world_turn_regen(character)
+	save_doc(character)
+	# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage (régén +
+	# XP partagée de la compagnie, cf. _apply_world_turn_groupe).
+	xp_compagnie = recrutement.xp_compagnie_payload(
+		_apply_world_turn_groupe(character, xp_partage, compagnons,
+								 montures_groupe),
+		xp_partage)
+	return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character), "ressource_recoltable": _recolte_payload(character), "effets_actifs": consommables.effets_actifs_payload(character), "caracts_detail": _caracts_payload(character), "focalisation_atteinte": {"lieu": destination, "nom": lieu_label(lieu_doc, destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
+
+
 @user_router.post("/move_character")
 async def move_character(
 	response: Response, 
@@ -582,6 +673,10 @@ async def move_character(
 		# (cas typique : on a ramassé un objet trop lourd, inventaire vide → bloqué tant
 		# qu'on ne s'est pas délesté). Le « wait » (move 0,0) reste autorisé pour pouvoir
 		# ouvrir l'inventaire / régénérer.
+		# En mer, le navire avance seul (`/api/traversee/avancer`) : aucun pas, aucun lien,
+		# pas même l'attente — le joueur ne reprend la main qu'au débarquement.
+		if traversee_util.en_mer(character_to_update):
+			raise HTTPException(status_code=409, detail="Vous êtes en mer — le navire vous mène à bon port.")
 		est_deplacement = ("link" in move) or bool(move.get("x")) or bool(move.get("y"))
 		if est_deplacement and carried_weight(character_to_update) > charge_max_of(character_to_update):
 			raise HTTPException(status_code=409, detail="Trop chargé pour vous déplacer — déposez un objet.")
@@ -630,85 +725,7 @@ async def move_character(
 							return {"moved": 0, "combat_id": combat_id}
 						destination_pos = {"x": node["pos"][0], "y": node["pos"][1] }
 						print("move to ", destination, destination_pos)
-						character_to_update["lieu"] = destination
-						character_to_update["position"] = destination_pos
-						# Progression des quêtes « aller en X » (persistée avec le déplacement).
-						quetes.maj_progress_visite(character_to_update, destination)
-						# Focalisation : arrivée au lieu guidé → effacée + toast côté client.
-						focus_atteint = focalisation.effacer_si_lieu_atteint(character_to_update, destination)
-						xp_gain = 0
-						niveau_up = False
-						niveau_new = compute_character_level(character_to_update.get("xp_total", 0))
-						lieux_visites = character_to_update.get("lieux_visites", [])
-						# Propriété de joueur : découvrir le bien d'AUTRUI rapporte l'XP d'un lieu
-						# (une fois, comme tout lieu) ; le sien, jamais — chaque achat en crée un.
-						if destination not in lieux_visites and not (
-								proprietes.est_propriete(lieu_doc)
-								and lieu_doc.get("proprietaire") == character_to_update.get("_id")):
-							lieux_visites.append(destination)
-							character_to_update["lieux_visites"] = lieux_visites
-							xp_gain = lieu_doc.get("xp_decouverte", character_stats.XP_DECOUVERTE_LIEU)
-							# XP + montée de niveau : règle partagée avec les combats.
-							info = grant_xp(character_to_update, xp_gain)
-							niveau_up = info["niveau_up"]
-							niveau_new = info["niveau_apres"]
-						# Changement de lieu : le sol (objets posés) est transitoire et perdu, et le
-						# marchand choisi dans une propriété ne suit pas (champ transitoire).
-						character_to_update["objets_au_sol"] = []
-						character_to_update.pop("atelier_courant", None)
-						# Événement de zone résolu AVANT le save pour persister la ressource récoltable.
-						zone_event = None
-						if lieu_doc.get("zone_influences"):
-							zone_defs = load_zone_defs_for_lieu(lieu_doc, get_doc)
-							zone_event = resolve_zone_event(
-								destination_pos["x"], destination_pos["y"],
-								lieu_doc["zone_influences"], zone_defs,
-								boost=focalisation.boost_zone_event(character_to_update, lieu_doc)
-							)
-						_set_ressource_recoltable(character_to_update, zone_event, lieu_doc,
-							favori=focalisation.favori_recolte(character_to_update))
-						# Intro : une arrivée par porte peut déposer directement en zone
-						# sûre de la cité (le reload affichera la conclusion via sessionStorage).
-						intro_terminee = intro.conclure_si_en_securite(character_to_update, lieu_doc)
-						xp_partage = xp_gain
-						if intro_terminee and intro_terminee.get("xp"):
-							info = grant_xp(character_to_update, intro_terminee["xp"])
-							niveau_up = niveau_up or info["niveau_up"]
-							niveau_new = info["niveau_apres"]
-							xp_partage += int(intro_terminee["xp"] or 0)
-						# Courses de transport échues (expiration paresseuse : pas de tick de fond).
-						transports_echoues = transport.traiter_expirations(
-							character_to_update, quetes.now_epoch(), get_doc, save_doc)
-						# ESCORTES (même motif : traitement paresseux à chaque point de
-						# passage). C'est CETTE branche qui solde la dépose — la seule qui
-						# change de lieu. Les docs `protege:*` et `relation` sont ANNEXES et
-						# persistés par le chokepoint ; le personnage reste autoritatif.
-						escorte_maj = escorte.traiter_deplacement(
-							character_to_update, lieu_doc, destination_pos,
-							get_doc, save_doc, find_docs)
-						# Taverne : sortir de l'auberge, c'est se lever de table — ses messages
-						# partent avec lui et la table s'efface si elle se vide. ⚠️ Coût NUL sans le
-						# marqueur `taverne_table` : la quasi-totalité des déplacements sort aussitôt.
-						auberge.traiter_deplacement(
-							character_to_update, get_doc, save_doc, delete_doc, find_docs)
-						if escorte_maj["depose"]:
-							# ⚠️ L'XP de la dépose est créditée au principal par
-							# `appliquer_recompenses(compagnons=[])` ; elle est PARTAGÉE avec la
-							# compagnie par `_apply_world_turn_groupe`, seul endroit du chemin
-							# de déplacement qui charge ET sauve les docs compagnons.
-							xp_partage += int(escorte_maj["depose"].get("xp") or 0)
-							niveau_up = niveau_up or bool(escorte_maj["depose"].get("niveau_up"))
-							niveau_new = compute_character_level(character_to_update.get("xp_total", 0))
-						compagnons, montures_groupe = _auras_du_groupe(character_to_update)
-						_apply_world_turn_regen(character_to_update)
-						save_doc(character_to_update)
-						# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage (régén +
-						# XP partagée de la compagnie, cf. _apply_world_turn_groupe).
-						xp_compagnie = recrutement.xp_compagnie_payload(
-							_apply_world_turn_groupe(character_to_update, xp_partage, compagnons,
-													 montures_groupe),
-							xp_partage)
-						return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_label(lieu_doc, destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
+						return _effets_arrivee(character_to_update, destination, destination_pos, lieu_doc)
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):

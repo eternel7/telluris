@@ -594,6 +594,11 @@ AUBERGE_TABLE_MESSAGES_MAX: int = 10
 AUBERGE_TABLES_MAX: int = 8
 AUBERGE_ANNONCE_LONGUEUR_MAX: int = 800
 
+# --- Traversées maritimes (utils/traversee.py) ---
+# PAS_MS : cadence du navire en mer, en millisecondes entre deux cases — le client attend
+#   ce délai après chaque pas avant de demander le suivant (pur confort de lecture).
+TRAVERSEE_PAS_MS: int = 900
+
 # ── Journal du personnage (onglet 📖) ─────────────────────────────────────────────
 # Le CARNET, pas un log. ⚠️ Écrire une entrée suit EXACTEMENT la règle du tableau
 # d'information d'une auberge : papier + encre + plume exigés, papier et encre dépensés
@@ -1050,6 +1055,7 @@ def current_world_variables() -> dict:
 		"ESCORTE_GUILDE_PROBA": ESCORTE_GUILDE_PROBA,
 		"ESCORTE_PROGENITURE_XP": ESCORTE_PROGENITURE_XP,
 		"AUBERGE_NUIT_COUT_CUIVRE": AUBERGE_NUIT_COUT_CUIVRE,
+		"TRAVERSEE_PAS_MS": TRAVERSEE_PAS_MS,
 		"AUBERGE_NUIT_PASSES_ATELIER": AUBERGE_NUIT_PASSES_ATELIER,
 		"AUBERGE_MESSAGE_DUREE_SECONDES": AUBERGE_MESSAGE_DUREE_SECONDES,
 		"AUBERGE_TABLE_MESSAGES_MAX": AUBERGE_TABLE_MESSAGES_MAX,
@@ -1141,7 +1147,7 @@ def load_world_variables() -> dict:
 	global ESCORTE_MORT_DEFINITIVE
 	global ESCORTE_PROGENITURE_PROBA, ESCORTE_PROGENITURE_RELATION_MIN
 	global ESCORTE_GUILDE_PROBA, ESCORTE_PROGENITURE_XP
-	global AUBERGE_NUIT_COUT_CUIVRE, AUBERGE_NUIT_PASSES_ATELIER
+	global AUBERGE_NUIT_COUT_CUIVRE, AUBERGE_NUIT_PASSES_ATELIER, TRAVERSEE_PAS_MS
 	global AUBERGE_MESSAGE_DUREE_SECONDES, AUBERGE_TABLE_MESSAGES_MAX
 	global AUBERGE_TABLES_MAX, AUBERGE_ANNONCE_LONGUEUR_MAX
 	global JOURNAL_LONGUEUR_MAX, JOURNAL_ENTREES_MAX, JOURNAL_BESTIAIRE_LIEUX_MAX
@@ -1378,6 +1384,9 @@ def load_world_variables() -> dict:
 	ESCORTE_GUILDE_PROBA = float(v.get("ESCORTE_GUILDE_PROBA", ESCORTE_GUILDE_PROBA))
 	ESCORTE_PROGENITURE_XP = max(0, int(v.get("ESCORTE_PROGENITURE_XP", ESCORTE_PROGENITURE_XP)))
 	AUBERGE_NUIT_COUT_CUIVRE = max(0, int(v.get("AUBERGE_NUIT_COUT_CUIVRE", AUBERGE_NUIT_COUT_CUIVRE)))
+	# Plancher à 150 ms : en dessous, l'animation de caméra (`--map-anim`) n'a plus le temps
+	# de montrer la case avant la suivante.
+	TRAVERSEE_PAS_MS = max(150, int(v.get("TRAVERSEE_PAS_MS", TRAVERSEE_PAS_MS)))
 	# Plancher à 1 : zéro passe rendrait la nuit muette côté marché — les étals ne
 	# bougeraient pas d'un pouce, et c'est la moitié de ce qu'on vient y chercher.
 	AUBERGE_NUIT_PASSES_ATELIER = max(1, int(v.get("AUBERGE_NUIT_PASSES_ATELIER", AUBERGE_NUIT_PASSES_ATELIER)))

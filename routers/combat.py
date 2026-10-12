@@ -21,6 +21,7 @@ from utils.zones import (
     terrain_tags_actifs,
 )
 from utils import focalisation
+from utils import traversee
 from utils import recrutement
 from utils import montures
 from utils import escorte
@@ -159,6 +160,14 @@ async def start_combat(
         raise HTTPException(status_code=500, detail="Aucune espèce en base")
 
     depart_lieu = get_doc(character.get("lieu")) if character.get("lieu") else None
+    # EN MER (utils/traversee.py) : la carte de mer est nue — la route porte la zone de danger
+    # du segment courant et ses rencontres. On lit donc la carte « vue depuis le navire » ;
+    # tout le reste de cet endpoint l'ignore (même pool, même décor par terrain_tags).
+    if traversee.en_mer(character):
+        route = get_doc(character["traversee"].get("route", ""))
+        if traversee.est_route(route):
+            depart_lieu = traversee.lieu_en_mer(
+                depart_lieu, route, int(character["traversee"].get("etape", 0)))
 
     # Espèces rencontrables = celles du lieu dont une zone concernée est active à la
     # position du personnage (rencontres: [{espece, zones:[zone_def_id]}]).

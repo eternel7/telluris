@@ -81,7 +81,10 @@ _CACHEABLE_PREFIXES = ("item:", "espece:", "profil:", "recette:", "sort:",
 					   # /api/zones (donc couvertes par l'invalidation de save_doc) et jamais
 					   # mutées en jeu. Lues par `load_zone_defs_for_lieu` à chaque événement
 					   # de zone et à chaque résolution de grade d'une chasse.
-					   "zone:")
+					   "zone:",
+					   # `traversee:calais_douvres`… : routes maritimes (utils/traversee.py),
+					   # lues à chaque case d'une traversée, jamais mutées (`lieu_en_mer` copie).
+					   "traversee:")
 # ⚠️ Les docs d'ÉTAT (lieu:, character:, user:, relation:…) n'en sont PAS : le cache de contenu
 # rend une copie de SURFACE, or leurs mutations sont IMBRIQUÉES (`stock_vente[i]["qty"]`,
 # `stock_matieres[cle]`) — `buy_item` ou `tick_atelier` empoisonneraient le mémo.

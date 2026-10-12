@@ -677,6 +677,23 @@ CATALOGUE = [
 			"terre de sa carte refuse le lot. Requiert Pillow.",
 	},
 	{
+		"id": "gen_ports_manche",
+		"label": "⛵ Ports de la Manche : Calais, Douvres, leurs quais et la traversée du Pas",
+		# Dump frais : les cités, une fois créées, sont relues du dump (retouches de l'éditeur
+		# gardées) ; seuls les docs qui diffèrent sont émis.
+		"argv_fn": lambda v, f: _py("gen_ports_manche.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/ports_manche_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/ports_manche_a_importer.json (+ un aperçu PNG "
+			"par cité créée). Rien en base avant 📥 Importer.",
+		"description": "Un seul fichier : `lieu:calais` (plaine européenne) et `lieu:douvres` "
+			"(Angleterre) avec leur grille proposée et leurs portes de rempart ouvertes, leurs "
+			"sorties vers la carte du pays, les quais (sous-lieux, capitaine présent), la carte "
+			"`lieu:manche`, les routes `traversee:calais_douvres` / `douvres_calais`, les deux "
+			"capitaines (service `traversee`) et les ponts de navire (cartes de combat en mer). "
+			"N'émet que ce qui diffère du dump. Requiert Pillow.",
+	},
+	{
 		"id": "gen_villes_pays",
 		"label": "📍 Poser chaque cité sur la carte de son pays, frontière Égypte ↔ Afrique du Nord (+ lieux d'Abou Simbel et de son Grand Temple, d'Atlantis et de Mu)",
 		# Dump frais : une cité qui reçoit son `lieu_parent` ou sa grille, `lieu:egypte` et
