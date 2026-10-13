@@ -161,6 +161,6 @@ def construire(docs, libelles):
 	egypte = preparer_egypte(par_id[EGYPTE])
 	afrique = preparer_afrique(par_id[AFRIQUE], egypte)
 	liens, refus, avert = connexions(lignes(egypte, afrique), libelles)
-	avert += frontieres_calees.liens_perimes(docs, "link:afrique_du_nord_to_egypte_",
+	liens += frontieres_calees.liens_perimes(docs, "link:afrique_du_nord_to_egypte_",
 		{l["_id"] for l in liens})
 	return [egypte, afrique], liens, refus, avert + connexions_coupees(docs, egypte, afrique)
