@@ -106,7 +106,7 @@ Une ligne par cité ; portails, monuments et décisions de l'Auteur : [reference
 
 
 ### Vampires
-Cinq lignées (Auteur, 12/10) — séance `docs/lore/monde/20261012_les_vampires_de_telluris.md` (récits de l'Auteur, ancrages terrestres, points ouverts) ; bestiaire : `dev/gen_vampires.py`.
+Cinq lignées (Auteur, 12/10) — séance `docs/lore/monde/20261012_les_vampires_de_telluris.md` (récits de l'Auteur, ancrages terrestres, points ouverts) ; bestiaire : `dev/gen_vampires.py` (dont `espece:abhartach`, `espece:penanggalan`, `espece:draugr`, 13/10) ; prose : `docs/lore/redige/09_vampires.md`.
 
 - **Aristocrates de Dracula** — Vlad, prince d'une cité-État, combat au dehors un monstre qui ravage ses terres ; un faux message de mort pousse sa femme à se jeter de la plus haute tour devant lui ; il **maudit les dieux** (polythéisme), qui le punissent par le vampirisme. Le monstre est un **balaur** sorti d'un **donjon qui déborde** (Auteur, 13/10). **L'empaleur** (Auteur, 13/10) : avant la malédiction, il empale les **monstres** abattus en lisière de ses terres agricoles (la lisière est tenue) ; le monstre ravageur est celui qu'il n'a pas pu empaler ; après, il empale aussi des anthropes. Séducteurs, d'apparence anthrope, bons en épée et en magie (`espece:vampire`, `espece:comte_vampire`).
 - **Strigoï** — un proche de Dracula tente de le renverser ; torturé, os brisés, tête fracassée, abandonné au soleil levant, il disparaît ; difforme, il déforme chaque cadavre avant de le relever. Bestiaux, corps à corps (`espece:strigoi`, ex-`nosferatu` bestial ; sort *Soif du strigoï*).

@@ -46,6 +46,11 @@ TAGS_RARE_PERMIS = ("boss", "legendaire")
 
 # slug d'espèce → liste d'`item:*` (sans préfixe), ou None pour mains nues (aucun champ).
 TABLE = {
+	# Roi-nain revenant (Auteur, 13/10) : un tyran armé comme les rois des tombes.
+	"abhartach": [
+		"Morgenstern", "Hache_de_guerre", "Ecu",
+		"Cotte_de_mailles", "Heaume_de_plates", "Gantelets_de_plates", "Jambières_de_plates",
+	],
 	"ange_de_la_connaissance": [
 		"Baton_canalisateur", "Epee_argent",
 		"Robe_de_savant", "Calotte_cuir_rune", "Sandales_moine",
@@ -99,6 +104,11 @@ TABLE = {
 	"doppleganger": [
 		"Dague", "Rapiere", "Dague_de_jet",
 		"Veste_cuir_souple", "Capuche_noire", "Gants_fins_noirs", "Bottes_silencieuses",
+	],
+	# Mort-vivant du Nord : haches et écu de ferme.
+	"draugr": [
+		"Hache_de_guerre", "Hache_a_deux_mains", "Ecu",
+		"Cotte_de_mailles", "Casque_de_cuir_bouilli", "Braies_fourrure",
 	],
 	"dragon_de_sang": [
 		"Epee_une_main_benie", "Masse_benie", "Bouclier_sacre",
