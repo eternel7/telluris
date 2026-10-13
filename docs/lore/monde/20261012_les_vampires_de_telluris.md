@@ -70,6 +70,7 @@ L'Auteur demande d'autres mythes et légendes terrestres à rattacher aux vampir
 - **Vetāla** : son esprit est **du même genre** que celui que les deux sœurs ont piégé dans la reine Lamia — un fil discret.
 - **Lord Ruthven** : un **aristocrate de Dracula**.
 - **Abhartach** : une **lignée indépendante**.
+- **L'empaleur** (Auteur, 13/10, verbatim) : « avant sa malédiction, Vlad empalait les monstres abattus en lisière de ses terres agricoles, pour signaler aux autres que la lisière était tenue. Le monstre qui ravageait ses terres serait celui qu'il n'a pas pu empaler. Après la malédiction, il empale aussi des anthropes. »
 - **Faiblesses validées** : Dracula, la terre natale · Strigoï, le feu et l'aubépine · lamies, le fer et les chevaux, et le soleil · dragons de sang, le parjure · Nosferatu, toute lumière (y compris la magie Sainte).
 
 ---
@@ -127,7 +128,7 @@ Comme toujours, ce sont des **théories de savants** : personne en jeu ne les ti
 **Adaptations proposées :**
 
 - **Le monstre** : un **balaur**, le dragon-serpent à plusieurs têtes du folklore roumain, échappé d'un **donjon qui déborde** près de la cité-État — purement tellurien, et cohérent avec l'Ordre du Dragon du père.
-- **L'empaleur sans guerre** : Vlad rentre de sa chasse en plantant sur des pieux, le long de la route, les **carcasses de la horde** qui accompagnait le balaur. La faune évite encore cette route ; les voyageurs, des siècles plus tard, racontent qu'il empalait des hommes — le mythe déformé.
+- ~~**L'empaleur sans guerre**~~ : remplacé par la décision de l'Auteur du 13/10 (§ 9) — les pieux tiennent la **lisière** des terres agricoles, et Vlad, maudit, empale **réellement** des anthropes : pas de « mythe déformé ».
 - **Le faux message** : envoyé par **Radu** (§ 3) — ce qui donne à la torture son motif.
 - **Les dieux maudits** : parmi eux **Zalmoxis**, le dieu dace qui promettait l'immortalité aux siens. Punition ironique : Vlad l'aura, mais **sans passage**.
 - **Fils d'un dragon de sang** (Auteur) : Vlad II, son père, est l'un des paladins de la nuit du carrosse, immortel. La malédiction du fils répond à la foi du père : l'un a gardé ses dieux par-delà la mort, l'autre les a maudits. *(lecture proposée)*
@@ -241,7 +242,7 @@ Le rattachement de chaque piste est **tranché par l'Auteur** (§ ✍️ quatri�
 - **Báthory** (lamie, Auteur) — la comtesse qui se baigne dans le sang de jeunes filles. Écho : la Báthory réelle finit **emmurée vivante** dans son château, comme la reine Lamia. Théorie de PNJ possible, jamais confirmée : elle serait liée à la libération de la reine (le mystère reste entier).
 - **Carmilla** (lamie) — Le Fanu : une lamie qui ne peut porter que des **anagrammes** de son nom (Mircalla, Millarca) ; ce serait un indice d'enquête.
 - **Lord Ruthven** (Polidori ; **aristocrate de Dracula**, Auteur) — un vampire mondain qui circule dans la haute société ; les Nosferatu ne pourraient pas passer pour des Anthropes.
-- **Empalés de Vlad** (aristocrates de Dracula) — avant sa malédiction, Vlad empalait les **monstres** abattus en lisière de ses terres agricoles, pour avertir les autres ; après, il empale aussi des anthropes.
+- **Empalés de Vlad** (aristocrates de Dracula, **Auteur**, 13/10) — avant sa malédiction, Vlad empalait les **monstres** abattus en lisière de ses terres agricoles, pour signaler aux autres que la lisière était tenue. Le monstre qui ravageait ses terres est **celui qu'il n'a pas pu empaler**. Après la malédiction, il empale aussi des **anthropes**.
 - **Vrykolakas / Santorin** (Strigoï, Auteur) — la forme grecque des Strigoï : des morts qui ne pourrissent pas. Santorin serait l'île où l'on exile les relevés (le dicton réel « envoyer un vampire à Santorin »).
 - **Arnold Paole / Peter Plogojowitz** (Strigoï, ou superstition) — le modèle de l'**enquête du rang D** (Auteur) : morts en série dans un village, tombes rouvertes, corps gonflés et sang frais, rapport d'enquêteurs. Le dénouement varie : un Strigoï, une maladie, ou rien de certain.
 
