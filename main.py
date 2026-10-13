@@ -1379,11 +1379,19 @@ def admin_import_bulk(
 			else:
 				# Upsert : si l'_id existe déjà en base, on attache son _rev courant.
 				doc_id = doc.get("_id")
+				existing = None
 				if doc_id:
 					existing = get_doc(doc_id)
 					if existing and existing.get("_rev"):
 						doc["_rev"] = existing["_rev"]
-				if save_doc(doc) is None:
+				if doc.get("_deleted") and not existing:
+					# Suppression (`{"_id", "_deleted": true}`) d'un doc déjà absent : le but est
+					# atteint. Sans _rev, CouchDB refuserait l'écriture (conflit) — c'était un
+					# faux échec au ré-import d'un lot déjà appliqué.
+					saved += 1
+					logger.info("Import bulk : %s déjà absent, suppression sans objet", doc_id)
+					ok = True
+				elif save_doc(doc) is None:
 					failed += 1
 					msg = f"#{i} ({doc_id or '?'}): échec d'écriture CouchDB."
 					errors.append(msg)
