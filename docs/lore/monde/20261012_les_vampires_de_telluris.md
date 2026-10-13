@@ -74,6 +74,8 @@ L'Auteur demande d'autres mythes et légendes terrestres à rattacher aux vampir
 - **Le soleil** (Auteur, 13/10, verbatim) : « Le soleil est craint de tout vampire sauf les dragons avec encore une bonne âme » — y compris Abhartach, le penanggalan et les dragons de sang déchus.
 - **Le monstre de Vlad** : un **balaur** (Auteur, 13/10) ; qu'il sorte d'un donjon qui déborde reste proposé.
 - **L'effet du soleil varie selon les lignées** (Auteur, 13/10, questionnaire) : il **brûle** les aristocrates de Dracula · **consume** les Nosferatu · **tue** les Strigoï et vrykolakas · rend les lamies **inertes** · n'est qu'une **simple gêne** pour les dragons de sang déchus · **enchaîne Abhartach à sa tombe** (le jour, il ne peut quitter la terre où il gît tête en bas) · **sépare** la tête du penanggalan de son corps (surprise hors du corps à l'aube, elle ne peut plus le rejoindre et meurt ; le jour, elle passe pour une femme ordinaire).
+- **Penanggalan et Mu** (Auteur, 13/10, verbatim) : « Les morts de mu sont rendus à la mer. Ceux qui ne trouvent pas le chemin du royaume de Poséidon reviennent sous cette forme, dévoré par les poissons... »
+- **Le balaur** sort d'un **donjon qui déborde** près de la cité-État de Vlad (Auteur, 13/10).
 - **Faiblesses d'Abhartach et du penanggalan** : validées — l'if (et la tête en bas) ; les épines et le vinaigre.
 - **Faiblesses validées** : Dracula, la terre natale · Strigoï, le feu et l'aubépine · lamies, le fer et les chevaux, et le soleil · dragons de sang, le parjure · Nosferatu, toute lumière (y compris la magie Sainte).
 
@@ -131,7 +133,7 @@ Comme toujours, ce sont des **théories de savants** : personne en jeu ne les ti
 
 **Adaptations proposées :**
 
-- **Le monstre** : un **balaur** (**Auteur**, 13/10), le dragon-serpent à plusieurs têtes du folklore roumain, échappé d'un **donjon qui déborde** près de la cité-État — purement tellurien, et cohérent avec l'Ordre du Dragon du père.
+- **Le monstre** : un **balaur** (**Auteur**, 13/10), le dragon-serpent à plusieurs têtes du folklore roumain, échappé d'un **donjon qui déborde** (**Auteur**, 13/10) près de la cité-État — purement tellurien, et cohérent avec l'Ordre du Dragon du père.
 - ~~**L'empaleur sans guerre**~~ : remplacé par la décision de l'Auteur du 13/10 (§ 9) — les pieux tiennent la **lisière** des terres agricoles, et Vlad, maudit, empale **réellement** des anthropes : pas de « mythe déformé ».
 - **Le faux message** : envoyé par **Radu** (§ 3) — ce qui donne à la torture son motif.
 - **Les dieux maudits** : parmi eux **Zalmoxis**, le dieu dace qui promettait l'immortalité aux siens. Punition ironique : Vlad l'aura, mais **sans passage**.
@@ -227,7 +229,7 @@ Restent **ouverts par choix de l'Auteur**, comme mystères du monde :
 - **Le nom** du paladin le plus pieux, et le lieu de l'auberge-relais.
 - **Le « sang premier »** : des PNJ y croient, rien ne le prouve (Auteur, 13/10).
 
-À trancher (§ 9) : ce que le penanggalan doit à Mu.
+Plus rien à trancher au § 9.
 
 ## 8. Prompts d'image à produire
 
@@ -253,7 +255,7 @@ Le rattachement de chaque piste est **tranché par l'Auteur** (§ ✍️ quatri�
 ### Créatures rattachées par l'Auteur
 
 - **Baobhan sith** (lamies essaimées, Auteur) — dans les Highlands, des danseuses en robe verte qui boivent le sang de chasseurs abrités pour la nuit dans une bergerie ; seul survit l'homme qui garde son **cheval** et du **fer** près de lui. Elles expliqueraient pourquoi les forestiers dorment avec leur monture.
-- **Penanggalan** (lié à Mu, Auteur) — en Malaisie, la tête d'une femme vole la nuit en entraînant ses viscères ; son corps attend dans un bac de **vinaigre**, et des **épines** posées aux fenêtres l'arrêtent. Dans la légende, une femme qui méditait pour dominer son corps est surprise, et sa tête s'arrache. Lien proposé avec le canon : une élève de Mu « revenue transformée » d'un enseignement avancé.
+- **Penanggalan** (lié à Mu, Auteur) — en Malaisie, la tête d'une femme vole la nuit en entraînant ses viscères ; son corps attend dans un bac de **vinaigre**, et des **épines** posées aux fenêtres l'arrêtent. Dans la légende, une femme qui méditait pour dominer son corps est surprise, et sa tête s'arrache. **Lien avec Mu (Auteur)** : les morts de Mu sont rendus à la mer ; ceux qui ne trouvent pas le chemin du royaume de Poséidon reviennent sous cette forme, dévorés par les poissons — d'où la tête qui ne traîne plus que ses viscères. (Proposition écartée : une élève de Mu revenue transformée.)
 - **Vetāla** (esprit du même genre que celui de la reine Lamia, Auteur) — le roi Vikramāditya porte un cadavre habité qui lui pose des énigmes. Ce serait une quête d'**escorte inversée** à énigmes ; le lien avec Lamia ne serait visible que d'un lettré.
 - **Abhartach** — en Irlande, un roi-**nain** tyran revient de la tombe et exige un bol de sang tiré des veines de ses sujets. Cathán le tue avec une épée en **if** et l'enterre **tête en bas** sous une pierre (le dolmen réel de Slaghtaverty). **Lignée indépendante** (Auteur) : un revenant isolé, unique.
 - **Draugr** (mort-vivant à part, Auteur) — en Islande, Glámr revient hanter une ferme ; Grettir le tue mais garde de sa malédiction la **peur du noir**. Lieux possibles : Reykjavik ou Akureyri. En jeu : un débuff d'**effroi nocturne** durable après la victoire.
