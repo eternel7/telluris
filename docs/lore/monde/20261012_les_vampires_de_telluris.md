@@ -72,6 +72,8 @@ L'Auteur demande d'autres mythes et légendes terrestres à rattacher aux vampir
 - **Abhartach** : une **lignée indépendante**.
 - **L'empaleur** (Auteur, 13/10, verbatim) : « avant sa malédiction, Vlad empalait les monstres abattus en lisière de ses terres agricoles, pour signaler aux autres que la lisière était tenue. Le monstre qui ravageait ses terres serait celui qu'il n'a pas pu empaler. Après la malédiction, il empale aussi des anthropes. »
 - **Le soleil** (Auteur, 13/10, verbatim) : « Le soleil est craint de tout vampire sauf les dragons avec encore une bonne âme » — y compris Abhartach, le penanggalan et les dragons de sang déchus.
+- **Le monstre de Vlad** : un **balaur** (Auteur, 13/10) ; qu'il sorte d'un donjon qui déborde reste proposé.
+- **L'effet du soleil varie selon les lignées** (Auteur, 13/10) ; les effets par lignée du § 1 restent proposés, sauf celui des lamies (inertes, Auteur).
 - **Faiblesses validées** : Dracula, la terre natale · Strigoï, le feu et l'aubépine · lamies, le fer et les chevaux, et le soleil · dragons de sang, le parjure · Nosferatu, toute lumière (y compris la magie Sainte).
 
 ---
@@ -101,7 +103,7 @@ L'Auteur demande d'autres mythes et légendes terrestres à rattacher aux vampir
 | Nom du peuple | « **lamies** » (le mot français) ; *Lamia* reste le nom propre de la reine | proposé, non tranché |
 | Lieux, noms secondaires, datations | § 2 à § 7 | proposé, non tranché |
 
-**Règle commune** (déduite des récits de l'Auteur, proposée) : le vampirisme est un **esprit lié à un corps mort par le sang**. Le soleil **sépare l'esprit du corps** (Auteur, lamies) ; ce qui retient l'esprit décide de la faiblesse :
+**Règle commune** (déduite des récits de l'Auteur, proposée ; que l'effet du soleil **varie selon la lignée** est tranché, Auteur 13/10) : le vampirisme est un **esprit lié à un corps mort par le sang**. Le soleil **sépare l'esprit du corps** (Auteur, lamies) ; ce qui retient l'esprit décide de la faiblesse :
 
 - **la foi** retient l'esprit — le dragon de sang fidèle ne craint pas le soleil, le déchu n'en ressent qu'une gêne ;
 - **la malédiction des dieux** retient l'esprit de Dracula et des siens — le soleil les brûle ;
@@ -128,7 +130,7 @@ Comme toujours, ce sont des **théories de savants** : personne en jeu ne les ti
 
 **Adaptations proposées :**
 
-- **Le monstre** : un **balaur**, le dragon-serpent à plusieurs têtes du folklore roumain, échappé d'un **donjon qui déborde** près de la cité-État — purement tellurien, et cohérent avec l'Ordre du Dragon du père.
+- **Le monstre** : un **balaur** (**Auteur**, 13/10), le dragon-serpent à plusieurs têtes du folklore roumain, échappé d'un **donjon qui déborde** près de la cité-État — purement tellurien, et cohérent avec l'Ordre du Dragon du père.
 - ~~**L'empaleur sans guerre**~~ : remplacé par la décision de l'Auteur du 13/10 (§ 9) — les pieux tiennent la **lisière** des terres agricoles, et Vlad, maudit, empale **réellement** des anthropes : pas de « mythe déformé ».
 - **Le faux message** : envoyé par **Radu** (§ 3) — ce qui donne à la torture son motif.
 - **Les dieux maudits** : parmi eux **Zalmoxis**, le dieu dace qui promettait l'immortalité aux siens. Punition ironique : Vlad l'aura, mais **sans passage**.
