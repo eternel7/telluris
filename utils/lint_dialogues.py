@@ -48,6 +48,8 @@ PLACEHOLDERS_CONNUS = {
 	"recherche", "suggestions",
 	# Quête d'APPORT ({objet}, {xp}, {prime} partagés) : quantité demandée, reste à remettre.
 	"quantite", "reste",
+	# Traversée maritime (service `traversee`) : port d'arrivée, prix pour CE groupe, têtes.
+	"port_arrivee", "tarif", "passagers",
 }
 
 # Clés de `condition` : deux formes structurées, tout le reste est traité comme un FLAG
@@ -145,6 +147,8 @@ NOEUDS_REQUIS = {
 	# `deja` reste optionnel — un gardien peut ne pas reconnaître les habitués.
 	"acces": {"ouvre", "refus"},
 	"direction": {"trouve", "proche", "inconnu"},
+	# Embarquer : payé (le client recharge /play en mode voyage) ou bourse trop légère.
+	"traversee": {"embarque", "sans_fonds"},
 }
 
 # Le transport a DEUX rôles, et presque aucun PNJ ne tient les deux :

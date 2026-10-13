@@ -86,6 +86,7 @@ def resolve_zone_event(
     zone_influences: list,
     zone_defs: dict,
     boost: dict | None = None,
+    rand_fn=None,
 ) -> dict | None:
     """
     Resolve a movement event from all active zones at (px, py).
@@ -93,6 +94,8 @@ def resolve_zone_event(
     `boost` (focalisation) : {"type": "combat"|"ressource", "mult": float, "zones": set}
     — multiplie le poids des entrées du type visé si l'une des `zones` (zone_def ids)
     est active. Ne touche PAS à la probabilité de déclenchement.
+
+    `rand_fn` : tirage de déclenchement injectable (tests) — `random.random` par défaut.
 
     Returns {"type", "tags", "zones_actives", "intensite", "modificateurs"} or None.
     """
@@ -110,7 +113,7 @@ def resolve_zone_event(
         return None
 
     proba_globale = max(intensity for intensity, _ in active)
-    if random.random() >= proba_globale:
+    if (rand_fn or random.random)() >= proba_globale:
         return None
 
     # Composite weighted event table

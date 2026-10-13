@@ -34,6 +34,8 @@ from utils import montures
 from utils import escorte
 from utils import indicateurs
 from utils import apport
+from utils import expedition
+from utils import traversee as traversee_util
 from utils import fiche as fiche_util
 from utils.combat import (
 	instantiate_monsters, build_monster_snapshot, create_combat_doc,
@@ -41,6 +43,7 @@ from utils.combat import (
 )
 from utils.lieux import get_lieu_links
 from routers.user import _derived_from_character, _vitals_payload, _inventory_payload
+from routers.traversee import nom_port as nom_port_traversee
 
 pnj_router = APIRouter()
 
@@ -308,6 +311,12 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 	# `quete_active` : elles visent une quête NOMMÉE, donc n'importe quel PNJ peut réagir à ce
 	# qu'un autre a confié ou fait accomplir. Aucune lecture DB — `quetes_terminees` et
 	# `quetes_actives` vivent sur le doc personnage, déjà chargé.
+	# TRAVERSÉE : le capitaine annonce le port d'arrivée, le nombre de passagers et le prix
+	# du passage pour CE groupe — recalculés à chaque rendu (une recrue de plus change le prix).
+	if (pnj_doc.get("services") or {}).get("traversee"):
+		offre_tr = _offre_traversee(character, pnj_doc, lieu_doc)
+		if offre_tr:
+			placeholders.update(offre_tr["placeholders"])
 	return pnj.contexte_dialogue(character, pnj_doc, _rel, flags, placeholders,
 								 quetes.quetes_reussies(character),
 								 quetes.quetes_actives_ids(character))
@@ -598,6 +607,50 @@ def _placeholders_escorte(q: dict, lieu_doc: dict) -> dict:
 	}
 
 
+def _offre_traversee(character: dict, pnj_doc: dict, lieu_doc: dict | None) -> dict | None:
+	"""La traversée que vend ce capitaine, ICI : `{route, cout, placeholders}`, ou None si la
+	route n'existe pas ou ne part pas de ce lieu (un capitaine ne vend que son quai).
+	Passagers = `expedition.membres` (le principal et ses compagnons, jamais de monture) ;
+	montures = `montures.montures_effectives`, au supplément de la route."""
+	conf = (pnj_doc.get("services") or {}).get("traversee") or {}
+	route = get_doc(conf.get("route", "")) if conf.get("route") else None
+	if not traversee_util.est_route(route) or not lieu_doc:
+		return None
+	if (route.get("depart") or {}).get("lieu") != lieu_doc.get("_id"):
+		return None
+	nb_passagers = len(expedition.membres(character, get_doc))
+	nb_montures = len(montures.montures_effectives(character, get_doc))
+	cout = traversee_util.prix(route, nb_passagers, nb_montures)
+	return {"route": route, "cout": cout, "placeholders": {
+		"port_arrivee": nom_port_traversee(route),
+		"tarif": traversee_util.texte_bourse(cout) if cout else "rien",
+		"passagers": nb_passagers,
+	}}
+
+
+def _resoudre_traversee(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
+						reponse: dict) -> str | None:
+	"""Service `traversee`, op `embarquer` : débit du passage puis embarquement — le joueur
+	perd la main, le client recharge /play en mode voyage. Bourse vide ⇒ `sans_fonds`, rien
+	débité, rien sauvé. Pas de garde de charge : c'est le navire qui porte."""
+	noeuds = ((pnj_doc.get("services") or {}).get("traversee") or {}).get("noeuds") or {}
+	if op != "embarquer":
+		raise HTTPException(status_code=422, detail="Opération de traversée inconnue.")
+	if traversee_util.en_mer(character):
+		raise HTTPException(status_code=409, detail="Vous êtes déjà en mer.")
+	offre = _offre_traversee(character, pnj_doc, lieu_doc)
+	if not offre:
+		raise HTTPException(status_code=422, detail="Aucune traversée ne part d'ici.")
+	if offre["cout"] > 0 and debit_character(character, offre["cout"]) is None:
+		return noeuds.get("sans_fonds")
+	traversee_util.embarquer(character, offre["route"], quetes.now_epoch())
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	reponse["traversee"] = {"port": offre["placeholders"]["port_arrivee"]}
+	reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
+	return noeuds.get("embarque")
+
+
 def _resoudre_direction(pnj_doc: dict, lieu_doc: dict, saisie) -> tuple[str | None, dict]:
 	"""Service `direction` : le PNJ cherche le lieu SAISI par le joueur parmi ceux de sa ville.
 	Nom exact → `trouve`, avec la phrase d'orientation des courses ({direction} : « au sud-est
@@ -843,6 +896,8 @@ async def pnj_dialogue_choix(
 		# Quête prise ou remise → refiltrer les choix sur les nouveaux flags.
 		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 		contexte["placeholders"].update(dits)
+	elif action.get("service") == "traversee":
+		suivant = _resoudre_traversee(character, pnj_doc, lieu_doc, action.get("op"), reponse)
 	elif action.get("service") == "direction":
 		# Simple consultation : aucun état ne bouge, donc aucun flag à refiltrer.
 		suivant, dits = _resoudre_direction(pnj_doc, lieu_doc, body.get("saisie"))

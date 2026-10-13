@@ -118,6 +118,14 @@ Verrouillé par `tests/test_passages.py`, `tests/test_apport.py`.
 - Flags `apport_offert` (« ! ») · `apport_en_cours` · `apport_possible` (« ? », une pièce portée) · `apport_accompli` ; placeholders `{objet}` `{quantite}` `{reste}` `{xp}` `{prime}`. Linter : offre illisible, receveur sans `quete`, `remettre` non conditionné par `apport_possible`.
 
 
+### Traversées maritimes — service `traversee`
+Un capitaine, sur les quais d'un port, vend le passage ; le joueur perd la main jusqu'aux quais d'en face (`utils/traversee.py`, `routers/traversee.py`, contenu `dev/gen_ports_manche.py` : Calais ↔ Douvres).
+- **Route** `traversee:<a>_<b>` : `depart.lieu` (quais), `arrivee {lieu, pos}`, `carte` (lieu de mer, sans connexion), `chemin` (points de passage → cases contiguës), `segments [{de, zone, intensite}]` (le DANGER est porté par la route, la carte de mer reste nue), `rencontres`, `profil_weights`, `prix {passager_cuivre, monture_cuivre}`.
+- **Service** `services.traversee = {route, noeuds:{embarque, sans_fonds}}`, choix `action {service:"traversee", op:"embarquer"}` ; placeholders `{port_arrivee}` `{tarif}` `{passagers}`. Un capitaine ne vend que la route qui part de SON lieu. Passagers = `expedition.membres`, montures en supplément. Pas de garde de charge.
+- **En mer** : `character.traversee = {route, etape, depart_lieu, debut}`, `lieu` = carte de mer, `position` = case du navire. `move_character` → **409** (pas, lien, attente). Une case par `POST /api/traversee/avancer` (tirage à l'`intensite` du segment, combat seul remonté). `start_combat` lit `traversee.lieu_en_mer` (zone du segment sur la seule case du navire + rencontres de la route) → décor `mer`/`eau` = ponts de navire.
+- **Débarquement** : `_effets_arrivee` (routers/user.py), la MÊME arrivée que la branche « lien » (quêtes de visite, XP de découverte, escortes, tour de monde). Défaite ou fuite en mer : traversée intacte, le voyage reprend au /play suivant.
+
+
 ### Contrôle des dialogues PNJ (linter)
 Un arbre de dialogue est de la **donnée** : ni typé, ni exécuté à l'import. Un `next` mort, un nœud de service mal nommé ou une condition mal orthographiée ne se voient **qu'en jouant la branche** — et un choix conditionné qui ne s'affiche jamais est indiscernable d'un tirage malheureux. D'où : passer le linter sur tout doc `pnj:*` écrit ou retouché.
 

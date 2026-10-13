@@ -1667,6 +1667,20 @@
 			background: #ff4757; border-radius: 50%; border: 2px solid red;
 			box-shadow: 0 0 10px #ff4757;
 		}
+		/* TRAVERSÉE MARITIME (utils/traversee.py) : le navire avance SEUL — pavé (sur la carte
+		   ou flottant) et panneau Actions/Lieux masqués. Le navire, c'est le `.token` habituel
+		   (carré à point rouge), fixe au centre pendant que la mer défile sous lui. */
+		body.en-traversee .controls,
+		body.en-traversee .move-flottant,
+		body.en-traversee .sub-locations-panel { display: none !important; }
+		.traversee-bandeau {
+			position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+			z-index: 60; padding: 6px 16px; border-radius: 6px;
+			background: rgba(20, 40, 60, .85); color: #f3e9d2;
+			border: 1px solid #c9a96e; font-weight: bold; pointer-events: none;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, .4);
+		}
+		.traversee-bandeau[hidden] { display: none; }
 
 		/* Pavé de déplacement — SOURCE UNIQUE (part-move-panel.html), partagée avec la page de
 		   combat et le mode test de l'éditeur. ⚠️ Les règles sont désormais SCOPÉES en
@@ -3719,24 +3733,7 @@
 					_refreshSol();
 					_refreshChargeGauge();
 				}
-				if (rep.zone_event && rep.zone_event.type === 'combat') {
-					const cr = await fetch('/api/combat/start', {
-						method: 'POST',
-						headers: {'Content-Type': 'application/json'},
-						body: JSON.stringify({
-							tags: rep.zone_event.tags || [],
-							intensite: rep.zone_event.intensite || 0.5,
-							modificateurs: rep.zone_event.modificateurs || {}
-						})
-					});
-					if (cr.ok) {
-						const cd = await cr.json();
-						if (cd.combat_id) {
-							window.location.href = '/combat/' + cd.combat_id;
-							return;
-						}
-					}
-				}
+				if (await _lancerCombatZone(rep.zone_event)) return;
 				// Bouton « Récolter » de la sidebar (déplacement par lien = SPA, pas de reload).
 				_ressourceRecoltable = rep.ressource_recoltable || null;
 				_refreshRecolte();
@@ -4012,6 +4009,60 @@
 		// (événements de zone re-testés à la position courante + régén PV hors combat).
 		await move(0, 0);
 	}
+	// Combat d'un événement de zone : un pas, un lien, une case de traversée. Renvoie true si
+	// la page part vers le combat (l'appelant s'arrête là).
+	async function _lancerCombatZone(ev) {
+		if (!ev || ev.type !== 'combat') return false;
+		const cr = await fetch('/api/combat/start', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({
+				tags: ev.tags || [],
+				intensite: ev.intensite || 0.5,
+				modificateurs: ev.modificateurs || {}
+			})
+		});
+		if (cr.ok) {
+			const cd = await cr.json();
+			if (cd.combat_id) {
+				window.location.href = '/combat/' + cd.combat_id;
+				return true;
+			}
+		}
+		return false;
+	}
+	// Toasts d'une ARRIVÉE dans un autre lieu, qui survivent au rechargement de la page :
+	// lien de `moveTo` et débarquement d'une traversée (même payload, `_effets_arrivee`).
+	function _stockerNotifsArrivee(data) {
+		if (data.xp_gain > 0) {
+			sessionStorage.setItem('xp_gain_notif', data.xp_gain);
+		}
+		if (data.niveau_up) {
+			sessionStorage.setItem('niveau_up_notif', data.niveau);
+		}
+		if (data.xp_compagnie) {
+			// Les compagnons engagés durablement ont touché la même XP (même pattern
+			// que xp_gain_notif : le changement de lieu recharge la page).
+			sessionStorage.setItem('xp_compagnie_notif', JSON.stringify(data.xp_compagnie));
+		}
+		if (data.focalisation_atteinte) {
+			// Arrivée au lieu focalisé : toast affiché après le reload (pattern xp_gain_notif).
+			sessionStorage.setItem('focus_arrive_notif', data.focalisation_atteinte.nom || '');
+		}
+		if (data.intro_terminee) {
+			// Arrivée par porte directement en zone sûre : conclusion rejouée après le reload.
+			sessionStorage.setItem('intro_fin_notif', JSON.stringify(data.intro_terminee));
+		}
+		if ((data.transports_echoues || []).length) {
+			// Le changement de lieu recharge la page : le toast doit survivre au reload.
+			sessionStorage.setItem('transports_echoues_notif', JSON.stringify(data.transports_echoues));
+		}
+		if (data.escorte && ((data.escorte.rencontres || []).length || data.escorte.depose)) {
+			// Même patron qu'`intro_fin_notif` : la branche « lien » recharge la page,
+			// donc le toast de DÉPOSE (« +1 or, quête accomplie ») ne survivrait pas.
+			sessionStorage.setItem('escorte_notif', JSON.stringify(data.escorte));
+		}
+	}
 	async function moveTo(linkId) {
 		const moveData = {link: linkId};
 		try {
@@ -4027,52 +4078,8 @@
 					window.location.href = '/combat/' + data.combat_id;
 					return;
 				}
-				if (data.xp_gain > 0) {
-					sessionStorage.setItem('xp_gain_notif', data.xp_gain);
-				}
-				if (data.niveau_up) {
-					sessionStorage.setItem('niveau_up_notif', data.niveau);
-				}
-				if (data.xp_compagnie) {
-					// Les compagnons engagés durablement ont touché la même XP (même pattern
-					// que xp_gain_notif : le changement de lieu recharge la page).
-					sessionStorage.setItem('xp_compagnie_notif', JSON.stringify(data.xp_compagnie));
-				}
-				if (data.focalisation_atteinte) {
-					// Arrivée au lieu focalisé : toast affiché après le reload (pattern xp_gain_notif).
-					sessionStorage.setItem('focus_arrive_notif', data.focalisation_atteinte.nom || '');
-				}
-				if (data.intro_terminee) {
-					// Arrivée par porte directement en zone sûre : conclusion rejouée après le reload.
-					sessionStorage.setItem('intro_fin_notif', JSON.stringify(data.intro_terminee));
-				}
-				if ((data.transports_echoues || []).length) {
-					// Le changement de lieu recharge la page : le toast doit survivre au reload.
-					sessionStorage.setItem('transports_echoues_notif', JSON.stringify(data.transports_echoues));
-				}
-				if (data.escorte && ((data.escorte.rencontres || []).length || data.escorte.depose)) {
-					// Même patron qu'`intro_fin_notif` : la branche « lien » recharge la page,
-					// donc le toast de DÉPOSE (« +1 or, quête accomplie ») ne survivrait pas.
-					sessionStorage.setItem('escorte_notif', JSON.stringify(data.escorte));
-				}
-				if (data.zone_event && data.zone_event.type === 'combat') {
-					const cr = await fetch('/api/combat/start', {
-						method: 'POST',
-						headers: {'Content-Type': 'application/json'},
-						body: JSON.stringify({
-							tags: data.zone_event.tags || [],
-							intensite: data.zone_event.intensite || 0.5,
-							modificateurs: data.zone_event.modificateurs || {}
-						})
-					});
-					if (cr.ok) {
-						const cd = await cr.json();
-						if (cd.combat_id) {
-							window.location.href = '/combat/' + cd.combat_id;
-							return;
-						}
-					}
-				}
+				_stockerNotifsArrivee(data);
+				if (await _lancerCombatZone(data.zone_event)) return;
 				window.location.reload(true);
 			} else {
 				const error = await response.json();
@@ -4080,6 +4087,91 @@
 				alert("Erreur : " + error.detail);
 			}
 		} catch (err) { console.error("Erreur de connexion", err); }
+	}
+
+	// ── TRAVERSÉE MARITIME (utils/traversee.py, routers/traversee.py) ─────────────
+	// Mode voyage : le passage payé au capitaine, le joueur ne joue plus. Chaque case est UN
+	// appel à `/api/traversee/avancer` (le serveur tranche : position, rencontre, débarquement),
+	// puis la caméra glisse (`_ecrireCarte`, `--map-anim`) et l'on attend `pas_ms`. Une rencontre
+	// part au combat ; le retour sur /play rouvre ce mode et le voyage reprend où il en était.
+	const TRAVERSEE = {{ traversee | tojson | safe }};
+	let _traverseeEnVol = false;
+	let _traverseeTimer = null;
+	// Libellé du bandeau (textContent : aucun échappement à faire). `etape` part de 0.
+	function _traverseeLibelle(t) {
+		return `⛵ Traversée vers ${t.destination} — ${Math.min(t.etape + 1, t.total)}/${t.total}`;
+	}
+	// Que faire d'une réponse d'`avancer` : débarquer, combattre, ou faire le pas suivant.
+	function _traverseeDecision(data) {
+		if (data && data.arrive) return 'arrivee';
+		if (data && data.zone_event && data.zone_event.type === 'combat') return 'combat';
+		return 'suite';
+	}
+	function _traverseeBandeau() {
+		let el = document.getElementById('traversee-bandeau');
+		if (!el) {
+			el = document.createElement('div');
+			el.id = 'traversee-bandeau';
+			el.className = 'traversee-bandeau';
+			el.setAttribute('role', 'status');
+			document.body.appendChild(el);
+		}
+		el.textContent = _traverseeLibelle(TRAVERSEE);
+	}
+	// Onglet masqué : rien ne part (le joueur ne verrait ni le voyage ni la rencontre).
+	function _traverseePlanifier(delai) {
+		clearTimeout(_traverseeTimer);
+		if (document.hidden) return;
+		_traverseeTimer = setTimeout(_traverseePas, delai);
+	}
+	async function _traverseePas() {
+		if (_traverseeEnVol) return;   // jamais deux pas en vol
+		_traverseeEnVol = true;
+		let delai = TRAVERSEE.pas_ms;
+		try {
+			const r = await fetch('api/traversee/avancer', {method: 'POST'});
+			const data = await r.json();
+			if (!r.ok) {
+				showToast('⛵ ' + (data.detail || 'Le navire est retenu.'));
+				delai = Math.max(3000, TRAVERSEE.pas_ms);
+				return;
+			}
+			const decision = _traverseeDecision(data);
+			if (decision === 'arrivee') {
+				_stockerNotifsArrivee(data);
+				sessionStorage.setItem('traversee_fin_notif', data.port || '');
+				if (await _lancerCombatZone(data.zone_event)) return;
+				window.location.reload(true);
+				return;
+			}
+			TRAVERSEE.etape = data.etape;
+			TRAVERSEE.total = data.total;
+			POSITIONS = {"x": data.position.x, "y": data.position.y};
+			_ecrireCarte(data.position.x, data.position.y);
+			_traverseeBandeau();
+			updateVitals(data.vitals);
+			_renderEffetsActifs(data.effets_actifs);
+			_notifierTransportsEchoues(data);
+			if (decision === 'combat') {
+				showToast('⚠️ Quelque chose remonte des profondeurs…', {major: true});
+				if (await _lancerCombatZone(data.zone_event)) return;
+			}
+		} catch (err) {
+			console.error('Traversée : erreur de connexion', err);
+			delai = Math.max(3000, TRAVERSEE.pas_ms);
+		} finally {
+			_traverseeEnVol = false;
+		}
+		_traverseePlanifier(delai);
+	}
+	if (TRAVERSEE) {
+		document.body.classList.add('en-traversee');
+		_traverseeBandeau();
+		document.addEventListener('visibilitychange', () => {
+			if (document.hidden) clearTimeout(_traverseeTimer);
+			else _traverseePlanifier(TRAVERSEE.pas_ms);
+		});
+		_traverseePlanifier(TRAVERSEE.pas_ms);
 	}
 </script>
 <script>
@@ -5034,6 +5126,16 @@ async function spendXp(statKey, useMaxBonus = false) {
 	if (_niveauUpNotif) {
 		sessionStorage.removeItem('niveau_up_notif');
 		showToast('Niveau ' + _niveauUpNotif + ' atteint !');
+	}
+	const _traverseeFin = sessionStorage.getItem('traversee_fin_notif');
+	if (_traverseeFin !== null) {
+		sessionStorage.removeItem('traversee_fin_notif');
+		showToast('⚓ Le navire accoste' + (_traverseeFin ? ' à ' + _traverseeFin : '') + '. Vous débarquez sur les quais.', {major: true});
+	}
+	const _traverseeDepart = sessionStorage.getItem('traversee_depart_notif');
+	if (_traverseeDepart !== null) {
+		sessionStorage.removeItem('traversee_depart_notif');
+		showToast('⛵ ' + (_traverseeDepart || 'Vous embarquez.'), {major: true});
 	}
 	const _focusArrive = sessionStorage.getItem('focus_arrive_notif');
 	if (_focusArrive !== null) {
@@ -11459,6 +11561,14 @@ async function choisirPnj(choixId, extra) {
 		// bord (quêtes `visite`, XP de découverte, événement de zone, régén de tour…) ; il
 		// recharge la page, ce qui ferme le dialogue de lui-même.
 		if (data.deplacer) { closePnjPanel(); await moveTo(data.deplacer); return; }
+		// Traversée payée : on monte à bord — /play rechargé passe en mode voyage. La réplique
+		// du capitaine (nœud `embarque`) part en toast, le panneau se ferme.
+		if (data.traversee) {
+			sessionStorage.setItem('traversee_depart_notif', (data.noeud && data.noeud.texte) || '');
+			closePnjPanel();
+			window.location.reload(true);
+			return;
+		}
 		if (data.noeud) renderPnjNoeud(data.noeud);
 		else closePnjPanel();
 	} catch(err) { console.error('Erreur choix de dialogue', err); }
