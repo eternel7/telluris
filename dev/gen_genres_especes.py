@@ -38,17 +38,17 @@ FEMININS = {
 	"bete_du_gevaudan", "chauve_souris", "chauve_souris_geante", "chimere", "cockatrice",
 	"corneille_noire", "dryade", "fee", "gargouille", "gorgone", "goule", "harpie", "horreur",
 	"hydre", "lamie", "lhamia", "liche", "licorne", "manticore", "momie", "monture_angelique",
-	"monture_demoniaque", "monture_squelette", "naiade", "nereide", "oceanide", "oreade",
+	"monture_demoniaque", "monture_squelette", "naiade", "nereide", "oceanide", "oreade", "penanggalan",
 	"reine_lhamia", "sirene", "succube", "tarasque", "vouivre", "wyvern",
 }
 
 MASCULINS = {
-	"aigle_geant", "ane", "ange_de_la_connaissance", "ange_de_la_justice", "apep",
+	"abhartach", "aigle_geant", "ane", "ange_de_la_connaissance", "ange_de_la_justice", "apep",
 	"archange_de_l_ordre", "archange_du_savoir", "avatar", "basilic", "besien", "boukhnoun",
 	"bunyip", "centaure", "cerbere", "cerf", "cheval", "cheval_de_trait", "cheval_normand",
 	"chevalier_du_sang", "comte_vampire", "coursier_elfique", "coursier_persan", "crocodile",
 	"cupidon", "cyclope", "demon_guerrier", "demon_majeur_de_la_destinee",
-	"demon_majeur_de_la_destruction", "demon_mineur", "demon_servant", "doppleganger", "dragnard",
+	"demon_majeur_de_la_destruction", "demon_mineur", "demon_servant", "doppleganger", "dragnard", "draugr",
 	"dragon", "dragon_de_sang", "dragon_empereur", "dragon_zombie",
 	"ecureuil", "familier", "fantome",
 	"fils_de_sobek", "geant_ou_titan", "genie", "ghul_des_sables", "gnome", "gobelin",
@@ -74,7 +74,7 @@ PLURIELS = {
 }
 
 # Êtres uniques : le titre dit « Apep », pas « l'Apep ».
-PROPRES = {"aicha_kandicha", "ammit", "apep", "cupidon"}
+PROPRES = {"abhartach", "aicha_kandicha", "ammit", "apep", "cupidon"}
 
 # « h » aspiré : « la Harpie » et non « l'Harpie ». Hydre, Horreur, Hippogriffe, Homme Arbre
 # s'élident.

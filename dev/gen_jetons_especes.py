@@ -40,6 +40,7 @@ FORMES = ("ellipse", "rectangle", "triangle")
 
 # slug d'espèce → (taille, forme), ou None pour 1x1 sans champ.
 TABLE = {
+	"abhartach": None,
 	"aigle_geant": ("3x2", "triangle"),
 	"ane": None,
 	"ange_de_la_connaissance": None,
@@ -79,6 +80,7 @@ TABLE = {
 	"demon_servant": None,
 	"doppleganger": None,
 	"dragnard": ("1x2", "ellipse"),
+	"draugr": None,
 	"dragon": ("3x2", "triangle"),
 	"dragon_de_sang": None,
 	"dragon_empereur": ("3x2", "triangle"),
@@ -144,6 +146,7 @@ TABLE = {
 	"ours": ("1x2", "ellipse"),
 	"ours_polaire": ("2x2", "ellipse"),
 	"pegase": ("1x2", "ellipse"),
+	"penanggalan": None,
 	"petit_dragon": ("2x2", "triangle"),
 	"petits_animaux_divers": None,
 	"phenix": ("2x1", "triangle"),

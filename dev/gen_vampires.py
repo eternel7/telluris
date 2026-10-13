@@ -19,7 +19,10 @@
 #     description, pour que les deux femmes-serpents ne se confondent plus ; graphie « Lamia »
 #     (GRAPHIE) sur les noms de l'espèce, de sa reine et des docs qui les citent ;
 #   - un `item:<espece>` d'ossements par espèce neuve, `item:nosferatu` au poids recalculé —
-#     même forme que ceux du dump (poids = F moyenne / 5).
+#     même forme que ceux du dump (poids = F moyenne / 5) ;
+#   - autres mythes du sang (Auteur, 13/10, § 9 de la séance) : `espece:abhartach` (roi-nain,
+#     être unique), `espece:penanggalan` (tête volante de Mu), `espece:draugr` (mort-vivant
+#     du Nord, PAS un vampire), avec leur image ; soleil et faiblesses en description seule.
 #
 # ⚠️ Les tables EXHAUSTIVES de `gen_genres_especes.py`, `gen_jetons_especes.py` et
 # `gen_equipement_humanoides.py` citent déjà les espèces neuves, et `gen_sorts_invocation.py`
@@ -31,9 +34,8 @@
 # RELUS du dump le plus récent et seuls les champs listés changent ; un doc neuf dont l'`_id`
 # est déjà en base n'est jamais réécrit (il apparaît « déjà en base »). Idempotent.
 #
-# Usage : python dev/gen_vampires.py
-# Sortie (à coller dans /admin → Import en masse) :
-#   jsons/vampires_a_importer.json
+# Usage : python dev/gen_vampires.py (aperçu). Les docs partent dans le fichier UNIQUE de
+# `dev/gen_enquete_escolives.py` → jsons/enquete_escolives_a_importer.json (CLAUDE.md §18).
 
 import copy
 import json
@@ -45,7 +47,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from gen_equipement_humanoides import TABLE as KITS, _dump_le_plus_recent, charger, erreurs_kit  # noqa: E402
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SORTIE = "jsons/vampires_a_importer.json"
 
 
 def _attrs(V, F, R, Ag, Vol, Int, Cha, Ch) -> dict:
@@ -134,7 +135,40 @@ NOUVELLES = {
 		"base_attributes": _attrs((6, 8), (45, 70), (45, 70), (35, 55), (60, 85), (35, 55), (35, 55), (20, 35)),
 		"tags": ["undead", "non_mort", "guerrier", "magique", "humanoide"],
 	},
+	# Autres mythes du sang (Auteur, 13/10, § 9 de la séance) : effet du soleil et faiblesse
+	# tirée du mythe portés par la description seule — aucune mécanique (Auteur).
+	"abhartach": {
+		# Être unique : « Abhartach », pas « l'Abhartach » (`nom_propre`, cf. gen_genres_especes).
+		"nom": "Abhartach", "genre": "m", "nom_propre": True, "image": "abhartach_transparent.png",
+		"description": "Roi-nain tyran revenu de sa tombe, qui exigeait de ses sujets un bol de sang "
+					   "tiré de leurs veines. Cathán l'abattit d'une épée en if et l'ensevelit tête en "
+					   "bas sous une pierre ; le jour l'enchaîne encore à sa tombe, et l'if le blesse "
+					   "comme aucun acier.",
+		"base_attributes": _attrs((5, 7), (55, 85), (65, 95), (25, 40), (65, 95), (35, 55), (0, 0), (40, 65)),
+		"tags": ["undead", "non_mort", "guerrier", "boss", "humanoide"],
+	},
+	"penanggalan": {
+		"nom": "Penanggalan", "genre": "f", "image": "penanggalan_transparent.png",
+		"description": "Tête de femme qui vole la nuit en traînant ses viscères : une morte de Mu rendue "
+					   "à la mer, qui n'a pas trouvé le chemin du royaume de Tangaroa et que les poissons "
+					   "ont dévorée. Le jour, elle passe pour une femme ordinaire ; l'aube qui la surprend "
+					   "loin de son corps la tue. Les épines l'accrochent, le vinaigre la brûle.",
+		"base_attributes": _attrs((10, 12), (15, 25), (15, 25), (45, 70), (40, 60), (30, 45), (0, 0), (30, 50)),
+		"tags": ["undead", "non_mort", "vol", "nocturne"],
+	},
+	# Mort-vivant à part, PAS un vampire (Auteur, 13/10) : il boit la force, pas le sang.
+	"draugr": {
+		"nom": "Draugr", "genre": "m", "image": "draugr_transparent.png",
+		"description": "Mort-vivant des terres du Nord, revenu hanter sa ferme ou son tertre : il ne boit "
+					   "pas le sang mais la force des vivants, et laisse à qui le terrasse la peur du noir "
+					   "pour le restant de ses jours.",
+		"base_attributes": _attrs((4, 6), (45, 70), (50, 80), (20, 35), (45, 70), (15, 30), (0, 0), (30, 50)),
+		"tags": ["undead", "non_mort", "guerrier", "nocturne", "humanoide"],
+	},
 }
+
+# Champs d'accord (`utils/accord_espece.py`) posés sur l'espèce neuve dès sa création.
+ACCORD = ("nom_propre", "pluriel", "h_aspire")
 
 # Graphie « lamia » (Auteur, 12/10) : les NOMS affichés changent, les `_id` (`lhamia`) restent —
 # rencontres, sorts appris, recettes et images y renvoient. Remplacements dans `nom` et
@@ -164,7 +198,8 @@ def _ossements(espece_id: str, nom: str, base_attributes: dict) -> dict:
 	return {
 		"_id": "item:" + espece_id.split(":", 1)[1],
 		"type": "item",
-		"nom": f"Ossements de {nom}",
+		# Élision comme « Ossements d'Horreur » du dump : « d'Abhartach », pas « de Abhartach ».
+		"nom": ("Ossements d'" if nom[:1].upper() in "AEIOUÉH" else "Ossements de ") + nom,
 		"sous_categorie": "ossements",
 		"icon": "🦴",
 		"rarete": "peu_commun",
@@ -181,13 +216,10 @@ def _sans_rev(doc: dict) -> dict:
 	return {k: v for k, v in copy.deepcopy(doc).items() if k != "_rev"}
 
 
-def main() -> None:
-	try:
-		sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-	except Exception:
-		pass
-	source = _dump_le_plus_recent()
-	base = {d["_id"]: d for d in charger(source) if isinstance(d, dict) and d.get("_id")}
+def docs_vampires(base: dict) -> tuple[list, list]:
+	"""(docs à importer, ids déjà en base) d'après les docs du dump `base` ({_id: doc}).
+	Importé par `gen_enquete_escolives.py`, qui les verse dans SON fichier : un seul fichier
+	à importer par demande (CLAUDE.md §18)."""
 	items = {i: d for i, d in base.items() if i.startswith("item:")}
 	erreurs, docs, deja = [], [], []
 
@@ -208,7 +240,9 @@ def main() -> None:
 	for slug, spec in NOUVELLES.items():
 		eid = "espece:" + slug
 		doc = {
-			"_id": eid, "type": "espece", "nom": spec["nom"], "genre": spec["genre"], "image": "",
+			"_id": eid, "type": "espece", "nom": spec["nom"], "genre": spec["genre"],
+			**{k: True for k in ACCORD if spec.get(k)},
+			"image": spec.get("image", ""),
 			"description": spec["description"],
 			"base_attributes": spec["base_attributes"] or copy.deepcopy(bete["base_attributes"]),
 			"tags": spec["tags"] or list(bete.get("tags") or []),
@@ -269,16 +303,24 @@ def main() -> None:
 			doc["poids"] = poids
 			docs.append(doc)
 
-	chemin = os.path.join(RACINE, SORTIE)
-	with open(chemin, "w", encoding="utf-8") as f:
-		json.dump(docs, f, ensure_ascii=False, indent=2)
-		f.write("\n")
+	return docs, deja
+
+
+def main() -> None:
+	"""Aperçu seul : les docs partent dans le fichier unique de `gen_enquete_escolives.py`."""
+	try:
+		sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+	except Exception:
+		pass
+	source = _dump_le_plus_recent()
+	base = {d["_id"]: d for d in charger(source) if isinstance(d, dict) and d.get("_id")}
+	docs, deja = docs_vampires(base)
 	print(f"relu {os.path.relpath(source, RACINE)}")
 	for d in docs:
-		print(f"   écrit {d['_id']}")
+		print(f"   à importer {d['_id']}")
 	for i in deja:
 		print(f"   déjà en base {i}")
-	print(f"écrit {SORTIE} : {len(docs)} doc(s)")
+	print(f"{len(docs)} doc(s) — fichier à importer : python dev/gen_enquete_escolives.py")
 
 
 if __name__ == "__main__":

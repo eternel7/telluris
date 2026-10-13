@@ -1,0 +1,1766 @@
+[
+  {
+    "_id": "espece:abhartach",
+    "type": "espece",
+    "nom": "Abhartach",
+    "genre": "m",
+    "nom_propre": true,
+    "image": "abhartach_transparent.png",
+    "description": "Roi-nain tyran revenu de sa tombe, qui exigeait de ses sujets un bol de sang tiré de leurs veines. Cathán l'abattit d'une épée en if et l'ensevelit tête en bas sous une pierre ; le jour l'enchaîne encore à sa tombe, et l'if le blesse comme aucun acier.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 65,
+        "max": 95
+      },
+      "Ag": {
+        "min": 25,
+        "max": 40
+      },
+      "Vol": {
+        "min": 65,
+        "max": 95
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 65
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "guerrier",
+      "boss",
+      "humanoide"
+    ],
+    "items": [
+      "item:Morgenstern",
+      "item:Hache_de_guerre",
+      "item:Ecu",
+      "item:Cotte_de_mailles",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates",
+      "item:Jambières_de_plates"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:abhartach",
+    "type": "item",
+    "nom": "Ossements d'Abhartach",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 14.0,
+    "description": "Ossements et reliquats récupérés sur Abhartach après sa destruction.",
+    "source_espece": "espece:abhartach",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:penanggalan",
+    "type": "espece",
+    "nom": "Penanggalan",
+    "genre": "f",
+    "image": "penanggalan_transparent.png",
+    "description": "Tête de femme qui vole la nuit en traînant ses viscères : une morte de Mu rendue à la mer, qui n'a pas trouvé le chemin du royaume de Tangaroa et que les poissons ont dévorée. Le jour, elle passe pour une femme ordinaire ; l'aube qui la surprend loin de son corps la tue. Les épines l'accrochent, le vinaigre la brûle.",
+    "base_attributes": {
+      "V": {
+        "min": 10,
+        "max": 12
+      },
+      "F": {
+        "min": 15,
+        "max": 25
+      },
+      "R": {
+        "min": 15,
+        "max": 25
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 30,
+        "max": 45
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "vol",
+      "nocturne"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:penanggalan",
+    "type": "item",
+    "nom": "Ossements de Penanggalan",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 4.0,
+    "description": "Ossements et reliquats récupérés sur Penanggalan après sa destruction.",
+    "source_espece": "espece:penanggalan",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:draugr",
+    "type": "espece",
+    "nom": "Draugr",
+    "genre": "m",
+    "image": "draugr_transparent.png",
+    "description": "Mort-vivant des terres du Nord, revenu hanter sa ferme ou son tertre : il ne boit pas le sang mais la force des vivants, et laisse à qui le terrasse la peur du noir pour le restant de ses jours.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 50,
+        "max": 80
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "guerrier",
+      "nocturne",
+      "humanoide"
+    ],
+    "items": [
+      "item:Hache_de_guerre",
+      "item:Hache_a_deux_mains",
+      "item:Ecu",
+      "item:Cotte_de_mailles",
+      "item:Casque_de_cuir_bouilli",
+      "item:Braies_fourrure"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:draugr",
+    "type": "item",
+    "nom": "Ossements de Draugr",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 11.5,
+    "description": "Ossements et reliquats récupérés sur Draugr après sa destruction.",
+    "source_espece": "espece:draugr",
+    "loot_defaut": true
+  },
+  {
+    "_id": "pnj:gautier_de_valcroix",
+    "type": "pnj",
+    "nom": "Gautier de Valcroix",
+    "race": "humain",
+    "vocation": "guerrier",
+    "portrait": "humain_m_guerrier01.jpg",
+    "description": "L'homme qui dirige la Guilde des Aventuriers d'Auxerre est connu de tous sous le nom de Gautier de Valcroix, que l'on surnomme parfois le Gardien des Cartes.\nAncien capitaine d'une compagnie d'éclaireurs, il ne s'est jamais distingué par sa force, mais par son jugement. Les murs de son bureau sont couverts de cartes annotées, de rapports d'expéditions et de trophées rapportés par ceux qui ont survécu à leurs premières missions. On raconte qu'aucun aventurier ne quitte son bureau sans avoir appris quelque chose, même lorsqu'il croit n'être venu que chercher un contrat.",
+    "services": {
+      "commission": {
+        "donjon": "donjon:mine_de_saint_austrelin",
+        "noeuds": {
+          "accepte": "commission_accepte",
+          "rapporte": "commission_rapporte"
+        }
+      },
+      "escorte": {
+        "offre": {
+          "id": "quete:escorte_bucherons_d_auxerre",
+          "titre": "Les bûcherons disparus",
+          "description": "Trois bûcherons d'Auxerre ne sont pas revenus d'une coupe au nord de la cité, et une voyageuse attendue à la même date n'y est jamais arrivée. Retrouvez-les, protégez-les, et ramenez-les vivants au bureau du maître de la Guilde.",
+          "destination": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+          "rencontre": {
+            "lieu": "lieu:clairiere_de_la_grotte_liberee"
+          },
+          "proteges": [
+            {
+              "prenom": "Armand",
+              "nom": "Renaud",
+              "race": "humain",
+              "sex": "M",
+              "image": "bucheron_Armand_Renaud_humain_m.jpg",
+              "description": "Chef de fait des trois bûcherons d'Auxerre. Vingt ans de coupe dans les futaies du nord, et la voix qu'on écoute quand la forêt se tait."
+            },
+            {
+              "prenom": "Étienne",
+              "nom": "Morel",
+              "race": "nain",
+              "sex": "M",
+              "image": "bucheron_Étienne_Morel_nain_m.jpg",
+              "description": "Bûcheron nain, la jambe ouverte pendant la fuite. Il marche encore, mais il ne courra pas deux fois."
+            },
+            {
+              "prenom": "Matthieu",
+              "nom": "Perrin",
+              "race": "ogre",
+              "sex": "M",
+              "image": "bucheron_Matthieu_Perrin_ogre_m.jpg",
+              "description": "Bûcheron ogre. C'est lui qui connaissait la grotte, et lui qui y a poussé les autres quand les crocs sont sortis des fougères."
+            },
+            {
+              "prenom": "Aélis",
+              "nom": "de Montfaucon",
+              "race": "humain",
+              "sex": "F",
+              "image": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+              "description": "Jeune architecte, chercheuse en cristaux de mana. Elle voyageait vers Auxerre sous escorte paladine ; il ne lui reste que son carnet et son obstination."
+            }
+          ],
+          "unique": true,
+          "proba": 1,
+          "rang_min": {
+            "cite": "lieu:auxerre",
+            "rang": "D"
+          },
+          "recompenses": {
+            "xp": 120,
+            "cuivre": 30000,
+            "items": [
+              {
+                "item": "item:Cristal_canalisation",
+                "poids": 0.1
+              }
+            ]
+          }
+        },
+        "noeuds": {
+          "accepte": "bucherons_acceptee"
+        }
+      },
+      "apport": {
+        "offre": {
+          "id": "quete:les_morts_d_escolives",
+          "titre": "Les morts d'Escolives",
+          "description": "Sept morts en trois semaines à Escolives, au sud d'Auxerre, sur l'Yonne. Le fossoyeur a rouvert les tombes et parle de Strigoï ; la guérisseuse parle de fièvre. Descendez dans la crypte de la nécropole et rapportez à Gautier de Valcroix la preuve de ce qui s'y terre.",
+          "item": "item:strigoi",
+          "quantite": 1,
+          "unique": true,
+          "recompenses": {
+            "xp": 120,
+            "cuivre": 30000
+          }
+        },
+        "noeuds": {
+          "accepte": "escolives_accepte",
+          "partiel": "escolives_partiel",
+          "remis": "escolives_remis"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeud_attente": "commission_repos",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le bureau sent le vélin et la cire. Penché sur une carte hérissée d'épingles, {pnj} ne lève pas les yeux tout de suite — il termine d'annoter une marge, pose sa plume, et vous regarde enfin. « {prenom}. Borin vous a fait monter, donc vous valez le déplacement. Asseyez-vous. »",
+          "choix": [
+            {
+              "id": "commission",
+              "label": "« Vous avez du travail pour moi ? »",
+              "condition": {
+                "commission_offerte": true,
+                "dialogue_en_attente": false
+              },
+              "next": "commission_propose"
+            },
+            {
+              "id": "commission_rapport",
+              "label": "« C'est fait. La bête ne tient plus les galeries. »",
+              "condition": {
+                "commission_a_rapporter": true
+              },
+              "action": {
+                "service": "commission",
+                "op": "rapporter"
+              }
+            },
+            {
+              "id": "commission_relance",
+              "label": "« Où en étais-je, déjà ? »",
+              "condition": {
+                "commission_en_cours": true
+              },
+              "next": "commission_relance"
+            },
+            {
+              "id": "cartes",
+              "label": "« Toutes ces cartes... »",
+              "next": "cartes"
+            },
+            {
+              "id": "trophees",
+              "label": "« Et ces trophées, au mur ? »",
+              "next": "trophees"
+            },
+            {
+              "id": "bucherons_offre",
+              "label": "« Vous me faites chercher, messire ? »",
+              "condition": {
+                "escorte_offerte": true
+              },
+              "next": "bucherons_propose"
+            },
+            {
+              "id": "bucherons_rang",
+              "label": "« Vous me faites chercher, messire ? »",
+              "condition": {
+                "escorte_rang_insuffisant": true
+              },
+              "next": "bucherons_rang_insuffisant"
+            },
+            {
+              "id": "bucherons_relance",
+              "label": "« Au sujet de {protege}… »",
+              "condition": {
+                "escorte_en_cours": true
+              },
+              "next": "bucherons_relance"
+            },
+            {
+              "id": "bucherons_rapport",
+              "label": "« Vous avez vu qui je vous ramène. »",
+              "condition": {
+                "escorte_accomplie": true
+              },
+              "next": "bucherons_rapport"
+            },
+            {
+              "id": "escolives_offre",
+              "label": "« On parle de morts, dans les villages du sud. »",
+              "condition": {
+                "apport_offert": true
+              },
+              "next": "escolives_propose"
+            },
+            {
+              "id": "escolives_rappel",
+              "label": "« Escolives… rappelez-moi. »",
+              "condition": {
+                "apport_en_cours": true,
+                "apport_possible": false
+              },
+              "next": "escolives_rappel"
+            },
+            {
+              "id": "escolives_remettre",
+              "label": "« Voici ce qu'il y avait dans la crypte. »",
+              "condition": {
+                "apport_possible": true
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
+              "id": "escolives_souvenir",
+              "label": "« Des nouvelles d'Escolives ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:les_morts_d_escolives"
+                }
+              },
+              "next": "escolives_souvenir"
+            },
+            {
+              "id": "rien",
+              "label": "« Rien. Je voulais voir le bureau. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_repos": {
+          "texte": "Il est debout devant son mur, une pile de feuillets sous le bras, et ne vous fait même pas asseoir. « Pas maintenant, {prenom}. Tant que le rapport n'est pas remonté au temple et que les épingles ne sont pas à jour, je ne confie rien à personne — c'est comme ça qu'on envoie des gens mourir sur une carte périmée. » Il désigne la porte du menton, sans dureté. « Repassez dans {attente} minutes. »",
+          "choix": [
+            {
+              "id": "cartes",
+              "label": "« Toutes ces cartes... »",
+              "next": "cartes"
+            },
+            {
+              "id": "trophees",
+              "label": "« Et ces trophées, au mur ? »",
+              "next": "trophees"
+            },
+            {
+              "id": "bucherons_offre",
+              "label": "« Vous me faites chercher, messire ? »",
+              "condition": {
+                "escorte_offerte": true
+              },
+              "next": "bucherons_propose"
+            },
+            {
+              "id": "bucherons_rang",
+              "label": "« Vous me faites chercher, messire ? »",
+              "condition": {
+                "escorte_rang_insuffisant": true
+              },
+              "next": "bucherons_rang_insuffisant"
+            },
+            {
+              "id": "bucherons_relance",
+              "label": "« Au sujet de {protege}… »",
+              "condition": {
+                "escorte_en_cours": true
+              },
+              "next": "bucherons_relance"
+            },
+            {
+              "id": "bucherons_rapport",
+              "label": "« Vous avez vu qui je vous ramène. »",
+              "condition": {
+                "escorte_accomplie": true
+              },
+              "next": "bucherons_rapport"
+            },
+            {
+              "id": "escolives_offre",
+              "label": "« On parle de morts, dans les villages du sud. »",
+              "condition": {
+                "apport_offert": true
+              },
+              "next": "escolives_propose"
+            },
+            {
+              "id": "escolives_rappel",
+              "label": "« Escolives… rappelez-moi. »",
+              "condition": {
+                "apport_en_cours": true,
+                "apport_possible": false
+              },
+              "next": "escolives_rappel"
+            },
+            {
+              "id": "escolives_remettre",
+              "label": "« Voici ce qu'il y avait dans la crypte. »",
+              "condition": {
+                "apport_possible": true
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
+              "id": "escolives_souvenir",
+              "label": "« Des nouvelles d'Escolives ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:les_morts_d_escolives"
+                }
+              },
+              "next": "escolives_souvenir"
+            },
+            {
+              "id": "rien",
+              "label": "« Je repasserai. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_propose": {
+          "texte": "Il fait glisser vers vous un parchemin déjà scellé. « Une commission d'éradication. Le temple a fermé un chantier : {lieu}. Ce n'est pas la vermine ordinaire qui l'inquiète, c'est ce qui la commande — un {espece} d'exception, assez vieux pour avoir fait des galeries son territoire. » Il repose son doigt sur la carte, exactement sur l'épingle noire. « Abattez-le. Les mineurs feront le reste. {xp} points d'expérience et {prime} pièces de cuivre à votre retour — et le chantier vous devra sa réouverture. »",
+          "choix": [
+            {
+              "id": "commission_details",
+              "label": "« Qui garde l'entrée ? »",
+              "next": "commission_details"
+            },
+            {
+              "id": "commission_accepter",
+              "label": "« Donnez-moi ce parchemin. »",
+              "action": {
+                "service": "commission",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "commission_refuser",
+              "label": "« Pas ce chantier-là. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "commission_details": {
+          "texte": "« Les templiers de Saint-Austrelin. » Il hausse un sourcil, amusé. « Deux barrages : l'un au sommet des marches, qui vérifie que la Guilde répond de vous ; l'autre devant l'arche, qui vérifie que c'est bien de CE chantier qu'on vous a chargé. Ils sont tatillons, et ils ont raison de l'être : le sceau que je vous donne est la seule chose qui ouvre les deux. »",
+          "choix": [
+            {
+              "id": "commission_accepter",
+              "label": "« Donnez-moi ce parchemin. »",
+              "action": {
+                "service": "commission",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "commission_refuser",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "commission_accepte": {
+          "texte": "Il presse son cachet sur la cire, souffle dessus, et vous tend le parchemin. « Vous cherchez un {espece} dans {lieu}. Une seule consigne, et elle n'est pas dans le texte : ce qui a tenu des galeries entières ne se laisse pas surprendre. » Il reprend sa plume et se penche déjà sur une autre carte. « Revenez me le dire vous-même. J'aime tenir mes registres à jour. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Ce sera fait. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_relance": {
+          "texte": "Il suit du doigt une ligne de son registre. « Vous. Un {espece}, dans {lieu}. » Il relève les yeux. « Le chantier est toujours fermé, {prenom}, et les mineurs comptent les jours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_rapporte": {
+          "delai_min": 1800,
+          "texte": "Gautier écoute jusqu'au bout sans vous interrompre une seule fois, puis prend une épingle blanche et remplace la noire sur sa carte. « {lieu} : rouvert. » Il pousse vers vous {prime} pièces de cuivre, et {xp} points portés à votre nom sur le registre. « Vous avez rapporté le fait, pas la légende — c'est plus rare que vous ne croyez, et c'est ce qui me dira, la prochaine fois, à qui confier un chantier plus profond. » Il désigne le mur couvert de cartes. « Il en reste. » Puis il rassemble ses feuillets. « Mais rien aujourd'hui : je dois faire remonter tout ceci au temple avant de rouvrir quoi que ce soit. Repassez dans {attente} minutes. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Merci, messire. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cartes": {
+          "texte": "« Elles ne valent rien. » Il dit cela sans quitter des yeux le mur qu'il a passé vingt ans à couvrir. « Une carte est le souvenir de ce qu'un homme a vu un jour donné. Les galeries s'effondrent, les rivières changent de lit, les monstres déménagent. Ce qui vaut quelque chose, c'est l'aventurier qui revient corriger la mienne. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "trophees": {
+          "texte": "Il jette un œil à la rangée de crânes, de griffes et de mâchoires clouées au-dessus de la cheminée. « Aucun n'est de moi. Chacun a été rapporté par une recrue qui pensait ne pas revenir. » Un silence. « Je garde aussi la liste de celles qui n'ont rien rapporté. Elle est plus longue, et je la relis plus souvent. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_propose": {
+          "texte": "« Je vous fais chercher depuis avant-hier. » Il repousse la carte des galeries et en déroule une autre : la cité, ses routes, la forêt du nord. Trois marques à l'encre rouge y forment un triangle serré. « Trois bûcherons. Partis couper au nord, attendus il y a deux jours, jamais rentrés. Leur employeur est venu réclamer de l'aide, et je n'aime pas ce que je ne comprends pas : ces hommes-là connaissent le bois mieux que mes éclaireurs. Une battue ordinaire aurait dû les ramener. »",
+          "choix": [
+            {
+              "id": "absence",
+              "label": "« Pourquoi ne pas envoyer une troupe ? »",
+              "next": "bucherons_absence"
+            },
+            {
+              "id": "architecte",
+              "label": "« Y a-t-il autre chose ? »",
+              "next": "bucherons_architecte"
+            },
+            {
+              "id": "instructions",
+              "label": "« Où dois-je commencer ? »",
+              "next": "bucherons_instructions"
+            },
+            {
+              "id": "refus",
+              "label": "« Ce n'est pas pour moi, messire. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_absence": {
+          "texte": "« Parce qu'une troupe piétine, s'annonce à une lieue et rentre bredouille en ayant coûté trois jours de solde. » Il appuie un doigt sur la marque du milieu. « Et parce que si ces hommes sont vivants, ils sont terrés quelque part à attendre qu'on vienne — pas qu'on batte les fourrés autour d'eux. Une personne qui regarde vaut mieux que vingt qui marchent. C'est ma conviction, et elle m'a rarement trompé. »",
+          "choix": [
+            {
+              "id": "architecte",
+              "label": "« Y a-t-il autre chose ? »",
+              "next": "bucherons_architecte"
+            },
+            {
+              "id": "instructions",
+              "label": "« Où dois-je commencer ? »",
+              "next": "bucherons_instructions"
+            }
+          ]
+        },
+        "bucherons_architecte": {
+          "texte": "Il hésite — chose rare — puis ouvre un pli posé au coin du bureau. « Il y a autre chose, oui, et j'ignore si cela a le moindre rapport. Une voyageuse devait rejoindre Auxerre cette semaine. Une architecte, recommandée par un chapitre du sud : elle venait étudier nos cristaux de mana et la façon dont nos bâtisseurs les emploient. » Il referme le pli. « Elle n'est jamais arrivée. Je ne prétends rien. Je constate que deux disparitions tombent dans la même semaine et dans la même direction. Si vous la trouvez, ramenez-la aussi — et protégez-la : ce n'est pas une aventurière. »",
+          "choix": [
+            {
+              "id": "instructions",
+              "label": "« Où dois-je commencer ? »",
+              "next": "bucherons_instructions"
+            },
+            {
+              "id": "absence",
+              "label": "« Pourquoi pas une troupe ? »",
+              "next": "bucherons_absence"
+            }
+          ]
+        },
+        "bucherons_instructions": {
+          "texte": "« Suivez la route forestière vers le nord. Leur dernier chantier connu est à une demi-journée de marche des murs. » Son doigt court le long d'un trait d'encre. « Cherchez leurs traces : des coupes fraîches, des outils laissés, un campement froid, des empreintes qui ne sont pas les leurs. Ce que la forêt vous montrera vaudra mieux que tout ce que je peux vous en dire d'ici. » Il vous regarde enfin vraiment. « S'ils vivent, ramenez-les-moi ici, dans ce bureau, sur leurs jambes. {xp} points d'expérience et {prime} pièces de cuivre à leur retour. Et ne prenez pas de risque inutile : nous ignorons encore ce qui les a empêchés de rentrer. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je vous les ramènerai. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "refus",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_acceptee": {
+          "texte": "Il note une ligne dans son registre, souffle sur l'encre et referme le volume. « Alors c'est votre affaire, {prenom}. Une dernière chose, qui n'est pas dans le contrat : ce ne sont pas des trophées. Une personne qu'on escorte ne se bat pas, ne fuit pas, et ne survit qu'à la mesure de ce que vous arrêtez avant elle. » Il vous rend votre salut. « Ramenez-les vivants. Le reste ne m'intéresse pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Ce sera fait. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_rang_insuffisant": {
+          "texte": "« Je vous fais chercher, en effet. Et je vais vous décevoir. » Il croise les mains sur la carte. « Ce que j'ai là demande qu'on réponde de vous, et aujourd'hui la Guilde ne répond pas encore assez fort. Prenez les contrats du Bastion, montez jusqu'au rang {rang_requis}, et revenez me voir. » Une pause sans dureté. « Des hommes attendent quelque part dans ce bois. Je préfère les faire attendre un jour de plus que d'y envoyer quelqu'un qui n'en reviendra pas non plus. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« J'y travaillerai. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je reviendrai. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_relance": {
+          "texte": "Il suit du doigt la ligne de son registre. « {protege}. » Il relève les yeux. « Toujours dans ce bois, donc. » Il repousse la carte vers vous, la forêt du nord bien au centre. « Ne me rapportez pas une histoire, {prenom}. Rapportez-moi des gens. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_rapport": {
+          "texte": "Gautier vous a écouté jusqu'au bout sans vous couper une seule fois — les loups, la fente de roche, les deux nuits, la demoiselle. Puis il prend une épingle blanche et la plante sur la forêt du nord, à la place des trois marques rouges. « Trois hommes vivants, et une voyageuse que je croyais perdue. » Il se tourne vers l'architecte, qui se tient très droite malgré la poussière. « Mademoiselle de Montfaucon. Votre voyage aura été plus mouvementé que prévu. » — « Je le reconnais. » — « Vous êtes arrivée à Auxerre. C'est l'essentiel. » Il revient à vous. « Quant à vous : bon travail. Mais cette histoire tombe à un moment particulier. »",
+          "choix": [
+            {
+              "id": "livraison",
+              "label": "« Particulier comment ? »",
+              "next": "bucherons_livraison"
+            },
+            {
+              "id": "fin",
+              "label": "« Je vous laisse à vos cartes. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_livraison": {
+          "texte": "Il ouvre un registre à couverture noire. « Auxerre doit encore envoyer une dernière livraison de cristaux de mana à Lutecia. » — « Lutecia ? » L'architecte a relevé la tête si vite que Gautier marque un temps. « Lutecia, mademoiselle. » Il referme le registre. « Elle devait partir avec une caravane marchande. Les cristaux sont trop précieux pour voyager sans protection, et les événements de cette semaine ne me disposent pas à l'optimisme. »",
+          "choix": [
+            {
+              "id": "proposition",
+              "label": "« Et vous pensez à moi. »",
+              "next": "bucherons_proposition"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "bucherons_rapport"
+            }
+          ]
+        },
+        "bucherons_proposition": {
+          "texte": "« Je pense à vous, oui. » Il s'appuie des deux mains sur le bureau. « Nous avons une livraison à conduire et, depuis ce matin, une personne de plus qui doit se rendre dans la même cité. » — « Je souhaite en effet poursuivre mon voyage », dit-elle, très posément. « Alors nous ferons d'une pierre deux coups. Vous accompagnerez la livraison jusqu'à Lutecia. » Vous demandez si ce sera seul. Gautier secoue la tête. « Non. Cette fois, la Guilde ne prendra aucun risque. »",
+          "choix": [
+            {
+              "id": "paladins",
+              "label": "« Qui d'autre ? »",
+              "next": "bucherons_paladins"
+            }
+          ]
+        },
+        "bucherons_paladins": {
+          "texte": "La porte s'ouvre. Deux paladins entrent — une elfe en haubert clair, un hobbit en cotte de mailles — et saluent sans un mot de trop.  « Une escorte de l'ordre accompagnera le convoi. La commandante, Dame Éléonore de Rochefort et Frère Martin de Clairvaux », dit Gautier. « Leur charge : les cristaux et mademoiselle de Montfaucon, jusqu'à Lutecia. »  Il revient à vous.  « La vôtre : les accompagner et veiller à ce que ce voyage se déroule correctement. »  L'architecte esquisse un sourire.  « Il semblerait que je sois arrivée à Auxerre au meilleur moment. » — « Ou au pire », répond Gautier sans se retourner. « Cela dépendra de ce que vous trouverez sur la route de Lutecia. »  Sur ce, les deux paladins ressortent.",
+          "choix": [
+            {
+              "id": "depart",
+              "label": "« Quand partons-nous ? »",
+              "next": "bucherons_depart"
+            }
+          ]
+        },
+        "bucherons_depart": {
+          "texte": "« Dès que les caisses seront sanglées. » Gautier reprend sa plume, ce qui est chez lui une façon de congédier. « Le convoi partira de la cathédrale : retrouvez-y la commandante, elle vous dira le reste mieux que moi. » Puis, sans lever les yeux : « Et {prenom}… trois bûcherons ont dormi chez eux cette nuit parce que quelqu'un est allé regarder au lieu de battre les fourrés. Je le note aussi dans mes registres. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Messire. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "escolives_propose": {
+          "texte": "Gautier ne répond pas tout de suite. Il cherche sur sa carte, au sud de la cité, un point minuscule au bord de l'Yonne, et y plante une épingle grise. « Escolives. Deux lieues d'ici, des vignes, un lavoir, une nécropole plus vieille qu'Auxerre. Sept morts en trois semaines. Le premier, un vigneron. Puis sa voisine, puis deux enfants, puis les autres. » Il croise les bras. « Le fossoyeur a rouvert les tombes. Il jure que les corps n'avaient pas pourri, qu'ils avaient du sang frais aux lèvres, et tout le village dit Strigoï. La guérisseuse, elle, dit fièvre, et puits souillé. »",
+          "choix": [
+            {
+              "id": "details",
+              "label": "« Et vous, qu'en dites-vous ? »",
+              "next": "escolives_details"
+            },
+            {
+              "id": "accepter",
+              "label": "« J'irai voir. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escolives_details": {
+          "texte": "« Moi ? Je dis que je ne paie pas les rumeurs. » Il tapote l'épingle grise. « Si quelque chose sort de cette nécropole la nuit, il dort quelque part le jour : dans la crypte, sous les sarcophages. Le fossoyeur s'appelle Gaspard ; il a la clef et il a peur, ce qui le rend bavard. Descendez. S'il y a une bête, rapportez-m'en {objet}. S'il n'y a rien… » Il hausse une épaule. « Alors la guérisseuse avait raison, et ce n'est plus un travail pour la Guilde. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« J'irai voir. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escolives_accepte": {
+          "texte": "Gautier note votre nom en marge, à côté de l'épingle grise. « La porte du sud, puis l'Yonne jusqu'aux vignes ; vous ne pouvez pas la manquer. » Il ajoute, sans lever les yeux : « Ne vous battez pas avec les villageois. Ils ont peur, et des gens qui ont peur déterrent leurs morts pour les brûler. Ce n'est pas votre affaire. La crypte, si. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Messire. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "escolives_rappel": {
+          "texte": "« Escolives, au sud, sur l'Yonne. Gaspard le fossoyeur vous ouvrira la crypte. Ce que j'attends, c'est {objet} — pas un récit de veillée. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y vais. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "escolives_partiel": {
+          "texte": "Gautier compte ce que vous posez sur la table. « Il en manque. Encore {reste}. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "escolives_remis": {
+          "texte": "Gautier déplie le linge sur sa table et ne dit rien pendant un long moment. Des os d'Anthrope, mais tordus, ressoudés de travers, un crâne enfoncé qui a pourtant continué de mordre. Il les retourne du bout de sa plume. « Strigoï. » Il remplace l'épingle grise par une noire, pousse vers vous {prime} pièces de cuivre et porte {xp} points à votre nom. Puis, plus bas : « Que ce soit la chose qui tuait Escolives, ou une chose de plus, je ne le saurai pas. Le registre dira Strigoï. Vous, vous saurez ce que vous avez vu en bas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Messire. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "escolives_souvenir": {
+          "texte": "« Plus de morts depuis votre passage, à ce qu'on me dit. » Il regarde l'épingle noire. « La guérisseuse m'a écrit que la fièvre était tombée avec les premières gelées. Elle ne le dit pas pour vous contredire. Elle le dit parce que c'est vrai aussi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:escolives",
+    "type": "lieu",
+    "label": "Escolives",
+    "image": "escolives.jpg",
+    "categorie": "chemin",
+    "lieu_parent": "lieu:france",
+    "pnj": [
+      {
+        "character": "pnj:fossoyeur_gaspard_fouquet",
+        "nom": "Gaspard",
+        "portrait": "fossoyeur_Gaspard_Fouquet_nain_m.jpg",
+        "probabilite": 1,
+        "description": "Gaspard, le fossoyeur, appuyé sur sa pelle au bord de la nécropole."
+      },
+      {
+        "character": "pnj:guerisseuse_ysolde_vernier",
+        "nom": "Ysolde",
+        "portrait": "guerisseuse_Ysolde_Vernier_elfe_f.jpg",
+        "probabilite": 1,
+        "description": "Ysolde, la guérisseuse, dans sa maison aux herbes."
+      },
+      {
+        "character": "pnj:veuve_perrine_vaudin",
+        "nom": "Perrine",
+        "portrait": "veuve_Perrine_Vaudin_hobbit_f.jpg",
+        "probabilite": 1,
+        "description": "Perrine, la veuve, sur le seuil de sa maison."
+      }
+    ]
+  },
+  {
+    "_id": "link:escolives_to_france",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          50,
+          21
+        ],
+        "label": "Escolives"
+      },
+      {
+        "lieu": "lieu:escolives",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Reprendre la route"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "pnj:fossoyeur_gaspard_fouquet",
+    "type": "pnj",
+    "nom": "Gaspard Fouquet",
+    "race": "nain",
+    "vocation": "guerrier",
+    "portrait": "fossoyeur_Gaspard_Fouquet_nain_m.jpg",
+    "description": "Le fossoyeur d'Escolives, appuyé sur sa pelle au bord des tombes rouvertes.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:crypte_de_la_necropole_d_escolives",
+        "noeuds": {
+          "ouvre": "crypte_ouverte",
+          "refus": "crypte_close"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Au bord de la nécropole, un nain s'appuie sur sa pelle, entre deux tas de terre fraîche. Les sarcophages affleurent l'herbe comme des dos de bêtes endormies. Il vous dévisage sans se presser. « Vous n'êtes pas d'ici. Si vous venez pour les morts, je suis celui qui les couche. Gaspard. »",
+          "choix": [
+            {
+              "id": "tombes",
+              "label": "« Ces tombes rouvertes… »",
+              "next": "tombes"
+            },
+            {
+              "id": "guilde",
+              "label": "« La Guilde d'Auxerre m'envoie. Ouvrez-moi la crypte. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "next": "seuil"
+            },
+            {
+              "id": "crypte",
+              "label": "« Et la crypte ? »",
+              "condition": {
+                "acces_ouvrable": false,
+                "acces_menace": true
+              },
+              "next": "crypte_fermee"
+            },
+            {
+              "id": "apres",
+              "label": "« Vous dormez, maintenant ? »",
+              "condition": {
+                "acces_libere": true
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(Le laisser à ses tombes.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "tombes": {
+          "texte": "« C'est moi qui les ai rouvertes, oui. Personne ne voulait, alors je l'ai fait. » Il crache dans ses mains, comme pour reprendre la pelle, et ne la reprend pas. « Gonflés, qu'ils étaient. Pas un qui avait pourri. Les ongles longs, la peau rose, et du sang aux lèvres, du sang frais, comme s'ils venaient de boire. Et deux tombes vides. Vides, je vous dis, la terre grattée de l'intérieur. » Il désigne du menton une dalle, plus loin, à moitié enfouie. « La nuit, j'entends racler, là-dessous. Dans la crypte. »",
+          "choix": [
+            {
+              "id": "qui",
+              "label": "« À qui étaient les tombes vides ? »",
+              "next": "qui"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "qui": {
+          "texte": "Gaspard regarde longtemps le fond du trou qu'il vient de creuser. « Les deux derniers enterrés. » Il n'en dit pas davantage, et vous comprenez qu'il n'en dira pas davantage. « Il y a des veuves dans ce village. Je ne mets pas de noms sur des tombes vides. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "crypte_fermee": {
+          "texte": "« La crypte ? » Il pose la main à plat sur la clef pendue à sa ceinture. « Je ne l'ouvre pas pour un curieux, ni pour un brave qui veut voir. S'il faut descendre, c'est la Guilde d'Auxerre qui envoie quelqu'un. J'ai écrit. Personne n'est encore venu. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "seuil": {
+          "texte": "Gaspard vous mène jusqu'à la dalle à moitié enfouie, l'arrache de ses deux mains et dévoile un escalier qui s'enfonce dans le noir. Une odeur monte : terre mouillée, fer, et quelque chose de sucré qui donne envie de reculer. « Les sarcophages sont au fond, l'ossuaire derrière l'arche. » Il vous tend une torche. « Je reste en haut. Si c'est vous qui remontez, je vous ouvre. »",
+          "choix": [
+            {
+              "id": "descendre",
+              "label": "Descendre.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "attendre",
+              "label": "« Pas encore. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "crypte_ouverte": {
+          "texte": "Les marches sont glissantes. En bas, la torche n'éclaire que des couvercles repoussés et des os épars. Puis quelque chose bouge entre les sarcophages, à quatre pattes, la tête de travers sur un cou trop long. Un deuxième se déplie derrière lui, puis un troisième, au fond, sous l'arche de l'ossuaire. Ils ont eu des visages. Ils n'en ont plus.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Tirer votre arme.",
+              "next": "fin"
+            }
+          ]
+        },
+        "crypte_close": {
+          "texte": "Gaspard secoue la tête, la main sur sa clef. « Pas maintenant. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Reculer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "« Je dors, oui. » Il tasse la terre d'une tombe du plat de sa pelle, trois fois, comme on frappe à une porte. « Les morts restent couchés. Pour l'instant. » Il lève les yeux vers vous. « Vous direz à la Guilde que le fossoyeur d'Escolives n'avait pas rêvé. La guérisseuse, elle, ne le dira jamais. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Le laisser à ses tombes.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:guerisseuse_ysolde_vernier",
+    "type": "pnj",
+    "nom": "Ysolde Vernier",
+    "race": "elfe",
+    "vocation": "lettre",
+    "portrait": "guerisseuse_Ysolde_Vernier_elfe_f.jpg",
+    "description": "La guérisseuse d'Escolives, entre ses herbes qui sèchent et ses fioles.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Une elfe aux tresses châtaines examine, à la lumière de la fenêtre, une coupe d'eau trouble. Des bouquets d'herbes sèchent au plafond. Elle ne pose pas la coupe pour vous saluer. « Si vous avez de la fièvre, asseyez-vous. Si vous venez pour les vampires, la porte est derrière vous. »",
+          "choix": [
+            {
+              "id": "morts",
+              "label": "« De quoi meurt-on, à Escolives ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:les_morts_d_escolives",
+                  "attendu": false
+                }
+              },
+              "next": "fievre"
+            },
+            {
+              "id": "apres",
+              "label": "« La crypte est vide, désormais. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:les_morts_d_escolives"
+                }
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(La laisser à son travail.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "fievre": {
+          "texte": "« De fièvre. » Elle fait tourner l'eau dans la coupe. « Une fièvre qui assoiffe, qui pâlit, qui vide les gens en quelques nuits. Tous ceux qui sont morts buvaient au puits du bas, celui qu'on a creusé trop près de la nécropole. Regardez cette eau. » Elle vous tend la coupe ; quelque chose y flotte, qui n'est pas de la terre. « Gaspard voit des Strigoï partout depuis qu'il creuse. Moi, je vois un puits souillé et des morts qu'on n'a pas laissés reposer. »",
+          "choix": [
+            {
+              "id": "corps",
+              "label": "« Et les corps qui n'ont pas pourri ? »",
+              "next": "corps"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "corps": {
+          "texte": "« La terre de la nécropole est froide et grasse. Elle garde les corps. » Elle hausse les épaules. « Le sang aux lèvres, un mort en rend souvent. Les ongles ont l'air de pousser parce que la peau se retire. Je l'ai vu cent fois. » Un temps. « Les tombes vides, je ne les explique pas. Mais je n'ai pas besoin d'un vampire pour ne pas savoir quelque chose. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "Ysolde pose enfin sa coupe. « Vous avez tué des choses, en bas. Je ne le nie pas : Gaspard m'a montré le sang sur les marches. » Elle reprend un bouquet d'herbes, le défait brin à brin. « Mais Marthe, la fille du charron, a encore de la fièvre ce matin, et elle n'est jamais descendue dans aucune crypte. Vous avez tué ce qui vivait sous la nécropole. Vous n'avez pas guéri le village. » Elle ne vous regarde plus. « Ce sont peut-être deux choses différentes. C'est peut-être la même. Je ne le saurai qu'en voyant qui tombe malade cet hiver. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(La laisser à son travail.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:veuve_perrine_vaudin",
+    "type": "pnj",
+    "nom": "Perrine Vaudin",
+    "race": "hobbit",
+    "vocation": "lettre",
+    "portrait": "veuve_Perrine_Vaudin_hobbit_f.jpg",
+    "description": "Une veuve d'Escolives, sur le seuil de sa maison, devant une porte où l'on a cloué de l'aubépine.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Sur le seuil d'une maison de pierre blonde, une jeune hobbit en deuil se tient les bras croisés sur son châle. Quelqu'un a cloué une branche d'aubépine en fleur sur sa porte. Pas elle, à en juger par la façon dont elle la regarde.",
+          "choix": [
+            {
+              "id": "aubepine",
+              "label": "« Qui a cloué cette aubépine ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:les_morts_d_escolives",
+                  "attendu": false
+                }
+              },
+              "next": "aubepine"
+            },
+            {
+              "id": "apres",
+              "label": "« C'est fini, en bas. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:les_morts_d_escolives"
+                }
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(La laisser.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "aubepine": {
+          "texte": "« Les voisins. Pour que Jehan ne rentre pas. » Sa voix ne tremble pas. « Jehan, c'était mon mari. Le premier à mourir, alors c'est lui qu'ils accusent. Il est rentré des vignes un soir avec la fièvre, il a eu soif trois jours, et le quatrième il ne s'est pas réveillé. » Elle serre son châle. « Maintenant ils veulent le déterrer et le brûler, avec un pieu dans le cœur. Ils ne le feront pas. Pas tant que je serai devant cette porte. »",
+          "choix": [
+            {
+              "id": "tombe",
+              "label": "« Gaspard a rouvert les tombes… »",
+              "next": "tombe"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "tombe": {
+          "texte": "« Sans me demander. » Elle détourne les yeux vers la nécropole, au bout du chemin. « Je ne suis pas allée voir. Je ne lui ai pas demandé ce qu'il a vu. Si je le lui demande, il me le dira, et je ne pourrai plus jamais ne pas le savoir. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "Perrine vous regarde longtemps, sans décroiser les bras. « Ce que vous avez tué, en bas… » Elle s'arrête. Ses lèvres bougent encore un peu, sans un son. Puis : « Non. Ne me répondez pas. » Elle se retourne, arrache l'aubépine de sa porte d'un seul geste et la jette dans le chemin. « Jehan dort où on l'a couché. C'est tout ce que je veux savoir. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(La laisser.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:crypte_de_la_necropole_d_escolives",
+    "type": "lieu",
+    "label": "La crypte de la nécropole d'Escolives",
+    "image": "crypte_de_la_necropole_d_escolives.jpg",
+    "categorie": "battle_map",
+    "dimensions": {
+      "x": 15,
+      "y": 27
+    },
+    "cells": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "nav": {},
+    "tags": [
+      "sous-terrain",
+      "crypte",
+      "necropole",
+      "humide",
+      "couvert",
+      "donjon"
+    ],
+    "acces": {
+      "gardien": "pnj:fossoyeur_gaspard_fouquet",
+      "refus": "La crypte est silencieuse. Plus rien ne racle sous les dalles.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "collect"
+            ],
+            "cible": "item:strigoi",
+            "objectif_atteint": false
+          }
+        },
+        {
+          "combat_gagne": {
+            "lieu": "lieu:crypte_de_la_necropole_d_escolives",
+            "attendu": false
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "donjon:crypte_d_escolives",
+    "type": "donjon",
+    "nom": "La crypte d'Escolives",
+    "description": "Sous la nécropole d'Escolives, une crypte de sarcophages et un ossuaire. Trois Strigoï s'y terrent le jour.",
+    "portail": "lieu:escolives",
+    "niveau_min": 1,
+    "niveau_max": 2,
+    "battle_maps": [
+      {
+        "lieu": "lieu:crypte_de_la_necropole_d_escolives",
+        "especes": [
+          "espece:strigoi"
+        ],
+        "nb_monstres": 3,
+        "niveau_min": 1,
+        "niveau_max": 2
+      }
+    ]
+  }
+]

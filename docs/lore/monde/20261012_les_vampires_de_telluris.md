@@ -2,7 +2,7 @@
 
 - **Source :** séance Claude Code du 12/10/2026. L'Auteur décrit cinq types de vampires (aristocrates de Dracula, Strigoï, Nosferatu, dragons de sang, lamies) et demande de les projeter sur les mythes terrestres et la littérature (Stoker, Anne Rice) ; Claude Code propose des ancrages, l'Auteur arbitre en mode plan.
 - **Créée :** 12/10/2026
-- **Statut :** les récits de l'Auteur (§ Auteur) et ses deux arbitrages (§ 1) **font foi** ; tout le reste — noms, lieux, ancrages, datations — est **proposé, non tranché** tant que l'Auteur ne l'a pas repris. Bestiaire en jeu : `dev/gen_vampires.py` → `jsons/vampires_a_importer.json`.
+- **Statut :** les récits de l'Auteur (§ Auteur) et ses deux arbitrages (§ 1) **font foi** ; tout le reste — noms, lieux, ancrages, datations — est **proposé, non tranché** tant que l'Auteur ne l'a pas repris. Bestiaire en jeu : `dev/gen_vampires.py`, versé dans le fichier unique `jsons/enquete_escolives_a_importer.json` (`dev/gen_enquete_escolives.py`).
 
 ---
 
@@ -52,6 +52,34 @@ En fait, les paladins se sont relevés parce que le sang de la lamia a été ré
 
 > « La lamia » désigne ici la **lamie** vampire sortie du carrosse, non la femme-serpent du bestiaire.
 
+## ✍️ Auteur — quatrième arbitrage (13/10, questionnaire)
+
+L'Auteur demande d'autres mythes et légendes terrestres à rattacher aux vampires ; Claude Code propose quatorze pistes (§ 9), l'Auteur arbitre par questionnaire :
+
+- **Origines** : **indépendantes**, et des PNJ défendent des **théories contradictoires** d'un « sang premier », sans preuve.
+- **Premier vampire du joueur** : au **rang D**, par une **enquête** (modèle Arnold Paole / Peter Plogojowitz).
+- **Superstition** : **oui, parfois**, une enquête se conclut sans vampire, ou sans réponse définitive.
+- **Mécanique retenue** : des **faiblesses propres à chaque lignée**, tirées de son mythe. Écartées : invitation au seuil, manie de compter, absence de reflet.
+- **Pistes retenues** : Upir de Novgorod · empalés de Vlad · Báthory · vrykolakas / Santorin · Paole / Plogojowitz · draugr · Abhartach · baobhan sith · penanggalan · vetāla · Carmilla · Lord Ruthven. **Écartées** : empouse de Corinthe (Apollonius), dhampirs, Raktabīja et Kālī, jiangshi.
+- **Novgorod** : **pouvoir caché**, cité ordinaire en apparence, gouvernée dans l'ombre par les lamies.
+- **Báthory** : une **lamie**.
+- **Vrykolakas** : une forme des **Strigoï**.
+- **Draugr** : un **mort-vivant à part**, pas un vampire.
+- **Baobhan sith** : des **lamies essaimées** vers l'ouest.
+- **Penanggalan** : **lié à Mu**.
+- **Vetāla** : son esprit est **du même genre** que celui que les deux sœurs ont piégé dans la reine Lamia — un fil discret.
+- **Lord Ruthven** : un **aristocrate de Dracula**.
+- **Abhartach** : une **lignée indépendante**.
+- **L'empaleur** (Auteur, 13/10, verbatim) : « avant sa malédiction, Vlad empalait les monstres abattus en lisière de ses terres agricoles, pour signaler aux autres que la lisière était tenue. Le monstre qui ravageait ses terres serait celui qu'il n'a pas pu empaler. Après la malédiction, il empale aussi des anthropes. »
+- **Le soleil** (Auteur, 13/10, verbatim) : « Le soleil est craint de tout vampire sauf les dragons avec encore une bonne âme » — y compris Abhartach, le penanggalan et les dragons de sang déchus.
+- **Le monstre de Vlad** : un **balaur** (Auteur, 13/10) ; qu'il sorte d'un donjon qui déborde reste proposé.
+- **L'effet du soleil varie selon les lignées** (Auteur, 13/10, questionnaire) : il **brûle** les aristocrates de Dracula · **consume** les Nosferatu · **tue** les Strigoï et vrykolakas · rend les lamies **inertes** · n'est qu'une **simple gêne** pour les dragons de sang déchus · **enchaîne Abhartach à sa tombe** (le jour, il ne peut quitter la terre où il gît tête en bas) · **sépare** la tête du penanggalan de son corps (surprise hors du corps à l'aube, elle ne peut plus le rejoindre et meurt ; le jour, elle passe pour une femme ordinaire).
+- **Penanggalan et Mu** (Auteur, 13/10, verbatim) : « Les morts de mu sont rendus à la mer. Ceux qui ne trouvent pas le chemin du royaume de Poséidon reviennent sous cette forme, dévoré par les poissons... »
+  - **Correction de l'Auteur** (13/10) : « je mélange les deux mythes » — Poséidon est le dieu d'**Atlantis** ; le dieu de la mer de **Mu** est **Tangaroa** (dieu polynésien de l'océan, père des poissons : Tangaroa chez les Māori, Tagaloa aux Samoa, Kanaloa à Hawaï). Lire : *le royaume de **Tangaroa***.
+- **Le balaur** sort d'un **donjon qui déborde** près de la cité-État de Vlad (Auteur, 13/10).
+- **Faiblesses d'Abhartach et du penanggalan** : validées — l'if (et la tête en bas) ; les épines et le vinaigre.
+- **Faiblesses validées** : Dracula, la terre natale · Strigoï, le feu et l'aubépine · lamies, le fer et les chevaux, et le soleil · dragons de sang, le parjure · Nosferatu, toute lumière (y compris la magie Sainte).
+
 ---
 
 ## 1. Arbitrage
@@ -79,7 +107,7 @@ En fait, les paladins se sont relevés parce que le sang de la lamia a été ré
 | Nom du peuple | « **lamies** » (le mot français) ; *Lamia* reste le nom propre de la reine | proposé, non tranché |
 | Lieux, noms secondaires, datations | § 2 à § 7 | proposé, non tranché |
 
-**Règle commune** (déduite des récits de l'Auteur, proposée) : le vampirisme est un **esprit lié à un corps mort par le sang**. Le soleil **sépare l'esprit du corps** (Auteur, lamies) ; ce qui retient l'esprit décide de la faiblesse :
+**Règle commune** (déduite des récits de l'Auteur, proposée ; les effets du soleil par lignée sont tranchés, Auteur 13/10 ; seule l'explication par « ce qui retient l'esprit » reste une théorie) : le vampirisme est un **esprit lié à un corps mort par le sang**. Le soleil **sépare l'esprit du corps** (Auteur, lamies) ; ce qui retient l'esprit décide de la faiblesse :
 
 - **la foi** retient l'esprit — le dragon de sang fidèle ne craint pas le soleil, le déchu n'en ressent qu'une gêne ;
 - **la malédiction des dieux** retient l'esprit de Dracula et des siens — le soleil les brûle ;
@@ -106,8 +134,8 @@ Comme toujours, ce sont des **théories de savants** : personne en jeu ne les ti
 
 **Adaptations proposées :**
 
-- **Le monstre** : un **balaur**, le dragon-serpent à plusieurs têtes du folklore roumain, échappé d'un **donjon qui déborde** près de la cité-État — purement tellurien, et cohérent avec l'Ordre du Dragon du père.
-- **L'empaleur sans guerre** : Vlad rentre de sa chasse en plantant sur des pieux, le long de la route, les **carcasses de la horde** qui accompagnait le balaur. La faune évite encore cette route ; les voyageurs, des siècles plus tard, racontent qu'il empalait des hommes — le mythe déformé.
+- **Le monstre** : un **balaur** (**Auteur**, 13/10), le dragon-serpent à plusieurs têtes du folklore roumain, échappé d'un **donjon qui déborde** (**Auteur**, 13/10) près de la cité-État — purement tellurien, et cohérent avec l'Ordre du Dragon du père.
+- ~~**L'empaleur sans guerre**~~ : remplacé par la décision de l'Auteur du 13/10 (§ 9) — les pieux tiennent la **lisière** des terres agricoles, et Vlad, maudit, empale **réellement** des anthropes : pas de « mythe déformé ».
 - **Le faux message** : envoyé par **Radu** (§ 3) — ce qui donne à la torture son motif.
 - **Les dieux maudits** : parmi eux **Zalmoxis**, le dieu dace qui promettait l'immortalité aux siens. Punition ironique : Vlad l'aura, mais **sans passage**.
 - **Fils d'un dragon de sang** (Auteur) : Vlad II, son père, est l'un des paladins de la nuit du carrosse, immortel. La malédiction du fils répond à la foi du père : l'un a gardé ses dieux par-delà la mort, l'autre les a maudits. *(lecture proposée)*
@@ -196,14 +224,57 @@ Comme toujours, ce sont des **théories de savants** : personne en jeu ne les ti
 
 ## 7. Points ouverts
 
-Tout est tranché. Restent **ouverts par choix de l'Auteur**, comme mystères du monde :
+Restent **ouverts par choix de l'Auteur**, comme mystères du monde :
 
 - **Qui a libéré Lamia** de son emmurement, et quand.
 - **Le nom** du paladin le plus pieux, et le lieu de l'auberge-relais.
+- **Le « sang premier »** : des PNJ y croient, rien ne le prouve (Auteur, 13/10).
+
+Plus rien à trancher au § 9.
 
 ## 8. Prompts d'image à produire
 
-- **Strigoï** (`strigoi_transparent.png`) : vampire bestial à quatre pattes, os brisés mal ressoudés, crâne enfoncé, mâchoire déboîtée, griffes, haillons ; fond transparent, pas de texte visible.
-- **Lamie** (`lamie_transparent.png`) : vampire d'une grande beauté, aristocrate antique, parures d'or et de lapis, peau très pâle, regard hypnotique ; fond transparent, pas de texte visible.
-- **Dragon de sang** (`dragon_de_sang_transparent.png`) : paladin en armure, visage anthrope apaisé, pupilles rouges, emblème d'un dragon enroulé sur le tabard, lumière dorée de la magie Sainte ; fond transparent, pas de texte visible.
-- **Nosferatu** (`nosferatu_transparent.png`, à remplacer) : mage chauve, livide, oreilles pointues, doigts immenses, robe de savant, rats à ses pieds, ombre démesurée ; fond transparent, pas de texte visible.
+Chaque prompt est **complet**, bloc de style compris : il se copie-colle tel quel (Auteur, 13/10).
+
+- **Strigoï** (`strigoi_transparent.png`) :
+  > Illustration en pied d'un **Strigoï** : vampire bestial à quatre pattes, os brisés mal ressoudés, crâne enfoncé, mâchoire déboîtée, longues griffes, haillons. Attitude de chasse, griffes et crocs visibles, regard fixé sur sa proie. Chair desséchée ou os apparents, lueur froide dans les orbites. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+- **Lamie** (`lamie_transparent.png`) :
+  > Illustration en pied d'une **Lamie** : vampire d'une grande beauté, aristocrate antique, parures d'or et de lapis-lazuli, peau très pâle, regard hypnotique, robe de soie sombre. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, vert vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+- **Dragon de sang** (`dragon_de_sang_transparent.png`) :
+  > Illustration en pied d'un **Dragon de sang** : paladin en armure, visage anthrope apaisé, pupilles rouges, emblème d'un dragon enroulé sur le tabard, lumière dorée de la magie Sainte autour de ses mains. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, vert vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+- **Nosferatu** (`nosferatu_transparent.png`, à remplacer) :
+  > Illustration en pied d'un **Nosferatu** : mage chauve et livide, oreilles pointues, doigts immenses, robe de savant, rats à ses pieds, ombre démesurée qui s'étire derrière lui. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+
+## 9. Autres mythes du sang (13/10)
+
+Le rattachement de chaque piste est **tranché par l'Auteur** (§ ✍️ quatrième arbitrage) ; le détail ci-dessous est **proposé, non tranché**.
+
+### Rattachées aux cinq lignées
+
+- **Upir de Novgorod** (lamies) — le mot slave *upir* apparaît dans la signature d'un copiste de Novgorod, « Upir Likhyi » (« le vampire méchant »). À Novgorod, le nom populaire des lamies, qu'on croit une vieille superstition ; le copiste, un servant lamie masculin qui recopie depuis des siècles. **Pouvoir caché** (Auteur) : la cité semble gouvernée par son assemblée et sa cloche (le *vétché* réel) ; derrière, les lamies.
+- **Báthory** (lamie, Auteur) — la comtesse qui se baigne dans le sang de jeunes filles. Écho : la Báthory réelle finit **emmurée vivante** dans son château, comme la reine Lamia. Théorie de PNJ possible, jamais confirmée : elle serait liée à la libération de la reine (le mystère reste entier).
+- **Carmilla** (lamie) — Le Fanu : une lamie qui ne peut porter que des **anagrammes** de son nom (Mircalla, Millarca) ; ce serait un indice d'enquête.
+- **Lord Ruthven** (Polidori ; **aristocrate de Dracula**, Auteur) — un vampire mondain qui circule dans la haute société ; les Nosferatu ne pourraient pas passer pour des Anthropes.
+- **Empalés de Vlad** (aristocrates de Dracula, **Auteur**, 13/10) — avant sa malédiction, Vlad empalait les **monstres** abattus en lisière de ses terres agricoles, pour signaler aux autres que la lisière était tenue. Le monstre qui ravageait ses terres est **celui qu'il n'a pas pu empaler**. Après la malédiction, il empale aussi des **anthropes**.
+- **Vrykolakas / Santorin** (Strigoï, Auteur) — la forme grecque des Strigoï : des morts qui ne pourrissent pas. Santorin serait l'île où l'on exile les relevés (le dicton réel « envoyer un vampire à Santorin »).
+- **Arnold Paole / Peter Plogojowitz** (Strigoï, ou superstition) — le modèle de l'**enquête du rang D** (Auteur) : morts en série dans un village, tombes rouvertes, corps gonflés et sang frais, rapport d'enquêteurs. Le dénouement varie : un Strigoï, une maladie, ou rien de certain.
+
+### Créatures rattachées par l'Auteur
+
+- **Baobhan sith** (lamies essaimées, Auteur) — dans les Highlands, des danseuses en robe verte qui boivent le sang de chasseurs abrités pour la nuit dans une bergerie ; seul survit l'homme qui garde son **cheval** et du **fer** près de lui. Elles expliqueraient pourquoi les forestiers dorment avec leur monture.
+- **Penanggalan** (lié à Mu, Auteur) — en Malaisie, la tête d'une femme vole la nuit en entraînant ses viscères ; son corps attend dans un bac de **vinaigre**, et des **épines** posées aux fenêtres l'arrêtent. Dans la légende, une femme qui méditait pour dominer son corps est surprise, et sa tête s'arrache. **Lien avec Mu (Auteur)** : les morts de Mu sont rendus à la mer ; ceux qui ne trouvent pas le chemin du royaume de **Tangaroa** (dieu de la mer de Mu, père des poissons — Auteur, 13/10, qui corrige « Poséidon », dieu d'Atlantis) reviennent sous cette forme, dévorés par les poissons, ses enfants — d'où la tête qui ne traîne plus que ses viscères. (Proposition écartée : une élève de Mu revenue transformée.)
+- **Vetāla** (esprit du même genre que celui de la reine Lamia, Auteur) — le roi Vikramāditya porte un cadavre habité qui lui pose des énigmes. Ce serait une quête d'**escorte inversée** à énigmes ; le lien avec Lamia ne serait visible que d'un lettré.
+- **Abhartach** — en Irlande, un roi-**nain** tyran revient de la tombe et exige un bol de sang tiré des veines de ses sujets. Cathán le tue avec une épée en **if** et l'enterre **tête en bas** sous une pierre (le dolmen réel de Slaghtaverty). **Lignée indépendante** (Auteur) : un revenant isolé, unique.
+- **Draugr** (mort-vivant à part, Auteur) — en Islande, Glámr revient hanter une ferme ; Grettir le tue mais garde de sa malédiction la **peur du noir**. Lieux possibles : Reykjavik ou Akureyri. En jeu : un débuff d'**effroi nocturne** durable après la victoire.
+
+### Faiblesses par lignée (Auteur, 13/10 : toutes validées)
+
+| Lignée | Soleil — craint de tous, sauf les dragons à la bonne âme (Auteur) | Faiblesse tirée du mythe |
+|---|---|---|
+| Aristocrates de Dracula | brûle (Auteur) | **la terre natale** : ils doivent dormir dans la terre de leur cité (les caisses de terre de Stoker) |
+| Strigoï, vrykolakas | tue (Auteur) | **le feu** (on brûle les vrykolakas) et **l'aubépine** (pieu des Balkans) |
+| Nosferatu | consume (Auteur) | **la lumière** sous toutes ses formes, y compris celle de la magie Sainte (Murnau) |
+| Lamies, baobhan sith | rend inerte (confirmé, Auteur) | **le fer froid** et **les chevaux** (baobhan sith) |
+| Dragons de sang | aucune (bonne âme) · simple gêne (déchus) (Auteur) | **le parjure** : un serment rompu les affaiblit |
+| Abhartach | l'enchaîne à sa tombe (Auteur) | **l'if**, et **la tête en bas** au tombeau |
+| Penanggalan | sépare tête et corps : l'aube surprend la tête dehors, elle meurt (Auteur) | **les épines** et **le vinaigre** |
