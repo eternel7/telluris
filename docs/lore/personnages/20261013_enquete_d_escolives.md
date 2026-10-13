@@ -2,7 +2,7 @@
 
 - **Source :** séance Claude Code du 13/10/2026 ; l'Auteur arbitre par questionnaire (§ 1).
 - **Créée :** 13/10/2026
-- **Statut :** le § 1 **fait foi** (noms, récompense compris) ; le reste du scénario (§ 2) et les textes sont **proposés, non tranchés**. Le contenu en jeu sera construit une fois les images générées (§ 3).
+- **Statut :** le § 1 **fait foi** (noms, récompense compris) ; le reste du scénario (§ 2) et les textes sont **proposés, non tranchés**. Contenu en jeu : `dev/gen_enquete_escolives.py` → `jsons/enquete_escolives_a_importer.json` (13/10).
 
 ---
 
@@ -15,7 +15,7 @@
 | Issue | un **Strigoï** à combattre, mais le **doute reste** : certains PNJ croient toujours à une maladie |
 | Donneur | la **guilde d'Auxerre** |
 | Forme | **preuve rapportée** : quête d'apport unique (les ossements du Strigoï) ; la crypte est une salle gardée, comme la nef de Jumièges ; aucun code neuf |
-| Monstres | **1 Strigoï + 2 relevés** (morts du village déjà déformés) |
+| Monstres | ~~1 Strigoï + 2 relevés~~ → **3 Strigoï** (Auteur, 13/10 : les relevés SONT des Strigoï ; le moteur tire chaque monstre au hasard parmi les espèces de la salle, un relevé aurait pu évincer le Strigoï et la preuve) |
 | PNJ du village | le **fossoyeur**, la **guérisseuse**, une **veuve** |
 | Images | carte de combat **neuve**, image du village **neuve** (prompts au § 3) |
 | PNJ | Gaspard Fouquet (fossoyeur, nain) · Ysolde Vernier (guérisseuse, elfe) · Perrine Vaudin (veuve, hobbit ; son mari Jehan, premier mort) — **validés** |
