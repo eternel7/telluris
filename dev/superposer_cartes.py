@@ -7,16 +7,30 @@ des repères lus à la main sur les deux images (px de l'image d'origine, 1408×
 Sortie : la plaine à l'échelle et la France, en fondu à `--alpha` sur leur recouvrement (0.5
 par défaut : les deux tracés se lisent ; 1 : la France recouvre la plaine).
 
-	python dev/superposer_cartes.py [--alpha 0.5] [--sortie chemin.jpg]
+Par-dessus, lus dans le DUMP le plus récent (`jsons/telluris-dump-*.json`) :
+  · les cases à 0 de chaque grille (profil `pays` : ce sont les frontières, la mer est
+    fermée par `nav`) — bleu pour la France, rouge pour la plaine ;
+  · les passages France ↔ plaine : le bout France en bleu, le bout plaine en rouge, un trait
+    épais reliant les deux bouts d'une même connexion.
+
+	python dev/superposer_cartes.py [--alpha 0.5] [--sortie chemin.jpg] [--sans-frontieres]
 """
 
 import argparse
+import glob
+import json
 import os
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CARTES = os.path.join(RACINE, "templates", "resources", "maps")
+FRANCE = "lieu:france"
+PLAINE = "lieu:plaine_europeenne"
+
+BLEU = (40, 110, 255)
+ROUGE = (230, 30, 30)
+TRAIT = (255, 215, 0)
 
 # Repères : nom → (point sur la plaine, point sur la France).
 REPERES = {
@@ -58,12 +72,64 @@ def superposer(alpha=0.5):
 	return toile, {"echelle": s, "plaine": (tx - x0, ty - y0), "france": (-x0, -y0)}
 
 
+def charger_dump():
+	"""{_id: doc} du dump committé le plus récent."""
+	chemin = sorted(glob.glob(os.path.join(RACINE, "jsons", "telluris-dump-*.json")))[-1]
+	with open(chemin, encoding="utf-8") as f:
+		return {d["_id"]: d for d in json.load(f)["docs"]}, os.path.basename(chemin)
+
+
+def vers_toile(lieu, info, taille_image):
+	"""Case (x, y) de la grille de `lieu` → (rect px de la case, centre px) sur la toile."""
+	cells = lieu["cells"]
+	cw, ch = taille_image[0] / len(cells[0]), taille_image[1] / len(cells)
+	k = info["echelle"] if lieu["_id"] == PLAINE else 1.0
+	ox, oy = info["plaine"] if lieu["_id"] == PLAINE else info["france"]
+
+	def f(x, y):
+		rect = (ox + x * cw * k, oy + y * ch * k, ox + (x + 1) * cw * k, oy + (y + 1) * ch * k)
+		return rect, ((rect[0] + rect[2]) / 2, (rect[1] + rect[3]) / 2)
+	return f
+
+
+def dessiner_frontieres(toile, info, docs):
+	"""Cases à 0 des deux grilles, puis passages France ↔ plaine reliés deux à deux."""
+	tailles = {i: Image.open(os.path.join(CARTES, docs[i]["image"])).size for i in (FRANCE, PLAINE)}
+	proj = {i: vers_toile(docs[i], info, tailles[i]) for i in (FRANCE, PLAINE)}
+	calque = Image.new("RGBA", toile.size, (0, 0, 0, 0))
+	d = ImageDraw.Draw(calque)
+	for lieu_id, couleur in ((FRANCE, BLEU), (PLAINE, ROUGE)):
+		for y, rang in enumerate(docs[lieu_id]["cells"]):
+			for x, v in enumerate(rang):
+				if v == 0:
+					d.rectangle(proj[lieu_id](x, y)[0], fill=couleur + (90,), outline=couleur + (150,))
+	toile.alpha_composite(calque)
+
+	liens = [c for c in docs.values() if c.get("type") == "connection"
+		and sorted(n["lieu"] for n in c.get("nodes", [])) == sorted((FRANCE, PLAINE))]
+	d = ImageDraw.Draw(toile)
+	bouts = []
+	for c in liens:
+		pos = {n["lieu"]: proj[n["lieu"]](*n["pos"])[1] for n in c["nodes"]}
+		d.line([pos[FRANCE], pos[PLAINE]], fill=(0, 0, 0, 255), width=7)
+		d.line([pos[FRANCE], pos[PLAINE]], fill=TRAIT + (255,), width=4)
+		bouts += [(pos[FRANCE], BLEU), (pos[PLAINE], ROUGE)]
+	for (cx, cy), couleur in bouts:
+		d.ellipse((cx - 7, cy - 7, cx + 7, cy + 7), fill=couleur + (255,), outline=(0, 0, 0, 255), width=2)
+	return len(liens)
+
+
 if __name__ == "__main__":
 	ap = argparse.ArgumentParser()
 	ap.add_argument("--alpha", type=float, default=0.5)
 	ap.add_argument("--sortie", default=os.path.join(RACINE, "dev", "cartes", "superposition_plaine_france.jpg"))
+	ap.add_argument("--sans-frontieres", action="store_true")
 	args = ap.parse_args()
 	toile, info = superposer(args.alpha)
+	if not args.sans_frontieres:
+		docs, dump = charger_dump()
+		n = dessiner_frontieres(toile, info, docs)
+		print(f"{dump} : {n} connexions France ↔ plaine")
 	os.makedirs(os.path.dirname(args.sortie), exist_ok=True)
 	toile.convert("RGB").save(args.sortie, quality=90)
 	print(f"{args.sortie} {toile.size} échelle plaine ×{info['echelle']:.3f}, "
