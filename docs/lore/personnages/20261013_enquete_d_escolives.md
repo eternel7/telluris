@@ -2,7 +2,7 @@
 
 - **Source :** séance Claude Code du 13/10/2026 ; l'Auteur arbitre par questionnaire (§ 1).
 - **Créée :** 13/10/2026
-- **Statut :** le § 1 **fait foi** ; le scénario (§ 2), les noms des PNJ et les textes sont **proposés, non tranchés**. Le contenu en jeu sera construit une fois les images générées (§ 3).
+- **Statut :** le § 1 **fait foi** (noms, récompense compris) ; le reste du scénario (§ 2) et les textes sont **proposés, non tranchés**. Le contenu en jeu sera construit une fois les images générées (§ 3).
 
 ---
 
@@ -18,6 +18,10 @@
 | Monstres | **1 Strigoï + 2 relevés** (morts du village déjà déformés) |
 | PNJ du village | le **fossoyeur**, la **guérisseuse**, une **veuve** |
 | Images | carte de combat **neuve**, image du village **neuve** (prompts au § 3) |
+| PNJ | Gaspard Fouquet (fossoyeur, nain) · Ysolde Vernier (guérisseuse, elfe) · Perrine Vaudin (veuve, hobbit ; son mari Jehan, premier mort) — **validés** |
+| Récompense | **120 XP + 30 000 cuivres** |
+| Jehan | qu'il soit l'un des relevés n'est **jamais dit** |
+| Images de PNJ | **portraits seuls**, pas de variante de présence |
 
 ## 2. Scénario (proposé)
 
@@ -28,7 +32,7 @@
 4. **Retour au bureau.** Le joueur remet les ossements à Gautier. La quête est réussie, avec XP et prime.
 5. **Après.** À Escolives, la guérisseuse n'est toujours pas convaincue et la veuve ne pardonne pas ; le fossoyeur dort de nouveau. Rien ne tranche.
 
-**PNJ (noms et Lignées proposés) :**
+**PNJ (validés, Auteur 13/10) :**
 
 | Rôle | Lignée | Nom proposé | Ce qu'il croit |
 |---|---|---|---|
@@ -36,9 +40,9 @@
 | Guérisseuse | elfe | Ysolde Vernier | Elle parle de fièvre et d'un puits souillé. Avant comme après le combat, elle ne croit pas aux vampires : « Vous avez tué une chose. Vous n'avez pas guéri le village. » |
 | Veuve | hobbit | Perrine Vaudin | Son mari Jehan a été le premier mort, et c'est lui qu'on accuse. Elle refuse qu'on brûle son corps. Après le combat, elle ne sait pas si ce qu'on a tué était encore Jehan. |
 
-**Le doute** : l'un des deux relevés pourrait être Jehan, mais personne ne le saura jamais.
+**Le doute** : l'un des deux relevés pourrait être Jehan ; ce n'est **jamais dit** (Auteur).
 
-**Récompenses (à ajuster)** : 120 XP et 30 000 cuivres, comme l'escorte des bûcherons du même rang.
+**Récompenses (Auteur)** : 120 XP et 30 000 cuivres, comme l'escorte des bûcherons du même rang.
 
 ## 3. Prompts d'images à produire
 
