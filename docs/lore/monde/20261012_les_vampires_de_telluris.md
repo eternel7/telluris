@@ -2,7 +2,7 @@
 
 - **Source :** séance Claude Code du 12/10/2026. L'Auteur décrit cinq types de vampires (aristocrates de Dracula, Strigoï, Nosferatu, dragons de sang, lamies) et demande de les projeter sur les mythes terrestres et la littérature (Stoker, Anne Rice) ; Claude Code propose des ancrages, l'Auteur arbitre en mode plan.
 - **Créée :** 12/10/2026
-- **Statut :** les récits de l'Auteur (§ Auteur) et ses deux arbitrages (§ 1) **font foi** ; tout le reste — noms, lieux, ancrages, datations — est **proposé, non tranché** tant que l'Auteur ne l'a pas repris. Bestiaire en jeu : `dev/gen_vampires.py` → `jsons/vampires_a_importer.json`.
+- **Statut :** les récits de l'Auteur (§ Auteur) et ses deux arbitrages (§ 1) **font foi** ; tout le reste — noms, lieux, ancrages, datations — est **proposé, non tranché** tant que l'Auteur ne l'a pas repris. Bestiaire en jeu : `dev/gen_vampires.py`, versé dans le fichier unique `jsons/enquete_escolives_a_importer.json` (`dev/gen_enquete_escolives.py`).
 
 ---
 

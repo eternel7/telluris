@@ -34,9 +34,8 @@
 # RELUS du dump le plus récent et seuls les champs listés changent ; un doc neuf dont l'`_id`
 # est déjà en base n'est jamais réécrit (il apparaît « déjà en base »). Idempotent.
 #
-# Usage : python dev/gen_vampires.py
-# Sortie (à coller dans /admin → Import en masse) :
-#   jsons/vampires_a_importer.json
+# Usage : python dev/gen_vampires.py (aperçu). Les docs partent dans le fichier UNIQUE de
+# `dev/gen_enquete_escolives.py` → jsons/enquete_escolives_a_importer.json (CLAUDE.md §18).
 
 import copy
 import json
@@ -48,7 +47,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from gen_equipement_humanoides import TABLE as KITS, _dump_le_plus_recent, charger, erreurs_kit  # noqa: E402
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SORTIE = "jsons/vampires_a_importer.json"
 
 
 def _attrs(V, F, R, Ag, Vol, Int, Cha, Ch) -> dict:
@@ -218,13 +216,10 @@ def _sans_rev(doc: dict) -> dict:
 	return {k: v for k, v in copy.deepcopy(doc).items() if k != "_rev"}
 
 
-def main() -> None:
-	try:
-		sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-	except Exception:
-		pass
-	source = _dump_le_plus_recent()
-	base = {d["_id"]: d for d in charger(source) if isinstance(d, dict) and d.get("_id")}
+def docs_vampires(base: dict) -> tuple[list, list]:
+	"""(docs à importer, ids déjà en base) d'après les docs du dump `base` ({_id: doc}).
+	Importé par `gen_enquete_escolives.py`, qui les verse dans SON fichier : un seul fichier
+	à importer par demande (CLAUDE.md §18)."""
 	items = {i: d for i, d in base.items() if i.startswith("item:")}
 	erreurs, docs, deja = [], [], []
 
@@ -308,16 +303,24 @@ def main() -> None:
 			doc["poids"] = poids
 			docs.append(doc)
 
-	chemin = os.path.join(RACINE, SORTIE)
-	with open(chemin, "w", encoding="utf-8") as f:
-		json.dump(docs, f, ensure_ascii=False, indent=2)
-		f.write("\n")
+	return docs, deja
+
+
+def main() -> None:
+	"""Aperçu seul : les docs partent dans le fichier unique de `gen_enquete_escolives.py`."""
+	try:
+		sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+	except Exception:
+		pass
+	source = _dump_le_plus_recent()
+	base = {d["_id"]: d for d in charger(source) if isinstance(d, dict) and d.get("_id")}
+	docs, deja = docs_vampires(base)
 	print(f"relu {os.path.relpath(source, RACINE)}")
 	for d in docs:
-		print(f"   écrit {d['_id']}")
+		print(f"   à importer {d['_id']}")
 	for i in deja:
 		print(f"   déjà en base {i}")
-	print(f"écrit {SORTIE} : {len(docs)} doc(s)")
+	print(f"{len(docs)} doc(s) — fichier à importer : python dev/gen_enquete_escolives.py")
 
 
 if __name__ == "__main__":

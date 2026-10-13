@@ -19,8 +19,9 @@
 #   · le DOUTE (Auteur) : la guérisseuse et la veuve ne sont jamais convaincues ; que Jehan
 #     soit l'un des relevés n'est JAMAIS dit.
 #
-# ⚠️ UN SEUL FICHIER À IMPORTER : jsons/enquete_escolives_a_importer.json, docs neufs ET
-# Gautier retouché, chacun COMPLET (l'import est un PUT, CLAUDE.md §11). Gautier est RELU du
+# ⚠️ UN SEUL FICHIER À IMPORTER : jsons/enquete_escolives_a_importer.json, qui porte AUSSI les
+# docs du bestiaire des vampires (`gen_vampires.docs_vampires` : Abhartach, penanggalan,
+# draugr et ce qui n'est pas encore en base), docs neufs ET Gautier retouché, chacun COMPLET (l'import est un PUT, CLAUDE.md §11). Gautier est RELU du
 # dernier dump et seuls son service `apport`, ses choix d'entrée et ses nœuds `escolives_*`
 # changent : régénération idempotente. ⚠️ `gen_mission_bucherons.py` et `gen_acces_donjon.py`
 # réécrivent Gautier depuis des dumps FIGÉS plus anciens : les relancer et importer leur
@@ -33,6 +34,10 @@ import glob
 import json
 import os
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from gen_vampires import docs_vampires  # noqa: E402
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JSONS = os.path.join(RACINE, "jsons")
@@ -449,7 +454,8 @@ def main(argv):
 	collisions = [d["_id"] for d in neufs if d["_id"] in par_id]
 	if collisions:
 		print("⚠️ ids déjà présents au dump (écrasés par l'import) :", ", ".join(collisions))
-	docs = [gautier(par_id[GAUTIER])] + neufs
+	vampires, _deja = docs_vampires(par_id)
+	docs = vampires + [gautier(par_id[GAUTIER])] + neufs
 	ecrire(SORTIE, docs)
 	print(f"{len(docs)} docs → {os.path.relpath(SORTIE, RACINE)}")
 

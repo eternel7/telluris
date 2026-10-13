@@ -97,7 +97,7 @@ Contenu : `dev/gen_quete_rang_c_jumieges.py` → **un seul** fichier d'import `j
 Verrouillé par `tests/test_quete_rang_c_jumieges.py`.
 
 #### Les morts d'Escolives — enquête du rang D, premier vampire
-Contenu : `dev/gen_enquete_escolives.py` → **un seul** `jsons/enquete_escolives_a_importer.json` (Gautier relu du dump + 7 docs neufs). 100 % donnée. Scénario et arbitrages : `docs/lore/personnages/20261013_enquete_d_escolives.md`.
+Contenu : `dev/gen_enquete_escolives.py` → **un seul** `jsons/enquete_escolives_a_importer.json` (bestiaire de `gen_vampires.docs_vampires` + Gautier relu du dump + 7 docs neufs). 100 % donnée. Scénario et arbitrages : `docs/lore/personnages/20261013_enquete_d_escolives.md`.
 - Gautier (bureau d'Auxerre, déjà rang D) offre ET reçoit une quête d'**apport** unique : `item:strigoi` (carcasse au butin de tout Strigoï abattu) → `lieu:escolives` (France (50,21)) → Gaspard le fossoyeur ouvre `lieu:crypte_de_la_necropole_d_escolives` (service `acces`, salle de `donjon:crypte_d_escolives`).
 - Barrière : `quete_active {types:[collect], cible:item:strigoi, objectif_atteint:false}` + `combat_gagne` faux (pas de filtre `id` dans les barrières).
 - ⚠️ **Salle à espèce UNIQUE** (3 Strigoï) : `instantiate_monsters` tire chaque monstre au hasard dans `especes` — un second type pourrait évincer le Strigoï et rendre la preuve introuvable.
