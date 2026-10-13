@@ -105,7 +105,7 @@ def get_doc(doc_id):
 @pytest.fixture
 def jets_surs(monkeypatch):
 	"""Toujours touché, jamais critique, dés figés à 10 → duel entièrement déterministe."""
-	monkeypatch.setattr(combat, "_resoudre_jet", lambda a, d, s: {
+	monkeypatch.setattr(combat, "_resoudre_jet", lambda a, d, s, furtif=False: {
 		"roll": 50, "seuil": s, "touche": True, "critique": False,
 		"fumble": False, "mult_degats": 1})
 	monkeypatch.setattr(combat, "roll_dice", lambda notation: 10)
@@ -205,7 +205,7 @@ def test_approche_1d_coute_le_deplacement(jets_surs):
 
 
 def test_plafond_de_rounds_donne_un_nul(monkeypatch):
-	monkeypatch.setattr(combat, "_resoudre_jet", lambda a, d, s: {
+	monkeypatch.setattr(combat, "_resoudre_jet", lambda a, d, s, furtif=False: {
 		"roll": 50, "seuil": s, "touche": False, "critique": False,
 		"fumble": False, "mult_degats": 1})
 	res = simulateur.simuler_duel(

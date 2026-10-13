@@ -77,6 +77,7 @@ Un acteur peut occuper un RECTANGLE de cases. Géométrie pure `utils/jetons.py`
 
 ### Critiques pilotés par la Chance
 Tout jet d100 offensif passe par `_seuils_critiques`/`_resoudre_jet` (`utils/combat.py`) : la Chance élargit symétriquement la fenêtre de réussite critique et repousse celle d'échec critique, bornées par les world-vars `CRIT_REUSSITE_MAX`/`CRIT_ECHEC_MIN`. Un critique double les dés **avant** soustraction des PA ; un échec critique coûte une action de plus (immédiate ou en dette au tour suivant). Couvert par `tests/test_combat_crit.py`.
+- **Furtivité** (`_attaque_furtive` : attaquant `furtif` ET cible non `detecte`, passé explicitement par les sites offensifs du joueur + simulateur, jamais par le test de concentration) : le jet reste fait ; un coup qui touche = critique ×2, une vraie réussite critique = ×4. Verrouillé par `test_combat_crit`.
 
 ⚠️ **Données** : beaucoup d'`espece:*` ont encore `Ch = {min:0, max:0}` → delta large en faveur du joueur, à peupler.
 

@@ -131,7 +131,7 @@ def _coup_qui_porte(monkeypatch):
 	coup porté (monture à terre, cargaison répandue, statut du combat) — laisser le
 	hasard décider les rendrait intermittents, et le prochain appel à `random` ajouté
 	ailleurs dans le moteur suffirait à les faire tomber."""
-	monkeypatch.setattr(combat_util, "_resoudre_jet", lambda a, d, seuil: {
+	monkeypatch.setattr(combat_util, "_resoudre_jet", lambda a, d, seuil, furtif=False: {
 		"roll": 1, "seuil": seuil, "touche": True, "critique": False,
 		"fumble": False, "mult_degats": 1})
 
