@@ -1,10 +1,7 @@
 """Superpose deux cartes de pays voisines pour VALIDER leur frontière : zones et passages.
 
-Les cartes sont toutes orientées nord en haut : la transformation est une SIMILITUDE SANS
-ROTATION (échelle + translation) de la carte POSÉE vers la carte de FOND, ajustée aux moindres
-carrés sur des repères lus à la main sur les deux images (px de l'image d'origine). Une paire
-par frontière (`PAIRES`) ; la carte posée est celle qu'on rétrécit (la plus détaillée), pour
-garder la toile petite.
+Calage (repères, similitude sans rotation) : `dev/calage_cartes.py`, une paire par frontière ;
+la carte POSÉE, la plus détaillée, est rétrécie sur la carte de FOND.
 
 Sortie par paire : `dev/cartes/superposition_<paire>.jpg` — les deux cartes en fondu à
 `--alpha` sur leur recouvrement, et par-dessus, lus dans le DUMP le plus récent
@@ -38,6 +35,7 @@ from PIL import Image, ImageDraw
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, RACINE)
 
+from dev.calage_cartes import PAIRES, ajuster  # noqa: E402
 from utils import grille_image  # noqa: E402
 
 CARTES = os.path.join(RACINE, "templates", "resources", "maps")
@@ -60,78 +58,6 @@ ANCRES = {
 	"lieu:egypte": (40, 30),
 	"lieu:afrique_du_nord": (40, 30),
 }
-
-# Paire → fond, carte posée, repères : nom → (point sur la carte POSÉE, point sur le FOND).
-PAIRES = {
-	"plaine_france": {
-		"fond": "lieu:france", "pose": "lieu:plaine_europeenne",
-		"reperes": {
-			"embouchure de la Seine": ((148, 597), (560, 160)),
-			"Lutecia": ((258, 705), (715, 212)),
-			"pas de Calais": ((215, 550), (660, 20)),
-			"forêt d'Ardenne": ((500, 620), (950, 190)),
-		},
-	},
-	"france_espagne": {
-		"fond": "lieu:espagne", "pose": "lieu:france",
-		"reperes": {
-			# Le coin basque (la côte cantabrique rejoint l'Atlantique) et la descente des
-			# Pyrénées dans la Méditerranée (cap de Creus).
-			"coin basque": ((405, 628), (845, 95)),
-			"cap de Creus": ((792, 700), (1175, 180)),
-		},
-	},
-	"france_italie": {
-		"fond": "lieu:italie", "pose": "lieu:france",
-		"reperes": {
-			"lac Léman": ((1040, 395), (277, 95)),
-			"lac Majeur": ((1215, 415), (432, 180)),
-			"lac de Garde": ((1370, 455), (621, 168)),
-			"fond du golfe de Gênes": ((1240, 545), (487, 262)),
-			"cap Corse": ((1285, 648), (527, 353)),
-		},
-	},
-	"italie_pannonie": {
-		"fond": "lieu:italie", "pose": "lieu:pannonie",
-		"reperes": {
-			"Venise": ((235, 405), (735, 180)),
-			"pointe de l'Istrie": ((358, 487), (858, 222)),
-			"lac Balaton": ((660, 285), (1062, 112)),
-			"bouches de Kotor": ((785, 742), (1082, 393)),
-		},
-	},
-	"pannonie_roumanie": {
-		"fond": "lieu:pannonie", "pose": "lieu:roumanie",
-		"reperes": {
-			# Le Danube à la sortie des Portes de Fer, puis au confluent de l'Olt.
-			"Portes de Fer": ((410, 615), (1075, 565)),
-			"confluent de l'Olt": ((615, 700), (1190, 575)),
-		},
-	},
-	"egypte_afrique": {
-		"fond": "lieu:afrique_du_nord", "pose": "lieu:egypte",
-		"reperes": {
-			"Le Caire": ((800, 265), (1180, 265)),
-			"pyramides": ((575, 285), (1095, 290)),
-			"Siwa": ((205, 330), (948, 315)),
-		},
-	},
-}
-
-
-def ajuster(reperes):
-	"""(s, tx, ty) minimisant Σ |s·p + t − f|² — similitude sans rotation, p sur la carte
-	posée, f sur le fond."""
-	ps = [p for p, _ in reperes.values()]
-	fs = [f for _, f in reperes.values()]
-	n = len(ps)
-	pcx, pcy = sum(p[0] for p in ps) / n, sum(p[1] for p in ps) / n
-	fcx, fcy = sum(f[0] for f in fs) / n, sum(f[1] for f in fs) / n
-	num = sum((p[0] - pcx) * (f[0] - fcx) + (p[1] - pcy) * (f[1] - fcy) for p, f in zip(ps, fs))
-	den = sum((p[0] - pcx) ** 2 + (p[1] - pcy) ** 2 for p in ps)
-	s = num / den
-	return s, fcx - s * pcx, fcy - s * pcy
-
 
 def image_de(doc):
 	return Image.open(os.path.join(CARTES, doc["image"])).convert("RGBA")

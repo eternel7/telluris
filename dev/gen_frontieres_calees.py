@@ -1,14 +1,18 @@
-"""Frontière plaine européenne ↔ France recalée, et Calais reposée sur la carte de France — UN
-seul fichier d'import (CLAUDE.md §18).
+"""Frontières entre pays CALÉES (la carte la plus détaillée fait foi) et Calais reposée sur la
+carte de France — UN seul fichier d'import (CLAUDE.md §18).
 
-Lance `gen_voisins_france` (bande `FRONTIERE_PLAINE` et passages France ↔ plaine) puis
-`gen_ports_manche` (Calais sous `lieu:france`, ses sorties, suppression des anciens liens vers
-la plaine), et fusionne leurs sorties. Chacun n'émet que ce qui diffère du dump.
+Lance et fusionne, chacun n'émettant que ce qui diffère du dump :
+  · `gen_voisins_france` — plaine ↔ France (`FRONTIERE_PLAINE`), Italie recalée sur la France
+    puis sur la Pannonie, Pannonie recalée sur la Roumanie (Bulgarie roumaine), passages ;
+  · `gen_ports_manche` — Calais sous `lieu:france`, ses sorties, anciens liens supprimés ;
+  · `gen_villes_pays` — Afrique du Nord recalée sur l'Égypte, passages.
+Recalage : `dev/frontieres_calees.py` ; calage des cartes : `dev/calage_cartes.py` ;
+validation visuelle : `dev/superposer_cartes.py --import <ce fichier>`.
 
 Usage :
-  python dev/gen_frontiere_plaine_calais.py [--dump jsons/telluris-dump-….json]
+  python dev/gen_frontieres_calees.py [--dump jsons/telluris-dump-….json]
 
-Sortie : jsons/frontiere_plaine_calais_a_importer.json
+Sortie : jsons/frontieres_calees_a_importer.json
 """
 
 import json
@@ -19,16 +23,16 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dev import gen_grille_image as ggi  # noqa: E402
-from dev import gen_ports_manche, gen_voisins_france  # noqa: E402
+from dev import gen_ports_manche, gen_villes_pays, gen_voisins_france  # noqa: E402
 
-SORTIE = os.path.join(ggi.DOSSIER_JSONS, "frontiere_plaine_calais_a_importer.json")
+SORTIE = os.path.join(ggi.DOSSIER_JSONS, "frontieres_calees_a_importer.json")
 
 
 def main() -> int:
 	args = [a for a in sys.argv[1:] if a != "--sans-apercu"] + ["--sans-apercu"]
 	emis, vus = [], set()
 	with tempfile.TemporaryDirectory() as tmp:
-		for module in (gen_voisins_france, gen_ports_manche):
+		for module in (gen_voisins_france, gen_ports_manche, gen_villes_pays):
 			module.SORTIE = os.path.join(tmp, module.__name__.rsplit(".", 1)[1] + ".json")
 			sys.argv = [module.__file__] + args
 			code = module.main()

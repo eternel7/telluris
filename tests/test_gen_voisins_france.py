@@ -50,12 +50,15 @@ def test_frontieres_du_dump_une_case_sur_deux():
 	italie = next(d for d in lieux_sud if d["_id"] == pannonie.ITALIE)
 	l_pl, d_pl, r_pl, _, a_pl = plaine.construire(docs, interdit, interdit, france)
 	l_pa, d_pa, r_pa, _, a_pa = pannonie.construire(docs, interdit, interdit, interdit, italie)
-	assert refus + r_pl + r_pa == []
-	# Aucun avertissement : sur chaque frontière, le côté le plus long a EXACTEMENT un poste
-	# une case sur deux (`postes`), et le côté court les a tous.
-	assert avert + a_pl + a_pa == []
+	# L'Italie finale (recalée sur la Pannonie aussi) porte les cols des Alpes.
+	italie = next(d for d in l_pa if d["_id"] == pannonie.ITALIE)
+	d_it, r_it, a_it = sud.liens_italie(france, italie, docs)
+	assert refus + r_pl + r_pa + r_it == []
+	# Aucun avertissement : sur chaque frontière, la carte qui compte (le côté le plus long, la
+	# carte qui fait foi) a EXACTEMENT un poste une case sur deux (`postes`).
+	assert avert + a_pl + a_pa + a_it == []
 	par_lieu = {d["_id"]: d for d in lieux_sud + l_pl + l_pa}
-	liens += d_pl + d_pa
+	liens += d_pl + d_pa + d_it
 	for prefixe, noms in FRONTIERES.items():
 		# Les `_deleted` effacent les passages d'un tracé précédent : ils ne comptent pas.
 		du_prefixe = [l for l in liens if l["_id"].startswith(prefixe + "_")

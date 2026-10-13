@@ -694,19 +694,21 @@ CATALOGUE = [
 			"N'émet que ce qui diffère du dump. Requiert Pillow.",
 	},
 	{
-		"id": "gen_frontiere_plaine_calais",
-		"label": "🧭 Frontière plaine européenne ↔ France recalée, Calais en France",
-		# Dump frais : enchaîne gen_voisins_france (PUT complet de `lieu:france`…) et gen_ports_manche.
-		"argv_fn": lambda v, f: _py("gen_frontiere_plaine_calais.py", "--dump", f["dump"]),
+		"id": "gen_frontieres_calees",
+		"label": "🧭 Frontières calées (la carte la plus détaillée fait foi), Calais en France",
+		# Dump frais : enchaîne gen_voisins_france (PUT complet de `lieu:france`…), gen_ports_manche
+		# et gen_villes_pays (PUT complet de `lieu:egypte`, `lieu:afrique_du_nord`).
+		"argv_fn": lambda v, f: _py("gen_frontieres_calees.py", "--dump", f["dump"]),
 		"dump_frais": True,
-		"sortie": "jsons/frontiere_plaine_calais_a_importer.json",
-		"ecrit": "Régénère un dump, écrit jsons/frontiere_plaine_calais_a_importer.json. Rien "
+		"sortie": "jsons/frontieres_calees_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/frontieres_calees_a_importer.json. Rien "
 			"en base avant 📥 Importer.",
-		"description": "Un seul fichier, les sorties de « La France et ses voisins » et « Ports "
-			"de la Manche » fusionnées : la bande du nord de la France sur la plaine calée sur "
-			"france.png, les 21 passages France ↔ plaine face à face, Calais posée sur la carte "
-			"de France. Les connexions périmées partent en `_deleted` (supprimées à l'import). "
-			"N'émet que ce qui diffère du dump. Requiert Pillow.",
+		"description": "Un seul fichier, les sorties de « La France et ses voisins », « Ports "
+			"de la Manche » et des villes des pays fusionnées : sur chaque frontière, la carte "
+			"la plus détaillée fait foi (plaine sur France, Italie sur France et Pannonie, "
+			"Pannonie sur Roumanie, Afrique du Nord sur Égypte), passages face à face, Calais "
+			"posée sur la carte de France. Les connexions périmées partent en `_deleted` "
+			"(supprimées à l'import). N'émet que ce qui diffère du dump. Requiert Pillow."
 	},
 	{
 		"id": "gen_villes_pays",

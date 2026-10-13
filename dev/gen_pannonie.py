@@ -14,10 +14,13 @@ connexion se pose SUR la frontière, du côté accessible.
     Transylvanie, Olténie) mises à 0. Déjà en base : relue, seules les frontières posées.
   · ROUMANIE — la plaine pannonienne à l'ouest de sa frontière dessinée et la Serbie au sud
     du Danube mises à 0 ; ses murs ne perdent aucun bit.
-  · Italie ↔ Pannonie (des Grisons à l'Istrie) et Pannonie ↔ Roumanie (du Maramureș au
-    Danube) : une case sur deux de la frontière (`liens_frontiere`), passages NOMMÉS
-    (cf. gen_plaine_europeenne). Côté Italie, seule la frontière TERRESTRE compte
-    (`TERRE_ITALIE`) : la bande des Balkans borde aussi toute la côte adriatique.
+  · LA CARTE LA PLUS DÉTAILLÉE FAIT FOI (`frontieres_calees`) : la Pannonie est RECALÉE sur
+    la Roumanie (toute case qui tombe dans la terre de la Roumanie mise à 0, la Bulgarie
+    au-delà du cadre de la Roumanie aussi : `BULGARIE_PANNONIE` — la Bulgarie est roumaine),
+    puis l'Italie sur la Pannonie. Les bandes ci-dessus restent la bande d'origine.
+  · Italie ↔ Pannonie (des Dolomites à Trieste) et Pannonie ↔ Roumanie (du Maramureș au
+    Timok) : une case sur deux sur la carte qui fait foi, chacun face à sa projection sur
+    l'autre (`frontieres_calees.liens_projetes`), passages NOMMÉS (cf. gen_plaine_europeenne).
   · BUCAREST posée sur la Roumanie : la cité dessinée en Valachie ↔ une sortie par route, chacune
     dans l'EXTÉRIEUR de la ville qu'elle vise (sa grille peinte sépare l'extérieur ouest,
     l'extérieur est et l'intérieur, reliés par les portes de rempart) ; `lieu:bucarest`
@@ -30,12 +33,13 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from dev import frontieres_calees  # noqa: E402
 from dev.gen_cartes_pays import cartes_a_creer  # noqa: E402
 from dev.gen_france_espagne_italie import (  # noqa: E402
 	ANCRE_ITALIE, FRONTIERE_ITALIE_PANNONIE, FRONTIERE_ITALIE_TYROL)
 from dev.gen_plaine_europeenne import (  # noqa: E402
-	bande, cases_autour, cases_frontiere, case_proche, connexion, fermer, libelle_sortie,
-	libelles_de, liens_frontiere, ligne_frontiere, sans_rev, zone_de)
+	cases_autour, cases_frontiere, case_proche, connexion, fermer, libelle_sortie,
+	libelles_de, sans_rev, zone_de)
 from dev.gen_villes_images import poser_grille  # noqa: E402
 
 IMAGE_PANNONIE = "pannonie.jpg"
@@ -68,39 +72,50 @@ FRONTIERE_PANNONIE_ROUMANIE = ((0, 7, 70), (8, 35, 64))
 FRONTIERE_ROUMANIE_PANNONIE = ((0, 8, 18), (9, 16, 16), (17, 22, 13), (23, 36, 10))
 FRONTIERE_ROUMANIE_SERBIE = ((0, 28, 37),)
 
-# Italie ↔ Pannonie, une case sur deux (`liens_frontiere`) : sur l'Italie, sous le Tyrol puis
-# le long de l'Isonzo jusqu'au golfe de Trieste (`TERRE_ITALIE`, x_min, x_max, y_min, y_max) ;
-# sur la Pannonie, au-dessus de la Vénétie puis le golfe. D'ouest en est depuis `DEPART_*`.
-DEPART_ITALIE = (18, 0)
-TERRE_ITALIE = (0, 87, 0, 10)
+# La BULGARIE au-delà du cadre de la Roumanie, sur la Pannonie : (y_min, y_max, x) ⇒ cases
+# x ≥ `x`, au sud du Danube, à l'est du Timok (la colonne où tombe le bout de la Serbie de
+# la Roumanie). Le recalage ne ferme que ce que montre la Roumanie ; la Bulgarie est roumaine
+# (Auteur, 13/10) : le reste, hors de toute carte, est fermé aussi.
+BULGARIE_PANNONIE = ((39, 46, 69),)
+
+# Italie ↔ Pannonie : sur la Pannonie (elle fait foi), au-dessus de la Vénétie puis le long de
+# l'Isonzo jusqu'au golfe de Trieste ; sur l'Italie recalée, la ligne qui lui fait face. D'ouest
+# en est depuis `DEPART_*`. Cadres (x_min, x_max, y_min, y_max) : la frontière TERRESTRE du
+# nord seule — le bas de la Pannonie (Monténégro, Albanie) borde l'Italie au-delà de
+# l'Adriatique, sans passage.
+DEPART_ITALIE = (39, 8)
+CADRE_ITALIE = (0, 60, 0, 20)
 DEPART_PANNONIE_ITALIE = (0, 20)
-# Noms, des Grisons à l'Istrie : un par poste de l'Italie (34 cases ⇒ 17 ; la Pannonie,
-# 18 cases, en porte deux sur la plupart).
-# ⚠️ Rang = suffixe d'`_id` (cf. gen_plaine_europeenne.PASSAGES_PLAINE).
+CADRE_PANNONIE_ITALIE = (0, 30, 0, 47)
+# Noms, des Dolomites à Trieste : un par poste de la Pannonie.
+# ⚠️ Rang = suffixe d'`_id` (cf. gen_plaine_europeenne.PASSAGES_PLAINE) ; un `_id` au-delà
+# du compte, encore en base, part en suppression (`liens_perimes`).
 PASSAGES_ITALIE = (
-	"Col de l'Umbrail", "Col du Stelvio", "Col de Resia", "Col du Timmelsjoch", "Col du Brenner",
-	"Col de Stalle", "Col de Monte Croce di Comelico", "Col de Monte Croce Carnico",
-	"Col de Nassfeld", "Col de Tarvisio", "Col du Predil", "Gorges de Caporetto",
-	"Gué de l'Isonzo", "Route de Gorizia", "Plateau du Carso", "Route de Trieste",
-	"Route de Capodistria",
+	"Col du Brenner", "Col de Stalle", "Col de Monte Croce di Comelico",
+	"Col de Monte Croce Carnico", "Col de Nassfeld", "Col de Tarvisio", "Col du Predil",
+	"Gorges de Caporetto", "Route de Gorizia", "Route de Trieste",
 )
 
-# Pannonie ↔ Roumanie, une case sur deux : du nord au sud le long de la frontière dessinée,
-# puis d'ouest en est le long du Danube (rive sud sur la Pannonie, rive nord sur la
-# Roumanie) ; au-delà de la rangée 36 (`DANUBE`), la Bulgarie, que montrent les deux cartes.
+# Pannonie ↔ Roumanie, une case sur deux sur la Roumanie (elle fait foi) : du nord au sud le
+# long de la frontière dessinée, d'ouest en est le long du Danube (rive nord, face à la
+# Serbie), puis du nord au sud le long du Timok (la Bulgarie, roumaine, face à la Serbie).
 DEPART_PANNONIE_ROUMANIE = (70, 0)
 DEPART_ROUMANIE = (19, 0)
-DANUBE = (0, 87, 0, 36)
-# Noms, du Maramureș à l'Olt : un par poste de la Pannonie (63 cases ⇒ 32).
+# Noms, du Maramureș au Timok : un par poste de la Roumanie.
 PASSAGES_ROUMANIE = (
+	# La frontière dessinée, du Maramureș au Banat.
 	"Gué de la Tisza", "Route de Satu Mare", "Gué du Someș", "Route de Carei",
 	"Marais de l'Ecsed", "Route de Valea lui Mihai", "Route d'Oradea", "Gué du Crișul Repede",
 	"Route de Salonta", "Gué du Crișul Negru", "Gué du Crișul Alb", "Route de Chișineu-Criș",
 	"Vallée du Mureș", "Route d'Arad", "Pont de Nădlac", "Route de Sânnicolau Mare",
 	"Gué de l'Aranca", "Route de Jimbolia", "Gué de la Bega", "Route de Timișoara",
-	"Gué du Timiș", "Route de Vršac", "Gué de la Caraș", "Gué de la Nera",
-	"Bac de Moldova Nouă", "Défilé du Kazan", "Portes de Fer", "Pont de Trajan",
-	"Bac de Vidin", "Gué du Jiu", "Bac de Corabia", "Gué de l'Olt",
+	"Gué du Timiș",
+	# Le Danube, rive nord, jusqu'aux Portes de Fer.
+	"Route de Vršac", "Gué de la Caraș", "Gué de la Nera", "Bac de Baziaș", "Bac de Moldova Nouă",
+	"Défilé du Kazan", "Bac d'Orșova", "Portes de Fer", "Pont de Trajan",
+	# Le Timok, la Bulgarie face à la Serbie.
+	"Bac de Prahovo", "Gué du Timok", "Route de Zaječar", "Col de Vrachka Tchouka",
+	"Route de Kula",
 )
 
 # Bucarest sur `roumanie.png` : la cité dessinée en Valachie, entre la Moldavian et le Danube.
@@ -120,14 +135,39 @@ def _bandes_pannonie(dims):
 		| cases_frontiere(FRONTIERE_PANNONIE_ROUMANIE, "est", dims["x"], dims["y"]))
 
 
-def preparer_pannonie(docs, taille_fn, proposer_fn, eau_fn):
-	"""(doc, proposition | None, refus) : la Pannonie créée ou relue, frontières posées.
-	`eau_fn(doc) -> eau[y][x]` : `grille_image.masque_eau` de l'image (Pillow côté CLI)."""
+def recaler_pannonie(doc, roumanie):
+	"""La Pannonie (mutée) recalée sur la Roumanie, qui fait foi, et la Bulgarie fermée."""
+	dims = doc["dimensions"]
+	frontieres_calees.recaler(doc, roumanie,
+		zone_de(roumanie["cells"], roumanie.get("nav") or {}, ANCRE_ROUMANIE),
+		cases_frontiere(FRONTIERE_PANNONIE_ROUMANIE, "est", dims["x"], dims["y"]),
+		cases_frontiere(FRONTIERE_ROUMANIE_PANNONIE, "ouest", dims["x"], dims["y"])
+		| cases_frontiere(FRONTIERE_ROUMANIE_SERBIE, "sud", dims["x"], dims["y"]),
+		cases_frontiere(BULGARIE_PANNONIE, "est", dims["x"], dims["y"]))
+	return doc
+
+
+def recaler_italie(italie, pannonie):
+	"""Copie de l'Italie recalée sur la Pannonie, qui fait foi."""
+	doc = copy.deepcopy(italie)
+	dims = doc["dimensions"]
+	frontieres_calees.recaler(doc, pannonie,
+		zone_de(pannonie["cells"], pannonie.get("nav") or {}, ANCRE_PANNONIE),
+		cases_frontiere(FRONTIERE_ITALIE_PANNONIE, "est", dims["x"], dims["y"])
+		| cases_frontiere(FRONTIERE_ITALIE_TYROL, "nord", dims["x"], dims["y"]),
+		cases_frontiere(FRONTIERE_PANNONIE_ITALIE, "ouest", dims["x"], dims["y"]))
+	return doc
+
+
+def preparer_pannonie(docs, taille_fn, proposer_fn, eau_fn, roumanie):
+	"""(doc, proposition | None, refus) : la Pannonie créée ou relue, frontières posées puis
+	recalée sur `roumanie` (préparée). `eau_fn(doc) -> eau[y][x]` : `grille_image.masque_eau`
+	de l'image (Pillow côté CLI)."""
 	par_id = {d.get("_id"): d for d in docs}
 	if PANNONIE in par_id:
 		doc = sans_rev(copy.deepcopy(par_id[PANNONIE]))
 		fermer(doc["cells"], _bandes_pannonie(doc["dimensions"]))
-		return doc, None, []
+		return recaler_pannonie(doc, roumanie), None, []
 	neufs, refus = cartes_a_creer([IMAGE_PANNONIE], docs, taille_fn)
 	if not neufs:
 		return None, None, refus or [f"{IMAGE_PANNONIE} : déjà citée par un autre lieu, ou absente de CARTES"]
@@ -143,7 +183,7 @@ def preparer_pannonie(docs, taille_fn, proposer_fn, eau_fn):
 	fermer(doc["cells"], bandes)
 	for x, y in bandes:
 		doc["nav"].pop(f"{x},{y}", None)
-	return doc, prop, []
+	return recaler_pannonie(doc, roumanie), prop, []
 
 
 def preparer_roumanie(roumanie):
@@ -182,46 +222,46 @@ def bucarest_rattachee(bucarest_doc):
 	return doc
 
 
-def connexions_italie(zone_ita, zone_pan, libelles, dims):
-	"""(docs, refus, avertissements) des passages Italie ↔ Pannonie."""
-	au_dela = bande(FRONTIERE_ITALIE_TYROL, "nord", dims) | bande(FRONTIERE_ITALIE_PANNONIE, "est", dims)
-	return liens_frontiere("link:italie_to_pannonie",
-		ITALIE, ligne_frontiere(zone_ita, au_dela, DEPART_ITALIE, TERRE_ITALIE),
-		PANNONIE, ligne_frontiere(zone_pan, bande(FRONTIERE_PANNONIE_ITALIE, "ouest", dims),
-			DEPART_PANNONIE_ITALIE),
-		PASSAGES_ITALIE, libelles)
+def connexions_italie(italie, zone_ita, pannonie, zone_pan, libelles):
+	"""(docs, refus, avertissements) des passages Italie ↔ Pannonie : postes sur la Pannonie."""
+	ligne_ita, ligne_pan = frontieres_calees.lignes(italie, zone_ita, pannonie, zone_pan,
+		DEPART_ITALIE, DEPART_PANNONIE_ITALIE, CADRE_ITALIE, CADRE_PANNONIE_ITALIE)
+	return frontieres_calees.liens_projetes("link:italie_to_pannonie", PANNONIE, ligne_pan,
+		ITALIE, ligne_ita, PASSAGES_ITALIE, libelles, ordre=(ITALIE, PANNONIE))
 
 
-def connexions_roumanie(zone_pan, zone_rou, libelles, dims):
-	"""(docs, refus, avertissements) des passages Pannonie ↔ Roumanie."""
-	au_dela = bande(FRONTIERE_ROUMANIE_PANNONIE, "ouest", dims) | bande(FRONTIERE_ROUMANIE_SERBIE, "sud", dims)
-	return liens_frontiere("link:pannonie_to_roumanie",
-		PANNONIE, ligne_frontiere(zone_pan, bande(FRONTIERE_PANNONIE_ROUMANIE, "est", dims),
-			DEPART_PANNONIE_ROUMANIE, DANUBE),
-		ROUMANIE, ligne_frontiere(zone_rou, au_dela, DEPART_ROUMANIE, DANUBE),
-		PASSAGES_ROUMANIE, libelles)
+def connexions_roumanie(pannonie, zone_pan, roumanie, zone_rou, libelles):
+	"""(docs, refus, avertissements) des passages Pannonie ↔ Roumanie : postes sur la Roumanie."""
+	ligne_pan, ligne_rou = frontieres_calees.lignes(pannonie, zone_pan, roumanie, zone_rou,
+		DEPART_PANNONIE_ROUMANIE, DEPART_ROUMANIE)
+	return frontieres_calees.liens_projetes("link:pannonie_to_roumanie", ROUMANIE, ligne_rou,
+		PANNONIE, ligne_pan, PASSAGES_ROUMANIE, libelles, ordre=(PANNONIE, ROUMANIE))
 
 
 def construire(docs, taille_fn, proposer_fn, eau_fn, italie):
-	"""(lieux, liens, refus, propositions, avertissements). `italie` : le doc de l'Italie TEL QU'IL SERA ÉCRIT
-	(frontières posées par `gen_france_espagne_italie`) — lu ici, jamais modifié."""
+	"""(lieux, liens, refus, propositions, avertissements). `italie` : le doc de l'Italie posé
+	par `gen_france_espagne_italie` (recalé sur la France) — non modifié : sa copie RECALÉE sur
+	la Pannonie est rendue dans `lieux`, c'est elle qui sera écrite."""
 	par_id = {d.get("_id"): d for d in docs}
 	manquants = [i for i in (ROUMANIE, BUCAREST) if not (par_id.get(i) or {}).get("cells")]
 	if manquants:
 		return [], [], [f"absent(s) du dump ou sans grille : {', '.join(manquants)}"], {}, []
-	pannonie, prop, refus = preparer_pannonie(docs, taille_fn, proposer_fn, eau_fn)
+	roumanie = preparer_roumanie(par_id[ROUMANIE])
+	pannonie, prop, refus = preparer_pannonie(docs, taille_fn, proposer_fn, eau_fn, roumanie)
 	if refus:
 		return [], [], refus, {}, []
-	roumanie = preparer_roumanie(par_id[ROUMANIE])
+	italie = recaler_italie(italie, pannonie)
 	zone_pan = zone_de(pannonie["cells"], pannonie.get("nav") or {}, ANCRE_PANNONIE)
 	zone_rou = zone_de(roumanie["cells"], roumanie.get("nav") or {}, ANCRE_ROUMANIE)
 	zone_ita = zone_de(italie["cells"], italie.get("nav") or {}, ANCRE_ITALIE)
 	bucarest = bucarest_rattachee(par_id[BUCAREST])
 	libelles = libelles_de(docs, [pannonie, italie])
-	dims = pannonie["dimensions"]
-	liens, refus, avert = connexions_italie(zone_ita, zone_pan, libelles, dims)
-	d, r, a = connexions_roumanie(zone_pan, zone_rou, libelles, dims)
+	liens, refus, avert = connexions_italie(italie, zone_ita, pannonie, zone_pan, libelles)
+	d, r, a = connexions_roumanie(pannonie, zone_pan, roumanie, zone_rou, libelles)
 	liens, refus, avert = liens + d, refus + r, avert + a
+	for prefixe, noms in (("link:italie_to_pannonie_", PASSAGES_ITALIE),
+			("link:pannonie_to_roumanie_", PASSAGES_ROUMANIE)):
+		liens += frontieres_calees.liens_perimes(docs, prefixe, {l["_id"] for l in liens})
 	d, r = connexions_bucarest(zone_rou, bucarest, libelles[BUCAREST])
-	return ([pannonie, roumanie, bucarest], liens + d, refus + r,
+	return ([pannonie, roumanie, bucarest, italie], liens + d, refus + r,
 		({PANNONIE: prop} if prop else {}), avert)

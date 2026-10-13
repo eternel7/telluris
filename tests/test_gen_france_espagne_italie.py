@@ -12,6 +12,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dev import gen_france_espagne_italie as gfei  # noqa: E402
+from dev.calage_cartes import projection  # noqa: E402
 from dev.gen_plaine_europeenne import cases_frontiere, zone_de  # noqa: E402
 
 VOISINES = ((1, 0), (-1, 0), (0, 1), (0, -1))
@@ -110,18 +111,37 @@ def test_frontieres_alpines_et_balkaniques_de_l_italie():
 	assert italie["cells"][gfei.ANCRE_ITALIE[1]][gfei.ANCRE_ITALIE[0]] == 1
 
 
-def test_cols_des_alpes_de_part_et_d_autre_de_la_crete():
-	_, liens, _, _ = gfei.construire(_docs(), _proposer_tour)
-	cols = _liens(liens, "link:france_to_italie_")
-	assert len(cols) == len(gfei.PASSAGES_ITALIE)
+def test_cols_des_alpes_face_a_face():
+	"""La France fait foi : un col une case sur deux sur elle, son autre bout sur la ligne de
+	l'Italie recalée, à une case au plus de sa projection — les deux bouts se font face."""
+	docs = _docs()
+	lieux, liens, refus, _ = gfei.construire(docs, _proposer_tour)
+	assert refus == [] and not _liens(liens, "link:france_to_italie_")  # posés par liens_italie
+	par_id = {d["_id"]: d for d in lieux}
+	france, italie = par_id[gfei.FRANCE], par_id[gfei.ITALIE]
+	cols, refus, avert = gfei.liens_italie(france, italie, docs)
+	assert refus == [] and len(cols) == len(gfei.PASSAGES_ITALIE)
+	vers_italie = projection(gfei.FRANCE, gfei.ITALIE)
+	zone_it = zone_de(italie["cells"], italie["nav"], gfei.ANCRE_ITALIE)
 	for l, nom in zip(cols, gfei.PASSAGES_ITALIE):
 		fr, it = l["nodes"]
 		assert fr["lieu"] == gfei.FRANCE and fr["label"] == f"{nom} — France"
 		assert it["lieu"] == gfei.ITALIE and it["label"] == f"{nom} — Italie"
-		assert _touche(fr["pos"], gfei.FRONTIERE_FRANCE_ITALIE, "est")
-		assert _touche(it["pos"], gfei.FRONTIERE_ITALIE_FRANCE, "ouest")
-	# Du nord au sud des deux côtés.
-	assert [l["nodes"][1]["pos"][1] for l in cols] == sorted(l["nodes"][1]["pos"][1] for l in cols)
+		assert tuple(it["pos"]) in zone_it and any(
+			italie["cells"][it["pos"][1] + dy][it["pos"][0] + dx] == 0 for dx, dy in VOISINES)
+		px, py = vers_italie(tuple(fr["pos"]))
+		assert max(abs(px - it["pos"][0]), abs(py - it["pos"][1])) <= 2, (l["_id"], fr, it)
+
+
+def test_italie_recalee_sur_la_france():
+	"""Toute case de l'Italie qui tombe dans la terre de la France est fermée."""
+	lieux, _, _, _ = gfei.construire(_docs(), _proposer_tour)
+	par_id = {d["_id"]: d for d in lieux}
+	france, italie = par_id[gfei.FRANCE], par_id[gfei.ITALIE]
+	zone_fr = zone_de(france["cells"], france["nav"], gfei.ANCRE_FRANCE)
+	vers_france = projection(gfei.ITALIE, gfei.FRANCE)
+	dans = [(x, y) for y in range(48) for x in range(88) if vers_france((x, y)) in zone_fr]
+	assert dans and all(italie["cells"][y][x] == 0 for x, y in dans)
 
 
 def test_rome_reste_atteignable_depuis_l_italie_bordee():

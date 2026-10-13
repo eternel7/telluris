@@ -11,7 +11,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dev import gen_pannonie as gpa  # noqa: E402
-from dev.gen_plaine_europeenne import cases_frontiere  # noqa: E402
+from dev.calage_cartes import projection  # noqa: E402
+from dev.gen_plaine_europeenne import cases_frontiere, zone_de  # noqa: E402
 
 TAILLES = {gpa.IMAGE_PANNONIE: (1408, 768)}
 
@@ -65,10 +66,8 @@ def test_frontieres_de_la_pannonie_et_de_la_roumanie():
 	lieux, _, _, _, _ = _construire()
 	par_id = {d["_id"]: d for d in lieux}
 	pannonie, roumanie = par_id[gpa.PANNONIE], par_id[gpa.ROUMANIE]
-	for bandes, sens in ((gpa.FRONTIERE_PANNONIE_ITALIE, "ouest"),
-			(gpa.FRONTIERE_PANNONIE_ROUMANIE, "est")):
-		for x, y in cases_frontiere(bandes, sens, 88, 48):
-			assert pannonie["cells"][y][x] == 0
+	for x, y in cases_frontiere(gpa.FRONTIERE_PANNONIE_ITALIE, "ouest", 88, 48):
+		assert pannonie["cells"][y][x] == 0
 	for bandes, sens in ((gpa.FRONTIERE_ROUMANIE_PANNONIE, "ouest"),
 			(gpa.FRONTIERE_ROUMANIE_SERBIE, "sud")):
 		for x, y in cases_frontiere(bandes, sens, 88, 48):
@@ -76,25 +75,63 @@ def test_frontieres_de_la_pannonie_et_de_la_roumanie():
 	assert "_rev" not in roumanie and roumanie["nav"] == {"40,40": 3}
 
 
-def test_liens_italie_pannonie_roumanie_sur_les_frontieres():
-	_, liens, refus, _, _ = _construire()
+def test_pannonie_recalee_sur_la_roumanie_bulgarie_fermee():
+	"""La Roumanie fait foi : toute case de la Pannonie qui tombe dans sa terre est fermée,
+	la Bulgarie au-delà de son cadre aussi ; l'ancienne bande de la Pannonie ne reste ouverte
+	que là où la Roumanie la ferme elle-même (le territoire de la Pannonie selon elle)."""
+	lieux, _, _, _, _ = _construire()
+	par_id = {d["_id"]: d for d in lieux}
+	pannonie, roumanie = par_id[gpa.PANNONIE], par_id[gpa.ROUMANIE]
+	zone_rou = zone_de(roumanie["cells"], roumanie["nav"], gpa.ANCRE_ROUMANIE)
+	vers = projection(gpa.PANNONIE, gpa.ROUMANIE)
+	bande_rou = (cases_frontiere(gpa.FRONTIERE_ROUMANIE_PANNONIE, "ouest", 88, 48)
+		| cases_frontiere(gpa.FRONTIERE_ROUMANIE_SERBIE, "sud", 88, 48))
+	ancienne = cases_frontiere(gpa.FRONTIERE_PANNONIE_ROUMANIE, "est", 88, 48)
+	for y in range(48):
+		for x in range(88):
+			v, c = pannonie["cells"][y][x], vers((x, y))
+			if c in zone_rou:
+				assert v == 0, (x, y)
+			elif (x, y) in ancienne:
+				assert v == (1 if c in bande_rou else 0), (x, y)
+	for x, y in cases_frontiere(gpa.BULGARIE_PANNONIE, "est", 88, 48):
+		assert pannonie["cells"][y][x] == 0
+
+
+def test_italie_recalee_sur_la_pannonie_et_rendue():
+	lieux, _, _, _, _ = _construire()
+	par_id = {d["_id"]: d for d in lieux}
+	italie, pannonie = par_id[gpa.ITALIE], par_id[gpa.PANNONIE]
+	zone_pan = zone_de(pannonie["cells"], pannonie["nav"], gpa.ANCRE_PANNONIE)
+	vers = projection(gpa.ITALIE, gpa.PANNONIE)
+	dans = [(x, y) for y in range(48) for x in range(88) if vers((x, y)) in zone_pan]
+	assert dans and all(italie["cells"][y][x] == 0 for x, y in dans)
+
+
+def test_liens_italie_pannonie_roumanie_face_a_face():
+	lieux, liens, refus, _, _ = _construire()
 	assert refus == []
+	lieux = {d["_id"]: d for d in lieux}
 	par_id = {l["_id"]: l for l in liens}
-	for prefixe, a, b, passages in (
-			("link:italie_to_pannonie", gpa.ITALIE, gpa.PANNONIE, gpa.PASSAGES_ITALIE),
-			("link:pannonie_to_roumanie", gpa.PANNONIE, gpa.ROUMANIE, gpa.PASSAGES_ROUMANIE)):
+	for prefixe, a, b, passages, foi in (
+			("link:italie_to_pannonie", gpa.ITALIE, gpa.PANNONIE, gpa.PASSAGES_ITALIE, gpa.PANNONIE),
+			("link:pannonie_to_roumanie", gpa.PANNONIE, gpa.ROUMANIE, gpa.PASSAGES_ROUMANIE, gpa.ROUMANIE)):
 		assert sum(1 for i in par_id if i.startswith(prefixe + "_")) == len(passages)
+		autre = b if foi == a else a
+		vers = projection(foi, autre)
 		for i, nom in enumerate(passages, start=1):
 			na, nb = par_id[f"{prefixe}_{i:02d}"]["nodes"]
 			assert na["lieu"] == a and na["label"].startswith(f"{nom} — ")
 			assert nb["lieu"] == b and nb["label"].startswith(f"{nom} — ")
-	# Côté Italie, la frontière terrestre seule : jamais la côte adriatique.
-	_, _, y_min, y_max = gpa.TERRE_ITALIE
-	assert all(y_min <= l["nodes"][0]["pos"][1] <= y_max for i, l in par_id.items()
-		if i.startswith("link:italie_to_pannonie_"))
-	# Pannonie ↔ Roumanie : jamais au sud du Danube.
-	assert all(n["pos"][1] <= gpa.DANUBE[3] for i, l in par_id.items()
-		if i.startswith("link:pannonie_to_roumanie_") for n in l["nodes"])
+			bouts = {na["lieu"]: na["pos"], nb["lieu"]: nb["pos"]}
+			for lieu, (x, y) in bouts.items():
+				assert lieux[lieu]["cells"][y][x] == 1, (prefixe, i, lieu)
+			px, py = vers(tuple(bouts[foi]))
+			assert max(abs(px - bouts[autre][0]), abs(py - bouts[autre][1])) <= 2, (prefixe, i)
+	# Pannonie ↔ Roumanie : jamais dans la Bulgarie, roumaine.
+	bulgarie = cases_frontiere(gpa.BULGARIE_PANNONIE, "est", 88, 48)
+	assert not any(tuple(n["pos"]) in bulgarie for i, l in par_id.items()
+		if i.startswith("link:pannonie_to_roumanie_") for n in l["nodes"] if n["lieu"] == gpa.PANNONIE)
 
 
 def test_bucarest_posee_sur_la_roumanie():
