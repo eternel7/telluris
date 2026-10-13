@@ -1,19 +1,25 @@
-"""Superpose `plaine_europeenne.jpg` et `france.png` : le nord de la France coïncide.
+"""Superpose deux cartes de pays voisines pour VALIDER leur frontière : zones et passages.
 
-Les deux cartes sont orientées nord en haut : la transformation est une SIMILITUDE SANS
-ROTATION (échelle + translation) de la plaine vers la France, ajustée aux moindres carrés sur
-des repères lus à la main sur les deux images (px de l'image d'origine, 1408×768).
+Les cartes sont toutes orientées nord en haut : la transformation est une SIMILITUDE SANS
+ROTATION (échelle + translation) de la carte POSÉE vers la carte de FOND, ajustée aux moindres
+carrés sur des repères lus à la main sur les deux images (px de l'image d'origine). Une paire
+par frontière (`PAIRES`) ; la carte posée est celle qu'on rétrécit (la plus détaillée), pour
+garder la toile petite.
 
-Sortie : la plaine à l'échelle et la France, en fondu à `--alpha` sur leur recouvrement (0.5
-par défaut : les deux tracés se lisent ; 1 : la France recouvre la plaine).
+Sortie par paire : `dev/cartes/superposition_<paire>.jpg` — les deux cartes en fondu à
+`--alpha` sur leur recouvrement, et par-dessus, lus dans le DUMP le plus récent
+(`jsons/telluris-dump-*.json`) :
+  · les cases à 0 de chaque grille (profil `pays` : ce sont les frontières, la mer est fermée
+    par `nav`) — bleu pour le fond, rouge pour la carte posée ;
+  · en VIOLET les cases du fond DOUBLEMENT praticables : dans la zone de terre du fond ET,
+    projetées, dans celle de la carte posée — le même terrain franchissable sur les deux ;
+  · les passages de la paire : bout du fond en bleu, bout posé en rouge, un trait épais reliant
+    les deux bouts d'une même connexion.
 
-Par-dessus, lus dans le DUMP le plus récent (`jsons/telluris-dump-*.json`) :
-  · les cases à 0 de chaque grille (profil `pays` : ce sont les frontières, la mer est
-    fermée par `nav`) — bleu pour la France, rouge pour la plaine ;
-  · les passages France ↔ plaine : le bout France en bleu, le bout plaine en rouge, un trait
-    épais reliant les deux bouts d'une même connexion.
+Rapport : par paire, l'écart des deux bouts de chaque passage, en cases du fond (0 = ils se
+font face), et le compte de cases doublement praticables.
 
-	python dev/superposer_cartes.py [--alpha 0.5] [--sortie chemin.jpg] [--sans-frontieres]
+	python dev/superposer_cartes.py [paire …] [--alpha 0.5] [--sans-frontieres]
 		[--import jsons/<lot>_a_importer.json]
 
 `--import` : le lot appliqué par-dessus le dump (PUT complet, `_deleted` supprime) — l'aperçu
@@ -24,29 +30,98 @@ import argparse
 import glob
 import json
 import os
+import statistics
+import sys
 
 from PIL import Image, ImageDraw
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, RACINE)
+
+from utils import grille_image  # noqa: E402
+
 CARTES = os.path.join(RACINE, "templates", "resources", "maps")
-FRANCE = "lieu:france"
-PLAINE = "lieu:plaine_europeenne"
+SORTIES = os.path.join(RACINE, "dev", "cartes")
 
 BLEU = (40, 110, 255)
 ROUGE = (230, 30, 30)
+VIOLET = (170, 0, 220)
 TRAIT = (255, 215, 0)
 
-# Repères : nom → (point sur la plaine, point sur la France).
-REPERES = {
-	"embouchure de la Seine": ((148, 597), (560, 160)),
-	"Lutecia": ((258, 705), (715, 212)),
-	"pas de Calais": ((215, 550), (660, 20)),
-	"forêt d'Ardenne": ((500, 620), (950, 190)),
+# Une case de TERRE par carte (celle des générateurs : `ANCRE_*`) : sa zone est celle où l'on
+# marche — sur une carte de pays, la mer est une zone à part.
+ANCRES = {
+	"lieu:france": (45, 25),
+	"lieu:plaine_europeenne": (41, 29),
+	"lieu:espagne": (40, 24),
+	"lieu:italie": (47, 25),
+	"lieu:pannonie": (50, 25),
+	"lieu:roumanie": (35, 17),
+	"lieu:egypte": (40, 30),
+	"lieu:afrique_du_nord": (40, 30),
+}
+
+# Paire → fond, carte posée, repères : nom → (point sur la carte POSÉE, point sur le FOND).
+PAIRES = {
+	"plaine_france": {
+		"fond": "lieu:france", "pose": "lieu:plaine_europeenne",
+		"reperes": {
+			"embouchure de la Seine": ((148, 597), (560, 160)),
+			"Lutecia": ((258, 705), (715, 212)),
+			"pas de Calais": ((215, 550), (660, 20)),
+			"forêt d'Ardenne": ((500, 620), (950, 190)),
+		},
+	},
+	"france_espagne": {
+		"fond": "lieu:espagne", "pose": "lieu:france",
+		"reperes": {
+			# Le coin basque (la côte cantabrique rejoint l'Atlantique) et la descente des
+			# Pyrénées dans la Méditerranée (cap de Creus).
+			"coin basque": ((405, 628), (845, 95)),
+			"cap de Creus": ((792, 700), (1175, 180)),
+		},
+	},
+	"france_italie": {
+		"fond": "lieu:italie", "pose": "lieu:france",
+		"reperes": {
+			"lac Léman": ((1040, 395), (277, 95)),
+			"lac Majeur": ((1215, 415), (432, 180)),
+			"lac de Garde": ((1370, 455), (621, 168)),
+			"fond du golfe de Gênes": ((1240, 545), (487, 262)),
+			"cap Corse": ((1285, 648), (527, 353)),
+		},
+	},
+	"italie_pannonie": {
+		"fond": "lieu:italie", "pose": "lieu:pannonie",
+		"reperes": {
+			"Venise": ((235, 405), (735, 180)),
+			"pointe de l'Istrie": ((358, 487), (858, 222)),
+			"lac Balaton": ((660, 285), (1062, 112)),
+			"bouches de Kotor": ((785, 742), (1082, 393)),
+		},
+	},
+	"pannonie_roumanie": {
+		"fond": "lieu:pannonie", "pose": "lieu:roumanie",
+		"reperes": {
+			# Le Danube à la sortie des Portes de Fer, puis au confluent de l'Olt.
+			"Portes de Fer": ((410, 615), (1075, 565)),
+			"confluent de l'Olt": ((615, 700), (1190, 575)),
+		},
+	},
+	"egypte_afrique": {
+		"fond": "lieu:afrique_du_nord", "pose": "lieu:egypte",
+		"reperes": {
+			"Le Caire": ((800, 265), (1180, 265)),
+			"pyramides": ((575, 285), (1095, 290)),
+			"Siwa": ((205, 330), (948, 315)),
+		},
+	},
 }
 
 
 def ajuster(reperes):
-	"""(s, tx, ty) minimisant Σ |s·p + t − f|² — similitude sans rotation."""
+	"""(s, tx, ty) minimisant Σ |s·p + t − f|² — similitude sans rotation, p sur la carte
+	posée, f sur le fond."""
 	ps = [p for p, _ in reperes.values()]
 	fs = [f for _, f in reperes.values()]
 	n = len(ps)
@@ -58,22 +133,29 @@ def ajuster(reperes):
 	return s, fcx - s * pcx, fcy - s * pcy
 
 
-def superposer(alpha=0.5):
-	s, tx, ty = ajuster(REPERES)
-	plaine = Image.open(os.path.join(CARTES, "plaine_europeenne.jpg")).convert("RGBA")
-	france = Image.open(os.path.join(CARTES, "france.png")).convert("RGBA")
-	plaine = plaine.resize((round(plaine.width * s), round(plaine.height * s)), Image.LANCZOS)
+def image_de(doc):
+	return Image.open(os.path.join(CARTES, doc["image"])).convert("RGBA")
+
+
+def superposer(paire, docs, alpha=0.5):
+	"""(toile, info) : `info[lieu]` = (échelle, origine px sur la toile, taille de l'image)."""
+	cfg = PAIRES[paire]
+	s, tx, ty = ajuster(cfg["reperes"])
+	fond, pose = image_de(docs[cfg["fond"]]), image_de(docs[cfg["pose"]])
+	taille_pose = pose.size
+	pose = pose.resize((round(pose.width * s), round(pose.height * s)), Image.LANCZOS)
 	tx, ty = round(tx), round(ty)
 	x0, y0 = min(0, tx), min(0, ty)
-	w = max(france.width, tx + plaine.width) - x0
-	h = max(france.height, ty + plaine.height) - y0
+	w = max(fond.width, tx + pose.width) - x0
+	h = max(fond.height, ty + pose.height) - y0
 	toile = Image.new("RGBA", (w, h), (0, 0, 0, 255))
-	# France opaque dessous : hors du recouvrement elle garde ses couleurs, dedans le fondu.
-	toile.alpha_composite(france, (-x0, -y0))
-	toile.alpha_composite(plaine, (tx - x0, ty - y0))
-	france.putalpha(round(255 * alpha))
-	toile.alpha_composite(france, (-x0, -y0))
-	return toile, {"echelle": s, "plaine": (tx - x0, ty - y0), "france": (-x0, -y0)}
+	# Fond opaque dessous : hors du recouvrement il garde ses couleurs, dedans le fondu.
+	toile.alpha_composite(fond, (-x0, -y0))
+	toile.alpha_composite(pose, (tx - x0, ty - y0))
+	fond.putalpha(round(255 * alpha))
+	toile.alpha_composite(fond, (-x0, -y0))
+	return toile, {cfg["fond"]: (1.0, (-x0, -y0), fond.size),
+				   cfg["pose"]: (s, (tx - x0, ty - y0), taille_pose)}
 
 
 def charger_dump(lot=None):
@@ -93,59 +175,105 @@ def charger_dump(lot=None):
 	return docs, nom
 
 
-def vers_toile(lieu, info, taille_image):
+def vers_toile(lieu, info):
 	"""Case (x, y) de la grille de `lieu` → (rect px de la case, centre px) sur la toile."""
+	k, (ox, oy), (lw, lh) = info[lieu["_id"]]
 	cells = lieu["cells"]
-	cw, ch = taille_image[0] / len(cells[0]), taille_image[1] / len(cells)
-	k = info["echelle"] if lieu["_id"] == PLAINE else 1.0
-	ox, oy = info["plaine"] if lieu["_id"] == PLAINE else info["france"]
+	cw, ch = lw / len(cells[0]) * k, lh / len(cells) * k
 
 	def f(x, y):
-		rect = (ox + x * cw * k, oy + y * ch * k, ox + (x + 1) * cw * k, oy + (y + 1) * ch * k)
+		rect = (ox + x * cw, oy + y * ch, ox + (x + 1) * cw, oy + (y + 1) * ch)
 		return rect, ((rect[0] + rect[2]) / 2, (rect[1] + rect[3]) / 2)
 	return f
 
 
-def dessiner_frontieres(toile, info, docs):
-	"""Cases à 0 des deux grilles, puis passages France ↔ plaine reliés deux à deux."""
-	tailles = {i: Image.open(os.path.join(CARTES, docs[i]["image"])).size for i in (FRANCE, PLAINE)}
-	proj = {i: vers_toile(docs[i], info, tailles[i]) for i in (FRANCE, PLAINE)}
+def depuis_toile(lieu, info):
+	"""Point px de la toile → case (x, y) de la grille de `lieu` (peut tomber hors grille)."""
+	k, (ox, oy), (lw, lh) = info[lieu["_id"]]
+	cells = lieu["cells"]
+	cw, ch = lw / len(cells[0]) * k, lh / len(cells) * k
+	return lambda px, py: (int((px - ox) // cw), int((py - oy) // ch))
+
+
+def zone(doc):
+	"""Cases de la zone de terre de `doc` (celle de son ancre)."""
+	z, _tailles = grille_image.zones(doc["cells"], doc.get("nav") or {})
+	ax, ay = ANCRES[doc["_id"]]
+	n = z[ay][ax]
+	return {(x, y) for y, ligne in enumerate(z) for x, v in enumerate(ligne) if v == n and n != -1}
+
+
+def valider(paire, toile, info, docs):
+	"""Dessine zones à 0, cases doublement praticables et passages ; rend le rapport."""
+	cfg = PAIRES[paire]
+	fond_id, pose_id = cfg["fond"], cfg["pose"]
+	fond, pose = docs[fond_id], docs[pose_id]
+	proj = {i: vers_toile(docs[i], info) for i in (fond_id, pose_id)}
 	calque = Image.new("RGBA", toile.size, (0, 0, 0, 0))
 	d = ImageDraw.Draw(calque)
-	for lieu_id, couleur in ((FRANCE, BLEU), (PLAINE, ROUGE)):
+	for lieu_id, couleur in ((fond_id, BLEU), (pose_id, ROUGE)):
 		for y, rang in enumerate(docs[lieu_id]["cells"]):
 			for x, v in enumerate(rang):
 				if v == 0:
 					d.rectangle(proj[lieu_id](x, y)[0], fill=couleur + (90,), outline=couleur + (150,))
+	z_fond, z_pose = zone(fond), zone(pose)
+	vers_pose = depuis_toile(pose, info)
+	doubles = [c for c in z_fond if vers_pose(*proj[fond_id](*c)[1]) in z_pose]
+	for c in doubles:
+		d.rectangle(proj[fond_id](*c)[0], fill=VIOLET + (130,), outline=VIOLET + (220,))
 	toile.alpha_composite(calque)
 
 	liens = [c for c in docs.values() if c.get("type") == "connection"
-		and sorted(n["lieu"] for n in c.get("nodes", [])) == sorted((FRANCE, PLAINE))]
+		and sorted(n["lieu"] for n in c.get("nodes", [])) == sorted((fond_id, pose_id))]
+	cote = info[fond_id][2][0] / len(fond["cells"][0])
 	d = ImageDraw.Draw(toile)
-	bouts = []
-	for c in liens:
+	bouts, ecarts = [], []
+	for c in sorted(liens, key=lambda c: c["_id"]):
 		pos = {n["lieu"]: proj[n["lieu"]](*n["pos"])[1] for n in c["nodes"]}
-		d.line([pos[FRANCE], pos[PLAINE]], fill=(0, 0, 0, 255), width=7)
-		d.line([pos[FRANCE], pos[PLAINE]], fill=TRAIT + (255,), width=4)
-		bouts += [(pos[FRANCE], BLEU), (pos[PLAINE], ROUGE)]
+		a, b = pos[fond_id], pos[pose_id]
+		ecarts.append((((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5 / cote, c["_id"]))
+		d.line([a, b], fill=(0, 0, 0, 255), width=7)
+		d.line([a, b], fill=TRAIT + (255,), width=4)
+		bouts += [(a, BLEU), (b, ROUGE)]
 	for (cx, cy), couleur in bouts:
 		d.ellipse((cx - 7, cy - 7, cx + 7, cy + 7), fill=couleur + (255,), outline=(0, 0, 0, 255), width=2)
-	return len(liens)
+	return {"liens": len(liens), "ecarts": ecarts, "doubles": len(doubles)}
 
 
-if __name__ == "__main__":
+def main() -> int:
 	ap = argparse.ArgumentParser()
+	ap.add_argument("paires", nargs="*")
 	ap.add_argument("--alpha", type=float, default=0.5)
-	ap.add_argument("--sortie", default=os.path.join(RACINE, "dev", "cartes", "superposition_plaine_france.jpg"))
 	ap.add_argument("--sans-frontieres", action="store_true")
 	ap.add_argument("--import", dest="lot")
 	args = ap.parse_args()
-	toile, info = superposer(args.alpha)
-	if not args.sans_frontieres:
-		docs, dump = charger_dump(args.lot)
-		n = dessiner_frontieres(toile, info, docs)
-		print(f"{dump} : {n} connexions France ↔ plaine")
-	os.makedirs(os.path.dirname(args.sortie), exist_ok=True)
-	toile.convert("RGB").save(args.sortie, quality=90)
-	print(f"{args.sortie} {toile.size} échelle plaine ×{info['echelle']:.3f}, "
-	      f"plaine en {info['plaine']}, France en {info['france']}")
+	paires = args.paires or list(PAIRES)
+	inconnues = [p for p in paires if p not in PAIRES]
+	if inconnues:
+		print(f"✗ paire(s) inconnue(s) : {', '.join(inconnues)} — connues : {', '.join(PAIRES)}")
+		return 2
+	docs, dump = charger_dump(args.lot)
+	print(dump)
+	os.makedirs(SORTIES, exist_ok=True)
+	for paire in paires:
+		cfg = PAIRES[paire]
+		toile, info = superposer(paire, docs, args.alpha)
+		ligne = f"{paire} : {cfg['pose']} ×{info[cfg['pose']][0]:.3f} sur {cfg['fond']}"
+		if not args.sans_frontieres:
+			r = valider(paire, toile, info, docs)
+			e = [v for v, _ in r["ecarts"]]
+			if e:
+				pire = max(r["ecarts"])
+				ligne += (f" — {r['liens']} passages, écart médian {statistics.median(e):.1f} "
+						  f"case(s), max {pire[0]:.1f} ({pire[1]}) ; {r['doubles']} case(s) "
+						  f"doublement praticables")
+			else:
+				ligne += f" — aucun passage ; {r['doubles']} case(s) doublement praticables"
+		sortie = os.path.join(SORTIES, f"superposition_{paire}.jpg")
+		toile.convert("RGB").save(sortie, quality=88)
+		print(f"{ligne}\n  ✎ {os.path.relpath(sortie, RACINE)} {toile.size}")
+	return 0
+
+
+if __name__ == "__main__":
+	raise SystemExit(main())
