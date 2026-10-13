@@ -63,31 +63,39 @@ SORTIES_CITES = {
 }
 
 # Le NORD DE LA FRANCE sur la plaine, mis à 0 : (x_min, x_max, y) ⇒ cases y ≥ `y` à 0.
-# Côte picarde, puis la frontière au sud de l'Ardenne, la Lorraine et l'Alsace jusqu'au Rhin ;
-# au-delà (x ≥ 56) le bas de la carte est l'Empire, pas la France.
-FRONTIERE_PLAINE = ((0, 12, 38), (13, 20, 39), (21, 34, 41), (35, 44, 43), (45, 55, 45))
+# CALÉE SUR LA CARTE DE FRANCE (`dev/superposer_cartes.py`, plaine ×1,08 posée en (419, −522)
+# px de la France) : sont à 0 les cases de la plaine qui tombent dans la terre de la France.
+# Le bord nord de `france.png` (sa rangée 1, d'où partent les passages) tombe sur la rangée 31
+# de la plaine, ses colonnes 45…87 sur les colonnes 18…55 ; à l'ouest, la côte picarde et
+# normande. Au-delà (x ≥ 56) le bas de la carte est l'Empire, hors du cadre de la France.
+FRONTIERE_PLAINE = ((0, 11, 38), (12, 13, 37), (14, 15, 33), (16, 18, 32), (19, 55, 31))
 
 # France ↔ plaine, une case sur deux de la frontière (`liens_frontiere`). Sur la France, la
 # rangée 1 peinte (nord fermé par nav) EST la frontière, et la côte picarde en (45, 2) : ses
 # cases touchent l'au-delà `NORD_FRANCE` (x_min, x_max, y_min, y_max — les cases hors de la
-# terre). Sur la plaine, la case juste au nord de la bande mise à 0. Lignes lues d'OUEST en
-# EST depuis `DEPART_*`.
+# terre). Sur la plaine, la case juste au nord de la bande mise à 0, dans `CADRE_PLAINE` :
+# la seule partie de la bande qui fait face à la ligne de la France (ni la côte à l'ouest du
+# pas de Calais, ni le flanc est de la bande, face à l'Empire) — les deux lignes se
+# superposent, leurs postes, répartis d'un bout à l'autre, se font face. Lignes lues d'OUEST
+# en EST depuis `DEPART_*`.
 NORD_FRANCE = (45, 87, 0, 1)
 DEPART_FRANCE_NORD = (45, 2)
-DEPART_PLAINE = (0, 37)
+CADRE_PLAINE = (17, 55, 0, 31)
+DEPART_PLAINE = (17, 31)
 
-# Noms, d'ouest en est (Manche → Flandre → Hainaut → Ardenne → Lorraine → Rhin) : un par
-# poste de la plaine (55 cases ⇒ 28 ; la France, 42 cases, en porte deux sur certaines).
+# Noms, d'ouest en est (pas de Calais → Flandre → Hainaut → Ardenne → Lorraine → Rhin) : un par
+# poste du côté le plus long (France, 42 cases ⇒ 21 ; la plaine, 39, en porte deux sur une
+# case). La côte picarde est en France depuis le recalage : plus de passage à l'ouest de Calais.
+# Un `_id` au-delà du compte, encore en base, part en suppression (`liens_perimes`).
 # ⚠️ Rang = suffixe d'`_id` (`_01`…) : réordonner fait désigner un autre passage aux `_id`
 # en base ; la grille bouge ⇒ `liens_frontiere` avertit que le compte ne tombe plus juste.
 PASSAGES_PLAINE = (
-	"Chemin de la côte picarde", "Grève de Malo", "Route de Furnes", "Gué de l'Yser",
-	"Route des Flandres", "Gué de la Lys", "Route de Lille à Courtrai", "Pont de Tournai",
-	"Route de Valenciennes à Mons", "Gué de la Sambre", "Bois de Chimay", "Route de Rocroi",
-	"Vallée de la Meuse", "Gué de la Semois", "Route de Bouillon", "Route de Montmédy",
-	"Gué de la Chiers", "Route du Luxembourg", "Gué de la Moselle", "Route de Thionville",
+	"Grève de Malo", "Route de Furnes", "Route des Flandres", "Gué de la Lys",
+	"Route de Lille à Courtrai", "Pont de Tournai", "Route de Valenciennes à Mons",
+	"Gué de la Sambre", "Route de Rocroi", "Vallée de la Meuse", "Gué de la Semois",
+	"Route de Bouillon", "Gué de la Chiers", "Route du Luxembourg", "Gué de la Moselle",
 	"Route de la Sarre", "Pont de Sarrebruck", "Passage de Bitche", "Route de Wissembourg",
-	"Gué de la Lauter", "Pont du Rhin", "Bac de Seltz", "Pont de Kehl",
+	"Pont du Rhin", "Pont de Kehl",
 )
 
 # Libellé d'une sortie de cité, d'après sa clé dans `SORTIES_*`.
@@ -298,13 +306,22 @@ def connexions_cite(cite_id, zone_cite, zone_plaine, cite_label=None):
 	return docs, refus
 
 
+def liens_perimes(docs, prefixe, gardes):
+	"""Suppressions `{"_id", "_deleted": true}` des connexions du dump dont l'`_id` commence
+	par `prefixe` et que le lot ne produit plus (`gardes`) — l'import (PUT) les efface."""
+	return [{"_id": d["_id"], "_deleted": True} for d in docs
+		if d.get("type") == "connection" and str(d.get("_id", "")).startswith(prefixe)
+		and d["_id"] not in gardes]
+
+
 def connexions_france_plaine(zone_france, zone_plaine, libelles):
 	"""(docs, refus, avertissements) des liens France ↔ plaine (`PASSAGES_PLAINE`)."""
 	x_min, x_max, y_min, y_max = NORD_FRANCE
 	au_dela = {(x, y) for x in range(x_min, x_max + 1) for y in range(y_min, y_max + 1)} - zone_france
 	return liens_frontiere("link:france_to_plaine_europeenne",
 		FRANCE, ligne_frontiere(zone_france, au_dela, DEPART_FRANCE_NORD),
-		PLAINE, ligne_frontiere(zone_plaine, bande(FRONTIERE_PLAINE, "sud", DIMS), DEPART_PLAINE),
+		PLAINE, ligne_frontiere(zone_plaine, bande(FRONTIERE_PLAINE, "sud", DIMS), DEPART_PLAINE,
+			CADRE_PLAINE),
 		PASSAGES_PLAINE, libelles)
 
 
@@ -341,6 +358,7 @@ def construire(docs, taille_fn, proposer_fn, france):
 
 	libelles = libelles_de(docs, lieux, [france])
 	liens, refus, avert = connexions_france_plaine(zone_france, zone_plaine, libelles)
+	liens += liens_perimes(docs, "link:france_to_plaine_europeenne_", {d["_id"] for d in liens})
 	for cite_id in sorted(POSITIONS_PLAINE):
 		cite = par_lieu[cite_id]
 		d, r = connexions_cite(cite_id, zone_de(cite["cells"], cite.get("nav") or {}), zone_plaine,

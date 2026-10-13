@@ -686,11 +686,26 @@ CATALOGUE = [
 		"sortie": "jsons/ports_manche_a_importer.json",
 		"ecrit": "Régénère un dump, écrit jsons/ports_manche_a_importer.json (+ un aperçu PNG "
 			"par cité créée). Rien en base avant 📥 Importer.",
-		"description": "Un seul fichier : `lieu:calais` (plaine européenne) et `lieu:douvres` "
+		"description": "Un seul fichier : `lieu:calais` (France) et `lieu:douvres` "
 			"(Angleterre) avec leur grille proposée et leurs portes de rempart ouvertes, leurs "
 			"sorties vers la carte du pays, les quais (sous-lieux, capitaine présent), la carte "
 			"`lieu:manche`, les routes `traversee:calais_douvres` / `douvres_calais`, les deux "
 			"capitaines (service `traversee`) et les ponts de navire (cartes de combat en mer). "
+			"N'émet que ce qui diffère du dump. Requiert Pillow.",
+	},
+	{
+		"id": "gen_frontiere_plaine_calais",
+		"label": "🧭 Frontière plaine européenne ↔ France recalée, Calais en France",
+		# Dump frais : enchaîne gen_voisins_france (PUT complet de `lieu:france`…) et gen_ports_manche.
+		"argv_fn": lambda v, f: _py("gen_frontiere_plaine_calais.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/frontiere_plaine_calais_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/frontiere_plaine_calais_a_importer.json. Rien "
+			"en base avant 📥 Importer.",
+		"description": "Un seul fichier, les sorties de « La France et ses voisins » et « Ports "
+			"de la Manche » fusionnées : la bande du nord de la France sur la plaine calée sur "
+			"france.png, les 21 passages France ↔ plaine face à face, Calais posée sur la carte "
+			"de France. Les connexions périmées partent en `_deleted` (supprimées à l'import). "
 			"N'émet que ce qui diffère du dump. Requiert Pillow.",
 	},
 	{

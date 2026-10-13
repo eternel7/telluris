@@ -14,6 +14,10 @@ Par-dessus, lus dans le DUMP le plus récent (`jsons/telluris-dump-*.json`) :
     épais reliant les deux bouts d'une même connexion.
 
 	python dev/superposer_cartes.py [--alpha 0.5] [--sortie chemin.jpg] [--sans-frontieres]
+		[--import jsons/<lot>_a_importer.json]
+
+`--import` : le lot appliqué par-dessus le dump (PUT complet, `_deleted` supprime) — l'aperçu
+de ce que la base sera une fois le lot importé.
 """
 
 import argparse
@@ -72,11 +76,21 @@ def superposer(alpha=0.5):
 	return toile, {"echelle": s, "plaine": (tx - x0, ty - y0), "france": (-x0, -y0)}
 
 
-def charger_dump():
-	"""{_id: doc} du dump committé le plus récent."""
+def charger_dump(lot=None):
+	"""{_id: doc} du dump committé le plus récent, `lot` (fichier à importer) appliqué dessus."""
 	chemin = sorted(glob.glob(os.path.join(RACINE, "jsons", "telluris-dump-*.json")))[-1]
 	with open(chemin, encoding="utf-8") as f:
-		return {d["_id"]: d for d in json.load(f)["docs"]}, os.path.basename(chemin)
+		docs = {d["_id"]: d for d in json.load(f)["docs"]}
+	nom = os.path.basename(chemin)
+	if lot:
+		with open(lot, encoding="utf-8") as f:
+			for d in json.load(f):
+				if d.get("_deleted"):
+					docs.pop(d["_id"], None)
+				else:
+					docs[d["_id"]] = d
+		nom += " + " + os.path.basename(lot)
+	return docs, nom
 
 
 def vers_toile(lieu, info, taille_image):
@@ -124,10 +138,11 @@ if __name__ == "__main__":
 	ap.add_argument("--alpha", type=float, default=0.5)
 	ap.add_argument("--sortie", default=os.path.join(RACINE, "dev", "cartes", "superposition_plaine_france.jpg"))
 	ap.add_argument("--sans-frontieres", action="store_true")
+	ap.add_argument("--import", dest="lot")
 	args = ap.parse_args()
 	toile, info = superposer(args.alpha)
 	if not args.sans_frontieres:
-		docs, dump = charger_dump()
+		docs, dump = charger_dump(args.lot)
 		n = dessiner_frontieres(toile, info, docs)
 		print(f"{dump} : {n} connexions France ↔ plaine")
 	os.makedirs(os.path.dirname(args.sortie), exist_ok=True)
