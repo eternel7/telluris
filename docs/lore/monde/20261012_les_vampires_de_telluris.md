@@ -68,6 +68,9 @@ L'Auteur demande d'autres mythes et légendes terrestres à rattacher aux vampir
 - **Baobhan sith** : des **lamies essaimées** vers l'ouest.
 - **Penanggalan** : **lié à Mu**.
 - **Vetāla** : son esprit est **du même genre** que celui que les deux sœurs ont piégé dans la reine Lamia — un fil discret.
+- **Lord Ruthven** : un **aristocrate de Dracula**.
+- **Abhartach** : une **lignée indépendante**.
+- **Faiblesses validées** : Dracula, la terre natale · Strigoï, le feu et l'aubépine · lamies, le fer et les chevaux, et le soleil · dragons de sang, le parjure · Nosferatu, toute lumière (y compris la magie Sainte).
 
 ---
 
@@ -219,7 +222,7 @@ Restent **ouverts par choix de l'Auteur**, comme mystères du monde :
 - **Le nom** du paladin le plus pieux, et le lieu de l'auberge-relais.
 - **Le « sang premier »** : des PNJ y croient, rien ne le prouve (Auteur, 13/10).
 
-À trancher (§ 9) : la faiblesse de chaque lignée ; ce que le penanggalan doit à Mu ; le sort de Ruthven et de Carmilla dans les cinq lignées.
+À trancher (§ 9) : ce que le penanggalan doit à Mu ; les faiblesses d'Abhartach et du penanggalan.
 
 ## 8. Prompts d'image à produire
 
@@ -237,7 +240,7 @@ Le rattachement de chaque piste est **tranché par l'Auteur** (§ ✍️ quatri�
 - **Upir de Novgorod** (lamies) — le mot slave *upir* apparaît dans la signature d'un copiste de Novgorod, « Upir Likhyi » (« le vampire méchant »). À Novgorod, le nom populaire des lamies, qu'on croit une vieille superstition ; le copiste, un servant lamie masculin qui recopie depuis des siècles. **Pouvoir caché** (Auteur) : la cité semble gouvernée par son assemblée et sa cloche (le *vétché* réel) ; derrière, les lamies.
 - **Báthory** (lamie, Auteur) — la comtesse qui se baigne dans le sang de jeunes filles. Écho : la Báthory réelle finit **emmurée vivante** dans son château, comme la reine Lamia. Théorie de PNJ possible, jamais confirmée : elle serait liée à la libération de la reine (le mystère reste entier).
 - **Carmilla** (lamie) — Le Fanu : une lamie qui ne peut porter que des **anagrammes** de son nom (Mircalla, Millarca) ; ce serait un indice d'enquête.
-- **Lord Ruthven** (Polidori) — un vampire mondain qui circule dans la haute société. ⚠️ Les Nosferatu de l'Auteur **ne peuvent pas passer pour des Anthropes** : Ruthven irait plutôt chez les **aristocrates de Dracula**. À trancher.
+- **Lord Ruthven** (Polidori ; **aristocrate de Dracula**, Auteur) — un vampire mondain qui circule dans la haute société ; les Nosferatu ne pourraient pas passer pour des Anthropes.
 - **Empalés de Vlad** (aristocrates de Dracula) — avant sa malédiction, Vlad empalait les **monstres** abattus en lisière de ses terres agricoles, pour avertir les autres ; après, il empale aussi des anthropes.
 - **Vrykolakas / Santorin** (Strigoï, Auteur) — la forme grecque des Strigoï : des morts qui ne pourrissent pas. Santorin serait l'île où l'on exile les relevés (le dicton réel « envoyer un vampire à Santorin »).
 - **Arnold Paole / Peter Plogojowitz** (Strigoï, ou superstition) — le modèle de l'**enquête du rang D** (Auteur) : morts en série dans un village, tombes rouvertes, corps gonflés et sang frais, rapport d'enquêteurs. Le dénouement varie : un Strigoï, une maladie, ou rien de certain.
@@ -247,17 +250,17 @@ Le rattachement de chaque piste est **tranché par l'Auteur** (§ ✍️ quatri�
 - **Baobhan sith** (lamies essaimées, Auteur) — dans les Highlands, des danseuses en robe verte qui boivent le sang de chasseurs abrités pour la nuit dans une bergerie ; seul survit l'homme qui garde son **cheval** et du **fer** près de lui. Elles expliqueraient pourquoi les forestiers dorment avec leur monture.
 - **Penanggalan** (lié à Mu, Auteur) — en Malaisie, la tête d'une femme vole la nuit en entraînant ses viscères ; son corps attend dans un bac de **vinaigre**, et des **épines** posées aux fenêtres l'arrêtent. Dans la légende, une femme qui méditait pour dominer son corps est surprise, et sa tête s'arrache. Lien proposé avec le canon : une élève de Mu « revenue transformée » d'un enseignement avancé.
 - **Vetāla** (esprit du même genre que celui de la reine Lamia, Auteur) — le roi Vikramāditya porte un cadavre habité qui lui pose des énigmes. Ce serait une quête d'**escorte inversée** à énigmes ; le lien avec Lamia ne serait visible que d'un lettré.
-- **Abhartach** — en Irlande, un roi-**nain** tyran revient de la tombe et exige un bol de sang tiré des veines de ses sujets. Cathán le tue avec une épée en **if** et l'enterre **tête en bas** sous une pierre (le dolmen réel de Slaghtaverty). Sa lignée est à trancher (lignée indépendante ? aristocrate ?).
+- **Abhartach** — en Irlande, un roi-**nain** tyran revient de la tombe et exige un bol de sang tiré des veines de ses sujets. Cathán le tue avec une épée en **if** et l'enterre **tête en bas** sous une pierre (le dolmen réel de Slaghtaverty). **Lignée indépendante** (Auteur) : un revenant isolé, unique.
 - **Draugr** (mort-vivant à part, Auteur) — en Islande, Glámr revient hanter une ferme ; Grettir le tue mais garde de sa malédiction la **peur du noir**. Lieux possibles : Reykjavik ou Akureyri. En jeu : un débuff d'**effroi nocturne** durable après la victoire.
 
-### Faiblesses par lignée (Auteur : retenues ; contenu proposé)
+### Faiblesses par lignée (Auteur, 13/10 : validées, sauf Abhartach et penanggalan, proposées)
 
 | Lignée | Soleil (règle commune § 1) | Faiblesse tirée du mythe |
 |---|---|---|
 | Aristocrates de Dracula | brûle | **la terre natale** : ils doivent dormir dans la terre de leur cité (les caisses de terre de Stoker) |
 | Strigoï, vrykolakas | tue | **le feu** (on brûle les vrykolakas) et **l'aubépine** (pieu des Balkans) |
 | Nosferatu | consume | **la lumière** sous toutes ses formes, y compris celle de la magie Sainte (Murnau) |
-| Lamies, baobhan sith | rend inerte | **le fer froid** et **les chevaux** (baobhan sith) |
+| Lamies, baobhan sith | rend inerte (confirmé, Auteur) | **le fer froid** et **les chevaux** (baobhan sith) |
 | Dragons de sang | aucune (fidèles) · gêne (déchus) | **le parjure** : un serment rompu les affaiblit |
 | Abhartach | à trancher | **l'if**, et **la tête en bas** au tombeau |
 | Penanggalan | à trancher | **les épines** et **le vinaigre** |
