@@ -30,6 +30,8 @@ PAIRES = {
 			# Pyrénées dans la Méditerranée (cap de Creus).
 			"coin basque": ((405, 628), (845, 95)),
 			"cap de Creus": ((792, 700), (1175, 180)),
+			# L'angle du golfe du Lion, où la côte du Roussillon tourne vers l'est (Narbonne).
+			"golfe du Lion": ((803, 640), (1180, 105)),
 		},
 	},
 	"france_italie": {
@@ -57,6 +59,9 @@ PAIRES = {
 			# Le Danube à la sortie des Portes de Fer, puis au confluent de l'Olt.
 			"Portes de Fer": ((410, 615), (1075, 565)),
 			"confluent de l'Olt": ((615, 700), (1190, 575)),
+			# L'Olt franchit les Carpates entre deux massifs : il fixe l'échelle du nord au sud,
+			# que les deux points du Danube, alignés, laissaient libre.
+			"défilé de Turnu Roșu": ((605, 430), (1185, 415)),
 		},
 	},
 	"egypte_afrique": {

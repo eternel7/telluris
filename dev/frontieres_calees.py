@@ -48,15 +48,16 @@ def recaler(voisine, foi, zone_foi, ancienne=frozenset(), bande_foi=frozenset(),
 
 
 def au_dela(doc, zone, autre_id, cible):
-	"""Cases de la grille de `doc` hors de `zone`, voisines d'elle, dont la projection sur
-	l'autre carte vérifie `cible(case)` : ce que la frontière sépare."""
+	"""Cases FERMÉES (0) de la grille de `doc`, voisines de `zone`, dont la projection sur
+	l'autre carte vérifie `cible(case)` : ce que la frontière sépare. Une case à 1 hors de la
+	zone (fleuve ou mer murés par `nav`) n'est jamais une frontière."""
 	vers = projection(doc["_id"], autre_id)
 	cells = doc["cells"]
 	cases = set()
 	for x, y in zone:
 		for dx, dy in ORTHO:
 			n = (x + dx, y + dy)
-			if n not in zone and _dans(cells, *n) and cible(vers(n)):
+			if n not in zone and _dans(cells, *n) and cells[n[1]][n[0]] == 0 and cible(vers(n)):
 				cases.add(n)
 	return cases
 
