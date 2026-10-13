@@ -20,8 +20,13 @@ montre une carte est mis à 0, la connexion se pose SUR la frontière, du côté
     (`FRONTIERE_ITALIE_PANNONIE`, `FRONTIERE_ITALIE_TYROL` : le territoire de
     `lieu:pannonie`) mis à 0. Côté France, l'Italie au sud-est des Alpes
     (`FRONTIERE_FRANCE_ITALIE`).
+    LA FRANCE FAIT FOI (carte plus détaillée) : l'Italie est ensuite RECALÉE sur elle
+    (`frontieres_calees.recaler`) — toute case de l'Italie qui tombe dans la terre de la France
+    est mise à 0, Suisse comprise ; les bandes ci-dessus restent la bande d'origine.
+    (Recalée de même sur la Pannonie par `gen_pannonie`.)
   · France ↔ Italie : les cols des Alpes et la corniche (`PASSAGES_ITALIE`), une case sur
-    deux de part et d'autre de la crête — Suisse comprise côté France (elle touche l'Italie).
+    deux sur la France, chacun face à sa projection sur l'Italie
+    (`frontieres_calees.liens_projetes`) — Suisse comprise côté France (elle touche l'Italie).
   · Italie ↔ Rome : la cité dessinée sur l'Italie et ses voisines ↔ une sortie par route ;
     `lieu:rome` reçoit `lieu_parent: "lieu:italie"`.
 """
@@ -32,6 +37,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from dev import frontieres_calees  # noqa: E402
 from dev.gen_plaine_europeenne import (  # noqa: E402
 	ANCRE_FRANCE, FRANCE, bande, cases_autour, cases_frontiere, case_proche, connexion, fermer,
 	libelle_sortie, libelles_de, liens_frontiere, ligne_frontiere, sans_rev, zone_de)
@@ -93,12 +99,12 @@ PASSAGES_ESPAGNE = (
 	"Port de Vénasque", "Val d'Aran", "Port d'Envalira", "Col du Perthus", "Col de Banyuls",
 )
 
-# France ↔ Italie, une case sur deux : sur la France, la Suisse au nord de la bande puis la
-# crête, du nord-est au sud (`DEPART_FRANCE_ALPES`) ; sur l'Italie, du nord au sud.
+# France ↔ Italie, une case sur deux sur la France (elle fait foi), la Suisse au nord de la
+# bande puis la crête, du nord-est au sud (`DEPART_FRANCE_ALPES`) ; sur l'Italie recalée, la
+# ligne qui lui fait face, du nord-est (Grisons) au sud (`DEPART_ITALIE_ALPES`).
 DEPART_FRANCE_ALPES = (87, 24)
-DEPART_ITALIE_ALPES = (18, 0)
-# Noms, des Grisons à la mer : un par poste de la France (25 cases ⇒ 13 ; l'Italie, 19 cases,
-# en porte deux sur certaines).
+DEPART_ITALIE_ALPES = (38, 8)
+# Noms, des Grisons à la mer : un par poste de la France (26 cases ⇒ 13).
 PASSAGES_ITALIE = (
 	"Col de la Bernina", "Col du Splügen", "Col du Saint-Gothard", "Col du Nufenen",
 	"Col du Simplon", "Col du Grand-Saint-Bernard", "Col du Géant", "Col du Petit-Saint-Bernard",
@@ -143,14 +149,20 @@ def preparer_france(france):
 	return doc
 
 
-def preparer_italie(italie):
+def preparer_italie(italie, france=None):
 	"""Le doc de l'Italie (copie, `_rev` retiré), la France, les Balkans et le Tyrol qu'elle
-	montre à 0 ; ses murs peints ne perdent aucun bit."""
+	montre à 0 ; ses murs peints ne perdent aucun bit. `france` (préparée) : l'Italie est
+	recalée sur elle, qui fait foi."""
 	doc = sans_rev(copy.deepcopy(italie))
 	dims = doc["dimensions"]
 	for bandes, sens in ((FRONTIERE_ITALIE_FRANCE, "ouest"), (FRONTIERE_ITALIE_PANNONIE, "est"),
 			(FRONTIERE_ITALIE_TYROL, "nord")):
 		fermer(doc["cells"], cases_frontiere(bandes, sens, dims["x"], dims["y"]))
+	if france is not None:
+		frontieres_calees.recaler(doc, france,
+			zone_de(france["cells"], france.get("nav") or {}, ANCRE_FRANCE),
+			cases_frontiere(FRONTIERE_ITALIE_FRANCE, "ouest", dims["x"], dims["y"]),
+			cases_frontiere(FRONTIERE_FRANCE_ITALIE, "est", dims["x"], dims["y"]))
 	return doc
 
 
@@ -164,12 +176,12 @@ def connexions_espagne(zone_france, zone_espagne, libelles, dims):
 		PASSAGES_ESPAGNE, libelles)
 
 
-def connexions_italie(zone_france, zone_italie, libelles, dims):
-	"""(docs, refus, avertissements) des cols des Alpes."""
-	return liens_frontiere("link:france_to_italie",
-		FRANCE, ligne_frontiere(zone_france, bande(FRONTIERE_FRANCE_ITALIE, "est", dims), DEPART_FRANCE_ALPES),
-		ITALIE, ligne_frontiere(zone_italie, bande(FRONTIERE_ITALIE_FRANCE, "ouest", dims), DEPART_ITALIE_ALPES),
-		PASSAGES_ITALIE, libelles)
+def connexions_italie(france, zone_france, italie, zone_italie, libelles):
+	"""(docs, refus, avertissements) des cols des Alpes : postes sur la France, qui fait foi."""
+	ligne_italie, ligne_france = frontieres_calees.lignes(italie, zone_italie, france, zone_france,
+		DEPART_ITALIE_ALPES, DEPART_FRANCE_ALPES)
+	return frontieres_calees.liens_projetes("link:france_to_italie", FRANCE, ligne_france,
+		ITALIE, ligne_italie, PASSAGES_ITALIE, libelles)
 
 
 def connexions_rome(zone_italie, zone_rome, rome_label="Rome"):
@@ -198,17 +210,26 @@ def rome_rattachee(rome_doc):
 	return doc
 
 
+def liens_italie(france, italie, docs):
+	"""(docs, refus, avertissements) des cols des Alpes, sur l'Italie FINALE — recalée aussi
+	sur la Pannonie (`gen_pannonie`), qui lui ferme le Tyrol : appelé après elle."""
+	return connexions_italie(france, zone_de(france["cells"], france.get("nav") or {}, ANCRE_FRANCE),
+		italie, zone_de(italie["cells"], italie.get("nav") or {}, ANCRE_ITALIE),
+		libelles_de(docs, [italie]))
+
+
 def construire(docs, proposer_espagne_fn):
 	"""(lieux, liens, refus, avertissements) : France, Espagne et Italie frontières posées, Rome rattachée, et
-	les liens. `lieux` = docs complets, émis par l'appelant s'ils diffèrent du dump ; l'Italie
-	en sort telle qu'elle sera écrite (lue ensuite par `gen_pannonie`)."""
+	les liens — SAUF France ↔ Italie (`liens_italie`, sur l'Italie finale). `lieux` = docs
+	complets, émis par l'appelant s'ils diffèrent du dump ; l'Italie en sort recalée sur la
+	France, puis `gen_pannonie` la recale sur la Pannonie."""
 	par_id = {d.get("_id"): d for d in docs}
 	manquants = [i for i in (FRANCE, ESPAGNE, ITALIE, ROME) if not (par_id.get(i) or {}).get("cells")]
 	if manquants:
 		return [], [], [f"absent(s) du dump ou sans grille : {', '.join(manquants)}"], []
 	france = preparer_france(par_id[FRANCE])
 	espagne = preparer_espagne(par_id[ESPAGNE], proposer_espagne_fn)
-	italie, rome = preparer_italie(par_id[ITALIE]), par_id[ROME]
+	italie, rome = preparer_italie(par_id[ITALIE], france), par_id[ROME]
 	zone_france = zone_de(france["cells"], france.get("nav") or {}, ANCRE_FRANCE)
 	zone_espagne = zone_de(espagne["cells"], espagne.get("nav") or {}, ANCRE_ESPAGNE)
 	zone_italie = zone_de(italie["cells"], italie.get("nav") or {}, ANCRE_ITALIE)
@@ -217,7 +238,5 @@ def construire(docs, proposer_espagne_fn):
 	libelles = libelles_de(docs)
 	dims = france["dimensions"]
 	liens, refus, avert = connexions_espagne(zone_france, zone_espagne, libelles, dims)
-	d, r, a = connexions_italie(zone_france, zone_italie, libelles, dims)
-	liens, refus, avert = liens + d, refus + r, avert + a
 	d, r = connexions_rome(zone_italie, zone_rome, libelles[ROME])
 	return [france, espagne, italie, rome_rattachee(rome)], liens + d, refus + r, avert

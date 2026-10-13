@@ -10,6 +10,7 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dev import gen_egypte_afrique_du_nord as gea  # noqa: E402
+from dev.calage_cartes import projection  # noqa: E402
 from dev import gen_grille_image as ggi  # noqa: E402
 from dev import gen_villes_pays as gvp  # noqa: E402
 from dev.gen_plaine_europeenne import zone_de  # noqa: E402
@@ -166,26 +167,39 @@ def test_frontiere_egypte_sans_avertissement_de_compte(construit):
 	assert not [a for a in construit[4] if "nom(s) pour" in a]
 
 
-def test_passages_une_case_sur_deux_cote_afrique_repartis_cote_egypte(construit):
+def test_passages_une_case_sur_deux_cote_afrique_face_a_face_cote_egypte(construit):
+	"""Une case sur deux côté Afrique du Nord (choix de l'Auteur) ; côté Égypte, qui fait foi,
+	le bout sur sa ligne, qui retombe à une case au plus du poste (en cases de l'Afrique du
+	Nord, la plus grossière : une des siennes vaut ~2,7 de l'Égypte)."""
 	par_id = {d["_id"]: d for d in construit[0]}
 	lignes = gea.lignes(par_id[gea.EGYPTE], par_id[gea.AFRIQUE])
 	passages = [l for l in construit[1] if l["_id"].startswith("link:afrique_du_nord_to_egypte_")]
 	assert len(passages) == sum(len(n) for n in gea.PASSAGES.values())
 	assert [l["_id"] for l in passages] == [f"link:afrique_du_nord_to_egypte_{i:02d}"
 		for i in range(1, len(passages) + 1)]
+	vers = projection(gea.EGYPTE, gea.AFRIQUE)
 	debut = 0
 	for troncon, (ligne_e, ligne_a) in lignes.items():
 		noms = gea.PASSAGES[troncon]
 		du_troncon = passages[debut:debut + len(noms)]
 		debut += len(noms)
 		assert [tuple(l["nodes"][0]["pos"]) for l in du_troncon] == ligne_a[0::2]
-		# Côté Égypte : répartis d'un bout à l'autre du tronçon, une case chacun.
-		cotes_e = [tuple(l["nodes"][1]["pos"]) for l in du_troncon]
-		assert cotes_e == gea.postes(ligne_e, len(noms))
-		assert cotes_e[0] == ligne_e[0] and cotes_e[-1] in ligne_e[-2:]
-		assert len(set(cotes_e)) == len(cotes_e)
 		for l, nom in zip(du_troncon, noms):
+			a, e = tuple(l["nodes"][0]["pos"]), tuple(l["nodes"][1]["pos"])
+			assert e in ligne_e
+			px, py = vers(e)
+			assert max(abs(px - a[0]), abs(py - a[1])) <= 1, (l["_id"], a, e)
 			assert [n["label"] for n in l["nodes"]] == [f"{nom} — Afrique du Nord", f"{nom} — Égypte"]
+
+
+def test_afrique_recalee_sur_l_egypte(construit):
+	"""L'Égypte fait foi : toute case de l'Afrique du Nord qui tombe dans sa terre est fermée."""
+	par_id = {d["_id"]: d for d in construit[0]}
+	egy, afr = par_id[gea.EGYPTE], par_id[gea.AFRIQUE]
+	zone_e = zone_de(egy["cells"], egy.get("nav") or {}, gea.ANCRE_EGYPTE)
+	vers = projection(gea.AFRIQUE, gea.EGYPTE)
+	dans = [(x, y) for y in range(48) for x in range(88) if vers((x, y)) in zone_e]
+	assert dans and all(afr["cells"][y][x] == 0 for x, y in dans)
 
 
 def test_territoire_du_voisin_mis_a_zero(construit):
@@ -209,14 +223,18 @@ def test_liens_des_cites_sur_l_afrique_du_nord_signales(dump, construit):
 
 def test_abou_simbel_reste_praticable_et_sa_route_y_mene(construit):
 	"""Abou Simbel n'est pas sur la carte d'Égypte : elle reste dans la terre de l'Afrique du
-	Nord, et le passage le plus proche d'elle est celui qui porte son nom."""
+	Nord ; le passage qui porte son nom part du Nil de l'Égypte (qui fait foi) et arrive près
+	d'elle."""
 	afr = next(d for d in construit[0] if d["_id"] == gea.AFRIQUE)
 	cible = gea.ABOU_SIMBEL_AFRIQUE
 	assert cible in zone_de(afr["cells"], afr.get("nav") or {}, gea.ANCRE_AFRIQUE)
 	passages = [l for l in construit[1] if l["_id"].startswith("link:afrique_du_nord_to_egypte_")]
-	plus_proche = min(passages, key=lambda l: (l["nodes"][0]["pos"][0] - cible[0]) ** 2
-		+ (l["nodes"][0]["pos"][1] - cible[1]) ** 2)
-	assert plus_proche["nodes"][0]["label"] == "Route d'Abou Simbel — Afrique du Nord"
+	nil = gea.NIL_EGYPTE
+	route = min(passages, key=lambda l: (l["nodes"][1]["pos"][0] - nil[0]) ** 2
+		+ (l["nodes"][1]["pos"][1] - nil[1]) ** 2)
+	assert route["nodes"][0]["label"] == "Route d'Abou Simbel — Afrique du Nord"
+	ax, ay = route["nodes"][0]["pos"]
+	assert max(abs(ax - cible[0]), abs(ay - cible[1])) <= 4
 
 
 # ── Grand Temple d'Abou Simbel ────────────────────────────────────────────────────────────

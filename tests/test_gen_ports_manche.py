@@ -68,3 +68,17 @@ def test_zones_de_la_grille_utilisees_par_le_generateur():
 	cells = [[0, 1]]
 	assert g.zone_proche(cells, {}, (0, 0)) == {(1, 0)}
 	assert grille_image.zones(cells, {})[0][0][0] == -1
+
+
+def test_cite_demenagee_anciens_liens_supprimes():
+	"""Calais change de pays : ses liens vers l'ancien pays partent en `_deleted`, jamais le
+	lien de ses quais ni un lien gardé."""
+	def lien(_id, a, b):
+		return {"_id": _id, "type": "connection", "nodes": [{"lieu": a}, {"lieu": b}]}
+	dump = [lien("link:plaine_europeenne_to_calais_sud", "lieu:plaine_europeenne", "lieu:calais"),
+		lien("link:quai01_to_calais", "lieu:calais", "lieu:calais_quais"),
+		lien("link:france_to_calais_sud", "lieu:france", "lieu:calais"),
+		lien("link:france_to_bruges", "lieu:france", "lieu:bruges")]
+	assert g.liens_perimes(dump, "lieu:calais", {"link:france_to_calais_sud"}) == [
+		{"_id": "link:plaine_europeenne_to_calais_sud", "_deleted": True}]
+	assert g.CITES["lieu:calais"]["parent"] == "lieu:france"

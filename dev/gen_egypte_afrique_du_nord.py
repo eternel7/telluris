@@ -12,12 +12,17 @@ accessible, et chaque passage est NOMMÉ.
     25e méridien, jusqu'à la latitude du bas de la carte d'Égypte (Louxor dessinée en
     y ≈ 26 sur les deux cartes à leur échelle). L'Anatolie, le Levant et l'Arabie du haut de
     la carte, au-delà du Sinaï, sont pris avec : ils ne se joignaient que par lui.
+    L'ÉGYPTE FAIT FOI (carte plus détaillée) : l'Afrique du Nord est ensuite RECALÉE sur
+    elle (`frontieres_calees.recaler`) — toute case qui tombe dans la terre de l'Égypte est
+    mise à 0 ; `FRONTIERE_AFRIQUE` reste la bande d'origine.
   · DEUX TRONÇONS (`TRONCONS`) : l'ouest, de la Méditerranée vers le sud ; le sud, d'ouest
     en est jusqu'à la mer Rouge (le cadre de chaque ligne s'arrête à son rivage).
 
-DENSITÉ (choix de l'Auteur, 12/10) : l'Égypte est dessinée ~4,5 fois plus grand. Une case
-sur deux est comptée côté AFRIQUE DU NORD (`ligne[0::2]`) ; côté Égypte, les mêmes passages
-sont RÉPARTIS sur tout le tronçon (`postes`) — un tous les ~5 cases au lieu d'une sur deux.
+DENSITÉ (choix de l'Auteur, 12/10) : l'Égypte est dessinée ~2,7 fois plus grand (calage sur
+quatre repères, du Caire à Louxor : `dev/calage_cartes.py`). Une case
+sur deux est comptée côté AFRIQUE DU NORD (`postes`) ; côté Égypte, chaque passage se pose
+sur la case de sa ligne la plus proche de la projection du poste
+(`frontieres_calees.liens_projetes`) — les deux bouts se font face.
 
 ⚠️ Une connexion déjà en base dont un nœud tombe dans le territoire mis à 0 est signalée
 (avertissement) : la retirer à la main (🧾 JSON → 🗑) — c'est le cas des liens Alexandrie et
@@ -30,8 +35,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from dev.gen_plaine_europeenne import (  # noqa: E402
-	bande, connexion, fermer, ligne_frontiere, postes, sans_rev, zone_de)
+from dev import frontieres_calees  # noqa: E402
+from dev.gen_plaine_europeenne import bande, fermer, sans_rev, zone_de  # noqa: E402
 
 EGYPTE = "lieu:egypte"
 AFRIQUE = "lieu:afrique_du_nord"
@@ -50,10 +55,11 @@ FRONTIERE_AFRIQUE = ((0, 27, 62),)
 
 # DEUX TRONÇONS, chacun réparti à part (sinon les postes de l'ouest d'une carte tomberaient sur
 # le sud de l'autre) : nom → (cadre sur l'Égypte, cadre sur l'Afrique du Nord, départs) ; un
-# cadre (x_min, x_max, y_min, y_max) borne la ligne, de la côte à la mer Rouge exclue.
+# cadre (x_min, x_max, y_min, y_max) borne la ligne, de la côte à la mer Rouge exclue. Lignes
+# de l'Afrique du Nord RECALÉE : le long du cadre ouest de la carte d'Égypte, puis de son bas.
 TRONCONS = {
-	"ouest": ((7, 8, 9, 44), (61, 61, 13, 27), (8, 9), (61, 13)),
-	"sud": ((9, 76, 44, 44), (62, 78, 28, 28), (9, 44), (62, 28)),
+	"ouest": ((7, 8, 9, 43), (56, 57, 0, 27), (7, 9), (56, 17)),
+	"sud": ((9, 87, 44, 44), (58, 87, 28, 28), (9, 44), (58, 28)),
 }
 
 # Noms par tronçon — l'ouest du nord au sud le long du 25e méridien, le sud d'ouest en est le
@@ -61,19 +67,22 @@ TRONCONS = {
 # ⚠️ Rang = suffixe d'`_id`, numérotés à la suite (cf. gen_plaine_europeenne.PASSAGES_PLAINE).
 # ABOU SIMBEL n'est PAS sur la carte d'Égypte (elle s'arrête sous Louxor) : elle est dessinée
 # sur l'Afrique du Nord en (76, 32), au bord du Nil, au sud du territoire mis à 0. Le passage
-# posé au plus près du Nil (8e du sud : Afrique du Nord x 76, Égypte x 67 sous Louxor) porte
-# donc son nom — c'est la route qui y mène.
+# qui tombe sur le Nil de l'Égypte, qui fait foi (`NIL_EGYPTE`, sous Louxor ; Afrique du Nord
+# x 78), porte son nom — c'est la route qui y mène. Les autres suivent le désert occidental de
+# l'Égypte, d'ouest en est ; le dernier, rive est, part vers la mer Rouge (Bérénice).
 ABOU_SIMBEL_AFRIQUE = (76, 32)
+# Le Nil au bas de la carte d'Égypte (sous Louxor) : la route d'Abou Simbel y part.
+NIL_EGYPTE = (64, 44)
 PASSAGES = {
 	"ouest": (
-		"Port de Sollum", "Col d'Halfaya", "Piste de Jaghboub", "Oasis de Siwa",
-		"Lisière nord de la Grande Mer de Sable", "Piste de Koufra", "Plateau du Gilf Kébir",
-		"Djebel Ouweinat",
+		"Port de Sollum", "Piste de Jaghboub", "Oasis de Siwa", "Piste de Koufra",
+		"Plateau du Gilf Kébir", "Djebel Ouweinat",
 	),
 	"sud": (
-		"Lisière sud de la Grande Mer de Sable", "Piste d'Abou Ballas", "Oasis de Dakhla",
-		"Oasis de Kharga", "Darb el-Arbaïn", "Piste de Kourkour", "Route d'Esna",
-		"Route d'Abou Simbel", "Route de Bérénice",
+		"Lisière sud de la Grande Mer de Sable", "Piste d'Abou Ballas", "Piste de Bir Tarfawi",
+		"Oasis de Dakhla", "Oasis de Kharga", "Darb el-Arbaïn", "Piste de Sélima",
+		"Oasis de Dounqoul", "Piste de Kourkour", "Route d'Assouan", "Route d'Abou Simbel",
+		"Route de Bérénice",
 	),
 }
 
@@ -86,60 +95,57 @@ def preparer_egypte(egypte):
 	return doc
 
 
-def preparer_afrique(afrique):
-	"""Le doc de l'Afrique du Nord (copie, `_rev` retiré), l'Égypte qu'elle montre à 0."""
+def preparer_afrique(afrique, egypte):
+	"""Le doc de l'Afrique du Nord (copie, `_rev` retiré), l'Égypte qu'elle montre à 0, puis
+	recalée sur `egypte` (préparée), qui fait foi."""
 	doc = sans_rev(copy.deepcopy(afrique))
 	fermer(doc["cells"], bande(FRONTIERE_AFRIQUE, "est", doc["dimensions"]))
+	frontieres_calees.recaler(doc, egypte,
+		zone_de(egypte["cells"], egypte.get("nav") or {}, ANCRE_EGYPTE),
+		bande(FRONTIERE_AFRIQUE, "est", doc["dimensions"]),
+		bande(FRONTIERE_EGYPTE, "ouest", egypte["dimensions"])
+		| bande(CADRE_SUD_EGYPTE, "sud", egypte["dimensions"]))
 	return doc
 
 
 def lignes(egypte, afrique):
 	"""{tronçon: (ligne de l'Égypte, ligne de l'Afrique du Nord)} sur les docs PRÉPARÉS."""
-	dims_e, dims_a = egypte["dimensions"], afrique["dimensions"]
-	au_dela_e = bande(FRONTIERE_EGYPTE, "ouest", dims_e) | bande(CADRE_SUD_EGYPTE, "sud", dims_e)
-	au_dela_a = bande(FRONTIERE_AFRIQUE, "est", dims_a)
 	zone_e = zone_de(egypte["cells"], egypte.get("nav") or {}, ANCRE_EGYPTE)
 	zone_a = zone_de(afrique["cells"], afrique.get("nav") or {}, ANCRE_AFRIQUE)
-	return {nom: (ligne_frontiere(zone_e, au_dela_e, depart_e, cadre_e),
-			ligne_frontiere(zone_a, au_dela_a, depart_a, cadre_a))
-		for nom, (cadre_e, cadre_a, depart_e, depart_a) in TRONCONS.items()}
+	sortie = {}
+	for nom, (cadre_e, cadre_a, depart_e, depart_a) in TRONCONS.items():
+		ligne_a, ligne_e = frontieres_calees.lignes(afrique, zone_a, egypte, zone_e,
+			depart_a, depart_e, cadre_a, cadre_e)
+		sortie[nom] = (ligne_e, ligne_a)
+	return sortie
 
 
 def connexions(lignes_par_troncon, libelles):
 	"""(docs, refus, avertissements) : un lien `link:afrique_du_nord_to_egypte_NN` par nom,
-	une case sur deux côté Afrique du Nord, répartis sur tout le tronçon côté Égypte."""
+	une case sur deux côté Afrique du Nord, chacun face à sa projection côté Égypte."""
 	prefixe = "link:afrique_du_nord_to_egypte"
-	docs, refus, avert, rang = [], [], [], 0
+	docs, refus, avert = [], [], []
 	for troncon, (ligne_e, ligne_a) in lignes_par_troncon.items():
-		noms = PASSAGES[troncon]
-		if not ligne_e or not ligne_a:
-			refus.append(f"{prefixe} ({troncon}) : aucune case de frontière sur "
-				f"{EGYPTE if not ligne_e else AFRIQUE}")
-			continue
-		attendu = (len(ligne_a) + 1) // 2
-		if len(noms) != attendu:
-			avert.append(f"{prefixe} ({troncon}) : {len(noms)} nom(s) pour {attendu} poste(s) — "
-				f"frontière de {len(ligne_a)} case(s) sur {AFRIQUE}, {len(ligne_e)} sur {EGYPTE}")
-		for nom, pos_a, pos_e in zip(noms, postes(ligne_a, len(noms)), postes(ligne_e, len(noms))):
-			rang += 1
-			doc = connexion(f"{prefixe}_{rang:02d}", AFRIQUE, pos_a, EGYPTE, pos_e)
-			for noeud in doc["nodes"]:
-				noeud["label"] = f"{nom} — {libelles.get(noeud['lieu'], noeud['lieu'])}"
-			docs.append(doc)
+		d, r, a = frontieres_calees.liens_projetes(prefixe, AFRIQUE, ligne_a, EGYPTE, ligne_e,
+			PASSAGES[troncon], libelles, rang0=len(docs))
+		docs += d
+		refus += [f"{x} ({troncon})" for x in r]
+		avert += [f"{x} ({troncon})" for x in a]
 	return docs, refus, avert
 
 
 def connexions_coupees(docs, egypte, afrique):
 	"""Avertissements : connexions en base dont un nœud tombe sur une case mise à 0 ici."""
-	fermees = {EGYPTE: bande(FRONTIERE_EGYPTE, "ouest", egypte["dimensions"])
-			| bande(CADRE_SUD_EGYPTE, "sud", egypte["dimensions"]),
-		AFRIQUE: bande(FRONTIERE_AFRIQUE, "est", afrique["dimensions"])}
+	cells = {EGYPTE: egypte["cells"], AFRIQUE: afrique["cells"]}
 	avert = []
 	for d in docs:
 		if d.get("type") != "connection" or str(d.get("_id", "")).startswith("link:afrique_du_nord_to_egypte_"):
 			continue
 		for n in d.get("nodes") or []:
-			if tuple(n.get("pos") or ()) in fermees.get(n.get("lieu"), ()):
+			grille = cells.get(n.get("lieu"))
+			x, y = (n.get("pos") or (None, None))[:2]
+			if grille is not None and x is not None and 0 <= y < len(grille) \
+					and 0 <= x < len(grille[y]) and grille[y][x] == 0:
 				avert.append(f"{d['_id']} : nœud {n['lieu']} {n['pos']} dans le territoire mis à 0 "
 					"— à retirer à la main (🧾 JSON → 🗑)")
 	return avert
@@ -152,6 +158,9 @@ def construire(docs, libelles):
 	manquants = [i for i in (EGYPTE, AFRIQUE) if not (par_id.get(i) or {}).get("cells")]
 	if manquants:
 		return [], [], [f"absent(s) du dump ou sans grille : {', '.join(manquants)}"], []
-	egypte, afrique = preparer_egypte(par_id[EGYPTE]), preparer_afrique(par_id[AFRIQUE])
+	egypte = preparer_egypte(par_id[EGYPTE])
+	afrique = preparer_afrique(par_id[AFRIQUE], egypte)
 	liens, refus, avert = connexions(lignes(egypte, afrique), libelles)
+	liens += frontieres_calees.liens_perimes(docs, "link:afrique_du_nord_to_egypte_",
+		{l["_id"] for l in liens})
 	return [egypte, afrique], liens, refus, avert + connexions_coupees(docs, egypte, afrique)

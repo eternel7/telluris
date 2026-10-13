@@ -5,7 +5,7 @@ POURQUOI : le système de traversées maritimes (`utils/traversee.py`, `routers/
 service PNJ `traversee`) n'a de sens qu'avec deux ports. Ce générateur les crée depuis les
 images déposées et tout ce qui les rend jouables :
 
-  · `lieu:calais` (sous `lieu:plaine_europeenne`, côte picarde) et `lieu:douvres` (sous
+  · `lieu:calais` (sous `lieu:france`, pas de Calais) et `lieu:douvres` (sous
     `lieu:angleterre`, pointe du Kent) — grille PROPOSÉE (`gen_grille_image.proposer_pour_image`,
     profil ville : rues, enceinte, coins, passages), puis le RÉSEAU INTERNE rendu continu : les
     PORTES dessinées du rempart sont ouvertes dans `nav` (la proposition ferme l'enceinte par nav
@@ -29,6 +29,11 @@ images déposées et tout ce qui les rend jouables :
 CRÉÉ UNE FOIS : un lieu déjà dans le dump garde sa grille (les retouches de l'éditeur survivent
 au rejeu) ; ÉMIS = ce qui DIFFÈRE du dump (`gen_voisins_france.a_emettre`) — un rejeu sur un
 dump à jour n'écrit rien. ⚠️ Import = PUT COMPLET (CLAUDE.md §11).
+
+DÉMÉNAGEMENT : changer le `parent` d'une cité déjà en base la repose sur la carte du nouveau
+pays (`lieu_parent` réécrit, liens `link:<pays>_to_<cité>_<sortie>` neufs) ; ses anciens
+liens vers un AUTRE lieu que ses quais partent en `{"_id", "_deleted": true}` — l'import
+(`save_doc`, PUT) les supprime de la base.
 
 Usage :
   python dev/gen_ports_manche.py [--dump jsons/telluris-dump-….json] [--sans-apercu]
@@ -66,9 +71,11 @@ SORTIE = os.path.join(ggi.DOSSIER_JSONS, "ports_manche_a_importer.json")
 CITES = {
 	"lieu:calais": {
 		"image": "calais_city.jpg",
-		"parent": "lieu:plaine_europeenne",
-		# Côte picarde, au plus près du Kent (carte de la plaine européenne).
-		"pays": (15, 34),
+		"parent": "lieu:france",
+		# Pas de Calais, au plus près du Kent : sur la carte de France, au sud-ouest du départ de
+		# sa frontière nord (45, 2) — la case (15, 34) de la plaine européenne, où la cité était
+		# d'abord posée, projetée sur `france.png` (`dev/superposer_cartes.py`).
+		"pays": (42, 4),
 		"dedans": (52, 20),
 		"dehors": (80, 44),
 		# Les deux portes à pont-levis du rempart sud.
@@ -252,6 +259,16 @@ def connexions_cite(cite_id, label, spec, zone_cite, zone_pays):
 	return docs, []
 
 
+def liens_perimes(docs, cite_id: str, gardes: set) -> list:
+	"""Suppressions `{"_id", "_deleted": true}` des connexions du dump entre `cite_id` et un
+	autre lieu que ses quais, absentes de `gardes` (la cité a changé de pays)."""
+	quais = QUAIS[cite_id]["_id"]
+	return [{"_id": d["_id"], "_deleted": True} for d in docs
+			if d.get("type") == "connection" and d["_id"] not in gardes
+			and cite_id in {n.get("lieu") for n in d.get("nodes", [])}
+			and quais not in {n.get("lieu") for n in d.get("nodes", [])}]
+
+
 def doc_quais(cite_id: str, q: dict) -> dict:
 	return {"_id": q["_id"], "type": "lieu", "label": q["label"], "image": q["image"],
 			"categorie": "quai", "lieu_parent": cite_id,
@@ -417,6 +434,7 @@ def construire(docs, taille_fn, proposer_fn, grille_pont_fn):
 	for cite_id, spec in CITES.items():
 		if cite_id in par_id:
 			cite = sans_rev(par_id[cite_id])   # créée une fois : grille de l'éditeur gardée
+			cite["lieu_parent"] = spec["parent"]
 			cells, nav = cite["cells"], cite.get("nav") or {}
 			principale = zone_proche(cells, nav, spec["dedans"])
 			quai = case_de_quai(cells, principale, spec["quai"])
@@ -441,7 +459,7 @@ def construire(docs, taille_fn, proposer_fn, grille_pont_fn):
 		zone_pays = zone_proche(pays["cells"], pays.get("nav") or {}, spec["pays"])
 		liens, refus_l = connexions_cite(cite_id, cite["label"], spec, principale, zone_pays)
 		refus += refus_l
-		sortants += liens
+		sortants += liens + liens_perimes(docs, cite_id, {d["_id"] for d in liens})
 		if quai is None:
 			refus.append(f"{cite_id} : pas de case de quai")
 			continue

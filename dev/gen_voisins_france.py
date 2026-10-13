@@ -83,6 +83,13 @@ def main() -> int:
 		pannonie.construire(docs, _taille_image, proposer, eau, italie)
 	refus += refus_pa
 	propositions.update(prop_pa)
+	# L'Italie FINALE (recalée sur la France puis sur la Pannonie) est celle de `gen_pannonie` ;
+	# les cols des Alpes se posent sur elle.
+	italie = next((d for d in lieux_pa if d["_id"] == pannonie.ITALIE), None)
+	if italie is not None:
+		lieux_sud = [d for d in lieux_sud if d["_id"] != pannonie.ITALIE]
+		d, r, a = sud.liens_italie(france, italie, docs)
+		liens_sud, refus, avert = liens_sud + d, refus + r, avert + a
 	for a in avert + avert_pl + avert_pa:
 		print(f"⚠ {a}")
 	emis, r = a_emettre(docs, lieux_sud + lieux_pl + lieux_pa + liens_sud + liens_pl + liens_pa)
@@ -97,6 +104,9 @@ def main() -> int:
 		return 0
 
 	for doc in emis:
+		if doc.get("_deleted"):
+			print(f"  ✖ {doc['_id']} : supprimé")
+			continue
 		if doc.get("type") == "connection":
 			a, b = doc["nodes"]
 			print(f"  🔗 {doc['_id']} : {a['lieu']} {a['pos']} ↔ {b['lieu']} {b['pos']}")
@@ -117,7 +127,7 @@ def main() -> int:
 	with open(SORTIE, "w", encoding="utf-8") as f:
 		json.dump(emis, f, ensure_ascii=False, indent=2)
 		f.write("\n")
-	n_liens = sum(1 for d in emis if d.get("type") == "connection")
+	n_liens = sum(1 for d in emis if d.get("type") == "connection" or d.get("_deleted"))
 	print(f"\n✎ {os.path.relpath(SORTIE, RACINE)} — {len(emis) - n_liens} lieu(x), {n_liens} connexion(s)")
 	return 0
 

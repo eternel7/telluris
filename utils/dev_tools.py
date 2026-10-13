@@ -686,12 +686,29 @@ CATALOGUE = [
 		"sortie": "jsons/ports_manche_a_importer.json",
 		"ecrit": "Régénère un dump, écrit jsons/ports_manche_a_importer.json (+ un aperçu PNG "
 			"par cité créée). Rien en base avant 📥 Importer.",
-		"description": "Un seul fichier : `lieu:calais` (plaine européenne) et `lieu:douvres` "
+		"description": "Un seul fichier : `lieu:calais` (France) et `lieu:douvres` "
 			"(Angleterre) avec leur grille proposée et leurs portes de rempart ouvertes, leurs "
 			"sorties vers la carte du pays, les quais (sous-lieux, capitaine présent), la carte "
 			"`lieu:manche`, les routes `traversee:calais_douvres` / `douvres_calais`, les deux "
 			"capitaines (service `traversee`) et les ponts de navire (cartes de combat en mer). "
 			"N'émet que ce qui diffère du dump. Requiert Pillow.",
+	},
+	{
+		"id": "gen_frontieres_calees",
+		"label": "🧭 Frontières calées (la carte la plus détaillée fait foi), Calais en France",
+		# Dump frais : enchaîne gen_voisins_france (PUT complet de `lieu:france`…), gen_ports_manche
+		# et gen_villes_pays (PUT complet de `lieu:egypte`, `lieu:afrique_du_nord`).
+		"argv_fn": lambda v, f: _py("gen_frontieres_calees.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/frontieres_calees_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/frontieres_calees_a_importer.json. Rien "
+			"en base avant 📥 Importer.",
+		"description": "Un seul fichier, les sorties de « La France et ses voisins », « Ports "
+			"de la Manche » et des villes des pays fusionnées : sur chaque frontière, la carte "
+			"la plus détaillée fait foi (plaine sur France, Italie sur France et Pannonie, "
+			"Pannonie sur Roumanie, Afrique du Nord sur Égypte), passages face à face, Calais "
+			"posée sur la carte de France. Les connexions périmées partent en `_deleted` "
+			"(supprimées à l'import). N'émet que ce qui diffère du dump. Requiert Pillow."
 	},
 	{
 		"id": "gen_villes_pays",
