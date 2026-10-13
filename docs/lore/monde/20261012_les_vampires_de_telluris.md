@@ -73,7 +73,8 @@ L'Auteur demande d'autres mythes et légendes terrestres à rattacher aux vampir
 - **L'empaleur** (Auteur, 13/10, verbatim) : « avant sa malédiction, Vlad empalait les monstres abattus en lisière de ses terres agricoles, pour signaler aux autres que la lisière était tenue. Le monstre qui ravageait ses terres serait celui qu'il n'a pas pu empaler. Après la malédiction, il empale aussi des anthropes. »
 - **Le soleil** (Auteur, 13/10, verbatim) : « Le soleil est craint de tout vampire sauf les dragons avec encore une bonne âme » — y compris Abhartach, le penanggalan et les dragons de sang déchus.
 - **Le monstre de Vlad** : un **balaur** (Auteur, 13/10) ; qu'il sorte d'un donjon qui déborde reste proposé.
-- **L'effet du soleil varie selon les lignées** (Auteur, 13/10) ; les effets par lignée du § 1 restent proposés, sauf celui des lamies (inertes, Auteur).
+- **L'effet du soleil varie selon les lignées** (Auteur, 13/10, questionnaire) : il **brûle** les aristocrates de Dracula · **consume** les Nosferatu · **tue** les Strigoï et vrykolakas · rend les lamies **inertes** · n'est qu'une **simple gêne** pour les dragons de sang déchus · **enchaîne Abhartach à sa tombe** (le jour, il ne peut quitter la terre où il gît tête en bas) · **sépare** la tête du penanggalan de son corps (surprise hors du corps à l'aube, elle ne peut plus le rejoindre et meurt ; le jour, elle passe pour une femme ordinaire).
+- **Faiblesses d'Abhartach et du penanggalan** : validées — l'if (et la tête en bas) ; les épines et le vinaigre.
 - **Faiblesses validées** : Dracula, la terre natale · Strigoï, le feu et l'aubépine · lamies, le fer et les chevaux, et le soleil · dragons de sang, le parjure · Nosferatu, toute lumière (y compris la magie Sainte).
 
 ---
@@ -103,7 +104,7 @@ L'Auteur demande d'autres mythes et légendes terrestres à rattacher aux vampir
 | Nom du peuple | « **lamies** » (le mot français) ; *Lamia* reste le nom propre de la reine | proposé, non tranché |
 | Lieux, noms secondaires, datations | § 2 à § 7 | proposé, non tranché |
 
-**Règle commune** (déduite des récits de l'Auteur, proposée ; que l'effet du soleil **varie selon la lignée** est tranché, Auteur 13/10) : le vampirisme est un **esprit lié à un corps mort par le sang**. Le soleil **sépare l'esprit du corps** (Auteur, lamies) ; ce qui retient l'esprit décide de la faiblesse :
+**Règle commune** (déduite des récits de l'Auteur, proposée ; les effets du soleil par lignée sont tranchés, Auteur 13/10 ; seule l'explication par « ce qui retient l'esprit » reste une théorie) : le vampirisme est un **esprit lié à un corps mort par le sang**. Le soleil **sépare l'esprit du corps** (Auteur, lamies) ; ce qui retient l'esprit décide de la faiblesse :
 
 - **la foi** retient l'esprit — le dragon de sang fidèle ne craint pas le soleil, le déchu n'en ressent qu'une gêne ;
 - **la malédiction des dieux** retient l'esprit de Dracula et des siens — le soleil les brûle ;
@@ -226,7 +227,7 @@ Restent **ouverts par choix de l'Auteur**, comme mystères du monde :
 - **Le nom** du paladin le plus pieux, et le lieu de l'auberge-relais.
 - **Le « sang premier »** : des PNJ y croient, rien ne le prouve (Auteur, 13/10).
 
-À trancher (§ 9) : ce que le penanggalan doit à Mu ; les faiblesses d'Abhartach et du penanggalan.
+À trancher (§ 9) : ce que le penanggalan doit à Mu.
 
 ## 8. Prompts d'image à produire
 
@@ -257,14 +258,14 @@ Le rattachement de chaque piste est **tranché par l'Auteur** (§ ✍️ quatri�
 - **Abhartach** — en Irlande, un roi-**nain** tyran revient de la tombe et exige un bol de sang tiré des veines de ses sujets. Cathán le tue avec une épée en **if** et l'enterre **tête en bas** sous une pierre (le dolmen réel de Slaghtaverty). **Lignée indépendante** (Auteur) : un revenant isolé, unique.
 - **Draugr** (mort-vivant à part, Auteur) — en Islande, Glámr revient hanter une ferme ; Grettir le tue mais garde de sa malédiction la **peur du noir**. Lieux possibles : Reykjavik ou Akureyri. En jeu : un débuff d'**effroi nocturne** durable après la victoire.
 
-### Faiblesses par lignée (Auteur, 13/10 : validées, sauf Abhartach et penanggalan, proposées)
+### Faiblesses par lignée (Auteur, 13/10 : toutes validées)
 
 | Lignée | Soleil — craint de tous, sauf les dragons à la bonne âme (Auteur) | Faiblesse tirée du mythe |
 |---|---|---|
-| Aristocrates de Dracula | brûle | **la terre natale** : ils doivent dormir dans la terre de leur cité (les caisses de terre de Stoker) |
-| Strigoï, vrykolakas | tue | **le feu** (on brûle les vrykolakas) et **l'aubépine** (pieu des Balkans) |
-| Nosferatu | consume | **la lumière** sous toutes ses formes, y compris celle de la magie Sainte (Murnau) |
+| Aristocrates de Dracula | brûle (Auteur) | **la terre natale** : ils doivent dormir dans la terre de leur cité (les caisses de terre de Stoker) |
+| Strigoï, vrykolakas | tue (Auteur) | **le feu** (on brûle les vrykolakas) et **l'aubépine** (pieu des Balkans) |
+| Nosferatu | consume (Auteur) | **la lumière** sous toutes ses formes, y compris celle de la magie Sainte (Murnau) |
 | Lamies, baobhan sith | rend inerte (confirmé, Auteur) | **le fer froid** et **les chevaux** (baobhan sith) |
-| Dragons de sang | aucune (fidèles) · gêne (déchus) | **le parjure** : un serment rompu les affaiblit |
-| Abhartach | craint (Auteur) | **l'if**, et **la tête en bas** au tombeau |
-| Penanggalan | craint (Auteur) | **les épines** et **le vinaigre** |
+| Dragons de sang | aucune (bonne âme) · simple gêne (déchus) (Auteur) | **le parjure** : un serment rompu les affaiblit |
+| Abhartach | l'enchaîne à sa tombe (Auteur) | **l'if**, et **la tête en bas** au tombeau |
+| Penanggalan | sépare tête et corps : l'aube surprend la tête dehors, elle meurt (Auteur) | **les épines** et **le vinaigre** |
