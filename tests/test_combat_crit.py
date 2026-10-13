@@ -133,6 +133,80 @@ def test_crit_dun_monstre_double_ses_degats(db, monkeypatch):
 	assert doc["log"][-1]["kind"] == "crit"
 
 
+# ── Furtivité : tout coup touché est critique, un vrai critique fait ×4 ─────────
+
+def test_attaque_furtive_exige_une_cible_non_alertee():
+	assert combat_util._attaque_furtive({"furtif": True}, {"detecte": False})
+	assert not combat_util._attaque_furtive({"furtif": True}, {"detecte": True})
+	assert not combat_util._attaque_furtive({}, {})
+
+
+def test_furtif_un_coup_ordinaire_qui_touche_devient_critique_x2(monkeypatch):
+	_force_roll(monkeypatch, 50)
+	jet = combat_util._resoudre_jet({}, {}, seuil=60, furtif=True)
+	assert jet["touche"] and jet["critique"] and jet["mult_degats"] == 2
+
+
+def test_furtif_une_reussite_critique_fait_x4(monkeypatch):
+	_force_roll(monkeypatch, 1)
+	jet = combat_util._resoudre_jet({}, {}, seuil=60, furtif=True)
+	assert jet["critique"] and jet["mult_degats"] == 4
+
+
+def test_furtif_le_jet_peut_toujours_rater(monkeypatch):
+	_force_roll(monkeypatch, 70)
+	jet = combat_util._resoudre_jet({}, {}, seuil=60, furtif=True)
+	assert not jet["touche"] and not jet["critique"]
+
+
+def test_furtif_lechec_critique_reste_un_echec(monkeypatch):
+	_force_roll(monkeypatch, 100)
+	jet = combat_util._resoudre_jet({}, {}, seuil=95, furtif=True)
+	assert jet["fumble"] and not jet["touche"] and jet["mult_degats"] == 1
+
+
+def test_attaque_furtive_critique_x4_avant_les_pa(db, monkeypatch):
+	"""1D10 max = 10, ×4 = 40, PA 3 soustraits APRÈS → 37."""
+	_force_roll(monkeypatch, 1)
+	j = joueur_snap("joueur_0", "character:u_1", x=0, y=0, cc=50, degats_cc="1D10",
+					furtif=True)
+	m = monstre_snap(x=1, y=0, pa=3, currentPV=100, pv_max=100, detecte=False)
+	doc = combat_doc([j], [m])
+	res = combat_util.resolve_action(doc, "attaquer", cible_id="monstre_0")
+	assert res["critique"] and res["dmg"] == 37
+
+
+def test_attaque_furtive_qui_touche_est_un_critique_x2(db, monkeypatch):
+	_force_roll(monkeypatch, 50)
+	j = joueur_snap("joueur_0", "character:u_1", x=0, y=0, cc=90, degats_cc="1D10",
+					furtif=True)
+	m = monstre_snap(x=1, y=0, pa=3, currentPV=100, pv_max=100, detecte=False)
+	doc = combat_doc([j], [m])
+	res = combat_util.resolve_action(doc, "attaquer", cible_id="monstre_0")
+	assert res["critique"] and res["dmg"] == 17
+
+
+def test_cible_qui_a_repere_le_joueur_ne_subit_pas_lattaque_furtive(db, monkeypatch):
+	_force_roll(monkeypatch, 50)
+	j = joueur_snap("joueur_0", "character:u_1", x=0, y=0, cc=90, degats_cc="1D10",
+					furtif=True)
+	m = monstre_snap(x=1, y=0, pa=3, currentPV=100, pv_max=100, detecte=True)
+	doc = combat_doc([j], [m])
+	res = combat_util.resolve_action(doc, "attaquer", cible_id="monstre_0")
+	assert not res["critique"] and res["dmg"] == 7
+
+
+def test_sort_furtif_critique_x4_sans_pa(db, monkeypatch):
+	_force_roll(monkeypatch, 1)
+	j = joueur_snap("joueur_0", "character:u_1", x=0, y=0, toucher_magique=50, furtif=True)
+	m = monstre_snap(x=1, y=0, pa=3, currentPV=100, pv_max=100, detecte=False)
+	doc = combat_doc([j], [m])
+	sort = {"doc": {"nom": "Trait de feu", "cible": "ennemi", "cout_pm": 0},
+			"effets": {"degats": "1D10"}, "composants_engages": [], "poids_consommes": 0}
+	res = combat_util.resolve_action(doc, "sort", cible_id="monstre_0", sort=sort)
+	assert res["critique"] and res["dmg"] == 40
+
+
 # ── Échec critique : perte d'action ──────────────────────────────────────────────
 
 def test_fumble_consomme_une_action_de_plus(db, monkeypatch):

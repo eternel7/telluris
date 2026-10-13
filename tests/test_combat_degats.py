@@ -86,7 +86,7 @@ def test_le_simulateur_et_le_moteur_partagent_la_formule(monkeypatch):
 		return 42
 
 	monkeypatch.setattr(combat, "calculer_degats", _mouchard)
-	monkeypatch.setattr(combat, "_resoudre_jet", lambda a, d, s: {
+	monkeypatch.setattr(combat, "_resoudre_jet", lambda a, d, s, furtif=False: {
 		"roll": 50, "seuil": s, "touche": True, "critique": False,
 		"fumble": False, "mult_degats": 1})
 

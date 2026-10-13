@@ -906,7 +906,7 @@ def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, sourc
 	else:
 		skill = joueur["cd"] if mode_jet == "cd" else joueur["cc"]
 		seuil = _hit_threshold(skill, _defense_physique(monstre))
-	jet = _resoudre_jet(joueur, monstre, seuil)
+	jet = _resoudre_jet(joueur, monstre, seuil, furtif=_attaque_furtive(joueur, monstre))
 	ctx = {"acteur": joueur["nom"], "cible": monstre["nom"], "roll": jet["roll"],
 		   "seuil": seuil, "ou": "", "dmg": 0,
 		   "pv": monstre["currentPV"], "pv_max": monstre["pv_max"], **noms}
@@ -3994,23 +3994,37 @@ def _seuils_critiques(attaquant: dict, defenseur: dict) -> tuple:
 	return max(base_ok, base_ok + glissement), min(base_ko, base_ko + glissement)
 
 
-def _resoudre_jet(attaquant: dict, defenseur: dict, seuil: int) -> dict:
-	"""Un jet d100 offensif : {roll, seuil, touche, critique, fumble, mult_degats}.
+def _attaque_furtive(attaquant: dict, defenseur: dict) -> bool:
+	"""Coup porté EN FURTIVITÉ : l'attaquant est furtif ET cette cible ne l'a pas repéré
+	(même test que la chasse des monstres)."""
+	return bool(attaquant.get("furtif")) and not defenseur.get("detecte")
+
+
+def _resoudre_jet(attaquant: dict, defenseur: dict, seuil: int, furtif: bool = False) -> dict:
+	"""Un jet d100 offensif : {roll, seuil, touche, critique, fumble, mult_degats, furtif}.
 
 	Le critique PRIME sur le seuil de toucher : une réussite critique touche même si le
 	seuil était raté, un échec critique rate même si le seuil passait. Si un réglage
 	extrême faisait se croiser les deux fenêtres, la réussite l'emporte (ordre des tests).
+
+	`furtif` (cf. `_attaque_furtive`, passé EXPLICITEMENT par les seuls sites offensifs du
+	camp du joueur) : le jet reste fait — raté et échec critique possibles —, mais un coup
+	qui TOUCHE devient un critique automatique (×2), et une vraie réussite critique fait ×4.
 	"""
 	crit_ok, crit_ko = _seuils_critiques(attaquant, defenseur)
 	roll = random.randint(1, 100)
 	if roll <= crit_ok:
 		return {"roll": roll, "seuil": seuil, "touche": True,
-				"critique": True, "fumble": False, "mult_degats": 2}
+				"critique": True, "fumble": False, "mult_degats": 4 if furtif else 2,
+				"furtif": furtif}
 	if roll >= crit_ko:
 		return {"roll": roll, "seuil": seuil, "touche": False,
-				"critique": False, "fumble": True, "mult_degats": 1}
-	return {"roll": roll, "seuil": seuil, "touche": roll <= seuil,
-			"critique": False, "fumble": False, "mult_degats": 1}
+				"critique": False, "fumble": True, "mult_degats": 1, "furtif": furtif}
+	touche = roll <= seuil
+	critique = touche and furtif
+	return {"roll": roll, "seuil": seuil, "touche": touche,
+			"critique": critique, "fumble": False, "mult_degats": 2 if critique else 1,
+			"furtif": furtif}
 
 
 def _appliquer_fumble(combat_doc: dict, acteur: dict) -> None:
@@ -5204,7 +5218,7 @@ def _frapper_monstre(combat_doc: dict, attaquant: dict, monstre: dict, profil: d
 	skill = attaquant.get("cd" if profil.get("toucher") == "cd" else "cc", 0)
 	notation = attaquant.get(profil.get("degats", "degats_cc")) or attaquant.get("degats_cc", "1D4")
 	seuil = _hit_threshold(skill, _defense_physique(monstre))
-	jet = _resoudre_jet(attaquant, monstre, seuil)
+	jet = _resoudre_jet(attaquant, monstre, seuil, furtif=_attaque_furtive(attaquant, monstre))
 	roll = jet["roll"]
 	if not jet["touche"]:
 		combat_doc["log"].append(_avec_vfx({

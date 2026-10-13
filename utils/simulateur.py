@@ -703,7 +703,8 @@ def _poser_positions(actor: dict, adversaire: dict, distance: int) -> None:
 
 def _executer_attaque(actor: dict, cible: dict, option: dict, etat: dict) -> None:
 	"""Un coup, résolu comme au moteur : PM débités AVANT le jet (un sort raté coûte),
-	critique ×2 sur les dés avant la soustraction des PA, magie sans PA, fumble = une
+	critique ×2 (×4 en furtivité, où tout coup touché est critique) sur les dés avant la
+	soustraction des PA, magie sans PA, fumble = une
 	action de plus perdue, part durative posée sur la cible touchée vivante. Un
 	attaquant FURTIF en sort comme au moteur : corps à corps = révélation, à distance =
 	la cible seule tente un jet (_furtivite_apres_offensive)."""
@@ -711,7 +712,7 @@ def _executer_attaque(actor: dict, cible: dict, option: dict, etat: dict) -> Non
 	if option["cout_pm"]:
 		actor["currentPM"] = max(0, int(actor.get("currentPM", 0)) - option["cout_pm"])
 	seuil = _seuil_de(actor, cible, option)
-	jet = combat._resoudre_jet(actor, cible, seuil)
+	jet = combat._resoudre_jet(actor, cible, seuil, furtif=combat._attaque_furtive(actor, cible))
 	actor[option["compteur"]] = actor.get(option["compteur"], 0) + 1
 	combat._refresh_actions(actor)
 	if jet["touche"]:
@@ -723,7 +724,7 @@ def _executer_attaque(actor: dict, cible: dict, option: dict, etat: dict) -> Non
 									 jet["mult_degats"], option["jet"], zone=zone)
 		cible["currentPV"] = max(0, int(cible.get("currentPV", 0)) - dmg)
 		cible["vivant"] = cible["currentPV"] > 0
-		suffixe = " — CRITIQUE ×2" if jet["critique"] else ""
+		suffixe = f" — CRITIQUE ×{jet['mult_degats']}" if jet["critique"] else ""
 		_log(pseudo, actor, "crit" if jet["critique"] else "hit",
 			 f"{actor.get('nom', '?')} touche {cible.get('nom', '?')}{ou} avec "
 			 f"{option['label']} : {dmg} dégâts{suffixe} "
