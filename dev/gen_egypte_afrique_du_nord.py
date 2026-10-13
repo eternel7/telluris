@@ -18,7 +18,8 @@ accessible, et chaque passage est NOMMÉ.
   · DEUX TRONÇONS (`TRONCONS`) : l'ouest, de la Méditerranée vers le sud ; le sud, d'ouest
     en est jusqu'à la mer Rouge (le cadre de chaque ligne s'arrête à son rivage).
 
-DENSITÉ (choix de l'Auteur, 12/10) : l'Égypte est dessinée ~2,5 fois plus grand. Une case
+DENSITÉ (choix de l'Auteur, 12/10) : l'Égypte est dessinée ~2,7 fois plus grand (calage sur
+quatre repères, du Caire à Louxor : `dev/calage_cartes.py`). Une case
 sur deux est comptée côté AFRIQUE DU NORD (`postes`) ; côté Égypte, chaque passage se pose
 sur la case de sa ligne la plus proche de la projection du poste
 (`frontieres_calees.liens_projetes`) — les deux bouts se font face.
@@ -57,18 +58,18 @@ FRONTIERE_AFRIQUE = ((0, 27, 62),)
 # cadre (x_min, x_max, y_min, y_max) borne la ligne, de la côte à la mer Rouge exclue. Lignes
 # de l'Afrique du Nord RECALÉE : le long du cadre ouest de la carte d'Égypte, puis de son bas.
 TRONCONS = {
-	"ouest": ((7, 8, 9, 43), (56, 56, 0, 28), (7, 9), (56, 17)),
-	"sud": ((9, 87, 44, 44), (57, 87, 29, 29), (9, 44), (57, 29)),
+	"ouest": ((7, 8, 9, 43), (56, 57, 0, 27), (7, 9), (56, 17)),
+	"sud": ((9, 87, 44, 44), (58, 87, 28, 28), (9, 44), (58, 28)),
 }
 
 # Noms par tronçon — l'ouest du nord au sud le long du 25e méridien, le sud d'ouest en est le
 # long du bas de la carte d'Égypte (vers 25° N) : un par poste de l'Afrique du Nord.
 # ⚠️ Rang = suffixe d'`_id`, numérotés à la suite (cf. gen_plaine_europeenne.PASSAGES_PLAINE).
 # ABOU SIMBEL n'est PAS sur la carte d'Égypte (elle s'arrête sous Louxor) : elle est dessinée
-# sur l'Afrique du Nord en (76, 32), au bord du Nil, au sud du territoire mis à 0. Le dernier
-# passage du sud tombe sur le Nil de l'Égypte, qui fait foi (Égypte x 64 sous Louxor ; Afrique
-# du Nord x 79, à trois cases du Nil qu'elle dessine) : il porte son nom — c'est la route qui
-# y mène. Les autres suivent le désert occidental de l'Égypte, d'ouest en est.
+# sur l'Afrique du Nord en (76, 32), au bord du Nil, au sud du territoire mis à 0. Le passage
+# qui tombe sur le Nil de l'Égypte, qui fait foi (`NIL_EGYPTE`, sous Louxor ; Afrique du Nord
+# x 78), porte son nom — c'est la route qui y mène. Les autres suivent le désert occidental de
+# l'Égypte, d'ouest en est ; le dernier, rive est, part vers la mer Rouge (Bérénice).
 ABOU_SIMBEL_AFRIQUE = (76, 32)
 # Le Nil au bas de la carte d'Égypte (sous Louxor) : la route d'Abou Simbel y part.
 NIL_EGYPTE = (64, 44)
@@ -79,9 +80,9 @@ PASSAGES = {
 	),
 	"sud": (
 		"Lisière sud de la Grande Mer de Sable", "Piste d'Abou Ballas", "Piste de Bir Tarfawi",
-		"Oasis de Dakhla", "Oasis de Baris", "Oasis de Kharga", "Darb el-Arbaïn",
-		"Piste de Sélima", "Oasis de Dounqoul", "Piste de Kourkour", "Route d'Assouan",
-		"Route d'Abou Simbel",
+		"Oasis de Dakhla", "Oasis de Kharga", "Darb el-Arbaïn", "Piste de Sélima",
+		"Oasis de Dounqoul", "Piste de Kourkour", "Route d'Assouan", "Route d'Abou Simbel",
+		"Route de Bérénice",
 	),
 }
 

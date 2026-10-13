@@ -65,6 +65,9 @@ PAIRES = {
 			"Le Caire": ((800, 265), (1180, 265)),
 			"pyramides": ((575, 285), (1095, 290)),
 			"Siwa": ((205, 330), (948, 315)),
+			# Haute-Égypte : le Nil, pas un monument — Louxor est dessinée rive EST sur l'Égypte
+			# et son temple rive OUEST sur l'Afrique du Nord (5 cases d'écart, rive comprise).
+			"Nil à Louxor": ((988, 645), (1225, 429)),
 		},
 	},
 }

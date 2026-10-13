@@ -170,7 +170,7 @@ def test_frontiere_egypte_sans_avertissement_de_compte(construit):
 def test_passages_une_case_sur_deux_cote_afrique_face_a_face_cote_egypte(construit):
 	"""Une case sur deux côté Afrique du Nord (choix de l'Auteur) ; côté Égypte, qui fait foi,
 	le bout sur sa ligne, qui retombe à une case au plus du poste (en cases de l'Afrique du
-	Nord, la plus grossière : une des siennes vaut ~2,5 de l'Égypte)."""
+	Nord, la plus grossière : une des siennes vaut ~2,7 de l'Égypte)."""
 	par_id = {d["_id"]: d for d in construit[0]}
 	lignes = gea.lignes(par_id[gea.EGYPTE], par_id[gea.AFRIQUE])
 	passages = [l for l in construit[1] if l["_id"].startswith("link:afrique_du_nord_to_egypte_")]
