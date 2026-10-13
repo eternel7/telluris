@@ -69,6 +69,7 @@ Prose tirée du seul canon (dump, messages de l'Auteur, réponses adoptées) ; u
 - [Prompt pour Élise](personnages/20261003_prompt_pour_elise.md) — 03/10/2026 — ## Scénario d’Élise Je partirais sur une mort très sobre : Élise ne meurt pas en héroïne. Elle part simplement chercher des plantes qu’elle …
 - [Ajouter introspection nocturne](personnages/20261005_ajouter_introspection_nocturne.md) — 05/10/2026 — MESSAGES_NUIT_LOGEMENT = [ "Le feu s'éteint lentement dans l'âtre tandis que la maison plonge dans le silence.", "Le vent fait craquer quelq…
 - [Maëlys, maîtresse de guilde](personnages/20261011_maelys_maitresse_de_guilde.md) — 11/10/2026 — Maëlys de Valombre, naine, maîtresse de la Guilde de Lutecia au Grand Relais des Frontières ; remplace le « vieux elfe » de la séance du 13/09. Fiche complète (histoire, devise, première rencontre, secret des lieux identiques) + arbitrage de l'Auteur (rencontre au rang D, prédécesseur elfe, Babel/Yggdrasil/hénochien).
+- [Les morts d'Escolives](personnages/20261013_enquete_d_escolives.md) — 13/10/2026 — Enquête du rang D : un Strigoï dans la crypte de la nécropole d'Escolives, le doute qui reste ; arbitrage, scénario proposé, prompts d'images.
 
 ## ⚙️ Systèmes de jeu
 
