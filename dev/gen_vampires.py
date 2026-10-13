@@ -22,7 +22,7 @@
 #     même forme que ceux du dump (poids = F moyenne / 5) ;
 #   - autres mythes du sang (Auteur, 13/10, § 9 de la séance) : `espece:abhartach` (roi-nain,
 #     être unique), `espece:penanggalan` (tête volante de Mu), `espece:draugr` (mort-vivant
-#     du Nord, PAS un vampire), sans image ; soleil et faiblesses en description seule.
+#     du Nord, PAS un vampire), avec leur image ; soleil et faiblesses en description seule.
 #
 # ⚠️ Les tables EXHAUSTIVES de `gen_genres_especes.py`, `gen_jetons_especes.py` et
 # `gen_equipement_humanoides.py` citent déjà les espèces neuves, et `gen_sorts_invocation.py`
@@ -141,7 +141,7 @@ NOUVELLES = {
 	# tirée du mythe portés par la description seule — aucune mécanique (Auteur).
 	"abhartach": {
 		# Être unique : « Abhartach », pas « l'Abhartach » (`nom_propre`, cf. gen_genres_especes).
-		"nom": "Abhartach", "genre": "m", "nom_propre": True,
+		"nom": "Abhartach", "genre": "m", "nom_propre": True, "image": "abhartach_transparent.png",
 		"description": "Roi-nain tyran revenu de sa tombe, qui exigeait de ses sujets un bol de sang "
 					   "tiré de leurs veines. Cathán l'abattit d'une épée en if et l'ensevelit tête en "
 					   "bas sous une pierre ; le jour l'enchaîne encore à sa tombe, et l'if le blesse "
@@ -150,7 +150,7 @@ NOUVELLES = {
 		"tags": ["undead", "non_mort", "guerrier", "boss", "humanoide"],
 	},
 	"penanggalan": {
-		"nom": "Penanggalan", "genre": "f",
+		"nom": "Penanggalan", "genre": "f", "image": "penanggalan_transparent.png",
 		"description": "Tête de femme qui vole la nuit en traînant ses viscères : une morte de Mu rendue "
 					   "à la mer, qui n'a pas trouvé le chemin du royaume de Tangaroa et que les poissons "
 					   "ont dévorée. Le jour, elle passe pour une femme ordinaire ; l'aube qui la surprend "
@@ -160,7 +160,7 @@ NOUVELLES = {
 	},
 	# Mort-vivant à part, PAS un vampire (Auteur, 13/10) : il boit la force, pas le sang.
 	"draugr": {
-		"nom": "Draugr", "genre": "m",
+		"nom": "Draugr", "genre": "m", "image": "draugr_transparent.png",
 		"description": "Mort-vivant des terres du Nord, revenu hanter sa ferme ou son tertre : il ne boit "
 					   "pas le sang mais la force des vivants, et laisse à qui le terrasse la peur du noir "
 					   "pour le restant de ses jours.",
@@ -247,7 +247,7 @@ def main() -> None:
 		doc = {
 			"_id": eid, "type": "espece", "nom": spec["nom"], "genre": spec["genre"],
 			**{k: True for k in ACCORD if spec.get(k)},
-			"image": "",
+			"image": spec.get("image", ""),
 			"description": spec["description"],
 			"base_attributes": spec["base_attributes"] or copy.deepcopy(bete["base_attributes"]),
 			"tags": spec["tags"] or list(bete.get("tags") or []),

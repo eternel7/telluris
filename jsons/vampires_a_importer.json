@@ -5,7 +5,7 @@
     "nom": "Abhartach",
     "genre": "m",
     "nom_propre": true,
-    "image": "",
+    "image": "abhartach_transparent.png",
     "description": "Roi-nain tyran revenu de sa tombe, qui exigeait de ses sujets un bol de sang tiré de leurs veines. Cathán l'abattit d'une épée en if et l'ensevelit tête en bas sous une pierre ; le jour l'enchaîne encore à sa tombe, et l'if le blesse comme aucun acier.",
     "base_attributes": {
       "V": {
@@ -78,7 +78,7 @@
     "type": "espece",
     "nom": "Penanggalan",
     "genre": "f",
-    "image": "",
+    "image": "penanggalan_transparent.png",
     "description": "Tête de femme qui vole la nuit en traînant ses viscères : une morte de Mu rendue à la mer, qui n'a pas trouvé le chemin du royaume de Tangaroa et que les poissons ont dévorée. Le jour, elle passe pour une femme ordinaire ; l'aube qui la surprend loin de son corps la tue. Les épines l'accrochent, le vinaigre la brûle.",
     "base_attributes": {
       "V": {
@@ -141,7 +141,7 @@
     "type": "espece",
     "nom": "Draugr",
     "genre": "m",
-    "image": "",
+    "image": "draugr_transparent.png",
     "description": "Mort-vivant des terres du Nord, revenu hanter sa ferme ou son tertre : il ne boit pas le sang mais la force des vivants, et laisse à qui le terrasse la peur du noir pour le restant de ses jours.",
     "base_attributes": {
       "V": {

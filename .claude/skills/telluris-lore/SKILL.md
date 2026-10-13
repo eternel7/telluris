@@ -39,6 +39,7 @@ Répétées en tête de presque chaque séance : elles valent pour **tout** text
 - **Émotion sobre** : les morts marquantes sont **banales** (Élise part chercher des herbes) ; les liens se construisent par l'habitude et la confiance. Pas d'ambiguïté romantique imposée — l'aventurier peut être une femme (correction de l'Auteur sur Aélis).
 - **Textes tirés au hasard** (ambiances de nuit, rumeurs…) : chacun **autonome**, aucun ne dépend d'un autre.
 - **Pas d'artisanat par le personnage joueur** : ce sont des PNJ marchands qui fabriquent.
+- **Prompt d'image livré = COMPLET et copiable-collable** : bloc de style (`docs/prompts_images.md` § 0.1 / 0.1 bis) écrit en entier dans chaque prompt, jamais en renvoi « [0.1] » (Auteur, 13/10).
 - Prompts d'image peuplés : garder **telle quelle** la phrase « Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. » et « Pas de texte visible » ; la foule est **répartie à parts égales** entre les cinq Lignées, même autour d'un tenancier humain (Auteur, 10/10/2026).
 - Graphie : **Lutecia** (forme savante, celle de l'Auteur), **Lutèce** admis dans les noms (« Dame Ysabeau de Lutèce ») ; **Rhemi** = Reims (`lieu:rhemi`).
 

@@ -6,6 +6,8 @@ Gabarits de prompts pour générer les illustrations du jeu (Gemini). Chaque gab
 
 ### 0.1 Bloc de style (ajouté à la fin de CHAQUE prompt)
 
+⚠️ **Écrit EN ENTIER dans chaque prompt livré**, jamais en renvoi (`[0.1]`) : un prompt se copie-colle tel quel (Auteur, 13/10/2026). Idem pour 0.1 bis et la phrase de foule.
+
 > Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
 
 ### 0.2 Foule de Telluris (quand la scène est peuplée)
