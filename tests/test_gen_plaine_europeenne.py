@@ -14,6 +14,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dev import gen_plaine_europeenne as gpe  # noqa: E402
+from dev.calage_cartes import projection  # noqa: E402
 
 TAILLES = {gpe.IMAGE_PLAINE: (1408, 768), **{nom: (1408, 768) for nom in gpe.IMAGES_CITES}}
 
@@ -69,19 +70,25 @@ def test_trois_lieux_neufs_frontiere_posee_et_cites_rattachees():
 	assert {l["_id"] for l in liens} == attendus
 
 
-def test_passage_france_plaine_juste_au_nord_de_la_frontiere():
-	lieux, liens, _, _, _ = gpe.construire([_france()], TAILLES.get, _proposer, _france())
+def test_passages_france_plaine_face_a_face():
+	"""La France fait foi : chaque passage part de sa ligne (bord nord puis bord droit), et son
+	bout sur la plaine, praticable, touche une case fermée et retombe près de la
+	projection du poste — deux cases au plus sur cette grille de test uniforme."""
+	lieux, liens, refus, _, _ = gpe.construire([_france()], TAILLES.get, _proposer, _france())
+	assert refus == []
 	plaine = next(d for d in lieux if d["_id"] == gpe.PLAINE)
 	par_id = {l["_id"]: l for l in liens}
+	vers = projection(gpe.FRANCE, gpe.PLAINE)
 	for i, nom in enumerate(gpe.PASSAGES_PLAINE, start=1):
 		fr, pl = par_id[f"link:france_to_plaine_europeenne_{i:02d}"]["nodes"]
 		assert fr["lieu"] == gpe.FRANCE and fr["label"] == f"{nom} — France"
-		assert fr["pos"][1] <= 2  # la rangée du nord de la France
 		assert pl["label"] == f"{nom} — Plaine européenne"
 		x, y = pl["pos"]
 		assert pl["lieu"] == gpe.PLAINE and plaine["cells"][y][x] == 1
-		# Une voisine est déjà la France, fermée (au sud, ou à l'ouest sur une marche de l'escalier).
-		assert 0 in (plaine["cells"][y + 1][x], plaine["cells"][y][x - 1])
+		assert 0 in (plaine["cells"][y + dy][x + dx] for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))
+			if 0 <= y + dy < 48 and 0 <= x + dx < 88)
+		px, py = vers(tuple(fr["pos"]))
+		assert max(abs(px - x), abs(py - y)) <= 2, (i, fr, pl)
 
 
 def test_passages_nommes_distincts_et_sorties_de_cite_libellees():

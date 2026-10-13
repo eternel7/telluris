@@ -2,7 +2,7 @@
 carte de France — UN seul fichier d'import (CLAUDE.md §18).
 
 Lance et fusionne, chacun n'émettant que ce qui diffère du dump :
-  · `gen_voisins_france` — plaine ↔ France (`FRONTIERE_PLAINE`), Italie recalée sur la France
+  · `gen_voisins_france` — plaine recalée sur la France (bord nord ET bord droit), Italie recalée sur la France
     puis sur la Pannonie, Pannonie recalée sur la Roumanie (Bulgarie roumaine), passages ;
   · `gen_ports_manche` — Calais sous `lieu:france`, ses sorties, anciens liens supprimés ;
   · `gen_villes_pays` — Afrique du Nord recalée sur l'Égypte, passages.

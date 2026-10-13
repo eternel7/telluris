@@ -47,17 +47,25 @@ def recaler(voisine, foi, zone_foi, ancienne=frozenset(), bande_foi=frozenset(),
 	return fermees, rouvertes
 
 
-def au_dela(doc, zone, autre_id, cible):
-	"""Cases FERMÉES (0) de la grille de `doc`, voisines de `zone`, dont la projection sur
-	l'autre carte vérifie `cible(case)` : ce que la frontière sépare. Une case à 1 hors de la
-	zone (fleuve ou mer murés par `nav`) n'est jamais une frontière."""
+def au_dela(doc, zone, autre_id, cible, cible_bord=None):
+	"""Cases voisines de `zone`, hors d'elle, dont la projection sur l'autre carte vérifie
+	`cible(case)` : ce que la frontière sépare. Une frontière passe contre une case FERMÉE (0),
+	contre le POURTOUR de la grille (cadre muré par `nav`) ou au-delà du bord de la carte —
+	ces deux-là jugés par `cible_bord` (défaut : `cible`) ; jamais contre une case intérieure
+	à 1 hors de la zone (fleuve ou mer murés : le Danube)."""
+	cible_bord = cible_bord or cible
 	vers = projection(doc["_id"], autre_id)
 	cells = doc["cells"]
+	h, w = len(cells), len(cells[0])
 	cases = set()
 	for x, y in zone:
 		for dx, dy in ORTHO:
 			n = (x + dx, y + dy)
-			if n not in zone and _dans(cells, *n) and cells[n[1]][n[0]] == 0 and cible(vers(n)):
+			if n in zone:
+				continue
+			ferme = _dans(cells, *n) and cells[n[1]][n[0]] == 0
+			bord = not _dans(cells, *n) or n[0] in (0, w - 1) or n[1] in (0, h - 1)
+			if (ferme and cible(vers(n))) or (not ferme and bord and cible_bord(vers(n))):
 				cases.add(n)
 	return cases
 
@@ -70,12 +78,15 @@ def lignes(voisine, zone_v, foi, zone_f, depart_v, depart_f, cadre_v=None, cadre
 	exact, c'est ainsi qu'elles ont été fermées. Carte qui fait foi, plus fine (2 à 3 de ses
 	cases par case de la voisine) : la projection de sa case fermée tombe souvent sur la case
 	frontière de la voisine elle-même, fermée ou non selon l'arrondi — on retient celles qui
-	tombent à UNE case au plus (Tchebychev) de la ligne de la voisine."""
+	tombent à UNE case au plus (Tchebychev) de la ligne de la voisine. Le cadre et l'au-delà du
+	bord de la carte qui fait foi (la France n'a pas de bande contre la plaine : sa frontière
+	est son bord) comptent quand leur projection tombe DANS la terre de la voisine, à une case
+	de sa ligne — pas seulement près d'elle, sinon les coins débordent sur le cadre voisin."""
 	ligne_v = ligne_frontiere(zone_v, au_dela(voisine, zone_v, foi["_id"], zone_f.__contains__),
 		depart_v, cadre_v)
 	proches = {(x + dx, y + dy) for x, y in ligne_v for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
-	ligne_f = ligne_frontiere(zone_f, au_dela(foi, zone_f, voisine["_id"], proches.__contains__),
-		depart_f, cadre_f)
+	ligne_f = ligne_frontiere(zone_f, au_dela(foi, zone_f, voisine["_id"], proches.__contains__,
+		lambda c: c in proches and c in zone_v), depart_f, cadre_f)
 	return ligne_v, ligne_f
 
 

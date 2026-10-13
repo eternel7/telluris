@@ -15334,16 +15334,16 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          45,
-          2
+          47,
+          1
         ],
         "label": "Grève de Malo — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          17,
-          31
+          19,
+          30
         ],
         "label": "Grève de Malo — Plaine européenne"
       }
@@ -15360,18 +15360,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          47,
+          49,
           1
         ],
-        "label": "Route de Furnes — France"
+        "label": "Gué de l'Yser — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          19,
+          21,
           30
         ],
-        "label": "Route de Furnes — Plaine européenne"
+        "label": "Gué de l'Yser — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15386,18 +15386,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          49,
+          51,
           1
         ],
-        "label": "Route des Flandres — France"
+        "label": "Route de Gand — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          21,
+          23,
           30
         ],
-        "label": "Route des Flandres — Plaine européenne"
+        "label": "Route de Gand — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15412,18 +15412,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          51,
+          53,
           1
         ],
-        "label": "Gué de la Lys — France"
+        "label": "Gué de l'Escaut — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          23,
+          25,
           30
         ],
-        "label": "Gué de la Lys — Plaine européenne"
+        "label": "Gué de l'Escaut — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15438,18 +15438,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          53,
+          55,
           1
         ],
-        "label": "Route de Lille à Courtrai — France"
+        "label": "Route de Bruxelles — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          25,
+          27,
           30
         ],
-        "label": "Route de Lille à Courtrai — Plaine européenne"
+        "label": "Route de Bruxelles — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15464,18 +15464,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          55,
+          57,
           1
         ],
-        "label": "Pont de Tournai — France"
+        "label": "Gué de la Dyle — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          27,
+          29,
           30
         ],
-        "label": "Pont de Tournai — Plaine européenne"
+        "label": "Gué de la Dyle — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15490,18 +15490,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          57,
+          59,
           1
         ],
-        "label": "Route de Valenciennes à Mons — France"
+        "label": "Route de Tirlemont — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          29,
+          30,
           30
         ],
-        "label": "Route de Valenciennes à Mons — Plaine européenne"
+        "label": "Route de Tirlemont — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15516,18 +15516,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          59,
+          61,
           1
         ],
-        "label": "Gué de la Sambre — France"
+        "label": "Route de Saint-Trond — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          31,
+          32,
           30
         ],
-        "label": "Gué de la Sambre — Plaine européenne"
+        "label": "Route de Saint-Trond — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15542,18 +15542,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          61,
+          63,
           1
         ],
-        "label": "Route de Rocroi — France"
+        "label": "Pont de Maastricht — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          33,
+          34,
           30
         ],
-        "label": "Route de Rocroi — Plaine européenne"
+        "label": "Pont de Maastricht — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15568,18 +15568,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          63,
+          65,
           1
         ],
-        "label": "Vallée de la Meuse — France"
+        "label": "Route d'Aix-la-Chapelle — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          35,
+          36,
           30
         ],
-        "label": "Vallée de la Meuse — Plaine européenne"
+        "label": "Route d'Aix-la-Chapelle — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15594,18 +15594,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          65,
+          67,
           1
         ],
-        "label": "Gué de la Semois — France"
+        "label": "Gué de la Rur — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          37,
+          38,
           30
         ],
-        "label": "Gué de la Semois — Plaine européenne"
+        "label": "Gué de la Rur — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15620,18 +15620,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          67,
+          69,
           1
         ],
-        "label": "Route de Bouillon — France"
+        "label": "Pont de Cologne — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          37,
+          40,
           30
         ],
-        "label": "Route de Bouillon — Plaine européenne"
+        "label": "Pont de Cologne — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15646,18 +15646,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          69,
+          71,
           1
         ],
-        "label": "Gué de la Chiers — France"
+        "label": "Gué de la Sieg — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          39,
+          41,
           30
         ],
-        "label": "Gué de la Chiers — Plaine européenne"
+        "label": "Gué de la Sieg — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15672,18 +15672,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          71,
+          73,
           1
         ],
-        "label": "Route du Luxembourg — France"
+        "label": "Route de Siegen — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          41,
+          43,
           30
         ],
-        "label": "Route du Luxembourg — Plaine européenne"
+        "label": "Route de Siegen — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15698,18 +15698,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          73,
+          75,
           1
         ],
-        "label": "Gué de la Moselle — France"
+        "label": "Gué de la Lahn — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          43,
+          45,
           30
         ],
-        "label": "Gué de la Moselle — Plaine européenne"
+        "label": "Gué de la Lahn — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15724,18 +15724,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          75,
+          77,
           1
         ],
-        "label": "Route de la Sarre — France"
+        "label": "Gué de l'Eder — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          45,
+          47,
           30
         ],
-        "label": "Route de la Sarre — Plaine européenne"
+        "label": "Gué de l'Eder — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15750,18 +15750,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          77,
+          79,
           1
         ],
-        "label": "Pont de Sarrebruck — France"
+        "label": "Route de Cassel — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          47,
+          49,
           30
         ],
-        "label": "Pont de Sarrebruck — Plaine européenne"
+        "label": "Route de Cassel — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15776,18 +15776,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          79,
+          81,
           1
         ],
-        "label": "Passage de Bitche — France"
+        "label": "Gué de la Werra — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          49,
+          51,
           30
         ],
-        "label": "Passage de Bitche — Plaine européenne"
+        "label": "Gué de la Werra — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15802,18 +15802,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          81,
+          83,
           1
         ],
-        "label": "Route de Wissembourg — France"
+        "label": "Route d'Eisenach — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          51,
+          53,
           30
         ],
-        "label": "Route de Wissembourg — Plaine européenne"
+        "label": "Route d'Eisenach — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15828,18 +15828,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          83,
+          85,
           1
         ],
-        "label": "Pont du Rhin — France"
+        "label": "Route d'Erfurt — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          53,
+          54,
           30
         ],
-        "label": "Pont du Rhin — Plaine européenne"
+        "label": "Route d'Erfurt — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15854,18 +15854,18 @@
       {
         "lieu": "lieu:france",
         "pos": [
-          85,
-          1
+          86,
+          2
         ],
-        "label": "Pont de Kehl — France"
+        "label": "Col du Rennsteig — France"
       },
       {
         "lieu": "lieu:plaine_europeenne",
         "pos": [
-          55,
-          30
+          56,
+          32
         ],
-        "label": "Pont de Kehl — Plaine européenne"
+        "label": "Col du Rennsteig — Plaine européenne"
       }
     ],
     "metadata": {
@@ -15875,31 +15875,211 @@
   },
   {
     "_id": "link:france_to_plaine_europeenne_22",
-    "_deleted": true
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          86,
+          4
+        ],
+        "label": "Route de Cobourg — France"
+      },
+      {
+        "lieu": "lieu:plaine_europeenne",
+        "pos": [
+          56,
+          34
+        ],
+        "label": "Route de Cobourg — Plaine européenne"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
   },
   {
     "_id": "link:france_to_plaine_europeenne_23",
-    "_deleted": true
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          86,
+          6
+        ],
+        "label": "Route de Bamberg — France"
+      },
+      {
+        "lieu": "lieu:plaine_europeenne",
+        "pos": [
+          56,
+          36
+        ],
+        "label": "Route de Bamberg — Plaine européenne"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
   },
   {
     "_id": "link:france_to_plaine_europeenne_24",
-    "_deleted": true
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          86,
+          8
+        ],
+        "label": "Route de Nuremberg — France"
+      },
+      {
+        "lieu": "lieu:plaine_europeenne",
+        "pos": [
+          56,
+          38
+        ],
+        "label": "Route de Nuremberg — Plaine européenne"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
   },
   {
     "_id": "link:france_to_plaine_europeenne_25",
-    "_deleted": true
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          86,
+          10
+        ],
+        "label": "Gué de l'Altmühl — France"
+      },
+      {
+        "lieu": "lieu:plaine_europeenne",
+        "pos": [
+          56,
+          39
+        ],
+        "label": "Gué de l'Altmühl — Plaine européenne"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
   },
   {
     "_id": "link:france_to_plaine_europeenne_26",
-    "_deleted": true
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          86,
+          12
+        ],
+        "label": "Gué du Danube — France"
+      },
+      {
+        "lieu": "lieu:plaine_europeenne",
+        "pos": [
+          56,
+          41
+        ],
+        "label": "Gué du Danube — Plaine européenne"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
   },
   {
     "_id": "link:france_to_plaine_europeenne_27",
-    "_deleted": true
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          86,
+          14
+        ],
+        "label": "Route d'Augsbourg — France"
+      },
+      {
+        "lieu": "lieu:plaine_europeenne",
+        "pos": [
+          56,
+          43
+        ],
+        "label": "Route d'Augsbourg — Plaine européenne"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
   },
   {
     "_id": "link:france_to_plaine_europeenne_28",
-    "_deleted": true
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          86,
+          16
+        ],
+        "label": "Gué du Lech — France"
+      },
+      {
+        "lieu": "lieu:plaine_europeenne",
+        "pos": [
+          56,
+          45
+        ],
+        "label": "Gué du Lech — Plaine européenne"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:france_to_plaine_europeenne_29",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          86,
+          18
+        ],
+        "label": "Route de Füssen — France"
+      },
+      {
+        "lieu": "lieu:plaine_europeenne",
+        "pos": [
+          56,
+          47
+        ],
+        "label": "Route de Füssen — Plaine européenne"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
   },
   {
     "_id": "link:italie_to_pannonie_01",
@@ -16194,8 +16374,8 @@
       {
         "lieu": "lieu:pannonie",
         "pos": [
-          62,
-          12
+          63,
+          10
         ],
         "label": "Route de Satu Mare — Pannonie"
       },
@@ -16203,7 +16383,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           19,
-          2
+          1
         ],
         "label": "Route de Satu Mare — Roumanie"
       }
@@ -16221,7 +16401,7 @@
         "lieu": "lieu:pannonie",
         "pos": [
           62,
-          13
+          12
         ],
         "label": "Gué du Someș — Pannonie"
       },
@@ -16229,7 +16409,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           19,
-          4
+          3
         ],
         "label": "Gué du Someș — Roumanie"
       }
@@ -16247,7 +16427,7 @@
         "lieu": "lieu:pannonie",
         "pos": [
           62,
-          14
+          13
         ],
         "label": "Route de Carei — Pannonie"
       },
@@ -16255,7 +16435,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           19,
-          6
+          5
         ],
         "label": "Route de Carei — Roumanie"
       }
@@ -16281,7 +16461,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           19,
-          8
+          7
         ],
         "label": "Marais de l'Ecsed — Roumanie"
       }
@@ -16298,15 +16478,15 @@
       {
         "lieu": "lieu:pannonie",
         "pos": [
-          61,
-          16
+          62,
+          15
         ],
         "label": "Route de Valea lui Mihai — Pannonie"
       },
       {
         "lieu": "lieu:roumanie",
         "pos": [
-          17,
+          18,
           9
         ],
         "label": "Route de Valea lui Mihai — Roumanie"
@@ -16325,7 +16505,7 @@
         "lieu": "lieu:pannonie",
         "pos": [
           61,
-          17
+          16
         ],
         "label": "Route d'Oradea — Pannonie"
       },
@@ -16333,7 +16513,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           17,
-          11
+          10
         ],
         "label": "Route d'Oradea — Roumanie"
       }
@@ -16359,7 +16539,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           17,
-          13
+          12
         ],
         "label": "Gué du Crișul Repede — Roumanie"
       }
@@ -16385,7 +16565,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           17,
-          15
+          14
         ],
         "label": "Route de Salonta — Roumanie"
       }
@@ -16410,8 +16590,8 @@
       {
         "lieu": "lieu:roumanie",
         "pos": [
-          16,
-          17
+          17,
+          16
         ],
         "label": "Gué du Crișul Negru — Roumanie"
       }
@@ -16436,7 +16616,7 @@
       {
         "lieu": "lieu:roumanie",
         "pos": [
-          14,
+          15,
           17
         ],
         "label": "Gué du Crișul Alb — Roumanie"
@@ -16454,8 +16634,8 @@
       {
         "lieu": "lieu:pannonie",
         "pos": [
-          59,
-          22
+          60,
+          20
         ],
         "label": "Route de Chișineu-Criș — Pannonie"
       },
@@ -16463,7 +16643,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           14,
-          19
+          18
         ],
         "label": "Route de Chișineu-Criș — Roumanie"
       }
@@ -16481,7 +16661,7 @@
         "lieu": "lieu:pannonie",
         "pos": [
           59,
-          23
+          22
         ],
         "label": "Vallée du Mureș — Pannonie"
       },
@@ -16489,7 +16669,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           14,
-          21
+          20
         ],
         "label": "Vallée du Mureș — Roumanie"
       }
@@ -16514,8 +16694,8 @@
       {
         "lieu": "lieu:roumanie",
         "pos": [
-          13,
-          23
+          14,
+          22
         ],
         "label": "Route d'Arad — Roumanie"
       }
@@ -16540,7 +16720,7 @@
       {
         "lieu": "lieu:roumanie",
         "pos": [
-          11,
+          12,
           23
         ],
         "label": "Pont de Nădlac — Roumanie"
@@ -16567,7 +16747,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           11,
-          25
+          24
         ],
         "label": "Route de Sânnicolau Mare — Roumanie"
       }
@@ -16585,7 +16765,7 @@
         "lieu": "lieu:pannonie",
         "pos": [
           57,
-          27
+          26
         ],
         "label": "Gué de l'Aranca — Pannonie"
       },
@@ -16593,7 +16773,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           11,
-          27
+          26
         ],
         "label": "Gué de l'Aranca — Roumanie"
       }
@@ -16611,7 +16791,7 @@
         "lieu": "lieu:pannonie",
         "pos": [
           57,
-          28
+          27
         ],
         "label": "Route de Jimbolia — Pannonie"
       },
@@ -16619,7 +16799,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           11,
-          29
+          28
         ],
         "label": "Route de Jimbolia — Roumanie"
       }
@@ -16637,7 +16817,7 @@
         "lieu": "lieu:pannonie",
         "pos": [
           57,
-          29
+          28
         ],
         "label": "Gué de la Bega — Pannonie"
       },
@@ -16645,7 +16825,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           11,
-          31
+          30
         ],
         "label": "Gué de la Bega — Roumanie"
       }
@@ -16671,7 +16851,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           11,
-          33
+          32
         ],
         "label": "Route de Timișoara — Roumanie"
       }
@@ -16697,7 +16877,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           11,
-          35
+          34
         ],
         "label": "Gué du Timiș — Roumanie"
       }
@@ -16722,7 +16902,7 @@
       {
         "lieu": "lieu:roumanie",
         "pos": [
-          12,
+          11,
           36
         ],
         "label": "Route de Vršac — Roumanie"
@@ -16740,7 +16920,7 @@
       {
         "lieu": "lieu:pannonie",
         "pos": [
-          60,
+          59,
           33
         ],
         "label": "Gué de la Caraș — Pannonie"
@@ -16748,7 +16928,7 @@
       {
         "lieu": "lieu:roumanie",
         "pos": [
-          14,
+          13,
           36
         ],
         "label": "Gué de la Caraș — Roumanie"
@@ -16766,7 +16946,7 @@
       {
         "lieu": "lieu:pannonie",
         "pos": [
-          61,
+          60,
           33
         ],
         "label": "Gué de la Nera — Pannonie"
@@ -16774,7 +16954,7 @@
       {
         "lieu": "lieu:roumanie",
         "pos": [
-          16,
+          15,
           36
         ],
         "label": "Gué de la Nera — Roumanie"
@@ -16792,7 +16972,7 @@
       {
         "lieu": "lieu:pannonie",
         "pos": [
-          62,
+          61,
           33
         ],
         "label": "Bac de Baziaș — Pannonie"
@@ -16800,7 +16980,7 @@
       {
         "lieu": "lieu:roumanie",
         "pos": [
-          18,
+          17,
           36
         ],
         "label": "Bac de Baziaș — Roumanie"
@@ -16826,7 +17006,7 @@
       {
         "lieu": "lieu:roumanie",
         "pos": [
-          20,
+          19,
           36
         ],
         "label": "Bac de Moldova Nouă — Roumanie"
@@ -16852,7 +17032,7 @@
       {
         "lieu": "lieu:roumanie",
         "pos": [
-          22,
+          21,
           36
         ],
         "label": "Défilé du Kazan — Roumanie"
@@ -16870,7 +17050,7 @@
       {
         "lieu": "lieu:pannonie",
         "pos": [
-          66,
+          65,
           33
         ],
         "label": "Bac d'Orșova — Pannonie"
@@ -16878,7 +17058,7 @@
       {
         "lieu": "lieu:roumanie",
         "pos": [
-          24,
+          23,
           36
         ],
         "label": "Bac d'Orșova — Roumanie"
@@ -16896,7 +17076,7 @@
       {
         "lieu": "lieu:pannonie",
         "pos": [
-          67,
+          66,
           33
         ],
         "label": "Portes de Fer — Pannonie"
@@ -16904,7 +17084,7 @@
       {
         "lieu": "lieu:roumanie",
         "pos": [
-          26,
+          25,
           36
         ],
         "label": "Portes de Fer — Roumanie"
@@ -16922,7 +17102,7 @@
       {
         "lieu": "lieu:pannonie",
         "pos": [
-          68,
+          67,
           33
         ],
         "label": "Pont de Trajan — Pannonie"
@@ -16930,7 +17110,7 @@
       {
         "lieu": "lieu:roumanie",
         "pos": [
-          28,
+          27,
           36
         ],
         "label": "Pont de Trajan — Roumanie"
@@ -16957,7 +17137,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           29,
-          38
+          37
         ],
         "label": "Bac de Prahovo — Roumanie"
       }
@@ -16983,7 +17163,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           29,
-          40
+          39
         ],
         "label": "Gué du Timok — Roumanie"
       }
@@ -17000,8 +17180,8 @@
       {
         "lieu": "lieu:pannonie",
         "pos": [
-          69,
-          36
+          68,
+          35
         ],
         "label": "Route de Zaječar — Pannonie"
       },
@@ -17009,7 +17189,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           29,
-          42
+          41
         ],
         "label": "Route de Zaječar — Roumanie"
       }
@@ -17035,7 +17215,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           29,
-          45
+          44
         ],
         "label": "Col de Vrachka Tchouka — Roumanie"
       }
@@ -17061,7 +17241,7 @@
         "lieu": "lieu:roumanie",
         "pos": [
           29,
-          47
+          46
         ],
         "label": "Route de Kula — Roumanie"
       }
