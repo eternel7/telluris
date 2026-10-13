@@ -32,8 +32,8 @@ dump à jour n'écrit rien. ⚠️ Import = PUT COMPLET (CLAUDE.md §11).
 
 DÉMÉNAGEMENT : changer le `parent` d'une cité déjà en base la repose sur la carte du nouveau
 pays (`lieu_parent` réécrit, liens `link:<pays>_to_<cité>_<sortie>` neufs) ; ses anciens
-liens vers un AUTRE lieu que ses quais partent en `{"_id", "_deleted": true}` — l'import
-(`save_doc`, PUT) les supprime de la base.
+liens vers un AUTRE lieu que ses quais sont SIGNALÉS (⚠), à retirer à la main (🧾 JSON → 🗑) :
+l'import de `/admin` ne sait pas effacer un doc.
 
 Usage :
   python dev/gen_ports_manche.py [--dump jsons/telluris-dump-….json] [--sans-apercu]
@@ -260,10 +260,11 @@ def connexions_cite(cite_id, label, spec, zone_cite, zone_pays):
 
 
 def liens_perimes(docs, cite_id: str, gardes: set) -> list:
-	"""Suppressions `{"_id", "_deleted": true}` des connexions du dump entre `cite_id` et un
-	autre lieu que ses quais, absentes de `gardes` (la cité a changé de pays)."""
+	"""Avertissements : connexions du dump entre `cite_id` et un autre lieu que ses quais,
+	absentes de `gardes` (la cité a changé de pays) — à retirer à la main."""
 	quais = QUAIS[cite_id]["_id"]
-	return [{"_id": d["_id"], "_deleted": True} for d in docs
+	return [f"{d['_id']} : périmée ({cite_id} a changé de pays) — à retirer à la main "
+			"(🧾 JSON → 🗑)" for d in docs
 			if d.get("type") == "connection" and d["_id"] not in gardes
 			and cite_id in {n.get("lieu") for n in d.get("nodes", [])}
 			and quais not in {n.get("lieu") for n in d.get("nodes", [])}]
@@ -411,9 +412,9 @@ def _grille_pont_image(image: str):
 
 # ── Construction ────────────────────────────────────────────────────────────────────────────
 def construire(docs, taille_fn, proposer_fn, grille_pont_fn):
-	"""(sortants, refus, rapports) — docs complets (`_rev` retiré)."""
+	"""(sortants, refus, rapports, avertissements) — docs complets (`_rev` retiré)."""
 	par_id = {d.get("_id"): d for d in docs}
-	refus, rapports, sortants = [], {}, []
+	refus, rapports, sortants, avert = [], {}, [], []
 	for e in sorted({e for es in RENCONTRES.values() for e in es}) + sorted(PROFIL_WEIGHTS):
 		if e not in par_id:
 			refus.append(f"{e} : absent du dump")
@@ -425,7 +426,7 @@ def construire(docs, taille_fn, proposer_fn, grille_pont_fn):
 		if not ggi.trouver_image(img):
 			refus.append(f"{img} : image absente de templates/resources")
 	if refus:
-		return [], refus, {}
+		return [], refus, {}, []
 
 	neuves, refus_v = villes_a_creer(
 		[c["image"] for cid, c in CITES.items() if cid not in par_id], docs, taille_fn)
@@ -459,7 +460,8 @@ def construire(docs, taille_fn, proposer_fn, grille_pont_fn):
 		zone_pays = zone_proche(pays["cells"], pays.get("nav") or {}, spec["pays"])
 		liens, refus_l = connexions_cite(cite_id, cite["label"], spec, principale, zone_pays)
 		refus += refus_l
-		sortants += liens + liens_perimes(docs, cite_id, {d["_id"] for d in liens})
+		sortants += liens
+		avert += liens_perimes(docs, cite_id, {d["_id"] for d in liens})
 		if quai is None:
 			refus.append(f"{cite_id} : pas de case de quai")
 			continue
@@ -479,7 +481,7 @@ def construire(docs, taille_fn, proposer_fn, grille_pont_fn):
 		pid = f"lieu:{os.path.splitext(image)[0]}"
 		sortants.append(sans_rev(par_id[pid]) if pid in par_id
 						else doc_pont(image, label, grille_pont_fn(image)))
-	return sortants, refus, rapports
+	return sortants, refus, rapports, avert
 
 
 def main() -> int:
@@ -500,7 +502,9 @@ def main() -> int:
 		dim = doc["dimensions"]
 		return ggi.proposer_pour_image(ggi.trouver_image(doc["image"]), dim["x"], dim["y"], doc)
 
-	sortants, refus, rapports = construire(docs, _taille_image, proposer, _grille_pont_image)
+	sortants, refus, rapports, avert = construire(docs, _taille_image, proposer, _grille_pont_image)
+	for a in avert:
+		print(f"⚠ {a}")
 	for r in refus:
 		print(f"✗ {r}")
 	if refus:

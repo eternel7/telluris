@@ -104,9 +104,6 @@ def main() -> int:
 		return 0
 
 	for doc in emis:
-		if doc.get("_deleted"):
-			print(f"  ✖ {doc['_id']} : supprimé")
-			continue
 		if doc.get("type") == "connection":
 			a, b = doc["nodes"]
 			print(f"  🔗 {doc['_id']} : {a['lieu']} {a['pos']} ↔ {b['lieu']} {b['pos']}")
@@ -127,7 +124,7 @@ def main() -> int:
 	with open(SORTIE, "w", encoding="utf-8") as f:
 		json.dump(emis, f, ensure_ascii=False, indent=2)
 		f.write("\n")
-	n_liens = sum(1 for d in emis if d.get("type") == "connection" or d.get("_deleted"))
+	n_liens = sum(1 for d in emis if d.get("type") == "connection")
 	print(f"\n✎ {os.path.relpath(SORTIE, RACINE)} — {len(emis) - n_liens} lieu(x), {n_liens} connexion(s)")
 	return 0
 

@@ -56,13 +56,12 @@ def test_frontieres_du_dump_une_case_sur_deux():
 	assert refus + r_pl + r_pa + r_it == []
 	# Aucun avertissement : sur chaque frontière, la carte qui compte (le côté le plus long, la
 	# carte qui fait foi) a EXACTEMENT un poste une case sur deux (`postes`).
-	assert avert + a_pl + a_pa + a_it == []
+	# (Une connexion périmée encore en base est signalée, à retirer à la main : pas un défaut.)
+	assert [a for a in avert + a_pl + a_pa + a_it if "périmée" not in a] == []
 	par_lieu = {d["_id"]: d for d in lieux_sud + l_pl + l_pa}
 	liens += d_pl + d_pa + d_it
 	for prefixe, noms in FRONTIERES.items():
-		# Les `_deleted` effacent les passages d'un tracé précédent : ils ne comptent pas.
-		du_prefixe = [l for l in liens if l["_id"].startswith(prefixe + "_")
-			and not l.get("_deleted")]
+		du_prefixe = [l for l in liens if l["_id"].startswith(prefixe + "_")]
 		assert len(du_prefixe) == len(noms) == len(set(noms))
 		for l in du_prefixe:
 			for n in l["nodes"]:
@@ -71,10 +70,10 @@ def test_frontieres_du_dump_une_case_sur_deux():
 
 
 def test_passages_hors_compte_supprimes():
-	"""Un passage du dump au-delà de la liste de noms part en `_deleted` ; rejoué sur un dump
-	qui ne l'a plus, rien."""
+	"""Un passage du dump au-delà de la liste de noms est SIGNALÉ (jamais émis en `_deleted` :
+	l'import de /admin ne sait pas effacer) ; rejoué sur un dump qui ne l'a plus, rien."""
 	dump = [{"_id": "link:x_01", "type": "connection"}, {"_id": "link:x_02", "type": "connection"},
 		{"_id": "link:xy_01", "type": "connection"}, {"_id": "lieu:x_03", "type": "lieu"}]
-	assert plaine.liens_perimes(dump, "link:x_", {"link:x_01"}) == [
-		{"_id": "link:x_02", "_deleted": True}]
+	avert = plaine.liens_perimes(dump, "link:x_", {"link:x_01"})
+	assert len(avert) == 1 and avert[0].startswith("link:x_02 : ") and "à la main" in avert[0]
 	assert plaine.liens_perimes(dump[:1], "link:x_", {"link:x_01"}) == []

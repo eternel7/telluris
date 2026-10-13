@@ -89,7 +89,7 @@ DEPART_PANNONIE_ITALIE = (0, 20)
 CADRE_PANNONIE_ITALIE = (0, 30, 0, 47)
 # Noms, des Dolomites à Trieste : un par poste de la Pannonie.
 # ⚠️ Rang = suffixe d'`_id` (cf. gen_plaine_europeenne.PASSAGES_PLAINE) ; un `_id` au-delà
-# du compte, encore en base, part en suppression (`liens_perimes`).
+# du compte, encore en base, est SIGNALÉ, à retirer à la main (`liens_perimes`).
 PASSAGES_ITALIE = (
 	"Col du Brenner", "Col de Stalle", "Col de Monte Croce di Comelico",
 	"Col de Monte Croce Carnico", "Col de Nassfeld", "Col de Tarvisio", "Col du Predil",
@@ -261,7 +261,7 @@ def construire(docs, taille_fn, proposer_fn, eau_fn, italie):
 	liens, refus, avert = liens + d, refus + r, avert + a
 	for prefixe, noms in (("link:italie_to_pannonie_", PASSAGES_ITALIE),
 			("link:pannonie_to_roumanie_", PASSAGES_ROUMANIE)):
-		liens += frontieres_calees.liens_perimes(docs, prefixe, {l["_id"] for l in liens})
+		avert += frontieres_calees.liens_perimes(docs, prefixe, {l["_id"] for l in liens})
 	d, r = connexions_bucarest(zone_rou, bucarest, libelles[BUCAREST])
 	return ([pannonie, roumanie, bucarest, italie], liens + d, refus + r,
 		({PANNONIE: prop} if prop else {}), avert)

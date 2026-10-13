@@ -17252,34 +17252,6 @@
     }
   },
   {
-    "_id": "link:italie_to_pannonie_11",
-    "_deleted": true
-  },
-  {
-    "_id": "link:italie_to_pannonie_12",
-    "_deleted": true
-  },
-  {
-    "_id": "link:italie_to_pannonie_13",
-    "_deleted": true
-  },
-  {
-    "_id": "link:italie_to_pannonie_14",
-    "_deleted": true
-  },
-  {
-    "_id": "link:italie_to_pannonie_15",
-    "_deleted": true
-  },
-  {
-    "_id": "link:italie_to_pannonie_16",
-    "_deleted": true
-  },
-  {
-    "_id": "link:italie_to_pannonie_17",
-    "_deleted": true
-  },
-  {
     "_id": "lieu:calais",
     "type": "lieu",
     "label": "Calais",
@@ -22610,18 +22582,6 @@
       "type": "chemin",
       "status": "ouvert"
     }
-  },
-  {
-    "_id": "link:plaine_europeenne_to_calais_est",
-    "_deleted": true
-  },
-  {
-    "_id": "link:plaine_europeenne_to_calais_nord_est",
-    "_deleted": true
-  },
-  {
-    "_id": "link:plaine_europeenne_to_calais_sud",
-    "_deleted": true
   },
   {
     "_id": "lieu:afrique_du_nord",

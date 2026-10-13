@@ -83,8 +83,8 @@ DEPART_PLAINE = (17, 31)
 # long du bord nord de `france.png` (vers le 51e parallèle : Flandre, Brabant, pays de Liège,
 # Rhénanie, Hesse, Thuringe), puis du nord au sud le long de son bord droit (vers le 11e
 # méridien : Thuringe, Franconie, Souabe). La côte picarde est en France : aucun passage à
-# l'ouest du pas de Calais. Un `_id` au-delà du compte, encore en base, part en suppression
-# (`liens_perimes`).
+# l'ouest du pas de Calais. Un `_id` au-delà du compte, encore en base, est SIGNALÉ, à
+# retirer à la main (`liens_perimes`).
 # ⚠️ Rang = suffixe d'`_id` (`_01`…) : réordonner fait désigner un autre passage aux `_id`
 # en base ; la grille bouge ⇒ `liens_projetes` avertit que le compte ne tombe plus juste.
 PASSAGES_PLAINE = (
@@ -308,9 +308,10 @@ def connexions_cite(cite_id, zone_cite, zone_plaine, cite_label=None):
 
 
 def liens_perimes(docs, prefixe, gardes):
-	"""Suppressions `{"_id", "_deleted": true}` des connexions du dump dont l'`_id` commence
-	par `prefixe` et que le lot ne produit plus (`gardes`) — l'import (PUT) les efface."""
-	return [{"_id": d["_id"], "_deleted": True} for d in docs
+	"""Avertissements : connexions du dump dont l'`_id` commence par `prefixe` et que le lot ne
+	produit plus (`gardes`). Jamais émises en suppression — l'import de `/admin` ne sait pas
+	effacer un doc (un `_deleted` y échoue) : elles sont à retirer à la main (🧾 JSON → 🗑)."""
+	return [f"{d['_id']} : périmée — à retirer à la main (🧾 JSON → 🗑)" for d in docs
 		if d.get("type") == "connection" and str(d.get("_id", "")).startswith(prefixe)
 		and d["_id"] not in gardes]
 
@@ -360,7 +361,7 @@ def construire(docs, taille_fn, proposer_fn, france):
 
 	libelles = libelles_de(docs, lieux, [france])
 	liens, refus, avert = connexions_france_plaine(france, zone_france, plaine, zone_plaine, libelles)
-	liens += liens_perimes(docs, "link:france_to_plaine_europeenne_", {d["_id"] for d in liens})
+	avert += liens_perimes(docs, "link:france_to_plaine_europeenne_", {d["_id"] for d in liens})
 	for cite_id in sorted(POSITIONS_PLAINE):
 		cite = par_lieu[cite_id]
 		d, r = connexions_cite(cite_id, zone_de(cite["cells"], cite.get("nav") or {}), zone_plaine,

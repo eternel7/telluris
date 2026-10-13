@@ -707,8 +707,8 @@ CATALOGUE = [
 			"de la Manche » et des villes des pays fusionnées : sur chaque frontière, la carte "
 			"la plus détaillée fait foi (plaine sur France, Italie sur France et Pannonie, "
 			"Pannonie sur Roumanie, Afrique du Nord sur Égypte), passages face à face, Calais "
-			"posée sur la carte de France. Les connexions périmées partent en `_deleted` "
-			"(supprimées à l'import). N'émet que ce qui diffère du dump. Requiert Pillow."
+			"posée sur la carte de France. Les connexions périmées sont signalées (⚠), à "
+			"retirer à la main (🧾 JSON → 🗑). N'émet que ce qui diffère du dump. Requiert Pillow."
 	},
 	{
 		"id": "gen_villes_pays",
