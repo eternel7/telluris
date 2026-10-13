@@ -71,6 +71,7 @@ L'Auteur demande d'autres mythes et légendes terrestres à rattacher aux vampir
 - **Lord Ruthven** : un **aristocrate de Dracula**.
 - **Abhartach** : une **lignée indépendante**.
 - **L'empaleur** (Auteur, 13/10, verbatim) : « avant sa malédiction, Vlad empalait les monstres abattus en lisière de ses terres agricoles, pour signaler aux autres que la lisière était tenue. Le monstre qui ravageait ses terres serait celui qu'il n'a pas pu empaler. Après la malédiction, il empale aussi des anthropes. »
+- **Le soleil** (Auteur, 13/10, verbatim) : « Le soleil est craint de tout vampire sauf les dragons avec encore une bonne âme » — y compris Abhartach, le penanggalan et les dragons de sang déchus.
 - **Faiblesses validées** : Dracula, la terre natale · Strigoï, le feu et l'aubépine · lamies, le fer et les chevaux, et le soleil · dragons de sang, le parjure · Nosferatu, toute lumière (y compris la magie Sainte).
 
 ---
@@ -256,12 +257,12 @@ Le rattachement de chaque piste est **tranché par l'Auteur** (§ ✍️ quatri�
 
 ### Faiblesses par lignée (Auteur, 13/10 : validées, sauf Abhartach et penanggalan, proposées)
 
-| Lignée | Soleil (règle commune § 1) | Faiblesse tirée du mythe |
+| Lignée | Soleil — craint de tous, sauf les dragons à la bonne âme (Auteur) | Faiblesse tirée du mythe |
 |---|---|---|
 | Aristocrates de Dracula | brûle | **la terre natale** : ils doivent dormir dans la terre de leur cité (les caisses de terre de Stoker) |
 | Strigoï, vrykolakas | tue | **le feu** (on brûle les vrykolakas) et **l'aubépine** (pieu des Balkans) |
 | Nosferatu | consume | **la lumière** sous toutes ses formes, y compris celle de la magie Sainte (Murnau) |
 | Lamies, baobhan sith | rend inerte (confirmé, Auteur) | **le fer froid** et **les chevaux** (baobhan sith) |
 | Dragons de sang | aucune (fidèles) · gêne (déchus) | **le parjure** : un serment rompu les affaiblit |
-| Abhartach | à trancher | **l'if**, et **la tête en bas** au tombeau |
-| Penanggalan | à trancher | **les épines** et **le vinaigre** |
+| Abhartach | craint (Auteur) | **l'if**, et **la tête en bas** au tombeau |
+| Penanggalan | craint (Auteur) | **les épines** et **le vinaigre** |
