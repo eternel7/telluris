@@ -119,6 +119,19 @@ Cinq lignées (Auteur, 12/10) — séance `docs/lore/monde/20261012_les_vampires
 - **Quatre noms à ne pas confondre** (Auteur, 12/10) : **lamie** (vampire) ≠ **lamia** (Lamia libyenne : femme-serpent **morte-vivante** du désert, dévoreuse, ôte ses yeux ; légende déformée, sans lien de sang) ≠ **vouivre** (femme-serpent **vivante**, écho de Mélusine) ≠ **wyvern** (serpent ailé animal). En jeu, la lamia s'affiche « Lamia » et sa reine « Reine des lamias » (`_id` `espece:lhamia` / `reine_lhamia` inchangés).
 
 
+### Loups-garous et chiens des légendes
+Familles **indépendantes** (Auteur, 14/10, cinq questionnaires) — séance `docs/lore/monde/20261014_les_loups_garous_de_telluris.md` ; bestiaire : `dev/gen_loups_garous.py` → `jsons/loups_garous_a_importer.json` ; prose : `docs/lore/redige/10_loups_garous.md`.
+
+- **Origines indépendantes**, théories contradictoires de PNJ (esprit de bête, malédiction, art) ; tout lycanthrope peut être de n'importe quelle Lignée. **Lune selon la famille** : elle force la mue des maudits, les autres changent à volonté.
+- **Irlande = gardiens** : le **faoladh** protège enfants, blessés, égarés ; **Ossory** : **don** de Laignech Fáelad (héréditaire, à volonté) **puis malédiction d'un druide** (un couple, sept ans, pleine lune ; chez Giraldus un saint — remplacé). Les **tertres (*sídhe*)** sont des **portails naturels** vers l'Autre Monde, non datés.
+- **Chiens d'Irlande** : **Cú Sídhe** (trois aboiements), **Bran et Sceólang** (cousins de Fionn nés chiens, alliés), **Failinis** (être unique), **Dobhar-chú** (chien des eaux, pas lycanthrope). **Cú Chulainn** : héros anthrope, **sans lycanthropie** (sa furie n'en prouve rien).
+- **Hommes-jaguars** : **nahual** (double animal, à volonté ; Teotihuacan, terres olmèques et mayas) + **uturuncu** (rite ; s'il tarde, jamais anthrope ; Amazonie, Pichao). **Tepeyollotl** = origine en **théorie** seulement. **Guerriers-jaguars** = **gardiens de la forêt**, pendant américain des Paladins (peu sont de vrais nahuals).
+- Autres familles : **Lycaon** (Arcadie, malédiction des dieux, être unique), **Ulfheðnar** (chasseurs du Nord en peau de loup — jamais guerriers d'une guerre), **Chiens des dieux** de Livonie (trois nuits par an, **portail naturel** vers un monde souterrain inconnu ; protecteurs), **loups-garous de France** (`espece:loup_garou` ; Bisclavret = PNJ ; Gévaudan : loup-garou ou non, jamais su).
+- **Faiblesses par famille** (validées) : faoladh — son corps endormi, déplacé ; Cú Sídhe — l'eau courante ; Dobhar-chú — sa mort appelle son compagnon ; nahual — blessures partagées avec son double, le sel sur sa peau ; uturuncu — trop tarder ; Ulfheðnar — la peau brûlée ; Lycaon — la chair anthrope (neuf ans d'abstinence) ; Bisclavret — ses vêtements ; France — son nom, trois gouttes de sang ; Chiens des dieux — manquer une des trois nuits. **Pas d'argent universel.**
+- **Vrykolakas** (« poil de loup ») : un loup-garou mort revenu en Strigoï = **théorie disputée**, jamais tranchée.
+- **Premier lycanthrope** : **rang E**, **enquête** en France (modèle Gévaudan), qui peut se conclure sans loup-garou ; les familles lointaines viennent avec les voyages.
+- Hors bestiaire (PNJ, alliés) : Bisclavret, Chiens des dieux, Bran et Sceólang, gardiens-jaguars.
+
 ### Contradictions ouvertes
 À signaler si un texte en dépend, jamais à trancher seul :
 
