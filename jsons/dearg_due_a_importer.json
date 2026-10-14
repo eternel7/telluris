@@ -1,0 +1,76 @@
+[
+  {
+    "_id": "espece:dearg_due",
+    "type": "espece",
+    "nom": "Dearg Due",
+    "genre": "f",
+    "nom_propre": true,
+    "image": "dearg_due_transparent.png",
+    "description": "Lamie d'Irlande : vendue par son père à un chef cruel qui l'enferma, elle se laissa mourir ; une lamie de passage la releva, et elle but le sang de son mari, puis celui de son père. Elle séduit encore les hommes avant de les vider ; le soleil la laisse inerte, le fer et les chevaux la tiennent à distance.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 60
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 55,
+        "max": 80
+      },
+      "Int": {
+        "min": 55,
+        "max": 80
+      },
+      "Cha": {
+        "min": 75,
+        "max": 95
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "magique",
+      "seduction",
+      "boss",
+      "humanoide"
+    ],
+    "items": [
+      "item:Rapiere",
+      "item:Dague",
+      "item:Robe_bordeaux",
+      "item:Cape_soie_sombre",
+      "item:Bottines_legeres",
+      "item:Gants_fins_noirs"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:dearg_due",
+    "type": "item",
+    "nom": "Ossements de Dearg Due",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 10.0,
+    "description": "Ossements et reliquats récupérés sur Dearg Due après sa destruction.",
+    "source_espece": "espece:dearg_due",
+    "loot_defaut": true
+  }
+]
