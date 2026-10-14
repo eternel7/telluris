@@ -377,6 +377,8 @@ def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 		"quetes_actives": set(quetes_actives or ()),
 		# Lu par la condition `passages` (cf. « Passages dans un lieu »).
 		"passages": dict((character or {}).get("passages") or {}),
+		# Lu par la condition `rang_min` (rang de guilde PAR CITÉ).
+		"rangs_guilde": dict((character or {}).get("rangs_guilde") or {}),
 	}
 
 
@@ -385,7 +387,7 @@ def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 # exact de cet ensemble (épinglé par un test) : une clé structurée absente de la liste du
 # linter serait signalée comme flag inconnu, et l'inverse ferait passer une faute en silence.
 CONDITIONS_STRUCTUREES = frozenset({
-	"relation_min", "intro_raison", "quete_reussie", "quete_active", "passages"})
+	"relation_min", "intro_raison", "quete_reussie", "quete_active", "passages", "rang_min"})
 
 # Les deux conditions qui nomment une QUÊTE : même forme `{id, attendu}`, même sémantique
 # fail-closed, seul l'ensemble consulté change — d'où UN prédicat partagé plutôt que deux
@@ -433,7 +435,8 @@ def condition_ok(condition: dict | None, contexte: dict) -> bool:
 	"""Évalue une condition de choix. Sans condition → True. `relation_min` = OU logique
 	sur les lieux (une relation ≥ seuil suffit) ; `intro_raison` = égalité stricte ;
 	`quete_reussie` / `quete_active` = état d'une quête NOMMÉE ; `passages` = nombre
-	d'entrées dans un lieu, entre deux bornes (`passages_ok`) ; toute autre clé est un **flag
+	d'entrées dans un lieu, entre deux bornes (`passages_ok`) ; `rang_min` = rang de guilde
+	dans une cité (`{cite, rang}`, `acces.rang_min_satisfait`) ; toute autre clé est un **flag
 	booléen** du contexte (ex. `transport_offert`) — un flag absent vaut False, ce qui masque
 	le choix."""
 	if not condition:
@@ -452,6 +455,14 @@ def condition_ok(condition: dict | None, contexte: dict) -> bool:
 			return False
 	if "passages" in condition and not passages_ok(contexte.get("passages"), condition["passages"]):
 		return False
+	if "rang_min" in condition:
+		# MÊME comparateur que la barrière de lieu et l'offre d'escorte (`{cite, rang}`,
+		# fail-closed) : un seul vocabulaire de rang dans tout le jeu. Import paresseux —
+		# `acces` importe ce module (`passages_ok`), et ce module reste minimal.
+		from utils import acces
+		if not isinstance(condition["rang_min"], dict) or not acces.rang_min_satisfait({"rangs_guilde": contexte.get("rangs_guilde")},
+										condition["rang_min"]):
+			return False
 	flags = contexte.get("flags") or {}
 	for cle, attendu in condition.items():
 		if cle in CONDITIONS_STRUCTUREES:

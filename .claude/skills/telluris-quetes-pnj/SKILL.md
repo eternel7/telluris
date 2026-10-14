@@ -75,6 +75,7 @@ La seule escorte **GÉNÉRÉE**, et le premier canal qui la rende répétable.
 - **Saisie libre** : un choix `"saisie": true` s'affiche en champ texte + bouton (`renderPnjNoeud`, `choisirPnjSaisie`) ; sa valeur part en `saisie` dans le POST. Seul lecteur : le service **`direction`** (`noeuds:{trouve, proche, inconnu}`) — le PNJ cherche le nom parmi les lieux du même `lieu_parent` que sa boutique (`transport.chercher_lieu_nomme`, `difflib`, ≤ `SUGGESTIONS_MAX`) et répond avec la phrase des courses (`indice_destination` + `texte_indice` → `{direction}`) ; `{recherche}`/`{suggestions}` sinon. Casse ET article de tête ignorés (« Relais de l'Eure » → « Le Relais de l'Eure ») si un seul lieu correspond, sinon suggestions. Chaque suggestion devient une **réplique cliquable** du joueur (`transport.choix_suggestions`, préfixée aux choix du nœud `proche` par le router) qui **rejoue** le choix de saisie d'origine avec le nom exact (`rejouer: {noeud, saisie}`, client `choisirPnjRejouer` — nom lu par index, jamais dans l'`onclick`) : aucun contenu à écrire. ⚠️ La saisie ne va jamais dans un `label` (innerHTML) : seulement dans `texte` (`textContent`). Borne `transport.RECHERCHE_LIEU_MAX`, recopiée par le `maxlength` du client. Contenu : `dev/gen_direction_marchands.py` (les 48 `pnj:marchand_*`).
 - Un nœud peut porter un **délai de réouverture** (`delai_min`/`noeud_attente`) et une **récompense de relation** versée une seule fois (`relation`, rouverte par `relation_reinit`).
 - Conditions `quete_reussie`/`quete_active` = une quête **nommée**, testable depuis n'importe quel PNJ (≠ la clause d'accès homonyme, qui filtre par critères) ; un seul prédicat fail-closed, partagé avec le linter.
+- Condition `rang_min` = `{cite, rang}`, rang de guilde DANS une cité — le MÊME comparateur fail-closed que la barrière de lieu (`acces.rang_min_satisfait`, import paresseux dans `pnj.condition_ok`) ; contexte `rangs_guilde` ; linter `fautes_rang_min`. Verrouillé par `tests/test_condition_rang_min.py`.
 - Endpoints **stateless** `GET /api/pnj/dialogue` et `POST /api/pnj/dialogue/choix`, logique pure `utils/pnj.py`. UI `#pnj-panel`, portraits par le mount `/pnj`.
 
 #### Milo, apprenti cartographe — un PNJ narratif à scènes
@@ -104,6 +105,15 @@ Contenu : `dev/gen_enquete_escolives.py` → **un seul** `jsons/enquete_escolive
 - ⚠️ `gen_mission_bucherons.py` / `gen_acces_donjon.py` réécrivent Gautier depuis des dumps FIGÉS : importer leur sortie effacerait la quête.
 
 Verrouillé par `tests/test_enquete_escolives.py`.
+
+#### La bête de Dun-les-Places — enquête du rang E, premier lycanthrope
+Contenu : `dev/gen_enquete_morvan.py` → **un seul** `jsons/enquete_morvan_a_importer.json` (Borin relu du dump + 7 docs neufs). Scénario et arbitrages : `docs/lore/personnages/20261014_enquete_du_morvan.md`.
+- Borin (comptoir du Bastion) offre ET reçoit une quête d'**apport** unique, choix d'offre sous `rang_min {cite: lieu:auxerre, rang: E}` : `item:loup_garou_tete` (portion de la carcasse, débitée à la lame — la carcasse trop lourde tombe au sol) → `lieu:dun_les_places` (France (52,22)) → la meneuse Jacotte ouvre `lieu:clairiere_du_charbonnier` (service `acces`, salle de `donjon:clairiere_du_charbonnier`, UN loup-garou).
+- Barrière : `quete_active {types:[collect], cible:item:loup_garou_tete, objectif_atteint:false}` **sans** `combat_gagne` (à la différence d'Escolives) : une tête perdue au sol ne bloque pas la quête, la clairière se rouvre jusqu'à la remise.
+- Le charbonnier disparaît une fois la clairière gagnée (présence `combat_gagne … attendu:false`) ; le nom de la bête n'est jamais dit.
+- ⚠️ Grille de la clairière = **brouillon** jusqu'à la livraison de la carte de combat.
+
+Verrouillé par `tests/test_enquete_morvan.py`.
 
 #### Passages dans un lieu — condition `passages`
 - `character["passages"] = {lieu_id: n}` : nombre d'ENTRÉES, compté par `pnj.poser_pnj_present` **avant** le tirage (le passage en cours compte déjà). Même sémantique que le tirage : refresh = 0, ressortir/rentrer = +1, connexion interne = 0. Champ absent ⇒ 0 (un perso compte à partir de sa prochaine entrée).

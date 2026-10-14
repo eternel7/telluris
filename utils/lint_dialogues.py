@@ -59,7 +59,7 @@ PLACEHOLDERS_CONNUS = {
 # structurée oubliée ici serait signalée comme flag inconnu sur du contenu correct, et une
 # clé de trop laisserait passer une vraie faute.
 CONDITIONS_STRUCTUREES = {
-	"relation_min", "intro_raison", "quete_reussie", "quete_active", "passages"}
+	"relation_min", "intro_raison", "quete_reussie", "quete_active", "passages", "rang_min"}
 
 # Les conditions qui NOMMENT une quête. ⚠️ Miroir de `utils.pnj.CONDITIONS_QUETE` : elles
 # partagent la forme `{id, attendu}` et le même prédicat côté moteur, donc le même contrôle.
@@ -95,6 +95,20 @@ def fautes_passages(filtre) -> list:
 	if "min" in bornes and "max" in bornes and bornes["min"] > bornes["max"]:
 		fautes.append("`min` > `max`")
 	return fautes
+def fautes_rang_min(filtre) -> list:
+	"""Ce qui rend une condition `rang_min` FAUSSE POUR TOUJOURS (cf.
+	`acces.rang_min_satisfait`, fail-closed), en clair — vide si elle est bien formée."""
+	if not isinstance(filtre, dict):
+		return ["doit être un objet `{\"cite\": \"lieu:...\", \"rang\": \"E\"}`"]
+	fautes = [f"sous-clé `{s}` inconnue" for s in sorted(set(filtre) - acces.SOUS_FILTRES_CONNUS["rang_min"])]
+	cite = filtre.get("cite")
+	if not isinstance(cite, str) or not cite.startswith("lieu:"):
+		fautes.append("`cite` doit être un id de lieu (`lieu:...`)")
+	if filtre.get("rang") not in acces.RANGS:
+		fautes.append(f"`rang` doit être l'un de {', '.join(acces.RANGS)}")
+	return fautes
+
+
 FLAGS_CONNUS = {
 	"transport_offert", "transport_a_livrer", "transport_a_rapporter",
 	"transport_en_cours", "transport_accompli", "transport_mefiance",
@@ -458,6 +472,12 @@ def analyser_doc(doc: dict) -> list:
 			if "passages" in conditions:
 				for faute in fautes_passages((choix.get("condition") or {}).get("passages")):
 					erreur(f"choix `{cid}` : `passages` {faute} — fail-closed, le choix "
+						   f"ne s'affichera JAMAIS.", nid)
+
+			# `rang_min` : même comparateur fail-closed que la barrière de lieu.
+			if "rang_min" in conditions:
+				for faute in fautes_rang_min((choix.get("condition") or {}).get("rang_min")):
+					erreur(f"choix `{cid}` : `rang_min` {faute} — fail-closed, le choix "
 						   f"ne s'affichera JAMAIS.", nid)
 
 			# Hook de déplacement automatique : `"deplacer": "lieu:xxx"`. On ne peut pas

@@ -182,7 +182,7 @@ Ancrages : *Bisclavret* de Marie de France (Bretagne : le chevalier qui devient 
 - **Bisclavret** (Auteur, PNJ) — un chevalier breton qui devient loup et ne peut redevenir anthrope sans ses vêtements. PNJ allié, triste et loyal, qu'on rencontre **loup, à la cour d'un seigneur breton** qui le garde comme un chien sans savoir qui il est (Auteur, 14/10) ; proposé : une quête pour retrouver ses vêtements.
 - **`espece:loup_garou`** (Auteur) — le **loup-garou de France** : un anthrope maudit que la pleine lune change en bête (Auteur, 14/10 : il doit **courir le garou** — une nuit de pleine lune, courir sept villages avant l'aube ; la malédiction frappe une faute cachée, ou naît d'un pacte avec un sorcier). Appelé par son nom, ou blessé jusqu'au sang, il redevient anthrope (§ 8).
 - **La Bête du Gévaudan** (déjà en jeu, `espece:bete_du_gevaudan`) — proposé : on n'a **jamais su** si c'était un loup-garou, un loup géant ou une autre bête ; des PNJ défendent les trois. Modèle de l'**enquête du rang E** (Auteur).
-- **Enquête du rang E** (Auteur ; scénario **validé** le 14/10) — dans un village du **Morvan**, à quelques jours d'Auxerre, pays des meneurs de loups, une bête décime les troupeaux, puis un berger. Les villageois accusent un solitaire. Le dénouement varie : un loup-garou qu'on peut ramener à son nom, un loup géant, ou rien de certain. À écrire dans une demande séparée.
+- **Enquête du rang E** (Auteur ; scénario **validé** le 14/10 ; **écrite** : `docs/lore/personnages/20261014_enquete_du_morvan.md`, Dun-les-Places) — dans un village du **Morvan**, à quelques jours d'Auxerre, pays des meneurs de loups, une bête décime les troupeaux, puis un berger. Les villageois accusent un solitaire. Le dénouement varie : un loup-garou qu'on peut ramener à son nom, un loup géant, ou rien de certain. À écrire dans une demande séparée.
 
 ## 8. Faiblesses par famille (Auteur, 14/10 : toutes validées)
 
@@ -216,7 +216,7 @@ Restent **ouverts par choix de l'Auteur**, comme mystères du monde :
 
 - **Ioruaidh**, l'île de Failinis, que nul ne sait situer (Auteur, 14/10).
 
-Proposés, non tranchés : le nom du druide, les galeries de Tepeyollotl sous Teotihuacan, la quête des vêtements de Bisclavret. À écrire dans des demandes séparées : **Riga**, l'**enquête du Morvan**.
+Proposés, non tranchés : le nom du druide, les galeries de Tepeyollotl sous Teotihuacan, la quête des vêtements de Bisclavret. À écrire dans une demande séparée : **Riga**. L'enquête du Morvan est écrite (14/10).
 
 ## 11. Bestiaire (Auteur, 14/10)
 
