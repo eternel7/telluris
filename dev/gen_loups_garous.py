@@ -11,7 +11,7 @@
 #   - `espece:loup_garou` (déjà en jeu) devient le loup-garou de FRANCE : description seule,
 #     `_id` et caractéristiques inchangés (Auteur).
 # Lune et faiblesses de chaque famille : DESCRIPTION SEULE, aucune mécanique (comme les vampires).
-# Sans image (`image: ""`) : prompts au § 12 de la séance.
+# Images détourées dans templates/resources/monsters/ ; le nahual n'en a pas encore (prompt au § 12).
 # Loot : une CARCASSE par bête (forme de `item:loup`, poids [min, max] ≤ 100 kg : pas de
 # découpe), des OSSEMENTS pour l'ulfheðinn humanoïde (forme de `gen_vampires._ossements`).
 #
@@ -57,7 +57,7 @@ MODIFS = {
 NOUVELLES = {
 	# Irlande — gardiens (Auteur) : le faoladh n'attaque que s'il croit menacés ceux qu'il garde.
 	"faoladh": {
-		"nom": "Faoladh", "genre": "m",
+		"nom": "Faoladh", "genre": "m", "image": "faoladh_transparent.png",
 		"description": "Loup-garou d'Irlande, héritier du don de Laignech Fáelad : il garde les enfants, "
 					   "les blessés et les égarés, et ne frappe que s'il les croit menacés. Pendant "
 					   "qu'il court, son corps anthrope dort là où il l'a laissé ; déplacé, l'esprit ne "
@@ -67,7 +67,7 @@ NOUVELLES = {
 		"carcasse": ([40, 80], "peu_commun"),
 	},
 	"cu_sidhe": {
-		"nom": "Cú Sídhe", "genre": "m",
+		"nom": "Cú Sídhe", "genre": "m", "image": "cu_sidhe_transparent.png",
 		"description": "Chien des tertres, grand comme un jeune taureau, au pelage vert sombre : il "
 					   "chasse en silence et n'aboie que trois fois — au troisième aboiement, qui "
 					   "l'entend meurt de peur. Il ne franchit pas l'eau courante.",
@@ -76,7 +76,7 @@ NOUVELLES = {
 		"carcasse": ([60, 100], "peu_commun"),
 	},
 	"dobhar_chu": {
-		"nom": "Dobhar-chú", "genre": "m",
+		"nom": "Dobhar-chú", "genre": "m", "image": "dobhar_chu_transparent.png",
 		"description": "Chien des eaux, mi-chien mi-loutre, qui guette les lacs du nord-ouest de "
 					   "l'Irlande et tue qui s'y baigne. Quand on l'abat, son compagnon sort de l'eau "
 					   "pour le venger.",
@@ -86,7 +86,7 @@ NOUVELLES = {
 	},
 	# Être unique (Auteur) : « Failinis », pas « le Failinis ».
 	"failinis": {
-		"nom": "Failinis", "genre": "m", "nom_propre": True,
+		"nom": "Failinis", "genre": "m", "nom_propre": True, "image": "failinis_transparent.png",
 		"description": "Le chien invincible du roi d'Ioruaidh, que Lugh voulut pour lui : nulle bête ne "
 					   "lui échappe, et toute bête qui le voit tombe. Nul ne sait s'il est chien, loup "
 					   "ou autre chose venu d'un tertre.",
@@ -106,7 +106,7 @@ NOUVELLES = {
 		"carcasse": ([40, 80], "peu_commun"),
 	},
 	"uturuncu": {
-		"nom": "Uturuncu", "genre": "m",
+		"nom": "Uturuncu", "genre": "m", "image": "uturuncu_transparent.png",
 		"description": "Chaman d'Amazonie devenu jaguar par le rite, qui a trop tardé à revenir : il ne "
 					   "redeviendra jamais anthrope. Seuls ses yeux, et les lambeaux d'un collier de "
 					   "graines, rappellent ce qu'il était.",
@@ -116,7 +116,7 @@ NOUVELLES = {
 	},
 	# Nord (Auteur) : un chasseur que la peau a pris — humanoïde armé, kit de gen_equipement.
 	"ulfhedinn": {
-		"nom": "Ulfheðinn", "genre": "m",
+		"nom": "Ulfheðinn", "genre": "m", "image": "ulfhedinn_transparent.png",
 		"description": "Chasseur de monstres du Nord vêtu d'une peau de loup : la peau l'a pris, la rage "
 					   "le rend sourd à la douleur et il ne reconnaît plus personne. Brûlée, la peau "
 					   "perd son pouvoir.",
@@ -125,7 +125,7 @@ NOUVELLES = {
 	},
 	# Être unique, boss (Auteur) : la malédiction des dieux qui ne vaut que pour lui.
 	"lycaon": {
-		"nom": "Lycaon", "genre": "m", "nom_propre": True,
+		"nom": "Lycaon", "genre": "m", "nom_propre": True, "image": "lycaon_transparent.png",
 		"description": "Roi d'Arcadie qui servit de la chair anthrope à un dieu de passage : les dieux "
 					   "le changèrent en loup. La chair anthrope le garde loup ; qui s'en abstiendrait "
 					   "neuf ans redeviendrait anthrope, et il ne s'en abstient jamais.",

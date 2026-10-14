@@ -204,7 +204,7 @@ Proposés, non tranchés : la faute du clan d'Ossory, le nom du druide, l'origin
 | Lycaon | `espece:lycaon` | m | **être unique**, boss : roi-loup d'Arcadie ; jeton 1x2 |
 | Loup-garou (existant) | `espece:loup_garou` | m | description seule : loup-garou de France |
 
-Faiblesses et lune : **description seule**, aucune mécanique (comme pour les vampires). Ossements ou carcasse : un `item:<espece>` par espèce neuve (carcasse pour les bêtes, comme `item:loup_garou`). Images : à produire (§ 12), champ `image` vide en attendant.
+Faiblesses et lune : **description seule**, aucune mécanique (comme pour les vampires). Ossements ou carcasse : un `item:<espece>` par espèce neuve (carcasse pour les bêtes, comme `item:loup_garou`). Images (14/10) : sept espèces détourées dans `templates/resources/monsters/` ; reste le **nahual** (prompt au § 12), champ `image` vide en attendant.
 
 ## 12. Prompts d'image à produire
 
