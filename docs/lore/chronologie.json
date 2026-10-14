@@ -74,6 +74,7 @@
 	"origines": {
 		"monde": "Tout Telluris",
 		"gaule": "Gaule",
+		"irlande": "Irlande et îles celtes",
 		"flandres": "Flandres",
 		"rhenanie": "Rhénanie",
 		"scandinavie": "Scandinavie et Islande",
@@ -145,7 +146,10 @@
 			"yggdrasil": "Yggdrasil",
 			"uruk": "Uruk",
 			"rhemi": "Rhemi",
-			"chartres": "Chartres"
+			"chartres": "Chartres",
+			"ossory": "Ossory",
+			"teotihuacan": "Teotihuacan",
+			"livonie": "Livonie"
 		},
 		"institutions": {
 			"paladins": "Paladins",
@@ -170,7 +174,8 @@
 			"mondes_divins": "Mondes divins",
 			"mystere": "Mystère ouvert",
 			"commerce": "Commerce",
-			"vampires": "Vampires"
+			"vampires": "Vampires",
+			"lycanthropes": "Lycanthropes"
 		}
 	},
 	"evenements": [
@@ -782,6 +787,50 @@
 			"sources": [{"fichier": "monde/20261012_les_vampires_de_telluris.md", "date": "2026-10-12", "citation": "c'est un proche de Dracula qui a tenté, on va dire, de le renverser"}],
 			"apres": ["dracula"],
 			"liens": ["dracula"]
+		},
+		{
+			"id": "ossory",
+			"titre": "Laignech Fáelad et la malédiction d'Ossory",
+			"titre_court": "Loups d'Ossory",
+			"resume": "Laignech Fáelad, ancêtre du clan d'Ossory, prend la forme du loup à volonté et ses descendants en héritent. Plus tard, un druide maudit le clan : tous les sept ans, un couple doit vivre en loups sept années, sous la pleine lune. Les loups-garous d'Irlande, les faoladh, restent des gardiens des enfants, des blessés et des égarés.",
+			"quand": {"moment": {"ere": "remparts", "inconnu": true}, "autorite": "proposition", "note": "Aucune date : l'ère est proposée ; le don précède la malédiction (Auteur, 14/10)."},
+			"couche": "histoire", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
+			"origine": ["irlande"],
+			"tags": {"lieux": ["ossory"], "themes": ["lycanthropes", "mythes"]},
+			"sources": [{"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "don puis malédiction"}, {"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "le faoladh protège enfants, blessés et égarés"}]
+		},
+		{
+			"id": "premier_nahual",
+			"titre": "Le premier nahual et le Cœur de la montagne",
+			"titre_court": "Premier nahual",
+			"resume": "Un sorcier reçoit un double animal, le jaguar, et en revêt la forme à volonté. Des PNJ disent que Tepeyollotl, le Cœur de la montagne, le lui a donné ; d'autres le nient. Des nahuals de Teotihuacan aux chamans-jaguars d'Amazonie, les gardiens de la forêt portent la peau du jaguar.",
+			"quand": {"moment": {"ere": "remparts", "inconnu": true}, "autorite": "proposition", "note": "Origine divine en théorie seulement (Auteur, 14/10) ; l'ère est proposée."},
+			"couche": "histoire", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
+			"origine": ["amerique_nord", "amerique_sud"],
+			"tags": {"lieux": ["teotihuacan"], "themes": ["lycanthropes", "mythes", "mystere"]},
+			"sources": [{"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "**Tepeyollotl**, en **théorie**"}, {"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "des **gardiens de la forêt**, pendant américain des Paladins"}]
+		},
+		{
+			"id": "lycaon",
+			"titre": "Lycaon changé en loup",
+			"titre_court": "Lycaon",
+			"resume": "Le roi d'Arcadie sert de la chair anthrope à un dieu de passage ; les dieux le changent en loup. Qui s'abstient de chair anthrope neuf ans redevient anthrope ; lui ne s'en abstient jamais.",
+			"quand": {"moment": {"ere": "remparts", "inconnu": true}, "autorite": "proposition"},
+			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
+			"origine": ["grece"],
+			"tags": {"peuples": ["grecs"], "themes": ["lycanthropes", "mythes"]},
+			"sources": [{"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "**Lycaon d'Arcadie**"}]
+		},
+		{
+			"id": "chiens_des_dieux",
+			"titre": "Les Chiens des dieux de Livonie",
+			"titre_court": "Chiens des dieux",
+			"resume": "Trois nuits par an, des loups-garous de Livonie franchissent un portail naturel vers un monde souterrain dont nul ne sait le nom, pour reprendre aux sorciers la fertilité volée aux récoltes.",
+			"quand": {"de": {"ere": "donjons", "inconnu": true}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "proposition", "note": "Une coutume qui dure encore ; son commencement est inconnu."},
+			"couche": "present", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
+			"origine": ["europe_est"],
+			"tags": {"lieux": ["livonie"], "themes": ["lycanthropes", "portails", "mystere"]},
+			"sources": [{"fichier": "monde/20261014_les_loups_garous_de_telluris.md", "date": "2026-10-14", "citation": "franchissent **trois nuits par an** un **portail naturel** vers un monde souterrain"}]
 		},
 		{
 			"id": "guildes",

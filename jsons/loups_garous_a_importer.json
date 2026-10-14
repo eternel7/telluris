@@ -1,0 +1,585 @@
+[
+  {
+    "_id": "espece:faoladh",
+    "type": "espece",
+    "nom": "Faoladh",
+    "genre": "m",
+    "image": "",
+    "description": "Loup-garou d'Irlande, héritier du don de Laignech Fáelad : il garde les enfants, les blessés et les égarés, et ne frappe que s'il les croit menacés. Pendant qu'il court, son corps anthrope dort là où il l'a laissé ; déplacé, l'esprit ne le retrouve plus.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 40,
+        "max": 60
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 45,
+        "max": 65
+      },
+      "Int": {
+        "min": 30,
+        "max": 45
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "metamorphe",
+      "gardien",
+      "nocturne"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:faoladh",
+    "type": "item",
+    "nom": "Carcasse de Faoladh",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      40,
+      80
+    ],
+    "description": "Dépouille de Faoladh récupérée à l'issue du combat.",
+    "source_espece": "espece:faoladh",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:cu_sidhe",
+    "type": "espece",
+    "nom": "Cú Sídhe",
+    "genre": "m",
+    "image": "",
+    "description": "Chien des tertres, grand comme un jeune taureau, au pelage vert sombre : il chasse en silence et n'aboie que trois fois — au troisième aboiement, qui l'entend meurt de peur. Il ne franchit pas l'eau courante.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 40,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 50,
+        "max": 75
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 40
+      }
+    },
+    "tags": [
+      "monstre",
+      "feerique",
+      "terreur",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:cu_sidhe",
+    "type": "item",
+    "nom": "Carcasse de Cú Sídhe",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      60,
+      100
+    ],
+    "description": "Dépouille de Cú Sídhe récupérée à l'issue du combat.",
+    "source_espece": "espece:cu_sidhe",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:dobhar_chu",
+    "type": "espece",
+    "nom": "Dobhar-chú",
+    "genre": "m",
+    "image": "",
+    "description": "Chien des eaux, mi-chien mi-loutre, qui guette les lacs du nord-ouest de l'Irlande et tue qui s'y baigne. Quand on l'abat, son compagnon sort de l'eau pour le venger.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 45,
+        "max": 65
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 15,
+        "max": 30
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:dobhar_chu",
+    "type": "item",
+    "nom": "Carcasse de Dobhar-chú",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      30,
+      60
+    ],
+    "description": "Dépouille de Dobhar-chú récupérée à l'issue du combat.",
+    "source_espece": "espece:dobhar_chu",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:failinis",
+    "type": "espece",
+    "nom": "Failinis",
+    "genre": "m",
+    "nom_propre": true,
+    "image": "",
+    "description": "Le chien invincible du roi d'Ioruaidh, que Lugh voulut pour lui : nulle bête ne lui échappe, et toute bête qui le voit tombe. Nul ne sait s'il est chien, loup ou autre chose venu d'un tertre.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 60,
+        "max": 85
+      },
+      "R": {
+        "min": 55,
+        "max": 80
+      },
+      "Ag": {
+        "min": 70,
+        "max": 95
+      },
+      "Vol": {
+        "min": 55,
+        "max": 80
+      },
+      "Int": {
+        "min": 30,
+        "max": 45
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 75
+      }
+    },
+    "tags": [
+      "monstre",
+      "feerique",
+      "predateur",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:failinis",
+    "type": "item",
+    "nom": "Carcasse de Failinis",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      50,
+      90
+    ],
+    "description": "Dépouille de Failinis récupérée à l'issue du combat.",
+    "source_espece": "espece:failinis",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:nahual",
+    "type": "espece",
+    "nom": "Nahual",
+    "genre": "m",
+    "image": "",
+    "description": "Sorcier des terres de Teotihuacan qui revêt à volonté la forme de son double, un jaguar. On dit que Tepeyollotl, le Cœur de la montagne, donna le premier double ; d'autres le nient. Ce qui blesse le jaguar blesse le sorcier, et le sel jeté sur sa peau abandonnée lui interdit de la reprendre.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 50
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 55,
+        "max": 80
+      },
+      "Int": {
+        "min": 50,
+        "max": 75
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "monstre",
+      "metamorphe",
+      "magique",
+      "nocturne"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:nahual",
+    "type": "item",
+    "nom": "Carcasse de Nahual",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      40,
+      80
+    ],
+    "description": "Dépouille de Nahual récupérée à l'issue du combat.",
+    "source_espece": "espece:nahual",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:uturuncu",
+    "type": "espece",
+    "nom": "Uturuncu",
+    "genre": "m",
+    "image": "",
+    "description": "Chaman d'Amazonie devenu jaguar par le rite, qui a trop tardé à revenir : il ne redeviendra jamais anthrope. Seuls ses yeux, et les lambeaux d'un collier de graines, rappellent ce qu'il était.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 50,
+        "max": 75
+      },
+      "R": {
+        "min": 40,
+        "max": 60
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 30,
+        "max": 50
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "monstre",
+      "metamorphe",
+      "predateur",
+      "foret"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:uturuncu",
+    "type": "item",
+    "nom": "Carcasse de Uturuncu",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      60,
+      100
+    ],
+    "description": "Dépouille de Uturuncu récupérée à l'issue du combat.",
+    "source_espece": "espece:uturuncu",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:ulfhedinn",
+    "type": "espece",
+    "nom": "Ulfheðinn",
+    "genre": "m",
+    "image": "",
+    "description": "Chasseur de monstres du Nord vêtu d'une peau de loup : la peau l'a pris, la rage le rend sourd à la douleur et il ne reconnaît plus personne. Brûlée, la peau perd son pouvoir.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 50,
+        "max": 75
+      },
+      "R": {
+        "min": 50,
+        "max": 70
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 50,
+        "max": 70
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 10,
+        "max": 25
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "metamorphe",
+      "guerrier",
+      "humanoide"
+    ],
+    "items": [
+      "item:Hache_de_guerre",
+      "item:Hache_a_deux_mains",
+      "item:Ecu",
+      "item:Braies_fourrure",
+      "item:Etole_de_fourrure",
+      "item:Bracelets_os"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:ulfhedinn",
+    "type": "item",
+    "nom": "Ossements d'Ulfheðinn",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 12.5,
+    "description": "Ossements et reliquats récupérés sur Ulfheðinn après sa destruction.",
+    "source_espece": "espece:ulfhedinn",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:lycaon",
+    "type": "espece",
+    "nom": "Lycaon",
+    "genre": "m",
+    "nom_propre": true,
+    "image": "",
+    "description": "Roi d'Arcadie qui servit de la chair anthrope à un dieu de passage : les dieux le changèrent en loup. La chair anthrope le garde loup ; qui s'en abstiendrait neuf ans redeviendrait anthrope, et il ne s'en abstient jamais.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 65,
+        "max": 90
+      },
+      "R": {
+        "min": 60,
+        "max": 85
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 60,
+        "max": 85
+      },
+      "Int": {
+        "min": 40,
+        "max": 60
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 60
+      }
+    },
+    "tags": [
+      "monstre",
+      "metamorphe",
+      "malediction",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:lycaon",
+    "type": "item",
+    "nom": "Carcasse de Lycaon",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      70,
+      100
+    ],
+    "description": "Dépouille de Lycaon récupérée à l'issue du combat.",
+    "source_espece": "espece:lycaon",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:loup_garou",
+    "type": "espece",
+    "nom": "Loup Garou",
+    "genre": "m",
+    "image": "loup_garou_transparent.png",
+    "description": "Anthrope maudit que la pleine lune change en bête, comme on en conte dans les campagnes de France ; force et rage décuplées. Appelé par son nom, ou blessé jusqu'au sang, il redevient anthrope.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 45,
+        "max": 75
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "malediction",
+      "metamorphe"
+    ],
+    "proprietes": {}
+  }
+]

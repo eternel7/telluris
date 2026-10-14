@@ -225,6 +225,11 @@ TABLE = {
 		"Kanabo", "Hache_de_guerre",
 		"Braies_fourrure", "Etole_de_fourrure", "Bracelets_os",
 	],
+	# Chasseur du Nord en peau de loup (Auteur, 14/10) : hache, écu, fourrures — pas d'armure lourde.
+	"ulfhedinn": [
+		"Hache_de_guerre", "Hache_a_deux_mains", "Ecu",
+		"Braies_fourrure", "Etole_de_fourrure", "Bracelets_os",
+	],
 	"vampire": [
 		"Rapiere", "Epee_longue", "Dague_de_parade",
 		"Cape_soie_sombre", "Pantalon_ajuste_noir", "Bottes_noires", "Gants_fins_noirs",
