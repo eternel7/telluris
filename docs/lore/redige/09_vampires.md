@@ -38,7 +38,7 @@ Son mari la trahit tôt et la fit **emmurer vivante**. C'est pendant ce long emm
 
 Les lamies fuirent la Mésopotamie vers le nord et trouvèrent refuge à **Novgorod**, d'où elles se sont répandues dans le monde. La cité paraît ordinaire. La reine y règne pourtant **dans l'ombre**, et le peuple ne parle de ses filles que sous le nom d'***upir***, comme d'une vieille superstition. Par réaction à la trahison de son mari, la reine a d'abord transformé des femmes d'une grande beauté et de haut rang. Les lamies restent avant tout féminines. Les rares lamies masculins, d'une beauté anthrope frappante, sont tolérés sans jamais être au premier rang : esclaves, servants, parfois amants.
 
-La comtesse **Báthory**, qui se baignait dans le sang, était une lamie, comme **Carmilla**. Dans les Highlands, les **baobhan sith** sont des lamies parties vers l'ouest : elles dansent avec les chasseurs avant de boire leur sang. Contre toutes, le **fer** et les **chevaux** protègent.
+La comtesse **Báthory**, qui se baignait dans le sang, était une lamie, comme **Carmilla**. Dans les Highlands, les **baobhan sith** sont des lamies parties vers l'ouest : elles dansent avec les chasseurs avant de boire leur sang. En Irlande, la **Dearg Due** fut vendue par son père à un chef cruel qui l'enferma ; elle se laissa mourir. Une lamie de passage, dont nul ne sait le nom, la releva, et la Dearg Due but le sang de son mari, puis celui de son père. Depuis, elle séduit des hommes avant de les vider. Contre toutes, le **fer** et les **chevaux** protègent.
 
 Selon quelques lettrés, l'esprit que les deux sœurs ont piégé dans la reine serait du même genre que celui qui habite le **vetāla**, le cadavre conteur d'énigmes que porta le roi Vikramāditya.
 
