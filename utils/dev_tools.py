@@ -193,7 +193,7 @@ CATALOGUE = [
 		"label": "👻 Espèces insensibles à la furtivité",
 		"argv": _py("gen_insensible_furtivite.py"),
 		"ecrit": "Écrit jsons/insensible_furtivite_a_importer.json.",
-		"description": "Ajoute le tag `insensible_furtivite` aux espèces listées (fantôme) : "
+		"description": "Ajoute le tag `insensible_furtivite` aux espèces listées (fantôme, spectre, chauves-souris, archanges…) : "
 			"elles repèrent le joueur furtif d'office. Relit le dump le plus récent et "
 			"n'ajoute que le tag : régénération idempotente.",
 	},

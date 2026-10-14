@@ -22,7 +22,17 @@ RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SORTIE = "jsons/insensible_furtivite_a_importer.json"
 TAG = "insensible_furtivite"   # = utils.combat.TAG_INSENSIBLE_FURTIVITE
 
-ESPECES = ("fantome",)
+ESPECES = (
+	# Esprits et morts-vivants
+	"fantome", "spectre", "banshee", "revenant", "jann",
+	# Sens surnaturels
+	"chauve_souris", "chauve_souris_geante", "ange_de_la_connaissance", "seraphin", "avatar",
+	"liche", "roi_liche",
+	# Gardiens
+	"cerbere", "ammit",
+	# Boss
+	"archange_de_l_ordre", "archange_du_savoir", "demon_majeur_de_la_destinee", "prince_demon",
+)
 
 
 def _dump_le_plus_recent() -> str:
