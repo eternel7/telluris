@@ -168,3 +168,29 @@ def test_dun_les_places_sur_une_case_libre_de_la_carte_de_france():
 	# Escolives (50,21) n'est pas encore au dump : on l'écarte aussi.
 	prises.add((50, 21))
 	assert (x, y) not in prises
+
+
+def test_images_presentes():
+	docs = _docs()
+	ressources = os.path.join(RACINE, "templates", "resources")
+	chemins = [
+		os.path.join(ressources, "battle_maps", docs[CLAIRIERE]["image"]),
+		os.path.join(ressources, "towns", docs[VILLAGE]["image"]),
+	]
+	for e in docs[VILLAGE]["pnj"]:
+		chemins.append(os.path.join(ressources, "pnj", e["portrait"]))
+	for d in docs.values():
+		if d.get("type") == "pnj" and d["_id"] != BORIN:
+			chemins.append(os.path.join(ressources, "pnj", d["portrait"]))
+	for p in chemins:
+		assert os.path.exists(p), p
+
+
+def test_la_grille_suit_le_quadrillage_de_la_carte():
+	"""40 × 20 cases sur une image rognée à 1376×746 : 34,4 × 37,3 px par case, le
+	quadrillage dessiné (cf. en-tête de la grille dans le générateur)."""
+	from PIL import Image
+	clairiere = _docs()[CLAIRIERE]
+	chemin = os.path.join(RACINE, "templates", "resources", "battle_maps", clairiere["image"])
+	assert Image.open(chemin).size == (1376, 746)
+	assert clairiere["dimensions"] == {"x": 40, "y": 20}

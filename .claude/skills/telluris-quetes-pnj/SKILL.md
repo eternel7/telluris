@@ -111,7 +111,7 @@ Contenu : `dev/gen_enquete_morvan.py` → **un seul** `jsons/enquete_morvan_a_im
 - Borin (comptoir du Bastion) offre ET reçoit une quête d'**apport** unique, choix d'offre sous `rang_min {cite: lieu:auxerre, rang: E}` : `item:loup_garou_tete` (portion de la carcasse, débitée à la lame — la carcasse trop lourde tombe au sol) → `lieu:dun_les_places` (France (52,22)) → la meneuse Jacotte ouvre `lieu:clairiere_du_charbonnier` (service `acces`, salle de `donjon:clairiere_du_charbonnier`, UN loup-garou).
 - Barrière : `quete_active {types:[collect], cible:item:loup_garou_tete, objectif_atteint:false}` **sans** `combat_gagne` (à la différence d'Escolives) : une tête perdue au sol ne bloque pas la quête, la clairière se rouvre jusqu'à la remise.
 - Le charbonnier disparaît une fois la clairière gagnée (présence `combat_gagne … attendu:false`) ; le nom de la bête n'est jamais dit.
-- ⚠️ Grille de la clairière = **brouillon** jusqu'à la livraison de la carte de combat.
+- Clairière : image rognée à 1376×746 pour que son quadrillage dessiné tombe sur 40 × 20 cases (verrouillé).
 
 Verrouillé par `tests/test_enquete_morvan.py`.
 

@@ -27,9 +27,6 @@
 # régénération idempotente) + les docs neufs, chacun COMPLET (l'import est un PUT, CLAUDE.md
 # §11). ⚠️ Tout script qui réécrirait Borin depuis un dump FIGÉ plus ancien effacerait la quête.
 #
-# ⚠️ GRILLE DE LA CLAIRIÈRE = BROUILLON tant que la carte de combat n'est pas livrée : la
-# recaler sur l'image (dimensions, arbres, meules, cabane), relancer, réimporter.
-#
 # Usage : python dev/gen_enquete_morvan.py [jsons/telluris-dump-….json]
 
 import copy
@@ -71,24 +68,32 @@ QUETE_A_FAIRE = {"quete_active": {"types": ["collect"], "cible": TETE, "objectif
 CLAIRIERE_GAGNEE = {"combat_gagne": {"lieu": CLAIRIERE}}
 CLAIRIERE_INTACTE = {"combat_gagne": {"lieu": CLAIRIERE, "attendu": False}}
 
-# ── Grille de la clairière (BROUILLON, 24 × 14, à recaler sur l'image) ────────────────────
-# '#' = 0 (forêt dense, cabane) · '.' = 1 (terre battue, sentier) · 'x' = 3 (meules,
-# bûches, souches : on ne marche pas dessus, un volant les survole).
+# ── Grille de la clairière (image 1376×746, quadrillage de 40 × 20 cases) ──────────────────
+# L'image livrée (1376×768) a été rognée de 10 px en haut et 12 px en bas : son quadrillage
+# dessiné (34,4 × 37,3 px) commence à y = 10 et finit à y = 756 ; rognée, elle tombe juste.
+# '#' = 0 (forêt, ciel, cabane) · '.' = 1 (terre, sentier) · 'x' = 3 (meules, bûches, souches,
+# branchages : on ne marche pas dessus, un volant les survole).
 GRILLE_CLAIRIERE = [
-	"########################",  # 0
-	"#####......#####....####",
-	"###..........##.......##",
-	"##....xx..............##",
-	"#.....xx.....###......##",  #    cabane au nord-est
-	"#............###...xx..#",  # 5
-	"#...................xx.#",
-	"##.......xx............#",  #    meule centrale
-	"##.......xx.......x....#",  #    billot
-	"#.....................##",
-	"#..xx..........xx.....##",  # 10 bûches, meule du sud
-	"##.xx..........xx....###",
-	"####.................###",
-	"#########.....##########",  #    sentier d'entrée, au sud
+	"########################################",  # 0
+	"########################################",
+	"########################################",
+	"##################.......#..#####.######",  # 3 cabane au nord-est, meule nord-est
+	"###############...xxx..xx..######.######",
+	"#########.........xxx..xx.#######..#####",  # 5
+	"#########xx....xx.xxx..xx.#######..#####",
+	"########..x...xxxx...........###.#######",  # 7 meule nord-ouest
+	"#######xx.....xxxx............##.#######",
+	"#######....x..xxxx..............########",
+	"#######..x....xx..............xx########",  # 10
+	"########.....xxxx............xxx########",  # 11 meule sud
+	"#########....xxxx...............########",
+	"#########....xxxx........x.xxx..########",  # 13 billot (hache), piles de bûches
+	"##########x.............x..xxxx.########",
+	"##########xx....x.............xx########",  # 15
+	"#################.....##################",  # 16 sentier d'entrée, au sud
+	"#################.....##################",
+	"#################.....##################",
+	"#################.....##################",
 ]
 CODES = {"#": 0, ".": 1, "x": 3}
 

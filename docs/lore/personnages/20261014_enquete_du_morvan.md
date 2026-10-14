@@ -2,7 +2,7 @@
 
 - **Source :** séance Claude Code du 14/10/2026 ; l'Auteur arbitre par questionnaire (§ 1), après le sixième arbitrage des loups-garous (`docs/lore/monde/20261014_les_loups_garous_de_telluris.md` : enquête du rang E dans le **Morvan**, scénario validé).
 - **Créée :** 14/10/2026
-- **Statut :** le § 1 **fait foi** (noms, récompense compris) ; les textes de dialogue sont **proposés**. Contenu en jeu : `dev/gen_enquete_morvan.py` → `jsons/enquete_morvan_a_importer.json`. ⚠️ La grille de la clairière est un **brouillon** tant que la carte de combat n'est pas livrée : elle se recale sur l'image (§ 4).
+- **Statut :** le § 1 **fait foi** (noms, récompense compris) ; les textes de dialogue sont **proposés**. Contenu en jeu : `dev/gen_enquete_morvan.py` → `jsons/enquete_morvan_a_importer.json` ; images livrées le 14/10 (§ 4).
 
 ---
 
@@ -65,7 +65,8 @@ Le nom du personnage ne figure jamais dans un prompt (§ 2 de `docs/prompts_imag
 - **`charbonnier_Pierre_Chaumereuil_ogre_m.jpg`** — Un ogre, colossal, nettement plus grand et plus massif qu'un humain, petites défenses pointant de la lèvre inférieure (ni orc ni troll), d'âge mûr, peau et barbe noircies de suie, tablier de cuir brûlé. C'est un charbonnier de forêt. Il se tient près d'une meule de charbon qui fume, une pelle à la main, l'avant-bras gauche entouré d'un bandage frais. Regard bourru et méfiant, sur la défensive. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle chaude, palette chaude et terreuse relevée de touches de couleurs vives, proportions crédibles ; pas une photographie. Image entièrement dépourvue d'écriture : aucun nom, aucune lettre, aucune signature, aucun monogramme, aucun filigrane, aucune enseigne lisible.
 - **`meneuse_de_loups_Jacotte_elfe_f.jpg`** — Une elfe aux longues oreilles pointues, très vieille pour une elfe, maigre et droite, longs cheveux blancs dénoués, manteau de laine grise rapiécé. C'est une meneuse de loups des forêts. Elle tient une musette (petite cornemuse de bois et de peau) contre elle, au bord d'un bois sombre ; derrière elle, entre les arbres, luisent les yeux de deux loups calmes. Regard perçant, qui sait des choses qu'elle ne dira pas. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle chaude, palette chaude et terreuse relevée de touches de couleurs vives, proportions crédibles ; pas une photographie. Image entièrement dépourvue d'écriture : aucun nom, aucune lettre, aucune signature, aucun monogramme, aucun filigrane, aucune enseigne lisible.
 
-## 4. À faire une fois les images livrées
+## 4. Images livrées (14/10)
 
-- Recaler `GRILLE_CLAIRIERE` de `dev/gen_enquete_morvan.py` sur la carte de combat (dimensions, arbres, meules, cabane), relancer le générateur, réimporter.
-- Les images du village et des portraits n'exigent rien d'autre que leur dépôt aux noms ci-dessus.
+- **Carte de combat** : 1376×768 livrée, rognée à **1376×746** (y 10 → 756) pour que son quadrillage dessiné (34,4 × 37,3 px) tombe juste sur **40 × 20 cases** ; `GRILLE_CLAIRIERE` relevée case par case (forêt, ciel, cabane = 0 ; meules, bûches, souches, branchages = 3).
+- **Village** et **portraits** déposés aux noms ci-dessus ; portraits recadrés en 464×580 comme les autres PNJ.
+- Prompts suivants : ils commencent par « Réalise l'image de… » (Auteur, 14/10).
