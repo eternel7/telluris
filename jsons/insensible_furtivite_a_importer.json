@@ -1024,5 +1024,273 @@
       "item:Bottes_de_plates"
     ],
     "proprietes": {}
+  },
+  {
+    "_id": "espece:bete_du_gevaudan",
+    "type": "espece",
+    "nom": "Bête du Gévaudan",
+    "genre": "f",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "bete_du_gevaudan_transparent.png",
+    "description": "Canidé monstrueux du folklore français, semblable à un loup démesuré à la fourrure brun roux striée d'une bande noire sur le dos. D'une rapidité et d'une ruse insaisissables, elle échappe à toutes les chasses organisées contre elle.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 35,
+        "max": 60
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 25,
+        "max": 45
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "rapide",
+      "predateur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:bete_de_l_apocalypse",
+    "type": "espece",
+    "nom": "Bete de l Apocalypse",
+    "genre": "f",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "bete_de_l_apocalypse_transparent.png",
+    "description": "Entité cataclysmique annonçant la fin des temps, sa puissance dépasse l'entendement des mortels.",
+    "base_attributes": {
+      "V": {
+        "min": 8,
+        "max": 10
+      },
+      "F": {
+        "min": 110,
+        "max": 160
+      },
+      "R": {
+        "min": 105,
+        "max": 155
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 110,
+        "max": 150
+      },
+      "Int": {
+        "min": 50,
+        "max": 80
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 70,
+        "max": 105
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "boss",
+      "cataclysme",
+      "predateur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:grootslang",
+    "type": "espece",
+    "nom": "Grootslang",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "grootslang_transparent.png",
+    "description": "Le « grand serpent » des légendes du Richtersveld, en Afrique australe : un colosse au corps d'éléphant prolongé d'une longue queue de serpent. On raconte qu'aux premiers temps, les dieux façonnèrent une créature trop forte et trop rusée, puis la séparèrent en éléphant et en serpent ; une seule leur aurait échappé. Il se terre au fond d'une caverne dont nul n'a vu le fond, le Trou des Merveilles, qu'on dit tapissé de diamants. Il y attire les éléphants pour les dévorer et convoite les pierres précieuses : plus d'un voyageur aurait racheté sa vie en lui offrant des gemmes.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 70,
+        "max": 110
+      },
+      "R": {
+        "min": 70,
+        "max": 105
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 35,
+        "max": 60
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 70
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "reptile",
+      "souterrain",
+      "predateur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:boukhnoun",
+    "type": "espece",
+    "nom": "Boukhnoun",
+    "genre": "m",
+    "image": "boukhnoun_transparent.png",
+    "description": "Ombre bossue des ravins, on l'entend renifler avant de la voir ; la peur des bergers après le couchant.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 30,
+        "max": 45
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 40,
+        "max": 60
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 15,
+        "max": 30
+      }
+    },
+    "tags": [
+      "monstre",
+      "nocturne",
+      "terreur",
+      "furtif",
+      "predateur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:fauves",
+    "type": "espece",
+    "nom": "Fauves",
+    "genre": "m",
+    "pluriel": true,
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "fauves_transparent.png",
+    "description": "Grands félins prédateurs — lions, tigres, panthères — vitesse et puissance combinées.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 30,
+        "max": 50
+      },
+      "R": {
+        "min": 25,
+        "max": 45
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "animal",
+      "predateur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
   }
 ]

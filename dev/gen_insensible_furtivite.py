@@ -32,6 +32,8 @@ ESPECES = (
 	"cerbere", "ammit",
 	# Boss
 	"archange_de_l_ordre", "archange_du_savoir", "demon_majeur_de_la_destinee", "prince_demon",
+	# Superprédateurs
+	"bete_du_gevaudan", "bete_de_l_apocalypse", "grootslang", "boukhnoun", "fauves",
 )
 
 
