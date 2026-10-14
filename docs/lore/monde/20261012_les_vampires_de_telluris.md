@@ -88,7 +88,7 @@ L'Auteur demande si la **Dearg Due** (Waterford, Irlande) peut être une vampire
 - **Lignée** : une **lamie essaimée**, comme les baobhan sith.
 - **Son retour** : **une lamie l'a relevée** — une lamie de passage, **anonyme** (comme le paladin de la nuit du carrosse) ; des PNJ peuvent avancer des noms, sans preuve.
 - **Faiblesses** : **celles de sa lignée**, sans faiblesse propre — le soleil la laisse inerte, le fer et les chevaux la tiennent à distance.
-- **En jeu** : un **être unique** (« Dearg Due », nom propre), boss, au profil de **lamie renforcée** (au-dessus d'une lamie, en dessous de la reine) ; image à produire, prompt au § 8.
+- **En jeu** : un **être unique** (« Dearg Due », nom propre), boss, au profil de **lamie renforcée** (au-dessus d'une lamie, en dessous de la reine) ; image `dearg_due_transparent.png` (prompt au § 8).
 
 ---
 

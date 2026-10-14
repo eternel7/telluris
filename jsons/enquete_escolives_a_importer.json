@@ -142,7 +142,7 @@
     "nom": "Dearg Due",
     "genre": "f",
     "nom_propre": true,
-    "image": "",
+    "image": "dearg_due_transparent.png",
     "description": "Lamie d'Irlande : vendue par son père à un chef cruel qui l'enferma, elle se laissa mourir ; une lamie de passage la releva, et elle but le sang de son mari, puis celui de son père. Elle séduit encore les hommes avant de les vider ; le soleil la laisse inerte, le fer et les chevaux la tiennent à distance.",
     "base_attributes": {
       "V": {

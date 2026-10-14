@@ -24,7 +24,7 @@
 #     être unique), `espece:penanggalan` (tête volante de Mu), `espece:draugr` (mort-vivant
 #     du Nord, PAS un vampire), avec leur image ; soleil et faiblesses en description seule ;
 #   - `espece:dearg_due` (Auteur, 14/10, cinquième arbitrage) : lamie d'Irlande relevée par une
-#     lamie anonyme, être unique, boss — une lamie renforcée, sans image (prompt au § 8).
+#     lamie anonyme, être unique, boss — une lamie renforcée, avec son image.
 #
 # ⚠️ Les tables EXHAUSTIVES de `gen_genres_especes.py`, `gen_jetons_especes.py` et
 # `gen_equipement_humanoides.py` citent déjà les espèces neuves, et `gen_sorts_invocation.py`
@@ -161,7 +161,7 @@ NOUVELLES = {
 	# Lamie essaimée en Irlande (Auteur, 14/10) : être unique, profil de lamie RENFORCÉ (au-dessus
 	# de `lamie`, sous la reine), faiblesses de sa lignée seules — aucune propre (Auteur).
 	"dearg_due": {
-		"nom": "Dearg Due", "genre": "f", "nom_propre": True,
+		"nom": "Dearg Due", "genre": "f", "nom_propre": True, "image": "dearg_due_transparent.png",
 		"description": "Lamie d'Irlande : vendue par son père à un chef cruel qui l'enferma, elle se "
 					   "laissa mourir ; une lamie de passage la releva, et elle but le sang de son mari, "
 					   "puis celui de son père. Elle séduit encore les hommes avant de les vider ; le "
