@@ -84,6 +84,11 @@ TABLE = {
 		"Kanabo", "Rungu",
 		"Braies_fourrure", "Etole_de_fourrure", "Bracelets_os",
 	],
+	# Lamie d'Irlande (Auteur, 14/10) : le kit de la lamie.
+	"dearg_due": [
+		"Rapiere", "Dague",
+		"Robe_bordeaux", "Cape_soie_sombre", "Bottines_legeres", "Gants_fins_noirs",
+	],
 	"demon_guerrier": [
 		"Talwar", "Fleau_arme", "Pilum", "Bouclier_chauffe",
 		"Cuirasse_cuir_noir", "Epaulieres_de_fer", "Heaume_de_fer", "Gantelets_acier",

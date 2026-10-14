@@ -73,6 +73,7 @@ TABLE = {
 	"crocodile": ("1x2", "ellipse"),
 	"cupidon": None,
 	"cyclope": ("2x2", "rectangle"),
+	"dearg_due": None,
 	"demon_guerrier": None,
 	"demon_majeur_de_la_destinee": None,
 	"demon_majeur_de_la_destruction": ("2x2", "rectangle"),

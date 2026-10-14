@@ -36,7 +36,7 @@ CHAMPS = ("genre", "pluriel", "nom_propre", "h_aspire")
 FEMININS = {
 	"aicha_kandicha", "ammit", "araignee", "araignee_geante", "banshee", "bete_de_l_apocalypse",
 	"bete_du_gevaudan", "chauve_souris", "chauve_souris_geante", "chimere", "cockatrice",
-	"corneille_noire", "dryade", "fee", "gargouille", "gorgone", "goule", "harpie", "horreur",
+	"corneille_noire", "dearg_due", "dryade", "fee", "gargouille", "gorgone", "goule", "harpie", "horreur",
 	"hydre", "lamie", "lhamia", "liche", "licorne", "manticore", "momie", "monture_angelique",
 	"monture_demoniaque", "monture_squelette", "naiade", "nereide", "oceanide", "oreade", "penanggalan",
 	"reine_lhamia", "sirene", "succube", "tarasque", "vouivre", "wyvern",
@@ -74,7 +74,7 @@ PLURIELS = {
 }
 
 # Êtres uniques : le titre dit « Apep », pas « l'Apep ».
-PROPRES = {"abhartach", "aicha_kandicha", "ammit", "apep", "cupidon"}
+PROPRES = {"abhartach", "aicha_kandicha", "ammit", "apep", "cupidon", "dearg_due"}
 
 # « h » aspiré : « la Harpie » et non « l'Harpie ». Hydre, Horreur, Hippogriffe, Homme Arbre
 # s'élident.

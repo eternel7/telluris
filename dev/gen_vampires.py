@@ -22,7 +22,9 @@
 #     même forme que ceux du dump (poids = F moyenne / 5) ;
 #   - autres mythes du sang (Auteur, 13/10, § 9 de la séance) : `espece:abhartach` (roi-nain,
 #     être unique), `espece:penanggalan` (tête volante de Mu), `espece:draugr` (mort-vivant
-#     du Nord, PAS un vampire), avec leur image ; soleil et faiblesses en description seule.
+#     du Nord, PAS un vampire), avec leur image ; soleil et faiblesses en description seule ;
+#   - `espece:dearg_due` (Auteur, 14/10, cinquième arbitrage) : lamie d'Irlande relevée par une
+#     lamie anonyme, être unique, boss — une lamie renforcée, avec son image.
 #
 # ⚠️ Les tables EXHAUSTIVES de `gen_genres_especes.py`, `gen_jetons_especes.py` et
 # `gen_equipement_humanoides.py` citent déjà les espèces neuves, et `gen_sorts_invocation.py`
@@ -155,6 +157,17 @@ NOUVELLES = {
 					   "loin de son corps la tue. Les épines l'accrochent, le vinaigre la brûle.",
 		"base_attributes": _attrs((10, 12), (15, 25), (15, 25), (45, 70), (40, 60), (30, 45), (0, 0), (30, 50)),
 		"tags": ["undead", "non_mort", "vol", "nocturne"],
+	},
+	# Lamie essaimée en Irlande (Auteur, 14/10) : être unique, profil de lamie RENFORCÉ (au-dessus
+	# de `lamie`, sous la reine), faiblesses de sa lignée seules — aucune propre (Auteur).
+	"dearg_due": {
+		"nom": "Dearg Due", "genre": "f", "nom_propre": True, "image": "dearg_due_transparent.png",
+		"description": "Lamie d'Irlande : vendue par son père à un chef cruel qui l'enferma, elle se "
+					   "laissa mourir ; une lamie de passage la releva, et elle but le sang de son mari, "
+					   "puis celui de son père. Elle séduit encore les hommes avant de les vider ; le "
+					   "soleil la laisse inerte, le fer et les chevaux la tiennent à distance.",
+		"base_attributes": _attrs((5, 7), (40, 60), (40, 65), (55, 80), (55, 80), (55, 80), (75, 95), (0, 0)),
+		"tags": ["undead", "non_mort", "magique", "seduction", "boss", "humanoide"],
 	},
 	# Mort-vivant à part, PAS un vampire (Auteur, 13/10) : il boit la force, pas le sang.
 	"draugr": {

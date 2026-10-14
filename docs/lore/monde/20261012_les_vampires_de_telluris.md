@@ -80,6 +80,16 @@ L'Auteur demande d'autres mythes et légendes terrestres à rattacher aux vampir
 - **Faiblesses d'Abhartach et du penanggalan** : validées — l'if (et la tête en bas) ; les épines et le vinaigre.
 - **Faiblesses validées** : Dracula, la terre natale · Strigoï, le feu et l'aubépine · lamies, le fer et les chevaux, et le soleil · dragons de sang, le parjure · Nosferatu, toute lumière (y compris la magie Sainte).
 
+
+## ✍️ Auteur — cinquième arbitrage (14/10, questionnaire)
+
+L'Auteur demande si la **Dearg Due** (Waterford, Irlande) peut être une vampire ; Claude Code propose de la rattacher, l'Auteur arbitre par questionnaire :
+
+- **Lignée** : une **lamie essaimée**, comme les baobhan sith.
+- **Son retour** : **une lamie l'a relevée** — une lamie de passage, **anonyme** (comme le paladin de la nuit du carrosse) ; des PNJ peuvent avancer des noms, sans preuve.
+- **Faiblesses** : **celles de sa lignée**, sans faiblesse propre — le soleil la laisse inerte, le fer et les chevaux la tiennent à distance.
+- **En jeu** : un **être unique** (« Dearg Due », nom propre), boss, au profil de **lamie renforcée** (au-dessus d'une lamie, en dessous de la reine) ; image `dearg_due_transparent.png` (prompt au § 8).
+
 ---
 
 ## 1. Arbitrage
@@ -228,6 +238,7 @@ Restent **ouverts par choix de l'Auteur**, comme mystères du monde :
 
 - **Qui a libéré Lamia** de son emmurement, et quand.
 - **Le nom** du paladin le plus pieux, et le lieu de l'auberge-relais.
+- **La lamie** qui a relevé la Dearg Due (Auteur, 14/10).
 - **Le « sang premier »** : des PNJ y croient, rien ne le prouve (Auteur, 13/10).
 
 Plus rien à trancher au § 9.
@@ -240,6 +251,8 @@ Chaque prompt est **complet**, bloc de style compris : il se copie-colle tel que
   > Illustration en pied d'un **Strigoï** : vampire bestial à quatre pattes, os brisés mal ressoudés, crâne enfoncé, mâchoire déboîtée, longues griffes, haillons. Attitude de chasse, griffes et crocs visibles, regard fixé sur sa proie. Chair desséchée ou os apparents, lueur froide dans les orbites. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
 - **Lamie** (`lamie_transparent.png`) :
   > Illustration en pied d'une **Lamie** : vampire d'une grande beauté, aristocrate antique, parures d'or et de lapis-lazuli, peau très pâle, regard hypnotique, robe de soie sombre. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, vert vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+- **Dearg Due** (`dearg_due_transparent.png`) :
+  > Illustration en pied de la **Dearg Due** : vampire d'une grande beauté, jeune femme pâle aux longs cheveux roux défaits, robe de mariée de laine claire tachée de terre et de sang aux manches, lèvres rouge sang, regard à la fois séducteur et affamé, mains fines tendues comme pour une invitation. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
 - **Dragon de sang** (`dragon_de_sang_transparent.png`) :
   > Illustration en pied d'un **Dragon de sang** : paladin en armure, visage anthrope apaisé, pupilles rouges, emblème d'un dragon enroulé sur le tabard, lumière dorée de la magie Sainte autour de ses mains. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, vert vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
 - **Nosferatu** (`nosferatu_transparent.png`, à remplacer) :
@@ -265,6 +278,7 @@ Le rattachement de chaque piste est **tranché par l'Auteur** (§ ✍️ quatri�
 - **Penanggalan** (lié à Mu, Auteur) — en Malaisie, la tête d'une femme vole la nuit en entraînant ses viscères ; son corps attend dans un bac de **vinaigre**, et des **épines** posées aux fenêtres l'arrêtent. Dans la légende, une femme qui méditait pour dominer son corps est surprise, et sa tête s'arrache. **Lien avec Mu (Auteur)** : les morts de Mu sont rendus à la mer ; ceux qui ne trouvent pas le chemin du royaume de **Tangaroa** (dieu de la mer de Mu, père des poissons — Auteur, 13/10, qui corrige « Poséidon », dieu d'Atlantis) reviennent sous cette forme, dévorés par les poissons, ses enfants — d'où la tête qui ne traîne plus que ses viscères. (Proposition écartée : une élève de Mu revenue transformée.)
 - **Vetāla** (esprit du même genre que celui de la reine Lamia, Auteur) — le roi Vikramāditya porte un cadavre habité qui lui pose des énigmes. Ce serait une quête d'**escorte inversée** à énigmes ; le lien avec Lamia ne serait visible que d'un lettré.
 - **Abhartach** — en Irlande, un roi-**nain** tyran revient de la tombe et exige un bol de sang tiré des veines de ses sujets. Cathán le tue avec une épée en **if** et l'enterre **tête en bas** sous une pierre (le dolmen réel de Slaghtaverty). **Lignée indépendante** (Auteur) : un revenant isolé, unique.
+- **Dearg Due** (lamie essaimée, Auteur, 14/10) — à Waterford, une jeune femme est vendue par son père à un chef cruel, qui l'enferme ; elle se laisse mourir. Dans le mythe, elle sort de sa tombe pour boire le sang de son mari, puis de son père, et séduit depuis des hommes qu'elle vide de leur sang. **Sur Telluris** (Auteur) : c'est une **lamie de passage, anonyme**, qui l'a relevée — son histoire répète en petit celle de la reine Lamia, trahie par son mari et emmurée. **Être unique**. Les pierres que les villageois entassent sur sa tombe (mythe réel) ne sont **pas une faiblesse** (Auteur) ; proposé, non tranché : une coutume qu'on y garde, par superstition.
 - **Draugr** (mort-vivant à part, Auteur) — en Islande, Glámr revient hanter une ferme ; Grettir le tue mais garde de sa malédiction la **peur du noir**. Lieux possibles : Reykjavik ou Akureyri. En jeu : un débuff d'**effroi nocturne** durable après la victoire.
 
 ### Faiblesses par lignée (Auteur, 13/10 : toutes validées)
@@ -274,7 +288,7 @@ Le rattachement de chaque piste est **tranché par l'Auteur** (§ ✍️ quatri�
 | Aristocrates de Dracula | brûle (Auteur) | **la terre natale** : ils doivent dormir dans la terre de leur cité (les caisses de terre de Stoker) |
 | Strigoï, vrykolakas | tue (Auteur) | **le feu** (on brûle les vrykolakas) et **l'aubépine** (pieu des Balkans) |
 | Nosferatu | consume (Auteur) | **la lumière** sous toutes ses formes, y compris celle de la magie Sainte (Murnau) |
-| Lamies, baobhan sith | rend inerte (confirmé, Auteur) | **le fer froid** et **les chevaux** (baobhan sith) |
+| Lamies, baobhan sith, Dearg Due | rend inerte (confirmé, Auteur) | **le fer froid** et **les chevaux** (baobhan sith) |
 | Dragons de sang | aucune (bonne âme) · simple gêne (déchus) (Auteur) | **le parjure** : un serment rompu les affaiblit |
 | Abhartach | l'enchaîne à sa tombe (Auteur) | **l'if**, et **la tête en bas** au tombeau |
 | Penanggalan | sépare tête et corps : l'aube surprend la tête dehors, elle meurt (Auteur) | **les épines** et **le vinaigre** |

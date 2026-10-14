@@ -16,7 +16,7 @@ Prose tirée du seul canon (dump, messages de l'Auteur, réponses adoptées) ; u
 - [Le chemin de l'aventurier](redige/06_personnages_et_trame.md) — 11/10/2026 — D'Auxerre à Lutecia, les PNJ (Aélis, Maëlys, Milo, Élise…), la trame des rangs D à S+, les trois fins.
 - [Les mystères et la cosmologie](redige/07_mysteres_et_cosmologie.md) — 11/10/2026 — Mondes divins, Échidna, Grigori, la vérité méta des Révélateurs, et la liste de ce qui ne sera pas tranché.
 - [La magie, les vocations et la vie de l'aventurier](redige/08_magie_et_vie_quotidienne.md) — 11/10/2026 — Magie à coût réel, vocations, guilde et contrats, auberges, logis, artisans.
-- [Les vampires et les autres mythes du sang](redige/09_vampires.md) — 13/10/2026 — Les cinq lignées (Dracula, Strigoï, Nosferatu, dragons de sang, lamies), soleil et faiblesses, Novgorod, Abhartach, la penanggalan de Mu, le draugr.
+- [Les vampires et les autres mythes du sang](redige/09_vampires.md) — 14/10/2026 — Les cinq lignées (Dracula, Strigoï, Nosferatu, dragons de sang, lamies), soleil et faiblesses, Novgorod, la Dearg Due, Abhartach, la penanggalan de Mu, le draugr.
 
 ## 🌍 Monde, cosmologie et chronologie
 
