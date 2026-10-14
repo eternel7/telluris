@@ -11,7 +11,7 @@
 #   - `espece:loup_garou` (déjà en jeu) devient le loup-garou de FRANCE : description seule,
 #     `_id` et caractéristiques inchangés (Auteur).
 # Lune et faiblesses de chaque famille : DESCRIPTION SEULE, aucune mécanique (comme les vampires).
-# Images détourées dans templates/resources/monsters/ ; le nahual n'en a pas encore (prompt au § 12).
+# Images détourées dans templates/resources/monsters/ (les huit espèces neuves).
 # Loot : une CARCASSE par bête (forme de `item:loup`, poids [min, max] ≤ 100 kg : pas de
 # découpe), des OSSEMENTS pour l'ulfheðinn humanoïde (forme de `gen_vampires._ossements`).
 #
@@ -96,7 +96,7 @@ NOUVELLES = {
 	},
 	# Amériques (Auteur) : nahual à volonté, uturuncu par un rite — et perdu s'il tarde.
 	"nahual": {
-		"nom": "Nahual", "genre": "m",
+		"nom": "Nahual", "genre": "m", "image": "nahual_transparent.png",
 		"description": "Sorcier des terres de Teotihuacan qui revêt à volonté la forme de son double, "
 					   "un jaguar. On dit que Tepeyollotl, le Cœur de la montagne, donna le premier "
 					   "double ; d'autres le nient. Ce qui blesse le jaguar blesse le sorcier, et le sel "

@@ -269,7 +269,7 @@
     "type": "espece",
     "nom": "Nahual",
     "genre": "m",
-    "image": "",
+    "image": "nahual_transparent.png",
     "description": "Sorcier des terres de Teotihuacan qui revêt à volonté la forme de son double, un jaguar. On dit que Tepeyollotl, le Cœur de la montagne, donna le premier double ; d'autres le nient. Ce qui blesse le jaguar blesse le sorcier, et le sel jeté sur sa peau abandonnée lui interdit de la reprendre.",
     "base_attributes": {
       "V": {
