@@ -4,6 +4,8 @@ Gabarits de prompts pour générer les illustrations du jeu (Gemini). Chaque gab
 
 ## 0. Règles communes
 
+⚠️ **Tout prompt livré COMMENCE par « Réalise l'image de… »** (Auteur, 14/10/2026) — « Réalise l'image de la clairière… », « Réalise l'image d'un ogre… », « Réalise l'image des… ».
+
 ### 0.1 Bloc de style (ajouté à la fin de CHAQUE prompt)
 
 ⚠️ **Écrit EN ENTIER dans chaque prompt livré**, jamais en renvoi (`[0.1]`) : un prompt se copie-colle tel quel (Auteur, 13/10/2026). Idem pour 0.1 bis et la phrase de foule.

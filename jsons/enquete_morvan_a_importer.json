@@ -1,0 +1,1988 @@
+[
+  {
+    "_id": "pnj:borin_barbe_de_jais",
+    "type": "pnj",
+    "nom": "Borin Barbe-de-Jais",
+    "race": "nain",
+    "vocation": "receptionniste",
+    "portrait": "nain_m_receptioniste01.png",
+    "description": "Réceptionniste du Bastion de l'Yonne. Ses yeux pétillent d'une malice bienveillante, mais rien n'échappe à son regard.",
+    "services": {
+      "transport": {
+        "offre": {
+          "id": "quete:transport_borin_premiere_mission",
+          "destination": "lieu:fumee_de_l_yonne",
+          "cargaison": [
+            {
+              "item": "item:viande_sanglier_gobelin",
+              "quantite": 2,
+              "poids": 5
+            }
+          ],
+          "duree": 3600,
+          "proba": 1,
+          "unique": true,
+          "retour": true,
+          "rang": "F",
+          "titre": "Première mission : les caisses du Bastion",
+          "description": "Borin Barbe-de-Jais vous confie deux caisses de viande de sanglier-gobelin — dix bons kilos — à porter au fumoir de la Guilde, Fumée de l'Yonne. Elles y deviendront les provisions des expéditions. Revenez ensuite lui en rendre compte au comptoir : ce n'est pas la viande qu'il met à l'épreuve.",
+          "recompenses": {
+            "xp": 30,
+            "cuivre": 200,
+            "items": [
+              {
+                "item": "item:carte_aventurier",
+                "poids": 0.05,
+                "lieu_parent": "auto"
+              }
+            ],
+            "rang_guilde": "F"
+          }
+        },
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "rapporte": "transport_rapporte"
+        }
+      },
+      "rang": {
+        "noeuds": {
+          "propose": "rang_propose",
+          "accepte": "rang_accepte",
+          "rapporte": "rang_rapporte"
+        }
+      },
+      "acces": {
+        "lieu": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+        "noeuds": {
+          "ouvre": "acces_ouvre",
+          "refus": "acces_refus",
+          "deja": "acces_deja"
+        }
+      },
+      "escorte": {
+        "recherche": {
+          "cite": "lieu:auxerre",
+          "proba": 0.25,
+          "recompenses": {
+            "xp": 30,
+            "cuivre": 500
+          }
+        },
+        "noeuds": {
+          "accepte": "escorte_acceptee"
+        }
+      },
+      "apport": {
+        "offre": {
+          "id": "quete:la_bete_de_dun_les_places",
+          "titre": "La bête de Dun-les-Places",
+          "description": "Une bête décime les troupeaux de Dun-les-Places, au fond des forêts du Morvan, et a tué un jeune berger. Les villageois parlent de loup-garou. Trouvez où elle se couche — la vieille Jacotte, la meneuse de loups, le sait peut-être — et rapportez sa tête à Borin Barbe-de-Jais, au comptoir du Bastion de l'Yonne.",
+          "item": "item:loup_garou_tete",
+          "quantite": 1,
+          "unique": true,
+          "recompenses": {
+            "xp": 70,
+            "cuivre": 8000
+          }
+        },
+        "noeuds": {
+          "accepte": "morvan_accepte",
+          "partiel": "morvan_partiel",
+          "remis": "morvan_remis"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le nain vous observe quelques secondes avant d'esquisser un sourire. « Bienvenue au Bastion de l'Yonne ! Approche donc, {prenom}. Tu viens chercher fortune, ou simplement vérifier que les histoires sont vraies ? »",
+          "choix": [
+            {
+              "id": "mission",
+              "label": "Je voudrais devenir aventurier.",
+              "next": "premiere_mission",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "rapport",
+              "label": "C'est fait. {destinataire} a sa viande.",
+              "action": {
+                "service": "transport",
+                "op": "rapporter"
+              },
+              "condition": {
+                "transport_a_rapporter": true
+              }
+            },
+            {
+              "id": "relance",
+              "label": "Où en est ma livraison, déjà ?",
+              "next": "transport_relance",
+              "condition": {
+                "transport_en_cours": true
+              }
+            },
+            {
+              "id": "veteran",
+              "label": "Vous vous souvenez de moi ?",
+              "next": "transport_veteran",
+              "condition": {
+                "transport_accompli": true
+              }
+            },
+            {
+              "id": "rang_proposer",
+              "label": "Une épreuve pour m'élever dans la Guilde ?",
+              "next": "rang_propose",
+              "condition": {
+                "rang_offert": true
+              }
+            },
+            {
+              "id": "rang_rapporter",
+              "label": "C'est fait. Le « {espece} {rang_vise} » a fini couché.",
+              "action": {
+                "service": "rang",
+                "op": "rapporter"
+              },
+              "condition": {
+                "rang_a_rapporter": true
+              }
+            },
+            {
+              "id": "rang_sommet",
+              "label": "Reste-t-il une épreuve à ma hauteur ?",
+              "next": "rang_sommet",
+              "condition": {
+                "rang_max": true
+              }
+            },
+            {
+              "id": "acces_passer",
+              "label": "Je voudrais voir le maître de la Guilde.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "acces_deja",
+              "label": "Je remonte au bureau.",
+              "condition": {
+                "acces_ouvert": true
+              },
+              "next": "acces_deja"
+            },
+            {
+              "id": "acces_pourquoi",
+              "label": "Qui dirige la Guilde, ici ?",
+              "condition": {
+                "acces_refuse": true
+              },
+              "next": "acces_refus"
+            },
+            {
+              "id": "escorte_offre",
+              "label": "Un avis de recherche, peut-être ?",
+              "next": "escorte_propose",
+              "condition": {
+                "escorte_offerte": true
+              }
+            },
+            {
+              "id": "escorte_relance",
+              "label": "Au sujet de {protege}…",
+              "next": "escorte_relance",
+              "condition": {
+                "escorte_en_cours": true
+              }
+            },
+            {
+              "id": "bucherons_appel",
+              "label": "On me dit que le maître de la Guilde me cherche ?",
+              "condition": {
+                "acces_ouvrable": true,
+                "relation_min": {
+                  "lieux": [
+                    "lieu:le_bastion_de_l_yonne_comptoir"
+                  ],
+                  "seuil": 51
+                },
+                "quete_active": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                }
+              },
+              "next": "bucherons_appel"
+            },
+            {
+              "id": "bucherons_appel_habitue",
+              "label": "On me dit que le maître de la Guilde me cherche ?",
+              "condition": {
+                "acces_ouvert": true,
+                "relation_min": {
+                  "lieux": [
+                    "lieu:le_bastion_de_l_yonne_comptoir"
+                  ],
+                  "seuil": 51
+                },
+                "quete_active": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                }
+              },
+              "next": "bucherons_appel"
+            },
+            {
+              "id": "morvan_offre",
+              "label": "« Il paraît qu'une bête court le Morvan ? »",
+              "condition": {
+                "apport_offert": true,
+                "rang_min": {
+                  "cite": "lieu:auxerre",
+                  "rang": "E"
+                }
+              },
+              "next": "morvan_propose"
+            },
+            {
+              "id": "morvan_rappel",
+              "label": "« Dun-les-Places… rappelle-moi. »",
+              "condition": {
+                "apport_en_cours": true,
+                "apport_possible": false
+              },
+              "next": "morvan_rappel"
+            },
+            {
+              "id": "morvan_remettre",
+              "label": "« Voilà la tête de ta bête. »",
+              "condition": {
+                "apport_possible": true
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
+              "id": "morvan_souvenir",
+              "label": "« Des nouvelles du Morvan ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
+              "next": "morvan_souvenir"
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "premiere_mission": {
+          "texte": "« Beaucoup le disent. Peu comprennent ce que cela signifie. » Il ouvre un grand registre relié de cuir et y inscrit soigneusement ton nom. « Les recrues pensent souvent que leur première mission sera de tuer un monstre. C'est faux. Avant de savoir combattre, il faut apprendre à être digne de confiance. »",
+          "choix": [
+            {
+              "id": "ecouter",
+              "label": "Qu'attendez-vous de moi ?",
+              "next": "transport_propose"
+            },
+            {
+              "id": "refuser",
+              "label": "Je préfère chercher fortune ailleurs.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "Borin disparaît derrière une porte donnant sur les réserves, et revient avec {colis} solides caisses de bois fermées par des courroies de cuir. Une odeur puissante s'en échappe. « {poids} kilos de viande de sanglier-gobelin, toute fraîche. Tu la livreras au fumoir de la Guilde. Destination : {destination}. Tu as {delai} minutes — après, la marchandise ne vaut plus rien, et ce ne sont pas deux caisses qui disparaissent : ce sont les provisions de tes futurs compagnons. » Il glisse un jeton de cuivre dans ta main. « {xp} points d'expérience et {prime} pièces de cuivre à ton retour. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Ce n'est... qu'une livraison.",
+              "next": "transport_lecon"
+            }
+          ]
+        },
+        "transport_lecon": {
+          "texte": "Le sourire du nain s'efface doucement. « Tu crois ? » Il se penche vers toi. « Les plus grands héros commencent rarement en terrassant un dragon. Ils commencent en accomplissant parfaitement une tâche que tout le monde croit ordinaire. » Puis il reprend son éternel sourire. « Et entre nous... l'odeur attirera sans doute quelques renards, des chiens errants, peut-être même un jeune loup ou deux. Tu devras garder la tête froide. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "Donnez-moi ces caisses.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas aujourd'hui.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "Il pose un doigt épais sur une carte de la région. « Tu quitteras la ville et tu suivras la route : c'est {direction}. Le bâtiment de pierre aux hautes cheminées, tu ne peux pas le manquer. Présente le jeton à {destinataire} : on saura que tu viens de notre part. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "Borin contourne le comptoir et t'aide à charger les {colis} caisses dans une solide hotte de portage. « Destination : {destination}, dans les {delai} minutes. Et reviens me voir ensuite : je veux te l'entendre dire. Tu découvriras bientôt une vérité que tous les vétérans connaissent, petit. » Il t'adresse un clin d'œil et referme son registre.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_rapporte": {
+          "texte": "Le vieux nain rouvre son grand registre et trace une ligne à côté de ton nom. « Les caisses sont arrivées, et à l'heure. » Il fait glisser sur le chêne une plaque de cuir bouilli frappée du blason du Bastion, puis {prime} pièces de cuivre. « Ce n'était pas la viande que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. Les aventuriers capables de protéger une simple cargaison sont souvent ceux à qui l'on confiera, un jour, des compagnons... et peut-être le destin d'une cité entière. » Il désigne le grand tableau de la salle commune. « Rang Cuivre — le premier échelon, celui par lequel tout le monde a commencé. Va choisir ta prochaine quête. Tu es des nôtres. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "Le nain soupèse ton barda d'un regard et éclate de rire. « Par les enclumes des anciens ! Tu ploies déjà sous ton propre bagage, {prenom}. Déleste-toi et reviens : la viande ne s'envolera pas... enfin, pas tout de suite. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_relance": {
+          "texte": "Borin lève un sourcil au-dessus de son registre. « Toujours là ? Ces caisses ne se porteront pas toutes seules. Destination : {destination}, c'est {direction}. Il te reste {delai} minutes, et la viande n'attend pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y cours.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_veteran": {
+          "texte": "« Si je me souviens de toi ? » Le vieux nain caresse distraitement une tresse de sa barbe noire de jais. « {destinataire} a reçu sa viande, et à l'heure. Ce n'était pas la marchandise que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. » Il désigne du menton le grand tableau couvert de parchemins, dans la salle commune. « Va donc voir ce qu'on y épingle. Tu as gagné le droit de choisir. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_propose": {
+          "texte": "Borin referme son registre et te jauge d'un œil neuf. « Tu veux t'élever dans la Guilde, {prenom} ? Alors il te faut une prise digne de ce nom. Nos éclaireurs ont repéré un {espece} d'exception qui écume {lieu} — une bête énorme, couverte du sang de ses victimes. Ramène-moi sa dépouille et le rang {rang_vise} sera à toi. {xp} points d'expérience à la clef, et la fierté qui va avec. »",
+          "choix": [
+            {
+              "id": "rang_accepter",
+              "label": "Je m'en occupe.",
+              "action": {
+                "service": "rang",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "rang_reflechir",
+              "label": "Une telle bête... laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "rang_accepte": {
+          "texte": "« Bien. » Le nain grave quelque chose à côté de ton nom. « La bête rôde du côté de {lieu}. Ne reviens pas sans sa dépouille — et reviens entier, {prenom}, ce serait un comble de perdre une recrue prometteuse sur une épreuve de rang. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_rapporte": {
+          "texte": "Borin examine la dépouille encore fumante, hoche lentement la tête, puis trace une marque nette sur ta plaque de cuir bouilli. « Peu en reviennent, {prenom}. Toi, si. » Il repousse le registre. « Te voilà rang {rang}. La Guilde n'oublie pas ceux qui montent — et elle en attend d'autant plus. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_sommet": {
+          "texte": "Le vieux nain éclate d'un rire franc qui fait trembler sa barbe de jais. « Une épreuve à ta hauteur ? {prenom}, tu es rang {rang} — le plus haut que le Bastion sache reconnaître. » Il redevient sérieux et tapote la couverture de son registre. « Ce n'est pas de la fausse modestie : nos bois et nos collines n'abritent plus rien qui puisse te grandir. Pour monter au-delà, il te faudra une autre guilde, dans une autre cité, et du gibier à la mesure. Le Bastion, lui, gardera ton nom. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un honneur.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_ouvre": {
+          "texte": "« Rang {rang}, et mon registre en témoigne. » Borin repose sa plume, se hisse sur la pointe des pieds et désigne l'escalier du fond. « Monte. C'est là-haut : {portail}. Frappe, entre, et surtout — écoute. On ne ressort jamais de ce bureau sans avoir appris quelque chose, même quand on croyait n'y venir que pour un contrat. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Monter l'escalier.",
+              "next": "fin",
+              "deplacer": "lieu:bureau_du_maitre_de_guilde_d_auxerre"
+            }
+          ]
+        },
+        "acces_refus": {
+          "texte": "Le nain referme son registre d'un coup sec. « Le maître de la Guilde, {prenom} ? Son bureau n'est pas une salle d'attente. On y monte quand la Guilde sait ce qu'on vaut — rang D, pas moins. Tu en es à {rang}. » Il se radoucit et tapote la couverture de cuir. « Fais allonger la ligne à côté de ton nom. Je t'y conduirai moi-même. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y travaille.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_deja": {
+          "texte": "« Je sais, je sais — tu connais le chemin. » Il agite sa plume vers l'escalier du fond sans même relever la tête. « Monte, {prenom}. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Monter l'escalier.",
+              "next": "fin",
+              "deplacer": "lieu:bureau_du_maitre_de_guilde_d_auxerre"
+            }
+          ]
+        },
+        "escorte_propose": {
+          "texte": "Borin fait glisser un registre plus mince que les autres et l'ouvre à une page cornée. « Celui-là, je n'aime pas le tenir. » Il tourne le livre vers vous. « {protege}. Une famille d'Auxerre, un enfant qui n'est pas rentré. On l'a vu du côté de {lieu_rencontre}. La Guilde paie ceux qui les ramènent — et elle se souvient de ceux qui les ramènent vivants. »",
+          "choix": [
+            {
+              "id": "escorte_details",
+              "label": "Où, exactement ?",
+              "next": "escorte_details"
+            },
+            {
+              "id": "escorte_refuser",
+              "label": "Ce n'est pas pour moi.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_details": {
+          "texte": "« {direction}. » Le doigt épais s'arrête et ne bouge plus. « Vous rendrez l'enfant à sa famille, pas à moi : {destinataire}, à : {destination}. Moi, je me contente d'inscrire que c'est fait — {xp} points d'expérience et {prime} pièces de cuivre ce jour-là. »",
+          "choix": [
+            {
+              "id": "escorte_accepter",
+              "label": "Je m'en charge.",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "escorte_refuser",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_acceptee": {
+          "texte": "Le nain trace une croix dans la marge et souffle sur l'encre. « C'est noté à votre nom. » Le sourire revient, un peu plus grave que d'habitude. « Une chose, {prenom} : {protege} ne se battra pas et ne pourra pas s'enfuir. Ce n'est pas un colis — ramenez l'enfant, pas son panier. »",
+          "choix": [
+            {
+              "id": "partir",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Encore une chose, Borin…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_relance": {
+          "texte": "« Toujours en chemin ? » Le registre reste ouvert à la page cornée. « Cherchez {direction}. Et souvenez-vous : c'est à : {destination} qu'on attend, pas ici. Une croix dans mon livre ne vaut rien tant que la porte ne s'est pas rouverte. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "J'y retourne.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Je m'en occupe.",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_appel": {
+          "texte": "« Hé ! Vous. Oui, vous. » Le nain pose le registre qu'il compulsait et se penche par-dessus le comptoir. « Le maître de la guilde vous cherche. » Il lève une main avant que vous ayez ouvert la bouche. « Et avant que vous demandiez : non, ce n'est ni une histoire de dette, ni une bagarre de taverne, ni un poulet volé. » Il marque un temps. « Cette fois, c'est sérieux. »",
+          "choix": [
+            {
+              "id": "quoi",
+              "label": "« Que me veut-il ? »",
+              "next": "bucherons_appel_qui"
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Il attendra. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_appel_qui": {
+          "texte": "« Il ne m'a rien expliqué. Il a seulement dit de vous envoyer le voir dès que vous mettriez les pieds ici. » Le ton descend d'un cran, et la malice avec. « Ça concerne des gens qui ne sont pas revenus de la forêt. »",
+          "choix": [
+            {
+              "id": "aventuriers",
+              "label": "« Des aventuriers ? »",
+              "next": "bucherons_appel_escalier"
+            },
+            {
+              "id": "monter",
+              "label": "« J'y vais. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_appel_escalier": {
+          "texte": "« Des bûcherons. Trois hommes. » Borin referme le registre d'un geste. « Ils coupent pour plusieurs exploitants de la région, ils connaissent ces bois depuis toujours, et voilà deux jours qu'on les attend. Ça commence à faire beaucoup de temps, pour des gens qui ne se perdent pas. » Il désigne du pouce l'escalier du fond. « Le maître de la guilde est dans son bureau. Montez. Il vous dira le reste. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Merci, Borin. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Monter l'escalier.",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_propose": {
+          "texte": "Borin pose sur le comptoir une lettre au papier taché, pliée en quatre. « Ça vient de Dun-les-Places, dans le Morvan. Des hameaux de charbonniers au fond des bois, à quatre jours d'ici. » Il tapote le papier. « Une bête leur mange les moutons depuis la dernière lune. Ils ont doublé les pieux des enclos ; elle a arraché la porte de la bergerie. Et la semaine passée, elle a tué un berger. Un gamin. » Il lève les yeux vers vous. « Ils disent loup-garou. Ils disent toujours loup-garou, là-haut. »",
+          "choix": [
+            {
+              "id": "details",
+              "label": "« Et toi, tu y crois ? »",
+              "next": "morvan_details"
+            },
+            {
+              "id": "accepter",
+              "label": "« J'y vais. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas tout de suite. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "morvan_details": {
+          "texte": "« Moi ? » Borin hausse ses larges épaules. « J'ai vu des loups gros comme des veaux, dans les forêts de l'est. J'ai vu des gens courir les bois les nuits de pleine lune, aussi, et revenir au matin les mains griffées. Je ne sais pas ce que c'était. » Il replie la lettre. « La Guilde paie au résultat, comme les primes au loup d'autrefois : tu me rapportes {objet}, et on écrit ce que c'était dans le registre. Là-haut, va voir la vieille Jacotte. On dit qu'elle mène les loups. Si quelqu'un sait où la bête se couche, c'est elle. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« J'y vais. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas tout de suite. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "morvan_accepte": {
+          "texte": "Borin inscrit votre nom au registre, d'une écriture lourde et appliquée. « Par la porte du sud-est, et puis les bois, toujours les bois. » Il ajoute, sans relever la tête : « Prends une bonne lame. Une bête comme ça, tu ne la ramèneras pas entière sur ton dos. La tête suffit. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_rappel": {
+          "texte": "« Dun-les-Places, au sud-est, dans le Morvan. Demande la vieille Jacotte. Et moi, j'attends {objet}, pas une histoire de veillée. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_partiel": {
+          "texte": "Borin regarde ce que vous posez sur le comptoir. « Il en manque. Encore {reste}. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_remis": {
+          "texte": "Borin défait le linge et recule d'un demi-pas. La tête est celle d'un loup, mais trop large, le front trop haut, et les yeux, à demi clos, n'ont pas tout à fait la couleur d'un œil de bête. Il la recouvre. « Loup-garou », dit-il, et il l'écrit au registre. Il pousse vers vous {prime} pièces de cuivre et porte {xp} points à votre nom. Puis, plus bas : « Ou un très grand loup. C'est ce qu'ils diront, là-haut, la moitié d'entre eux. Moi, j'écris ce que la Guilde a payé. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Ça me va. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_souvenir": {
+          "texte": "« Plus une brebis de perdue, à ce qu'on m'écrit de Dun-les-Places. » Borin lisse une natte de sa barbe. « Et leur charbonnier n'est jamais revenu. Ils ont brûlé sa cabane. Moi, je dis que ça ne prouve rien, ni dans un sens ni dans l'autre. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:dun_les_places",
+    "type": "lieu",
+    "label": "Dun-les-Places",
+    "image": "dun_les_places.jpg",
+    "categorie": "chemin",
+    "lieu_parent": "lieu:france",
+    "pnj": [
+      {
+        "character": "pnj:meneuse_de_loups_jacotte",
+        "nom": "Jacotte",
+        "portrait": "meneuse_de_loups_Jacotte_elfe_f.jpg",
+        "probabilite": 1,
+        "description": "La vieille Jacotte, assise sur une souche à la lisière, sa musette sur les genoux."
+      },
+      {
+        "character": "pnj:bergere_margot_gueneau",
+        "nom": "Margot",
+        "portrait": "bergere_Margot_Gueneau_hobbit_f.jpg",
+        "probabilite": 1,
+        "description": "Margot, la bergère, devant l'enclos aux pieux doublés."
+      },
+      {
+        "character": "pnj:charbonnier_pierre_chaumereuil",
+        "nom": "Gros-Pierre",
+        "portrait": "charbonnier_Pierre_Chaumereuil_ogre_m.jpg",
+        "probabilite": 1,
+        "description": "Le Gros-Pierre, le charbonnier, qui décharge ses sacs devant la palissade.",
+        "conditions": [
+          {
+            "combat_gagne": {
+              "lieu": "lieu:clairiere_du_charbonnier",
+              "attendu": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "_id": "link:dun_les_places_to_france",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          52,
+          22
+        ],
+        "label": "Dun-les-Places"
+      },
+      {
+        "lieu": "lieu:dun_les_places",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Reprendre la route"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "pnj:meneuse_de_loups_jacotte",
+    "type": "pnj",
+    "nom": "Jacotte",
+    "race": "elfe",
+    "vocation": "chaman",
+    "portrait": "meneuse_de_loups_Jacotte_elfe_f.jpg",
+    "description": "La vieille Jacotte, meneuse de loups, sa musette serrée contre elle au bord du bois.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:clairiere_du_charbonnier",
+        "noeuds": {
+          "ouvre": "clairiere_ouverte",
+          "refus": "clairiere_close"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "À la lisière, là où le hameau s'arrête et où les grands chênes commencent, une vieille elfe aux cheveux blancs dénoués est assise sur une souche, une musette sur les genoux. Entre les arbres, derrière elle, deux paires d'yeux luisent sans bouger. Elle ne les regarde pas. « Tu cherches la bête. Ils te l'ont tous dit avant de te dire bonjour. »",
+          "choix": [
+            {
+              "id": "loups",
+              "label": "« Ces loups vous suivent ? »",
+              "next": "loups"
+            },
+            {
+              "id": "guilde",
+              "label": "« La Guilde m'envoie. Où la bête se couche-t-elle ? »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "next": "seuil"
+            },
+            {
+              "id": "clairiere",
+              "label": "« Où se couche la bête ? »",
+              "condition": {
+                "acces_ouvrable": false,
+                "acces_menace": true
+              },
+              "next": "pas_la_guilde"
+            },
+            {
+              "id": "apres",
+              "label": "« La bête est morte. »",
+              "condition": {
+                "acces_libere": true
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(La laisser à sa musette.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "loups": {
+          "texte": "« Ils me suivent quand je joue. » Elle souffle dans la musette, une seule note, aigre et longue ; les yeux, derrière elle, se ferment et se rouvrent. « Les loups de ces bois, je les connais tous, et chacun par son nom. Celle qui mange les moutons de Margot, ce n'est pas un des miens. Elle ne répond pas quand je joue. » Elle repose l'instrument. « Ce qui ne répond pas à la musette, d'habitude, répond à autre chose. »",
+          "choix": [
+            {
+              "id": "quoi",
+              "label": "« À quoi ? »",
+              "next": "nom"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "nom": {
+          "texte": "« À son nom. Son vrai nom, celui qu'on lui a donné avant qu'il coure le garou. » Jacotte vous regarde enfin, et vous comprenez qu'elle ne vous le dira pas. « Ceux qui courent le garou font sept villages avant l'aube, les nuits de pleine lune. Appelle-les par leur nom, ou fais-leur couler trois gouttes de sang, et ils te reviennent. Mais il faut savoir à qui l'on parle. » Elle hausse les épaules. « Et ici, tout le monde croit le savoir. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "pas_la_guilde": {
+          "texte": "« Je le sais. » Jacotte caresse le bois de sa musette. « Je ne mène pas les curieux dans les bois la nuit, ni les braves qui veulent voir. Le village a écrit à la Guilde d'Auxerre. Quand la Guilde enverra quelqu'un, je le mènerai. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "seuil": {
+          "texte": "Jacotte se lève, lentement, et vous fait signe de la suivre. Elle marche longtemps sous les arbres sans lumière, sans jamais trébucher. Les deux loups vont devant, sans bruit. Enfin, une odeur de fumée froide, une lueur rouge entre les troncs : la clairière du charbonnier, ses meules qui fument sous la lune. Elle s'arrête au bord. « C'est là qu'elle revient. Moi, je n'entre pas. »",
+          "choix": [
+            {
+              "id": "entrer",
+              "label": "Entrer dans la clairière.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "attendre",
+              "label": "« Pas encore. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "clairiere_ouverte": {
+          "texte": "Vous faites trois pas sur la terre noire. Les meules fument doucement. Personne devant la cabane. Puis, de l'autre côté de la clairière, quelque chose se lève d'entre les bûches : un loup, mais trop grand, debout sur des pattes de derrière qui ne sont pas faites pour ça, et qui retombe à quatre pattes en grondant. Il vous a vu avant que vous le voyiez.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Tirer votre arme.",
+              "next": "fin"
+            }
+          ]
+        },
+        "clairiere_close": {
+          "texte": "Jacotte ne se lève pas. « La clairière est vide, maintenant. Il n'y a plus rien à y chercher. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Reculer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "« Morte, oui. Je l'ai entendue. » Jacotte souffle une note dans sa musette ; derrière elle, les deux loups se couchent. « Ce n'était qu'un loup, tu sais. Un loup plus grand que les autres, venu d'ailleurs, qui ne connaissait pas ma musette. » Elle se tait un long moment.",
+          "choix": [
+            {
+              "id": "nom",
+              "label": "« Et s'il ne l'était pas ? »",
+              "next": "le_nom"
+            },
+            {
+              "id": "fin",
+              "label": "(La laisser à sa musette.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "le_nom": {
+          "texte": "Jacotte regarde ses mains. « Alors il aurait fallu l'appeler par son nom. Il serait peut-être revenu. » Vous lui demandez quel nom. Elle se lève sans répondre et rentre dans le bois, ses deux loups sur les talons.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(La laisser partir.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:bergere_margot_gueneau",
+    "type": "pnj",
+    "nom": "Margot Gueneau",
+    "race": "hobbit",
+    "vocation": "forestier",
+    "portrait": "bergere_Margot_Gueneau_hobbit_f.jpg",
+    "description": "Margot Gueneau, bergère, devant l'enclos aux pieux doublés.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Devant un enclos aux pieux doublés, une jeune hobbit compte ses moutons, une houlette à la main, un brassard noir au bras. Elle recommence trois fois et trouve trois fois le même compte. « Si vous venez de la Guilde, vous êtes en retard d'un berger. »",
+          "choix": [
+            {
+              "id": "bete",
+              "label": "« Vous avez vu la bête ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:la_bete_de_dun_les_places",
+                  "attendu": false
+                }
+              },
+              "next": "bete"
+            },
+            {
+              "id": "frere",
+              "label": "« Un berger ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:la_bete_de_dun_les_places",
+                  "attendu": false
+                }
+              },
+              "next": "frere"
+            },
+            {
+              "id": "apres",
+              "label": "« La bête ne reviendra pas. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(La laisser à ses moutons.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "frere": {
+          "texte": "« Mon frère. Colin. Il gardait le troupeau d'en haut, il avait seize ans. » Elle serre la houlette. « On l'a trouvé au matin, contre la porte de la bergerie. La porte était arrachée, et les gonds tordus, comme si on avait tiré dessus avec des mains. Un loup n'a pas de mains. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bete": {
+          "texte": "« Une fois. De loin, sous la lune. » Elle parle vite, comme quelqu'un qui l'a déjà raconté vingt fois. « Un loup trop grand. Il marchait mal, comme un homme qui aurait voulu marcher à quatre pattes. Il est parti vers les bois de l'est. » Elle crache par terre. « Vers la clairière du Gros-Pierre. Et le Gros-Pierre, depuis, il porte un bandage au bras. Demandez-lui donc d'où il vient. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "Margot compte ses moutons, une fois, et le compte est bon. « Plus une bête de perdue depuis que vous êtes passé. » Elle regarde vers l'est, vers les bois. « Le Gros-Pierre est parti, aussi. Sa cabane est vide, ses meules se sont éteintes. » Elle serre la houlette. « S'il est parti, c'est bien qu'il était coupable. Non ? » Elle n'attend pas votre réponse. « C'est ce que tout le monde dit. Alors c'est ce que je dirai à Colin. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(La laisser à ses moutons.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:charbonnier_pierre_chaumereuil",
+    "type": "pnj",
+    "nom": "Pierre Chaumereuil",
+    "race": "ogre",
+    "vocation": "guerrier",
+    "portrait": "charbonnier_Pierre_Chaumereuil_ogre_m.jpg",
+    "description": "Pierre Chaumereuil, le Gros-Pierre, charbonnier, noir de suie, un bandage au bras.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Un ogre noir de suie décharge des sacs de charbon devant la palissade, sans un regard pour les villageois qui s'écartent sur son passage. Son avant-bras gauche est serré dans un bandage frais. Il vous voit venir, et soupire. « Encore un qui vient voir le loup-garou. »",
+          "choix": [
+            {
+              "id": "accuse",
+              "label": "« On vous accuse, au village. »",
+              "next": "accuse"
+            },
+            {
+              "id": "bras",
+              "label": "« Ce bandage ? »",
+              "next": "bras"
+            },
+            {
+              "id": "nuits",
+              "label": "« Où êtes-vous, les nuits de pleine lune ? »",
+              "next": "nuits"
+            },
+            {
+              "id": "fin",
+              "label": "(Le laisser à son charbon.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "accuse": {
+          "texte": "« Ils accusent toujours celui qui vit dans les bois. » Il jette un sac sur la pile. « Mon père vivait dans les bois, et on l'accusait aussi. Il est mort dans son lit. » Il vous regarde de haut, de très haut. « Si vous voulez la bête, elle passe par ma clairière. Je l'entends gratter aux meules. C'est pour ça que je ne dors plus. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bras": {
+          "texte": "Il cache le bras derrière son dos, comme un enfant. « Une meule qui s'est effondrée. Le feu couvait dessous, la terre a cédé, j'ai mis le bras dedans pour sauver le bois. » Il hausse les épaules. « Allez demander à la vieille Jacotte, si vous ne me croyez pas. Elle sait tout, elle. Elle ne dit rien, mais elle sait tout. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "nuits": {
+          "texte": "« Les nuits de pleine lune ? » Il s'arrête, un sac sur l'épaule. « Je ne dors pas. Personne ne dort, ici. » Il repart vers sa charrette. « Une meule, ça se veille sept jours et sept nuits. Moi, je veille mes meules. Les autres veillent leurs moutons. Et tout le monde regarde la lisière. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:clairiere_du_charbonnier",
+    "type": "lieu",
+    "label": "La clairière du charbonnier",
+    "image": "clairiere_du_charbonnier.jpg",
+    "categorie": "battle_map",
+    "dimensions": {
+      "x": 40,
+      "y": 20
+    },
+    "cells": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        3,
+        3,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        3,
+        3,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "nav": {},
+    "tags": [
+      "foret",
+      "clairiere",
+      "nuit",
+      "donjon"
+    ],
+    "acces": {
+      "gardien": "pnj:meneuse_de_loups_jacotte",
+      "refus": "La clairière est vide. Les meules se sont éteintes.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "collect"
+            ],
+            "cible": "item:loup_garou_tete",
+            "objectif_atteint": false
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "donjon:clairiere_du_charbonnier",
+    "type": "donjon",
+    "nom": "La clairière du charbonnier",
+    "description": "Au fond des bois de Dun-les-Places, la clairière d'un charbonnier, ses meules et sa cabane. Une bête y revient les nuits de pleine lune.",
+    "portail": "lieu:dun_les_places",
+    "niveau_min": 1,
+    "niveau_max": 2,
+    "battle_maps": [
+      {
+        "lieu": "lieu:clairiere_du_charbonnier",
+        "especes": [
+          "espece:loup_garou"
+        ],
+        "nb_monstres": 1,
+        "niveau_min": 1,
+        "niveau_max": 2
+      }
+    ]
+  }
+]

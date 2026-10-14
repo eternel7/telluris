@@ -792,7 +792,7 @@
 			"id": "ossory",
 			"titre": "Laignech Fáelad et la malédiction d'Ossory",
 			"titre_court": "Loups d'Ossory",
-			"resume": "Laignech Fáelad, ancêtre du clan d'Ossory, prend la forme du loup à volonté et ses descendants en héritent. Plus tard, un druide maudit le clan : tous les sept ans, un couple doit vivre en loups sept années, sous la pleine lune. Les loups-garous d'Irlande, les faoladh, restent des gardiens des enfants, des blessés et des égarés.",
+			"resume": "Laignech Fáelad, ancêtre du clan d'Ossory, prend la forme du loup à volonté et ses descendants en héritent. Plus tard, un druide à qui le clan a refusé l'hospitalité le maudit : tous les sept ans, un couple doit vivre en loups sept années, sous la pleine lune. Les loups-garous d'Irlande, les faoladh, restent des gardiens des enfants, des blessés et des égarés.",
 			"quand": {"moment": {"ere": "remparts", "inconnu": true}, "autorite": "proposition", "note": "Aucune date : l'ère est proposée ; le don précède la malédiction (Auteur, 14/10)."},
 			"couche": "histoire", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
 			"origine": ["irlande"],

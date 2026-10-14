@@ -49,6 +49,25 @@ Le canon contenait déjà, en jeu, `espece:loup_garou` (« Humain maudit se tran
 - **`espece:loup_garou`** devient le **loup-garou de France** (Gévaudan, Dole) : description réécrite sans « humain », `_id` et caractéristiques inchangés.
 - **Premier lycanthrope du joueur** : au **rang E**, par une **enquête** en France — une bête qui décime les troupeaux : loup-garou, loup géant ou superstition (modèle du Gévaudan). Les familles lointaines viennent avec les voyages (Irlande, Nord, Amériques après le rang A).
 
+## ✍️ Auteur — sixième arbitrage (14/10, questionnaires)
+
+L'Auteur demande de lui proposer par questionnaire tout ce qu'il n'a pas tranché ; quatre questionnaires :
+
+- **Faute du clan d'Ossory** : l'**hospitalité refusée** — le clan ferme sa porte à un druide sous la pluie, et le druide le condamne à errer dehors comme des loups.
+- **Récit du druide errant** (adapté de Giraldus) : **gardé tel quel**.
+- **Faoladh abattu sans raison** : **récit seulement** (mauvais œil des villages, dit par les PNJ), aucune mécanique.
+- **Trait de Lignée** : **oui** — la bête garde un trait visible de la Lignée de l'anthrope, sans mécanique.
+- **Failinis** : vient d'**Ioruaidh**, une **île que nul ne sait situer** (tertre ou île du Nord : mystère ouvert).
+- **Cú Sídhe** : **annonciateur de mort** et **ravisseur de nourrices** pour les enfants des *sídhe*. Écarté : gardien des tertres.
+- **Double du nahual** : **d'autres animaux** que le jaguar sont possibles (coyote, chouette, serpent, aigle) ; le jaguar reste la marque des plus puissants.
+- **Hommes-jaguars** : retenus — le **Palais des Jaguars** maison des nahuals, les **Olmèques premiers** nahuals, le **rite de l'uturuncu** (peau de jaguar, breuvage de la liane), les **gardiens-aigles**.
+- **Lycaon** : le **festin du dieu** retenu. Écartés : les fêtes du mont Lycée (la règle des neuf ans reste sa faiblesse, § 8), ses cinquante fils.
+- **Ulfheðnar** : au service de **Reykjavik et d'Akureyri**.
+- **Livonie** : rattachée à **Riga**, cité-État nouvelle à décrire plus tard ; **fouets de fer** contre les balais des sorciers, gardés.
+- **Enquête du rang E** : dans le **Morvan** ; le **scénario est validé**, à écrire dans une demande séparée (comme Escolives).
+- **Malédiction du loup-garou de France** : **courir le garou**.
+- **Bisclavret** : rencontré **loup, à la cour d'un seigneur breton** qui le garde comme un chien.
+
 ---
 
 ## 1. Arbitrage
@@ -71,9 +90,18 @@ Le canon contenait déjà, en jeu, `espece:loup_garou` (« Humain maudit se tran
 | Chiens des dieux | trois nuits par an, **portail naturel** vers un monde souterrain inconnu | Auteur |
 | `espece:loup_garou` | **loup-garou de France** | Auteur |
 | Premier lycanthrope | **rang E**, enquête en France (modèle Gévaudan) | Auteur |
-| Récits détaillés, noms secondaires, lieux précis, datations | § 2 à § 7 | proposé, non tranché |
+| Faute d'Ossory | **hospitalité refusée** à un druide | Auteur |
+| Failinis | d'**Ioruaidh**, île que nul ne sait situer | Auteur |
+| Cú Sídhe | annonce la mort, enlève des nourrices | Auteur |
+| Nahual | double jaguar le plus souvent, autres animaux possibles ; Palais des Jaguars ; Olmèques premiers | Auteur |
+| Lycaon | le festin du dieu | Auteur |
+| Ulfheðnar | au service de Reykjavik et d'Akureyri | Auteur |
+| Livonie | **Riga**, cité-État à décrire | Auteur |
+| Enquête du rang E | **Morvan**, scénario validé | Auteur |
+| Loup-garou de France | **courir le garou** ; Bisclavret loup à une cour bretonne | Auteur |
+| Récits détaillés restants, datations | § 2 à § 7 | proposé, non tranché |
 
-**Lignée** : un lycanthrope peut être de **n'importe quelle Lignée** (un nahual hobbit, une ulfheðinn naine) ; la bête qu'il devient garde parfois un trait de sa Lignée (proposé, non tranché : un loup d'ogre est plus massif, un loup d'elfe plus long et plus pâle).
+**Lignée** : un lycanthrope peut être de **n'importe quelle Lignée** (un nahual hobbit, une ulfheðinn naine) ; la bête qu'il devient garde un trait visible de sa Lignée (Auteur, 14/10 ; sans mécanique) : un loup d'ogre est plus massif, un loup d'elfe plus long et plus pâle, un loup de hobbit petit et vif.
 
 **Théories de savants** (proposées) : on se dispute sur ce qu'est la mue. Pour les uns, un **esprit de bête** loge dans un corps vivant, comme l'esprit du vampire dans un corps mort — ce serait le « double » du nahual, la *fylgja* des Nordiques ; pour d'autres, une **malédiction** qui tord le corps (Lycaon, Ossory) ; pour d'autres encore, un **art** qui s'apprend (uturuncu, Ulfheðnar). Personne ne tranche : les familles n'ont rien en commun que la bête.
 
@@ -86,16 +114,16 @@ Le canon contenait déjà, en jeu, `espece:loup_garou` (« Humain maudit se tran
 Ancrages : le *faoladh* (ou *conriocht*) du folklore irlandais, loup-garou protecteur ; Giraldus Cambrensis, *Topographia Hibernica* (un prêtre en route rencontre un loup qui parle, et qui le conduit à sa compagne mourante) ; Laignech Fáelad, ancêtre des loups d'Ossory, dont le *Cóir Anmann* dit que ses descendants changeaient de forme à volonté.
 
 - **Le don** (Auteur) — **Laignech Fáelad**, ancêtre du clan d'Ossory, prend la forme du loup quand il le veut ; ses descendants en héritent. Proposé : le clan s'en sert pour garder les troupeaux et les routes de son territoire ; on dit que le loup d'Ossory rapporte au feu l'enfant perdu dans la lande.
-- **La malédiction** (Auteur) — plus tard, un **druide** maudit le clan : tous les sept ans, un couple doit vivre en loups sept années ; la pleine lune les y force. S'ils survivent, ils rentrent et un autre couple part. Proposé : la faute du clan n'est pas connue — les uns parlent d'un druide humilié, les autres d'un serment rompu.
-- **Le récit du druide errant** (adapté de Giraldus, proposé) — un druide qui voyage de nuit voit un loup s'approcher du feu et lui parler. La louve du loup se meurt ; il le supplie de venir lui accorder les derniers rites. Pour prouver ce qu'il est, le loup ouvre de sa patte la peau de sa compagne depuis la tête jusqu'au nombril : dessous, c'est une vieille femme.
+- **La malédiction** (Auteur) — plus tard, un **druide** maudit le clan : tous les sept ans, un couple doit vivre en loups sept années ; la pleine lune les y force. S'ils survivent, ils rentrent et un autre couple part. **La faute** (Auteur, 14/10) : l'**hospitalité refusée** — un soir de pluie, le clan ferma sa porte à un druide ; puisqu'ils laissaient un voyageur dehors, il les condamna à vivre dehors comme des loups.
+- **Le récit du druide errant** (adapté de Giraldus, Auteur : gardé tel quel) — un druide qui voyage de nuit voit un loup s'approcher du feu et lui parler. La louve du loup se meurt ; il le supplie de venir lui accorder les derniers rites. Pour prouver ce qu'il est, le loup ouvre de sa patte la peau de sa compagne depuis la tête jusqu'au nombril : dessous, c'est une vieille femme.
 - **Le corps endormi** (folklore réel) — le faoladh qui court la nuit laisse son corps anthrope endormi, comme mort, là où il l'a quitté. Si on le déplace, l'esprit ne le retrouve plus. Faiblesse au § 8.
-- **Gardiens** (Auteur) — le faoladh protège les enfants, les blessés et les égarés. En jeu (proposé) : il n'attaque que s'il croit menacés ceux qu'il garde ; un aventurier qui l'abat sans raison s'en fait une mauvaise réputation dans la région.
+- **Gardiens** (Auteur) — le faoladh protège les enfants, les blessés et les égarés. Il n'attaque que s'il croit menacés ceux qu'il garde ; un aventurier qui l'abat sans raison s'attire le mauvais œil des villages — **récit seulement**, dit par les PNJ, aucune mécanique (Auteur, 14/10).
 
 ### Les chiens d'Irlande
 
-- **Cú Sídhe** (Auteur) — le chien des tertres, grand comme un jeune taureau, vert sombre, la queue roulée ou tressée. Il chasse en silence ; **il aboie trois fois**, et au troisième aboiement celui qui l'entend meurt de peur, s'il n'a pas gagné un abri (folklore écossais et irlandais). Il sort des tertres, qui sont des **portails naturels** vers l'Autre Monde (Auteur). Proposé : il annonce une mort ou vient chercher les femmes nourricières pour les enfants des *sídhe*.
+- **Cú Sídhe** (Auteur) — le chien des tertres, grand comme un jeune taureau, vert sombre, la queue roulée ou tressée. Il chasse en silence ; **il aboie trois fois**, et au troisième aboiement celui qui l'entend meurt de peur, s'il n'a pas gagné un abri (folklore écossais et irlandais). Il sort des tertres, qui sont des **portails naturels** vers l'Autre Monde (Auteur). Il **annonce une mort** prochaine, et vient **enlever des nourrices** pour allaiter les enfants des *sídhe* (Auteur, 14/10).
 - **Bran et Sceólang** (Auteur) — les chiens de **Fionn mac Cumhaill**, qui sont en vérité ses cousins : sa tante **Uirne**, enceinte, fut changée en chienne par une femme des *sídhe* jalouse, et mit bas deux chiots qui ne redevinrent jamais anthropes. Ils comprennent la parole et ne trahissent jamais leur maître. **Alliés**, hors bestiaire (Auteur). Proposé : des PNJ y voient la preuve qu'une lycanthropie peut se transmettre au ventre, d'autres que seule la magie des *sídhe* en est capable.
-- **Failinis** (Auteur) — le chiot invincible du roi d'**Ioruaidh**, que les fils de Tuireann durent rapporter à **Lugh** : nulle bête ne lui échappe, et toute bête qui le voit tombe. Sur Telluris (proposé) : un **être unique**, qu'un aventurier ne rencontre qu'au bout d'une longue traque ; on ne sait s'il est chien, loup ou autre chose venu d'un tertre.
+- **Failinis** (Auteur) — le chiot invincible du roi d'**Ioruaidh**, que les fils de Tuireann durent rapporter à **Lugh** : nulle bête ne lui échappe, et toute bête qui le voit tombe. Sur Telluris : un **être unique** ; **Ioruaidh** est une **île que nul ne sait situer** — un tertre pour les uns, une île du Nord pour les autres (Auteur, 14/10 : mystère ouvert). Proposé : un aventurier ne le rencontre qu'au bout d'une longue traque.
 - **Dobhar-chú** (Auteur) — le « chien des eaux », mi-chien mi-loutre, des lacs du nord-ouest (le Glenade réel, et sa pierre tombale gravée de la bête) : il tue qui se baigne, et quand on l'abat, **son compagnon** sort de l'eau pour le venger. Monstre de lac, **hors lycanthropie**.
 - **Cú Chulainn** (Auteur, sans lycanthropie) — l'enfant **Setanta** tue le chien de garde du forgeron **Culann** et, pour réparer, offre de le remplacer jusqu'à ce qu'un chiot soit dressé : on l'appelle désormais « le chien de Culann ». Il lui est interdit de manger du chien (*geis*). Sa furie (*ríastrad*), qui le tord jusqu'à le rendre méconnaissable, passe pour une parenté avec les loups : **rien ne le prouve** (Auteur). Sur Telluris (proposé) : il garde la forge et la route d'un clan d'Ulster contre les monstres — jamais une guerre.
 
@@ -105,37 +133,37 @@ Ancrages : le *faoladh* (ou *conriocht*) du folklore irlandais, loup-garou prote
 
 Ancrages : le *nahualli* des Nahuas et le *way* des Mayas, sorcier qui partage sa vie avec un double animal et en revêt la forme ; le **Palais des Jaguars** de Teotihuacan et ses fresques ; le titre *balam* (« jaguar ») des prêtres mayas et les livres de *Chilam Balam* ; les enfants « were-jaguars » de l'art olmèque (terme des archéologues).
 
-- **La forme** (Auteur) — le nahual **change à volonté** ; la lune ne le contraint pas. Son double est le plus souvent un **jaguar**, parfois un autre animal (proposé : coyote, chouette, serpent ; le jaguar reste la marque des plus puissants).
+- **La forme** (Auteur) — le nahual **change à volonté** ; la lune ne le contraint pas. Son double est le plus souvent un **jaguar**, parfois un autre animal — coyote, chouette, serpent, aigle ; le jaguar reste la marque des plus puissants (Auteur, 14/10).
 - **L'origine** (Auteur, théorie) — **Tepeyollotl**, « Cœur de la montagne », dieu-jaguar des grottes et de l'écho, aurait donné son double au premier nahual. D'autres PNJ le nient : un art qui s'apprend, rien de plus. Proposé : on entend son écho dans les galeries sous Teotihuacan ; les Architectes qui passent par le portail d'Aix-la-Chapelle n'osent pas trancher.
-- **Teotihuacan** (Auteur) — cité-État de la **Cité des dieux**, reliée à **Aix-la-Chapelle** par un des cinq portails de la Chapelle Palatine. Le Palais des Jaguars y est la maison des nahuals (proposé).
-- **Terres olmèques et mayas** (Auteur) — proposé : les plus anciens nahuals viendraient des terres olmèques, et leurs têtes sculptées d'enfants mi-jaguars seraient leurs portraits ; les prêtres-jaguars (*balam*) des cités mayas tiennent leurs livres de prophéties.
+- **Teotihuacan** (Auteur) — cité-État de la **Cité des dieux**, reliée à **Aix-la-Chapelle** par un des cinq portails de la Chapelle Palatine. Le **Palais des Jaguars** y est la maison des nahuals (Auteur, 14/10).
+- **Terres olmèques et mayas** (Auteur) — les plus anciens nahuals viennent des **terres olmèques**, et leurs têtes sculptées d'enfants mi-jaguars sont leurs portraits (Auteur, 14/10) ; proposé : les prêtres-jaguars (*balam*) des cités mayas tiennent leurs livres de prophéties.
 
 ### Le runa uturuncu / Yaguareté-Abá
 
 Ancrages : le *runa uturuncu* (« homme-jaguar », quechua) des Andes et de l'Amazonie ; le *Yaguareté-Abá* guarani, chaman qui devient jaguar en se roulant sur une peau ou en buvant un breuvage ; l'usage chamanique de l'*ayahuasca*.
 
-- **La forme** (Auteur) — le chaman devient jaguar par un **rite** (proposé : se rouler sur une peau de jaguar, boire le breuvage de la liane) ; **s'il tarde, il ne redevient jamais anthrope** — faiblesse au § 8.
+- **La forme** (Auteur) — le chaman devient jaguar par un **rite** : se rouler sur une peau de jaguar, boire le breuvage de la liane (Auteur, 14/10) ; **s'il tarde, il ne redevient jamais anthrope** — faiblesse au § 8.
 - **Lieux** (Auteur) — la **forêt amazonienne**, zone blanche de la carte et domaine des légendes, et les pentes de **Pichao** (Machu Picchu), relié lui aussi à Aix-la-Chapelle.
 - **En jeu** (Auteur) — le bestiaire porte l'uturuncu **perdu dans le jaguar**, bestial ; les chamans qui maîtrisent encore le rite sont des PNJ.
 
 ### Les gardiens de la forêt
 
 - **Auteur** — les **guerriers-jaguars** (*ocēlōtl*) sont, sur Telluris, des **gardiens de la forêt** : le pendant américain des Paladins. Ils gardent les chaussées et les sentiers contre les monstres, vêtus de peaux de jaguar ; **seuls quelques-uns sont de vrais nahuals**, les autres le laissent croire.
-- Proposé : leurs pendants aigles (*cuāuhtli*) gardent le ciel, comme les paladins de Montmartre ; l'aventurier qui voyage par Aix les rencontre comme escorte.
+- **Gardiens-aigles** (Auteur, 14/10) — leurs pendants aigles (*cuāuhtli*) gardent le ciel, comme les paladins de Montmartre ; gardiens-jaguars et aigles escortent les voyageurs venus par Aix.
 
 ## 4. Lycaon d'Arcadie
 
 Ancrages : Ovide, *Métamorphoses* ; Pausanias, *Description de la Grèce* (les fêtes du mont Lycée, où un homme devenu loup ne redevient homme qu'au bout de neuf ans s'il n'a pas goûté de chair humaine).
 
-- **Le récit** (proposé) — Lycaon, roi d'**Arcadie**, veut éprouver un dieu de passage : il lui sert de la **chair anthrope**. Les dieux le changent en loup. Comme Dracula, c'est une **malédiction des dieux** — mais elle ne vaut que pour lui et ceux qui partagent sa faute.
+- **Le festin du dieu** (Auteur, 14/10) — Lycaon, roi d'**Arcadie**, veut éprouver un dieu de passage : il lui sert de la **chair anthrope**. Les dieux le changent en loup. Comme Dracula, c'est une **malédiction des dieux** — mais elle ne vaut que pour lui et ceux qui partagent sa faute.
 - **Être unique** (Auteur) — roi-loup, boss du bestiaire.
-- **Le mont Lycée** (proposé) — des fêtes où l'un des convives devient loup ; s'il s'abstient de chair anthrope neuf ans, il redevient anthrope (faiblesse au § 8).
+- **Écartés** (Auteur, 14/10) : les fêtes du mont Lycée et les cinquante fils de Lycaon. La règle des neuf ans reste sa faiblesse (§ 8).
 
 ## 5. Les Ulfheðnar du Nord
 
 Ancrages : les *ulfheðnar* (« vêtus de loup ») des sagas, cousins des berserkers ; la *Saga des Völsungs* (Sigmund et Sinfjötli trouvent des peaux de loup ensorcelées, deviennent loups dix jours durant ; Sigmund finit par **brûler** les peaux).
 
-- **Sans guerre** (proposé, dans l'esprit de l'Auteur) — ce sont des **chasseurs de monstres** en peau de loup, au service des cités du Nord ; la rage de la peau les rend insensibles à la douleur. Proche de **Reykjavik** et d'**Akureyri**.
+- **Sans guerre** — ce sont des **chasseurs de monstres** en peau de loup, au service de **Reykjavik** et d'**Akureyri** (Auteur, 14/10), contre les monstres de l'île ; la rage de la peau les rend insensibles à la douleur.
 - **La peau est la mue** — qui la revêt devient loup ; brûlée, elle ne sert plus (faiblesse au § 8).
 - **En jeu** (Auteur) — l'**ulfheðinn** du bestiaire est un chasseur que la peau a pris et qui ne reconnaît plus personne.
 
@@ -144,17 +172,17 @@ Ancrages : les *ulfheðnar* (« vêtus de loup ») des sagas, cousins des berser
 Ancrages : le vieux **Thiess de Kaltenbrun**, jugé en Livonie, qui se dit loup-garou et « chien de Dieu » : chaque année, aux nuits de la Sainte-Lucie, de la Saint-Jean et de la Pentecôte, les loups-garous descendent « au bout de la mer » reprendre aux sorciers les semences volées, avec des fouets de fer.
 
 - **Adaptation** (Auteur) — des « **Chiens des dieux** » franchissent **trois nuits par an** un **portail naturel** vers un monde souterrain, au bout de la mer de Livonie, pour reprendre aux sorciers la fertilité volée aux récoltes. **Quel monde, nul ne le sait** (Auteur).
-- **Gardiens** — ce sont des loups-garous **protecteurs** ; ils se battent au **fouet de fer** contre les sorciers aux balais (proposé). Des PNJ, hors bestiaire (Auteur).
-- **Rattachement** (proposé) — Livonie, région d'Europe de l'Est ; aucune cité-État n'est encore décrite là-bas.
+- **Gardiens** — ce sont des loups-garous **protecteurs** ; ils se battent au **fouet de fer** contre les sorciers aux balais (Auteur, 14/10). Des PNJ, hors bestiaire (Auteur).
+- **Rattachement** (Auteur, 14/10) — **Riga**, cité-État de Livonie à l'embouchure de la Daugava, **à décrire plus tard** ; les Chiens des dieux vivent dans ses campagnes.
 
 ## 7. Les loups-garous de France
 
 Ancrages : *Bisclavret* de Marie de France (Bretagne : le chevalier qui devient loup trois jours par semaine et cache ses vêtements ; sa femme les fait voler, il reste loup) ; la **Bête du Gévaudan** ; le loup-garou de **Dole** ; le folklore du **« meneur de loups »**.
 
-- **Bisclavret** (Auteur, PNJ) — un chevalier breton qui devient loup et ne peut redevenir anthrope sans ses vêtements. Proposé : un PNJ allié, triste et loyal, qu'on rencontre loup à la cour d'un seigneur qui le garde comme un chien.
-- **`espece:loup_garou`** (Auteur) — le **loup-garou de France** : un anthrope maudit que la pleine lune change en bête (proposé : la mue le prend quand il a « couru le garou » une nuit de pleine lune). Appelé par son nom, ou blessé jusqu'au sang, il redevient anthrope (§ 8).
+- **Bisclavret** (Auteur, PNJ) — un chevalier breton qui devient loup et ne peut redevenir anthrope sans ses vêtements. PNJ allié, triste et loyal, qu'on rencontre **loup, à la cour d'un seigneur breton** qui le garde comme un chien sans savoir qui il est (Auteur, 14/10) ; proposé : une quête pour retrouver ses vêtements.
+- **`espece:loup_garou`** (Auteur) — le **loup-garou de France** : un anthrope maudit que la pleine lune change en bête (Auteur, 14/10 : il doit **courir le garou** — une nuit de pleine lune, courir sept villages avant l'aube ; la malédiction frappe une faute cachée, ou naît d'un pacte avec un sorcier). Appelé par son nom, ou blessé jusqu'au sang, il redevient anthrope (§ 8).
 - **La Bête du Gévaudan** (déjà en jeu, `espece:bete_du_gevaudan`) — proposé : on n'a **jamais su** si c'était un loup-garou, un loup géant ou une autre bête ; des PNJ défendent les trois. Modèle de l'**enquête du rang E** (Auteur).
-- **Enquête du rang E** (Auteur ; scénario proposé, non tranché) — dans un village de France, une bête décime les troupeaux, puis un berger. Les villageois accusent un solitaire. Le dénouement varie : un loup-garou qu'on peut ramener à son nom, un loup géant, ou rien de certain. À écrire dans une demande séparée.
+- **Enquête du rang E** (Auteur ; scénario **validé** le 14/10 ; **écrite** : `docs/lore/personnages/20261014_enquete_du_morvan.md`, Dun-les-Places) — dans un village du **Morvan**, à quelques jours d'Auxerre, pays des meneurs de loups, une bête décime les troupeaux, puis un berger. Les villageois accusent un solitaire. Le dénouement varie : un loup-garou qu'on peut ramener à son nom, un loup géant, ou rien de certain. À écrire dans une demande séparée.
 
 ## 8. Faiblesses par famille (Auteur, 14/10 : toutes validées)
 
@@ -186,7 +214,9 @@ Restent **ouverts par choix de l'Auteur**, comme mystères du monde :
 - **Le loup-garou mort** revient-il en vrykolakas ?
 - **Les tertres** : non datés, comme les autres portails naturels.
 
-Proposés, non tranchés : la faute du clan d'Ossory, le nom du druide, l'origine de Failinis, la cité-État la plus proche de la Livonie, le lieu de l'enquête du rang E.
+- **Ioruaidh**, l'île de Failinis, que nul ne sait situer (Auteur, 14/10).
+
+Proposés, non tranchés : le nom du druide, les galeries de Tepeyollotl sous Teotihuacan, la quête des vêtements de Bisclavret. À écrire dans une demande séparée : **Riga**. L'enquête du Morvan est écrite (14/10).
 
 ## 11. Bestiaire (Auteur, 14/10)
 
