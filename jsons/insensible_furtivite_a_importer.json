@@ -1,0 +1,52 @@
+[
+  {
+    "_id": "espece:fantome",
+    "type": "espece",
+    "nom": "Fantome",
+    "genre": "m",
+    "image": "fantome_transparent.png",
+    "description": "Esprit errant attaché à un lieu ou un objet, oscillant entre tristesse et fureur destructrice.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 5,
+        "max": 15
+      },
+      "R": {
+        "min": 10,
+        "max": 20
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "esprit",
+      "incorporel",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  }
+]

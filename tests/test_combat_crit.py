@@ -196,6 +196,30 @@ def test_cible_qui_a_repere_le_joueur_ne_subit_pas_lattaque_furtive(db, monkeypa
 	assert not res["critique"] and res["dmg"] == 7
 
 
+# ── Tag d'espèce `insensible_furtivite` : la furtivité ne le trompe jamais ──────
+
+def test_insensible_furtivite_repere_des_le_snapshot():
+	from tests._fixtures_magie import espece
+	tag = combat_util.TAG_INSENSIBLE_FURTIVITE
+	assert combat_util.build_monster_snapshot(espece(tags=[tag]), None, 0)["detecte"]
+	assert not combat_util.build_monster_snapshot(espece(), None, 0)["detecte"]
+
+
+def test_insensible_furtivite_garde_le_joueur_repere_quand_il_se_cache():
+	j = joueur_snap("joueur_0", "character:u_1")
+	fantome = monstre_snap("monstre_0", tags=[combat_util.TAG_INSENSIBLE_FURTIVITE],
+						   detecte=True)
+	rat = monstre_snap("monstre_1", detecte=True)
+	doc = combat_doc([j], [fantome, rat])
+	combat_util._activer_furtivite(doc, j, 10)
+	assert fantome["detecte"] and not rat["detecte"]
+	assert not combat_util._attaque_furtive(j, fantome)
+	assert combat_util._cible_joueur(doc, fantome) is j
+	rat["detecte"] = fantome["detecte"] = True
+	combat_util._entrer_en_furtivite(doc)
+	assert fantome["detecte"] and not rat["detecte"]
+
+
 def test_sort_furtif_critique_x4_sans_pa(db, monkeypatch):
 	_force_roll(monkeypatch, 1)
 	j = joueur_snap("joueur_0", "character:u_1", x=0, y=0, toucher_magique=50, furtif=True)

@@ -3440,7 +3440,7 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 		# Tags d'espèce embarqués : predateur/proie pilotent la chasse entre
 		# monstres quand le joueur est furtif et non détecté.
 		"tags": list(espece.get("tags", [])),
-		"detecte": False,
+		"detecte": TAG_INSENSIBLE_FURTIVITE in (espece.get("tags") or []),
 		"xp_reward": xp_reward,
 		"niveau": niveau,   # niveau du profil → pondère le tirage du poids de carcasse
 	}
@@ -3847,7 +3847,7 @@ def _entrer_en_furtivite(combat_doc: dict, bonus_par_perso: dict | None = None) 
 		j["furtif"] = True
 		j["furtivite_bonus"] = int(bonus_par_perso.get(j.get("character_id"), 0) or 0)
 	for m in combat_doc["monstres"]:
-		m["detecte"] = False
+		_oublier_detection(m)
 
 
 # ── Helpers internes ────────────────────────────────────────────────────────
@@ -4955,6 +4955,17 @@ def _deplacement_ia(combat_doc: dict, monstre: dict, cible: dict, grid: dict,
 	return steps, "avance vers"
 
 
+# Tag d'espèce : le monstre perçoit les furtifs (esprit, sens surnaturel) — `detecte`
+# posé dès le snapshot et jamais effacé : ni embuscade, ni coup furtif contre lui.
+TAG_INSENSIBLE_FURTIVITE = "insensible_furtivite"
+
+
+def _oublier_detection(monstre: dict) -> None:
+	"""La furtivité (re)commence : le monstre doit réussir un nouveau jet — sauf s'il
+	est `insensible_furtivite`, qui garde le joueur repéré."""
+	monstre["detecte"] = TAG_INSENSIBLE_FURTIVITE in (monstre.get("tags") or [])
+
+
 def _detection_threshold(monstre: dict, joueur: dict) -> int:
 	"""Seuil du jet de détection d'un joueur furtif (d100, jet ≤ seuil = repéré).
 	Compétence de détection = Vol du monstre, repli Int−10 (créature sans volonté),
@@ -5024,7 +5035,7 @@ def _activer_furtivite(combat_doc: dict, joueur: dict, bonus: int) -> None:
 	joueur["furtif"] = True
 	joueur["furtivite_bonus"] = max(int(joueur.get("furtivite_bonus", 0) or 0), int(bonus))
 	for m in combat_doc["monstres"]:
-		m["detecte"] = False
+		_oublier_detection(m)
 	combat_doc["log"].append({
 		"tour": combat_doc["tour"],
 		"acteur": joueur["nom"],
