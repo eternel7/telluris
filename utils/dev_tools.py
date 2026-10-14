@@ -189,6 +189,15 @@ CATALOGUE = [
 			"régénération idempotente.",
 	},
 	{
+		"id": "gen_insensible_furtivite",
+		"label": "👻 Espèces insensibles à la furtivité",
+		"argv": _py("gen_insensible_furtivite.py"),
+		"ecrit": "Écrit jsons/insensible_furtivite_a_importer.json.",
+		"description": "Ajoute le tag `insensible_furtivite` aux espèces listées (fantôme, spectre, chauves-souris, archanges…) : "
+			"elles repèrent le joueur furtif d'office. Relit le dump le plus récent et "
+			"n'ajoute que le tag : régénération idempotente.",
+	},
+	{
 		"id": "gen_animations_capacites",
 		"label": "🎬 Animations et sons des sorts et compétences",
 		"argv": _py("gen_animations_capacites.py"),

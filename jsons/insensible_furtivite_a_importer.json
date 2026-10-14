@@ -1,0 +1,1296 @@
+[
+  {
+    "_id": "espece:fantome",
+    "type": "espece",
+    "nom": "Fantome",
+    "genre": "m",
+    "image": "fantome_transparent.png",
+    "description": "Esprit errant attaché à un lieu ou un objet, oscillant entre tristesse et fureur destructrice.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 5,
+        "max": 15
+      },
+      "R": {
+        "min": 10,
+        "max": 20
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "esprit",
+      "incorporel",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:spectre",
+    "type": "espece",
+    "nom": "Spectre",
+    "genre": "m",
+    "image": "spectre_transparent.png",
+    "description": "Apparition immatérielle traversant les murs, son contact glacial draine la force vitale.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 15,
+        "max": 25
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 50,
+        "max": 80
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 55
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "esprit",
+      "incorporel",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:banshee",
+    "type": "espece",
+    "nom": "Banshee",
+    "genre": "f",
+    "image": "banshee_transparent.png",
+    "description": "Esprit féminin dont le cri funeste annonce la mort et peut briser l'esprit ou le corps des vivants.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 15,
+        "max": 25
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 55,
+        "max": 85
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "esprit",
+      "incorporel",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:revenant",
+    "type": "espece",
+    "nom": "Revenant",
+    "genre": "m",
+    "image": "revenant_transparent.png",
+    "description": "Esprit vengeur revenu d'entre les morts, hanté par une obsession qui le pousse à traquer les vivants.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "esprit",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:jann",
+    "type": "espece",
+    "nom": "Djinn des Ruines",
+    "genre": "m",
+    "image": "jann_transparent.png",
+    "description": "Esprit tapi dans les cités ensevelies, tour à tour vent de sable, mirage ou murmure.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 25,
+        "max": 45
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "esprit",
+      "elementaire",
+      "magique",
+      "desert",
+      "incorporel",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:chauve_souris",
+    "type": "espece",
+    "nom": "Chauve Souris",
+    "genre": "f",
+    "image": "chauve_souris_transparent.png",
+    "description": "Petit mammifère volant nocturne, se repérant par écholocalisation dans l'obscurité totale.",
+    "base_attributes": {
+      "V": {
+        "min": 13,
+        "max": 15
+      },
+      "F": {
+        "min": 5,
+        "max": 15
+      },
+      "R": {
+        "min": 5,
+        "max": 10
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 15,
+        "max": 25
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "animal",
+      "vol",
+      "nocturne",
+      "proie",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:chauve_souris_geante",
+    "type": "espece",
+    "nom": "Chauve Souris Geante",
+    "genre": "f",
+    "jeton": {
+      "taille": "2x1",
+      "forme": "triangle"
+    },
+    "image": "chauve_souris_geante_transparent.png",
+    "description": "Chiroptère monstrueux assoiffé de sang, ses cris ultrasoniques désorientent ses proies.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "monstre",
+      "vol",
+      "nocturne",
+      "predateur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:ange_de_la_connaissance",
+    "type": "espece",
+    "nom": "Ange de la Connaissance",
+    "genre": "m",
+    "image": "ange_de_la_connaissance_transparent.png",
+    "description": "Messager céleste gardien des savoirs sacrés, son intellect perçoit les vérités cachées de l'univers.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 55,
+        "max": 85
+      },
+      "Int": {
+        "min": 60,
+        "max": 90
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 30,
+        "max": 70
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "vol",
+      "magique",
+      "humanoide",
+      "insensible_furtivite"
+    ],
+    "items": [
+      "item:Baton_canalisateur",
+      "item:Epee_argent",
+      "item:Robe_de_savant",
+      "item:Calotte_cuir_rune",
+      "item:Sandales_moine"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:seraphin",
+    "type": "espece",
+    "nom": "Seraphin",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "seraphin_transparent.png",
+    "description": "Plus haute hiérarchie angélique, entité de lumière pure dont la contemplation seule éblouit les mortels.",
+    "base_attributes": {
+      "V": {
+        "min": 18,
+        "max": 20
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 85,
+        "max": 125
+      },
+      "Ag": {
+        "min": 50,
+        "max": 75
+      },
+      "Vol": {
+        "min": 105,
+        "max": 145
+      },
+      "Int": {
+        "min": 70,
+        "max": 100
+      },
+      "Cha": {
+        "min": 65,
+        "max": 95
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "vol",
+      "boss",
+      "legendaire",
+      "divin",
+      "humanoide",
+      "insensible_furtivite"
+    ],
+    "items": [
+      "item:Epee_une_main_benie",
+      "item:Masse_benie",
+      "item:Bouclier_sacre",
+      "item:Harnois_du_grand_arsenal",
+      "item:Epaulieres_benies",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:avatar",
+    "type": "espece",
+    "nom": "Avatar",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x1",
+      "forme": "rectangle"
+    },
+    "image": "avatar_transparent.png",
+    "description": "Manifestation incarnée d'une puissance divine sur le plan mortel, son pouvoir dépasse toute mesure conventionnelle.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 70,
+        "max": 105
+      },
+      "R": {
+        "min": 70,
+        "max": 105
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 90,
+        "max": 130
+      },
+      "Int": {
+        "min": 60,
+        "max": 90
+      },
+      "Cha": {
+        "min": 55,
+        "max": 85
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "boss",
+      "legendaire",
+      "divin",
+      "humanoide",
+      "insensible_furtivite"
+    ],
+    "items": [
+      "item:Epee_une_main_benie",
+      "item:Morgenstern",
+      "item:Bouclier_sacre",
+      "item:Harnois_du_grand_arsenal",
+      "item:Epaulieres_benies",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates",
+      "item:Bottes_de_plates"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:liche",
+    "type": "espece",
+    "nom": "Liche",
+    "genre": "f",
+    "image": "liche_transparent.png",
+    "description": "Sorcier ayant transcendé la mort par nécromancie, conservant une intelligence redoutable et un pouvoir arcanique immense.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 65,
+        "max": 100
+      },
+      "Int": {
+        "min": 60,
+        "max": 90
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 65
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "magique",
+      "nécromancie",
+      "humanoide",
+      "insensible_furtivite"
+    ],
+    "items": [
+      "item:Sceptre_os",
+      "item:Baton_cornu",
+      "item:dague_rituelle",
+      "item:Robe_noire_capuche",
+      "item:Capuche_noire",
+      "item:Gants_peau_noire"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:roi_liche",
+    "type": "espece",
+    "nom": "Roi Liche",
+    "genre": "m",
+    "image": "roi_liche_transparent.png",
+    "description": "Liche ayant atteint un pouvoir suprême, régnant sur les morts-vivants comme un monarque sur ses sujets.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 30,
+        "max": 50
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 85,
+        "max": 125
+      },
+      "Int": {
+        "min": 75,
+        "max": 110
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "magique",
+      "nécromancie",
+      "boss",
+      "legendaire",
+      "humanoide",
+      "insensible_furtivite"
+    ],
+    "items": [
+      "item:Baguette_ouvragee",
+      "item:Sceptre_os",
+      "item:Baton_cornu",
+      "item:Robe_noire_capuche",
+      "item:Reliquaire_de_thanaturge",
+      "item:Cape_de_plumes_noires",
+      "item:Capuche_noire"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:cerbere",
+    "type": "espece",
+    "nom": "Cerbere",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "cerbere_transparent.png",
+    "description": "Chien tricéphale gardien des enfers, chaque tête mordant avec une rage indépendante.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 45,
+        "max": 75
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "monstre",
+      "infernal",
+      "gardien",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:ammit",
+    "type": "espece",
+    "nom": "Ammit, la Dévoreuse",
+    "genre": "f",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "ammit_transparent.png",
+    "description": "Gueule de crocodile, garrot de lion, croupe d'hippopotame : elle rôde dans les salles de jugement des nécropoles et dévore le cœur des indignes.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 55,
+        "max": 85
+      },
+      "Ag": {
+        "min": 25,
+        "max": 40
+      },
+      "Vol": {
+        "min": 50,
+        "max": 75
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 55
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "gardien",
+      "predateur",
+      "legendaire",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:archange_de_l_ordre",
+    "type": "espece",
+    "nom": "Archange de l Ordre",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x1",
+      "forme": "triangle"
+    },
+    "image": "archange_de_l_ordre_transparent.png",
+    "description": "Haut commandant des armées célestes, garant de l'équilibre cosmique et de la discipline divine.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 60,
+        "max": 90
+      },
+      "R": {
+        "min": 60,
+        "max": 90
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 75,
+        "max": 110
+      },
+      "Int": {
+        "min": 50,
+        "max": 75
+      },
+      "Cha": {
+        "min": 50,
+        "max": 80
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "vol",
+      "boss",
+      "legendaire",
+      "humanoide",
+      "insensible_furtivite"
+    ],
+    "items": [
+      "item:Epee_une_main_benie",
+      "item:Masse_benie",
+      "item:Arc_long",
+      "item:Bouclier_sacre",
+      "item:Cotte_mailles_benie",
+      "item:Epaulieres_benies",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:archange_du_savoir",
+    "type": "espece",
+    "nom": "Archange du Savoir",
+    "genre": "m",
+    "image": "archange_du_savoir_transparent.png",
+    "description": "Haut gardien des mystères célestes, sa sagesse dépasse l'entendement mortel et guide les destinées.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 75,
+        "max": 110
+      },
+      "Int": {
+        "min": 75,
+        "max": 105
+      },
+      "Cha": {
+        "min": 50,
+        "max": 80
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "vol",
+      "boss",
+      "legendaire",
+      "magique",
+      "humanoide",
+      "insensible_furtivite"
+    ],
+    "items": [
+      "item:Baguette_ouvragee",
+      "item:Baton_canalisateur",
+      "item:Armure_cuir_runee",
+      "item:Epaulieres_benies",
+      "item:Calotte_cuir_rune"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:demon_majeur_de_la_destinee",
+    "type": "espece",
+    "nom": "Demon Majeur de la Destinee",
+    "genre": "m",
+    "image": "demon_majeur_de_la_destinee_transparent.png",
+    "description": "Seigneur infernal manipulant le fil du destin, ses machinations s'étendent sur des générations entières.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 75,
+        "max": 110
+      },
+      "Int": {
+        "min": 60,
+        "max": 90
+      },
+      "Cha": {
+        "min": 45,
+        "max": 70
+      },
+      "Ch": {
+        "min": 30,
+        "max": 70
+      }
+    },
+    "tags": [
+      "demon",
+      "infernal",
+      "boss",
+      "legendaire",
+      "magique",
+      "humanoide",
+      "insensible_furtivite"
+    ],
+    "items": [
+      "item:Sceptre_os",
+      "item:Baton_cornu",
+      "item:dague_rituelle",
+      "item:Robe_noire_capuche",
+      "item:Cape_de_plumes_noires",
+      "item:Gants_runiques"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:prince_demon",
+    "type": "espece",
+    "nom": "Prince Demon",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "prince_demon_transparent.png",
+    "description": "Souverain des enfers, son autorité s'étend sur des légions entières et sa seule volonté peut déchaîner des guerres.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 85,
+        "max": 130
+      },
+      "R": {
+        "min": 85,
+        "max": 130
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 85,
+        "max": 125
+      },
+      "Int": {
+        "min": 55,
+        "max": 85
+      },
+      "Cha": {
+        "min": 45,
+        "max": 75
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "demon",
+      "infernal",
+      "boss",
+      "legendaire",
+      "humanoide",
+      "insensible_furtivite"
+    ],
+    "items": [
+      "item:Da_dao",
+      "item:Morgenstern",
+      "item:Talwar",
+      "item:Pavois",
+      "item:Harnois_du_grand_arsenal",
+      "item:Epaulieres_acier_gravees",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates",
+      "item:Bottes_de_plates"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:bete_du_gevaudan",
+    "type": "espece",
+    "nom": "Bête du Gévaudan",
+    "genre": "f",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "bete_du_gevaudan_transparent.png",
+    "description": "Canidé monstrueux du folklore français, semblable à un loup démesuré à la fourrure brun roux striée d'une bande noire sur le dos. D'une rapidité et d'une ruse insaisissables, elle échappe à toutes les chasses organisées contre elle.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 35,
+        "max": 60
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 25,
+        "max": 45
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "rapide",
+      "predateur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:bete_de_l_apocalypse",
+    "type": "espece",
+    "nom": "Bete de l Apocalypse",
+    "genre": "f",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "bete_de_l_apocalypse_transparent.png",
+    "description": "Entité cataclysmique annonçant la fin des temps, sa puissance dépasse l'entendement des mortels.",
+    "base_attributes": {
+      "V": {
+        "min": 8,
+        "max": 10
+      },
+      "F": {
+        "min": 110,
+        "max": 160
+      },
+      "R": {
+        "min": 105,
+        "max": 155
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 110,
+        "max": 150
+      },
+      "Int": {
+        "min": 50,
+        "max": 80
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 70,
+        "max": 105
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "boss",
+      "cataclysme",
+      "predateur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:grootslang",
+    "type": "espece",
+    "nom": "Grootslang",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "grootslang_transparent.png",
+    "description": "Le « grand serpent » des légendes du Richtersveld, en Afrique australe : un colosse au corps d'éléphant prolongé d'une longue queue de serpent. On raconte qu'aux premiers temps, les dieux façonnèrent une créature trop forte et trop rusée, puis la séparèrent en éléphant et en serpent ; une seule leur aurait échappé. Il se terre au fond d'une caverne dont nul n'a vu le fond, le Trou des Merveilles, qu'on dit tapissé de diamants. Il y attire les éléphants pour les dévorer et convoite les pierres précieuses : plus d'un voyageur aurait racheté sa vie en lui offrant des gemmes.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 70,
+        "max": 110
+      },
+      "R": {
+        "min": 70,
+        "max": 105
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 35,
+        "max": 60
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 70
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "reptile",
+      "souterrain",
+      "predateur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:boukhnoun",
+    "type": "espece",
+    "nom": "Boukhnoun",
+    "genre": "m",
+    "image": "boukhnoun_transparent.png",
+    "description": "Ombre bossue des ravins, on l'entend renifler avant de la voir ; la peur des bergers après le couchant.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 30,
+        "max": 45
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 40,
+        "max": 60
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 15,
+        "max": 30
+      }
+    },
+    "tags": [
+      "monstre",
+      "nocturne",
+      "terreur",
+      "furtif",
+      "predateur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:fauves",
+    "type": "espece",
+    "nom": "Fauves",
+    "genre": "m",
+    "pluriel": true,
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "fauves_transparent.png",
+    "description": "Grands félins prédateurs — lions, tigres, panthères — vitesse et puissance combinées.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 30,
+        "max": 50
+      },
+      "R": {
+        "min": 25,
+        "max": 45
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "animal",
+      "predateur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  }
+]
