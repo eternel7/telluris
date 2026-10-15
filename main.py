@@ -2037,8 +2037,12 @@ def admin_simulateur_potentiels(
 			bel = simulateur_util.construire_belligerant({"type": t, "id": did}, _get_doc_local)
 			# UN seul appel : `survie` est le sous-score défensif de potentiel_combat.
 			combat_pot = potentiel_util.potentiel_combat(bel["snapshot_reference"], bel["arsenal"])
+			# Espèce : potentiel ÉQUIPEMENT ESPÉRÉ + bonus humanoïde compris (même valeur que le
+			# plancher des épreuves de rang) ; la survie reste celle du spécimen nu.
+			total = (potentiel_util.potentiel_espece(did, None, _get_doc_local)["total"]
+					 if t == "espece" else combat_pot["total"])
 			potentiels[did] = {
-				"potentiel_combat": combat_pot["total"],
+				"potentiel_combat": total,
 				"potentiel_survie": combat_pot["survie"],
 				"potentiel_support": potentiel_util.potentiel_support(
 					bel["snapshot_reference"], bel["arsenal"])["total"],

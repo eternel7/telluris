@@ -393,6 +393,17 @@ QUETE_CHASSE_PROBA_RANG: float = 0.5
 # haut demande la guilde d'une autre cité. ⚠️ Valeur hors de recrutement.RANGS ⇒ plus aucune
 # promotion nulle part (symptôme bruyant, préféré à un plafond silencieusement trop permissif).
 RANG_GUILDE_MAX_DEFAUT: str = "D"
+# PLANCHER DE PUISSANCE de la cible d'une épreuve de rang : rang VISÉ → `potentiel_combat`
+# minimum de l'espèce sous son profil résolu, ÉQUIPEMENT ESPÉRÉ et bonus humanoïde compris
+# (`potentiel.potentiel_espece`, la colonne de /admin/table). Une cible sous le plancher est
+# écartée ; plus aucune ⇒ pas d'épreuve (fail-closed). Rang absent ⇒ aucun plancher. Calibré
+# sur le dump du 2026-10-13 : à Auxerre, le grade max (`combattant`) va de 8 (écureuil) à 57
+# (grand sanglier) — E garde loup/sanglier/cerf/gobelin armé/grand sanglier, D le seul grand
+# sanglier ; au-delà, ≈ quartiles et queue du bestiaire sans profil (Q3 108, P90 179, P99 463),
+# car ces rangs exigent le bestiaire d'autres cités.
+QUETE_RANG_POTENTIEL_MIN: dict[str, float] = {
+	"E": 25.0, "D": 50.0, "C": 105.0, "B": 175.0, "A": 250.0, "S": 400.0, "S+": 600.0,
+}
 
 # ── Focalisation ─────────────────────────────────────────────────────────────────
 # Le personnage peut se focaliser sur une quête active : les tirages aléatoires sont
@@ -1005,6 +1016,7 @@ def current_world_variables() -> dict:
 		"QUETE_CHASSE_XP_FACTEUR": QUETE_CHASSE_XP_FACTEUR,
 		"QUETE_CHASSE_PROBA_RANG": QUETE_CHASSE_PROBA_RANG,
 		"RANG_GUILDE_MAX_DEFAUT": RANG_GUILDE_MAX_DEFAUT,
+		"QUETE_RANG_POTENTIEL_MIN": dict(QUETE_RANG_POTENTIEL_MIN),
 		"FOCUS_EVENEMENT_MULT": FOCUS_EVENEMENT_MULT,
 		"FOCUS_CIBLE_MULT": FOCUS_CIBLE_MULT,
 		"SORT_COUT_COEFF": SORT_COUT_COEFF,
@@ -1294,6 +1306,17 @@ def load_world_variables() -> dict:
 	QUETE_CHASSE_XP_FACTEUR = float(v.get("QUETE_CHASSE_XP_FACTEUR", QUETE_CHASSE_XP_FACTEUR))
 	QUETE_CHASSE_PROBA_RANG = float(v.get("QUETE_CHASSE_PROBA_RANG", QUETE_CHASSE_PROBA_RANG))
 	RANG_GUILDE_MAX_DEFAUT  = str(v.get("RANG_GUILDE_MAX_DEFAUT", RANG_GUILDE_MAX_DEFAUT))
+	# Dict MUTÉ EN PLACE ; valeur illisible écartée (ce rang perd son plancher) plutôt que de
+	# faire tomber le chargement.
+	if isinstance(v.get("QUETE_RANG_POTENTIEL_MIN"), dict):
+		planchers = {}
+		for rang, seuil in v["QUETE_RANG_POTENTIEL_MIN"].items():
+			try:
+				planchers[str(rang)] = float(seuil)
+			except (TypeError, ValueError):
+				continue
+		QUETE_RANG_POTENTIEL_MIN.clear()
+		QUETE_RANG_POTENTIEL_MIN.update(planchers)
 
 	FOCUS_EVENEMENT_MULT = float(v.get("FOCUS_EVENEMENT_MULT", FOCUS_EVENEMENT_MULT))
 	FOCUS_CIBLE_MULT     = float(v.get("FOCUS_CIBLE_MULT", FOCUS_CIBLE_MULT))

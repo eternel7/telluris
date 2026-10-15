@@ -125,7 +125,10 @@ def _snapshot_median(espece: dict, profil: dict | None) -> dict:
 	doivent pas changer d'un run à l'autre) : le tirage du profil est remplacé par le
 	MILIEU de son modificateur — même clamp que roll_monster_stats (randint(mid, mid)
 	est déterministe), sans dupliquer la formule. Sans profil, build_monster_snapshot
-	prend déjà le point médian de l'espèce."""
+	prend déjà le point médian de l'espèce.
+	⚠️ Humanoïde NU (`equiper=False`) : son équipement est TIRÉ au hasard en jeu, il n'a rien
+	à faire dans une référence déterministe — les potentiels le comptent en espérance
+	(`potentiel.potentiel_espece`), le paperdoll l'habille ensuite (`_equiper_snapshot`)."""
 	profil_median = None
 	if profil:
 		mods = {}
@@ -133,7 +136,7 @@ def _snapshot_median(espece: dict, profil: dict | None) -> dict:
 			milieu = (int(borne.get("min", 0)) + int(borne.get("max", 0))) // 2
 			mods[caract] = {"min": milieu, "max": milieu}
 		profil_median = {**profil, "attributs_modifier": mods}
-	return _normaliser_snapshot(combat.build_monster_snapshot(espece, profil_median, 0))
+	return _normaliser_snapshot(combat.build_monster_snapshot(espece, profil_median, 0, equiper=False))
 
 
 # ── Stats FORCÉES (overlay JSON de l'écran) ──────────────────────────────────────────
@@ -489,7 +492,7 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = T
 			if not espece_equipable(espece):
 				raise ValueError(
 					f"{espece.get('nom', doc_id)} n'est pas humanoïde : rien à équiper")
-			nu = (_normaliser_snapshot(combat.build_monster_snapshot(espece, profil, 0))
+			nu = (_normaliser_snapshot(combat.build_monster_snapshot(espece, profil, 0, equiper=False))
 				  if borne else _snapshot_median(espece, profil))
 			equipement = normaliser_slots_equipes(
 				spec.get("slots"), get_doc_fn, nu.get("caracts_base") or {})
@@ -505,7 +508,9 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = T
 				# potentiels doivent décrire ce qui est simulé, pas le médian.
 				# La référence porte les mêmes stats forcées : les potentiels doivent
 				# décrire ce qui est simulé.
-				"snapshot_reference": (fabrique() if borne
+				# Humanoïde NU dans les deux cas (cf. `_snapshot_median`).
+				"snapshot_reference": (_fini(combat.build_monster_snapshot(espece, profil, 0, equiper=False))
+									   if borne
 									   else _fini(_snapshot_median(espece, profil))),
 				# Route servable de l'image — c'est le SERVEUR qui sait où elle vit
 				# (mount /monsters), le client ne fait que la rendre.

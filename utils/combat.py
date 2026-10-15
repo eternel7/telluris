@@ -3267,6 +3267,19 @@ def des_cc_espece(espece: dict) -> int:
 	return max(1, int(character_stats.MONSTRE_DES_CC_NATURELS or 1))
 
 
+def items_equipables_monstre(espece: dict) -> list:
+	"""`[(item_id, item_doc)]` que cette espèce PEUT porter : ses `items` dont le doc existe et
+	est une arme ou une armure. SOURCE UNIQUE de « ce qu'un monstre porte » — le tirage
+	(`roll_monster_equipment`) et l'espérance d'équipement des potentiels
+	(`potentiel.potentiel_espece`) lisent la même règle."""
+	out = []
+	for item_id in (str(i) for i in (espece or {}).get("items") or [] if i):
+		item = get_doc(item_id)
+		if item and item.get("categorie") in ("arme", "armure"):
+			out.append((item_id, item))
+	return out
+
+
 def roll_monster_equipment(espece: dict) -> dict:
 	"""Tire l'équipement d'un monstre HUMANOÏDE parmi `espece['items']` : un jet
 	INDÉPENDANT par item éligible (world-var `MONSTRE_EQUIPEMENT_PROBA`), affecté à un
@@ -3276,18 +3289,14 @@ def roll_monster_equipment(espece: dict) -> dict:
 	(`liberer_pour_deux_mains`). Renvoie `{slot: item_id}` (chaîne, jamais {item, poids}
 	: pas d'exemplaire personnalisé pour un monstre). Vide ⇒ armure naturelle + mains
 	nues, à la lettre — c'est le repli de `build_monster_snapshot`."""
-	items = [str(i) for i in (espece or {}).get("items") or [] if i]
-	if not items:
+	pool = items_equipables_monstre(espece)
+	if not pool:
 		return {}
-	pool = list(items)
 	random.shuffle(pool)
 	proba = character_stats.MONSTRE_EQUIPEMENT_PROBA
 	slots: dict[str, str] = {}
 	occupied: set[str] = set()
-	for item_id in pool:
-		item = get_doc(item_id)
-		if not item or item.get("categorie") not in ("arme", "armure"):
-			continue
+	for item_id, item in pool:
 		if random.random() >= proba:
 			continue
 		candidats = [s for s in (item.get("slots") or []) if s not in occupied]
@@ -3331,11 +3340,14 @@ def roll_monster_sorts(espece: dict, niveau: int) -> list[str]:
 	return [s["id"] for s in random.sample(pool, x)]
 
 
-def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
+def build_monster_snapshot(espece: dict, profil: dict | None, idx: int, equiper: bool = True) -> dict:
 	"""Snapshot d'UN monstre (stats dérivées + XP) pour un profil donné. `profil is None`
 	→ repli sur le point médian de l'espèce (niveau 1). Extrait de la boucle
 	d'`instantiate_monsters` pour pouvoir reconstruire un monstre à profil FORCÉ (quête de
-	chasse : l'élite recherchée) sans dupliquer la dérivation des stats."""
+	chasse : l'élite recherchée) sans dupliquer la dérivation des stats.
+	`equiper=False` saute le TIRAGE d'équipement d'un humanoïde (il reste nu) : le snapshot de
+	référence des potentiels doit être déterministe — l'équipement y est compté en espérance
+	(`potentiel.potentiel_espece`)."""
 	if profil:
 		base_stats = roll_monster_stats(espece, profil)
 		niveau = profil.get("niveau", 1)
@@ -3351,7 +3363,7 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 	equipment = EquipmentBonus()
 	attaque_profils = None
 	if is_humanoide:
-		slots_monstre = roll_monster_equipment(espece)
+		slots_monstre = roll_monster_equipment(espece) if equiper else {}
 		if slots_monstre:
 			equipment = recompute_equipment_bonus(slots_monstre)
 		attaque_profils = _weapon_attacks({"slots": slots_monstre}, base_stats)
