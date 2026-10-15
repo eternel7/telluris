@@ -198,6 +198,15 @@
 		   `buildLocationslist` ne passe, et par lui quand il n'y a aucun lieu : la liste a
 		   toujours la hauteur d'une ligne, le passage 0 → 1 lieu ne fait plus sauter la sidebar. */
 		.sub-loc-btn.sub-loc-vide { visibility: hidden; }
+		/* Récolte / Cap 🧭 : dépliage en hauteur + fondu (`_basculerDepliable`). Rendu ouvert
+		   par Jinja au chargement : aucune animation à l'arrivée, seulement en cours de jeu. */
+		.bloc-depliable {
+			display: grid; grid-template-rows: 0fr; opacity: 0;
+			transition: grid-template-rows .25s ease, opacity .25s ease;
+		}
+		.bloc-depliable.ouvert { grid-template-rows: 1fr; opacity: 1; }
+		.bloc-depliable > .bloc-depliable-corps { overflow: hidden; min-height: 0; }
+		@media (prefers-reduced-motion: reduce) { .bloc-depliable { transition: none; } }
 
 		/* 4. SECTION GESTION DU PERSONNAGE */
 		.character-panel {
@@ -1594,11 +1603,21 @@
 			width: calc(var(--cols) * var(--cell-w));
 			height: calc(var(--rows) * var(--cell-h));
 			max-width: none;
-			transition: transform var(--map-anim, 600ms) ease-out;
 			will-change: transform;
+			/* RÉVÉLATION : invisible jusqu'à ce que l'image soit chargée et la mise en page posée
+			   (`.carte-revelee`, cf. `_revelerCarte`), puis fondu sur place. */
+			opacity: 0;
+			transition: opacity 0.5s ease-out;
+		}
+		.viewport.carte-revelee img#bg-image, .viewport.carte-revelee #carte-calque { opacity: 1; }
+		/* Le glissement n'existe QUE pendant un pas (`.carte-glisse`, posée par `_ecrireCarte`).
+		   ⚠️ Jamais en permanence : `--cell` suit la taille de la zone (cq*), qui bouge pendant le
+		   chargement — la caméra traversait alors la carte jusqu'au joueur à l'arrivée. */
+		.viewport.carte-glisse img#bg-image, .viewport.carte-glisse #carte-calque {
+			transition: transform var(--map-anim, 600ms) ease-out, opacity 0.5s ease-out;
 		}
 		@media (prefers-reduced-motion: reduce) {
-			img#bg-image, #carte-calque { transition: none; }
+			.viewport img#bg-image, .viewport #carte-calque { transition: none; }
 		}
 		/* Sous le jeton (10) et le pavé (20) ; n'intercepte rien (survol de la carte). */
 		#carte-calque { z-index: 5; pointer-events: none; }
@@ -2032,8 +2051,18 @@
 					{% endfor %}
 				</ul>
 				{% endif %}
-				<section id="recolte-action"></section>
-				<section id="guidage-action"></section>
+				{# Récolte et Cap 🧭 : premier état rendu ICI (rien ne surgit au chargement), puis tenu
+				   par `_refreshRecolte` / `_refreshGuidage`, qui DÉPLIENT/REPLIENT le bloc
+				   (`_basculerDepliable`) au lieu de le faire apparaître d'un coup. Textes = miroirs
+				   de ces deux fonctions. #}
+				{% set r = ressource_recoltable %}
+				<section id="recolte-action" class="bloc-depliable{% if r %} ouvert{% endif %}"{% if not r %} inert{% endif %}><div class="bloc-depliable-corps">
+					{%- if r %}<h3>Récolte</h3><ul class="sub-locations-list"><li><button class="sub-loc-btn" onclick="recolterRessource()">{% if r.a_couper %}🪓 Abattre {{ r.nom }}{% else %}{{ r.icon or '🌿' }} Récolter {{ r.nom }}{% endif %}</button></li></ul>{% endif -%}
+				</div></section>
+				{% set g = guidage %}
+				<section id="guidage-action" class="bloc-depliable{% if g %} ouvert{% endif %}"{% if not g %} inert{% endif %}><div class="bloc-depliable-corps">
+					{%- if g %}<h3>🧭 Cap : {{ g.cible_nom }}</h3><div class="q-desc" style="padding:0 4px">{% if g.injoignable %}aucun chemin connu 😕{% elif not g.direction %}prenez le passage → <strong>{{ g.etape_nom }}</strong>{% else %}prochaine étape : <strong>{{ g.etape_nom }}</strong>{% endif %}</div>{% endif -%}
+				</div></section>
 				<h3 id="sub-locations-title">Lieux</h3>
 				<ul id="sub-locations-list-id" class="sub-locations-list">
 					<li aria-hidden="true"><button type="button" class="sub-loc-btn sub-loc-vide" disabled tabindex="-1">&nbsp;</button></li>
@@ -3531,9 +3560,23 @@
 		if (!el) return;
 		const r = _ressourceRecoltable;
 		const label = r ? (r.a_couper ? `🪓 Abattre ${r.nom}` : `${r.icon || '🌿'} Récolter ${r.nom}`) : '';
-		el.innerHTML = r
+		_basculerDepliable(el, r
 			? `<h3>Récolte</h3><ul class="sub-locations-list"><li><button class="sub-loc-btn" onclick="recolterRessource()">${label}</button></li></ul>`
-			: '';
+			: '');
+	}
+	// Bloc de sidebar qui se DÉPLIE (`.bloc-depliable`) au lieu de surgir : la liste des Lieux
+	// glisse au lieu de sauter. Vide → replié, l'ancien contenu reste le temps du repli
+	// (`inert` : plus cliquable ni focusable). Même contenu → rien ne bouge.
+	function _basculerDepliable(el, html) {
+		const corps = el.querySelector('.bloc-depliable-corps') || el;
+		if (html) {
+			if (corps.innerHTML !== html) corps.innerHTML = html;
+			el.classList.add('ouvert');
+			el.inert = false;
+		} else {
+			el.classList.remove('ouvert');
+			el.inert = true;
+		}
 	}
 	function _majProprietesOffre(offre) {
 		const li = document.getElementById('prop-offre-li');
@@ -3573,12 +3616,12 @@
 		const el = document.getElementById('guidage-action');
 		if (!el) return;
 		const g = _guidage;
-		if (!g) { el.innerHTML = ''; return; }
+		if (!g) { _basculerDepliable(el, ''); return; }
 		let detail;
 		if (g.injoignable) detail = 'aucun chemin connu 😕';
 		else if (!g.direction) detail = `prenez le passage → <strong>${g.etape_nom}</strong>`;
 		else detail = `prochaine étape : <strong>${g.etape_nom}</strong>`;
-		el.innerHTML = `<h3>🧭 Cap : ${g.cible_nom}</h3><div class="q-desc" style="padding:0 4px">${detail}</div>`;
+		_basculerDepliable(el, `<h3>🧭 Cap : ${g.cible_nom}</h3><div class="q-desc" style="padding:0 4px">${detail}</div>`);
 	}
 	async function _postFocaliser(type, cible) {
 		try {
@@ -3676,10 +3719,38 @@
 	// (carte de pays) — (la transition `--map-anim` porte sur sa
 	// valeur CALCULÉE). Réécrire la MÊME valeur ne relance aucune transition — c'est ce
 	// qui rend la confirmation serveur visuellement gratuite quand la prédiction était juste.
+	// Le glissement n'est armé que le temps d'un pas (`.carte-glisse`) : hors pas, tout
+	// changement de `--cell` (chargement, redimensionnement) place la carte SANS animation.
+	let _carteGlisseTimer = null;
 	function _ecrireCarte(x, y) {
+		const vue = document.getElementById('swipe-zone');
+		if (vue) {
+			vue.classList.add('carte-glisse');
+			clearTimeout(_carteGlisseTimer);
+			const ms = parseFloat(getComputedStyle(root).getPropertyValue('--map-anim')) || 600;
+			_carteGlisseTimer = setTimeout(() => vue.classList.remove('carte-glisse'), ms + 100);
+		}
 		root.style.setProperty('--x', x);
 		root.style.setProperty('--y', y);
 	}
+	// Arrivée sur la carte : AUCUN mouvement — l'image apparaît en fondu, déjà centrée sur le
+	// joueur, une fois chargée et la mise en page posée (deux frames : la sidebar remplie).
+	(function _revelerCarte() {
+		const vue = document.getElementById('swipe-zone');
+		const img = document.getElementById('bg-image');
+		if (!vue || !img) return;
+		let fait = false;
+		const reveler = () => {
+			if (fait) return;
+			fait = true;
+			requestAnimationFrame(() => requestAnimationFrame(() => vue.classList.add('carte-revelee')));
+		};
+		if (img.complete) reveler();
+		else {
+			img.addEventListener('load', reveler, {once: true});
+			img.addEventListener('error', reveler, {once: true});   // jamais de carte noire à vie
+		}
+	})();
 	// Récit d'une chute de fin de vol (`vol.chute_exploration` : un dé par case jusqu'au sol,
 	// D20 depuis une falaise, D6 à la nage). ⚠️ showToast écrit en textContent.
 	function _texteChute(c) {
