@@ -65,6 +65,13 @@ RANG_E = {"rang_min": {"cite": CITE, "rang": RANG}}
 # La clairière s'ouvre tant que la tête reste À RAPPORTER (cf. en-tête : pas de
 # `combat_gagne`). Les barrières n'ont pas de filtre `id` : la collecte se reconnaît à sa cible.
 QUETE_A_FAIRE = {"quete_active": {"types": ["collect"], "cible": TETE, "objectif_atteint": False}}
+
+# Les villageois ne parlent de l'enquête que quête EN COURS (Auteur, 15/10) : AVANT, un simple
+# bonjour ; APRÈS, ce que la quête a changé. La conjonction des deux `attendu: false` dit
+# « jamais confiée » (une quête abandonnée y retombe) — `pnj.CONDITIONS_QUETE`.
+AVANT = {"quete_active": {"id": QUETE, "attendu": False}, "quete_reussie": {"id": QUETE, "attendu": False}}
+EN_COURS = {"quete_active": {"id": QUETE}}
+APRES = {"quete_reussie": {"id": QUETE}}
 CLAIRIERE_GAGNEE = {"combat_gagne": {"lieu": CLAIRIERE}}
 CLAIRIERE_INTACTE = {"combat_gagne": {"lieu": CLAIRIERE, "attendu": False}}
 
@@ -227,20 +234,25 @@ def meneuse() -> dict:
 			"noeud_depart": "accueil",
 			"noeuds": {
 				"accueil": {
-					"texte": "À la lisière, là où le hameau s'arrête et où les grands chênes commencent, une vieille elfe aux cheveux blancs dénoués est assise sur une souche, une musette sur les genoux. Entre les arbres, derrière elle, deux paires d'yeux luisent sans bouger. Elle ne les regarde pas. « Tu cherches la bête. Ils te l'ont tous dit avant de te dire bonjour. »",
+					"texte": "À la lisière, là où le hameau s'arrête et où les grands chênes commencent, une vieille elfe aux cheveux blancs dénoués est assise sur une souche, une musette sur les genoux. Entre les arbres, derrière elle, deux paires d'yeux luisent sans bouger. Elle ne les regarde pas. « Bonjour, voyageur. N'aie pas peur de ceux-là : ils sont avec moi. »",
 					"choix": [
-						{"id": "loups", "label": "« Ces loups vous suivent ? »", "next": "loups"},
+						{"id": "bonjour", "label": "« Bonjour. Vous allez bien ? »", "condition": AVANT, "next": "bonjour"},
+						{"id": "loups", "label": "« Ces loups vous suivent ? »", "condition": EN_COURS, "next": "loups"},
+						# `acces_ouvrable` suppose la collecte en cours (barrière de la clairière).
 						{"id": "guilde", "label": "« La Guilde m'envoie. Où la bête se couche-t-elle ? »",
 						 "condition": {"acces_ouvrable": True}, "next": "seuil"},
-						{"id": "clairiere", "label": "« Où se couche la bête ? »",
-						 "condition": {"acces_ouvrable": False, "acces_menace": True}, "next": "pas_la_guilde"},
+						# `acces_libere` = la clairière est gagnée (état du MONDE), avant même le rapport.
 						{"id": "apres", "label": "« La bête est morte. »",
 						 "condition": {"acces_libere": True}, "next": "apres"},
 						{"id": "fin", "label": "(La laisser à sa musette.)", "next": "fin"},
 					],
 				},
+				"bonjour": {
+					"texte": "« Aussi bien qu'une vieille peut aller. » Elle souffle une note légère dans sa musette ; derrière elle, les yeux clignent et disparaissent entre les troncs. « Les bois sont beaux, en cette saison. Reste sur le chemin, et bonne route. »",
+					"choix": [{"id": "fin", "label": "« Bonne journée. »", "next": "fin"}],
+				},
 				"loups": {
-					"texte": "« Ils me suivent quand je joue. » Elle souffle dans la musette, une seule note, aigre et longue ; les yeux, derrière elle, se ferment et se rouvrent. « Les loups de ces bois, je les connais tous, et chacun par son nom. Celle qui mange les moutons de Margot, ce n'est pas un des miens. Elle ne répond pas quand je joue. » Elle repose l'instrument. « Ce qui ne répond pas à la musette, d'habitude, répond à autre chose. »",
+					"texte": "« Tu cherches la bête. Ils te l'ont tous dit avant de te dire bonjour. » Elle tapote sa musette. « Ceux-là me suivent quand je joue. » Elle souffle dans la musette, une seule note, aigre et longue ; les yeux, derrière elle, se ferment et se rouvrent. « Les loups de ces bois, je les connais tous, et chacun par son nom. Celle qui mange les moutons de Margot, ce n'est pas un des miens. Elle ne répond pas quand je joue. » Elle repose l'instrument. « Ce qui ne répond pas à la musette, d'habitude, répond à autre chose. »",
 					"choix": [
 						{"id": "quoi", "label": "« À quoi ? »", "next": "nom"},
 						{"id": "retour", "label": "Revenir.", "next": "accueil"},
@@ -248,10 +260,6 @@ def meneuse() -> dict:
 				},
 				"nom": {
 					"texte": "« À son nom. Son vrai nom, celui qu'on lui a donné avant qu'il coure le garou. » Jacotte vous regarde enfin, et vous comprenez qu'elle ne vous le dira pas. « Ceux qui courent le garou font sept villages avant l'aube, les nuits de pleine lune. Appelle-les par leur nom, ou fais-leur couler trois gouttes de sang, et ils te reviennent. Mais il faut savoir à qui l'on parle. » Elle hausse les épaules. « Et ici, tout le monde croit le savoir. »",
-					"choix": [{"id": "retour", "label": "Revenir.", "next": "accueil"}],
-				},
-				"pas_la_guilde": {
-					"texte": "« Je le sais. » Jacotte caresse le bois de sa musette. « Je ne mène pas les curieux dans les bois la nuit, ni les braves qui veulent voir. Le village a écrit à la Guilde d'Auxerre. Quand la Guilde enverra quelqu'un, je le mènerai. »",
 					"choix": [{"id": "retour", "label": "Revenir.", "next": "accueil"}],
 				},
 				"seuil": {
@@ -287,8 +295,6 @@ def meneuse() -> dict:
 
 
 def bergere() -> dict:
-	reussie = {"quete_reussie": {"id": QUETE}}
-	pas_reussie = {"quete_reussie": {"id": QUETE, "attendu": False}}
 	return {
 		"_id": BERGERE,
 		"type": "pnj",
@@ -301,16 +307,21 @@ def bergere() -> dict:
 			"noeud_depart": "accueil",
 			"noeuds": {
 				"accueil": {
-					"texte": "Devant un enclos aux pieux doublés, une jeune hobbit compte ses moutons, une houlette à la main, un brassard noir au bras. Elle recommence trois fois et trouve trois fois le même compte. « Si vous venez de la Guilde, vous êtes en retard d'un berger. »",
+					"texte": "Devant un enclos aux pieux doublés, une jeune hobbit compte ses moutons, une houlette à la main, un brassard noir au bras. Elle recommence trois fois et trouve trois fois le même compte, puis lève les yeux. « Bonjour. Attention à la barrière, elle ne tient plus que par habitude. »",
 					"choix": [
-						{"id": "bete", "label": "« Vous avez vu la bête ? »", "condition": pas_reussie, "next": "bete"},
-						{"id": "frere", "label": "« Un berger ? »", "condition": pas_reussie, "next": "frere"},
-						{"id": "apres", "label": "« La bête ne reviendra pas. »", "condition": reussie, "next": "apres"},
+						{"id": "bonjour", "label": "« Bonjour. Vous allez bien ? »", "condition": AVANT, "next": "bonjour"},
+						{"id": "frere", "label": "« La Guilde d'Auxerre m'envoie. »", "condition": EN_COURS, "next": "frere"},
+						{"id": "bete", "label": "« Vous avez vu la bête ? »", "condition": EN_COURS, "next": "bete"},
+						{"id": "apres", "label": "« La bête ne reviendra pas. »", "condition": APRES, "next": "apres"},
 						{"id": "fin", "label": "(La laisser à ses moutons.)", "next": "fin"},
 					],
 				},
+				"bonjour": {
+					"texte": "« On fait avec. Les bêtes mangent, l'herbe repousse. » Elle reprend son compte du bout de la houlette. « Bonne route, et refermez bien derrière vous. »",
+					"choix": [{"id": "fin", "label": "« Bonne journée. »", "next": "fin"}],
+				},
 				"frere": {
-					"texte": "« Mon frère. Colin. Il gardait le troupeau d'en haut, il avait seize ans. » Elle serre la houlette. « On l'a trouvé au matin, contre la porte de la bergerie. La porte était arrachée, et les gonds tordus, comme si on avait tiré dessus avec des mains. Un loup n'a pas de mains. »",
+					"texte": "« Alors vous êtes en retard d'un berger. » Sa voix se durcit. « Mon frère. Colin. Il gardait le troupeau d'en haut, il avait seize ans. » Elle serre la houlette. « On l'a trouvé au matin, contre la porte de la bergerie. La porte était arrachée, et les gonds tordus, comme si on avait tiré dessus avec des mains. Un loup n'a pas de mains. »",
 					"choix": [{"id": "retour", "label": "Revenir.", "next": "accueil"}],
 				},
 				"bete": {
@@ -339,16 +350,22 @@ def charbonnier() -> dict:
 			"noeud_depart": "accueil",
 			"noeuds": {
 				"accueil": {
-					"texte": "Un ogre noir de suie décharge des sacs de charbon devant la palissade, sans un regard pour les villageois qui s'écartent sur son passage. Son avant-bras gauche est serré dans un bandage frais. Il vous voit venir, et soupire. « Encore un qui vient voir le loup-garou. »",
+					"texte": "Un ogre noir de suie décharge des sacs de charbon devant la palissade, sans un regard pour les villageois qui s'écartent sur son passage. Son avant-bras gauche est serré dans un bandage frais. Il vous voit venir et hoche la tête. « Bonjour. Écartez-vous de la charrette, les sacs glissent. »",
+					# Pas de branche APRÈS : il a disparu une fois la clairière gagnée (présence du lieu).
 					"choix": [
-						{"id": "accuse", "label": "« On vous accuse, au village. »", "next": "accuse"},
-						{"id": "bras", "label": "« Ce bandage ? »", "next": "bras"},
-						{"id": "nuits", "label": "« Où êtes-vous, les nuits de pleine lune ? »", "next": "nuits"},
+						{"id": "bonjour", "label": "« Bonjour. Vous allez bien ? »", "condition": AVANT, "next": "bonjour"},
+						{"id": "accuse", "label": "« On vous accuse, au village. »", "condition": EN_COURS, "next": "accuse"},
+						{"id": "bras", "label": "« Ce bandage ? »", "condition": EN_COURS, "next": "bras"},
+						{"id": "nuits", "label": "« Où êtes-vous, les nuits de pleine lune ? »", "condition": EN_COURS, "next": "nuits"},
 						{"id": "fin", "label": "(Le laisser à son charbon.)", "next": "fin"},
 					],
 				},
+				"bonjour": {
+					"texte": "« Je vais. » Il hisse un sac sur la pile. « Le charbon ne se vend pas tout seul, et l'hiver vient toujours plus tôt qu'on croit. Bonne route. »",
+					"choix": [{"id": "fin", "label": "« Bon courage. »", "next": "fin"}],
+				},
 				"accuse": {
-					"texte": "« Ils accusent toujours celui qui vit dans les bois. » Il jette un sac sur la pile. « Mon père vivait dans les bois, et on l'accusait aussi. Il est mort dans son lit. » Il vous regarde de haut, de très haut. « Si vous voulez la bête, elle passe par ma clairière. Je l'entends gratter aux meules. C'est pour ça que je ne dors plus. »",
+					"texte": "Il soupire. « Encore un qui vient voir le loup-garou. Ils accusent toujours celui qui vit dans les bois. » Il jette un sac sur la pile. « Mon père vivait dans les bois, et on l'accusait aussi. Il est mort dans son lit. » Il vous regarde de haut, de très haut. « Si vous voulez la bête, elle passe par ma clairière. Je l'entends gratter aux meules. C'est pour ça que je ne dors plus. »",
 					"choix": [{"id": "retour", "label": "Revenir.", "next": "accueil"}],
 				},
 				"bras": {

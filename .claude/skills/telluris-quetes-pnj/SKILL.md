@@ -1,9 +1,43 @@
 ---
 name: telluris-quetes-pnj
-description: Quests, NPCs, dungeons and access gates — guild board and quest engine, transport/hunt/escort quests (incl. generated progeny escorts), NPC dialogue trees and services, the dialogue linter and the /admin/dialogues editor for authored quest offers, gated place access (acces blocks, laissez-passer), dungeons and eradication commissions, resource gathering and zone events, woodcutting, and the intro narrative (utils/quetes.py, transport.py, chasse.py, escorte.py, donjon.py, acces.py, pnj.py, lint_dialogues.py, bois.py, intro.py, routers/quetes.py, routers/pnj.py, jsons/pnj-*.json). Load whenever a request touches a quest, a PNJ or its dialogue JSON, a guard or locked door, a dungeon, table_evenements, harvesting or wood — including French requests such as « écris un dialogue », « quête de transport », « escorte », « un garde bloque l'accès », « laissez-passer », « donjon », « le choix ne s'affiche pas ».
+description: Quests, NPCs, dungeons and access gates — guild board and quest engine, transport/hunt/escort quests (incl. generated progeny escorts), NPC dialogue trees and services, the dialogue linter and the /admin/dialogues editor for authored quest offers, gated place access (acces blocks, laissez-passer), dungeons and eradication commissions, resource gathering and zone events, woodcutting, and the intro narrative (utils/quetes.py, transport.py, chasse.py, escorte.py, donjon.py, acces.py, pnj.py, lint_dialogues.py, bois.py, intro.py, routers/quetes.py, routers/pnj.py, jsons/pnj-*.json). Load whenever a request touches a quest, a PNJ or its dialogue JSON, a guard or locked door, a dungeon, table_evenements, harvesting or wood — including French requests such as « écris une quête », « écris un dialogue », « quête de transport », « escorte », « un garde bloque l'accès », « laissez-passer », « donjon », « le choix ne s'affiche pas ».
 ---
 
 Quêtes, PNJ, barrières d'accès et donjons. Tout ce contenu (docs `pnj:*`, blocs `acces`, `donjon:*`) part par `import-bulk`, un PUT complet (CLAUDE.md §11) ; valeurs à jour dans le dump, docs PNJ exportés dans `jsons/pnj-*.json`.
+
+
+### Écrire une quête — AVANT · PENDANT · APRÈS (règle de l'Auteur, 15/10)
+Toute quête écrite à la main, et **chaque PNJ qu'elle touche** (donneur, receveur, témoins, gardiens), se pense dans **trois états**. Un PNJ qui récite l'enquête avant qu'on la lui ait confiée trahit l'intrigue ; un PNJ qui l'a oubliée après efface ce qu'a fait le joueur.
+
+| État | Condition de choix | Ce que dit le PNJ |
+|---|---|---|
+| AVANT | `{"quete_active": {"id": Q, "attendu": false}, "quete_reussie": {"id": Q, "attendu": false}}` | un bonjour, quelques mots, bonne route — rien de la quête (une quête abandonnée ou ratée retombe ici) |
+| PENDANT | `{"quete_active": {"id": Q}}` | l'enquête : indices, théories, accès |
+| APRÈS | `{"quete_reussie": {"id": Q}}` (gardien : `acces_libere`, état du monde) | ce que la quête a changé |
+
+Référence : `dev/gen_enquete_escolives.py`, `dev/gen_enquete_morvan.py` (constantes `AVANT` / `EN_COURS` / `APRES`).
+
+**Dialogues**
+- **Accueil neutre** : le texte du nœud d'accueil s'affiche dans les trois états, il ne révèle jamais l'intrigue. Ce qui concerne la quête va dans la première réponse filtrée.
+- **Badges ! / ?** : ils dérivent des conditions des choix visibles (`pnj.marque_noeud`). Avant la quête, aucun PNJ tiers n'en porte qui la trahirait ; le vérifier sur le nœud de départ.
+- **Souvenir chez le donneur** : toujours une réplique APRÈS (`escolives_souvenir`, `morvan_souvenir`).
+
+**Garde-fous**
+- **Test des trois états** obligatoire, PNJ par PNJ : choix visibles de l'accueil avant / pendant / après (`pnj._choix_visibles`, modèle `test_les_villageois_ne_parlent_de_l_enquete_que_quete_en_cours`).
+- **Preuve jamais perdue** : un objet tombé au combat peut rester au sol ; la porte se rouvre tant qu'il n'est pas remis (`objectif_atteint: false`, sans `combat_gagne`, cf. Morvan), sinon la quête est bloquée pour toujours.
+- **Butin garanti** : une salle dont le butin sert de preuve ne porte qu'**une** espèce (`instantiate_monsters` tire au hasard dans `especes`).
+  - **Plusieurs monstres ET une preuve garantie** : donjon à ÉTAGES (§ Donjon à étages) — étage 1 à plusieurs espèces, étage 2 à espèce unique, porteur de la preuve. Les deux étages peuvent montrer **la même carte**, mais restent deux docs `lieu:*` distincts (image, `dimensions`, `cells`, `nav` recopiés par le générateur depuis une seule source) : tout s'indexe par l'id de lieu (`battle_maps`, `monstres_de_salle`), et `passages_de_l_etage` ignore une connexion d'un lieu vers lui-même. La sortie vers la surface part de l'étage 2 : seul l'étage qu'on quitte garde son butin (`butin_disponible`). Aucune victoire de salle n'est notée → barrière par `quete_active … objectif_atteint:false`, jamais `combat_gagne`.
+  - Exemples de l'Auteur (15/10), non écrits en jeu :
+    - **Les gardiens d'Irlande** — étage 1 : les villageois qui défendent leurs faoladh (loups-garous protecteurs) ; étage 2 : les faoladh (`espece:faoladh`). L'Irlande vient avec les voyages, donc après le rang A (telluris-lore). Abattre un faoladh sans raison vaut le mauvais œil des villages : le motif de la commission doit rester discutable (doute après).
+    - **La lamie du hameau** — une lamie (vampire, `espece:lamie` — jamais la Lamia du désert, `espece:lhamia`) aimée de son hameau. Étage 1 : les habitants qui la défendent ; étage 2, **même carte** : elle arrive et cherche à venger ceux qui sont tombés. Le soleil la rend inerte, donc le combat a lieu de nuit ; faiblesses de sa lignée : le fer, les chevaux, le soleil.
+    - ⚠️ Aucune espèce d'Anthropes villageois n'existe au bestiaire (dump du 13/10) : il faut créer des `espece:*` neuves, une foule mêlée des cinq Lignées.
+- **Ids de quête vérifiés** : tout `quete:*` cité dans une condition correspond à une offre existante, verrouillé par un test (modèle `test_toute_quete_nommee_est_l_offre`) — un id mal recopié masque un choix sans symptôme (fail-closed).
+
+**Narration** (règles d'écriture : telluris-lore)
+- **« Avant » qui annonce** : le bonjour peut glisser un détail d'ambiance (terre fraîche, brassard noir, aubépine clouée) sans rien dire de l'affaire.
+- **Pendant, des PNJ qui varient** : chaque témoin apporte un indice ou une théorie **différente** (fossoyeur contre guérisseuse) ; jamais deux qui disent la même chose.
+- **Le monde change après** : au moins un signe visible — un PNJ part ou arrive, un lieu apparaît ou disparaît (présence `combat_gagne … attendu:false` du charbonnier, restes du convoi de Milo).
+- **Doute après** : au moins un PNJ garde une théorie contraire ; le mystère n'est jamais tranché.
 
 
 ### Quêtes — guilde + moteur
@@ -102,6 +136,7 @@ Contenu : `dev/gen_enquete_escolives.py` → **un seul** `jsons/enquete_escolive
 - Gautier (bureau d'Auxerre, déjà rang D) offre ET reçoit une quête d'**apport** unique : `item:strigoi` (carcasse au butin de tout Strigoï abattu) → `lieu:escolives` (France (50,21)) → Gaspard le fossoyeur ouvre `lieu:crypte_de_la_necropole_d_escolives` (service `acces`, salle de `donjon:crypte_d_escolives`).
 - Barrière : `quete_active {types:[collect], cible:item:strigoi, objectif_atteint:false}` + `combat_gagne` faux (pas de filtre `id` dans les barrières).
 - ⚠️ **Salle à espèce UNIQUE** (3 Strigoï) : `instantiate_monsters` tire chaque monstre au hasard dans `especes` — un second type pourrait évincer le Strigoï et rendre la preuve introuvable.
+- **Villageois des deux enquêtes** (Escolives, Dun-les-Places) : l'enquête ne se dit que quête EN COURS (`quete_active`), AVANT un simple bonjour (`quete_active` ET `quete_reussie` à `attendu:false`), APRÈS ce qui a changé (`quete_reussie`, ou `acces_libere` pour les gardiens). Delta : `dev/gen_dialogues_villageois_enquetes.py` → `jsons/dialogues_villageois_enquetes_a_importer.json`. Verrouillé par `test_les_villageois_ne_parlent_de_l_enquete_que_quete_en_cours` (×2).
 - ⚠️ `gen_mission_bucherons.py` / `gen_acces_donjon.py` réécrivent Gautier depuis des dumps FIGÉS : importer leur sortie effacerait la quête.
 
 Verrouillé par `tests/test_enquete_escolives.py`.
@@ -207,6 +242,7 @@ Catacombes qu'on descend, tour qu'on gravit : même doc, mêmes salles (`battle_
 - **Pas de condition de sortie** : `_check_victory` ignoré, `fuir` refusé. Action `emprunter` (gratuite) : le **principal** SUR la case, les autres combattants debout en **file continue** derrière lui — chacun adjacent à un autre, de proche en proche (un groupe de 7 s'étire sur 7 cases, diagonale comprise ; principal à terre → la file part de tout combattant debout sur la case) (`passage_franchissable`, exposé en `franchissable` par `annoter_passages`). ⚠️ Jamais « tous à ≤ 1 du passage » : une sortie au fond d'un couloir d'une case n'a qu'une voisine, un groupe de 3 y restait enfermé (verrouillé par `test_un_couloir_en_cul_de_sac_se_franchit_en_file`). Vers un étage : `routers/combat._passer_a_l_etage` → `combat.changer_d_etage` (joueurs/PV/PM/effets conservés, monstres archivés et renumérotés, carcasses laissées en bas, client recharge la page). Vers la surface : `victoire` + `sortie` appliquée par `finalize_combat` (XP, kills, bestiaire sur tous les étages). Défaite : retour au lieu d'origine, sans XP.
 - **Butin d'un étage vidé** : `emprunter` vers un AUTRE étage sans ennemi vivant → sans `attributions`, renvoie `{butin_etage, passage_id}` sans bouger (poids tirés une fois, mémorisés sur `etages.butin_etage`) ; le client ouvre l'overlay de répartition (✕/Échap = rester) et rappelle `emprunter` avec `attributions` (liste vide = tout laisser). Les carcasses vont au `butin_ramasse` du SNAPSHOT (versé au sac par `_finalize_membre` / `_finalize_monture`, toute issue), refus global en surcharge ; le reste demeure à l'étage. La sortie vers la surface garde `butin_disponible` (morts de l'étage courant seulement).
 - ⚠️ Chaque entrée dans un étage retire ses monstres (y compris en y revenant). Aucune `victoire` de salle n'est notée (`salle_gardee` absent).
+- **Même carte sur deux étages** : deux docs `lieu:*` (ids distincts, grille recopiée), chacun avec ses `especes` — technique d'une quête à plusieurs monstres dont la preuve reste garantie (§ Écrire une quête).
 - UI (`renderPassages`, combat_telluris) : un bouton par passage **empruntable maintenant** seulement (à son tour, `franchissable`), dans le **bandeau d'initiative** (`.tour-header`, entre `#initiative-strip` et le 🔊) et non plus dans la barre d'action, où la rangée coûtait une ligne vide. `margin-left: auto` : un bouton qui paraît prend la marge libre sans décaler les badges, et la hauteur du bandeau reste celle des badges (§17) — plus de cale invisible. Bouton = pastille dorée `.passage-btn` (teinte de la case de passage), **icône seule sous 768 px** (nom en `title`/`aria-label`). ⚠️ C'est le passage qui cède la place (`flex: 0 4 auto`), jamais `#initiative-strip` — et pas de `min-width: 0` sur la rangée, qui rognerait la pastille.
 
 Verrouillé par `tests/test_donjon_etages.py`.

@@ -791,11 +791,31 @@
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
-          "texte": "À la lisière, là où le hameau s'arrête et où les grands chênes commencent, une vieille elfe aux cheveux blancs dénoués est assise sur une souche, une musette sur les genoux. Entre les arbres, derrière elle, deux paires d'yeux luisent sans bouger. Elle ne les regarde pas. « Tu cherches la bête. Ils te l'ont tous dit avant de te dire bonjour. »",
+          "texte": "À la lisière, là où le hameau s'arrête et où les grands chênes commencent, une vieille elfe aux cheveux blancs dénoués est assise sur une souche, une musette sur les genoux. Entre les arbres, derrière elle, deux paires d'yeux luisent sans bouger. Elle ne les regarde pas. « Bonjour, voyageur. N'aie pas peur de ceux-là : ils sont avec moi. »",
           "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Bonjour. Vous allez bien ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:la_bete_de_dun_les_places",
+                  "attendu": false
+                }
+              },
+              "next": "bonjour"
+            },
             {
               "id": "loups",
               "label": "« Ces loups vous suivent ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
               "next": "loups"
             },
             {
@@ -805,15 +825,6 @@
                 "acces_ouvrable": true
               },
               "next": "seuil"
-            },
-            {
-              "id": "clairiere",
-              "label": "« Où se couche la bête ? »",
-              "condition": {
-                "acces_ouvrable": false,
-                "acces_menace": true
-              },
-              "next": "pas_la_guilde"
             },
             {
               "id": "apres",
@@ -830,8 +841,18 @@
             }
           ]
         },
+        "bonjour": {
+          "texte": "« Aussi bien qu'une vieille peut aller. » Elle souffle une note légère dans sa musette ; derrière elle, les yeux clignent et disparaissent entre les troncs. « Les bois sont beaux, en cette saison. Reste sur le chemin, et bonne route. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Bonne journée. »",
+              "next": "fin"
+            }
+          ]
+        },
         "loups": {
-          "texte": "« Ils me suivent quand je joue. » Elle souffle dans la musette, une seule note, aigre et longue ; les yeux, derrière elle, se ferment et se rouvrent. « Les loups de ces bois, je les connais tous, et chacun par son nom. Celle qui mange les moutons de Margot, ce n'est pas un des miens. Elle ne répond pas quand je joue. » Elle repose l'instrument. « Ce qui ne répond pas à la musette, d'habitude, répond à autre chose. »",
+          "texte": "« Tu cherches la bête. Ils te l'ont tous dit avant de te dire bonjour. » Elle tapote sa musette. « Ceux-là me suivent quand je joue. » Elle souffle dans la musette, une seule note, aigre et longue ; les yeux, derrière elle, se ferment et se rouvrent. « Les loups de ces bois, je les connais tous, et chacun par son nom. Celle qui mange les moutons de Margot, ce n'est pas un des miens. Elle ne répond pas quand je joue. » Elle repose l'instrument. « Ce qui ne répond pas à la musette, d'habitude, répond à autre chose. »",
           "choix": [
             {
               "id": "quoi",
@@ -847,16 +868,6 @@
         },
         "nom": {
           "texte": "« À son nom. Son vrai nom, celui qu'on lui a donné avant qu'il coure le garou. » Jacotte vous regarde enfin, et vous comprenez qu'elle ne vous le dira pas. « Ceux qui courent le garou font sept villages avant l'aube, les nuits de pleine lune. Appelle-les par leur nom, ou fais-leur couler trois gouttes de sang, et ils te reviennent. Mais il faut savoir à qui l'on parle. » Elle hausse les épaules. « Et ici, tout le monde croit le savoir. »",
-          "choix": [
-            {
-              "id": "retour",
-              "label": "Revenir.",
-              "next": "accueil"
-            }
-          ]
-        },
-        "pas_la_guilde": {
-          "texte": "« Je le sais. » Jacotte caresse le bois de sa musette. « Je ne mène pas les curieux dans les bois la nuit, ni les braves qui veulent voir. Le village a écrit à la Guilde d'Auxerre. Quand la Guilde enverra quelqu'un, je le mènerai. »",
           "choix": [
             {
               "id": "retour",
@@ -946,29 +957,42 @@
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
-          "texte": "Devant un enclos aux pieux doublés, une jeune hobbit compte ses moutons, une houlette à la main, un brassard noir au bras. Elle recommence trois fois et trouve trois fois le même compte. « Si vous venez de la Guilde, vous êtes en retard d'un berger. »",
+          "texte": "Devant un enclos aux pieux doublés, une jeune hobbit compte ses moutons, une houlette à la main, un brassard noir au bras. Elle recommence trois fois et trouve trois fois le même compte, puis lève les yeux. « Bonjour. Attention à la barrière, elle ne tient plus que par habitude. »",
           "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Bonjour. Vous allez bien ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:la_bete_de_dun_les_places",
+                  "attendu": false
+                }
+              },
+              "next": "bonjour"
+            },
+            {
+              "id": "frere",
+              "label": "« La Guilde d'Auxerre m'envoie. »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
+              "next": "frere"
+            },
             {
               "id": "bete",
               "label": "« Vous avez vu la bête ? »",
               "condition": {
-                "quete_reussie": {
-                  "id": "quete:la_bete_de_dun_les_places",
-                  "attendu": false
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places"
                 }
               },
               "next": "bete"
-            },
-            {
-              "id": "frere",
-              "label": "« Un berger ? »",
-              "condition": {
-                "quete_reussie": {
-                  "id": "quete:la_bete_de_dun_les_places",
-                  "attendu": false
-                }
-              },
-              "next": "frere"
             },
             {
               "id": "apres",
@@ -987,8 +1011,18 @@
             }
           ]
         },
+        "bonjour": {
+          "texte": "« On fait avec. Les bêtes mangent, l'herbe repousse. » Elle reprend son compte du bout de la houlette. « Bonne route, et refermez bien derrière vous. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Bonne journée. »",
+              "next": "fin"
+            }
+          ]
+        },
         "frere": {
-          "texte": "« Mon frère. Colin. Il gardait le troupeau d'en haut, il avait seize ans. » Elle serre la houlette. « On l'a trouvé au matin, contre la porte de la bergerie. La porte était arrachée, et les gonds tordus, comme si on avait tiré dessus avec des mains. Un loup n'a pas de mains. »",
+          "texte": "« Alors vous êtes en retard d'un berger. » Sa voix se durcit. « Mon frère. Colin. Il gardait le troupeau d'en haut, il avait seize ans. » Elle serre la houlette. « On l'a trouvé au matin, contre la porte de la bergerie. La porte était arrachée, et les gonds tordus, comme si on avait tiré dessus avec des mains. Un loup n'a pas de mains. »",
           "choix": [
             {
               "id": "retour",
@@ -1032,21 +1066,51 @@
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
-          "texte": "Un ogre noir de suie décharge des sacs de charbon devant la palissade, sans un regard pour les villageois qui s'écartent sur son passage. Son avant-bras gauche est serré dans un bandage frais. Il vous voit venir, et soupire. « Encore un qui vient voir le loup-garou. »",
+          "texte": "Un ogre noir de suie décharge des sacs de charbon devant la palissade, sans un regard pour les villageois qui s'écartent sur son passage. Son avant-bras gauche est serré dans un bandage frais. Il vous voit venir et hoche la tête. « Bonjour. Écartez-vous de la charrette, les sacs glissent. »",
           "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Bonjour. Vous allez bien ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:la_bete_de_dun_les_places",
+                  "attendu": false
+                }
+              },
+              "next": "bonjour"
+            },
             {
               "id": "accuse",
               "label": "« On vous accuse, au village. »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
               "next": "accuse"
             },
             {
               "id": "bras",
               "label": "« Ce bandage ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
               "next": "bras"
             },
             {
               "id": "nuits",
               "label": "« Où êtes-vous, les nuits de pleine lune ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
               "next": "nuits"
             },
             {
@@ -1056,8 +1120,18 @@
             }
           ]
         },
+        "bonjour": {
+          "texte": "« Je vais. » Il hisse un sac sur la pile. « Le charbon ne se vend pas tout seul, et l'hiver vient toujours plus tôt qu'on croit. Bonne route. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Bon courage. »",
+              "next": "fin"
+            }
+          ]
+        },
         "accuse": {
-          "texte": "« Ils accusent toujours celui qui vit dans les bois. » Il jette un sac sur la pile. « Mon père vivait dans les bois, et on l'accusait aussi. Il est mort dans son lit. » Il vous regarde de haut, de très haut. « Si vous voulez la bête, elle passe par ma clairière. Je l'entends gratter aux meules. C'est pour ça que je ne dors plus. »",
+          "texte": "Il soupire. « Encore un qui vient voir le loup-garou. Ils accusent toujours celui qui vit dans les bois. » Il jette un sac sur la pile. « Mon père vivait dans les bois, et on l'accusait aussi. Il est mort dans son lit. » Il vous regarde de haut, de très haut. « Si vous voulez la bête, elle passe par ma clairière. Je l'entends gratter aux meules. C'est pour ça que je ne dors plus. »",
           "choix": [
             {
               "id": "retour",

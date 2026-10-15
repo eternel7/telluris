@@ -1,0 +1,763 @@
+[
+  {
+    "_id": "pnj:fossoyeur_gaspard_fouquet",
+    "type": "pnj",
+    "nom": "Gaspard Fouquet",
+    "race": "nain",
+    "vocation": "guerrier",
+    "portrait": "fossoyeur_Gaspard_Fouquet_nain_m.jpg",
+    "description": "Le fossoyeur d'Escolives, appuyé sur sa pelle au bord des tombes rouvertes.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:crypte_de_la_necropole_d_escolives",
+        "noeuds": {
+          "ouvre": "crypte_ouverte",
+          "refus": "crypte_close"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Au bord de la nécropole, un nain s'appuie sur sa pelle, entre deux tas de terre fraîche. Les sarcophages affleurent l'herbe comme des dos de bêtes endormies. Il vous dévisage sans se presser. « Le bonjour. Vous n'êtes pas d'ici. Gaspard, fossoyeur. »",
+          "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Bonjour. Vous allez bien ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:les_morts_d_escolives",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:les_morts_d_escolives",
+                  "attendu": false
+                }
+              },
+              "next": "bonjour"
+            },
+            {
+              "id": "tombes",
+              "label": "« Ces tombes rouvertes… »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:les_morts_d_escolives"
+                }
+              },
+              "next": "tombes"
+            },
+            {
+              "id": "guilde",
+              "label": "« La Guilde d'Auxerre m'envoie. Ouvrez-moi la crypte. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "next": "seuil"
+            },
+            {
+              "id": "apres",
+              "label": "« Vous dormez, maintenant ? »",
+              "condition": {
+                "acces_libere": true
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(Le laisser à ses tombes.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "bonjour": {
+          "texte": "« Je vais comme va un fossoyeur : je creuse, je couche, je recouvre. » Il essuie son front d'un revers de manche. « Les vignes sont belles, cette année, si vous passez par le coteau. Bonne route à vous. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Bonne journée, Gaspard. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "tombes": {
+          "texte": "« C'est moi qui les ai rouvertes, oui. Personne ne voulait, alors je l'ai fait. » Il crache dans ses mains, comme pour reprendre la pelle, et ne la reprend pas. « Gonflés, qu'ils étaient. Pas un qui avait pourri. Les ongles longs, la peau rose, et du sang aux lèvres, du sang frais, comme s'ils venaient de boire. Et deux tombes vides. Vides, je vous dis, la terre grattée de l'intérieur. » Il désigne du menton une dalle, plus loin, à moitié enfouie. « La nuit, j'entends racler, là-dessous. Dans la crypte. »",
+          "choix": [
+            {
+              "id": "qui",
+              "label": "« À qui étaient les tombes vides ? »",
+              "next": "qui"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "qui": {
+          "texte": "Gaspard regarde longtemps le fond du trou qu'il vient de creuser. « Les deux derniers enterrés. » Il n'en dit pas davantage, et vous comprenez qu'il n'en dira pas davantage. « Il y a des veuves dans ce village. Je ne mets pas de noms sur des tombes vides. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "seuil": {
+          "texte": "Gaspard vous mène jusqu'à la dalle à moitié enfouie, l'arrache de ses deux mains et dévoile un escalier qui s'enfonce dans le noir. Une odeur monte : terre mouillée, fer, et quelque chose de sucré qui donne envie de reculer. « Les sarcophages sont au fond, l'ossuaire derrière l'arche. » Il vous tend une torche. « Je reste en haut. Si c'est vous qui remontez, je vous ouvre. »",
+          "choix": [
+            {
+              "id": "descendre",
+              "label": "Descendre.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "attendre",
+              "label": "« Pas encore. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "crypte_ouverte": {
+          "texte": "Les marches sont glissantes. En bas, la torche n'éclaire que des couvercles repoussés et des os épars. Puis quelque chose bouge entre les sarcophages, à quatre pattes, la tête de travers sur un cou trop long. Un deuxième se déplie derrière lui, puis un troisième, au fond, sous l'arche de l'ossuaire. Ils ont eu des visages. Ils n'en ont plus.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Tirer votre arme.",
+              "next": "fin"
+            }
+          ]
+        },
+        "crypte_close": {
+          "texte": "Gaspard secoue la tête, la main sur sa clef. « Pas maintenant. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Reculer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "« Je dors, oui. » Il tasse la terre d'une tombe du plat de sa pelle, trois fois, comme on frappe à une porte. « Les morts restent couchés. Pour l'instant. » Il lève les yeux vers vous. « Vous direz à la Guilde que le fossoyeur d'Escolives n'avait pas rêvé. La guérisseuse, elle, ne le dira jamais. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Le laisser à ses tombes.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:guerisseuse_ysolde_vernier",
+    "type": "pnj",
+    "nom": "Ysolde Vernier",
+    "race": "elfe",
+    "vocation": "lettre",
+    "portrait": "guerisseuse_Ysolde_Vernier_elfe_f.jpg",
+    "description": "La guérisseuse d'Escolives, entre ses herbes qui sèchent et ses fioles.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Une elfe aux tresses châtaines examine, à la lumière de la fenêtre, une coupe d'eau trouble. Des bouquets d'herbes sèchent au plafond. Elle ne pose pas la coupe pour vous saluer. « Si vous avez de la fièvre, asseyez-vous. Sinon, bonjour, et ne marchez pas sur mes herbes. »",
+          "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Bonjour. Vous allez bien ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:les_morts_d_escolives",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:les_morts_d_escolives",
+                  "attendu": false
+                }
+              },
+              "next": "bonjour"
+            },
+            {
+              "id": "morts",
+              "label": "« La Guilde m'envoie. De quoi meurt-on, à Escolives ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:les_morts_d_escolives"
+                }
+              },
+              "next": "fievre"
+            },
+            {
+              "id": "apres",
+              "label": "« La crypte est vide, désormais. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:les_morts_d_escolives"
+                }
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(La laisser à son travail.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "bonjour": {
+          "texte": "« Assez bien, merci. La saison est chargée, on ne manque jamais de toux ni d'entorses. » Elle lève un instant les yeux vers vous. « Si vous repassez, j'ai un onguent pour les ampoules : les voyageurs en ont toujours. Bonne route. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Merci. Bonne journée. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "fievre": {
+          "texte": "« Vous aussi, vous venez pour les vampires. » Elle ne pose pas la coupe. « On meurt de fièvre. » Elle fait tourner l'eau dans la coupe. « Une fièvre qui assoiffe, qui pâlit, qui vide les gens en quelques nuits. Tous ceux qui sont morts buvaient au puits du bas, celui qu'on a creusé trop près de la nécropole. Regardez cette eau. » Elle vous tend la coupe ; quelque chose y flotte, qui n'est pas de la terre. « Gaspard voit des Strigoï partout depuis qu'il creuse. Moi, je vois un puits souillé et des morts qu'on n'a pas laissés reposer. »",
+          "choix": [
+            {
+              "id": "corps",
+              "label": "« Et les corps qui n'ont pas pourri ? »",
+              "next": "corps"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "corps": {
+          "texte": "« La terre de la nécropole est froide et grasse. Elle garde les corps. » Elle hausse les épaules. « Le sang aux lèvres, un mort en rend souvent. Les ongles ont l'air de pousser parce que la peau se retire. Je l'ai vu cent fois. » Un temps. « Les tombes vides, je ne les explique pas. Mais je n'ai pas besoin d'un vampire pour ne pas savoir quelque chose. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "Ysolde pose enfin sa coupe. « Vous avez tué des choses, en bas. Je ne le nie pas : Gaspard m'a montré le sang sur les marches. » Elle reprend un bouquet d'herbes, le défait brin à brin. « Mais Marthe, la fille du charron, a encore de la fièvre ce matin, et elle n'est jamais descendue dans aucune crypte. Vous avez tué ce qui vivait sous la nécropole. Vous n'avez pas guéri le village. » Elle ne vous regarde plus. « Ce sont peut-être deux choses différentes. C'est peut-être la même. Je ne le saurai qu'en voyant qui tombe malade cet hiver. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(La laisser à son travail.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:veuve_perrine_vaudin",
+    "type": "pnj",
+    "nom": "Perrine Vaudin",
+    "race": "hobbit",
+    "vocation": "lettre",
+    "portrait": "veuve_Perrine_Vaudin_hobbit_f.jpg",
+    "description": "Une veuve d'Escolives, sur le seuil de sa maison, devant une porte où l'on a cloué de l'aubépine.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Sur le seuil d'une maison de pierre blonde, une jeune hobbit en deuil se tient les bras croisés sur son châle. Quelqu'un a cloué une branche d'aubépine en fleur sur sa porte. Pas elle, à en juger par la façon dont elle la regarde. Elle vous salue d'un signe de tête.",
+          "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Bonjour, madame. Vous allez bien ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:les_morts_d_escolives",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:les_morts_d_escolives",
+                  "attendu": false
+                }
+              },
+              "next": "bonjour"
+            },
+            {
+              "id": "aubepine",
+              "label": "« Qui a cloué cette aubépine ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:les_morts_d_escolives"
+                }
+              },
+              "next": "aubepine"
+            },
+            {
+              "id": "apres",
+              "label": "« C'est fini, en bas. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:les_morts_d_escolives"
+                }
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(La laisser.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "bonjour": {
+          "texte": "« On fait aller. Merci de demander. » Elle resserre son châle. « Le lavoir est en bas du chemin, si vous voulez faire boire vos bêtes. Bonne route. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Bonne journée. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "aubepine": {
+          "texte": "« Les voisins. Pour que Jehan ne rentre pas. » Sa voix ne tremble pas. « Jehan, c'était mon mari. Le premier à mourir, alors c'est lui qu'ils accusent. Il est rentré des vignes un soir avec la fièvre, il a eu soif trois jours, et le quatrième il ne s'est pas réveillé. » Elle serre son châle. « Maintenant ils veulent le déterrer et le brûler, avec un pieu dans le cœur. Ils ne le feront pas. Pas tant que je serai devant cette porte. »",
+          "choix": [
+            {
+              "id": "tombe",
+              "label": "« Gaspard a rouvert les tombes… »",
+              "next": "tombe"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "tombe": {
+          "texte": "« Sans me demander. » Elle détourne les yeux vers la nécropole, au bout du chemin. « Je ne suis pas allée voir. Je ne lui ai pas demandé ce qu'il a vu. Si je le lui demande, il me le dira, et je ne pourrai plus jamais ne pas le savoir. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "Perrine vous regarde longtemps, sans décroiser les bras. « Ce que vous avez tué, en bas… » Elle s'arrête. Ses lèvres bougent encore un peu, sans un son. Puis : « Non. Ne me répondez pas. » Elle se retourne, arrache l'aubépine de sa porte d'un seul geste et la jette dans le chemin. « Jehan dort où on l'a couché. C'est tout ce que je veux savoir. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(La laisser.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:meneuse_de_loups_jacotte",
+    "type": "pnj",
+    "nom": "Jacotte",
+    "race": "elfe",
+    "vocation": "chaman",
+    "portrait": "meneuse_de_loups_Jacotte_elfe_f.jpg",
+    "description": "La vieille Jacotte, meneuse de loups, sa musette serrée contre elle au bord du bois.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:clairiere_du_charbonnier",
+        "noeuds": {
+          "ouvre": "clairiere_ouverte",
+          "refus": "clairiere_close"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "À la lisière, là où le hameau s'arrête et où les grands chênes commencent, une vieille elfe aux cheveux blancs dénoués est assise sur une souche, une musette sur les genoux. Entre les arbres, derrière elle, deux paires d'yeux luisent sans bouger. Elle ne les regarde pas. « Bonjour, voyageur. N'aie pas peur de ceux-là : ils sont avec moi. »",
+          "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Bonjour. Vous allez bien ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:la_bete_de_dun_les_places",
+                  "attendu": false
+                }
+              },
+              "next": "bonjour"
+            },
+            {
+              "id": "loups",
+              "label": "« Ces loups vous suivent ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
+              "next": "loups"
+            },
+            {
+              "id": "guilde",
+              "label": "« La Guilde m'envoie. Où la bête se couche-t-elle ? »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "next": "seuil"
+            },
+            {
+              "id": "apres",
+              "label": "« La bête est morte. »",
+              "condition": {
+                "acces_libere": true
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(La laisser à sa musette.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "bonjour": {
+          "texte": "« Aussi bien qu'une vieille peut aller. » Elle souffle une note légère dans sa musette ; derrière elle, les yeux clignent et disparaissent entre les troncs. « Les bois sont beaux, en cette saison. Reste sur le chemin, et bonne route. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Bonne journée. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "loups": {
+          "texte": "« Tu cherches la bête. Ils te l'ont tous dit avant de te dire bonjour. » Elle tapote sa musette. « Ceux-là me suivent quand je joue. » Elle souffle dans la musette, une seule note, aigre et longue ; les yeux, derrière elle, se ferment et se rouvrent. « Les loups de ces bois, je les connais tous, et chacun par son nom. Celle qui mange les moutons de Margot, ce n'est pas un des miens. Elle ne répond pas quand je joue. » Elle repose l'instrument. « Ce qui ne répond pas à la musette, d'habitude, répond à autre chose. »",
+          "choix": [
+            {
+              "id": "quoi",
+              "label": "« À quoi ? »",
+              "next": "nom"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "nom": {
+          "texte": "« À son nom. Son vrai nom, celui qu'on lui a donné avant qu'il coure le garou. » Jacotte vous regarde enfin, et vous comprenez qu'elle ne vous le dira pas. « Ceux qui courent le garou font sept villages avant l'aube, les nuits de pleine lune. Appelle-les par leur nom, ou fais-leur couler trois gouttes de sang, et ils te reviennent. Mais il faut savoir à qui l'on parle. » Elle hausse les épaules. « Et ici, tout le monde croit le savoir. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "seuil": {
+          "texte": "Jacotte se lève, lentement, et vous fait signe de la suivre. Elle marche longtemps sous les arbres sans lumière, sans jamais trébucher. Les deux loups vont devant, sans bruit. Enfin, une odeur de fumée froide, une lueur rouge entre les troncs : la clairière du charbonnier, ses meules qui fument sous la lune. Elle s'arrête au bord. « C'est là qu'elle revient. Moi, je n'entre pas. »",
+          "choix": [
+            {
+              "id": "entrer",
+              "label": "Entrer dans la clairière.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "attendre",
+              "label": "« Pas encore. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "clairiere_ouverte": {
+          "texte": "Vous faites trois pas sur la terre noire. Les meules fument doucement. Personne devant la cabane. Puis, de l'autre côté de la clairière, quelque chose se lève d'entre les bûches : un loup, mais trop grand, debout sur des pattes de derrière qui ne sont pas faites pour ça, et qui retombe à quatre pattes en grondant. Il vous a vu avant que vous le voyiez.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Tirer votre arme.",
+              "next": "fin"
+            }
+          ]
+        },
+        "clairiere_close": {
+          "texte": "Jacotte ne se lève pas. « La clairière est vide, maintenant. Il n'y a plus rien à y chercher. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Reculer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "« Morte, oui. Je l'ai entendue. » Jacotte souffle une note dans sa musette ; derrière elle, les deux loups se couchent. « Ce n'était qu'un loup, tu sais. Un loup plus grand que les autres, venu d'ailleurs, qui ne connaissait pas ma musette. » Elle se tait un long moment.",
+          "choix": [
+            {
+              "id": "nom",
+              "label": "« Et s'il ne l'était pas ? »",
+              "next": "le_nom"
+            },
+            {
+              "id": "fin",
+              "label": "(La laisser à sa musette.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "le_nom": {
+          "texte": "Jacotte regarde ses mains. « Alors il aurait fallu l'appeler par son nom. Il serait peut-être revenu. » Vous lui demandez quel nom. Elle se lève sans répondre et rentre dans le bois, ses deux loups sur les talons.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(La laisser partir.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:bergere_margot_gueneau",
+    "type": "pnj",
+    "nom": "Margot Gueneau",
+    "race": "hobbit",
+    "vocation": "forestier",
+    "portrait": "bergere_Margot_Gueneau_hobbit_f.jpg",
+    "description": "Margot Gueneau, bergère, devant l'enclos aux pieux doublés.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Devant un enclos aux pieux doublés, une jeune hobbit compte ses moutons, une houlette à la main, un brassard noir au bras. Elle recommence trois fois et trouve trois fois le même compte, puis lève les yeux. « Bonjour. Attention à la barrière, elle ne tient plus que par habitude. »",
+          "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Bonjour. Vous allez bien ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:la_bete_de_dun_les_places",
+                  "attendu": false
+                }
+              },
+              "next": "bonjour"
+            },
+            {
+              "id": "frere",
+              "label": "« La Guilde d'Auxerre m'envoie. »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
+              "next": "frere"
+            },
+            {
+              "id": "bete",
+              "label": "« Vous avez vu la bête ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
+              "next": "bete"
+            },
+            {
+              "id": "apres",
+              "label": "« La bête ne reviendra pas. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(La laisser à ses moutons.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "bonjour": {
+          "texte": "« On fait avec. Les bêtes mangent, l'herbe repousse. » Elle reprend son compte du bout de la houlette. « Bonne route, et refermez bien derrière vous. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Bonne journée. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "frere": {
+          "texte": "« Alors vous êtes en retard d'un berger. » Sa voix se durcit. « Mon frère. Colin. Il gardait le troupeau d'en haut, il avait seize ans. » Elle serre la houlette. « On l'a trouvé au matin, contre la porte de la bergerie. La porte était arrachée, et les gonds tordus, comme si on avait tiré dessus avec des mains. Un loup n'a pas de mains. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bete": {
+          "texte": "« Une fois. De loin, sous la lune. » Elle parle vite, comme quelqu'un qui l'a déjà raconté vingt fois. « Un loup trop grand. Il marchait mal, comme un homme qui aurait voulu marcher à quatre pattes. Il est parti vers les bois de l'est. » Elle crache par terre. « Vers la clairière du Gros-Pierre. Et le Gros-Pierre, depuis, il porte un bandage au bras. Demandez-lui donc d'où il vient. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "Margot compte ses moutons, une fois, et le compte est bon. « Plus une bête de perdue depuis que vous êtes passé. » Elle regarde vers l'est, vers les bois. « Le Gros-Pierre est parti, aussi. Sa cabane est vide, ses meules se sont éteintes. » Elle serre la houlette. « S'il est parti, c'est bien qu'il était coupable. Non ? » Elle n'attend pas votre réponse. « C'est ce que tout le monde dit. Alors c'est ce que je dirai à Colin. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(La laisser à ses moutons.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:charbonnier_pierre_chaumereuil",
+    "type": "pnj",
+    "nom": "Pierre Chaumereuil",
+    "race": "ogre",
+    "vocation": "guerrier",
+    "portrait": "charbonnier_Pierre_Chaumereuil_ogre_m.jpg",
+    "description": "Pierre Chaumereuil, le Gros-Pierre, charbonnier, noir de suie, un bandage au bras.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Un ogre noir de suie décharge des sacs de charbon devant la palissade, sans un regard pour les villageois qui s'écartent sur son passage. Son avant-bras gauche est serré dans un bandage frais. Il vous voit venir et hoche la tête. « Bonjour. Écartez-vous de la charrette, les sacs glissent. »",
+          "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Bonjour. Vous allez bien ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:la_bete_de_dun_les_places",
+                  "attendu": false
+                }
+              },
+              "next": "bonjour"
+            },
+            {
+              "id": "accuse",
+              "label": "« On vous accuse, au village. »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
+              "next": "accuse"
+            },
+            {
+              "id": "bras",
+              "label": "« Ce bandage ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
+              "next": "bras"
+            },
+            {
+              "id": "nuits",
+              "label": "« Où êtes-vous, les nuits de pleine lune ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
+              "next": "nuits"
+            },
+            {
+              "id": "fin",
+              "label": "(Le laisser à son charbon.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "bonjour": {
+          "texte": "« Je vais. » Il hisse un sac sur la pile. « Le charbon ne se vend pas tout seul, et l'hiver vient toujours plus tôt qu'on croit. Bonne route. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Bon courage. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "accuse": {
+          "texte": "Il soupire. « Encore un qui vient voir le loup-garou. Ils accusent toujours celui qui vit dans les bois. » Il jette un sac sur la pile. « Mon père vivait dans les bois, et on l'accusait aussi. Il est mort dans son lit. » Il vous regarde de haut, de très haut. « Si vous voulez la bête, elle passe par ma clairière. Je l'entends gratter aux meules. C'est pour ça que je ne dors plus. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bras": {
+          "texte": "Il cache le bras derrière son dos, comme un enfant. « Une meule qui s'est effondrée. Le feu couvait dessous, la terre a cédé, j'ai mis le bras dedans pour sauver le bois. » Il hausse les épaules. « Allez demander à la vieille Jacotte, si vous ne me croyez pas. Elle sait tout, elle. Elle ne dit rien, mais elle sait tout. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "nuits": {
+          "texte": "« Les nuits de pleine lune ? » Il s'arrête, un sac sur l'épaule. « Je ne dors pas. Personne ne dort, ici. » Il repart vers sa charrette. « Une meule, ça se veille sept jours et sept nuits. Moi, je veille mes meules. Les autres veillent leurs moutons. Et tout le monde regarde la lisière. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  }
+]
