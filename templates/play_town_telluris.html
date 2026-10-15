@@ -28,8 +28,7 @@
 	   `html.pave-flottant` masque le pavé tant qu'il est encore sur la carte ;
 	   `appliquerModePave` le déplace et tient la classe à jour. Clé = PAVE_MODE_CLE. #}
 	<script>try { if (localStorage.getItem('telluris.play.pave_mode') === 'flottant') document.documentElement.classList.add('pave-flottant'); } catch (e) {}</script>
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+	{% include "part-polices.html" %}
 	<style>
 		:root {
 			--x: {{ position["x"] | tojson | safe }};

@@ -1,0 +1,11 @@
+{#
+	Polices du jeu, HÉBERGÉES par l'application (mount /polices, templates/resources/polices) :
+	plus de requête vers Google Fonts, donc plus de police de repli remplacée après coup —
+	ce remplacement faisait grandir les textes (et la sidebar de /play) juste après le chargement.
+	Cinzel (la police de presque tout) est PRÉCHARGÉE : elle arrive avant le premier rendu.
+	⚠️ `crossorigin` est obligatoire sur un preload de police, même servie par la même origine :
+	sans lui, le navigateur la télécharge deux fois.
+	Usage : `{% include "part-polices.html" %}` dans le <head>.
+#}
+<link rel="preload" href="{{ url_for('polices', path='cinzel-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{ url_for('polices', path='polices.css') }}">
