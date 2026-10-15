@@ -1,9 +1,38 @@
 ---
 name: telluris-quetes-pnj
-description: Quests, NPCs, dungeons and access gates — guild board and quest engine, transport/hunt/escort quests (incl. generated progeny escorts), NPC dialogue trees and services, the dialogue linter and the /admin/dialogues editor for authored quest offers, gated place access (acces blocks, laissez-passer), dungeons and eradication commissions, resource gathering and zone events, woodcutting, and the intro narrative (utils/quetes.py, transport.py, chasse.py, escorte.py, donjon.py, acces.py, pnj.py, lint_dialogues.py, bois.py, intro.py, routers/quetes.py, routers/pnj.py, jsons/pnj-*.json). Load whenever a request touches a quest, a PNJ or its dialogue JSON, a guard or locked door, a dungeon, table_evenements, harvesting or wood — including French requests such as « écris un dialogue », « quête de transport », « escorte », « un garde bloque l'accès », « laissez-passer », « donjon », « le choix ne s'affiche pas ».
+description: Quests, NPCs, dungeons and access gates — guild board and quest engine, transport/hunt/escort quests (incl. generated progeny escorts), NPC dialogue trees and services, the dialogue linter and the /admin/dialogues editor for authored quest offers, gated place access (acces blocks, laissez-passer), dungeons and eradication commissions, resource gathering and zone events, woodcutting, and the intro narrative (utils/quetes.py, transport.py, chasse.py, escorte.py, donjon.py, acces.py, pnj.py, lint_dialogues.py, bois.py, intro.py, routers/quetes.py, routers/pnj.py, jsons/pnj-*.json). Load whenever a request touches a quest, a PNJ or its dialogue JSON, a guard or locked door, a dungeon, table_evenements, harvesting or wood — including French requests such as « écris une quête », « écris un dialogue », « quête de transport », « escorte », « un garde bloque l'accès », « laissez-passer », « donjon », « le choix ne s'affiche pas ».
 ---
 
 Quêtes, PNJ, barrières d'accès et donjons. Tout ce contenu (docs `pnj:*`, blocs `acces`, `donjon:*`) part par `import-bulk`, un PUT complet (CLAUDE.md §11) ; valeurs à jour dans le dump, docs PNJ exportés dans `jsons/pnj-*.json`.
+
+
+### Écrire une quête — AVANT · PENDANT · APRÈS (règle de l'Auteur, 15/10)
+Toute quête écrite à la main, et **chaque PNJ qu'elle touche** (donneur, receveur, témoins, gardiens), se pense dans **trois états**. Un PNJ qui récite l'enquête avant qu'on la lui ait confiée trahit l'intrigue ; un PNJ qui l'a oubliée après efface ce qu'a fait le joueur.
+
+| État | Condition de choix | Ce que dit le PNJ |
+|---|---|---|
+| AVANT | `{"quete_active": {"id": Q, "attendu": false}, "quete_reussie": {"id": Q, "attendu": false}}` | un bonjour, quelques mots, bonne route — rien de la quête (une quête abandonnée ou ratée retombe ici) |
+| PENDANT | `{"quete_active": {"id": Q}}` | l'enquête : indices, théories, accès |
+| APRÈS | `{"quete_reussie": {"id": Q}}` (gardien : `acces_libere`, état du monde) | ce que la quête a changé |
+
+Référence : `dev/gen_enquete_escolives.py`, `dev/gen_enquete_morvan.py` (constantes `AVANT` / `EN_COURS` / `APRES`).
+
+**Dialogues**
+- **Accueil neutre** : le texte du nœud d'accueil s'affiche dans les trois états, il ne révèle jamais l'intrigue. Ce qui concerne la quête va dans la première réponse filtrée.
+- **Badges ! / ?** : ils dérivent des conditions des choix visibles (`pnj.marque_noeud`). Avant la quête, aucun PNJ tiers n'en porte qui la trahirait ; le vérifier sur le nœud de départ.
+- **Souvenir chez le donneur** : toujours une réplique APRÈS (`escolives_souvenir`, `morvan_souvenir`).
+
+**Garde-fous**
+- **Test des trois états** obligatoire, PNJ par PNJ : choix visibles de l'accueil avant / pendant / après (`pnj._choix_visibles`, modèle `test_les_villageois_ne_parlent_de_l_enquete_que_quete_en_cours`).
+- **Preuve jamais perdue** : un objet tombé au combat peut rester au sol ; la porte se rouvre tant qu'il n'est pas remis (`objectif_atteint: false`, sans `combat_gagne`, cf. Morvan), sinon la quête est bloquée pour toujours.
+- **Butin garanti** : une salle dont le butin sert de preuve ne porte qu'**une** espèce (`instantiate_monsters` tire au hasard dans `especes`).
+- **Ids de quête vérifiés** : tout `quete:*` cité dans une condition correspond à une offre existante, verrouillé par un test (modèle `test_toute_quete_nommee_est_l_offre`) — un id mal recopié masque un choix sans symptôme (fail-closed).
+
+**Narration** (règles d'écriture : telluris-lore)
+- **« Avant » qui annonce** : le bonjour peut glisser un détail d'ambiance (terre fraîche, brassard noir, aubépine clouée) sans rien dire de l'affaire.
+- **Pendant, des PNJ qui varient** : chaque témoin apporte un indice ou une théorie **différente** (fossoyeur contre guérisseuse) ; jamais deux qui disent la même chose.
+- **Le monde change après** : au moins un signe visible — un PNJ part ou arrive, un lieu apparaît ou disparaît (présence `combat_gagne … attendu:false` du charbonnier, restes du convoi de Milo).
+- **Doute après** : au moins un PNJ garde une théorie contraire ; le mystère n'est jamais tranché.
 
 
 ### Quêtes — guilde + moteur
