@@ -68,6 +68,13 @@ POS_FRANCE = [50, 21]
 # reconnaît à sa cible.
 QUETE_A_FAIRE = {"quete_active": {"types": ["collect"], "cible": OSSEMENTS, "objectif_atteint": False}}
 
+# Les villageois ne parlent de l'enquête que quête EN COURS (Auteur, 15/10) : AVANT, un simple
+# bonjour ; APRÈS, ce que la quête a changé. La conjonction des deux `attendu: false` dit
+# « jamais confiée » (une quête abandonnée y retombe) — `pnj.CONDITIONS_QUETE`.
+AVANT = {"quete_active": {"id": QUETE, "attendu": False}, "quete_reussie": {"id": QUETE, "attendu": False}}
+EN_COURS = {"quete_active": {"id": QUETE}}
+APRES = {"quete_reussie": {"id": QUETE}}
+
 # ── Grille de la crypte (image 768×1376, quadrillage de 15 × 27 cases) ─────────────────────
 # '#' = 0 (roc, murs, niches) · '.' = 1 (dalles, terre, ossements épars) · 'x' = 3
 # (sarcophages : on ne marche pas dessus, un volant les survole).
@@ -234,19 +241,22 @@ def fossoyeur() -> dict:
 			"noeud_depart": "accueil",
 			"noeuds": {
 				"accueil": {
-					"texte": "Au bord de la nécropole, un nain s'appuie sur sa pelle, entre deux tas de terre fraîche. Les sarcophages affleurent l'herbe comme des dos de bêtes endormies. Il vous dévisage sans se presser. « Vous n'êtes pas d'ici. Si vous venez pour les morts, je suis celui qui les couche. Gaspard. »",
+					"texte": "Au bord de la nécropole, un nain s'appuie sur sa pelle, entre deux tas de terre fraîche. Les sarcophages affleurent l'herbe comme des dos de bêtes endormies. Il vous dévisage sans se presser. « Le bonjour. Vous n'êtes pas d'ici. Gaspard, fossoyeur. »",
 					"choix": [
-						{"id": "tombes", "label": "« Ces tombes rouvertes… »", "next": "tombes"},
+						{"id": "bonjour", "label": "« Bonjour. Vous allez bien ? »", "condition": AVANT, "next": "bonjour"},
+						{"id": "tombes", "label": "« Ces tombes rouvertes… »", "condition": EN_COURS, "next": "tombes"},
+						# `acces_ouvrable` suppose la collecte en cours (barrière de la crypte).
 						{"id": "guilde", "label": "« La Guilde d'Auxerre m'envoie. Ouvrez-moi la crypte. »",
 						 "condition": {"acces_ouvrable": True}, "next": "seuil"},
-						{"id": "crypte", "label": "« Et la crypte ? »",
-						 "condition": {"acces_ouvrable": False, "acces_menace": True},
-						 "next": "crypte_fermee"},
 						# `acces_libere` = la menace est tombée (état du MONDE), avant même le rapport.
 						{"id": "apres", "label": "« Vous dormez, maintenant ? »",
 						 "condition": {"acces_libere": True}, "next": "apres"},
 						{"id": "fin", "label": "(Le laisser à ses tombes.)", "next": "fin"},
 					],
+				},
+				"bonjour": {
+					"texte": "« Je vais comme va un fossoyeur : je creuse, je couche, je recouvre. » Il essuie son front d'un revers de manche. « Les vignes sont belles, cette année, si vous passez par le coteau. Bonne route à vous. »",
+					"choix": [{"id": "fin", "label": "« Bonne journée, Gaspard. »", "next": "fin"}],
 				},
 				"tombes": {
 					"texte": "« C'est moi qui les ai rouvertes, oui. Personne ne voulait, alors je l'ai fait. » Il crache dans ses mains, comme pour reprendre la pelle, et ne la reprend pas. « Gonflés, qu'ils étaient. Pas un qui avait pourri. Les ongles longs, la peau rose, et du sang aux lèvres, du sang frais, comme s'ils venaient de boire. Et deux tombes vides. Vides, je vous dis, la terre grattée de l'intérieur. » Il désigne du menton une dalle, plus loin, à moitié enfouie. « La nuit, j'entends racler, là-dessous. Dans la crypte. »",
@@ -257,10 +267,6 @@ def fossoyeur() -> dict:
 				},
 				"qui": {
 					"texte": "Gaspard regarde longtemps le fond du trou qu'il vient de creuser. « Les deux derniers enterrés. » Il n'en dit pas davantage, et vous comprenez qu'il n'en dira pas davantage. « Il y a des veuves dans ce village. Je ne mets pas de noms sur des tombes vides. »",
-					"choix": [{"id": "retour", "label": "Revenir.", "next": "accueil"}],
-				},
-				"crypte_fermee": {
-					"texte": "« La crypte ? » Il pose la main à plat sur la clef pendue à sa ceinture. « Je ne l'ouvre pas pour un curieux, ni pour un brave qui veut voir. S'il faut descendre, c'est la Guilde d'Auxerre qui envoie quelqu'un. J'ai écrit. Personne n'est encore venu. »",
 					"choix": [{"id": "retour", "label": "Revenir.", "next": "accueil"}],
 				},
 				"seuil": {
@@ -289,8 +295,6 @@ def fossoyeur() -> dict:
 
 
 def guerisseuse() -> dict:
-	reussie = {"quete_reussie": {"id": QUETE}}
-	pas_reussie = {"quete_reussie": {"id": QUETE, "attendu": False}}
 	return {
 		"_id": GUERISSEUSE,
 		"type": "pnj",
@@ -303,17 +307,22 @@ def guerisseuse() -> dict:
 			"noeud_depart": "accueil",
 			"noeuds": {
 				"accueil": {
-					"texte": "Une elfe aux tresses châtaines examine, à la lumière de la fenêtre, une coupe d'eau trouble. Des bouquets d'herbes sèchent au plafond. Elle ne pose pas la coupe pour vous saluer. « Si vous avez de la fièvre, asseyez-vous. Si vous venez pour les vampires, la porte est derrière vous. »",
+					"texte": "Une elfe aux tresses châtaines examine, à la lumière de la fenêtre, une coupe d'eau trouble. Des bouquets d'herbes sèchent au plafond. Elle ne pose pas la coupe pour vous saluer. « Si vous avez de la fièvre, asseyez-vous. Sinon, bonjour, et ne marchez pas sur mes herbes. »",
 					"choix": [
-						{"id": "morts", "label": "« De quoi meurt-on, à Escolives ? »",
-						 "condition": pas_reussie, "next": "fievre"},
+						{"id": "bonjour", "label": "« Bonjour. Vous allez bien ? »", "condition": AVANT, "next": "bonjour"},
+						{"id": "morts", "label": "« La Guilde m'envoie. De quoi meurt-on, à Escolives ? »",
+						 "condition": EN_COURS, "next": "fievre"},
 						{"id": "apres", "label": "« La crypte est vide, désormais. »",
-						 "condition": reussie, "next": "apres"},
+						 "condition": APRES, "next": "apres"},
 						{"id": "fin", "label": "(La laisser à son travail.)", "next": "fin"},
 					],
 				},
+				"bonjour": {
+					"texte": "« Assez bien, merci. La saison est chargée, on ne manque jamais de toux ni d'entorses. » Elle lève un instant les yeux vers vous. « Si vous repassez, j'ai un onguent pour les ampoules : les voyageurs en ont toujours. Bonne route. »",
+					"choix": [{"id": "fin", "label": "« Merci. Bonne journée. »", "next": "fin"}],
+				},
 				"fievre": {
-					"texte": "« De fièvre. » Elle fait tourner l'eau dans la coupe. « Une fièvre qui assoiffe, qui pâlit, qui vide les gens en quelques nuits. Tous ceux qui sont morts buvaient au puits du bas, celui qu'on a creusé trop près de la nécropole. Regardez cette eau. » Elle vous tend la coupe ; quelque chose y flotte, qui n'est pas de la terre. « Gaspard voit des Strigoï partout depuis qu'il creuse. Moi, je vois un puits souillé et des morts qu'on n'a pas laissés reposer. »",
+					"texte": "« Vous aussi, vous venez pour les vampires. » Elle ne pose pas la coupe. « On meurt de fièvre. » Elle fait tourner l'eau dans la coupe. « Une fièvre qui assoiffe, qui pâlit, qui vide les gens en quelques nuits. Tous ceux qui sont morts buvaient au puits du bas, celui qu'on a creusé trop près de la nécropole. Regardez cette eau. » Elle vous tend la coupe ; quelque chose y flotte, qui n'est pas de la terre. « Gaspard voit des Strigoï partout depuis qu'il creuse. Moi, je vois un puits souillé et des morts qu'on n'a pas laissés reposer. »",
 					"choix": [
 						{"id": "corps", "label": "« Et les corps qui n'ont pas pourri ? »", "next": "corps"},
 						{"id": "retour", "label": "Revenir.", "next": "accueil"},
@@ -333,8 +342,6 @@ def guerisseuse() -> dict:
 
 
 def veuve() -> dict:
-	reussie = {"quete_reussie": {"id": QUETE}}
-	pas_reussie = {"quete_reussie": {"id": QUETE, "attendu": False}}
 	return {
 		"_id": VEUVE,
 		"type": "pnj",
@@ -347,14 +354,19 @@ def veuve() -> dict:
 			"noeud_depart": "accueil",
 			"noeuds": {
 				"accueil": {
-					"texte": "Sur le seuil d'une maison de pierre blonde, une jeune hobbit en deuil se tient les bras croisés sur son châle. Quelqu'un a cloué une branche d'aubépine en fleur sur sa porte. Pas elle, à en juger par la façon dont elle la regarde.",
+					"texte": "Sur le seuil d'une maison de pierre blonde, une jeune hobbit en deuil se tient les bras croisés sur son châle. Quelqu'un a cloué une branche d'aubépine en fleur sur sa porte. Pas elle, à en juger par la façon dont elle la regarde. Elle vous salue d'un signe de tête.",
 					"choix": [
+						{"id": "bonjour", "label": "« Bonjour, madame. Vous allez bien ? »", "condition": AVANT, "next": "bonjour"},
 						{"id": "aubepine", "label": "« Qui a cloué cette aubépine ? »",
-						 "condition": pas_reussie, "next": "aubepine"},
+						 "condition": EN_COURS, "next": "aubepine"},
 						{"id": "apres", "label": "« C'est fini, en bas. »",
-						 "condition": reussie, "next": "apres"},
+						 "condition": APRES, "next": "apres"},
 						{"id": "fin", "label": "(La laisser.)", "next": "fin"},
 					],
+				},
+				"bonjour": {
+					"texte": "« On fait aller. Merci de demander. » Elle resserre son châle. « Le lavoir est en bas du chemin, si vous voulez faire boire vos bêtes. Bonne route. »",
+					"choix": [{"id": "fin", "label": "« Bonne journée. »", "next": "fin"}],
 				},
 				"aubepine": {
 					"texte": "« Les voisins. Pour que Jehan ne rentre pas. » Sa voix ne tremble pas. « Jehan, c'était mon mari. Le premier à mourir, alors c'est lui qu'ils accusent. Il est rentré des vignes un soir avec la fièvre, il a eu soif trois jours, et le quatrième il ne s'est pas réveillé. » Elle serre son châle. « Maintenant ils veulent le déterrer et le brûler, avec un pieu dans le cœur. Ils ne le feront pas. Pas tant que je serai devant cette porte. »",

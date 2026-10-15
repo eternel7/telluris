@@ -102,6 +102,7 @@ Contenu : `dev/gen_enquete_escolives.py` → **un seul** `jsons/enquete_escolive
 - Gautier (bureau d'Auxerre, déjà rang D) offre ET reçoit une quête d'**apport** unique : `item:strigoi` (carcasse au butin de tout Strigoï abattu) → `lieu:escolives` (France (50,21)) → Gaspard le fossoyeur ouvre `lieu:crypte_de_la_necropole_d_escolives` (service `acces`, salle de `donjon:crypte_d_escolives`).
 - Barrière : `quete_active {types:[collect], cible:item:strigoi, objectif_atteint:false}` + `combat_gagne` faux (pas de filtre `id` dans les barrières).
 - ⚠️ **Salle à espèce UNIQUE** (3 Strigoï) : `instantiate_monsters` tire chaque monstre au hasard dans `especes` — un second type pourrait évincer le Strigoï et rendre la preuve introuvable.
+- **Villageois des deux enquêtes** (Escolives, Dun-les-Places) : l'enquête ne se dit que quête EN COURS (`quete_active`), AVANT un simple bonjour (`quete_active` ET `quete_reussie` à `attendu:false`), APRÈS ce qui a changé (`quete_reussie`, ou `acces_libere` pour les gardiens). Delta : `dev/gen_dialogues_villageois_enquetes.py` → `jsons/dialogues_villageois_enquetes_a_importer.json`. Verrouillé par `test_les_villageois_ne_parlent_de_l_enquete_que_quete_en_cours` (×2).
 - ⚠️ `gen_mission_bucherons.py` / `gen_acces_donjon.py` réécrivent Gautier depuis des dumps FIGÉS : importer leur sortie effacerait la quête.
 
 Verrouillé par `tests/test_enquete_escolives.py`.

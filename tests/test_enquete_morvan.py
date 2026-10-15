@@ -24,6 +24,12 @@ TETE = "item:loup_garou_tete"
 CHARBONNIER = "pnj:charbonnier_pierre_chaumereuil"
 MENEUSE = "pnj:meneuse_de_loups_jacotte"
 
+VILLAGEOIS = {  # pnj → (choix de l'enquête, branche après : "gardien" = sous `acces_libere`)
+	MENEUSE: ({"loups"}, "gardien"),
+	"pnj:bergere_margot_gueneau": ({"frere", "bete"}, "quete"),
+	CHARBONNIER: ({"accuse", "bras", "nuits"}, None),  # disparu une fois la clairière gagnée
+}
+
 
 def _charger(chemin):
 	with open(chemin, encoding="utf-8") as f:
@@ -194,3 +200,23 @@ def test_la_grille_suit_le_quadrillage_de_la_carte():
 	chemin = os.path.join(RACINE, "templates", "resources", "battle_maps", clairiere["image"])
 	assert Image.open(chemin).size == (1376, 746)
 	assert clairiere["dimensions"] == {"x": 40, "y": 20}
+
+
+def _accueil(pnj_id, actives=(), reussies=(), flags=None):
+	"""Ids des choix visibles à l'accueil d'un villageois, selon l'état de la quête."""
+	contexte = {"quetes_actives": set(actives), "quetes_reussies": set(reussies), "flags": flags or {}}
+	return {c["id"] for c in pnj._choix_visibles(_docs()[pnj_id], "accueil", contexte)}
+
+
+def test_les_villageois_ne_parlent_de_l_enquete_que_quete_en_cours():
+	"""Avant : un bonjour et rien d'autre ; pendant : l'enquête ; après : ce qui a changé
+	(Auteur, 15/10). Gardiens : la porte s'ouvre par `acces_ouvrable`, l'après par
+	`acces_libere` (état du monde, tous deux posés par le router)."""
+	for pnj_id, (enquete, apres) in VILLAGEOIS.items():
+		assert _accueil(pnj_id) == {"bonjour", "fin"}, pnj_id
+		pendant = _accueil(pnj_id, actives=[QUETE])
+		assert enquete <= pendant and "bonjour" not in pendant and "apres" not in pendant, pnj_id
+		flags = {"acces_libere": True} if apres == "gardien" else {}
+		fini = _accueil(pnj_id, reussies=[QUETE], flags=flags)
+		attendu = {"fin"} if apres is None else {"apres", "fin"}
+		assert fini == attendu, pnj_id

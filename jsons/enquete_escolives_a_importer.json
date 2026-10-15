@@ -952,11 +952,31 @@
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
-          "texte": "Au bord de la nécropole, un nain s'appuie sur sa pelle, entre deux tas de terre fraîche. Les sarcophages affleurent l'herbe comme des dos de bêtes endormies. Il vous dévisage sans se presser. « Vous n'êtes pas d'ici. Si vous venez pour les morts, je suis celui qui les couche. Gaspard. »",
+          "texte": "Au bord de la nécropole, un nain s'appuie sur sa pelle, entre deux tas de terre fraîche. Les sarcophages affleurent l'herbe comme des dos de bêtes endormies. Il vous dévisage sans se presser. « Le bonjour. Vous n'êtes pas d'ici. Gaspard, fossoyeur. »",
           "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Bonjour. Vous allez bien ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:les_morts_d_escolives",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:les_morts_d_escolives",
+                  "attendu": false
+                }
+              },
+              "next": "bonjour"
+            },
             {
               "id": "tombes",
               "label": "« Ces tombes rouvertes… »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:les_morts_d_escolives"
+                }
+              },
               "next": "tombes"
             },
             {
@@ -966,15 +986,6 @@
                 "acces_ouvrable": true
               },
               "next": "seuil"
-            },
-            {
-              "id": "crypte",
-              "label": "« Et la crypte ? »",
-              "condition": {
-                "acces_ouvrable": false,
-                "acces_menace": true
-              },
-              "next": "crypte_fermee"
             },
             {
               "id": "apres",
@@ -987,6 +998,16 @@
             {
               "id": "fin",
               "label": "(Le laisser à ses tombes.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "bonjour": {
+          "texte": "« Je vais comme va un fossoyeur : je creuse, je couche, je recouvre. » Il essuie son front d'un revers de manche. « Les vignes sont belles, cette année, si vous passez par le coteau. Bonne route à vous. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Bonne journée, Gaspard. »",
               "next": "fin"
             }
           ]
@@ -1008,16 +1029,6 @@
         },
         "qui": {
           "texte": "Gaspard regarde longtemps le fond du trou qu'il vient de creuser. « Les deux derniers enterrés. » Il n'en dit pas davantage, et vous comprenez qu'il n'en dira pas davantage. « Il y a des veuves dans ce village. Je ne mets pas de noms sur des tombes vides. »",
-          "choix": [
-            {
-              "id": "retour",
-              "label": "Revenir.",
-              "next": "accueil"
-            }
-          ]
-        },
-        "crypte_fermee": {
-          "texte": "« La crypte ? » Il pose la main à plat sur la clef pendue à sa ceinture. « Je ne l'ouvre pas pour un curieux, ni pour un brave qui veut voir. S'il faut descendre, c'est la Guilde d'Auxerre qui envoie quelqu'un. J'ai écrit. Personne n'est encore venu. »",
           "choix": [
             {
               "id": "retour",
@@ -1092,15 +1103,29 @@
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
-          "texte": "Une elfe aux tresses châtaines examine, à la lumière de la fenêtre, une coupe d'eau trouble. Des bouquets d'herbes sèchent au plafond. Elle ne pose pas la coupe pour vous saluer. « Si vous avez de la fièvre, asseyez-vous. Si vous venez pour les vampires, la porte est derrière vous. »",
+          "texte": "Une elfe aux tresses châtaines examine, à la lumière de la fenêtre, une coupe d'eau trouble. Des bouquets d'herbes sèchent au plafond. Elle ne pose pas la coupe pour vous saluer. « Si vous avez de la fièvre, asseyez-vous. Sinon, bonjour, et ne marchez pas sur mes herbes. »",
           "choix": [
             {
-              "id": "morts",
-              "label": "« De quoi meurt-on, à Escolives ? »",
+              "id": "bonjour",
+              "label": "« Bonjour. Vous allez bien ? »",
               "condition": {
+                "quete_active": {
+                  "id": "quete:les_morts_d_escolives",
+                  "attendu": false
+                },
                 "quete_reussie": {
                   "id": "quete:les_morts_d_escolives",
                   "attendu": false
+                }
+              },
+              "next": "bonjour"
+            },
+            {
+              "id": "morts",
+              "label": "« La Guilde m'envoie. De quoi meurt-on, à Escolives ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:les_morts_d_escolives"
                 }
               },
               "next": "fievre"
@@ -1122,8 +1147,18 @@
             }
           ]
         },
+        "bonjour": {
+          "texte": "« Assez bien, merci. La saison est chargée, on ne manque jamais de toux ni d'entorses. » Elle lève un instant les yeux vers vous. « Si vous repassez, j'ai un onguent pour les ampoules : les voyageurs en ont toujours. Bonne route. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Merci. Bonne journée. »",
+              "next": "fin"
+            }
+          ]
+        },
         "fievre": {
-          "texte": "« De fièvre. » Elle fait tourner l'eau dans la coupe. « Une fièvre qui assoiffe, qui pâlit, qui vide les gens en quelques nuits. Tous ceux qui sont morts buvaient au puits du bas, celui qu'on a creusé trop près de la nécropole. Regardez cette eau. » Elle vous tend la coupe ; quelque chose y flotte, qui n'est pas de la terre. « Gaspard voit des Strigoï partout depuis qu'il creuse. Moi, je vois un puits souillé et des morts qu'on n'a pas laissés reposer. »",
+          "texte": "« Vous aussi, vous venez pour les vampires. » Elle ne pose pas la coupe. « On meurt de fièvre. » Elle fait tourner l'eau dans la coupe. « Une fièvre qui assoiffe, qui pâlit, qui vide les gens en quelques nuits. Tous ceux qui sont morts buvaient au puits du bas, celui qu'on a creusé trop près de la nécropole. Regardez cette eau. » Elle vous tend la coupe ; quelque chose y flotte, qui n'est pas de la terre. « Gaspard voit des Strigoï partout depuis qu'il creuse. Moi, je vois un puits souillé et des morts qu'on n'a pas laissés reposer. »",
           "choix": [
             {
               "id": "corps",
@@ -1172,15 +1207,29 @@
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
-          "texte": "Sur le seuil d'une maison de pierre blonde, une jeune hobbit en deuil se tient les bras croisés sur son châle. Quelqu'un a cloué une branche d'aubépine en fleur sur sa porte. Pas elle, à en juger par la façon dont elle la regarde.",
+          "texte": "Sur le seuil d'une maison de pierre blonde, une jeune hobbit en deuil se tient les bras croisés sur son châle. Quelqu'un a cloué une branche d'aubépine en fleur sur sa porte. Pas elle, à en juger par la façon dont elle la regarde. Elle vous salue d'un signe de tête.",
           "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Bonjour, madame. Vous allez bien ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:les_morts_d_escolives",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:les_morts_d_escolives",
+                  "attendu": false
+                }
+              },
+              "next": "bonjour"
+            },
             {
               "id": "aubepine",
               "label": "« Qui a cloué cette aubépine ? »",
               "condition": {
-                "quete_reussie": {
-                  "id": "quete:les_morts_d_escolives",
-                  "attendu": false
+                "quete_active": {
+                  "id": "quete:les_morts_d_escolives"
                 }
               },
               "next": "aubepine"
@@ -1198,6 +1247,16 @@
             {
               "id": "fin",
               "label": "(La laisser.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "bonjour": {
+          "texte": "« On fait aller. Merci de demander. » Elle resserre son châle. « Le lavoir est en bas du chemin, si vous voulez faire boire vos bêtes. Bonne route. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Bonne journée. »",
               "next": "fin"
             }
           ]

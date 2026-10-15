@@ -9,7 +9,7 @@ import glob
 import json
 import os
 
-from utils import acces, apport, lint_dialogues
+from utils import acces, apport, lint_dialogues, pnj
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JSONS = os.path.join(RACINE, "jsons")
@@ -22,6 +22,12 @@ VILLAGE = "lieu:escolives"
 CRYPTE = "lieu:crypte_de_la_necropole_d_escolives"
 DONJON = "donjon:crypte_d_escolives"
 OSSEMENTS = "item:strigoi"
+
+VILLAGEOIS = {  # pnj → (choix de l'enquête, branche après : "gardien" = sous `acces_libere`)
+	"pnj:fossoyeur_gaspard_fouquet": ({"tombes"}, "gardien"),
+	"pnj:guerisseuse_ysolde_vernier": ({"morts"}, "quete"),
+	"pnj:veuve_perrine_vaudin": ({"aubepine"}, "quete"),
+}
 
 
 def _charger(chemin):
@@ -159,3 +165,23 @@ def test_images_presentes():
 			chemins.append(os.path.join(RESSOURCES, "pnj", d["portrait"]))
 	for p in chemins:
 		assert os.path.exists(p), p
+
+
+def _accueil(pnj_id, actives=(), reussies=(), flags=None):
+	"""Ids des choix visibles à l'accueil d'un villageois, selon l'état de la quête."""
+	contexte = {"quetes_actives": set(actives), "quetes_reussies": set(reussies), "flags": flags or {}}
+	return {c["id"] for c in pnj._choix_visibles(_docs()[pnj_id], "accueil", contexte)}
+
+
+def test_les_villageois_ne_parlent_de_l_enquete_que_quete_en_cours():
+	"""Avant : un bonjour et rien d'autre ; pendant : l'enquête ; après : ce qui a changé
+	(Auteur, 15/10). Gardiens : la porte s'ouvre par `acces_ouvrable`, l'après par
+	`acces_libere` (état du monde, tous deux posés par le router)."""
+	for pnj_id, (enquete, apres) in VILLAGEOIS.items():
+		assert _accueil(pnj_id) == {"bonjour", "fin"}, pnj_id
+		pendant = _accueil(pnj_id, actives=[QUETE])
+		assert enquete <= pendant and "bonjour" not in pendant and "apres" not in pendant, pnj_id
+		flags = {"acces_libere": True} if apres == "gardien" else {}
+		fini = _accueil(pnj_id, reussies=[QUETE], flags=flags)
+		attendu = {"fin"} if apres is None else {"apres", "fin"}
+		assert fini == attendu, pnj_id
