@@ -182,7 +182,8 @@ templates/
   part-*.html            # fragments partagés : {% include %} de markup OU macros paramétrées
                          #   (part-character-card, part-slot-bar-css, part-move-panel,
                          #    part-lieux-{js,css,markup} : mode Lieux partagé /admin/editor ↔ /admin/lieux,
-                         #    part-auth-css : carte de parchemin partagée /auth ↔ /reinitialisation)
+                         #    part-auth-css : carte de parchemin partagée /auth ↔ /reinitialisation,
+                         #    part-polices : polices HÉBERGÉES (mount /polices), jamais Google Fonts)
   scripts/               # JS partagé, servi par le mount /scripts — ⚠️ toujours `{{ script_url('x.js') }}`
                          #   (URL versionnée par mtime : sinon Chrome garde l'ancien fichier en cache)
                          #   battle_map.js · nav.js (bitmask nav) · deplacement.js (règles de marche)

@@ -172,6 +172,8 @@ def script_url(ctx, path):
 
 templates.env.globals["script_url"] = script_url
 app.mount("/icons", StaticFiles(directory="templates/resources/icons"), name="icons")
+# Polices hébergées (ex-Google Fonts) : cf. templates/part-polices.html.
+app.mount("/polices", StaticFiles(directory="templates/resources/polices"), name="polices")
 CHARACTERS_IMAGES_PATH = "templates/resources/characters"
 app.mount("/characters", StaticFiles(directory=CHARACTERS_IMAGES_PATH), name="characters")
 BATTLE_MAPS_IMAGES_PATH = "templates/resources/battle_maps"
