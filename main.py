@@ -1212,7 +1212,8 @@ async def get_combat_page(
 
 	combat_doc = get_doc(combat_id)
 	if not combat_doc or combat_doc.get("type") != "combat":
-		raise HTTPException(status_code=404, detail="Combat introuvable")
+		# Combat disparu (terminé, purgé, lien périmé) : retour à l'emblème plutôt qu'un 404 brut.
+		return RedirectResponse(url="/embleme", headers=request.headers)
 
 	if combat_doc["user_id"] != current_user["_id"]:
 		return RedirectResponse(url="/play", headers=request.headers)
