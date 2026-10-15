@@ -23,31 +23,11 @@
 	<title>Telluris — {{ title }}</title>
 	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
 	{{ pleinecran.tete() }}
-e personnage : source unique du markup, partagée par la sidebar, la fiche, la liste
-   du groupe et le board de recrutement (les deux dernières la clonent depuis <template>). #}
-{% import "part-character-card.html" as cards %}
-{# Barre de slots : CSS partagé avec l'écran de combat (macro paramétrée par les sélecteurs,
-   les deux pages ne portant pas les mêmes noms de classes). #}
-{% import "part-slot-bar-css.html" as slotbar %}
-{# Pavé de déplacement : markup ET CSS partagés avec la page de combat et le mode « test de
-   déplacement » de l'éditeur de carte. #}
-{% import "part-move-panel.html" as movepanel %}
-{# Plein écran : choix gardé d'une page à l'autre + manifeste (cf. part-plein-ecran.html). #}
-{% import "part-plein-ecran.html" as pleinecran %}
-{# ★ Points d'attribut de la fiche : dans la ligne PV/PM de l'identité (carte de la fiche en
-   portrait — paramètre `points` de la macro de carte —, colonne gauche en paysage), visibles
-   au-dessus de TOUS les onglets — ils sont la bourse commune des caracts, de la vocation,
-   des sorts, des écoles et des compétences. Pas d'id (deux exemplaires) : `_syncPoints` les
-   retrouve par `data-points`. #}
-{% macro points_fiche(pts) %}<span class="sh-card-points pts-dispo{% if pts <= 0 %} is-vide{% endif %}" title="Points d'attribut à répartir (caractéristiques, vocation, sorts, écoles, compétences)">★ <span data-points>{{ pts }}</span></span>{% endmacro %}
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Telluris — {{ title }}</title>
-	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
-	{{ pleinecran.tete() }}
+	{# Mode du pavé lu AVANT le premier rendu : sans lui, le pavé s'affichait sur la carte
+	   puis sautait dans le panneau flottant une fois les scripts de fin de page chargés.
+	   `html.pave-flottant` masque le pavé tant qu'il est encore sur la carte ;
+	   `appliquerModePave` le déplace et tient la classe à jour. Clé = PAVE_MODE_CLE. #}
+	<script>try { if (localStorage.getItem('telluris.play.pave_mode') === 'flottant') document.documentElement.classList.add('pave-flottant'); } catch (e) {}</script>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 	<style>
@@ -213,15 +193,11 @@ e personnage : source unique du markup, partagée par la sidebar, la fiche, la l
 		.sub-loc-btn:hover {
 			border-color: var(--accent-color);
 		}
-		/* Ligne « Aucun » de la liste des Lieux : un VRAI .sub-loc-btn (même police, padding,
-		   bordure, mêmes media queries), éteint. Elle est aussi rendue par Jinja avant que
-		   `buildLocationslist` ne passe : la liste a dès le premier rendu la hauteur d'une
-		   ligne, le passage 0 → 1 lieu ne fait plus sauter la sidebar. */
-		.sub-loc-btn.sub-loc-vide,
-		.sub-loc-btn.sub-loc-vide:hover {
-			background: transparent; border-color: transparent;
-			cursor: default; opacity: .6;
-		}
+		/* Ligne RÉSERVÉE de la liste des Lieux : un vrai .sub-loc-btn (même police, padding,
+		   bordure, mêmes media queries) mais invisible. Rendue par Jinja avant que
+		   `buildLocationslist` ne passe, et par lui quand il n'y a aucun lieu : la liste a
+		   toujours la hauteur d'une ligne, le passage 0 → 1 lieu ne fait plus sauter la sidebar. */
+		.sub-loc-btn.sub-loc-vide { visibility: hidden; }
 
 		/* 4. SECTION GESTION DU PERSONNAGE */
 		.character-panel {
@@ -1737,10 +1713,9 @@ e personnage : source unique du markup, partagée par la sidebar, la fiche, la l
 			pointer-events: none;
 		}
 		.viewport .controls-carte .move-spacer { display: none; }
-		/* Pavé INVISIBLE tant que son mode (localStorage) n'est pas appliqué : sinon il
-		   s'affichait sur la carte puis sautait dans le panneau flottant une fois les scripts
-		   de fin de page chargés. `appliquerModePave` pose `pave-pret` ; rien n'apparaît avant. */
-		#controls:not(.pave-pret) { visibility: hidden; }
+		/* Mode flottant retenu (classe posée dans <head>) : rien n'apparaît sur la carte en
+		   attendant que `appliquerModePave` emporte le pavé dans #move-flottant. */
+		html.pave-flottant .viewport .controls-carte { visibility: hidden; }
 		.viewport .controls-carte .btn {
 			width: var(--fleche); height: var(--fleche);
 			pointer-events: auto;
@@ -2061,7 +2036,7 @@ e personnage : source unique du markup, partagée par la sidebar, la fiche, la l
 				<section id="guidage-action"></section>
 				<h3 id="sub-locations-title">Lieux</h3>
 				<ul id="sub-locations-list-id" class="sub-locations-list">
-					<li><button type="button" class="sub-loc-btn sub-loc-vide" disabled tabindex="-1" aria-hidden="true">&nbsp;</button></li>
+					<li aria-hidden="true"><button type="button" class="sub-loc-btn sub-loc-vide" disabled tabindex="-1">&nbsp;</button></li>
 				</ul>
 			</section>
 		</aside>
@@ -3840,7 +3815,7 @@ e personnage : source unique du markup, partagée par la sidebar, la fiche, la l
 				// Pas de pastille sur une connexion interne : elle marquerait le lieu où l'on EST.
 				.map(l => `<li><button class="sub-loc-btn${_guidage && link._id === _guidage.link_id ? ' btn-highlight' : ''}" onclick="moveTo('${link._id}')">${l.lieu === "{{lieu}}" ? '' : _marquePastille(_lieuxMarques[l.lieu])}➔ ${l.details.label}</button></li>`)
 				.join('');
-		}).join('') || `<li><button type="button" class="sub-loc-btn sub-loc-vide" disabled tabindex="-1">Aucun</button></li>`;
+		}).join('') || `<li aria-hidden="true"><button type="button" class="sub-loc-btn sub-loc-vide" disabled tabindex="-1">&nbsp;</button></li>`;
 	}
 	buildLocationslist();
 
@@ -3990,7 +3965,7 @@ e personnage : source unique du markup, partagée par la sidebar, la fiche, la l
 		const carte = document.getElementById('swipe-zone');
 		if (!controls || !panneau || !corps || !carte) return;
 		const flottant = mode === 'flottant';
-		controls.classList.add('pave-pret');
+		document.documentElement.classList.toggle('pave-flottant', flottant);
 		if (flottant) {
 			corps.appendChild(controls);
 			controls.classList.remove('controls-carte');
