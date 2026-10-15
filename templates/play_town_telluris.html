@@ -23,11 +23,31 @@
 	<title>Telluris — {{ title }}</title>
 	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
 	{{ pleinecran.tete() }}
-	{# Mode du pavé lu AVANT le premier rendu : sans lui, le pavé s'affichait sur la carte
-	   puis sautait dans le panneau flottant une fois les scripts de fin de page chargés.
-	   `html.pave-flottant` masque le pavé tant qu'il est encore sur la carte ;
-	   `appliquerModePave` le déplace et tient la classe à jour. Clé = PAVE_MODE_CLE. #}
-	<script>try { if (localStorage.getItem('telluris.play.pave_mode') === 'flottant') document.documentElement.classList.add('pave-flottant'); } catch (e) {}</script>
+e personnage : source unique du markup, partagée par la sidebar, la fiche, la liste
+   du groupe et le board de recrutement (les deux dernières la clonent depuis <template>). #}
+{% import "part-character-card.html" as cards %}
+{# Barre de slots : CSS partagé avec l'écran de combat (macro paramétrée par les sélecteurs,
+   les deux pages ne portant pas les mêmes noms de classes). #}
+{% import "part-slot-bar-css.html" as slotbar %}
+{# Pavé de déplacement : markup ET CSS partagés avec la page de combat et le mode « test de
+   déplacement » de l'éditeur de carte. #}
+{% import "part-move-panel.html" as movepanel %}
+{# Plein écran : choix gardé d'une page à l'autre + manifeste (cf. part-plein-ecran.html). #}
+{% import "part-plein-ecran.html" as pleinecran %}
+{# ★ Points d'attribut de la fiche : dans la ligne PV/PM de l'identité (carte de la fiche en
+   portrait — paramètre `points` de la macro de carte —, colonne gauche en paysage), visibles
+   au-dessus de TOUS les onglets — ils sont la bourse commune des caracts, de la vocation,
+   des sorts, des écoles et des compétences. Pas d'id (deux exemplaires) : `_syncPoints` les
+   retrouve par `data-points`. #}
+{% macro points_fiche(pts) %}<span class="sh-card-points pts-dispo{% if pts <= 0 %} is-vide{% endif %}" title="Points d'attribut à répartir (caractéristiques, vocation, sorts, écoles, compétences)">★ <span data-points>{{ pts }}</span></span>{% endmacro %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	{{ pleinecran.tete() }}
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 	<style>
@@ -1717,9 +1737,10 @@
 			pointer-events: none;
 		}
 		.viewport .controls-carte .move-spacer { display: none; }
-		/* Mode flottant retenu (classe posée dans <head>) : rien n'apparaît sur la carte en
-		   attendant que `appliquerModePave` emporte le pavé dans #move-flottant. */
-		html.pave-flottant .viewport .controls-carte { visibility: hidden; }
+		/* Pavé INVISIBLE tant que son mode (localStorage) n'est pas appliqué : sinon il
+		   s'affichait sur la carte puis sautait dans le panneau flottant une fois les scripts
+		   de fin de page chargés. `appliquerModePave` pose `pave-pret` ; rien n'apparaît avant. */
+		#controls:not(.pave-pret) { visibility: hidden; }
 		.viewport .controls-carte .btn {
 			width: var(--fleche); height: var(--fleche);
 			pointer-events: auto;
@@ -3969,7 +3990,7 @@
 		const carte = document.getElementById('swipe-zone');
 		if (!controls || !panneau || !corps || !carte) return;
 		const flottant = mode === 'flottant';
-		document.documentElement.classList.toggle('pave-flottant', flottant);
+		controls.classList.add('pave-pret');
 		if (flottant) {
 			corps.appendChild(controls);
 			controls.classList.remove('controls-carte');
