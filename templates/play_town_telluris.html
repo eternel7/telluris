@@ -1905,49 +1905,49 @@
 				flex-shrink: 0;
 				font-size: 13px;
 			}
+			/* Cadre = EXACTEMENT la fenêtre (border-box : bordure et padding compris), jamais
+			   plus : aucun défilement de page. La rangée des Lieux prend le reste (`1fr`) et
+			   défile chez elle ; fiche et boutons restent collés en bas. `dvh` : seul le BAS
+			   suit la fenêtre, rien au-dessus (page ancrée en haut). Écran court : la carte
+			   (`minmax(0, auto)`) rétrécit avant que les Lieux ne passent sous 20vh. */
 			#game-container {
 				grid-template-columns: 1fr;
-				grid-template-rows: auto auto auto auto;
-				/* Hauteur minimale du cadre (95vh) > contenu : sans `start`, le surplus étirait
-				   les rangées `auto` — bandeau plus haut, carte plus bas, à chaque changement
-				   de hauteur de fenêtre. */
-				align-content: start;
-				/* Cadre jusqu'au bas de l'écran (95vh laissait une bande vide sous lui, la page
-				   étant ancrée en haut). `dvh` : seul le BAS suit la fenêtre, rien au-dessus. */
-				min-height: 100dvh;
-				grid-template-areas: 
+				grid-template-rows: auto minmax(0, auto) minmax(20vh, 1fr) auto auto;
+				height: 100dvh;
+				min-height: 0;
+				grid-template-areas:
 					"header"
 					"map"
 					"sidebar"
 					"char"
 					"footer";
-				height: auto;
-				overflow: visible;
+				overflow: hidden;
 			}
 			img#bg-image-fit {
 				width : 85vw;
 				max-width: min-content;
 			}
 			.sidebar {
-				overflow: visible;
+				min-height: 0;
 			}
 			.sub-locations-panel {
 				order: 1;
-				overflow: visible;
-				contain: none;
+				min-height: 0;
 			}
 			.map-area {
 				height: stretch;
 				max-height: 465px;
 			}		
-			/* Zone zoomée : pleine largeur, carrée comme la fenêtre de cases — sans quoi la
-			   containment de taille la ramènerait à 0. */
+			/* Zone zoomée : la containment de taille la ramènerait à 0 dans une rangée `auto`.
+			   Sa rangée vise donc le CARRÉ pleine largeur (100vw − bordure et padding du cadre,
+			   2 × 14 px) et rétrécit avant les Lieux ; la zone s'étire sur la rangée
+			   (`--cell` prend min(cqw, cqh), un rectangle convient). */
+			#game-container:has(> .map-grille) {
+				grid-template-rows: auto minmax(0, calc(100vw - 28px)) minmax(20vh, 1fr) auto auto;
+			}
 			.map-area.map-grille {
 				height: auto;
 				max-height: none;
-				aspect-ratio: 1;
-				/* ⚠️ Sans lui, le minimum automatique d'un élément à `aspect-ratio` élargit la
-				   colonne au-delà de l'écran (la page déborde de ~24 px). */
 				min-width: 0;
 			}
 			.sh-quest-status {
