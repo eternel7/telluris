@@ -69,6 +69,13 @@ def _get_doc(doc_id):
 	return _DOCS.get(doc_id)
 
 
+@pytest.fixture(autouse=True)
+def _sans_plancher_de_puissance(monkeypatch):
+	"""Le monde de test n'est pas calibré sur les planchers réels de `QUETE_RANG_POTENTIEL_MIN` :
+	on les retire partout, les tests du plancher posent le leur."""
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {})
+
+
 def _find_docs(query, fields=None):
 	# `fields` = projection Mango (lieux_chasse_de la demande pour ne pas rapatrier les
 	# `cells`) — ignorée ici : un faux qui rend TOUT le doc est le pire cas honnête.
@@ -428,6 +435,90 @@ def test_offre_rang_reprend_au_dessus_du_defaut_si_comptoir_plus_prestigieux():
 def test_offre_rang_none_si_deja_active():
 	character = {"quetes_actives": [{"source": "rang", "cite": "lieu:auxerre"}]}
 	assert chasse.offre_rang_pour(character, COMPTOIR, _get_doc, _find_docs) is None
+
+
+# ── Plancher de puissance de la cible (QUETE_RANG_POTENTIEL_MIN) ─────────────────
+
+# Lapin rendu chassable à Auxerre, à côté du loup : deux cibles de puissances différentes.
+AUXERRE_DEUX_PROIES = {**AUXERRE, "rencontres": AUXERRE["rencontres"] + [
+	{"espece": "espece:lapin", "zones": ["zone:foret"]}]}
+_POTENTIELS = {"espece:loup": 60.0, "espece:lapin": 10.0}
+
+
+def _get_doc_deux_proies(doc_id):
+	return AUXERRE_DEUX_PROIES if doc_id == "lieu:auxerre" else _DOCS.get(doc_id)
+
+
+def _potentiel_fixe(espece, profil_id, get_doc_fn):
+	return _POTENTIELS.get(espece["_id"])
+
+
+def test_offre_rang_ecarte_les_cibles_sous_le_plancher(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 30.0})
+	cibles = {
+		chasse.offre_rang_pour({}, COMPTOIR, _get_doc_deux_proies, _find_docs,
+		                       potentiel_fn=_potentiel_fixe)["objectif"]["cible"]
+		for _ in range(30)
+	}
+	assert cibles == {"espece:loup"}
+
+
+def test_offre_rang_sans_plancher_garde_toutes_les_cibles():
+	# Fixture autouse : aucun plancher → le lapin redevient une cible possible.
+	random.seed(3)
+	cibles = {
+		chasse.offre_rang_pour({}, COMPTOIR, _get_doc_deux_proies, _find_docs,
+		                       potentiel_fn=_potentiel_fixe)["objectif"]["cible"]
+		for _ in range(30)
+	}
+	assert cibles == {"espece:loup", "espece:lapin"}
+
+
+def test_offre_rang_none_si_aucune_cible_au_plancher(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 100.0})
+	assert chasse.offre_rang_pour({}, COMPTOIR, _get_doc_deux_proies, _find_docs,
+	                              potentiel_fn=_potentiel_fixe) is None
+
+
+def test_offre_rang_plancher_du_rang_VISE(monkeypatch):
+	# Plancher posé pour D seulement : un perso F vise E → aucun filtre ; un perso E vise D → filtré.
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"D": 100.0})
+	assert chasse.offre_rang_pour({}, COMPTOIR, _get_doc_deux_proies, _find_docs,
+	                              potentiel_fn=_potentiel_fixe) is not None
+	character = {"rangs_guilde": {"lieu:auxerre": "E"}}
+	assert chasse.offre_rang_pour(character, COMPTOIR, _get_doc_deux_proies, _find_docs,
+	                              potentiel_fn=_potentiel_fixe) is None
+
+
+def test_offre_rang_potentiel_illisible_ecarte_la_cible(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 1.0})
+	assert chasse.offre_rang_pour({}, COMPTOIR, _get_doc, _find_docs,
+	                              potentiel_fn=lambda *a: None) is None
+
+
+def test_potentiel_cible_reel_croit_avec_le_profil():
+	# Vrai simulateur : valeur positive, et l'élite de grade supérieur pèse plus lourd.
+	novice = chasse.potentiel_cible(LOUP, "profil:novice", _get_doc)
+	veteran = chasse.potentiel_cible(LOUP, "profil:veteran", _get_doc)
+	assert novice is not None and novice > 0
+	assert veteran > novice
+	assert chasse.potentiel_cible(LOUP, "profil:inexistant", _get_doc) is None
+
+
+def test_offre_rang_plancher_par_defaut_sur_le_vrai_potentiel(monkeypatch):
+	# Chemin par défaut (`potentiel_cible`) : un plancher juste au-dessus du loup vétéran coupe l'offre.
+	pot = chasse.potentiel_cible(LOUP, "profil:veteran", _get_doc)
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": pot})
+	assert chasse.offre_rang_pour({}, COMPTOIR, _get_doc, _find_docs) is not None
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": pot + 0.1})
+	assert chasse.offre_rang_pour({}, COMPTOIR, _get_doc, _find_docs) is None
+
+
+def test_planchers_par_defaut_sur_lechelle_et_croissants():
+	planchers = character_stats.CODE_DEFAULTS["QUETE_RANG_POTENTIEL_MIN"]
+	assert planchers and set(planchers) <= set(RANGS)
+	ordonnes = [planchers[r] for r in RANGS if r in planchers]
+	assert ordonnes == sorted(ordonnes) and len(set(ordonnes)) == len(ordonnes)
 
 
 # ── accepter_rang / solder_rang ──────────────────────────────────────────────────

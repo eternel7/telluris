@@ -24,6 +24,10 @@
 # Aller plus haut demande la guilde d'une AUTRE cité — c'est le plafond, et non le sommet de
 # l'échelle, qui coupe les offres (`rang_plafond_atteint`) et arme le flag de dialogue `rang_max`.
 #
+# ⚠️ PLANCHER de puissance : la cible d'une épreuve de rang doit atteindre le `potentiel_combat`
+# minimum du rang VISÉ (world-var `QUETE_RANG_POTENTIEL_MIN`), sans quoi on montait de rang en
+# abattant un écureuil. Aucune cible au niveau ⇒ pas d'épreuve (fail-closed, comme le plafond).
+#
 # Logique pure (DB injectée : get_doc_fn / find_docs_fn), mute sans save — l'endpoint persiste.
 # Pattern de utils/transport.py. World-vars lues via le module (jamais from-import).
 
@@ -552,11 +556,40 @@ def _rang_deja_actif(character: dict, cite: str) -> bool:
 	return False
 
 
-def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_fn) -> dict | None:
+def potentiel_min_pour(rang_vise: str) -> float | None:
+	"""Plancher de `potentiel_combat` de la cible d'une épreuve visant `rang_vise`, ou None (aucun
+	plancher pour ce rang). Lu via le module : la world-var est rechargeable."""
+	seuil = (character_stats.QUETE_RANG_POTENTIEL_MIN or {}).get(rang_vise)
+	return None if seuil is None else float(seuil)
+
+
+def potentiel_cible(espece_doc: dict, profil_id: str, get_doc_fn) -> float | None:
+	"""`potentiel_combat` (total) de l'espèce sous ce profil — la valeur de /admin/simulateur,
+	snapshot médian déterministe. None si le belligérant ne se construit pas.
+	Import PARESSEUX : `potentiel → simulateur → combat → quetes`, et ce module tient à ne pas
+	tirer le moteur de combat (cf. `case_praticable_proche`)."""
+	from utils import potentiel, simulateur
+	eid = (espece_doc or {}).get("_id")
+	if not eid or not profil_id:
+		return None
+
+	def _get(doc_id):
+		return espece_doc if doc_id == eid else get_doc_fn(doc_id)
+	try:
+		bel = simulateur.construire_belligerant({"type": "espece", "id": eid, "profil": profil_id}, _get)
+		return float(potentiel.potentiel_combat(bel["snapshot_reference"], bel["arsenal"])["total"])
+	except Exception:
+		return None
+
+
+def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_fn,
+                    potentiel_fn=None) -> dict | None:
 	"""Construit une épreuve de rang au comptoir, ou `None` si : pas de `lieu_parent`, PLAFOND DE
 	CE COMPTOIR déjà atteint (`rang_max_de`, défaut `D` — pas le sommet du monde), épreuve de rang
-	de cette cité déjà active, ou aucune cible résolvable au grade MAX. Ne tire PAS la probabilité
-	(c'est `poser_rang_offert` qui la gère)."""
+	de cette cité déjà active, ou aucune cible résolvable au grade MAX dont la puissance atteint le
+	PLANCHER du rang visé (`potentiel_min_pour` ; potentiel illisible ⇒ cible écartée). Ne tire PAS
+	la probabilité (c'est `poser_rang_offert` qui la gère). `potentiel_fn(espece, profil_id,
+	get_doc_fn)` injectable, défaut `potentiel_cible`."""
 	cite = (comptoir_doc or {}).get("lieu_parent")
 	if not cite:
 		return None
@@ -565,6 +598,8 @@ def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_f
 		return None
 	if _rang_deja_actif(character, cite):
 		return None
+	plancher = potentiel_min_pour(rang_suivant(rang_courant))
+	potentiel_fn = potentiel_fn or potentiel_cible
 	candidats = []
 	for L in lieux_chasse_de(cite, get_doc_fn, find_docs_fn):
 		for eid in quetes.especes_du_parent(L):
@@ -575,8 +610,13 @@ def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_f
 			if position is None:
 				continue
 			profil_id = resoudre_profil_chasse(L, espece, TIER_MAX, position, get_doc_fn)
-			if profil_id:
-				candidats.append((L, espece, position, profil_id))
+			if not profil_id:
+				continue
+			if plancher is not None:
+				pot = potentiel_fn(espece, profil_id, get_doc_fn)
+				if pot is None or pot < plancher:
+					continue
+			candidats.append((L, espece, position, profil_id))
 	if not candidats:
 		return None
 	L, espece, position, profil_id = random.choice(candidats)
