@@ -197,6 +197,10 @@
 		   `buildLocationslist` ne passe, et par lui quand il n'y a aucun lieu : la liste a
 		   toujours la hauteur d'une ligne, le passage 0 → 1 lieu ne fait plus sauter la sidebar. */
 		.sub-loc-btn.sub-loc-vide { visibility: hidden; }
+		/* Plancher = une ligne qui porte une pastille `.loc-marque` (18 px bordure comprise,
+		   + padding 2×8 + bordure 2×1) : en mobile (0.8rem), cette ligne fait 1 px de plus que
+		   la ligne réservée, et passer d'un lieu à l'autre décalait encore la sidebar. */
+		#sub-locations-list-id .sub-loc-btn { min-height: 36px; }
 		/* Récolte / Cap 🧭 : dépliage en hauteur + fondu (`_basculerDepliable`). Rendu ouvert
 		   par Jinja au chargement : aucune animation à l'arrivée, seulement en cours de jeu. */
 		.bloc-depliable {
