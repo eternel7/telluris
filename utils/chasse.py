@@ -564,11 +564,12 @@ def potentiel_min_pour(rang_vise: str) -> float | None:
 
 
 def potentiel_cible(espece_doc: dict, profil_id: str, get_doc_fn) -> float | None:
-	"""`potentiel_combat` (total) de l'espèce sous ce profil — la valeur de /admin/simulateur,
-	snapshot médian déterministe. None si le belligérant ne se construit pas.
+	"""Potentiel de combat de l'espèce sous ce profil, ÉQUIPEMENT ESPÉRÉ et bonus humanoïde
+	compris (`potentiel.potentiel_espece`, la valeur de /admin/table). Déterministe. None si le
+	belligérant ne se construit pas.
 	Import PARESSEUX : `potentiel → simulateur → combat → quetes`, et ce module tient à ne pas
 	tirer le moteur de combat (cf. `case_praticable_proche`)."""
-	from utils import potentiel, simulateur
+	from utils import potentiel
 	eid = (espece_doc or {}).get("_id")
 	if not eid or not profil_id:
 		return None
@@ -576,8 +577,7 @@ def potentiel_cible(espece_doc: dict, profil_id: str, get_doc_fn) -> float | Non
 	def _get(doc_id):
 		return espece_doc if doc_id == eid else get_doc_fn(doc_id)
 	try:
-		bel = simulateur.construire_belligerant({"type": "espece", "id": eid, "profil": profil_id}, _get)
-		return float(potentiel.potentiel_combat(bel["snapshot_reference"], bel["arsenal"])["total"])
+		return float(potentiel.potentiel_espece(eid, profil_id, _get)["total"])
 	except Exception:
 		return None
 

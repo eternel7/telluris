@@ -394,14 +394,15 @@ QUETE_CHASSE_PROBA_RANG: float = 0.5
 # promotion nulle part (symptôme bruyant, préféré à un plafond silencieusement trop permissif).
 RANG_GUILDE_MAX_DEFAUT: str = "D"
 # PLANCHER DE PUISSANCE de la cible d'une épreuve de rang : rang VISÉ → `potentiel_combat`
-# minimum (utils/potentiel, celui de /admin/simulateur) de l'espèce sous son profil résolu. Une
-# cible sous le plancher est écartée ; plus aucune ⇒ pas d'épreuve (fail-closed). Rang absent ⇒
-# aucun plancher. Calibré sur le dump du 2026-10-13 : à Auxerre, le grade max (`combattant`)
-# va de 8 (écureuil) à 57 (grand sanglier) — E garde loup/sanglier/cerf/grand sanglier, D le
-# seul grand sanglier ; au-delà, ≈ quartiles et queue du bestiaire sans profil (Q3 93, P90 145,
-# P99 403), car ces rangs exigent le bestiaire d'autres cités.
+# minimum de l'espèce sous son profil résolu, ÉQUIPEMENT ESPÉRÉ et bonus humanoïde compris
+# (`potentiel.potentiel_espece`, la colonne de /admin/table). Une cible sous le plancher est
+# écartée ; plus aucune ⇒ pas d'épreuve (fail-closed). Rang absent ⇒ aucun plancher. Calibré
+# sur le dump du 2026-10-13 : à Auxerre, le grade max (`combattant`) va de 8 (écureuil) à 57
+# (grand sanglier) — E garde loup/sanglier/cerf/gobelin armé/grand sanglier, D le seul grand
+# sanglier ; au-delà, ≈ quartiles et queue du bestiaire sans profil (Q3 108, P90 179, P99 463),
+# car ces rangs exigent le bestiaire d'autres cités.
 QUETE_RANG_POTENTIEL_MIN: dict[str, float] = {
-	"E": 25.0, "D": 50.0, "C": 90.0, "B": 140.0, "A": 250.0, "S": 400.0, "S+": 600.0,
+	"E": 25.0, "D": 50.0, "C": 105.0, "B": 175.0, "A": 250.0, "S": 400.0, "S+": 600.0,
 }
 
 # ── Focalisation ─────────────────────────────────────────────────────────────────
