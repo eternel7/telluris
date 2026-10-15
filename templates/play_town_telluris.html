@@ -1877,6 +1877,13 @@
 
 		/* RESPONSIVE : Mode Portrait Mobile */
 		@media (max-width: 768px) and (orientation: portrait) {
+			/* Page ANCRÉE EN HAUT, jamais centrée : centrée, elle glissait de la moitié de tout
+			   écart — fenêtre qui change de hauteur (application installée : l'espace au-dessus
+			   du bandeau apparaissait au premier pas), ligne de la liste des Lieux plus haute
+			   d'un pixel (la carte bougeait). Le surplus de hauteur part en bas. */
+			body {
+				align-items: flex-start;
+			}
 			.sheet-layout {
 				flex-direction: column;
 			}
@@ -1899,6 +1906,13 @@
 			#game-container {
 				grid-template-columns: 1fr;
 				grid-template-rows: auto auto auto auto;
+				/* Hauteur minimale du cadre (95vh) > contenu : sans `start`, le surplus étirait
+				   les rangées `auto` — bandeau plus haut, carte plus bas, à chaque changement
+				   de hauteur de fenêtre. */
+				align-content: start;
+				/* Cadre jusqu'au bas de l'écran (95vh laissait une bande vide sous lui, la page
+				   étant ancrée en haut). `dvh` : seul le BAS suit la fenêtre, rien au-dessus. */
+				min-height: 100dvh;
 				grid-template-areas: 
 					"header"
 					"map"
