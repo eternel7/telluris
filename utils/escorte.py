@@ -568,11 +568,14 @@ def _offre_du_registre(character: dict, lieu_doc: dict, recherche: dict, find_do
 	attend encore un enfant est choisie, et l'offre est bâtie comme si le parent l'avait
 	confiée — seul le `giver` change (le comptoir), et c'est lui qui encaissera le +1 en plus
 	du magasin."""
+	cite = recherche.get("cite") or (lieu_doc or {}).get("lieu_parent")
+	# Le registre de la guilde ne s'ouvre qu'à ses MEMBRES (`chasse.inscrit_a_la_guilde`).
+	if not chasse.inscrit_a_la_guilde(character, cite):
+		return None
 	if not rang_suffisant(character, recherche):
 		return None
 	if rand_fn() >= float(recherche.get("proba", character_stats.ESCORTE_GUILDE_PROBA)):
 		return None
-	cite = recherche.get("cite") or (lieu_doc or {}).get("lieu_parent")
 	familles = familles_de_la_cite(character, cite, find_docs_fn, get_doc_fn)
 	if not familles:
 		return None

@@ -16,6 +16,7 @@ Base en mémoire, comme `tests/test_apprendre_sort.py`.
 import asyncio
 
 import pytest
+from fastapi import HTTPException
 
 from utils import quetes
 from utils.characters import money_to_cuivre
@@ -60,6 +61,8 @@ def _perso(**champs):
 		"_id": "character:u_1", "type": "character", "lieu": "lieu:guilde",
 		"inventaire": [], "quetes_actives": [], "quetes_terminees": [],
 		"or": 0, "argent": 0, "cuivre": 0, "groupe": [],
+		# Membre de la guilde de la cité : le tableau est réservé aux inscrits.
+		"rangs_guilde": {GUILDE["lieu_parent"]: "F"},
 	}
 	base.update(champs)
 	return base
@@ -254,3 +257,27 @@ def test_turn_in_epargne_un_contrat_ordinaire(monde):
 
 	assert av["statut"] == "embauche" and "contrats_echus" not in payload
 	assert money_to_cuivre(av) == 200   # part ORDINAIRE : 20 % de 1000
+
+
+# ── Tableau réservé aux membres de la guilde ─────────────────────────────────────
+
+def test_un_non_inscrit_voit_le_tableau_vide_et_ne_peut_rien_accepter(monde):
+	rq = monde["rq"]
+	monde["docs"]["quete:g1"] = _offre("quete:g1")
+	avant = set(monde["docs"])
+	inconnu = _perso(rangs_guilde={})
+
+	payload = rq._board_payload(inconnu, GUILDE, completer=True)
+	assert payload["offres"] == []
+	assert payload["inscription_requise"] == rq.INSCRIPTION_REQUISE
+	assert set(monde["docs"]) == avant            # rien n'est généré pour lui
+
+	with pytest.raises(HTTPException) as exc:
+		_accepter(monde, inconnu, "quete:g1")
+	assert exc.value.status_code == 403
+	assert monde["docs"]["quete:g1"]["statut"] == "offerte"   # l'offre reste au tableau
+
+
+def test_un_inscrit_n_a_pas_de_refus(monde):
+	payload = monde["rq"]._board_payload(_perso(), GUILDE)
+	assert payload["inscription_requise"] is None

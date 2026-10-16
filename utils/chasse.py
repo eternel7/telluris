@@ -39,8 +39,8 @@ from utils.zones import (
 	load_zone_defs_for_lieu, compute_zone_intensity, resolve_profil_weights,
 	profils_compatibles,
 )
-from utils.characters import lieu_label, item_ref_id
-from utils.recrutement import RANGS
+from utils.characters import lieu_label, item_ref_id, item_ref_lieu
+from utils.recrutement import RANGS, CARTE_AVENTURIER_ITEM_ID
 from utils import accord_espece, quetes
 
 
@@ -474,6 +474,35 @@ def crediter_rang(character: dict, spec) -> str | None:
 	return rang
 
 
+def inscrit_a_la_guilde(character: dict, cite_id: str) -> bool:
+	"""Le personnage est-il INSCRIT à la guilde de cette cité ? Garde des services réservés
+	aux membres : épreuve de rang, avis de recherche du registre, tableau de quêtes.
+
+	⚠️ `rang_de` NE dit PAS l'inscription : son repli `F` vaut pour tout le monde, et c'est
+	ce repli qui laissait Borin proposer une épreuve de rang à qui n'avait même pas sa carte.
+
+	Inscrit = un rang posé DANS CETTE CITÉ (`rangs_guilde`, écrit par la première mission
+	d'Auxerre et par l'inscription du Grand Relais), OU une quête réussie dont la récompense
+	remettait la carte de cette cité ou un rang de guilde de cette cité. Le second cas sert les
+	archives d'avant `crediter_rang` : la mission faite, `rangs_guilde` resté vide (aucune
+	migration, Conventions §4). Fail-closed : cité absente ⇒ False."""
+	if not cite_id:
+		return False
+	if cite_id in ((character or {}).get("rangs_guilde") or {}):
+		return True
+	for q in (character or {}).get("quetes_terminees") or []:
+		if q.get("echec"):
+			continue
+		rec = q.get("recompenses") or {}
+		rang = rec.get("rang_guilde")
+		if isinstance(rang, dict) and rang.get("cite") == cite_id:
+			return True
+		for ref in rec.get("items") or []:
+			if item_ref_id(ref) == CARTE_AVENTURIER_ITEM_ID and item_ref_lieu(ref) == cite_id:
+				return True
+	return False
+
+
 # ── Offre de rang au comptoir (miroir simplifié du transport authoré) ─────────────
 
 # Qualificatifs de l'élite traquée, INDEXÉS PAR NIVEAU DE PROFIL (1 → 6). Le `nom` du doc
@@ -584,7 +613,8 @@ def potentiel_cible(espece_doc: dict, profil_id: str, get_doc_fn) -> float | Non
 
 def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_fn,
                     potentiel_fn=None) -> dict | None:
-	"""Construit une épreuve de rang au comptoir, ou `None` si : pas de `lieu_parent`, PLAFOND DE
+	"""Construit une épreuve de rang au comptoir, ou `None` si : pas de `lieu_parent`, personnage
+	non inscrit à la guilde de la cité (`inscrit_a_la_guilde`), PLAFOND DE
 	CE COMPTOIR déjà atteint (`rang_max_de`, défaut `D` — pas le sommet du monde), épreuve de rang
 	de cette cité déjà active, ou aucune cible résolvable au grade MAX dont la puissance atteint le
 	PLANCHER du rang visé (`potentiel_min_pour` ; potentiel illisible ⇒ cible écartée). Ne tire PAS
@@ -592,6 +622,10 @@ def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_f
 	get_doc_fn)` injectable, défaut `potentiel_cible`."""
 	cite = (comptoir_doc or {}).get("lieu_parent")
 	if not cite:
+		return None
+	# Une épreuve de rang élève un MEMBRE : pas d'épreuve avant l'inscription (première
+	# mission, inscription au Grand Relais), sinon on montait de « non inscrit » à E.
+	if not inscrit_a_la_guilde(character, cite):
 		return None
 	rang_courant = rang_de(character, cite)
 	if rang_plafond_atteint(rang_courant, comptoir_doc):
