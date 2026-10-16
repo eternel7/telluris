@@ -28,6 +28,12 @@
 	   `html.pave-flottant` masque le pavé tant qu'il est encore sur la carte ;
 	   `appliquerModePave` le déplace et tient la classe à jour. Clé = PAVE_MODE_CLE. #}
 	<script>try { if (localStorage.getItem('telluris.play.pave_mode') === 'flottant') document.documentElement.classList.add('pave-flottant'); } catch (e) {}</script>
+	{# `--app-h` = hauteur RÉELLE de la fenêtre (innerHeight), mesurée avant le premier rendu
+	   et à chaque redimensionnement. Application installée en plein écran (Android) : `dvh`
+	   y vaut l'écran entier quand les barres système sont masquées, plus haut que la fenêtre
+	   — fiche et boutons Personnage/Groupe tombaient sous le bas de l'écran. Écrire la
+	   variable ne change pas innerHeight : aucune boucle (§17). Repli CSS : `100dvh`. #}
+	<script>(function () { var r = document.documentElement; function f() { r.style.setProperty('--app-h', window.innerHeight + 'px'); } f(); window.addEventListener('resize', f); })();</script>
 	{% include "part-polices.html" %}
 	<style>
 		:root {
@@ -1910,12 +1916,13 @@
 			   vaut AU MOINS la fenêtre (border-box : bordure et padding compris, donc pile
 			   100 % quand tout tient, aucun scroll) et grandit avec son contenu. La rangée des
 			   Lieux (`1fr`) prend le surplus : fiche et boutons collés en bas de l'écran.
-			   `dvh` : seul le BAS suit la fenêtre, rien au-dessus (page ancrée en haut). */
+			   `--app-h` (innerHeight, repli `dvh`) : seul le BAS suit la fenêtre, rien au-dessus
+			   (page ancrée en haut). */
 			#game-container {
 				grid-template-columns: 1fr;
 				grid-template-rows: auto auto 1fr auto auto;
 				height: auto;
-				min-height: 100dvh;
+				min-height: var(--app-h, 100dvh);
 				grid-template-areas:
 					"header"
 					"map"
