@@ -189,6 +189,15 @@ html.vue-portrait body { padding-bottom: calc(var(--barre-h, 0px) + 18px); }
 /* La pastille plein écran (part-plein-ecran, coin bas-gauche fixe) masquerait les barres :
    elle monte juste au-dessus. */
 html.vue-portrait .fs-fab.fs-fab-compact { bottom: calc(var(--barre-h, 0px) + 18px); }
+/* Application installée en plein écran : l'écran du téléphone a des coins ARRONDIS — à 8px
+   du bas, les extrémités des barres étaient rognées. Même marge que /play (`--marge-bas`,
+   play_town_telluris.html) ; le pied de page garde ses 10px au-dessus des barres. Le pavé
+   posé par défaut suit le haut mesuré des barres (_placerPaveParDefaut) : rien à recaler. */
+@media (display-mode: fullscreen) {
+	html.vue-portrait { --marge-bas: max(24px, env(safe-area-inset-bottom, 0px)); }
+	html.vue-portrait .barres-bas { bottom: var(--marge-bas); }
+	html.vue-portrait body { padding-bottom: calc(var(--barre-h, 0px) + var(--marge-bas) + 10px); }
+}
 html.vue-portrait .viewport::after {
 	background: radial-gradient(ellipse at 30% 50%, transparent 30%, rgba(0,0,0,0.9) 96%);
 }
