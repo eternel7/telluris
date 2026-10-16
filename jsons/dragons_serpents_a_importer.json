@@ -1,0 +1,3776 @@
+[
+  {
+    "_id": "espece:balaur",
+    "type": "espece",
+    "nom": "Balaur",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "balaur_transparent.png",
+    "description": "Dragon-serpent des Carpates aux ailes de cuir, qui porte trois, sept ou douze têtes selon les récits. On dit que sa bave durcit en pierres précieuses, et qu'un balaur sorti d'un donjon qui débordait ravagea jadis les terres d'un prince de ces montagnes. Une tête tranchée repousse si le cou n'est pas brûlé ; certains assurent qu'il faut les abattre toutes d'un même élan.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 65,
+        "max": 95
+      },
+      "R": {
+        "min": 65,
+        "max": 95
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 55,
+        "max": 80
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "regeneration",
+      "legendaire",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:balaur",
+    "type": "item",
+    "nom": "Carcasse de Balaur",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      400,
+      1200
+    ],
+    "description": "Dépouille de Balaur récupérée à l'issue du combat.",
+    "source_espece": "espece:balaur",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:balaur_tete",
+        "quantite": 1,
+        "fraction": 0.1
+      },
+      {
+        "item": "item:balaur_corps",
+        "quantite": 1,
+        "fraction": 0.45
+      },
+      {
+        "item": "item:balaur_aile",
+        "quantite": 2,
+        "fraction": 0.2
+      },
+      {
+        "item": "item:balaur_patte",
+        "quantite": 2,
+        "fraction": 0.14
+      },
+      {
+        "item": "item:balaur_queue",
+        "quantite": 1,
+        "fraction": 0.11
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:dragon_hydre",
+    "type": "espece",
+    "nom": "Dragon-hydre",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "dragon_hydre_transparent.png",
+    "description": "Dragon sans ailes au corps massif, dont cinq à sept cous jaillissent des épaules ; chaque gueule crache le feu. Une tête tranchée en fait repousser deux, sauf si le moignon est brûlé aussitôt. On raconte qu'une de ses têtes ne meurt jamais et qu'il faut l'enterrer sous un rocher.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 65,
+        "max": 100
+      },
+      "R": {
+        "min": 70,
+        "max": 105
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 55,
+        "max": 80
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 65
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "souffle",
+      "regeneration",
+      "legendaire",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:dragon_hydre",
+    "type": "item",
+    "nom": "Carcasse de Dragon-hydre",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      2500,
+      7000
+    ],
+    "description": "Dépouille de Dragon-hydre récupérée à l'issue du combat.",
+    "source_espece": "espece:dragon_hydre",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:dragon_hydre_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:dragon_hydre_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:dragon_hydre_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:dragon_hydre_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:mushhushshu",
+    "type": "espece",
+    "nom": "Mušḫuššu",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "mushhushshu_transparent.png",
+    "description": "Le « serpent furieux » des déserts de Mésopotamie : tête de serpent cornue, pattes avant de lion, pattes arrière d'aigle, queue armée d'un dard de scorpion. Il fut l'un des onze monstres de Tiamat avant que Marduk ne le dompte ; Babylone l'a peint sur la porte d'Ishtar. Les prêtres de l'Esagil disent qu'il recule devant la bêche de Marduk.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 45,
+        "max": 65
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "venin",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:mushhushshu",
+    "type": "item",
+    "nom": "Carcasse de Mušḫuššu",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      150,
+      350
+    ],
+    "description": "Dépouille de Mušḫuššu récupérée à l'issue du combat.",
+    "source_espece": "espece:mushhushshu",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:mushhushshu_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:mushhushshu_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:mushhushshu_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:mushhushshu_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:xiuhcoatl",
+    "type": "espece",
+    "nom": "Xiuhcóatl",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "xiuhcoatl_transparent.png",
+    "description": "Serpent de feu des terres sèches des Mexicas, aux écailles couleur de turquoise et au museau retroussé : il brûle ce qu'il traverse. On dit que Huitzilopochtli en fit son arme sur la colline de Coatepec. La saison sèche l'appelle ; la pluie, dit-on, le rend aux braises.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 40,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 40,
+        "max": 60
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "souffle",
+      "magique",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:xiuhcoatl",
+    "type": "item",
+    "nom": "Carcasse de Xiuhcóatl",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      40,
+      90
+    ],
+    "description": "Dépouille de Xiuhcóatl récupérée à l'issue du combat.",
+    "source_espece": "espece:xiuhcoatl",
+    "loot_defaut": true
+  },
+  {
+    "_id": "espece:zmey_gorynych",
+    "type": "espece",
+    "nom": "Zmeï Gorynytch",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "zmey_gorynych_transparent.png",
+    "description": "Dragon à trois têtes des terres de Kiev, aux griffes de fer, qui crache le feu et enlève qui lui plaît. Il garde le pont Kalinov sur la Smorodina, la rivière de feu ; on dit que ce pont mène au pays des morts, et nul n'en est revenu pour le confirmer. Ses têtes repoussent ; la terre, dit-on, refuse de boire son sang tant qu'on ne l'en supplie pas.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 80,
+        "max": 115
+      },
+      "R": {
+        "min": 75,
+        "max": 110
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 70,
+        "max": 100
+      },
+      "Int": {
+        "min": 45,
+        "max": 65
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "regeneration",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:zmey_gorynych",
+    "type": "item",
+    "nom": "Carcasse de Zmeï Gorynytch",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      800,
+      2500
+    ],
+    "description": "Dépouille de Zmeï Gorynytch récupérée à l'issue du combat.",
+    "source_espece": "espece:zmey_gorynych",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:zmey_gorynych_tete",
+        "quantite": 1,
+        "fraction": 0.1
+      },
+      {
+        "item": "item:zmey_gorynych_corps",
+        "quantite": 1,
+        "fraction": 0.45
+      },
+      {
+        "item": "item:zmey_gorynych_aile",
+        "quantite": 2,
+        "fraction": 0.2
+      },
+      {
+        "item": "item:zmey_gorynych_patte",
+        "quantite": 2,
+        "fraction": 0.14
+      },
+      {
+        "item": "item:zmey_gorynych_queue",
+        "quantite": 1,
+        "fraction": 0.11
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:ladon",
+    "type": "espece",
+    "nom": "Ladon",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "ladon_transparent.png",
+    "description": "Serpent aux cent têtes et aux cent voix, enroulé autour de l'arbre aux pommes d'or du jardin des Hespérides, au-delà des Colonnes, que les marins disent apercevoir au couchant. Il ne dort jamais. Les uns le disent né de Cétô, les autres d'Échidna. Des flèches trempées dans le venin d'une hydre l'auraient déjà blessé ; une ruse l'aurait déjà détourné.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 80,
+        "max": 115
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 80,
+        "max": 110
+      },
+      "Int": {
+        "min": 50,
+        "max": 70
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "gardien",
+      "legendaire",
+      "boss",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:ladon",
+    "type": "item",
+    "nom": "Carcasse de Ladon",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      3000,
+      9000
+    ],
+    "description": "Dépouille de Ladon récupérée à l'issue du combat.",
+    "source_espece": "espece:ladon",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:ladon_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:ladon_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:ladon_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:ladon_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:yamata_no_orochi",
+    "type": "espece",
+    "nom": "Yamata no Orochi",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "yamata_no_orochi_transparent.png",
+    "description": "Serpent d'Izumo à huit têtes et huit queues, long de huit vallées et de huit collines : des cyprès poussent sur son dos, ses yeux sont rouges comme des cerises d'hiver, son ventre suinte le sang. Chaque année il exigeait une jeune fille. Le saké huit fois brassé endort ses têtes une à une ; on dit qu'une lame dort dans l'une de ses queues.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 100,
+        "max": 145
+      },
+      "R": {
+        "min": 95,
+        "max": 140
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 70,
+        "max": 100
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "legendaire",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:yamata_no_orochi",
+    "type": "item",
+    "nom": "Carcasse de Yamata no Orochi",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      8000,
+      20000
+    ],
+    "description": "Dépouille de Yamata no Orochi récupérée à l'issue du combat.",
+    "source_espece": "espece:yamata_no_orochi",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:yamata_no_orochi_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:yamata_no_orochi_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:yamata_no_orochi_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:yamata_no_orochi_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:illuyanka",
+    "type": "espece",
+    "nom": "Illuyanka",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "illuyanka_transparent.png",
+    "description": "Serpent-dragon des hauts plateaux d'Anatolie, terré dans un trou de la montagne : on raconte qu'il vainquit un jour le dieu de l'orage et lui prit son cœur et ses yeux. Sa gloutonnerie le perd : gavé de festin, il ne repasse plus par son trou, et un simple anthrope put le ligoter.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 15,
+        "max": 25
+      },
+      "Vol": {
+        "min": 60,
+        "max": 90
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 75
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "souterrain",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:illuyanka",
+    "type": "item",
+    "nom": "Carcasse de Illuyanka",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      3000,
+      8000
+    ],
+    "description": "Dépouille de Illuyanka récupérée à l'issue du combat.",
+    "source_espece": "espece:illuyanka",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:illuyanka_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:illuyanka_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:illuyanka_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:illuyanka_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:balaur_tete",
+    "type": "item",
+    "nom": "Tête de Balaur",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      40.0,
+      120.0
+    ],
+    "description": "Tête de Balaur, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "regeneration",
+      "vol"
+    ],
+    "source_espece": "espece:balaur",
+    "portion_de": "item:balaur",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:balaur_tete_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:balaur_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Balaur",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      20.0,
+      60.0
+    ],
+    "description": "Morceau de tête de Balaur, taillé pour être emporté.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "predateur",
+      "regeneration",
+      "vol"
+    ],
+    "source_espece": "espece:balaur",
+    "portion_de": "item:balaur_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:balaur_corps",
+    "type": "item",
+    "nom": "Corps de Balaur",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      180.0,
+      540.0
+    ],
+    "description": "Corps de Balaur, débité sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "predateur",
+      "regeneration",
+      "vol"
+    ],
+    "source_espece": "espece:balaur",
+    "portion_de": "item:balaur",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:balaur_corps_morceau",
+        "quantite": 6,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:balaur_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Balaur",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      30.0,
+      90.0
+    ],
+    "description": "Morceau de corps de Balaur, taillé pour être emporté.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "predateur",
+      "regeneration",
+      "vol"
+    ],
+    "source_espece": "espece:balaur",
+    "portion_de": "item:balaur_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:balaur_aile",
+    "type": "item",
+    "nom": "Aile de Balaur",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      40.0,
+      120.0
+    ],
+    "description": "Aile de Balaur, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_aile",
+      "predateur",
+      "regeneration",
+      "vol"
+    ],
+    "source_espece": "espece:balaur",
+    "portion_de": "item:balaur",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:balaur_aile_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:balaur_aile_morceau",
+    "type": "item",
+    "nom": "Morceau de aile de Balaur",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      20.0,
+      60.0
+    ],
+    "description": "Morceau de aile de Balaur, taillé pour être emporté.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_aile",
+      "predateur",
+      "regeneration",
+      "vol"
+    ],
+    "source_espece": "espece:balaur",
+    "portion_de": "item:balaur_aile",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:balaur_patte",
+    "type": "item",
+    "nom": "Patte de Balaur",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      28.0,
+      84.0
+    ],
+    "description": "Patte de Balaur, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "regeneration",
+      "vol"
+    ],
+    "source_espece": "espece:balaur",
+    "portion_de": "item:balaur",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:balaur_queue",
+    "type": "item",
+    "nom": "Queue de Balaur",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      44.0,
+      132.0
+    ],
+    "description": "Queue de Balaur, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "regeneration",
+      "vol"
+    ],
+    "source_espece": "espece:balaur",
+    "portion_de": "item:balaur",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:balaur_queue_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:balaur_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Balaur",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      22.0,
+      66.0
+    ],
+    "description": "Morceau de queue de Balaur, taillé pour être emporté.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "predateur",
+      "regeneration",
+      "vol"
+    ],
+    "source_espece": "espece:balaur",
+    "portion_de": "item:balaur_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_hydre_tete",
+    "type": "item",
+    "nom": "Tête de Dragon-hydre",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      300.0,
+      840.0
+    ],
+    "description": "Tête de Dragon-hydre, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "regeneration",
+      "souffle"
+    ],
+    "source_espece": "espece:dragon_hydre",
+    "portion_de": "item:dragon_hydre",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:dragon_hydre_tete_morceau",
+        "quantite": 9,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_hydre_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Dragon-hydre",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      33.33,
+      93.33
+    ],
+    "description": "Morceau de tête de Dragon-hydre, taillé pour être emporté.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "predateur",
+      "regeneration",
+      "souffle"
+    ],
+    "source_espece": "espece:dragon_hydre",
+    "portion_de": "item:dragon_hydre_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_hydre_corps",
+    "type": "item",
+    "nom": "Corps de Dragon-hydre",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      1300.0,
+      3640.0
+    ],
+    "description": "Corps de Dragon-hydre, débité sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "predateur",
+      "regeneration",
+      "souffle"
+    ],
+    "source_espece": "espece:dragon_hydre",
+    "portion_de": "item:dragon_hydre",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:dragon_hydre_corps_morceau",
+        "quantite": 37,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_hydre_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Dragon-hydre",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      35.14,
+      98.38
+    ],
+    "description": "Morceau de corps de Dragon-hydre, taillé pour être emporté.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "predateur",
+      "regeneration",
+      "souffle"
+    ],
+    "source_espece": "espece:dragon_hydre",
+    "portion_de": "item:dragon_hydre_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_hydre_patte",
+    "type": "item",
+    "nom": "Patte de Dragon-hydre",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      175.0,
+      490.0
+    ],
+    "description": "Patte de Dragon-hydre, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "regeneration",
+      "souffle"
+    ],
+    "source_espece": "espece:dragon_hydre",
+    "portion_de": "item:dragon_hydre",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:dragon_hydre_patte_morceau",
+        "quantite": 5,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_hydre_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte de Dragon-hydre",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      35.0,
+      98.0
+    ],
+    "description": "Morceau de patte de Dragon-hydre, taillé pour être emporté.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "predateur",
+      "regeneration",
+      "souffle"
+    ],
+    "source_espece": "espece:dragon_hydre",
+    "portion_de": "item:dragon_hydre_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_hydre_queue",
+    "type": "item",
+    "nom": "Queue de Dragon-hydre",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      200.0,
+      560.0
+    ],
+    "description": "Queue de Dragon-hydre, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "regeneration",
+      "souffle"
+    ],
+    "source_espece": "espece:dragon_hydre",
+    "portion_de": "item:dragon_hydre",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:dragon_hydre_queue_morceau",
+        "quantite": 6,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_hydre_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Dragon-hydre",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      33.33,
+      93.33
+    ],
+    "description": "Morceau de queue de Dragon-hydre, taillé pour être emporté.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "predateur",
+      "regeneration",
+      "souffle"
+    ],
+    "source_espece": "espece:dragon_hydre",
+    "portion_de": "item:dragon_hydre_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:illuyanka_tete",
+    "type": "item",
+    "nom": "Tête d'Illuyanka",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      360.0,
+      960.0
+    ],
+    "description": "Tête d'Illuyanka, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "reptile",
+      "souterrain"
+    ],
+    "source_espece": "espece:illuyanka",
+    "portion_de": "item:illuyanka",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:illuyanka_tete_morceau",
+        "quantite": 10,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:illuyanka_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête d'Illuyanka",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      36.0,
+      96.0
+    ],
+    "description": "Morceau de tête d'Illuyanka, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "reptile",
+      "souterrain"
+    ],
+    "source_espece": "espece:illuyanka",
+    "portion_de": "item:illuyanka_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:illuyanka_corps",
+    "type": "item",
+    "nom": "Corps d'Illuyanka",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      1560.0,
+      4160.0
+    ],
+    "description": "Corps d'Illuyanka, débité sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "reptile",
+      "souterrain"
+    ],
+    "source_espece": "espece:illuyanka",
+    "portion_de": "item:illuyanka",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:illuyanka_corps_morceau",
+        "quantite": 42,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:illuyanka_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps d'Illuyanka",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      37.14,
+      99.05
+    ],
+    "description": "Morceau de corps d'Illuyanka, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "reptile",
+      "souterrain"
+    ],
+    "source_espece": "espece:illuyanka",
+    "portion_de": "item:illuyanka_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:illuyanka_patte",
+    "type": "item",
+    "nom": "Patte d'Illuyanka",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      210.0,
+      560.0
+    ],
+    "description": "Patte d'Illuyanka, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "reptile",
+      "souterrain"
+    ],
+    "source_espece": "espece:illuyanka",
+    "portion_de": "item:illuyanka",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:illuyanka_patte_morceau",
+        "quantite": 6,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:illuyanka_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte d'Illuyanka",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      35.0,
+      93.33
+    ],
+    "description": "Morceau de patte d'Illuyanka, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "reptile",
+      "souterrain"
+    ],
+    "source_espece": "espece:illuyanka",
+    "portion_de": "item:illuyanka_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:illuyanka_queue",
+    "type": "item",
+    "nom": "Queue d'Illuyanka",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      240.0,
+      640.0
+    ],
+    "description": "Queue d'Illuyanka, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "reptile",
+      "souterrain"
+    ],
+    "source_espece": "espece:illuyanka",
+    "portion_de": "item:illuyanka",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:illuyanka_queue_morceau",
+        "quantite": 7,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:illuyanka_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue d'Illuyanka",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      34.29,
+      91.43
+    ],
+    "description": "Morceau de queue d'Illuyanka, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "reptile",
+      "souterrain"
+    ],
+    "source_espece": "espece:illuyanka",
+    "portion_de": "item:illuyanka_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:ladon_tete",
+    "type": "item",
+    "nom": "Tête de Ladon",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      360.0,
+      1080.0
+    ],
+    "description": "Tête de Ladon, débitée sur place.",
+    "tags": [
+      "boss",
+      "gardien",
+      "insensible_furtivite",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "reptile"
+    ],
+    "source_espece": "espece:ladon",
+    "portion_de": "item:ladon",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:ladon_tete_morceau",
+        "quantite": 11,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:ladon_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Ladon",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      32.73,
+      98.18
+    ],
+    "description": "Morceau de tête de Ladon, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "gardien",
+      "insensible_furtivite",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "reptile"
+    ],
+    "source_espece": "espece:ladon",
+    "portion_de": "item:ladon_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:ladon_corps",
+    "type": "item",
+    "nom": "Corps de Ladon",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      1560.0,
+      4680.0
+    ],
+    "description": "Corps de Ladon, débité sur place.",
+    "tags": [
+      "boss",
+      "gardien",
+      "insensible_furtivite",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "reptile"
+    ],
+    "source_espece": "espece:ladon",
+    "portion_de": "item:ladon",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:ladon_corps_morceau",
+        "quantite": 47,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:ladon_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Ladon",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      33.19,
+      99.57
+    ],
+    "description": "Morceau de corps de Ladon, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "gardien",
+      "insensible_furtivite",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "reptile"
+    ],
+    "source_espece": "espece:ladon",
+    "portion_de": "item:ladon_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:ladon_patte",
+    "type": "item",
+    "nom": "Patte de Ladon",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      210.0,
+      630.0
+    ],
+    "description": "Patte de Ladon, débitée sur place.",
+    "tags": [
+      "boss",
+      "gardien",
+      "insensible_furtivite",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "reptile"
+    ],
+    "source_espece": "espece:ladon",
+    "portion_de": "item:ladon",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:ladon_patte_morceau",
+        "quantite": 7,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:ladon_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte de Ladon",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      30.0,
+      90.0
+    ],
+    "description": "Morceau de patte de Ladon, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "gardien",
+      "insensible_furtivite",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "reptile"
+    ],
+    "source_espece": "espece:ladon",
+    "portion_de": "item:ladon_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:ladon_queue",
+    "type": "item",
+    "nom": "Queue de Ladon",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      240.0,
+      720.0
+    ],
+    "description": "Queue de Ladon, débitée sur place.",
+    "tags": [
+      "boss",
+      "gardien",
+      "insensible_furtivite",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "reptile"
+    ],
+    "source_espece": "espece:ladon",
+    "portion_de": "item:ladon",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:ladon_queue_morceau",
+        "quantite": 8,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:ladon_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Ladon",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      30.0,
+      90.0
+    ],
+    "description": "Morceau de queue de Ladon, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "gardien",
+      "insensible_furtivite",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "reptile"
+    ],
+    "source_espece": "espece:ladon",
+    "portion_de": "item:ladon_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:mushhushshu_tete",
+    "type": "item",
+    "nom": "Tête de Mušḫuššu",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      18.0,
+      42.0
+    ],
+    "description": "Tête de Mušḫuššu, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "reptile",
+      "venin"
+    ],
+    "source_espece": "espece:mushhushshu",
+    "portion_de": "item:mushhushshu",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:mushhushshu_corps",
+    "type": "item",
+    "nom": "Corps de Mušḫuššu",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      78.0,
+      182.0
+    ],
+    "description": "Corps de Mušḫuššu, débité sur place.",
+    "tags": [
+      "monstre",
+      "partie_corps",
+      "predateur",
+      "reptile",
+      "venin"
+    ],
+    "source_espece": "espece:mushhushshu",
+    "portion_de": "item:mushhushshu",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:mushhushshu_corps_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:mushhushshu_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Mušḫuššu",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      39.0,
+      91.0
+    ],
+    "description": "Morceau de corps de Mušḫuššu, taillé pour être emporté.",
+    "tags": [
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "predateur",
+      "reptile",
+      "venin"
+    ],
+    "source_espece": "espece:mushhushshu",
+    "portion_de": "item:mushhushshu_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:mushhushshu_patte",
+    "type": "item",
+    "nom": "Patte de Mušḫuššu",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      10.5,
+      24.5
+    ],
+    "description": "Patte de Mušḫuššu, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "reptile",
+      "venin"
+    ],
+    "source_espece": "espece:mushhushshu",
+    "portion_de": "item:mushhushshu",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:mushhushshu_queue",
+    "type": "item",
+    "nom": "Queue de Mušḫuššu",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      12.0,
+      28.0
+    ],
+    "description": "Queue de Mušḫuššu, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "reptile",
+      "venin"
+    ],
+    "source_espece": "espece:mushhushshu",
+    "portion_de": "item:mushhushshu",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:yamata_no_orochi_tete",
+    "type": "item",
+    "nom": "Tête d'Yamata no Orochi",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      960.0,
+      2400.0
+    ],
+    "description": "Tête d'Yamata no Orochi, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "reptile"
+    ],
+    "source_espece": "espece:yamata_no_orochi",
+    "portion_de": "item:yamata_no_orochi",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:yamata_no_orochi_tete_morceau",
+        "quantite": 25,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:yamata_no_orochi_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête d'Yamata no Orochi",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      38.4,
+      96.0
+    ],
+    "description": "Morceau de tête d'Yamata no Orochi, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "predateur",
+      "reptile"
+    ],
+    "source_espece": "espece:yamata_no_orochi",
+    "portion_de": "item:yamata_no_orochi_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:yamata_no_orochi_corps",
+    "type": "item",
+    "nom": "Corps d'Yamata no Orochi",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      4160.0,
+      10400.0
+    ],
+    "description": "Corps d'Yamata no Orochi, débité sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "predateur",
+      "reptile"
+    ],
+    "source_espece": "espece:yamata_no_orochi",
+    "portion_de": "item:yamata_no_orochi",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:yamata_no_orochi_corps_morceau",
+        "quantite": 105,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:yamata_no_orochi_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps d'Yamata no Orochi",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      39.62,
+      99.05
+    ],
+    "description": "Morceau de corps d'Yamata no Orochi, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "predateur",
+      "reptile"
+    ],
+    "source_espece": "espece:yamata_no_orochi",
+    "portion_de": "item:yamata_no_orochi_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:yamata_no_orochi_patte",
+    "type": "item",
+    "nom": "Patte d'Yamata no Orochi",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      560.0,
+      1400.0
+    ],
+    "description": "Patte d'Yamata no Orochi, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "reptile"
+    ],
+    "source_espece": "espece:yamata_no_orochi",
+    "portion_de": "item:yamata_no_orochi",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:yamata_no_orochi_patte_morceau",
+        "quantite": 15,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:yamata_no_orochi_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte d'Yamata no Orochi",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      37.33,
+      93.33
+    ],
+    "description": "Morceau de patte d'Yamata no Orochi, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "predateur",
+      "reptile"
+    ],
+    "source_espece": "espece:yamata_no_orochi",
+    "portion_de": "item:yamata_no_orochi_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:yamata_no_orochi_queue",
+    "type": "item",
+    "nom": "Queue d'Yamata no Orochi",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      640.0,
+      1600.0
+    ],
+    "description": "Queue d'Yamata no Orochi, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "reptile"
+    ],
+    "source_espece": "espece:yamata_no_orochi",
+    "portion_de": "item:yamata_no_orochi",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:yamata_no_orochi_queue_morceau",
+        "quantite": 17,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:yamata_no_orochi_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue d'Yamata no Orochi",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      37.65,
+      94.12
+    ],
+    "description": "Morceau de queue d'Yamata no Orochi, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "predateur",
+      "reptile"
+    ],
+    "source_espece": "espece:yamata_no_orochi",
+    "portion_de": "item:yamata_no_orochi_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:zmey_gorynych_tete",
+    "type": "item",
+    "nom": "Tête de Zmeï Gorynytch",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      80.0,
+      250.0
+    ],
+    "description": "Tête de Zmeï Gorynytch, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "regeneration",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:zmey_gorynych",
+    "portion_de": "item:zmey_gorynych",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:zmey_gorynych_tete_morceau",
+        "quantite": 3,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:zmey_gorynych_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Zmeï Gorynytch",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      26.67,
+      83.33
+    ],
+    "description": "Morceau de tête de Zmeï Gorynytch, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "regeneration",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:zmey_gorynych",
+    "portion_de": "item:zmey_gorynych_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:zmey_gorynych_corps",
+    "type": "item",
+    "nom": "Corps de Zmeï Gorynytch",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      360.0,
+      1125.0
+    ],
+    "description": "Corps de Zmeï Gorynytch, débité sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "regeneration",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:zmey_gorynych",
+    "portion_de": "item:zmey_gorynych",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:zmey_gorynych_corps_morceau",
+        "quantite": 12,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:zmey_gorynych_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Zmeï Gorynytch",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      30.0,
+      93.75
+    ],
+    "description": "Morceau de corps de Zmeï Gorynytch, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "regeneration",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:zmey_gorynych",
+    "portion_de": "item:zmey_gorynych_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:zmey_gorynych_aile",
+    "type": "item",
+    "nom": "Aile de Zmeï Gorynytch",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      80.0,
+      250.0
+    ],
+    "description": "Aile de Zmeï Gorynytch, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_aile",
+      "regeneration",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:zmey_gorynych",
+    "portion_de": "item:zmey_gorynych",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:zmey_gorynych_aile_morceau",
+        "quantite": 3,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:zmey_gorynych_aile_morceau",
+    "type": "item",
+    "nom": "Morceau de aile de Zmeï Gorynytch",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      26.67,
+      83.33
+    ],
+    "description": "Morceau de aile de Zmeï Gorynytch, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_aile",
+      "regeneration",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:zmey_gorynych",
+    "portion_de": "item:zmey_gorynych_aile",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:zmey_gorynych_patte",
+    "type": "item",
+    "nom": "Patte de Zmeï Gorynytch",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      56.0,
+      175.0
+    ],
+    "description": "Patte de Zmeï Gorynytch, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "regeneration",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:zmey_gorynych",
+    "portion_de": "item:zmey_gorynych",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:zmey_gorynych_patte_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:zmey_gorynych_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte de Zmeï Gorynytch",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      28.0,
+      87.5
+    ],
+    "description": "Morceau de patte de Zmeï Gorynytch, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "regeneration",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:zmey_gorynych",
+    "portion_de": "item:zmey_gorynych_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:zmey_gorynych_queue",
+    "type": "item",
+    "nom": "Queue de Zmeï Gorynytch",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      88.0,
+      275.0
+    ],
+    "description": "Queue de Zmeï Gorynytch, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "regeneration",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:zmey_gorynych",
+    "portion_de": "item:zmey_gorynych",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:zmey_gorynych_queue_morceau",
+        "quantite": 3,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:zmey_gorynych_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Zmeï Gorynytch",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      29.33,
+      91.67
+    ],
+    "description": "Morceau de queue de Zmeï Gorynytch, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "regeneration",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:zmey_gorynych",
+    "portion_de": "item:zmey_gorynych_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "espece:apep",
+    "type": "espece",
+    "nom": "Apep, Serpent du Chaos",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "apep_transparent.png",
+    "description": "Serpent du chaos lové sous le monde. Chaque nuit, dit-on en Égypte, il assaille la barque du soleil dans la Douat, et chaque nuit on le repousse sans jamais le tuer ; les orages et les éclipses seraient ses assauts. Sa seule présence éteint les torches et fend la pierre. Les prêtres écrivent son nom pour le brûler et piétinent sa figure de cire ; nul ne sait si cela l'affaiblit ou le rend furieux.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 85,
+        "max": 125
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 70,
+        "max": 100
+      },
+      "Int": {
+        "min": 40,
+        "max": 60
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "souterrain",
+      "magique",
+      "legendaire",
+      "boss",
+      "cataclysme"
+    ],
+    "proprietes": {}
+  }
+]

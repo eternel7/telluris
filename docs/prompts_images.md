@@ -145,7 +145,7 @@ Champs propres au tenancier (dérivés du métier, une ligne par catégorie à t
 
 > Illustration en pied d'un **{espece}** : {description}. {posture} La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond **parfaitement uni et plat, {couleur_fond} pur**, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. [0.1]
 
-`{couleur_fond}` = une couleur absente de la créature, pour que le fond se retire automatiquement (Pillow, `dev/` — détourage par couleur depuis les bords) : **magenta** par défaut, **vert vif** si la créature est rose, violette ou rouge, **bleu vif** si elle est verte. Le fichier détouré s'enregistre en `<slug_espece>_transparent.png`.
+`{couleur_fond}` = une couleur absente de la créature, pour que le fond se retire automatiquement (`python dev/detourer_image.py <image> <slug_espece>` : Pillow seul, remplissage depuis les bords + poches de fond enclavées, recadré ; ⚠️ une image avec décor collé à la créature ne se détoure pas — la régénérer) : **magenta** par défaut, **vert vif** si la créature est rose, violette ou rouge, **bleu vif** si elle est verte. Le fichier détouré s'enregistre en `<slug_espece>_transparent.png`.
 
 Traduction des tags en `{posture}` :
 
