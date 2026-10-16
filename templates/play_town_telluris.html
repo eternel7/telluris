@@ -1905,23 +1905,23 @@
 				flex-shrink: 0;
 				font-size: 13px;
 			}
+			/* UN SEUL défilement, celui de la page : aucun petit scroll interne (Lieux, texte
+			   d'ambiance) — l'utilisateur préfère un grand scroll à plusieurs petits. Le cadre
+			   vaut AU MOINS la fenêtre (border-box : bordure et padding compris, donc pile
+			   100 % quand tout tient, aucun scroll) et grandit avec son contenu. La rangée des
+			   Lieux (`1fr`) prend le surplus : fiche et boutons collés en bas de l'écran.
+			   `dvh` : seul le BAS suit la fenêtre, rien au-dessus (page ancrée en haut). */
 			#game-container {
 				grid-template-columns: 1fr;
-				grid-template-rows: auto auto auto auto;
-				/* Hauteur minimale du cadre (95vh) > contenu : sans `start`, le surplus étirait
-				   les rangées `auto` — bandeau plus haut, carte plus bas, à chaque changement
-				   de hauteur de fenêtre. */
-				align-content: start;
-				/* Cadre jusqu'au bas de l'écran (95vh laissait une bande vide sous lui, la page
-				   étant ancrée en haut). `dvh` : seul le BAS suit la fenêtre, rien au-dessus. */
+				grid-template-rows: auto auto 1fr auto auto;
+				height: auto;
 				min-height: 100dvh;
-				grid-template-areas: 
+				grid-template-areas:
 					"header"
 					"map"
 					"sidebar"
 					"char"
 					"footer";
-				height: auto;
 				overflow: visible;
 			}
 			img#bg-image-fit {
@@ -1935,6 +1935,10 @@
 				order: 1;
 				overflow: visible;
 				contain: none;
+			}
+			.loc-texte {
+				max-height: none;
+				overflow: visible;
 			}
 			.map-area {
 				height: stretch;
