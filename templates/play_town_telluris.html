@@ -1918,6 +1918,17 @@
 			}
 		}
 
+		/* Application installée en plein écran : l'écran du téléphone a des coins ARRONDIS
+		   (et parfois une barre système en surimpression) — sans marge, les coins du cadre et
+		   des boutons Personnage/Groupe étaient rognés. Le cadre remonte de `--marge-bas` :
+		   sa marge basse la réserve, son plancher la retranche (rien ne défile en plus).
+		   Marge sur le cadre et non sur le body : les autres panneaux, bornés à la fenêtre,
+		   déborderaient d'autant. */
+		@media (display-mode: fullscreen) and (max-width: 768px) and (orientation: portrait) {
+			:root { --marge-bas: max(24px, env(safe-area-inset-bottom, 0px)); }
+			#game-container { margin-bottom: var(--marge-bas); }
+		}
+
 		/* RESPONSIVE : Mode Portrait Mobile */
 		@media (max-width: 768px) and (orientation: portrait) {
 			/* Page ANCRÉE EN HAUT, jamais centrée : centrée, elle glissait de la moitié de tout
@@ -1957,7 +1968,7 @@
 				grid-template-columns: 1fr;
 				grid-template-rows: auto auto 1fr auto auto;
 				height: auto;
-				min-height: var(--app-h, 100dvh);
+				min-height: calc(var(--app-h, 100dvh) - var(--marge-bas, 0px));
 				grid-template-areas:
 					"header"
 					"map"
