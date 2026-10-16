@@ -169,10 +169,10 @@ def test_dun_les_places_sur_une_case_libre_de_la_carte_de_france():
 	(noeud_france,) = [n for n in docs["link:dun_les_places_to_france"]["nodes"] if n["lieu"] == "lieu:france"]
 	x, y = noeud_france["pos"]
 	assert base["lieu:france"]["cells"][y][x] >= 1
-	prises = {tuple(n["pos"]) for d in base.values() if d.get("type") == "connection"
+	# Le lien lui-même est au dump une fois importé : seules les AUTRES connexions comptent.
+	prises = {tuple(n["pos"]) for d in base.values()
+			  if d.get("type") == "connection" and d.get("_id") != "link:dun_les_places_to_france"
 			  for n in d.get("nodes", []) if n.get("lieu") == "lieu:france"}
-	# Escolives (50,21) n'est pas encore au dump : on l'écarte aussi.
-	prises.add((50, 21))
 	assert (x, y) not in prises
 
 

@@ -8750,6 +8750,12 @@ function renderQuetesOffres(data) {
 	const list = document.getElementById('quetes-offres-list');
 	if (!list) return;
 	const offres = data.offres || [];
+	// Non-inscrit : refus PARLÉ (texte serveur, écrit en textContent), pas un tableau muet.
+	if (data.inscription_requise) {
+		list.innerHTML = '<li class="sell-empty"></li>';
+		list.firstChild.textContent = data.inscription_requise;
+		return;
+	}
 	if (!offres.length) { list.innerHTML = '<li class="sell-empty">Aucune offre pour le moment.</li>'; return; }
 	list.innerHTML = offres.map(o => `<li class="sh-inv-item">
 		<span>

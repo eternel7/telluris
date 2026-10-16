@@ -865,10 +865,21 @@ def test_la_guilde_ne_recense_que_les_familles_ecrites(dbp):
 	assert escorte_util.familles_de_la_cite(perso, "lieu:auxerre", dbp["find"], dbp["get"]) == []
 
 
+# Membre de la guilde d'Auxerre : le registre des disparitions ne s'ouvre qu'aux inscrits.
+INSCRIT_AUXERRE = {"lieu:auxerre": "F"}
+
+
+def test_le_registre_de_la_guilde_reste_ferme_a_un_non_inscrit(dbp):
+	perso = character()
+	escorte_util.poser_escorte_offerte(perso, COMPTOIR, dbp["find"], dbp["get"],
+									   rand_fn=_toujours(0.0), pnj_doc=BORIN, choix_fn=_premier)
+	assert perso["escorte_offerte"]["quete"] is None
+
+
 def test_le_comptoir_confie_la_recherche_sans_condition_de_relation(dbp):
 	# Aucune relation posée : la guilde n'exige pas la confiance du marchand, seulement
 	# d'être inscrit chez elle.
-	perso = character()
+	perso = character(rangs_guilde=dict(INSCRIT_AUXERRE))
 	assert escorte_util.poser_escorte_offerte(
 		perso, COMPTOIR, dbp["find"], dbp["get"], rand_fn=_toujours(0.0),
 		pnj_doc=BORIN, choix_fn=_premier)
@@ -921,7 +932,7 @@ def _mener_a_bien(dbp, perso, q):
 
 
 def test_une_escorte_de_guilde_monte_les_DEUX_reputations(dbp):
-	perso = character()
+	perso = character(rangs_guilde=dict(INSCRIT_AUXERRE))
 	escorte_util.poser_escorte_offerte(perso, COMPTOIR, dbp["find"], dbp["get"],
 									   rand_fn=_toujours(0.0), pnj_doc=BORIN,
 									   choix_fn=_premier)
@@ -952,7 +963,7 @@ def test_une_escorte_confiee_par_le_parent_ne_paie_qu_une_fois(dbp):
 
 
 def test_l_enfant_ramene_disparait_des_deux_canaux(dbp):
-	perso = character()
+	perso = character(rangs_guilde=dict(INSCRIT_AUXERRE))
 	escorte_util.poser_escorte_offerte(perso, COMPTOIR, dbp["find"], dbp["get"],
 									   rand_fn=_toujours(0.0), pnj_doc=BORIN,
 									   choix_fn=_premier)
@@ -968,7 +979,7 @@ def test_l_enfant_ramene_disparait_des_deux_canaux(dbp):
 
 
 def test_une_escorte_en_cours_empeche_toute_autre_offre(dbp):
-	perso = character()
+	perso = character(rangs_guilde=dict(INSCRIT_AUXERRE))
 	escorte_util.poser_escorte_offerte(perso, COMPTOIR, dbp["find"], dbp["get"],
 									   rand_fn=_toujours(0.0), pnj_doc=BORIN,
 									   choix_fn=_premier)
@@ -982,7 +993,7 @@ def test_une_escorte_en_cours_empeche_toute_autre_offre(dbp):
 
 
 def test_escorte_vers_retrouve_la_quete_a_deposer_ici(dbp):
-	perso = character()
+	perso = character(rangs_guilde=dict(INSCRIT_AUXERRE))
 	escorte_util.poser_escorte_offerte(perso, COMPTOIR, dbp["find"], dbp["get"],
 									   rand_fn=_toujours(0.0), pnj_doc=BORIN,
 									   choix_fn=_premier)

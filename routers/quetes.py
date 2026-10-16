@@ -17,6 +17,7 @@ from utils import quetes
 from utils import focalisation
 from utils import recrutement
 from utils import escorte
+from utils import chasse
 from utils import indicateurs
 from utils import fiche as fiche_util
 from utils.marche import debit_character
@@ -26,6 +27,11 @@ from models import character_stats
 quetes_router = APIRouter()
 
 GUILDE_CATEGORIE = "guilde_aventurier"
+
+
+# Refus du tableau à un non-inscrit (403 de l'acceptation ET message du tableau vide).
+INSCRIPTION_REQUISE = ("Ce tableau est réservé aux membres de la Guilde. "
+					   "Faites-vous inscrire au comptoir de la cité.")
 
 
 def _guild_lieu(character: dict) -> dict:
@@ -87,7 +93,14 @@ def _board_payload(character: dict, lieu_doc: dict, completer: bool = False) -> 
 	et l'acceptation. `terminer`/`déposer`/`abandonner` ne retirent AUCUNE offre — la quête
 	a quitté le tableau à l'acceptation —, ils se contentent donc de lister l'existant
 	(`lister_offres`) au lieu de payer une génération complète pour un tableau identique."""
-	offres = quetes.remplir_tableau(lieu_doc) if completer else quetes.lister_offres(lieu_doc)
+	# Tableau réservé aux MEMBRES de la guilde de la cité (`chasse.inscrit_a_la_guilde`) : un
+	# non-inscrit voit ses quêtes en cours (il doit pouvoir les rendre) mais aucune offre, et
+	# rien n'est généré pour lui. `inscription_requise` porte le refus PARLÉ du client.
+	inscrit = chasse.inscrit_a_la_guilde(character, lieu_doc.get("lieu_parent"))
+	if not inscrit:
+		offres = []
+	else:
+		offres = quetes.remplir_tableau(lieu_doc) if completer else quetes.lister_offres(lieu_doc)
 	giver = lieu_doc.get("_id")
 	fiche = _fiche_payload(character)
 	# ⚠️ `actives` est un SOUS-ENSEMBLE de `fiche_actives` : les recalculer était une seconde
@@ -102,6 +115,7 @@ def _board_payload(character: dict, lieu_doc: dict, completer: bool = False) -> 
 		"offres": [_offre_view(o) for o in offres],
 		"actives": [d for d in fiche["fiche_actives"] if d.get("id") in ids_giver],
 		"lieu_parent": lieu_doc.get("lieu_parent"),
+		"inscription_requise": None if inscrit else INSCRIPTION_REQUISE,
 	}
 
 
@@ -130,6 +144,8 @@ async def quetes_accepter(
 		raise HTTPException(status_code=404, detail="Quête introuvable")
 	if quete_doc.get("giver") != lieu_doc.get("_id"):
 		raise HTTPException(status_code=403, detail="Cette quête n'est pas proposée ici.")
+	if not chasse.inscrit_a_la_guilde(character, lieu_doc.get("lieu_parent")):
+		raise HTTPException(status_code=403, detail=INSCRIPTION_REQUISE)
 	if quete_doc.get("statut", "offerte") != "offerte":
 		raise HTTPException(status_code=409, detail="Quête déjà prise.")
 	if quetes.quete_active(character, quete_id):

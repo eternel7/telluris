@@ -389,9 +389,44 @@ def test_rangs_guilde_title_repli_sur_id_si_lieu_introuvable():
 
 # ── offre_rang_pour ──────────────────────────────────────────────────────────────
 
+def _inscrit():
+	"""Personnage INSCRIT à la guilde d'Auxerre, au premier cran : une épreuve de rang n'élève
+	que les membres (`chasse.inscrit_a_la_guilde`)."""
+	return {"rangs_guilde": {"lieu:auxerre": "F"}}
+
+
+def test_pas_d_epreuve_de_rang_avant_l_inscription():
+	# Le bug d'origine : `rang_de` replie un inconnu sur F, et Borin lui proposait l'épreuve E.
+	random.seed(1)
+	assert chasse.offre_rang_pour({}, COMPTOIR, _get_doc, _find_docs) is None
+	assert chasse.offre_rang_pour({"rangs_guilde": {"lieu:lutecia": "D"}}, COMPTOIR,
+	                              _get_doc, _find_docs) is None   # inscrit AILLEURS seulement
+	assert chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc, _find_docs) is not None
+
+
+def test_inscrit_a_la_guilde_par_le_rang_ou_par_l_archive():
+	assert not chasse.inscrit_a_la_guilde({}, "lieu:auxerre")
+	assert not chasse.inscrit_a_la_guilde(_inscrit(), None)            # fail-closed
+	assert chasse.inscrit_a_la_guilde(_inscrit(), "lieu:auxerre")
+	assert not chasse.inscrit_a_la_guilde(_inscrit(), "lieu:lutecia")
+	# Archive d'AVANT `crediter_rang` : la première mission a remis la carte, rang resté vide.
+	carte = {"item": "item:carte_aventurier", "poids": 0.05, "lieu_parent": "lieu:auxerre"}
+	ancien = {"rangs_guilde": {}, "quetes_terminees": [
+		{"id": "quete:transport_borin_premiere_mission", "echec": False,
+		 "recompenses": {"items": [carte]}}]}
+	assert chasse.inscrit_a_la_guilde(ancien, "lieu:auxerre")
+	assert not chasse.inscrit_a_la_guilde(ancien, "lieu:lutecia")   # la carte d'une AUTRE cité
+	# Archive qui porte le rang de guilde résolu.
+	recent = {"quetes_terminees": [{"recompenses": {"rang_guilde": {"cite": "lieu:auxerre", "rang": "F"}}}]}
+	assert chasse.inscrit_a_la_guilde(recent, "lieu:auxerre")
+	# Une mission RATÉE n'inscrit pas.
+	rate = {"quetes_terminees": [{"echec": True, "recompenses": {"items": [carte]}}]}
+	assert not chasse.inscrit_a_la_guilde(rate, "lieu:auxerre")
+
+
 def test_offre_rang_tire_une_epreuve_max():
 	random.seed(1)
-	offre = chasse.offre_rang_pour({}, COMPTOIR, _get_doc, _find_docs)
+	offre = chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc, _find_docs)
 	assert offre is not None
 	assert offre["source"] == "rang"
 	assert offre["lieu_parent"] == "lieu:auxerre"
@@ -433,7 +468,7 @@ def test_offre_rang_reprend_au_dessus_du_defaut_si_comptoir_plus_prestigieux():
 
 
 def test_offre_rang_none_si_deja_active():
-	character = {"quetes_actives": [{"source": "rang", "cite": "lieu:auxerre"}]}
+	character = {**_inscrit(), "quetes_actives": [{"source": "rang", "cite": "lieu:auxerre"}]}
 	assert chasse.offre_rang_pour(character, COMPTOIR, _get_doc, _find_docs) is None
 
 
@@ -456,7 +491,7 @@ def _potentiel_fixe(espece, profil_id, get_doc_fn):
 def test_offre_rang_ecarte_les_cibles_sous_le_plancher(monkeypatch):
 	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 30.0})
 	cibles = {
-		chasse.offre_rang_pour({}, COMPTOIR, _get_doc_deux_proies, _find_docs,
+		chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc_deux_proies, _find_docs,
 		                       potentiel_fn=_potentiel_fixe)["objectif"]["cible"]
 		for _ in range(30)
 	}
@@ -467,7 +502,7 @@ def test_offre_rang_sans_plancher_garde_toutes_les_cibles():
 	# Fixture autouse : aucun plancher → le lapin redevient une cible possible.
 	random.seed(3)
 	cibles = {
-		chasse.offre_rang_pour({}, COMPTOIR, _get_doc_deux_proies, _find_docs,
+		chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc_deux_proies, _find_docs,
 		                       potentiel_fn=_potentiel_fixe)["objectif"]["cible"]
 		for _ in range(30)
 	}
@@ -476,14 +511,14 @@ def test_offre_rang_sans_plancher_garde_toutes_les_cibles():
 
 def test_offre_rang_none_si_aucune_cible_au_plancher(monkeypatch):
 	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 100.0})
-	assert chasse.offre_rang_pour({}, COMPTOIR, _get_doc_deux_proies, _find_docs,
+	assert chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc_deux_proies, _find_docs,
 	                              potentiel_fn=_potentiel_fixe) is None
 
 
 def test_offre_rang_plancher_du_rang_VISE(monkeypatch):
 	# Plancher posé pour D seulement : un perso F vise E → aucun filtre ; un perso E vise D → filtré.
 	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"D": 100.0})
-	assert chasse.offre_rang_pour({}, COMPTOIR, _get_doc_deux_proies, _find_docs,
+	assert chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc_deux_proies, _find_docs,
 	                              potentiel_fn=_potentiel_fixe) is not None
 	character = {"rangs_guilde": {"lieu:auxerre": "E"}}
 	assert chasse.offre_rang_pour(character, COMPTOIR, _get_doc_deux_proies, _find_docs,
@@ -492,7 +527,7 @@ def test_offre_rang_plancher_du_rang_VISE(monkeypatch):
 
 def test_offre_rang_potentiel_illisible_ecarte_la_cible(monkeypatch):
 	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 1.0})
-	assert chasse.offre_rang_pour({}, COMPTOIR, _get_doc, _find_docs,
+	assert chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc, _find_docs,
 	                              potentiel_fn=lambda *a: None) is None
 
 
@@ -509,9 +544,9 @@ def test_offre_rang_plancher_par_defaut_sur_le_vrai_potentiel(monkeypatch):
 	# Chemin par défaut (`potentiel_cible`) : un plancher juste au-dessus du loup vétéran coupe l'offre.
 	pot = chasse.potentiel_cible(LOUP, "profil:veteran", _get_doc)
 	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": pot})
-	assert chasse.offre_rang_pour({}, COMPTOIR, _get_doc, _find_docs) is not None
+	assert chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc, _find_docs) is not None
 	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": pot + 0.1})
-	assert chasse.offre_rang_pour({}, COMPTOIR, _get_doc, _find_docs) is None
+	assert chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc, _find_docs) is None
 
 
 def test_planchers_par_defaut_sur_lechelle_et_croissants():
@@ -525,8 +560,8 @@ def test_planchers_par_defaut_sur_lechelle_et_croissants():
 
 def _character_avec_offre():
 	random.seed(1)
-	offre = chasse.offre_rang_pour({}, COMPTOIR, _get_doc, _find_docs)
-	return {"rang_offert": {"lieu": "lieu:comptoir", "quete": offre},
+	offre = chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc, _find_docs)
+	return {**_inscrit(), "rang_offert": {"lieu": "lieu:comptoir", "quete": offre},
 	        "quetes_actives": [], "quetes_terminees": [],
 	        "xp_total": 0, "vocations_niveaux": {"guerrier": 0}, "voc": "guerrier",
 	        "or": 0, "argent": 0, "cuivre": 0, "attribute_points": 0}, offre
