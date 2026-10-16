@@ -147,7 +147,9 @@ def test_escolives_sur_une_case_libre_de_la_carte_de_france():
 	(noeud_france,) = [n for n in docs["link:escolives_to_france"]["nodes"] if n["lieu"] == "lieu:france"]
 	x, y = noeud_france["pos"]
 	assert base["lieu:france"]["cells"][y][x] >= 1
-	prises = {tuple(n["pos"]) for d in base.values() if d.get("type") == "connection"
+	# Le lien lui-même est au dump une fois importé : seules les AUTRES connexions comptent.
+	prises = {tuple(n["pos"]) for d in base.values()
+			  if d.get("type") == "connection" and d.get("_id") != "link:escolives_to_france"
 			  for n in d.get("nodes", []) if n.get("lieu") == "lieu:france"}
 	assert (x, y) not in prises
 
