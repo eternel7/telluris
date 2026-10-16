@@ -1921,12 +1921,21 @@
 		/* Application installée en plein écran : l'écran du téléphone a des coins ARRONDIS
 		   (et parfois une barre système en surimpression) — sans marge, les coins du cadre et
 		   des boutons Personnage/Groupe étaient rognés. Le cadre remonte de `--marge-bas` :
-		   sa marge basse la réserve, son plancher la retranche (rien ne défile en plus).
-		   Marge sur le cadre et non sur le body : les autres panneaux, bornés à la fenêtre,
-		   déborderaient d'autant. */
+		   sa marge basse la réserve, sa hauteur la retranche (rien ne défile en plus).
+		   TOUS les panneaux (`.panel-frame` : carte, fiche, marché, quêtes, groupe, coffre…) ;
+		   ceux qui sont BORNÉS à la fenêtre le sont ici sur `--app-h` (mesure réelle, cf. <head>)
+		   moins la marge. `#game-container` retranche la marge dans sa propre règle (portrait). */
 		@media (display-mode: fullscreen) and (max-width: 768px) and (orientation: portrait) {
 			:root { --marge-bas: max(24px, env(safe-area-inset-bottom, 0px)); }
-			#game-container { margin-bottom: var(--marge-bas); }
+			.panel-frame {
+				margin-bottom: var(--marge-bas);
+				min-height: calc(var(--app-h, 100svh) - var(--marge-bas));
+			}
+			#sheet-panel { height: calc(var(--app-h, 100svh) - var(--marge-bas)); min-height: 0; }
+			#sell-panel, #prop-coffre-panel, #groupe-panel {
+				height: calc(var(--app-h, 100vh) - 20px - var(--marge-bas));
+				min-height: 0;
+			}
 		}
 
 		/* RESPONSIVE : Mode Portrait Mobile */
