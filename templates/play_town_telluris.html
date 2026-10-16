@@ -28,6 +28,38 @@
 	   `html.pave-flottant` masque le pavé tant qu'il est encore sur la carte ;
 	   `appliquerModePave` le déplace et tient la classe à jour. Clé = PAVE_MODE_CLE. #}
 	<script>try { if (localStorage.getItem('telluris.play.pave_mode') === 'flottant') document.documentElement.classList.add('pave-flottant'); } catch (e) {}</script>
+	{# `--app-h` = hauteur RÉELLE de la fenêtre, plancher du cadre en portrait mobile.
+	   Application installée en plein écran (Android) : au chargement (F5, changement de lieu),
+	   la fenêtre se recale APRÈS le premier rendu sans toujours émettre `resize` — `dvh` restait
+	   plus haut que l'écran jusqu'au premier pas, fiche et boutons Personnage/Groupe sous le bas.
+	   Mesure = le plus petit de `innerHeight` et d'un témoin `position:fixed; top:0; bottom:0`
+	   (suivi par ResizeObserver, qui voit tout recalage de la fenêtre, événement ou non),
+	   reprise aux événements de fenêtre et à quelques instants après `load`.
+	   Écrire la variable ne change aucune des deux mesures : aucune boucle (§17). Repli : `100dvh`. #}
+	<script>
+	(function () {
+		var r = document.documentElement, temoin = null, ecrit = null;
+		function mesurer() {
+			var h = window.innerHeight;
+			if (temoin) { var t = temoin.getBoundingClientRect().height; if (t > 0 && t < h) h = t; }
+			h = Math.round(h);
+			if (h > 0 && h !== ecrit) { ecrit = h; r.style.setProperty('--app-h', h + 'px'); }
+		}
+		mesurer();
+		['resize', 'orientationchange', 'pageshow', 'focus'].forEach(function (ev) { window.addEventListener(ev, mesurer); });
+		document.addEventListener('fullscreenchange', mesurer);
+		if (window.visualViewport) window.visualViewport.addEventListener('resize', mesurer);
+		window.addEventListener('load', function () { mesurer(); [300, 1000, 2500].forEach(function (ms) { setTimeout(mesurer, ms); }); });
+		document.addEventListener('DOMContentLoaded', function () {
+			temoin = document.createElement('div');
+			temoin.setAttribute('aria-hidden', 'true');
+			temoin.style.cssText = 'position:fixed;top:0;bottom:0;left:0;width:0;visibility:hidden;pointer-events:none;';
+			document.body.appendChild(temoin);
+			if (window.ResizeObserver) new ResizeObserver(mesurer).observe(temoin);
+			mesurer();
+		});
+	})();
+	</script>
 	{% include "part-polices.html" %}
 	<style>
 		:root {
@@ -1877,6 +1909,26 @@
 			}
 		}
 
+		/* Application installée en plein écran : l'écran du téléphone a des coins ARRONDIS
+		   (et parfois une barre système en surimpression) — sans marge, les coins du cadre et
+		   des boutons Personnage/Groupe étaient rognés. Le cadre remonte de `--marge-bas` :
+		   sa marge basse la réserve, sa hauteur la retranche (rien ne défile en plus).
+		   TOUS les panneaux (`.panel-frame` : carte, fiche, marché, quêtes, groupe, coffre…) ;
+		   ceux qui sont BORNÉS à la fenêtre le sont ici sur `--app-h` (mesure réelle, cf. <head>)
+		   moins la marge. `#game-container` retranche la marge dans sa propre règle (portrait). */
+		@media (display-mode: fullscreen) and (max-width: 768px) and (orientation: portrait) {
+			:root { --marge-bas: max(24px, env(safe-area-inset-bottom, 0px)); }
+			.panel-frame {
+				margin-bottom: var(--marge-bas);
+				min-height: calc(var(--app-h, 100svh) - var(--marge-bas));
+			}
+			#sheet-panel { height: calc(var(--app-h, 100svh) - var(--marge-bas)); min-height: 0; }
+			#sell-panel, #prop-coffre-panel, #groupe-panel {
+				height: calc(var(--app-h, 100vh) - 20px - var(--marge-bas));
+				min-height: 0;
+			}
+		}
+
 		/* RESPONSIVE : Mode Portrait Mobile */
 		@media (max-width: 768px) and (orientation: portrait) {
 			/* Page ANCRÉE EN HAUT, jamais centrée : centrée, elle glissait de la moitié de tout
@@ -1910,12 +1962,13 @@
 			   vaut AU MOINS la fenêtre (border-box : bordure et padding compris, donc pile
 			   100 % quand tout tient, aucun scroll) et grandit avec son contenu. La rangée des
 			   Lieux (`1fr`) prend le surplus : fiche et boutons collés en bas de l'écran.
-			   `dvh` : seul le BAS suit la fenêtre, rien au-dessus (page ancrée en haut). */
+			   `--app-h` (innerHeight, repli `dvh`) : seul le BAS suit la fenêtre, rien au-dessus
+			   (page ancrée en haut). */
 			#game-container {
 				grid-template-columns: 1fr;
 				grid-template-rows: auto auto 1fr auto auto;
 				height: auto;
-				min-height: 100dvh;
+				min-height: calc(var(--app-h, 100dvh) - var(--marge-bas, 0px));
 				grid-template-areas:
 					"header"
 					"map"
