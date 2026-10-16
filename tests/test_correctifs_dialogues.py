@@ -104,6 +104,7 @@ def test_maelys_ne_suppose_pas_qu_on_connait_aelis():
 	assert "rang_c_offre_inconnu" in sans and "rang_c_offre" not in sans and "auxerre" not in sans
 	avec = _visibles(maelys, reussies=[CONVOI], flags={"transport_offert": True})
 	assert "rang_c_offre" in avec and "rang_c_offre_inconnu" not in avec
+	assert "Vaugirard m'a parlé de vous." in DOCS[maelys]["dialogue"]["noeuds"]["accueil"]["texte"]
 	texte = DOCS[maelys]["dialogue"]["noeuds"]["rang_c_propose_inconnu"]["texte"]
 	assert "vous la connaissez" not in texte
 

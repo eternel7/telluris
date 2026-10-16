@@ -4515,7 +4515,7 @@
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
-          "texte": "Le bureau sent la cire, le vélin et le cuir. Entre la grande table couverte de registres et le mur tapissé de cartes, une naine se tient debout, une main posée sur sa ceinture. Elle vous a vu franchir le seuil avant même que vous ayez fini de pousser la porte. Ses yeux gris clair vous détaillent un long moment, sans hâte. « {prenom}. Éléonore m'a parlé de vous. Entrez — et fermez derrière vous. »",
+          "texte": "Le bureau sent la cire, le vélin et le cuir. Entre la grande table couverte de registres et le mur tapissé de cartes, une naine se tient debout, une main posée sur sa ceinture. Elle vous a vu franchir le seuil avant même que vous ayez fini de pousser la porte. Ses yeux gris clair vous détaillent un long moment, sans hâte. « {prenom}. Vaugirard m'a parlé de vous. Entrez — et fermez derrière vous. »",
           "choix": [
             {
               "id": "auxerre",

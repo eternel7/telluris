@@ -194,6 +194,8 @@ def gautier(doc):
 # ── Maëlys : une épreuve du rang C pour qui n'a pas fait l'arc d'Auxerre ──────────
 
 def maelys(doc):
+	# « Éléonore » prêtait à confusion avec Dame Éléonore de Rochefort, rencontrée au convoi.
+	texte(doc, "accueil", "Éléonore m'a parlé de vous.", "Vaugirard m'a parlé de vous.")
 	condition(doc, "accueil", "auxerre", {"quete_reussie": q_reussie(CONVOI)})
 	condition(doc, "accueil", "rang_c_offre", {"quete_reussie": q_reussie(CONVOI)})
 	base = noeud(doc, "rang_c_propose")
