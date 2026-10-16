@@ -132,6 +132,13 @@ Familles **indépendantes** (Auteur, 14/10, cinq questionnaires + sixième arbit
 - **Premier lycanthrope** : **rang E**, **enquête** dans le **Morvan** — *La bête de Dun-les-Places* (`docs/lore/personnages/20261014_enquete_du_morvan.md` : Borin, la bergère Margot, le charbonnier Gros-Pierre, la meneuse de loups Jacotte ; la tête rapportée ; le nom jamais dit), qui peut se conclure sans loup-garou ; les familles lointaines viennent avec les voyages.
 - Hors bestiaire (PNJ, alliés) : Bisclavret, Chiens des dieux, Bran et Sceólang, gardiens-jaguars.
 
+### Dragons et serpents des mythes
+Arbitrage de l'Auteur (16/10) — séance `docs/lore/monde/20261016_dragons_et_serpents.md` (mythes + un prompt d'image par entrée) ; bestiaire : `dev/gen_dragons_serpents.py` → `jsons/dragons_serpents_a_importer.json`.
+
+- Espèces : **balaur** (le monstre de Vlad), **dragon-hydre**, **Mušḫuššu** (dragon de Marduk, porte d'Ishtar), **Xiuhcóatl** (serpent de feu, arme de Huitzilopochtli). Êtres uniques, boss : **Zmeï Gorynytch** (pont Kalinov), **Ladon** (Hespérides, né de Cétô ou d'Échidna : disputé), **Yamata no Orochi** (Izumo), **Illuyanka** (Anatolie). **Apep** : mythe égyptien en description.
+- **Tiamat** (puissance primordiale ordonnée par Marduk) et **Quetzalcoatl** (dieu) : **hors bestiaire**.
+- Faiblesses : **description seule**, pas forcément propres à un être.
+
 ### Contradictions ouvertes
 À signaler si un texte en dépend, jamais à trancher seul :
 

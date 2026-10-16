@@ -44,25 +44,26 @@ FEMININS = {
 
 MASCULINS = {
 	"abhartach", "aigle_geant", "ane", "ange_de_la_connaissance", "ange_de_la_justice", "apep",
-	"archange_de_l_ordre", "archange_du_savoir", "avatar", "basilic", "besien", "boukhnoun",
+	"archange_de_l_ordre", "archange_du_savoir", "avatar", "balaur", "basilic", "besien", "boukhnoun",
 	"bunyip", "centaure", "cerbere", "cerf", "cheval", "cheval_de_trait", "cheval_normand",
 	"chevalier_du_sang", "comte_vampire", "coursier_elfique", "coursier_persan", "crocodile", "cu_sidhe",
 	"cupidon", "cyclope", "demon_guerrier", "demon_majeur_de_la_destinee",
 	"demon_majeur_de_la_destruction", "demon_mineur", "demon_servant", "doppleganger", "dobhar_chu", "dragnard", "draugr",
-	"dragon", "dragon_de_sang", "dragon_empereur", "dragon_zombie",
+	"dragon", "dragon_de_sang", "dragon_empereur", "dragon_hydre", "dragon_zombie",
 	"ecureuil", "failinis", "familier", "fantome", "faoladh",
 	"fils_de_sobek", "geant_ou_titan", "genie", "ghul_des_sables", "gnome", "gobelin",
 	"gobelin_chamanique", "gobelin_des_marais", "golem_de_chair", "golem_de_fer",
 	"golem_de_pierre", "grand_dragon", "grand_faucon", "grand_phenix", "grand_sanglier",
-	"griffon", "hippogriffe", "homme_arbre", "ifrit", "incube", "jann", "kraken", "leprechaun",
+	"griffon", "hippogriffe", "homme_arbre", "ifrit", "illuyanka", "incube", "jann", "kraken", "ladon", "leprechaun",
 	"leviathan", "lievre", "loup", "loup_garou", "loup_geant", "lycaon", "malandhir", "mammouth", "marid",
-	"minotaure", "mulet", "nahual", "nosferatu", "ondin", "orc", "ours", "ours_polaire", "pegase",
+	"minotaure", "mulet", "mushhushshu", "nahual", "nosferatu", "ondin", "orc", "ours", "ours_polaire", "pegase",
 	"petit_dragon", "petits_animaux_divers", "phenix", "polar_kraken", "poney", "prince_demon",
 	"rat_geant", "rejeton_demoniaque", "renard", "revenant", "roi_des_tombes", "roi_liche",
 	"sanglier", "sanglier_apprivoise", "satyre", "seigneur_du_sang", "seraphin", "serpent",
 	"serpent_geant", "serpopard", "silat", "spectre", "sphinx", "squelette", "strigoi", "taureau",
 	"triton",
-	"troglodyte", "troll", "ulfhedinn", "uturuncu", "vampire", "zombie",
+	"troglodyte", "troll", "ulfhedinn", "uturuncu", "vampire", "xiuhcoatl", "yamata_no_orochi",
+	"zmey_gorynych", "zombie",
 	# Noms de groupe : masculins, mais au pluriel (voir PLURIELS).
 	"elementaux", "fauves", "oiseaux_de_proies", "poissons_mammiferes_marins", "rapaces",
 	"vers_des_sables",
@@ -74,7 +75,8 @@ PLURIELS = {
 }
 
 # Êtres uniques : le titre dit « Apep », pas « l'Apep ».
-PROPRES = {"abhartach", "aicha_kandicha", "ammit", "apep", "cupidon", "dearg_due", "failinis", "lycaon"}
+PROPRES = {"abhartach", "aicha_kandicha", "ammit", "apep", "cupidon", "dearg_due", "failinis",
+		   "illuyanka", "ladon", "lycaon", "yamata_no_orochi", "zmey_gorynych"}
 
 # « h » aspiré : « la Harpie » et non « l'Harpie ». Hydre, Horreur, Hippogriffe, Homme Arbre
 # s'élident.
