@@ -35,8 +35,7 @@
 	   Mesure = le plus petit de `innerHeight` et d'un témoin `position:fixed; top:0; bottom:0`
 	   (suivi par ResizeObserver, qui voit tout recalage de la fenêtre, événement ou non),
 	   reprise aux événements de fenêtre et à quelques instants après `load`.
-	   Écrire la variable ne change aucune des deux mesures : aucune boucle (§17). Repli : `100dvh`.
-	   🔎 DIAGNOSTIC TEMPORAIRE : toucher le titre du lieu affiche les mesures (toast). #}
+	   Écrire la variable ne change aucune des deux mesures : aucune boucle (§17). Repli : `100dvh`. #}
 	<script>
 	(function () {
 		var r = document.documentElement, temoin = null, ecrit = null;
@@ -58,14 +57,6 @@
 			document.body.appendChild(temoin);
 			if (window.ResizeObserver) new ResizeObserver(mesurer).observe(temoin);
 			mesurer();
-			var titre = document.querySelector('.location-desc');
-			if (titre) titre.addEventListener('click', function () {
-				if (typeof showToast !== 'function') return;
-				showToast('🔎 fenêtre ' + window.innerHeight + ' · témoin ' + Math.round(temoin.getBoundingClientRect().height)
-					+ ' · app-h ' + ecrit + ' · écran ' + screen.height
-					+ ' · cadre ' + Math.round(document.getElementById('game-container').getBoundingClientRect().height)
-					+ ' · page ' + r.scrollHeight + ' · défil ' + Math.round(window.scrollY));
-			});
 		});
 	})();
 	</script>
