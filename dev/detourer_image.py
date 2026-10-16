@@ -18,7 +18,8 @@
 #
 # Usage :
 #   python dev/detourer_image.py source.jpg <slug_espece>      # → templates/resources/monsters/<slug>_transparent.png
-#   python dev/detourer_image.py source.jpg sortie.png [--dur 60] [--doux 110]
+#   python dev/detourer_image.py source.jpg <slug>_transparent01.png  # variante tirée au sort en combat (utils/images_monstres.py)
+#   python dev/detourer_image.py source.jpg chemin/sortie.png [--dur 60] [--doux 110]
 
 import argparse
 import os
@@ -119,15 +120,16 @@ def detourer(source: str, sortie: str, dur: float = 60.0, doux: float = 110.0) -
 def main() -> None:
 	p = argparse.ArgumentParser(description="Détoure une illustration de monstre sur fond uni.")
 	p.add_argument("source", help="image générée (jpg/png)")
-	p.add_argument("cible", help="slug d'espèce (→ templates/resources/monsters/<slug>_transparent.png) "
-					"ou chemin .png de sortie")
+	p.add_argument("cible", help="slug d'espèce (→ templates/resources/monsters/<slug>_transparent.png), nom .png seul "
+					"(même dossier) ou chemin .png de sortie")
 	p.add_argument("--dur", type=float, default=60.0, help="distance au fond sous laquelle un pixel est effacé")
 	p.add_argument("--doux", type=float, default=110.0, help="distance au-delà de laquelle un pixel reste opaque")
 	args = p.parse_args()
 	if args.doux <= args.dur:
 		sys.exit("ERREUR : --doux doit dépasser --dur")
-	sortie = args.cible if args.cible.lower().endswith(".png") else \
-		os.path.join(MONSTRES, f"{args.cible}_transparent.png")
+	sortie = args.cible if args.cible.lower().endswith(".png") else f"{args.cible}_transparent.png"
+	if not os.path.dirname(sortie):
+		sortie = os.path.join(MONSTRES, sortie)  # nom seul (variante `…_transparent01.png`) : dossier des monstres
 	fond, taille, part = detourer(args.source, sortie, args.dur, args.doux)
 	print(f"{os.path.relpath(sortie, RACINE)} : fond {tuple(round(c) for c in fond)}, "
 		  f"{taille[0]}x{taille[1]}, {part:.0%} de fond retiré")
