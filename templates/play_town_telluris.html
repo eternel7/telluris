@@ -11744,6 +11744,15 @@ async function choisirPnj(choixId, extra) {
 </script>
 {% if a_ligne_actions %}
 {{ pleinecran.cablage('affichage-fs', 'affichage-fs-ico', 'affichage-fs-txt', libelle_quitter='Quitter le plein écran') }}
+<script>
+	// Lieu sans carte (ex. une réception avec PNJ) : le menu n'a que « Plein écran », que le
+	// câblage laisse caché sans API ou en application installée → ⚙️ sans entrée, on le retire.
+	(function () {
+		const menu = document.getElementById('affichage-menu');
+		const btn = document.getElementById('affichage-btn');
+		if (menu && btn && !menu.querySelector('.affichage-item:not([hidden])')) btn.hidden = true;
+	})();
+</script>
 {% else %}
 {{ pleinecran.pastille(compact=true) }}
 {% endif %}
