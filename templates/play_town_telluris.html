@@ -1314,7 +1314,13 @@
 		   (portrait mobile seul : sur un écran large, tronquer ne cache que pour rien), et
 		   en paysage haut l'en-tête COLLÉ (barre comprise). Une seule liste partout.
 		   Hors de ces media, `.capa-tete` ne montre que recherche + tri. */
-		.capa-tete { display: flex; flex-direction: column; gap: .35rem; }
+		/* ⚠️ `text-size-adjust` : sans lui, le « text autosizing » des navigateurs mobiles
+		   (Chrome Android, Safari iOS) grossit le texte d'un bloc selon la QUANTITÉ de texte
+		   qui l'entoure — la liste de Connues (longue, lignes fusionnées dans l'onglet) et
+		   celle d'Apprendre (courte, en sections) n'en ont pas autant, et vues, recherche et
+		   puces de filtre changeaient de taille à chaque bascule. Taille d'en-tête FIXE. */
+		.capa-tete { display: flex; flex-direction: column; gap: .35rem;
+			-webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 		.capa-vues, .capa-filtres { display: none; }
 		.capa-outils { display: flex; align-items: center; gap: .4rem; }
 		.capa-outils .sh-rel-filter { flex: 1 1 auto; min-width: 0; margin: 0; }
