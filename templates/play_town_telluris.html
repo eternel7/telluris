@@ -1314,7 +1314,13 @@
 		   (portrait mobile seul : sur un écran large, tronquer ne cache que pour rien), et
 		   en paysage haut l'en-tête COLLÉ (barre comprise). Une seule liste partout.
 		   Hors de ces media, `.capa-tete` ne montre que recherche + tri. */
-		.capa-tete { display: flex; flex-direction: column; gap: .35rem; }
+		/* ⚠️ `text-size-adjust` : sans lui, le « text autosizing » des navigateurs mobiles
+		   (Chrome Android, Safari iOS) grossit le texte d'un bloc selon la QUANTITÉ de texte
+		   qui l'entoure — la liste de Connues (longue, lignes fusionnées dans l'onglet) et
+		   celle d'Apprendre (courte, en sections) n'en ont pas autant, et vues, recherche et
+		   puces de filtre changeaient de taille à chaque bascule. Taille d'en-tête FIXE. */
+		.capa-tete { display: flex; flex-direction: column; gap: .35rem;
+			-webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 		.capa-vues, .capa-filtres { display: none; }
 		.capa-outils { display: flex; align-items: center; gap: .4rem; }
 		.capa-outils .sh-rel-filter { flex: 1 1 auto; min-width: 0; margin: 0; }
@@ -1331,24 +1337,29 @@
 			   sorts s'y lisent comme UNE liste (le filtre les sépare au besoin). */
 			#acc-head-capa-modes, #acc-head-capa-competences, #acc-head-capa-sorts { display: none; }
 			#sh-competences .capa-tete {
-				display: flex; flex-direction: column; gap: .35rem;
+				display: flex; flex-direction: column; gap: .35rem; flex-shrink: 0;
 				position: sticky; top: 0; z-index: 20;
 				background: var(--panel-bg); padding: .25rem 0 .35rem;
 			}
-			.capa-vues { display: flex; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
+			.capa-vues { display: flex; flex-shrink: 0; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
+			/* ⚠️ Vues et puces à taille FIXE (px, `line-height:1`, rien qui rétrécit) : leur
+			   taille ne doit dépendre ni de la vue affichée ni de la place restante. */
 			.capa-vue {
-				flex: 1; padding: .45rem .2rem; background: transparent; border: 0;
-				color: var(--muted); font: inherit; font-size: .8rem; text-transform: uppercase;
+				flex: 1; height: 30px; box-sizing: border-box; line-height: 1;
+				padding: 0 .2rem; background: transparent; border: 0;
+				color: var(--muted); font: inherit; font-size: 13px; text-transform: uppercase;
 				letter-spacing: .03em; cursor: pointer; white-space: nowrap;
 			}
 			.capa-vue + .capa-vue { border-left: 1px solid var(--border-color); }
 			.capa-vue[aria-selected="true"] { background: var(--btn-bg); color: var(--accent-color); }
 			#capa-apprendre-compte { margin-left: .3rem; }
-			.capa-filtres { display: flex; gap: .35rem; overflow-x: auto; scrollbar-width: none; }
+			.capa-filtres { display: flex; flex: 0 0 24px; height: 24px; align-items: center;
+				gap: .35rem; overflow-x: auto; scrollbar-width: none; }
 			.capa-filtre {
-				flex: 0 0 auto; padding: .2rem .7rem; border-radius: 999px; cursor: pointer;
+				flex: 0 0 auto; height: 24px; box-sizing: border-box; line-height: 1;
+				padding: 0 .7rem; border-radius: 999px; cursor: pointer; white-space: nowrap;
 				border: 1px solid var(--border-color); background: transparent;
-				color: var(--muted); font: inherit; font-size: .78rem;
+				color: var(--muted); font: inherit; font-size: 12px;
 			}
 			.capa-filtre[aria-pressed="true"] { border-color: var(--accent-color); color: var(--accent-color); }
 			/* ⚔ Attaque : la puce la plus à droite, comme ses lignes sont les dernières. */
