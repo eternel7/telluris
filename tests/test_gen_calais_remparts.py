@@ -8,7 +8,6 @@
 """
 
 from dev import gen_calais_remparts as g
-from utils import grille_image
 
 
 def _cout_plat(x, y):
@@ -76,6 +75,15 @@ def test_une_impasse_est_prolongee_vers_une_case_eloignee():
 	assert ouvertures == [("impasse", [(1, 2)])]
 
 
+def test_chaque_porte_est_sur_son_pont_levis():
+	# La porte extérieure est la dernière case du pont, voisine (8) de la précédente : le pont
+	# se parcourt d'un bout à l'autre.
+	for p in g.PORTES:
+		for a, b in zip(p["pont"], p["pont"][1:]):
+			assert max(abs(a[0] - b[0]), abs(a[1] - b[1])) == 1, p["slug"]
+	assert len({p["slug"] for p in g.PORTES}) == len(g.PORTES)
+
+
 def test_les_cinq_docs_d_une_porte():
 	porte = dict(g.PORTES[0])
 	docs = g.docs_porte("lieu:calais", porte, (35, 40), (37, 32))
@@ -91,50 +99,3 @@ def test_les_cinq_docs_d_une_porte():
 	assert carte_int["nodes"][0] == {"lieu": "lieu:calais", "pos": [37, 32]}
 	assert [n["lieu"] for n in passage["nodes"]] == [ext["_id"], inte["_id"]]
 	assert all(n["pos"] == [0, 0] and "label" not in n for n in passage["nodes"])
-
-
-# ── Lecture par les traits ───────────────────────────────────────────────────────────────
-def test_pixel_de_rue_ni_encre_ni_pierre():
-	assert g.pixel_de_rue(191, 175, 145)            # pavé de la place (mesuré)
-	assert not g.pixel_de_rue(40, 35, 30)           # trait d'encre
-	assert not g.pixel_de_rue(143, 130, 112)        # pierre du mur nord (saturation 0,12)
-
-
-def test_masque_rues_garde_les_grandes_regions():
-	# 6×2 px : une région de 4 px à gauche, une de 2 px à droite, séparées par un trait.
-	libre = [1, 1, 0, 0, 1, 1,
-			 1, 1, 0, 0, 0, 0]
-	rue = g.masque_rues(libre, 6, 2, aire=3)
-	assert list(rue) == [1, 1, 0, 0, 0, 0,
-						 1, 1, 0, 0, 0, 0]
-
-
-def _rue_deux_cases(trait):
-	"""Deux cases de 4 px côte à côte (8×4 px), rue partout sauf la colonne 4 si `trait`."""
-	return bytearray(0 if trait and x == 4 else 1 for y in range(4) for x in range(8))
-
-
-def test_un_trait_noir_separe_deux_cases():
-	assert g.relies(_rue_deux_cases(False), 8, 4, (0, 0), (1, 0))
-	assert not g.relies(_rue_deux_cases(True), 8, 4, (0, 0), (1, 0))
-
-
-def test_grille_traits_pose_le_mur_sur_le_trait():
-	cells, nav = [[0, 0]], {}
-	poses = g.grille_traits(cells, nav, _rue_deux_cases(True), 8, {(0, 0), (1, 0)}, k=4,
-							pixels_case=4)
-	assert cells == [[1, 1]] and poses == 1
-	assert not grille_image.nav_autorise(nav, 0, 0, 1, 0)
-	cells, nav = [[0, 0]], {}
-	assert g.grille_traits(cells, nav, _rue_deux_cases(False), 8, {(0, 0), (1, 0)}, k=4,
-						   pixels_case=4) == 0
-	assert grille_image.nav_autorise(nav, 0, 0, 1, 0)
-
-
-def test_l_anneau_de_l_enceinte_isole_l_interieur():
-	anneau, interieur = g.anneau_et_interieur(((0, 0), (5, 0), (5, 5), (0, 5)), 6, 6)
-	assert interieur == {(x, y) for x in range(1, 4) for y in range(1, 4)}
-	for (x, y) in interieur:
-		for dx in (-1, 0, 1):
-			for dy in (-1, 0, 1):
-				assert (x + dx, y + dy) in anneau | interieur

@@ -17,7 +17,8 @@ Ce que fait le script, sur `lieu:calais` RELU du dump (dehors : grille de l'édi
     ainsi que les tracés `REMPART` et le corps du rempart sud (`CORPS_REMPART`) ;
   · RUES PAR LES TRAITS (intra-muros, `grille_traits`) : pixel de rue = ni encre (gris ≥
     `SEUIL_ENCRE`) ni pierre grise (saturation ≥ `SATURATION_RUE`), dans une région d'au moins
-    `AIRE_RUE` pixels (une face de toit entre ses hachures est plus petite). Case praticable
+    `AIRE_RUE` pixels (une face de toit entre ses hachures est plus petite) — `utils/
+    grille_traits`, partagé avec `dev/gen_grille_traits.py`. Case praticable
     si elle en contient `PIXELS_CASE` ; deux cases voisines ne communiquent (sinon mur `nav`)
     que si des pixels de rue les relient DANS leur fenêtre — un trait noir est une limite ;
   · PASSAGES : ceux que la lecture manque et que le dessin montre (`PASSAGES`, l'arche du mur
@@ -28,7 +29,8 @@ Ce que fait le script, sur `lieu:calais` RELU du dump (dehors : grille de l'édi
     `*_LONGUEUR` cases, à travers des cases 0 / 2 — coût lu sur l'image (une rue est claire,
     un toit sombre : `cout_case`). Jamais une case du rempart ni hors de l'enceinte
     (`ENCEINTE`), et toute ouverture qui relierait dedans et dehors est annulée ;
-  · PORTES DE REMPART : une PAIRE par porte dessinée (pont-levis sud-ouest et sud-est),
+  · PORTES DE REMPART : une PAIRE par porte dessinée à pont-levis (sud-ouest, sud-est, est),
+    porte extérieure sur le pont-levis rendu praticable jusqu'à l'arche,
     cinq docs chacune, forme de l'éditeur (`dev/test_portes_client.js`) et `_id` à la
     convention d'Alexandrie. Images reprises du fonds (porte à pont-levis) ;
   · SORTIE SUD : `link:france_to_calais_sud` reposé sur la route qui descend de la porte
@@ -54,7 +56,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dev import gen_grille_image as ggi  # noqa: E402
 from dev.gen_plaine_europeenne import case_proche, sans_rev  # noqa: E402
 from dev.gen_voisins_france import a_emettre  # noqa: E402
-from utils import grille_image  # noqa: E402
+from dev.gen_grille_traits import masque_image  # noqa: E402
+from utils import grille_image, grille_traits  # noqa: E402
+from utils.grille_traits import anneau_et_interieur, dans_polygone  # noqa: E402
 
 RACINE = ggi.RACINE
 SORTIE = os.path.join(ggi.DOSSIER_JSONS, "calais_remparts_a_importer.json")
@@ -86,14 +90,7 @@ ENCEINTE =((9, 26), (25, 26), (25, 31), (34, 34), (34, 37), (70, 37), (72, 35), 
 			(80, 22), (78, 18), (75, 13), (72, 10), (68, 6), (62, 6), (60, 7), (45, 7), (36, 9),
 			(33, 10), (26, 10), (22, 7), (20, 10), (18, 13), (12, 14), (9, 20))
 
-# Lecture par les traits, mesurée sur `calais_city.jpg` (1408×768, 16 px la case) : les
-# traits font ~2 px, gris < 60 ; une rue est grise 150-190 et saturée 0,19-0,27 (HLS), la
-# pierre des murs et du château 0,12-0,14, l'herbe du dehors 0,19.
-SEUIL_ENCRE = 80
-SATURATION_RUE = 0.14
-AIRE_RUE = 300          # px : une face de toit entre ses hachures en fait moins
-PIXELS_CASE = 10        # px de rue (sur 256) pour qu'une case soit praticable
-K_CASE = 16
+# Lecture par les traits : réglages de `utils/grille_traits` (mesurés sur cette image).
 
 # Passages que la lecture manque (cases, pas orthogonaux ou diagonaux) : l'arche en ogive
 # du mur intérieur du port, de la rue de la place au quai.
@@ -111,15 +108,23 @@ IMPASSE_DETOUR = 6      # la case rejointe est à au moins 6 pas de l'impasse pa
 LUMINANCE_RUE = 0.40
 COUT_SOMBRE = 25
 
-# Portes de rempart : `dehors` = pied du pont-levis, `dedans` = débouché du passage dans la
-# ville ; chaque case est ramenée à la plus proche de sa zone.
+# Portes de rempart, une par porte dessinée À PONT-LEVIS (trois : sud-ouest, sud-est, est).
+# `pont` = cases du pont-levis, du pré jusqu'au pied de l'arche — ouvertes (`PASSAGES`) ; sa
+# DERNIÈRE case porte la porte extérieure. `dedans` = débouché du passage dans la ville,
+# ramené à la case de rue la plus proche. L'arche elle-même est dans l'anneau du rempart.
 PORTES = (
-	{"slug": "porte_sud_ouest", "label": "Porte sud-ouest", "dehors": (35, 40), "dedans": (36, 32),
+	{"slug": "porte_sud_ouest", "label": "Porte sud-ouest", "pont": ((35, 40), (35, 39), (36, 38)),
+	 "dedans": (36, 32),
 	 "image_ext": "porte_de_ville_pont_exterieur01.png",
 	 "image_int": "porte_de_ville_pont_interieur05.png"},
-	{"slug": "porte_sud_est", "label": "Porte sud-est", "dehors": (67, 41), "dedans": (66, 31),
+	{"slug": "porte_sud_est", "label": "Porte sud-est", "pont": ((67, 40), (67, 39), (66, 38)),
+	 "dedans": (66, 31),
 	 "image_ext": "porte_de_ville_pont_exterieur02.png",
 	 "image_int": "porte_de_ville_pont_interieur02.png"},
+	{"slug": "porte_est", "label": "Porte est", "pont": ((82, 25), (81, 25), (80, 25)),
+	 "dedans": (76, 25),
+	 "image_ext": "porte_de_ville_pont_exterieur03.png",
+	 "image_int": "porte_de_ville_pont_interieur03.png"},
 )
 PORTE_CATEGORIE = "Porte de rempart"
 PORTE_META = {"type": "poste de garde", "status": "ouvert"}
@@ -153,16 +158,6 @@ def cases_du_rempart(traces=REMPART, corps=CORPS_REMPART) -> set:
 	for x0, y0, x1, y1 in corps:
 		murs.update((x, y) for y in range(y0, y1 + 1) for x in range(x0, x1 + 1))
 	return murs
-
-
-def dans_polygone(poly, x, y) -> bool:
-	"""Le CENTRE de la case (x, y) est-il dans `poly` ? (parité des croisements)"""
-	px, py = x + .5, y + .5
-	dedans = False
-	for (ax, ay), (bx, by) in zip(poly, poly[1:] + poly[:1]):
-		if (ay > py) != (by > py) and px < ax + (py - ay) * (bx - ax) / (by - ay):
-			dedans = not dedans
-	return dedans
 
 
 def atteint(cells, nav, depart) -> set:
@@ -206,126 +201,6 @@ def fermer_rempart(cells, murs) -> int:
 			cells[y][x] = 0
 			fermees += 1
 	return fermees
-
-
-def anneau_et_interieur(poly, cols, rows):
-	"""(anneau, intérieur) des cases de l'enceinte : l'anneau a une voisine (8) hors du
-	polygone — c'est le rempart —, l'intérieur n'a que des voisines dedans."""
-	dedans = {(x, y) for y in range(rows) for x in range(cols) if dans_polygone(poly, x, y)}
-	interieur = {(x, y) for (x, y) in dedans
-				 if all((x + dx, y + dy) in dedans for dx in (-1, 0, 1) for dy in (-1, 0, 1))}
-	return dedans - interieur, interieur
-
-
-# ── Rues par les traits ────────────────────────────────────────────────────────────────────
-def pixel_de_rue(r, g, b, seuil=SEUIL_ENCRE, saturation=SATURATION_RUE) -> bool:
-	"""Ni encre (gris ITU-R 601, celui de Pillow `L`, ≥ `seuil`) ni pierre grise
-	(saturation HLS ≥ `saturation`)."""
-	if (r * 299 + g * 587 + b * 114) // 1000 < seuil:
-		return False
-	mx, mn = max(r, g, b), min(r, g, b)
-	if mx == mn:
-		return False
-	somme = mx + mn
-	return (mx - mn) / (somme if somme < 255 else 510 - somme) >= saturation
-
-
-def masque_rues(libre, largeur, hauteur, aire=AIRE_RUE) -> bytearray:
-	"""Pixels `libre` (suite de booléens, ligne par ligne) dont la région 4-connexe fait au
-	moins `aire` pixels : 1, sinon 0."""
-	rue = bytearray(largeur * hauteur)
-	vu = bytearray(largeur * hauteur)
-	for depart in range(largeur * hauteur):
-		if not libre[depart] or vu[depart]:
-			continue
-		vu[depart] = 1
-		region, pile = [], [depart]
-		while pile:
-			i = pile.pop()
-			region.append(i)
-			x = i % largeur
-			for j in (i - largeur, i + largeur, i - 1 if x else -1, i + 1 if x + 1 < largeur else -1):
-				if 0 <= j < largeur * hauteur and libre[j] and not vu[j]:
-					vu[j] = 1
-					pile.append(j)
-		if len(region) >= aire:
-			for i in region:
-				rue[i] = 1
-	return rue
-
-
-def relies(rue, largeur, k, a, b) -> bool:
-	"""Des pixels de rue relient-ils les cases voisines `a` et `b` SANS sortir de leur
-	fenêtre (2 cases, ou le carré 2×2 d'un pas diagonal) ? Un trait noir les sépare sinon."""
-	x0, y0 = min(a[0], b[0]) * k, min(a[1], b[1]) * k
-	x1, y1 = (max(a[0], b[0]) + 1) * k, (max(a[1], b[1]) + 1) * k
-
-	def dans(p, case):
-		return case[0] * k <= p[0] < (case[0] + 1) * k and case[1] * k <= p[1] < (case[1] + 1) * k
-
-	pile = [(px, py) for py in range(a[1] * k, (a[1] + 1) * k)
-			for px in range(a[0] * k, (a[0] + 1) * k) if rue[py * largeur + px]]
-	vus = set(pile)
-	while pile:
-		p = pile.pop()
-		if dans(p, b):
-			return True
-		for q in ((p[0] + 1, p[1]), (p[0] - 1, p[1]), (p[0], p[1] + 1), (p[0], p[1] - 1)):
-			if x0 <= q[0] < x1 and y0 <= q[1] < y1 and q not in vus and rue[q[1] * largeur + q[0]]:
-				vus.add(q)
-				pile.append(q)
-	return False
-
-
-def grille_traits(cells, nav, rue, largeur, interieur, k=K_CASE, pixels_case=PIXELS_CASE) -> int:
-	"""Mute `cells`/`nav` sur l'`intérieur` : case à 1 si elle porte `pixels_case` pixels de
-	rue, sinon 0 (l'eau, 5, reste) ; ses murs nav repartent de zéro, un mur est posé entre
-	deux cases praticables que `relies` ne joint pas. Rend le nombre de murs posés."""
-	for (x, y) in interieur:
-		nav.pop(f"{x},{y}", None)
-		if cells[y][x] == grille_image.TERRAIN_EAU:
-			continue
-		compte = sum(rue[py * largeur + px] for py in range(y * k, (y + 1) * k)
-					 for px in range(x * k, (x + 1) * k))
-		cells[y][x] = 1 if compte >= pixels_case else 0
-	poses = 0
-	for (x, y) in sorted(interieur):
-		if cells[y][x] != 1:
-			continue
-		for dx, dy in ((1, 0), (0, 1), (1, 1), (-1, 1)):
-			v = (x + dx, y + dy)
-			if v in interieur and cells[v[1]][v[0]] == 1 and not relies(rue, largeur, k, (x, y), v):
-				grille_image.interdire(nav, x, y, dx, dy)
-				poses += 1
-	return poses
-
-
-def ouvrir_passages(cells, nav, passages=PASSAGES) -> None:
-	"""Mute : chaque passage à 1, murs nav levés sur ses pas (orthogonaux ou diagonaux)."""
-	for chemin in passages:
-		for x, y in chemin:
-			cells[y][x] = 1
-		for a, b in zip(chemin, chemin[1:]):
-			for p, q in ((a, b), (b, a)):
-				bit, _op = grille_image._BIT[(q[0] - p[0], q[1] - p[1])]
-				cle = f"{p[0]},{p[1]}"
-				reste = int(nav.get(cle, 0) or 0) & ~bit
-				if reste:
-					nav[cle] = reste
-				else:
-					nav.pop(cle, None)
-
-
-def masque_image(chemin):
-	"""(masque de rue, largeur, hauteur) de l'image (Pillow)."""
-	from PIL import Image
-	with Image.open(chemin) as img:
-		img = img.convert("RGB")
-		largeur, hauteur = img.size
-		octets = img.tobytes()
-		libre = [pixel_de_rue(octets[i], octets[i + 1], octets[i + 2])
-				 for i in range(0, len(octets), 3)]
-	return masque_rues(libre, largeur, hauteur), largeur, hauteur
 
 
 # ── Rues ───────────────────────────────────────────────────────────────────────────────────
@@ -496,14 +371,12 @@ def construire(docs, luminances_fn, masque_fn):
 	cols, rows = len(cells[0]), len(cells)
 	anneau, interieur = anneau_et_interieur(ENCEINTE, cols, rows)
 	rue, largeur, hauteur = masque_fn(cite["image"])
-	if (largeur, hauteur) != (cols * K_CASE, rows * K_CASE):
-		return [], [f"{cite['image']} : {largeur}×{hauteur} px, {K_CASE} px la case attendus"], {}
-	murs_nav = grille_traits(cells, nav, rue, largeur, interieur)
+	murs_nav = grille_traits.grille_traits(cells, nav, rue, largeur, hauteur, interieur)
 	murs = cases_du_rempart() | anneau
-	for x, y in anneau:
-		nav.pop(f"{x},{y}", None)
-	fermees = fermer_rempart(cells, {c for c in murs if cells[c[1]][c[0]] != grille_image.TERRAIN_EAU})
-	ouvrir_passages(cells, nav)
+	fermees = grille_traits.fermer_anneau(cells, nav, anneau)
+	fermees += fermer_rempart(cells, {c for c in murs - anneau
+									  if cells[c[1]][c[0]] != grille_image.TERRAIN_EAU})
+	grille_traits.ouvrir_passages(cells, nav, PASSAGES + tuple(p["pont"] for p in PORTES))
 	if atteint(cells, nav, ANCRE_DEDANS) & atteint(cells, nav, ANCRE_DEHORS):
 		return [], [f"{CITE} : le rempart fermé laisse encore passer du dedans au dehors"], {}
 	cout = cout_depuis_luminances(luminances_fn(cite["image"], cols, rows))
@@ -515,7 +388,9 @@ def construire(docs, luminances_fn, masque_fn):
 	sortants = [cite]
 
 	for p in PORTES:
-		pos_dehors, pos_dedans = case_proche(dehors, p["dehors"]), case_proche(dedans, p["dedans"])
+		pos_dehors, pos_dedans = p["pont"][-1], case_proche(dedans, p["dedans"])
+		if pos_dehors not in dehors:
+			refus.append(f"{p['slug']} : le pont-levis {list(pos_dehors)} ne rejoint pas le dehors")
 		sortants += docs_porte(CITE, p, pos_dehors, pos_dedans)
 
 	sortie = copy.deepcopy(sans_rev(sortie))   # nœuds partagés avec le dump sinon
