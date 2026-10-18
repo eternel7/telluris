@@ -81,6 +81,10 @@ REMPART = (
 	# Tour gauche de la porte sud-ouest : une impasse sur son toit sinon.
 	((35, 34), (36, 34), (36, 36), (35, 36)),
 )
+# Cases de TOUR que la lecture prend pour la rue qui les longe, fermées APRÈS la liaison des
+# rues (fermées avant, elles changent l'ordre des poches et d'autres cases bougent) :
+# la tour ouest de la porte sud-est.
+TOURS = ((61, 31), (61, 32), (61, 33), (61, 34), (62, 33), (62, 34))
 # Corps du rempart sud (chemin de ronde et parement) : (x0, y0, x1, y1) inclus.
 CORPS_REMPART = ((38, 35, 62, 39),)
 
@@ -395,6 +399,8 @@ def construire(docs, luminances_fn, masque_fn):
 		return [], [f"{CITE} : le rempart fermé laisse encore passer du dedans au dehors"], {}
 	cout = cout_depuis_luminances(luminances_fn(cite["image"], cols, rows))
 	ouvertures = relier_rues(cells, nav, murs, ENCEINTE, cout)
+	for x, y in TOURS:
+		cells[y][x] = 0
 	dedans, dehors = atteint(cells, nav, ANCRE_DEDANS), atteint(cells, nav, ANCRE_DEHORS)
 	if dedans & dehors:
 		return [], [f"{CITE} : dedans et dehors se rejoignent après les rues"], {}
