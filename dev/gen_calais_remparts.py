@@ -93,8 +93,10 @@ ENCEINTE =((9, 26), (25, 26), (25, 31), (34, 34), (34, 37), (70, 37), (72, 35), 
 # Lecture par les traits : réglages de `utils/grille_traits` (mesurés sur cette image).
 
 # Passages que la lecture manque (cases, pas orthogonaux ou diagonaux) : l'arche en ogive
-# du mur intérieur du port, de la rue de la place au quai.
-PASSAGES = (((41, 20), (40, 20), (40, 19), (39, 18)),)
+# du mur intérieur du port, de la rue de la place au quai ; la cour au pied de la tour de la
+# porte est, depuis la rue (73, 24) jusqu'au débouché de la porte (75, 24).
+PASSAGES = (((41, 20), (40, 20), (40, 19), (39, 18)),
+			((73, 24), (74, 24), (75, 24)))
 
 POCHE_MIN = 3           # une poche de 1-2 cases est un reste de lecture, pas une rue
 POCHE_LONGUEUR = 5      # cases ouvertes au plus pour relier une poche
@@ -120,11 +122,11 @@ PORTES = (
 	 "image_ext": "porte_de_ville_pont_exterieur01.png",
 	 "image_int": "porte_de_ville_pont_interieur05.png"},
 	{"slug": "porte_sud_est", "label": "Porte sud-est", "pont": ((67, 40), (67, 39), (66, 38)),
-	 "dedans": (68, 29),
+	 "dedans": (60, 31),
 	 "image_ext": "porte_de_ville_pont_exterieur02.png",
 	 "image_int": "porte_de_ville_pont_interieur02.png"},
 	{"slug": "porte_est", "label": "Porte est", "pont": ((82, 25), (81, 25), (80, 25)),
-	 "dedans": (73, 25),
+	 "dedans": (75, 24),
 	 "image_ext": "porte_de_ville_pont_exterieur03.png",
 	 "image_int": "porte_de_ville_pont_interieur03.png"},
 )
@@ -132,7 +134,8 @@ PORTE_CATEGORIE = "Porte de rempart"
 PORTE_META = {"type": "poste de garde", "status": "ouvert"}
 PORTE_LABEL_EXT = "au-delà des remparts"
 # Les deux portes d'une paire encadrent le châtelet : au plus 9 cases (Chebyshev) de la porte
-# extérieure au débouché — le châtelet sud-est, le plus profond, en fait 9 du pont à la rue.
+# extérieure au débouché — de quoi longer le châtelet sud-est (7 cases du pont à la rue, en
+# haut à gauche, hors de sa tour ouest) sans laisser partir le débouché dans une autre rue.
 PORTE_ECART_MAX = 9
 
 # La route qui descend de la porte sud-ouest touche le bas de la carte en x = 28.
