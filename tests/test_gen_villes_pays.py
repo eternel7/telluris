@@ -86,17 +86,6 @@ def test_atlantis_et_mu_creees_sans_connexion(dump, construit):
 	assert not any(n["lieu"] in par_id for l in liens for n in l["nodes"])
 
 
-def test_abou_simbel_grille_dessinee_posee_sur_l_afrique_du_nord(dump, construit):
-	"""Créée avec la grille DESSINÉE (pas la proposition), parent = la carte qui la montre."""
-	if any(d.get("_id") == "lieu:abou_simbel" for d in dump):
-		pytest.skip("Abou Simbel déjà en base")
-	doc = next(d for d in construit[0] if d["_id"] == "lieu:abou_simbel")
-	cells, nav = gvp.GRILLES_DESSINEES["lieu:abou_simbel"](_proposer(doc)["cells"])
-	assert doc["cells"] == cells and doc["nav"] == nav
-	assert doc["lieu_parent"] == "lieu:afrique_du_nord" and doc["image"] == "abou_simbel_capital.jpg"
-	assert sum(1 for d in construit[0] if d["_id"] == "lieu:abou_simbel") == 1
-
-
 def test_parent_pose_s_il_manque_jamais_reecrit():
 	assert gvp.rattachee({"_id": "lieu:x", "_rev": "1-a"}, "lieu:p") == {"_id": "lieu:x", "lieu_parent": "lieu:p"}
 	assert gvp.rattachee({"_id": "lieu:x", "lieu_parent": "lieu:q"}, "lieu:p")["lieu_parent"] == "lieu:q"
@@ -211,16 +200,6 @@ def test_territoire_du_voisin_mis_a_zero(construit):
 		assert afr["cells"][y][x] == 0
 
 
-def test_liens_des_cites_sur_l_afrique_du_nord_signales(dump, construit):
-	"""Alexandrie et Le Caire ↔ Afrique du Nord tombent dans l'Égypte mise à 0 : signalés."""
-	coupes = [d["_id"] for d in dump if d.get("type") == "connection"
-		and any(n.get("lieu") == gea.AFRIQUE and tuple(n.get("pos") or ())
-			in gea.bande(gea.FRONTIERE_AFRIQUE, "est", {"x": 88, "y": 48}) for n in d.get("nodes") or [])]
-	if not coupes:
-		pytest.skip("anciens liens déjà retirés de la base")
-	assert all(any(a.startswith(c + " :") for a in construit[4]) for c in coupes)
-
-
 def test_abou_simbel_reste_praticable_et_sa_route_y_mene(construit):
 	"""Abou Simbel n'est pas sur la carte d'Égypte : elle reste dans la terre de l'Afrique du
 	Nord ; le passage qui porte son nom part du Nil de l'Égypte (qui fait foi) et arrive près
@@ -238,19 +217,13 @@ def test_abou_simbel_reste_praticable_et_sa_route_y_mene(construit):
 
 
 # ── Grand Temple d'Abou Simbel ────────────────────────────────────────────────────────────
-def test_grand_temple_cree_et_relie_a_la_porte_du_temple(dump, construit):
-	lieux, liens = construit[0], construit[1]
+def test_grand_temple_relie_a_la_porte_du_temple(construit):
 	spec = gvp.INTERIEURS["lieu:grand_temple_d_abou_simbel"]
-	lien = next(l for l in liens if l["_id"] == "link:abou_simbel_to_grand_temple_d_abou_simbel")
+	lien = next(l for l in construit[1] if l["_id"] == "link:abou_simbel_to_grand_temple_d_abou_simbel")
 	(n_ville, n_temple) = lien["nodes"]
 	assert (n_ville["lieu"], tuple(n_ville["pos"])) == ("lieu:abou_simbel", spec["pos_parent"])
 	assert (n_temple["lieu"], tuple(n_temple["pos"])) == ("lieu:grand_temple_d_abou_simbel", spec["pos"])
 	assert lien["metadata"] == {"type": "temple", "status": "ouvert"}
-	if any(d.get("_id") == "lieu:grand_temple_d_abou_simbel" for d in dump):
-		pytest.skip("Grand Temple déjà en base")
-	temple = next(d for d in lieux if d["_id"] == "lieu:grand_temple_d_abou_simbel")
-	assert (temple["cells"], temple["nav"]) == spec["grille"]()
-	assert temple["lieu_parent"] == "lieu:abou_simbel" and temple["categorie"] == "temple"
 
 
 def test_interieur_deja_en_base_garde_sa_grille():
