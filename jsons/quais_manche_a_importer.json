@@ -1,0 +1,2104 @@
+[
+  {
+    "_id": "lieu:calais_quais_nord",
+    "type": "lieu",
+    "label": "Les quais nord de Calais",
+    "image": "quai_europe_calais01.jpg",
+    "categorie": "quai",
+    "lieu_parent": "lieu:calais",
+    "pnj": [
+      {
+        "character": "pnj:capitaine_calais_nord",
+        "nom": "Aubin Cordemâle",
+        "portrait": "capitaine_nain_m_calais01.jpg",
+        "probabilite": 1
+      }
+    ]
+  },
+  {
+    "_id": "pnj:capitaine_calais_nord",
+    "type": "pnj",
+    "nom": "Aubin Cordemâle",
+    "race": "nain",
+    "portrait": "capitaine_nain_m_calais01.jpg",
+    "vocation": "guerrier",
+    "description": "Patron d'un navire trapu qui fait la traversée du Pas vers Douvres depuis le bassin nord.",
+    "services": {
+      "traversee": {
+        "route": "traversee:calais_nord_douvres",
+        "noeuds": {
+          "embarque": "a_bord",
+          "sans_fonds": "pauvre"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "{pnj} tape du plat de la main sur la coque de son navire, large et bas sur l'eau. « Il ne gagne pas de courses, mais il arrive. Douvres, c'est ça ? Places à bord : {passagers}. Ce sera {tarif}. »",
+          "choix": [
+            {
+              "id": "embarquer",
+              "label": "Payer {tarif} et monter à bord.",
+              "action": {
+                "service": "traversee",
+                "op": "embarquer"
+              }
+            },
+            {
+              "id": "danger",
+              "label": "Qu'est-ce qui rôde au large ?",
+              "next": "danger"
+            },
+            {
+              "id": "fin",
+              "label": "Une autre fois.",
+              "next": "fin"
+            }
+          ]
+        },
+        "danger": {
+          "texte": "« Des tritons qui tirent sur les filins, des sirènes qui chantent aux matelots trop jeunes. » {pnj} montre la hache passée au mât. « Et quand un bras de kraken monte sur le pont, on coupe. On ne discute pas avec un kraken. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir au passage.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Une autre fois.",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_bord": {
+          "texte": "« Larguez ! » Le navire du bassin nord quitte le quai à la rame puis prend le vent. Cap sur Douvres.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Monter à bord.",
+              "next": "fin"
+            }
+          ]
+        },
+        "pauvre": {
+          "texte": "{pnj} compte vos pièces et secoue la tête. « Ça ne paie pas la place. Revenez avec {tarif}, et on lève l'ancre. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Repartir.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "traversee:calais_nord_douvres",
+    "type": "traversee",
+    "label": "Traversée vers Douvres",
+    "depart": {
+      "lieu": "lieu:calais_quais_nord"
+    },
+    "arrivee": {
+      "lieu": "lieu:douvres_quais",
+      "pos": [
+        0,
+        0
+      ]
+    },
+    "carte": "lieu:manche",
+    "chemin": [
+      [
+        54,
+        27
+      ],
+      [
+        51,
+        25
+      ],
+      [
+        46,
+        21
+      ],
+      [
+        40,
+        17
+      ],
+      [
+        35,
+        13
+      ],
+      [
+        31,
+        10
+      ],
+      [
+        29,
+        8
+      ]
+    ],
+    "segments": [
+      {
+        "de": 0,
+        "zone": "zone:mer_cotiere",
+        "intensite": 0.08
+      },
+      {
+        "de": 5,
+        "zone": "zone:haute_mer",
+        "intensite": 0.18
+      },
+      {
+        "de": 21,
+        "zone": "zone:mer_cotiere",
+        "intensite": 0.08
+      }
+    ],
+    "rencontres": [
+      {
+        "espece": "espece:kraken",
+        "zones": [
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:nereide",
+        "zones": [
+          "zone:mer_cotiere"
+        ]
+      },
+      {
+        "espece": "espece:oceanide",
+        "zones": [
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:ondin",
+        "zones": [
+          "zone:mer_cotiere"
+        ]
+      },
+      {
+        "espece": "espece:poissons_mammiferes_marins",
+        "zones": [
+          "zone:mer_cotiere",
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:sirene",
+        "zones": [
+          "zone:mer_cotiere",
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:triton",
+        "zones": [
+          "zone:mer_cotiere",
+          "zone:haute_mer"
+        ]
+      }
+    ],
+    "profil_weights": {
+      "profil:novice": 3,
+      "profil:apprenti": 3,
+      "profil:combattant": 2,
+      "profil:veteran": 1
+    },
+    "prix": {
+      "passager_cuivre": 150,
+      "monture_cuivre": 100
+    }
+  },
+  {
+    "_id": "link:quai02_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          27,
+          18
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais_nord",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai03_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          28,
+          17
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais_nord",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai04_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          30,
+          16
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais_nord",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai05_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          31,
+          15
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais_nord",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai06_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          33,
+          15
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais_nord",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai07_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          34,
+          14
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais_nord",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:calais_quais",
+    "type": "lieu",
+    "label": "Les quais de Calais",
+    "image": "quai_europe_calais01.jpg",
+    "categorie": "quai",
+    "lieu_parent": "lieu:calais",
+    "pnj": [
+      {
+        "character": "pnj:capitaine_calais",
+        "nom": "Mahaut Lestrade",
+        "portrait": "capitaine_humain_f_calais01.jpg",
+        "probabilite": 1
+      }
+    ]
+  },
+  {
+    "_id": "pnj:capitaine_calais",
+    "type": "pnj",
+    "nom": "Mahaut Lestrade",
+    "race": "humain",
+    "portrait": "capitaine_humain_f_calais01.jpg",
+    "vocation": "guerrier",
+    "description": "Patronne d'un navire qui fait la traversée du Pas vers Douvres.",
+    "services": {
+      "traversee": {
+        "route": "traversee:calais_douvres",
+        "noeuds": {
+          "embarque": "a_bord",
+          "sans_fonds": "pauvre"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "{pnj} lève les yeux d'un rouleau de cordage. « Pour Douvres ? Le Pas est court, mais il a des dents. On part avec la marée, on arrive avant la nuit, la plupart du temps. Places à bord : {passagers}. Ce sera {tarif}. »",
+          "choix": [
+            {
+              "id": "embarquer",
+              "label": "Payer {tarif} et monter à bord.",
+              "action": {
+                "service": "traversee",
+                "op": "embarquer"
+              }
+            },
+            {
+              "id": "danger",
+              "label": "Qu'est-ce qui rôde au large ?",
+              "next": "danger"
+            },
+            {
+              "id": "fin",
+              "label": "Une autre fois.",
+              "next": "fin"
+            }
+          ]
+        },
+        "danger": {
+          "texte": "« Des sirènes près des côtes, qui chantent pour qu'on approche des récifs. Au large, des tritons, et parfois un bras de kraken qui sort de l'eau sans prévenir. » {pnj} montre du menton les deux tours dont les runes rougeoient au-dessus du bassin. « Tant qu'on les voit briller, rien n'entre au port. Après, c'est l'équipage… et vous. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir au passage.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Une autre fois.",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_bord": {
+          "texte": "« Larguez les amarres ! » Le navire s'écarte du quai et prend le vent. Cap sur Douvres.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Monter à bord.",
+              "next": "fin"
+            }
+          ]
+        },
+        "pauvre": {
+          "texte": "{pnj} compte vos pièces et secoue la tête. « Ça ne paie pas la place. Revenez avec {tarif}, et on lève l'ancre. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Repartir.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "link:quai08_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          36,
+          16
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai09_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          38,
+          16
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai10_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          38,
+          18
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai01_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          37,
+          19
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai11_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          37,
+          21
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai12_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          36,
+          22
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:calais_quais_sud",
+    "type": "lieu",
+    "label": "Les quais sud de Calais",
+    "image": "quai_europe_calais01.jpg",
+    "categorie": "quai",
+    "lieu_parent": "lieu:calais",
+    "pnj": [
+      {
+        "character": "pnj:capitaine_calais_sud",
+        "nom": "Ysolde Marbrise",
+        "portrait": "capitaine_elfe_f_calais01.jpg",
+        "probabilite": 1
+      }
+    ]
+  },
+  {
+    "_id": "pnj:capitaine_calais_sud",
+    "type": "pnj",
+    "nom": "Ysolde Marbrise",
+    "race": "elfe",
+    "portrait": "capitaine_elfe_f_calais01.jpg",
+    "vocation": "guerrier",
+    "description": "Patronne d'un navire effilé qui fait la traversée du Pas vers Douvres depuis le bassin sud.",
+    "services": {
+      "traversee": {
+        "route": "traversee:calais_sud_douvres",
+        "noeuds": {
+          "embarque": "a_bord",
+          "sans_fonds": "pauvre"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "{pnj} lève les yeux de ses cartes marines, couvertes de courants tracés à l'encre fine. « Douvres ? Le vent tourne à la marée haute, nous serons partis avant lui. Places à bord : {passagers}. Le passage coûte {tarif}. »",
+          "choix": [
+            {
+              "id": "embarquer",
+              "label": "Payer {tarif} et monter à bord.",
+              "action": {
+                "service": "traversee",
+                "op": "embarquer"
+              }
+            },
+            {
+              "id": "danger",
+              "label": "Qu'est-ce qui rôde au large ?",
+              "next": "danger"
+            },
+            {
+              "id": "fin",
+              "label": "Une autre fois.",
+              "next": "fin"
+            }
+          ]
+        },
+        "danger": {
+          "texte": "« J'ai fait cette traversée plus de fois que vous n'avez vu de printemps. » {pnj} replie une carte. « Les serpents suivent les sillages, les sirènes guettent les récifs. Mon navire est rapide : nous ne nous battons que quand ils sont plus rapides que lui. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir au passage.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Une autre fois.",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_bord": {
+          "texte": "« Larguez les amarres ! » Le navire effilé glisse hors du bassin sud et prend le vent. Cap sur Douvres.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Monter à bord.",
+              "next": "fin"
+            }
+          ]
+        },
+        "pauvre": {
+          "texte": "{pnj} compte vos pièces et secoue la tête. « Ça ne paie pas la place. Revenez avec {tarif}, et on lève l'ancre. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Repartir.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "traversee:calais_sud_douvres",
+    "type": "traversee",
+    "label": "Traversée vers Douvres",
+    "depart": {
+      "lieu": "lieu:calais_quais_sud"
+    },
+    "arrivee": {
+      "lieu": "lieu:douvres_quais",
+      "pos": [
+        0,
+        0
+      ]
+    },
+    "carte": "lieu:manche",
+    "chemin": [
+      [
+        54,
+        27
+      ],
+      [
+        51,
+        25
+      ],
+      [
+        46,
+        21
+      ],
+      [
+        40,
+        17
+      ],
+      [
+        35,
+        13
+      ],
+      [
+        31,
+        10
+      ],
+      [
+        29,
+        8
+      ]
+    ],
+    "segments": [
+      {
+        "de": 0,
+        "zone": "zone:mer_cotiere",
+        "intensite": 0.08
+      },
+      {
+        "de": 5,
+        "zone": "zone:haute_mer",
+        "intensite": 0.18
+      },
+      {
+        "de": 21,
+        "zone": "zone:mer_cotiere",
+        "intensite": 0.08
+      }
+    ],
+    "rencontres": [
+      {
+        "espece": "espece:kraken",
+        "zones": [
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:nereide",
+        "zones": [
+          "zone:mer_cotiere"
+        ]
+      },
+      {
+        "espece": "espece:oceanide",
+        "zones": [
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:ondin",
+        "zones": [
+          "zone:mer_cotiere"
+        ]
+      },
+      {
+        "espece": "espece:poissons_mammiferes_marins",
+        "zones": [
+          "zone:mer_cotiere",
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:sirene",
+        "zones": [
+          "zone:mer_cotiere",
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:triton",
+        "zones": [
+          "zone:mer_cotiere",
+          "zone:haute_mer"
+        ]
+      }
+    ],
+    "profil_weights": {
+      "profil:novice": 3,
+      "profil:apprenti": 3,
+      "profil:combattant": 2,
+      "profil:veteran": 1
+    },
+    "prix": {
+      "passager_cuivre": 150,
+      "monture_cuivre": 100
+    }
+  },
+  {
+    "_id": "link:quai13_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          35,
+          23
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais_sud",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai14_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          34,
+          24
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais_sud",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai15_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          35,
+          25
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais_sud",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai16_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          33,
+          25
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais_sud",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai17_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          31,
+          25
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais_sud",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai18_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          30,
+          25
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais_sud",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:douvres_quais_ouest",
+    "type": "lieu",
+    "label": "Les quais ouest de Douvres",
+    "image": "quai_europe_douvres01.jpg",
+    "categorie": "quai",
+    "lieu_parent": "lieu:douvres",
+    "pnj": [
+      {
+        "character": "pnj:capitaine_douvres_ouest",
+        "nom": "Tamsin Brockwell",
+        "portrait": "capitaine_hobbit_f_douvres01.jpg",
+        "probabilite": 1
+      }
+    ]
+  },
+  {
+    "_id": "pnj:capitaine_douvres_ouest",
+    "type": "pnj",
+    "nom": "Tamsin Brockwell",
+    "race": "hobbit",
+    "portrait": "capitaine_hobbit_f_douvres01.jpg",
+    "vocation": "guerrier",
+    "description": "Patronne d'un petit navire vif qui fait la traversée du Pas vers Calais depuis le quai ouest.",
+    "services": {
+      "traversee": {
+        "route": "traversee:douvres_ouest_calais",
+        "noeuds": {
+          "embarque": "a_bord",
+          "sans_fonds": "pauvre"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "{pnj} grimpe sur une caisse pour vous regarder dans les yeux. « Calais ? Le plus petit navire du port, et le plus rapide à virer. Places à bord : {passagers}. Ce sera {tarif}. »",
+          "choix": [
+            {
+              "id": "embarquer",
+              "label": "Payer {tarif} et monter à bord.",
+              "action": {
+                "service": "traversee",
+                "op": "embarquer"
+              }
+            },
+            {
+              "id": "danger",
+              "label": "Qu'est-ce qui rôde au large ?",
+              "next": "danger"
+            },
+            {
+              "id": "fin",
+              "label": "Une autre fois.",
+              "next": "fin"
+            }
+          ]
+        },
+        "danger": {
+          "texte": "« Les grands navires, les serpents les voient de loin. Le mien, ils le prennent pour une planche qui flotte. » {pnj} sourit. « Ça ne marche pas toujours. Les sirènes, elles, chantent pour tout le monde : on se bouche les oreilles à la cire, et on rame. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir au passage.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Une autre fois.",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_bord": {
+          "texte": "« Larguez ! » Le petit navire file hors du quai ouest et prend le vent. Cap sur Calais.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Monter à bord.",
+              "next": "fin"
+            }
+          ]
+        },
+        "pauvre": {
+          "texte": "{pnj} compte vos pièces et secoue la tête. « Ça ne paie pas la place. Revenez avec {tarif}, et on lève l'ancre. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Repartir.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "traversee:douvres_ouest_calais",
+    "type": "traversee",
+    "label": "Traversée vers Calais",
+    "depart": {
+      "lieu": "lieu:douvres_quais_ouest"
+    },
+    "arrivee": {
+      "lieu": "lieu:calais_quais",
+      "pos": [
+        0,
+        0
+      ]
+    },
+    "carte": "lieu:manche",
+    "chemin": [
+      [
+        29,
+        8
+      ],
+      [
+        30,
+        9
+      ],
+      [
+        31,
+        10
+      ],
+      [
+        32,
+        11
+      ],
+      [
+        33,
+        11
+      ],
+      [
+        34,
+        12
+      ],
+      [
+        35,
+        13
+      ],
+      [
+        36,
+        14
+      ],
+      [
+        37,
+        15
+      ],
+      [
+        38,
+        15
+      ],
+      [
+        39,
+        16
+      ],
+      [
+        40,
+        17
+      ],
+      [
+        41,
+        18
+      ],
+      [
+        42,
+        18
+      ],
+      [
+        43,
+        19
+      ],
+      [
+        44,
+        20
+      ],
+      [
+        45,
+        20
+      ],
+      [
+        46,
+        21
+      ],
+      [
+        47,
+        22
+      ],
+      [
+        48,
+        23
+      ],
+      [
+        49,
+        23
+      ],
+      [
+        50,
+        24
+      ],
+      [
+        51,
+        25
+      ],
+      [
+        52,
+        26
+      ],
+      [
+        53,
+        26
+      ],
+      [
+        54,
+        27
+      ]
+    ],
+    "segments": [
+      {
+        "de": 0,
+        "zone": "zone:mer_cotiere",
+        "intensite": 0.08
+      },
+      {
+        "de": 5,
+        "zone": "zone:haute_mer",
+        "intensite": 0.18
+      },
+      {
+        "de": 21,
+        "zone": "zone:mer_cotiere",
+        "intensite": 0.08
+      }
+    ],
+    "rencontres": [
+      {
+        "espece": "espece:kraken",
+        "zones": [
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:nereide",
+        "zones": [
+          "zone:mer_cotiere"
+        ]
+      },
+      {
+        "espece": "espece:oceanide",
+        "zones": [
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:ondin",
+        "zones": [
+          "zone:mer_cotiere"
+        ]
+      },
+      {
+        "espece": "espece:poissons_mammiferes_marins",
+        "zones": [
+          "zone:mer_cotiere",
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:sirene",
+        "zones": [
+          "zone:mer_cotiere",
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:triton",
+        "zones": [
+          "zone:mer_cotiere",
+          "zone:haute_mer"
+        ]
+      }
+    ],
+    "profil_weights": {
+      "profil:novice": 3,
+      "profil:apprenti": 3,
+      "profil:combattant": 2,
+      "profil:veteran": 1
+    },
+    "prix": {
+      "passager_cuivre": 150,
+      "monture_cuivre": 100
+    }
+  },
+  {
+    "_id": "link:quai02_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          49,
+          29
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais_ouest",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai03_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          49,
+          27
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais_ouest",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai04_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          49,
+          25
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais_ouest",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai05_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          52,
+          23
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais_ouest",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai06_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          54,
+          22
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais_ouest",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai07_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          56,
+          22
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais_ouest",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:douvres_quais",
+    "type": "lieu",
+    "label": "Les quais de Douvres",
+    "image": "quai_europe_douvres01.jpg",
+    "categorie": "quai",
+    "lieu_parent": "lieu:douvres",
+    "pnj": [
+      {
+        "character": "pnj:capitaine_douvres",
+        "nom": "Godwin Hale",
+        "portrait": "capitaine_ogre_m_douvres01.jpg",
+        "probabilite": 1
+      }
+    ]
+  },
+  {
+    "_id": "pnj:capitaine_douvres",
+    "type": "pnj",
+    "nom": "Godwin Hale",
+    "race": "ogre",
+    "portrait": "capitaine_ogre_m_douvres01.jpg",
+    "vocation": "guerrier",
+    "description": "Patron d'un navire qui fait la traversée du Pas vers Calais.",
+    "services": {
+      "traversee": {
+        "route": "traversee:douvres_calais",
+        "noeuds": {
+          "embarque": "a_bord",
+          "sans_fonds": "pauvre"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "{pnj} se déplie de toute sa hauteur sur le quai. « Calais ? Bonne idée, la mer est calme. Pour l'instant. Places à bord : {passagers}. Le passage coûte {tarif}. »",
+          "choix": [
+            {
+              "id": "embarquer",
+              "label": "Payer {tarif} et monter à bord.",
+              "action": {
+                "service": "traversee",
+                "op": "embarquer"
+              }
+            },
+            {
+              "id": "danger",
+              "label": "Qu'est-ce qui rôde au large ?",
+              "next": "danger"
+            },
+            {
+              "id": "fin",
+              "label": "Une autre fois.",
+              "next": "fin"
+            }
+          ]
+        },
+        "danger": {
+          "texte": "« Le vieux phare des falaises nous garde l'entrée du port, depuis plus longtemps que n'importe qui ne s'en souvient. Plus loin, il ne garde plus rien. » {pnj} hausse ses énormes épaules. « Les serpents suivent les coques, les sirènes guettent les imprudents. On repousse ce qui monte à bord. Le reste, on le contourne. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir au passage.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Une autre fois.",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_bord": {
+          "texte": "« Larguez les amarres ! » Le navire s'écarte du quai et prend le vent. Cap sur Calais.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Monter à bord.",
+              "next": "fin"
+            }
+          ]
+        },
+        "pauvre": {
+          "texte": "{pnj} compte vos pièces et secoue la tête. « Ça ne paie pas la place. Revenez avec {tarif}, et on lève l'ancre. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Repartir.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "link:quai08_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          59,
+          22
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai01_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          61,
+          22
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai09_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          63,
+          21
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai10_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          65,
+          21
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai11_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          67,
+          22
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai12_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          69,
+          23
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai13_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          71,
+          25
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:douvres_quais_sud",
+    "type": "lieu",
+    "label": "Les quais sud de Douvres",
+    "image": "quai_europe_douvres01.jpg",
+    "categorie": "quai",
+    "lieu_parent": "lieu:douvres",
+    "pnj": [
+      {
+        "character": "pnj:capitaine_douvres_sud",
+        "nom": "Osric Fenwick",
+        "portrait": "capitaine_humain_m_douvres01.jpg",
+        "probabilite": 1
+      }
+    ]
+  },
+  {
+    "_id": "pnj:capitaine_douvres_sud",
+    "type": "pnj",
+    "nom": "Osric Fenwick",
+    "race": "humain",
+    "portrait": "capitaine_humain_m_douvres01.jpg",
+    "vocation": "guerrier",
+    "description": "Patron d'un navire de charge qui fait la traversée du Pas vers Calais depuis le quai sud.",
+    "services": {
+      "traversee": {
+        "route": "traversee:douvres_sud_calais",
+        "noeuds": {
+          "embarque": "a_bord",
+          "sans_fonds": "pauvre"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "{pnj} surveille le chargement de ses tonneaux sans lâcher son registre. « Calais, avec la cargaison de laine. Il reste de la place entre les ballots. Places à bord : {passagers}. Le passage coûte {tarif}. »",
+          "choix": [
+            {
+              "id": "embarquer",
+              "label": "Payer {tarif} et monter à bord.",
+              "action": {
+                "service": "traversee",
+                "op": "embarquer"
+              }
+            },
+            {
+              "id": "danger",
+              "label": "Qu'est-ce qui rôde au large ?",
+              "next": "danger"
+            },
+            {
+              "id": "fin",
+              "label": "Une autre fois.",
+              "next": "fin"
+            }
+          ]
+        },
+        "danger": {
+          "texte": "« Un navire lourd, ça n'esquive rien. » {pnj} montre les harpons rangés le long du bastingage. « Alors on se prépare : harpons pour les serpents, torches pour les tritons, et le cap droit sur Calais. Les sirènes, on les laisse chanter. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir au passage.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Une autre fois.",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_bord": {
+          "texte": "« Larguez les amarres ! » Le navire chargé s'écarte lourdement du quai sud et prend le vent. Cap sur Calais.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Monter à bord.",
+              "next": "fin"
+            }
+          ]
+        },
+        "pauvre": {
+          "texte": "{pnj} compte vos pièces et secoue la tête. « Ça ne paie pas la place. Revenez avec {tarif}, et on lève l'ancre. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Repartir.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "traversee:douvres_sud_calais",
+    "type": "traversee",
+    "label": "Traversée vers Calais",
+    "depart": {
+      "lieu": "lieu:douvres_quais_sud"
+    },
+    "arrivee": {
+      "lieu": "lieu:calais_quais",
+      "pos": [
+        0,
+        0
+      ]
+    },
+    "carte": "lieu:manche",
+    "chemin": [
+      [
+        29,
+        8
+      ],
+      [
+        30,
+        9
+      ],
+      [
+        31,
+        10
+      ],
+      [
+        32,
+        11
+      ],
+      [
+        33,
+        11
+      ],
+      [
+        34,
+        12
+      ],
+      [
+        35,
+        13
+      ],
+      [
+        36,
+        14
+      ],
+      [
+        37,
+        15
+      ],
+      [
+        38,
+        15
+      ],
+      [
+        39,
+        16
+      ],
+      [
+        40,
+        17
+      ],
+      [
+        41,
+        18
+      ],
+      [
+        42,
+        18
+      ],
+      [
+        43,
+        19
+      ],
+      [
+        44,
+        20
+      ],
+      [
+        45,
+        20
+      ],
+      [
+        46,
+        21
+      ],
+      [
+        47,
+        22
+      ],
+      [
+        48,
+        23
+      ],
+      [
+        49,
+        23
+      ],
+      [
+        50,
+        24
+      ],
+      [
+        51,
+        25
+      ],
+      [
+        52,
+        26
+      ],
+      [
+        53,
+        26
+      ],
+      [
+        54,
+        27
+      ]
+    ],
+    "segments": [
+      {
+        "de": 0,
+        "zone": "zone:mer_cotiere",
+        "intensite": 0.08
+      },
+      {
+        "de": 5,
+        "zone": "zone:haute_mer",
+        "intensite": 0.18
+      },
+      {
+        "de": 21,
+        "zone": "zone:mer_cotiere",
+        "intensite": 0.08
+      }
+    ],
+    "rencontres": [
+      {
+        "espece": "espece:kraken",
+        "zones": [
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:nereide",
+        "zones": [
+          "zone:mer_cotiere"
+        ]
+      },
+      {
+        "espece": "espece:oceanide",
+        "zones": [
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:ondin",
+        "zones": [
+          "zone:mer_cotiere"
+        ]
+      },
+      {
+        "espece": "espece:poissons_mammiferes_marins",
+        "zones": [
+          "zone:mer_cotiere",
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:sirene",
+        "zones": [
+          "zone:mer_cotiere",
+          "zone:haute_mer"
+        ]
+      },
+      {
+        "espece": "espece:triton",
+        "zones": [
+          "zone:mer_cotiere",
+          "zone:haute_mer"
+        ]
+      }
+    ],
+    "profil_weights": {
+      "profil:novice": 3,
+      "profil:apprenti": 3,
+      "profil:combattant": 2,
+      "profil:veteran": 1
+    },
+    "prix": {
+      "passager_cuivre": 150,
+      "monture_cuivre": 100
+    }
+  },
+  {
+    "_id": "link:quai14_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          50,
+          32
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais_sud",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai15_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          52,
+          33
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais_sud",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai16_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          54,
+          34
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais_sud",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai17_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          56,
+          34
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais_sud",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai18_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          58,
+          34
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais_sud",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai19_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          60,
+          34
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais_sud",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  }
+]
