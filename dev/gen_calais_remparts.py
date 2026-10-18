@@ -54,7 +54,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dev import gen_grille_image as ggi  # noqa: E402
-from dev.gen_plaine_europeenne import case_proche, sans_rev  # noqa: E402
+from dev.gen_plaine_europeenne import sans_rev  # noqa: E402
 from dev.gen_voisins_france import a_emettre  # noqa: E402
 from dev.gen_grille_traits import masque_image  # noqa: E402
 from utils import grille_image, grille_traits  # noqa: E402
@@ -110,25 +110,30 @@ COUT_SOMBRE = 25
 
 # Portes de rempart, une par porte dessinée À PONT-LEVIS (trois : sud-ouest, sud-est, est).
 # `pont` = cases du pont-levis, du pré jusqu'au pied de l'arche — ouvertes (`PASSAGES`) ; sa
-# DERNIÈRE case porte la porte extérieure. `dedans` = débouché du passage dans la ville,
-# ramené à la case de rue la plus proche. L'arche elle-même est dans l'anneau du rempart.
+# DERNIÈRE case porte la porte extérieure. `dedans` = débouché du passage dans la ville, la
+# case de rue au pied INTÉRIEUR du châtelet, lue sur l'image — prise telle quelle, jamais
+# recalée : « la rue la plus proche » d'un point estimé avait envoyé la porte sud-ouest
+# (39, 28) dans une autre rue, loin du châtelet. L'arche elle-même est dans l'anneau du rempart.
 PORTES = (
 	{"slug": "porte_sud_ouest", "label": "Porte sud-ouest", "pont": ((35, 40), (35, 39), (36, 38)),
-	 "dedans": (36, 32),
+	 "dedans": (41, 33),
 	 "image_ext": "porte_de_ville_pont_exterieur01.png",
 	 "image_int": "porte_de_ville_pont_interieur05.png"},
 	{"slug": "porte_sud_est", "label": "Porte sud-est", "pont": ((67, 40), (67, 39), (66, 38)),
-	 "dedans": (66, 31),
+	 "dedans": (68, 29),
 	 "image_ext": "porte_de_ville_pont_exterieur02.png",
 	 "image_int": "porte_de_ville_pont_interieur02.png"},
 	{"slug": "porte_est", "label": "Porte est", "pont": ((82, 25), (81, 25), (80, 25)),
-	 "dedans": (76, 25),
+	 "dedans": (73, 25),
 	 "image_ext": "porte_de_ville_pont_exterieur03.png",
 	 "image_int": "porte_de_ville_pont_interieur03.png"},
 )
 PORTE_CATEGORIE = "Porte de rempart"
 PORTE_META = {"type": "poste de garde", "status": "ouvert"}
 PORTE_LABEL_EXT = "au-delà des remparts"
+# Les deux portes d'une paire encadrent le châtelet : au plus 9 cases (Chebyshev) de la porte
+# extérieure au débouché — le châtelet sud-est, le plus profond, en fait 9 du pont à la rue.
+PORTE_ECART_MAX = 9
 
 # La route qui descend de la porte sud-ouest touche le bas de la carte en x = 28.
 SORTIE_SUD = {"_id": "link:france_to_calais_sud", "pos": (28, 47)}
@@ -323,6 +328,12 @@ def luminances_image(chemin, cols, rows):
 
 
 # ── Docs ───────────────────────────────────────────────────────────────────────────────────
+def ecart_porte(porte) -> int:
+	"""Cases (Chebyshev) de la porte extérieure (bout du pont) au débouché intérieur."""
+	(xa, ya), (xb, yb) = porte["pont"][-1], porte["dedans"]
+	return max(abs(xa - xb), abs(ya - yb))
+
+
 def docs_porte(cite_id, porte, pos_dehors, pos_dedans) -> list:
 	"""Les cinq docs d'une porte de rempart (forme de l'éditeur, `test_portes_client.js`)."""
 	ville = cite_id.split(":", 1)[1]
@@ -388,7 +399,12 @@ def construire(docs, luminances_fn, masque_fn):
 	sortants = [cite]
 
 	for p in PORTES:
-		pos_dehors, pos_dedans = p["pont"][-1], case_proche(dedans, p["dedans"])
+		pos_dehors, pos_dedans = p["pont"][-1], p["dedans"]
+		if pos_dedans not in dedans:
+			refus.append(f"{p['slug']} : le débouché {list(pos_dedans)} n'est pas une rue de la ville")
+		if ecart_porte(p) > PORTE_ECART_MAX:
+			refus.append(f"{p['slug']} : débouché {list(pos_dedans)} à {ecart_porte(p)} cases "
+						 f"de la porte extérieure, loin du châtelet")
 		if pos_dehors not in dehors:
 			refus.append(f"{p['slug']} : le pont-levis {list(pos_dehors)} ne rejoint pas le dehors")
 		sortants += docs_porte(CITE, p, pos_dehors, pos_dedans)
