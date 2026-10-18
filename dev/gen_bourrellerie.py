@@ -216,18 +216,24 @@ def item_doc(slug: str, table: dict = None) -> dict:
 	d = dict((table or ITEMS)[slug])
 	doc = {"_id": "item:" + slug, "type": "item", "nom": d.pop("nom"), "icon": d.pop("icon"),
 		   "description": d.pop("description"), "rarete": d.pop("rarete"),
-		   "categorie": d.pop("categorie"), "sous_categorie": "", "slots": d.pop("slots"),
+		   "categorie": d.pop("categorie"), "sous_categorie": d.pop("sous_categorie", ""), "slots": d.pop("slots"),
 		   "tags": d.pop("tags", []), "poids": d.pop("poids")}
 	doc.update(d)
 	return doc
 
 
 def recette_doc(slug: str, table: dict = None) -> dict:
-	categorie, matieres, produite = (table or RECETTES)[slug]
-	return {
+	"""Ligne `(catégorie, matières, quantité[, portée])` → doc recette. La portée
+	(`lieu_portee`, id de lieu) est facultative : absente, la recette est mondiale."""
+	categorie, matieres, produite, *portee = (table or RECETTES)[slug]
+	doc = {
 		"_id": "recette:%s_%s" % (categorie, slug.lower()),
 		"type": "recette",
 		"lieu_categorie": categorie,
+	}
+	if portee:
+		doc["lieu_portee"] = portee[0]
+	return doc | {
 		"objet_final": slug,
 		"quantite_produite": produite,
 		"matieres_premieres": [
@@ -255,22 +261,32 @@ def controler_items(docs_items: list, slots_monture=None) -> list:
 	return erreurs
 
 
+def _ville_de(lieu: dict, index: dict) -> str | None:
+	"""La cité d'un lieu : son premier ancêtre `categorie == "ville"`."""
+	courant, n = lieu, 0
+	while courant and courant.get("categorie") != "ville" and n < 12:
+		courant, n = index.get(courant.get("lieu_parent")), n + 1
+	return courant["_id"] if courant else None
+
+
 def villes_par_categorie(docs: list) -> dict:
 	"""{catégorie de lieu: {cité}} — la cité est le premier ancêtre `categorie == "ville"`."""
 	index = {d["_id"]: d for d in docs if str(d.get("_id", "")).startswith("lieu:")}
 	out = {}
 	for lieu in index.values():
-		courant, n = lieu, 0
-		while courant and courant.get("categorie") != "ville" and n < 12:
-			courant, n = index.get(courant.get("lieu_parent")), n + 1
-		if courant and lieu.get("categorie") and lieu.get("categorie") != "ville":
-			out.setdefault(lieu["categorie"], set()).add(courant["_id"])
+		ville = _ville_de(lieu, index)
+		if ville and lieu.get("categorie") and lieu.get("categorie") != "ville":
+			out.setdefault(lieu["categorie"], set()).add(ville)
 	return out
 
 
-def main(items: dict = None, recettes: dict = None, sortie: str = None):
+def main(items: dict = None, recettes: dict = None, sortie: str = None, modifs: dict = None):
 	"""Contrôle puis écrit un lot items + recettes. Paramétré pour être rejoué par les
-	générateurs frères (dev/gen_brosserie.py) : mêmes garde-fous, autre table."""
+	générateurs frères (dev/gen_brosserie.py) : mêmes garde-fous, autre table.
+
+	`items` peut être une fonction rendant la table, appelée une fois le moteur branché.
+	`modifs` = `{_id: {champ: valeur}}` : champs posés sur un doc DÉJÀ en base, repris du dump
+	(PUT complet : ses autres clés survivent) ; absent du dump ⇒ erreur, déjà à jour ⇒ sauté."""
 	items, recettes, sortie = items or ITEMS, recettes or RECETTES, sortie or SORTIE
 	try:
 		sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -286,6 +302,8 @@ def main(items: dict = None, recettes: dict = None, sortie: str = None):
 	index = {d["_id"]: d for d in docs}
 
 	marche = brancher_moteur(docs)
+	if callable(items):
+		items = items()          # table qui importe `utils.*` : APRÈS le branchement du moteur
 	from models import character_stats
 	from utils import montures
 
@@ -305,8 +323,19 @@ def main(items: dict = None, recettes: dict = None, sortie: str = None):
 			deja += 1
 		else:
 			erreurs.append("%s : _id déjà pris par un autre doc" % doc["_id"])
+	for doc_id, champs in sorted((modifs or {}).items()):
+		existant = index.get(doc_id)
+		if existant is None:
+			erreurs.append("%s : doc à compléter absent du dump" % doc_id)
+			continue
+		avant = {k: v for k, v in existant.items() if k != "_rev"}
+		apres = avant | champs
+		if apres == avant:
+			deja += 1
+		else:
+			nouveaux.append(apres)
 	ids_lot = {d["_id"] for d in lot_items}
-	for slug, (cat, matieres, _q) in sorted(recettes.items()):
+	for slug, (cat, matieres, _q, *_p) in sorted(recettes.items()):
 		if "item:" + slug not in ids_lot and "item:" + slug not in index:
 			erreurs.append("item:%s : produit sans doc" % slug)
 		if cat not in lieux_cats:
@@ -319,13 +348,31 @@ def main(items: dict = None, recettes: dict = None, sortie: str = None):
 				erreurs.append("%s : intrant %s sans doc (%s)" % (slug, cle, mid))
 
 	# ── Contrôles APRÈS ajout du lot ─────────────────────────────────────────
-	docs.extend(nouveaux)
+	remplaces = {d["_id"]: d for d in nouveaux if d["_id"] in index}
+	docs[:] = [remplaces.get(d["_id"], d) for d in docs]
+	docs.extend(d for d in nouveaux if d["_id"] not in index)
 	marche.reset_prix_cache()
 	villes = villes_par_categorie(docs)
 	ventes, flux = set(), set()
-	for slug, (cat, matieres, _q) in sorted(recettes.items()):
-		feuilles_livrees = set(marche.appro_leaves_categorie(cat))
-		produits = marche.produits_categorie(cat)
+	lieux_docs = [d for d in docs if d["_id"].startswith("lieu:")]
+	index_lieux = {d["_id"]: d for d in lieux_docs}
+	for slug, (cat, matieres, _q, *portee) in sorted(recettes.items()):
+		villes_cat = villes.get(cat, set())
+		if portee:
+			# Recette PORTÉE : elle sort des index par catégorie — ses intrants se contrôlent
+			# sur les boutiques de la portée, et le flux sur LEURS cités seules.
+			cibles = [l for l in lieux_docs if l.get("categorie") == cat
+					  and portee[0] in marche.portees_lieu(l)]
+			if not cibles:
+				erreurs.append("%s : aucune boutique « %s » dans la portée %s" % (slug, cat, portee[0]))
+				continue
+			feuilles_livrees = set.intersection(*(set(marche.appro_leaves_lieu(l)) for l in cibles))
+			produits = set.intersection(*(marche.produits_lieu(l) for l in cibles))
+			villes_cat = {v for v in villes_cat if v == portee[0] or v in
+						  {a for l in cibles for a in marche.portees_lieu(l)}}
+		else:
+			feuilles_livrees = set(marche.appro_leaves_categorie(cat))
+			produits = marche.produits_categorie(cat)
 		for cle, _n in matieres:
 			mid = marche.matiere_item_id(cle)
 			if cle in feuilles_livrees and marche._appro_debit_pour(cle) > 0:
@@ -333,9 +380,12 @@ def main(items: dict = None, recettes: dict = None, sortie: str = None):
 				continue
 			if mid in produits:
 				continue
-			producteurs = {c for c in villes if mid in marche.produits_categorie(c)}
-			couvertes = set().union(*(villes[c] for c in producteurs)) if producteurs else set()
-			manque = villes.get(cat, set()) - couvertes
+			# Par BOUTIQUE (`produits_lieu`, portée comprise) : un intermédiaire de recette
+			# portée (le vinaigre d'une cave de Chartres) ne vient que des cités de sa portée.
+			source = [l for l in lieux_docs if mid in marche.produits_lieu(l)]
+			producteurs = {l.get("categorie") for l in source}
+			couvertes = {_ville_de(l, index_lieux) for l in source}
+			manque = villes_cat - couvertes
 			if producteurs and not manque:
 				flux.add((cat, cle, ", ".join(sorted(producteurs))))
 				continue

@@ -177,6 +177,13 @@ MATIERES = {
 	"item:cuir": _matiere("à garniture de cuir", 1, {"bonus_pa": 1, "poids": _val(0.95)}),
 	# Demi-produit de bourrellerie (dev/gen_bourrellerie.py) : durcit une pièce PORTÉE.
 	"item:Cuir_bouilli": _matiere("en cuir bouilli", 1, {"bonus_pa": 1, "poids": _val(1.05)}, [TAG_ARMURE]),
+	# Demi-produits des petits marchands (dev/gen_recettes_petits_marchands.py).
+	"item:Cuir_fume": _matiere("de cuir fumé", 1, {"effets": {"esquive": 1}}, [TAG_ARMURE]),
+	"item:Peau_chamoisee": _matiere("doublé de chamois", 1, {"bonus": {"Ag": 1}, "effets": {"esquive": 1},
+															  "poids": _val(0.95)}, [TAG_ARMURE]),
+	"item:Oeil_de_bete_conserve": _matiere("à l'œil de bête", 1, {"bonus_pm": 2, "effets": {"canalisation": 1}},
+										   [TAG_CATALYSEUR]),
+	"item:Bocal_d_yeux_en_saumure": _matiere("des Yeux", 1, {"bonus_pm": 4}, [TAG_CATALYSEUR]),
 	"item:tendons": _matiere("à ligature de tendons", 1, {"bonus_degats": 1, "poids": _val(0.95)}),
 	"item:os": _matiere("à poignée d'os", 1, {"bonus_degats": 1, "poids": _val(0.9)}),
 	"item:cuir_brut": _matiere("de la Peau", 1, {"bonus_pv": 1, "bonus": {"R": 1}, "poids": _val(0.95),
@@ -216,6 +223,10 @@ MATIERES = {
 	# ── Palier 2 : peu communs ─────────────────────────────────────────────────
 	"item:acier": _matiere("en acier", 2, {"bonus_degats": 2, "bonus_pa": 2, "poids": _val(1.05)}),
 	"item:crocs": _matiere("à garde de crocs", 2, {"bonus_degats": 2, "bonus_cc": 1}),
+	# Demi-produits des petits marchands (dev/gen_recettes_petits_marchands.py).
+	"item:Cuir_tanne_au_chene": _matiere("en cuir de chêne", 2, {"bonus_pa": 2, "bonus": {"R": 1}}, [TAG_ARMURE]),
+	"item:Croupon_epais": _matiere("de croupon", 2, {"bonus_pa": 3, "poids": _val(1.1)}, [TAG_ARMURE]),
+	"item:Griffe_montee": _matiere("à griffe montée", 2, {"bonus_degats": 2, "bonus_cc": 1}, [TAG_ARME]),
 	"item:composant_rituel": _matiere("de rituel", 2, {"bonus_pm": 2, "bonus": {"Vol": 1},
 													   "effets": {"canalisation": 1}}, ARME_ARMURE_CONSO),
 	# Régén : jamais sur une arme (elle soignerait la cible) — armure et consommable seulement.

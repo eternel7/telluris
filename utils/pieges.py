@@ -214,10 +214,77 @@ def seuil_detection(detecteur: dict, piege: dict, bonus: int = 0) -> int:
 
 
 def seuil_desamorcage(acteur: dict, piege: dict) -> int:
-	"""Seuil d100 du désamorçage : 50 + Ag (les mains) + bonus de compétence − difficulté."""
+	"""Seuil d100 du désamorçage : 50 + Ag (les mains) + bonus de compétence + bonus du
+	meilleur outil du sac (`outil_courant`) − difficulté."""
 	a = acteur or {}
+	outil = outil_courant(a)
 	return _borne(50 + _as_int(a.get("ag")) + _as_int(a.get("desamorcage"))
-				  - _difficulte(piege), 5, 95)
+				  + (outil["bonus"] if outil else 0) - _difficulte(piege), 5, 95)
+
+
+# ── Outils de crochetage ─────────────────────────────────────────────────────
+# Un item portant `bonus_desamorcage` > 0 (crochets, trousse, passe-partout) AUGMENTE le
+# seuil de désamorçage de qui l'a dans son SAC — il ne donne jamais le droit d'essayer
+# (`desamorcage` > 0, compétence seule). Seul le MEILLEUR compte : deux trousses ne
+# s'additionnent pas. Un jet ≥ OUTIL_CASSE_JET sur un désamorçage raté brise l'outil
+# employé ; le suivant prend le relais au geste d'après.
+
+CLE_BONUS_OUTIL = "bonus_desamorcage"
+OUTIL_CASSE_JET = 96
+
+
+def _ref_item_id(ref) -> str | None:
+	"""Id d'item d'une entrée d'inventaire (chaîne legacy ou `{item, poids}`)."""
+	if isinstance(ref, str):
+		return ref
+	if isinstance(ref, dict) and isinstance(ref.get("item"), str):
+		return ref["item"]
+	return None
+
+
+def outils_desamorcage(inventaire, get_doc_fn) -> list:
+	"""Outils du sac, du meilleur au moins bon : `[{item, nom, bonus}]`, un par EXEMPLAIRE
+	(ordre du sac à bonus égal — le premier gagne). Un doc relu une fois par id."""
+	docs, out = {}, []
+	for ref in inventaire or []:
+		iid = _ref_item_id(ref)
+		if not iid:
+			continue
+		if iid not in docs:
+			docs[iid] = get_doc_fn(iid) or {}
+		bonus = _as_int(docs[iid].get(CLE_BONUS_OUTIL))
+		if bonus > 0:
+			out.append({"item": iid, "nom": docs[iid].get("nom") or iid, "bonus": bonus})
+	return sorted(out, key=lambda o: -o["bonus"])
+
+
+def outil_courant(acteur: dict) -> dict | None:
+	"""L'outil que l'acteur emploie : le meilleur de ceux qui ne sont pas encore brisés."""
+	outils = (acteur or {}).get("outils_desamorcage") or []
+	return outils[0] if outils else None
+
+
+def briser_outil(acteur: dict, jet: int) -> dict | None:
+	"""Désamorçage RATÉ : un jet ≥ OUTIL_CASSE_JET brise l'outil employé. Le retire de la
+	liste vivante, l'inscrit dans `outils_brises` (retirés du sac à la clôture du combat) et
+	le rend ; None si rien ne casse. Mute l'acteur."""
+	outil = outil_courant(acteur)
+	if outil is None or _as_int(jet) < OUTIL_CASSE_JET:
+		return None
+	acteur["outils_desamorcage"] = list(acteur["outils_desamorcage"][1:])
+	acteur.setdefault("outils_brises", []).append(outil["item"])
+	return outil
+
+
+def retirer_outils_brises(inventaire, brises) -> list:
+	"""Le sac sans UN exemplaire par outil brisé (le premier trouvé). Ne mute pas."""
+	reste = list(inventaire or [])
+	for iid in brises or []:
+		for i, ref in enumerate(reste):
+			if _ref_item_id(ref) == iid:
+				del reste[i]
+				break
+	return reste
 
 
 def seuil_detection_monstre(monstre: dict, piege: dict) -> int:

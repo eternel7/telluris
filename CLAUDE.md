@@ -95,7 +95,7 @@ utils/
   tresor.py              # trésor d'un étage de donjon à étages (pur) : bloc `tresor` de salle, contenu garanti +
                          #   bourse + tirage, piège probable à l'OUVERTURE (dégâts / alarme / mimique)
   pieges.py              # pièges de combat (pur) : tag `pieges_<q>_<d>` de salle, placement loin du
-                         #   départ, seuils détection/désamorçage/flair, pose (`pose_piege`), XP ;
+                         #   départ, seuils détection/désamorçage/flair, pose (`pose_piege`), XP, outils de crochetage ;
                          #   ⚠️ `combat.vue_client` SEUL filtre des pièges cachés envoyés au client
   vol.py                 # vol magique (pur) : `effets.vol`, case d'atterrissage, chute en exploration ;
                          #   combat : `_can_fly` lit `vol_magique`, chute par `combat._atterrir`

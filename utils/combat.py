@@ -2126,6 +2126,9 @@ def _action_desamorcer(combat_doc: dict, joueur: dict, piege_id: str | None,
 		anim = pieges_util.ANIM_DESAMORCAGE_REUSSI
 	else:
 		texte = f"🛠 {joueur['nom']} échoue à désamorcer le piège (jet {roll} / seuil {seuil})."
+		brise = pieges_util.briser_outil(joueur, roll)
+		if brise:
+			texte += f" {brise['nom']} se brise dans le mécanisme."
 		anim = pieges_util.ANIM_DESAMORCAGE_RATE
 	# Ancrée sur le désamorceur : le piège n'est pas un acteur, le client ne sait placer un
 	# sprite que sur un id de snapshot.
@@ -3434,6 +3437,11 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"int": base.int_,
 		"detection_pieges": _eff_int((character.get("competences_bonus") or {}).get("detection_pieges")),
 		"desamorcage": _eff_int((character.get("competences_bonus") or {}).get("desamorcage")),
+		# Outils de crochetage du SAC (meilleur en tête) : ils n'augmentent le seuil que de qui
+		# sait déjà désamorcer — sans la compétence, inutile de relire l'inventaire.
+		"outils_desamorcage": (pieges_util.outils_desamorcage(character.get("inventaire"), get_doc)
+							   if _eff_int((character.get("competences_bonus") or {}).get("desamorcage")) > 0
+							   else []),
 		"xp_pieges": 0,
 		# VOL MAGIQUE lancé en exploration et encore actif : dérivé de `effets_actifs`, comme
 		# le fait `_refresh_snapshot_stats` (clé absente sinon).
@@ -6870,6 +6878,10 @@ def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> 
 		inventaire = doc.get("inventaire", [])
 		inventaire.extend(ramasse)
 		doc["inventaire"] = inventaire
+	# Outils de crochetage brisés en désamorçant : retirés du sac de CE membre, sous la même
+	# garde d'idempotence (sinon /play qui re-finalise en retirerait un second).
+	if joueur.get("outils_brises"):
+		doc["inventaire"] = pieges_util.retirer_outils_brises(doc.get("inventaire"), joueur["outils_brises"])
 	# Bourse d'un TRÉSOR ouvert par CE membre : même règle que le butin ramassé.
 	if _eff_int(joueur.get("cuivre_ramasse")) > 0:
 		credit_character(doc, _eff_int(joueur.get("cuivre_ramasse")))
