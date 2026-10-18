@@ -885,6 +885,25 @@ CATALOGUE = [
 			"une ligne par atelier (recettes, en rayon sans le joueur, matières manquantes).",
 	},
 	{
+		"id": "lieux_grille_traits",
+		"portee": "lieux",
+		"label": "✒️ Grille de la ville relue par les traits d'encre",
+		"params": [{"nom": "ville", "type": "ville"}, {"nom": "spec", "type": "json"}],
+		"argv_fn": lambda v, f: _py("gen_grille_traits.py", v["ville"], "--dump", f["dump"],
+									"--spec", f["spec"]),
+		"dump_frais": True,
+		"sortie": "jsons/grille_traits_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/grille_traits_a_importer.json (+ un aperçu PNG). "
+			"Rien en base avant 📥 Importer.",
+		"description": "Pour une ville DESSINÉE À L'ENCRE : rue = pixel clair et beige entre les "
+			"traits noirs (ni encre, ni pierre grise, région ≥ 300 px) ; case praticable à 10 px "
+			"de rue sur 256, mur nav entre deux cases qu'un trait sépare. Spec `{}` : toute la "
+			"carte. `{\"enceinte\": [[x, y], …]}` : polygone posé sur la crête du rempart — son "
+			"anneau est fermé, seul l'intérieur est relu, le dehors garde sa grille. "
+			"`\"passages\": [[[x, y], …]]` : cases ouvertes à la main (arche, pont-levis). Liste "
+			"les zones isolées. Ne pose pas de porte de rempart (🏰 de l'éditeur). Requiert Pillow.",
+	},
+	{
 		"id": "pytest",
 		"label": "🧪 Suite de tests pure (pytest)",
 		# `--color=no` : sans tty pytest se décolore déjà tout seul, mais un PY_COLORS/FORCE_COLOR

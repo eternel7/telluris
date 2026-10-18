@@ -136,6 +136,14 @@ Deux cartes : « 🔍 Générer grille » (**Proposer une grille**, `utils/grill
 - **En mode test de déplacement**, `#dep-open-btn` devient « 🛤️ Tracer / ↻ Recalculer les voies » (`_depOpenBtnMaj`, `depOpenBtnClic`) ; ⚠️ le tracé suit alors la règle **du jeton** (`depReglesCombat` → `#voies-regle-combat`), comptes dans la barre de statut.
 
 
+### Lecture par les traits — ville dessinée à l'encre
+`utils/grille_traits.py` (pur), CLI `dev/gen_grille_traits.py`, outil ✒️ `lieux_grille_traits` de `/admin/lieux` (spec JSON). **Meilleure que 🔍 sur une cité à l'encre** (Calais) : la lecture par couleur de case y faisait traverser des maisons et bloquait des rues.
+- **Pixel de rue** = ni encre (gris ≥ 80) ni pierre grise (saturation HLS ≥ 0,14 : la pierre des murs/château fait 0,12-0,14, le pavé 0,19-0,27) — sans ce second critère, murs et château passent pour des rues. Régions 4-connexes ≥ 300 px seulement (une face de toit entre ses hachures est plus petite). Ne PAS dilater l'encre ni « ouvrir » les traits : à 16 px la case, ils font ~2 px, une ouverture 3×3 les efface et une marge d'1 px coupe les ruelles.
+- **Case** praticable à 10 px de rue sur 256 (une rue de 6 px à cheval sur deux cases n'en donne que ~20 % à chacune : un seuil à 30 % ne laissait que des tronçons). **Mur nav** entre deux cases praticables voisines si aucun chemin de pixels de rue ne les relie DANS leur fenêtre (2 cases, 2×2 pour un pas diagonal) : le trait noir est la limite.
+- **Enceinte** (polygone en cases sur la crête du mur) : son **anneau** (cases dedans avec une voisine dehors) est fermé — une case intérieure n'a que des voisines intérieures, aucun pas ne sort, aucune règle de coin à gérer ; seul l'intérieur est relu, le dehors garde sa grille. Sans polygone, la carte entière est relue (et les murs nav du doc sur ces cases sont repris de zéro).
+- Ce que la lecture rate : l'arche, la porte, le **pont-levis** (bois sombre hachuré) → `passages`, ouverts à la main. Les ruelles très ombrées sortent en poches : `gen_calais_remparts.relier_rues` les rattache (chemin orthogonal le moins cher, coût = luminance), le CLI générique se contente de les lister.
+- Les portes de rempart restent un geste de l'éditeur (🏰) ou d'un générateur dédié : porte extérieure SUR le pont-levis rendu praticable, porte intérieure sur la rue la plus proche du débouché.
+
 ### Redimensionner la grille (carte 📐)
 Rééchantillonnage **au plus proche voisin** de `dimensions`, `cells`, `nav`, zones d'influence et portes. Carte `#dim-card`, masquée sans grille chargée. Fonctions pures du template (`_resizeMatrice`, `_resizeNav`, `_resizeZones`, `_resizePos`, `_caseLibreProche`…) ; côté serveur `utils.lieux.dimensions_coherentes` (422, `tests/test_lieu_dimensions.py`).
 

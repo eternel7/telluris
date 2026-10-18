@@ -151,6 +151,9 @@ utils/
                          #   sous-cases et squelettisées (Zhang-Suen), enceinte fermée (nav, ou terrain sans murs nav), coins de
                          #   maison, passages reliant les zones → 0/1/3/5 ; profil `pays` (catégorie
                          #   pays) : `cells` toutes à 1, murs nav de la CÔTE seule (fleuves non murés)
+  grille_traits.py       # grille d'une ville à l'ENCRE (pur) : rue = pixel clair et beige entre les
+                         #   traits, mur nav là où un trait sépare deux cases, anneau d'enceinte = rempart ;
+                         #   CLI `dev/gen_grille_traits.py`, outil ✒️ de /admin/lieux
   graphe_recettes.py     # réseau item → recette → item (pur) pour /admin/recettes-graphe ; familles
                          #   `sc:<sous_categorie>`, nœuds `absent` — règles LUES dans `marche`, jamais recopiées
   bois.py                # découpe du bois (pur) : tier suivant par essence, conservation du poids, outil

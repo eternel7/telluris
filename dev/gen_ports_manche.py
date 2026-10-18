@@ -80,7 +80,8 @@ CITES = {
 		"dehors": (80, 44),
 		# Les deux portes à pont-levis du rempart sud.
 		"portes": ((36, 38), (63, 39)),
-		"sorties": {"sud": (35, 47), "est": (87, 26), "nord_est": (70, 0)},
+		# Sud : sur la route qui descend de la porte sud-ouest (`gen_calais_remparts`).
+		"sorties": {"sud": (28, 47), "est": (87, 26), "nord_est": (70, 0)},
 		# Quai est du bassin, entre les deux tours runiques.
 		"quai": (36, 19),
 	},
@@ -261,12 +262,14 @@ def connexions_cite(cite_id, label, spec, zone_cite, zone_pays):
 
 def liens_perimes(docs, cite_id: str, gardes: set) -> list:
 	"""Suppressions `{"_id", "_deleted": true}` des connexions du dump entre `cite_id` et un
-	autre lieu que ses quais, absentes de `gardes` (la cité a changé de pays)."""
-	quais = QUAIS[cite_id]["_id"]
+	autre lieu que ses quais ou ses sous-lieux (portes de rempart…), absentes de `gardes`
+	(la cité a changé de pays)."""
+	sous_lieux = {QUAIS[cite_id]["_id"]} | {d["_id"] for d in docs
+		if d.get("type") == "lieu" and d.get("lieu_parent") == cite_id}
 	return [{"_id": d["_id"], "_deleted": True} for d in docs
 			if d.get("type") == "connection" and d["_id"] not in gardes
 			and cite_id in {n.get("lieu") for n in d.get("nodes", [])}
-			and quais not in {n.get("lieu") for n in d.get("nodes", [])}]
+			and not sous_lieux & {n.get("lieu") for n in d.get("nodes", [])}]
 
 
 def doc_quais(cite_id: str, q: dict) -> dict:
@@ -438,6 +441,9 @@ def construire(docs, taille_fn, proposer_fn, grille_pont_fn):
 			cells, nav = cite["cells"], cite.get("nav") or {}
 			principale = zone_proche(cells, nav, spec["dedans"])
 			quai = case_de_quai(cells, principale, spec["quai"])
+			# Rempart fermé par l'éditeur ou `gen_calais_remparts` (portes de rempart) : les
+			# sorties tombent dans les faubourgs, que la ville ne joint plus à pied.
+			principale = principale | zone_proche(cells, nav, spec["dehors"])
 		else:
 			cite = neuves.get(cite_id)
 			if not cite:

@@ -15,7 +15,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import dev_tools as dt
 
 VILLES = ["lieu:lutecia", "lieu:auxerre"]
-OUTILS_LIEUX = ["lieux_magasins_json", "lieux_progeniture", "lieux_audit_economy"]
+OUTILS_LIEUX = ["lieux_magasins_json", "lieux_progeniture", "lieux_audit_economy",
+	"lieux_grille_traits"]
 
 
 def _outil(outil_id):
@@ -104,6 +105,11 @@ def test_argv_est_une_liste_des_seules_valeurs_validees():
 	o = _outil("lieux_progeniture")
 	valeurs, _ = dt.valider_params(o, {"lieux": ["lieu:a", "lieu:b"]})
 	assert o["argv_fn"](valeurs, {"dump": "d.json"})[-4:] == ["--dump", "d.json", "--lieux", "lieu:a,lieu:b"]
+	o = _outil("lieux_grille_traits")
+	valeurs, _ = dt.valider_params(o, {"ville": "lieu:lutecia", "spec": {}}, VILLES)
+	assert o["argv_fn"](valeurs, {"dump": "d.json", "spec": "s.json"})[-6:] == [
+		os.path.join("dev", "gen_grille_traits.py"), "lieu:lutecia", "--dump", "d.json",
+		"--spec", "s.json"]
 
 
 def test_spec_ecrite_force_la_ville_affichee():
