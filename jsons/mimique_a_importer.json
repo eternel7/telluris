@@ -1,0 +1,160 @@
+[
+  {
+    "_id": "espece:mimique",
+    "type": "espece",
+    "nom": "Mimique",
+    "genre": "f",
+    "image": "mimique_transparent.png",
+    "description": "Coffre de bois noirci cerclé de fer, en tout point semblable à ceux qu'on abandonne au fond des donjons — jusqu'à ce qu'on en soulève le couvercle. Le bois s'ouvre alors en gueule, frangée de dents d'ébène, et une langue poisseuse saisit la main qui fouillait. Les uns disent qu'un donjon imite ce qu'il a englouti, les autres qu'elle se nourrit de l'avidité des pilleurs ; aucun Templier n'a jamais vu une mimique se déplacer quand on la regardait.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 40,
+        "max": 60
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 30,
+        "max": 50
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "monstre",
+      "gardien",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:mimique",
+    "type": "item",
+    "nom": "Carcasse de Mimique",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      30,
+      70
+    ],
+    "description": "Dépouille de Mimique récupérée à l'issue du combat.",
+    "source_espece": "espece:mimique",
+    "loot_defaut": true
+  },
+  {
+    "_id": "donjon:catacombes_de_lutecia",
+    "type": "donjon",
+    "battle_maps": [
+      {
+        "lieu": "lieu:catacombes0001",
+        "especes": [
+          "espece:goule"
+        ],
+        "niveau_min": 3,
+        "niveau_max": 4,
+        "nb_monstres": 3
+      },
+      {
+        "lieu": "lieu:catacombes0002",
+        "especes": [
+          "espece:goule",
+          "espece:squelette",
+          "espece:fantome",
+          "espece:golem_de_chair"
+        ],
+        "niveau_min": 3,
+        "niveau_max": 4,
+        "nb_monstres": 3
+      },
+      {
+        "lieu": "lieu:catacombes0003",
+        "especes": [
+          "espece:zombie",
+          "espece:vampire",
+          "espece:comte_vampire",
+          "espece:gargouille"
+        ],
+        "niveau_min": 3,
+        "niveau_max": 4,
+        "nb_monstres": 5,
+        "tresor": {
+          "nom": "Coffre de l'ossuaire",
+          "icon": "🧰",
+          "pos": [
+            5,
+            35
+          ],
+          "garanti": [
+            {
+              "item": "item:cristal_de_mana_jaune",
+              "quantite": 1
+            }
+          ],
+          "bourse": [
+            40,
+            120
+          ],
+          "tirage": {
+            "nb": 2,
+            "table": [
+              {
+                "item": "item:gemmes",
+                "poids": 3
+              },
+              {
+                "item": "item:anneau",
+                "poids": 3
+              },
+              {
+                "item": "item:bague",
+                "poids": 2
+              },
+              {
+                "item": "item:Cristal_canalisation",
+                "poids": 2
+              }
+            ]
+          },
+          "piege": {
+            "chance": 40,
+            "danger": 2,
+            "effets": [
+              "degats",
+              "alarme",
+              "mimique"
+            ],
+            "alarme": 3,
+            "mimique": "espece:mimique"
+          }
+        }
+      }
+    ],
+    "nom": "Catacombes de Lutécia",
+    "mode": "etages",
+    "niveau_min": 3,
+    "niveau_max": 6
+  }
+]

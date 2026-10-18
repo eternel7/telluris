@@ -259,19 +259,25 @@ def especes_de_salle(donjon_doc: dict, lieu_id: str, get_doc_fn) -> list:
 
 
 def monstres_de_salle(donjon_doc: dict, lieu_id: str, profils: list, nb_compagnons: int,
-					  get_doc_fn, instantiate_fn) -> list:
+					  get_doc_fn, instantiate_fn, nb: int | None = None,
+					  especes: list | None = None) -> list:
 	"""Les monstres qui peuplent cette salle : espèces de la salle, grades dans sa
 	fourchette, effectif écrit (sinon `3 + compagnons // 2`). Liste vide si la salle n'a
 	aucune espèce. Partagé par le donjon classique et chaque étage d'un donjon à étages.
 
+	`nb` / `especes` (docs) remplacent l'effectif et les espèces de la salle, la fourchette
+	de grade restant la sienne — renforts et mimique d'un trésor (`utils/tresor.py`).
+
 	`instantiate_fn` = `combat.instantiate_monsters`, injecté (ce module n'importe pas le
 	moteur de combat). `zone_tags` vide : les espèces sont déjà choisies à la main."""
-	pool_especes = especes_de_salle(donjon_doc, lieu_id, get_doc_fn)
+	pool_especes = especes if especes is not None else especes_de_salle(
+		donjon_doc, lieu_id, get_doc_fn)
 	if not pool_especes:
 		return []
 	dispo = _profils_dans_fourchette(
 		profils, niveau_max_de(donjon_doc, lieu_id), niveau_min_de(donjon_doc, lieu_id))
-	nb = nb_monstres_de(donjon_doc, lieu_id)
+	if nb is None:
+		nb = nb_monstres_de(donjon_doc, lieu_id)
 	if nb is None:
 		nb = 3 + int(nb_compagnons or 0) // 2
 	return instantiate_fn(pool_especes, dispo, nb, []) or []

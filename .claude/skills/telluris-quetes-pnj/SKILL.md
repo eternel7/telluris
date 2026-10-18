@@ -252,6 +252,16 @@ Catacombes qu'on descend, tour qu'on gravit : même doc, mêmes salles (`battle_
 
 Verrouillé par `tests/test_donjon_etages.py`.
 
+#### Trésor d'un étage (bloc `tresor` sur l'entrée de salle de `battle_maps`)
+Absent ⇒ aucun coffre. Forme et règle : en-tête de `utils/tresor.py` (`garanti` · `bourse` [min, max] cuivre · `tirage {nb, table:[{item, poids}]}` · `piege {chance, danger, effets, alarme, mimique}` · `pos` optionnelle).
+- **Tiré à la PREMIÈRE entrée de l'expédition** (`tresor.preparer_tresor`, appelé par `_ouvrir_donjon_a_etages` et `_passer_a_l_etage` seulement si l'étage n'est pas déjà dans `etages.tresors`) ; revenir à l'étage ne relance rien. Nouvelle expédition = nouveau tirage, **part garantie comprise** (Auteur, 18/10).
+- **Piège** = piège `monde` ordinaire sur la case du coffre, `declencheur:"ouverture"` : détection/fouille/désamorçage inchangés, **jamais déclenché par un pas** (`_pieges_au_pas`). Il vit dans `combat_doc["pieges"]` à l'étage et retourne dans le coffre quand on le quitte (`_ranger_tresor`). Effet tiré parmi `effets` : `degats` (cascade de piège), `alarme` (renforts `alarme` ou l'effectif de la salle, loin de l'ouvreur, `detecte`), `mimique` (espèce écrite ; le coffre ne s'ouvre qu'une fois elle abattue). Monstres réservés instanciés au tirage : le moteur ne lit pas les espèces.
+- **Ouvrir** (`ouvrir_tresor`, 1 action) : au contact, même en plein combat, pas d'ennemi au corps à corps (règle de `ramasser`), membre du groupe seulement. Objets → `butin_ramasse` de l'ouvreur tant que sa charge le permet, le reste demeure (coffre `ouvert`, un autre le vide) ; bourse → `cuivre_ramasse`, créditée par `_finalize_membre` quelle que soit l'issue.
+- ⚠️ `etages.tresors` ne part **jamais** au client : `vue_client` le remplace par `etages.tresor` (vue publique, contenu seulement une fois ouvert) + `peut_ouvrir_tresor`. Client : `peindreTresor`, bouton pastille dans `renderPassages`.
+- Contenu : `dev/gen_tresor_catacombes.py` (coffre de l'ossuaire, `lieu:catacombes0003`, `item:cristal_de_mana_jaune`) ; la mimique (`espece:mimique`, inventée — Auteur, 18/10, prompt d'image dans le script) : `dev/gen_mimique.py`, qui ressort aussi le donjon (bloc `tresor` lu dans `gen_tresor_catacombes.TRESOR`).
+
+Verrouillé par `tests/test_tresor.py`.
+
 
 ### Récolte de ressources et événements de zone
 - Les lieux portent `ressources:[{ressource:"item:x", zones:[…]}]` (mode Ressources de l'éditeur → `PUT /api/lieu/{id}/ressources`).

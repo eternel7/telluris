@@ -1,0 +1,107 @@
+[
+  {
+    "_id": "donjon:catacombes_de_lutecia",
+    "type": "donjon",
+    "battle_maps": [
+      {
+        "lieu": "lieu:catacombes0001",
+        "especes": [
+          "espece:goule"
+        ],
+        "niveau_min": 3,
+        "niveau_max": 4,
+        "nb_monstres": 3
+      },
+      {
+        "lieu": "lieu:catacombes0002",
+        "especes": [
+          "espece:goule",
+          "espece:squelette",
+          "espece:fantome",
+          "espece:golem_de_chair"
+        ],
+        "niveau_min": 3,
+        "niveau_max": 4,
+        "nb_monstres": 3
+      },
+      {
+        "lieu": "lieu:catacombes0003",
+        "especes": [
+          "espece:zombie",
+          "espece:vampire",
+          "espece:comte_vampire",
+          "espece:gargouille"
+        ],
+        "niveau_min": 3,
+        "niveau_max": 4,
+        "nb_monstres": 5,
+        "tresor": {
+          "nom": "Coffre de l'ossuaire",
+          "icon": "🧰",
+          "pos": [
+            5,
+            35
+          ],
+          "garanti": [
+            {
+              "item": "item:cristal_de_mana_jaune",
+              "quantite": 1
+            }
+          ],
+          "bourse": [
+            40,
+            120
+          ],
+          "tirage": {
+            "nb": 2,
+            "table": [
+              {
+                "item": "item:gemmes",
+                "poids": 3
+              },
+              {
+                "item": "item:anneau",
+                "poids": 3
+              },
+              {
+                "item": "item:bague",
+                "poids": 2
+              },
+              {
+                "item": "item:Cristal_canalisation",
+                "poids": 2
+              }
+            ]
+          },
+          "piege": {
+            "chance": 40,
+            "danger": 2,
+            "effets": [
+              "degats",
+              "alarme",
+              "mimique"
+            ],
+            "alarme": 3,
+            "mimique": "espece:mimique"
+          }
+        }
+      }
+    ],
+    "nom": "Catacombes de Lutécia",
+    "mode": "etages",
+    "niveau_min": 3,
+    "niveau_max": 6
+  },
+  {
+    "_id": "item:cristal_de_mana_jaune",
+    "type": "item",
+    "nom": "Cristal de mana jaune",
+    "icon": "💛",
+    "description": "Éclat de mana couleur de miel, tiède au creux de la main. Les Architectes disent qu'il tient un seuil ouvert quand le portail voudrait se refermer ; aucun n'explique pourquoi on le trouve au fond des catacombes, et pas ailleurs.",
+    "categorie": "composant",
+    "sous_categorie": "cristal",
+    "rarete": "tres_rare",
+    "slots": [],
+    "poids": 0.1
+  }
+]

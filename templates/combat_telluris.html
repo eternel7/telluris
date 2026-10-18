@@ -322,6 +322,17 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
 }
 /* Piège détecté que l'acteur courant peut désamorcer (au contact) : liseré doré. */
 .zone-case.piege.desamorcable { border: 2px solid var(--gold2); }
+/* TRÉSOR d'un étage (utils/tresor.py) : le coffre, peint sous les jetons et jamais cliquable
+   — on l'ouvre par le bouton du bandeau. Ouvert (il reste des objets) : liseré plein ;
+   vide : estompé. Son piège, une fois détecté, se peint par-dessus comme tout piège. */
+.zone-case.tresor {
+	display: flex; align-items: center; justify-content: center;
+	font-size: calc(var(--step) * 0.6); line-height: 1;
+	background: rgba(240, 190, 80, 0.16);
+	border: 1.5px solid rgba(240, 190, 80, 0.9);
+	box-shadow: inset 0 0 10px rgba(240, 190, 80, 0.45);
+}
+.zone-case.tresor.vide { opacity: 0.45; border-style: dotted; box-shadow: none; }
 /* Dans `.tour-header`, à DROITE du bandeau d'initiative, avant le 🔊. `margin-left: auto`
    pousse la rangée à droite ET cale le libellé et le bandeau à gauche : un bouton qui
    apparaît à son tour prend la marge libre sans décaler les badges (§17).
@@ -1525,6 +1536,9 @@ const SERVER_DATA = {
 	pieges_desamorcables: {{ (combat.pieges_desamorcables or []) | tojson | safe }},
 	peut_fouiller:        {{ (combat.peut_fouiller or false) | tojson | safe }},
 	peut_desamorcer:      {{ (combat.peut_desamorcer or false) | tojson | safe }},
+	// TRÉSOR de l'étage : la vue publique vit dans `etages.tresor` ; l'acteur courant peut-il
+	// l'ouvrir maintenant (au contact, sans ennemi au corps à corps) — jugé au serveur.
+	peut_ouvrir_tresor:   {{ (combat.peut_ouvrir_tresor or false) | tojson | safe }},
 };
 
 // Grille de combat : statique pour toute la durée du combat (cells appartient au
@@ -2500,6 +2514,24 @@ function peindrePieges(layer, j) {
 	});
 }
 
+// TRÉSOR de l'étage (`state.etages.tresor`, vue publique : jamais le contenu d'un coffre
+// fermé). Repeint à chaque rendu comme les passages. `textContent` / `title` : données de
+// contenu (nom, icône, objets restants).
+const _casesTresor = [];
+function peindreTresor(layer, j) {
+	while (_casesTresor.length) _casesTresor.pop().remove();
+	const t = (state.etages || {}).tresor;
+	if (!t || !j || !j.pos) return;
+	const el = document.createElement('div');
+	el.className = 'zone-case tresor ' + (t.etat || 'ferme');
+	el.textContent = t.icon || '🧰';
+	const reste = (t.contenu || []).map(o => o.nom).join(', ');
+	el.title = (t.nom || 'Coffre') + (t.etat === 'vide' ? ' (vide)' : (reste ? ` — reste : ${reste}` : ''));
+	_placerToken(el, t.x - j.pos.x, t.y - j.pos.y);
+	layer.appendChild(el);
+	_casesTresor.push(el);
+}
+
 // ── Pièges : désamorcer / poser ───────────────────────────────────
 // Même mode « on vise le SOL » que le saut : les cases cibles sont des `.zone-case
 // destination` rangées dans `_apercuZoneCases` (effacées et repeintes à chaque rendu).
@@ -2616,8 +2648,28 @@ function renderPassages(data) {
 	const tous = (data.etages || {}).passages || [];
 	const peutAgir = data.status === 'active' && isPlayerTurn(data) && !revealing && !busy;
 	const actifs = peutAgir ? tous.filter(p => p.franchissable) : [];
-	row.style.display = tous.length ? '' : 'none';
+	const tresor = (data.etages || {}).tresor;
+	row.style.display = (tous.length || tresor) ? '' : 'none';
 	row.replaceChildren();
+	// Coffre de l'étage au contact (`peut_ouvrir_tresor`, jugé au serveur) : même pastille.
+	if (peutAgir && tresor && data.peut_ouvrir_tresor) {
+		const nom = tresor.nom || 'Coffre';
+		const b = document.createElement('button');
+		b.type = 'button';
+		b.className = 'passage-btn';
+		b.title = `${nom} — ouvrir, 1 action`;
+		b.setAttribute('aria-label', `Ouvrir : ${nom}`);
+		const ico = document.createElement('span');
+		ico.className = 'passage-ico';
+		ico.setAttribute('aria-hidden', 'true');
+		ico.textContent = tresor.icon || '🧰';
+		const lbl = document.createElement('span');
+		lbl.className = 'passage-lbl';
+		lbl.textContent = tresor.etat === 'ouvert' ? 'Fouiller le coffre' : 'Ouvrir le coffre';
+		b.append(ico, lbl);
+		b.onclick = () => doAction('ouvrir_tresor', null);
+		row.appendChild(b);
+	}
 	actifs.forEach(p => {
 		// Icône et libellé séparés : sous 768 px seule l'icône reste (CSS), le nom passe
 		// dans `title`/`aria-label` — il ne doit jamais manger le bandeau d'initiative.
@@ -2661,6 +2713,7 @@ function renderTokens() {
 	// dès que quelqu'un bouge ou que la caméra pivote.
 	effacerApercuZone();
 	peindrePassages(layer, j);
+	peindreTresor(layer, j);
 	peindreZonesPersistantes(layer, j);
 	peindrePieges(layer, j);
 	// Ciblage de sort/compétence en attente : cibles violettes au lieu de l'attaque.

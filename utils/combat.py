@@ -3,6 +3,7 @@ import math
 import os
 import random
 import uuid
+import copy
 from db.config import get_doc, save_doc, find_docs
 from models import character_stats
 from models.character_stats import (
@@ -12,6 +13,7 @@ from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import (
 	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, tirer_poids, item_ref_id,
 	lieu_label, noter_victoire, resolve_item_ref, recompute_equipment_bonus, autre_main,
+	credit_character,
 )
 from utils.consommables import (
 	caracts_avec_buffs, canalisation_bonus, est_consommable, effet_instantane, effets_de,
@@ -39,6 +41,7 @@ from utils import animations as animations_util
 from utils import jetons
 from utils import journal
 from utils import pieges as pieges_util
+from utils import tresor as tresor_util
 from utils import vol as vol_util
 from utils import images_monstres
 
@@ -1819,9 +1822,11 @@ def _detecter_pieges(combat_doc: dict, acteur: dict, bonus: int = 0,
 		p["etat"] = pieges_util.ETAT_DETECTE
 		acteur["xp_pieges"] = _eff_int(acteur.get("xp_pieges")) + pieges_util.XP_DETECTION
 		reperes.append(p)
+		ou = ("sur le coffre" if tresor_util.piege_d_ouverture(p)
+			  else f"en [{p['x']},{p['y']}]")
 		combat_doc.setdefault("log", []).append({
 			"tour": combat_doc.get("tour", 0), "acteur": acteur.get("nom", "?"), "kind": "sys",
-			"texte": f"🪤 {acteur.get('nom', '?')} repère un piège en [{p['x']},{p['y']}] "
+			"texte": f"🪤 {acteur.get('nom', '?')} repère un piège {ou} "
 					 f"(jet {roll} / seuil {seuil}) (+{pieges_util.XP_DETECTION} XP).",
 		})
 	return reperes
@@ -1848,7 +1853,8 @@ def _pieges_au_pas(combat_doc: dict, acteur: dict, rand_fn=None) -> None:
 			return
 		if p.get("camp") != camp or not pieges_util.est_actif(p):
 			continue
-		if not pieges_util.couvre(p, emprise):
+		# Piège d'un COFFRE : c'est de l'ouvrir qui le déclenche (`_action_ouvrir_tresor`).
+		if tresor_util.piege_d_ouverture(p) or not pieges_util.couvre(p, emprise):
 			continue
 		p["etat"] = pieges_util.ETAT_DECLENCHE
 		if est_monstre:
@@ -2176,6 +2182,243 @@ def _action_poser_piege(combat_doc: dict, joueur: dict, piege_arg: dict | None,
 	return {"pose": True, "piege_id": piege["id"]}
 
 
+# ── TRÉSOR (utils/tresor.py) ──────────────────────────────────────────────────
+# `etages.tresors[<lieu>]` : le coffre de chaque étage visité, tiré à la première entrée de
+# l'expédition — {x, y, nom, icon, etat, objets, cuivre, piege_id, mimique?, renforts?}.
+# ⚠️ Jamais servi au client (`vue_client` le remplace par `etages.tresor`, vue publique) :
+# il porte le contenu d'un coffre fermé et les monstres que son piège réserve.
+# Son piège vit dans `combat_doc["pieges"]` tant que le groupe est à l'étage (détection,
+# désamorçage, rendu : ceux de tout piège), et retourne dans le coffre quand il le quitte.
+
+def _tresor_courant(combat_doc: dict) -> dict | None:
+	etages = combat_doc.get("etages") or {}
+	return (etages.get("tresors") or {}).get(etages.get("etage"))
+
+
+def _piege_du_tresor(combat_doc: dict, etat: dict | None) -> dict | None:
+	pid = (etat or {}).get("piege_id")
+	return next((p for p in _pieges(combat_doc) if pid and p.get("id") == pid), None)
+
+
+def installer_tresor(combat_doc: dict, tresor: dict | None, grid: dict,
+					 point_apparition: dict | None = None, rand_fn=None) -> None:
+	"""Pose le coffre de l'étage courant, APRÈS `_place_actors` et `_poser_pieges`.
+
+	Première entrée de l'expédition : `tresor` (`tresor.preparer_tresor`) est mémorisé et
+	placé — case écrite, sinon tirée loin du départ, hors passages et acteurs. Retour à un
+	étage déjà vu : son coffre tel qu'on l'a laissé (`tresor` ignoré), piège compris ; une
+	mimique qu'on n'a pas abattue y attend toujours. Un piège de salle sur la case du coffre
+	est retiré : le coffre a le sien."""
+	etages = combat_doc.get("etages")
+	if not etages:
+		return
+	tresors = etages.setdefault("tresors", {})
+	lieu = etages.get("etage")
+	etat = tresors.get(lieu)
+	if etat is None:
+		if not tresor:
+			return
+		depart = ((int(point_apparition.get("x", -1)), int(point_apparition.get("y", -1)))
+				  if point_apparition else None)
+		interdites = set(_occupied_set(combat_doc))
+		for p in etages.get("passages") or []:
+			pos = p.get("pos") or {}
+			if pos.get("x") is not None and pos.get("y") is not None:
+				interdites.add((int(pos["x"]), int(pos["y"])))
+		case = tresor_util.case_du_tresor(grid["cells"], grid["dims"], tresor.get("pos"),
+										  depart, interdites, rand_fn=rand_fn)
+		if case is None:
+			return
+		etat = {k: v for k, v in tresor.items() if k not in ("pos", "piege", "lieu")}
+		etat.update({"x": case[0], "y": case[1], "etat": tresor_util.ETAT_FERME})
+		if tresor.get("piege"):
+			etat["piege"] = tresor_util.nouveau_piege_du_coffre(
+				f"piege_tresor_{len(tresors)}", case[0], case[1], tresor["piege"], etat["nom"])
+			etat["piege_id"] = etat["piege"]["id"]
+		tresors[lieu] = etat
+	case = (etat["x"], etat["y"])
+	combat_doc["pieges"] = [p for p in _pieges(combat_doc)
+							if not pieges_util.couvre(p, [case])]
+	if etat.get("piege"):
+		combat_doc["pieges"].append(etat.pop("piege"))
+		for j in combat_doc["joueurs"]:
+			if _debout(j):
+				_detecter_pieges(combat_doc, j, rand_fn=rand_fn)
+	if etat.get("etat") == tresor_util.ETAT_ANIME and etat.get("mimique"):
+		_faire_surgir_mimique(combat_doc, etat, grid)
+
+
+def _ranger_tresor(combat_doc: dict) -> None:
+	"""On quitte l'étage : le piège du coffre (désamorcé, déclenché ou intact) y reste."""
+	etat = _tresor_courant(combat_doc)
+	piege = _piege_du_tresor(combat_doc, etat)
+	if piege is not None:
+		etat["piege"] = piege
+
+
+def _numeroter_monstre(combat_doc: dict, monstre: dict) -> dict:
+	"""Id à la suite de TOUS les monstres de l'expédition (cf. `changer_d_etage`)."""
+	archives = (combat_doc.get("etages") or {}).get("archives") or []
+	monstre["id"] = f"monstre_{len(archives) + len(combat_doc.get('monstres') or [])}"
+	return monstre
+
+
+def _faire_surgir_mimique(combat_doc: dict, etat: dict, grid: dict) -> dict | None:
+	"""Le coffre s'anime : sa mimique paraît sur la case du coffre (ou au plus près), sait
+	où est le groupe et joue juste après l'acteur courant (comme une invocation)."""
+	m = _numeroter_monstre(combat_doc, copy.deepcopy(etat["mimique"]))
+	places = _cases_invocation(combat_doc, grid, {"pos": {"x": etat["x"], "y": etat["y"]}},
+							   1, m.get("jeton"))
+	if not places:
+		return None
+	m["pos"] = places[0]["pos"]
+	if places[0]["cap"]:
+		m["cap"] = places[0]["cap"]
+	if places[0]["reduit"]:
+		m.pop("jeton", None)
+	m["detecte"] = True
+	_appliquer_couvert(m, bool(combat_doc.get("couvert")))
+	combat_doc["monstres"].append(m)
+	combat_doc["ordre_initiative"].insert(combat_doc.get("acteur_courant_index", 0) + 1, m["id"])
+	etat["etat"] = tresor_util.ETAT_ANIME
+	etat["mimique_id"] = m["id"]
+	return m
+
+
+def _faire_accourir(combat_doc: dict, renforts: list, origine: dict, grid: dict) -> list:
+	"""Alarme : les renforts paraissent dans la région du coffre, à au moins
+	DISTANCE_MIN_APPARITION de l'ouvreur (ils accourent de loin), et savent où est le
+	groupe. En fin d'ordre d'initiative : ils jouent au prochain passage de la ronde."""
+	ox, oy = origine["pos"]["x"], origine["pos"]["y"]
+	region = _reachable_region(grid["cells"], grid["dims"], grid.get("nav", {}), (ox, oy))
+	occupees = _occupied_set(combat_doc)
+	arrives = []
+	for brut in renforts or []:
+		m = _numeroter_monstre(combat_doc, copy.deepcopy(brut))
+		pool = [c for c in region if c not in occupees]
+		loin = [c for c in pool if max(abs(c[0] - ox), abs(c[1] - oy)) >= DISTANCE_MIN_APPARITION]
+		pool = sorted(loin or pool)
+		if not pool:
+			break
+		if jetons.est_grand(m):
+			random.shuffle(pool)
+			if not _poser_emprise(m, pool, region, occupees, origine):
+				m.pop("jeton", None)
+				m["pos"] = {"x": pool[0][0], "y": pool[0][1]}
+		else:
+			c = random.choice(pool)
+			m["pos"] = {"x": c[0], "y": c[1]}
+		occupees.update(jetons.cases_emprise(m))
+		m["detecte"] = True
+		_appliquer_couvert(m, bool(combat_doc.get("couvert")))
+		combat_doc["monstres"].append(m)
+		combat_doc["ordre_initiative"].append(m["id"])
+		arrives.append(m)
+	return arrives
+
+
+def _mimique_abattue(combat_doc: dict, etat: dict) -> bool:
+	mid = etat.get("mimique_id")
+	return not any(m.get("id") == mid and m.get("vivant") for m in combat_doc.get("monstres") or [])
+
+
+def _etat_tresor(combat_doc: dict, etat: dict | None) -> str | None:
+	"""État LU du coffre : une mimique abattue rend le coffre (fermé, son piège a joué)."""
+	if not etat:
+		return None
+	if etat.get("etat") == tresor_util.ETAT_ANIME and _mimique_abattue(combat_doc, etat):
+		return tresor_util.ETAT_FERME
+	return etat.get("etat")
+
+
+def _menace_au_contact(combat_doc: dict, joueur: dict) -> bool:
+	return any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"])
+
+
+def _peut_ouvrir_tresor(combat_doc: dict, joueur: dict | None) -> bool:
+	"""Garde UNIQUE de l'ouverture (action et bouton du client)."""
+	etat = _tresor_courant(combat_doc)
+	return bool(joueur and joueur.get("character_id") and joueur.get("pos")
+				and _debout(joueur) and joueur.get("jouable", True) is not False
+				and _etat_tresor(combat_doc, etat) in tresor_util.ETATS_OUVRABLES
+				and tresor_util.a_portee(etat, jetons.cases_emprise(joueur))
+				and not _menace_au_contact(combat_doc, joueur))
+
+
+def _action_ouvrir_tresor(combat_doc: dict, joueur: dict, grid: dict) -> dict:
+	"""Ouvrir le coffre de l'étage : 1 action, au contact, même en plein combat — mais pas
+	avec un ennemi au corps à corps (règle du ramassage d'une carcasse).
+
+	Piège encore actif (caché ou seulement détecté) ⇒ il se déclenche d'abord : dégâts à
+	l'ouvreur, alarme, ou mimique — le coffre s'anime et ne s'ouvre qu'une fois abattu.
+	Puis l'ouvreur emporte ce que sa charge permet (au sac à la fin du combat, quelle que
+	soit l'issue, comme le butin ramassé), plus toute la bourse ; le reste demeure dans le
+	coffre, qu'un autre peut vider."""
+	etat = _tresor_courant(combat_doc)
+	if _etat_tresor(combat_doc, etat) not in tresor_util.ETATS_OUVRABLES:
+		return {"error": "Aucun coffre à ouvrir ici."}
+	if not joueur.get("character_id") or joueur.get("jouable", True) is False:
+		return {"error": "Seul un membre du groupe peut ouvrir ce coffre."}
+	if not tresor_util.a_portee(etat, jetons.cases_emprise(joueur)):
+		return {"error": "Le coffre est hors de portée."}
+	if _menace_au_contact(combat_doc, joueur):
+		return {"error": "Un ennemi vous menace au corps à corps."}
+	err = _garde_action(joueur)
+	if err:
+		return {"error": err}
+	_payer_action(joueur)
+	etat["etat"] = _etat_tresor(combat_doc, etat)
+	tour, nom = combat_doc["tour"], joueur["nom"]
+	combat_doc["log"].append({"tour": tour, "acteur": nom, "kind": "sys",
+							  "texte": f"{etat['icon']} {etat['nom']} : {nom} l'ouvre."})
+	piege = _piege_du_tresor(combat_doc, etat)
+	if piege is not None and pieges_util.est_actif(piege):
+		piege["etat"] = pieges_util.ETAT_DECLENCHE
+		effet = piege.get("effet")
+		if effet == tresor_util.EFFET_MIMIQUE and etat.get("mimique"):
+			m = _faire_surgir_mimique(combat_doc, etat, grid)
+			if m is not None:
+				combat_doc["log"].append(_avec_etat(_avec_vfx({
+					"tour": tour, "acteur": m["nom"], "kind": "sys",
+					"texte": f"{etat['icon']} Le coffre s'anime : {m['nom']} !",
+				}, "piege", m["id"], pieges_util.ANIM_DECLENCHEMENT), m))
+				return {"tresor": "mimique", "monstre_id": m["id"]}
+			effet = tresor_util.EFFET_DEGATS   # nulle part où paraître : la lame part quand même
+		if effet == tresor_util.EFFET_ALARME:
+			arrives = _faire_accourir(combat_doc, etat.pop("renforts", None), joueur, grid)
+			combat_doc["log"].append(_avec_vfx({
+				"tour": tour, "acteur": nom, "kind": "sys",
+				"texte": f"🔔 Le coffre sonne l'alarme : {len(arrives)} créature(s) accourent !",
+			}, "piege", joueur.get("id", ""), pieges_util.ANIM_DECLENCHEMENT))
+		else:
+			_declencher_sur_joueur(combat_doc, piege, joueur)
+		if combat_doc.get("status", "active") != "active" or not _debout(joueur):
+			return {"tresor": "piege"}
+	pris, restes = tresor_util.prendre(etat.get("objets"), joueur.get("charge", 0),
+									   joueur.get("charge_max", 0))
+	for o in pris:
+		joueur.setdefault("butin_ramasse", []).append({"item": o["item"], "poids": o["poids"]})
+		joueur["charge"] = round(joueur.get("charge", 0) + o["poids"], 2)
+		_ajuster_charge_magique(joueur, o["poids"],
+								charge_magie.coefficient_item(get_doc(o["item"]) or {}))
+	if pris:
+		_recompute_player_deplacement(joueur)
+	cuivre = _eff_int(etat.pop("cuivre", 0))
+	if cuivre:
+		joueur["cuivre_ramasse"] = _eff_int(joueur.get("cuivre_ramasse")) + cuivre
+	etat["objets"] = restes
+	etat["etat"] = tresor_util.ETAT_OUVERT if restes else tresor_util.ETAT_VIDE
+	trouve = [f"{o.get('icon', '')} {o['nom']}".strip() for o in pris]
+	if cuivre:
+		trouve.append(f"🪙 {cuivre} cuivre")
+	texte = (f"{nom} emporte : {', '.join(trouve)}." if trouve else f"{nom} ne trouve rien à emporter.")
+	if restes:
+		texte += f" Trop lourd : {len(restes)} objet(s) restent dans le coffre."
+	combat_doc["log"].append({"tour": tour, "acteur": nom, "kind": "sys", "texte": texte})
+	return {"tresor": etat["etat"], "pris": [o["nom"] for o in pris], "cuivre": cuivre,
+			"restes": len(restes), "charge": joueur.get("charge", 0)}
+
+
 def vue_client(combat_doc: dict) -> dict:
 	"""Ce que le CLIENT reçoit du doc de combat — copie superficielle, le doc n'est pas muté.
 
@@ -2186,6 +2429,15 @@ def vue_client(combat_doc: dict) -> dict:
 	# ⚠️ Posé dans TOUS les combats, pièges ou non : un bouton « Fouiller » qui n'apparaîtrait
 	# que sur une carte piégée trahirait la carte.
 	vue = dict(combat_doc)
+	# TRÉSOR : jamais `etages.tresors` (contenu fermé, monstres réservés) — sa vue publique.
+	if combat_doc.get("etages"):
+		etages = {k: v for k, v in combat_doc["etages"].items() if k != "tresors"}
+		etat = _tresor_courant(combat_doc)
+		publique = tresor_util.vue_publique(
+			dict(etat, etat=_etat_tresor(combat_doc, etat)) if etat else None)
+		if publique:
+			etages["tresor"] = publique
+		vue["etages"] = etages
 	tous = _pieges(combat_doc)
 	vue["pieges"] = pieges_util.pieges_publics(tous)
 	acteur = None
@@ -2197,6 +2449,7 @@ def vue_client(combat_doc: dict) -> dict:
 		tous, acteur, jetons.cases_emprise(acteur))] if acteur and acteur.get("pos") else [])
 	vue["peut_fouiller"] = bool(acteur and _eff_int(acteur.get("detection_pieges")) > 0)
 	vue["peut_desamorcer"] = bool(acteur and _eff_int(acteur.get("desamorcage")) > 0)
+	vue["peut_ouvrir_tresor"] = _peut_ouvrir_tresor(combat_doc, acteur)
 	return vue
 
 
@@ -3718,10 +3971,12 @@ def create_combat_doc(
 	point_apparition: dict | None = None,
 	etages: dict | None = None,
 	furtivite_groupe: dict | None = None,
+	tresor: dict | None = None,
 ) -> dict:
 	"""`etages` (donjon à étages) : état de la descente, posé tel quel sur le doc — il retire
 	la fin par victoire et la fuite, et ouvre l'action `emprunter`. Le groupe entier y entre
-	furtif (`furtivite_groupe` = {character_id: bonus passif}), au `point_apparition` fixe."""
+	furtif (`furtivite_groupe` = {character_id: bonus passif}), au `point_apparition` fixe.
+	`tresor` : trésor de ce premier étage (`tresor.preparer_tresor`), ou None."""
 	joueur = build_joueur_snapshot(character, joueur_index=0)
 	# Furtivité passive à l'entrée (conditions de terrain déjà évaluées par l'appelant
 	# via competences.furtivite_passive) : posée AVANT resolve_first_turns pour que les
@@ -3838,6 +4093,7 @@ def create_combat_doc(
 	# PIÈGES de la carte (tag `pieges_<q>_<d>`) : après le placement ET les passages, pour
 	# rester loin des cases de départ et ne jamais couvrir une sortie.
 	_poser_pieges(combat_doc, battle_map, grid, point_apparition)
+	installer_tresor(combat_doc, tresor, grid, point_apparition)
 	# Auras posées dès le placement : les alliés côte à côte en profitent dès le tour 1.
 	_recalculer_auras(combat_doc, grid)
 	return combat_doc
@@ -4205,14 +4461,17 @@ def _sortir_du_donjon(combat_doc: dict, passage: dict) -> None:
 
 
 def changer_d_etage(combat_doc: dict, lieu_doc: dict, point_apparition: dict,
-					monstres: list, passages: list, bonus_par_perso: dict | None = None) -> None:
+					monstres: list, passages: list, bonus_par_perso: dict | None = None,
+					tresor: dict | None = None) -> None:
 	"""Le même combat passe à l'étage `lieu_doc`. Mute sans sauvegarder.
 
 	Conservé : les joueurs (PV, PM, effets, sorts maintenus, butin ramassé), le compteur de
 	tours, le journal. Remplacé : la carte, les monstres (ceux de l'étage quitté sont
 	archivés pour l'XP et les quêtes ; leurs carcasses restent en bas), les passages.
-	Le groupe réapparaît au point fixe, furtif, et un ordre d'initiative neuf commence."""
+	Le groupe réapparaît au point fixe, furtif, et un ordre d'initiative neuf commence.
+	`tresor` : trésor de l'étage atteint s'il n'y a pas encore été tiré (sinon ignoré)."""
 	etages = combat_doc["etages"]
+	_ranger_tresor(combat_doc)
 	etages.setdefault("archives", []).extend(combat_doc.get("monstres") or [])
 	# Ids renumérotés à la suite de TOUS les monstres déjà vus : le journal garde les lignes
 	# des étages passés, et deux `monstre_0` y désigneraient deux bêtes différentes.
@@ -4238,6 +4497,7 @@ def changer_d_etage(combat_doc: dict, lieu_doc: dict, point_apparition: dict,
 	_place_actors(combat_doc, grid, point_apparition)
 	# Pièges de l'étage atteint (ceux du précédent restent en bas, posés ou non).
 	_poser_pieges(combat_doc, lieu_doc, grid, point_apparition)
+	installer_tresor(combat_doc, tresor, grid, point_apparition)
 	_entrer_en_furtivite(combat_doc, bonus_par_perso)
 	joueurs_en_jeu = set(combat_doc["ordre_initiative"])
 	combat_doc["ordre_initiative"] = _ordre_par_initiative(
@@ -6341,6 +6601,11 @@ def _resoudre_action_joueur(
 		if result.get("error"):
 			return result
 
+	elif action_type == "ouvrir_tresor":
+		result = _action_ouvrir_tresor(combat_doc, joueur, grid)
+		if result.get("error"):
+			return result
+
 	else:
 		return {"error": f"Action inconnue : {action_type}"}
 
@@ -6605,6 +6870,9 @@ def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> 
 		inventaire = doc.get("inventaire", [])
 		inventaire.extend(ramasse)
 		doc["inventaire"] = inventaire
+	# Bourse d'un TRÉSOR ouvert par CE membre : même règle que le butin ramassé.
+	if _eff_int(joueur.get("cuivre_ramasse")) > 0:
+		credit_character(doc, _eff_int(joueur.get("cuivre_ramasse")))
 
 	# Idempotence atomique : le combat est enregistré dans le doc du membre,
 	# sauvegardé avec l'XP. Borné pour éviter une croissance illimitée.
