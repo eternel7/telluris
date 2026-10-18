@@ -4,7 +4,8 @@
 2. **Une poche est reliée au réseau** par la case la moins chère, une **impasse** prolongée
    vers une case éloignée ; jamais à travers le rempart ni hors de l'enceinte.
 3. **Une ouverture qui joindrait dedans et dehors est annulée.**
-4. **Les cinq docs d'une porte** ont la forme de l'éditeur (`dev/test_portes_client.js`).
+4. **Les cinq docs d'une porte** ont la forme de l'éditeur (`dev/test_portes_client.js`),
+   ses deux portes de part et d'autre du châtelet (`PORTE_ECART_MAX`).
 """
 
 from dev import gen_calais_remparts as g
@@ -82,6 +83,14 @@ def test_chaque_porte_est_sur_son_pont_levis():
 		for a, b in zip(p["pont"], p["pont"][1:]):
 			assert max(abs(a[0] - b[0]), abs(a[1] - b[1])) == 1, p["slug"]
 	assert len({p["slug"] for p in g.PORTES}) == len(g.PORTES)
+
+
+def test_les_deux_portes_d_une_paire_encadrent_le_chatelet():
+	# Débouché lu sur l'image, jamais recalé « à la rue la plus proche » : la porte sud-ouest
+	# était partie en (39, 28), une autre rue, loin du châtelet.
+	for p in g.PORTES:
+		assert g.ecart_porte(p) <= g.PORTE_ECART_MAX, p["slug"]
+	assert g.ecart_porte({"pont": ((0, 0),), "dedans": (3, 10)}) == 10
 
 
 def test_les_cinq_docs_d_une_porte():

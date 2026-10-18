@@ -2246,8 +2246,8 @@
         0,
         1,
         1,
-        0,
-        0,
+        1,
+        1,
         0,
         0,
         0,
@@ -2863,7 +2863,7 @@
         0,
         0,
         1,
-        1,
+        0,
         0,
         0,
         0,
@@ -2953,7 +2953,97 @@
         0,
         0,
         1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
         1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
         0,
         0,
         0,
@@ -3005,96 +3095,6 @@
         1,
         1,
         1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        1,
-        0,
-        1,
-        1,
-        1,
-        0,
-        0,
-        0,
-        1,
-        1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1
-      ],
-      [
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        5,
-        1,
-        1,
-        1,
         0,
         1,
         1,
@@ -3133,8 +3133,8 @@
         0,
         0,
         1,
-        1,
-        1,
+        0,
+        0,
         0,
         0,
         0,
@@ -4779,124 +4779,18 @@
     "lieu_parent": "lieu:france"
   },
   {
-    "_id": "lieu:calais_porte_sud_ouest_exterieur",
-    "type": "lieu",
-    "label": "Porte sud-ouest — extérieur",
-    "image": "porte_de_ville_pont_exterieur01.png",
-    "categorie": "Porte de rempart",
-    "lieu_parent": "lieu:calais"
-  },
-  {
-    "_id": "lieu:calais_porte_sud_ouest_interieur",
-    "type": "lieu",
-    "label": "Porte sud-ouest — intérieur",
-    "image": "porte_de_ville_pont_interieur05.png",
-    "categorie": "Porte de rempart",
-    "lieu_parent": "lieu:calais"
-  },
-  {
-    "_id": "link:calais_porte_sud_ouest_carte_exterieur",
-    "type": "connection",
-    "nodes": [
-      {
-        "lieu": "lieu:calais",
-        "pos": [
-          36,
-          38
-        ],
-        "label": "au-delà des remparts"
-      },
-      {
-        "lieu": "lieu:calais_porte_sud_ouest_exterieur",
-        "pos": [
-          0,
-          0
-        ]
-      }
-    ],
-    "metadata": {
-      "type": "poste de garde",
-      "status": "ouvert"
-    }
-  },
-  {
     "_id": "link:calais_porte_sud_ouest_carte_interieur",
     "type": "connection",
     "nodes": [
       {
         "lieu": "lieu:calais",
         "pos": [
-          39,
-          28
+          41,
+          33
         ]
       },
       {
         "lieu": "lieu:calais_porte_sud_ouest_interieur",
-        "pos": [
-          0,
-          0
-        ]
-      }
-    ],
-    "metadata": {
-      "type": "poste de garde",
-      "status": "ouvert"
-    }
-  },
-  {
-    "_id": "link:calais_porte_sud_ouest_passage",
-    "type": "connection",
-    "nodes": [
-      {
-        "lieu": "lieu:calais_porte_sud_ouest_exterieur",
-        "pos": [
-          0,
-          0
-        ]
-      },
-      {
-        "lieu": "lieu:calais_porte_sud_ouest_interieur",
-        "pos": [
-          0,
-          0
-        ]
-      }
-    ],
-    "metadata": {
-      "type": "poste de garde",
-      "status": "ouvert"
-    }
-  },
-  {
-    "_id": "lieu:calais_porte_sud_est_exterieur",
-    "type": "lieu",
-    "label": "Porte sud-est — extérieur",
-    "image": "porte_de_ville_pont_exterieur02.png",
-    "categorie": "Porte de rempart",
-    "lieu_parent": "lieu:calais"
-  },
-  {
-    "_id": "lieu:calais_porte_sud_est_interieur",
-    "type": "lieu",
-    "label": "Porte sud-est — intérieur",
-    "image": "porte_de_ville_pont_interieur02.png",
-    "categorie": "Porte de rempart",
-    "lieu_parent": "lieu:calais"
-  },
-  {
-    "_id": "link:calais_porte_sud_est_carte_exterieur",
-    "type": "connection",
-    "nodes": [
-      {
-        "lieu": "lieu:calais",
-        "pos": [
-          66,
-          38
-        ],
-        "label": "au-delà des remparts"
-      },
-      {
-        "lieu": "lieu:calais_porte_sud_est_exterieur",
         "pos": [
           0,
           0
@@ -4915,77 +4809,12 @@
       {
         "lieu": "lieu:calais",
         "pos": [
-          68,
-          29
+          60,
+          31
         ]
       },
       {
         "lieu": "lieu:calais_porte_sud_est_interieur",
-        "pos": [
-          0,
-          0
-        ]
-      }
-    ],
-    "metadata": {
-      "type": "poste de garde",
-      "status": "ouvert"
-    }
-  },
-  {
-    "_id": "link:calais_porte_sud_est_passage",
-    "type": "connection",
-    "nodes": [
-      {
-        "lieu": "lieu:calais_porte_sud_est_exterieur",
-        "pos": [
-          0,
-          0
-        ]
-      },
-      {
-        "lieu": "lieu:calais_porte_sud_est_interieur",
-        "pos": [
-          0,
-          0
-        ]
-      }
-    ],
-    "metadata": {
-      "type": "poste de garde",
-      "status": "ouvert"
-    }
-  },
-  {
-    "_id": "lieu:calais_porte_est_exterieur",
-    "type": "lieu",
-    "label": "Porte est — extérieur",
-    "image": "porte_de_ville_pont_exterieur03.png",
-    "categorie": "Porte de rempart",
-    "lieu_parent": "lieu:calais"
-  },
-  {
-    "_id": "lieu:calais_porte_est_interieur",
-    "type": "lieu",
-    "label": "Porte est — intérieur",
-    "image": "porte_de_ville_pont_interieur03.png",
-    "categorie": "Porte de rempart",
-    "lieu_parent": "lieu:calais"
-  },
-  {
-    "_id": "link:calais_porte_est_carte_exterieur",
-    "type": "connection",
-    "nodes": [
-      {
-        "lieu": "lieu:calais",
-        "pos": [
-          80,
-          25
-        ],
-        "label": "au-delà des remparts"
-      },
-      {
-        "lieu": "lieu:calais_porte_est_exterieur",
         "pos": [
           0,
           0
@@ -5004,8 +4833,8 @@
       {
         "lieu": "lieu:calais",
         "pos": [
-          73,
-          25
+          75,
+          24
         ]
       },
       {
@@ -5018,55 +4847,6 @@
     ],
     "metadata": {
       "type": "poste de garde",
-      "status": "ouvert"
-    }
-  },
-  {
-    "_id": "link:calais_porte_est_passage",
-    "type": "connection",
-    "nodes": [
-      {
-        "lieu": "lieu:calais_porte_est_exterieur",
-        "pos": [
-          0,
-          0
-        ]
-      },
-      {
-        "lieu": "lieu:calais_porte_est_interieur",
-        "pos": [
-          0,
-          0
-        ]
-      }
-    ],
-    "metadata": {
-      "type": "poste de garde",
-      "status": "ouvert"
-    }
-  },
-  {
-    "_id": "link:france_to_calais_sud",
-    "type": "connection",
-    "nodes": [
-      {
-        "lieu": "lieu:france",
-        "pos": [
-          42,
-          4
-        ]
-      },
-      {
-        "lieu": "lieu:calais",
-        "pos": [
-          28,
-          47
-        ],
-        "label": "Calais — par le sud"
-      }
-    ],
-    "metadata": {
-      "type": "chemin",
       "status": "ouvert"
     }
   }
