@@ -92,6 +92,8 @@ utils/
   charge_magie.py        # charge portée → canalisation (pur) : ratio, courbe, paliers,
                          #   sensibilité d'un sort, aide à la canalisation ; DEUX charges —
                          #   la PHYSIQUE (`charge_max_of`) reste brute, seule la MAGIQUE bouge
+  tresor.py              # trésor d'un étage de donjon à étages (pur) : bloc `tresor` de salle, contenu garanti +
+                         #   bourse + tirage, piège probable à l'OUVERTURE (dégâts / alarme / mimique)
   pieges.py              # pièges de combat (pur) : tag `pieges_<q>_<d>` de salle, placement loin du
                          #   départ, seuils détection/désamorçage/flair, pose (`pose_piege`), XP ;
                          #   ⚠️ `combat.vue_client` SEUL filtre des pièges cachés envoyés au client

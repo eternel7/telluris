@@ -30,6 +30,7 @@ from utils.marche import (
 )
 from utils.lieux import get_lieu_links, get_lieu_directions, est_cite_de_depart, connexions_du_lieu, noeud_destination
 from utils import donjon
+from utils import tresor as tresor_util
 from utils.combat import instantiate_monsters, create_combat_doc, resolve_first_turns, finalize_combat
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_recolte
 from utils import quetes
@@ -540,9 +541,11 @@ def _ouvrir_donjon_a_etages(character: dict, donjon_doc: dict, lieu_doc: dict,
 	compagnons = recrutement.groupe_effectif(character, get_doc)
 	montures_groupe = montures.montures_effectives(character, get_doc)
 	proteges_groupe = escorte.proteges_effectifs(character, get_doc)
+	profils = find_docs({"type": "profil"}) or []
 	monstres = donjon.monstres_de_salle(
-		donjon_doc, lieu_doc["_id"], find_docs({"type": "profil"}) or [],
-		len(compagnons), get_doc, instantiate_monsters)
+		donjon_doc, lieu_doc["_id"], profils, len(compagnons), get_doc, instantiate_monsters)
+	tresor = tresor_util.preparer_tresor(
+		donjon_doc, lieu_doc["_id"], profils, len(compagnons), get_doc, instantiate_monsters)
 	passages = donjon.passages_de_l_etage(
 		connexions_du_lieu(lieu_doc["_id"]), lieu_doc["_id"], donjon_doc,
 		lambda lid: lieu_label(get_doc(lid), lid))
@@ -555,7 +558,7 @@ def _ouvrir_donjon_a_etages(character: dict, donjon_doc: dict, lieu_doc: dict,
 		point_apparition=point_apparition,
 		etages={"donjon": donjon_doc["_id"], "etage": lieu_doc["_id"],
 				"passages": passages, "archives": []},
-		furtivite_groupe=bonus)
+		furtivite_groupe=bonus, tresor=tresor)
 	resolve_first_turns(combat_doc)
 	if combat_doc["status"] != "active":
 		finalize_combat(combat_doc)
