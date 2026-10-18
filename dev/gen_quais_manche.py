@@ -14,7 +14,10 @@ traversée, et une connexion par case :
     d'en face.
 
 Connexions : forme de `quai01` (pas de label : le bouton reprend celui du lieu), `_id`
-`link:quaiNN_to_<cité>` — un numéro reste attaché à sa case d'un rejeu à l'autre.
+`link:quaiNN_to_<cité>` numérotés dans l'ordre du pourtour (`numeroter`) ; `quai01`, la
+connexion existante, est reposée sur la case `quai01` du port (Douvres : elle tombait dans
+l'eau ; Calais : sur un ponton). Cases prises sur le PAVÉ du quai et le long des maisons, jamais sur l'eau, un ponton
+ou un bateau — même là où la grille de la cité les dit praticables.
 
 Refus avant toute écriture : case ≠ 1, case que les rues ne relient pas à `quai01`, case
 prise par une autre connexion de la cité, `_id` d'une autre connexion, doc d'origine absent.
@@ -67,12 +70,12 @@ def _dialogue(accueil, danger, a_bord):
 
 
 # Cases de quai lues sur l'image de la cité (grille 88×48), dans l'ordre du pourtour du
-# bassin ; `NN` = numéro de la connexion `link:quaiNN_to_<cité>` (01 = l'existante).
+# bassin, zone après zone ; `quai01` = case de la connexion existante (zone d'origine).
 PORTS = (
-	{"cite": "lieu:calais", "existant": (36, 19), "route": "traversee:calais_douvres",
+	{"cite": "lieu:calais", "quai01": (37, 19), "route": "traversee:calais_douvres",
 	 "zones": (
 		{"zone": "nord", "label": "Les quais nord de Calais",
-		 "cases": {7: (28, 17), 2: (30, 17), 8: (32, 17)},
+		 "cases": ((27, 18), (28, 17), (30, 16), (31, 15), (33, 15), (34, 14)),
 		 "capitaine": {"nom": "Aubin Cordemâle", "race": "nain", "sexe": "m",
 					   "description": "Patron d'un navire trapu qui fait la traversée du Pas "
 									  "vers Douvres depuis le bassin nord.",
@@ -87,9 +90,9 @@ PORTS = (
 						   "« Larguez ! » Le navire du bassin nord quitte le quai à la rame "
 						   "puis prend le vent. Cap sur Douvres.")}},
 		{"zone": None,      # zone d'origine : lieu:calais_quais, pnj:capitaine_calais
-		 "cases": {3: (37, 17), 1: (36, 19), 4: (36, 21)}},
+		 "cases": ((36, 16), (38, 16), (38, 18), (37, 19), (37, 21), (36, 22))},
 		{"zone": "sud", "label": "Les quais sud de Calais",
-		 "cases": {9: (35, 23), 5: (33, 25), 6: (30, 25)},
+		 "cases": ((35, 23), (34, 24), (35, 25), (33, 25), (31, 25), (30, 25)),
 		 "capitaine": {"nom": "Ysolde Marbrise", "race": "elfe", "sexe": "f",
 					   "description": "Patronne d'un navire effilé qui fait la traversée du "
 									  "Pas vers Douvres depuis le bassin sud.",
@@ -105,10 +108,10 @@ PORTS = (
 						   "« Larguez les amarres ! » Le navire effilé glisse hors du bassin "
 						   "sud et prend le vent. Cap sur Douvres.")}},
 	 )},
-	{"cite": "lieu:douvres", "existant": (60, 24), "route": "traversee:douvres_calais",
+	{"cite": "lieu:douvres", "quai01": (61, 22), "route": "traversee:douvres_calais",
 	 "zones": (
 		{"zone": "ouest", "label": "Les quais ouest de Douvres",
-		 "cases": {3: (56, 22), 7: (54, 25), 2: (50, 27)},
+		 "cases": ((49, 29), (49, 27), (49, 25), (52, 23), (54, 22), (56, 22)),
 		 "capitaine": {"nom": "Tamsin Brockwell", "race": "hobbit", "sexe": "f",
 					   "description": "Patronne d'un petit navire vif qui fait la traversée "
 									  "du Pas vers Calais depuis le quai ouest.",
@@ -124,9 +127,9 @@ PORTS = (
 						   "« Larguez ! » Le petit navire file hors du quai ouest et prend "
 						   "le vent. Cap sur Calais.")}},
 		{"zone": None,      # zone d'origine : lieu:douvres_quais, pnj:capitaine_douvres
-		 "cases": {1: (60, 24), 8: (63, 22), 4: (66, 22), 5: (70, 26)}},
+		 "cases": ((59, 22), (61, 22), (63, 21), (65, 21), (67, 22), (69, 23), (71, 25))},
 		{"zone": "sud", "label": "Les quais sud de Douvres",
-		 "cases": {9: (52, 32), 6: (56, 33), 10: (59, 33), 11: (61, 33)},
+		 "cases": ((50, 32), (52, 33), (54, 34), (56, 34), (58, 34), (60, 34)),
 		 "capitaine": {"nom": "Osric Fenwick", "race": "humain", "sexe": "m",
 					   "description": "Patron d'un navire de charge qui fait la traversée "
 									  "du Pas vers Calais depuis le quai sud.",
@@ -143,6 +146,21 @@ PORTS = (
 						   "du quai sud et prend le vent. Cap sur Calais.")}},
 	 )},
 )
+
+
+def numeroter(port):
+	"""[(NN, case)] par zone, dans l'ordre : `quai01` → 1, les autres 2, 3… le long du pourtour."""
+	suivant, sortie = 2, []
+	for z in port["zones"]:
+		nums = []
+		for case in z["cases"]:
+			if tuple(case) == tuple(port["quai01"]):
+				nums.append((1, case))
+			else:
+				nums.append((suivant, case))
+				suivant += 1
+		sortie.append(nums)
+	return sortie
 
 
 def slug_cite(cite_id):
@@ -177,12 +195,12 @@ def construire(docs):
 			refus += [f"{i} : absent du dump" for i in manquants]
 			continue
 		cells, nav = cite["cells"], cite.get("nav") or {}
-		joint = atteint(cells, nav, port["existant"])
+		joint = atteint(cells, nav, port["quai01"])
 		prises = {tuple(n["pos"]): d["_id"] for d in docs if d.get("type") == "connection"
 				  for n in d.get("nodes", []) if n.get("lieu") == cite_id}
 		quais_du_port = {f"lieu:{s}_quais"} | {f"lieu:{s}_quais_{z['zone']}"
 											   for z in port["zones"] if z["zone"]}
-		for z in port["zones"]:
+		for z, nums in zip(port["zones"], numeroter(port)):
 			lieu_id, pnj_id = ids_zone(cite_id, z["zone"])
 			if z["zone"] is None:
 				portrait = PORTRAITS[pnj_id]
@@ -213,13 +231,13 @@ def construire(docs):
 					 "dialogue": cap["dialogue"]},
 					route,
 				]
-			for nn, (x, y) in z["cases"].items():
+			for nn, (x, y) in nums:
 				_id = f"link:quai{nn:02d}_to_{s}"
 				if cells[y][x] != 1:
 					refus.append(f"{_id} : case {[x, y]} = {cells[y][x]}, pas 1")
 				elif (x, y) not in joint:
 					refus.append(f"{_id} : case {[x, y]} non reliée par les rues à "
-								 f"{list(port['existant'])}")
+								 f"{list(port['quai01'])}")
 				if (x, y) in prises and prises[(x, y)] != _id:
 					refus.append(f"{_id} : case {[x, y]} déjà prise par {prises[(x, y)]}")
 				ancien = par_id.get(_id)
@@ -227,10 +245,12 @@ def construire(docs):
 									  for n in ancien.get("nodes", [])):
 					refus.append(f"{_id} : _id déjà pris par une autre connexion")
 				if ancien and nn == 1:
-					lien = sans_rev(copy.deepcopy(ancien))   # quai01 : seul le quai peut changer
+					lien = sans_rev(copy.deepcopy(ancien))   # quai01 : reposé, quai de sa zone
 					for n in lien["nodes"]:
 						if n.get("lieu") in quais_du_port:
 							n["lieu"] = lieu_id
+						elif n.get("lieu") == cite_id:
+							n["pos"] = [x, y]
 					sortants.append(lien)
 					continue
 				sortants.append({"_id": _id, "type": "connection",
