@@ -81,4 +81,11 @@ def test_cite_demenagee_anciens_liens_supprimes():
 		lien("link:france_to_bruges", "lieu:france", "lieu:bruges")]
 	assert g.liens_perimes(dump, "lieu:calais", {"link:france_to_calais_sud"}) == [
 		{"_id": "link:plaine_europeenne_to_calais_sud", "_deleted": True}]
+	# Une porte de rempart (sous-lieu de la cité) n'est pas un lien vers l'ancien pays.
+	dump += [{"_id": "lieu:calais_porte_sud_est_exterieur", "type": "lieu",
+			  "lieu_parent": "lieu:calais"},
+			 lien("link:calais_porte_sud_est_carte_exterieur", "lieu:calais",
+				  "lieu:calais_porte_sud_est_exterieur")]
+	assert [d["_id"] for d in g.liens_perimes(dump, "lieu:calais", {"link:france_to_calais_sud"})] \
+		== ["link:plaine_europeenne_to_calais_sud"]
 	assert g.CITES["lieu:calais"]["parent"] == "lieu:france"
