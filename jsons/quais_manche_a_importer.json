@@ -1,0 +1,242 @@
+[
+  {
+    "_id": "link:quai02_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          30,
+          17
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai03_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          37,
+          17
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai04_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          36,
+          21
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai05_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          33,
+          25
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai06_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          30,
+          25
+        ]
+      },
+      {
+        "lieu": "lieu:calais_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai02_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          50,
+          27
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai03_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          56,
+          22
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai04_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          66,
+          22
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai05_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          70,
+          26
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:quai06_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          56,
+          33
+        ]
+      },
+      {
+        "lieu": "lieu:douvres_quais",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "quai",
+      "status": "ouvert"
+    }
+  }
+]
