@@ -38,7 +38,7 @@ FEMININS = {
 	"bete_du_gevaudan", "chauve_souris", "chauve_souris_geante", "chimere", "cockatrice",
 	"corneille_noire", "dearg_due", "dryade", "fee", "gargouille", "gorgone", "goule", "harpie", "horreur",
 	"hydre", "lamie", "lhamia", "liche", "licorne", "manticore", "momie", "monture_angelique",
-	"monture_demoniaque", "monture_squelette", "naiade", "nereide", "oceanide", "oreade", "penanggalan",
+	"mimique", "monture_demoniaque", "monture_squelette", "naiade", "nereide", "oceanide", "oreade", "penanggalan",
 	"reine_lhamia", "sirene", "succube", "tarasque", "vouivre", "wyvern",
 }
 

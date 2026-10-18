@@ -48,7 +48,8 @@ CRISTAL = {
 
 # Case (5, 35) : l'alcôve au bout de la galerie sud-ouest, la plus éloignée de l'arrivée
 # (33, 3). Grade de l'étage : 3-4 (`niveau_*` de la salle) — piège de danger 2, renforts
-# moins nombreux que la garnison (5).
+# moins nombreux que la garnison (5). La mimique (`espece:mimique`) vient de dev/gen_mimique.py :
+# tant qu'elle n'est pas en base, `tresor.preparer_tresor` change cet effet en dégâts.
 TRESOR = {
 	"nom": "Coffre de l'ossuaire",
 	"icon": "🧰",
@@ -61,7 +62,8 @@ TRESOR = {
 		{"item": "item:bague", "poids": 2},
 		{"item": "item:Cristal_canalisation", "poids": 2},
 	]},
-	"piege": {"chance": 40, "danger": 2, "effets": ["degats", "alarme"], "alarme": 3},
+	"piege": {"chance": 40, "danger": 2, "effets": ["degats", "alarme", "mimique"], "alarme": 3,
+			  "mimique": "espece:mimique"},   # dev/gen_mimique.py
 }
 
 

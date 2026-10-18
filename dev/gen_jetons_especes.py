@@ -139,6 +139,7 @@ TABLE = {
 	"malandhir": ("1x2", "ellipse"),
 	"mammouth": ("2x2", "ellipse"),
 	"manticore": ("2x2", "ellipse"),
+	"mimique": None,
 	"minotaure": None,
 	"momie": None,
 	"monture_angelique": ("1x2", "ellipse"),

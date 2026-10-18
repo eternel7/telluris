@@ -78,9 +78,11 @@
             "danger": 2,
             "effets": [
               "degats",
-              "alarme"
+              "alarme",
+              "mimique"
             ],
-            "alarme": 3
+            "alarme": 3,
+            "mimique": "espece:mimique"
           }
         }
       }
