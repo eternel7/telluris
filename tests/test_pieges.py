@@ -398,6 +398,69 @@ def test_desamorcer_refuse(cas):
 	assert doc["pieges"][0]["etat"] == etat
 
 
+# ── Outils de crochetage ────────────────────────────────────────────────────────
+
+OUTILS = {
+	"item:Crochets": {"_id": "item:Crochets", "nom": "Crochets", pieges.CLE_BONUS_OUTIL: 10},
+	"item:Trousse": {"_id": "item:Trousse", "nom": "Trousse fine", pieges.CLE_BONUS_OUTIL: 15},
+	"item:Pain": {"_id": "item:Pain", "nom": "Pain"},
+}
+
+
+def test_les_outils_du_sac_sont_tries_du_meilleur_au_moins_bon():
+	sac = ["item:Pain", {"item": "item:Crochets", "poids": 0.1}, "item:Trousse", "item:Inconnu"]
+	outils = pieges.outils_desamorcage(sac, OUTILS.get)
+	assert [o["item"] for o in outils] == ["item:Trousse", "item:Crochets"]
+
+
+def test_seul_le_meilleur_outil_s_ajoute_au_seuil():
+	sans = {"ag": 10, "desamorcage": 20}
+	avec = dict(sans, outils_desamorcage=pieges.outils_desamorcage(
+		["item:Crochets", "item:Trousse"], OUTILS.get))
+	assert pieges.seuil_desamorcage(avec, {"danger": 2}) == pieges.seuil_desamorcage(sans, {"danger": 2}) + 15
+
+
+def test_sans_la_competence_le_snapshot_ne_lit_aucun_outil():
+	snap = combat_mod.build_joueur_snapshot({"_id": "character:x", "nom": "X", "inventaire": ["item:Trousse"]})
+	assert snap["outils_desamorcage"] == []
+
+
+def test_un_outil_ne_donne_pas_le_droit_de_desamorcer():
+	v = joueur(x=3, y=5)
+	v["outils_desamorcage"] = pieges.outils_desamorcage(["item:Trousse"], OUTILS.get)
+	doc = combat([v], [monstre(x=10, y=8)])
+	doc["pieges"] = [piege_monde(4, 5, etat=pieges.ETAT_DETECTE)]
+	assert "error" in resolve_action(doc, "desamorcer", piege={"piege_id": "piege_0_0"})
+
+
+@pytest.mark.parametrize("jet, brise", [(0.999, True), (0.94, False)])
+def test_un_echec_critique_brise_l_outil_employe(monkeypatch, jet, brise):
+	"""d100 = 100 (≥ OUTIL_CASSE_JET) brise la trousse ; d100 = 95 (raté, pas critique) non."""
+	_jets(monkeypatch, jet)
+	v = voleur(x=3, y=5)
+	v["outils_desamorcage"] = pieges.outils_desamorcage(["item:Crochets", "item:Trousse"], OUTILS.get)
+	doc = combat([v], [monstre(x=10, y=8)])
+	doc["pieges"] = [piege_monde(4, 5, danger=5, etat=pieges.ETAT_DETECTE)]
+	assert resolve_action(doc, "desamorcer", piege={"piege_id": "piege_0_0"})["desamorce"] is False
+	assert v.get("outils_brises", []) == (["item:Trousse"] if brise else [])
+	assert pieges.outil_courant(v)["item"] == ("item:Crochets" if brise else "item:Trousse")
+	assert ("se brise" in doc["log"][-1]["texte"]) is brise
+
+
+def test_l_outil_brise_quitte_le_sac_une_seule_fois(monkeypatch):
+	monkeypatch.setattr(combat_mod, "grant_xp", lambda doc, xp: None)
+	monkeypatch.setattr(combat_mod, "save_doc", lambda doc: doc)
+	v = voleur(x=3, y=5)
+	v["outils_brises"] = ["item:Crochets"]
+	doc = combat([v], [monstre(x=10, y=8)])
+	doc["xp_gagnee"] = 0
+	perso = {"_id": v["character_id"], "combats_recompenses": [],
+			 "inventaire": ["item:Crochets", {"item": "item:Crochets", "poids": 0.1}, "item:Pain"]}
+	combat_mod._finalize_membre(doc, v, perso, "victoire")
+	combat_mod._finalize_membre(doc, v, perso, "victoire")   # re-finalisation
+	assert perso["inventaire"] == [{"item": "item:Crochets", "poids": 0.1}, "item:Pain"]
+
+
 # ── Vue client ──────────────────────────────────────────────────────────────────
 
 def test_la_vue_client_ne_contient_aucun_piege_cache_et_ne_mute_pas_le_doc():

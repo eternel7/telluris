@@ -1,0 +1,1869 @@
+[
+	{
+		"_id": "item:Aiguille_d_os",
+		"type": "item",
+		"nom": "Aiguilles d'os",
+		"icon": "🪡",
+		"description": "Aiguilles taillées dans des éclats d'os, chas percé au foret. Elles passent là où l'acier déchirerait la peau.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.01
+	},
+	{
+		"_id": "item:Appeau_de_chasse",
+		"type": "item",
+		"nom": "Appeau de chasse",
+		"icon": "🎶",
+		"description": "Un sifflet d'os garni d'une plume, qui imite le cri d'une proie blessée. Il attire le gibier — et parfois ce qui chasse le gibier.",
+		"rarete": "commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.05
+	},
+	{
+		"_id": "item:Arc_recurve_de_corne",
+		"type": "item",
+		"nom": "Arc recurve de corne",
+		"icon": "🏹",
+		"description": "Un arc court à branches retournées : âme de bois, ventre de corne, dos de tendon, le tout collé à la colle d'os. Il tire comme un arc long.",
+		"rarete": "peu_commun",
+		"categorie": "arme",
+		"sous_categorie": "arc",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"tir"
+		],
+		"poids": [
+			0.8,
+			1.2
+		],
+		"portee": 8,
+		"restriction": {
+			"Ag": 21
+		},
+		"bonus_degats": 3,
+		"bonus_degats_dice": 4,
+		"bonus_cd": 6,
+		"bonus": {
+			"Ag": 2
+		},
+		"deux_mains": true
+	},
+	{
+		"_id": "item:Besace_de_cuir_fume",
+		"type": "item",
+		"nom": "Besace de cuir fumé",
+		"icon": "👝",
+		"description": "Une sacoche plate à rabat, en cuir fumé qui ne boit pas la pluie. Les messagers la portent sur la hanche.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"ceinture"
+		],
+		"tags": [],
+		"poids": 0.5,
+		"bonus_initiative": 2
+	},
+	{
+		"_id": "item:Biere_de_Beauce",
+		"type": "item",
+		"nom": "Bière de Beauce",
+		"icon": "🍺",
+		"description": "La bière du grenier : orge de la plaine, eau de puits, une nuit de levain. Elle désaltère les moissonneurs et les caravanes.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "boisson",
+		"slots": [],
+		"tags": [],
+		"poids": 1.0,
+		"effets": {
+			"pv": 8,
+			"buffs": {
+				"R": 1
+			},
+			"duree": 6
+		}
+	},
+	{
+		"_id": "item:Bocal_d_yeux_en_saumure",
+		"type": "item",
+		"nom": "Bocal d'yeux en saumure",
+		"icon": "🫙",
+		"description": "Des yeux de bêtes rangés dans une saumure trouble, le col scellé à la cire et étiqueté de la main du conservateur. Les alchimistes en achètent sans poser de question.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [
+			"fabrication_catalyseur"
+		],
+		"poids": 0.6,
+		"fabrication": {
+			"nom": "des Yeux",
+			"modificateurs": {
+				"bonus_pm": 4
+			}
+		}
+	},
+	{
+		"_id": "item:Bottes_de_cuir_fume",
+		"type": "item",
+		"nom": "Bottes de cuir fumé",
+		"icon": "🥾",
+		"description": "Des bottes de cuir fumé, coutures enduites : on traverse un gué sans y laisser ses pieds.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"pieds"
+		],
+		"tags": [],
+		"poids": 0.9,
+		"bonus_pa": 1,
+		"bonus": {
+			"Ag": 1
+		}
+	},
+	{
+		"_id": "item:Bouclier_de_croupon",
+		"type": "item",
+		"nom": "Bouclier de croupon",
+		"icon": "🛡️",
+		"description": "Deux épaisseurs de croupon tendues sur un cerclage de fer. Plus léger qu'un bouclier de bois, et il ne se fend pas.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"main_gauche"
+		],
+		"tags": [],
+		"poids": [
+			1.5,
+			2.5
+		],
+		"bonus_pa": 4,
+		"restriction": {
+			"F": 12
+		}
+	},
+	{
+		"_id": "item:Cape_de_fourrure",
+		"type": "item",
+		"nom": "Cape de fourrure",
+		"icon": "🧥",
+		"description": "Une peau entière, poil dehors, assouplie à la graisse et cousue d'une bordure. Le vent des routes ne passe pas.",
+		"rarete": "peu_commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"epaules"
+		],
+		"tags": [],
+		"poids": 1.5,
+		"bonus_pa": 2,
+		"bonus": {
+			"R": 1
+		}
+	},
+	{
+		"_id": "item:Ceinturon_tanne_au_chene",
+		"type": "item",
+		"nom": "Ceinturon tanné au chêne",
+		"icon": "🎗️",
+		"description": "Une large ceinture de cuir de chêne, épaisse comme deux doigts, qui tient les reins au port d'une charge.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"ceinture"
+		],
+		"tags": [],
+		"poids": 0.4,
+		"bonus_pa": 1,
+		"bonus": {
+			"R": 1
+		}
+	},
+	{
+		"_id": "item:Coeur_fume_du_chasseur",
+		"type": "item",
+		"nom": "Cœur fumé du chasseur",
+		"icon": "🫀",
+		"description": "Les chasseurs le mangent à la veille d'une traque : un cœur de bête fumé entier, dur et noir. On dit qu'il donne le courage de ce qu'on a tué.",
+		"rarete": "peu_commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.2,
+		"effets": {
+			"pv": 4,
+			"buffs": {
+				"Vol": 3
+			},
+			"duree": 6
+		}
+	},
+	{
+		"_id": "item:Coeur_reliquaire",
+		"type": "item",
+		"nom": "Cœur reliquaire",
+		"icon": "🫀",
+		"description": "Un cœur séché au sel, enchâssé dans un petit coffret d'os qu'on porte au cou. Il bat encore, prétendent ceux qui le vendent.",
+		"rarete": "rare",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"cou"
+		],
+		"tags": [],
+		"poids": 0.3,
+		"bonus_pv": 2,
+		"bonus": {
+			"Vol": 2
+		}
+	},
+	{
+		"_id": "item:Coffret_marquete",
+		"type": "item",
+		"nom": "Coffret marqueté",
+		"icon": "🧰",
+		"description": "Un coffret de bois couvert de losanges d'os et de bois sombre, collés un à un. On y range ce qu'on ne montre pas.",
+		"rarete": "peu_commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.8
+	},
+	{
+		"_id": "item:Colle_d_os",
+		"type": "item",
+		"nom": "Colle d'os",
+		"icon": "🍯",
+		"description": "Os concassés bouillis des heures, puis la gelée coulée en plaques. On la refond au bain-marie : luthiers, archers et tabletiers n'assemblent rien sans elle.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.2
+	},
+	{
+		"_id": "item:Collier_de_crocs",
+		"type": "item",
+		"nom": "Collier de crocs",
+		"icon": "🦷",
+		"description": "Des crocs percés, enfilés sur un tendon. On ne les porte pas pour la beauté : chacun est une bête qui n'a pas gagné.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"cou"
+		],
+		"tags": [],
+		"poids": 0.15,
+		"bonus": {
+			"F": 1
+		},
+		"bonus_initiative": 1
+	},
+	{
+		"_id": "item:Couteau_a_echarner",
+		"type": "item",
+		"nom": "Couteau à écharner",
+		"icon": "🔪",
+		"description": "Une longue lame courbe à deux poignées, émoussée exprès : elle racle la chair et la graisse sans jamais trouer la peau.",
+		"rarete": "commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.4
+	},
+	{
+		"_id": "item:Crochets_d_os",
+		"type": "item",
+		"nom": "Crochets d'os",
+		"icon": "🔓",
+		"description": "Deux tiges d'os limées en crochet et en tension. Elles cassent plus vite que le fer, mais ne sonnent pas dans la serrure.",
+		"rarete": "commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.05,
+		"bonus_desamorcage": 5
+	},
+	{
+		"_id": "item:Croupon_epais",
+		"type": "item",
+		"nom": "Croupon épais",
+		"icon": "🟫",
+		"description": "Le dos de la peau, la partie la plus épaisse, tannée lentement au chêne. Le tanneur la garde pour qui veut un cuir qui encaisse.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [
+			"fabrication_armure"
+		],
+		"poids": 1.0,
+		"valeur": [
+			{
+				"cu": 60
+			},
+			{
+				"cu": 110
+			}
+		],
+		"fabrication": {
+			"nom": "de croupon",
+			"modificateurs": {
+				"bonus_pa": 3,
+				"poids": {
+					"facteur": 1.1
+				},
+				"valeur": {
+					"facteur": 1.3
+				},
+				"rarete": "peu_commun"
+			}
+		}
+	},
+	{
+		"_id": "item:Cuir_fume",
+		"type": "item",
+		"nom": "Cuir fumé",
+		"icon": "🟫",
+		"description": "Un cuir pendu dans la fumée jusqu'à prendre la couleur du tabac. L'eau perle dessus, et il garde une souplesse de gant.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [
+			"fabrication_armure"
+		],
+		"poids": 0.5,
+		"valeur": [
+			{
+				"cu": 35
+			},
+			{
+				"cu": 70
+			}
+		],
+		"fabrication": {
+			"nom": "de cuir fumé",
+			"modificateurs": {
+				"effets": {
+					"esquive": 1
+				}
+			}
+		}
+	},
+	{
+		"_id": "item:Cuir_tanne_au_chene",
+		"type": "item",
+		"nom": "Cuir tanné au chêne",
+		"icon": "🟫",
+		"description": "Des mois dans les fosses à tan, couche de peau, couche d'écorce : le cuir en ressort ferme, brun et presque imputrescible.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [
+			"fabrication_armure"
+		],
+		"poids": 0.6,
+		"valeur": [
+			{
+				"cu": 40
+			},
+			{
+				"cu": 80
+			}
+		],
+		"fabrication": {
+			"nom": "en cuir de chêne",
+			"modificateurs": {
+				"bonus_pa": 2,
+				"bonus": {
+					"R": 1
+				},
+				"valeur": {
+					"facteur": 1.3
+				},
+				"rarete": "peu_commun"
+			}
+		}
+	},
+	{
+		"_id": "item:Elixir_de_clairvoyance",
+		"type": "item",
+		"nom": "Élixir de clairvoyance",
+		"icon": "🧪",
+		"description": "Une tisane de concentration où l'on a laissé infuser un œil de bête. Le regard porte plus loin, le goût aussi.",
+		"rarete": "rare",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.1,
+		"effets": {
+			"pm": 10,
+			"buffs": {
+				"Int": 4
+			},
+			"duree": 6
+		}
+	},
+	{
+		"_id": "item:Foie_fume_au_genevrier",
+		"type": "item",
+		"nom": "Foie fumé au genévrier",
+		"icon": "🍖",
+		"description": "Foie fumé sur des rameaux de genévrier, qui lui laissent un goût de résine. Les magiciens de passage en achètent plus que les soldats.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.2,
+		"effets": {
+			"pm": 3,
+			"regen_pm": 1,
+			"duree": 6
+		}
+	},
+	{
+		"_id": "item:Gants_d_echarneur",
+		"type": "item",
+		"nom": "Gants d'écharneur",
+		"icon": "🧤",
+		"description": "Gants épais cousus à l'aiguille d'os, paume doublée de tendon. L'écharneur y tient son couteau des heures sans glisser.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"mains"
+		],
+		"tags": [],
+		"poids": 0.3,
+		"bonus_pa": 1,
+		"bonus": {
+			"Ag": 1
+		}
+	},
+	{
+		"_id": "item:Gants_de_chamois",
+		"type": "item",
+		"nom": "Gants de chamois",
+		"icon": "🧤",
+		"description": "Des gants fins comme une seconde peau. Ils protègent peu, mais la main garde tout son toucher.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"mains"
+		],
+		"tags": [],
+		"poids": 0.1,
+		"bonus": {
+			"Ag": 1,
+			"Cha": 1
+		}
+	},
+	{
+		"_id": "item:Genievre_de_Beauce",
+		"type": "item",
+		"nom": "Genièvre de Beauce",
+		"icon": "🥃",
+		"description": "Eau-de-vie de grain passée sur des baies de genévrier. Elle réchauffe le cœur et embrume les mains.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "boisson",
+		"slots": [],
+		"tags": [],
+		"poids": 0.6,
+		"effets": {
+			"pv": 4,
+			"buffs": {
+				"Vol": 2,
+				"Ag": -1
+			},
+			"duree": 5
+		}
+	},
+	{
+		"_id": "item:Griffe_montee",
+		"type": "item",
+		"nom": "Griffe montée",
+		"icon": "🦅",
+		"description": "Une griffe vidée, durcie au feu et ligaturée sur un talon de tendon, prête à être fixée à une garde ou à un poing.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [
+			"fabrication_arme"
+		],
+		"poids": 0.1,
+		"fabrication": {
+			"nom": "à griffe montée",
+			"modificateurs": {
+				"bonus_degats": 2,
+				"bonus_cc": 1,
+				"valeur": {
+					"facteur": 1.3
+				},
+				"rarete": "peu_commun"
+			}
+		}
+	},
+	{
+		"_id": "item:Guiterne",
+		"type": "item",
+		"nom": "Guiterne",
+		"icon": "🪕",
+		"description": "Petit luth au dos taillé dans la masse, table collée à l'os. Sa voix aigre porte au-dessus d'une salle de taverne.",
+		"rarete": "commun",
+		"categorie": "arme",
+		"sous_categorie": "instrument",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac"
+		],
+		"poids": 1.2,
+		"portee": 1,
+		"deux_mains": true,
+		"bonus_degats_dice": 2,
+		"bonus": {
+			"Cha": 4
+		},
+		"restriction": {
+			"Cha": 25
+		}
+	},
+	{
+		"_id": "item:Hydromel_du_pelerin",
+		"type": "item",
+		"nom": "Hydromel du pèlerin",
+		"icon": "🍯",
+		"description": "Hydromel chauffé aux épices douces, qu'on sert à ceux qui viennent parcourir le labyrinthe de Chartres. On le boit avant d'entrer, pour garder la tête claire.",
+		"rarete": "peu_commun",
+		"categorie": "consommable",
+		"sous_categorie": "boisson",
+		"slots": [],
+		"tags": [],
+		"poids": 1.0,
+		"effets": {
+			"pm": 10,
+			"regen_pm": 1,
+			"buffs": {
+				"Vol": 2
+			},
+			"duree": 6
+		},
+		"valeur": [
+			{
+				"cu": 40
+			},
+			{
+				"cu": 90
+			}
+		]
+	},
+	{
+		"_id": "item:Lard_fume",
+		"type": "item",
+		"nom": "Lard fumé",
+		"icon": "🥓",
+		"description": "Poitrine de lard frottée de sel puis fumée au hêtre. Le gras tient au corps plus qu'aucun pain.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.3,
+		"effets": {
+			"pv": 6,
+			"regen_pv": 1,
+			"duree": 5
+		}
+	},
+	{
+		"_id": "item:Main_de_gloire",
+		"type": "item",
+		"nom": "Main de gloire",
+		"icon": "🖐️",
+		"description": "La main d'un pendu, salée, séchée, les doigts garnis de suif et de mèches. Allumée, disent les vieux récits, elle tient endormis ceux de la maison où l'on entre.",
+		"rarete": "rare",
+		"categorie": "catalyseur",
+		"sous_categorie": "",
+		"slots": [
+			"main_gauche"
+		],
+		"tags": [],
+		"poids": 0.4,
+		"bonus_pm": 3,
+		"effets": {
+			"canalisation": 1
+		},
+		"restriction": {
+			"Vol": 25
+		}
+	},
+	{
+		"_id": "item:Oeil_de_bete_conserve",
+		"type": "item",
+		"nom": "Œil de bête conservé",
+		"icon": "👁️",
+		"description": "Un œil gardé dans le sel jusqu'à durcir comme une perle. Les catalyseurs qui en portent un, dit-on, voient le mana venir.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [
+			"fabrication_catalyseur"
+		],
+		"poids": 0.05,
+		"fabrication": {
+			"nom": "à l'œil de bête",
+			"modificateurs": {
+				"bonus_pm": 2,
+				"effets": {
+					"canalisation": 1
+				}
+			}
+		}
+	},
+	{
+		"_id": "item:Ossuaire_articule",
+		"type": "item",
+		"nom": "Ossuaire articulé",
+		"icon": "💀",
+		"description": "Une main de squelette articulé montée sur un manche, frottée de sel noir. Les thanaturges la tendent vers les morts qu'ils appellent.",
+		"rarete": "rare",
+		"categorie": "catalyseur",
+		"sous_categorie": "",
+		"slots": [
+			"main_gauche"
+		],
+		"tags": [],
+		"poids": 1.5,
+		"bonus_pm": 4,
+		"effets": {
+			"canalisation": 1
+		},
+		"bonus": {
+			"Vol": 1
+		},
+		"restriction": {
+			"Vol": 30
+		}
+	},
+	{
+		"_id": "item:Passe_partout",
+		"type": "item",
+		"nom": "Passe-partout",
+		"icon": "🗝️",
+		"description": "Une clef de fer limée sur un crochet de serrurier : sans dents, elle trouve d'elle-même les gorges d'un mécanisme.",
+		"rarete": "commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.1,
+		"bonus_desamorcage": 10
+	},
+	{
+		"_id": "item:Patte_de_chasseur",
+		"type": "item",
+		"nom": "Patte de chasseur",
+		"icon": "🐾",
+		"description": "Une patte griffue séchée, pendue à la ceinture par une ligature. Les forestiers y voient de la chance ; les taxidermistes, un client.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"ceinture"
+		],
+		"tags": [],
+		"poids": 0.1,
+		"bonus": {
+			"Ag": 1
+		}
+	},
+	{
+		"_id": "item:Peau_chamoisee",
+		"type": "item",
+		"nom": "Peau chamoisée",
+		"icon": "🟨",
+		"description": "Peau foulée à la graisse jusqu'à devenir douce comme une étoffe. Elle se plie, se lave et ne craque jamais.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [
+			"fabrication_armure"
+		],
+		"poids": 0.3,
+		"valeur": [
+			{
+				"cu": 30
+			},
+			{
+				"cu": 60
+			}
+		],
+		"fabrication": {
+			"nom": "doublé de chamois",
+			"modificateurs": {
+				"bonus": {
+					"Ag": 1
+				},
+				"effets": {
+					"esquive": 1
+				},
+				"poids": {
+					"facteur": 0.95
+				}
+			}
+		}
+	},
+	{
+		"_id": "item:Planche_anatomique",
+		"type": "item",
+		"nom": "Planche anatomique",
+		"icon": "📜",
+		"description": "Un parchemin couvert de coupes de bêtes, tracées à l'encre de sang d'après des pièces du cabinet. Les chirurgiens en tapissent leurs murs.",
+		"rarete": "peu_commun",
+		"categorie": "document",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.1,
+		"valeur": [
+			{
+				"cu": 120
+			},
+			{
+				"cu": 240
+			}
+		]
+	},
+	{
+		"_id": "item:Plume_totem",
+		"type": "item",
+		"nom": "Plume-totem",
+		"icon": "🪶",
+		"description": "Trois plumes de rapace liées en éventail. On la serre dans le poing avant de traverser une lande.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"cou"
+		],
+		"tags": [],
+		"poids": 0.05,
+		"bonus": {
+			"Vol": 1
+		}
+	},
+	{
+		"_id": "item:Saucisson_fume",
+		"type": "item",
+		"nom": "Saucisson fumé",
+		"icon": "🌭",
+		"description": "Viande hachée au sel, poussée en boyau et pendue des semaines dans la fumée. On le tranche à la halte, on le finit au rempart suivant.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.25,
+		"effets": {
+			"pv": 10,
+			"regen_pv": 1,
+			"duree": 8
+		}
+	},
+	{
+		"_id": "item:Squelette_articule",
+		"type": "item",
+		"nom": "Squelette articulé",
+		"icon": "🦴",
+		"description": "Une ossature remontée pièce à pièce, chaque jointure tenue par une boucle de fer. Les étudiants du cabinet y apprennent où frapper.",
+		"rarete": "rare",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 4.0
+	},
+	{
+		"_id": "item:Tablier_de_tanneur",
+		"type": "item",
+		"nom": "Tablier de tanneur",
+		"icon": "🦺",
+		"description": "Un tablier de cuir de chêne qui descend aux genoux, bouclé dans le dos. Ce qui coupe et ce qui ronge s'y arrête.",
+		"rarete": "commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"torse"
+		],
+		"tags": [],
+		"poids": 1.2,
+		"bonus_pa": 3,
+		"bonus": {
+			"R": 1
+		}
+	},
+	{
+		"_id": "item:Tourte_au_lard_fume",
+		"type": "item",
+		"nom": "Tourte au lard fumé",
+		"icon": "🥧",
+		"description": "Pâte au beurre, lard fumé en dés, cuite au four du boulanger. Un repas entier qui voyage dans un linge.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "boulangerie",
+		"slots": [],
+		"tags": [],
+		"poids": 0.6,
+		"effets": {
+			"pv": 18,
+			"regen_pv": 2,
+			"duree": 6
+		}
+	},
+	{
+		"_id": "item:Trousse_de_crochetage_fine",
+		"type": "item",
+		"nom": "Trousse de crochetage fine",
+		"icon": "🧰",
+		"description": "Un rouleau de cuir où dorment crochets, tensions et aiguilles, chacun dans sa couture. L'outil des mains qui savent déjà.",
+		"rarete": "peu_commun",
+		"categorie": "outil",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.2,
+		"bonus_desamorcage": 15
+	},
+	{
+		"_id": "item:Viande_sechee_de_route",
+		"type": "item",
+		"nom": "Viande séchée de route",
+		"icon": "🥩",
+		"description": "Lanières de viande salées puis séchées à la fumée jusqu'à durcir comme du cuir. Ça ne pèse rien, ça ne pourrit pas, et ça se mâche longtemps.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.1,
+		"effets": {
+			"pv": 6
+		}
+	},
+	{
+		"_id": "item:Vinaigre_de_miel",
+		"type": "item",
+		"nom": "Vinaigre de miel",
+		"icon": "🫙",
+		"description": "Un hydromel oublié en fût jusqu'à tourner : doux d'abord, aigre ensuite. Les cuisiniers de Chartres en déglacent leurs volailles.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "condiment",
+		"slots": [],
+		"tags": [],
+		"poids": 0.8
+	},
+	{
+		"_id": "item:Volaille_au_vinaigre_de_miel",
+		"type": "item",
+		"nom": "Volaille au vinaigre de miel",
+		"icon": "🍗",
+		"description": "Volaille rôtie, déglacée au vinaigre de miel et aux herbes du fournil. Le plat des jours de marché à Chartres.",
+		"rarete": "peu_commun",
+		"categorie": "consommable",
+		"sous_categorie": "cuisine",
+		"slots": [],
+		"tags": [],
+		"poids": 0.8,
+		"effets": {
+			"pv": 22,
+			"regen_pv": 2,
+			"duree": 6
+		}
+	},
+	{
+		"_id": "item:alun",
+		"type": "item",
+		"nom": "Alun",
+		"icon": "🧂",
+		"description": "Pierre blanche qu'on dissout dans l'eau chaude pour passer les peaux en blanc : un cuir souple et pâle, qui prend l'encre.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "alun",
+		"slots": [],
+		"tags": [],
+		"poids": 0.2,
+		"valeur": [
+			{
+				"cu": 10
+			}
+		]
+	},
+	{
+		"_id": "item:copeaux_de_hetre",
+		"type": "item",
+		"nom": "Copeaux de hêtre",
+		"icon": "🪵",
+		"description": "Copeaux et sciure de hêtre sec, que le fumeur jette sur la braise : la fumée doit rester froide et blanche, jamais la flamme.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "copeaux_de_hetre",
+		"slots": [],
+		"tags": [],
+		"poids": 0.3,
+		"valeur": [
+			{
+				"cu": 3
+			}
+		]
+	},
+	{
+		"_id": "item:ecorce_de_chene",
+		"type": "item",
+		"nom": "Écorce de chêne",
+		"icon": "🌳",
+		"description": "Écorce pilée de jeunes chênes, levée au printemps. Moulue et mise à tremper, elle donne le tan, qui fait d'une peau un cuir.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "ecorce_de_chene",
+		"slots": [],
+		"tags": [],
+		"poids": 0.5,
+		"valeur": [
+			{
+				"cu": 4
+			}
+		]
+	},
+	{
+		"_id": "recette:atelier_d_artisan_aiguille_d_os",
+		"type": "recette",
+		"lieu_categorie": "atelier_d_artisan",
+		"objet_final": "Aiguille_d_os",
+		"quantite_produite": 4,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "os",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:taxidermie_appeau_de_chasse",
+		"type": "recette",
+		"lieu_categorie": "taxidermie",
+		"objet_final": "Appeau_de_chasse",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "os",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "plumes",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:atelier_de_l_empenneur_arc_recurve_de_corne",
+		"type": "recette",
+		"lieu_categorie": "atelier_de_l_empenneur",
+		"objet_final": "Arc_recurve_de_corne",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "manche",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "cordes_d_arc",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 1
+			},
+			{
+				"item": "item:Colle_d_os",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:maroquinerie_besace_de_cuir_fume",
+		"type": "recette",
+		"lieu_categorie": "maroquinerie",
+		"objet_final": "Besace_de_cuir_fume",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Cuir_fume",
+				"quantite": 2
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:cave_biere_de_beauce",
+		"type": "recette",
+		"lieu_categorie": "cave",
+		"lieu_portee": "lieu:chartres",
+		"objet_final": "Biere_de_Beauce",
+		"quantite_produite": 3,
+		"matieres_premieres": [
+			{
+				"item": "item:grain_d_orge",
+				"quantite": 3
+			},
+			{
+				"item": "item:Eau_de_source",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:cabinet_des_specimens_bocal_d_yeux_en_saumure",
+		"type": "recette",
+		"lieu_categorie": "cabinet_des_specimens",
+		"objet_final": "Bocal_d_yeux_en_saumure",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "yeux",
+				"quantite": 3
+			},
+			{
+				"item": "item:Sel",
+				"quantite": 2
+			},
+			{
+				"item": "item:Cire_d_abeille",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:cordonnerie_bottes_de_cuir_fume",
+		"type": "recette",
+		"lieu_categorie": "cordonnerie",
+		"objet_final": "Bottes_de_cuir_fume",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Cuir_fume",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:armurerie_bouclier_de_croupon",
+		"type": "recette",
+		"lieu_categorie": "armurerie",
+		"objet_final": "Bouclier_de_croupon",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Croupon_epais",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:taxidermie_cape_de_fourrure",
+		"type": "recette",
+		"lieu_categorie": "taxidermie",
+		"objet_final": "Cape_de_fourrure",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "peaux",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "poils",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "graisse",
+				"quantite": 1
+			},
+			{
+				"item": "item:Aiguille_d_os",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:maroquinerie_ceinturon_tanne_au_chene",
+		"type": "recette",
+		"lieu_categorie": "maroquinerie",
+		"objet_final": "Ceinturon_tanne_au_chene",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Cuir_tanne_au_chene",
+				"quantite": 1
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:fumoir_coeur_fume_du_chasseur",
+		"type": "recette",
+		"lieu_categorie": "fumoir",
+		"objet_final": "Coeur_fume_du_chasseur",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "coeur",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "copeaux_de_hetre",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:cabinet_des_specimens_coeur_reliquaire",
+		"type": "recette",
+		"lieu_categorie": "cabinet_des_specimens",
+		"objet_final": "Coeur_reliquaire",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "coeur",
+				"quantite": 1
+			},
+			{
+				"item": "item:Sel",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "ossements",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:tabletterie_coffret_marquete",
+		"type": "recette",
+		"lieu_categorie": "tabletterie",
+		"objet_final": "Coffret_marquete",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "branche",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "os",
+				"quantite": 2
+			},
+			{
+				"item": "item:Colle_d_os",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:atelier_d_artisan_colle_d_os",
+		"type": "recette",
+		"lieu_categorie": "atelier_d_artisan",
+		"objet_final": "Colle_d_os",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "os",
+				"quantite": 2
+			},
+			{
+				"item": "item:Eau_de_source",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:taxidermie_collier_de_crocs",
+		"type": "recette",
+		"lieu_categorie": "taxidermie",
+		"objet_final": "Collier_de_crocs",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "crocs",
+				"quantite": 3
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:tannerie_couteau_a_echarner",
+		"type": "recette",
+		"lieu_categorie": "tannerie",
+		"objet_final": "Couteau_a_echarner",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "fer",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "manche",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:atelier_d_artisan_crochets_d_os",
+		"type": "recette",
+		"lieu_categorie": "atelier_d_artisan",
+		"objet_final": "Crochets_d_os",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "os",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:tannerie_croupon_epais",
+		"type": "recette",
+		"lieu_categorie": "tannerie",
+		"objet_final": "Croupon_epais",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "cuir_brut",
+				"quantite": 3
+			},
+			{
+				"sous_categorie": "ecorce_de_chene",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:fumoir_cuir_fume",
+		"type": "recette",
+		"lieu_categorie": "fumoir",
+		"objet_final": "Cuir_fume",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "cuir",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "copeaux_de_hetre",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:tannerie_cuir_tanne_au_chene",
+		"type": "recette",
+		"lieu_categorie": "tannerie",
+		"objet_final": "Cuir_tanne_au_chene",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "cuir_brut",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "ecorce_de_chene",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:grand_laboratoire_alchimique_elixir_de_clairvoyance",
+		"type": "recette",
+		"lieu_categorie": "grand_laboratoire_alchimique",
+		"objet_final": "Elixir_de_clairvoyance",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Bocal_d_yeux_en_saumure",
+				"quantite": 1
+			},
+			{
+				"item": "item:Tisane_concentration",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:fumoir_foie_fume_au_genevrier",
+		"type": "recette",
+		"lieu_categorie": "fumoir",
+		"objet_final": "Foie_fume_au_genevrier",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "foie",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "copeaux_de_hetre",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:tannerie_gants_d_echarneur",
+		"type": "recette",
+		"lieu_categorie": "tannerie",
+		"objet_final": "Gants_d_echarneur",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "cuir",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 1
+			},
+			{
+				"item": "item:Aiguille_d_os",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:maroquinerie_gants_de_chamois",
+		"type": "recette",
+		"lieu_categorie": "maroquinerie",
+		"objet_final": "Gants_de_chamois",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Peau_chamoisee",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:cave_genievre_de_beauce",
+		"type": "recette",
+		"lieu_categorie": "cave",
+		"lieu_portee": "lieu:chartres",
+		"objet_final": "Genievre_de_Beauce",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"item": "item:grain_d_orge",
+				"quantite": 2
+			},
+			{
+				"item": "item:Eau_de_vie",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:taxidermie_griffe_montee",
+		"type": "recette",
+		"lieu_categorie": "taxidermie",
+		"objet_final": "Griffe_montee",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "griffes",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:lutherie_guiterne",
+		"type": "recette",
+		"lieu_categorie": "lutherie",
+		"objet_final": "Guiterne",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Table_d_harmonie",
+				"quantite": 1
+			},
+			{
+				"item": "item:cordes_d_instrument",
+				"quantite": 4
+			},
+			{
+				"item": "item:Colle_d_os",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:cave_hydromel_du_pelerin",
+		"type": "recette",
+		"lieu_categorie": "cave",
+		"lieu_portee": "lieu:chartres",
+		"objet_final": "Hydromel_du_pelerin",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Hydromel_de_Beauce",
+				"quantite": 1
+			},
+			{
+				"item": "item:epices_douces",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:fumoir_lard_fume",
+		"type": "recette",
+		"lieu_categorie": "fumoir",
+		"objet_final": "Lard_fume",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graisse",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "viande",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "copeaux_de_hetre",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:cabinet_des_specimens_main_de_gloire",
+		"type": "recette",
+		"lieu_categorie": "cabinet_des_specimens",
+		"objet_final": "Main_de_gloire",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "ossements",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "graisse",
+				"quantite": 1
+			},
+			{
+				"item": "item:Sel",
+				"quantite": 1
+			},
+			{
+				"item": "item:Meche",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:taxidermie_oeil_de_bete_conserve",
+		"type": "recette",
+		"lieu_categorie": "taxidermie",
+		"objet_final": "Oeil_de_bete_conserve",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "yeux",
+				"quantite": 2
+			},
+			{
+				"item": "item:Sel",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:institut_de_thanaturgie_ossuaire_articule",
+		"type": "recette",
+		"lieu_categorie": "institut_de_thanaturgie",
+		"objet_final": "Ossuaire_articule",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Squelette_articule",
+				"quantite": 1
+			},
+			{
+				"item": "item:Sel_noir",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:tannerie_parchemin_vierge",
+		"type": "recette",
+		"lieu_categorie": "tannerie",
+		"objet_final": "Parchemin_vierge",
+		"quantite_produite": 3,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "peaux",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "alun",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:atelier_d_artisan_passe_partout",
+		"type": "recette",
+		"lieu_categorie": "atelier_d_artisan",
+		"objet_final": "Passe_partout",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "fer",
+				"quantite": 1
+			},
+			{
+				"item": "item:Crochet_serrurier",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:taxidermie_patte_de_chasseur",
+		"type": "recette",
+		"lieu_categorie": "taxidermie",
+		"objet_final": "Patte_de_chasseur",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "griffes",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:tannerie_peau_chamoisee",
+		"type": "recette",
+		"lieu_categorie": "tannerie",
+		"objet_final": "Peau_chamoisee",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "peaux",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "graisse",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:atelier_d_artisan_pierre_a_aiguiser",
+		"type": "recette",
+		"lieu_categorie": "atelier_d_artisan",
+		"objet_final": "Pierre_a_aiguiser",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "pierre",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:cabinet_des_specimens_planche_anatomique",
+		"type": "recette",
+		"lieu_categorie": "cabinet_des_specimens",
+		"objet_final": "Planche_anatomique",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Parchemin_vierge",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "sang",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "yeux",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:taxidermie_plume_totem",
+		"type": "recette",
+		"lieu_categorie": "taxidermie",
+		"objet_final": "Plume_totem",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "plumes",
+				"quantite": 3
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:fumoir_saucisson_fume",
+		"type": "recette",
+		"lieu_categorie": "fumoir",
+		"objet_final": "Saucisson_fume",
+		"quantite_produite": 3,
+		"matieres_premieres": [
+			{
+				"item": "item:boyaux_pour_saucisses",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "viande",
+				"quantite": 2
+			},
+			{
+				"item": "item:Sel",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "copeaux_de_hetre",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:cabinet_des_specimens_squelette_articule",
+		"type": "recette",
+		"lieu_categorie": "cabinet_des_specimens",
+		"objet_final": "Squelette_articule",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "ossements",
+				"quantite": 4
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:tannerie_tablier_de_tanneur",
+		"type": "recette",
+		"lieu_categorie": "tannerie",
+		"objet_final": "Tablier_de_tanneur",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Cuir_tanne_au_chene",
+				"quantite": 2
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:boulangerie_tourte_au_lard_fume",
+		"type": "recette",
+		"lieu_categorie": "boulangerie",
+		"objet_final": "Tourte_au_lard_fume",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:farine_de_froment",
+				"quantite": 2
+			},
+			{
+				"item": "item:Lard_fume",
+				"quantite": 2
+			},
+			{
+				"item": "item:motte_de_beurre",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:atelier_d_artisan_trousse_de_crochetage_fine",
+		"type": "recette",
+		"lieu_categorie": "atelier_d_artisan",
+		"objet_final": "Trousse_de_crochetage_fine",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Crochets",
+				"quantite": 1
+			},
+			{
+				"item": "item:aiguille",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "cuir",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:fumoir_viande_sechee_de_route",
+		"type": "recette",
+		"lieu_categorie": "fumoir",
+		"objet_final": "Viande_sechee_de_route",
+		"quantite_produite": 3,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "viande",
+				"quantite": 1
+			},
+			{
+				"item": "item:Sel",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:cave_vinaigre_de_miel",
+		"type": "recette",
+		"lieu_categorie": "cave",
+		"lieu_portee": "lieu:chartres",
+		"objet_final": "Vinaigre_de_miel",
+		"quantite_produite": 3,
+		"matieres_premieres": [
+			{
+				"item": "item:Hydromel_de_Beauce",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:cuisine_volaille_au_vinaigre_de_miel",
+		"type": "recette",
+		"lieu_categorie": "cuisine",
+		"lieu_portee": "lieu:chartres",
+		"objet_final": "Volaille_au_vinaigre_de_miel",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Volaille",
+				"quantite": 1
+			},
+			{
+				"item": "item:Vinaigre_de_miel",
+				"quantite": 1
+			},
+			{
+				"item": "item:herbes_de_fournil",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Crochet_serrurier",
+		"type": "item",
+		"nom": "Crochet de serrurier",
+		"sous_categorie": "",
+		"icon": "🔓",
+		"description": "Crochet de serrurier, pour les serrures dont on n'a pas la clé.",
+		"rarete": "commun",
+		"categorie": "outil",
+		"slots": [],
+		"poids": 0.05,
+		"bonus_desamorcage": 5
+	},
+	{
+		"_id": "item:Crochets",
+		"type": "item",
+		"nom": "Crochets",
+		"sous_categorie": "",
+		"icon": "🔓",
+		"description": "Trousse de crochets fins, pour forcer les serrures.",
+		"rarete": "commun",
+		"categorie": "outil",
+		"slots": [],
+		"poids": 0.1,
+		"bonus_desamorcage": 10
+	},
+	{
+		"_id": "item:Pierre_a_aiguiser",
+		"type": "item",
+		"nom": "Pierre à aiguiser",
+		"sous_categorie": "",
+		"icon": "🪨",
+		"description": "Pierre à grain fin, pour redonner le fil à une lame émoussée.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"slots": [],
+		"poids": 0.2,
+		"effets": {
+			"buffs": {
+				"F": 2
+			},
+			"duree": 3
+		}
+	}
+]
