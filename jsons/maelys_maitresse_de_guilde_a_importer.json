@@ -599,7 +599,7 @@
           ]
         },
         "rang_sommet": {
-          "texte": "« Une épreuve à votre mesure ? » Éléonore referme le registre. « Rang {rang}. Ce que le Grand Relais pouvait vous demander, vous l'avez fait. Au-delà, il vous faudra la guilde d'une autre cité — et je leur écrirai que vous êtes quelqu'un de fiable. » Un léger sourire. « Je l'écris rarement. »",
+          "texte": "« Une épreuve à votre mesure ? » Éléonore referme le registre, lentement, et pose la main à plat sur la couverture. « Rang {rang}. Adamantite. Il n'y a pas de page après celle-ci, {prenom} : la Guilde n'a plus rien à vous demander, ici ni ailleurs. » Elle vous regarde longtemps, comme le jour où vous avez posé la main sur ce comptoir pour la première fois. « Ce qui viendra maintenant, personne ne vous le confiera. Il faudra aller le chercher vous-même — et revenir me le raconter. Je l'écrirai. » Un léger sourire. « Ce sera la première fois. »",
           "choix": [
             {
               "id": "ok",
