@@ -22,7 +22,7 @@ images déposées et tout ce qui les rend jouables :
     l'eau de la Manche, danger gradué par segment (côtier au départ et à l'arrivée, haute mer
     au milieu), rencontres marines ;
   · les ponts de navire `lieu:pont_de_navire0001`…`0004` (catégorie `battle_map`, tags
-    `mer`/`eau`/`navire`/`pont`) : `select_battle_map` les tire pour un combat en mer (les zones
+    `mer`/`eau`/`navire`/`pont`/`en_mer`) : `select_battle_map` les tire pour un combat en mer (les zones
     marines portent `mer`/`eau`). Grille de première passe : le bois du pont est praticable,
     l'eau et les monstres non — à retoucher dans l'éditeur.
 
@@ -147,7 +147,7 @@ PONTS = {
 	"pont_de_navire0003.jpg": "Sur le pont d'un drakkar battu par l'orage",
 	"pont_de_navire0004.jpg": "Sur le pont d'un galion pris dans les bras d'un kraken",
 }
-TAGS_PONT = ["mer", "eau", "navire", "pont"]
+TAGS_PONT = ["mer", "eau", "navire", "pont", "en_mer"]  # en_mer : hors traversée, jamais tirée (combat.TAG_BATTLE_MAP_EN_MER)
 DIMS_PONT = {"x": 32, "y": 18}
 
 

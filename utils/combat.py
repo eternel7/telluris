@@ -55,6 +55,11 @@ BATTLE_MAPS = [
 # `donjon.donjon_de_lieu`, qui coûterait un find_docs à chaque entrée en combat.
 TAG_BATTLE_MAP_EXCLU = "donjon"
 
+# Tag d'une battle map réservée aux combats EN MER (pont de navire) : hors traversée
+# (`traversee.en_mer`), elle quitte le pool — sans lui, le repli uniforme et le tag `eau`
+# des lacs, marais et rivières la sortaient en pleine terre.
+TAG_BATTLE_MAP_EN_MER = "en_mer"
+
 # Donjon à étages : distance de Chebyshev minimale entre le point d'apparition FIXE du groupe
 # et les monstres tirés sur l'étage. Sans elle, un monstre pourrait naître au contact du
 # groupe et l'entrée furtive ne vaudrait rien. Repli sans contrainte sur un étage trop petit.
@@ -2968,7 +2973,8 @@ def _poser_emprise(acteur: dict, ancres, region: set, occupied: set, repere: dic
 	return False
 
 
-def select_battle_map(terrain_tags: list, depart_lieu: dict | None) -> dict | None:
+def select_battle_map(terrain_tags: list, depart_lieu: dict | None,
+					  en_mer: bool = False) -> dict | None:
 	"""Sélection pondérée d'un lieu battle map selon le recoupement de tags de TERRAIN.
 
 	`terrain_tags` = décor des zones actives (`zones.terrain_tags_actifs`), PAS les
@@ -2979,6 +2985,7 @@ def select_battle_map(terrain_tags: list, depart_lieu: dict | None) -> dict | No
 	Trois règles :
 	  1. une salle de donjon (tag `donjon`) n'est JAMAIS tirée comme décor ordinaire —
 	     on n'y descend que par son gardien (cf. § Donjons) ;
+	     une carte taguée `en_mer` (pont de navire) ne l'est qu'en traversée (`en_mer`) ;
 	  2. au moins UN tag commun est exigé, et le poids est le nombre de tags communs ;
 	  3. repli si rien ne matche : tirage uniforme sur tout le pool hors donjon. Une
 	     zone dont le terrain n'a pas encore de carte (urbaine, marais…) garde ainsi le
@@ -2991,6 +2998,7 @@ def select_battle_map(terrain_tags: list, depart_lieu: dict | None) -> dict | No
 	candidates = [
 		b for b in (find_docs({"type": "lieu", "categorie": "battle_map"}) or [])
 		if b.get("cells") and TAG_BATTLE_MAP_EXCLU not in (b.get("tags") or [])
+		and (en_mer or TAG_BATTLE_MAP_EN_MER not in (b.get("tags") or []))
 	]
 	if not candidates:
 		return None

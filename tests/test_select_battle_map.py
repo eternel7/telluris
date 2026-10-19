@@ -145,6 +145,30 @@ def test_aucune_carte_renvoie_none(base):
 	assert select_battle_map(["foret"], None) is None
 
 
+# ── 4 bis. Ponts de navire : réservés aux traversées ───────────────────────────
+
+PONT = _map("lieu:pont_de_navire0001", ["mer", "eau", "navire", "pont", combat_util.TAG_BATTLE_MAP_EN_MER])
+
+
+def test_un_pont_de_navire_n_est_jamais_tire_a_terre(base):
+	# Le bug : à terre, le repli uniforme (ville) et le tag `eau` (lac, rivière) le sortaient.
+	base(FORET, PONT)
+	for terrain in (["ville", "urbain"], ["lac", "eau", "berge"], ["riviere", "eau", "bois"]):
+		assert set(_tirages(100, terrain, None)) == {"lieu:chemin1"}
+
+
+def test_pont_seule_carte_a_terre_renvoie_none(base):
+	base(PONT)
+	assert select_battle_map(["eau"], None) is None
+
+
+def test_un_pont_de_navire_est_tire_en_mer(base):
+	# zone:haute_mer → mer, eau, large, oceanique : seul le pont recoupe.
+	base(FORET, PONT)
+	compte = _tirages(100, ["mer", "eau", "large", "oceanique"], None, en_mer=True)
+	assert set(compte) == {"lieu:pont_de_navire0001"}
+
+
 # ── 5. terrain_tags_actifs (pur) ───────────────────────────────────────────────
 
 DEFS = {
