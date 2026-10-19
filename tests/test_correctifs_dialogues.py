@@ -28,7 +28,9 @@ def _gen():
 
 GEN = _gen()
 BASE, _NOM = GEN.dernier_dump()
-DOCS = {d["_id"]: d for d in GEN.corriger(BASE)}
+# `corriges`, pas `corriger` : une fois le correctif importé, le dump n'a plus rien à corriger
+# et `corriger` rend [] — c'est l'ÉTAT CORRIGÉ qu'on vérifie, pas le delta d'import.
+DOCS = {d["_id"]: d for d in GEN.corriges(BASE)}
 
 
 def _visibles(pnj_id, noeud="accueil", actives=(), reussies=(), flags=None):

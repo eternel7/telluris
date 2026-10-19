@@ -486,8 +486,9 @@ CORRECTIFS = {
 }
 
 
-def corriger(base: dict) -> list:
-	"""Docs corrigés qui DIFFÈRENT de `base` (ids du dump), dans un ordre stable."""
+def corriges(base: dict) -> list:
+	"""TOUS les docs ciblés, corrigés, dans un ordre stable — qu'ils diffèrent du dump ou non.
+	C'est l'état visé après import : les tests le vérifient même une fois le correctif en base."""
 	sortie = []
 	cibles = dict(CORRECTIFS)
 	for did in sorted(base):
@@ -499,10 +500,14 @@ def corriger(base: dict) -> list:
 		doc = copy.deepcopy(base[did])
 		doc.pop("_rev", None)
 		fn(doc)
-		avant = {k: v for k, v in base[did].items() if k != "_rev"}
-		if doc != avant:
-			sortie.append(doc)
+		sortie.append(doc)
 	return sortie
+
+
+def corriger(base: dict) -> list:
+	"""Docs corrigés qui DIFFÈRENT de `base` (ids du dump), dans un ordre stable."""
+	return [doc for doc in corriges(base)
+			if doc != {k: v for k, v in base[doc["_id"]].items() if k != "_rev"}]
 
 
 def main():

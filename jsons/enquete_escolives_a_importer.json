@@ -1,214 +1,5 @@
 [
   {
-    "_id": "espece:abhartach",
-    "type": "espece",
-    "nom": "Abhartach",
-    "genre": "m",
-    "nom_propre": true,
-    "image": "abhartach_transparent.png",
-    "description": "Roi-nain tyran revenu de sa tombe, qui exigeait de ses sujets un bol de sang tiré de leurs veines. Cathán l'abattit d'une épée en if et l'ensevelit tête en bas sous une pierre ; le jour l'enchaîne encore à sa tombe, et l'if le blesse comme aucun acier.",
-    "base_attributes": {
-      "V": {
-        "min": 5,
-        "max": 7
-      },
-      "F": {
-        "min": 55,
-        "max": 85
-      },
-      "R": {
-        "min": 65,
-        "max": 95
-      },
-      "Ag": {
-        "min": 25,
-        "max": 40
-      },
-      "Vol": {
-        "min": 65,
-        "max": 95
-      },
-      "Int": {
-        "min": 35,
-        "max": 55
-      },
-      "Cha": {
-        "min": 0,
-        "max": 0
-      },
-      "Ch": {
-        "min": 40,
-        "max": 65
-      }
-    },
-    "tags": [
-      "undead",
-      "non_mort",
-      "guerrier",
-      "boss",
-      "humanoide"
-    ],
-    "items": [
-      "item:Morgenstern",
-      "item:Hache_de_guerre",
-      "item:Ecu",
-      "item:Cotte_de_mailles",
-      "item:Heaume_de_plates",
-      "item:Gantelets_de_plates",
-      "item:Jambières_de_plates"
-    ],
-    "proprietes": {}
-  },
-  {
-    "_id": "item:abhartach",
-    "type": "item",
-    "nom": "Ossements d'Abhartach",
-    "sous_categorie": "ossements",
-    "icon": "🦴",
-    "rarete": "peu_commun",
-    "categorie": "composant",
-    "slots": [],
-    "poids": 14.0,
-    "description": "Ossements et reliquats récupérés sur Abhartach après sa destruction.",
-    "source_espece": "espece:abhartach",
-    "loot_defaut": true
-  },
-  {
-    "_id": "espece:penanggalan",
-    "type": "espece",
-    "nom": "Penanggalan",
-    "genre": "f",
-    "image": "penanggalan_transparent.png",
-    "description": "Tête de femme qui vole la nuit en traînant ses viscères : une morte de Mu rendue à la mer, qui n'a pas trouvé le chemin du royaume de Tangaroa et que les poissons ont dévorée. Le jour, elle passe pour une femme ordinaire ; l'aube qui la surprend loin de son corps la tue. Les épines l'accrochent, le vinaigre la brûle.",
-    "base_attributes": {
-      "V": {
-        "min": 10,
-        "max": 12
-      },
-      "F": {
-        "min": 15,
-        "max": 25
-      },
-      "R": {
-        "min": 15,
-        "max": 25
-      },
-      "Ag": {
-        "min": 45,
-        "max": 70
-      },
-      "Vol": {
-        "min": 40,
-        "max": 60
-      },
-      "Int": {
-        "min": 30,
-        "max": 45
-      },
-      "Cha": {
-        "min": 0,
-        "max": 0
-      },
-      "Ch": {
-        "min": 30,
-        "max": 50
-      }
-    },
-    "tags": [
-      "undead",
-      "non_mort",
-      "vol",
-      "nocturne"
-    ],
-    "proprietes": {}
-  },
-  {
-    "_id": "item:penanggalan",
-    "type": "item",
-    "nom": "Ossements de Penanggalan",
-    "sous_categorie": "ossements",
-    "icon": "🦴",
-    "rarete": "peu_commun",
-    "categorie": "composant",
-    "slots": [],
-    "poids": 4.0,
-    "description": "Ossements et reliquats récupérés sur Penanggalan après sa destruction.",
-    "source_espece": "espece:penanggalan",
-    "loot_defaut": true
-  },
-  {
-    "_id": "espece:draugr",
-    "type": "espece",
-    "nom": "Draugr",
-    "genre": "m",
-    "image": "draugr_transparent.png",
-    "description": "Mort-vivant des terres du Nord, revenu hanter sa ferme ou son tertre : il ne boit pas le sang mais la force des vivants, et laisse à qui le terrasse la peur du noir pour le restant de ses jours.",
-    "base_attributes": {
-      "V": {
-        "min": 4,
-        "max": 6
-      },
-      "F": {
-        "min": 45,
-        "max": 70
-      },
-      "R": {
-        "min": 50,
-        "max": 80
-      },
-      "Ag": {
-        "min": 20,
-        "max": 35
-      },
-      "Vol": {
-        "min": 45,
-        "max": 70
-      },
-      "Int": {
-        "min": 15,
-        "max": 30
-      },
-      "Cha": {
-        "min": 0,
-        "max": 0
-      },
-      "Ch": {
-        "min": 30,
-        "max": 50
-      }
-    },
-    "tags": [
-      "undead",
-      "non_mort",
-      "guerrier",
-      "nocturne",
-      "humanoide"
-    ],
-    "items": [
-      "item:Hache_de_guerre",
-      "item:Hache_a_deux_mains",
-      "item:Ecu",
-      "item:Cotte_de_mailles",
-      "item:Casque_de_cuir_bouilli",
-      "item:Braies_fourrure"
-    ],
-    "proprietes": {}
-  },
-  {
-    "_id": "item:draugr",
-    "type": "item",
-    "nom": "Ossements de Draugr",
-    "sous_categorie": "ossements",
-    "icon": "🦴",
-    "rarete": "peu_commun",
-    "categorie": "composant",
-    "slots": [],
-    "poids": 11.5,
-    "description": "Ossements et reliquats récupérés sur Draugr après sa destruction.",
-    "source_espece": "espece:draugr",
-    "loot_defaut": true
-  },
-  {
     "_id": "pnj:gautier_de_valcroix",
     "type": "pnj",
     "nom": "Gautier de Valcroix",
@@ -381,9 +172,37 @@
               "id": "bucherons_rapport",
               "label": "« Vous avez vu qui je vous ramène. »",
               "condition": {
-                "escorte_accomplie": true
+                "escorte_accomplie": true,
+                "quete_active": {
+                  "id": "quete:escorte_convoi_de_lutecia",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:escorte_convoi_de_lutecia",
+                  "attendu": false
+                }
               },
               "next": "bucherons_rapport"
+            },
+            {
+              "id": "bucherons_souvenir",
+              "label": "« Des nouvelles des bûcherons ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:escorte_convoi_de_lutecia"
+                }
+              },
+              "next": "bucherons_souvenir"
+            },
+            {
+              "id": "bucherons_souvenir_apres",
+              "label": "« Des nouvelles des bûcherons ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_convoi_de_lutecia"
+                }
+              },
+              "next": "bucherons_souvenir"
             },
             {
               "id": "escolives_offre",
@@ -471,9 +290,37 @@
               "id": "bucherons_rapport",
               "label": "« Vous avez vu qui je vous ramène. »",
               "condition": {
-                "escorte_accomplie": true
+                "escorte_accomplie": true,
+                "quete_active": {
+                  "id": "quete:escorte_convoi_de_lutecia",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:escorte_convoi_de_lutecia",
+                  "attendu": false
+                }
               },
               "next": "bucherons_rapport"
+            },
+            {
+              "id": "bucherons_souvenir",
+              "label": "« Des nouvelles des bûcherons ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:escorte_convoi_de_lutecia"
+                }
+              },
+              "next": "bucherons_souvenir"
+            },
+            {
+              "id": "bucherons_souvenir_apres",
+              "label": "« Des nouvelles des bûcherons ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_convoi_de_lutecia"
+                }
+              },
+              "next": "bucherons_souvenir"
             },
             {
               "id": "escolives_offre",
@@ -544,7 +391,7 @@
           ]
         },
         "commission_details": {
-          "texte": "« Les templiers de Saint-Austrelin. » Il hausse un sourcil, amusé. « Deux barrages : l'un au sommet des marches, qui vérifie que la Guilde répond de vous ; l'autre devant l'arche, qui vérifie que c'est bien de CE chantier qu'on vous a chargé. Ils sont tatillons, et ils ont raison de l'être : le sceau que je vous donne est la seule chose qui ouvre les deux. »",
+          "texte": "« Les templiers de Saint-Austrelin. » Il hausse un sourcil, amusé. « Deux barrages : l'un au sommet des marches, qui vérifie que la Guilde répond de vous ; l'autre devant l'arche, qui vérifie que c'est bien CE chantier qu'on vous a confié. Ils sont tatillons, et ils ont raison de l'être : le sceau que je vous donne est la seule chose qui ouvre les deux. »",
           "choix": [
             {
               "id": "commission_accepter",
@@ -751,7 +598,7 @@
           ]
         },
         "bucherons_proposition": {
-          "texte": "« Je pense à vous, oui. » Il s'appuie des deux mains sur le bureau. « Nous avons une livraison à conduire et, depuis ce matin, une personne de plus qui doit se rendre dans la même cité. » — « Je souhaite en effet poursuivre mon voyage », dit-elle, très posément. « Alors nous ferons d'une pierre deux coups. Vous accompagnerez la livraison jusqu'à Lutecia. » Vous demandez si ce sera seul. Gautier secoue la tête. « Non. Cette fois, la Guilde ne prendra aucun risque. »",
+          "texte": "« Je pense à vous, oui. » Il s'appuie des deux mains sur le bureau. « Nous avons une livraison à conduire et, depuis ce matin, une personne de plus qui doit se rendre dans la même cité. » — « Je souhaite en effet poursuivre mon voyage », dit-elle, très posément. « Alors nous ferons d'une pierre deux coups. Vous accompagnerez la livraison jusqu'à Lutecia. » Vous demandez si vous partirez sans renfort. Gautier secoue la tête. « Non. Cette fois, la Guilde ne prendra aucun risque. »",
           "choix": [
             {
               "id": "paladins",
@@ -866,6 +713,16 @@
           "choix": [
             {
               "id": "ok",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_souvenir": {
+          "texte": "Gautier lève les yeux de sa carte. « Étienne remarche — mal, mais il marche. Armand est retourné couper au nord, et il n'y va plus jamais à moins de quatre. » Il effleure l'épingle blanche plantée sur la forêt. « Matthieu, lui, n'a plus remis les pieds dans une grotte. Il dit que c'est le froid. Je ne lui ai pas demandé lequel. »",
+          "choix": [
+            {
+              "id": "retour",
               "label": "Revenir.",
               "next": "accueil"
             }
