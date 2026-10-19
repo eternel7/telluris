@@ -235,7 +235,7 @@ async def start_combat(
     # devenait uniforme et la mine sortait en pleine forêt. Le terrain est dérivé ICI,
     # côté serveur, plutôt que renvoyé par le client : même information, sans confiance.
     terrain = terrain_tags_actifs(active_placements, zone_defs)
-    battle_map = select_battle_map(terrain, depart_lieu)
+    battle_map = select_battle_map(terrain, depart_lieu, en_mer=traversee.en_mer(character))
     map_image = battle_map.get("image") if battle_map else random.choice(BATTLE_MAPS)
     # Furtivité passive à l'entrée en combat : conditions de terrain évaluées contre les
     # tags de la battle map ∪ tags de zone (ex. Furtivité sylvestre du forestier en forêt).
