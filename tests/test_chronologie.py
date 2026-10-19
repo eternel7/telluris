@@ -165,7 +165,109 @@ def test_payload_garde_les_erreurs_par_element():
 	assert any("mars" in m for m in e["erreurs"])
 
 
+# ── Fleuves, bandeaux, images ─────────────────────────────────────────────────
+
+def _ent(eid="rome", **extra):
+	ent = {"id": eid, "libelle": eid.title(), "famille": "cite", "couleur": "#9a3b22",
+		   "rattache": {"lieux": [eid]}, "sources": [{"fichier": "README.md"}]}
+	ent.update(extra)
+	return ent
+
+
+def _image_ok(rel):
+	return rel == "towns/rome.png"
+
+
+def test_fleuves_sains_et_vie_jusqu_au_present():
+	cite = _ev("cite_rome", quand={"de": {"ere": "anc", "rang": "r1"}, "a": {"ere": "p2", "ouvert": True}})
+	data = _source(cite, _ev("a"))
+	data["entites"] = [_ent(evenement="cite_rome", image="towns/rome.png",
+							largeur=[{"l": 1}, {"depuis": {"ere": "p1", "entre": [900, 800]}, "l": 3}])]
+	data["bandeaux"] = [{"evenement": "a", "libelle": "A"}]
+	data["eres"][0]["carte"] = "towns/rome.png"
+	assert chrono.valider(data, chemin_de=lambda f: f if f == "README.md" else None, image_ok=_image_ok) == []
+	p = chrono.payload(data, chemin_de=lambda f: f, image_ok=_image_ok)
+	(ent,) = p["entites"]
+	# « jusqu'à aujourd'hui » traverse le temps du joueur : le fleuve s'arrête au seuil du futur.
+	assert ent["calc"]["present"] and ent["calc"]["fin"]["t"] == [4.0, 4.0] == [p["present"]] * 2
+	assert ent["calc"]["debut"] == next(e for e in p["evenements"] if e["id"] == "cite_rome")["calc"]["debut"]
+	assert [x["l"] for x in ent["largeurs"]] == [1, 3] and ent["largeurs"][0]["t"] is None
+	assert ent["largeurs"][1]["t"] == list(chrono.intervalle({"ere": "p1", "entre": [900, 800]}, E)[:2])
+	assert p["bandeaux"] == [{"evenement": "a", "libelle": "A"}] and set(p["cartes"]) == {"anc"}
+
+
+def test_fleuves_erreurs_detectees():
+	data = _source(_ev("a"))
+	data["entites"] = [
+		_ent("x", couleur="rouge", famille="royaume", evenement="fantome"),
+		_ent("y", quand={"moment": {"ere": "p2", "ans": 1}}, evenement="a"),
+		_ent("z", evenement="a", largeur=[{"l": 2}, {"l": 3}], rattache={"lieux": ["mars"], "metiers": ["x"]},
+			 issu_de="nulle_part", image="towns/absente.png", sources=[]),
+		_ent("z", evenement="a"),
+		_ent("w", evenement="a", largeur=[{"l": 4}], rattache={}),
+	]
+	data["bandeaux"] = [{"evenement": "fantome", "libelle": "?"}]
+	data["eres"][1]["carte"] = "../hors.png"
+	msgs = "\n".join(_valide(data))
+	for attendu in ("fleuve x : `couleur` attend #rrggbb", "fleuve x : `famille` 'royaume'", "fleuve x : date : `evenement` inconnu",
+					"fleuve y : date : un fleuve porte `evenement` OU `quand`",
+					"fleuve z : largeur : palier 1 : seul le premier", "fleuve z : lieux:'mars' absent",
+					"fleuve z : facette de rattachement inconnue : 'metiers'", "fleuve z : `issu_de` vers un fleuve inconnu",
+					"fleuve z : image introuvable", "fleuve z : aucune source", "fleuve sans id ou en double : 'z'",
+					"fleuve w : largeur : palier 0 : `l`", "fleuve w : `rattache` vide",
+					"bandeau invalide", "ère p1 : carte introuvable"):
+		assert attendu in msgs, (attendu, msgs)
+
+
+def _pl(eid, t0, t1, **tags):
+	"""Événement au format du payload, juste ce que lit `rattacher`."""
+	return {"id": eid, "calc": {"debut": {"t": [t0, t0]}, "fin": {"t": [t1, t1]}},
+			"tags": {k: v for k, v in tags.items() if k != "origine"}, "origine": tags.get("origine", [])}
+
+
+def _vivant(eid, t0, t1, evenement=None, **rattache):
+	return {"id": eid, "evenement": evenement, "rattache": rattache,
+			"calc": {"debut": {"t": [t0, t0]}, "fin": {"t": [t1, t1]}}}
+
+
+def test_rattacher_ordre_de_l_evenement_vie_et_echos():
+	ents = [_vivant("rome", 1, 4, "cite_rome", lieux=["rome"], peuples=["romains"]),
+			_vivant("constantinople", 2, 4, lieux=["constantinople"]),
+			_vivant("templiers", 1, 4, institutions=["templiers"])]
+	evs = [_pl("cite_rome", 1, 4, lieux=["rome"]),
+		   _pl("sophie", 2.5, 4, lieux=["constantinople", "rome"]),
+		   _pl("louve", 1.2, 1.2, lieux=["rome"], institutions=["templiers"]),
+		   _pl("grotte", 0.5, 0.5, lieux=["constantinople"], peuples=["romains"]),
+		   _pl("avant_tout", 0.2, 0.2, lieux=["rome"]),
+		   _pl("ailleurs", 3, 3, lieux=["babylone"])]
+	r = chrono.rattacher(evs, ents)
+	assert r["cite_rome"] == ("rome", [])                              # le fleuve porte sa propre cité
+	assert r["sophie"] == ("constantinople", ["rome"])                 # l'ordre des tags de l'événement décide
+	assert r["louve"] == ("rome", ["templiers"])                       # les lieux passent avant les institutions
+	assert r["grotte"] == (None, [])                                    # aucun fleuve vivant à ce moment
+	assert r["avant_tout"] == (None, []) and r["ailleurs"] == (None, [])
+
+
+def test_vignette_servie_si_generee(tmp_path):
+	assert chrono.nom_vignette("pnj/architecte_Aélis de Montfaucon.jpg") == "pnj_architecte_A_lis_de_Montfaucon.jpg"
+	assert chrono.url_image("towns/rome capital.png", tmp_path) == "/towns/rome%20capital.png"
+	(tmp_path / chrono.nom_vignette("towns/rome capital.png")).write_bytes(b"x")
+	assert chrono.url_image("towns/rome capital.png", tmp_path) == chrono.URL_VIGNETTES + "towns_rome_capital.jpg"
+	assert not chrono.image_existe("../main.py") and not chrono.image_existe("towns/../main.py") and not chrono.image_existe("polices/x.css")
+
+
 # ── Vraie source ───────────────────────────────────────────────────────────────
+
+@pytest.mark.lent
+def test_vraie_source_vignettes_generees():
+	"""Chaque image citée a sa vignette (`python dev/gen_vignettes_chronologie.py`)."""
+	data = chrono.charger()
+	citees = [e["carte"] for e in data["eres"] if e.get("carte")]
+	citees += [x["image"] for x in data.get("entites", []) + data["evenements"] if x.get("image")]
+	assert citees
+	manquantes = [r for r in citees if not (chrono.DOSSIER_VIGNETTES / chrono.nom_vignette(r)).is_file()]
+	assert manquantes == []
+
 
 @pytest.mark.lent
 def test_vraie_source_valide():
@@ -176,7 +278,8 @@ def test_vraie_source_valide():
 def test_citations_presentes_dans_leur_source():
 	"""Chaque citation se retrouve dans le fichier cité (espaces et emphases ignorés)."""
 	norm = lambda s: re.sub(r"\s+", " ", s.replace("*", "")).strip().lower()  # noqa: E731
-	for ev in chrono.charger()["evenements"]:
+	data = chrono.charger()
+	for ev in data["evenements"] + data.get("entites", []):
 		for s in ev["sources"]:
 			if not s.get("citation"):
 				continue

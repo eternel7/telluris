@@ -12,7 +12,9 @@
 //   3. les filtres (ET entre facettes, OU dans une facette), le regroupement, la
 //      contemporanéité et l'export JSON doivent dire la même chose que la source ;
 //   4. clic / appui long / glissement : une machine à états qui se trompe ouvre le JSON au
-//      lieu de sélectionner, ou sélectionne en faisant défiler.
+//      lieu de sélectionner, ou sélectionne en faisant défiler ;
+//   5. vue en fleuves : un lit qui revient en arrière se dessine replié sur lui-même, et un
+//      événement mal réparti disparaît de toutes les colonnes ou apparaît deux fois.
 //
 // MÉTHODE : identique aux autres harnais — extraction par nom (accolades équilibrées) et
 // exécution dans le realm du test (`runInThisContext`) ; les constantes (`GEO`, délais,
@@ -57,14 +59,15 @@ function extraireConst(nom) {
 	throw new Error('littéral déséquilibré : ' + nom);
 }
 
-const CONSTS = ['CHRONO_DELAI_LONG', 'CHRONO_GLISSE', 'FACETTES_LISTES', 'GEO'];
+const CONSTS = ['CHRONO_DELAI_LONG', 'CHRONO_GLISSE', 'FACETTES_LISTES', 'GEO', 'FLEUVE_DEMI'];
 const FONCTIONS = ['chronoEchelle', 'chronoEresVisibles', 'chronoPx', 'chronoGeometrie', 'chronoEtendue', 'chronoCouloirs', '_sansAccent',
-	'chronoFiltrer', 'chronoGrouper', 'chronoContemporains', 'chronoSousEnsemble', 'chronoAppuiLong', 'chronoXY', 'chronoPas'];
+	'chronoFiltrer', 'chronoGrouper', 'chronoContemporains', 'chronoSousEnsemble', 'chronoAppuiLong', 'chronoXY', 'chronoPas',
+	'chronoRiviere', 'chronoFleuves'];
 // `var` plutôt que `const` : les déclarations restent visibles de ce realm après runInThisContext.
 vm.runInThisContext(CONSTS.map(n => extraireConst(n).replace(/^const /, 'var ')).join('\n') + '\n'
 	+ FONCTIONS.map(extraire).join('\n') + '\n'
 	+ 'globalThis.F = {' + FONCTIONS.join(',') + '};');
-const C = { CHRONO_DELAI_LONG, CHRONO_GLISSE, GEO };
+const C = { CHRONO_DELAI_LONG, CHRONO_GLISSE, GEO, FLEUVE_DEMI };
 
 let echecs = 0, n = 0;
 function t(nom, fn) {
@@ -310,6 +313,57 @@ t('orientation : la portrait transpose la paysage (axe ↔ travers)', () => {
 	assert.deepStrictEqual([hx, hy], [C.GEO.h.axe + 120, C.GEO.h.bande + 40]);
 	const [vx, vy] = F.chronoXY('v', 120, 40);
 	assert.deepStrictEqual([vx, vy], [C.GEO.v.bande + 40, C.GEO.v.axe + 120]);
+});
+
+// ── Fleuves ──────────────────────────────────────────────────────────────────
+const fleuve = (debut, fin, largeurs, extra) => Object.assign({ id: 'f', calc: { debut: debut, fin: fin, present: false }, largeurs: largeurs }, extra || {});
+const croissant = pts => pts.every((p, i) => !i || p[0] >= pts[i - 1][0]);
+
+t('fleuve : source incertaine effilée, paliers en rampe, embouchure effilée', () => {
+	const e = F.chronoEchelle(ERES, 1);
+	const pts = F.chronoRiviere(fleuve(borne(1.1, 1.3, 'incertain'), borne(2.6, 2.7, 'incertain'),
+		[{ t: null, l: 1 }, { t: [2.1, 2.2], l: 3 }]), e);
+	assert.ok(croissant(pts), JSON.stringify(pts));
+	assert.deepStrictEqual(pts[0], [F.chronoPx(1.1, e), 0], 'la source naît à largeur nulle');
+	assert.strictEqual(pts[1][0], F.chronoPx(1.3, e), 'pleine largeur au bout de l\'incertitude');
+	assert.strictEqual(pts[1][1], C.FLEUVE_DEMI[1]);
+	assert.deepStrictEqual(pts.map(p => p[1]).slice(1, -1), [1, 1, 3, 3].map(l => C.FLEUVE_DEMI[l]));
+	assert.strictEqual(pts[3][0], F.chronoPx(2.2, e), 'le palier est atteint à la fin de son « depuis »');
+	assert.strictEqual(pts[pts.length - 1][1], 0, 'l\'embouchure se referme');
+	assert.strictEqual(pts[pts.length - 1][0], F.chronoPx(2.7, e));
+});
+
+t('fleuve : « depuis toujours » à pleine largeur, « jusqu\'à aujourd\'hui » sans embouchure', () => {
+	const e = F.chronoEchelle(ERES, 1);
+	const f = fleuve(borne(0, 0, 'ouvert'), borne(4, 4, 'ouvert'), [{ t: null, l: 2 }]);
+	f.calc.present = true;
+	const pts = F.chronoRiviere(f, e);
+	assert.deepStrictEqual(pts, [[0, C.FLEUVE_DEMI[2]], [F.chronoPx(4, e), C.FLEUVE_DEMI[2]]]);
+});
+
+t('fleuve : un palier hors de la vie du fleuve est ramené dans son lit, jamais en arrière', () => {
+	const e = F.chronoEchelle(ERES, 1);
+	const pts = F.chronoRiviere(fleuve(borne(2.0), borne(2.5), [{ t: null, l: 1 }, { t: [0.2, 0.4], l: 3 }, { t: [3.5, 3.9], l: 2 }]), e);
+	assert.ok(croissant(pts), JSON.stringify(pts));
+	assert.ok(pts.every(p => p[0] >= F.chronoPx(2.0, e) && p[0] <= F.chronoPx(2.5, e) + 10));
+});
+
+t('fleuve : une ère repliée écrase le lit sans le retourner', () => {
+	const e = F.chronoEchelle(ERES, 1, new Set(['p2']));
+	const pts = F.chronoRiviere(fleuve(borne(1.2, 1.6, 'incertain'), borne(3.5), [{ t: null, l: 2 }, { t: [2.5, 2.6], l: 3 }]), e);
+	assert.ok(croissant(pts) && pts.every(p => p[0] >= 0 && p[0] <= e.total + 10));
+});
+
+t('colonnes : « Telluris entier » d\'abord, chaque événement dans UNE colonne, cité et bandeau hors repères', () => {
+	const ents = [{ id: 'rome', libelle: 'Rome', evenement: 'cite_rome' }, { id: 'mu', libelle: 'Mu', evenement: null }];
+	const evs = [point('cite_rome', borne(1)), point('vague', borne(2)), point('louve', borne(1), { riviere: 'rome', echos: ['mu'] }),
+		point('sombre', borne(2), { riviere: 'mu' }), point('flux', borne(0)), point('perdu', borne(0), { riviere: 'fleuve_retire' })];
+	const g = F.chronoFleuves(evs, ents, [{ evenement: 'vague' }], null);
+	assert.deepStrictEqual(g.map(x => x.cle), ['', 'rome', 'mu']);
+	assert.strictEqual(g[0].libelle, 'Telluris entier');
+	assert.deepStrictEqual(g.map(x => x.evenements.map(ev => ev.id)), [['flux', 'perdu'], ['louve'], ['sombre']]);
+	const filtre = F.chronoFleuves(evs, ents, [{ evenement: 'vague' }], new Set(['cite_rome']));
+	assert.deepStrictEqual(filtre.map(x => x.cle), ['rome'], 'un fleuve dont seule la cité est retenue reste ; les autres se retirent');
 });
 
 console.log(`\n${n - echecs} / ${n} tests passés`);
