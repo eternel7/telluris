@@ -154,6 +154,16 @@ CATALOGUE = [
 			"--optimiser (en console).",
 	},
 	{
+		"id": "gen_vignettes_chronologie",
+		"label": "🕰 Vignettes des médaillons de la frise du lore",
+		"argv": _py("gen_vignettes_chronologie.py"),
+		"ecrit": "Écrit templates/resources/icons/chronologie/*.jpg (ne touche pas la base).",
+		"description": "Une vignette légère par image citée dans docs/lore/chronologie.json "
+			"(`carte` d'une ère, `image` d'un fleuve ou d'un événement) : sans elle, "
+			"/admin/lore/chronologie charge l'image d'origine (1 à 3 Mo). Idempotent : une "
+			"vignette plus récente que sa source n'est pas réécrite.",
+	},
+	{
 		"id": "export_bestiaire",
 		"label": "🐉 Export bestiaire (.xlsx)",
 		"argv": _py("export_bestiaire.py"),

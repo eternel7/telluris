@@ -14,14 +14,35 @@ fraction dans l'ère (0 → 1, dans le sens de l'axe). `t` est continu d'une èr
 l'autre (750 ans = fin de l'Âge des Portails = début de l'Âge des Donjons) et ne dépend
 d'aucun zoom : le client ne fait que projeter `t` en pixels (`chronoEchelle`), il ne
 recalcule jamais une date — une seule vérité, ici.
+
+Vue en FLEUVES (affiches « Time Chart ») :
+- une ENTITÉ (`entites`, cité ou ordre) = un fleuve coloré ; sa vie vient de son `evenement`
+  (la cité déjà datée) ou de son propre `quand` ; `largeur` = paliers 1 → 3 (établissement mince,
+  avènement large), chacun `depuis` une borne ; `issu_de` / `absorbe_par` = branches ;
+- un événement se RATTACHE à un fleuve par ses tags (`rattache`, facettes `ORDRE_RATTACHE`,
+  valeurs dans l'ordre de l'événement) pourvu que le fleuve vive à ce moment — sinon colonne
+  « Telluris entier » ; les autres fleuves touchés deviennent des `echos` ;
+- un fleuve « jusqu'à aujourd'hui » se prolonge à travers le temps du joueur (jusqu'au futur) ;
+- `bandeaux` = grands événements qui barrent toutes les colonnes ; ères `carte`, entités et
+  événements `image` = cartouches et médaillons (vignettes : `dev/gen_vignettes_chronologie.py`).
 """
 
 import json
+import re
 from pathlib import Path
 
 from utils import lore
 
 CHEMIN = lore.RACINE / "lore" / "chronologie.json"
+# Images des cartouches et médaillons : préfixe = mount statique de main.py.
+RESSOURCES = Path(__file__).resolve().parent.parent / "templates" / "resources"
+PREFIXES_IMAGE = ("maps", "towns", "pnj")
+DOSSIER_VIGNETTES = RESSOURCES / "icons" / "chronologie"
+URL_VIGNETTES = "/icons/chronologie/"
+FAMILLES = {"ordre": "Ordre", "cite": "Cité"}
+ORDRE_RATTACHE = ("lieux", "peuples", "institutions", "origine")
+LARGEURS = (1, 2, 3)
+_COULEUR = re.compile(r"^#[0-9a-fA-F]{6}$")
 
 COUCHES = {"histoire": "Histoire", "present": "Présent du monde", "trame": "Trame du joueur"}
 AUTORITES = {"auteur": "Auteur", "synthese": "Synthèse", "proposition": "Proposition"}
@@ -207,6 +228,177 @@ def _bornes_calc(ev: dict, eres: _Eres) -> dict:
 	raise ValueError("`quand` = {moment} ou {de, a}")
 
 
+def image_existe(rel) -> bool:
+	"""`towns/x.jpg` → vrai si le fichier existe sous un mount d'images autorisé."""
+	if not isinstance(rel, str) or "/" not in rel:
+		return False
+	parties = rel.split("/")
+	if parties[0] not in PREFIXES_IMAGE or ".." in parties or "" in parties:
+		return False
+	return (RESSOURCES / rel).is_file()
+
+
+def nom_vignette(rel: str) -> str:
+	"""Nom ASCII stable de la vignette d'une image (`towns/rome_capital.png` → `towns_rome_capital.jpg`)."""
+	return re.sub(r"[^0-9A-Za-z_-]+", "_", rel.rsplit(".", 1)[0]) + ".jpg"
+
+
+def url_image(rel: str, vignettes: Path = DOSSIER_VIGNETTES) -> str:
+	"""La vignette si elle a été générée, sinon l'image d'origine (lourde, mais juste)."""
+	from urllib.parse import quote
+	nom = nom_vignette(rel)
+	return URL_VIGNETTES + nom if (Path(vignettes) / nom).is_file() else "/" + quote(rel)
+
+
+def t_present(eres: _Eres) -> float:
+	"""Fin du « présent » : début de la première ère future (le temps du joueur EST aujourd'hui)."""
+	for i, e in enumerate(eres.liste):
+		if e.get("type") == "futur":
+			return float(i)
+	return float(len(eres.liste))
+
+
+def _jusqu_a_aujourdhui(c: dict, eres: _Eres) -> bool:
+	"""Fin `ouvert` sur la fin d'une ère passée qui s'achève à 0 an (« jusqu'à aujourd'hui »)."""
+	if c["fin"]["genre"] != "ouvert":
+		return False
+	t = c["fin"]["t"][1]
+	k = int(round(t)) - 1
+	return abs(t - round(t)) < _EPS and 0 <= k < len(eres.liste) \
+		and eres.liste[k].get("type") == "passe" and eres.liste[k].get("fin") == 0
+
+
+def _vie(ent: dict, eres: _Eres, calc: dict) -> dict:
+	"""{debut, fin, present} d'un fleuve — lève ValueError. La vie d'une entité est celle de son
+	`evenement` (une seule date pour la cité et son fleuve) ou son propre `quand`."""
+	a_ev, a_quand = "evenement" in ent, "quand" in ent
+	if a_ev == a_quand:
+		raise ValueError("un fleuve porte `evenement` OU `quand`")
+	if a_ev:
+		if ent["evenement"] not in calc:
+			raise ValueError(f"`evenement` inconnu ou mal daté : {ent['evenement']!r}")
+		c = json.loads(json.dumps(calc[ent["evenement"]]))
+	else:
+		c = _bornes_calc(ent, eres)
+	c.pop("jalons", None)
+	c["present"] = _jusqu_a_aujourdhui(c, eres)
+	if c["present"]:
+		tp = t_present(eres)
+		c["fin"] = {"t": [tp, tp], "genre": "ouvert"}
+	return c
+
+
+def _largeurs(ent: dict, eres: _Eres) -> list:
+	"""[{t: [a, b] | None, l, note}] — paliers de largeur, le premier sans `depuis` = dès la source."""
+	paliers = ent.get("largeur") or [{"l": 2}]
+	if not isinstance(paliers, list):
+		raise ValueError("`largeur` = liste de paliers {l, depuis}")
+	out, avant = [], None
+	for k, p in enumerate(paliers):
+		if not isinstance(p, dict) or p.get("l") not in LARGEURS:
+			raise ValueError(f"palier {k} : `l` ∈ {LARGEURS}")
+		if "depuis" in p:
+			a, b, _ = intervalle(p["depuis"], eres)
+			if avant is not None and a < avant - _EPS:
+				raise ValueError(f"palier {k} : `depuis` antérieur au palier précédent")
+			avant = a
+			t = [a, b]
+		elif k:
+			raise ValueError(f"palier {k} : seul le premier palier se passe de `depuis`")
+		else:
+			t = None
+		out.append({"t": t, "l": p["l"], "note": p.get("note", "")})
+	return out
+
+
+def _verifier_entites(data: dict, eres: _Eres, calc: dict, ids: set, chemin_de, image_ok) -> list:
+	"""Messages (globaux : un id d'entité peut être aussi celui d'un événement)."""
+	err = []
+	voc = data.get("vocabulaire") or {}
+	origines = data.get("origines") or {}
+	entites = [e for e in data.get("entites") or [] if isinstance(e, dict)]
+	vus = set()
+	for ent in entites:
+		eid = ent.get("id")
+		pre = f"fleuve {eid}"
+		if not eid or eid in vus:
+			err.append(f"fleuve sans id ou en double : {eid!r}")
+			continue
+		vus.add(eid)
+		if not ent.get("libelle"):
+			err.append(f"{pre} : `libelle` manquant")
+		if ent.get("famille") not in FAMILLES:
+			err.append(f"{pre} : `famille` {ent.get('famille')!r} inconnue")
+		if not _COULEUR.match(str(ent.get("couleur", ""))):
+			err.append(f"{pre} : `couleur` attend #rrggbb")
+		if ent.get("autorite", "auteur") not in AUTORITES:
+			err.append(f"{pre} : autorité {ent.get('autorite')!r} inconnue")
+		try:
+			_vie(ent, eres, calc)
+		except ValueError as e:
+			err.append(f"{pre} : date : {e}")
+		try:
+			_largeurs(ent, eres)
+		except ValueError as e:
+			err.append(f"{pre} : largeur : {e}")
+		rattache = ent.get("rattache") or {}
+		if not rattache:
+			err.append(f"{pre} : `rattache` vide — aucun événement n'y coulerait")
+		for f, valeurs in rattache.items():
+			permis = origines if f == "origine" else voc.get(f)
+			if f not in ORDRE_RATTACHE or permis is None:
+				err.append(f"{pre} : facette de rattachement inconnue : {f!r}")
+				continue
+			for v in valeurs:
+				if v not in permis:
+					err.append(f"{pre} : {f}:{v!r} absent du vocabulaire")
+		for champ in ("issu_de", "absorbe_par"):
+			if ent.get(champ) is not None and ent[champ] not in {e.get("id") for e in entites}:
+				err.append(f"{pre} : `{champ}` vers un fleuve inconnu : {ent[champ]!r}")
+		if ent.get("image") is not None and not image_ok(ent["image"]):
+			err.append(f"{pre} : image introuvable : {ent['image']!r}")
+		sources = ent.get("sources") or []
+		if not sources:
+			err.append(f"{pre} : aucune source")
+		for s in sources:
+			if chemin_de(s.get("fichier", "")) is None:
+				err.append(f"{pre} : source hors du lore : {s.get('fichier')!r}")
+	for b in data.get("bandeaux") or []:
+		if not isinstance(b, dict) or b.get("evenement") not in ids or not b.get("libelle"):
+			err.append(f"bandeau invalide (`evenement` connu + `libelle`) : {b!r}")
+	for e in eres.liste:
+		if e.get("carte") is not None and not image_ok(e["carte"]):
+			err.append(f"ère {e['id']} : carte introuvable : {e['carte']!r}")
+	return err
+
+
+def rattacher(evenements: list, entites: list) -> dict:
+	"""{id d'événement: (fleuve | None, [échos])} — `evenements` / `entites` au format du payload.
+
+	Le fleuve d'une entité porte son propre événement. Sinon on parcourt les facettes dans
+	l'ordre `ORDRE_RATTACHE`, et dans chacune les valeurs dans l'ORDRE DE L'ÉVÉNEMENT
+	(« Sainte-Sophie ↔ Rome » coule à Constantinople) ; le premier fleuve VIVANT à ce moment
+	l'emporte, les autres fleuves touchés et vivants sont des échos."""
+	propre = {e["evenement"]: e["id"] for e in entites if e.get("evenement")}
+	out = {}
+	for ev in evenements:
+		if ev["id"] in propre:
+			out[ev["id"]] = (propre[ev["id"]], [])
+			continue
+		lo, hi = ev["calc"]["debut"]["t"][0], ev["calc"]["fin"]["t"][1]
+		touches = []
+		for f in ORDRE_RATTACHE:
+			valeurs = ev.get("origine", []) if f == "origine" else ev.get("tags", {}).get(f, [])
+			for v in valeurs:
+				for ent in entites:
+					vie = ent["calc"]
+					vivant = vie["debut"]["t"][0] <= hi + _EPS and vie["fin"]["t"][1] >= lo - _EPS
+					if vivant and v in (ent.get("rattache") or {}).get(f, []) and ent["id"] not in touches:
+						touches.append(ent["id"])
+		out[ev["id"]] = (touches[0], touches[1:]) if touches else (None, [])
+	return out
+
+
 def _verifier_vocabulaire(data: dict) -> list:
 	err = []
 	ids_eres = set()
@@ -228,7 +420,7 @@ def _verifier_vocabulaire(data: dict) -> list:
 	return err
 
 
-def verifier(data: dict, chemin_de=lore.chemin_de) -> list:
+def verifier(data: dict, chemin_de=lore.chemin_de, image_ok=image_existe) -> list:
 	"""[(id ou None, message)] — tout ce qui empêche de lire ou de croire la source."""
 	err = [(None, m) for m in _verifier_vocabulaire(data)]
 	eres = _Eres(data.get("eres"))
@@ -286,6 +478,8 @@ def verifier(data: dict, chemin_de=lore.chemin_de) -> list:
 		for c in ev.get("contradictions") or []:
 			if not c.get("texte"):
 				err.append((eid, "contradiction sans texte"))
+		if ev.get("image") is not None and not image_ok(ev["image"]):
+			err.append((eid, f"image introuvable : {ev['image']!r}"))
 	for ev in evenements:
 		eid = ev.get("id")
 		for champ in ("liens", "apres"):
@@ -297,12 +491,13 @@ def verifier(data: dict, chemin_de=lore.chemin_de) -> list:
 				b, a = calc[eid]["debut"]["t"], calc[cible]["debut"]["t"]
 				if b[0] < a[0] - _EPS or b[1] < a[1] - _EPS:
 					err.append((eid, f"déclaré après {cible!r} mais daté avant lui"))
+	err += [(None, m) for m in _verifier_entites(data, eres, calc, ids, chemin_de, image_ok)]
 	return err
 
 
-def valider(data: dict, chemin_de=lore.chemin_de) -> list:
+def valider(data: dict, chemin_de=lore.chemin_de, image_ok=image_existe) -> list:
 	"""Messages lisibles « id : message » (vide = source saine)."""
-	return [f"{i} : {m}" if i else m for i, m in verifier(data, chemin_de)]
+	return [f"{i} : {m}" if i else m for i, m in verifier(data, chemin_de, image_ok)]
 
 
 def _eres_touchees(c: dict, eres: _Eres) -> list:
@@ -312,12 +507,13 @@ def _eres_touchees(c: dict, eres: _Eres) -> list:
 	return [eres.liste[k]["id"] for k in range(lo, min(hi, len(eres.liste) - 1) + 1)]
 
 
-def payload(data: dict, chemin_de=lore.chemin_de) -> dict:
+def payload(data: dict, chemin_de=lore.chemin_de, image_ok=image_existe, vignettes: Path = DOSSIER_VIGNETTES) -> dict:
 	"""Ce que lit la page : ères, vocabulaire, facettes (avec comptes), événements enrichis
-	(temps normalisé, notation, URL des sources, erreurs propres) et l'en-tête brut de la
-	source pour l'export du sous-ensemble filtré."""
+	(temps normalisé, notation, URL des sources, fleuve de rattachement, erreurs propres),
+	fleuves, bandeaux, cartes d'ères et l'en-tête brut de la source pour l'export du
+	sous-ensemble filtré."""
 	eres = _Eres(data.get("eres"))
-	erreurs = verifier(data, chemin_de)
+	erreurs = verifier(data, chemin_de, image_ok)
 	par_id = {}
 	for i, m in erreurs:
 		par_id.setdefault(i, []).append(m)
@@ -364,8 +560,34 @@ def payload(data: dict, chemin_de=lore.chemin_de) -> dict:
 			"eres": _eres_touchees(c, eres),
 			"calc": c,
 			"sources": sources,
+			"image": url_image(ev["image"], vignettes) if ev.get("image") and image_ok(ev["image"]) else None,
 			"brut": ev,
 		})
+	calc = {e["id"]: e["calc"] for e in evenements}
+	entites = []
+	for ent in data.get("entites") or []:
+		if not isinstance(ent, dict) or not ent.get("id"):
+			continue
+		try:
+			vie, paliers = _vie(ent, eres, calc), _largeurs(ent, eres)
+		except ValueError:
+			continue  # déjà signalé ; un fleuve sans date ne coule pas
+		entites.append({
+			"id": ent["id"], "libelle": ent.get("libelle", ent["id"]), "famille": ent.get("famille"),
+			"couleur": ent.get("couleur", "#7a6446"), "evenement": ent.get("evenement"),
+			"rattache": {f: list(v) for f, v in (ent.get("rattache") or {}).items()},
+			"issu_de": ent.get("issu_de"), "absorbe_par": ent.get("absorbe_par"),
+			"autorite": ent.get("autorite", "auteur"), "note": ent.get("note", ""),
+			"image": url_image(ent["image"], vignettes) if ent.get("image") and image_ok(ent["image"]) else None,
+			"calc": vie, "largeurs": paliers,
+		})
+	liens = rattacher(evenements, entites)
+	for ev in evenements:
+		ev["riviere"], ev["echos"] = liens[ev["id"]]
+	ids_ev = {e["id"] for e in evenements}
+	bandeaux = [{"evenement": b["evenement"], "libelle": b["libelle"]} for b in data.get("bandeaux") or []
+				if isinstance(b, dict) and b.get("evenement") in ids_ev and b.get("libelle")]
+	cartes = {e["id"]: url_image(e["carte"], vignettes) for e in eres.liste if e.get("carte") and image_ok(e["carte"])}
 	facettes = {
 		"couche": COUCHES, "autorite": AUTORITES, "categorie": CATEGORIES, "visibilite": VISIBILITES,
 		"ere": {e["id"]: e.get("libelle", e["id"]) for e in eres.liste},
@@ -391,6 +613,11 @@ def payload(data: dict, chemin_de=lore.chemin_de) -> dict:
 		"facettes": {f: [{"id": k, "libelle": lib, "n": comptes[f].get(k, 0)} for k, lib in v.items()]
 					 for f, v in facettes.items()},
 		"evenements": evenements,
+		"entites": entites,
+		"familles": FAMILLES,
+		"bandeaux": bandeaux,
+		"cartes": cartes,
+		"present": t_present(eres),
 		"erreurs_globales": par_id.get(None, []),
 		"entete": {k: v for k, v in data.items() if k != "evenements"},
 	}

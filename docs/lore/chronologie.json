@@ -4,6 +4,7 @@
 	"eres": [
 		{
 			"id": "antediluvien",
+			"carte": "maps/world_globe5.png",
 			"libelle": "Antédiluvien",
 			"sous_titre": "des origines au Déluge — durée inconnue",
 			"type": "ordinal",
@@ -16,6 +17,7 @@
 		},
 		{
 			"id": "remparts",
+			"carte": "maps/world_globe1.png",
 			"libelle": "Âge des Remparts",
 			"sous_titre": "de Gilgamesh aux trois frères — durée inconnue",
 			"type": "ordinal",
@@ -27,6 +29,7 @@
 		},
 		{
 			"id": "portails",
+			"carte": "maps/world_globe3.png",
 			"libelle": "Âge des Portails",
 			"sous_titre": "des trois frères à la Vague",
 			"type": "passe",
@@ -36,6 +39,7 @@
 		},
 		{
 			"id": "donjons",
+			"carte": "maps/world.png",
 			"libelle": "Âge des Donjons",
 			"sous_titre": "de la Vague, il y a sept à huit siècles, à aujourd'hui",
 			"type": "passe",
@@ -45,6 +49,7 @@
 		},
 		{
 			"id": "jeu",
+			"carte": "maps/france.png",
 			"libelle": "Le temps du joueur",
 			"sous_titre": "par rang de Guilde",
 			"type": "ordinal",
@@ -63,6 +68,7 @@
 		},
 		{
 			"id": "futur",
+			"carte": "maps/world_globe8.png",
 			"libelle": "Futur",
 			"sous_titre": "dans N ans",
 			"type": "futur",
@@ -178,6 +184,36 @@
 			"lycanthropes": "Lycanthropes"
 		}
 	},
+	"entites": [
+		{"id": "paladins", "libelle": "Paladins", "famille": "ordre", "couleur": "#b8901f", "evenement": "paladins", "rattache": {"institutions": ["paladins"]}, "largeur": [{"l": 2}, {"depuis": {"ere": "donjons", "entre": [780, 600]}, "l": 3, "note": "Âge des Temples : les Paladins rouvrent les routes"}], "image": "towns/pnj_paladins_cathedrale_saint_etienne_auxerre.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "dont la magie Sainte soigne, pour garder les routes"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "se développent à cette époque"}]},
+		{"id": "templiers", "libelle": "Templiers", "famille": "ordre", "couleur": "#8b1e1e", "evenement": "templiers", "rattache": {"institutions": ["templiers", "papaute"]}, "largeur": [{"l": 2}, {"depuis": {"ere": "donjons", "entre": [780, 600]}, "l": 3, "note": "Âge des Temples : recentrage sur les temples-forteresses"}], "image": "towns/portail_de_temple_albi.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Naissance des Templiers, pour garder les remparts et ce qu'ils enferment"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "se développent à cette époque"}]},
+		{"id": "architectes", "libelle": "Architectes", "famille": "ordre", "couleur": "#5b3f8c", "evenement": "architectes", "rattache": {"institutions": ["architectes"]}, "largeur": [{"l": 3}, {"depuis": {"ere": "portails", "entre": [2600, 2000]}, "l": 2, "note": "dégradation du savoir : science → artisanat → tradition"}], "image": "towns/institut_des_architectes_lutecia01.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Le savoir se transmet aux Architectes"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "science → artisanat → tradition"}]},
+		{"id": "guilde", "libelle": "Guilde des Aventuriers", "famille": "ordre", "couleur": "#b0602a", "evenement": "guildes", "rattache": {"institutions": ["guilde"]}, "largeur": [{"l": 2}], "image": "towns/pnj_maitresse_de_guilde_Maelys_naine_f_grand_relais_bureau.jpg", "autorite": "proposition", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "L'exploration des donjons s'organise : naissent les Guildes"}]},
+		{"id": "atlantis", "libelle": "Atlantis", "famille": "cite", "couleur": "#1f6f8b", "evenement": "atlantis", "rattache": {"lieux": ["atlantis"], "peuples": ["atlantes"]}, "largeur": [{"l": 1, "note": "isolement volontaire"}], "image": "towns/atlantis_capital.jpg", "autorite": "auteur", "note": "Jamais Cité-État du réseau : un filet.", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Jamais devenue un centre du réseau, par isolement volontaire"}]},
+		{"id": "cordoue", "libelle": "Cordoue", "famille": "cite", "couleur": "#c2571a", "evenement": "cite_cordoue", "rattache": {"lieux": ["cordoue"], "peuples": ["andalous"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Brèche originelle non datée"}]},
+		{"id": "reykjavik", "libelle": "Reykjavik", "famille": "cite", "couleur": "#3a5a8c", "evenement": "cite_reykjavik", "rattache": {"lieux": ["reykjavik"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/reykjavík_capital.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Le dragon guide les lignées islandaises « depuis des millénaires »"}]},
+		{"id": "akureyri", "libelle": "Akureyri", "famille": "cite", "couleur": "#6c8ebf", "evenement": "cite_akureyri", "rattache": {"lieux": ["akureyri"], "peuples": ["islandais"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/akureyri_start_city.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Portail vers Reykjavik altéré par la Vague"}]},
+		{"id": "bruges", "libelle": "Bruges", "famille": "cite", "couleur": "#7a5c2e", "evenement": "cite_bruges", "rattache": {"lieux": ["bruges"], "peuples": ["flamands"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/bruges_city.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "La Notre-Dame de Bruges a résisté à la Vague"}]},
+		{"id": "aix", "libelle": "Aix-la-Chapelle", "famille": "cite", "couleur": "#2e6b3a", "evenement": "cite_aix", "rattache": {"lieux": ["aix"], "peuples": ["carolingiens"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "entre": [700, 600]}, "l": 3, "note": "avènement : Charlemagne"}], "image": "towns/aix_la_chapelle_city.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Charlemagne transforme la cité un siècle après la Vague"}]},
+		{"id": "chartres", "libelle": "Chartres", "famille": "cite", "couleur": "#9a7b2f", "evenement": "cite_chartres", "rattache": {"lieux": ["chartres"], "peuples": ["carnutes"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "entre": [500, 400]}, "l": 3, "note": "avènement : son école"}], "image": "towns/chartres_city.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "avènement avec son école, après Charlemagne"}]},
+		{"id": "lutecia", "libelle": "Lutecia", "famille": "cite", "couleur": "#2f4f9f", "evenement": "cite_lutecia", "rattache": {"lieux": ["lutecia"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement, en dernier"}], "image": "towns/lutecia_capital.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "prend son nom en dernier"}]},
+		{"id": "rhemi", "libelle": "Rhemi", "famille": "cite", "couleur": "#a3476b", "evenement": "cite_rhemi", "rattache": {"lieux": ["rhemi"], "peuples": ["remes"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/reims_start_city.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "épargnée par la Vague"}]},
+		{"id": "auxerre", "libelle": "Auxerre", "famille": "cite", "couleur": "#5f7f2a", "evenement": "cite_auxerre", "rattache": {"lieux": ["auxerre"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "image": "towns/auxerre_start_city.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Temple-mine bâti sur un portail devenu donjon"}]},
+		{"id": "venise", "libelle": "Venise", "famille": "cite", "couleur": "#b23a48", "evenement": "cite_venise", "rattache": {"lieux": ["venise"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "rivalité « de plusieurs siècles » avec Gênes"}]},
+		{"id": "genes", "libelle": "Gênes", "famille": "cite", "couleur": "#d08c2c", "evenement": "cite_genes", "rattache": {"lieux": ["genes"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "donjons", "inconnu": true}, "l": 3, "note": "avènement"}], "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "La Banque de Saint-Georges naît du commerce des cristaux"}]},
+		{"id": "rome", "libelle": "Rome", "famille": "cite", "couleur": "#9a3b22", "evenement": "cite_rome", "rattache": {"lieux": ["rome"], "peuples": ["romains"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "remparts", "rang": "murailles"}, "l": 3, "note": "avènement : Romulus trace l'enceinte"}], "image": "towns/rome_capital.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Romulus trace l'enceinte à l'Âge des Remparts"}]},
+		{"id": "constantinople", "libelle": "Constantinople", "famille": "cite", "couleur": "#6a2c70", "evenement": "cite_constantinople", "rattache": {"lieux": ["constantinople"], "peuples": ["byzantins"]}, "largeur": [{"l": 3, "note": "établissement et avènement avant la Vague"}], "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Grand Palais antérieur à la Vague"}]},
+		{"id": "jerusalem", "libelle": "Jérusalem", "famille": "cite", "couleur": "#a8790c", "evenement": "cite_jerusalem", "rattache": {"lieux": ["jerusalem"], "peuples": ["hebreux"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "portails", "inconnu": true}, "l": 3, "note": "avènement avant la Vague"}], "autorite": "proposition", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "David reconnu roi par la cité"}]},
+		{"id": "babylone", "libelle": "Babylone", "famille": "cite", "couleur": "#2a7f75", "evenement": "cite_babylone", "rattache": {"lieux": ["babylone"], "peuples": ["babyloniens"]}, "largeur": [{"l": 2, "note": "avènement non daté"}], "autorite": "proposition", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Absentes, faute de séance qui les date : Alexandrie, Babylone"}]},
+		{"id": "abou_simbel", "libelle": "Abou Simbel", "famille": "cite", "couleur": "#c98b2b", "evenement": "cite_abou_simbel", "rattache": {"lieux": ["abou_simbel", "alexandrie"], "peuples": ["egyptiens"]}, "largeur": [{"l": 3, "note": "établissement et avènement antédiluviens"}], "image": "towns/abou_simbel_capital.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Royaume de Néfertiti, « avant les pyramides et avant les frères »"}]},
+		{"id": "mu", "libelle": "Mu", "famille": "cite", "couleur": "#138a72", "evenement": "mu", "rattache": {"lieux": ["mu"], "peuples": ["mu"]}, "largeur": [{"l": 3}, {"depuis": {"ere": "donjons", "entre": [800, 700]}, "l": 1, "note": "Mu sombre ; sa cité survit sous la mer"}], "image": "towns/mu_capital.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "sombre au moment de la Vague"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Ce n'est pas une Cité-État"}]}
+	],
+	"bandeaux": [
+		{"evenement": "deluge", "libelle": "Le Déluge"},
+		{"evenement": "remparts", "libelle": "Les premières murailles"},
+		{"evenement": "trois_freres", "libelle": "Les trois frères"},
+		{"evenement": "vague", "libelle": "La Vague de mana"}
+	],
 	"evenements": [
 		{
 			"id": "flux_et_monstres",
@@ -481,6 +517,7 @@
 			"id": "notre_dame",
 			"titre": "Le portail de Notre-Dame",
 			"titre_court": "Notre-Dame",
+			"image": "towns/portail_de_temple_notre_dame.png",
 			"resume": "Œuvre de l'un des frères, programmable, intact grâce au mana faible de Lutecia : il relie tout le monde connu (gemme violette) et Mu (cristal jaune).",
 			"quand": {"de": {"ere": "portails", "entre": [3000, 2500]}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "auteur"},
 			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
@@ -803,6 +840,7 @@
 			"id": "premier_nahual",
 			"titre": "Le premier nahual et le Cœur de la montagne",
 			"titre_court": "Premier nahual",
+			"image": "towns/teotihuacan_capital.png",
 			"resume": "Un sorcier reçoit un double animal, le jaguar, et en revêt la forme à volonté. Des PNJ disent que Tepeyollotl, le Cœur de la montagne, le lui a donné ; d'autres le nient. Des nahuals de Teotihuacan aux chamans-jaguars d'Amazonie, les gardiens de la forêt portent la peau du jaguar.",
 			"quand": {"moment": {"ere": "remparts", "inconnu": true}, "autorite": "proposition", "note": "Origine divine en théorie seulement (Auteur, 14/10) ; l'ère est proposée."},
 			"couche": "histoire", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
@@ -1193,6 +1231,7 @@
 			"id": "milo",
 			"titre": "Milo, l'aide-cartographe",
 			"titre_court": "Milo",
+			"image": "pnj/cartographe_Milo_hobbit_m.jpg",
 			"resume": "Ils complètent ensemble la carte de la région. Une escorte de caravane banale tourne mal : Milo meurt en voulant récupérer sa carte. Une région reste vierge.",
 			"quand": {"moment": {"ere": "jeu", "entre_rangs": ["F", "D"]}, "autorite": "proposition", "note": "Arc d'Auxerre ; rang de la mort non fixé."},
 			"couche": "present", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
@@ -1204,6 +1243,7 @@
 			"id": "bucherons",
 			"titre": "Les bûcherons disparus et la rencontre d'Aélis",
 			"titre_court": "Bûcherons et Aélis",
+			"image": "towns/Retrouver_les_bûcherons_d_Auxerre_victoire_combat.jpg",
 			"resume": "Dernière quête d'Auxerre : les bûcherons sont retrouvés dans une grotte avec Aélis, jeune architecte, pendant que trois loups géants rôdent. Puis le voyage vers Lutecia sous escorte paladine.",
 			"quand": {"moment": {"ere": "jeu", "rang": "E"}, "autorite": "proposition", "note": "Dernière quête propre à Auxerre."},
 			"couche": "present", "categorie": "quete", "autorite": "auteur", "visibilite": "public",
@@ -1216,6 +1256,7 @@
 			"id": "elise",
 			"titre": "Élise, l'herboriste du Coq de Lutèce",
 			"titre_court": "Élise",
+			"image": "pnj/herboriste_Elise_naine_f.jpg",
 			"resume": "Quatre visites, une familiarité ; puis elle part chercher des herbes dans une forêt qu'elle connaît depuis des années, et ne revient pas. « À tout à l'heure. »",
 			"quand": {"moment": {"ere": "jeu", "entre_rangs": ["E", "C"]}, "autorite": "proposition", "note": "Après l'arrivée à Lutecia ; rang non fixé."},
 			"couche": "present", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
@@ -1228,6 +1269,7 @@
 			"id": "maelys_rang_d",
 			"titre": "Maëlys reçoit le personnage au bureau",
 			"titre_court": "Bureau de Maëlys",
+			"image": "pnj/maitresse_de_guilde_Maelys_naine_f.jpg",
 			"resume": "Au rang D, Éléonore de Vaugirard fait monter le personnage ; Maëlys a lu la recommandation de Gautier de Valcroix.",
 			"quand": {"moment": {"ere": "jeu", "rang": "D"}, "autorite": "auteur"},
 			"couche": "present", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
@@ -1240,6 +1282,7 @@
 			"id": "jumieges_rang_c",
 			"titre": "Escorter Aélis jusqu'au portail de Jumièges",
 			"titre_court": "Épreuve de Jumièges",
+			"image": "towns/abbaye_de_jumieges.jpg",
 			"resume": "Épreuve du rang C confiée par Maëlys : Aélis revient aux Archives des Seuils avec trois théories et aucune réponse.",
 			"quand": {"moment": {"ere": "jeu", "rang": "C"}, "autorite": "auteur"},
 			"couche": "present", "categorie": "quete", "autorite": "auteur", "visibilite": "public",
@@ -1252,6 +1295,7 @@
 			"id": "aelis_mu",
 			"titre": "Aélis invitée à se former à Mu",
 			"titre_court": "Aélis et Mu",
+			"image": "pnj/architecte_Aélis_de_Montfaucon_humain_f.jpg",
 			"resume": "Plus tard, on offre à Aélis d'approfondir sa formation à Mu ; elle veut que l'aventurier l'accompagne.",
 			"quand": {"moment": {"ere": "jeu", "rang": "A"}, "autorite": "proposition", "note": "« Plus tard » ; Mu s'ouvre au rang A."},
 			"couche": "present", "categorie": "evenement", "autorite": "auteur", "visibilite": "secret",
@@ -1275,6 +1319,7 @@
 			"id": "trame_c",
 			"titre": "« La route de Saint-Denis »",
 			"titre_court": "Route de Saint-Denis",
+			"image": "towns/montmartre.jpg",
 			"resume": "Route nord avec un paladin du Sacré-Cœur : les monstres précèdent les donjons.",
 			"quand": {"moment": {"ere": "jeu", "rang": "C"}, "autorite": "auteur"},
 			"couche": "trame", "categorie": "quete", "autorite": "auteur", "visibilite": "public",
