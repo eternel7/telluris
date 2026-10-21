@@ -3,7 +3,7 @@
 Chaque entrée sépare **Auteur** (décision, niveau 2) et **Proposé** (réponse ChatGPT non adoptée, niveau 4). Source : le fichier entre crochets dans `docs/lore/`. Lieux réellement en jeu : `lieu:*` du dump (catégories `ville`, `pays`, `portail`, `temple`, `guilde_aventurier`).
 
 ## Sommaire
-France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem — Mythiques : Mu · Atlantis — Réseau des portails
+France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri · Camelot — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem — Mythiques : Mu · Atlantis — Réseau des portails
 
 ---
 
@@ -151,6 +151,22 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 **Tableau de l'Auteur (26/08)** : Akureyri → Reykjavik, forteresse-portail des Templiers, active mais altérée, passages instables scellés.
 
 **Proposé** : garde du gouffre, rapports Reykjavik/Akureyri au secret — voir le fichier.
+
+## Camelot — [cites/20261021_camelot_winchester.md]
+**Auteur (21/10, trois questionnaires)**
+- **Nom : Camelot** (`lieu:camelot` à créer). **Fondée par Arthur**, juste après la Vague, à la **croisée de nombreux donjons perturbés** : il y crée la Table ronde pour tenter de les maîtriser ; rien avant lui. **Winchester** = **bourg voisin** (faubourgs, marché), PAS un autre nom de la cité. **Accès tôt** par Douvres (`lieu:angleterre`, `lieu:london` au dump).
+- **La Table ronde** (nom de l'ordre, tout simplement) **gouverne** Camelot ; c'est aussi la **table d'arbitrage** des cités de l'île, et un héritage **revendiqué par la Guilde de Londres** (théorie de PNJ, Lutecia en rit). **Trois ordres côte à côte** sur l'île : Paladins (routes), Templiers (portes), Table ronde (là où un donjon déborde). Rivalités en **tournois**, jamais en guerre.
+- **Portails qui APPARAISSENT** (Auteur, 21/10) : une zone d'influence autour de Camelot fait surgir des portails naturels, éphémères (certains restent), multipliés par la Vague ; il en sort des monstres atypiques ; ils mènent souvent aux mêmes lieux, **Annwn** en tête. Pourquoi : théories (Annwn tout proche sous l'île, Glastonbury Tor sa porte la plus connue / Stonehenge les attire). **Chevaliers errants ≈ Paladins** (chassent les monstres, NE cherchent PAS les portails), sans garder les routes → troisième ordre. **Templiers = portail ENFERMÉ** dans un bâtiment (Saint-Pierre bâti autour d'une grotte-portail fixe : cacher, contrôler, défendre) ; **Table ronde = portails qui surgissent**, on chasse ce qui en sort. **Chasse sauvage** de Gwyn ap Nudd (Cŵn Annwn) adoptée : ennemi récurrent, futur bestiaire.
+- **Douze batailles d'Arthur** (mont Badon) = **douze débordements de donjons**, récit **NON altéré** : jamais « des chroniqueurs en ont fait des batailles contre des hommes » (vision guerrière de la Terre).
+- **Camlann** = treizième débordement, fatal : Arthur et **Medraut, son neveu**, l'un contre l'autre ou côte à côte, **théories contradictoires**. Arthur emporté à **Avalon**, mort ou endormi : mystère.
+- **Merlin** : Architecte **ou** fils d'une mortelle et d'un incube, théories concurrentes ; enserré par **Viviane** à **Brocéliande**. **Viviane ≠ Dame du Lac.** **Morgane soigneuse** (*Vita Merlini*, neuf sœurs d'Avalon). **Guenièvre et Lancelot** en récit, sobres (aucun adultère mis en avant).
+- **Excalibur** conservée à Camelot, intouchable, sous la garde de l'ordre ; origine : le lac **ou** la pierre, récits concurrents.
+- **Pas de Graal** : le **chaudron d'Annwn** (*Preiddeu Annwfn*, sept reviennent). **Stonehenge** = cercle-portail non daté ; **Glastonbury Tor** = portail naturel vers **Annwn** (Gwyn ap Nudd), abbaye bâtie autour ; **Dinas Emrys** = donjon sous la tour de Vortigern, dragons rouge et blanc.
+- **Caerleon, Cadbury, Tintagel** = lieux en jeu, chacun « le vrai Camelot ». **Pellinore** = le vrai, **immortel**, toujours après la Bête glatissante. Chevaliers PNJ actuels **plusieurs et égaux** ; Kaï, Bedwyr, Gauvain, Perceval… **en récit seulement**. Foule mêlée des cinq Lignées.
+- **Bestiaire** : `dev/gen_bestiaire_arthurien.py` → `jsons/bestiaire_arthurien_a_importer.json` (géant du Mont-Saint-Michel, Cath Palug, Bête glatissante, Twrch Trwyth, dragons rouge et blanc). Chasse sauvage : `dev/gen_chasse_sauvage.py` → `jsons/chasse_sauvage_a_importer.json` (Chien d'Annwn C, Gwyn ap Nudd A : rangs proposés).
+- **Progression** : géant du Mont-Saint-Michel D · Camelot et Cath Palug E–D · Bête glatissante C · Twrch Trwyth B · Dinas Emrys A · Avalon et Annwn S.
+
+**Ouvert** : noms et Lignées des chevaliers PNJ ; récits propres de Caerleon, Cadbury, Tintagel.
 
 ## Constantinople — [cites/20260824_decrit_constantinople_telluris.md]
 **Auteur**

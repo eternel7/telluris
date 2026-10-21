@@ -1,0 +1,2849 @@
+[
+  {
+    "_id": "espece:geant_du_mont_saint_michel",
+    "type": "espece",
+    "nom": "Géant du Mont-Saint-Michel",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "geant_du_mont_saint_michel_transparent.png",
+    "description": "Géant venu d'Ibérie qui s'installa sur le mont, au milieu des grèves de la baie, et dévorait les gens du pays. Il enleva Hélène, nièce d'un duc d'Armorique, qui mourut de terreur entre ses mains. Arthur gravit le mont avec Kaï et Bedwyr et l'abattit, dit-on. Pourtant il y a toujours un géant sur le mont : le même qui revient, ou un autre qui a pris sa place, les pêcheurs de la baie ne se risquent pas à trancher.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 60,
+        "max": 90
+      },
+      "R": {
+        "min": 55,
+        "max": 85
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "humanoide",
+      "geant",
+      "legendaire",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:geant_du_mont_saint_michel",
+    "type": "item",
+    "nom": "Carcasse de Géant du Mont-Saint-Michel",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      500,
+      900
+    ],
+    "description": "Dépouille de Géant du Mont-Saint-Michel récupérée à l'issue du combat.",
+    "source_espece": "espece:geant_du_mont_saint_michel",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:geant_du_mont_saint_michel_tete",
+        "quantite": 1,
+        "fraction": 0.08
+      },
+      {
+        "item": "item:geant_du_mont_saint_michel_corps",
+        "quantite": 1,
+        "fraction": 0.5
+      },
+      {
+        "item": "item:geant_du_mont_saint_michel_bras",
+        "quantite": 2,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:geant_du_mont_saint_michel_jambe",
+        "quantite": 2,
+        "fraction": 0.3
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:cath_palug",
+    "type": "espece",
+    "nom": "Cath Palug",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "cath_palug_transparent.png",
+    "description": "Chat monstrueux de l'île de Môn. Une truie errante, Henwen, l'aurait mis bas au pied d'un rocher ; des porchers jetèrent le chaton à la mer, et les fils de Palug le recueillirent sur l'île, où il dévora neuf-vingts guerriers. Les Bretons de l'île disent que Kaï l'affronta ; ceux du continent, qu'Arthur le tua au bord d'un lac des montagnes. Les deux récits ne peuvent pas être vrais, et il chasse encore.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 40,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 55
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "boss",
+      "rapide",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:cath_palug",
+    "type": "item",
+    "nom": "Carcasse de Cath Palug",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      120,
+      250
+    ],
+    "description": "Dépouille de Cath Palug récupérée à l'issue du combat.",
+    "source_espece": "espece:cath_palug",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:cath_palug_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:cath_palug_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:cath_palug_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:cath_palug_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:bete_glatissante",
+    "type": "espece",
+    "nom": "Bête glatissante",
+    "genre": "f",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "bete_glatissante_transparent.png",
+    "description": "Tête de serpent, corps de léopard, croupe de lion, pieds de cerf : de son ventre sort le vacarme de trente couples de chiens qui donnent de la voix, d'où son nom. Le roi Pellinore la traque depuis le temps d'Arthur et ne l'a jamais rattrapée. Certains disent que c'est la quête qui le garde en vie, et que la bête le sait.",
+    "base_attributes": {
+      "V": {
+        "min": 8,
+        "max": 10
+      },
+      "F": {
+        "min": 50,
+        "max": 75
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 60,
+        "max": 85
+      },
+      "Vol": {
+        "min": 50,
+        "max": 70
+      },
+      "Int": {
+        "min": 30,
+        "max": 45
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 70
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "legendaire",
+      "boss",
+      "rapide",
+      "terreur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:bete_glatissante",
+    "type": "item",
+    "nom": "Carcasse de Bête glatissante",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      200,
+      400
+    ],
+    "description": "Dépouille de Bête glatissante récupérée à l'issue du combat.",
+    "source_espece": "espece:bete_glatissante",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:bete_glatissante_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:bete_glatissante_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:bete_glatissante_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:bete_glatissante_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:twrch_trwyth",
+    "type": "espece",
+    "nom": "Twrch Trwyth",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "twrch_trwyth_transparent.png",
+    "description": "Sanglier-roi aux soies d'argent : un roi changé en sanglier pour ses fautes, disent les Gallois. Entre ses oreilles il porte un peigne, un rasoir et des ciseaux. Il traversa la mer d'Irlande à la nage avec ses sept marcassins et ravagea le pays de Galles jusqu'à la Cornouailles ; Arthur et ses chevaliers le chassèrent d'une côte à l'autre, et il disparut dans la mer. Nul ne l'a vu mourir.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 80,
+        "max": 115
+      },
+      "R": {
+        "min": 80,
+        "max": 115
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 60,
+        "max": 85
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 70
+      }
+    },
+    "tags": [
+      "monstre",
+      "malediction",
+      "legendaire",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:twrch_trwyth",
+    "type": "item",
+    "nom": "Carcasse de Twrch Trwyth",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      700,
+      1400
+    ],
+    "description": "Dépouille de Twrch Trwyth récupérée à l'issue du combat.",
+    "source_espece": "espece:twrch_trwyth",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:twrch_trwyth_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:twrch_trwyth_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:twrch_trwyth_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:twrch_trwyth_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:dragon_rouge",
+    "type": "espece",
+    "nom": "Dragon rouge",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "dragon_rouge_transparent.png",
+    "description": "L'un des deux dragons de Dinas Emrys. Un roi les aurait pris au centre de l'île, endormis dans une cuve d'hydromel, et enfermés sous la colline. Quand Vortigern voulut y bâtir sa tour, elle s'effondrait chaque nuit : les deux dragons se battaient dessous. Un enfant sans père, que certains appellent Merlin, l'annonça. Le blanc a l'avantage au début de chaque combat ; le rouge, celui que les Gallois peignent sur leurs bannières, l'emporte à la fin.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 85,
+        "max": 125
+      },
+      "R": {
+        "min": 85,
+        "max": 125
+      },
+      "Ag": {
+        "min": 40,
+        "max": 60
+      },
+      "Vol": {
+        "min": 80,
+        "max": 115
+      },
+      "Int": {
+        "min": 50,
+        "max": 80
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:dragon_rouge",
+    "type": "item",
+    "nom": "Carcasse de Dragon rouge",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      1500,
+      4000
+    ],
+    "description": "Dépouille de Dragon rouge récupérée à l'issue du combat.",
+    "source_espece": "espece:dragon_rouge",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:dragon_rouge_tete",
+        "quantite": 1,
+        "fraction": 0.1
+      },
+      {
+        "item": "item:dragon_rouge_corps",
+        "quantite": 1,
+        "fraction": 0.45
+      },
+      {
+        "item": "item:dragon_rouge_aile",
+        "quantite": 2,
+        "fraction": 0.2
+      },
+      {
+        "item": "item:dragon_rouge_patte",
+        "quantite": 2,
+        "fraction": 0.14
+      },
+      {
+        "item": "item:dragon_rouge_queue",
+        "quantite": 1,
+        "fraction": 0.11
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:dragon_blanc",
+    "type": "espece",
+    "nom": "Dragon blanc",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "dragon_blanc_transparent.png",
+    "description": "Le second dragon de Dinas Emrys, pâle comme la craie. Il ouvre chaque combat en furie et repousse le rouge jusqu'au bord du lac souterrain, puis faiblit et recule. On dit qu'il ne meurt jamais tout à fait, qu'il revient toujours pour une nouvelle lutte, et que la tour au-dessus n'a jamais tenu longtemps.",
+    "base_attributes": {
+      "V": {
+        "min": 17,
+        "max": 19
+      },
+      "F": {
+        "min": 80,
+        "max": 115
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 45,
+        "max": 65
+      },
+      "Vol": {
+        "min": 80,
+        "max": 115
+      },
+      "Int": {
+        "min": 50,
+        "max": 80
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:dragon_blanc",
+    "type": "item",
+    "nom": "Carcasse de Dragon blanc",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      1500,
+      4000
+    ],
+    "description": "Dépouille de Dragon blanc récupérée à l'issue du combat.",
+    "source_espece": "espece:dragon_blanc",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:dragon_blanc_tete",
+        "quantite": 1,
+        "fraction": 0.1
+      },
+      {
+        "item": "item:dragon_blanc_corps",
+        "quantite": 1,
+        "fraction": 0.45
+      },
+      {
+        "item": "item:dragon_blanc_aile",
+        "quantite": 2,
+        "fraction": 0.2
+      },
+      {
+        "item": "item:dragon_blanc_patte",
+        "quantite": 2,
+        "fraction": 0.14
+      },
+      {
+        "item": "item:dragon_blanc_queue",
+        "quantite": 1,
+        "fraction": 0.11
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:bete_glatissante_tete",
+    "type": "item",
+    "nom": "Tête de Bête glatissante",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      24.0,
+      48.0
+    ],
+    "description": "Tête de Bête glatissante, débitée sur place.",
+    "tags": [
+      "boss",
+      "hybride",
+      "insensible_furtivite",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "rapide",
+      "terreur"
+    ],
+    "source_espece": "espece:bete_glatissante",
+    "portion_de": "item:bete_glatissante",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:bete_glatissante_corps",
+    "type": "item",
+    "nom": "Corps de Bête glatissante",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      104.0,
+      208.0
+    ],
+    "description": "Corps de Bête glatissante, débité sur place.",
+    "tags": [
+      "boss",
+      "hybride",
+      "insensible_furtivite",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "rapide",
+      "terreur"
+    ],
+    "source_espece": "espece:bete_glatissante",
+    "portion_de": "item:bete_glatissante",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:bete_glatissante_corps_morceau",
+        "quantite": 3,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:bete_glatissante_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Bête glatissante",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      34.67,
+      69.33
+    ],
+    "description": "Morceau de corps de Bête glatissante, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "hybride",
+      "insensible_furtivite",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "rapide",
+      "terreur"
+    ],
+    "source_espece": "espece:bete_glatissante",
+    "portion_de": "item:bete_glatissante_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:bete_glatissante_patte",
+    "type": "item",
+    "nom": "Patte de Bête glatissante",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      14.0,
+      28.0
+    ],
+    "description": "Patte de Bête glatissante, débitée sur place.",
+    "tags": [
+      "boss",
+      "hybride",
+      "insensible_furtivite",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "rapide",
+      "terreur"
+    ],
+    "source_espece": "espece:bete_glatissante",
+    "portion_de": "item:bete_glatissante",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:bete_glatissante_queue",
+    "type": "item",
+    "nom": "Queue de Bête glatissante",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      16.0,
+      32.0
+    ],
+    "description": "Queue de Bête glatissante, débitée sur place.",
+    "tags": [
+      "boss",
+      "hybride",
+      "insensible_furtivite",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "rapide",
+      "terreur"
+    ],
+    "source_espece": "espece:bete_glatissante",
+    "portion_de": "item:bete_glatissante",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:cath_palug_tete",
+    "type": "item",
+    "nom": "Tête de Cath Palug",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      14.4,
+      30.0
+    ],
+    "description": "Tête de Cath Palug, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "rapide"
+    ],
+    "source_espece": "espece:cath_palug",
+    "portion_de": "item:cath_palug",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:cath_palug_corps",
+    "type": "item",
+    "nom": "Corps de Cath Palug",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      62.4,
+      130.0
+    ],
+    "description": "Corps de Cath Palug, débité sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "predateur",
+      "rapide"
+    ],
+    "source_espece": "espece:cath_palug",
+    "portion_de": "item:cath_palug",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:cath_palug_corps_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:cath_palug_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Cath Palug",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      31.2,
+      65.0
+    ],
+    "description": "Morceau de corps de Cath Palug, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "predateur",
+      "rapide"
+    ],
+    "source_espece": "espece:cath_palug",
+    "portion_de": "item:cath_palug_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:cath_palug_patte",
+    "type": "item",
+    "nom": "Patte de Cath Palug",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      8.4,
+      17.5
+    ],
+    "description": "Patte de Cath Palug, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "rapide"
+    ],
+    "source_espece": "espece:cath_palug",
+    "portion_de": "item:cath_palug",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:cath_palug_queue",
+    "type": "item",
+    "nom": "Queue de Cath Palug",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      9.6,
+      20.0
+    ],
+    "description": "Queue de Cath Palug, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "rapide"
+    ],
+    "source_espece": "espece:cath_palug",
+    "portion_de": "item:cath_palug",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_blanc_tete",
+    "type": "item",
+    "nom": "Tête de Dragon blanc",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      150.0,
+      400.0
+    ],
+    "description": "Tête de Dragon blanc, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_blanc",
+    "portion_de": "item:dragon_blanc",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:dragon_blanc_tete_morceau",
+        "quantite": 5,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_blanc_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Dragon blanc",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      30.0,
+      80.0
+    ],
+    "description": "Morceau de tête de Dragon blanc, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_blanc",
+    "portion_de": "item:dragon_blanc_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_blanc_corps",
+    "type": "item",
+    "nom": "Corps de Dragon blanc",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      675.0,
+      1800.0
+    ],
+    "description": "Corps de Dragon blanc, débité sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_blanc",
+    "portion_de": "item:dragon_blanc",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:dragon_blanc_corps_morceau",
+        "quantite": 19,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_blanc_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Dragon blanc",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      35.53,
+      94.74
+    ],
+    "description": "Morceau de corps de Dragon blanc, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_blanc",
+    "portion_de": "item:dragon_blanc_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_blanc_aile",
+    "type": "item",
+    "nom": "Aile de Dragon blanc",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      150.0,
+      400.0
+    ],
+    "description": "Aile de Dragon blanc, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_aile",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_blanc",
+    "portion_de": "item:dragon_blanc",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:dragon_blanc_aile_morceau",
+        "quantite": 5,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_blanc_aile_morceau",
+    "type": "item",
+    "nom": "Morceau de aile de Dragon blanc",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      30.0,
+      80.0
+    ],
+    "description": "Morceau de aile de Dragon blanc, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_aile",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_blanc",
+    "portion_de": "item:dragon_blanc_aile",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_blanc_patte",
+    "type": "item",
+    "nom": "Patte de Dragon blanc",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      105.0,
+      280.0
+    ],
+    "description": "Patte de Dragon blanc, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_blanc",
+    "portion_de": "item:dragon_blanc",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:dragon_blanc_patte_morceau",
+        "quantite": 3,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_blanc_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte de Dragon blanc",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      35.0,
+      93.33
+    ],
+    "description": "Morceau de patte de Dragon blanc, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_blanc",
+    "portion_de": "item:dragon_blanc_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_blanc_queue",
+    "type": "item",
+    "nom": "Queue de Dragon blanc",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      165.0,
+      440.0
+    ],
+    "description": "Queue de Dragon blanc, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_blanc",
+    "portion_de": "item:dragon_blanc",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:dragon_blanc_queue_morceau",
+        "quantite": 5,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_blanc_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Dragon blanc",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      33.0,
+      88.0
+    ],
+    "description": "Morceau de queue de Dragon blanc, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_blanc",
+    "portion_de": "item:dragon_blanc_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_rouge_tete",
+    "type": "item",
+    "nom": "Tête de Dragon rouge",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      150.0,
+      400.0
+    ],
+    "description": "Tête de Dragon rouge, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_rouge",
+    "portion_de": "item:dragon_rouge",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:dragon_rouge_tete_morceau",
+        "quantite": 5,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_rouge_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Dragon rouge",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      30.0,
+      80.0
+    ],
+    "description": "Morceau de tête de Dragon rouge, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_rouge",
+    "portion_de": "item:dragon_rouge_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_rouge_corps",
+    "type": "item",
+    "nom": "Corps de Dragon rouge",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      675.0,
+      1800.0
+    ],
+    "description": "Corps de Dragon rouge, débité sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_rouge",
+    "portion_de": "item:dragon_rouge",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:dragon_rouge_corps_morceau",
+        "quantite": 19,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_rouge_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Dragon rouge",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      35.53,
+      94.74
+    ],
+    "description": "Morceau de corps de Dragon rouge, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_rouge",
+    "portion_de": "item:dragon_rouge_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_rouge_aile",
+    "type": "item",
+    "nom": "Aile de Dragon rouge",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      150.0,
+      400.0
+    ],
+    "description": "Aile de Dragon rouge, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_aile",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_rouge",
+    "portion_de": "item:dragon_rouge",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:dragon_rouge_aile_morceau",
+        "quantite": 5,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_rouge_aile_morceau",
+    "type": "item",
+    "nom": "Morceau de aile de Dragon rouge",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      30.0,
+      80.0
+    ],
+    "description": "Morceau de aile de Dragon rouge, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_aile",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_rouge",
+    "portion_de": "item:dragon_rouge_aile",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_rouge_patte",
+    "type": "item",
+    "nom": "Patte de Dragon rouge",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      105.0,
+      280.0
+    ],
+    "description": "Patte de Dragon rouge, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_rouge",
+    "portion_de": "item:dragon_rouge",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:dragon_rouge_patte_morceau",
+        "quantite": 3,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_rouge_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte de Dragon rouge",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      35.0,
+      93.33
+    ],
+    "description": "Morceau de patte de Dragon rouge, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_rouge",
+    "portion_de": "item:dragon_rouge_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_rouge_queue",
+    "type": "item",
+    "nom": "Queue de Dragon rouge",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      165.0,
+      440.0
+    ],
+    "description": "Queue de Dragon rouge, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_rouge",
+    "portion_de": "item:dragon_rouge",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:dragon_rouge_queue_morceau",
+        "quantite": 5,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_rouge_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Dragon rouge",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      33.0,
+      88.0
+    ],
+    "description": "Morceau de queue de Dragon rouge, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_rouge",
+    "portion_de": "item:dragon_rouge_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:geant_du_mont_saint_michel_tete",
+    "type": "item",
+    "nom": "Tête de Géant du Mont-Saint-Michel",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      40.0,
+      72.0
+    ],
+    "description": "Tête de Géant du Mont-Saint-Michel, débitée sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "humanoide",
+      "legendaire",
+      "partie_tete",
+      "predateur"
+    ],
+    "source_espece": "espece:geant_du_mont_saint_michel",
+    "portion_de": "item:geant_du_mont_saint_michel",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:geant_du_mont_saint_michel_corps",
+    "type": "item",
+    "nom": "Corps de Géant du Mont-Saint-Michel",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      250.0,
+      450.0
+    ],
+    "description": "Corps de Géant du Mont-Saint-Michel, débité sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "humanoide",
+      "legendaire",
+      "partie_corps",
+      "predateur"
+    ],
+    "source_espece": "espece:geant_du_mont_saint_michel",
+    "portion_de": "item:geant_du_mont_saint_michel",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:geant_du_mont_saint_michel_corps_morceau",
+        "quantite": 5,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:geant_du_mont_saint_michel_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Géant du Mont-Saint-Michel",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      50.0,
+      90.0
+    ],
+    "description": "Morceau de corps de Géant du Mont-Saint-Michel, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "geant",
+      "humanoide",
+      "legendaire",
+      "morceau",
+      "partie_corps",
+      "predateur"
+    ],
+    "source_espece": "espece:geant_du_mont_saint_michel",
+    "portion_de": "item:geant_du_mont_saint_michel_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:geant_du_mont_saint_michel_bras",
+    "type": "item",
+    "nom": "Bras de Géant du Mont-Saint-Michel",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      30.0,
+      54.0
+    ],
+    "description": "Bras de Géant du Mont-Saint-Michel, débité sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "humanoide",
+      "legendaire",
+      "partie_bras",
+      "predateur"
+    ],
+    "source_espece": "espece:geant_du_mont_saint_michel",
+    "portion_de": "item:geant_du_mont_saint_michel",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:geant_du_mont_saint_michel_jambe",
+    "type": "item",
+    "nom": "Jambe de Géant du Mont-Saint-Michel",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      75.0,
+      135.0
+    ],
+    "description": "Jambe de Géant du Mont-Saint-Michel, débitée sur place.",
+    "tags": [
+      "boss",
+      "geant",
+      "humanoide",
+      "legendaire",
+      "partie_jambe",
+      "predateur"
+    ],
+    "source_espece": "espece:geant_du_mont_saint_michel",
+    "portion_de": "item:geant_du_mont_saint_michel",
+    "partie": "jambe",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:geant_du_mont_saint_michel_jambe_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:geant_du_mont_saint_michel_jambe_morceau",
+    "type": "item",
+    "nom": "Morceau de jambe de Géant du Mont-Saint-Michel",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      37.5,
+      67.5
+    ],
+    "description": "Morceau de jambe de Géant du Mont-Saint-Michel, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "geant",
+      "humanoide",
+      "legendaire",
+      "morceau",
+      "partie_jambe",
+      "predateur"
+    ],
+    "source_espece": "espece:geant_du_mont_saint_michel",
+    "portion_de": "item:geant_du_mont_saint_michel_jambe",
+    "partie": "jambe",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:twrch_trwyth_tete",
+    "type": "item",
+    "nom": "Tête de Twrch Trwyth",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      84.0,
+      168.0
+    ],
+    "description": "Tête de Twrch Trwyth, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "malediction",
+      "monstre",
+      "partie_tete",
+      "predateur"
+    ],
+    "source_espece": "espece:twrch_trwyth",
+    "portion_de": "item:twrch_trwyth",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:twrch_trwyth_tete_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:twrch_trwyth_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Twrch Trwyth",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      42.0,
+      84.0
+    ],
+    "description": "Morceau de tête de Twrch Trwyth, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "malediction",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "predateur"
+    ],
+    "source_espece": "espece:twrch_trwyth",
+    "portion_de": "item:twrch_trwyth_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:twrch_trwyth_corps",
+    "type": "item",
+    "nom": "Corps de Twrch Trwyth",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      364.0,
+      728.0
+    ],
+    "description": "Corps de Twrch Trwyth, débité sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "malediction",
+      "monstre",
+      "partie_corps",
+      "predateur"
+    ],
+    "source_espece": "espece:twrch_trwyth",
+    "portion_de": "item:twrch_trwyth",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:twrch_trwyth_corps_morceau",
+        "quantite": 8,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:twrch_trwyth_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Twrch Trwyth",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      45.5,
+      91.0
+    ],
+    "description": "Morceau de corps de Twrch Trwyth, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "malediction",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "predateur"
+    ],
+    "source_espece": "espece:twrch_trwyth",
+    "portion_de": "item:twrch_trwyth_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:twrch_trwyth_patte",
+    "type": "item",
+    "nom": "Patte de Twrch Trwyth",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      49.0,
+      98.0
+    ],
+    "description": "Patte de Twrch Trwyth, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "malediction",
+      "monstre",
+      "partie_patte",
+      "predateur"
+    ],
+    "source_espece": "espece:twrch_trwyth",
+    "portion_de": "item:twrch_trwyth",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:twrch_trwyth_queue",
+    "type": "item",
+    "nom": "Queue de Twrch Trwyth",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      56.0,
+      112.0
+    ],
+    "description": "Queue de Twrch Trwyth, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "malediction",
+      "monstre",
+      "partie_queue",
+      "predateur"
+    ],
+    "source_espece": "espece:twrch_trwyth",
+    "portion_de": "item:twrch_trwyth",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:twrch_trwyth_queue_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:twrch_trwyth_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Twrch Trwyth",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      28.0,
+      56.0
+    ],
+    "description": "Morceau de queue de Twrch Trwyth, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "malediction",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "predateur"
+    ],
+    "source_espece": "espece:twrch_trwyth",
+    "portion_de": "item:twrch_trwyth_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  }
+]
