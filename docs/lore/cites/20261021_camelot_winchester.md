@@ -1,8 +1,8 @@
-# Camelot — Winchester et la Table ronde
+# Camelot et la Table ronde
 
-- **Source :** séance Claude Code du 21/10/2026. L'Auteur demande si Camelot peut entrer dans Telluris et comment adapter un mythe plein de combats entre villes. Claude Code propose ; l'Auteur arbitre par questionnaire.
+- **Source :** séance Claude Code du 21/10/2026. L'Auteur demande si Camelot peut entrer dans Telluris et comment adapter un mythe plein de combats entre villes. Claude Code propose ; l'Auteur arbitre par trois questionnaires successifs.
 - **Créée :** 21/10/2026
-- **Statut :** propositions de Claude Code **arbitrées par l'Auteur** (§ 1). Ce qui n'a pas été tranché est signalé au § 5.
+- **Statut :** propositions de Claude Code **arbitrées par l'Auteur** (§ 1 et § 2). Le second arbitrage l'emporte sur le premier là où ils diffèrent : Camelot est **fondée par Arthur**, et Winchester n'est qu'un **bourg voisin**.
 
 ---
 
@@ -20,11 +20,25 @@ Pose-moi des questions via un questionnaire pour que je réponde. Et je suis d'a
 
 "Les douze batailles de Nennius (dont le mont Badon) deviennent douze débordements de donjons contenus. Ce sont les chroniqueurs des siècles suivants qui en ont fait des batailles contre des hommes." Le "ce sont les chroniqueurs... contre des hommes " ne s'applique pas à Telluris, c'est pour moi trop propre à une vision guerrière de notre Terre. Dans Telluris cela reste un évènement  de débordements de donjons sans avoir été altéré par le temps.
 
+## ✍️ Auteur
+
+Est-ce que Winchester doit s'appeler Winchester ou Camelot? Perso, j'aime bien Camelot. Après, je sais pas ce que préféreront les Anglais.
+
+## 🤖 Claude Code
+
+Garder **Camelot**. C'est la tradition anglaise elle-même (Malory : « Camelot, that is Winchester »), et c'est la règle de Telluris, qui préfère Lutecia à Paris et Rhemi à Reims.
+
+## ✍️ Auteur
+
+Oui consigne dans le lore. Pose-moi via questionnaire toutes les questions qui restent encore en suspens.
+
+Sur les origines de Camelot : « C'est fondé par Arthur c'est à la croisée de nombreux donjons qui ont été perturbés et c'est de là que Arthur créé la table ronde pour tenter de maîtriser les différents donjons »
+
 ---
 
-## 1. Arbitrage de l'Auteur (21/10/2026)
+## 1. Premier arbitrage (21/10/2026)
 
-1. **Camelot existe** : c'est **Winchester**, une cité vivante, qui garde la Table ronde.
+1. **Camelot existe** : une cité vivante, qui garde la Table ronde. Son emplacement est celui de Winchester (voir § 2, points 1 et 2).
 2. **Les douze batailles** sont **douze débordements de donjons**, et rien d'autre. Aucun chroniqueur ne les a déformées en batailles contre des hommes : le récit tellurien n'a **pas été altéré** par le temps.
 3. **La Table ronde** est à la fois :
    - un **ordre vivant**, celui des chevaliers de la Table ronde ;
@@ -39,45 +53,71 @@ Pose-moi des questions via un questionnaire pour que je réponde. Et je suis d'a
 10. **Morgane est soigneuse**, fidèle à la *Vita Merlini* : guérisseuse d'Avalon avec ses neuf sœurs. **Viviane** garde Merlin à **Brocéliande**.
 11. **Les deux portails** : **Stonehenge** est un cercle-portail, non daté. **Glastonbury Tor** est un portail naturel vers **Annwn**, le domaine de Gwyn ap Nudd ; l'abbaye est bâtie autour.
 12. **Dinas Emrys** : un **donjon sous la tour** de Vortigern. Les deux dragons, le rouge et le blanc, y vivent ; ils entrent au bestiaire et servent de boss.
-13. **Excalibur est à Camelot** : conservée à Winchester, intouchable, sous la garde de l'ordre.
-14. **Les chevaliers en jeu** : des **chevaliers actuels**, PNJ à Winchester, qui donnent des quêtes. Les **noms anciens** (Kaï, Bedwyr, Gauvain, Perceval…) n'apparaissent que dans les récits des PNJ, jamais en chair et en os.
+13. **Excalibur est à Camelot** : conservée dans la cité, intouchable, sous la garde de l'ordre.
+14. **Les chevaliers en jeu** : des **chevaliers actuels**, PNJ à Camelot, qui donnent des quêtes. Les **noms anciens** (Kaï, Bedwyr, Gauvain, Perceval…) n'apparaissent que dans les récits des PNJ, jamais en chair et en os.
 
-## 2. Camelot — Winchester
+## 2. Second arbitrage (21/10/2026)
 
-**Ce qui la distingue** : une table où nul ne siège au-dessus d'un autre, et un ordre qui part en quête plutôt que de lever une armée.
+1. **Le nom est Camelot** (`lieu:camelot` le jour où la cité entre en jeu).
+2. **Winchester** est un **bourg voisin**, né à côté de Camelot (faubourgs, marché). Ce n'est pas un autre nom de la cité.
+3. **Arthur vit juste après la Vague**, un peu avant Charlemagne.
+4. **Camelot est fondée par Arthur**, à la **croisée de nombreux donjons perturbés** par la Vague. C'est là qu'il crée la Table ronde, pour tenter de **maîtriser ces donjons**. Rien n'existait avant lui à cet endroit.
+5. **L'ordre gouverne Camelot.**
+6. **Trois ordres côte à côte** sur l'île : les Paladins sur les routes, les Templiers aux portes, les chevaliers de la Table ronde là où un donjon déborde.
+7. **Viviane et la Dame du Lac sont deux figures distinctes** : la Dame du Lac pour Excalibur, Viviane pour Merlin.
+8. **Excalibur** : deux **récits concurrents** circulent, le lac et la pierre. À Camelot, on ne tranche pas.
+9. **Guenièvre et Lancelot** existent **en récit**, de façon **sobre** : aucun adultère mis en avant.
+10. **Medraut est le neveu d'Arthur**, comme chez Geoffroy de Monmouth.
+11. **Pellinore est le vrai, immortel** : le Pellinore d'Arthur, que sa quête de la Bête glatissante maintient en vie. Comment, on ne le sait pas.
+12. **Les rivaux de Camelot sont des lieux en jeu** : Caerleon, Cadbury et Tintagel se disent chacun le « vrai » Camelot, avec leur propre récit.
+13. **Avalon et Annwn sont accessibles à haut rang**, sans que tout soit expliqué.
+14. **L'ordre s'appelle « la Table ronde »**, tout simplement.
+15. **Les chevaliers PNJ sont plusieurs et égaux** : des donneurs de quêtes, aucun ne domine, dans l'esprit de la Table ronde.
+16. **Progression par rang adoptée** : géant du Mont-Saint-Michel **D** · Camelot et Cath Palug **E – D** · Bête glatissante **C** · Twrch Trwyth **B** · Dinas Emrys **A** · Avalon et Annwn **S**.
+17. **Les Lignées se mêlent à Camelot**, comme partout. La Table ronde n'en distingue aucune.
 
-- **Arthur**, l'homme des premiers donjons. Quand la Vague change la couleur des portails de l'île, les premiers donjons débordent. Arthur réunit des chevaliers et contient **douze débordements**, dont celui du **mont Badon**.
-- **La Table ronde**, accrochée dans la grande salle. Aujourd'hui encore, les cités de l'île s'y assoient pour **arbitrer leurs différends**, comme les sages à Chartres. L'**ordre de la Table ronde** y siège et envoie ses chevaliers en quête contre ce qui menace les routes et les donjons.
-- **Excalibur** est conservée à Camelot, intouchable, sous la garde de l'ordre.
-- **Tournois** : les cités de l'île se mesurent en joutes. C'est une rivalité d'influence et de prestige, **jamais une guerre**.
-- **Camlann** : un treizième débordement, celui où tombent Arthur et Medraut. Que Medraut l'ait trahi ou soit mort à ses côtés, chacun a sa version.
-- **Avalon** : Arthur blessé y est emporté. Morgane et ses neuf sœurs y soignent. Qu'il soit mort ou endormi reste un mystère.
-- **La Guilde de Londres** se dit héritière de la Table ronde. Les chevaliers de l'ordre ne la contredisent pas tout à fait, et Lutecia en rit.
+## 3. Camelot
 
-## 3. Autour de Camelot
+**Ce qui la distingue** : une cité née des donjons, gouvernée par une table où nul ne siège au-dessus d'un autre.
+
+- **Fondation.** Quand la Vague change la couleur des portails de l'île, un lieu se trouve à la croisée de nombreux donjons perturbés. Arthur s'y installe, réunit des chevaliers autour d'une table ronde et tente de maîtriser ces donjons. Camelot naît de cette table.
+- **Les douze débordements**, dont celui du **mont Badon**, sont contenus par Arthur et ses chevaliers.
+- **Camlann**, le treizième débordement, est fatal. Arthur et Medraut, son neveu, y tombent. Que Medraut l'ait trahi ou soit mort à ses côtés, chacun a sa version. Arthur blessé est emporté à **Avalon**, où Morgane et ses neuf sœurs soignent. Mort ou endormi, nul ne le sait.
+- **Aujourd'hui**, l'**ordre de la Table ronde** gouverne la cité. Les cités de l'île viennent s'asseoir à sa table pour **arbitrer leurs différends**, comme les sages à Chartres. Les chevaliers partent en quête là où un donjon déborde.
+- **Excalibur** est conservée à Camelot, intouchable, sous la garde de l'ordre. Venue du lac ou tirée de la pierre : les deux récits circulent.
+- **Tournois** : les cités de l'île s'y mesurent en joutes. C'est une rivalité d'influence et de prestige, **jamais une guerre**.
+- **Winchester**, bourg né à côté, abrite les faubourgs et le marché.
+- **Caerleon, Cadbury et Tintagel** se disent chacune le « vrai » Camelot.
+- **La Guilde de Londres** se dit héritière de la Table ronde. Les chevaliers ne la contredisent pas tout à fait, et Lutecia en rit.
+
+## 4. Autour de Camelot
 
 | Lieu ou figure | Adaptation tellurienne | Ancrage réel |
 |---|---|---|
 | **Merlin** | Architecte, ou fils d'une mortelle et d'un incube : théories concurrentes. Enserré par Viviane à Brocéliande. | Geoffroy de Monmouth, *Historia* et *Vita Merlini* ; Myrddin |
+| **Viviane** | Garde Merlin à Brocéliande. Distincte de la Dame du Lac. | romans arthuriens, forêt de Paimpont |
+| **La Dame du Lac** | L'un des deux récits d'Excalibur. | romans arthuriens |
+| **Guenièvre et Lancelot** | En récit, sobres. | romans arthuriens |
+| **Pellinore** | Le vrai, immortel, toujours en quête de la Bête glatissante. | Malory |
 | **Stonehenge** | Cercle-portail, non daté. | la « Danse des Géants » que Merlin fait venir d'Irlande (Geoffroy) |
 | **Glastonbury Tor** | Portail naturel vers **Annwn** (Gwyn ap Nudd) ; l'abbaye est bâtie autour. | légende de Gwyn ap Nudd sous le Tor ; Glastonbury identifiée à Avalon |
-| **Avalon** | L'île où Morgane et ses neuf sœurs soignent ; Arthur y est emporté. | *Vita Merlini*, *Insula Pomorum* |
+| **Avalon** | L'île où Morgane et ses neuf sœurs soignent ; Arthur y est emporté. Atteinte à haut rang. | *Vita Merlini*, *Insula Pomorum* |
 | **Chaudron d'Annwn** | Arthur part le chercher dans l'Autre Monde avec trois navires ; sept hommes seulement reviennent. | *Preiddeu Annwfn* |
 | **Dinas Emrys** | La tour de Vortigern s'effondre sans cesse : un **donjon** s'est ouvert dessous, où vivent un dragon rouge et un dragon blanc. | *Historia Brittonum*, Geoffroy |
-| **Brocéliande** | Viviane y garde Merlin. | romans arthuriens, forêt de Paimpont |
+| **Caerleon, Cadbury, Tintagel** | Lieux en jeu, chacun le « vrai » Camelot selon les siens. | revendications réelles |
 
-## 4. Bestiaire retenu
+## 5. Bestiaire et progression
 
-- **Twrch Trwyth** : sanglier-roi chassé à travers le pays de Galles, l'Irlande et la Cornouailles (*Culhwch ac Olwen*).
-- **Cath Palug** : chat monstrueux d'Anglesey (*Pa gur*, Triades).
-- **Géant du Mont-Saint-Michel** : tué par Arthur selon Geoffroy. Il est en France, à portée du joueur dès les premiers rangs.
-- **Bête glatissante**, avec **Pellinore** en PNJ qui la traque sans jamais l'avoir.
-- **Dragons rouge et blanc** de Dinas Emrys (§ 1, point 12).
+| Rang | Contenu |
+|---|---|
+| D | **Géant du Mont-Saint-Michel**, en France, tué par Arthur selon Geoffroy |
+| E – D | **Camelot** ; **Cath Palug**, chat monstrueux d'Anglesey (*Pa gur*, Triades) |
+| C | **Bête glatissante**, avec Pellinore |
+| B | **Twrch Trwyth**, sanglier-roi chassé à travers Galles, Irlande et Cornouailles (*Culhwch ac Olwen*) |
+| A | **Dinas Emrys**, dragons rouge et blanc |
+| S | **Avalon** et **Annwn** |
 
-## 5. Points ouverts
+## 6. Points ouverts
 
-- **Date d'Arthur** : « juste après la Vague » est la proposition de Claude Code, que l'Auteur n'a pas contestée sans pour autant la trancher.
-- **Origines de Winchester** avant Arthur (établissement, avènement) : non décrites. Camelot n'a donc pas encore de fleuve dans la frise.
-- **Nom et devoirs** de l'ordre de la Table ronde aujourd'hui, et ses rapports avec les Paladins et les Templiers de l'île.
-- **Viviane et la Dame du Lac** : même figure ou non, et lien avec Excalibur.
-- **PNJ chevaliers actuels** : noms, Lignées, quêtes.
+- **Noms et Lignées** des chevaliers PNJ actuels, et leurs quêtes.
+- **Récits propres** de Caerleon, Cadbury et Tintagel.
