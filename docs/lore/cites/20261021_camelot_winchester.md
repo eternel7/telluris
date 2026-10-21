@@ -202,6 +202,8 @@ Oui, génère les Cŵn Annwn et Gwyn ap Nudd avec les prompts.
 
 **Images reçues et détourées** (21/10) : les six espèces du § 6. Le dragon blanc et la Bête glatissante ont été détourés avec des seuils resserrés (`--dur 30 --doux 55`), car leur fond magenta terne était trop proche de leurs couleurs ; le souffle translucide du dragon blanc, resté rosé, a été repeint en blanc bleuté.
 
+**Chasse sauvage, images reçues et détourées** (21/10) : Gwyn ap Nudd avec des seuils resserrés (`--dur 30 --doux 55`), liseré magenta retiré des cheveux et de la couronne ; la brume aux pattes du Chien d'Annwn, teintée du fond bleu, ramenée au blanc grisé.
+
 ### Prompts d'image
 
 **`cwn_annwn`**
