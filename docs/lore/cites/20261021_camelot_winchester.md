@@ -153,7 +153,6 @@ La différence par rapport à Rome, c'est que il y avait une grotte au fond de l
 
 - **Noms et Lignées** des chevaliers PNJ actuels, et leurs quêtes.
 - **Récits propres** de Caerleon, Cadbury et Tintagel.
-- **Cŵn Annwn** et Gwyn ap Nudd au bestiaire.
 
 ## 8. Prompts d'image
 
@@ -187,4 +186,30 @@ Réalise l'image du Dragon rouge de Dinas Emrys : grand dragon aux écailles rou
 **`dragon_blanc`**
 ```
 Réalise l'image du Dragon blanc de Dinas Emrys : grand dragon aux écailles blanc crayeux et gris pâle, cornes ivoire, crête dorsale épineuse, grandes ailes de cuir blanc veinées de gris, yeux bleu glacé, gueule ouverte sur un souffle d'une lumière blanche et froide, griffes grises. Elle est en vol, ailes déployées. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+## ✍️ Auteur
+
+Oui, génère les Cŵn Annwn et Gwyn ap Nudd avec les prompts.
+
+## 9. La Chasse sauvage — bestiaire
+
+`dev/gen_chasse_sauvage.py` → `jsons/chasse_sauvage_a_importer.json` (même cœur que le bestiaire arthurien, fichier propre à la demande).
+
+- **`espece:cwn_annwn`**, « Chien d'Annwn » : chiens blancs aux oreilles rouges qui aboient plus fort de loin que de près, en meute. **Rang C proposé.**
+- **`espece:gwyn_ap_nudd`** : seigneur d'Annwn, être unique et boss, accompagné de son chien Dormarth. Il se bat chaque premier jour de mai contre Gwythyr pour Creiddylad. **Rang A proposé.** Annwn lui-même reste au rang S.
+- Proposé, non tranché : les deux rangs ; Gwyn courtois avant de lâcher ses chiens.
+
+**Images reçues et détourées** (21/10) : les six espèces du § 6. Le dragon blanc et la Bête glatissante ont été détourés avec des seuils resserrés (`--dur 30 --doux 55`), car leur fond magenta terne était trop proche de leurs couleurs ; le souffle translucide du dragon blanc, resté rosé, a été repeint en blanc bleuté.
+
+### Prompts d'image
+
+**`cwn_annwn`**
+```
+Réalise l'image d'un Chien d'Annwn, chien de chasse de l'Autre Monde : grand lévrier massif à la taille d'un loup, pelage d'un blanc éclatant presque lumineux, oreilles d'un rouge vif, yeux pâles et brillants, gueule entrouverte sur des crocs blancs, une brume légère et blanche s'accrochant à ses pattes. Attitude de chasse, griffes et crocs visibles, regard fixé sur sa proie. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, bleu vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+**`gwyn_ap_nudd`**
+```
+Réalise l'image de Gwyn ap Nudd, seigneur d'Annwn et maître de la Chasse sauvage : homme grand et élancé à la beauté inquiétante, peau pâle, longs cheveux noirs, yeux gris argent, couronne de branches d'aubépine noire, manteau de chasse gris sombre doublé de fourrure de loup, cor de chasse en corne à la ceinture, longue lance à la main, à ses pieds un grand chien blanc au museau rouge. Attitude calme et courtoise, prêt à lâcher la meute. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
 ```

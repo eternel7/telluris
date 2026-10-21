@@ -1,0 +1,587 @@
+[
+  {
+    "_id": "espece:cwn_annwn",
+    "type": "espece",
+    "nom": "Chien d'Annwn",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "cwn_annwn_transparent.png",
+    "description": "Les Cŵn Annwn, chiens de l'Autre Monde, d'un blanc éclatant aux oreilles rouges. Certaines nuits ils sortent en meute des portails qui surgissent autour de Camelot, avec la Chasse sauvage. Leur aboiement est d'autant plus fort qu'ils sont loin, et se fait doux quand ils sont tout près : qui les entend chuchoter derrière lui n'a plus le temps de fuir. On dit qu'ils mènent les âmes jusqu'à Annwn ; les chevaliers de la Table ronde disent seulement qu'ils ne lâchent jamais une piste.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 45,
+        "max": 65
+      },
+      "R": {
+        "min": 40,
+        "max": 60
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 45,
+        "max": 65
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "monstre",
+      "feerique",
+      "nocturne",
+      "rapide",
+      "terreur",
+      "predateur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:cwn_annwn",
+    "type": "item",
+    "nom": "Carcasse de Chien d'Annwn",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      60,
+      110
+    ],
+    "description": "Dépouille de Chien d'Annwn récupérée à l'issue du combat.",
+    "source_espece": "espece:cwn_annwn",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:cwn_annwn_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:cwn_annwn_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:cwn_annwn_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:cwn_annwn_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "espece:gwyn_ap_nudd",
+    "type": "espece",
+    "nom": "Gwyn ap Nudd",
+    "genre": "m",
+    "nom_propre": true,
+    "image": "gwyn_ap_nudd_transparent.png",
+    "description": "Seigneur d'Annwn, qui mène la Chasse sauvage hors des portails par les nuits d'orage, son chien Dormarth au museau rouge à ses côtés. Chaque premier jour de mai il se bat contre Gwythyr pour la belle Creiddylad, et se battra ainsi jusqu'à la fin des temps sans qu'aucun ne l'emporte. Les uns disent qu'il demeure sous Glastonbury Tor ; ceux qui l'ont croisé disent qu'il leur a parlé avec courtoisie, puis a lâché ses chiens.",
+    "base_attributes": {
+      "V": {
+        "min": 8,
+        "max": 10
+      },
+      "F": {
+        "min": 65,
+        "max": 95
+      },
+      "R": {
+        "min": 60,
+        "max": 90
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 85,
+        "max": 120
+      },
+      "Int": {
+        "min": 65,
+        "max": 90
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "humanoide",
+      "feerique",
+      "magique",
+      "nocturne",
+      "legendaire",
+      "boss",
+      "insensible_furtivite"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "item:gwyn_ap_nudd",
+    "type": "item",
+    "nom": "Carcasse de Gwyn ap Nudd",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      70,
+      110
+    ],
+    "description": "Dépouille de Gwyn ap Nudd récupérée à l'issue du combat.",
+    "source_espece": "espece:gwyn_ap_nudd",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:gwyn_ap_nudd_tete",
+        "quantite": 1,
+        "fraction": 0.08
+      },
+      {
+        "item": "item:gwyn_ap_nudd_corps",
+        "quantite": 1,
+        "fraction": 0.5
+      },
+      {
+        "item": "item:gwyn_ap_nudd_bras",
+        "quantite": 2,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:gwyn_ap_nudd_jambe",
+        "quantite": 2,
+        "fraction": 0.3
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:cwn_annwn_tete",
+    "type": "item",
+    "nom": "Tête de Chien d'Annwn",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      7.2,
+      13.2
+    ],
+    "description": "Tête de Chien d'Annwn, débitée sur place.",
+    "tags": [
+      "feerique",
+      "insensible_furtivite",
+      "monstre",
+      "nocturne",
+      "partie_tete",
+      "predateur",
+      "rapide",
+      "terreur"
+    ],
+    "source_espece": "espece:cwn_annwn",
+    "portion_de": "item:cwn_annwn",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:cwn_annwn_corps",
+    "type": "item",
+    "nom": "Corps de Chien d'Annwn",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      31.2,
+      57.2
+    ],
+    "description": "Corps de Chien d'Annwn, débité sur place.",
+    "tags": [
+      "feerique",
+      "insensible_furtivite",
+      "monstre",
+      "nocturne",
+      "partie_corps",
+      "predateur",
+      "rapide",
+      "terreur"
+    ],
+    "source_espece": "espece:cwn_annwn",
+    "portion_de": "item:cwn_annwn",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:cwn_annwn_patte",
+    "type": "item",
+    "nom": "Patte de Chien d'Annwn",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      4.2,
+      7.7
+    ],
+    "description": "Patte de Chien d'Annwn, débitée sur place.",
+    "tags": [
+      "feerique",
+      "insensible_furtivite",
+      "monstre",
+      "nocturne",
+      "partie_patte",
+      "predateur",
+      "rapide",
+      "terreur"
+    ],
+    "source_espece": "espece:cwn_annwn",
+    "portion_de": "item:cwn_annwn",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:cwn_annwn_queue",
+    "type": "item",
+    "nom": "Queue de Chien d'Annwn",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      4.8,
+      8.8
+    ],
+    "description": "Queue de Chien d'Annwn, débitée sur place.",
+    "tags": [
+      "feerique",
+      "insensible_furtivite",
+      "monstre",
+      "nocturne",
+      "partie_queue",
+      "predateur",
+      "rapide",
+      "terreur"
+    ],
+    "source_espece": "espece:cwn_annwn",
+    "portion_de": "item:cwn_annwn",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:gwyn_ap_nudd_tete",
+    "type": "item",
+    "nom": "Tête de Gwyn ap Nudd",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      5.6,
+      8.8
+    ],
+    "description": "Tête de Gwyn ap Nudd, débitée sur place.",
+    "tags": [
+      "boss",
+      "feerique",
+      "humanoide",
+      "insensible_furtivite",
+      "legendaire",
+      "magique",
+      "nocturne",
+      "partie_tete"
+    ],
+    "source_espece": "espece:gwyn_ap_nudd",
+    "portion_de": "item:gwyn_ap_nudd",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:gwyn_ap_nudd_corps",
+    "type": "item",
+    "nom": "Corps de Gwyn ap Nudd",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      35.0,
+      55.0
+    ],
+    "description": "Corps de Gwyn ap Nudd, débité sur place.",
+    "tags": [
+      "boss",
+      "feerique",
+      "humanoide",
+      "insensible_furtivite",
+      "legendaire",
+      "magique",
+      "nocturne",
+      "partie_corps"
+    ],
+    "source_espece": "espece:gwyn_ap_nudd",
+    "portion_de": "item:gwyn_ap_nudd",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:gwyn_ap_nudd_bras",
+    "type": "item",
+    "nom": "Bras de Gwyn ap Nudd",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      4.2,
+      6.6
+    ],
+    "description": "Bras de Gwyn ap Nudd, débité sur place.",
+    "tags": [
+      "boss",
+      "feerique",
+      "humanoide",
+      "insensible_furtivite",
+      "legendaire",
+      "magique",
+      "nocturne",
+      "partie_bras"
+    ],
+    "source_espece": "espece:gwyn_ap_nudd",
+    "portion_de": "item:gwyn_ap_nudd",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:gwyn_ap_nudd_jambe",
+    "type": "item",
+    "nom": "Jambe de Gwyn ap Nudd",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      10.5,
+      16.5
+    ],
+    "description": "Jambe de Gwyn ap Nudd, débitée sur place.",
+    "tags": [
+      "boss",
+      "feerique",
+      "humanoide",
+      "insensible_furtivite",
+      "legendaire",
+      "magique",
+      "nocturne",
+      "partie_jambe"
+    ],
+    "source_espece": "espece:gwyn_ap_nudd",
+    "portion_de": "item:gwyn_ap_nudd",
+    "partie": "jambe",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  }
+]

@@ -163,7 +163,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 - **Excalibur** conservée à Camelot, intouchable, sous la garde de l'ordre ; origine : le lac **ou** la pierre, récits concurrents.
 - **Pas de Graal** : le **chaudron d'Annwn** (*Preiddeu Annwfn*, sept reviennent). **Stonehenge** = cercle-portail non daté ; **Glastonbury Tor** = portail naturel vers **Annwn** (Gwyn ap Nudd), abbaye bâtie autour ; **Dinas Emrys** = donjon sous la tour de Vortigern, dragons rouge et blanc.
 - **Caerleon, Cadbury, Tintagel** = lieux en jeu, chacun « le vrai Camelot ». **Pellinore** = le vrai, **immortel**, toujours après la Bête glatissante. Chevaliers PNJ actuels **plusieurs et égaux** ; Kaï, Bedwyr, Gauvain, Perceval… **en récit seulement**. Foule mêlée des cinq Lignées.
-- **Bestiaire** : `dev/gen_bestiaire_arthurien.py` → `jsons/bestiaire_arthurien_a_importer.json` (géant du Mont-Saint-Michel, Cath Palug, Bête glatissante, Twrch Trwyth, dragons rouge et blanc).
+- **Bestiaire** : `dev/gen_bestiaire_arthurien.py` → `jsons/bestiaire_arthurien_a_importer.json` (géant du Mont-Saint-Michel, Cath Palug, Bête glatissante, Twrch Trwyth, dragons rouge et blanc). Chasse sauvage : `dev/gen_chasse_sauvage.py` → `jsons/chasse_sauvage_a_importer.json` (Chien d'Annwn C, Gwyn ap Nudd A : rangs proposés).
 - **Progression** : géant du Mont-Saint-Michel D · Camelot et Cath Palug E–D · Bête glatissante C · Twrch Trwyth B · Dinas Emrys A · Avalon et Annwn S.
 
 **Ouvert** : noms et Lignées des chevaliers PNJ ; récits propres de Caerleon, Cadbury, Tintagel.

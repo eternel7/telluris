@@ -117,15 +117,16 @@ NOUVELLES = {
 }
 
 
-def docs_bestiaire_arthurien(base: dict) -> tuple[list, list]:
-	"""(docs à importer, ids déjà en base) d'après les docs du dump `base` ({_id: doc})."""
-	erreurs = [f"espece:{s} absente de gen_jetons_especes.TABLE" for s in NOUVELLES if s not in JETONS]
+def docs_bestiaire_arthurien(base: dict, nouvelles: dict = NOUVELLES) -> tuple[list, list]:
+	"""(docs à importer, ids déjà en base) d'après les docs du dump `base` ({_id: doc}).
+	`nouvelles` : un autre lot de même forme (cf. `gen_chasse_sauvage.py`)."""
+	erreurs = [f"espece:{s} absente de gen_jetons_especes.TABLE" for s in nouvelles if s not in JETONS]
 	if erreurs:
 		sys.exit("ERREUR :\n   " + "\n   ".join(erreurs))
 
 	docs, deja = [], []
 	neufs = []  # espèces + carcasses, tels qu'ils seraient en base (pour la découpe)
-	for slug, spec in NOUVELLES.items():
+	for slug, spec in nouvelles.items():
 		doc = _espece(slug, spec)
 		carc = _carcasse(doc["_id"], doc["nom"], *spec["carcasse"])
 		neufs += [doc, carc]
@@ -138,7 +139,7 @@ def docs_bestiaire_arthurien(base: dict) -> tuple[list, list]:
 	# Découpe des grosses carcasses : même cœur que gen_carcasses_parties, restreint aux neuves.
 	carcasses.controler_profils()
 	vue = {**base, **{d["_id"]: d for d in neufs}}
-	grosses = [s for s, spec in NOUVELLES.items() if spec["carcasse"][0][1] > carcasses.seuil()]
+	grosses = [s for s, spec in nouvelles.items() if spec["carcasse"][0][1] > carcasses.seuil()]
 	sortie, _resume, _ign, _orph, inchanges = carcasses.generer(list(vue.values()), grosses)
 	par_id = {d["_id"]: i for i, d in enumerate(docs)}
 	for d in sortie:

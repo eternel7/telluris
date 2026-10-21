@@ -47,14 +47,14 @@ MASCULINS = {
 	"archange_de_l_ordre", "archange_du_savoir", "avatar", "balaur", "basilic", "besien", "boukhnoun",
 	"bunyip", "cath_palug", "centaure", "cerbere", "cerf", "cheval", "cheval_de_trait", "cheval_normand",
 	"chevalier_du_sang", "comte_vampire", "coursier_elfique", "coursier_persan", "crocodile", "cu_sidhe",
-	"cupidon", "cyclope", "demon_guerrier", "demon_majeur_de_la_destinee",
+	"cupidon", "cwn_annwn", "cyclope", "demon_guerrier", "demon_majeur_de_la_destinee",
 	"demon_majeur_de_la_destruction", "demon_mineur", "demon_servant", "doppleganger", "dobhar_chu", "dragnard", "draugr",
 	"dragon", "dragon_blanc", "dragon_de_sang", "dragon_empereur", "dragon_hydre", "dragon_rouge", "dragon_zombie",
 	"ecureuil", "failinis", "familier", "fantome", "faoladh",
 	"fils_de_sobek", "geant_du_mont_saint_michel", "geant_ou_titan", "genie", "ghul_des_sables", "gnome", "gobelin",
 	"gobelin_chamanique", "gobelin_des_marais", "golem_de_chair", "golem_de_fer",
 	"golem_de_pierre", "grand_dragon", "grand_faucon", "grand_phenix", "grand_sanglier",
-	"griffon", "hippogriffe", "homme_arbre", "ifrit", "illuyanka", "incube", "jann", "kraken", "ladon", "leprechaun",
+	"griffon", "gwyn_ap_nudd", "hippogriffe", "homme_arbre", "ifrit", "illuyanka", "incube", "jann", "kraken", "ladon", "leprechaun",
 	"leviathan", "lievre", "loup", "loup_garou", "loup_geant", "lycaon", "malandhir", "mammouth", "marid",
 	"minotaure", "mulet", "mushhushshu", "nahual", "nosferatu", "ondin", "orc", "ours", "ours_polaire", "pegase",
 	"petit_dragon", "petits_animaux_divers", "phenix", "polar_kraken", "poney", "prince_demon",
@@ -76,7 +76,7 @@ PLURIELS = {
 
 # Êtres uniques : le titre dit « Apep », pas « l'Apep ».
 PROPRES = {"abhartach", "aicha_kandicha", "ammit", "apep", "cath_palug", "cupidon", "dearg_due", "failinis",
-		   "illuyanka", "ladon", "lycaon", "twrch_trwyth", "yamata_no_orochi", "zmey_gorynych"}
+		   "gwyn_ap_nudd", "illuyanka", "ladon", "lycaon", "twrch_trwyth", "yamata_no_orochi", "zmey_gorynych"}
 
 # « h » aspiré : « la Harpie » et non « l'Harpie ». Hydre, Horreur, Hippogriffe, Homme Arbre
 # s'élident.
