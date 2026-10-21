@@ -34,6 +34,12 @@ Oui consigne dans le lore. Pose-moi via questionnaire toutes les questions qui r
 
 Sur les origines de Camelot : « C'est fondé par Arthur c'est à la croisée de nombreux donjons qui ont été perturbés et c'est de là que Arthur créé la table ronde pour tenter de maîtriser les différents donjons »
 
+## ✍️ Auteur
+
+Génère le bestiaire arthurien à importer.
+
+Pour moi, Arthur a surtout fondé la table ronde et a mis des chevaliers autour pour défendre Camelot et l'Angleterre contre des portails qui sont nombreux et qui étaient naturels autour de cette zone de Camelot. Et donc, ils ne sont pas templiers parce que c'était pas des portails créés. Ils ne sont pas paladins parce qu'ils ne protègent pas vraiment les routes. Et donc, c'est bien une sorte de troisième ordre. Est-ce que cela s'intègre bien dans ce que tu as dit? Et est-ce que tu veux apporter quelque chose supplémentaire à ce que je viens de dire?
+
 ---
 
 ## 1. Premier arbitrage (21/10/2026)
@@ -76,6 +82,13 @@ Sur les origines de Camelot : « C'est fondé par Arthur c'est à la croisée de
 16. **Progression par rang adoptée** : géant du Mont-Saint-Michel **D** · Camelot et Cath Palug **E – D** · Bête glatissante **C** · Twrch Trwyth **B** · Dinas Emrys **A** · Avalon et Annwn **S**.
 17. **Les Lignées se mêlent à Camelot**, comme partout. La Table ronde n'en distingue aucune.
 
+## 2 bis. Précision de l'Auteur : des portails naturels (21/10/2026)
+
+1. Les donjons perturbés autour de Camelot sont des **portails NATURELS**, nombreux dans cette zone, que personne n'a bâtis. La Vague les a perturbés.
+2. Arthur fonde la Table ronde et place des chevaliers autour pour **défendre Camelot et l'île** contre ces portails.
+3. **Troisième ordre** : ni Templiers, puisque ces portails n'ont pas été créés, ni Paladins, puisque les chevaliers ne protègent pas vraiment les routes.
+4. ⚠️ **Nuance à garder** : la frontière « créé / naturel » n'est pas celle des Templiers partout. À Rome, un groupe de Templiers garde le portail **naturel** de Saint-Pierre. La règle vaut pour l'île : les Templiers y gardent les portails bâtis, la Table ronde les portails naturels.
+
 ## 3. Camelot
 
 **Ce qui la distingue** : une cité née des donjons, gouvernée par une table où nul ne siège au-dessus d'un autre.
@@ -117,7 +130,11 @@ Sur les origines de Camelot : « C'est fondé par Arthur c'est à la croisée de
 | A | **Dinas Emrys**, dragons rouge et blanc |
 | S | **Avalon** et **Annwn** |
 
-## 6. Points ouverts
+## 6. Bestiaire importable
+
+`dev/gen_bestiaire_arthurien.py` → `jsons/bestiaire_arthurien_a_importer.json` : `espece:geant_du_mont_saint_michel`, `espece:cath_palug`, `espece:bete_glatissante`, `espece:twrch_trwyth`, `espece:dragon_rouge`, `espece:dragon_blanc`, avec leurs carcasses et leurs découpes. Images à générer : `templates/resources/monsters/<slug>_transparent.png`.
+
+## 7. Points ouverts
 
 - **Noms et Lignées** des chevaliers PNJ actuels, et leurs quêtes.
 - **Récits propres** de Caerleon, Cadbury et Tintagel.
