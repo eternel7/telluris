@@ -3,7 +3,7 @@
 Chaque entrée sépare **Auteur** (décision, niveau 2) et **Proposé** (réponse ChatGPT non adoptée, niveau 4). Source : le fichier entre crochets dans `docs/lore/`. Lieux réellement en jeu : `lieu:*` du dump (catégories `ville`, `pays`, `portail`, `temple`, `guilde_aventurier`).
 
 ## Sommaire
-France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem — Mythiques : Mu · Atlantis — Réseau des portails
+France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri · Camelot (Winchester) — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem — Mythiques : Mu · Atlantis — Réseau des portails
 
 ---
 
@@ -151,6 +151,19 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 **Tableau de l'Auteur (26/08)** : Akureyri → Reykjavik, forteresse-portail des Templiers, active mais altérée, passages instables scellés.
 
 **Proposé** : garde du gouffre, rapports Reykjavik/Akureyri au secret — voir le fichier.
+
+## Camelot (Winchester) — [cites/20261021_camelot_winchester.md]
+**Auteur (21/10, questionnaire)**
+- **Camelot existe** : c'est **Winchester**, cité vivante de l'île de Bretagne. **Accès tôt** par Douvres (`lieu:angleterre`, `lieu:london` au dump ; Winchester pas encore en jeu).
+- **Table ronde** = trois choses à la fois : **ordre vivant** de chevaliers en quête · **table d'arbitrage** des cités de l'île, où l'ordre siège · héritage **revendiqué par la Guilde de Londres** (théorie de PNJ, Lutecia en rit). Rivalités en **tournois**, jamais en guerre.
+- **Douze batailles d'Arthur** (mont Badon) = **douze débordements de donjons**, récit **NON altéré** : jamais « des chroniqueurs en ont fait des batailles contre des hommes » (vision guerrière de la Terre).
+- **Camlann** = treizième débordement, fatal : Arthur et Medraut l'un contre l'autre ou côte à côte, **théories contradictoires**. Arthur emporté à **Avalon**, mort ou endormi : mystère.
+- **Merlin** : Architecte **ou** fils d'une mortelle et d'un incube, théories concurrentes ; enserré par **Viviane** à **Brocéliande**. **Morgane soigneuse** (*Vita Merlini*, neuf sœurs d'Avalon).
+- **Pas de Graal** : le **chaudron d'Annwn** (*Preiddeu Annwfn*, sept reviennent). **Stonehenge** = cercle-portail non daté ; **Glastonbury Tor** = portail naturel vers **Annwn** (Gwyn ap Nudd), abbaye bâtie autour ; **Dinas Emrys** = donjon sous la tour de Vortigern, dragons rouge et blanc (bestiaire, boss).
+- **Excalibur** conservée à Camelot, intouchable, sous la garde de l'ordre. Chevaliers **actuels** = PNJ donneurs de quêtes ; Kaï, Bedwyr, Gauvain, Perceval… **en récit seulement**.
+- Bestiaire retenu : Twrch Trwyth, Cath Palug, géant du Mont-Saint-Michel, Bête glatissante (+ Pellinore PNJ).
+
+**Ouvert** : date d'Arthur (« juste après la Vague », non tranché), origines de Winchester (pas de fleuve dans la frise), nom/devoirs de l'ordre aujourd'hui, Viviane = Dame du Lac ?, PNJ chevaliers.
 
 ## Constantinople — [cites/20260824_decrit_constantinople_telluris.md]
 **Auteur**

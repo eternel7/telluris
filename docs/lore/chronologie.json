@@ -81,6 +81,7 @@
 		"monde": "Tout Telluris",
 		"gaule": "Gaule",
 		"irlande": "Irlande et îles celtes",
+		"ile_bretagne": "Île de Bretagne",
 		"flandres": "Flandres",
 		"rhenanie": "Rhénanie",
 		"scandinavie": "Scandinavie et Islande",
@@ -123,7 +124,8 @@
 			"mu": "Peuple de Mu",
 			"atlantes": "Atlantes",
 			"dragons": "Dragons",
-			"anges_demons": "Anges et démons"
+			"anges_demons": "Anges et démons",
+			"bretons": "Bretons de l'île"
 		},
 		"lieux": {
 			"lutecia": "Lutecia",
@@ -155,7 +157,13 @@
 			"chartres": "Chartres",
 			"ossory": "Ossory",
 			"teotihuacan": "Teotihuacan",
-			"livonie": "Livonie"
+			"livonie": "Livonie",
+			"camelot": "Camelot (Winchester)",
+			"avalon": "Avalon",
+			"annwn": "Annwn",
+			"stonehenge": "Stonehenge",
+			"glastonbury": "Glastonbury",
+			"dinas_emrys": "Dinas Emrys"
 		},
 		"institutions": {
 			"paladins": "Paladins",
@@ -163,7 +171,8 @@
 			"architectes": "Architectes",
 			"guilde": "Guilde des Aventuriers",
 			"papaute": "Papauté",
-			"ordre_dragon": "Ordre du Dragon"
+			"ordre_dragon": "Ordre du Dragon",
+			"table_ronde": "Table ronde"
 		},
 		"themes": {
 			"portails": "Portails",
@@ -1191,6 +1200,116 @@
 			"tags": {"lieux": ["chartres"], "themes": ["savoir"]},
 			"sources": [{"fichier": "cites/20261011_rhemi_et_chartres.md", "date": "2026-10-11", "citation": "des nains juchés sur des épaules de géants"}],
 			"apres": ["charlemagne"]
+		},
+		{
+			"id": "cite_camelot",
+			"titre": "Camelot, à Winchester",
+			"titre_court": "Camelot",
+			"resume": "Cité vivante de l'île de Bretagne, qui garde la Table ronde : les cités de l'île s'y assoient pour arbitrer leurs différends, l'ordre de la Table ronde y siège, Excalibur y est conservée, intouchable. Les cités s'y mesurent en tournois, jamais en guerre.",
+			"quand": {"de": {"ere": "donjons", "entre": [800, 700]}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "proposition", "note": "Le Camelot d'Arthur ; les origines de Winchester avant lui ne sont pas décrites (§ 5 de la séance)."},
+			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
+			"origine": ["ile_bretagne"],
+			"tags": {"peuples": ["bretons"], "lieux": ["camelot"], "institutions": ["table_ronde"], "themes": ["donjons", "mythes"]},
+			"sources": [
+				{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "je suis d'accord avec Winchester, c'est un endroit pour mettre le rôle et mettre Camelot"},
+				{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "**Excalibur est à Camelot**"}
+			],
+			"liens": ["arthur", "table_ronde"]
+		},
+		{
+			"id": "arthur",
+			"titre": "Arthur, l'homme des premiers donjons",
+			"titre_court": "Arthur",
+			"resume": "Quand la Vague change la couleur des portails de l'île, les premiers donjons débordent. Arthur réunit des chevaliers autour d'une table où nul ne siège au-dessus d'un autre.",
+			"quand": {"moment": {"ere": "donjons", "entre": [800, 700]}, "autorite": "proposition", "note": "« Juste après la Vague » : proposition non contestée, non tranchée (§ 5 de la séance)."},
+			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
+			"origine": ["ile_bretagne"],
+			"tags": {"peuples": ["bretons"], "lieux": ["camelot"], "institutions": ["table_ronde"], "themes": ["donjons", "mythes"]},
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "Arthur devient l'homme des **premiers donjons**"}],
+			"apres": ["vague"],
+			"liens": ["douze_debordements", "camlann"]
+		},
+		{
+			"id": "table_ronde",
+			"titre": "L'ordre de la Table ronde",
+			"titre_court": "Table ronde",
+			"resume": "Ordre vivant dont les chevaliers partent en quête contre ce qui menace les routes et les donjons ; il siège à la table d'arbitrage des cités de l'île. La Guilde de Londres se dit son héritière, et Lutecia en rit.",
+			"quand": {"de": {"ere": "donjons", "entre": [800, 700]}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "proposition"},
+			"couche": "histoire", "categorie": "institution", "autorite": "auteur", "visibilite": "public",
+			"origine": ["ile_bretagne"],
+			"tags": {"lieux": ["camelot"], "institutions": ["table_ronde", "guilde"], "themes": ["donjons"]},
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "un héritage que la **Guilde de Londres revendique**"}],
+			"apres": ["vague"]
+		},
+		{
+			"id": "douze_debordements",
+			"titre": "Les douze débordements contenus par Arthur",
+			"titre_court": "Douze débordements",
+			"resume": "Les douze batailles d'Arthur, dont celle du mont Badon, sont douze débordements de donjons, et rien d'autre : le récit n'a pas été altéré par le temps.",
+			"quand": {"moment": {"ere": "donjons", "entre": [800, 700]}, "autorite": "proposition"},
+			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
+			"origine": ["ile_bretagne"],
+			"tags": {"lieux": ["camelot"], "institutions": ["table_ronde"], "themes": ["donjons"]},
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "Dans Telluris cela reste un évènement  de débordements de donjons sans avoir été altéré par le temps."}],
+			"apres": ["vague"]
+		},
+		{
+			"id": "camlann",
+			"titre": "Camlann, le treizième débordement",
+			"titre_court": "Camlann",
+			"resume": "Un débordement fatal où tombent Arthur et Medraut : l'un contre l'autre ou côte à côte, les théories se contredisent. Arthur blessé est emporté à Avalon, où Morgane et ses neuf sœurs soignent ; mort ou endormi, nul ne le sait.",
+			"quand": {"moment": {"ere": "donjons", "entre": [800, 700]}, "autorite": "proposition"},
+			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
+			"origine": ["ile_bretagne"],
+			"tags": {"peuples": ["bretons"], "lieux": ["camelot", "avalon"], "institutions": ["table_ronde"], "themes": ["donjons", "mystere", "deuil"]},
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "**Camlann** est un **débordement fatal**"}],
+			"apres": ["douze_debordements"]
+		},
+		{
+			"id": "chaudron_annwn",
+			"titre": "Le chaudron d'Annwn",
+			"titre_court": "Chaudron d'Annwn",
+			"resume": "Arthur part chercher un chaudron dans l'Autre Monde avec trois navires ; sept hommes seulement reviennent.",
+			"quand": {"moment": {"ere": "donjons", "entre": [800, 700]}, "autorite": "proposition"},
+			"couche": "histoire", "categorie": "mythe", "autorite": "auteur", "visibilite": "public",
+			"origine": ["ile_bretagne", "au_dela"],
+			"tags": {"lieux": ["annwn", "glastonbury"], "themes": ["mondes_divins", "mythes", "mystere"]},
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "On garde la version galloise plus ancienne : le **chaudron d'Annwn**"}],
+			"apres": ["vague"]
+		},
+		{
+			"id": "stonehenge",
+			"titre": "Stonehenge, le cercle-portail",
+			"titre_court": "Stonehenge",
+			"resume": "Un cercle-portail de pierres dressées, non daté. Merlin l'aurait déplacé ou rallumé, selon ceux qui le tiennent pour un Architecte.",
+			"quand": {"moment": {"ere": "antediluvien", "inconnu": true}, "autorite": "auteur", "note": "Non daté : placé dans l'antédiluvien faute de mieux, comme l'Hekla."},
+			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
+			"origine": ["ile_bretagne"],
+			"tags": {"lieux": ["stonehenge"], "institutions": ["architectes"], "themes": ["portails", "mystere"]},
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "**Stonehenge** est un cercle-portail, non daté"}]
+		},
+		{
+			"id": "glastonbury_annwn",
+			"titre": "Glastonbury Tor, porte d'Annwn",
+			"titre_court": "Glastonbury Tor",
+			"resume": "Un portail naturel vers Annwn, le domaine de Gwyn ap Nudd ; l'abbaye de Glastonbury est bâtie autour.",
+			"quand": {"moment": {"ere": "antediluvien", "inconnu": true}, "autorite": "auteur", "note": "Non daté, comme les autres portails naturels."},
+			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
+			"origine": ["ile_bretagne", "au_dela"],
+			"tags": {"lieux": ["glastonbury", "annwn", "avalon"], "themes": ["portails", "mondes_divins", "mystere"]},
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "**Glastonbury Tor** est un portail naturel vers **Annwn**"}]
+		},
+		{
+			"id": "dinas_emrys",
+			"titre": "Dinas Emrys, le donjon sous la tour",
+			"titre_court": "Dinas Emrys",
+			"resume": "La tour de Vortigern s'effondre sans cesse : un donjon s'est ouvert dessous, où vivent un dragon rouge et un dragon blanc.",
+			"quand": {"de": {"ere": "donjons", "entre": [800, 650]}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "proposition"},
+			"couche": "histoire", "categorie": "portail", "autorite": "auteur", "visibilite": "public",
+			"origine": ["ile_bretagne"],
+			"tags": {"peuples": ["dragons"], "lieux": ["dinas_emrys"], "themes": ["donjons", "mythes"]},
+			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "un **donjon sous la tour** de Vortigern"}],
+			"apres": ["vague"]
 		},
 		{
 			"id": "predecesseur_maelys",
