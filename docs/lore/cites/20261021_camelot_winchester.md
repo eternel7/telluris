@@ -40,6 +40,18 @@ Génère le bestiaire arthurien à importer.
 
 Pour moi, Arthur a surtout fondé la table ronde et a mis des chevaliers autour pour défendre Camelot et l'Angleterre contre des portails qui sont nombreux et qui étaient naturels autour de cette zone de Camelot. Et donc, ils ne sont pas templiers parce que c'était pas des portails créés. Ils ne sont pas paladins parce qu'ils ne protègent pas vraiment les routes. Et donc, c'est bien une sorte de troisième ordre. Est-ce que cela s'intègre bien dans ce que tu as dit? Et est-ce que tu veux apporter quelque chose supplémentaire à ce que je viens de dire?
 
+## 🤖 Claude Code
+
+Trois propositions : (1) des chevaliers errants pour des portails errants, qui suivent un portail jusqu'à ce qu'il se referme ; (2) pourquoi tant de portails autour de Camelot ? Un mystère, avec des théories concurrentes : certains disent que l'Autre Monde, Annwn, est tout proche sous l'île, Glastonbury Tor n'en étant que la porte la plus connue ; d'autres pensent que Stonehenge les attire ; (3) la Chasse sauvage de Gwyn ap Nudd, dont les chiens d'Annwn (Cŵn Annwn) sortiraient de ces portails certaines nuits. Nuance : à Rome, des Templiers gardent le portail naturel de Saint-Pierre.
+
+## ✍️ Auteur
+
+Les chevaliers errants sont plus des paladins que des templiers. Donc eux, ils n'ont pas vraiment besoin de chercher des portails. Il y a bien assez de monstres à oxire dans notre de Telluris.
+2. On garde ton texte.
+3. Ok.
+
+La différence par rapport à Rome, c'est que il y avait une grotte au fond de laquelle il y avait un portail naturel. Et Saint-Pierre s'est créé autour de ce portail. Donc un bâtiment a été bâti pour cacher, contrôler l'accès et défendre de ce qu'il pouvait y avoir dedans. Et donc là, c'était des Templiers. La table ronde, c'est plus des portails qui ont spawné, donc qui sont apparus et qui ont tendance de temps en temps à disparaître. Certains restent, mais autour de Camelot, il y a une zone, l'influence de Stone Age et plein d'autres choses. En fait, les explications que tu donnais étaient pas mal. C'était quoi? Tu avais dit quoi? Je sais plus. Je vois plus ce que tu as dit. Mais l'histoire de l'influence de Stone Age, de... de toute autre chose, et semblait pas mal. Si jamais tu peux les reprendre, vas-y. Et donc cette influence a fait apparaître des portails, fait sortir des monstres vraiment atypiques. La plupart de ces portails viennent quand même d'endroits qui sont souvent les mêmes, d'où le truc de Annwn, imprononçable ce truc...
+
 ---
 
 ## 1. Premier arbitrage (21/10/2026)
@@ -82,12 +94,15 @@ Pour moi, Arthur a surtout fondé la table ronde et a mis des chevaliers autour 
 16. **Progression par rang adoptée** : géant du Mont-Saint-Michel **D** · Camelot et Cath Palug **E – D** · Bête glatissante **C** · Twrch Trwyth **B** · Dinas Emrys **A** · Avalon et Annwn **S**.
 17. **Les Lignées se mêlent à Camelot**, comme partout. La Table ronde n'en distingue aucune.
 
-## 2 bis. Précision de l'Auteur : des portails naturels (21/10/2026)
+## 2 bis. Portails naturels et troisième ordre (Auteur, 21/10/2026)
 
-1. Les donjons perturbés autour de Camelot sont des **portails NATURELS**, nombreux dans cette zone, que personne n'a bâtis. La Vague les a perturbés.
-2. Arthur fonde la Table ronde et place des chevaliers autour pour **défendre Camelot et l'île** contre ces portails.
-3. **Troisième ordre** : ni Templiers, puisque ces portails n'ont pas été créés, ni Paladins, puisque les chevaliers ne protègent pas vraiment les routes.
-4. ⚠️ **Nuance à garder** : la frontière « créé / naturel » n'est pas celle des Templiers partout. À Rome, un groupe de Templiers garde le portail **naturel** de Saint-Pierre. La règle vaut pour l'île : les Templiers y gardent les portails bâtis, la Table ronde les portails naturels.
+1. Autour de Camelot, une **zone d'influence** fait **apparaître** des portails naturels que personne n'a bâtis. Ils surgissent, ont tendance à **disparaître** de temps en temps, et certains restent. La Vague les a multipliés.
+2. **Pourquoi cette zone ?** C'est un mystère, avec des **théories concurrentes**. Pour les uns, l'Autre Monde, **Annwn**, est tout proche sous l'île, et Glastonbury Tor n'en est que la porte la plus connue. Pour les autres, c'est **Stonehenge** qui les attire.
+3. Il en sort des **monstres atypiques**. La plupart de ces portails mènent **souvent aux mêmes endroits**, Annwn en tête. Prononciation : « A-noun ».
+4. Arthur fonde la Table ronde et place des chevaliers autour pour **défendre Camelot et l'île** contre ce qui en sort.
+5. **Les chevaliers errants sont plus proches des Paladins que des Templiers** : ils **chassent les monstres** et ne cherchent pas les portails. Ce ne sont pas pour autant des Paladins, puisqu'ils ne gardent pas les routes. C'est bien un **troisième ordre**.
+6. **Templiers ≠ Table ronde : un portail ENFERMÉ contre des portails qui APPARAISSENT.** À Rome, un portail naturel au fond d'une grotte, toujours au même endroit : on a bâti Saint-Pierre autour pour le cacher, en contrôler l'accès et se défendre de ce qui pouvait en sortir. C'est le métier des Templiers. Autour de Camelot, les portails surgissent et s'éteignent : on ne bâtit rien autour, on chasse ce qui en sort.
+7. **La Chasse sauvage** de Gwyn ap Nudd est adoptée : certaines nuits, ses chiens d'Annwn, les **Cŵn Annwn**, sortent de ces portails. C'est un ennemi récurrent de la Table ronde et une future entrée du bestiaire.
 
 ## 3. Camelot
 
@@ -138,6 +153,7 @@ Pour moi, Arthur a surtout fondé la table ronde et a mis des chevaliers autour 
 
 - **Noms et Lignées** des chevaliers PNJ actuels, et leurs quêtes.
 - **Récits propres** de Caerleon, Cadbury et Tintagel.
+- **Cŵn Annwn** et Gwyn ap Nudd au bestiaire.
 
 ## 8. Prompts d'image
 
