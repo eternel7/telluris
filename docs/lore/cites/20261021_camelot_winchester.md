@@ -138,3 +138,37 @@ Pour moi, Arthur a surtout fondé la table ronde et a mis des chevaliers autour 
 
 - **Noms et Lignées** des chevaliers PNJ actuels, et leurs quêtes.
 - **Récits propres** de Caerleon, Cadbury et Tintagel.
+
+## 8. Prompts d'image
+
+Un par espèce ; fichier détouré `templates/resources/monsters/<slug>_transparent.png`, carré 1:1 (`docs/prompts_images.md` § 3).
+
+**`geant_du_mont_saint_michel`**
+```
+Réalise l'image du Géant du Mont-Saint-Michel : géant colossal et voûté, trois fois la taille d'un homme, peau tannée et crevassée par le sel, barbe et chevelure hirsutes emmêlées d'algues, vêtu de peaux mal cousues, une massue faite d'un tronc d'arbre arraché à la main, des ossements accrochés à sa ceinture de corde. Attitude de chasse, massue levée, dents jaunes découvertes, regard fixé sur sa proie. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+**`cath_palug`**
+```
+Réalise l'image du Cath Palug, chat monstrueux de l'île de Môn : félin gigantesque de la taille d'un cheval, pelage noir tacheté de gris, musculature puissante, longues moustaches, oreilles déchirées, yeux jaunes luisants, crocs démesurés, griffes recourbées comme des faucilles. Attitude de chasse, griffes et crocs visibles, regard fixé sur sa proie. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+**`bete_glatissante`**
+```
+Réalise l'image de la Bête glatissante : créature hybride à tête de serpent écailleuse brun-vert, long cou souple, corps de léopard au pelage fauve tacheté, croupe et queue de lion, pattes fines de cerf terminées par des sabots, gueule entrouverte d'où semblent jaillir des aboiements, flancs qui palpitent comme si une meute grondait à l'intérieur. Attitude en pleine course, insaisissable, tournant la tête vers ses poursuivants. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+**`twrch_trwyth`**
+```
+Réalise l'image du Twrch Trwyth, sanglier-roi des légendes galloises : sanglier colossal, aussi grand qu'un taureau, soies argentées hérissées le long de l'échine, défenses énormes et ébréchées, regard intelligent et presque anthrope, et, coincés entre ses deux oreilles, un peigne, un rasoir et des ciseaux d'or. Attitude de charge, tête basse, défenses en avant, regard fixé sur sa proie. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+**`dragon_rouge`**
+```
+Réalise l'image du Dragon rouge de Dinas Emrys : grand dragon aux écailles rouge sombre et carmin, ventre ocre, cornes recourbées, crête dorsale épineuse, grandes ailes de cuir rouge, gueule ouverte sur un souffle de flammes orangées, griffes noires. Elle est en vol, ailes déployées. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, vert vif pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+**`dragon_blanc`**
+```
+Réalise l'image du Dragon blanc de Dinas Emrys : grand dragon aux écailles blanc crayeux et gris pâle, cornes ivoire, crête dorsale épineuse, grandes ailes de cuir blanc veinées de gris, yeux bleu glacé, gueule ouverte sur un souffle d'une lumière blanche et froide, griffes grises. Elle est en vol, ailes déployées. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
