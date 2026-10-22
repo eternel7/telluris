@@ -25,6 +25,8 @@ Options : --profil=ville|foret|catacombes|pays (défaut : `pays` pour un lieu de
           --sans-passages (ni enceinte, ni coins, ni passages)
           --sans-rues (pas de tracé des rues intra-muros)
           --sans-nav (aucun mur nav proposé ; l'enceinte est fermée par le terrain)
+          --matieres (lecture par matières, `utils/grille_matieres` : pierre et toits à 0,
+            eau à 5, rivière recousue, ponts — à combiner avec --sans-nav)
           --sans-enceinte · --connexite (efface les poches praticables enclavées)
           --sans-apercu
           --nav-vide (repart d'un nav VIDE au lieu de celui du doc : pour mesurer le profil
@@ -198,6 +200,37 @@ def imprimer_concordance(rapport: dict):
 		f" ({rapport['justes']}/{rapport['total']} cases)")
 
 
+def lecture_matieres(chemin: str, cols: int, rows: int):
+	"""Lecture par matières de l'image (`utils/grille_matieres`) : Pillow ne sert qu'ici."""
+	from PIL import Image
+	from utils import grille_matieres
+	with Image.open(chemin) as img:
+		img = img.convert("RGB")
+		k = grille_matieres.REGLES_MATIERES["sous_case"]
+		grille_sc = grille_matieres.sous_cases(list(img.getdata()), img.width, img.height, k)
+	return grille_matieres.lecture(grille_sc, cols, rows)
+
+
+def base_cite(chemin: str, cols: int, rows: int) -> dict:
+	"""Ce dont `grille_matieres.proposer_cite` a besoin pour une cité à enceinte DÉCLARÉE : la
+	proposition du profil ville SANS enceinte devinée, sans nav ni passages (`cells` + `rues`
+	tracées), le cadre décoratif et la lecture par matières."""
+	profil = "ville"
+	regles = grille_image.regles_de(profil)
+	couleurs, contours, _taille = echantillonner(chemin, cols, rows)
+	k = grille_image.sous_cases_de(profil)
+	fins = echantillonner_fins(chemin, cols, rows, k)
+	from PIL import Image
+	with Image.open(chemin) as img:
+		img.load()
+		bords = image_bords.profils_bords(img, cols, rows, int(regles.get("cadre_max_cases", 0)))
+	_epaisseurs, cadre = grille_image.cadre_depuis_bords(bords, cols, rows, regles)
+	p = grille_image.proposer(couleurs, contours, cols, rows, nav={}, profil=profil,
+		passages=False, enceinte=False, fins=fins, k=k, rues=True, murs_nav=False, bords=bords)
+	return {"cells": p["cells"], "rues": p["rapport"]["rues"], "cadre": cadre,
+		"lecture": lecture_matieres(chemin, cols, rows)}
+
+
 def proposer_pour_image(chemin: str, cols: int, rows: int, doc_lieu=None, options=frozenset(),
 		profil: str = "") -> dict:
 	"""La grille proposée pour une image : `{cells, nav, rapport, profil, taille, peinte,
@@ -229,7 +262,8 @@ def proposer_pour_image(chemin: str, cols: int, rows: int, doc_lieu=None, option
 	proposition = grille_image.proposer(couleurs, contours, cols, rows, nav=nav_doc,
 		profil=profil, passages="--sans-passages" not in options,
 		enceinte=False if "--sans-enceinte" in options else None,
-		fins=fins, k=k, rues=rues, murs_nav="--sans-nav" not in options, bords=bords)
+		fins=fins, k=k, rues=rues, murs_nav="--sans-nav" not in options, bords=bords,
+		matieres=lecture_matieres(chemin, cols, rows) if "--matieres" in options else None)
 	cells = proposition["cells"]
 	if "--connexite" in options:
 		cells = grille_image.garder_composante_principale(cells)

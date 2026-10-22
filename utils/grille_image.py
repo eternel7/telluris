@@ -1654,7 +1654,7 @@ def proposer_pays(couleurs, cols, rows, nav=None, regles=None, profil=None,
 # ── Point d'entrée ───────────────────────────────────────────────────────────────────────
 def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
 		passages=True, enceinte=None, fins=None, k=SOUS_CASES, rues=True,
-		murs_nav=True, bords=None) -> dict:
+		murs_nav=True, bords=None, matieres=None) -> dict:
 	"""La proposition complète : `{cells, nav, profil, rapport}`.
 
 	classer → lisser → rues → enceinte (ville) → coins → passages. ⚠️ Le lissage vient AVANT
@@ -1670,6 +1670,9 @@ def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
 	juste après le lissage (l'enceinte le voit comme du dehors), reposé après les rues, et
 	INTERDIT aux passages de `relier_zones` — sans quoi un passage creusé le long du bord
 	rouvrirait un chemin autour de la ville.
+	`matieres` : lecture par matières de l'image (`grille_matieres.lecture`) ; ses corrections
+	(eau, pierre, toits, terre franche hors les murs) passent après les rues et AVANT la
+	fermeture de l'enceinte, puis la rivière est recousue et les ponts rouverts.
 	"""
 	regles = regles_de(profil, regles)
 	nom = profil if profil in PROFILS_GRILLE else PROFIL_DEFAUT
@@ -1698,6 +1701,10 @@ def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
 		rapport["rues"] = [[x, y] for x, y in rapport["rues"] if not cadre[y][x]]
 		_poser_cadre(cells, cadre)
 		rapport["rues_dehors"] = sum(1 for x, y in rapport["rues"] if not (masque and masque[y][x]))
+	if matieres:
+		from utils import grille_matieres
+		rapport["matieres"] = grille_matieres.corriger(cells, matieres, masque, regles.get("matieres"))
+		_poser_cadre(cells, cadre)
 	if not passages:
 		rapport["zones"] = len(zones(cells, nav_sortie)[1])
 		return {"cells": cells, "nav": nav_sortie, "profil": nom, "rapport": rapport}
@@ -1719,6 +1726,12 @@ def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
 		if coins:
 			# Une poche effacée a pu laisser un angle neuf : repasse complète, idempotente.
 			rapport["coins"] += fermer_coins(cells, nav_sortie)
+	if matieres:
+		from utils import grille_matieres
+		b_case = [[c["b"] for c in ligne] for ligne in matieres]
+		parts = [[c["parts"] for c in ligne] for ligne in matieres]
+		rapport["riviere_recousue"] = grille_matieres.recoudre_rivieres(cells, b_case, regles.get("matieres"))
+		rapport["ponts"] = grille_matieres.poser_ponts(cells, parts)
 	rapport["nav_ajoutes"] = _bits(nav_sortie) - avant
 	rapport["zones"] = len(zones(cells, nav_sortie)[1])
 	return {"cells": cells, "nav": nav_sortie, "profil": nom, "rapport": rapport}

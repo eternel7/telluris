@@ -287,3 +287,13 @@ Pour Camelot, essaye de diminuer le nombre de barrières nav. Normalement, les n
 - **Londres** : la rangée du bas (y = 37) est retirée ; 12 connexions sur les deux rangées hautes de la forteresse ([68-73, 35-36]). Le lien `sud` existant remonte en [70, 36] ; « par le fleuve » en [69, 36].
 - **Règle des murs nav** (Auteur) : un mur nav contrôle un passage non voulu ; il ne double pas un mur de terrain. Retirés : tout mur tourné vers une case à 0 ou le bord, tout mur entre deux cases praticables du même côté de l'enceinte. Restent le rempart (entre le dedans et le dehors) et le bord de l'eau, un seul côté par mur comme les grilles peintes à la main : **307 bits sur 121 cases, contre 1 726 sur 912**.
 
+## ✍️ Auteur (22/10/2026)
+
+Retour sur la grille : remparts et tours qui ne sont pas à 0 (une moitié de tour praticable, l'autre non), chemin de ronde utilisé comme passage (« c'est un truc qui est que pour les militaires »), nav qui font de vrais murs en pleine nature ou devant du 0, rivière coupée en plein milieu, falaise du fort où l'on marche alors qu'il y a un chemin qui monte à la Table. Demande d'améliorations algorithmiques : d'abord les cases 0 / 1 / 5, ensuite les nav seulement là où un passage non voulu reste ouvert ; montrer les points d'entrée et tracer les chemins (jusqu'à 8) entre entrées et entre portes.
+
+## 16. Grille par matières (22/10/2026)
+
+- Nouveau module `utils/grille_matieres.py` (lecture de l'image par matières, rivière recousue, ponts, cité à enceinte déclarée) ; vérification de jouabilité `dev/tracer_chemins.py`.
+- Camelot : données déclarées seulement — le polygone de la crête du rempart, le **fort de la Table ronde** et la **cathédrale** (futurs lieux, où l'on entrera par une connexion), la **pente du fort** et la **rampe** qui y monte (porte du fort en [28, 18]). Résultat : deux zones (dedans 151 cases, dehors 1 451), **aucun mur nav**, toutes les paires d'entrées et de portes reliées, un passage d'une porte de rempart à l'autre par les rues.
+- Portes recalculées au plus près des arches : porte ouest dehors [21, 31] / dedans [24, 26] ; porte de Winchester dehors [54, 33] / dedans [53, 29].
+

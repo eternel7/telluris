@@ -156,6 +156,10 @@ utils/
   grille_traits.py       # grille d'une ville à l'ENCRE (pur) : rue = pixel clair et beige entre les
                          #   traits, mur nav là où un trait sépare deux cases, anneau d'enceinte = rempart ;
                          #   CLI `dev/gen_grille_traits.py`, outil ✒️ de /admin/lieux
+  grille_matieres.py     # grille d'une cité PEINTE lue par MATIÈRES (pur) : pierre/toits/roche → 0, herbe/terre → 1,
+                         #   eau → 5 (rivière recousue, ponts) ; enceinte DÉCLARÉE (polygone de crête) → rempart
+                         #   + chemin de ronde à 0, nav SEULEMENT sur un pas qui l'enjambe ; jouabilité vérifiée par
+                         #   `dev/tracer_chemins.py` (chemins voies.js entre entrées et portes)
   graphe_recettes.py     # réseau item → recette → item (pur) pour /admin/recettes-graphe ; familles
                          #   `sc:<sous_categorie>`, nœuds `absent` — règles LUES dans `marche`, jamais recopiées
   bois.py                # découpe du bois (pur) : tier suivant par essence, conservation du poids, outil
