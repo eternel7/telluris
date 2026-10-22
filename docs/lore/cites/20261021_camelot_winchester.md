@@ -215,3 +215,106 @@ Réalise l'image d'un Chien d'Annwn, chien de chasse de l'Autre Monde : grand l�
 ```
 Réalise l'image de Gwyn ap Nudd, seigneur d'Annwn et maître de la Chasse sauvage : homme grand et élancé à la beauté inquiétante, peau pâle, longs cheveux noirs, yeux gris argent, couronne de branches d'aubépine noire, manteau de chasse gris sombre doublé de fourrure de loup, cor de chasse en corne à la ceinture, longue lance à la main, à ses pieds un grand chien blanc au museau rouge. Attitude calme et courtoise, prêt à lâcher la meute. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
 ```
+
+## ✍️ Auteur
+
+Donne-moi un prompt pour faire dessiner Camelot. Comme toute ville de Telluris, c'est une ville fortifiée. Et comme toute ville de Telluris, elle doit sûrement avoir quand même des portails, donc des temples ou églises, et une guilde d'aventuriers. Au moins, ce n'est pas juste une forteresse. Tu peux t'inspirer de Winchester et d'autres choses pour le prompt.
+
+## 10. Prompt d'image de la cité
+
+Carte illustrée sur parchemin en vue cavalière, comme les autres capitales (`towns/london_capital.png`) ; paysage 16:9 (1408×768), à enregistrer en `templates/resources/towns/camelot_capital.png`. Ancrages de Winchester : vallée de craie et rivière (l'Itchen) aux prairies humides, château sur la butte ouest et sa grande salle (le Great Hall, où pend la Table ronde), très longue cathédrale à la tour trapue, Westgate et Kingsgate, maison de guilde à colombages. **Camelot n'a pas de portail dans ses murs** (§ 11) : la cathédrale ne garde aucun portail, elle abrite **Excalibur** sous la garde de l'ordre (adopté, § 12). Les portails naturels de la campagne ne sont **pas dessinés** (règle du § 12). **Image retenue** : `templates/resources/towns/camelot_capital.jpg` (1376×768), aucun portail visible.
+
+```
+Réalise l'image de Camelot, cité fortifiée de l'île de Bretagne, sous la forme d'une carte illustrée sur un vieux parchemin aux bords usés, posé sur une table de bois, en vue cavalière plongeante, format paysage 16:9. La cité s'étend dans une vallée de craie, au bord d'une rivière claire bordée de prairies humides, au pied de collines rondes et herbeuses. Une enceinte de pierre claire et de silex, flanquée de tours rondes, l'entoure entièrement, percée de deux grandes portes fortifiées à l'ouest et au sud. Sur la butte ouest, un château domine la ville ; en son centre, une grande salle de pierre aux hautes fenêtres en ogive abrite une immense table ronde peinte, visible par le toit ouvert de la salle comme sur une maquette. Au cœur de la ville, une très longue cathédrale de pierre à la tour carrée trapue ; par son toit ouvert comme sur une maquette, on voit au fond de la nef une épée posée sur un autel de pierre, gardée par des chevaliers en armure. Près de la grand-rue, une grande maison de guilde à colombages et à pignons, avec sa cour où se pressent des aventuriers armés. Des maisons à colombages aux toits de tuiles et de chaume, des ruelles, une place de marché. Juste hors des murs, au sud, le bourg de Winchester avec ses faubourgs, ses étals et ses moulins sur la rivière, et une lice de tournoi entourée de tribunes et de bannières sans aucun motif écrit. Dans la campagne alentour, des chevaliers à cheval patrouillent. À l'horizon, sur la plaine, un petit cercle de grandes pierres dressées. Dans une marge, une meute de chiens blancs aux oreilles rouges court sur une colline au clair de lune ; dans un coin, un blason à dragon rouge sans aucune lettre, et une rose des vents. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+## ✍️ Auteur
+
+Une ville n'a pas forcément un portail. Auxerre n'a pas de portail, du moins, n'a pas de portail transversal. Chartres n'en a pas encore, et Reims non plus. Mais il est fort probable qu'ils en aient. De ce que je sache, normalement, Reims, dans notre lore, il en a pas. Chartres, il a un portail pour un donjon, mais on n'a jamais parlé de l'absence de portail transversal. Je vais essayer de toujours bien dire portail transversal ou portail de donjon. Il n'y a pas d'obligation pour une ville d'avoir un portail, qu'il soit transversal ou donjon. Il faut que ça aille avec le lore. Un portail transversal, c'est normalement quand même une création, on va dire, anthrope. Donc, il faut qu'il y ait une utilité à ce portail et que le coût , l'ingénierie, l'intelligence aient une raison d'être mis.
+
+## 11. Arbitrage : pas de portail obligatoire (22/10/2026)
+
+1. **Aucune ville n'a forcément un portail**, ni transversal ni de donjon : il faut que ça aille avec le lore. On dit toujours **portail transversal** ou **portail de donjon**.
+2. **Un portail transversal est une création anthrope** : il lui faut une utilité qui justifie son coût, son ingénierie et le savoir qu'il demande.
+3. **Camelot n'a aucun portail dans ses murs.** Sa raison d'être, ce sont les portails naturels qui surgissent dans la campagne. Elle est d'accès facile (Douvres, routes), et rien ne justifie un portail transversal. Le prompt du § 10 est corrigé : plus de portail ni de Templiers dans la cathédrale.
+
+## ✍️ Auteur
+
+ok pour Excalibur dans la cathédrale.  Et garder l'image qui a été générée par le premier prompt. Après, on doit enlever les portails. Dans les images de cité, par défaut, faire apparaître des portails sur les cartes n'est pas une bonne idée. C'est plus, plus intéressant, je trouve, de se déplacer et de tomber sur un lieu qui est un portail que de le voir véritablement sur la carte. Par défaut, sur les cartes de ville, je pense que le mieux est de jamais vraiment faire apparaître de portail, sauf si jamais ça se justifie vraiment par le lore de la ville. Là, j'ai pas d'idée encore de ville dont on est déjà parlé, qui en ait vraiment besoin. Mais voilà, je pense que ça peut presque être une règle de dire toute apparence d'un portail sur une carte de ville doit avoir une véritable justification. Même pour les portails qui sont autour de la ville.
+
+## 12. Arbitrage : Excalibur, image, portails sur les cartes (22/10/2026)
+
+1. **Excalibur est conservée dans la cathédrale** de Camelot, sous la garde de l'ordre.
+2. **L'image générée est retenue** : `templates/resources/towns/camelot_capital.jpg`. Elle ne montre aucun portail.
+3. **Règle des cartes de cité** : aucun portail dessiné, ni dans les murs ni autour, sauf vraie justification par le lore de la cité. On tombe sur un portail en se déplaçant ; on ne le voit pas sur la carte. Aucune cité décrite à ce jour n'en a besoin. Consignée dans `docs/prompts_images.md` § 0.5 bis.
+4. Le prompt du § 10 est corrigé : plus de portails dans la campagne.
+
+## ✍️ Auteur
+
+crée le lieu Camelot à importer et donc place le sur la carte d'Angleterre.
+
+## 13. Le lieu en jeu
+
+`dev/gen_camelot.py` → `jsons/camelot_a_importer.json` : `lieu:camelot` (ville, 86×48, image `camelot_capital.jpg`, `lieu_parent: lieu:angleterre`) et trois connexions `link:angleterre_to_camelot_{ouest,sud,est}`.
+
+- **Sur la carte d'Angleterre** : cases [63, 38], [64, 39] et [65, 38], là où est Winchester, au sud-ouest de Londres, dans les terres au-dessus de l'estuaire de Southampton.
+- **Grille** : première passe automatique (profil ville), à retoucher dans l'éditeur. La campagne et la ville ne communiquent pas encore : l'enceinte est fermée et les **portes de rempart** se posent dans l'éditeur. Les trois entrées tombent donc dans la zone de la ville et de son bourg : derrière la porte ouest, dans le bourg de Winchester, à l'est du bourg.
+- `sous_categorie: "ville"` : Londres reste la capitale de l'île.
+
+## ✍️ Auteur
+
+pose les portes de rempart de Camelot. Et rajoute le déplacement léger de Londres et ses connexions multiples dans le Json. J'ai encore rien apporté.
+
+Le pont-levis, le pont sur la rivière pour la porte ouest n'a pas à être bloqué comme il l'est aujourd'hui. Normalement, on essaye d'arriver au plus près de la porte pour pouvoir créer les connexions de porte de rempart.
+
+## 14. Portes de rempart, et Londres sur sa forteresse (22/10/2026)
+
+Même fichier `jsons/camelot_a_importer.json` (`dev/gen_camelot.py`), qui remplace le précédent (rien n'était importé).
+
+- **Grille retouchée** : le chemin de ronde du rempart sud n'est plus une rue (trois cases de mur à 0) ; le **pont de la porte ouest** est rouvert entre la rive sud et le pré devant l'arche, fermé côté tour ; le bourg de Winchester, sans enceinte, s'ouvre sur la campagne. Il reste deux zones, le dedans et le dehors, reliées par les seules portes.
+- **Porte ouest** : dehors [21, 32], juste sous l'arche, au débouché du pont ; dedans [22, 28]. **Porte de Winchester** : dehors [56, 35], sous l'arche côté bourg ; dedans [56, 32].
+- Entrées depuis l'Angleterre, toutes dehors : par le pont de l'ouest (rive sud, [16, 34]), par le bourg de Winchester, par l'est.
+- **Londres** : 17 connexions couvrent le corps de la forteresse dessinée, descendue jusqu'à l'entrée du fleuve ([68-73, 35-37]) ; les quatre liens existants gardent leur `_id`. Nouveaux côtés : « par le fleuve » (quai en bois) et « par le pont ». Chaque connexion a sa propre case d'arrivée dans Londres.
+
+## ✍️ Auteur
+
+régénère avec les 12 connexions, La forteresse dessinée est vraiment énorme. En fait, tu peux supprimer, je pense, les 5 qui sont en bas.
+
+Pour Camelot, essaye de diminuer le nombre de barrières nav. Normalement, les nav, c'est vraiment juste pour contrôler des points de passage qui sont non voulus, des choses comme ça. Là, ça crée des véritables murs. Ça sert à rien. Il y a du zéro derrière. On peut pas y aller.
+
+## 15. Londres à 12 connexions, nav de Camelot allégé (22/10/2026)
+
+- **Londres** : la rangée du bas (y = 37) est retirée ; 12 connexions sur les deux rangées hautes de la forteresse ([68-73, 35-36]). Le lien `sud` existant remonte en [70, 36] ; « par le fleuve » en [69, 36].
+- **Règle des murs nav** (Auteur) : un mur nav contrôle un passage non voulu ; il ne double pas un mur de terrain. Retirés : tout mur tourné vers une case à 0 ou le bord, tout mur entre deux cases praticables du même côté de l'enceinte. Restent le rempart (entre le dedans et le dehors) et le bord de l'eau, un seul côté par mur comme les grilles peintes à la main : **307 bits sur 121 cases, contre 1 726 sur 912**.
+
+## ✍️ Auteur (22/10/2026)
+
+Retour sur la grille : remparts et tours qui ne sont pas à 0 (une moitié de tour praticable, l'autre non), chemin de ronde utilisé comme passage (« c'est un truc qui est que pour les militaires »), nav qui font de vrais murs en pleine nature ou devant du 0, rivière coupée en plein milieu, falaise du fort où l'on marche alors qu'il y a un chemin qui monte à la Table. Demande d'améliorations algorithmiques : d'abord les cases 0 / 1 / 5, ensuite les nav seulement là où un passage non voulu reste ouvert ; montrer les points d'entrée et tracer les chemins (jusqu'à 8) entre entrées et entre portes.
+
+## 16. Grille par matières (22/10/2026)
+
+- Nouveau module `utils/grille_matieres.py` (lecture de l'image par matières, rivière recousue, ponts, cité à enceinte déclarée) ; vérification de jouabilité `dev/tracer_chemins.py`.
+- Camelot : données déclarées seulement — le polygone de la crête du rempart, le **fort de la Table ronde** et la **cathédrale** (futurs lieux, où l'on entrera par une connexion), la **pente du fort** et la **rampe** qui y monte (porte du fort en [28, 18]). Résultat : deux zones (dedans 151 cases, dehors 1 451), **aucun mur nav**, toutes les paires d'entrées et de portes reliées, un passage d'une porte de rempart à l'autre par les rues.
+- Portes recalculées au plus près des arches : porte ouest dehors [21, 31] / dedans [24, 26] ; porte de Winchester dehors [54, 33] / dedans [53, 29].
+
+## ✍️ Auteur (22/10/2026)
+
+Faire par strates : identifier les remparts, isoler le cœur de la ville, tracer tout ce qui n'est pas le cœur, puis le cœur à part en omettant le reste, pour augmenter la sensibilité aux rues. La connexion extérieure de la porte sud est dans une tour : la déplacer de 3 cases à droite et 3 vers le bas. À l'intérieur, le passage d'une porte à l'autre passe sur les toits et la pente du château ; la rue est de l'autre côté des maisons. Creuser petit à petit dans une direction pour voir si on peut y aller. Le test de connexion de porte de rempart à porte de rempart, quelle qu'elle soit, doit être automatique quand on génère la grille d'une ville.
+
+## 17. Strates, rues creusées, contrôle des portes (22/10/2026)
+
+- Le cœur (dans le rempart) est lu à part et repart de 0 ; ses rues sont creusées entre les portes, les places et le pied de la rampe du fort, sur le pavé clair et ocre.
+- Chaque porte a sa percée : la rue qui sort de l'arche n'est plus fermée comme chemin de ronde. Porte ouest dedans [25, 28] ; porte de Winchester dedans [56, 28] (percée plein nord), dehors **[57, 36]** comme demandé.
+- Le passage d'une porte à l'autre suit maintenant la rue entre les deux rangées de maisons, puis la place de la cathédrale (35 cases).
+- Contrôle de porte à porte automatique pour toute cité (`gen_grille_image.py lieu:<cite>` l'imprime) ; au dedans c'est une erreur, au dehors une information (un fleuve peut couper la campagne).
+
+## ✍️ Auteur (22/10/2026)
+
+Porte ouest correcte : ses points de connexion sont gravés dans le marbre. Porte sud : le point extérieur est à remonter de 2 cases ; le point intérieur est à déplacer de 4 en x en moins, 3 en y en plus. Démarche : séparer l'intérieur et l'extérieur, les traiter sans que l'un influence l'autre ; proposer les connexions de rempart, les valider, les déplacer ; puis les cells, puis les nav ; vérifier le passage de porte intérieure à porte intérieure et un nombre de routes cohérent. Utiliser les gros traits noirs du cel shading : une voie qui traverse de gros traits pour ne mener nulle part est retirée. La zone du tournoi est noircie alors que rien ne la distingue de là où l'on passe.
+
+## 18. Traits, portes validées (22/10/2026)
+
+- Portes **imposées** : porte ouest dehors [21, 31] / dedans [25, 28] ; porte de Winchester dehors **[57, 34]** (sous l'arche) / dedans **[52, 31]** (la rue au pied de la tour gauche). Le polygone sud du rempart est redescendu sur les créneaux (y = 32), où il était une case trop haut.
+- Le dehors est lu au pixel (sol contre toit) puis élagué le long des gros traits : le tournoi et le bourg sont praticables, seuls les toits restent fermés.
+- Le cœur creuse en évitant de franchir les traits. Une seule route d'une porte à l'autre au dedans (29 cases) : les variantes rallongeaient trop le trajet.
+
