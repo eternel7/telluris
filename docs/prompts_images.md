@@ -68,6 +68,10 @@ Seules les lignes `Done = 0` sont à générer ; une ligne sans `Description ten
 
 Un prompt qui renvoie à une image précédente (« le même tenancier », « la même porte ») exige d'**envoyer cette image en référence** avec le prompt. Sans elle, le modèle invente une autre scène. ⚠️ À l'inverse, une image jointe est **recopiée** : n'en joindre une que pour reproduire CE sujet, jamais pour un simple style.
 
+### 0.5 bis Cartes de cité : aucun portail par défaut
+
+⚠️ Une carte de cité (`towns/<cite>_capital`) **ne montre aucun portail**, ni dans les murs ni autour (Auteur, 22/10/2026) : il est plus intéressant de tomber sur un portail en se déplaçant que de le voir sur la carte. Toute apparition d'un portail sur une carte exige une **vraie justification par le lore** de la cité. Aucune cité décrite à ce jour n'en a.
+
 ### 0.6 Enregistrement
 
 Chaque image générée est écrite **directement dans son dossier cible** (cf. 0.3), et **n'écrase jamais** un fichier existant : si `…01` est pris, on passe à `…02`, et ainsi de suite.
