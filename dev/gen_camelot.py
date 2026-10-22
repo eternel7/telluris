@@ -13,6 +13,7 @@ nav, seulement là où un passage non voulu reste ouvert)
   `MONUMENTS`, le fort de la Table ronde et la cathédrale d'Excalibur : des LIEUX où l'on
   entrera par une connexion, pas des toits où marcher ; la pente du fort (un relief se lit
   à la couleur comme une place, mi-herbe mi-ombre) ; `CHEMINS`, la rampe qui y monte.
+  Le DEDANS est ensuite remplacé par `DEDANS_TRACE`, relevé à la main sur l'image.
 - Deux zones : le DEDANS (polygone) et le DEHORS (campagne + bourg), reliées par les seules
   portes de rempart. Le script refuse d'écrire sinon.
 - Portes (forme de l'éditeur, `_ptDocs`, cinq docs par porte) : chaque case au plus près du
@@ -67,6 +68,24 @@ CHEMINS = (((31, 22), (29, 20), (28, 18)),)
 # Repères : la campagne (DEHORS) et le parvis de la cathédrale (DEDANS).
 CAMPAGNE = (10, 40)
 PARVIS = (45, 25)
+# DEDANS TRACÉ À LA MAIN (Auteur, 22/10/2026) : aucun algorithme ne lit les rues du cœur sans
+# passer sur un toit, la falaise ou le long de la cathédrale ; les cases praticables du dedans
+# sont relevées à l'œil sur l'image, ligne y → colonnes x. Remplace le cœur calculé ; le
+# rempart, le dehors et les portes restent ceux de `proposer_cite`.
+DEDANS_TRACE = {
+	18: (28,), 19: (28,), 20: (29, 30),                    # rampe du fort, escalier
+	21: (31, 32, 33, 34),                                  # pied de l'escalier, entre les maisons
+	22: (35, 40, 41, 52, 53, 54, 55),
+	23: (34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55),
+	24: (33, 34, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 54, 55),       # parvis
+	25: (32, 33, 40, 42, 43, 44, 45, 46, 47, 48, 49, 54, 55),
+	26: (29, 30, 31, 32, 40, 49, *range(55, 68)),                       # place du marché
+	27: (27, 28, 29, 40, 49, *range(56, 64)),
+	28: (25, 26, 27, 39, 50, 51, 52, 56, 57, 61, 62, 63),               # (25, 28) : porte ouest
+	29: (39, 52),
+	30: (52,),
+	31: (52,),                                                          # porte de Winchester
+}
 
 # (nom, slug, arche, image extérieure, image intérieure, (case dehors, case dedans) IMPOSÉES)
 # arche = centre (x, y), ou (x, y, dx, dy) pour imposer la direction vers le dedans.
@@ -227,6 +246,18 @@ def connexions_londres(par_id: dict, erreurs: list) -> list:
 	return sortie
 
 
+def poser_dedans_trace(cells):
+	"""Le dedans (centre dans `ENCEINTE`, hors ligne du rempart) prend `DEDANS_TRACE` : 1 sur
+	les cases relevées, 0 ailleurs. Mute `cells`."""
+	rows, cols = len(cells), len(cells[0])
+	dedans = grille_matieres.dedans_polygone(ENCEINTE, cols, rows)
+	anneau = grille_matieres.polygone_cases(ENCEINTE)
+	for y in range(rows):
+		for x in range(cols):
+			if dedans[y][x] and (x, y) not in anneau:
+				cells[y][x] = 1 if x in DEDANS_TRACE.get(y, ()) else 0
+
+
 def main() -> int:
 	args = sys.argv[1:]
 	chemin_dump = args[args.index("--dump") + 1] if "--dump" in args else None
@@ -251,6 +282,7 @@ def main() -> int:
 		portes=[p[2] for p in PORTES], masques=base["masques"],
 		ancres_dehors=[e[3] for e in ENTREES], portes_imposees=[p[5] for p in PORTES])
 	doc = gvi.poser_grille(doc, cite)
+	poser_dedans_trace(doc["cells"])
 	cells, nav = doc["cells"], doc["nav"]
 
 	dedans, dehors = zone_de(cells, nav, plus_proche_case(cells, PARVIS)), zone_de(cells, nav, CAMPAGNE)
