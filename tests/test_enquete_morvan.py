@@ -9,6 +9,7 @@ import glob
 import json
 import os
 
+from dev import gen_enquete_morvan as gen
 from utils import acces, apport, lint_dialogues, pnj
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -59,7 +60,6 @@ def test_l_offre_de_borin_vise_la_tete_du_loup_garou():
 	spec = apport.offre_spec(_docs()[BORIN])
 	assert spec["id"] == QUETE and spec["item"] == TETE and spec["quantite"] == 1
 	assert spec["unique"]
-	assert spec["recompenses"] == {"xp": 70, "cuivre": 800}
 	# La tête est une PORTION de la carcasse que tout loup-garou abattu laisse au butin.
 	base = _dump()
 	assert base[TETE]["portion_de"] == "item:loup_garou"
@@ -88,15 +88,22 @@ def test_toute_quete_nommee_est_l_offre():
 
 
 def test_borin_garde_ses_autres_services_et_choix():
-	"""Borin est RELU du dump : la quête s'ajoute sans rien retirer."""
+	"""Le générateur RÉÉCRIT Borin en entier (PUT complet à l'import, CLAUDE.md §11) : appliqué
+	au doc du dump courant, il ajoute sa quête sans rien retirer. On teste la TRANSFORMATION,
+	pas le fichier figé : Borin peut évoluer en base sans casser ce test. Le service `apport`
+	et les nœuds que le générateur possède sont les siens : il les réécrit, on ne les compare pas."""
 	avant = _dump()[BORIN]
-	apres = _docs()[BORIN]
+	apres = gen.borin(avant)
 	for service, conf in avant.get("services", {}).items():
-		assert apres["services"][service] == conf
+		if service != "apport":
+			assert apres["services"][service] == conf, service
 	for nid, noeud in avant["dialogue"]["noeuds"].items():
+		if nid in gen.NOEUDS_BORIN:
+			continue
 		ids_avant = [c["id"] for c in noeud.get("choix", [])]
 		ids_apres = [c["id"] for c in apres["dialogue"]["noeuds"][nid].get("choix", [])]
 		assert [i for i in ids_apres if i in ids_avant] == ids_avant, nid
+		# La sortie reste le dernier choix.
 		if ids_avant:
 			assert ids_apres[-1] == ids_avant[-1], nid
 

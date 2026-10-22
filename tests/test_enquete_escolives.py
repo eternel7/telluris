@@ -9,6 +9,7 @@ import glob
 import json
 import os
 
+from dev import gen_enquete_escolives as gen
 from utils import acces, apport, lint_dialogues, pnj
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -75,12 +76,18 @@ def test_toute_quete_nommee_est_l_offre():
 
 
 def test_gautier_garde_ses_autres_services_et_choix():
-	"""Gautier est RELU du dump : la quête s'ajoute sans rien retirer."""
+	"""Le générateur RÉÉCRIT Gautier en entier (PUT complet à l'import, CLAUDE.md §11) : appliqué
+	au doc du dump courant, il ajoute sa quête sans rien retirer. On teste la TRANSFORMATION,
+	pas le fichier figé : Gautier peut évoluer en base sans casser ce test. Le service `apport`
+	et les nœuds que le générateur possède sont les siens : il les réécrit, on ne les compare pas."""
 	avant = _dump()[GAUTIER]
-	apres = _docs()[GAUTIER]
+	apres = gen.gautier(avant)
 	for service, conf in avant.get("services", {}).items():
-		assert apres["services"][service] == conf
+		if service != "apport":
+			assert apres["services"][service] == conf, service
 	for nid, noeud in avant["dialogue"]["noeuds"].items():
+		if nid in gen.NOEUDS_GAUTIER:
+			continue
 		ids_avant = [c["id"] for c in noeud.get("choix", [])]
 		ids_apres = [c["id"] for c in apres["dialogue"]["noeuds"][nid].get("choix", [])]
 		assert [i for i in ids_apres if i in ids_avant] == ids_avant, nid
