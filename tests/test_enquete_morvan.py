@@ -59,7 +59,7 @@ def test_l_offre_de_borin_vise_la_tete_du_loup_garou():
 	spec = apport.offre_spec(_docs()[BORIN])
 	assert spec["id"] == QUETE and spec["item"] == TETE and spec["quantite"] == 1
 	assert spec["unique"]
-	assert spec["recompenses"] == {"xp": 70, "cuivre": 8000}
+	assert spec["recompenses"] == {"xp": 70, "cuivre": 800}
 	# La tête est une PORTION de la carcasse que tout loup-garou abattu laisse au butin.
 	base = _dump()
 	assert base[TETE]["portion_de"] == "item:loup_garou"

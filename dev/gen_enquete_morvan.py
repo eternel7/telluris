@@ -208,7 +208,7 @@ def borin(doc: dict) -> dict:
 			"item": TETE,
 			"quantite": 1,
 			"unique": True,
-			"recompenses": {"xp": 70, "cuivre": 8000},
+			"recompenses": {"xp": 70, "cuivre": 800},  # barème E/D (gen_recalage_primes.py)
 		},
 		"noeuds": {"accepte": "morvan_accepte", "partiel": "morvan_partiel", "remis": "morvan_remis"},
 	}

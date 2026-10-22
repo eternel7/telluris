@@ -14,9 +14,9 @@
 # sautée ; une prime ni ancienne ni nouvelle est une ERREUR (le doc a bougé : arbitrer).
 #
 # ⚠️ Les anciens fichiers d'import et générateurs qui écrivent ces PNJ (gen_convoi_lutecia,
-# gen_enquete_escolives, gen_enquete_morvan, gen_escorte_guilde, gen_mission_bucherons,
-# gen_quete_rang_c_jumieges, pnj_bouchard_de_clignancourt_a_importer.json…) portent encore
-# l'ancienne prime : les réimporter effacerait ce recalage.
+# gen_escorte_guilde, gen_mission_bucherons, gen_quete_rang_c_jumieges,
+# pnj_bouchard_de_clignancourt_a_importer.json…) portent encore l'ancienne prime : les
+# réimporter effacerait ce recalage. (gen_enquete_escolives et gen_enquete_morvan sont recalés.)
 #
 # Usage : python dev/gen_recalage_primes.py
 
