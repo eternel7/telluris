@@ -261,3 +261,18 @@ crée le lieu Camelot à importer et donc place le sur la carte d'Angleterre.
 - **Grille** : première passe automatique (profil ville), à retoucher dans l'éditeur. La campagne et la ville ne communiquent pas encore : l'enceinte est fermée et les **portes de rempart** se posent dans l'éditeur. Les trois entrées tombent donc dans la zone de la ville et de son bourg : derrière la porte ouest, dans le bourg de Winchester, à l'est du bourg.
 - `sous_categorie: "ville"` : Londres reste la capitale de l'île.
 
+## ✍️ Auteur
+
+pose les portes de rempart de Camelot. Et rajoute le déplacement léger de Londres et ses connexions multiples dans le Json. J'ai encore rien apporté.
+
+Le pont-levis, le pont sur la rivière pour la porte ouest n'a pas à être bloqué comme il l'est aujourd'hui. Normalement, on essaye d'arriver au plus près de la porte pour pouvoir créer les connexions de porte de rempart.
+
+## 14. Portes de rempart, et Londres sur sa forteresse (22/10/2026)
+
+Même fichier `jsons/camelot_a_importer.json` (`dev/gen_camelot.py`), qui remplace le précédent (rien n'était importé).
+
+- **Grille retouchée** : le chemin de ronde du rempart sud n'est plus une rue (trois cases de mur à 0) ; le **pont de la porte ouest** est rouvert entre la rive sud et le pré devant l'arche, fermé côté tour ; le bourg de Winchester, sans enceinte, s'ouvre sur la campagne. Il reste deux zones, le dedans et le dehors, reliées par les seules portes.
+- **Porte ouest** : dehors [21, 32], juste sous l'arche, au débouché du pont ; dedans [22, 28]. **Porte de Winchester** : dehors [56, 35], sous l'arche côté bourg ; dedans [56, 32].
+- Entrées depuis l'Angleterre, toutes dehors : par le pont de l'ouest (rive sud, [16, 34]), par le bourg de Winchester, par l'est.
+- **Londres** : 17 connexions couvrent le corps de la forteresse dessinée, descendue jusqu'à l'entrée du fleuve ([68-73, 35-37]) ; les quatre liens existants gardent leur `_id`. Nouveaux côtés : « par le fleuve » (quai en bois) et « par le pont ». Chaque connexion a sa propre case d'arrivée dans Londres.
+

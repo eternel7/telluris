@@ -2954,10 +2954,10 @@
         1,
         1,
         0,
-        1,
         0,
         0,
-        1,
+        0,
+        0,
         1,
         0,
         1,
@@ -3051,7 +3051,7 @@
         0,
         0,
         0,
-        1,
+        0,
         1,
         1,
         1,
@@ -4475,9 +4475,9 @@
       "70,31": 128,
       "17,31": 224,
       "16,32": 6,
-      "20,31": 136,
-      "21,32": 193,
-      "21,31": 24,
+      "20,31": 152,
+      "21,32": 129,
+      "21,31": 56,
       "22,32": 130,
       "23,31": 56,
       "23,32": 3,
@@ -4492,7 +4492,7 @@
       "69,32": 224,
       "17,32": 224,
       "16,33": 2,
-      "20,32": 44,
+      "20,32": 203,
       "21,33": 128,
       "27,32": 120,
       "26,33": 2,
@@ -4502,18 +4502,11 @@
       "29,32": 32,
       "68,32": 14,
       "69,33": 224,
-      "79,32": 163,
-      "78,31": 8,
-      "79,31": 24,
-      "80,31": 56,
-      "80,32": 131,
-      "81,31": 48,
-      "81,32": 129,
-      "18,33": 58,
-      "17,34": 2,
+      "79,32": 32,
+      "18,33": 26,
       "18,34": 3,
       "19,34": 129,
-      "19,33": 58,
+      "19,33": 57,
       "20,34": 128,
       "29,33": 122,
       "28,34": 2,
@@ -4523,49 +4516,24 @@
       "69,34": 192,
       "32,34": 56,
       "31,35": 130,
-      "32,35": 5,
+      "32,35": 1,
       "68,34": 46,
       "69,35": 168,
-      "33,35": 248,
-      "32,36": 2,
-      "33,36": 3,
-      "34,36": 131,
-      "34,35": 56,
-      "35,36": 143,
-      "35,35": 50,
-      "36,35": 32,
-      "76,35": 232,
-      "75,34": 8,
-      "75,35": 12,
-      "75,36": 14,
-      "36,36": 96,
-      "35,37": 14,
+      "33,35": 128,
+      "35,35": 2,
+      "76,35": 8,
       "68,36": 130,
-      "76,36": 224,
-      "75,37": 14,
-      "36,37": 224,
-      "35,38": 14,
-      "76,37": 224,
-      "75,38": 14,
-      "36,38": 226,
-      "35,39": 14,
-      "76,38": 226,
-      "75,39": 46,
-      "36,39": 224,
+      "36,38": 2,
+      "76,38": 2,
+      "36,39": 32,
       "35,40": 6,
-      "76,39": 200,
-      "36,40": 248,
+      "76,39": 8,
+      "36,40": 120,
       "35,41": 2,
       "36,41": 1,
       "37,41": 128,
-      "72,40": 131,
-      "71,39": 8,
-      "72,39": 24,
-      "73,39": 56,
-      "73,40": 131,
-      "74,39": 48,
-      "74,40": 139,
-      "76,40": 160,
+      "74,40": 8,
+      "76,40": 32,
       "41,41": 56,
       "40,42": 2,
       "41,42": 1,
@@ -4968,7 +4936,7 @@
       "66,30": 8,
       "67,31": 160,
       "18,31": 8,
-      "19,32": 160,
+      "19,32": 180,
       "31,32": 10,
       "36,31": 32,
       "35,32": 10,
@@ -5148,10 +5116,189 @@
       "70,42": 56,
       "68,41": 8,
       "23,3": 40,
-      "15,5": 40
+      "15,5": 40,
+      "19,31": 8
     },
     "tags": [],
     "lieu_parent": "lieu:angleterre"
+  },
+  {
+    "_id": "lieu:camelot_porte_ouest_exterieur",
+    "type": "lieu",
+    "label": "Porte ouest — extérieur",
+    "image": "porte_de_ville_pont_exterieur04.png",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:camelot"
+  },
+  {
+    "_id": "lieu:camelot_porte_ouest_interieur",
+    "type": "lieu",
+    "label": "Porte ouest — intérieur",
+    "image": "porte_de_ville_pont_interieur04.png",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:camelot"
+  },
+  {
+    "_id": "link:camelot_porte_ouest_carte_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:camelot",
+        "pos": [
+          21,
+          32
+        ],
+        "label": "au-delà des remparts"
+      },
+      {
+        "lieu": "lieu:camelot_porte_ouest_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "poste de garde",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:camelot_porte_ouest_carte_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:camelot",
+        "pos": [
+          22,
+          28
+        ]
+      },
+      {
+        "lieu": "lieu:camelot_porte_ouest_interieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "poste de garde",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:camelot_porte_ouest_passage",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:camelot_porte_ouest_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      },
+      {
+        "lieu": "lieu:camelot_porte_ouest_interieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "poste de garde",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:camelot_porte_de_winchester_exterieur",
+    "type": "lieu",
+    "label": "Porte de Winchester — extérieur",
+    "image": "porte_de_ville_exterieure08.jpg",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:camelot"
+  },
+  {
+    "_id": "lieu:camelot_porte_de_winchester_interieur",
+    "type": "lieu",
+    "label": "Porte de Winchester — intérieur",
+    "image": "porte_de_ville_interieur16.png",
+    "categorie": "Porte de rempart",
+    "lieu_parent": "lieu:camelot"
+  },
+  {
+    "_id": "link:camelot_porte_de_winchester_carte_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:camelot",
+        "pos": [
+          56,
+          35
+        ],
+        "label": "au-delà des remparts"
+      },
+      {
+        "lieu": "lieu:camelot_porte_de_winchester_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "poste de garde",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:camelot_porte_de_winchester_carte_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:camelot",
+        "pos": [
+          56,
+          32
+        ]
+      },
+      {
+        "lieu": "lieu:camelot_porte_de_winchester_interieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "poste de garde",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:camelot_porte_de_winchester_passage",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:camelot_porte_de_winchester_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      },
+      {
+        "lieu": "lieu:camelot_porte_de_winchester_interieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "poste de garde",
+      "status": "ouvert"
+    }
   },
   {
     "_id": "link:angleterre_to_camelot_ouest",
@@ -5167,10 +5314,10 @@
       {
         "lieu": "lieu:camelot",
         "pos": [
-          22,
-          28
+          16,
+          34
         ],
-        "label": "Camelot — par la porte ouest"
+        "label": "Camelot — par le pont de l'ouest"
       }
     ],
     "metadata": {
@@ -5217,10 +5364,435 @@
       {
         "lieu": "lieu:camelot",
         "pos": [
-          72,
-          40
+          78,
+          27
         ],
         "label": "Camelot — par l'est"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_ouest",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          68,
+          36
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          5,
+          22
+        ],
+        "label": "Londres — par l'ouest"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_nord",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          71,
+          35
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          30,
+          5
+        ],
+        "label": "Londres — par le nord"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_sud",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          72,
+          37
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          14,
+          43
+        ],
+        "label": "Londres — par le sud"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_est",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          73,
+          36
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          79,
+          24
+        ],
+        "label": "Londres — par l'est"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_ouest_01",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          68,
+          35
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          5,
+          23
+        ],
+        "label": "Londres — par l'ouest"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_ouest_02",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          69,
+          35
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          5,
+          21
+        ],
+        "label": "Londres — par l'ouest"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_ouest_03",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          69,
+          36
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          5,
+          24
+        ],
+        "label": "Londres — par l'ouest"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_fleuve_01",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          69,
+          37
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          38,
+          34
+        ],
+        "label": "Londres — par le fleuve"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_fleuve_02",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          70,
+          37
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          39,
+          34
+        ],
+        "label": "Londres — par le fleuve"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_sud_01",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          71,
+          37
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          15,
+          43
+        ],
+        "label": "Londres — par le sud"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_sud_02",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          73,
+          37
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          13,
+          43
+        ],
+        "label": "Londres — par le sud"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_nord_01",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          70,
+          35
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          31,
+          5
+        ],
+        "label": "Londres — par le nord"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_nord_02",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          72,
+          35
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          29,
+          5
+        ],
+        "label": "Londres — par le nord"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_nord_03",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          73,
+          35
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          32,
+          5
+        ],
+        "label": "Londres — par le nord"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_pont_01",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          70,
+          36
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          51,
+          30
+        ],
+        "label": "Londres — par le pont"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_pont_02",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          71,
+          36
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          50,
+          30
+        ],
+        "label": "Londres — par le pont"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:angleterre_to_london_est_01",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:angleterre",
+        "pos": [
+          72,
+          36
+        ]
+      },
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          79,
+          25
+        ],
+        "label": "Londres — par l'est"
       }
     ],
     "metadata": {
