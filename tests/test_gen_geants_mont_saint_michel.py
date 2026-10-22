@@ -1,12 +1,12 @@
 """`dev/gen_geants_mont_saint_michel.py` — les géants de la baie, sur le dernier dump.
 
-1. **Le Mont est dans sa zone** : la case de l'îlot dessiné (23,14) est dans le placement du Mont.
-2. **Les deux grades ne se mélangent pas** : aucune case n'est à la fois au Mont et dans
-   l'arrière-pays, ni dans l'un d'eux et dans la zone très dangereuse (le grade se somme par
-   placement actif, cf. `zones.resolve_profil_weights`).
-3. **L'arrière-pays est à terre** : sous la côte murée de la baie (rangée 14).
-4. **Le géant du Mont est seul** : round(intensité × 3) = 1 dans sa zone.
-5. **Les géants restent sous le maître du Mont** : grades strictement inférieurs.
+1. **Le Mont est dans la zone** : la case de l'îlot dessiné (23,14) est dans le placement.
+2. **Les grades ne se mélangent pas** : aucune case commune avec la zone très dangereuse (le
+   grade se somme par placement actif, cf. `zones.resolve_profil_weights`).
+3. **La zone est à terre** : sous la côte murée de la baie, à l'est de la mer.
+4. **Le géant du Mont est toujours un Seigneur** : pour TOUT profil, chaque caractéristique tirée
+   reste dans la fourchette d'un géant ordinaire Seigneur.
+5. **Les géants restent sous le maître du Mont** : aucun grade de la zone n'atteint Seigneur.
 6. **Idempotent.**
 """
 
@@ -28,62 +28,80 @@ def base():
 
 
 @pytest.fixture(scope="module")
-def france(base):
-	return g.appliquer(base[g.LIEU_ID])
+def docs(base):
+	return g.generer(base)
 
 
-def _cases(lieu, predicat):
+@pytest.fixture(scope="module")
+def france(docs):
+	return docs[0]
+
+
+@pytest.fixture(scope="module")
+def geant_du_mont(docs):
+	return docs[1]
+
+
+def _cases(lieu, zone):
 	dims = lieu["dimensions"]
 	return {(x, y) for y in range(dims["y"]) for x in range(dims["x"])
 			if any(compute_zone_intensity(x, y, p, {"intensite_max": 1}) > 0
-				   for p in lieu["zone_influences"] if predicat(p))}
+				   for p in lieu["zone_influences"] if p.get("zone") == zone)}
 
 
-def _de(zone):
-	return lambda p: p.get("zone") == zone
+def test_un_seul_fichier_deux_docs(docs):
+	assert [d["_id"] for d in docs] == [g.LIEU_ID, g.GEANT_DU_MONT]
+	assert not any("_rev" in d for d in docs)
 
 
-def test_le_mont_est_dans_sa_zone(france):
-	assert (23, 14) in _cases(france, _de(g.ZONE_MONT))
+def test_le_mont_est_dans_la_zone(france):
+	assert (23, 14) in _cases(france, g.ZONE)
 
 
 def test_les_grades_ne_se_melangent_pas(france):
-	mont = _cases(france, _de(g.ZONE_MONT))
-	arriere = _cases(france, _de(g.ZONE_ARRIERE_PAYS))
-	dangereuse = _cases(france, _de("zone:tres_dangereuse"))
-	assert mont and arriere
-	assert not mont & arriere
-	assert not (mont | arriere) & dangereuse
+	assert not _cases(france, g.ZONE) & _cases(france, "zone:tres_dangereuse")
 
 
-def test_les_zones_numerotees_n_etaient_pas_utilisees(base):
-	# Si l'auteur pose ailleurs une de ces zones, ses rencontres y amèneraient les géants.
+def test_la_zone_numerotee_n_etait_pas_utilisee(base):
+	# Si l'auteur la pose ailleurs, ses rencontres y amèneraient les géants.
 	for doc in base.values():
 		if doc.get("type") == "lieu":
-			zones = {p.get("zone") for p in doc.get("zone_influences") or []}
-			assert not zones & {g.ZONE_MONT, g.ZONE_ARRIERE_PAYS}, doc["_id"]
+			assert g.ZONE not in {p.get("zone") for p in doc.get("zone_influences") or []}, doc["_id"]
 
 
-def test_l_arriere_pays_est_a_terre(france):
-	assert min(y for _, y in _cases(france, _de(g.ZONE_ARRIERE_PAYS))) >= 15
+def test_la_zone_est_a_terre(france):
+	# Baie : mer au nord de la rangée 14 et à l'ouest du Cotentin (x 27).
+	assert all(y >= 14 for x, y in _cases(france, g.ZONE) if x < 27)
 
 
-def test_le_geant_du_mont_est_seul(base):
-	assert round(base[g.ZONE_MONT]["intensite_max"] * 3) == 1
+@pytest.mark.parametrize("profil_id", ["profil:novice", "profil:combattant", "profil:veteran",
+									   "profil:champion", "profil:heros", "profil:seigneur"])
+def test_le_geant_du_mont_est_toujours_un_seigneur(base, geant_du_mont, profil_id):
+	cible = g.fourchette_seigneur(base[g.GEANT], base[g.SEIGNEUR])
+	mods = base[profil_id].get("attributs_modifier") or {}
+	for cle, borne in geant_du_mont["base_attributes"].items():
+		mod = mods.get(cle) or {}
+		# Extrêmes de `combat.roll_monster_stats` : clamp(min + écart, min, max).
+		for ecart in (mod.get("min", 0), mod.get("max", 0)):
+			tire = max(borne["min"], min(borne["max"], borne["min"] + ecart))
+			assert cible[cle]["min"] <= tire <= cible[cle]["max"], (profil_id, cle)
+
+
+def test_fourchette_relue_du_dump(base, geant_du_mont):
+	assert set(geant_du_mont["base_attributes"]) == set(base[g.GEANT]["base_attributes"])
+	assert geant_du_mont["description"] == base[g.GEANT_DU_MONT]["description"]
 
 
 def test_les_geants_restent_sous_le_maitre_du_mont(base):
-	def niveaux(spec):
-		return [base[pid]["niveau"] for pid in spec["profil_weights"]]
-	assert max(niveaux(g.PLACEMENT_ARRIERE_PAYS)) < min(niveaux(g.PLACEMENT_MONT))
+	assert max(base[p]["niveau"] for p in g.PLACEMENT["profil_weights"]) < base[g.SEIGNEUR]["niveau"]
 
 
 def test_rencontres(france):
 	zones = {r["espece"]: r["zones"] for r in france["rencontres"]}
-	assert g.ZONE_ARRIERE_PAYS in zones[g.GEANT]
+	assert g.ZONE in zones[g.GEANT]
 	assert "zone:tres_dangereuse" in zones[g.GEANT]          # l'existant est conservé
-	assert zones[g.GEANT_DU_MONT] == [g.ZONE_MONT]
+	assert zones[g.GEANT_DU_MONT] == [g.ZONE]
 
 
-def test_idempotent(france):
-	assert g.appliquer(france) == france
+def test_idempotent(base, france):
+	assert g.appliquer_france(france) == france

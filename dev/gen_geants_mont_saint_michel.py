@@ -2,35 +2,32 @@
 # dev/gen_geants_mont_saint_michel.py
 # Les géants de la baie du Mont-Saint-Michel, sur la carte de France.
 #
-# DEUX placements, deux zones numérotées jusque-là inutilisées (aucun lieu ne les portait au
-# dump du 22/10) :
-#   · `zone:zone_danger_1` sur le MONT lui-même — l'îlot dessiné en (23,14), au bord de la côte
-#     murée par `nav` — où vit le Géant du Mont-Saint-Michel, en grade Héros/Seigneur ;
-#   · `zone:zone_danger_3` sur l'ARRIÈRE-PAYS, au sud-est de la baie, côté terre : les géants
-#     ordinaires (`espece:geant_ou_titan`), en grade Novice/Combattant.
+# UNE zone numérotée jusque-là inutilisée (`zone:zone_danger_3`, aucun lieu ne la portait au
+# dump du 22/10), un seul placement : une ellipse inclinée qui part du MONT — l'îlot dessiné en
+# (23,14), sur la rangée de côte murée par `nav` — et file vers l'arrière-pays au sud-est,
+# toute en terre. On y croise les géants ordinaires (`espece:geant_ou_titan`) et le Géant du
+# Mont-Saint-Michel.
 #
-# ⚠️ POURQUOI DEUX ZONES ET NON UNE : le grade se tire par PLACEMENT, jamais par espèce
-# (`zones.resolve_profil_weights` somme les tables des placements actifs, puis
-# `instantiate_monsters` l'applique à toutes les espèces du pool). Une seule zone donnerait
-# aux géants ordinaires le même grade que le géant du Mont. Les deux ellipses ne se touchent
-# donc pas (verrouillé par tests/test_gen_geants_mont_saint_michel.py), ni la zone très
-# dangereuse voisine, dont les Héros/Seigneurs s'additionneraient aux géants.
+# LE GÉANT DU MONT EST TOUJOURS UN SEIGNEUR, quel que soit le profil tiré. `roll_monster_stats`
+# vaut, par caractéristique, clamp(min + écart du profil, min, max) : poser sur l'espèce
+# [min, max] = la fourchette d'un géant ordinaire au profil Seigneur suffit — le profil ne peut
+# plus le faire sortir de cette fourchette. Elle est RELUE dans le dump (`geant_ou_titan` +
+# `profil:seigneur`), jamais recopiée : rééquilibrer l'un ou l'autre se reporte au prochain
+# passage. Le niveau du profil ne joue plus que sur l'XP rendue (niveau × 4).
 #
-# ⚠️ POURQUOI `zone_danger_1` POUR LE MONT : l'effectif d'un combat aléatoire vaut
-# round(intensité × 3) (`routers/combat.start_combat`) ; à 0,4 il n'y a qu'UN monstre — le géant
-# est seul sur son rocher, comme dans la légende. À 0,8 (`zone_danger_3`) on en tirerait deux.
+# ⚠️ UNE zone ⇒ UN tirage de grade pour tout le pool (`zones.resolve_profil_weights`) : les
+# grades posés ici sont ceux des géants ordinaires, plafonnés à Champion pour rester sous le
+# maître du Mont. Le placement ne touche pas la zone très dangereuse, dont les Héros/Seigneurs
+# s'additionneraient aux géants (verrouillé par tests/test_gen_geants_mont_saint_michel.py).
 #
-# ⚠️ GRADES : à profil égal le Géant du Mont est PLUS FAIBLE que le géant ordinaire
-# (Seigneur 105 ≈ géant Vétéran 103, `potentiel.potentiel_espece`). Les géants de l'arrière-pays
-# s'arrêtent donc à Combattant (≈ 66) pour rester nettement sous le maître du Mont (101-105).
-#
-# Comme `gen_grades_france.py` : on RELIT `lieu:france` depuis le dump et on n'y touche que
-# `zone_influences` (ajout) et `rencontres` (ajout) — PUT complet à l'import (CLAUDE.md §11).
-# Idempotent : un placement ou une rencontre déjà présents ne sont pas redoublés.
+# Comme `gen_grades_france.py` : on RELIT les docs depuis le dump et on n'y touche que
+# `zone_influences` / `rencontres` (ajouts) de `lieu:france` et `base_attributes` du géant du
+# Mont — PUT complet à l'import (CLAUDE.md §11). Idempotent.
 #
 # Usage : python dev/gen_geants_mont_saint_michel.py [jsons/telluris-dump-….json]
 #         (sans argument : le dump le plus récent)
-# Sortie : jsons/geants_mont_saint_michel_a_importer.json   (1 doc : lieu:france)
+# Sortie : jsons/geants_mont_saint_michel_a_importer.json
+#          (2 docs : lieu:france, espece:geant_du_mont_saint_michel)
 
 import copy
 import glob
@@ -48,30 +45,18 @@ SORTIE = "jsons/geants_mont_saint_michel_a_importer.json"
 
 GEANT = "espece:geant_ou_titan"
 GEANT_DU_MONT = "espece:geant_du_mont_saint_michel"
-ZONE_MONT = "zone:zone_danger_1"
-ZONE_ARRIERE_PAYS = "zone:zone_danger_3"
+SEIGNEUR = "profil:seigneur"
+ZONE = "zone:zone_danger_3"
 
-# Le Mont : (23,14) à (25,14), la dernière rangée de terre avant la baie, plus (24,15) et
-# (24,13) — cette dernière en mer, derrière le mur de côte, donc jamais foulée.
-PLACEMENT_MONT = {
-	"x": 24, "y": 14, "w": 3, "h": 2, "rot": 0, "forme": "ellipse", "zone": ZONE_MONT,
+# Du Mont (23,14) jusqu'à (31,18) : 23 cases, aucune en mer.
+PLACEMENT = {
+	"x": 27, "y": 16, "w": 10, "h": 3, "rot": 30, "forme": "ellipse", "zone": ZONE,
 	"profil_weights": {
-		"profil:heros": 2,     # niveau 5
-		"profil:seigneur": 3,  # niveau 6
+		"profil:combattant": 2,  # niveau 2
+		"profil:veteran": 3,     # niveau 3
+		"profil:champion": 1,    # niveau 4
 	},
 }
-
-# L'arrière-pays de la baie : x 24 → 32, y 15 → 19, tout en terre.
-PLACEMENT_ARRIERE_PAYS = {
-	"x": 28, "y": 17, "w": 8, "h": 4, "rot": 0, "forme": "ellipse", "zone": ZONE_ARRIERE_PAYS,
-	"profil_weights": {
-		"profil:novice": 1,      # niveau 1
-		"profil:combattant": 3,  # niveau 2
-	},
-}
-
-PLACEMENTS = [PLACEMENT_MONT, PLACEMENT_ARRIERE_PAYS]
-RENCONTRES = {GEANT: ZONE_ARRIERE_PAYS, GEANT_DU_MONT: ZONE_MONT}
 
 
 def dernier_dump(argv):
@@ -90,49 +75,77 @@ def charger(chemin: str) -> dict:
 	return {d["_id"]: d for d in docs if isinstance(d, dict) and d.get("_id")}
 
 
+def _sans_rev(doc: dict) -> dict:
+	doc = copy.deepcopy(doc)
+	doc.pop("_rev", None)
+	return doc
+
+
 def _meme_placement(a: dict, b: dict) -> bool:
 	return all(a.get(k) == b.get(k) for k in ("x", "y", "w", "h", "rot", "forme", "zone"))
 
 
-def appliquer(lieu: dict) -> dict:
-	"""Copie de `lieu` avec les deux placements et les deux rencontres. Pur, idempotent."""
-	lieu = copy.deepcopy(lieu)
-	lieu.pop("_rev", None)
+def fourchette_seigneur(geant: dict, seigneur: dict) -> dict:
+	"""[min, max] de chaque caractéristique d'un géant ordinaire au profil Seigneur, avec la
+	règle de `combat.roll_monster_stats` : clamp(min + écart, min, max)."""
+	out = {}
+	mods = seigneur.get("attributs_modifier") or {}
+	for cle, borne in (geant.get("base_attributes") or {}).items():
+		bmin, bmax = borne.get("min", 1), borne.get("max", 5)
+		mod = mods.get(cle) or {}
+		out[cle] = {
+			"min": max(bmin, min(bmax, bmin + mod.get("min", 0))),
+			"max": max(bmin, min(bmax, bmin + mod.get("max", 0))),
+		}
+	return out
 
+
+def appliquer_france(lieu: dict) -> dict:
+	"""Copie de `lieu` avec le placement et les deux rencontres. Pur, idempotent."""
+	lieu = _sans_rev(lieu)
 	placements = lieu.setdefault("zone_influences", [])
-	for spec in PLACEMENTS:
-		if not any(_meme_placement(p, spec) for p in placements):
-			p = copy.deepcopy(spec)
-			p["bbox"] = compute_bbox(p)
-			placements.append(p)
+	if not any(_meme_placement(p, PLACEMENT) for p in placements):
+		p = copy.deepcopy(PLACEMENT)
+		p["bbox"] = compute_bbox(p)
+		placements.append(p)
 
 	rencontres = lieu.setdefault("rencontres", [])
-	for espece, zone in RENCONTRES.items():
+	for espece in (GEANT, GEANT_DU_MONT):
 		entree = next((r for r in rencontres if r.get("espece") == espece), None)
 		if entree is None:
-			rencontres.append({"espece": espece, "zones": [zone]})
-		elif zone not in entree.setdefault("zones", []):
-			entree["zones"].append(zone)
+			rencontres.append({"espece": espece, "zones": [ZONE]})
+		elif ZONE not in entree.setdefault("zones", []):
+			entree["zones"].append(ZONE)
 	return lieu
 
 
+def appliquer_geant_du_mont(base: dict) -> dict:
+	doc = _sans_rev(base[GEANT_DU_MONT])
+	doc["base_attributes"] = fourchette_seigneur(base[GEANT], base[SEIGNEUR])
+	return doc
+
+
 def valider(base: dict) -> None:
-	manquants = [i for i in [LIEU_ID, GEANT, GEANT_DU_MONT, ZONE_MONT, ZONE_ARRIERE_PAYS]
-				 + [pid for s in PLACEMENTS for pid in s["profil_weights"]] if i not in base]
+	manquants = [i for i in [LIEU_ID, GEANT, GEANT_DU_MONT, SEIGNEUR, ZONE, *PLACEMENT["profil_weights"]]
+				 if i not in base]
 	if manquants:
 		sys.exit("ERREUR : absents du dump : " + ", ".join(manquants))
 
 
+def generer(base: dict) -> list:
+	valider(base)
+	return [appliquer_france(base[LIEU_ID]), appliquer_geant_du_mont(base)]
+
+
 def main(argv):
 	chemin = dernier_dump(argv)
-	base = charger(chemin)
-	valider(base)
-	lieu = appliquer(base[LIEU_ID])
+	docs = generer(charger(chemin))
 	with open(os.path.join(RACINE, SORTIE), "w", encoding="utf-8", newline="\n") as f:
-		f.write(json.dumps([lieu], ensure_ascii=False, indent=2) + "\n")
+		f.write(json.dumps(docs, ensure_ascii=False, indent=2) + "\n")
 	print(f"Source : {os.path.basename(chemin)}")
-	print(f"{SORTIE} : {LIEU_ID}, {len(lieu['zone_influences'])} placements, "
-		  f"{len(lieu['rencontres'])} rencontres")
+	print(f"{SORTIE} : {', '.join(d['_id'] for d in docs)}")
+	for cle, b in docs[1]["base_attributes"].items():
+		print(f"  {cle:>3} {b['min']:>3} – {b['max']}")
 
 
 if __name__ == "__main__":

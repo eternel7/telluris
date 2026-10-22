@@ -7734,41 +7734,23 @@
         }
       },
       {
-        "x": 24,
-        "y": 14,
-        "w": 3,
-        "h": 2,
-        "rot": 0,
-        "forme": "ellipse",
-        "zone": "zone:zone_danger_1",
-        "profil_weights": {
-          "profil:heros": 2,
-          "profil:seigneur": 3
-        },
-        "bbox": {
-          "x_min": 22.5,
-          "x_max": 25.5,
-          "y_min": 13.0,
-          "y_max": 15.0
-        }
-      },
-      {
-        "x": 28,
-        "y": 17,
-        "w": 8,
-        "h": 4,
-        "rot": 0,
+        "x": 27,
+        "y": 16,
+        "w": 10,
+        "h": 3,
+        "rot": 30,
         "forme": "ellipse",
         "zone": "zone:zone_danger_3",
         "profil_weights": {
-          "profil:novice": 1,
-          "profil:combattant": 3
+          "profil:combattant": 2,
+          "profil:veteran": 3,
+          "profil:champion": 1
         },
         "bbox": {
-          "x_min": 24.0,
-          "x_max": 32.0,
-          "y_min": 15.0,
-          "y_max": 19.0
+          "x_min": 22.605401042188262,
+          "x_max": 31.394598957811738,
+          "y_min": 13.182643082603839,
+          "y_max": 18.81735691739616
         }
       }
     ],
@@ -8048,7 +8030,7 @@
       {
         "espece": "espece:geant_du_mont_saint_michel",
         "zones": [
-          "zone:zone_danger_1"
+          "zone:zone_danger_3"
         ]
       }
     ],
@@ -8285,5 +8267,59 @@
         ]
       }
     ]
+  },
+  {
+    "_id": "espece:geant_du_mont_saint_michel",
+    "type": "espece",
+    "nom": "Géant du Mont-Saint-Michel",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "geant_du_mont_saint_michel_transparent.png",
+    "description": "Géant venu d'Ibérie qui s'installa sur le mont, au milieu des grèves de la baie, et dévorait les gens du pays. Il enleva Hélène, nièce d'un duc d'Armorique, qui mourut de terreur entre ses mains. Arthur gravit le mont avec Kaï et Bedwyr et l'abattit, dit-on. Pourtant il y a toujours un géant sur le mont : le même qui revient, ou un autre qui a pris sa place, les pêcheurs de la baie ne se risquent pas à trancher.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 10
+      },
+      "F": {
+        "min": 90,
+        "max": 110
+      },
+      "R": {
+        "min": 80,
+        "max": 95
+      },
+      "Ag": {
+        "min": 20,
+        "max": 20
+      },
+      "Vol": {
+        "min": 35,
+        "max": 35
+      },
+      "Int": {
+        "min": 20,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 55
+      }
+    },
+    "tags": [
+      "humanoide",
+      "geant",
+      "legendaire",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {}
   }
 ]
