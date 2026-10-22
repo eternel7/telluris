@@ -213,7 +213,7 @@ def gautier(doc: dict) -> dict:
 			"item": OSSEMENTS,
 			"quantite": 1,
 			"unique": True,
-			"recompenses": {"xp": 120, "cuivre": 30000},
+			"recompenses": {"xp": 120, "cuivre": 1500},  # barème D (gen_recalage_primes.py)
 		},
 		"noeuds": {"accepte": "escolives_accepte", "partiel": "escolives_partiel", "remis": "escolives_remis"},
 	}

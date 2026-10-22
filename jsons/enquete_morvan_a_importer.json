@@ -68,7 +68,7 @@
           "proba": 0.25,
           "recompenses": {
             "xp": 30,
-            "cuivre": 500
+            "cuivre": 250
           }
         },
         "noeuds": {
@@ -85,7 +85,7 @@
           "unique": true,
           "recompenses": {
             "xp": 70,
-            "cuivre": 8000
+            "cuivre": 800
           }
         },
         "noeuds": {
@@ -300,7 +300,7 @@
           ]
         },
         "premiere_mission": {
-          "texte": "« Beaucoup le disent. Peu comprennent ce que cela signifie. » Il ouvre un grand registre relié de cuir et y inscrit soigneusement ton nom. « Les recrues pensent souvent que leur première mission sera de tuer un monstre. C'est faux. Avant de savoir combattre, il faut apprendre à être digne de confiance. »",
+          "texte": "« Beaucoup le disent. Peu comprennent ce que cela signifie. » Il ouvre un grand registre relié de cuir et y inscrit soigneusement votre nom. « Les recrues pensent souvent que leur première mission sera de tuer un monstre. C'est faux. Avant de savoir combattre, il faut apprendre à être digne de confiance. »",
           "choix": [
             {
               "id": "ecouter",
@@ -315,7 +315,7 @@
           ]
         },
         "transport_propose": {
-          "texte": "Borin disparaît derrière une porte donnant sur les réserves, et revient avec {colis} solides caisses de bois fermées par des courroies de cuir. Une odeur puissante s'en échappe. « {poids} kilos de viande de sanglier-gobelin, toute fraîche. Tu la livreras au fumoir de la Guilde. Destination : {destination}. Tu as {delai} minutes — après, la marchandise ne vaut plus rien, et ce ne sont pas deux caisses qui disparaissent : ce sont les provisions de tes futurs compagnons. » Il glisse un jeton de cuivre dans ta main. « {xp} points d'expérience et {prime} pièces de cuivre à ton retour. »",
+          "texte": "Borin disparaît derrière une porte donnant sur les réserves, et revient avec {colis} solides caisses de bois fermées par des courroies de cuir. Une odeur puissante s'en échappe. « {poids} kilos de viande de sanglier-gobelin, toute fraîche. Tu la livreras au fumoir de la Guilde. Destination : {destination}. Tu as {delai} minutes — après, la marchandise ne vaut plus rien, et ce ne sont pas deux caisses qui disparaissent : ce sont les provisions de tes futurs compagnons. » Il glisse un jeton de cuivre dans votre main. « {xp} points d'expérience et {prime} pièces de cuivre à ton retour. »",
           "choix": [
             {
               "id": "transport_infos",
@@ -338,7 +338,7 @@
           ]
         },
         "transport_lecon": {
-          "texte": "Le sourire du nain s'efface doucement. « Tu crois ? » Il se penche vers toi. « Les plus grands héros commencent rarement en terrassant un dragon. Ils commencent en accomplissant parfaitement une tâche que tout le monde croit ordinaire. » Puis il reprend son éternel sourire. « Et entre nous... l'odeur attirera sans doute quelques renards, des chiens errants, peut-être même un jeune loup ou deux. Tu devras garder la tête froide. »",
+          "texte": "Le sourire du nain s'efface doucement. « Tu crois ? » Il se penche vers vous. « Les plus grands héros commencent rarement en terrassant un dragon. Ils commencent en accomplissant parfaitement une tâche que tout le monde croit ordinaire. » Puis il reprend son éternel sourire. « Et entre nous... l'odeur attirera sans doute quelques renards, des chiens errants, peut-être même un jeune loup ou deux. Tu devras garder la tête froide. »",
           "choix": [
             {
               "id": "transport_accepter",
@@ -374,7 +374,7 @@
           ]
         },
         "transport_accepte": {
-          "texte": "Borin contourne le comptoir et t'aide à charger les {colis} caisses dans une solide hotte de portage. « Destination : {destination}, dans les {delai} minutes. Et reviens me voir ensuite : je veux te l'entendre dire. Tu découvriras bientôt une vérité que tous les vétérans connaissent, petit. » Il t'adresse un clin d'œil et referme son registre.",
+          "texte": "Borin contourne le comptoir et vous aide à charger les {colis} caisses dans une solide hotte de portage. « Destination : {destination}, dans les {delai} minutes. Et reviens me voir ensuite : je veux te l'entendre dire. Tu découvriras bientôt une vérité que tous les vétérans connaissent. » Il vous adresse un clin d'œil et referme son registre.",
           "choix": [
             {
               "id": "ok",
@@ -384,7 +384,7 @@
           ]
         },
         "transport_rapporte": {
-          "texte": "Le vieux nain rouvre son grand registre et trace une ligne à côté de ton nom. « Les caisses sont arrivées, et à l'heure. » Il fait glisser sur le chêne une plaque de cuir bouilli frappée du blason du Bastion, puis {prime} pièces de cuivre. « Ce n'était pas la viande que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. Les aventuriers capables de protéger une simple cargaison sont souvent ceux à qui l'on confiera, un jour, des compagnons... et peut-être le destin d'une cité entière. » Il désigne le grand tableau de la salle commune. « Rang Cuivre — le premier échelon, celui par lequel tout le monde a commencé. Va choisir ta prochaine quête. Tu es des nôtres. »",
+          "texte": "Le vieux nain rouvre son grand registre et trace une ligne à côté de votre nom. « Les caisses sont arrivées, et à l'heure. » Il fait glisser sur le chêne une plaque de cuir bouilli frappée du blason du Bastion, puis {prime} pièces de cuivre. « Ce n'était pas la viande que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. Les aventuriers capables de protéger une simple cargaison sont souvent ceux à qui l'on confiera, un jour, des compagnons... et peut-être le destin d'une cité entière. » Il désigne le grand tableau de la salle commune. « Rang F, le cuivre — le premier échelon, celui par lequel tout le monde a commencé. Va choisir ta prochaine quête. Tu es des nôtres. »",
           "choix": [
             {
               "id": "ok",
@@ -394,11 +394,11 @@
           ]
         },
         "transport_trop_charge": {
-          "texte": "Le nain soupèse ton barda d'un regard et éclate de rire. « Par les enclumes des anciens ! Tu ploies déjà sous ton propre bagage, {prenom}. Déleste-toi et reviens : la viande ne s'envolera pas... enfin, pas tout de suite. »",
+          "texte": "Le nain soupèse votre barda d'un regard et éclate de rire. « Par les enclumes des anciens ! Tu ploies déjà sous ton propre bagage, {prenom}. Déleste-toi et reviens : la viande ne s'envolera pas... enfin, pas tout de suite. »",
           "choix": [
             {
               "id": "ok",
-              "label": "Je reviendrai plus léger.",
+              "label": "Je reviendrai le sac plus léger.",
               "next": "fin"
             }
           ]
@@ -414,7 +414,7 @@
           ]
         },
         "transport_veteran": {
-          "texte": "« Si je me souviens de toi ? » Le vieux nain caresse distraitement une tresse de sa barbe noire de jais. « {destinataire} a reçu sa viande, et à l'heure. Ce n'était pas la marchandise que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. » Il désigne du menton le grand tableau couvert de parchemins, dans la salle commune. « Va donc voir ce qu'on y épingle. Tu as gagné le droit de choisir. »",
+          "texte": "« Si je me souviens de toi ? » Le vieux nain caresse distraitement une tresse de sa barbe noire de jais. « {destinataire} a reçu sa viande, et à l'heure. Ce n'était pas la marchandise que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. » Il tapote la couverture de son registre. « Ton nom y est toujours. Ceux qui tiennent parole, je ne les raye jamais. »",
           "choix": [
             {
               "id": "ok",
@@ -424,7 +424,7 @@
           ]
         },
         "rang_propose": {
-          "texte": "Borin referme son registre et te jauge d'un œil neuf. « Tu veux t'élever dans la Guilde, {prenom} ? Alors il te faut une prise digne de ce nom. Nos éclaireurs ont repéré un {espece} d'exception qui écume {lieu} — une bête énorme, couverte du sang de ses victimes. Ramène-moi sa dépouille et le rang {rang_vise} sera à toi. {xp} points d'expérience à la clef, et la fierté qui va avec. »",
+          "texte": "Borin referme son registre et vous jauge d'un œil neuf. « Tu veux t'élever dans la Guilde, {prenom} ? Alors il te faut une prise digne de ce nom. Nos éclaireurs ont repéré un {espece} d'exception qui écume {lieu} — une bête énorme, couverte du sang de ses victimes. Ramène-moi sa dépouille et le rang {rang_vise} sera à toi. {xp} points d'expérience à la clef, et la fierté qui va avec. »",
           "choix": [
             {
               "id": "rang_accepter",
@@ -442,7 +442,7 @@
           ]
         },
         "rang_accepte": {
-          "texte": "« Bien. » Le nain grave quelque chose à côté de ton nom. « La bête rôde du côté de {lieu}. Ne reviens pas sans sa dépouille — et reviens entier, {prenom}, ce serait un comble de perdre une recrue prometteuse sur une épreuve de rang. »",
+          "texte": "« Bien. » Le nain grave quelque chose à côté de votre nom. « La bête rôde du côté de {lieu}. Ne reviens pas sans sa dépouille — et reviens en un seul morceau, {prenom} : ce serait un comble de perdre une recrue prometteuse sur une épreuve de rang. »",
           "choix": [
             {
               "id": "ok",
@@ -452,7 +452,7 @@
           ]
         },
         "rang_rapporte": {
-          "texte": "Borin examine la dépouille encore fumante, hoche lentement la tête, puis trace une marque nette sur ta plaque de cuir bouilli. « Peu en reviennent, {prenom}. Toi, si. » Il repousse le registre. « Te voilà rang {rang}. La Guilde n'oublie pas ceux qui montent — et elle en attend d'autant plus. »",
+          "texte": "Borin examine la dépouille encore fumante, hoche lentement la tête, puis trace une marque nette sur votre plaque de cuir bouilli. « Peu en reviennent, {prenom}. Toi, si. » Il repousse le registre. « Te voilà rang {rang}. La Guilde n'oublie pas ceux qui montent — et elle en attend d'autant plus. »",
           "choix": [
             {
               "id": "ok",
@@ -504,7 +504,7 @@
           ]
         },
         "escorte_propose": {
-          "texte": "Borin fait glisser un registre plus mince que les autres et l'ouvre à une page cornée. « Celui-là, je n'aime pas le tenir. » Il tourne le livre vers vous. « {protege}. Une famille d'Auxerre, un enfant qui n'est pas rentré. On l'a vu du côté de {lieu_rencontre}. La Guilde paie ceux qui les ramènent — et elle se souvient de ceux qui les ramènent vivants. »",
+          "texte": "Borin fait glisser un registre plus mince que les autres et l'ouvre à une page cornée. « Celui-là, je n'aime pas le tenir. » Il tourne le livre vers vous. « {protege}. Une famille d'Auxerre, un enfant qui n'est pas rentré. On a vu l'enfant du côté de {lieu_rencontre}. La Guilde paie ceux qui les ramènent — et elle se souvient de ceux qui les ramènent vivants. »",
           "choix": [
             {
               "id": "escorte_details",
@@ -519,7 +519,7 @@
           ]
         },
         "escorte_details": {
-          "texte": "« {direction}. » Le doigt épais s'arrête et ne bouge plus. « Vous rendrez l'enfant à sa famille, pas à moi : {destinataire}, à : {destination}. Moi, je me contente d'inscrire que c'est fait — {xp} points d'expérience et {prime} pièces de cuivre ce jour-là. »",
+          "texte": "« {direction}. » Le doigt épais s'arrête et ne bouge plus. « Tu rendras l'enfant à sa famille, pas à moi : {destinataire}, à : {destination}. Moi, je me contente d'inscrire que c'est fait — {xp} points d'expérience et {prime} pièces de cuivre ce jour-là. »",
           "choix": [
             {
               "id": "escorte_accepter",
@@ -537,7 +537,7 @@
           ]
         },
         "escorte_acceptee": {
-          "texte": "Le nain trace une croix dans la marge et souffle sur l'encre. « C'est noté à votre nom. » Le sourire revient, un peu plus grave que d'habitude. « Une chose, {prenom} : {protege} ne se battra pas et ne pourra pas s'enfuir. Ce n'est pas un colis — ramenez l'enfant, pas son panier. »",
+          "texte": "Le nain trace une croix dans la marge et souffle sur l'encre. « C'est noté à ton nom. » Le sourire revient, un peu plus grave que d'habitude. « Une chose, {prenom} : {protege} ne se battra pas et ne pourra pas s'enfuir. Ce n'est pas un colis — ramène l'enfant, pas son panier. »",
           "choix": [
             {
               "id": "partir",
@@ -552,7 +552,7 @@
           ]
         },
         "escorte_relance": {
-          "texte": "« Toujours en chemin ? » Le registre reste ouvert à la page cornée. « Cherchez {direction}. Et souvenez-vous : c'est à : {destination} qu'on attend, pas ici. Une croix dans mon livre ne vaut rien tant que la porte ne s'est pas rouverte. »",
+          "texte": "« Toujours en chemin ? » Le registre reste ouvert à la page cornée. « Cherche {direction}. Et souviens-toi : c'est à : {destination} qu'on attend, pas ici. Une croix dans mon livre ne vaut rien tant que la porte ne s'est pas rouverte. »",
           "choix": [
             {
               "id": "retour",
@@ -567,7 +567,7 @@
           ]
         },
         "bucherons_appel": {
-          "texte": "« Hé ! Vous. Oui, vous. » Le nain pose le registre qu'il compulsait et se penche par-dessus le comptoir. « Le maître de la guilde vous cherche. » Il lève une main avant que vous ayez ouvert la bouche. « Et avant que vous demandiez : non, ce n'est ni une histoire de dette, ni une bagarre de taverne, ni un poulet volé. » Il marque un temps. « Cette fois, c'est sérieux. »",
+          "texte": "« Hé ! Toi. Oui, toi. » Le nain pose le registre qu'il compulsait et se penche par-dessus le comptoir. « Le maître de la guilde te cherche. » Il lève une main avant que vous ayez ouvert la bouche. « Et avant que tu demandes : non, ce n'est ni une histoire de dette, ni une bagarre de taverne, ni un poulet volé. » Il marque un temps. « Cette fois, c'est sérieux. »",
           "choix": [
             {
               "id": "quoi",
@@ -582,7 +582,7 @@
           ]
         },
         "bucherons_appel_qui": {
-          "texte": "« Il ne m'a rien expliqué. Il a seulement dit de vous envoyer le voir dès que vous mettriez les pieds ici. » Le ton descend d'un cran, et la malice avec. « Ça concerne des gens qui ne sont pas revenus de la forêt. »",
+          "texte": "« Il ne m'a rien expliqué. Il a seulement dit de t'envoyer le voir dès que tu mettrais les pieds ici. » Le ton descend d'un cran, et la malice avec. « Ça concerne des gens qui ne sont pas revenus de la forêt. »",
           "choix": [
             {
               "id": "aventuriers",
@@ -597,7 +597,7 @@
           ]
         },
         "bucherons_appel_escalier": {
-          "texte": "« Des bûcherons. Trois hommes. » Borin referme le registre d'un geste. « Ils coupent pour plusieurs exploitants de la région, ils connaissent ces bois depuis toujours, et voilà deux jours qu'on les attend. Ça commence à faire beaucoup de temps, pour des gens qui ne se perdent pas. » Il désigne du pouce l'escalier du fond. « Le maître de la guilde est dans son bureau. Montez. Il vous dira le reste. »",
+          "texte": "« Des bûcherons. Trois hommes. » Borin referme le registre d'un geste. « Ils coupent pour plusieurs exploitants de la région, ils connaissent ces bois depuis toujours, et voilà deux jours qu'on les attend. Ça commence à faire beaucoup de temps, pour des gens qui ne se perdent pas. » Il désigne du pouce l'escalier du fond. « Le maître de la guilde est dans son bureau. Monte. Il te dira le reste. »",
           "choix": [
             {
               "id": "retour",
