@@ -73,6 +73,17 @@ REGLES_MATIERES = {
 	"place_cases_min": 2,        # tache de places reliée en tant que telle
 	"sol_cout": 30.0,            # coût de creuser une sous-case qui n'a rien d'un pavé
 	"percee_cases": 4,           # cases ouvertes de l'arche d'une porte vers le cœur
+	# Traits (cel shading) et strate du dehors.
+	"trait_gris": 45,            # gris < : pixel d'ENCRE (gros trait noir)
+	"sol_px_l_min": 40.0,        # pixel de terre ou de pavé : assez clair…
+	"toit_ardoise_l_max": 55.0,  # ardoise : froide et pas trop claire
+	"toit_ombre_l_max": 25.0,    # ombre profonde (sous un toit)
+	"dehors_sol_min": 0.45,      # part de pixels de sol qui ouvre une case du dehors…
+	"dehors_toit_max": 0.25,     # …avec au plus cette part de toit
+	"dehors_garder_min": 30,     # composante sans ancre gardée à partir de cette taille
+	"encre_cout": 40.0,          # coût de creuser une sous-case faite d'encre
+	"routes_max": 3,             # routes de porte à porte au plus…
+	"route_allonge_max": 1.6,    # …chacune au plus ce facteur de la plus courte
 	# Rivière : trou maximal recousu (cases) et écart de teinte toléré sur le trou.
 	"riviere_trou_max": 4,
 	"riviere_ecart_b": 10.0,
@@ -430,7 +441,8 @@ def marges(lect, regles=None) -> list:
 
 
 def proposer_cite(cells, rues, lect, enceinte, pleins=(), cadre=None, regles=None,
-		regles_grille=None, chemins=(), grille_sc=None, portes=()) -> dict:
+		regles_grille=None, chemins=(), grille_sc=None, portes=(), masques=None,
+		ancres_dehors=(), portes_imposees=()) -> dict:
 	"""Grille d'une cité à enceinte déclarée, à partir de la proposition de `grille_image`
 	(SANS enceinte devinée, sans nav, sans passages : `cells` et la liste `rues` du tracé).
 
@@ -456,6 +468,16 @@ def proposer_cite(cells, rues, lect, enceinte, pleins=(), cadre=None, regles=Non
 	direction de la percée vers le dedans (défaut : le centre du polygone) ; chaque porte
 	reçoit sa case dehors et sa case dedans au plus près, et le rapport dit si l'on va de chacune à chacune (`portes_reliees`) —
 	contrôle AUTOMATIQUE de toute grille de cité.
+	`masques` (`masques_pixels` : encre, sol, toit) : les TRAITS du cel shading. Le dehors est
+	relu par `lire_dehors` (sol contre toit, au pixel) puis ÉLAGUÉ (`elaguer` : un morceau que
+	de gros traits isolent, sans ancre — `ancres_dehors`, cases dehors des portes — et petit,
+	mène nulle part) ; l'encre entre dans le coût du creusement du cœur, qui trace jusqu'à
+	`routes_max` routes de porte à porte ; `relier_zones` n'est plus appelé (il creusait à
+	travers les traits).
+	`portes_imposees` : [(case dehors | None, case dedans | None)] alignées sur `portes` — les
+	cases VALIDÉES par l'Auteur (« gravées dans le marbre ») : posées telles quelles, forcées
+	praticables (même dans le chemin de ronde), ancres du creusement ; une porte dont la case
+	dedans est imposée n'a pas de percée.
 	Ne mute pas `cells`. Rend `{cells, nav, dedans, anneau, portes, rapport}`."""
 	from utils import grille_image
 	from utils.lieux import VALID_MOVES
@@ -529,7 +551,15 @@ def proposer_cite(cells, rues, lect, enceinte, pleins=(), cadre=None, regles=Non
 	cy_ = sum(y for _x, y in enceinte) / len(enceinte) + 0.5
 	percees = []
 	portes = [tuple(p) for p in portes]
-	for porte in portes:
+	imposees = list(portes_imposees) + [(None, None)] * (len(portes) - len(portes_imposees))
+	for porte, (_imp_dehors, imp_dedans) in zip(portes, imposees):
+		if imp_dedans:
+			c = tuple(imp_dedans)
+			ronde.discard(c)
+			tours.discard(c)
+			cells[c[1]][c[0]] = 1
+			percees.append([c])
+			continue
 		px, py = porte[0], porte[1]
 		# Direction déclarée (dx, dy) en 3e et 4e place, sinon vers le centre de la cité.
 		dx_, dy_ = (porte[2], porte[3]) if len(porte) >= 4 else (cx_ - px, cy_ - py)
@@ -561,21 +591,32 @@ def proposer_cite(cells, rues, lect, enceinte, pleins=(), cadre=None, regles=Non
 		ancres = [o[-1] if o else plus_proche(p[:2], True, lambda x, y: True)
 			for o, p in zip(percees, portes)]
 		ancres = [c for c in ancres if c]
+		encre_sc = encre_par_sous_case(masques, r["sous_case"]) if masques else None
+		n_portes = len(ancres)
 		ancres += [tuple(t[0]) for t in chemins if t]
-		coeur = creuser_coeur(grille_sc, cols, rows, dedans, interdites_coeur, ancres, regles)
+		coeur = creuser_coeur(grille_sc, cols, rows, dedans, interdites_coeur, ancres, regles,
+			encre_sc=encre_sc, portes_ancres=n_portes)
 		for x, y in coeur["cases"]:
 			cells[y][x] = 1
 		rapport["coeur"] = {"places": len(coeur["places"]), "rues_creusees": len(coeur["chemins"]),
-			"cases": len(coeur["cases"]), "isolees": coeur["isolees"]}
+			"cases": len(coeur["cases"]), "isolees": coeur["isolees"], "routes": coeur["routes"]}
+
+	dehors_cases = [(x, y) for y in range(rows) for x in range(cols)
+		if not dedans[y][x] and (x, y) not in anneau and (x, y) not in tours
+		and not (cadre and cadre[y][x])]
+	if masques:
+		pixels_case = parts_pixels(masques, cols, rows)
+		rapport["dehors"] = lire_dehors(cells, dehors_cases, pixels_case, lect, regles)
 
 	interdites = [[(x, y) in anneau or (x, y) in ronde or bool(cadre and cadre[y][x])
 		for x in range(cols)] for y in range(rows)]
 	cotes = [[1 if dedans[y][x] else 0 for x in range(cols)] for y in range(rows)]
-	cells, _nav, relie = grille_image.relier_zones(cells, {}, marges(lect, regles), cotes,
-		grille_image.regles_de("ville", regles_grille), murs_nav=False, interdites=interdites)
-	rapport["passages"] = len(relie["passages"])
-	rapport["poches_effacees"] = relie["poches_effacees"]
-	rapport["zones_isolees"] = relie["zones_isolees"]
+	if not masques:
+		cells, _nav, relie = grille_image.relier_zones(cells, {}, marges(lect, regles), cotes,
+			grille_image.regles_de("ville", regles_grille), murs_nav=False, interdites=interdites)
+		rapport["passages"] = len(relie["passages"])
+		rapport["poches_effacees"] = relie["poches_effacees"]
+		rapport["zones_isolees"] = relie["zones_isolees"]
 
 	nav = {}
 	for y in range(rows):
@@ -598,9 +639,61 @@ def proposer_cite(cells, rues, lect, enceinte, pleins=(), cadre=None, regles=Non
 				if cadre[y][x]:
 					cells[y][x] = 0
 
-	cases_portes = [(plus_proche(p[:2], False, lambda x, y: cells[y][x] == 1),
+	for imp_dehors, _imp_dedans in imposees:
+		if imp_dehors:
+			cells[imp_dehors[1]][imp_dehors[0]] = 1
+	if masques:
+		ancres_d = [tuple(a) for a in ancres_dehors] + [tuple(i[0]) for i in imposees if i[0]]
+		ancres_d += [c for c in (plus_proche(p[:2], False, lambda x, y: cells[y][x] == 1)
+			for p in portes) if c]
+		elague = elaguer(cells, dehors_cases, masques, ancres_d, r["dehors_garder_min"])
+		rapport["elagage"] = {"retirees": len(elague["retirees"]), "composantes": elague["composantes"]}
+	# Raccord : une case imposée qui ne rejoint pas la plus grande zone de son côté y est
+	# reliée par le plus court passage du même côté (jamais la ligne du mur ni un monument).
+	raccords = []
+	for imp in imposees:
+		for cote, c in ((False, imp[0]), (True, imp[1])):
+			if not c:
+				continue
+			c = tuple(c)
+			zones_cote = {}
+			for y in range(rows):
+				for x in range(cols):
+					if cells[y][x] == 1 and dedans[y][x] == cote and (x, y) not in zones_cote:
+						z = zone(cells, nav, (x, y))
+						for v in z:
+							zones_cote[v] = len(z)
+			taille = max(zones_cote.values(), default=0)
+			if zones_cote.get(c) == taille:
+				continue
+			cibles = {v for v, t in zones_cote.items() if t == taille}
+			parent, file_, fin = {c: None}, [c], None
+			while file_ and fin is None:
+				suivante = []
+				for x, y in file_:
+					for dx, dy in _VOISINS8:
+						v = (x + dx, y + dy)
+						if (0 <= v[0] < cols and 0 <= v[1] < rows and v not in parent
+								and dedans[v[1]][v[0]] == cote and v not in anneau and v not in monuments):
+							parent[v] = (x, y)
+							if v in cibles:
+								fin = v
+								break
+							suivante.append(v)
+					if fin:
+						break
+				file_ = suivante
+			v = fin
+			while v is not None:
+				if cells[v[1]][v[0]] != 1:
+					cells[v[1]][v[0]] = 1
+					raccords.append(v)
+				v = parent[v]
+	rapport["raccords"] = raccords
+	cases_portes = [(tuple(imp[0]) if imp[0] else plus_proche(p[:2], False, lambda x, y: cells[y][x] == 1),
 		next((c for c in reversed(o) if cells[c[1]][c[0]] == 1), None)
-		or plus_proche(p[:2], True, lambda x, y: cells[y][x] == 1)) for o, p in zip(percees, portes)]
+		or plus_proche(p[:2], True, lambda x, y: cells[y][x] == 1))
+		for o, p, imp in zip(percees, portes, imposees)]
 	rapport["portes_reliees"] = portes_reliees(cells, nav, [c for c in cases_portes])
 	return {"cells": cells, "nav": nav, "dedans": dedans, "anneau": anneau | ronde,
 		"portes": cases_portes, "rapport": rapport}
@@ -677,15 +770,68 @@ def _places(grille_sc, cols, rows, dedans, interdites, regles):
 	return sortie
 
 
-def creuser_coeur(grille_sc, cols, rows, dedans, interdites, ancres, regles=None) -> dict:
+def encre_par_sous_case(masques, k) -> list:
+	"""Part d'encre de chaque sous-case k×k px (même découpe que `sous_cases`)."""
+	w, h = masques["largeur"], masques["hauteur"]
+	encre = masques["encre"]
+	sortie = []
+	for sy in range(h // k):
+		ligne = []
+		for sx in range(w // k):
+			n = 0
+			for dy in range(k):
+				base = (sy * k + dy) * w + sx * k
+				n += sum(encre[base:base + k])
+			ligne.append(n / (k * k))
+		sortie.append(ligne)
+	return sortie
+
+
+def _dijkstra_sc(sources, cibles, cout, libre_sc, penalite=None):
+	"""Chemin de moindre coût de `sources` vers la première sous-case de `cibles` (pas de 8).
+	Rend `(chemin de sous-cases, coût SANS pénalité)` ou `(None, None)`."""
+	import heapq
+	h, w = len(cout), len(cout[0])
+	dist, vrai, parent, tas = {}, {}, {}, []
+	for sc_ in sources:
+		dist[sc_] = vrai[sc_] = 0.0
+		heapq.heappush(tas, (0.0, sc_))
+	while tas:
+		d, (sx, sy) = heapq.heappop(tas)
+		if d > dist.get((sx, sy), float("inf")):
+			continue
+		if (sx, sy) in cibles:
+			chemin, c = [(sx, sy)], (sx, sy)
+			while c in parent:
+				c = parent[c]
+				chemin.append(c)
+			return chemin[::-1], vrai[(sx, sy)]
+		for dx, dy in _VOISINS8:
+			nx, ny = sx + dx, sy + dy
+			if 0 <= nx < w and 0 <= ny < h and libre_sc(nx, ny):
+				pas = cout[ny][nx] * (1.4142 if dx and dy else 1.0)
+				nd = d + pas + (penalite.get((nx, ny), 0.0) if penalite else 0.0)
+				if nd < dist.get((nx, ny), float("inf")):
+					dist[(nx, ny)] = nd
+					vrai[(nx, ny)] = vrai[(sx, sy)] + pas
+					parent[(nx, ny)] = (sx, sy)
+					heapq.heappush(tas, (nd, (nx, ny)))
+	return None, None
+
+
+def creuser_coeur(grille_sc, cols, rows, dedans, interdites, ancres, regles=None,
+		encre_sc=None, portes_ancres=0) -> dict:
 	"""Rues du cœur : places, puis chemins de moindre coût entre groupes d'ancres.
 
 	`ancres` : cases (portes, pied de rampe…) qui DOIVENT être reliées ; s'y ajoutent les
 	places. Partant du groupe de la première ancre, on creuse à chaque tour le chemin le moins
 	cher vers le groupe le plus proche (Dijkstra multi-source sur les sous-cases du cœur, pas
 	de 8, coût d'entrée `1 + sol_cout × (1 − sol)²`), puis il fusionne. `interdites` (rempart,
-	monuments, reliefs) ne se traversent jamais. Rend `{cases, places, chemins, isolees}`."""
-	import heapq
+	monuments, reliefs) ne se traversent jamais. `encre_sc` (part d'encre par sous-case) :
+	franchir un gros trait coûte `encre_cout` en plus — un chemin suit l'aplat d'une rue au
+	lieu de couper à travers les contours des toits. Les `portes_ancres` premières ancres sont
+	des portes : entre chaque paire, jusqu'à `routes_max` routes (variantes renchéries, au plus
+	`route_allonge_max` × la plus courte). Rend `{cases, places, chemins, isolees, routes}`."""
 	r = {**REGLES_MATIERES, **(regles or {})}
 	h, w = len(grille_sc), len(grille_sc[0])
 
@@ -696,7 +842,8 @@ def creuser_coeur(grille_sc, cols, rows, dedans, interdites, ancres, regles=None
 		cx, cy = case_de(sx, sy)
 		return dedans[cy][cx] and not interdites[cy][cx]
 
-	cout = [[1.0 + r["sol_cout"] * (1.0 - sol(grille_sc[sy][sx], r)) ** 2 for sx in range(w)]
+	cout = [[1.0 + r["sol_cout"] * (1.0 - sol(grille_sc[sy][sx], r)) ** 2
+		+ (r["encre_cout"] * encre_sc[sy][sx] if encre_sc else 0.0) for sx in range(w)]
 		for sy in range(h)]
 	places = _places(grille_sc, cols, rows, dedans, interdites, r)
 
@@ -717,7 +864,7 @@ def creuser_coeur(grille_sc, cols, rows, dedans, interdites, ancres, regles=None
 		if len(tache) >= r["place_cases_min"]:
 			groupes.append(tache)
 	if not groupes:
-		return {"cases": set(), "places": set(), "chemins": [], "isolees": []}
+		return {"cases": set(), "places": set(), "chemins": [], "isolees": [], "routes": []}
 
 	def sous_cases_de(cases_):
 		out = []
@@ -736,26 +883,8 @@ def creuser_coeur(grille_sc, cols, rows, dedans, interdites, ancres, regles=None
 			if i not in relies:
 				for sc_ in sous_cases_de(g):
 					cible[sc_] = i
-		dist, parent, tas = {}, {}, []
-		for sc_ in sous_cases_de(ouvertes):
-			dist[sc_] = 0.0
-			heapq.heappush(tas, (0.0, sc_))
-		trouve = None
-		while tas:
-			d, (sx, sy) = heapq.heappop(tas)
-			if d > dist.get((sx, sy), float("inf")):
-				continue
-			if (sx, sy) in cible:
-				trouve = (sx, sy)
-				break
-			for dx, dy in _VOISINS8:
-				nx, ny = sx + dx, sy + dy
-				if 0 <= nx < w and 0 <= ny < h and libre_sc(nx, ny):
-					nd = d + cout[ny][nx] * (1.4142 if dx and dy else 1.0)
-					if nd < dist.get((nx, ny), float("inf")):
-						dist[(nx, ny)] = nd
-						parent[(nx, ny)] = (sx, sy)
-						heapq.heappush(tas, (nd, (nx, ny)))
+		chemin_sc, _cout = _dijkstra_sc(sous_cases_de(ouvertes), cible, cout, libre_sc)
+		trouve = chemin_sc[-1] if chemin_sc else None
 		if trouve is None:
 			for i, g in enumerate(groupes):
 				if i not in relies:
@@ -763,18 +892,40 @@ def creuser_coeur(grille_sc, cols, rows, dedans, interdites, ancres, regles=None
 					relies.add(i)
 			break
 		i = cible[trouve]
-		trace, sc_ = [], trouve
-		while sc_ in parent:
-			trace.append(case_de(*sc_))
-			sc_ = parent[sc_]
 		chemin = []
-		for c in reversed(trace):
+		for c in (case_de(*sc_) for sc_ in chemin_sc):
 			if not chemin or chemin[-1] != c:
 				chemin.append(c)
 		chemins.append(chemin)
 		ouvertes |= set(chemin) | groupes[i]
 		relies.add(i)
-	return {"cases": ouvertes, "places": places, "chemins": chemins, "isolees": isolees}
+
+	# Routes de porte à porte : la plus courte, puis des variantes qui s'en écartent.
+	routes = []
+	n_portes = min(portes_ancres, len(groupes))
+	for i in range(n_portes):
+		for j in range(i + 1, n_portes):
+			src, dst = sous_cases_de(groupes[i]), set(sous_cases_de(groupes[j]))
+			penal, trouvees, base = {}, [], None
+			for _essai in range(r["routes_max"] * 3):
+				chemin_sc, c = _dijkstra_sc(src, dst, cout, libre_sc, penal)
+				if not chemin_sc:
+					break
+				base = base if base is not None else c
+				cases_ = {case_de(*sc_) for sc_ in chemin_sc}
+				deja = set().union(*trouvees) if trouvees else set()
+				if c <= base * r["route_allonge_max"] and len(cases_ - deja) >= 0.3 * len(cases_):
+					trouvees.append(cases_)
+					ouvertes |= cases_
+				if len(trouvees) >= r["routes_max"]:
+					break
+				for sx, sy in chemin_sc:
+					for dx in (-2, -1, 0, 1, 2):
+						for dy in (-2, -1, 0, 1, 2):
+							penal[(sx + dx, sy + dy)] = penal.get((sx + dx, sy + dy), 0.0) + r["sol_cout"]
+			routes.append((i, j, len(trouvees)))
+	return {"cases": ouvertes, "places": places, "chemins": chemins, "isolees": isolees,
+		"routes": routes}
 
 
 _COTE_PORTE = __import__("re").compile(r"_(exterieur|interieur)(\d*)$")
@@ -803,3 +954,138 @@ def portes_de_cite(docs, cite) -> dict:
 		portes.setdefault(cle, [None, None])[0 if m.group(1) == "exterieur" else 1] = tuple(ici[0]["pos"])
 	return portes
 
+
+
+# ── Les TRAITS : cel shading ─────────────────────────────────────────────────────────
+# Règle de l'Auteur (22/10/2026) : la plupart des cartes sont en cel shading, un gros trait
+# noir sépare le toit, le mur, la tour du reste. Se fonder sur la couleur seule ne suffit pas :
+# on TRACE des voies, et une voie qui franchit un gros trait pour ne mener nulle part est
+# retirée (retour en arrière). Pixels : « encre » (gris < `trait_gris`), « sol » (herbe,
+# terre, pavé : on y marche), « toit » (tuile, ardoise, ombre profonde).
+
+def masques_pixels(pixels, largeur, hauteur, regles=None) -> dict:
+	"""Masques plats (bytearray, ligne à ligne) de l'image : encre, sol, toit."""
+	r = {**REGLES_MATIERES, **(regles or {})}
+	n = largeur * hauteur
+	encre, sol_, toit = bytearray(n), bytearray(n), bytearray(n)
+	cache = {}
+	for i, px in enumerate(pixels):
+		v = cache.get(px)
+		if v is None:
+			gris = 0.299 * px[0] + 0.587 * px[1] + 0.114 * px[2]
+			if gris < r["trait_gris"]:
+				v = 1
+			else:
+				L, a, b = lab(px)
+				vert = a < r["veg_a_max"] and b > r["veg_b_min"]
+				terreux = L >= r["sol_px_l_min"] and b >= r["sol_b_min"] and a < r["sol_a_max"]
+				tuile = a >= r["sol_a_max"]
+				ardoise = b < r["sol_b_min"] and L < r["toit_ardoise_l_max"]
+				v = 2 if (vert or terreux) else (3 if (tuile or ardoise or L < r["toit_ombre_l_max"]) else 0)
+			cache[px] = v
+		if v == 1:
+			encre[i] = 1
+		elif v == 2:
+			sol_[i] = 1
+		elif v == 3:
+			toit[i] = 1
+	return {"encre": encre, "sol": sol_, "toit": toit, "largeur": largeur, "hauteur": hauteur}
+
+
+def _bornes(pixels, cases):
+	return [i * pixels // cases for i in range(cases + 1)]
+
+
+def parts_pixels(masques, cols, rows) -> list:
+	"""[y][x] → {encre, sol, toit} : part des pixels de chaque case."""
+	w, h = masques["largeur"], masques["hauteur"]
+	bx, by = _bornes(w, cols), _bornes(h, rows)
+	sortie = []
+	for y in range(rows):
+		ligne = []
+		for x in range(cols):
+			c = {"encre": 0, "sol": 0, "toit": 0}
+			n = 0
+			for py in range(by[y], by[y + 1]):
+				base = py * w
+				for px in range(bx[x], bx[x + 1]):
+					i = base + px
+					n += 1
+					c["encre"] += masques["encre"][i]
+					c["sol"] += masques["sol"][i]
+					c["toit"] += masques["toit"][i]
+			ligne.append({k: v / max(1, n) for k, v in c.items()})
+		sortie.append(ligne)
+	return sortie
+
+
+def relies_sans_trait(masques, cols, rows, a, b) -> bool:
+	"""Les cases voisines `a` et `b` sont-elles jointes par des pixels SANS ENCRE, sans sortir
+	de leur fenêtre ? Sinon un gros trait les sépare (même principe que `grille_traits.relies`)."""
+	w, h = masques["largeur"], masques["hauteur"]
+	encre = masques["encre"]
+	bx, by = _bornes(w, cols), _bornes(h, rows)
+	x0, x1 = bx[min(a[0], b[0])], bx[max(a[0], b[0]) + 1]
+	y0, y1 = by[min(a[1], b[1])], by[max(a[1], b[1]) + 1]
+	bx0, bx1, by0, by1 = bx[b[0]], bx[b[0] + 1], by[b[1]], by[b[1] + 1]
+	pile = [(px, py) for py in range(by[a[1]], by[a[1] + 1])
+		for px in range(bx[a[0]], bx[a[0] + 1]) if not encre[py * w + px]]
+	vus = set(pile)
+	while pile:
+		px, py = pile.pop()
+		if bx0 <= px < bx1 and by0 <= py < by1:
+			return True
+		for q in ((px + 1, py), (px - 1, py), (px, py + 1), (px, py - 1)):
+			if x0 <= q[0] < x1 and y0 <= q[1] < y1 and q not in vus and not encre[q[1] * w + q[0]]:
+				vus.add(q)
+				pile.append(q)
+	return False
+
+
+def elaguer(cells, cases, masques, ancres, garder_min) -> dict:
+	"""Retour en arrière : parmi les cases praticables de `cases`, les composantes jointes SANS
+	franchir de gros trait (`relies_sans_trait`) ; une composante qui ne contient aucune ancre
+	et compte moins de `garder_min` cases mène nulle part : elle repasse à 0. Mute `cells`.
+	Rend `{retirees, composantes}`."""
+	rows, cols = len(cells), len(cells[0])
+	praticables = {c for c in cases if cells[c[1]][c[0]] == 1}
+	ancres = {tuple(a) for a in ancres}
+	vues, retirees, nb = set(), [], 0
+	for depart in sorted(praticables):
+		if depart in vues:
+			continue
+		nb += 1
+		comp, pile = {depart}, [depart]
+		vues.add(depart)
+		while pile:
+			x, y = pile.pop()
+			for dx, dy in _VOISINS8:
+				v = (x + dx, y + dy)
+				if v in praticables and v not in vues and relies_sans_trait(masques, cols, rows, (x, y), v):
+					vues.add(v)
+					comp.add(v)
+					pile.append(v)
+		if not comp & ancres and len(comp) < garder_min:
+			for x, y in comp:
+				cells[y][x] = 0
+			retirees += sorted(comp)
+	return {"retirees": retirees, "composantes": nb}
+
+
+def lire_dehors(cells, cases, pixels_case, lect, regles=None) -> dict:
+	"""Strate du DEHORS, sans rien du cœur : eau (matières) → 5 ; sinon praticable si la case
+	est surtout faite de SOL (herbe, terre) et peu de toit ; sinon 0. Mute `cells`."""
+	r = {**REGLES_MATIERES, **(regles or {})}
+	comptes = {"eau": 0, "praticables": 0, "fermees": 0}
+	for x, y in cases:
+		p = pixels_case[y][x]
+		if lect[y][x]["parts"].get(EAU, 0) >= r["case_eau"]:
+			cells[y][x] = 5
+			comptes["eau"] += 1
+		elif p["sol"] >= r["dehors_sol_min"] and p["toit"] <= r["dehors_toit_max"]:
+			cells[y][x] = 1
+			comptes["praticables"] += 1
+		else:
+			cells[y][x] = 0
+			comptes["fermees"] += 1
+	return comptes

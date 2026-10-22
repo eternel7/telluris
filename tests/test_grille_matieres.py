@@ -314,3 +314,80 @@ def test_portes_de_cite_apparie_par_id_y_compris_numerotees():
 		"lieu:ville_porte_nord": [(1, 1), (1, 3)],
 		"lieu:ville_porte_douve#01": [(9, 9), (7, 7)],
 	}
+
+
+# ── Traits (cel shading), dehors, portes imposées ───────────────────────────────────
+
+NOIR, HERBE_PX, TUILE_PX = (0, 0, 0), (110, 160, 60), (190, 80, 50)
+
+
+def _image(cols, rows, k, motif):
+	"""Pixels plats d'une image cols·k × rows·k ; motif(px, py) → (r, g, b)."""
+	w, h = cols * k, rows * k
+	return [motif(px, py) for py in range(h) for px in range(w)], w, h
+
+
+def test_masques_pixels_encre_sol_toit():
+	m = gm.masques_pixels([NOIR, HERBE_PX, TUILE_PX], 3, 1)
+	assert list(m["encre"]) == [1, 0, 0]
+	assert list(m["sol"]) == [0, 1, 0]
+	assert list(m["toit"]) == [0, 0, 1]
+
+
+def test_trait_noir_separe_deux_cases():
+	k = 8
+	# Deux cases d'herbe ; un trait vertical à la frontière dans le second cas.
+	sans, w, h = _image(2, 1, k, lambda px, py: HERBE_PX)
+	avec, _, _ = _image(2, 1, k, lambda px, py: NOIR if px == k else HERBE_PX)
+	assert gm.relies_sans_trait(gm.masques_pixels(sans, w, h), 2, 1, (0, 0), (1, 0))
+	assert not gm.relies_sans_trait(gm.masques_pixels(avec, w, h), 2, 1, (0, 0), (1, 0))
+
+
+def test_elaguer_retire_le_morceau_isole_par_un_trait_sans_ancre():
+	k, cols = 6, 6
+	# Un trait vertical entre la colonne 3 et la colonne 4 : à droite, deux colonnes isolées.
+	pixels, w, h = _image(cols, 2, k, lambda px, py: NOIR if px == 4 * k else HERBE_PX)
+	m = gm.masques_pixels(pixels, w, h)
+	cells = [[1] * cols for _ in range(2)]
+	cases = [(x, y) for y in range(2) for x in range(cols)]
+	res = gm.elaguer(cells, cases, m, [(0, 0)], garder_min=10)
+	assert cells == [[1, 1, 1, 1, 0, 0], [1, 1, 1, 1, 0, 0]]
+	assert res["composantes"] == 2
+	# Avec une ancre de l'autre côté, le morceau reste.
+	cells = [[1] * cols for _ in range(2)]
+	gm.elaguer(cells, cases, m, [(0, 0), (5, 1)], garder_min=10)
+	assert all(v == 1 for ligne in cells for v in ligne)
+
+
+def test_lire_dehors_sol_toit_eau():
+	cells = [[0, 0, 0]]
+	pixels_case = [[{"sol": 0.9, "toit": 0.0, "encre": 0.1}, {"sol": 0.2, "toit": 0.7, "encre": 0.1},
+		{"sol": 0.9, "toit": 0.0, "encre": 0.0}]]
+	lect = [[_lect(gm.VEGETATION), _lect(gm.SOMBRE), _lect(gm.EAU)]]
+	gm.lire_dehors(cells, [(0, 0), (1, 0), (2, 0)], pixels_case, lect)
+	assert cells == [[1, 0, 5]]
+
+
+def test_cite_portes_imposees_posees_et_raccordees():
+	cells, lect, enceinte, g = _cite_coeur()
+	portes = [(2.5, 8.5), (13.5, 8.5)]
+	# Case dedans imposée dans le chemin de ronde, case dehors imposée dans un coin à 0.
+	cells[8][1] = 0
+	res = gm.proposer_cite(cells, [], lect, enceinte, grille_sc=g, portes=portes,
+		portes_imposees=[((1, 8), (4, 9)), (None, None)])
+	assert res["portes"][0] == ((1, 8), (4, 9))
+	assert res["cells"][9][4] == 1 and res["cells"][8][1] == 1
+	assert res["rapport"]["percees"][0] == [(4, 9)]
+	assert res["rapport"]["portes_reliees"]["ok"]
+
+
+def test_cite_routes_de_porte_a_porte():
+	n = 18
+	cells, lect = _cite(n)
+	enceinte = ((2, 2), (15, 2), (15, 15), (2, 15))
+	# Deux rues parallèles de pavé entre les portes ouest et est : deux routes.
+	g = _sc_grille(n, n, 2, lambda x, y: PAVE if y in (6, 11) or x in (4, 13) else TOIT)
+	res = gm.proposer_cite(cells, [], lect, enceinte, grille_sc=g,
+		portes=[(1.5, 8.5, 1, 0), (16.5, 8.5, -1, 0)])
+	assert res["rapport"]["coeur"]["routes"] == [(0, 1, 2)]
+	assert res["cells"][6][8] == 1 and res["cells"][11][8] == 1

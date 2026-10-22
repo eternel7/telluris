@@ -308,3 +308,13 @@ Faire par strates : identifier les remparts, isoler le cœur de la ville, tracer
 - Le passage d'une porte à l'autre suit maintenant la rue entre les deux rangées de maisons, puis la place de la cathédrale (35 cases).
 - Contrôle de porte à porte automatique pour toute cité (`gen_grille_image.py lieu:<cite>` l'imprime) ; au dedans c'est une erreur, au dehors une information (un fleuve peut couper la campagne).
 
+## ✍️ Auteur (22/10/2026)
+
+Porte ouest correcte : ses points de connexion sont gravés dans le marbre. Porte sud : le point extérieur est à remonter de 2 cases ; le point intérieur est à déplacer de 4 en x en moins, 3 en y en plus. Démarche : séparer l'intérieur et l'extérieur, les traiter sans que l'un influence l'autre ; proposer les connexions de rempart, les valider, les déplacer ; puis les cells, puis les nav ; vérifier le passage de porte intérieure à porte intérieure et un nombre de routes cohérent. Utiliser les gros traits noirs du cel shading : une voie qui traverse de gros traits pour ne mener nulle part est retirée. La zone du tournoi est noircie alors que rien ne la distingue de là où l'on passe.
+
+## 18. Traits, portes validées (22/10/2026)
+
+- Portes **imposées** : porte ouest dehors [21, 31] / dedans [25, 28] ; porte de Winchester dehors **[57, 34]** (sous l'arche) / dedans **[52, 31]** (la rue au pied de la tour gauche). Le polygone sud du rempart est redescendu sur les créneaux (y = 32), où il était une case trop haut.
+- Le dehors est lu au pixel (sol contre toit) puis élagué le long des gros traits : le tournoi et le bourg sont praticables, seuls les toits restent fermés.
+- Le cœur creuse en évitant de franchir les traits. Une seule route d'une porte à l'autre au dedans (29 cases) : les variantes rallongeaient trop le trajet.
+

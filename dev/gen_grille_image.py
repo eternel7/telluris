@@ -260,8 +260,12 @@ def base_cite(chemin: str, cols: int, rows: int, enceinte=None) -> dict:
 		passages=False, enceinte=False, fins=fins, k=k, rues=True, murs_nav=False, bords=bords,
 		masque=masque)
 	grille_sc = sous_cases_image(chemin)
+	with Image.open(chemin) as img:
+		img = img.convert("RGB")
+		masques = grille_matieres.masques_pixels(list(img.getdata()), img.width, img.height)
 	return {"cells": p["cells"], "rues": p["rapport"]["rues"], "cadre": cadre,
-		"lecture": grille_matieres.lecture(grille_sc, cols, rows), "sous_cases": grille_sc}
+		"lecture": grille_matieres.lecture(grille_sc, cols, rows), "sous_cases": grille_sc,
+		"masques": masques}
 
 
 def sous_cases_image(chemin: str):

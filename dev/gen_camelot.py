@@ -54,7 +54,7 @@ SORTIE = os.path.join(ggi.DOSSIER_JSONS, "camelot_a_importer.json")
 # Crête du rempart, sens horaire depuis le fort : mur nord, tour nord-est, mur est, porte de
 # Winchester, mur sud, porte ouest (entre ses deux tours), tour ouest.
 ENCEINTE = ((15, 9), (30, 9), (33, 12), (40, 12), (46, 12), (50, 12), (57, 12), (63, 14),
-	(69, 15), (70, 21), (69, 27), (61, 29), (57, 30), (52, 31), (46, 32), (41, 33), (32, 31), (26, 29),
+	(69, 15), (70, 21), (69, 27), (61, 30), (57, 32), (53, 32), (46, 32), (41, 33), (32, 31), (26, 29),
 	(19, 28), (16, 25), (14, 21), (14, 17))
 MONUMENTS = {
 	"fort de la Table ronde": ((14, 8), (31, 8), (31, 17), (26, 20), (17, 21), (14, 19)),
@@ -68,16 +68,18 @@ CHEMINS = (((31, 22), (29, 20), (28, 18)),)
 CAMPAGNE = (10, 40)
 PARVIS = (45, 25)
 
-# (nom, slug, arche, image extérieure, image intérieure, case dehors IMPOSÉE)
-# arche = centre (x, y), ou (x, y, dx, dy) pour imposer la direction vers le dedans : la
-# porte de Winchester s'ouvre plein nord sur la place, pas vers le centre de la cité.
-# Porte de Winchester : la case calculée tombait dans une tour de la porte ; l'Auteur la
-# veut 3 cases à droite et 3 vers le bas (22/10/2026).
+# (nom, slug, arche, image extérieure, image intérieure, (case dehors, case dedans) IMPOSÉES)
+# arche = centre (x, y), ou (x, y, dx, dy) pour imposer la direction vers le dedans.
+# Cases VALIDÉES par l'Auteur (22/10/2026), « gravées dans le marbre » : la porte ouest telle
+# que calculée ; la porte de Winchester dehors sous l'arche, dedans dans la rue au pied de la
+# tour gauche.
 PORTES = (
 	("Porte ouest", "ouest", (21.5, 30),
-	 "porte_de_ville_pont_exterieur04.png", "porte_de_ville_pont_interieur04.png", None),
+	 "porte_de_ville_pont_exterieur04.png", "porte_de_ville_pont_interieur04.png",
+	 ((21, 31), (25, 28))),
 	("Porte de Winchester", "de_winchester", (56.5, 32, 0, -1),
-	 "porte_de_ville_exterieure08.jpg", "porte_de_ville_interieur16.png", (57, 36)),
+	 "porte_de_ville_exterieure08.jpg", "porte_de_ville_interieur16.png",
+	 ((57, 34), (52, 31))),
 )
 PORTE_TYPE = "poste de garde"
 PORTE_LABEL_DEHORS = "au-delà des remparts"
@@ -246,7 +248,8 @@ def main() -> int:
 	base = ggi.base_cite(chemin, cols, rows, ENCEINTE)
 	cite = grille_matieres.proposer_cite(base["cells"], base["rues"], base["lecture"], ENCEINTE,
 		MONUMENTS.values(), base["cadre"], chemins=CHEMINS, grille_sc=base["sous_cases"],
-		portes=[p[2] for p in PORTES])
+		portes=[p[2] for p in PORTES], masques=base["masques"],
+		ancres_dehors=[e[3] for e in ENTREES], portes_imposees=[p[5] for p in PORTES])
 	doc = gvi.poser_grille(doc, cite)
 	cells, nav = doc["cells"], doc["nav"]
 
@@ -257,8 +260,8 @@ def main() -> int:
 	poly = cite["dedans"]
 	hors_zone = [(x, y) for y in range(rows) for x in range(cols) if cells[y][x] == 1
 		and (x, y) not in dedans and (x, y) not in dehors]
-	portes_cases = [(nom, slug, (impose or c_dehors, c_dedans), ie, ii)
-		for (nom, slug, _centre, ie, ii, impose), (c_dehors, c_dedans) in zip(PORTES, cite["portes"])]
+	portes_cases = [(nom, slug, cases_, ie, ii)
+		for (nom, slug, _centre, ie, ii, _imp), cases_ in zip(PORTES, cite["portes"])]
 	for nom, _s, (c_dehors, c_dedans), _ie, _ii in portes_cases:
 		if c_dehors not in dehors or c_dedans not in dedans:
 			erreurs.append(f"{nom} : case dehors {c_dehors} ou dedans {c_dedans} du mauvais côté")
