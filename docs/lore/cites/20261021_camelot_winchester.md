@@ -249,3 +249,15 @@ ok pour Excalibur dans la cathédrale.  Et garder l'image qui a été générée
 3. **Règle des cartes de cité** : aucun portail dessiné, ni dans les murs ni autour, sauf vraie justification par le lore de la cité. On tombe sur un portail en se déplaçant ; on ne le voit pas sur la carte. Aucune cité décrite à ce jour n'en a besoin. Consignée dans `docs/prompts_images.md` § 0.5 bis.
 4. Le prompt du § 10 est corrigé : plus de portails dans la campagne.
 
+## ✍️ Auteur
+
+crée le lieu Camelot à importer et donc place le sur la carte d'Angleterre.
+
+## 13. Le lieu en jeu
+
+`dev/gen_camelot.py` → `jsons/camelot_a_importer.json` : `lieu:camelot` (ville, 86×48, image `camelot_capital.jpg`, `lieu_parent: lieu:angleterre`) et trois connexions `link:angleterre_to_camelot_{ouest,sud,est}`.
+
+- **Sur la carte d'Angleterre** : cases [63, 38], [64, 39] et [65, 38], là où est Winchester, au sud-ouest de Londres, dans les terres au-dessus de l'estuaire de Southampton.
+- **Grille** : première passe automatique (profil ville), à retoucher dans l'éditeur. La campagne et la ville ne communiquent pas encore : l'enceinte est fermée et les **portes de rempart** se posent dans l'éditeur. Les trois entrées tombent donc dans la zone de la ville et de son bourg : derrière la porte ouest, dans le bourg de Winchester, à l'est du bourg.
+- `sous_categorie: "ville"` : Londres reste la capitale de l'île.
+
