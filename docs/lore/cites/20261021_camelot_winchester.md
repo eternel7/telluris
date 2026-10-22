@@ -276,3 +276,14 @@ Même fichier `jsons/camelot_a_importer.json` (`dev/gen_camelot.py`), qui rempla
 - Entrées depuis l'Angleterre, toutes dehors : par le pont de l'ouest (rive sud, [16, 34]), par le bourg de Winchester, par l'est.
 - **Londres** : 17 connexions couvrent le corps de la forteresse dessinée, descendue jusqu'à l'entrée du fleuve ([68-73, 35-37]) ; les quatre liens existants gardent leur `_id`. Nouveaux côtés : « par le fleuve » (quai en bois) et « par le pont ». Chaque connexion a sa propre case d'arrivée dans Londres.
 
+## ✍️ Auteur
+
+régénère avec les 12 connexions, La forteresse dessinée est vraiment énorme. En fait, tu peux supprimer, je pense, les 5 qui sont en bas.
+
+Pour Camelot, essaye de diminuer le nombre de barrières nav. Normalement, les nav, c'est vraiment juste pour contrôler des points de passage qui sont non voulus, des choses comme ça. Là, ça crée des véritables murs. Ça sert à rien. Il y a du zéro derrière. On peut pas y aller.
+
+## 15. Londres à 12 connexions, nav de Camelot allégé (22/10/2026)
+
+- **Londres** : la rangée du bas (y = 37) est retirée ; 12 connexions sur les deux rangées hautes de la forteresse ([68-73, 35-36]). Le lien `sud` existant remonte en [70, 36] ; « par le fleuve » en [69, 36].
+- **Règle des murs nav** (Auteur) : un mur nav contrôle un passage non voulu ; il ne double pas un mur de terrain. Retirés : tout mur tourné vers une case à 0 ou le bord, tout mur entre deux cases praticables du même côté de l'enceinte. Restent le rempart (entre le dedans et le dehors) et le bord de l'eau, un seul côté par mur comme les grilles peintes à la main : **307 bits sur 121 cases, contre 1 726 sur 912**.
+

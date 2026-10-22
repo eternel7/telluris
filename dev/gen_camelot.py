@@ -6,7 +6,7 @@ bourg voisin au sud, accès tôt par Douvres). Image : towns/camelot_capital.jpg
 Camelot
 - Le doc est celui de `gen_villes_images.villes_a_creer` (forme de `lieu:rhemi`, cases de la
   taille de celles des villes en base), avec la PREMIÈRE PASSE de grille de
-  `gen_grille_image.proposer_pour_image`, puis trois RETOUCHES (ci-dessous). `sous_categorie`
+  `gen_grille_image.proposer_pour_image`, puis quatre RETOUCHES (ci-dessous). `sous_categorie`
   « ville » et non « capitale » : Londres reste la capitale de l'île (champ sans effet en jeu).
 - Retouches de la grille :
   1. `COUPE_REMPART` → 0 : la lecture des rues a pris le chemin de ronde du rempart sud pour
@@ -17,6 +17,8 @@ Camelot
      tour). Son tablier est rouvert vers la rive et le pré, et fermé côté ville.
   3. Le bourg de Winchester n'a pas d'enceinte : les murs nav qui le séparaient de la
      campagne sont effacés (entre cases praticables seulement).
+  4. `alleger_nav` : seuls restent les murs nav qui séparent deux zones (ou touchent l'eau) ;
+     la première passe en posait partout, y compris devant des cases à 0.
   Résultat : deux zones, le DEDANS (zone du parvis) et le DEHORS (campagne + bourg), reliées
   par les seules portes de rempart. Le script refuse d'écrire si ce n'est plus vrai.
 - Portes de rempart (forme de l'éditeur, `_ptDocs`, cinq docs par porte) : porte ouest (sur
@@ -28,8 +30,8 @@ Camelot
   l'estuaire de Southampton). Ses trois entrées arrivent DEHORS.
 
 Londres (demande de l'Auteur, 22/10/2026)
-- Ses connexions descendent sur le corps de la forteresse dessinée (cases `LONDRES_PAYS`),
-  jusqu'à l'entrée du fleuve au coin sud-ouest, et la COUVRENT : une connexion par case.
+- Ses connexions descendent sur le corps de la forteresse dessinée (`LONDRES_COTES`) et la
+  COUVRENT : une connexion par case de ses deux rangées hautes, 12 en tout.
   Les quatre liens existants gardent leur `_id` (relus du dump, seul leur nœud Angleterre
   bouge) ; les autres sont neufs. Chaque connexion a sa PROPRE case d'arrivée dans Londres :
   partagée, cette case porterait plusieurs boutons « Angleterre » menant ailleurs.
@@ -82,24 +84,25 @@ ENTREES = (
 	("est", "Camelot — par l'est", (65, 38), (78, 27)),
 )
 
-# Londres : le corps de la forteresse sur la carte d'Angleterre ([68, 37] est une case
-# enclavée par les murs du fleuve, exclue), groupé par côté. Chaque groupe arrive dans Londres
+# Londres : le corps de la forteresse sur la carte d'Angleterre, ses deux rangées hautes
+# (la rangée du bas, y = 37, retirée à la demande de l'Auteur : 12 connexions), groupé par
+# côté. Chaque groupe arrive dans Londres
 # le long de sa case d'origine : cases voisines, une par connexion.
 #   côté : (libellé, cases Angleterre, case d'arrivée de référence dans Londres, pas)
 LONDRES_COTES = {
-	"ouest": ("Londres — par l'ouest", ((68, 35), (68, 36), (69, 35), (69, 36)), (5, 22), (0, 1)),
-	"fleuve": ("Londres — par le fleuve", ((69, 37), (70, 37)), (38, 34), (1, 0)),
-	"sud": ("Londres — par le sud", ((71, 37), (72, 37), (73, 37)), (14, 43), (1, 0)),
+	"ouest": ("Londres — par l'ouest", ((68, 35), (68, 36), (69, 35)), (5, 22), (0, 1)),
+	"fleuve": ("Londres — par le fleuve", ((69, 36),), (38, 34), (1, 0)),
 	"nord": ("Londres — par le nord", ((70, 35), (71, 35), (72, 35), (73, 35)), (30, 5), (1, 0)),
-	"pont": ("Londres — par le pont", ((70, 36), (71, 36)), (52, 30), (1, 0)),
-	"est": ("Londres — par l'est", ((72, 36), (73, 36)), (79, 24), (0, 1)),
+	"sud": ("Londres — par le sud", ((70, 36), (71, 36)), (14, 43), (1, 0)),
+	"pont": ("Londres — par le pont", ((72, 36),), (52, 30), (1, 0)),
+	"est": ("Londres — par l'est", ((73, 36),), (79, 24), (0, 1)),
 }
 # Les quatre liens existants : leur `_id` et leur nœud Londres restent, la case Angleterre
 # devient celle-ci.
 LONDRES_EXISTANTS = {
 	"link:angleterre_to_london_ouest": (68, 36),
 	"link:angleterre_to_london_nord": (71, 35),
-	"link:angleterre_to_london_sud": (72, 37),
+	"link:angleterre_to_london_sud": (70, 36),
 	"link:angleterre_to_london_est": (73, 36),
 }
 
@@ -145,7 +148,7 @@ def _voisins(case):
 
 
 def retoucher(doc: dict) -> dict:
-	"""Les trois retouches de la première passe (cf. docstring du module)."""
+	"""Les quatre retouches de la première passe (cf. docstring du module)."""
 	cells, nav = doc["cells"], doc["nav"]
 	for x, y in COUPE_REMPART:
 		cells[y][x] = 0
@@ -167,7 +170,54 @@ def retoucher(doc: dict) -> dict:
 		for n in _voisins(case):
 			if n in campagne:
 				_poser(nav, case, n, ferme=False)
+	alleger_nav(cells, nav)
 	return doc
+
+
+def alleger_nav(cells, nav) -> None:
+	"""Ne garde que les murs nav qui SÉPARENT quelque chose (Auteur, 22/10/2026 : un mur nav
+	contrôle un passage non voulu, il ne double pas un mur de terrain). Retirés :
+	- tout bit tourné vers une case à 0 ou hors carte, ou posé sur une case à 0 — le terrain
+	  refuse déjà le pas ;
+	- tout bit entre deux cases à 1 du même côté de l'enceinte (dedans / dehors) : il n'impose
+	  qu'un détour, ou enferme une poche du bord du parchemin. Seuls les murs ENTRE le dedans
+	  et le dehors restent : c'est le rempart, franchi par les seules portes.
+	Gardés aussi : ceux qui touchent l'eau (5), franchissable en combat."""
+	hauteur, largeur = len(cells), len(cells[0])
+	# Deux zones seulement : le dedans (celle du parvis) et tout le reste. Les poches du bord
+	# du parchemin rejoignent ainsi le dehors au lieu de garder un pourtour de murs.
+	dedans = zone_de(cells, nav, PARVIS)
+	zone = {(x, y): (x, y) in dedans
+		for y in range(hauteur) for x in range(largeur) if cells[y][x] == 1}
+	for cle in list(nav):
+		x, y = map(int, cle.split(","))
+		masque = nav[cle]
+		for bit, dx, dy, _op in VALID_MOVES:
+			if not masque & bit:
+				continue
+			nx, ny = x + dx, y + dy
+			dehors = not (0 <= nx < largeur and 0 <= ny < hauteur)
+			cible = None if dehors else cells[ny][nx]
+			if (cells[y][x] == 0 or cible in (0, None)
+					or (cells[y][x] == 1 and cible == 1 and zone[(x, y)] == zone[(nx, ny)])):
+				masque &= ~bit
+		if masque:
+			nav[cle] = masque
+		else:
+			del nav[cle]
+	# Un seul côté par mur, comme les grilles peintes à la main (le pas est vérifié des deux
+	# côtés, cf. `nav_allows`) : celui de la ville pour le rempart, de la terre pour l'eau.
+	def garde(case):
+		return (zone.get(case, False), cells[case[1]][case[0]] == 1, (-case[1], -case[0]))
+	for cle in sorted(nav):
+		x, y = map(int, cle.split(","))
+		for bit, dx, dy, op in VALID_MOVES:
+			autre = f"{x + dx},{y + dy}"
+			if nav.get(cle, 0) & bit and nav.get(autre, 0) & op:
+				perdant = autre if garde((x, y)) >= garde((x + dx, y + dy)) else cle
+				nav[perdant] &= ~(op if perdant == autre else bit)
+				if not nav[perdant]:
+					del nav[perdant]
 
 
 def portes(cite: str) -> list:
