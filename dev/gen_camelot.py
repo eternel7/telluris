@@ -68,12 +68,16 @@ CHEMINS = (((31, 22), (29, 20), (28, 18)),)
 CAMPAGNE = (10, 40)
 PARVIS = (45, 25)
 
-# (nom, slug, centre de l'arche, image extérieure, image intérieure)
+# (nom, slug, arche, image extérieure, image intérieure, case dehors IMPOSÉE)
+# arche = centre (x, y), ou (x, y, dx, dy) pour imposer la direction vers le dedans : la
+# porte de Winchester s'ouvre plein nord sur la place, pas vers le centre de la cité.
+# Porte de Winchester : la case calculée tombait dans une tour de la porte ; l'Auteur la
+# veut 3 cases à droite et 3 vers le bas (22/10/2026).
 PORTES = (
 	("Porte ouest", "ouest", (21.5, 30),
-	 "porte_de_ville_pont_exterieur04.png", "porte_de_ville_pont_interieur04.png"),
-	("Porte de Winchester", "de_winchester", (56.5, 32),
-	 "porte_de_ville_exterieure08.jpg", "porte_de_ville_interieur16.png"),
+	 "porte_de_ville_pont_exterieur04.png", "porte_de_ville_pont_interieur04.png", None),
+	("Porte de Winchester", "de_winchester", (56.5, 32, 0, -1),
+	 "porte_de_ville_exterieure08.jpg", "porte_de_ville_interieur16.png", (57, 36)),
 )
 PORTE_TYPE = "poste de garde"
 PORTE_LABEL_DEHORS = "au-delà des remparts"
@@ -239,9 +243,10 @@ def main() -> int:
 	doc.update({"label": "Camelot", "sous_categorie": "ville", "lieu_parent": PAYS})
 	cols, rows = doc["dimensions"]["x"], doc["dimensions"]["y"]
 	chemin = ggi.trouver_image(IMAGE)
-	base = ggi.base_cite(chemin, cols, rows)
+	base = ggi.base_cite(chemin, cols, rows, ENCEINTE)
 	cite = grille_matieres.proposer_cite(base["cells"], base["rues"], base["lecture"], ENCEINTE,
-		MONUMENTS.values(), base["cadre"], chemins=CHEMINS)
+		MONUMENTS.values(), base["cadre"], chemins=CHEMINS, grille_sc=base["sous_cases"],
+		portes=[p[2] for p in PORTES])
 	doc = gvi.poser_grille(doc, cite)
 	cells, nav = doc["cells"], doc["nav"]
 
@@ -252,8 +257,14 @@ def main() -> int:
 	poly = cite["dedans"]
 	hors_zone = [(x, y) for y in range(rows) for x in range(cols) if cells[y][x] == 1
 		and (x, y) not in dedans and (x, y) not in dehors]
-	portes_cases = [(nom, slug, (plus_proche(dehors, centre), plus_proche(dedans, centre)), ie, ii)
-		for nom, slug, centre, ie, ii in PORTES]
+	portes_cases = [(nom, slug, (impose or c_dehors, c_dedans), ie, ii)
+		for (nom, slug, _centre, ie, ii, impose), (c_dehors, c_dedans) in zip(PORTES, cite["portes"])]
+	for nom, _s, (c_dehors, c_dedans), _ie, _ii in portes_cases:
+		if c_dehors not in dehors or c_dedans not in dedans:
+			erreurs.append(f"{nom} : case dehors {c_dehors} ou dedans {c_dedans} du mauvais côté")
+	reliees = grille_matieres.portes_reliees(cells, nav, [c for _n, _s, c, _e, _i in portes_cases])
+	erreurs += [f"portes non reliées au {cote} : {portes_cases[i][0]} ↔ {portes_cases[j][0]}"
+		for cote, i, j in reliees["manques"]]   # Camelot : dedans ET dehors (aucun fleuve ne coupe)
 	entrees = [(s_, l_, p_, plus_proche(dehors, c_)) for s_, l_, p_, c_ in ENTREES]
 
 	pays = par_id[PAYS]

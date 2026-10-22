@@ -201,3 +201,116 @@ def test_cite_cadre_ferme():
 	cadre = [[x == 0 for x in range(14)] for _ in range(14)]
 	res = gm.proposer_cite(cells, [], lect, ((3, 3), (10, 3), (10, 10), (3, 10)), cadre=cadre)
 	assert all(ligne[0] == 0 for ligne in res["cells"])
+
+
+# ── Strate du cœur, percées, portes ──────────────────────────────────────────────
+
+PAVE = (R["sol_l_haut"] + 5, 2.0, R["sol_b_min"] + 10, 3.0)       # sol plein
+TOIT = (R["sol_l_bas"] - 5, R["sol_a_max"] + 6, 20.0, 3.0)        # ni clair ni ocre
+
+
+def _sc_grille(cols, rows, k, motif):
+	"""Sous-cases k×k par case, motif(x, y) → sous-case de la case."""
+	return [[motif(sx // k, sy // k) for sx in range(cols * k)] for sy in range(rows * k)]
+
+
+def test_sol_pave_et_toit():
+	assert gm.sol(PAVE) == 1.0
+	assert gm.sol(TOIT) == 0.0
+	assert gm.sol((R["sol_l_haut"], R["sol_a_max"] + 5, 30.0, 0.0)) == R["sol_hors_teinte"]
+
+
+def test_creuser_suit_le_pave_plutot_que_le_toit():
+	# Deux ancres aux deux bouts ; une rue de pavé fait un détour par la rangée 0, la ligne
+	# droite (rangée 2) passe sur les toits.
+	cols, rows = 7, 3
+
+	def motif(x, y):
+		return PAVE if y == 0 or x in (0, cols - 1) else TOIT
+	g = _sc_grille(cols, rows, 2, motif)
+	dedans = [[True] * cols for _ in range(rows)]
+	interdites = [[False] * cols for _ in range(rows)]
+	res = gm.creuser_coeur(g, cols, rows, dedans, interdites, [(0, 2), (cols - 1, 2)])
+	assert (3, 0) in res["cases"]          # la rue de pavé
+	assert (3, 2) not in res["cases"]      # pas la ligne droite sur les toits
+	assert res["isolees"] == []
+
+
+def test_creuser_ne_traverse_jamais_une_interdite():
+	cols, rows = 5, 3
+	g = _sc_grille(cols, rows, 2, lambda x, y: PAVE)
+	dedans = [[True] * cols for _ in range(rows)]
+	interdites = [[x == 2 for x in range(cols)] for _ in range(rows)]
+	res = gm.creuser_coeur(g, cols, rows, dedans, interdites, [(0, 1), (4, 1)])
+	assert not any(x == 2 for x, _y in res["cases"])
+	assert (4, 1) in res["isolees"]        # l'ancre de l'autre côté reste signalée isolée
+
+
+def test_places_ouvertes_et_reliees():
+	cols, rows = 9, 5
+
+	def motif(x, y):
+		return PAVE if (x >= 6 and y <= 2) or y == 4 else TOIT
+	g = _sc_grille(cols, rows, 2, motif)
+	dedans = [[True] * cols for _ in range(rows)]
+	interdites = [[False] * cols for _ in range(rows)]
+	res = gm.creuser_coeur(g, cols, rows, dedans, interdites, [(0, 4)])
+	assert {(7, 1), (8, 0)} <= res["places"] <= res["cases"]
+
+
+def _cite_coeur():
+	n = 16
+	cells, lect = _cite(n)
+	enceinte = ((3, 3), (12, 3), (12, 12), (3, 12))
+	# Le cœur : toits partout, sauf une rue de pavé de la porte ouest à la porte est.
+	g = _sc_grille(n, n, 2, lambda x, y: PAVE if y == 8 else TOIT)
+	return cells, lect, enceinte, g
+
+
+def test_cite_strate_du_coeur_et_percees():
+	cells, lect, enceinte, g = _cite_coeur()
+	portes = [(2.5, 8.5), (13.5, 8.5)]
+	res = gm.proposer_cite(cells, [], lect, enceinte, grille_sc=g, portes=portes)
+	c = res["cells"]
+	# Le cœur repart de 0 : seule la rue de pavé est ouverte (le reste était « praticable »).
+	assert c[8][7] == 1 and c[6][7] == 0
+	# Percées : le chemin de ronde s'ouvre derrière chaque arche, la ligne du mur non.
+	assert c[8][3] == 0 and c[8][4] == 1 and c[8][11] == 1
+	(dehors_o, dedans_o), (dehors_e, dedans_e) = res["portes"]
+	assert dehors_o[0] < 3 and dedans_o[0] > 3 and dedans_e[0] < 12 < dehors_e[0]
+	assert res["rapport"]["portes_reliees"] == {"ok": True, "manques": []}
+
+
+def test_cite_direction_de_percee_imposee():
+	cells, lect, enceinte, g = _cite_coeur()
+	# Arche au sud, percée imposée vers le nord : elle ouvre la colonne de l'arche.
+	res = gm.proposer_cite(cells, [], lect, enceinte, grille_sc=g, portes=[(7.5, 12.5, 0, -1)])
+	assert [c[0] for c in res["rapport"]["percees"][0]] == [7] * len(res["rapport"]["percees"][0])
+
+
+def test_portes_reliees_signale_le_cote():
+	cells = [[1, 1, 0, 1, 1]]
+	portes = [((0, 0), (1, 0)), ((4, 0), (3, 0))]
+	res = gm.portes_reliees(cells, {}, portes)
+	assert not res["ok"] and set(res["manques"]) == {("dehors", 0, 1), ("dedans", 0, 1)}
+	assert gm.portes_reliees([[1] * 5], {}, portes)["ok"]
+
+
+def test_portes_de_cite_apparie_par_id_y_compris_numerotees():
+	docs = [
+		{"_id": "lieu:ville_porte_nord_exterieur", "type": "lieu", "categorie": "Porte de rempart"},
+		{"_id": "lieu:ville_porte_nord_interieur", "type": "lieu", "categorie": "Porte de rempart"},
+		{"_id": "lieu:ville_porte_douve_exterieur01", "type": "lieu", "categorie": "Porte de rempart"},
+		{"_id": "lieu:ville_porte_douve_interieur01", "type": "lieu", "categorie": "Porte de rempart"},
+		{"_id": "lieu:ville_forge", "type": "lieu", "categorie": "forge"},
+	]
+
+	def lien(lieu, pos):
+		return {"type": "connection", "nodes": [{"lieu": "lieu:ville", "pos": pos}, {"lieu": lieu, "pos": [0, 0]}]}
+	docs += [lien("lieu:ville_porte_nord_exterieur", [1, 1]), lien("lieu:ville_porte_nord_interieur", [1, 3]),
+		lien("lieu:ville_porte_douve_exterieur01", [9, 9]), lien("lieu:ville_porte_douve_interieur01", [7, 7]),
+		lien("lieu:ville_forge", [5, 5])]
+	assert gm.portes_de_cite(docs, "lieu:ville") == {
+		"lieu:ville_porte_nord": [(1, 1), (1, 3)],
+		"lieu:ville_porte_douve#01": [(9, 9), (7, 7)],
+	}

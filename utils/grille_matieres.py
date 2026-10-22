@@ -62,6 +62,17 @@ REGLES_MATIERES = {
 	"tour_part": 0.6,            # pierre + ombre + autre d'une case du dehors collée au rempart
 	"marge_pierre": 6.0,         # coût de creuser une case de pierre (`relier_zones`)
 	"marge_toit": 4.0,           # … un toit
+	# Strate du cœur (`creuser_coeur`) : ressemblance au pavé d'une sous-case.
+	"sol_l_bas": 35.0,           # clarté sous laquelle ce n'est plus du pavé…
+	"sol_l_haut": 65.0,          # …et au-dessus de laquelle c'en est pleinement
+	"sol_a_max": 9.0,            # plus rouge : une tuile
+	"sol_b_min": 10.0,           # plus froid : une ardoise
+	"sol_hors_teinte": 0.15,     # ce qu'il reste à une sous-case hors teinte
+	"sol_clair": 0.6,            # sous-case de pavé franc
+	"place_part": 0.45,          # part de pavé franc qui fait une place
+	"place_cases_min": 2,        # tache de places reliée en tant que telle
+	"sol_cout": 30.0,            # coût de creuser une sous-case qui n'a rien d'un pavé
+	"percee_cases": 4,           # cases ouvertes de l'arche d'une porte vers le cœur
 	# Rivière : trou maximal recousu (cases) et écart de teinte toléré sur le trou.
 	"riviere_trou_max": 4,
 	"riviere_ecart_b": 10.0,
@@ -419,7 +430,7 @@ def marges(lect, regles=None) -> list:
 
 
 def proposer_cite(cells, rues, lect, enceinte, pleins=(), cadre=None, regles=None,
-		regles_grille=None, chemins=()) -> dict:
+		regles_grille=None, chemins=(), grille_sc=None, portes=()) -> dict:
 	"""Grille d'une cité à enceinte déclarée, à partir de la proposition de `grille_image`
 	(SANS enceinte devinée, sans nav, sans passages : `cells` et la liste `rues` du tracé).
 
@@ -438,7 +449,14 @@ def proposer_cite(cells, rues, lect, enceinte, pleins=(), cadre=None, regles=Non
 	6. nav : SEULEMENT un pas qui enjambe la ligne du rempart entre deux cases praticables
 	   (en diagonale, le mur est trop fin pour une case pleine) — un seul côté, celui du dedans ;
 	7. rivière recousue, ponts rouverts.
-	Ne mute pas `cells`. Rend `{cells, nav, dedans, anneau, rapport}`."""
+	`grille_sc` (sous-cases de l'image) : STRATE DU CŒUR indépendante (Auteur) — le dedans
+	repart de 0, sans rien garder du tracé commun, et ses rues sont CREUSÉES
+	(`creuser_coeur`) entre les portes, les places et le pied des `chemins` déclarés ; l'étape 2
+	ne sert plus. `portes` : centres des arches (x, y), ou (x, y, dx, dy) pour imposer la
+	direction de la percée vers le dedans (défaut : le centre du polygone) ; chaque porte
+	reçoit sa case dehors et sa case dedans au plus près, et le rapport dit si l'on va de chacune à chacune (`portes_reliees`) —
+	contrôle AUTOMATIQUE de toute grille de cité.
+	Ne mute pas `cells`. Rend `{cells, nav, dedans, anneau, portes, rapport}`."""
 	from utils import grille_image
 	from utils.lieux import VALID_MOVES
 	r = {**REGLES_MATIERES, **(regles or {})}
@@ -451,14 +469,19 @@ def proposer_cite(cells, rues, lect, enceinte, pleins=(), cadre=None, regles=Non
 	epures = 0
 	for y in range(rows):
 		for x in range(cols):
+			if not dedans[y][x] or cells[y][x] != 1:
+				continue
+			if grille_sc is not None:
+				cells[y][x] = 0      # strate du cœur : on repart de rien
+				continue
 			c = lect[y][x]
 			p = c["parts"]
-			sol = p.get(VEGETATION, 0) + p.get(TERRE, 0) + p.get(ROCHE, 0)
-			if (dedans[y][x] and cells[y][x] == 1 and (x, y) not in rues
-					and c["ecart"] < r["dedans_uni_ecart"] and sol >= r["dedans_uni_sol"]):
+			sol_ = p.get(VEGETATION, 0) + p.get(TERRE, 0) + p.get(ROCHE, 0)
+			if (x, y) not in rues and c["ecart"] < r["dedans_uni_ecart"] and sol_ >= r["dedans_uni_sol"]:
 				cells[y][x] = 0
 				epures += 1
 	rapport["talus"] = epures
+	monuments = set()
 
 	pleines = 0
 	for poly in pleins:
@@ -468,9 +491,11 @@ def proposer_cite(cells, rues, lect, enceinte, pleins=(), cadre=None, regles=Non
 				masque[y][x] = True
 		for y in range(rows):
 			for x in range(cols):
-				if masque[y][x] and cells[y][x] != 0:
-					cells[y][x] = 0
-					pleines += 1
+				if masque[y][x]:
+					monuments.add((x, y))
+					if cells[y][x] != 0:
+						cells[y][x] = 0
+						pleines += 1
 	rapport["monuments"] = pleines
 	ouverts = set()
 	for trace in chemins:
@@ -495,6 +520,53 @@ def proposer_cite(cells, rues, lect, enceinte, pleins=(), cadre=None, regles=Non
 	for x, y in anneau | ronde | tours:
 		cells[y][x] = 0
 	rapport["rempart"] = {"anneau": len(anneau), "chemin_de_ronde": len(ronde), "tours": len(tours)}
+
+	# Percée de chaque porte : de l'arche vers le cœur de la cité (centre du polygone), le
+	# chemin de ronde et les tours s'ouvrent sur `percee_cases` — une porte est un passage à
+	# travers le rempart, la rue qui en sort n'est pas un chemin de ronde. La LIGNE du mur
+	# reste fermée : c'est la porte de rempart (connexion) qui la fait franchir.
+	cx_ = sum(x for x, _y in enceinte) / len(enceinte) + 0.5
+	cy_ = sum(y for _x, y in enceinte) / len(enceinte) + 0.5
+	percees = []
+	portes = [tuple(p) for p in portes]
+	for porte in portes:
+		px, py = porte[0], porte[1]
+		# Direction déclarée (dx, dy) en 3e et 4e place, sinon vers le centre de la cité.
+		dx_, dy_ = (porte[2], porte[3]) if len(porte) >= 4 else (cx_ - px, cy_ - py)
+		n_ = (dx_ * dx_ + dy_ * dy_) ** 0.5 or 1.0
+		ouvre = []
+		for k in range(1, r["percee_cases"] + 1):
+			c = (int(px + dx_ / n_ * k), int(py + dy_ / n_ * k))
+			if 0 <= c[0] < cols and 0 <= c[1] < rows and dedans[c[1]][c[0]] and c not in anneau:
+				ouvre.append(c)
+		for c in ouvre:
+			ronde.discard(c)
+			tours.discard(c)
+			if c not in monuments:
+				cells[c[1]][c[0]] = 1
+		percees.append(ouvre)
+	rapport["percees"] = percees
+
+	ferme = anneau | ronde | (monuments - ouverts)
+
+	def plus_proche(centre, dedans_voulu, admise):
+		cand = [(x, y) for y in range(rows) for x in range(cols)
+			if dedans[y][x] == dedans_voulu and (x, y) not in ferme and admise(x, y)]
+		return min(cand, key=lambda c: ((c[0] + 0.5 - centre[0]) ** 2 + (c[1] + 0.5 - centre[1]) ** 2,
+			c[1], c[0])) if cand else None
+
+	if grille_sc is not None:
+		interdites_coeur = [[(x, y) in ferme or bool(cadre and cadre[y][x]) for x in range(cols)]
+			for y in range(rows)]
+		ancres = [o[-1] if o else plus_proche(p[:2], True, lambda x, y: True)
+			for o, p in zip(percees, portes)]
+		ancres = [c for c in ancres if c]
+		ancres += [tuple(t[0]) for t in chemins if t]
+		coeur = creuser_coeur(grille_sc, cols, rows, dedans, interdites_coeur, ancres, regles)
+		for x, y in coeur["cases"]:
+			cells[y][x] = 1
+		rapport["coeur"] = {"places": len(coeur["places"]), "rues_creusees": len(coeur["chemins"]),
+			"cases": len(coeur["cases"]), "isolees": coeur["isolees"]}
 
 	interdites = [[(x, y) in anneau or (x, y) in ronde or bool(cadre and cadre[y][x])
 		for x in range(cols)] for y in range(rows)]
@@ -525,5 +597,209 @@ def proposer_cite(cells, rues, lect, enceinte, pleins=(), cadre=None, regles=Non
 			for x in range(cols):
 				if cadre[y][x]:
 					cells[y][x] = 0
+
+	cases_portes = [(plus_proche(p[:2], False, lambda x, y: cells[y][x] == 1),
+		next((c for c in reversed(o) if cells[c[1]][c[0]] == 1), None)
+		or plus_proche(p[:2], True, lambda x, y: cells[y][x] == 1)) for o, p in zip(percees, portes)]
+	rapport["portes_reliees"] = portes_reliees(cells, nav, [c for c in cases_portes])
 	return {"cells": cells, "nav": nav, "dedans": dedans, "anneau": anneau | ronde,
-		"rapport": rapport}
+		"portes": cases_portes, "rapport": rapport}
+
+
+def zone(cells, nav, depart) -> set:
+	"""Cases praticables (1) jointes à `depart` sous la règle des flèches (nav respectés)."""
+	from utils.lieux import nav_allows
+	rows, cols = len(cells), len(cells[0])
+	if not depart or cells[depart[1]][depart[0]] != 1:
+		return set()
+	vues, pile = {tuple(depart)}, [tuple(depart)]
+	while pile:
+		x, y = pile.pop()
+		for dx, dy in _VOISINS8:
+			nx, ny = x + dx, y + dy
+			if (0 <= nx < cols and 0 <= ny < rows and (nx, ny) not in vues
+					and cells[ny][nx] == 1 and nav_allows(nav, x, y, dx, dy)):
+				vues.add((nx, ny))
+				pile.append((nx, ny))
+	return vues
+
+
+def portes_reliees(cells, nav, portes) -> dict:
+	"""Contrôle de toute grille de cité : de chaque porte de rempart à chaque autre, côté
+	dedans comme côté dehors, il existe un passage. `portes` = [(case dehors, case dedans)].
+	Rend `{ok, manques: [(côté, i, j)]}` — indices dans `portes`."""
+	manques = []
+	for cote in (0, 1):
+		cases_ = [p[cote] for p in portes]
+		for i in range(len(cases_)):
+			z = zone(cells, nav, cases_[i])
+			for j in range(i + 1, len(cases_)):
+				if cases_[j] is None or tuple(cases_[j]) not in z:
+					manques.append(("dehors" if cote == 0 else "dedans", i, j))
+	return {"ok": not manques, "manques": manques}
+
+
+# ── Strate du CŒUR : rues creusées, sans rien reprendre du dehors ──────────────────
+# Règle de l'Auteur (22/10/2026) : lire la cité PAR STRATES — isoler le cœur (dans le
+# rempart), tracer le dehors, puis le cœur à part, à sa propre sensibilité. Dans le cœur,
+# une ruelle fait une ou deux sous-cases de large et passe souvent dans l'ombre : en moyenne
+# de case, elle a la couleur d'une façade. On la CREUSE : chemins de moindre coût, au niveau
+# des sous-cases, entre des ancres (portes, places, pied d'une rampe), sur un coût faible
+# pour le pavé clair et ocre, fort pour un toit, une façade, une ardoise.
+
+def sol(sc, regles=None) -> float:
+	"""Ressemblance d'une sous-case (L, a, b, texture) au pavé d'une rue : claire, ocre, ni
+	rouge (tuile) ni froide (ardoise). 0 à 1."""
+	r = {**REGLES_MATIERES, **(regles or {})}
+	L, a, b, _tex = sc
+	clarte = min(1.0, max(0.0, (L - r["sol_l_bas"]) / (r["sol_l_haut"] - r["sol_l_bas"])))
+	if a > r["sol_a_max"] or b < r["sol_b_min"]:
+		clarte *= r["sol_hors_teinte"]
+	return clarte
+
+
+def _places(grille_sc, cols, rows, dedans, interdites, regles):
+	"""Cases du cœur riches en sous-cases de pavé (`sol` ≥ `sol_clair`) : places, parvis."""
+	r = {**REGLES_MATIERES, **(regles or {})}
+	h, w = len(grille_sc), len(grille_sc[0])
+	sortie = set()
+	for y in range(rows):
+		y0, y1 = y * h // rows, max(y * h // rows + 1, (y + 1) * h // rows)
+		for x in range(cols):
+			if not dedans[y][x] or interdites[y][x]:
+				continue
+			x0, x1 = x * w // cols, max(x * w // cols + 1, (x + 1) * w // cols)
+			n = (y1 - y0) * (x1 - x0)
+			clairs = sum(1 for sy in range(y0, y1) for sx in range(x0, x1)
+				if sol(grille_sc[sy][sx], r) >= r["sol_clair"])
+			if clairs >= r["place_part"] * n:
+				sortie.add((x, y))
+	return sortie
+
+
+def creuser_coeur(grille_sc, cols, rows, dedans, interdites, ancres, regles=None) -> dict:
+	"""Rues du cœur : places, puis chemins de moindre coût entre groupes d'ancres.
+
+	`ancres` : cases (portes, pied de rampe…) qui DOIVENT être reliées ; s'y ajoutent les
+	places. Partant du groupe de la première ancre, on creuse à chaque tour le chemin le moins
+	cher vers le groupe le plus proche (Dijkstra multi-source sur les sous-cases du cœur, pas
+	de 8, coût d'entrée `1 + sol_cout × (1 − sol)²`), puis il fusionne. `interdites` (rempart,
+	monuments, reliefs) ne se traversent jamais. Rend `{cases, places, chemins, isolees}`."""
+	import heapq
+	r = {**REGLES_MATIERES, **(regles or {})}
+	h, w = len(grille_sc), len(grille_sc[0])
+
+	def case_de(sx, sy):
+		return sx * cols // w, sy * rows // h
+
+	def libre_sc(sx, sy):
+		cx, cy = case_de(sx, sy)
+		return dedans[cy][cx] and not interdites[cy][cx]
+
+	cout = [[1.0 + r["sol_cout"] * (1.0 - sol(grille_sc[sy][sx], r)) ** 2 for sx in range(w)]
+		for sy in range(h)]
+	places = _places(grille_sc, cols, rows, dedans, interdites, r)
+
+	# Groupes à relier : chaque ancre seule, et chaque tache de places (8-connexes).
+	groupes = [{tuple(a)} for a in ancres if dedans[a[1]][a[0]] and not interdites[a[1]][a[0]]]
+	restantes = set(places)
+	while restantes:
+		depart = restantes.pop()
+		tache, pile = {depart}, [depart]
+		while pile:
+			x, y = pile.pop()
+			for dx, dy in _VOISINS8:
+				n = (x + dx, y + dy)
+				if n in restantes:
+					restantes.discard(n)
+					tache.add(n)
+					pile.append(n)
+		if len(tache) >= r["place_cases_min"]:
+			groupes.append(tache)
+	if not groupes:
+		return {"cases": set(), "places": set(), "chemins": [], "isolees": []}
+
+	def sous_cases_de(cases_):
+		out = []
+		for cx, cy in cases_:
+			for sy in range(cy * h // rows, max(cy * h // rows + 1, (cy + 1) * h // rows)):
+				for sx in range(cx * w // cols, max(cx * w // cols + 1, (cx + 1) * w // cols)):
+					out.append((sx, sy))
+		return out
+
+	ouvertes = set(groupes[0])
+	relies = {0}
+	chemins, isolees = [], []
+	while len(relies) < len(groupes):
+		cible = {}
+		for i, g in enumerate(groupes):
+			if i not in relies:
+				for sc_ in sous_cases_de(g):
+					cible[sc_] = i
+		dist, parent, tas = {}, {}, []
+		for sc_ in sous_cases_de(ouvertes):
+			dist[sc_] = 0.0
+			heapq.heappush(tas, (0.0, sc_))
+		trouve = None
+		while tas:
+			d, (sx, sy) = heapq.heappop(tas)
+			if d > dist.get((sx, sy), float("inf")):
+				continue
+			if (sx, sy) in cible:
+				trouve = (sx, sy)
+				break
+			for dx, dy in _VOISINS8:
+				nx, ny = sx + dx, sy + dy
+				if 0 <= nx < w and 0 <= ny < h and libre_sc(nx, ny):
+					nd = d + cout[ny][nx] * (1.4142 if dx and dy else 1.0)
+					if nd < dist.get((nx, ny), float("inf")):
+						dist[(nx, ny)] = nd
+						parent[(nx, ny)] = (sx, sy)
+						heapq.heappush(tas, (nd, (nx, ny)))
+		if trouve is None:
+			for i, g in enumerate(groupes):
+				if i not in relies:
+					isolees.append(sorted(g)[0])
+					relies.add(i)
+			break
+		i = cible[trouve]
+		trace, sc_ = [], trouve
+		while sc_ in parent:
+			trace.append(case_de(*sc_))
+			sc_ = parent[sc_]
+		chemin = []
+		for c in reversed(trace):
+			if not chemin or chemin[-1] != c:
+				chemin.append(c)
+		chemins.append(chemin)
+		ouvertes |= set(chemin) | groupes[i]
+		relies.add(i)
+	return {"cases": ouvertes, "places": places, "chemins": chemins, "isolees": isolees}
+
+
+_COTE_PORTE = __import__("re").compile(r"_(exterieur|interieur)(\d*)$")
+
+
+def portes_de_cite(docs, cite) -> dict:
+	"""Portes de rempart d'une cité lues dans des docs (dump, fichier d'import) :
+	`{id de la paire sans suffixe: [case dehors, case dedans]}` — nœuds posés sur la cité par les connexions vers les
+	lieux `Porte de rempart` (`_exterieur` = dehors, `_interieur` = dedans)."""
+	lieux = {d.get("_id"): d for d in docs if d.get("type") == "lieu"}
+	portes = {}
+	for d in docs:
+		if d.get("type") != "connection":
+			continue
+		ici = [n for n in d.get("nodes") or [] if n.get("lieu") == cite]
+		autres = [lieux.get(n.get("lieu")) for n in d.get("nodes") or [] if n.get("lieu") != cite]
+		if not ici or not autres or not autres[0] or autres[0].get("categorie") != "Porte de rempart":
+			continue
+		autre = autres[0]
+		# Paire = même `_id` sans son côté (`_exterieur` / `_interieur`, éventuellement suivi
+		# d'un numéro : `auxerre_porte_douve_exterieur01`) ; les libellés varient trop.
+		m = _COTE_PORTE.search(str(autre["_id"]))
+		if not m:
+			continue
+		cle = str(autre["_id"])[:m.start()] + (f"#{m.group(2)}" if m.group(2) else "")
+		portes.setdefault(cle, [None, None])[0 if m.group(1) == "exterieur" else 1] = tuple(ici[0]["pos"])
+	return portes
+

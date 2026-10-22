@@ -187,6 +187,39 @@ def ecrire_apercu(chemin_image: str, cells, cible: str, nav=None, rapport=None):
 	Image.alpha_composite(fond, calque).save(cible)
 
 
+def imprimer_portes(docs, cite, cells, nav) -> bool:
+	"""Contrôle AUTOMATIQUE de toute grille de cité (Auteur, 22/10/2026) : de chaque porte de
+	rempart à chaque autre, il existe un passage AU DEDANS sur la grille proposée (au dehors :
+	information seulement). Une case de porte non praticable est signalée aussi. Rend vrai si
+	tout est relié au dedans."""
+	from utils import grille_matieres
+	portes = grille_matieres.portes_de_cite(docs, cite)
+	if not portes:
+		return True
+	noms = sorted(portes)
+	cases = [tuple(portes[n]) for n in noms]
+	ok = True
+	for nom, (dehors, dedans) in zip(noms, cases):
+		for cote, c in (("dehors", dehors), ("dedans", dedans)):
+			if c is None or not (0 <= c[1] < len(cells) and 0 <= c[0] < len(cells[0])) \
+					or cells[c[1]][c[0]] != 1:
+				print(f"  ⚠ porte « {nom} » : case {cote} {c} non praticable sur la grille proposée")
+				ok = False
+	reliees = grille_matieres.portes_reliees(cells, nav, cases)
+	# Au dedans, une porte doit mener à toutes les autres. Au dehors, un fleuve peut couper la
+	# campagne (on passe alors par la carte du pays) : simple information.
+	dedans_ok = True
+	for cote, i, j in reliees["manques"]:
+		if cote == "dedans":
+			dedans_ok = False
+			print(f"  ✗ portes non reliées au DEDANS : « {noms[i]} » ↔ « {noms[j]} »")
+		else:
+			print(f"  ℹ portes non reliées au dehors : « {noms[i]} » ↔ « {noms[j]} »")
+	if dedans_ok and ok:
+		print(f"  ✓ {len(noms)} porte(s) de rempart reliées entre elles au dedans")
+	return dedans_ok and ok
+
+
 def imprimer_concordance(rapport: dict):
 	"""⚠️ Le taux global vient EN DERNIER et jamais seul : sur une carte à 65 % de cases
 	libres, répondre « libre » partout l'afficherait à 65 % sans rien savoir faire."""
@@ -202,19 +235,15 @@ def imprimer_concordance(rapport: dict):
 
 def lecture_matieres(chemin: str, cols: int, rows: int):
 	"""Lecture par matières de l'image (`utils/grille_matieres`) : Pillow ne sert qu'ici."""
-	from PIL import Image
 	from utils import grille_matieres
-	with Image.open(chemin) as img:
-		img = img.convert("RGB")
-		k = grille_matieres.REGLES_MATIERES["sous_case"]
-		grille_sc = grille_matieres.sous_cases(list(img.getdata()), img.width, img.height, k)
-	return grille_matieres.lecture(grille_sc, cols, rows)
+	return grille_matieres.lecture(sous_cases_image(chemin), cols, rows)
 
 
-def base_cite(chemin: str, cols: int, rows: int) -> dict:
+def base_cite(chemin: str, cols: int, rows: int, enceinte=None) -> dict:
 	"""Ce dont `grille_matieres.proposer_cite` a besoin pour une cité à enceinte DÉCLARÉE : la
 	proposition du profil ville SANS enceinte devinée, sans nav ni passages (`cells` + `rues`
-	tracées), le cadre décoratif et la lecture par matières."""
+	tracées — dedans et dehors lus À PART quand `enceinte` est donnée : les strates), le cadre
+	décoratif, la lecture par matières et les sous-cases (strate du cœur)."""
 	profil = "ville"
 	regles = grille_image.regles_de(profil)
 	couleurs, contours, _taille = echantillonner(chemin, cols, rows)
@@ -225,10 +254,24 @@ def base_cite(chemin: str, cols: int, rows: int) -> dict:
 		img.load()
 		bords = image_bords.profils_bords(img, cols, rows, int(regles.get("cadre_max_cases", 0)))
 	_epaisseurs, cadre = grille_image.cadre_depuis_bords(bords, cols, rows, regles)
+	from utils import grille_matieres
+	masque = grille_matieres.dedans_polygone(enceinte, cols, rows) if enceinte else None
 	p = grille_image.proposer(couleurs, contours, cols, rows, nav={}, profil=profil,
-		passages=False, enceinte=False, fins=fins, k=k, rues=True, murs_nav=False, bords=bords)
+		passages=False, enceinte=False, fins=fins, k=k, rues=True, murs_nav=False, bords=bords,
+		masque=masque)
+	grille_sc = sous_cases_image(chemin)
 	return {"cells": p["cells"], "rues": p["rapport"]["rues"], "cadre": cadre,
-		"lecture": lecture_matieres(chemin, cols, rows)}
+		"lecture": grille_matieres.lecture(grille_sc, cols, rows), "sous_cases": grille_sc}
+
+
+def sous_cases_image(chemin: str):
+	"""Sous-cases (L, a, b, texture) de l'image (`grille_matieres.sous_cases`)."""
+	from PIL import Image
+	from utils import grille_matieres
+	with Image.open(chemin) as img:
+		img = img.convert("RGB")
+		k = grille_matieres.REGLES_MATIERES["sous_case"]
+		return grille_matieres.sous_cases(list(img.getdata()), img.width, img.height, k)
 
 
 def proposer_pour_image(chemin: str, cols: int, rows: int, doc_lieu=None, options=frozenset(),
@@ -374,6 +417,7 @@ def main() -> int:
 		ecrits.append(a_importer)
 
 	if doc_lieu is not None:
+		imprimer_portes(docs, doc_lieu["_id"], cells, nav)
 		if meme_taille and proposition["profil"] == "pays":
 			# Cells toutes à 1 des deux côtés : seule la concordance des MURS dit quelque chose.
 			m = grille_image.concordance_nav(nav, proposition["nav_peint"])

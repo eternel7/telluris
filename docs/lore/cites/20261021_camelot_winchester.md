@@ -297,3 +297,14 @@ Retour sur la grille : remparts et tours qui ne sont pas à 0 (une moitié de to
 - Camelot : données déclarées seulement — le polygone de la crête du rempart, le **fort de la Table ronde** et la **cathédrale** (futurs lieux, où l'on entrera par une connexion), la **pente du fort** et la **rampe** qui y monte (porte du fort en [28, 18]). Résultat : deux zones (dedans 151 cases, dehors 1 451), **aucun mur nav**, toutes les paires d'entrées et de portes reliées, un passage d'une porte de rempart à l'autre par les rues.
 - Portes recalculées au plus près des arches : porte ouest dehors [21, 31] / dedans [24, 26] ; porte de Winchester dehors [54, 33] / dedans [53, 29].
 
+## ✍️ Auteur (22/10/2026)
+
+Faire par strates : identifier les remparts, isoler le cœur de la ville, tracer tout ce qui n'est pas le cœur, puis le cœur à part en omettant le reste, pour augmenter la sensibilité aux rues. La connexion extérieure de la porte sud est dans une tour : la déplacer de 3 cases à droite et 3 vers le bas. À l'intérieur, le passage d'une porte à l'autre passe sur les toits et la pente du château ; la rue est de l'autre côté des maisons. Creuser petit à petit dans une direction pour voir si on peut y aller. Le test de connexion de porte de rempart à porte de rempart, quelle qu'elle soit, doit être automatique quand on génère la grille d'une ville.
+
+## 17. Strates, rues creusées, contrôle des portes (22/10/2026)
+
+- Le cœur (dans le rempart) est lu à part et repart de 0 ; ses rues sont creusées entre les portes, les places et le pied de la rampe du fort, sur le pavé clair et ocre.
+- Chaque porte a sa percée : la rue qui sort de l'arche n'est plus fermée comme chemin de ronde. Porte ouest dedans [25, 28] ; porte de Winchester dedans [56, 28] (percée plein nord), dehors **[57, 36]** comme demandé.
+- Le passage d'une porte à l'autre suit maintenant la rue entre les deux rangées de maisons, puis la place de la cathédrale (35 cases).
+- Contrôle de porte à porte automatique pour toute cité (`gen_grille_image.py lieu:<cite>` l'imprime) ; au dedans c'est une erreur, au dehors une information (un fleuve peut couper la campagne).
+
