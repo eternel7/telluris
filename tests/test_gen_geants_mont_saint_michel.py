@@ -8,6 +8,10 @@
    reste dans la fourchette d'un géant ordinaire Seigneur.
 5. **Les géants restent sous le maître du Mont** : aucun grade de la zone n'atteint Seigneur.
 6. **Idempotent.**
+7. **Son équipement** : les deux objets de la légende sont portables par lui (arme/armure à
+   emplacement équipable), dans sa liste `items`, et NON FABRICABLES — aucune recette, sur-mesure
+   fermé, exclus du générateur de recettes pour orphelins. Faits pour un géant : aucune Lignée
+   n'atteint la Force requise, et aucun malus ne pèse sur le géant qui les porte.
 """
 
 import glob
@@ -16,6 +20,8 @@ import os
 import pytest
 
 from dev import gen_geants_mont_saint_michel as g
+from dev import gen_recettes_orphelins
+from utils import marche, simulateur
 from utils.zones import compute_zone_intensity
 
 DUMPS = sorted(glob.glob(os.path.join(g.RACINE, "jsons", "telluris-dump-*.json")))
@@ -62,10 +68,10 @@ def test_les_grades_ne_se_melangent_pas(france):
 	assert not _cases(france, g.ZONE) & _cases(france, "zone:tres_dangereuse")
 
 
-def test_la_zone_numerotee_n_etait_pas_utilisee(base):
+def test_la_zone_numerotee_n_est_utilisee_qu_en_france(base):
 	# Si l'auteur la pose ailleurs, ses rencontres y amèneraient les géants.
 	for doc in base.values():
-		if doc.get("type") == "lieu":
+		if doc.get("type") == "lieu" and doc["_id"] != g.LIEU_ID:
 			assert g.ZONE not in {p.get("zone") for p in doc.get("zone_influences") or []}, doc["_id"]
 
 
@@ -105,3 +111,50 @@ def test_rencontres(france):
 
 def test_idempotent(base, france):
 	assert g.appliquer_france(france) == france
+
+
+def test_equipement_dans_la_liste_du_geant_du_mont(geant_du_mont):
+	assert "humanoide" in geant_du_mont["tags"]           # sans quoi il ne porte rien
+	for item in g.EQUIPEMENT:
+		assert geant_du_mont["items"].count(item["_id"]) == 1
+
+
+def test_equipement_portable_par_un_monstre():
+	# Règle de `combat.items_equipables_monstre` + premier emplacement du simulateur.
+	for item in g.EQUIPEMENT:
+		assert item["categorie"] in ("arme", "armure"), item["_id"]
+		assert set(item["slots"]) <= set(simulateur.SLOTS_EQUIPABLES), item["_id"]
+
+
+def test_equipement_non_fabricable(base):
+	ids = {item["_id"] for item in g.EQUIPEMENT}
+	produits = {marche.objet_final_item_id(r.get("objet_final", ""))
+				for r in base.values() if r.get("type") == "recette"}
+	assert not ids & produits
+	assert ids <= set(gen_recettes_orphelins.EXCLUS)
+	for item in g.EQUIPEMENT:
+		assert not marche.est_personnalisable(item), item["_id"]
+
+
+def test_equipement_sans_collision(base):
+	docs = g.equipement(base)
+	for doc in docs:
+		assert doc["_id"] not in base or base[doc["_id"]]["nom"] == doc["nom"]
+
+
+def test_equipement_hors_de_portee_d_un_anthrope(base):
+	"""Force requise au-delà du plafond de toute Lignée (bonus racial compris), et au plus la
+	Force minimale du géant du Mont, qui doit pouvoir les porter (le monstre ignore la
+	restriction, mais la cohérence du monde le veut)."""
+	races = base["rules:races"]["value"]
+	plafond = max(r["stats_max"]["F"] + (r.get("max_bonus") or {}).get("F", 0) for r in races)
+	force_geant = g.fourchette_seigneur(base[g.GEANT], base[g.SEIGNEUR])["F"]["min"]
+	for item in g.EQUIPEMENT:
+		assert plafond < item["restriction"]["F"] <= force_geant, item["_id"]
+
+
+def test_equipement_sans_malus():
+	# Un malus pèserait AUSSI sur le géant (même `recompute_equipment_bonus`).
+	for item in g.EQUIPEMENT:
+		assert all(v >= 0 for v in (item.get("bonus") or {}).values()), item["_id"]
+		assert item.get("bonus_malus_depl", 0) >= 0, item["_id"]

@@ -8320,6 +8320,10 @@
       "boss",
       "predateur"
     ],
-    "proprietes": {}
+    "proprietes": {},
+    "items": [
+      "item:massue_de_fer_du_geant",
+      "item:tunique_de_barbes_du_geant"
+    ]
   }
 ]

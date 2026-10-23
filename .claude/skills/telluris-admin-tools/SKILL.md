@@ -51,6 +51,7 @@ Voie du contenu **authoré** : relire le dump (source unique), n'injecter que le
 - `gen_lutecia.py` — zones d'influence de la capitale (urbain, Seine, faubourgs, campagne).
 - `gen_coherence_france.py` — ressources + espèces manquantes de `lieu:france` (+ `restriction_tags` magique).
 - `gen_grades_france.py` — profils de niveau 5-6 du lieu descendus vers `zone:tres_dangereuse`.
+- `gen_geants_mont_saint_michel.py` — zone de la baie (`zone:zone_danger_3`) sur `lieu:france` ; géant du Mont toujours Seigneur (bornes relues : géant ordinaire × `profil:seigneur`) ; sa massue de fer et sa tunique de barbes, non fabricables (exclues de `gen_recettes_orphelins.py`, posées aussi dans la table de `gen_equipement_humanoides.py`). Un seul fichier d'import : `jsons/geants_mont_saint_michel_a_importer.json`.
 - `gen_acces_donjon.py` — chaîne d'accès au donjon-mine.
 - `gen_relation_guilde.py` — `relation_lieu` : les 4 lieux du Bastion partagent une cote.
 - `gen_jetons_especes.py` — `jeton: {taille, forme}` des espèces à gabarit (dragon 3x2, cheval 1x2…) ; table EXHAUSTIVE, échoue sur une espèce du dump non classée ; relit le dump le plus récent (cf. `telluris-combat` § Jetons de taille variable).
