@@ -70,7 +70,7 @@ for (const f of ['_cxSlug', '_cxPosPosable', '_fusionConnexion',
 	// `_fusionLieu` délègue ses entrées `pnj` (une porte n'en a pas, mais l'appel a lieu).
 	'_probaLue', '_fusionPnjEntrees',
 	'_ptIds', '_ptCote', '_ptOrdonner', '_ptDocs', '_ptPosCarte', '_ptValider',
-	'_ptPaireDe', '_ptImagesLibres']) {
+	'_ptPaireDe', '_ptImagesLibres', '_ptImagesProposees']) {
 	vm.runInThisContext(extraire(f));
 }
 
@@ -461,6 +461,31 @@ t('les images déjà prises sont écartées ; hors porte_de_ville*, rien n’est
 		_ptImagesLibres(IMAGES_PORTES, 'exterieur', ['porte_de_ville_douves_exterieur01.png', 'porte_de_ville_exterieur01.jpg']),
 		['porte_de_ville_pont_exterieur02.png', 'porte_de_ville_lutece_exterieur.jpg']);
 	assert.ok(!_ptImagesLibres(IMAGES_PORTES, 'exterieur', []).includes('grande_porte_exterieur.png'));
+});
+
+// ── _ptImagesProposees ───────────────────────────────────────────────────────
+t('des images libres restent : seules elles sont proposées, sans repli', () => {
+	const r = _ptImagesProposees(IMAGES_PORTES, 'interieur', ['porte_de_ville_route_interieur01.png']);
+	assert.deepStrictEqual(r, {
+		liste: ['porte_de_ville_interieure02.jpg', 'porte_de_ville_douves_interieur03.png'],
+		repli: false,
+	});
+});
+
+t('aucune libre d’un côté : toutes celles DE CE CÔTÉ, déjà portées comprises', () => {
+	const toutesExt = _ptImagesLibres(IMAGES_PORTES, 'exterieur', []);
+	const toutesInt = _ptImagesLibres(IMAGES_PORTES, 'interieur', []);
+	const prises = toutesExt.concat(toutesInt);
+	assert.deepStrictEqual(_ptImagesProposees(IMAGES_PORTES, 'exterieur', prises),
+		{ liste: toutesExt, repli: true });
+	assert.deepStrictEqual(_ptImagesProposees(IMAGES_PORTES, 'interieur', prises),
+		{ liste: toutesInt, repli: true }, 'jamais une image de l’autre côté');
+});
+
+t('extérieur épuisé, intérieur libre : le repli ne touche que l’extérieur', () => {
+	const prises = _ptImagesLibres(IMAGES_PORTES, 'exterieur', []);
+	assert.strictEqual(_ptImagesProposees(IMAGES_PORTES, 'exterieur', prises).repli, true);
+	assert.strictEqual(_ptImagesProposees(IMAGES_PORTES, 'interieur', prises).repli, false);
 });
 
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).`);

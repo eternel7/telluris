@@ -86,7 +86,7 @@ Source unique des formulaires (admin) : catégories (`lieu.categorie` ∪ `recet
 - Les deux cases **carte** doivent différer et passer le voile rouge. ⚠️ L'éditeur ne peut pas vérifier qu'elles sont du bon **côté** du mur : c'est l'œil de l'auteur (le tracé des voies aide).
 - ⚠️ `_ptOrdonner` remet les nœuds dans l'ordre du **doc** avant `_fusionConnexion` : fusion par position, permuter changerait la porte de côté en silence.
 - `_ptPaireDe` lit **`cxDocsConnus`**, pas `lieuxConnections` : le passage n'a aucun nœud sur la cité. Côté indécidable ⇒ **refus d'ouvrir** plutôt qu'intervertir.
-- ⚠️ `_ptRepeuplerImages(voulues)` reçoit la valeur en **paramètre**, jamais relue du DOM : affecter `.value` sur un `<select>` encore vide ne prend pas (« image requise » sur une porte qui en avait une). L'image courante reste offerte même si un autre lieu la porte.
+- ⚠️ `_ptRepeuplerImages(voulues)` reçoit la valeur en **paramètre**, jamais relue du DOM : affecter `.value` sur un `<select>` encore vide ne prend pas (« image requise » sur une porte qui en avait une). L'image courante reste offerte même si un autre lieu la porte. Plus aucune image libre d'un côté ⇒ `_ptImagesProposees` liste **toutes** celles de ce côté, marquées « (déjà portée) », avis `#pt-images-repli`.
 
 
 ### Maison de guilde — une étape par geste

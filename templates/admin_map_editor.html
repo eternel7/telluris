@@ -2855,6 +2855,15 @@ function _ptImagesLibres(images, cote, prises) {
 	});
 }
 
+// Ce que propose le sélecteur d'un côté : les images libres ; s'il n'en reste AUCUNE, toutes
+// celles du côté, déjà portées comprises (`repli`) — une liste vide bloquerait la création sur
+// « image requise », alors qu'une porte jumelle à l'écran se corrige plus tard.
+function _ptImagesProposees(images, cote, prises) {
+	const libres = _ptImagesLibres(images, cote, prises);
+	if (libres.length) return { liste: libres, repli: false };
+	return { liste: _ptImagesLibres(images, cote, []), repli: true };
+}
+
 
 // ══ PORTES DE REMPART : le panneau ═════════════════════════════════════════
 // Pose ou corrige une paire complète (2 lieux + 3 connexions) en UNE requête
@@ -2900,17 +2909,29 @@ function _ptImagesPrises(sauf) {
 function _ptRepeuplerImages(voulues) {
 	const toutes = (creationOptions && creationOptions.images) || [];
 	const v = voulues || {};
+	const replis = [];
 	for (const cote of ['exterieur', 'interieur']) {
 		const estExt = cote === 'exterieur';
 		const sel = _ptEl(estExt ? 'pt-image-ext' : 'pt-image-int');
 		const courante = (estExt ? v.ext : v.int) !== undefined
 			? (estExt ? v.ext : v.int) : sel.value;
 		const prises = _ptImagesPrises([courante]);
-		let liste = _ptImagesLibres(toutes, cote, prises);
+		const proposees = _ptImagesProposees(toutes, cote, prises);
+		let liste = proposees.liste;
+		if (proposees.repli) replis.push(estExt ? 'extérieure' : 'intérieure');
 		if (courante && liste.indexOf(courante) === -1) liste = [courante].concat(liste);
+		const deja = new Set(prises);
 		sel.innerHTML = `<option value="">— choisir —</option>`
-			+ liste.map(f => `<option value="${_escHtml(f)}">${_escHtml(f)}</option>`).join('');
+			+ liste.map(f => `<option value="${_escHtml(f)}">${_escHtml(f)}${
+				deja.has(f) ? ' (déjà portée)' : ''}</option>`).join('');
 		sel.value = courante || '';
+	}
+	const avis = _ptEl('pt-images-repli');
+	if (avis) {
+		avis.textContent = replis.length
+			? `⚠ Aucune image ${replis.join(' ni ')} libre : toutes celles du côté sont listées, déjà portées comprises.`
+			: '';
+		avis.style.display = replis.length ? '' : 'none';
 	}
 	_ptMajApercu();
 }
@@ -6590,7 +6611,8 @@ function _choixSauverChamp(el) {
 		<select id="pt-image-ext" style="margin-bottom:6px;"></select>
 		<label for="pt-image-int">Intérieure</label>
 		<select id="pt-image-int" style="margin-bottom:0;"></select>
-		<div class="cx-hint">Toutes les images <code>porte_de_ville*</code> du bon côté (extérieur / intérieur), sans filtre de famille. Celles déjà portées par un lieu ne sont pas proposées.</div>
+		<div class="cx-hint">Toutes les images <code>porte_de_ville*</code> du bon côté (extérieur / intérieur), sans filtre de famille. Celles déjà portées par un lieu ne sont pas proposées — sauf s'il n'en reste aucune de libre : toutes celles du côté sont alors listées.</div>
+		<div class="cx-hint ko" id="pt-images-repli" style="display:none;"></div>
 	</div>
 
 	<div class="cx-noeud">
