@@ -39,7 +39,7 @@ FEMININS = {
 	"corneille_noire", "dearg_due", "dryade", "fee", "gargouille", "gorgone", "goule", "harpie", "horreur",
 	"hydre", "lamie", "lhamia", "liche", "licorne", "manticore", "momie", "monture_angelique",
 	"mimique", "monture_demoniaque", "monture_squelette", "naiade", "nereide", "oceanide", "oreade", "penanggalan",
-	"reine_lhamia", "sirene", "succube", "tarasque", "vouivre", "wyvern",
+	"reine_lhamia", "silat", "sirene", "succube", "tarasque", "vouivre", "wyvern",
 }
 
 MASCULINS = {
@@ -51,7 +51,7 @@ MASCULINS = {
 	"demon_majeur_de_la_destruction", "demon_mineur", "demon_servant", "doppleganger", "dobhar_chu", "dragnard", "draugr",
 	"dragon", "dragon_blanc", "dragon_de_sang", "dragon_empereur", "dragon_hydre", "dragon_rouge", "dragon_zombie",
 	"ecureuil", "failinis", "familier", "fantome", "faoladh",
-	"fils_de_sobek", "geant_du_mont_saint_michel", "geant_ou_titan", "genie", "ghul_des_sables", "gnome", "gobelin",
+	"fils_de_sobek", "geant_du_mont_saint_michel", "geant_ou_titan", "genie", "ghul_des_sables", "gnome", "gobelin", "grootslang",
 	"gobelin_chamanique", "gobelin_des_marais", "golem_de_chair", "golem_de_fer",
 	"golem_de_pierre", "grand_dragon", "grand_faucon", "grand_phenix", "grand_sanglier",
 	"griffon", "gwyn_ap_nudd", "hippogriffe", "homme_arbre", "ifrit", "illuyanka", "incube", "jann", "kraken", "ladon", "leprechaun",
@@ -60,7 +60,7 @@ MASCULINS = {
 	"petit_dragon", "petits_animaux_divers", "phenix", "polar_kraken", "poney", "prince_demon",
 	"rat_geant", "rejeton_demoniaque", "renard", "revenant", "roi_des_tombes", "roi_liche",
 	"sanglier", "sanglier_apprivoise", "satyre", "seigneur_du_sang", "seraphin", "serpent",
-	"serpent_geant", "serpopard", "silat", "spectre", "sphinx", "squelette", "strigoi", "taureau",
+	"serpent_geant", "serpopard", "spectre", "sphinx", "squelette", "strigoi", "taureau",
 	"triton",
 	"troglodyte", "troll", "twrch_trwyth", "ulfhedinn", "uturuncu", "vampire", "xiuhcoatl", "yamata_no_orochi",
 	"zmey_gorynych", "zombie",
