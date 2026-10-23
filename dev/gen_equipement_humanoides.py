@@ -51,6 +51,11 @@ TABLE = {
 		"Morgenstern", "Hache_de_guerre", "Ecu",
 		"Cotte_de_mailles", "Heaume_de_plates", "Gantelets_de_plates", "Jambières_de_plates",
 	],
+	# Dame des oasis : lame de palmeraie, robe de lin mouillée, jupe longue sur les pieds de chèvre.
+	"aicha_kandicha": [
+		"Dague", "Faucille",
+		"Robe_lin_ceinturee", "Jupe_longue_lin", "Peigne_d_os",
+	],
 	"ange_de_la_connaissance": [
 		"Baton_canalisateur", "Epee_argent",
 		"Robe_de_savant", "Calotte_cuir_rune", "Sandales_moine",
@@ -129,6 +134,11 @@ TABLE = {
 		"Kanabo", "Rungu",
 		"Braies_fourrure", "Manteau_de_loup", "Bracelets_os",
 	],
+	# Charognard des pistes sous la peau de sa dernière proie : la mise d'un caravanier.
+	"ghul_des_sables": [
+		"Cimeterre", "Coutelas", "Couteau_de_chasse",
+		"Robe_lin_ceinturee", "Pantalon_ample", "Capuchon_de_lin", "Sandales_de_corde",
+	],
 	"gnome": [
 		"Dague", "Epee_courte", "Arbalete_legere",
 		"Veste_cuir_souple", "Chapeau_mou", "Gants_cuir_epais", "Souliers_cuir",
@@ -149,6 +159,12 @@ TABLE = {
 	"golem_de_fer": None,
 	"golem_de_pierre": None,
 	"goule": None,
+	# Seigneur d'Annwn, veneur de la Chasse sauvage : courtois, puis il lâche ses chiens.
+	# L'arc à deux mains concurrence l'épée et la lance au lieu d'en faire un tireur pur.
+	"gwyn_ap_nudd": [
+		"Epee_batarde", "Lance", "Arc_du_grand_atelier",
+		"Manteau_de_cour_double", "Mantelet_de_chasse", "Gants_archer", "Bottes_de_chasse",
+	],
 	"incube": [
 		"Rapiere", "Dague",
 		"Pourpoint_colore", "Pantalon_ajuste_noir", "Bottes_noires", "Gants_fins_noirs",
@@ -214,6 +230,11 @@ TABLE = {
 		"Harnois_du_grand_arsenal", "Epaulieres_benies", "Heaume_de_plates",
 		"Gantelets_de_plates",
 	],
+	# Djinn errante qui suit les caravanes à l'écart des feux : lames courtes, soie, pas feutrés.
+	"silat": [
+		"Stylet", "Cimeterre",
+		"Cape_soie_sombre", "Capuche_soie", "Pantalon_ample", "Chaussons_silencieux",
+	],
 	"squelette": [
 		"Epee_courte", "Gladius", "Arc_court", "Arbalete_legere", "Rondache",
 		"Camail_de_mailles", "Heaume_de_fer",
@@ -248,6 +269,7 @@ TABLE = {
 
 # Slots que le corps n'a pas : queue de serpent, arrière-train de cheval, pattes de bouc.
 SLOTS_INTERDITS = {
+	"aicha_kandicha": {"pieds"},
 	"centaure": {"jambes", "pieds"},
 	"reine_lhamia": {"jambes", "pieds"},
 	"vouivre": {"jambes", "pieds"},

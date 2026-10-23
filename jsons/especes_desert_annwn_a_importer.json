@@ -1,0 +1,244 @@
+[
+  {
+    "_id": "espece:aicha_kandicha",
+    "_rev": "5-68ec6ecea14873676ad2ac836319dafb",
+    "type": "espece",
+    "nom": "Aïcha Kandicha",
+    "genre": "f",
+    "nom_propre": true,
+    "image": "aicha_kandicha_transparent.png",
+    "description": "Dame des oasis aux pieds de chèvre cachés sous sa robe mouillée ; elle attire les voyageurs au bord de l'eau, et on ne les revoit pas.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 50,
+        "max": 80
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "esprit",
+      "aquatique",
+      "seduction",
+      "magique",
+      "humanoide"
+    ],
+    "items": [
+      "item:Dague",
+      "item:Faucille",
+      "item:Robe_lin_ceinturee",
+      "item:Jupe_longue_lin",
+      "item:Peigne_d_os"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:ghul_des_sables",
+    "_rev": "2-eac12be17526be82ea3da00c68f6e4ee",
+    "type": "espece",
+    "nom": "Ghûl des Sables",
+    "genre": "m",
+    "image": "ghul_des_sables_transparent.png",
+    "description": "Charognard des pistes qui revêt l'apparence de sa dernière proie pour en attirer une autre.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 30,
+        "max": 45
+      },
+      "R": {
+        "min": 30,
+        "max": 45
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 15,
+        "max": 30
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "metamorphe",
+      "desert",
+      "predateur",
+      "humanoide"
+    ],
+    "items": [
+      "item:Cimeterre",
+      "item:Coutelas",
+      "item:Couteau_de_chasse",
+      "item:Robe_lin_ceinturee",
+      "item:Pantalon_ample",
+      "item:Capuchon_de_lin",
+      "item:Sandales_de_corde"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:gwyn_ap_nudd",
+    "_rev": "1-80898c7ba9065642d694f7c8443ca9f2",
+    "type": "espece",
+    "nom": "Gwyn ap Nudd",
+    "genre": "m",
+    "nom_propre": true,
+    "image": "gwyn_ap_nudd_transparent.png",
+    "description": "Seigneur d'Annwn, qui mène la Chasse sauvage hors des portails par les nuits d'orage, son chien Dormarth au museau rouge à ses côtés. Chaque premier jour de mai il se bat contre Gwythyr pour la belle Creiddylad, et se battra ainsi jusqu'à la fin des temps sans qu'aucun ne l'emporte. Les uns disent qu'il demeure sous Glastonbury Tor ; ceux qui l'ont croisé disent qu'il leur a parlé avec courtoisie, puis a lâché ses chiens.",
+    "base_attributes": {
+      "V": {
+        "min": 8,
+        "max": 10
+      },
+      "F": {
+        "min": 65,
+        "max": 95
+      },
+      "R": {
+        "min": 60,
+        "max": 90
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 85,
+        "max": 120
+      },
+      "Int": {
+        "min": 65,
+        "max": 90
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "humanoide",
+      "feerique",
+      "magique",
+      "nocturne",
+      "legendaire",
+      "boss",
+      "insensible_furtivite"
+    ],
+    "items": [
+      "item:Epee_batarde",
+      "item:Lance",
+      "item:Arc_du_grand_atelier",
+      "item:Manteau_de_cour_double",
+      "item:Mantelet_de_chasse",
+      "item:Gants_archer",
+      "item:Bottes_de_chasse"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:silat",
+    "_rev": "2-bf9e557a17c4bdd8ed08afc43a069ec5",
+    "type": "espece",
+    "nom": "Si'lat",
+    "genre": "f",
+    "image": "silat_transparent.png",
+    "description": "La plus rusée des djinns errants : elle prend la voix d'une parente et suit les caravanes à l'écart des feux.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 30,
+        "max": 45
+      },
+      "Cha": {
+        "min": 30,
+        "max": 55
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "humanoide",
+      "metamorphe",
+      "magique",
+      "desert",
+      "furtif"
+    ],
+    "items": [
+      "item:Stylet",
+      "item:Cimeterre",
+      "item:Cape_soie_sombre",
+      "item:Capuche_soie",
+      "item:Pantalon_ample",
+      "item:Chaussons_silencieux"
+    ],
+    "proprietes": {}
+  }
+]
