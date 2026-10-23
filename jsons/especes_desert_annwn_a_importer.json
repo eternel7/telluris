@@ -187,7 +187,7 @@
     "_rev": "2-bf9e557a17c4bdd8ed08afc43a069ec5",
     "type": "espece",
     "nom": "Si'lat",
-    "genre": "m",
+    "genre": "f",
     "image": "silat_transparent.png",
     "description": "La plus rusée des djinns errants : elle prend la voix d'une parente et suit les caravanes à l'écart des feux.",
     "base_attributes": {
