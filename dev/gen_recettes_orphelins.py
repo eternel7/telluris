@@ -51,6 +51,8 @@ SORTIE = os.path.join(DOSSIER_JSONS, "recettes_orphelins_a_importer.json")
 
 EXCLUS = {
 	"item:carte_aventurier": "délivrée par la guilde à l'inscription (`lieu_parent` localisé)",
+	"item:massue_de_fer_du_geant": "trophée du géant du Mont, au butin seulement (gen_geants_mont_saint_michel.py)",
+	"item:tunique_de_barbes_du_geant": "trophée du géant du Mont, au butin seulement (gen_geants_mont_saint_michel.py)",
 }
 
 CATEGORIES_EXCLUES = {"composant"}

@@ -120,6 +120,11 @@ TABLE = {
 		"Cotte_mailles_benie", "Epaulieres_de_fer", "Heaume_ouvert_grave",
 	],
 	"familier": None,
+	# Les deux trophées de la légende, seuls (Auteur, 22/10) : créés et posés par
+	# dev/gen_geants_mont_saint_michel.py, qui fait foi.
+	"geant_du_mont_saint_michel": [
+		"massue_de_fer_du_geant", "tunique_de_barbes_du_geant",
+	],
 	"geant_ou_titan": [
 		"Kanabo", "Rungu",
 		"Braies_fourrure", "Manteau_de_loup", "Bracelets_os",

@@ -24,10 +24,18 @@
 # `zone_influences` / `rencontres` (ajouts) de `lieu:france` et `base_attributes` du géant du
 # Mont — PUT complet à l'import (CLAUDE.md §11). Idempotent.
 #
+# SON ÉQUIPEMENT : les deux objets de la légende (Morte Arthure allitérative, Malory), ceux
+# qu'Arthur fait emporter en trophée avec la tête — la massue de fer et la tunique cousue des
+# barbes des rois vaincus. NON FABRICABLES : aucune recette ne les produit (exclus aussi de
+# `gen_recettes_orphelins.py`), tag `non_personnalisable` contre le sur-mesure ; prix tenu par
+# `valeur`. Ils n'existent qu'au butin du géant du Mont : il est `humanoide`, chaque objet de
+# sa liste `items` est porté à MONSTRE_EQUIPEMENT_PROBA, et un objet porté tombe au butin.
+#
 # Usage : python dev/gen_geants_mont_saint_michel.py [jsons/telluris-dump-….json]
 #         (sans argument : le dump le plus récent)
-# Sortie : jsons/geants_mont_saint_michel_a_importer.json
-#          (2 docs : lieu:france, espece:geant_du_mont_saint_michel)
+# Sortie (UN seul fichier, CLAUDE.md §18) : jsons/geants_mont_saint_michel_a_importer.json
+#   lieu:france, espece:geant_du_mont_saint_michel, et les deux objets (sauf déjà en base à
+#   l'identique)
 
 import copy
 import glob
@@ -57,6 +65,54 @@ PLACEMENT = {
 		"profil:champion": 1,    # niveau 4
 	},
 }
+
+MASSUE = "item:massue_de_fer_du_geant"
+TUNIQUE = "item:tunique_de_barbes_du_geant"
+
+# Massue : au-dessus du Kanabō (6 + 1D8, F 22), la meilleure masse à deux mains du jeu.
+# Tunique : peaux d'un géant, pas une plate — entre l'Armure de peau (11 PA) et la cotte.
+# Faites pour un VRAI géant (Force 90-110, deux à trois fois un ogre) : la Force requise
+# dépasse ce qu'atteint un Anthrope (ogre 70, humain 50 + 10 de bonus racial, `rules:races`),
+# et le poids celui qu'il porte (charge = F × 5 kg). PAS de malus : `bonus` et
+# `bonus_malus_depl` pèseraient aussi sur le géant (`recompute_equipment_bonus` sert au
+# snapshot de monstre), alors qu'un monstre ignore la `restriction` (`roll_monster_equipment`).
+EQUIPEMENT = [
+	{
+		"_id": MASSUE,
+		"type": "item",
+		"nom": "Massue de fer du géant",
+		"description": "Massue forgée d'une seule masse de fer, noircie par le sel des grèves. Le géant du Mont la traîne derrière lui dans la baie ; ceux qui l'ont vue tomber disent qu'il faut quatre hommes et des leviers pour la soulever.",
+		"icon": "🏏",
+		"rarete": "legendaire",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": ["main_droite", "main_gauche"],
+		"poids": 150.0,
+		"tags": ["cac", "non_personnalisable"],
+		"portee": 1,
+		"restriction": {"F": 90},
+		"bonus_degats": 9,
+		"bonus_degats_dice": 12,
+		"deux_mains": True,
+		"valeur": [{"cu": 2500}, {"cu": 5000}],
+	},
+	{
+		"_id": TUNIQUE,
+		"type": "item",
+		"nom": "Tunique de barbes du géant",
+		"description": "Tunique de peaux mal cousues, bordée de barbes de toutes couleurs. Le géant du Mont exige, dit-on, la barbe de chaque seigneur qu'il défie, et en coud une de plus à chaque victoire ; la place de la prochaine reste vide.",
+		"icon": "🧥",
+		"rarete": "legendaire",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": ["torse"],
+		"poids": [40, 60],
+		"tags": ["non_personnalisable"],
+		"restriction": {"F": 80},
+		"bonus_pa": 15,
+		"valeur": [{"cu": 2000}, {"cu": 4000}],
+	},
+]
 
 
 def dernier_dump(argv):
@@ -122,7 +178,26 @@ def appliquer_france(lieu: dict) -> dict:
 def appliquer_geant_du_mont(base: dict) -> dict:
 	doc = _sans_rev(base[GEANT_DU_MONT])
 	doc["base_attributes"] = fourchette_seigneur(base[GEANT], base[SEIGNEUR])
+	items = doc.setdefault("items", [])
+	for item in EQUIPEMENT:
+		if item["_id"] not in items:
+			items.append(item["_id"])
 	return doc
+
+
+def equipement(base: dict) -> list:
+	"""Les deux objets, sauf ceux déjà en base à l'identique. Un `_id` pris par un AUTRE doc
+	(pas l'un des nôtres) arrête tout : l'import l'écraserait en silence (CLAUDE.md §11)."""
+	docs = []
+	for item in EQUIPEMENT:
+		existant = base.get(item["_id"])
+		if existant is not None:
+			if existant.get("nom") != item["nom"]:
+				sys.exit(f"ERREUR : {item['_id']} déjà pris par « {existant.get('nom')} »")
+			if {k: v for k, v in existant.items() if k != "_rev"} == item:
+				continue
+		docs.append(copy.deepcopy(item))
+	return docs
 
 
 def valider(base: dict) -> None:
@@ -137,13 +212,18 @@ def generer(base: dict) -> list:
 	return [appliquer_france(base[LIEU_ID]), appliquer_geant_du_mont(base)]
 
 
+def _ecrire(chemin: str, docs: list) -> None:
+	with open(os.path.join(RACINE, chemin), "w", encoding="utf-8", newline="\n") as f:
+		f.write(json.dumps(docs, ensure_ascii=False, indent=2) + "\n")
+	print(f"{chemin} : {', '.join(d['_id'] for d in docs)}")
+
+
 def main(argv):
 	chemin = dernier_dump(argv)
-	docs = generer(charger(chemin))
-	with open(os.path.join(RACINE, SORTIE), "w", encoding="utf-8", newline="\n") as f:
-		f.write(json.dumps(docs, ensure_ascii=False, indent=2) + "\n")
+	base = charger(chemin)
+	docs = generer(base)
 	print(f"Source : {os.path.basename(chemin)}")
-	print(f"{SORTIE} : {', '.join(d['_id'] for d in docs)}")
+	_ecrire(SORTIE, [*docs, *equipement(base)])
 	for cle, b in docs[1]["base_attributes"].items():
 		print(f"  {cle:>3} {b['min']:>3} – {b['max']}")
 

@@ -138,16 +138,17 @@ La différence par rapport à Rome, c'est que il y avait une grotte au fond de l
 
 | Rang | Contenu |
 |---|---|
-| D | **Géant du Mont-Saint-Michel**, en France, tué par Arthur selon Geoffroy |
 | E – D | **Camelot** ; **Cath Palug**, chat monstrueux d'Anglesey (*Pa gur*, Triades) |
 | C | **Bête glatissante**, avec Pellinore |
-| B | **Twrch Trwyth**, sanglier-roi chassé à travers Galles, Irlande et Cornouailles (*Culhwch ac Olwen*) |
+| B | **Twrch Trwyth**, sanglier-roi chassé à travers Galles, Irlande et Cornouailles (*Culhwch ac Olwen*) ; **Géant du Mont-Saint-Michel**, en France, tué par Arthur selon Geoffroy — rang B **voire plus** (Auteur, 22/10, remplace le rang D du second arbitrage : § 19) |
 | A | **Dinas Emrys**, dragons rouge et blanc |
 | S | **Avalon** et **Annwn** |
 
 ## 6. Bestiaire importable
 
 `dev/gen_bestiaire_arthurien.py` → `jsons/bestiaire_arthurien_a_importer.json` : `espece:geant_du_mont_saint_michel`, `espece:cath_palug`, `espece:bete_glatissante`, `espece:twrch_trwyth`, `espece:dragon_rouge`, `espece:dragon_blanc`, avec leurs carcasses et leurs découpes. Images à générer : `templates/resources/monsters/<slug>_transparent.png`.
+
+Le géant du Mont-Saint-Michel est **retouché** par `dev/gen_geants_mont_saint_michel.py` (§ 19) : caractéristiques, équipement, zone de la baie. ⚠️ Réimporter l'ancien `bestiaire_arthurien_a_importer.json` effacerait ces retouches.
 
 ## 7. Points ouverts
 
@@ -160,7 +161,7 @@ Un par espèce ; fichier détouré `templates/resources/monsters/<slug>_transpar
 
 **`geant_du_mont_saint_michel`**
 ```
-Réalise l'image du Géant du Mont-Saint-Michel : géant colossal et voûté, trois fois la taille d'un homme, peau tannée et crevassée par le sel, barbe et chevelure hirsutes emmêlées d'algues, vêtu de peaux mal cousues, une massue faite d'un tronc d'arbre arraché à la main, des ossements accrochés à sa ceinture de corde. Attitude de chasse, massue levée, dents jaunes découvertes, regard fixé sur sa proie. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+Réalise l'image du Géant du Mont-Saint-Michel : un vrai géant, haut comme cinq hommes, deux à trois fois plus massif qu'un ogre, carrure de tour, épaules larges comme une charrette, bras épais comme des troncs de chêne, pieds nus énormes couverts du sable gris des grèves. Peau tannée et crevassée par le sel, barbe et chevelure hirsutes emmêlées d'algues, petits yeux enfoncés sous un front lourd. Il porte une longue tunique de peaux épaisses grossièrement cousues, couverte de dizaines de barbes humaines coupées, cousues en rangs serrés, blondes, rousses, grises et noires, tressées ou en broussaille ; sur la poitrine, une place est restée vide. Dans sa main droite, une massue forgée d'un seul bloc de fer noir, piquée de rouille et blanchie de sel, longue comme un homme et épaisse comme un tonneau à son extrémité, qu'il tient sans effort. À sa ceinture de cordage de navire pend un porc entier, minuscule contre sa cuisse, à côté de crânes humains qui ont l'air de grelots. Attitude de chasse, massue levée au-dessus de l'épaule, dents jaunes découvertes, regard fixé sur sa proie. La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond parfaitement uni et plat, magenta pur, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
 ```
 
 **`cath_palug`**
@@ -318,3 +319,21 @@ Porte ouest correcte : ses points de connexion sont gravés dans le marbre. Port
 - Le dehors est lu au pixel (sol contre toit) puis élagué le long des gros traits : le tournoi et le bourg sont praticables, seuls les toits restent fermés.
 - Le cœur creuse en évitant de franchir les traits. Une seule route d'une porte à l'autre au dedans (29 cases) : les variantes rallongeaient trop le trajet.
 
+## ✍️ Auteur (22/10/2026)
+
+Une zone autour du Mont-Saint-Michel, plus dans les terres qu'en mer, avec des géants et le géant du Mont-Saint-Michel, sur une zone de danger numérotée inutilisée. Le géant du Mont prend les caractéristiques d'un géant Seigneur, quel que soit son profil : une seule zone, des géants d'un niveau inférieur, et ce géant atypique toujours Seigneur. Il doit porter des objets : la massue de fer et la tunique de barbes, non fabricables, associées à lui. Garder ce niveau : il devient un adversaire de rang B, voire plus. Dans la légende arthurienne, il ressemble à un simple ogre ; dans Telluris, c'est un vrai géant, deux ou trois fois plus fort qu'un ogre. Rendre sa massue et sa tunique encore plus difficiles à porter, par des restrictions plutôt que par des malus.
+
+## 19. Le géant du Mont-Saint-Michel, un vrai géant (22/10/2026)
+
+- **Rang B, voire plus** — remplace le rang D du second arbitrage (§ 2, point 16). Puissance mesurée (`potentiel.potentiel_espece`, équipement compris) : 173 à 236, entre le seuil du rang B (175) et celui du rang A (250).
+- **Un vrai géant**, pas l'ogre que dessinent les récits arthuriens : Force 90 à 110, deux à trois fois un ogre (40 au départ, 70 au plus).
+- **Toujours un Seigneur** : ses bornes de caractéristiques sont celles d'un géant ordinaire au profil Seigneur ; le profil tiré ne change plus que l'XP rendue.
+- **La baie** : une seule zone (`zone:zone_danger_3`), une ellipse qui part du Mont (îlot de la carte de France en (23,14)) et file à terre vers le sud-est. Géants ordinaires de Combattant à Champion, et lui. Deux monstres par combat, chacun tiré parmi les espèces présentes : deux géants du Mont ensemble restent possibles.
+- **Son équipement, les trophées de la légende** — ceux qu'Arthur fait emporter avec la tête (*Morte Arthure* allitérative, Malory) :
+  - **Massue de fer du géant** : massue d'un seul bloc de fer (chez Geoffroy, deux hommes peinaient à la soulever) ;
+  - **Tunique de barbes du géant** : peaux cousues des barbes des seigneurs qu'il a défiés (chez Geoffroy, ce manteau de barbes est celui de Ritho ; la *Morte Arthure* le donne au géant du Mont). Sur Telluris, les rois de la légende sont des seigneurs et des princes de cités ;
+  - **non fabricables** : aucune recette, aucun sur-mesure ; on ne les obtient qu'à son butin ;
+  - **faites pour un géant** : Force requise 90 et 80, au-delà de toute Lignée ; 150 kg et 40 à 60 kg ; aucun malus, qui pèserait aussi sur lui.
+- **Mystère gardé** : « il y a toujours un géant sur le mont », le même qui revient ou un autre ; les pêcheurs de la baie ne tranchent pas.
+- **Image** : `monsters/geant_du_mont_saint_michel_transparent.png`, régénérée sur le prompt du § 8 (vrai géant, massue de fer, tunique de barbes, porc à la ceinture). Fond framboise et non magenta pur : détourée avec `--dur 35 --doux 65`.
+- Contenu : `dev/gen_geants_mont_saint_michel.py` → `jsons/geants_mont_saint_michel_a_importer.json` (zone, espèce, objets : un seul import).
