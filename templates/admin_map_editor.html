@@ -843,6 +843,14 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 					</div>
 				</div>
 				<div style="font-size:.68rem;color:var(--accent-dim,#888);margin-bottom:6px;">Cliquer sur la grille pour placer la zone.</div>
+				<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:.68rem;">
+					<label for="zone-tri" style="color:var(--accent);">Trier par</label>
+					<select id="zone-tri" style="flex:1;background:#1c1c28;color:var(--text);border:1px solid var(--accent);border-radius:4px;padding:2px;font-size:.68rem;">
+						<option value="x">X puis Y</option>
+						<option value="y">Y puis X</option>
+						<option value="nom">Nom</option>
+					</select>
+				</div>
 				<div id="zone-list" style="max-height:180px;overflow-y:auto;margin-bottom:8px;font-size:.68rem;"></div>
 				<div id="zone-pw-section" style="border-top:1px solid var(--border);margin-top:6px;padding-top:8px;margin-bottom:8px;">
 					<label style="font-size:.7rem;color:var(--accent);">⚔ Grades (override de cette instance)</label>
@@ -1307,6 +1315,8 @@ const zoneHEl		= document.getElementById('zone-h');
 const zoneXEl		= document.getElementById('zone-x');
 const zoneYEl		= document.getElementById('zone-y');
 const zoneListEl	= document.getElementById('zone-list');
+const zoneTriEl	= document.getElementById('zone-tri');
+if (zoneTriEl) zoneTriEl.addEventListener('change', () => renderZoneList());
 const saveZonesBtn	= document.getElementById('save-zones-btn');
 const panelRencontres	= document.getElementById('panel-rencontres');
 const especeSelect		= document.getElementById('espece-select');
@@ -5908,14 +5918,23 @@ function renderZoneList() {
 		zoneListEl.innerHTML = '<div style="color:#888;padding:4px;">Aucune zone placée.</div>';
 		return;
 	}
-	zoneListEl.innerHTML = zonesPlacements.map((p, i) => {
-		const def = zoneDefs[p.zone];
-		const nom = def ? def.nom : (p.zone || '?');
+	// Tri d'AFFICHAGE seul : l'index d'origine reste la clé (couleur, data-idx, deleteZone).
+	const tri = zoneTriEl ? zoneTriEl.value : 'x';
+	const nomDe = p => { const def = zoneDefs[p.zone]; return def ? def.nom : (p.zone || '?'); };
+	const parX = (a, b) => (a.p.x ?? 0) - (b.p.x ?? 0) || (a.p.y ?? 0) - (b.p.y ?? 0);
+	const parY = (a, b) => (a.p.y ?? 0) - (b.p.y ?? 0) || (a.p.x ?? 0) - (b.p.x ?? 0);
+	const lignes = zonesPlacements.map((p, i) => ({ p, i }));
+	lignes.sort(tri === 'y' ? parY
+		: tri === 'nom' ? (a, b) => nomDe(a.p).localeCompare(nomDe(b.p), 'fr', { sensitivity: 'base' }) || parX(a, b)
+		: parX);
+	zoneListEl.innerHTML = lignes.map(({ p, i }) => {
+		const nom = nomDe(p);
 		const color = ZONE_COLORS[i % ZONE_COLORS.length].replace('0.35', '0.8');
 		const isSel = i === selectedZoneIdx;
 		return `<div style="display:flex;align-items:center;gap:4px;padding:3px 2px;border-radius:3px;background:${isSel ? 'rgba(255,255,255,0.08)' : 'transparent'};" data-idx="${i}">
 			<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></span>
 			<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${nom}">${nom} (${p.forme}, ${p.w}×${p.h})</span>
+			<span style="color:#aaa;font-variant-numeric:tabular-nums;white-space:nowrap;flex-shrink:0;" title="Position (x, y)">${p.x ?? 0}, ${p.y ?? 0}</span>
 			<button onclick="deleteZone(${i})" style="background:none;border:none;color:#c84b4b;cursor:pointer;font-size:.9rem;padding:0 2px;" title="Supprimer">✕</button>
 		</div>`;
 	}).join('');
