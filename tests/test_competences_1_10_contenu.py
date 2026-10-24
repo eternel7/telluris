@@ -193,3 +193,14 @@ def test_une_provocation_du_lot_provoque_vraiment(construit, monkeypatch):
 	res = resolve_action(doc, "competence", cible_id=loup["id"], competence=normaliser_competence(defi))
 	assert "error" not in res, res
 	assert _cible_joueur(doc, loup) is garde
+
+
+def test_la_doc_affiche_la_base_sauf_remplacement_en_attente(gen):
+	"""docs/competences_vocations_1_10.md montre ce qui est EN JEU : une retouche faite après
+	import (valeur en base ≠ ECHELLE) s'y lit ; un remplacement pas encore importé montre le neuf."""
+	genere = {"_id": "competence:x", "nom": "X", "mode": "passive", "effets": {"buffs": {"F": 2}}}
+	base = dict(genere, _rev="1-a", effets={"buffs": {"F": 4}})
+	ref = {"competences": {"competence:x": base}}
+	assert gen._vue_doc(genere, ref, set()) == ({k: v for k, v in base.items() if k != "_rev"}, True)
+	assert gen._vue_doc(genere, ref, {"competence:x"}) == (genere, False)
+	assert gen._vue_doc(genere, {"competences": {}}, set()) == (genere, False)

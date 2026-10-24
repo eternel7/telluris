@@ -596,13 +596,26 @@ def _resume_anim(doc, themes):
 	return f"{nom} · 🔊 {son}"
 
 
-def ecrire_doc(lot, compte, ref):
+def _vue_doc(d, ref, ids_emis):
+	"""Doc à AFFICHER : celui de la base dès qu'il existe (une retouche faite après import doit
+	se lire ici), sauf s'il est encore à émettre (remplacement en attente) → (doc, retouché)."""
+	existant = ref["competences"].get(d["_id"])
+	if existant is None or d["_id"] in ids_emis:
+		return d, False
+	vue = _sans_rev(existant)
+	return vue, vue != d
+
+
+def ecrire_doc(lot, compte, ref, a_emettre=()):
 	themes = ref["themes"]
+	ids_emis = {d["_id"] for d in a_emettre}
 	L = ["# Compétences de vocation — niveaux 1 à 10", "",
 		 "**Document GÉNÉRÉ par `python dev/gen_competences_1_10.py`** — ne pas retoucher : les "
 		 "données vivent dans `dev/competences_1_10/<vocation>.py`, les valeurs dans l'échelle "
 		 "`ECHELLE` du générateur. Import : `jsons/competences_vocations_1_10_a_importer.json`.", "",
 		 f"Référentiel : `{ref['dump']}` + `jsons/*_a_importer.json`.", "",
+		 "Une compétence déjà en base est affichée **telle qu'en base** ; ✎ signale qu'elle "
+		 "diffère de ce que calcule le générateur (retouchée après import).", "",
 		 "## Règle de compte", "",
 		 "À chaque niveau de 1 à 10, **existantes comprises (pièges inclus)** :", "",
 		 "| groupe | passives | actives | total |", "|---|---|---|---|",
@@ -641,10 +654,12 @@ def ecrire_doc(lot, compte, ref):
 			ex_p, ex_a, nv_p, nv_a = compte[voc]["niveaux"][niv]
 			L += [f"### Niveau {niv} — {ex_p + ex_a} existante(s) + {nv_p + nv_a} neuve(s)", "",
 				  "| compétence | mode | coût | cible | effets | animation |", "|---|---|---|---|---|---|"]
-			for d in sorted((d for d in par_voc[voc] if d["niveau"] == niv),
-							key=lambda d: (d["mode"] != "passive", d["nom"])):
+			for d in sorted((_vue_doc(d, ref, ids_emis) for d in par_voc[voc] if d["niveau"] == niv),
+							key=lambda v: (v[0]["mode"] != "passive", v[0]["nom"])):
+				d, retouche = d
 				ancien = (ref["competences"].get(d["_id"]) or {}).get("nom")
 				marque = f" ♻ *remplace « {ancien} »*" if ancien and ancien != d["nom"] else ""
+				marque += " ✎" if retouche else ""
 				L.append(f"| {d['icon']} **{d['nom']}**{marque} — *{d['description']}* | {d['mode']} | "
 						 f"{_resume_cout(d)} | {_resume_cible(d)} | {_resume_effets(d)} | "
 						 f"{_resume_anim(d, themes)} |")
@@ -665,7 +680,7 @@ def main():
 		json.dump(a_emettre, f, ensure_ascii=False, indent="\t")
 		f.write("\n")
 	with open(SORTIE_DOC, "w", encoding="utf-8", newline="\n") as f:
-		f.write(ecrire_doc(lot, compte, ref))
+		f.write(ecrire_doc(lot, compte, ref, a_emettre))
 		f.write("\n")
 	passives = sum(1 for d in lot if d["mode"] == "passive")
 	print(f"OK — {len(lot)} compétence(s) dans le lot ({passives} passives / "
