@@ -3,7 +3,7 @@
 Chaque entrée sépare **Auteur** (décision, niveau 2) et **Proposé** (réponse ChatGPT non adoptée, niveau 4). Source : le fichier entre crochets dans `docs/lore/`. Lieux réellement en jeu : `lieu:*` du dump (catégories `ville`, `pays`, `portail`, `temple`, `guilde_aventurier`).
 
 ## Sommaire
-France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri · Camelot — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem — Mythiques : Mu · Atlantis — Réseau des portails
+France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri · Camelot — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem · Petra — Mythiques : Mu · Atlantis — Réseau des portails
 
 ---
 
@@ -229,6 +229,15 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 **Auteur** : **Salomon a vécu après les trois frères** et le début de l'ère des portails. David est **reconnu par Jérusalem comme son roi** (pas de prise) ; « le royaume se divise » → « les cités avoisinantes diminuent leurs relations » ; réduire « royaume » au profit de « Cité-État » (11/10). Colonne réécrite : `monde/20261011_frise_chronologique_fusionnee.md` § 6.
 
 **Tableau (26/08)** : « héritage de Salomon », portail ancien, coûteux, mal compris, pas un passage libre.
+
+## Petra — [cites/20261024_histoire_de_petra.md]
+**Auteur** (24/10, cinq questionnaires sur une histoire ChatGPT) — carte `towns/petra_city.jpg` ; pas de `lieu:petra` au dump.
+- Née à l'**Âge des Remparts** (halte de caravanes nabatéennes autour des sources du massif de Sharah) ; rois **Arétas** et **Obodas** à l'**Âge des Portails** (dynastie entière gardée, Huldu, Arétas IV le Bâtisseur, Rabbel II dernier roi). Nom ancien **Raqmu**. Devise : « La montagne abrite, l'eau fait vivre, la pierre se souvient. »
+- **Nebaioth** seul (trois principes d'hospitalité) : **Moïse et Aaron retirés**. Dushara, al-Uzza, Allat, Manat = croyances ouvertes. Aucune comparaison terrestre.
+- **Vague et séismes en même temps** ; les **gardiens des sources** réparent vite ; certaines sources chaudes ou chargées de mana ; **aucun déclin** ; courte adaptation, essor des Templiers et des Paladins.
+- Portails transversaux (héritiers des frères) : **Khazneh → Alexandrie** (Sérapéum ; savoir, encens, hydraulique), **ad-Deir → Bucarest** (lien à Dracula / château de Bran : séance dédiée à venir), **Qasr al-Bint → Muziris** (Inde, cité-État à créer).
+- **Exactement 4 donjons**, un temple-forteresse chacun, dans les tombeaux royaux, forme différente : Urne = crue (réinfestation, marids, faune des oueds, 51-55) · Soie = refuge des djinns (salle à pièges, boss ifrit, 55-60 ; djinns sur Telluris depuis toujours) · Corinthien = trésor du Pharaon (étages + coffres piégés, mimiques, scarabées, sphinx, 58-65) · Palais = cités anéanties (2 étages : Iram et géants de ʿĀd, Hégra et Qudar, 61-70).
+- Conseil à six institutions, **veto des gardiens des sources** sur l'eau. Guilde : **Le Caravansérail des Seuils**, dans les coursives du bâtiment à cour ; maîtresse : une **ogresse** ancienne cheffe de caravane (nom à proposer). Accès : Notre-Dame, **rang A**. Enceinte bâtie complète ; Petite Petra hors de la ville.
 
 ## Mu et Atlantis — [monde/20260826_chronologie_des_cites_telluris.md]
 **Auteur**

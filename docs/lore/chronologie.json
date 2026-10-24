@@ -125,7 +125,8 @@
 			"atlantes": "Atlantes",
 			"dragons": "Dragons",
 			"anges_demons": "Anges et démons",
-			"bretons": "Bretons de l'île"
+			"bretons": "Bretons de l'île",
+			"nabateens": "Nabatéens"
 		},
 		"lieux": {
 			"lutecia": "Lutecia",
@@ -163,7 +164,8 @@
 			"annwn": "Annwn",
 			"stonehenge": "Stonehenge",
 			"glastonbury": "Glastonbury",
-			"dinas_emrys": "Dinas Emrys"
+			"dinas_emrys": "Dinas Emrys",
+			"petra": "Petra"
 		},
 		"institutions": {
 			"paladins": "Paladins",
@@ -213,6 +215,7 @@
 		{"id": "rome", "libelle": "Rome", "famille": "cite", "couleur": "#9a3b22", "evenement": "cite_rome", "rattache": {"lieux": ["rome"], "peuples": ["romains"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "remparts", "rang": "murailles"}, "l": 3, "note": "avènement : Romulus trace l'enceinte"}], "image": "towns/rome_capital.png", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Romulus trace l'enceinte à l'Âge des Remparts"}]},
 		{"id": "constantinople", "libelle": "Constantinople", "famille": "cite", "couleur": "#6a2c70", "evenement": "cite_constantinople", "rattache": {"lieux": ["constantinople"], "peuples": ["byzantins"]}, "largeur": [{"l": 3, "note": "établissement et avènement avant la Vague"}], "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Grand Palais antérieur à la Vague"}]},
 		{"id": "jerusalem", "libelle": "Jérusalem", "famille": "cite", "couleur": "#a8790c", "evenement": "cite_jerusalem", "rattache": {"lieux": ["jerusalem"], "peuples": ["hebreux"]}, "largeur": [{"l": 1, "note": "établissement"}, {"depuis": {"ere": "portails", "inconnu": true}, "l": 3, "note": "avènement avant la Vague"}], "autorite": "proposition", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "le site prend racine et ne change plus d'emplacement"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "David reconnu roi par la cité"}]},
+		{"id": "petra", "libelle": "Petra", "famille": "cite", "couleur": "#b5543a", "evenement": "cite_petra", "rattache": {"lieux": ["petra"], "peuples": ["nabateens"]}, "largeur": [{"l": 1, "note": "établissement : halte de caravanes"}, {"depuis": {"ere": "portails", "inconnu": true}, "l": 3, "note": "avènement : les rois Arétas et Obodas"}], "image": "towns/petra_city.jpg", "autorite": "auteur", "sources": [{"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Fondation : Âge des Remparts. Rois : Âge des Portails."}, {"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Aucun déclin"}]},
 		{"id": "babylone", "libelle": "Babylone", "famille": "cite", "couleur": "#2a7f75", "evenement": "cite_babylone", "rattache": {"lieux": ["babylone"], "peuples": ["babyloniens"]}, "largeur": [{"l": 2, "note": "avènement non daté"}], "autorite": "proposition", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Absentes, faute de séance qui les date : Alexandrie, Babylone"}]},
 		{"id": "abou_simbel", "libelle": "Abou Simbel", "famille": "cite", "couleur": "#c98b2b", "evenement": "cite_abou_simbel", "rattache": {"lieux": ["abou_simbel", "alexandrie"], "peuples": ["egyptiens"]}, "largeur": [{"l": 3, "note": "établissement et avènement antédiluviens"}], "image": "towns/abou_simbel_capital.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Royaume de Néfertiti, « avant les pyramides et avant les frères »"}]},
 		{"id": "mu", "libelle": "Mu", "famille": "cite", "couleur": "#138a72", "evenement": "mu", "rattache": {"lieux": ["mu"], "peuples": ["mu"]}, "largeur": [{"l": 3}, {"depuis": {"ere": "donjons", "entre": [800, 700]}, "l": 1, "note": "Mu sombre ; sa cité survit sous la mer"}], "image": "towns/mu_capital.jpg", "autorite": "auteur", "sources": [{"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "sombre au moment de la Vague"}, {"fichier": "monde/20261011_frise_chronologique_fusionnee.md", "date": "2026-10-11", "citation": "Ce n'est pas une Cité-État"}]}
@@ -1310,6 +1313,42 @@
 			"origine": ["ile_bretagne"],
 			"tags": {"peuples": ["dragons"], "lieux": ["dinas_emrys"], "themes": ["donjons", "mythes"]},
 			"sources": [{"fichier": "cites/20261021_camelot_winchester.md", "date": "2026-10-21", "citation": "un **donjon sous la tour** de Vortigern"}],
+			"apres": ["vague"]
+		},
+		{
+			"id": "cite_petra",
+			"titre": "Petra, la cité des roches et des sources",
+			"titre_court": "Petra",
+			"resume": "Des caravaniers nabatéens s'installent autour des sources du massif de Sharah ; les falaises sont leur premier rempart. Cité de l'eau, de la pierre et des passages, gouvernée aujourd'hui par un conseil où les gardiens des sources ont un droit de veto sur l'eau. Nom ancien : Raqmu.",
+			"quand": {"de": {"ere": "remparts", "inconnu": true}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "auteur"},
+			"couche": "histoire", "categorie": "cite", "autorite": "auteur", "visibilite": "public",
+			"origine": ["levant"],
+			"tags": {"peuples": ["nabateens"], "lieux": ["petra"], "institutions": ["templiers", "architectes", "paladins"], "themes": ["commerce", "remparts"]},
+			"sources": [{"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Fondation : Âge des Remparts"}, {"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "les **gardiens des sources ont un droit de veto**"}],
+			"liens": ["petra_rois", "petra_seisme"]
+		},
+		{
+			"id": "petra_rois",
+			"titre": "Les rois Arétas et Obodas, et les portails de Petra",
+			"titre_court": "Rois de Petra",
+			"resume": "Des héritiers des trois frères bâtissent les portails transversaux de Petra, vers Alexandrie, Bucarest et Muziris ; Arétas IV le Bâtisseur sculpte autour d'eux la Khazneh, ad-Deir et le Qasr al-Bint. Rabbel II est le dernier roi : la monarchie devient un conseil.",
+			"quand": {"moment": {"ere": "portails", "inconnu": true}, "autorite": "auteur"},
+			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
+			"origine": ["levant"],
+			"tags": {"peuples": ["nabateens"], "lieux": ["petra", "alexandrie"], "institutions": ["architectes"], "themes": ["portails", "commerce"]},
+			"sources": [{"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Rois : Âge des Portails"}, {"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "Portails : des héritiers"}],
+			"apres": ["trois_freres"]
+		},
+		{
+			"id": "petra_seisme",
+			"titre": "À Petra, la Vague et les séismes en même temps",
+			"titre_court": "Séisme de Petra",
+			"resume": "La Vague frappe Petra en même temps que des séismes. Les gardiens des sources réparent vite canaux et citernes ; certaines sources deviennent chaudes ou chargées de mana. Trois portails restent stables, quatre deviennent des donjons dans les tombeaux royaux ; après une courte adaptation, Templiers et Paladins y gagnent en importance.",
+			"quand": {"moment": {"ere": "donjons", "entre": [800, 700]}, "autorite": "auteur", "note": "Même moment que la Vague (Auteur, 24/10)."},
+			"couche": "histoire", "categorie": "evenement", "autorite": "auteur", "visibilite": "public",
+			"origine": ["levant"],
+			"tags": {"peuples": ["nabateens"], "lieux": ["petra"], "institutions": ["templiers", "paladins"], "themes": ["vague", "donjons", "portails"]},
+			"sources": [{"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "La vague et les séismes ont lieux en même temps et les canaux d'irriguation sont rapidement réparés"}],
 			"apres": ["vague"]
 		},
 		{
