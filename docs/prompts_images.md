@@ -76,6 +76,10 @@ Un prompt qui renvoie à une image précédente (« le même tenancier », « la
 
 ⚠️ Une carte de cité ne montre **aucun personnage** : ni passant dans les rues, ni foule sur les places, ni chevalier ou cavalier dans la campagne autour (Auteur, 22/10/2026). Deux raisons : un passant posé dans une rue empêche de la lire (la grille praticable se tire de l'image, et une silhouette casse la lecture des algorithmes comme celle à l'œil), et des petits personnages humanisent la carte au lieu de rester anthrope. Le prompt l'écrit en toutes lettres (« rues, places et campagne entièrement vides de personnages, de cavaliers et d'animaux de trait ») — la règle du § 0.2 (foule de Telluris) ne s'applique PAS aux cartes de cité.
 
+### 0.5 quater Cartes de combat : « C'est une battlemap »
+
+⚠️ Tout prompt de carte de combat (`battle_maps/`) **se termine** par la phrase « La vue est aérienne. C'est une battlemap. », écrite après le bloc de style (Auteur, 24/10/2026) : sans elle, le modèle dessine la salle en perspective (`battle_maps/donjon_djinns.jpg`, premier essai de Petra).
+
 ### 0.6 Enregistrement
 
 Chaque image générée est écrite **directement dans son dossier cible** (cf. 0.3), et **n'écrase jamais** un fichier existant : si `…01` est pris, on passe à `…02`, et ainsi de suite.
