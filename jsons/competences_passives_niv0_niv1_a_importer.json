@@ -1,0 +1,123 @@
+[
+  {
+    "_id": "competence:oeil_du_predateur",
+    "type": "competence",
+    "nom": "Œil du prédateur",
+    "icon": "🗡️",
+    "description": "Il voit d'un coup d'œil où frapper pour que ça compte.",
+    "vocation": "assassin",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Ag": 2
+      }
+    }
+  },
+  {
+    "_id": "competence:main_froide",
+    "type": "competence",
+    "nom": "Main froide",
+    "icon": "🧊",
+    "description": "Une main qui ne tremble pas, même au moment de tuer.",
+    "vocation": "assassin",
+    "niveau": 1,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Ag": 4
+      }
+    }
+  },
+  {
+    "_id": "competence:sang_chaud",
+    "type": "competence",
+    "nom": "Sang chaud",
+    "icon": "🩸",
+    "description": "La douleur le réveille au lieu de l'abattre : sa carcasse encaisse ce que d'autres ne survivent pas.",
+    "vocation": "barbare",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "R": 2
+      }
+    }
+  },
+  {
+    "_id": "competence:fils_des_steppes",
+    "type": "competence",
+    "nom": "Fils des steppes",
+    "icon": "🏔️",
+    "description": "Le froid et la faim ont forgé ce corps bien avant les armes.",
+    "vocation": "barbare",
+    "niveau": 1,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "R": 5
+      }
+    }
+  },
+  {
+    "_id": "competence:jeu_de_jambes",
+    "type": "competence",
+    "nom": "Jeu de jambes",
+    "icon": "🤺",
+    "description": "Toujours en mouvement, jamais là où le coup tombe.",
+    "vocation": "duelliste",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Ag": 2
+      }
+    }
+  },
+  {
+    "_id": "competence:poignet_souple",
+    "type": "competence",
+    "nom": "Poignet souple",
+    "icon": "🤌",
+    "description": "La lame tourne dans sa main comme une plume.",
+    "vocation": "duelliste",
+    "niveau": 1,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Ag": 4
+      }
+    }
+  },
+  {
+    "_id": "competence:maitrise_martiale",
+    "type": "competence",
+    "nom": "Maîtrise martiale",
+    "icon": "🗡️",
+    "description": "Le métier des armes, appris jusque dans les muscles : il frappe juste et encaisse sans broncher.",
+    "vocation": "guerrier",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "F": 1,
+        "R": 1
+      }
+    }
+  },
+  {
+    "_id": "competence:peau_tannee",
+    "type": "competence",
+    "nom": "Peau tannée",
+    "icon": "🛡️",
+    "description": "Les bleus d'hier sont la cuirasse de demain.",
+    "vocation": "guerrier",
+    "niveau": 1,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "R": 4
+      }
+    }
+  }
+]
