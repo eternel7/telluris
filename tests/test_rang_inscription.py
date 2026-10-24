@@ -154,3 +154,20 @@ def test_une_course_ordinaire_ne_touche_a_aucun_rang():
 	recap = quetes.appliquer_recompenses(c, {"recompenses": {"xp": 10, "cuivre": 30}})
 	assert recap["rang"] is None
 	assert "rangs_guilde" not in c
+
+
+# ── Rang reconnu d'une autre cité (`services.don.rang_reconnu`, Petra ← Lutecia) ────
+
+def test_reconnaitre_rang_credite_le_rang_de_l_autre_cite():
+	c = {"rangs_guilde": {"lieu:lutecia": "A", "lieu:petra": "F"}}
+	assert chasse.reconnaitre_rang(c, "lieu:lutecia", "lieu:petra") == "A"
+	assert c["rangs_guilde"]["lieu:petra"] == "A"
+
+
+def test_reconnaitre_rang_ne_retrograde_jamais_et_sans_rang_ne_fait_rien():
+	c = {"rangs_guilde": {"lieu:lutecia": "D", "lieu:petra": "B"}}
+	assert chasse.reconnaitre_rang(c, "lieu:lutecia", "lieu:petra") is None
+	assert c["rangs_guilde"]["lieu:petra"] == "B"
+	vide = {"rangs_guilde": {"lieu:petra": "F"}}
+	assert chasse.reconnaitre_rang(vide, "lieu:lutecia", "lieu:petra") is None
+	assert vide["rangs_guilde"] == {"lieu:petra": "F"}

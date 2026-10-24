@@ -75,6 +75,17 @@ PAIRES = {
 			"Nil à Louxor": ((988, 645), (1225, 429)),
 		},
 	},
+	# Le Levant (1376 px, 86 cases) dessine le Sinaï environ deux fois plus grand que l'Égypte :
+	# il est posé. Les deux golfes et le canal se lisent sur les deux cartes.
+	"egypte_levant": {
+		"fond": "lieu:egypte", "pose": "lieu:levant",
+		"reperes": {
+			"Port-Saïd": ((100, 248), (955, 150)),
+			"tête du golfe de Suez": ((110, 415), (978, 268)),
+			"tête du golfe d'Aqaba": ((552, 498), (1232, 262)),
+			"pointe sud du Sinaï": ((315, 655), (1165, 413)),
+		},
+	},
 }
 
 

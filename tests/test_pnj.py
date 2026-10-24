@@ -519,13 +519,15 @@ def test_appliquer_soin_fraction_et_clamp():
 def test_don_effectif_payant_par_defaut():
     don = pnj.don_effectif(_pnj_doc(), _ctx({"lieu:auxerre": 50, "lieu:guilde": 69}))
     assert don == {"item": "item:Eau_benite", "quantite": 1, "cout_cuivre": 5, "gratuit": False,
-                   "lieu_parent": None, "rang_guilde": None, "unique": False}
+                   "lieu_parent": None, "rang_guilde": None, "rang_reconnu": None,
+                   "unique": False}
 
 
 def test_don_effectif_gratuit_si_une_relation_suffit():
     don = pnj.don_effectif(_pnj_doc(), _ctx({"lieu:auxerre": 20, "lieu:guilde": 70}))
     assert don == {"item": "item:Eau_benite", "quantite": 1, "cout_cuivre": 0, "gratuit": True,
-                   "lieu_parent": None, "rang_guilde": None, "unique": False}
+                   "lieu_parent": None, "rang_guilde": None, "rang_reconnu": None,
+                   "unique": False}
 
 
 def test_don_effectif_sans_service_ou_sans_item():

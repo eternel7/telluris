@@ -1,0 +1,262 @@
+[
+  {
+    "_id": "link:egypte_to_levant_01",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:egypte",
+        "pos": [
+          71,
+          9
+        ],
+        "label": "Route côtière d'El-Arich — Égypte"
+      },
+      {
+        "lieu": "lieu:levant",
+        "pos": [
+          20,
+          18
+        ],
+        "label": "Route côtière d'El-Arich — Levant"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:egypte_to_levant_02",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:egypte",
+        "pos": [
+          71,
+          11
+        ],
+        "label": "Piste de Bir el-Abd — Égypte"
+      },
+      {
+        "lieu": "lieu:levant",
+        "pos": [
+          20,
+          19
+        ],
+        "label": "Piste de Bir el-Abd — Levant"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:egypte_to_levant_03",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:egypte",
+        "pos": [
+          71,
+          13
+        ],
+        "label": "Piste du djebel Maghara — Égypte"
+      },
+      {
+        "lieu": "lieu:levant",
+        "pos": [
+          20,
+          22
+        ],
+        "label": "Piste du djebel Maghara — Levant"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:egypte_to_levant_04",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:egypte",
+        "pos": [
+          71,
+          15
+        ],
+        "label": "Col de la Mitla — Égypte"
+      },
+      {
+        "lieu": "lieu:levant",
+        "pos": [
+          20,
+          25
+        ],
+        "label": "Col de la Mitla — Levant"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:egypte_to_levant_05",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:egypte",
+        "pos": [
+          71,
+          17
+        ],
+        "label": "Col du Giddi — Égypte"
+      },
+      {
+        "lieu": "lieu:levant",
+        "pos": [
+          20,
+          29
+        ],
+        "label": "Col du Giddi — Levant"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:egypte_to_levant_06",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:egypte",
+        "pos": [
+          71,
+          19
+        ],
+        "label": "Darb el-Hajj, par Nakhl — Égypte"
+      },
+      {
+        "lieu": "lieu:levant",
+        "pos": [
+          20,
+          32
+        ],
+        "label": "Darb el-Hajj, par Nakhl — Levant"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:egypte_to_levant_07",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:egypte",
+        "pos": [
+          71,
+          21
+        ],
+        "label": "Plateau du Tih — Égypte"
+      },
+      {
+        "lieu": "lieu:levant",
+        "pos": [
+          20,
+          35
+        ],
+        "label": "Plateau du Tih — Levant"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:egypte_to_levant_08",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:egypte",
+        "pos": [
+          71,
+          23
+        ],
+        "label": "Wadi Feiran — Égypte"
+      },
+      {
+        "lieu": "lieu:levant",
+        "pos": [
+          20,
+          38
+        ],
+        "label": "Wadi Feiran — Levant"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:egypte_to_levant_09",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:egypte",
+        "pos": [
+          71,
+          25
+        ],
+        "label": "Piste de Dahab — Égypte"
+      },
+      {
+        "lieu": "lieu:levant",
+        "pos": [
+          20,
+          41
+        ],
+        "label": "Piste de Dahab — Levant"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:egypte_to_levant_10",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:egypte",
+        "pos": [
+          71,
+          27
+        ],
+        "label": "Piste de Ras Mohammed — Égypte"
+      },
+      {
+        "lieu": "lieu:levant",
+        "pos": [
+          20,
+          43
+        ],
+        "label": "Piste de Ras Mohammed — Levant"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  }
+]

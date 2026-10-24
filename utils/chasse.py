@@ -474,6 +474,18 @@ def crediter_rang(character: dict, spec) -> str | None:
 	return rang
 
 
+def reconnaitre_rang(character: dict, cite_source: str, cite_cible: str) -> str | None:
+	"""Une guilde qui inscrit RECONNAÎT le rang déjà gagné ailleurs (Petra reconnaît celui de
+	Lutecia — Auteur, 24/10) : le rang de `cite_source` est crédité à `cite_cible` (mute, sans
+	save). Même règle que `crediter_rang` — jamais de rétrogradation, fail-closed —, dont il
+	n'est qu'une source : aucun rang dans `cite_source` ⇒ rien. Renvoie le rang si le doc a
+	CHANGÉ, None sinon."""
+	if not cite_source or not cite_cible:
+		return None
+	rang = ((character or {}).get("rangs_guilde") or {}).get(cite_source)
+	return crediter_rang(character, {"cite": cite_cible, "rang": rang})
+
+
 def inscrit_a_la_guilde(character: dict, cite_id: str) -> bool:
 	"""Le personnage est-il INSCRIT à la guilde de cette cité ? Garde des services réservés
 	aux membres : épreuve de rang, avis de recherche du registre, tableau de quêtes.

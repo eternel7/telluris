@@ -868,7 +868,8 @@ def don_effectif(pnj_doc: dict, contexte: dict) -> dict | None:
 	`lieu_parent` (`"auto"` = la cité du lieu, résolue par le router comme les récompenses de
 	transport), `rang_guilde` (même forme que `recompenses.rang_guilde`) et `unique` (refusé
 	tant que le personnage porte déjà cet exemplaire, cf. `don_deja_recu`). Rendues BRUTES :
-	ce module ne lit aucun doc lieu."""
+	ce module ne lit aucun doc lieu. `rang_reconnu` (id de cité, optionnel) : la guilde qui
+	inscrit RECONNAÎT le rang déjà gagné dans cette autre cité (`chasse.reconnaitre_rang`)."""
 	service = (((pnj_doc or {}).get("services") or {}).get("don"))
 	if not service or not service.get("item"):
 		return None
@@ -884,6 +885,7 @@ def don_effectif(pnj_doc: dict, contexte: dict) -> dict | None:
 		"gratuit": gratuit,
 		"lieu_parent": service.get("lieu_parent"),
 		"rang_guilde": service.get("rang_guilde"),
+		"rang_reconnu": service.get("rang_reconnu"),
 		"unique": bool(service.get("unique")),
 	}
 
