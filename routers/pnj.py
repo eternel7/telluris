@@ -244,18 +244,18 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			don_conf.get("unique") and don_conf.get("item")
 			and pnj.don_deja_recu(character, don_conf["item"], _lieu_parent_don(don_conf, lieu_doc),
 								  item_ref_id, item_ref_lieu))
-		# Commissions d'éradication (maître de guilde) : `services.commission.donjon` est le
-		# SEUL lien PNJ → donjon. L'offre est REBÂTIE à chaque affichage (pas de champ
+		# Commissions d'éradication (maître de guilde) : `services.commission.donjon` (ou
+		# `donjons`, liste — `donjon.donjons_du_service`) est le SEUL lien PNJ → donjon. L'offre est REBÂTIE à chaque affichage (pas de champ
 		# transitoire `*_offert`, cf. `donjon.offre_commission_pour`) → les placeholders
 		# {espece}/{lieu}/{xp} viennent de l'offre courante, ou de la commission en cours
 		# quand il n'y a plus rien à proposer (c'est elle que le PNJ relance ou solde).
 		commission_conf = (pnj_doc.get("services") or {}).get("commission") or {}
-		donjon_doc = get_doc(commission_conf["donjon"]) if commission_conf.get("donjon") else None
-		if donjon_doc:
+		donjon_docs = donjon.donjons_du_service(commission_conf, get_doc)
+		if donjon_docs:
 			en_cours = donjon.commission_active(character)
 			a_solder = donjon.commission_a_rapporter(character)
-			offre_com = donjon.offre_commission_pour(
-				character, lieu_doc, donjon_doc, get_doc, find_docs)
+			offre_com = donjon.offre_commission_parmi(
+				character, lieu_doc, donjon_docs, get_doc, find_docs)
 			flags["commission_offerte"] = bool(offre_com)
 			flags["commission_a_rapporter"] = bool(a_solder)
 			# « en cours » exclut « à rapporter » : l'élite abattue, ce n'est plus une relance
@@ -837,6 +837,10 @@ async def pnj_dialogue_choix(
 			# transport : la cité est celle du lieu. `crediter_rang` ne rétrograde jamais.
 			spec_rang = transport.rang_guilde_recompense(don["rang_guilde"], lieu_doc).get("rang_guilde")
 			promu = chasse.crediter_rang(character, spec_rang) if spec_rang else None
+			# Rang d'une autre cité RECONNU à l'inscription (`rang_reconnu`) : jamais en dessous
+			# du rang d'inscription, `crediter_rang` ne rétrogradant pas.
+			if spec_rang and don.get("rang_reconnu"):
+				promu = chasse.reconnaitre_rang(character, don["rang_reconnu"], spec_rang.get("cite")) or promu
 			if save_doc(character) is None:
 				raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 			suivant = noeuds_don.get("fait")
@@ -1264,8 +1268,8 @@ def _resoudre_commission(character: dict, pnj_doc: dict, lieu_doc: dict, op: str
 	Renvoie (nœud de résultat, placeholders que ce nœud peut citer). Miroir de `_resoudre_rang`."""
 	commission_conf = (pnj_doc.get("services") or {}).get("commission") or {}
 	noeuds = commission_conf.get("noeuds") or {}
-	donjon_doc = get_doc(commission_conf["donjon"]) if commission_conf.get("donjon") else None
-	if not donjon_doc:
+	donjon_docs = donjon.donjons_du_service(commission_conf, get_doc)
+	if not donjon_docs:
 		raise HTTPException(status_code=422, detail="Ce personnage ne mandate aucune commission.")
 
 	if op == "accepter":
@@ -1273,7 +1277,7 @@ def _resoudre_commission(character: dict, pnj_doc: dict, lieu_doc: dict, op: str
 		# n'est jamais mémorisée) : la cible acceptée est celle de CE tirage, pas celle que le
 		# joueur croyait avoir lue au nœud précédent s'il a rechargé entre-temps. Assumé — le
 		# nœud de résultat récite la cible réellement engagée.
-		offre = donjon.offre_commission_pour(character, lieu_doc, donjon_doc, get_doc, find_docs)
+		offre = donjon.offre_commission_parmi(character, lieu_doc, donjon_docs, get_doc, find_docs)
 		if not offre:
 			raise HTTPException(status_code=422, detail="Aucune commission à prendre ici.")
 		dits = _placeholders_commission(offre)

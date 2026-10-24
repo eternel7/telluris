@@ -342,8 +342,15 @@ def _profil_max_compatible(espece_doc: dict, profils: list) -> dict | None:
 
 
 def tirer_cible(donjon_doc: dict, get_doc_fn, find_docs_fn) -> dict | None:
-	"""Choisit la proie d'une commission : `{lieu, lieu_doc, espece, profil}` (docs résolus),
-	ou None si le donjon n'offre aucune cible jouable.
+	"""Choisit la proie d'une commission parmi `cibles_de` : `{lieu, lieu_doc, espece, profil}`
+	(docs résolus), ou None si le donjon n'offre aucune cible jouable."""
+	candidats = cibles_de(donjon_doc, get_doc_fn, find_docs_fn)
+	return random.choice(candidats) if candidats else None
+
+
+def cibles_de(donjon_doc: dict, get_doc_fn, find_docs_fn, profils: list | None = None) -> list:
+	"""Toutes les proies jouables d'un donjon, `{lieu, lieu_doc, espece, profil}`.
+	`profils` : déjà requêtés par l'appelant (un mandat multi-donjons ne les relit qu'une fois).
 
 	Une salle ne compte que si son lieu existe ET porte une grille (`cells`) : sans grille,
 	`create_combat_doc` retomberait sur une carte ouverte générique et le décor du donjon
@@ -353,7 +360,8 @@ def tirer_cible(donjon_doc: dict, get_doc_fn, find_docs_fn) -> dict | None:
 	`niveau_max_de`). Le plancher ne la change qu'au cas limite : elle prend déjà le plus
 	haut grade compatible, il ne joue donc que si le plafond de la salle admettait des
 	profils qu'aucune espèce ne peut porter et que le repli descendait trop bas."""
-	profils = find_docs_fn({"type": "profil"}) or []
+	if profils is None:
+		profils = find_docs_fn({"type": "profil"}) or []
 	candidats = []
 	for entree in battle_maps_de(donjon_doc):
 		lieu_doc = get_doc_fn(entree["lieu"])
@@ -371,9 +379,7 @@ def tirer_cible(donjon_doc: dict, get_doc_fn, find_docs_fn) -> dict | None:
 					"lieu": entree["lieu"], "lieu_doc": lieu_doc,
 					"espece": espece_doc, "profil": profil,
 				})
-	if not candidats:
-		return None
-	return random.choice(candidats)
+	return candidats
 
 
 # ── Construction de la commission ───────────────────────────────────────────────
@@ -493,12 +499,71 @@ def offre_commission_pour(character: dict, bureau_doc: dict, donjon_doc: dict,
 	est REBÂTIE à chaque affichage. Ça se voit — la cible peut changer entre deux ouvertures
 	du dialogue —, et c'est assumé : le maître de guilde puise dans une pile de contrats, il
 	ne réserve pas un dossier au joueur qui n'a rien signé."""
+	return offre_commission_parmi(character, bureau_doc, [donjon_doc], get_doc_fn, find_docs_fn)
+
+
+# ── Mandat de PLUSIEURS donjons (Petra : Shaqilath mandate ses quatre tombeaux) ──────
+# `services.commission.donjons: [...]` à côté de l'historique `donjon` (un seul) : absent ⇒
+# la liste d'un élément, aucune migration. Chaque donjon garde SA barrière de rang, posée sur
+# ses salles (`acces.conditions[].rang_min`) : le bureau ne propose que les donjons dont le
+# personnage franchirait toutes les barrières — sinon il recevrait un mandat que le Templier
+# refuserait à la porte. Une salle sans `rang_min` ne filtre rien (comportement d'avant).
+
+def donjons_du_service(commission_conf: dict, get_doc_fn) -> list:
+	"""Les docs donjon d'un service `commission` : `donjons` (liste), sinon `donjon` (seul).
+	Ids introuvables ignorés ; liste vide ⇒ le PNJ ne mandate rien."""
+	conf = commission_conf or {}
+	ids = [i for i in (conf.get("donjons") or []) if i] or ([conf["donjon"]] if conf.get("donjon") else [])
+	return [doc for doc in (get_doc_fn(i) for i in ids) if doc]
+
+
+def _salles_docs(donjon_doc: dict, get_doc_fn) -> list:
+	return [doc for doc in (get_doc_fn(e["lieu"]) for e in battle_maps_de(donjon_doc)) if doc]
+
+
+def rang_du_donjon(bureau_doc: dict, donjon_doc: dict, get_doc_fn) -> str:
+	"""Rang AFFICHÉ d'une commission de ce donjon : la barrière la plus stricte de TOUTES ses
+	salles et du bureau (`acces.rang_de_quete`, source unique). Dans un donjon à étages, la
+	barrière est sur l'étage d'entrée, pas forcément sur la salle de l'élite tirée."""
+	return acces.rang_de_quete(
+		None,
+		*(acces.rang_min_du_lieu(doc) for doc in _salles_docs(donjon_doc, get_doc_fn)),
+		acces.rang_min_du_lieu(bureau_doc),
+		defaut=RANG_COMMISSION_DEFAUT,
+	)
+
+
+def rang_suffisant(character: dict, donjon_doc: dict, get_doc_fn) -> bool:
+	"""Le personnage franchit-il TOUTES les barrières `rang_min` des salles du donjon ?
+	Même comparateur que la porte (`acces.rang_min_satisfait`) : aucune règle recopiée."""
+	for doc in _salles_docs(donjon_doc, get_doc_fn):
+		for condition in (acces.gate_de(doc) or {}).get("conditions") or []:
+			if isinstance(condition, dict) and condition.get("rang_min") \
+					and not acces.rang_min_satisfait(character, condition["rang_min"]):
+				return False
+	return True
+
+
+def offre_commission_parmi(character: dict, bureau_doc: dict, donjon_docs: list,
+						   get_doc_fn, find_docs_fn) -> dict | None:
+	"""La commission que ce bureau peut confier MAINTENANT parmi ses donjons, ou None (une
+	déjà en cours, aucun donjon à la portée du rang, ou aucune cible jouable). La proie est
+	tirée parmi les cibles de TOUS les donjons accessibles (une pile de contrats, cf.
+	`offre_commission_pour`) ; son rang est celui de SON donjon (`rang_du_donjon`)."""
 	if commission_active(character):
 		return None
-	cible = tirer_cible(donjon_doc, get_doc_fn, find_docs_fn)
-	if not cible:
+	accessibles = [d for d in donjon_docs if d and rang_suffisant(character, d, get_doc_fn)]
+	if not accessibles:
 		return None
-	return construire_commission(bureau_doc, cible)
+	profils = find_docs_fn({"type": "profil"}) or []
+	candidats = [(d, c) for d in accessibles for c in cibles_de(d, get_doc_fn, find_docs_fn, profils)]
+	if not candidats:
+		return None
+	donjon_doc, cible = random.choice(candidats)
+	offre = construire_commission(bureau_doc, cible)
+	if offre and len(battle_maps_de(donjon_doc)) > 1:
+		offre["rang"] = rang_du_donjon(bureau_doc, donjon_doc, get_doc_fn)
+	return offre
 
 
 def accepter_commission(character: dict, offre: dict) -> dict | None:

@@ -38,7 +38,7 @@ FEMININS = {
 	"bete_du_gevaudan", "bete_glatissante", "chauve_souris", "chauve_souris_geante", "chimere", "cockatrice",
 	"corneille_noire", "dearg_due", "dryade", "fee", "gargouille", "gorgone", "goule", "harpie", "horreur",
 	"hydre", "lamie", "lhamia", "liche", "licorne", "manticore", "momie", "monture_angelique",
-	"mimique", "monture_demoniaque", "monture_squelette", "naiade", "nereide", "oceanide", "oreade", "penanggalan",
+	"mimique", "monture_demoniaque", "nuee_de_scarabees", "monture_squelette", "naiade", "nereide", "oceanide", "oreade", "penanggalan",
 	"reine_lhamia", "silat", "sirene", "succube", "tarasque", "vouivre", "wyvern",
 }
 
@@ -51,15 +51,15 @@ MASCULINS = {
 	"demon_majeur_de_la_destruction", "demon_mineur", "demon_servant", "doppleganger", "dobhar_chu", "dragnard", "draugr",
 	"dragon", "dragon_blanc", "dragon_de_sang", "dragon_empereur", "dragon_hydre", "dragon_rouge", "dragon_zombie",
 	"ecureuil", "failinis", "familier", "fantome", "faoladh",
-	"fils_de_sobek", "geant_du_mont_saint_michel", "geant_ou_titan", "genie", "ghul_des_sables", "gnome", "gobelin", "grootslang",
+	"fils_de_sobek", "geant_de_ad", "geant_du_mont_saint_michel", "geant_ou_titan", "genie", "ghul_des_sables", "gnome", "gobelin", "grootslang",
 	"gobelin_chamanique", "gobelin_des_marais", "golem_de_chair", "golem_de_fer",
 	"golem_de_pierre", "grand_dragon", "grand_faucon", "grand_phenix", "grand_sanglier",
 	"griffon", "gwyn_ap_nudd", "hippogriffe", "homme_arbre", "ifrit", "illuyanka", "incube", "jann", "kraken", "ladon", "leprechaun",
 	"leviathan", "lievre", "loup", "loup_garou", "loup_geant", "lycaon", "malandhir", "mammouth", "marid",
-	"minotaure", "mulet", "mushhushshu", "nahual", "nosferatu", "ondin", "orc", "ours", "ours_polaire", "pegase",
-	"petit_dragon", "petits_animaux_divers", "phenix", "polar_kraken", "poney", "prince_demon",
+	"minotaure", "mulet", "mushhushshu", "nahual", "nasnas", "nosferatu", "ondin", "orc", "ours", "ours_polaire", "pegase",
+	"petit_dragon", "petits_animaux_divers", "phenix", "polar_kraken", "poney", "prince_demon", "qudar",
 	"rat_geant", "rejeton_demoniaque", "renard", "revenant", "roi_des_tombes", "roi_liche",
-	"sanglier", "sanglier_apprivoise", "satyre", "seigneur_du_sang", "seraphin", "serpent",
+	"sanglier", "sanglier_apprivoise", "satyre", "scorpion_geant", "seigneur_du_sang", "seraphin", "serpent",
 	"serpent_geant", "serpopard", "spectre", "sphinx", "squelette", "strigoi", "taureau",
 	"triton",
 	"troglodyte", "troll", "twrch_trwyth", "ulfhedinn", "uturuncu", "vampire", "xiuhcoatl", "yamata_no_orochi",
@@ -76,7 +76,7 @@ PLURIELS = {
 
 # Êtres uniques : le titre dit « Apep », pas « l'Apep ».
 PROPRES = {"abhartach", "aicha_kandicha", "ammit", "apep", "cath_palug", "cupidon", "dearg_due", "failinis",
-		   "gwyn_ap_nudd", "illuyanka", "ladon", "lycaon", "twrch_trwyth", "yamata_no_orochi", "zmey_gorynych"}
+		   "gwyn_ap_nudd", "illuyanka", "ladon", "lycaon", "qudar", "twrch_trwyth", "yamata_no_orochi", "zmey_gorynych"}
 
 # « h » aspiré : « la Harpie » et non « l'Harpie ». Hydre, Horreur, Hippogriffe, Homme Arbre
 # s'élident.

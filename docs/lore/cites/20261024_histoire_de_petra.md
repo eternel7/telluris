@@ -244,6 +244,77 @@ Réalise l'image d'un scorpion géant du désert, de la taille d'un cheval : car
 
 Réemplois (aucun prompt) : la crue = `marid` + `crocodile` + `serpent_geant` ; les djinns = `ifrit` (boss) + `marid` + `silat` + `jann` + `nasnas` ; le trésor = `mimique` + `nuee_de_scarabees` + `scorpion_geant`, `sphinx` en gardien de l'étage 2 ; les cités anéanties = `geant_de_ad` + `ghul_des_sables` + `jann` (étage 1), `qudar` (étage 2).
 
+
+### 8.5 Lieux de Petra — `templates/resources/towns/` (paysage 16:9)
+
+Images des lieux du fichier `jsons/petra_a_importer.json` qui n'étaient pas encore dessinées.
+
+`temple_petra_urne.jpg` :
+
+```
+Réalise l'image du temple-forteresse du tombeau de l'Urne, dans la cité rupestre de Petra, au massif de Sharah, dans un monde médiéval fantastique, format paysage 16:9. La grande façade du tombeau de l'Urne, taillée dans la falaise de grès rose et violet, couronnée d'une urne de pierre, domine une terrasse soutenue par de hautes arches. Devant la façade, les Templiers ont bâti une forteresse : une muraille neuve de pierre ocre ferme l'entrée du tombeau, percée d'une seule poterne cerclée de bronze ; une chaire de pierre surplombe la porte pour les magiciens de garde ; une garde de Templiers en haubert sous des surcots clairs se tient sur le parvis. Sous la poterne, un filet d'eau boueuse s'écoule sans cesse et noircit les dalles ; les marches portent les marques de crues anciennes. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`temple_petra_soie.jpg` :
+
+```
+Réalise l'image du temple-forteresse du tombeau de la Soie, dans la cité rupestre de Petra, au massif de Sharah, dans un monde médiéval fantastique, format paysage 16:9. La façade du tombeau de la Soie, taillée dans une falaise aux veines ondulantes de rouge, de jaune, de blanc et de violet, comme une étoffe de soie. Devant la façade, les Templiers ont bâti une forteresse : une muraille neuve de pierre ocre ferme l'entrée du tombeau, percée d'une seule poterne cerclée de bronze ; une chaire de pierre surplombe la porte pour les magiciens de garde ; une garde de Templiers en haubert sous des surcots clairs se tient sur le parvis. Une fumée fine et lente s'échappe sous la poterne murée ; les Templiers de garde portent un linge humide noué sur le visage. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`temple_petra_corinthien.jpg` :
+
+```
+Réalise l'image du temple-forteresse du tombeau Corinthien, dans la cité rupestre de Petra, au massif de Sharah, dans un monde médiéval fantastique, format paysage 16:9. La façade du tombeau Corinthien, taillée dans le grès rose sur plusieurs étages de colonnes à chapiteaux corinthiens, en partie usée par le vent. Devant la façade, les Templiers ont bâti une forteresse : une muraille neuve de pierre ocre ferme l'entrée du tombeau, percée d'une seule poterne cerclée de bronze ; une chaire de pierre surplombe la porte pour les magiciens de garde ; une garde de Templiers en haubert sous des surcots clairs se tient sur le parvis. Quelques chercheurs de trésor attendent à l'écart avec leurs sacs vides et leurs pelles ; un scarabée noir grand comme un poing remonte les marches. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`temple_petra_palais.jpg` :
+
+```
+Réalise l'image du temple-forteresse du tombeau du Palais, dans la cité rupestre de Petra, au massif de Sharah, dans un monde médiéval fantastique, format paysage 16:9. La façade du tombeau du Palais, la plus haute des tombeaux royaux, aux étages superposés de colonnes et de portes taillées dans la falaise rose. Devant la façade, les Templiers ont bâti une forteresse : une muraille neuve de pierre ocre ferme l'entrée du tombeau, percée d'une seule poterne cerclée de bronze ; une chaire de pierre surplombe la porte pour les magiciens de garde ; une garde de Templiers en haubert sous des surcots clairs se tient sur le parvis. Un sable fin et doré coule sous la poterne alors qu'aucun vent ne souffle ; un Templier ogre le balaie lentement. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`petra_khazneh_portail.jpg` :
+
+```
+Réalise l'image de l'intérieur de la Khazneh, à Petra, dans un monde médiéval fantastique, format paysage 16:9 : une salle unique taillée dans le grès rose, haute et nue, éclairée par la porte ouverte et par des lampes à huile de cuivre. Les murs portent des niches vides et des traces de pioches anciennes, laissées par ceux qui cherchaient le trésor du Pharaon. Au fond, un seuil de pierre ancien, une arche massive gravée de motifs géométriques nabatéens sans aucune lettre, encadre un voile de lumière qui tourne lentement sur lui-même. Devant l'arche, un autel d'ancrage de pierre porte un cristal de mana. Des Architectes en robes de lin ocre surveillent l'ancrage, des Templiers montent la garde. Le voile de lumière est d'un blanc doré, et l'on devine derrière lui les colonnades d'un grand temple de savoir. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`petra_ad_deir_portail.jpg` :
+
+```
+Réalise l'image de l'intérieur d'ad-Deir, à Petra, dans un monde médiéval fantastique, format paysage 16:9 : une salle unique taillée dans le grès rose, haute et nue, éclairée par la porte ouverte et par des lampes à huile de cuivre. Par la porte, on aperçoit les canyons et les montagnes au loin, vus d'en haut. Au fond, un seuil de pierre ancien, une arche massive gravée de motifs géométriques nabatéens sans aucune lettre, encadre un voile de lumière qui tourne lentement sur lui-même. Devant l'arche, un autel d'ancrage de pierre porte un cristal de mana. Des Architectes en robes de lin ocre surveillent l'ancrage, des Templiers montent la garde. Le voile de lumière est d'un bleu froid, et l'on devine derrière lui des collines boisées sous un ciel gris. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`petra_qasr_al_bint_portail.jpg` :
+
+```
+Réalise l'image de l'intérieur du Qasr al-Bint, grand temple carré de pierre jaune, à Petra, dans un monde médiéval fantastique, format paysage 16:9 : une salle unique taillée dans le grès rose, haute et nue, éclairée par la porte ouverte et par des lampes à huile de cuivre. Des stucs peints de rouge et de bleu s'écaillent sur les murs. Au fond, un seuil de pierre ancien, une arche massive gravée de motifs géométriques nabatéens sans aucune lettre, encadre un voile de lumière qui tourne lentement sur lui-même. Devant l'arche, un autel d'ancrage de pierre porte un cristal de mana. Des Architectes en robes de lin ocre surveillent l'ancrage, des Templiers montent la garde. Le voile de lumière est d'un vert chaud, et une odeur de poivre et d'épices flotte dans la salle. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`porte_de_ville_petra_siq_exterieur01.jpg` :
+
+```
+Réalise l'image de la porte du Siq de Petra, cité rupestre du massif de Sharah, vue depuis l'extérieur, dans un monde médiéval fantastique, format paysage 16:9. Au bout d'un défilé étroit et sinueux entre deux falaises de grès rose vertigineuses, longé d'une rigole d'eau taillée dans la roche, une porte fortifiée de pierre ocre flanquée de deux tours carrées ferme le passage. Des caravaniers et leurs chameaux attendent devant elle, des gardes contrôlent les arrivants, un gobelet d'eau à la main. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`porte_de_ville_petra_siq_interieur01.jpg` :
+
+```
+Réalise l'image de la porte du Siq de Petra, cité rupestre du massif de Sharah, vue depuis l'intérieur de la cité, dans un monde médiéval fantastique, format paysage 16:9. La porte fortifiée de pierre ocre et ses deux tours carrées se dressent au débouché du défilé ; face à elle s'ouvre la grande place, et sur la droite monte l'immense façade sculptée de la Khazneh, à colonnes, fronton et rotonde, taillée dans la falaise rose. Une rigole d'eau longe le sol dallé jusqu'à une fontaine. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`porte_de_ville_petra_sud_exterieur01.jpg` :
+
+```
+Réalise l'image de la porte du sud de Petra, cité rupestre du massif de Sharah, vue depuis l'extérieur, depuis le désert, dans un monde médiéval fantastique, format paysage 16:9. Une haute muraille de pierre ocre crénelée court au pied des falaises de grès rouge ; une tour carrée massive percée d'une arche y ouvre la porte du sud. Une piste caravanière de sable y mène à travers les dunes ocre ; une caravane approche sous un soleil bas. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`porte_de_ville_petra_sud_interieur01.jpg` :
+
+```
+Réalise l'image de la porte du sud de Petra, cité rupestre du massif de Sharah, vue depuis l'intérieur de la cité, dans un monde médiéval fantastique, format paysage 16:9. Derrière la muraille ocre et sa tour-porte, des maisons de pierre aux toits plats en terrasses, un canal d'eau taillé dans la pierre, des palmiers et des jardins ; au-dessus, un haut-lieu rocheux couronné de deux obélisques domine le quartier. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
 ## ✍️ Auteur
 
 Pour les battlemaps ajoute dorénavant "La vue est aérienne. C'est une battlemap." en fin de prompt.
@@ -252,10 +323,26 @@ J'ai pushé sur main les images. Indique moi s'il en manque alors répète moi l
 
 > Les 17 images sont livrées (`maps/levant.jpg` au lieu de `.png`). En plus : `battle_maps/donjon_djinns.jpg`, en perspective, que remplace `petra_donjon_djinns.jpg`, vue du dessus. Les prompts du § 8.2 portent désormais la phrase.
 
+## ✍️ Auteur — réponses aux formulaires (questionnaires n° 6 et n° 7)
+
+- `battle_maps/donjon_djinns.jpg` (perspective) : on le garde. Réceptionniste : **Zaydu**. Temples : **un Templier par temple**. Hors de la ville : le Levant avec Petra seule, et les portails transversaux (Muziris attendra sa cité).
+- Mandats : « Il faut faire sauter la contrainte de "un seule mandat". Shaqilath mandate pour les 4 avec pour chaque donjon des rangs minimum différents A, S, S+. »
+- Rang : « L'inscription à Petra est nécessaire mais le réceptionniste reconnait le rang de Lutecia. »
+- Trésor : « Encens et myrrhe. Des résines précieuses, la richesse de Petra, à créer comme item et à inclure dans le json s'il n'exite pas. », or et bourse, cristal de mana. Pièges des djinns : nombreux et retors.
+
+## 9. Le contenu en jeu (`dev/gen_petra.py` → `jsons/petra_a_importer.json`, 24/10/2026)
+
+- **Moteur** : `services.commission.donjons` (liste ; `donjon` seul reste lu) — le bureau ne propose que les donjons dont le personnage franchit les barrières `rang_min` (`donjon.offre_commission_parmi`) ; `services.don.rang_reconnu` — l'inscription recopie le rang d'une autre cité, sans jamais rétrograder (`chasse.reconnaitre_rang`).
+- **Rangs** : crue et djinns **A**, trésor **S**, cités anéanties **S+** (lecture de « A, S, S+ » sur quatre donjons). Grades des monstres : crue 4-5, djinns 5-6, trésor 5-6, cités 6.
+- **Lieux** : `lieu:levant` (grille du profil pays), `lieu:petra` (grille relevée à la main : dedans, deux pans de dehors, canaux), portes du Siq et du sud, Caravansérail des Seuils (coursives, comptoir de Zaydu, bureau de Shaqilath au rang A de Petra), Khazneh → Alexandrie et ad-Deir → Bucarest (rang A de **Lutecia**), Qasr al-Bint sans connexion, quatre temples, six salles.
+- **Templiers** : Natiru (nain, l'Urne), Abd-Obodas (humain, la Soie), Wa'ilu (ogre, le Corinthien), Aslah (ogre, le Palais) — portraits **réemployés** des gardes de temple existants.
+- **Objets** : `item:myrrhe`, `item:cristal_de_mana_violet` (l'encens existait : `item:Encens`). **Espèces** : nasnas, géant de ʿĀd, Qudar, nuée de scarabées, scorpion géant (+ carcasses et découpe).
+- ⚠️ **À valider en jeu** : les grilles de la cité et des six salles (première passe relevée à l'œil), les cases des connexions.
+- `/admin/dialogues` ne sait éditer que `commission.donjon` : la liste `donjons` de Shaqilath se modifie par le JSON.
+
 ## 7. Points ouverts
 
-- Nom et portrait de la **maîtresse de guilde** ogresse, réceptionniste, PNJ des quatre temples.
 - **Muziris** : cité-État à décrire (séance à venir).
 - **Bucarest ↔ Dracula** (château de Bran) : séance dédiée.
 - Les trois mystères (Khazneh, Haut-Lieu, Petite Petra) : théories ouvertes, aucune tranchée.
-- À produire (livrables choisis) : `lieu:petra` et sous-lieux sur `petra_city.jpg`, les 4 docs `donjon:*`, le bestiaire (djinns, géants de ʿĀd, Qudar, sphinx, mimiques, scarabées, faune des oueds) avec prompts d'image — dans **un seul** fichier à importer.
+- Images des onze lieux du § 8.5 à produire ; portraits propres aux quatre Templiers (réemploi provisoire).

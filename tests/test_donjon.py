@@ -740,3 +740,64 @@ def test_combat_de_salle_gardee_sans_les_proteges_si_la_salle_le_dit(monkeypatch
 	character = {"_id": "character:x", "user_id": "user:x"}
 	assert rp._declencher_combat_donjon(character, salle) == "combat:x"
 	assert captures["proteges"] == attendu
+
+
+# ── Mandat de plusieurs donjons (`services.commission.donjons`) ──────────────────
+
+TOMBE = {"_id": "lieu:tombe", "type": "lieu", "categorie": "battle_map", "label": "La tombe",
+		 "dimensions": {"x": 4, "y": 4}, "cells": [[1] * 4 for _ in range(4)],
+		 "acces": {"gardien": "pnj:x", "cycle": 1,
+				   "conditions": [{"rang_min": {"cite": "lieu:auxerre", "rang": "S"}}]}}
+TOMBE_BAS = {"_id": "lieu:tombe_bas", "type": "lieu", "categorie": "battle_map",
+			 "dimensions": {"x": 4, "y": 4}, "cells": [[1] * 4 for _ in range(4)]}
+DONJON_S = {"_id": "donjon:tombe", "type": "donjon", "nom": "La tombe",
+			"battle_maps": [{"lieu": "lieu:tombe", "especes": ["espece:gobelin"]},
+							{"lieu": "lieu:tombe_bas", "especes": ["espece:araignee_geante"]}]}
+
+
+def _get_multi(doc_id):
+	return {**DOCS, **{d["_id"]: d for d in (TOMBE, TOMBE_BAS, DONJON_S)}}.get(doc_id)
+
+
+def test_donjons_du_service_lit_la_liste_ou_le_donjon_seul():
+	assert [d["_id"] for d in donjon.donjons_du_service({"donjon": "donjon:mine"}, _get_multi)] \
+		== ["donjon:mine"]
+	conf = {"donjons": ["donjon:mine", "donjon:tombe", "donjon:absent"]}
+	assert [d["_id"] for d in donjon.donjons_du_service(conf, _get_multi)] == ["donjon:mine", "donjon:tombe"]
+	assert donjon.donjons_du_service({}, _get_multi) == []
+
+
+def test_le_bureau_ne_mandate_que_les_donjons_a_la_portee_du_rang():
+	"""Sous le rang S, seule la mine (libre) est proposée ; au rang S, la tombe s'y ajoute."""
+	sous = _character(rangs_guilde={"lieu:auxerre": "A"})
+	assert donjon.rang_suffisant(sous, DONJON_S, _get_multi) is False
+	offre = donjon.offre_commission_parmi(sous, BUREAU, [DONJON, DONJON_S], _get_multi, find_docs)
+	assert offre["objectif"]["lieu"] == "lieu:mine"
+	assert donjon.offre_commission_parmi(sous, BUREAU, [DONJON_S], _get_multi, find_docs) is None
+	au_rang = _character(rangs_guilde={"lieu:auxerre": "S"})
+	offre = donjon.offre_commission_parmi(au_rang, BUREAU, [DONJON_S], _get_multi, find_docs)
+	assert offre["objectif"]["lieu"] == "lieu:tombe"
+
+
+def test_le_rang_d_un_donjon_a_plusieurs_salles_est_celui_de_toutes_ses_salles(monkeypatch):
+	"""L'élite peut être tirée dans une salle sans barrière (l'étage du bas) : la commission
+	affiche pourtant le rang de l'étage d'entrée."""
+	au_rang = _character(rangs_guilde={"lieu:auxerre": "S"})
+	assert donjon.rang_du_donjon(BUREAU, DONJON_S, _get_multi) == "S"
+	import random
+
+	def vers_le_bas(seq):
+		seq = list(seq)
+		bas = [x for x in seq if isinstance(x, tuple) and x[1]["lieu"] == "lieu:tombe_bas"]
+		return (bas or seq)[0]
+
+	monkeypatch.setattr(random, "choice", vers_le_bas)
+	offre = donjon.offre_commission_parmi(au_rang, BUREAU, [DONJON_S], _get_multi, find_docs)
+	assert offre["objectif"]["lieu"] == "lieu:tombe_bas" and offre["rang"] == "S"
+
+
+def test_un_seul_mandat_a_la_fois_meme_avec_plusieurs_donjons():
+	c = _character(rangs_guilde={"lieu:auxerre": "S"})
+	donjon.accepter_commission(c, donjon.offre_commission_parmi(c, BUREAU, [DONJON, DONJON_S],
+		_get_multi, find_docs))
+	assert donjon.offre_commission_parmi(c, BUREAU, [DONJON, DONJON_S], _get_multi, find_docs) is None

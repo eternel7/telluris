@@ -105,6 +105,7 @@ TABLE = {
 	"fauves": ("1x2", "ellipse"),
 	"fee": None,
 	"gargouille": None,
+	"geant_de_ad": ("2x2", "rectangle"),
 	"geant_du_mont_saint_michel": ("2x2", "rectangle"),
 	"geant_ou_titan": ("2x2", "rectangle"),
 	"genie": None,
@@ -211,6 +212,10 @@ TABLE = {
 	"yamata_no_orochi": ("3x2", "ellipse"),
 	"zmey_gorynych": ("3x2", "triangle"),
 	"zombie": None,
+	"nasnas": None,
+	"nuee_de_scarabees": ("2x2", "ellipse"),
+	"qudar": None,
+	"scorpion_geant": ("2x2", "ellipse"),
 }
 
 
