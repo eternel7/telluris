@@ -213,7 +213,10 @@ def test_territoire_du_voisin_mis_a_zero(construit):
 
 def test_liens_des_cites_sur_l_afrique_du_nord_signales(dump, construit):
 	"""Alexandrie et Le Caire ↔ Afrique du Nord tombent dans l'Égypte mise à 0 : signalés."""
+	# Les passages de la frontière eux-mêmes ne sont pas des liens de cités : le générateur les
+	# exclut (`connexions_coupees`), le test aussi.
 	coupes = [d["_id"] for d in dump if d.get("type") == "connection"
+		and not d["_id"].startswith("link:afrique_du_nord_to_egypte_")
 		and any(n.get("lieu") == gea.AFRIQUE and tuple(n.get("pos") or ())
 			in gea.bande(gea.FRONTIERE_AFRIQUE, "est", {"x": 88, "y": 48}) for n in d.get("nodes") or [])]
 	if not coupes:
