@@ -1,0 +1,456 @@
+[
+  {
+    "_id": "pnj:aenor_de_sully",
+    "type": "pnj",
+    "nom": "Aénor de Sully",
+    "race": "elfe",
+    "vocation": "magicien",
+    "portrait": "templier_elfe_f_magicienne_notre_dame01.jpg",
+    "description": "Commanderesse des Templiers de Notre-Dame. Elfe et magicienne, elle tient l'autel d'ancrage et sait sur quel seuil du monde il peut prendre pied, et pour combien de temps.",
+    "services": {
+      "portail": {
+        "ancrage": "lieu:notre_dame_portail",
+        "cout": {
+          "item": "item:cristal_de_mana_jaune",
+          "quantite": 1
+        },
+        "choix": "franchir",
+        "noeuds": {
+          "ouvert": "ouvert",
+          "ferme": "ferme",
+          "refus_cristal": "refus_cristal"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Au pied de l'autel d'ancrage, une elfe en manteau blanc de Templière garde une main posée sur la roue de pierre, comme on sent battre un pouls. Elle ne se retourne qu'une fois la roue immobile. « Aénor de Sully. Je commande ceux qui gardent ce cercle. Vous êtes venu pour le seuil. »",
+          "choix": [
+            {
+              "id": "seuils",
+              "label": "« Où peut-on aller, en ce moment ? »",
+              "next": "seuils"
+            },
+            {
+              "id": "comment",
+              "label": "« Comment ce portail choisit-il où il mène ? »",
+              "next": "comment"
+            },
+            {
+              "id": "retour",
+              "label": "« Et pour revenir ? »",
+              "next": "retour"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "comment": {
+          "texte": "« Il ne choisit pas. Les portails du monde vont chacun d'un lieu à un autre, toujours le même. Celui-ci n'a pas d'autre bout. » Elle fait tourner la roue d'un cran. « La gemme violette tient l'ancrage ouvert. Quand quelqu'un, ailleurs, franchit son propre seuil, l'ancrage peut se glisser dans son passage et en prendre l'arrivée, le temps que ce seuil reste chaud. Le cristal jaune tient votre prise sur le passage d'un autre. Sans lui, vous n'arriveriez nulle part. »",
+          "choix": [
+            {
+              "id": "seuils",
+              "label": "« Montrez-moi les seuils. »",
+              "next": "seuils"
+            },
+            {
+              "id": "accueil",
+              "label": "« Autre chose. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "retour": {
+          "texte": "« Rien ne ramène ici. » Aénor le dit sans regret. « Presque personne n'arrive à Notre-Dame : un seul lieu y mène, et je ne vous dirai pas lequel. Vous rentrerez par les routes, ou par le portail que vous trouverez là-bas. Arrivé de l'autre côté, vous serez où arrivent ceux qui l'ont pris, et pas ailleurs. »",
+          "choix": [
+            {
+              "id": "seuils",
+              "label": "« Montrez-moi les seuils. »",
+              "next": "seuils"
+            },
+            {
+              "id": "accueil",
+              "label": "« Autre chose. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "seuils": {
+          "texte": "Aénor pose les deux mains sur la roue. Les runes s'allument une à une, puis s'éteignent, sauf quelques-unes. « Voilà ceux qu'on franchit ailleurs, en ce moment. Je peux vous y glisser encore {fermeture}. Ensuite viendront {seuils_suivants}. Le passage coûte un {cristal}, et il fond dans la roue. »",
+          "choix": [
+            {
+              "id": "franchir",
+              "label": "Franchir un seuil.",
+              "condition": {
+                "cristal_jaune_porte": true
+              },
+              "action": {
+                "service": "portail",
+                "op": "franchir"
+              }
+            },
+            {
+              "id": "sans_cristal",
+              "label": "« Je n'ai pas de cristal jaune. »",
+              "condition": {
+                "cristal_jaune_porte": false
+              },
+              "next": "refus_cristal"
+            },
+            {
+              "id": "attendre",
+              "label": "« J'attends les suivants. »",
+              "next": "seuils"
+            },
+            {
+              "id": "accueil",
+              "label": "« Pas maintenant. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "ouvert": {
+          "texte": "Le cristal jaune fond au creux de la roue. Une lumière jaune tient le vortex immobile le temps d'un pas. Vous arrivez à {destination}, là où arrivent ceux qui ont pris ce portail.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Avancer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "ferme": {
+          "texte": "« Trop tard. » La rune s'éteint sous la main d'Aénor. « Ce seuil s'est refroidi derrière les derniers qui l'ont pris. D'autres s'ouvrent. »",
+          "choix": [
+            {
+              "id": "seuils",
+              "label": "« Lesquels ? »",
+              "next": "seuils"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "refus_cristal": {
+          "texte": "« Sans cristal jaune, la roue ne tient rien, et vous non plus. » Aénor retire ses mains. « On en trouve tout au fond des catacombes, et, dit-on, dans le coffre du puits de Chartres. Revenez avec un cristal. »",
+          "choix": [
+            {
+              "id": "accueil",
+              "label": "« Autre chose. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:notre_dame_portail",
+    "type": "lieu",
+    "label": "Le portail de Notre-Dame",
+    "image": "portail_de_temple_notre_dame.png",
+    "categorie": "portail",
+    "sous_categorie": "temple",
+    "lieu_parent": "lieu:lutecia",
+    "texte": "Sous les voûtes de Notre-Dame, au fond de la nef, une arche de pierre ouvragée s'ouvre dans le jubé sur un vortex d'un blanc bleuté qui ne cesse jamais de tourner. Un bourdonnement grave monte des dalles et fait trembler la flamme des cierges ; à intervalles irréguliers, un claquement sec et une odeur d'orage annoncent un voyageur venu de l'autre bout du monde connu.\nDevant l'arche, l'autel d'ancrage — une grande roue de pierre gravée de runes — porte en son cœur la gemme de mana violette qui alimente le passage : deux cent cinquante grammes, et le chemin demeure. Depuis les tribunes, des maîtres de l'Institut des Architectes entretiennent l'ancrage, tandis que les templiers tiennent le cercle autour de l'autel et contrôlent ceux qui en reviennent.",
+    "acces": {
+      "gardien": "pnj:templier_florian_bouzereau",
+      "refus": "Un templier ogre barre les portes de la nef : le portail de Notre-Dame n'est ouvert qu'aux aventuriers de rang A de la guilde de Lutecia.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "item": {
+            "item": "item:carte_aventurier",
+            "lieu_parent": "lieu:lutecia"
+          }
+        },
+        {
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "A"
+          }
+        }
+      ]
+    },
+    "pnj": [
+      {
+        "character": "pnj:aenor_de_sully",
+        "nom": "Aénor de Sully",
+        "portrait": "templier_elfe_f_magicienne_notre_dame01.jpg",
+        "probabilite": 1,
+        "description": "Une elfe en manteau blanc de Templière, une main posée sur la roue de pierre de l'autel d'ancrage."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:les_archives_des_seuils",
+    "type": "lieu",
+    "label": "Les Archives des Seuils",
+    "image": "archives_des_seuils_lutecia01.jpg",
+    "categorie": "institut_des_architectes",
+    "lieu_parent": "lieu:lutecia",
+    "acces": {
+      "refus": "Un archiviste referme la porte vitrée devant vous, poliment mais sans appel : les Archives des Seuils ne s'ouvrent qu'aux Architectes, et à ceux qui reviennent d'un seuil avec eux.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "combat_gagne": {
+            "lieu": "lieu:nef_de_l_abbaye_de_jumieges"
+          }
+        }
+      ]
+    },
+    "pnj": [
+      {
+        "character": "pnj:aelis_de_montfaucon_archives",
+        "nom": "Aélis",
+        "portrait": "architecte_Aélis_de_Montfaucon_dans_les_invalides.jpg",
+        "probabilite": 1,
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_aelis_abbaye_de_jumieges"
+            }
+          }
+        ],
+        "description": "Une jeune architecte au milieu de relevés étalés, une plume entre les dents et un compas à la main."
+      }
+    ]
+  },
+  {
+    "_id": "donjon:puits_de_chartres",
+    "type": "donjon",
+    "nom": "Le puits de Chartres",
+    "description": "Sous la crypte de Chartres, un puits devenu portail à la Vague, ouvert sur un labyrinthe que personne n'a creusé. Un Minotaure l'habite, disent les registres des Templiers.",
+    "portail": "lieu:crypte_de_chartres",
+    "niveau_min": 4,
+    "niveau_max": 5,
+    "battle_maps": [
+      {
+        "lieu": "lieu:labyrinthe_du_puits_de_chartres",
+        "especes": [
+          "espece:minotaure"
+        ],
+        "nb_monstres": 2,
+        "niveau_min": 4,
+        "niveau_max": 5,
+        "tresor": {
+          "nom": "Coffre du Minotaure",
+          "icon": "🧰",
+          "pos": [
+            3,
+            13
+          ],
+          "garanti": [
+            {
+              "item": "item:cristal_de_mana_jaune",
+              "quantite": 1
+            }
+          ],
+          "bourse": [
+            80,
+            200
+          ],
+          "tirage": {
+            "nb": 2,
+            "table": [
+              {
+                "item": "item:gemmes",
+                "poids": 3
+              },
+              {
+                "item": "item:anneau",
+                "poids": 3
+              },
+              {
+                "item": "item:bague",
+                "poids": 2
+              },
+              {
+                "item": "item:Cristal_canalisation",
+                "poids": 2
+              }
+            ]
+          },
+          "piege": {
+            "chance": 40,
+            "danger": 3,
+            "effets": [
+              "degats",
+              "mimique"
+            ],
+            "mimique": "espece:mimique"
+          }
+        }
+      }
+    ],
+    "mode": "etages"
+  },
+  {
+    "_id": "pnj:templier_de_la_crypte_de_chartres",
+    "type": "pnj",
+    "nom": "Le Templier de la crypte",
+    "race": "nain",
+    "vocation": "templier",
+    "portrait": "templier_nain_m_crypte_chartres01.png",
+    "description": "Templier nain de la crypte de Chartres, gardien du puits. Il en a vu descendre ; il en a vu peu remonter.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:labyrinthe_du_puits_de_chartres",
+        "noeuds": {
+          "ouvre": "puits_ouvert",
+          "refus": "puits_clos"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "La crypte de Chartres est longue, basse, éclairée de lampes à huile. Au fond, une margelle de pierre noire et un treuil de fer : le puits. Un Templier nain se tient devant, la main sur la manivelle, comme s'il craignait qu'elle tourne toute seule. « Le puits n'est pas une curiosité. Regardez-le de loin. »",
+          "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Qu'y a-t-il au fond ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:rang_a_minotaure_de_chartres",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:rang_a_minotaure_de_chartres",
+                  "attendu": false
+                }
+              },
+              "next": "fond"
+            },
+            {
+              "id": "guilde",
+              "label": "« Je veux descendre. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "next": "seuil"
+            },
+            {
+              "id": "apres",
+              "label": "« Ils sont morts. Tous les deux. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_a_minotaure_de_chartres"
+                }
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "fond": {
+          "texte": "« Un labyrinthe que personne n'a creusé. » Il ne lâche pas la manivelle. « Avant la Vague, ce n'était qu'un puits, au milieu du labyrinthe qu'on a tracé autour. Puis il a changé de couleur. Les premiers qui sont descendus, on les appelle les Forts. On a gardé leurs noms. Pas leurs corps. » Il désigne la sortie. « Bonne journée. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "seuil": {
+          "texte": "Le Templier regarde l'insigne de guilde à votre cou, platine ou mieux, puis tourne la manivelle. La chaîne descend longtemps. « En bas, des couloirs. Ils tournent toujours du même côté, et ne ramènent jamais où l'on croit. » Il bloque le treuil. « Quand vous remonterez, tirez trois fois sur la chaîne. Si vous ne tirez pas, je ne remonte rien. »",
+          "choix": [
+            {
+              "id": "descendre",
+              "label": "Descendre dans le puits.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              },
+              "deplacer": "lieu:labyrinthe_du_puits_de_chartres"
+            },
+            {
+              "id": "attendre",
+              "label": "« Pas encore. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "puits_ouvert": {
+          "texte": "L'échelle de fer s'arrête au-dessus d'un sol de dalles. L'air est chaud, et sent l'étable. Un mugissement, très loin, rebondit sur des murs que vous ne voyez pas. Puis un second, plus près, qui ne vient pas du même côté. Il y en a deux.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Tirer votre arme.",
+              "next": "fin"
+            }
+          ]
+        },
+        "puits_clos": {
+          "texte": "Le Templier ne touche pas la manivelle. « Le puits ne s'ouvre qu'à l'insigne de platine de la Guilde, ou à mieux. Revenez quand vous le porterez. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Reculer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "« Deux. » Le Templier le répète, comme pour s'habituer au mot. « Nos registres n'en ont jamais compté qu'un. » Il regarde la chaîne. « Le prieur dit que le second était un fils. Notre frère archiviste, que le labyrinthe en refait un chaque fois qu'on en tue un, comme une porte rouvre ce qu'on lui ferme. Ils ont doublé la garde. Moi, je garde la manivelle. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "link:labyrinthe_du_puits_de_chartres_to_crypte_de_chartres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:crypte_de_chartres",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Descendre dans le puits"
+      },
+      {
+        "lieu": "lieu:labyrinthe_du_puits_de_chartres",
+        "pos": [
+          14,
+          10
+        ],
+        "label": "Remonter par la chaîne"
+      }
+    ],
+    "metadata": {
+      "type": "descente",
+      "status": "ouvert"
+    }
+  }
+]
