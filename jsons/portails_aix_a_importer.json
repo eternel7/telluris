@@ -1,0 +1,660 @@
+[
+  {
+    "_id": "lieu:sanctuaire_de_baiame",
+    "type": "lieu",
+    "label": "Le Sanctuaire de Baiame",
+    "image": "sanctuaire_de_baiame_sydney.jpg",
+    "categorie": "portail",
+    "sous_categorie": "temple",
+    "texte": "Sur le promontoire de grès ocre qui garde l'entrée de la baie, la roche plate est couverte de gravures : des baleines, des poissons, des chasseurs, et une grande silhouette aux bras ouverts. Les Templiers ont élevé autour une enceinte basse de pierre sèche, sans toit : le ciel en est la voûte. Au centre, une arche de grès nu encadre un voile de lumière tranquille — la porte d'Aix.",
+    "acces": {
+      "refus": "Un Templier vous arrête au bord du seuil : on ne le franchit qu'avec le rang A de la Guilde de Lutecia.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "A"
+          }
+        }
+      ]
+    },
+    "pnj": [
+      {
+        "character": "pnj:templiere_barangaroo_sydney",
+        "nom": "Barangaroo",
+        "portrait": "templier_humain_f_sydney01.jpg",
+        "probabilite": 1,
+        "description": "Templière du Sanctuaire de Baiame, gardienne de la porte d'Aix à Sydney."
+      }
+    ],
+    "lieu_parent": "lieu:sydney"
+  },
+  {
+    "_id": "pnj:templiere_barangaroo_sydney",
+    "type": "pnj",
+    "nom": "Barangaroo",
+    "race": "humain",
+    "vocation": "garde",
+    "portrait": "templier_humain_f_sydney01.jpg",
+    "description": "Templière du Sanctuaire de Baiame, gardienne de la porte d'Aix à Sydney. Pêcheuse avant d'être Templière, elle lit la mer mieux que les registres, et ne laisse personne marcher sur les gravures.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "lore": {
+          "texte": "« La grande silhouette, c'est Baiame, le père du ciel. Les autres, personne ne s'accorde. » Elle désigne trois petites figures côte à côte. « Les anciens disent que ce sont les trois frères, et que l'un d'eux est parti d'ici pour aller poser les portes de l'autre côté du monde. Les Architectes d'Aix disent que la porte a été bâtie depuis là-bas, et que nos gravures n'y sont pour rien. Moi, je pêche ici depuis l'enfance : la porte n'a jamais bougé, et les gravures non plus. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Une autre question…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "cite": {
+          "texte": "« La ville est derrière le promontoire, au bord de la baie. Suivez le sentier des falaises ; et regardez la mer en marchant, ce qui y nage ne reste pas toujours dedans. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Une autre question…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "accueil": {
+          "texte": "Le vent de la mer couche l'herbe rase du promontoire. Au bord de l'enceinte de pierre sèche, une femme en manteau blanc, les pieds nus sur la roche gravée, enroule une ligne de pêche autour de son poignet. {pnj} vous regarde arriver par l'arche. « Vous venez de l'autre bout du monde. Marchez sur la pierre nue, pas sur les gravures : elles étaient là avant nous tous. »",
+          "choix": [
+            {
+              "id": "lore",
+              "label": "« Qui a bâti cette porte ? »",
+              "next": "lore"
+            },
+            {
+              "id": "cite",
+              "label": "« Par où gagner la ville ? »",
+              "next": "cite"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "link:chapelle_palatine_to_sydney",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:chapelle_palatine",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Aix-la-Chapelle — repasser le seuil"
+      },
+      {
+        "lieu": "lieu:sanctuaire_de_baiame",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Franchir la porte de Sydney"
+      }
+    ],
+    "metadata": {
+      "type": "portail",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:sydney_to_sanctuaire_de_baiame",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:sydney",
+        "pos": [
+          72,
+          27
+        ],
+        "label": "Ressortir dans la ville"
+      },
+      {
+        "lieu": "lieu:sanctuaire_de_baiame",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Le Sanctuaire de Baiame"
+      }
+    ],
+    "metadata": {
+      "type": "temple",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:temple_de_senso_ji",
+    "type": "lieu",
+    "label": "Le temple de Sensō-ji",
+    "image": "temple_de_senso_ji_tokyo.jpg",
+    "categorie": "portail",
+    "sous_categorie": "temple",
+    "texte": "Au nord-est du château, au bord de la rivière Sumida, le temple de Sensō-ji dresse sa pagode à cinq toits au-dessus des cerisiers. Passé la grande porte de bois laqué de rouge, la salle principale ne garde ni autel ni statue visible : seulement, au fond, une arche de bois sombre où tremble un voile de lumière — la porte d'Aix.",
+    "acces": {
+      "refus": "Un Templier vous arrête au bord du seuil : on ne le franchit qu'avec le rang A de la Guilde de Lutecia.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "A"
+          }
+        }
+      ]
+    },
+    "pnj": [
+      {
+        "character": "pnj:templier_haji_no_nakatomo_tokyo",
+        "nom": "Haji no Nakatomo",
+        "portrait": "templier_nain_m_tokyo01.jpg",
+        "probabilite": 1,
+        "description": "Templier gardien de Sensō-ji, à Tokyo."
+      }
+    ],
+    "lieu_parent": "lieu:tokyo"
+  },
+  {
+    "_id": "pnj:templier_haji_no_nakatomo_tokyo",
+    "type": "pnj",
+    "nom": "Haji no Nakatomo",
+    "race": "nain",
+    "vocation": "garde",
+    "portrait": "templier_nain_m_tokyo01.jpg",
+    "description": "Templier gardien de Sensō-ji, à Tokyo. Il porte le nom du chef de village qui bâtit le premier sanctuaire, et balaie lui-même les pétales devant la porte d'Aix.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "lore": {
+          "texte": "« Deux frères pêchaient dans la Sumida. Un matin, leur filet a remonté une petite statue d'or, pas plus haute qu'une main. Ils l'ont rejetée ; elle est revenue dans le filet, trois fois. » {pnj} sourit. « Le chef de leur village, celui dont je porte le nom, a bâti un sanctuaire autour. Bien plus tard, la porte s'est ouverte à côté de la statue. Les uns disent que la statue l'a appelée ; les autres, que la porte était là avant tout, et que c'est elle qui a mis la statue dans le filet. La statue, plus personne ne la montre. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Une autre question…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "cite": {
+          "texte": "« Le château est au sud-ouest, derrière les douves. Ne traînez pas sur les quais à la nuit tombée : la baie a ses propres gardiens, et ils ne sont pas des nôtres. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Une autre question…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "accueil": {
+          "texte": "Des pétales de cerisier glissent sur le plancher ciré. Un nain en manteau blanc passé sur une armure de lamelles laquées pose son balai contre un pilier et s'incline, juste assez. « Bienvenue à Sensō-ji. Je suis {pnj}. Ôtez la poussière d'Aix de vos bottes : ici, on balaie deux fois par jour. »",
+          "choix": [
+            {
+              "id": "lore",
+              "label": "« Qui a bâti cette porte ? »",
+              "next": "lore"
+            },
+            {
+              "id": "cite",
+              "label": "« Par où gagner la ville ? »",
+              "next": "cite"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "link:chapelle_palatine_to_tokyo",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:chapelle_palatine",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Aix-la-Chapelle — repasser le seuil"
+      },
+      {
+        "lieu": "lieu:temple_de_senso_ji",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Franchir la porte de Tokyo"
+      }
+    ],
+    "metadata": {
+      "type": "portail",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:tokyo_to_temple_de_senso_ji",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:tokyo",
+        "pos": [
+          53,
+          16
+        ],
+        "label": "Ressortir dans la ville"
+      },
+      {
+        "lieu": "lieu:temple_de_senso_ji",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Le temple de Sensō-ji"
+      }
+    ],
+    "metadata": {
+      "type": "temple",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:temple_du_serpent_a_plumes",
+    "type": "lieu",
+    "label": "Le temple du Serpent à plumes",
+    "image": "temple_du_serpent_a_plumes_teotihuacan.jpg",
+    "categorie": "portail",
+    "sous_categorie": "temple",
+    "texte": "Au fond de la Ciudadela, la grande place carrée à l'est de l'allée, le temple du Serpent à plumes monte en degrés ornés de têtes de serpents emplumés. Sous lui, un long tunnel creusé dans la roche descend vers une salle où des flaques de métal liquide brillent comme des lacs minuscules ; au bout, une arche de pierre noire encadre un voile de lumière — la porte d'Aix.",
+    "acces": {
+      "refus": "Un Templier vous arrête au bord du seuil : on ne le franchit qu'avec le rang A de la Guilde de Lutecia.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "A"
+          }
+        }
+      ]
+    },
+    "pnj": [
+      {
+        "character": "pnj:templier_ocelotl_teotihuacan",
+        "nom": "Ocelotl",
+        "portrait": "templier_ogre_m_teotihuacan01.jpg",
+        "probabilite": 1,
+        "description": "Templier gardien du temple du Serpent à plumes, à Teotihuacan."
+      }
+    ],
+    "lieu_parent": "lieu:teotihuacan"
+  },
+  {
+    "_id": "pnj:templier_ocelotl_teotihuacan",
+    "type": "pnj",
+    "nom": "Ocelotl",
+    "race": "ogre",
+    "vocation": "garde",
+    "portrait": "templier_ogre_m_teotihuacan01.jpg",
+    "description": "Templier gardien du temple du Serpent à plumes, à Teotihuacan. Il porte une peau de jaguar sur son manteau blanc, en signe d'alliance avec les guerriers-jaguars qui gardent la forêt.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "lore": {
+          "texte": "« Ceux d'ici disent que le Serpent à plumes a enseigné la porte au frère venu de loin, et qu'il a choisi ce temple parce qu'il est le sien. » {pnj} hausse ses énormes épaules. « Les Architectes d'Aix disent que le frère n'a eu besoin de personne. Les guerriers-jaguars, eux, ne disent rien : ils montent la garde dans la forêt et nous laissent le tunnel. Les lacs d'argent étaient là avant la porte. Pourquoi, personne ne le sait. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Une autre question…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "cite": {
+          "texte": "« Remontez le tunnel, traversez la Ciudadela : l'allée mène aux deux grandes pyramides. Saluez les guerriers-jaguars si vous en croisez. Ils vous rendront le salut… ou pas. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Une autre question…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "accueil": {
+          "texte": "Le tunnel sent la pierre froide et le métal. Dans la lueur des flaques argentées, un ogre immense en manteau blanc, une peau de jaguar jetée sur les épaules, se déplie lentement. « Je suis {pnj}. Ne touchez pas aux lacs d'argent : ils boivent la chaleur des doigts, et parfois le reste. »",
+          "choix": [
+            {
+              "id": "lore",
+              "label": "« Qui a bâti cette porte ? »",
+              "next": "lore"
+            },
+            {
+              "id": "cite",
+              "label": "« Par où gagner la ville ? »",
+              "next": "cite"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "link:chapelle_palatine_to_teotihuacan",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:chapelle_palatine",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Aix-la-Chapelle — repasser le seuil"
+      },
+      {
+        "lieu": "lieu:temple_du_serpent_a_plumes",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Franchir la porte de Teotihuacan"
+      }
+    ],
+    "metadata": {
+      "type": "portail",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:teotihuacan_to_temple_du_serpent_a_plumes",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:teotihuacan",
+        "pos": [
+          62,
+          26
+        ],
+        "label": "Ressortir dans la ville"
+      },
+      {
+        "lieu": "lieu:temple_du_serpent_a_plumes",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Le temple du Serpent à plumes"
+      }
+    ],
+    "metadata": {
+      "type": "temple",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:temple_du_soleil_de_pichao",
+    "type": "lieu",
+    "label": "Le temple du Soleil de Pichao",
+    "image": "temple_du_soleil_de_pichao.jpg",
+    "categorie": "portail",
+    "sous_categorie": "temple",
+    "texte": "Accroché aux terrasses de Pichao, sur la montagne verte noyée de nuages, le temple du Soleil est une tour de pierre courbe aux blocs ajustés sans mortier. Sous elle, une grotte taillée garde une arche de granit où flotte un voile de lumière — la porte d'Aix. Plus haut, sur la crête, la pierre où l'on attache le soleil projette son ombre sur les nuages.",
+    "acces": {
+      "refus": "Un Templier vous arrête au bord du seuil : on ne le franchit qu'avec le rang A de la Guilde de Lutecia.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "A"
+          }
+        }
+      ]
+    },
+    "pnj": [
+      {
+        "character": "pnj:templiere_cusi_coyllur_pichao",
+        "nom": "Cusi Coyllur",
+        "portrait": "templier_hobbit_f_pichao01.jpg",
+        "probabilite": 1,
+        "description": "Templière gardienne du temple du Soleil, à Pichao."
+      }
+    ]
+  },
+  {
+    "_id": "pnj:templiere_cusi_coyllur_pichao",
+    "type": "pnj",
+    "nom": "Cusi Coyllur",
+    "race": "hobbit",
+    "vocation": "garde",
+    "portrait": "templier_hobbit_f_pichao01.jpg",
+    "description": "Templière gardienne du temple du Soleil, à Pichao. Elle connaît chaque marche des terrasses et compte les nuages comme d'autres comptent les passants.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "lore": {
+          "texte": "« Là-haut, sur la crête, il y a la pierre où l'on attache le soleil. Au plus court jour de l'année, les prêtres l'y lient pour qu'il ne s'en aille pas. » {pnj} pointe la grotte du doigt. « Certains disent que c'est la pierre qui tient la porte ouverte, et que si on la brisait, la porte s'éteindrait. D'autres, que la porte tient la pierre debout. Personne n'a essayé de savoir, et personne ne devrait. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Une autre question…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "cite": {
+          "texte": "« Les terrasses descendent jusqu'à la forêt. Plus bas, dans les vallées chaudes, des hommes se couvrent de peaux de jaguar pour un rite que je ne vous conseille pas d'interrompre. » « Pour l'heure, on ne descend pas sans un guide : revenez par la porte. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Une autre question…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "accueil": {
+          "texte": "L'air est rare et froid. Une hobbit en manteau blanc, un châle de laine aux couleurs vives noué par-dessus, vous tend une gourde avant même de vous saluer. « Buvez. Tout le monde a le souffle court en arrivant d'Aix. Je suis {pnj}, et vous êtes au temple du Soleil. »",
+          "choix": [
+            {
+              "id": "lore",
+              "label": "« Qui a bâti cette porte ? »",
+              "next": "lore"
+            },
+            {
+              "id": "cite",
+              "label": "« Il y a une ville, en bas ? »",
+              "next": "cite"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "link:chapelle_palatine_to_pichao",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:chapelle_palatine",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Aix-la-Chapelle — repasser le seuil"
+      },
+      {
+        "lieu": "lieu:temple_du_soleil_de_pichao",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Franchir la porte de Pichao"
+      }
+    ],
+    "metadata": {
+      "type": "portail",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:petit_temple_d_abou_simbel",
+    "type": "lieu",
+    "label": "Le Petit Temple d'Abou Simbel",
+    "image": "petit_temple_d_abou_simbel.jpg",
+    "categorie": "portail",
+    "sous_categorie": "temple",
+    "texte": "Au pied de la falaise, à l'écart du Grand Temple, le Petit Temple ouvre sa façade taillée dans le grès : six colosses debout, Néfertiti et Akhénaton tour à tour, encadrent une porte basse. Dans la salle hypostyle, des piliers à visage de femme aux oreilles de vache veillent sur une arche de pierre où tremble un voile de lumière — la porte d'Aix.",
+    "acces": {
+      "refus": "Un Templier vous arrête au bord du seuil : on ne le franchit qu'avec le rang A de la Guilde de Lutecia.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "A"
+          }
+        }
+      ]
+    },
+    "pnj": [
+      {
+        "character": "pnj:templier_nakhtmin_abou_simbel",
+        "nom": "Nakhtmin",
+        "portrait": "templier_elfe_m_abou_simbel01.jpg",
+        "probabilite": 1,
+        "description": "Templier gardien du Petit Temple d'Abou Simbel."
+      }
+    ],
+    "lieu_parent": "lieu:abou_simbel"
+  },
+  {
+    "_id": "pnj:templier_nakhtmin_abou_simbel",
+    "type": "pnj",
+    "nom": "Nakhtmin",
+    "race": "elfe",
+    "vocation": "garde",
+    "portrait": "templier_elfe_m_abou_simbel01.jpg",
+    "description": "Templier gardien du Petit Temple d'Abou Simbel. Mort depuis longtemps et fort bien conservé, il sert la porte d'Aix comme il servait la cour, sans hâte et sans fatigue.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "lore": {
+          "texte": "« La Reine régnait déjà quand le frère est venu. » {pnj} effleure un pilier. « Certains de la cour disent qu'elle a obtenu la porte en échange d'un secret de longue vie ; d'autres, que le frère la lui a donnée pour qu'elle ne vienne jamais la chercher elle-même. J'étais là, et je ne sais pas lequel est vrai. Ne le répétez pas : à la cour, on aime les questions qui durent. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Une autre question…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "cite": {
+          "texte": "« L'esplanade est devant, le Grand Temple sur votre droite. Ne vous étonnez pas de ceux que vous croiserez : la plupart ont votre âge depuis plusieurs siècles. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Une autre question…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "accueil": {
+          "texte": "La salle est fraîche, presque froide, et sent la résine et le lin. Un elfe en manteau blanc sur une cuirasse dorée vous regarde sortir de l'arche ; sa peau est sèche et brune comme un parchemin, ses yeux parfaitement vivants. « Je suis {pnj}. Bienvenue au royaume de la Reine. Ici, les vivants sont des invités : comportez-vous comme tels. »",
+          "choix": [
+            {
+              "id": "lore",
+              "label": "« Qui a bâti cette porte ? »",
+              "next": "lore"
+            },
+            {
+              "id": "cite",
+              "label": "« Par où gagner la ville ? »",
+              "next": "cite"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "link:chapelle_palatine_to_abou_simbel",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:chapelle_palatine",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Aix-la-Chapelle — repasser le seuil"
+      },
+      {
+        "lieu": "lieu:petit_temple_d_abou_simbel",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Franchir la porte d'Abou Simbel"
+      }
+    ],
+    "metadata": {
+      "type": "portail",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:abou_simbel_to_petit_temple_d_abou_simbel",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:abou_simbel",
+        "pos": [
+          13,
+          20
+        ],
+        "label": "Ressortir dans la ville"
+      },
+      {
+        "lieu": "lieu:petit_temple_d_abou_simbel",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Le Petit Temple d'Abou Simbel"
+      }
+    ],
+    "metadata": {
+      "type": "temple",
+      "status": "ouvert"
+    }
+  }
+]

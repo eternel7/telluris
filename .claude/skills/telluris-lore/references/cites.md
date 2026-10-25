@@ -134,6 +134,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 	- **Abou Simbel**.
 - **Hôtel de Ville** : réseau de portails vers les cités sœurs, **postérieurs** à la Vague (Charlemagne, un siècle après). **Aucun** ne mène à un donjon : ce rôle revient aux autres cités germaniques.
 - **Granusturm** : défense aérienne. Double rempart, Ponttor et Marschiertor.
+- **En jeu (25/10, proposé, à arbitrer)** [cites/20261025_portails_d_aix_la_chapelle.md] : un temple et un Templier à chaque sortie — Sanctuaire de Baiame (Barangaroo), Sensō-ji (Haji no Nakatomo), Serpent à plumes (Ocelotl), temple du Soleil de Pichao (Cusi Coyllur, sans cité : cul-de-sac), Petit Temple d'Abou Simbel (Nakhtmin, mort-vivant) ; rang A de Lutecia ; `dev/gen_portails_aix.py`.
 
 ## Reykjavik — `lieu:reykjavik` · [cites/20260820_decrire_l_histoire_de_reykjavik.md]
 **Auteur**
