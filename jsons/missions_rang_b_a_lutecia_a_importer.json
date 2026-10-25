@@ -323,12 +323,28 @@
               "label": "« Le pli est remis. Voici la réponse. »",
               "condition": {
                 "transport_a_rapporter": true,
-                "offre": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir"
+                "offre": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir",
+                "quete_reussie": {
+                  "id": "quete:cristal_de_l_ossuaire"
+                }
               },
               "action": {
                 "service": "transport",
                 "op": "rapporter"
               }
+            },
+            {
+              "id": "b_temple_attente",
+              "label": "« Le pli est remis. »",
+              "condition": {
+                "transport_a_rapporter": true,
+                "offre": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir",
+                "quete_reussie": {
+                  "id": "quete:cristal_de_l_ossuaire",
+                  "attendu": false
+                }
+              },
+              "next": "b_temple_pas_encore"
             },
             {
               "id": "b_mars_relance",
@@ -881,7 +897,7 @@
           ]
         },
         "b_temple_propose": {
-          "texte": "Maëlys garde la main sur le pli un instant avant de le poser. « L'Enclos du Temple. La maison des Templiers, ici, à Lutecia. Ce sont eux qui gardent ce qu'il y a sous nos pieds, les catacombes et leur donjon, et qui en remontent les cristaux jaunes. » Elle se tait. « Depuis trois mois, leur commandeur ne répond plus aux lettres de la Guilde que par des politesses. Quand un Templier devient poli, {prenom}, il se passe quelque chose au fond. Portez-lui ceci à {destination}, et écoutez ce qu'il ne dira pas. »",
+          "texte": "Maëlys garde la main sur le pli un instant avant de le poser. « L'Enclos du Temple. La maison des Templiers, ici, à Lutecia. Ce sont eux qui gardent ce qu'il y a sous nos pieds, les catacombes et leur donjon, et qui en remontent les cristaux jaunes. » Elle se tait. « Depuis trois mois, leur commandeur ne répond plus aux lettres de la Guilde que par des politesses. Quand un Templier devient poli, {prenom}, il se passe quelque chose au fond. Portez-lui ceci à {destination}. S'il vous envoie en bas, descendez : je ne veux pas sa réponse, je veux ce que vous aurez vu. »",
           "choix": [
             {
               "id": "infos",
@@ -922,7 +938,7 @@
           ]
         },
         "b_temple_accepte": {
-          "texte": "Elle vous tend le pli. « Au commandeur. Et s'il vous propose de descendre, ne refusez pas. »",
+          "texte": "Elle vous tend le pli. « Au commandeur. Et s'il vous envoie dans les catacombes, allez jusqu'au fond. Le rang B, c'est l'ossuaire, pas l'antichambre. »",
           "choix": [
             {
               "id": "ok",
@@ -951,8 +967,18 @@
             }
           ]
         },
+        "b_temple_pas_encore": {
+          "texte": "Maëlys lève les yeux de ses registres. « Remis, oui. Le commandeur me l'a fait savoir. » Un temps. « Il me fait savoir aussi que son cristal n'est pas remonté de l'ossuaire. » Elle referme le registre. « Allez au fond, {prenom}, et rapportez-le-lui. Ensuite seulement, revenez ici. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y vais. »",
+              "next": "fin"
+            }
+          ]
+        },
         "b_temple_rapporte": {
-          "texte": "Maëlys écoute sans vous interrompre : l'ossuaire, la paroi, la porte qui n'était pas là, le symbole, la chaleur de la pierre. Quand vous parlez du symbole, elle prend une feuille et vous demande de le dessiner. Vous le faites. Elle le regarde longtemps, puis le glisse dans le registre, à une page qu'elle ne vous montre pas. « Rang B. » Elle fait glisser vers vous {prime} pièces de cuivre. « Ils continueront d'extraire. Ils n'ont pas le choix : sans cristaux jaunes, la moitié des portes de cette ville s'éteindrait. » Un temps. « Personne n'a le choix. C'est ce qui rend les portes si patientes. »",
+          "texte": "Maëlys brise le sceau du commandeur, lit, puis vous écoute sans vous interrompre : les trois étages, ce qui rôdait, l'ossuaire, le coffre, la paroi ouverte et la porte qui n'était pas là, le symbole, la chaleur de la pierre. Quand vous parlez du symbole, elle prend une feuille et vous demande de le dessiner. Vous le faites. Elle le regarde longtemps, puis le glisse dans le registre, à une page qu'elle ne vous montre pas. « Rang B. » Elle fait glisser vers vous {prime} pièces de cuivre. « Ils continueront d'extraire. Ils n'ont pas le choix : sans cristaux jaunes, la moitié des portes de cette ville s'éteindrait. » Un temps. « Personne n'a le choix. C'est ce qui rend les portes si patientes. »",
           "choix": [
             {
               "id": "ok",
@@ -10612,6 +10638,26 @@
           "livre": "pli_lu",
           "incomplet": "pli_absent"
         }
+      },
+      "apport": {
+        "offre": {
+          "id": "quete:cristal_de_l_ossuaire",
+          "titre": "Le cristal de l'ossuaire",
+          "description": "Le commandeur de l'Enclos du Temple veut que vous descendiez dans les catacombes de Lutecia jusqu'à l'ossuaire, le dernier étage, et que vous lui rapportiez le cristal jaune de son coffre. Ensuite seulement, il écrira sa réponse à la Guilde.",
+          "item": "item:cristal_de_mana_jaune",
+          "quantite": 1,
+          "unique": true,
+          "rang": "B",
+          "recompenses": {
+            "xp": 60,
+            "cuivre": 1200
+          }
+        },
+        "noeuds": {
+          "accepte": "cristal_accepte",
+          "remis": "cristal_remis",
+          "partiel": "cristal_partiel"
+        }
       }
     },
     "dialogue": {
@@ -10647,19 +10693,54 @@
               }
             },
             {
+              "id": "descente",
+              "label": "« Vous vouliez que je descende ? »",
+              "condition": {
+                "apport_offert": true,
+                "quete_active": {
+                  "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir"
+                },
+                "transport_a_livrer": false
+              },
+              "next": "cristal_propose"
+            },
+            {
+              "id": "cristal",
+              "label": "Poser le cristal jaune de l'ossuaire sur la table.",
+              "condition": {
+                "apport_possible": true
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
+              "id": "relance",
+              "label": "« Au sujet de l'ossuaire… »",
+              "condition": {
+                "apport_en_cours": true,
+                "apport_possible": false
+              },
+              "next": "cristal_relance"
+            },
+            {
               "id": "attente",
               "label": "« Votre réponse part pour la Guilde. »",
               "condition": {
                 "quete_active": {
                   "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir"
                 },
-                "transport_a_livrer": false
+                "transport_a_livrer": false,
+                "quete_reussie": {
+                  "id": "quete:cristal_de_l_ossuaire"
+                }
               },
               "next": "attente"
             },
             {
               "id": "apres",
-              "label": "« La porte de l'ossuaire ? »",
+              "label": "« L'ossuaire ? »",
               "condition": {
                 "quete_reussie": {
                   "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir"
@@ -10685,17 +10766,65 @@
           ]
         },
         "pli_lu": {
-          "texte": "Le commandeur lit la lettre de Maëlys deux fois, puis la pose sur la table, sous le cristal. « Elle a raison. Je suis devenu poli. » Il vous regarde. « Au fond de l'ossuaire, là où nous extrayons depuis vingt ans, une paroi s'est ouverte le mois dernier. Derrière, une porte. De pierre, fermée, gravée d'un signe que nul ici ne sait lire. Elle n'était pas là. Je l'aurais vue : j'ai creusé moi-même ce couloir. »",
+          "texte": "Le commandeur lit la lettre de Maëlys deux fois, puis la pose sur la table, sous le cristal. « Elle a raison. Je suis devenu poli. » Il vous regarde. « Au fond de l'ossuaire, là où nous extrayons depuis vingt ans, une paroi s'est ouverte le mois dernier. Derrière, une porte de pierre, fermée, gravée d'un signe que nul ici ne sait lire. Elle n'était pas là : j'ai creusé moi-même ce couloir. » Il repousse la lettre. « Je ne répondrai pas à votre maîtresse sur ma parole. Je répondrai sur la vôtre. »",
           "choix": [
             {
               "id": "suite",
-              "label": "« Elle s'est ouverte ? »",
-              "next": "pli_suite"
+              "label": "« C'est-à-dire ? »",
+              "next": "cristal_propose"
             }
           ]
         },
-        "pli_suite": {
-          "texte": "« Non. » Il secoue la tête. « Elle est tiède. Quand on pose la main dessus, la pierre est tiède, comme une bête qui dort. » Il trempe sa plume et écrit vite. « Voici ma réponse pour votre maîtresse. Tout y est, sauf une chose : je ne sais pas s'il faut cesser d'extraire. Si nous cessons, Lutecia s'éteint. Si nous continuons… » Il scelle la lettre. « Une porte qui ne devait pas s'ouvrir, on ne sait jamais ce qui la retient. »",
+        "cristal_propose": {
+          "texte": "« Descendez. » Il désigne le sol. « Par la porte des catacombes, comme tout le monde : trois étages, jusqu'à l'ossuaire. Mes hommes n'y vont plus depuis que la paroi s'est ouverte ; ce qui rôde en bas s'y est rassemblé. Au fond, il y a un coffre. Nous y laissions le cristal du mois. Rapportez-le-moi, et dites-moi ce que vous avez vu. Ensuite, j'écrirai à la Guilde. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je descends. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cristal_accepte": {
+          "texte": "Le commandeur hoche la tête. « Trois étages. Ne vous attardez pas au deuxième, et n'ouvrez le coffre qu'une fois la salle vide : certains coffres, en bas, ont des dents. » Il revient à son cristal. « Je vous attends. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cristal_relance": {
+          "texte": "« L'ossuaire. » Il ne lève pas les yeux. « Le troisième étage, le coffre du fond. Je ne réponds pas à la Guilde avant. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cristal_partiel": {
+          "texte": "« Il en manque. » Le commandeur compte : il reste {reste} pièce à rapporter.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Je reviens avec. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cristal_remis": {
+          "texte": "Le commandeur prend le cristal, le pose à côté du sien, et les regarde briller ensemble. Il vous écoute : les étages, ce qui rôdait, l'ossuaire, la paroi ouverte et la porte derrière, tiède sous la main. « Vous l'avez touchée. Moi aussi. » Il fait glisser vers vous {prime} pièces de cuivre, trempe sa plume et écrit vite. « Voici ma réponse. Tout y est, sauf une chose : je ne sais pas s'il faut cesser d'extraire. Si nous cessons, Lutecia s'éteint. Si nous continuons… » Il scelle la lettre. « Une porte qui ne devait pas s'ouvrir, on ne sait jamais ce qui la retient. »",
           "choix": [
             {
               "id": "fin",
@@ -10996,7 +11125,7 @@
     "_id": "lieu:labyrinthe_du_puits_de_chartres",
     "type": "lieu",
     "label": "Le labyrinthe du puits de Chartres",
-    "image": "catacombes0004.png",
+    "image": "crypte_de_la_necropole_d_escolives.jpg",
     "categorie": "battle_map",
     "dimensions": {
       "x": 30,

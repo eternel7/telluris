@@ -55,6 +55,8 @@ A_BETE = "quete:rang_a_bete_du_gevaudan"
 A_MINOTAURE = "quete:rang_a_minotaure_de_chartres"
 A_AMPOULE = "quete:rang_a_ampoule_du_sacre"
 A_DELEGATION = "quete:rang_a_delegation_palatine"
+# Quête du COMMANDEUR (pas une épreuve de Maëlys) : la descente qui suit la livraison du pli.
+CRISTAL_OSSUAIRE = "quete:cristal_de_l_ossuaire"
 QUETES_B = (B_GARGOUILLE, B_AIX, B_MARS, B_TEMPLE)
 QUETES_A = (A_GEANT, A_BETE, A_MINOTAURE, A_AMPOULE, A_DELEGATION)
 
@@ -82,6 +84,10 @@ TETE_GARGOUILLE = "item:gargouille_tete"
 TETE_GEANT = "item:geant_du_mont_saint_michel_tete"
 TETE_BETE = "item:bete_du_gevaudan_tete"
 TETE_MINOTAURE = "item:minotaure_tete"
+# Preuve de la descente du Temple : le coffre de l'ossuaire (`lieu:catacombes0003`) est la
+# SEULE source de ce cristal en jeu (dump du 24/10) — verrouillé par le test.
+CRISTAL_JAUNE = "item:cristal_de_mana_jaune"
+OSSUAIRE = "lieu:catacombes0003"
 GARGOUILLE = "espece:gargouille"
 MINOTAURE = "espece:minotaure"
 
@@ -109,7 +115,7 @@ IMAGES = {
 	PORTE_MARS: "porte_de_ville_chartres_exterieur01.jpg",
 	ENCLOS: "portail_de_temple_europe03.png",
 	CRYPTE: "portail_de_temple_europe10.png",
-	LABYRINTHE: "catacombes0004.png",
+	LABYRINTHE: "crypte_de_la_necropole_d_escolives.jpg",
 }
 
 # Cibles approchées des portes sur les cartes de cité (x, y) : la case praticable libre la
@@ -376,14 +382,24 @@ def choix_accueil_maelys():
 			 "condition": {"apport_en_cours": True, "apport_possible": False, "offre": q},
 			 "next": f"{p}_relance"},
 		]
-	for p, q in (("b_aix", B_AIX), ("b_temple", B_TEMPLE)):
+	for p, q, preuve in (("b_aix", B_AIX, None), ("b_temple", B_TEMPLE, CRISTAL_OSSUAIRE)):
+		rapport = {"transport_a_rapporter": True, "offre": q}
+		if preuve:
+			rapport["quete_reussie"] = {"id": preuve}
 		c += [
 			{"id": f"{p}_relance", "label": "« Au sujet du pli… »",
 			 "condition": {"transport_en_cours": True, "offre": q}, "next": f"{p}_relance"},
 			{"id": f"{p}_rapport", "label": "« Le pli est remis. Voici la réponse. »",
-			 "condition": {"transport_a_rapporter": True, "offre": q},
+			 "condition": rapport,
 			 "action": {"service": "transport", "op": "rapporter"}},
 		]
+		if preuve:
+			# Le pli remis mais la descente pas faite : Maëlys renvoie au commandeur (modèle du
+			# couple `rang_c_attente` / `rang_c_rapport` de Jumièges).
+			c.append({"id": f"{p}_attente", "label": "« Le pli est remis. »",
+					  "condition": {"transport_a_rapporter": True, "offre": q,
+									"quete_reussie": {"id": preuve, "attendu": False}},
+					  "next": f"{p}_pas_encore"})
 	for p, q in (("b_mars", B_MARS), ("a_ampoule", A_AMPOULE), ("a_delegation", A_DELEGATION)):
 		c.append({"id": f"{p}_relance", "label": "« Au sujet de l'escorte… »",
 				  "condition": {"escorte_en_cours": True, "offre": q}, "next": f"{p}_relance"})
@@ -483,7 +499,7 @@ def noeuds_maelys():
 	}
 	# ── B · la porte qui ne devait pas s'ouvrir ──
 	n["b_temple_propose"] = {
-		"texte": "Maëlys garde la main sur le pli un instant avant de le poser. « L'Enclos du Temple. La maison des Templiers, ici, à Lutecia. Ce sont eux qui gardent ce qu'il y a sous nos pieds, les catacombes et leur donjon, et qui en remontent les cristaux jaunes. » Elle se tait. « Depuis trois mois, leur commandeur ne répond plus aux lettres de la Guilde que par des politesses. Quand un Templier devient poli, {prenom}, il se passe quelque chose au fond. Portez-lui ceci à {destination}, et écoutez ce qu'il ne dira pas. »",
+		"texte": "Maëlys garde la main sur le pli un instant avant de le poser. « L'Enclos du Temple. La maison des Templiers, ici, à Lutecia. Ce sont eux qui gardent ce qu'il y a sous nos pieds, les catacombes et leur donjon, et qui en remontent les cristaux jaunes. » Elle se tait. « Depuis trois mois, leur commandeur ne répond plus aux lettres de la Guilde que par des politesses. Quand un Templier devient poli, {prenom}, il se passe quelque chose au fond. Portez-lui ceci à {destination}. S'il vous envoie en bas, descendez : je ne veux pas sa réponse, je veux ce que vous aurez vu. »",
 		"choix": [
 			{"id": "infos", "label": "« Pourquoi moi ? »", "next": "b_temple_infos"},
 			_accepter("transport", "« Donnez-moi ce pli. »"),
@@ -495,7 +511,7 @@ def noeuds_maelys():
 		"choix": [_accepter("transport", "« Donnez-moi ce pli. »"), _plus_tard("« Laissez-moi y réfléchir. »")],
 	}
 	n["b_temple_accepte"] = {
-		"texte": "Elle vous tend le pli. « Au commandeur. Et s'il vous propose de descendre, ne refusez pas. »",
+		"texte": "Elle vous tend le pli. « Au commandeur. Et s'il vous envoie dans les catacombes, allez jusqu'au fond. Le rang B, c'est l'ossuaire, pas l'antichambre. »",
 		"choix": _ok("« Compris. »"),
 	}
 	n["b_temple_trop_charge"] = {
@@ -506,8 +522,12 @@ def noeuds_maelys():
 		"texte": "« Le commandeur n'a pas eu ma lettre. » Elle ne lève pas les yeux. « L'Enclos du Temple, {prenom}. Ce n'est pas loin. C'est ce qui m'inquiète. »",
 		"choix": _ok("« J'y vais. »"),
 	}
+	n["b_temple_pas_encore"] = {
+		"texte": "Maëlys lève les yeux de ses registres. « Remis, oui. Le commandeur me l'a fait savoir. » Un temps. « Il me fait savoir aussi que son cristal n'est pas remonté de l'ossuaire. » Elle referme le registre. « Allez au fond, {prenom}, et rapportez-le-lui. Ensuite seulement, revenez ici. »",
+		"choix": _ok("« J'y vais. »"),
+	}
 	n["b_temple_rapporte"] = {
-		"texte": "Maëlys écoute sans vous interrompre : l'ossuaire, la paroi, la porte qui n'était pas là, le symbole, la chaleur de la pierre. Quand vous parlez du symbole, elle prend une feuille et vous demande de le dessiner. Vous le faites. Elle le regarde longtemps, puis le glisse dans le registre, à une page qu'elle ne vous montre pas. « Rang B. » Elle fait glisser vers vous {prime} pièces de cuivre. « Ils continueront d'extraire. Ils n'ont pas le choix : sans cristaux jaunes, la moitié des portes de cette ville s'éteindrait. » Un temps. « Personne n'a le choix. C'est ce qui rend les portes si patientes. »",
+		"texte": "Maëlys brise le sceau du commandeur, lit, puis vous écoute sans vous interrompre : les trois étages, ce qui rôdait, l'ossuaire, le coffre, la paroi ouverte et la porte qui n'était pas là, le symbole, la chaleur de la pierre. Quand vous parlez du symbole, elle prend une feuille et vous demande de le dessiner. Vous le faites. Elle le regarde longtemps, puis le glisse dans le registre, à une page qu'elle ne vous montre pas. « Rang B. » Elle fait glisser vers vous {prime} pièces de cuivre. « Ils continueront d'extraire. Ils n'ont pas le choix : sans cristaux jaunes, la moitié des portes de cette ville s'éteindrait. » Un temps. « Personne n'a le choix. C'est ce qui rend les portes si patientes. »",
 		"choix": _ok("« Merci, maîtresse. »"),
 	}
 	n["b_temple_souvenir"] = {
@@ -830,11 +850,30 @@ def gardienne():
 
 
 def commandeur():
+	# Le pli livré, il envoie à l'OSSUAIRE (étage 3 des catacombes, `lieu:catacombes0003`) :
+	# la preuve de la descente est le cristal jaune de son coffre garanti — seule source du
+	# cristal en jeu (Auteur, 25/10 : on descend dans les catacombes EXISTANTES).
+	pli_livre = {"quete_active": {"id": B_TEMPLE}, "transport_a_livrer": False}
 	return {
 		"_id": COMMANDEUR, "type": "pnj", "nom": "Le commandeur de l'Enclos",
 		"race": "humain", "vocation": "templier", "portrait": PORTRAITS[COMMANDEUR],
 		"description": "Commandeur de l'Enclos du Temple, la maison des Templiers de Lutecia. Ses hommes gardent les catacombes et leur donjon, et en remontent les cristaux jaunes.",
-		"services": {"transport": {"noeuds": {"livre": "pli_lu", "incomplet": "pli_absent"}}},
+		"services": {
+			"transport": {"noeuds": {"livre": "pli_lu", "incomplet": "pli_absent"}},
+			"apport": {
+				"offre": {
+					"id": CRISTAL_OSSUAIRE,
+					"titre": "Le cristal de l'ossuaire",
+					"description": "Le commandeur de l'Enclos du Temple veut que vous descendiez dans les catacombes de Lutecia jusqu'à l'ossuaire, le dernier étage, et que vous lui rapportiez le cristal jaune de son coffre. Ensuite seulement, il écrira sa réponse à la Guilde.",
+					"item": CRISTAL_JAUNE,
+					"quantite": 1,
+					"unique": True,
+					"rang": "B",
+					"recompenses": {"xp": 60, "cuivre": 1200},
+				},
+				"noeuds": {"accepte": "cristal_accepte", "remis": "cristal_remis", "partiel": "cristal_partiel"},
+			},
+		},
 		"dialogue": {
 			"noeud_depart": "accueil",
 			"noeuds": {
@@ -845,9 +884,16 @@ def commandeur():
 						{"id": "pli", "label": "Lui remettre le pli de la Guilde.",
 						 "condition": {"transport_a_livrer": True},
 						 "action": {"service": "transport", "op": "livrer"}},
+						{"id": "descente", "label": "« Vous vouliez que je descende ? »",
+						 "condition": {"apport_offert": True, **pli_livre}, "next": "cristal_propose"},
+						{"id": "cristal", "label": "Poser le cristal jaune de l'ossuaire sur la table.",
+						 "condition": {"apport_possible": True},
+						 "action": {"service": "apport", "op": "remettre"}},
+						{"id": "relance", "label": "« Au sujet de l'ossuaire… »",
+						 "condition": {"apport_en_cours": True, "apport_possible": False}, "next": "cristal_relance"},
 						{"id": "attente", "label": "« Votre réponse part pour la Guilde. »",
-						 "condition": {"quete_active": {"id": B_TEMPLE}, "transport_a_livrer": False}, "next": "attente"},
-						{"id": "apres", "label": "« La porte de l'ossuaire ? »", "condition": apres(B_TEMPLE), "next": "apres"},
+						 "condition": {**pli_livre, "quete_reussie": {"id": CRISTAL_OSSUAIRE}}, "next": "attente"},
+						{"id": "apres", "label": "« L'ossuaire ? »", "condition": apres(B_TEMPLE), "next": "apres"},
 						choix_fin(),
 					],
 				},
@@ -856,11 +902,30 @@ def commandeur():
 					"choix": [choix_fin()],
 				},
 				"pli_lu": {
-					"texte": "Le commandeur lit la lettre de Maëlys deux fois, puis la pose sur la table, sous le cristal. « Elle a raison. Je suis devenu poli. » Il vous regarde. « Au fond de l'ossuaire, là où nous extrayons depuis vingt ans, une paroi s'est ouverte le mois dernier. Derrière, une porte. De pierre, fermée, gravée d'un signe que nul ici ne sait lire. Elle n'était pas là. Je l'aurais vue : j'ai creusé moi-même ce couloir. »",
-					"choix": [{"id": "suite", "label": "« Elle s'est ouverte ? »", "next": "pli_suite"}],
+					"texte": "Le commandeur lit la lettre de Maëlys deux fois, puis la pose sur la table, sous le cristal. « Elle a raison. Je suis devenu poli. » Il vous regarde. « Au fond de l'ossuaire, là où nous extrayons depuis vingt ans, une paroi s'est ouverte le mois dernier. Derrière, une porte de pierre, fermée, gravée d'un signe que nul ici ne sait lire. Elle n'était pas là : j'ai creusé moi-même ce couloir. » Il repousse la lettre. « Je ne répondrai pas à votre maîtresse sur ma parole. Je répondrai sur la vôtre. »",
+					"choix": [{"id": "suite", "label": "« C'est-à-dire ? »", "next": "cristal_propose"}],
 				},
-				"pli_suite": {
-					"texte": "« Non. » Il secoue la tête. « Elle est tiède. Quand on pose la main dessus, la pierre est tiède, comme une bête qui dort. » Il trempe sa plume et écrit vite. « Voici ma réponse pour votre maîtresse. Tout y est, sauf une chose : je ne sais pas s'il faut cesser d'extraire. Si nous cessons, Lutecia s'éteint. Si nous continuons… » Il scelle la lettre. « Une porte qui ne devait pas s'ouvrir, on ne sait jamais ce qui la retient. »",
+				"cristal_propose": {
+					"texte": "« Descendez. » Il désigne le sol. « Par la porte des catacombes, comme tout le monde : trois étages, jusqu'à l'ossuaire. Mes hommes n'y vont plus depuis que la paroi s'est ouverte ; ce qui rôde en bas s'y est rassemblé. Au fond, il y a un coffre. Nous y laissions le cristal du mois. Rapportez-le-moi, et dites-moi ce que vous avez vu. Ensuite, j'écrirai à la Guilde. »",
+					"choix": [
+						{"id": "accepter", "label": "« Je descends. »", "action": {"service": "apport", "op": "accepter"}},
+						{"id": "plus_tard", "label": "« Pas aujourd'hui. »", "next": "fin"},
+					],
+				},
+				"cristal_accepte": {
+					"texte": "Le commandeur hoche la tête. « Trois étages. Ne vous attardez pas au deuxième, et n'ouvrez le coffre qu'une fois la salle vide : certains coffres, en bas, ont des dents. » Il revient à son cristal. « Je vous attends. »",
+					"choix": [choix_fin("« Compris. »")],
+				},
+				"cristal_relance": {
+					"texte": "« L'ossuaire. » Il ne lève pas les yeux. « Le troisième étage, le coffre du fond. Je ne réponds pas à la Guilde avant. »",
+					"choix": [choix_fin("« J'y retourne. »")],
+				},
+				"cristal_partiel": {
+					"texte": "« Il en manque. » Le commandeur compte : il reste {reste} pièce à rapporter.",
+					"choix": [choix_fin("« Je reviens avec. »")],
+				},
+				"cristal_remis": {
+					"texte": "Le commandeur prend le cristal, le pose à côté du sien, et les regarde briller ensemble. Il vous écoute : les étages, ce qui rôdait, l'ossuaire, la paroi ouverte et la porte derrière, tiède sous la main. « Vous l'avez touchée. Moi aussi. » Il fait glisser vers vous {prime} pièces de cuivre, trempe sa plume et écrit vite. « Voici ma réponse. Tout y est, sauf une chose : je ne sais pas s'il faut cesser d'extraire. Si nous cessons, Lutecia s'éteint. Si nous continuons… » Il scelle la lettre. « Une porte qui ne devait pas s'ouvrir, on ne sait jamais ce qui la retient. »",
 					"choix": [choix_fin("(Prendre la réponse.)")],
 				},
 				"pli_absent": {
@@ -1060,6 +1125,7 @@ def lieux_neufs(par_id):
 
 REQUIS = (MAELYS, FRANCE, LUTECIA, AIX, RHEMI, CHARTRES, AUBERGE_SACRE, ITEM_LETTRE,
 		  TETE_GARGOUILLE, TETE_GEANT, TETE_BETE, TETE_MINOTAURE, GARGOUILLE, MINOTAURE,
+		  CRISTAL_JAUNE, OSSUAIRE,
 		  ZONE_GARGOUILLE, "item:Cotte_de_mailles", "item:Epee_longue_ordre", "item:Bouclier_ordre")
 
 

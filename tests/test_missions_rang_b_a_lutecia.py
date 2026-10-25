@@ -83,6 +83,9 @@ def test_les_ids_de_quete_sont_ceux_des_offres():
 		for brut in re.findall(r'"(quete:rang_[a-z0-9_]+)"', texte):
 			assert brut in ids, (doc["_id"], brut)
 	assert set(GEN.QUETES_B) | set(GEN.QUETES_A) <= nommees
+	# La descente du Temple est nommée par Maëlys (rapport) ET offerte par le commandeur.
+	assert f'"{GEN.CRISTAL_OSSUAIRE}"' in json.dumps(MAELYS["dialogue"], ensure_ascii=False)
+	assert apport.offre_spec(DOCS[GEN.COMMANDEUR])["id"] == GEN.CRISTAL_OSSUAIRE
 
 
 def test_plusieurs_missions_par_rang_et_un_seul_type_par_tirage():
@@ -171,7 +174,8 @@ ETATS = [
 	(GEN.CHANCELIER, GEN.B_AIX, set(), {"attente"}, {"apres_pli"}),
 	(GEN.CHANCELIER, GEN.A_DELEGATION, set(), {"delegation"}, {"apres_delegation"}),
 	(GEN.GARDIENNE, GEN.A_AMPOULE, {"portes"}, {"ampoule"}, {"apres"}),
-	(GEN.COMMANDEUR, GEN.B_TEMPLE, {"bonjour"}, {"attente"}, {"apres"}),
+	# Le commandeur a un PENDANT en plusieurs temps (pli, descente, cristal) : test dédié plus bas.
+	(GEN.COMMANDEUR, GEN.B_TEMPLE, {"bonjour"}, set(), {"apres"}),
 	(GEN.GARDE_MARS, GEN.B_MARS, {"bonjour"}, {"architecte"}, {"apres"}),
 	(GEN.TEMPLIER_CRYPTE, GEN.A_MINOTAURE, {"bonjour"}, set(), {"apres"}),
 ]
@@ -188,6 +192,53 @@ def test_trois_etats(pnj_id, qid, avant, pendant, apres):
 	assert pendant <= v_pendant and not (apres - pendant) & v_pendant
 	assert apres <= v_apres and not ((avant | pendant) - apres) & v_apres
 	assert propres, "chaque PNJ dit quelque chose dans au moins un état"
+
+
+# ── La porte qui ne devait pas s'ouvrir : le pli, puis la descente à l'ossuaire ─────
+
+@pytest.mark.parametrize("actives, reussies, flags, attendus, exclus", [
+	((), (), {}, {"bonjour"}, {"pli", "descente", "cristal", "relance", "attente", "apres"}),
+	((GEN.B_TEMPLE,), (), {"transport_a_livrer": True}, {"pli"}, {"descente", "attente", "bonjour"}),
+	((GEN.B_TEMPLE,), (), {"apport_offert": True}, {"descente"}, {"pli", "attente", "relance"}),
+	((GEN.B_TEMPLE, GEN.CRISTAL_OSSUAIRE), (), {"apport_en_cours": True}, {"relance"}, {"descente", "cristal", "attente"}),
+	((GEN.B_TEMPLE, GEN.CRISTAL_OSSUAIRE), (), {"apport_en_cours": True, "apport_possible": True}, {"cristal"}, {"relance", "attente"}),
+	((GEN.B_TEMPLE,), (GEN.CRISTAL_OSSUAIRE,), {}, {"attente"}, {"descente", "cristal", "apres"}),
+	((), (GEN.B_TEMPLE, GEN.CRISTAL_OSSUAIRE), {}, {"apres"}, {"bonjour", "attente", "descente"}),
+])
+def test_le_commandeur_du_pli_a_l_ossuaire(actives, reussies, flags, attendus, exclus):
+	visibles = _visibles(DOCS[GEN.COMMANDEUR], _perso(actives=actives, reussies=reussies), flags)
+	assert attendus <= visibles and not exclus & visibles, visibles
+
+
+def test_la_descente_n_est_offerte_qu_apres_le_pli():
+	"""L'apport du commandeur n'a pas de condition propre : c'est le CHOIX qui le réserve à
+	qui lui a remis le pli de Maëlys."""
+	visibles = _visibles(DOCS[GEN.COMMANDEUR], _perso(), {"apport_offert": True})
+	assert "descente" not in visibles
+
+
+def test_maelys_ne_solde_le_temple_qu_apres_l_ossuaire():
+	c = _perso("C", actives=[GEN.B_TEMPLE])
+	vue = _vue(c)
+	flags = {"transport_a_rapporter": True}
+	sans = _visibles(vue, c, flags)
+	assert "b_temple_attente" in sans and "b_temple_rapport" not in sans
+	c["quetes_terminees"].append({"id": GEN.CRISTAL_OSSUAIRE})
+	avec = _visibles(vue, c, flags)
+	assert "b_temple_rapport" in avec and "b_temple_attente" not in avec
+
+
+def test_le_cristal_jaune_ne_vient_que_du_coffre_de_l_ossuaire():
+	"""La preuve de la descente ne vaut que si le cristal n'a pas d'autre source : ni boutique,
+	ni recette, ni autre donjon (personnages du dump exclus : c'est l'état d'un joueur)."""
+	sources = [d["_id"] for d in DUMP.values()
+			   if d["_id"] != GEN.CRISTAL_JAUNE and d.get("type") != "character"
+			   and f'"{GEN.CRISTAL_JAUNE}"' in json.dumps(d, ensure_ascii=False)]
+	assert sources == ["donjon:catacombes_de_lutecia"], sources
+	salle = next(b for b in DUMP["donjon:catacombes_de_lutecia"]["battle_maps"]
+				 if f'"{GEN.CRISTAL_JAUNE}"' in json.dumps(b))
+	assert salle["lieu"] == GEN.OSSUAIRE
+	assert {"item": GEN.CRISTAL_JAUNE, "quantite": 1} in salle["tresor"]["garanti"]
 
 
 def test_hugues_n_est_sous_l_arche_qu_apres_l_escorte():
