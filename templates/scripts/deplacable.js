@@ -12,10 +12,14 @@
 // par `translateX(-50%)`, qui le décalerait d'une demi-largeur sous le pointeur.
 // ⚠️ Un `pointerdown` sur un BOUTON de la poignée (le ✕ du pavé de test) n'amorce aucun
 // glisser — la capture de pointeur détournerait le clic censé fermer le mode.
+// ⚠️ `touch-action:none` est posé ICI sur la poignée, pas laissé au CSS de chaque page :
+// sans lui, au doigt, le navigateur prend le glisser pour un défilement/zoom et envoie
+// `pointercancel` d'emblée — le panneau ne bouge qu'à la souris (poignées de l'éditeur).
 // `onFin(pos)` (optionnel) reçoit `{ left, top }` au lâcher d'un glisser — play_town y
 // mémorise la position.
 function rendreDeplacable(el, poignee, onFin) {
 	if (!el || !poignee) return;
+	poignee.style.touchAction = 'none';
 	let drag = null;   // { dx, dy } écart pointeur → coin haut-gauche
 	poignee.addEventListener('pointerdown', e => {
 		if (e.target && e.target.closest && e.target.closest('button')) return;
