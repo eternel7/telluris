@@ -24,6 +24,7 @@ from utils.marche import (
 from utils import pnj
 from utils import intro
 from utils import transport
+from utils import offres
 from utils import chasse
 from utils import quetes
 from utils import focalisation
@@ -64,7 +65,9 @@ def _pnj_du_lieu(character: dict, pnj_id: str | None = None) -> tuple[dict, dict
 	entree = pnj.entree_pnj_active(
 		character, lieu_doc or {}, transport.entree_marchand,
 		lambda conds: acces.clauses_remplies(character, conds, get_doc), pnj_id)
-	pnj_doc = get_doc(entree["character"]) if entree else None
+	# VUE du doc (utils/offres.py) : un PNJ à plusieurs `offres` n'en tient qu'une par service,
+	# celle en cours ou celle tirée à l'entrée — tout le reste du router n'en voit qu'une.
+	pnj_doc = offres.vue_pnj(get_doc(entree["character"]) if entree else None, character, lieu_doc)
 	if not entree or not pnj_doc:
 		raise HTTPException(status_code=404, detail="Personne à qui parler ici.")
 	return entree, pnj_doc, lieu_doc

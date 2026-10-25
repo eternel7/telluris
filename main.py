@@ -53,6 +53,7 @@ from utils import auberge as auberge_util
 from utils import scriptorium as scriptorium_util
 from utils import commande as commande_util
 from utils import escorte as escorte_util
+from utils import offres as offres_util
 from utils import indicateurs as indicateurs_util
 from utils import fiche as fiche_util
 from utils import acces
@@ -821,6 +822,11 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 								  transport_util.entree_marchand, conditions_pnj)
 	pnj_paires = [(e, get_doc(e["character"])) for e in pnj_entrees]
 	pnj_paires = [(e, d) for e, d in pnj_paires if d]
+	# PNJ à PLUSIEURS offres par service (`offres`, Maëlys) : l'offre proposée est tirée à
+	# l'entrée (persistée, même sémantique que pnj_present), puis chaque doc est remplacé par
+	# sa VUE — un seul bloc par service — avant tout tirage d'offre et tout calcul de badge.
+	change |= offres_util.poser_offres_tirees(character, grid_doc, [d for _, d in pnj_paires])
+	pnj_paires = [(e, offres_util.vue_pnj(d, character, grid_doc)) for e, d in pnj_paires]
 	# Offre de course : tirée à l'entrée, persistée (même sémantique que pnj_present).
 	change |= transport_util.poser_transport_offert(character, grid_doc, find_docs, get_doc,
 													pnj_doc=transport_util.donneur_present(

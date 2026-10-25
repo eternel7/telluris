@@ -70,6 +70,8 @@ Trame **retenue** (D–B de la première version, A–S+ de la version gardée) 
 | S | **Yggdrasil** | cité nordique | Asgard, Midgard, Jötunheim, Hel ; les mondes précèdent-ils les récits ? |
 | S+ | « Celui qui était avant » | hors de toute mythologie | quatre hypothèses, **le jeu ne tranche pas** |
 
+**Épreuves de rang de Lutecia en jeu** (Auteur, 25/10) : au rang C → B et B → A, Maëlys propose **plusieurs épreuves** — B : Gargouille de la Seine, pli d'Aix-la-Chapelle, Porte de Mars, la porte qui ne devait pas s'ouvrir (Enclos du Temple, catacombes) ; A : géant de la baie, Bête du Gévaudan, Minotaure du puits de Chartres (deux, on y descend), Ampoule du Sacre, délégation palatine. Chasses = trophées sur la carte de France. Détail : [personnages/20261025_missions_rang_b_a_lutecia.md].
+
 La première version d'A–S+ (« Le bélier de Mu », Orphée/Hadès, Ragnarök, « Le jardin derrière le ciel ») est une **variante** de la même séance. Règle proposée et cohérente avec l'Auteur : chaque mythologie **répond à une question et en ouvre deux**.
 
 ## Autres séances utiles

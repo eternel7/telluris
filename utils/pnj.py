@@ -379,6 +379,9 @@ def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 		"passages": dict((character or {}).get("passages") or {}),
 		# Lu par la condition `rang_min` (rang de guilde PAR CITÉ).
 		"rangs_guilde": dict((character or {}).get("rangs_guilde") or {}),
+		# Lu par la condition `offre` : ids des offres que ce PNJ tient maintenant, posés sur
+		# la VUE du doc par `utils/offres.vue_pnj` (jamais en base).
+		"offres_retenues": set((pnj_doc or {}).get("_offres_retenues") or ()),
 	}
 
 
@@ -387,7 +390,8 @@ def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 # exact de cet ensemble (épinglé par un test) : une clé structurée absente de la liste du
 # linter serait signalée comme flag inconnu, et l'inverse ferait passer une faute en silence.
 CONDITIONS_STRUCTUREES = frozenset({
-	"relation_min", "intro_raison", "quete_reussie", "quete_active", "passages", "rang_min"})
+	"relation_min", "intro_raison", "quete_reussie", "quete_active", "passages", "rang_min",
+	"offre"})
 
 # Les deux conditions qui nomment une QUÊTE : même forme `{id, attendu}`, même sémantique
 # fail-closed, seul l'ensemble consulté change — d'où UN prédicat partagé plutôt que deux
@@ -462,6 +466,13 @@ def condition_ok(condition: dict | None, contexte: dict) -> bool:
 		from utils import acces
 		if not isinstance(condition["rang_min"], dict) or not acces.rang_min_satisfait({"rangs_guilde": contexte.get("rangs_guilde")},
 										condition["rang_min"]):
+			return False
+	if "offre" in condition:
+		# L'offre NOMMÉE est-elle celle que ce PNJ tient maintenant pour son service ? Départage
+		# deux choix conditionnés sur le même flag (`transport_offert`…) quand le PNJ porte
+		# plusieurs `offres` (utils/offres.py). Fail-closed : id non textuel ⇒ faux.
+		qid = condition["offre"]
+		if not isinstance(qid, str) or qid not in (contexte.get("offres_retenues") or ()):
 			return False
 	flags = contexte.get("flags") or {}
 	for cle, attendu in condition.items():
