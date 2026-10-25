@@ -29,7 +29,7 @@ from utils.sorts import (
 	sorts_eligibles_espece, resoudre_effets, portee_effective, resoudre_temps,
 	provocation_pure,
 )
-from utils.zones_effet import cases_effet, placement_visuel
+from utils.zones_effet import axe_facing, cases_effet, placement_visuel
 from utils.quetes import maj_progress_kills, maj_progress_chasse
 # `utils/zones.py` est une FEUILLE (math/random seulement) : aucun cycle possible.
 from utils.zones import profils_compatibles
@@ -1314,6 +1314,45 @@ def _vue_acteurs(cells: list, a: dict, b: dict) -> bool:
 			   for (x0, y0) in cases_a for (x1, y1) in cases_b)
 
 
+# ── Orientation : on ne frappe pas dans son dos ──────────────────────────────────
+# Un acteur porte un DEVANT : le `facing` d'un acteur piloté par le joueur (la caméra,
+# action `tourner`), le `cap` d'un acteur joué par le serveur (monstre, invocation —
+# posé face au groupe au placement, suivi à chaque pas). Devant, et les cases DIRECTEMENT
+# à gauche et à droite, se frappent ; dès une rangée en arrière, il faut pivoter.
+# ⚠️ Un quart de tour suffit toujours : la cible dans le dos passe sur le côté.
+
+def _axe_acteur(acteur: dict) -> tuple:
+	"""Axe monde du devant d'un acteur : son `facing` s'il en porte un (ou, camp du joueur,
+	s'il n'a pas encore de `cap` — défaut 0, le Nord), sinon son `cap` (défaut `jetons`)."""
+	camp_joueur = str(acteur.get("id", "")).startswith("joueur_")
+	if "facing" in acteur or (camp_joueur and "cap" not in acteur):
+		return axe_facing(acteur.get("facing", 0))
+	return jetons.CAPS[jetons.cap_de(acteur)]
+
+
+def _dans_le_dos(a: dict, b: dict) -> bool:
+	"""`b` est-il TOUT ENTIER derrière la rangée arrière de `a` ? Projection des emprises
+	sur l'axe de `a` : les côtés (projection égale) et les diagonales avant passent."""
+	fx, fy = _axe_acteur(a)
+	arriere = min(x * fx + y * fy for (x, y) in jetons.cases_emprise(a))
+	return max(x * fx + y * fy for (x, y) in jetons.cases_emprise(b)) < arriere
+
+
+def _peut_frapper(cells: list, a: dict, b: dict) -> bool:
+	"""Chokepoint de TOUT coup porté (arme, capacité offensive, IA) hors portée : ligne de
+	vue — en mêlée aussi, un fouet ne frappe pas à travers un mur — et cible pas dans le dos."""
+	return _vue_acteurs(cells, a, b) and not _dans_le_dos(a, b)
+
+
+def _refus_frappe(cells: list, a: dict, b: dict) -> str | None:
+	"""Message de refus d'un coup du joueur sur `b`, ou None s'il peut frapper."""
+	if not _vue_acteurs(cells, a, b):
+		return "Ligne de vue obstruée."
+	if _dans_le_dos(a, b):
+		return "Cible dans votre dos : pivotez d'abord."
+	return None
+
+
 def _traversable_par(occupant: dict, traversant: dict | None) -> bool:
 	"""`traversant` peut-il passer sur les cases d'`occupant` ? Seul un joueur JOUABLE, et
 	seulement sur un grand allié NON JOUABLE (monture, personne escortée, invocation de plus
@@ -2316,6 +2355,7 @@ def _faire_accourir(combat_doc: dict, renforts: list, origine: dict, grid: dict)
 		else:
 			c = random.choice(pool)
 			m["pos"] = {"x": c[0], "y": c[1]}
+			m["cap"] = jetons.cap_vers(m, origine)
 		occupees.update(jetons.cases_emprise(m))
 		m["detecte"] = True
 		_appliquer_couvert(m, bool(combat_doc.get("couvert")))
@@ -2941,6 +2981,7 @@ def _place_actors(combat_doc: dict, grid: dict, point_apparition: dict | None = 
 		else:  # région saturée (carte minuscule) : repli sur la case libre la plus proche.
 			pos = _nearest_passable(cells, dims, base[0], base[1], occupied)
 		m["pos"] = {"x": pos[0], "y": pos[1]}
+		m["cap"] = jetons.cap_vers(m, main)   # face au groupe, comme un grand jeton
 		occupied.add(pos)
 
 
@@ -5086,14 +5127,62 @@ def _pas_budget_ok(acteur: dict) -> bool:
 	return projected <= acteur["actions_max"]
 
 
+def _pivoter_vers(combat_doc: dict, acteur: dict, cible: dict, grid: dict) -> bool:
+	"""Quart de tour d'un acteur JOUÉ PAR LE SERVEUR vers le côté de `cible` (dans son dos) :
+	elle passe sur le côté ou devant (`_dans_le_dos`). Même prix que l'action `tourner` du
+	joueur — une case du budget de déplacement. Grand jeton : la nouvelle emprise doit tenir.
+	Rend False sans rien changer si le budget manque ou si le pivot ne suffit pas."""
+	if acteur["cells_moved"] >= acteur.get("deplacement", 1) or not _pas_budget_ok(acteur):
+		return False
+	fx, fy = _axe_acteur(acteur)
+	(ax, ay), (bx, by) = jetons.centre(acteur), jetons.centre(cible)
+	droite = (bx - ax) * -fy + (by - ay) * fx >= 0   # côté droit = (-fy, fx), repère monde
+	sonde = dict(acteur)
+	if "facing" in acteur:
+		sonde["facing"] = (acteur.get("facing", 0) + (90 if droite else -90)) % 360
+	else:
+		axe = (-fy, fx) if droite else (fy, -fx)
+		sonde["cap"] = next(c for c, v in jetons.CAPS.items() if v == axe)
+		if jetons.est_grand(acteur):
+			praticable, _ = _predicats_jeton(grid, acteur)
+			bloque = _occupied_set(combat_doc, exclude=acteur)
+			if not all(praticable(x, y) and (x, y) not in bloque
+					   for (x, y) in jetons.cases_emprise(sonde)):
+				return False
+	if _dans_le_dos(sonde, cible):
+		return False
+	for cle in ("facing", "cap"):
+		if cle in sonde:
+			acteur[cle] = sonde[cle]
+	acteur["cells_moved"] += 1
+	_refresh_actions(acteur)
+	combat_doc["log"].append(_avec_etat({
+		"tour": combat_doc["tour"],
+		"acteur": acteur["nom"],
+		"kind": "move",
+		"texte": f"{acteur['nom']} pivote vers {cible['nom']}.",
+	}, acteur))
+	return True
+
+
+def _pret_a_frapper(combat_doc: dict, acteur: dict, cible: dict, grid: dict) -> bool:
+	"""L'IA peut-elle porter son coup sur `cible` (déjà à portée) ? Ligne de vue exigée ;
+	cible dans le dos ⇒ elle pivote d'abord (`_pivoter_vers`), si son budget le permet."""
+	if not _vue_acteurs(grid["cells"], acteur, cible):
+		return False
+	return not _dans_le_dos(acteur, cible) or _pivoter_vers(combat_doc, acteur, cible, grid)
+
+
 def _grand_pas_vers(combat_doc: dict, acteur: dict, cible: dict, grid: dict, blocked: set) -> bool:
 	"""Un pas d'un GRAND jeton vers `cible` : A* sur les états (ancre, cap) jusqu'à ce que son
-	emprise soit à portée, puis le premier pas — pivot compris (utils/jetons.py)."""
+	emprise soit à portée, en vue et la cible devant ou sur le côté (`_peut_frapper`), puis le
+	premier pas — pivot compris (utils/jetons.py)."""
 	portee = max(1, int(acteur.get("portee", 1) or 1))
 	praticable, nav_ok = _predicats_jeton(grid, acteur)
 	chemin = jetons.chemin_jeton(
 		acteur,
-		but=lambda vue: jetons.distance(vue, cible) <= portee,
+		but=lambda vue: (jetons.distance(vue, cible) <= portee
+						 and _peut_frapper(grid["cells"], vue, cible)),
 		heuristique=lambda vue: max(0, jetons.distance(vue, cible) - portee),
 		bloque=blocked, praticable=praticable, nav_ok=nav_ok,
 	)
@@ -5135,8 +5224,9 @@ def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: di
 	# Vérifier qu'il reste assez d'AP pour ce pas (coût proportionnel).
 	if not _pas_budget_ok(monstre):
 		return False
-	if monstre.get("jeton"):   # 1x1 à forme : le dessin s'oriente dans le sens de la marche
-		monstre["cap"] = jetons.cap_vers(monstre, {"pos": {"x": nxt[0], "y": nxt[1]}})
+	# Le cap suit la marche, pour TOUT monstre : le dessin d'un jeton à forme s'oriente, et
+	# le DOS bouge avec lui (`_dans_le_dos`).
+	monstre["cap"] = jetons.cap_vers(monstre, {"pos": {"x": nxt[0], "y": nxt[1]}})
 	monstre["pos"] = {"x": nxt[0], "y": nxt[1]}
 	monstre["cells_moved"] += 1
 	_refresh_actions(monstre)
@@ -5197,9 +5287,10 @@ def _monster_step_away(combat_doc: dict, monstre: dict, cible: dict, grid: dict,
 			best = (nx, ny)
 	if best is None or not _pas_budget_ok(monstre):
 		return False
-	if monstre.get("jeton"):   # même parti pris que `_monster_step_toward` : le dessin s'oriente
-		monstre["cap"] = jetons.cap_vers(monstre, {"pos": {"x": best[0], "y": best[1]}})
+	# Il RECULE : il garde la menace devant lui (sinon il lui tournerait le dos, et devrait
+	# pivoter avant chaque tir — cf. `_dans_le_dos`).
 	monstre["pos"] = {"x": best[0], "y": best[1]}
+	monstre["cap"] = jetons.cap_vers(monstre, cible)
 	monstre["cells_moved"] += 1
 	_refresh_actions(monstre)
 	_bruler_zones(combat_doc, monstre)
@@ -5218,7 +5309,9 @@ def _deplacement_ia(combat_doc: dict, monstre: dict, cible: dict, grid: dict,
 	ranged = bool(profil.get("ranged"))
 	steps = 0
 	safety = 0
-	if ranged and _cheby(monstre, cible) < portee:
+	# Sans ligne de vue, reculer ne sert à rien : il contourne l'obstacle (approche).
+	if (ranged and _cheby(monstre, cible) < portee
+			and _vue_acteurs(grid["cells"], monstre, cible)):
 		while (combat_doc["status"] == "active" and _debout(monstre)
 			   and monstre["actions_restantes"] > 0
 			   and _cheby(monstre, cible) < portee
@@ -5233,7 +5326,8 @@ def _deplacement_ia(combat_doc: dict, monstre: dict, cible: dict, grid: dict,
 	# ⚠️ `_debout` : une INVOCATION emprunte cette fonction et ne porte pas `vivant`.
 	while (combat_doc["status"] == "active" and _debout(monstre)
 		   and monstre["actions_restantes"] > 0
-		   and _cheby(monstre, cible) > portee
+		   and (_cheby(monstre, cible) > portee
+				or not _vue_acteurs(grid["cells"], monstre, cible))
 		   and monstre["cells_moved"] < monstre.get("deplacement", 1)
 		   and safety < 100):
 		safety += 1
@@ -5401,8 +5495,9 @@ def _wander_step(combat_doc: dict, monstre: dict, grid: dict) -> bool:
 	if projected > monstre["actions_max"]:
 		return False
 	nx, ny = random.choice(options)
-	if monstre.get("jeton"):   # 1x1 à forme : le dessin s'oriente dans le sens de la marche
-		monstre["cap"] = jetons.cap_vers(monstre, {"pos": {"x": nx, "y": ny}})
+	# Le cap suit la marche, pour TOUT monstre : le dessin d'un jeton à forme s'oriente, et
+	# le DOS bouge avec lui (`_dans_le_dos`).
+	monstre["cap"] = jetons.cap_vers(monstre, {"pos": {"x": nx, "y": ny}})
 	monstre["pos"] = {"x": nx, "y": ny}
 	monstre["cells_moved"] += 1
 	_refresh_actions(monstre)
@@ -5425,7 +5520,8 @@ def _chasse_ou_erre(combat_doc: dict, monstre: dict, grid: dict) -> None:
 			_deplacement_ia(combat_doc, monstre, proie, grid, profil)
 		while (combat_doc["status"] == "active" and monstre["vivant"]
 			   and monstre["actions_restantes"] > 0
-			   and proie["vivant"] and _cheby(monstre, proie) <= portee):
+			   and proie["vivant"] and _cheby(monstre, proie) <= portee
+			   and _pret_a_frapper(combat_doc, monstre, proie, grid)):
 			_do_attack_on(combat_doc, monstre, proie, profil)   # décompte l'action lui-même
 		return
 	# Errance : quelques pas au hasard, sans jamais fondre sur le joueur.
@@ -5497,7 +5593,8 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 		   and monstre["actions_restantes"] > 0):
 		if joueur is None or joueur.get("currentPV", 0) <= 0:
 			joueur = _cible_joueur(combat_doc, monstre)
-		if joueur is None or _cheby(monstre, joueur) > portee:
+		if (joueur is None or _cheby(monstre, joueur) > portee
+				or not _pret_a_frapper(combat_doc, monstre, joueur, grid)):
 			break
 		_do_monster_attack(combat_doc, monstre, joueur, profil)   # décompte l'action lui-même
 
@@ -5574,7 +5671,7 @@ def _frapper_monstre(combat_doc: dict, attaquant: dict, monstre: dict, profil: d
 	return result, jet
 
 
-def _run_defenseur_turn(combat_doc: dict, joueur: dict) -> None:
+def _run_defenseur_turn(combat_doc: dict, joueur: dict, grid: dict) -> None:
 	"""Tour d'une personne escortée qui SAIT SE DÉFENDRE (`se_defend`) — joué par le serveur,
 	comme celui d'un monstre, et ne rend donc jamais la main au client.
 
@@ -5597,10 +5694,14 @@ def _run_defenseur_turn(combat_doc: dict, joueur: dict) -> None:
 		   and joueur["actions_restantes"] > 0 and safety < 100):
 		safety += 1
 		cibles = [m for m in combat_doc["monstres"]
-				  if m["vivant"] and _cheby(joueur, m) <= portee]
+				  if m["vivant"] and _cheby(joueur, m) <= portee
+				  and _vue_acteurs(grid["cells"], joueur, m)]
 		if not cibles:
 			break
-		monstre = min(cibles, key=lambda m: m["currentPV"])
+		# Une cible devant d'abord ; dans le dos, elle pivote (`_pret_a_frapper`).
+		monstre = min(cibles, key=lambda m: (_dans_le_dos(joueur, m), m["currentPV"]))
+		if not _pret_a_frapper(combat_doc, joueur, monstre, grid):
+			break
 		_, jet = _frapper_monstre(combat_doc, joueur, monstre, profil)
 		joueur["attaques"] = joueur.get("attaques", 0) + 1
 		_refresh_actions(joueur)
@@ -5658,7 +5759,8 @@ def _run_invocation_turn(combat_doc: dict, invoc: dict, grid: dict) -> None:
 		if cible is None or not cible["vivant"]:
 			vivants = [m for m in combat_doc["monstres"] if m["vivant"]]
 			cible = min(vivants, key=lambda m: _cheby(invoc, m)) if vivants else None
-		if cible is None or _cheby(invoc, cible) > portee:
+		if (cible is None or _cheby(invoc, cible) > portee
+				or not _pret_a_frapper(combat_doc, invoc, cible, grid)):
 			break
 		_, jet = _frapper_monstre(combat_doc, invoc, cible, profil)
 		invoc["attaques"] = invoc.get("attaques", 0) + 1
@@ -5725,7 +5827,7 @@ def _resolve_until_player(combat_doc: dict, grid: dict, start_at_current: bool =
 					_run_invocation_turn(combat_doc, joueur, grid)
 					continue
 				if joueur.get("jouable") is False:
-					_run_defenseur_turn(combat_doc, joueur)
+					_run_defenseur_turn(combat_doc, joueur, grid)
 					continue
 				# ⚠️ C'est `_reset_turn_budget` qui prélève l'entretien des sorts maintenus
 				# ET fait avancer une incantation longue : le budget qu'il rend peut donc
@@ -5917,12 +6019,13 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		# `portee > 1` : une hallebarde frappe à 2 cases EN MÊLÉE.
 		# EXCEPTION : une provocation PURE se lance engagé (`provocation_pure`) — c'est au
 		# contact que le garde en a besoin ; la ligne de vue, elle, reste exigée.
-		if est_a_distance:
-			if (not provocation_pure(effets)
-					and any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"])):
-				return {"error": profil["engage"]}, None
-			if not _vue_acteurs(grid["cells"], joueur, monstre):
-				return {"error": "Ligne de vue obstruée."}, None
+		if (est_a_distance and not provocation_pure(effets)
+				and any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"])):
+			return {"error": profil["engage"]}, None
+		# Ligne de vue et dos : à distance comme au contact allongé (cf. `_peut_frapper`).
+		refus = _refus_frappe(grid["cells"], joueur, monstre)
+		if refus:
+			return {"error": refus}, None
 		if _cheby(joueur, monstre) > sort_portee:
 			return {"error": "Cible hors de portée."}, None
 
@@ -6263,17 +6366,20 @@ def _resoudre_action_joueur(
 			if not monstre or not monstre["vivant"]:
 				return {"error": "Cible invalide."}
 		else:
-			candidats = [m for m in alive if _cheby(joueur, m) <= atk_portee]
+			candidats = [m for m in alive if _cheby(joueur, m) <= atk_portee
+						 and _peut_frapper(grid["cells"], joueur, m)]
 			if not candidats:
 				return {"error": "Aucune cible à portée. Rapprochez-vous."}
 			monstre = candidats[0]
 
-		# Règles de combat à distance (jet/tir) : pas d'engagement au corps à corps + ligne de vue.
-		if is_ranged:
-			if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
-				return {"error": "Un ennemi vous menace au corps à corps : impossible de tirer."}
-			if not _vue_acteurs(grid["cells"], joueur, monstre):
-				return {"error": "Ligne de vue obstruée."}
+		# Combat à distance (jet/tir) : pas d'engagement au corps à corps.
+		if is_ranged and any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
+			return {"error": "Un ennemi vous menace au corps à corps : impossible de tirer."}
+		# Ligne de vue et dos : pour TOUTE arme — une allonge de mêlée (fouet, hallebarde)
+		# ne frappe pas à travers un mur, et personne ne frappe derrière lui.
+		refus = _refus_frappe(grid["cells"], joueur, monstre)
+		if refus:
+			return {"error": refus}
 		if _cheby(joueur, monstre) > atk_portee:
 			return {"error": "Cible hors de portée."}
 

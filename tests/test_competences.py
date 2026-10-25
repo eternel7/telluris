@@ -615,16 +615,25 @@ def test_frappe_cc_atteint_une_cible_a_l_allonge_de_l_arme(monkeypatch):
     assert "error" in res and "hors de portée" in res["error"]
 
 
-def test_frappe_cc_a_l_allonge_reste_jouable_engage_et_sans_ligne_de_vue(monkeypatch):
+def test_frappe_cc_a_l_allonge_reste_jouable_engage(monkeypatch):
     # LE piège : `ranged` déduit de `portee > 1` aurait interdit la hallebarde dès qu'un
-    # ennemi est au contact, et lui aurait exigé une ligne de vue.
+    # ennemi est au contact.
     monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 1)
-    combat = _combat_arme(monstres=[_monstre("monstre_0", 3, 3),    # 2 cases
+    combat = _combat_arme(monstres=[_monstre("monstre_0", 4, 3),    # 2 cases
                                     _monstre("monstre_1", 3, 4)])   # au contact
-    combat["grid"]["cells"][4][3] = 0        # mur entre le joueur (3, 5) et la cible (3, 3)
     res = resolve_action(combat, "competence", cible_id="monstre_0",
                          competence=normaliser_competence(_comp()))
     assert "error" not in res, res
+
+
+def test_frappe_cc_a_l_allonge_exige_la_ligne_de_vue(monkeypatch):
+    # Une allonge de mêlée ne frappe pas à travers un mur (le fouet qui traversait).
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 1)
+    combat = _combat_arme(monstres=[_monstre("monstre_0", 3, 3)])   # 2 cases
+    combat["grid"]["cells"][4][3] = 0        # mur entre le joueur (3, 5) et la cible (3, 3)
+    res = resolve_action(combat, "competence", cible_id="monstre_0",
+                         competence=normaliser_competence(_comp()))
+    assert res.get("error") == "Ligne de vue obstruée."
 
 
 def test_frappe_cc_a_l_allonge_brise_la_furtivite(monkeypatch):
