@@ -52,7 +52,7 @@ Révision du 25/10 : phrase de foule rendue **telle quelle** et répartition ég
 
 ### 4.1 Lieux
 
-**Le labyrinthe du puits de Chartres** (`battle_maps/labyrinthe_du_puits_de_chartres.jpg`, paysage 3:2, carte 30 × 20 cases — grille à recalculer sur l'image) :
+**Le labyrinthe du puits de Chartres** (`battle_maps/labyrinthe_du_puits_de_chartres.jpg`, livrée en 16:9, 1408 × 768 → carte 30 × 16 ; grille relevée sur l'image, `GRILLE_LABY` du générateur) :
 
 ```
 Réalise l'image d'un labyrinthe souterrain vu exactement du dessus : des couloirs de dalles de pierre ocre et grise, larges de deux pas, séparés par des murs épais de pierre sèche, qui tournent toujours du même côté autour d'une petite salle centrale ronde. Au centre, une margelle de pierre noire et le bas d'une chaîne de fer qui pend d'en haut. Sur les dalles, de la paille piétinée, des os rongés, de grandes traces de sabots fendus, quelques torches éteintes fichées dans les murs ; dans deux recoins, des litières de paille plus épaisses. Une faible lueur violette sourd entre les joints des dalles du centre. Aucun personnage, aucune créature. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
