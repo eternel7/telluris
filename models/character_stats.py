@@ -610,6 +610,13 @@ AUBERGE_ANNONCE_LONGUEUR_MAX: int = 800
 #   ce délai après chaque pas avant de demander le suivant (pur confort de lecture).
 TRAVERSEE_PAS_MS: int = 900
 
+# --- Portail de Notre-Dame : tableau des seuils (utils/portails.py) ---
+# FENETRE_MINUTES : durée d'une tranche — le tirage des seuils ouverts change à chaque
+#   tranche de l'epoch réel (aucune horloge, aucun tick). SEUILS_OUVERTS : combien de points
+#   d'arrivée la commanderesse propose à la fois (borné par le nombre de portails existants).
+PORTAIL_FENETRE_MINUTES: int = 2
+PORTAIL_SEUILS_OUVERTS: int = 3
+
 # ── Journal du personnage (onglet 📖) ─────────────────────────────────────────────
 # Le CARNET, pas un log. ⚠️ Écrire une entrée suit EXACTEMENT la règle du tableau
 # d'information d'une auberge : papier + encre + plume exigés, papier et encre dépensés
@@ -1068,6 +1075,8 @@ def current_world_variables() -> dict:
 		"ESCORTE_PROGENITURE_XP": ESCORTE_PROGENITURE_XP,
 		"AUBERGE_NUIT_COUT_CUIVRE": AUBERGE_NUIT_COUT_CUIVRE,
 		"TRAVERSEE_PAS_MS": TRAVERSEE_PAS_MS,
+		"PORTAIL_FENETRE_MINUTES": PORTAIL_FENETRE_MINUTES,
+		"PORTAIL_SEUILS_OUVERTS": PORTAIL_SEUILS_OUVERTS,
 		"AUBERGE_NUIT_PASSES_ATELIER": AUBERGE_NUIT_PASSES_ATELIER,
 		"AUBERGE_MESSAGE_DUREE_SECONDES": AUBERGE_MESSAGE_DUREE_SECONDES,
 		"AUBERGE_TABLE_MESSAGES_MAX": AUBERGE_TABLE_MESSAGES_MAX,
@@ -1160,6 +1169,7 @@ def load_world_variables() -> dict:
 	global ESCORTE_PROGENITURE_PROBA, ESCORTE_PROGENITURE_RELATION_MIN
 	global ESCORTE_GUILDE_PROBA, ESCORTE_PROGENITURE_XP
 	global AUBERGE_NUIT_COUT_CUIVRE, AUBERGE_NUIT_PASSES_ATELIER, TRAVERSEE_PAS_MS
+	global PORTAIL_FENETRE_MINUTES, PORTAIL_SEUILS_OUVERTS
 	global AUBERGE_MESSAGE_DUREE_SECONDES, AUBERGE_TABLE_MESSAGES_MAX
 	global AUBERGE_TABLES_MAX, AUBERGE_ANNONCE_LONGUEUR_MAX
 	global JOURNAL_LONGUEUR_MAX, JOURNAL_ENTREES_MAX, JOURNAL_BESTIAIRE_LIEUX_MAX
@@ -1410,6 +1420,8 @@ def load_world_variables() -> dict:
 	# Plancher à 150 ms : en dessous, l'animation de caméra (`--map-anim`) n'a plus le temps
 	# de montrer la case avant la suivante.
 	TRAVERSEE_PAS_MS = max(150, int(v.get("TRAVERSEE_PAS_MS", TRAVERSEE_PAS_MS)))
+	PORTAIL_FENETRE_MINUTES = max(1, int(v.get("PORTAIL_FENETRE_MINUTES", PORTAIL_FENETRE_MINUTES)))
+	PORTAIL_SEUILS_OUVERTS = max(1, int(v.get("PORTAIL_SEUILS_OUVERTS", PORTAIL_SEUILS_OUVERTS)))
 	# Plancher à 1 : zéro passe rendrait la nuit muette côté marché — les étals ne
 	# bougeraient pas d'un pouce, et c'est la moitié de ce qu'on vient y chercher.
 	AUBERGE_NUIT_PASSES_ATELIER = max(1, int(v.get("AUBERGE_NUIT_PASSES_ATELIER", AUBERGE_NUIT_PASSES_ATELIER)))

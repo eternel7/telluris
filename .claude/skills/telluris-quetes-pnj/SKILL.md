@@ -241,6 +241,13 @@ Un `lieu:*` peut porter un bloc `acces` — sur le lieu de **destination**, jama
 
 Verrouillé par `tests/test_acces.py`, `tests/test_lieux_acces.py` et `tests/test_quete_reussie_cite.py`, y compris le contrôle `conditions_invalides` (clé de 1er niveau vs sous-filtre).
 
+### Portail de Notre-Dame — tableau des seuils, service `portail`
+Notre-Dame n'a **aucun lien** vers ses destinations (Auteur, 25/10) : les portails du monde sont des `connection` `metadata.type:"portail"` X ↔ Y, et l'ancrage **court-circuite** l'un d'eux pour prendre son **point d'arrivée** (le `pos` d'un nœud), contre un cristal de mana jaune. On n'arrive presque jamais À Notre-Dame (seul Mu y mène). Pur : `utils/portails.py` ; contenu `dev/gen_portail_notre_dame.py` (Aénor de Sully, `pnj:aenor_de_sully`, dans `lieu:notre_dame_portail`).
+- **Destinations DÉRIVÉES** : chaque nœud de chaque lien portail `ouvert`, ancrage exclu (`arrivees_candidates`) — un portail créé demain entre au tableau sans contenu ni code.
+- **Tranches de l'epoch** (`PORTAIL_FENETRE_MINUTES`, 2) : chaque tranche tire `PORTAIL_SEUILS_OUVERTS` (3) arrivées par une graine `ancrage:tranche` — même tableau pour tous, ressortir/rentrer ne re-tire rien, aucun tick. `{fermeture}` = temps restant (secondes), `{seuils_suivants}` = la tranche suivante, `{cristal}`. Une tranche de **grâce** au franchissement.
+- **Service** `services.portail = {ancrage, cout:{item, quantite}, choix, noeuds:{ouvert, ferme, refus_cristal}}`. Le choix gabarit `choix` (action `{service:"portail", op:"franchir"}`) est REMPLACÉ au rendu par une réplique par seuil ouvert, qui le **rejoue** avec la clé du seuil en `saisie` (mécanique des suggestions `direction`). Flags `cristal_jaune_porte`, `seuils_ouverts`.
+- **Franchir** : seuil revalidé, cristal retiré, puis relocalisation directe par `_effets_arrivee` (même arrivée que le débarquement) — ⚠️ la barrière `acces` du lieu d'arrivée n'est PAS consultée, c'est le court-circuit. Le client recharge `/play` (`portail_notif`). Aucun retour : on rentre par les routes ou par le portail trouvé là-bas.
+- Verrouillé par `tests/test_portails.py`.
 
 ### Donjons & commissions d'éradication
 Un donjon est un lieu de combat **FERMÉ** : on y descend par une porte gardée, avec un mandat. Doc `donjon:*` : `{nom, portail, niveau_max?, niveau_min?, nb_monstres?, battle_maps:[{lieu, especes, niveau_max?, niveau_min?, nb_monstres?}]}`. Logique pure `utils/donjon.py`.

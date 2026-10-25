@@ -95,7 +95,9 @@ def test_le_labyrinthe_n_a_qu_une_region_praticable():
 def test_le_puits_et_sa_fosse_ne_sont_pas_du_sol():
 	cells = LABY["cells"]
 	assert cells[8][14] == 0   # le puits
-	assert cells[6][13] == 3   # la fosse violette : falaise, nul n'y naît
+	# La fosse violette autour du puits : rouverte (Auteur, 25/10) — on y arrive au treuil et
+	# l'on remonte par la chaîne (dev/gen_portail_notre_dame.py).
+	assert cells[6][13] == 1
 
 
 def test_placement_du_combat_toujours_dans_la_region():

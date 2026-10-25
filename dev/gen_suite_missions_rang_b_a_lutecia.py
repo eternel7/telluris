@@ -75,17 +75,18 @@ def appliquer(par_id):
 
 	laby = copy.deepcopy(par_id[GEN.LABYRINTHE])
 	laby["image"] = GEN.IMAGES[GEN.LABYRINTHE]
-	laby["dimensions"] = {"x": GEN.LARGEUR_LABY, "y": GEN.HAUTEUR_LABY}
-	laby["cells"] = GEN.cells_labyrinthe()
-	laby["nav"] = {}   # murs peints = cases à 0 ; un nav de l'ancienne grille 30×20 n'a plus de sens
+	# ⚠️ `dimensions` / `cells` ne sont plus posés ici : le puits devenu donjon à étages (Auteur,
+	# 25/10) a rouvert la fosse, et c'est dev/gen_portail_notre_dame.py qui porte la grille —
+	# un seul fichier par demande (CLAUDE.md §18). Cette suite-ci est importée (dump du 25/10).
+	# `nav` non plus : remis à {} à la migration 30×20 → 30×16, il porte depuis les murs peints
+	# dans /admin/editor — le réécrire les effacerait.
 	laby["acces"] = copy.deepcopy(generes[GEN.LABYRINTHE]["acces"])
 	garder(par_id[GEN.LABYRINTHE], laby)
 
 	for pid, portrait in GEN.PORTRAITS.items():
 		pnj = copy.deepcopy(par_id[pid])
 		pnj["portrait"] = portrait
-		if pid == GEN.TEMPLIER_CRYPTE:
-			pnj["dialogue"] = copy.deepcopy(generes[pid]["dialogue"])
+		# Le dialogue du Templier de la crypte (descente au treuil) : dev/gen_portail_notre_dame.py.
 		garder(par_id[pid], pnj)
 
 	maelys = copy.deepcopy(par_id[GEN.MAELYS])

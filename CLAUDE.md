@@ -60,7 +60,7 @@ routers/
   scriptorium.py         # /api/scriptorium(/ecrire) : écrit personnel (papier+encre+plume → livre)
   commande.py            # /api/commande(/devis,/passer,/relancer,/retirer,/annuler) : commande chez un artisan
   animations.py          # /admin/animations/* : scan des feuilles de sprites, liaison au contenu
-  pnj.py                 # /api/pnj/dialogue (+ /choix) : dialogues PNJ + services ; /api/intro/raison
+  pnj.py                 # /api/pnj/dialogue (+ /choix) : dialogues PNJ + services (dont `portail` de Notre-Dame) ; /api/intro/raison
   traversee.py           # /api/traversee/avancer : une case de traversée maritime (rencontre, débarquement)
 utils/
   auth.py                # JWT creation + get_current_user() FastAPI dependency
@@ -166,6 +166,8 @@ utils/
                          #   `sc:<sous_categorie>`, nœuds `absent` — règles LUES dans `marche`, jamais recopiées
   bois.py                # découpe du bois (pur) : tier suivant par essence, conservation du poids, outil
   pnj.py                 # PNJ de lieu (pur) : tirage de présence, arbre de dialogue, services
+  portails.py            # portail de Notre-Dame (pur) : tableau des seuils DÉRIVÉ des liens portail du monde (nœuds
+                         #   d'arrivée), tiré par tranche de l'epoch (`PORTAIL_FENETRE_MINUTES`), cristal jaune par passage
   traversee.py           # traversées maritimes (pur) : route `traversee:*`, chemin case à case, danger
                          #   par segment, embarquer/avancer/débarquer, lieu « vu du navire » pour start_combat
   acces.py               # barrière d'accès à un lieu gardée par un PNJ (pur) : conditions, laissez-passer, cycle

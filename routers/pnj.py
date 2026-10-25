@@ -37,13 +37,14 @@ from utils import indicateurs
 from utils import apport
 from utils import expedition
 from utils import traversee as traversee_util
+from utils import portails
 from utils import fiche as fiche_util
 from utils.combat import (
 	instantiate_monsters, build_monster_snapshot, create_combat_doc,
 	resolve_first_turns, finalize_combat,
 )
 from utils.lieux import get_lieu_links
-from routers.user import _derived_from_character, _vitals_payload, _inventory_payload
+from routers.user import _derived_from_character, _vitals_payload, _inventory_payload, _effets_arrivee
 from routers.traversee import nom_port as nom_port_traversee
 
 pnj_router = APIRouter()
@@ -320,6 +321,24 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		offre_tr = _offre_traversee(character, pnj_doc, lieu_doc)
 		if offre_tr:
 			placeholders.update(offre_tr["placeholders"])
+	# PORTAIL DE NOTRE-DAME : le tableau des seuils de la tranche courante (utils/portails.py).
+	# {fermeture} = le temps avant que la tranche ne tourne ; {seuils_suivants} = ceux qu'elle
+	# annonce ; `cristal_jaune_porte` dit si le joueur a de quoi payer le passage.
+	if (pnj_doc.get("services") or {}).get("portail"):
+		conf_p = pnj_doc["services"]["portail"]
+		now = quetes.now_epoch()
+		arrivees = _arrivees_portail(conf_p)
+		ouverts = portails.seuils_ouverts(arrivees, conf_p.get("ancrage"), now)
+		cout = conf_p.get("cout") or {}
+		flags["cristal_jaune_porte"] = quetes._count_inventaire(
+			character, cout.get("item", "")) >= int(cout.get("quantite", 1) or 1)
+		flags["seuils_ouverts"] = bool(ouverts)
+		placeholders["fermeture"] = portails.texte_duree(ouverts[0]["ferme_dans_s"]) if ouverts else "—"
+		placeholders["seuils_suivants"] = ", ".join(
+			_label_arrivee(a) for a in portails.seuils_suivants(arrivees, conf_p.get("ancrage"), now)) or "—"
+		# Dit dans la phrase (« coûte un cristal de mana jaune ») : sans la majuscule du nom.
+		nom_cout = _nom_item(cout.get("item", ""))
+		placeholders["cristal"] = nom_cout[:1].lower() + nom_cout[1:]
 	return pnj.contexte_dialogue(character, pnj_doc, _rel, flags, placeholders,
 								 quetes.quetes_reussies(character),
 								 quetes.quetes_actives_ids(character))
@@ -654,6 +673,84 @@ def _resoudre_traversee(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 	return noeuds.get("embarque")
 
 
+def _arrivees_portail(conf: dict) -> list:
+	"""Points d'arrivée du tableau : TOUS les liens portail du monde (utils/portails.py)."""
+	return portails.arrivees_candidates(
+		find_docs({"type": "connection", "metadata.type": portails.TYPE_PORTAIL}) or [],
+		conf.get("ancrage"))
+
+
+def _label_arrivee(arrivee: dict) -> str:
+	"""« Alexandrie », « Petra — La Khazneh » : le lieu d'arrivée, précédé de sa cité quand
+	c'est un sous-lieu."""
+	doc = get_doc(arrivee["lieu"]) or {}
+	label = lieu_label(doc, arrivee["lieu"])
+	parent = get_doc(doc.get("lieu_parent", "")) if doc.get("lieu_parent") else None
+	if parent and parent.get("categorie") not in ("pays", "continent"):
+		return f"{lieu_label(parent, doc['lieu_parent'])} — {label}"
+	return label
+
+
+def _choix_portail(character: dict, pnj_doc: dict, noeud: dict | None) -> None:
+	"""Remplace, dans le nœud RENDU, le choix gabarit `services.portail.choix` par une réplique
+	par seuil ouvert (« Alexandrie — se referme dans 1 min 40 »). Chacune REJOUE ce choix avec la
+	clé du seuil en `saisie` (même mécanique que les suggestions du service `direction`) : le
+	serveur revalide le choix, puis le seuil, au franchissement. Mute `noeud` en place."""
+	conf = (pnj_doc.get("services") or {}).get("portail")
+	if not conf or not noeud:
+		return
+	gabarit = conf.get("choix", "franchir")
+	idx = next((i for i, c in enumerate(noeud.get("choix") or []) if c.get("id") == gabarit), None)
+	if idx is None:
+		return
+	ouverts = portails.seuils_ouverts(_arrivees_portail(conf), conf.get("ancrage"), quetes.now_epoch())
+	generes = [{
+		"id": gabarit,
+		"label": f"🌀 {_label_arrivee(a)} — se referme dans {portails.texte_duree(a['ferme_dans_s'])}",
+		"action": True,
+		"marque": None,
+		"saisie": False,
+		"rejouer": {"noeud": noeud["id"], "saisie": a["cle"]},
+	} for a in ouverts]
+	noeud["choix"][idx:idx + 1] = generes
+
+
+def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, saisie,
+					  reponse: dict) -> str | None:
+	"""Service `portail`, op `franchir` : l'ancrage court-circuite le lien portail choisi et
+	dépose le groupe à SON point d'arrivée, contre un cristal jaune. Aucun lien n'est emprunté :
+	le personnage est relocalisé par `_effets_arrivee`, comme au débarquement d'une traversée.
+	⚠️ La barrière `acces` du lieu d'arrivée n'est PAS consultée — c'est tout le court-circuit.
+	Seuil refermé (tranche passée au-delà de la grâce) → `ferme` ; pas de cristal →
+	`refus_cristal` ; rien n'est retiré ni sauvé dans ces deux cas."""
+	conf = (pnj_doc.get("services") or {}).get("portail") or {}
+	noeuds = conf.get("noeuds") or {}
+	if op != "franchir":
+		raise HTTPException(status_code=422, detail="Opération de portail inconnue.")
+	if conf.get("ancrage") != (lieu_doc or {}).get("_id"):
+		raise HTTPException(status_code=422, detail="Aucun seuil ne s'ouvre ici.")
+	if traversee_util.en_mer(character):
+		raise HTTPException(status_code=409, detail="Vous êtes en mer.")
+	if carried_weight(character) > charge_max_of(character):
+		raise HTTPException(status_code=409, detail="Trop chargé pour vous déplacer — déposez un objet.")
+	seuil = portails.seuil_franchissable(
+		_arrivees_portail(conf), conf.get("ancrage"), str(saisie or ""), quetes.now_epoch())
+	if not seuil:
+		return noeuds.get("ferme")
+	cout = conf.get("cout") or {}
+	item_id, quantite = cout.get("item", ""), int(cout.get("quantite", 1) or 1)
+	if quetes._count_inventaire(character, item_id) < quantite:
+		return noeuds.get("refus_cristal")
+	dest_doc = get_doc(seuil["lieu"])
+	if not dest_doc:
+		raise HTTPException(status_code=409, detail="Ce seuil ne mène plus nulle part.")
+	quetes.retirer_items(character, item_id, quantite)
+	arrivee = _effets_arrivee(character, seuil["lieu"],
+							  {"x": seuil["pos"][0], "y": seuil["pos"][1]}, dest_doc)
+	reponse["portail"] = {"lieu": _label_arrivee(seuil), "arrivee": arrivee}
+	return noeuds.get("ouvert")
+
+
 def _resoudre_direction(pnj_doc: dict, lieu_doc: dict, saisie) -> tuple[str | None, dict]:
 	"""Service `direction` : le PNJ cherche le lieu SAISI par le joueur parmi ceux de sa ville.
 	Nom exact → `trouve`, avec la phrase d'orientation des courses ({direction} : « au sud-est
@@ -745,6 +842,7 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)],
 	reponse["pnj"] = pnj.pnj_payload(entree, pnj_doc)
 	reponse["noeud"] = pnj.noeud_client(pnj_doc, depart, contexte,
 										pnj.soin_effectif(pnj_doc, contexte))
+	_choix_portail(character, pnj_doc, reponse["noeud"])
 	# Badge du bouton 🗣 : recalculé sur le contexte SERVI (une course échue vient peut-être
 	# de faire tomber une offre). Marque de lieux gratuite (0 lecture), cf. utils/indicateurs.
 	reponse["pnj_marque"] = pnj.marque_noeud(pnj_doc, depart, contexte)
@@ -905,6 +1003,12 @@ async def pnj_dialogue_choix(
 		contexte["placeholders"].update(dits)
 	elif action.get("service") == "traversee":
 		suivant = _resoudre_traversee(character, pnj_doc, lieu_doc, action.get("op"), reponse)
+	elif action.get("service") == "portail":
+		contexte["placeholders"]["destination"] = "—"
+		suivant = _resoudre_portail(character, pnj_doc, lieu_doc, action.get("op"),
+									body.get("saisie"), reponse)
+		if reponse.get("portail"):
+			contexte["placeholders"]["destination"] = reponse["portail"]["lieu"]
 	elif action.get("service") == "direction":
 		# Simple consultation : aucun état ne bouge, donc aucun flag à refiltrer.
 		suivant, dits = _resoudre_direction(pnj_doc, lieu_doc, body.get("saisie"))
@@ -945,6 +1049,7 @@ async def pnj_dialogue_choix(
 		reponse["noeud"] = pnj.noeud_client(pnj_doc, suivant, contexte, soin)
 		if reponse["noeud"] and suggestions_direction:
 			reponse["noeud"]["choix"] = suggestions_direction + reponse["noeud"]["choix"]
+		_choix_portail(character, pnj_doc, reponse["noeud"])
 	# Badge du 🗣 et marques de lieux, sur le contexte DÉJÀ reconstruit par les branches de
 	# service ci-dessus : aucune lecture supplémentaire. Indispensable — accepter une course
 	# doit faire DISPARAÎTRE le « ! » quand le joueur ferme le panneau, sinon le badge paraît

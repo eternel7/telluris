@@ -5305,6 +5305,11 @@ async function spendXp(statKey, useMaxBonus = false) {
 		sessionStorage.removeItem('traversee_fin_notif');
 		showToast('⚓ Le navire accoste' + (_traverseeFin ? ' à ' + _traverseeFin : '') + '. Vous débarquez sur les quais.', {major: true});
 	}
+	const _portailNotif = sessionStorage.getItem('portail_notif');
+	if (_portailNotif !== null) {
+		sessionStorage.removeItem('portail_notif');
+		showToast('🌀 ' + (_portailNotif || 'Vous franchissez le seuil.'), {major: true});
+	}
 	const _traverseeDepart = sessionStorage.getItem('traversee_depart_notif');
 	if (_traverseeDepart !== null) {
 		sessionStorage.removeItem('traversee_depart_notif');
@@ -11740,6 +11745,16 @@ async function choisirPnj(choixId, extra) {
 		// bord (quêtes `visite`, XP de découverte, événement de zone, régén de tour…) ; il
 		// recharge la page, ce qui ferme le dialogue de lui-même.
 		if (data.deplacer) { closePnjPanel(); await moveTo(data.deplacer); return; }
+		// Seuil de Notre-Dame franchi : le serveur a DÉJÀ relocalisé le groupe (aucun lien n'est
+		// emprunté) — on stocke les toasts d'arrivée comme `moveTo` et la réplique de la
+		// commanderesse (nœud `ouvert`), puis /play est rechargé au point d'arrivée.
+		if (data.portail) {
+			if (data.portail.arrivee) _stockerNotifsArrivee(data.portail.arrivee);
+			sessionStorage.setItem('portail_notif', (data.noeud && data.noeud.texte) || data.portail.lieu || '');
+			closePnjPanel();
+			window.location.reload(true);
+			return;
+		}
 		// Traversée payée : on monte à bord — /play rechargé passe en mode voyage. La réplique
 		// du capitaine (nœud `embarque`) part en toast, le panneau se ferme.
 		if (data.traversee) {

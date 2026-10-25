@@ -51,6 +51,9 @@ PLACEHOLDERS_CONNUS = {
 	"quantite", "reste",
 	# Traversée maritime (service `traversee`) : port d'arrivée, prix pour CE groupe, têtes.
 	"port_arrivee", "tarif", "passagers",
+	# Portail de Notre-Dame (service `portail`) : fin de la tranche courante, seuils de la
+	# suivante, nom de l'item payé. ({destination} partagé avec les quêtes.)
+	"fermeture", "seuils_suivants", "cristal",
 }
 
 # Clés de `condition` : deux formes structurées, tout le reste est traité comme un FLAG
@@ -145,6 +148,8 @@ FLAGS_CONNUS = {
 	# Quête d'APPORT (utils/apport.py) : offerte, en cours, remettable (une pièce portée),
 	# menée à bien.
 	"apport_offert", "apport_en_cours", "apport_possible", "apport_accompli",
+	# Portail de Notre-Dame (utils/portails.py) : de quoi payer / la tranche a des seuils.
+	"cristal_jaune_porte", "seuils_ouverts",
 }
 
 # Nœuds de résultat que le ROUTER va chercher par leur clé. Les absents laissent le
@@ -165,6 +170,9 @@ NOEUDS_REQUIS = {
 	"direction": {"trouve", "proche", "inconnu"},
 	# Embarquer : payé (le client recharge /play en mode voyage) ou bourse trop légère.
 	"traversee": {"embarque", "sans_fonds"},
+	# Franchir un seuil : déposé à l'arrivée (le client recharge /play), seuil refermé, ou
+	# pas de cristal dans le sac.
+	"portail": {"ouvert", "ferme", "refus_cristal"},
 }
 
 # Le transport a DEUX rôles, et presque aucun PNJ ne tient les deux :
