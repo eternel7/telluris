@@ -555,6 +555,11 @@ def main(argv):
 	source_maelys = charger(SOURCE_MAELYS)
 	source_cour = charger(SOURCE_COUR)
 	base_maelys = next(d for d in source_maelys if d["_id"] == "pnj:maelys")
+	# ⚠️ Depuis les épreuves B et A (dev/gen_missions_rang_b_a_lutecia.py), Maëlys porte des
+	# `offres` : ce générateur, qui repart de son fichier source, les EFFACERAIT à l'import.
+	if "offres" in ((par_id.get("pnj:maelys") or {}).get("services") or {}).get("transport", {}):
+		sys.exit("ERREUR : pnj:maelys porte des `offres` au dump — régénérer plutôt "
+				 "dev/gen_missions_rang_b_a_lutecia.py, qui reprend l'épreuve du rang C.")
 	base_aelis = par_id.get(AELIS_COUR) or next(d for d in source_cour if d["_id"] == AELIS_COUR)
 	base_cour = par_id.get(COUR) or next(d for d in source_cour if d["_id"] == COUR)
 

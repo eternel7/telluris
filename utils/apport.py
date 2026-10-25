@@ -46,6 +46,8 @@ def offre_spec(pnj_doc: dict) -> dict | None:
 		"quantite": quantite,
 		"unique": offre.get("unique", True) is not False,
 		"recompenses": dict(offre.get("recompenses") or {}),
+		# Rang AFFICHÉ de la quête (badge de la fiche) ; absent ⇒ le défaut du snapshot.
+		"rang": offre.get("rang"),
 	}
 
 
@@ -135,6 +137,7 @@ def accepter(character: dict, pnj_doc: dict, lieu_id: str) -> dict | None:
 		"giver": lieu_id,
 		"objectif": {"type": "collect", "cible": spec["item"], "quantite": spec["quantite"]},
 		"recompenses": spec["recompenses"],
+		**({"rang": spec["rang"]} if spec.get("rang") else {}),
 	})
 	character.setdefault("quetes_actives", []).append(q)
 	return q

@@ -255,6 +255,10 @@ def generer_escorte_authoree(spec: dict, giver_doc: dict, find_docs_fn, get_doc_
 	autres = [x for x in (rec.get("relation_lieux") or []) if x]
 	if autres:
 		recompenses["relation_lieux"] = autres
+	# Rang de guilde porté par la mission (épreuve de rang, utils/offres.py) : même résolution
+	# que la course écrite — `"B"` seul vaut la cité du donneur. Absent ⇒ rien, comme avant.
+	from utils import transport
+	recompenses.update(transport.rang_guilde_recompense(rec.get("rang_guilde"), giver_doc))
 	return {
 		"id": spec.get("id") or ("quete:escorte_" + uuid.uuid4().hex[:12]),
 		"type_quete": "escorte",

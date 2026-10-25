@@ -18,6 +18,7 @@ import re
 from utils import acces
 from utils.pnj import PASSAGES_CLES
 from utils import apport as apport_util
+from utils import offres as offres_util
 
 # ── Ce que le moteur connaît ─────────────────────────────────────────────────────
 
@@ -59,7 +60,8 @@ PLACEHOLDERS_CONNUS = {
 # structurée oubliée ici serait signalée comme flag inconnu sur du contenu correct, et une
 # clé de trop laisserait passer une vraie faute.
 CONDITIONS_STRUCTUREES = {
-	"relation_min", "intro_raison", "quete_reussie", "quete_active", "passages", "rang_min"}
+	"relation_min", "intro_raison", "quete_reussie", "quete_active", "passages", "rang_min",
+	"offre"}
 
 # Les conditions qui NOMMENT une quête. ⚠️ Miroir de `utils.pnj.CONDITIONS_QUETE` : elles
 # partagent la forme `{id, attendu}` et le même prédicat côté moteur, donc le même contrôle.
@@ -233,6 +235,34 @@ def _textes_du_noeud(noeud: dict) -> list:
 	return [t for t in textes if t]
 
 
+def services_deplies(doc: dict) -> list:
+	"""`[(service, conf)]` du doc, un service à `offres` (utils/offres.py) DÉPLIÉ en autant de
+	confs qu'il a d'entrées — chacune vue comme une offre seule (`offre` + `noeuds`), c'est
+	ainsi que le moteur la servira (`offres.vue_pnj`). Un service sans `offres` est rendu tel
+	quel."""
+	out = []
+	for service, conf in (doc.get("services") or {}).items():
+		conf = conf if isinstance(conf, dict) else {}
+		liste = conf.get("offres")
+		if service in offres_util.SERVICES_LISTABLES and isinstance(liste, list):
+			base = {k: v for k, v in conf.items() if k not in ("offres", "offre", "noeuds")}
+			for e in liste:
+				e = e if isinstance(e, dict) else {}
+				out.append((service, {**base, "offre": e.get("offre"), "noeuds": e.get("noeuds") or {}}))
+		else:
+			out.append((service, conf))
+	return out
+
+
+def ids_offres(doc: dict) -> set:
+	"""Ids de toutes les offres écrites du doc (listées ou à l'ancienne) : ce que la
+	condition `offre` peut nommer."""
+	return {
+		(conf.get("offre") or {}).get("id")
+		for _, conf in services_deplies(doc) if isinstance(conf.get("offre"), dict)
+	} - {None}
+
+
 def _entrees(doc: dict, noeuds: dict) -> set:
 	"""Points d'entrée de l'arbre : le nœud de départ, le nœud d'attente (servi à sa place
 	pendant un délai de réouverture) ET tous les nœuds de service (le router y saute
@@ -242,7 +272,7 @@ def _entrees(doc: dict, noeuds: dict) -> set:
 	entrees = {depart} if depart else set()
 	if dialogue.get("noeud_attente"):
 		entrees.add(dialogue["noeud_attente"])
-	for conf in (doc.get("services") or {}).values():
+	for _, conf in services_deplies(doc):
 		entrees |= {nid for nid in (conf.get("noeuds") or {}).values() if nid}
 	return {e for e in entrees if e in noeuds}
 
@@ -474,6 +504,14 @@ def analyser_doc(doc: dict) -> list:
 					erreur(f"choix `{cid}` : `passages` {faute} — fail-closed, le choix "
 						   f"ne s'affichera JAMAIS.", nid)
 
+			# `offre` : nomme une offre ÉCRITE de ce PNJ (utils/offres.py) — un id qui n'en
+			# est pas une laisse le choix caché pour toujours.
+			if "offre" in conditions:
+				qid = (choix.get("condition") or {}).get("offre")
+				if not isinstance(qid, str) or qid not in ids_offres(doc):
+					erreur(f"choix `{cid}` : `offre` {qid!r} ne désigne aucune offre écrite de "
+						   f"ce PNJ — fail-closed, le choix ne s'affichera JAMAIS.", nid)
+
 			# `rang_min` : même comparateur fail-closed que la barrière de lieu.
 			if "rang_min" in conditions:
 				for faute in fautes_rang_min((choix.get("condition") or {}).get("rang_min")):
@@ -507,7 +545,7 @@ def analyser_doc(doc: dict) -> list:
 
 	# Nœuds de service : déclarés mais absents (référence morte), ou manquants alors que le
 	# router ira les chercher.
-	for service, conf in (doc.get("services") or {}).items():
+	for service, conf in services_deplies(doc):
 		declares = (conf or {}).get("noeuds") or {}
 		for cle, nid in declares.items():
 			if nid not in noeuds:
@@ -566,11 +604,11 @@ def analyser_doc(doc: dict) -> list:
 			if (conf or {}).get("offre") is not None:
 				attendus |= APPORT_DONNEUR
 				# `apport.offre_spec` IGNORE une offre illisible : le PNJ ne proposerait rien.
-				if apport_util.offre_spec(doc) is None:
+				if apport_util.offre_spec({"services": {"apport": conf}}) is None:
 					erreur("`services.apport.offre` illisible : `id` (`quete:…`), `item` "
 						   "(`item:…`) et `quantite` (entier ≥ 1) sont requis — l'offre "
 						   "serait ignorée.")
-			elif apport_util.quete_id_de(doc) is None:
+			elif apport_util.quete_id_de({"services": {"apport": conf}}) is None:
 				erreur("`services.apport` sans `offre` ni `quete` (`quete:…`) : ce PNJ ne "
 					   "recevrait aucune remise.")
 		else:

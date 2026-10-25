@@ -136,6 +136,25 @@ Contenu : `dev/gen_quete_rang_c_jumieges.py` → **un seul** fichier d'import `j
 
 Verrouillé par `tests/test_quete_rang_c_jumieges.py`.
 
+#### PLUSIEURS offres par service — `offres` (utils/offres.py)
+`services.transport` / `escorte` / `apport` acceptent `offres: [{offre, noeuds}]` à côté de la forme seule (relue telle quelle). Le moteur ne voit jamais qu'**une** offre par service : `offres.vue_pnj` rend une copie du doc réduite au bloc retenu — appliquée dans `/play` (avant tout tirage d'offre et tout badge) et dans `routers/pnj._pnj_du_lieu`.
+- Retenue : la quête **active** d'abord, sinon l'offre **tirée à l'entrée** (`character["offres_tirees"] = {lieu, tirages:{pnj:{service: quete_id}}}`, sémantique de `pnj_present`) si elle est encore éligible.
+- Éligible : `unique` pas déjà réussie ; récompense de rang ⇒ **cran juste en dessous** dans la cité (lu dans `recompenses.rang_guilde`, aucun champ neuf) ; **une seule épreuve de rang à la fois** chez ce donneur, tous services confondus.
+- `rang_guilde: "B"` est RÉSOLU en `{cite, rang}` sur la vue (l'apport recopie ses récompenses telles quelles) ; l'escorte porte désormais `rang_guilde` dans son snapshot (`transport.rang_guilde_recompense`).
+- Condition de dialogue **`offre: "quete:x"`** (structurée, `pnj.CONDITIONS_STRUCTUREES`) : vraie si ce PNJ tient cette offre maintenant — elle départage deux choix conditionnés sur le même flag. ⚠️ Tout choix d'une épreuve listée la porte, y compris ceux du rang C de Maëlys.
+- Linter : `services_deplies` contrôle chaque entrée comme une offre seule ; `offre` doit nommer une offre écrite du doc. `/admin/dialogues` n'édite que `offre` (la liste survit à la fusion).
+
+Verrouillé par `tests/test_offres_multiples.py`.
+
+#### Épreuves des rangs B et A de Lutecia — Maëlys, neuf missions
+Contenu : `dev/gen_missions_rang_b_a_lutecia.py` → **un seul** `jsons/missions_rang_b_a_lutecia_a_importer.json` (Maëlys et `lieu:france` relus du dump + docs neufs). Scénario et arbitrages : `docs/lore/personnages/20261025_missions_rang_b_a_lutecia.md`.
+- Rang B (cran C) : apport tête de **Gargouille** (ajoutée aux `rencontres` de France, `zone:riviere`) · transport `retour` pli à l'**Hôtel de Ville d'Aix** · escorte d'Hugues Vaucelle à la **Porte de Mars** (Rhemi) · transport `retour` à l'**Enclos du Temple** (porte de l'ossuaire). Rang A (cran B) : apports têtes du **Géant du Mont-Saint-Michel**, de la **Bête du Gévaudan**, du **Minotaure** (donjon `donjon:puits_de_chartres`, 2 Minotaures grade 4-5, barrière Morvan sans `combat_gagne`) · escortes de l'**Ampoule** (rendez-vous Auberge du Sacre → Chapelle Palatine) et de la **délégation** (→ Hôtel de Ville d'Aix).
+- Calibrage (Auteur, 25/10) : planchers de potentiel = simple référence pour les trophées au hasard ; le puits compense par l'effectif (verrouillé : un Minotaure seul < plancher A ≤ deux). ⚠️ Mesurer un potentiel hors base exige de rediriger TOUS les `get_doc` vers le dump, sinon l'équipement des humanoïdes vaut 0.
+- Portes posées sur la case praticable la plus proche d'une cible (`CIBLES_PORTES`), à recaler dans l'éditeur ; grille du labyrinthe PROVISOIRE (enceinte + sol) à recalculer sur l'image définitive.
+- ⚠️ `gen_quete_rang_c_jumieges.py` refuse désormais de tourner si Maëlys porte des `offres` au dump : il repart de son fichier source et les effacerait.
+
+Verrouillé par `tests/test_missions_rang_b_a_lutecia.py`.
+
 #### Les morts d'Escolives — enquête du rang D, premier vampire
 Contenu : `dev/gen_enquete_escolives.py` → **un seul** `jsons/enquete_escolives_a_importer.json` (bestiaire de `gen_vampires.docs_vampires` + Gautier relu du dump + 7 docs neufs). 100 % donnée. Scénario et arbitrages : `docs/lore/personnages/20261013_enquete_d_escolives.md`.
 - Gautier (bureau d'Auxerre, déjà rang D) offre ET reçoit une quête d'**apport** unique : `item:strigoi` (carcasse au butin de tout Strigoï abattu) → `lieu:escolives` (France (50,21)) → Gaspard le fossoyeur ouvre `lieu:crypte_de_la_necropole_d_escolives` (service `acces`, salle de `donjon:crypte_d_escolives`).

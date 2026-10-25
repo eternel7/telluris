@@ -127,6 +127,8 @@ utils/
   auberge.py             # tavernes (pur) : tables-chatrooms, tableau d'information, nuit
   scriptorium.py         # scriptorium (pur) : écrit personnel transportable + livres de contenu générés au tick d'atelier
   escorte.py             # escortes (pur) : personne à retrouver, à protéger, à déposer vivante
+  offres.py              # PLUSIEURS offres écrites par service (`offres`, pur) : vue du PNJ réduite au bloc retenu
+                         #   (quête active, sinon tirée à l'entrée), épreuve de rang au seul cran du dessous ; condition `offre`
   expedition.py          # capacités MISES EN COMMUN par le groupe (pur) : membres, outil partagé, négociateur
   marche.py              # prix, stocks, tick atelier, relations de lieu
   negoce.py              # négociant, « marchand pur » (pur) : achète TOUT sans recette, commission
