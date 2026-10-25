@@ -4,6 +4,7 @@
 # contrôlées — fichier, ids, offres au bon cran, états AVANT / PENDANT / APRÈS de chaque PNJ,
 # remise d'un trophée jusqu'au rang, cibles présentes en France, calibrage du puits de Chartres.
 
+import copy
 import importlib.util
 import json
 import os
@@ -230,9 +231,15 @@ def test_maelys_ne_solde_le_temple_qu_apres_l_ossuaire():
 
 def test_le_cristal_jaune_ne_vient_que_du_coffre_de_l_ossuaire():
 	"""La preuve de la descente ne vaut que si le cristal n'a pas d'autre source : ni boutique,
-	ni recette, ni autre donjon (personnages du dump exclus : c'est l'état d'un joueur)."""
+	ni recette, ni autre donjon (personnages du dump exclus : c'est l'état d'un joueur). Le
+	commandeur DEMANDE le cristal (objet de son apport) : une fois l'import passé il est dans le
+	dump, d'où son exclusion — tant qu'il ne fait que le demander."""
+	if GEN.COMMANDEUR in DUMP:
+		commandeur = copy.deepcopy(DUMP[GEN.COMMANDEUR])
+		assert commandeur["services"]["apport"]["offre"].pop("item") == GEN.CRISTAL_JAUNE
+		assert f'"{GEN.CRISTAL_JAUNE}"' not in json.dumps(commandeur, ensure_ascii=False)
 	sources = [d["_id"] for d in DUMP.values()
-			   if d["_id"] != GEN.CRISTAL_JAUNE and d.get("type") != "character"
+			   if d["_id"] not in (GEN.CRISTAL_JAUNE, GEN.COMMANDEUR) and d.get("type") != "character"
 			   and f'"{GEN.CRISTAL_JAUNE}"' in json.dumps(d, ensure_ascii=False)]
 	assert sources == ["donjon:catacombes_de_lutecia"], sources
 	salle = next(b for b in DUMP["donjon:catacombes_de_lutecia"]["battle_maps"]

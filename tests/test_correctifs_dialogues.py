@@ -33,8 +33,10 @@ BASE, _NOM = GEN.dernier_dump()
 DOCS = {d["_id"]: d for d in GEN.corriges(BASE)}
 
 
-def _visibles(pnj_id, noeud="accueil", actives=(), reussies=(), flags=None):
-	contexte = {"quetes_actives": set(actives), "quetes_reussies": set(reussies), "flags": flags or {}}
+def _visibles(pnj_id, noeud="accueil", actives=(), reussies=(), flags=None, retenues=()):
+	# `retenues` : offres que le PNJ tient (condition `offre`, posées en jeu par `offres.vue_pnj`).
+	contexte = {"quetes_actives": set(actives), "quetes_reussies": set(reussies), "flags": flags or {},
+				"offres_retenues": set(retenues)}
 	return {c["id"] for c in pnj._choix_visibles(DOCS[pnj_id], noeud, contexte)}
 
 
@@ -102,9 +104,11 @@ def test_aelis_absente_de_lutecia_pendant_l_arc_d_auxerre():
 
 def test_maelys_ne_suppose_pas_qu_on_connait_aelis():
 	maelys = "pnj:maelys"
-	sans = _visibles(maelys, flags={"transport_offert": True})
+	# Maëlys tient l'épreuve du rang C (joueur au rang D) : seule offre de transport à départager.
+	rang_c = ["quete:rang_c_lettre_a_l_institut"]
+	sans = _visibles(maelys, flags={"transport_offert": True}, retenues=rang_c)
 	assert "rang_c_offre_inconnu" in sans and "rang_c_offre" not in sans and "auxerre" not in sans
-	avec = _visibles(maelys, reussies=[CONVOI], flags={"transport_offert": True})
+	avec = _visibles(maelys, reussies=[CONVOI], flags={"transport_offert": True}, retenues=rang_c)
 	assert "rang_c_offre" in avec and "rang_c_offre_inconnu" not in avec
 	assert "Vaugirard m'a parlé de vous." in DOCS[maelys]["dialogue"]["noeuds"]["accueil"]["texte"]
 	texte = DOCS[maelys]["dialogue"]["noeuds"]["rang_c_propose_inconnu"]["texte"]
