@@ -1,0 +1,2853 @@
+[
+  {
+    "_id": "lieu:hotel_de_ville_d_aix_la_chapelle",
+    "type": "lieu",
+    "label": "L'Hôtel de Ville d'Aix-la-Chapelle",
+    "image": "hotel_de_ville_d_aix_la_chapelle.jpg",
+    "categorie": "hotel_de_ville",
+    "lieu_parent": "lieu:aix_la_chapelle",
+    "pnj": [
+      {
+        "character": "pnj:chancelier_de_l_hotel_de_ville_d_aix",
+        "nom": "Le chancelier",
+        "portrait": "Set442-Lepidstadt-School of Law and Civic Dean Cassian Ornel.jpg",
+        "probabilite": 1,
+        "description": "Un homme en robe noire derrière une table chargée de registres."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:chapelle_palatine",
+    "type": "lieu",
+    "label": "La Chapelle Palatine",
+    "image": "chapelle_palatine.jpg",
+    "categorie": "chapelle_palatine",
+    "lieu_parent": "lieu:aix_la_chapelle",
+    "pnj": [
+      {
+        "character": "pnj:gardienne_des_cinq_portes",
+        "nom": "La gardienne des cinq portes",
+        "portrait": "templier_elfe_f_magicienne_notre_dame01.jpg",
+        "probabilite": 1,
+        "description": "Une elfe en manteau de Templière, debout au centre de l'étoile des cinq portes."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:porte_de_mars",
+    "type": "lieu",
+    "label": "La Porte de Mars",
+    "image": "porte_de_mars_rhemi.jpg",
+    "categorie": "monument",
+    "lieu_parent": "lieu:rhemi",
+    "pnj": [
+      {
+        "character": "pnj:gardien_de_la_porte_de_mars",
+        "nom": "Le gardien de la Porte",
+        "portrait": "Set346-Male-Dwarf-Oread-Torag-08.jpg",
+        "probabilite": 1,
+        "description": "Un vieux nain en cuirasse, assis au pied du pilier central, une hallebarde en travers des genoux."
+      },
+      {
+        "character": "pnj:hugues_vaucelle_porte_de_mars",
+        "nom": "Hugues Vaucelle",
+        "portrait": "Set437-Magister Othmar Vey.jpg",
+        "probabilite": 1,
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:rang_b_porte_de_mars"
+            }
+          }
+        ],
+        "description": "Un architecte accroupi sous l'arche, au milieu de ficelles tendues et de traits de craie."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:enclos_du_temple",
+    "type": "lieu",
+    "label": "L'Enclos du Temple",
+    "image": "enclos_du_temple_lutecia.jpg",
+    "categorie": "temple_templier",
+    "lieu_parent": "lieu:lutecia",
+    "pnj": [
+      {
+        "character": "pnj:commandeur_de_l_enclos_du_temple",
+        "nom": "Le commandeur",
+        "portrait": "templier_humain_m_commandeur_enclos01.png",
+        "probabilite": 1,
+        "description": "Un Templier grisonnant, debout près d'une table où brille un cristal jaune."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:crypte_de_chartres",
+    "type": "lieu",
+    "label": "La crypte de Chartres",
+    "image": "crypte_de_chartres.jpg",
+    "categorie": "temple_templier",
+    "lieu_parent": "lieu:chartres",
+    "pnj": [
+      {
+        "character": "pnj:templier_de_la_crypte_de_chartres",
+        "nom": "Le Templier de la crypte",
+        "portrait": "templier_nain_m_crypte_chartres01.png",
+        "probabilite": 1,
+        "description": "Un Templier nain, la main sur la manivelle du treuil du puits."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:labyrinthe_du_puits_de_chartres",
+    "type": "lieu",
+    "label": "Le labyrinthe du puits de Chartres",
+    "image": "labyrinthe_du_puits_de_chartres.jpg",
+    "categorie": "battle_map",
+    "dimensions": {
+      "x": 30,
+      "y": 16
+    },
+    "cells": [
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        3,
+        3,
+        3,
+        3,
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        3,
+        3,
+        3,
+        3,
+        3,
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        3,
+        3,
+        0,
+        0,
+        3,
+        3,
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        3,
+        3,
+        0,
+        0,
+        3,
+        3,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        3,
+        3,
+        0,
+        0,
+        3,
+        3,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        3,
+        3,
+        3,
+        3,
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "nav": {},
+    "tags": [
+      "labyrinthe",
+      "souterrain",
+      "portail",
+      "donjon"
+    ],
+    "acces": {
+      "gardien": "pnj:templier_de_la_crypte_de_chartres",
+      "refus": "Le Templier ne touche pas la manivelle : le puits ne s'ouvre qu'à l'insigne de platine de la Guilde, ou à mieux.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "B"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "pnj:commandeur_de_l_enclos_du_temple",
+    "type": "pnj",
+    "nom": "Le commandeur de l'Enclos",
+    "race": "humain",
+    "vocation": "templier",
+    "portrait": "templier_humain_m_commandeur_enclos01.png",
+    "description": "Commandeur de l'Enclos du Temple, la maison des Templiers de Lutecia. Ses hommes gardent les catacombes et leur donjon, et en remontent les cristaux jaunes.",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "livre": "pli_lu",
+          "incomplet": "pli_absent"
+        }
+      },
+      "apport": {
+        "offre": {
+          "id": "quete:cristal_de_l_ossuaire",
+          "titre": "Le cristal de l'ossuaire",
+          "description": "Le commandeur de l'Enclos du Temple veut que vous descendiez dans les catacombes de Lutecia jusqu'à l'ossuaire, le dernier étage, et que vous lui rapportiez le cristal jaune de son coffre. Ensuite seulement, il écrira sa réponse à la Guilde.",
+          "item": "item:cristal_de_mana_jaune",
+          "quantite": 1,
+          "unique": true,
+          "rang": "B",
+          "recompenses": {
+            "xp": 60,
+            "cuivre": 1200
+          }
+        },
+        "noeuds": {
+          "accepte": "cristal_accepte",
+          "remis": "cristal_remis",
+          "partiel": "cristal_partiel"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "L'Enclos du Temple est une ville dans la ville : une tour carrée, des murs épais, une cour où des Templiers déchargent des caisses qui tintent. Le commandeur vous reçoit debout, dans une salle sans fenêtre éclairée par un cristal jaune posé sur la table. « La paix sur vous. »",
+          "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Que gardez-vous, ici ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir",
+                  "attendu": false
+                }
+              },
+              "next": "garde"
+            },
+            {
+              "id": "pli",
+              "label": "Lui remettre le pli de la Guilde.",
+              "condition": {
+                "transport_a_livrer": true
+              },
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              }
+            },
+            {
+              "id": "descente",
+              "label": "« Vous vouliez que je descende ? »",
+              "condition": {
+                "apport_offert": true,
+                "quete_active": {
+                  "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir"
+                },
+                "transport_a_livrer": false
+              },
+              "next": "cristal_propose"
+            },
+            {
+              "id": "cristal",
+              "label": "Poser le cristal jaune de l'ossuaire sur la table.",
+              "condition": {
+                "apport_possible": true
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
+              "id": "relance",
+              "label": "« Au sujet de l'ossuaire… »",
+              "condition": {
+                "apport_en_cours": true,
+                "apport_possible": false
+              },
+              "next": "cristal_relance"
+            },
+            {
+              "id": "attente",
+              "label": "« Votre réponse part pour la Guilde. »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir"
+                },
+                "transport_a_livrer": false,
+                "quete_reussie": {
+                  "id": "quete:cristal_de_l_ossuaire"
+                }
+              },
+              "next": "attente"
+            },
+            {
+              "id": "apres",
+              "label": "« L'ossuaire ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir"
+                }
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "garde": {
+          "texte": "« Ce qu'il y a sous vos pieds. » Il pose la main sur le cristal. « Les catacombes, et ce qu'elles sont devenues depuis la Vague. Nous en remontons ceci. Sans eux, les portes de cette ville s'éteindraient l'une après l'autre. » Il retire la main. « C'est un travail de patience. Bonne journée. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "pli_lu": {
+          "texte": "Le commandeur lit la lettre de Maëlys deux fois, puis la pose sur la table, sous le cristal. « Elle a raison. Je suis devenu poli. » Il vous regarde. « Au fond de l'ossuaire, là où nous extrayons depuis vingt ans, une paroi s'est ouverte le mois dernier. Derrière, une porte de pierre, fermée, gravée d'un signe que nul ici ne sait lire. Elle n'était pas là : j'ai creusé moi-même ce couloir. » Il repousse la lettre. « Je ne répondrai pas à votre maîtresse sur ma parole. Je répondrai sur la vôtre. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'est-à-dire ? »",
+              "next": "cristal_propose"
+            }
+          ]
+        },
+        "cristal_propose": {
+          "texte": "« Descendez. » Il désigne le sol. « Par la porte des catacombes, comme tout le monde : trois étages, jusqu'à l'ossuaire. Mes hommes n'y vont plus depuis que la paroi s'est ouverte ; ce qui rôde en bas s'y est rassemblé. Au fond, il y a un coffre. Nous y laissions le cristal du mois. Rapportez-le-moi, et dites-moi ce que vous avez vu. Ensuite, j'écrirai à la Guilde. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je descends. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cristal_accepte": {
+          "texte": "Le commandeur hoche la tête. « Trois étages. Ne vous attardez pas au deuxième, et n'ouvrez le coffre qu'une fois la salle vide : certains coffres, en bas, ont des dents. » Il revient à son cristal. « Je vous attends. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cristal_relance": {
+          "texte": "« L'ossuaire. » Il ne lève pas les yeux. « Le troisième étage, le coffre du fond. Je ne réponds pas à la Guilde avant. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cristal_partiel": {
+          "texte": "« Il en manque. » Le commandeur compte : il reste {reste} pièce à rapporter.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Je reviens avec. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cristal_remis": {
+          "texte": "Le commandeur prend le cristal, le pose à côté du sien, et les regarde briller ensemble. Il vous écoute : les étages, ce qui rôdait, l'ossuaire, la paroi ouverte et la porte derrière, tiède sous la main. « Vous l'avez touchée. Moi aussi. » Il fait glisser vers vous {prime} pièces de cuivre, trempe sa plume et écrit vite. « Voici ma réponse. Tout y est, sauf une chose : je ne sais pas s'il faut cesser d'extraire. Si nous cessons, Lutecia s'éteint. Si nous continuons… » Il scelle la lettre. « Une porte qui ne devait pas s'ouvrir, on ne sait jamais ce qui la retient. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre la réponse.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "pli_absent": {
+          "texte": "Le commandeur attend. « La Guilde m'écrit, dit-on. Sans pli, je n'ai rien à lire, et rien à répondre. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Je reviens avec. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "attente": {
+          "texte": "« Portez-la vite. » Il ne lève pas les yeux du cristal. « Et dites-lui que je ne suis plus poli. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "« Toujours fermée. Toujours tiède. » Le commandeur a l'air plus vieux. « Je crois qu'elle a toujours été là, et que nous l'avons seulement découverte en creusant. Mon second croit que c'est l'extraction qui la fait venir, comme l'eau fait venir une racine. Nous continuons d'extraire, tous les deux, et chacun espère avoir raison. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:templier_de_la_crypte_de_chartres",
+    "type": "pnj",
+    "nom": "Le Templier de la crypte",
+    "race": "nain",
+    "vocation": "templier",
+    "portrait": "templier_nain_m_crypte_chartres01.png",
+    "description": "Templier nain de la crypte de Chartres, gardien du puits. Il en a vu descendre ; il en a vu peu remonter.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:labyrinthe_du_puits_de_chartres",
+        "noeuds": {
+          "ouvre": "puits_ouvert",
+          "refus": "puits_clos"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "La crypte de Chartres est longue, basse, éclairée de lampes à huile. Au fond, une margelle de pierre noire et un treuil de fer : le puits. Un Templier nain se tient devant, la main sur la manivelle, comme s'il craignait qu'elle tourne toute seule. « Le puits n'est pas une curiosité. Regardez-le de loin. »",
+          "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Qu'y a-t-il au fond ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:rang_a_minotaure_de_chartres",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:rang_a_minotaure_de_chartres",
+                  "attendu": false
+                }
+              },
+              "next": "fond"
+            },
+            {
+              "id": "guilde",
+              "label": "« Je veux descendre. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "next": "seuil"
+            },
+            {
+              "id": "apres",
+              "label": "« Ils sont morts. Tous les deux. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_a_minotaure_de_chartres"
+                }
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "fond": {
+          "texte": "« Un labyrinthe que personne n'a creusé. » Il ne lâche pas la manivelle. « Avant la Vague, ce n'était qu'un puits, au milieu du labyrinthe qu'on a tracé autour. Puis il a changé de couleur. Les premiers qui sont descendus, on les appelle les Forts. On a gardé leurs noms. Pas leurs corps. » Il désigne la sortie. « Bonne journée. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "seuil": {
+          "texte": "Le Templier regarde l'insigne de guilde à votre cou, platine ou mieux, puis tourne la manivelle. La chaîne descend longtemps. « En bas, des couloirs. Ils tournent toujours du même côté, et ne ramènent jamais où l'on croit. » Il bloque le treuil. « Quand vous remonterez, tirez trois fois sur la chaîne. Si vous ne tirez pas, je ne remonte rien. »",
+          "choix": [
+            {
+              "id": "descendre",
+              "label": "Descendre dans le puits.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "attendre",
+              "label": "« Pas encore. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "puits_ouvert": {
+          "texte": "L'échelle de fer s'arrête au-dessus d'un sol de dalles. L'air est chaud, et sent l'étable. Un mugissement, très loin, rebondit sur des murs que vous ne voyez pas. Puis un second, plus près, qui ne vient pas du même côté. Il y en a deux.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Tirer votre arme.",
+              "next": "fin"
+            }
+          ]
+        },
+        "puits_clos": {
+          "texte": "Le Templier ne touche pas la manivelle. « Le puits ne s'ouvre qu'à l'insigne de platine de la Guilde, ou à mieux. Revenez quand vous le porterez. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Reculer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "« Deux. » Le Templier le répète, comme pour s'habituer au mot. « Nos registres n'en ont jamais compté qu'un. » Il regarde la chaîne. « Le prieur dit que le second était un fils. Notre frère archiviste, que le labyrinthe en refait un chaque fois qu'on en tue un, comme une porte rouvre ce qu'on lui ferme. Ils ont doublé la garde. Moi, je garde la manivelle. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:maelys",
+    "type": "pnj",
+    "nom": "Maëlys de Valombre",
+    "race": "nain",
+    "vocation": "maitre_de_guilde",
+    "portrait": "maitresse_de_guilde_Maelys_naine_f.jpg",
+    "description": "Maîtresse de la Guilde des Aventuriers de Lutecia, au Grand Relais des Frontières. Une naine solidement bâtie, aux épaules larges et à la démarche assurée ; ses cheveux auburn, striés de quelques mèches grises, sont noués en une tresse courte qui ne gêne jamais ses mouvements. Ses yeux gris clair semblent peser chaque parole. Une fine cicatrice part de sa tempe gauche et disparaît dans sa chevelure : elle ne la cache pas, mais ne raconte jamais comment elle l'a obtenue. Veste de cuir sombre renforcée aux épaules, chemise de lin de belle facture et, sur la poitrine, la broche d'argent en forme de porte ouverte, emblème de la Guilde de Lutecia. À sa ceinture, une vieille épée courte qu'elle porte par habitude, et qu'elle préfère ne jamais avoir à dégainer. Ancienne aventurière sans naissance ni fortune — Valombre n'est que le nom du hameau dont elle vient —, elle a gravi la Guilde de la vérification des contrats jusqu'à sa direction, le jour où son prédécesseur, un vieil elfe, n'est pas revenu de l'enquête qu'il menait sur un portail.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le bureau sent la cire, le vélin et le cuir. Entre la grande table couverte de registres et le mur tapissé de cartes, une naine se tient debout, une main posée sur sa ceinture. Elle vous a vu franchir le seuil avant même que vous ayez fini de pousser la porte. Ses yeux gris clair vous détaillent un long moment, sans hâte. « {prenom}. Vaugirard m'a parlé de vous. Entrez — et fermez derrière vous. »",
+          "choix": [
+            {
+              "id": "auxerre",
+              "label": "« Je viens d'Auxerre. Gautier de Valcroix m'a recommandé. »",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:le_grand_relais_des_frontieres_bureau_du_maitre",
+                  "max": 1
+                },
+                "quete_reussie": {
+                  "id": "quete:escorte_convoi_de_lutecia"
+                }
+              },
+              "next": "auxerre"
+            },
+            {
+              "id": "qui",
+              "label": "« C'est vous qui dirigez la Guilde ? »",
+              "next": "qui"
+            },
+            {
+              "id": "broche",
+              "label": "« Cette broche… une porte ? »",
+              "next": "broche"
+            },
+            {
+              "id": "cicatrice",
+              "label": "« Cette cicatrice, à la tempe… »",
+              "next": "cicatrice"
+            },
+            {
+              "id": "epee",
+              "label": "« Vous portez encore l'épée ? »",
+              "next": "epee"
+            },
+            {
+              "id": "rang_c_offre",
+              "label": "« On dit que l'épreuve du rang C, c'est vous qui la donnez. »",
+              "condition": {
+                "transport_offert": true,
+                "quete_reussie": {
+                  "id": "quete:escorte_convoi_de_lutecia"
+                },
+                "offre": "quete:rang_c_lettre_a_l_institut"
+              },
+              "next": "rang_c_propose"
+            },
+            {
+              "id": "rang_c_offre_inconnu",
+              "label": "« On dit que l'épreuve du rang C, c'est vous qui la donnez. »",
+              "condition": {
+                "transport_offert": true,
+                "quete_reussie": {
+                  "id": "quete:escorte_convoi_de_lutecia",
+                  "attendu": false
+                },
+                "offre": "quete:rang_c_lettre_a_l_institut"
+              },
+              "next": "rang_c_propose_inconnu"
+            },
+            {
+              "id": "rang_c_relance",
+              "label": "« Au sujet de la lettre pour l'Institut… »",
+              "condition": {
+                "transport_en_cours": true,
+                "offre": "quete:rang_c_lettre_a_l_institut"
+              },
+              "next": "rang_c_relance"
+            },
+            {
+              "id": "rang_c_attente",
+              "label": "« La lettre est remise. »",
+              "condition": {
+                "transport_a_rapporter": true,
+                "quete_reussie": {
+                  "id": "quete:escorte_aelis_abbaye_de_jumieges",
+                  "attendu": false
+                },
+                "offre": "quete:rang_c_lettre_a_l_institut"
+              },
+              "next": "rang_c_pas_encore"
+            },
+            {
+              "id": "rang_c_rapport",
+              "label": "« L'architecte est rentrée à la Cour des Arches, saine et sauve. »",
+              "condition": {
+                "transport_a_rapporter": true,
+                "quete_reussie": {
+                  "id": "quete:escorte_aelis_abbaye_de_jumieges"
+                },
+                "offre": "quete:rang_c_lettre_a_l_institut"
+              },
+              "action": {
+                "service": "transport",
+                "op": "rapporter"
+              }
+            },
+            {
+              "id": "rang_c_souvenir",
+              "label": "« Jumièges… »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_c_lettre_a_l_institut"
+                }
+              },
+              "next": "rang_c_souvenir"
+            },
+            {
+              "id": "b_gargouille_offre",
+              "label": "« Une épreuve pour le rang B ? On parle d'une gargouille. »",
+              "condition": {
+                "apport_offert": true,
+                "offre": "quete:rang_b_gargouille_de_la_seine"
+              },
+              "next": "b_gargouille_propose"
+            },
+            {
+              "id": "b_aix_offre",
+              "label": "« Une épreuve pour le rang B ? Un pli pour Aix, dit-on. »",
+              "condition": {
+                "transport_offert": true,
+                "offre": "quete:rang_b_pli_d_aix_la_chapelle"
+              },
+              "next": "b_aix_propose"
+            },
+            {
+              "id": "b_temple_offre",
+              "label": "« Une épreuve pour le rang B ? Il paraît que le Temple vous inquiète. »",
+              "condition": {
+                "transport_offert": true,
+                "offre": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir"
+              },
+              "next": "b_temple_propose"
+            },
+            {
+              "id": "b_mars_offre",
+              "label": "« Une épreuve pour le rang B ? Quelqu'un à conduire à Rhemi ? »",
+              "condition": {
+                "escorte_offerte": true,
+                "offre": "quete:rang_b_porte_de_mars"
+              },
+              "next": "b_mars_propose"
+            },
+            {
+              "id": "a_geant_offre",
+              "label": "« Le rang A. Qu'attendez-vous de moi ? » (le géant de la baie)",
+              "condition": {
+                "apport_offert": true,
+                "offre": "quete:rang_a_geant_de_la_baie"
+              },
+              "next": "a_geant_propose"
+            },
+            {
+              "id": "a_bete_offre",
+              "label": "« Le rang A. Qu'attendez-vous de moi ? » (la Bête)",
+              "condition": {
+                "apport_offert": true,
+                "offre": "quete:rang_a_bete_du_gevaudan"
+              },
+              "next": "a_bete_propose"
+            },
+            {
+              "id": "a_minotaure_offre",
+              "label": "« Le rang A. Qu'attendez-vous de moi ? » (le puits de Chartres)",
+              "condition": {
+                "apport_offert": true,
+                "offre": "quete:rang_a_minotaure_de_chartres"
+              },
+              "next": "a_minotaure_propose"
+            },
+            {
+              "id": "a_ampoule_offre",
+              "label": "« Le rang A. Qu'attendez-vous de moi ? » (une escorte depuis Rhemi)",
+              "condition": {
+                "escorte_offerte": true,
+                "offre": "quete:rang_a_ampoule_du_sacre"
+              },
+              "next": "a_ampoule_propose"
+            },
+            {
+              "id": "a_delegation_offre",
+              "label": "« Le rang A. Qu'attendez-vous de moi ? » (une délégation pour Aix)",
+              "condition": {
+                "escorte_offerte": true,
+                "offre": "quete:rang_a_delegation_palatine"
+              },
+              "next": "a_delegation_propose"
+            },
+            {
+              "id": "b_gargouille_remise",
+              "label": "Poser la tête de la gargouille sur la table.",
+              "condition": {
+                "apport_possible": true,
+                "offre": "quete:rang_b_gargouille_de_la_seine"
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
+              "id": "b_gargouille_relance",
+              "label": "« Au sujet de l'épreuve… »",
+              "condition": {
+                "apport_en_cours": true,
+                "apport_possible": false,
+                "offre": "quete:rang_b_gargouille_de_la_seine"
+              },
+              "next": "b_gargouille_relance"
+            },
+            {
+              "id": "a_geant_remise",
+              "label": "Poser la tête du géant sur la table.",
+              "condition": {
+                "apport_possible": true,
+                "offre": "quete:rang_a_geant_de_la_baie"
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
+              "id": "a_geant_relance",
+              "label": "« Au sujet de l'épreuve… »",
+              "condition": {
+                "apport_en_cours": true,
+                "apport_possible": false,
+                "offre": "quete:rang_a_geant_de_la_baie"
+              },
+              "next": "a_geant_relance"
+            },
+            {
+              "id": "a_bete_remise",
+              "label": "Poser la tête de la Bête sur la table.",
+              "condition": {
+                "apport_possible": true,
+                "offre": "quete:rang_a_bete_du_gevaudan"
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
+              "id": "a_bete_relance",
+              "label": "« Au sujet de l'épreuve… »",
+              "condition": {
+                "apport_en_cours": true,
+                "apport_possible": false,
+                "offre": "quete:rang_a_bete_du_gevaudan"
+              },
+              "next": "a_bete_relance"
+            },
+            {
+              "id": "a_minotaure_remise",
+              "label": "Poser la tête du Minotaure sur la table.",
+              "condition": {
+                "apport_possible": true,
+                "offre": "quete:rang_a_minotaure_de_chartres"
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
+              "id": "a_minotaure_relance",
+              "label": "« Au sujet de l'épreuve… »",
+              "condition": {
+                "apport_en_cours": true,
+                "apport_possible": false,
+                "offre": "quete:rang_a_minotaure_de_chartres"
+              },
+              "next": "a_minotaure_relance"
+            },
+            {
+              "id": "b_aix_relance",
+              "label": "« Au sujet du pli… »",
+              "condition": {
+                "transport_en_cours": true,
+                "offre": "quete:rang_b_pli_d_aix_la_chapelle"
+              },
+              "next": "b_aix_relance"
+            },
+            {
+              "id": "b_aix_rapport",
+              "label": "« Le pli est remis. Voici la réponse. »",
+              "condition": {
+                "transport_a_rapporter": true,
+                "offre": "quete:rang_b_pli_d_aix_la_chapelle"
+              },
+              "action": {
+                "service": "transport",
+                "op": "rapporter"
+              }
+            },
+            {
+              "id": "b_temple_relance",
+              "label": "« Au sujet du pli… »",
+              "condition": {
+                "transport_en_cours": true,
+                "offre": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir"
+              },
+              "next": "b_temple_relance"
+            },
+            {
+              "id": "b_temple_rapport",
+              "label": "« Le pli est remis. Voici la réponse. »",
+              "condition": {
+                "transport_a_rapporter": true,
+                "offre": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir",
+                "quete_reussie": {
+                  "id": "quete:cristal_de_l_ossuaire"
+                }
+              },
+              "action": {
+                "service": "transport",
+                "op": "rapporter"
+              }
+            },
+            {
+              "id": "b_temple_attente",
+              "label": "« Le pli est remis. »",
+              "condition": {
+                "transport_a_rapporter": true,
+                "offre": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir",
+                "quete_reussie": {
+                  "id": "quete:cristal_de_l_ossuaire",
+                  "attendu": false
+                }
+              },
+              "next": "b_temple_pas_encore"
+            },
+            {
+              "id": "b_mars_relance",
+              "label": "« Au sujet de l'escorte… »",
+              "condition": {
+                "escorte_en_cours": true,
+                "offre": "quete:rang_b_porte_de_mars"
+              },
+              "next": "b_mars_relance"
+            },
+            {
+              "id": "a_ampoule_relance",
+              "label": "« Au sujet de l'escorte… »",
+              "condition": {
+                "escorte_en_cours": true,
+                "offre": "quete:rang_a_ampoule_du_sacre"
+              },
+              "next": "a_ampoule_relance"
+            },
+            {
+              "id": "a_delegation_relance",
+              "label": "« Au sujet de l'escorte… »",
+              "condition": {
+                "escorte_en_cours": true,
+                "offre": "quete:rang_a_delegation_palatine"
+              },
+              "next": "a_delegation_relance"
+            },
+            {
+              "id": "b_gargouille_souvenir",
+              "label": "« La gargouille… »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_b_gargouille_de_la_seine"
+                }
+              },
+              "next": "b_gargouille_souvenir"
+            },
+            {
+              "id": "b_aix_souvenir",
+              "label": "« La réponse d'Aix… »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_b_pli_d_aix_la_chapelle"
+                }
+              },
+              "next": "b_aix_souvenir"
+            },
+            {
+              "id": "b_temple_souvenir",
+              "label": "« La porte des catacombes… »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir"
+                }
+              },
+              "next": "b_temple_souvenir"
+            },
+            {
+              "id": "b_mars_souvenir",
+              "label": "« La Porte de Mars… »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_b_porte_de_mars"
+                }
+              },
+              "next": "b_mars_souvenir"
+            },
+            {
+              "id": "a_geant_souvenir",
+              "label": "« Le géant de la baie… »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_a_geant_de_la_baie"
+                }
+              },
+              "next": "a_geant_souvenir"
+            },
+            {
+              "id": "a_bete_souvenir",
+              "label": "« La Bête… »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_a_bete_du_gevaudan"
+                }
+              },
+              "next": "a_bete_souvenir"
+            },
+            {
+              "id": "a_minotaure_souvenir",
+              "label": "« Le puits de Chartres… »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_a_minotaure_de_chartres"
+                }
+              },
+              "next": "a_minotaure_souvenir"
+            },
+            {
+              "id": "a_ampoule_souvenir",
+              "label": "« L'Ampoule… »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_a_ampoule_du_sacre"
+                }
+              },
+              "next": "a_ampoule_souvenir"
+            },
+            {
+              "id": "a_delegation_souvenir",
+              "label": "« Les architectes d'Aix… »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_a_delegation_palatine"
+                }
+              },
+              "next": "a_delegation_souvenir"
+            },
+            {
+              "id": "rien",
+              "label": "« Rien. Je voulais vous rencontrer. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "qui": {
+          "texte": "« Diriger. » Elle laisse le mot en suspens, comme pour en vérifier le poids. « Je ne commande personne, {prenom}. Je décide qui part, où, et avec qui. Ce qui arrive ensuite, ce sont les routes qui en décident. » Elle désigne le mur de cartes d'un mouvement du menton. « Mon métier, c'est que la route se trompe le moins souvent possible. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "broche": {
+          "texte": "Elle effleure l'argent du bout des doigts. « Une porte ouverte. Vous l'avez vue sculptée au-dessus de l'entrée : “Toute porte s'ouvre. Toute route a son prix.” » Un temps. « Les Templiers gardent les portes, les Architectes les entretiennent. Nous, nous les franchissons — et c'est nous qui payons le prix. Ils ne reviennent pas tous. Mais la porte, elle, reste ouverte pour ceux qui reviennent. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "cicatrice": {
+          "texte": "Elle ne détourne pas le visage, ne porte pas la main à sa tempe. Elle vous regarde, simplement, assez longtemps pour que la question vous paraisse de trop. « Une vieille histoire. » Puis, d'un ton égal : « Revenez me la demander le jour où vous en aurez une meilleure à me raconter. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "epee": {
+          "texte": "Sa main se pose sur la poignée usée, sans la serrer. « Par habitude. Elle a connu plus de routes que d'ennemis, et c'est très bien ainsi. » Elle retire sa main. « Une lame qu'on doit tirer, c'est une décision qu'on a prise trop tard. Si je fais bien mon travail, vous dégainerez moins souvent qu'on ne vous l'a promis à l'auberge. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "conge": {
+          "texte": "Elle hoche la tête, une fois. « Revenez quand vous aurez quelque chose à me dire, {prenom}. Pas avant, pas après. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "auxerre": {
+          "texte": "Elle tire un pli du coin de la table, le cachet de cire du Bastion de l'Yonne déjà rompu. « Valcroix. Il m'écrit que vous savez tenir un engagement. » Elle repose la lettre. « Il recommande peu. C'est une bonne chose pour vous. Mais ici, une recommandation ne vaut rien tant que je ne vous ai pas vu revenir. » Elle ouvre le registre. « Votre rang dit que vous savez vous battre. Ce qui m'intéresse, c'est de savoir si vous serez encore capable de me donner votre nom quand vous reviendrez de votre première mission ici. »",
+          "choix": [
+            {
+              "id": "pourquoi",
+              "label": "« Vous ne me demandez pas pourquoi je fais ce métier ? »",
+              "next": "pourquoi"
+            },
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "pourquoi": {
+          "texte": "« Je pourrais. Mais les gens ont toujours une bonne raison de prendre des risques. La faim, l'argent, la vengeance, la curiosité… Parfois même l'ennui. » Elle trempe sa plume. « Les contrats qui partent de ce bureau ne sont pas ceux du tableau d'en bas. Lisez-les attentivement. Si vous avez une question, posez-la avant de partir, pas quand les choses commencent à vous dévorer. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "rang_c_propose": {
+          "texte": "Maëlys ne s'assied pas. Elle tire d'un casier un pli déjà scellé — la cire porte la porte ouverte de la Guilde — et le pose à plat sur la table, entre vous. « Le rang C, {prenom}, ne se gagne pas sur une bête abattue. Il se gagne le jour où je peux confier à quelqu'un la vie d'une personne qui ne sait pas se défendre, et le regarder partir sans compter les jours. » Elle tapote le pli du bout de l'index. « L'Institut des Architectes me demande une escorte. En Normandie, en aval de Rouen, dans les ruines de l'abbaye de Jumièges, un portail s'est ouvert. Personne ne l'a bâti. Ils envoient l'une des leurs l'examiner : Aélis de Montfaucon. Je crois que vous la connaissez. Portez-lui cette lettre à {destination}, faites ce qu'elle vous demandera, ramenez-la vivante. Ensuite seulement, revenez ici. »",
+          "choix": [
+            {
+              "id": "rang_c_infos",
+              "label": "« Que sait-on de ce portail ? »",
+              "next": "rang_c_infos"
+            },
+            {
+              "id": "rang_c_accepter",
+              "label": "« Donnez-moi cette lettre. »",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "rang_c_plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "rang_c_infos": {
+          "texte": "« Ce qu'en dit un berger, et ce qu'en devinent trois maîtres de la Cour qui ne l'ont pas vu. » Elle hausse une épaule. « De la lumière dans la nef, la nuit. Des choses qui bougent sur les dalles. Pour le reste, l'abbaye est sur une boucle de la Seine, deux tours encore debout : suivez le fleuve vers la mer, vous ne la manquerez pas. » Elle vous regarde droit dans les yeux. « Ce qui sort d'un portail que personne n'a bâti, je ne le sais pas. C'est précisément pour cela que je n'y envoie pas n'importe qui. Et ne traînez pas avec la lettre : l'Institut attend ma réponse avant de faire partir quelqu'un d'autre. »",
+          "choix": [
+            {
+              "id": "rang_c_accepter",
+              "label": "« Donnez-moi cette lettre. »",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "rang_c_plus_tard",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "rang_c_accepte": {
+          "texte": "Elle vous tend le pli. Il ne pèse rien ; elle le retient pourtant un instant avant de le lâcher. « {destination}. En main propre. » Puis, déjà retournée vers ses cartes : « Et, {prenom} — là-bas, c'est elle qui décide quand on s'approche. Vous, vous décidez quand on recule. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_trop_charge": {
+          "texte": "Maëlys regarde votre sac, puis vous. « Une lettre, {prenom}. Une seule. Si vous ne pouvez plus la glisser dans votre barda, vous ne pourrez pas non plus courir quand il le faudra. Allégez-vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Je reviens le sac plus léger. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_relance": {
+          "texte": "« Le pli n'est pas arrivé. » Ce n'est pas une question. « {destination}. L'Institut n'enverra personne à Jumièges tant qu'il n'aura pas ma réponse — et le portail, lui, n'attend personne. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y vais. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_pas_encore": {
+          "texte": "Elle lève les yeux de ses registres. « Remise, oui. On me l'a fait savoir. » Un temps. « Je ne vous ai pas envoyé porter une lettre, {prenom}. Je vous ai envoyé ramener quelqu'un. Revenez quand l'architecte sera de retour à la Cour des Arches — pas avant. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Elle le sera. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_rapporte": {
+          "texte": "Maëlys vous écoute sans vous interrompre : la Seine, les deux tours, la nef, ce qui est sorti du portail et la façon dont c'est tombé. Elle ne prend aucune note. Quand vous parlez de la lueur violette, d'aucune couleur qu'Aélis connaisse, sa main s'arrête un instant sur la couverture du registre. Quand vous vous taisez, elle l'ouvre, y trace une ligne, puis fait glisser vers vous {prime} pièces de cuivre. « Rang C. » Elle referme le registre. « L'Institut m'a écrit ce matin. Leur architecte est rentrée avec plus de questions qu'elle n'en avait en partant. Chez eux, c'est un compliment. » Un temps. « Chez moi aussi. » Puis, plus bas, les yeux sur le mur de cartes : « Celui qui tenait ce bureau avant moi est parti un matin voir un portail qui avait changé de couleur. Il n'est pas revenu. » Elle se tourne de nouveau vers vous. « Vous, vous êtes là. Continuez comme ça. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Merci, maîtresse. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_c_souvenir": {
+          "texte": "« Jumièges. » Maëlys hoche la tête, une fois. « La Cour y a renvoyé des relevés. Le portail est toujours là, et personne ne sait encore vers où il ouvre. Ceux qui prétendent le savoir ne sont pas d'accord entre eux — ce qui, d'ordinaire, est bon signe : ils cherchent encore. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "rang_c_propose_inconnu": {
+          "texte": "Maëlys ne s'assied pas. Elle tire d'un casier un pli déjà scellé — la cire porte la porte ouverte de la Guilde — et le pose à plat sur la table, entre vous. « Le rang C, {prenom}, ne se gagne pas sur une bête abattue. Il se gagne le jour où je peux confier à quelqu'un la vie d'une personne qui ne sait pas se défendre, et le regarder partir sans compter les jours. » Elle tapote le pli du bout de l'index. « L'Institut des Architectes me demande une escorte. En Normandie, en aval de Rouen, dans les ruines de l'abbaye de Jumièges, un portail s'est ouvert. Personne ne l'a bâti. Ils envoient l'une des leurs l'examiner : Aélis de Montfaucon : une architecte qui ne sait pas se battre — et qui le sait, ce qui vaut mieux. Portez-lui cette lettre à {destination}, faites ce qu'elle vous demandera, ramenez-la vivante. Ensuite seulement, revenez ici. »",
+          "choix": [
+            {
+              "id": "rang_c_infos",
+              "label": "« Que sait-on de ce portail ? »",
+              "next": "rang_c_infos"
+            },
+            {
+              "id": "rang_c_accepter",
+              "label": "« Donnez-moi cette lettre. »",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "rang_c_plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "b_gargouille_propose": {
+          "texte": "Maëlys ouvre un registre ancien, relié de cuir noir, et le tourne vers vous. Sur la page, une gravure : une bête de pierre, ailes repliées, gueule ouverte sur une ville au bord d'un fleuve. « Rouen raconte qu'une gargouille ravageait ses quais, autrefois. On la brûla. Le corps brûla ; la tête et le cou, non. On les cloua au rempart pour qu'on s'en souvienne. » Elle referme le registre. « Il y en a d'autres. Le long de la Seine, de Lutecia à la mer, et sur d'autres rivières. Rapportez-moi une tête, {prenom}. Le rang B ne se gagne pas sur un loup. »",
+          "choix": [
+            {
+              "id": "infos",
+              "label": "« Comment la trouver ? »",
+              "next": "b_gargouille_infos"
+            },
+            {
+              "id": "accepter",
+              "label": "« Je vous la rapporte. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "b_gargouille_infos": {
+          "texte": "« On ne la trouve pas : on la croise. » Elle suit du doigt le tracé de la Seine sur la carte du mur. « Elle se tient immobile sur les berges, comme une pierre parmi les pierres. Ceux qui la cherchent passent devant sans la voir ; ceux qui ne la cherchent pas la réveillent. Marchez le long de l'eau, et regardez ce qui ne bouge pas. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je vous la rapporte. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "b_gargouille_accepte": {
+          "texte": "Maëlys trace une ligne dans son registre. « Une tête. Pas une aile, pas une griffe : je veux savoir que la bête ne se relèvera pas. » Elle lève les yeux. « Et ne la cherchez pas seule, si vous pouvez l'éviter. La pierre ne saigne pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_gargouille_relance": {
+          "texte": "« La gargouille. » Maëlys ne lève pas les yeux. « Le long de l'eau, {prenom}. Ce qui ne bouge pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_gargouille_partiel": {
+          "texte": "Maëlys regarde ce que vous avez posé, puis vous. « Ce n'est pas tout. Il reste {reste} pièce à rapporter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Je reviens avec. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_gargouille_remis": {
+          "texte": "La tête de pierre frappe la table avec un bruit de dalle qu'on pose. Maëlys en fait le tour, du bout des doigts, sans la toucher tout à fait. « Rouen avait raison : elle ne brûle pas. » Elle ouvre son registre, y trace une ligne, puis fait glisser vers vous {prime} pièces de cuivre. « Rang B. » Un temps. « Faites-la porter aux Archives des Seuils. Les architectes voudront savoir de quelle pierre elle est faite, et pourquoi elle bougeait. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Merci, maîtresse. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_gargouille_souvenir": {
+          "texte": "« Les Archives ont gardé la tête. » Maëlys hausse une épaule. « Un architecte jure que c'est de la pierre, rien d'autre, animée par un portail qu'on n'a jamais trouvé. Un autre, qu'une gargouille est une bête qui finit en pierre comme nous finissons en os. Ils ne se parlent plus. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "b_aix_propose": {
+          "texte": "Maëlys pose devant vous un pli scellé, épais, à la cire de la porte ouverte. « Aix-la-Chapelle. Au-delà de la plaine, sur les routes que tiennent les cités carolingiennes. Leur Hôtel de Ville garde des portes vers les cités sœurs ; aucune ne mène ici. » Elle tapote le pli. « J'ai une question à poser à leur chancelier, et je ne la confierai ni à un portail, ni à un messager. Portez-la à {destination}, rapportez-moi sa réponse. C'est loin, {prenom}. C'est le but. »",
+          "choix": [
+            {
+              "id": "infos",
+              "label": "« Quelle question ? »",
+              "next": "b_aix_infos"
+            },
+            {
+              "id": "accepter",
+              "label": "« Donnez-moi ce pli. »",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "b_aix_infos": {
+          "texte": "Maëlys vous regarde un long moment. « Une question sur une porte. » Ce sera tout. Puis, parce que vous attendez encore : « Le chemin, en revanche, je peux vous le donner. Le nord-est, par la plaine européenne, la route d'Aix-la-Chapelle. Vous ne la manquerez pas : les Carolingiens entretiennent leurs routes mieux que nous. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Donnez-moi ce pli. »",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "b_aix_accepte": {
+          "texte": "Elle vous tend le pli. « Au chancelier, en main propre. S'il l'ouvre devant vous, regardez son visage. » Puis, déjà retournée vers ses cartes : « C'est sa réponse que je veux. Son visage, c'est pour vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_aix_trop_charge": {
+          "texte": "Maëlys regarde votre sac, puis vous. « Un pli, {prenom}. Il n'y a plus la place ? Allégez-vous d'abord. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Je reviens le sac plus léger. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_aix_relance": {
+          "texte": "« Aix-la-Chapelle attend toujours. » Ce n'est pas une question. « Le nord-est, par la plaine. Et le chancelier, en main propre. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y vais. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_aix_rapporte": {
+          "texte": "Maëlys brise le sceau de la réponse et lit, debout, sans rien laisser paraître. Une fois. Deux fois. Elle plie la lettre en quatre et la range dans une poche intérieure de sa veste, pas dans un registre. « Il n'a rien vu. Aucune de leurs portes n'a changé de couleur. » Un temps. « C'est une bonne nouvelle. Je ne sais pas encore pourquoi elle ne me rassure pas. » Elle ouvre son registre, y trace une ligne, et fait glisser vers vous {prime} pièces de cuivre. « Rang B. Vous avez vu Aix. La plupart des membres de cette guilde mourront sans l'avoir vue. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Merci, maîtresse. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_aix_souvenir": {
+          "texte": "« Aix. » Maëlys effleure la poche de sa veste. « Le chancelier m'a écrit de nouveau. Une de leurs portes, la nuit, a pâli. Une seule fois, une heure, puis elle est redevenue comme avant. Leurs architectes disent que c'est l'hiver. » Elle ne dit pas ce qu'elle en pense.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "b_temple_propose": {
+          "texte": "Maëlys garde la main sur le pli un instant avant de le poser. « L'Enclos du Temple. La maison des Templiers, ici, à Lutecia. Ce sont eux qui gardent ce qu'il y a sous nos pieds, les catacombes et leur donjon, et qui en remontent les cristaux jaunes. » Elle se tait. « Depuis trois mois, leur commandeur ne répond plus aux lettres de la Guilde que par des politesses. Quand un Templier devient poli, {prenom}, il se passe quelque chose au fond. Portez-lui ceci à {destination}. S'il vous envoie en bas, descendez : je ne veux pas sa réponse, je veux ce que vous aurez vu. »",
+          "choix": [
+            {
+              "id": "infos",
+              "label": "« Pourquoi moi ? »",
+              "next": "b_temple_infos"
+            },
+            {
+              "id": "accepter",
+              "label": "« Donnez-moi ce pli. »",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "b_temple_infos": {
+          "texte": "« Parce qu'on ne ment pas de la même façon à une lettre et à quelqu'un qui revient du fond. » Elle hausse une épaule. « Et parce que le rang B, c'est le jour où je peux vous envoyer chez des gens plus puissants que la Guilde, et savoir que vous en reviendrez avec ce que je cherche. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Donnez-moi ce pli. »",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "b_temple_accepte": {
+          "texte": "Elle vous tend le pli. « Au commandeur. Et s'il vous envoie dans les catacombes, allez jusqu'au fond. Le rang B, c'est l'ossuaire, pas l'antichambre. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_temple_trop_charge": {
+          "texte": "Maëlys regarde votre sac, puis vous. « Un pli, {prenom}. Allégez-vous d'abord. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Je reviens le sac plus léger. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_temple_relance": {
+          "texte": "« Le commandeur n'a pas eu ma lettre. » Elle ne lève pas les yeux. « L'Enclos du Temple, {prenom}. Ce n'est pas loin. C'est ce qui m'inquiète. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y vais. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_temple_pas_encore": {
+          "texte": "Maëlys lève les yeux de ses registres. « Remis, oui. Le commandeur me l'a fait savoir. » Un temps. « Il me fait savoir aussi que son cristal n'est pas remonté de l'ossuaire. » Elle referme le registre. « Allez au fond, {prenom}, et rapportez-le-lui. Ensuite seulement, revenez ici. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y vais. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_temple_rapporte": {
+          "texte": "Maëlys brise le sceau du commandeur, lit, puis vous écoute sans vous interrompre : les trois étages, ce qui rôdait, l'ossuaire, le coffre, la paroi ouverte et la porte qui n'était pas là, le symbole, la chaleur de la pierre. Quand vous parlez du symbole, elle prend une feuille et vous demande de le dessiner. Vous le faites. Elle le regarde longtemps, puis le glisse dans le registre, à une page qu'elle ne vous montre pas. « Rang B. » Elle fait glisser vers vous {prime} pièces de cuivre. « Ils continueront d'extraire. Ils n'ont pas le choix : sans cristaux jaunes, la moitié des portes de cette ville s'éteindrait. » Un temps. « Personne n'a le choix. C'est ce qui rend les portes si patientes. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Merci, maîtresse. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_temple_souvenir": {
+          "texte": "« La porte des catacombes est toujours fermée. » Maëlys referme un tiroir. « Le commandeur pense qu'elle a toujours été là, et qu'on l'a seulement découverte en creusant. Son second pense que c'est l'extraction qui la fait pousser, comme une racine vers l'eau. Chacun espère avoir raison. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "b_mars_propose": {
+          "texte": "« Rhemi a une porte qui ne s'est jamais ouverte. » Maëlys déroule sur la table un vieux relevé : une arche triple, sans rien derrière. « La Porte de Mars. Des architectes de Rome l'ont bâtie pour relier Rhemi à Rome. Elle ne s'est jamais allumée. Rhemi dit que la craie boit le mana. » Elle roule le relevé. « La Cour des Arches veut la mesurer à nouveau, et envoie l'un des siens : Hugues Vaucelle. Il attend ici même, dans l'antichambre. Conduisez-le à Rhemi, et déposez-le vivant au pied de l'arche. »",
+          "choix": [
+            {
+              "id": "infos",
+              "label": "« Pourquoi la mesurer, si elle n'a jamais marché ? »",
+              "next": "b_mars_infos"
+            },
+            {
+              "id": "accepter",
+              "label": "« Je l'y conduis. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "b_mars_infos": {
+          "texte": "« Parce que certains jurent qu'elle a marché une fois. » Maëlys hausse une épaule. « Une nuit, il y a longtemps, un garde aurait vu de la lumière sous l'arche. Personne ne l'a jamais revue. » Elle vous regarde. « Un portail qui ne marche pas n'intéresse personne. Un portail qui a marché une fois, et qu'on ne comprend pas, intéresse tout le monde. Y compris des gens que je préfère ne pas croiser sur la route de Rhemi. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je l'y conduis. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "b_mars_accepte": {
+          "texte": "Maëlys ouvre la porte de l'antichambre. Un humain maigre se lève d'un banc, un sac de craies de couleur à l'épaule et un niveau d'eau sous le bras. « Vaucelle. Voici qui vous conduira. » L'architecte vous serre la main, longtemps, en vous regardant comme on mesure un mur. « Parfait. Je marche lentement, je m'arrête souvent, et je ne sais pas me battre. Je vous préviens maintenant : cela évitera les déceptions. » Maëlys a déjà refermé la porte.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« En route pour Rhemi. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_mars_relance": {
+          "texte": "« Vaucelle n'est pas encore à Rhemi. » Maëlys ne lève pas les yeux. « Il marche lentement, je sais. C'est vous qui comptez les jours, pas lui. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Nous y serons bientôt. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "b_mars_souvenir": {
+          "texte": "« Vaucelle est toujours à Rhemi. » Maëlys a presque un sourire. « Il m'a écrit. Trois pages de mesures et une seule ligne qui compte : la porte n'est pas morte. Elle attend. Le gardien de l'arche lui a répondu qu'une porte qui attend depuis des siècles, à Rhemi, on appelle ça une porte morte. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "a_geant_propose": {
+          "texte": "Maëlys déroule une carte de la côte ouest : une baie immense, un rocher au milieu des grèves. « Le Mont. Les pêcheurs de la baie disent qu'un géant y vit, qu'il est venu d'Ibérie et qu'il mange les gens du pays. Les vieilles chansons disent qu'Arthur l'a tué. » Elle pose le doigt sur la baie. « Il y a toujours un géant sur le Mont. Le même qui revient, ou un autre qui a pris sa place. Le rang A, {prenom}, c'est la tête de ce géant sur cette table. »",
+          "choix": [
+            {
+              "id": "infos",
+              "label": "« Que sait-on de lui ? »",
+              "next": "a_geant_infos"
+            },
+            {
+              "id": "accepter",
+              "label": "« Je vous la rapporte. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "a_geant_infos": {
+          "texte": "« Qu'il est plus grand que tout ce que vous avez abattu, et plus fort. Qu'il porte une massue de fer qu'un ogre ne soulèverait pas. Et qu'il ne quitte jamais la baie. » Elle vous regarde droit dans les yeux. « N'y allez pas sans compagnons. Ce n'est pas un conseil. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je vous la rapporte. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "a_geant_accepte": {
+          "texte": "Maëlys trace une ligne dans son registre. « La baie, à l'ouest. Les grèves se couvrent vite : surveillez la marée autant que le géant. » Un temps. « Et rapportez-moi aussi les compagnons que vous emmènerez. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_geant_relance": {
+          "texte": "« La baie. » Maëlys ne lève pas les yeux. « Le géant ne viendra pas jusqu'ici, {prenom}. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_geant_partiel": {
+          "texte": "« Il reste {reste} pièce à rapporter. » Maëlys n'a même pas regardé ce que vous avez posé.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Je reviens avec. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_geant_remis": {
+          "texte": "Il faut deux employés du Grand Relais pour monter la tête jusqu'au bureau. Maëlys les congédie d'un geste, puis reste un long moment devant ce visage énorme, aux yeux fermés. « Arthur l'a tué, disent les chansons. » Elle ouvre son registre et y trace une ligne, lentement. « Rang A. » Elle fait glisser vers vous {prime} pièces de cuivre. « À partir d'aujourd'hui, la Guilde de Lutecia n'a plus grand-chose à vous apprendre sur la France. Le reste du monde, en revanche… » Elle ne finit pas sa phrase.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Merci, maîtresse. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_geant_souvenir": {
+          "texte": "« Les pêcheurs de la baie m'ont fait porter un panier de poissons. » Maëlys désigne un coin du bureau, vide. « Je l'ai donné aux cuisines. Ils disent que le Mont est silencieux, maintenant. Ils disent aussi qu'il l'était, la dernière fois, avant qu'un autre revienne. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "a_bete_propose": {
+          "texte": "« La Bête. » Maëlys ne précise pas laquelle. Elle tire d'un casier une liasse de rapports, dont certains ont jauni. « Une bête rousse, une raie noire sur le dos, plus rapide qu'un cheval et plus rusée qu'un chasseur. On l'a vue dans le Gévaudan, au sud-ouest de Lyon, puis partout où la France est la plus dangereuse. Les battues reviennent bredouilles. » Elle repose la liasse. « Rapportez-moi sa tête, {prenom}. Le rang A est au bout. »",
+          "choix": [
+            {
+              "id": "infos",
+              "label": "« Un loup-garou ? »",
+              "next": "a_bete_infos"
+            },
+            {
+              "id": "accepter",
+              "label": "« Je vous la rapporte. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "a_bete_infos": {
+          "texte": "« Peut-être. » Maëlys n'hésite pas. « Les uns disent qu'on court le garou dans le Gévaudan comme ailleurs. Les autres, que c'est une bête, une vraie, et qu'on cherche un homme sous la fourrure pour se rassurer : un homme, on peut le juger. » Elle hausse une épaule. « Je ne vous demande pas ce qu'elle est. Je vous demande sa tête. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je vous la rapporte. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "a_bete_accepte": {
+          "texte": "Maëlys trace une ligne dans son registre. « Elle ne se laisse pas chercher. Laissez-la vous trouver, et soyez sur vos gardes quand elle le fera. » Puis, sans lever les yeux : « Et si, une fois tombée, elle a un visage, je veux le savoir aussi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_bete_relance": {
+          "texte": "« La Bête court toujours. » Maëlys ne lève pas les yeux de ses rapports. « Les régions les plus dangereuses, {prenom}. Elle n'aime pas les autres. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_bete_partiel": {
+          "texte": "« Il reste {reste} pièce à rapporter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Je reviens avec. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_bete_remis": {
+          "texte": "La tête est celle d'une bête : un museau long, des crocs, une fourrure rousse et la raie noire. Rien d'autre. Maëlys la regarde longtemps, comme si elle attendait qu'elle change. Elle ne change pas. « Une bête. » Elle ouvre son registre et y trace une ligne. « Rang A. » Elle fait glisser vers vous {prime} pièces de cuivre. « On dira dans le Gévaudan que vous avez tué un loup, et que la vraie Bête court toujours. On le dit à chaque fois. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Merci, maîtresse. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_bete_souvenir": {
+          "texte": "« Le Gévaudan est calme. » Maëlys tourne une page. « Une rebouteuse du Gévaudan m'a écrit qu'elle a veillé la tête une nuit avant que les Archives la prennent, et qu'elle a saigné. Un archiviste m'a écrit qu'une tête ne saigne pas trois semaines après la mort. L'un des deux ment, ou se trompe. Je ne cherche pas à savoir lequel. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "a_minotaure_propose": {
+          "texte": "« Chartres. » Maëlys pose sur la table une lettre au sceau des Templiers. « Sous la cathédrale, dans la crypte, il y a un puits. On y entre en descendant, et l'on arrive dans un labyrinthe que personne n'a creusé. Depuis la Vague, un Minotaure l'habite. Les premiers qui sont descendus, on les appelle encore les Forts. Ils ne sont pas remontés. » Elle replie la lettre. « Les Templiers demandent qu'on descende. Je vous le demande. Rapportez-moi une tête, {prenom}. »",
+          "choix": [
+            {
+              "id": "infos",
+              "label": "« Et le héros de la légende ? Celui qui l'a tué ? »",
+              "next": "a_minotaure_infos"
+            },
+            {
+              "id": "accepter",
+              "label": "« Je descendrai. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "a_minotaure_infos": {
+          "texte": "« Personne ne l'a tué. » Maëlys ne sourit pas. « Ailleurs, on raconte qu'un héros est entré dans un labyrinthe avec un fil, et qu'il en est ressorti. À Chartres, on raconte seulement que les Forts sont entrés. » Elle vous tend la lettre. « Le Templier de la crypte vous attend. C'est lui qui ouvre le puits, et il ne l'ouvre qu'à ceux que la Guilde envoie. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je descendrai. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "a_minotaure_accepte": {
+          "texte": "Maëlys trace une ligne dans son registre. « La crypte de Chartres, le Templier, le puits. » Elle lève les yeux. « Emmenez du monde. Et si vous perdez la tête en remontant, le Templier vous laissera redescendre la chercher. Il me l'a promis. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_minotaure_relance": {
+          "texte": "« Chartres attend. » Maëlys ne lève pas les yeux. « Le Templier de la crypte, {prenom}. Il ouvrira le puits. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y vais. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_minotaure_partiel": {
+          "texte": "« Il reste {reste} pièce à rapporter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Je reviens avec. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_minotaure_remis": {
+          "texte": "Maëlys écoute le récit de la descente : le puits, l'échelle, le labyrinthe, et les deux silhouettes cornues là où l'on n'en attendait qu'une. À ce mot, deux, sa plume s'arrête. Puis elle trace une ligne dans son registre. « Rang A. » Elle fait glisser vers vous {prime} pièces de cuivre. « Les Templiers vont devoir réécrire leurs registres. Un Minotaure, ils savaient le garder. Deux, ils ne savent pas d'où ils viennent. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Merci, maîtresse. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_minotaure_souvenir": {
+          "texte": "« Le puits de Chartres. » Maëlys secoue la tête. « Les Templiers ne s'accordent pas. Les uns disent que le second est un fils, et qu'il y en aura d'autres. Les autres, que le labyrinthe en refait un chaque fois qu'on en tue un, comme une porte rouvre ce qu'on y a fermé. Ils ont doublé la garde de la crypte. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "a_ampoule_propose": {
+          "texte": "« Rhemi garde une Ampoule dont l'huile ne s'épuise pas. On en oint ceux que les cités voisines reconnaissent pour gouverner : c'est le Sacre. » Maëlys pose devant vous une lettre aux armes d'Aix. « Aix-la-Chapelle va couronner quelqu'un, et demande l'Ampoule. Rhemi accepte de la prêter, sous escorte de deux de ses paladins, à condition que la Guilde de Lutecia en réponde. » Elle vous regarde. « La Guilde, c'est vous. Rendez-vous à l'Auberge du Sacre, à Rhemi ; conduisez-les jusqu'à la Chapelle Palatine d'Aix. »",
+          "choix": [
+            {
+              "id": "infos",
+              "label": "« D'où vient cette huile ? »",
+              "next": "a_ampoule_infos"
+            },
+            {
+              "id": "accepter",
+              "label": "« J'en réponds. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "a_ampoule_infos": {
+          "texte": "« Une colombe l'aurait apportée à Remi, le jour du premier Sacre. » Maëlys hausse une épaule. « Les uns disent qu'un portail s'est ouvert un instant dans le ciel. D'autres, que quelqu'un l'a donnée, et qu'on ne sait plus qui. D'autres encore, qu'elle vient de Rome, par la porte de Saint-Pierre. Ce que je sais, moi, c'est que tous ceux qui la convoitent ont la même certitude : elle vaut plus qu'une cité. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« J'en réponds. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "a_ampoule_accepte": {
+          "texte": "Maëlys trace une ligne dans son registre, puis une seconde, qu'elle souligne. « Le gardien s'appelle Gervais. Les deux paladins se défendront ; lui, non. S'il tombe, l'Ampoule tombe avec lui. » Elle referme le registre. « Rhemi, l'Auberge du Sacre. Ensuite Aix. Et pas de détour. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_ampoule_relance": {
+          "texte": "« L'Ampoule n'est pas encore à Aix. » Maëlys ne lève pas les yeux. « Pas de détour, {prenom}. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Nous y serons bientôt. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_ampoule_souvenir": {
+          "texte": "« L'Ampoule est rentrée à Rhemi. » Maëlys referme une lettre. « Aix a couronné qui elle voulait couronner. On dit là-bas que l'huile a brillé d'une lumière qu'on n'avait jamais vue. À Rhemi, on dit qu'elle brille toujours ainsi, et qu'il faut seulement être là pour la voir. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        },
+        "a_delegation_propose": {
+          "texte": "« L'Hôtel de Ville d'Aix tient des portes vers les cités sœurs. Charlemagne les a fait bâtir, un siècle après la Vague, et aucune ne mène à un donjon. » Maëlys pose devant vous un ordre de mission de la Cour des Arches. « La Cour veut comprendre comment on bâtit une porte qui tient depuis si longtemps. Elle envoie deux des siens : maître Gerbier et Clémence d'Orval. Ils attendent dans l'antichambre. Conduisez-les à l'Hôtel de Ville d'Aix, et déposez-les vivants. »",
+          "choix": [
+            {
+              "id": "infos",
+              "label": "« Pourquoi n'y vont-ils pas par une porte ? »",
+              "next": "a_delegation_infos"
+            },
+            {
+              "id": "accepter",
+              "label": "« Je les y conduis. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas aujourd'hui. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "a_delegation_infos": {
+          "texte": "« Parce qu'aucune porte d'Aix ne mène ici. » Maëlys a presque un sourire. « Et parce que celle de Notre-Dame ne s'ouvre pas pour deux architectes curieux. Pas encore. » Elle vous regarde. « Pour vous non plus, d'ailleurs. Pas encore. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je les y conduis. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "a_delegation_accepte": {
+          "texte": "Maëlys ouvre la porte de l'antichambre. Un nain trapu se lève en grommelant, une elfe très jeune derrière lui, un carnet déjà ouvert. « Maître Gerbier, Clémence d'Orval. Voici qui vous conduira. » Le nain vous toise. « J'ai compté : il y a quatre cent douze mille pas d'ici à Aix. » L'elfe, sans lever les yeux de son carnet : « Quatre cent onze. Il compte toujours le premier deux fois. » Maëlys a déjà refermé la porte.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« En route pour Aix. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_delegation_relance": {
+          "texte": "« Gerbier et d'Orval ne sont pas encore à Aix. » Maëlys ne lève pas les yeux. « Ne les laissez pas compter les pas à voix haute. Ils attirent les bêtes. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Nous y serons bientôt. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "a_delegation_souvenir": {
+          "texte": "« La Cour a reçu le premier rapport de Gerbier. » Maëlys soupèse un cahier épais. « Il conclut que les portes d'Aix tiennent parce qu'elles ont été bâties par des gens qui savaient ce qu'ils faisaient. D'Orval a ajouté une note en marge : qu'elles tiennent peut-être parce que quelque chose, de l'autre côté, les tient aussi. Gerbier a barré la note. La Cour l'a recopiée. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Une autre question… »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je ne vous retiens pas plus. »",
+              "next": "conge"
+            }
+          ]
+        }
+      }
+    },
+    "services": {
+      "transport": {
+        "offres": [
+          {
+            "offre": {
+              "id": "quete:rang_c_lettre_a_l_institut",
+              "destination": "lieu:la_cour_des_arches",
+              "cargaison": [
+                {
+                  "item": "item:lettre_de_mission_de_la_guilde",
+                  "quantite": 1,
+                  "poids": 0.05
+                }
+              ],
+              "duree": 172800,
+              "proba": 1,
+              "unique": true,
+              "retour": true,
+              "rang": "C",
+              "titre": "Rang C : le portail de Jumièges",
+              "description": "Maëlys, maîtresse de la Guilde, vous confie un pli scellé pour l'Institut des Architectes, à la Cour des Arches. L'architecte qui le recevra part pour les ruines de l'abbaye de Jumièges, en Normandie, où un portail s'est ouvert : escortez-la, ramenez-la vivante, puis revenez rendre compte au bureau de la maîtresse. Le rang C est au bout.",
+              "recompenses": {
+                "xp": 150,
+                "cuivre": 3000,
+                "rang_guilde": "C"
+              }
+            },
+            "noeuds": {
+              "propose": "rang_c_propose",
+              "infos": "rang_c_infos",
+              "accepte": "rang_c_accepte",
+              "trop_charge": "rang_c_trop_charge",
+              "rapporte": "rang_c_rapporte"
+            }
+          },
+          {
+            "offre": {
+              "id": "quete:rang_b_pli_d_aix_la_chapelle",
+              "titre": "Rang B : le pli d'Aix-la-Chapelle",
+              "description": "Maëlys vous confie un pli scellé pour le chancelier de l'Hôtel de Ville d'Aix-la-Chapelle, au-delà de la plaine européenne. Remettez-le en main propre, puis revenez rendre compte au bureau de la maîtresse avec la réponse. Le rang B est au bout.",
+              "destination": "lieu:hotel_de_ville_d_aix_la_chapelle",
+              "cargaison": [
+                {
+                  "item": "item:lettre_de_mission_de_la_guilde",
+                  "quantite": 1,
+                  "poids": 0.05
+                }
+              ],
+              "duree": 604800,
+              "proba": 1,
+              "unique": true,
+              "retour": true,
+              "rang": "B",
+              "recompenses": {
+                "xp": 250,
+                "cuivre": 5000,
+                "rang_guilde": "B"
+              }
+            },
+            "noeuds": {
+              "accepte": "b_aix_accepte",
+              "trop_charge": "b_aix_trop_charge",
+              "rapporte": "b_aix_rapporte"
+            }
+          },
+          {
+            "offre": {
+              "id": "quete:rang_b_porte_qui_ne_devait_pas_s_ouvrir",
+              "titre": "Rang B : la porte qui ne devait pas s'ouvrir",
+              "description": "Maëlys vous confie un pli pour le commandeur de l'Enclos du Temple, la maison des Templiers de Lutecia. Elle veut savoir ce qui se passe au fond des catacombes. Remettez-le, écoutez ce qu'il dira, puis revenez rendre compte. Le rang B est au bout.",
+              "destination": "lieu:enclos_du_temple",
+              "cargaison": [
+                {
+                  "item": "item:lettre_de_mission_de_la_guilde",
+                  "quantite": 1,
+                  "poids": 0.05
+                }
+              ],
+              "duree": 172800,
+              "proba": 1,
+              "unique": true,
+              "retour": true,
+              "rang": "B",
+              "recompenses": {
+                "xp": 250,
+                "cuivre": 5000,
+                "rang_guilde": "B"
+              }
+            },
+            "noeuds": {
+              "accepte": "b_temple_accepte",
+              "trop_charge": "b_temple_trop_charge",
+              "rapporte": "b_temple_rapporte"
+            }
+          }
+        ]
+      },
+      "apport": {
+        "offres": [
+          {
+            "offre": {
+              "id": "quete:rang_b_gargouille_de_la_seine",
+              "titre": "Rang B : la Gargouille de la Seine",
+              "description": "Maëlys veut la tête d'une gargouille. Elles hantent les berges des rivières de France, et d'abord celles de la Seine, entre Lutecia et Rouen. Rapportez-la au bureau de la maîtresse : le rang B est au bout.",
+              "item": "item:gargouille_tete",
+              "quantite": 1,
+              "unique": true,
+              "rang": "B",
+              "recompenses": {
+                "xp": 250,
+                "cuivre": 5000,
+                "rang_guilde": "B"
+              }
+            },
+            "noeuds": {
+              "accepte": "b_gargouille_accepte",
+              "remis": "b_gargouille_remis",
+              "partiel": "b_gargouille_partiel"
+            }
+          },
+          {
+            "offre": {
+              "id": "quete:rang_a_geant_de_la_baie",
+              "titre": "Rang A : le géant de la baie",
+              "description": "Maëlys veut la tête du géant qui hante la baie du Mont, à l'ouest de la Normandie, là où les grèves se couvrent et se découvrent. Rapportez-la au bureau de la maîtresse : le rang A est au bout.",
+              "item": "item:geant_du_mont_saint_michel_tete",
+              "quantite": 1,
+              "unique": true,
+              "rang": "A",
+              "recompenses": {
+                "xp": 400,
+                "cuivre": 8000,
+                "rang_guilde": "A"
+              }
+            },
+            "noeuds": {
+              "accepte": "a_geant_accepte",
+              "remis": "a_geant_remis",
+              "partiel": "a_geant_partiel"
+            }
+          },
+          {
+            "offre": {
+              "id": "quete:rang_a_bete_du_gevaudan",
+              "titre": "Rang A : la Bête",
+              "description": "Maëlys veut la tête de la Bête qui rôde dans les régions les plus dangereuses de France, des monts du Gévaudan aux confins de la carte. Rapportez-la au bureau de la maîtresse : le rang A est au bout.",
+              "item": "item:bete_du_gevaudan_tete",
+              "quantite": 1,
+              "unique": true,
+              "rang": "A",
+              "recompenses": {
+                "xp": 400,
+                "cuivre": 8000,
+                "rang_guilde": "A"
+              }
+            },
+            "noeuds": {
+              "accepte": "a_bete_accepte",
+              "remis": "a_bete_remis",
+              "partiel": "a_bete_partiel"
+            }
+          },
+          {
+            "offre": {
+              "id": "quete:rang_a_minotaure_de_chartres",
+              "titre": "Rang A : le puits de Chartres",
+              "description": "Les Templiers de Chartres demandent à la Guilde une descente dans le puits de la crypte, jusqu'au labyrinthe du Minotaure. Présentez-vous au Templier de la crypte, descendez, et rapportez une tête au bureau de la maîtresse : le rang A est au bout.",
+              "item": "item:minotaure_tete",
+              "quantite": 1,
+              "unique": true,
+              "rang": "A",
+              "recompenses": {
+                "xp": 400,
+                "cuivre": 8000,
+                "rang_guilde": "A"
+              }
+            },
+            "noeuds": {
+              "accepte": "a_minotaure_accepte",
+              "remis": "a_minotaure_remis",
+              "partiel": "a_minotaure_partiel"
+            }
+          }
+        ]
+      },
+      "escorte": {
+        "offres": [
+          {
+            "offre": {
+              "id": "quete:rang_b_porte_de_mars",
+              "titre": "Rang B : la Porte de Mars",
+              "description": "La Cour des Arches envoie l'architecte Hugues Vaucelle relever la Porte de Mars, à Rhemi : un portail qui ne s'est jamais allumé. Conduisez-le jusqu'à la porte et déposez-le vivant. Il ne sait pas se battre. Le rang B est au bout.",
+              "destination": "lieu:porte_de_mars",
+              "proteges": [
+                {
+                  "prenom": "Hugues",
+                  "nom": "Vaucelle",
+                  "race": "humain",
+                  "sex": "M",
+                  "image": "Set437-Magister Othmar Vey.jpg",
+                  "description": "Architecte de la Cour des Arches, spécialiste des portails qui n'ont jamais fonctionné. Un sac de craies de couleur, un niveau d'eau, et la conviction qu'un échec bien mesuré vaut mieux qu'une réussite qu'on ne comprend pas. Il ne sait pas se battre."
+                }
+              ],
+              "unique": true,
+              "proba": 1,
+              "rang": "B",
+              "recompenses": {
+                "xp": 250,
+                "cuivre": 5000,
+                "rang_guilde": "B"
+              }
+            },
+            "noeuds": {
+              "accepte": "b_mars_accepte"
+            }
+          },
+          {
+            "offre": {
+              "id": "quete:rang_a_ampoule_du_sacre",
+              "titre": "Rang A : l'Ampoule du Sacre",
+              "description": "Aix-la-Chapelle a demandé l'Ampoule du Sacre pour un couronnement. Retrouvez son gardien et ses deux paladins à l'Auberge du Sacre, à Rhemi, puis conduisez-les jusqu'à la Chapelle Palatine d'Aix. Le gardien ne sait pas se battre ; les paladins, si. Le rang A est au bout.",
+              "destination": "lieu:chapelle_palatine",
+              "proteges": [
+                {
+                  "prenom": "Gervais",
+                  "nom": "de Sillery",
+                  "race": "hobbit",
+                  "sex": "M",
+                  "description": "Gardien de l'Ampoule du Sacre. Il porte contre sa poitrine un coffret de bois noir qu'il ne lâche jamais, même pour manger. Il ne sait pas se battre.",
+                  "image": "gardien_hobbit_m_ampoule01.png"
+                },
+                {
+                  "prenom": "Aude",
+                  "nom": "de Cormicy",
+                  "race": "elfe",
+                  "sex": "F",
+                  "description": "Paladine de Rhemi, escorte de l'Ampoule. Elle marche toujours à la gauche du gardien, l'épée au clair dès que la route se resserre.",
+                  "se_defend": true,
+                  "equipement": {
+                    "torse": "item:Cotte_de_mailles",
+                    "main_droite": "item:Epee_longue_ordre",
+                    "main_gauche": "item:Bouclier_ordre"
+                  },
+                  "image": "paladin_elfe_f_rhemi01.png"
+                },
+                {
+                  "prenom": "Baudouin",
+                  "nom": "de Verzy",
+                  "race": "ogre",
+                  "sex": "M",
+                  "description": "Paladin de Rhemi, escorte de l'Ampoule. Il parle peu et se place toujours entre le coffret et ce qui s'en approche.",
+                  "se_defend": true,
+                  "equipement": {
+                    "torse": "item:Cotte_de_mailles",
+                    "main_droite": "item:Epee_longue_ordre",
+                    "main_gauche": "item:Bouclier_ordre"
+                  },
+                  "image": "paladin_ogre_m_rhemi01.png"
+                }
+              ],
+              "unique": true,
+              "proba": 1,
+              "rang": "A",
+              "recompenses": {
+                "xp": 400,
+                "cuivre": 8000,
+                "rang_guilde": "A"
+              },
+              "rencontre": {
+                "lieu": "lieu:auberge_du_sacre"
+              }
+            },
+            "noeuds": {
+              "accepte": "a_ampoule_accepte"
+            }
+          },
+          {
+            "offre": {
+              "id": "quete:rang_a_delegation_palatine",
+              "titre": "Rang A : la délégation palatine",
+              "description": "La Cour des Arches envoie deux architectes étudier les portes des cités sœurs, à l'Hôtel de Ville d'Aix-la-Chapelle. Conduisez maître Gerbier et Clémence d'Orval jusqu'à l'Hôtel de Ville et déposez-les vivants. Ils ne savent pas se battre. Le rang A est au bout.",
+              "destination": "lieu:hotel_de_ville_d_aix_la_chapelle",
+              "proteges": [
+                {
+                  "prenom": "Anselme",
+                  "nom": "Gerbier",
+                  "race": "nain",
+                  "sex": "M",
+                  "description": "Maître architecte de la Cour des Arches, envoyé à l'Hôtel de Ville d'Aix pour y étudier les portes des cités sœurs. Il compte ses pas et se plaint de chacun. Il ne sait pas se battre.",
+                  "image": "architecte_nain_m_cour01.png"
+                },
+                {
+                  "prenom": "Clémence",
+                  "nom": "d'Orval",
+                  "race": "elfe",
+                  "sex": "F",
+                  "description": "Jeune architecte de la Cour, seconde de maître Gerbier. Elle relève tout ce qu'elle voit, y compris ce que personne ne lui a demandé de relever. Elle ne sait pas se battre.",
+                  "image": "architecte_elfe_f_cour01.png"
+                }
+              ],
+              "unique": true,
+              "proba": 1,
+              "rang": "A",
+              "recompenses": {
+                "xp": 400,
+                "cuivre": 8000,
+                "rang_guilde": "A"
+              }
+            },
+            "noeuds": {
+              "accepte": "a_delegation_accepte"
+            }
+          }
+        ]
+      }
+    }
+  }
+]
