@@ -94,7 +94,8 @@
           0,
           0
         ],
-        "label": "Aix-la-Chapelle — repasser le seuil"
+        "label": "Aix-la-Chapelle — repasser le seuil",
+        "bouton": false
       },
       {
         "lieu": "lieu:sanctuaire_de_baiame",
@@ -231,7 +232,8 @@
           0,
           0
         ],
-        "label": "Aix-la-Chapelle — repasser le seuil"
+        "label": "Aix-la-Chapelle — repasser le seuil",
+        "bouton": false
       },
       {
         "lieu": "lieu:temple_de_senso_ji",
@@ -368,7 +370,8 @@
           0,
           0
         ],
-        "label": "Aix-la-Chapelle — repasser le seuil"
+        "label": "Aix-la-Chapelle — repasser le seuil",
+        "bouton": false
       },
       {
         "lieu": "lieu:temple_du_serpent_a_plumes",
@@ -504,7 +507,8 @@
           0,
           0
         ],
-        "label": "Aix-la-Chapelle — repasser le seuil"
+        "label": "Aix-la-Chapelle — repasser le seuil",
+        "bouton": false
       },
       {
         "lieu": "lieu:temple_du_soleil_de_pichao",
@@ -615,7 +619,8 @@
           0,
           0
         ],
-        "label": "Aix-la-Chapelle — repasser le seuil"
+        "label": "Aix-la-Chapelle — repasser le seuil",
+        "bouton": false
       },
       {
         "lieu": "lieu:petit_temple_d_abou_simbel",
@@ -654,6 +659,275 @@
     ],
     "metadata": {
       "type": "temple",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "pnj:gardienne_des_cinq_portes",
+    "type": "pnj",
+    "nom": "La gardienne des cinq portes",
+    "race": "elfe",
+    "vocation": "magicien",
+    "portrait": "templier_elfe_f_magicienne_notre_dame01.jpg",
+    "description": "Templière de la Chapelle Palatine, gardienne des cinq portes en pentagramme. Elle ne dit jamais où elles mènent avant qu'on ait le droit de les franchir.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "La Chapelle Palatine est octogonale, haute, dorée jusqu'à la coupole. Au sol, cinq arches de pierre dessinent une étoile, chacune ouverte sur une lueur calme. Une elfe en manteau de Templière se tient au centre, les mains croisées. « Bienvenue à la Chapelle. Ne marchez pas dans l'étoile. »",
+          "choix": [
+            {
+              "id": "portes",
+              "label": "« Où mènent-elles ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:rang_a_ampoule_du_sacre",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:rang_a_ampoule_du_sacre",
+                  "attendu": false
+                }
+              },
+              "next": "portes"
+            },
+            {
+              "id": "ampoule",
+              "label": "« Vous attendez l'Ampoule de Rhemi ? »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:rang_a_ampoule_du_sacre"
+                }
+              },
+              "next": "ampoule_attendue"
+            },
+            {
+              "id": "apres",
+              "label": "« Le couronnement a eu lieu ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:rang_a_ampoule_du_sacre"
+                }
+              },
+              "next": "apres"
+            },
+            {
+              "id": "seuils",
+              "label": "« Je voudrais franchir une porte. »",
+              "condition": {
+                "rang_min": {
+                  "cite": "lieu:lutecia",
+                  "rang": "A"
+                }
+              },
+              "next": "seuils"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "portes": {
+          "texte": "« Loin. » Elle sourit. « Plus loin qu'aucune porte de France. Un des Frères les a posées ici, et elles n'ont jamais bougé, ni avant la Vague, ni après. » Elle regarde la lueur la plus proche. « Ceux qui les franchissent, leur guilde les envoie. Il faut le rang A de la Guilde de Lutecia pour en passer une. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "ampoule_attendue": {
+          "texte": "« Nous l'attendons. » Elle ne quitte pas l'étoile des yeux. « On ne couronne pas sans elle, depuis Charlemagne. Amenez-la, et son gardien avec. L'un sans l'autre ne nous sert à rien. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "« Il a eu lieu. » Elle se tait un moment. « Quand on a ouvert le coffret, les cinq portes ont brillé ensemble. Elles ne l'avaient jamais fait. Le gardien de l'Ampoule dit que c'est l'huile qui les a reconnues. Mes frères Templiers disent que ce sont les portes qui ont reconnu l'huile. » Elle sourit à peine. « Ce n'est pas la même chose, et personne ici ne sait laquelle des deux est la plus inquiétante. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "seuils": {
+          "texte": "Elle s'écarte du centre de l'étoile. Les cinq arches s'éclairent ensemble, chacune sur son paysage lointain. « Elles ne bougent pas, elles ne s'éteignent pas, et elles ne demandent rien : ni gemme, ni cristal. Choisissez, et ne vous arrêtez pas au milieu. »",
+          "choix": [
+            {
+              "id": "franchir",
+              "label": "Franchir une porte.",
+              "action": {
+                "service": "portail",
+                "op": "franchir"
+              }
+            },
+            {
+              "id": "accueil",
+              "label": "« Pas maintenant. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "ouvert": {
+          "texte": "Vous entrez dans l'étoile. La lumière se referme derrière vous comme une eau calme, et vous arrivez à {destination}.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Avancer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "refus_acces": {
+          "texte": "Elle vous barre l'étoile du bras. « Pas encore. Le rang A de la Guilde de Lutecia, d'abord. »",
+          "choix": [
+            {
+              "id": "accueil",
+              "label": "« Autre chose. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    },
+    "services": {
+      "portail": {
+        "ancrage": "lieu:chapelle_palatine",
+        "fixe": true,
+        "choix": "franchir",
+        "noeuds": {
+          "ouvert": "ouvert",
+          "refus_acces": "refus_acces",
+          "ferme": "seuils"
+        }
+      }
+    }
+  },
+  {
+    "_id": "link:chapelle_palatine_to_aix_la_chapelle",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:aix_la_chapelle",
+        "pos": [
+          47,
+          26
+        ],
+        "label": "Retourner dans la ville"
+      },
+      {
+        "lieu": "lieu:chapelle_palatine",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "La Chapelle Palatine"
+      }
+    ],
+    "metadata": {
+      "type": "chapelle_palatine",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:hotel_de_ville_d_aix_la_chapelle_to_aix_la_chapelle",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:aix_la_chapelle",
+        "pos": [
+          44,
+          22
+        ],
+        "label": "Retourner dans la ville"
+      },
+      {
+        "lieu": "lieu:hotel_de_ville_d_aix_la_chapelle",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "L'Hôtel de Ville"
+      }
+    ],
+    "metadata": {
+      "type": "hotel_de_ville",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:enclos_du_temple_to_lutecia",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:lutecia",
+        "pos": [
+          56,
+          22
+        ],
+        "label": "Retourner dans la ville"
+      },
+      {
+        "lieu": "lieu:enclos_du_temple",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "L'Enclos du Temple"
+      }
+    ],
+    "metadata": {
+      "type": "temple_templier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:labyrinthe_du_puits_de_chartres_to_crypte_de_chartres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:crypte_de_chartres",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Remonter par la chaîne"
+      },
+      {
+        "lieu": "lieu:labyrinthe_du_puits_de_chartres",
+        "pos": [
+          14,
+          10
+        ],
+        "label": "Descendre dans le puits"
+      }
+    ],
+    "metadata": {
+      "type": "descente",
       "status": "ouvert"
     }
   }

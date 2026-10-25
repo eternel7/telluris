@@ -121,3 +121,26 @@ def test_chambre_louee_visible_du_locataire(monkeypatch):
 						lambda _u: dict(CHARACTER, _id="character:autre"))
 	ids = {c["_id"] for c in lieux_module.get_lieu_links(CURRENT_USER)}
 	assert ids == {"link:maison_1", "link:chambre_1"}
+
+
+# ── Nœud `bouton: false` : on y arrive, on n'en part pas par un bouton ─────────
+
+CONN_SANS_BOUTON = {"_id": "link:ville_temple", "type": "connection",
+					"nodes": [{"lieu": "lieu:ville", "pos": [1, 1], "bouton": False},
+							  {"lieu": "lieu:place", "pos": [0, 0]}]}
+
+
+def test_noeud_sans_bouton_ecarte_meme_pour_le_deplaceur(monkeypatch):
+	monkeypatch.setattr(lieux_module, "db", _FakeDB([CONN_SANS_BOUTON, CONN_OUVERTE]))
+	for filtrer in (True, False):
+		ids = {c["_id"] for c in lieux_module.get_lieu_links(CURRENT_USER, filtrer_acces=filtrer)}
+		assert ids == {"link:ville_place"}
+
+
+def test_noeud_sans_bouton_le_retour_reste_un_bouton():
+	# Depuis l'AUTRE bout, le lien reste empruntable : le flag ne vaut que pour SON nœud.
+	assert not lieux_module.depart_interdit(CONN_SANS_BOUTON, "lieu:place", {"x": 0, "y": 0})
+	assert lieux_module.depart_interdit(CONN_SANS_BOUTON, "lieu:ville", {"x": 1, "y": 1})
+	marqueurs = lieux_module.passages_carte([CONN_SANS_BOUTON], "lieu:ville", lambda c: False,
+											get_doc_fn=_get_doc)
+	assert marqueurs == []

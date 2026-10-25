@@ -437,7 +437,7 @@
           0,
           0
         ],
-        "label": "Descendre dans le puits"
+        "label": "Remonter par la chaîne"
       },
       {
         "lieu": "lieu:labyrinthe_du_puits_de_chartres",
@@ -445,7 +445,7 @@
           14,
           10
         ],
-        "label": "Remonter par la chaîne"
+        "label": "Descendre dans le puits"
       }
     ],
     "metadata": {

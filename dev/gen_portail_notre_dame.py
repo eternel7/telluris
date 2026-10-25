@@ -183,8 +183,9 @@ def puits(par_id):
 	# Le treuil : descente (donjon à étages → le combat s'ouvre au bas du puits) et remontée par
 	# la chaîne, passage `surface` de l'unique étage.
 	lien = {"_id": LIEN_PUITS, "type": "connection",
-			"nodes": [{"lieu": M.CRYPTE, "pos": [0, 0], "label": "Descendre dans le puits"},
-					  {"lieu": M.LABYRINTHE, "pos": list(LABY_PUITS), "label": "Remonter par la chaîne"}],
+			# Label d'un nœud = le bouton qui MÈNE à ce nœud : « Remonter » sur la crypte.
+			"nodes": [{"lieu": M.CRYPTE, "pos": [0, 0], "label": "Remonter par la chaîne"},
+					  {"lieu": M.LABYRINTHE, "pos": list(LABY_PUITS), "label": "Descendre dans le puits"}],
 			"metadata": {"type": "descente", "status": "ouvert"}}
 	return [donjon_doc, templier, lien]
 

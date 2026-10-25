@@ -22,13 +22,14 @@ def _gen():
 GEN = _gen()
 DUMP = {d["_id"]: d for d in GEN.ggi.charger_dump()}
 ERREURS = []
-DOCS = {d["_id"]: d for d in GEN.docs_portails(DUMP, ERREURS)}
+DOCS = {d["_id"]: d for d in GEN.docs_portails(DUMP, ERREURS)
+		+ [GEN.gardienne(DUMP[GEN.GARDIENNE])] + GEN.corrections(DUMP, ERREURS)}
 LIENS = [d for d in DOCS.values() if d.get("type") == "connection"]
 
 
 def test_aucune_erreur_ni_id_en_double():
 	assert ERREURS == []
-	assert len(DOCS) == len(GEN.docs_portails(DUMP, []))
+	assert len(DOCS) == len(GEN.docs_portails(DUMP, [])) + 1 + len(GEN.CORRECTIONS)
 
 
 def test_une_porte_par_temple_et_toutes_au_tableau_des_seuils():
@@ -67,3 +68,31 @@ def test_dialogues_des_templiers_sans_faute():
 	rapport = lint_dialogues.analyser(list(DOCS.values()))
 	assert rapport["analyses"] >= len(GEN.TEMPLES)
 	assert rapport["erreurs"] == 0 and rapport["avertissements"] == 0, rapport["trouvailles"]
+
+
+RETOUR = ("Retourner", "Ressortir", "Remonter", "Revenir", "Aix-la-Chapelle — repasser")
+
+
+def test_label_d_un_noeud_mene_a_ce_noeud():
+	"""Le bouton affiché est le label du nœud DESTINATION : un label de retour se pose sur le
+	nœud du lieu où l'on RETOURNE (la cité, la chapelle, la crypte), jamais sur le sous-lieu."""
+	assert set(GEN.CORRECTIONS) <= set(DOCS)
+	for lien in LIENS:
+		for k, n in enumerate(lien["nodes"]):
+			autre = lien["nodes"][1 - k]
+			if (n.get("label") or "").startswith(RETOUR):
+				parent = (DOCS.get(n["lieu"]) or DUMP.get(n["lieu"]) or {}).get("lieu_parent")
+				assert parent != autre["lieu"], (lien["_id"], n)
+	portes = [l for l in LIENS if l["metadata"]["type"] == portails.TYPE_PORTAIL]
+	assert all(l["nodes"][0]["bouton"] is False and "bouton" not in l["nodes"][1] for l in portes)
+	assert all(l["nodes"][1]["label"].startswith("Franchir") for l in portes)
+
+
+def test_la_gardienne_tient_le_tableau_fixe_au_rang_a():
+	g = DOCS[GEN.GARDIENNE]
+	conf = g["services"]["portail"]
+	assert conf["fixe"] is True and conf["ancrage"] == GEN.CHAPELLE and "cout" not in conf
+	choix = next(c for c in g["dialogue"]["noeuds"]["accueil"]["choix"] if c["id"] == "seuils")
+	assert choix["condition"] == GEN.RANG_A
+	# Rien du dump n'est perdu (PUT complet) : le dialogue d'avant est toujours là.
+	assert set(DUMP[GEN.GARDIENNE]["dialogue"]["noeuds"]) <= set(g["dialogue"]["noeuds"])

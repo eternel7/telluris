@@ -619,6 +619,10 @@ def analyser_doc(doc: dict) -> list:
 			elif apport_util.quete_id_de({"services": {"apport": conf}}) is None:
 				erreur("`services.apport` sans `offre` ni `quete` (`quete:…`) : ce PNJ ne "
 					   "recevrait aucune remise.")
+		elif service == "portail" and (conf or {}).get("fixe"):
+			# Tableau fixe : aucun seuil ne se referme ; sans `cout`, rien à payer ; la
+			# barrière de la porte, elle, peut refuser.
+			attendus = {"ouvert", "refus_acces"} | ({"refus_cristal"} if (conf or {}).get("cout") else set())
 		else:
 			attendus = NOEUDS_REQUIS.get(service, set())
 		for cle in attendus - set(declares):

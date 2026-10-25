@@ -37,6 +37,11 @@ Théories contradictoires portées par les Templiers, aucune tranchée : le frè
 - ⚠️ **Pichao n'existe pas au dump** : son temple n'a que la porte (cul-de-sac) jusqu'à la création de la cité.
 - ⚠️ Tokyo et Teotihuacan n'ont **aucun autre lien** : la porte d'Aix en est le seul accès.
 
+### 3 bis. Tableau fixe (Auteur, 25/10)
+> Le but est de reprendre le tableau de Notre-Dame, mais sans que ça tourne. C'est-à-dire que là, les destinations sont fixes et n'ont pas d'expiration.
+
+- La **gardienne des cinq portes** tient le tableau (rang A de Lutecia) : les cinq portes, toujours ouvertes, sans gemme ni cristal. Plus aucun bouton de porte dans la chapelle ; le retour depuis chaque temple reste un bouton.
+
 ### 4. Prompts d'image
 Lieux : `templates/resources/towns/`, paysage 16:9. Portraits : `templates/resources/pnj/`, paysage 16:9, aucun nom dans le prompt.
 

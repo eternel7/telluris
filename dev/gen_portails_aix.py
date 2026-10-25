@@ -10,6 +10,12 @@ colosses assis au bord d'un fleuve.
 
 - Portails : `connection` `metadata.type == "portail"` chapelle ↔ temple (le tableau des seuils
   de Notre-Dame les prend d'office, `utils/portails.py`). Nœuds sans grille : `pos` [0, 0].
+  Le nœud CHAPELLE porte `"bouton": false` : aucun bouton dans la chapelle, on part par le
+  TABLEAU FIXE de la gardienne (`services.portail.fixe` : les cinq portes, toujours ouvertes,
+  sans cristal — portes d'un frère) ; le retour depuis le temple reste un bouton.
+- ⚠️ Label d'un nœud = le bouton qui MÈNE à ce nœud (play_town affiche le label du nœud
+  destination). `CORRECTIONS` remet à l'endroit quatre liens posés à l'envers (labels écrits,
+  donc rejeu idempotent).
 - Temples : `categorie: "portail"`, `sous_categorie: "temple"` (forme d'ad-Deir et de la Khazneh),
   barrière `acces` rang A de Lutecia sur le TEMPLE (destination ; aucune barrière sur la chapelle,
   dont la gardienne parle à tous). Un Templier par temple (dialogue seul, aucun service).
@@ -17,12 +23,14 @@ colosses assis au bord d'un fleuve.
   plus proche praticable dans la plus grande zone. Pichao n'a pas de `lieu:*` : son temple
   n'a que la porte (cul-de-sac assumé, à relier quand la cité existera).
 
-REJOUABLE : un `_id` déjà au dump est signalé et le fichier n'est pas écrit (PUT complet, §11).
+REJOUABLE : un `_id` NEUF déjà au dump est signalé et le fichier n'est pas écrit (PUT complet,
+§11) ; la gardienne et les liens corrigés sont relus du dump et ne portent que leur delta.
 
 Usage : python dev/gen_portails_aix.py [--dump jsons/telluris-dump-….json]
 Sortie : jsons/portails_aix_a_importer.json
 """
 
+import copy
 import json
 import os
 import sys
@@ -35,6 +43,20 @@ from dev.gen_petra import choix, connexion, noeud, plus_proche, pnj_doc, zone_de
 
 SORTIE = os.path.join(ggi.DOSSIER_JSONS, "portails_aix_a_importer.json")
 CHAPELLE, LUTECIA = "lieu:chapelle_palatine", "lieu:lutecia"
+GARDIENNE = "pnj:gardienne_des_cinq_portes"
+RANG_A = {"rang_min": {"cite": LUTECIA, "rang": "A"}}
+# Liens posés à l'envers par des générateurs antérieurs : {lien: {lieu du nœud: label}} — le
+# label d'un nœud est le bouton qui mène À ce nœud.
+CORRECTIONS = {
+	"link:chapelle_palatine_to_aix_la_chapelle": {
+		"lieu:aix_la_chapelle": "Retourner dans la ville", CHAPELLE: "La Chapelle Palatine"},
+	"link:hotel_de_ville_d_aix_la_chapelle_to_aix_la_chapelle": {
+		"lieu:aix_la_chapelle": "Retourner dans la ville", "lieu:hotel_de_ville_d_aix_la_chapelle": "L'Hôtel de Ville"},
+	"link:enclos_du_temple_to_lutecia": {
+		LUTECIA: "Retourner dans la ville", "lieu:enclos_du_temple": "L'Enclos du Temple"},
+	"link:labyrinthe_du_puits_de_chartres_to_crypte_de_chartres": {
+		"lieu:crypte_de_chartres": "Remonter par la chaîne", "lieu:labyrinthe_du_puits_de_chartres": "Descendre dans le puits"},
+}
 ACCES = {"refus": "Un Templier vous arrête au bord du seuil : on ne le franchit qu'avec le rang A de la "
 	"Guilde de Lutecia.", "cycle": 1, "conditions": [{"rang_min": {"cite": LUTECIA, "rang": "A"}}]}
 RETOUR = choix("retour", "Une autre question…", "accueil")
@@ -192,8 +214,10 @@ def docs_portails(par_id: dict, erreurs: list) -> list:
 				"description": pnj["description"].split(". ")[0] + "."}]}
 		if t["cite"]:
 			temple["lieu_parent"] = t["cite"]
-		out += [temple, pnj, connexion(f"link:chapelle_palatine_to_{t['slug']}", CHAPELLE, (0, 0), t["lieu"],
-			(0, 0), "portail", "Aix-la-Chapelle — repasser le seuil", "Franchir " + t["porte"])]
+		porte = connexion(f"link:chapelle_palatine_to_{t['slug']}", CHAPELLE, (0, 0), t["lieu"], (0, 0),
+			"portail", "Aix-la-Chapelle — repasser le seuil", "Franchir " + t["porte"])
+		porte["nodes"][0]["bouton"] = False
+		out += [temple, pnj, porte]
 		if not t["cite"]:
 			continue
 		cite = par_id.get(t["cite"])
@@ -214,18 +238,67 @@ def docs_portails(par_id: dict, erreurs: list) -> list:
 	return out
 
 
+def gardienne(doc: dict) -> dict:
+	"""La gardienne relue du dump, plus le TABLEAU FIXE des cinq portes (rang A de Lutecia)."""
+	doc = copy.deepcopy(doc)
+	doc.pop("_rev", None)
+	doc["services"] = {**(doc.get("services") or {}), "portail": {
+		"ancrage": CHAPELLE, "fixe": True, "choix": "franchir",
+		"noeuds": {"ouvert": "ouvert", "refus_acces": "refus_acces", "ferme": "seuils"}}}
+	noeuds = doc["dialogue"]["noeuds"]
+	noeuds["portes"]["texte"] = noeuds["portes"]["texte"].replace(
+		"Vous y viendrez peut-être. Pas encore. »",
+		"Il faut le rang A de la Guilde de Lutecia pour en passer une. »")
+	accueil = [c for c in noeuds["accueil"]["choix"] if c["id"] != "seuils"]
+	accueil.insert(len(accueil) - 1, choix("seuils", "« Je voudrais franchir une porte. »", "seuils", RANG_A))
+	noeuds["accueil"]["choix"] = accueil
+	noeuds.update({
+		"seuils": noeud(
+			"Elle s'écarte du centre de l'étoile. Les cinq arches s'éclairent ensemble, chacune sur son "
+			"paysage lointain. « Elles ne bougent pas, elles ne s'éteignent pas, et elles ne demandent "
+			"rien : ni gemme, ni cristal. Choisissez, et ne vous arrêtez pas au milieu. »",
+			choix("franchir", "Franchir une porte.", action={"service": "portail", "op": "franchir"}),
+			choix("accueil", "« Pas maintenant. »", "accueil")),
+		"ouvert": noeud(
+			"Vous entrez dans l'étoile. La lumière se referme derrière vous comme une eau calme, et vous "
+			"arrivez à {destination}.",
+			choix("fin", "Avancer.")),
+		"refus_acces": noeud(
+			"Elle vous barre l'étoile du bras. « Pas encore. Le rang A de la Guilde de Lutecia, d'abord. »",
+			choix("accueil", "« Autre chose. »", "accueil"), choix("fin", "(Prendre congé.)")),
+	})
+	return doc
+
+
+def corrections(par_id: dict, erreurs: list) -> list:
+	out = []
+	for lid, labels in CORRECTIONS.items():
+		lien = par_id.get(lid)
+		if not lien or {n.get("lieu") for n in lien.get("nodes", [])} != set(labels):
+			erreurs.append(f"{lid} absent du dump ou nœuds inattendus")
+			continue
+		lien = copy.deepcopy(lien)
+		lien.pop("_rev", None)
+		for n in lien["nodes"]:
+			n["label"] = labels[n["lieu"]]
+		out.append(lien)
+	return out
+
+
 def main() -> int:
 	args = sys.argv[1:]
 	chemin_dump = args[args.index("--dump") + 1] if "--dump" in args else None
 	par_id = {d.get("_id"): d for d in ggi.charger_dump(chemin_dump)}
-	if CHAPELLE not in par_id:
-		print(f"✗ {CHAPELLE} absente du dump")
+	if CHAPELLE not in par_id or GARDIENNE not in par_id:
+		print(f"✗ {CHAPELLE} ou {GARDIENNE} absent du dump")
 		return 1
 	erreurs = []
 	sortie = docs_portails(par_id, erreurs)
+	neufs = [d["_id"] for d in sortie]
+	sortie += [gardienne(par_id[GARDIENNE])] + corrections(par_id, erreurs)
 	ids = [d["_id"] for d in sortie]
 	erreurs += [f"_id en double : {i}" for i in sorted({i for i in ids if ids.count(i) > 1})]
-	deja = [i for i in ids if i in par_id]
+	deja = [i for i in neufs if i in par_id]
 	if deja:
 		erreurs.append("déjà en base : " + ", ".join(deja))
 	if erreurs:
