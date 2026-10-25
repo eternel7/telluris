@@ -99,23 +99,24 @@ RECOMPENSES_A = {"xp": 400, "cuivre": 8000, "rang_guilde": "A"}
 # traverse Lutecia et Rouen). Trophée au hasard, grade de la zone (Auteur, 25/10).
 ZONE_GARGOUILLE = "zone:riviere"
 
-# Portraits et images : stock existant de templates/resources ; les images DÉFINITIVES des
-# lieux neufs (prompts livrés avec la demande) remplaceront ces valeurs.
+# Portraits et images : images DÉFINITIVES (prompts : docs/lore/personnages/
+# 20261025_missions_rang_b_a_lutecia.md § 4) ; chancelier, gardienne, gardien de la Porte de
+# Mars et Hugues gardent un portrait du stock, qui n'est porté par personne d'autre.
 PORTRAITS = {
 	CHANCELIER: "Set442-Lepidstadt-School of Law and Civic Dean Cassian Ornel.jpg",
 	GARDIENNE: "templier_elfe_f_magicienne_notre_dame01.jpg",
-	COMMANDEUR: "templier_humain_m_garde_temple01.png",
+	COMMANDEUR: "templier_humain_m_commandeur_enclos01.png",
 	GARDE_MARS: "Set346-Male-Dwarf-Oread-Torag-08.jpg",
 	HUGUES: "Set437-Magister Othmar Vey.jpg",
-	TEMPLIER_CRYPTE: "templier_nain_m_garde_temple01.png",
+	TEMPLIER_CRYPTE: "templier_nain_m_crypte_chartres01.png",
 }
 IMAGES = {
-	HOTEL: "portail_de_temple_europe05.png",
-	CHAPELLE: "portail_de_temple_europe08.png",
-	PORTE_MARS: "porte_de_ville_chartres_exterieur01.jpg",
-	ENCLOS: "portail_de_temple_europe03.png",
-	CRYPTE: "portail_de_temple_europe10.png",
-	LABYRINTHE: "crypte_de_la_necropole_d_escolives.jpg",
+	HOTEL: "hotel_de_ville_d_aix_la_chapelle.jpg",
+	CHAPELLE: "chapelle_palatine.jpg",
+	PORTE_MARS: "porte_de_mars_rhemi.jpg",
+	ENCLOS: "enclos_du_temple_lutecia.jpg",
+	CRYPTE: "crypte_de_chartres.jpg",
+	LABYRINTHE: "labyrinthe_du_puits_de_chartres.jpg",
 }
 
 # Cibles approchées des portes sur les cartes de cité (x, y) : la case praticable libre la
@@ -142,15 +143,37 @@ def apres(q):
 	return {"quete_reussie": {"id": q}}
 
 
-# Grille provisoire du labyrinthe : enceinte murée, sol praticable. À RECALCULER sur l'image
-# définitive (outil d'analyse d'image de /admin/editor) — un placeholder ne doit pas mentir
-# sur des murs qu'on ne voit pas.
-LARGEUR_LABY, HAUTEUR_LABY = 30, 20
+# Grille du labyrinthe, relevée à l'œil sur l'image définitive (1408×768 → 30×16, cases
+# ≈ carrées ; le profil `catacombes` de grille_image lisait mal cette peinture). Murs peints =
+# cases à 0 (aucun mur nav). Le cercle central est FERMÉ sur l'image : sa fosse violette en
+# contrebas est une falaise (3, un volant seul y descend, personne n'y naît), le puits à 0.
+# Les alcôves que la peinture mure (litières de droite, bout de couloir en haut) sont à 0 :
+# une seule région praticable, sinon le placement pourrait y ouvrir le combat.
+# '#' / 'o' (puits) → 0 · '.' → 1 · 'p' → 3
+GRILLE_LABY = [
+	"####..##.#####################",  # 0
+	"###..##..#########..##########",  # 1
+	"##..##..#####.....#..#########",  # 2
+	"##..##.#..##.......##.########",  # 3
+	"##.##.#..#..######..##.#######",  # 4
+	"##.#..#.##.##pppp##..#.#######",  # 5
+	"##.#..###..##ppppp##.#..######",  # 6
+	"##.#.......#ppoopp##.#....####",  # 7
+	"##.#.......#ppoopp##......####",  # 8
+	"#..######..#ppoopp##.#########",  # 9
+	"#..#....#..##pppp##..#....####",  # 10
+	"##.##....#..######..##.#######",  # 11
+	"##....#..##..####...#..#######",  # 12
+	"##....#...##......##...#######",  # 13
+	"###..####..########...########",  # 14
+	"#########............#########",  # 15
+]
+LARGEUR_LABY, HAUTEUR_LABY = len(GRILLE_LABY[0]), len(GRILLE_LABY)
+_CASE_LABY = {"#": 0, "o": 0, ".": 1, "p": 3}
 
 
 def cells_labyrinthe():
-	return [[0 if x in (0, LARGEUR_LABY - 1) or y in (0, HAUTEUR_LABY - 1) else 1
-			 for x in range(LARGEUR_LABY)] for y in range(HAUTEUR_LABY)]
+	return [[_CASE_LABY[c] for c in ligne] for ligne in GRILLE_LABY]
 
 
 # ── Utilitaires ──────────────────────────────────────────────────────────────────────────
@@ -283,13 +306,16 @@ PROTEGE_HUGUES = {
 }
 PROTEGES_AMPOULE = [
 	{"prenom": "Gervais", "nom": "de Sillery", "race": "hobbit", "sex": "M",
+	 "image": "gardien_hobbit_m_ampoule01.png",
 	 "description": "Gardien de l'Ampoule du Sacre. Il porte contre sa poitrine un coffret de bois noir qu'il ne lâche jamais, même pour manger. Il ne sait pas se battre."},
 	{"prenom": "Aude", "nom": "de Cormicy", "race": "elfe", "sex": "F",
+	 "image": "paladin_elfe_f_rhemi01.png",
 	 "description": "Paladine de Rhemi, escorte de l'Ampoule. Elle marche toujours à la gauche du gardien, l'épée au clair dès que la route se resserre.",
 	 "se_defend": True,
 	 "equipement": {"torse": "item:Cotte_de_mailles", "main_droite": "item:Epee_longue_ordre",
 					"main_gauche": "item:Bouclier_ordre"}},
 	{"prenom": "Baudouin", "nom": "de Verzy", "race": "ogre", "sex": "M",
+	 "image": "paladin_ogre_m_rhemi01.png",
 	 "description": "Paladin de Rhemi, escorte de l'Ampoule. Il parle peu et se place toujours entre le coffret et ce qui s'en approche.",
 	 "se_defend": True,
 	 "equipement": {"torse": "item:Cotte_de_mailles", "main_droite": "item:Epee_longue_ordre",
@@ -297,8 +323,10 @@ PROTEGES_AMPOULE = [
 ]
 PROTEGES_DELEGATION = [
 	{"prenom": "Anselme", "nom": "Gerbier", "race": "nain", "sex": "M",
+	 "image": "architecte_nain_m_cour01.png",
 	 "description": "Maître architecte de la Cour des Arches, envoyé à l'Hôtel de Ville d'Aix pour y étudier les portes des cités sœurs. Il compte ses pas et se plaint de chacun. Il ne sait pas se battre."},
 	{"prenom": "Clémence", "nom": "d'Orval", "race": "elfe", "sex": "F",
+	 "image": "architecte_elfe_f_cour01.png",
 	 "description": "Jeune architecte de la Cour, seconde de maître Gerbier. Elle relève tout ce qu'elle voit, y compris ce que personne ne lui a demandé de relever. Elle ne sait pas se battre."},
 ]
 
@@ -1004,7 +1032,9 @@ def hugues():
 
 
 def templier_crypte():
-	quete_a_faire = {"quete_active": {"types": ["collect"], "cible": TETE_MINOTAURE, "objectif_atteint": False}}
+	# Puits ouvert à tout insigne de platine de Lutecia ou mieux, mission ou non (Auteur, 25/10) :
+	# l'épreuve du Minotaure se tient au rang B, elle passe donc par la même porte.
+	rang_b = {"rang_min": {"cite": LUTECIA, "rang": "B"}}
 	return {
 		"_id": TEMPLIER_CRYPTE, "type": "pnj", "nom": "Le Templier de la crypte",
 		"race": "nain", "vocation": "templier", "portrait": PORTRAITS[TEMPLIER_CRYPTE],
@@ -1017,7 +1047,7 @@ def templier_crypte():
 					"texte": "La crypte de Chartres est longue, basse, éclairée de lampes à huile. Au fond, une margelle de pierre noire et un treuil de fer : le puits. Un Templier nain se tient devant, la main sur la manivelle, comme s'il craignait qu'elle tourne toute seule. « Le puits n'est pas une curiosité. Regardez-le de loin. »",
 					"choix": [
 						{"id": "bonjour", "label": "« Qu'y a-t-il au fond ? »", "condition": avant(A_MINOTAURE), "next": "fond"},
-						{"id": "guilde", "label": "« La Guilde de Lutecia m'envoie descendre. »",
+						{"id": "guilde", "label": "« Je veux descendre. »",
 						 "condition": {"acces_ouvrable": True}, "next": "seuil"},
 						{"id": "apres", "label": "« Ils sont morts. Tous les deux. »", "condition": apres(A_MINOTAURE), "next": "apres"},
 						choix_fin(),
@@ -1028,7 +1058,7 @@ def templier_crypte():
 					"choix": [choix_fin()],
 				},
 				"seuil": {
-					"texte": "Le Templier lit votre ordre de mission, le rend, et tourne la manivelle. La chaîne descend longtemps. « En bas, des couloirs. Ils tournent toujours du même côté, et ne ramènent jamais où l'on croit. » Il bloque le treuil. « Quand vous remonterez, tirez trois fois sur la chaîne. Si vous ne tirez pas, je ne remonte rien. »",
+					"texte": "Le Templier regarde l'insigne de guilde à votre cou, platine ou mieux, puis tourne la manivelle. La chaîne descend longtemps. « En bas, des couloirs. Ils tournent toujours du même côté, et ne ramènent jamais où l'on croit. » Il bloque le treuil. « Quand vous remonterez, tirez trois fois sur la chaîne. Si vous ne tirez pas, je ne remonte rien. »",
 					"choix": [
 						{"id": "descendre", "label": "Descendre dans le puits.", "condition": {"acces_ouvrable": True},
 						 "action": {"service": "acces", "op": "passer"}},
@@ -1040,7 +1070,7 @@ def templier_crypte():
 					"choix": [{"id": "ok", "label": "Tirer votre arme.", "next": "fin"}],
 				},
 				"puits_clos": {
-					"texte": "Le Templier ne touche pas la manivelle. « Le puits ne s'ouvre qu'à ceux que la Guilde envoie, et qui ont quelque chose à y faire. »",
+					"texte": "Le Templier ne touche pas la manivelle. « Le puits ne s'ouvre qu'à l'insigne de platine de la Guilde, ou à mieux. Revenez quand vous le porterez. »",
 					"choix": [choix_fin("Reculer.")],
 				},
 				"apres": {
@@ -1049,7 +1079,7 @@ def templier_crypte():
 				},
 			},
 		},
-		"_barriere": quete_a_faire,
+		"_barriere": rang_b,
 	}
 
 
@@ -1105,10 +1135,10 @@ def lieux_neufs(par_id):
 		 "dimensions": {"x": LARGEUR_LABY, "y": HAUTEUR_LABY},
 		 "cells": cells_labyrinthe(), "nav": {},
 		 "tags": ["labyrinthe", "souterrain", "portail", "donjon"],
-		 # Barrière de la descente (modèle de la clairière du Morvan) : ouverte tant que la tête
-		 # n'est pas remise, SANS `combat_gagne` — une tête perdue au sol ne bloque pas la quête.
+		 # Barrière de la descente : rang B à Lutecia, avec ou sans mission (Auteur, 25/10) —
+		 # salle de donjon, donc aucun laissez-passer : chaque descente est un combat neuf.
 		 "acces": {"gardien": TEMPLIER_CRYPTE,
-				   "refus": "La chaîne pend, immobile. En bas, rien ne mugit plus.",
+				   "refus": "Le Templier ne touche pas la manivelle : le puits ne s'ouvre qu'à l'insigne de platine de la Guilde, ou à mieux.",
 				   "cycle": 1, "conditions": [barriere]}},
 		{"_id": DONJON_PUITS, "type": "donjon", "nom": "Le puits de Chartres",
 		 "description": "Sous la crypte de Chartres, un puits devenu portail à la Vague, ouvert sur un labyrinthe que personne n'a creusé. Un Minotaure l'habite, disent les registres des Templiers.",
