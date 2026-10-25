@@ -1,21 +1,22 @@
-# tests/test_images_missions_rang_b_a_lutecia.py
-# Images définitives des épreuves des rangs B et A de Lutecia (dev/gen_images_missions_rang_b_a_lutecia.py) :
-# rejouées contre le DERNIER dump — delta seul, idempotent, fichiers présents, labyrinthe jouable.
+# tests/test_suite_missions_rang_b_a_lutecia.py
+# Suite des épreuves des rangs B et A de Lutecia (dev/gen_suite_missions_rang_b_a_lutecia.py) : images
+# définitives et puits ouvert au rang B, rejoués contre le DERNIER dump — delta seul, idempotent,
+# fichiers présents, labyrinthe jouable, porte au rang B.
 
 import importlib.util
 import json
 import os
 import random
 
-from utils import combat
+from utils import acces, combat
 
 RACINE = os.path.join(os.path.dirname(__file__), "..")
 RESSOURCES = os.path.join(RACINE, "templates", "resources")
 
 
 def _gen():
-	chemin = os.path.join(RACINE, "dev", "gen_images_missions_rang_b_a_lutecia.py")
-	spec = importlib.util.spec_from_file_location("gen_images_missions_rang_b_a_lutecia", chemin)
+	chemin = os.path.join(RACINE, "dev", "gen_suite_missions_rang_b_a_lutecia.py")
+	spec = importlib.util.spec_from_file_location("gen_suite_missions_rang_b_a_lutecia", chemin)
 	mod = importlib.util.module_from_spec(spec)
 	spec.loader.exec_module(mod)
 	return mod
@@ -33,7 +34,7 @@ def test_le_fichier_est_a_jour():
 	with open(GEN.SORTIE, encoding="utf-8") as f:
 		fichier = {d["_id"]: d for d in json.load(f)}
 	if DOCS:   # dump d'avant l'import : le fichier est le delta
-		assert fichier == DOCS, "relancer dev/gen_images_missions_rang_b_a_lutecia.py"
+		assert fichier == DOCS, "relancer dev/gen_suite_missions_rang_b_a_lutecia.py"
 
 
 def test_regeneration_idempotente():
@@ -113,3 +114,11 @@ def test_placement_du_combat_toujours_dans_la_region():
 			assert all(p in region and grid["cells"][p[1]][p[0]] == 1 for p in poses)
 	finally:
 		random.setstate(etat)
+
+
+def test_le_puits_s_ouvre_au_rang_b_de_lutecia_sans_mission():
+	def perso(rang):
+		return {"rangs_guilde": {MISSIONS.LUTECIA: rang}, "quetes_actives": [], "quetes_terminees": []}
+	assert not acces.acces_autorise(perso("C"), LABY, DUMP.get)[0]
+	assert acces.acces_autorise(perso("B"), LABY, DUMP.get)[0]
+	assert acces.acces_autorise(perso("S+"), LABY, DUMP.get)[0]

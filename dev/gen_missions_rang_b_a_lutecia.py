@@ -1032,7 +1032,9 @@ def hugues():
 
 
 def templier_crypte():
-	quete_a_faire = {"quete_active": {"types": ["collect"], "cible": TETE_MINOTAURE, "objectif_atteint": False}}
+	# Puits ouvert à tout insigne de platine de Lutecia ou mieux, mission ou non (Auteur, 25/10) :
+	# l'épreuve du Minotaure se tient au rang B, elle passe donc par la même porte.
+	rang_b = {"rang_min": {"cite": LUTECIA, "rang": "B"}}
 	return {
 		"_id": TEMPLIER_CRYPTE, "type": "pnj", "nom": "Le Templier de la crypte",
 		"race": "nain", "vocation": "templier", "portrait": PORTRAITS[TEMPLIER_CRYPTE],
@@ -1045,7 +1047,7 @@ def templier_crypte():
 					"texte": "La crypte de Chartres est longue, basse, éclairée de lampes à huile. Au fond, une margelle de pierre noire et un treuil de fer : le puits. Un Templier nain se tient devant, la main sur la manivelle, comme s'il craignait qu'elle tourne toute seule. « Le puits n'est pas une curiosité. Regardez-le de loin. »",
 					"choix": [
 						{"id": "bonjour", "label": "« Qu'y a-t-il au fond ? »", "condition": avant(A_MINOTAURE), "next": "fond"},
-						{"id": "guilde", "label": "« La Guilde de Lutecia m'envoie descendre. »",
+						{"id": "guilde", "label": "« Je veux descendre. »",
 						 "condition": {"acces_ouvrable": True}, "next": "seuil"},
 						{"id": "apres", "label": "« Ils sont morts. Tous les deux. »", "condition": apres(A_MINOTAURE), "next": "apres"},
 						choix_fin(),
@@ -1056,7 +1058,7 @@ def templier_crypte():
 					"choix": [choix_fin()],
 				},
 				"seuil": {
-					"texte": "Le Templier lit votre ordre de mission, le rend, et tourne la manivelle. La chaîne descend longtemps. « En bas, des couloirs. Ils tournent toujours du même côté, et ne ramènent jamais où l'on croit. » Il bloque le treuil. « Quand vous remonterez, tirez trois fois sur la chaîne. Si vous ne tirez pas, je ne remonte rien. »",
+					"texte": "Le Templier regarde l'insigne de guilde à votre cou, platine ou mieux, puis tourne la manivelle. La chaîne descend longtemps. « En bas, des couloirs. Ils tournent toujours du même côté, et ne ramènent jamais où l'on croit. » Il bloque le treuil. « Quand vous remonterez, tirez trois fois sur la chaîne. Si vous ne tirez pas, je ne remonte rien. »",
 					"choix": [
 						{"id": "descendre", "label": "Descendre dans le puits.", "condition": {"acces_ouvrable": True},
 						 "action": {"service": "acces", "op": "passer"}},
@@ -1068,7 +1070,7 @@ def templier_crypte():
 					"choix": [{"id": "ok", "label": "Tirer votre arme.", "next": "fin"}],
 				},
 				"puits_clos": {
-					"texte": "Le Templier ne touche pas la manivelle. « Le puits ne s'ouvre qu'à ceux que la Guilde envoie, et qui ont quelque chose à y faire. »",
+					"texte": "Le Templier ne touche pas la manivelle. « Le puits ne s'ouvre qu'à l'insigne de platine de la Guilde, ou à mieux. Revenez quand vous le porterez. »",
 					"choix": [choix_fin("Reculer.")],
 				},
 				"apres": {
@@ -1077,7 +1079,7 @@ def templier_crypte():
 				},
 			},
 		},
-		"_barriere": quete_a_faire,
+		"_barriere": rang_b,
 	}
 
 
@@ -1133,10 +1135,10 @@ def lieux_neufs(par_id):
 		 "dimensions": {"x": LARGEUR_LABY, "y": HAUTEUR_LABY},
 		 "cells": cells_labyrinthe(), "nav": {},
 		 "tags": ["labyrinthe", "souterrain", "portail", "donjon"],
-		 # Barrière de la descente (modèle de la clairière du Morvan) : ouverte tant que la tête
-		 # n'est pas remise, SANS `combat_gagne` — une tête perdue au sol ne bloque pas la quête.
+		 # Barrière de la descente : rang B à Lutecia, avec ou sans mission (Auteur, 25/10) —
+		 # salle de donjon, donc aucun laissez-passer : chaque descente est un combat neuf.
 		 "acces": {"gardien": TEMPLIER_CRYPTE,
-				   "refus": "La chaîne pend, immobile. En bas, rien ne mugit plus.",
+				   "refus": "Le Templier ne touche pas la manivelle : le puits ne s'ouvre qu'à l'insigne de platine de la Guilde, ou à mieux.",
 				   "cycle": 1, "conditions": [barriere]}},
 		{"_id": DONJON_PUITS, "type": "donjon", "nom": "Le puits de Chartres",
 		 "description": "Sous la crypte de Chartres, un puits devenu portail à la Vague, ouvert sur un labyrinthe que personne n'a creusé. Un Minotaure l'habite, disent les registres des Templiers.",

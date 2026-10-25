@@ -631,16 +631,13 @@
     ],
     "acces": {
       "gardien": "pnj:templier_de_la_crypte_de_chartres",
-      "refus": "La chaîne pend, immobile. En bas, rien ne mugit plus.",
+      "refus": "Le Templier ne touche pas la manivelle : le puits ne s'ouvre qu'à l'insigne de platine de la Guilde, ou à mieux.",
       "cycle": 1,
       "conditions": [
         {
-          "quete_active": {
-            "types": [
-              "collect"
-            ],
-            "cible": "item:minotaure_tete",
-            "objectif_atteint": false
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "B"
           }
         }
       ]
@@ -928,7 +925,7 @@
             },
             {
               "id": "guilde",
-              "label": "« La Guilde de Lutecia m'envoie descendre. »",
+              "label": "« Je veux descendre. »",
               "condition": {
                 "acces_ouvrable": true
               },
@@ -962,7 +959,7 @@
           ]
         },
         "seuil": {
-          "texte": "Le Templier lit votre ordre de mission, le rend, et tourne la manivelle. La chaîne descend longtemps. « En bas, des couloirs. Ils tournent toujours du même côté, et ne ramènent jamais où l'on croit. » Il bloque le treuil. « Quand vous remonterez, tirez trois fois sur la chaîne. Si vous ne tirez pas, je ne remonte rien. »",
+          "texte": "Le Templier regarde l'insigne de guilde à votre cou, platine ou mieux, puis tourne la manivelle. La chaîne descend longtemps. « En bas, des couloirs. Ils tournent toujours du même côté, et ne ramènent jamais où l'on croit. » Il bloque le treuil. « Quand vous remonterez, tirez trois fois sur la chaîne. Si vous ne tirez pas, je ne remonte rien. »",
           "choix": [
             {
               "id": "descendre",
@@ -993,7 +990,7 @@
           ]
         },
         "puits_clos": {
-          "texte": "Le Templier ne touche pas la manivelle. « Le puits ne s'ouvre qu'à ceux que la Guilde envoie, et qui ont quelque chose à y faire. »",
+          "texte": "Le Templier ne touche pas la manivelle. « Le puits ne s'ouvre qu'à l'insigne de platine de la Guilde, ou à mieux. Revenez quand vous le porterez. »",
           "choix": [
             {
               "id": "fin",

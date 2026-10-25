@@ -256,11 +256,19 @@ def test_hugues_n_est_sous_l_arche_qu_apres_l_escorte():
 	assert acces.clauses_remplies(_perso(reussies=[GEN.B_MARS]), entree["conditions"], get)
 
 
-def test_le_puits_ne_s_ouvre_que_tete_a_rapporter():
+def test_le_puits_s_ouvre_a_tout_rang_b_ou_plus_avec_ou_sans_mission():
+	"""Auteur, 25/10 : le Templier laisse descendre tout rang B ou plus, mission ou non."""
 	salle = DOCS[GEN.LABYRINTHE]
-	en_cours = {"quetes_actives": [{"id": GEN.A_MINOTAURE, "objectif": {"type": "collect", "cible": GEN.TETE_MINOTAURE, "quantite": 1}, "progress": 0}]}
-	assert acces.acces_autorise(en_cours, salle, DUMP.get)[0]
+	tete = {"id": GEN.A_MINOTAURE, "objectif": {"type": "collect", "cible": GEN.TETE_MINOTAURE, "quantite": 1}, "progress": 0}
+	en_epreuve = {**_perso(rang="B"), "quetes_actives": [tete]}
+	assert acces.acces_autorise(en_epreuve, salle, DUMP.get)[0]
+	assert acces.acces_autorise(_perso(rang="B"), salle, DUMP.get)[0]
+	assert acces.acces_autorise(_perso(rang="A", reussies=[GEN.A_MINOTAURE]), salle, DUMP.get)[0]
+	# Sous le rang B, ni la mission ni rien d'autre n'ouvre le puits.
 	assert not acces.acces_autorise(_perso(), salle, DUMP.get)[0]
+	assert not acces.acces_autorise({**_perso(), "quetes_actives": [tete]}, salle, DUMP.get)[0]
+	# Salle de donjon : aucun laissez-passer, chaque descente est un combat neuf.
+	assert salle["categorie"] == "battle_map"
 
 
 # ── Cibles et calibrage ──────────────────────────────────────────────────────

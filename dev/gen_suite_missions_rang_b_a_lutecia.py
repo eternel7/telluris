@@ -1,18 +1,21 @@
 #!/usr/bin/env python
-# dev/gen_images_missions_rang_b_a_lutecia.py
-# Images DÉFINITIVES des épreuves des rangs B et A de Lutecia, posées sur les docs déjà en jeu.
+# dev/gen_suite_missions_rang_b_a_lutecia.py
+# Suite des épreuves des rangs B et A de Lutecia (PR 184), posée sur les docs déjà en jeu :
+#   · images DÉFINITIVES — image des lieux neufs, portrait de leurs PNJ (doc `pnj:*` et entrée
+#     `pnj` du lieu), grille du labyrinthe, portrait des protégés des escortes de Maëlys ;
+#   · puits de Chartres ouvert à tout rang B ou plus de Lutecia, mission ou non (Auteur, 25/10) :
+#     barrière `acces` du labyrinthe et dialogue du Templier de la crypte.
 #
 # Source unique des valeurs : dev/gen_missions_rang_b_a_lutecia.py (`IMAGES`, `PORTRAITS`,
-# `GRILLE_LABY`, images des `PROTEGES_*`). Ce script n'en recopie aucune : il relit le DERNIER
-# dump et n'injecte que ces champs — image des lieux neufs, portrait de leurs PNJ (doc `pnj:*`
-# et entrée `pnj` du lieu), grille du labyrinthe, portrait des protégés des escortes de Maëlys.
-# Tout le reste du doc vient du dump : une porte recalée dans /admin/editor depuis l'import de la
-# PR 184 n'est pas ramenée à sa position générée (PUT complet, CLAUDE.md §11).
+# `GRILLE_LABY`, images des `PROTEGES_*`, docs générés pour `acces` et `dialogue`). Ce script n'en
+# recopie aucune : il relit le DERNIER dump et n'injecte que ces champs. Tout le reste du doc vient
+# du dump : une porte recalée dans /admin/editor depuis l'import de la PR 184 n'est pas ramenée à
+# sa position générée (PUT complet, CLAUDE.md §11).
 #
 # ⚠️ UN SEUL FICHIER À IMPORTER (CLAUDE.md §18), le DELTA seul : les docs que l'injection change.
-# Rejoué sur un dump qui porte déjà ces images : rien à écrire.
+# Rejoué sur un dump qui porte déjà ces champs : rien à écrire.
 #
-# Usage : python dev/gen_images_missions_rang_b_a_lutecia.py [jsons/telluris-dump-….json]
+# Usage : python dev/gen_suite_missions_rang_b_a_lutecia.py [jsons/telluris-dump-….json]
 
 import copy
 import importlib.util
@@ -20,7 +23,7 @@ import os
 import sys
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SORTIE = os.path.join(RACINE, "jsons", "images_missions_rang_b_a_lutecia_a_importer.json")
+SORTIE = os.path.join(RACINE, "jsons", "suite_missions_rang_b_a_lutecia_a_importer.json")
 
 
 def _gen():
@@ -57,6 +60,7 @@ def appliquer(par_id):
 	absents = [i for i in requis if i not in par_id]
 	if absents:
 		sys.exit("ERREUR : absents du dump (importer d'abord la PR 184) : " + ", ".join(absents))
+	generes = {d["_id"]: d for d in GEN.generer(par_id)}
 	sortie = []
 
 	def garder(avant, apres):
@@ -74,11 +78,14 @@ def appliquer(par_id):
 	laby["dimensions"] = {"x": GEN.LARGEUR_LABY, "y": GEN.HAUTEUR_LABY}
 	laby["cells"] = GEN.cells_labyrinthe()
 	laby["nav"] = {}   # murs peints = cases à 0 ; un nav de l'ancienne grille 30×20 n'a plus de sens
+	laby["acces"] = copy.deepcopy(generes[GEN.LABYRINTHE]["acces"])
 	garder(par_id[GEN.LABYRINTHE], laby)
 
 	for pid, portrait in GEN.PORTRAITS.items():
 		pnj = copy.deepcopy(par_id[pid])
 		pnj["portrait"] = portrait
+		if pid == GEN.TEMPLIER_CRYPTE:
+			pnj["dialogue"] = copy.deepcopy(generes[pid]["dialogue"])
 		garder(par_id[pid], pnj)
 
 	maelys = copy.deepcopy(par_id[GEN.MAELYS])
