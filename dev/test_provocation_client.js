@@ -34,7 +34,7 @@ function extraire(nom) {
 	throw new Error('accolades déséquilibrées dans ' + nom);
 }
 
-vm.runInThisContext(extraire('capaProvocationPure') + '\n' + extraire('sortTargets'),
+vm.runInThisContext(['capaProvocationPure', 'sortTargets', 'peutFrapper'].map(extraire).join('\n'),
 					{ filename: TEMPLATE });
 
 let passes = 0, echecs = 0;
@@ -52,6 +52,7 @@ global.chebyJM = (j, m) => Math.max(Math.abs(j.pos.x - m.pos.x), Math.abs(j.pos.
 global.isEngaged = () => true;
 global.vueActeurs = (j, m) => m !== LOIN || global.vueSurLoin;
 global.vueSurLoin = true;
+global.dansLeDos = () => false;   // le dos a son harnais (dev/test_dos_client.js)
 
 const PROVOCATION = { effets: { provocation: 1, duree: 2 } };
 

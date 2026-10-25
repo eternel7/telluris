@@ -3416,17 +3416,33 @@ function vueActeurs(a, b) {
 	const cb = casesActeur(b);
 	return casesActeur(a).some(p => cb.some(q => lineOfSight(p[0], p[1], q[0], q[1])));
 }
-// Cibles atteignables pour un mode : portée, et pour le tir/jet non engagé + ligne de vue.
+// Axe monde du DEVANT d'un acteur — miroir de `_axe_acteur` : son `facing` (0 = Nord), ou
+// camp du joueur sans `cap` ; sinon son `cap`.
+function axeActeur(a) {
+	const campJoueur = String(a.id || '').startsWith('joueur_');
+	if ('facing' in a || (campJoueur && !('cap' in a))) return rot(0, -1, a.facing || 0);
+	return JETON_CAPS[capDe(a)];
+}
+// `b` est-il TOUT ENTIER derrière la rangée arrière de `a` ? Miroir de `_dans_le_dos` :
+// devant et les cases directement à gauche/droite se frappent, dès une rangée en arrière non.
+function dansLeDos(a, b) {
+	const [fx, fy] = axeActeur(a);
+	const arriere = Math.min(...casesActeur(a).map(([x, y]) => x * fx + y * fy));
+	return Math.max(...casesActeur(b).map(([x, y]) => x * fx + y * fy)) < arriere;
+}
+// Coup possible sur `b` (hors portée et engagement) — miroir de `_peut_frapper` : ligne de vue
+// pour TOUTE arme (un fouet ne frappe pas à travers un mur) et cible pas dans le dos.
+function peutFrapper(a, b) {
+	return vueActeurs(a, b) && !dansLeDos(a, b);
+}
+// Cibles atteignables pour un mode : portée, ligne de vue et devant (`peutFrapper`), et pour
+// le tir/jet non engagé.
 function targetableMonsters(mode) {
 	const j = me();
 	const prof = attackProfile(mode);
 	const portee = prof.portee || 1;
-	let list = state.monstres.filter(m => m.vivant && m.pos && chebyJM(j, m) <= portee);
-	if (prof.ranged) {
-		if (isEngaged()) return [];
-		list = list.filter(m => vueActeurs(j, m));
-	}
-	return list;
+	if (prof.ranged && isEngaged()) return [];
+	return state.monstres.filter(m => m.vivant && m.pos && chebyJM(j, m) <= portee && peutFrapper(j, m));
 }
 // Modes d'attaque réellement équipés par le membre actif. Un slot d'attaque dont le
 // mode manque reste VISIBLE mais grisé : c'est tout l'intérêt d'une grille fixe — la
@@ -3500,11 +3516,9 @@ function capaProvocationPure(s) {
 function sortTargets(s) {
 	const j = me();
 	const { portee, ranged } = capaPortee(s);
-	let list = state.monstres.filter(m => m.vivant && m.pos && chebyJM(j, m) <= portee);
-	if (ranged) {
-		if (isEngaged() && !capaProvocationPure(s)) return [];
-		list = list.filter(m => vueActeurs(j, m));
-	}
+	if (ranged && isEngaged() && !capaProvocationPure(s)) return [];
+	// Ligne de vue et dos : à distance comme au contact allongé (miroir serveur).
+	let list = state.monstres.filter(m => m.vivant && m.pos && chebyJM(j, m) <= portee && peutFrapper(j, m));
 	// ÉCHANGE DE PLACE avec un ennemi : seuls ceux avec qui la permutation passera (même
 	// miroir que le ciblage allié — `echangeOffert`).
 	if ((s.effets || {}).echange) list = list.filter(m => echangeOffert(j, m));

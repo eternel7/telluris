@@ -100,7 +100,9 @@ def test_les_pa_investis_sont_conserves_d_un_round_a_l_autre():
 
 def test_le_sort_frappe_vraiment_a_la_fin():
 	mage = _mage(pm=60)
-	loup = monstre(x=9, y=5)
+	# Au Nord, DEVANT le mage : en approchant, le loup ne passe pas dans son dos (le sort
+	# s'achèverait dans le vide — cf. `_dans_le_dos`, revérifié à l'achèvement).
+	loup = monstre(x=3, y=0)
 	doc = combat([mage], [loup])
 	resolve_action(doc, "sort", cible_id="monstre_0", sort=sort(**METEORE))
 	assert loup["currentPV"] < 200

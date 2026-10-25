@@ -105,7 +105,7 @@ def test_l_armure_n_arrete_pas_une_siphonie():
 	"""⚠️ AUCUNE soustraction des PA : c'est pour cela que le jet ne passe pas par
 	`calculer_degats`. Une cible cuirassée perd exactement autant de mana qu'une cible nue."""
 	mage = joueur(pm=60)
-	nu, cuirasse = monstre(0, x=8, y=5), monstre(1, x=8, y=6)
+	nu, cuirasse = monstre(0, x=8, y=5), monstre(1, x=8, y=4)
 	cuirasse["pa"] = 500
 	doc = combat([mage], [nu, cuirasse])
 

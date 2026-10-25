@@ -1335,7 +1335,7 @@ def test_defenseur_ne_frappe_pas_hors_de_portee(dbc, des_fixes):
 	doc = combat_doc([joueur_snap("joueur_0", "character:u_1"), defe], [m],
 					 acteur_courant_index=1)
 
-	combat_util._run_defenseur_turn(doc, defe)
+	combat_util._run_defenseur_turn(doc, defe, combat_util.get_combat_grid(doc))
 
 	assert m["currentPV"] == 10
 	assert defe["attaques"] == 0 and defe["pos"] == {"x": 5, "y": 5}
@@ -1350,7 +1350,7 @@ def test_defenseur_frappe_d_abord_l_ennemi_le_plus_entame(dbc, des_fixes):
 	doc = combat_doc([joueur_snap("joueur_0", "character:u_1"), defe], [intact, blesse],
 					 acteur_courant_index=1)
 
-	combat_util._run_defenseur_turn(doc, defe)
+	combat_util._run_defenseur_turn(doc, defe, combat_util.get_combat_grid(doc))
 
 	assert intact["currentPV"] == 100
 	assert blesse["currentPV"] < 50
@@ -1362,7 +1362,7 @@ def test_defenseur_qui_abat_le_dernier_ennemi_donne_la_victoire(dbc, des_fixes):
 	doc = combat_doc([joueur_snap("joueur_0", "character:u_1"), defe], [m],
 					 acteur_courant_index=1)
 
-	combat_util._run_defenseur_turn(doc, defe)
+	combat_util._run_defenseur_turn(doc, defe, combat_util.get_combat_grid(doc))
 
 	assert m["vivant"] is False
 	assert doc["status"] == "victoire" and doc["xp_gagnee"] == 10

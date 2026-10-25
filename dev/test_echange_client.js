@@ -43,7 +43,8 @@ function extraire(nom) {
 	throw new Error('accolades déséquilibrées dans ' + nom);
 }
 
-vm.runInThisContext(['chebyJM', 'echangeOffert', 'allyTargets', 'capaProvocationPure', 'sortTargets']
+vm.runInThisContext(['chebyJM', 'echangeOffert', 'allyTargets', 'capaProvocationPure', 'sortTargets',
+	'rot', 'axeActeur', 'dansLeDos', 'peutFrapper']
 	.map(extraire).join('\n'), { filename: TEMPLATE });
 
 let passes = 0, echecs = 0;

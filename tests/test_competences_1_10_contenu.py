@@ -187,7 +187,7 @@ def test_une_provocation_du_lot_provoque_vraiment(construit, monkeypatch):
 	defi = next(d for d in construit["lot"] if d["effets"].get("provocation") and not d.get("zone"))
 	garde = joueur(0, x=5, y=5, nom="Garde")
 	mage = joueur(1, x=7, y=5, nom="Mage")
-	loup = monstre(x=6, y=6)
+	loup = monstre(x=6, y=4)   # devant le garde (orienté au Nord)
 	doc = combat([garde, mage], [loup])
 	garde["cc"] = 200
 	res = resolve_action(doc, "competence", cible_id=loup["id"], competence=normaliser_competence(defi))
