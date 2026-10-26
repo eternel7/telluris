@@ -112,7 +112,9 @@ def sorts_sans_grimoire_unique(sorts, grimoires) -> list:
 	"""Sorts sans grimoire unique, triés école → niveau → id. Accepte des docs projetés."""
 	couverts = _couverts(grimoires)
 	return sorted(
-		(s for s in sorts if s.get("_id") and s["_id"] not in couverts),
+		# Un sort ENSEIGNÉ par un maître (`enseignement`) n'a pas de grimoire, par décision.
+		(s for s in sorts if s.get("_id") and s["_id"] not in couverts
+		 and not s.get("enseignement")),
 		key=_cle_tri,
 	)
 

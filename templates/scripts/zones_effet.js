@@ -15,12 +15,12 @@
 // ancre, orientation, `decalage` compté depuis l'ancre incluse) est documenté en tête de
 // `utils/zones_effet.py` et n'est pas répété ici.
 
-const ZONE_FORMES = ['cercle', 'carre', 'rectangle', 'cone'];
+const ZONE_FORMES = ['cercle', 'carre', 'rectangle', 'cone', 'ligne'];
 const ZONE_ANGLE_DEFAUT = 90;
 // Mêmes bornes que le serveur : un doc déjà borné à l'écriture repasse inchangé, et un
 // payload bricolé ne fait pas tourner la boucle d'aperçu sur la moitié de la carte.
 const ZONE_RAYON_MAX = 8;
-const ZONE_LONGUEUR_MAX = 12;
+const ZONE_LONGUEUR_MAX = 20;
 const ZONE_LARGEUR_MAX = 12;
 const ZONE_DECALAGE_MAX = 12;
 
@@ -52,6 +52,7 @@ function normaliserZone(raw) {
 	if (ZONE_FORMES.indexOf(forme) < 0) return null;
 	let origine = String(raw.origine || 'cible').trim().toLowerCase();
 	if (origine !== 'cible' && origine !== 'lanceur') origine = 'cible';
+	if (forme === 'ligne') origine = 'lanceur';   // un trait part TOUJOURS du lanceur
 	let orientation = String(raw.orientation || 'cible').trim().toLowerCase();
 	if (orientation !== 'cible' && orientation !== 'facing') orientation = 'cible';
 	return {
@@ -63,11 +64,13 @@ function normaliserZone(raw) {
 		largeur: _zoneBorne(raw.largeur, 1, 1, ZONE_LARGEUR_MAX),
 		decalage: _zoneBorne(raw.decalage, 0, 0, ZONE_DECALAGE_MAX),
 		angle: _zoneBorne(raw.angle, ZONE_ANGLE_DEFAUT, 1, 360),
+		perce: !!raw.perce,
+		tir_ami: !!raw.tir_ami,
 	};
 }
 
 function zoneOrientee(zone) {
-	return !!zone && (zone.forme === 'rectangle' || zone.forme === 'cone');
+	return !!zone && (zone.forme === 'rectangle' || zone.forme === 'cone' || zone.forme === 'ligne');
 }
 
 function zoneAxeFacing(facing) {
@@ -90,6 +93,34 @@ function zoneAxe(zone, lanceur, cible, facing) {
 	return ZONE_DIRECTIONS_8[k];
 }
 
+// Miroir de `vecteur_ligne` : direction NON arrondie d'une `ligne` (repli : le facing).
+function zoneVecteurLigne(zone, lanceur, cible, facing) {
+	if (!zone || zone.orientation !== 'facing') {
+		const dx = cible[0] - lanceur[0], dy = cible[1] - lanceur[1];
+		if (dx || dy) return [dx, dy];
+	}
+	return zoneAxeFacing(facing).slice();
+}
+
+// Miroir de `_trace_ligne` : Bresenham vers un multiple entier du vecteur, lanceur exclu,
+// `longueur` cases, dans l'ordre depuis le lanceur.
+function zoneTraceLigne(zone, lanceur, cible, facing) {
+	const v = zoneVecteurLigne(zone, lanceur, cible, facing);
+	const k = Math.floor(zone.longueur / Math.max(Math.abs(v[0]), Math.abs(v[1]))) + 1;
+	const x1 = v[0] * k, y1 = v[1] * k;
+	const adx = Math.abs(x1), ady = Math.abs(y1);
+	const sx = x1 > 0 ? 1 : -1, sy = y1 > 0 ? 1 : -1;
+	let err = adx - ady, x = 0, y = 0;
+	const out = [];
+	while (out.length < zone.longueur) {
+		const e2 = 2 * err;
+		if (e2 > -ady) { err -= ady; x += sx; }
+		if (e2 < adx) { err += adx; y += sy; }
+		out.push([lanceur[0] + x, lanceur[1] + y]);
+	}
+	return out;
+}
+
 // Géométrie PURE : ni bornes de carte, ni terrain, ni ligne de vue (cf. casesEffet).
 // Rendue triée par (y, x), comme côté serveur — les deux listes se comparent telles quelles.
 function casesZone(zone, lanceur, cible, facing) {
@@ -110,6 +141,8 @@ function casesZone(zone, lanceur, cible, facing) {
 		}
 		return _zoneTrier(cases);
 	}
+
+	if (zone.forme === 'ligne') return _zoneTrier(zoneTraceLigne(zone, lanceur, cible, facing));
 
 	const axe = zoneAxe(zone, lanceur, cible, facing);
 	const fx = axe[0], fy = axe[1];
@@ -189,11 +222,13 @@ function ligneDeVueZone(cells, x0, y0, x1, y1) {
 // `dims` (facultatif) écarte en plus ce qui sort de la carte — l'aperçu n'a rien à peindre
 // hors du décor. Miroir de `zones_effet.cases_effet`, dont les deux prédicats sont ici
 // figés sur la grille de combat (le serveur, lui, les reçoit injectés).
+// Zone `perce` : ni terrain ni ligne de vue (le rayon transperce), seules les bornes de carte.
 function casesEffet(zone, lanceur, cible, facing, cells, dims) {
 	const ancre = zoneAncre(zone, lanceur, cible);
 	return casesZone(zone, lanceur, cible, facing).filter(c => {
 		const x = c[0], y = c[1];
 		if (dims && (x < 0 || y < 0 || x >= dims.x || y >= dims.y)) return false;
+		if (zone && zone.perce) return true;
 		if (!caseTransparenteZone(cells, x, y)) return false;
 		if (x === ancre[0] && y === ancre[1]) return true;
 		return ligneDeVueZone(cells, ancre[0], ancre[1], x, y);
@@ -220,7 +255,8 @@ function placementVisuelZone(zone, lanceur, cible, facing) {
 	const xs = cases.map(c => c[0]), ys = cases.map(c => c[1]);
 	return {
 		centre: [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2],
-		axe: zoneAxe(zone, lanceur, cible, facing).slice(),
+		axe: zone.forme === 'ligne' ? zoneVecteurLigne(zone, lanceur, cible, facing)
+			: zoneAxe(zone, lanceur, cible, facing).slice(),
 	};
 }
 
@@ -233,6 +269,8 @@ function libelleZone(zone, cibleCapa) {
 		return `${icone} ${forme} rayon ${zone.rayon} ${surSoi ? 'autour de soi' : 'sur la cible'}`;
 	}
 	const depart = surSoi ? 'devant soi' : 'depuis la cible';
-	if (zone.forme === 'rectangle') return `${icone} ${zone.longueur}×${zone.largeur} cases ${depart}`;
-	return `${icone} cône ${zone.longueur} cases (${zone.angle}°) ${depart}`;
+	const suite = (zone.perce ? ', perce les murs' : '') + (zone.tir_ami ? ', ⚠ touche les alliés' : '');
+	if (zone.forme === 'ligne') return `${icone} ligne de ${zone.longueur} cases à travers la cible${suite}`;
+	if (zone.forme === 'rectangle') return `${icone} ${zone.longueur}×${zone.largeur} cases ${depart}${suite}`;
+	return `${icone} cône ${zone.longueur} cases (${zone.angle}°) ${depart}${suite}`;
 }

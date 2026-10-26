@@ -59,6 +59,7 @@ t('toutes les clés présentes, même celles des autres formes', () => {
 	assert.deepStrictEqual(z, {
 		forme: 'cercle', origine: 'cible', orientation: 'cible',
 		rayon: 3, longueur: 1, largeur: 1, decalage: 0, angle: 90,
+		perce: false, tir_ami: false,
 	});
 });
 
@@ -67,7 +68,7 @@ t('valeurs hors contrat : défaut pour les énumérations, bornes pour les nombr
 							   longueur: 999, angle: 0 });
 	assert.strictEqual(z.origine, 'cible');
 	assert.strictEqual(z.orientation, 'cible');
-	assert.strictEqual(z.longueur, 12);
+	assert.strictEqual(z.longueur, ZONE_LONGUEUR_MAX);
 	assert.strictEqual(z.angle, 1, 'jamais 0 : un cône d’ouverture nulle ne touche rien');
 });
 
@@ -218,6 +219,32 @@ t('une explosion ne contourne pas l’angle d’un couloir', () => {
 	assert.ok(cases.has('5,2'), 'dans l’axe de l’ouverture');
 	assert.ok(!cases.has('5,0'), 'à l’abri derrière le mur');
 	assert.ok(cases.has('3,2'), 'l’ancre n’est jamais écartée par la ligne de vue');
+});
+
+t('ligne : tout angle, à travers la cible (mêmes cas que pytest)', () => {
+	const z = normaliserZone({ forme: 'ligne', longueur: 8 });
+	assert.deepStrictEqual(casesZone(z, [0, 0], [6, -2], 0),
+		[[8, -3], [5, -2], [6, -2], [7, -2], [2, -1], [3, -1], [4, -1], [1, 0]]);
+	assert.deepStrictEqual(casesZone(z, [0, 0], [4, -6], 0),
+		[[5, -8], [5, -7], [4, -6], [3, -5], [3, -4], [2, -3], [1, -2], [1, -1]]);
+	for (let cx = -8; cx <= 8; cx++) for (let cy = -8; cy <= 8; cy++) {
+		if (!cx && !cy) continue;
+		const c = ens(casesZone(z, [0, 0], [cx, cy], 0));
+		assert.ok(c.size === 8 && !c.has('0,0') && c.has(cx + ',' + cy), cx + ',' + cy);
+	}
+	assert.strictEqual(normaliserZone({ forme: 'ligne', origine: 'cible' }).origine, 'lanceur');
+	assert.deepStrictEqual(placementVisuelZone(z, [0, 0], [6, -2], 0), { centre: [4.5, -1.5], axe: [6, -2] });
+	assert.ok(/ligne de 8 cases à travers la cible/.test(libelleZone(z, 'ennemi')));
+});
+
+t('zone perce : murs et ligne de vue ignorés (mêmes cas que pytest)', () => {
+	const z = normaliserZone({ forme: 'rectangle', origine: 'lanceur', largeur: 1,
+							   longueur: 6, decalage: 1, perce: true });
+	assert.deepStrictEqual(casesEffet(z, [0, 0], [2, 0], 0, CELLS, DIMS),
+		[[1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0]]);
+	const sans = normaliserZone(Object.assign({}, z, { perce: false }));
+	assert.ok(!ens(casesEffet(sans, [0, 0], [2, 0], 0, CELLS, DIMS)).has('5,0'));
+	assert.ok(/perce les murs/.test(libelleZone(z, 'ennemi')));
 });
 
 t('ce qui sort de la carte n’est pas peint', () => {

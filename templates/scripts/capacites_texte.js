@@ -143,7 +143,8 @@ function _sortPorteeTexte(s) {
 function _sortLigneDesc(s) {
 	return `${_invocationLabel(s) || _sortEffetsLabel(s.effets)}${_sortTempsLabel(s)}`
 		+ `${s.cible === 'ennemi' ? ' · portée ' + s.portee : ''}${_zoneLabel(s)}`
-		+ `${s.cible === 'allie' ? ' · 🤝 sur un allié' : ''}`;
+		+ `${s.cible === 'allie' ? ' · 🤝 sur un allié' : ''}`
+		+ `${s.enseignement ? ' · 🎓 enseigné par un maître' : ''}`;
 }
 // Pastilles des composants d'un sort connu (`.sh-sort-compo`, grisée si indisponible).
 function _sortComposHtml(s) {

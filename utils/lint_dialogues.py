@@ -54,6 +54,8 @@ PLACEHOLDERS_CONNUS = {
 	# Portail de Notre-Dame (service `portail`) : fin de la tranche courante, seuils de la
 	# suivante, nom de l'item payé. ({destination} partagé avec les quêtes.)
 	"fermeture", "seuils_suivants", "cristal",
+	# Enseignement d'un maître (service `enseignement`) : nom du sort, coût en points.
+	"sort", "cout",
 }
 
 # Clés de `condition` : deux formes structurées, tout le reste est traité comme un FLAG
@@ -150,6 +152,10 @@ FLAGS_CONNUS = {
 	"apport_offert", "apport_en_cours", "apport_possible", "apport_accompli",
 	# Portail de Notre-Dame (utils/portails.py) : de quoi payer / la tranche a des seuils.
 	"cristal_jaune_porte", "seuils_ouverts",
+	# ENSEIGNEMENT d'un maître (`sorts.etat_enseignement`) : déjà connu, forme simple non
+	# maîtrisée, école/niveau insuffisants, points insuffisants, tout est réuni.
+	"enseignement_connu", "enseignement_prerequis_manquant", "enseignement_niveau_insuffisant",
+	"enseignement_points_insuffisants", "enseignement_possible",
 }
 
 # Nœuds de résultat que le ROUTER va chercher par leur clé. Les absents laissent le
@@ -173,6 +179,8 @@ NOEUDS_REQUIS = {
 	# Franchir un seuil : déposé à l'arrivée (le client recharge /play), seuil refermé, ou
 	# pas de cristal dans le sac.
 	"portail": {"ouvert", "ferme", "refus_cristal"},
+	# Enseignement d'un maître : sort transmis, ou refus (règle d'apprentissage non remplie).
+	"enseignement": {"appris", "refus"},
 }
 
 # Le transport a DEUX rôles, et presque aucun PNJ ne tient les deux :
@@ -209,6 +217,7 @@ ACTIONS_A_CONDITIONNER = {
 	("commission", "rapporter"): "commission_a_rapporter",
 	("acces", "passer"):        "acces_ouvrable",
 	("apport", "remettre"):     "apport_possible",
+	("enseignement", "apprendre"): "enseignement_possible",
 }
 
 # Clés du bloc `relation` d'un nœud (utils/pnj.recompense_relation_de). Tout le reste y est
