@@ -10139,7 +10139,7 @@
           44,
           22
         ],
-        "label": "L'Hôtel de Ville"
+        "label": "Retourner dans la ville"
       },
       {
         "lieu": "lieu:hotel_de_ville_d_aix_la_chapelle",
@@ -10147,7 +10147,7 @@
           0,
           0
         ],
-        "label": "Retourner dans la ville"
+        "label": "L'Hôtel de Ville"
       }
     ],
     "metadata": {
@@ -10182,7 +10182,7 @@
           47,
           26
         ],
-        "label": "La Chapelle Palatine"
+        "label": "Retourner dans la ville"
       },
       {
         "lieu": "lieu:chapelle_palatine",
@@ -10190,7 +10190,7 @@
           0,
           0
         ],
-        "label": "Retourner dans la ville"
+        "label": "La Chapelle Palatine"
       }
     ],
     "metadata": {
@@ -10239,7 +10239,7 @@
           45,
           6
         ],
-        "label": "La Porte de Mars"
+        "label": "Retourner dans la ville"
       },
       {
         "lieu": "lieu:porte_de_mars",
@@ -10247,7 +10247,7 @@
           0,
           0
         ],
-        "label": "Retourner dans la ville"
+        "label": "La Porte de Mars"
       }
     ],
     "metadata": {
@@ -10282,7 +10282,7 @@
           56,
           22
         ],
-        "label": "L'Enclos du Temple"
+        "label": "Retourner dans la ville"
       },
       {
         "lieu": "lieu:enclos_du_temple",
@@ -10290,7 +10290,7 @@
           0,
           0
         ],
-        "label": "Retourner dans la ville"
+        "label": "L'Enclos du Temple"
       }
     ],
     "metadata": {
@@ -10325,7 +10325,7 @@
           43,
           23
         ],
-        "label": "La crypte de Chartres"
+        "label": "Remonter dans la ville"
       },
       {
         "lieu": "lieu:crypte_de_chartres",
@@ -10333,7 +10333,7 @@
           0,
           0
         ],
-        "label": "Remonter dans la ville"
+        "label": "La crypte de Chartres"
       }
     ],
     "metadata": {

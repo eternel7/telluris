@@ -45,6 +45,10 @@ def get_lieu_links(current_user: dict = Body(...), filtrer_acces: bool = True):
 
 	out = []
 	for conn in connections:
+		# Pas de bouton (ni de passage) depuis un nœud `bouton: false` : ÉCARTÉ même sans
+		# `filtrer_acces`, donc aussi pour le déplaceur — c'est un verrou, pas un affichage.
+		if depart_interdit(conn, lieu, position):
+			continue
 		ferme = False
 		for node in conn["nodes"]:
 			doc = get_doc(node["lieu"])
@@ -60,6 +64,18 @@ def get_lieu_links(current_user: dict = Body(...), filtrer_acces: bool = True):
 			out.append(conn)
 
 	return out
+
+
+def depart_interdit(conn: dict, lieu_courant: str, position: dict) -> bool:
+	"""Le nœud où l'on se tient porte `"bouton": false` : ce lien ne s'emprunte pas d'ICI, on
+	y ARRIVE seulement (retour d'un temple, court-circuit de Notre-Dame) ; on en part par le
+	service d'un PNJ — le tableau FIXE de la Chapelle Palatine (`services.portail.fixe`).
+	Connexion interne : seul le nœud de la case courante compte."""
+	nodes = [n for n in (conn or {}).get("nodes") or [] if isinstance(n, dict)]
+	ici = [(position or {}).get("x"), (position or {}).get("y")]
+	interne = all(n.get("lieu") == lieu_courant for n in nodes)
+	return any(n.get("lieu") == lieu_courant and n.get("bouton") is False
+			   and (not interne or list(n.get("pos") or [])[:2] == ici) for n in nodes)
 
 
 def noeud_ferme(character: dict, lieu_courant: str, noeud_lieu: str, doc, get_doc_fn=get_doc) -> bool:
@@ -98,7 +114,7 @@ def passages_carte(connexions, lieu_id: str, est_fermee, get_doc_fn=get_doc) -> 
 			continue
 		for node in conn.get("nodes") or []:
 			pos = list((node or {}).get("pos") or [])
-			if node.get("lieu") != lieu_id or len(pos) < 2:
+			if node.get("lieu") != lieu_id or len(pos) < 2 or node.get("bouton") is False:
 				continue
 			x, y = pos[0], pos[1]
 			dest, _interne = noeud_destination(conn, lieu_id, {"x": x, "y": y})

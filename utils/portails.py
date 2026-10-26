@@ -53,6 +53,30 @@ def arrivees_candidates(connexions: list, ancrage: str) -> list:
 	return [vues[c] for c in sorted(vues)]
 
 
+def arrivees_fixes(connexions: list, ancrage: str) -> list:
+	"""Tableau FIXE (`services.portail.fixe`, Chapelle Palatine d'Aix) : les portes de
+	l'ancrage LUI-MÊME — l'autre bout de chaque lien portail OUVERT dont un nœud est posé sur
+	l'ancrage. Aucune tranche, aucune expiration : toutes sont ouvertes, toujours. Même forme
+	que `arrivees_candidates`, triée par `cle`."""
+	vues = {}
+	for conn in connexions or []:
+		meta = conn.get("metadata") or {}
+		if meta.get("type") != TYPE_PORTAIL or meta.get("status", "ouvert") != "ouvert":
+			continue
+		nodes = conn.get("nodes") or []
+		if not any(n.get("lieu") == ancrage for n in nodes):
+			continue
+		for node in nodes:
+			lieu = node.get("lieu")
+			if not lieu or lieu == ancrage:
+				continue
+			pos = node.get("pos") or [0, 0]
+			cle = f"{conn.get('_id')}|{lieu}"
+			vues.setdefault(cle, {"cle": cle, "lien": conn.get("_id"), "lieu": lieu,
+								  "pos": [int(pos[0]), int(pos[1])]})
+	return [vues[c] for c in sorted(vues)]
+
+
 def _tirage(arrivees: list, ancrage: str, tranche: int) -> list:
 	nb = min(max(1, int(character_stats.PORTAIL_SEUILS_OUVERTS)), len(arrivees))
 	graine = int(hashlib.sha256(f"{ancrage}:{tranche}".encode("utf-8")).hexdigest()[:16], 16)

@@ -162,6 +162,54 @@ def test_le_gabarit_devient_une_replique_par_seuil_ouvert(rp):
 	assert noeud["choix"][-1]["id"] == "accueil"
 
 
+# ── Tableau FIXE (`fixe`, Chapelle Palatine d'Aix) ────────────────────────────
+
+CHAPELLE = "lieu:chapelle_palatine"
+LIENS_AIX = LIENS + [
+	_lien("link:chapelle_to_tokyo", (CHAPELLE, (0, 0)), ("lieu:senso_ji", (0, 0))),
+	_lien("link:chapelle_to_sydney", (CHAPELLE, (0, 0)), ("lieu:baiame", (0, 0))),
+	_lien("link:chapelle_to_ferme", (CHAPELLE, (0, 0)), ("lieu:ailleurs", (0, 0)), status="ferme"),
+]
+CONF_FIXE = {"ancrage": CHAPELLE, "fixe": True, "choix": "franchir",
+			 "noeuds": {"ouvert": "ouvert", "refus_acces": "refus_acces", "ferme": "seuils"}}
+PNJ_FIXE = {"_id": "pnj:gardienne", "services": {"portail": CONF_FIXE}}
+
+
+def test_tableau_fixe_les_seules_portes_de_l_ancrage_toujours_ouvertes():
+	fixes = portails.arrivees_fixes(LIENS_AIX, CHAPELLE)
+	assert [a["lieu"] for a in fixes] == ["lieu:baiame", "lieu:senso_ji"]
+	assert all("ferme_dans_s" not in a for a in fixes)
+
+
+@pytest.fixture
+def rp_fixe(rp, monkeypatch):
+	monkeypatch.setattr(rp, "find_docs", lambda q: LIENS_AIX)
+	return rp
+
+
+def test_tableau_fixe_une_replique_par_porte_sans_fermeture(rp_fixe):
+	noeud = {"id": "seuils", "choix": [{"id": "franchir", "label": "Franchir"}, {"id": "accueil", "label": "Non"}]}
+	rp_fixe._choix_portail({}, PNJ_FIXE, noeud)
+	assert [c["label"] for c in noeud["choix"][:-1]] == ["🌀 baiame", "🌀 senso_ji"]
+
+
+def test_tableau_fixe_franchir_sans_cristal_a_n_importe_quelle_heure(rp_fixe, monkeypatch):
+	cle = portails.arrivees_fixes(LIENS_AIX, CHAPELLE)[1]["cle"]
+	for t in (rp_fixe._t0, rp_fixe._t0 + 10_000 * FENETRE):
+		monkeypatch.setattr(rp_fixe.quetes, "now_epoch", lambda t=t: t)
+		c = {"lieu": CHAPELLE, "inventaire": ["item:pain"]}
+		assert rp_fixe._resoudre_portail(c, PNJ_FIXE, {"_id": CHAPELLE}, "franchir", cle, {}) == "ouvert"
+		assert c["lieu"] == "lieu:senso_ji" and c["inventaire"] == ["item:pain"]
+
+
+def test_tableau_fixe_la_barriere_de_la_porte_tient(rp_fixe, monkeypatch):
+	monkeypatch.setattr(rp_fixe.acces, "acces_autorise", lambda c, d, g: (False, "rang"))
+	cle = portails.arrivees_fixes(LIENS_AIX, CHAPELLE)[0]["cle"]
+	c = {"lieu": CHAPELLE, "inventaire": []}
+	assert rp_fixe._resoudre_portail(c, PNJ_FIXE, {"_id": CHAPELLE}, "franchir", cle, {}) == "refus_acces"
+	assert c["lieu"] == CHAPELLE and not rp_fixe._arrivees
+
+
 # ── Contenu ──────────────────────────────────────────────────────────────────
 
 def _gen():
@@ -187,8 +235,9 @@ def test_le_fichier_est_a_jour_et_passe_le_linter():
 
 
 def test_delta_seul_et_aucun_id_neuf_ne_collisionne():
+	# Neufs AVANT l'import, déjà au dump après : seul ce sous-ensemble peut l'être.
 	neufs = {i for i in DOCS if i not in DUMP}
-	assert neufs == {GEN.AENOR, GEN.LIEN_PUITS}
+	assert neufs <= {GEN.AENOR, GEN.LIEN_PUITS}
 	# Les docs relus ne perdent aucune clé du dump (PUT complet à l'import).
 	for i in set(DOCS) - neufs:
 		assert set(DUMP[i]) - {"_rev"} <= set(DOCS[i]), i

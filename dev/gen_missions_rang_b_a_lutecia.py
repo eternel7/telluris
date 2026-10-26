@@ -251,12 +251,16 @@ def cases_occupees(par_id, cite):
 
 
 def lien(cite, sous_lieu, pos, label_cite, label_retour, type_):
+	"""`label_cite` = le bouton affiché DANS la cité (il mène au sous-lieu), `label_retour` =
+	celui affiché dans le sous-lieu. ⚠️ Le label d'un nœud est le bouton qui MÈNE à ce nœud
+	(play_town : bouton = label du nœud destination) : chacun se pose donc sur le nœud
+	d'en face."""
 	return {
 		"_id": id_lien(cite, sous_lieu),
 		"type": "connection",
 		"nodes": [
-			{"lieu": cite, "pos": list(pos), "label": label_cite},
-			{"lieu": sous_lieu, "pos": [0, 0], "label": label_retour},
+			{"lieu": cite, "pos": list(pos), "label": label_retour},
+			{"lieu": sous_lieu, "pos": [0, 0], "label": label_cite},
 		],
 		"metadata": {"type": type_, "status": "ouvert"},
 	}

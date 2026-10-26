@@ -324,21 +324,26 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 	# PORTAIL DE NOTRE-DAME : le tableau des seuils de la tranche courante (utils/portails.py).
 	# {fermeture} = le temps avant que la tranche ne tourne ; {seuils_suivants} = ceux qu'elle
 	# annonce ; `cristal_jaune_porte` dit si le joueur a de quoi payer le passage.
+	# Tableau FIXE (`fixe`, Chapelle Palatine) : toutes les portes de l'ancrage, toujours
+	# ouvertes, sans {fermeture} ni {seuils_suivants} ; sans `cout`, le passage est gratuit.
 	if (pnj_doc.get("services") or {}).get("portail"):
 		conf_p = pnj_doc["services"]["portail"]
 		now = quetes.now_epoch()
+		fixe = bool(conf_p.get("fixe"))
 		arrivees = _arrivees_portail(conf_p)
-		ouverts = portails.seuils_ouverts(arrivees, conf_p.get("ancrage"), now)
+		ouverts = arrivees if fixe else portails.seuils_ouverts(arrivees, conf_p.get("ancrage"), now)
 		cout = conf_p.get("cout") or {}
-		flags["cristal_jaune_porte"] = quetes._count_inventaire(
-			character, cout.get("item", "")) >= int(cout.get("quantite", 1) or 1)
+		flags["cristal_jaune_porte"] = not cout.get("item") or quetes._count_inventaire(
+			character, cout["item"]) >= int(cout.get("quantite", 1) or 1)
 		flags["seuils_ouverts"] = bool(ouverts)
-		placeholders["fermeture"] = portails.texte_duree(ouverts[0]["ferme_dans_s"]) if ouverts else "—"
-		placeholders["seuils_suivants"] = ", ".join(
+		placeholders["fermeture"] = (portails.texte_duree(ouverts[0]["ferme_dans_s"])
+									 if ouverts and not fixe else "—")
+		placeholders["seuils_suivants"] = "—" if fixe else ", ".join(
 			_label_arrivee(a) for a in portails.seuils_suivants(arrivees, conf_p.get("ancrage"), now)) or "—"
 		# Dit dans la phrase (« coûte un cristal de mana jaune ») : sans la majuscule du nom.
-		nom_cout = _nom_item(cout.get("item", ""))
-		placeholders["cristal"] = nom_cout[:1].lower() + nom_cout[1:]
+		if cout.get("item"):
+			nom_cout = _nom_item(cout["item"])
+			placeholders["cristal"] = nom_cout[:1].lower() + nom_cout[1:]
 	return pnj.contexte_dialogue(character, pnj_doc, _rel, flags, placeholders,
 								 quetes.quetes_reussies(character),
 								 quetes.quetes_actives_ids(character))
@@ -674,10 +679,12 @@ def _resoudre_traversee(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 
 
 def _arrivees_portail(conf: dict) -> list:
-	"""Points d'arrivée du tableau : TOUS les liens portail du monde (utils/portails.py)."""
-	return portails.arrivees_candidates(
-		find_docs({"type": "connection", "metadata.type": portails.TYPE_PORTAIL}) or [],
-		conf.get("ancrage"))
+	"""Points d'arrivée du tableau : TOUS les liens portail du monde (utils/portails.py) —
+	ou, tableau `fixe`, les seules portes de l'ancrage."""
+	liens = find_docs({"type": "connection", "metadata.type": portails.TYPE_PORTAIL}) or []
+	if conf.get("fixe"):
+		return portails.arrivees_fixes(liens, conf.get("ancrage"))
+	return portails.arrivees_candidates(liens, conf.get("ancrage"))
 
 
 def _label_arrivee(arrivee: dict) -> str:
@@ -703,10 +710,14 @@ def _choix_portail(character: dict, pnj_doc: dict, noeud: dict | None) -> None:
 	idx = next((i for i, c in enumerate(noeud.get("choix") or []) if c.get("id") == gabarit), None)
 	if idx is None:
 		return
-	ouverts = portails.seuils_ouverts(_arrivees_portail(conf), conf.get("ancrage"), quetes.now_epoch())
+	if conf.get("fixe"):
+		ouverts = _arrivees_portail(conf)
+	else:
+		ouverts = portails.seuils_ouverts(_arrivees_portail(conf), conf.get("ancrage"), quetes.now_epoch())
 	generes = [{
 		"id": gabarit,
-		"label": f"🌀 {_label_arrivee(a)} — se referme dans {portails.texte_duree(a['ferme_dans_s'])}",
+		"label": f"🌀 {_label_arrivee(a)}" + (
+			"" if conf.get("fixe") else f" — se referme dans {portails.texte_duree(a['ferme_dans_s'])}"),
 		"action": True,
 		"marque": None,
 		"saisie": False,
@@ -720,7 +731,8 @@ def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, s
 	"""Service `portail`, op `franchir` : l'ancrage court-circuite le lien portail choisi et
 	dépose le groupe à SON point d'arrivée, contre un cristal jaune. Aucun lien n'est emprunté :
 	le personnage est relocalisé par `_effets_arrivee`, comme au débarquement d'une traversée.
-	⚠️ La barrière `acces` du lieu d'arrivée n'est PAS consultée — c'est tout le court-circuit.
+	⚠️ La barrière `acces` du lieu d'arrivée n'est PAS consultée — c'est tout le court-circuit
+	(sauf tableau `fixe`, qui franchit la porte elle-même : refus → `refus_acces`).
 	Seuil refermé (tranche passée au-delà de la grâce) → `ferme` ; pas de cristal →
 	`refus_cristal` ; rien n'est retiré ni sauvé dans ces deux cas."""
 	conf = (pnj_doc.get("services") or {}).get("portail") or {}
@@ -733,18 +745,26 @@ def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, s
 		raise HTTPException(status_code=409, detail="Vous êtes en mer.")
 	if carried_weight(character) > charge_max_of(character):
 		raise HTTPException(status_code=409, detail="Trop chargé pour vous déplacer — déposez un objet.")
-	seuil = portails.seuil_franchissable(
-		_arrivees_portail(conf), conf.get("ancrage"), str(saisie or ""), quetes.now_epoch())
+	if conf.get("fixe"):
+		seuil = next((a for a in _arrivees_portail(conf) if a["cle"] == str(saisie or "")), None)
+	else:
+		seuil = portails.seuil_franchissable(
+			_arrivees_portail(conf), conf.get("ancrage"), str(saisie or ""), quetes.now_epoch())
 	if not seuil:
 		return noeuds.get("ferme")
 	cout = conf.get("cout") or {}
 	item_id, quantite = cout.get("item", ""), int(cout.get("quantite", 1) or 1)
-	if quetes._count_inventaire(character, item_id) < quantite:
+	if item_id and quetes._count_inventaire(character, item_id) < quantite:
 		return noeuds.get("refus_cristal")
 	dest_doc = get_doc(seuil["lieu"])
 	if not dest_doc:
 		raise HTTPException(status_code=409, detail="Ce seuil ne mène plus nulle part.")
-	quetes.retirer_items(character, item_id, quantite)
+	# Tableau fixe : ce n'est PAS un court-circuit — on franchit la porte elle-même, donc sa
+	# barrière (`acces` du lieu d'arrivée) tient, comme pour un déplacement par le lien.
+	if conf.get("fixe") and not acces.acces_autorise(character, dest_doc, get_doc)[0]:
+		return noeuds.get("refus_acces")
+	if item_id:
+		quetes.retirer_items(character, item_id, quantite)
 	arrivee = _effets_arrivee(character, seuil["lieu"],
 							  {"x": seuil["pos"][0], "y": seuil["pos"][1]}, dest_doc)
 	reponse["portail"] = {"lieu": _label_arrivee(seuil), "arrivee": arrivee}
