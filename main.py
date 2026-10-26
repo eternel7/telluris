@@ -1615,7 +1615,10 @@ def admin_grimoires_manquants(current_user: Annotated[User, Depends(get_current_
 	`gen_grimoires` de /admin/dev-tools qui génère. Règle : `grimoires.sorts_sans_grimoire_unique`."""
 	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
 		raise HTTPException(status_code=403, detail="Admin only")
-	sorts = find_docs({"type": "sort"}, fields=["_id", "nom", "niveau", "magie"])
+	# ⚠️ `enseignement` DANS la projection : la règle écarte les sorts transmis par un maître
+	# (Lance de lumière) — sans ce champ, l'alerte les comptait alors que `gen_grimoires`,
+	# qui lit les docs complets, n'avait rien à générer.
+	sorts = find_docs({"type": "sort"}, fields=["_id", "nom", "niveau", "magie", "enseignement"])
 	grims = find_docs({"type": "item", "sous_categorie": "grimoire"}, fields=["_id", "sous_categorie", "sorts"])
 	if sorts is None or grims is None:
 		raise HTTPException(status_code=503, detail="Base injoignable")

@@ -141,3 +141,23 @@ def test_meme_verdict_pour_l_alerte():
 def test_grimoires_sans_recette():
 	base = _base(_grimoire("item:grimoire_modele", ["sort:a"]), _grimoire("item:Grimoire_vide", []))
 	assert g.grimoires_sans_recette(base) == ["item:Grimoire_vide"]
+
+
+def test_alerte_admin_ignore_un_sort_enseigne(monkeypatch):
+	"""La route de l'alerte de /admin PROJETTE les sorts (`fields`) : la projection doit garder
+	`enseignement`, sinon la Lance de lumière (transmise par un maître, sans grimoire par
+	décision) y était comptée alors que `gen_grimoires` n'avait rien à générer."""
+	import main
+	docs = [
+		{**_sort("lance", 10, "Sainte"), "enseignement": True},
+		_sort("rayon", 10, "Sainte"),
+		_grimoire("item:grimoire_rayon", ["sort:rayon"]),
+	]
+
+	def find_docs(selector, fields=None):
+		trouves = [d for d in docs if all(d.get(k) == v for k, v in selector.items())]
+		# Comme CouchDB : une projection ne rend QUE les champs demandés.
+		return [{k: d[k] for k in fields if k in d} for d in trouves] if fields else trouves
+
+	monkeypatch.setattr(main, "find_docs", find_docs)
+	assert main.admin_grimoires_manquants({"admin": 1}) == {"nb": 0, "sorts": []}
