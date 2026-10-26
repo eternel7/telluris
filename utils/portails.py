@@ -13,12 +13,11 @@
 #
 # On ne propose que quelques seuils à la fois, ceux « qui vont être empruntés dans les
 # prochains moments ». ⚠️ Aucune horloge ni tick (CLAUDE.md §5) : l'epoch réel est coupé
-# en TRANCHES de `PORTAIL_FENETRE_MINUTES`, et les seuils TOURNENT par un hasard
-# DÉTERMINISTE (cercle battu par période, cf. `_tirage`) — même tableau pour tous les joueurs,
-# ressortir/rentrer ne re-tire rien, et la tranche suivante ne redit jamais la courante.
+# en TRANCHES de `PORTAIL_FENETRE_MINUTES`, et chaque tranche tire ses seuils par un hasard
+# DÉTERMINISTE (graine = ancrage + tranche) — même tableau pour tous les joueurs, et
+# ressortir/rentrer ne re-tire rien.
 
 import hashlib
-import math
 import random
 
 from models import character_stats
@@ -83,44 +82,10 @@ def arrivees_fixes(connexions: list, ancrage: str) -> list:
 	return [vues[c] for c in sorted(vues)]
 
 
-def _arc(arrivees: list, ancrage: str, periode: int, debut: int, nb: int) -> list:
-	"""Les `nb` arrivées à partir du rang `debut` du cercle battu de la période."""
-	graine = int(hashlib.sha256(f"{ancrage}:{periode}".encode("utf-8")).hexdigest()[:16], 16)
-	cercle = random.Random(graine).sample(arrivees, len(arrivees))
-	return [cercle[(debut + i) % len(cercle)] for i in range(nb)]
-
-
-def _debuts(n: int, nb: int) -> list:
-	"""Rang de départ de chaque arc d'une période, un par tranche : arcs bout à bout jusqu'à
-	retomber sur le premier. Avec exactement 2 × `nb` arrivées il n'y en aurait que deux, et
-	l'échange de jonction toucherait le dernier : on refait le tour décalé d'un cran."""
-	debuts = [j * nb % n for j in range(n // math.gcd(n, nb))]
-	return [0, nb, 1, nb + 1] if len(debuts) == 2 and nb > 1 else debuts
-
-
 def _tirage(arrivees: list, ancrage: str, tranche: int) -> list:
-	"""ROTATION, pas tirage indépendant : deux tranches qui se suivent ne ressortent jamais
-	les mêmes seuils (un tirage indépendant le faisait une fois sur quatre avec 4 arrivées
-	pour 3 seuils : le tableau d'Aénor paraissait figé). Les arrivées sont battues en cercle
-	une fois par PÉRIODE (graine = ancrage + période) ; chaque tranche prend l'arc suivant de
-	`nb` arrivées (`_debuts`) — chacune passe donc par période. À la jonction, si le premier
-	arc redit le dernier de la période d'avant, les deux premiers s'échangent : le dernier ne
-	bouge jamais, aucune dépendance en chaîne."""
-	n = len(arrivees)
-	nb = min(max(1, int(character_stats.PORTAIL_SEUILS_OUVERTS)), n)
-	if not nb:
-		return []
-	if n == 2 and nb == 1:
-		return [arrivees[tranche % 2]]
-	debuts = _debuts(n, nb)
-	w = len(debuts)
-	periode, j = divmod(tranche, w)
-	if w >= 3 and j <= 1:
-		cles = lambda arc: {a["cle"] for a in arc}
-		if cles(_arc(arrivees, ancrage, periode, debuts[0], nb)) == cles(
-				_arc(arrivees, ancrage, periode - 1, debuts[-1], nb)):
-			j = 1 - j
-	return _arc(arrivees, ancrage, periode, debuts[j], nb)
+	nb = min(max(1, int(character_stats.PORTAIL_SEUILS_OUVERTS)), len(arrivees))
+	graine = int(hashlib.sha256(f"{ancrage}:{tranche}".encode("utf-8")).hexdigest()[:16], 16)
+	return random.Random(graine).sample(arrivees, nb) if nb else []
 
 
 def seuils_ouverts(arrivees: list, ancrage: str, now: int) -> list:
