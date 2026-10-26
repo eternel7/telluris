@@ -63,6 +63,9 @@ def entree_sort(doc: dict, items: dict, rules_vocations) -> dict:
 		"effets": _apercu(vue["effets"]),
 		"invocation": vue["invocation"],
 		"sensibilite_charge": vue["sensibilite_charge"],
+		# Sort transmis par un maître (aucun grimoire) / sort qu'il remplace en l'améliorant.
+		"enseignement": vue["enseignement"],
+		"ameliore": vue["ameliore"],
 		"composants": [{
 			"item": c["item"],
 			"nom": (items.get(c["item"]) or {}).get("nom", c["item"]),

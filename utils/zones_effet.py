@@ -76,7 +76,8 @@ ANGLE_DEFAUT = 90
 # ferait balayer toute la carte (ou tourner la boucle pour rien) : la plus grande carte
 # de combat tient largement dans ces valeurs.
 RAYON_MAX = 8
-LONGUEUR_MAX = 12
+# 20 : la Lance de lumière tire à travers tout le champ de bataille (défense aérienne).
+LONGUEUR_MAX = 20
 LARGEUR_MAX = 12
 DECALAGE_MAX = 12
 
@@ -133,6 +134,11 @@ def normaliser_zone(raw) -> dict | None:
 		"largeur": _champ(raw, "largeur", 1, 1, LARGEUR_MAX),
 		"decalage": _champ(raw, "decalage", 0, 0, DECALAGE_MAX),
 		"angle": _champ(raw, "angle", ANGLE_DEFAUT, 1, 360),
+		# `perce` : la forme ignore murs et ligne de vue (cf. `cases_effet`).
+		# `tir_ami` : une zone OFFENSIVE touche aussi le camp du joueur au lancement
+		# (`combat.allies_de_zone`) — Rayon/Lance de lumière, seul tir ami au lancement.
+		"perce": bool(raw.get("perce")),
+		"tir_ami": bool(raw.get("tir_ami")),
 	}
 
 
@@ -256,7 +262,11 @@ def cases_effet(zone: dict, lanceur: tuple, cible: tuple, facing=0,
 	  • `vue` écarte ce que l'ancre ne voit pas, donc ce qui est à l'abri DERRIÈRE un mur.
 	    Sans lui, une boule de feu contournerait l'angle d'un couloir.
 	L'ancre est exemptée du second (elle se voit elle-même), jamais du premier.
+
+	Zone `perce` : AUCUN des deux filtres — le rayon transperce murs et obstacles.
 	"""
+	if (zone or {}).get("perce"):
+		return list(cases_zone(zone, lanceur, cible, facing))
 	ancre = ancre_de(zone, lanceur, cible)
 	out = []
 	for (x, y) in cases_zone(zone, lanceur, cible, facing):

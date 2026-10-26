@@ -724,9 +724,9 @@ def cibles_de_zone(combat_doc: dict, joueur: dict, monstre: dict, zone: dict,
 	été validés, et c'est elle que le joueur a payé pour frapper : l'écarter rendrait un
 	sort visiblement sans effet sur l'ennemi qu'on vient de désigner.
 
-	⚠️ **Aucun tir ami.** Une zone hostile ne touche QUE des monstres : ni le lanceur, ni
-	ses compagnons, ni ses montures, ni ses invocations. C'est une limite assumée du
-	périmètre (le jeu n'a de tir ami nulle part), pas un oubli.
+	⚠️ **Monstres seulement.** Une zone hostile ne touche ici QUE des monstres. Le seul tir
+	ami au lancement est déclaré par la donnée (`zone.tir_ami`, Rayon/Lance de lumière) et
+	passe par `allies_de_zone`, jamais par cette liste.
 	"""
 	if not zone:
 		return [monstre]
@@ -735,6 +735,19 @@ def cibles_de_zone(combat_doc: dict, joueur: dict, monstre: dict, zone: dict,
 			  if m["vivant"] and m is not monstre and m.get("pos")
 			  and any(c in cases for c in jetons.cases_emprise(m))]
 	return [monstre] + autres
+
+
+def allies_de_zone(combat_doc: dict, joueur: dict, monstre: dict, zone: dict,
+				   grid: dict) -> list:
+	"""Acteurs DEBOUT du camp du joueur pris dans une zone OFFENSIVE à `tir_ami` — le
+	lanceur exclu (il tire, il n'est pas sur la trajectoire). Compagnons, montures,
+	escortés, invocations : tout corps de `joueurs`. Liste vide sans `tir_ami`."""
+	if not zone or not zone.get("tir_ami"):
+		return []
+	cases = _cases_zone_offensive(joueur, monstre, zone, grid)
+	return [j for j in combat_doc.get("joueurs") or []
+			if j is not joueur and _debout(j) and j.get("pos")
+			and any(c in cases for c in jetons.cases_emprise(j))]
 
 
 def beneficiaires_de_zone(combat_doc: dict, lanceur: dict, principal: dict, zone: dict,
@@ -1755,30 +1768,71 @@ def _bruler(combat_doc: dict, zone: dict, lanceur: dict, victime: dict) -> None:
 			_ligne(victime, f"{icon} {nom} brûle dans {nom_zone} : {dmg} dégâts "
 							f"(PV : {victime['currentPV']}/{victime.get('pv_max', 0)}).")
 	else:
-		# ⚠️ Les DEUX déductions avant tout `_traiter_ko` (même raison que `_do_attack_on`).
-		dmg_def, dmg_prot, protecteur = _rediriger_lien_vie(combat_doc, victime, dmg)
-		victime["currentPV"] = max(0, victime["currentPV"] - dmg_def)
-		if protecteur is not None:
-			protecteur["currentPV"] = max(0, protecteur["currentPV"] - dmg_prot)
-		if dmg:
-			_ligne(victime, f"{icon} {nom} brûle dans {nom_zone} : {dmg} dégâts "
-							f"(PV : {victime['currentPV']}/{victime.get('pv_max', 0)}).")
-		if protecteur is not None:
-			_ligne(protecteur, f"Le lien de vie détourne {dmg_prot} dégâts vers "
-							   f"{protecteur['nom']} ! "
-							   f"(PV : {protecteur['currentPV']}/{protecteur['pv_max']})")
-		if dmg_def > 0:
-			_tester_concentration(combat_doc, victime, lanceur, dmg_def)
-		if protecteur is not None and dmg_prot > 0:
-			_tester_concentration(combat_doc, protecteur, lanceur, dmg_prot)
-		if victime["currentPV"] <= 0:
-			_traiter_ko(combat_doc, victime, lanceur)
-		if protecteur is not None and protecteur["currentPV"] <= 0:
-			_traiter_ko(combat_doc, protecteur, lanceur)
-		if not _debout(victime):
+		if not _blesser_allie(combat_doc, lanceur, victime, dmg, _ligne,
+							  f"{icon} {nom} brûle dans {nom_zone}"):
 			return
 	_appliquer_effet_sur_cible(combat_doc, victime, zone.get("source") or {},
 							   zone.get("effets") or {}, tour)
+
+
+def _blesser_allie(combat_doc: dict, attaquant: dict, victime: dict, dmg: int,
+				   ligne, intro: str) -> bool:
+	"""Dégâts `dmg` infligés par le camp du joueur à l'un des SIENS : la MÊME cascade qu'un
+	coup de monstre (`_do_attack_on`) — lien de vie, test de concentration, `_traiter_ko`,
+	`attaquant` tenant lieu d'agresseur. Rend True si la victime est encore debout.
+
+	Source unique des deux tirs amis : brûlure d'une zone persistante (`_bruler`) et zone
+	offensive à `tir_ami` au lancement (`_frapper_allies_de_zone`). `ligne(cible, texte)`
+	écrit le journal (chaque appelant porte son vfx) ; `intro` ouvre la ligne de la victime."""
+	# ⚠️ Les DEUX déductions avant tout `_traiter_ko` (même raison que `_do_attack_on`).
+	dmg_def, dmg_prot, protecteur = _rediriger_lien_vie(combat_doc, victime, dmg)
+	victime["currentPV"] = max(0, victime["currentPV"] - dmg_def)
+	if protecteur is not None:
+		protecteur["currentPV"] = max(0, protecteur["currentPV"] - dmg_prot)
+	if dmg:
+		ligne(victime, f"{intro} : {dmg} dégâts "
+					   f"(PV : {victime['currentPV']}/{victime.get('pv_max', 0)}).")
+	if protecteur is not None:
+		ligne(protecteur, f"Le lien de vie détourne {dmg_prot} dégâts vers "
+						  f"{protecteur['nom']} ! "
+						  f"(PV : {protecteur['currentPV']}/{protecteur['pv_max']})")
+	if dmg_def > 0:
+		_tester_concentration(combat_doc, victime, attaquant, dmg_def)
+	if protecteur is not None and dmg_prot > 0:
+		_tester_concentration(combat_doc, protecteur, attaquant, dmg_prot)
+	if victime["currentPV"] <= 0:
+		_traiter_ko(combat_doc, victime, attaquant)
+	if protecteur is not None and protecteur["currentPV"] <= 0:
+		_traiter_ko(combat_doc, protecteur, attaquant)
+	return _debout(victime)
+
+
+def _frapper_allies_de_zone(combat_doc: dict, joueur: dict, allies: list, sdoc: dict,
+							effets: dict, notation: str, mode_jet: str, canal: str,
+							nom_capacite: str) -> list:
+	"""TIR AMI au lancement (`zone.tir_ami`) : chaque allié sur la trajectoire prend des
+	dégâts AUTOMATIQUES (ni jet de toucher, ni critique — comme une zone persistante : on
+	n'esquive pas un trait qui ne vous visait pas), puis la part durative du sort s'il tient
+	debout. Rend `[{id, nom, degats, pv}]` pour le payload."""
+	tour = int(combat_doc.get("tour", 0) or 0)
+	touches = []
+
+	def _ligne(cible: dict, texte: str, kind: str = "hit") -> None:
+		combat_doc.setdefault("log", []).append(_avec_etat(_avec_vfx({
+			"tour": tour, "acteur": joueur.get("nom", "?"), "kind": kind, "texte": texte,
+		}, canal, cible.get("id", ""), sdoc.get("animation"), joueur.get("id", "")), cible))
+
+	for allie in allies:
+		if combat_doc.get("status", "active") != "active" or not _debout(allie):
+			continue
+		dmg = calculer_degats(joueur, allie, notation, 1, mode_jet) if notation else 0
+		debout = _blesser_allie(combat_doc, joueur, allie, dmg, _ligne,
+								f"⚠ {allie.get('nom', '?')} est pris dans {nom_capacite}")
+		touches.append({"id": allie.get("id"), "nom": allie.get("nom"), "degats": dmg,
+						"pv": allie.get("currentPV", 0)})
+		if debout:
+			_appliquer_effet_sur_cible(combat_doc, allie, sdoc, effets, tour)
+	return touches
 
 
 # ── PIÈGES (utils/pieges.py) ──────────────────────────────────────────────────
@@ -6052,6 +6106,12 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 			combat_doc, joueur, cibles_sort, sdoc, effets, notation,
 			mode_jet, cle, profil["textes"],
 			{"nom": nom_capacite, "nom_fumble": nom_capacite})
+		# TIR AMI (`zone.tir_ami`) : les alliés sur la trajectoire, APRÈS les monstres.
+		allies_pris = allies_de_zone(combat_doc, joueur, monstre, sdoc.get("zone"), grid)
+		if allies_pris:
+			result["allies_touches"] = _frapper_allies_de_zone(
+				combat_doc, joueur, allies_pris, sdoc, effets, notation, mode_jet, cle,
+				nom_capacite)
 		# ANIMATION DE ZONE : portée par la PREMIÈRE ligne du lancement (celle de la cible
 		# désignée, touchée ou non) sous `vfx_zone`, que le client joue AVANT son `vfx`.
 		# Pas de ligne à elle : le journal n'a rien à dire de plus qu'« il lance ».

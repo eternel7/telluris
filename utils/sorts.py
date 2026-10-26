@@ -661,6 +661,12 @@ def normaliser_sort(sort_doc) -> dict | None:
 		# d'une capacité offensive à `zone`, au centre de la forme et dans son axe, AVANT
 		# les impacts de `animation` sur chaque victime (cf. `combat._vfx_de_zone`).
 		"animation_zone": str(doc.get("animation_zone") or ""),
+		# ENSEIGNEMENT : sort transmis de maître à élève (service PNJ `enseignement`) —
+		# ni grimoire, ni liste « Apprendre », refusé par `/api/apprendre_sort`.
+		"enseignement": bool(doc.get("enseignement")),
+		# AMÉLIORATION : id du sort qu'il exige de connaître et qu'il REMPLACE (même rang
+		# dans `sorts_connus`, même case de barre) — cf. `appliquer_apprentissage`.
+		"ameliore": str(doc.get("ameliore") or "") or None,
 	}
 
 
@@ -976,6 +982,75 @@ def cout_apprentissage(sort: dict) -> int:
 	return (_as_int((sort or {}).get("niveau")) + 1) * character_stats.SORT_COUT_COEFF
 
 
+def verifier_apprentissage(character: dict, sort: dict, rules_vocations) -> tuple | None:
+	"""Motif de refus `(code_http, message)` d'un apprentissage, ou None s'il est permis.
+
+	Source UNIQUE des règles partagées par `/api/apprendre_sort` et le service PNJ
+	`enseignement` : déjà connu, école et niveau, famille exclue, sort à améliorer connu,
+	points. Le GRIMOIRE n'en fait pas partie (propre à l'endpoint : un maître enseigne
+	sans livre), ni le verrou `enseignement` (propre à l'endpoint aussi)."""
+	connus = (character or {}).get("sorts_connus") or []
+	if sort["id"] in connus:
+		return 422, "Sort déjà connu"
+	ecole = magie_de_sort(sort, rules_vocations)
+	niveau = niveau_ecole(character, ecole, rules_vocations)
+	if niveau is None or niveau < sort["niveau"]:
+		return 422, "École de magie non pratiquée ou niveau insuffisant"
+	if apprentissage_exclu(sort, (character or {}).get("voc"), rules_vocations):
+		return 422, "Votre vocation ne pratique pas ce type de sort"
+	if sort.get("ameliore") and sort["ameliore"] not in connus:
+		return 422, "Ce sort exige d'en maîtriser d'abord la forme simple"
+	cout = cout_apprentissage(sort)
+	points = (character or {}).get("attribute_points", 0)
+	if points < cout:
+		return 422, f"Points insuffisants (besoin {cout}, disponible {points})"
+	return None
+
+
+def etat_enseignement(character: dict, sort: dict | None, rules_vocations) -> dict:
+	"""Drapeaux du service PNJ `enseignement` (conditions de dialogue) pour `sort` :
+	`enseignement_connu` · `enseignement_prerequis_manquant` · `enseignement_niveau_insuffisant`
+	· `enseignement_points_insuffisants` · `enseignement_possible` (aucun refus de
+	`verifier_apprentissage`). Sort introuvable ⇒ tous faux."""
+	flags = {k: False for k in ("enseignement_connu", "enseignement_prerequis_manquant",
+								"enseignement_niveau_insuffisant",
+								"enseignement_points_insuffisants", "enseignement_possible")}
+	if not sort:
+		return flags
+	connus = (character or {}).get("sorts_connus") or []
+	flags["enseignement_connu"] = sort["id"] in connus
+	flags["enseignement_prerequis_manquant"] = bool(sort.get("ameliore")) and sort["ameliore"] not in connus
+	niveau = niveau_ecole(character, magie_de_sort(sort, rules_vocations), rules_vocations)
+	flags["enseignement_niveau_insuffisant"] = (
+		niveau is None or niveau < sort["niveau"]
+		or apprentissage_exclu(sort, (character or {}).get("voc"), rules_vocations))
+	flags["enseignement_points_insuffisants"] = (
+		(character or {}).get("attribute_points", 0) < cout_apprentissage(sort))
+	flags["enseignement_possible"] = verifier_apprentissage(character, sort, rules_vocations) is None
+	return flags
+
+
+def appliquer_apprentissage(character: dict, sort: dict) -> None:
+	"""Débite les points et inscrit le sort. MUTE, NE SAUVEGARDE PAS.
+
+	Sort qui en AMÉLIORE un autre (`ameliore`) : il prend sa place AU MÊME RANG dans
+	`sorts_connus`, dans `sorts_epingles` (si la clé existe) et dans chaque case de la
+	barre d'action qui le portait — le joueur retrouve sa Lance là où était son Rayon."""
+	character["attribute_points"] = character.get("attribute_points", 0) - cout_apprentissage(sort)
+	connus = character.setdefault("sorts_connus", [])
+	ancien = sort.get("ameliore")
+	if ancien and ancien in connus:
+		connus[connus.index(ancien)] = sort["id"]
+		if isinstance(character.get("sorts_epingles"), list):
+			character["sorts_epingles"] = [sort["id"] if s == ancien else s
+										   for s in character["sorts_epingles"]]
+		for entree in character.get("slots_actions") or []:
+			if isinstance(entree, dict) and entree.get("type") == "sort" and entree.get("ref") == ancien:
+				entree["ref"] = sort["id"]
+	else:
+		connus.append(sort["id"])
+
+
 def est_grimoire(item_doc) -> bool:
 	return bool(item_doc) and item_doc.get("sous_categorie") == "grimoire"
 
@@ -1235,6 +1310,9 @@ def sorts_apprenables(character: dict, find_docs, resolve_ref, rules_vocations, 
 	for doc in find_docs({"type": "sort"}) or []:
 		sort = normaliser_sort(doc)
 		if not sort or sort["id"] in connus:
+			continue
+		# Sort ENSEIGNÉ par un maître : il ne s'achète pas depuis la fiche.
+		if sort["enseignement"]:
 			continue
 		# Famille interdite à cette vocation : le sort n'apparaît même pas dans la liste
 		# (l'endpoint `apprendre_sort` refait le test — la liste n'est pas la garde).

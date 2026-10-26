@@ -11770,6 +11770,11 @@ async function choisirPnj(choixId, extra) {
 				updateRang(data.rang.meilleur, data.rang.detail);
 			}
 		}
+		if (data.enseignement) {
+			// Service `enseignement` d'un maître : la fiche (⚡, points, barre) arrive par data.fiche.
+			if (data.enseignement.appris) showToast((data.enseignement.appris.icon || '📖') + ' Sort appris : ' + data.enseignement.appris.nom, {major: true});
+			else if (data.enseignement.refus) showToast(data.enseignement.refus);
+		}
 		if (data.acces) {
 			showToast('🗝️ ' + data.acces.nom + ' — le passage vous est ouvert.');
 			// Le laissez-passer vient d'être posé : sans resynchroniser LINKS ici, le lieu

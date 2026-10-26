@@ -257,6 +257,13 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
 	border-color: rgba(76, 217, 123, 0.85);
 	box-shadow: inset 0 0 8px rgba(76, 217, 123, 0.5);
 }
+/* TIR AMI (`zone.tir_ami`, Rayon/Lance de lumière) : la case d'un ALLIÉ sur la trajectoire,
+   en rouge — il sera touché comme l'ennemi. */
+.zone-case.tir-ami {
+	background: rgba(230, 60, 60, 0.36);
+	border-color: rgba(230, 60, 60, 0.95);
+	box-shadow: inset 0 0 8px rgba(230, 60, 60, 0.6);
+}
 /* Case de DESTINATION d'un saut. Contrairement à l'aperçu de zone, celle-ci se CLIQUE.
    ⚠️ `pointer-events: auto` rouvert POUR ELLE SEULE : #tokens-layer est en `none` et chaque
    élément doit le rouvrir pour lui-même — c'est exactement l'oubli qui a longtemps rendu
@@ -2269,10 +2276,19 @@ function apercuZone(capa, cible) {
 	const g = GRID || {};
 	// Grand jeton : la forme se pose sur la case de son emprise la plus proche du lanceur
 	// (miroir de `cibles_de_zone` / `beneficiaires_de_zone`).
+	// TIR AMI : cases d'un allié DEBOUT (lanceur exclu) pris dans la forme — miroir de
+	// `combat.allies_de_zone`.
+	const prisAmi = new Set();
+	if (zone.tir_ami && !soutien) {
+		(state.joueurs || []).forEach(a => {
+			if (a === j || a.id === j.id || !a.pos || (a.currentPV || 0) <= 0) return;
+			casesActeur(a).forEach(c => prisAmi.add(c[0] + ',' + c[1]));
+		});
+	}
 	casesEffet(zone, [j.pos.x, j.pos.y], caseProche(ancre, j.pos.x, j.pos.y), j.facing || 0,
 			   g.cells, g.dims).forEach(c => {
 		const el = document.createElement('div');
-		el.className = 'zone-case' + soutien;
+		el.className = 'zone-case' + soutien + (prisAmi.has(c[0] + ',' + c[1]) ? ' tir-ami' : '');
 		_placerToken(el, c[0] - j.pos.x, c[1] - j.pos.y);
 		layer.appendChild(el);   // posé APRÈS son placement, comme les jetons
 		_apercuZoneCases.push(el);

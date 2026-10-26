@@ -12,7 +12,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from utils.zones_effet import (  # noqa: E402
-	ANGLE_DEFAUT, RAYON_MAX, ancre_de, axe_de, axe_facing, cases_effet, cases_zone,
+	ANGLE_DEFAUT, LONGUEUR_MAX, RAYON_MAX, ancre_de, axe_de, axe_facing, cases_effet, cases_zone,
 	est_orientee, normaliser_zone, placement_visuel,
 )
 
@@ -43,7 +43,7 @@ def test_normalisation_valeurs_hors_contrat():
 						 "longueur": 999, "angle": 0})
 	assert z["origine"] == "cible"        # valeur inconnue ⇒ défaut
 	assert z["orientation"] == "cible"
-	assert z["longueur"] == 12            # borné
+	assert z["longueur"] == LONGUEUR_MAX  # borné
 	assert z["angle"] == 1                # borné par le bas, jamais 0
 
 
@@ -222,6 +222,23 @@ def _vue(x0, y0, x1, y1):
 def test_cases_effet_sans_predicat_rend_la_geometrie_brute():
 	z = normaliser_zone({"forme": "carre", "rayon": 1})
 	assert cases_effet(z, (2, 2), (2, 2)) == cases_zone(z, (2, 2), (2, 2))
+
+
+def test_zone_perce_traverse_murs_et_ligne_de_vue():
+	# Rayon de lumière : ligne 1×6 depuis (0, 0) vers l'Est, à travers le mur en x=4.
+	z = normaliser_zone({"forme": "rectangle", "origine": "lanceur", "largeur": 1,
+						 "longueur": 6, "decalage": 1, "perce": True})
+	cases = cases_effet(z, (0, 0), (2, 0), praticable=_praticable, vue=_vue)
+	assert cases == [(1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+	assert (0, 0) not in cases                           # le lanceur n'est jamais sur la ligne
+	sans = normaliser_zone({**z, "perce": False})
+	assert (5, 0) not in cases_effet(sans, (0, 0), (2, 0), praticable=_praticable, vue=_vue)
+
+
+def test_perce_et_tir_ami_faux_par_defaut():
+	z = normaliser_zone({"forme": "cercle"})
+	assert z["perce"] is False and z["tir_ami"] is False
+	assert normaliser_zone({"forme": "cercle", "tir_ami": 1})["tir_ami"] is True
 
 
 def test_cases_effet_ecarte_les_murs():

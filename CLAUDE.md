@@ -60,7 +60,7 @@ routers/
   scriptorium.py         # /api/scriptorium(/ecrire) : écrit personnel (papier+encre+plume → livre)
   commande.py            # /api/commande(/devis,/passer,/relancer,/retirer,/annuler) : commande chez un artisan
   animations.py          # /admin/animations/* : scan des feuilles de sprites, liaison au contenu
-  pnj.py                 # /api/pnj/dialogue (+ /choix) : dialogues PNJ + services (dont `portail` de Notre-Dame) ; /api/intro/raison
+  pnj.py                 # /api/pnj/dialogue (+ /choix) : dialogues PNJ + services (dont `portail` de Notre-Dame, `enseignement` d'un maître) ; /api/intro/raison
   traversee.py           # /api/traversee/avancer : une case de traversée maritime (rencontre, débarquement)
 utils/
   auth.py                # JWT creation + get_current_user() FastAPI dependency

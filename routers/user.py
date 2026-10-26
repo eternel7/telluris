@@ -1637,26 +1637,17 @@ async def apprendre_sort(
 	sort = sorts_util.normaliser_sort(get_doc(body.get("sort_id")))
 	if not sort:
 		raise HTTPException(status_code=422, detail="Sort introuvable")
-	if sort["id"] in (character.get("sorts_connus") or []):
-		raise HTTPException(status_code=422, detail="Sort déjà connu")
+	if sort["enseignement"]:
+		raise HTTPException(status_code=403, detail="Ce sort ne s'enseigne que de maître à élève")
 	vocations = get_doc("rules:vocations")
-	ecole = sorts_util.magie_de_sort(sort, vocations)
-	niveau = sorts_util.niveau_ecole(character, ecole, vocations)
-	if niveau is None or niveau < sort["niveau"]:
-		raise HTTPException(status_code=422, detail="École de magie non pratiquée ou niveau insuffisant")
-	if sorts_util.apprentissage_exclu(sort, character.get("voc"), vocations):
-		raise HTTPException(status_code=422, detail="Votre vocation ne pratique pas ce type de sort")
+	refus = sorts_util.verifier_apprentissage(character, sort, vocations)
+	if refus:
+		raise HTTPException(status_code=refus[0], detail=refus[1])
 	if sorts_util.grimoire_pour(character, sort["id"], resolve_item_ref,
 								proprietes.refs_bibliotheque(character, get_doc)) is None:
 		raise HTTPException(status_code=409, detail="Grimoire requis pour apprendre ce sort")
 
-	cout = sorts_util.cout_apprentissage(sort)
-	attribute_points = character.get("attribute_points", 0)
-	if attribute_points < cout:
-		raise HTTPException(status_code=422, detail=f"Points insuffisants (besoin {cout}, disponible {attribute_points})")
-
-	character["attribute_points"] = attribute_points - cout
-	character.setdefault("sorts_connus", []).append(sort["id"])
+	sorts_util.appliquer_apprentissage(character, sort)
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 

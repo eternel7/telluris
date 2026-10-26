@@ -39,6 +39,7 @@ from utils import expedition
 from utils import traversee as traversee_util
 from utils import portails
 from utils import fiche as fiche_util
+from utils import sorts as sorts_util
 from utils.combat import (
 	instantiate_monsters, build_monster_snapshot, create_combat_doc,
 	resolve_first_turns, finalize_combat,
@@ -344,6 +345,14 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		if cout.get("item"):
 			nom_cout = _nom_item(cout["item"])
 			placeholders["cristal"] = nom_cout[:1].lower() + nom_cout[1:]
+	# ENSEIGNEMENT d'un MAÎTRE (`services.enseignement.sort`) : ce que le maître peut
+	# transmettre à CE personnage — l'épreuve, elle, est une condition `quete_reussie` écrite.
+	conf_e = (pnj_doc.get("services") or {}).get("enseignement")
+	if conf_e:
+		sort_e = sorts_util.normaliser_sort(get_doc(conf_e.get("sort")))
+		flags.update(sorts_util.etat_enseignement(character, sort_e, get_doc("rules:vocations")))
+		placeholders["sort"] = (sort_e or {}).get("nom", "—")
+		placeholders["cout"] = sorts_util.cout_apprentissage(sort_e) if sort_e else 0
 	return pnj.contexte_dialogue(character, pnj_doc, _rel, flags, placeholders,
 								 quetes.quetes_reussies(character),
 								 quetes.quetes_actives_ids(character))
@@ -1077,6 +1086,10 @@ async def pnj_dialogue_choix(
 		contexte["placeholders"].update(dits)
 	elif action.get("service") == "traversee":
 		suivant = _resoudre_traversee(character, pnj_doc, lieu_doc, action.get("op"), reponse)
+	elif action.get("service") == "enseignement":
+		suivant = _resoudre_enseignement(character, pnj_doc, action.get("op"), reponse)
+		# Le sort est appris : refiltrer les choix sur les nouveaux flags (`enseignement_connu`).
+		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 	elif action.get("service") == "portail":
 		contexte["placeholders"]["destination"] = "—"
 		suivant = _resoudre_portail(character, pnj_doc, lieu_doc, action.get("op"),
@@ -1139,6 +1152,31 @@ async def pnj_dialogue_choix(
 	if "fiche_actives" in reponse or "inventaire_payload" in reponse:
 		reponse["fiche"] = fiche_util.fiche_resync(character, get_doc, find_docs)
 	return reponse
+
+
+def _resoudre_enseignement(character: dict, pnj_doc: dict, op: str, reponse: dict) -> str | None:
+	"""Service `enseignement` : un MAÎTRE transmet `services.enseignement.sort`, seule voie
+	d'apprentissage d'un sort `enseignement` (aucun grimoire). MÊMES règles que
+	`/api/apprendre_sort` (`sorts.verifier_apprentissage`), grimoire excepté ; un sort qui en
+	`ameliore` un autre le remplace. Nœuds de résultat : `appris` / `refus`."""
+	conf = (pnj_doc.get("services") or {}).get("enseignement") or {}
+	noeuds = conf.get("noeuds") or {}
+	if op != "apprendre":
+		raise HTTPException(status_code=422, detail="Action d'enseignement inconnue.")
+	sort = sorts_util.normaliser_sort(get_doc(conf.get("sort")))
+	if not sort:
+		raise HTTPException(status_code=422, detail="Sort introuvable")
+	refus = sorts_util.verifier_apprentissage(character, sort, get_doc("rules:vocations"))
+	if refus:
+		reponse["enseignement"] = {"refus": refus[1]}
+		return noeuds.get("refus")
+	sorts_util.appliquer_apprentissage(character, sort)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	reponse["enseignement"] = {"appris": {"nom": sort["nom"], "icon": sort["icon"]}}
+	# Onglet ⚡, points et barre d'action (le sort remplacé y change de case) — Convention §10.
+	reponse["fiche"] = fiche_util.fiche_resync(character, get_doc, find_docs)
+	return noeuds.get("appris")
 
 
 def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,

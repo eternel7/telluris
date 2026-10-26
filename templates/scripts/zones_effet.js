@@ -20,7 +20,7 @@ const ZONE_ANGLE_DEFAUT = 90;
 // Mêmes bornes que le serveur : un doc déjà borné à l'écriture repasse inchangé, et un
 // payload bricolé ne fait pas tourner la boucle d'aperçu sur la moitié de la carte.
 const ZONE_RAYON_MAX = 8;
-const ZONE_LONGUEUR_MAX = 12;
+const ZONE_LONGUEUR_MAX = 20;
 const ZONE_LARGEUR_MAX = 12;
 const ZONE_DECALAGE_MAX = 12;
 
@@ -63,6 +63,8 @@ function normaliserZone(raw) {
 		largeur: _zoneBorne(raw.largeur, 1, 1, ZONE_LARGEUR_MAX),
 		decalage: _zoneBorne(raw.decalage, 0, 0, ZONE_DECALAGE_MAX),
 		angle: _zoneBorne(raw.angle, ZONE_ANGLE_DEFAUT, 1, 360),
+		perce: !!raw.perce,
+		tir_ami: !!raw.tir_ami,
 	};
 }
 
@@ -189,11 +191,13 @@ function ligneDeVueZone(cells, x0, y0, x1, y1) {
 // `dims` (facultatif) écarte en plus ce qui sort de la carte — l'aperçu n'a rien à peindre
 // hors du décor. Miroir de `zones_effet.cases_effet`, dont les deux prédicats sont ici
 // figés sur la grille de combat (le serveur, lui, les reçoit injectés).
+// Zone `perce` : ni terrain ni ligne de vue (le rayon transperce), seules les bornes de carte.
 function casesEffet(zone, lanceur, cible, facing, cells, dims) {
 	const ancre = zoneAncre(zone, lanceur, cible);
 	return casesZone(zone, lanceur, cible, facing).filter(c => {
 		const x = c[0], y = c[1];
 		if (dims && (x < 0 || y < 0 || x >= dims.x || y >= dims.y)) return false;
+		if (zone && zone.perce) return true;
 		if (!caseTransparenteZone(cells, x, y)) return false;
 		if (x === ancre[0] && y === ancre[1]) return true;
 		return ligneDeVueZone(cells, ancre[0], ancre[1], x, y);
@@ -233,6 +237,7 @@ function libelleZone(zone, cibleCapa) {
 		return `${icone} ${forme} rayon ${zone.rayon} ${surSoi ? 'autour de soi' : 'sur la cible'}`;
 	}
 	const depart = surSoi ? 'devant soi' : 'depuis la cible';
-	if (zone.forme === 'rectangle') return `${icone} ${zone.longueur}×${zone.largeur} cases ${depart}`;
-	return `${icone} cône ${zone.longueur} cases (${zone.angle}°) ${depart}`;
+	const suite = (zone.perce ? ', perce les murs' : '') + (zone.tir_ami ? ', ⚠ touche les alliés' : '');
+	if (zone.forme === 'rectangle') return `${icone} ${zone.longueur}×${zone.largeur} cases ${depart}${suite}`;
+	return `${icone} cône ${zone.longueur} cases (${zone.angle}°) ${depart}${suite}`;
 }
