@@ -38,23 +38,29 @@ def ferme_dans_s(now: int) -> int:
 	return (tranche_de(now) + 1) * fenetre_secondes() - int(now)
 
 
+def _vers(nodes: list, lieu: str) -> list:
+	"""Où mène d'habitude la porte posée en `lieu` : les AUTRES bouts de son lien."""
+	return [n["lieu"] for n in nodes if n.get("lieu") and n["lieu"] != lieu]
+
+
 def arrivees_candidates(connexions: list, ancrage: str) -> list:
 	"""Chaque nœud de chaque lien portail OUVERT est un point d'arrivée possible :
-	`[{cle, lien, lieu, pos}]`, trié par `cle` (le tirage en dépend : un ordre stable est
+	`[{cle, lien, lieu, pos, vers}]` (`vers` = l'autre bout du lien), trié par `cle` (le tirage en dépend : un ordre stable est
 	ce qui rend la graine reproductible). Les nœuds posés sur l'ancrage sont écartés."""
 	vues = {}
 	for conn in connexions or []:
 		meta = conn.get("metadata") or {}
 		if meta.get("type") != TYPE_PORTAIL or meta.get("status", "ouvert") != "ouvert":
 			continue
-		for node in conn.get("nodes") or []:
+		nodes = conn.get("nodes") or []
+		for node in nodes:
 			lieu = node.get("lieu")
 			if not lieu or lieu == ancrage:
 				continue
 			pos = node.get("pos") or [0, 0]
 			cle = f"{conn.get('_id')}|{lieu}"
 			vues.setdefault(cle, {"cle": cle, "lien": conn.get("_id"), "lieu": lieu,
-								  "pos": [int(pos[0]), int(pos[1])]})
+								  "pos": [int(pos[0]), int(pos[1])], "vers": _vers(nodes, lieu)})
 	return [vues[c] for c in sorted(vues)]
 
 
@@ -78,7 +84,7 @@ def arrivees_fixes(connexions: list, ancrage: str) -> list:
 			pos = node.get("pos") or [0, 0]
 			cle = f"{conn.get('_id')}|{lieu}"
 			vues.setdefault(cle, {"cle": cle, "lien": conn.get("_id"), "lieu": lieu,
-								  "pos": [int(pos[0]), int(pos[1])]})
+								  "pos": [int(pos[0]), int(pos[1])], "vers": _vers(nodes, lieu)})
 	return [vues[c] for c in sorted(vues)]
 
 
@@ -117,3 +123,12 @@ def texte_duree(secondes: int) -> str:
 	if not m:
 		return f"{s} s"
 	return f"{m} min {s:02d}" if s else f"{m} min"
+
+
+def libelles_distincts(bases: list, vers: list) -> list:
+	"""Un libellé par seuil : `bases[i]` (le lieu d'arrivée), suivi de « · porte vers
+	`vers[i]` » (là où mène d'habitude cette porte) quand un AUTRE seuil de la liste porte le
+	même libellé — plusieurs portes d'un même lieu ne se confondent plus, les autres restent
+	courts."""
+	return [f"{b} · porte vers {v}" if v and bases.count(b) > 1 else b
+			for b, v in zip(bases, vers)]

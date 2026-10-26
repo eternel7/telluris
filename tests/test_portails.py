@@ -46,6 +46,24 @@ def test_chaque_noeud_d_un_portail_ouvert_est_une_arrivee_sauf_l_ancrage():
 	assert alex["pos"] == [28, 33] and alex["lien"] == "link:petra_khazneh_to_alexandrie"
 
 
+def test_chaque_arrivee_sait_ou_mene_sa_porte():
+	alex = next(a for a in ARRIVEES if a["lieu"] == "lieu:alexandrie")
+	assert alex["vers"] == ["lieu:petra_khazneh"]
+
+
+def test_deux_portes_d_un_meme_lieu_ont_des_libelles_distincts():
+	"""Seuls les libellés en double reçoivent la destination habituelle de leur porte."""
+	assert portails.libelles_distincts(["Rome", "Rome", "Bruges"], ["Petra", "Aix", "Gênes"]) == [
+		"Rome · porte vers Petra", "Rome · porte vers Aix", "Bruges"]
+
+
+def test_le_tableau_distingue_les_portes_d_un_meme_lieu(rp, monkeypatch):
+	liens = [_lien("link:rome_to_petra", ("lieu:rome", (1, 1)), ("lieu:petra", (0, 0))),
+			 _lien("link:rome_to_aix", ("lieu:rome", (2, 2)), ("lieu:aix", (0, 0)))]
+	arrivees = [a for a in portails.arrivees_candidates(liens, ANCRAGE) if a["lieu"] == "lieu:rome"]
+	assert rp._labels_arrivees(arrivees) == ["rome · porte vers aix", "rome · porte vers petra"]
+
+
 def test_un_portail_cree_plus_tard_entre_au_tableau_de_lui_meme():
 	plus = LIENS + [_lien("link:rome_to_bruges", ("lieu:rome", (1, 2)), ("lieu:bruges", (3, 4)))]
 	assert len(portails.arrivees_candidates(plus, ANCRAGE)) == len(ARRIVEES) + 2
@@ -187,7 +205,7 @@ def _contexte_seuils(rp, cristal=True):
 
 
 def _texte_seuils(rp, now):
-	suivants = ", ".join(rp._label_arrivee(a) for a in portails.seuils_suivants(ARRIVEES, ANCRAGE, now))
+	suivants = ", ".join(rp._labels_arrivees(portails.seuils_suivants(ARRIVEES, ANCRAGE, now)))
 	return f"Encore {portails.texte_duree(portails.ferme_dans_s(now))}. Ensuite {suivants}."
 
 
