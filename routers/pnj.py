@@ -714,15 +714,22 @@ def _choix_portail(character: dict, pnj_doc: dict, noeud: dict | None) -> None:
 		ouverts = _arrivees_portail(conf)
 	else:
 		ouverts = portails.seuils_ouverts(_arrivees_portail(conf), conf.get("ancrage"), quetes.now_epoch())
-	generes = [{
-		"id": gabarit,
-		"label": f"🌀 {_label_arrivee(a)}" + (
-			"" if conf.get("fixe") else f" — se referme dans {portails.texte_duree(a['ferme_dans_s'])}"),
-		"action": True,
-		"marque": None,
-		"saisie": False,
-		"rejouer": {"noeud": noeud["id"], "saisie": a["cle"]},
-	} for a in ouverts]
+	generes = []
+	for a in ouverts:
+		base = f"🌀 {_label_arrivee(a)}"
+		choix = {
+			"id": gabarit,
+			"label": base + (
+				"" if conf.get("fixe") else f" — se referme dans {portails.texte_duree(a['ferme_dans_s'])}"),
+			"action": True,
+			"marque": None,
+			"saisie": False,
+			"rejouer": {"noeud": noeud["id"], "saisie": a["cle"]},
+		}
+		# Compte à rebours du libellé, tenu à la seconde par le client (`_pnjReboursTick`).
+		if not conf.get("fixe"):
+			choix["rebours"] = {"base": base, "ferme_dans_s": a["ferme_dans_s"]}
+		generes.append(choix)
 	noeud["choix"][idx:idx + 1] = generes
 
 

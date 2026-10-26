@@ -162,6 +162,16 @@ def test_le_gabarit_devient_une_replique_par_seuil_ouvert(rp):
 	assert noeud["choix"][-1]["id"] == "accueil"
 
 
+def test_chaque_seuil_porte_son_compte_a_rebours(rp):
+	"""Le client recompte le libellé à la seconde depuis `rebours` : base sans durée + secondes."""
+	noeud = {"id": "seuils", "choix": [{"id": "franchir", "label": "Franchir"}]}
+	rp._choix_portail({}, PNJ, noeud)
+	ouverts = portails.seuils_ouverts(ARRIVEES, ANCRAGE, rp._t0)
+	assert [c["rebours"]["ferme_dans_s"] for c in noeud["choix"]] == [s["ferme_dans_s"] for s in ouverts]
+	for c in noeud["choix"]:
+		assert c["label"] == c["rebours"]["base"] + " — se referme dans " + portails.texte_duree(c["rebours"]["ferme_dans_s"])
+
+
 # ── Tableau FIXE (`fixe`, Chapelle Palatine d'Aix) ────────────────────────────
 
 CHAPELLE = "lieu:chapelle_palatine"
@@ -191,6 +201,7 @@ def test_tableau_fixe_une_replique_par_porte_sans_fermeture(rp_fixe):
 	noeud = {"id": "seuils", "choix": [{"id": "franchir", "label": "Franchir"}, {"id": "accueil", "label": "Non"}]}
 	rp_fixe._choix_portail({}, PNJ_FIXE, noeud)
 	assert [c["label"] for c in noeud["choix"][:-1]] == ["🌀 baiame", "🌀 senso_ji"]
+	assert all("rebours" not in c for c in noeud["choix"])
 
 
 def test_tableau_fixe_franchir_sans_cristal_a_n_importe_quelle_heure(rp_fixe, monkeypatch):
