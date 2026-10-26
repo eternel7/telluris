@@ -698,32 +698,68 @@ def _label_arrivee(arrivee: dict) -> str:
 	return label
 
 
+def _porte_gabarit(pnj_doc: dict, noeud_id: str, gabarit: str) -> bool:
+	"""Le nœud `noeud_id` de l'arbre porte-t-il le choix gabarit du portail (condition ignorée) ?"""
+	noeud = ((((pnj_doc or {}).get("dialogue") or {}).get("noeuds") or {}).get(noeud_id)) or {}
+	return any(c.get("id") == gabarit for c in noeud.get("choix") or [])
+
+
 def _choix_portail(character: dict, pnj_doc: dict, noeud: dict | None) -> None:
 	"""Remplace, dans le nœud RENDU, le choix gabarit `services.portail.choix` par une réplique
 	par seuil ouvert (« Alexandrie — se referme dans 1 min 40 »). Chacune REJOUE ce choix avec la
 	clé du seuil en `saisie` (même mécanique que les suggestions du service `direction`) : le
-	serveur revalide le choix, puis le seuil, au franchissement. Mute `noeud` en place."""
+	serveur revalide le choix, puis le seuil, au franchissement. Mute `noeud` en place.
+	Le nœud des seuils (celui qui porte le gabarit DANS L'ARBRE, choix visible ou non — sans
+	cristal, il est masqué) reçoit `seuils_dans_s` : à cette échéance, le client le redemande
+	(`/api/pnj/portail/seuils`), texte d'Aénor compris ({fermeture}, {seuils_suivants})."""
 	conf = (pnj_doc.get("services") or {}).get("portail")
 	if not conf or not noeud:
 		return
 	gabarit = conf.get("choix", "franchir")
+	now = quetes.now_epoch()
+	if not conf.get("fixe") and _porte_gabarit(pnj_doc, noeud["id"], gabarit):
+		noeud["seuils_dans_s"] = portails.ferme_dans_s(now)
 	idx = next((i for i, c in enumerate(noeud.get("choix") or []) if c.get("id") == gabarit), None)
 	if idx is None:
 		return
 	if conf.get("fixe"):
 		ouverts = _arrivees_portail(conf)
 	else:
-		ouverts = portails.seuils_ouverts(_arrivees_portail(conf), conf.get("ancrage"), quetes.now_epoch())
-	generes = [{
-		"id": gabarit,
-		"label": f"🌀 {_label_arrivee(a)}" + (
-			"" if conf.get("fixe") else f" — se referme dans {portails.texte_duree(a['ferme_dans_s'])}"),
-		"action": True,
-		"marque": None,
-		"saisie": False,
-		"rejouer": {"noeud": noeud["id"], "saisie": a["cle"]},
-	} for a in ouverts]
+		ouverts = portails.seuils_ouverts(_arrivees_portail(conf), conf.get("ancrage"), now)
+	generes = []
+	for a in ouverts:
+		base = f"🌀 {_label_arrivee(a)}"
+		choix = {
+			"id": gabarit,
+			"label": base + (
+				"" if conf.get("fixe") else f" — se referme dans {portails.texte_duree(a['ferme_dans_s'])}"),
+			"action": True,
+			"marque": None,
+			"saisie": False,
+			"rejouer": {"noeud": noeud["id"], "saisie": a["cle"]},
+		}
+		# Compte à rebours du libellé, tenu à la seconde par le client (`_pnjReboursTick`).
+		if not conf.get("fixe"):
+			choix["rebours"] = {"base": base, "ferme_dans_s": a["ferme_dans_s"]}
+		generes.append(choix)
 	noeud["choix"][idx:idx + 1] = generes
+
+
+def _noeud_seuils(character: dict, pnj_doc: dict, lieu_doc: dict, contexte: dict,
+				  noeud_id: str) -> dict | None:
+	"""Le nœud `noeud_id` re-rendu sur la tranche COURANTE (texte et {fermeture} compris), pour
+	le client dont le compte à rebours vient de tomber à zéro. Lecture seule : aucun effet de
+	nœud, aucun délai armé. N'est servi QUE le nœud qui porte le choix gabarit du portail dans
+	l'arbre — jamais un nœud arbitraire. Sa condition n'est PAS exigée : sans cristal, le choix
+	est masqué mais le texte d'Aénor doit tourner comme le tableau. None sinon."""
+	conf = (pnj_doc.get("services") or {}).get("portail")
+	if not conf or conf.get("fixe") or conf.get("ancrage") != (lieu_doc or {}).get("_id"):
+		return None
+	if not _porte_gabarit(pnj_doc, noeud_id, conf.get("choix", "franchir")):
+		return None
+	noeud = pnj.noeud_client(pnj_doc, noeud_id, contexte, pnj.soin_effectif(pnj_doc, contexte))
+	_choix_portail(character, pnj_doc, noeud)
+	return noeud
 
 
 def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, saisie,
@@ -868,6 +904,24 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)],
 	reponse["pnj_marque"] = pnj.marque_noeud(pnj_doc, depart, contexte)
 	reponse["lieux_marques"] = indicateurs.marques_lieux(character)
 	return reponse
+
+
+@pnj_router.get("/pnj/portail/seuils")
+async def pnj_portail_seuils(current_user: Annotated[dict, Depends(get_current_user)],
+							 noeud: str, pnj_id: str | None = None):
+	"""Tableau des seuils RAFRAÎCHI quand la tranche tourne (compte à rebours client à zéro) :
+	le nœud `noeud` re-rendu, sans aucun effet (cf. `_noeud_seuils`). 422 hors du nœud des seuils."""
+	if not current_user:
+		raise HTTPException(status_code=400, detail="Invalid session credentials")
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=406, detail="Aucun personnage sélectionné")
+	entree, pnj_doc, lieu_doc = _pnj_du_lieu(character, pnj_id)
+	rendu = _noeud_seuils(character, pnj_doc, lieu_doc,
+						  _contexte(character, pnj_doc, lieu_doc, entree), noeud)
+	if not rendu:
+		raise HTTPException(status_code=422, detail="Aucun tableau de seuils ici.")
+	return {"noeud": rendu}
 
 
 @pnj_router.post("/pnj/dialogue/choix")

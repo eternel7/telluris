@@ -33,6 +33,11 @@ def tranche_de(now: int) -> int:
 	return int(now) // fenetre_secondes()
 
 
+def ferme_dans_s(now: int) -> int:
+	"""Secondes avant que la tranche courante ne tourne."""
+	return (tranche_de(now) + 1) * fenetre_secondes() - int(now)
+
+
 def arrivees_candidates(connexions: list, ancrage: str) -> list:
 	"""Chaque nœud de chaque lien portail OUVERT est un point d'arrivée possible :
 	`[{cle, lien, lieu, pos}]`, trié par `cle` (le tirage en dépend : un ordre stable est
@@ -85,9 +90,8 @@ def _tirage(arrivees: list, ancrage: str, tranche: int) -> list:
 
 def seuils_ouverts(arrivees: list, ancrage: str, now: int) -> list:
 	"""Les seuils de la tranche courante, chacun avec `ferme_dans_s` (secondes restantes)."""
-	tranche = tranche_de(now)
-	fin = (tranche + 1) * fenetre_secondes()
-	return [dict(a, ferme_dans_s=fin - int(now)) for a in _tirage(arrivees, ancrage, tranche)]
+	reste = ferme_dans_s(now)
+	return [dict(a, ferme_dans_s=reste) for a in _tirage(arrivees, ancrage, tranche_de(now))]
 
 
 def seuils_suivants(arrivees: list, ancrage: str, now: int) -> list:

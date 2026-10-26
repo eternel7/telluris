@@ -11565,7 +11565,71 @@ function _relationGainTexte(g) {
 	return '🤝 ' + (g.nom || 'Relation') + ' — relation ' + signe + ' (' + g.valeur + ')';
 }
 
+// Seuils du portail (`rebours` d'un choix, cf. routers/pnj._choix_portail) : le libellé
+// « — se referme dans 1 min 40 » est recompté chaque seconde contre une échéance prise à la
+// réception. L'échéance du NŒUD (`seuils_dans_s`) pilote la redemande, pas les boutons : sans
+// cristal, le choix « franchir » est masqué et aucun bouton ne décompte, mais le texte d'Aénor
+// ({fermeture}, {seuils_suivants}) doit tourner aussi. À zéro, les boutons s'éteignent et le
+// nœud entier est redemandé (`/api/pnj/portail/seuils`, lecture seule).
+// Miroir de `portails.texte_duree`.
+let _pnjReboursMinuteur = null;
+let _pnjSeuilsEcheance = null;
+
+function _texteDuree(secondes) {
+	const t = Math.max(0, Math.floor(secondes));
+	const m = Math.floor(t / 60), s = t % 60;
+	if (!m) return s + ' s';
+	return s ? m + ' min ' + String(s).padStart(2, '0') : m + ' min';
+}
+
+function _pnjReboursArreter() {
+	if (_pnjReboursMinuteur) clearInterval(_pnjReboursMinuteur);
+	_pnjReboursMinuteur = null;
+	_pnjSeuilsEcheance = null;
+}
+
+function _pnjReboursTick() {
+	let actifs = 0;
+	document.querySelectorAll('#pnj-choix button[data-echeance]').forEach(btn => {
+		const c = _pnjChoix[+btn.dataset.index];
+		if (!c || !c.rebours) return;
+		const reste = Math.ceil((+btn.dataset.echeance - Date.now()) / 1000);
+		if (reste > 0) {
+			btn.textContent = c.rebours.base + ' — se referme dans ' + _texteDuree(reste);
+			actifs++;
+		} else {
+			btn.textContent = c.rebours.base + ' — refermé';
+			btn.disabled = true;
+			btn.removeAttribute('data-echeance');
+		}
+	});
+	if (_pnjSeuilsEcheance !== null && Date.now() >= _pnjSeuilsEcheance) {
+		_pnjReboursArreter();
+		_pnjSeuilsRafraichir();
+	} else if (!actifs && _pnjSeuilsEcheance === null) {
+		_pnjReboursArreter();
+	}
+}
+
+// ⚠️ La réponse n'est appliquée que si le joueur est TOUJOURS sur ce nœud, avec ce PNJ, panneau
+// ouvert : entre-temps il a pu cliquer ailleurs ou prendre congé. En échec, le nœud reste en
+// l'état, boutons éteints — reparler à la commanderesse redonne le tableau.
+async function _pnjSeuilsRafraichir() {
+	const noeud = _pnjNoeudCourant, pnjId = _pnjCourant;
+	if (!noeud) return;
+	try {
+		const res = await fetch('api/pnj/portail/seuils?noeud=' + encodeURIComponent(noeud)
+			+ (pnjId ? '&pnj_id=' + encodeURIComponent(pnjId) : ''));
+		if (!res.ok) return;
+		const data = await res.json();
+		if (_pnjNoeudCourant !== noeud || _pnjCourant !== pnjId
+			|| document.getElementById('pnj-panel').classList.contains('panel-hidden')) return;
+		renderPnjNoeud(data.noeud);
+	} catch(err) { console.error('Erreur rafraîchissement des seuils', err); }
+}
+
 function renderPnjNoeud(noeud) {
+	_pnjReboursArreter();
 	_pnjNoeudCourant = noeud ? noeud.id : null;
 	const texte = document.getElementById('pnj-noeud-texte');
 	const liste = document.getElementById('pnj-choix');
@@ -11579,14 +11643,21 @@ function renderPnjNoeud(noeud) {
 	// Réplique `rejouer` (nom suggéré par le service direction) : renvoie un AUTRE nœud/choix
 	// avec une saisie toute faite ; lue par index dans `_pnjChoix`, jamais dans l'onclick.
 	_pnjChoix = noeud.choix || [];
+	const recu = Date.now();
 	liste.innerHTML = _pnjChoix.map((c, i) => c.rejouer
-		? `<li><button class="sub-loc-btn" onclick="choisirPnjRejouer(${i})">${escapeHtml(c.label)}</button></li>`
+		? `<li><button class="sub-loc-btn" data-index="${i}"${c.rebours
+			? ` data-echeance="${recu + c.rebours.ferme_dans_s * 1000}"` : ''} onclick="choisirPnjRejouer(${i})">${escapeHtml(c.label)}</button></li>`
 		: c.saisie
 		? `<li class="pnj-saisie"><input type="text" id="pnj-saisie-${c.id}" maxlength="80"
 				placeholder="Nom du lieu…" onkeydown="if(event.key==='Enter'){choisirPnjSaisie('${c.id}');}">
 			<button class="sub-loc-btn" onclick="choisirPnjSaisie('${c.id}')">${c.label}</button></li>`
 		: `<li><button class="sub-loc-btn" onclick="choisirPnj('${c.id}')">${_marquePastille(c.marque)}${c.action ? '✨ ' : ''}${c.label}</button></li>`
 	).join('') || '<li><button class="sub-loc-btn" onclick="closePnjPanel()">✕ Prendre congé</button></li>';
+	if (typeof noeud.seuils_dans_s === 'number') _pnjSeuilsEcheance = recu + noeud.seuils_dans_s * 1000;
+	if (_pnjSeuilsEcheance !== null || liste.querySelector('button[data-echeance]')) {
+		_pnjReboursMinuteur = setInterval(_pnjReboursTick, 1000);
+		_pnjReboursTick();
+	}
 	const champ = liste.querySelector('.pnj-saisie input');
 	if (champ) champ.focus();
 }
@@ -11635,6 +11706,7 @@ async function openPnjDialogue(btn) {
 }
 
 function closePnjPanel() {
+	_pnjReboursArreter();
 	document.getElementById('game-container').classList.remove('panel-hidden');
 	document.getElementById('pnj-panel').classList.add('panel-hidden');
 	window.scrollTo({ top: 0, behavior: 'smooth' });
