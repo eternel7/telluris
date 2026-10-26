@@ -136,7 +136,7 @@
     "nom": "Dame Geneviève",
     "race": "humain",
     "vocation": "paladin",
-    "portrait": "race_paladin_f_humain01.jpg",
+    "portrait": "paladin_humain_f_montmartre01.jpg",
     "description": "Maîtresse de guet du Sacré-Cœur. Les vieux de Lutecia disent qu'une Geneviève a déjà gardé la ville quand tout le monde fuyait ; elle répond que c'était une autre, et qu'on raconte n'importe quoi.",
     "services": {
       "apport": {
@@ -469,7 +469,7 @@
       {
         "character": "pnj:genevieve_du_sacre_coeur",
         "nom": "Dame Geneviève",
-        "portrait": "race_paladin_f_humain01.jpg",
+        "portrait": "paladin_humain_f_montmartre01.jpg",
         "probabilite": 1,
         "description": "Une paladine aux cheveux gris coupés court, descendue des terrasses de la basilique, qui regarde le ciel plus souvent que les convois."
       }
@@ -481,7 +481,7 @@
     "nom": "Sœur Marguerite",
     "race": "elfe",
     "vocation": "paladin",
-    "portrait": "paladin_elfe_f01.jpg",
+    "portrait": "paladin_elfe_f_bruges01.jpg",
     "description": "Sœur de Bataille du Béguinage de Bruges, maîtresse de tir du Beffroi. Elle a été sœur du Calvaire avant de passer à l'autre ordre, et soigne encore ceux qu'elle a dû toucher avec le reste.",
     "services": {
       "apport": {
@@ -5957,7 +5957,7 @@
       {
         "character": "pnj:soeur_marguerite_du_beffroi",
         "nom": "Sœur Marguerite",
-        "portrait": "paladin_elfe_f01.jpg",
+        "portrait": "paladin_elfe_f_bruges01.jpg",
         "probabilite": 1,
         "description": "Une sœur de Bataille du Béguinage, en manteau gris, descendue du Beffroi. Elle compte les coups de cloche sans y penser."
       }
@@ -5969,7 +5969,7 @@
     "nom": "Turpin",
     "race": "ogre",
     "vocation": "paladin",
-    "portrait": "paladin_ogre_m_rhemi01.png",
+    "portrait": "paladin_ogre_m_aix01.jpg",
     "description": "Maître de guet du Granusturm. Il se dit l'un des pairs de la cour de Charlemagne ; les chroniqueurs d'Aix ne sont pas d'accord entre eux sur le nombre de Turpin qu'il y a eu.",
     "services": {
       "apport": {
@@ -11375,7 +11375,7 @@
       {
         "character": "pnj:turpin_du_granusturm",
         "nom": "Turpin",
-        "portrait": "paladin_ogre_m_rhemi01.png",
+        "portrait": "paladin_ogre_m_aix01.jpg",
         "probabilite": 1,
         "description": "Un paladin ogre d'un âge indéfinissable, descendu du Granusturm, le manteau rapiécé aux épaules."
       }
@@ -11387,7 +11387,7 @@
     "nom": "Auðr",
     "race": "elfe",
     "vocation": "paladin",
-    "portrait": "paladin_elfe_f02.jpg",
+    "portrait": "paladin_elfe_f_reykjavik01.jpg",
     "description": "Paladine de Hallgrímskirkja, sur les voies terrestres de l'Islande. Les Islandais lui prêtent le nom d'une fondatrice venue par la mer ; elle ne dit ni oui ni non.",
     "services": {
       "apport": {
@@ -16493,7 +16493,7 @@
       {
         "character": "pnj:audr_de_hallgrimskirkja",
         "nom": "Auðr",
-        "portrait": "paladin_elfe_f02.jpg",
+        "portrait": "paladin_elfe_f_reykjavik01.jpg",
         "probabilite": 1,
         "description": "Une paladine elfe au manteau doublé de fourrure, descendue de Hallgrímskirkja, qui garde les yeux sur les montagnes."
       }
