@@ -41,6 +41,13 @@ def vol_actif(porteur: dict | None) -> bool:
 	return any((e or {}).get("vol") for e in (porteur or {}).get("effets_actifs") or [])
 
 
+def abattu(porteur: dict | None) -> bool:
+	"""Le porteur est-il CLOUÉ AU SOL ? Une entrée vivante portant `abattu` (posée par un
+	effet `abattre` : Harpon arcanique, Cisaille des vents, Liane d'abattage). Il ne vole
+	plus, ailes d'espèce ou vol magique : l'entrée l'emporte sur les deux (`combat._can_fly`)."""
+	return any((e or {}).get("abattu") for e in (porteur or {}).get("effets_actifs") or [])
+
+
 def case_la_plus_proche(x: int, y: int, largeur: int, hauteur: int, accepte) -> tuple | None:
 	"""La case (cx, cy) acceptée par `accepte(cx, cy)` la plus proche de (x, y), hors (x, y)
 	elle-même ; None si aucune.

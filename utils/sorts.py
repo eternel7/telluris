@@ -415,6 +415,10 @@ def _bonus_dict(raw) -> dict:
 		# VOL MAGIQUE (1) : part à DURÉE (`part_durative`) — le porteur lévite tant que l'entrée
 		# vit : falaises en combat, eau/falaise/terrain difficile en exploration (utils/vol.py).
 		"vol": min(1, _as_int(raw.get("vol"))),
+		# ABATTRE (1) : part à DURÉE posée sur un MONSTRE touché — il ne vole plus tant que
+		# l'entrée vit (ailes ou vol magique : `vol.abattu`, lu par combat `_can_fly`), et
+		# tombe aussitôt s'il surplombe une case qu'on ne foule pas (`combat._atterrir`).
+		"abattre": min(1, _as_int(raw.get("abattre"))),
 		# Renforts d'un sort qui ne pose pas d'`effets` : ils ne valent QUE comme bonus de
 		# composant, appliqués au doc par `doc_effectif` (cf. INVOCATION_* / MAINTIEN_*).
 		"invocation_duree": _as_int(raw.get("invocation_duree")),
@@ -714,6 +718,7 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 		"provocation": _as_int(base.get("provocation")),
 		"echange": _as_int(base.get("echange")),
 		"vol": min(1, _as_int(base.get("vol"))),
+		"abattre": min(1, _as_int(base.get("abattre"))),
 	}
 	formules = _fusionner_formules(base.get("formules"), {})
 	for bonus in bonus_list or []:
@@ -738,6 +743,7 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 			out[key] += _as_signed_int(bonus.get(key))
 		out["echange"] = max(out["echange"], min(1, _as_int(bonus.get("echange"))))
 		out["vol"] = max(out["vol"], min(1, _as_int(bonus.get("vol"))))
+		out["abattre"] = max(out["abattre"], min(1, _as_int(bonus.get("abattre"))))
 		for k, delta in (bonus.get("buffs") or {}).items():
 			if str(k) == "V":
 				continue
@@ -820,7 +826,7 @@ def doc_effectif(sort: dict, effets: dict) -> dict:
 
 def part_durative(effets: dict) -> bool:
 	"""Vrai si `effets` porte quelque chose à empiler sur la durée : une `duree` > 0 ET
-	au moins un bénéfice prolongé (buffs de caract, régén, esquive, provocation, vol).
+	au moins un bénéfice prolongé (buffs de caract, régén, esquive, provocation, vol, abattre).
 
 	SOURCE UNIQUE de ce test — utilisée par les éligibilités combat/exploration des sorts,
 	des compétences et des consommables, et par les deux `empiler_effet_*`. Un critère qui
@@ -831,7 +837,8 @@ def part_durative(effets: dict) -> bool:
 	return _as_int(eff.get("duree")) > 0 and bool(
 		eff.get("buffs") or _as_signed_int(eff.get("regen_pv"))
 		or _as_signed_int(eff.get("regen_pm")) or _as_int(eff.get("esquive"))
-		or _as_int(eff.get("provocation")) or _as_int(eff.get("vol")))
+		or _as_int(eff.get("provocation")) or _as_int(eff.get("vol"))
+		or _as_int(eff.get("abattre")))
 
 
 # ── Éligibilité d'une CAPACITÉ — source unique des sorts ET des compétences ──────

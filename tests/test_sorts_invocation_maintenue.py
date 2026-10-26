@@ -75,7 +75,7 @@ def test_aucune_espece_n_est_deja_invoquee_par_un_autre_sort(construits):
 		espece = doc["invocation"]["espece"]
 		autres = [s["_id"] for s in tous.values()
 				  if s.get("type") == "sort" and (s.get("invocation") or {}).get("espece") == espece
-				  and s["_id"] not in ids]
+				  and s["_id"] not in ids and s.get("ameliore") not in ids]
 		assert autres == [], f"{doc['_id']} réinvoque {espece} ({autres})"
 
 

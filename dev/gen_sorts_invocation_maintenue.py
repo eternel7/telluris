@@ -222,6 +222,10 @@ def construire(base: dict, autres: dict) -> tuple:
 	ids_table = {"sort:" + spec[2] for spec in SORTS}
 	invoquees = {}
 	for d in tous.values():
+		# Une forme ENSEIGNÉE qui améliore un sort de la table (Volée funèbre → Ciel de
+		# charogne) le REMPLACE : les deux ne coexistent jamais, l'espèce reste à elle seule.
+		if d.get("ameliore") in ids_table:
+			continue
 		if d.get("type") == "sort" and d.get("invocation") and d["_id"] not in ids_table:
 			invoquees.setdefault((d.get("invocation") or {}).get("espece"), d["_id"])
 	# Lancement : le sort À DURÉE de même école et niveau, relu (jamais retapé).
