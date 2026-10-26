@@ -72,6 +72,30 @@ def test_le_tableau_tourne_et_annonce_la_tranche_suivante():
 	assert suivants == [s["cle"] for s in portails.seuils_ouverts(ARRIVEES, ANCRAGE, t0 + FENETRE)]
 
 
+@pytest.mark.parametrize("nb", [1, 2, 3, 4])
+@pytest.mark.parametrize("n", range(2, 13))
+def test_la_tranche_suivante_ne_redit_jamais_la_courante(monkeypatch, nb, n):
+	"""Le tableau d'Aénor paraissait figé : 4 arrivées pour 3 seuils, tirées indépendamment à
+	chaque tranche, ressortaient une fois sur quatre les mêmes. La rotation l'interdit, pour
+	tout nombre d'arrivées supérieur au nombre de seuils, jonctions de période comprises."""
+	if n <= nb:
+		pytest.skip("rien à faire tourner")
+	monkeypatch.setattr(character_stats, "PORTAIL_SEUILS_OUVERTS", nb)
+	arrivees = [{"cle": f"link:{i}|lieu:{i}"} for i in range(n)]
+	tableaux = [{a["cle"] for a in portails._tirage(arrivees, ANCRAGE, t)} for t in range(-30, 400)]
+	assert all(len(s) == nb for s in tableaux)
+	assert all(a != b for a, b in zip(tableaux, tableaux[1:]))
+
+
+def test_chaque_arrivee_passe_au_tableau_a_chaque_periode():
+	# Une période dure au plus `len(ARRIVEES)` tranches : 2 × autant d'affilée en couvrent une entière.
+	t0 = 1_000 * FENETRE
+	for k in range(30):
+		vues = {s["cle"] for j in range(2 * len(ARRIVEES))
+				for s in portails.seuils_ouverts(ARRIVEES, ANCRAGE, t0 + (k + j) * FENETRE)}
+		assert vues == {a["cle"] for a in ARRIVEES}
+
+
 def test_le_nombre_de_seuils_suit_la_variable_de_monde(monkeypatch):
 	monkeypatch.setattr(character_stats, "PORTAIL_SEUILS_OUVERTS", 2)
 	assert len(portails.seuils_ouverts(ARRIVEES, ANCRAGE, 0)) == 2
