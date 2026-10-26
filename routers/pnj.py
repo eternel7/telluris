@@ -733,6 +733,22 @@ def _choix_portail(character: dict, pnj_doc: dict, noeud: dict | None) -> None:
 	noeud["choix"][idx:idx + 1] = generes
 
 
+def _noeud_seuils(character: dict, pnj_doc: dict, lieu_doc: dict, contexte: dict,
+				  noeud_id: str) -> dict | None:
+	"""Le nœud `noeud_id` re-rendu sur la tranche COURANTE (texte et {fermeture} compris), pour
+	le client dont le compte à rebours vient de tomber à zéro. Lecture seule : aucun effet de
+	nœud, aucun délai armé. N'est servi QUE le nœud qui porte le choix gabarit du portail, et
+	seulement si ce choix passe sa condition — jamais un nœud arbitraire de l'arbre. None sinon."""
+	conf = (pnj_doc.get("services") or {}).get("portail")
+	if not conf or conf.get("fixe") or conf.get("ancrage") != (lieu_doc or {}).get("_id"):
+		return None
+	if not pnj.choix_valide(pnj_doc, noeud_id, conf.get("choix", "franchir"), contexte):
+		return None
+	noeud = pnj.noeud_client(pnj_doc, noeud_id, contexte, pnj.soin_effectif(pnj_doc, contexte))
+	_choix_portail(character, pnj_doc, noeud)
+	return noeud
+
+
 def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, saisie,
 					  reponse: dict) -> str | None:
 	"""Service `portail`, op `franchir` : l'ancrage court-circuite le lien portail choisi et
@@ -875,6 +891,24 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)],
 	reponse["pnj_marque"] = pnj.marque_noeud(pnj_doc, depart, contexte)
 	reponse["lieux_marques"] = indicateurs.marques_lieux(character)
 	return reponse
+
+
+@pnj_router.get("/pnj/portail/seuils")
+async def pnj_portail_seuils(current_user: Annotated[dict, Depends(get_current_user)],
+							 noeud: str, pnj_id: str | None = None):
+	"""Tableau des seuils RAFRAÎCHI quand la tranche tourne (compte à rebours client à zéro) :
+	le nœud `noeud` re-rendu, sans aucun effet (cf. `_noeud_seuils`). 422 hors du nœud des seuils."""
+	if not current_user:
+		raise HTTPException(status_code=400, detail="Invalid session credentials")
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=406, detail="Aucun personnage sélectionné")
+	entree, pnj_doc, lieu_doc = _pnj_du_lieu(character, pnj_id)
+	rendu = _noeud_seuils(character, pnj_doc, lieu_doc,
+						  _contexte(character, pnj_doc, lieu_doc, entree), noeud)
+	if not rendu:
+		raise HTTPException(status_code=422, detail="Aucun tableau de seuils ici.")
+	return {"noeud": rendu}
 
 
 @pnj_router.post("/pnj/dialogue/choix")

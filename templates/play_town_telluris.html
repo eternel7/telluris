@@ -11567,7 +11567,8 @@ function _relationGainTexte(g) {
 
 // Seuils du portail (`rebours` d'un choix, cf. routers/pnj._choix_portail) : le libellé
 // « — se referme dans 1 min 40 » est recompté chaque seconde contre une échéance prise à la
-// réception. À zéro, la tranche a tourné : le bouton s'éteint (le tableau est à redemander).
+// réception. À zéro, la tranche a tourné : les boutons s'éteignent et le nœud est redemandé
+// (`/api/pnj/portail/seuils`, lecture seule) avec les seuils de la nouvelle tranche.
 // Miroir de `portails.texte_duree`.
 let _pnjReboursMinuteur = null;
 
@@ -11584,7 +11585,7 @@ function _pnjReboursArreter() {
 }
 
 function _pnjReboursTick() {
-	let actifs = 0;
+	let actifs = 0, echus = 0;
 	document.querySelectorAll('#pnj-choix button[data-echeance]').forEach(btn => {
 		const c = _pnjChoix[+btn.dataset.index];
 		if (!c || !c.rebours) return;
@@ -11596,9 +11597,28 @@ function _pnjReboursTick() {
 			btn.textContent = c.rebours.base + ' — refermé';
 			btn.disabled = true;
 			btn.removeAttribute('data-echeance');
+			echus++;
 		}
 	});
 	if (!actifs) _pnjReboursArreter();
+	if (echus) _pnjSeuilsRafraichir();
+}
+
+// ⚠️ La réponse n'est appliquée que si le joueur est TOUJOURS sur ce nœud, avec ce PNJ, panneau
+// ouvert : entre-temps il a pu cliquer ailleurs ou prendre congé. En échec, les boutons restent
+// éteints — reparler à la commanderesse redonne le tableau.
+async function _pnjSeuilsRafraichir() {
+	const noeud = _pnjNoeudCourant, pnjId = _pnjCourant;
+	if (!noeud) return;
+	try {
+		const res = await fetch('api/pnj/portail/seuils?noeud=' + encodeURIComponent(noeud)
+			+ (pnjId ? '&pnj_id=' + encodeURIComponent(pnjId) : ''));
+		if (!res.ok) return;
+		const data = await res.json();
+		if (_pnjNoeudCourant !== noeud || _pnjCourant !== pnjId
+			|| document.getElementById('pnj-panel').classList.contains('panel-hidden')) return;
+		renderPnjNoeud(data.noeud);
+	} catch(err) { console.error('Erreur rafraîchissement des seuils', err); }
 }
 
 function renderPnjNoeud(noeud) {

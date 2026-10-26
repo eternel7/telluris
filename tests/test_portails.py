@@ -172,6 +172,36 @@ def test_chaque_seuil_porte_son_compte_a_rebours(rp):
 		assert c["label"] == c["rebours"]["base"] + " — se referme dans " + portails.texte_duree(c["rebours"]["ferme_dans_s"])
 
 
+PNJ_DIALOGUE = dict(PNJ, dialogue={"depart": "accueil", "noeuds": {
+	"accueil": {"texte": "Bonjour.", "choix": [{"id": "voir", "label": "Les seuils ?", "next": "seuils"}]},
+	"seuils": {"texte": "Encore {fermeture}.", "choix": [
+		{"id": "franchir", "label": "Franchir"}, {"id": "accueil", "label": "Non", "next": "accueil"}]},
+}})
+
+
+def _contexte_seuils(rp):
+	return rp._contexte({"lieu": ANCRAGE, "inventaire": []}, PNJ_DIALOGUE, {"_id": ANCRAGE})
+
+
+def test_le_noeud_des_seuils_se_rafraichit_sur_la_tranche_courante(rp, monkeypatch):
+	ctx = _contexte_seuils(rp)
+	avant = rp._noeud_seuils({}, PNJ_DIALOGUE, {"_id": ANCRAGE}, ctx, "seuils")
+	monkeypatch.setattr(rp.quetes, "now_epoch", lambda: rp._t0 + FENETRE)
+	apres = rp._noeud_seuils({}, PNJ_DIALOGUE, {"_id": ANCRAGE}, _contexte_seuils(rp), "seuils")
+	attendus = portails.seuils_ouverts(ARRIVEES, ANCRAGE, rp._t0 + FENETRE)
+	assert [c["rejouer"]["saisie"] for c in apres["choix"][:-1]] == [s["cle"] for s in attendus]
+	assert apres["choix"][0]["rebours"]["ferme_dans_s"] == FENETRE
+	assert avant["id"] == apres["id"] == "seuils"
+	assert apres["texte"] == f"Encore {portails.texte_duree(FENETRE)}."
+
+
+def test_seul_le_noeud_des_seuils_est_servi(rp):
+	ctx = _contexte_seuils(rp)
+	assert rp._noeud_seuils({}, PNJ_DIALOGUE, {"_id": ANCRAGE}, ctx, "accueil") is None
+	assert rp._noeud_seuils({}, PNJ_DIALOGUE, {"_id": ANCRAGE}, ctx, "inconnu") is None
+	assert rp._noeud_seuils({}, PNJ_DIALOGUE, {"_id": "lieu:ailleurs"}, ctx, "seuils") is None
+
+
 # ── Tableau FIXE (`fixe`, Chapelle Palatine d'Aix) ────────────────────────────
 
 CHAPELLE = "lieu:chapelle_palatine"
@@ -202,6 +232,7 @@ def test_tableau_fixe_une_replique_par_porte_sans_fermeture(rp_fixe):
 	rp_fixe._choix_portail({}, PNJ_FIXE, noeud)
 	assert [c["label"] for c in noeud["choix"][:-1]] == ["🌀 baiame", "🌀 senso_ji"]
 	assert all("rebours" not in c for c in noeud["choix"])
+	assert rp_fixe._noeud_seuils({}, PNJ_FIXE, {"_id": CHAPELLE}, {}, "seuils") is None
 
 
 def test_tableau_fixe_franchir_sans_cristal_a_n_importe_quelle_heure(rp_fixe, monkeypatch):
