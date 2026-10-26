@@ -174,13 +174,21 @@ def test_chaque_seuil_porte_son_compte_a_rebours(rp):
 
 PNJ_DIALOGUE = dict(PNJ, dialogue={"depart": "accueil", "noeuds": {
 	"accueil": {"texte": "Bonjour.", "choix": [{"id": "voir", "label": "Les seuils ?", "next": "seuils"}]},
-	"seuils": {"texte": "Encore {fermeture}.", "choix": [
-		{"id": "franchir", "label": "Franchir"}, {"id": "accueil", "label": "Non", "next": "accueil"}]},
+	# Comme le contenu (dev/gen_portail_notre_dame.py) : « franchir » masqué sans cristal.
+	"seuils": {"texte": "Encore {fermeture}. Ensuite {seuils_suivants}.", "choix": [
+		{"id": "franchir", "label": "Franchir", "condition": {"cristal_jaune_porte": True}},
+		{"id": "accueil", "label": "Non", "next": "accueil"}]},
 }})
 
 
-def _contexte_seuils(rp):
-	return rp._contexte({"lieu": ANCRAGE, "inventaire": []}, PNJ_DIALOGUE, {"_id": ANCRAGE})
+def _contexte_seuils(rp, cristal=True):
+	return rp._contexte({"lieu": ANCRAGE, "inventaire": [CRISTAL] if cristal else []},
+						PNJ_DIALOGUE, {"_id": ANCRAGE})
+
+
+def _texte_seuils(rp, now):
+	suivants = ", ".join(rp._label_arrivee(a) for a in portails.seuils_suivants(ARRIVEES, ANCRAGE, now))
+	return f"Encore {portails.texte_duree(portails.ferme_dans_s(now))}. Ensuite {suivants}."
 
 
 def test_le_noeud_des_seuils_se_rafraichit_sur_la_tranche_courante(rp, monkeypatch):
@@ -192,7 +200,25 @@ def test_le_noeud_des_seuils_se_rafraichit_sur_la_tranche_courante(rp, monkeypat
 	assert [c["rejouer"]["saisie"] for c in apres["choix"][:-1]] == [s["cle"] for s in attendus]
 	assert apres["choix"][0]["rebours"]["ferme_dans_s"] == FENETRE
 	assert avant["id"] == apres["id"] == "seuils"
-	assert apres["texte"] == f"Encore {portails.texte_duree(FENETRE)}."
+	assert apres["seuils_dans_s"] == FENETRE
+	assert apres["texte"] == _texte_seuils(rp, rp._t0 + FENETRE) != avant["texte"]
+
+
+def test_sans_cristal_le_texte_d_aenor_tourne_quand_meme(rp, monkeypatch):
+	"""« franchir » masqué : aucun bouton ne décompte, mais le nœud porte son échéance et la
+	redemande le sert — texte de la nouvelle tranche, aucun seuil proposé."""
+	avant = rp._noeud_seuils({}, PNJ_DIALOGUE, {"_id": ANCRAGE}, _contexte_seuils(rp, False), "seuils")
+	assert avant["seuils_dans_s"] == FENETRE and [c["id"] for c in avant["choix"]] == ["accueil"]
+	monkeypatch.setattr(rp.quetes, "now_epoch", lambda: rp._t0 + FENETRE + 30)
+	apres = rp._noeud_seuils({}, PNJ_DIALOGUE, {"_id": ANCRAGE}, _contexte_seuils(rp, False), "seuils")
+	assert apres["seuils_dans_s"] == FENETRE - 30
+	assert apres["texte"] == _texte_seuils(rp, rp._t0 + FENETRE + 30)
+
+
+def test_seul_le_noeud_des_seuils_porte_une_echeance(rp):
+	accueil = rp.pnj.noeud_client(PNJ_DIALOGUE, "accueil", _contexte_seuils(rp))
+	rp._choix_portail({}, PNJ_DIALOGUE, accueil)
+	assert "seuils_dans_s" not in accueil
 
 
 def test_seul_le_noeud_des_seuils_est_servi(rp):
@@ -231,7 +257,7 @@ def test_tableau_fixe_une_replique_par_porte_sans_fermeture(rp_fixe):
 	noeud = {"id": "seuils", "choix": [{"id": "franchir", "label": "Franchir"}, {"id": "accueil", "label": "Non"}]}
 	rp_fixe._choix_portail({}, PNJ_FIXE, noeud)
 	assert [c["label"] for c in noeud["choix"][:-1]] == ["🌀 baiame", "🌀 senso_ji"]
-	assert all("rebours" not in c for c in noeud["choix"])
+	assert all("rebours" not in c for c in noeud["choix"]) and "seuils_dans_s" not in noeud
 	assert rp_fixe._noeud_seuils({}, PNJ_FIXE, {"_id": CHAPELLE}, {}, "seuils") is None
 
 

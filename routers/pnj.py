@@ -698,22 +698,34 @@ def _label_arrivee(arrivee: dict) -> str:
 	return label
 
 
+def _porte_gabarit(pnj_doc: dict, noeud_id: str, gabarit: str) -> bool:
+	"""Le nœud `noeud_id` de l'arbre porte-t-il le choix gabarit du portail (condition ignorée) ?"""
+	noeud = ((((pnj_doc or {}).get("dialogue") or {}).get("noeuds") or {}).get(noeud_id)) or {}
+	return any(c.get("id") == gabarit for c in noeud.get("choix") or [])
+
+
 def _choix_portail(character: dict, pnj_doc: dict, noeud: dict | None) -> None:
 	"""Remplace, dans le nœud RENDU, le choix gabarit `services.portail.choix` par une réplique
 	par seuil ouvert (« Alexandrie — se referme dans 1 min 40 »). Chacune REJOUE ce choix avec la
 	clé du seuil en `saisie` (même mécanique que les suggestions du service `direction`) : le
-	serveur revalide le choix, puis le seuil, au franchissement. Mute `noeud` en place."""
+	serveur revalide le choix, puis le seuil, au franchissement. Mute `noeud` en place.
+	Le nœud des seuils (celui qui porte le gabarit DANS L'ARBRE, choix visible ou non — sans
+	cristal, il est masqué) reçoit `seuils_dans_s` : à cette échéance, le client le redemande
+	(`/api/pnj/portail/seuils`), texte d'Aénor compris ({fermeture}, {seuils_suivants})."""
 	conf = (pnj_doc.get("services") or {}).get("portail")
 	if not conf or not noeud:
 		return
 	gabarit = conf.get("choix", "franchir")
+	now = quetes.now_epoch()
+	if not conf.get("fixe") and _porte_gabarit(pnj_doc, noeud["id"], gabarit):
+		noeud["seuils_dans_s"] = portails.ferme_dans_s(now)
 	idx = next((i for i, c in enumerate(noeud.get("choix") or []) if c.get("id") == gabarit), None)
 	if idx is None:
 		return
 	if conf.get("fixe"):
 		ouverts = _arrivees_portail(conf)
 	else:
-		ouverts = portails.seuils_ouverts(_arrivees_portail(conf), conf.get("ancrage"), quetes.now_epoch())
+		ouverts = portails.seuils_ouverts(_arrivees_portail(conf), conf.get("ancrage"), now)
 	generes = []
 	for a in ouverts:
 		base = f"🌀 {_label_arrivee(a)}"
@@ -737,12 +749,13 @@ def _noeud_seuils(character: dict, pnj_doc: dict, lieu_doc: dict, contexte: dict
 				  noeud_id: str) -> dict | None:
 	"""Le nœud `noeud_id` re-rendu sur la tranche COURANTE (texte et {fermeture} compris), pour
 	le client dont le compte à rebours vient de tomber à zéro. Lecture seule : aucun effet de
-	nœud, aucun délai armé. N'est servi QUE le nœud qui porte le choix gabarit du portail, et
-	seulement si ce choix passe sa condition — jamais un nœud arbitraire de l'arbre. None sinon."""
+	nœud, aucun délai armé. N'est servi QUE le nœud qui porte le choix gabarit du portail dans
+	l'arbre — jamais un nœud arbitraire. Sa condition n'est PAS exigée : sans cristal, le choix
+	est masqué mais le texte d'Aénor doit tourner comme le tableau. None sinon."""
 	conf = (pnj_doc.get("services") or {}).get("portail")
 	if not conf or conf.get("fixe") or conf.get("ancrage") != (lieu_doc or {}).get("_id"):
 		return None
-	if not pnj.choix_valide(pnj_doc, noeud_id, conf.get("choix", "franchir"), contexte):
+	if not _porte_gabarit(pnj_doc, noeud_id, conf.get("choix", "franchir")):
 		return None
 	noeud = pnj.noeud_client(pnj_doc, noeud_id, contexte, pnj.soin_effectif(pnj_doc, contexte))
 	_choix_portail(character, pnj_doc, noeud)
