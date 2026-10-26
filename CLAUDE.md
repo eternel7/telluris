@@ -101,7 +101,7 @@ utils/
                          #   ⚠️ `combat.vue_client` SEUL filtre des pièges cachés envoyés au client
   vol.py                 # vol magique (pur) : `effets.vol`, case d'atterrissage, chute en exploration ;
                          #   combat : `_can_fly` lit `vol_magique`, chute par `combat._atterrir`
-  zones_effet.py         # zones d'effet des sorts/compétences (pur) : cercle, carré, rectangle, cône ;
+  zones_effet.py         # zones d'effet des sorts/compétences (pur) : cercle, carré, rectangle, cône, ligne ;
                          #   ancre (lanceur/cible) + orientation ; miroir scripts/zones_effet.js
   jetons.py              # jetons de taille variable (pur) : emprise LxP selon le cap, distance entre
                          #   emprises, pas avec pivot, A* ; miroir scripts/jetons.js

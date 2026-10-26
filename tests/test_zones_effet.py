@@ -7,6 +7,8 @@
 # `dev/test_zones_effet_client.js` rejoue EXACTEMENT les mêmes cas côté client.
 
 import os
+
+import pytest
 import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -233,6 +235,38 @@ def test_zone_perce_traverse_murs_et_ligne_de_vue():
 	assert (0, 0) not in cases                           # le lanceur n'est jamais sur la ligne
 	sans = normaliser_zone({**z, "perce": False})
 	assert (5, 0) not in cases_effet(sans, (0, 0), (2, 0), praticable=_praticable, vue=_vue)
+
+
+# ── Ligne (Rayon de lumière) : tout angle, à TRAVERS la cible ────────────────────
+
+LIGNE_8 = {"forme": "ligne", "longueur": 8}
+
+
+@pytest.mark.parametrize("cible,attendu", [
+	((6, -2), [(8, -3), (5, -2), (6, -2), (7, -2), (2, -1), (3, -1), (4, -1), (1, 0)]),
+	((4, -6), [(5, -8), (5, -7), (4, -6), (3, -5), (3, -4), (2, -3), (1, -2), (1, -1)]),
+])
+def test_ligne_hors_axe_passe_par_la_cible_et_continue(cible, attendu):
+	"""Valeurs reprises À L'IDENTIQUE par dev/test_zones_effet_client.js."""
+	assert cases_zone(normaliser_zone(LIGNE_8), (0, 0), cible) == attendu
+
+
+def test_ligne_toute_cible_a_portee_est_sur_sa_ligne():
+	"""Quel que soit l'angle : `longueur` cases, lanceur exclu, cible incluse."""
+	z = normaliser_zone(LIGNE_8)
+	for cx in range(-8, 9):
+		for cy in range(-8, 9):
+			if (cx, cy) == (0, 0):
+				continue
+			cases = cases_zone(z, (0, 0), (cx, cy))
+			assert len(cases) == 8 and (0, 0) not in cases
+			assert (cx, cy) in cases, (cx, cy)
+
+
+def test_ligne_part_toujours_du_lanceur():
+	z = normaliser_zone({**LIGNE_8, "origine": "cible"})
+	assert z["origine"] == "lanceur" and est_orientee(z)
+	assert placement_visuel(z, (0, 0), (6, -2)) == {"centre": [4.5, -1.5], "axe": [6, -2]}
 
 
 def test_perce_et_tir_ami_faux_par_defaut():

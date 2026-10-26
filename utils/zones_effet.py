@@ -20,7 +20,11 @@
 #                   le long de l'axe à partir de `decalage` (coup d'épée qui balaie les
 #                   trois cases DEVANT : longueur 1, largeur 3, decalage 1) ;
 #   • `cone`      — secteur angulaire d'ouverture `angle` et de `longueur` anneaux le
-#                   long de l'axe (souffle de feu).
+#                   long de l'axe (souffle de feu) ;
+#   • `ligne`     — `longueur` cases tracées case par case (Bresenham) depuis le lanceur
+#                   À TRAVERS la cible, dans n'importe quel angle (Rayon de lumière). Toujours
+#                   ancrée sur le lanceur, qui n'en fait pas partie ; l'axe n'est PAS arrondi
+#                   aux huit directions, contrairement au rectangle.
 #
 # ⚠️ `decalage` compte à partir de l'ANCRE INCLUSE : 0 = la zone commence sur la case
 # d'ancre, 1 = elle commence une case plus loin le long de l'axe. Une forme orientée
@@ -49,7 +53,7 @@ from utils.consommables import _as_int
 
 # Formes reconnues. Une `forme` absente ou inconnue ⇒ pas de zone (`normaliser_zone`
 # rend None) ⇒ la capacité touche la seule case de sa cible, comme avant.
-FORMES = ("cercle", "carre", "rectangle", "cone")
+FORMES = ("cercle", "carre", "rectangle", "cone", "ligne")
 
 # Case d'ancre de la zone.
 #   `cible`   → la case de la cible désignée (boule de feu qui explose sur l'ennemi) ;
@@ -120,6 +124,8 @@ def normaliser_zone(raw) -> dict | None:
 	origine = str(raw.get("origine") or ORIGINE_DEFAUT).strip().lower()
 	if origine not in ORIGINES:
 		origine = ORIGINE_DEFAUT
+	if forme == "ligne":
+		origine = "lanceur"   # un trait part TOUJOURS du lanceur, quoi qu'écrive la donnée
 	orientation = str(raw.get("orientation") or ORIENTATION_DEFAUT).strip().lower()
 	if orientation not in ORIENTATIONS:
 		orientation = ORIENTATION_DEFAUT
@@ -144,7 +150,7 @@ def normaliser_zone(raw) -> dict | None:
 
 def est_orientee(zone: dict) -> bool:
 	"""La forme dépend-elle d'un axe ? (rectangle et cône oui, cercle et carré non.)"""
-	return (zone or {}).get("forme") in ("rectangle", "cone")
+	return (zone or {}).get("forme") in ("rectangle", "cone", "ligne")
 
 
 def _axe_unitaire(dx: int, dy: int) -> tuple | None:
@@ -190,6 +196,44 @@ def axe_de(zone: dict, lanceur: tuple, cible: tuple, facing=0) -> tuple:
 	return axe if axe is not None else axe_facing(facing)
 
 
+def vecteur_ligne(zone: dict, lanceur: tuple, cible: tuple, facing=0) -> tuple:
+	"""Direction NON arrondie d'une `ligne` : lanceur → cible (repli : le `facing`, pour une
+	cible posée sur le lanceur ou une orientation `facing`)."""
+	if (zone or {}).get("orientation") != "facing":
+		dx, dy = int(cible[0]) - int(lanceur[0]), int(cible[1]) - int(lanceur[1])
+		if dx or dy:
+			return dx, dy
+	return axe_facing(facing)
+
+
+def _trace_ligne(zone: dict, lanceur: tuple, cible: tuple, facing=0) -> list:
+	"""Cases d'une `ligne`, DANS L'ORDRE depuis le lanceur (exclu), `longueur` au plus.
+
+	Bresenham vers un point PROLONGÉ à un multiple entier du vecteur lanceur → cible : la
+	droite idéale passe exactement par la case de la cible (erreur nulle sur un point du
+	réseau), donc le trait la traverse au lieu de la frôler, puis continue derrière elle.
+	Une case par pas sur l'axe majeur : `longueur` compte en distance de Chebyshev, comme
+	la `portee` — une cible à portée est toujours sur sa ligne."""
+	lx, ly = int(lanceur[0]), int(lanceur[1])
+	dx, dy = vecteur_ligne(zone, lanceur, cible, facing)
+	longueur = int(zone.get("longueur", 1))
+	k = longueur // max(abs(dx), abs(dy)) + 1
+	x1, y1 = dx * k, dy * k
+	adx, ady = abs(x1), abs(y1)
+	sx, sy = (1 if x1 > 0 else -1), (1 if y1 > 0 else -1)
+	err, x, y, out = adx - ady, 0, 0, []
+	while len(out) < longueur:
+		e2 = 2 * err
+		if e2 > -ady:
+			err -= ady
+			x += sx
+		if e2 < adx:
+			err += adx
+			y += sy
+		out.append((lx + x, ly + y))
+	return out
+
+
 def cases_zone(zone: dict, lanceur: tuple, cible: tuple, facing=0) -> list:
 	"""Cases (x, y) couvertes par la forme, GÉOMÉTRIE PURE.
 
@@ -214,6 +258,9 @@ def cases_zone(zone: dict, lanceur: tuple, cible: tuple, facing=0) -> list:
 				if forme == "carre" or dx * dx + dy * dy <= rayon * rayon:
 					cases.append((ax + dx, ay + dy))
 		return sorted(set(cases), key=lambda c: (c[1], c[0]))
+
+	if forme == "ligne":
+		return sorted(set(_trace_ligne(zone, lanceur, cible, facing)), key=lambda c: (c[1], c[0]))
 
 	fx, fy = axe_de(zone, lanceur, cible, facing)
 	debut = int(zone.get("decalage", 0))
@@ -297,5 +344,8 @@ def placement_visuel(zone: dict, lanceur: tuple, cible: tuple, facing=0) -> dict
 	xs = [c[0] for c in cases]
 	ys = [c[1] for c in cases]
 	centre = [(min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2]
-	fx, fy = axe_de(zone, lanceur, cible, facing)
+	# `ligne` : l'axe RÉEL du trait (vecteur brut, non arrondi) — le client n'en lit que
+	# la direction, comme le `bx − ax` d'un coup ordinaire.
+	fx, fy = (vecteur_ligne(zone, lanceur, cible, facing) if (zone or {}).get("forme") == "ligne"
+			  else axe_de(zone, lanceur, cible, facing))
 	return {"centre": centre, "axe": [fx, fy]}

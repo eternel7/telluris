@@ -2,7 +2,7 @@
 """Rayon / Lance de lumière — la défense anti-aérienne des cités, et ses quatre maîtres."""
 # dev/gen_lumiere_paladine.py
 #
-# Deux sorts Saints de niveau 10, en LIGNE (rectangle 1×20 ancré sur le lanceur) qui PERCE les
+# Deux sorts Saints de niveau 10, en LIGNE (forme `ligne`, 20 cases, tout angle) qui PERCE les
 # murs (`zone.perce`) et touche AUSSI les alliés (`zone.tir_ami`, seul tir ami au lancement) :
 #   • Rayon de lumière — forme simple : grimoire unique + recette de scriptorium ;
 #   • Lance de lumière — forme paladine (lore : 04_institutions.md, perfectionnée à Montmartre) :
@@ -42,10 +42,10 @@ from utils import grimoires  # noqa: E402
 RAYON_ID = "sort:rayon_de_lumiere"
 LANCE_ID = "sort:lance_de_lumiere"
 
-# Ligne droite : part de la case VOISINE du lanceur (decalage 1, il n'est jamais touché),
-# traverse la cible et continue jusqu'à 20 cases. Axe arrondi au huitième de tour.
-ZONE_RAYON = {"forme": "rectangle", "origine": "lanceur", "orientation": "cible",
-			  "longueur": 20, "largeur": 1, "decalage": 1, "perce": True, "tir_ami": True}
+# Forme `ligne` : tracée case par case depuis la case VOISINE du lanceur (il n'est jamais
+# touché), À TRAVERS la cible quel que soit l'angle, jusqu'à 20 cases. La cible se vise
+# devant ou sur les côtés, jamais dans le dos (`combat._dans_le_dos`, règle de toute frappe).
+ZONE_RAYON = {"forme": "ligne", "longueur": 20, "perce": True, "tir_ami": True}
 
 SORTS = [
 	{

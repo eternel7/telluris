@@ -201,6 +201,7 @@ Bloc `zone` d'un doc `sort:*`/`competence:*`, géométrie pure `utils/zones_effe
 | `carre` | `rayon` | disque de CHEBYSHEV (rayon 1 = les 8 cases autour, 9) — tourbillon de lames |
 | `rectangle` | `longueur` × `largeur`, `decalage` | bande orientée — les 3 cases devant : `longueur 1, largeur 3, decalage 1` |
 | `cone` | `longueur`, `angle` (défaut 90), `decalage` | secteur angulaire — souffle de feu : 3 + 5 + 7 cases sur 3 crans |
+| `ligne` | `longueur` | trait Bresenham depuis le lanceur (exclu) À TRAVERS la cible, **tout angle** (axe non arrondi, `origine` forcée à `lanceur`) — Rayon de lumière |
 
 ⚠️ **`decalage` compte depuis l'ancre INCLUSE** : 0 = la forme commence sur la case d'ancre. Une forme orientée ancrée sur le LANCEUR s'écrit donc `decalage: 1` (sinon son premier cran est la case du lanceur) ; ancrée sur la CIBLE elle garde 0, faute de quoi la cible désignée serait la seule épargnée. ⚠️ `cercle` et `carre` de rayon 1 sont **deux figures distinctes**, c'est la raison d'être des deux formes. ⚠️ Largeur PAIRE : débordement d'une case à droite (assumé, on ne centre pas sur une case). Bornes de donnée : rayon ≤ 8, longueur ≤ 20, largeur/décalage ≤ 12, angle 1-360.
 

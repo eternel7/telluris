@@ -34,12 +34,8 @@
     "animation": "animation:capa_lumiere",
     "animation_zone": "animation:capa_lumiere_zone",
     "zone": {
-      "forme": "rectangle",
-      "origine": "lanceur",
-      "orientation": "cible",
+      "forme": "ligne",
       "longueur": 20,
-      "largeur": 1,
-      "decalage": 1,
       "perce": true,
       "tir_ami": true
     }
@@ -79,12 +75,8 @@
     "animation": "animation:capa_lumiere",
     "animation_zone": "animation:capa_lumiere_zone",
     "zone": {
-      "forme": "rectangle",
-      "origine": "lanceur",
-      "orientation": "cible",
+      "forme": "ligne",
       "longueur": 20,
-      "largeur": 1,
-      "decalage": 1,
       "perce": true,
       "tir_ami": true
     },
