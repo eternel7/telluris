@@ -19,8 +19,9 @@
 # de la CITÉ, et son texte dit d'où il descend.
 #
 # IDEMPOTENT : un doc déjà en base à l'identique n'est pas réémis ; un `_id` pris par un doc
-# différent fait REFUSER tout le lot (l'import est un PUT complet). Les docs de LIEU sont relus
-# dans le dump et ne gagnent que l'entrée `pnj` du maître (fusion, CLAUDE.md § 11).
+# différent fait REFUSER tout le lot (l'import est un PUT complet) — sauf un MAÎTRE déjà importé
+# (il enseigne la Lance), réémis FUSIONNÉ quand ses champs ont changé (portraits du 26/10). Les
+# docs de LIEU sont relus dans le dump et ne gagnent / ne réécrivent que l'entrée `pnj` du maître.
 #
 # Usage : python dev/gen_lumiere_paladine.py [--dump chemin] [--sortie chemin]
 # Sortie : jsons/lumiere_paladine_a_importer.json (📥 Importer depuis /admin)
@@ -116,7 +117,7 @@ MAITRES = [
 		"lieu": "lieu:montmartre",
 		"nom": "Dame Geneviève",
 		"race": "humain",
-		"portrait": "race_paladin_f_humain01.jpg",
+		"portrait": "paladin_humain_f_montmartre01.jpg",
 		"presence": "Une paladine aux cheveux gris coupés court, descendue des terrasses de la "
 					"basilique, qui regarde le ciel plus souvent que les convois.",
 		"description": "Maîtresse de guet du Sacré-Cœur. Les vieux de Lutecia disent qu'une "
@@ -147,7 +148,7 @@ MAITRES = [
 		"lieu": "lieu:bruges",
 		"nom": "Sœur Marguerite",
 		"race": "elfe",
-		"portrait": "paladin_elfe_f01.jpg",
+		"portrait": "paladin_elfe_f_bruges01.jpg",
 		"presence": "Une sœur de Bataille du Béguinage, en manteau gris, descendue du Beffroi. "
 					"Elle compte les coups de cloche sans y penser.",
 		"description": "Sœur de Bataille du Béguinage de Bruges, maîtresse de tir du Beffroi. "
@@ -176,7 +177,7 @@ MAITRES = [
 		"lieu": "lieu:aix_la_chapelle",
 		"nom": "Turpin",
 		"race": "ogre",
-		"portrait": "paladin_ogre_m_rhemi01.png",
+		"portrait": "paladin_ogre_m_aix01.jpg",
 		"presence": "Un paladin ogre d'un âge indéfinissable, descendu du Granusturm, le "
 					"manteau rapiécé aux épaules.",
 		"description": "Maître de guet du Granusturm. Il se dit l'un des pairs de la cour de "
@@ -204,7 +205,7 @@ MAITRES = [
 		"lieu": "lieu:reykjavik",
 		"nom": "Auðr",
 		"race": "elfe",
-		"portrait": "paladin_elfe_f02.jpg",
+		"portrait": "paladin_elfe_f_reykjavik01.jpg",
 		"presence": "Une paladine elfe au manteau doublé de fourrure, descendue de "
 					"Hallgrímskirkja, qui garde les yeux sur les montagnes.",
 		"description": "Paladine de Hallgrímskirkja, sur les voies terrestres de l'Islande. Les "
@@ -385,6 +386,17 @@ def construire(base: dict) -> tuple:
 		elif not deja_importe(doc, existant):
 			erreurs.append(f"{doc['_id']} : `_id` déjà pris par un doc différent")
 
+	def _maitre(doc):
+		"""Un maître DÉJÀ importé se met à jour : doc relu + champs produits (fusion, CLAUDE.md
+		§ 11). Seul un `pnj:*` qui enseigne la Lance est le nôtre — tout autre est une collision."""
+		existant = base.get(doc["_id"])
+		if existant is None or deja_importe(doc, existant):
+			_neuf(doc)
+		elif ((existant.get("services") or {}).get("enseignement") or {}).get("sort") == LANCE_ID:
+			docs.append({**_sans_rev(existant), **doc})
+		else:
+			erreurs.append(f"{doc['_id']} : `_id` déjà pris par un doc différent")
+
 	for item in ("item:relique", "item:Eau_benite", "item:griffon_tete", "item:wyvern_tete",
 				 "item:gargouille_tete", "item:dragon_blanc_tete"):
 		if item not in base:
@@ -400,16 +412,25 @@ def construire(base: dict) -> tuple:
 			 or d.get("objet_final") == "grimoire_rayon_de_lumiere"]
 	erreurs += [e for e in grim_erreurs if "rayon_de_lumiere" in e or "aucune recette" in e]
 	for m in MAITRES:
-		_neuf(pnj_doc(m))
+		_maitre(pnj_doc(m))
 		lieu = base.get(m["lieu"])
 		if lieu is None:
 			erreurs.append(f"{m['lieu']} absent du dump")
 			continue
+		# Entrée de présence du maître : ajoutée, ou RÉÉCRITE si elle a changé (portrait…) ;
+		# les autres entrées du lieu restent telles quelles.
+		entree = entree_presence(m)
 		presence = list(lieu.get("pnj") or [])
-		if any((p or {}).get("character") == "pnj:" + m["slug"] for p in presence):
+		rang = next((i for i, p in enumerate(presence)
+					 if (p or {}).get("character") == entree["character"]), None)
+		if rang is not None and presence[rang] == entree:
 			continue
+		if rang is None:
+			presence.append(entree)
+		else:
+			presence[rang] = entree
 		lieu = copy.deepcopy(_sans_rev(lieu))
-		lieu["pnj"] = presence + [entree_presence(m)]
+		lieu["pnj"] = presence
 		docs.append(lieu)
 	return docs, erreurs
 

@@ -113,3 +113,37 @@ def test_chaque_maitre_est_present_dans_son_lieu():
 	lieux = {d["_id"]: d for d in _contenu() if d["type"] == "lieu"}
 	for m in gen.MAITRES:
 		assert any(p.get("character") == "pnj:" + m["slug"] for p in lieux[m["lieu"]]["pnj"])
+
+
+# ── Portraits propres (26/10) : mise à jour des maîtres DÉJÀ importés ──────────────
+# Dump FIXE postérieur à l'import des maîtres (portraits encore empruntés au fonds).
+DUMP_IMPORTE = os.path.join(RACINE, "jsons", "telluris-dump-20261026-175531.json")
+MAJ = os.path.join(RACINE, "jsons", "portraits_maitres_lance_a_importer.json")
+
+
+def test_chaque_maitre_a_son_portrait_dans_le_depot():
+	for m in gen.MAITRES:
+		assert os.path.isfile(os.path.join(RACINE, "templates", "resources", "pnj", m["portrait"])), m["slug"]
+	assert len({m["portrait"] for m in gen.MAITRES}) == len(gen.MAITRES)   # aucun portrait partagé
+
+
+def test_la_mise_a_jour_ne_porte_que_les_portraits(tmp_path):
+	sortie = tmp_path / "maj.json"
+	assert gen.main(["--dump", DUMP_IMPORTE, "--sortie", str(sortie)]) == 0
+	maj = json.loads(sortie.read_text(encoding="utf-8"))
+	with open(MAJ, encoding="utf-8") as f:
+		assert maj == json.load(f)
+	base = {d["_id"]: d for d in json.load(open(DUMP_IMPORTE, encoding="utf-8"))["docs"]}
+	assert {d["_id"] for d in maj} == ({"pnj:" + m["slug"] for m in gen.MAITRES}
+									  | {m["lieu"] for m in gen.MAITRES})
+	for doc in maj:
+		avant = {k: v for k, v in base[doc["_id"]].items() if k != "_rev"}
+		if doc["type"] == "pnj":
+			assert {k for k in set(avant) | set(doc) if avant.get(k) != doc.get(k)} == {"portrait"}
+		else:
+			# Seule l'entrée du maître change, et seulement son portrait.
+			changees = [(a, b) for a, b in zip(avant["pnj"], doc["pnj"]) if a != b]
+			assert len(changees) == 1 and len(avant["pnj"]) == len(doc["pnj"])
+			a, b = changees[0]
+			assert {k for k in set(a) | set(b) if a.get(k) != b.get(k)} == {"portrait"}
+			assert {k: v for k, v in doc.items() if k != "pnj"} == {k: v for k, v in avant.items() if k != "pnj"}
