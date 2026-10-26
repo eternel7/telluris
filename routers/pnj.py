@@ -340,7 +340,7 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		placeholders["fermeture"] = (portails.texte_duree(ouverts[0]["ferme_dans_s"])
 									 if ouverts and not fixe else "—")
 		placeholders["seuils_suivants"] = "—" if fixe else ", ".join(
-			_label_arrivee(a) for a in portails.seuils_suivants(arrivees, conf_p.get("ancrage"), now)) or "—"
+			_labels_arrivees(portails.seuils_suivants(arrivees, conf_p.get("ancrage"), now))) or "—"
 		# Dit dans la phrase (« coûte un cristal de mana jaune ») : sans la majuscule du nom.
 		if cout.get("item"):
 			nom_cout = _nom_item(cout["item"])
@@ -707,6 +707,13 @@ def _label_arrivee(arrivee: dict) -> str:
 	return label
 
 
+def _labels_arrivees(arrivees: list) -> list:
+	"""Les libellés d'un tableau : deux portes d'un même lieu se distinguent par l'endroit où
+	chacune mène d'habitude (`portails.libelles_distincts`)."""
+	vers = [", ".join(_label_arrivee({"lieu": v}) for v in a.get("vers") or []) for a in arrivees]
+	return portails.libelles_distincts([_label_arrivee(a) for a in arrivees], vers)
+
+
 def _porte_gabarit(pnj_doc: dict, noeud_id: str, gabarit: str) -> bool:
 	"""Le nœud `noeud_id` de l'arbre porte-t-il le choix gabarit du portail (condition ignorée) ?"""
 	noeud = ((((pnj_doc or {}).get("dialogue") or {}).get("noeuds") or {}).get(noeud_id)) or {}
@@ -736,8 +743,8 @@ def _choix_portail(character: dict, pnj_doc: dict, noeud: dict | None) -> None:
 	else:
 		ouverts = portails.seuils_ouverts(_arrivees_portail(conf), conf.get("ancrage"), now)
 	generes = []
-	for a in ouverts:
-		base = f"🌀 {_label_arrivee(a)}"
+	for a, label in zip(ouverts, _labels_arrivees(ouverts)):
+		base = f"🌀 {label}"
 		choix = {
 			"id": gabarit,
 			"label": base + (
