@@ -2133,8 +2133,10 @@
 					   ⚠️ L'id du PNJ passe par `data-pnj` et le bouton se transmet par `this` —
 					   jamais dans un `onclick="…('{{ … }}')"` : Jinja échapperait une apostrophe
 					   en `&#39;` et casserait la chaîne JS (Conventions §9). #}
+					{# Un PNJ posté sur certaines cases (`cases` de son entrée) : ligne émise
+					   masquée hors de sa case, basculée à chaque pas par `_majPnjsIci`. #}
 					{% for p in pnjs_presents %}
-					<li><button class="sub-loc-btn pnj-talk-btn" data-pnj="{{ p.character }}" onclick="openPnjDialogue(this)"><span class="pnj-talk-marque">{% if p.marque %}<span class="loc-marque {% if p.marque == '!' %}neuf{% else %}rendu{% endif %}">{{ p.marque }}</span>{% endif %}</span>🗣 Parler à {{ p.nom }}</button></li>
+					<li class="pnj-talk-li"{% if not p.ici %} hidden style="display:none"{% endif %}><button class="sub-loc-btn pnj-talk-btn" data-pnj="{{ p.character }}" onclick="openPnjDialogue(this)"><span class="pnj-talk-marque">{% if p.marque %}<span class="loc-marque {% if p.marque == '!' %}neuf{% else %}rendu{% endif %}">{{ p.marque }}</span>{% endif %}</span>🗣 Parler à {{ p.nom }}</button></li>
 					{% endfor %}
 				</ul>
 				{% endif %}
@@ -3667,6 +3669,17 @@
 			el.inert = true;
 		}
 	}
+	// PNJ postés sur certaines cases : `ids` = ceux qui se tiennent sur la case du joueur
+	// (`pnjs_ici` de move_character). Absent de la réponse ⇒ rien ne bouge.
+	function _majPnjsIci(ids) {
+		if (!Array.isArray(ids)) return;
+		document.querySelectorAll('li.pnj-talk-li').forEach(li => {
+			const btn = li.querySelector('.pnj-talk-btn');
+			const ici = !!btn && ids.includes(btn.dataset.pnj);
+			li.hidden = !ici;
+			li.style.display = ici ? '' : 'none';
+		});
+	}
 	function _majProprietesOffre(offre) {
 		const li = document.getElementById('prop-offre-li');
 		if (!li) return;
@@ -3912,6 +3925,7 @@
 				_ressourceRecoltable = rep.ressource_recoltable || null;
 				_refreshRecolte();
 				_majProprietesOffre(rep.proprietes_offre);
+				_majPnjsIci(rep.pnjs_ici);
 				// Effets actifs : décrémentés/expirés à chaque tour monde côté serveur.
 				_renderEffetsActifs(rep.effets_actifs);
 				_renderCaractsMod(rep.caracts_detail);

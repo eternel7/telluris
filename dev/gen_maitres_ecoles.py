@@ -1083,9 +1083,9 @@ MAITRES = [
 	},
 	{
 		"slug": "philibert_des_catacombes", "sort": "sort:ossuaire_des_catacombes",
-		# À l'entrée des catacombes (premier niveau, au pied de l'escalier de la surface) : posé
-		# sur `lieu:lutecia`, il était présent sur toutes les cases de la cité.
-		"lieu": "lieu:catacombes0001", "nom": "Philibert", "race": "hobbit",
+		# En surface, sur la SEULE case de Lutecia qui descend aux catacombes (nœud Lutecia de
+		# `link:lutecia_to_catacombes0001`) — sans `cases`, il était sur toutes celles de la cité.
+		"lieu": "lieu:lutecia", "cases": [[26, 27]], "nom": "Philibert", "race": "hobbit",
 		"vocation": "necromancien", "ecole_texte": "nécromantique",
 		"presence": "Un nécromancien hobbit couvert de poussière de calcaire, une lanterne "
 					"éteinte à la main, qui vient de remonter des catacombes.",
@@ -1364,8 +1364,12 @@ def pnj_doc(m: dict, sorts: dict) -> dict:
 
 
 def entree_presence(m: dict) -> dict:
-	return {"character": "pnj:" + m["slug"], "nom": m["nom"], "portrait": portrait(m),
-			"probabilite": 1, "description": m["presence"]}
+	"""`cases` (optionnel) : le maître ne se tient que sur ces cases du lieu (`utils/pnj`)."""
+	entree = {"character": "pnj:" + m["slug"], "nom": m["nom"], "portrait": portrait(m),
+			  "probabilite": 1, "description": m["presence"]}
+	if m.get("cases"):
+		entree["cases"] = m["cases"]
+	return entree
 
 
 def construire(base: dict) -> tuple:

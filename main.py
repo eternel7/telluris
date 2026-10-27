@@ -818,8 +818,11 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# d'initiation). ⚠️ Le donneur se CHERCHE (`donneur_present`) au lieu d'être le premier
 	# venu : depuis le cumul des présences, un PNJ muet placé en tête de liste ferait taire
 	# en silence l'offre de son voisin.
+	# ⚠️ `toutes_cases` : un PNJ posté sur certaines cases (`cases`) est tiré pour TOUT le lieu
+	# — ses offres aussi, prêtes quand on le rejoint ; seule sa ligne d'action suit la case.
 	pnj_entrees = pnj_util.entrees_pnj_actives(character, grid_doc,
-								  transport_util.entree_marchand, conditions_pnj)
+								  transport_util.entree_marchand, conditions_pnj,
+								  toutes_cases=True)
 	pnj_paires = [(e, get_doc(e["character"])) for e in pnj_entrees]
 	pnj_paires = [(e, d) for e, d in pnj_paires if d]
 	# PNJ à PLUSIEURS offres par service (`offres`, Maëlys) : l'offre proposée est tirée à
@@ -888,9 +891,14 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# nœud d'ouverture — donc EXACT par construction, contrairement à un « ! » posé sur une
 	# porte voisine (dont l'offre n'est tirée qu'à l'entrée : cf. utils/indicateurs). ⚠️ Chemin
 	# LECTURE SEULE : il n'arme aucun `delai_min` et ne verse aucune récompense de relation.
+	# `ici` : faux pour un PNJ posté sur d'AUTRES cases (`cases`) — sa ligne est émise masquée,
+	# et `pnjs_ici` de `move_character` la bascule à chaque pas (un pas ne recharge pas la page).
+	_ici = {e.get("character") for e in pnj_util.entrees_pnj_actives(
+		character, grid_doc, transport_util.entree_marchand, conditions_pnj)}
 	pnjs_presents = [
 		dict(pnj_util.pnj_payload(e, d),
-			 marque=pnj_router_marque_pnj(character, d, grid_doc, e))
+			 marque=pnj_router_marque_pnj(character, d, grid_doc, e),
+			 ici=e.get("character") in _ici)
 		for e, d in pnj_paires
 	]
 	lieux_marques = indicateurs_util.marques_lieux(character)
@@ -904,7 +912,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# ⚠️ Une seule image de fond pour le lieu : le PREMIER présent qui en propose une la donne
 	# (deux variantes ne se superposent pas, il n'y a qu'un décor).
 	for _p in pnjs_presents:
-		if _p.get("image_lieu") and os.path.exists(
+		if _p["ici"] and _p.get("image_lieu") and os.path.exists(
 				os.path.join(TOWNS_IMAGES_PATH, _p["image_lieu"])):
 			image = _p["image_lieu"]
 			break
