@@ -1326,6 +1326,37 @@ function _probaLue(v) {
 	return isFinite(p) ? p : 1;
 }
 
+// ── Cases où se tient un PNJ (`cases: [[x, y], …]` d'une entrée, cf. utils/pnj.sur_sa_case) ──
+// Sans `cases`, le PNJ est sur tout le lieu ; avec, il y est TIRÉ à l'entrée mais sa ligne 🗣
+// et son dialogue n'existent que sur ces cases. Saisie « x,y ; x,y » ou visée 🎯 sur la carte.
+
+function _casesEnTexte(cases) {
+	return (Array.isArray(cases) ? cases : [])
+		.map(c => Array.isArray(c) ? c.join(',') : String(c)).join(' ; ');
+}
+
+// `{cases, erreur}` : cases lues dans l'ordre, doublons retirés ; '' ⇒ []. ⚠️ Une saisie
+// illisible rend `erreur` et laisse à l'appelant les dernières cases valides.
+function _casesDepuisTexte(txt) {
+	const cases = [];
+	const morceaux = String(txt || '').split(/[;\n]+/).map(m => m.trim()).filter(Boolean);
+	for (const m of morceaux) {
+		const r = /^\[?\s*(\d+)\s*[,\s]\s*(\d+)\s*\]?$/.exec(m);
+		if (!r) return { cases, erreur: `« ${m} » n'est pas une case (attendu : x,y)` };
+		const c = [parseInt(r[1], 10), parseInt(r[2], 10)];
+		if (!cases.some(a => a[0] === c[0] && a[1] === c[1])) cases.push(c);
+	}
+	return { cases, erreur: '' };
+}
+
+// La case visée s'ajoute, ou se retire si elle y était déjà. PURE.
+function _basculerCase(cases, x, y) {
+	const liste = Array.isArray(cases) ? cases : [];
+	return liste.some(c => c[0] === x && c[1] === y)
+		? liste.filter(c => !(c[0] === x && c[1] === y))
+		: liste.concat([[x, y]]);
+}
+
 // La ligne de formulaire qui prolonge l'entrée d'indice `src` du doc relu.
 // ⚠️ Des `conditions` qui ne sont pas une liste cachent le PNJ pour toujours (le moteur
 // n'y trouve aucune clause valide) : la ligne s'ouvre en JSON, en erreur, et l'enregistrement
@@ -1337,12 +1368,25 @@ function _nlLigneDepuisEntree(entree, src) {
 		probabilite: _probaLue(e.probabilite),
 		conditions: Array.isArray(e.conditions) ? JSON.parse(JSON.stringify(e.conditions)) : [],
 		json: null, jsonErreur: '', clauseErreurs: {},
+		cases: [], casesTexte: '', casesErreur: '',
 		nomTouche: true,   // un nom relu de la base n'est pas à écraser par le portrait
 		ouvert: false, ecurie: false, tousPortraits: false, auto: false,
 	};
 	if (e.conditions != null && !Array.isArray(e.conditions)) {
 		l.json = JSON.stringify(e.conditions, null, 2);
 		l.jsonErreur = 'les conditions doivent être une LISTE de clauses';
+	}
+	// Des `cases` que la saisie ne relit pas à l'identique (forme inconnue) : montrées en
+	// JSON, en erreur — l'enregistrement reste bloqué plutôt que de les réécrire.
+	if (e.cases != null) {
+		const lues = _casesDepuisTexte(_casesEnTexte(e.cases));
+		if (!lues.erreur && JSON.stringify(lues.cases) === JSON.stringify(e.cases)) {
+			l.cases = lues.cases;
+			l.casesTexte = _casesEnTexte(lues.cases);
+		} else {
+			l.casesTexte = JSON.stringify(e.cases);
+			l.casesErreur = 'cases illisibles : une LISTE de [x, y] est attendue';
+		}
 	}
 	return l;
 }
@@ -1388,6 +1432,13 @@ function _fusionPnjEntrees(existantes, lignes, montures) {
 			else delete e.conditions;
 		}
 
+		const cases = Array.isArray(l.cases) ? l.cases : [];
+		const origCases = (orig && orig.cases != null) ? orig.cases : [];
+		if (JSON.stringify(cases) !== JSON.stringify(origCases)) {
+			if (cases.length) e.cases = JSON.parse(JSON.stringify(cases));
+			else delete e.cases;
+		}
+
 		if (ecurie && i === tenue) e.montures = ecurie.slice();
 		else delete e.montures;
 		return e;
@@ -1395,9 +1446,10 @@ function _fusionPnjEntrees(existantes, lignes, montures) {
 }
 
 // Les lignes dont le PNJ figure DÉJÀ plus haut : `{indice: {premier, masquee}}`.
-// Le moteur ne montre qu'UNE entrée par PNJ, la première VISIBLE (`entrees_pnj_actives`) :
-// une ligne est `masquee` dès qu'une ligne plus haut porte le même PNJ SANS condition — son
-// nom, son portrait, sa description ne se verront jamais. Sa probabilité compte encore : le
+// Le moteur ne montre qu'UNE entrée par PNJ, la première VISIBLE sur la case du joueur
+// (`entrees_pnj_actives`) : une ligne est `masquee` dès qu'une ligne plus haut porte le même
+// PNJ SANS condition, et sur toutes ses cases (aucune `cases` = tout le lieu) — son nom, son
+// portrait, sa description ne se verront jamais. Sa probabilité compte encore : le
 // tirage retente un PNJ qui a raté le sien.
 function _pnjDoublons(lignes) {
 	const out = {};
@@ -1407,7 +1459,10 @@ function _pnjDoublons(lignes) {
 			const avant = lignes[k];
 			if (!avant || avant.character !== l.character) continue;
 			if (!(i in out)) out[i] = { premier: k, masquee: false };
-			if (!(avant.conditions || []).length) out[i].masquee = true;
+			const ici = l.cases || [], la = avant.cases || [];
+			const couvre = !la.length
+				|| (ici.length > 0 && ici.every(c => la.some(a => a[0] === c[0] && a[1] === c[1])));
+			if (!(avant.conditions || []).length && couvre) out[i].masquee = true;
 		}
 	});
 	return out;
@@ -1676,7 +1731,56 @@ function _nlMajChrome() {
 }
 
 function closeLieuAdd() {
+	desarmerViseePnj();
 	_nlEl('lieu-add-overlay').classList.add('la-hidden');
+}
+
+// ── Visée 🎯 de la case d'un PNJ ───────────────────────────────────────────
+// Écrit dans le FORMULAIRE, jamais en base (comme la visée de connexion). Offerte seulement
+// en ÉDITION du lieu dont la carte est ouverte : on vise SA grille. Le formulaire s'efface et
+// laisse passer les clics le temps du geste ; le clic retenu revient par `_nlpPoserVisee`.
+let nlpVisee = null;   // indice de la ligne PNJ dont on vise une case, null sinon
+
+function _nlpViseePossible() {
+	return !!LIEUX_HOTE.visee && nlMode === 'edition' && !!nlDocExistant
+		&& nlDocExistant._id === LIEUX_HOTE.lieuCourant();
+}
+
+function basculerViseePnj(r) {
+	if (nlpVisee === r) { desarmerViseePnj(); return; }
+	desarmerViseePnj();
+	const l = nlPnjLignes[r];
+	const err = document.querySelector(`#nl-pnj-liste [data-err-cases="${r}"]`);
+	const refus = !_nlpViseePossible() ? 'Visée impossible : ouvrez ce lieu sur la carte de l\'éditeur.'
+		: LIEUX_HOTE.visee.refus();
+	if (!l || refus) { if (err) err.textContent = `✗ ${refus}`; return; }
+	nlpVisee = r;
+	_nlEl('lieu-add-overlay').classList.add('la-viser');
+	LIEUX_HOTE.visee.armer();   // APRÈS `nlpVisee = r` : le rendu de la carte en lit l'état
+	LIEUX_HOTE.statut(`Visée : cliquez la case où se tient ${_escHtml(_nlNomAffiche(l))} `
+		+ `(une case déjà retenue se retire) — <span>Échap</span> pour renoncer.`);
+}
+
+function desarmerViseePnj() {
+	if (nlpVisee === null) return;
+	nlpVisee = null;
+	const ov = _nlEl('lieu-add-overlay');
+	if (ov) ov.classList.remove('la-viser');
+	if (LIEUX_HOTE.visee) LIEUX_HOTE.visee.desarmer();
+}
+
+function _nlpPoserVisee(cx, cy) {
+	const l = nlPnjLignes[nlpVisee];
+	desarmerViseePnj();
+	if (!l) return;
+	l.cases = _basculerCase(l.cases, cx, cy);
+	l.casesTexte = _casesEnTexte(l.cases);
+	l.casesErreur = '';
+	l.auto = false;
+	l.ouvert = true;
+	_nlRenderPnj();
+	_nlRefreshApercu();
+	LIEUX_HOTE.statut(`Case [${cx}, ${cy}] ${l.cases.some(c => c[0] === cx && c[1] === cy) ? 'ajoutée' : 'retirée'} — reste à enregistrer.`);
 }
 
 // Images qu'un lieu peut porter : TOUTES les origines servables (`images_lieu` =
@@ -1850,6 +1954,9 @@ function _nlBadgesHtml(l, r, doublons) {
 		const detail = l.json !== null ? l.json : JSON.stringify(l.conditions);
 		b.push(`<span class="nlp-badge nlp-si" title="${_escAttr(detail)}">si…</span>`);
 	}
+	if ((l.cases || []).length) {
+		b.push(`<span class="nlp-badge" title="Ne se tient que sur : ${_escAttr(_casesEnTexte(l.cases))}">📍 ${l.cases.length}</span>`);
+	}
 	if (orig && orig.progeniture) b.push(`<span class="nlp-badge" title="Porte une progéniture (chaîne d’escorte)">👶</span>`);
 	if (l.ecurie && _nlCapacitesActives().montures) b.push(`<span class="nlp-badge" title="Tient l’écurie">🐴</span>`);
 	const d = doublons[r];
@@ -1908,7 +2015,9 @@ function _nlCorpsHtml(l, r, d) {
 	const pct = isFinite(p) ? Math.round(p * 10000) / 100 : '';
 	const doublon = !d ? '' : `<div class="la-warn">⚠ Même PNJ que la ligne n°${d.premier + 1} : ` + (d.masquee
 		? `le jeu ne montre que la première entrée visible — ce nom, ce portrait et cette description ne se verront jamais. Sa chance de présence ajoute seulement un second tirage.`
-		: `cette entrée ne se montre que lorsque les conditions des lignes plus haut les écartent.`) + `</div>`;
+		: `cette entrée ne se montre que lorsque les conditions ou les cases des lignes plus haut les écartent.`) + `</div>`;
+	const viser = _nlpViseePossible()
+		? `<button type="button" class="btn btn-inline nlp-mini" data-act="viser-case" data-ligne="${r}" title="Cliquer une case de la carte : ajoutée, ou retirée si elle y est déjà">🎯 Viser</button>` : '';
 
 	return `<div class="nlp-corps">
 		<label>PNJ <span class="nlp-note">(★ = tenancier générique de la catégorie)</span></label>
@@ -1927,6 +2036,13 @@ function _nlCorpsHtml(l, r, d) {
 			<input type="number" min="0" max="100" step="any" data-champ="proba" data-ligne="${r}" value="${pct}"> %
 		</div>
 		<div class="nlp-note">Tirée à chaque entrée dans le lieu, indépendamment des autres PNJ.</div>
+		<label>Cases où il se tient <span class="nlp-note">(vide = tout le lieu)</span></label>
+		<div class="nlp-cases">
+			<input type="text" data-champ="cases" data-ligne="${r}" value="${_escAttr(l.casesTexte || '')}" placeholder="tout le lieu — ex. 26,27 ; 30,31">
+			${viser}
+		</div>
+		<div class="la-warn" data-err-cases="${r}">${_escHtml(l.casesErreur || '')}</div>
+		<div class="nlp-note">Tiré pour tout le lieu, mais son bouton 🗣 et son dialogue n'existent que sur ces cases.${viser ? '' : ' 🎯 : depuis l\'éditeur, sur la carte de ce lieu, en mode Lieux.'}</div>
 		${_nlConditionsHtml(l, r)}
 		${_nlAutresLieuxHtml(l, r)}
 		${_nlClesConserveesHtml(l)}
@@ -2042,7 +2158,7 @@ function _nlAutresLieuxHtml(l, r) {
 function _nlClesConserveesHtml(l) {
 	const orig = _nlEntreeOrigine(l);
 	if (!orig) return '';
-	const possedees = ['character', 'nom', 'portrait', 'probabilite', 'conditions', 'montures'];
+	const possedees = ['character', 'nom', 'portrait', 'probabilite', 'conditions', 'cases', 'montures'];
 	const autres = Object.keys(orig).filter(k => possedees.indexOf(k) === -1);
 	return autres.length
 		? `<div class="nlp-note" style="margin-top:8px;">Conservé tel quel : <i>${autres.map(_escHtml).join(', ')}</i></div>` : '';
@@ -2150,6 +2266,9 @@ function _nlPnjClic(ev) {
 	case 'ouvrir-lieu':
 		_nlOuvrirAutreLieu(b.dataset.lieu);
 		return;
+	case 'viser-case':
+		basculerViseePnj(r);
+		return;
 	default:
 		return;
 	}
@@ -2187,6 +2306,15 @@ function _nlPnjSaisie(ev) {
 		const jumeau = d.champ === 'proba' ? 'proba-range' : 'proba';
 		const autre = document.querySelector(`#nl-pnj-liste [data-ligne="${r}"][data-champ="${jumeau}"]`);
 		if (autre) autre.value = el.value;
+	} else if (d.champ === 'cases') {
+		// Frappe : jamais de redessin (focus) ; une saisie illisible garde les dernières cases
+		// valides et bloque l'enregistrement (`_nlErreursPnj`).
+		l.casesTexte = el.value;
+		const lues = _casesDepuisTexte(el.value);
+		l.casesErreur = lues.erreur;
+		if (!lues.erreur) l.cases = lues.cases;
+		const err = document.querySelector(`#nl-pnj-liste [data-err-cases="${r}"]`);
+		if (err) err.textContent = l.casesErreur;
 	} else if (d.champ === 'json') {
 		l.json = el.value;
 		try {
@@ -2262,6 +2390,7 @@ function _nlErreursPnj() {
 		if (!l.character) return `${n} : choisissez un PNJ (character), ou retirez la ligne.`;
 		if (!(l.probabilite >= 0 && l.probabilite <= 1)) return `${n} : chance de présence entre 0 et 100 %.`;
 		if (l.json !== null && l.jsonErreur) return `${n} : JSON des conditions illisible — ${l.jsonErreur}.`;
+		if (l.casesErreur) return `${n} : ${l.casesErreur}.`;
 		if (Object.keys(l.clauseErreurs || {}).length) return `${n} : une clause JSON est illisible.`;
 		const fautes = _clausesFautives(l.conditions);
 		if (fautes.length) return `${n} : ${fautes[0]}.`;
@@ -2745,7 +2874,7 @@ function _nlChamps() {
 		// Une ligne par entrée `pnj` : `src` dit laquelle elle prolonge (cf. _fusionPnjEntrees).
 		pnj: nlPnjLignes.map(l => ({
 			src: l.src, character: l.character, nom: (l.nom || '').trim(), portrait: l.portrait,
-			probabilite: l.probabilite, conditions: l.conditions, ecurie: l.ecurie,
+			probabilite: l.probabilite, conditions: l.conditions, cases: l.cases, ecurie: l.ecurie,
 		})),
 	};
 	return champs;

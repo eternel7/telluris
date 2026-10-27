@@ -102,6 +102,10 @@
 		background: rgba(0,0,0,0.72); padding: 24px 12px; overflow-y: auto;
 	}
 	#lieu-add-overlay.la-hidden { display: none; }
+	/* Visée 🎯 de la case d'un PNJ : le formulaire s'efface et laisse la carte recevoir le clic. */
+	#lieu-add-overlay.la-viser { visibility: hidden; pointer-events: none; }
+	.nlp-cases { display: flex; gap: 6px; align-items: center; }
+	.nlp-cases input { flex: 1; min-width: 0; margin-bottom: 0; }
 	.la-panel {
 		background: var(--panel); border: 1px solid var(--accent); border-radius: 6px;
 		box-shadow: 0 10px 40px rgba(0,0,0,0.6);

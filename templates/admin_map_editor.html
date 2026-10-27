@@ -1777,6 +1777,7 @@ lieuSelect.addEventListener('change', async (e) => {
 			lieuxJsonOuvert = null;
 			lieuxJsonDest = null;
 			lieuxRepos = null;
+			desarmerViseePnj();   // elle visait la grille qu'on quitte
 			// La file du lot est faite de cases D'UNE grille : elle ne veut plus rien dire
 			// sur la suivante. Le lot ouvert se ferme avec elle, sans rien écrire.
 			lieuxFileCases = [];
@@ -2030,7 +2031,7 @@ function renderGrid() {
 	// ⚠️ TOUTES les visées passent par ce même drapeau (🎯 de l'éditeur JSON, 🎯 du
 	// formulaire de connexion et les DEUX 🎯 du formulaire de porte) : voile rouge, cadre de
 	// survol et refus du clic sont ainsi littéralement le même code pour tous les outils.
-	const showRepos   = (showLieux && (!!lieuxRepos || cxVisee || !!ptVisee));
+	const showRepos   = (showLieux && (!!lieuxRepos || cxVisee || !!ptVisee || nlpVisee !== null));
 
 	// Draw cell fills
 	// ⚠️ Pendant un aperçu, on peint la PROPOSITION À LA PLACE du terrain réel, jamais par-dessus.
@@ -2421,6 +2422,16 @@ function paint(e) {
 		// Visée du FORMULAIRE de connexion : le clic lui appartient. Même refus et même
 		// prédicat que le repositionnement — c'est le voile rouge qu'on vient de peindre.
 		// Différence unique : on écrit dans le formulaire, rien ne part en base.
+		// Visée du FORMULAIRE DE LIEU : la case où se tient un PNJ (`cases` de son entrée).
+		// Même voile, même prédicat : un joueur doit pouvoir s'y tenir.
+		if (nlpVisee !== null) {
+			if (!_caseAccessible(cx, cy)) {
+				setStatus(`<span style="color:var(--danger)">Case [${cx}, ${cy}] inaccessible : aucun joueur ne s'y tiendrait.</span>`);
+				return;
+			}
+			_nlpPoserVisee(cx, cy);
+			return;
+		}
 		if (cxVisee) {
 			if (!_caseAccessible(cx, cy)) {
 				// On refuse et on RESTE armé, l'admin vise à côté.
@@ -2506,10 +2517,10 @@ canvas.addEventListener('mousemove', e => {
 		// Même classe de défaut que celle déjà colmatée dans renderGrid/paint/_caseAccessible.
 		const _v = c ? (grid[c.cy] || [])[c.cx] : undefined;
 		const _txt = _v === undefined ? '(hors cells)' : _v;
-		if (c && (lieuxRepos || cxVisee || ptVisee)) {
+		if (c && (lieuxRepos || cxVisee || ptVisee || nlpVisee !== null)) {
 			const ok = _caseAccessible(c.cx, c.cy);
 			setStatus(`Cellule [${c.cx}, ${c.cy}] = ${_txt} — `
-				+ (ok ? '<span>porte posable ici</span>'
+				+ (ok ? `<span>${nlpVisee !== null ? 'PNJ posable ici' : 'porte posable ici'}</span>`
 					  : '<span style="color:var(--danger)">INACCESSIBLE</span>'));
 		} else if (c) setStatus(`Cellule [${c.cx}, ${c.cy}] = ${_txt} - ${currentRev}.`);
 		return;
@@ -2574,6 +2585,7 @@ function setMode(mode) {
 	// donc au-dessus d'un mode où le panneau Lieux n'est même plus affiché. Le repositionnement
 	// part avec lui — armé, le clic du mode d'arrivée lui reviendrait.
 	lieuxRepos = null; voiesVisee = null; canvas.style.cursor = '';
+	desarmerViseePnj();   // armée, le clic du mode d'arrivée peindrait, formulaire invisible
 	// Le formulaire de connexion part avec, et dans les deux sens : sa visée attend un clic
 	// sur une carte dont le mode ne peint plus le terrain.
 	closeConnForm();
@@ -4915,7 +4927,7 @@ function armerVoiesAB() {
 	}
 	if (voiesPerime) { _voiesMsg('⚠️ Grille modifiée depuis le tracé — ↻ Recalculer avant de viser.', true); return; }
 	// ⚠️ Deux visées armées se disputeraient le même clic : celle du tracé l'intercepte en tête.
-	if (lieuxRepos || cxVisee || ptVisee) {
+	if (lieuxRepos || cxVisee || ptVisee || nlpVisee !== null) {
 		_voiesMsg("✗ Une visée du mode Lieux est armée : terminez-la ou annulez-la d'abord.", true);
 		return;
 	}
@@ -5782,6 +5794,8 @@ document.addEventListener('keydown', (e) => {
 	// ⚠️ Échap ANNULE le lot sans rien écrire (CLAUDE.md §8) — sauf pendant l'écriture,
 	// où fermer masquerait une opération en cours sans l'interrompre.
 	if (_lotOuvert() && !lotEnVol) { closeLot(); return; }
+	// Visée 🎯 d'une case de PNJ : Échap y renonce et RAMÈNE le formulaire de lieu, sans le fermer.
+	if (nlpVisee !== null) { desarmerViseePnj(); return; }
 	const add = document.getElementById('lieu-add-overlay');
 	if (add && !add.classList.contains('la-hidden')) { closeLieuAdd(); return; }
 	const ov = document.getElementById('lieu-fiche-overlay');

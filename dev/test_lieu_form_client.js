@@ -51,6 +51,7 @@ function extraire(nom) {
 
 for (const f of ['_capaciteAccordee', '_capacitesDe', '_tagsApres', '_fusionLieu',
 				 '_escRe', '_portraitsPourCategorie', '_nomDepuisPortrait',
+				 '_casesEnTexte', '_casesDepuisTexte', '_basculerCase',
 				 '_probaLue', '_nlLigneDepuisEntree', '_fusionPnjEntrees', '_pnjDoublons',
 				 '_probaPersonne', '_lieuxDuPnj',
 				 '_genreSousFiltre', '_brutDepuisValeur', '_valeurDepuisBrut',
@@ -521,6 +522,61 @@ t('doublons : masquée derrière une entrée SANS condition, pas derrière une c
 		ligne({ character: 'pnj:a' }),
 		ligne({ character: 'pnj:b' }),
 	]), { 1: { premier: 0, masquee: false } });
+});
+
+console.log('\n── Cases où se tient un PNJ (`cases`) ──');
+
+t('cases : saisie « x,y ; x,y » lue dans l’ordre, doublons retirés, vide = tout le lieu', () => {
+	assert.deepStrictEqual(_casesDepuisTexte('26,27 ; 30 31\n[4, 5]; 26,27'),
+		{ cases: [[26, 27], [30, 31], [4, 5]], erreur: '' });
+	assert.deepStrictEqual(_casesDepuisTexte('  '), { cases: [], erreur: '' });
+	assert.ok(_casesDepuisTexte('26,27 ; abc').erreur.includes('abc'));
+	assert.ok(_casesDepuisTexte('-1,2').erreur);
+	assert.strictEqual(_casesEnTexte([[26, 27], [30, 31]]), '26,27 ; 30,31');
+});
+
+t('cases : la visée ajoute une case, ou la retire si elle y est', () => {
+	assert.deepStrictEqual(_basculerCase([], 26, 27), [[26, 27]]);
+	assert.deepStrictEqual(_basculerCase([[26, 27], [1, 2]], 26, 27), [[1, 2]]);
+	assert.deepStrictEqual(_basculerCase(undefined, 3, 4), [[3, 4]]);
+});
+
+t('cases : ouvrir puis enregistrer les rend IDENTIQUES ; vidées, la clé part', () => {
+	const avant = [
+		{ character: 'pnj:philibert_des_catacombes', nom: 'Philibert', probabilite: 1,
+		  description: 'lanterne éteinte', cases: [[26, 27]] },
+		{ character: 'pnj:autre' },
+	];
+	const lignes = lignesDe({ pnj: avant });
+	assert.strictEqual(lignes[0].casesTexte, '26,27');
+	assert.deepStrictEqual(_fusionPnjEntrees(avant, lignes, null), avant);
+	lignes[0].cases = [];
+	lignes[1].cases = [[3, 4]];
+	const apres = _fusionPnjEntrees(avant, lignes, null);
+	assert.ok(!('cases' in apres[0]));
+	assert.deepStrictEqual(apres[1].cases, [[3, 4]]);
+	assert.strictEqual(apres[0].description, 'lanterne éteinte');
+});
+
+t('cases : une forme illisible s’ouvre en erreur, jamais réécrite en silence', () => {
+	const l = _nlLigneDepuisEntree({ character: 'pnj:a', cases: '26,27' }, 0);
+	assert.ok(l.casesErreur);
+	assert.deepStrictEqual(l.cases, []);
+	assert.strictEqual(l.casesTexte, '"26,27"');
+});
+
+t('doublons : une entrée postée sur des cases ne masque que sur SES cases', () => {
+	// Postée ailleurs : la ligne suivante (tout le lieu) se montre sur les autres cases.
+	assert.deepStrictEqual(_pnjDoublons([
+		ligne({ character: 'pnj:a', cases: [[1, 1]] }), ligne({ character: 'pnj:a' }),
+	]), { 1: { premier: 0, masquee: false } });
+	// Toutes ses cases déjà couvertes plus haut : inerte.
+	assert.deepStrictEqual(_pnjDoublons([
+		ligne({ character: 'pnj:a', cases: [[1, 1], [2, 2]] }), ligne({ character: 'pnj:a', cases: [[2, 2]] }),
+	]), { 1: { premier: 0, masquee: true } });
+	assert.deepStrictEqual(_pnjDoublons([
+		ligne({ character: 'pnj:a' }), ligne({ character: 'pnj:a', cases: [[2, 2]] }),
+	]), { 1: { premier: 0, masquee: true } });
 });
 
 t('chance que le lieu soit vide : le tirage du moteur, conditions à part', () => {
