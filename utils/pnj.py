@@ -8,6 +8,9 @@
 # des autres, et tous ceux qui passent sont là ensemble (une ligne d'action chacun, dans
 # l'ordre de la liste du lieu). ⚠️ Forme d'AVANT le cumul, `{"lieu": id, "character": id|None}`,
 # relue telle quelle (Conventions §4 : aucune migration) — cf. `_ids_presents`.
+# Une entrée peut porter **`cases: [[x, y], …]`** : le PNJ est tiré à l'entrée du lieu comme
+# les autres, mais ne se tient QUE sur ces cases — bouton et dialogue n'existent que là
+# (`sur_sa_case`, appliqué à la LECTURE par `entrees_pnj_actives`). Sans `cases` : tout le lieu.
 #
 # Le doc PNJ (`type:"pnj"`) porte :
 # - `dialogue` : {"noeud_depart": id, "noeud_attente"?: id,
@@ -204,6 +207,19 @@ def passages_ok(passages, filtre) -> bool:
 	return (not a_min or n >= mini) and (not a_max or n <= maxi)
 
 
+def sur_sa_case(entree: dict, position) -> bool:
+	"""Le personnage en `position` ({x, y}) se tient-il là où l'entrée place son PNJ ? Sans
+	`cases`, partout. ⚠️ FAIL-CLOSED : une entrée à `cases` sans position lisible est écartée."""
+	cases = (entree or {}).get("cases")
+	if not cases:
+		return True
+	try:
+		ici = [int(position["x"]), int(position["y"])]
+	except (TypeError, KeyError, ValueError):
+		return False
+	return any(isinstance(c, (list, tuple)) and len(c) == 2 and list(c) == ici for c in cases)
+
+
 def _ids_presents(character: dict) -> list:
 	"""Les ids tirés à l'entrée. ⚠️ Aucune migration (Conventions §4) : un personnage
 	sauvegardé AVANT le cumul porte `character: id|None` et non `characters: [...]` — il
@@ -217,7 +233,7 @@ def _ids_presents(character: dict) -> list:
 
 
 def entrees_pnj_actives(character: dict, lieu_doc: dict, marchand_fn=None,
-						condition_fn=None) -> list:
+						condition_fn=None, toutes_cases: bool = False) -> list:
 	"""Les entrées `pnj` du lieu correspondant au tirage persisté, dans l'ordre du lieu.
 	Liste vide si le tirage est périmé, si personne n'est là, ou si le lieu n'a pas de pnj ;
 	une entrée retirée de la donnée depuis le tirage disparaît d'elle-même.
@@ -225,7 +241,12 @@ def entrees_pnj_actives(character: dict, lieu_doc: dict, marchand_fn=None,
 	⚠️ Le filtre `conditions` joue ICI AUSSI, et pas seulement au tirage : `pnj_present` est
 	un champ TRANSITOIRE persisté, et `poser_pnj_present` est un no-op tant qu'on reste dans
 	le lieu. Un PNJ tiré alors que sa condition tenait continuerait donc de parler après
-	qu'elle a cessé de tenir. La condition est autoritative à la LECTURE."""
+	qu'elle a cessé de tenir. La condition est autoritative à la LECTURE.
+
+	Même chose pour `cases` : seuls les PNJ de la case du personnage sont rendus — sauf
+	`toutes_cases=True` (tirage des offres à l'entrée : un donneur posté ailleurs dans la cité
+	propose sa course quand on le rejoint). Filtré AVANT le dédoublonnage : deux entrées d'un
+	même PNJ à des cases différentes le placent à chacune."""
 	present = (character or {}).get("pnj_present") or {}
 	lieu_id = (lieu_doc or {}).get("_id")
 	if not lieu_id or present.get("lieu") != lieu_id:
@@ -240,7 +261,8 @@ def entrees_pnj_actives(character: dict, lieu_doc: dict, marchand_fn=None,
 	vues, retenues = set(), []
 	for e in entrees_pnj(lieu_doc, marchand_fn, condition_fn):
 		pnj_id = e.get("character")
-		if pnj_id in presents and pnj_id not in vues:
+		if (pnj_id in presents and pnj_id not in vues
+				and (toutes_cases or sur_sa_case(e, (character or {}).get("position")))):
 			vues.add(pnj_id)
 			retenues.append(e)
 	return retenues

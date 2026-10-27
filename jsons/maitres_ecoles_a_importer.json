@@ -72039,7 +72039,13 @@
         "nom": "Philibert",
         "portrait": "maitre_philibert_des_catacombes01.jpg",
         "probabilite": 1,
-        "description": "Un nécromancien hobbit couvert de poussière de calcaire, une lanterne éteinte à la main, qui vient de remonter des catacombes."
+        "description": "Un nécromancien hobbit couvert de poussière de calcaire, une lanterne éteinte à la main, qui vient de remonter des catacombes.",
+        "cases": [
+          [
+            26,
+            27
+          ]
+        ]
       }
     ]
   },

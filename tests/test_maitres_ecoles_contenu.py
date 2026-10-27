@@ -4,6 +4,7 @@
 # ENSEIGNÉES des sept écoles (contrat de la Lance de lumière), leurs maîtres et leurs épreuves,
 # les formes simples de niveau 10 créées pour l'occasion et leurs grimoires.
 
+import copy
 import json
 import os
 import sys
@@ -141,6 +142,39 @@ def test_chaque_maitre_est_present_dans_son_lieu_sans_toucher_aux_autres():
 		assert doc["pnj"][:len(avant.get("pnj") or [])] == list(avant.get("pnj") or [])
 		assert {k: v for k, v in doc.items() if k != "pnj"} == {
 			k: v for k, v in avant.items() if k not in ("pnj", "_rev")}
+
+
+def _dump_apres_import():
+	with open(os.path.join(RACINE, "jsons", "telluris-dump-20261027-060252.json"),
+			  encoding="utf-8") as f:
+		return {d["_id"]: d for d in json.load(f)["docs"]}
+
+
+def test_philibert_ne_se_tient_que_sur_la_descente_des_catacombes():
+	"""Importé d'abord sans `cases`, Philibert était sur toutes les cases de Lutecia : rejoué
+	sur ce dump, le générateur ne réécrit que son entrée, postée sur la case qui descend."""
+	base = _dump_apres_import()
+	docs, erreurs = gen.construire(base)
+	assert not erreurs
+	assert [d["_id"] for d in docs] == ["lieu:lutecia"]
+	(entree,) = docs[0]["pnj"]
+	lien = base["link:lutecia_to_catacombes0001"]
+	descente = next(n["pos"] for n in lien["nodes"] if n["lieu"] == "lieu:lutecia")
+	assert entree["character"] == "pnj:philibert_des_catacombes"
+	assert entree["cases"] == [descente]
+
+
+def test_un_maitre_deplace_quitte_son_ancien_lieu():
+	"""Un maître posté ailleurs que là où une entrée le place encore : l'entrée part."""
+	base = copy.deepcopy(_dump_apres_import())
+	(entree,) = base["lieu:lutecia"]["pnj"]
+	base["lieu:catacombes0001"]["pnj"] = [entree]
+	docs, erreurs = gen.construire(base)
+	assert not erreurs
+	lieux = {d["_id"]: d for d in docs}
+	assert "pnj" not in lieux["lieu:catacombes0001"]
+	assert lieux["lieu:catacombes0001"] == {k: v for k, v in base["lieu:catacombes0001"].items()
+											if k not in ("pnj", "_rev")}
 
 
 def test_aucun_portrait_partage():

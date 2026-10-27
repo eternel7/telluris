@@ -1083,7 +1083,9 @@ MAITRES = [
 	},
 	{
 		"slug": "philibert_des_catacombes", "sort": "sort:ossuaire_des_catacombes",
-		"lieu": "lieu:lutecia", "nom": "Philibert", "race": "hobbit",
+		# En surface, sur la SEULE case de Lutecia qui descend aux catacombes (nœud Lutecia de
+		# `link:lutecia_to_catacombes0001`) — sans `cases`, il était sur toutes celles de la cité.
+		"lieu": "lieu:lutecia", "cases": [[26, 27]], "nom": "Philibert", "race": "hobbit",
 		"vocation": "necromancien", "ecole_texte": "nécromantique",
 		"presence": "Un nécromancien hobbit couvert de poussière de calcaire, une lanterne "
 					"éteinte à la main, qui vient de remonter des catacombes.",
@@ -1362,8 +1364,12 @@ def pnj_doc(m: dict, sorts: dict) -> dict:
 
 
 def entree_presence(m: dict) -> dict:
-	return {"character": "pnj:" + m["slug"], "nom": m["nom"], "portrait": portrait(m),
-			"probabilite": 1, "description": m["presence"]}
+	"""`cases` (optionnel) : le maître ne se tient que sur ces cases du lieu (`utils/pnj`)."""
+	entree = {"character": "pnj:" + m["slug"], "nom": m["nom"], "portrait": portrait(m),
+			  "probabilite": 1, "description": m["presence"]}
+	if m.get("cases"):
+		entree["cases"] = m["cases"]
+	return entree
 
 
 def construire(base: dict) -> tuple:
@@ -1421,15 +1427,29 @@ def construire(base: dict) -> tuple:
 	for m in MAITRES:
 		_maitre(pnj_doc(m, sorts))
 		presences.setdefault(m["lieu"], []).append(entree_presence(m))
+	# Un maître DÉPLACÉ quitte son ancien lieu : tout lieu du dump qui porte encore l'entrée
+	# d'un maître posté ailleurs est réémis sans elle.
+	poste = {"pnj:" + m["slug"]: m["lieu"] for m in MAITRES}
+	for lieu_id, lieu in base.items():
+		if lieu.get("type") != "lieu" or lieu_id in presences:
+			continue
+		if any(poste.get((p or {}).get("character"), lieu_id) != lieu_id
+			   for p in lieu.get("pnj") or []):
+			presences[lieu_id] = []
 	for lieu_id, entrees in presences.items():
 		lieu = base.get(lieu_id)
 		if lieu is None:
 			erreurs.append(f"{lieu_id} absent du dump")
 			continue
-		# Entrées de présence des maîtres : ajoutées, ou RÉÉCRITES si elles ont changé ; les
-		# autres entrées du lieu restent telles quelles.
+		# Entrées de présence des maîtres : ajoutées, ou RÉÉCRITES si elles ont changé, ou
+		# RETIRÉES si le maître est posté ailleurs ; les autres entrées restent telles quelles.
 		presence = list(lieu.get("pnj") or [])
 		change = False
+		ailleurs = [p for p in presence
+					if poste.get((p or {}).get("character"), lieu_id) != lieu_id]
+		if ailleurs:
+			presence = [p for p in presence if p not in ailleurs]
+			change = True
 		for entree in entrees:
 			rang = next((i for i, p in enumerate(presence)
 						 if (p or {}).get("character") == entree["character"]), None)
@@ -1441,7 +1461,10 @@ def construire(base: dict) -> tuple:
 				change = True
 		if change:
 			lieu = copy.deepcopy(_sans_rev(lieu))
-			lieu["pnj"] = presence
+			if presence:
+				lieu["pnj"] = presence
+			else:
+				lieu.pop("pnj", None)
 			docs.append(lieu)
 	return docs, erreurs
 

@@ -189,6 +189,50 @@ def test_entree_pnj_active_designe_son_interlocuteur():
     assert pnj.entree_pnj_active(character, lieu, pnj_id="pnj:absent") is None
 
 
+def test_pnj_poste_sur_une_case_n_est_la_que_sur_elle():
+    """`cases` : tiré pour TOUT le lieu à l'entrée (le pas suivant ne re-tire pas), mais
+    ligne d'action et dialogue n'existent que sur sa case — Philibert à la descente des
+    catacombes, et non sur toutes les cases de Lutecia."""
+    character = _character()
+    character["position"] = {"x": 3, "y": 4}
+    lieu = _lieu([_entree("pnj:poste", proba=1.0, cases=[[26, 27]]),
+                  _entree("pnj:partout", proba=1.0)])
+    pnj.poser_pnj_present(character, lieu, rand_fn=lambda: 0.0)
+    assert character["pnj_present"]["characters"] == ["pnj:poste", "pnj:partout"]
+    assert [e["character"] for e in pnj.entrees_pnj_actives(character, lieu)] == ["pnj:partout"]
+    assert pnj.entree_pnj_active(character, lieu, pnj_id="pnj:poste") is None
+    # Les offres se tirent à l'entrée sur tout le lieu : `toutes_cases`.
+    assert [e["character"] for e in pnj.entrees_pnj_actives(character, lieu, toutes_cases=True)] \
+        == ["pnj:poste", "pnj:partout"]
+    character["position"] = {"x": 26, "y": 27}
+    assert [e["character"] for e in pnj.entrees_pnj_actives(character, lieu)] \
+        == ["pnj:poste", "pnj:partout"]
+    assert pnj.entree_pnj_active(character, lieu, pnj_id="pnj:poste")["character"] == "pnj:poste"
+
+
+def test_pnj_a_deux_postes_rend_l_entree_de_la_case():
+    """Deux entrées d'un même PNJ à des cases différentes : chacune vaut sur SA case (le
+    filtre de case passe AVANT le « une entrée par PNJ »)."""
+    character = _character()
+    lieu = _lieu([_entree("pnj:a", proba=1.0, cases=[[1, 1]], nom="Au puits"),
+                  _entree("pnj:a", proba=1.0, cases=[[5, 5]], nom="Au marché")])
+    pnj.poser_pnj_present(character, lieu, rand_fn=lambda: 0.0)
+    character["position"] = {"x": 5, "y": 5}
+    assert [e["nom"] for e in pnj.entrees_pnj_actives(character, lieu)] == ["Au marché"]
+    character["position"] = {"x": 2, "y": 2}
+    assert pnj.entrees_pnj_actives(character, lieu) == []
+
+
+def test_sur_sa_case_fail_closed():
+    assert pnj.sur_sa_case({"character": "pnj:a"}, None)
+    assert pnj.sur_sa_case({"cases": []}, None)
+    assert not pnj.sur_sa_case({"cases": [[1, 2]]}, None)
+    assert not pnj.sur_sa_case({"cases": [[1, 2]]}, {"x": "?", "y": 2})
+    assert not pnj.sur_sa_case({"cases": [[1, 2]]}, {"x": 2, "y": 1})
+    assert not pnj.sur_sa_case({"cases": [[1, 2, 3], "1,2"]}, {"x": 1, "y": 2})
+    assert pnj.sur_sa_case({"cases": [[0, 0], [1, 2]]}, {"x": 1, "y": 2})
+
+
 def test_pnj_present_forme_d_avant_le_cumul_toujours_lue():
     """Aucune migration (Conventions §4) : un personnage sauvegardé avant le cumul porte
     `character: id` et non `characters: [...]` — il garde son PNJ jusqu'à son prochain pas."""

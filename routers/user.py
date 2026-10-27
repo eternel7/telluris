@@ -48,6 +48,7 @@ from utils import intro
 from utils import transport
 from utils import recrutement
 from utils import acces
+from utils import pnj as pnj_util
 from utils import proprietes
 from utils import cadence
 from utils import courriel
@@ -655,6 +656,14 @@ def _effets_arrivee(character: dict, destination: str, destination_pos: dict,
 	return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character), "ressource_recoltable": _recolte_payload(character), "effets_actifs": consommables.effets_actifs_payload(character), "caracts_detail": _caracts_payload(character), "focalisation_atteinte": {"lieu": destination, "nom": lieu_label(lieu_doc, destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
 
 
+def _pnjs_ici(character: dict, lieu_doc: dict) -> list:
+	"""Ids des PNJ présents qui se tiennent sur la case du personnage — mêmes filtres que la
+	ligne d'action de /play et que le dialogue (`pnj.entrees_pnj_actives`)."""
+	return [e.get("character") for e in pnj_util.entrees_pnj_actives(
+		character, lieu_doc, transport.entree_marchand,
+		lambda conds: acces.clauses_remplies(character, conds, get_doc))]
+
+
 @user_router.post("/move_character")
 async def move_character(
 	response: Response, 
@@ -799,7 +808,7 @@ async def move_character(
 				# docs relation + un doc lieu complet par lieu connu).
 				relations_lieux = (relations_lieux_payload(character_to_update)
 								   if (transports_echoues or escorte_maj["depose"]) else None)
-				return {"transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "lieux_marques": indicateurs.marques_lieux(character_to_update), "access": access, "volant": vol_util.vol_actif(character_to_update), "chute": chute, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp, "proprietes_offre": proprietes.offre_ici(lieu_doc, character_to_update["position"], auberge.lieu_est_taverne(lieu_doc), proprietes.catalogue(get_doc), get_doc)}
+				return {"transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "lieux_marques": indicateurs.marques_lieux(character_to_update), "access": access, "volant": vol_util.vol_actif(character_to_update), "chute": chute, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp, "proprietes_offre": proprietes.offre_ici(lieu_doc, character_to_update["position"], auberge.lieu_est_taverne(lieu_doc), proprietes.catalogue(get_doc), get_doc), "pnjs_ici": _pnjs_ici(character_to_update, lieu_doc)}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 
