@@ -171,10 +171,11 @@ def catalogue_commandable(lieu_doc: dict, get_doc_fn=None, voisins=None) -> list
 def recette_pour(lieu_doc: dict, item_id: str):
 	"""La recette de CE lieu qui produit `item_id`, ou None. La première trouvée fait foi :
 	`recettes_lieu` sert la catégorie propre en tête, donc la recette maison prime sur celle
-	d'un métier réuni."""
+	d'un métier réuni. Puis les recettes à TROPHÉE (`marche.recettes_trophee_lieu`), absentes
+	du tick mais commandables : leur trophée, seul le client l'apporte (`sourcer`)."""
 	if not item_id:
 		return None
-	for r in marche.recettes_lieu(lieu_doc):
+	for r in marche.recettes_lieu(lieu_doc) + marche.recettes_trophee_lieu(lieu_doc):
 		if marche.objet_final_item_id(r.get("objet_final", "")) == item_id:
 			return r
 	return None
@@ -349,6 +350,53 @@ def emplacements_fournis(besoins, porteurs, get_doc_fn, retenus=None) -> tuple:
 		if reste > 0:
 			manquants.append({"cle": cle, "quantite": reste})
 	return trouves, manquants
+
+
+# ── La pièce de base apportée (sur-mesure seulement) ────────────────────────────
+# Le client confie SA pièce à façonner au lieu d'en faire fabriquer une neuve : les
+# ingrédients de la recette ne sont plus demandés (trophée compris) et la pièce entière est
+# remise sur le prix. Son nom propre (`nom_perso`) passe à la variante livrée.
+#
+# ⚠️ Seul l'objet de base EXACT est admis (`item_ref_id(ref) == item_id`) : une variante a
+# son propre id, et l'item commandé est toujours un produit du catalogue, jamais une variante
+# (`sur_commande` la sort de `produits`). Sans cette égalité stricte, façonner une variante
+# déjà façonnée empilerait les valeurs à chaque passage.
+
+def exemplaires_base(porteurs, item_id: str) -> list:
+	"""Les exemplaires de `item_id` dans les sacs de l'expédition, dans l'ordre des porteurs
+	(principal en tête) : `[{"porteur": id, "index": i, "nom_perso": "…"}]`. Les pièces
+	ÉQUIPÉES n'y sont pas — il faut les ôter d'abord."""
+	out = []
+	for porteur in porteurs or ():
+		pid = (porteur or {}).get("_id") or ""
+		for index, ref in enumerate((porteur or {}).get("inventaire", []) or []):
+			if item_id and item_ref_id(ref) == item_id:
+				out.append({"porteur": pid, "index": index,
+							"nom_perso": (ref.get("nom_perso") or "") if isinstance(ref, dict) else ""})
+	return out
+
+
+def exemplaire_base(porteurs, item_id: str, choix) -> dict | None:
+	"""L'exemplaire désigné par `choix` (`{"porteur": id, "index": i}`), sous la forme d'une
+	entrée d'`emplacements_fournis` (donc retirable par `retirer_fournitures`) plus son
+	`nom_perso` — ou None si la position ne porte plus EXACTEMENT `item_id` (le sac a bougé
+	entre l'affichage et l'envoi : on ne prend pas une autre pièce à la place)."""
+	if not isinstance(choix, dict) or not item_id:
+		return None
+	try:
+		index = int(choix.get("index"))
+	except (TypeError, ValueError):
+		return None
+	for porteur in porteurs or ():
+		if ((porteur or {}).get("_id") or "") != (choix.get("porteur") or ""):
+			continue
+		inventaire = porteur.get("inventaire", []) or []
+		if not 0 <= index < len(inventaire) or item_ref_id(inventaire[index]) != item_id:
+			return None
+		ref = inventaire[index]
+		return {"cle": item_id, "porteur": porteur, "index": index, "item_id": item_id,
+				"nom_perso": (ref.get("nom_perso") or "") if isinstance(ref, dict) else ""}
+	return None
 
 
 def retirer_fournitures(trouves) -> list:
@@ -588,7 +636,7 @@ def _fabriquer(lieu_doc, cle, manque, get_doc_fn, flux, registre, chemin, profon
 
 
 def sourcer(besoins, porteurs, lieu_doc, get_doc_fn, prix_fn=None, retenus=None,
-			atelier=False, flux=None, voisins=()) -> dict:
+			atelier=False, flux=None, voisins=(), trophees=()) -> dict:
 	"""Les trois cas du §7 : ce que le joueur fournit, ce que l'artisan met, ce qui manque.
 
 	DEUX modes, parce que les deux familles de matières ne se facturent pas pareil :
@@ -620,12 +668,21 @@ def sourcer(besoins, porteurs, lieu_doc, get_doc_fn, prix_fn=None, retenus=None,
 
 	`voisins` : les boutiques de la cité. Ce que ni la réserve, ni le rayon, ni le pool ne
 	fournissent, l'artisan le prend au RAYON de l'une d'elles, avant de fabriquer — les crins du
-	boucher, que le joueur pourrait y acheter lui-même."""
+	boucher, que le joueur pourrait y acheter lui-même.
+
+	`trophees` (`marche.cles_trophee` de la recette) : ces clés-là ne viennent QUE des sacs de
+	l'expédition — ni réserve, ni rayon, ni pool, ni voisine, ni fabrication. Le crâne du
+	Minotaure se gagne contre le Minotaure ; l'artisan n'en a pas en stock."""
 	trouves, manquants = emplacements_fournis(besoins, porteurs, get_doc_fn, retenus)
 	achetees, fournies_atelier, introuvables = [], [], []
 	registre = _registre()
 	for manque in manquants:
 		cle, reste = manque["cle"], int(manque["quantite"])
+		if cle in trophees:
+			doc = get_doc_fn(marche.matiere_item_id(cle)) or {}
+			introuvables.append({"cle": cle, "quantite": reste, "trophee": True,
+								 "nom": doc.get("nom") or cle})
+			continue
 		if atelier:
 			part = _source_atelier(lieu_doc, cle, reste, get_doc_fn, flux, registre,
 								   frozenset(), COMMANDE_PROFONDEUR, voisins)
@@ -858,15 +915,19 @@ def prix_variante(base_doc: dict, matieres_docs, cout_fn=None, prix_min_fn=None)
 
 def nouvelle_commande(lieu_doc: dict, item_id: str, detail: dict, now: int | None = None,
 					  base_item: str = "", matieres=None, fournies=None,
-					  achetees=None, manquantes=None, poids: float = 0.0) -> dict:
+					  achetees=None, manquantes=None, poids: float = 0.0,
+					  nom_perso: str = "") -> dict:
 	"""Enregistrement d'une commande, prêt à être poussé dans `character["commandes"]`.
 
 	Naît `payee` si tout est réuni, `en_attente_materiaux` sinon — jamais en échec (§7 cas C).
 	`pret_at` n'a de sens que pour une commande payée ; il est posé dès maintenant pour que le
-	statut reste purement dérivable de l'horloge, sans second champ à tenir à jour."""
+	statut reste purement dérivable de l'horloge, sans second champ à tenir à jour.
+
+	`nom_perso` : celui de la pièce APPORTÉE (`exemplaire_base`), rendu à la livraison."""
 	instant = now_epoch() if now is None else int(now)
 	complet = not (manquantes or [])
-	return {
+	extra = {"nom_perso": nom_perso} if nom_perso else {}
+	return extra | {
 		"id": uuid.uuid4().hex,
 		"lieu": (lieu_doc or {}).get("_id", ""),
 		"lieu_categorie": (lieu_doc or {}).get("categorie", ""),
@@ -934,6 +995,9 @@ def ref_livree(commande: dict) -> dict:
 	poids = float(commande.get("poids", 0) or 0)
 	if poids > 0:
 		ref["poids"] = poids
+	# Le nom propre de la pièce apportée suit la pièce façonnée (`nouvelle_commande`).
+	if commande.get("nom_perso"):
+		ref["nom_perso"] = commande["nom_perso"]
 	return ref
 
 
