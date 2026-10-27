@@ -249,6 +249,25 @@ def test_location_perimee_meme_avant_bascule_du_statut():
 	assert not proprietes.location_perimee(maison(), now=10**12)
 
 
+def test_chambre_reprise_apres_le_delai_de_grace():
+	grace = proprietes.grace_location_s(CAT)
+	c = perso(proprietes=["propriete:x"], lieu="propriete:x")
+	p = chambre_louee(expire_at=2000, _id="propriete:x", coffre=[{"item": "item:a", "poids": 1}])
+	lire = {"propriete:x": p}.get
+	assert proprietes.reprendre_locations(c, CAT, lire, now=2000 + grace - 1) == []
+	assert c["proprietes"] == ["propriete:x"]
+	assert proprietes.reprendre_locations(c, CAT, lire, now=2000 + grace) == [p]
+	assert c["proprietes"] == []
+	# Il se trouvait dans la chambre : ressorti dans l'auberge, sur la case de la porte.
+	assert c["lieu"] == "lieu:auberge" and c["position"] == {"x": 0, "y": 0}
+
+
+def test_delai_de_grace_reglable_cinq_jours_par_defaut():
+	assert proprietes.grace_location_s({}) == proprietes.GRACE_LOCATION_S == 5 * 86400
+	assert proprietes.grace_location_s({"reglages": {"location_grace_s": 60}}) == 60
+	assert not proprietes.location_reprise(maison(), CAT, now=10**12)
+
+
 def test_prolonger_ne_perd_jamais_de_temps():
 	p = chambre_louee(expire_at=2000)
 	proprietes.prolonger_location(p, 100, now=1500)

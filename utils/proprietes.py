@@ -386,8 +386,9 @@ def creer_lien(prop: dict) -> dict:
 
 def traiter_expiration_location(prop: dict, now: int | None = None) -> bool:
 	"""Péremption PARESSEUSE d'une location (aucun tick de fond). True si le doc a changé.
-	La chambre expirée reste celle du locataire : il peut y reprendre ses affaires, et
-	relouer dans la même auberge la réactive (`louer`)."""
+	La chambre expirée reste celle du locataire pendant le délai de grâce : il peut y
+	reprendre ses affaires, et relouer dans la même auberge la réactive (`louer`). Au-delà,
+	`reprendre_locations`."""
 	now = now_epoch() if now is None else now
 	if (prop.get("mode") == MODE_LOCATION and prop.get("statut") == LOUEE
 			and _int(prop.get("expire_at")) <= now):
@@ -547,6 +548,63 @@ def chambre_louee_ici(character: dict, auberge_id, get_doc_fn=None) -> dict | No
 		if p.get("mode") == MODE_LOCATION and (p.get("origine") or {}).get("lieu") == auberge_id:
 			return p
 	return None
+
+
+# Délai de grâce après l'échéance : 5 jours RÉELS, voulus longs — un joueur occasionnel qui
+# revient en ayant oublié sa chambre retrouve encore ses affaires. Réglable par
+# `rules:proprietes.reglages.location_grace_s`.
+GRACE_LOCATION_S = 5 * 86400
+
+
+def grace_location_s(cat: dict) -> int:
+	return max(0, _int(reglages(cat).get("location_grace_s"), GRACE_LOCATION_S))
+
+
+def location_reprise(prop: dict, cat: dict, now: int | None = None) -> bool:
+	"""L'aubergiste reprend la chambre : échéance + délai de grâce dépassés."""
+	if prop.get("mode") != MODE_LOCATION:
+		return False
+	now = now_epoch() if now is None else now
+	return _int(prop.get("expire_at")) + grace_location_s(cat) <= now
+
+
+def reprendre_locations(character: dict, cat: dict, get_doc_fn=None, now: int | None = None) -> list:
+	"""Péremption PARESSEUSE des chambres délaissées : retirées du personnage (ressorti dans
+	l'auberge s'il s'y trouvait), coffre PERDU. Mute le personnage, sans save ; l'appelant
+	le sauve puis supprime la chambre et sa porte. → docs des chambres reprises."""
+	reprises = [p for p in proprietes_de(character, get_doc_fn) if location_reprise(p, cat, now)]
+	if not reprises:
+		return []
+	ids = {p["_id"] for p in reprises}
+	character["proprietes"] = [i for i in character.get("proprietes") or [] if i not in ids]
+	for p in reprises:
+		if character.get("residence") == p["_id"]:
+			character["residence"] = None
+		if character.get("lieu") == p["_id"]:
+			origine = p.get("origine") or {}
+			opos = origine.get("pos") or [0, 0]
+			character["lieu"] = origine.get("lieu") or character.get("cite")
+			character["position"] = {"x": opos[0], "y": opos[1]}
+	return reprises
+
+
+def appliquer_reprises(character: dict, cat: dict, get_doc_fn, save_doc_fn, delete_doc_fn,
+					   now: int | None = None) -> list:
+	"""`reprendre_locations` + persistance : personnage d'abord (l'autoritatif), puis chambre
+	et porte supprimées. → [{"label", "auberge"}] pour le toast du joueur."""
+	reprises = reprendre_locations(character, cat, get_doc_fn, now)
+	if not reprises:
+		return []
+	save_doc_fn(character)
+	out = []
+	for p in reprises:
+		lien = get_doc_fn(p.get("lien", "")) if p.get("lien") else None
+		if lien:
+			delete_doc_fn(lien)
+		delete_doc_fn(p)
+		auberge = get_doc_fn((p.get("origine") or {}).get("lieu") or "") or {}
+		out.append({"label": p.get("label", ""), "auberge": auberge.get("label") or auberge.get("nom") or ""})
+	return out
 
 
 def prolonger_location(prop: dict, duree_s: int, now: int | None = None) -> None:

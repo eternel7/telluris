@@ -762,6 +762,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	vocation = next((v for v in vocations["value"] if v["id"] == character["voc"]), None)
 	races = get_doc("rules:races")
 	race = next((r for r in races["value"] if r["id"] == character["race"]), None)
+	# Chambres d'auberge délaissées au-delà du délai de grâce : reprises par l'aubergiste,
+	# coffre perdu (paresseux, avant de relire le lieu : on a pu y être ressorti).
+	chambres_reprises = proprietes_util.appliquer_reprises(
+		character, proprietes_util.catalogue(get_doc), get_doc, save_doc, delete_doc)
 	lieu = character.get("lieu",character["cite"])
 	grid_doc = get_doc(lieu)
 	# Propriété de joueur : location périmée PARESSEUSEMENT, et expulsion si l'on se trouve
@@ -1197,6 +1201,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"transports_echoues": [
 				{"titre": q.get("titre", "—")} for q in transports_echoues
 			],
+			"chambres_reprises": chambres_reprises,
 			"intro": intro_payload,
 			"ressource_recoltable": ressource_recoltable,
 			"relations_lieux": relations_lieux,

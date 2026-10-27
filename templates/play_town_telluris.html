@@ -8831,6 +8831,8 @@ renderFicheQuetes({
 });
 // Courses échues pendant l'absence du joueur : le serveur les a déjà soldées au rendu.
 _notifierTransportsEchoues({ transports_echoues: {{ transports_echoues | tojson | safe }} });
+// Chambres d'auberge délaissées : reprises par le serveur au rendu.
+_notifierChambresReprises({ chambres_reprises: {{ chambres_reprises | tojson | safe }} });
 // Course expirée pendant un changement de lieu : le toast a été mis de côté avant le reload.
 (function () {
 	const differe = sessionStorage.getItem('transports_echoues_notif');
@@ -9416,6 +9418,8 @@ async function openProprietesOffre() {
 	const data = await _aubFetch('api/proprietes/offre');
 	if (!data) return;
 	_propVue = 'offre';
+	_notifierChambresReprises(data);
+	_majLiens(data);
 	updatePurse(data.purse);
 	renderProprietesOffre(data);
 	_propAfficher();
@@ -9486,10 +9490,11 @@ function renderProprietesOffre(data) {
 		const l = data.location, ch = l.chambre;
 		const etat = !ch ? 'Aucune chambre louée ici.'
 			: ch.statut === 'louee' ? `Votre chambre est louée jusqu'au ${_propDate(ch.expire_at)}.`
-			: 'Votre location a expiré : vos affaires vous attendent, relouez pour y dormir.';
+			: `Votre location a expiré : relouez avant le ${_propDate(ch.expire_at + (l.grace_s || 0))} ou l'aubergiste reprendra la chambre et son coffre.`;
 		html += `<section class="prop-section"><h3>🛏️ Chambre à louer</h3><div class="prop-ligne"><div class="prop-txt">
 			<span class="q-desc">${escapeHtml(l.type.description || '')}</span>
 			<span class="q-desc">Durée : ${Math.round(l.duree_s / 86400 * 10) / 10} jour(s) · inviolable</span>
+			<span class="q-desc">⚠️ Non renouvelée ${Math.round((l.grace_s || 0) / 86400 * 10) / 10} jour(s) après l'échéance, la chambre est reprise : les affaires laissées dans son coffre sont perdues.</span>
 			<span class="q-desc">${etat}</span>
 			<span class="sell-prix">💰 ${_prixTexte(l.prix)}</span>
 		</div><button class="sh-drop-btn" ${l.prix > bourse ? 'disabled' : ''} onclick="propLouer()">${ch ? 'Prolonger' : 'Louer'}</button></div></section>`;
@@ -9620,6 +9625,14 @@ async function propEcurie(btn, geste) {
 }
 
 // Liste des lieux depuis le `links` d'une réponse (même source que `move_character`).
+// Chambre délaissée au-delà du délai de grâce : l'aubergiste l'a reprise, coffre compris
+// (serveur, au passage). ⚠️ `showToast` écrit en textContent : rien à échapper.
+function _notifierChambresReprises(rep) {
+	((rep && rep.chambres_reprises) || []).forEach(c => {
+		showToast(`🛏️ ${c.auberge ? "L'aubergiste de " + c.auberge : "L'aubergiste"} a repris votre chambre faute de paiement : les affaires laissées dans son coffre sont perdues.`, { major: true });
+	});
+}
+
 function _majLiens(data) {
 	if (Array.isArray(data.links)) { LINKS = data.links; buildLocationslist(); }
 }
@@ -9671,6 +9684,7 @@ async function propAcheter(btn) {
 
 async function propLouer() {
 	const data = await _propPost('api/proprietes/louer', {});
+	_notifierChambresReprises(data);
 	if (data && data.louee) {
 		showToast(`🛏️ Chambre louée jusqu'au ${_propDate(data.louee.expire_at)}.`);
 		_majLiens(data);
