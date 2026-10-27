@@ -129,6 +129,43 @@ def test_le_score_ne_compte_que_ce_qui_agit():
 	assert gen.score_matiere(eff, [gen.TAG_CONSOMMABLE]) == 1
 	# Débuff : |Δ| × durée / 2.
 	assert gen.score_matiere({"effets": {"buffs": {"R": -2}, "duree": 3}}) == 3
+	# Poison (régén négative) : compté comme un débuff, jamais en négatif.
+	assert gen.score_matiere({"effets": {"regen_pv": -2, "duree": 3}}) == 3
+
+
+def test_une_rarete_derogee_est_acceptee_et_produite():
+	# Décision de l'Auteur : la Graine sacrée confère `rare` bien qu'elle soit au palier 2.
+	entree = gen._matiere("X", 2, {"bonus_degats": 3}, [gen.TAG_ARME], rarete_derogee="rare")
+	assert entree["modificateurs"]["rarete"] == "rare"
+	assert gen.erreurs_de_budget({"item:x": entree}) == []
+	sans = gen._matiere("X", 2, {"bonus_degats": 3, "rarete": "rare"}, [gen.TAG_ARME])
+	assert gen.erreurs_de_budget({"item:x": sans}) != []
+
+
+def test_le_poison_de_base_empoisonne_la_cible():
+	# Régén PV NÉGATIVE à durée : c'est la part durative qu'une arme pose sur l'ennemi.
+	eff = gen.MATIERES["item:Poison_de_base"]["modificateurs"]["effets"]
+	assert eff["regen_pv"] < 0 and eff["duree"] > 0
+
+
+def test_les_dards_de_monstres_empoisonnent_plus_que_le_poison_de_base():
+	# Pertes TOTALES (par tour × durée) : un dard venimeux surclasse le poison d'échoppe.
+	def total(item_id):
+		eff = gen.MATIERES[item_id]["modificateurs"]["effets"]
+		return -eff["regen_pv"] * eff["duree"]
+	base = total("item:Poison_de_base")
+	for dard in ("item:manticore_queue", "item:scorpion_geant_queue", "item:wyvern_queue",
+				 "item:hydre_tete", "item:Extrait_de_mandragore"):
+		assert total(dard) > base, dard
+		assert gen.MATIERES[dard]["tags"] == [gen.TAG_ARME], dard
+
+
+def test_un_poison_hors_arme_est_refuse():
+	# Sur une armure, la régén est lue en permanence : elle empoisonnerait le porteur.
+	table = {"item:x": {"modificateurs": {"effets": {"regen_pv": -2, "duree": 2}},
+						"tags": [gen.TAG_ARME, gen.TAG_ARMURE]}}
+	assert gen.effets_mal_diriges(table) == [
+		"item:x : regen_pv négatif hors arme empoisonnerait le PORTEUR"]
 
 
 # ── Tags et rareté de l'item ─────────────────────────────────────────────────────

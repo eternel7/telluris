@@ -30,7 +30,10 @@
 # ⚠️ `effets` NE VEUT PAS DIRE LA MÊME CHOSE SELON LA PIÈCE (`effets_mal_diriges`) :
 #   - sur une ARME, il vise l'ENNEMI (`sorts.effets_d_arme`) et seule sa part durative agit :
 #     un buff positif ou une régén y soignerait la cible. Une matière d'arme ne porte donc que
-#     des DÉBUFFS (`{"buffs": {X: -n}, "duree": d}`) ;
+#     des DÉBUFFS (`{"buffs": {X: -n}, "duree": d}`) ou des POISONS — une régén PV NÉGATIVE
+#     (`{"regen_pv": -n, "duree": d}`, `_poison`), perdue à chaque tour de la cible ;
+#   - un POISON sur toute autre pièce empoisonnerait SON PORTEUR (régén lue en permanence) :
+#     une matière à régén négative n'est donc ouverte qu'aux armes ;
 #   - sur une pièce PORTÉE, seuls `regen_*`, `esquive` et `canalisation` sont lus
 #     (`characters.recompute_equipment_bonus`) ;
 #   - sur un CONSOMMABLE, `pv`/`pm` sont ramenés à 0 s'ils sont négatifs
@@ -126,12 +129,21 @@ def _deb(carac: str, delta: int, duree: int) -> dict:
 	return {"buffs": {carac: -abs(delta)}, "duree": duree}
 
 
+def _poison(pertes: int, duree: int) -> dict:
+	"""Poison d'arme : régén PV NÉGATIVE posée sur la CIBLE à l'impact, perdue à chacun de ses
+	tours (`combat._tick_effets_combat`)."""
+	return {"regen_pv": -abs(pertes), "duree": duree}
+
+
 def _val(facteur: float) -> dict:
 	return {"facteur": facteur}
 
 
-def _partie(nom: str, palier: int, partie: str, mods: dict) -> dict:
-	"""Entrée d'une partie de créature : tags par partie, `rarete` de l'item alignée sur le palier."""
+def _partie(nom: str, palier: int, partie: str, mods: dict, tags=None) -> dict:
+	"""Entrée d'une partie de créature : tags par partie, `rarete` de l'item alignée sur le palier.
+
+	`tags` remplace ceux de la partie — une tête VENIMEUSE n'est ouverte qu'aux armes (un
+	poison sur une armure empoisonnerait son porteur, cf. `effets_mal_diriges`)."""
 	p = PALIERS[palier]
 	mods = dict(mods)
 	if p["valeur"]:
@@ -139,19 +151,27 @@ def _partie(nom: str, palier: int, partie: str, mods: dict) -> dict:
 	if p["rarete"]:
 		mods.setdefault("rarete", p["rarete"])
 	return {"nom": nom, "modificateurs": mods, "palier": palier,
-			"tags": list(TAGS_PAR_PARTIE[partie]),
+			"tags": list(TAGS_PAR_PARTIE[partie] if tags is None else tags),
 			"rarete_item": p["rarete"] or RARETE_ITEM_PALIER_1}
 
 
-def _matiere(nom: str, palier: int, mods: dict, tags=()) -> dict:
-	"""Entrée d'une matière d'échoppe : facteur de `valeur` et `rarete` produite du palier."""
+def _matiere(nom: str, palier: int, mods: dict, tags=(), rarete_derogee: str = "") -> dict:
+	"""Entrée d'une matière d'échoppe : facteur de `valeur` et `rarete` produite du palier.
+
+	`rarete_derogee` : rareté produite DÉCIDÉE par l'Auteur hors de son palier (le reste du
+	palier — budget, valeur — s'applique) ; `erreurs_de_budget` l'accepte au lieu de celle du palier."""
 	p = PALIERS[palier]
 	mods = dict(mods)
 	if p["valeur"]:
 		mods.setdefault("valeur", _val(p["valeur"]))
-	if p["rarete"]:
+	if rarete_derogee:
+		mods["rarete"] = rarete_derogee
+	elif p["rarete"]:
 		mods.setdefault("rarete", p["rarete"])
-	return {"nom": nom, "modificateurs": mods, "palier": palier, "tags": list(tags)}
+	entree = {"nom": nom, "modificateurs": mods, "palier": palier, "tags": list(tags)}
+	if rarete_derogee:
+		entree["rarete_derogee"] = rarete_derogee
+	return entree
 
 
 ARME_ARMURE = [TAG_ARME, TAG_ARMURE]
@@ -195,8 +215,8 @@ MATIERES = {
 											   "rarete": "commun"}, ARME_ARMURE),
 	"item:Poudre_os": _matiere("des Ossements", 1, {"bonus_pv": 2, "bonus": {"R": 1}, "poids": _val(0.95),
 													"valeur": _val(1.1)}, ARME_ARMURE_CONSO),
-	"item:Poison_de_base": _matiere("Empoisonné", 1, {"bonus_degats": 1, "effets": _deb("R", 1, 2),
-													  "valeur": _val(1.1)}, ARME_ARMURE),
+	"item:Poison_de_base": _matiere("Empoisonné", 1, {"bonus_degats": 1, "effets": _poison(2, 2),
+													  "valeur": _val(1.1)}, [TAG_ARME]),
 	"item:Fiole_sang_bete": _matiere("Bestial", 1, {"bonus_degats": 1, "bonus": {"F": 1, "V": 1},
 													"valeur": _val(1.1)}, ARME_ARMURE),
 	"item:Eau_benite": _matiere("béni", 1, {"bonus_degats": 1, "bonus": {"Vol": 1}, "effets": {"pv": 5},
@@ -222,6 +242,9 @@ MATIERES = {
 
 	# ── Palier 2 : peu communs ─────────────────────────────────────────────────
 	"item:acier": _matiere("en acier", 2, {"bonus_degats": 2, "bonus_pa": 2, "poids": _val(1.05)}),
+	# Poison d'échoppe du cran au-dessus du Poison de base, sous les dards de monstres.
+	"item:Extrait_de_mandragore": _matiere("à la Mandragore", 2, {"bonus_degats": 2, "effets": _poison(3, 2)},
+										   [TAG_ARME]),
 	"item:crocs": _matiere("à garde de crocs", 2, {"bonus_degats": 2, "bonus_cc": 1}),
 	# Demi-produits des petits marchands (dev/gen_recettes_petits_marchands.py).
 	"item:Cuir_tanne_au_chene": _matiere("en cuir de chêne", 2, {"bonus_pa": 2, "bonus": {"R": 1}}, [TAG_ARMURE]),
@@ -243,7 +266,7 @@ MATIERES = {
 														"effets": _deb("Vol", 1, 2)}, ARME_ARMURE),
 	"item:Graine_sacree": _matiere("Sacrée", 2, {"bonus_pv": 2, "bonus": {"Vol": 1},
 												 "effets": {"pv": 5, "regen_pv": 1, "duree": 3}},
-								   [TAG_ARMURE, TAG_CONSOMMABLE]),
+								   [TAG_ARMURE, TAG_CONSOMMABLE], rarete_derogee="rare"),   # choix de l'Auteur
 	"item:Sel_noir": _matiere("Ténébreux", 2, {"bonus_degats": 2, "bonus": {"Vol": 1},
 											   "effets": _deb("Int", 1, 2)}, [TAG_ARME]),
 	"item:metaux_precieux": _matiere("à incrustations précieuses", 2, {"bonus": {"Cha": 3}}, ARME_ARMURE),
@@ -312,9 +335,11 @@ MATIERES = {
 															   "effets": _deb("V", 1, 2)}),
 	"item:basilic_tete": _partie("du Regard Mortel", 2, "tete", {"bonus_degats": 2, "bonus": {"Vol": 2},
 																 "effets": _deb("R", 1, 2)}),
-	"item:basilic_queue": _partie("du Basilic", 2, "queue", {"bonus_degats": 3, "effets": _deb("R", 1, 2)}),
-	"item:araignee_geante_tete": _partie("Arachnéen", 2, "tete", {"bonus_degats": 2, "bonus": {"Ag": 1},
-																  "effets": _deb("V", 1, 2)}),
+	"item:basilic_queue": _partie("du Basilic", 2, "queue", {"bonus_degats": 2, "effets": _poison(3, 2)}),
+	# Venin paralysant : le V −1 reste, le poison s'y ajoute (même durée — un seul `duree` par bloc).
+	"item:araignee_geante_tete": _partie("Arachnéen", 2, "tete", {"bonus_degats": 1, "bonus": {"Ag": 1},
+																  "effets": {**_deb("V", 1, 2), **_poison(2, 2)}},
+										 [TAG_ARME]),
 	"item:chimere_tete_morceau": _partie("de la Monstruosité", 2, "tete", {"bonus_degats": 2, "bonus": {"Vol": 1},
 																		   "effets": _deb("Vol", 1, 2)}),
 	"item:chimere_patte_morceau": _partie("de la Férocité", 2, "patte", {"bonus_degats": 2, "bonus_cc": 1,
@@ -323,6 +348,13 @@ MATIERES = {
 																		 "bonus_cd": 1}),
 
 	# Palier 3 : bunyip, chimère, cerbère.
+	# DARDS (Auteur, 27/10 : « venin d'abord ») : tout le budget du palier dans le poison, aucun
+	# dégât en plus — scorpion géant ≈252, manticore ≈256, hydre ≈291 (le sang de l'Hydre de
+	# Lerne), wyvern ≈304. Ouverts aux seules armes.
+	"item:manticore_queue": _partie("au Dard de Manticore", 3, "queue", {"effets": _poison(4, 4)}),
+	"item:scorpion_geant_queue": _partie("au Venin de Scorpion", 3, "queue", {"effets": _poison(4, 4)}),
+	"item:wyvern_queue": _partie("au Venin de Wyvern", 3, "queue", {"effets": _poison(4, 4)}),
+	"item:hydre_tete": _partie("au Sang d'Hydre", 3, "tete", {"effets": _poison(4, 4)}, [TAG_ARME]),
 	"item:bunyip_tete": _partie("des Marais", 3, "tete", {"bonus_degats": 3, "bonus_pv": 6, "bonus": {"R": 2}}),
 	"item:bunyip_patte": _partie("des Profondeurs", 3, "patte", {"bonus_degats": 3, "bonus": {"R": 1, "Ag": 2},
 																 "poids": _val(1.05)}),
@@ -333,8 +365,9 @@ MATIERES = {
 																  "effets": _deb("Vol", 1, 2)}),
 	"item:chimere_patte": _partie("de la Fureur", 3, "patte", {"bonus_degats": 3, "bonus_pa": 1, "bonus_cc": 1,
 															   "bonus": {"F": 1, "Ag": 1}}),
+	# Queue de serpent : son venin est un poison.
 	"item:chimere_queue": _partie("de la Chimère", 3, "queue", {"bonus_degats": 3, "bonus_cd": 2, "bonus": {"Ag": 1},
-																"effets": _deb("R", 1, 2)}),
+																"effets": _poison(2, 2)}),
 	"item:cerbere_tete": _partie("du Gardien Infernal", 3, "tete", {"bonus_degats": 4, "bonus": {"F": 2, "Vol": 1},
 																	"effets": _deb("Vol", 1, 2)}),
 
@@ -384,7 +417,7 @@ MATIERES = {
 
 def bloc_fabrication(entree: dict) -> dict:
 	"""Le bloc `fabrication` à écrire : `nom` + `modificateurs`, rien des clés de pilotage
-	(`palier`, `tags`, `rarete_item`)."""
+	(`palier`, `tags`, `rarete_item`, `rarete_derogee`)."""
 	return {"nom": entree.get("nom", ""), "modificateurs": entree.get("modificateurs") or {}}
 
 
@@ -396,14 +429,17 @@ def score_matiere(mods: dict, tags=()) -> float:
 	"""Points qu'apporte une matière (cf. en-tête) : ce qui AGIT, pas ce qui est écrit.
 
 	Un soin instantané (`pv`/`pm` d'`effets`) ne compte que si la matière entre dans un
-	consommable — ailleurs il n'est lu par personne. Un débuff vaut |Δ| × durée / 2."""
+	consommable — ailleurs il n'est lu par personne. Un débuff vaut |Δ| × durée / 2, un
+	poison (régén négative) aussi."""
 	mods = mods or {}
 	score = sum(_num(mods.get(cle)) * poids for cle, poids in POIDS_SCORE.items())
 	score += sum(_num(v) for v in (mods.get("bonus") or {}).values())
 	eff = mods.get("effets") or {}
-	score += POIDS_REGEN * (_num(eff.get("regen_pv")) + _num(eff.get("regen_pm")))
-	score += POIDS_EFFET_PORTE * (_num(eff.get("esquive")) + _num(eff.get("canalisation")))
 	duree = _num(eff.get("duree"))
+	for cle in ("regen_pv", "regen_pm"):
+		v = _num(eff.get(cle))
+		score += abs(v) * duree / 2 if v < 0 else POIDS_REGEN * v
+	score += POIDS_EFFET_PORTE * (_num(eff.get("esquive")) + _num(eff.get("canalisation")))
 	for v in (eff.get("buffs") or {}).values():
 		score += abs(_num(v)) * duree / 2 if _num(v) < 0 else _num(v)
 	if TAG_CONSOMMABLE in set(tags or ()):
@@ -438,7 +474,7 @@ def erreurs_de_budget(matieres: dict) -> list:
 		elif facteur != p["valeur"]:
 			erreurs.append("%s : valeur ×%g ≠ ×%g du palier %d" % (item_id, facteur, p["valeur"], palier))
 		rarete = mods.get("rarete")
-		attendue = p["rarete"]
+		attendue = entree.get("rarete_derogee") or p["rarete"]
 		if (attendue is None and rarete not in (None, RARETE_ITEM_PALIER_1)) or \
 				(attendue is not None and rarete != attendue):
 			erreurs.append("%s : rareté produite `%s` ≠ `%s` du palier %d" % (item_id, rarete, attendue, palier))
@@ -465,6 +501,10 @@ def effets_mal_diriges(matieres: dict) -> list:
 		elif negatifs:
 			erreurs.append("%s : débuff %s sans famille d'arme — il ne toucherait personne"
 						   % (item_id, ", ".join(sorted(negatifs))))
+		poisons = [k for k in ("regen_pv", "regen_pm") if _num(eff.get(k)) < 0]
+		if poisons and tags - TAGS_ARME:
+			erreurs.append("%s : %s négatif hors arme empoisonnerait le PORTEUR"
+						   % (item_id, ", ".join(poisons)))
 		for cle in ("pv", "pm"):
 			if _num(eff.get(cle)) < 0:
 				erreurs.append("%s : `effets.%s` négatif est ramené à 0 — inerte" % (item_id, cle))

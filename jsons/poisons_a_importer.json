@@ -1,0 +1,616 @@
+[
+  {
+    "_id": "item:Poison_de_base",
+    "type": "item",
+    "nom": "Poison de base",
+    "sous_categorie": "",
+    "icon": "☠️",
+    "description": "Poison simple tiré de plantes communes. Sur une lame, il affaiblit qui en est touché.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "Empoisonné",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "effets": {
+          "regen_pv": -2,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.1
+        }
+      }
+    },
+    "tags": [
+      "fabrication_arme"
+    ]
+  },
+  {
+    "_id": "item:Fouet_31f6c52c",
+    "type": "item",
+    "nom": "Fouet Empoisonné Démoniaque en adamantite",
+    "icon": "➰",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "description": "Long fouet de cuir tressé : inefficace contre l'armure, redoutable pour désarmer. Façonné sur mesure : Poison de base, Sang de démon séché, Lingot d'adamantite.",
+    "bonus_degats_dice": 2,
+    "bonus_cc": 4,
+    "portee": 2,
+    "bonus_degats": 11,
+    "bonus_pa": 6,
+    "effets": {
+      "regen_pv": -2,
+      "duree": 4,
+      "buffs": {
+        "Vol": -1
+      }
+    },
+    "bonus": {
+      "F": 1,
+      "Vol": 1,
+      "R": 3
+    },
+    "restriction": {
+      "Ag": 17
+    },
+    "rarete": "legendaire",
+    "poids": 1.2,
+    "valeur": [
+      {
+        "cu": 200370
+      },
+      {
+        "cu": 200535
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Fouet",
+      "matieres": [
+        {
+          "item": "item:Poison_de_base",
+          "quantite": 1
+        },
+        {
+          "item": "item:Sang_demon_seche",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Fouet_31f6c52c",
+      "cree_at": 1792613232,
+      "lieu": "lieu:la_grande_megisserie"
+    }
+  },
+  {
+    "_id": "item:Masse_a_brides_c97e3203",
+    "type": "item",
+    "nom": "Masse d'armes à brides Empoisonné Démoniaque en mithril",
+    "icon": "⚙️",
+    "description": "Masse d'armes à ailettes : là où elle frappe, l'armure se tord et les côtes plient. Façonné sur mesure : Poison de base, Sang de démon séché, Lingot de mithril.",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "cible": "ennemi",
+    "bonus_degats": 11,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 3,
+    "portee": 1,
+    "bonus_pa": 3,
+    "effets": {
+      "buffs": {
+        "R": -4,
+        "Vol": -1
+      },
+      "duree": 6,
+      "regen_pv": -2
+    },
+    "bonus": {
+      "F": 1,
+      "Vol": 1,
+      "Ag": 2
+    },
+    "restriction": {
+      "F": 13
+    },
+    "rarete": "tres_rare",
+    "poids": 1.08,
+    "valeur": [
+      {
+        "cu": 12445
+      },
+      {
+        "cu": 13751
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Masse_a_brides",
+      "matieres": [
+        {
+          "item": "item:Poison_de_base",
+          "quantite": 1
+        },
+        {
+          "item": "item:Sang_demon_seche",
+          "quantite": 1
+        },
+        {
+          "item": "item:mithril",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Masse_a_brides_c97e3203",
+      "cree_at": 1790288846,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Extrait_de_mandragore",
+    "type": "item",
+    "nom": "Extrait de mandragore",
+    "icon": "⚗️",
+    "description": "Suc de racine réduit à froid, matière première des philtres du sommeil.",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [
+      "fabrication_arme"
+    ],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "à la Mandragore",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "effets": {
+          "regen_pv": -3,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:araignee_geante_tete",
+    "type": "item",
+    "nom": "Tête d'Araignee Geante",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      11.25,
+      18.0
+    ],
+    "description": "Tête d'Araignee Geante, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:araignee_geante",
+    "portion_de": "item:araignee_geante",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "Arachnéen",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "bonus": {
+          "Ag": 1
+        },
+        "effets": {
+          "buffs": {
+            "V": -1
+          },
+          "duree": 2,
+          "regen_pv": -2
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:basilic_queue",
+    "type": "item",
+    "nom": "Queue de Basilic",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      46,
+      97.6
+    ],
+    "description": "Queue de Basilic, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_queue",
+      "petrification",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:basilic",
+    "portion_de": "item:basilic",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Basilic",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "effets": {
+          "regen_pv": -3,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:chimere_queue",
+    "type": "item",
+    "nom": "Queue de Chimere",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      64,
+      144
+    ],
+    "description": "Queue de Chimere, débitée sur place.",
+    "tags": [
+      "hybride",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "souffle",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:chimere",
+    "portion_de": "item:chimere",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:chimere_queue_morceau",
+        "quantite": 2,
+        "fraction": 1
+      }
+    ],
+    "decoupe_poids_min": 100,
+    "fabrication": {
+      "nom": "de la Chimère",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_cd": 2,
+        "bonus": {
+          "Ag": 1
+        },
+        "effets": {
+          "regen_pv": -2,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:hydre_tete",
+    "type": "item",
+    "nom": "Tête d'Hydre",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      240.0,
+      720.0
+    ],
+    "description": "Tête d'Hydre, débitée sur place.",
+    "tags": [
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "regeneration",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:hydre",
+    "portion_de": "item:hydre",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:hydre_tete_morceau",
+        "quantite": 8,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0,
+    "fabrication": {
+      "nom": "au Sang d'Hydre",
+      "modificateurs": {
+        "effets": {
+          "regen_pv": -4,
+          "duree": 4
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:manticore_queue",
+    "type": "item",
+    "nom": "Queue de Manticore",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      32.0,
+      64.0
+    ],
+    "description": "Queue de Manticore, débitée sur place.",
+    "tags": [
+      "hybride",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:manticore",
+    "portion_de": "item:manticore",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "au Dard de Manticore",
+      "modificateurs": {
+        "effets": {
+          "regen_pv": -4,
+          "duree": 4
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:scorpion_geant_queue",
+    "type": "item",
+    "nom": "Queue de Scorpion géant",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      16.0,
+      32.0
+    ],
+    "description": "Queue de Scorpion géant, débitée sur place.",
+    "tags": [
+      "desert",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "venin",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:scorpion_geant",
+    "portion_de": "item:scorpion_geant",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "au Venin de Scorpion",
+      "modificateurs": {
+        "effets": {
+          "regen_pv": -4,
+          "duree": 4
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:wyvern_queue",
+    "type": "item",
+    "nom": "Queue de Wyvern",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      33.0,
+      88.0
+    ],
+    "description": "Queue de Wyvern, débitée sur place.",
+    "tags": [
+      "draconique",
+      "monstre",
+      "partie_queue",
+      "venin",
+      "vol",
+      "fabrication_arme"
+    ],
+    "source_espece": "espece:wyvern",
+    "portion_de": "item:wyvern",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "item:Poison_de_base",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "au Venin de Wyvern",
+      "modificateurs": {
+        "effets": {
+          "regen_pv": -4,
+          "duree": 4
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  }
+]
