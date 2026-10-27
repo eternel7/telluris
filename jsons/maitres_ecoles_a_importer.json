@@ -43605,7 +43605,13 @@
         "nom": "Maître Bernard",
         "portrait": "maitre_bernard_de_l_ecole01.jpg",
         "probabilite": 1,
-        "description": "Un lettré nain assis sur l'épaule d'un ogre qui porte ses livres, dans la cour de l'école de Chartres."
+        "description": "Un lettré nain assis sur l'épaule d'un ogre qui porte ses livres, dans la cour de l'école de Chartres.",
+        "cases": [
+          [
+            61,
+            20
+          ]
+        ]
       }
     ]
   },

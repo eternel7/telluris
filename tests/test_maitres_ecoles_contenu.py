@@ -7,7 +7,10 @@
 import copy
 import json
 import os
+import shutil
+import subprocess
 import sys
+import tempfile
 
 import pytest
 
@@ -156,12 +159,59 @@ def test_philibert_ne_se_tient_que_sur_la_descente_des_catacombes():
 	base = _dump_apres_import()
 	docs, erreurs = gen.construire(base)
 	assert not erreurs
-	assert [d["_id"] for d in docs] == ["lieu:lutecia"]
-	(entree,) = docs[0]["pnj"]
+	# Chartres : Maître Bernard, posté devant le scriptorium (test suivant).
+	assert sorted(d["_id"] for d in docs) == ["lieu:chartres", "lieu:lutecia"]
+	(entree,) = next(d for d in docs if d["_id"] == "lieu:lutecia")["pnj"]
 	lien = base["link:lutecia_to_catacombes0001"]
 	descente = next(n["pos"] for n in lien["nodes"] if n["lieu"] == "lieu:lutecia")
 	assert entree["character"] == "pnj:philibert_des_catacombes"
 	assert entree["cases"] == [descente]
+
+
+def test_bernard_se_tient_devant_le_scriptorium_du_pont_bouju_joignable_des_portes():
+	"""Maître Bernard n'est plus sur toute la cité : sur une case praticable voisine de la porte
+	du Livre Relié du Pont Bouju, joignable à pied (voies.js, règle des flèches) depuis la case
+	intérieure de CHAQUE porte de rempart de Chartres. Seule son entrée change."""
+	base = _dump_apres_import()
+	docs, erreurs = gen.construire(base)
+	assert not erreurs
+	chartres = next(d for d in docs if d["_id"] == "lieu:chartres")
+	assert chartres == {**{k: v for k, v in base["lieu:chartres"].items() if k != "_rev"},
+						"pnj": chartres["pnj"]}
+	(entree,) = chartres["pnj"]
+	assert entree["character"] == "pnj:bernard_de_l_ecole"
+	(case,) = entree["cases"]
+	x, y = case
+	porte = next(n["pos"] for n in base["link:scriptorium01_to_chartres"]["nodes"]
+				 if n["lieu"] == "lieu:chartres")
+	assert max(abs(x - porte[0]), abs(y - porte[1])) == 1
+	assert chartres["cells"][y][x] == 1
+	interieurs = []
+	for d in base.values():
+		if d.get("type") != "connection":
+			continue
+		ici = [n for n in d["nodes"] if n["lieu"] == "lieu:chartres"]
+		autre = [n["lieu"] for n in d["nodes"] if n["lieu"] != "lieu:chartres"]
+		if ici and autre and autre[0].startswith("lieu:chartres_porte_") \
+				and autre[0].endswith("_interieur"):
+			interieurs.append(ici[0]["pos"])
+	assert interieurs
+	node = shutil.which("node")
+	if node is None:
+		pytest.skip("node absent : chemins non tracés")
+	paires = [{"nom": str(p), "a": p, "b": case} for p in interieurs]
+	paires.append({"nom": "porte", "a": case, "b": porte})
+	with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+		json.dump({"cells": chartres["cells"], "nav": chartres.get("nav") or {},
+				   "dims": chartres["dimensions"], "regle": "exploration", "max": 1,
+				   "paires": paires}, f)
+	try:
+		sortie = subprocess.run([node, os.path.join(RACINE, "dev", "tracer_chemins.js"), f.name],
+								capture_output=True, text=True, check=True).stdout
+	finally:
+		os.unlink(f.name)
+	injoignables = [p["nom"] for p in json.loads(sortie)["paires"] if not p["chemins"]]
+	assert injoignables == []
 
 
 def test_un_maitre_deplace_quitte_son_ancien_lieu():

@@ -856,7 +856,11 @@ MAITRES = [
 	},
 	{
 		"slug": "bernard_de_l_ecole", "sort": "sort:sur_des_epaules_de_geants",
-		"lieu": "lieu:chartres", "nom": "Maître Bernard", "race": "nain", "vocation": "lettre",
+		# Devant le scriptorium du Pont Bouju (porte de `link:scriptorium01_to_chartres` en
+		# (62, 20)), sur la case praticable à sa gauche — joignable depuis les six portes de
+		# rempart (`dev/tracer_chemins.js`) ; sans `cases`, il était sur toutes celles de la cité.
+		"lieu": "lieu:chartres", "cases": [[61, 20]], "nom": "Maître Bernard", "race": "nain",
+		"vocation": "lettre",
 		"ecole_texte": "illusoire",
 		"presence": "Un lettré nain assis sur l'épaule d'un ogre qui porte ses livres, dans la "
 					"cour de l'école de Chartres.",
