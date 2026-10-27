@@ -133,6 +133,15 @@ def test_le_score_ne_compte_que_ce_qui_agit():
 	assert gen.score_matiere({"effets": {"regen_pv": -2, "duree": 3}}) == 3
 
 
+def test_une_rarete_derogee_est_acceptee_et_produite():
+	# Décision de l'Auteur : la Graine sacrée confère `rare` bien qu'elle soit au palier 2.
+	entree = gen._matiere("X", 2, {"bonus_degats": 3}, [gen.TAG_ARME], rarete_derogee="rare")
+	assert entree["modificateurs"]["rarete"] == "rare"
+	assert gen.erreurs_de_budget({"item:x": entree}) == []
+	sans = gen._matiere("X", 2, {"bonus_degats": 3, "rarete": "rare"}, [gen.TAG_ARME])
+	assert gen.erreurs_de_budget({"item:x": sans}) != []
+
+
 def test_le_poison_de_base_empoisonne_la_cible():
 	# Régén PV NÉGATIVE à durée : c'est la part durative qu'une arme pose sur l'ennemi.
 	eff = gen.MATIERES["item:Poison_de_base"]["modificateurs"]["effets"]

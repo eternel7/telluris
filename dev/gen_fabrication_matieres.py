@@ -152,15 +152,23 @@ def _partie(nom: str, palier: int, partie: str, mods: dict) -> dict:
 			"rarete_item": p["rarete"] or RARETE_ITEM_PALIER_1}
 
 
-def _matiere(nom: str, palier: int, mods: dict, tags=()) -> dict:
-	"""Entrée d'une matière d'échoppe : facteur de `valeur` et `rarete` produite du palier."""
+def _matiere(nom: str, palier: int, mods: dict, tags=(), rarete_derogee: str = "") -> dict:
+	"""Entrée d'une matière d'échoppe : facteur de `valeur` et `rarete` produite du palier.
+
+	`rarete_derogee` : rareté produite DÉCIDÉE par l'Auteur hors de son palier (le reste du
+	palier — budget, valeur — s'applique) ; `erreurs_de_budget` l'accepte au lieu de celle du palier."""
 	p = PALIERS[palier]
 	mods = dict(mods)
 	if p["valeur"]:
 		mods.setdefault("valeur", _val(p["valeur"]))
-	if p["rarete"]:
+	if rarete_derogee:
+		mods["rarete"] = rarete_derogee
+	elif p["rarete"]:
 		mods.setdefault("rarete", p["rarete"])
-	return {"nom": nom, "modificateurs": mods, "palier": palier, "tags": list(tags)}
+	entree = {"nom": nom, "modificateurs": mods, "palier": palier, "tags": list(tags)}
+	if rarete_derogee:
+		entree["rarete_derogee"] = rarete_derogee
+	return entree
 
 
 ARME_ARMURE = [TAG_ARME, TAG_ARMURE]
@@ -252,7 +260,7 @@ MATIERES = {
 														"effets": _deb("Vol", 1, 2)}, ARME_ARMURE),
 	"item:Graine_sacree": _matiere("Sacrée", 2, {"bonus_pv": 2, "bonus": {"Vol": 1},
 												 "effets": {"pv": 5, "regen_pv": 1, "duree": 3}},
-								   [TAG_ARMURE, TAG_CONSOMMABLE]),
+								   [TAG_ARMURE, TAG_CONSOMMABLE], rarete_derogee="rare"),   # choix de l'Auteur
 	"item:Sel_noir": _matiere("Ténébreux", 2, {"bonus_degats": 2, "bonus": {"Vol": 1},
 											   "effets": _deb("Int", 1, 2)}, [TAG_ARME]),
 	"item:metaux_precieux": _matiere("à incrustations précieuses", 2, {"bonus": {"Cha": 3}}, ARME_ARMURE),
@@ -393,7 +401,7 @@ MATIERES = {
 
 def bloc_fabrication(entree: dict) -> dict:
 	"""Le bloc `fabrication` à écrire : `nom` + `modificateurs`, rien des clés de pilotage
-	(`palier`, `tags`, `rarete_item`)."""
+	(`palier`, `tags`, `rarete_item`, `rarete_derogee`)."""
 	return {"nom": entree.get("nom", ""), "modificateurs": entree.get("modificateurs") or {}}
 
 
@@ -450,7 +458,7 @@ def erreurs_de_budget(matieres: dict) -> list:
 		elif facteur != p["valeur"]:
 			erreurs.append("%s : valeur ×%g ≠ ×%g du palier %d" % (item_id, facteur, p["valeur"], palier))
 		rarete = mods.get("rarete")
-		attendue = p["rarete"]
+		attendue = entree.get("rarete_derogee") or p["rarete"]
 		if (attendue is None and rarete not in (None, RARETE_ITEM_PALIER_1)) or \
 				(attendue is not None and rarete != attendue):
 			erreurs.append("%s : rareté produite `%s` ≠ `%s` du palier %d" % (item_id, rarete, attendue, palier))
