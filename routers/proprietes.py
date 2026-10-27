@@ -76,7 +76,9 @@ def _resume(p: dict, cat: dict, character: dict) -> dict:
 
 
 def _mes_proprietes(character: dict, cat: dict) -> list:
-	return [_resume(p, cat, character) for p in proprietes.proprietes_de(character, get_doc)]
+	"""Une location échue en disparaît d'elle-même (son auberge la garde pour les affaires)."""
+	return [_resume(p, cat, character) for p in proprietes.proprietes_de(character, get_doc)
+			if not proprietes.location_perimee(p)]
 
 
 def _voisinage_ici(character: dict, lieu_doc: dict, cat: dict) -> dict:
@@ -112,6 +114,7 @@ def _payload_offre(character: dict, lieu_doc: dict, cat: dict) -> dict:
 				"type": _type_view(cat, tdef),
 				"prix": loc["prix_cuivre"],
 				"duree_s": loc["duree_s"],
+				"grace_s": proprietes.grace_location_s(cat),
 				"chambre": _resume(ch, cat, character) if ch else None,
 			}
 	return {
@@ -249,6 +252,11 @@ def _exiger(role: str, *attendus) -> None:
 		raise HTTPException(status_code=403, detail="Seul le propriétaire peut faire cela.")
 
 
+def _reprises(character: dict, cat: dict) -> list:
+	"""Chambres délaissées au-delà du délai de grâce : reprises (coffre perdu) au passage."""
+	return proprietes.appliquer_reprises(character, cat, get_doc, save_doc, delete_doc)
+
+
 def _sauver(*docs) -> None:
 	"""Sauve dans l'ordre donné ; le DERNIER est l'autoritatif (409 sur conflit). Les
 	précédents aussi : un échec avant le principal n'a encore rien engagé."""
@@ -263,9 +271,14 @@ def _sauver(*docs) -> None:
 async def offre(current_user: Annotated[dict, Depends(get_current_user)]):
 	character = _personnage(current_user)
 	lieu_doc = get_doc(character.get("lieu", "")) or {}
-	payload = _payload_offre(character, lieu_doc, proprietes.catalogue(get_doc))
+	cat = proprietes.catalogue(get_doc)
+	reprises = _reprises(character, cat)
+	payload = _payload_offre(character, lieu_doc, cat)
 	if not payload["types"] and not payload["location"]:
 		raise HTTPException(status_code=403, detail="Aucune propriété à acquérir ici.")
+	payload["chambres_reprises"] = reprises
+	if reprises:                                   # leur porte vient de disparaître
+		payload["links"] = get_lieu_links(current_user)
 	return payload
 
 
@@ -318,6 +331,8 @@ async def louer(current_user: Annotated[dict, Depends(get_current_user)]):
 	tdef = _type_location(cat)
 	if not tdef:
 		raise HTTPException(status_code=404, detail="Aucune chambre à louer.")
+	# Avant `chambre_louee_ici` : une chambre reprise ne se prolonge pas, on en loue une neuve.
+	reprises = _reprises(character, cat)
 	loc = proprietes.location_de(tdef)
 	if money_to_cuivre(character) < loc["prix_cuivre"]:
 		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi payer la chambre.")
@@ -340,6 +355,7 @@ async def louer(current_user: Annotated[dict, Depends(get_current_user)]):
 
 	payload = _payload_offre(character, lieu_doc, cat)
 	payload["louee"] = _resume(prop, cat, character)
+	payload["chambres_reprises"] = reprises
 	# Première location : la porte de la chambre vient de naître (cf. `acheter`).
 	payload["links"] = get_lieu_links(current_user)
 	return payload

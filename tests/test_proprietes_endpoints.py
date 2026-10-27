@@ -417,6 +417,33 @@ def test_chambre_louee_refuse_un_intrus(monde):
 	assert e.value.status_code == 403
 
 
+def test_chambre_echue_disparait_de_mes_proprietes(monde):
+	char = _perso(lieu="lieu:auberge", position={"x": 0, "y": 0})
+	pid = _appel(monde, char, monde["rp"].louer, None)["louee"]["id"]
+	assert [p["id"] for p in _appel(monde, char, monde["rp"].offre, None)["mes_proprietes"]] == [pid]
+	# Échue, statut encore « louée » en base, mais DANS le délai de grâce.
+	monde["docs"][pid]["expire_at"] = proprietes.now_epoch() - 60
+	data = _appel(monde, char, monde["rp"].offre, None)
+	assert data["mes_proprietes"] == []
+	# L'auberge la garde : les affaires restent à reprendre.
+	assert data["location"]["chambre"]["id"] == pid
+
+
+def test_chambre_delaissee_reprise_coffre_perdu_puis_neuve(monde):
+	char = _perso(lieu="lieu:auberge", position={"x": 0, "y": 0})
+	pid = _appel(monde, char, monde["rp"].louer, None)["louee"]["id"]
+	lien = monde["docs"][pid]["lien"]
+	monde["docs"][pid]["coffre"] = [{"item": "item:a", "poids": 1}]
+	monde["docs"][pid]["expire_at"] = 1        # échue depuis bien plus que le délai de grâce
+	data = _appel(monde, char, monde["rp"].offre, None)
+	assert [c["label"] for c in data["chambres_reprises"]] and data["location"]["chambre"] is None
+	assert pid not in monde["docs"] and lien not in monde["docs"]
+	assert pid not in char.get("proprietes", [])
+	# Relouer donne une chambre NEUVE, coffre vide.
+	neuve = _appel(monde, char, monde["rp"].louer, None)["louee"]["id"]
+	assert neuve != pid and monde["docs"][neuve]["coffre"] == []
+
+
 # ── La nuit chez soi ──────────────────────────────────────────────────────────────
 
 def test_nuit_gratuite_chez_soi(monde):
