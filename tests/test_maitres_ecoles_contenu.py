@@ -143,6 +143,26 @@ def test_chaque_maitre_est_present_dans_son_lieu_sans_toucher_aux_autres():
 			k: v for k, v in avant.items() if k not in ("pnj", "_rev")}
 
 
+def test_un_maitre_deplace_quitte_son_ancien_lieu():
+	"""Philibert, d'abord posé sur `lieu:lutecia` (présent sur toutes les cases de la cité),
+	ne se tient plus qu'à l'entrée des catacombes : rejoué sur un dump qui porte l'ancien
+	import, le générateur le retire de Lutecia sans toucher au reste du doc."""
+	with open(os.path.join(RACINE, "jsons", "telluris-dump-20261027-060252.json"),
+			  encoding="utf-8") as f:
+		base = {d["_id"]: d for d in json.load(f)["docs"]}
+	assert any(p.get("character") == "pnj:philibert_des_catacombes"
+			   for p in base["lieu:lutecia"].get("pnj") or [])
+	docs, erreurs = gen.construire(base)
+	assert not erreurs
+	lieux = {d["_id"]: d for d in docs if d["type"] == "lieu"}
+	assert set(lieux) == {"lieu:lutecia", "lieu:catacombes0001"}
+	assert "pnj" not in lieux["lieu:lutecia"]
+	assert lieux["lieu:lutecia"] == {k: v for k, v in base["lieu:lutecia"].items()
+									 if k not in ("pnj", "_rev")}
+	assert [p["character"] for p in lieux["lieu:catacombes0001"]["pnj"]] == [
+		"pnj:philibert_des_catacombes"]
+
+
 def test_aucun_portrait_partage():
 	portraits = [d["portrait"] for d in _contenu() if d["type"] == "pnj"]
 	assert len(set(portraits)) == len(portraits)
