@@ -417,6 +417,17 @@ def test_chambre_louee_refuse_un_intrus(monde):
 	assert e.value.status_code == 403
 
 
+def test_chambre_echue_disparait_de_mes_proprietes(monde):
+	char = _perso(lieu="lieu:auberge", position={"x": 0, "y": 0})
+	pid = _appel(monde, char, monde["rp"].louer, None)["louee"]["id"]
+	assert [p["id"] for p in _appel(monde, char, monde["rp"].offre, None)["mes_proprietes"]] == [pid]
+	monde["docs"][pid]["expire_at"] = 1        # échue, statut encore « louée » en base
+	data = _appel(monde, char, monde["rp"].offre, None)
+	assert data["mes_proprietes"] == []
+	# L'auberge la garde : les affaires restent à reprendre.
+	assert data["location"]["chambre"]["id"] == pid
+
+
 # ── La nuit chez soi ──────────────────────────────────────────────────────────────
 
 def test_nuit_gratuite_chez_soi(monde):

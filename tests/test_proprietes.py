@@ -240,6 +240,15 @@ def test_location_expire_paresseusement():
 	assert not proprietes.peut_dormir(perso(), p, now=3000)
 
 
+def test_location_perimee_meme_avant_bascule_du_statut():
+	# Le statut stocké peut rester « louée » après l'échéance (péremption paresseuse non
+	# encore passée) : la liste « mes propriétés » se fie à l'échéance.
+	p = chambre_louee(expire_at=2000)
+	assert not proprietes.location_perimee(p, now=1999)
+	assert proprietes.location_perimee(p, now=2000) and p["statut"] == proprietes.LOUEE
+	assert not proprietes.location_perimee(maison(), now=10**12)
+
+
 def test_prolonger_ne_perd_jamais_de_temps():
 	p = chambre_louee(expire_at=2000)
 	proprietes.prolonger_location(p, 100, now=1500)

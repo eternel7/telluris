@@ -76,7 +76,9 @@ def _resume(p: dict, cat: dict, character: dict) -> dict:
 
 
 def _mes_proprietes(character: dict, cat: dict) -> list:
-	return [_resume(p, cat, character) for p in proprietes.proprietes_de(character, get_doc)]
+	"""Une location échue en disparaît d'elle-même (son auberge la garde pour les affaires)."""
+	return [_resume(p, cat, character) for p in proprietes.proprietes_de(character, get_doc)
+			if not proprietes.location_perimee(p)]
 
 
 def _voisinage_ici(character: dict, lieu_doc: dict, cat: dict) -> dict:

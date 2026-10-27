@@ -396,6 +396,16 @@ def traiter_expiration_location(prop: dict, now: int | None = None) -> bool:
 	return False
 
 
+def location_perimee(prop: dict, now: int | None = None) -> bool:
+	"""Location dont l'échéance est passée, que son statut ait déjà été basculé ou non.
+	Sert à la LISTE « mes propriétés », d'où elle disparaît d'elle-même ; la chambre reste
+	jointe à l'auberge (`chambre_louee_ici`) pour y reprendre ses affaires ou relouer."""
+	if prop.get("mode") != MODE_LOCATION:
+		return False
+	now = now_epoch() if now is None else now
+	return prop.get("statut") == EXPIREE or _int(prop.get("expire_at")) <= now
+
+
 def role_de(character: dict, prop: dict, now: int | None = None) -> str | None:
 	"""Rôle du personnage — None = il n'a rien à y faire (refus d'entrée)."""
 	cid = (character or {}).get("_id")
