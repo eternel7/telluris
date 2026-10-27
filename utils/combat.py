@@ -348,6 +348,10 @@ def _empiler_effet_combat(acteur: dict, source: dict, effets: dict, tour: int) -
 		# PROVOCATION : le provocateur (`provocateur_id`) est timbré par l'appelant qui
 		# connaît le lanceur (`_resoudre_coup_capacite`) ; lue par `_cible_joueur`.
 		entry["provocation"] = 1
+	if _eff_int(eff.get("abattre")):
+		# ABATTRE : la cible ne vole plus tant que l'entrée vit (`vol.abattu`, lu par
+		# `_can_fly`) ; la chute éventuelle est jouée par `_resoudre_coup_capacite`.
+		entry["abattu"] = 1
 	if maintien:
 		# ⚠️ `maintenu` fait SAUTER le décrément (cf. _tick_effets_combat) : « tant qu'il
 		# peut payer, le sort reste actif ». `duree` ne veut donc plus rien dire pour lui —
@@ -1012,8 +1016,17 @@ def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, sourc
 
 	# Part à DURÉE sur la CIBLE : posée seulement si la capacité a TOUCHÉ, et jamais sur
 	# une cible que le même coup vient d'abattre.
+	volait = _can_fly(monstre)
 	effet_cible = _appliquer_effet_sur_cible(combat_doc, monstre, source, effets,
 											 combat_doc["tour"])
+	if effet_cible and effet_cible.get("abattu") and volait:
+		# ABATTRE : le volant touché est cloué au sol (`_can_fly` lit l'entrée) — et s'il
+		# surplombe une falaise, il y tombe, un dé par case, par le chokepoint de la chute.
+		combat_doc["log"].append(_avec_etat({
+			"tour": combat_doc["tour"], "acteur": joueur["nom"], "kind": "sys",
+			"texte": f"🪢 {monstre['nom']} est cloué au sol : il ne peut plus voler.",
+		}, monstre))
+		_atterrir(combat_doc, monstre)
 	if effet_cible and effet_cible.get("provocation"):
 		# L'entrée EST celle des `effets_actifs` du monstre (`poser_effet` la stocke telle
 		# quelle) : la timbrer ici suffit. Relancer la même capacité la remplace — donc le
@@ -1202,7 +1215,10 @@ def _can_fly(actor: dict) -> bool:
 	"""L'acteur peut-il franchir les falaises ? `volant` (ailes d'une espèce, posé par
 	`_appliquer_couvert`) OU `vol_magique` (sort de vol, dérivé de ses effets vivants par
 	`_refresh_snapshot_stats`). ⚠️ La lévitation ignore le COUVERT : seules les ailes s'y
-	replient."""
+	replient. ⚠️ Un acteur ABATTU (`vol.abattu`, effet `abattre`) ne vole plus, ni d'ailes ni
+	de magie, tant que l'entrée vit : à son expiration il reprend l'air sans rien d'autre."""
+	if vol_util.abattu(actor):
+		return False
 	return bool(actor.get("volant") or actor.get("vol_magique"))
 
 

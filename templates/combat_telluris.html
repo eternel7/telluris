@@ -1893,6 +1893,7 @@ function renderEffetsActifs(list) {
 		if (e.regen_pm) details.push(regenTexte(e.regen_pm, 'PM'));
 		if (e.esquive) details.push(`+${e.esquive} esquive`);
 		if (e.vol) details.push('🪽 vol');
+		if (e.abattu) details.push('🪢 cloué au sol');
 		// Un sort MAINTENU n'a pas de compte à rebours : il dure tant que son lanceur paie
 		// l'entretien. Afficher « ⏳3 » mentirait — le chiffre ne bougerait jamais. On
 		// annonce donc la FACTURE par round, seule chose qui décide de sa survie.
@@ -3966,6 +3967,7 @@ function sortLabel(s) {
 	// Provocation : le monstre touché vise le lanceur (cf. combat._cible_joueur).
 	if (s.effets.provocation) parts.push(`📢 provoque${s.effets.duree ? ` ${s.effets.duree} tours` : ''}`);
 	if (s.effets.echange) parts.push('🔄 échange de place');
+	if (s.effets.abattre) parts.push(`🪢 abat les volants${s.effets.duree ? ` ${s.effets.duree} tours` : ''}`);
 	// Invocation : ses `effets` sont vides par construction (elle fait apparaître une
 	// créature, elle ne pose rien sur personne) — sans cette ligne la case n'annoncerait rien.
 	// Maintenue : la créature reste tant que l'entretien est payé, sa `duree` est inerte.
@@ -4244,6 +4246,7 @@ function compLabel(c) {
 	// Provocation : le monstre touché vise le porteur (cf. combat._cible_joueur).
 	if (c.effets.provocation) parts.push(`📢 provoque${c.effets.duree ? ` ${c.effets.duree} tours` : ''}`);
 	if (c.effets.echange) parts.push('🔄 échange de place');
+	if (c.effets.abattre) parts.push(`🪢 abat les volants${c.effets.duree ? ` ${c.effets.duree} tours` : ''}`);
 	if (c.effets.lien_vie) parts.push(`🔗 lien de vie ${formuleTexte(c.effets, 'lien_vie.part', c.effets.lien_vie.part)} %`);
 	// Portée EFFECTIVE et non déclarée : une frappe `cc` emprunte l'allonge de l'arme en
 	// main, donc la même compétence ne porte pas à la même distance d'une épée à une hast.
