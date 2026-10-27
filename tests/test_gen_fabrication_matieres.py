@@ -129,6 +129,22 @@ def test_le_score_ne_compte_que_ce_qui_agit():
 	assert gen.score_matiere(eff, [gen.TAG_CONSOMMABLE]) == 1
 	# Débuff : |Δ| × durée / 2.
 	assert gen.score_matiere({"effets": {"buffs": {"R": -2}, "duree": 3}}) == 3
+	# Poison (régén négative) : compté comme un débuff, jamais en négatif.
+	assert gen.score_matiere({"effets": {"regen_pv": -2, "duree": 3}}) == 3
+
+
+def test_le_poison_de_base_empoisonne_la_cible():
+	# Régén PV NÉGATIVE à durée : c'est la part durative qu'une arme pose sur l'ennemi.
+	eff = gen.MATIERES["item:Poison_de_base"]["modificateurs"]["effets"]
+	assert eff["regen_pv"] < 0 and eff["duree"] > 0
+
+
+def test_un_poison_hors_arme_est_refuse():
+	# Sur une armure, la régén est lue en permanence : elle empoisonnerait le porteur.
+	table = {"item:x": {"modificateurs": {"effets": {"regen_pv": -2, "duree": 2}},
+						"tags": [gen.TAG_ARME, gen.TAG_ARMURE]}}
+	assert gen.effets_mal_diriges(table) == [
+		"item:x : regen_pv négatif hors arme empoisonnerait le PORTEUR"]
 
 
 # ── Tags et rareté de l'item ─────────────────────────────────────────────────────

@@ -1,0 +1,163 @@
+[
+  {
+    "_id": "item:Poison_de_base",
+    "type": "item",
+    "nom": "Poison de base",
+    "sous_categorie": "",
+    "icon": "☠️",
+    "description": "Poison simple tiré de plantes communes. Sur une lame, il affaiblit qui en est touché.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "Empoisonné",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "effets": {
+          "regen_pv": -2,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.1
+        }
+      }
+    },
+    "tags": [
+      "fabrication_arme"
+    ]
+  },
+  {
+    "_id": "item:Fouet_31f6c52c",
+    "type": "item",
+    "nom": "Fouet Empoisonné Démoniaque en adamantite",
+    "icon": "➰",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "description": "Long fouet de cuir tressé : inefficace contre l'armure, redoutable pour désarmer. Façonné sur mesure : Poison de base, Sang de démon séché, Lingot d'adamantite.",
+    "bonus_degats_dice": 2,
+    "bonus_cc": 4,
+    "portee": 2,
+    "bonus_degats": 11,
+    "bonus_pa": 6,
+    "effets": {
+      "regen_pv": -2,
+      "duree": 4,
+      "buffs": {
+        "Vol": -1
+      }
+    },
+    "bonus": {
+      "F": 1,
+      "Vol": 1,
+      "R": 3
+    },
+    "restriction": {
+      "Ag": 17
+    },
+    "rarete": "legendaire",
+    "poids": 1.2,
+    "valeur": [
+      {
+        "cu": 200370
+      },
+      {
+        "cu": 200535
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Fouet",
+      "matieres": [
+        {
+          "item": "item:Poison_de_base",
+          "quantite": 1
+        },
+        {
+          "item": "item:Sang_demon_seche",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Fouet_31f6c52c",
+      "cree_at": 1792613232,
+      "lieu": "lieu:la_grande_megisserie"
+    }
+  },
+  {
+    "_id": "item:Masse_a_brides_c97e3203",
+    "type": "item",
+    "nom": "Masse d'armes à brides Empoisonné Démoniaque en mithril",
+    "icon": "⚙️",
+    "description": "Masse d'armes à ailettes : là où elle frappe, l'armure se tord et les côtes plient. Façonné sur mesure : Poison de base, Sang de démon séché, Lingot de mithril.",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "cible": "ennemi",
+    "bonus_degats": 11,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 3,
+    "portee": 1,
+    "bonus_pa": 3,
+    "effets": {
+      "buffs": {
+        "R": -4,
+        "Vol": -1
+      },
+      "duree": 6,
+      "regen_pv": -2
+    },
+    "bonus": {
+      "F": 1,
+      "Vol": 1,
+      "Ag": 2
+    },
+    "restriction": {
+      "F": 13
+    },
+    "rarete": "tres_rare",
+    "poids": 1.08,
+    "valeur": [
+      {
+        "cu": 12445
+      },
+      {
+        "cu": 13751
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Masse_a_brides",
+      "matieres": [
+        {
+          "item": "item:Poison_de_base",
+          "quantite": 1
+        },
+        {
+          "item": "item:Sang_demon_seche",
+          "quantite": 1
+        },
+        {
+          "item": "item:mithril",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Masse_a_brides_c97e3203",
+      "cree_at": 1790288846,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  }
+]

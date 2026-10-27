@@ -30,7 +30,10 @@
 # ⚠️ `effets` NE VEUT PAS DIRE LA MÊME CHOSE SELON LA PIÈCE (`effets_mal_diriges`) :
 #   - sur une ARME, il vise l'ENNEMI (`sorts.effets_d_arme`) et seule sa part durative agit :
 #     un buff positif ou une régén y soignerait la cible. Une matière d'arme ne porte donc que
-#     des DÉBUFFS (`{"buffs": {X: -n}, "duree": d}`) ;
+#     des DÉBUFFS (`{"buffs": {X: -n}, "duree": d}`) ou des POISONS — une régén PV NÉGATIVE
+#     (`{"regen_pv": -n, "duree": d}`, `_poison`), perdue à chaque tour de la cible ;
+#   - un POISON sur toute autre pièce empoisonnerait SON PORTEUR (régén lue en permanence) :
+#     une matière à régén négative n'est donc ouverte qu'aux armes ;
 #   - sur une pièce PORTÉE, seuls `regen_*`, `esquive` et `canalisation` sont lus
 #     (`characters.recompute_equipment_bonus`) ;
 #   - sur un CONSOMMABLE, `pv`/`pm` sont ramenés à 0 s'ils sont négatifs
@@ -126,6 +129,12 @@ def _deb(carac: str, delta: int, duree: int) -> dict:
 	return {"buffs": {carac: -abs(delta)}, "duree": duree}
 
 
+def _poison(pertes: int, duree: int) -> dict:
+	"""Poison d'arme : régén PV NÉGATIVE posée sur la CIBLE à l'impact, perdue à chacun de ses
+	tours (`combat._tick_effets_combat`)."""
+	return {"regen_pv": -abs(pertes), "duree": duree}
+
+
 def _val(facteur: float) -> dict:
 	return {"facteur": facteur}
 
@@ -195,8 +204,8 @@ MATIERES = {
 											   "rarete": "commun"}, ARME_ARMURE),
 	"item:Poudre_os": _matiere("des Ossements", 1, {"bonus_pv": 2, "bonus": {"R": 1}, "poids": _val(0.95),
 													"valeur": _val(1.1)}, ARME_ARMURE_CONSO),
-	"item:Poison_de_base": _matiere("Empoisonné", 1, {"bonus_degats": 1, "effets": _deb("R", 1, 2),
-													  "valeur": _val(1.1)}, ARME_ARMURE),
+	"item:Poison_de_base": _matiere("Empoisonné", 1, {"bonus_degats": 1, "effets": _poison(2, 2),
+													  "valeur": _val(1.1)}, [TAG_ARME]),
 	"item:Fiole_sang_bete": _matiere("Bestial", 1, {"bonus_degats": 1, "bonus": {"F": 1, "V": 1},
 													"valeur": _val(1.1)}, ARME_ARMURE),
 	"item:Eau_benite": _matiere("béni", 1, {"bonus_degats": 1, "bonus": {"Vol": 1}, "effets": {"pv": 5},
@@ -396,14 +405,17 @@ def score_matiere(mods: dict, tags=()) -> float:
 	"""Points qu'apporte une matière (cf. en-tête) : ce qui AGIT, pas ce qui est écrit.
 
 	Un soin instantané (`pv`/`pm` d'`effets`) ne compte que si la matière entre dans un
-	consommable — ailleurs il n'est lu par personne. Un débuff vaut |Δ| × durée / 2."""
+	consommable — ailleurs il n'est lu par personne. Un débuff vaut |Δ| × durée / 2, un
+	poison (régén négative) aussi."""
 	mods = mods or {}
 	score = sum(_num(mods.get(cle)) * poids for cle, poids in POIDS_SCORE.items())
 	score += sum(_num(v) for v in (mods.get("bonus") or {}).values())
 	eff = mods.get("effets") or {}
-	score += POIDS_REGEN * (_num(eff.get("regen_pv")) + _num(eff.get("regen_pm")))
-	score += POIDS_EFFET_PORTE * (_num(eff.get("esquive")) + _num(eff.get("canalisation")))
 	duree = _num(eff.get("duree"))
+	for cle in ("regen_pv", "regen_pm"):
+		v = _num(eff.get(cle))
+		score += abs(v) * duree / 2 if v < 0 else POIDS_REGEN * v
+	score += POIDS_EFFET_PORTE * (_num(eff.get("esquive")) + _num(eff.get("canalisation")))
 	for v in (eff.get("buffs") or {}).values():
 		score += abs(_num(v)) * duree / 2 if _num(v) < 0 else _num(v)
 	if TAG_CONSOMMABLE in set(tags or ()):
@@ -465,6 +477,10 @@ def effets_mal_diriges(matieres: dict) -> list:
 		elif negatifs:
 			erreurs.append("%s : débuff %s sans famille d'arme — il ne toucherait personne"
 						   % (item_id, ", ".join(sorted(negatifs))))
+		poisons = [k for k in ("regen_pv", "regen_pm") if _num(eff.get(k)) < 0]
+		if poisons and tags - TAGS_ARME:
+			erreurs.append("%s : %s négatif hors arme empoisonnerait le PORTEUR"
+						   % (item_id, ", ".join(poisons)))
 		for cle in ("pv", "pm"):
 			if _num(eff.get(cle)) < 0:
 				erreurs.append("%s : `effets.%s` négatif est ramené à 0 — inerte" % (item_id, cle))
