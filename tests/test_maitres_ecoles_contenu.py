@@ -146,3 +146,8 @@ def test_chaque_maitre_est_present_dans_son_lieu_sans_toucher_aux_autres():
 def test_aucun_portrait_partage():
 	portraits = [d["portrait"] for d in _contenu() if d["type"] == "pnj"]
 	assert len(set(portraits)) == len(portraits)
+
+
+def test_chaque_maitre_a_son_portrait_dans_le_depot():
+	for m in gen.MAITRES:
+		assert os.path.isfile(os.path.join(RACINE, "templates", "resources", "pnj", gen.portrait(m))), m["slug"]
