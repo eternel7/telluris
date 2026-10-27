@@ -58,7 +58,8 @@ CHAMPS_PROPRES = {"_id", "_rev", "type", "nom", "icon", "description", "rarete",
 
 
 # ── La table ────────────────────────────────────────────────────────────────────
-# slug → {nom, icon, poids, description, socle, trophee, categorie, intrants, apport}
+# slug → {nom, icon, poids, description, socle, trophee, categorie, intrants, apport[, tags]}
+# `tags` : ajoutés à ceux du socle (ex. `non_personnalisable`).
 # `apport` : additif sur les `bonus_*` et `bonus`, fusion sur `effets` (buffs additionnés,
 # `duree` au maximum), maximum sur `restriction`, additif sur `monture.charge_pct`.
 PIECES = {
@@ -194,6 +195,8 @@ PIECES = {
 		"categorie": "grand_laboratoire_alchimique",
 		"intrants": [("item:Herbes_medicinales", 2), ("reactif_brut", 1)],
 		"apport": {"effets": {"pv": 20, "buffs": {"F": 6, "R": 4}, "duree": 6}},
+		# Se commande tel quel : pas de variante sur mesure d'un élixir de trophée.
+		"tags": ["non_personnalisable"],
 	},
 	"Olifant_de_mammouth": {
 		"nom": "Olifant de Mammouth", "icon": "📯", "poids": 1.5,
@@ -269,7 +272,8 @@ def item_doc(slug: str, socle: dict, rarete_palier: str | None) -> dict:
 	doc = {"_id": "item:" + slug, "type": "item", "nom": p["nom"], "icon": p["icon"],
 		   "description": p["description"], "rarete": rarete,
 		   "categorie": jeu.pop("categorie"), "sous_categorie": jeu.pop("sous_categorie", ""),
-		   "slots": jeu.pop("slots"), "tags": jeu.pop("tags", []), "poids": p["poids"]}
+		   "slots": jeu.pop("slots"), "poids": p["poids"],
+		   "tags": list(dict.fromkeys(jeu.pop("tags", []) + p.get("tags", [])))}
 	doc.update(jeu)
 	return doc
 

@@ -58,3 +58,10 @@ def test_la_piece_prend_la_rarete_la_plus_haute():
 	slug = next(iter(gen.PIECES))
 	assert gen.item_doc(slug, socle, "peu_commun")["rarete"] == "rare"
 	assert gen.item_doc(slug, dict(socle, rarete="commun"), "peu_commun")["rarete"] == "peu_commun"
+
+
+def test_l_elixir_se_commande_tel_quel():
+	"""Décision de l'auteur : pas de variante sur mesure de l'élixir de sang de dragon."""
+	socle = {"rarete": "peu_commun", "categorie": "consommable", "slots": []}
+	doc = gen.item_doc("Elixir_de_sang_de_dragon", socle, "legendaire")
+	assert marche.est_personnalisable(doc) is False

@@ -11,10 +11,10 @@
 		"slots": [
 			"monture_dos"
 		],
+		"poids": 4.5,
 		"tags": [
 			"harnachement"
 		],
-		"poids": 4.5,
 		"monture": {
 			"charge_pct": 40
 		},
@@ -63,8 +63,8 @@
 		"slots": [
 			"epaules"
 		],
-		"tags": [],
 		"poids": 2.5,
+		"tags": [],
 		"bonus": {
 			"Ag": 4
 		},
@@ -111,8 +111,8 @@
 		"slots": [
 			"tete"
 		],
-		"tags": [],
 		"poids": 3.0,
+		"tags": [],
 		"bonus_pa": 2,
 		"bonus": {
 			"F": 2
@@ -161,8 +161,8 @@
 		"slots": [
 			"cou"
 		],
-		"tags": [],
 		"poids": 0.3,
+		"tags": [],
 		"bonus": {
 			"F": 1,
 			"Vol": 2
@@ -212,8 +212,8 @@
 		"slots": [
 			"main_gauche"
 		],
-		"tags": [],
 		"poids": 1.2,
+		"tags": [],
 		"bonus_pm": 4,
 		"bonus": {
 			"Vol": 2
@@ -261,8 +261,10 @@
 		"categorie": "consommable",
 		"sous_categorie": "",
 		"slots": [],
-		"tags": [],
 		"poids": 0.3,
+		"tags": [
+			"non_personnalisable"
+		],
 		"effets": {
 			"pv": 45,
 			"pm": 25,
@@ -316,10 +318,10 @@
 			"main_droite",
 			"main_gauche"
 		],
+		"poids": 2.0,
 		"tags": [
 			"cac"
 		],
-		"poids": 2.0,
 		"portee": 2,
 		"restriction": {
 			"Ag": 17
@@ -377,12 +379,12 @@
 			"main_droite",
 			"main_gauche"
 		],
+		"poids": 3.0,
 		"tags": [
 			"cac",
 			"hast",
 			"tranchant"
 		],
-		"poids": 3.0,
 		"portee": 2,
 		"restriction": {
 			"F": 19
@@ -441,11 +443,11 @@
 			"main_droite",
 			"main_gauche"
 		],
+		"poids": 2.5,
 		"tags": [
 			"cac",
 			"hast"
 		],
-		"poids": 2.5,
 		"portee": 2,
 		"restriction": {
 			"F": 15
@@ -503,8 +505,8 @@
 		"slots": [
 			"main_gauche"
 		],
-		"tags": [],
 		"poids": 2.0,
+		"tags": [],
 		"bonus_pm": 2,
 		"bonus": {
 			"Int": 2
@@ -559,10 +561,10 @@
 			"main_droite",
 			"main_gauche"
 		],
+		"poids": 6.0,
 		"tags": [
 			"cac"
 		],
-		"poids": 6.0,
 		"portee": 1,
 		"restriction": {
 			"F": 28
@@ -614,8 +616,8 @@
 		"slots": [
 			"main_gauche"
 		],
-		"tags": [],
 		"poids": 0.6,
+		"tags": [],
 		"bonus_pm": 4,
 		"bonus": {
 			"Vol": 2
@@ -666,10 +668,10 @@
 			"main_droite",
 			"main_gauche"
 		],
+		"poids": 1.5,
 		"tags": [
 			"cac"
 		],
-		"poids": 1.5,
 		"portee": 1,
 		"bonus_degats": 1,
 		"bonus_degats_dice": 2,
@@ -730,11 +732,11 @@
 		"slots": [
 			"main_gauche"
 		],
-		"tags": [],
 		"poids": [
 			10,
 			16
 		],
+		"tags": [],
 		"bonus_pa": 18,
 		"bonus": {
 			"Ag": -10
@@ -786,8 +788,8 @@
 		"slots": [
 			"torse"
 		],
-		"tags": [],
 		"poids": 4.0,
+		"tags": [],
 		"bonus_pa": 2,
 		"bonus": {
 			"R": 2,
@@ -836,8 +838,8 @@
 		"slots": [
 			"main_gauche"
 		],
-		"tags": [],
 		"poids": 0.4,
+		"tags": [],
 		"bonus_pm": 8,
 		"bonus": {
 			"Int": 2
