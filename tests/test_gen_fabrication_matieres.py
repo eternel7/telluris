@@ -148,6 +148,18 @@ def test_le_poison_de_base_empoisonne_la_cible():
 	assert eff["regen_pv"] < 0 and eff["duree"] > 0
 
 
+def test_les_dards_de_monstres_empoisonnent_plus_que_le_poison_de_base():
+	# Pertes TOTALES (par tour × durée) : un dard venimeux surclasse le poison d'échoppe.
+	def total(item_id):
+		eff = gen.MATIERES[item_id]["modificateurs"]["effets"]
+		return -eff["regen_pv"] * eff["duree"]
+	base = total("item:Poison_de_base")
+	for dard in ("item:manticore_queue", "item:scorpion_geant_queue", "item:wyvern_queue",
+				 "item:hydre_tete", "item:Extrait_de_mandragore"):
+		assert total(dard) > base, dard
+		assert gen.MATIERES[dard]["tags"] == [gen.TAG_ARME], dard
+
+
 def test_un_poison_hors_arme_est_refuse():
 	# Sur une armure, la régén est lue en permanence : elle empoisonnerait le porteur.
 	table = {"item:x": {"modificateurs": {"effets": {"regen_pv": -2, "duree": 2}},

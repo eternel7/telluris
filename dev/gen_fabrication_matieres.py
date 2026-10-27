@@ -139,8 +139,11 @@ def _val(facteur: float) -> dict:
 	return {"facteur": facteur}
 
 
-def _partie(nom: str, palier: int, partie: str, mods: dict) -> dict:
-	"""Entrée d'une partie de créature : tags par partie, `rarete` de l'item alignée sur le palier."""
+def _partie(nom: str, palier: int, partie: str, mods: dict, tags=None) -> dict:
+	"""Entrée d'une partie de créature : tags par partie, `rarete` de l'item alignée sur le palier.
+
+	`tags` remplace ceux de la partie — une tête VENIMEUSE n'est ouverte qu'aux armes (un
+	poison sur une armure empoisonnerait son porteur, cf. `effets_mal_diriges`)."""
 	p = PALIERS[palier]
 	mods = dict(mods)
 	if p["valeur"]:
@@ -148,7 +151,7 @@ def _partie(nom: str, palier: int, partie: str, mods: dict) -> dict:
 	if p["rarete"]:
 		mods.setdefault("rarete", p["rarete"])
 	return {"nom": nom, "modificateurs": mods, "palier": palier,
-			"tags": list(TAGS_PAR_PARTIE[partie]),
+			"tags": list(TAGS_PAR_PARTIE[partie] if tags is None else tags),
 			"rarete_item": p["rarete"] or RARETE_ITEM_PALIER_1}
 
 
@@ -239,6 +242,9 @@ MATIERES = {
 
 	# ── Palier 2 : peu communs ─────────────────────────────────────────────────
 	"item:acier": _matiere("en acier", 2, {"bonus_degats": 2, "bonus_pa": 2, "poids": _val(1.05)}),
+	# Poison d'échoppe du cran au-dessus du Poison de base, sous les dards de monstres.
+	"item:Extrait_de_mandragore": _matiere("à la Mandragore", 2, {"bonus_degats": 2, "effets": _poison(3, 2)},
+										   [TAG_ARME]),
 	"item:crocs": _matiere("à garde de crocs", 2, {"bonus_degats": 2, "bonus_cc": 1}),
 	# Demi-produits des petits marchands (dev/gen_recettes_petits_marchands.py).
 	"item:Cuir_tanne_au_chene": _matiere("en cuir de chêne", 2, {"bonus_pa": 2, "bonus": {"R": 1}}, [TAG_ARMURE]),
@@ -329,9 +335,11 @@ MATIERES = {
 															   "effets": _deb("V", 1, 2)}),
 	"item:basilic_tete": _partie("du Regard Mortel", 2, "tete", {"bonus_degats": 2, "bonus": {"Vol": 2},
 																 "effets": _deb("R", 1, 2)}),
-	"item:basilic_queue": _partie("du Basilic", 2, "queue", {"bonus_degats": 3, "effets": _deb("R", 1, 2)}),
-	"item:araignee_geante_tete": _partie("Arachnéen", 2, "tete", {"bonus_degats": 2, "bonus": {"Ag": 1},
-																  "effets": _deb("V", 1, 2)}),
+	"item:basilic_queue": _partie("du Basilic", 2, "queue", {"bonus_degats": 2, "effets": _poison(3, 2)}),
+	# Venin paralysant : le V −1 reste, le poison s'y ajoute (même durée — un seul `duree` par bloc).
+	"item:araignee_geante_tete": _partie("Arachnéen", 2, "tete", {"bonus_degats": 1, "bonus": {"Ag": 1},
+																  "effets": {**_deb("V", 1, 2), **_poison(2, 2)}},
+										 [TAG_ARME]),
 	"item:chimere_tete_morceau": _partie("de la Monstruosité", 2, "tete", {"bonus_degats": 2, "bonus": {"Vol": 1},
 																		   "effets": _deb("Vol", 1, 2)}),
 	"item:chimere_patte_morceau": _partie("de la Férocité", 2, "patte", {"bonus_degats": 2, "bonus_cc": 1,
@@ -340,6 +348,13 @@ MATIERES = {
 																		 "bonus_cd": 1}),
 
 	# Palier 3 : bunyip, chimère, cerbère.
+	# DARDS (Auteur, 27/10 : « venin d'abord ») : tout le budget du palier dans le poison, aucun
+	# dégât en plus — scorpion géant ≈252, manticore ≈256, hydre ≈291 (le sang de l'Hydre de
+	# Lerne), wyvern ≈304. Ouverts aux seules armes.
+	"item:manticore_queue": _partie("au Dard de Manticore", 3, "queue", {"effets": _poison(4, 4)}),
+	"item:scorpion_geant_queue": _partie("au Venin de Scorpion", 3, "queue", {"effets": _poison(4, 4)}),
+	"item:wyvern_queue": _partie("au Venin de Wyvern", 3, "queue", {"effets": _poison(4, 4)}),
+	"item:hydre_tete": _partie("au Sang d'Hydre", 3, "tete", {"effets": _poison(4, 4)}, [TAG_ARME]),
 	"item:bunyip_tete": _partie("des Marais", 3, "tete", {"bonus_degats": 3, "bonus_pv": 6, "bonus": {"R": 2}}),
 	"item:bunyip_patte": _partie("des Profondeurs", 3, "patte", {"bonus_degats": 3, "bonus": {"R": 1, "Ag": 2},
 																 "poids": _val(1.05)}),
@@ -350,8 +365,9 @@ MATIERES = {
 																  "effets": _deb("Vol", 1, 2)}),
 	"item:chimere_patte": _partie("de la Fureur", 3, "patte", {"bonus_degats": 3, "bonus_pa": 1, "bonus_cc": 1,
 															   "bonus": {"F": 1, "Ag": 1}}),
+	# Queue de serpent : son venin est un poison.
 	"item:chimere_queue": _partie("de la Chimère", 3, "queue", {"bonus_degats": 3, "bonus_cd": 2, "bonus": {"Ag": 1},
-																"effets": _deb("R", 1, 2)}),
+																"effets": _poison(2, 2)}),
 	"item:cerbere_tete": _partie("du Gardien Infernal", 3, "tete", {"bonus_degats": 4, "bonus": {"F": 2, "Vol": 1},
 																	"effets": _deb("Vol", 1, 2)}),
 
