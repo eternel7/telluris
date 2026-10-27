@@ -3470,6 +3470,8 @@
 		/* Provenance : 🎒 = déjà dans les sacs de l'expédition, donc fournie sans frais. */
 		.sm-source { font-size: .9em; }
 		.sm-liste { max-height: 40vh; overflow-y: auto; margin: .2rem 0 .8rem; }
+		.sm-base { display: block; margin: .2rem 0 .4rem; }
+		.sm-base select { max-width: 100%; }
 		.sm-devis { border-top: 1px solid rgba(74,74,90,.4); padding-top: .5rem; margin-top: .4rem; }
 		.sm-devis-ligne { display: flex; justify-content: space-between; font-size: .88em; padding: 2px 0; }
 		.sm-devis-total { font-weight: bold; color: var(--gold2, var(--gold, #d8b46a)); }
@@ -7197,7 +7199,7 @@ function updatePurse(purse) {
 
 // État relation/blocage du marchand courant. `blocDeadline` = horloge client absolue
 // (on convertit `bloque_jusqu`−`now` serveur en délai relatif pour éviter les décalages).
-let MARCHAND = { relation: 50, blocDeadline: 0, cmdMatieres: [], cmdMatieresMax: 1 };
+let MARCHAND = { relation: 50, blocDeadline: 0, cmdMatieres: [], cmdExemplaires: [], cmdMatieresMax: 1 };
 
 function isMarchBlocked()  { return MARCHAND.blocDeadline > Date.now(); }
 function blocRemainingMin(){ return Math.max(1, Math.ceil((MARCHAND.blocDeadline - Date.now()) / 60000)); }
@@ -8435,7 +8437,7 @@ function relancerCommande(btn) {
 // promesse est RÉSOLUE À NULL — sinon la commande resterait suspendue et son bouton
 // désactivé pour toujours (Convention §8).
 let _smResolve = null;
-let _smEtat = { itemId: null, choisies: [] };
+let _smEtat = { itemId: null, choisies: [], baseIdx: -1 };
 
 function closeSurMesure() {
 	document.getElementById('sur-mesure-overlay').classList.add('clauses-hidden');
@@ -8469,12 +8471,35 @@ function _smProvenance(m) {
 	return '<span class="sm-source" title="Ni en rayon ni dans vos sacs — la commande attendra que vous l\'apportiez">🔎</span>';
 }
 
+// La pièce de base : neuve (l'artisan la fabrique) ou l'un des exemplaires des sacs, confié
+// à l'artisan — ses ingrédients ne sont plus demandés et son nom propre passe à la pièce
+// façonnée. `{porteur, index}` vient du serveur, qui le revérifie à l'envoi.
+function _smBase() {
+	const e = (MARCHAND.cmdExemplaires || [])[_smEtat.baseIdx];
+	return e ? { porteur: e.porteur, index: e.index } : undefined;
+}
+
+function _smChoisirBase(sel) {
+	_smEtat.baseIdx = +sel.value;
+	_smRafraichirDevis();
+}
+
+function _smChoixBase() {
+	const ex = MARCHAND.cmdExemplaires || [];
+	if (!ex.length) return '';
+	return `<label class="cmd-aide sm-base">Pièce : <select id="sm-base" onchange="_smChoisirBase(this)">
+		<option value="-1">🛠️ Neuve, fabriquée par l'artisan</option>
+		${ex.map((e, i) => `<option value="${i}"${_smEtat.baseIdx === i ? ' selected' : ''}>🎒 Votre ${escapeHtml(e.nom)}${e.chez ? ' (porté par ' + escapeHtml(e.chez) + ')' : ''}</option>`).join('')}
+	</select></label>`;
+}
+
 function _smRender() {
 	const mats = MARCHAND.cmdMatieres || [];
 	const cat = (MARCHAND.catalogue || []).find(c => c.item_id === _smEtat.itemId);
 	document.getElementById('sur-mesure-body').innerHTML =
 		`<h3 style="margin:.1rem 0 .2rem">✨ ${escapeHtml((cat && cat.nom) || 'Sur mesure')}</h3>
 		<p class="cmd-aide">Jusqu'à ${MARCHAND.cmdMatieresMax} matières. Ce que vous avez dans vos sacs (🎒) est pris d'abord ; ce qui est en rayon est acheté à l'artisan ; ce qui reste à trouver (🔎) met la commande en attente.</p>
+		${_smChoixBase()}
 		<div class="sm-liste">${
 			mats.length ? mats.map(m => `<button type="button" class="sm-matiere${_smEtat.choisies.includes(m.item_id) ? ' choisie' : ''}"
 				data-item="${escapeHtml(m.item_id)}" onclick="_smToggle(this)">
@@ -8507,7 +8532,7 @@ async function _smRafraichirDevis() {
 	try {
 		const res = await fetch('api/commande/devis', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ item_id: _smEtat.itemId, matieres: _smEtat.choisies })
+			body: JSON.stringify({ item_id: _smEtat.itemId, matieres: _smEtat.choisies, base: _smBase() })
 		});
 		const data = await res.json();
 		if (!res.ok) { box.innerHTML = `<p class="sm-manque">${escapeHtml(data.detail || 'Devis impossible.')}</p>`; return; }
@@ -8523,7 +8548,7 @@ async function _smRafraichirDevis() {
 		box.innerHTML =
 			`<div class="sm-devis-ligne sm-devis-total"><span>${escapeHtml(data.nom || '')}</span><span>${formatPrix(data.total)}</span></div>`
 			+ ligne('Pièce', d.prix_base)
-			+ (d.credit_matieres ? ligne('Matières apportées', '− ' + d.credit_matieres) : '')
+			+ (d.credit_matieres ? ligne(data.base_apportee ? 'Pièce apportée' : 'Matières apportées', '− ' + d.credit_matieres) : '')
 			+ (d.cout_matieres ? ligne('Matières achetées', d.cout_matieres) : '')
 			+ ligne('Façon', d.cout_fabrication)
 			+ (d.supplement_complexite ? ligne('Complexité', d.supplement_complexite) : '')
@@ -8542,15 +8567,17 @@ async function _chargerMatieresSurMesure(itemId) {
 	try {
 		const res = await fetch('api/commande/matieres?item_id=' + encodeURIComponent(itemId));
 		const data = await res.json();
-		if (!res.ok) { showToast('Erreur : ' + data.detail); return []; }
-		return data.matieres || [];
-	} catch (err) { console.error('Erreur matières', err); return []; }
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return {}; }
+		return data;
+	} catch (err) { console.error('Erreur matières', err); return {}; }
 }
 
 async function commanderSurMesure(btn) {
 	if (btn) btn.disabled = true;
-	_smEtat = { itemId: btn.dataset.item, choisies: [] };
-	MARCHAND.cmdMatieres = await _chargerMatieresSurMesure(_smEtat.itemId);
+	_smEtat = { itemId: btn.dataset.item, choisies: [], baseIdx: -1 };
+	const offre = await _chargerMatieresSurMesure(_smEtat.itemId);
+	MARCHAND.cmdMatieres = offre.matieres || [];
+	MARCHAND.cmdExemplaires = offre.exemplaires || [];
 	_smRender();
 	document.getElementById('sur-mesure-overlay').classList.remove('clauses-hidden');
 	const choisies = await new Promise(resolve => { _smResolve = resolve; });
@@ -8560,7 +8587,7 @@ async function commanderSurMesure(btn) {
 	// provisoire dit tout de suite où la commande est partie.
 	_cmdLigneProvisoire(_smEtat.itemId);
 	await _cmdAction('api/commande/passer',
-		{ item_id: _smEtat.itemId, matieres: choisies.map(id => ({ item: id, quantite: 1 })) }, btn);
+		{ item_id: _smEtat.itemId, matieres: choisies.map(id => ({ item: id, quantite: 1 })), base: _smBase() }, btn);
 }
 
 // ── Tableau des quêtes (guilde) ───────────────────────────────────────

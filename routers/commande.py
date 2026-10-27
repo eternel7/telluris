@@ -302,7 +302,21 @@ def matieres_sur_mesure(
 		raise HTTPException(status_code=422, detail="Objet introuvable")
 	_garde_sur_mesure(lieu_doc, base_doc)
 	porteurs = [character] + recrutement.porteurs_effectifs(character, get_doc)
-	return {"item_id": item_id, "matieres": _matieres_vue(lieu_doc, base_doc, porteurs)}
+	return {"item_id": item_id, "matieres": _matieres_vue(lieu_doc, base_doc, porteurs),
+			"exemplaires": _exemplaires_vue(character, base_doc, porteurs)}
+
+
+def _exemplaires_vue(character: dict, base_doc: dict, porteurs: list) -> list:
+	"""Les exemplaires de la pièce que l'expédition peut CONFIER à l'artisan, résolus pour le
+	client : `{porteur, index}` à renvoyer tels quels dans `base`, et un libellé — nom propre
+	s'il y en a un, porteur s'il n'est pas le principal. Le serveur revérifie à l'envoi."""
+	noms = {(p or {}).get("_id"): (p or {}).get("nom") or "" for p in porteurs}
+	vue = []
+	for e in commande_util.exemplaires_base(porteurs, base_doc.get("_id")):
+		vue.append({"porteur": e["porteur"], "index": e["index"],
+					"nom": e["nom_perso"] or base_doc.get("nom") or base_doc.get("_id"),
+					"chez": "" if e["porteur"] == character.get("_id") else noms.get(e["porteur"], "")})
+	return vue
 
 
 # ── Résolution commune devis / passer ───────────────────────────────────────────
@@ -340,7 +354,7 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 		return {
 			"item_id": item_id, "base_doc": base_doc, "matieres_docs": [], "matieres": [],
 			"source": source, "detail": detail, "porteurs": [character],
-			"flux": flux, "voisins": voisins,
+			"flux": flux, "voisins": voisins, "exemplaire": None,
 		}
 
 	if matieres_demandees:
@@ -384,7 +398,20 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 	porteurs = [character] + recrutement.porteurs_effectifs(character, get_doc)
 	retenus = set()
 
-	recette = commande_util.recette_pour(lieu_doc, item_id)
+	# Pièce de base APPORTÉE (`body.base` = {porteur, index}) : sur mesure seulement. Elle
+	# tient lieu de toute la recette — trophée compris —, et elle est retenue pour qu'aucune
+	# passe ne la prenne une seconde fois.
+	exemplaire = None
+	if (body or {}).get("base"):
+		if not matieres_demandees:
+			raise HTTPException(status_code=422,
+								detail="On n'apporte sa pièce que pour la faire façonner sur mesure.")
+		exemplaire = commande_util.exemplaire_base(porteurs, item_id, body["base"])
+		if exemplaire is None:
+			raise HTTPException(status_code=422, detail="Cette pièce n'est plus dans vos sacs.")
+		retenus.add((exemplaire["porteur"].get("_id") or "", exemplaire["index"]))
+
+	recette = None if exemplaire else commande_util.recette_pour(lieu_doc, item_id)
 	besoins_recette = list(marche.recette_matieres(recette)) if recette else []
 	# `atelier=True` : ce que le joueur n'apporte pas, l'artisan le prend dans SA réserve, dans
 	# son rayon, dans le pool de la cité (la commande passe AVANT le flux), au rayon d'une
@@ -404,9 +431,15 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 	# Remise : ce que l'artisan n'aura pas à acheter parce que le client l'a apporté, au coût
 	# de revient (pas au prix de vente — le joueur contribue, il ne revend pas).
 	credit = sum(marche.cout_production_cuivre(f["item_id"]) for f in src_recette["fournies"])
+	prix_base = _prix_piece(relation, lieu_doc, base_doc, item_id)
+	if exemplaire:
+		# La pièce entière est fournie : remise de tout `prix_base` — restent la façon, la
+		# complexité et les matières sur mesure. `devis` plafonne de toute façon à `prix_base`.
+		credit = prix_base
 
 	source = {
-		"fournies": src_recette["fournies"] + src_sur_mesure["fournies"],
+		"fournies": ([exemplaire] if exemplaire else [])
+					+ src_recette["fournies"] + src_sur_mesure["fournies"],
 		"atelier": src_recette["atelier"],
 		"achetees": src_sur_mesure["achetees"],
 		"manquantes": src_recette["manquantes"] + src_sur_mesure["manquantes"],
@@ -414,13 +447,13 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 		"credit_matieres": credit,
 	}
 
-	prix_base = _prix_piece(relation, lieu_doc, base_doc, item_id)
 	detail = commande_util.devis(prix_base, source["cout_matieres"], credit,
 								 len(matieres_demandees))
 	return {
 		"item_id": item_id, "base_doc": base_doc, "matieres_docs": matieres_docs,
 		"matieres": matieres_demandees, "source": source,
 		"detail": detail, "porteurs": porteurs, "flux": flux, "voisins": voisins,
+		"exemplaire": exemplaire,
 	}
 
 
@@ -454,6 +487,7 @@ def devis_commande(
 		"atelier": source["atelier"],
 		"achetees": source["achetees"],
 		"manquantes": source["manquantes"],
+		"base_apportee": bool(resolu.get("exemplaire")),
 		"apercu": apercu,
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 	}
@@ -482,6 +516,17 @@ async def passer_commande(
 	now = commande_util.now_epoch()
 
 	commande_util.purger_commandes(character, now)
+
+	# ⚠️ Pièce apportée : pas de mise en attente. L'intention devrait désigner UN exemplaire
+	# par sa position dans un sac, qui aura bougé à la relance ; on refuse donc tant que les
+	# matières ne sont pas réunies — rien n'est pris, rien n'est débité.
+	exemplaire = resolu.get("exemplaire")
+	if exemplaire and source["manquantes"]:
+		raise HTTPException(
+			status_code=422,
+			detail="Il manque %s : réunissez les matières avant de confier votre pièce."
+				   % ", ".join(m.get("nom") or (get_doc(marche.matiere_item_id(m["cle"])) or {}).get("nom")
+							   or m["cle"] for m in source["manquantes"]))
 
 	# Cas C : on enregistre l'intention, on ne touche ni au sac ni à la bourse.
 	# ⚠️ L'intention, c'est la pièce ET ses matières. Sans `base_item`/`matieres`, une commande
@@ -530,7 +575,8 @@ async def passer_commande(
 		lieu_doc, item_id, resolu["detail"], now=now, base_item=base_item,
 		matieres=resolu["matieres"],
 		fournies=[{"cle": f["cle"], "item_id": f["item_id"]} for f in source["fournies"]],
-		achetees=source["achetees"], poids=poids)
+		achetees=source["achetees"], poids=poids,
+		nom_perso=(exemplaire or {}).get("nom_perso", ""))
 	character.setdefault("commandes", []).append(enr)
 
 	mutes = {id(f["porteur"]): f["porteur"] for f in source["fournies"]}

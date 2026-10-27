@@ -352,6 +352,53 @@ def emplacements_fournis(besoins, porteurs, get_doc_fn, retenus=None) -> tuple:
 	return trouves, manquants
 
 
+# ── La pièce de base apportée (sur-mesure seulement) ────────────────────────────
+# Le client confie SA pièce à façonner au lieu d'en faire fabriquer une neuve : les
+# ingrédients de la recette ne sont plus demandés (trophée compris) et la pièce entière est
+# remise sur le prix. Son nom propre (`nom_perso`) passe à la variante livrée.
+#
+# ⚠️ Seul l'objet de base EXACT est admis (`item_ref_id(ref) == item_id`) : une variante a
+# son propre id, et l'item commandé est toujours un produit du catalogue, jamais une variante
+# (`sur_commande` la sort de `produits`). Sans cette égalité stricte, façonner une variante
+# déjà façonnée empilerait les valeurs à chaque passage.
+
+def exemplaires_base(porteurs, item_id: str) -> list:
+	"""Les exemplaires de `item_id` dans les sacs de l'expédition, dans l'ordre des porteurs
+	(principal en tête) : `[{"porteur": id, "index": i, "nom_perso": "…"}]`. Les pièces
+	ÉQUIPÉES n'y sont pas — il faut les ôter d'abord."""
+	out = []
+	for porteur in porteurs or ():
+		pid = (porteur or {}).get("_id") or ""
+		for index, ref in enumerate((porteur or {}).get("inventaire", []) or []):
+			if item_id and item_ref_id(ref) == item_id:
+				out.append({"porteur": pid, "index": index,
+							"nom_perso": (ref.get("nom_perso") or "") if isinstance(ref, dict) else ""})
+	return out
+
+
+def exemplaire_base(porteurs, item_id: str, choix) -> dict | None:
+	"""L'exemplaire désigné par `choix` (`{"porteur": id, "index": i}`), sous la forme d'une
+	entrée d'`emplacements_fournis` (donc retirable par `retirer_fournitures`) plus son
+	`nom_perso` — ou None si la position ne porte plus EXACTEMENT `item_id` (le sac a bougé
+	entre l'affichage et l'envoi : on ne prend pas une autre pièce à la place)."""
+	if not isinstance(choix, dict) or not item_id:
+		return None
+	try:
+		index = int(choix.get("index"))
+	except (TypeError, ValueError):
+		return None
+	for porteur in porteurs or ():
+		if ((porteur or {}).get("_id") or "") != (choix.get("porteur") or ""):
+			continue
+		inventaire = porteur.get("inventaire", []) or []
+		if not 0 <= index < len(inventaire) or item_ref_id(inventaire[index]) != item_id:
+			return None
+		ref = inventaire[index]
+		return {"cle": item_id, "porteur": porteur, "index": index, "item_id": item_id,
+				"nom_perso": (ref.get("nom_perso") or "") if isinstance(ref, dict) else ""}
+	return None
+
+
 def retirer_fournitures(trouves) -> list:
 	"""Retire de leur porteur les emplacements repérés — rend les références retirées.
 
@@ -868,15 +915,19 @@ def prix_variante(base_doc: dict, matieres_docs, cout_fn=None, prix_min_fn=None)
 
 def nouvelle_commande(lieu_doc: dict, item_id: str, detail: dict, now: int | None = None,
 					  base_item: str = "", matieres=None, fournies=None,
-					  achetees=None, manquantes=None, poids: float = 0.0) -> dict:
+					  achetees=None, manquantes=None, poids: float = 0.0,
+					  nom_perso: str = "") -> dict:
 	"""Enregistrement d'une commande, prêt à être poussé dans `character["commandes"]`.
 
 	Naît `payee` si tout est réuni, `en_attente_materiaux` sinon — jamais en échec (§7 cas C).
 	`pret_at` n'a de sens que pour une commande payée ; il est posé dès maintenant pour que le
-	statut reste purement dérivable de l'horloge, sans second champ à tenir à jour."""
+	statut reste purement dérivable de l'horloge, sans second champ à tenir à jour.
+
+	`nom_perso` : celui de la pièce APPORTÉE (`exemplaire_base`), rendu à la livraison."""
 	instant = now_epoch() if now is None else int(now)
 	complet = not (manquantes or [])
-	return {
+	extra = {"nom_perso": nom_perso} if nom_perso else {}
+	return extra | {
 		"id": uuid.uuid4().hex,
 		"lieu": (lieu_doc or {}).get("_id", ""),
 		"lieu_categorie": (lieu_doc or {}).get("categorie", ""),
@@ -944,6 +995,9 @@ def ref_livree(commande: dict) -> dict:
 	poids = float(commande.get("poids", 0) or 0)
 	if poids > 0:
 		ref["poids"] = poids
+	# Le nom propre de la pièce apportée suit la pièce façonnée (`nouvelle_commande`).
+	if commande.get("nom_perso"):
+		ref["nom_perso"] = commande["nom_perso"]
 	return ref
 
 
