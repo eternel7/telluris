@@ -1147,6 +1147,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			# Règle de marche du pavé : `>= 1` en vol, `=== 1` à pied (scripts/deplacement.js).
 			"volant": vol_util.vol_actif(character),
 			"chute_vol": chute_vol,
+			# Portée réelle d'une arme de jet sur la fiche objet (miroir de combat._weapon_attacks).
+			"jet_portee_f_div": character_stats.JET_PORTEE_F_DIV,
 			# stat_caps, xp_coeff/xp_voc_coeff, xp_niv_prev/next, effets_actifs,
 			# caracts_detail, sorts*, competences* — cf. utils/fiche.bloc_fiche.
 			**fiche_bloc,

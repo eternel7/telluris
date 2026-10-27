@@ -4897,6 +4897,7 @@ function _majPointsCompagnons(groupe) {
 }
 const _STAT_COEFF = {{ xp_coeff | tojson | safe }};
 const _VOC_COEFF = {{ xp_voc_coeff | tojson | safe }};
+const _JET_F_DIV = {{ jet_portee_f_div | tojson | safe }};
 // Grille « Profil modifié » : {code: {base, total, delta, sources:[{origine,nom,icon,delta}]}}
 let _caractsDetail = {{ caracts_detail | tojson | safe }};
 // Bloc ✦ Expérience : ces valeurs suivent le personnage AFFICHÉ (le joueur ou un compagnon),
@@ -5672,7 +5673,7 @@ function _slotCandidatesInBag(slot) {
 // Attributs numériques comparables (better: +1 = plus haut mieux, -1 = plus bas mieux).
 const _CMP_ATTRS = [
 	{ label: 'Poids',        get: it => +(it.poids || 0),             better: -1, fmt: v => v.toFixed(1) + ' kg', always: true },
-	{ label: 'Portée',       get: it => it.categorie === 'arme' ? +(it.portee || 1) : null, better: 1, fmt: v => String(v) },
+	{ label: 'Portée',       get: it => _porteeArme(it), better: 1, fmt: v => String(v) },
 	{ label: 'Armure',       get: it => +(it.bonus_pa || 0),          better: 1,  fmt: v => '+' + v },
 	{ label: 'PV',           get: it => +(it.bonus_pv || 0),          better: 1,  fmt: v => '+' + v },
 	{ label: 'PM',           get: it => +(it.bonus_pm || 0),          better: 1,  fmt: v => '+' + v },
@@ -5686,6 +5687,16 @@ const _CMP_ATTRS = [
 	{ label: 'Vitesse (V)',  get: it => +((it.bonus || {}).V || 0) + +(it.bonus_malus_depl || 0),
 	  better: 1, fmt: v => (v > 0 ? '+' : '') + v },
 ];
+
+// Portée RÉELLE d'une arme, miroir de combat._weapon_attacks : une arme de JET y ajoute
+// F // JET_PORTEE_F_DIV, F buffs compris (le snapshot lit les caracts avec buffs). Null hors arme.
+function _porteeArme(it) {
+	if (!it || it.categorie !== 'arme') return null;
+	const base = +(it.portee || 1);
+	if (_itemMode(it) !== 'jet') return base;
+	const f = +((_caractsDetail.F || {}).total ?? _charStats.F ?? 0);
+	return base + Math.floor(f / Math.max(1, +_JET_F_DIV || 1));
+}
 
 function _fmtDelta(d) { return Number.isInteger(d) ? String(d) : d.toFixed(1); }
 
@@ -5722,17 +5733,39 @@ function _harnachementText(item) {
 		.map(s => SLOTS_MONTURE_LABELS[s]).join(' · ');
 }
 // → templates/scripts/capacites_texte.js (partagé avec /admin/sorts et /admin/competences)
+// Le bloc `effets` a TROIS lectures selon l'objet (miroir de recompute_equipment_bonus) :
+//   · `conso` — consommable : tout s'applique à l'ingestion ;
+//   · `coup`  — arme AVEC durée (`arme_effets_portes` faux) : seule la part durative est posée
+//     sur la CIBLE du coup (`cible`, défaut ennemi) — jamais sur le porteur ;
+//   · `porte` — tout autre objet : seuls régén, esquive et canalisation jouent, en PERMANENCE.
+//     +PV, +PM, buffs et durée n'y sont lus par rien : on ne les affiche pas.
+function _effetsLecture(item) {
+	const e = (item && item.effets) || {};
+	if (!item || !Object.keys(e).length) return null;
+	if (item.categorie === 'consommable') return 'conso';
+	if (item.categorie === 'arme' && +(e.duree || 0) > 0) return 'coup';
+	return 'porte';
+}
 function _effetsChips(item) {
 	const e = (item && item.effets) || {};
+	const lecture = _effetsLecture(item);
 	const chips = [];
-	if (e.pv) chips.push(`❤️ +${e.pv} PV`);
-	if (e.pm) chips.push(`💧 +${e.pm} PM`);
+	if (!lecture) return chips;
+	if (lecture === 'conso') {
+		if (e.pv) chips.push(`❤️ +${e.pv} PV`);
+		if (e.pm) chips.push(`💧 +${e.pm} PM`);
+	}
 	if (e.regen_pv) chips.push(e.regen_pv < 0 ? regenTexte(e.regen_pv, 'PV') : `❤️ ${regenTexte(e.regen_pv, 'PV')}`);
 	if (e.regen_pm) chips.push(e.regen_pm < 0 ? regenTexte(e.regen_pm, 'PM') : `💧 ${regenTexte(e.regen_pm, 'PM')}`);
-	for (const [k, v] of Object.entries(e.buffs || {})) chips.push(`✨ ${v > 0 ? '+' : ''}${v} ${k}`);
-	if (e.duree) chips.push(`⏳ ${e.duree} tours`);
+	if (lecture !== 'conso' && +e.esquive) chips.push(`🛡️ esquive +${e.esquive}`);
+	if (lecture === 'porte' && +e.canalisation) chips.push(`🔮 canalisation +${e.canalisation} %`);
+	if (lecture !== 'porte') {
+		for (const [k, v] of Object.entries(e.buffs || {})) chips.push(`✨ ${v > 0 ? '+' : ''}${v} ${k}`);
+		if (e.duree) chips.push(`⏳ ${e.duree} tours`);
+	}
 	return chips;
 }
+function _cibleCoup(item) { return item && item.cible === 'soi' ? 'soi' : 'ennemi'; }
 // `bonus_degats_dice` porte le nombre de FACES en base (6 = 1D6) : miroir de
 // models/character_stats.normalize_dice, pour ne pas afficher un « 6 » ambigu.
 function _diceText(raw) {
@@ -5810,15 +5843,35 @@ function _restrictionRow(left, right, compare) {
 	if (compare) html += _restrictionCell(right);
 	return html + `</div>`;
 }
+// Deux lignes possibles : « Effets » (porteur / ingestion) et « Au coup → cible » (arme à
+// durée) — en comparaison, une épée ordinaire face à des bolas n'a rien sur la ligne du coup.
 function _effetsRow(left, right, compare) {
-	const lc = _effetsChips(left), rc = compare ? _effetsChips(right) : [];
-	if (!lc.length && !rc.length) return '';
+	const de = (item, coup) => {
+		const l = _effetsLecture(item);
+		return (l === 'coup') === coup && l ? _effetsChips(item) : [];
+	};
 	const cell = arr => arr.length
 		? `<span class="cell"><span class="item-cmp-chips">${arr.map(c => `<span class="sh-effet-chip">${c}</span>`).join('')}</span></span>`
 		: '<span class="cell muted">—</span>';
-	let html = `<div class="item-cmp-row"><span class="lbl">Effets</span>${cell(lc)}`;
-	if (compare) html += cell(rc);
-	return html + `</div>`;
+	let html = '';
+	for (const coup of [false, true]) {
+		const lc = de(left, coup), rc = compare ? de(right, coup) : [];
+		if (!lc.length && !rc.length) continue;
+		let lbl = 'Effets';
+		if (coup) {
+			const cibles = new Set([lc.length && _cibleCoup(left), rc.length && _cibleCoup(right)].filter(Boolean));
+			if (cibles.size === 1) lbl = `Au coup → ${[...cibles][0]}`;
+			else {   // cibles différentes : chaque cellule dit la sienne
+				lbl = 'Au coup';
+				lc.unshift(`→ ${_cibleCoup(left)}`);
+				rc.unshift(`→ ${_cibleCoup(right)}`);
+			}
+		}
+		html += `<div class="item-cmp-row"><span class="lbl">${lbl}</span>${cell(lc)}`;
+		if (compare) html += cell(rc);
+		html += `</div>`;
+	}
+	return html;
 }
 function _bonusRow(left, right, compare) {
 	const lc = _bonusChips(left), rc = compare ? _bonusChips(right) : [];
