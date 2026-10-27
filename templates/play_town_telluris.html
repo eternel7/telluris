@@ -8199,6 +8199,12 @@ const CMD_LIBELLES = {
 	impossible: 'impossible',
 };
 
+// Une matière manquante : son nom quand le serveur le donne (trophée), sinon sa clé ; 🏆 pour
+// un trophée, que seul le client peut apporter.
+function _cmdManque(m) {
+	return (m.trophee ? '🏆 ' : '') + escapeHtml(m.nom || m.cle) + ' ×' + m.quantite;
+}
+
 function renderCmdCatalogue(data) {
 	const list = document.getElementById('cmd-list');
 	if (!list) return;
@@ -8233,9 +8239,12 @@ function renderCmdCatalogue(data) {
 		const sm = (CMD_SUR_MESURE && v.sur_mesure)
 			? `<button class="sh-drop-btn" data-item="${escapeHtml(v.item_id)}" onclick="commanderSurMesure(this)" title="Choisir des matières">✨ Sur mesure</button>`
 			: '';
+		// Recette à trophée : la pièce de monstre, seul le client l'apporte (le serveur la nomme).
+		const troph = (v.trophees || []).length
+			? ` <span class="cmd-trophee" title="À rapporter de la chasse : ${escapeHtml(v.trophees.join(', '))}">🏆</span>` : '';
 		return `<li class="sh-inv-item">
 		<span class="sh-inv-open" onclick="openMarchandDetail('commande',${idx})" title="Voir la fiche">${v.icon || '🛠️'}</span>
-		<span class="sh-inv-name sh-inv-open" onclick="openMarchandDetail('commande',${idx})" title="Voir la fiche">${escapeHtml(v.nom || '—')}</span>
+		<span class="sh-inv-name sh-inv-open" onclick="openMarchandDetail('commande',${idx})" title="Voir la fiche">${escapeHtml(v.nom || '—')}${troph}</span>
 		<span class="sh-inv-poids">${v.poids_max != null ? `${(+v.poids).toFixed(1)}–${(+v.poids_max).toFixed(1)}` : (+v.poids).toFixed(1)} kg</span>
 		<span class="sell-prix">${formatPrix(v.prix)}</span>
 		<span class="sh-inv-actions">
@@ -8273,7 +8282,7 @@ function renderCmdEnCours(data) {
 			? '⏳ ' + _fmtRestant(c.pret_dans * 1000)
 			: (CMD_LIBELLES[c.statut] || c.statut);
 		const manque = (c.manquantes || []).length
-			? `<span class="sm-manque"> — il manque ${c.manquantes.map(m => escapeHtml(m.cle) + ' ×' + m.quantite).join(', ')}</span>` : '';
+			? `<span class="sm-manque"> — il manque ${c.manquantes.map(_cmdManque).join(', ')}</span>` : '';
 		// Une commande en attente n'a RIEN prélevé ni débité : l'annuler ne coûte rien, et
 		// « Relancer » la reprend une fois les matières réunies (§7 cas C).
 		const attente = c.statut === 'en_attente_materiaux';
@@ -8505,7 +8514,7 @@ async function _smRafraichirDevis() {
 		const d = data.devis || {};
 		const ligne = (l, v) => `<div class="sm-devis-ligne"><span>${l}</span><span>${v} cu</span></div>`;
 		const manque = (data.manquantes || []).length
-			? `<p class="sm-manque">Il manque ${data.manquantes.map(m => escapeHtml(m.cle) + ' ×' + m.quantite).join(', ')} — la commande sera mise en attente.</p>` : '';
+			? `<p class="sm-manque">Il manque ${data.manquantes.map(_cmdManque).join(', ')} — la commande sera mise en attente.</p>` : '';
 		// Les ingrédients que l'artisan met de lui-même ne coûtent rien de plus (ils sont
 		// déjà dans le prix de la pièce) : on les nomme quand même, sinon le devis a l'air
 		// d'oublier la moitié de la recette.

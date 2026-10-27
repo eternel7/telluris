@@ -1,0 +1,878 @@
+[
+	{
+		"_id": "item:Bat_en_cuir_de_wyvern",
+		"type": "item",
+		"nom": "Bât en cuir de Wyvern",
+		"icon": "🐉",
+		"description": "Des panneaux taillés dans la membrane d'une aile de wyverne, tendus sur des arcs et bouclés de fer. Plus léger qu'un bât de toile : la pluie glisse dessus, et les griffes aussi.",
+		"rarete": "rare",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"monture_dos"
+		],
+		"tags": [
+			"harnachement"
+		],
+		"poids": 4.5,
+		"monture": {
+			"charge_pct": 40
+		},
+		"bonus_pa": 3,
+		"bonus_pv": 6,
+		"valeur": [
+			{
+				"cu": 2943
+			},
+			{
+				"cu": 4161
+			}
+		]
+	},
+	{
+		"_id": "recette:grande_manufacture_du_cuir_bat_en_cuir_de_wyvern",
+		"type": "recette",
+		"lieu_categorie": "grande_manufacture_du_cuir",
+		"objet_final": "Bat_en_cuir_de_wyvern",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:wyvern_aile",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"item": "item:Sangle_de_cuir",
+				"quantite": 2
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "item:Cape_ailes_de_griffon",
+		"type": "item",
+		"nom": "Cape-ailes de Griffon",
+		"icon": "🪶",
+		"description": "Les rémiges d'une aile de griffon, montées à plat sur une doublure de soie. Au moindre pas de côté, elle s'ouvre comme pour prendre le vent.",
+		"rarete": "rare",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"epaules"
+		],
+		"tags": [],
+		"poids": 2.5,
+		"bonus": {
+			"Ag": 4
+		},
+		"bonus_initiative": 3,
+		"effets": {
+			"esquive": 2
+		},
+		"valeur": [
+			{
+				"cu": 400
+			},
+			{
+				"cu": 480
+			}
+		]
+	},
+	{
+		"_id": "recette:grande_manufacture_textile_cape_ailes_de_griffon",
+		"type": "recette",
+		"lieu_categorie": "grande_manufacture_textile",
+		"objet_final": "Cape_ailes_de_griffon",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:griffon_aile",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"sous_categorie": "soie",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "item:Casque_cornu",
+		"type": "item",
+		"nom": "Casque cornu",
+		"icon": "🐂",
+		"description": "Le crâne d'un Minotaure, cornes comprises, évidé et doublé de cuir, cerclé de fer à la nuque. On baisse la tête pour le porter, et l'on garde l'habitude de foncer.",
+		"rarete": "peu_commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"tete"
+		],
+		"tags": [],
+		"poids": 3.0,
+		"bonus_pa": 2,
+		"bonus": {
+			"F": 2
+		},
+		"bonus_pv": 4,
+		"valeur": [
+			{
+				"cu": 987
+			},
+			{
+				"cu": 1444
+			}
+		]
+	},
+	{
+		"_id": "recette:grand_arsenal_casque_cornu",
+		"type": "recette",
+		"lieu_categorie": "grand_arsenal",
+		"objet_final": "Casque_cornu",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:minotaure_tete",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"sous_categorie": "fer",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "cuir",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Collier_des_trois_crocs",
+		"type": "item",
+		"nom": "Collier des trois crocs",
+		"icon": "🦷",
+		"description": "Un croc de chacune des trois gueules d'un cerbère, enfilés sur un même lacet serti de métal précieux. Trois têtes, une seule garde : qui le porte dort d'un œil.",
+		"rarete": "rare",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"cou"
+		],
+		"tags": [],
+		"poids": 0.3,
+		"bonus": {
+			"F": 1,
+			"Vol": 2
+		},
+		"bonus_initiative": 2,
+		"bonus_pv": 6,
+		"valeur": [
+			{
+				"cu": 3035
+			},
+			{
+				"cu": 3090
+			}
+		]
+	},
+	{
+		"_id": "recette:grande_orfevrerie_collier_des_trois_crocs",
+		"type": "recette",
+		"lieu_categorie": "grande_orfevrerie",
+		"objet_final": "Collier_des_trois_crocs",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:cerbere_tete",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"sous_categorie": "metaux_precieux",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "cuir",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Corne_de_licorne",
+		"type": "item",
+		"nom": "Corne de Licorne",
+		"icon": "🦄",
+		"description": "La corne torse d'une licorne, baguée de métal précieux. Les apothicaires en grattent la poudre contre les poisons ; entière, elle fait couler le soin d'elle-même dans la main qui la porte.",
+		"rarete": "rare",
+		"categorie": "catalyseur",
+		"sous_categorie": "",
+		"slots": [
+			"main_gauche"
+		],
+		"tags": [],
+		"poids": 1.2,
+		"bonus_pm": 4,
+		"bonus": {
+			"Vol": 2
+		},
+		"effets": {
+			"regen_pv": 1
+		},
+		"restriction": {
+			"Vol": 25
+		},
+		"valeur": [
+			{
+				"cu": 1820
+			},
+			{
+				"cu": 2200
+			}
+		]
+	},
+	{
+		"_id": "recette:grande_orfevrerie_corne_de_licorne",
+		"type": "recette",
+		"lieu_categorie": "grande_orfevrerie",
+		"objet_final": "Corne_de_licorne",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:licorne_tete",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"sous_categorie": "metaux_precieux",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Elixir_de_sang_de_dragon",
+		"type": "item",
+		"nom": "Élixir de sang de dragon",
+		"icon": "🩸",
+		"description": "Sang de dragon rouge réduit au bain-marie, coupé d'herbes et de réactif pour qu'il ne brûle pas la gorge. Sigurd s'y serait baigné tout entier ; une gorgée suffit à tenir debout.",
+		"rarete": "legendaire",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.3,
+		"effets": {
+			"pv": 45,
+			"pm": 25,
+			"buffs": {
+				"F": 6,
+				"R": 4
+			},
+			"duree": 6
+		},
+		"valeur": [
+			{
+				"cu": 2180
+			},
+			{
+				"cu": 2205
+			}
+		]
+	},
+	{
+		"_id": "recette:grand_laboratoire_alchimique_elixir_de_sang_de_dragon",
+		"type": "recette",
+		"lieu_categorie": "grand_laboratoire_alchimique",
+		"objet_final": "Elixir_de_sang_de_dragon",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:dragon_rouge_corps_morceau",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"item": "item:Herbes_medicinales",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "reactif_brut",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Fouet_dard_de_manticore",
+		"type": "item",
+		"nom": "Fouet-dard de Manticore",
+		"icon": "🦂",
+		"description": "La queue d'une manticore, tressée de cuir jusqu'au dard. Les vieux récits de Perse disent que la bête lançait ses dards comme des flèches ; celui-ci se contente de mordre, et le venin fait le reste.",
+		"rarete": "rare",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac"
+		],
+		"poids": 2.0,
+		"portee": 2,
+		"restriction": {
+			"Ag": 17
+		},
+		"bonus_degats_dice": 2,
+		"bonus_cc": 4,
+		"bonus_degats": 2,
+		"effets": {
+			"buffs": {
+				"R": -3
+			},
+			"duree": 3
+		},
+		"valeur": [
+			{
+				"cu": 394
+			},
+			{
+				"cu": 559
+			}
+		]
+	},
+	{
+		"_id": "recette:grande_manufacture_du_cuir_fouet_dard_de_manticore",
+		"type": "recette",
+		"lieu_categorie": "grande_manufacture_du_cuir",
+		"objet_final": "Fouet_dard_de_manticore",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:manticore_queue",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"sous_categorie": "cuir",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Glaive_croc_de_basilic",
+		"type": "item",
+		"nom": "Glaive-croc de Basilic",
+		"icon": "🐍",
+		"description": "Un croc de basilic emmanché au bout d'une hampe, à la place du fer. Le regard de la bête n'y est plus, mais ce qu'il entaille se raidit encore.",
+		"rarete": "peu_commun",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac",
+			"hast",
+			"tranchant"
+		],
+		"poids": 3.0,
+		"portee": 2,
+		"restriction": {
+			"F": 19
+		},
+		"bonus_degats": 6,
+		"bonus_degats_dice": 6,
+		"bonus_cc": 1,
+		"deux_mains": true,
+		"effets": {
+			"buffs": {
+				"Ag": -2
+			},
+			"duree": 2
+		},
+		"valeur": [
+			{
+				"cu": 3785
+			},
+			{
+				"cu": 4940
+			}
+		]
+	},
+	{
+		"_id": "recette:grand_arsenal_glaive_croc_de_basilic",
+		"type": "recette",
+		"lieu_categorie": "grand_arsenal",
+		"objet_final": "Glaive_croc_de_basilic",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:basilic_tete",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"sous_categorie": "hampe",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Lance_dent_de_wyvern",
+		"type": "item",
+		"nom": "Lance-dent de Wyvern",
+		"icon": "🔱",
+		"description": "Une griffe de wyverne ligaturée de tendons au bout d'une hampe. Faite pour ce qui fond du ciel, elle se souvient encore du venin de sa bête.",
+		"rarete": "rare",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac",
+			"hast"
+		],
+		"poids": 2.5,
+		"portee": 2,
+		"restriction": {
+			"F": 15
+		},
+		"bonus_degats": 5,
+		"bonus_degats_dice": 6,
+		"deux_mains": true,
+		"bonus_cc": 2,
+		"effets": {
+			"buffs": {
+				"R": -2
+			},
+			"duree": 2
+		},
+		"valeur": [
+			{
+				"cu": 2475
+			},
+			{
+				"cu": 3438
+			}
+		]
+	},
+	{
+		"_id": "recette:grand_arsenal_lance_dent_de_wyvern",
+		"type": "recette",
+		"lieu_categorie": "grand_arsenal",
+		"objet_final": "Lance_dent_de_wyvern",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:wyvern_patte",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"sous_categorie": "hampe",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "tendons",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Lanterne_de_cyclope",
+		"type": "item",
+		"nom": "Lanterne de Cyclope",
+		"icon": "🏮",
+		"description": "L'orbite unique d'un cyclope, évidée, garnie de cire et d'une mèche. Certains récits disent que les cyclopes avaient troqué un œil contre la vue de l'avenir ; à sa lueur, les lettres d'un grimoire se lisent plus vite.",
+		"rarete": "peu_commun",
+		"categorie": "catalyseur",
+		"sous_categorie": "",
+		"slots": [
+			"main_gauche"
+		],
+		"tags": [],
+		"poids": 2.0,
+		"bonus_pm": 2,
+		"bonus": {
+			"Int": 2
+		},
+		"effets": {
+			"canalisation": 1
+		},
+		"restriction": {
+			"Int": 20
+		},
+		"valeur": [
+			{
+				"cu": 1124
+			},
+			{
+				"cu": 1647
+			}
+		]
+	},
+	{
+		"_id": "recette:cabinet_des_specimens_lanterne_de_cyclope",
+		"type": "recette",
+		"lieu_categorie": "cabinet_des_specimens",
+		"objet_final": "Lanterne_de_cyclope",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:cyclope_tete",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"item": "item:Cire_d_abeille",
+				"quantite": 2
+			},
+			{
+				"item": "item:Meche",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Masse_poing_de_troll",
+		"type": "item",
+		"nom": "Masse-poing de Troll",
+		"icon": "👊",
+		"description": "Un avant-bras de troll, poing fermé, durci au feu et ferré aux phalanges. Les forgerons qui l'ont cerclé jurent qu'il serrait un peu plus chaque matin.",
+		"rarete": "rare",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac"
+		],
+		"poids": 6.0,
+		"portee": 1,
+		"restriction": {
+			"F": 28
+		},
+		"bonus_degats": 10,
+		"bonus_degats_dice": 10,
+		"bonus_malus_depl": -1,
+		"deux_mains": true,
+		"valeur": [
+			{
+				"cu": 1136
+			},
+			{
+				"cu": 1672
+			}
+		]
+	},
+	{
+		"_id": "recette:grand_arsenal_masse_poing_de_troll",
+		"type": "recette",
+		"lieu_categorie": "grand_arsenal",
+		"objet_final": "Masse_poing_de_troll",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:troll_bras",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"sous_categorie": "fer",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "cuir",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Oeil_de_gorgone_serti",
+		"type": "item",
+		"nom": "Œil de Gorgone serti",
+		"icon": "👁️",
+		"description": "L'œil d'une gorgone, figé dans une monture de métal précieux. Il ne pétrifie plus personne ; il fixe, et la volonté de qui le tient se durcit à son contact.",
+		"rarete": "rare",
+		"categorie": "catalyseur",
+		"sous_categorie": "",
+		"slots": [
+			"main_gauche"
+		],
+		"tags": [],
+		"poids": 0.6,
+		"bonus_pm": 4,
+		"bonus": {
+			"Vol": 2
+		},
+		"effets": {
+			"canalisation": 2
+		},
+		"restriction": {
+			"Vol": 25
+		},
+		"valeur": [
+			{
+				"cu": 994
+			},
+			{
+				"cu": 1374
+			}
+		]
+	},
+	{
+		"_id": "recette:grande_orfevrerie_oeil_de_gorgone_serti",
+		"type": "recette",
+		"lieu_categorie": "grande_orfevrerie",
+		"objet_final": "Oeil_de_gorgone_serti",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:gorgone_tete",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"sous_categorie": "metaux_precieux",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Olifant_de_mammouth",
+		"type": "item",
+		"nom": "Olifant de Mammouth",
+		"icon": "📯",
+		"description": "Une pointe de défense de mammouth, évidée et cerclée de bronze. Son appel grave roule sur la plaine comme un troupeau en marche, et ceux qu'il vise sentent faiblir leur résolution.",
+		"rarete": "peu_commun",
+		"categorie": "arme",
+		"sous_categorie": "instrument",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"tags": [
+			"cac"
+		],
+		"poids": 1.5,
+		"portee": 1,
+		"bonus_degats": 1,
+		"bonus_degats_dice": 2,
+		"bonus": {
+			"Cha": 6
+		},
+		"restriction": {
+			"Cha": 35
+		},
+		"effets": {
+			"buffs": {
+				"Vol": -6,
+				"Cha": -3
+			},
+			"duree": 2
+		},
+		"cible": "ennemi",
+		"valeur": [
+			{
+				"cu": 460
+			},
+			{
+				"cu": 636
+			}
+		]
+	},
+	{
+		"_id": "recette:manufacture_des_instruments_olifant_de_mammouth",
+		"type": "recette",
+		"lieu_categorie": "manufacture_des_instruments",
+		"objet_final": "Olifant_de_mammouth",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:mammouth_tete_morceau",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"sous_categorie": "bronze",
+				"quantite": 1
+			},
+			{
+				"sous_categorie": "cuir",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Pavois_de_tarasque",
+		"type": "item",
+		"nom": "Pavois de Tarasque",
+		"icon": "🛡️",
+		"description": "Un pan de la carapace hérissée d'une tarasque, assis sur un châssis de fer. On le plante en terre comme un pavois ordinaire ; les riverains du Rhône jurent que rien de ce qui l'a frappé ne l'a jamais percé.",
+		"rarete": "rare",
+		"categorie": "armure",
+		"sous_categorie": "bouclier",
+		"slots": [
+			"main_gauche"
+		],
+		"tags": [],
+		"poids": [
+			10,
+			16
+		],
+		"bonus_pa": 18,
+		"bonus": {
+			"Ag": -10
+		},
+		"restriction": {
+			"F": 40
+		},
+		"bonus_pv": 6,
+		"valeur": [
+			{
+				"cu": 8161
+			},
+			{
+				"cu": 11021
+			}
+		]
+	},
+	{
+		"_id": "recette:grand_arsenal_pavois_de_tarasque",
+		"type": "recette",
+		"lieu_categorie": "grand_arsenal",
+		"objet_final": "Pavois_de_tarasque",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:tarasque_corps_morceau",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"sous_categorie": "fer",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "cuir",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Pelisse_d_ulfhedinn",
+		"type": "item",
+		"nom": "Pelisse d'ulfheðinn",
+		"icon": "🐺",
+		"description": "La peau d'un loup géant portée à même le dos, la tête de la bête en capuchon. Les chasseurs de Reykjavik et d'Akureyri s'en couvrent ainsi depuis toujours — mais leurs loups faisaient moitié moins.",
+		"rarete": "peu_commun",
+		"categorie": "armure",
+		"sous_categorie": "",
+		"slots": [
+			"torse"
+		],
+		"tags": [],
+		"poids": 4.0,
+		"bonus_pa": 2,
+		"bonus": {
+			"R": 2,
+			"Vol": 2
+		},
+		"valeur": [
+			{
+				"cu": 326
+			},
+			{
+				"cu": 436
+			}
+		]
+	},
+	{
+		"_id": "recette:grande_manufacture_du_cuir_pelisse_d_ulfhedinn",
+		"type": "recette",
+		"lieu_categorie": "grande_manufacture_du_cuir",
+		"objet_final": "Pelisse_d_ulfhedinn",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:loup_geant_corps",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"item": "item:Sangle_de_cuir",
+				"quantite": 1
+			},
+			{
+				"item": "item:Boucle_de_fer",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Remige_de_phenix",
+		"type": "item",
+		"nom": "Rémige de Phénix",
+		"icon": "🔥",
+		"description": "Une seule plume d'aile de grand phénix, emmanchée d'os. Elle reste tiède, et nul ne sait si elle se consumera un jour pour renaître ailleurs.",
+		"rarete": "tres_rare",
+		"categorie": "catalyseur",
+		"sous_categorie": "",
+		"slots": [
+			"main_gauche"
+		],
+		"tags": [],
+		"poids": 0.4,
+		"bonus_pm": 8,
+		"bonus": {
+			"Int": 2
+		},
+		"effets": {
+			"regen_pm": 2
+		},
+		"restriction": {
+			"Vol": 30
+		},
+		"valeur": [
+			{
+				"cu": 2752
+			},
+			{
+				"cu": 3132
+			}
+		]
+	},
+	{
+		"_id": "recette:cabinet_des_specimens_remige_de_phenix",
+		"type": "recette",
+		"lieu_categorie": "cabinet_des_specimens",
+		"objet_final": "Remige_de_phenix",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:grand_phenix_aile",
+				"quantite": 1,
+				"trophee": true
+			},
+			{
+				"sous_categorie": "os",
+				"quantite": 1
+			}
+		]
+	}
+]

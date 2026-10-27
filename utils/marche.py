@@ -124,14 +124,17 @@ _cles_consommees_memo: set | None = None   # toutes les clés matières consomm�
 _commandable_memo: dict[str, bool] = {}    # item_id → peut figurer au catalogue de commande
 # Univers des matières de sur-mesure (cf. `matieres_fabrication`).
 _matieres_fab_memo: list | None = None     # ids des items porteurs d'un bloc `fabrication`
+# Recettes à TROPHÉE (cf. `est_recette_trophee`) : hors du tick, servies à la commande seule.
+_recettes_trophee: dict | None = None      # lieu_categorie → [recettes à trophée]
 
 
 def reset_prix_cache() -> None:
 	"""Vide les caches de coût de revient (à appeler quand recettes/items/MARGE changent)."""
 	global _recipe_map, _marche_map, _recettes_all, _recettes_par_lieu, _image_route_memo
 	global _marche_map_portee, _recettes_par_portee, _cles_consommees_memo
-	global _matieres_fab_memo
+	global _matieres_fab_memo, _recettes_trophee
 	_cles_consommees_memo = None
+	_recettes_trophee = None
 	_recipe_map = None
 	_marche_map = None
 	_recettes_all = None
@@ -280,6 +283,34 @@ def est_sur_commande(recette: dict) -> bool:
 	return bool((recette or {}).get(fabrication.CLE_SUR_COMMANDE))
 
 
+CLE_TROPHEE = "trophee"
+
+
+def cles_trophee(recette: dict) -> set:
+	"""Clés des intrants marqués `trophee: true` dans `matieres_premieres` — la pièce de
+	monstre (`item:minotaure_tete`) que SEUL le client apporte. Vide pour une recette
+	ordinaire, et pour la forme mono-entrée historique."""
+	mp = (recette or {}).get("matieres_premieres")
+	if not isinstance(mp, list):
+		return set()
+	return {e.get("item") or e.get("sous_categorie") for e in mp
+			if isinstance(e, dict) and e.get(CLE_TROPHEE) and (e.get("item") or e.get("sous_categorie"))}
+
+
+def est_recette_trophee(recette: dict) -> bool:
+	"""Recette à TROPHÉE : un intrant au moins ne s'obtient qu'en abattant la bête.
+
+	Elle est une recette normale pour le PRIX (`_get_recipe_map` la garde) et pour le
+	CATALOGUE (son produit entre dans `produits` : la maison prend commande de la pièce et la
+	rachète). Elle n'est PAS une recette de production :
+	- hors de `besoins`/`feuilles` — sinon le trophée deviendrait une feuille LIVRÉE, donc
+	  achetable au comptoir (`approvisionner`), et la maison l'achèterait au joueur ;
+	- hors de `lieu_recettes` — sinon le tick cuirait la pièce de lui-même avec ce qu'il
+	  aurait reçu. Servie à la commande par `recettes_trophee_lieu`, et le trophée n'y vient
+	  que du sac de l'expédition (`commande.sourcer`, `trophees`)."""
+	return bool(cles_trophee(recette))
+
+
 def _get_recipe_map() -> dict:
 	"""Construit (une fois) la table objet_final_item_id → liste de recettes le produisant.
 
@@ -338,6 +369,10 @@ def _get_marche_map() -> dict:
 			if cat:
 				cible["produits"].setdefault(cat, set()).add(
 					objet_final_item_id(r.get("objet_final", "")))
+			# ⚠️ Recette à trophée : son produit seulement — aucun de ses intrants n'est un
+			# besoin de la catégorie ni une feuille (cf. `est_recette_trophee`).
+			if est_recette_trophee(r):
+				continue
 			for (cle, _qm) in recette_matieres(r):
 				if not cle:
 					continue
@@ -564,6 +599,28 @@ def recettes_lieu(lieu_doc: dict) -> list:
 					vus.add(rid)
 				sup.append(r)
 	return base + sup if sup else base
+
+
+def recettes_trophee_lieu(lieu_doc: dict) -> list:
+	"""Recettes à TROPHÉE que CE lieu honore à la COMMANDE (jamais au tick) : celles de sa
+	catégorie et des métiers qu'elle réunit, la sienne en tête ; une recette portée seulement
+	sous sa portée. Cf. `est_recette_trophee`."""
+	lieu_doc = lieu_doc or {}
+	categorie = lieu_doc.get("categorie")
+	if not categorie:
+		return []
+	if _recettes_trophee is None:
+		lieu_recettes("__amorce__")   # bâtit les index d'un coup
+	scopes = None
+	out = []
+	for cat in categories_incluses(categorie):
+		for r in (_recettes_trophee or {}).get(cat, []):
+			if r.get("lieu_portee"):
+				scopes = scopes if scopes is not None else set(portees_lieu(lieu_doc))
+				if r["lieu_portee"] not in scopes:
+					continue
+			out.append(r)
+	return out
 
 
 def lieu_produit(lieu_doc: dict, item_doc: dict) -> bool:
@@ -1285,12 +1342,13 @@ def lieu_recettes(lieu_categorie: str) -> list:
 	(`categories_incluses`) : concaténation dans l'ordre — les siennes d'abord — dédoublonnée
 	par `_id`, deux métiers réunis pouvant partager une recette. Le résultat est mémoïsé : ce
 	chemin est celui des quatre sites de tick."""
-	global _recettes_par_lieu, _recettes_par_portee
+	global _recettes_par_lieu, _recettes_par_portee, _recettes_trophee
 	if not lieu_categorie:
 		return []
 	if _recettes_par_lieu is None:
 		index: dict[str, list] = {}
 		portees: dict[str, dict] = {}
+		trophees: dict[str, list] = {}
 		for r in _all_recettes():
 			cat = r.get("lieu_categorie")
 			if not cat:
@@ -1300,6 +1358,11 @@ def lieu_recettes(lieu_categorie: str) -> list:
 			# cette ligne, la variante d'un joueur apparaîtrait d'elle-même en rayon dans
 			# toutes les boutiques de la catégorie. Cf. `est_sur_commande`.
 			if est_sur_commande(r):
+				continue
+			# ⚠️ Recette à trophée : index à part, lu par la commande seule
+			# (`recettes_trophee_lieu`). Cf. `est_recette_trophee`.
+			if est_recette_trophee(r):
+				trophees.setdefault(cat, []).append(r)
 				continue
 			# ⚠️ Une recette PORTÉE sort de l'index par catégorie : sinon elle serait cuite
 			# par toutes les boutiques du métier, ce que la portée sert précisément à éviter.
@@ -1311,6 +1374,7 @@ def lieu_recettes(lieu_categorie: str) -> list:
 				index.setdefault(cat, []).append(r)
 		_recettes_par_lieu = index
 		_recettes_par_portee = portees
+		_recettes_trophee = trophees
 	incluses = categories_incluses(lieu_categorie)
 	if len(incluses) == 1:
 		return _recettes_par_lieu.get(lieu_categorie, [])

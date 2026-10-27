@@ -156,6 +156,14 @@ Sans cette coupure, rien ne lève : toutes les boutiques de la catégorie se met
 - ⚠️ **Une matière doit pouvoir S'OBTENIR** : le sur-mesure propose tout le catalogue du monde, donc une matière sans source donne une commande à jamais `en_attente_materiaux`. `dev/audit_economy.py` §6 (hypothèse J) les liste — à relancer après tout ajout de matière. Sources ajoutées le 24/09 : `jsons/recettes_matieres_sans_source_a_importer.json` (poison, fiole de sang de bête, poudre d'améthyste, encre magique, fragments d'âme) + `item:Poison_de_base` sur le tag de dépeçage `venin`.
 - ⚠️ **`COMMANDE_QUANTITE_MAX`** (défaut 1) : l'additif est multiplié par la quantité, une requête forgée « acier ×20 » donnait +40 dégâts. Verrouillé par `tests/test_gen_fabrication_matieres.py` et `tests/test_commande*.py`.
 
+### Recettes à trophée — une pièce faite d'un morceau de monstre
+Intrant marqué **`trophee: true`** dans `matieres_premieres` (`marche.cles_trophee` / `est_recette_trophee`) : le trophée est une portion de carcasse déjà en jeu (`item:minotaure_tete`, rapportée par la découpe 🪓). Verrouillé par `tests/test_recettes_trophee.py`.
+- **Prix et catalogue** : `_get_recipe_map` la garde ; son produit entre dans `produits` (catalogue de commande, rachat de la pièce).
+- **Hors production** : aucun de ses intrants n'entre dans `besoins`/`feuilles` — sinon le trophée serait LIVRÉ, donc vendu au comptoir, et racheté au joueur ; hors de `lieu_recettes` (le tick ne la cuit jamais). Servie par **`recettes_trophee_lieu`** (fusion comprise, portée respectée), que `commande.recette_pour` lit après `recettes_lieu`.
+- **Sourçage** : `commande.sourcer(…, trophees=)` — le trophée ne vient QUE des sacs de l'expédition (ni réserve, ni rayon, ni pool, ni voisine, ni fabrication) ; sinon `manquantes` avec `trophee: true` + `nom`. Client : 🏆 au catalogue (`trophees` de `_catalogue_vue`), `_cmdManque` pour les manques.
+- ⚠️ Ses intrants ORDINAIRES ne sont pas non plus livrés par elle : les choisir parmi ce que la maison achète ou produit déjà (contrôlé par le générateur).
+- Contenu : `dev/gen_trophees.py` → `jsons/trophees_a_importer.json` (16 pièces de grandes maisons au dump du 27/10). Pièce = SOCLE existant + APPORT du trophée, budget du palier de l'espèce (`gen_fabrication_matieres.score_matiere`, gain = score(pièce) − score(socle)) ; `valeur` explicite = celle d'une variante sur mesure du socle avec ces matières (`commande.prix_variante` → `fabrication.valeur_variante`, facteur du palier) — sans elle le prix suivait le POIDS de la portion. Refus si les feuilles du monde bougent ou si une maison ne la catalogue pas.
+
 ### Graphe des recettes — `/admin/recettes-graphe`
 Réseau « A sert à fabriquer B » : `utils/graphe_recettes.construire_graphe` (verrouillé par `tests/test_graphe_recettes.py`), écran `admin_recettes_graphe.html` (logique verrouillée par `dev/test_graphe_recettes_client.js`).
 

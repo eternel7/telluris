@@ -171,10 +171,11 @@ def catalogue_commandable(lieu_doc: dict, get_doc_fn=None, voisins=None) -> list
 def recette_pour(lieu_doc: dict, item_id: str):
 	"""La recette de CE lieu qui produit `item_id`, ou None. La première trouvée fait foi :
 	`recettes_lieu` sert la catégorie propre en tête, donc la recette maison prime sur celle
-	d'un métier réuni."""
+	d'un métier réuni. Puis les recettes à TROPHÉE (`marche.recettes_trophee_lieu`), absentes
+	du tick mais commandables : leur trophée, seul le client l'apporte (`sourcer`)."""
 	if not item_id:
 		return None
-	for r in marche.recettes_lieu(lieu_doc):
+	for r in marche.recettes_lieu(lieu_doc) + marche.recettes_trophee_lieu(lieu_doc):
 		if marche.objet_final_item_id(r.get("objet_final", "")) == item_id:
 			return r
 	return None
@@ -588,7 +589,7 @@ def _fabriquer(lieu_doc, cle, manque, get_doc_fn, flux, registre, chemin, profon
 
 
 def sourcer(besoins, porteurs, lieu_doc, get_doc_fn, prix_fn=None, retenus=None,
-			atelier=False, flux=None, voisins=()) -> dict:
+			atelier=False, flux=None, voisins=(), trophees=()) -> dict:
 	"""Les trois cas du §7 : ce que le joueur fournit, ce que l'artisan met, ce qui manque.
 
 	DEUX modes, parce que les deux familles de matières ne se facturent pas pareil :
@@ -620,12 +621,21 @@ def sourcer(besoins, porteurs, lieu_doc, get_doc_fn, prix_fn=None, retenus=None,
 
 	`voisins` : les boutiques de la cité. Ce que ni la réserve, ni le rayon, ni le pool ne
 	fournissent, l'artisan le prend au RAYON de l'une d'elles, avant de fabriquer — les crins du
-	boucher, que le joueur pourrait y acheter lui-même."""
+	boucher, que le joueur pourrait y acheter lui-même.
+
+	`trophees` (`marche.cles_trophee` de la recette) : ces clés-là ne viennent QUE des sacs de
+	l'expédition — ni réserve, ni rayon, ni pool, ni voisine, ni fabrication. Le crâne du
+	Minotaure se gagne contre le Minotaure ; l'artisan n'en a pas en stock."""
 	trouves, manquants = emplacements_fournis(besoins, porteurs, get_doc_fn, retenus)
 	achetees, fournies_atelier, introuvables = [], [], []
 	registre = _registre()
 	for manque in manquants:
 		cle, reste = manque["cle"], int(manque["quantite"])
+		if cle in trophees:
+			doc = get_doc_fn(marche.matiere_item_id(cle)) or {}
+			introuvables.append({"cle": cle, "quantite": reste, "trophee": True,
+								 "nom": doc.get("nom") or cle})
+			continue
 		if atelier:
 			part = _source_atelier(lieu_doc, cle, reste, get_doc_fn, flux, registre,
 								   frozenset(), COMMANDE_PROFONDEUR, voisins)

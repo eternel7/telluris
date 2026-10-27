@@ -164,12 +164,20 @@ def _catalogue_vue(lieu_doc: dict, relation, voisins=None) -> list:
 	lignes = []
 	if voisins is None:
 		voisins = _voisins(lieu_doc)
+	# Trophées à apporter, par pièce — une passe sur les seules recettes à trophée du lieu.
+	trophees = {}
+	for r in marche.recettes_trophee_lieu(lieu_doc):
+		produit = marche.objet_final_item_id(r.get("objet_final", ""))
+		trophees.setdefault(produit, [
+			(get_doc(marche.matiere_item_id(c)) or {}).get("nom") or c
+			for c in sorted(marche.cles_trophee(r))])
 	for item_id in commande_util.catalogue_commandable(lieu_doc, get_doc, voisins):
 		item = resolve_item_ref(item_id)
 		if not item:
 			continue
 		prix = commande_util.devis(_prix_piece(relation, lieu_doc, item, item_id))["total"]
 		lignes.append({
+			"trophees": trophees.get(item_id, []),
 			"item_id": item_id,
 			"nom": item.get("nom") or item_id,
 			"icon": item.get("icon") or "🛠️",
@@ -384,9 +392,10 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 	# pièce. Jamais les voisines pour l'atelier d'une propriété, qui vit sur SON bien.
 	voisins = ([] if proprietes.est_atelier(lieu_doc)
 			   else commande_util.voisins_cite(lieu_doc, find_docs))
+	# Le trophée d'une recette à trophée ne vient que des sacs (`marche.est_recette_trophee`).
 	src_recette = commande_util.sourcer(besoins_recette, porteurs, lieu_doc, get_doc,
 										retenus=retenus, atelier=True, flux=flux,
-										voisins=voisins)
+										voisins=voisins, trophees=marche.cles_trophee(recette))
 
 	besoins_sur_mesure = [(e["item"], e["quantite"]) for e in matieres_demandees]
 	src_sur_mesure = commande_util.sourcer(besoins_sur_mesure, porteurs, lieu_doc, get_doc,
