@@ -3320,5 +3320,156 @@
       "type": "guilde_aventurier",
       "status": "ouvert"
     }
+  },
+  {
+    "_id": "lieu:la_maison_des_deux_rives_exterieur",
+    "type": "lieu",
+    "label": "La Maison des Deux Rives",
+    "image": "guilde_abou_simbel_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:abou_simbel",
+    "relation_lieu": "lieu:la_maison_des_deux_rives_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_des_deux_rives_interieur",
+    "type": "lieu",
+    "label": "La Maison des Deux Rives - réception",
+    "image": "guilde_abou_simbel_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:abou_simbel",
+    "relation_lieu": "lieu:la_maison_des_deux_rives_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_des_deux_rives_comptoir",
+    "type": "lieu",
+    "label": "La Maison des Deux Rives - comptoir",
+    "image": "guilde_abou_simbel_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:abou_simbel"
+  },
+  {
+    "_id": "lieu:la_maison_des_deux_rives_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Maison des Deux Rives - bureau du maître",
+    "image": "guilde_abou_simbel_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:abou_simbel",
+    "relation_lieu": "lieu:la_maison_des_deux_rives_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:abou_simbel",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_abou_simbel",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:abou_simbel",
+        "pos": [
+          24,
+          45
+        ]
+      },
+      {
+        "lieu": "lieu:la_maison_des_deux_rives_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_des_deux_rives_interieur_to_la_maison_des_deux_rives_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_des_deux_rives_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_maison_des_deux_rives_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_des_deux_rives_comptoir_to_la_maison_des_deux_rives_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_des_deux_rives_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_maison_des_deux_rives_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_des_deux_rives_bureau_du_maitre_to_la_maison_des_deux_rives_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_des_deux_rives_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_maison_des_deux_rives_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
   }
 ]

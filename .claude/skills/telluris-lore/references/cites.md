@@ -220,7 +220,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 	- Chambre du Rituel Astral ;
 	- gardes momifiés, spectres de prêtres, squelettes caparaçonnés d'or.
 - Relié à Aix-la-Chapelle par la Chapelle Palatine.
-- **Ville extérieure** (quais, marchés, ateliers de la ville basse du Nil) : **vivants autant que morts-vivants** (Auteur, 29/10) [cites/20261029_maisons_de_guilde_des_cites.md] — les morts au cœur (Grand Temple, cryptes), les deux mêlés au dehors.
+- **Deux villes** (Auteur, 29/10) [cites/20261029_maisons_de_guilde_des_cites.md] : la **ville extérieure** (au jour, sur le Nil : quais, marchés, ateliers) mêle **vivants et morts-vivants** ; la **ville souterraine** n'abrite **que des morts-vivants**. La carte en jeu montre la ville extérieure.
 
 **Proposé** : guilde « La Maison des Deux Rives » sur le quai (29/10).
 

@@ -68,6 +68,7 @@ GUILDES = {
 	"lieu:sydney": ("La Maison de la Grande Baie", "la_maison_de_la_grande_baie"),
 	"lieu:melbourne": ("La Maison de la Yarra", "la_maison_de_la_yarra"),
 	"lieu:atlantis": ("La Maison du Port Extérieur", "la_maison_du_port_exterieur"),
+	"lieu:abou_simbel": ("La Maison des Deux Rives", "la_maison_des_deux_rives"),
 }
 
 RANG_BUREAU = "D"  # comme le Bastion et le Grand Relais
@@ -86,6 +87,7 @@ VISEES = {
 	"lieu:bucarest": (0.47, 0.60), "lieu:pekin": (0.50, 0.72), "lieu:tokyo": (0.50, 0.55),
 	"lieu:teotihuacan": (0.47, 0.60), "lieu:sydney": (0.50, 0.50), "lieu:melbourne": (0.50, 0.47),
 	"lieu:atlantis": (0.70, 0.70),
+	"lieu:abou_simbel": (0.50, 0.55),  # ville extérieure, au bord du Nil (la ville souterraine n'est pas sur la carte)
 }
 PAS = [(dx, dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1) if (dx, dy) != (0, 0)]
 
