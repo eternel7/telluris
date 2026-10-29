@@ -1,0 +1,3324 @@
+[
+  {
+    "_id": "lieu:la_maison_des_deux_fleuves_exterieur",
+    "type": "lieu",
+    "label": "La Maison des Deux Fleuves",
+    "image": "guilde_lyon_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:lyon",
+    "relation_lieu": "lieu:la_maison_des_deux_fleuves_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_des_deux_fleuves_interieur",
+    "type": "lieu",
+    "label": "La Maison des Deux Fleuves - réception",
+    "image": "guilde_lyon_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:lyon",
+    "relation_lieu": "lieu:la_maison_des_deux_fleuves_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_des_deux_fleuves_comptoir",
+    "type": "lieu",
+    "label": "La Maison des Deux Fleuves - comptoir",
+    "image": "guilde_lyon_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:lyon"
+  },
+  {
+    "_id": "lieu:la_maison_des_deux_fleuves_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Maison des Deux Fleuves - bureau du maître",
+    "image": "guilde_lyon_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:lyon",
+    "relation_lieu": "lieu:la_maison_des_deux_fleuves_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:lyon",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_lyon",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:lyon",
+        "pos": [
+          42,
+          28
+        ]
+      },
+      {
+        "lieu": "lieu:la_maison_des_deux_fleuves_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_des_deux_fleuves_interieur_to_la_maison_des_deux_fleuves_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_des_deux_fleuves_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_maison_des_deux_fleuves_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_des_deux_fleuves_comptoir_to_la_maison_des_deux_fleuves_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_des_deux_fleuves_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_maison_des_deux_fleuves_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_des_deux_fleuves_bureau_du_maitre_to_la_maison_des_deux_fleuves_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_des_deux_fleuves_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_maison_des_deux_fleuves_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:le_relais_de_la_loire_exterieur",
+    "type": "lieu",
+    "label": "Le Relais de la Loire",
+    "image": "guilde_orleans_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:orleans",
+    "relation_lieu": "lieu:le_relais_de_la_loire_comptoir"
+  },
+  {
+    "_id": "lieu:le_relais_de_la_loire_interieur",
+    "type": "lieu",
+    "label": "Le Relais de la Loire - réception",
+    "image": "guilde_orleans_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:orleans",
+    "relation_lieu": "lieu:le_relais_de_la_loire_comptoir"
+  },
+  {
+    "_id": "lieu:le_relais_de_la_loire_comptoir",
+    "type": "lieu",
+    "label": "Le Relais de la Loire - comptoir",
+    "image": "guilde_orleans_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:orleans"
+  },
+  {
+    "_id": "lieu:le_relais_de_la_loire_bureau_du_maitre",
+    "type": "lieu",
+    "label": "Le Relais de la Loire - bureau du maître",
+    "image": "guilde_orleans_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:orleans",
+    "relation_lieu": "lieu:le_relais_de_la_loire_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:orleans",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_orleans",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:orleans",
+        "pos": [
+          26,
+          36
+        ]
+      },
+      {
+        "lieu": "lieu:le_relais_de_la_loire_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_relais_de_la_loire_interieur_to_le_relais_de_la_loire_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_relais_de_la_loire_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:le_relais_de_la_loire_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_relais_de_la_loire_comptoir_to_le_relais_de_la_loire_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_relais_de_la_loire_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:le_relais_de_la_loire_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_relais_de_la_loire_bureau_du_maitre_to_le_relais_de_la_loire_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_relais_de_la_loire_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:le_relais_de_la_loire_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:le_fanal_du_detroit_exterieur",
+    "type": "lieu",
+    "label": "Le Fanal du Détroit",
+    "image": "guilde_calais_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:calais",
+    "relation_lieu": "lieu:le_fanal_du_detroit_comptoir"
+  },
+  {
+    "_id": "lieu:le_fanal_du_detroit_interieur",
+    "type": "lieu",
+    "label": "Le Fanal du Détroit - réception",
+    "image": "guilde_calais_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:calais",
+    "relation_lieu": "lieu:le_fanal_du_detroit_comptoir"
+  },
+  {
+    "_id": "lieu:le_fanal_du_detroit_comptoir",
+    "type": "lieu",
+    "label": "Le Fanal du Détroit - comptoir",
+    "image": "guilde_calais_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:calais"
+  },
+  {
+    "_id": "lieu:le_fanal_du_detroit_bureau_du_maitre",
+    "type": "lieu",
+    "label": "Le Fanal du Détroit - bureau du maître",
+    "image": "guilde_calais_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:calais",
+    "relation_lieu": "lieu:le_fanal_du_detroit_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:calais",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_calais",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:calais",
+        "pos": [
+          50,
+          25
+        ]
+      },
+      {
+        "lieu": "lieu:le_fanal_du_detroit_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_fanal_du_detroit_interieur_to_le_fanal_du_detroit_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_fanal_du_detroit_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:le_fanal_du_detroit_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_fanal_du_detroit_comptoir_to_le_fanal_du_detroit_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_fanal_du_detroit_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:le_fanal_du_detroit_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_fanal_du_detroit_bureau_du_maitre_to_le_fanal_du_detroit_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_fanal_du_detroit_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:le_fanal_du_detroit_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:le_relais_de_la_beauce_exterieur",
+    "type": "lieu",
+    "label": "Le Relais de la Beauce",
+    "image": "guilde_chartres_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:chartres",
+    "relation_lieu": "lieu:le_relais_de_la_beauce_comptoir"
+  },
+  {
+    "_id": "lieu:le_relais_de_la_beauce_interieur",
+    "type": "lieu",
+    "label": "Le Relais de la Beauce - réception",
+    "image": "guilde_chartres_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:chartres",
+    "relation_lieu": "lieu:le_relais_de_la_beauce_comptoir"
+  },
+  {
+    "_id": "lieu:le_relais_de_la_beauce_comptoir",
+    "type": "lieu",
+    "label": "Le Relais de la Beauce - comptoir",
+    "image": "guilde_chartres_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:chartres"
+  },
+  {
+    "_id": "lieu:le_relais_de_la_beauce_bureau_du_maitre",
+    "type": "lieu",
+    "label": "Le Relais de la Beauce - bureau du maître",
+    "image": "guilde_chartres_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:chartres",
+    "relation_lieu": "lieu:le_relais_de_la_beauce_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:chartres",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_chartres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:chartres",
+        "pos": [
+          41,
+          24
+        ]
+      },
+      {
+        "lieu": "lieu:le_relais_de_la_beauce_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_relais_de_la_beauce_interieur_to_le_relais_de_la_beauce_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_relais_de_la_beauce_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:le_relais_de_la_beauce_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_relais_de_la_beauce_comptoir_to_le_relais_de_la_beauce_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_relais_de_la_beauce_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:le_relais_de_la_beauce_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_relais_de_la_beauce_bureau_du_maitre_to_le_relais_de_la_beauce_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_relais_de_la_beauce_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:le_relais_de_la_beauce_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:le_carrefour_des_remes_exterieur",
+    "type": "lieu",
+    "label": "Le Carrefour des Rèmes",
+    "image": "guilde_rhemi_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:rhemi",
+    "relation_lieu": "lieu:le_carrefour_des_remes_comptoir"
+  },
+  {
+    "_id": "lieu:le_carrefour_des_remes_interieur",
+    "type": "lieu",
+    "label": "Le Carrefour des Rèmes - réception",
+    "image": "guilde_rhemi_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:rhemi",
+    "relation_lieu": "lieu:le_carrefour_des_remes_comptoir"
+  },
+  {
+    "_id": "lieu:le_carrefour_des_remes_comptoir",
+    "type": "lieu",
+    "label": "Le Carrefour des Rèmes - comptoir",
+    "image": "guilde_rhemi_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:rhemi"
+  },
+  {
+    "_id": "lieu:le_carrefour_des_remes_bureau_du_maitre",
+    "type": "lieu",
+    "label": "Le Carrefour des Rèmes - bureau du maître",
+    "image": "guilde_rhemi_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:rhemi",
+    "relation_lieu": "lieu:le_carrefour_des_remes_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:rhemi",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_rhemi",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:rhemi",
+        "pos": [
+          41,
+          30
+        ]
+      },
+      {
+        "lieu": "lieu:le_carrefour_des_remes_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_carrefour_des_remes_interieur_to_le_carrefour_des_remes_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_carrefour_des_remes_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:le_carrefour_des_remes_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_carrefour_des_remes_comptoir_to_le_carrefour_des_remes_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_carrefour_des_remes_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:le_carrefour_des_remes_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_carrefour_des_remes_bureau_du_maitre_to_le_carrefour_des_remes_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_carrefour_des_remes_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:le_carrefour_des_remes_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:la_tour_des_falaises_exterieur",
+    "type": "lieu",
+    "label": "La Tour des Falaises",
+    "image": "guilde_douvres_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:douvres",
+    "relation_lieu": "lieu:la_tour_des_falaises_comptoir"
+  },
+  {
+    "_id": "lieu:la_tour_des_falaises_interieur",
+    "type": "lieu",
+    "label": "La Tour des Falaises - réception",
+    "image": "guilde_douvres_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:douvres",
+    "relation_lieu": "lieu:la_tour_des_falaises_comptoir"
+  },
+  {
+    "_id": "lieu:la_tour_des_falaises_comptoir",
+    "type": "lieu",
+    "label": "La Tour des Falaises - comptoir",
+    "image": "guilde_douvres_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:douvres"
+  },
+  {
+    "_id": "lieu:la_tour_des_falaises_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Tour des Falaises - bureau du maître",
+    "image": "guilde_douvres_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:douvres",
+    "relation_lieu": "lieu:la_tour_des_falaises_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:douvres",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_douvres",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:douvres",
+        "pos": [
+          31,
+          23
+        ]
+      },
+      {
+        "lieu": "lieu:la_tour_des_falaises_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_tour_des_falaises_interieur_to_la_tour_des_falaises_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_tour_des_falaises_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_tour_des_falaises_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_tour_des_falaises_comptoir_to_la_tour_des_falaises_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_tour_des_falaises_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_tour_des_falaises_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_tour_des_falaises_bureau_du_maitre_to_la_tour_des_falaises_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_tour_des_falaises_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_tour_des_falaises_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:la_salle_ronde_exterieur",
+    "type": "lieu",
+    "label": "La Salle Ronde",
+    "image": "guilde_london_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:london",
+    "relation_lieu": "lieu:la_salle_ronde_comptoir"
+  },
+  {
+    "_id": "lieu:la_salle_ronde_interieur",
+    "type": "lieu",
+    "label": "La Salle Ronde - réception",
+    "image": "guilde_london_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:london",
+    "relation_lieu": "lieu:la_salle_ronde_comptoir"
+  },
+  {
+    "_id": "lieu:la_salle_ronde_comptoir",
+    "type": "lieu",
+    "label": "La Salle Ronde - comptoir",
+    "image": "guilde_london_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:london"
+  },
+  {
+    "_id": "lieu:la_salle_ronde_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Salle Ronde - bureau du maître",
+    "image": "guilde_london_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:london",
+    "relation_lieu": "lieu:la_salle_ronde_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:london",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_london",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:london",
+        "pos": [
+          33,
+          23
+        ]
+      },
+      {
+        "lieu": "lieu:la_salle_ronde_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_salle_ronde_interieur_to_la_salle_ronde_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_salle_ronde_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_salle_ronde_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_salle_ronde_comptoir_to_la_salle_ronde_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_salle_ronde_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_salle_ronde_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_salle_ronde_bureau_du_maitre_to_la_salle_ronde_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_salle_ronde_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_salle_ronde_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:la_halle_des_breches_exterieur",
+    "type": "lieu",
+    "label": "La Halle des Brèches",
+    "image": "guilde_camelot_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:camelot",
+    "relation_lieu": "lieu:la_halle_des_breches_comptoir"
+  },
+  {
+    "_id": "lieu:la_halle_des_breches_interieur",
+    "type": "lieu",
+    "label": "La Halle des Brèches - réception",
+    "image": "guilde_camelot_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:camelot",
+    "relation_lieu": "lieu:la_halle_des_breches_comptoir"
+  },
+  {
+    "_id": "lieu:la_halle_des_breches_comptoir",
+    "type": "lieu",
+    "label": "La Halle des Brèches - comptoir",
+    "image": "guilde_camelot_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:camelot"
+  },
+  {
+    "_id": "lieu:la_halle_des_breches_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Halle des Brèches - bureau du maître",
+    "image": "guilde_camelot_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:camelot",
+    "relation_lieu": "lieu:la_halle_des_breches_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:camelot",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_camelot",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:camelot",
+        "pos": [
+          49,
+          27
+        ]
+      },
+      {
+        "lieu": "lieu:la_halle_des_breches_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_halle_des_breches_interieur_to_la_halle_des_breches_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_halle_des_breches_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_halle_des_breches_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_halle_des_breches_comptoir_to_la_halle_des_breches_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_halle_des_breches_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_halle_des_breches_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_halle_des_breches_bureau_du_maitre_to_la_halle_des_breches_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_halle_des_breches_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_halle_des_breches_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:la_maison_du_zwin_exterieur",
+    "type": "lieu",
+    "label": "La Maison du Zwin",
+    "image": "guilde_bruges_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:bruges",
+    "relation_lieu": "lieu:la_maison_du_zwin_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_du_zwin_interieur",
+    "type": "lieu",
+    "label": "La Maison du Zwin - réception",
+    "image": "guilde_bruges_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:bruges",
+    "relation_lieu": "lieu:la_maison_du_zwin_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_du_zwin_comptoir",
+    "type": "lieu",
+    "label": "La Maison du Zwin - comptoir",
+    "image": "guilde_bruges_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:bruges"
+  },
+  {
+    "_id": "lieu:la_maison_du_zwin_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Maison du Zwin - bureau du maître",
+    "image": "guilde_bruges_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:bruges",
+    "relation_lieu": "lieu:la_maison_du_zwin_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:bruges",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_bruges",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:bruges",
+        "pos": [
+          45,
+          8
+        ]
+      },
+      {
+        "lieu": "lieu:la_maison_du_zwin_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_du_zwin_interieur_to_la_maison_du_zwin_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_du_zwin_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_maison_du_zwin_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_du_zwin_comptoir_to_la_maison_du_zwin_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_du_zwin_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_maison_du_zwin_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_du_zwin_bureau_du_maitre_to_la_maison_du_zwin_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_du_zwin_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_maison_du_zwin_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:le_relais_palatin_exterieur",
+    "type": "lieu",
+    "label": "Le Relais Palatin",
+    "image": "guilde_aix_la_chapelle_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:aix_la_chapelle",
+    "relation_lieu": "lieu:le_relais_palatin_comptoir"
+  },
+  {
+    "_id": "lieu:le_relais_palatin_interieur",
+    "type": "lieu",
+    "label": "Le Relais Palatin - réception",
+    "image": "guilde_aix_la_chapelle_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:aix_la_chapelle",
+    "relation_lieu": "lieu:le_relais_palatin_comptoir"
+  },
+  {
+    "_id": "lieu:le_relais_palatin_comptoir",
+    "type": "lieu",
+    "label": "Le Relais Palatin - comptoir",
+    "image": "guilde_aix_la_chapelle_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:aix_la_chapelle"
+  },
+  {
+    "_id": "lieu:le_relais_palatin_bureau_du_maitre",
+    "type": "lieu",
+    "label": "Le Relais Palatin - bureau du maître",
+    "image": "guilde_aix_la_chapelle_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:aix_la_chapelle",
+    "relation_lieu": "lieu:le_relais_palatin_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:aix_la_chapelle",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_aix_la_chapelle",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:aix_la_chapelle",
+        "pos": [
+          49,
+          28
+        ]
+      },
+      {
+        "lieu": "lieu:le_relais_palatin_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_relais_palatin_interieur_to_le_relais_palatin_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_relais_palatin_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:le_relais_palatin_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_relais_palatin_comptoir_to_le_relais_palatin_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_relais_palatin_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:le_relais_palatin_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_relais_palatin_bureau_du_maitre_to_le_relais_palatin_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_relais_palatin_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:le_relais_palatin_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:la_halle_des_fumees_exterieur",
+    "type": "lieu",
+    "label": "La Halle des Fumées",
+    "image": "guilde_reykjavik_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:reykjavik",
+    "relation_lieu": "lieu:la_halle_des_fumees_comptoir"
+  },
+  {
+    "_id": "lieu:la_halle_des_fumees_interieur",
+    "type": "lieu",
+    "label": "La Halle des Fumées - réception",
+    "image": "guilde_reykjavik_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:reykjavik",
+    "relation_lieu": "lieu:la_halle_des_fumees_comptoir"
+  },
+  {
+    "_id": "lieu:la_halle_des_fumees_comptoir",
+    "type": "lieu",
+    "label": "La Halle des Fumées - comptoir",
+    "image": "guilde_reykjavik_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:reykjavik"
+  },
+  {
+    "_id": "lieu:la_halle_des_fumees_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Halle des Fumées - bureau du maître",
+    "image": "guilde_reykjavik_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:reykjavik",
+    "relation_lieu": "lieu:la_halle_des_fumees_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:reykjavik",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_reykjavik",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:reykjavik",
+        "pos": [
+          61,
+          21
+        ]
+      },
+      {
+        "lieu": "lieu:la_halle_des_fumees_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_halle_des_fumees_interieur_to_la_halle_des_fumees_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_halle_des_fumees_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_halle_des_fumees_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_halle_des_fumees_comptoir_to_la_halle_des_fumees_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_halle_des_fumees_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_halle_des_fumees_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_halle_des_fumees_bureau_du_maitre_to_la_halle_des_fumees_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_halle_des_fumees_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_halle_des_fumees_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:le_refuge_du_fjord_exterieur",
+    "type": "lieu",
+    "label": "Le Refuge du Fjord",
+    "image": "guilde_akureyri_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:akureyri",
+    "relation_lieu": "lieu:le_refuge_du_fjord_comptoir"
+  },
+  {
+    "_id": "lieu:le_refuge_du_fjord_interieur",
+    "type": "lieu",
+    "label": "Le Refuge du Fjord - réception",
+    "image": "guilde_akureyri_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:akureyri",
+    "relation_lieu": "lieu:le_refuge_du_fjord_comptoir"
+  },
+  {
+    "_id": "lieu:le_refuge_du_fjord_comptoir",
+    "type": "lieu",
+    "label": "Le Refuge du Fjord - comptoir",
+    "image": "guilde_akureyri_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:akureyri"
+  },
+  {
+    "_id": "lieu:le_refuge_du_fjord_bureau_du_maitre",
+    "type": "lieu",
+    "label": "Le Refuge du Fjord - bureau du maître",
+    "image": "guilde_akureyri_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:akureyri",
+    "relation_lieu": "lieu:le_refuge_du_fjord_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:akureyri",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_akureyri",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:akureyri",
+        "pos": [
+          29,
+          52
+        ]
+      },
+      {
+        "lieu": "lieu:le_refuge_du_fjord_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_refuge_du_fjord_interieur_to_le_refuge_du_fjord_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_refuge_du_fjord_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:le_refuge_du_fjord_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_refuge_du_fjord_comptoir_to_le_refuge_du_fjord_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_refuge_du_fjord_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:le_refuge_du_fjord_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_refuge_du_fjord_bureau_du_maitre_to_le_refuge_du_fjord_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_refuge_du_fjord_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:le_refuge_du_fjord_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:la_maison_des_sept_collines_exterieur",
+    "type": "lieu",
+    "label": "La Maison des Sept Collines",
+    "image": "guilde_rome_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:rome",
+    "relation_lieu": "lieu:la_maison_des_sept_collines_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_des_sept_collines_interieur",
+    "type": "lieu",
+    "label": "La Maison des Sept Collines - réception",
+    "image": "guilde_rome_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:rome",
+    "relation_lieu": "lieu:la_maison_des_sept_collines_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_des_sept_collines_comptoir",
+    "type": "lieu",
+    "label": "La Maison des Sept Collines - comptoir",
+    "image": "guilde_rome_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:rome"
+  },
+  {
+    "_id": "lieu:la_maison_des_sept_collines_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Maison des Sept Collines - bureau du maître",
+    "image": "guilde_rome_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:rome",
+    "relation_lieu": "lieu:la_maison_des_sept_collines_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:rome",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_rome",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:rome",
+        "pos": [
+          48,
+          8
+        ]
+      },
+      {
+        "lieu": "lieu:la_maison_des_sept_collines_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_des_sept_collines_interieur_to_la_maison_des_sept_collines_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_des_sept_collines_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_maison_des_sept_collines_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_des_sept_collines_comptoir_to_la_maison_des_sept_collines_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_des_sept_collines_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_maison_des_sept_collines_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_des_sept_collines_bureau_du_maitre_to_la_maison_des_sept_collines_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_des_sept_collines_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_maison_des_sept_collines_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:le_relais_du_phare_exterieur",
+    "type": "lieu",
+    "label": "Le Relais du Phare",
+    "image": "guilde_alexandrie_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:alexandrie",
+    "relation_lieu": "lieu:le_relais_du_phare_comptoir"
+  },
+  {
+    "_id": "lieu:le_relais_du_phare_interieur",
+    "type": "lieu",
+    "label": "Le Relais du Phare - réception",
+    "image": "guilde_alexandrie_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:alexandrie",
+    "relation_lieu": "lieu:le_relais_du_phare_comptoir"
+  },
+  {
+    "_id": "lieu:le_relais_du_phare_comptoir",
+    "type": "lieu",
+    "label": "Le Relais du Phare - comptoir",
+    "image": "guilde_alexandrie_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:alexandrie"
+  },
+  {
+    "_id": "lieu:le_relais_du_phare_bureau_du_maitre",
+    "type": "lieu",
+    "label": "Le Relais du Phare - bureau du maître",
+    "image": "guilde_alexandrie_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:alexandrie",
+    "relation_lieu": "lieu:le_relais_du_phare_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:alexandrie",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_alexandrie",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:alexandrie",
+        "pos": [
+          38,
+          24
+        ]
+      },
+      {
+        "lieu": "lieu:le_relais_du_phare_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_relais_du_phare_interieur_to_le_relais_du_phare_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_relais_du_phare_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:le_relais_du_phare_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_relais_du_phare_comptoir_to_le_relais_du_phare_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_relais_du_phare_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:le_relais_du_phare_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_relais_du_phare_bureau_du_maitre_to_le_relais_du_phare_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_relais_du_phare_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:le_relais_du_phare_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:la_wakala_du_nil_exterieur",
+    "type": "lieu",
+    "label": "La Wakala du Nil",
+    "image": "guilde_cairo_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:cairo",
+    "relation_lieu": "lieu:la_wakala_du_nil_comptoir"
+  },
+  {
+    "_id": "lieu:la_wakala_du_nil_interieur",
+    "type": "lieu",
+    "label": "La Wakala du Nil - réception",
+    "image": "guilde_cairo_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:cairo",
+    "relation_lieu": "lieu:la_wakala_du_nil_comptoir"
+  },
+  {
+    "_id": "lieu:la_wakala_du_nil_comptoir",
+    "type": "lieu",
+    "label": "La Wakala du Nil - comptoir",
+    "image": "guilde_cairo_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:cairo"
+  },
+  {
+    "_id": "lieu:la_wakala_du_nil_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Wakala du Nil - bureau du maître",
+    "image": "guilde_cairo_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:cairo",
+    "relation_lieu": "lieu:la_wakala_du_nil_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:cairo",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_cairo",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:cairo",
+        "pos": [
+          52,
+          26
+        ]
+      },
+      {
+        "lieu": "lieu:la_wakala_du_nil_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_wakala_du_nil_interieur_to_la_wakala_du_nil_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_wakala_du_nil_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_wakala_du_nil_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_wakala_du_nil_comptoir_to_la_wakala_du_nil_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_wakala_du_nil_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_wakala_du_nil_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_wakala_du_nil_bureau_du_maitre_to_la_wakala_du_nil_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_wakala_du_nil_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_wakala_du_nil_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:le_han_de_la_dambovita_exterieur",
+    "type": "lieu",
+    "label": "Le Han de la Dâmbovița",
+    "image": "guilde_bucarest_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:bucarest",
+    "relation_lieu": "lieu:le_han_de_la_dambovita_comptoir"
+  },
+  {
+    "_id": "lieu:le_han_de_la_dambovita_interieur",
+    "type": "lieu",
+    "label": "Le Han de la Dâmbovița - réception",
+    "image": "guilde_bucarest_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:bucarest",
+    "relation_lieu": "lieu:le_han_de_la_dambovita_comptoir"
+  },
+  {
+    "_id": "lieu:le_han_de_la_dambovita_comptoir",
+    "type": "lieu",
+    "label": "Le Han de la Dâmbovița - comptoir",
+    "image": "guilde_bucarest_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:bucarest"
+  },
+  {
+    "_id": "lieu:le_han_de_la_dambovita_bureau_du_maitre",
+    "type": "lieu",
+    "label": "Le Han de la Dâmbovița - bureau du maître",
+    "image": "guilde_bucarest_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:bucarest",
+    "relation_lieu": "lieu:le_han_de_la_dambovita_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:bucarest",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_bucarest",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:bucarest",
+        "pos": [
+          41,
+          29
+        ]
+      },
+      {
+        "lieu": "lieu:le_han_de_la_dambovita_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_han_de_la_dambovita_interieur_to_le_han_de_la_dambovita_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_han_de_la_dambovita_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:le_han_de_la_dambovita_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_han_de_la_dambovita_comptoir_to_le_han_de_la_dambovita_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_han_de_la_dambovita_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:le_han_de_la_dambovita_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:le_han_de_la_dambovita_bureau_du_maitre_to_le_han_de_la_dambovita_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_han_de_la_dambovita_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:le_han_de_la_dambovita_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:la_maison_des_neuf_portes_exterieur",
+    "type": "lieu",
+    "label": "La Maison des Neuf Portes",
+    "image": "guilde_pekin_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:pekin",
+    "relation_lieu": "lieu:la_maison_des_neuf_portes_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_des_neuf_portes_interieur",
+    "type": "lieu",
+    "label": "La Maison des Neuf Portes - réception",
+    "image": "guilde_pekin_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:pekin",
+    "relation_lieu": "lieu:la_maison_des_neuf_portes_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_des_neuf_portes_comptoir",
+    "type": "lieu",
+    "label": "La Maison des Neuf Portes - comptoir",
+    "image": "guilde_pekin_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:pekin"
+  },
+  {
+    "_id": "lieu:la_maison_des_neuf_portes_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Maison des Neuf Portes - bureau du maître",
+    "image": "guilde_pekin_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:pekin",
+    "relation_lieu": "lieu:la_maison_des_neuf_portes_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:pekin",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_pekin",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:pekin",
+        "pos": [
+          39,
+          41
+        ]
+      },
+      {
+        "lieu": "lieu:la_maison_des_neuf_portes_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_des_neuf_portes_interieur_to_la_maison_des_neuf_portes_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_des_neuf_portes_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_maison_des_neuf_portes_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_des_neuf_portes_comptoir_to_la_maison_des_neuf_portes_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_des_neuf_portes_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_maison_des_neuf_portes_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_des_neuf_portes_bureau_du_maitre_to_la_maison_des_neuf_portes_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_des_neuf_portes_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_maison_des_neuf_portes_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:la_maison_du_pont_d_edo_exterieur",
+    "type": "lieu",
+    "label": "La Maison du Pont d'Edo",
+    "image": "guilde_tokyo_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:tokyo",
+    "relation_lieu": "lieu:la_maison_du_pont_d_edo_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_du_pont_d_edo_interieur",
+    "type": "lieu",
+    "label": "La Maison du Pont d'Edo - réception",
+    "image": "guilde_tokyo_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:tokyo",
+    "relation_lieu": "lieu:la_maison_du_pont_d_edo_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_du_pont_d_edo_comptoir",
+    "type": "lieu",
+    "label": "La Maison du Pont d'Edo - comptoir",
+    "image": "guilde_tokyo_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:tokyo"
+  },
+  {
+    "_id": "lieu:la_maison_du_pont_d_edo_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Maison du Pont d'Edo - bureau du maître",
+    "image": "guilde_tokyo_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:tokyo",
+    "relation_lieu": "lieu:la_maison_du_pont_d_edo_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:tokyo",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_tokyo",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:tokyo",
+        "pos": [
+          43,
+          26
+        ]
+      },
+      {
+        "lieu": "lieu:la_maison_du_pont_d_edo_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_du_pont_d_edo_interieur_to_la_maison_du_pont_d_edo_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_du_pont_d_edo_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_maison_du_pont_d_edo_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_du_pont_d_edo_comptoir_to_la_maison_du_pont_d_edo_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_du_pont_d_edo_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_maison_du_pont_d_edo_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_du_pont_d_edo_bureau_du_maitre_to_la_maison_du_pont_d_edo_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_du_pont_d_edo_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_maison_du_pont_d_edo_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:la_maison_de_la_chaussee_exterieur",
+    "type": "lieu",
+    "label": "La Maison de la Chaussée",
+    "image": "guilde_teotihuacan_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:teotihuacan",
+    "relation_lieu": "lieu:la_maison_de_la_chaussee_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_de_la_chaussee_interieur",
+    "type": "lieu",
+    "label": "La Maison de la Chaussée - réception",
+    "image": "guilde_teotihuacan_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:teotihuacan",
+    "relation_lieu": "lieu:la_maison_de_la_chaussee_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_de_la_chaussee_comptoir",
+    "type": "lieu",
+    "label": "La Maison de la Chaussée - comptoir",
+    "image": "guilde_teotihuacan_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:teotihuacan"
+  },
+  {
+    "_id": "lieu:la_maison_de_la_chaussee_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Maison de la Chaussée - bureau du maître",
+    "image": "guilde_teotihuacan_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:teotihuacan",
+    "relation_lieu": "lieu:la_maison_de_la_chaussee_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:teotihuacan",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_teotihuacan",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:teotihuacan",
+        "pos": [
+          46,
+          24
+        ]
+      },
+      {
+        "lieu": "lieu:la_maison_de_la_chaussee_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_de_la_chaussee_interieur_to_la_maison_de_la_chaussee_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_de_la_chaussee_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_maison_de_la_chaussee_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_de_la_chaussee_comptoir_to_la_maison_de_la_chaussee_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_de_la_chaussee_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_maison_de_la_chaussee_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_de_la_chaussee_bureau_du_maitre_to_la_maison_de_la_chaussee_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_de_la_chaussee_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_maison_de_la_chaussee_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:la_maison_de_la_grande_baie_exterieur",
+    "type": "lieu",
+    "label": "La Maison de la Grande Baie",
+    "image": "guilde_sydney_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:sydney",
+    "relation_lieu": "lieu:la_maison_de_la_grande_baie_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_de_la_grande_baie_interieur",
+    "type": "lieu",
+    "label": "La Maison de la Grande Baie - réception",
+    "image": "guilde_sydney_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:sydney",
+    "relation_lieu": "lieu:la_maison_de_la_grande_baie_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_de_la_grande_baie_comptoir",
+    "type": "lieu",
+    "label": "La Maison de la Grande Baie - comptoir",
+    "image": "guilde_sydney_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:sydney"
+  },
+  {
+    "_id": "lieu:la_maison_de_la_grande_baie_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Maison de la Grande Baie - bureau du maître",
+    "image": "guilde_sydney_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:sydney",
+    "relation_lieu": "lieu:la_maison_de_la_grande_baie_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:sydney",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_sydney",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:sydney",
+        "pos": [
+          43,
+          18
+        ]
+      },
+      {
+        "lieu": "lieu:la_maison_de_la_grande_baie_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_de_la_grande_baie_interieur_to_la_maison_de_la_grande_baie_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_de_la_grande_baie_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_maison_de_la_grande_baie_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_de_la_grande_baie_comptoir_to_la_maison_de_la_grande_baie_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_de_la_grande_baie_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_maison_de_la_grande_baie_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_de_la_grande_baie_bureau_du_maitre_to_la_maison_de_la_grande_baie_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_de_la_grande_baie_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_maison_de_la_grande_baie_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:la_maison_de_la_yarra_exterieur",
+    "type": "lieu",
+    "label": "La Maison de la Yarra",
+    "image": "guilde_melbourne_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:melbourne",
+    "relation_lieu": "lieu:la_maison_de_la_yarra_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_de_la_yarra_interieur",
+    "type": "lieu",
+    "label": "La Maison de la Yarra - réception",
+    "image": "guilde_melbourne_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:melbourne",
+    "relation_lieu": "lieu:la_maison_de_la_yarra_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_de_la_yarra_comptoir",
+    "type": "lieu",
+    "label": "La Maison de la Yarra - comptoir",
+    "image": "guilde_melbourne_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:melbourne"
+  },
+  {
+    "_id": "lieu:la_maison_de_la_yarra_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Maison de la Yarra - bureau du maître",
+    "image": "guilde_melbourne_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:melbourne",
+    "relation_lieu": "lieu:la_maison_de_la_yarra_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:melbourne",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_melbourne",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:melbourne",
+        "pos": [
+          43,
+          22
+        ]
+      },
+      {
+        "lieu": "lieu:la_maison_de_la_yarra_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_de_la_yarra_interieur_to_la_maison_de_la_yarra_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_de_la_yarra_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_maison_de_la_yarra_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_de_la_yarra_comptoir_to_la_maison_de_la_yarra_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_de_la_yarra_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_maison_de_la_yarra_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_de_la_yarra_bureau_du_maitre_to_la_maison_de_la_yarra_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_de_la_yarra_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_maison_de_la_yarra_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:la_maison_du_port_exterieur_exterieur",
+    "type": "lieu",
+    "label": "La Maison du Port Extérieur",
+    "image": "guilde_atlantis_exterieur.jpg",
+    "categorie": "guilde_aventurier_exterieur",
+    "lieu_parent": "lieu:atlantis",
+    "relation_lieu": "lieu:la_maison_du_port_exterieur_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_du_port_exterieur_interieur",
+    "type": "lieu",
+    "label": "La Maison du Port Extérieur - réception",
+    "image": "guilde_atlantis_reception.jpg",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:atlantis",
+    "relation_lieu": "lieu:la_maison_du_port_exterieur_comptoir"
+  },
+  {
+    "_id": "lieu:la_maison_du_port_exterieur_comptoir",
+    "type": "lieu",
+    "label": "La Maison du Port Extérieur - comptoir",
+    "image": "guilde_atlantis_comptoir.jpg",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:atlantis"
+  },
+  {
+    "_id": "lieu:la_maison_du_port_exterieur_bureau_du_maitre",
+    "type": "lieu",
+    "label": "La Maison du Port Extérieur - bureau du maître",
+    "image": "guilde_atlantis_bureau.jpg",
+    "categorie": "bureau_maitre_guilde",
+    "lieu_parent": "lieu:atlantis",
+    "relation_lieu": "lieu:la_maison_du_port_exterieur_comptoir",
+    "acces": {
+      "refus": "Un employé de la Guilde barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:atlantis",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_atlantis",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:atlantis",
+        "pos": [
+          61,
+          33
+        ]
+      },
+      {
+        "lieu": "lieu:la_maison_du_port_exterieur_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_du_port_exterieur_interieur_to_la_maison_du_port_exterieur_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_du_port_exterieur_exterieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      },
+      {
+        "lieu": "lieu:la_maison_du_port_exterieur_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Entrer dans la guilde"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_du_port_exterieur_comptoir_to_la_maison_du_port_exterieur_interieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_du_port_exterieur_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:la_maison_du_port_exterieur_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:la_maison_du_port_exterieur_bureau_du_maitre_to_la_maison_du_port_exterieur_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:la_maison_du_port_exterieur_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:la_maison_du_port_exterieur_bureau_du_maitre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  }
+]
