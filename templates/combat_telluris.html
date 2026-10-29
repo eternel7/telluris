@@ -609,7 +609,7 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
    le wrap faisait grandir le header en hauteur et repoussait la carte hors de l'écran.
    ⚠️ `min-width: 0` : un item flex vaut `min-width: auto`, sans quoi le bandeau refuse de
    rétrécir sous la largeur de son contenu et DÉBORDE au lieu de défiler ; ses deux voisins
-   ne cèdent rien (`.tour-label` est `nowrap`, `.son-btn` `flex-shrink: 0`), c'est donc bien
+   ne cèdent rien (`.tour-label` est `nowrap`, `.reglages-wrap` `flex-shrink: 0`), c'est donc bien
    lui qui doit absorber la contrainte.
    ⚠️ Le `padding` vertical n'est pas cosmétique : dès qu'`overflow-x` cesse d'être
    `visible`, l'axe vertical est clippé lui aussi — et le badge actif déborde de sa case
@@ -651,15 +651,36 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
 /* Séparateur : ces badges ne font pas partie de l'ordre du tour, la coupure doit se voir. */
 .init-sep { flex-shrink: 0; width: 1px; height: 26px; background: var(--border-color); margin: 0 4px; opacity: 0.7; }
 .init-badge.active  { border-color: var(--gold2); box-shadow: 0 0 9px rgba(240,192,74,0.7); transform: scale(1.12); }
-/* Coupe-son : discret par défaut, franchement éteint quand il coupe — l'état doit se lire
-   sans survol, c'est le seul repère qu'a le joueur pour savoir pourquoi il n'entend rien. */
-.son-btn {
-	flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
+/* Réglages ⚙️ (même écrou que le menu d'affichage de /play) : sons et musique dans UN menu,
+   deux boutons prenaient trop de place au bandeau. Le menu s'ouvre VERS LE HAUT : le bandeau
+   est en bas de l'écran. Coupé, un 🔇 se pose sur l'écrou — l'état doit se lire sans
+   l'ouvrir, c'est le seul repère qu'a le joueur pour savoir pourquoi il n'entend rien. */
+.reglages-wrap { position: relative; flex-shrink: 0; display: inline-flex; }
+.reglages-btn {
+	width: 32px; height: 32px; border-radius: 50%; padding: 0;
 	background: #2a2a36; border: 1.5px solid var(--border-color);
 	color: var(--muted); font-size: 15px; line-height: 1; cursor: pointer;
 }
-.son-btn:hover { border-color: var(--accent-color); }
-.son-btn.muet { opacity: 0.55; filter: grayscale(1); }
+.reglages-btn:hover, .reglages-btn[aria-expanded="true"] { border-color: var(--accent-color); }
+.reglages-btn.muet::after {
+	content: '🔇'; position: absolute; right: -4px; bottom: -4px;
+	font-size: 11px; line-height: 1; pointer-events: none;
+}
+.reglages-menu {
+	position: absolute; bottom: calc(100% + 6px); right: 0; z-index: 150;
+	display: flex; flex-direction: column; min-width: 150px; padding: 4px;
+	background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px;
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+.reglages-menu[hidden] { display: none; }
+.reglages-item {
+	display: block; width: 100%; text-align: left; white-space: nowrap;
+	padding: 6px 10px 6px 24px; position: relative;
+	background: none; border: none; border-radius: 4px; cursor: pointer;
+	color: var(--text); font-size: 0.85rem; font-weight: normal;
+}
+.reglages-item:hover { background: rgba(255, 255, 255, 0.08); }
+.reglages-item[aria-checked="true"]::before { content: '✓'; position: absolute; left: 8px; color: var(--accent-color); }
 .init-badge.dead    { opacity: 0.3; filter: grayscale(1); }
 
 /* ── Portrait/image + anneau de vitalité (partagés badge initiative ↔ player-token) ── */
@@ -1419,14 +1440,19 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 			     Dans le bandeau et non dans la barre d'action : il y coûtait une rangée entière,
 			     vide la plupart du temps. -->
 			<div class="passages-row" id="passages-row" style="display:none"></div>
-			<!-- Coupe-son : premier réglage audio du jeu. Son état vit dans localStorage
-			     (par navigateur, pas par personnage) et il coupe AUSSI le son en cours. -->
-			<button type="button" id="btn-son" class="son-btn" title="Couper / rétablir les sons de combat">🔊</button>
-			{% if musique %}
-			<!-- Musique du donjon (`donjon.musique_du_donjon`) : réglage À PART du son, une
-			     ambiance qui lasse ne doit pas faire perdre le bruit des coups. -->
-			<button type="button" id="btn-musique" class="son-btn" title="Couper / rétablir la musique du donjon">🎵</button>
-			{% endif %}
+			<!-- Réglages ⚙️ : coupe-son (état dans localStorage, par navigateur, il coupe AUSSI le
+			     son en cours) et, dans un donjon, musique (`donjon.musique_du_donjon`) — réglage À
+			     PART du son, une ambiance qui lasse ne doit pas faire perdre le bruit des coups. -->
+			<span class="reglages-wrap" id="reglages-wrap">
+				<button type="button" id="reglages-btn" class="reglages-btn" title="Réglages"
+					aria-haspopup="menu" aria-expanded="false" aria-controls="reglages-menu">⚙️</button>
+				<span class="reglages-menu" id="reglages-menu" role="menu" hidden>
+					<button type="button" role="menuitemcheckbox" class="reglages-item" id="reglage-son" aria-checked="true">🔊 Sons</button>
+					{% if musique %}
+					<button type="button" role="menuitemcheckbox" class="reglages-item" id="reglage-musique" aria-checked="true">🎵 Musique</button>
+					{% endif %}
+				</span>
+			</span>
 		</div>
 		</div><!-- /barres-bas -->
 		</div><!-- /combat-center -->
@@ -2968,25 +2994,53 @@ function jouerSon(anim) {
 	else a.addEventListener('loadedmetadata', lancer, { once: true });
 }
 
-function majBoutonSon() {
-	const btn = document.getElementById('btn-son');
-	if (!btn) return;
-	btn.textContent = sonCoupe ? '🔇' : '🔊';
-	btn.classList.toggle('muet', sonCoupe);
+// Menu ⚙️ : coches des deux entrées + 🔇 sur l'écrou dès que sons OU musique sont coupés.
+function majReglages() {
+	const son = document.getElementById('reglage-son');
+	if (son) son.setAttribute('aria-checked', sonCoupe ? 'false' : 'true');
+	const mus = document.getElementById('reglage-musique');
+	if (mus) mus.setAttribute('aria-checked', musiqueCoupee() ? 'false' : 'true');
+	const btn = document.getElementById('reglages-btn');
+	if (btn) btn.classList.toggle('muet', sonCoupe || (!!mus && musiqueCoupee()));
 }
 
-(function initSon() {
+// Menu simple, pas un overlay de décision (comme le ⚙️ de /play) : second clic sur l'écrou,
+// clic ailleurs ou Échap le referment. Basculer une entrée le laisse OUVERT : on règle
+// souvent les deux d'affilée.
+function fermerReglages() {
+	const menu = document.getElementById('reglages-menu');
+	if (!menu || menu.hidden) return;
+	menu.hidden = true;
+	const btn = document.getElementById('reglages-btn');
+	if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
+(function initReglages() {
 	try { sonCoupe = localStorage.getItem(SON_CLE) === '0'; } catch (e) { sonCoupe = false; }
-	const btn = document.getElementById('btn-son');
-	if (btn) btn.onclick = () => {
+	const btn = document.getElementById('reglages-btn');
+	const menu = document.getElementById('reglages-menu');
+	if (btn && menu) btn.onclick = () => {
+		if (!menu.hidden) { fermerReglages(); return; }
+		menu.hidden = false;
+		btn.setAttribute('aria-expanded', 'true');
+	};
+	const son = document.getElementById('reglage-son');
+	if (son) son.onclick = () => {
 		sonCoupe = !sonCoupe;
 		try { localStorage.setItem(SON_CLE, sonCoupe ? '0' : '1'); } catch (e) { /* mode privé */ }
 		// ⚠️ Couper doit faire taire ce qui sonne DÉJÀ : sans ça le clic reste sans effet
 		// audible pendant une seconde, et on le croit cassé.
 		if (sonCoupe) arreterSon();
-		majBoutonSon();
+		majReglages();
 	};
-	majBoutonSon();
+	const mus = document.getElementById('reglage-musique');
+	if (mus) mus.onclick = () => { basculerMusique(); majReglages(); };
+	document.addEventListener('click', e => {
+		const wrap = document.getElementById('reglages-wrap');
+		if (wrap && !wrap.contains(e.target)) fermerReglages();
+	});
+	document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerReglages(); });
+	majReglages();
 })();
 
 // Pavé déplaçable : sa position vit dans localStorage (préférence du joueur, par navigateur,
@@ -4835,13 +4889,6 @@ else {
 	if ((state.tour || 0) <= 1) jouerSonUi('degainer');
 }
 installerSonsApi(SONS_API);
-(function initMusique() {
-	const btn = document.getElementById('btn-musique');
-	if (!btn) return;
-	const maj = () => { btn.classList.toggle('muet', musiqueCoupee()); };
-	btn.onclick = () => { basculerMusique(); maj(); };
-	maj();
-})();
 // Épreuve de rang : narration d'ambiance avant le premier tour (non bloquante).
 if (state.chasse_narration) {
 	document.getElementById('chasse-txt').textContent = state.chasse_narration;
