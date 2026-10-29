@@ -3,7 +3,7 @@
 Chaque entrée sépare **Auteur** (décision, niveau 2) et **Proposé** (réponse ChatGPT non adoptée, niveau 4). Source : le fichier entre crochets dans `docs/lore/`. Lieux réellement en jeu : `lieu:*` du dump (catégories `ville`, `pays`, `portail`, `temple`, `guilde_aventurier`).
 
 ## Sommaire
-France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri · Camelot — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem · Petra — Mythiques : Mu · Atlantis — Réseau des portails
+France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri · Camelot — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem · Petra · Sydney — Mythiques : Mu · Atlantis — Réseau des portails
 
 ---
 
@@ -220,6 +220,16 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 	- Chambre du Rituel Astral ;
 	- gardes momifiés, spectres de prêtres, squelettes caparaçonnés d'or.
 - Relié à Aix-la-Chapelle par la Chapelle Palatine.
+- **Deux villes** (Auteur, 29/10) [cites/20261029_maisons_de_guilde_des_cites.md] : la **ville extérieure** (au jour, sur le Nil : quais, marchés, ateliers) mêle **vivants et morts-vivants** ; la **ville souterraine** n'abrite **que des morts-vivants**. La carte en jeu montre la ville extérieure.
+
+**Proposé** : guilde « La Maison des Deux Rives » sur le quai (29/10).
+
+## Sydney — `lieu:sydney` · [cites/20261029_maisons_de_guilde_des_cites.md], [cites/20261025_portails_d_aix_la_chapelle.md]
+**Auteur**
+- Une des cinq destinations fixes de la Chapelle Palatine d'Aix (24/08, 26/08).
+- Le grand édifice blanc aux voûtes en coquilles sur une pointe de la baie (silhouette de l'opéra) est un **temple à la gloire des trois frères** (29/10) ; rien d'autre n'est fixé (nom, date, bâtisseurs, portail).
+
+**Proposé** : Sanctuaire de Baiame et la Templière Barangaroo à la sortie de la porte d'Aix (25/10) ; guilde « La Maison de la Grande Baie » (29/10).
 
 ## Babylone — [cites/20260819_histoire_de_babylone.md]
 **Auteur** : sa tour, ses jardins suspendus, son état actuel (demande seulement). L'Auteur a demandé qui sont **Hārūt et Mārūt** dans Telluris.
