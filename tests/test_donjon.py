@@ -801,3 +801,41 @@ def test_un_seul_mandat_a_la_fois_meme_avec_plusieurs_donjons():
 	donjon.accepter_commission(c, donjon.offre_commission_parmi(c, BUREAU, [DONJON, DONJON_S],
 		_get_multi, find_docs))
 	assert donjon.offre_commission_parmi(c, BUREAU, [DONJON, DONJON_S], _get_multi, find_docs) is None
+
+
+# ── Musique d'un donjon ──────────────────────────────────────────────────────────
+
+_MUSICAL = {"_id": "donjon:puits", "type": "donjon", "musique": "dungeon_ambient_1.ogg",
+			"musique_volume": 0.8, "battle_maps": [{"lieu": "lieu:labyrinthe"}]}
+
+
+def _get_musical(i):
+	return _MUSICAL if i == _MUSICAL["_id"] else None
+
+
+def _find_musical(selector):
+	return [_MUSICAL] if selector.get("type") == "donjon" else []
+
+
+def test_le_combat_trouve_son_donjon_par_ses_deux_entrees_jamais_par_le_decor():
+	assert donjon.donjon_du_combat({"etages": {"donjon": "donjon:puits"}},
+		_get_musical, _find_musical) is _MUSICAL
+	assert donjon.donjon_du_combat({"salle_gardee": "lieu:labyrinthe"},
+		_get_musical, _find_musical) is _MUSICAL
+	# La même salle tirée comme DÉCOR d'une rencontre ordinaire : aucun donjon, aucune musique.
+	assert donjon.donjon_du_combat({"battle_map_id": "lieu:labyrinthe"},
+		_get_musical, _find_musical) is None
+	assert donjon.donjon_du_combat(None, _get_musical, _find_musical) is None
+
+
+def test_musique_du_donjon_bornee_a_un_fichier_jouable():
+	assert donjon.musique_du_donjon(_MUSICAL) == {"fichier": "dungeon_ambient_1.ogg", "volume": 0.8}
+	assert donjon.musique_du_donjon({"musique": "a.mp3"}) == {
+		"fichier": "a.mp3", "volume": donjon.MUSIQUE_VOLUME_DEFAUT}
+	assert donjon.musique_du_donjon({"musique": "a.mp3", "musique_volume": 3})["volume"] == 1.0
+	assert donjon.musique_du_donjon({"musique": "a.mp3", "musique_volume": "x"})["volume"] \
+		== donjon.MUSIQUE_VOLUME_DEFAUT
+	for refuse in ("", "../secret.mp3", "sous/dossier.mp3", "a\\b.mp3", ".cache.mp3", "notes.txt"):
+		assert donjon.musique_du_donjon({"musique": refuse}) is None, refuse
+	assert donjon.musique_du_donjon(None) is None
+	assert donjon.musique_du_donjon({"nom": "sans musique"}) is None

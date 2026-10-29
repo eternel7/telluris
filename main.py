@@ -34,6 +34,7 @@ from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs, R
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of, credit_character
 from utils import quetes
+from utils import donjon as donjon_util
 from utils import dump as dump_util
 from utils import bois
 from utils import consommables
@@ -1345,6 +1346,9 @@ async def get_combat_page(
 			# Catalogue des animations ACTIVES : le journal porte l'id (`vfx.anim`), le
 			# client y lit la découpe de la feuille. Les brouillons en sont exclus.
 			"animations": animations_util.catalogue_payload(find_docs({"type": "animation"}) or []),
+			# Musique du DONJON (`musique` du doc `donjon:*`), jouée en boucle ; None hors donjon.
+			"musique": donjon_util.musique_du_donjon(
+				donjon_util.donjon_du_combat(combat_doc, get_doc, find_docs)),
 		},
 		headers={"Cache-Control": "no-store"},
 	)

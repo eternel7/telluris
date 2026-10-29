@@ -258,6 +258,7 @@ Notre-Dame n'a **aucun lien** vers ses destinations (Auteur, 25/10) : les portai
 Un donjon est un lieu de combat **FERMÉ** : on y descend par une porte gardée, avec un mandat. Doc `donjon:*` : `{nom, portail, niveau_max?, niveau_min?, nb_monstres?, battle_maps:[{lieu, especes, niveau_max?, niveau_min?, nb_monstres?}]}`. Logique pure `utils/donjon.py`.
 
 - Contenu **curaté salle par salle** (pas de zones d'influence) ; `donjon_de_lieu` est le seul lien salle → donjon.
+- `musique` (+ `musique_volume`) optionnels : jouée en boucle à l'arrivée (`telluris-social-ui` § Sons). Le formulaire 🏰 ne l'édite pas mais la conserve (fusion du doc relu).
 - **Écriture** : section 🏰 du formulaire de lieu de `/admin/editor` (doc donjon, salle, porte gardée simple, passages d'étage) — telluris-editeur-carte § Section 🏰 Donjon.
 - `niveau_max`/`niveau_min` bornent le grade de l'élite **et** de l'escorte, en cascade salle → donjon → aucune (le plancher cède au plafond en cas de conflit).
 - `nb_monstres` fixe l'effectif **sans** bonus au nombre de compagnons, pour que les répliques narratives qui comptent les ennemis restent exactes.

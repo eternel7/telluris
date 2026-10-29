@@ -1422,6 +1422,11 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 			<!-- Coupe-son : premier réglage audio du jeu. Son état vit dans localStorage
 			     (par navigateur, pas par personnage) et il coupe AUSSI le son en cours. -->
 			<button type="button" id="btn-son" class="son-btn" title="Couper / rétablir les sons de combat">🔊</button>
+			{% if musique %}
+			<!-- Musique du donjon (`donjon.musique_du_donjon`) : réglage À PART du son, une
+			     ambiance qui lasse ne doit pas faire perdre le bruit des coups. -->
+			<button type="button" id="btn-musique" class="son-btn" title="Couper / rétablir la musique du donjon">🎵</button>
+			{% endif %}
 		</div>
 		</div><!-- /barres-bas -->
 		</div><!-- /combat-center -->
@@ -1514,6 +1519,8 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 <script src="{{ script_url('jetons.js') }}"></script>
 {# `rendreDeplacable`/`placerPanneau` : la poignée du pavé (partagé avec play_town et l'éditeur). #}
 <script src="{{ script_url('deplacable.js') }}"></script>
+{# Sons d'interface, coupe-son partagé avec /play, musique du donjon en boucle. #}
+<script src="{{ script_url('sons.js') }}"></script>
 <script>
 // ─── State ────────────────────────────────────────────────────────
 const SERVER_DATA = {
@@ -1565,6 +1572,8 @@ const GRID = {{ grid | tojson | safe }};
 // le SEUL canal possible, un tour de monstre étant résolu entièrement côté serveur.
 // Une animation absente du catalogue (brouillon, doc supprimé) ne joue rien.
 const ANIMATIONS = {{ animations | tojson | safe }};
+// Musique du donjon, `{fichier, volume}` ou null (rencontre ordinaire) — scripts/sons.js.
+const MUSIQUE = {{ musique | tojson | safe }};
 
 // Consommables du sac utilisables en combat (effet instantané pv/pm, index d'origine
 // dans l'inventaire) — resynchronisés par la réponse de l'action « consommer ».
@@ -3309,6 +3318,8 @@ function _appliquerEtat(etat) {
 
 let logQueue  = [];
 let revealing = false;
+// Genre de ligne de journal → clé de `SONS_UI`, pour les lignes que rien n'anime.
+const SONS_JOURNAL = { move: 'pas', flee: 'fuite' };
 function enqueueLogs(log) {
 	logQueue.push(...log.slice(logLen));
 	logLen = log.length;
@@ -3342,6 +3353,8 @@ async function revealNext() {
 		// l'impact propre à la ligne. Le rythme de la ligne compte les deux.
 		const dureeZone = entry.vfx_zone ? await jouerVfx(entry.vfx_zone) : 0;
 		duree = dureeZone + (entry.vfx ? await jouerVfx(entry.vfx) : 0);
+		// Ligne sans animation : bruit d'interface selon son genre (pas, fuite).
+		if (!entry.vfx && !entry.vfx_zone && SONS_JOURNAL[entry.kind]) jouerSonUi(SONS_JOURNAL[entry.kind]);
 		_ecrireLigne(entry);
 		_appliquerEtat(entry.etat);
 	} catch (e) {
@@ -4578,6 +4591,9 @@ document.getElementById('end-overlay').addEventListener('click', e => {
 
 function showEndOverlay(status, xp) {
 	lootEtagePassage = null;
+	// La scène est finie : la musique s'éteint en fondu, le jingle de l'issue la remplace.
+	arreterMusique(1500);
+	if (status === 'victoire' || status === 'defaite') jouerSonUi(status);
 	document.getElementById('end-close').style.display = 'none';
 	document.getElementById('loot-hint').textContent = LOOT_HINT_FIN;
 	const icons  = { victoire: '🏆', defaite: '💀', fuite: '🏃' };
@@ -4812,6 +4828,20 @@ if (window.ResizeObserver) {
 	if (_barre) new ResizeObserver(_syncBarreFixe).observe(_barre);
 }
 if (state.status !== 'active') showEndOverlay(state.status, state.xp_gagnee);
+else {
+	// Arrivée dans un donjon : sa musique (reprise où elle en était après un changement d'étage).
+	demarrerMusique(MUSIQUE);
+	// Premier tour : on dégaine.
+	if ((state.tour || 0) <= 1) jouerSonUi('degainer');
+}
+installerSonsApi(SONS_API);
+(function initMusique() {
+	const btn = document.getElementById('btn-musique');
+	if (!btn) return;
+	const maj = () => { btn.classList.toggle('muet', musiqueCoupee()); };
+	btn.onclick = () => { basculerMusique(); maj(); };
+	maj();
+})();
 // Épreuve de rang : narration d'ambiance avant le premier tour (non bloquante).
 if (state.chasse_narration) {
 	document.getElementById('chasse-txt').textContent = state.chasse_narration;
