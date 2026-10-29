@@ -4011,9 +4011,11 @@
 	function passagesProches(passages, x, y, rayon) {
 		return (passages || []).filter(p => Math.max(Math.abs(p.x - x), Math.abs(p.y - y)) <= rayon);
 	}
-	// Pure (même harnais) : les passages proches à ANNONCER par un toast. Debout sur un
-	// passage (point bleu), aucun : il est déjà dans la liste « Lieux » et ses voisins
-	// contigus ne sont que du bruit ; ils seront annoncés en quittant le passage.
+	// Pure (même harnais) : les passages proches à ANNONCER par un toast — un toast sert à
+	// signaler un passage PROCHE quand on n'est sur AUCUN. Debout sur un passage (point bleu),
+	// aucun : il est déjà dans la liste « Lieux », ses voisins contigus ne sont que du bruit.
+	// Le passage foulé est ensuite tenu pour annoncé (`_majHaloPassages`) : le quitter ne
+	// l'annonce pas ; ses contigus, eux, le seront.
 	function passagesAAnnoncer(passages, x, y, rayon) {
 		if ((passages || []).some(p => p.x === x && p.y === y)) return [];
 		return passagesProches(passages, x, y, rayon);
@@ -4078,8 +4080,10 @@
 			const p = PASSAGES[m.dataset.i];
 			const proche = proches.has(p);
 			m.classList.toggle('proche', proche);
-			// Une annonce par destination et par chargement de page (`passagesAAnnoncer`).
+			// Une annonce par destination et par chargement de page (`passagesAAnnoncer`) ;
+			// celui qu'on foule compte comme annoncé.
 			const cle = p.link_id + '|' + p.label;
+			if (p.x === POSITIONS.x && p.y === POSITIONS.y) _passagesAnnonces.add(cle);
 			if (aAnnoncer.has(p) && !_passagesAnnonces.has(cle)) {
 				_passagesAnnonces.add(cle);
 				showToast(`Un passage est proche : ${p.label || 'route'}`);

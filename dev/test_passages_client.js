@@ -70,7 +70,7 @@ t('à côté d\'un passage : il est annoncé', () => {
 t('debout sur un passage (point bleu) : aucune annonce, pas même des contigus', () => {
 	const C = [{ x: 10, y: 10, label: 'ici' }, { x: 11, y: 10, label: 'contigu' }];
 	assert.deepStrictEqual(passagesAAnnoncer(C, 10, 10, 1), []);
-	// en le quittant, le contigu est annoncé
+	// en le quittant, les deux sont proches ; `_majHaloPassages` écarte « ici », déjà foulé
 	assert.deepStrictEqual(passagesAAnnoncer(C, 10, 11, 1).map(p => p.label), ['ici', 'contigu']);
 });
 t('liste vide ou absente', () => {
