@@ -220,6 +220,9 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 	- Chambre du Rituel Astral ;
 	- gardes momifiés, spectres de prêtres, squelettes caparaçonnés d'or.
 - Relié à Aix-la-Chapelle par la Chapelle Palatine.
+- **Ville extérieure** (quais, marchés, ateliers de la ville basse du Nil) : **vivants autant que morts-vivants** (Auteur, 29/10) [cites/20261029_maisons_de_guilde_des_cites.md] — les morts au cœur (Grand Temple, cryptes), les deux mêlés au dehors.
+
+**Proposé** : guilde « La Maison des Deux Rives » sur le quai (29/10).
 
 ## Sydney — `lieu:sydney` · [cites/20261029_maisons_de_guilde_des_cites.md], [cites/20261025_portails_d_aix_la_chapelle.md]
 **Auteur**
