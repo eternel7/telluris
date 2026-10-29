@@ -62,6 +62,21 @@ t('liste vide ou absente', () => {
 	assert.deepStrictEqual(passagesProches(null, 0, 0, 3), []);
 });
 
+vm.runInThisContext(extraire('passagesAAnnoncer'));
+
+t('à côté d\'un passage : il est annoncé', () => {
+	assert.deepStrictEqual(passagesAAnnoncer(P, 11, 10, 1).map(p => p.label), ['a']);
+});
+t('debout sur un passage (point bleu) : aucune annonce, pas même des contigus', () => {
+	const C = [{ x: 10, y: 10, label: 'ici' }, { x: 11, y: 10, label: 'contigu' }];
+	assert.deepStrictEqual(passagesAAnnoncer(C, 10, 10, 1), []);
+	// en le quittant, le contigu est annoncé
+	assert.deepStrictEqual(passagesAAnnoncer(C, 10, 11, 1).map(p => p.label), ['ici', 'contigu']);
+});
+t('liste vide ou absente', () => {
+	assert.deepStrictEqual(passagesAAnnoncer(null, 0, 0, 1), []);
+});
+
 vm.runInThisContext(extraire('directionFrontiere'));
 
 // Voile 5×5 : colonne de droite voilée (frontière à l'est).

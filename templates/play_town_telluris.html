@@ -4011,6 +4011,13 @@
 	function passagesProches(passages, x, y, rayon) {
 		return (passages || []).filter(p => Math.max(Math.abs(p.x - x), Math.abs(p.y - y)) <= rayon);
 	}
+	// Pure (même harnais) : les passages proches à ANNONCER par un toast. Debout sur un
+	// passage (point bleu), aucun : il est déjà dans la liste « Lieux » et ses voisins
+	// contigus ne sont que du bruit ; ils seront annoncés en quittant le passage.
+	function passagesAAnnoncer(passages, x, y, rayon) {
+		if ((passages || []).some(p => p.x === x && p.y === y)) return [];
+		return passagesProches(passages, x, y, rayon);
+	}
 	// Pure (même harnais) : angle en degrés (0 = est, 90 = sud, repère écran) vers la frontière
 	// la plus proche de (x, y) — cases voilées (« 1 ») ET hors carte, pondérées en 1/d² pour
 	// que la plus proche l'emporte. `null` si rien dans `rayon` ou si tout s'annule.
@@ -4066,14 +4073,14 @@
 		const calque = document.getElementById('carte-calque');
 		if (!calque) return;
 		const proches = new Set(passagesProches(PASSAGES, POSITIONS.x, POSITIONS.y, RAYON_PASSAGE));
+		const aAnnoncer = new Set(passagesAAnnoncer(PASSAGES, POSITIONS.x, POSITIONS.y, RAYON_PASSAGE));
 		calque.querySelectorAll('.passage-marque').forEach(m => {
 			const p = PASSAGES[m.dataset.i];
 			const proche = proches.has(p);
 			m.classList.toggle('proche', proche);
-			// Une annonce par destination et par chargement de page ; la case même du passage
-			// n'en a pas besoin, il est déjà dans la liste « Lieux ».
+			// Une annonce par destination et par chargement de page (`passagesAAnnoncer`).
 			const cle = p.link_id + '|' + p.label;
-			if (proche && !_passagesAnnonces.has(cle) && (p.x !== POSITIONS.x || p.y !== POSITIONS.y)) {
+			if (aAnnoncer.has(p) && !_passagesAnnonces.has(cle)) {
 				_passagesAnnonces.add(cle);
 				showToast(`Un passage est proche : ${p.label || 'route'}`);
 			}
