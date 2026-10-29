@@ -74,6 +74,7 @@ import uuid
 from models import character_stats
 from utils.characters import lieu_label, victoire_acquise
 from utils import accord_espece, acces, chasse, quetes
+from utils.animations import est_son
 from utils.zones import profils_compatibles
 
 
@@ -141,6 +142,42 @@ def donjon_a_etages_de(lieu_doc: dict | None, find_docs_fn) -> dict | None:
 		return None
 	donjon_doc = donjon_de_lieu(d.get("_id"), find_docs_fn)
 	return donjon_doc if est_a_etages(donjon_doc) else None
+
+
+# ── Musique d'un donjon ──────────────────────────────────────────────────────────
+# `musique` (fichier de `templates/resources/sounds`, mount `/sounds`) et `musique_volume`
+# ([0,1], optionnel) sur le doc `donjon:*` : jouée EN BOUCLE par la page de combat dès
+# l'arrivée dans le donjon. Champ absent ⇒ silence, comme avant.
+MUSIQUE_VOLUME_DEFAUT = 0.5
+
+
+def donjon_du_combat(combat_doc: dict | None, get_doc_fn, find_docs_fn) -> dict | None:
+	"""Le donjon où se déroule ce combat, ou None (rencontre ordinaire).
+
+	⚠️ Jamais d'après `battle_map_id` : une salle de donjon reste TIRABLE COMME DÉCOR
+	(`combat.select_battle_map`), une escarmouche en forêt jouerait sinon la musique de la
+	grotte aux loups. Seuls les deux chemins d'ENTRÉE le savent : `etages.donjon` (donjon à
+	étages) et `salle_gardee` (la porte franchie, `routers/pnj._declencher_combat_donjon`)."""
+	c = combat_doc or {}
+	donjon_id = (c.get("etages") or {}).get("donjon")
+	if donjon_id:
+		return get_doc_fn(donjon_id)
+	return donjon_de_lieu(c.get("salle_gardee"), find_docs_fn)
+
+
+def musique_du_donjon(donjon_doc: dict | None) -> dict | None:
+	"""`{fichier, volume}` à jouer, ou None. Le nom est BORNÉ à un fichier du dossier des
+	sons (aucun chemin, extension jouable) : il part tel quel dans une URL `/sounds/…`."""
+	d = donjon_doc or {}
+	fichier = str(d.get("musique") or "").strip()
+	if (not fichier or "/" in fichier or "\\" in fichier or fichier.startswith(".")
+			or not est_son(fichier)):
+		return None
+	try:
+		volume = float(d.get("musique_volume", MUSIQUE_VOLUME_DEFAUT))
+	except (TypeError, ValueError):
+		volume = MUSIQUE_VOLUME_DEFAUT
+	return {"fichier": fichier, "volume": min(1.0, max(0.0, volume))}
 
 
 def _niveau(profil: dict) -> int:

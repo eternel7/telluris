@@ -2068,6 +2068,8 @@
 							<button type="button" role="menuitemradio" class="affichage-item" data-pave="carte" aria-checked="true" onclick="choisirModePave('carte')">🗺️ Flèches sur la carte</button>
 							<button type="button" role="menuitemradio" class="affichage-item" data-pave="flottant" aria-checked="false" onclick="choisirModePave('flottant')">🕹️ Flèches flottantes</button>
 							{% endif %}
+							{# Coupe-son : même réglage que le 🔊 du combat (scripts/sons.js). #}
+							<button type="button" role="menuitemcheckbox" class="affichage-item" id="affichage-son" aria-checked="true" onclick="basculerSonsMenu()">🔊 Sons</button>
 							<button type="button" role="menuitem" class="affichage-item" id="affichage-fs" aria-pressed="false" hidden onclick="fermerMenuAffichage()"><span id="affichage-fs-ico" aria-hidden="true">⛶</span> <span id="affichage-fs-txt">Plein écran</span></button>
 						</span>
 					</span>
@@ -3606,6 +3608,8 @@
 {# Libellés d'une capacité connue (onglet ⚡), partagés avec /admin/sorts et /admin/competences.
    APRÈS zones_effet.js (`libelleZone`) ; `_coutPmCharge` est défini plus bas. #}
 <script src="{{ script_url('capacites_texte.js') }}"></script>
+{# Sons d'action (chokepoint `installerSonsApi`), coupe-son partagé avec le combat. #}
+<script src="{{ script_url('sons.js') }}"></script>
 <script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
 	let LINKS = {{ links | tojson | safe }};
@@ -3878,7 +3882,7 @@
 		const prevu = {x: confirme.x + Math.sign(viewDx), y: confirme.y + Math.sign(viewDy)};
 		// waitTurn() appelle move(0,0) : aucun mouvement, donc ni glissement ni rollback.
 		const optimiste = (prevu.x !== confirme.x || prevu.y !== confirme.y);
-		if (optimiste) _ecrireCarte(prevu.x, prevu.y);
+		if (optimiste) { _ecrireCarte(prevu.x, prevu.y); jouerSonUi('pas'); }
 		try {
 			const response = await fetch('api/move_character', {
 				method: 'POST',
@@ -4203,6 +4207,28 @@
 		if (wrap && !wrap.contains(e.target)) fermerMenuAffichage();
 	});
 	document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerMenuAffichage(); });
+	function _majMenuSons() {
+		const b = document.getElementById('affichage-son');
+		if (b) b.setAttribute('aria-checked', sonsCoupes() ? 'false' : 'true');
+	}
+	function basculerSonsMenu() {
+		basculerSons();
+		_majMenuSons();
+		jouerSonUi('choix');   // muet si l'on vient de couper : c'est le retour attendu
+	}
+	_majMenuSons();
+
+	// ── Sons d'action ──────────────────────────────────────────────────────────
+	// Chaque POST réussi d'une route de `SONS_API` sonne (scripts/sons.js) ; les clics
+	// d'interface ci-dessous. Première règle qui contient la cible gagne : une clé vide
+	// EXCLUT (le pas, la porte et la nuit ont déjà leur propre son).
+	installerSonsApi(SONS_API);
+	brancherSonsClics(document, [
+		{ selecteur: '.close-sheet-btn', cle: 'fermer' },
+		{ selecteur: '.sheet-tab-btn', cle: el => /'inventaire'/.test(el.getAttribute('onclick') || '') ? 'sac' : 'onglet' },
+		{ selecteur: '#sub-locations-list-id, #btn-attendre, #aub-nuit-btn', cle: '' },
+		{ selecteur: '.sub-loc-btn', cle: 'ouvrir' },
+	]);
 
 	async function waitTurn(){
 		// Attendre un tour : pas de déplacement, mais on rejoue la résolution serveur
@@ -4265,6 +4291,8 @@
 	}
 	async function moveTo(linkId) {
 		const moveData = {link: linkId};
+		// Au clic et non au retour : la page se recharge dès la réponse, le son y serait coupé net.
+		jouerSonUi('porte');
 		try {
 			const response = await fetch('api/move_character', {
 				method: 'POST',

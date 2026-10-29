@@ -219,6 +219,18 @@ CATALOGUE = [
 			"thème déjà en base. Relit le dump le plus récent : régénération idempotente.",
 	},
 	{
+		"id": "gen_sons",
+		"label": "🔊 Sons du combat et musiques de donjon",
+		"argv": _py("gen_sons.py"),
+		"ecrit": "Écrit jsons/sons_a_importer.json.",
+		"description": "Un doc `animation:son_<canal>` (son seul) par canal de combat et la "
+			"world-var COMBAT_ANIMATIONS_DEFAUT pour les seuls canaux vides ; un cri par "
+			"famille d'espèce (gobelin, ogre, géant, spectre, dragon, bête…) posé sur les "
+			"espèces sans animation ; le déclic du piège ; `musique` du puits de Chartres et "
+			"des catacombes de Lutécia. Ne touche rien de déjà réglé. ⚠️ rules:world_variables "
+			"part ENTIER depuis le dump.",
+	},
+	{
 		"id": "gen_equipement_humanoides",
 		"label": "⚔️ Équipement des monstres humanoïdes",
 		"argv": _py("gen_equipement_humanoides.py"),
