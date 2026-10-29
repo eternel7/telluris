@@ -1262,6 +1262,10 @@ def _dialogue(m: dict, nom_sort: str, nom_base: str) -> dict:
 					{"id": "remettre", "label": "(Montrer ce que vous rapportez.)",
 					 "condition": {"apport_possible": True},
 					 "action": {"service": "apport", "op": "remettre"}},
+					# Épreuve en cours, rien à remettre dans le sac : le maître rappelle le reste.
+					{"id": "rappel", "label": "« Où en est l'épreuve ? »",
+					 "condition": {"apport_en_cours": True, "apport_possible": False},
+					 "next": "epreuve_rappel"},
 					{"id": "apprendre", "label": recevoir,
 					 "condition": {**reussie, "enseignement_possible": True},
 					 "action": {"service": "enseignement", "op": "apprendre"}},
@@ -1304,6 +1308,11 @@ def _dialogue(m: dict, nom_sort: str, nom_base: str) -> dict:
 				"texte": "{pnj} examine ce que vous rapportez et le pose de côté. « Il en manque "
 						 "encore {reste}. »",
 				"choix": [{"id": "fin", "label": "(Repartir.)", "next": "fin"}],
+			},
+			"epreuve_rappel": {
+				"texte": "« Il m'en manque encore {reste} : {objet}. Je vous attends. »",
+				"choix": [{"id": "retour", "label": "(Revenir à la conversation.)", "next": "accueil"},
+						  {"id": "fin", "label": "(Prendre congé.)", "next": "fin"}],
 			},
 			"epreuve_remis": {
 				"texte": m["remis"],

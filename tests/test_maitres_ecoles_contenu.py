@@ -127,6 +127,17 @@ def test_un_maitre_par_forme_enseignee_avec_son_epreuve():
 	assert len({m["services"]["apport"]["offre"]["id"] for m in maitres}) == len(maitres)
 
 
+def test_le_maitre_rappelle_ce_qui_manque_a_l_epreuve():
+	"""Épreuve en cours sans rien à remettre : un choix mène au reste à apporter — exclusif de
+	la remise (`apport_possible`), qui a déjà son nœud `partiel`."""
+	for m in (d for d in _contenu() if d["type"] == "pnj"):
+		choix = m["dialogue"]["noeuds"]["accueil"]["choix"]
+		rappel = next(c for c in choix if c["id"] == "rappel")
+		assert rappel["condition"] == {"apport_en_cours": True, "apport_possible": False}
+		texte = m["dialogue"]["noeuds"][rappel["next"]]["texte"]
+		assert "{reste}" in texte and "{objet}" in texte, m["_id"]
+
+
 def test_le_maitre_pratique_l_ecole_qu_il_enseigne():
 	base = _base()
 	vocations = {v["id"]: v for v in base["rules:vocations"]["value"]}
@@ -160,7 +171,8 @@ def test_philibert_ne_se_tient_que_sur_la_descente_des_catacombes():
 	docs, erreurs = gen.construire(base)
 	assert not erreurs
 	# Chartres : Maître Bernard, posté devant le scriptorium (test suivant).
-	assert sorted(d["_id"] for d in docs) == ["lieu:chartres", "lieu:lutecia"]
+	# Les maîtres reviennent aussi (fusionnés) : ce dump précède leur choix `rappel`.
+	assert sorted(d["_id"] for d in docs if d["type"] == "lieu") == ["lieu:chartres", "lieu:lutecia"]
 	(entree,) = next(d for d in docs if d["_id"] == "lieu:lutecia")["pnj"]
 	lien = base["link:lutecia_to_catacombes0001"]
 	descente = next(n["pos"] for n in lien["nodes"] if n["lieu"] == "lieu:lutecia")
