@@ -88,6 +88,18 @@ def lieux_chasse_de(cite_id: str, get_doc_fn, find_docs_fn) -> list:
 	return out
 
 
+def pays_de_chasse(cite_doc: dict, get_doc_fn, find_docs_fn) -> list:
+	"""Pays relié à une CAPITALE par une route ouverte (`quetes.pays_relies`) qui porte à la fois
+	`rencontres` et `zone_influences` — mêmes exigences que `lieux_chasse_de`. Vide hors capitale
+	(aucune requête alors)."""
+	cite_id = (cite_doc or {}).get("_id")
+	if not cite_id or cite_doc.get("sous_categorie") != "capitale":
+		return []
+	connexions = find_docs_fn({"type": "connection", "nodes": {"$elemMatch": {"lieu": cite_id}}}) or []
+	return [p for p in quetes.pays_relies(cite_doc, connexions, get_doc_fn)
+			if p.get("rencontres") and p.get("zone_influences")]
+
+
 def _zones_de_lespece(lieu_doc: dict, espece_id: str) -> set:
 	"""Ids de zones d'influence (`rencontres[].zones`) où l'espèce peut apparaître."""
 	return {
@@ -647,7 +659,12 @@ def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_f
 	plancher = potentiel_min_pour(rang_suivant(rang_courant))
 	potentiel_fn = potentiel_fn or potentiel_cible
 	candidats = []
-	for L in lieux_chasse_de(cite, get_doc_fn, find_docs_fn):
+	# Capitale : l'élite peut aussi écumer le pays où mènent ses routes (`pays_de_chasse`).
+	lieux = lieux_chasse_de(cite, get_doc_fn, find_docs_fn)
+	# ⚠️ La cité est déjà lue par `lieux_chasse_de` (en tête) : la relire coûterait un gros doc.
+	cite_doc = next((L for L in lieux if L.get("_id") == cite), None)
+	lieux += pays_de_chasse(cite_doc, get_doc_fn, find_docs_fn)
+	for L in lieux:
 		for eid in quetes.especes_du_parent(L):
 			espece = get_doc_fn(eid)
 			if not espece:

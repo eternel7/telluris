@@ -442,6 +442,40 @@ def test_offre_rang_tire_une_epreuve_max():
 	assert "Farouche" in offre["narration"]
 
 
+def test_offre_rang_d_une_capitale_traque_dans_le_pays_relie():
+	"""Capitale SANS gibier, reliée au pays par une route ouverte : l'épreuve vise le pays.
+	Sans la route — ou si la cité n'est pas une capitale — aucune épreuve."""
+	pays = dict(AUXERRE, _id="lieu:royaume", categorie="pays", label="Royaume")
+	cite = {"_id": "lieu:capitale", "type": "lieu", "categorie": "ville", "sous_categorie": "capitale"}
+	comptoir = dict(COMPTOIR, _id="lieu:comptoir_capitale", lieu_parent=cite["_id"])
+	route = {"_id": "link:capitale_royaume", "type": "connection",
+	         "nodes": [{"lieu": cite["_id"], "pos": [0, 0]}, {"lieu": pays["_id"], "pos": [1, 1]}],
+	         "metadata": {"status": "ouvert"}}
+	docs = {**_DOCS, **{d["_id"]: d for d in (pays, cite, comptoir, route)}}
+
+	def find(sel, fields=None):
+		if sel.get("type") == "connection":
+			lid = sel["nodes"]["$elemMatch"]["lieu"]
+			return [d for d in docs.values() if d.get("type") == "connection"
+			        and any(n.get("lieu") == lid for n in d["nodes"])]
+		return [d for d in docs.values() if d.get("type") == "lieu"
+		        and d.get("lieu_parent") == sel.get("lieu_parent")]
+
+	perso = {"rangs_guilde": {cite["_id"]: "F"}}
+	random.seed(1)
+	offre = chasse.offre_rang_pour(perso, comptoir, docs.get, find)
+	assert offre is not None
+	assert offre["objectif"]["lieu"] == "lieu:royaume"
+	assert offre["objectif"]["profil"] == "profil:veteran"   # grade MAX, comme dans la cité
+	assert offre["lieu_parent"] == cite["_id"]
+
+	docs[cite["_id"]] = dict(cite, sous_categorie="ville")
+	assert chasse.offre_rang_pour(perso, comptoir, docs.get, find) is None
+	docs[cite["_id"]] = cite
+	del docs[route["_id"]]
+	assert chasse.offre_rang_pour(perso, comptoir, docs.get, find) is None
+
+
 def test_qualificatif_par_niveau_et_bornage():
 	assert [chasse.qualificatif_de({"niveau": n}) for n in range(1, 7)] == chasse.QUALIFICATIFS
 	assert chasse.qualificatif_de({"niveau": 99}) == "Apocalypse"   # borné en haut

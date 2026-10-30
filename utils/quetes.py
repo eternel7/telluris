@@ -507,8 +507,9 @@ def _offre_key(objectif: dict):
 def _candidats_chasse(cite_id: str, get_doc_fn=None, find_docs_fn=None, lieux: list | None = None) -> list:
 	"""Candidats `("chasse", (lieu_id, espece_id))` du tableau : élites d'un lieu de la cité,
 	résolvables au grade `max−1`. Balaie les lieux de chasse × leurs rencontres.
-	`lieux` remplace ce balayage (pays relié à une capitale, cf. `pays_relies`) ; un lieu
-	sans `rencontres` ou sans `zone_influences` n'a ni gibier ni zone de grade : écarté."""
+	`lieux` remplace ce balayage (pays relié à une capitale, cf. `pays_relies` ; l'épreuve de
+	rang du comptoir passe par `chasse.pays_de_chasse`) ; un lieu sans `rencontres` ou sans
+	`zone_influences` n'a ni gibier ni zone de grade : écarté."""
 	from utils import chasse  # import paresseux : chasse dépend de ce module
 	get_doc_fn = get_doc_fn or get_doc
 	find_docs_fn = find_docs_fn or find_docs
