@@ -170,9 +170,11 @@ def test_philibert_ne_se_tient_que_sur_la_descente_des_catacombes():
 	base = _dump_apres_import()
 	docs, erreurs = gen.construire(base)
 	assert not erreurs
-	# Chartres : Maître Bernard, posté devant le scriptorium (test suivant).
+	# Chartres : Maître Bernard, posté devant le scriptorium (test suivant) ; puis tous les
+	# maîtres d'une cité à grille, postés sur leur case (`test_chaque_maitre_poste_…`).
 	# Les maîtres reviennent aussi (fusionnés) : ce dump précède leur choix `rappel`.
-	assert sorted(d["_id"] for d in docs if d["type"] == "lieu") == ["lieu:chartres", "lieu:lutecia"]
+	assert sorted(d["_id"] for d in docs if d["type"] == "lieu") == sorted(
+		{m["lieu"] for m in gen.MAITRES if m.get("cases")})
 	(entree,) = next(d for d in docs if d["_id"] == "lieu:lutecia")["pnj"]
 	lien = base["link:lutecia_to_catacombes0001"]
 	descente = next(n["pos"] for n in lien["nodes"] if n["lieu"] == "lieu:lutecia")
@@ -224,6 +226,65 @@ def test_bernard_se_tient_devant_le_scriptorium_du_pont_bouju_joignable_des_port
 		os.unlink(f.name)
 	injoignables = [p["nom"] for p in json.loads(sortie)["paires"] if not p["chemins"]]
 	assert injoignables == []
+
+
+def _entrees(base, lieu_id):
+	"""Cases d'où l'on ENTRE dans un lieu à pied : arrivée d'un autre lieu (hors sous-lieux),
+	porte de rempart, portail, ou sous-lieu où l'on débarque d'un portail (nœud `bouton:
+	false` — la Chapelle Palatine d'Aix)."""
+	arrivee_portail = {n["lieu"] for d in base.values() if d.get("type") == "connection"
+					   for n in d["nodes"] if n.get("bouton") is False}
+	out = []
+	for d in base.values():
+		if d.get("type") != "connection":
+			continue
+		ici = [n for n in d["nodes"] if n["lieu"] == lieu_id]
+		autres = [n["lieu"] for n in d["nodes"] if n["lieu"] != lieu_id]
+		if not ici or not autres:
+			continue
+		autre = base.get(autres[0], {})
+		if autre.get("lieu_parent") != lieu_id or autres[0] in arrivee_portail \
+				or autre.get("categorie") in ("Porte de rempart", "portail"):
+			out.append(ici[0]["pos"])
+	return out
+
+
+# Dump FIXE : les grilles sur lesquelles les cases ont été choisies.
+DUMP_GRILLES = os.path.join(RACINE, "jsons", "telluris-dump-20261029-112600.json")
+
+
+def test_chaque_maitre_poste_dans_une_cite_a_grille_est_joignable_a_pied():
+	"""Tout maître (écoles ET Lance de lumière) d'un lieu à grille se tient sur UNE case
+	praticable, qu'on rejoint à pied (voies.js, règle des flèches) depuis au moins une entrée
+	du lieu. Un lieu sans grille (crypte, bastion, temple) n'a pas de case : le maître y est
+	partout."""
+	import gen_lumiere_paladine as lance
+	with open(DUMP_GRILLES, encoding="utf-8") as f:
+		base = {d["_id"]: d for d in json.load(f)["docs"]}
+	node = shutil.which("node")
+	for m in gen.MAITRES + lance.MAITRES:
+		lieu = base[m["lieu"]]
+		if not lieu.get("cells"):
+			assert not m.get("cases"), m["slug"]
+			continue
+		(case,) = m["cases"]
+		x, y = case
+		assert lieu["cells"][y][x] == 1, m["slug"]
+		if node is None:
+			continue
+		with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+			json.dump({"cells": lieu["cells"], "nav": lieu.get("nav") or {},
+					   "dims": lieu["dimensions"], "regle": "exploration", "max": 1,
+					   "paires": [{"nom": str(e), "a": e, "b": case}
+								  for e in _entrees(base, m["lieu"])]}, f)
+		try:
+			sortie = subprocess.run([node, os.path.join(RACINE, "dev", "tracer_chemins.js"),
+									 f.name], capture_output=True, text=True, check=True).stdout
+		finally:
+			os.unlink(f.name)
+		assert any(p["chemins"] for p in json.loads(sortie)["paires"]), m["slug"]
+	if node is None:
+		pytest.skip("node absent : chemins non tracés")
 
 
 def test_un_maitre_deplace_quitte_son_ancien_lieu():

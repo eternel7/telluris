@@ -598,6 +598,9 @@ MAITRES = [
 	{
 		"slug": "hadewijch_du_beguinage", "sort": "sort:veille_du_calvaire",
 		"lieu": "lieu:bruges", "nom": "Sœur Hadewijch", "race": "humain", "vocation": "pretre",
+		# Hors les murs, au sud, près des maisons du bord de l'eau (l'enceinte de Bruges n'a
+		# aucune entrée).
+		"cases": [[67, 43]],
 		"ecole_texte": "sainte",
 		"presence": "Une sœur du Calvaire en manteau gris, assise au chevet d'un blessé dans "
 					"la cour du Béguinage. Elle écrit entre deux soins.",
@@ -656,6 +659,8 @@ MAITRES = [
 	{
 		"slug": "caffaro_le_genois", "sort": "sort:harpon_arcanique",
 		"lieu": "lieu:calais", "nom": "Maître Caffaro", "race": "humain", "vocation": "mage",
+		# Sur la jetée du sud, entre les quais et la tour du phare.
+		"cases": [[29, 26]],
 		"ecole_texte": "de bataille",
 		"presence": "Un magicien de combat génois aux bras tatoués de cordages, qui surveille le "
 					"détroit depuis la jetée.",
@@ -685,6 +690,8 @@ MAITRES = [
 	{
 		"slug": "faustulus_de_la_porte", "sort": "sort:egide_de_la_garde_interieure",
 		"lieu": "lieu:rome", "nom": "Frère Faustulus", "race": "ogre", "vocation": "templier",
+		# Adossé au mur du Vatican, sur la route de la grotte du portail.
+		"cases": [[15, 21]],
 		"ecole_texte": "de bataille",
 		"presence": "Un Templier ogre en manteau de peau de loup, adossé au rempart comme s'il "
 					"le tenait debout.",
@@ -714,6 +721,8 @@ MAITRES = [
 	{
 		"slug": "callinicos_de_constantinople", "sort": "sort:feu_gregeois",
 		"lieu": "lieu:rome", "nom": "Maître Callinicos", "race": "elfe",
+		# Devant l'enceinte du Vatican, d'où l'on vient du portail.
+		"cases": [[19, 21]],
 		"vocation": "elementaliste", "ecole_texte": "élémentaire",
 		"presence": "Un élémentaliste elfe aux manches roussies, qui sent la poix. Il est venu de "
 					"Constantinople par le portail de Sainte-Sophie.",
@@ -742,6 +751,8 @@ MAITRES = [
 	{
 		"slug": "hallmundr_de_surtshellir", "sort": "sort:pluie_de_surtr",
 		"lieu": "lieu:reykjavik", "nom": "Hallmundr", "race": "ogre",
+		# Devant la porte est, sur la route des champs de lave.
+		"cases": [[67, 31]],
 		"vocation": "elementaliste", "ecole_texte": "élémentaire",
 		"presence": "Un élémentaliste ogre très âgé, au manteau couvert de cendre, descendu des "
 					"champs de lave à l'est de la ville.",
@@ -771,6 +782,8 @@ MAITRES = [
 	{
 		"slug": "saemundr_d_akureyri", "sort": "sort:colere_de_l_hekla",
 		"lieu": "lieu:akureyri", "nom": "Sæmundr", "race": "humain",
+		# Sur la route du sud, celle de l'Hekla.
+		"cases": [[34, 59]],
 		"vocation": "elementaliste", "ecole_texte": "élémentaire",
 		"presence": "Un élémentaliste maigre au regard amusé, qui revient du gouffre de l'Hekla "
 					"avec de la suie jusqu'aux épaules.",
@@ -800,6 +813,9 @@ MAITRES = [
 	{
 		"slug": "eginhard_du_granusturm", "sort": "sort:cisaille_des_vents",
 		"lieu": "lieu:aix_la_chapelle", "nom": "Éginhard", "race": "hobbit",
+		# Au pied du Granusturm (porte de l'Hôtel de Ville en (44, 22)) ; joignable par la Chapelle
+		# Palatine — l'enceinte d'Aix n'a pas de porte vers la plaine.
+		"cases": [[45, 21]],
 		"vocation": "elementaliste", "ecole_texte": "élémentaire",
 		"presence": "Un élémentaliste hobbit, menu, qui monte et descend les escaliers du "
 					"Granusturm plus vite que les paladins.",
@@ -889,6 +905,8 @@ MAITRES = [
 	{
 		"slug": "boutes_le_rescape", "sort": "sort:chant_des_sirenes",
 		"lieu": "lieu:alexandrie", "nom": "Boutès", "race": "humain", "vocation": "menestrel",
+		# Sur le quai, au pied de la chaussée du Phare.
+		"cases": [[52, 19]],
 		"ecole_texte": "illusoire",
 		"presence": "Un ménestrel au teint cuivré, assis sur le quai face au Phare, qui chante "
 					"en regardant la mer et s'arrête quand on s'approche.",
@@ -918,6 +936,8 @@ MAITRES = [
 	{
 		"slug": "cuauhtlehuanitl_gardienne_aigle", "sort": "sort:liane_d_abattage",
 		"lieu": "lieu:teotihuacan", "nom": "Cuauhtlehuanitl", "race": "elfe",
+		# Au bord de la grand-place, face aux pyramides de l'avenue.
+		"cases": [[43, 25]],
 		"vocation": "druide", "ecole_texte": "de la nature",
 		"presence": "Une druide elfe vêtue de plumes d'aigle, gardienne-aigle de Teotihuacan, "
 					"qui tresse une liane aussi épaisse que son bras sur les marches d'une "
@@ -976,6 +996,8 @@ MAITRES = [
 	{
 		"slug": "kveldulfr_d_akureyri", "sort": "sort:meute_des_ulfhednar",
 		"lieu": "lieu:akureyri", "nom": "Kveldúlfr", "race": "ogre", "vocation": "chaman",
+		# Devant la porte sud, près du Refuge du Fjord.
+		"cases": [[31, 53]],
 		"ecole_texte": "de la nature",
 		"presence": "Un chaman ogre en peau de loup, qui somnole le jour près des portes "
 					"d'Akureyri et repart chasser au crépuscule.",
@@ -1004,6 +1026,8 @@ MAITRES = [
 	{
 		"slug": "faelan_d_ossory", "sort": "sort:garde_du_faoladh",
 		"lieu": "lieu:camelot", "nom": "Fáelán", "race": "humain", "vocation": "druide",
+		# Au pied du rempart du château de la Table ronde.
+		"cases": [[31, 21]],
 		"ecole_texte": "de la nature",
 		"presence": "Un druide irlandais aux cheveux gris, venu d'Ossory, qui soigne les blessés "
 					"de la Table ronde au pied des remparts de Camelot.",
@@ -1031,6 +1055,8 @@ MAITRES = [
 	{
 		"slug": "corvin_de_valachie", "sort": "sort:ciel_de_charogne",
 		"lieu": "lieu:bucarest", "nom": "Maître Corvin", "race": "nain",
+		# Sous l'église aux coupoles d'or de l'ouest.
+		"cases": [[26, 22]],
 		"vocation": "necromancien", "ecole_texte": "nécromantique",
 		"presence": "Un nécromancien nain au manteau noir, entouré de corneilles mortes qui "
 					"attendent sur les toits sans jamais croasser.",
@@ -1060,6 +1086,8 @@ MAITRES = [
 	{
 		"slug": "sennedjem_d_abou_simbel", "sort": "sort:gardien_d_abou_simbel",
 		"lieu": "lieu:grand_temple_d_abou_simbel", "nom": "Sennedjem", "race": "humain",
+		# Dans la salle hypostyle, près des colosses.
+		"cases": [[36, 12]],
 		"vocation": "necromancien", "ecole_texte": "nécromantique",
 		"presence": "Un nécromancien momifié, aux bandelettes propres et aux outils de bâtisseur "
 					"à la ceinture, qui mesure l'ombre des colosses de la façade.",
@@ -1118,6 +1146,8 @@ MAITRES = [
 	{
 		"slug": "anna_darvulia", "sort": "sort:baiser_de_la_lamie",
 		"lieu": "lieu:pannonie", "nom": "Anna Darvulia", "race": "humain",
+		# Au bord de la route, sous le château du nord.
+		"cases": [[38, 9]],
 		"vocation": "necromancien", "ecole_texte": "nécromantique",
 		"presence": "Une femme très pâle en robe sombre, qui attend au bord de la route, toujours "
 					"à l'ombre, et sourit sans montrer les dents.",
@@ -1145,6 +1175,8 @@ MAITRES = [
 	{
 		"slug": "kisir_assur_l_exorciste", "sort": "sort:flamme_de_maqlu",
 		"lieu": "lieu:petra", "nom": "Kisir-Aššur", "race": "nain", "vocation": "repurgateur",
+		# Devant les tombeaux royaux taillés dans la roche.
+		"cases": [[67, 30]],
 		"ecole_texte": "démoniaque",
 		"presence": "Un répurgateur nain venu de Babylone, qui brûle de petites figurines "
 					"d'argile dans une coupe de bronze, à l'abri d'un tombeau taillé dans la "
@@ -1175,6 +1207,8 @@ MAITRES = [
 	{
 		"slug": "berose_le_chaldeen", "sort": "sort:ailes_du_roi_des_vents",
 		"lieu": "lieu:alexandrie", "nom": "Bérose", "race": "elfe", "vocation": "demoniste",
+		# À la porte du quartier de la Bibliothèque (enclos, sans entrée).
+		"cases": [[61, 25]],
 		"ecole_texte": "démoniaque",
 		"presence": "Un démoniste elfe venu de Babylone, entouré de tablettes d'argile dans un "
 					"recoin de la grande bibliothèque d'Alexandrie.",
@@ -1204,6 +1238,8 @@ MAITRES = [
 	{
 		"slug": "asaf_le_vizir", "sort": "sort:anneau_de_salomon",
 		"lieu": "lieu:petra", "nom": "Âsaf", "race": "hobbit", "vocation": "repurgateur",
+		# Devant le Caravansérail des Seuils (45, 27).
+		"cases": [[44, 28]],
 		"ecole_texte": "démoniaque",
 		"presence": "Un répurgateur hobbit aux bagues trop grandes pour ses doigts, venu de "
 					"Jérusalem par la route de l'encens, qui marchande avec les caravaniers.",
