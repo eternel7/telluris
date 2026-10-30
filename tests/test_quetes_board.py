@@ -267,3 +267,63 @@ def test_cached_finder_distingue_les_selectors(board):
 	finder({"type": "item", "sous_categorie": "a"})
 	finder({"type": "item", "sous_categorie": "b"})
 	assert len(appels) == 2
+
+
+# ── Capitale : le pays relié ouvre ses rencontres et ses ressources ──────────────
+# Une capitale relie le pays par des connexions : ses monstres et ses ressources deviennent
+# des cibles `kill`/`collect` du tableau, hors les murs. Une ville ordinaire reste locale.
+
+def _monde_capitale(docs, sous_categorie="capitale", status="ouvert"):
+	"""Cité (une espèce locale) + pays (cinq espèces dont la locale) reliés par une route."""
+	cite = {"_id": "lieu:capitale", "type": "lieu", "categorie": "ville",
+			"sous_categorie": sous_categorie, "rencontres": [{"espece": "espece:bestiole0"}]}
+	pays = {"_id": "lieu:royaume", "type": "lieu", "categorie": "pays", "label": "Royaume",
+			"rencontres": [{"espece": f"espece:bestiole{i}"} for i in range(5)],
+			"ressources": [{"ressource": "item:herbe"}]}
+	guilde = {"_id": "lieu:guilde_capitale", "type": "lieu", "categorie": "guilde_aventurier",
+			  "lieu_parent": cite["_id"]}
+	docs.update({d["_id"]: d for d in (cite, pays, guilde)})
+	docs["item:herbe"] = {"_id": "item:herbe", "type": "item", "nom": "Herbe", "poids": 1}
+	docs["link:capitale_royaume"] = {
+		"_id": "link:capitale_royaume", "type": "connection",
+		"nodes": [{"lieu": pays["_id"], "pos": [1, 1]}, {"lieu": cite["_id"], "pos": [0, 0]}],
+		"metadata": {"type": "chemin", "status": status},
+	}
+	return cite, pays, guilde
+
+
+def test_pays_relies_ne_vaut_que_pour_une_capitale_et_une_route_ouverte(board):
+	docs = board["docs"]
+	cite, pays, _ = _monde_capitale(docs)
+	liens = [docs["link:capitale_royaume"]]
+	assert [p["_id"] for p in quetes.pays_relies(cite, liens, docs.get)] == [pays["_id"]]
+	assert quetes.pays_relies(dict(cite, sous_categorie="ville"), liens, docs.get) == []
+	ferme = dict(liens[0], metadata={"status": "occupée"})
+	assert quetes.pays_relies(cite, [ferme], docs.get) == []
+	# Une connexion vers un lieu qui n'est pas un pays (quartier, porte…) n'ouvre rien.
+	assert quetes.pays_relies(cite, liens, lambda i: dict(docs.get(i), categorie="ville")) == []
+
+
+def test_la_capitale_offre_les_cibles_du_pays_hors_les_murs(board):
+	docs = board["docs"]
+	cite, pays, guilde = _monde_capitale(docs)
+
+	offres = quetes.remplir_tableau(guilde)
+
+	cibles = {(o["objectif"]["type"], o["objectif"]["cible"]) for o in offres}
+	attendues = ({("kill", f"espece:bestiole{i}") for i in range(5)} | {("collect", "item:herbe")})
+	# La cité seule n'offre qu'UNE cible : le tableau plein vient du pays.
+	assert len(offres) == min(character_stats.QUETE_BOARD_TAILLE, len(attendues))
+	assert cibles <= attendues
+	for o in offres:
+		assert o["lieu_parent"] == cite["_id"]
+		hors_murs = "hors les murs (Royaume)" in o["description"]
+		# L'espèce que la cité porte elle-même reste une quête LOCALE, offerte une seule fois.
+		assert hors_murs == (o["objectif"]["cible"] != "espece:bestiole0")
+
+
+def test_une_ville_ordinaire_ignore_le_pays(board):
+	docs = board["docs"]
+	_, _, guilde = _monde_capitale(docs, sous_categorie="ville")
+	offres = quetes.remplir_tableau(guilde)
+	assert {o["objectif"]["cible"] for o in offres} == {"espece:bestiole0"}

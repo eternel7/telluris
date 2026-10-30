@@ -442,6 +442,40 @@ def test_offre_rang_tire_une_epreuve_max():
 	assert "Farouche" in offre["narration"]
 
 
+def test_offre_rang_d_une_capitale_traque_dans_le_pays_relie():
+	"""Capitale SANS gibier, reliée au pays par une route ouverte : l'épreuve vise le pays.
+	Sans la route — ou si la cité n'est pas une capitale — aucune épreuve."""
+	pays = dict(AUXERRE, _id="lieu:royaume", categorie="pays", label="Royaume")
+	cite = {"_id": "lieu:capitale", "type": "lieu", "categorie": "ville", "sous_categorie": "capitale"}
+	comptoir = dict(COMPTOIR, _id="lieu:comptoir_capitale", lieu_parent=cite["_id"])
+	route = {"_id": "link:capitale_royaume", "type": "connection",
+	         "nodes": [{"lieu": cite["_id"], "pos": [0, 0]}, {"lieu": pays["_id"], "pos": [1, 1]}],
+	         "metadata": {"status": "ouvert"}}
+	docs = {**_DOCS, **{d["_id"]: d for d in (pays, cite, comptoir, route)}}
+
+	def find(sel, fields=None):
+		if sel.get("type") == "connection":
+			lid = sel["nodes"]["$elemMatch"]["lieu"]
+			return [d for d in docs.values() if d.get("type") == "connection"
+			        and any(n.get("lieu") == lid for n in d["nodes"])]
+		return [d for d in docs.values() if d.get("type") == "lieu"
+		        and d.get("lieu_parent") == sel.get("lieu_parent")]
+
+	perso = {"rangs_guilde": {cite["_id"]: "F"}}
+	random.seed(1)
+	offre = chasse.offre_rang_pour(perso, comptoir, docs.get, find)
+	assert offre is not None
+	assert offre["objectif"]["lieu"] == "lieu:royaume"
+	assert offre["objectif"]["profil"] == "profil:veteran"   # grade MAX, comme dans la cité
+	assert offre["lieu_parent"] == cite["_id"]
+
+	docs[cite["_id"]] = dict(cite, sous_categorie="ville")
+	assert chasse.offre_rang_pour(perso, comptoir, docs.get, find) is None
+	docs[cite["_id"]] = cite
+	del docs[route["_id"]]
+	assert chasse.offre_rang_pour(perso, comptoir, docs.get, find) is None
+
+
 def test_qualificatif_par_niveau_et_bornage():
 	assert [chasse.qualificatif_de({"niveau": n}) for n in range(1, 7)] == chasse.QUALIFICATIFS
 	assert chasse.qualificatif_de({"niveau": 99}) == "Apocalypse"   # borné en haut
@@ -733,6 +767,42 @@ def test_candidats_chasse_du_tableau(quetes_db):
 	assert ("chasse", ("lieu:auxerre", "espece:loup")) in candidats
 	# Le lapin n'est dans aucune rencontre → pas de candidat chasse pour lui.
 	assert not any(c[1][1] == "espece:lapin" for c in candidats)
+
+
+def test_candidats_chasse_sur_des_lieux_donnes(quetes_db):
+	"""`lieux` remplace le balayage de la cité ; un lieu sans gibier ou sans zone est écarté."""
+	candidats = quetes._candidats_chasse("lieu:autre", lieux=[AUXERRE, BOUTIQUE])
+	assert candidats == [("chasse", ("lieu:auxerre", "espece:loup"))]
+
+
+def test_la_capitale_offre_les_chasses_d_elite_du_pays_relie(quetes_db, monkeypatch):
+	"""Une capitale reliée au pays par une route : ses élites entrent au tableau de la guilde."""
+	pays = dict(AUXERRE, _id="lieu:royaume", categorie="pays", label="Royaume")
+	cite = {"_id": "lieu:capitale", "type": "lieu", "categorie": "ville", "sous_categorie": "capitale"}
+	guilde = {"_id": "lieu:guilde_capitale", "type": "lieu", "categorie": "guilde_aventurier",
+	          "lieu_parent": cite["_id"]}
+	route = {"_id": "link:capitale_royaume", "type": "connection",
+	         "nodes": [{"lieu": cite["_id"], "pos": [0, 0]}, {"lieu": pays["_id"], "pos": [1, 1]}],
+	         "metadata": {"status": "ouvert"}}
+	docs = {**quetes_db, **{d["_id"]: d for d in (pays, cite, guilde, route)}}
+	monkeypatch.setattr(quetes, "get_doc", docs.get)
+	monkeypatch.setattr(quetes, "find_docs", lambda sel, fields=None: [
+		d for d in docs.values() if d.get("type") == sel.get("type")
+		and (sel.get("type") != "lieu" or d.get("lieu_parent") == sel.get("lieu_parent"))])
+	monkeypatch.setattr(quetes, "save_doc", lambda d: docs.setdefault(d["_id"], d))
+	monkeypatch.setattr(quetes, "now_epoch", lambda: 1000)
+	monkeypatch.setattr(character_stats, "QUETE_BOARD_TAILLE", 6)
+
+	chasses = [o for o in quetes.remplir_tableau(guilde) if o["objectif"]["type"] == "chasse"]
+
+	assert [(o["objectif"]["lieu"], o["objectif"]["cible"]) for o in chasses] == [
+		("lieu:royaume", "espece:loup")]
+	assert chasses[0]["lieu_parent"] == cite["_id"]
+	# Sans la route, la même capitale n'a aucun gibier d'élite.
+	del docs[route["_id"]]
+	for o in chasses:
+		docs.pop(o["_id"])
+	assert not [o for o in quetes.remplir_tableau(guilde) if o["objectif"]["type"] == "chasse"]
 
 
 # ── dans_zone_chasse (zone 3×3 de déclenchement) ─────────────────────────────────
