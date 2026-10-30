@@ -127,10 +127,17 @@ def test_chaque_maitre_a_son_portrait_dans_le_depot():
 	assert len({m["portrait"] for m in gen.MAITRES}) == len(gen.MAITRES)   # aucun portrait partagé
 
 
+def _sans_cases(doc):
+	"""Le lieu sans les `cases` de ses entrées : posées APRÈS cette livraison (maîtres postés)."""
+	if doc["type"] != "lieu":
+		return doc
+	return {**doc, "pnj": [{k: v for k, v in p.items() if k != "cases"} for p in doc["pnj"]]}
+
+
 def test_la_mise_a_jour_ne_porte_que_les_portraits(tmp_path):
 	sortie = tmp_path / "maj.json"
 	assert gen.main(["--dump", DUMP_IMPORTE, "--sortie", str(sortie)]) == 0
-	maj = json.loads(sortie.read_text(encoding="utf-8"))
+	maj = [_sans_cases(d) for d in json.loads(sortie.read_text(encoding="utf-8"))]
 	with open(MAJ, encoding="utf-8") as f:
 		assert maj == json.load(f)
 	base = {d["_id"]: d for d in json.load(open(DUMP_IMPORTE, encoding="utf-8"))["docs"]}

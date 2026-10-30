@@ -13043,7 +13043,13 @@
         "nom": "Sœur Hadewijch",
         "portrait": "maitre_hadewijch_du_beguinage01.jpg",
         "probabilite": 1,
-        "description": "Une sœur du Calvaire en manteau gris, assise au chevet d'un blessé dans la cour du Béguinage. Elle écrit entre deux soins."
+        "description": "Une sœur du Calvaire en manteau gris, assise au chevet d'un blessé dans la cour du Béguinage. Elle écrit entre deux soins.",
+        "cases": [
+          [
+            67,
+            43
+          ]
+        ]
       }
     ]
   },
@@ -17855,7 +17861,13 @@
         "nom": "Maître Caffaro",
         "portrait": "maitre_caffaro_le_genois01.jpg",
         "probabilite": 1,
-        "description": "Un magicien de combat génois aux bras tatoués de cordages, qui surveille le détroit depuis la jetée."
+        "description": "Un magicien de combat génois aux bras tatoués de cordages, qui surveille le détroit depuis la jetée.",
+        "cases": [
+          [
+            29,
+            26
+          ]
+        ]
       }
     ]
   },
@@ -23147,14 +23159,26 @@
         "nom": "Frère Faustulus",
         "portrait": "maitre_faustulus_de_la_porte01.jpg",
         "probabilite": 1,
-        "description": "Un Templier ogre en manteau de peau de loup, adossé au rempart comme s'il le tenait debout."
+        "description": "Un Templier ogre en manteau de peau de loup, adossé au rempart comme s'il le tenait debout.",
+        "cases": [
+          [
+            15,
+            21
+          ]
+        ]
       },
       {
         "character": "pnj:callinicos_de_constantinople",
         "nom": "Maître Callinicos",
         "portrait": "maitre_callinicos_de_constantinople01.jpg",
         "probabilite": 1,
-        "description": "Un élémentaliste elfe aux manches roussies, qui sent la poix. Il est venu de Constantinople par le portail de Sainte-Sophie."
+        "description": "Un élémentaliste elfe aux manches roussies, qui sent la poix. Il est venu de Constantinople par le portail de Sainte-Sophie.",
+        "cases": [
+          [
+            19,
+            21
+          ]
+        ]
       }
     ]
   },
@@ -28004,7 +28028,13 @@
         "nom": "Hallmundr",
         "portrait": "maitre_hallmundr_de_surtshellir01.jpg",
         "probabilite": 1,
-        "description": "Un élémentaliste ogre très âgé, au manteau couvert de cendre, descendu des champs de lave à l'est de la ville."
+        "description": "Un élémentaliste ogre très âgé, au manteau couvert de cendre, descendu des champs de lave à l'est de la ville.",
+        "cases": [
+          [
+            67,
+            31
+          ]
+        ]
       }
     ]
   },
@@ -32716,14 +32746,26 @@
         "nom": "Sæmundr",
         "portrait": "maitre_saemundr_d_akureyri01.jpg",
         "probabilite": 1,
-        "description": "Un élémentaliste maigre au regard amusé, qui revient du gouffre de l'Hekla avec de la suie jusqu'aux épaules."
+        "description": "Un élémentaliste maigre au regard amusé, qui revient du gouffre de l'Hekla avec de la suie jusqu'aux épaules.",
+        "cases": [
+          [
+            34,
+            59
+          ]
+        ]
       },
       {
         "character": "pnj:kveldulfr_d_akureyri",
         "nom": "Kveldúlfr",
         "portrait": "maitre_kveldulfr_d_akureyri01.jpg",
         "probabilite": 1,
-        "description": "Un chaman ogre en peau de loup, qui somnole le jour près des portes d'Akureyri et repart chasser au crépuscule."
+        "description": "Un chaman ogre en peau de loup, qui somnole le jour près des portes d'Akureyri et repart chasser au crépuscule.",
+        "cases": [
+          [
+            31,
+            53
+          ]
+        ]
       }
     ]
   },
@@ -37873,7 +37915,13 @@
         "nom": "Éginhard",
         "portrait": "maitre_eginhard_du_granusturm01.jpg",
         "probabilite": 1,
-        "description": "Un élémentaliste hobbit, menu, qui monte et descend les escaliers du Granusturm plus vite que les paladins."
+        "description": "Un élémentaliste hobbit, menu, qui monte et descend les escaliers du Granusturm plus vite que les paladins.",
+        "cases": [
+          [
+            45,
+            21
+          ]
+        ]
       }
     ]
   },
@@ -48922,14 +48970,26 @@
         "nom": "Boutès",
         "portrait": "maitre_boutes_le_rescape01.jpg",
         "probabilite": 1,
-        "description": "Un ménestrel au teint cuivré, assis sur le quai face au Phare, qui chante en regardant la mer et s'arrête quand on s'approche."
+        "description": "Un ménestrel au teint cuivré, assis sur le quai face au Phare, qui chante en regardant la mer et s'arrête quand on s'approche.",
+        "cases": [
+          [
+            52,
+            19
+          ]
+        ]
       },
       {
         "character": "pnj:berose_le_chaldeen",
         "nom": "Bérose",
         "portrait": "maitre_berose_le_chaldeen01.jpg",
         "probabilite": 1,
-        "description": "Un démoniste elfe venu de Babylone, entouré de tablettes d'argile dans un recoin de la grande bibliothèque d'Alexandrie."
+        "description": "Un démoniste elfe venu de Babylone, entouré de tablettes d'argile dans un recoin de la grande bibliothèque d'Alexandrie.",
+        "cases": [
+          [
+            61,
+            25
+          ]
+        ]
       }
     ]
   },
@@ -54082,7 +54142,13 @@
         "nom": "Cuauhtlehuanitl",
         "portrait": "maitre_cuauhtlehuanitl_gardienne_aigle01.jpg",
         "probabilite": 1,
-        "description": "Une druide elfe vêtue de plumes d'aigle, gardienne-aigle de Teotihuacan, qui tresse une liane aussi épaisse que son bras sur les marches d'une pyramide."
+        "description": "Une druide elfe vêtue de plumes d'aigle, gardienne-aigle de Teotihuacan, qui tresse une liane aussi épaisse que son bras sur les marches d'une pyramide.",
+        "cases": [
+          [
+            43,
+            25
+          ]
+        ]
       }
     ]
   },
@@ -58370,7 +58436,13 @@
         "nom": "Fáelán",
         "portrait": "maitre_faelan_d_ossory01.jpg",
         "probabilite": 1,
-        "description": "Un druide irlandais aux cheveux gris, venu d'Ossory, qui soigne les blessés de la Table ronde au pied des remparts de Camelot."
+        "description": "Un druide irlandais aux cheveux gris, venu d'Ossory, qui soigne les blessés de la Table ronde au pied des remparts de Camelot.",
+        "cases": [
+          [
+            31,
+            21
+          ]
+        ]
       }
     ]
   },
@@ -62737,7 +62809,13 @@
         "nom": "Maître Corvin",
         "portrait": "maitre_corvin_de_valachie01.jpg",
         "probabilite": 1,
-        "description": "Un nécromancien nain au manteau noir, entouré de corneilles mortes qui attendent sur les toits sans jamais croasser."
+        "description": "Un nécromancien nain au manteau noir, entouré de corneilles mortes qui attendent sur les toits sans jamais croasser.",
+        "cases": [
+          [
+            26,
+            22
+          ]
+        ]
       }
     ]
   },
@@ -67088,7 +67166,13 @@
         "nom": "Sennedjem",
         "portrait": "maitre_sennedjem_d_abou_simbel01.jpg",
         "probabilite": 1,
-        "description": "Un nécromancien momifié, aux bandelettes propres et aux outils de bâtisseur à la ceinture, qui mesure l'ombre des colosses de la façade."
+        "description": "Un nécromancien momifié, aux bandelettes propres et aux outils de bâtisseur à la ceinture, qui mesure l'ombre des colosses de la façade.",
+        "cases": [
+          [
+            36,
+            12
+          ]
+        ]
       }
     ]
   },
@@ -77155,7 +77239,13 @@
         "nom": "Anna Darvulia",
         "portrait": "maitre_anna_darvulia01.jpg",
         "probabilite": 1,
-        "description": "Une femme très pâle en robe sombre, qui attend au bord de la route, toujours à l'ombre, et sourit sans montrer les dents."
+        "description": "Une femme très pâle en robe sombre, qui attend au bord de la route, toujours à l'ombre, et sourit sans montrer les dents.",
+        "cases": [
+          [
+            38,
+            9
+          ]
+        ]
       }
     ]
   },
@@ -81405,14 +81495,26 @@
         "nom": "Kisir-Aššur",
         "portrait": "maitre_kisir_assur_l_exorciste01.jpg",
         "probabilite": 1,
-        "description": "Un répurgateur nain venu de Babylone, qui brûle de petites figurines d'argile dans une coupe de bronze, à l'abri d'un tombeau taillé dans la roche."
+        "description": "Un répurgateur nain venu de Babylone, qui brûle de petites figurines d'argile dans une coupe de bronze, à l'abri d'un tombeau taillé dans la roche.",
+        "cases": [
+          [
+            67,
+            30
+          ]
+        ]
       },
       {
         "character": "pnj:asaf_le_vizir",
         "nom": "Âsaf",
         "portrait": "maitre_asaf_le_vizir01.jpg",
         "probabilite": 1,
-        "description": "Un répurgateur hobbit aux bagues trop grandes pour ses doigts, venu de Jérusalem par la route de l'encens, qui marchande avec les caravaniers."
+        "description": "Un répurgateur hobbit aux bagues trop grandes pour ses doigts, venu de Jérusalem par la route de l'encens, qui marchande avec les caravaniers.",
+        "cases": [
+          [
+            44,
+            28
+          ]
+        ]
       }
     ]
   }

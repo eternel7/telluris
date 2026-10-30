@@ -5959,7 +5959,13 @@
         "nom": "Sœur Marguerite",
         "portrait": "paladin_elfe_f_bruges01.jpg",
         "probabilite": 1,
-        "description": "Une sœur de Bataille du Béguinage, en manteau gris, descendue du Beffroi. Elle compte les coups de cloche sans y penser."
+        "description": "Une sœur de Bataille du Béguinage, en manteau gris, descendue du Beffroi. Elle compte les coups de cloche sans y penser.",
+        "cases": [
+          [
+            50,
+            8
+          ]
+        ]
       }
     ]
   },
@@ -11377,7 +11383,13 @@
         "nom": "Turpin",
         "portrait": "paladin_ogre_m_aix01.jpg",
         "probabilite": 1,
-        "description": "Un paladin ogre d'un âge indéfinissable, descendu du Granusturm, le manteau rapiécé aux épaules."
+        "description": "Un paladin ogre d'un âge indéfinissable, descendu du Granusturm, le manteau rapiécé aux épaules.",
+        "cases": [
+          [
+            44,
+            24
+          ]
+        ]
       }
     ]
   },
@@ -16495,7 +16507,13 @@
         "nom": "Auðr",
         "portrait": "paladin_elfe_f_reykjavik01.jpg",
         "probabilite": 1,
-        "description": "Une paladine elfe au manteau doublé de fourrure, descendue de Hallgrímskirkja, qui garde les yeux sur les montagnes."
+        "description": "Une paladine elfe au manteau doublé de fourrure, descendue de Hallgrímskirkja, qui garde les yeux sur les montagnes.",
+        "cases": [
+          [
+            57,
+            19
+          ]
+        ]
       }
     ]
   }

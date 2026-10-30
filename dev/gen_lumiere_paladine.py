@@ -146,6 +146,8 @@ MAITRES = [
 	{
 		"slug": "soeur_marguerite_du_beffroi",
 		"lieu": "lieu:bruges",
+		# Sous le rempart nord, face au Beffroi (l'enceinte de Bruges n'a aucune entrée).
+		"cases": [[50, 8]],
 		"nom": "Sœur Marguerite",
 		"race": "elfe",
 		"portrait": "paladin_elfe_f_bruges01.jpg",
@@ -175,6 +177,9 @@ MAITRES = [
 	{
 		"slug": "turpin_du_granusturm",
 		"lieu": "lieu:aix_la_chapelle",
+		# Au pied du Granusturm (porte de l'Hôtel de Ville en (44, 22)) ; joignable par la Chapelle
+		# Palatine — l'enceinte d'Aix n'a pas de porte vers la plaine.
+		"cases": [[44, 24]],
 		"nom": "Turpin",
 		"race": "ogre",
 		"portrait": "paladin_ogre_m_aix01.jpg",
@@ -203,6 +208,8 @@ MAITRES = [
 	{
 		"slug": "audr_de_hallgrimskirkja",
 		"lieu": "lieu:reykjavik",
+		# Au pied de Hallgrímskirkja, près de la Halle des Fumées.
+		"cases": [[57, 19]],
 		"nom": "Auðr",
 		"race": "elfe",
 		"portrait": "paladin_elfe_f_reykjavik01.jpg",
@@ -355,8 +362,11 @@ def pnj_doc(m: dict) -> dict:
 
 
 def entree_presence(m: dict) -> dict:
-	return {"character": "pnj:" + m["slug"], "nom": m["nom"], "portrait": m["portrait"],
-			"probabilite": 1, "description": m["presence"]}
+	entree = {"character": "pnj:" + m["slug"], "nom": m["nom"], "portrait": m["portrait"],
+			  "probabilite": 1, "description": m["presence"]}
+	if m.get("cases"):
+		entree["cases"] = m["cases"]
+	return entree
 
 
 def dernier_dump() -> str:
@@ -418,7 +428,7 @@ def construire(base: dict) -> tuple:
 			erreurs.append(f"{m['lieu']} absent du dump")
 			continue
 		# Entrée de présence du maître : ajoutée, ou RÉÉCRITE si elle a changé (portrait…) ;
-		# les autres entrées du lieu restent telles quelles.
+		# Les autres entrées du lieu restent telles quelles.
 		entree = entree_presence(m)
 		presence = list(lieu.get("pnj") or [])
 		rang = next((i for i, p in enumerate(presence)
