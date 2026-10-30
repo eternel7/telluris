@@ -110,6 +110,32 @@ def especes_du_parent(parent_doc: dict) -> list:
 	return out
 
 
+def pays_relies(cite_doc: dict, connexions: list, get_doc_fn=None) -> list:
+	"""Pays (`categorie:"pays"`) qu'une CAPITALE (`sous_categorie:"capitale"`) relie par une
+	connexion ouverte — ses quêtes `kill`/`collect` peuvent viser leurs rencontres et leurs
+	ressources, hors les murs. Une ville ordinaire n'en a aucun : son tableau reste local.
+	Lu sur les CONNEXIONS, jamais sur `lieu_parent` : c'est la route qui fait la portée."""
+	get_doc_fn = get_doc_fn or get_doc
+	cite_id = (cite_doc or {}).get("_id")
+	if not cite_id or cite_doc.get("sous_categorie") != "capitale":
+		return []
+	out, vus = [], set()
+	for c in connexions or []:
+		if (c.get("metadata") or {}).get("status", "ouvert") != "ouvert":
+			continue
+		lieux = [n.get("lieu") for n in c.get("nodes") or []]
+		if cite_id not in lieux:
+			continue
+		for lid in lieux:
+			if not lid or lid == cite_id or lid in vus:
+				continue
+			vus.add(lid)
+			doc = get_doc_fn(lid)
+			if doc and doc.get("categorie") == "pays":
+				out.append(doc)
+	return out
+
+
 def ressources_du_parent(parent_doc: dict) -> list:
 	"""IDs d'items récoltables dans le lieu parent (attribut `ressources`)."""
 	out = []
@@ -294,24 +320,28 @@ def _generer_chasse(guild_doc: dict, parent_doc: dict, cible, get_doc_fn=None) -
 	}
 
 
-def generer_quete(guild_doc: dict, parent_doc: dict, type_obj: str, cible, niveau: int, get_doc_fn=None) -> dict | None:
+def generer_quete(guild_doc: dict, parent_doc: dict, type_obj: str, cible, niveau: int, get_doc_fn=None,
+				  pays_doc: dict | None = None) -> dict | None:
 	"""Construit un doc `quete:*` (non persisté) pour une cible donnée. Renvoie None si une
-	quête `chasse` ne peut être résolue (aucun grade compatible) — l'appelant saute la cible."""
+	quête `chasse` ne peut être résolue (aucun grade compatible) — l'appelant saute la cible.
+	`pays_doc` : la cible vient du pays relié à la capitale (`pays_relies`), la description
+	envoie hors les murs ; `lieu_parent` reste la cité de la guilde."""
 	get_doc_fn = get_doc_fn or get_doc
 	if type_obj == "chasse":
 		return _generer_chasse(guild_doc, parent_doc, cible, get_doc_fn)
+	ailleurs = f" hors les murs ({lieu_label(pays_doc, pays_doc.get('_id', ''))})" if pays_doc else ""
 	if type_obj == "kill":
 		esp = get_doc_fn(cible)
 		xp_unit = _xp_unitaire(esp, niveau) if esp else max(1, int(niveau) * 4)
 		nom = (esp.get("nom") if esp else None) or _nom_espece(cible)
 		titre = random.choice(_TITRES_KILL).format(nom=nom)
-		desc_tpl = "La guilde demande d'abattre {q} {nom} qui rôdent dans les environs."
+		desc_tpl = "La guilde demande d'abattre {q} {nom} qui rôdent" + (ailleurs or " dans les environs") + "."
 	else:  # collect
 		item = get_doc_fn(cible)
 		xp_unit = _xp_unitaire_item(item, niveau, get_doc_fn)
 		nom = (item.get("nom") if item else None) or _nom_item(cible)
 		titre = random.choice(_TITRES_COLLECT).format(nom=nom)
-		desc_tpl = "Rapportez {q} {nom} à la guilde."
+		desc_tpl = "Rapportez {q} {nom} à la guilde" + (f" — on en trouve{ailleurs}" if pays_doc else "") + "."
 
 	# Quantité tirée dans [QTE_MIN, borne_haute] : plus la cible est « chère » (xp_unit
 	# élevé), plus la borne haute se rapproche du minimum (objectifs courts pour les durs).
@@ -429,17 +459,32 @@ def remplir_tableau(guild_doc: dict) -> list:
 		find_docs_c = _cached_finder(find_docs)
 		niveau = niveau_representatif(parent_doc, get_doc_c)
 		existants = {_offre_key(o["objectif"]) for o in offres if o.get("objectif")}
-		candidats = [("kill", eid) for eid in especes_du_parent(parent_doc)]
-		candidats += [("collect", iid) for iid in cibles_collect(parent_doc, get_doc_c, find_docs_c)]
-		candidats += _candidats_chasse(parent_id, get_doc_c, find_docs_c)
+		# (type, cible, pays) — pays None = cible de la cité elle-même.
+		candidats = [("kill", eid, None) for eid in especes_du_parent(parent_doc)]
+		candidats += [("collect", iid, None) for iid in cibles_collect(parent_doc, get_doc_c, find_docs_c)]
+		candidats += [(t, c, None) for t, c in _candidats_chasse(parent_id, get_doc_c, find_docs_c)]
+		# Capitale : le pays où mènent ses routes ouvre ses rencontres et ses ressources. Une cible
+		# déjà offerte par la cité y reste locale (dédoublonnée sur (type, cible) au tirage).
+		locales = {(t, c) for t, c, _ in candidats}
+		niveaux = {}
+		if parent_doc.get("sous_categorie") == "capitale":
+			connexions = find_docs_c({"type": "connection", "nodes": {"$elemMatch": {"lieu": parent_id}}})
+			for pays in pays_relies(parent_doc, connexions, get_doc_c):
+				niveaux[pays["_id"]] = niveau_representatif(pays, get_doc_c)
+				for t, c in ([("kill", eid) for eid in especes_du_parent(pays)]
+							 + [("collect", iid) for iid in cibles_collect(pays, get_doc_c, find_docs_c)]):
+					if (t, c) not in locales:
+						locales.add((t, c))
+						candidats.append((t, c, pays))
 		random.shuffle(candidats)
-		for type_obj, cible in candidats:
+		for type_obj, cible, pays in candidats:
 			if manquantes <= 0:
 				break
 			key = ("chasse", cible) if type_obj == "chasse" else (type_obj, cible)
 			if key in existants:
 				continue
-			q = generer_quete(guild_doc, parent_doc, type_obj, cible, niveau, get_doc_c)
+			niv = niveaux[pays["_id"]] if pays else niveau
+			q = generer_quete(guild_doc, parent_doc, type_obj, cible, niv, get_doc_c, pays_doc=pays)
 			if q is None or save_doc(q) is None:
 				continue
 			offres.append(q)
