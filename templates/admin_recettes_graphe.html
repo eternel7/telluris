@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+	{# Session expirée (401 / x-session: aucune) → /auth. AVANT les scripts de la page. #}
+	<script src="{{ script_url('session.js') }}"></script>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<title>Telluris — {{ title }}</title>

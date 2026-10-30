@@ -40,7 +40,7 @@ async def traversee_avancer(current_user: Annotated[dict, Depends(get_current_us
 	"""Une case de plus. En mer : rencontre éventuelle (combat seul, comme un pas à terre).
 	Sur la dernière case : débarquement sur les quais d'arrivée, `arrive: true`."""
 	if not current_user:
-		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
 	character = get_selected_character(current_user)
 	if not character:
 		raise HTTPException(status_code=406, detail="Aucun personnage sélectionné")
