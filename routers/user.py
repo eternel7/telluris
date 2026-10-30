@@ -9,7 +9,7 @@ import uuid
 import random
 import os
 from db.config import save_doc, get_doc, delete_doc, find_docs
-from utils.auth import get_current_user, create_access_token
+from utils.auth import get_current_user, create_access_token, ouvrir_session, fermer_session, revoquer_sessions
 from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
 	sync_equipment_bonus, carried_weight, charge_max_of,
@@ -107,7 +107,7 @@ async def register_user(user: RegisterRequest, response: Response):
 	})
 	content = {"token": token, "user_id": user_id, "username": user.username}
 	response = JSONResponse(content=content)
-	response.set_cookie(key="auth_token", value=token, httponly=True, samesite="lax")
+	ouvrir_session(response, user_id)
 	return response
 
 class LoginRequest(BaseModel):
@@ -123,8 +123,24 @@ async def login_user(user: LoginRequest, response: Response):
 	token = create_access_token({"user_id": user_doc["_id"]})
 	content = {"token": token, "user_id":	user_doc["_id"], "username":	user_doc["username"]}
 	response = JSONResponse(content=content)
-	response.set_cookie(key="auth_token", value=token, httponly=True, samesite="lax")
+	ouvrir_session(response, user_doc["_id"])
 	return	response
+
+@user_router.post("/auth/rafraichir")
+async def rafraichir_session(current_user: Annotated[User, Depends(get_current_user)]):
+	"""Renouvellement explicite. La rotation elle-même est faite AVANT l'endpoint par
+	`session.RafraichissementMiddleware` (pour toute requête) : ici, on ne fait que dire
+	si une session valide en est sortie."""
+	if not current_user:
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
+	return {"ok": True}
+
+@user_router.post("/auth/deconnexion")
+async def deconnexion(request: Request):
+	"""Révoque la session (famille de rafraîchissement) et efface les cookies."""
+	response = JSONResponse(content={"ok": True})
+	fermer_session(request, response)
+	return response
 
 class OubliRequest(BaseModel):
 	email: str
@@ -196,12 +212,14 @@ async def mot_de_passe_reinitialiser(demande: ReinitialisationRequest):
 	if save_doc(user_doc) is None:
 		raise HTTPException(status_code=500, detail="Échec de l'enregistrement du nouveau sceau")
 	delete_doc(doc_jeton)
+	# Nouveau sceau : toute session ouverte avec l'ancien est fermée (accès restants ≤ 15 min).
+	revoquer_sessions(user_doc["_id"])
 	return {"reinitialise": True}
 
 @user_router.post("/character")
 async def add_character(response: Response, current_user: Annotated[User, Depends(get_current_user)], characterinfo: dict = Body(...),):
 	if not current_user:
-		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
 	
 	user_id = current_user["_id"]
 	db_user = get_doc(user_id)
@@ -389,7 +407,7 @@ async def delete_character(
 	characterinfo: dict = Body(...)):
 
 	if not current_user:
-		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
 	
 	current_user_id = current_user["_id"]
 	db_user = get_doc(current_user_id)
@@ -422,7 +440,7 @@ async def select_character(
 	characterinfo: dict = Body(...)):
 	
 	if not current_user:
-		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
 	
 	current_user_id = current_user["_id"]
 	db_user = get_doc(current_user_id)
@@ -457,7 +475,7 @@ async def update_character_portrait(
 	portrait_info: dict = Body(...)):
 	
 	if not current_user:
-		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
 	
 	if portrait_info:
 		# Le cadrage appartient au PORTEUR affiché : la fiche sert aussi les compagnons, et le
@@ -671,7 +689,7 @@ async def move_character(
 	move: dict = Body(...)):
 	
 	if not current_user:
-		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
 		
 	if move :
 		character_to_update = get_selected_character(current_user)
@@ -822,7 +840,7 @@ async def focaliser(
 	(poser remplace l'existante). Réponse : {focalisation, guidage} pour resync client.
 	"""
 	if not current_user:
-		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
 	character = get_selected_character(current_user)
 	if not character:
 		raise HTTPException(status_code=406, detail="Aucun personnage sélectionné")
@@ -1056,7 +1074,7 @@ async def spend_xp(
 	body: dict = Body(...),
 ):
 	if not current_user:
-		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
 
 	stat_key  = body.get("stat")
 	new_value = body.get("new_value")
@@ -2485,7 +2503,7 @@ async def spend_xp_vocation(
 	body: dict = Body(default={}),
 ):
 	if not current_user:
-		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
 
 	character, _principal = _acteur(current_user, body)
 
@@ -2530,7 +2548,7 @@ async def ecrire_journal(
 	AVANT la dépense (une saisie vide ne coûte pas une feuille), retrait en MÉMOIRE, puis un
 	seul `save_doc`. Un échec laisse donc le sac intact en base."""
 	if not current_user:
-		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
 
 	character = get_selected_character(current_user)
 	if not character:

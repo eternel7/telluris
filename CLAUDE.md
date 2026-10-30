@@ -29,7 +29,7 @@ node dev/check_js.js               # syntaxe du JS inline des templates ET de te
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Harnais : `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
+Harnais : `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
 - ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
 - **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
@@ -63,7 +63,11 @@ routers/
   pnj.py                 # /api/pnj/dialogue (+ /choix) : dialogues PNJ + services (dont `portail` de Notre-Dame, `enseignement` d'un maître) ; /api/intro/raison
   traversee.py           # /api/traversee/avancer : une case de traversée maritime (rencontre, débarquement)
 utils/
-  auth.py                # JWT creation + get_current_user() FastAPI dependency
+  auth.py                # JWT d'accès + get_current_user() ; ouvrir/fermer/révoquer la session
+  session.py             # session (pur + middleware) : accès 15 min, rafraîchissement 30 j OPAQUE
+                         #   (`refresh:<sha256>`), ROTATION à chaque usage, grâce 30 s (requêtes
+                         #   parallèles), réutilisation → famille révoquée ; `RafraichissementMiddleware`
+                         #   renouvelle AVANT tout endpoint et pose `x-session: aucune` sans session
   characters.py          # get/selected character, sync_equipment_bonus, grant_xp,
                          #   carried_weight, charge_max_of, références d'items (item_ref_*)
   fiche.py               # source unique du contenu des onglets Stats et ⚡ (bloc_fiche, derived_de, stat_caps, race_de)
@@ -208,6 +212,7 @@ templates/
                          #   sceau_visuel.js (icône du mot de passe : /auth ↔ /reinitialisation)
                          #   deplacable.js (panneaux flottants à glisser : éditeur, 🔗 connexion ↔ pavé flottant de /play)
                          #   capacites_texte.js (texte d'un sort/compétence connu : onglet ⚡ de /play ↔ /admin/sorts, /admin/competences)
+                         #   session.js (session morte : 401 / `x-session: aucune` → /auth ; <head> des pages connectées)
                          #   sons.js (sons d'action : chokepoint `installerSonsApi` des POST, coupe-son /play ↔ /combat, musique de donjon)
   resources/sounds/      # sonothèque À PLAT (mount /sounds, `encodeURIComponent` : pas de sous-dossier) ; détail : telluris-social-ui § Sons
   resources/             # assets statiques (characters, towns, maps, monsters, icons, pnj, sounds)

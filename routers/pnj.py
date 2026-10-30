@@ -884,7 +884,7 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)],
 	"""État initial du panneau de dialogue : PNJ présent + nœud de départ (choix filtrés).
 	`pnj_id` (query) = celui des PNJ présents à qui l'on parle ; le premier à défaut."""
 	if not current_user:
-		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
 	character = get_selected_character(current_user)
 	if not character:
 		raise HTTPException(status_code=406, detail="Aucun personnage sélectionné")
@@ -928,7 +928,7 @@ async def pnj_portail_seuils(current_user: Annotated[dict, Depends(get_current_u
 	"""Tableau des seuils RAFRAÎCHI quand la tranche tourne (compte à rebours client à zéro) :
 	le nœud `noeud` re-rendu, sans aucun effet (cf. `_noeud_seuils`). 422 hors du nœud des seuils."""
 	if not current_user:
-		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
 	character = get_selected_character(current_user)
 	if not character:
 		raise HTTPException(status_code=406, detail="Aucun personnage sélectionné")
@@ -952,7 +952,7 @@ async def pnj_dialogue_choix(
 	objet (contrôle de charge + débit, séquence modèle buy_item) ; un choix simple renvoie
 	le nœud suivant, `noeud: null` = fin (le client ferme)."""
 	if not current_user:
-		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
 	character = get_selected_character(current_user)
 	if not character:
 		raise HTTPException(status_code=406, detail="Aucun personnage sélectionné")
@@ -1686,7 +1686,7 @@ async def intro_raison(
 	"""Persiste la raison de la fuite choisie dans l'overlay d'intro. Body {"raison": id}.
 	Renvoie le texte de suite propre à la raison (affiché avant « Prendre la route »)."""
 	if not current_user:
-		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
 	character = get_selected_character(current_user)
 	if not character:
 		raise HTTPException(status_code=406, detail="Aucun personnage sélectionné")

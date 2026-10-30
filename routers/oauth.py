@@ -3,7 +3,7 @@ import os
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from db.config import get_doc, save_doc
-from utils.auth import create_access_token
+from utils.auth import ouvrir_session
 from utils.oauth_config import oauth, ENABLED_PROVIDERS, generate_apple_client_secret
 
 router = APIRouter()
@@ -53,9 +53,8 @@ def _redirect_uri(request: Request, name: str) -> str:
 
 
 def _auth_redirect(user_id: str) -> RedirectResponse:
-    token = create_access_token({"user_id": user_id})
     response = RedirectResponse(url="/embleme")
-    response.set_cookie(key="auth_token", value=token, httponly=True, samesite="lax")
+    ouvrir_session(response, user_id)
     return response
 
 

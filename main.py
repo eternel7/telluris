@@ -31,7 +31,8 @@ from utils.combat import (
 	bloc_charge_snapshot, annoter_passages, vue_client,
 )
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs, RequestDocCacheMiddleware
-from utils.auth import get_current_user
+from utils.auth import get_current_user, create_access_token, expiration_acces
+from utils import session as session_util
 from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of, credit_character
 from utils import quetes
 from utils import donjon as donjon_util
@@ -130,6 +131,19 @@ app.add_middleware(
 # Middleware ASGI PUR : BaseHTTPMiddleware exécuterait l'aval dans une tâche anyio distincte
 # et casserait la propagation du ContextVar. Coupé sur /admin (import-bulk lit ET écrit).
 app.add_middleware(RequestDocCacheMiddleware)
+# Renouvellement de session : accès court rechargé depuis le jeton de rafraîchissement
+# (rotation, cf. utils/session.py) AVANT tout endpoint, pages comme /api. Ajouté en
+# dernier = le plus EXTÉRIEUR. Les montages statiques n'en ont pas besoin.
+app.add_middleware(
+	session_util.RafraichissementMiddleware,
+	decoder_acces=expiration_acces,
+	creer_acces=create_access_token,
+	get_doc_fn=get_doc,
+	save_doc_fn=save_doc,
+	delete_doc_fn=delete_doc,
+	ignorer=("/scripts/", "/icons/", "/polices/", "/characters/", "/battle_maps/", "/maps/",
+		"/towns/", "/monsters/", "/pnj/", "/sounds/"),
+)
 
 # Definit ou se trouvent les fichiers HTML
 templates = Jinja2Templates(directory="templates")
