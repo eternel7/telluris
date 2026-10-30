@@ -112,8 +112,8 @@ def especes_du_parent(parent_doc: dict) -> list:
 
 def pays_relies(cite_doc: dict, connexions: list, get_doc_fn=None) -> list:
 	"""Pays (`categorie:"pays"`) qu'une CAPITALE (`sous_categorie:"capitale"`) relie par une
-	connexion ouverte — ses quêtes `kill`/`collect` peuvent viser leurs rencontres et leurs
-	ressources, hors les murs. Une ville ordinaire n'en a aucun : son tableau reste local.
+	connexion ouverte — ses quêtes `kill`/`collect`/`chasse` peuvent viser leurs rencontres,
+	leurs ressources et leurs élites, hors les murs. Une ville ordinaire n'en a aucun : son tableau reste local.
 	Lu sur les CONNEXIONS, jamais sur `lieu_parent` : c'est la route qui fait la portée."""
 	get_doc_fn = get_doc_fn or get_doc
 	cite_id = (cite_doc or {}).get("_id")
@@ -463,8 +463,9 @@ def remplir_tableau(guild_doc: dict) -> list:
 		candidats = [("kill", eid, None) for eid in especes_du_parent(parent_doc)]
 		candidats += [("collect", iid, None) for iid in cibles_collect(parent_doc, get_doc_c, find_docs_c)]
 		candidats += [(t, c, None) for t, c in _candidats_chasse(parent_id, get_doc_c, find_docs_c)]
-		# Capitale : le pays où mènent ses routes ouvre ses rencontres et ses ressources. Une cible
-		# déjà offerte par la cité y reste locale (dédoublonnée sur (type, cible) au tirage).
+		# Capitale : le pays où mènent ses routes ouvre ses rencontres, ses ressources et ses
+		# élites. Une cible kill/collect déjà offerte par la cité y reste locale (dédoublonnée sur
+		# (type, cible) au tirage) ; une chasse porte son lieu, elle ne se confond jamais.
 		locales = {(t, c) for t, c, _ in candidats}
 		niveaux = {}
 		if parent_doc.get("sous_categorie") == "capitale":
@@ -476,6 +477,7 @@ def remplir_tableau(guild_doc: dict) -> list:
 					if (t, c) not in locales:
 						locales.add((t, c))
 						candidats.append((t, c, pays))
+				candidats += [(t, c, pays) for t, c in _candidats_chasse(parent_id, get_doc_c, find_docs_c, [pays])]
 		random.shuffle(candidats)
 		for type_obj, cible, pays in candidats:
 			if manquantes <= 0:
@@ -502,14 +504,20 @@ def _offre_key(objectif: dict):
 	return (objectif.get("type"), objectif.get("cible"))
 
 
-def _candidats_chasse(cite_id: str, get_doc_fn=None, find_docs_fn=None) -> list:
+def _candidats_chasse(cite_id: str, get_doc_fn=None, find_docs_fn=None, lieux: list | None = None) -> list:
 	"""Candidats `("chasse", (lieu_id, espece_id))` du tableau : élites d'un lieu de la cité,
-	résolvables au grade `max−1`. Balaie les lieux de chasse × leurs rencontres."""
+	résolvables au grade `max−1`. Balaie les lieux de chasse × leurs rencontres.
+	`lieux` remplace ce balayage (pays relié à une capitale, cf. `pays_relies`) ; un lieu
+	sans `rencontres` ou sans `zone_influences` n'a ni gibier ni zone de grade : écarté."""
 	from utils import chasse  # import paresseux : chasse dépend de ce module
 	get_doc_fn = get_doc_fn or get_doc
 	find_docs_fn = find_docs_fn or find_docs
+	if lieux is None:
+		lieux = chasse.lieux_chasse_de(cite_id, get_doc_fn, find_docs_fn)
+	else:
+		lieux = [L for L in lieux if L.get("rencontres") and L.get("zone_influences")]
 	out = []
-	for L in chasse.lieux_chasse_de(cite_id, get_doc_fn, find_docs_fn):
+	for L in lieux:
 		for eid in especes_du_parent(L):
 			espece = get_doc_fn(eid)
 			if not espece:

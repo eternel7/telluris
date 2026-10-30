@@ -735,6 +735,42 @@ def test_candidats_chasse_du_tableau(quetes_db):
 	assert not any(c[1][1] == "espece:lapin" for c in candidats)
 
 
+def test_candidats_chasse_sur_des_lieux_donnes(quetes_db):
+	"""`lieux` remplace le balayage de la cité ; un lieu sans gibier ou sans zone est écarté."""
+	candidats = quetes._candidats_chasse("lieu:autre", lieux=[AUXERRE, BOUTIQUE])
+	assert candidats == [("chasse", ("lieu:auxerre", "espece:loup"))]
+
+
+def test_la_capitale_offre_les_chasses_d_elite_du_pays_relie(quetes_db, monkeypatch):
+	"""Une capitale reliée au pays par une route : ses élites entrent au tableau de la guilde."""
+	pays = dict(AUXERRE, _id="lieu:royaume", categorie="pays", label="Royaume")
+	cite = {"_id": "lieu:capitale", "type": "lieu", "categorie": "ville", "sous_categorie": "capitale"}
+	guilde = {"_id": "lieu:guilde_capitale", "type": "lieu", "categorie": "guilde_aventurier",
+	          "lieu_parent": cite["_id"]}
+	route = {"_id": "link:capitale_royaume", "type": "connection",
+	         "nodes": [{"lieu": cite["_id"], "pos": [0, 0]}, {"lieu": pays["_id"], "pos": [1, 1]}],
+	         "metadata": {"status": "ouvert"}}
+	docs = {**quetes_db, **{d["_id"]: d for d in (pays, cite, guilde, route)}}
+	monkeypatch.setattr(quetes, "get_doc", docs.get)
+	monkeypatch.setattr(quetes, "find_docs", lambda sel, fields=None: [
+		d for d in docs.values() if d.get("type") == sel.get("type")
+		and (sel.get("type") != "lieu" or d.get("lieu_parent") == sel.get("lieu_parent"))])
+	monkeypatch.setattr(quetes, "save_doc", lambda d: docs.setdefault(d["_id"], d))
+	monkeypatch.setattr(quetes, "now_epoch", lambda: 1000)
+	monkeypatch.setattr(character_stats, "QUETE_BOARD_TAILLE", 6)
+
+	chasses = [o for o in quetes.remplir_tableau(guilde) if o["objectif"]["type"] == "chasse"]
+
+	assert [(o["objectif"]["lieu"], o["objectif"]["cible"]) for o in chasses] == [
+		("lieu:royaume", "espece:loup")]
+	assert chasses[0]["lieu_parent"] == cite["_id"]
+	# Sans la route, la même capitale n'a aucun gibier d'élite.
+	del docs[route["_id"]]
+	for o in chasses:
+		docs.pop(o["_id"])
+	assert not [o for o in quetes.remplir_tableau(guilde) if o["objectif"]["type"] == "chasse"]
+
+
 # ── dans_zone_chasse (zone 3×3 de déclenchement) ─────────────────────────────────
 
 @pytest.mark.parametrize("jx,jy,attendu", [
