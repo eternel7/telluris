@@ -26,6 +26,8 @@ Contenu : `jsons/sorts_sans_vocation_a_importer.json` (les 112 sorts de l'export
 Contenu : `jsons/sort-exemples.json`, `update_sorts.json`, `magie_naturelle_sorts.json`, `sorts_nature_elementaire_a_importer.json`, `sorts_bataille_illusoire_noire_sainte_a_importer.json`, `repurgateur_magie_noire_a_importer.json`, `sorts_invocation_a_importer.json` (échelles d'invocation 1-10 + grimoires manquants, `dev/gen_sorts_invocation.py`).
 
 
+**Cap posé par un guide local** : focalisation `type:"lieu"` + `guide` / `puis_quete` (cf. `telluris-recrutement` § Guides locaux).
+
 ### Les trois notions du temps magique — PA de lancement / PM de lancement / PM de maintien
 Trois contraintes DISTINCTES sur un doc `sort:*`, faites pour se combiner librement : `incantation` = PA de lancement (défaut 1), `cout_pm` = PM de lancement (existant), `maintien` = PM par round pour rester actif (défaut 0). Bornes `INCANTATION_PA_MAX` / `MAINTIEN_PM_MAX` dans `utils/sorts.py`. Défauts neutres ⇒ aucune migration.
 

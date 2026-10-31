@@ -2880,6 +2880,10 @@
 			</header>
 			<button class="sheet-tab-btn close-sheet-btn" onclick="closeAuberge()" role="button">✕ Fermer</button>
 		</div>
+		<div id="aub-guides-bloc" hidden>
+			<h2 style="margin:.6rem 0 0">🧭 Guides locaux</h2>
+			<div id="aub-guides-list" class="cards-list"></div>
+		</div>
 		<h2 style="margin:.6rem 0 0">🪑 Les tables (<span id="aub-tables-compte"></span>)</h2>
 		<div id="aub-tables-list" class="aub-tables"></div>
 		<h2 style="margin:1rem 0 0">📌 Tableau d'information</h2>
@@ -2950,6 +2954,8 @@
 				{# Les montures ferment la marche, dans leur propre regroupement : elles
 				   voyagent avec le groupe mais n'en sont pas membres (ni affinité, ni part
 				   de butin, ni plafond commun). Titre masqué tant qu'il n'y en a aucune. #}
+				<h3 id="grp-guide-titre" class="grp-sous-titre" style="display:none">🧭 Guide local</h3>
+				<div id="grp-guide-list" class="cards-list"></div>
 				<h3 id="grp-montures-titre" class="grp-sous-titre" style="display:none">🐴 Montures</h3>
 				<div id="grp-montures-list" class="cards-list"></div>
 				{# Les personnes SOUS PROTECTION ferment la marche : elles ne sont ni membres
@@ -3414,13 +3420,13 @@
 		/* ── Choix de la cible d'un effet bénéfique (sort/compétence `cible: allie`) ──
 		   Même calque et mêmes briques de carte que les clauses : c'est aussi une
 		   décision bloquante, et refermer sans choisir ne doit RIEN lancer. */
-		#cible-allie-overlay, #choix-overlay {
+		#cible-allie-overlay, #choix-overlay, #guide-overlay {
 			position: fixed; inset: 0; z-index: 9400;
 			background: rgba(10, 8, 5, .78);
 			display: flex; align-items: center; justify-content: center; padding: 1rem;
 		}
-		#cible-allie-overlay.clauses-hidden, #choix-overlay.clauses-hidden { display: none; }
-		#cible-allie-overlay .item-detail-card, #choix-overlay .item-detail-card { max-width: 460px; }
+		#cible-allie-overlay.clauses-hidden, #choix-overlay.clauses-hidden, #guide-overlay.clauses-hidden { display: none; }
+		#cible-allie-overlay .item-detail-card, #choix-overlay .item-detail-card, #guide-overlay .item-detail-card { max-width: 460px; }
 		.choix-liste { margin: 0 0 .8rem; display: flex; flex-direction: column; gap: .3rem; }
 		.choix-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
 		.choix-actions .sh-drop-btn { flex: 1 1 auto; margin-left: 0; padding: .45rem .6rem; }
@@ -3585,6 +3591,22 @@
 			<div id="choix-body"></div>
 		</div>
 	</div><!-- /#choix-overlay -->
+	{# Interroger son guide local. Rien n'est en attente : ✕ / Échap / clic hors carte referment. #}
+	<div id="guide-overlay" class="clauses-hidden" role="dialog" aria-label="Interroger le guide"
+		 onclick="if(event.target===this)closeGuide()">
+		<div class="item-detail-card">
+			<button class="item-detail-close" onclick="closeGuide()" title="Fermer">✕</button>
+			<h3 id="guide-titre" style="margin:.1rem 0 .5rem; padding-right:2rem"></h3>
+			<p id="guide-replique" class="q-desc"></p>
+			<div id="guide-sujets" class="choix-actions"></div>
+			<div id="guide-saisie" class="aub-dire">
+				<input type="text" id="guide-saisie-txt" maxlength="80" placeholder="Connais-tu tel lieu ?"
+					   onkeydown="if(event.key==='Enter')guideDemanderLieu()">
+				<button class="sub-loc-btn aub-dire-btn" onclick="guideDemanderLieu()">Demander</button>
+			</div>
+			<div id="guide-renouveler" class="choix-actions" hidden></div>
+		</div>
+	</div><!-- /#guide-overlay -->
 	{# Dépassement du maximum racial : UNIQUE et IRRÉVERSIBLE pour le personnage.
 	   ✕ / Échap / clic hors carte = annuler sans rien engager — seul le bouton
 	   « Dépasser » de la carte envoie `use_max_bonus`. #}
@@ -3917,6 +3939,7 @@
 				// Guidage 🧭 : à jour AVANT buildLocationslist/updateControls (exergues flèche+lien).
 				_guidage = rep.guidage || null;
 				_refreshGuidage();
+				_notifierGuideTour(rep.guide_tour);
 				buildLocationslist();
 				_majHaloPassages();
 				updateControls();
@@ -4281,6 +4304,10 @@
 			// que xp_gain_notif : le changement de lieu recharge la page).
 			sessionStorage.setItem('xp_compagnie_notif', JSON.stringify(data.xp_compagnie));
 		}
+		if (data.guide_tour && data.guide_tour.alerte) {
+			// Le changement de lieu recharge la page : toast rejoué après (pattern xp_gain_notif).
+			sessionStorage.setItem('guide_tour_notif', JSON.stringify(data.guide_tour));
+		}
 		if (data.focalisation_atteinte) {
 			// Arrivée au lieu focalisé : toast affiché après le reload (pattern xp_gain_notif).
 			sessionStorage.setItem('focus_arrive_notif', data.focalisation_atteinte.nom || '');
@@ -4386,6 +4413,7 @@
 			TRAVERSEE.total = data.total;
 			POSITIONS = {"x": data.position.x, "y": data.position.y};
 			_ecrireCarte(data.position.x, data.position.y);
+			_notifierGuideTour(data.guide_tour);
 			_traverseeBandeau();
 			updateVitals(data.vitals);
 			_renderEffetsActifs(data.effets_actifs);
@@ -4841,6 +4869,8 @@ document.addEventListener('keydown', e => {
 	if (cibleAllie && !cibleAllie.classList.contains('clauses-hidden')) { closeCibleAllie(); return; }
 	const choixOv = document.getElementById('choix-overlay');
 	if (choixOv && !choixOv.classList.contains('clauses-hidden')) { closeChoix(); return; }
+	const guideOv = document.getElementById('guide-overlay');
+	if (guideOv && !guideOv.classList.contains('clauses-hidden')) { closeGuide(); return; }
 	// ⚠️ Le sur-mesure attend une promesse, comme le choix de cible : Échap doit la RÉSOUDRE
 	// (à null), sinon la commande reste suspendue et son bouton désactivé pour toujours.
 	const surMesure = document.getElementById('sur-mesure-overlay');
@@ -5383,6 +5413,11 @@ async function spendXp(statKey, useMaxBonus = false) {
 	if (_traverseeDepart !== null) {
 		sessionStorage.removeItem('traversee_depart_notif');
 		showToast('⛵ ' + (_traverseeDepart || 'Vous embarquez.'), {major: true});
+	}
+	const _guideTourNotif = sessionStorage.getItem('guide_tour_notif');
+	if (_guideTourNotif !== null) {
+		sessionStorage.removeItem('guide_tour_notif');
+		try { _notifierGuideTour(JSON.parse(_guideTourNotif)); } catch (e) { /* notif illisible : sans conséquence */ }
 	}
 	const _focusArrive = sessionStorage.getItem('focus_arrive_notif');
 	if (_focusArrive !== null) {
@@ -6790,6 +6825,8 @@ function _alliesCibles() {
 	(d.montures || []).forEach(m => out.push({
 		id: m.id, nom: nomDe(m), icon: '🐴',
 		pv: m.currentPV, pv_max: m.pv_max }));
+	if (d.guide) out.push({ id: d.guide.id, nom: nomDe(d.guide), icon: '🧭',
+		pv: d.guide.currentPV, pv_max: d.guide.pv_max });
 	return out.filter(c => c.id && c.id !== moi);
 }
 
@@ -9219,6 +9256,8 @@ let _compagnieNom = {{ (compagnie.nom if compagnie else '') | tojson }};
 // doc lieu le renvoient quand même (`_majLieuDeGuilde`) — cela ne coûte aucune lecture.
 // ⚠️ Il ne pilote que des LIBELLÉS et du grisage : la garde reste le 403/409 du serveur.
 let LIEU_DE_GUILDE = {{ lieu_de_guilde | tojson }};
+// Tout changement de lieu recharge /play : ce drapeau reste exact (la garde reste le 403 serveur).
+const EST_AUBERGE = {{ est_auberge | tojson }};
 
 function _majCompagnie(data) {
 	if (data && 'compagnie' in data) _compagnieNom = (data.compagnie || {}).nom || '';
@@ -10461,6 +10500,7 @@ async function openAuberge() {
 	if (!data) return;
 	updatePurse(data.purse);
 	renderAuberge(data);
+	chargerGuidesAuberge();
 	document.getElementById('game-container').classList.add('panel-hidden');
 	document.getElementById('auberge-panel').classList.remove('panel-hidden');
 	window.scrollTo({ top: 0, behavior: 'instant' });
@@ -10477,6 +10517,7 @@ function closeAuberge() {
 	// `resize` les recalculerait pour rien jusqu'à la fin de la session.
 	clearCharacterCards(document.getElementById('aub-tables-list'));
 	clearCharacterCards(document.getElementById('aub-tableau-list'));
+	clearCharacterCards(document.getElementById('aub-guides-list'));
 	_aubSigs = new Map();
 	_aubSigsOcc = new Map();
 	document.getElementById('game-container').classList.remove('panel-hidden');
@@ -11136,6 +11177,11 @@ function renderGroupe(data) {
 			openCompagnonSheet(card.dataset.porteur);
 		});
 	});
+	const guideListe = data.guide ? [data.guide] : [];
+	_rendreCartesMontures(document.getElementById('grp-guide-list'), guideListe,
+		g => _guideActions(g), g => _guidePied(g));
+	const titreGuide = document.getElementById('grp-guide-titre');
+	if (titreGuide) titreGuide.style.display = guideListe.length ? '' : 'none';
 	_rendreCartesMontures(document.getElementById('grp-montures-list'), data.montures || [],
 		m => _btnRelacher(m));
 	const titreMnt = document.getElementById('grp-montures-titre');
@@ -11152,6 +11198,155 @@ function renderGroupe(data) {
 
 // Pied d'une monture : ce qui la définit, c'est ce qu'elle PORTE (ses PV sont déjà dans ses
 // barres). L'espèce n'est pas répétée — c'est le nom de la carte.
+// ── Guide local ──────────────────────────────────────────────────────────────────
+// Engagé et congédié à l'auberge (le serveur garde : 403 ailleurs), interrogé partout.
+function _guideForfaitTexte(g) {
+	return `${_prixTexte(g.forfait_cuivre)} / ${g.forfait_tours} tours`;
+}
+function _guidePied(g) {
+	const tours = g.epuise ? '⌛ Forfait épuisé' : `⌛ ${g.tours_restants} tours restants`;
+	return `<span>${escapeHtml(g.metier_label || '')} · ${tours}</span>`;
+}
+function _guideActions(g) {
+	const charge = +(g.charge || 0) > 0;
+	const peutPartir = EST_AUBERGE && !charge;
+	const raison = !EST_AUBERGE ? "Un guide se congédie dans une auberge"
+		: (charge ? 'Videz son sac avant de le congédier' : 'Mettre fin à son service (forfait non remboursé)');
+	return `<button class="sh-drop-btn" onclick="ouvrirGuide()">🗣️ Interroger</button>`
+		+ `<button class="sh-drop-btn sh-abandon-btn" ${peutPartir ? '' : 'disabled'} title="${raison}" onclick="congedierGuide()">✕ Congédier</button>`;
+}
+// Texte du toast d'un tour de monde, ou null : aucune bulle hors des deux seuils.
+function _texteGuideTour(t) {
+	if (!t || !t.alerte) return null;
+	if (t.alerte === 'epuise') return '🧭 Le forfait de votre guide est épuisé : il ne vous indique plus la route.';
+	if (t.alerte === 'bientot') return `🧭 Votre guide n'est plus payé que pour ${t.tours_restants} tours.`;
+	return null;
+}
+function _notifierGuideTour(t) {
+	const texte = _texteGuideTour(t);
+	if (texte) showToast(texte);
+}
+// Ce que chaque réponse du guide resynchronise (Convention §10).
+function _appliquerReponseGuide(data) {
+	if (data.purse) updatePurse(data.purse);
+	if ('focalisation' in data) _focalisation = data.focalisation || null;
+	if ('guidage' in data) _guidage = data.guidage || null;
+	_refreshGuidage();
+	_syncFocusBtns();
+	updateControls();
+	buildLocationslist();
+	if (_grpEtat && 'guide' in data) _grpEtat.guide = data.guide;
+	if (_grpEtat && !document.getElementById('groupe-panel').classList.contains('panel-hidden')) renderGroupe(_grpEtat);
+}
+// Une carte par offre de l'auberge. `textContent` pour tout ce qui vient de la donnée.
+function renderGuidesAuberge(data) {
+	const bloc = document.getElementById('aub-guides-bloc');
+	const liste = document.getElementById('aub-guides-list');
+	if (!bloc || !liste) return;
+	clearCharacterCards(liste);
+	const offres = data.offres || [];
+	bloc.hidden = !offres.length && !data.guide;
+	const bourse = _purseEnCuivre(data.purse);
+	offres.forEach(o => renderCharacterCard(liste, o, {
+		editable: false,
+		footer: `<span>${escapeHtml(o.metier_label || '')} · ${escapeHtml(o.zone_nom || '')}</span>`
+			+ `<span class="sell-prix">💰 ${_guideForfaitTexte(o)}</span>`,
+		actions: `<button class="sh-drop-btn" data-guide="${escapeHtml(o.id)}" onclick="engagerGuide(this.dataset.guide)"
+			${(data.guide || o.forfait_cuivre > bourse) ? 'disabled' : ''}
+			title="${data.guide ? 'Un guide vous accompagne déjà' : 'Forfait payé d\'avance'}">🧭 Engager</button>`,
+	}));
+	if (data.guide) {
+		const note = document.createElement('div');
+		note.className = 'sell-empty';
+		note.textContent = `${data.guide.prenom} ${data.guide.nom} vous accompagne déjà. Le panneau 👥 permet de l'interroger ou de le congédier.`;
+		liste.appendChild(note);
+	}
+}
+async function chargerGuidesAuberge() {
+	const data = await _aubFetch('api/guides/tableau');
+	if (data) renderGuidesAuberge(data);
+}
+async function engagerGuide(guideId) {
+	const data = await _aubFetch('api/guides/engager', { guide_id: guideId });
+	if (!data) return;
+	_appliquerReponseGuide(data);
+	renderGuidesAuberge(data);
+	if (data.guide) showToast(`🧭 ${data.guide.prenom} ${data.guide.nom} vous accompagne.`);
+}
+async function congedierGuide() {
+	const data = await _aubFetch('api/guides/congedier', {});
+	if (!data) return;
+	_appliquerReponseGuide(data);
+	if (!document.getElementById('auberge-panel').classList.contains('panel-hidden')) renderGuidesAuberge(data);
+	const r = await fetch('api/groupe');
+	if (r.ok) renderGroupe(await r.json());
+	showToast('🧭 Votre guide reprend sa route.');
+}
+function closeGuide() {
+	document.getElementById('guide-overlay').classList.add('clauses-hidden');
+}
+function _rendreGuide(data) {
+	const g = data.guide;
+	if (!g) { closeGuide(); return; }
+	document.getElementById('guide-titre').textContent = `🗣️ ${g.prenom} ${g.nom}`;
+	document.getElementById('guide-replique').textContent = data.replique || '';
+	const sujets = document.getElementById('guide-sujets');
+	sujets.replaceChildren();
+	(data.sujets || []).forEach(s => {
+		const b = document.createElement('button');
+		b.type = 'button';
+		b.className = 'sh-drop-btn';
+		b.textContent = `Peux-tu m'aider pour « ${s.titre} » ?`;
+		b.addEventListener('click', () => guideDemander({ quete_id: s.quete_id }));
+		sujets.appendChild(b);
+	});
+	(data.suggestions || []).forEach(nom => {
+		const b = document.createElement('button');
+		b.type = 'button';
+		b.className = 'sh-drop-btn';
+		b.textContent = `Oui, ${nom}.`;
+		b.addEventListener('click', () => guideDemander({ saisie: nom }));
+		sujets.appendChild(b);
+	});
+	document.getElementById('guide-saisie').hidden = !!g.epuise;
+	const renouv = document.getElementById('guide-renouveler');
+	renouv.hidden = !g.epuise;
+	renouv.replaceChildren();
+	if (g.epuise) {
+		const b = document.createElement('button');
+		b.type = 'button';
+		b.className = 'sh-drop-btn';
+		b.textContent = `Payer un nouveau forfait (${_guideForfaitTexte(g)})`;
+		b.addEventListener('click', guideRenouveler);
+		renouv.appendChild(b);
+	}
+}
+async function ouvrirGuide() {
+	const data = await _aubFetch('api/guides/dialogue');
+	if (!data) return;
+	_rendreGuide(data);
+	document.getElementById('guide-overlay').classList.remove('clauses-hidden');
+}
+async function guideDemander(corps) {
+	const data = await _aubFetch('api/guides/demander', corps);
+	if (!data) return;
+	_appliquerReponseGuide(data);
+	_rendreGuide(data);
+}
+function guideDemanderLieu() {
+	const champ = document.getElementById('guide-saisie-txt');
+	const saisie = champ.value.trim();
+	if (!saisie) return;
+	champ.value = '';
+	guideDemander({ saisie });
+}
+async function guideRenouveler() {
+	const data = await _aubFetch('api/guides/renouveler', {});
+	if (!data) return;
+	_appliquerReponseGuide(data);
+	_rendreGuide(data);
+}
+
 function _piedMonture(m) {
 	const charge = +(m.charge || 0), max = +(m.charge_max || 0);
 	return `<span>🎒 ${charge.toFixed(1)} / ${max} kg</span>`;
@@ -11160,12 +11355,13 @@ function _piedMonture(m) {
 // Rafraîchit en place le pied (et le bouton Relâcher) de la carte d'UNE monture, sans
 // reconstruire la liste — reconstruire perdrait les viewports de portrait déjà mesurés.
 function _majPiedMonture(m) {
-	const card = document.querySelector(`#grp-montures-list .character-card[data-porteur="${m.id}"]`);
+	const liste = m.est_guide ? 'grp-guide-list' : 'grp-montures-list';
+	const card = document.querySelector(`#${liste} .character-card[data-porteur="${m.id}"]`);
 	if (!card) return;
 	const pied = card.querySelector('[data-role="footer"]');
-	if (pied) pied.innerHTML = _piedMonture(m);
+	if (pied) pied.innerHTML = m.est_guide ? _guidePied(m) : _piedMonture(m);
 	const act = card.querySelector('[data-role="actions"]');
-	if (act) act.innerHTML = _btnRelacher(m);
+	if (act) act.innerHTML = m.est_guide ? _guideActions(m) : _btnRelacher(m);
 }
 
 function _btnRelacher(m) {
@@ -11298,7 +11494,7 @@ async function _grpEquipement(url, corps) {
 			inventaire: data.inventaire, charge: data.charge, charge_max: data.charge_max,
 			harnachement: harn,
 		};
-		const mnt = (_grpEtat.montures || []).find(m => m.id === mid);
+		const mnt = [..._grpEtat.montures || [], ...(_grpEtat.guide ? [_grpEtat.guide] : [])].find(m => m.id === mid);
 		if (mnt) {
 			mnt.charge = data.charge;
 			mnt.charge_max = data.charge_max;
@@ -11404,7 +11600,7 @@ async function transfererItem(sens, index, itemId) {
 			});
 			// La carte d'une monture affiche sa charge en pied : sans cette resynchro elle
 			// resterait figée sur l'état d'avant le transfert jusqu'à la réouverture du panneau.
-			const mnt = (_grpEtat.montures || []).find(m => m.id === data.compagnon_id);
+			const mnt = [..._grpEtat.montures || [], ...(_grpEtat.guide ? [_grpEtat.guide] : [])].find(m => m.id === data.compagnon_id);
 			if (mnt) {
 				mnt.charge = data.compagnon.charge;
 				_majPiedMonture(mnt);

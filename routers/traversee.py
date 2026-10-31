@@ -16,6 +16,7 @@ from models import character_stats
 from utils.auth import get_current_user
 from utils.characters import get_selected_character, lieu_label
 from utils import consommables
+from utils import guides
 from utils import quetes
 from utils import transport
 from utils import traversee
@@ -68,11 +69,13 @@ async def traversee_avancer(current_user: Annotated[dict, Depends(get_current_us
 	transports_echoues = transport.traiter_expirations(
 		character, quetes.now_epoch(), get_doc, save_doc)
 	compagnons, montures_groupe = _auras_du_groupe(character)
+	guide_tour = guides.decompter_tour(character, montures_groupe, lambda: guides.regles_de(get_doc))
 	_apply_world_turn_regen(character)
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 	_apply_world_turn_groupe(character, 0, compagnons, montures_groupe)
 	return {
+		"guide_tour": guide_tour,
 		"arrive": False,
 		"position": character["position"],
 		"etape": etat["etape"],

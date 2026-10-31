@@ -1041,6 +1041,8 @@ def montures_logees(character: dict, prop: dict, get_doc_fn=None) -> list:
 def loger_monture(character: dict, prop: dict, cat: dict, monture: dict) -> tuple[bool, str]:
 	if role_de(character, prop) != PROPRIETAIRE:
 		return False, "Seul le propriétaire loge ses montures ici."
+	if monture.get("guide"):
+		return False, "Un guide ne reste pas à l'écurie."
 	if (monture.get("statut") != "acquise" or monture.get("acquise_par") != character.get("_id")
 			or monture.get("_id") not in (character.get("montures") or []) or monture.get("loge_a")):
 		return False, "Cette monture ne vous suit pas."

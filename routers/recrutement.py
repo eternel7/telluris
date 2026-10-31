@@ -189,8 +189,13 @@ def _payload(character: dict, recrues: list | None = None, lieu_doc: dict | None
 		# part de butin, ni plafond commun) : liste et plafond SÉPARÉS, que le client rend
 		# dans son propre regroupement en fin de panneau.
 		"montures": [_monture_view(m)
-					 for m in montures.montures_effectives(character, get_doc)],
+					 for m in montures.montures_effectives(character, get_doc)
+					 if not montures.est_guide(m)],
 		"montures_plafond": montures.plafond_montures(),
+		# Le guide local : doc `monture:*`, mais ni relâché ni rangé avec les bêtes.
+		"guide": next((_monture_view(m)
+					   for m in montures.montures_effectives(character, get_doc)
+					   if montures.est_guide(m)), None),
 		# Les personnes escortées ferment la marche : ni membres du groupe (pas d'affinité,
 		# pas de part de butin, pas de plafond), ni porteuses. Elles n'ont ni plafond ni
 		# action — elles sont là tant que la quête dure.
@@ -482,7 +487,7 @@ def _charge_view(porteur: dict) -> dict:
 def _harnachement_view(porteur: dict) -> dict:
 	"""Emplacements de harnachement d'une MONTURE (résolus, vides compris : le panneau les
 	affiche tous) ; rien pour un compagnon, dont l'équipement vit dans sa fiche."""
-	if not montures.est_monture(porteur):
+	if not montures.est_monture(porteur) or montures.est_guide(porteur):
 		return {}
 	slots = porteur.get("slots") or {}
 	return {"harnachement": {s: (resolve_item_ref(slots[s]) if slots.get(s) else None)

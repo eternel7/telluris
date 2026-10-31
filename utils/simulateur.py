@@ -852,6 +852,8 @@ def _jouer_tour(actor: dict, adversaire: dict, arsenal: dict, etat: dict, round_
 	pseudo = etat["pseudo"]
 	# Tick des effets (régén, décrément, expiration → _refresh_snapshot_stats) + budget.
 	combat._reset_turn_budget(actor, pseudo)
+	if not _vivant(actor):
+		return   # mort du poison en début de tour : il ne joue pas (ni détection, ni action)
 	_refiger(actor)   # une expiration vient peut-être de recomposer les dérivées
 	# Adversaire furtif non repéré : UN jet de détection par tour, comme au début d'un
 	# tour de monstre (_run_monster_turn) — réussite définitive.
@@ -894,7 +896,11 @@ def _derouler_duel(bel_a: dict, bel_b: dict, distance: int, journal: list | None
 	snap_a, snap_b = bel_a["fabrique"](), bel_b["fabrique"]()
 	snap_a["nom"] = f"[A] {snap_a.get('nom', bel_a['label'])}"
 	snap_b["nom"] = f"[B] {snap_b.get('nom', bel_b['label'])}"
-	pseudo = {"tour": 0, "log": journal if journal is not None else []}
+	# Pseudo-doc de combat : c'est `_vivant` qui décide de la fin du duel, jamais le moteur. Une mort
+	# hors d'un coup (poison, début de tour) passe par ses cascades : `etages` court-circuite
+	# `_check_victory`, `joueurs` vide et `status` non actif neutralisent la défaite de `_traiter_ko`.
+	pseudo = {"tour": 0, "log": journal if journal is not None else [],
+			  "etages": True, "joueurs": [], "status": "simulation"}
 	etat = {"distance": max(1, int(distance)), "pseudo": pseudo}
 	camps = [(snap_a, snap_b, bel_a["arsenal"]), (snap_b, snap_a, bel_b["arsenal"])]
 

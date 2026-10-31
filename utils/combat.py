@@ -1496,7 +1496,7 @@ def _reset_turn_budget(actor: dict, combat_doc: dict | None = None) -> None:
 	actor["canalisation"] = 0
 	actor["actions_restantes"] = actor["actions_max"]
 	_refresh_actions(actor)
-	# ⚠️ `combat_doc` peut être le PSEUDO-DOC du simulateur (`{"tour", "log"}` seuls, cf.
+	# ⚠️ `combat_doc` peut être le PSEUDO-DOC du simulateur (ni grille ni monstres, cf.
 	# utils/simulateur) : les deux helpers ci-dessous ne lisent que `tour`, `log` et
 	# `joueurs` via `.get(...)`, et sortent en tête sur un acteur qui n'entretient ni ne
 	# canalise rien — c'est-à-dire toujours, au banc d'essai.
@@ -4143,6 +4143,11 @@ def create_combat_doc(
 		# Pégase, grand faucon… : même règle de vol qu'un monstre (relue sur l'espèce).
 		if espece_vole(espece_monture):
 			snap["vol_espece"] = True
+		# Guide local : une personne, pas une bête. Il se défend comme un paladin d'escorte
+		# (`_run_defenseur_turn`), forfait épuisé ou non : ne plus être payé pour guider
+		# n'empêche pas de sauver sa peau. Le reste de son statut de monture ne change pas.
+		if montures_util.est_guide(m):
+			snap["se_defend"] = True
 		montures_snaps.append(snap)
 	joueurs += montures_snaps
 
@@ -5742,7 +5747,7 @@ def _frapper_monstre(combat_doc: dict, attaquant: dict, monstre: dict, profil: d
 
 
 def _run_defenseur_turn(combat_doc: dict, joueur: dict, grid: dict) -> None:
-	"""Tour d'une personne escortée qui SAIT SE DÉFENDRE (`se_defend`) — joué par le serveur,
+	"""Tour d'une personne escortée qui SAIT SE DÉFENDRE (`se_defend`) ou d'un guide local — joué par le serveur,
 	comme celui d'un monstre, et ne rend donc jamais la main au client.
 
 	Elle ne fait JAMAIS un pas : la couvrir reste l'affaire du joueur. Elle frappe, à l'allonge

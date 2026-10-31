@@ -18,6 +18,8 @@ from utils.characters import (
 )
 from utils.marche import debit_character
 from utils import montures
+from utils import escorte
+from utils import guides
 
 montures_router = APIRouter()
 
@@ -60,7 +62,18 @@ def _monture_view(m: dict) -> dict:
 	"""Vue d'une monture POSSÉDÉE. Mêmes clés que `_recrue_view` là où le client les
 	partage (`id`/`nom`/`image`/vitaux) : les deux alimentent la même carte de personnage.
 	`est_monture` permet au client de la ranger dans son propre groupe et de lui offrir
-	« Relâcher » plutôt que « Congédier »."""
+	« Relâcher » plutôt que « Congédier ». Un GUIDE a un prénom, un portrait de personne et
+	ses tours restants : c'est la seule vue où il diffère d'une bête."""
+	guide_bloc = {}
+	if montures.est_guide(m):
+		guide_bloc = {
+			"prenom": m.get("prenom", ""),
+			"race": m.get("race", ""),
+			"sex": m.get("sex", ""),
+			"image_base": escorte.image_protege(m.get("image", ""))[0],
+			"est_guide": True,
+			**guides.vue_contrat(m, guides.regles_de(get_doc)),
+		}
 	return {
 		"id": m["_id"],
 		"nom": m.get("nom", "Monture"),
@@ -74,12 +87,14 @@ def _monture_view(m: dict) -> dict:
 		"charge": round(carried_weight(m), 2),
 		"charge_max": montures.charge_max_porteur(m),
 		**montures.vitaux_de(m),
+		**guide_bloc,
 	}
 
 
 def _payload(character: dict, lieu_doc: dict | None = None) -> dict:
 	payload = {
-		"montures": [_monture_view(m) for m in montures.montures_effectives(character, get_doc)],
+		"montures": [_monture_view(m) for m in montures.montures_effectives(character, get_doc)
+					 if not montures.est_guide(m)],
 		"plafond": montures.plafond_montures(),
 		# Laissées à l'écurie d'une propriété : hors de la liste (elles ne suivent pas), mais
 		# dans le plafond — le compteur du panneau les ajoute.

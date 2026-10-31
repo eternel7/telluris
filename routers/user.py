@@ -44,6 +44,7 @@ from utils import sorts as sorts_util
 from utils import competences as competences_util
 from utils import slots_actions
 from utils import focalisation
+from utils import guides
 from utils import intro
 from utils import transport
 from utils import recrutement
@@ -663,6 +664,7 @@ def _effets_arrivee(character: dict, destination: str, destination_pos: dict,
 		niveau_up = niveau_up or bool(escorte_maj["depose"].get("niveau_up"))
 		niveau_new = compute_character_level(character.get("xp_total", 0))
 	compagnons, montures_groupe = _auras_du_groupe(character)
+	guide_tour = guides.decompter_tour(character, montures_groupe, lambda: guides.regles_de(get_doc))
 	_apply_world_turn_regen(character)
 	save_doc(character)
 	# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage (régén +
@@ -671,7 +673,7 @@ def _effets_arrivee(character: dict, destination: str, destination_pos: dict,
 		_apply_world_turn_groupe(character, xp_partage, compagnons,
 								 montures_groupe),
 		xp_partage)
-	return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character), "ressource_recoltable": _recolte_payload(character), "effets_actifs": consommables.effets_actifs_payload(character), "caracts_detail": _caracts_payload(character), "focalisation_atteinte": {"lieu": destination, "nom": lieu_label(lieu_doc, destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
+	return {"moved": 1, "guide_tour": guide_tour, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character), "ressource_recoltable": _recolte_payload(character), "effets_actifs": consommables.effets_actifs_payload(character), "caracts_detail": _caracts_payload(character), "focalisation_atteinte": {"lieu": destination, "nom": lieu_label(lieu_doc, destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
 
 
 def _pnjs_ici(character: dict, lieu_doc: dict) -> list:
@@ -805,6 +807,7 @@ async def move_character(
 				if escorte_maj["depose"]:
 					xp_partage += int(escorte_maj["depose"].get("xp") or 0)
 				compagnons, montures_groupe = _auras_du_groupe(character_to_update)
+				guide_tour = guides.decompter_tour(character_to_update, montures_groupe, lambda: guides.regles_de(get_doc))
 				_apply_world_turn_regen(character_to_update)
 				# VOL MAGIQUE (utils/vol.py) : le tour de monde a pu l'éteindre au-dessus de l'eau
 				# ou d'une falaise — chute sur la case de sol la plus proche. APRÈS le tick, donc
@@ -826,7 +829,7 @@ async def move_character(
 				# docs relation + un doc lieu complet par lieu connu).
 				relations_lieux = (relations_lieux_payload(character_to_update)
 								   if (transports_echoues or escorte_maj["depose"]) else None)
-				return {"transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "lieux_marques": indicateurs.marques_lieux(character_to_update), "access": access, "volant": vol_util.vol_actif(character_to_update), "chute": chute, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp, "proprietes_offre": proprietes.offre_ici(lieu_doc, character_to_update["position"], auberge.lieu_est_taverne(lieu_doc), proprietes.catalogue(get_doc), get_doc), "pnjs_ici": _pnjs_ici(character_to_update, lieu_doc)}
+				return {"guide_tour": guide_tour, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "lieux_marques": indicateurs.marques_lieux(character_to_update), "access": access, "volant": vol_util.vol_actif(character_to_update), "chute": chute, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp, "proprietes_offre": proprietes.offre_ici(lieu_doc, character_to_update["position"], auberge.lieu_est_taverne(lieu_doc), proprietes.catalogue(get_doc), get_doc), "pnjs_ici": _pnjs_ici(character_to_update, lieu_doc)}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 
@@ -1283,6 +1286,9 @@ async def unequip_item(
 		raise HTTPException(status_code=422, detail="Slot invalide")
 
 	character, _principal = _acteur(current_user, body)
+	# Son équipement est à lui : l'ôter puis le transférer revendrait une arme fournie par le jeu.
+	if montures.est_guide(character):
+		raise HTTPException(status_code=403, detail="Un guide garde son équipement.")
 
 	slots   = character.get("slots", {})
 	ref = slots.get(slot)

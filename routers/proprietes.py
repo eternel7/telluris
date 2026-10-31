@@ -187,7 +187,8 @@ def _payload_ici(character: dict, prop: dict, cat: dict, role: str, extra: dict 
 			"logees": [{"id": m["_id"], "nom": m.get("nom", "Monture")}
 					   for m in proprietes.montures_logees(character, prop, get_doc)] if gere else [],
 			"logeables": [{"id": m["_id"], "nom": m.get("nom", "Monture"), "charge": bool(m.get("inventaire"))}
-						  for m in montures.montures_effectives(character, get_doc)] if gere else [],
+						  for m in montures.montures_effectives(character, get_doc)
+						  if not montures.est_guide(m)] if gere else [],
 		},
 		"mes_proprietes": _mes_proprietes(character, cat),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),

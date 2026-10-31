@@ -1377,8 +1377,8 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 						{% set jp = combat.joueurs | selectattr('id', 'equalto', actor_id) | first %}
 						{% set j_ko = ' dead' if (jp and jp.currentPV <= 0) else '' %}
 						{# Personne escortée qui SE DÉFEND (`se_defend`) : dans l'ordre, mais aux couleurs dorées d'une escortée — jamais prise pour un combattant jouable. Créature INVOQUÉE : même situation, aux couleurs violettes du sort qui l'a appelée. #}
-						{% set badge_role = 'invocation' if (jp and jp.est_invocation) else ('protege' if (jp and jp.est_protege) else 'joueur') %}
-						<div class="init-badge {{ badge_role }}{{ j_ko }} {{ active }}" id="badge-{{ actor_id }}"{% if jp and jp.est_protege %} title="{{ jp.nom }} — sous votre protection : se défend au contact, sans se déplacer."{% elif jp and jp.est_invocation %} title="{{ jp.nom }} — créature invoquée : elle joue seule, {% if jp.sort_maintenu %}et reste tant que {{ jp.invocateur_nom or 'son invocateur' }} entretient le sort.{% else %}encore {{ jp.invocation_restants }} tour(s) avant de se dissiper.{% endif %}"{% endif %}>
+						{% set badge_role = 'invocation' if (jp and jp.est_invocation) else ('protege' if (jp and (jp.est_protege or jp.se_defend)) else 'joueur') %}
+						<div class="init-badge {{ badge_role }}{{ j_ko }} {{ active }}" id="badge-{{ actor_id }}"{% if jp and (jp.est_protege or jp.se_defend) %} title="{{ jp.nom }} — sous votre protection : se défend au contact, sans se déplacer."{% elif jp and jp.est_invocation %} title="{{ jp.nom }} — créature invoquée : elle joue seule, {% if jp.sort_maintenu %}et reste tant que {{ jp.invocateur_nom or 'son invocateur' }} entretient le sort.{% else %}encore {{ jp.invocation_restants }} tour(s) avant de se dissiper.{% endif %}"{% endif %}>
 							{% if portraits_joueurs.get(actor_id, {}).get('image') %}<div class="ib-img" id="badge-portrait-{{ actor_id }}"></div>{% else %}<div class="ib-letter">{{ jp.nom[0] | upper if jp and jp.nom else '?' }}</div>{% endif %}
 							<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">
 								<path class="vit-track" d="M21 38 A17 17 0 0 1 21 4"></path>

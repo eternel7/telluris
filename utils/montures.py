@@ -96,6 +96,8 @@ def charge_max_monture(monture: dict, get_doc_fn=None) -> int:
 	à chaque appel (jamais dénormalisé sur la monture) : régler `charge_mult` en base
 	prend effet immédiatement, comme pour toute donnée d'équilibrage. Le HARNACHEMENT
 	(`bonus_charge_pct`) s'y ajoute, relu de même sur les docs item."""
+	if est_guide(monture):
+		return charge_max_of(monture)   # un guide porte comme un homme, sans multiplicateur
 	lire = get_doc_fn or get_doc
 	espece = lire(monture.get("espece", "")) if monture.get("espece") else None
 	pct = bonus_charge_pct(monture, lire)
@@ -121,7 +123,9 @@ SLOTS_MONTURE = ("monture_dos", "monture_tete", "monture_poitrail")
 
 
 def slot_admis(porteur: dict, slot: str) -> bool:
-	"""Une monture n'équipe que `SLOTS_MONTURE`, un personnage jamais."""
+	"""Une monture n'équipe que `SLOTS_MONTURE`, un personnage jamais, un guide rien."""
+	if est_guide(porteur):
+		return False
 	return (slot in SLOTS_MONTURE) == est_monture(porteur)
 
 
@@ -262,7 +266,8 @@ def montures_possedees(character: dict, get_doc_fn=None) -> list:
 def peut_acquerir(character: dict, espece_doc: dict, get_doc_fn=None) -> tuple[bool, str]:
 	"""(ok, raison) : plafond du troupeau (écurie comprise), puis fonds. L'ordre compte —
 	annoncer « bourse insuffisante » à quelqu'un qui a déjà son quota serait trompeur."""
-	if len(montures_possedees(character, get_doc_fn)) >= plafond_montures():
+	betes = [m for m in montures_possedees(character, get_doc_fn) if not est_guide(m)]
+	if len(betes) >= plafond_montures():
 		return False, "Vous ne pouvez pas mener davantage de montures."
 	if money_to_cuivre(character) < prix_de(espece_doc):
 		return False, "Vous n'avez pas de quoi payer cette monture."
@@ -288,7 +293,9 @@ def relacher(character: dict, monture: dict) -> tuple[bool, str]:
 	"""Rend sa liberté à une monture (miroir de `recrutement.congedier`, autorisé
 	partout). REFUSE tant qu'elle porte quelque chose : la relâcher chargée ferait
 	disparaître le butin sans que rien ne le signale — harnachement compris. Mute les deux
-	docs, sans save."""
+	docs, sans save. Un GUIDE ne se relâche pas : il se congédie à l'auberge (`guides.congedier`)."""
+	if est_guide(monture):
+		return False, "Un guide se congédie dans une auberge."
 	if monture.get("inventaire"):
 		return False, "Videz son sac avant de la relâcher."
 	if any((monture.get("slots") or {}).values()):
@@ -313,6 +320,11 @@ def tuer(character: dict, monture: dict) -> list:
 	monture["slots"] = {s: None for s in slots}
 	monture["statut"] = "morte"
 	monture["currentPV"] = 0
+	# Le cap qu'indiquait un guide meurt avec lui (lu ici sans importer `focalisation`, qui
+	# tire `quetes` et tout le moteur derrière lui).
+	focus = character.get("focalisation")
+	if isinstance(focus, dict) and focus.get("guide") == monture.get("_id"):
+		character["focalisation"] = None
 	monture.pop("acquise_par", None)
 	monture.pop("auras_recues", None)   # hors du troupeau, plus d'aura
 	character["montures"] = [
@@ -325,6 +337,13 @@ def tuer(character: dict, monture: dict) -> list:
 
 def est_monture(porteur: dict) -> bool:
 	return (porteur or {}).get("type") == "monture"
+
+
+def est_guide(porteur: dict) -> bool:
+	"""Guide local (utils/guides.py) : un doc `monture:*` portant le bloc `guide`. Il a le
+	statut d'une monture en combat, en portage et au tour de monde ; ce prédicat marque les
+	seules exceptions (plafond, relâche, harnachement, écurie, capacité)."""
+	return est_monture(porteur) and bool((porteur or {}).get("guide"))
 
 
 def charge_max_porteur(porteur: dict, get_doc_fn=None) -> int:

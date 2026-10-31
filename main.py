@@ -20,6 +20,7 @@ from routers.quetes import quetes_router
 from routers.pnj import pnj_router, marque_pnj as pnj_router_marque_pnj
 from routers.recrutement import recrutement_router
 from routers.montures import montures_router
+from routers.guides import guides_router
 from routers.proprietes import proprietes_router
 from routers.auberge import auberge_router
 from routers.scriptorium import scriptorium_router
@@ -217,6 +218,7 @@ app.include_router(quetes_router, prefix="/api")
 app.include_router(pnj_router, prefix="/api")
 app.include_router(recrutement_router, prefix="/api")
 app.include_router(montures_router, prefix="/api")
+app.include_router(guides_router, prefix="/api")
 app.include_router(proprietes_router, prefix="/api")
 app.include_router(auberge_router, prefix="/api")
 app.include_router(scriptorium_router, prefix="/api")
@@ -1301,7 +1303,10 @@ async def get_combat_page(
 		# `portrait_translate` absents) — le cadrage par défaut zoomerait sur un fragment.
 		# C'est le SERVEUR qui le dit : le client ne doit pas le déduire du dossier d'image.
 		entier = est_monture or est_invocation or bool(j.get("est_protege"))
-		if est_monture or est_invocation:
+		if (cdoc or {}).get("guide"):
+			# Guide local : un doc `monture:*`, mais illustré par un portrait de PERSONNE.
+			base, dossier = escorte_util.image_protege(img)
+		elif est_monture or est_invocation:
 			base, dossier = "/monsters", MONSTERS_IMAGES_PATH
 		elif j.get("est_protege"):
 			# Personne escortée : /pnj d'abord, /characters en dernier ressort — même

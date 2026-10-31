@@ -180,6 +180,14 @@ CATALOGUE = [
 			"de la quête de transport.",
 	},
 	{
+		"id": "gen_guides",
+		"label": "🧭 Générer le catalogue des guides locaux (rules:guides)",
+		"argv": _py("gen_guides.py"),
+		"ecrit": "Écrit jsons/guides_a_importer.json.",
+		"description": "Métiers, localisation, forfaits et répliques des guides d'auberge. Doc "
+			"neuf : refus si l'_id existe déjà dans le dump avec un autre contenu.",
+	},
+	{
 		"id": "gen_negociant",
 		"label": "⚖️ Générer le tenancier du négociant (pnj:marchand_negociant)",
 		"argv": _py("gen_negociant.py"),

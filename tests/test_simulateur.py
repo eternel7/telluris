@@ -190,6 +190,30 @@ def test_duel_joue_d_avance(jets_surs):
 	assert res["b"]["image_route"] == ""
 
 
+@pytest.mark.parametrize("spec", [
+	{"type": "espece", "id": "espece:ours_test"},    # branche monstre : `_check_victory`
+	{"type": "character", "id": CHARACTER["_id"]},   # branche joueur : `_traiter_ko`
+])
+def test_mort_du_poison_en_debut_de_tour_finit_le_duel(jets_surs, spec):
+	"""Le poison tue au début du tour du porteur, hors de tout coup : le duel se termine
+	sur le pseudo-doc (KeyError 'monstres' en prod), et le mort ne joue pas son tour."""
+	empoisonne = simulateur.construire_belligerant(spec, get_doc)
+	fabrique = empoisonne["fabrique"]
+	def fabrique_empoisonnee():
+		snap = fabrique()
+		snap["regen_pv_base"] = -100000   # létal dès le premier tick, quels que soient les PV
+		snap["initiative"] = 1000         # joue d'abord : il meurt avant tout coup adverse
+		return snap
+	empoisonne["fabrique"] = fabrique_empoisonnee
+	adversaire = simulateur.construire_belligerant({"type": "espece", "id": "espece:rat_test"}, get_doc)
+	journal = []
+	res = simulateur._derouler_duel(empoisonne, adversaire, 1, journal)
+	assert res["vainqueur"] == "b" and res["rounds"] == 1
+	assert not any(l["kind"] == "hit" and l["acteur"].startswith("[A]") and "poison" not in l["texte"]
+				   for l in journal)
+	assert not any("Défaite" in l["texte"] or "Victoire" in l["texte"] for l in journal)
+
+
 def test_approche_1d_coute_le_deplacement(jets_surs):
 	"""À distance 5, l'Ours (dép. 4, 3 actions) brûle son round 1 à approcher (3 cases =
 	3 AP) : son premier coup tombe au round 2. Le Rat, arrivé à 1 case à son tour du

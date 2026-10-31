@@ -50,6 +50,10 @@ def focalisation_effective(character: dict) -> dict | None:
 	if not f:
 		return None
 	if f["type"] == "lieu":
+		# Cap posé par un guide local : inerte si le guide n'accompagne plus le personnage —
+		# défense en profondeur, `guides` et `montures.tuer` l'effacent déjà.
+		if f.get("guide") and f["guide"] not in (character.get("montures") or []):
+			return None
 		return {"mode": "guidage", "lieu_cible": f["cible"], "source": "lieu", "quete_id": None}
 	if f["type"] == "quete":
 		q = quete_active(character, f["cible"])
@@ -102,9 +106,26 @@ def effacer_si_quete(character: dict, quete_id: str) -> bool:
 
 
 def effacer_si_lieu_atteint(character: dict, lieu_id: str) -> bool:
-	"""Efface la focalisation si c'est un guidage (lieu ou quête visite) vers ce lieu."""
+	"""Efface la focalisation si c'est un guidage (lieu ou quête visite) vers ce lieu.
+
+	Cap d'un guide posé pour une quête (`puis_quete`) : à l'arrivée, le 🎯 de cette quête prend
+	le relais s'il aurait un effet — le guide a mené au terrain, le biais des tirages y joue."""
 	eff = focalisation_effective(character)
 	if eff and eff.get("mode") == "guidage" and eff.get("lieu_cible") == lieu_id:
+		quete_id = (focalisation_de(character) or {}).get("puis_quete")
+		q = quete_active(character, quete_id) if quete_id else None
+		if q and quete_focalisable(q) and not objectif_atteint(character, q):
+			character["focalisation"] = {"type": "quete", "cible": quete_id, "posee_at": int(time.time())}
+		else:
+			character["focalisation"] = None
+		return True
+	return False
+
+
+def effacer_si_guide(character: dict, guide_id: str) -> bool:
+	"""Retire le cap posé par ce guide (forfait épuisé, congé). Le 🧭 du joueur n'est pas touché."""
+	f = focalisation_de(character)
+	if f and f.get("guide") == guide_id:
 		character["focalisation"] = None
 		return True
 	return False
@@ -211,6 +232,19 @@ def prochaine_etape(graphe: dict, depuis: str, vers: str) -> dict | None:
 		"porte": premiere["porte"],
 		"distance": distance,
 	}
+
+
+def distances_depuis(graphe: dict, depuis: str) -> dict:
+	"""{lieu_id: nombre de liens} pour tout lieu joignable depuis `depuis` (lui-même à 0)."""
+	vus = {depuis: 0}
+	file = deque([depuis])
+	while file:
+		cur = file.popleft()
+		for arete in graphe.get(cur, []):
+			if arete["voisin"] not in vus:
+				vus[arete["voisin"]] = vus[cur] + 1
+				file.append(arete["voisin"])
+	return vus
 
 
 # ── Direction dans le lieu courant (micro) ────────────────────────────────────

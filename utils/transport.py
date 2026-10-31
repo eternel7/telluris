@@ -261,6 +261,14 @@ def chercher_lieu_nomme(nom: str, giver_doc: dict, find_docs_fn) -> dict:
 	candidats = [(d["_id"], lieu_label(d, d["_id"]))
 				 for d in find_docs_fn({"type": "lieu", "lieu_parent": parent_id}) or []
 				 if d.get("_id") and d["_id"] != giver_id]
+	return chercher_parmi(nom, candidats)
+
+
+def chercher_parmi(nom: str, candidats: list) -> dict:
+	"""Le cœur de `chercher_lieu_nomme` sur une liste `[(lieu_id, libellé)]` déjà établie —
+	partagé avec le guide local, qui connaît plus large qu'une seule ville."""
+	if not nom:
+		return {}
 	cle = nom.casefold()
 	for lieu_id, label in candidats:
 		if label.casefold() == cle:

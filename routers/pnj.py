@@ -654,8 +654,11 @@ def _offre_traversee(character: dict, pnj_doc: dict, lieu_doc: dict | None) -> d
 		return None
 	if (route.get("depart") or {}).get("lieu") != lieu_doc.get("_id"):
 		return None
-	nb_passagers = len(expedition.membres(character, get_doc))
-	nb_montures = len(montures.montures_effectives(character, get_doc))
+	# Un guide est un doc `monture:*` mais il embarque comme une personne, pas comme une bête.
+	suiveurs = montures.montures_effectives(character, get_doc)
+	nb_guides = sum(1 for m in suiveurs if montures.est_guide(m))
+	nb_passagers = len(expedition.membres(character, get_doc)) + nb_guides
+	nb_montures = len(suiveurs) - nb_guides
 	cout = traversee_util.prix(route, nb_passagers, nb_montures)
 	return {"route": route, "cout": cout, "placeholders": {
 		"port_arrivee": nom_port_traversee(route),
