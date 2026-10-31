@@ -14,7 +14,9 @@
 #
 # Logique pure : DB injectée, mute sans sauver (l'appelant persiste). `random` passe par `rand`.
 
+import os
 import random
+import re
 import time
 import uuid
 
@@ -100,6 +102,8 @@ def metier_disponible(metier: dict, lieu_id: str, index: dict) -> bool:
 	offre = (metier or {}).get("offre") or {}
 	if offre.get("partout"):
 		return True
+	if set(offre.get("pays") or []) & {d["_id"] for d in chaine(lieu_id, index)}:
+		return True
 	if set(offre.get("traits") or []) & traits_cite(lieu_id, index):
 		return True
 	cite = cite_de(lieu_id, index) or {}
@@ -138,10 +142,33 @@ def equipement_de(metier: dict, get_doc_fn, rand=random) -> dict:
 	return slots
 
 
+PORTRAIT_GUIDE = re.compile(r"^guide_(.+)_([mf])_([a-z]+?)\d*\.(?:jpe?g|png|webp)$")
+
+
+def portraits_guide_disponibles() -> list:
+	"""Portraits propres aux guides : `pnj/guide_<type>_<sexe>_<lignée>NN.ext`."""
+	dossier = os.path.join(os.path.dirname(__file__), "..", "templates", "resources", "pnj")
+	try:
+		return [f for f in os.listdir(dossier) if f.lower().startswith("guide_")]
+	except OSError:
+		return []
+
+
+def choisir_portrait_guide(metier_id: str, metier: dict, sex: str, race: str, portraits: list,
+						   rand=random) -> str:
+	"""Portrait du type de ce guide, sexe et Lignée stricts ; le type du fichier est
+	`metier.portrait`, à défaut l'id du métier. Chaîne vide si aucun ne convient."""
+	cible = ((metier or {}).get("portrait") or metier_id, (sex or "M").lower(), (race or "").lower())
+	pool = [p for p in portraits or []
+			if (m := PORTRAIT_GUIDE.match(p.lower())) and m.groups() == cible]
+	return rand.choice(pool) if pool else ""
+
+
 def generer_guide(metier_id: str, lieu_doc: dict, index: dict, regles: dict, races: list,
-				  portraits: list, rand=random, get_doc_fn=None) -> dict | None:
-	"""Doc d'une offre. Nom et portrait suivent les règles des recrues (visage juste ou rien) ;
-	équipement selon le métier (⚠️ PORTÉ pour se défendre : il ne le cède pas au joueur)."""
+				  portraits: list, rand=random, get_doc_fn=None, portraits_guide=()) -> dict | None:
+	"""Doc d'une offre. Portrait propre au type (`portraits_guide`), sinon la règle des recrues
+	(visage juste ou rien) ; équipement selon le métier (⚠️ PORTÉ pour se défendre : il ne le
+	cède pas au joueur)."""
 	metier = ((regles or {}).get("metiers") or {}).get(metier_id)
 	if not metier or not races:
 		return None
@@ -163,7 +190,8 @@ def generer_guide(metier_id: str, lieu_doc: dict, index: dict, regles: dict, rac
 		"nom": rand.choice(recrutement.NOMS.get(race_id, recrutement.NOMS["defaut"])),
 		"race": race_id,
 		"sex": sex,
-		"image": recrutement.choisir_portrait(metier.get("portrait_voc", ""), sex, race_id, portraits),
+		"image": (choisir_portrait_guide(metier_id, metier, sex, race_id, portraits_guide, rand)
+				  or recrutement.choisir_portrait(metier.get("portrait_voc", ""), sex, race_id, portraits)),
 		"caracteristiques_current": caract,
 		"currentPV": 0,
 		"currentPM": 0,
@@ -186,7 +214,7 @@ def generer_guide(metier_id: str, lieu_doc: dict, index: dict, regles: dict, rac
 
 def remplir_tableau(lieu_doc: dict, index: dict, regles: dict, races: list, portraits: list,
 					find_docs_fn, save_doc_fn, delete_doc_fn, now: int | None = None, rand=random,
-					get_doc_fn=None) -> list:
+					get_doc_fn=None, portraits_guide=()) -> list:
 	"""Purge les offres périmées puis complète jusqu'à `tableau_nb`, en variant les métiers.
 	Une offre est partagée entre joueurs, comme une recrue au tableau de la guilde."""
 	now = int(time.time()) if now is None else now
@@ -205,7 +233,8 @@ def remplir_tableau(lieu_doc: dict, index: dict, regles: dict, races: list, port
 	sac = [m for m in metiers if m not in presents] or list(metiers)
 	rand.shuffle(sac)
 	for i in range(manque):
-		guide = generer_guide(sac[i % len(sac)], lieu_doc, index, regles, races, portraits, rand, get_doc_fn)
+		guide = generer_guide(sac[i % len(sac)], lieu_doc, index, regles, races, portraits, rand, get_doc_fn,
+							  portraits_guide)
 		if guide and save_doc_fn(guide) is not None:
 			offres.append(guide)
 	return offres

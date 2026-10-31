@@ -67,7 +67,8 @@ def _tableau(character: dict, lieu_doc: dict) -> dict:
 	index = guides.index_lieux(find_docs)
 	races = (get_doc("rules:races") or {}).get("value") or []
 	offres = guides.remplir_tableau(lieu_doc, index, regles, races, recrutement.portraits_disponibles(),
-									find_docs, save_doc, delete_doc, get_doc_fn=get_doc)
+									find_docs, save_doc, delete_doc, get_doc_fn=get_doc,
+									portraits_guide=guides.portraits_guide_disponibles())
 	return {"offres": [_offre_view(o, regles, index) for o in offres], **_resync(character)}
 
 

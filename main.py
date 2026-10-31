@@ -36,6 +36,7 @@ from utils.auth import get_current_user, create_access_token, expiration_acces
 from utils import session as session_util
 from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of, credit_character, marquer_joue
 from utils import derniers_joues as derniers_joues_util
+from utils.statiques import PortraitsStatic
 from utils import quetes
 from utils import donjon as donjon_util
 from utils import dump as dump_util
@@ -193,7 +194,8 @@ app.mount("/icons", StaticFiles(directory="templates/resources/icons"), name="ic
 # Polices hébergées (ex-Google Fonts) : cf. templates/part-polices.html.
 app.mount("/polices", StaticFiles(directory="templates/resources/polices"), name="polices")
 CHARACTERS_IMAGES_PATH = "templates/resources/characters"
-app.mount("/characters", StaticFiles(directory=CHARACTERS_IMAGES_PATH), name="characters")
+PNJ_IMAGES_PATH = "templates/resources/pnj"
+app.mount("/characters", PortraitsStatic(directory=CHARACTERS_IMAGES_PATH, dossier_guides=PNJ_IMAGES_PATH), name="characters")
 BATTLE_MAPS_IMAGES_PATH = "templates/resources/battle_maps"
 app.mount("/battle_maps", StaticFiles(directory=BATTLE_MAPS_IMAGES_PATH), name="battle_maps")
 MAPS_IMAGES_PATH = "templates/resources/maps"
@@ -202,7 +204,6 @@ TOWNS_IMAGES_PATH = "templates/resources/towns"
 app.mount("/towns", StaticFiles(directory=TOWNS_IMAGES_PATH), name="towns")
 MONSTERS_IMAGES_PATH = "templates/resources/monsters"
 app.mount("/monsters", StaticFiles(directory=MONSTERS_IMAGES_PATH), name="monsters")
-PNJ_IMAGES_PATH = "templates/resources/pnj"
 app.mount("/pnj", StaticFiles(directory=PNJ_IMAGES_PATH), name="pnj")
 # Sons des animations de combat — servis au COMBAT comme à l'éditeur (/admin/animations).
 # ⚠️ Des noms de fichiers contiennent des espaces (« melee sound.wav ») : côté client, tout
