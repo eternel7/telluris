@@ -91,9 +91,10 @@ OSSUAIRE = "lieu:catacombes0003"
 GARGOUILLE = "espece:gargouille"
 MINOTAURE = "espece:minotaure"
 
-# Récompenses : même rapport cuivre/XP que l'épreuve du rang C recalée (3000 cu pour 150 XP).
-RECOMPENSES_B = {"xp": 250, "cuivre": 5000, "rang_guilde": "B"}
-RECOMPENSES_A = {"xp": 400, "cuivre": 8000, "rang_guilde": "A"}
+# Récompenses : XP d'origine (250, 400) + tiers du niveau d'entrée du rang visé
+# (`chasse.xp_promotion`, Auteur, 31/10 ; verrouillé par test_xp_des_epreuves_de_maelys). Cuivre inchangé.
+RECOMPENSES_B = {"xp": 1633, "cuivre": 5000, "rang_guilde": "B"}
+RECOMPENSES_A = {"xp": 2117, "cuivre": 8000, "rang_guilde": "A"}
 
 # Zone de la carte de France où la Gargouille rejoint les rencontres : les berges (la Seine
 # traverse Lutecia et Rouen). Trophée au hasard, grade de la zone (Auteur, 25/10).

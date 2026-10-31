@@ -162,7 +162,7 @@ def maelys(doc: dict) -> dict:
 				"les ruines de l'abbaye de Jumièges, en Normandie, où un portail s'est ouvert : "
 				"escortez-la, ramenez-la vivante, puis revenez rendre compte au bureau de la "
 				"maîtresse. Le rang C est au bout."),
-			"recompenses": {"xp": 150, "cuivre": 20000, "rang_guilde": "C"},
+			"recompenses": {"xp": 1200, "cuivre": 20000, "rang_guilde": "C"},  # 150 + chasse.xp_promotion("C")
 		},
 		"noeuds": {
 			"propose": "rang_c_propose",

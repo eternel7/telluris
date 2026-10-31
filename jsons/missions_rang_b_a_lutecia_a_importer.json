@@ -1574,7 +1574,7 @@
               "retour": true,
               "rang": "B",
               "recompenses": {
-                "xp": 250,
+                "xp": 1633,
                 "cuivre": 5000,
                 "rang_guilde": "B"
               }
@@ -1604,7 +1604,7 @@
               "retour": true,
               "rang": "B",
               "recompenses": {
-                "xp": 250,
+                "xp": 1633,
                 "cuivre": 5000,
                 "rang_guilde": "B"
               }
@@ -1629,7 +1629,7 @@
               "unique": true,
               "rang": "B",
               "recompenses": {
-                "xp": 250,
+                "xp": 1633,
                 "cuivre": 5000,
                 "rang_guilde": "B"
               }
@@ -1650,7 +1650,7 @@
               "unique": true,
               "rang": "A",
               "recompenses": {
-                "xp": 400,
+                "xp": 2117,
                 "cuivre": 8000,
                 "rang_guilde": "A"
               }
@@ -1671,7 +1671,7 @@
               "unique": true,
               "rang": "A",
               "recompenses": {
-                "xp": 400,
+                "xp": 2117,
                 "cuivre": 8000,
                 "rang_guilde": "A"
               }
@@ -1692,7 +1692,7 @@
               "unique": true,
               "rang": "A",
               "recompenses": {
-                "xp": 400,
+                "xp": 2117,
                 "cuivre": 8000,
                 "rang_guilde": "A"
               }
@@ -1727,7 +1727,7 @@
               "proba": 1,
               "rang": "B",
               "recompenses": {
-                "xp": 250,
+                "xp": 1633,
                 "cuivre": 5000,
                 "rang_guilde": "B"
               }
@@ -1784,7 +1784,7 @@
               "proba": 1,
               "rang": "A",
               "recompenses": {
-                "xp": 400,
+                "xp": 2117,
                 "cuivre": 8000,
                 "rang_guilde": "A"
               },
@@ -1824,7 +1824,7 @@
               "proba": 1,
               "rang": "A",
               "recompenses": {
-                "xp": 400,
+                "xp": 2117,
                 "cuivre": 8000,
                 "rang_guilde": "A"
               }

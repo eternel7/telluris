@@ -404,6 +404,13 @@ RANG_GUILDE_MAX_DEFAUT: str = "D"
 QUETE_RANG_POTENTIEL_MIN: dict[str, float] = {
 	"E": 25.0, "D": 50.0, "C": 105.0, "B": 175.0, "A": 250.0, "S": 400.0, "S+": 600.0,
 }
+# Part de PROMOTION d'une épreuve de rang, ajoutée à l'XP de la bête (Auteur, 31/10) : le TIERS du
+# coût du niveau d'entrée du rang VISÉ (chasse.xp_promotion). Niveaux d'entrée : table des rangs
+# de la Guilde (Auteur, 12/08). Rang absent ⇒ aucune part. Le cuivre ne la suit pas.
+QUETE_RANG_NIVEAU_ENTREE: dict[str, int] = {
+	"E": 10, "D": 21, "C": 31, "B": 41, "A": 51, "S": 61, "S+": 81,
+}
+QUETE_RANG_PART_NIVEAU: float = 1 / 3
 
 # ── Focalisation ─────────────────────────────────────────────────────────────────
 # Le personnage peut se focaliser sur une quête active : les tirages aléatoires sont
@@ -1024,6 +1031,8 @@ def current_world_variables() -> dict:
 		"QUETE_CHASSE_PROBA_RANG": QUETE_CHASSE_PROBA_RANG,
 		"RANG_GUILDE_MAX_DEFAUT": RANG_GUILDE_MAX_DEFAUT,
 		"QUETE_RANG_POTENTIEL_MIN": dict(QUETE_RANG_POTENTIEL_MIN),
+		"QUETE_RANG_NIVEAU_ENTREE": dict(QUETE_RANG_NIVEAU_ENTREE),
+		"QUETE_RANG_PART_NIVEAU": QUETE_RANG_PART_NIVEAU,
 		"FOCUS_EVENEMENT_MULT": FOCUS_EVENEMENT_MULT,
 		"FOCUS_CIBLE_MULT": FOCUS_CIBLE_MULT,
 		"SORT_COUT_COEFF": SORT_COUT_COEFF,
@@ -1147,6 +1156,7 @@ def load_world_variables() -> dict:
 	global QUETE_REUSSITE_RELATION_DELTA
 	global QUETE_TRANSPORT_STOCK_PROBA, QUETE_TRANSPORT_RELATION_MIN
 	global QUETE_CHASSE_XP_FACTEUR, QUETE_CHASSE_PROBA_RANG, RANG_GUILDE_MAX_DEFAUT
+	global QUETE_RANG_PART_NIVEAU
 	global FOCUS_EVENEMENT_MULT, FOCUS_CIBLE_MULT
 	global SORT_COUT_COEFF, MAGIE_ECOLE_COUT_COEFF, COMPETENCE_COUT_COEFF
 	global CHARGE_MAGIE_FRANCHISE, CHARGE_MAGIE_PEN_MAX, CHARGE_MAGIE_PENTE_SURCHARGE
@@ -1327,6 +1337,17 @@ def load_world_variables() -> dict:
 				continue
 		QUETE_RANG_POTENTIEL_MIN.clear()
 		QUETE_RANG_POTENTIEL_MIN.update(planchers)
+	# Même patron : dict MUTÉ EN PLACE, valeur illisible écartée.
+	if isinstance(v.get("QUETE_RANG_NIVEAU_ENTREE"), dict):
+		entrees = {}
+		for rang, niveau in v["QUETE_RANG_NIVEAU_ENTREE"].items():
+			try:
+				entrees[str(rang)] = int(niveau)
+			except (TypeError, ValueError):
+				continue
+		QUETE_RANG_NIVEAU_ENTREE.clear()
+		QUETE_RANG_NIVEAU_ENTREE.update(entrees)
+	QUETE_RANG_PART_NIVEAU = max(0.0, float(v.get("QUETE_RANG_PART_NIVEAU", QUETE_RANG_PART_NIVEAU)))
 
 	FOCUS_EVENEMENT_MULT = float(v.get("FOCUS_EVENEMENT_MULT", FOCUS_EVENEMENT_MULT))
 	FOCUS_CIBLE_MULT     = float(v.get("FOCUS_CIBLE_MULT", FOCUS_CIBLE_MULT))

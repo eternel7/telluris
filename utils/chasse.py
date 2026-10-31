@@ -560,6 +560,16 @@ def _lieu_nom(lieu_doc: dict) -> str:
 	return lieu_label(lieu_doc)
 
 
+def xp_promotion(rang_vise: str) -> int:
+	"""XP payant la PROMOTION d'une épreuve : `QUETE_RANG_PART_NIVEAU` du coût du niveau d'entrée
+	du rang visé, 0 si ce rang n'a pas de niveau d'entrée. Lu via le module (world-var)."""
+	niveau = (character_stats.QUETE_RANG_NIVEAU_ENTREE or {}).get(rang_vise)
+	if niveau is None:
+		return 0
+	cout = character_stats.xp_seuil_niveau(niveau + 1) - character_stats.xp_seuil_niveau(niveau)
+	return round(cout * character_stats.QUETE_RANG_PART_NIVEAU)
+
+
 def _construire_quete_rang(comptoir_doc: dict, cite: str, lieu_doc: dict, espece_doc: dict,
                            position: dict | None, profil_id: str, rang_courant: str, get_doc_fn) -> dict:
 	"""Doc `quete:*` d'une épreuve de rang (non persisté ; l'accept en fait un snapshot)."""
@@ -569,8 +579,9 @@ def _construire_quete_rang(comptoir_doc: dict, cite: str, lieu_doc: dict, espece
 	nom = espece_doc.get("nom", "créature")
 	lieu_nom = _lieu_nom(lieu_doc)
 	rang_vise = rang_suivant(rang_courant)
-	xp = max(1, round(quetes._xp_unitaire(espece_doc, niv) * character_stats.QUETE_CHASSE_XP_FACTEUR))
-	cuivre = max(0, round(xp * character_stats.QUETE_CUIVRE_PAR_XP))
+	xp_bete = max(1, round(quetes._xp_unitaire(espece_doc, niv) * character_stats.QUETE_CHASSE_XP_FACTEUR))
+	xp = xp_bete + xp_promotion(rang_vise)
+	cuivre = max(0, round(xp_bete * character_stats.QUETE_CUIVRE_PAR_XP))
 	objectif = {
 		"type": "chasse",
 		"cible": espece_doc["_id"],
