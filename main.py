@@ -36,6 +36,7 @@ from utils.auth import get_current_user, create_access_token, expiration_acces
 from utils import session as session_util
 from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of, credit_character, marquer_joue
 from utils import derniers_joues as derniers_joues_util
+from utils import aide as aide_util
 from utils.statiques import PortraitsStatic
 from utils import quetes
 from utils import donjon as donjon_util
@@ -1171,6 +1172,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"chute_vol": chute_vol,
 			# Portée réelle d'une arme de jet sur la fiche objet (miroir de combat._weapon_attacks).
 			"jet_portee_f_div": character_stats.JET_PORTEE_F_DIV,
+			# Aide au démarrage (bouton ? de la carte) : facteur d'armure, table des dés, monnaie.
+			"aide_regles": aide_util.regles_aide(),
 			# stat_caps, xp_coeff/xp_voc_coeff, xp_niv_prev/next, effets_actifs,
 			# caracts_detail, sorts*, competences* — cf. utils/fiche.bloc_fiche.
 			**fiche_bloc,

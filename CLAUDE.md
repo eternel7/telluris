@@ -71,6 +71,8 @@ utils/
                          #   renouvelle AVANT tout endpoint et pose `x-session: aucune` sans session
   characters.py          # get/selected character, sync_equipment_bonus, grant_xp,
                          #   carried_weight, charge_max_of, références d'items (item_ref_*)
+  aide.py                # aide au démarrage de /play (pur) : chiffres RELUS (facteur d'armure, dés, monnaie) ;
+                         #   texte dans `#aide-overlay`, bouton « ? » = `aide=true` de la carte, masquable par ⚙️
   fiche.py               # source unique du contenu des onglets Stats et ⚡ (bloc_fiche, derived_de, stat_caps, race_de)
   derniers_joues.py      # /admin/personnages-recents (pur) : tri sur `dernier_jeu`, emplacement (lieu + parents, combat, mer)
   lieux.py               # lieu_router, movement logic, navigation bitmask
