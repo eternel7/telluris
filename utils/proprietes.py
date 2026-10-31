@@ -30,7 +30,9 @@
 #
 # Pattern utils/montures.py : logique PURE, DB injectée, mute sans jamais sauvegarder.
 
+import os
 import random
+import re
 import time
 import uuid
 
@@ -1240,8 +1242,46 @@ def categories_du_poste(adef: dict, metier_id) -> list:
 
 # ── Tableau d'embauche ───────────────────────────────────────────────────────────
 
-def _candidat(am_id, mdef: dict, race: str, portrait: str, rand, categorie=None, modele=None) -> dict:
-	sex = rand.choice(["M", "F"])
+# Portraits `pnj/personnel_<groupe>_<sexe>_<lignée>NN.ext` : des métiers proches partagent leurs
+# images (dev/gabarits_personnel.py, relu par test). Un métier hors table garde la règle d'avant.
+GROUPE_PORTRAIT = {
+	"garde": "garde", "gardien": "garde",
+	"erudit": "lettre", "bibliothecaire": "lettre", "intendant": "lettre",
+	"medecin": "soin", "apothicaire": "soin", "alchimiste": "soin",
+	"artisan": "atelier", "marchand": "atelier",
+	"cuisinier": "bouche", "boucher": "bouche",
+	"domestique": "domestique",
+	"jardinier": "service", "palefrenier": "service",
+}
+PORTRAIT_PERSONNEL = re.compile(r"^personnel_([a-z]+)_([mf])_([a-z]+?)\d*\.(?:jpe?g|png|webp)$")
+
+
+def portraits_personnel_disponibles() -> list:
+	dossier = os.path.join(os.path.dirname(__file__), "..", "templates", "resources", "pnj")
+	try:
+		return [f for f in os.listdir(dossier) if f.lower().startswith("personnel_")]
+	except OSError:
+		return []
+
+
+def _visage(metier_id, portraits_personnel, rand, pris=()) -> tuple | None:
+	"""(race, sexe, portrait) du groupe de ce métier : Lignée puis sexe à chances égales, quel que
+	soit le nombre d'images de chacun. Évite les images `pris` (candidats du tableau et employés
+	de la propriété : pas deux fois un visage) ; groupe épuisé : on réutilise plutôt que de sortir du groupe. None si le
+	groupe n'a aucune image."""
+	groupe = GROUPE_PORTRAIT.get(metier_id)
+	pool = [(m.group(3), m.group(2), p) for p in portraits_personnel or []
+			if (m := PORTRAIT_PERSONNEL.match(p.lower())) and m.group(1) == groupe]
+	if not pool:
+		return None
+	pool = [v for v in pool if v[2] not in pris] or pool
+	race = rand.choice(sorted({r for r, _, _ in pool}))
+	sexe = rand.choice(sorted({s for r, s, _ in pool if r == race}))
+	return race, sexe.upper(), rand.choice([p for r, s, p in pool if r == race and s == sexe])
+
+
+def _candidat(am_id, mdef: dict, race: str, portrait: str, rand, categorie=None, modele=None, sex=None) -> dict:
+	sex = sex or rand.choice(["M", "F"])
 	prenoms = recrutement.prenoms_possibles(race, sex)
 	noms = recrutement.NOMS.get(race) or recrutement.NOMS["defaut"]
 	c = {
@@ -1262,13 +1302,15 @@ def _candidat(am_id, mdef: dict, race: str, portrait: str, rand, categorie=None,
 
 
 def generer_candidats(prop: dict, cat: dict, employes: list, get_doc_fn=None,
-					  portraits=None, rand=random) -> list:
+					  portraits=None, rand=random, portraits_personnel=()) -> list:
 	"""Un candidat par poste libre — et, pour un poste marchand, un par catégorie ouverte dont
-	le marchand générique `pnj:marchand_<cat>` existe : le candidat en reprend le portrait et
-	la race, mais porte un nom TIRÉ (deux joueurs n'embauchent pas le même Maître Fromond).
+	le marchand générique `pnj:marchand_<cat>` existe. Visage tiré dans les portraits du groupe
+	du métier (`_visage`), à défaut celui du modèle ou de la règle des recrues ; le nom est
+	TIRÉ (deux joueurs n'embauchent pas le même Maître Fromond).
 	Une Salle de gestion tenue (`effets_poste.candidats_bonus`) ajoute des candidats par poste."""
 	return _candidats_pour(postes_libres(prop, cat, employes), cat, get_doc_fn, portraits, rand,
-						   candidats_par_poste(prop, cat, employes))
+						   candidats_par_poste(prop, cat, employes), portraits_personnel,
+						   {e.get("portrait") for e in employes})
 
 
 def candidats_par_poste(prop: dict, cat: dict, employes: list) -> int:
@@ -1276,9 +1318,18 @@ def candidats_par_poste(prop: dict, cat: dict, employes: list) -> int:
 	return 1 + max([_int(v) for v in valeurs_effet(prop, cat, employes, "candidats_bonus")], default=0)
 
 
-def _candidats_pour(postes: list, cat: dict, get_doc_fn, portraits, rand, n: int = 1) -> list:
+def _candidats_pour(postes: list, cat: dict, get_doc_fn, portraits, rand, n: int = 1, portraits_personnel=(),
+					deja_pris=()) -> list:
 	lire = get_doc_fn or get_doc
 	out = []
+	pris = set(deja_pris)
+
+	def visage(metier_id):
+		v = _visage(metier_id, portraits_personnel, rand, pris)
+		if v:
+			pris.add(v[2])
+		return v
+
 	for p in postes:
 		mdef = metier_def(cat, p["metier"])
 		if not mdef:
@@ -1290,16 +1341,18 @@ def _candidats_pour(postes: list, cat: dict, get_doc_fn, portraits, rand, n: int
 				for c in cats:
 					modele = lire(MODELE_PREFIXE + c)
 					if modele:
-						out.append(_candidat(p["amenagement"], mdef, modele.get("race") or RACE_PERSONNEL,
-											 modele.get("portrait", ""), rand, c, modele["_id"]))
+						race, sex, portrait = (visage(p["metier"])
+											   or (modele.get("race") or RACE_PERSONNEL, None, modele.get("portrait", "")))
+						out.append(_candidat(p["amenagement"], mdef, race, portrait, rand, c, modele["_id"], sex))
 			else:
-				portrait = rand.choice(portraits) if portraits else ""
-				out.append(_candidat(p["amenagement"], mdef, RACE_PERSONNEL, portrait, rand))
+				race, sex, portrait = (visage(p["metier"])
+									   or (RACE_PERSONNEL, None, rand.choice(portraits) if portraits else ""))
+				out.append(_candidat(p["amenagement"], mdef, race, portrait, rand, sex=sex))
 	return out
 
 
 def rafraichir_candidats(prop: dict, cat: dict, employes: list, get_doc_fn=None, portraits=None,
-						 now: int | None = None, rand=random, force: bool = False) -> bool:
+						 now: int | None = None, rand=random, force: bool = False, portraits_personnel=()) -> bool:
 	"""Péremption PARESSEUSE du tableau. Tableau valide : on retire les candidats dont le
 	poste a été pourvu entre-temps, et on complète — sans re-tirer les autres — les postes
 	libres qui n'ont plus (poste pourvu en partie) ou pas encore (aménagement installé
@@ -1311,12 +1364,13 @@ def rafraichir_candidats(prop: dict, cat: dict, employes: list, get_doc_fn=None,
 		gardes = [c for c in prop["candidats"] if (c.get("amenagement"), c.get("metier")) in libres]
 		couverts = {(c.get("amenagement"), c.get("metier")) for c in gardes}
 		gardes += _candidats_pour([p for p in postes if (p["amenagement"], p["metier"]) not in couverts],
-								  cat, get_doc_fn, portraits, rand, candidats_par_poste(prop, cat, employes))
+								  cat, get_doc_fn, portraits, rand, candidats_par_poste(prop, cat, employes), portraits_personnel,
+								  {x.get("portrait") for x in gardes + employes})
 		if gardes == prop["candidats"]:
 			return False
 		prop["candidats"] = gardes
 		return True
-	prop["candidats"] = generer_candidats(prop, cat, employes, get_doc_fn, portraits, rand)
+	prop["candidats"] = generer_candidats(prop, cat, employes, get_doc_fn, portraits, rand, portraits_personnel)
 	prop["candidats_expire_at"] = now + _int(reglages(cat).get("candidats_duree_s"), 86400)
 	return True
 

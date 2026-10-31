@@ -507,7 +507,8 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 			if change and save_doc(e) is not None:
 				ateliers += 1
 		proprietes.rafraichir_candidats(lieu_doc, cat_prop, employes, get_doc,
-										recrutement.portraits_disponibles(), force=True)
+										recrutement.portraits_disponibles(), force=True,
+										portraits_personnel=proprietes.portraits_personnel_disponibles())
 		# Le flux se referme SUR le doc de la propriété : s'il n'a pas bougé, on sauve quand
 		# même le doc pour ses candidats renouvelés.
 		if not persister_flux(flux_prop, save_doc):

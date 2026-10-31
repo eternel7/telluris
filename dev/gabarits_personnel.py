@@ -1,0 +1,95 @@
+# dev/gabarits_personnel.py
+# Gabarits des portraits du personnel de propriété (dev/gen_images_personnel.py) : 10 VARIANTES
+# par groupe. Une image doit convenir à TOUS les métiers de son groupe : tenues et décors neutres.
+# Ce ne sont que des EXEMPLES : le prompt laisse le modèle libre d'en sortir.
+#
+#   GROUPES[groupe] = (métiers, qui, [(objet en main, tenue, décor) × 10])
+#
+# ⚠️ Aucun nom propre, aucun texte, aucun symbole religieux (docs/prompts_images.md §0).
+
+GROUPES = {
+	"garde": (["garde", "gardien"], "veille sur une maison et sur ceux qui y entrent", [
+		("une lance courte tenue droite", "brigandine de cuir, cape de laine", "porte cochère d'une demeure de pierre"),
+		("une lanterne de ronde", "cotte de mailles courte sous un surcot sans blason", "cour pavée à la tombée de la nuit"),
+		("un trousseau de clés de fer", "jaque matelassé, ceinture large", "couloir de pierre aux portes de chêne"),
+		("une épée courte au fourreau", "plastron de cuir bouilli, gants épais", "seuil d'une maison bourgeoise, au matin"),
+		("un bâton ferré", "manteau sombre sur une armure légère", "petite loge près d'une entrée"),
+		("une hachette à la ceinture", "gilet clouté, bottes solides", "muret de clôture et portail de bois"),
+		("une torche de résine", "casque ouvert, tunique de laine", "escalier extérieur d'un logis"),
+		("une arbalète légère au repos", "cuir sombre, foulard au cou", "chemin de ronde d'un petit domaine"),
+		("un petit bouclier rond sans aucun motif", "cape courte, épaulières de cuir", "passage voûté, ombre et lumière"),
+		("une chope de ronde, l'autre main sur le pommeau", "tunique rapiécée, ceinturon usé", "banc de pierre près d'une poterne"),
+	]),
+	"lettre": (["erudit", "bibliothecaire", "intendant"], "met son savoir et son sens de l'ordre au service d'une maison", [
+		("un gros registre fermé", "robe sombre aux manches larges", "pièce lambrissée, étagères de livres aux dos sans aucune lettre"),
+		("une plume et un encrier", "pourpoint sobre, col clair", "bureau de chêne éclairé d'une chandelle"),
+		("un trousseau de petites clés", "longue tunique de laine fine", "couloir tapissé d'une demeure"),
+		("un rouleau sans aucune écriture visible", "chaperon d'étoffe, manteau doublé", "alcôve près d'une fenêtre à meneaux"),
+		("un livre ouvert aux pages sans écriture lisible", "lunettes de corne, gilet usé", "échelle de bois contre de hauts rayonnages"),
+		("une petite balance de comptes", "habit bien coupé et passé de mode", "cabinet de travail, coffre et jetons"),
+		("une pile de livres serrée contre soi", "robe de lin gris, ceinture de corde", "salle haute baignée de lumière"),
+		("un sablier de table", "manteau d'intérieur brodé de motifs géométriques", "table couverte de cartes sans aucune lettre"),
+		("une tablette de cire vierge", "chemise claire, veste de velours élimée", "palier d'un grand escalier"),
+		("une chandelle dans un bougeoir", "bonnet de drap, manches protégées de lustrine", "pièce d'archives voûtée"),
+	]),
+	"soin": (["medecin", "apothicaire", "alchimiste"], "soigne les gens d'une maison et prépare remèdes et décoctions", [
+		("une fiole de verre levée à la lumière", "robe sombre, tablier de toile", "pièce aux étagères de bocaux sans étiquette"),
+		("un mortier et son pilon", "manches retroussées, tablier taché", "table de préparation, bouquets d'herbes séchées"),
+		("une sacoche de cuir ouverte", "manteau long à col montant", "chevet d'une chambre sobre"),
+		("un bouquet d'herbes médicinales", "tunique de lin vert passé", "petit cabinet ouvert sur un jardin clos"),
+		("un alambic de cuivre miniature", "gants de cuir fin, foulard au cou", "salle voûtée, petit fourneau rougeoyant"),
+		("une bande de lin roulée", "tablier blanc sur une robe simple", "salle claire, lit étroit et bassine"),
+		("un flacon bleu et un petit entonnoir", "gilet aux nombreuses poches", "paillasse de bois couverte de cornues"),
+		("un petit couteau à simples", "chapeau de feutre, cape légère", "seuil d'une officine sans aucune enseigne"),
+		("une boîte à onguents en bois", "robe de laine fine, ceinture à fioles", "armoire à tiroirs sans aucune étiquette"),
+		("une chandelle et un cristal terne", "tunique sombre aux manches larges", "cabinet encombré de bocaux et de cornues"),
+	]),
+	"atelier": (["artisan", "marchand"], "tient atelier et comptoir, fabrique et vend ses ouvrages", [
+		("une petite balance de marchand", "gilet de cuir, chemise claire", "comptoir de bois chargé d'ouvrages"),
+		("un maillet de bois", "tablier de cuir, manches retroussées", "établi d'atelier ouvert sur une cour"),
+		("un coffret de marchandises ouvert", "pourpoint soigné, chapeau de feutre", "boutique aux étagères garnies, sans aucune enseigne"),
+		("une pièce de cuir à examiner", "tablier de toile épaisse", "atelier aux outils pendus au mur"),
+		("une bourse et quelques pièces", "robe de laine bien coupée, ceinture de cuir", "arrière-boutique, caisses et ballots"),
+		("une équerre de bois", "veste courte, foulard de couleur", "atelier baigné de lumière, copeaux au sol"),
+		("un rouleau d'étoffe", "chaperon d'étoffe, manteau doublé", "réserve aux tissus empilés"),
+		("une pince et un petit ouvrage de métal", "tablier roussi, gants usés", "petite forge d'atelier, braises"),
+		("un coffret de jetons de compte", "tunique ample, manches larges", "table de comptes près d'une fenêtre"),
+		("un pot de terre qu'on présente", "chemise tachée de travail, gilet simple", "étal sous un auvent de maison"),
+	]),
+	"bouche": (["cuisinier", "boucher"], "prépare les viandes et les repas d'une maison", [
+		("un grand couteau de cuisine", "tablier de toile épaisse, manches retroussées", "cuisine voûtée, grande cheminée"),
+		("une louche de fer", "tablier blanc, foulard sur les cheveux", "table de bois et marmite fumante"),
+		("un couperet tenu bas", "tablier de cuir, bras nus", "salle carrelée, crochets vides aux poutres"),
+		("une planche à découper", "chemise de lin, ceinture de corde", "cellier frais, jambons fumés suspendus"),
+		("un pain rond et un couteau", "tablier enfariné, bonnet de toile", "four de briques rougeoyant"),
+		("une pièce de viande emballée de toile", "gilet de laine, tablier usé", "garde-manger de pierre"),
+		("une longue fourchette à rôtir", "manches relevées, joues rougies par le feu", "broche dans une haute cheminée"),
+		("un fusil à aiguiser et une lame", "tablier sombre, sabots", "billot de bois massif, sans sang"),
+		("un panier d'oignons et de thym", "robe simple, tablier noué", "cuisine ouverte sur une arrière-cour"),
+		("une chope de bouillon qu'on goûte", "tablier reprisé, torchon à l'épaule", "cuisine de maison, casseroles de cuivre"),
+	]),
+	"domestique": (["domestique"], "tient une maison au quotidien : ménage, linge, service à table et soin des pièces", [
+		("une pile de linge plié", "robe de laine grise, tablier blanc, coiffe de toile", "couloir d'une demeure, fenêtre ouverte"),
+		("un plateau de bois chargé d'un pichet et de gobelets", "tunique sombre bien tenue, tablier noué", "salle à manger aux lourdes tables de chêne"),
+		("un plumeau", "gilet boutonné, chemise claire, manches relevées", "salon aux tentures passées, cheminée éteinte"),
+		("un bougeoir de cuivre allumé", "livrée simple sans aucun emblème", "palier d'un escalier de bois ciré, au soir"),
+		("un balai de genêt", "robe simple, tablier reprisé", "chambre de maître, lit à baldaquin en cours de rangement"),
+		("un seau et un chiffon", "manches retroussées, tablier de toile épaisse", "dallage de pierre fraîchement lavé, dans une grande pièce"),
+		("une cruche d'eau et une serviette", "veste courte de drap, col propre", "chambre sobre, table de toilette"),
+		("une brosse à habits et un manteau sur le bras", "pourpoint sobre de domestique", "antichambre près d'une porte de chêne"),
+		("un trousseau de petites clés et un panier à linge", "robe de drap bleu passé, ceinture de cuir", "lingerie aux armoires ouvertes"),
+		("une nappe qu'on déplie", "tenue de service claire, foulard noué", "grande table qu'on dresse, chandeliers"),
+	]),
+	"service": (["jardinier", "palefrenier"], "assure les travaux de chaque jour des terres et des dépendances d'une maison", [
+		("un seau de bois", "tunique de toile, sabots", "arrière-cour d'une maison de pierre"),
+		("un panier d'osier", "tablier simple, foulard", "porte de service au matin"),
+		("une brosse de crin", "gilet de laine, manches retroussées", "cour pavée près d'un puits"),
+		("une lanterne simple", "chemise de lin, braies usées", "passage couvert au crépuscule"),
+		("une corde enroulée", "veste de toile, chapeau de paille", "muret de pierre sèche et barrière de bois"),
+		("une pile de linge plié", "robe de laine grise, coiffe de toile", "couloir d'une demeure, fenêtre ouverte"),
+		("une serpette de travail", "tablier de grosse toile, bottes crottées", "allée de terre le long d'un mur"),
+		("un balai de genêt", "tunique rapiécée, ceinture de corde", "seuil d'une grande maison"),
+		("une musette de toile sur l'épaule", "chemise claire, gilet de cuir simple", "dépendance de bois, toit de chaume"),
+		("une pelle de bois", "manteau court de travail, bonnet de laine", "cour de ferme bien tenue, au petit jour"),
+	]),
+}

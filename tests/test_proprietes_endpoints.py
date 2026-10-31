@@ -346,13 +346,13 @@ def _marchand(monde, proprio):
 	return monde["docs"][eid]
 
 
-def test_embaucher_un_marchand_reprend_la_fiche_du_modele(monde):
+def test_embaucher_un_marchand_prend_le_visage_de_son_groupe(monde):
 	proprio = _perso()
 	_entrer(monde, proprio)
 	e = _marchand(monde, proprio)
 	modele = monde["docs"][proprietes.MODELE_PREFIXE + "laboratoire_d_alchimie"]
 	assert proprietes.est_atelier(e) and e["categorie"] == "laboratoire_d_alchimie"
-	assert e["portrait"] == modele["portrait"] and e["modele"] == modele["_id"]
+	assert e["portrait"].startswith("personnel_soin_") and e["modele"] == modele["_id"]
 
 
 def test_choisir_un_marchand_commande_simple_pas_sur_mesure(monde):
