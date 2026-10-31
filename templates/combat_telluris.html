@@ -1481,7 +1481,7 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 		<!-- La vie des ennemis est désormais montrée par les anneaux du header
 		     (bandeau d'initiative) et le grand portrait ci-dessus : plus de liste. -->
 		<div class="combat-log" id="combat-log">
-			{% for entry in combat.log %}
+			{% for entry in combat.log | reverse %}
 				<div class="log-entry {{ entry.kind or '' }}">{{ entry.texte }}</div>
 			{% endfor %}
 		</div>
@@ -3386,7 +3386,7 @@ function enqueueLogs(log) {
 	if (!revealing) revealNext();
 }
 
-// Écrit une ligne dans le journal (et fait passer au panneau droit le portrait du monstre
+// Écrit une ligne EN TÊTE du journal, le plus récent en haut (et fait passer au panneau droit le portrait du monstre
 // qui vient de frapper).
 function _ecrireLigne(entry) {
 	if ((entry.kind === 'hit' || entry.kind === 'crit')
@@ -3398,8 +3398,8 @@ function _ecrireLigne(entry) {
 	const div = document.createElement('div');
 	div.className = 'log-entry ' + logClass(entry);
 	div.textContent = entry.texte || '';
-	container.appendChild(div);
-	container.scrollTop = container.scrollHeight;
+	container.prepend(div);
+	container.scrollTop = 0;
 }
 
 async function revealNext() {
@@ -3461,8 +3461,8 @@ function logSys(texte) {
 	const div = document.createElement('div');
 	div.className = 'log-entry sys';
 	div.textContent = texte;
-	container.appendChild(div);
-	container.scrollTop = container.scrollHeight;
+	container.prepend(div);
+	container.scrollTop = 0;
 }
 
 function isPlayerTurn(data) {
@@ -4878,7 +4878,7 @@ updateJoueur(activePlayer(state));
 updateInitiativeStrip(state);   // pose les anneaux de vie des ennemis dans le header dès le chargement
 document.getElementById('furtif-badge').style.visibility = (activePlayer(state) || {}).furtif ? '' : 'hidden';
 renderEnemyPortrait(state);
-document.getElementById('combat-log').scrollTop = 9999;
+document.getElementById('combat-log').scrollTop = 0;
 window._combatReady = true;
 // Vue portrait : la barre d'action FIXE n'est remplie (renderSlots) qu'ici — sa hauteur, rendue
 // en vide au pied de la page, et la place du pavé au-dessus d'elle se prennent maintenant.
