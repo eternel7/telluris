@@ -279,14 +279,19 @@ def _sorts_du_contenu():
 def test_le_json_est_la_sortie_du_generateur(tmp_path):
 	"""Le fichier committé ne dérive pas de son générateur.
 
-	⚠️ Relu sur un dump FIXE, antérieur à l'import des sorts de vol : sur un dump qui les
-	contient déjà, le générateur (idempotent) ne rend plus rien et le test échouait dès
-	qu'un nouvel export arrivait dans jsons/ (constaté sur le dump du 09/10)."""
+	⚠️ Relu sur le DERNIER dump PRIVÉ des docs de ce fichier (état d'avant l'import) : sur un
+	dump qui les contient déjà, le générateur (idempotent) ne rend plus rien. Un dump fixe
+	nommé en dur cassait le test dès qu'il était purgé de jsons/."""
 	sys.path.insert(0, os.path.join(RACINE, "dev"))
 	import gen_sorts_vol as gen
+	ids = {d["_id"] for d in _contenu()}
+	with open(gen.dernier_dump(), encoding="utf-8") as f:
+		brut = json.load(f)
+	brut["docs"] = [d for d in brut["docs"] if not (isinstance(d, dict) and d.get("_id") in ids)]
+	dump = tmp_path / "dump_avant_vol.json"
+	dump.write_text(json.dumps(brut, ensure_ascii=False), encoding="utf-8")
 	sortie = tmp_path / "vol.json"
-	dump = os.path.join(RACINE, "jsons", "telluris-dump-20261008-204335.json")
-	assert gen.main(["--dump", dump, "--sortie", str(sortie)]) == 0
+	assert gen.main(["--dump", str(dump), "--sortie", str(sortie)]) == 0
 	assert json.loads(sortie.read_text(encoding="utf-8")) == _contenu()
 
 

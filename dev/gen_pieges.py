@@ -418,7 +418,9 @@ def main(argv=None) -> int:
 			existant = existants.get(doc["_id"])
 			if existant is None:
 				continue
-			if _sans_rev(existant) == doc:
+			# Une animation déjà en base se règle depuis /admin/animations (son, volume…) :
+			# la retouche survit au rejeu, le doc n'est jamais réécrit.
+			if _sans_rev(existant) == doc or (source == "base" and doc["type"] == "animation"):
 				sautes.append(doc["_id"])
 			else:
 				erreurs.append(f"{doc['_id']} : `_id` déjà pris ({source}) par un doc différent")

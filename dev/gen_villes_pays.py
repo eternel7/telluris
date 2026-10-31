@@ -297,16 +297,27 @@ def interieurs(par_id, propositions):
 			propositions[lieu_id] = {"cells": cells, "nav": nav, "dessinee": True}
 			docs.append(doc)
 		parent = par_id.get(spec["parent"])
-		for lieu, pos in ((parent, spec["pos_parent"]), (doc, spec["pos"])):
-			x, y = pos
+		lien_id = f"link:{slug(spec['parent'])}_to_{slug(lieu_id)}"
+		# Connexion déjà en base : gardée telle quelle (une porte déplacée depuis dans l'éditeur
+		# survit au rejeu) ; le garde-fou porte alors sur SES cases.
+		existant = par_id.get(lien_id)
+		if existant is not None:
+			lien = sans_rev(existant)
+			par_lieu = {n.get("lieu"): tuple(n.get("pos") or ()) for n in lien.get("nodes") or []}
+			pos_parent, pos = par_lieu.get(spec["parent"]), par_lieu.get(lieu_id)
+			if not pos_parent or not pos:
+				refus.append(f"{lien_id} : en base sans nœud sur {spec['parent']} et {lieu_id}")
+				continue
+		else:
+			pos_parent, pos = spec["pos_parent"], spec["pos"]
+			lien = connexion(lien_id, spec["parent"], pos_parent, lieu_id, pos)
+			lien["nodes"][0]["label"] = spec["label_parent"]
+			lien["nodes"][1]["label"] = spec["label_lieu"]
+			lien["metadata"] = dict(spec["metadata"])
+		for lieu, (x, y) in ((parent, pos_parent), (doc, pos)):
 			if not lieu or not lieu.get("cells") or lieu["cells"][y][x] != 1:
-				refus.append(f"{lieu_id} : case {list(pos)} non libre sur "
+				refus.append(f"{lieu_id} : case {[x, y]} non libre sur "
 					f"{(lieu or {}).get('_id') or spec['parent']}")
-		lien = connexion(f"link:{slug(spec['parent'])}_to_{slug(lieu_id)}", spec["parent"],
-			spec["pos_parent"], lieu_id, spec["pos"])
-		lien["nodes"][0]["label"] = spec["label_parent"]
-		lien["nodes"][1]["label"] = spec["label_lieu"]
-		lien["metadata"] = dict(spec["metadata"])
 		docs.append(lien)
 	return docs, refus
 
