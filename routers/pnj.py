@@ -839,9 +839,9 @@ def _resoudre_direction(pnj_doc: dict, lieu_doc: dict, saisie) -> tuple[str | No
 	Dans l'ordre :
 	1. nom exact À LA LETTRE (casse ignorée) → `trouve`, avec la phrase d'orientation des
 	   courses ({direction} : « au sud-est d'ici, tout près de … ») ;
-	2. TYPE de magasin exact (sa catégorie) → `type_trouve` : le plus proche de ce type,
-	   {lieu} = « nom (type) », {direction} = « au nord d'ici, proche de nom (type) » —
-	   AVANT le nom à article près : « fumoir » est le type, pas l'enseigne « Le Fumoir » ;
+	2. TYPE de magasin exact (sa catégorie) → `trouve` aussi, MÊME FORME que par le nom, pour
+	   le magasin de ce type le plus proche (`transport.plus_proche`) — AVANT le nom à
+	   article près : « fumoir » est le type, pas l'enseigne « Le Fumoir » ;
 	3. nom exact à article près → `trouve` ;
 	4. type à `TYPE_LEVENSHTEIN_MAX` au plus → `type_propose` ({type}) ; le « Oui » (`_type`,
 	   retiré par le router) rejoue la saisie avec le type exact → étape 2 ;
@@ -858,12 +858,9 @@ def _resoudre_direction(pnj_doc: dict, lieu_doc: dict, saisie) -> tuple[str | No
 		indice = transport.indice_destination(lieu_doc, lieu_id, find_docs, get_doc)
 		return noeuds.get("trouve"), {"lieu": label, "direction": transport.texte_indice(indice)}
 	if type_trouve.get("exact"):
-		cat = type_trouve["exact"]
-		indice = transport.indice_type(lieu_doc, par_type[cat], find_docs, get_doc)
-		libelle = transport.libelle_type(cat)
-		return noeuds.get("type_trouve"), {
-			"type": libelle, "lieu": f"{indice['nom']} ({libelle})",
-			"direction": transport.texte_indice_type(indice)}
+		lieu_id, label = transport.plus_proche(lieu_doc, par_type[type_trouve["exact"]], find_docs)
+		indice = transport.indice_destination(lieu_doc, lieu_id, find_docs, get_doc)
+		return noeuds.get("trouve"), {"lieu": label, "direction": transport.texte_indice(indice)}
 	if type_trouve.get("proche"):
 		# `_type` n'est pas un placeholder : le router le retire pour bâtir le « Oui ».
 		return noeuds.get("type_propose"), {

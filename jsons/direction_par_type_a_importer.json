@@ -31,7 +31,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -389,21 +388,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -464,7 +448,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -822,21 +805,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -897,7 +865,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -1255,21 +1222,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -1330,7 +1282,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -1688,21 +1639,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -1763,7 +1699,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -2121,21 +2056,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -2196,7 +2116,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -2554,21 +2473,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -2629,7 +2533,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -2987,21 +2890,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -3062,7 +2950,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -3420,21 +3307,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -3495,7 +3367,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -3853,21 +3724,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -3928,7 +3784,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -4286,21 +4141,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -4361,7 +4201,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -4719,21 +4558,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -4794,7 +4618,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -5152,21 +4975,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -5227,7 +5035,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -5585,21 +5392,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -5660,7 +5452,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -6018,21 +5809,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -6093,7 +5869,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -6451,21 +6226,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -6526,7 +6286,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -6884,21 +6643,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -6959,7 +6703,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -7347,21 +7090,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -7422,7 +7150,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -7780,21 +7507,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -7855,7 +7567,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -8213,21 +7924,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -8288,7 +7984,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -8646,21 +8341,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -8721,7 +8401,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -9079,21 +8758,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -9154,7 +8818,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -9512,21 +9175,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -9587,7 +9235,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -9945,21 +9592,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -10020,7 +9652,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -10378,21 +10009,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -10453,7 +10069,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -10811,21 +10426,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -10886,7 +10486,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -11244,21 +10843,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -11319,7 +10903,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -11677,21 +11260,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -11752,7 +11320,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -12110,21 +11677,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -12185,7 +11737,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -12543,21 +12094,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -12618,7 +12154,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -12976,21 +12511,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -13051,7 +12571,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -13409,21 +12928,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -13484,7 +12988,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -13842,21 +13345,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -13917,7 +13405,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -14275,21 +13762,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -14350,7 +13822,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -14708,21 +14179,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -14783,7 +14239,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -15141,21 +14596,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -15216,7 +14656,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -15574,21 +15013,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -15649,7 +15073,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -16007,21 +15430,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -16082,7 +15490,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -16440,21 +15847,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -16515,7 +15907,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -16873,21 +16264,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -16948,7 +16324,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -17306,21 +16681,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -17381,7 +16741,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -17739,8 +17098,130 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
+        "direction_type_propose": {
+          "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
+          "choix": [
+            {
+              "id": "direction_type_non",
+              "label": "Non, pas du tout.",
+              "next": "direction_type_inconnu"
+            }
+          ]
+        },
+        "direction_type_inconnu": {
+          "texte": "« Alors je ne connais pas de magasin de ce type, {prenom}. »",
+          "choix": [
+            {
+              "id": "direction_encore",
+              "label": "Et un autre lieu ?",
+              "next": "direction_demande"
+            },
+            {
+              "id": "direction_merci",
+              "label": "Merci bien.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_negociant",
+    "_rev": "1-54946584a263daef48ba9264ae4aa366",
+    "type": "pnj",
+    "nom": "Maître Lombard",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_lettre01.jpg",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Une balance de changeur trône sur le comptoir, entre deux registres ouverts. « Bien le bonjour, {prenom}. Je prends tout, et je paie comptant. Ce qui vaut la peine finit sur mes rayons ; le reste, j'en fais mon affaire. »",
+          "choix": [
+            {
+              "id": "commission",
+              "label": "Et votre commission ?",
+              "next": "commission"
+            },
+            {
+              "id": "direction",
+              "label": "Vous sauriez m'indiquer un lieu ?",
+              "next": "direction_demande"
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission": {
+          "texte": "« Elle dépend de vous, {prenom}. Un client que je connais mal me coûte des précautions ; un ami de la maison, presque rien. Revenez souvent, et vous verrez la différence. Mais on ne marchande pas avec moi : mon prix est juste, et il est le même pour tout ce que vous m'apportez. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Entendu.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Au revoir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "direction_demande": {
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "choix": [
+            {
+              "id": "direction_chercher",
+              "label": "Demander",
+              "saisie": true,
+              "action": {
+                "service": "direction"
+              }
+            },
+            {
+              "id": "direction_annuler",
+              "label": "Laissez, ce n'est rien.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "direction_trouve": {
+          "texte": "« {lieu} ? C'est {direction}. Impossible de vous tromper. »",
+          "choix": [
+            {
+              "id": "direction_encore",
+              "label": "Et un autre lieu ?",
+              "next": "direction_demande"
+            },
+            {
+              "id": "direction_merci",
+              "label": "Merci bien.",
+              "next": "fin"
+            }
+          ]
+        },
+        "direction_proche": {
+          "texte": "« “{recherche}” ? Connais pas. » Un temps de réflexion. « Vous ne voulez pas plutôt dire {suggestions} ? »",
+          "choix": [
+            {
+              "id": "direction_encore",
+              "label": "Et un autre lieu ?",
+              "next": "direction_demande"
+            },
+            {
+              "id": "direction_merci",
+              "label": "Merci bien.",
+              "next": "fin"
+            }
+          ]
+        },
+        "direction_inconnu": {
+          "texte": "« “{recherche}” ? » Une moue perplexe. « Je ne connais rien de ce nom-là par ici, {prenom}. »",
           "choix": [
             {
               "id": "direction_encore",
@@ -17780,6 +17261,17 @@
           ]
         }
       }
+    },
+    "services": {
+      "direction": {
+        "noeuds": {
+          "trouve": "direction_trouve",
+          "proche": "direction_proche",
+          "inconnu": "direction_inconnu",
+          "type_propose": "direction_type_propose",
+          "type_inconnu": "direction_type_inconnu"
+        }
+      }
     }
   },
   {
@@ -17814,7 +17306,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -18172,21 +17663,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -18247,7 +17723,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -18605,21 +18080,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -18680,7 +18140,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -19038,21 +18497,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -19113,7 +18557,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -19471,21 +18914,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -19546,7 +18974,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -19904,21 +19331,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -19979,7 +19391,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -20337,21 +19748,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -20412,7 +19808,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -20770,21 +20165,6 @@
             }
           ]
         },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
         "direction_type_propose": {
           "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
           "choix": [
@@ -20845,7 +20225,6 @@
           "trouve": "direction_trouve",
           "proche": "direction_proche",
           "inconnu": "direction_inconnu",
-          "type_trouve": "direction_type_trouve",
           "type_propose": "direction_type_propose",
           "type_inconnu": "direction_type_inconnu"
         }
@@ -21190,21 +20569,6 @@
         },
         "direction_inconnu": {
           "texte": "« “{recherche}” ? » Une moue perplexe. « Je ne connais rien de ce nom-là par ici, {prenom}. »",
-          "choix": [
-            {
-              "id": "direction_encore",
-              "label": "Et un autre lieu ?",
-              "next": "direction_demande"
-            },
-            {
-              "id": "direction_merci",
-              "label": "Merci bien.",
-              "next": "fin"
-            }
-          ]
-        },
-        "direction_type_trouve": {
-          "texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
           "choix": [
             {
               "id": "direction_encore",

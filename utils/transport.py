@@ -62,6 +62,14 @@ def est_magasin(lieu_doc: dict) -> bool:
 	return bool(marche.besoins_lieu(lieu_doc))
 
 
+def magasin_a_indiquer(lieu_doc: dict) -> bool:
+	"""Magasin pour s'ORIENTER (repère, demande de chemin par type) : `est_magasin`, plus le
+	négociant (`marche.est_negociant`), qui n'a pas de recette mais tient boutique comme les
+	autres. ⚠️ Pas `est_magasin` lui-même : celui-ci fait aussi les destinations de course, et
+	le tenancier du négociant n'a pas de nœud de livraison."""
+	return est_magasin(lieu_doc) or marche.est_negociant(lieu_doc)
+
+
 def entree_marchand(lieu_doc: dict) -> dict | None:
 	"""Entrée `pnj` implicite d'un lieu marchand : son tenancier générique de catégorie.
 	Aucun doc `lieu:*` ne porte de `pnj` marchand — on le dérive de la catégorie. Présence
@@ -134,10 +142,10 @@ def direction_cardinale(depuis: tuple, vers: tuple) -> str | None:
 	return meilleur
 
 
-def repere_proche_doc(cible_id: str, portes: dict, get_doc_fn, exclure: set | None = None) -> tuple | None:
-	"""(lieu_id, doc) du MAGASIN dont la porte est la plus proche de celle de `cible_id` dans
-	la grille du parent. `exclure` = lieux à ignorer (la cible, le donneur). None si la cible
-	n'a pas de porte connue ou qu'il n'y a aucun voisin."""
+def repere_proche(cible_id: str, portes: dict, get_doc_fn, exclure: set | None = None) -> str | None:
+	"""Label du lieu dont la porte est la plus proche de celle de `cible_id` dans la grille
+	du parent (« tout près de … »). `exclure` = lieux à ignorer (la cible, le donneur).
+	None si la cible n'a pas de porte connue ou qu'il n'y a aucun voisin."""
 	cible_porte = (portes or {}).get(cible_id)
 	if not cible_porte:
 		return None
@@ -147,19 +155,12 @@ def repere_proche_doc(cible_id: str, portes: dict, get_doc_fn, exclure: set | No
 		if lieu_id in exclure:
 			continue
 		doc = get_doc_fn(lieu_id) or {}
-		if not est_magasin(doc):
+		if not magasin_a_indiquer(doc):
 			continue
 		d = (porte[0] - cible_porte[0]) ** 2 + (porte[1] - cible_porte[1]) ** 2
 		if meilleure_d is None or d < meilleure_d:
-			meilleur, meilleure_d = (lieu_id, doc), d
+			meilleur, meilleure_d = lieu_label(doc, lieu_id), d
 	return meilleur
-
-
-def repere_proche(cible_id: str, portes: dict, get_doc_fn, exclure: set | None = None) -> str | None:
-	"""Label du lieu dont la porte est la plus proche de celle de `cible_id` dans la grille
-	du parent (« tout près de … »). Cf. `repere_proche_doc`."""
-	trouve = repere_proche_doc(cible_id, portes, get_doc_fn, exclure)
-	return lieu_label(trouve[1], trouve[0]) if trouve else None
 
 
 def indice_destination(giver_doc: dict, dest_id: str, find_docs_fn, get_doc_fn) -> dict:
@@ -315,7 +316,8 @@ def choix_suggestions(noms: list, noeud_id: str, choix_id: str) -> list:
 # ---------------------------------------------------------------------------
 # Le « type » d'un magasin est sa `categorie` (aucun libellé en base : l'identifiant fait foi,
 # underscores lus comme des espaces — cf. routers/proprietes.categorie_label). Le PNJ ne
-# connaît que les types des MAGASINS de sa ville (`est_magasin`), hors sa propre boutique.
+# connaît que les types des MAGASINS de sa ville (`magasin_a_indiquer`, négociant compris),
+# hors sa propre boutique. La réponse a la forme de la demande par nom (nœud `trouve`).
 
 # Distance de Levenshtein maximale pour proposer « Vous cherchez … ? » sur une saisie qui
 # n'est le nom d'aucun type connu (règle de l'Auteur : 3 au plus).
@@ -359,7 +361,7 @@ def levenshtein(a: str, b: str) -> int:
 def magasins_par_type(giver_doc: dict, find_docs_fn, est_magasin_fn=None) -> dict:
 	"""{categorie: [(lieu_id, libellé), …]} — les magasins de la ville de `giver_doc`, lui
 	exclu, groupés par type. {} sans ville."""
-	est_magasin_fn = est_magasin_fn or est_magasin
+	est_magasin_fn = est_magasin_fn or magasin_a_indiquer
 	parent_id = (giver_doc or {}).get("lieu_parent")
 	if not parent_id:
 		return {}
@@ -391,15 +393,13 @@ def chercher_type(nom: str, categories) -> dict:
 	return {"proche": meilleur} if meilleur else {}
 
 
-def indice_type(giver_doc: dict, candidats: list, find_docs_fn, get_doc_fn) -> dict:
-	"""Le magasin de `candidats` ([(lieu_id, libellé)], tous du même type et de la ville du
-	donneur) dont la porte est la plus proche de celle du donneur, et de quoi s'y orienter :
-	{lieu_id, nom, direction, repere_id, repere_nom}. Une porte inconnue passe en dernier ;
-	ex æquo départagés par le libellé (résultat stable)."""
+def plus_proche(giver_doc: dict, candidats: list, find_docs_fn) -> tuple:
+	"""Le (lieu_id, libellé) de `candidats` (même ville que le donneur) dont la porte est la
+	plus proche de celle du donneur. Une porte inconnue passe en dernier ; ex æquo
+	départagés par le libellé (résultat stable)."""
 	graphe = focalisation.charger_graphe(find_docs_fn)
 	portes = portes_du_parent(graphe, (giver_doc or {}).get("lieu_parent"))
-	giver_id = (giver_doc or {}).get("_id")
-	porte_x = porte_effective(graphe, portes, giver_id)
+	porte_x = porte_effective(graphe, portes, (giver_doc or {}).get("_id"))
 
 	def eloignement(c):
 		porte = porte_effective(graphe, portes, c[0])
@@ -407,34 +407,13 @@ def indice_type(giver_doc: dict, candidats: list, find_docs_fn, get_doc_fn) -> d
 			return (1, 0, c[1])
 		return (0, (porte[0] - porte_x[0]) ** 2 + (porte[1] - porte_x[1]) ** 2, c[1])
 
-	lieu_id, nom = min(candidats, key=eloignement)
-	porte_y = porte_effective(graphe, portes, lieu_id)
-	direction = direction_cardinale(porte_x, porte_y) if (porte_x and porte_y) else None
-	repere = repere_proche_doc(lieu_id, portes, get_doc_fn, exclure={giver_id})
-	return {
-		"lieu_id": lieu_id,
-		"nom": nom,
-		"direction": direction,
-		"repere_id": repere[0] if repere else None,
-		"repere_nom": lieu_label(repere[1], repere[0]) if repere else None,
-		"repere_type": libelle_type((repere[1] or {}).get("categorie")) if repere else None,
-	}
-
-
-def texte_indice_type(indice: dict) -> str:
-	"""« au nord d'ici, proche de Le Fumoir (fumoir) » — {direction} du nœud `type_trouve`."""
-	bout = f"{groupe_direction(indice['direction'])} d'ici" if indice.get("direction") else "à deux pas d'ici"
-	if indice.get("repere_nom"):
-		bout += f", proche de {indice['repere_nom']}"
-		if indice.get("repere_type"):
-			bout += f" ({indice['repere_type']})"
-	return bout
+	return min(candidats, key=eloignement)
 
 
 def choix_confirmation_type(categorie: str, noeud_id: str, choix_id: str) -> list:
 	"""La réplique « Oui » du nœud `type_propose` : comme `choix_suggestions`, elle rejoue le
 	choix de saisie d'origine, avec le libellé EXACT du type — la recherche aboutit alors sur
-	`type_trouve`. Le « Non » est un choix ordinaire du contenu (→ `type_inconnu`)."""
+	`trouve`. Le « Non » est un choix ordinaire du contenu (→ `type_inconnu`)."""
 	return [{
 		"id": choix_id,
 		"label": "Oui, c'est cela.",

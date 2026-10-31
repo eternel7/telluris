@@ -5,8 +5,8 @@
 # Le moteur sait déjà tout faire (service `direction` de `routers/pnj.py`, recherche pure
 # `utils/transport.chercher_lieu_nomme`) ; ce qui manque à chaque tenancier, ce sont les MOTS :
 # un choix d'accueil, le nœud où le joueur SAISIT le nom du lieu, les trois réponses
-# (trouvé / approchant / inconnu) et les trois réponses à une demande PAR TYPE de magasin
-# (trouvé / « Vous cherchez … ? » / inconnu). Ce fichier n'ajoute QUE cela — identique pour tous : la
+# (trouvé / approchant / inconnu), et pour une demande PAR TYPE de magasin la question
+# « Vous cherchez … ? » et son refus (le type trouvé répond par `trouve`, comme le nom). Ce fichier n'ajoute QUE cela — identique pour tous : la
 # réponse est entièrement calculée, aucun tenancier n'a de texte à lui.
 #
 # ⚠️ POURQUOI UN SCRIPT QUI RELIT LE DUMP (même raison que `dev/gen_escorte_marchands.py`) :
@@ -36,7 +36,6 @@ NOEUDS_DIRECTION = {
 	"trouve": "direction_trouve",
 	"proche": "direction_proche",
 	"inconnu": "direction_inconnu",
-	"type_trouve": "direction_type_trouve",
 	"type_propose": "direction_type_propose",
 	# Non lu par le router (atteint par le « Non » de `type_propose`) : documentation.
 	"type_inconnu": "direction_type_inconnu",
@@ -77,12 +76,7 @@ NOEUDS_DIALOGUE_DIRECTION = {
 				 "« Je ne connais rien de ce nom-là par ici, {prenom}. »",
 		"choix": _SUITE,
 	},
-	# Demande PAR TYPE ({type} = la catégorie en clair, {lieu} = « nom (type) »).
-	"direction_type_trouve": {
-		"texte": "« Le plus proche magasin de ce type est {direction}. C'est {lieu}. »",
-		"choix": _SUITE,
-	},
-	# Le « Oui » est ajouté par le router (il rejoue la saisie avec le type exact).
+	# Demande PAR TYPE ({type} = la catégorie en clair). Le « Oui » est ajouté par le router (il rejoue la saisie avec le type exact).
 	"direction_type_propose": {
 		"texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
 		"choix": [
@@ -109,7 +103,8 @@ def injecter(doc: dict) -> dict:
 	relancer ce script deux fois ne duplique rien."""
 	doc = json.loads(json.dumps(doc))          # copie profonde : on ne mute pas le dump
 
-	services = doc.setdefault("services", {})
+	# `or {}` : le négociant porte `services: null`.
+	services = doc["services"] = doc.get("services") or {}
 	services.setdefault("direction", {})["noeuds"] = dict(NOEUDS_DIRECTION)
 
 	dialogue = doc.setdefault("dialogue", {})
@@ -136,11 +131,8 @@ def main() -> None:
 				 if isinstance(d, dict) and str(d.get("_id", "")).startswith(PREFIXE)]
 	if not marchands:
 		raise SystemExit(f"Aucun doc `{PREFIXE}*` dans {SRC_DUMP} — dump périmé ?")
-	# DELTA seul (CLAUDE.md §18) : les tenanciers qui renseignent DÉJÀ leur chemin et que
-	# l'injection modifie. Le négociant, créé après, n'a pas le service : l'y ajouter est une
-	# demande à part.
-	docs = [n for n in (injecter(d) for d in sorted(marchands, key=lambda d: d["_id"])
-						if (d.get("services") or {}).get("direction"))
+	# DELTA seul (CLAUDE.md §18) : les tenanciers que l'injection modifie.
+	docs = [n for n in (injecter(d) for d in sorted(marchands, key=lambda d: d["_id"]))
 			if n != next(d for d in marchands if d["_id"] == n["_id"])]
 	chemin = os.path.join(RACINE, SORTIE)
 	with open(chemin, "w", encoding="utf-8") as f:

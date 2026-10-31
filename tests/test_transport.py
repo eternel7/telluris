@@ -363,7 +363,21 @@ def test_suggestion_cliquable_rejoue_la_saisie_et_trouve_le_lieu(monkeypatch):
 
 DOC_DIRECTION = {"_id": "pnj:marchand_boucherie", "services": {"direction": {"noeuds": {
 	"trouve": "n_trouve", "proche": "n_proche", "inconnu": "n_inconnu",
-	"type_trouve": "n_type_trouve", "type_propose": "n_type_propose"}}}}
+	"type_propose": "n_type_propose"}}}}
+NEGOCE = {"_id": "lieu:negoce", "type": "lieu", "categorie": "negociant", "label": "La Balance",
+		  "lieu_parent": "lieu:ville"}
+
+
+@pytest.fixture
+def avec_negoce(monkeypatch):
+	"""Un négociant (sans recette, donc pas `est_magasin`) collé au fumoir : (41,20)."""
+	import sys
+	monkeypatch.setitem(DOCS, NEGOCE["_id"], NEGOCE)
+	monkeypatch.setattr(character_stats, "CATEGORIES_NEGOCE", ["negociant"])
+	monkeypatch.setattr(sys.modules[__name__], "CONNECTIONS", CONNECTIONS + [
+		{"_id": "link:n", "type": "connection",
+		 "nodes": [{"lieu": "lieu:ville", "pos": [41, 20]}, {"lieu": "lieu:negoce", "pos": [0, 0]}]}])
+	focalisation.reset_graphe_cache()
 
 
 def test_cle_type_ignore_casse_accents_article_et_underscores():
@@ -399,23 +413,30 @@ def test_type_exact_puis_proche_a_levenshtein_borne():
 	assert transport.chercher_type("", types) == {}
 
 
-def test_indice_type_choisit_le_plus_proche_du_donneur():
+def test_le_plus_proche_du_type_depuis_le_donneur():
 	# Depuis la boucherie (20,20) : la salaison (20,5) est plus proche que le fumoir (40,20).
 	candidats = [("lieu:fumoir", "Le Fumoir"), ("lieu:salaison", "Le Saloir")]
-	indice = transport.indice_type(BOUCHERIE, candidats, find_docs, get_doc)
-	assert (indice["lieu_id"], indice["direction"]) == ("lieu:salaison", "nord")
-	assert (indice["repere_nom"], indice["repere_type"]) == ("Le Fumoir", "fumoir")
-	assert transport.texte_indice_type(indice) == "au nord d'ici, proche de Le Fumoir (fumoir)"
+	assert transport.plus_proche(BOUCHERIE, candidats, find_docs) == ("lieu:salaison", "Le Saloir")
+
+
+def test_le_negociant_est_un_magasin_pour_s_orienter(avec_negoce):
+	assert not transport.est_magasin(NEGOCE)          # aucune recette : pas destinataire de course
+	assert transport.magasin_a_indiquer(NEGOCE)
+	assert transport.magasins_par_type(BOUCHERIE, find_docs)["negociant"] == [("lieu:negoce", "La Balance")]
+	# … et il sert de repère : collé au fumoir, il passe devant la salaison.
+	graphe = focalisation.charger_graphe(find_docs)
+	portes = transport.portes_du_parent(graphe, "lieu:ville")
+	assert transport.repere_proche("lieu:fumoir", portes, get_doc, exclure={"lieu:boucherie"}) == "La Balance"
 
 
 def test_resoudre_direction_par_type(monkeypatch):
+	"""Type exact : MÊME réponse que la demande par nom du magasin le plus proche de ce type."""
 	from routers import pnj as rp
 	monkeypatch.setattr(rp, "get_doc", get_doc)
 	monkeypatch.setattr(rp, "find_docs", find_docs)
-	suivant, dits = rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "salaison")
-	assert suivant == "n_type_trouve"
-	assert dits == {"type": "salaison", "lieu": "Le Saloir (salaison)",
-					"direction": "au nord d'ici, proche de Le Fumoir (fumoir)"}
+	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "une Salaison") \
+		== rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "Le Saloir") \
+		== ("n_trouve", {"lieu": "Le Saloir", "direction": "au nord d'ici, tout près de Le Fumoir"})
 	# Type approchant : la question, et de quoi bâtir le « Oui ».
 	suivant, dits = rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "salasion")
 	assert suivant == "n_type_propose"
@@ -423,9 +444,16 @@ def test_resoudre_direction_par_type(monkeypatch):
 	# Le nom d'une enseigne à la lettre garde la priorité ; sans son article, c'est le type
 	# (« fumoir ») qui l'emporte sur l'enseigne « Le Fumoir ». L'inconnu reste inconnu.
 	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "le fumoir")[0] == "n_trouve"
-	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "fumoir")[0] == "n_type_trouve"
 	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "Saloir")[0] == "n_trouve"
 	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "Qwxz")[0] == "n_inconnu"
+
+
+def test_resoudre_direction_vers_le_negociant(monkeypatch, avec_negoce):
+	from routers import pnj as rp
+	monkeypatch.setattr(rp, "get_doc", get_doc)
+	monkeypatch.setattr(rp, "find_docs", find_docs)
+	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "négociant") \
+		== ("n_trouve", {"lieu": "La Balance", "direction": "à l'est d'ici, tout près de Le Fumoir"})
 
 
 def test_oui_rejoue_la_saisie_avec_le_type_exact(monkeypatch):
@@ -437,7 +465,7 @@ def test_oui_rejoue_la_saisie_avec_le_type_exact(monkeypatch):
 	assert oui["id"] == "chercher" and not oui["saisie"] and not oui["action"]
 	assert oui["rejouer"] == {"noeud": "n_demande", "saisie": "fumoir"}
 	suivant, dits = rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, oui["rejouer"]["saisie"])
-	assert suivant == "n_type_trouve" and dits["lieu"] == "Le Fumoir (fumoir)"
+	assert suivant == "n_trouve" and dits["lieu"] == "Le Fumoir"
 
 
 def test_le_generateur_pose_les_noeuds_par_type_que_le_router_lit():
