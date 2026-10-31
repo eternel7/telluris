@@ -24,6 +24,8 @@
   bloc identité. ⚠️ Les deux valent `true` par DÉFAUT : les ajouter ne change rien aux usages
   existants. Le portrait seul (`vitaux=false, identite=false`) sert les avatars du chat de
   taverne — les PV d'un AUTRE joueur y seraient à la fois privés et faux (figés à l'envoi).
+  `aide` = bouton « ? » à droite du nom, qui ouvre l'aide au démarrage (`false` par défaut :
+  seules les deux cartes du joueur de /play le portent).
   `points` = ★ points d'attribut dans la ligne PV/PM (carte de la FICHE seulement : `none` par
   défaut, aucune autre carte n'en porte). `[data-points]` est réécrit par `_syncPoints`, qui suit
   le porteur affiché — compagnon compris.
@@ -33,7 +35,7 @@
 {% macro character_card(card_id='', porteur_id='', nom='', voc_icon='', voc_label='',
                         voc_niveau=0, race='', niveau=0, rang='', rang_title='', pv=0, pv_max=0,
                         pm=0, pm_max=0, image='', zoom=50, editable=true, classes='',
-                        vitaux=true, identite=true, points=none) %}
+                        vitaux=true, identite=true, points=none, aide=false) %}
 {% set _pv_max = pv_max or 1 %}
 {% set _pm_max = pm_max or 1 %}
 {% set pv_pct = [(pv / _pv_max * 100)|int, 100]|min %}
@@ -77,7 +79,13 @@
 		</div>
 		{% if identite %}
 		<div class="char-identity" data-role="identity">
-			<div class="char-name" data-role="nom">{{ nom }}</div>
+			{# `aide` = bouton « ? » de l'aide au démarrage (cartes du JOUEUR dans /play seulement) :
+			   `ouvrirAide()` et `#aide-overlay` vivent dans play_town_telluris.html. Masqué par la
+			   classe `aide-masquee` de <html> (réglage du menu ⚙️). #}
+			<div class="char-name-row">
+				<div class="char-name" data-role="nom">{{ nom }}</div>
+				{% if aide %}<button type="button" class="aide-btn" data-role="aide" onclick="ouvrirAide()" title="Aide au démarrage" aria-label="Aide au démarrage">?</button>{% endif %}
+			</div>
 			{# ⚠️ Le RANG n'appartient qu'au personnage principal : seul lui en a un (`rangs_guilde`,
 			   gagné aux épreuves du comptoir). Compagnons, recrues, montures et personnes escortées
 			   n'en portent pas — leur payload n'a pas de clé `rang` et la mention reste `hidden`,
