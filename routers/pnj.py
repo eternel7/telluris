@@ -45,7 +45,7 @@ from utils.combat import (
 	resolve_first_turns, finalize_combat,
 )
 from utils.lieux import get_lieu_links
-from routers.user import _derived_from_character, _vitals_payload, _inventory_payload, _effets_arrivee
+from routers.user import _derived_from_character, _vitals_payload, _inventory_payload, _effets_arrivee, guide_quitte
 from routers.traversee import nom_port as nom_port_traversee
 
 pnj_router = APIRouter()
@@ -782,14 +782,15 @@ def _noeud_seuils(character: dict, pnj_doc: dict, lieu_doc: dict, contexte: dict
 
 
 def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, saisie,
-					  reponse: dict) -> str | None:
+					  reponse: dict, guide_adieu: bool = False) -> str | None:
 	"""Service `portail`, op `franchir` : l'ancrage court-circuite le lien portail choisi et
 	dépose le groupe à SON point d'arrivée, contre un cristal jaune. Aucun lien n'est emprunté :
 	le personnage est relocalisé par `_effets_arrivee`, comme au débarquement d'une traversée.
 	⚠️ La barrière `acces` du lieu d'arrivée n'est PAS consultée — c'est tout le court-circuit
 	(sauf tableau `fixe`, qui franchit la porte elle-même : refus → `refus_acces`).
 	Seuil refermé (tranche passée au-delà de la grâce) → `ferme` ; pas de cristal →
-	`refus_cristal` ; rien n'est retiré ni sauvé dans ces deux cas."""
+	`refus_cristal` ; rien n'est retiré ni sauvé dans ces deux cas. Un guide prévient APRÈS ces
+	refus et avant le cristal : il ne dit adieu que pour un passage réellement possible."""
 	conf = (pnj_doc.get("services") or {}).get("portail") or {}
 	noeuds = conf.get("noeuds") or {}
 	if op != "franchir":
@@ -818,10 +819,17 @@ def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, s
 	# barrière (`acces` du lieu d'arrivée) tient, comme pour un déplacement par le lien.
 	if conf.get("fixe") and not acces.acces_autorise(character, dest_doc, get_doc)[0]:
 		return noeuds.get("refus_acces")
+	avertir, guide_parti = guide_quitte(character, guide_adieu, get_doc, portail=True)
+	if avertir:
+		reponse["guide_avertissement"] = avertir["guide_avertissement"]
+		return None
 	if item_id:
 		quetes.retirer_items(character, item_id, quantite)
 	arrivee = _effets_arrivee(character, seuil["lieu"],
 							  {"x": seuil["pos"][0], "y": seuil["pos"][1]}, dest_doc)
+	# Doc ANNEXE, sauvé après le personnage (déjà sorti de son groupe).
+	if guide_parti:
+		save_doc(guide_parti)
 	reponse["portail"] = {"lieu": _label_arrivee(seuil), "arrivee": arrivee}
 	return noeuds.get("ouvert")
 
@@ -1103,7 +1111,7 @@ async def pnj_dialogue_choix(
 	elif action.get("service") == "portail":
 		contexte["placeholders"]["destination"] = "—"
 		suivant = _resoudre_portail(character, pnj_doc, lieu_doc, action.get("op"),
-									body.get("saisie"), reponse)
+									body.get("saisie"), reponse, bool(body.get("guide_adieu")))
 		if reponse.get("portail"):
 			contexte["placeholders"]["destination"] = reponse["portail"]["lieu"]
 	elif action.get("service") == "direction":

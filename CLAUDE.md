@@ -52,7 +52,7 @@ routers/
   quetes.py              # /api/quetes/* : board, accepter, terminer, abandonner (guilde)
   recrutement.py         # /api/recrutement/* + /api/groupe/* : board de recrues, embaucher, congedier, engager
   montures.py            # /api/montures/* : étable, acheter, relacher
-  guides.py              # /api/guides/* : guides locaux d'auberge : tableau, engager, congedier, dialogue, demander, renouveler
+  guides.py              # /api/guides/* : guides locaux d'auberge : tableau, engager, congedier, dialogue, demander
   proprietes.py          # /api/proprietes/* : offre, acheter (zone habitable), louer (auberge),
                          #   ici, occuper/quitter, vendre/abandonner, installer, embauche/engager/renvoyer,
                          #   heberger/reprendre, coffre (+transferer, vol sans gardien),
@@ -124,7 +124,7 @@ utils/
                          #   donjon à ÉTAGES (`mode:"etages"`) : étages reliés par des connexions, un seul combat
   recrutement.py         # recrutement (pur) : recrues, tableau, groupe, affinités, parts, compagnie
   montures.py            # montures (pur) : étable, charge multipliée, troupeau, harnachement (slots propres)
-  guides.py              # guides locaux (pur) : `rules:guides`, métiers localisés, forfait de tours, savoir, cap posé par le guide
+  guides.py              # guides locaux (pur) : `rules:guides`, métiers localisés, arrhes + question, départ à la sortie de la cité, savoir, cap posé par le guide
   proprietes.py          # propriétés résidentielles (pur) : type FIGÉ, aménagements contraints
                          #   par type (`rules:proprietes`), capacités dérivées, personnel à poste,
                          #   gardien/vol, location inviolable, zones habitables peintes ;

@@ -5,9 +5,9 @@
 Sortie :
 	jsons/guides_a_importer.json   (à coller dans la carte d'import de /admin)
 
-Doc NEUF : refus d'écrire s'il existe déjà dans le dump le plus récent avec un contenu
-différent (le PUT complet de l'import écraserait en silence un réglage fait en base).
-Relancer régénère le fichier à l'identique."""
+Doc présent au dump : relu, seuls les tarifs et les répliques du paiement sont réécrits (le PUT
+complet de l'import écraserait sinon en silence un réglage fait en base). Relancer régénère le
+fichier à l'identique."""
 
 import glob
 import json
@@ -23,7 +23,6 @@ DOC = {
 	"type": "rules",
 	"tableau_nb": 3,
 	"duree_offre_secondes": 21600,
-	"seuil_alerte_tours": 10,
 	"repliques": {
 		"accueil": "Dites-moi ce que vous cherchez, je vous dirai si je connais.",
 		"accepte": "Oui, je vois. Pour {lieu}, suivez-moi, je vous indique la direction.",
@@ -31,13 +30,14 @@ DOC = {
 		"inconnu": "« {quete} »… Non, ça ne me dit rien. Je ne vous enverrai pas au hasard.",
 		"proche": "« {recherche} » ? Je ne connais pas ce nom. Vous pensez à l'un de ceux-là ?",
 		"sans_chemin": "{lieu}, je connais le nom, mais je ne sais pas par où on y passe d'ici.",
-		"epuise": "Vous m'avez payé jusqu'ici, et ici nous sommes. Je reste avec vous, mais pour la route, il faudra un nouveau forfait.",
-		"renouvele": "Le compte est bon. Où allons-nous ?",
+		"sans_le_sou": "{lieu}, je connais. Mais la réponse vaut {prix} cuivres, et votre bourse n'y est pas.",
+		"adieu": "Si vous quittez {cite}, je vous laisse partir : moi, je reste par ici. Sans rancune.",
+		"adieu_portail": "Si vous passez ce portail, je vous laisse partir : moi, je reste de ce côté-ci. Sans rancune.",
 	},
 	"metiers": {
 		"ancien_aventurier": {
 			"label": "Ancien aventurier",
-			"forfait_cuivre": 100, "forfait_tours": 100,
+			"arrhes_cuivre": 50, "question_cuivre": 10,
 			"offre": {"partout": True},
 			"savoir": {"categories": ["guilde_aventurier_exterieur"]},
 			"portrait_voc": "guerrier",
@@ -49,7 +49,7 @@ DOC = {
 		},
 		"guide_des_routes": {
 			"label": "Guide des routes",
-			"forfait_cuivre": 50, "forfait_tours": 100,
+			"arrhes_cuivre": 25, "question_cuivre": 5,
 			"offre": {"partout": True},
 			"savoir": {},
 			"portrait": "routes",
@@ -62,7 +62,7 @@ DOC = {
 		},
 		"survivant_de_donjon": {
 			"label": "Survivant d'un donjon",
-			"forfait_cuivre": 150, "forfait_tours": 100,
+			"arrhes_cuivre": 75, "question_cuivre": 15,
 			"offre": {"traits": ["donjon"]},
 			"savoir": {"tags": ["donjon"]},
 			"portrait": "survivant",
@@ -75,7 +75,7 @@ DOC = {
 		},
 		"contrebandier": {
 			"label": "Contrebandier",
-			"forfait_cuivre": 150, "forfait_tours": 100,
+			"arrhes_cuivre": 75, "question_cuivre": 15,
 			"offre": {"traits": ["port", "contrebande"]},
 			"savoir": {"categories": ["quai"], "tags": ["contrebande"]},
 			"portrait_voc": "voleur",
@@ -87,7 +87,7 @@ DOC = {
 		},
 		"interprete": {
 			"label": "Interprète",
-			"forfait_cuivre": 150, "forfait_tours": 100,
+			"arrhes_cuivre": 75, "question_cuivre": 15,
 			"offre": {"traits": ["port"], "sous_categories": ["capitale"]},
 			"savoir": {"categories": ["ville"]},
 			"portrait_voc": "lettre",
@@ -99,7 +99,7 @@ DOC = {
 		},
 		"montagnard": {
 			"label": "Montagnard",
-			"forfait_cuivre": 100, "forfait_tours": 100,
+			"arrhes_cuivre": 50, "question_cuivre": 10,
 			"offre": {"traits": ["montagne"]},
 			"savoir": {"tags": ["montagne"]},
 			"portrait_voc": "barbare",
@@ -111,7 +111,7 @@ DOC = {
 		},
 		"marin": {
 			"label": "Marin",
-			"forfait_cuivre": 100, "forfait_tours": 100,
+			"arrhes_cuivre": 50, "question_cuivre": 10,
 			"offre": {"traits": ["port"]},
 			"savoir": {"categories": ["quai"]},
 			"portrait_voc": "duelliste",
@@ -176,18 +176,32 @@ def _dump_recent() -> dict | None:
 		return json.load(f)
 
 
+def mise_a_jour(existant: dict | None) -> dict:
+	"""Le doc à importer : le catalogue neuf, ou celui de la base dont seul le PAIEMENT change."""
+	if not existant:
+		return DOC
+	doc = {k: v for k, v in existant.items() if k not in ("_rev", "seuil_alerte_tours")}
+	repliques = {k: v for k, v in doc.get("repliques", {}).items() if k not in ("epuise", "renouvele")}
+	doc["repliques"] = {**repliques, **{c: DOC["repliques"][c] for c in ("sans_le_sou", "adieu", "adieu_portail")}}
+	metiers = {}
+	for mid, m in doc.get("metiers", {}).items():
+		neuf = DOC["metiers"].get(mid) or {}
+		m = {k: v for k, v in m.items() if k not in ("forfait_cuivre", "forfait_tours")}
+		m["arrhes_cuivre"] = neuf.get("arrhes_cuivre", DOC["metiers"]["ancien_aventurier"]["arrhes_cuivre"])
+		m["question_cuivre"] = neuf.get("question_cuivre", DOC["metiers"]["ancien_aventurier"]["question_cuivre"])
+		metiers[mid] = m
+	doc["metiers"] = metiers
+	return doc
+
+
 def main() -> int:
 	dump = _dump_recent() or {"docs": []}
 	existant = next((d for d in dump["docs"] if d.get("_id") == ID), None)
-	if existant:
-		sans_rev = {k: v for k, v in existant.items() if k != "_rev"}
-		if sans_rev != DOC:
-			print(f"REFUS : {ID} existe déjà dans le dump avec un autre contenu.")
-			return 1
+	doc = mise_a_jour(existant)
 	with open(SORTIE, "w", encoding="utf-8", newline="\n") as f:
-		json.dump([DOC], f, ensure_ascii=False, indent="\t")
+		json.dump([doc], f, ensure_ascii=False, indent="\t")
 		f.write("\n")
-	print(f"{SORTIE} : 1 doc ({len(DOC['metiers'])} métiers).")
+	print(f"{SORTIE} : 1 doc ({len(doc['metiers'])} métiers).")
 	return 0
 
 

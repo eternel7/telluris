@@ -107,7 +107,7 @@ def test_les_types_de_pays_gardent_le_service_de_leur_modele():
 	for type_id, modele, pays, *_ in gen.TYPES_PAR_PAYS:
 		m, base = gen.DOC["metiers"][type_id], gen.DOC["metiers"][modele]
 		assert m["offre"] == {"pays": [pays]}
-		for champ in ("forfait_cuivre", "forfait_tours", "savoir", "equipement"):
+		for champ in ("arrhes_cuivre", "question_cuivre", "savoir", "equipement"):
 			assert m[champ] == base[champ]
 
 

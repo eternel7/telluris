@@ -1,7 +1,7 @@
 // dev/test_guide_client.js
 //
 // Tests d'EXÉCUTION du JS du guide local (templates/play_town_telluris.html) :
-// toasts de tours, pied et actions de carte, forfait affiché.
+// tarifs affichés, pied et actions de carte, avertissement de départ.
 //
 //   node dev/test_guide_client.js     # sort en code 1 au premier échec
 //
@@ -34,27 +34,33 @@ function extraire(nom) {
 	throw new Error(`fonction ${nom} non fermée`);
 }
 
-['_prixTexte', '_guideForfaitTexte', '_guidePied', '_guideActions', '_texteGuideTour']
+['_prixTexte', '_guideTarifTexte', '_guideSujetTexte', '_guidePied', '_guideActions', '_guideDepartEtat']
 	.forEach(n => vm.runInThisContext(extraire(n)));
 globalThis.escapeHtml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
 function test(nom, fn) { fn(); console.log('ok -', nom); }
 
-test('toast seulement sur une alerte', () => {
-	assert.strictEqual(_texteGuideTour(null), null);
-	assert.strictEqual(_texteGuideTour({ tours_restants: 40, alerte: null }), null);
-	assert.ok(_texteGuideTour({ tours_restants: 0, alerte: 'epuise' }).includes('épuisé'));
-	assert.ok(_texteGuideTour({ tours_restants: 10, alerte: 'bientot' }).includes('10 tours'));
+test('tarifs lisibles', () => {
+	assert.strictEqual(_guideTarifTexte({ arrhes_cuivre: 50, question_cuivre: 10 }), "50 cu d'arrhes · 10 cu la question");
 });
 
-test('forfait lisible', () => {
-	assert.strictEqual(_guideForfaitTexte({ forfait_cuivre: 50, forfait_tours: 100 }), '50 cu / 100 tours');
+test('le prix n\'est annoncé que sur une réponse payante', () => {
+	const g = { question_cuivre: 10 };
+	assert.ok(_guideSujetTexte({ titre: 'Loups', connu: true }, g).includes('(10 cu)'));
+	assert.ok(!_guideSujetTexte({ titre: 'Loups', connu: false }, g).includes('cu)'));
+	assert.ok(!_guideSujetTexte({ titre: 'Loups', connu: true, ici: true }, g).includes('cu)'));
 });
 
-test('pied : tours restants, ou épuisé, métier échappé', () => {
-	assert.ok(_guidePied({ metier_label: 'Marin', tours_restants: 7 }).includes('7 tours restants'));
-	assert.ok(_guidePied({ metier_label: 'Marin', epuise: true }).includes('épuisé'));
-	assert.ok(_guidePied({ metier_label: '<b>' }).includes('&lt;b>'));
+test('pied : métier échappé et prix de la question', () => {
+	const html = _guidePied({ metier_label: '<b>', question_cuivre: 5 });
+	assert.ok(html.includes('&lt;b>') && html.includes('5 cu la question'));
+});
+
+test('départ : le sac plein retient le joueur', () => {
+	assert.deepStrictEqual(_guideDepartEtat({ sac_plein: false }), { peutPartir: true, note: '' });
+	const plein = _guideDepartEtat({ sac_plein: true });
+	assert.strictEqual(plein.peutPartir, false);
+	assert.ok(plein.note.includes('Reprenez'));
 });
 
 test('congédier grisé hors auberge ou sac plein, interroger toujours offert', () => {

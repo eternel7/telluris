@@ -123,7 +123,7 @@ def effacer_si_lieu_atteint(character: dict, lieu_id: str) -> bool:
 
 
 def effacer_si_guide(character: dict, guide_id: str) -> bool:
-	"""Retire le cap posé par ce guide (forfait épuisé, congé). Le 🧭 du joueur n'est pas touché."""
+	"""Retire le cap posé par ce guide (congé). Le 🧭 du joueur n'est pas touché."""
 	f = focalisation_de(character)
 	if f and f.get("guide") == guide_id:
 		character["focalisation"] = None

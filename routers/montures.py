@@ -63,7 +63,7 @@ def _monture_view(m: dict) -> dict:
 	partage (`id`/`nom`/`image`/vitaux) : les deux alimentent la même carte de personnage.
 	`est_monture` permet au client de la ranger dans son propre groupe et de lui offrir
 	« Relâcher » plutôt que « Congédier ». Un GUIDE a un prénom, un portrait de personne et
-	ses tours restants : c'est la seule vue où il diffère d'une bête."""
+	ses tarifs : c'est la seule vue où il diffère d'une bête."""
 	guide_bloc = {}
 	if montures.est_guide(m):
 		guide_bloc = {

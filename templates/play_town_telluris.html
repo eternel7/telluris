@@ -3420,13 +3420,15 @@
 		/* ── Choix de la cible d'un effet bénéfique (sort/compétence `cible: allie`) ──
 		   Même calque et mêmes briques de carte que les clauses : c'est aussi une
 		   décision bloquante, et refermer sans choisir ne doit RIEN lancer. */
-		#cible-allie-overlay, #choix-overlay, #guide-overlay {
+		#cible-allie-overlay, #choix-overlay, #guide-overlay, #guide-depart-overlay {
 			position: fixed; inset: 0; z-index: 9400;
 			background: rgba(10, 8, 5, .78);
 			display: flex; align-items: center; justify-content: center; padding: 1rem;
 		}
-		#cible-allie-overlay.clauses-hidden, #choix-overlay.clauses-hidden, #guide-overlay.clauses-hidden { display: none; }
+		#cible-allie-overlay.clauses-hidden, #choix-overlay.clauses-hidden, #guide-overlay.clauses-hidden, #guide-depart-overlay.clauses-hidden { display: none; }
 		#cible-allie-overlay .item-detail-card, #choix-overlay .item-detail-card, #guide-overlay .item-detail-card { max-width: 460px; }
+		#guide-depart-overlay .item-detail-card { max-width: 720px; }
+		#guide-depart-img { display: block; width: 100%; max-height: 62vh; object-fit: contain; border-radius: 6px; margin-bottom: .6rem; }
 		.choix-liste { margin: 0 0 .8rem; display: flex; flex-direction: column; gap: .3rem; }
 		.choix-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
 		.choix-actions .sh-drop-btn { flex: 1 1 auto; margin-left: 0; padding: .45rem .6rem; }
@@ -3602,11 +3604,26 @@
 			<div id="guide-saisie" class="aub-dire">
 				<input type="text" id="guide-saisie-txt" maxlength="80" placeholder="Connais-tu tel lieu ?"
 					   onkeydown="if(event.key==='Enter')guideDemanderLieu()">
-				<button class="sub-loc-btn aub-dire-btn" onclick="guideDemanderLieu()">Demander</button>
+				<button id="guide-demander-btn" class="sub-loc-btn aub-dire-btn" onclick="guideDemanderLieu()">Demander</button>
 			</div>
-			<div id="guide-renouveler" class="choix-actions" hidden></div>
 		</div>
 	</div><!-- /#guide-overlay -->
+	{# Le guide prévient avant la sortie de sa cité. Rien n'est en attente et rien n'a bougé :
+	   ✕ / Échap / clic hors carte = rester. Seul « Partir sans lui » rappelle le déplacement. #}
+	<div id="guide-depart-overlay" class="clauses-hidden" role="dialog" aria-label="Votre guide vous prévient"
+		 onclick="if(event.target===this)closeGuideDepart()">
+		<div class="item-detail-card">
+			<button class="item-detail-close" onclick="closeGuideDepart()" title="Rester">✕</button>
+			<h3 id="guide-depart-titre" style="margin:.1rem 0 .5rem; padding-right:2rem"></h3>
+			<img id="guide-depart-img" alt="">
+			<p id="guide-depart-replique" class="q-desc"></p>
+			<p id="guide-depart-note" class="q-desc" hidden></p>
+			<div class="choix-actions">
+				<button class="sh-drop-btn" onclick="closeGuideDepart()">Rester</button>
+				<button id="guide-depart-ok" class="sh-drop-btn sh-abandon-btn" onclick="confirmerGuideDepart()">Partir sans lui</button>
+			</div>
+		</div>
+	</div><!-- /#guide-depart-overlay -->
 	{# Dépassement du maximum racial : UNIQUE et IRRÉVERSIBLE pour le personnage.
 	   ✕ / Échap / clic hors carte = annuler sans rien engager — seul le bouton
 	   « Dépasser » de la carte envoie `use_max_bonus`. #}
@@ -3939,7 +3956,6 @@
 				// Guidage 🧭 : à jour AVANT buildLocationslist/updateControls (exergues flèche+lien).
 				_guidage = rep.guidage || null;
 				_refreshGuidage();
-				_notifierGuideTour(rep.guide_tour);
 				buildLocationslist();
 				_majHaloPassages();
 				updateControls();
@@ -4304,10 +4320,6 @@
 			// que xp_gain_notif : le changement de lieu recharge la page).
 			sessionStorage.setItem('xp_compagnie_notif', JSON.stringify(data.xp_compagnie));
 		}
-		if (data.guide_tour && data.guide_tour.alerte) {
-			// Le changement de lieu recharge la page : toast rejoué après (pattern xp_gain_notif).
-			sessionStorage.setItem('guide_tour_notif', JSON.stringify(data.guide_tour));
-		}
 		if (data.focalisation_atteinte) {
 			// Arrivée au lieu focalisé : toast affiché après le reload (pattern xp_gain_notif).
 			sessionStorage.setItem('focus_arrive_notif', data.focalisation_atteinte.nom || '');
@@ -4326,8 +4338,8 @@
 			sessionStorage.setItem('escorte_notif', JSON.stringify(data.escorte));
 		}
 	}
-	async function moveTo(linkId) {
-		const moveData = {link: linkId};
+	async function moveTo(linkId, guideAdieu = false) {
+		const moveData = guideAdieu ? {link: linkId, guide_adieu: true} : {link: linkId};
 		// Au clic et non au retour : la page se recharge dès la réponse, le son y serait coupé net.
 		jouerSonUi('porte');
 		try {
@@ -4338,6 +4350,8 @@
 			});
 			if (response.ok) {
 				const data = await response.json();
+				// Le guide prévient avant de quitter sa cité : rien n'a bougé côté serveur.
+				if (data.guide_avertissement) { _ouvrirGuideDepart(data.guide_avertissement, () => moveTo(linkId, true)); return; }
 				// Donjon à étages : la connexion ouvre la descente (un combat), sans déplacer.
 				if (data.combat_id) {
 					window.location.href = '/combat/' + data.combat_id;
@@ -4413,7 +4427,6 @@
 			TRAVERSEE.total = data.total;
 			POSITIONS = {"x": data.position.x, "y": data.position.y};
 			_ecrireCarte(data.position.x, data.position.y);
-			_notifierGuideTour(data.guide_tour);
 			_traverseeBandeau();
 			updateVitals(data.vitals);
 			_renderEffetsActifs(data.effets_actifs);
@@ -4869,6 +4882,8 @@ document.addEventListener('keydown', e => {
 	if (cibleAllie && !cibleAllie.classList.contains('clauses-hidden')) { closeCibleAllie(); return; }
 	const choixOv = document.getElementById('choix-overlay');
 	if (choixOv && !choixOv.classList.contains('clauses-hidden')) { closeChoix(); return; }
+	const guideDepartOv = document.getElementById('guide-depart-overlay');
+	if (guideDepartOv && !guideDepartOv.classList.contains('clauses-hidden')) { closeGuideDepart(); return; }
 	const guideOv = document.getElementById('guide-overlay');
 	if (guideOv && !guideOv.classList.contains('clauses-hidden')) { closeGuide(); return; }
 	// ⚠️ Le sur-mesure attend une promesse, comme le choix de cible : Échap doit la RÉSOUDRE
@@ -5413,11 +5428,6 @@ async function spendXp(statKey, useMaxBonus = false) {
 	if (_traverseeDepart !== null) {
 		sessionStorage.removeItem('traversee_depart_notif');
 		showToast('⛵ ' + (_traverseeDepart || 'Vous embarquez.'), {major: true});
-	}
-	const _guideTourNotif = sessionStorage.getItem('guide_tour_notif');
-	if (_guideTourNotif !== null) {
-		sessionStorage.removeItem('guide_tour_notif');
-		try { _notifierGuideTour(JSON.parse(_guideTourNotif)); } catch (e) { /* notif illisible : sans conséquence */ }
 	}
 	const _focusArrive = sessionStorage.getItem('focus_arrive_notif');
 	if (_focusArrive !== null) {
@@ -11200,31 +11210,24 @@ function renderGroupe(data) {
 // barres). L'espèce n'est pas répétée — c'est le nom de la carte.
 // ── Guide local ──────────────────────────────────────────────────────────────────
 // Engagé et congédié à l'auberge (le serveur garde : 403 ailleurs), interrogé partout.
-function _guideForfaitTexte(g) {
-	return `${_prixTexte(g.forfait_cuivre)} / ${g.forfait_tours} tours`;
+function _guideTarifTexte(g) {
+	return `${_prixTexte(g.arrhes_cuivre)} d'arrhes · ${_prixTexte(g.question_cuivre)} la question`;
+}
+// Le prix n'est annoncé que si la réponse peut se payer : « je ne connais pas » est gratuit.
+function _guideSujetTexte(s, g) {
+	const prix = s.connu && !s.ici ? ` (${_prixTexte(g.question_cuivre)})` : '';
+	return `Peux-tu m'aider pour « ${s.titre} » ?${prix}`;
 }
 function _guidePied(g) {
-	const tours = g.epuise ? '⌛ Forfait épuisé' : `⌛ ${g.tours_restants} tours restants`;
-	return `<span>${escapeHtml(g.metier_label || '')} · ${tours}</span>`;
+	return `<span>${escapeHtml(g.metier_label || '')} · ${_prixTexte(g.question_cuivre)} la question</span>`;
 }
 function _guideActions(g) {
 	const charge = +(g.charge || 0) > 0;
 	const peutPartir = EST_AUBERGE && !charge;
 	const raison = !EST_AUBERGE ? "Un guide se congédie dans une auberge"
-		: (charge ? 'Videz son sac avant de le congédier' : 'Mettre fin à son service (forfait non remboursé)');
+		: (charge ? 'Videz son sac avant de le congédier' : 'Mettre fin à son service (arrhes non remboursées)');
 	return `<button class="sh-drop-btn" onclick="ouvrirGuide()">🗣️ Interroger</button>`
 		+ `<button class="sh-drop-btn sh-abandon-btn" ${peutPartir ? '' : 'disabled'} title="${raison}" onclick="congedierGuide()">✕ Congédier</button>`;
-}
-// Texte du toast d'un tour de monde, ou null : aucune bulle hors des deux seuils.
-function _texteGuideTour(t) {
-	if (!t || !t.alerte) return null;
-	if (t.alerte === 'epuise') return '🧭 Le forfait de votre guide est épuisé : il ne vous indique plus la route.';
-	if (t.alerte === 'bientot') return `🧭 Votre guide n'est plus payé que pour ${t.tours_restants} tours.`;
-	return null;
-}
-function _notifierGuideTour(t) {
-	const texte = _texteGuideTour(t);
-	if (texte) showToast(texte);
 }
 // Ce que chaque réponse du guide resynchronise (Convention §10).
 function _appliquerReponseGuide(data) {
@@ -11250,10 +11253,10 @@ function renderGuidesAuberge(data) {
 	offres.forEach(o => renderCharacterCard(liste, o, {
 		editable: false,
 		footer: `<span>${escapeHtml(o.metier_label || '')} · ${escapeHtml(o.zone_nom || '')}</span>`
-			+ `<span class="sell-prix">💰 ${_guideForfaitTexte(o)}</span>`,
+			+ `<span class="sell-prix">💰 ${_guideTarifTexte(o)}</span>`,
 		actions: `<button class="sh-drop-btn" data-guide="${escapeHtml(o.id)}" onclick="engagerGuide(this.dataset.guide)"
-			${(data.guide || o.forfait_cuivre > bourse) ? 'disabled' : ''}
-			title="${data.guide ? 'Un guide vous accompagne déjà' : 'Forfait payé d\'avance'}">🧭 Engager</button>`,
+			${(data.guide || o.arrhes_cuivre > bourse) ? 'disabled' : ''}
+			title="${data.guide ? 'Un guide vous accompagne déjà' : 'Arrhes payées à l\'engagement'}">🧭 Engager</button>`,
 	}));
 	if (data.guide) {
 		const note = document.createElement('div');
@@ -11296,7 +11299,7 @@ function _rendreGuide(data) {
 		const b = document.createElement('button');
 		b.type = 'button';
 		b.className = 'sh-drop-btn';
-		b.textContent = `Peux-tu m'aider pour « ${s.titre} » ?`;
+		b.textContent = _guideSujetTexte(s, g);
 		b.addEventListener('click', () => guideDemander({ quete_id: s.quete_id }));
 		sujets.appendChild(b);
 	});
@@ -11308,18 +11311,7 @@ function _rendreGuide(data) {
 		b.addEventListener('click', () => guideDemander({ saisie: nom }));
 		sujets.appendChild(b);
 	});
-	document.getElementById('guide-saisie').hidden = !!g.epuise;
-	const renouv = document.getElementById('guide-renouveler');
-	renouv.hidden = !g.epuise;
-	renouv.replaceChildren();
-	if (g.epuise) {
-		const b = document.createElement('button');
-		b.type = 'button';
-		b.className = 'sh-drop-btn';
-		b.textContent = `Payer un nouveau forfait (${_guideForfaitTexte(g)})`;
-		b.addEventListener('click', guideRenouveler);
-		renouv.appendChild(b);
-	}
+	document.getElementById('guide-demander-btn').textContent = `Demander (${_prixTexte(g.question_cuivre)})`;
 }
 async function ouvrirGuide() {
 	const data = await _aubFetch('api/guides/dialogue');
@@ -11340,11 +11332,37 @@ function guideDemanderLieu() {
 	champ.value = '';
 	guideDemander({ saisie });
 }
-async function guideRenouveler() {
-	const data = await _aubFetch('api/guides/renouveler', {});
-	if (!data) return;
-	_appliquerReponseGuide(data);
-	_rendreGuide(data);
+// ── Le guide prévient avant la sortie de sa cité ─────────────────────────────────
+let _guideDepartSuite = null;
+// Sac plein : on ne part pas avant de l'avoir repris, rien ne doit disparaître en silence.
+function _guideDepartEtat(a) {
+	return a.sac_plein
+		? { peutPartir: false, note: "Reprenez d'abord ce qu'il porte (panneau 👥) : il garde son sac s'il reste ici." }
+		: { peutPartir: true, note: '' };
+}
+// `suite` : le geste à rejouer s'il part quand même (connexion, seuil de portail).
+function _ouvrirGuideDepart(a, suite) {
+	_guideDepartSuite = suite;
+	const etat = _guideDepartEtat(a);
+	document.getElementById('guide-depart-titre').textContent = `🧭 ${a.prenom} ${a.nom}`;
+	const img = document.getElementById('guide-depart-img');
+	img.hidden = !a.image;
+	if (a.image) img.src = a.image;
+	document.getElementById('guide-depart-replique').textContent = a.replique || '';
+	const note = document.getElementById('guide-depart-note');
+	note.hidden = etat.peutPartir;
+	note.textContent = etat.note;
+	document.getElementById('guide-depart-ok').disabled = !etat.peutPartir;
+	document.getElementById('guide-depart-overlay').classList.remove('clauses-hidden');
+}
+function closeGuideDepart() {
+	_guideDepartSuite = null;
+	document.getElementById('guide-depart-overlay').classList.add('clauses-hidden');
+}
+function confirmerGuideDepart() {
+	const suite = _guideDepartSuite;
+	closeGuideDepart();
+	if (suite) suite();
 }
 
 function _piedMonture(m) {
@@ -12087,6 +12105,12 @@ async function choisirPnj(choixId, extra) {
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		// Seuil de portail avec un guide : il prévient, rien n'a bougé ; le dialogue reste ouvert.
+		if (data.guide_avertissement) {
+			_ouvrirGuideDepart(data.guide_avertissement,
+				() => choisirPnj(choixId, Object.assign({}, extra || {}, { guide_adieu: true })));
+			return;
+		}
 		if (data.vitals) updateVitals(data.vitals);
 		if (data.purse) updatePurse(data.purse);
 		// Une course livrée/rapportée fait monter la relation du donneur : l'onglet 🤝 est rendu

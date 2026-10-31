@@ -1,5 +1,5 @@
 # routers/guides.py
-# Guides locaux : engager et congédier À L'AUBERGE, interroger et renouveler PARTOUT.
+# Guides locaux : engager et congédier À L'AUBERGE, interroger PARTOUT (seul un nouveau cap se paie).
 # Le moteur est dans utils/guides.py. Pattern de routers/montures.py : gardes, débit APRÈS les
 # gardes, `save_doc is None` ⇒ 409, le bloc recalculé dans chaque réponse (Convention §10).
 
@@ -89,10 +89,10 @@ async def engager(current_user: Annotated[dict, Depends(get_current_user)], body
 	if not guide or not montures.est_guide(guide) or guide.get("giver") != lieu_doc.get("_id"):
 		raise HTTPException(status_code=403, detail="Ce guide n'est pas proposé ici.")
 	regles = guides.regles_de(get_doc)
-	cout, _ = guides.forfait(guides.metier_de(guide, regles))
+	cout, _ = guides.tarifs(guides.metier_de(guide, regles))
 	if money_to_cuivre(character) < cout:
-		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi payer son forfait.")
-	ok, raison = guides.engager(character, guide, regles)
+		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi payer ses arrhes.")
+	ok, raison = guides.engager(character, guide)
 	if not ok:
 		raise HTTPException(status_code=409, detail=raison)
 	if debit_character(character, cout) is None:
@@ -116,31 +116,26 @@ async def congedier(current_user: Annotated[dict, Depends(get_current_user)]):
 	return _tableau(character, lieu_doc)
 
 
-@guides_router.post("/guides/renouveler")
-async def renouveler(current_user: Annotated[dict, Depends(get_current_user)]):
-	"""Un nouveau forfait, PARTOUT : le guide n'abandonne personne en route."""
-	character = _perso(current_user)
-	guide = _guide(character)
-	regles = guides.regles_de(get_doc)
-	cout, _ = guides.forfait(guides.metier_de(guide, regles))
-	if debit_character(character, cout) is None:
-		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi payer son forfait.")
-	guides.ajouter_forfait(guide, regles)
-	if save_doc(character) is None or save_doc(guide) is None:
-		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
-	return {"replique": guides.replique(guide, regles, "renouvele"), **_resync(character)}
-
-
 @guides_router.get("/guides/dialogue")
 async def dialogue(current_user: Annotated[dict, Depends(get_current_user)]):
 	character = _perso(current_user)
 	guide = _guide(character)
 	regles = guides.regles_de(get_doc)
-	if not guides.actif(guide):
-		return {"replique": guides.replique(guide, regles, "epuise"), "sujets": [], **_resync(character)}
 	sujets = guides.sujets(character, guide, guides.index_lieux(find_docs),
 						   focalisation.charger_graphe(find_docs), regles)
 	return {"replique": guides.replique(guide, regles, "accueil"), "sujets": sujets, **_resync(character)}
+
+
+def _poser_cap_paye(character: dict, guide: dict, regles: dict, lieu_id: str, nom: str,
+					quete_id: str | None = None, quete: str = "") -> str:
+	"""Le seul geste payant. Bourse trop légère : il le dit, sans cap ni dette. Le débit mute le
+	personnage ; `demander` persiste, et un conflit de sauvegarde ne coûte donc rien."""
+	if not guides.cap_deja_pose(character, guide, lieu_id):
+		_, prix = guides.tarifs(guides.metier_de(guide, regles))
+		if debit_character(character, prix) is None:
+			return guides.replique(guide, regles, "sans_le_sou", lieu=nom, prix=prix)
+	guides.poser_cap(character, guide, lieu_id, quete_id)
+	return guides.replique(guide, regles, "accepte", lieu=nom, quete=quete)
 
 
 def _cap_quete(character: dict, guide: dict, regles: dict, quete_id: str, index: dict, graphe: dict) -> tuple[str, list]:
@@ -158,8 +153,7 @@ def _cap_quete(character: dict, guide: dict, regles: dict, quete_id: str, index:
 			character["focalisation"] = {"type": "quete", "cible": quete_id,
 										 "posee_at": quetes.now_epoch()}
 		return guides.replique(guide, regles, "ici", lieu=nom, quete=q.get("titre", "")), []
-	guides.poser_cap(character, guide, piste["lieu"], quete_id)
-	return guides.replique(guide, regles, "accepte", lieu=nom, quete=q.get("titre", "")), []
+	return _poser_cap_paye(character, guide, regles, piste["lieu"], nom, quete_id, q.get("titre", "")), []
 
 
 def _cap_saisie(character: dict, guide: dict, regles: dict, saisie, index: dict, graphe: dict) -> tuple[str, list]:
@@ -172,8 +166,7 @@ def _cap_saisie(character: dict, guide: dict, regles: dict, saisie, index: dict,
 			return guides.replique(guide, regles, "ici", lieu=label), []
 		if lieu_id not in focalisation.distances_depuis(graphe, character.get("lieu")):
 			return guides.replique(guide, regles, "sans_chemin", lieu=label), []
-		guides.poser_cap(character, guide, lieu_id)
-		return guides.replique(guide, regles, "accepte", lieu=label), []
+		return _poser_cap_paye(character, guide, regles, lieu_id, label), []
 	if trouve.get("suggestions"):
 		return guides.replique(guide, regles, "proche", recherche=nom), trouve["suggestions"]
 	return guides.replique(guide, regles, "inconnu", quete=nom), []
@@ -185,8 +178,6 @@ async def demander(current_user: Annotated[dict, Depends(get_current_user)], bod
 	character = _perso(current_user)
 	guide = _guide(character)
 	regles = guides.regles_de(get_doc)
-	if not guides.actif(guide):
-		raise HTTPException(status_code=409, detail="Son forfait est épuisé : il ne vous indique plus rien.")
 	index = guides.index_lieux(find_docs)
 	graphe = focalisation.charger_graphe(find_docs)
 	if body.get("quete_id"):

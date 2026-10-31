@@ -184,8 +184,8 @@ CATALOGUE = [
 		"label": "🧭 Générer le catalogue des guides locaux (rules:guides)",
 		"argv": _py("gen_guides.py"),
 		"ecrit": "Écrit jsons/guides_a_importer.json.",
-		"description": "Métiers, localisation, forfaits et répliques des guides d'auberge. Doc "
-			"neuf : refus si l'_id existe déjà dans le dump avec un autre contenu.",
+		"description": "Métiers, localisation, tarifs et répliques des guides d'auberge. Doc "
+			"présent au dump : seuls les tarifs et les répliques du paiement sont réécrits.",
 	},
 	{
 		"id": "gen_negociant",

@@ -10,18 +10,18 @@ STATS = {"V": 10, "F": 10, "R": 10, "Ag": 10, "Vol": 10, "Int": 10, "Cha": 10, "
 RACES = [{"id": "humain", "stats": STATS, "stats_max": {k: 40 for k in STATS}}]
 
 REGLES = {
-	"tableau_nb": 2, "duree_offre_secondes": 100, "seuil_alerte_tours": 3,
+	"tableau_nb": 2, "duree_offre_secondes": 100,
 	"repliques": {"accepte": "Pour {lieu}, par ici."},
 	"metiers": {
-		"routes": {"label": "Routes", "forfait_cuivre": 50, "forfait_tours": 10, "offre": {"partout": True},
+		"routes": {"label": "Routes", "arrhes_cuivre": 50, "question_cuivre": 10, "offre": {"partout": True},
 				   "savoir": {}, "portrait_voc": "forestier"},
-		"marin": {"label": "Marin", "forfait_cuivre": 80, "forfait_tours": 10, "offre": {"traits": ["port"]},
+		"marin": {"label": "Marin", "arrhes_cuivre": 80, "question_cuivre": 10, "offre": {"traits": ["port"]},
 				  "savoir": {"categories": ["quai"]}, "repliques": {"accepte": "Cap sur {lieu}."}},
-		"interprete": {"label": "Interprète", "forfait_cuivre": 90, "forfait_tours": 10,
+		"interprete": {"label": "Interprète", "arrhes_cuivre": 90, "question_cuivre": 10,
 					   "offre": {"sous_categories": ["capitale"]}, "savoir": {}},
-		"survivant": {"label": "Survivant", "forfait_cuivre": 90, "forfait_tours": 10,
+		"survivant": {"label": "Survivant", "arrhes_cuivre": 90, "question_cuivre": 10,
 					  "offre": {"traits": ["donjon"]}, "savoir": {"tags": ["donjon"]}},
-		"montagnard": {"label": "Montagnard", "forfait_cuivre": 90, "forfait_tours": 10,
+		"montagnard": {"label": "Montagnard", "arrhes_cuivre": 90, "question_cuivre": 10,
 					   "offre": {"traits": ["montagne"]}, "savoir": {}},
 	},
 }
@@ -62,10 +62,10 @@ GRAPHE = {
 }
 
 
-def _guide(metier="routes", tours=10, zone="lieu:france"):
+def _guide(metier="routes", zone="lieu:france"):
 	return {"_id": "monture:guide_a", "type": "monture", "statut": "acquise", "acquise_par": "character:1",
 			"caracteristiques_current": dict(STATS), "inventaire": [], "slots": {},
-			"guide": {"metier": metier, "zone": zone, "tours_restants": tours}}
+			"guide": {"metier": metier, "zone": zone}}
 
 
 def _perso(**extra):
@@ -172,49 +172,107 @@ def test_sujet_sans_piste_reste_listé():
 	assert [s["connu"] for s in sujets] == [False]
 
 
-# ── Forfait ──────────────────────────────────────────────────────────────────────
+# ── Contrat et départ ────────────────────────────────────────────────────────────
 
-def test_engager_credite_le_forfait():
-	g = dict(_guide(tours=0), statut="offert", expire_at=5)
+def test_engager_acquiert_le_guide():
+	g = dict(_guide(), statut="offert", expire_at=5)
 	perso = {"_id": "character:1", "montures": []}
-	ok, _ = guides.engager(perso, g, REGLES)
+	ok, _ = guides.engager(perso, g)
 	assert ok and g["statut"] == "acquise" and "expire_at" not in g
-	assert guides.tours_restants(g) == REGLES["metiers"]["routes"]["forfait_tours"]
 	assert g["_id"] in perso["montures"]
 
 
-def test_renouveler_cumule():
-	g = _guide(tours=2)
-	assert guides.ajouter_forfait(g, REGLES) == 2 + REGLES["metiers"]["routes"]["forfait_tours"]
+def test_tarifs_lus_dans_le_metier():
+	m = REGLES["metiers"]["routes"]
+	assert guides.tarifs(m) == (m["arrhes_cuivre"], m["question_cuivre"])
+	assert guides.tarifs({}) == (0, 0)
 
 
-def test_decompte_alerte_puis_epuisement_efface_le_cap():
-	g = _guide(tours=REGLES["seuil_alerte_tours"] + 1)
-	perso = _perso()
+def test_cap_deja_pose_ne_vaut_que_pour_le_meme_cap_du_meme_guide():
+	g, perso = _guide(), _perso()
+	assert not guides.cap_deja_pose(perso, g, "lieu:loin")
 	guides.poser_cap(perso, g, "lieu:loin")
-	regles = lambda: REGLES
-	assert guides.decompter_tour(perso, [g], regles)["alerte"] == "bientot"
-	for _ in range(REGLES["seuil_alerte_tours"] - 1):
-		assert guides.decompter_tour(perso, [g], regles)["alerte"] is None
-	assert perso["focalisation"]["cible"] == "lieu:loin"
-	fin = guides.decompter_tour(perso, [g], regles)
-	assert fin == {"tours_restants": 0, "alerte": "epuise"}
-	assert perso["focalisation"] is None and not guides.actif(g)
-	# Déjà épuisé : plancher, plus d'alerte.
-	assert guides.decompter_tour(perso, [g], regles) == {"tours_restants": 0, "alerte": None}
+	assert guides.cap_deja_pose(perso, g, "lieu:loin")
+	assert not guides.cap_deja_pose(perso, g, "lieu:pres")
+	assert not guides.cap_deja_pose(perso, dict(g, _id="monture:guide_b"), "lieu:loin")
 
 
-def test_epuisement_laisse_le_cap_du_joueur():
-	g = _guide(tours=1)
-	perso = _perso(focalisation={"type": "lieu", "cible": "lieu:loin", "posee_at": 1})
-	guides.decompter_tour(perso, [g], lambda: REGLES)
-	assert perso["focalisation"]["cible"] == "lieu:loin"
+def test_seule_la_carte_d_un_pays_fait_partir_le_guide():
+	assert guides.mene_hors_de_sa_cite(INDEX["lieu:france"])
+	assert not guides.mene_hors_de_sa_cite(INDEX["lieu:capitale"])
+	assert not guides.mene_hors_de_sa_cite(INDEX["lieu:loin"])
+	assert not guides.mene_hors_de_sa_cite(None)
 
 
-def test_sans_guide_ne_lit_pas_les_regles():
-	def interdit():
-		raise AssertionError("règles lues sans guide")
-	assert guides.decompter_tour(_perso(), [{"type": "monture", "_id": "monture:ane"}], interdit) is None
+def test_laisser_partir_garde_le_cap_paye_sans_sa_signature():
+	g, perso = _guide(), _perso()
+	guides.poser_cap(perso, g, "lieu:loin", "q1")
+	ok, _ = guides.laisser_partir(perso, g)
+	assert ok and g["statut"] == "parti" and perso["montures"] == []
+	assert perso["focalisation"]["cible"] == "lieu:loin" and perso["focalisation"]["puis_quete"] == "q1"
+	assert focalisation.focalisation_effective(perso)["lieu_cible"] == "lieu:loin"
+
+
+def test_laisser_partir_ne_touche_pas_le_cap_du_joueur():
+	g = _guide()
+	f = {"type": "lieu", "cible": "lieu:loin", "posee_at": 1}
+	perso = _perso(focalisation=dict(f))
+	assert guides.laisser_partir(perso, g)[0] and perso["focalisation"] == f
+
+
+def test_laisser_partir_refuse_tant_que_son_sac_n_est_pas_vide():
+	g, perso = dict(_guide(), inventaire=["item:sac"]), _perso()
+	assert guides.laisser_partir(perso, g)[0] is False
+	assert g["statut"] == "acquise" and perso["montures"] == ["monture:guide_a"]
+
+
+def test_laisser_partir_ne_laisse_aucune_rancune():
+	g, perso = _guide(), _perso(affinites={"autre": 60})
+	guides.laisser_partir(perso, g)
+	assert perso["affinites"] == {"autre": 60}
+
+
+def test_avertissement_nomme_la_cite_et_signale_le_sac():
+	regles = {"repliques": {"adieu": "Si vous quittez {cite}, je reste."}, "metiers": REGLES["metiers"]}
+	lire = {"lieu:auberge": {"lieu_parent": "lieu:v"}, "lieu:v": {"categorie": "ville", "label": "Auxerre"}}.get
+	g = dict(_guide(), prenom="Ana", nom="B", inventaire=["item:sac"])
+	vue = guides.avertissement(g, regles, "lieu:auberge", lire)
+	assert vue["replique"] == "Si vous quittez Auxerre, je reste."
+	assert vue["sac_plein"] is True and vue["prenom"] == "Ana"
+
+
+def test_avertissement_nomme_la_cite_d_origine_du_guide_pas_celle_du_joueur():
+	regles = {"repliques": {"adieu": "Si vous quittez {cite}, je reste."}, "metiers": REGLES["metiers"]}
+	lire = {"lieu:auberge": {"lieu_parent": "lieu:v"}, "lieu:v": {"categorie": "ville", "label": "Auxerre"},
+			"lieu:ailleurs": {"categorie": "ville", "label": "Chartres"}}.get
+	g = dict(_guide(), giver="lieu:auberge")
+	assert guides.avertissement(g, regles, "lieu:ailleurs", lire)["replique"] == "Si vous quittez Auxerre, je reste."
+
+
+def test_avertissement_au_portail_a_sa_propre_replique():
+	regles = {"repliques": {"adieu": "Cité {cite}.", "adieu_portail": "Portail."}, "metiers": REGLES["metiers"]}
+	vue = guides.avertissement(_guide(), regles, "lieu:auberge", {}.get, portail=True)
+	assert vue["replique"] == "Portail."
+
+
+def test_lien_portail_lit_le_type_de_la_connexion():
+	assert guides.lien_portail({"metadata": {"type": "portail"}})
+	assert not guides.lien_portail({"metadata": {"type": "chemin"}})
+	assert not guides.lien_portail({}) and not guides.lien_portail(None)
+
+
+def test_image_adieu_prefere_la_version_full_puis_le_portrait():
+	g = {"image": "guide_routes_m_humain01.jpg"}
+	assert guides.image_adieu(g, lambda p: True) == "/pnj/full_guide_routes_m_humain01.jpg"
+	assert guides.image_adieu({"image": "forestier.jpg"}, lambda p: "full_" not in p and "pnj" in p) == "/pnj/forestier.jpg"
+	assert guides.image_adieu({}) == ""
+
+
+def test_chaque_portrait_de_guide_a_sa_version_full():
+	"""Un portrait `guide_*` sans `full_guide_*` retomberait en silence sur le portrait."""
+	for nom in guides.portraits_guide_disponibles():
+		if nom.lower().startswith("guide_"):
+			assert guides.image_adieu({"image": nom}).endswith(f"/full_{nom}"), nom
 
 
 def test_congedier_refuse_un_sac_plein_et_retire_le_cap():
@@ -326,11 +384,28 @@ def test_generateur_catalogue_coherent():
 	mod = importlib.util.module_from_spec(spec)
 	spec.loader.exec_module(mod)
 	for mid, m in mod.DOC["metiers"].items():
-		assert m["forfait_cuivre"] > 0 and m["forfait_tours"] > 0, mid
+		assert m["arrhes_cuivre"] > 0 and m["question_cuivre"] > 0, mid
 		assert m["offre"], mid
 		assert m["repliques"]["presentation"], mid
-	for cle in ("accueil", "accepte", "ici", "inconnu", "proche", "sans_chemin", "epuise", "renouvele"):
+	for cle in ("accueil", "accepte", "ici", "inconnu", "proche", "sans_chemin", "sans_le_sou", "adieu", "adieu_portail"):
 		assert mod.DOC["repliques"][cle], cle
+
+
+def test_generateur_ne_reecrit_que_le_paiement_d_un_doc_en_base():
+	mod = _generateur()
+	existant = {
+		"_id": "rules:guides", "_rev": "9-x", "type": "rules", "tableau_nb": 7, "seuil_alerte_tours": 10,
+		"repliques": {"accueil": "Réglé en base.", "epuise": "Fini.", "renouvele": "Bien."},
+		"metiers": {"marin": {"label": "Réglé", "forfait_cuivre": 100, "forfait_tours": 100}},
+	}
+	doc = mod.mise_a_jour(existant)
+	assert "_rev" not in doc and "seuil_alerte_tours" not in doc and doc["tableau_nb"] == 7
+	assert doc["repliques"]["accueil"] == "Réglé en base."
+	assert "epuise" not in doc["repliques"] and doc["repliques"]["adieu"]
+	marin = doc["metiers"]["marin"]
+	assert marin["label"] == "Réglé" and "forfait_cuivre" not in marin
+	assert marin["arrhes_cuivre"] == mod.DOC["metiers"]["marin"]["arrhes_cuivre"]
+	assert mod.mise_a_jour(doc) == doc   # idempotent
 
 
 def _generateur():

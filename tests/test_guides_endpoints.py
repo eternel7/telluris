@@ -1,5 +1,5 @@
-"""Endpoints des guides (`routers/guides.py`) et guide en combat : gardes d'auberge, forfait payé
-d'avance, cap, épuisement, statut de monture. Base en mémoire, gabarit de test_auberge_endpoints."""
+"""Endpoints des guides (`routers/guides.py`) et guide en combat : gardes d'auberge, arrhes,
+question payée au cap posé, départ à la sortie de la cité, statut de monture. Base en mémoire, gabarit de test_auberge_endpoints."""
 
 import asyncio
 
@@ -15,18 +15,19 @@ from tests.test_combat_groupe import character as perso_combat, monstre_snap
 
 CARACTS = {"V": 5, "F": 20, "R": 40, "Ag": 40, "Vol": 40, "Int": 40, "Cha": 40, "Ch": 40}
 REGLES = {
-	"_id": "rules:guides", "tableau_nb": 2, "duree_offre_secondes": 1000, "seuil_alerte_tours": 3,
+	"_id": "rules:guides", "tableau_nb": 2, "duree_offre_secondes": 1000,
 	"repliques": {"accueil": "Dites.", "accepte": "Vers {lieu}.", "ici": "Ici : {lieu}.",
 				  "inconnu": "Connais pas {quete}.", "proche": "{recherche} ?", "sans_chemin": "Pas de route.",
-				  "epuise": "Plus de forfait.", "renouvele": "Bien."},
+				  "sans_le_sou": "{prix} pour {lieu}.", "adieu": "Je reste à {cite}.", "adieu_portail": "Pas ce portail."},
 	"metiers": {
-		"routes": {"label": "Routes", "forfait_cuivre": 50, "forfait_tours": 100,
+		"routes": {"label": "Routes", "arrhes_cuivre": 50, "question_cuivre": 10,
 				   "offre": {"partout": True}, "savoir": {}, "portrait_voc": "forestier",
 				   "repliques": {"presentation": "Il connaît."}},
-		"marin": {"label": "Marin", "forfait_cuivre": 100, "forfait_tours": 100,
+		"marin": {"label": "Marin", "arrhes_cuivre": 100, "question_cuivre": 15,
 				  "offre": {"traits": ["port"]}, "savoir": {}},
 	},
 }
+ROUTES = REGLES["metiers"]["routes"]
 RACES = {"_id": "rules:races", "value": [{"id": "humain", "stats": CARACTS, "stats_max": {k: 40 for k in CARACTS}}]}
 LIEUX = [
 	{"_id": "lieu:france", "type": "lieu", "categorie": "pays", "label": "France"},
@@ -39,7 +40,7 @@ LIEUX = [
 	 "rencontres": [{"espece": "espece:wyvern", "zones": ["zone:a"]}]},
 ]
 LIENS = [
-	{"_id": f"link:{a}", "type": "connection", "nodes": [{"lieu": a, "pos": [0, 0]}, {"lieu": b, "pos": [0, 0]}]}
+	{"_id": f"link:{a}>{b}", "type": "connection", "nodes": [{"lieu": a, "pos": [0, 0]}, {"lieu": b, "pos": [0, 0]}]}
 	for a, b in (("lieu:auberge", "lieu:bois"), ("lieu:bois", "lieu:etable"), ("lieu:bois", "lieu:etranger"))
 ]
 
@@ -115,11 +116,11 @@ def test_tableau_ne_montre_que_les_metiers_du_lieu(monde):
 	assert data["offres"] and {o["metier_label"] for o in data["offres"]} == {"Routes"}
 
 
-def test_engager_debite_le_forfait_et_cree_le_contrat(monde):
+def test_engager_debite_les_arrhes(monde):
 	char = _perso()
 	data = _engage(monde, char)
-	assert data["guide"]["tours_restants"] == REGLES["metiers"]["routes"]["forfait_tours"]
-	assert characters_util.money_to_cuivre(char) == 100 - REGLES["metiers"]["routes"]["forfait_cuivre"]
+	assert data["guide"]["question_cuivre"] == ROUTES["question_cuivre"]
+	assert characters_util.money_to_cuivre(char) == 100 - ROUTES["arrhes_cuivre"]
 
 
 def test_engager_sans_fonds_ne_prend_rien(monde):
@@ -205,29 +206,120 @@ def test_saisie_exacte_et_approchante(monde):
 	assert data["suggestions"] == ["Le Bois"] and data["replique"] == "Le Boi ?"
 
 
-def test_epuise_il_refuse_puis_le_renouvellement_le_relance_partout(monde):
+def _bourse(char):
+	return characters_util.money_to_cuivre(char)
+
+
+def test_le_cap_pose_se_paie_une_seule_fois(monde):
+	char = _perso()
+	_engage(monde, char)
+	avant = _bourse(char)
+	_appel(monde, char, monde["rg"].demander, None, {"saisie": "bois"})
+	assert _bourse(char) == avant - ROUTES["question_cuivre"]
+	assert char["focalisation"]["cible"] == "lieu:bois"
+	_appel(monde, char, monde["rg"].demander, None, {"saisie": "bois"})
+	assert _bourse(char) == avant - ROUTES["question_cuivre"]
+
+
+def test_un_autre_cap_se_paie_a_nouveau(monde):
+	char = _perso()
+	_engage(monde, char)
+	avant = _bourse(char)
+	_appel(monde, char, monde["rg"].demander, None, {"saisie": "bois"})
+	_appel(monde, char, monde["rg"].demander, None, {"saisie": "Étable"})
+	assert _bourse(char) == avant - 2 * ROUTES["question_cuivre"]
+
+
+@pytest.mark.parametrize("corps", [
+	{"saisie": "Le Boi"},          # proche
+	{"saisie": "zzz"},             # inconnu
+	{"saisie": "auberge"},         # ici
+	{"quete_id": "q_hors_zone"},   # quête qu'il ne connaît pas
+	{"quete_id": "q_ici"},         # déjà sur le terrain
+])
+def test_une_reponse_sans_cap_est_gratuite(monde, corps):
+	char = _perso(lieu="lieu:auberge", quetes_actives=[
+		{"id": "q_hors_zone", "titre": "W", "objectif": {"type": "kill", "cible": "espece:wyvern", "quantite": 1}},
+		{"id": "q_ici", "titre": "I", "objectif": {"type": "visite", "cible": "lieu:auberge"}},
+	])
+	_engage(monde, char)
+	avant = _bourse(char)
+	_appel(monde, char, monde["rg"].demander, None, corps)
+	assert _bourse(char) == avant
+
+
+def test_bourse_trop_legere_ni_cap_ni_dette(monde):
+	char = _perso()
+	_engage(monde, char)
+	char["argent"], char["cuivre"] = 0, ROUTES["question_cuivre"] - 1
+	data = _appel(monde, char, monde["rg"].demander, None, {"saisie": "bois"})
+	assert data["replique"] == f"{ROUTES['question_cuivre']} pour Le Bois."
+	assert not char.get("focalisation") and _bourse(char) == ROUTES["question_cuivre"] - 1
+
+
+# ── Sortie de la cité ────────────────────────────────────────────────────────────
+
+@pytest.fixture
+def franchir(monde, monkeypatch):
+	from routers import user as ru
+	monkeypatch.setattr(ru, "get_doc", monde["docs"].get)
+	return lambda char, destination, **move: ru._guide_au_franchissement(char, monde["docs"][destination], move)
+
+
+def test_vers_le_pays_il_previent_sans_rien_changer(monde, franchir):
+	char = _perso(lieu="lieu:etable")
+	_engage_ici = dict(char, lieu="lieu:auberge")
+	_engage(monde, _engage_ici)
+	char["montures"] = _engage_ici["montures"]
+	reponse, parti = franchir(char, "lieu:france")
+	assert parti is None and reponse["moved"] == 0
+	assert reponse["guide_avertissement"]["replique"] == "Je reste à Ville."
+	assert char["montures"] and _guide_doc(monde, char)["statut"] == "acquise"
+
+
+def test_confirme_il_reste_et_le_groupe_continue(monde, franchir):
 	char = _perso()
 	_engage(monde, char)
 	guide = _guide_doc(monde, char)
-	guide["guide"]["tours_restants"] = 0
-	with pytest.raises(HTTPException) as e:
-		_appel(monde, char, monde["rg"].demander, None, {"saisie": "bois"})
-	assert e.value.status_code == 409
-	assert _appel(monde, char, monde["rg"].dialogue, None)["replique"] == "Plus de forfait."
-	char["lieu"] = "lieu:etable"
-	data = _appel(monde, char, monde["rg"].renouveler, None)
-	assert data["guide"]["tours_restants"] == REGLES["metiers"]["routes"]["forfait_tours"]
-	assert characters_util.money_to_cuivre(char) == 0
+	reponse, parti = franchir(char, "lieu:france", guide_adieu=True)
+	assert reponse is None and parti is guide and guide["statut"] == "parti" and char["montures"] == []
 
 
-def test_renouveler_sans_fonds_ne_change_rien(monde):
+def test_confirme_avec_un_sac_plein_refuse(monde, franchir):
 	char = _perso()
 	_engage(monde, char)
-	char["argent"], char["cuivre"] = 0, 0
-	tours = guides.tours_restants(_guide_doc(monde, char))
-	with pytest.raises(HTTPException):
-		_appel(monde, char, monde["rg"].renouveler, None)
-	assert guides.tours_restants(_guide_doc(monde, char)) == tours
+	guide = _guide_doc(monde, char)
+	guide["inventaire"] = ["item:sac"]
+	assert franchir(char, "lieu:france")[0]["guide_avertissement"]["sac_plein"] is True
+	with pytest.raises(HTTPException) as e:
+		franchir(char, "lieu:france", guide_adieu=True)
+	assert e.value.status_code == 409 and guide["statut"] == "acquise"
+
+
+def test_un_lien_portail_le_fait_partir_vers_n_importe_quel_lieu(monde, monkeypatch):
+	from routers import user as ru
+	monkeypatch.setattr(ru, "get_doc", monde["docs"].get)
+	char = _perso()
+	_engage(monde, char)
+	guide = _guide_doc(monde, char)
+	lien = {"metadata": {"type": "portail"}}
+	bois = monde["docs"]["lieu:bois"]
+	reponse, parti = ru._guide_au_franchissement(char, bois, {}, lien)
+	assert parti is None and reponse["guide_avertissement"]["replique"] == "Pas ce portail."
+	assert guide["statut"] == "acquise"
+	reponse, parti = ru._guide_au_franchissement(char, bois, {"guide_adieu": True}, lien)
+	assert reponse is None and parti is guide and char["montures"] == []
+
+
+def test_ailleurs_que_vers_un_pays_rien(monde, franchir):
+	char = _perso()
+	_engage(monde, char)
+	assert franchir(char, "lieu:bois") == (None, None)
+	assert _guide_doc(monde, char)
+
+
+def test_sans_guide_le_pays_ne_demande_rien(monde, franchir):
+	assert franchir(_perso(), "lieu:france") == (None, None)
 
 
 # ── En combat : le statut d'une monture, mais il se défend ───────────────────────
@@ -244,12 +336,11 @@ def test_en_combat_se_defend_immobile_et_porte_comme_un_homme(monde, monkeypatch
 	assert character_stats.MONTURE_CHARGE_MULT_DEFAUT > 1   # sinon ce test ne distinguerait rien
 
 
-def test_guide_epuise_frappe_au_contact_sans_bouger_et_ne_retient_pas_la_defaite(monde, monkeypatch):
+def test_guide_frappe_au_contact_sans_bouger_et_ne_retient_pas_la_defaite(monde, monkeypatch):
 	monkeypatch.setattr(combat_util, "get_doc", monde["docs"].get)
 	monkeypatch.setattr(combat_util.random, "randint", lambda a, b: min(max(10, a), b))   # ni critique ni fumble
 	g = guides.generer_guide("routes", monde["docs"]["lieu:auberge"], guides.index_lieux(
 		lambda s, fields=None: LIEUX), REGLES, RACES["value"], [])
-	assert not guides.actif(g)   # forfait à 0 : il se défend quand même
 	doc = combat_util.create_combat_doc(perso_combat(), [monstre_snap()], [], "", montures=[g])
 	principal, snap, monstre = doc["joueurs"][0], doc["joueurs"][1], doc["monstres"][0]
 	principal["currentPV"] = 0   # la main ne reviendra pas : seul le guide peut agir

@@ -153,6 +153,50 @@ def test_franchir_relocalise_au_point_d_arrivee_et_consomme_un_cristal(rp):
 	assert rep["portail"]["arrivee"] == {"moved": 1}
 
 
+@pytest.fixture
+def avec_guide(rp, monkeypatch):
+	"""Un guide au groupe : `get_doc` le sert, `save_doc` note ce qui est sauvé."""
+	guide = {"_id": "monture:guide_x", "type": "monture", "statut": "acquise", "acquise_par": "character:c",
+			 "prenom": "Ana", "nom": "B", "guide": {"metier": "routes"}, "inventaire": [], "slots": {}}
+	regles = {"_id": "rules:guides", "repliques": {"adieu_portail": "Pas ce portail."}, "metiers": {}}
+	sous = rp.get_doc
+	docs = {guide["_id"]: guide, regles["_id"]: regles}
+	monkeypatch.setattr(rp, "get_doc", lambda i: docs.get(i) or sous(i))
+	sauves = []
+	monkeypatch.setattr(rp, "save_doc", lambda d: sauves.append(d["_id"]) or d)
+	c = {"_id": "character:c", "lieu": ANCRAGE, "position": {"x": 0, "y": 0}, "inventaire": [CRISTAL],
+		 "montures": [guide["_id"]]}
+	return c, guide, sauves
+
+
+def test_le_guide_previent_au_seuil_sans_rien_prendre(rp, avec_guide):
+	c, guide, _ = avec_guide
+	seuil = portails.seuils_ouverts(ARRIVEES, ANCRAGE, rp._t0)[0]
+	rep = {}
+	assert rp._resoudre_portail(c, PNJ, {"_id": ANCRAGE}, "franchir", seuil["cle"], rep) is None
+	assert rep["guide_avertissement"]["replique"] == "Pas ce portail."
+	assert c["lieu"] == ANCRAGE and c["inventaire"] == [CRISTAL] and c["montures"] == [guide["_id"]]
+	assert rp._arrivees == []
+
+
+def test_le_guide_reste_de_ce_cote_si_l_on_passe_quand_meme(rp, avec_guide):
+	c, guide, sauves = avec_guide
+	seuil = portails.seuils_ouverts(ARRIVEES, ANCRAGE, rp._t0)[0]
+	rep = {}
+	assert rp._resoudre_portail(c, PNJ, {"_id": ANCRAGE}, "franchir", seuil["cle"], rep, True) == "ouvert"
+	assert c["lieu"] == seuil["lieu"] and c["inventaire"] == [] and c["montures"] == []
+	assert guide["statut"] == "parti" and guide["_id"] in sauves
+
+
+def test_sans_cristal_le_guide_ne_dit_rien(rp, avec_guide):
+	c, _, _ = avec_guide
+	c["inventaire"] = []
+	seuil = portails.seuils_ouverts(ARRIVEES, ANCRAGE, rp._t0)[0]
+	rep = {}
+	assert rp._resoudre_portail(c, PNJ, {"_id": ANCRAGE}, "franchir", seuil["cle"], rep) == "refus_cristal"
+	assert "guide_avertissement" not in rep
+
+
 def test_sans_cristal_rien_ne_bouge(rp):
 	seuil = portails.seuils_ouverts(ARRIVEES, ANCRAGE, rp._t0)[0]
 	c = {"lieu": ANCRAGE, "inventaire": ["item:pain"]}

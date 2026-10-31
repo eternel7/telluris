@@ -4144,7 +4144,7 @@ def create_combat_doc(
 		if espece_vole(espece_monture):
 			snap["vol_espece"] = True
 		# Guide local : une personne, pas une bête. Il se défend comme un paladin d'escorte
-		# (`_run_defenseur_turn`), forfait épuisé ou non : ne plus être payé pour guider
+		# (`_run_defenseur_turn`), qu'on l'interroge ou non : ne pas être payé pour guider
 		# n'empêche pas de sauver sa peau. Le reste de son statut de monture ne change pas.
 		if montures_util.est_guide(m):
 			snap["se_defend"] = True

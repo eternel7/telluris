@@ -6,8 +6,12 @@
 # au contact comme un paladin d'escorte (`se_defend`) ; au tour de monde il régénère et il porte.
 # Ses seules différences passent par `est_guide`.
 #
-# Le service est PAYÉ D'AVANCE au forfait (X cuivres pour N tours ; un tour = un pas ou une
-# attente). Forfait épuisé : il reste mais n'aide plus, son cap tombe ; aucune dette.
+# PAIEMENT : des arrhes à l'engagement (sa compagnie, son dos, sa défense), puis un prix par
+# QUESTION UTILE : seul un nouveau cap se paie. Aucun compteur, aucune dette.
+#
+# DÉPART : il ne quitte pas sa cité. Au clic sur une connexion menant à la carte d'un pays, ou
+# au franchissement d'un portail (lien ou seuil de Notre-Dame), il prévient avant tout déplacement ; si le joueur passe outre, il reste là, sans rancune, et le
+# cap déjà payé continue de valoir.
 #
 # LOCALISATION. `rules:guides` décrit chaque métier : où il s'offre (`offre`) et ce qu'il sait
 # en plus de son pays (`savoir`). Tout est lu à l'exécution : le doc absent = aucun guide.
@@ -20,6 +24,7 @@ import re
 import time
 import uuid
 
+from utils import escorte
 from utils import focalisation
 from utils import montures
 from utils import quetes
@@ -204,7 +209,7 @@ def generer_guide(metier_id: str, lieu_doc: dict, index: dict, regles: dict, rac
 		"jouable": False,
 		"genere_at": now,
 		"expire_at": now + int((regles or {}).get("duree_offre_secondes", 0) or 0),
-		"guide": {"metier": metier_id, "zone": zone_de(lieu_id, index), "tours_restants": 0},
+		"guide": {"metier": metier_id, "zone": zone_de(lieu_id, index)},
 	}
 	derives = montures._derives_de(guide)
 	guide["currentPV"] = derives.pv_max
@@ -247,44 +252,25 @@ def guide_de(character: dict, get_doc_fn) -> dict | None:
 				 if montures.est_guide(m)), None)
 
 
-def tours_restants(guide: dict) -> int:
-	return max(0, int(((guide or {}).get("guide") or {}).get("tours_restants", 0) or 0))
-
-
-def actif(guide: dict) -> bool:
-	"""Seule source de l'état « épuisé » : dérivé, jamais stocké."""
-	return tours_restants(guide) > 0
-
-
-def forfait(metier: dict) -> tuple[int, int]:
-	"""(cuivres, tours) du forfait d'un métier."""
-	return (max(0, int((metier or {}).get("forfait_cuivre", 0) or 0)),
-			max(0, int((metier or {}).get("forfait_tours", 0) or 0)))
+def tarifs(metier: dict) -> tuple[int, int]:
+	"""(arrhes, prix d'une question) d'un métier, en cuivres."""
+	return (max(0, int((metier or {}).get("arrhes_cuivre", 0) or 0)),
+			max(0, int((metier or {}).get("question_cuivre", 0) or 0)))
 
 
 def vue_contrat(guide: dict, regles: dict) -> dict:
 	metier = metier_de(guide, regles)
-	cout, tours = forfait(metier)
-	return {"metier_label": metier.get("label", ""), "forfait_cuivre": cout, "forfait_tours": tours,
-			"tours_restants": tours_restants(guide), "epuise": not actif(guide)}
+	arrhes, question = tarifs(metier)
+	return {"metier_label": metier.get("label", ""), "arrhes_cuivre": arrhes, "question_cuivre": question}
 
 
-def ajouter_forfait(guide: dict, regles: dict) -> int:
-	"""Crédite les tours d'un forfait (renouveler avant la fin cumule). Le débit reste à
-	l'appelant, après ses gardes. Renvoie les tours restants."""
-	_, tours = forfait(metier_de(guide, regles))
-	guide["guide"]["tours_restants"] = tours_restants(guide) + tours
-	return tours_restants(guide)
-
-
-def engager(character: dict, guide: dict, regles: dict) -> tuple[bool, str]:
+def engager(character: dict, guide: dict) -> tuple[bool, str]:
 	if guide.get("statut") != "offert" or not montures.est_guide(guide):
 		return False, "Ce guide n'est plus disponible."
 	ok, raison = montures.acquerir(character, guide)
 	if not ok:
 		return False, raison
 	guide.pop("expire_at", None)
-	ajouter_forfait(guide, regles)
 	return True, ""
 
 
@@ -300,24 +286,71 @@ def congedier(character: dict, guide: dict) -> tuple[bool, str]:
 	return True, ""
 
 
-def decompter_tour(character: dict, compagnons_montures: list, regles_fn) -> dict | None:
-	"""Un tour de monde : retire un tour au guide qui accompagne le personnage. Mute le guide
-	(sauvé par `_apply_world_turn_groupe`) et le character (cap retiré à l'épuisement, sauvé par
-	l'appelant). Renvoie {"tours_restants", "alerte": "epuise"|"bientot"|None}, ou None sans guide.
-	`regles_fn` est paresseux : un joueur sans guide ne lit rien de plus."""
-	guide = next((m for m in compagnons_montures or [] if montures.est_guide(m)), None)
-	if guide is None:
-		return None
-	avant = tours_restants(guide)
-	apres = max(0, avant - 1)
-	guide["guide"]["tours_restants"] = apres
-	alerte = None
-	if avant and not apres:
-		focalisation.effacer_si_guide(character, guide.get("_id"))
-		alerte = "epuise"
-	elif apres and apres == int((regles_fn() or {}).get("seuil_alerte_tours", 0) or 0):
-		alerte = "bientot"
-	return {"tours_restants": apres, "alerte": alerte}
+# ── Départ à la sortie de sa cité ────────────────────────────────────────────────
+
+def mene_hors_de_sa_cite(lieu_doc: dict) -> bool:
+	"""La destination d'une connexion est-elle la carte d'un pays ? Le type de lieu suffit :
+	un guide ne suit personne sur une carte de pays, le sien ou un autre."""
+	return (lieu_doc or {}).get("categorie") == "pays"
+
+
+def lien_portail(link: dict | None) -> bool:
+	"""Connexion de type portail (même valeur que `portails.TYPE_PORTAIL`, relue ici pour ne pas
+	tirer `portails` dans ce module)."""
+	return ((link or {}).get("metadata") or {}).get("type") == "portail"
+
+
+def nom_cite_quittee(lieu_id: str, get_doc_fn) -> str:
+	"""La cité du lieu courant, à défaut le lieu lui-même (borné contre un cycle de données)."""
+	depart, vus = lieu_id, set()
+	while lieu_id and lieu_id not in vus:
+		vus.add(lieu_id)
+		doc = get_doc_fn(lieu_id) or {}
+		if doc.get("categorie") == "ville":
+			return lieu_label(doc, lieu_id)
+		lieu_id = doc.get("lieu_parent")
+	return lieu_label(get_doc_fn(depart) or {}, depart)
+
+
+def image_adieu(guide: dict, existe_fn=os.path.isfile) -> str:
+	"""URL de sa version « full » (le guide dans son décor), à défaut de son portrait : un guide
+	au portrait de repli (`portrait_voc`) n'a pas de version full."""
+	image = (guide or {}).get("image", "")
+	if not image:
+		return ""
+	route, dossier = escorte.image_protege(f"full_{image}", existe_fn)
+	if existe_fn(os.path.join(dossier, f"full_{image}")):
+		return f"{route}/full_{image}"
+	route, _ = escorte.image_protege(image, existe_fn)
+	return f"{route}/{image}"
+
+
+def avertissement(guide: dict, regles: dict, lieu_id: str, get_doc_fn, portail: bool = False) -> dict:
+	"""Ce qu'il dit au clic sur la connexion. `sac_plein` : il faudra d'abord reprendre ce qu'il
+	porte, rien de ce qui reste à une cité ne doit partir avec le joueur ni disparaître."""
+	return {
+		"prenom": guide.get("prenom", ""),
+		"nom": guide.get("nom", ""),
+		"image": image_adieu(guide),
+		"replique": (replique(guide, regles, "adieu_portail") if portail else
+					 replique(guide, regles, "adieu", cite=nom_cite_quittee(guide.get("giver") or lieu_id, get_doc_fn))),
+		"sac_plein": bool(guide.get("inventaire")),
+	}
+
+
+def laisser_partir(character: dict, guide: dict) -> tuple[bool, str]:
+	"""Il reste là, sans rancune. Le cap qu'il a posé a été PAYÉ : il perd sa signature et devient
+	un cap ordinaire, sinon `focalisation_effective` l'éteindrait. Mute les deux docs, sans save."""
+	if guide.get("inventaire"):
+		return False, "Reprenez d'abord ce que porte votre guide."
+	focus = character.get("focalisation")
+	if isinstance(focus, dict) and focus.get("guide") == guide.get("_id"):
+		focus.pop("guide")
+	guide["statut"] = "parti"
+	guide.pop("acquise_par", None)
+	guide.pop("auras_recues", None)
+	character["montures"] = [m for m in character.get("montures") or [] if m != guide.get("_id")]
+	return True, ""
 
 
 # ── Ce que le guide sait ─────────────────────────────────────────────────────────
@@ -395,6 +428,12 @@ def poser_cap(character: dict, guide: dict, lieu_id: str, quete_id: str | None =
 	if quete_id:
 		f["puis_quete"] = quete_id
 	character["focalisation"] = f
+
+
+def cap_deja_pose(character: dict, guide: dict, lieu_id: str) -> bool:
+	"""Reposer le même cap ne se paie pas deux fois (double clic, question répétée)."""
+	f = focalisation.focalisation_de(character) or {}
+	return f.get("type") == "lieu" and f.get("cible") == lieu_id and f.get("guide") == guide.get("_id")
 
 
 def replique(guide: dict, regles: dict, cle: str, **valeurs) -> str:
