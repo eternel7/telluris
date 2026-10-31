@@ -48,6 +48,7 @@ class CharacterDocument(BaseModel):
     pv_actuel:  int = 0       # Recalculé = pv_max à la création
     pm_actuel:  int = 0       # Recalculé = pm_max à la création
     ap_actuel:  int = 2       # Actions restantes ce tour
+    dernier_jeu: Optional[int] = None  # Epoch de la dernière activité (characters.marquer_joue)
 
     # ── Équipement (slots) ───────────────────────────────────────────
     # Chaque slot contient l'_id CouchDB de l'item ou null

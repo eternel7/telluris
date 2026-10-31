@@ -17,7 +17,7 @@ from utils.characters import (
 	main_occupee_par_deux_mains, liberer_pour_deux_mains,
 	item_ref_id, item_ref_weight, resolve_item_ref, poids_bounds, tirer_poids, lieu_label,
 	money_to_cuivre, cuivre_to_purse, credit_character,
-	nettoyer_nom_objet, renommer_ref,
+	nettoyer_nom_objet, renommer_ref, marquer_joue,
 )
 from utils.marche import (
 	debit_character, merchant_cha, prix_achat_lieu, marchander,
@@ -666,6 +666,7 @@ def _effets_arrivee(character: dict, destination: str, destination_pos: dict,
 	compagnons, montures_groupe = _auras_du_groupe(character)
 	guide_tour = guides.decompter_tour(character, montures_groupe, lambda: guides.regles_de(get_doc))
 	_apply_world_turn_regen(character)
+	marquer_joue(character)
 	save_doc(character)
 	# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage (régén +
 	# XP partagée de la compagnie, cf. _apply_world_turn_groupe).
@@ -815,6 +816,7 @@ async def move_character(
 				chute = vol_util.chute_exploration(character_to_update, lieu_doc)
 				if chute:
 					access = get_lieu_directions(current_user, lieu_doc, character_to_update["position"])
+				marquer_joue(character_to_update)
 				save_doc(character_to_update)
 				# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage. Un pas ne
 				# rapporte pas d'XP — seule une conclusion d'intro peut en partager ici.

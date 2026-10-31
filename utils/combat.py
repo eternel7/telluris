@@ -13,7 +13,7 @@ from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import (
 	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, tirer_poids, item_ref_id,
 	lieu_label, noter_victoire, resolve_item_ref, recompute_equipment_bonus, autre_main,
-	credit_character,
+	credit_character, marquer_joue,
 )
 from utils.consommables import (
 	caracts_avec_buffs, canalisation_bonus, est_consommable, effet_instantane, effets_de,
@@ -7337,6 +7337,7 @@ def finalize_combat(combat_doc: dict) -> bool:
 		if delta:
 			recrutement.ajuster_affinite(character, doc["_id"], delta)
 
+	marquer_joue(character)  # persisté par `_finalize_membre`, même save que l'XP
 	if not _finalize_membre(combat_doc, joueur_principal, character, status):
 		return False  # échec de sauvegarde → ne pas marquer, on réessaiera
 

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	{# Session expirée (401 / x-session: aucune) → /auth. AVANT les scripts de la page. #}
+	<script src="{{ script_url('session.js') }}"></script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<style>
+		:root {
+			--bg: #0d0f14;
+			--panel: #141720;
+			--border: #2a3040;
+			--accent: #c8a84b;
+			--accent2: #4b8fc8;
+			--danger: #c84b4b;
+			--text: #fff;
+			--muted: #9aa3b2;
+		}
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			background: var(--bg); color: var(--text);
+			font-family: 'Share Tech Mono', monospace;
+			min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+		}
+		header {
+			width: 100%; padding: 18px 32px; border-bottom: 1px solid var(--border);
+			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+			display: flex; align-items: center; justify-content: space-between; gap: 16px;
+		}
+		header h1 { font-size: 1.3rem; letter-spacing: 0.12em; color: var(--accent); }
+		header a { color: var(--muted); font-size: 0.8rem; text-decoration: none; }
+		header a:hover { color: var(--accent); }
+		.main { width: 100%; max-width: 1200px; padding: 24px; }
+		.card {
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: 8px; padding: 20px; margin-bottom: 16px;
+		}
+		.card-desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+		.defile { overflow-x: auto; }
+		table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+		th, td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+		th { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+		tr:last-child td { border-bottom: none; }
+		.nom { font-weight: bold; }
+		.sec { display: block; margin-top: 3px; font-size: 0.74rem; color: var(--muted); }
+		.date { white-space: nowrap; }
+		.inconnue { color: var(--muted); font-style: italic; }
+		.badge {
+			display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 4px;
+			font-size: 0.7rem; white-space: nowrap; border: 1px solid;
+		}
+		.badge.combat { color: var(--danger); border-color: var(--danger); }
+		.badge.mer { color: var(--accent2); border-color: var(--accent2); }
+		.vide { font-size: 0.85rem; color: var(--muted); }
+		@media (max-width: 600px) {
+			header { padding: 14px 16px; }
+			header h1 { font-size: 1rem; }
+			.main { padding: 16px; }
+			.card { padding: 14px; }
+			/* Une fiche par personnage : l'emplacement reste lisible sans défilement horizontal. */
+			thead { display: none; }
+			table, tbody, tr, td { display: block; }
+			tr { padding: 10px 0; border-bottom: 1px solid var(--border); }
+			tr:last-child { border-bottom: none; }
+			td { padding: 3px 0; border-bottom: none; }
+			td:nth-child(2)::before { content: 'Niveau '; color: var(--muted); }
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<h1>🧭 Derniers personnages joués</h1>
+		{% include 'part-admin-retour.html' %}
+	</header>
+	<div class="main">
+		<div class="card">
+			<div class="card-desc">
+				Les {{ lignes|length }} personnages les plus récemment actifs, et où ils se trouvent à
+				l'instant du chargement. Rechargez la page pour actualiser. « Avant le suivi » : pas
+				joué depuis que la date est enregistrée, donc non classé.
+			</div>
+			{% if lignes %}
+			<div class="defile">
+				<table>
+					<thead>
+						<tr>
+							<th>Personnage</th>
+							<th>Niveau</th>
+							<th>Dernier jeu</th>
+							<th>Emplacement</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for l in lignes %}
+						<tr>
+							<td>
+								<span class="nom">{{ l.nom or l.id }}</span>
+								<span class="sec">{{ l.race }}{% if l.race and l.voc %} · {% endif %}{{ l.voc }}</span>
+							</td>
+							<td>{{ l.niveau }}</td>
+							<td class="date">
+								{% if l.dernier_jeu is not none %}
+								<time data-epoch="{{ l.dernier_jeu }}">{{ l.dernier_jeu }}</time>
+								{% else %}
+								<span class="inconnue">avant le suivi</span>
+								{% endif %}
+							</td>
+							<td>
+								{{ l.lieu_label }}
+								{%- if l.en_combat %}<span class="badge combat">⚔ en combat</span>{% endif %}
+								{%- if l.en_mer %}<span class="badge mer">⛵ en mer</span>{% endif %}
+								<span class="sec">
+									{%- if l.parents %}{{ l.parents|join(' › ') }}{% endif %}
+									{%- if l.parents and l.x is not none %} · {% endif %}
+									{%- if l.x is not none %}x {{ l.x }}, y {{ l.y }}{% endif -%}
+								</span>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			{% else %}
+			<div class="vide">Aucun personnage en base.</div>
+			{% endif %}
+		</div>
+	</div>
+	<script>
+		document.querySelectorAll('time[data-epoch]').forEach((el) => {
+			const date = new Date(Number(el.dataset.epoch) * 1000);
+			el.dateTime = date.toISOString();
+			el.textContent = date.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+		});
+	</script>
+</body>
+</html>

@@ -26,6 +26,9 @@ description: Admin tooling, content generators and tunable world variables — t
 ⚠️ **Deux entrées ne peuvent pas tourner dans le conteneur tel qu'il est** — elles restent au catalogue pour que la raison soit **lisible**, plutôt que d'être absentes sans explication : `node` n'est pas dans l'image (`check_js` / `test_slots_client` → **127**, `[introuvable]`). L'y ajouter suffit, sans une ligne de code — c'est ce qui a été fait pour **`pytest`, désormais dans le `pip install` du `docker-compose.yml`** (avec `Pillow`) : cette entrée-là tourne. ⚠️ L'entrée `pytest` porte `-p no:cacheprovider` (sans quoi elle écrirait `.pytest_cache`, et sa fiche « Lecture seule » mentirait) et `--color=no` (un `PY_COLORS` traînant cracherait des séquences ANSI dans un notepad qui écrit en `textContent`).
 
 
+### `/admin/personnages-recents` — `utils/derniers_joues.py`
+Champ `dernier_jeu` (epoch), posé par `characters.marquer_joue` sur les chemins qui sauvent déjà le personnage : pas, arrivée, traversée, fin de combat, `/play` (au plus une écriture par minute). ⚠️ Jamais dans `get_selected_character` : les sondages y passent aussi (faux « jeu » et conflits 409). Date figée pendant un combat, d'où le badge ⚔. Sans date : classé en bas, « avant le suivi ». Verrouillé par `tests/test_derniers_joues.py`.
+
 ### Carte « 🖥 Serveur » de `/admin` — `utils/serveur.py`
 
 Endpoints `GET /admin/serveur/etat` (`fetch=0` : sans réseau), `POST /admin/serveur/mettre-a-jour`, `POST /admin/serveur/redemarrer`. Verrouillé par `tests/test_serveur.py` (exécuteur factice + vrai dépôt git temporaire).

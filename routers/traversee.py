@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from db.config import get_doc, save_doc
 from models import character_stats
 from utils.auth import get_current_user
-from utils.characters import get_selected_character, lieu_label
+from utils.characters import get_selected_character, lieu_label, marquer_joue
 from utils import consommables
 from utils import guides
 from utils import quetes
@@ -71,6 +71,7 @@ async def traversee_avancer(current_user: Annotated[dict, Depends(get_current_us
 	compagnons, montures_groupe = _auras_du_groupe(character)
 	guide_tour = guides.decompter_tour(character, montures_groupe, lambda: guides.regles_de(get_doc))
 	_apply_world_turn_regen(character)
+	marquer_joue(character)
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 	_apply_world_turn_groupe(character, 0, compagnons, montures_groupe)

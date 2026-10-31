@@ -1,4 +1,5 @@
 import random
+import time
 from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Request, Body
 from db.config import get_doc, save_doc, find_docs
 from models import character_stats
@@ -52,6 +53,21 @@ def get_selected_character(current_user: dict = Body(...)):
 		save_doc(character)
 
 	return character
+
+
+def marquer_joue(character: dict, now: int | None = None, intervalle: int = 0) -> bool:
+	"""Pose `dernier_jeu` (epoch) ; True si le champ a changé, donc à sauver. Ne sauve rien.
+
+	⚠️ À n'appeler que sur un chemin qui sauve déjà le personnage, JAMAIS dans
+	`get_selected_character` : les sondages (taverne…) y passent aussi. Ils compteraient comme
+	du jeu, et leurs écritures concurrentes feraient échouer les vraies actions en conflit.
+	`intervalle` borne la fréquence pour un chemin qui n'écrirait sinon rien (/play)."""
+	maintenant = int(now if now is not None else time.time())
+	dernier = character.get("dernier_jeu")
+	if isinstance(dernier, int) and 0 <= maintenant - dernier < intervalle:
+		return False
+	character["dernier_jeu"] = maintenant
+	return dernier != maintenant
 
 # ── Références d'items (inventaire / sol / slots / butin) ──────────────────────
 # Une référence d'item stockée est SOIT une chaîne "item:xxx" (legacy → poids = min

@@ -34,7 +34,8 @@ from utils.combat import (
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs, RequestDocCacheMiddleware
 from utils.auth import get_current_user, create_access_token, expiration_acces
 from utils import session as session_util
-from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of, credit_character
+from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of, credit_character, marquer_joue
+from utils import derniers_joues as derniers_joues_util
 from utils import quetes
 from utils import donjon as donjon_util
 from utils import dump as dump_util
@@ -900,6 +901,9 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			_a_sauver.append(_m)
 	for _av in _a_sauver:
 		save_doc(_av)
+	# Intervalle : recharger la page n'écrit pas le personnage à chaque fois.
+	if marquer_joue(character, intervalle=60):
+		change = True
 	if change:
 		save_doc(character)
 	# Combats terminés : supprimés SEULEMENT une fois le personnage sauvé — sur conflit, le
@@ -1567,6 +1571,26 @@ def admin_dialogues(request: Request, current_user: Annotated[User, Depends(get_
 		request=request,
 		name="admin_dialogues.html",
 		context={"title": "Dialogues & quêtes", "vocabulaire": _vocabulaire_dialogues()},
+	)
+
+
+@app.get("/admin/personnages-recents", response_class=HTMLResponse)
+def admin_personnages_recents(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Les derniers personnages joués et leur emplacement actuel."""
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	personnages = find_docs({"type": "character"}, fields=[
+		"_id", "prenom", "nom", "race", "voc", "xp_total", "lieu", "position", "traversee", "dernier_jeu",
+	]) or []
+	combats = find_docs({"type": "combat", "status": "active"}, fields=["character_id"]) or []
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_personnages_recents.html",
+		context={
+			"title": "Derniers personnages joués",
+			"lignes": derniers_joues_util.derniers_joues(personnages, get_doc, combats),
+		},
 	)
 
 

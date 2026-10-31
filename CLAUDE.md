@@ -42,7 +42,7 @@ La CouchDB live est distante, NON joignable en local. Valeurs réelles des docs 
 
 ```
 main.py                  # FastAPI app, page routes (/play, /combat/{id}, /reinitialisation, /admin*, /admin/simulateur, /admin/recettes-graphe,
-                         #   /admin/sorts, /admin/competences, /admin/lore (+ /chronologie)), static mounts
+                         #   /admin/sorts, /admin/competences, /admin/lore (+ /chronologie), /admin/personnages-recents), static mounts
 routers/
   user.py                # /api/* : auth (dont sceau oublié : mot-de-passe/oubli + /reinitialiser),
                          #   character CRUD, movement, equip/unequip, drop/pickup, spend_xp
@@ -72,6 +72,7 @@ utils/
   characters.py          # get/selected character, sync_equipment_bonus, grant_xp,
                          #   carried_weight, charge_max_of, références d'items (item_ref_*)
   fiche.py               # source unique du contenu des onglets Stats et ⚡ (bloc_fiche, derived_de, stat_caps, race_de)
+  derniers_joues.py      # /admin/personnages-recents (pur) : tri sur `dernier_jeu`, emplacement (lieu + parents, combat, mer)
   lieux.py               # lieu_router, movement logic, navigation bitmask
   combat.py              # logique de combat pure (snapshots, A*, résolution, loot, finalize)
   zones.py               # géométrie des zones d'influence + tirage d'événements + resolve_profil_weights

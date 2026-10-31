@@ -222,6 +222,20 @@ def test_resolve_action_refuse_un_joueur_a_terre(db):
 
 # ── finalize_combat multi-docs ───────────────────────────────────────────────────
 
+def test_finalize_date_le_dernier_jeu_du_principal_seul(db):
+	"""Page /admin/personnages-recents : une fin de combat compte comme du jeu."""
+	perso = character()
+	comp = aventurier()
+	db[perso["_id"]] = perso
+	db[comp["_id"]] = comp
+	j0 = joueur_snap("joueur_0", perso["_id"], pv=30)
+	j1 = joueur_snap("joueur_1", comp["_id"], pv=30)
+	doc = combat_doc([j0, j1], [monstre_snap(vivant=False)], status="victoire", xp_gagnee=10)
+	assert combat_util.finalize_combat(doc) is True
+	assert isinstance(perso["dernier_jeu"], int)
+	assert "dernier_jeu" not in comp
+
+
 def test_finalize_applique_a_tous_les_docs(db, monkeypatch):
 	monkeypatch.setattr(character_stats, "AFFINITE_DELTA_VICTOIRE", 1)
 	monkeypatch.setattr(character_stats, "AFFINITE_DELTA_KO", -5)
