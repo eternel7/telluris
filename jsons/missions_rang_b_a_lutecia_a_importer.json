@@ -1542,7 +1542,7 @@
               "titre": "Rang C : le portail de Jumièges",
               "description": "Maëlys, maîtresse de la Guilde, vous confie un pli scellé pour l'Institut des Architectes, à la Cour des Arches. L'architecte qui le recevra part pour les ruines de l'abbaye de Jumièges, en Normandie, où un portail s'est ouvert : escortez-la, ramenez-la vivante, puis revenez rendre compte au bureau de la maîtresse. Le rang C est au bout.",
               "recompenses": {
-                "xp": 150,
+                "xp": 1200,
                 "cuivre": 3000,
                 "rang_guilde": "C"
               }

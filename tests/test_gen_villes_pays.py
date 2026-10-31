@@ -241,10 +241,25 @@ def test_abou_simbel_reste_praticable_et_sa_route_y_mene(construit):
 
 
 # ── Grand Temple d'Abou Simbel ────────────────────────────────────────────────────────────
-def test_grand_temple_cree_et_relie_a_la_porte_du_temple(dump, construit):
-	lieux, liens = construit[0], construit[1]
+LIEN_TEMPLE = "link:abou_simbel_to_grand_temple_d_abou_simbel"
+
+
+def test_grand_temple_cree_et_relie_a_la_porte_du_temple(dump):
+	"""Sans connexion en base, elle part des cases de la spec (la porte dessinée, à 1)."""
 	spec = gvp.INTERIEURS["lieu:grand_temple_d_abou_simbel"]
-	lien = next(l for l in liens if l["_id"] == "link:abou_simbel_to_grand_temple_d_abou_simbel")
+	sans_lien = []
+	for d in dump:
+		if d.get("_id") == LIEN_TEMPLE:
+			continue
+		if d.get("_id") == spec["parent"]:
+			# La porte de la spec peut avoir été repeinte depuis dans l'éditeur : rouverte ici.
+			d = {**d, "cells": [list(r) for r in d["cells"]]}
+			x, y = spec["pos_parent"]
+			d["cells"][y][x] = 1
+		sans_lien.append(d)
+	lieux, liens, refus = gvp.construire(sans_lien, _taille, _proposer)[:3]
+	assert refus == []
+	lien = next(l for l in liens if l["_id"] == LIEN_TEMPLE)
 	(n_ville, n_temple) = lien["nodes"]
 	assert (n_ville["lieu"], tuple(n_ville["pos"])) == ("lieu:abou_simbel", spec["pos_parent"])
 	assert (n_temple["lieu"], tuple(n_temple["pos"])) == ("lieu:grand_temple_d_abou_simbel", spec["pos"])
@@ -254,6 +269,22 @@ def test_grand_temple_cree_et_relie_a_la_porte_du_temple(dump, construit):
 	temple = next(d for d in lieux if d["_id"] == "lieu:grand_temple_d_abou_simbel")
 	assert (temple["cells"], temple["nav"]) == spec["grille"]()
 	assert temple["lieu_parent"] == "lieu:abou_simbel" and temple["categorie"] == "temple"
+
+
+def test_connexion_du_temple_en_base_gardee_telle_quelle():
+	"""Porte déplacée dans l'éditeur : la connexion relue survit au rejeu (`_rev` retiré)."""
+	parent = {"_id": "lieu:abou_simbel", "cells": [[1] * 3 for _ in range(3)]}
+	temple = {"_id": "lieu:grand_temple_d_abou_simbel", "cells": [[1] * 3 for _ in range(3)]}
+	lien = {"_id": LIEN_TEMPLE, "_rev": "3-x", "type": "connection",
+		"nodes": [{"lieu": "lieu:grand_temple_d_abou_simbel", "pos": [2, 1], "label": "a"},
+				  {"lieu": "lieu:abou_simbel", "pos": [0, 2], "label": "b"}]}
+	par_id = {d["_id"]: d for d in (parent, temple, lien)}
+	docs, refus = gvp.interieurs(par_id, {})
+	assert refus == [] and docs == [{k: v for k, v in lien.items() if k != "_rev"}]
+	# Le garde-fou porte sur les cases de la connexion relue.
+	parent["cells"][2][0] = 0
+	assert gvp.interieurs(par_id, {})[1] == [
+		"lieu:grand_temple_d_abou_simbel : case [0, 2] non libre sur lieu:abou_simbel"]
 
 
 def test_interieur_deja_en_base_garde_sa_grille():

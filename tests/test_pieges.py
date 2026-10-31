@@ -819,6 +819,10 @@ def test_le_generateur_passe_ses_garde_fous_sur_le_dump_et_est_idempotent(tmp_pa
 	ecrits = {d["_id"]: d for d in json.loads(premier)}
 	for doc in lot:
 		deja = base.get(doc["_id"]) or autres.get(doc["_id"])
+		if doc["type"] == "animation" and doc["_id"] in base:
+			# Retouchée depuis /admin/animations (son, volume) : gardée, jamais réécrite.
+			assert doc["_id"] not in ecrits, doc["_id"]
+			continue
 		assert ecrits.get(doc["_id"]) == doc or gen_pieges._sans_rev(deja) == doc, doc["_id"]
 
 

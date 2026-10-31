@@ -297,7 +297,9 @@
         }
       }
     ],
-    "mode": "etages"
+    "mode": "etages",
+    "musique": "dungeon_ambient_1.ogg",
+    "musique_volume": 0.6
   },
   {
     "_id": "pnj:templier_de_la_crypte_de_chartres",
