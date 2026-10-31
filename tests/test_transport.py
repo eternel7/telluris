@@ -359,6 +359,101 @@ def test_suggestion_cliquable_rejoue_la_saisie_et_trouve_le_lieu(monkeypatch):
 	assert suivant == "n_trouve" and dits["lieu"] == "Le Saloir"
 
 
+# ── Demander son chemin PAR TYPE de magasin ──────────────────────────────────────
+
+DOC_DIRECTION = {"_id": "pnj:marchand_boucherie", "services": {"direction": {"noeuds": {
+	"trouve": "n_trouve", "proche": "n_proche", "inconnu": "n_inconnu",
+	"type_trouve": "n_type_trouve", "type_propose": "n_type_propose"}}}}
+
+
+def test_cle_type_ignore_casse_accents_article_et_underscores():
+	assert transport.cle_type("Une  SALAISON") == "salaison"
+	assert transport.cle_type("le Négociant") == transport.cle_type("negociant")
+	assert transport.cle_type("Laboratoire d’alchimie") == transport.cle_type("laboratoire_d_alchimie")
+	assert transport.libelle_type("atelier_de_cirier") == "atelier de cirier"
+
+
+def test_levenshtein():
+	assert transport.levenshtein("fumoir", "fumoir") == 0
+	assert transport.levenshtein("salason", "salaison") == 1
+	assert transport.levenshtein("kitten", "sitting") == 3
+	assert transport.levenshtein("", "abc") == 3
+
+
+def test_types_connus_magasins_de_la_ville_hors_soi():
+	par_type = transport.magasins_par_type(BOUCHERIE, find_docs)
+	# Ni le temple ni la guilde (pas des magasins), ni la boucherie où l'on parle.
+	assert par_type == {"salaison": [("lieu:salaison", "Le Saloir")],
+						"fumoir": [("lieu:fumoir", "Le Fumoir")]}
+	assert transport.magasins_par_type(VILLE, find_docs) == {}
+
+
+def test_type_exact_puis_proche_a_levenshtein_borne():
+	types = ["salaison", "fumoir"]
+	assert transport.chercher_type("une Salaison", types) == {"exact": "salaison"}
+	assert transport.chercher_type("salason", types) == {"proche": "salaison"}
+	n = transport.TYPE_LEVENSHTEIN_MAX
+	# Exactement n substitutions en fin de mot : encore proposé ; n + 1 : plus rien.
+	assert transport.chercher_type("fumoir"[:-n] + "x" * n, types) == {"proche": "fumoir"}
+	assert transport.chercher_type("x" * (n + 1) + "fumoir"[n + 1:], types) == {}
+	assert transport.chercher_type("", types) == {}
+
+
+def test_indice_type_choisit_le_plus_proche_du_donneur():
+	# Depuis la boucherie (20,20) : la salaison (20,5) est plus proche que le fumoir (40,20).
+	candidats = [("lieu:fumoir", "Le Fumoir"), ("lieu:salaison", "Le Saloir")]
+	indice = transport.indice_type(BOUCHERIE, candidats, find_docs, get_doc)
+	assert (indice["lieu_id"], indice["direction"]) == ("lieu:salaison", "nord")
+	assert (indice["repere_nom"], indice["repere_type"]) == ("Le Fumoir", "fumoir")
+	assert transport.texte_indice_type(indice) == "au nord d'ici, proche de Le Fumoir (fumoir)"
+
+
+def test_resoudre_direction_par_type(monkeypatch):
+	from routers import pnj as rp
+	monkeypatch.setattr(rp, "get_doc", get_doc)
+	monkeypatch.setattr(rp, "find_docs", find_docs)
+	suivant, dits = rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "salaison")
+	assert suivant == "n_type_trouve"
+	assert dits == {"type": "salaison", "lieu": "Le Saloir (salaison)",
+					"direction": "au nord d'ici, proche de Le Fumoir (fumoir)"}
+	# Type approchant : la question, et de quoi bâtir le « Oui ».
+	suivant, dits = rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "salasion")
+	assert suivant == "n_type_propose"
+	assert dits == {"recherche": "salasion", "type": "salaison", "_type": "salaison"}
+	# Le nom d'une enseigne à la lettre garde la priorité ; sans son article, c'est le type
+	# (« fumoir ») qui l'emporte sur l'enseigne « Le Fumoir ». L'inconnu reste inconnu.
+	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "le fumoir")[0] == "n_trouve"
+	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "fumoir")[0] == "n_type_trouve"
+	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "Saloir")[0] == "n_trouve"
+	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "Qwxz")[0] == "n_inconnu"
+
+
+def test_oui_rejoue_la_saisie_avec_le_type_exact(monkeypatch):
+	from routers import pnj as rp
+	monkeypatch.setattr(rp, "get_doc", get_doc)
+	monkeypatch.setattr(rp, "find_docs", find_docs)
+	_, dits = rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "fumoire")
+	(oui,) = transport.choix_confirmation_type(dits["_type"], "n_demande", "chercher")
+	assert oui["id"] == "chercher" and not oui["saisie"] and not oui["action"]
+	assert oui["rejouer"] == {"noeud": "n_demande", "saisie": "fumoir"}
+	suivant, dits = rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, oui["rejouer"]["saisie"])
+	assert suivant == "n_type_trouve" and dits["lieu"] == "Le Fumoir (fumoir)"
+
+
+def test_le_generateur_pose_les_noeuds_par_type_que_le_router_lit():
+	import importlib.util, os
+	chemin = os.path.join(os.path.dirname(__file__), "..", "dev", "gen_direction_marchands.py")
+	spec = importlib.util.spec_from_file_location("gen_direction_marchands", chemin)
+	gen = importlib.util.module_from_spec(spec)
+	spec.loader.exec_module(gen)
+	from utils import lint_dialogues
+	assert set(gen.NOEUDS_DIRECTION) == lint_dialogues.NOEUDS_REQUIS["direction"]
+	assert set(gen.NOEUDS_DIRECTION.values()) <= set(gen.NOEUDS_DIALOGUE_DIRECTION)
+	# Le « Non » de la question mène au refus.
+	propose = gen.NOEUDS_DIALOGUE_DIRECTION[gen.NOEUDS_DIRECTION["type_propose"]]
+	assert [c["next"] for c in propose["choix"]] == [gen.NOEUDS_DIRECTION["type_inconnu"]]
+
+
 # ── Choix de la destination & de la cargaison ────────────────────────────────────
 
 def test_destination_exclut_le_donneur_et_exige_un_racheteur():

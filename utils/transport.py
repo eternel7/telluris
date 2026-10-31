@@ -39,6 +39,7 @@
 
 import difflib
 import random
+import unicodedata
 import uuid
 
 from models import character_stats
@@ -133,10 +134,10 @@ def direction_cardinale(depuis: tuple, vers: tuple) -> str | None:
 	return meilleur
 
 
-def repere_proche(cible_id: str, portes: dict, get_doc_fn, exclure: set | None = None) -> str | None:
-	"""Label du lieu dont la porte est la plus proche de celle de `cible_id` dans la grille
-	du parent (« tout près de … »). `exclure` = lieux à ignorer (la cible, le donneur).
-	None si la cible n'a pas de porte connue ou qu'il n'y a aucun voisin."""
+def repere_proche_doc(cible_id: str, portes: dict, get_doc_fn, exclure: set | None = None) -> tuple | None:
+	"""(lieu_id, doc) du MAGASIN dont la porte est la plus proche de celle de `cible_id` dans
+	la grille du parent. `exclure` = lieux à ignorer (la cible, le donneur). None si la cible
+	n'a pas de porte connue ou qu'il n'y a aucun voisin."""
 	cible_porte = (portes or {}).get(cible_id)
 	if not cible_porte:
 		return None
@@ -150,8 +151,15 @@ def repere_proche(cible_id: str, portes: dict, get_doc_fn, exclure: set | None =
 			continue
 		d = (porte[0] - cible_porte[0]) ** 2 + (porte[1] - cible_porte[1]) ** 2
 		if meilleure_d is None or d < meilleure_d:
-			meilleur, meilleure_d = lieu_label(doc, lieu_id), d
+			meilleur, meilleure_d = (lieu_id, doc), d
 	return meilleur
+
+
+def repere_proche(cible_id: str, portes: dict, get_doc_fn, exclure: set | None = None) -> str | None:
+	"""Label du lieu dont la porte est la plus proche de celle de `cible_id` dans la grille
+	du parent (« tout près de … »). Cf. `repere_proche_doc`."""
+	trouve = repere_proche_doc(cible_id, portes, get_doc_fn, exclure)
+	return lieu_label(trouve[1], trouve[0]) if trouve else None
 
 
 def indice_destination(giver_doc: dict, dest_id: str, find_docs_fn, get_doc_fn) -> dict:
@@ -300,6 +308,141 @@ def choix_suggestions(noms: list, noeud_id: str, choix_id: str) -> list:
 		"saisie": False,
 		"rejouer": {"noeud": noeud_id, "saisie": nom},
 	} for nom in noms]
+
+
+# ---------------------------------------------------------------------------
+# Demander son chemin PAR TYPE de magasin (même service `direction`)
+# ---------------------------------------------------------------------------
+# Le « type » d'un magasin est sa `categorie` (aucun libellé en base : l'identifiant fait foi,
+# underscores lus comme des espaces — cf. routers/proprietes.categorie_label). Le PNJ ne
+# connaît que les types des MAGASINS de sa ville (`est_magasin`), hors sa propre boutique.
+
+# Distance de Levenshtein maximale pour proposer « Vous cherchez … ? » sur une saisie qui
+# n'est le nom d'aucun type connu (règle de l'Auteur : 3 au plus).
+TYPE_LEVENSHTEIN_MAX = 3
+
+_ARTICLES_TYPE = ("de la ", "les ", "le ", "la ", "un ", "une ", "des ", "du ", "l'", "d'")
+
+
+def libelle_type(categorie) -> str:
+	"""« atelier_de_cirier » → « atelier de cirier »."""
+	return str(categorie or "").replace("_", " ").strip()
+
+
+def cle_type(texte) -> str:
+	"""Clé de comparaison d'un type : casse et accents ignorés, underscores = espaces, blancs
+	écrasés, article de tête retiré (« une Boulangerie » = « boulangerie »)."""
+	t = unicodedata.normalize("NFD", str(texte or "").casefold().replace("’", "'").replace("_", " "))
+	t = " ".join("".join(c for c in t if unicodedata.category(c) != "Mn").split())
+	for art in _ARTICLES_TYPE:
+		if t.startswith(art) and len(t) > len(art):
+			t = t[len(art):]
+			break
+	# « laboratoire d'alchimie » = « laboratoire_d_alchimie ».
+	return " ".join(t.replace("'", " ").split())
+
+
+def levenshtein(a: str, b: str) -> int:
+	"""Distance d'édition (insertion, suppression, substitution) entre deux chaînes."""
+	if len(a) < len(b):
+		a, b = b, a
+	precedente = list(range(len(b) + 1))
+	for i, ca in enumerate(a, 1):
+		courante = [i]
+		for j, cb in enumerate(b, 1):
+			courante.append(min(precedente[j] + 1, courante[j - 1] + 1,
+								precedente[j - 1] + (ca != cb)))
+		precedente = courante
+	return precedente[-1]
+
+
+def magasins_par_type(giver_doc: dict, find_docs_fn, est_magasin_fn=None) -> dict:
+	"""{categorie: [(lieu_id, libellé), …]} — les magasins de la ville de `giver_doc`, lui
+	exclu, groupés par type. {} sans ville."""
+	est_magasin_fn = est_magasin_fn or est_magasin
+	parent_id = (giver_doc or {}).get("lieu_parent")
+	if not parent_id:
+		return {}
+	giver_id = (giver_doc or {}).get("_id")
+	par_type = {}
+	for d in find_docs_fn({"type": "lieu", "lieu_parent": parent_id}) or []:
+		if not d.get("_id") or d["_id"] == giver_id or not d.get("categorie") or not est_magasin_fn(d):
+			continue
+		par_type.setdefault(d["categorie"], []).append((d["_id"], lieu_label(d, d["_id"])))
+	return par_type
+
+
+def chercher_type(nom: str, categories) -> dict:
+	"""La saisie désigne-t-elle un type connu ? {"exact": categorie} ; sinon le type le plus
+	proche à TYPE_LEVENSHTEIN_MAX au plus → {"proche": categorie} (ex æquo : ordre
+	alphabétique, pour un résultat stable) ; sinon {}."""
+	cle = cle_type(nom)
+	if not cle:
+		return {}
+	cles = {c: cle_type(libelle_type(c)) for c in sorted(categories or ())}
+	for cat, k in cles.items():
+		if k == cle:
+			return {"exact": cat}
+	meilleur, meilleure_d = None, None
+	for cat, k in cles.items():
+		d = levenshtein(cle, k)
+		if d <= TYPE_LEVENSHTEIN_MAX and (meilleure_d is None or d < meilleure_d):
+			meilleur, meilleure_d = cat, d
+	return {"proche": meilleur} if meilleur else {}
+
+
+def indice_type(giver_doc: dict, candidats: list, find_docs_fn, get_doc_fn) -> dict:
+	"""Le magasin de `candidats` ([(lieu_id, libellé)], tous du même type et de la ville du
+	donneur) dont la porte est la plus proche de celle du donneur, et de quoi s'y orienter :
+	{lieu_id, nom, direction, repere_id, repere_nom}. Une porte inconnue passe en dernier ;
+	ex æquo départagés par le libellé (résultat stable)."""
+	graphe = focalisation.charger_graphe(find_docs_fn)
+	portes = portes_du_parent(graphe, (giver_doc or {}).get("lieu_parent"))
+	giver_id = (giver_doc or {}).get("_id")
+	porte_x = porte_effective(graphe, portes, giver_id)
+
+	def eloignement(c):
+		porte = porte_effective(graphe, portes, c[0])
+		if not (porte and porte_x):
+			return (1, 0, c[1])
+		return (0, (porte[0] - porte_x[0]) ** 2 + (porte[1] - porte_x[1]) ** 2, c[1])
+
+	lieu_id, nom = min(candidats, key=eloignement)
+	porte_y = porte_effective(graphe, portes, lieu_id)
+	direction = direction_cardinale(porte_x, porte_y) if (porte_x and porte_y) else None
+	repere = repere_proche_doc(lieu_id, portes, get_doc_fn, exclure={giver_id})
+	return {
+		"lieu_id": lieu_id,
+		"nom": nom,
+		"direction": direction,
+		"repere_id": repere[0] if repere else None,
+		"repere_nom": lieu_label(repere[1], repere[0]) if repere else None,
+		"repere_type": libelle_type((repere[1] or {}).get("categorie")) if repere else None,
+	}
+
+
+def texte_indice_type(indice: dict) -> str:
+	"""« au nord d'ici, proche de Le Fumoir (fumoir) » — {direction} du nœud `type_trouve`."""
+	bout = f"{groupe_direction(indice['direction'])} d'ici" if indice.get("direction") else "à deux pas d'ici"
+	if indice.get("repere_nom"):
+		bout += f", proche de {indice['repere_nom']}"
+		if indice.get("repere_type"):
+			bout += f" ({indice['repere_type']})"
+	return bout
+
+
+def choix_confirmation_type(categorie: str, noeud_id: str, choix_id: str) -> list:
+	"""La réplique « Oui » du nœud `type_propose` : comme `choix_suggestions`, elle rejoue le
+	choix de saisie d'origine, avec le libellé EXACT du type — la recherche aboutit alors sur
+	`type_trouve`. Le « Non » est un choix ordinaire du contenu (→ `type_inconnu`)."""
+	return [{
+		"id": choix_id,
+		"label": "Oui, c'est cela.",
+		"action": False,
+		"marque": None,
+		"saisie": False,
+		"rejouer": {"noeud": noeud_id, "saisie": libelle_type(categorie)},
+	}]
 
 
 # ---------------------------------------------------------------------------

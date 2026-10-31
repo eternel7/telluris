@@ -47,6 +47,8 @@ PLACEHOLDERS_CONNUS = {
 	# Service `direction` : le nom SAISI par le joueur et les noms approchants proposés.
 	# ({lieu} et {direction} sont partagés avec les quêtes.)
 	"recherche", "suggestions",
+	# … et le TYPE de magasin demandé ou proposé (sa catégorie, lue en clair).
+	"type",
 	# Quête d'APPORT ({objet}, {xp}, {prime} partagés) : quantité demandée, reste à remettre.
 	"quantite", "reste",
 	# Traversée maritime (service `traversee`) : port d'arrivée, prix pour CE groupe, têtes.
@@ -173,7 +175,9 @@ NOEUDS_REQUIS = {
 	"escorte": {"accepte"},
 	# `deja` reste optionnel — un gardien peut ne pas reconnaître les habitués.
 	"acces": {"ouvre", "refus"},
-	"direction": {"trouve", "proche", "inconnu"},
+	# `type_inconnu` n'est pas lu par le router (atteint par le « Non » de `type_propose`),
+	# mais sans lui la question n'a pas de réponse négative.
+	"direction": {"trouve", "proche", "inconnu", "type_trouve", "type_propose", "type_inconnu"},
 	# Embarquer : payé (le client recharge /play en mode voyage) ou bourse trop légère.
 	"traversee": {"embarque", "sans_fonds"},
 	# Franchir un seuil : déposé à l'arrivée (le client recharge /play), seuil refermé, ou

@@ -43,6 +43,9 @@
 #   `{"service":"direction"}`) s'affiche en champ texte, la valeur arrive en `saisie` dans le
 #   POST. Placeholders : {lieu} + {direction} (trouve), {recherche} + {suggestions} (proche),
 #   {recherche} (inconnu). Recherche pure : utils/transport.chercher_lieu_nomme.
+#   La saisie peut aussi être un TYPE de magasin (sa catégorie) : {type} + {lieu} +
+#   {direction} (type_trouve, le plus proche de ce type), {recherche} + {type} (type_propose :
+#   type à Levenshtein ≤ 3, « Oui » ajouté par le router, « Non » écrit → type_inconnu).
 # Placeholders substitués serveur dans texte/label : {prenom}, {cout}, plus toute clé de
 # `contexte["placeholders"]` posée par le router — {pnj} (le nom EFFECTIF de celui à qui l'on
 # parle, cf. `nom_effectif`), {destinataire} / {donneur} (les PNJ des deux bouts d'une course),

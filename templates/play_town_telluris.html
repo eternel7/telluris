@@ -12370,7 +12370,7 @@ function renderPnjNoeud(noeud) {
 			? ` data-echeance="${recu + c.rebours.ferme_dans_s * 1000}"` : ''} onclick="choisirPnjRejouer(${i})">${escapeHtml(c.label)}</button></li>`
 		: c.saisie
 		? `<li class="pnj-saisie"><input type="text" id="pnj-saisie-${c.id}" maxlength="80"
-				placeholder="Nom du lieu…" onkeydown="if(event.key==='Enter'){choisirPnjSaisie('${c.id}');}">
+				placeholder="Nom ou type de lieu…" onkeydown="if(event.key==='Enter'){choisirPnjSaisie('${c.id}');}">
 			<button class="sub-loc-btn" onclick="choisirPnjSaisie('${c.id}')">${c.label}</button></li>`
 		: `<li><button class="sub-loc-btn" onclick="choisirPnj('${c.id}')">${_marquePastille(c.marque)}${c.action ? '✨ ' : ''}${c.label}</button></li>`
 	).join('') || '<li><button class="sub-loc-btn" onclick="closePnjPanel()">✕ Prendre congé</button></li>';
