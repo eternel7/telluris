@@ -1,0 +1,198 @@
+[
+  {
+    "_id": "pnj:marchand_negociant",
+    "_rev": "1-54946584a263daef48ba9264ae4aa366",
+    "type": "pnj",
+    "nom": "Maître Lombard",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_lettre01.jpg",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Une balance de changeur trône sur le comptoir, entre deux registres ouverts. « Bien le bonjour, {prenom}. Je prends tout, et je paie comptant. Ce qui vaut la peine finit sur mes rayons ; le reste, j'en fais mon affaire. »",
+          "choix": [
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "commission",
+              "label": "Et votre commission ?",
+              "next": "commission"
+            },
+            {
+              "id": "direction",
+              "label": "Vous sauriez m'indiquer un lieu ?",
+              "next": "direction_demande"
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission": {
+          "texte": "« Elle dépend de vous, {prenom}. Un client que je connais mal me coûte des précautions ; un ami de la maison, presque rien. Revenez souvent, et vous verrez la différence. Mais on ne marchande pas avec moi : mon prix est juste, et il est le même pour tout ce que vous m'apportez. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Entendu.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Au revoir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "direction_demande": {
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "choix": [
+            {
+              "id": "direction_chercher",
+              "label": "Demander",
+              "saisie": true,
+              "action": {
+                "service": "direction"
+              }
+            },
+            {
+              "id": "direction_annuler",
+              "label": "Laissez, ce n'est rien.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "direction_trouve": {
+          "texte": "« {lieu} ? C'est {direction}. Impossible de vous tromper. »",
+          "choix": [
+            {
+              "id": "direction_encore",
+              "label": "Et un autre lieu ?",
+              "next": "direction_demande"
+            },
+            {
+              "id": "direction_merci",
+              "label": "Merci bien.",
+              "next": "fin"
+            }
+          ]
+        },
+        "direction_proche": {
+          "texte": "« “{recherche}” ? Connais pas. » Un temps de réflexion. « Vous ne voulez pas plutôt dire {suggestions} ? »",
+          "choix": [
+            {
+              "id": "direction_encore",
+              "label": "Et un autre lieu ?",
+              "next": "direction_demande"
+            },
+            {
+              "id": "direction_merci",
+              "label": "Merci bien.",
+              "next": "fin"
+            }
+          ]
+        },
+        "direction_inconnu": {
+          "texte": "« “{recherche}” ? » Une moue perplexe. « Je ne connais rien de ce nom-là par ici, {prenom}. »",
+          "choix": [
+            {
+              "id": "direction_encore",
+              "label": "Et un autre lieu ?",
+              "next": "direction_demande"
+            },
+            {
+              "id": "direction_merci",
+              "label": "Merci bien.",
+              "next": "fin"
+            }
+          ]
+        },
+        "direction_type_propose": {
+          "texte": "« “{recherche}” ? » Un temps de réflexion. « Vous cherchez : {type} ? »",
+          "choix": [
+            {
+              "id": "direction_type_non",
+              "label": "Non, pas du tout.",
+              "next": "direction_type_inconnu"
+            }
+          ]
+        },
+        "direction_type_inconnu": {
+          "texte": "« Alors je ne connais pas de magasin de ce type, {prenom}. »",
+          "choix": [
+            {
+              "id": "direction_encore",
+              "label": "Et un autre lieu ?",
+              "next": "direction_demande"
+            },
+            {
+              "id": "direction_merci",
+              "label": "Merci bien.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "La balance s'incline sous le premier colis, puis sous le suivant. « {colis} colis, pesés et comptés : le compte y est, {prenom}. » Les pièces glissent sur le comptoir. « {prime} pièces de cuivre, comptant, comme toujours. {expediteur} saura que sa marchandise est arrivée à bon port. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, pesés et comptés. » Un reçu est porté au registre, signé, scellé à la cire. « Je ne vous dois rien : c'est {donneur} qui paie les siens. Rapportez-lui ce reçu, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "Un doigt suit le registre, puis compte vos colis, et la tête se secoue. « Le compte n'y est pas, {prenom}. Je paie ce qu'on me livre, pas ce qu'on me promet — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    },
+    "services": {
+      "direction": {
+        "noeuds": {
+          "trouve": "direction_trouve",
+          "proche": "direction_proche",
+          "inconnu": "direction_inconnu",
+          "type_propose": "direction_type_propose",
+          "type_inconnu": "direction_type_inconnu"
+        }
+      },
+      "transport": {
+        "noeuds": {
+          "livre": "transport_livre",
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    }
+  }
+]

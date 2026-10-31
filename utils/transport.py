@@ -62,11 +62,12 @@ def est_magasin(lieu_doc: dict) -> bool:
 	return bool(marche.besoins_lieu(lieu_doc))
 
 
-def magasin_a_indiquer(lieu_doc: dict) -> bool:
-	"""Magasin pour s'ORIENTER (repère, demande de chemin par type) : `est_magasin`, plus le
-	négociant (`marche.est_negociant`), qui n'a pas de recette mais tient boutique comme les
-	autres. ⚠️ Pas `est_magasin` lui-même : celui-ci fait aussi les destinations de course, et
-	le tenancier du négociant n'a pas de nœud de livraison."""
+def tient_boutique(lieu_doc: dict) -> bool:
+	"""Magasin AUX YEUX DU JOUEUR : `est_magasin`, plus le négociant (`marche.est_negociant`),
+	qui n'a pas de recette mais tient boutique comme les autres. Sert à s'orienter (repère,
+	demande de chemin par type) et à RECEVOIR une course (`magasins_candidats` : il achète
+	tout, son tenancier a les nœuds de livraison). ⚠️ `est_magasin` reste le prédicat du
+	DONNEUR : sans recette ni rayon produit, le négociant ne confie aucune course tirée."""
 	return est_magasin(lieu_doc) or marche.est_negociant(lieu_doc)
 
 
@@ -155,7 +156,7 @@ def repere_proche(cible_id: str, portes: dict, get_doc_fn, exclure: set | None =
 		if lieu_id in exclure:
 			continue
 		doc = get_doc_fn(lieu_id) or {}
-		if not magasin_a_indiquer(doc):
+		if not tient_boutique(doc):
 			continue
 		d = (porte[0] - cible_porte[0]) ** 2 + (porte[1] - cible_porte[1]) ** 2
 		if meilleure_d is None or d < meilleure_d:
@@ -316,7 +317,7 @@ def choix_suggestions(noms: list, noeud_id: str, choix_id: str) -> list:
 # ---------------------------------------------------------------------------
 # Le « type » d'un magasin est sa `categorie` (aucun libellé en base : l'identifiant fait foi,
 # underscores lus comme des espaces — cf. routers/proprietes.categorie_label). Le PNJ ne
-# connaît que les types des MAGASINS de sa ville (`magasin_a_indiquer`, négociant compris),
+# connaît que les types des MAGASINS de sa ville (`tient_boutique`, négociant compris),
 # hors sa propre boutique. La réponse a la forme de la demande par nom (nœud `trouve`).
 
 # Distance de Levenshtein maximale pour proposer « Vous cherchez … ? » sur une saisie qui
@@ -361,7 +362,7 @@ def levenshtein(a: str, b: str) -> int:
 def magasins_par_type(giver_doc: dict, find_docs_fn, est_magasin_fn=None) -> dict:
 	"""{categorie: [(lieu_id, libellé), …]} — les magasins de la ville de `giver_doc`, lui
 	exclu, groupés par type. {} sans ville."""
-	est_magasin_fn = est_magasin_fn or magasin_a_indiquer
+	est_magasin_fn = est_magasin_fn or tient_boutique
 	parent_id = (giver_doc or {}).get("lieu_parent")
 	if not parent_id:
 		return {}
@@ -438,7 +439,7 @@ def magasins_candidats(giver_doc: dict, find_docs_fn) -> list:
 		pools.append(find_docs_fn({"type": "lieu", "lieu_parent": parent}) or [])
 	pools.append(find_docs_fn({"type": "lieu"}) or [])
 	for pool in pools:
-		candidats = [d for d in pool if d.get("_id") != giver_id and est_magasin(d)]
+		candidats = [d for d in pool if d.get("_id") != giver_id and tient_boutique(d)]
 		if candidats:
 			return candidats
 	return []

@@ -15,6 +15,8 @@
 
 import re
 
+from models import character_stats
+
 from utils import acces
 from utils.pnj import PASSAGES_CLES
 from utils import apport as apport_util
@@ -577,7 +579,10 @@ def analyser_doc(doc: dict) -> list:
 			# DONNEUR : une course ÉCRITE, ou le tenancier générique (course tirée au hasard).
 			# Un PNJ qui ne déclare que `livre`/`incomplet` est un destinataire pur (Aélis
 			# reçoit la lettre de la Guilde) : il ne confie rien.
-			donneur = bool(offre) or doc_id.startswith("pnj:marchand_")
+			# Sauf le NÉGOCIANT : sans recette, il ne confie aucune course tirée (`est_magasin`
+			# faux) — il ne fait que recevoir (`transport.tient_boutique`).
+			donneur = bool(offre) or (doc_id.startswith("pnj:marchand_")
+									  and doc_id[len("pnj:marchand_"):] not in character_stats.CATEGORIES_NEGOCE)
 			attendus = set(TRANSPORT_DONNEUR) if donneur else set()
 			if offre and offre.get("retour"):
 				attendus |= TRANSPORT_RETOUR

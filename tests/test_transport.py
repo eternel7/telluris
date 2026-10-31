@@ -421,12 +421,40 @@ def test_le_plus_proche_du_type_depuis_le_donneur():
 
 def test_le_negociant_est_un_magasin_pour_s_orienter(avec_negoce):
 	assert not transport.est_magasin(NEGOCE)          # aucune recette : pas destinataire de course
-	assert transport.magasin_a_indiquer(NEGOCE)
+	assert transport.tient_boutique(NEGOCE)
 	assert transport.magasins_par_type(BOUCHERIE, find_docs)["negociant"] == [("lieu:negoce", "La Balance")]
 	# … et il sert de repère : collé au fumoir, il passe devant la salaison.
 	graphe = focalisation.charger_graphe(find_docs)
 	portes = transport.portes_du_parent(graphe, "lieu:ville")
 	assert transport.repere_proche("lieu:fumoir", portes, get_doc, exclure={"lieu:boucherie"}) == "La Balance"
+
+
+def test_le_negociant_recoit_des_courses_sans_en_donner(avec_negoce):
+	# Destinataire : il achète tout, donc la viande de la boucherie peut lui être portée.
+	assert NEGOCE in transport.magasins_candidats(BOUCHERIE, find_docs)
+	assert transport.items_livrables(BOUCHERIE, NEGOCE, get_doc) == [VIANDE]
+	# Donneur : jamais (pas de recette) — ni tenancier implicite, ni course tirée.
+	assert transport.entree_marchand(NEGOCE) is None
+	perso = character()
+	assert transport.poser_transport_offert(perso, NEGOCE, find_docs, get_doc, rand_fn=lambda: 0.0) is False
+	assert not perso.get("transport_offert")
+
+
+def test_les_repliques_du_negociant_passent_le_linter():
+	import importlib.util, os
+	chemin = os.path.join(os.path.dirname(__file__), "..", "dev", "gen_livraison_negociant.py")
+	spec = importlib.util.spec_from_file_location("gen_livraison_negociant", chemin)
+	gen = importlib.util.module_from_spec(spec)
+	spec.loader.exec_module(gen)
+	from utils import lint_dialogues
+	doc = gen.injecter({"_id": gen.DOC_ID, "type": "pnj", "nom": "X", "services": None,
+						"dialogue": {"noeud_depart": "accueil", "noeuds": {"accueil": {
+							"texte": "…", "choix": [{"id": "rien", "label": "Rien.", "next": "fin"}]}}}})
+	assert lint_dialogues.analyser_doc(doc) == []
+	assert set(lint_dialogues.TRANSPORT_DESTINATAIRE) <= set(doc["services"]["transport"]["noeuds"])
+	assert doc["dialogue"]["noeuds"]["accueil"]["choix"][0]["id"] == "livraison"
+	# Idempotent.
+	assert gen.injecter(doc) == doc
 
 
 def test_resoudre_direction_par_type(monkeypatch):
