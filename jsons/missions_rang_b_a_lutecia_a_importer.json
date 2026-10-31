@@ -10166,7 +10166,7 @@
       {
         "character": "pnj:gardienne_des_cinq_portes",
         "nom": "La gardienne des cinq portes",
-        "portrait": "templier_elfe_f_magicienne_notre_dame01.jpg",
+        "portrait": "templier_elfe_f_chapelle_palatine01.jpg",
         "probabilite": 1,
         "description": "Une elfe en manteau de Templière, debout au centre de l'étoile des cinq portes."
       }
@@ -10536,7 +10536,7 @@
     "nom": "La gardienne des cinq portes",
     "race": "elfe",
     "vocation": "magicien",
-    "portrait": "templier_elfe_f_magicienne_notre_dame01.jpg",
+    "portrait": "templier_elfe_f_chapelle_palatine01.jpg",
     "description": "Templière de la Chapelle Palatine, gardienne des cinq portes en pentagramme. Elle ne dit jamais où elles mènent avant qu'on ait le droit de les franchir.",
     "dialogue": {
       "noeud_depart": "accueil",

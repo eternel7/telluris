@@ -44,10 +44,15 @@ def test_regeneration_idempotente():
 
 
 def test_le_delta_est_le_doc_genere_par_la_pr():
-	"""Mêmes valeurs que le générateur des missions : aucune n'est recopiée ici."""
+	"""Mêmes valeurs injectées que le générateur des missions : aucune n'est recopiée ici. Le reste
+	du doc vient du dump, enrichi depuis (le tableau de la gardienne : dev/gen_portails_aix.py)."""
 	generes = {d["_id"]: d for d in MISSIONS.generer(DUMP)}
 	for doc_id, doc in DOCS.items():
-		assert doc == generes[doc_id], doc_id
+		for cle in ("image", "portrait", "acces"):
+			assert doc.get(cle) == generes[doc_id].get(cle), (doc_id, cle)
+		portraits = {e.get("character"): e.get("portrait") for e in doc.get("pnj") or []}
+		for entree in generes[doc_id].get("pnj") or []:
+			assert portraits[entree["character"]] == entree["portrait"], (doc_id, entree["character"])
 
 
 def _fichiers(doc):

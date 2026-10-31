@@ -104,7 +104,7 @@ ZONE_GARGOUILLE = "zone:riviere"
 # Mars et Hugues gardent un portrait du stock, qui n'est porté par personne d'autre.
 PORTRAITS = {
 	CHANCELIER: "Set442-Lepidstadt-School of Law and Civic Dean Cassian Ornel.jpg",
-	GARDIENNE: "templier_elfe_f_magicienne_notre_dame01.jpg",
+	GARDIENNE: "templier_elfe_f_chapelle_palatine01.jpg",
 	COMMANDEUR: "templier_humain_m_commandeur_enclos01.png",
 	GARDE_MARS: "Set346-Male-Dwarf-Oread-Torag-08.jpg",
 	HUGUES: "Set437-Magister Othmar Vey.jpg",
