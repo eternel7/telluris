@@ -1518,6 +1518,11 @@
 		.sh-xp-btn:hover:not(:disabled) { background: rgba(255,215,0,0.22); border-color: var(--accent-color); }
 		.sh-xp-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 		.sh-xp-btn.subcap { border-color: rgba(197,197,197,0.2); color: var(--muted); }
+		.sh-stat-max-lbl {
+			display: block; margin-top: 5px; padding: 3px 5px; border: 1px solid transparent;
+			color: var(--muted); font-size: 0.8rem; text-align: center;
+			text-transform: uppercase; letter-spacing: .08em;
+		}
 		.sh-stat-pip.subcap { background-color: var(--muted); box-shadow: 0 0 2px rgba(197,197,197,0.4); }
 		/* Dépassement du max racial : unique et IRRÉVERSIBLE — il ne doit pas se confondre
 		   avec le bouton d'XP ordinaire, doré comme tout le reste de la fiche. */
@@ -2344,10 +2349,13 @@
 								<button class="sh-xp-btn{% if not is_accessible %} subcap{% endif %}"
 										id="sh-btn-{{ code }}"
 										{% if at_cap or not can_afford %}disabled{% endif %}
-										{% if attribute_points == 0 %}style="display:none"{% endif %}
+										{% if attribute_points == 0 or at_cap %}style="display:none"{% endif %}
 										onclick="spendXp('{{ code }}')">
 									- <span class="sh-xp-cost">{{ cost_next }} P<small>oints</small></span>
 								</button>
+								{# Au plafond, le bouton (inutilisable) cède la place à un libellé. #}
+								<span class="sh-stat-max-lbl" id="sh-max-{{ code }}"
+									  {% if attribute_points == 0 or not at_cap %}style="display:none"{% endif %}>max</span>
 								{# Dépassement du max racial (humain) : offert sur les seules caracts BLOQUÉES
 								   (au max racial, ou coincées au sous-plafond par le quota de maxima). Le
 								   bouton est rendu même quand il n'est pas offert, en `display:none` : une
@@ -5035,12 +5043,15 @@ function _refreshStatBoxes() {
 		_renderStatJauge(code);
 		const btn = document.getElementById('sh-btn-' + code);
 		if (btn) {
-			btn.style.display = _attributePoints > 0 ? '' : 'none';
+			btn.style.display = (_attributePoints > 0 && val < cap) ? '' : 'none';
 			btn.disabled = val >= cap || _attributePoints < cost;
 			btn.classList.toggle('subcap', !isAccessible);
 			const costEl = btn.querySelector('.sh-xp-cost');
 			if (costEl) costEl.innerHTML = cost + ' P<small>oints</small>';
 		}
+		// Au plafond : libellé « max » à la place du bouton (mêmes conditions d'affichage).
+		const maxLbl = document.getElementById('sh-max-' + code);
+		if (maxLbl) maxLbl.style.display = (_attributePoints > 0 && val >= cap) ? '' : 'none';
 		// Dépassement du max racial : offert sur les seules caracts BLOQUÉES (au max racial
 		// ou coincées au sous-plafond par le quota), tant que le bonus n'a pas été brûlé.
 		// Le bouton existe toujours dans le DOM, même caché : une caract peut se bloquer en
