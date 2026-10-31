@@ -836,16 +836,36 @@ def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, s
 
 def _resoudre_direction(pnj_doc: dict, lieu_doc: dict, saisie) -> tuple[str | None, dict]:
 	"""Service `direction` : le PNJ cherche le lieu SAISI par le joueur parmi ceux de sa ville.
-	Nom exact → `trouve`, avec la phrase d'orientation des courses ({direction} : « au sud-est
-	d'ici, tout près de … ») ; nom approchant → `proche` et ses {suggestions} ; sinon `inconnu`.
+	Dans l'ordre :
+	1. nom exact À LA LETTRE (casse ignorée) → `trouve`, avec la phrase d'orientation des
+	   courses ({direction} : « au sud-est d'ici, tout près de … ») ;
+	2. TYPE de magasin exact (sa catégorie) → `trouve` aussi, MÊME FORME que par le nom, pour
+	   le magasin de ce type le plus proche (`transport.plus_proche`) — AVANT le nom à
+	   article près : « fumoir » est le type, pas l'enseigne « Le Fumoir » ;
+	3. nom exact à article près → `trouve` ;
+	4. type à `TYPE_LEVENSHTEIN_MAX` au plus → `type_propose` ({type}) ; le « Oui » (`_type`,
+	   retiré par le router) rejoue la saisie avec le type exact → étape 2 ;
+	5. nom approchant → `proche` et ses {suggestions} ; sinon `inconnu`.
 	{recherche} = la saisie assainie, rendue au joueur en `textContent` seulement."""
 	noeuds = ((pnj_doc.get("services") or {}).get("direction") or {}).get("noeuds") or {}
 	nom = transport.nettoyer_recherche_lieu(saisie)
 	trouve = transport.chercher_lieu_nomme(nom, lieu_doc, find_docs)
-	if trouve.get("exact"):
+	par_type = transport.magasins_par_type(lieu_doc, find_docs)
+	type_trouve = transport.chercher_type(nom, par_type)
+	if trouve.get("exact") and (trouve["exact"][1].casefold() == nom.casefold()
+								or not type_trouve.get("exact")):
 		lieu_id, label = trouve["exact"]
 		indice = transport.indice_destination(lieu_doc, lieu_id, find_docs, get_doc)
 		return noeuds.get("trouve"), {"lieu": label, "direction": transport.texte_indice(indice)}
+	if type_trouve.get("exact"):
+		lieu_id, label = transport.plus_proche(lieu_doc, par_type[type_trouve["exact"]], find_docs)
+		indice = transport.indice_destination(lieu_doc, lieu_id, find_docs, get_doc)
+		return noeuds.get("trouve"), {"lieu": label, "direction": transport.texte_indice(indice)}
+	if type_trouve.get("proche"):
+		# `_type` n'est pas un placeholder : le router le retire pour bâtir le « Oui ».
+		return noeuds.get("type_propose"), {
+			"recherche": nom, "type": transport.libelle_type(type_trouve["proche"]),
+			"_type": type_trouve["proche"]}
 	if trouve.get("suggestions"):
 		noms = trouve["suggestions"]
 		liste = noms[0] if len(noms) == 1 else ", ".join(noms[:-1]) + " ou " + noms[-1]
@@ -1121,6 +1141,11 @@ async def pnj_dialogue_choix(
 		# nœud rendu plus bas : elles rejouent CE choix de saisie avec le nom exact.
 		suggestions_direction = transport.choix_suggestions(
 			dits.pop("_noms", []), noeud_id, body.get("choix_id"))
+		# Type approchant (nœud `type_propose`) : « Oui » rejoue la saisie avec le type exact.
+		type_propose = dits.pop("_type", None)
+		if type_propose:
+			suggestions_direction = transport.choix_confirmation_type(
+				type_propose, noeud_id, body.get("choix_id"))
 		contexte["placeholders"].update(dits)
 	else:
 		suivant = choix.get("next")

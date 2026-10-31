@@ -15,6 +15,8 @@
 
 import re
 
+from models import character_stats
+
 from utils import acces
 from utils.pnj import PASSAGES_CLES
 from utils import apport as apport_util
@@ -47,6 +49,8 @@ PLACEHOLDERS_CONNUS = {
 	# Service `direction` : le nom SAISI par le joueur et les noms approchants proposés.
 	# ({lieu} et {direction} sont partagés avec les quêtes.)
 	"recherche", "suggestions",
+	# … et le TYPE de magasin proposé (`type_propose` : sa catégorie, lue en clair).
+	"type",
 	# Quête d'APPORT ({objet}, {xp}, {prime} partagés) : quantité demandée, reste à remettre.
 	"quantite", "reste",
 	# Traversée maritime (service `traversee`) : port d'arrivée, prix pour CE groupe, têtes.
@@ -173,7 +177,9 @@ NOEUDS_REQUIS = {
 	"escorte": {"accepte"},
 	# `deja` reste optionnel — un gardien peut ne pas reconnaître les habitués.
 	"acces": {"ouvre", "refus"},
-	"direction": {"trouve", "proche", "inconnu"},
+	# `type_inconnu` n'est pas lu par le router (atteint par le « Non » de `type_propose`),
+	# mais sans lui la question n'a pas de réponse négative.
+	"direction": {"trouve", "proche", "inconnu", "type_propose", "type_inconnu"},
 	# Embarquer : payé (le client recharge /play en mode voyage) ou bourse trop légère.
 	"traversee": {"embarque", "sans_fonds"},
 	# Franchir un seuil : déposé à l'arrivée (le client recharge /play), seuil refermé, ou
@@ -573,7 +579,10 @@ def analyser_doc(doc: dict) -> list:
 			# DONNEUR : une course ÉCRITE, ou le tenancier générique (course tirée au hasard).
 			# Un PNJ qui ne déclare que `livre`/`incomplet` est un destinataire pur (Aélis
 			# reçoit la lettre de la Guilde) : il ne confie rien.
-			donneur = bool(offre) or doc_id.startswith("pnj:marchand_")
+			# Sauf le NÉGOCIANT : sans recette, il ne confie aucune course tirée (`est_magasin`
+			# faux) — il ne fait que recevoir (`transport.tient_boutique`).
+			donneur = bool(offre) or (doc_id.startswith("pnj:marchand_")
+									  and doc_id[len("pnj:marchand_"):] not in character_stats.CATEGORIES_NEGOCE)
 			attendus = set(TRANSPORT_DONNEUR) if donneur else set()
 			if offre and offre.get("retour"):
 				attendus |= TRANSPORT_RETOUR

@@ -359,6 +359,157 @@ def test_suggestion_cliquable_rejoue_la_saisie_et_trouve_le_lieu(monkeypatch):
 	assert suivant == "n_trouve" and dits["lieu"] == "Le Saloir"
 
 
+# ── Demander son chemin PAR TYPE de magasin ──────────────────────────────────────
+
+DOC_DIRECTION = {"_id": "pnj:marchand_boucherie", "services": {"direction": {"noeuds": {
+	"trouve": "n_trouve", "proche": "n_proche", "inconnu": "n_inconnu",
+	"type_propose": "n_type_propose"}}}}
+NEGOCE = {"_id": "lieu:negoce", "type": "lieu", "categorie": "negociant", "label": "La Balance",
+		  "lieu_parent": "lieu:ville"}
+
+
+@pytest.fixture
+def avec_negoce(monkeypatch):
+	"""Un négociant (sans recette, donc pas `est_magasin`) collé au fumoir : (41,20)."""
+	import sys
+	monkeypatch.setitem(DOCS, NEGOCE["_id"], NEGOCE)
+	monkeypatch.setattr(character_stats, "CATEGORIES_NEGOCE", ["negociant"])
+	monkeypatch.setattr(sys.modules[__name__], "CONNECTIONS", CONNECTIONS + [
+		{"_id": "link:n", "type": "connection",
+		 "nodes": [{"lieu": "lieu:ville", "pos": [41, 20]}, {"lieu": "lieu:negoce", "pos": [0, 0]}]}])
+	focalisation.reset_graphe_cache()
+
+
+def test_cle_type_ignore_casse_accents_article_et_underscores():
+	assert transport.cle_type("Une  SALAISON") == "salaison"
+	assert transport.cle_type("le Négociant") == transport.cle_type("negociant")
+	assert transport.cle_type("Laboratoire d’alchimie") == transport.cle_type("laboratoire_d_alchimie")
+	assert transport.libelle_type("atelier_de_cirier") == "atelier de cirier"
+
+
+def test_levenshtein():
+	assert transport.levenshtein("fumoir", "fumoir") == 0
+	assert transport.levenshtein("salason", "salaison") == 1
+	assert transport.levenshtein("kitten", "sitting") == 3
+	assert transport.levenshtein("", "abc") == 3
+
+
+def test_types_connus_magasins_de_la_ville_hors_soi():
+	par_type = transport.magasins_par_type(BOUCHERIE, find_docs)
+	# Ni le temple ni la guilde (pas des magasins), ni la boucherie où l'on parle.
+	assert par_type == {"salaison": [("lieu:salaison", "Le Saloir")],
+						"fumoir": [("lieu:fumoir", "Le Fumoir")]}
+	assert transport.magasins_par_type(VILLE, find_docs) == {}
+
+
+def test_type_exact_puis_proche_a_levenshtein_borne():
+	types = ["salaison", "fumoir"]
+	assert transport.chercher_type("une Salaison", types) == {"exact": "salaison"}
+	assert transport.chercher_type("salason", types) == {"proche": "salaison"}
+	n = transport.TYPE_LEVENSHTEIN_MAX
+	# Exactement n substitutions en fin de mot : encore proposé ; n + 1 : plus rien.
+	assert transport.chercher_type("fumoir"[:-n] + "x" * n, types) == {"proche": "fumoir"}
+	assert transport.chercher_type("x" * (n + 1) + "fumoir"[n + 1:], types) == {}
+	assert transport.chercher_type("", types) == {}
+
+
+def test_le_plus_proche_du_type_depuis_le_donneur():
+	# Depuis la boucherie (20,20) : la salaison (20,5) est plus proche que le fumoir (40,20).
+	candidats = [("lieu:fumoir", "Le Fumoir"), ("lieu:salaison", "Le Saloir")]
+	assert transport.plus_proche(BOUCHERIE, candidats, find_docs) == ("lieu:salaison", "Le Saloir")
+
+
+def test_le_negociant_est_un_magasin_pour_s_orienter(avec_negoce):
+	assert not transport.est_magasin(NEGOCE)          # aucune recette : pas destinataire de course
+	assert transport.tient_boutique(NEGOCE)
+	assert transport.magasins_par_type(BOUCHERIE, find_docs)["negociant"] == [("lieu:negoce", "La Balance")]
+	# … et il sert de repère : collé au fumoir, il passe devant la salaison.
+	graphe = focalisation.charger_graphe(find_docs)
+	portes = transport.portes_du_parent(graphe, "lieu:ville")
+	assert transport.repere_proche("lieu:fumoir", portes, get_doc, exclure={"lieu:boucherie"}) == "La Balance"
+
+
+def test_le_negociant_recoit_des_courses_sans_en_donner(avec_negoce):
+	# Destinataire : il achète tout, donc la viande de la boucherie peut lui être portée.
+	assert NEGOCE in transport.magasins_candidats(BOUCHERIE, find_docs)
+	assert transport.items_livrables(BOUCHERIE, NEGOCE, get_doc) == [VIANDE]
+	# Donneur : jamais (pas de recette) — ni tenancier implicite, ni course tirée.
+	assert transport.entree_marchand(NEGOCE) is None
+	perso = character()
+	assert transport.poser_transport_offert(perso, NEGOCE, find_docs, get_doc, rand_fn=lambda: 0.0) is False
+	assert not perso.get("transport_offert")
+
+
+def test_les_repliques_du_negociant_passent_le_linter():
+	import importlib.util, os
+	chemin = os.path.join(os.path.dirname(__file__), "..", "dev", "gen_livraison_negociant.py")
+	spec = importlib.util.spec_from_file_location("gen_livraison_negociant", chemin)
+	gen = importlib.util.module_from_spec(spec)
+	spec.loader.exec_module(gen)
+	from utils import lint_dialogues
+	doc = gen.injecter({"_id": gen.DOC_ID, "type": "pnj", "nom": "X", "services": None,
+						"dialogue": {"noeud_depart": "accueil", "noeuds": {"accueil": {
+							"texte": "…", "choix": [{"id": "rien", "label": "Rien.", "next": "fin"}]}}}})
+	assert lint_dialogues.analyser_doc(doc) == []
+	assert set(lint_dialogues.TRANSPORT_DESTINATAIRE) <= set(doc["services"]["transport"]["noeuds"])
+	assert doc["dialogue"]["noeuds"]["accueil"]["choix"][0]["id"] == "livraison"
+	# Idempotent.
+	assert gen.injecter(doc) == doc
+
+
+def test_resoudre_direction_par_type(monkeypatch):
+	"""Type exact : MÊME réponse que la demande par nom du magasin le plus proche de ce type."""
+	from routers import pnj as rp
+	monkeypatch.setattr(rp, "get_doc", get_doc)
+	monkeypatch.setattr(rp, "find_docs", find_docs)
+	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "une Salaison") \
+		== rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "Le Saloir") \
+		== ("n_trouve", {"lieu": "Le Saloir", "direction": "au nord d'ici, tout près de Le Fumoir"})
+	# Type approchant : la question, et de quoi bâtir le « Oui ».
+	suivant, dits = rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "salasion")
+	assert suivant == "n_type_propose"
+	assert dits == {"recherche": "salasion", "type": "salaison", "_type": "salaison"}
+	# Le nom d'une enseigne à la lettre garde la priorité ; sans son article, c'est le type
+	# (« fumoir ») qui l'emporte sur l'enseigne « Le Fumoir ». L'inconnu reste inconnu.
+	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "le fumoir")[0] == "n_trouve"
+	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "Saloir")[0] == "n_trouve"
+	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "Qwxz")[0] == "n_inconnu"
+
+
+def test_resoudre_direction_vers_le_negociant(monkeypatch, avec_negoce):
+	from routers import pnj as rp
+	monkeypatch.setattr(rp, "get_doc", get_doc)
+	monkeypatch.setattr(rp, "find_docs", find_docs)
+	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "négociant") \
+		== ("n_trouve", {"lieu": "La Balance", "direction": "à l'est d'ici, tout près de Le Fumoir"})
+
+
+def test_oui_rejoue_la_saisie_avec_le_type_exact(monkeypatch):
+	from routers import pnj as rp
+	monkeypatch.setattr(rp, "get_doc", get_doc)
+	monkeypatch.setattr(rp, "find_docs", find_docs)
+	_, dits = rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "fumoire")
+	(oui,) = transport.choix_confirmation_type(dits["_type"], "n_demande", "chercher")
+	assert oui["id"] == "chercher" and not oui["saisie"] and not oui["action"]
+	assert oui["rejouer"] == {"noeud": "n_demande", "saisie": "fumoir"}
+	suivant, dits = rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, oui["rejouer"]["saisie"])
+	assert suivant == "n_trouve" and dits["lieu"] == "Le Fumoir"
+
+
+def test_le_generateur_pose_les_noeuds_par_type_que_le_router_lit():
+	import importlib.util, os
+	chemin = os.path.join(os.path.dirname(__file__), "..", "dev", "gen_direction_marchands.py")
+	spec = importlib.util.spec_from_file_location("gen_direction_marchands", chemin)
+	gen = importlib.util.module_from_spec(spec)
+	spec.loader.exec_module(gen)
+	from utils import lint_dialogues
+	assert set(gen.NOEUDS_DIRECTION) == lint_dialogues.NOEUDS_REQUIS["direction"]
+	assert set(gen.NOEUDS_DIRECTION.values()) <= set(gen.NOEUDS_DIALOGUE_DIRECTION)
+	# Le « Non » de la question mène au refus.
+	propose = gen.NOEUDS_DIALOGUE_DIRECTION[gen.NOEUDS_DIRECTION["type_propose"]]
+	assert [c["next"] for c in propose["choix"]] == [gen.NOEUDS_DIRECTION["type_inconnu"]]
+
+
 # ── Choix de la destination & de la cargaison ────────────────────────────────────
 
 def test_destination_exclut_le_donneur_et_exige_un_racheteur():
