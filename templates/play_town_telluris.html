@@ -3498,6 +3498,22 @@
 		}
 		.aide-btn:hover, .aide-btn:focus-visible { background: #e6c98e; outline: none; }
 		.aide-masquee .aide-btn { display: none; }
+		/* Pouls des boutons d'aide — même halo que les marques de passage (`passage-pouls`).
+		   🧭/🎯 (`data-focus-key`), Carte et 🗣️ Interroger (`data-aide-pouls`) : seulement sans
+		   focalisation en cours (`html.sans-focalisation`, posée par `_syncFocusBtns`) ; « ? » :
+		   tant que l'aide n'a jamais été ouverte (`.aide-pouls`, cf. `ouvrirAide`). */
+		html.sans-focalisation [data-focus-key],
+		html.sans-focalisation [data-aide-pouls],
+		.aide-btn.aide-pouls { animation: aide-pouls 1.6s ease-in-out infinite; }
+		@keyframes aide-pouls {
+			0%, 100% { box-shadow: 0 0 2px 0 rgba(110, 185, 255, 0.45); }
+			50%      { box-shadow: 0 0 9px 3px rgba(110, 185, 255, 0.85); }
+		}
+		@media (prefers-reduced-motion: reduce) {
+			html.sans-focalisation [data-focus-key],
+			html.sans-focalisation [data-aide-pouls],
+			.aide-btn.aide-pouls { animation: none; box-shadow: 0 0 7px 2px rgba(110, 185, 255, 0.75); }
+		}
 		#aide-overlay {
 			position: fixed; inset: 0; z-index: 9350;
 			background: rgba(10, 8, 5, .78);
@@ -4042,12 +4058,16 @@
 		return !!(_focalisation && _focalisation.type === type && _focalisation.cible === cible);
 	}
 	// Toggle de la classe dorée sur tous les boutons 🧭/🎯 rendus (Jinja comme miroirs JS).
+	// `html.sans-focalisation` fait pulser les boutons d'aide (CSS `aide-pouls`) : posée sur la
+	// racine, elle vaut aussi pour les boutons rendus PLUS TARD (listes re-rendues).
 	function _syncFocusBtns() {
 		const key = _focalisation ? _focalisation.type + '|' + _focalisation.cible : null;
+		document.documentElement.classList.toggle('sans-focalisation', !key);
 		document.querySelectorAll('[data-focus-key]').forEach(btn => {
 			btn.classList.toggle('btn-highlight', btn.getAttribute('data-focus-key') === key);
 		});
 	}
+	_syncFocusBtns();
 	function _refreshGuidage() {
 		const el = document.getElementById('guidage-action');
 		if (!el) return;
@@ -4587,7 +4607,15 @@
 		document.getElementById('aide-corps').scrollTop = 0;
 	}
 	function aidePas(delta) { if (_aideSection) aideAller(_aideSection + delta); }
+	// « ? » pulse tant que l'aide n'a jamais été ouverte (mémo par navigateur : un stockage
+	// indisponible ne fait que laisser pulser).
+	const _AIDE_VUE = 'aide_vue';
+	try {
+		if (!localStorage.getItem(_AIDE_VUE)) document.querySelectorAll('.aide-btn').forEach(b => b.classList.add('aide-pouls'));
+	} catch (e) {}
 	function ouvrirAide() {
+		document.querySelectorAll('.aide-btn.aide-pouls').forEach(b => b.classList.remove('aide-pouls'));
+		try { localStorage.setItem(_AIDE_VUE, '1'); } catch (e) {}
 		aideAller(0);
 		document.getElementById('aide-overlay').classList.remove('clauses-hidden');
 		document.querySelector('#aide-overlay .item-detail-close')?.focus();
@@ -9280,7 +9308,7 @@ function renderFicheQuetes(data) {
 			// 🗺️ carte de la zone à explorer (quête de chasse localisée) : les données du crop
 			// voyagent dans data-carte pour rester disponibles sans re-fetch.
 			const mapBtn = q.carte
-				? `<button class="sh-drop-btn" data-carte='${_escAttr(JSON.stringify(q.carte))}' onclick="showQuestMap(this)" title="Voir la zone à explorer sur la carte">Carte</button>`
+				? `<button class="sh-drop-btn" data-aide-pouls data-carte='${_escAttr(JSON.stringify(q.carte))}' onclick="showQuestMap(this)" title="Voir la zone à explorer sur la carte">Carte</button>`
 				: '';
 			return `<div class="sh-quest ${rang}">
 				<div class="sh-quest-hdr">
@@ -11564,7 +11592,7 @@ function _guideActions(g) {
 	const peutPartir = EST_AUBERGE && !charge;
 	const raison = !EST_AUBERGE ? "Un guide se congédie dans une auberge"
 		: (charge ? 'Videz son sac avant de le congédier' : 'Mettre fin à son service (arrhes non remboursées)');
-	return `<button class="sh-drop-btn" onclick="ouvrirGuide()">🗣️ Interroger</button>`
+	return `<button class="sh-drop-btn" data-aide-pouls onclick="ouvrirGuide()">🗣️ Interroger</button>`
 		+ `<button class="sh-drop-btn sh-abandon-btn" ${peutPartir ? '' : 'disabled'} title="${raison}" onclick="congedierGuide()">✕ Congédier</button>`;
 }
 // Ce que chaque réponse du guide resynchronise (Convention §10).
