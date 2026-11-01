@@ -8211,7 +8211,8 @@
           "remplacement": "carte_remplacee",
           "sans_fonds": "carte_sans_fonds",
           "trop_charge": "carte_trop_charge"
-        }
+        },
+        "rang_guilde": "F"
       }
     },
     "dialogue": {
