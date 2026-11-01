@@ -1209,6 +1209,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			# répartir ? Servie ici pour la même raison que la compagnie — sans elle, il
 			# faudrait ouvrir le panneau pour apprendre qu'il y a quelque chose à y faire.
 			"compagnons_points": recrutement_util.compagnons_a_repartir(character, get_doc),
+			# Bouton 👥 Groupe masqué tant que personne n'accompagne le joueur.
+			"groupe_visible": recrutement_util.groupe_visible(character, get_doc),
 			# Compagnons partis d'eux-mêmes pendant l'absence (affinité sous le seuil) : toast.
 			# Sorts perdus avec le changement d'école de la vocation (purge paresseuse
 			# ci-dessus) : annoncés UNE fois, au rendu qui les a retirés — le doc étant déjà

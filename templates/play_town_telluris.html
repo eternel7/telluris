@@ -1604,7 +1604,9 @@
 		.management-footer {
 			grid-area: footer;
 			display: grid;
-			grid-template-columns: 1fr 1fr;
+			/* Colonnes AUTOMATIQUES : 👥 masqué (groupe vide) ⇒ 👤 prend toute la largeur. */
+			grid-auto-flow: column;
+			grid-auto-columns: 1fr;
 			gap: 10px;
 		}
 		.manage-btn {
@@ -2206,7 +2208,10 @@
 			<button class="manage-btn" onclick="openSheet()">👤 Personnage<span
 				class="pts-indic pts-dispo" id="pts-indic-perso" title="Points d'attribut à répartir"
 				{% if character.get("attribute_points", 0) <= 0 %}hidden{% endif %}>★</span></button>
-			<button class="manage-btn" onclick="openGroupe()">👥 Groupe<span
+			{# 👥 masqué tant que le panneau n'a personne à montrer (`groupe_visible` : compagnon,
+			   monture, guide ou escorté) ; resynchronisé par `_majBoutonGroupe`. #}
+			<button class="manage-btn" id="btn-groupe" onclick="openGroupe()"
+				{% if not groupe_visible %}hidden{% endif %}>👥 Groupe<span
 				class="pts-indic pts-dispo" id="pts-indic-groupe" title="Un compagnon a des points d'attribut à répartir"
 				{% if not compagnons_points %}hidden{% endif %}>★</span></button>
 		</footer>
@@ -5351,6 +5356,15 @@ function _majIndicateursPoints() {
 // Un compagnon a-t-il de quoi dépenser ? Recalculé à chaque payload de groupe — c'est le
 // seul moment où l'on connaît TOUS les compagnons (dépenser depuis la fiche de l'un ne dit
 // rien de ce qu'il reste aux autres).
+// Bouton 👥 Groupe : visible dès qu'un payload serveur dit que le groupe n'est pas vide.
+// Chaque payload qui le change (recrutement, étable, guide, GET api/groupe) porte
+// `groupe_visible` ; un payload sans la clé ne touche à rien.
+function _majBoutonGroupe(data) {
+	if (!data || !('groupe_visible' in data)) return;
+	const btn = document.getElementById('btn-groupe');
+	if (btn) btn.hidden = !data.groupe_visible;
+}
+
 function _majPointsCompagnons(groupe) {
 	_pointsCompagnons = (groupe || []).some(c => (c.attribute_points || 0) > 0);
 	_majIndicateursPoints();
@@ -9736,6 +9750,7 @@ let _recEtat = {};
 let _recPurse = null;
 
 function renderRecrutement(data) {
+	_majBoutonGroupe(data);
 	_majCompagnie(data);
 	_majLieuDeGuilde(data);
 	if (data.purse) _recPurse = data.purse;
@@ -9807,6 +9822,7 @@ function closeRecrutementPanel() {
 // montures — elles ne prennent pas la place d'un compagnon.
 
 function renderEtable(data) {
+	_majBoutonGroupe(data);
 	const plafondEl = document.getElementById('mnt-plafond');
 	const possedees = data.montures || [];
 	// Une monture laissée à l'écurie d'un bien compte dans le troupeau (`a_l_ecurie`).
@@ -11385,6 +11401,7 @@ async function congedierAventurier(avId, permanent, mission) {
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		_majBoutonGroupe(data);  // dernier compagnon congédié hors lieu recruteur : 👥 disparaît
 		if ('recrues' in data) renderRecrutement(data);
 		else if (data.affinites_detail) renderFicheCompagnons(data.affinites_detail);
 		// Congédier depuis le panneau 👥 : son état (liste ET sacs) doit être re-tiré, le
@@ -11528,6 +11545,7 @@ function toggleGroupeSection(id) {
 
 function renderGroupe(data) {
 	_grpEtat = data;
+	_majBoutonGroupe(data);
 	_majCompagnie(data);
 	_majLieuDeGuilde(data);
 	const groupe = data.groupe || [];
@@ -11597,6 +11615,7 @@ function _guideActions(g) {
 }
 // Ce que chaque réponse du guide resynchronise (Convention §10).
 function _appliquerReponseGuide(data) {
+	_majBoutonGroupe(data);
 	if (data.purse) updatePurse(data.purse);
 	if ('focalisation' in data) _focalisation = data.focalisation || null;
 	if ('guidage' in data) _guidage = data.guidage || null;
