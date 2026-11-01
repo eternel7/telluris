@@ -149,16 +149,40 @@ def test_offre_d_une_autre_auberge_refusee(monde):
 	assert e.value.status_code == 403
 
 
-def test_congedier_seulement_a_l_auberge(monde):
+def test_congedier_hors_de_l_auberge(monde):
 	char = _perso()
 	_engage(monde, char)
 	char["lieu"] = "lieu:etable"
+	data = _appel(monde, char, monde["rg"].congedier, None)
+	assert data["guide"] is None and char["montures"] == [] and "offres" not in data
+
+
+def test_congedier_a_l_auberge_redessine_le_tableau(monde):
+	char = _perso()
+	_engage(monde, char)
+	data = _appel(monde, char, monde["rg"].congedier, None)
+	assert data["guide"] is None and "offres" in data
+
+
+def test_congedier_refuse_en_combat(monde):
+	char = _perso()
+	_engage(monde, char)
+	monde["docs"]["combat:x"] = {"_id": "combat:x", "type": "combat", "character_id": char["_id"], "status": "active"}
 	with pytest.raises(HTTPException) as e:
 		_appel(monde, char, monde["rg"].congedier, None)
-	assert e.value.status_code == 403
-	char["lieu"] = "lieu:auberge"
-	data = _appel(monde, char, monde["rg"].congedier, None)
-	assert data["guide"] is None and char["montures"] == []
+	assert e.value.status_code == 403 and _guide_doc(monde, char) is not None
+	monde["docs"]["combat:x"]["status"] = "termine"
+	assert _appel(monde, char, monde["rg"].congedier, None)["guide"] is None
+
+
+def test_congedier_refuse_dans_un_donjon(monde):
+	char = _perso()
+	_engage(monde, char)
+	monde["docs"]["lieu:salle"] = {"_id": "lieu:salle", "type": "lieu", "categorie": "battle_map", "tags": ["donjon"]}
+	char["lieu"] = "lieu:salle"
+	with pytest.raises(HTTPException) as e:
+		_appel(monde, char, monde["rg"].congedier, None)
+	assert e.value.status_code == 403 and _guide_doc(monde, char) is not None
 
 
 def test_relacher_le_guide_refuse_par_l_etable(monde):

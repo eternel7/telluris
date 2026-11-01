@@ -274,8 +274,20 @@ def engager(character: dict, guide: dict) -> tuple[bool, str]:
 	return True, ""
 
 
+def congediable_ici(lieu_doc: dict | None, en_combat: bool) -> tuple[bool, str]:
+	"""Où peut-on congédier son guide ? PARTOUT où il vous suit (sa cité, sa zone : il part seul
+	à la sortie), sauf en combat et dans une salle de donjon (`battle_map` + tag `donjon`, le
+	marqueur de `donjon.donjon_a_etages_de`, relu ici sans tirer `donjon`)."""
+	if en_combat:
+		return False, "On ne congédie pas son guide en plein combat."
+	d = lieu_doc or {}
+	if d.get("categorie") == "battle_map" and "donjon" in (d.get("tags") or []):
+		return False, "On ne congédie pas son guide au fond d'un donjon."
+	return True, ""
+
+
 def congedier(character: dict, guide: dict) -> tuple[bool, str]:
-	"""Rend sa liberté au guide. La garde « dans une auberge » est au router. Aucun remboursement.
+	"""Rend sa liberté au guide. Le « où » est `congediable_ici`, gardé au router. Aucun remboursement.
 	Sac plein : il part AVEC, c'est au joueur de reprendre ses affaires avant (pas de refus)."""
 	focalisation.effacer_si_guide(character, guide.get("_id"))
 	guide["statut"] = "parti"

@@ -1,5 +1,6 @@
 # routers/guides.py
-# Guides locaux : engager et congédier À L'AUBERGE, interroger PARTOUT (seul un nouveau cap se paie).
+# Guides locaux : engager À L'AUBERGE, congédier et interroger PARTOUT (seul un nouveau cap se paie ;
+# congédier : ni en combat ni dans un donjon, cf. `guides.congediable_ici`).
 # Le moteur est dans utils/guides.py. Pattern de routers/montures.py : gardes, débit APRÈS les
 # gardes, `save_doc is None` ⇒ 409, le bloc recalculé dans chaque réponse (Convention §10).
 
@@ -26,7 +27,7 @@ def _perso(current_user: dict) -> dict:
 def _a_l_auberge(character: dict) -> dict:
 	lieu_doc = get_doc(character.get("lieu", ""))
 	if not lieu_doc or not auberge.lieu_est_taverne(lieu_doc):
-		raise HTTPException(status_code=403, detail="Un guide s'engage et se congédie dans une auberge.")
+		raise HTTPException(status_code=403, detail="Un guide s'engage dans une auberge.")
 	return lieu_doc
 
 
@@ -107,15 +108,23 @@ async def engager(current_user: Annotated[dict, Depends(get_current_user)], body
 @guides_router.post("/guides/congedier")
 async def congedier(current_user: Annotated[dict, Depends(get_current_user)]):
 	character = _perso(current_user)
-	lieu_doc = _a_l_auberge(character)
+	lieu_doc = get_doc(character.get("lieu", "")) or {}
 	guide = _guide(character)
+	en_combat = any(c.get("status") == "active" for c in
+					find_docs({"type": "combat", "character_id": character["_id"]}) or [])
+	ok, raison = guides.congediable_ici(lieu_doc, en_combat)
+	if not ok:
+		raise HTTPException(status_code=403, detail=raison)
 	ok, raison = guides.congedier(character, guide)
 	if not ok:
 		raise HTTPException(status_code=409, detail=raison)
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 	save_doc(guide)
-	return _tableau(character, lieu_doc)
+	# À l'auberge, le tableau des offres se redessine ; ailleurs, le seul resync suffit.
+	if auberge.lieu_est_taverne(lieu_doc):
+		return _tableau(character, lieu_doc)
+	return _resync(character)
 
 
 @guides_router.get("/guides/dialogue")

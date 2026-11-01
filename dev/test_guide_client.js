@@ -63,13 +63,10 @@ test('départ : le sac plein prévient sans retenir', () => {
 	assert.ok(plein.note.includes('garde ce que contient son sac'));
 });
 
-test('congédier grisé hors auberge seulement, interroger toujours offert', () => {
-	globalThis.EST_AUBERGE = false;
+test('congédier et interroger toujours offerts, partout', () => {
 	let html = _guideActions({ sac_plein: false });
-	assert.ok(html.includes('ouvrirGuide'));
-	assert.ok(/disabled[^>]*onclick="congedierGuide/.test(html));
-	globalThis.EST_AUBERGE = true;
-	assert.ok(!/disabled/.test(_guideActions({ sac_plein: false })));
+	assert.ok(html.includes('ouvrirGuide') && html.includes('congedierGuide'));
+	assert.ok(!/disabled/.test(html));
 	// Sac plein : il part avec, le bouton reste offert mais le titre prévient.
 	html = _guideActions({ sac_plein: true });
 	assert.ok(!/disabled/.test(html) && html.includes('part avec'));

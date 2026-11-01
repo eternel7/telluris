@@ -11704,7 +11704,7 @@ function renderGroupe(data) {
 // Pied d'une monture : ce qui la définit, c'est ce qu'elle PORTE (ses PV sont déjà dans ses
 // barres). L'espèce n'est pas répétée — c'est le nom de la carte.
 // ── Guide local ──────────────────────────────────────────────────────────────────
-// Engagé et congédié à l'auberge (le serveur garde : 403 ailleurs), interrogé partout.
+// Engagé à l'auberge ; congédié et interrogé partout (le serveur refuse en combat ou en donjon).
 function _guideTarifTexte(g) {
 	return `${_prixTexte(g.arrhes_cuivre)} d'arrhes · ${_prixTexte(g.question_cuivre)} la question`;
 }
@@ -11717,14 +11717,12 @@ function _guidePied(g) {
 	return `<span>${escapeHtml(g.metier_label || '')} · ${_prixTexte(g.question_cuivre)} la question</span>`;
 }
 function _guideActions(g) {
-	// Seule l'auberge retient le bouton. Sac plein : il part AVEC son contenu (`guides.congedier`),
-	// à charge pour le joueur de le reprendre avant — le titre le rappelle, rien n'est bloqué.
-	const peutPartir = EST_AUBERGE;
-	const raison = !EST_AUBERGE ? "Un guide se congédie dans une auberge"
-		: 'Mettre fin à son service (arrhes non remboursées)'
-		  + (g.sac_plein ? ' — ⚠️ il part avec ce que contient son sac' : '');
+	// Toujours offert : /play n'est ni un combat ni un donjon (`guides.congediable_ici`, serveur).
+	// Sac plein : il part AVEC son contenu — le titre le rappelle, rien n'est bloqué.
+	const raison = 'Mettre fin à son service (arrhes non remboursées)'
+		+ (g.sac_plein ? ' — ⚠️ il part avec ce que contient son sac' : '');
 	return `<button class="sh-drop-btn" data-aide-pouls onclick="ouvrirGuide()">🗣️ Interroger</button>`
-		+ `<button class="sh-drop-btn sh-abandon-btn" ${peutPartir ? '' : 'disabled'} title="${raison}" onclick="congedierGuide()">✕ Congédier</button>`;
+		+ `<button class="sh-drop-btn sh-abandon-btn" title="${raison}" onclick="congedierGuide()">✕ Congédier</button>`;
 }
 // Ce que chaque réponse du guide resynchronise (Convention §10).
 function _appliquerReponseGuide(data) {
