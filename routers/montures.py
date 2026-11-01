@@ -73,6 +73,8 @@ def _monture_view(m: dict) -> dict:
 			"sex": m.get("sex", ""),
 			"image_base": escorte.image_protege(m.get("image", ""))[0],
 			"est_guide": True,
+			# Sac plein : « Congédier » reste offert, il part avec (le client prévient dans le titre).
+			"sac_plein": bool(m.get("inventaire")),
 			**guides.vue_contrat(m, guides.regles_de(get_doc)),
 		}
 	return {

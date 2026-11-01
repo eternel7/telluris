@@ -56,21 +56,22 @@ test('pied : métier échappé et prix de la question', () => {
 	assert.ok(html.includes('&lt;b>') && html.includes('5 cu la question'));
 });
 
-test('départ : le sac plein retient le joueur', () => {
+test('départ : le sac plein prévient sans retenir', () => {
 	assert.deepStrictEqual(_guideDepartEtat({ sac_plein: false }), { peutPartir: true, note: '' });
 	const plein = _guideDepartEtat({ sac_plein: true });
-	assert.strictEqual(plein.peutPartir, false);
-	assert.ok(plein.note.includes('Reprenez'));
+	assert.strictEqual(plein.peutPartir, true);
+	assert.ok(plein.note.includes('garde ce que contient son sac'));
 });
 
-test('congédier grisé hors auberge ou sac plein, interroger toujours offert', () => {
-	globalThis.EST_AUBERGE = false;
-	let html = _guideActions({ charge: 0 });
-	assert.ok(html.includes('ouvrirGuide'));
-	assert.ok(/disabled[^>]*onclick="congedierGuide/.test(html));
-	globalThis.EST_AUBERGE = true;
-	assert.ok(/disabled[^>]*onclick="congedierGuide/.test(_guideActions({ charge: 2 })));
-	assert.ok(!/disabled/.test(_guideActions({ charge: 0 })));
+test('congédier et interroger toujours offerts, partout', () => {
+	let html = _guideActions({ sac_plein: false });
+	assert.ok(html.includes('ouvrirGuide') && html.includes('congedierGuide'));
+	assert.ok(!/disabled/.test(html));
+	// Sac plein : il part avec, le bouton reste offert mais le titre prévient.
+	html = _guideActions({ sac_plein: true });
+	assert.ok(!/disabled/.test(html) && html.includes('part avec'));
+	// Son équipement porté compte dans `charge` : il ne doit jamais griser le bouton.
+	assert.ok(!/disabled/.test(_guideActions({ charge: 3.98, sac_plein: false })));
 });
 
 console.log('test_guide_client : tout passe');

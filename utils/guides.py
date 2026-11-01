@@ -274,10 +274,21 @@ def engager(character: dict, guide: dict) -> tuple[bool, str]:
 	return True, ""
 
 
+def congediable_ici(lieu_doc: dict | None, en_combat: bool) -> tuple[bool, str]:
+	"""Où peut-on congédier son guide ? PARTOUT où il vous suit (sa cité, sa zone : il part seul
+	à la sortie), sauf en combat et dans une salle de donjon (`battle_map` + tag `donjon`, le
+	marqueur de `donjon.donjon_a_etages_de`, relu ici sans tirer `donjon`)."""
+	if en_combat:
+		return False, "On ne congédie pas son guide en plein combat."
+	d = lieu_doc or {}
+	if d.get("categorie") == "battle_map" and "donjon" in (d.get("tags") or []):
+		return False, "On ne congédie pas son guide au fond d'un donjon."
+	return True, ""
+
+
 def congedier(character: dict, guide: dict) -> tuple[bool, str]:
-	"""Rend sa liberté au guide. La garde « dans une auberge » est au router. Aucun remboursement."""
-	if guide.get("inventaire"):
-		return False, "Videz son sac avant de le congédier."
+	"""Rend sa liberté au guide. Le « où » est `congediable_ici`, gardé au router. Aucun remboursement.
+	Sac plein : il part AVEC, c'est au joueur de reprendre ses affaires avant (pas de refus)."""
 	focalisation.effacer_si_guide(character, guide.get("_id"))
 	guide["statut"] = "parti"
 	guide.pop("acquise_par", None)
@@ -326,8 +337,8 @@ def image_adieu(guide: dict, existe_fn=os.path.isfile) -> str:
 
 
 def avertissement(guide: dict, regles: dict, lieu_id: str, get_doc_fn, portail: bool = False) -> dict:
-	"""Ce qu'il dit au clic sur la connexion. `sac_plein` : il faudra d'abord reprendre ce qu'il
-	porte, rien de ce qui reste à une cité ne doit partir avec le joueur ni disparaître."""
+	"""Ce qu'il dit au clic sur la connexion. `sac_plein` : le client prévient qu'il garde son sac
+	s'il reste — au joueur de reprendre ses affaires avant de confirmer (aucun refus)."""
 	return {
 		"prenom": guide.get("prenom", ""),
 		"nom": guide.get("nom", ""),
@@ -340,9 +351,8 @@ def avertissement(guide: dict, regles: dict, lieu_id: str, get_doc_fn, portail: 
 
 def laisser_partir(character: dict, guide: dict) -> tuple[bool, str]:
 	"""Il reste là, sans rancune. Le cap qu'il a posé a été PAYÉ : il perd sa signature et devient
-	un cap ordinaire, sinon `focalisation_effective` l'éteindrait. Mute les deux docs, sans save."""
-	if guide.get("inventaire"):
-		return False, "Reprenez d'abord ce que porte votre guide."
+	un cap ordinaire, sinon `focalisation_effective` l'éteindrait. Mute les deux docs, sans save.
+	Sac plein : il le garde, comme au congédiement (`congedier`)."""
 	focus = character.get("focalisation")
 	if isinstance(focus, dict) and focus.get("guide") == guide.get("_id"):
 		focus.pop("guide")

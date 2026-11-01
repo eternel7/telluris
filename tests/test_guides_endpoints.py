@@ -149,16 +149,40 @@ def test_offre_d_une_autre_auberge_refusee(monde):
 	assert e.value.status_code == 403
 
 
-def test_congedier_seulement_a_l_auberge(monde):
+def test_congedier_hors_de_l_auberge(monde):
 	char = _perso()
 	_engage(monde, char)
 	char["lieu"] = "lieu:etable"
+	data = _appel(monde, char, monde["rg"].congedier, None)
+	assert data["guide"] is None and char["montures"] == [] and "offres" not in data
+
+
+def test_congedier_a_l_auberge_redessine_le_tableau(monde):
+	char = _perso()
+	_engage(monde, char)
+	data = _appel(monde, char, monde["rg"].congedier, None)
+	assert data["guide"] is None and "offres" in data
+
+
+def test_congedier_refuse_en_combat(monde):
+	char = _perso()
+	_engage(monde, char)
+	monde["docs"]["combat:x"] = {"_id": "combat:x", "type": "combat", "character_id": char["_id"], "status": "active"}
 	with pytest.raises(HTTPException) as e:
 		_appel(monde, char, monde["rg"].congedier, None)
-	assert e.value.status_code == 403
-	char["lieu"] = "lieu:auberge"
-	data = _appel(monde, char, monde["rg"].congedier, None)
-	assert data["guide"] is None and char["montures"] == []
+	assert e.value.status_code == 403 and _guide_doc(monde, char) is not None
+	monde["docs"]["combat:x"]["status"] = "termine"
+	assert _appel(monde, char, monde["rg"].congedier, None)["guide"] is None
+
+
+def test_congedier_refuse_dans_un_donjon(monde):
+	char = _perso()
+	_engage(monde, char)
+	monde["docs"]["lieu:salle"] = {"_id": "lieu:salle", "type": "lieu", "categorie": "battle_map", "tags": ["donjon"]}
+	char["lieu"] = "lieu:salle"
+	with pytest.raises(HTTPException) as e:
+		_appel(monde, char, monde["rg"].congedier, None)
+	assert e.value.status_code == 403 and _guide_doc(monde, char) is not None
 
 
 def test_relacher_le_guide_refuse_par_l_etable(monde):
@@ -285,15 +309,15 @@ def test_confirme_il_reste_et_le_groupe_continue(monde, franchir):
 	assert reponse is None and parti is guide and guide["statut"] == "parti" and char["montures"] == []
 
 
-def test_confirme_avec_un_sac_plein_refuse(monde, franchir):
+def test_confirme_avec_un_sac_plein_il_part_avec(monde, franchir):
 	char = _perso()
 	_engage(monde, char)
 	guide = _guide_doc(monde, char)
 	guide["inventaire"] = ["item:sac"]
 	assert franchir(char, "lieu:france")[0]["guide_avertissement"]["sac_plein"] is True
-	with pytest.raises(HTTPException) as e:
-		franchir(char, "lieu:france", guide_adieu=True)
-	assert e.value.status_code == 409 and guide["statut"] == "acquise"
+	reponse, parti = franchir(char, "lieu:france", guide_adieu=True)
+	assert reponse is None and parti is guide and guide["statut"] == "parti"
+	assert guide["inventaire"] == ["item:sac"] and char["montures"] == []
 
 
 def test_un_lien_portail_le_fait_partir_vers_n_importe_quel_lieu(monde, monkeypatch):
