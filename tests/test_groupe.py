@@ -157,6 +157,50 @@ def test_transfert_sans_inventaire_initial(monde):
 	assert ok and av["inventaire"] == ["item:epee"]
 
 
+# ── ramasser_pour : du sol au sac d'un autre porteur ─────────────────────────────
+
+def test_ramasser_pour_mute_le_sol_en_place(monde):
+	"""Le sol est la liste `objets_au_sol` du principal : elle doit être amputée EN PLACE
+	(l'endpoint la réécrit telle quelle), avec le poids d'instance de l'exemplaire visé."""
+	principal = porteur()
+	principal["objets_au_sol"] = [{"item": "item:caillou", "poids": 2},
+								  {"item": "item:caillou", "poids": 8}]
+	sol = principal["objets_au_sol"]
+	av = porteur("aventurier:x")
+
+	ok, raison, ref = recrutement.ramasser_pour(sol, av, 1, "item:caillou")
+
+	assert (ok, raison, ref) == (True, "", {"item": "item:caillou", "poids": 8})
+	assert principal["objets_au_sol"] == [{"item": "item:caillou", "poids": 2}]
+	assert av["inventaire"] == [{"item": "item:caillou", "poids": 8}]
+
+
+def test_ramasser_pour_refuse_sans_delester_ni_amputer_le_sol(monde):
+	"""Refus DUR, contrairement au ramassage pour soi : rien du sac du destinataire ne
+	tombe, et l'objet reste par terre."""
+	sol = [{"item": "item:enclume", "poids": 40}]
+	av = porteur("aventurier:x", force=4, inventaire=[{"item": "item:caillou", "poids": 5}])
+
+	ok, raison, ref = recrutement.ramasser_pour(sol, av, 0, "item:enclume")
+
+	assert ok is False and ref is None and "porter davantage" in raison
+	assert sol == [{"item": "item:enclume", "poids": 40}]
+	assert av["inventaire"] == [{"item": "item:caillou", "poids": 5}]
+
+
+def test_ramasser_pour_objet_absent_du_sol(monde):
+	"""Le message parle du SOL (l'endpoint en fait un 422), pas de l'inventaire."""
+	ok, raison, ref = recrutement.ramasser_pour([], porteur("aventurier:x"), 0, "item:epee")
+	assert (ok, raison, ref) == (False, "Objet absent du sol", None)
+
+
+def test_ramasser_pour_index_desaligne_repli_sur_item_id(monde):
+	sol = ["item:caillou", "item:epee"]
+	av = porteur("aventurier:x")
+	ok, _, ref = recrutement.ramasser_pour(sol, av, 0, "item:epee")
+	assert ok and ref == "item:epee" and sol == ["item:caillou"]
+
+
 # ── Garde d'appartenance : groupe_effectif ───────────────────────────────────────
 
 def test_groupe_effectif_exclut_les_non_compagnons(monde):
