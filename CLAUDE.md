@@ -158,6 +158,8 @@ utils/
                          #   et idempotents ; la recette porte `sur_commande` (hors tick)
   focalisation.py        # 🧭 lieu (BFS) / 🎯 quête (biais probabiliste)
   enseignes.py           # noms d'enseigne (pur) : tournures par métier × toponymes de cité
+  enseignes_icones.py    # marqueur d'une connexion sur la carte de /play (pur) : famille (couleur du halo),
+                         #   pictogramme et métier (« une boucherie », toast) du lieu destination
   capacites.py           # capacités d'un lieu (pur) : catalogue taverne/étable/scriptorium/recrutement/guilde
   grille_image.py        # grille de terrain ET murs nav depuis l'image d'une carte (pur) : profils
                          #   ville/forêt/catacombes (`dev/calibrer_grille_image.py`), rues lues sur
