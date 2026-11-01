@@ -11717,7 +11717,9 @@ function _guidePied(g) {
 	return `<span>${escapeHtml(g.metier_label || '')} · ${_prixTexte(g.question_cuivre)} la question</span>`;
 }
 function _guideActions(g) {
-	const charge = +(g.charge || 0) > 0;
+	// ⚠️ Le SAC, pas `charge` : la charge compte son équipement porté (canne, veste…), jamais nul —
+	// le bouton restait grisé pour toujours. Même règle que `guides.congedier` côté serveur.
+	const charge = !!g.sac_plein;
 	const peutPartir = EST_AUBERGE && !charge;
 	const raison = !EST_AUBERGE ? "Un guide se congédie dans une auberge"
 		: (charge ? 'Videz son sac avant de le congédier' : 'Mettre fin à son service (arrhes non remboursées)');

@@ -65,12 +65,14 @@ test('départ : le sac plein retient le joueur', () => {
 
 test('congédier grisé hors auberge ou sac plein, interroger toujours offert', () => {
 	globalThis.EST_AUBERGE = false;
-	let html = _guideActions({ charge: 0 });
+	let html = _guideActions({ sac_plein: false });
 	assert.ok(html.includes('ouvrirGuide'));
 	assert.ok(/disabled[^>]*onclick="congedierGuide/.test(html));
 	globalThis.EST_AUBERGE = true;
-	assert.ok(/disabled[^>]*onclick="congedierGuide/.test(_guideActions({ charge: 2 })));
-	assert.ok(!/disabled/.test(_guideActions({ charge: 0 })));
+	assert.ok(/disabled[^>]*onclick="congedierGuide/.test(_guideActions({ sac_plein: true })));
+	assert.ok(!/disabled/.test(_guideActions({ sac_plein: false })));
+	// Son équipement porté compte dans `charge` : il ne doit jamais griser le bouton.
+	assert.ok(!/disabled/.test(_guideActions({ charge: 3.98, sac_plein: false })));
 });
 
 console.log('test_guide_client : tout passe');
