@@ -153,7 +153,7 @@ TABLE = {
 	"monture_angelique": ("1x2", "ellipse"),
 	"monture_demoniaque": ("1x2", "ellipse"),
 	"monture_squelette": ("1x2", "ellipse"),
-	"mulet": ("1x2", "ellipse"),
+	"mulet": None,
 	"mushhushshu": ("1x2", "ellipse"),
 	"nahual": None,
 	"naiade": None,
