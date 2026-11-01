@@ -275,15 +275,15 @@ def test_chaque_portrait_de_guide_a_sa_version_full():
 			assert guides.image_adieu({"image": nom}).endswith(f"/full_{nom}"), nom
 
 
-def test_congedier_refuse_un_sac_plein_et_retire_le_cap():
+def test_congedier_part_avec_son_sac_et_retire_le_cap():
+	"""Sac plein : aucun refus, il part avec — au joueur de reprendre ses affaires avant."""
 	g = _guide()
 	perso = _perso()
 	guides.poser_cap(perso, g, "lieu:loin")
 	g["inventaire"] = ["item:x"]
-	assert guides.congedier(perso, g)[0] is False
-	g["inventaire"] = []
 	assert guides.congedier(perso, g)[0] is True
 	assert perso["montures"] == [] and perso["focalisation"] is None and g["statut"] == "parti"
+	assert g["inventaire"] == ["item:x"]
 
 
 # ── Exceptions de monture ────────────────────────────────────────────────────────

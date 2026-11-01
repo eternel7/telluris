@@ -275,9 +275,8 @@ def engager(character: dict, guide: dict) -> tuple[bool, str]:
 
 
 def congedier(character: dict, guide: dict) -> tuple[bool, str]:
-	"""Rend sa liberté au guide. La garde « dans une auberge » est au router. Aucun remboursement."""
-	if guide.get("inventaire"):
-		return False, "Videz son sac avant de le congédier."
+	"""Rend sa liberté au guide. La garde « dans une auberge » est au router. Aucun remboursement.
+	Sac plein : il part AVEC, c'est au joueur de reprendre ses affaires avant (pas de refus)."""
 	focalisation.effacer_si_guide(character, guide.get("_id"))
 	guide["statut"] = "parti"
 	guide.pop("acquise_par", None)

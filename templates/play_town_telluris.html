@@ -11717,12 +11717,12 @@ function _guidePied(g) {
 	return `<span>${escapeHtml(g.metier_label || '')} · ${_prixTexte(g.question_cuivre)} la question</span>`;
 }
 function _guideActions(g) {
-	// ⚠️ Le SAC, pas `charge` : la charge compte son équipement porté (canne, veste…), jamais nul —
-	// le bouton restait grisé pour toujours. Même règle que `guides.congedier` côté serveur.
-	const charge = !!g.sac_plein;
-	const peutPartir = EST_AUBERGE && !charge;
+	// Seule l'auberge retient le bouton. Sac plein : il part AVEC son contenu (`guides.congedier`),
+	// à charge pour le joueur de le reprendre avant — le titre le rappelle, rien n'est bloqué.
+	const peutPartir = EST_AUBERGE;
 	const raison = !EST_AUBERGE ? "Un guide se congédie dans une auberge"
-		: (charge ? 'Videz son sac avant de le congédier' : 'Mettre fin à son service (arrhes non remboursées)');
+		: 'Mettre fin à son service (arrhes non remboursées)'
+		  + (g.sac_plein ? ' — ⚠️ il part avec ce que contient son sac' : '');
 	return `<button class="sh-drop-btn" data-aide-pouls onclick="ouvrirGuide()">🗣️ Interroger</button>`
 		+ `<button class="sh-drop-btn sh-abandon-btn" ${peutPartir ? '' : 'disabled'} title="${raison}" onclick="congedierGuide()">✕ Congédier</button>`;
 }
