@@ -10,9 +10,9 @@
 #     « J'ai… perdu ma carte » (condition `don_a_remplacer`), l'inscription masquée pour un
 #     inscrit, nœud `carte_remplacee` ;
 #   - Borin (Bastion de l'Yonne) remet la carte par sa PREMIÈRE MISSION, pas par un don : il
-#     reçoit un `don` SANS `rang_guilde` dont le seul choix est conditionné par
-#     `don_a_remplacer` — la condition est revalidée au serveur (`pnj.choix_valide`), la mission
-#     reste donc la seule porte d'entrée à Auxerre.
+#     reçoit un `don` dont le seul choix est conditionné par `don_a_remplacer` — la condition
+#     est revalidée au serveur (`pnj.choix_valide`), la mission reste donc la seule porte
+#     d'entrée à Auxerre. Son `rang_guilde` est celui de la récompense de la mission.
 #
 # Relit le dump le plus récent, n'écrit que les docs qui CHANGENT (CLAUDE.md §11, §18) →
 # jsons/carte_perdue_a_importer.json. Rejouable : un second passage ne change plus rien.
@@ -234,6 +234,14 @@ def appliquer(doc):
 	depart = noeuds[dialogue["noeud_depart"]]
 	if pid == BORIN:
 		services["don"] = copy.deepcopy(BORIN_DON)
+		# Même rang d'inscription que la première mission, RELU dans sa récompense (jamais recopié) :
+		# un inscrit dont `rangs_guilde` est resté vide (archives d'avant `crediter_rang`) y est
+		# posé ; tout autre garde son rang, `crediter_rang` ne rétrogradant pas.
+		rang_mission = ((((services.get("transport") or {}).get("offre") or {})
+						 .get("recompenses") or {}).get("rang_guilde"))
+		if not rang_mission:
+			sys.exit(f"ERREUR : {pid} sans `rang_guilde` dans la récompense de sa première mission")
+		services["don"]["rang_guilde"] = rang_mission
 		noeuds.update(copy.deepcopy(BORIN_NOEUDS))
 		suite = [{"id": "merci", "label": "« Merci, Borin. »", "next": "fin"},
 				 {"id": "retour", "label": "Autre chose…", "next": "accueil"}]

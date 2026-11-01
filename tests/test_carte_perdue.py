@@ -91,8 +91,11 @@ def test_le_non_inscrit_s_inscrit_et_borin_reste_la_premiere_mission():
 		vus = _visibles(doc, {"don_recu": False, "don_a_remplacer": False})
 		assert g.CHOIX_ID not in vus, pid
 		if pid == g.BORIN:
-			# Aucune inscription par le don : la carte d'Auxerre se gagne en mission.
-			assert "rang_guilde" not in doc["services"]["don"]
+			# Aucune inscription par le don : la carte d'Auxerre se gagne en mission. Le don
+			# refait la carte au rang d'inscription de CETTE mission, relu dans sa récompense.
+			assert "inscription" not in vus
+			mission = doc["services"]["transport"]["offre"]["recompenses"]["rang_guilde"]
+			assert doc["services"]["don"]["rang_guilde"] == mission
 		else:
 			assert "inscription" in vus, pid
 
@@ -160,3 +163,16 @@ def test_router_premiere_inscription_inchangee(monkeypatch):
 	r = choisir("inscription")
 	assert r["don"]["remplacement"] is False and r["noeud"]["texte"] == "Bienvenue."
 	assert character["rangs_guilde"] == {CITE: "F"}
+
+
+def test_router_carte_perdue_inscrit_d_archive_pose_au_rang_d_inscription(monkeypatch):
+	"""Inscrit par une mission d'avant `crediter_rang` : `rangs_guilde` vide, la carte refaite
+	pose enfin le rang d'inscription du don au registre (cas de Borin)."""
+	carte_cite = {"item": "item:carte_aventurier", "lieu_parent": CITE}
+	character = {"_id": "character:u_1", "inventaire": [],
+				 "quetes_terminees": [{"recompenses": {"items": [carte_cite]}}]}
+	choisir = _router(monkeypatch, character)
+	r = choisir("perdue")
+	assert r["don"]["remplacement"] is True
+	assert character["rangs_guilde"] == {CITE: "F"}
+	assert "Rang F" in r["noeud"]["texte"]
