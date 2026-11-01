@@ -750,6 +750,22 @@ CATALOGUE = [
 			"(supprimées à l'import). N'émet que ce qui diffère du dump. Requiert Pillow."
 	},
 	{
+		"id": "gen_aksoum",
+		"label": "📍 Aksoum, posée sur la carte d'Afrique du Nord",
+		# Dump frais : une fois créée, la cité est relue du dump (retouches de l'éditeur
+		# gardées) ; seuls les docs qui diffèrent sont émis. `lieu:afrique_du_nord` n'est pas
+		# réémis.
+		"argv_fn": lambda v, f: _py("gen_aksoum.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/aksoum_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/aksoum_a_importer.json (+ un aperçu PNG si "
+			"la cité est créée). Rien en base avant 📥 Importer.",
+		"description": "Un seul fichier : `lieu:aksoum` (towns/aksoum_capital.jpg, première "
+			"passe de grille, parent Afrique du Nord) et ses trois sorties (est, sud, ouest) "
+			"vers le coin sud-est de la carte d'Afrique du Nord, sur les hauts plateaux. "
+			"N'émet que ce qui diffère du dump. Requiert Pillow.",
+	},
+	{
 		"id": "gen_villes_pays",
 		"label": "📍 Poser chaque cité sur la carte de son pays, frontière Égypte ↔ Afrique du Nord (+ lieux d'Abou Simbel et de son Grand Temple, d'Atlantis et de Mu)",
 		# Dump frais : une cité qui reçoit son `lieu_parent` ou sa grille, `lieu:egypte` et

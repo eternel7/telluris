@@ -42,6 +42,14 @@ Réalise l'image d'Aksoum, cité-État des hauts plateaux d'Éthiopie, sous la f
 - **Enceinte ouverte à l'ouest, VOULUE** : le palais de la reine, le haras royal (aires d'envol) et le bassin restent hors des murs.
 - À reprendre au tracé de la grille : la **porte est** n'est pas nette (la route de l'est longe le mur), seule la porte sud se lit ; vérifier en grand de possibles petits points sombres près des étals du marché. Restent tolérés : un « N » sur la rose des vents, les pégases dans le ciel au lieu d'une vignette de marge.
 
+## En jeu (01/11/2026)
+
+« Positionne-la sur la carte d'Afrique du Nord, avec Abou Simbel. »
+
+- `lieu:aksoum` (capitale, parent `lieu:afrique_du_nord`), première passe de grille à retoucher : `dev/gen_aksoum.py` → `jsons/aksoum_a_importer.json`.
+- Sur la carte d'Afrique du Nord : la vraie Aksoum (14° N, 38,7° E) tombe juste hors du cadre ; posée dans le **coin sud-est** (85, 45), sur les hauts plateaux, au-delà de la source de l'affluent du Nil — Abou Simbel est en (76, 32). Trois sorties : par l'est (route de la mer), par le sud (champs), par l'ouest (bassin).
+- Portes de rempart non posées ; la grille relie déjà dehors et cœur de la ville (passages creusés aux portes).
+
 ## Points encore ouverts
 
 - Fonction tellurienne de l'**Arche** ; nature de l'autre monde du donjon et de son gardien.
