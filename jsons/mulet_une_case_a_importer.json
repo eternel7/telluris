@@ -1,0 +1,55 @@
+[
+  {
+    "_id": "espece:mulet",
+    "_rev": "8-bb9f19937d14f37edfd40a298febfefc",
+    "type": "espece",
+    "nom": "Mulet",
+    "genre": "m",
+    "image": "mulet_transparent.png",
+    "description": "Animal de bât increvable, têtu mais d'une endurance remarquable sur les terrains difficiles.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 7
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 45
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "bete_de_somme",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 1.45,
+      "prix_cuivre": 1200
+    },
+    "animation": "animation:son_bete_05"
+  }
+]
