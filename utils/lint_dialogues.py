@@ -128,6 +128,8 @@ FLAGS_CONNUS = {
 	"rang_apport_offert", "rang_apport_possible",
 	# Don UNIQUE (carte de guilde) : l'exemplaire est déjà dans le sac.
 	"don_recu",
+	# Carte PERDUE par un inscrit de cette cité (`pnj.don_a_remplacer`) : le choix de remplacement.
+	"don_a_remplacer",
 	# Escortes. ⚠️ Pas de flag « à déposer » : la dépose est AUTOMATIQUE (elle se solde en
 	# franchissant la porte du lieu de destination), le dialogue n'a qu'un geste — accepter.
 	"escorte_offerte", "escorte_en_cours", "escorte_accomplie",
@@ -196,6 +198,8 @@ NOEUDS_REQUIS = {
 #    recettes), donc en pratique un tenancier générique `pnj:marchand_*`.
 # Exiger les nœuds des deux rôles de tout le monde ferait crier au défaut sur un donneur
 # parfaitement correct (le réceptionniste de guilde ne reçoit jamais de colis).
+# Nœud OPTIONNEL du don : carte perdue refaite (repli sur `fait` s'il manque).
+DON_REMPLACEMENT = {"remplacement"}
 TRANSPORT_DONNEUR = {"accepte", "trop_charge"}
 TRANSPORT_DESTINATAIRE = {"livre", "incomplet"}
 TRANSPORT_RETOUR = {"rapporte"}   # course `retour` : le donneur solde au retour

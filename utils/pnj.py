@@ -954,3 +954,15 @@ def don_deja_recu(character: dict, item_id: str, lieu_parent: str | None,
 	n'importe que `random` et `character_stats`."""
 	return any(ref_id_fn(ref) == item_id and ref_lieu_fn(ref) == lieu_parent
 			   for ref in (character or {}).get("inventaire") or [])
+
+
+def don_a_remplacer(character: dict, don_conf: dict, lieu_parent: str | None,
+					deja_recu: bool, inscrit_fn) -> bool:
+	"""Carte PERDUE : don `unique` localisé à une cité (`lieu_parent` RÉSOLU), plus dans le sac
+	(`deja_recu` faux), alors que le personnage est déjà INSCRIT à la guilde de cette cité
+	(`inscrit_fn` = `chasse.inscrit_a_la_guilde`, injecté). Flag `don_a_remplacer` : le
+	réceptionniste se moque, puis refait la carte (nœud `noeuds.remplacement`).
+	Le rang ne bouge pas : il vit dans `rangs_guilde`, jamais sur la carte — la nouvelle
+	vaut l'ancienne, et `crediter_rang` ne rétrograde pas."""
+	return bool((don_conf or {}).get("unique") and (don_conf or {}).get("item")
+				and lieu_parent and not deja_recu and inscrit_fn(character, lieu_parent))
