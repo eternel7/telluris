@@ -1542,6 +1542,7 @@ def _vocabulaire_dialogues() -> dict:
 							 | {"livre_retour"}),
 			escorte=sorted(set(lint_dialogues.NOEUDS_REQUIS["escorte"])
 						   | lint_dialogues.ESCORTE_MEFIANCE),
+			don=sorted(set(lint_dialogues.NOEUDS_REQUIS["don"]) | lint_dialogues.DON_REMPLACEMENT),
 			acces=sorted(set(lint_dialogues.NOEUDS_REQUIS["acces"]) | {"deja"}),
 			rang=sorted(set(lint_dialogues.NOEUDS_REQUIS["rang"]) | lint_dialogues.RANG_APPORT),
 			apport=sorted(lint_dialogues.APPORT_DONNEUR | lint_dialogues.APPORT_RECEVEUR),

@@ -245,10 +245,17 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		# Don UNIQUE (la carte de guilde remise à l'inscription) : le choix se masque tant que
 		# l'exemplaire est dans le sac, et revient s'il est perdu.
 		don_conf = (pnj_doc.get("services") or {}).get("don") or {}
+		cite_don = _lieu_parent_don(don_conf, lieu_doc)
 		flags["don_recu"] = bool(
 			don_conf.get("unique") and don_conf.get("item")
-			and pnj.don_deja_recu(character, don_conf["item"], _lieu_parent_don(don_conf, lieu_doc),
+			and pnj.don_deja_recu(character, don_conf["item"], cite_don,
 								  item_ref_id, item_ref_lieu))
+		# Carte PERDUE par un inscrit : le choix « j'ai perdu ma carte » remplace l'inscription.
+		# `{rang}` = celui du registre, que la nouvelle carte porte à l'identique.
+		flags["don_a_remplacer"] = pnj.don_a_remplacer(
+			character, don_conf, cite_don, flags["don_recu"], chasse.inscrit_a_la_guilde)
+		if flags["don_a_remplacer"]:
+			placeholders.setdefault("rang", chasse.rang_de(character, cite_don))
 		# Commissions d'éradication (maître de guilde) : `services.commission.donjon` (ou
 		# `donjons`, liste — `donjon.donjons_du_service`) est le SEUL lien PNJ → donjon. L'offre est REBÂTIE à chaque affichage (pas de champ
 		# transitoire `*_offert`, cf. `donjon.offre_commission_pour`) → les placeholders
@@ -1044,6 +1051,9 @@ async def pnj_dialogue_choix(
 		if not item_doc:
 			raise HTTPException(status_code=422, detail="Objet du don introuvable.")
 		noeuds_don = (pnj_doc.get("services", {}).get("don", {}).get("noeuds", {}))
+		# Lu AVANT la remise : une fois la carte au sac, elle n'est plus « à remplacer ».
+		remplacement = pnj.don_a_remplacer(character, don, lieu_parent_don, False,
+										   chasse.inscrit_a_la_guilde)
 		# Un poids d'instance TIRÉ par exemplaire (`tirer_poids`, fixe ⇒ sans tirage), contrôlé
 		# sur leur total.
 		poids = [tirer_poids(item_doc) for _ in range(max(1, int(don["quantite"])))]
@@ -1065,8 +1075,13 @@ async def pnj_dialogue_choix(
 				promu = chasse.reconnaitre_rang(character, don["rang_reconnu"], spec_rang.get("cite")) or promu
 			if save_doc(character) is None:
 				raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
-			suivant = noeuds_don.get("fait")
+			# Carte perdue : le réceptionniste se moque (`remplacement`) ; sans ce nœud, `fait`.
+			suivant = (remplacement and noeuds_don.get("remplacement")) or noeuds_don.get("fait")
+			if remplacement:
+				# `{rang}` relu APRÈS un éventuel `rang_reconnu` : la carte refaite dit le rang du jour.
+				contexte["placeholders"]["rang"] = chasse.rang_de(character, lieu_parent_don)
 			reponse["don"] = {
+				"remplacement": remplacement,
 				"item": don["item"],
 				"nom": item_doc.get("nom"),
 				"icon": item_doc.get("icon"),
