@@ -912,6 +912,18 @@ def transferer_ref(source: dict, cible: dict, idx, item_id) -> tuple[bool, str, 
 	return True, "", ref
 
 
+def ramasser_pour(au_sol: list, cible: dict, idx, item_id) -> tuple[bool, str, object]:
+	"""Passe un objet du SOL (liste `objets_au_sol` du principal, mutée en place) au sac de
+	`cible` — un compagnon, une monture, le guide ou le principal lui-même. Mêmes règles que
+	`transferer_ref` : refus DUR si `cible` ne peut pas le porter, le sol n'est alors pas
+	amputé. ⚠️ Pas d'auto-délestage, contrairement au ramassage pour soi : on ne fait pas
+	tomber au hasard la cargaison d'un autre porteur. NE SAUVEGARDE PAS."""
+	ok, raison, ref = transferer_ref({"inventaire": au_sol}, cible, idx, item_id)
+	if raison == "Objet absent de l'inventaire":
+		raison = "Objet absent du sol"
+	return ok, raison, ref
+
+
 def affinite_de(character: dict, av_id: str) -> int:
 	"""Affinité mémorisée avec un compagnon (neutre AFFINITE_INITIALE si inconnue)."""
 	val = (character.get("affinites", {}) or {}).get(av_id)

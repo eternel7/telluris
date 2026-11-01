@@ -3461,6 +3461,9 @@
 		.cible-allie-btn:hover { background: rgba(216,180,106,.14); }
 		.cible-allie-nom { flex: 1; }
 		.cible-allie-pv { font-size: .82em; opacity: .8; white-space: nowrap; }
+		.cible-allie-btn:disabled { opacity: .45; cursor: not-allowed; }
+		.cible-allie-btn:disabled:hover { background: rgba(255,255,255,.04); }
+		.cible-allie-trop { color: #e07a5f; }
 		.clauses-part { color: var(--gold2, var(--gold, #d8b46a)); margin: .2rem 0 .8rem; }
 		.clauses-list { list-style: none; padding: 0; margin: 0 0 .9rem; }
 		.clauses-list li {
@@ -6135,6 +6138,7 @@ function _refreshSol() {
 	if (section) section.style.display = has ? 'flex' : 'none';
 	if (scrollEl) scrollEl.style.display = has ? '' : 'none';
 	if (!has) { solEl.innerHTML = ''; if (scrollEl) scrollEl.classList.remove('scrollable'); updateSolSortBtn(); return; }
+	const donner = _groupeAPorteurs();
 	solEl.innerHTML = _sortedOrder(_objetsAuSol, _solSort).map(idx => {
 		const item = _objetsAuSol[idx];
 		if (!item || typeof item !== 'object') return '';
@@ -6144,7 +6148,7 @@ function _refreshSol() {
 			<span class="sh-inv-open" onclick="openItemDetail('sol',${idx})" title="Voir la fiche">${item.icon || '📦'}</span>
 			<span class="sh-inv-name sh-inv-open" onclick="openItemDetail('sol',${idx})" title="Voir la fiche">${item.nom || '—'}</span>
 			${poidsHtml}${rarHtml}
-			<span class="sh-inv-actions">${(_estCoupable(item) || _estDecoupable(item)) ? _couperBtn(idx, item._id, 'sol', item) : ''}<button class="sh-pickup-btn" onclick="pickupItem(${idx},'${item._id}')" title="Prendre du sol">Prendre</button></span>
+			<span class="sh-inv-actions">${(_estCoupable(item) || _estDecoupable(item)) ? _couperBtn(idx, item._id, 'sol', item) : ''}<button class="sh-pickup-btn" onclick="pickupItem(${idx},'${item._id}')" title="Prendre du sol">Prendre</button>${donner ? `<button class="sh-pickup-btn" onclick="donnerDuSol(${idx},'${item._id}')" title="Faire prendre par un compagnon ou une monture">🤝</button>` : ''}</span>
 		</div>`;
 	}).join('');
 	if (scrollEl) scrollEl.classList.toggle('scrollable', _objetsAuSol.length > INV_VISIBLE);
@@ -7648,6 +7652,79 @@ async function pickupItem(index, itemId) {
 			showToast('Trop lourd ! Tombé au sol : ' + data.auto_dropped.join(', '));
 		}
 	} catch(err) { console.error('Erreur pickup', err); }
+}
+
+// 🤝 du sol : seulement s'il existe un AUTRE porteur que celui de la fiche — un compagnon
+// ouvert a toujours le joueur ; le joueur, dès que 👥 est visible (le groupe peut ne
+// compter qu'un escorté, qui ne porte rien : le choix le dira alors).
+function _groupeAPorteurs() {
+	if (_compagnonActif) return true;
+	const btn = document.getElementById('btn-groupe');
+	return !!btn && !btn.hidden;
+}
+
+// Qui peut recevoir un objet du sol : tout le groupe porteur (principal, compagnons,
+// montures, guide) SAUF le porteur de la fiche, avec la place libre de chacun. `rentre`
+// = même arithmétique que `peut_porter` côté serveur (qui reste juge : 409).
+function _porteursPourRamasser(item) {
+	const d = _grpEtat || {};
+	const sacs = d.sacs || {};
+	const moi = porteurActifId();
+	const nomDe = c => `${c.prenom || ''} ${c.nom || ''}`.trim() || '?';
+	const out = [];
+	const ajouter = (c, icon, sac) => {
+		if (!c || !c.id || c.id === moi || !sac) return;
+		const libre = +(sac.charge_max || 0) - +(sac.charge || 0);
+		out.push({ id: c.id, nom: nomDe(c), icon, libre, rentre: _grpRentre(item, sac) });
+	};
+	ajouter(d.principal, '👤', d.principal);
+	(d.groupe || []).forEach(c => ajouter(c, '🧑‍🤝‍🧑', sacs[c.id]));
+	(d.montures || []).forEach(m => ajouter(m, '🐴', sacs[m.id]));
+	if (d.guide) ajouter(d.guide, '🧭', sacs[d.guide.id]);
+	return out;
+}
+
+// Décision bloquante sur le calque des cibles alliées (Conventions §8 : ✕ / Échap / clic
+// hors carte → null). Un porteur trop chargé reste listé, grisé : on voit pourquoi.
+function demanderPorteur(item, porteurs) {
+	const poids = +(item.poids || 0);
+	document.getElementById('cible-allie-body').innerHTML =
+		`<h3 style="margin:.1rem 0 .3rem">${item.icon || '📦'} ${escapeHtml(item.nom || '—')} — qui le prend ?</h3>`
+		+ `<div class="cible-allie-pv" style="margin-bottom:.7rem">${poids.toFixed(1)} kg · place libre de chacun</div>`
+		+ porteurs.map(p => `<button type="button" class="cible-allie-btn" ${p.rentre ? '' : 'disabled'}
+			onclick="_choisirCibleAllie('${p.id}')">
+			<span>${p.icon}</span><span class="cible-allie-nom">${escapeHtml(p.nom)}</span>
+			<span class="cible-allie-pv${p.rentre ? '' : ' cible-allie-trop'}">${Math.max(0, p.libre).toFixed(1)} kg libres${p.rentre ? '' : ' · trop lourd'}</span>
+		</button>`).join('');
+	document.getElementById('cible-allie-overlay').classList.remove('clauses-hidden');
+	return new Promise(resolve => { _cibleAllieResolve = resolve; });
+}
+
+async function donnerDuSol(index, itemId) {
+	const item = (_objetsAuSol || [])[index];
+	if (!item) return;
+	// Charges RELUES : celles d'un payload de groupe gardé en mémoire datent peut-être d'avant
+	// le dernier ramassage ou transfert.
+	_grpEtat = null;
+	await _assurerGroupe();
+	const porteurs = _porteursPourRamasser(item);
+	if (!porteurs.length) { showToast('Personne d\'autre dans le groupe ne peut porter.'); return; }
+	const dest = await demanderPorteur(item, porteurs);
+	if (!dest) return;
+	try {
+		// `compagnon_id` (via _actionBody) = la fiche ouverte : la réponse est SON sac, le sol
+		// à jour ; le sac du destinataire voyage à part (`destinataire`), jamais à sa place.
+		const res = await fetch('api/pickup_item', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify(_actionBody({ index, item_id: itemId, destinataire_id: dest }))
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		_applyInventoryPayload(data);
+		_grpEtat = null;   // sacs du groupe périmés : rechargés à la prochaine ouverture de 👥
+		const p = data.pris || {}, d = data.destinataire || {};
+		showToast(`${p.icon || '📦'} ${p.nom || 'Objet'} → ${d.nom || '?'}`);
+	} catch (err) { console.error('Erreur ramassage pour un porteur', err); }
 }
 
 // Applique la réponse partagée des endpoints drop/pickup (inventaire/sol/slots + charge).

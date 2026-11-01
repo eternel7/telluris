@@ -1066,17 +1066,27 @@ def _cible_alliee(principal: dict, lanceur: dict, body: dict) -> dict:
 	cible_id = (body or {}).get("cible_id")
 	if not cible_id:
 		raise HTTPException(status_code=422, detail="Cet effet demande une cible")
-	if cible_id == lanceur.get("_id"):
-		return lanceur
-	if cible_id == principal.get("_id"):
-		return principal
-	cible = next(
-		(a for a in recrutement.porteurs_effectifs(principal, get_doc) if a.get("_id") == cible_id),
-		None,
-	)
+	cible = _membre_du_groupe(principal, lanceur, cible_id)
 	if cible is None:
 		raise HTTPException(status_code=403, detail="Cette cible ne fait pas partie de votre groupe")
 	return cible
+
+
+def _membre_du_groupe(principal: dict, acteur: dict, membre_id: str) -> dict | None:
+	"""Le principal, l'acteur ou l'un des porteurs du groupe désigné par `membre_id`, ou
+	None s'il n'en fait pas partie (cible d'un sort, destinataire d'un ramassage…).
+
+	⚠️ L'acteur et le principal sont rendus tels qu'EN MAIN : `porteurs_effectifs` relit les
+	docs en base, et un second dict du même doc ferait deux `save_doc` sur un `_rev`
+	identique — une écriture perdue en silence."""
+	if membre_id == acteur.get("_id"):
+		return acteur
+	if membre_id == principal.get("_id"):
+		return principal
+	return next(
+		(a for a in recrutement.porteurs_effectifs(principal, get_doc) if a.get("_id") == membre_id),
+		None,
+	)
 
 
 def _save_cast(lanceur: dict, cible: dict, principal: dict) -> None:
@@ -1444,10 +1454,41 @@ async def pickup_item(
 
 	Un compagnon ramasse DANS LE SOL DU JOUEUR : le tas par terre est celui du lieu où se
 	tient le principal, le sac (et la charge max qui borne le ramassage) sont ceux du porteur —
-	mêmes règles que le principal (miroir de drop_item)."""
+	mêmes règles que le principal (miroir de drop_item).
+
+	`destinataire_id` (optionnel) : un AUTRE membre du groupe (compagnon, monture, guide,
+	principal) reçoit l'objet dans son sac — refus DUR (409) s'il ne peut pas le porter, pas
+	d'auto-délestage (`recrutement.ramasser_pour`). La réponse reste celle de la fiche ouverte
+	(sac de l'acteur, sol à jour) : le sac du destinataire n'y est JAMAIS mis à la place
+	(CLAUDE.md §1) ; il voyage à part, dans `destinataire`."""
 	character, principal = _acteur(current_user, body)
 
 	au_sol = principal.get("objets_au_sol", [])
+	dest_id = body.get("destinataire_id")
+	if dest_id and dest_id != character.get("_id"):
+		dest = _membre_du_groupe(principal, character, dest_id)
+		if dest is None:
+			raise HTTPException(status_code=403, detail="Ce porteur ne fait pas partie de votre groupe")
+		ok, raison, ref = recrutement.ramasser_pour(au_sol, dest, body.get("index"), body.get("item_id"))
+		if not ok:
+			raise HTTPException(status_code=422 if raison == "Objet absent du sol" else 409,
+								detail=raison)
+		principal["objets_au_sol"] = au_sol
+		_save_acteur(dest, principal)
+		doc = resolve_item_ref(ref) or {}
+		payload = _inventory_payload(character, principal)
+		payload["destinataire"] = {
+			"id":         dest["_id"],
+			"nom":        f"{dest.get('prenom', '') or ''} {dest.get('nom', '') or ''}".strip(),
+			"charge":     round(carried_weight(dest), 2),
+			"charge_max": montures.charge_max_porteur(dest),
+		}
+		payload["pris"] = {"nom": doc.get("nom") or item_ref_id(ref), "icon": doc.get("icon", ""),
+						   "poids": round(item_ref_weight(ref), 2)}
+		# Pas de bloc `fiche` : le sac de la fiche ouverte n'a pas bougé (un grimoire posé sur
+		# un autre porteur n'ouvre ni ne ferme rien à l'apprentissage de l'acteur).
+		return payload
+
 	picked = _take_ref(au_sol, body.get("index"), body.get("item_id"))
 	if picked is None:
 		raise HTTPException(status_code=422, detail="Objet absent du sol")
