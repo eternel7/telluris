@@ -9,11 +9,17 @@ ENTREES = [
 	A(1, "Battement", "🤺", "entrave", "lame", "Un coup sec sur la lame adverse, qui ouvre la garde.", malus=("Ag",)),
 	A(1, "En garde", "⚜️", "esquive_soi", "garde", "Il prend la garde, et l'on comprend qu'il ne sera pas facile à toucher."),
 	A(1, "Marche-fente", "🦶", "saut", "saut", "Un pas glissé, puis la détente : il est déjà au contact."),
-	A(1, "Riposte", "↩️", "frappe", "lame", "Il pare et rend la politesse dans le même mouvement."),
+	# « Coup droit » frappe plus fort ; la riposte dévie la lame adverse et l'alourdit
+	L(1, "Riposte", "↩️", "lame", "Il pare et rend la politesse dans le même mouvement : le bras adverse en reste engourdi.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 10, "effets": {"degats": "1D6+{Ag/10}", "buffs": {"F": -3}, "duree": 2}},
+	  remplace="riposte"),
 	# ── Niveau 2 ──
 	P(2, "Œil de l'escrimeur", "👁️", "p_esquive", "Il lit l'épaule avant que la lame ne parte."),
 	P(2, "Port de tête", "👑", "p_carac", "Son assurance déroute ceux qui le croisent.", stats=("Vol",)),
-	A(2, "Flèche", "➡️", "saut", "saut", "Une course en extension, la pointe en avant."),
+	# même saut que « Marche-fente » (niv 1) : il arrive la pointe en avant, lancé
+	L(2, "Flèche", "➡️", "saut", "Une course en extension, la pointe en avant : il arrive lancé.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 12, "effets": {"saut": 2, "buffs": {"Ag": 4}, "duree": 2}},
+	  remplace="fleche"),
 	A(2, "Coup de manchette", "✂️", "entrave", "saignee", "La lame effleure le poignet, et l'arme pèse soudain plus lourd.", malus=("F",)),
 	A(2, "Taille en tierce", "⚔️", "frappe", "lame", "Un coup haut, porté avec la grâce d'une révérence."),
 	A(2, "Estafilade", "🩸", "poison", "saignee", "Une entaille fine, qui saigne plus qu'on ne le croit."),
@@ -35,7 +41,10 @@ ENTREES = [
 	A(4, "Bravade", "😏", "buff_soi", "aura_bataille", "Un sourire insolent : il se sait meilleur.", stats=("Cha", "Ag")),
 	A(4, "Saut de côté", "↗️", "saut", "saut", "Il s'efface d'un bond et réapparaît dans le dos de l'adversaire."),
 	# ── Niveau 5 ──
-	P(5, "Main du prévôt", "✋", "p_carac", "La main de celui qui enseigne : jamais crispée, jamais lâche.", stats=("Ag",)),
+	# même Ag que « Grâce naturelle » (niv 3) : l'autorité du maître en plus
+	L(5, "Main du prévôt", "✋", None, "La main de celui qui enseigne : jamais crispée, jamais lâche, et la salle se tait quand elle se lève.",
+	  {"effets": {"buffs": {"Ag": 3, "Cha": 1}}},
+	  remplace="main_du_prevot", mode="passive"),
 	L(5, "Prestance", "🎭", None, "La grâce du geste fait l'aura de l'homme : plus il est vif, plus on le regarde.",
 	  {"effets": {"buffs": {"Cha": "{Ag/15}"}}},
 	  remplace="prestance", mode="passive"),
@@ -53,13 +62,19 @@ ENTREES = [
 	A(6, "Éventail d'acier", "🪭", "zone_cone", "impact_eclat_dore/cone_tueur_demon", "La lame se déploie en éventail devant lui."),
 	A(6, "Pas de l'ombre", "👣", "saut", "furtif", "Il glisse d'une ombre à l'autre."),
 	# ── Niveau 7 ──
-	P(7, "Lame vivante", "🗡️", "p_carac", "L'épée n'est plus un outil : elle est le prolongement de son bras.", stats=("Ag",)),
+	# même Ag que « Poignet souple » (niv 1) : la lame pare d'elle-même
+	L(7, "Lame vivante", "🗡️", None, "L'épée n'est plus un outil : elle est le prolongement de son bras, et pare d'elle-même.",
+	  {"effets": {"buffs": {"Ag": 4}, "esquive": 3}},
+	  remplace="lame_vivante", mode="passive"),
 	P(7, "Panache", "🪶", "p_carac", "Il ne recule jamais sans un mot d'esprit.", stats=("Vol",)),
 	A(7, "Botte secrète", "🤫", "frappe", "saignee", "Un coup transmis de maître à élève, jamais écrit."),
 	A(7, "Coup du papillon", "🦋", "zone_carre", "balayage", "Une volte légère, et partout autour la lame a mordu."),
 	A(7, "Prise de fer", "🔗", "entrave", "garde", "Sa lame cloue celle de l'autre et la paralyse.", malus=("F", "Ag")),
 	A(7, "Assaut de grâce", "💫", "buff_soi", "aura_bataille", "Une série parfaite, enchaînée sans un faux pas.", stats=("Ag", "F")),
-	A(7, "Coup de pied de salle", "🦶", "frappe", "poing", "Un coup de botte, que les règles tolèrent à peine."),
+	# « Botte secrète » frappe plus fort ; le coup de pied déséquilibre
+	L(7, "Coup de pied de salle", "🦶", "poing", "Un coup de botte, que les règles tolèrent à peine : l'adversaire en perd l'équilibre.",
+	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 29, "effets": {"degats": "3D8+{Ag/8}", "buffs": {"Ag": -6}, "duree": 2}},
+	  remplace="coup_de_pied_de_salle"),
 	# ── Niveau 8 ──
 	P(8, "Instinct du duel", "⚖️", "p_esquive", "Face à un seul adversaire, il est presque intouchable."),
 	P(8, "Œil de faucon", "🦅", "p_carac", "Pas un mouvement adverse ne lui échappe.", stats=("Int",)),

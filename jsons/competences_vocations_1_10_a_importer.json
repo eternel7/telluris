@@ -1,1 +1,224 @@
-[]
+[
+	{
+		"_id": "competence:saut_du_chat",
+		"type": "competence",
+		"nom": "Saut du chat",
+		"icon": "🐈",
+		"animation": "animation:capa_saut",
+		"description": "D'un toit à l'autre, d'une ombre à l'autre, et il retombe toujours sur ses pattes.",
+		"vocation": "assassin",
+		"niveau": 5,
+		"mode": "active",
+		"cout_pm": 21,
+		"sensibilite_charge": 0,
+		"cible": "soi",
+		"portee": 1,
+		"effets": {
+			"saut": 3,
+			"esquive": 6,
+			"duree": 2
+		}
+	},
+	{
+		"_id": "competence:peau_de_bete",
+		"type": "competence",
+		"nom": "Peau de bête",
+		"icon": "🐻",
+		"description": "Sous les fourrures, une peau qui ne craint ni lame ni griffe.",
+		"vocation": "barbare",
+		"niveau": 2,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"R": 2
+			},
+			"esquive": 2
+		}
+	},
+	{
+		"_id": "competence:muscles_d_airain",
+		"type": "competence",
+		"nom": "Muscles d'airain",
+		"icon": "🏋️",
+		"description": "Il porte sa hache à une main, comme une branche morte.",
+		"vocation": "barbare",
+		"niveau": 5,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"F": 3,
+				"R": 1
+			}
+		}
+	},
+	{
+		"_id": "competence:avatar_de_la_rage",
+		"type": "competence",
+		"nom": "Avatar de la rage",
+		"icon": "👹",
+		"description": "Les clans le croient habité par l'esprit de la guerre, qui referme ses plaies.",
+		"vocation": "barbare",
+		"niveau": 10,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"F": 5
+			},
+			"regen_pv": 1
+		}
+	},
+	{
+		"_id": "competence:riposte",
+		"type": "competence",
+		"nom": "Riposte",
+		"icon": "↩️",
+		"animation": "animation:capa_lame",
+		"description": "Il pare et rend la politesse dans le même mouvement : le bras adverse en reste engourdi.",
+		"vocation": "duelliste",
+		"niveau": 1,
+		"mode": "active",
+		"cout_pm": 10,
+		"sensibilite_charge": 0,
+		"cible": "ennemi",
+		"jet": "cc",
+		"portee": 1,
+		"effets": {
+			"degats": "1D6+{Ag/10}",
+			"buffs": {
+				"F": -3
+			},
+			"duree": 2
+		}
+	},
+	{
+		"_id": "competence:fleche",
+		"type": "competence",
+		"nom": "Flèche",
+		"icon": "➡️",
+		"animation": "animation:capa_saut",
+		"description": "Une course en extension, la pointe en avant : il arrive lancé.",
+		"vocation": "duelliste",
+		"niveau": 2,
+		"mode": "active",
+		"cout_pm": 12,
+		"sensibilite_charge": 0,
+		"cible": "soi",
+		"portee": 1,
+		"effets": {
+			"saut": 2,
+			"buffs": {
+				"Ag": 4
+			},
+			"duree": 2
+		}
+	},
+	{
+		"_id": "competence:main_du_prevot",
+		"type": "competence",
+		"nom": "Main du prévôt",
+		"icon": "✋",
+		"description": "La main de celui qui enseigne : jamais crispée, jamais lâche, et la salle se tait quand elle se lève.",
+		"vocation": "duelliste",
+		"niveau": 5,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Ag": 3,
+				"Cha": 1
+			}
+		}
+	},
+	{
+		"_id": "competence:lame_vivante",
+		"type": "competence",
+		"nom": "Lame vivante",
+		"icon": "🗡️",
+		"description": "L'épée n'est plus un outil : elle est le prolongement de son bras, et pare d'elle-même.",
+		"vocation": "duelliste",
+		"niveau": 7,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"Ag": 4
+			},
+			"esquive": 3
+		}
+	},
+	{
+		"_id": "competence:coup_de_pied_de_salle",
+		"type": "competence",
+		"nom": "Coup de pied de salle",
+		"icon": "🦶",
+		"animation": "animation:capa_poing",
+		"description": "Un coup de botte, que les règles tolèrent à peine : l'adversaire en perd l'équilibre.",
+		"vocation": "duelliste",
+		"niveau": 7,
+		"mode": "active",
+		"cout_pm": 29,
+		"sensibilite_charge": 0,
+		"cible": "ennemi",
+		"jet": "cc",
+		"portee": 1,
+		"effets": {
+			"degats": "3D8+{Ag/8}",
+			"buffs": {
+				"Ag": -6
+			},
+			"duree": 2
+		}
+	},
+	{
+		"_id": "competence:carrure",
+		"type": "competence",
+		"nom": "Carrure",
+		"icon": "🏋️",
+		"description": "Des épaules faites pour porter l'acier et ceux qui tombent.",
+		"vocation": "guerrier",
+		"niveau": 4,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"F": 3,
+				"R": 1
+			}
+		}
+	},
+	{
+		"_id": "competence:ossature_de_chene",
+		"type": "competence",
+		"nom": "Ossature de chêne",
+		"icon": "🌳",
+		"description": "Les coups glissent sur lui comme la pluie sur l'écorce.",
+		"vocation": "guerrier",
+		"niveau": 8,
+		"mode": "passive",
+		"effets": {
+			"buffs": {
+				"R": 4
+			},
+			"esquive": 3
+		}
+	},
+	{
+		"_id": "competence:roulade",
+		"type": "competence",
+		"nom": "Roulade",
+		"icon": "🤸",
+		"animation": "animation:capa_saut",
+		"description": "Une roulade sous les jambes de l'ennemi, et il se relève plus vif qu'avant.",
+		"vocation": "voleur",
+		"niveau": 5,
+		"mode": "active",
+		"cout_pm": 21,
+		"sensibilite_charge": 0,
+		"cible": "soi",
+		"portee": 1,
+		"effets": {
+			"saut": 3,
+			"buffs": {
+				"Ag": 5
+			},
+			"duree": 2
+		}
+	}
+]

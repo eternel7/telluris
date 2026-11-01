@@ -31,7 +31,10 @@ ENTREES = [
 	A(3, "Mur de boucliers", "🛡️", "posture", "garde", "Il plante les pieds et lève le bouclier : la ligne tiendra.", stats=("R", "Vol")),
 	A(3, "Taillade aux jarrets", "🩸", "poison", "saignee", "Une entaille basse, qui saigne longtemps."),
 	# ── Niveau 4 ──
-	P(4, "Carrure", "🏋️", "p_carac", "Des épaules faites pour porter l'acier et ceux qui tombent.", stats=("F",)),
+	# même F que « Poigne d'acier » (niv 1) : des épaules qui encaissent aussi
+	L(4, "Carrure", "🏋️", None, "Des épaules faites pour porter l'acier et ceux qui tombent.",
+	  {"effets": {"buffs": {"F": 3, "R": 1}}},
+	  remplace="carrure", mode="passive"),
 	P(4, "Œil du vétéran", "👁️", "p_esquive", "Il voit venir le coup avant que l'autre ne le sache."),
 	A(4, "Coup de bélier", "🐏", "entrave", "coup_lourd", "Tout le corps derrière l'épaule : l'ennemi recule et s'essouffle.", malus=("F", "Ag")),
 	A(4, "Lame lourde", "⚔️", "frappe", "lame", "Un coup sans finesse, mais qui ne s'arrête pas à l'armure."),
@@ -77,7 +80,10 @@ ENTREES = [
 	A(7, "Lame tournoyante", "⚔️", "zone_rect", "balayage", "Trois coups en un, de gauche à droite et retour."),
 	A(7, "Tenue de ligne", "🛡️", "cri", "garde", "Autour de lui, les boucliers se resserrent.", stats=("R",)),
 	# ── Niveau 8 ──
-	P(8, "Ossature de chêne", "🌳", "p_carac", "Les coups glissent sur lui comme la pluie sur l'écorce.", stats=("R",)),
+	# même R que « Peau tannée » (niv 1) : les coups glissent
+	L(8, "Ossature de chêne", "🌳", None, "Les coups glissent sur lui comme la pluie sur l'écorce.",
+	  {"effets": {"buffs": {"R": 4}, "esquive": 3}},
+	  remplace="ossature_de_chene", mode="passive"),
 	P(8, "Volonté de fer", "🔩", "p_carac", "Ni la peur ni la fatigue n'entrent plus sous son casque.", stats=("Vol",)),
 	A(8, "Tranche-armure", "⚔️", "frappe", "lame", "La lame cherche la jointure et la trouve."),
 	A(8, "Écrasement", "🔨", "entrave", "coup_lourd", "Le genou de l'ennemi cède sous le choc.", malus=("Ag", "F")),

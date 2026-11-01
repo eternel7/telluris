@@ -11,7 +11,10 @@ ENTREES = [
 	A(1, "Ruée", "🐗", "saut", "saut", "Il fonce tête baissée et franchit la distance d'un seul élan."),
 	A(1, "Morsure du fer", "🩸", "sang", "saignee", "Il frappe si fort que le manche lui brûle les mains."),
 	# ── Niveau 2 ──
-	P(2, "Peau de bête", "🐻", "p_carac", "Sous les fourrures, une peau qui ne craint ni lame ni griffe.", stats=("R",)),
+	# même R que « Sang chaud » (niv 0) : la fourrure fait glisser les coups
+	L(2, "Peau de bête", "🐻", None, "Sous les fourrures, une peau qui ne craint ni lame ni griffe.",
+	  {"effets": {"buffs": {"R": 2}, "esquive": 2}},
+	  remplace="peau_de_bete", mode="passive"),
 	P(2, "Fureur latente", "😠", "p_regen", "La colère qui couve répare ce que les coups défont."),
 	A(2, "Fracas", "💥", "frappe", "coup_lourd", "Le métal hurle contre le métal."),
 	A(2, "Tête la première", "🐏", "entrave", "coup_lourd", "Un coup de front qui laisse l'ennemi hébété.", malus=("Int", "Ag")),
@@ -41,7 +44,10 @@ ENTREES = [
 	  remplace="hache_rouge"),
 	# ── Niveau 5 ──
 	P(5, "Cuir de troll", "🧌", "p_carac", "On dit qu'un troll a été son père. On ne le dit pas devant lui.", stats=("R",)),
-	P(5, "Muscles d'airain", "🏋️", "p_carac", "Il porte sa hache à une main, comme une branche morte.", stats=("F",)),
+	# même F que « Sang chaud des clans » (niv 3) : un corps endurci avec
+	L(5, "Muscles d'airain", "🏋️", None, "Il porte sa hache à une main, comme une branche morte.",
+	  {"effets": {"buffs": {"F": 3, "R": 1}}},
+	  remplace="muscles_d_airain", mode="passive"),
 	A(5, "Brise-os", "🦴", "frappe", "coup_lourd", "Le bruit de l'os qui casse couvre le fracas des armes."),
 	A(5, "Charge du sanglier", "🐗", "entrave", "griffe", "Il renverse tout sur son passage.", malus=("Ag",)),
 	A(5, "Folie sanglante", "🩸", "sang", "rage", "Il se mord jusqu'au sang et se jette en avant."),
@@ -86,7 +92,10 @@ ENTREES = [
 	A(9, "Bond de l'avalanche", "🏔️", "saut", "saut", "Il dévale sur l'ennemi comme la neige des cimes."),
 	A(9, "Berserk", "😡", "posture", "rage", "Il cesse de penser, il ne fait plus que tuer.", stats=("F", "R")),
 	# ── Niveau 10 ──
-	P(10, "Avatar de la rage", "👹", "p_carac", "Les clans le croient habité par l'esprit de la guerre.", stats=("F",)),
+	# même F que « Fureur éternelle » (niv 9) : l'esprit de la guerre referme ses plaies
+	L(10, "Avatar de la rage", "👹", None, "Les clans le croient habité par l'esprit de la guerre, qui referme ses plaies.",
+	  {"effets": {"buffs": {"F": 5}, "regen_pv": 1}},
+	  remplace="avatar_de_la_rage", mode="passive"),
 	A(10, "Coup du fléau des clans", "🪓", "frappe", "coup_lourd", "Le coup dont les chants des steppes se souviendront."),
 	A(10, "Carnage", "🌪️", "zone_carre", "balayage", "Un cercle de mort, au centre duquel il hurle.", rayon=2),
 	A(10, "Cri du dernier clan", "📯", "cri", "aura_bataille", "Le cri qui a précédé chaque victoire de son peuple.", stats=("F", "Vol"), rayon=2),

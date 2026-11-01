@@ -2,7 +2,7 @@
 
 **Document GÉNÉRÉ par `python dev/gen_competences_1_10.py`** — ne pas retoucher : les données vivent dans `dev/competences_1_10/<vocation>.py`, les valeurs dans l'échelle `ECHELLE` du générateur. Import : `jsons/competences_vocations_1_10_a_importer.json`.
 
-Référentiel : `telluris-dump-20261024-125345.json` + `jsons/*_a_importer.json`.
+Référentiel : `telluris-dump-20261101-210622.json` + `jsons/*_a_importer.json`.
 
 Une compétence déjà en base est affichée **telle qu'en base** ; ✎ signale qu'elle diffère de ce que calcule le générateur (retouchée après import).
 
@@ -21,15 +21,15 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 
 | vocation | magie | passives neuves | actives neuves | total neuf |
 |---|---|---|---|---|
-| Assassin | — | 10 | 45 | 55 |
-| Barbare | — | 16 | 43 | 59 |
+| Assassin | — | 10 | 44 | 54 |
+| Barbare | — | 13 | 43 | 56 |
 | Chaman | Nature | 0 | 28 | 28 |
 | Démoniste | Démonologie | 0 | 27 | 27 |
 | Druide | Nature | 0 | 24 | 24 |
-| Duelliste | — | 16 | 44 | 60 |
+| Duelliste | — | 14 | 41 | 55 |
 | Élémentaliste | Élémentaire | 0 | 30 | 30 |
 | Forestier | — | 6 | 43 | 49 |
-| Guerrier | — | 16 | 40 | 56 |
+| Guerrier | — | 14 | 40 | 54 |
 | Illusionniste | Illusoire | 0 | 29 | 29 |
 | Lettré | Illusoire | 0 | 32 | 32 |
 | Magicien de combat | Bataille | 0 | 24 | 24 |
@@ -40,8 +40,8 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 | Prêtre | Sainte | 0 | 25 | 25 |
 | Répurgateur | Démonologie | 0 | 26 | 26 |
 | Templier | Bataille | 0 | 29 | 29 |
-| Voleur | — | 7 | 44 | 51 |
-| **total** | | **71** | **643** | **714** |
+| Voleur | — | 7 | 43 | 50 |
+| **total** | | **64** | **638** | **702** |
 
 ## Échelle par niveau
 
@@ -108,14 +108,14 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 | 🧪 **Toxine paralysante** ✎ — *La victime sent ses jambes se dérober.* | active | 18 PM | ennemi / cc / portée 1 | 1D8 dégâts · Ag -4-{Int/8} F -4 · 3 tours | poison · 🔊 17.mp3 |
 | 🌫️ **Voile de fumée** ✎ — *Une fiole brisée au sol, et il n'est plus là.* | active | 18 PM | soi / portée 1 | Ag 3+{Ag/15} · esquive 9 · 3 tours | poudre · 🔊 swish_2.wav |
 
-### Niveau 5 — 2 existante(s) + 5 neuve(s)
+### Niveau 5 — 3 existante(s) + 4 neuve(s)
 
 | compétence | mode | coût | cible | effets | animation |
 |---|---|---|---|---|---|
 | 🌙 **Œil de nuit** — *Il voit dans le noir comme d'autres en plein jour.* | passive | — | permanent | Int +3 | — |
 | 🎯 **Concentration mortelle** ✎ — *Plus rien n'existe que la cible.* | active | 10 PM + 3/round | soi / portée 1 | Ag 8+{Ag/6} F +8 | marque · 🔊 17.mp3 |
 | 🌿 **Essence de mandragore** ✎ — *Une essence qui ronge la volonté.* | active | 21 PM | ennemi / cc / portée 1 | 1D8+2 dégâts · régén PM -1-{Int/25} · 4 tours | poison · 🔊 17.mp3 |
-| 🐈 **Saut du chat** — *D'un toit à l'autre, d'une ombre à l'autre.* | active | 21 PM | soi / portée 1 | saut 3 cases | saut · 🔊 swish_4.wav |
+| 🐈 **Saut du chat** — *D'un toit à l'autre, d'une ombre à l'autre, et il retombe toujours sur ses pattes.* | active | 21 PM | soi / portée 1 | esquive 6 · saut 3 cases · 2 tours | saut · 🔊 swish_4.wav |
 | 🧪 **Venin double** — *Deux poisons mêlés dans la même entaille : l'un ronge la chair, l'autre l'esprit.* | active | 21 PM | ennemi / cc / portée 1 | 1D6 dégâts · régén PV -2-{Int/20} · régén PM -1-{Int/30} · 3 tours | poison · 🔊 17.mp3 |
 | 🔪 **Égorgement** ✎ — *Un geste, et la gorge s'ouvre.* | active | 21 PM | ennemi / cc / portée 1 | 3D8+{Ag/12} dégâts | saignee · 🔊 sword sound.wav |
 
@@ -188,12 +188,12 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 | 🐗 **Ruée** — *Il fonce tête baissée et franchit la distance d'un seul élan.* | active | 10 PM | soi / portée 1 | saut 2 cases | saut · 🔊 swish_4.wav |
 | 🔥 **Échauffement** ✎ — *Le sang commence à battre aux tempes.* | active | 10 PM | soi / portée 1 | F 4+{R/8} · 4 tours | rage · 🔊 power_up_sound_v3.ogg |
 
-### Niveau 2 — 1 existante(s) + 6 neuve(s)
+### Niveau 2 — 2 existante(s) + 5 neuve(s)
 
 | compétence | mode | coût | cible | effets | animation |
 |---|---|---|---|---|---|
 | 😠 **Fureur latente** — *La colère qui couve répare ce que les coups défont.* | passive | — | permanent | régén PV +1 | — |
-| 🐻 **Peau de bête** — *Sous les fourrures, une peau qui ne craint ni lame ni griffe.* | passive | — | permanent | R +2 | — |
+| 🐻 **Peau de bête** — *Sous les fourrures, une peau qui ne craint ni lame ni griffe.* | passive | — | permanent | R +2 · esquive 2 | — |
 | 💥 **Fracas** ✎ — *Le métal hurle contre le métal.* | active | 12 PM | ennemi / cc / portée 1 | 2D6+{F/12} dégâts | coup_lourd · 🔊 melee sound.wav |
 | 🌋 **Sang qui bout** ✎ — *Il laisse monter la rage et la tient au bord des lèvres.* | active | 7 PM + 2/round | soi / portée 1 | F 6+{R/6} | rage · 🔊 power_up_sound_v3.ogg |
 | 🪓 **Taille sauvage** ✎ — *Un revers aveugle qui frappe tout ce qui bouge devant lui.* | active | 12 PM | ennemi / cc / portée 1 · rectangle longueur 1 largeur 3 | 1D8+{F/12} dégâts | balayage · 🔊 swish_3.wav |
@@ -222,12 +222,12 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 | 😤 **Rage qui ronge** — *Une colère qui se paie en sang — moins cher pour les plus robustes.* | active | 18 PM | ennemi / cc / portée 1 | 3D8+{F/10} dégâts · coûte 12-{R/8} PV | rage · 🔊 power_up_sound_v3.ogg |
 | 🌀 **Tourbillon sauvage** ✎ — *Il tourne sur lui-même, hache tendue, en hurlant.* | active | 18 PM | ennemi / cc / portée 1 · carre rayon 1 | 2D6+{F/15} dégâts | balayage · 🔊 swish_3.wav |
 
-### Niveau 5 — 0 existante(s) + 7 neuve(s)
+### Niveau 5 — 1 existante(s) + 6 neuve(s)
 
 | compétence | mode | coût | cible | effets | animation |
 |---|---|---|---|---|---|
 | 🧌 **Cuir de troll** — *On dit qu'un troll a été son père. On ne le dit pas devant lui.* | passive | — | permanent | R +3 | — |
-| 🏋️ **Muscles d'airain** — *Il porte sa hache à une main, comme une branche morte.* | passive | — | permanent | F +3 | — |
+| 🏋️ **Muscles d'airain** — *Il porte sa hache à une main, comme une branche morte.* | passive | — | permanent | F +3 R +1 | — |
 | 🦴 **Brise-os** ✎ — *Le bruit de l'os qui casse couvre le fracas des armes.* | active | 21 PM | ennemi / cc / portée 1 | 3D8+{F/12} dégâts | coup_lourd · 🔊 melee sound.wav |
 | 🐗 **Charge du sanglier** ✎ — *Il renverse tout sur son passage.* | active | 21 PM | ennemi / cc / portée 1 | 1D8+2 dégâts · Ag -5-{R/10} · 4 tours | griffe · 🔊 animal melee sound.wav |
 | 🌾 **Fauche** ✎ — *La hache passe à hauteur de genou, et trois ennemis tombent.* | active | 21 PM | ennemi / cc / portée 1 · rectangle longueur 1 largeur 3 | 2D8+{F/10} dégâts | balayage · 🔊 swish_3.wav |
@@ -281,11 +281,11 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 | 🩸 **Folie du massacre** ✎ — *Il sacrifie sa chair pour le coup le plus terrible de sa vie.* | active | 37 PM | ennemi / cc / portée 1 | 5D10+{F/7} dégâts · coûte 13 PV | rage · 🔊 power_up_sound_v3.ogg |
 | 🌋 **Séisme** ✎ — *Il frappe le sol, et la terre jette ses ennemis à bas.* | active | 37 PM | ennemi / cc / portée 1 · carre rayon 2 | 3D8+{F/15} dégâts | coup_lourd · 🔊 melee sound.wav |
 
-### Niveau 10 — 2 existante(s) + 5 neuve(s)
+### Niveau 10 — 3 existante(s) + 4 neuve(s)
 
 | compétence | mode | coût | cible | effets | animation |
 |---|---|---|---|---|---|
-| 👹 **Avatar de la rage** — *Les clans le croient habité par l'esprit de la guerre.* | passive | — | permanent | F +5 | — |
+| 👹 **Avatar de la rage** — *Les clans le croient habité par l'esprit de la guerre, qui referme ses plaies.* | passive | — | permanent | F +5 · régén PV +1 | — |
 | 🌪️ **Carnage** ✎ — *Un cercle de mort, au centre duquel il hurle.* | active | 40 PM | ennemi / cc / portée 1 · carre rayon 2 | 3D8+{F/10} dégâts | balayage · 🔊 swish_3.wav |
 | 🪓 **Coup du fléau des clans** ✎ — *Le coup dont les chants des steppes se souviendront.* | active | 40 PM | ennemi / cc / portée 1 | 5D10+{F/6} dégâts | coup_lourd · 🔊 melee sound.wav |
 | 📯 **Cri du dernier clan** ✎ — *Le cri qui a précédé chaque victoire de son peuple.* | active | 40 PM | soi / portée 1 · carre rayon 2 | F 7+{R/10} Vol +7 · 5 tours | aura_bataille · 🔊 power_up_sound_v0.ogg |
@@ -561,7 +561,7 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 
 ## Duelliste 🤺
 
-### Niveau 1 — 0 existante(s) + 7 neuve(s)
+### Niveau 1 — 1 existante(s) + 6 neuve(s)
 
 | compétence | mode | coût | cible | effets | animation |
 |---|---|---|---|---|---|
@@ -571,9 +571,9 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 | 🗡️ **Coup droit** ✎ — *La première leçon de toute salle d'armes, exécutée à la perfection.* | active | 10 PM | ennemi / cc / portée 1 | 1D8+{Ag/10} dégâts | lame · 🔊 sword sound.wav |
 | ⚜️ **En garde** ✎ — *Il prend la garde, et l'on comprend qu'il ne sera pas facile à toucher.* | active | 10 PM | soi / portée 1 | Ag 2+{Cha/15} · esquive 6 · 3 tours | garde · 🔊 sword sound.wav |
 | 🦶 **Marche-fente** — *Un pas glissé, puis la détente : il est déjà au contact.* | active | 10 PM | soi / portée 1 | saut 2 cases | saut · 🔊 swish_4.wav |
-| ↩️ **Riposte** ✎ — *Il pare et rend la politesse dans le même mouvement.* | active | 10 PM | ennemi / cc / portée 1 | 1D8+{Ag/10} dégâts | lame · 🔊 sword sound.wav |
+| ↩️ **Riposte** — *Il pare et rend la politesse dans le même mouvement : le bras adverse en reste engourdi.* | active | 10 PM | ennemi / cc / portée 1 | 1D6+{Ag/10} dégâts · F -3 · 2 tours | lame · 🔊 sword sound.wav |
 
-### Niveau 2 — 0 existante(s) + 7 neuve(s)
+### Niveau 2 — 1 existante(s) + 6 neuve(s)
 
 | compétence | mode | coût | cible | effets | animation |
 |---|---|---|---|---|---|
@@ -582,7 +582,7 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 | ✂️ **Coup de manchette** ✎ — *La lame effleure le poignet, et l'arme pèse soudain plus lourd.* | active | 12 PM | ennemi / cc / portée 1 | 1D6 dégâts · F -3-{Ag/8} · 3 tours | saignee · 🔊 sword sound.wav |
 | 🧤 **Défi d'honneur** ✎ — *Il jette le gant, et son sang s'échauffe.* | active | 12 PM | soi / portée 1 | Ag 4+{Cha/7} Cha +4 · 4 tours | aura_bataille · 🔊 power_up_sound_v0.ogg |
 | 🩸 **Estafilade** ✎ — *Une entaille fine, qui saigne plus qu'on ne le croit.* | active | 12 PM | ennemi / cc / portée 1 | 1D6 dégâts · régén PV -1-{Ag/15} · 3 tours | saignee · 🔊 sword sound.wav |
-| ➡️ **Flèche** — *Une course en extension, la pointe en avant.* | active | 12 PM | soi / portée 1 | saut 2 cases | saut · 🔊 swish_4.wav |
+| ➡️ **Flèche** — *Une course en extension, la pointe en avant : il arrive lancé.* | active | 12 PM | soi / portée 1 | Ag +4 · saut 2 cases · 2 tours | saut · 🔊 swish_4.wav |
 | ⚔️ **Taille en tierce** ✎ — *Un coup haut, porté avec la grâce d'une révérence.* | active | 12 PM | ennemi / cc / portée 1 | 2D6+{Ag/12} dégâts | lame · 🔊 sword sound.wav |
 
 ### Niveau 3 — 3 existante(s) + 4 neuve(s)
@@ -607,11 +607,11 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 | ↗️ **Saut de côté** — *Il s'efface d'un bond et réapparaît dans le dos de l'adversaire.* | active | 18 PM | soi / portée 1 | saut 3 cases | saut · 🔊 swish_4.wav |
 | 🌀 **Volte** ✎ — *Une pirouette et sa lame fait le tour de ses adversaires.* | active | 18 PM | ennemi / cc / portée 1 · carre rayon 1 | 2D6+{Ag/15} dégâts | balayage · 🔊 swish_3.wav |
 
-### Niveau 5 — 1 existante(s) + 6 neuve(s)
+### Niveau 5 — 2 existante(s) + 5 neuve(s)
 
 | compétence | mode | coût | cible | effets | animation |
 |---|---|---|---|---|---|
-| ✋ **Main du prévôt** — *La main de celui qui enseigne : jamais crispée, jamais lâche.* | passive | — | permanent | Ag +3 | — |
+| ✋ **Main du prévôt** — *La main de celui qui enseigne : jamais crispée, jamais lâche, et la salle se tait quand elle se lève.* | passive | — | permanent | Ag +3 Cha +1 | — |
 | 🎭 **Prestance** — *La grâce du geste fait l'aura de l'homme : plus il est vif, plus on le regarde.* | passive | — | permanent | Cha {Ag/15} | — |
 | 📍 **Coup de pointe** ✎ — *La pointe trouve le cœur de la cible comme une aiguille son chas.* | active | 21 PM | ennemi / cc / portée 1 | 3D8+{Ag/12} dégâts | lame · 🔊 sword sound.wav |
 | 🔗 **Liement** ✎ — *Il enroule sa lame autour de l'autre et l'emporte.* | active | 21 PM | ennemi / cc / portée 1 | 1D8+2 dégâts · Ag -5-{Ag/10} F -5 · 4 tours | garde · 🔊 sword sound.wav |
@@ -629,15 +629,15 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 | 👣 **Pas de l'ombre** — *Il glisse d'une ombre à l'autre.* | active | 25 PM | soi / portée 1 | saut 4 cases | furtif · 🔊 swish_2.wav |
 | 🪭 **Éventail d'acier** ✎ — *La lame se déploie en éventail devant lui.* | active | 25 PM | ennemi / cc / portée 1 · cone longueur 2 | 3D6+{Ag/8} dégâts | impact_eclat_dore + nappe cone_tueur_demon · 🔊 sword sound.wav |
 
-### Niveau 7 — 0 existante(s) + 7 neuve(s)
+### Niveau 7 — 2 existante(s) + 5 neuve(s)
 
 | compétence | mode | coût | cible | effets | animation |
 |---|---|---|---|---|---|
-| 🗡️ **Lame vivante** — *L'épée n'est plus un outil : elle est le prolongement de son bras.* | passive | — | permanent | Ag +4 | — |
+| 🗡️ **Lame vivante** — *L'épée n'est plus un outil : elle est le prolongement de son bras, et pare d'elle-même.* | passive | — | permanent | Ag +4 · esquive 3 | — |
 | 🪶 **Panache** — *Il ne recule jamais sans un mot d'esprit.* | passive | — | permanent | Vol +4 | — |
 | 💫 **Assaut de grâce** ✎ — *Une série parfaite, enchaînée sans un faux pas.* | active | 29 PM | soi / portée 1 | Ag 8+{Cha/7} F +8 · 5 tours | aura_bataille · 🔊 power_up_sound_v0.ogg |
 | 🤫 **Botte secrète** ✎ — *Un coup transmis de maître à élève, jamais écrit.* | active | 29 PM | ennemi / cc / portée 1 | 3D10+{Ag/8} dégâts | saignee · 🔊 sword sound.wav |
-| 🦶 **Coup de pied de salle** ✎ — *Un coup de botte, que les règles tolèrent à peine.* | active | 29 PM | ennemi / cc / portée 1 | 3D10+{Ag/8} dégâts | poing · 🔊 melee sound.wav |
+| 🦶 **Coup de pied de salle** — *Un coup de botte, que les règles tolèrent à peine : l'adversaire en perd l'équilibre.* | active | 29 PM | ennemi / cc / portée 1 | 3D8+{Ag/8} dégâts · Ag -6 · 2 tours | poing · 🔊 melee sound.wav |
 | 🦋 **Coup du papillon** ✎ — *Une volte légère, et partout autour la lame a mordu.* | active | 29 PM | ennemi / cc / portée 1 · carre rayon 1 | 2D8+{Ag/10} dégâts | balayage · 🔊 swish_3.wav |
 | 🔗 **Prise de fer** ✎ — *Sa lame cloue celle de l'autre et la paralyse.* | active | 29 PM | ennemi / cc / portée 1 | 2D6+4 dégâts · F -6-{Ag/8} Ag -6 · 4 tours | garde · 🔊 sword sound.wav |
 
@@ -904,11 +904,11 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 | 🛡️ **Mur de boucliers** ✎ — *Il plante les pieds et lève le bouclier : la ligne tiendra.* | active | 8 PM + 3/round | soi / portée 1 | R 6+{Vol/6} Vol +6 | garde · 🔊 sword sound.wav |
 | 🩸 **Taillade aux jarrets** ✎ — *Une entaille basse, qui saigne longtemps.* | active | 15 PM | ennemi / cc / portée 1 | 1D6+1 dégâts · régén PV -2-{F/20} · 3 tours | saignee · 🔊 sword sound.wav |
 
-### Niveau 4 — 0 existante(s) + 7 neuve(s)
+### Niveau 4 — 1 existante(s) + 6 neuve(s)
 
 | compétence | mode | coût | cible | effets | animation |
 |---|---|---|---|---|---|
-| 🏋️ **Carrure** — *Des épaules faites pour porter l'acier et ceux qui tombent.* | passive | — | permanent | F +3 | — |
+| 🏋️ **Carrure** — *Des épaules faites pour porter l'acier et ceux qui tombent.* | passive | — | permanent | F +3 R +1 | — |
 | 👁️ **Œil du vétéran** — *Il voit venir le coup avant que l'autre ne le sache.* | passive | — | permanent | esquive 4 | — |
 | 🦘 **Bond du fantassin** — *Par-dessus le fossé, par-dessus le mort, droit sur l'ennemi.* | active | 18 PM | soi / portée 1 | saut 3 cases | saut · 🔊 swish_4.wav |
 | 🐏 **Coup de bélier** ✎ — *Tout le corps derrière l'épaule : l'ennemi recule et s'essouffle.* | active | 18 PM | ennemi / cc / portée 1 | 1D8 dégâts · F -4-{F/8} Ag -4 · 3 tours | coup_lourd · 🔊 melee sound.wav |
@@ -952,11 +952,11 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 | ⚔️ **Lame tournoyante** ✎ — *Trois coups en un, de gauche à droite et retour.* | active | 29 PM | ennemi / cc / portée 1 · rectangle longueur 1 largeur 3 | 3D8+{F/10} dégâts | balayage · 🔊 swish_3.wav |
 | 🛡️ **Tenue de ligne** ✎ — *Autour de lui, les boucliers se resserrent.* | active | 29 PM | soi / portée 1 · carre rayon 1 | R 5+{Vol/10} · 4 tours | garde · 🔊 sword sound.wav |
 
-### Niveau 8 — 0 existante(s) + 7 neuve(s)
+### Niveau 8 — 1 existante(s) + 6 neuve(s)
 
 | compétence | mode | coût | cible | effets | animation |
 |---|---|---|---|---|---|
-| 🌳 **Ossature de chêne** — *Les coups glissent sur lui comme la pluie sur l'écorce.* | passive | — | permanent | R +4 | — |
+| 🌳 **Ossature de chêne** — *Les coups glissent sur lui comme la pluie sur l'écorce.* | passive | — | permanent | R +4 · esquive 3 | — |
 | 🔩 **Volonté de fer** — *Ni la peur ni la fatigue n'entrent plus sous son casque.* | passive | — | permanent | Vol +4 | — |
 | 🛡️ **Garde du capitaine** ✎ — *Il tient le terrain comme on tient une promesse.* | active | 15 PM + 5/round | soi / portée 1 | R 10+{Vol/6} F +10 | garde · 🔊 sword sound.wav |
 | 🌀 **Moulinet** ✎ — *Une roue d'acier dont personne ne sort indemne.* | active | 33 PM | ennemi / cc / portée 1 · carre rayon 2 | 2D8+{F/10} dégâts | balayage · 🔊 swish_3.wav |
@@ -1910,7 +1910,7 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 | 😏 **Gouaille** ✎ — *Un bon mot lancé au bon moment : il reprend confiance.* | active | 18 PM | soi / portée 1 | Cha 6+{Ch/7} Ch +6 · 4 tours | chant · 🔊 power_up_sound_v1.ogg |
 | 🗡️ **Lame cachée** ✎ — *La lame sort de la manche au dernier moment.* | active | 18 PM | ennemi / cc / portée 1 | 2D8+{Ag/8} dégâts | lame · 🔊 sword sound.wav |
 
-### Niveau 5 — 2 existante(s) + 5 neuve(s)
+### Niveau 5 — 3 existante(s) + 4 neuve(s)
 
 | compétence | mode | coût | cible | effets | animation |
 |---|---|---|---|---|---|
@@ -1918,7 +1918,7 @@ Les vocations à magie ne reçoivent **aucune passive** neuve. Chaque active neu
 | 🐇 **Coup du lapin** ✎ — *Un coup sec à la nuque.* | active | 21 PM | ennemi / cc / portée 1 | 3D8+{Ag/12} dégâts | coup_lourd · 🔊 melee sound.wav |
 | 🐸 **Fiel de crapaud** ✎ — *Une lame trempée dans un fiel que vend l'apothicaire véreux.* | active | 21 PM | ennemi / cc / portée 1 | 1D8+2 dégâts · régén PV -2-{Int/15} · 4 tours | poison · 🔊 17.mp3 |
 | 📌 **Pluie de clous** ✎ — *Il jette une poignée de clous rouillés sous les pieds ennemis.* | active | 21 PM | ennemi / cc / portée 1 · cercle rayon 1 | 2D8+{Ag/10} dégâts | lame · 🔊 sword sound.wav |
-| 🤸 **Roulade** — *Une roulade sous les jambes de l'ennemi.* | active | 21 PM | soi / portée 1 | saut 3 cases | saut · 🔊 swish_4.wav |
+| 🤸 **Roulade** — *Une roulade sous les jambes de l'ennemi, et il se relève plus vif qu'avant.* | active | 21 PM | soi / portée 1 | Ag +5 · saut 3 cases · 2 tours | saut · 🔊 swish_4.wav |
 | 🫳 **Vol à l'arraché** ✎ — *Il arrache à sa victime ce qui lui restait de forces.* | active | 21 PM | ennemi / cc / portée 1 | 1D8+2 dégâts · 2D6+{Int/30} aux PM | furtif · 🔊 swish_2.wav |
 
 ### Niveau 6 — 4 existante(s) + 3 neuve(s)
