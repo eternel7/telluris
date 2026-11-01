@@ -3,7 +3,7 @@
 Chaque entrée sépare **Auteur** (décision, niveau 2) et **Proposé** (réponse ChatGPT non adoptée, niveau 4). Source : le fichier entre crochets dans `docs/lore/`. Lieux réellement en jeu : `lieu:*` du dump (catégories `ville`, `pays`, `portail`, `temple`, `guilde_aventurier`).
 
 ## Sommaire
-France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri · Camelot — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem · Petra · Sydney — Mythiques : Mu · Atlantis — Réseau des portails
+France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri · Camelot — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem · Petra · Aksoum · Sydney — Mythiques : Mu · Atlantis — Réseau des portails
 
 ---
 
@@ -241,7 +241,16 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 ## Jérusalem — [monde/20260819_frise_chronologique_de_telluris.md]
 **Auteur** : **Salomon a vécu après les trois frères** et le début de l'ère des portails. David est **reconnu par Jérusalem comme son roi** (pas de prise) ; « le royaume se divise » → « les cités avoisinantes diminuent leurs relations » ; réduire « royaume » au profit de « Cité-État » (11/10). Colonne réécrite : `monde/20261011_frise_chronologique_fusionnee.md` § 6.
 
-**Tableau (26/08)** : « héritage de Salomon », portail ancien, coûteux, mal compris, pas un passage libre.
+**Tableau (26/08)** : « héritage de Salomon », portail ancien, coûteux, mal compris, pas un passage libre. Salomon a bâti le transversal **Aksoum ↔ Jérusalem** pour la reine de Saba (Auteur, 01/11).
+
+## Aksoum — [cites/20261101_histoire_d_aksoum.md]
+**Auteur** (01/11, trois questionnaires) — pas de `lieu:aksoum` au dump.
+- Identité, par ordre : **cité de la reine** · des **éleveurs de pégases** · **marchande** (Adulis, mer Rouge, or, ivoire, encens) · des **stèles**.
+- **Une seule lignée** : Céphée et Cassiopée → Andromède → bien plus tard la **reine de Saba**. **Arwé** (roi-serpent des terres) ≠ monstre marin d'Andromède ; **tué par Angabo**, devenu roi, père de Saba. Persée et Andromède = récit ancien.
+- **Donjon** au **sanctuaire de la reine** (Sainte-Marie-de-Sion, Templiers) ; l'**Arche d'alliance** y est, gardée par un **être du donjon** unique. Deux **transversaux** : → **Jérusalem** (bâti par **Salomon**, pour la reine) ; → **Muziris** (Inde, à créer).
+- **Abou Simbel** : commerce prudent (Aksoum vend aux morts-vivants). **Pégases** : troupeaux sauvages des plateaux, dressage au haras royal.
+
+**Ouvert** : fonction de l'Arche, monde du donjon, bâtisseur du portail de Muziris, gouvernement, dates.
 
 ## Petra — [cites/20261024_histoire_de_petra.md]
 **Auteur** (24/10, cinq questionnaires sur une histoire ChatGPT) — carte `towns/petra_city.jpg` ; pas de `lieu:petra` au dump.

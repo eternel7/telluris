@@ -52,5 +52,5 @@
 
 ## Points encore ouverts
 
-- Histoire et identité d'**Aksoum** ; les autres lieux qui vendraient des pégases.
+- ~~Histoire et identité d'**Aksoum**~~ : arbitrée, `../cites/20261101_histoire_d_aksoum.md`. Les autres lieux qui vendraient des pégases.
 - Mesure de la « bonne réputation » à Camelot (seuil de relation) : mécanique à concevoir en jeu.
