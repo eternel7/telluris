@@ -18,6 +18,7 @@ from utils.characters import (
 )
 from utils.marche import debit_character
 from utils import montures
+from utils import recrutement
 from utils import escorte
 from utils import guides
 
@@ -101,6 +102,8 @@ def _payload(character: dict, lieu_doc: dict | None = None) -> dict:
 		"a_l_ecurie": (len(montures.montures_possedees(character, get_doc))
 					   - len(montures.montures_effectives(character, get_doc))),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
+		# Bouton 👥 Groupe de /play : une monture achetée/relâchée le fait apparaître/disparaître.
+		"groupe_visible": recrutement.groupe_visible(character, get_doc),
 	}
 	if lieu_doc is not None:
 		offres = []

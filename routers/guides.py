@@ -59,6 +59,8 @@ def _resync(character: dict) -> dict:
 		"focalisation": focalisation.payload_client(character, get_doc),
 		"guidage": focalisation.guidage(character, lieu_doc, find_docs, get_doc),
 		"guide": _monture_view(guide) if guide else None,
+		# Bouton 👥 Groupe de /play : un guide engagé suffit à le faire apparaître.
+		"groupe_visible": recrutement.groupe_visible(character, get_doc),
 	}
 
 

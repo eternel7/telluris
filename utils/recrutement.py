@@ -997,6 +997,18 @@ def compagnons_a_repartir(character: dict, get_doc_fn=None, compagnons: list | N
 	return any(int(av.get("attribute_points", 0) or 0) > 0 for av in membres)
 
 
+def groupe_visible(character: dict, get_doc_fn=None) -> bool:
+	"""Le bouton 👥 Groupe de /play a-t-il quelque chose à ouvrir ?
+
+	Vrai dès que le panneau montre quelqu'un : compagnon actif, monture (guide compris :
+	c'est un doc `monture:*`) ou personne escortée. Faux ⇒ bouton masqué."""
+	from utils import escorte  # import paresseux : escorte → quetes → ce module
+	lire = get_doc_fn or get_doc
+	return bool(groupe_effectif(character, lire)
+				or montures.montures_effectives(character, lire)
+				or escorte.proteges_effectifs(character, lire))
+
+
 def partager_xp(character: dict, xp: int, compagnons: list | None = None,
 				get_doc_fn=None) -> list:
 	"""Chaque membre de la COMPAGNIE gagne la MÊME XP que le principal — pas une part.

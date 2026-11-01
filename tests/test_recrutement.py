@@ -468,6 +468,29 @@ def test_groupe_effectif_filtre_les_partis(monde):
 	assert [a["_id"] for a in recrutement.groupe_effectif(c)] == [av["_id"]]
 
 
+def test_groupe_visible_des_quun_panneau_a_quelquun(monde):
+	"""Bouton 👥 de /play : masqué groupe vide ; un compagnon, une monture (guide compris)
+	ou un escorté suffit. Un id périmé ou une monture à l'écurie ne compte pas."""
+	lire = monde["docs"].get
+	assert recrutement.groupe_visible(perso(), lire) is False
+	assert recrutement.groupe_visible(perso(groupe=["aventurier:disparu"]), lire) is False
+
+	av = recrue(statut="embauche", embauche_par="character:u_1")
+	monde["docs"][av["_id"]] = av
+	assert recrutement.groupe_visible(perso(groupe=[av["_id"]]), lire) is True
+
+	bete = {"_id": "monture:a", "statut": "acquise", "acquise_par": "character:u_1"}
+	ecurie = {"_id": "monture:b", "statut": "acquise", "acquise_par": "character:u_1",
+			  "loge_a": "propriete:x"}
+	monde["docs"].update({bete["_id"]: bete, ecurie["_id"]: ecurie})
+	assert recrutement.groupe_visible(perso(montures=[bete["_id"]]), lire) is True
+	assert recrutement.groupe_visible(perso(montures=[ecurie["_id"]]), lire) is False
+
+	protege = {"_id": "protege:a", "statut": "escorte", "escorte_par": "character:u_1"}
+	monde["docs"][protege["_id"]] = protege
+	assert recrutement.groupe_visible(perso(proteges=[protege["_id"]]), lire) is True
+
+
 def test_departs_volontaires_sous_le_seuil(monde, monkeypatch):
 	monkeypatch.setattr(character_stats, "AFFINITE_SEUIL_DEPART", 30)
 	av = recrue(statut="embauche", embauche_par="character:u_1")
