@@ -2471,25 +2471,6 @@
 		}
 	},
 	{
-		"_id": "competence:coup_de_pied_de_salle",
-		"type": "competence",
-		"nom": "Coup de pied de salle",
-		"icon": "🦶",
-		"animation": "animation:capa_poing",
-		"description": "Un coup de botte, que les règles tolèrent à peine.",
-		"vocation": "duelliste",
-		"niveau": 7,
-		"mode": "active",
-		"cout_pm": 29,
-		"sensibilite_charge": 0,
-		"cible": "ennemi",
-		"jet": "cc",
-		"portee": 1,
-		"effets": {
-			"degats": "3D10+{Ag/8}"
-		}
-	},
-	{
 		"_id": "competence:coup_de_pieu",
 		"type": "competence",
 		"nom": "Coup de pieu",
@@ -9868,25 +9849,6 @@
 		"portee": 4,
 		"effets": {
 			"pm": "12+{Cha/6}"
-		}
-	},
-	{
-		"_id": "competence:riposte",
-		"type": "competence",
-		"nom": "Riposte",
-		"icon": "↩️",
-		"animation": "animation:capa_lame",
-		"description": "Il pare et rend la politesse dans le même mouvement.",
-		"vocation": "duelliste",
-		"niveau": 1,
-		"mode": "active",
-		"cout_pm": 10,
-		"sensibilite_charge": 0,
-		"cible": "ennemi",
-		"jet": "cc",
-		"portee": 1,
-		"effets": {
-			"degats": "1D8+{Ag/10}"
 		}
 	},
 	{

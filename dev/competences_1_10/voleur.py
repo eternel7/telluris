@@ -40,7 +40,10 @@ ENTREES = [
 	A(5, "Coup du lapin", "🐇", "frappe", "coup_lourd", "Un coup sec à la nuque."),
 	A(5, "Vol à l'arraché", "🫳", "siphon", "furtif", "Il arrache à sa victime ce qui lui restait de forces."),
 	A(5, "Pluie de clous", "📌", "zone_cercle", "lame", "Il jette une poignée de clous rouillés sous les pieds ennemis."),
-	A(5, "Roulade", "🤸", "saut", "saut", "Une roulade sous les jambes de l'ennemi."),
+	# même saut que « Saut de toit » (niv 3) : il se relève plus vif qu'il n'est tombé
+	L(5, "Roulade", "🤸", "saut", "Une roulade sous les jambes de l'ennemi, et il se relève plus vif qu'avant.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 21, "effets": {"saut": 3, "buffs": {"Ag": 5}, "duree": 2}},
+	  remplace="roulade"),
 	A(5, "Fiel de crapaud", "🐸", "poison", "poison", "Une lame trempée dans un fiel que vend l'apothicaire véreux."),
 	# ── Niveau 6 ──
 	A(6, "Coup de surin", "🔪", "frappe", "saignee", "Un coup vif dans le flanc, sans prévenir."),

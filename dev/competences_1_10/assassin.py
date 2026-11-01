@@ -41,7 +41,10 @@ ENTREES = [
 	  {"cible": "ennemi", "jet": "cc", "portee": 1, "cout_pm": 21, "effets": {"degats": "1D6", "regen_pv": "-2-{Int/20}", "regen_pm": "-1-{Int/30}", "duree": 3}},
 	  remplace="cigue"),
 	A(5, "Essence de mandragore", "🌿", "poison_pm", "poison", "Une essence qui ronge la volonté."),
-	A(5, "Saut du chat", "🐈", "saut", "saut", "D'un toit à l'autre, d'une ombre à l'autre."),
+	# même saut que « Saut de l'ombre » (niv 3) : il retombe sur ses pattes, insaisissable
+	L(5, "Saut du chat", "🐈", "saut", "D'un toit à l'autre, d'une ombre à l'autre, et il retombe toujours sur ses pattes.",
+	  {"cible": "soi", "portee": 1, "cout_pm": 21, "effets": {"saut": 3, "esquive": 6, "duree": 2}},
+	  remplace="saut_du_chat"),
 	A(5, "Concentration mortelle", "🎯", "posture", "marque", "Plus rien n'existe que la cible.", stats=("Ag", "F")),
 	# ── Niveau 6 ──
 	A(6, "Lame dans les reins", "🗡️", "frappe", "lame", "Un coup sous la cuirasse, là où elle ne protège pas."),
