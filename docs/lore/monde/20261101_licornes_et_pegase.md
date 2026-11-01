@@ -2,7 +2,7 @@
 
 - **Source :** séance Claude Code du 01/11/2026. Dictée vocale de l'Auteur : les licornes, montures possibles de Camelot ; Pégase, associé au tueur de Méduse.
 - **Créée :** 01/11/2026
-- **Statut :** **intention** de l'Auteur (« sûrement »), pas encore une décision arrêtée ; rien n'est implémenté en jeu. Les mythes ci-dessous sont des rappels ; les ancrages et points ouverts sont **proposés, non tranchés**.
+- **Statut :** intention de l'Auteur, puis **arbitrage** par deux questionnaires (§ ✍️ dernier message) qui **fait foi** ; rien n'est implémenté en jeu.
 - **Au dump (31/10)** : `espece:licorne` (tags `monture`, `magique`, `pure`, `proie`) et `espece:pegase` (tags `monture`, `vol`, `magique`) existent comme **espèces du bestiaire**, pas comme montures d'étable ; `espece:gorgone` aussi (`petrification`). Sort `sort:licorne_immaculee` (école Sainte, invocation) ; trophée `item:Corne_de_licorne`.
 
 ---
@@ -40,10 +40,17 @@
 1. **Licornes** : montures possibles de **Camelot**, liées à la **Dame du Lac** (pas à Viviane).
 2. **Pégase** : associé à **Persée**, tueur de Méduse et sauveur d'Andromède ; le récit qui circule à Telluris le fait **arriver sur Pégase** et tuer le monstre marin **par la tête de Méduse**.
 
-## Points ouverts (proposés, non tranchés)
+## ✍️ Auteur (01/11/2026) — arbitrage par deux questionnaires
 
-- **Cétô** : Méduse est, chez les Grecs, **fille de Cétô** — la Cétô domptée par Évenor qui protège sa progéniture et Atlantis (Auteur, 12/10). Et le monstre d'Andromède est un *kêtos*, « monstre marin », même mot. Un tueur de la fille de Cétô ne peut pas être neutre pour Atlantis : rumeur d'érudits, rancune de Cétô, ou aucun lien — **à arbitrer**.
-- **Où ancrer Persée et Pégase** : Joppé / Jaffa (rocher d'Andromède) · l'Éthiopie de Céphée et Cassiopée · Corinthe (source Pirène, Bellérophon) · Mycènes (fondée par Persée selon la légende) · l'Ouest lointain des Gorgones, près des Hespérides de Ladon.
-- **Bellérophon** : second cavalier, à garder en récit ou en rival de Persée, version concurrente (« le vrai cavalier de Pégase »), comme les « vrais Camelot ».
-- **Monture ou être unique** : des licornes et des pégases qu'on achète à une étable de Camelot, ou un seul **Pégase**, être unique, et des chevaux ailés ordinaires ? Le dump n'a qu'une espèce `espece:pegase`.
-- **Qui peut monter une licorne** : condition de pureté (réputation, vocation Sainte, aucun meurtre…) — rien de tel n'existe en jeu, ce serait une mécanique neuve.
+1. **Cétô et Méduse** : **théories contradictoires** — des PNJ voient dans la mort de Méduse, fille de Cétô, la cause des attaques marines récentes contre Atlantis, d'autres non ; jamais tranché.
+2. **Ancrage** : **Éthiopie** — royaume de Céphée et Cassiopée, rocher d'Andromède ; la cité-État qui le porte est **Aksoum** (cité à décrire : absente du lore et du dump au 31/10).
+3. **Bellérophon** : **récit seulement** — mentionné dans les livres, sans rôle en jeu.
+4. **Montures** : licornes **et** pégases sont des **espèces montables**, rares et chères — pas d'être unique.
+5. **Licorne** : vendue seulement à qui a une bonne **réputation à Camelot**.
+6. **Pégases** : achetables en **Éthiopie** et à **Camelot**, et « sûrement d'autres endroits que le lore justifiera ».
+7. **Persée et Andromède** : **récit ancien** — nul ne sait ce qu'ils sont devenus.
+
+## Points encore ouverts
+
+- Histoire et identité d'**Aksoum** ; les autres lieux qui vendraient des pégases.
+- Mesure de la « bonne réputation » à Camelot (seuil de relation) : mécanique à concevoir en jeu.

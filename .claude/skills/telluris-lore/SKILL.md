@@ -148,11 +148,12 @@ Arbitrage de l'Auteur (16/10) — séance `docs/lore/monde/20261016_dragons_et_s
 - Faiblesses : **description seule**, pas forcément propres à un être.
 
 ### Licornes et Pégase
-Intention de l'Auteur (01/11, « sûrement ») — `docs/lore/monde/20261101_licornes_et_pegase.md` ; rien en jeu (`espece:licorne`, `espece:pegase` = bestiaire, pas étable).
+Arbitrage de l'Auteur (01/11, deux questionnaires) — `docs/lore/monde/20261101_licornes_et_pegase.md` ; rien en jeu (`espece:licorne`, `espece:pegase` = bestiaire, pas étable).
 
-- **Licornes** = montures possibles de **Camelot**, liées à la **Dame du Lac** (≠ Viviane).
-- **Pégase** = associé à **Persée** (pas Thésée) : Méduse décapitée, Andromède sauvée, monstre marin **pétrifié par la tête**, Persée **arrivant sur Pégase** — version tardive (les Grecs : sandales d'Hermès ; cavalier = Bellérophon), donc mythe déformé, admis.
-- Ouvert : Méduse **fille de Cétô** (Atlantis) ; ancrage géographique ; Bellérophon ; être unique ou espèce montable.
+- **Licornes et pégases** = **espèces montables** (pas d'être unique). **Licorne** liée à la **Dame du Lac** (≠ Viviane), vendue à **Camelot** à qui y a une bonne **réputation**. **Pégases** : **Éthiopie** et **Camelot**, d'autres lieux si le lore le justifie.
+- **Pégase** = associé à **Persée** (pas Thésée) : Méduse décapitée, Andromède sauvée, monstre marin **pétrifié par la tête**, Persée **arrivant sur Pégase** — version tardive (les Grecs : sandales d'Hermès ; cavalier = Bellérophon), donc mythe déformé, admis. Persée et Andromède = **récit ancien**, sort inconnu ; **Bellérophon** = récit seulement.
+- **Éthiopie** (Céphée, Cassiopée, rocher d'Andromède) = cité-État d'**Aksoum**, à décrire.
+- **Méduse fille de Cétô** : théories contradictoires de PNJ — cause ou non des attaques marines contre Atlantis ; jamais tranché.
 
 ### Contradictions ouvertes
 À signaler si un texte en dépend, jamais à trancher seul :
