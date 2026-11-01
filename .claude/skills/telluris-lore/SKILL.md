@@ -111,6 +111,7 @@ Une ligne par cité ; portails, monuments et décisions de l'Auteur : [reference
 - **Atlantis** — au-delà de Gibraltar, l'une des **premières cités des Lignées** à l'Ouest ; anneaux **tracés par Poséidon** (« la mer est le seul chemin »), **remparts d'orichalque** (première puissance et monnaie d'échange ; insignes du rang S), **temple de Poséidon** au centre. **Seule** à avoir **refusé un des frères** ; un **dirigeant au nom rayé** tenta d'ouvrir la ville, une épidémie suivit, il fut **sacrifié à Poséidon** → règles d'isolement (aucun étranger au-delà du port extérieur, aucun portail, sortie sous l'aval du temple). Aucun donjon de portail. **Cétô** domptée par **Évenor** (prêtre-chaman) protège sa progéniture et la cité ; **guilde du port extérieur** (remparts extérieurs, **par la mer, dès le rang A**). Récits mêlés avec Mu, dont Lutecia et les ports **rient**. Gouvernement ouvert. `docs/lore/cites/20261012_histoire_d_atlantis.md`, image `towns/atlantis_capital.jpg`.
 - **Camelot** — **fondée par Arthur** juste après la Vague, à la croisée de donjons perturbés (Auteur, 21/10) ; **Winchester** = bourg voisin, pas son nom ; la **Table ronde** gouverne (ordre vivant + table d'arbitrage de l'île + héritage revendiqué par la Guilde de Londres) ; les douze batailles d'Arthur sont douze **débordements de donjons**, récit **non altéré** (jamais « déformé en batailles contre des hommes ») ; Camlann, Avalon, Merlin : théories ouvertes ; chaudron d'Annwn, **pas de Graal** ; accès tôt par Douvres.
 - **Petra** — cité de l'eau et de la pierre, née à l'Âge des Remparts ; Vague et séismes simultanés, **aucun déclin** ; 3 portails transversaux (Khazneh → Alexandrie, ad-Deir → Bucarest, Qasr al-Bint → Muziris) et 4 donjons dans les tombeaux royaux ; Moïse et Aaron **retirés** ; veto des gardiens des sources (Auteur, 24/10).
+- **Aksoum** — cité de la **reine** (Cassiopée → Andromède → reine de Saba : une lignée), des **pégases** (plateaux, haras royal), marchande (Adulis) ; donjon au sanctuaire de Sainte-Marie-de-Sion, l'**Arche** gardée par un être du donjon ; transversaux → Jérusalem (Salomon) et → Muziris (Auteur, 01/11).
 - **Venise**, **Gênes**, **Bruges**, **Aix-la-Chapelle**, **Cordoue**, **Constantinople**, **Babylone**, **Jérusalem** : voir la référence.
 
 
@@ -146,6 +147,14 @@ Arbitrage de l'Auteur (16/10) — séance `docs/lore/monde/20261016_dragons_et_s
 - Espèces : **balaur** (le monstre de Vlad), **dragon-hydre**, **Mušḫuššu** (dragon de Marduk, porte d'Ishtar), **Xiuhcóatl** (serpent de feu, arme de Huitzilopochtli). Êtres uniques, boss : **Zmeï Gorynytch** (pont Kalinov), **Ladon** (Hespérides, né de Cétô ou d'Échidna : disputé), **Yamata no Orochi** (Izumo), **Illuyanka** (Anatolie). **Apep** : mythe égyptien en description.
 - **Tiamat** (puissance primordiale ordonnée par Marduk) et **Quetzalcoatl** (dieu) : **hors bestiaire**.
 - Faiblesses : **description seule**, pas forcément propres à un être.
+
+### Licornes et Pégase
+Arbitrage de l'Auteur (01/11, deux questionnaires) — `docs/lore/monde/20261101_licornes_et_pegase.md` ; rien en jeu (`espece:licorne`, `espece:pegase` = bestiaire, pas étable).
+
+- **Licornes et pégases** = **espèces montables** (pas d'être unique). **Licorne** liée à la **Dame du Lac** (≠ Viviane), vendue à **Camelot** à qui y a une bonne **réputation**. **Pégases** : **Éthiopie** et **Camelot**, d'autres lieux si le lore le justifie.
+- **Pégase** = associé à **Persée** (pas Thésée) : Méduse décapitée, Andromède sauvée, monstre marin **pétrifié par la tête**, Persée **arrivant sur Pégase** — version tardive (les Grecs : sandales d'Hermès ; cavalier = Bellérophon), donc mythe déformé, admis. Persée et Andromède = **récit ancien**, sort inconnu ; **Bellérophon** = récit seulement.
+- **Éthiopie** (Céphée, Cassiopée, rocher d'Andromède) = cité-État d'**Aksoum** (§ Cités-États).
+- **Méduse fille de Cétô** : théories contradictoires de PNJ — cause ou non des attaques marines contre Atlantis ; jamais tranché.
 
 ### Contradictions ouvertes
 À signaler si un texte en dépend, jamais à trancher seul :

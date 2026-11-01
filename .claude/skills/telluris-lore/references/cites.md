@@ -3,7 +3,7 @@
 Chaque entrée sépare **Auteur** (décision, niveau 2) et **Proposé** (réponse ChatGPT non adoptée, niveau 4). Source : le fichier entre crochets dans `docs/lore/`. Lieux réellement en jeu : `lieu:*` du dump (catégories `ville`, `pays`, `portail`, `temple`, `guilde_aventurier`).
 
 ## Sommaire
-France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri · Camelot — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem · Petra · Sydney — Mythiques : Mu · Atlantis — Réseau des portails
+France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri · Camelot — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem · Petra · Aksoum · Sydney — Mythiques : Mu · Atlantis — Réseau des portails
 
 ---
 
@@ -168,6 +168,8 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 - **Progression** : Camelot et Cath Palug E–D · Bête glatissante C · Twrch Trwyth B · **géant du Mont-Saint-Michel B, voire plus** (Auteur, 22/10 : remplace D) · Dinas Emrys A · Avalon et Annwn S.
 - **Géant du Mont-Saint-Michel** (Auteur, 22/10) : un **vrai géant**, deux à trois fois un ogre (pas l'ogre des récits), **toujours Seigneur** ; zone de la baie avec des géants ordinaires plus faibles ; porte la **massue de fer** et la **tunique de barbes** (trophées de la *Morte Arthure* et de Malory), **non fabricables**, hors de portée de toute Lignée. `dev/gen_geants_mont_saint_michel.py` ; séance § 19.
 
+- **Licornes** (Auteur, 01/11) : **espèce montable** vendue à Camelot à qui y a une bonne **réputation**, liée à la **Dame du Lac** (pas à Viviane) — ancrage : Physiologus, *La Dame à la licorne*, licorne d'Écosse ; aucun texte arthurien ne les lie. **Pégases** aussi en vente à Camelot (et en Éthiopie, Aksoum). Non implémenté (`espece:licorne`, `espece:pegase` = bestiaire). [monde/20261101_licornes_et_pegase.md]
+
 **Ouvert** : noms et Lignées des chevaliers PNJ ; récits propres de Caerleon, Cadbury, Tintagel.
 
 ## Constantinople — [cites/20260824_decrit_constantinople_telluris.md]
@@ -239,7 +241,16 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 ## Jérusalem — [monde/20260819_frise_chronologique_de_telluris.md]
 **Auteur** : **Salomon a vécu après les trois frères** et le début de l'ère des portails. David est **reconnu par Jérusalem comme son roi** (pas de prise) ; « le royaume se divise » → « les cités avoisinantes diminuent leurs relations » ; réduire « royaume » au profit de « Cité-État » (11/10). Colonne réécrite : `monde/20261011_frise_chronologique_fusionnee.md` § 6.
 
-**Tableau (26/08)** : « héritage de Salomon », portail ancien, coûteux, mal compris, pas un passage libre.
+**Tableau (26/08)** : « héritage de Salomon », portail ancien, coûteux, mal compris, pas un passage libre. Salomon a bâti le transversal **Aksoum ↔ Jérusalem** pour la reine de Saba (Auteur, 01/11).
+
+## Aksoum — [cites/20261101_histoire_d_aksoum.md]
+**Auteur** (01/11, trois questionnaires) — carte `towns/aksoum_capital.jpg` (retenue ; **enceinte ouverte à l'ouest voulue** : palais, haras, bassin hors des murs) ; en jeu : `lieu:aksoum` (`dev/gen_aksoum.py`), coin sud-est de `lieu:afrique_du_nord` en (85, 45).
+- Identité, par ordre : **cité de la reine** · des **éleveurs de pégases** · **marchande** (Adulis, mer Rouge, or, ivoire, encens) · des **stèles**.
+- **Une seule lignée** : Céphée et Cassiopée → Andromède → bien plus tard la **reine de Saba**. **Arwé** (roi-serpent des terres) ≠ monstre marin d'Andromède ; **tué par Angabo**, devenu roi, père de Saba. Persée et Andromède = récit ancien.
+- **Donjon** au **sanctuaire de la reine** (Sainte-Marie-de-Sion, Templiers) ; l'**Arche d'alliance** y est, gardée par un **être du donjon** unique. Deux **transversaux** : → **Jérusalem** (bâti par **Salomon**, pour la reine) ; → **Muziris** (Inde, à créer).
+- **Abou Simbel** : commerce prudent (Aksoum vend aux morts-vivants). **Pégases** : troupeaux sauvages des plateaux, dressage au haras royal.
+
+**Ouvert** : fonction de l'Arche, monde du donjon, bâtisseur du portail de Muziris, gouvernement, dates.
 
 ## Petra — [cites/20261024_histoire_de_petra.md]
 **Auteur** (24/10, cinq questionnaires sur une histoire ChatGPT) — carte `towns/petra_city.jpg` ; pas de `lieu:petra` au dump.
@@ -263,7 +274,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 	- **Orichalque** (volcan et montagnes des anneaux) : **première source de puissance** et **première monnaie d'échange** ; **tous les remparts** en sont faits ; les Atlantes l'**apportent eux-mêmes** (Cordoue, Bruges, Gênes, Venise, Lutecia par la Seine) ; insignes du **rang S** tous atlantes (lore seul). Temple central = **temple de Poséidon**.
 	- **Refus** de la visite d'un des frères (lequel : ouvert) — **premiers, et sûrement les seuls**. Aujourd'hui lu comme un **isolement volontaire**.
 	- **Dirigeant sans nom** (Âge des Portails) : tente d'**ouvrir la ville** → **épidémie** → **sacrifié à Poséidon**, nom **rayé**. Règles : aucun étranger au-delà du port extérieur, aucun portail sur l'île, aucune sortie sans l'aval du temple. Épidémie : **théories contradictoires** (dieu, navires étrangers, coïncidence exploitée par les prêtres).
-	- **Aucun donjon de portail.** Monstres marins à l'assaut depuis peu ; **Évenor**, prêtre de Poséidon et chaman surpuissant, a dompté **Cétô** (femelle), qui protège sa progéniture et la cité ; l'enceinte extérieure se délabre. Cétô mère d'Échidna = **rumeur d'érudits**.
+	- **Aucun donjon de portail.** Monstres marins à l'assaut depuis peu ; **Évenor**, prêtre de Poséidon et chaman surpuissant, a dompté **Cétô** (femelle), qui protège sa progéniture et la cité ; l'enceinte extérieure se délabre. Cétô mère d'Échidna = **rumeur d'érudits**. Cétô mère de **Méduse** (tuée par Persée) : **théories contradictoires** de PNJ, cause ou non des attaques marines (Auteur, 01/11 ; monde/20261101_licornes_et_pegase.md).
 	- **Guilde du port extérieur** : seule présence étrangère tolérée ; mission principale, **sécuriser les remparts extérieurs** ; l'aventurier y va **par la mer, dès le rang A**, jamais par portail. Gouvernement : **ouvert**. Pas de `lieu:*`.
 	- **Récits mêlés** avec Mu (« Atlantis a sombré ») ; Lutecia et les ports en contact **en rient**. **Pas de guerre** (celle de Platon est écartée).
 - **Mu — l'oubli des causes** (Auteur, 12/10) [cites/20261012_histoire_d_atlantis.md § 1.12] : nul au dehors ne connaît le sort de Mu, et Mu a oublié les vraies raisons de son engloutissement — **ses dirigeants d'alors les ont cachées**, en invoquant la **tectonique des plaques et les volcans** du continent.
