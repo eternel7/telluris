@@ -56,11 +56,11 @@ test('pied : métier échappé et prix de la question', () => {
 	assert.ok(html.includes('&lt;b>') && html.includes('5 cu la question'));
 });
 
-test('départ : le sac plein retient le joueur', () => {
+test('départ : le sac plein prévient sans retenir', () => {
 	assert.deepStrictEqual(_guideDepartEtat({ sac_plein: false }), { peutPartir: true, note: '' });
 	const plein = _guideDepartEtat({ sac_plein: true });
-	assert.strictEqual(plein.peutPartir, false);
-	assert.ok(plein.note.includes('Reprenez'));
+	assert.strictEqual(plein.peutPartir, true);
+	assert.ok(plein.note.includes('garde ce que contient son sac'));
 });
 
 test('congédier grisé hors auberge seulement, interroger toujours offert', () => {

@@ -11832,10 +11832,10 @@ function guideDemanderLieu() {
 }
 // ── Le guide prévient avant la sortie de sa cité ─────────────────────────────────
 let _guideDepartSuite = null;
-// Sac plein : on ne part pas avant de l'avoir repris, rien ne doit disparaître en silence.
+// Sac plein : on peut partir quand même, il garde son sac — la note prévient, rien ne bloque.
 function _guideDepartEtat(a) {
 	return a.sac_plein
-		? { peutPartir: false, note: "Reprenez d'abord ce qu'il porte (panneau 👥) : il garde son sac s'il reste ici." }
+		? { peutPartir: true, note: "⚠️ Il garde ce que contient son sac s'il reste ici : reprenez-le d'abord (panneau 👥)." }
 		: { peutPartir: true, note: '' };
 }
 // `suite` : le geste à rejouer s'il part quand même (connexion, seuil de portail).
@@ -11848,7 +11848,7 @@ function _ouvrirGuideDepart(a, suite) {
 	if (a.image) img.src = a.image;
 	document.getElementById('guide-depart-replique').textContent = a.replique || '';
 	const note = document.getElementById('guide-depart-note');
-	note.hidden = etat.peutPartir;
+	note.hidden = !etat.note;
 	note.textContent = etat.note;
 	document.getElementById('guide-depart-ok').disabled = !etat.peutPartir;
 	document.getElementById('guide-depart-overlay').classList.remove('clauses-hidden');

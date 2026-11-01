@@ -325,8 +325,8 @@ def image_adieu(guide: dict, existe_fn=os.path.isfile) -> str:
 
 
 def avertissement(guide: dict, regles: dict, lieu_id: str, get_doc_fn, portail: bool = False) -> dict:
-	"""Ce qu'il dit au clic sur la connexion. `sac_plein` : il faudra d'abord reprendre ce qu'il
-	porte, rien de ce qui reste à une cité ne doit partir avec le joueur ni disparaître."""
+	"""Ce qu'il dit au clic sur la connexion. `sac_plein` : le client prévient qu'il garde son sac
+	s'il reste — au joueur de reprendre ses affaires avant de confirmer (aucun refus)."""
 	return {
 		"prenom": guide.get("prenom", ""),
 		"nom": guide.get("nom", ""),
@@ -339,9 +339,8 @@ def avertissement(guide: dict, regles: dict, lieu_id: str, get_doc_fn, portail: 
 
 def laisser_partir(character: dict, guide: dict) -> tuple[bool, str]:
 	"""Il reste là, sans rancune. Le cap qu'il a posé a été PAYÉ : il perd sa signature et devient
-	un cap ordinaire, sinon `focalisation_effective` l'éteindrait. Mute les deux docs, sans save."""
-	if guide.get("inventaire"):
-		return False, "Reprenez d'abord ce que porte votre guide."
+	un cap ordinaire, sinon `focalisation_effective` l'éteindrait. Mute les deux docs, sans save.
+	Sac plein : il le garde, comme au congédiement (`congedier`)."""
 	focus = character.get("focalisation")
 	if isinstance(focus, dict) and focus.get("guide") == guide.get("_id"):
 		focus.pop("guide")

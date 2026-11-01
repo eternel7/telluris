@@ -285,15 +285,15 @@ def test_confirme_il_reste_et_le_groupe_continue(monde, franchir):
 	assert reponse is None and parti is guide and guide["statut"] == "parti" and char["montures"] == []
 
 
-def test_confirme_avec_un_sac_plein_refuse(monde, franchir):
+def test_confirme_avec_un_sac_plein_il_part_avec(monde, franchir):
 	char = _perso()
 	_engage(monde, char)
 	guide = _guide_doc(monde, char)
 	guide["inventaire"] = ["item:sac"]
 	assert franchir(char, "lieu:france")[0]["guide_avertissement"]["sac_plein"] is True
-	with pytest.raises(HTTPException) as e:
-		franchir(char, "lieu:france", guide_adieu=True)
-	assert e.value.status_code == 409 and guide["statut"] == "acquise"
+	reponse, parti = franchir(char, "lieu:france", guide_adieu=True)
+	assert reponse is None and parti is guide and guide["statut"] == "parti"
+	assert guide["inventaire"] == ["item:sac"] and char["montures"] == []
 
 
 def test_un_lien_portail_le_fait_partir_vers_n_importe_quel_lieu(monde, monkeypatch):

@@ -220,10 +220,10 @@ def test_laisser_partir_ne_touche_pas_le_cap_du_joueur():
 	assert guides.laisser_partir(perso, g)[0] and perso["focalisation"] == f
 
 
-def test_laisser_partir_refuse_tant_que_son_sac_n_est_pas_vide():
+def test_laisser_partir_avec_son_sac_plein_il_le_garde():
 	g, perso = dict(_guide(), inventaire=["item:sac"]), _perso()
-	assert guides.laisser_partir(perso, g)[0] is False
-	assert g["statut"] == "acquise" and perso["montures"] == ["monture:guide_a"]
+	assert guides.laisser_partir(perso, g)[0] is True
+	assert g["statut"] == "parti" and perso["montures"] == [] and g["inventaire"] == ["item:sac"]
 
 
 def test_laisser_partir_ne_laisse_aucune_rancune():
