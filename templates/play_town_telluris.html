@@ -1704,6 +1704,8 @@
 			background: radial-gradient(circle, rgba(var(--passage-rgb), 0.95) 0 35%, rgba(var(--passage-rgb), 0.35) 70%, transparent 100%);
 			box-shadow: 0 0 calc(var(--cell-w) * 0.25) rgba(var(--passage-rgb), 0.55);
 		}
+		/* Pictogramme effacé quand on est DEBOUT sur la case (`.ici`, `_majHaloPassages`). */
+		.passage-marque.ici .passage-icone { display: none; }
 		.passage-icone {
 			position: absolute; inset: 0;
 			display: flex; align-items: center; justify-content: center;
@@ -4468,6 +4470,9 @@
 			const p = PASSAGES[m.dataset.i];
 			const proche = proches.has(p);
 			m.classList.toggle('proche', proche);
+			// Debout sur la case : le pictogramme s'efface (la liste « Lieux » nomme déjà le lieu),
+			// comme le toast, qui ne part pas tant qu'on est sur un passage.
+			m.classList.toggle('ici', p.x === POSITIONS.x && p.y === POSITIONS.y);
 			// Une annonce par destination (par métier pour une boutique) et par chargement de
 			// page (`passagesAAnnoncer`) ; celui qu'on foule compte comme annoncé.
 			const cle = clePassageAnnonce(p);
