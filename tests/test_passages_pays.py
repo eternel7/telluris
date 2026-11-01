@@ -3,12 +3,14 @@
 # voilées, la mer à 1 laissée claire) et `lieux.passages_carte` (un marqueur par connexion,
 # libellé de la DESTINATION, filtré comme la liste des sous-lieux).
 
+from utils import enseignes_icones
 from utils.lieux import passages_carte, voile_hors_pays
 
 DOCS = {
 	"lieu:espagne": {"label": "Espagne"},
 	"lieu:chartres": {"label": "Chartres"},
 	"lieu:france": {"label": "France"},
+	"lieu:boucherie_du_pont": {"label": "Au Bon Couteau", "categorie": "boucherie"},
 }
 get_doc = DOCS.get
 JAMAIS_FERMEE = lambda conn: False
@@ -27,7 +29,8 @@ def test_un_marqueur_par_noeud_de_la_carte_avec_le_libelle_de_la_destination():
 	c = conn("link:a", {"lieu": "lieu:france", "pos": [26, 38], "label": "Hendaye côté France"},
 		{"lieu": "lieu:espagne", "pos": [52, 7], "label": "Plage d'Hendaye"})
 	assert passages_carte([c], "lieu:france", JAMAIS_FERMEE, get_doc) == [
-		{"x": 26, "y": 38, "link_id": "link:a", "type": "chemin", "label": "Plage d'Hendaye"}]
+		{"x": 26, "y": 38, "link_id": "link:a", "type": "chemin", "label": "Plage d'Hendaye",
+		 "categorie": None, **enseignes_icones.ROUTE}]
 
 
 def test_sans_libelle_de_noeud_on_prend_celui_du_lieu_destination():
@@ -55,3 +58,22 @@ def test_plusieurs_liens_vers_la_meme_destination_depuis_une_case_dedoublonnes()
 	liens = [conn(f"link:c{i}", {"lieu": "lieu:chartres", "pos": [i, 0]},
 		{"lieu": "lieu:france", "pos": [41, 14]}, "pays") for i in range(3)]
 	assert len(passages_carte(liens, "lieu:france", JAMAIS_FERMEE, get_doc)) == 1
+
+
+def test_marqueur_vers_une_boutique_porte_famille_pictogramme_et_metier():
+	c = conn("link:b", {"lieu": "lieu:france", "pos": [3, 4]},
+		{"lieu": "lieu:boucherie_du_pont", "pos": [0, 0]}, "ville")
+	(m,) = passages_carte([c], "lieu:france", JAMAIS_FERMEE, get_doc)
+	assert m["categorie"] == "boucherie"
+	assert m["label"] == "Au Bon Couteau"
+	famille, icone, metier = enseignes_icones.METIERS["boucherie"]
+	assert (m["famille"], m["icone"], m["metier"]) == (famille, icone, metier)
+	assert m["rgb"] == enseignes_icones.FAMILLES[famille]
+
+
+def test_connexion_interne_reste_une_route_meme_dans_une_boutique():
+	"""Elle mène au lieu où l'on EST : ni pictogramme ni métier."""
+	c = conn("link:i", {"lieu": "lieu:boucherie_du_pont", "pos": [1, 1]},
+		{"lieu": "lieu:boucherie_du_pont", "pos": [5, 5]})
+	for m in passages_carte([c], "lieu:boucherie_du_pont", JAMAIS_FERMEE, get_doc):
+		assert m["metier"] is None and m["icone"] is None and m["categorie"] is None

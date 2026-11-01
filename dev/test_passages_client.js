@@ -1,7 +1,7 @@
 // dev/test_passages_client.js
 //
-// Tests d'EXÉCUTION du halo de proximité des passages d'une carte de pays
-// (play_town_telluris.html).
+// Tests d'EXÉCUTION du halo de proximité des passages d'une carte (pays ou ville) et du
+// texte de son toast (play_town_telluris.html).
 //
 //   node dev/test_passages_client.js     # sort en code 1 au premier échec
 //
@@ -98,6 +98,26 @@ t('la frontière la plus proche l\'emporte', () => {
 	const v = ['10000', '10000', '10000', '10000', '10000'];
 	const a = directionFrontiere(v, 1, 2, 4);
 	assert.ok(Math.abs(Math.abs(a) - 180) < 1, 'attendu ~180°, obtenu ' + a);
+});
+
+vm.runInThisContext(extraire('textePassageProche'));
+vm.runInThisContext(extraire('clePassageAnnonce'));
+
+t('boutique : le toast nomme le MÉTIER seul, sans l\'enseigne', () => {
+	const p = { label: 'Au Bon Couteau', metier: 'une boucherie', link_id: 'link:b' };
+	assert.strictEqual(textePassageProche(p), 'Une boucherie est proche.');
+});
+t('route : le toast garde le libellé de la destination', () => {
+	assert.strictEqual(textePassageProche({ label: 'Chartres', metier: null }), 'Un passage est proche : Chartres');
+	assert.strictEqual(textePassageProche({ label: '' }), 'Un passage est proche : route');
+});
+t('deux boucheries : même clé d\'annonce (un seul toast)', () => {
+	const a = { label: 'A', metier: 'une boucherie', link_id: 'link:a' };
+	const b = { label: 'B', metier: 'une boucherie', link_id: 'link:b' };
+	assert.strictEqual(clePassageAnnonce(a), clePassageAnnonce(b));
+});
+t('deux routes : une clé par destination', () => {
+	assert.notStrictEqual(clePassageAnnonce({ label: 'A', link_id: 'l' }), clePassageAnnonce({ label: 'B', link_id: 'l' }));
 });
 
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).\n`);

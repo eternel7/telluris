@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from db.config import db, get_doc, save_doc, find_docs
 from utils.characters import get_selected_character
 from utils.auth import get_current_user
-from utils import acces, capacites, enseignes, pnj as pnj_util, proprietes
+from utils import acces, capacites, enseignes, enseignes_icones, pnj as pnj_util, proprietes
 from models import character_stats
 
 # Répertoires d'images servis par les mounts /towns et /pnj (cf. main.py).
@@ -102,12 +102,15 @@ def voile_hors_pays(cells) -> list[str]:
 
 
 def passages_carte(connexions, lieu_id: str, est_fermee, get_doc_fn=get_doc) -> list[dict]:
-	"""Marqueurs de passage d'une carte : `[{x, y, link_id, type, label}]`, un par nœud de
-	`connexions` posé sur `lieu_id` avec un `pos`. `label` = celui du nœud DESTINATION
-	(`noeud_destination`, vu depuis la case du marqueur), sinon le libellé de son lieu ;
-	`type` = `metadata.type` (ville, chemin, pays…). Une connexion interne pose un marqueur
-	à chaque extrémité. `est_fermee(conn)` écarte ce que la liste des sous-lieux cache.
-	Dédoublonné par case et libellé (plusieurs liens vers la même ville depuis une case)."""
+	"""Marqueurs de passage d'une carte : `[{x, y, link_id, type, label, categorie, famille,
+	rgb, icone, metier}]`, un par nœud de `connexions` posé sur `lieu_id` avec un `pos`.
+	`label` = celui du nœud DESTINATION (`noeud_destination`, vu depuis la case du marqueur),
+	sinon le libellé de son lieu ; `type` = `metadata.type` (ville, chemin, pays…) ;
+	`categorie` et le bloc `enseignes_icones.icone_lieu` = ceux du lieu DESTINATION (couleur,
+	pictogramme, « une boucherie »). Une connexion interne pose un marqueur à chaque extrémité,
+	toujours en `route` (elle mène au lieu où l'on est). `est_fermee(conn)` écarte ce que la
+	liste des sous-lieux cache. Dédoublonné par case et libellé (plusieurs liens vers la même
+	ville depuis une case)."""
 	out, vus = [], set()
 	for conn in connexions or []:
 		if est_fermee(conn):
@@ -117,16 +120,20 @@ def passages_carte(connexions, lieu_id: str, est_fermee, get_doc_fn=get_doc) -> 
 			if node.get("lieu") != lieu_id or len(pos) < 2 or node.get("bouton") is False:
 				continue
 			x, y = pos[0], pos[1]
-			dest, _interne = noeud_destination(conn, lieu_id, {"x": x, "y": y})
+			dest, interne = noeud_destination(conn, lieu_id, {"x": x, "y": y})
 			if dest is None:
 				continue
-			label = dest.get("label") or ((get_doc_fn(dest.get("lieu")) or {}).get("label")) or ""
+			doc_dest = get_doc_fn(dest.get("lieu")) or {}
+			label = dest.get("label") or doc_dest.get("label") or ""
 			cle = (x, y, label)
 			if cle in vus:
 				continue
 			vus.add(cle)
-			out.append({"x": x, "y": y, "link_id": conn.get("_id"),
-				"type": (conn.get("metadata") or {}).get("type"), "label": label})
+			marque = {"x": x, "y": y, "link_id": conn.get("_id"),
+				"type": (conn.get("metadata") or {}).get("type"), "label": label,
+				"categorie": None if interne else doc_dest.get("categorie")}
+			marque.update(enseignes_icones.ROUTE if interne else enseignes_icones.icone_lieu(doc_dest))
+			out.append(marque)
 	return out
 
 

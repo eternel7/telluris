@@ -968,14 +968,15 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 
 	access = get_lieu_directions(current_user, grid_doc, position)
 
-	# Carte de PAYS : voile sur le hors-pays (cases à 0) et marqueurs de toutes ses connexions,
-	# filtrées comme la liste des sous-lieux. Les autres lieux n'en portent pas.
-	carte_voile = passages = None
+	# Marqueurs de TOUTES les connexions de la carte (pays comme ville), filtrées comme la liste
+	# des sous-lieux ; couleur et pictogramme selon le lieu destination (`enseignes_icones`).
+	# Le voile du hors-pays (cases à 0) reste propre à une carte de PAYS.
+	carte_voile = None
 	if grid_doc.get("categorie") == CATEGORIE_PAYS and grid_doc.get("cells"):
 		carte_voile = voile_hors_pays(grid_doc["cells"])
-		passages = passages_carte(connexions_du_lieu(lieu), lieu,
-			lambda conn: any(noeud_ferme(character, lieu, n.get("lieu"), get_doc(n.get("lieu")))
-				for n in conn.get("nodes") or []))
+	passages = passages_carte(connexions_du_lieu(lieu), lieu,
+		lambda conn: any(noeud_ferme(character, lieu, n.get("lieu"), get_doc(n.get("lieu")))
+			for n in conn.get("nodes") or []))
 
 	# Dérivées bufées (équipement, passives, consommables/sorts), charge max exceptée : elle
 	# reste brute, c'est la limite réellement appliquée par la garde de surcharge. Les stats

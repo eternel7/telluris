@@ -1637,7 +1637,7 @@
 			overflow: hidden;
 		}
 
-		/* `#carte-calque` (voile + passages d'une carte de pays) PARTAGE cette règle : même
+		/* `#carte-calque` (voile d'une carte de pays + passages de toute carte) PARTAGE cette règle : même
 		   taille, même transform, même transition — les deux couches ne peuvent pas glisser
 		   l'une par rapport à l'autre pendant un pas. */
 		img#bg-image, #carte-calque {
@@ -1681,9 +1681,11 @@
 		/* Sous le jeton (10) et le pavé (20) ; n'intercepte rien (survol de la carte). */
 		#carte-calque { z-index: 5; pointer-events: none; }
 		#carte-voile { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
-		/* Passage : un point de lumière bleue sur la case (aucune icône, la carte reste lisible),
-		   et un chevron translucide tourné vers la frontière qu'il franchit (`--angle`, posé par
-		   `directionFrontiere`). Une seule teinte, `--passage-rgb`, déclinée en opacités. */
+		/* Passage : un point de lumière sur la case, et un chevron translucide tourné vers la
+		   frontière qu'il franchit (`--angle`, posé par `directionFrontiere` — carte de pays
+		   seulement). Une seule teinte, `--passage-rgb`, déclinée en opacités : bleue par défaut,
+		   celle de la FAMILLE du lieu destination sinon (posée en ligne, `utils/enseignes_icones`),
+		   avec le pictogramme du métier au centre (`.passage-icone`). */
 		.passage-marque {
 			--passage-rgb: 110, 185, 255;
 			position: absolute;
@@ -1701,6 +1703,13 @@
 			border-radius: 50%;
 			background: radial-gradient(circle, rgba(var(--passage-rgb), 0.95) 0 35%, rgba(var(--passage-rgb), 0.35) 70%, transparent 100%);
 			box-shadow: 0 0 calc(var(--cell-w) * 0.25) rgba(var(--passage-rgb), 0.55);
+		}
+		.passage-icone {
+			position: absolute; inset: 0;
+			display: flex; align-items: center; justify-content: center;
+			font-size: calc(var(--cell-w) * 0.55);
+			line-height: 1;
+			filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.85));
 		}
 		.passage-fleche {
 			position: absolute;
@@ -2046,7 +2055,7 @@
 			<div class="grid-placeholder">
 				<div class="viewport" id="swipe-zone">
 					<img id="bg-image" src="{{ url_for(image_route, path=image) }}">
-					{% if carte_voile is not none %}<div id="carte-calque"><canvas id="carte-voile"></canvas></div>{% endif %}
+					{% if carte_voile is not none or passages %}<div id="carte-calque">{% if carte_voile is not none %}<canvas id="carte-voile"></canvas>{% endif %}</div>{% endif %}
 					<div class="token"></div>
 					<!-- Pavé de déplacement : markup et CSS viennent de part-move-panel.html, partagés
 					     avec la page de combat et le mode test de l'éditeur. Ici il est posé SUR la
@@ -4352,11 +4361,12 @@
 	}
 	buildLocationslist();
 
-	// ── Carte de PAYS : voile du hors-pays + marqueurs de passage ──────────────
-	// Le serveur ne les envoie que pour une carte de `categorie` pays (main.py, /play) :
-	// `CARTE_VOILE` = une chaîne par ligne, « 1 » = case à 0 (hors pays, cadre) ; `PASSAGES` =
-	// toutes les connexions de la carte, filtrées comme la liste des sous-lieux. Calque STATIQUE :
-	// changer de lieu recharge la page. Seul le halo suit la position (`_majHaloPassages`).
+	// ── Voile du hors-pays + marqueurs de passage ───────────────────────────────
+	// `CARTE_VOILE` (carte de `categorie` pays seulement, main.py /play) = une chaîne par ligne,
+	// « 1 » = case à 0 (hors pays, cadre). `PASSAGES` (toute carte) = toutes les connexions,
+	// filtrées comme la liste des sous-lieux, avec la couleur et le pictogramme du lieu
+	// destination (`utils/enseignes_icones`). Calque STATIQUE : changer de lieu recharge la page.
+	// Seul le halo suit la position (`_majHaloPassages`).
 	const CARTE_VOILE = {{ carte_voile | tojson | safe }};
 	const PASSAGES = {{ passages | tojson | safe }} || [];
 	// Rayon de VISIBILITÉ d'un passage, en cases (Tchebychev) : un marqueur n'apparaît (et ne
@@ -4399,6 +4409,17 @@
 		if (!vu || Math.hypot(sx, sy) < 1e-6) return null;
 		return Math.atan2(sy, sx) * 180 / Math.PI;
 	}
+	// Pure (même harnais) : texte du toast. Une boutique se nomme par son MÉTIER seul
+	// (« Une boucherie est proche. ») — l'enseigne reste dans l'infobulle et la liste « Lieux ».
+	function textePassageProche(p) {
+		if (p && p.metier) return p.metier.charAt(0).toUpperCase() + p.metier.slice(1) + ' est proche.';
+		return `Un passage est proche : ${(p && p.label) || 'route'}`;
+	}
+	// Pure (même harnais) : clé d'annonce — une par MÉTIER (deux boucheries contiguës = un
+	// toast), une par destination sinon.
+	function clePassageAnnonce(p) {
+		return p.metier ? 'metier|' + p.metier : p.link_id + '|' + p.label;
+	}
 	function _dessinerVoile() {
 		const cv = document.getElementById('carte-voile');
 		if (!cv || !Array.isArray(CARTE_VOILE) || !CARTE_VOILE.length) return;
@@ -4418,7 +4439,15 @@
 			m.dataset.i = i;
 			m.style.setProperty('--px', p.x);
 			m.style.setProperty('--py', p.y);
-			m.title = p.label || '';   // propriété DOM : rien à échapper
+			if (p.rgb) m.style.setProperty('--passage-rgb', p.rgb);
+			// propriétés DOM (`title`, `textContent`) : rien à échapper
+			m.title = p.metier && p.label ? `${p.label} — ${p.metier}` : (p.label || '');
+			if (p.icone) {
+				const ic = document.createElement('span');
+				ic.className = 'passage-icone';
+				ic.textContent = p.icone;
+				m.appendChild(ic);
+			}
 			const angle = directionFrontiere(CARTE_VOILE, p.x, p.y, RAYON_FRONTIERE);
 			if (angle !== null) {
 				const f = document.createElement('span');
@@ -4439,13 +4468,13 @@
 			const p = PASSAGES[m.dataset.i];
 			const proche = proches.has(p);
 			m.classList.toggle('proche', proche);
-			// Une annonce par destination et par chargement de page (`passagesAAnnoncer`) ;
-			// celui qu'on foule compte comme annoncé.
-			const cle = p.link_id + '|' + p.label;
+			// Une annonce par destination (par métier pour une boutique) et par chargement de
+			// page (`passagesAAnnoncer`) ; celui qu'on foule compte comme annoncé.
+			const cle = clePassageAnnonce(p);
 			if (p.x === POSITIONS.x && p.y === POSITIONS.y) _passagesAnnonces.add(cle);
 			if (aAnnoncer.has(p) && !_passagesAnnonces.has(cle)) {
 				_passagesAnnonces.add(cle);
-				showToast(`Un passage est proche : ${p.label || 'route'}`);
+				showToast(textePassageProche(p));
 			}
 		});
 	}
