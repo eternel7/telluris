@@ -157,12 +157,13 @@ Arbitrage de l'Auteur (01/11, deux questionnaires) — `docs/lore/monde/20261101
 - **Méduse fille de Cétô** : théories contradictoires de PNJ — cause ou non des attaques marines contre Atlantis ; jamais tranché.
 
 ### Contenants des légendes
-Arbitrage de l'Auteur (02/11, cinq questionnaires) — `docs/lore/monde/20261102_sacs_des_legendes.md` ; rien en jeu.
+Arbitrage de l'Auteur (02/11, huit questionnaires) — `docs/lore/monde/20261102_sacs_des_legendes.md` (tableau « Ce qui est retenu ») ; rien en jeu.
 
-- **Reliques** (contenant à poids fixe, contenance très supérieure, tout objet) : **sac de Manannán** (île de Man cachée sous la brume, **rang A** ; on ne reprend son contenu qu'à **marée haute**, heure du jeu), **sac de Rhiannon** (derrière un portail d'**Annwn**, **rang S**), **carquois d'Arjuna** (pas de flèches infinies : un contenant), **coquille d'Oduduwa** (la plus vaste) et **pot d'Anansi** (zones blanches, **rang S**).
-- **Copies** = art des **Architectes** (« contenants spatiaux », rare, PNJ) : **Besace profonde** · **Urne intérieure** · **Coffre de retrait**, contenance croissante.
-- Règles : **inventaire séparé** (le contenu ne pèse rien, limite propre à chaque contenant) ; **aucun être vivant** ; **aucun contenant magique dans un autre** (anomalie en récit).
-- Récit seulement : **Manannán** lui-même, le piège de Rhiannon (Gwawl), le grenier céleste dogon. **Sac sans fond** (D&D) hors du jeu. Treize Trésors : reportés.
+- **Reliques** (poids de l'objet ordinaire, contenance très supérieure, tout objet) : **sac de Manannán** (500 kg ; île de Man, **rang A** ; contenu repris seulement à **marée haute**, 2 × 3 h par jour), **sac de Rhiannon** (1 000 kg ; Annwn, **rang S**), **carquois d'Arjuna** (300 kg ; lieu plus tard), **coquille d'Oduduwa** (2 000 kg) et **pots d'Anansi** (300 kg, plusieurs) dans les zones blanches, **rang S**.
+- **Copies** = art des **Architectes** : **Besace profonde** 100 kg / 10 000 cu · **Urne intérieure** 300 kg / 40 000 · **Coffre de retrait** 1 000 kg / 150 000 ; Lutecia + cités à portail transversal, **aucune condition de rang** (le prix et l'accès suffisent, Auteur). Une copie peut dépasser une relique : voulu.
+- Objets aussi (détails à trancher) : coffres du Livre de Thot, gourde de Li Tieguai, tente de Pari Banou, kibisis, outre d'Éole.
+- Règles : **inventaire séparé** ; **aucun être vivant** ; **aucun contenant magique dans un autre** (anomalie en récit).
+- Récit seulement : **Manannán** lui-même, piège de Rhiannon, grenier dogon, Igbá Odù, nkisi, Skíðblaðnir. **Sac sans fond** (D&D) hors du jeu. Treize Trésors : reportés.
 
 ### Contradictions ouvertes
 À signaler si un texte en dépend, jamais à trancher seul :

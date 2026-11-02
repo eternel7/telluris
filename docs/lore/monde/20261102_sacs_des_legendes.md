@@ -2,7 +2,7 @@
 
 - **Source :** séance Claude Code du 02/11/2026. L'Auteur cherche des objets de légende qui **contiennent plus que leur taille**, où l'on dépose des choses pour les reprendre plus tard (la corne d'abondance, elle, produit sans fin).
 - **Créée :** 02/11/2026
-- **Statut :** intention de l'Auteur, puis **arbitrage** par cinq questionnaires (§ ✍️ dernier message) qui **fait foi** ; le reste des réponses Claude Code et ChatGPT = propositions. Rien n'est implémenté en jeu.
+- **Statut :** intention de l'Auteur, puis **arbitrage** par huit questionnaires (deux messages ✍️) (§ ✍️ dernier message) qui **fait foi** ; le reste des réponses Claude Code et ChatGPT = propositions. Rien n'est implémenté en jeu.
 - **Au dump (02/11)** : aucun des deux sacs, ni Manannán, ni Rhiannon, ni Pwyll. Contenants existants, tous ordinaires : `item:Besace_de_cuir_fume` (ceinture, `bonus_initiative`), `item:Petite_bourse_vide` (outil), `item:Selle_a_sacoches` (harnachement, `monture.charge_pct` 25 — seul objet qui touche à la charge). La charge physique se lit dans `charge_max_of` (règle anti-exploit : caractéristiques **brutes**).
 
 ---
@@ -174,25 +174,43 @@ Réponses de l'Auteur ; elles **font foi**.
 19. **Pot de la sagesse d'Anansi** : **contenant simple**, tout objet.
 20. **Reliques africaines** : obtenues au **rang S**, en voyage dans les **zones blanches**, au-delà de la carte connue.
 
+## ✍️ Auteur (02/11/2026) — second arbitrage, trois questionnaires sur les points ouverts
+
+Réponses de l'Auteur ; elles **font foi** et complètent le premier arbitrage.
+
+21. **Contenance des copies** : Besace profonde **100 kg** · Urne intérieure **300 kg** · Coffre de retrait **1 000 kg**.
+22. **Contenance des reliques** (la plus modeste des échelles proposées) : Carquois d'Arjuna et Pot d'Anansi **300 kg** · Sac de Manannán **500 kg** · Sac de Rhiannon **1 000 kg** · Coquille d'Oduduwa **2 000 kg**.
+23. **Copie au-dessus d'une relique** : le Coffre de retrait (1 000 kg) dépasse le Sac de Manannán et égale celui de Rhiannon — **« c'est voulu »** : une relique vaut par sa légèreté et sa légende, pas par son volume.
+24. **Poids propre** : **celui de l'objet ordinaire** qu'il imite — sac 0,5 kg, carquois 1 kg, pot 3 kg, urne 8 kg, coffre 20 kg, coquille 0,1 kg (valeurs proposées par Claude Code dans la question, retenues avec l'option).
+25. **Prix des copies** : Besace profonde **10 000 cuivres** · Urne intérieure **40 000** · Coffre de retrait **150 000**.
+26. **Vendeurs** : **Lutecia** (institut des Architectes) **et les cités qui entretiennent un portail transversal** (Rome, Constantinople, Petra…).
+27. **Rang des copies** : **aucun** — « Pourquoi il devrait y avoir des limites de rang ? Le prix et le fait d'arriver à tel endroit qui en propose est déjà amplement suffisant. »
+28. **Carquois d'Arjuna** (unicité, lieu) : **plus tard**, quand Muziris ou l'Inde seront décrites.
+29. **Pot d'Anansi** : **plusieurs pots**, et non une relique unique.
+30. **Autres contenants devenus objets** : **coffres du Livre de Thot**, **gourde de Li Tieguai**, **tente de Pari Banou**, **kibisis de Persée**, **outre d'Éole**. **Récit seulement** : Igbá Odù, nkisi, Skíðblaðnir.
+31. **Marée haute** (Sac de Manannán) : chaque fenêtre dure **3 heures**, deux fois par jour (6 heures par jour en tout).
+
 ## Ce qui est retenu
 
-| Contenant | Nature | Contenu | Contrainte | Où, quand |
-|---|---|---|---|---|
-| **Sac de Manannán** | relique unique | tout objet | on ne reprend qu'à **marée haute** (heure du jeu) | île de Man, rang **A** |
-| **Sac de Rhiannon** | relique unique | tout objet | — | derrière un portail d'Annwn, rang **S** |
-| **Carquois d'Arjuna** | relique unique (implicite) | tout objet | — | à trancher |
-| **Coquille d'Oduduwa** | relique unique, la plus vaste | tout objet | — | zones blanches, rang **S** |
-| **Pot d'Anansi** | relique | tout objet | — | zones blanches, rang **S** |
-| **Besace profonde** · **Urne intérieure** · **Coffre de retrait** | copies d'Architectes (PNJ) | tout objet | contenance croissante | à trancher |
+| Contenant | Nature | Contenance | Poids | Contrainte | Où, quand |
+|---|---|---|---|---|---|
+| **Sac de Manannán** | relique unique | 500 kg | 0,5 kg | on ne reprend qu'à **marée haute** (2 × 3 h par jour, heure du jeu) | île de Man, rang **A** |
+| **Sac de Rhiannon** | relique unique | 1 000 kg | 0,5 kg | — | derrière un portail d'Annwn, rang **S** |
+| **Carquois d'Arjuna** | relique | 300 kg | 1 kg | — | **plus tard** |
+| **Coquille d'Oduduwa** | relique unique, la plus vaste | 2 000 kg | 0,1 kg | — | zones blanches, rang **S** |
+| **Pots d'Anansi** | plusieurs exemplaires | 300 kg | 3 kg | — | zones blanches, rang **S** |
+| **Besace profonde** | copie d'Architectes | 100 kg | 0,5 kg | — | 10 000 cuivres |
+| **Urne intérieure** | copie d'Architectes | 300 kg | 8 kg | — | 40 000 cuivres |
+| **Coffre de retrait** | copie d'Architectes | 1 000 kg | 20 kg | — | 150 000 cuivres |
+| Coffres du Livre de Thot · gourde de Li Tieguai · tente de Pari Banou · kibisis · outre d'Éole | objets | à trancher | à trancher | — | à trancher |
 
-Règles communes : **inventaire séparé**, le contenu ne pèse rien pour le porteur, **limite propre** à chaque contenant ; **aucun être vivant** ; **aucun contenant magique dans un autre**. Récit seulement : Manannán lui-même, le piège de Rhiannon, le grenier céleste dogon.
+Copies : vendues à **Lutecia** et dans les **cités à portail transversal**, **sans condition de rang**. Règles communes : **inventaire séparé**, le contenu ne pèse rien pour le porteur, **limite propre** à chaque contenant ; **aucun être vivant** ; **aucun contenant magique dans un autre**. Récit seulement : Manannán lui-même, le piège de Rhiannon, le grenier céleste dogon, Igbá Odù, nkisi, Skíðblaðnir.
 
 ## Points encore ouverts
 
-- **Chiffres** : la limite de chaque contenant (reliques et trois paliers), leur poids propre, le prix des copies.
-- **Carquois d'Arjuna** : unique ou non, où et à quel rang ; l'Inde n'est pas décrite (seule Muziris).
-- **Copies** : quels Architectes les vendent (Lutecia, qui forme les Architectes ?), à partir de quel rang.
-- **Pot d'Anansi** : unique ou non (non posé).
-- Les autres contenants listés — **Igbá Odù**, **nkisi**, **coffres du Livre de Thot**, gourdes taoïstes, Skíðblaðnir, tente de Pari Banou, kibisis, outre d'Éole — n'ont pas été arbitrés.
+- **Cinq nouveaux objets** (coffres du Livre de Thot, gourde de Li Tieguai, tente de Pari Banou, kibisis, outre d'Éole) : nature (relique unique ou non), contenance, poids, lieu et rang.
+- **Carquois d'Arjuna** : unicité, lieu, rang — quand Muziris ou l'Inde seront décrites.
+- **Pots d'Anansi** : « plusieurs pots » mais obtention au rang S dans les zones blanches (point 20) — à confirmer.
 - **Treize Trésors** : séance Camelot à venir.
+- **Mécanique en jeu** : aucun inventaire de contenant n'existe (seul le coffre d'une propriété en est un) ; à construire.
 - Aucune date : rien à reporter dans `chronologie.json` tant que l'Auteur ne place pas ces récits dans une ère.
