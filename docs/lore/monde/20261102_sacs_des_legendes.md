@@ -212,5 +212,5 @@ Copies : vendues à **Lutecia** et dans les **cités à portail transversal**, *
 - **Carquois d'Arjuna** : unicité, lieu, rang — quand Muziris ou l'Inde seront décrites.
 - **Pots d'Anansi** : « plusieurs pots » mais obtention au rang S dans les zones blanches (point 20) — à confirmer.
 - **Treize Trésors** : séance Camelot à venir.
-- **Mécanique en jeu** : aucun inventaire de contenant n'existe (seul le coffre d'une propriété en est un) ; à construire.
+- **Mécanique en jeu** : conçue et arbitrée dans `../../conception_contenants.md` (02/11), non implémentée.
 - Aucune date : rien à reporter dans `chronologie.json` tant que l'Auteur ne place pas ces récits dans une ère.
