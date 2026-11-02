@@ -252,6 +252,13 @@ def resolve_item_ref(ref):
 	if item_sous_categorie(doc) == scriptorium.SOUS_CATEGORIE_LIVRE_ECRIT and isinstance(ref, dict) and ref.get("texte"):
 		doc["description"] = ref.get("texte") or doc.get("description")
 		doc["nom"] = scriptorium.titre_livre(doc.get("nom") or item_id, ref)
+	# Contenant (utils/contenants.py) : capacité, charge et nombre d'objets rangés sur
+	# CETTE référence ; masqués hors marée. Import tardif : contenants dépend de ce module.
+	if doc.get("contenant"):
+		import time
+		from utils import contenants
+		if (bloc := contenants.resume(ref, doc, int(time.time()))):
+			doc["contenant"] = bloc
 	if (lieu_id := item_ref_lieu(ref)):
 		doc["lieu_parent"] = lieu_id
 		doc["nom"] = item_label(doc.get("nom") or item_id, get_doc(lieu_id))

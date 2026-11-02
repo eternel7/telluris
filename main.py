@@ -26,6 +26,7 @@ from routers.auberge import auberge_router
 from routers.scriptorium import scriptorium_router
 from routers.commande import commande_router
 from routers.traversee import traversee_router, payload_play as traversee_payload_play
+from routers.contenants import contenants_router
 from routers.animations import animations_router
 from utils.combat import (
 	get_combat_grid, finalize_combat, verser_butin_au_sol, etat_charge_snapshot, caracts_effectives,
@@ -227,6 +228,7 @@ app.include_router(auberge_router, prefix="/api")
 app.include_router(scriptorium_router, prefix="/api")
 app.include_router(commande_router, prefix="/api")
 app.include_router(traversee_router, prefix="/api")
+app.include_router(contenants_router, prefix="/api")
 # Sans préfixe : ce router porte des chemins des DEUX familles (`/api/admin/...` en
 # lecture, `/admin/...` en écriture, comme les endpoints d'admin de main.py).
 app.include_router(animations_router)

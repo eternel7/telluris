@@ -29,7 +29,7 @@ node dev/check_js.js               # syntaxe du JS inline des templates ET de te
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Harnais : `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
+Harnais : `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
 - ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
 - **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
@@ -63,6 +63,7 @@ routers/
   animations.py          # /admin/animations/* : scan des feuilles de sprites, liaison au contenu
   pnj.py                 # /api/pnj/dialogue (+ /choix) : dialogues PNJ + services (dont `portail` de Notre-Dame, `enseignement` d'un maître) ; /api/intro/raison
   traversee.py           # /api/traversee/avancer : une case de traversée maritime (rencontre, débarquement)
+  contenants.py          # /api/contenant (+ /ranger, /sortir) : ouvrir un contenant du sac (porteur via _acteur, hors combat)
 utils/
   auth.py                # JWT d'accès + get_current_user() ; ouvrir/fermer/révoquer la session
   session.py             # session (pur + middleware) : accès 15 min, rafraîchissement 30 j OPAQUE
@@ -114,6 +115,10 @@ utils/
   jetons.py              # jetons de taille variable (pur) : emprise LxP selon le cap, distance entre
                          #   emprises, pas avec pivot, A* ; miroir scripts/jetons.js
   consommables.py        # chokepoint des buffs : sources, cumul, effets_actifs
+  contenants.py          # contenants (pur) : capacité sur le doc item (`contenant`), CONTENU sur la RÉFÉRENCE
+                         #   (`ref.contenu`) → suit l'objet partout, ne pèse rien (physique ET magique), INERTE
+                         #   pour tout autre système ; aucun contenant dans un autre ; marée en temps réel
+                         #   (Sac de Manannán) ; refus de vente / don plein, vol au poids réel
   slots_actions.py       # barre d'action de combat (pur) : entrées, invariante, migration à la lecture
   animations.py          # animations de combat (pur) : découpe d'une feuille, cascade de canaux, charge `vfx`
   quetes.py              # moteur de génération de quêtes (pur) + état joueur / progression / récompenses
