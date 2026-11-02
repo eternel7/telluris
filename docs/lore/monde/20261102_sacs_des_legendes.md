@@ -2,7 +2,7 @@
 
 - **Source :** séance Claude Code du 02/11/2026. L'Auteur cherche des objets de légende qui **contiennent plus que leur taille**, où l'on dépose des choses pour les reprendre plus tard (la corne d'abondance, elle, produit sans fin).
 - **Créée :** 02/11/2026
-- **Statut :** **intention** de l'Auteur (retenir les deux sacs) ; les mythes et les ancrages ci-dessous sont des **propositions** tant que les questions du § « À arbitrer » restent ouvertes. Rien n'est implémenté en jeu.
+- **Statut :** **intention** de l'Auteur (retenir les deux sacs ; le carquois d'Arjuna et le sac sans fond ajoutés ensuite) ; les mythes et les ancrages ci-dessous sont des **propositions** tant que les questions du § « À arbitrer » restent ouvertes. Rien n'est implémenté en jeu.
 - **Au dump (02/11)** : aucun des deux sacs, ni Manannán, ni Rhiannon, ni Pwyll. Contenants existants, tous ordinaires : `item:Besace_de_cuir_fume` (ceinture, `bonus_initiative`), `item:Petite_bourse_vide` (outil), `item:Selle_a_sacoches` (harnachement, `monture.charge_pct` 25 — seul objet qui touche à la charge). La charge physique se lit dans `charge_max_of` (règle anti-exploit : caractéristiques **brutes**).
 
 ---
@@ -97,6 +97,27 @@ De plus, j'aimerais des précisions sur les 13 trésors de l'île de Bretagne. E
 - **Le plus proche de ton besoin** : la **coquille d'Oduduwa**. Elle répond au critère (contenu sans commune mesure avec le contenant), mais c'est un objet de **création du monde** et non un sac de voyage.
 - **Ancrage Telluris** : l'Afrique du lore se limite aujourd'hui à Alexandrie, Abou Simbel et Aksoum. Ilé-Ifè, le pays dogon, le pays akan et le Kongo sont **hors de la carte** décrite : zones blanches, domaine des légendes.
 
+## ✍️ Auteur (02/11/2026)
+
+Le carquois inépuisable d'Arjuna (Mythologie hindoue / Mahabharata) : Dans l'épopée, le héros Arjuna possède des carquois divins (Akshayashtuka) qui ne se vident jamais, contenant une réserve infinie de flèches. C'est un entre-deux intéressant : un contenant fermé d'où l'on retire constamment des objets sans qu'il ne devienne jamais vide.
+
+Le Sac de stockage extradimensionnel (Pop-culture moderne et folklore inspiré) : Le concept moderne le plus célèbre de ce que vous cherchez est le Sac sans fond (Bag of Holding) popularisé par les jeux de rôle sur table comme Donjons & Dragons, ou encore les poches magiques infinies qu'on retrouve dans la fantasy (comme la bourse de Mary Poppins ou les technologies de stockage de type Telluris). Ces objets ont l'air tout à fait ordinaires de l'extérieur, mais abritent un espace infini ou gigantesque à l'intérieur.
+
+## 🤖 Claude Code — le carquois d'Arjuna, le sac sans fond
+
+### Les carquois inépuisables d'Arjuna
+- **Le nom** : « Akshayashtuka » n'est pas un terme attesté. Le Mahabharata parle de **deux carquois inépuisables** (*akṣaya tūṇīra*, « carquois qui ne s'épuisent pas »).
+- **Source** : le *Khāṇḍava-dāha* (l'incendie de la forêt de Khāṇḍava, *Ādi Parva*). **Agni**, le feu, veut dévorer la forêt qu'**Indra** protège par la pluie. Pour l'y aider, il obtient de **Varuṇa**, dieu des eaux, et donne à Arjuna l'arc **Gāṇḍīva**, les deux carquois et un char aux chevaux blancs ; **Krishna** reçoit le disque **Sudarśana**.
+- **La fin** : au début du *Mahāprasthānika Parva*, quand les Pāṇḍava partent pour leur dernier voyage, Agni demande à Arjuna de **rendre l'arc et les carquois à Varuṇa** : Arjuna les jette **dans la mer**. Les objets retournent à leur propriétaire, comme le corrbolg passe de main en main.
+- **Nature** : un objet d'**abondance** (même famille que la corne, le panier de Gwyddno), restreint aux **munitions**. Il ne garde rien de ce qu'on y met.
+- **En jeu, aujourd'hui** : les flèches existent comme objets (`item:Carquois_20`, `item:Carreaux_argentes`, catégorie `munition`) et des carquois d'équipement (`item:Carquois_de_cuir_bouilli`, `item:Carquois_emplume`, slot `ceinture`), mais **le combat ne décompte aucune munition**. Un carquois inépuisable n'aurait donc **aucun effet mécanique** tant que les flèches ne s'usent pas.
+- **Ancrage** : l'Inde n'est pas décrite dans le lore ; seule **Muziris** (côte de Malabar) y apparaît, comme destination des portails de Petra et d'Aksoum.
+
+### Le sac sans fond (*Bag of Holding*)
+- **Ce n'est pas un mythe** : il vient des jeux de rôle (Donjons & Dragons, 1974) ; le sac de Mary Poppins vient du roman de P. L. Travers (1934) et du film (1964). Les règles de l'Auteur demandent d'**adapter des mythes réels** plutôt que d'inventer ou d'emprunter.
+- **Le besoin de jeu reste le même** : un objet d'apparence ordinaire, avec un grand espace dedans. **Le sac de Manannán y répond déjà** à partir d'un mythe réel, avec en plus une contrainte (les marées) qui le rend moins puissant que le sac de D&D.
+- La mention « technologies de stockage de type Telluris » ne renvoie à rien de connu : ni le lore, ni le dump.
+
 ## À arbitrer
 
 1. **Les deux sacs sont-ils des êtres uniques** (un seul exemplaire chacun), ou existe-t-il des imitations ?
@@ -108,6 +129,8 @@ De plus, j'aimerais des précisions sur les 13 trésors de l'île de Bretagne. E
 7. **Le piège de Rhiannon** : la règle du « assez » sert-elle en jeu (capturer un être, une quête), ou reste-t-elle un récit ?
 8. **Treize Trésors** : en garder certains (Dyrnwyn, le manteau d'Arthur, l'échiquier…), et que faire du char de Morgan ?
 9. **Afrique** : retenir la coquille d'Oduduwa, le grenier dogon ou le pot d'Anansi, comme récit ou comme objet ?
+10. **Carquois d'Arjuna** : le retenir ? Il n'a de sens en jeu que si les flèches deviennent des munitions **consommées** au combat (mécanique à concevoir, absente aujourd'hui).
+11. **Sac sans fond** : confirmer qu'il reste hors du jeu en tant que tel, et que le sac de Manannán tient ce rôle.
 
 ## Points encore ouverts
 
