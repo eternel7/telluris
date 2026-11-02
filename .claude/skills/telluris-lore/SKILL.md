@@ -156,6 +156,14 @@ Arbitrage de l'Auteur (01/11, deux questionnaires) — `docs/lore/monde/20261101
 - **Éthiopie** (Céphée, Cassiopée, rocher d'Andromède) = cité-État d'**Aksoum** (§ Cités-États).
 - **Méduse fille de Cétô** : théories contradictoires de PNJ — cause ou non des attaques marines contre Atlantis ; jamais tranché.
 
+### Contenants des légendes
+Arbitrage de l'Auteur (02/11, cinq questionnaires) — `docs/lore/monde/20261102_sacs_des_legendes.md` ; rien en jeu.
+
+- **Reliques** (contenant à poids fixe, contenance très supérieure, tout objet) : **sac de Manannán** (île de Man cachée sous la brume, **rang A** ; on ne reprend son contenu qu'à **marée haute**, heure du jeu), **sac de Rhiannon** (derrière un portail d'**Annwn**, **rang S**), **carquois d'Arjuna** (pas de flèches infinies : un contenant), **coquille d'Oduduwa** (la plus vaste) et **pot d'Anansi** (zones blanches, **rang S**).
+- **Copies** = art des **Architectes** (« contenants spatiaux », rare, PNJ) : **Besace profonde** · **Urne intérieure** · **Coffre de retrait**, contenance croissante.
+- Règles : **inventaire séparé** (le contenu ne pèse rien, limite propre à chaque contenant) ; **aucun être vivant** ; **aucun contenant magique dans un autre** (anomalie en récit).
+- Récit seulement : **Manannán** lui-même, le piège de Rhiannon (Gwawl), le grenier céleste dogon. **Sac sans fond** (D&D) hors du jeu. Treize Trésors : reportés.
+
 ### Contradictions ouvertes
 À signaler si un texte en dépend, jamais à trancher seul :
 

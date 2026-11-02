@@ -2,7 +2,7 @@
 
 - **Source :** séance Claude Code du 02/11/2026. L'Auteur cherche des objets de légende qui **contiennent plus que leur taille**, où l'on dépose des choses pour les reprendre plus tard (la corne d'abondance, elle, produit sans fin).
 - **Créée :** 02/11/2026
-- **Statut :** **intention** de l'Auteur (retenir les deux sacs ; le carquois d'Arjuna et le sac sans fond ajoutés ensuite) ; les mythes et les ancrages ci-dessous sont des **propositions** tant que les questions du § « À arbitrer » restent ouvertes. Rien n'est implémenté en jeu.
+- **Statut :** intention de l'Auteur, puis **arbitrage** par cinq questionnaires (§ ✍️ dernier message) qui **fait foi** ; le reste des réponses Claude Code et ChatGPT = propositions. Rien n'est implémenté en jeu.
 - **Au dump (02/11)** : aucun des deux sacs, ni Manannán, ni Rhiannon, ni Pwyll. Contenants existants, tous ordinaires : `item:Besace_de_cuir_fume` (ceinture, `bonus_initiative`), `item:Petite_bourse_vide` (outil), `item:Selle_a_sacoches` (harnachement, `monture.charge_pct` 25 — seul objet qui touche à la charge). La charge physique se lit dans `charge_max_of` (règle anti-exploit : caractéristiques **brutes**).
 
 ---
@@ -118,21 +118,81 @@ Le Sac de stockage extradimensionnel (Pop-culture moderne et folklore inspiré) 
 - **Le besoin de jeu reste le même** : un objet d'apparence ordinaire, avec un grand espace dedans. **Le sac de Manannán y répond déjà** à partir d'un mythe réel, avec en plus une contrainte (les marées) qui le rend moins puissant que le sac de D&D.
 - La mention « technologies de stockage de type Telluris » ne renvoie à rien de connu : ni le lore, ni le dump.
 
-## À arbitrer
+## 🤖 ChatGPT (réponse transmise par l'Auteur, 02/11/2026)
 
-1. **Les deux sacs sont-ils des êtres uniques** (un seul exemplaire chacun), ou existe-t-il des imitations ?
-2. **Où les trouver ?** Manannán : une île cachée des mers d'Irlande, un donjon, un PNJ qui le garde ? Rhiannon : derrière un portail d'**Annwn** (rang S), ou plus tôt ?
-3. **À quel rang** chacun ?
-4. **Manannán, dieu de la mer** à côté de Tangaroa (Mu) et de Poséidon (Atlantis) : présence en jeu, ou récit seulement ?
-5. **Mécanique** : bonus de charge du porteur, ou poids annulé pour ce qui est dans le sac (inventaire séparé) ?
-6. **La règle des marées** (Manannán) : la garder en jeu, et comment la lire (heure du jeu, distance à la mer) ?
-7. **Le piège de Rhiannon** : la règle du « assez » sert-elle en jeu (capturer un être, une quête), ou reste-t-elle un récit ?
-8. **Treize Trésors** : en garder certains (Dyrnwyn, le manteau d'Arthur, l'échiquier…), et que faire du char de Morgan ?
-9. **Afrique** : retenir la coquille d'Oduduwa, le grenier dogon ou le pot d'Anansi, comme récit ou comme objet ?
-10. **Carquois d'Arjuna** : le retenir ? Il n'a de sens en jeu que si les flèches deviennent des munitions **consommées** au combat (mécanique à concevoir, absente aujourd'hui).
-11. **Sac sans fond** : confirmer qu'il reste hors du jeu en tant que tel, et que le sac de Manannán tient ce rôle.
+> Texte transmis par l'Auteur (« de nombreuses remarques intéressantes ») ; images et renvois de sources retirés. **Proposition** : ne fait foi que ce que l'arbitrage ci-dessous retient.
+
+Il existe plusieurs objets mythologiques ou folkloriques qui pourraient servir de base à un équivalent du sac sans fond, du coffre dimensionnel ou de la réserve de stockage magique : un objet qui ne crée rien, ne transforme rien, mais permet de transporter et de conserver une quantité de choses bien supérieure à son volume apparent.
+
+Trois propriétés à distinguer :
+- **Contenance extradimensionnelle** : l'objet contient un espace intérieur bien plus grand que son apparence.
+- **Stockage sans limite apparente** : on peut y ajouter des objets presque indéfiniment.
+- **Conservation** : ce qui est placé à l'intérieur ne vieillit pas, ne pourrit pas ou ne se détériore pas.
+
+1. **La besace de Manannán (Crane Bag)** — la meilleure correspondance : une besace faite de la peau d'une grue, qui contient armes, vêtements, outils et objets merveilleux, associée à Lugh et à plusieurs héros irlandais ; les trésors deviennent visibles à marée haute et disparaissent à marée basse. Un objet de stockage véritable, sans être un objet de création ou de multiplication.
+2. **Les gourdes magiques taoïstes** — celle de **Li Tieguai**, l'un des Huit Immortels, est emblématique ; elles transportent élixirs, remèdes et substances merveilleuses. Un récipient rigide dont l'intérieur est plus grand que l'ouverture ; déclinaisons possibles (liquides, substances alchimiques, capture de créatures, réserve de matériaux) — ce sont des adaptations, pas des propriétés d'une même gourde dans les légendes.
+3. **Le sac magique des contes populaires** — motif répandu (Europe, Asie, Amériques), répertorié par l'index de Stith Thompson sous **D1193, « Magic bag (sack) »** : une famille d'objets plutôt qu'une relique précise.
+4. **Skíðblaðnir** — le navire de Freyr, plié comme un tissu et rangé dans une poche : non pas un espace intérieur, mais un objet immense réduit à une taille transportable (tente, charrette, embarcation).
+5. **Objets d'abondance, pas de stockage** : l'**Akshaya Patra** (hindou, nourriture inépuisable), la corne de Brân Galed, le panier de Gwyddno Garanhir, les vases **Óðrerir, Boðn et Són** (hydromel de poésie, nordique).
+
+**Proposition pour Telluris** : non pas un objet légendaire universel, mais une **famille d'artefacts**, les **contenants spatiaux** :
+- **Besace profonde** — usage courant chez les aventuriers fortunés : plusieurs centaines de kilos de matériel dans un volume réduit.
+- **Urne intérieure** — contenant rigide, pour matériaux, minerais, cristaux de mana et marchandises.
+- **Coffre de retrait** — artefact exceptionnel : un véritable espace clos accessible depuis un petit coffre (marchandises, réserves, mobilier, objets volumineux).
+
+**Règles proposées** : le poids extérieur n'est pas le poids intérieur ; le volume reste limité ; la conservation n'est pas automatique ; les êtres vivants ne peuvent pas nécessairement y séjourner ; un contenant spatial dans un autre peut provoquer une anomalie.
+
+**Lien avec les Architectes** : un portail relie deux espaces ; un contenant spatial serait un portail à **une seule ouverture**, l'entrée d'un espace intérieur artificiel. Certains Architectes se spécialiseraient dans les portails de transport, d'autres dans les espaces de stockage. Préférence : la besace de Manannán comme inspiration principale, et les contenants spatiaux comme **branche de l'artisanat magique**.
+
+### 🤖 Claude Code — vérification
+- Les références tiennent : gourde de Li Tieguai, motif **D1193** de Stith Thompson, Skíðblaðnir, Akshaya Patra (le récipient que Sūrya donne à Draupadī), Óðrerir, Boðn et Són. Une gourde qui **capture** existe bien dans *La Pérégrination vers l'Ouest* (la calebasse qui aspire qui répond à son nom).
+- **Compatible avec les règles** : les contenants sont fabriqués par des **PNJ** (le joueur ne fabrique pas) ; un art d'Architecte reste **rare et coûteux**, comme la création d'un portail (transmission dégradée).
+- **La conservation** n'a pas d'objet aujourd'hui : rien ne pourrit dans le jeu.
+
+## ✍️ Auteur (02/11/2026) — arbitrage par cinq questionnaires
+
+Réponses de l'Auteur ; elles **font foi**.
+
+1. **Unicité** : les sacs de Manannán et de Rhiannon sont **uniques** ; des **copies moins puissantes** existent aussi.
+2. **Lieux** : le sac de **Manannán** se trouve sur l'**île de Man**, cachée sous la brume des mers d'Irlande ; celui de **Rhiannon** derrière un **portail d'Annwn** (Glastonbury Tor, Camelot).
+3. **Rangs** : **Manannán au rang A**, **Rhiannon au rang S**.
+4. **Manannán** : **récit seulement** — on parle de lui (livres, PNJ, légendes de marins), il n'apparaît jamais ; son sac est l'héritage qu'il a laissé.
+5. **Mécanique** : **inventaire séparé** — le contenant a son propre contenu, qui ne pèse rien pour le porteur, dans une **limite propre** à chaque contenant.
+6. **Marées** (Manannán) : **gardées en jeu, sur l'heure du jeu** (deux marées hautes par jour), partout dans le monde ; on dépose à tout moment, on ne **reprend qu'à marée haute**.
+7. **Piège de Rhiannon** (la règle du « assez ») : **récit seulement** ; en jeu, le sac est un grand contenant.
+8. **Treize Trésors** : **plus tard**, dans une séance consacrée à Camelot.
+9. **Afrique** : « Dès maintenant tu mets les listes et propose des mécaniques via des questionnaires » → les contenants africains sont listés (§ « et en Afrique ? ») et leurs mécaniques arbitrées aux points 17 à 20.
+10. **Carquois d'Arjuna** : **retenu**, mais pas pour des flèches infinies : « c'est un objet avec un poids fixe et qui va pouvoir contenir un poids supérieur ». Un contenant comme les autres.
+11. **Sac sans fond** : **hors du jeu** en tant que tel ; le **sac de Manannán** (et ses copies) tient ce rôle.
+12. **Architectes** (idée de ChatGPT) : **oui, c'est leur art** — les copies sont l'œuvre d'**Architectes spécialisés** (contenants spatiaux), art rare et coûteux comme celui des portails.
+13. **Contenu du carquois** : « Tout ça me semble trop compliqué d'essayer de faire autre chose » → **aucune restriction** de contenu (lecture de Claude Code : rester simple).
+14. **Paliers des copies** : **trois** — **Besace profonde** (courante chez les aventuriers aisés), **Urne intérieure** (rigide, matériaux et marchandises), **Coffre de retrait** (rare, objets volumineux) ; contenance et prix croissants.
+15. **Emboîtement** : **interdit** — le jeu refuse de ranger un contenant magique dans un autre ; les légendes racontent ce qui arrive à ceux qui ont essayé (mystère ouvert).
+16. **Êtres vivants** : **jamais** — seuls les objets entrent dans un contenant.
+17. **Coquille d'Oduduwa** : **contenant simple** (poids fixe, contenance très supérieure, tout objet) ; relique **unique**, la plus vaste de toutes.
+18. **Grenier céleste dogon** : **récit seulement**.
+19. **Pot de la sagesse d'Anansi** : **contenant simple**, tout objet.
+20. **Reliques africaines** : obtenues au **rang S**, en voyage dans les **zones blanches**, au-delà de la carte connue.
+
+## Ce qui est retenu
+
+| Contenant | Nature | Contenu | Contrainte | Où, quand |
+|---|---|---|---|---|
+| **Sac de Manannán** | relique unique | tout objet | on ne reprend qu'à **marée haute** (heure du jeu) | île de Man, rang **A** |
+| **Sac de Rhiannon** | relique unique | tout objet | — | derrière un portail d'Annwn, rang **S** |
+| **Carquois d'Arjuna** | relique unique (implicite) | tout objet | — | à trancher |
+| **Coquille d'Oduduwa** | relique unique, la plus vaste | tout objet | — | zones blanches, rang **S** |
+| **Pot d'Anansi** | relique | tout objet | — | zones blanches, rang **S** |
+| **Besace profonde** · **Urne intérieure** · **Coffre de retrait** | copies d'Architectes (PNJ) | tout objet | contenance croissante | à trancher |
+
+Règles communes : **inventaire séparé**, le contenu ne pèse rien pour le porteur, **limite propre** à chaque contenant ; **aucun être vivant** ; **aucun contenant magique dans un autre**. Récit seulement : Manannán lui-même, le piège de Rhiannon, le grenier céleste dogon.
 
 ## Points encore ouverts
 
-- Tout le § « À arbitrer ».
+- **Chiffres** : la limite de chaque contenant (reliques et trois paliers), leur poids propre, le prix des copies.
+- **Carquois d'Arjuna** : unique ou non, où et à quel rang ; l'Inde n'est pas décrite (seule Muziris).
+- **Copies** : quels Architectes les vendent (Lutecia, qui forme les Architectes ?), à partir de quel rang.
+- **Pot d'Anansi** : unique ou non (non posé).
+- Les autres contenants listés — **Igbá Odù**, **nkisi**, **coffres du Livre de Thot**, gourdes taoïstes, Skíðblaðnir, tente de Pari Banou, kibisis, outre d'Éole — n'ont pas été arbitrés.
+- **Treize Trésors** : séance Camelot à venir.
 - Aucune date : rien à reporter dans `chronologie.json` tant que l'Auteur ne place pas ces récits dans une ère.
