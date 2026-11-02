@@ -40,6 +40,7 @@ from db.config import get_doc
 from models import character_stats
 from utils.characters import item_ref_weight, resolve_item_ref, poids_bounds, tirer_poids
 from utils import consommables
+from utils import contenants
 from utils import marche
 from utils import negoce
 from utils import zones as zones_util
@@ -156,7 +157,14 @@ def postes_par_amenagement(prop: dict, cat: dict) -> list:
 
 
 def poids_coffre(prop: dict) -> float:
+	"""Occupation du coffre : un contenant ne compte que SON poids, plein ou vide — il
+	agrandit le stockage du bien (Auteur, 02/11, docs/conception_contenants.md)."""
 	return round(sum(item_ref_weight(r) for r in prop.get("coffre") or []), 2)
+
+
+def poids_coffre_reel(prop: dict) -> float:
+	"""Contenu des contenants compris — seule la limite de vol le lit."""
+	return round(sum(contenants.poids_total(r) for r in prop.get("coffre") or []), 2)
 
 
 # ── Aménagements ─────────────────────────────────────────────────────────────────
@@ -989,7 +997,8 @@ def vol_limite(prop: dict, cat: dict, employes: list) -> dict | None:
 def _fenetre_vol(prop: dict, limite: dict, now: int) -> dict:
 	f = prop.get("vol_fenetre") or {}
 	if not f or now >= _int(f.get("debut")) + _int(limite.get("delai_s"), 86400):
-		f = {"debut": now, "base_kg": poids_coffre(prop), "vole_kg": 0.0, "caisse": False}
+		# Poids RÉEL (contenants pleins compris) : la limite de vol compte le contenu (Auteur, 02/11).
+		f = {"debut": now, "base_kg": poids_coffre_reel(prop), "vole_kg": 0.0, "caisse": False}
 		prop["vol_fenetre"] = f
 	return f
 
@@ -1000,7 +1009,7 @@ def vol_coffre_autorise(prop: dict, limite: dict | None, ref, now: int | None = 
 	now = now_epoch() if now is None else now
 	f = _fenetre_vol(prop, limite, now)
 	plafond = float(limite.get("fraction", 1)) * float(f.get("base_kg") or 0)
-	if float(f.get("vole_kg") or 0) + item_ref_weight(ref) > plafond + 1e-9:
+	if float(f.get("vole_kg") or 0) + contenants.poids_total(ref) > plafond + 1e-9:
 		return False, "Des dispositifs défensifs vous arrêtent : impossible d'emporter davantage."
 	return True, ""
 
@@ -1009,7 +1018,7 @@ def noter_vol_coffre(prop: dict, limite: dict | None, ref, now: int | None = Non
 	if not limite:
 		return
 	f = _fenetre_vol(prop, limite, now_epoch() if now is None else now)
-	f["vole_kg"] = round(float(f.get("vole_kg") or 0) + item_ref_weight(ref), 2)
+	f["vole_kg"] = round(float(f.get("vole_kg") or 0) + contenants.poids_total(ref), 2)
 
 
 def fraction_caisse_volable(prop: dict, limite: dict | None, now: int | None = None) -> float:
@@ -1410,6 +1419,8 @@ def donner(employe: dict, item_doc: dict, flux: dict | None = None, cles_utiles=
 	à SA caisse. L'appelant persiste le flux (`marche.persister_flux`)."""
 	if not est_atelier(employe):
 		return False, "Ce PNJ ne tient pas d'atelier."
+	if not contenants.est_vide(ref):
+		return False, contenants.REFUS_PLEIN
 	if not marche.lieu_buys(employe, item_doc):
 		return False, "Il n'a pas l'usage de cet objet."
 	item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")

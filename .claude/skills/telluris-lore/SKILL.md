@@ -156,6 +156,15 @@ Arbitrage de l'Auteur (01/11, deux questionnaires) — `docs/lore/monde/20261101
 - **Éthiopie** (Céphée, Cassiopée, rocher d'Andromède) = cité-État d'**Aksoum** (§ Cités-États).
 - **Méduse fille de Cétô** : théories contradictoires de PNJ — cause ou non des attaques marines contre Atlantis ; jamais tranché.
 
+### Contenants des légendes
+Arbitrage de l'Auteur (02/11, huit questionnaires) — `docs/lore/monde/20261102_sacs_des_legendes.md` (tableau « Ce qui est retenu ») ; rien en jeu.
+
+- **Reliques** (poids de l'objet ordinaire, contenance très supérieure, tout objet) : **sac de Manannán** (500 kg ; île de Man, **rang A** ; contenu repris seulement à **marée haute**, 2 × 3 h par jour), **sac de Rhiannon** (1 000 kg ; Annwn, **rang S**), **carquois d'Arjuna** (300 kg ; lieu plus tard), **coquille d'Oduduwa** (2 000 kg) et **pots d'Anansi** (300 kg, plusieurs) dans les zones blanches, **rang S**.
+- **Copies** = art des **Architectes** : **Besace profonde** 100 kg / 10 000 cu · **Urne intérieure** 300 kg / 40 000 · **Coffre de retrait** 1 000 kg / 150 000 ; Lutecia + cités à portail transversal, **aucune condition de rang** (le prix et l'accès suffisent, Auteur). Une copie peut dépasser une relique : voulu.
+- **Une relique par personnage** ; copies vendues à **prix fixe** par un PNJ Architecte de l'institut (Lutecia, Petra…). Objets aussi : coffres du Livre de Thot 1 000 kg, tente de Pari Banou 1 500, outre d'Éole 300, gourde de Li Tieguai 200, kibisis 100 (lieux à trancher). Mécanique : `docs/conception_contenants.md` (rangé = ne pèse rien, ni physiquement ni magiquement).
+- Règles : **inventaire séparé** ; **aucun être vivant** ; **aucun contenant magique dans un autre** (anomalie en récit).
+- Récit seulement : **Manannán** lui-même, piège de Rhiannon, grenier dogon, Igbá Odù, nkisi, Skíðblaðnir. **Sac sans fond** (D&D) hors du jeu. Treize Trésors : reportés.
+
 ### Contradictions ouvertes
 À signaler si un texte en dépend, jamais à trancher seul :
 

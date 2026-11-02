@@ -197,6 +197,15 @@ CATALOGUE = [
 			"neuf : refus si l'_id existe déjà dans le dump.",
 	},
 	{
+		"id": "gen_contenants",
+		"label": "👜 Générer les contenants (copies d'Architectes, reliques)",
+		"argv": _py("gen_contenants.py"),
+		"ecrit": "Écrit jsons/contenants_a_importer.json.",
+		"description": "Objets à poids fixe qui contiennent plus qu'ils ne pèsent (utils/contenants.py) : "
+			"Besace profonde, Urne intérieure, Coffre de retrait, reliques et objets du lore. Docs "
+			"neufs : refus si un _id existe déjà dans le dump.",
+	},
+	{
 		"id": "gen_jetons_especes",
 		"label": "🐉 Gabarits des jetons de combat (espèces)",
 		"argv": _py("gen_jetons_especes.py"),

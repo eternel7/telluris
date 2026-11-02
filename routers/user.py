@@ -55,6 +55,7 @@ from utils import cadence
 from utils import courriel
 from utils import motdepasse
 from utils import montures
+from utils import contenants
 from utils import escorte
 from utils import indicateurs
 from utils import expedition
@@ -2344,6 +2345,10 @@ async def sell_item(
 	if ref is None:
 		raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
 
+	# Contenant plein : le marchand achète le contenant, jamais ce qu'il contient sans le
+	# voir (Auteur, 02/11). Même remarque : `pop` sans save, sans effet sur le doc.
+	if not contenants.est_vide(ref):
+		raise HTTPException(status_code=409, detail=contenants.REFUS_PLEIN)
 	item = resolve_item_ref(ref)
 	if not item or not lieu_buys(lieu_doc, item):
 		# On a `pop` la ref mais on raise avant tout save_doc : sans effet sur le doc.

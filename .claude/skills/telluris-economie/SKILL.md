@@ -11,6 +11,15 @@ Entrée d'inventaire = **string legacy** `"item:xxx"` (poids = min) **ou objet**
 **Nom affichable d'un LIEU = `characters.lieu_label(doc, id?)`**, pendant de `item_label` et **source unique** : le nom d'un lieu part dans les libellés de quêtes, les placeholders de dialogue, l'onglet 🤝 et le guidage 🧭. ⚠️ Les docs `lieu:*` portent **`label` et lui seul** (90/90 dans le dump — ni `nom`, ni `description`) ; le dernier repli est le **slug** de l'id, jamais l'id entier. ⚠️ Il prend le **DOC**, pas l'id : les `lieu:*` sont les plus gros documents du jeu et sont exclus du cache de requête. La formule était recopiée à sept endroits et l'un d'eux l'avait oubliée — `quetes._cible_nom` n'aiguillait pas le type **`escorte`**, et la fiche annonçait « Escorter … jusqu'à : `lieu:athanor` ». ⚠️ Tout type d'objectif dont la cible est un lieu doit figurer dans son tuple, et lui recevoir le getter **mémoïsé** de la passe.
 
 
+### Contenants — un poids fixe qui contient plus (`utils/contenants.py`, `routers/contenants.py`)
+Conception arbitrée : `docs/conception_contenants.md` ; lore : `docs/lore/monde/20261102_sacs_des_legendes.md`. Verrouillé par `tests/test_contenants.py` et `dev/test_contenants_client.js`.
+- Capacité sur le doc item (`contenant: {capacite_kg, maree?}`), **contenu sur la RÉFÉRENCE** (`ref.contenu`, comme `texte`/`nom_perso`) : il suit le contenant partout (groupe, monture, coffre, sol) sans code ; chaîne legacy → dict à la première mise (`figer_ref`).
+- ⚠️ **Rangé = INERTE** : les lecteurs d'`inventaire` ne voient que le contenant — vente groupée, quêtes, grimoires, outils, combat, charge **physique et magique** (voulu, Auteur 02/11). `item_ref_weight` ignore `contenu` : ne jamais l'y ajouter.
+- Gardes : aucun contenant dans un autre ; `sell_item` et `proprietes.donner` (donc `racheter`) refusent un contenant **non vide** (`REFUS_PLEIN`) ; coffre de propriété au poids du **contenant** (`poids_coffre`), limite de vol au poids **réel** (`poids_coffre_reel`, `poids_total`) ; 409 si combat actif.
+- Marée (`maree: true`) : temps réel, `MAREE_*` (variables de monde) ; dépôt toujours, contenu masqué et reprise refusée hors fenêtre.
+- Client : « 👜 Ouvrir » (fiche objet, sac), `#contenant-overlay` deux colonnes (`_pcfLigne`), `_actionBody` pour le porteur courant.
+- Contenu : `dev/gen_contenants.py` → `jsons/contenants_a_importer.json` (13 docs neufs, refus sur `_id` pris ; verrouillé par `tests/test_gen_contenants.py`). Copies à `valeur` fixe ; tag `relique` sur les reliques uniques ; reliques et objets du lore sans `valeur` (non arbitré) ni moyen d'obtention.
+
 ### Charge & surcharge
 `charge_max_of(character)` (dérivée de F, jamais stockée) et `carried_weight(character)` (inventaire + équipés, pas le sol) sont couverts par `tests/test_character_stats.py`/`tests/test_groupe.py`. En **exploration**, dépasser la charge bloque le déplacement (409) et le pickup fait tomber des items aléatoires au sol ; en **combat**, au-delà de la demi-charge le déplacement est divisé par deux.
 

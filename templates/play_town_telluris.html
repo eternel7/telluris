@@ -3297,6 +3297,18 @@
 			display: flex; align-items: center; justify-content: center; padding: 1rem;
 		}
 		#item-detail-overlay.item-detail-hidden { display: none; }
+		/* ── 👜 Contenant ouvert (sac ↔ contenu) ── */
+		#contenant-overlay {
+			position: fixed; inset: 0; z-index: 9200;
+			background: rgba(10, 8, 5, .72);
+			display: flex; align-items: center; justify-content: center; padding: 1rem;
+		}
+		#contenant-overlay.item-detail-hidden { display: none; }
+		#contenant-overlay .item-detail-card { display: flex; flex-direction: column; }
+		#contenant-overlay .grp-inv-wrap { min-height: 0; }
+		#contenant-overlay .sh-inv-scroll { max-height: 50vh; }
+		.ctn-maree { margin: .2rem 0 .6rem; font-style: italic; color: var(--gold2, var(--gold, #d8b46a)); }
+		.ctn-maree:empty { display: none; }
 		/* ── Carte 6×6 d'une quête de chasse ── */
 		#quest-map-overlay {
 			position: fixed; inset: 0; z-index: 9300;
@@ -3661,6 +3673,23 @@
 			<div id="item-detail-body"></div>
 		</div>
 	</div><!-- /#item-detail-overlay -->
+	<div id="contenant-overlay" class="item-detail-hidden" aria-label="Contenant" onclick="if(event.target===this)fermerContenant()">
+		<div class="item-detail-card">
+			<button class="item-detail-close" onclick="fermerContenant()" title="Fermer">✕</button>
+			<h3 id="ctn-titre"></h3>
+			<p id="ctn-maree" class="ctn-maree"></p>
+			<div class="grp-inv-wrap">
+				<div class="grp-inv-col">
+					<div class="grp-inv-head"><strong>🎒 Sac</strong><span class="sh-inv-poids" id="ctn-charge-sac"></span></div>
+					<div class="sh-inv-scroll sh-scroll"><div id="ctn-sac" class="sh-inv-box"></div></div>
+				</div>
+				<div class="grp-inv-col">
+					<div class="grp-inv-head"><strong id="ctn-nom-droite">👜 Contenu</strong><span class="sh-inv-poids" id="ctn-charge"></span></div>
+					<div class="sh-inv-scroll sh-scroll"><div id="ctn-contenu" class="sh-inv-box"></div></div>
+				</div>
+			</div>
+		</div>
+	</div><!-- /#contenant-overlay -->
 	<div id="quest-map-overlay" class="hidden" aria-label="Carte de la quête" onclick="if(event.target===this)closeQuestMap()">
 		<div class="qmap-card">
 			<button class="qmap-close" onclick="closeQuestMap()" title="Fermer">✕</button>
@@ -5312,6 +5341,8 @@ document.addEventListener('keydown', e => {
 	if (qmap && !qmap.classList.contains('hidden')) { closeQuestMap(); return; }
 	const itemOv = document.getElementById('item-detail-overlay');
 	if (itemOv && !itemOv.classList.contains('item-detail-hidden')) { closeItemDetail(); return; }
+	const ctnOv = document.getElementById('contenant-overlay');
+	if (ctnOv && !ctnOv.classList.contains('item-detail-hidden')) { fermerContenant(); return; }
 	const sell = document.getElementById('sell-panel');
 	if (sell && !sell.classList.contains('panel-hidden')) { closeSellPanel(); return; }
 	const groupe = document.getElementById('groupe-panel');
@@ -6514,8 +6545,10 @@ function _renderMono(st) {
 	// texte du JOUEUR (Convention §9).
 	if (item.description) html += `<div class="item-detail-desc">${escapeHtml(item.description)}</div>`;
 	html += _renderCmpTable(item, null, 'Objet', '');
+	if (item.contenant) html += `<div class="item-cmp-slotsel"><span>👜 Contenance :</span><strong>${_contenanceTexte(item.contenant)}</strong></div>`;
 	const acts = [_carteBtn(item)].filter(Boolean);
 	if (st.source === 'sac') {
+		if (item.contenant) acts.push(`<button class="sh-equip-btn" onclick="_cardOuvrirContenant(${st.idx},'${item._id}')" title="Ranger et sortir des objets">👜 Ouvrir</button>`);
 		if (_estConsommable(item)) acts.push(`<button class="sh-equip-btn" onclick="_cardConsommer(${st.idx},'${item._id}')">🍽️ Consommer</button>`);
 		if (_estCoupable(item) || _estDecoupable(item)) acts.push(_cardCouperBtn(st.idx, item._id, 'sac', item));
 		acts.push(`<button class="sh-drop-btn" onclick="_cardDrop(${st.idx},'${item._id}')">Poser</button>`);
@@ -6644,6 +6677,114 @@ function _cardPickup(idx, itemId)       { closeItemDetail(); pickupItem(idx, ite
 function _cardConsommer(idx, itemId)    { closeItemDetail(); consommerItem(idx, itemId, null); }
 function _cardCouper(idx, itemId, src)  { closeItemDetail(); couperItem(idx, itemId, src); }
 function _cardTransferer(source, idx, itemId) { closeItemDetail(); transfererItem(_GRP_SENS[source], idx, itemId); }
+function _cardOuvrirContenant(idx, itemId) { closeItemDetail(); ouvrirContenant(idx, itemId); }
+
+// ── 👜 Contenants (utils/contenants.py, docs/conception_contenants.md) ───────────
+// Le contenu vit sur la référence du contenant : il ne pèse rien pour le porteur et reste
+// inerte tant qu'il n'est pas sorti. La fenêtre agit sur le sac du PORTEUR AFFICHÉ
+// (`_actionBody` injecte le `compagnon_id`, Convention §1). Le serveur tranche ; le client
+// ne fait que griser les flèches qu'il refuserait. Hors combat : /play redirige déjà.
+let _ctnEtat = null;   // { index, item_id, contenant }
+function _dureeCourte(s) {
+	s = Math.max(0, Math.round(+s || 0));
+	const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+	return h ? `${h} h ${String(m).padStart(2, '0')}` : `${Math.max(1, m)} min`;
+}
+// Sac de Manannán : temps réel, même instant pour tous (`now` en secondes epoch).
+function _mareeTexte(c, now) {
+	if (!c || !c.maree) return '';
+	if (c.accessible) return c.fin_maree_at
+		? `🌊 Marée haute — la mer se retire dans ${_dureeCourte(c.fin_maree_at - now)}.` : '🌊 Marée haute.';
+	return `🏖️ La mer s'est retirée : le sac semble vide. Prochaine marée haute dans ${_dureeCourte(c.prochaine_maree_at - now)}.`;
+}
+function _contenanceTexte(c) {
+	if (!c) return '';
+	if (!c.accessible) return `? / ${c.capacite_kg} kg`;
+	const nb = +c.nb || 0;
+	return `${(+c.charge_kg || 0).toFixed(1)} / ${c.capacite_kg} kg` + (nb ? ` — ${nb} objet${nb > 1 ? 's' : ''}` : '');
+}
+// Miroir de contenants.peut_ranger (hors marée la charge est masquée : le serveur décide).
+function _ctnPeutRanger(item, c) {
+	if (!item || !c) return { ok: false, titre: '' };
+	if (item.contenant) return { ok: false, titre: 'Un contenant magique ne se range pas dans un autre' };
+	if (c.accessible && (+item.poids || 0) > (+c.capacite_kg || 0) - (+c.charge_kg || 0) + 1e-9)
+		return { ok: false, titre: 'Trop lourd — le contenant est plein' };
+	return { ok: true, titre: 'Ranger dans le contenant' };
+}
+// Miroir de recrutement.peut_porter : l'objet sorti revient au sac du porteur.
+function _ctnPeutSortir(item, charge, chargeMax) {
+	if ((+charge || 0) + (+(item && item.poids) || 0) > (+chargeMax || 0) + 1e-9)
+		return { ok: false, titre: 'Trop lourd — vous êtes à votre charge maximale' };
+	return { ok: true, titre: 'Sortir dans le sac' };
+}
+async function ouvrirContenant(index, itemId) {
+	try {
+		const q = new URLSearchParams({ index, item_id: itemId });
+		const cid = _actionBody({}).compagnon_id;
+		if (cid) q.set('compagnon_id', cid);
+		const res = await fetch('api/contenant?' + q.toString());
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		_appliquerContenant(data);
+		document.getElementById('contenant-overlay').classList.remove('item-detail-hidden');
+	} catch (err) { console.error('Erreur contenant', err); }
+}
+function fermerContenant() {
+	_ctnEtat = null;
+	const ov = document.getElementById('contenant-overlay');
+	if (ov) ov.classList.add('item-detail-hidden');
+}
+function _appliquerContenant(data) {
+	_applyInventoryPayload(data);
+	_appliquerFiche(data.fiche);   // un grimoire rangé ou sorti ferme ou ouvre son sort
+	_ctnEtat = { index: data.contenant.index, item_id: data.contenant.item_id, contenant: data.contenant };
+	renderContenant();
+}
+function renderContenant() {
+	const st = _ctnEtat;
+	if (!st) return;
+	const c = st.contenant;
+	const now = Date.now() / 1000;
+	const conteneur = (_inventaire || [])[st.index] || {};
+	document.getElementById('ctn-titre').textContent = `${conteneur.icon || '👜'} ${c.nom || conteneur.nom || 'Contenant'}`;
+	document.getElementById('ctn-maree').textContent = _mareeTexte(c, now);
+	document.getElementById('ctn-charge').textContent = _contenanceTexte(c);
+	const charge = _currentCharge();
+	document.getElementById('ctn-charge-sac').textContent = `${charge.toFixed(1)} / ${_chargeMax || 0} kg`;
+	const sac = (_inventaire || []).map((it, i) => {
+		if (i === st.index) return '';
+		const g = _ctnPeutRanger(it, c);
+		return _pcfLigne(it, i, '→', '_ctnRanger', g.ok, g.titre, 'droite', null);
+	}).join('');
+	document.getElementById('ctn-sac').innerHTML = sac || '<p class="q-desc">Sac vide.</p>';
+	const dedans = (c.contenu || []).map(it => {
+		const g = _ctnPeutSortir(it, charge, _chargeMax);
+		return _pcfLigne(it, it.idx, '←', '_ctnSortir', g.ok, g.titre, 'gauche', null);
+	}).join('');
+	document.getElementById('ctn-contenu').innerHTML = dedans
+		|| `<p class="q-desc">${c.accessible ? 'Rien à l’intérieur.' : 'Le sac semble vide.'}</p>`;
+}
+async function _ctnAction(url, extra) {
+	const st = _ctnEtat;
+	if (!st) return;
+	try {
+		const res = await fetch(url, {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify(_actionBody({ index_contenant: st.index, item_id_contenant: st.item_id, ...extra }))
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		_appliquerContenant(data);
+	} catch (err) { console.error('Erreur contenant', err); }
+}
+function _ctnRanger(btn) {
+	btn.disabled = true;
+	return _ctnAction('api/contenant/ranger', { index: +btn.dataset.idx, item_id: btn.dataset.item });
+}
+function _ctnSortir(btn) {
+	btn.disabled = true;
+	return _ctnAction('api/contenant/sortir', { index_contenu: +btn.dataset.idx, item_id: btn.dataset.item });
+}
 
 // Fiche d'un objet du marchand (vente/achat) : même carte, avec comparaison à
 // l'équipement porté si l'objet est équipable, et actions Vendre/Acheter/Marchander.
