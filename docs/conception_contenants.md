@@ -1,6 +1,6 @@
 # Conception — inventaire de contenant
 
-- **Créée :** 02/11/2026. **Statut :** conception arbitrée par l'Auteur (deux questionnaires, § Décisions), **non implémentée**.
+- **Créée :** 02/11/2026. **Statut :** conception arbitrée par l'Auteur (trois questionnaires, § Décisions), **non implémentée**.
 - **Lore :** `docs/lore/monde/20261102_sacs_des_legendes.md` (reliques, copies d'Architectes, chiffres).
 - **Besoin :** un objet à poids fixe qui contient un poids supérieur ; ce qui est dedans ne pèse rien pour le porteur.
 
@@ -16,6 +16,10 @@
 | Vendre / confier à un atelier | **refusé s'il n'est pas vide** |
 | Combat | contenu **inaccessible** ; ranger et sortir hors combat seulement |
 | Où ranger et sortir | **partout** hors combat (sauf la marée de Manannán) |
+| Charge magique | ce qui est rangé **ne gêne pas la magie** non plus (« il ne pèse rien ») |
+| Reliques | **une par personnage** : chacun peut obtenir la sienne une fois |
+| Vente des copies | **PNJ Architecte de l'institut, vente à prix fixe**, sans stock ni fabrication ; un institut pareil à Petra et dans les cités à portail à venir |
+| Cinq objets du lore | contenance / poids selon leur légende (§ Contenu) |
 
 Rappel du lore arbitré : inventaire séparé à limite propre ; **aucun contenant magique dans un autre** ; **aucun être vivant** (aucun objet du jeu n'en est un : rien à garder) ; on dépose dans le Sac de Manannán à tout moment, on ne reprend (ni ne voit) qu'à marée haute.
 
@@ -38,6 +42,7 @@ Rappel du lore arbitré : inventaire séparé à limite propre ; **aucun contena
 - Même patron que le texte d'un livre écrit (`scriptorium`) ou `nom_perso` : l'état de l'**exemplaire** sur sa référence, jamais sur le doc générique.
 - **Le contenu suit le contenant partout** sans code : sac, compagnon, monture (`groupe/transferer`), coffre de propriété, sol, butin.
 - **Rangé = inerte** : les 27 fichiers qui lisent `inventaire` ne voient que la référence du contenant. Vente groupée, quêtes (cargaison comprise), grimoires de « 📖 Apprendre », outils partagés, pièges, combat, charge magique : rien à modifier, l'objet doit être **sorti** pour servir.
+- **Charge magique** : `charge_magie.charge_magique_portee` lit l'inventaire, donc ignore aussi le contenu — voulu (décision de l'Auteur).
 - **Poids** : `item_ref_weight` ignore déjà `contenu` → `carried_weight`, `peut_porter`, `poids_coffre` comptent le seul contenant **sans changement**.
 - **Aucune migration** : une référence chaîne devient un dict à la première mise (comme `renommer_ref`) ; `contenu` absent = vide.
 
@@ -83,11 +88,28 @@ Tous par **`_acteur(current_user, body)`** : le contenant peut être dans le sac
 ## Tests (`tests/test_contenants.py`)
 Capacité, emboîtement refusé, chaîne → dict, poids porté inchangé, `sortir` refusé en surcharge, marée sur `now` injecté (bords de fenêtre, période), refus de vente plein, limite de vol au poids total, contenu conservé par `groupe/transferer` et `coffre/transferer`.
 
+## Vente des copies — service neuf
+Aucun service de vente n'existe parmi ceux des PNJ (`soin`, `don`, `transport`, `escorte`, `rang`, `commission`, `acces`, `apport`, `traversee`, `enseignement`, `portail`, `direction`) ni au marché sans stock. À construire :
+- service **`vente`** d'un PNJ Architecte (`{"service": "vente", "items": [...]}` dans son arbre de dialogue) : liste à **prix fixe** relu sur le doc item (`valeur`), aucun stock, aucune relation ni marchandage ; achat refusé si la bourse ou la charge du porteur ne suit pas ;
+- lieux : la Cour des Arches et les Archives des Seuils (`institut_des_architectes`, Lutecia) ; un institut à **Petra** (à créer) ; puis chaque cité à portail transversal décrite.
+
 ## Contenu (générateur, plus tard)
-Un `dev/gen_contenants.py` → **un** `jsons/contenants_a_importer.json` : 3 copies (Besace profonde, Urne intérieure, Coffre de retrait) + reliques (sacs de Manannán et de Rhiannon, carquois d'Arjuna, coquille d'Oduduwa, pot d'Anansi) ; capacité, poids et prix repris du tableau de la séance de lore. Vente des copies : boutiques d'Architectes de Lutecia et des cités à portail transversal (à poser).
+Un `dev/gen_contenants.py` → **un** `jsons/contenants_a_importer.json`, chiffres du tableau de la séance de lore :
+
+| Objet | Contenance | Poids | Nature |
+|---|---|---|---|
+| Besace profonde · Urne intérieure · Coffre de retrait | 100 · 300 · 1 000 kg | 0,5 · 8 · 20 kg | copies, 10 000 · 40 000 · 150 000 cu |
+| Carquois d'Arjuna · Pot d'Anansi | 300 kg | 1 · 3 kg | relique · plusieurs pots |
+| Sac de Manannán (marée) · Sac de Rhiannon | 500 · 1 000 kg | 0,5 kg | reliques |
+| Coquille d'Oduduwa | 2 000 kg | 0,1 kg | relique |
+| Coffres du Livre de Thot | 1 000 kg | 30 kg | objet du lore |
+| Tente de Pari Banou | 1 500 kg | 2 kg | objet du lore |
+| Outre d'Éole | 300 kg | 1,5 kg | objet du lore |
+| Gourde de Li Tieguai | 200 kg | 1 kg | objet du lore |
+| Kibisis de Persée | 100 kg | 0,5 kg | objet du lore |
+
+**Une relique par personnage** : l'obtention (quête, coffre de donjon) vérifie qu'il ne l'a jamais reçue — trace sur le personnage, comme une quête unique réussie.
 
 ## Points ouverts
-- **Charge magique** : ce qui est rangé ne pèse rien, donc ne gêne plus la canalisation non plus — conséquence directe de « ne pèse rien » ; à confirmer.
-- **Unicité d'une relique** : une par monde, ou une par personnage ? (dépend de la façon de l'obtenir : quête, coffre de donjon).
-- **Boutique des copies** : quelle catégorie de lieu (atelier d'Architecte neuf, ou tag sur un lieu existant) dans chaque cité à portail.
-- Les cinq objets ajoutés au lore (coffres de Thot, gourde de Li Tieguai, tente de Pari Banou, kibisis, outre d'Éole) : contenance et poids.
+- **Où trouver** le carquois d'Arjuna (Muziris, plus tard) et les cinq objets du lore (coffres de Thot, gourde, tente, kibisis, outre) ; **unique ou non** pour ces cinq.
+- **Obtention des reliques** : quelle quête ou quel coffre de donjon pour chacune (île de Man, Annwn, zones blanches).

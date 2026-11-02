@@ -202,13 +202,18 @@ Réponses de l'Auteur ; elles **font foi** et complètent le premier arbitrage.
 | **Besace profonde** | copie d'Architectes | 100 kg | 0,5 kg | — | 10 000 cuivres |
 | **Urne intérieure** | copie d'Architectes | 300 kg | 8 kg | — | 40 000 cuivres |
 | **Coffre de retrait** | copie d'Architectes | 1 000 kg | 20 kg | — | 150 000 cuivres |
-| Coffres du Livre de Thot · gourde de Li Tieguai · tente de Pari Banou · kibisis · outre d'Éole | objets | à trancher | à trancher | — | à trancher |
+| **Coffres du Livre de Thot** | objet | 1 000 kg | 30 kg | — | à trancher |
+| **Tente de Pari Banou** | objet | 1 500 kg | 2 kg | — | à trancher |
+| **Outre d'Éole** | objet | 300 kg | 1,5 kg | — | à trancher |
+| **Gourde de Li Tieguai** | objet | 200 kg | 1 kg | — | à trancher |
+| **Kibisis de Persée** | objet | 100 kg | 0,5 kg | — | à trancher |
 
 Copies : vendues à **Lutecia** et dans les **cités à portail transversal**, **sans condition de rang**. Règles communes : **inventaire séparé**, le contenu ne pèse rien pour le porteur, **limite propre** à chaque contenant ; **aucun être vivant** ; **aucun contenant magique dans un autre**. Récit seulement : Manannán lui-même, le piège de Rhiannon, le grenier céleste dogon, Igbá Odù, nkisi, Skíðblaðnir.
 
 ## Points encore ouverts
 
-- **Cinq nouveaux objets** (coffres du Livre de Thot, gourde de Li Tieguai, tente de Pari Banou, kibisis, outre d'Éole) : nature (relique unique ou non), contenance, poids, lieu et rang.
+- **Cinq nouveaux objets** : contenance et poids arbitrés (02/11, « selon leur légende », `../../conception_contenants.md`) ; restent nature (unique ou non), lieu et rang.
+- **Reliques** : **une par personnage** ; copies vendues **à prix fixe par un PNJ Architecte de l'institut** (Auteur, 02/11).
 - **Carquois d'Arjuna** : unicité, lieu, rang — quand Muziris ou l'Inde seront décrites.
 - **Pots d'Anansi** : « plusieurs pots » mais obtention au rang S dans les zones blanches (point 20) — à confirmer.
 - **Treize Trésors** : séance Camelot à venir.
