@@ -228,14 +228,14 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		# Épreuve d'APPORT (`services.rang.apport`) : un rang obtenu en REMETTANT un objet, sans
 		# chasse. Deux flags, parce qu'il y a deux gestes : le PNJ dit ce qu'il veut
 		# (`rang_apport_offert`), puis le reçoit (`rang_apport_possible` = l'un des objets est porté
-		# par le joueur ou une de ses montures). Les montures ne sont lues qu'au cran concerné.
+		# par le joueur ou un de ses porteurs). Les porteurs ne sont lus qu'au cran concerné.
 		spec_apport = chasse.apport_spec(pnj_doc)
 		if spec_apport:
 			cite_apport = lieu_doc.get("lieu_parent")
 			ouvert = chasse.apport_offert(character, cite_apport, spec_apport)
 			flags["rang_apport_offert"] = ouvert
 			flags["rang_apport_possible"] = ouvert and chasse.sac_avec_apport(
-				[character] + montures.montures_effectives(character, get_doc), spec_apport) is not None
+				[character] + recrutement.porteurs_effectifs(character, get_doc), spec_apport) is not None
 			rec_apport = spec_apport.get("recompenses") or {}
 			# `setdefault` : une épreuve de CHASSE offerte ou en cours garde ses propres valeurs.
 			placeholders.setdefault("rang", chasse.rang_de(character, cite_apport))
@@ -315,7 +315,8 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 	# donneur ou un autre PNJ du même lieu). `setdefault` : {xp}/{prime}/{objet} d'un autre
 	# service déjà posé gardent leur valeur.
 	if lieu_doc and (pnj_doc.get("services") or {}).get("apport"):
-		flags.update(apport.etat(character, pnj_doc, lieu_doc.get("_id")))
+		flags.update(apport.etat(character, pnj_doc, lieu_doc.get("_id"),
+								 recrutement.porteurs_effectifs(character, get_doc)))
 		for cle, val in apport.placeholders(character, pnj_doc, lieu_doc.get("_id"),
 											_nom_item).items():
 			placeholders.setdefault(cle, val)
@@ -504,9 +505,11 @@ def _resoudre_apport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		return noeuds.get("accepte"), apport.placeholders(character, pnj_doc, lieu_id, _nom_item)
 
 	if op == "remettre":
-		# ⚠️ Groupe chargé AVANT la récompense et repassé : mêmes dicts que ceux qu'on sauve.
+		# ⚠️ Groupe chargé AVANT la récompense et repassé : mêmes dicts que ceux qu'on sauve —
+		# et que ceux dont les sacs fournissent les pièces (compagnons puis montures).
 		groupe = recrutement.groupe_effectif(character, get_doc)
-		q, n, complete = apport.remettre(character, pnj_doc, lieu_id)
+		porteurs = groupe + montures.montures_effectives(character, get_doc)
+		q, n, complete, touches = apport.remettre(character, pnj_doc, lieu_id, porteurs)
 		if not q or n <= 0:
 			raise HTTPException(status_code=422, detail="Vous n'avez rien de ce qui est demandé.")
 		dits = apport.placeholders(character, pnj_doc, lieu_id, _nom_item)
@@ -517,6 +520,7 @@ def _resoudre_apport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 			apport.archiver(character, q, quetes.now_epoch())
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		_sauver_porteurs(touches)
 		reponse["inventaire_payload"] = _inventory_payload(character)
 		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
 		if not complete:
@@ -562,15 +566,25 @@ def _xp_compagnie(recap: dict) -> dict | None:
 	)
 
 
-def _cloturer_contrats(character: dict, lieu_doc: dict) -> list:
+def _sauver_porteurs(touches: list) -> None:
+	"""Persiste les sacs des porteurs (compagnons, montures) vidés par une remise d'objets de
+	quête. ⚠️ APRÈS le save autoritatif du personnage, best-effort (la quête est acquise) ;
+	un même dict ressauvé ensuite par `_sauver_compagnie` porte déjà son `_rev` neuf."""
+	for p in touches or []:
+		save_doc(p)
+
+
+def _cloturer_contrats(character: dict, lieu_doc: dict, compagnons: list | None = None) -> list:
 	"""Fin des contrats d'UNE MISSION quand la quête est rendue DANS une guilde. Mute le
 	personnage et les docs compagnons ; À APPELER AVANT le `save_doc(character)` autoritatif.
 
 	⚠️ Il charge le groupe lui-même, et c'est SANS DANGER parce qu'il ne mute et ne renvoie
 	que des NON-PERMANENTS, là où `_sauver_compagnie` ne sauve que des permanents : les deux
 	ensembles sont disjoints (`engager_permanent` retire `contrat`, `_attacher` retire
-	`permanent`). Sans cet invariant, les deux tiendraient deux dicts du même document."""
-	return recrutement.cloturer_contrats_mission(character, lieu_doc)
+	`permanent`). Sans cet invariant, les deux tiendraient deux dicts du même document.
+	⚠️ Quand un sac de compagnon a servi à la remise, l'appelant passe `compagnons` (les dicts
+	déjà mutés) : un contrat échu et un sac vidé doivent partir dans la MÊME écriture."""
+	return recrutement.cloturer_contrats_mission(character, lieu_doc, compagnons=compagnons)
 
 
 def _sauver_contrats(libres: list, reponse: dict) -> None:
@@ -1287,7 +1301,12 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 			"xp": rec.get("xp", 0),
 			"prime": rec.get("cuivre", 0),
 		}
-		if not transport.livrer_transport(character, q):
+		# La cargaison peut voyager sur un compagnon ou une monture (principal EN TÊTE, §7).
+		# ⚠️ Ces MÊMES dicts sont repassés au solde et à la fin de contrat (un seul dict par doc).
+		groupe = recrutement.groupe_effectif(character, get_doc)
+		touches: list = []
+		if not transport.livrer_transport(
+				character, q, groupe + montures.montures_effectives(character, get_doc), touches):
 			# Cargaison incomplète (vendue, jetée) : la quête reste active, le délai court.
 			return noeuds.get("incomplet"), dits
 		if q.get("retour"):
@@ -1296,6 +1315,7 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 			recap = transport.livrer_en_attente_de_retour(character, q, lieu_doc, get_doc, save_doc)
 			if save_doc(character) is None:
 				raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+			_sauver_porteurs(touches)
 			reponse["transport"] = {"remis": q.get("titre"), "en_rayon": sum(recap["rayon"].values())}
 			reponse["inventaire_payload"] = _inventory_payload(character)
 			reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
@@ -1304,11 +1324,13 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 			return noeuds.get("livre_retour") or noeuds.get("livre"), dits
 		# Le doc `relation` est annexe (hors character) : reussir_transport le persiste, le
 		# character est sauvé juste après — un conflit sur la relation n'annule pas la livraison.
-		recap = transport.reussir_transport(character, q, lieu_doc, get_doc, save_doc)
+		recap = transport.reussir_transport(character, q, lieu_doc, get_doc, save_doc,
+											compagnons=groupe)
 		focalisation.effacer_si_quete(character, q.get("id"))
-		libres = _cloturer_contrats(character, lieu_doc)
+		libres = _cloturer_contrats(character, lieu_doc, compagnons=groupe)
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		_sauver_porteurs(touches)
 		_sauver_compagnie(recap)
 		_sauver_contrats(libres, reponse)
 		reponse["transport"] = {
@@ -1474,21 +1496,24 @@ def _resoudre_rang(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		spec = chasse.apport_spec(pnj_doc)
 		if not spec or not chasse.apport_offert(character, cite, spec):
 			raise HTTPException(status_code=422, detail="Aucune épreuve d'apport à solder ici.")
-		# Principal EN TÊTE puis ses montures : à égalité, c'est le sac du joueur qui se vide (§7).
-		sacs = [character] + montures.montures_effectives(character, get_doc)
+		# Principal EN TÊTE puis ses porteurs (compagnons, montures) : à égalité, c'est le sac du
+		# joueur qui se vide (§7). ⚠️ Les MÊMES dicts de compagnons servent au solde et à la fin
+		# de contrat : un seul dict par doc `aventurier:*`.
+		groupe = recrutement.groupe_effectif(character, get_doc)
+		sacs = [character] + groupe + montures.montures_effectives(character, get_doc)
 		i = chasse.sac_avec_apport(sacs, spec)
 		if i is None:
 			raise HTTPException(status_code=422, detail="Vous n'avez rien de ce qui est demandé.")
 		objet_id = chasse.retirer_objet_apport(sacs[i], spec)
-		resultat = chasse.solder_apport(character, cite, spec)
-		libres = _cloturer_contrats(character, lieu_doc)
+		resultat = chasse.solder_apport(character, cite, spec, compagnons=groupe)
+		libres = _cloturer_contrats(character, lieu_doc, compagnons=groupe)
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
-		# ⚠️ Le sac d'une MONTURE après le save autoritatif, best-effort : le rang atteint referme
+		# ⚠️ Le sac d'un PORTEUR après le save autoritatif, best-effort : le rang atteint referme
 		# l'apport (`apport_offert`), un échec ici laisse au pire l'objet dans la sacoche — jamais un
 		# second rang.
 		if i > 0:
-			save_doc(sacs[i])
+			_sauver_porteurs([sacs[i]])
 		_sauver_compagnie(resultat["recompenses"])
 		_sauver_contrats(libres, reponse)
 		relation_gain = quetes.recompenser_donneur(character, lieu_doc, get_doc, save_doc)

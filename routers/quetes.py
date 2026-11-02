@@ -325,13 +325,18 @@ async def quetes_deposer(
 	if q.get("objectif", {}).get("type") != "collect":
 		raise HTTPException(status_code=422, detail="Cette quête ne se dépose pas.")
 
-	n = quetes.deposer_collect(character, q)
+	# Les pièces portées par les compagnons et les montures comptent aussi (le principal en tête).
+	n, touches = quetes.deposer_collect(
+		character, q, recrutement.porteurs_effectifs(character, get_doc))
 	if n <= 0:
 		raise HTTPException(status_code=422, detail="Rien à déposer (aucune pièce portée ou objectif déjà atteint).")
 	# Collecte complétée par ce dépôt → la focalisation tombe (même save).
 	focalisation.effacer_si_objectif_atteint(character)
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	# Sacs des porteurs APRÈS le save autoritatif, best-effort (même ordre que l'apport de rang).
+	for p in touches:
+		save_doc(p)
 
 	payload = _board_payload(character, lieu_doc)
 	payload["depose"] = {"n": n, "titre": q.get("titre", "—"), "complete": quetes.objectif_atteint(character, q)}

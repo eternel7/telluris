@@ -841,37 +841,46 @@ def accepter_transport(character: dict, offre: dict, now: int | None = None) -> 
 	return snapshot
 
 
-def cargaison_manquante(character: dict, q: dict) -> dict:
+def cargaison_manquante(character: dict, q: dict, porteurs: list | None = None) -> dict:
 	"""{item_id: nb manquant} — ce que le joueur ne porte plus de la cargaison confiée
-	(vendu, jeté, perdu). Vide = livraison possible."""
+	(vendu, jeté, perdu), son sac et ceux de ses `porteurs` (compagnons, montures) confondus.
+	Vide = livraison possible."""
 	requis: dict = {}
 	for ref in q.get("cargaison") or []:
 		iid = item_ref_id(ref)
 		if iid:
 			requis[iid] = requis.get(iid, 0) + 1
 	porte: dict = {}
-	for ref in character.get("inventaire", []):
-		iid = item_ref_id(ref)
-		if iid in requis:
-			porte[iid] = porte.get(iid, 0) + 1
+	for sac in [character] + list(porteurs or []):
+		for ref in (sac or {}).get("inventaire", []):
+			iid = item_ref_id(ref)
+			if iid in requis:
+				porte[iid] = porte.get(iid, 0) + 1
 	return {
 		iid: n - porte.get(iid, 0)
 		for iid, n in requis.items() if n > porte.get(iid, 0)
 	}
 
 
-def livrer_transport(character: dict, q: dict) -> bool:
-	"""Retire la cargaison du sac et marque l'objectif atteint (mute sans save). False si
-	le joueur ne porte plus tout (l'appelant route vers le nœud « incomplet »)."""
-	if cargaison_manquante(character, q):
+def livrer_transport(character: dict, q: dict, porteurs: list | None = None,
+					 touches: list | None = None) -> bool:
+	"""Retire la cargaison des sacs — le principal EN TÊTE, puis ses `porteurs` (compagnons,
+	montures) — et marque l'objectif atteint (mute sans save). False si le groupe ne porte plus
+	tout (l'appelant route vers le nœud « incomplet »). Les porteurs dont le sac a été vidé
+	sont ajoutés à `touches`, à persister par l'appelant APRÈS son save autoritatif."""
+	if cargaison_manquante(character, q, porteurs):
 		return False
+	touches = touches if touches is not None else []
 	requis: dict = {}
 	for ref in q.get("cargaison") or []:
 		iid = item_ref_id(ref)
 		if iid:
 			requis[iid] = requis.get(iid, 0) + 1
+	sacs = [character] + list(porteurs or [])
 	for iid, n in requis.items():
-		quetes.retirer_items(character, iid, n)
+		for sac in quetes.retirer_items_sacs(sacs, iid, n)[1]:
+			if not any(sac is t for t in touches):
+				touches.append(sac)
 	q["progress"] = int((q.get("objectif") or {}).get("quantite", 1) or 1)
 	return True
 
@@ -960,7 +969,8 @@ def traiter_expirations(character: dict, now: int, get_doc_fn, save_doc_fn, find
 	return echues
 
 
-def _solder(character: dict, q: dict, get_doc_fn, save_doc_fn, now: int) -> dict:
+def _solder(character: dict, q: dict, get_doc_fn, save_doc_fn, now: int,
+			compagnons: list | None = None) -> dict:
 	"""Solde la course : récompenses (XP + prime + items), archivage, +1 relation avec le DONNEUR
 	(jamais le destinataire). Le doc `relation` est ANNEXE (hors character) : il est persisté ici ;
 	le character est muté sans save — l'endpoint le sauvegarde.
@@ -968,7 +978,7 @@ def _solder(character: dict, q: dict, get_doc_fn, save_doc_fn, now: int) -> dict
 	⚠️ `compagnie` remonte tel quel : ce sont des docs `aventurier:*` mutés (la compagnie a
 	gagné la même XP), et ils sont ANNEXES comme la relation — mais persistés par l'ENDPOINT,
 	APRÈS son save du personnage, jamais ici (un 409 rejoué les paierait deux fois)."""
-	recap = quetes.appliquer_recompenses(character, q)
+	recap = quetes.appliquer_recompenses(character, q, compagnons=compagnons)
 	archiver(character, q, echec=False, now=now)
 	giver_doc = get_doc_fn(q.get("giver")) if q.get("giver") else None
 	relation_val = quetes.recompenser_donneur(character, giver_doc, get_doc_fn, save_doc_fn)
@@ -991,12 +1001,15 @@ def _ranger_chez_le_destinataire(q: dict, lieu_doc: dict, get_doc_fn, save_doc_f
 
 
 def reussir_transport(character: dict, q: dict, lieu_doc: dict, get_doc_fn, save_doc_fn,
-					  now: int | None = None, rand_fn=random.random) -> dict:
+					  now: int | None = None, rand_fn=random.random,
+					  compagnons: list | None = None) -> dict:
 	"""Livraison réussie chez le destinataire, qui SOLDE la course (cas nominal des marchands :
-	c'est lui qui paie). Renvoie {xp, purse, relation, rayon}."""
+	c'est lui qui paie). Renvoie {xp, purse, relation, rayon}.
+	⚠️ `compagnons` = docs déjà chargés par l'appelant (ceux dont la cargaison a vidé le sac) :
+	l'XP partagée doit muter les MÊMES dicts, jamais un second du même document."""
 	now = int(quetes.now_epoch() if now is None else now)
 	rayon = _ranger_chez_le_destinataire(q, lieu_doc, get_doc_fn, save_doc_fn, rand_fn)
-	recap = _solder(character, q, get_doc_fn, save_doc_fn, now)
+	recap = _solder(character, q, get_doc_fn, save_doc_fn, now, compagnons)
 	recap["rayon"] = rayon
 	return recap
 

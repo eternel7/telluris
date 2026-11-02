@@ -586,22 +586,46 @@ def progress_courant(character: dict, q: dict) -> int:
 	return int(q.get("progress", 0) or 0)
 
 
-def deposer_collect(character: dict, q: dict) -> int:
-	"""Dépose à la guilde les pièces de collecte actuellement portées (jusqu'au reste à faire) :
-	les retire de l'inventaire et incrémente `progress`. Mute en place ; renvoie le nombre déposé."""
+def compter_sacs(sacs: list, item_id: str) -> int:
+	"""Exemplaires de `item_id` portés dans TOUS ces sacs (principal + porteurs du groupe)."""
+	return sum(_count_inventaire(s or {}, item_id) for s in sacs or [])
+
+
+def retirer_items_sacs(sacs: list, item_id: str, quantite: int) -> tuple[int, list]:
+	"""Retire jusqu'à `quantite` exemplaires de `item_id` en vidant les sacs DANS L'ORDRE
+	(principal EN TÊTE : à égalité c'est son sac qui se vide, Convention §7). Mute sans save.
+	→ (nombre retiré, sacs touchés hors du premier) — l'appelant persiste ces derniers APRÈS
+	son save autoritatif du principal."""
+	retire, touches = 0, []
+	for i, sac in enumerate(sacs or []):
+		if retire >= quantite:
+			break
+		n = retirer_items(sac, item_id, quantite - retire)
+		if n and i > 0:
+			touches.append(sac)
+		retire += n
+	return retire, touches
+
+
+def deposer_collect(character: dict, q: dict, porteurs: list | None = None) -> tuple[int, list]:
+	"""Dépose les pièces de collecte portées par le principal PUIS par ses porteurs
+	(`recrutement.porteurs_effectifs` : compagnons et montures — la carcasse voyage souvent
+	sur la mule), jusqu'au reste à faire, et incrémente `progress`. Mute en place.
+	→ (nombre déposé, porteurs touchés à persister par l'appelant)."""
 	obj = q.get("objectif", {})
 	if obj.get("type") != "collect":
-		return 0
+		return 0, []
 	reste = int(obj.get("quantite", 0) or 0) - int(q.get("progress", 0) or 0)
 	if reste <= 0:
-		return 0
+		return 0, []
 	cible = obj.get("cible")
-	n = min(reste, _count_inventaire(character, cible))
+	sacs = [character] + list(porteurs or [])
+	n = min(reste, compter_sacs(sacs, cible))
 	if n <= 0:
-		return 0
-	retirer_items(character, cible, n)
+		return 0, []
+	_, touches = retirer_items_sacs(sacs, cible, n)
 	q["progress"] = int(q.get("progress", 0) or 0) + n
-	return n
+	return n, touches
 
 
 def objectif_atteint(character: dict, q: dict) -> bool:

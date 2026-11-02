@@ -73,10 +73,10 @@ def _active_ici(character: dict, qid: str | None, lieu_id: str | None) -> dict |
 	return q
 
 
-def nb_portes(character: dict, q: dict) -> int:
-	"""Pièces de la cible portées par le principal (jamais un compagnon : cf. `rang.apport`)."""
+def nb_portes(character: dict, q: dict, porteurs: list | None = None) -> int:
+	"""Pièces de la cible portées par le principal ET ses porteurs (compagnons, montures)."""
 	cible = (q.get("objectif") or {}).get("cible")
-	return quetes._count_inventaire(character, cible) if cible else 0
+	return quetes.compter_sacs([character] + list(porteurs or []), cible) if cible else 0
 
 
 def reste_a_remettre(q: dict) -> int:
@@ -84,11 +84,12 @@ def reste_a_remettre(q: dict) -> int:
 	return max(0, int(obj.get("quantite", 0) or 0) - int(q.get("progress", 0) or 0))
 
 
-def etat(character: dict, pnj_doc: dict, lieu_id: str | None) -> dict:
+def etat(character: dict, pnj_doc: dict, lieu_id: str | None, porteurs: list | None = None) -> dict:
 	"""Les FLAGS du service pour CE PNJ dans CE lieu :
 	- `apport_offert`   : offre écrite, ni en cours, ni (si `unique`) déjà réussie ;
 	- `apport_en_cours` : la quête court (qu'on porte ou non de quoi la remettre) ;
-	- `apport_possible` : elle court ET le joueur porte au moins une pièce à remettre ;
+	- `apport_possible` : elle court ET le joueur (ou un de ses `porteurs`) porte au moins une
+	  pièce à remettre ;
 	- `apport_accompli` : la quête a été menée à bien (miroir de `quete_reussie`)."""
 	spec = offre_spec(pnj_doc)
 	qid = quete_id_de(pnj_doc)
@@ -98,7 +99,7 @@ def etat(character: dict, pnj_doc: dict, lieu_id: str | None) -> dict:
 		"apport_offert": bool(spec) and q is None and quetes.quete_active(character, qid) is None
 						 and not (spec["unique"] and reussie),
 		"apport_en_cours": q is not None,
-		"apport_possible": q is not None and reste_a_remettre(q) > 0 and nb_portes(character, q) > 0,
+		"apport_possible": q is not None and reste_a_remettre(q) > 0 and nb_portes(character, q, porteurs) > 0,
 		"apport_accompli": reussie,
 	}
 
@@ -143,15 +144,17 @@ def accepter(character: dict, pnj_doc: dict, lieu_id: str) -> dict | None:
 	return q
 
 
-def remettre(character: dict, pnj_doc: dict, lieu_id: str) -> tuple[dict | None, int, bool]:
-	"""Dépose les pièces portées (jusqu'au reste à faire). → (quête, déposées, complète).
-	(None, 0, False) si rien n'est remettable ici. N'archive PAS : l'appelant crédite les
+def remettre(character: dict, pnj_doc: dict, lieu_id: str,
+			 porteurs: list | None = None) -> tuple[dict | None, int, bool, list]:
+	"""Dépose les pièces portées par le principal PUIS ses `porteurs` (jusqu'au reste à faire).
+	→ (quête, déposées, complète, porteurs touchés à persister par l'appelant).
+	(None, 0, False, []) si rien n'est remettable ici. N'archive PAS : l'appelant crédite les
 	récompenses d'abord (`quetes.appliquer_recompenses`), puis appelle `archiver`."""
 	q = _active_ici(character, quete_id_de(pnj_doc), lieu_id)
 	if not q:
-		return None, 0, False
-	n = quetes.deposer_collect(character, q)
-	return q, n, quetes.objectif_atteint(character, q)
+		return None, 0, False, []
+	n, touches = quetes.deposer_collect(character, q, porteurs)
+	return q, n, quetes.objectif_atteint(character, q), touches
 
 
 def archiver(character: dict, q: dict, now: int) -> None:
