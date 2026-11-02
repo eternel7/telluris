@@ -813,10 +813,11 @@ def apport_offert(character: dict, cite: str, spec: dict | None) -> bool:
 
 def sac_avec_apport(sacs: list, spec: dict) -> int | None:
 	"""Index du premier sac qui contient l'un des objets de l'apport, ou None.
-	`sacs` = le principal EN TÊTE puis ses MONTURES : une portion de Tarasque pèse de 70 à 520 kg,
-	elle voyage sur une monture — n'accepter que le sac du joueur rendrait l'épreuve impossible.
-	⚠️ Jamais un compagnon : le solde recharge le groupe de son côté (XP partagée, fin de contrat),
-	on tiendrait deux dicts du même doc `aventurier:*`."""
+	`sacs` = le principal EN TÊTE puis ses porteurs (`recrutement.porteurs_effectifs` : compagnons
+	et montures) : une portion de Tarasque pèse de 70 à 520 kg, elle voyage sur une monture ou sur
+	le dos d'un compagnon — n'accepter que le sac du joueur rendrait l'épreuve impossible.
+	⚠️ L'appelant repasse ces MÊMES dicts de compagnons au solde (XP partagée, fin de contrat) :
+	sinon on tiendrait deux dicts du même doc `aventurier:*`."""
 	voulus = set(spec.get("items") or [])
 	for i, sac in enumerate(sacs or []):
 		if any(item_ref_id(ref) in voulus for ref in (sac or {}).get("inventaire") or []):
@@ -841,15 +842,18 @@ def apport_quete_id(spec: dict, cite: str) -> str:
 	return spec.get("id") or f"quete:apport_{str(cite).split(':', 1)[-1]}_{spec.get('rang_vise')}"
 
 
-def solder_apport(character: dict, cite: str, spec: dict) -> dict | None:
+def solder_apport(character: dict, cite: str, spec: dict,
+				  compagnons: list | None = None) -> dict | None:
 	"""Solde l'apport — l'objet est déjà RETIRÉ par l'appelant, qui seul sait de quel sac : inscrit
 	au rang visé, applique XP/prime, archive. Mute sans save. `{promu, recompenses}`, ou None si
-	l'apport n'est pas ouvert."""
+	l'apport n'est pas ouvert. `compagnons` = docs déjà chargés par l'appelant (cf.
+	`quetes.appliquer_recompenses`) : jamais un second dict d'un compagnon dont le sac a servi."""
 	if not apport_offert(character, cite, spec):
 		return None
 	promu = spec["rang_vise"]
 	crediter_rang(character, {"cite": cite, "rang": promu})
-	recap = quetes.appliquer_recompenses(character, {"recompenses": spec.get("recompenses") or {}})
+	recap = quetes.appliquer_recompenses(character, {"recompenses": spec.get("recompenses") or {}},
+										 compagnons=compagnons)
 	character.setdefault("quetes_terminees", []).append({
 		"id": apport_quete_id(spec, cite),
 		"titre": spec.get("titre") or f"Épreuve de rang {promu}",

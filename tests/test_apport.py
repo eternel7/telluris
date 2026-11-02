@@ -64,12 +64,12 @@ def test_remise_partielle_puis_complete():
 	c = {"inventaire": _feuilles(2)}
 	apport.accepter(c, _donneur(), COQ)
 	assert apport.etat(c, _donneur(), COQ)["apport_possible"]
-	q, n, complete = apport.remettre(c, _donneur(), COQ)
+	q, n, complete, _ = apport.remettre(c, _donneur(), COQ)
 	assert (n, complete) == (2, False) and c["inventaire"] == []
 	assert apport.reste_a_remettre(q) == 1
 	assert not apport.etat(c, _donneur(), COQ)["apport_possible"], "plus rien en poche"
 	c["inventaire"] = _feuilles(2)
-	q, n, complete = apport.remettre(c, _donneur(), COQ)
+	q, n, complete, _ = apport.remettre(c, _donneur(), COQ)
 	assert (n, complete) == (1, True)
 	assert len(c["inventaire"]) == 1, "on ne prend pas plus que le reste à faire"
 	apport.archiver(c, q, now=123)
@@ -96,7 +96,7 @@ def test_un_autre_pnj_du_meme_lieu_recoit_la_remise():
 	apport.accepter(c, _donneur(), COQ)
 	assert apport.etat(c, _receveur(), COQ)["apport_possible"]
 	assert not apport.etat(c, _receveur(), COQ)["apport_offert"]
-	q, n, complete = apport.remettre(c, _receveur(), COQ)
+	q, n, complete, _ = apport.remettre(c, _receveur(), COQ)
 	assert (n, complete) == (3, True)
 
 
@@ -104,8 +104,24 @@ def test_la_remise_exige_le_lieu_du_donneur():
 	c = {"inventaire": _feuilles(3)}
 	apport.accepter(c, _donneur(), COQ)
 	assert not apport.etat(c, _receveur(), "lieu:ailleurs")["apport_possible"]
-	assert apport.remettre(c, _receveur(), "lieu:ailleurs") == (None, 0, False)
+	assert apport.remettre(c, _receveur(), "lieu:ailleurs") == (None, 0, False, [])
 	assert len(c["inventaire"]) == 3
+
+
+def test_les_pieces_portees_par_les_porteurs_comptent():
+	"""Compagnon (Bob) ou monture : leurs sacs fournissent les pièces, le principal EN TÊTE (§7)."""
+	c = {"inventaire": _feuilles(1)}
+	bob = {"_id": "aventurier:bob", "inventaire": _feuilles(1)}
+	mule = {"_id": "monture:mule", "inventaire": _feuilles(2)}
+	apport.accepter(c, _donneur(), COQ)
+	assert not apport.etat({"quetes_actives": c["quetes_actives"]}, _donneur(), COQ)["apport_possible"]
+	assert apport.etat({"quetes_actives": c["quetes_actives"]}, _donneur(), COQ,
+					   [bob])["apport_possible"], "seul Bob porte : la remise est possible"
+	q, n, complete, touches = apport.remettre(c, _donneur(), COQ, [bob, mule])
+	assert (n, complete) == (3, True)
+	assert c["inventaire"] == [] and bob["inventaire"] == []
+	assert len(mule["inventaire"]) == 1, "on ne prend que le reste à faire"
+	assert touches == [bob, mule], "les sacs vidés sont à persister par l'appelant"
 
 
 def test_placeholders_depuis_l_offre_puis_le_snapshot():

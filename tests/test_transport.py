@@ -800,6 +800,25 @@ def test_livraison_refusee_si_la_cargaison_a_ete_vendue():
 	assert transport.transports_actifs(c) == [snap]
 
 
+def test_la_cargaison_portee_par_un_compagnon_ou_une_monture_se_livre():
+	"""La cargaison voyage souvent sur la mule ou sur le dos d'un compagnon : leurs sacs
+	comptent, le principal se vide EN PREMIER, et les sacs touchés sont signalés."""
+	c = character()
+	snap = transport.accepter_transport(c, offre(), now=1000)
+	colis = list(c["inventaire"])
+	assert len(colis) >= 2, "le test répartit la cargaison sur deux sacs"
+	bob = {"_id": "aventurier:bob", "inventaire": colis[1:]}
+	mule = {"_id": "monture:mule", "inventaire": []}
+	c["inventaire"] = colis[:1]
+	assert transport.cargaison_manquante(c, snap) != {}
+	assert transport.cargaison_manquante(c, snap, [bob, mule]) == {}
+	touches = []
+	assert transport.livrer_transport(c, snap, [bob, mule], touches) is True
+	assert c["inventaire"] == [] and bob["inventaire"] == []
+	assert touches == [bob], "la mule n'a rien porté : rien à sauver"
+	assert snap["progress"] == 1
+
+
 def test_reussite_paie_et_monte_la_relation(monkeypatch):
 	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_DELTA", 1)
 	monkeypatch.setattr(character_stats, "RELATION_INITIALE", 50)

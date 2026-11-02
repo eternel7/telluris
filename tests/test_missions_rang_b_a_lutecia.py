@@ -153,7 +153,7 @@ def test_remettre_la_tete_de_gargouille_monte_au_rang_b():
 	c.setdefault("inventaire", []).append({"item": GEN.TETE_GARGOUILLE, "poids": 20.0})
 	vue = offres.vue_pnj(MAELYS, c, BUREAU)
 	assert apport.etat(c, vue, GEN.BUREAU)["apport_possible"]
-	q, n, complete = apport.remettre(c, vue, GEN.BUREAU)
+	q, n, complete, _ = apport.remettre(c, vue, GEN.BUREAU)
 	assert complete and n == 1
 	recap = quetes.appliquer_recompenses(c, q, compagnons=[])
 	assert recap["rang"] == "B" and c["rangs_guilde"][GEN.LUTECIA] == "B"
