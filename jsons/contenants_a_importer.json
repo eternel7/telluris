@@ -1,0 +1,280 @@
+{
+  "docs": [
+    {
+      "_id": "item:besace_profonde",
+      "type": "item",
+      "nom": "Besace profonde",
+      "icon": "👜",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "rare",
+      "poids": 0.5,
+      "contenant": {
+        "capacite_kg": 100
+      },
+      "description": "Une besace de cuir souple, ordinaire à l'œil. Les Architectes y ont plié un espace bien plus vaste que sa toile : on y range de quoi charger une mule, et l'épaule n'en sent rien.",
+      "valeur": [
+        {
+          "cu": 10000
+        },
+        {
+          "cu": 10000
+        }
+      ]
+    },
+    {
+      "_id": "item:urne_interieure",
+      "type": "item",
+      "nom": "Urne intérieure",
+      "icon": "🏺",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "tres_rare",
+      "poids": 8,
+      "contenant": {
+        "capacite_kg": 300
+      },
+      "description": "Une urne de terre cuite au col étroit, cerclée de bronze. Son ventre ouvre sur une réserve où tiennent minerais, matériaux et marchandises ; son poids ne change jamais, qu'elle soit vide ou pleine.",
+      "valeur": [
+        {
+          "cu": 40000
+        },
+        {
+          "cu": 40000
+        }
+      ]
+    },
+    {
+      "_id": "item:coffre_de_retrait",
+      "type": "item",
+      "nom": "Coffre de retrait",
+      "icon": "🗃️",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "tres_rare",
+      "poids": 20,
+      "contenant": {
+        "capacite_kg": 1000
+      },
+      "description": "Un petit coffre ferré qu'un homme seul porte sur le dos. Le couvercle soulevé, on devine une salle entière derrière ses planches. Les Architectes qui savent en bâtir se comptent sur les doigts d'une main.",
+      "valeur": [
+        {
+          "cu": 150000
+        },
+        {
+          "cu": 150000
+        }
+      ]
+    },
+    {
+      "_id": "item:sac_de_manannan",
+      "type": "item",
+      "nom": "Sac de Manannán",
+      "icon": "🌊",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable",
+        "relique"
+      ],
+      "rarete": "legendaire",
+      "poids": 0.5,
+      "contenant": {
+        "capacite_kg": 500,
+        "maree": true
+      },
+      "description": "Un sac en peau de grue, qui fut une femme selon les marins d'Irlande. Le dieu de la mer y gardait ses trésors. À marée haute, son contenu apparaît en son milieu ; quand la mer se retire, le sac semble vide."
+    },
+    {
+      "_id": "item:sac_de_rhiannon",
+      "type": "item",
+      "nom": "Sac de Rhiannon",
+      "icon": "👝",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable",
+        "relique"
+      ],
+      "rarete": "legendaire",
+      "poids": 0.5,
+      "contenant": {
+        "capacite_kg": 1000
+      },
+      "description": "Un petit sac qu'on dit venu d'Annwn. On y verse et on y verse encore : il ne se remplit jamais. Les conteurs gallois prétendent qu'un homme y fut pris pour avoir voulu en tasser le contenu de ses pieds."
+    },
+    {
+      "_id": "item:carquois_d_arjuna",
+      "type": "item",
+      "nom": "Carquois d'Arjuna",
+      "icon": "🏹",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable",
+        "relique"
+      ],
+      "rarete": "legendaire",
+      "poids": 1,
+      "contenant": {
+        "capacite_kg": 300
+      },
+      "description": "Un carquois qu'un héros lointain reçut, dit-on, du dieu des eaux, et qu'il rendit à la mer. On croyait qu'il ne se vidait jamais ; en vérité, il contient bien plus qu'il ne pèse."
+    },
+    {
+      "_id": "item:coquille_d_oduduwa",
+      "type": "item",
+      "nom": "Coquille d'Oduduwa",
+      "icon": "🐚",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable",
+        "relique"
+      ],
+      "rarete": "legendaire",
+      "poids": 0.1,
+      "contenant": {
+        "capacite_kg": 2000
+      },
+      "description": "Une coquille d'escargot qui tient dans le creux de la main. Les récits du Sud disent qu'un dieu en versa toute la terre ferme sur les eaux du commencement. De tous les contenants connus, c'est le plus vaste."
+    },
+    {
+      "_id": "item:pot_d_anansi",
+      "type": "item",
+      "nom": "Pot d'Anansi",
+      "icon": "🕷️",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "legendaire",
+      "poids": 3,
+      "contenant": {
+        "capacite_kg": 300
+      },
+      "description": "Un pot de terre ventru, fait à l'image de celui où l'araignée Anansi enferma toute la sagesse du monde avant de le briser. Les conteurs akan en façonnent encore, et ceux-là contiennent bien davantage que leur panse."
+    },
+    {
+      "_id": "item:coffres_de_thot",
+      "type": "item",
+      "nom": "Coffres du Livre de Thot",
+      "icon": "🗝️",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "legendaire",
+      "poids": 30,
+      "contenant": {
+        "capacite_kg": 1000
+      },
+      "description": "Six coffres emboîtés — fer, bronze, bois, ivoire et ébène, argent, or — que les récits d'Égypte placent au fond du Nil, gardés par des serpents. On n'en ouvre qu'un à la fois, et le dernier est toujours plus vaste que le premier."
+    },
+    {
+      "_id": "item:tente_de_pari_banou",
+      "type": "item",
+      "nom": "Tente de Pari Banou",
+      "icon": "⛺",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "legendaire",
+      "poids": 2,
+      "contenant": {
+        "capacite_kg": 1500
+      },
+      "description": "Une toile pliée qui tient dans une main. Dépliée, elle abriterait les ballots d'une caravane entière ; repliée, tout ce qu'on y a laissé voyage avec elle."
+    },
+    {
+      "_id": "item:outre_d_eole",
+      "type": "item",
+      "nom": "Outre d'Éole",
+      "icon": "💨",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "legendaire",
+      "poids": 1.5,
+      "contenant": {
+        "capacite_kg": 300
+      },
+      "description": "Une outre de cuir cousue d'un fil d'argent. Les marins disent qu'elle enferma tous les vents sauf un, et qu'un équipage curieux l'ouvrit trop tôt. Elle garde aujourd'hui des choses plus sages."
+    },
+    {
+      "_id": "item:gourde_de_li_tieguai",
+      "type": "item",
+      "nom": "Gourde de Li Tieguai",
+      "icon": "🍶",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "legendaire",
+      "poids": 1,
+      "contenant": {
+        "capacite_kg": 200
+      },
+      "description": "Une calebasse laquée, attachée à une cordelette. Celle de l'Immortel à la béquille de fer portait élixirs et remèdes ; son col étroit ouvre sur une panse bien plus grande que lui."
+    },
+    {
+      "_id": "item:kibisis",
+      "type": "item",
+      "nom": "Kibisis de Persée",
+      "icon": "🎒",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "legendaire",
+      "poids": 0.5,
+      "contenant": {
+        "capacite_kg": 100
+      },
+      "description": "La besace que Persée porta en revenant d'avoir tranché la tête de la Gorgone : rien de ce qu'elle renferme ne peut nuire à qui la porte. Sa toile est usée, son fermoir toujours sûr."
+    }
+  ]
+}

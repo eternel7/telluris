@@ -1,6 +1,6 @@
 # Conception — inventaire de contenant
 
-- **Créée :** 02/11/2026. **Statut :** conception arbitrée par l'Auteur (trois questionnaires, § Décisions). **Mécanique implémentée** le 02/11 (`utils/contenants.py`, `routers/contenants.py`, fenêtre 👜 de `/play`) ; restent le service `vente`, le générateur de contenu et l'obtention des reliques.
+- **Créée :** 02/11/2026. **Statut :** conception arbitrée par l'Auteur (trois questionnaires, § Décisions). **Mécanique implémentée** le 02/11 (`utils/contenants.py`, `routers/contenants.py`, fenêtre 👜 de `/play`) ; contenu : `dev/gen_contenants.py` → `jsons/contenants_a_importer.json` ; restent le service `vente` et l'obtention des reliques.
 - **Lore :** `docs/lore/monde/20261102_sacs_des_legendes.md` (reliques, copies d'Architectes, chiffres).
 - **Besoin :** un objet à poids fixe qui contient un poids supérieur ; ce qui est dedans ne pèse rien pour le porteur.
 

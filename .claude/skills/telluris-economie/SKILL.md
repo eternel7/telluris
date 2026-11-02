@@ -18,6 +18,7 @@ Conception arbitrée : `docs/conception_contenants.md` ; lore : `docs/lore/monde
 - Gardes : aucun contenant dans un autre ; `sell_item` et `proprietes.donner` (donc `racheter`) refusent un contenant **non vide** (`REFUS_PLEIN`) ; coffre de propriété au poids du **contenant** (`poids_coffre`), limite de vol au poids **réel** (`poids_coffre_reel`, `poids_total`) ; 409 si combat actif.
 - Marée (`maree: true`) : temps réel, `MAREE_*` (variables de monde) ; dépôt toujours, contenu masqué et reprise refusée hors fenêtre.
 - Client : « 👜 Ouvrir » (fiche objet, sac), `#contenant-overlay` deux colonnes (`_pcfLigne`), `_actionBody` pour le porteur courant.
+- Contenu : `dev/gen_contenants.py` → `jsons/contenants_a_importer.json` (13 docs neufs, refus sur `_id` pris ; verrouillé par `tests/test_gen_contenants.py`). Copies à `valeur` fixe ; tag `relique` sur les reliques uniques ; reliques et objets du lore sans `valeur` (non arbitré) ni moyen d'obtention.
 
 ### Charge & surcharge
 `charge_max_of(character)` (dérivée de F, jamais stockée) et `carried_weight(character)` (inventaire + équipés, pas le sol) sont couverts par `tests/test_character_stats.py`/`tests/test_groupe.py`. En **exploration**, dépasser la charge bloque le déplacement (409) et le pickup fait tomber des items aléatoires au sol ; en **combat**, au-delà de la demi-charge le déplacement est divisé par deux.
