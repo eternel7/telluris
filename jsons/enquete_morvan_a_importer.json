@@ -93,6 +93,20 @@
           "partiel": "morvan_partiel",
           "remis": "morvan_remis"
         }
+      },
+      "don": {
+        "item": "item:carte_aventurier",
+        "quantite": 1,
+        "cout_cuivre": 0,
+        "lieu_parent": "auto",
+        "unique": true,
+        "noeuds": {
+          "fait": "carte_remplacee",
+          "remplacement": "carte_remplacee",
+          "sans_fonds": "carte_sans_fonds",
+          "trop_charge": "carte_trop_charge"
+        },
+        "rang_guilde": "F"
       }
     },
     "dialogue": {
@@ -291,6 +305,16 @@
                 }
               },
               "next": "morvan_souvenir"
+            },
+            {
+              "id": "carte_perdue",
+              "label": "« J'ai… perdu ma carte d'aventurier. »",
+              "condition": {
+                "don_a_remplacer": true
+              },
+              "action": {
+                "service": "don"
+              }
             },
             {
               "id": "rien",
@@ -698,6 +722,41 @@
             {
               "id": "ok",
               "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "carte_trop_charge": {
+          "texte": "« Pas même la place d'une carte dans ton sac, {prenom} ? Allège-toi d'abord. Ton nom ne bougera pas du registre. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviens le sac plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "carte_sans_fonds": {
+          "texte": "« Une carte refaite ne coûte rien au Bastion, {prenom}. Si quelqu'un t'a dit le contraire, envoie-le-moi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai.",
+              "next": "fin"
+            }
+          ]
+        },
+        "carte_remplacee": {
+          "texte": "Borin te regarde longuement, puis sa barbe se met à trembler. Le rire finit par sortir, énorme, et deux aventuriers se retournent au fond de la salle. « Perdue ! Vous entendez ça, là-bas ? Ça m'a porté des caisses de sanglier jusqu'au fumoir sans en lâcher une, et ça me perd une plaque de cuir grande comme ma main ! » Il s'essuie les yeux, tire le registre à lui et grave une carte neuve sans même chercher ton nom : il le connaît. « Rang {rang}, comme avant. Ça, personne ne te le prendra. Mais attache-la, {prenom}. La prochaine que je refais, tu paies la tournée. »",
+          "choix": [
+            {
+              "id": "merci",
+              "label": "« Merci, Borin. »",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Autre chose…",
               "next": "accueil"
             }
           ]
@@ -2034,6 +2093,12 @@
             ],
             "cible": "item:loup_garou_tete",
             "objectif_atteint": false
+          }
+        },
+        {
+          "combat_gagne": {
+            "lieu": "lieu:clairiere_du_charbonnier",
+            "attendu": false
           }
         }
       ]

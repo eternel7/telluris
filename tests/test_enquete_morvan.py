@@ -2,7 +2,7 @@
 
 Contenu pur (`dev/gen_enquete_morvan.py` → UN fichier d'import) : on verrouille ce qu'aucun
 symptôme ne trahirait en jeu — une offre visible avant le rang E, une clairière qui ne
-s'ouvre jamais ou se referme pour toujours sur une tête perdue (quête bloquée), une salle
+s'ouvre jamais ou se rouvre sur un second loup-garou, une salle
 sans loup-garou garanti, un charbonnier qui ne disparaît pas, une grille qui enferme le groupe."""
 
 import glob
@@ -116,17 +116,17 @@ def test_conditions_de_presence_et_d_acces_lisibles():
 		assert acces.conditions_pnj_invalides(doc) == [], doc["_id"]
 
 
-def test_la_clairiere_s_ouvre_tant_que_la_tete_reste_a_rapporter():
-	"""Fermée sans la quête ; ouverte quête en cours, MÊME après une victoire (une tête
-	perdue au sol ne doit pas bloquer la quête) ; refermée la tête REMISE (`progress`)."""
+def test_la_clairiere_s_ouvre_tant_que_la_bete_n_est_pas_tombee():
+	"""Fermée sans la quête ; ouverte quête en cours ; refermée dès la victoire (un loup-garou
+	tué, pas de deuxième — Auteur, 03/11), même tête perdue ; refermée la tête REMISE."""
 	clairiere = _docs()[CLAIRIERE]
 	sans = {"quetes_actives": [], "battle_maps_gagnees": [], "inventaire": []}
 	assert not acces.acces_autorise(sans, clairiere, lambda _id: None)[0]
 	pendant = {"quetes_actives": [_collecte()], "battle_maps_gagnees": [], "inventaire": []}
 	assert acces.acces_autorise(pendant, clairiere, lambda _id: None)[0]
 	tete_perdue = dict(pendant, battle_maps_gagnees=[CLAIRIERE])
-	assert acces.acces_autorise(tete_perdue, clairiere, lambda _id: None)[0]
-	remise = dict(tete_perdue, quetes_actives=[dict(_collecte(), progress=1)])
+	assert not acces.acces_autorise(tete_perdue, clairiere, lambda _id: None)[0]
+	remise = dict(pendant, quetes_actives=[dict(_collecte(), progress=1)])
 	assert not acces.acces_autorise(remise, clairiere, lambda _id: None)[0]
 
 

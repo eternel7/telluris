@@ -12,10 +12,10 @@
 #
 # 100 % DONNÉE (hors la condition `rang_min`, ajoutée au moteur de dialogue pour cette quête) :
 #   · la quête est une `collect` ordinaire (`services.apport` de Borin, donneur ET receveur) ;
-#   · la clairière s'ouvre tant que la tête reste À RAPPORTER — SANS `combat_gagne` faux,
-#     à la différence d'Escolives : la tête se découpe sur une carcasse tombée au sol, un pas
-#     de trop et elle est perdue ; la porte doit alors se rouvrir, sans quoi la quête serait
-#     bloquée pour toujours ;
+#   · la clairière s'ouvre tant que la tête reste À RAPPORTER ET que la bête n'est pas
+#     tombée (`combat_gagne` faux, comme à Escolives — arbitrage de l'Auteur du 03/11 : un
+#     loup-garou tué, il n'y en a pas de deuxième). ⚠️ Revers assumé : la tête se découpe sur
+#     une carcasse tombée au sol ; abandonnée là, la quête ne peut plus être menée à bien ;
 #   · UN loup-garou, salle à espèce UNIQUE (un second type pourrait évincer la bête et
 #     rendre la preuve introuvable, cf. Escolives) ;
 #   · le DOUTE (Auteur) : le charbonnier disparaît une fois la clairière gagnée
@@ -62,8 +62,8 @@ PORTRAITS = {
 POS_FRANCE = [52, 22]
 
 RANG_E = {"rang_min": {"cite": CITE, "rang": RANG}}
-# La clairière s'ouvre tant que la tête reste À RAPPORTER (cf. en-tête : pas de
-# `combat_gagne`). Les barrières n'ont pas de filtre `id` : la collecte se reconnaît à sa cible.
+# La clairière s'ouvre tant que la tête reste À RAPPORTER (+ `CLAIRIERE_INTACTE`, cf. en-tête).
+# Les barrières n'ont pas de filtre `id` : la collecte se reconnaît à sa cible.
 QUETE_A_FAIRE = {"quete_active": {"types": ["collect"], "cible": TETE, "objectif_atteint": False}}
 
 # Les villageois ne parlent de l'enquête que quête EN COURS (Auteur, 15/10) : AVANT, un simple
@@ -427,7 +427,7 @@ def docs_neufs() -> list:
 				"gardien": MENEUSE,
 				"refus": "La clairière est vide. Les meules se sont éteintes.",
 				"cycle": 1,
-				"conditions": [QUETE_A_FAIRE],
+				"conditions": [QUETE_A_FAIRE, CLAIRIERE_INTACTE],
 			},
 		},
 		{
