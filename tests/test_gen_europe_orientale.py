@@ -76,94 +76,78 @@ def test_grille_nettoyee_mure_la_cote_et_garde_le_cadre():
 	assert len(g["zones_isolees"]) == 1
 
 
-def test_postes_une_case_sur_deux_le_long_de_la_ligne_la_plus_longue():
-	assert geo_gen.nombre_postes(((0, 0), (20, 0)), ((0, 0), (8, 0))) == 10
-	assert geo_gen.nombre_postes(((0, 0), (0, 1)), ((0, 0), (0, 1))) == 1
+def test_georeferencement_retrouve_ses_reperes():
+	"""La projection passe par chaque repère (résidus interpolés) et reste continue entre eux."""
+	from dev import georeferencement_cartes as georef
+	for lieu, reperes in georef.REPERES.items():
+		for nom, ((lon, lat), (x, y)) in reperes.items():
+			px, py = georef.vers_case(lieu, lon, lat)
+			assert math.dist((px, py), (x, y)) < 0.01, (lieu, nom, (px, py), (x, y))
+			# À un dixième de degré : à moins de 2 cases.
+			assert math.dist(georef.vers_case(lieu, lon + 0.1, lat), (x, y)) < 2, (lieu, nom)
 
 
-def test_liens_poses_sur_la_terre_et_abandonnes_sur_l_eau():
-	zone_a = {(x, 0) for x in range(0, 11)}
-	# Sur B, la terre s'arrête à x = 4 : au-delà, les postes tomberaient sur la mer.
-	zone_b = {(x, 5) for x in range(0, 5)}
-	libelles = {"lieu:a": "A", "lieu:b": "B"}
-	docs, abandonnes = geo_gen.liens_frontiere("Gué", "a", ((0, 0), (10, 0)), zone_a,
-		"b", ((0, 5), (10, 5)), zone_b, libelles)
-	assert abandonnes and docs
-	for d in docs:
-		(na, nb) = d["nodes"]
-		assert tuple(na["pos"]) in zone_a and tuple(nb["pos"]) in zone_b
-		assert math.dist(nb["pos"], (nb["pos"][0], 5)) <= geo_gen.ECART_MAX
-	assert docs[0]["_id"] == "link:a_to_b_01"
-	assert docs[0]["nodes"][0]["label"] == "Gué 1 — A"
-	assert len({tuple(map(tuple, (n["pos"] for n in d["nodes"]))) for d in docs}) == len(docs)
+def test_paire_georeferencee_au_format_de_calage_cartes():
+	from dev import calage_cartes
+	from dev import georeferencement_cartes as georef
+	reperes = georef.paire("lieu:roumanie", "lieu:balkans", (88, 48), (86, 48))
+	assert len(reperes) == 16
+	s, _, _ = calage_cartes.ajuster(reperes)
+	assert 0.5 < s < 2.5
 
 
 def test_specification_coherente():
-	"""Chaque frontière relie deux cartes connues, ses lignes restent dans la grille (86×48 pour
-	les cartes neuves, 88×48 pour celles en jeu), chaque carte neuve a ses graines et son ancre."""
-	en_jeu = {"france", "plaine_europeenne", "pannonie", "roumanie"}
-	for nom, a, ligne_a, b, ligne_b in geo_gen.FRONTIERES:
-		for slug, ligne in ((a, ligne_a), (b, ligne_b)):
-			assert slug in geo_gen.CARTES or slug in en_jeu, (nom, slug)
-			w = 86 if slug in geo_gen.CARTES else 88
-			assert all(0 <= x < w and 0 <= y < 48 for x, y in ligne), (nom, slug)
-	assert set(geo_gen.CARTES) == set(geo.EAUX) == set(geo_gen.ANCRES)
-	ids = [f"{a}_to_{b}" for _, a, _, b, _ in geo_gen.FRONTIERES]
-	assert len(ids) == len(set(ids))
-
-
-def test_construire_n_emet_que_le_delta():
-	"""Cartes neuves absentes du dump : créées ; rejeu avec le lot importé : plus rien."""
-	def carte(slug):
-		W = 88 if slug in ("france", "plaine_europeenne", "pannonie", "roumanie") else 86
-		return {"_id": f"lieu:{slug}", "type": "lieu", "label": slug,
-			"cells": [[1] * W for _ in range(48)], "nav": {}}
-
-	dump = [carte(s) for s in ("france", "plaine_europeenne", "pannonie", "roumanie")]
-	lieux, liens, suppr, rapport = geo_gen.construire(dump, carte)
-	assert len(lieux) == len(geo_gen.CARTES) and liens and not suppr
-	lieux2, liens2, suppr2, _ = geo_gen.construire(dump + lieux + liens, carte)
-	assert lieux2 == [] and liens2 == [] and suppr2 == []
-	# Un lien de frontière en base que le lot ne produit plus part en suppression.
-	perime = {"_id": "link:moscovie_to_volga_oural_99", "type": "connection", "nodes": []}
-	_, _, suppr3, _ = geo_gen.construire(dump + lieux + liens + [perime], carte)
-	assert suppr3 == [{"_id": perime["_id"], "_deleted": True}]
-
-
-# ── Afrique : même moteur, configuration de dev/gen_afrique.py ─────────────────────────────
-def test_afrique_specification_coherente():
+	"""Chaque paire relie deux cartes géoréférencées et ancrées ; une paire au plus par couple."""
+	from dev import georeferencement_cartes as georef
 	from dev import gen_afrique as af
-	en_jeu = {"afrique_du_nord", "egypte"}
-	for nom, a, ligne_a, b, ligne_b in af.FRONTIERES:
-		for slug, ligne in ((a, ligne_a), (b, ligne_b)):
-			assert slug in af.CARTES or slug in en_jeu, (nom, slug)
-			w = 86 if slug in af.CARTES else 88
-			assert all(0 <= x < w and 0 <= y < 48 for x, y in ligne), (nom, slug)
-	assert set(af.CARTES) == set(af.EAUX) and set(af.CARTES) <= set(af.ANCRES)
-	# L'Égypte n'est pas touchée : aucune frontière vers elle, aucun territoire fermé dessus.
-	assert all("egypte" not in (a, b) for _, a, _, b, _ in af.FRONTIERES)
+	for cfg in (geo_gen, af):
+		vus = set()
+		for foi, voisine, _ in cfg.PAIRES_CALEES:
+			for s in (foi, voisine):
+				assert f"lieu:{s}" in georef.REPERES and s in cfg.ANCRES, (cfg.__name__, s)
+			assert frozenset((foi, voisine)) not in vus
+			vus.add(frozenset((foi, voisine)))
+		assert set(cfg.CARTES) == set(cfg.EAUX)
+	# L'Égypte n'est jamais recalée : elle ne figure qu'en carte qui fait foi.
+	assert all(v != "egypte" for _, v, _ in af.PAIRES_CALEES)
+
+
+def test_bord_et_lignes_face():
+	"""Deux cartes bord à bord : la frontière est le bord tourné vers l'autre, réduit à la portion
+	en face de sa terre ; les passages vont d'un bout à l'autre à la même fraction."""
+	ligne_a = [(x, 0) for x in range(10)]
+	ligne_b = [(x, 5) for x in range(0, 20, 4)]
+	libelles = {"lieu:a": "A", "lieu:b": "B"}
+	docs, _ = geo_gen.liens_proportionnels("link:a_to_b", "lieu:a", ligne_a, "lieu:b", ligne_b,
+		[f"P {k}" for k in range(1, 6)], libelles)
+	assert [d["nodes"][0]["pos"] for d in docs] == [[0, 0], [2, 0], [4, 0], [6, 0], [8, 0]]
+	assert docs[0]["nodes"][1]["pos"] == [0, 5] and docs[-1]["nodes"][1]["pos"][0] >= 12
+	assert docs[0]["nodes"][0]["label"] == "P 1 — A"
+	zone = {(x, y) for x in range(5) for y in range(5)} | {(5, 2)}
+	# Le bord droit : la case (5, 2) qui avance, et les cases à `BORD_PROFONDEUR` d'elle.
+	bord = geo_gen._bord(zone, "droite", lambda c: True)
+	assert (5, 2) in bord and all(x >= 5 - geo_gen.BORD_PROFONDEUR for x, _ in bord)
+	assert geo_gen.extremite({(0, 0), (1, 0), (9, 0)}) == (9, 0)
 
 
 def test_afrique_aksoum_passe_sur_l_abyssinie():
 	from dev import gen_afrique as af
-
-	def carte(slug):
-		W = 88 if slug == "afrique_du_nord" else 86
-		return {"_id": f"lieu:{slug}", "type": "lieu", "label": slug,
-			"cells": [[1] * W for _ in range(48)], "nav": {}}
-
-	anciens = [{"_id": f"link:afrique_du_nord_to_aksoum_{n}", "type": "connection",
+	anciens = {f"link:afrique_du_nord_to_aksoum_{n}": {
+		"_id": f"link:afrique_du_nord_to_aksoum_{n}", "type": "connection",
 		"nodes": [{"lieu": "lieu:afrique_du_nord", "pos": [85, 45]},
 			{"lieu": "lieu:aksoum", "pos": [i, 20], "label": f"Aksoum — {n}"}]}
-		for i, n in enumerate(af.SORTIES_AKSOUM)]
-	aksoum = {"_id": "lieu:aksoum", "_rev": "2-x", "type": "lieu", "label": "Aksoum",
+		for i, n in enumerate(af.SORTIES_AKSOUM)}
+	par_id = dict(anciens)
+	par_id["lieu:aksoum"] = {"_id": "lieu:aksoum", "_rev": "2-x", "type": "lieu", "label": "Aksoum",
 		"lieu_parent": "lieu:afrique_du_nord"}
-	dump = [carte("afrique_du_nord"), aksoum] + anciens
-	lieux, liens, suppr, _ = geo_gen.construire(dump, carte, af)
-	par_id = {d["_id"]: d for d in liens}
-	assert par_id["lieu:aksoum"]["lieu_parent"] == "lieu:abyssinie" and "_rev" not in par_id["lieu:aksoum"]
+	zone = {(x, y) for x in range(20, 45) for y in range(5, 25)}
+	docs, suppr, _ = af.extras(par_id, {}, {"abyssinie": zone})
+	par = {d["_id"]: d for d in docs}
+	assert par["lieu:aksoum"]["lieu_parent"] == "lieu:abyssinie" and "_rev" not in par["lieu:aksoum"]
 	for i, n in enumerate(af.SORTIES_AKSOUM):
-		lien = par_id[f"link:abyssinie_to_aksoum_{n}"]
-		assert lien["nodes"][0]["lieu"] == "lieu:abyssinie"
+		lien = par[f"link:abyssinie_to_aksoum_{n}"]
+		assert lien["nodes"][0]["lieu"] == "lieu:abyssinie" and tuple(lien["nodes"][0]["pos"]) in zone
 		assert lien["nodes"][1]["pos"] == [i, 20]
-	assert {s["_id"] for s in suppr} == {a["_id"] for a in anciens}
+	assert {s["_id"] for s in suppr} == set(anciens)
+	# Ses anciens liens ne protègent aucune case de l'Afrique du Nord au recalage.
+	assert all(i.startswith(af.LIENS_REMPLACES) for i in anciens)

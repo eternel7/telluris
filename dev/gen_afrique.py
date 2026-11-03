@@ -1,19 +1,19 @@
 """Les 15 cartes de pays d'Afrique (02/11/2026) : grilles NETTOYÉES, passages, Aksoum sur l'Abyssinie.
 
 Même moteur que `dev/gen_europe_orientale.py` (cette configuration lui est passée : `CARTES`,
-`EAUX`, `ANCRES`, `TERRITOIRES`, `CADRE_MINIMUM`, `FRONTIERES`, `extras`) — voir sa docstring.
+`EAUX`, `ANCRES`, `TERRITOIRES`, `CADRE_MINIMUM`, `PAIRES_CALEES`, `extras`) — voir sa docstring :
+calage par SUPERPOSITION (`dev/georeferencement_cartes.py` → `calage_cartes.PAIRES`), recalage
+de la carte la moins détaillée, passages projetés une case sur deux.
 
-  · `lieu:afrique_du_nord` et `lieu:egypte` (déjà en jeu) ne sont PAS touchés (choix de
-    l'Auteur, 03/11). L'Afrique du Nord, à plus petite échelle, montre aussi le Maroc,
-    l'Ifriqiya, le Sahel et la Nubie : les passages vers elle sont posés à la LATITUDE de la
-    carte voisine, lue sur l'Afrique du Nord (Gibraltar (19, 5), lac Tchad (49, 45), Abou Simbel
-    (76, 32)) — sortir par le bas du Maroc mène au Sahara, à la hauteur du 27e parallèle.
-  · `lieu:afrique` (vue d'ensemble, `continent`) et `lieu:madagascar` (île) : aucun passage
-    à pied, comme `lieu:europe` et les îles.
+  · `lieu:afrique_du_nord` garde son image et sa grille ; seule la terre que montre une carte
+    plus fine (Maroc, Ifriqiya, Sahel, Nubie, Abyssinie) y est mise à 0, comme l'avait fait
+    l'Égypte. `lieu:egypte` n'est pas touchée (elle fait foi sur la Nubie).
+  · `lieu:afrique` (vue d'ensemble, `continent`) et `lieu:madagascar` (île) : aucun passage.
   · Aksoum passe de l'Afrique du Nord à l'Abyssinie (Auteur, 03/11) : `lieu_parent` réécrit,
     sorties reposées autour de la cité dessinée (stèles, `POSITION_AKSOUM`), mêmes cases dans la
     cité ; les trois liens `link:afrique_du_nord_to_aksoum_*` partent en suppression.
 
+Validation : `python dev/superposer_cartes.py <paire> --import jsons/afrique_a_importer.json`.
 Usage : python dev/gen_afrique.py [--dump jsons/telluris-dump-….json] [--sans-apercu]
 Sortie : jsons/afrique_a_importer.json (+ jsons/<slug>_grille_apercu.png)
 """
@@ -73,13 +73,11 @@ ANCRES = {
 	"cote_de_guinee": (40, 20), "lac_tchad": (40, 25), "nubie": (40, 25), "abyssinie": (25, 25),
 	"bassin_du_congo": (40, 25), "grands_lacs": (40, 25), "angola": (50, 25), "zambeze": (40, 25),
 	"namib_kalahari": (60, 25), "le_cap": (40, 15), "madagascar": (40, 25),
-	"afrique_du_nord": (40, 30),
+	"afrique_du_nord": (40, 30), "espagne": (40, 24), "egypte": (40, 30),
 }
 
-# Terre d'une autre carte mise à 0 : l'Espagne au-dessus du détroit (Maroc).
 # Les déferlantes blanches du cap (Le Cap) : de la mer, illisible à la couleur.
 TERRITOIRES = {
-	"maroc": ((30, 64, 3, 7),),
 	"le_cap": ((0, 17, 35, 47), (18, 45, 40, 47)),
 }
 # Cadre plus épais que ce que lit le profil (haut, bas, gauche, droite).
@@ -88,65 +86,46 @@ CADRE_MINIMUM = {
 	"le_cap": (5, 4, 5, 5),
 }
 
-# (nom, lieu A, ligne sur A, lieu B, ligne sur B) — lignes parcourues dans le même sens.
-FRONTIERES = (
-	# Avec l'Afrique du Nord, à la latitude de la carte voisine.
-	("Route du Sahara", "maroc", ((18, 44), (82, 44)),
-		"afrique_du_nord", ((3, 21), (27, 21))),
-	("Route des oasis", "ifriqiya", ((3, 44), (82, 44)),
-		"afrique_du_nord", ((30, 18), (57, 18))),
-	("Route de Syrte", "ifriqiya", ((82, 31), (82, 44)),
-		"afrique_du_nord", ((57, 13), (57, 18))),
-	("Piste de Tombouctou", "senegambie", ((22, 4), (81, 4)),
-		"afrique_du_nord", ((3, 35), (29, 35))),
-	("Piste du Kanem", "lac_tchad", ((4, 4), (82, 4)),
-		"afrique_du_nord", ((36, 43), (65, 43))),
-	("Route de Méroé", "nubie", ((4, 4), (82, 4)),
-		"afrique_du_nord", ((58, 36), (86, 36))),
-	("Route d'Adulis", "abyssinie", ((4, 4), (40, 4)),
-		"afrique_du_nord", ((76, 45), (86, 45))),
-	("Route de Maghreb", "maroc", ((82, 10), (82, 44)),
-		"ifriqiya", ((3, 12), (3, 44))),
-	# Afrique de l'Ouest et centrale.
-	("Route du Fouta", "senegambie", ((30, 43), (81, 43)),
-		"cote_de_guinee", ((5, 4), (55, 4))),
-	("Route du Bénin", "cote_de_guinee", ((82, 4), (82, 30)),
-		"lac_tchad", ((4, 4), (4, 36))),
-	("Route de l'Oubangui", "lac_tchad", ((25, 44), (83, 44)),
-		"bassin_du_congo", ((4, 4), (70, 4))),
-	("Route du Darfour", "lac_tchad", ((83, 4), (83, 30)),
-		"nubie", ((3, 20), (3, 44))),
-	("Route du Bahr el-Ghazal", "nubie", ((3, 44), (30, 44)),
-		"bassin_du_congo", ((50, 4), (82, 4))),
-	("Route du Sudd", "nubie", ((31, 44), (51, 44)),
-		"grands_lacs", ((4, 4), (50, 4))),
-	("Route du Nil Bleu", "nubie", ((52, 44), (80, 44)),
-		"abyssinie", ((3, 6), (3, 44))),
-	("Route du Rift", "abyssinie", ((4, 44), (60, 44)),
-		"grands_lacs", ((25, 4), (82, 4))),
-	("Route des Grands Lacs", "bassin_du_congo", ((82, 4), (82, 44)),
-		"grands_lacs", ((3, 4), (3, 44))),
-	("Route du Kasaï", "bassin_du_congo", ((12, 44), (82, 44)),
-		"angola", ((4, 4), (70, 4))),
-	("Route du Katanga", "angola", ((82, 4), (82, 20)),
-		"grands_lacs", ((3, 30), (3, 44))),
-	# Afrique australe.
-	("Route du Zambèze", "grands_lacs", ((3, 44), (60, 44)),
-		"zambeze", ((20, 4), (82, 4))),
-	("Route du Barotsé", "angola", ((82, 21), (82, 44)),
-		"zambeze", ((3, 4), (3, 24))),
-	("Route du Cunene", "angola", ((15, 44), (81, 44)),
-		"namib_kalahari", ((15, 4), (82, 4))),
-	("Route de l'Okavango", "namib_kalahari", ((82, 4), (82, 44)),
-		"zambeze", ((3, 25), (3, 44), (40, 44))),
-	("Gué de l'Orange", "namib_kalahari", ((35, 44), (82, 44)),
-		"le_cap", ((10, 5), (60, 5))),
-	("Route du Limpopo", "zambeze", ((41, 44), (70, 44)),
-		"le_cap", ((61, 5), (82, 5))),
+# Paires CALÉES (`dev/georeferencement_cartes.py`) : (carte qui FAIT FOI, carte RECALÉE, nom de
+# la frontière | None = recalage seul). La carte PLUS DÉTAILLÉE fait foi : l'Afrique du Nord,
+# à petite échelle, est RECALÉE sur le Maroc, l'Ifriqiya, la Sénégambie, le lac Tchad, la Nubie
+# et l'Abyssinie (comme sur l'Égypte) — la carte et son image restent, seule la terre que montre
+# une carte plus fine y est fermée. L'Égypte ne bouge pas : elle fait foi sur l'Afrique du Nord
+# (déjà recalée) et sur la Nubie.
+PAIRES_CALEES = (
+	("espagne", "maroc", None),
+	("maroc", "afrique_du_nord", "Route du Sahara"),
+	("ifriqiya", "afrique_du_nord", "Route des oasis"),
+	("maroc", "ifriqiya", "Route du Maghreb"),
+	("senegambie", "afrique_du_nord", "Piste de Tombouctou"),
+	("lac_tchad", "afrique_du_nord", "Piste du Kanem"),
+	("egypte", "nubie", None),
+	("nubie", "afrique_du_nord", "Route de Méroé"),
+	("abyssinie", "afrique_du_nord", "Route d'Adulis"),
+	("senegambie", "cote_de_guinee", "Route du Fouta"),
+	("cote_de_guinee", "lac_tchad", "Route du Bénin"),
+	("lac_tchad", "bassin_du_congo", "Route de l'Oubangui"),
+	("lac_tchad", "nubie", "Route du Darfour"),
+	("nubie", "bassin_du_congo", "Route du Bahr el-Ghazal"),
+	("nubie", "grands_lacs", "Route du Sudd"),
+	("abyssinie", "nubie", "Route du Nil Bleu"),
+	("abyssinie", "grands_lacs", "Route du Rift"),
+	("grands_lacs", "bassin_du_congo", "Route des Grands Lacs"),
+	("bassin_du_congo", "angola", "Route du Kasaï"),
+	("grands_lacs", "angola", "Route du Katanga"),
+	("grands_lacs", "zambeze", "Route du Zambèze"),
+	("angola", "zambeze", "Route du Barotsé"),
+	("angola", "namib_kalahari", "Route du Cunene"),
+	("zambeze", "namib_kalahari", "Route de l'Okavango"),
+	("le_cap", "namib_kalahari", "Gué de l'Orange"),
+	("le_cap", "zambeze", "Route du Limpopo"),
+	("zambeze", "madagascar", None),
 )
 
 # Aksoum sur l'Abyssinie : la cité aux stèles, au nord du plateau (lue sur l'image).
 AKSOUM = "lieu:aksoum"
+# Liens en base remplacés par ce lot (pas de case protégée autour) : les sorties d'Aksoum.
+LIENS_REMPLACES = ("link:afrique_du_nord_to_aksoum_",)
 ANCIEN_PARENT = "lieu:afrique_du_nord"
 POSITION_AKSOUM = (31, 13)
 SORTIES_AKSOUM = ("est", "ouest", "sud")
