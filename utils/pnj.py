@@ -903,7 +903,8 @@ def don_effectif(pnj_doc: dict, contexte: dict) -> dict | None:
 	Trois clés font d'un don une INSCRIPTION (la carte de guilde remise sans épreuve) :
 	`lieu_parent` (`"auto"` = la cité du lieu, résolue par le router comme les récompenses de
 	transport), `rang_guilde` (même forme que `recompenses.rang_guilde`) et `unique` (refusé
-	tant que le personnage porte déjà cet exemplaire, cf. `don_deja_recu`). Rendues BRUTES :
+	tant que le personnage porte déjà cet exemplaire, cf. `don_deja_recu` ; avec `unique_porteurs`,
+	ses compagnons et montures aussi — la tête que Jacotte rend). Rendues BRUTES :
 	ce module ne lit aucun doc lieu. `rang_reconnu` (id de cité, optionnel) : la guilde qui
 	inscrit RECONNAÎT le rang déjà gagné dans cette autre cité (`chasse.reconnaitre_rang`)."""
 	service = (((pnj_doc or {}).get("services") or {}).get("don"))
@@ -923,6 +924,7 @@ def don_effectif(pnj_doc: dict, contexte: dict) -> dict | None:
 		"rang_guilde": service.get("rang_guilde"),
 		"rang_reconnu": service.get("rang_reconnu"),
 		"unique": bool(service.get("unique")),
+		"unique_porteurs": bool(service.get("unique_porteurs")),
 	}
 
 
@@ -944,16 +946,20 @@ def appliquer_don(character: dict, item_id: str, poids: list,
 
 
 def don_deja_recu(character: dict, item_id: str, lieu_parent: str | None,
-				  ref_id_fn, ref_lieu_fn) -> bool:
+				  ref_id_fn, ref_lieu_fn, porteurs: list | None = None) -> bool:
 	"""Garde d'un don `unique` : le personnage porte-t-il DÉJÀ cet exemplaire (même item, même
 	`lieu_parent`) dans SON sac ?
 	⚠️ Un état porté, pas un registre : perdue, la carte se redemande. C'est le sac du PRINCIPAL
 	que lit le tableau de recrues (`recrutement.acces_autorise`) — une carte confiée à une
 	monture n'y ouvre rien. Aucun champ neuf sur le personnage (CLAUDE.md §4).
 	`ref_id_fn`/`ref_lieu_fn` = `characters.item_ref_id`/`item_ref_lieu`, injectés : ce module
-	n'importe que `random` et `character_stats`."""
+	n'importe que `random` et `character_stats`.
+	`porteurs` (don `unique_porteurs`, `recrutement.porteurs_effectifs` injecté par l'appelant) :
+	le sac des compagnons et des montures compte aussi — pas le SOL, d'où l'on peut tout laisser
+	tomber (Auteur, 03/11)."""
 	return any(ref_id_fn(ref) == item_id and ref_lieu_fn(ref) == lieu_parent
-			   for ref in (character or {}).get("inventaire") or [])
+			   for sac in [character] + list(porteurs or [])
+			   for ref in (sac or {}).get("inventaire") or [])
 
 
 def don_a_remplacer(character: dict, don_conf: dict, lieu_parent: str | None,

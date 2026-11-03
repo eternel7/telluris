@@ -850,6 +850,7 @@
         "quantite": 1,
         "cout_cuivre": 0,
         "unique": true,
+        "unique_porteurs": true,
         "noeuds": {
           "fait": "tete_rendue",
           "sans_fonds": "tete_rendue",

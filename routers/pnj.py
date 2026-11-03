@@ -249,7 +249,11 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		flags["don_recu"] = bool(
 			don_conf.get("unique") and don_conf.get("item")
 			and pnj.don_deja_recu(character, don_conf["item"], cite_don,
-								  item_ref_id, item_ref_lieu))
+								  item_ref_id, item_ref_lieu,
+								  # Porteurs lus seulement si le don le demande (la carte de
+								  # guilde, elle, ne compte que le sac du principal).
+								  recrutement.porteurs_effectifs(character, get_doc)
+								  if don_conf.get("unique_porteurs") else None))
 		# Carte PERDUE par un inscrit : le choix « j'ai perdu ma carte » remplace l'inscription.
 		# `{rang}` = celui du registre, que la nouvelle carte porte à l'identique.
 		flags["don_a_remplacer"] = pnj.don_a_remplacer(
@@ -1058,8 +1062,9 @@ async def pnj_dialogue_choix(
 			raise HTTPException(status_code=422, detail="Ce personnage n'a rien à donner.")
 		lieu_parent_don = _lieu_parent_don(don, lieu_doc)
 		# ⚠️ Garde AUTORITATIVE du don `unique` : le flag `don_recu` ne fait que masquer le choix.
-		if don["unique"] and pnj.don_deja_recu(character, don["item"], lieu_parent_don,
-											   item_ref_id, item_ref_lieu):
+		if don["unique"] and pnj.don_deja_recu(
+				character, don["item"], lieu_parent_don, item_ref_id, item_ref_lieu,
+				recrutement.porteurs_effectifs(character, get_doc) if don["unique_porteurs"] else None):
 			raise HTTPException(status_code=422, detail="Vous avez déjà reçu cet objet.")
 		item_doc = get_doc(don["item"])
 		if not item_doc:

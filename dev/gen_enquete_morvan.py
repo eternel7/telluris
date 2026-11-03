@@ -17,7 +17,8 @@
 #     loup-garou tué, il n'y en a pas de deuxième). ⚠️ Revers assumé : la tête se découpe sur
 #     une carcasse tombée au sol ; abandonnée là, ce sont les loups de JACOTTE qui la lui
 #     rapportent (Auteur, 03/11) : service `don` (tête neuve, gratuite), offert tant que la
-#     bête est tombée (`acces_libere`), la quête en cours et aucune tête dans le sac ;
+#     bête est tombée (`acces_libere`), la quête en cours et aucune tête portée (joueur,
+#     compagnons, montures — le sol ne compte pas) ;
 #   · UN loup-garou, salle à espèce UNIQUE (un second type pourrait évincer la bête et
 #     rendre la preuve introuvable, cf. Escolives) ;
 #   · le DOUTE (Auteur) : le charbonnier disparaît une fois la clairière gagnée
@@ -235,9 +236,10 @@ def meneuse() -> dict:
 		"description": "La vieille Jacotte, meneuse de loups, sa musette serrée contre elle au bord du bois.",
 		"services": {
 			"acces": {"lieu": CLAIRIERE, "noeuds": {"ouvre": "clairiere_ouverte", "refus": "clairiere_close"}},
-			# La tête oubliée dans la clairière (cf. en-tête) : `unique` = refusée tant qu'une
-			# tête est déjà dans le sac (`pnj.don_deja_recu`) ; gratuite, `sans_fonds` sans objet.
-			"don": {"item": TETE, "quantite": 1, "cout_cuivre": 0, "unique": True,
+			# La tête oubliée dans la clairière (cf. en-tête) : `unique` + `unique_porteurs` =
+			# refusée tant qu'une tête est dans le sac du joueur, d'un compagnon ou d'une monture
+			# (`pnj.don_deja_recu`) — le sol ne compte pas ; gratuite, `sans_fonds` sans objet.
+			"don": {"item": TETE, "quantite": 1, "cout_cuivre": 0, "unique": True, "unique_porteurs": True,
 					"noeuds": {"fait": "tete_rendue", "sans_fonds": "tete_rendue", "trop_charge": "tete_trop_lourde"}},
 		},
 		"dialogue": {

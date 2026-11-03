@@ -235,6 +235,8 @@ def test_jacotte_rend_la_tete_oubliee_dans_la_clairiere():
 	jacotte = _docs()[MENEUSE]
 	don = jacotte["services"]["don"]
 	assert don["item"] == TETE and don["unique"] and don["cout_cuivre"] == 0
+	# Compagnons et montures comptent (`unique_porteurs`), pas le sol (Auteur, 03/11).
+	assert don["unique_porteurs"] is True
 	assert set(don["noeuds"]) == set(lint_dialogues.NOEUDS_REQUIS["don"])
 	assert "tete" in _accueil(MENEUSE, actives=[QUETE], flags={"acces_libere": True})
 	# Tête déjà au sac, bête debout, ou quête rendue : rien à rendre.
