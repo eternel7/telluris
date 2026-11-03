@@ -564,14 +564,14 @@ def test_don_effectif_payant_par_defaut():
     don = pnj.don_effectif(_pnj_doc(), _ctx({"lieu:auxerre": 50, "lieu:guilde": 69}))
     assert don == {"item": "item:Eau_benite", "quantite": 1, "cout_cuivre": 5, "gratuit": False,
                    "lieu_parent": None, "rang_guilde": None, "rang_reconnu": None,
-                   "unique": False}
+                   "unique": False, "unique_porteurs": False}
 
 
 def test_don_effectif_gratuit_si_une_relation_suffit():
     don = pnj.don_effectif(_pnj_doc(), _ctx({"lieu:auxerre": 20, "lieu:guilde": 70}))
     assert don == {"item": "item:Eau_benite", "quantite": 1, "cout_cuivre": 0, "gratuit": True,
                    "lieu_parent": None, "rang_guilde": None, "rang_reconnu": None,
-                   "unique": False}
+                   "unique": False, "unique_porteurs": False}
 
 
 def test_don_effectif_sans_service_ou_sans_item():
@@ -631,6 +631,27 @@ def test_don_deja_recu_compare_l_item_ET_la_cite():
                              item_ref_id, item_ref_lieu) is True
     # Sans `lieu_parent`, une référence héritée (chaîne) compte.
     assert pnj.don_deja_recu(character, "item:pain", None, item_ref_id, item_ref_lieu) is True
+
+
+def test_don_deja_recu_lit_les_porteurs_seulement_s_ils_sont_fournis():
+    """`unique_porteurs` (la tête que Jacotte rend) : une tête portée par un compagnon ou une
+    monture compte ; sans porteurs fournis, seul le sac du principal (la carte de guilde)."""
+    from utils.characters import item_ref_id, item_ref_lieu
+    tete = "item:loup_garou_tete"
+    principal = {"inventaire": []}
+    monture = {"inventaire": [{"item": tete, "poids": 12.0}]}
+    assert pnj.don_deja_recu(principal, tete, None, item_ref_id, item_ref_lieu) is False
+    assert pnj.don_deja_recu(principal, tete, None, item_ref_id, item_ref_lieu,
+                             [{"inventaire": []}, monture]) is True
+    assert pnj.don_deja_recu(principal, tete, None, item_ref_id, item_ref_lieu,
+                             [{"inventaire": []}]) is False
+
+
+def test_don_effectif_rend_unique_porteurs():
+    doc = {"services": {"don": {"item": "item:x", "unique": True, "unique_porteurs": True}}}
+    assert pnj.don_effectif(doc, {})["unique_porteurs"] is True
+    doc["services"]["don"].pop("unique_porteurs")
+    assert pnj.don_effectif(doc, {})["unique_porteurs"] is False
 
 
 # ---------------------------------------------------------------------------

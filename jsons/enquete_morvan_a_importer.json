@@ -93,6 +93,20 @@
           "partiel": "morvan_partiel",
           "remis": "morvan_remis"
         }
+      },
+      "don": {
+        "item": "item:carte_aventurier",
+        "quantite": 1,
+        "cout_cuivre": 0,
+        "lieu_parent": "auto",
+        "unique": true,
+        "noeuds": {
+          "fait": "carte_remplacee",
+          "remplacement": "carte_remplacee",
+          "sans_fonds": "carte_sans_fonds",
+          "trop_charge": "carte_trop_charge"
+        },
+        "rang_guilde": "F"
       }
     },
     "dialogue": {
@@ -291,6 +305,16 @@
                 }
               },
               "next": "morvan_souvenir"
+            },
+            {
+              "id": "carte_perdue",
+              "label": "« J'ai… perdu ma carte d'aventurier. »",
+              "condition": {
+                "don_a_remplacer": true
+              },
+              "action": {
+                "service": "don"
+              }
             },
             {
               "id": "rien",
@@ -701,6 +725,41 @@
               "next": "accueil"
             }
           ]
+        },
+        "carte_trop_charge": {
+          "texte": "« Pas même la place d'une carte dans ton sac, {prenom} ? Allège-toi d'abord. Ton nom ne bougera pas du registre. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviens le sac plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "carte_sans_fonds": {
+          "texte": "« Une carte refaite ne coûte rien au Bastion, {prenom}. Si quelqu'un t'a dit le contraire, envoie-le-moi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai.",
+              "next": "fin"
+            }
+          ]
+        },
+        "carte_remplacee": {
+          "texte": "Borin te regarde longuement, puis sa barbe se met à trembler. Le rire finit par sortir, énorme, et deux aventuriers se retournent au fond de la salle. « Perdue ! Vous entendez ça, là-bas ? Ça m'a porté des caisses de sanglier jusqu'au fumoir sans en lâcher une, et ça me perd une plaque de cuir grande comme ma main ! » Il s'essuie les yeux, tire le registre à lui et grave une carte neuve sans même chercher ton nom : il le connaît. « Rang {rang}, comme avant. Ça, personne ne te le prendra. Mais attache-la, {prenom}. La prochaine que je refais, tu paies la tournée. »",
+          "choix": [
+            {
+              "id": "merci",
+              "label": "« Merci, Borin. »",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Autre chose…",
+              "next": "accueil"
+            }
+          ]
         }
       }
     }
@@ -785,13 +844,25 @@
           "ouvre": "clairiere_ouverte",
           "refus": "clairiere_close"
         }
+      },
+      "don": {
+        "item": "item:loup_garou_tete",
+        "quantite": 1,
+        "cout_cuivre": 0,
+        "unique": true,
+        "unique_porteurs": true,
+        "noeuds": {
+          "fait": "tete_rendue",
+          "sans_fonds": "tete_rendue",
+          "trop_charge": "tete_trop_lourde"
+        }
       }
     },
     "dialogue": {
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
-          "texte": "À la lisière, là où le hameau s'arrête et où les grands chênes commencent, une vieille elfe aux cheveux blancs dénoués est assise sur une souche, une musette sur les genoux. Entre les arbres, derrière elle, deux paires d'yeux luisent sans bouger. Elle ne les regarde pas. « Bonjour, voyageur. N'aie pas peur de ceux-là : ils sont avec moi. »",
+          "texte": "À la lisière, là où le hameau s'arrête et où les grands chênes commencent, une vieille elfe aux cheveux blancs dénoués est assise sur une souche, une musette sur les genoux. Entre les arbres, derrière elle, deux paires d'yeux luisent sans bouger. Elle ne les regarde pas. « Bonjour à toi. N'aie pas peur de ceux-là : ils sont avec moi. »",
           "choix": [
             {
               "id": "bonjour",
@@ -833,6 +904,18 @@
                 "acces_libere": true
               },
               "next": "apres"
+            },
+            {
+              "id": "tete",
+              "label": "« La bête est tombée… mais je n'ai pas sa tête. »",
+              "condition": {
+                "acces_libere": true,
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                },
+                "don_recu": false
+              },
+              "next": "tete"
             },
             {
               "id": "fin",
@@ -929,6 +1012,50 @@
               "id": "fin",
               "label": "(La laisser à sa musette.)",
               "next": "fin"
+            }
+          ]
+        },
+        "tete": {
+          "texte": "Jacotte ne répond pas tout de suite. Elle souffle une note dans sa musette, une seule, et les deux loups se lèvent d'entre les troncs. L'un d'eux traîne quelque chose dans un sac de toile noirci de sang, qu'il laisse tomber à vos pieds. « Ils sont retournés à la clairière, cette nuit-là. Ils ne mangent pas ce qui ne répond pas à la musette. » Elle pousse le sac du bout du pied. « Ce que tu as laissé là-bas, je te le rends. Prends-le, puisque c'est ce que la Guilde veut voir. »",
+          "choix": [
+            {
+              "id": "prendre",
+              "label": "Prendre la tête.",
+              "condition": {
+                "acces_libere": true,
+                "quete_active": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                },
+                "don_recu": false
+              },
+              "action": {
+                "service": "don"
+              }
+            },
+            {
+              "id": "retour",
+              "label": "« Pas maintenant. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "tete_rendue": {
+          "texte": "Vous soulevez le sac. Il est lourd, et ce qu'il contient a l'odeur de la fumée froide des meules. Jacotte a déjà détourné les yeux. « Porte-la à ton nain d'Auxerre. Et dis-lui ce que tu voudras. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(La laisser à sa musette.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "tete_trop_lourde": {
+          "texte": "Vous essayez de soulever le sac ; votre charge ne le permet pas. Jacotte hausse les épaules. « Allège-toi d'abord. Elle ne s'en ira pas, elle. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
             }
           ]
         },
@@ -1042,7 +1169,7 @@
           ]
         },
         "apres": {
-          "texte": "Margot compte ses moutons, une fois, et le compte est bon. « Plus une bête de perdue depuis que vous êtes passé. » Elle regarde vers l'est, vers les bois. « Le Gros-Pierre est parti, aussi. Sa cabane est vide, ses meules se sont éteintes. » Elle serre la houlette. « S'il est parti, c'est bien qu'il était coupable. Non ? » Elle n'attend pas votre réponse. « C'est ce que tout le monde dit. Alors c'est ce que je dirai à Colin. »",
+          "texte": "Margot compte ses moutons, une fois, et le compte est bon. « Plus une bête de perdue depuis votre passage. » Elle regarde vers l'est, vers les bois. « Le Gros-Pierre est parti, aussi. Sa cabane est vide, ses meules se sont éteintes. » Elle serre la houlette. « S'il est parti, c'est bien qu'il était coupable. Non ? » Elle n'attend pas votre réponse. « C'est ce que tout le monde dit. Alors c'est ce que je dirai à Colin. »",
           "choix": [
             {
               "id": "fin",
@@ -2034,6 +2161,12 @@
             ],
             "cible": "item:loup_garou_tete",
             "objectif_atteint": false
+          }
+        },
+        {
+          "combat_gagne": {
+            "lieu": "lieu:clairiere_du_charbonnier",
+            "attendu": false
           }
         }
       ]

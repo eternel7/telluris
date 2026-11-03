@@ -12,10 +12,13 @@
 #
 # 100 % DONNÉE (hors la condition `rang_min`, ajoutée au moteur de dialogue pour cette quête) :
 #   · la quête est une `collect` ordinaire (`services.apport` de Borin, donneur ET receveur) ;
-#   · la clairière s'ouvre tant que la tête reste À RAPPORTER — SANS `combat_gagne` faux,
-#     à la différence d'Escolives : la tête se découpe sur une carcasse tombée au sol, un pas
-#     de trop et elle est perdue ; la porte doit alors se rouvrir, sans quoi la quête serait
-#     bloquée pour toujours ;
+#   · la clairière s'ouvre tant que la tête reste À RAPPORTER ET que la bête n'est pas
+#     tombée (`combat_gagne` faux, comme à Escolives — arbitrage de l'Auteur du 03/11 : un
+#     loup-garou tué, il n'y en a pas de deuxième). ⚠️ Revers assumé : la tête se découpe sur
+#     une carcasse tombée au sol ; abandonnée là, ce sont les loups de JACOTTE qui la lui
+#     rapportent (Auteur, 03/11) : service `don` (tête neuve, gratuite), offert tant que la
+#     bête est tombée (`acces_libere`), la quête en cours et aucune tête portée (joueur,
+#     compagnons, montures — le sol ne compte pas) ;
 #   · UN loup-garou, salle à espèce UNIQUE (un second type pourrait évincer la bête et
 #     rendre la preuve introuvable, cf. Escolives) ;
 #   · le DOUTE (Auteur) : le charbonnier disparaît une fois la clairière gagnée
@@ -62,8 +65,8 @@ PORTRAITS = {
 POS_FRANCE = [52, 22]
 
 RANG_E = {"rang_min": {"cite": CITE, "rang": RANG}}
-# La clairière s'ouvre tant que la tête reste À RAPPORTER (cf. en-tête : pas de
-# `combat_gagne`). Les barrières n'ont pas de filtre `id` : la collecte se reconnaît à sa cible.
+# La clairière s'ouvre tant que la tête reste À RAPPORTER (+ `CLAIRIERE_INTACTE`, cf. en-tête).
+# Les barrières n'ont pas de filtre `id` : la collecte se reconnaît à sa cible.
 QUETE_A_FAIRE = {"quete_active": {"types": ["collect"], "cible": TETE, "objectif_atteint": False}}
 
 # Les villageois ne parlent de l'enquête que quête EN COURS (Auteur, 15/10) : AVANT, un simple
@@ -74,6 +77,8 @@ EN_COURS = {"quete_active": {"id": QUETE}}
 APRES = {"quete_reussie": {"id": QUETE}}
 CLAIRIERE_GAGNEE = {"combat_gagne": {"lieu": CLAIRIERE}}
 CLAIRIERE_INTACTE = {"combat_gagne": {"lieu": CLAIRIERE, "attendu": False}}
+# La tête oubliée, que Jacotte rend : bête tombée, quête pas encore remise, aucune tête au sac.
+TETE_A_RENDRE = {"acces_libere": True, "quete_active": {"id": QUETE}, "don_recu": False}
 
 # ── Grille de la clairière (image 1376×746, quadrillage de 40 × 20 cases) ──────────────────
 # L'image livrée (1376×768) a été rognée de 10 px en haut et 12 px en bas : son quadrillage
@@ -229,12 +234,19 @@ def meneuse() -> dict:
 		"vocation": "chaman",
 		"portrait": PORTRAITS[MENEUSE],
 		"description": "La vieille Jacotte, meneuse de loups, sa musette serrée contre elle au bord du bois.",
-		"services": {"acces": {"lieu": CLAIRIERE, "noeuds": {"ouvre": "clairiere_ouverte", "refus": "clairiere_close"}}},
+		"services": {
+			"acces": {"lieu": CLAIRIERE, "noeuds": {"ouvre": "clairiere_ouverte", "refus": "clairiere_close"}},
+			# La tête oubliée dans la clairière (cf. en-tête) : `unique` + `unique_porteurs` =
+			# refusée tant qu'une tête est dans le sac du joueur, d'un compagnon ou d'une monture
+			# (`pnj.don_deja_recu`) — le sol ne compte pas ; gratuite, `sans_fonds` sans objet.
+			"don": {"item": TETE, "quantite": 1, "cout_cuivre": 0, "unique": True, "unique_porteurs": True,
+					"noeuds": {"fait": "tete_rendue", "sans_fonds": "tete_rendue", "trop_charge": "tete_trop_lourde"}},
+		},
 		"dialogue": {
 			"noeud_depart": "accueil",
 			"noeuds": {
 				"accueil": {
-					"texte": "À la lisière, là où le hameau s'arrête et où les grands chênes commencent, une vieille elfe aux cheveux blancs dénoués est assise sur une souche, une musette sur les genoux. Entre les arbres, derrière elle, deux paires d'yeux luisent sans bouger. Elle ne les regarde pas. « Bonjour, voyageur. N'aie pas peur de ceux-là : ils sont avec moi. »",
+					"texte": "À la lisière, là où le hameau s'arrête et où les grands chênes commencent, une vieille elfe aux cheveux blancs dénoués est assise sur une souche, une musette sur les genoux. Entre les arbres, derrière elle, deux paires d'yeux luisent sans bouger. Elle ne les regarde pas. « Bonjour à toi. N'aie pas peur de ceux-là : ils sont avec moi. »",
 					"choix": [
 						{"id": "bonjour", "label": "« Bonjour. Vous allez bien ? »", "condition": AVANT, "next": "bonjour"},
 						{"id": "loups", "label": "« Ces loups vous suivent ? »", "condition": EN_COURS, "next": "loups"},
@@ -244,6 +256,8 @@ def meneuse() -> dict:
 						# `acces_libere` = la clairière est gagnée (état du MONDE), avant même le rapport.
 						{"id": "apres", "label": "« La bête est morte. »",
 						 "condition": {"acces_libere": True}, "next": "apres"},
+						{"id": "tete", "label": "« La bête est tombée… mais je n'ai pas sa tête. »",
+						 "condition": TETE_A_RENDRE, "next": "tete"},
 						{"id": "fin", "label": "(La laisser à sa musette.)", "next": "fin"},
 					],
 				},
@@ -284,6 +298,21 @@ def meneuse() -> dict:
 						{"id": "nom", "label": "« Et s'il ne l'était pas ? »", "next": "le_nom"},
 						{"id": "fin", "label": "(La laisser à sa musette.)", "next": "fin"},
 					],
+				},
+				"tete": {
+					"texte": "Jacotte ne répond pas tout de suite. Elle souffle une note dans sa musette, une seule, et les deux loups se lèvent d'entre les troncs. L'un d'eux traîne quelque chose dans un sac de toile noirci de sang, qu'il laisse tomber à vos pieds. « Ils sont retournés à la clairière, cette nuit-là. Ils ne mangent pas ce qui ne répond pas à la musette. » Elle pousse le sac du bout du pied. « Ce que tu as laissé là-bas, je te le rends. Prends-le, puisque c'est ce que la Guilde veut voir. »",
+					"choix": [
+						{"id": "prendre", "label": "Prendre la tête.", "condition": TETE_A_RENDRE, "action": {"service": "don"}},
+						{"id": "retour", "label": "« Pas maintenant. »", "next": "accueil"},
+					],
+				},
+				"tete_rendue": {
+					"texte": "Vous soulevez le sac. Il est lourd, et ce qu'il contient a l'odeur de la fumée froide des meules. Jacotte a déjà détourné les yeux. « Porte-la à ton nain d'Auxerre. Et dis-lui ce que tu voudras. »",
+					"choix": [{"id": "fin", "label": "(La laisser à sa musette.)", "next": "fin"}],
+				},
+				"tete_trop_lourde": {
+					"texte": "Vous essayez de soulever le sac ; votre charge ne le permet pas. Jacotte hausse les épaules. « Allège-toi d'abord. Elle ne s'en ira pas, elle. »",
+					"choix": [{"id": "retour", "label": "Revenir.", "next": "accueil"}],
 				},
 				"le_nom": {
 					"texte": "Jacotte regarde ses mains. « Alors il aurait fallu l'appeler par son nom. Il serait peut-être revenu. » Vous lui demandez quel nom. Elle se lève sans répondre et rentre dans le bois, ses deux loups sur les talons.",
@@ -329,7 +358,7 @@ def bergere() -> dict:
 					"choix": [{"id": "retour", "label": "Revenir.", "next": "accueil"}],
 				},
 				"apres": {
-					"texte": "Margot compte ses moutons, une fois, et le compte est bon. « Plus une bête de perdue depuis que vous êtes passé. » Elle regarde vers l'est, vers les bois. « Le Gros-Pierre est parti, aussi. Sa cabane est vide, ses meules se sont éteintes. » Elle serre la houlette. « S'il est parti, c'est bien qu'il était coupable. Non ? » Elle n'attend pas votre réponse. « C'est ce que tout le monde dit. Alors c'est ce que je dirai à Colin. »",
+					"texte": "Margot compte ses moutons, une fois, et le compte est bon. « Plus une bête de perdue depuis votre passage. » Elle regarde vers l'est, vers les bois. « Le Gros-Pierre est parti, aussi. Sa cabane est vide, ses meules se sont éteintes. » Elle serre la houlette. « S'il est parti, c'est bien qu'il était coupable. Non ? » Elle n'attend pas votre réponse. « C'est ce que tout le monde dit. Alors c'est ce que je dirai à Colin. »",
 					"choix": [{"id": "fin", "label": "(La laisser à ses moutons.)", "next": "fin"}],
 				},
 			},
@@ -427,7 +456,7 @@ def docs_neufs() -> list:
 				"gardien": MENEUSE,
 				"refus": "La clairière est vide. Les meules se sont éteintes.",
 				"cycle": 1,
-				"conditions": [QUETE_A_FAIRE],
+				"conditions": [QUETE_A_FAIRE, CLAIRIERE_INTACTE],
 			},
 		},
 		{

@@ -2,7 +2,7 @@
 
 Contenu pur (`dev/gen_enquete_morvan.py` → UN fichier d'import) : on verrouille ce qu'aucun
 symptôme ne trahirait en jeu — une offre visible avant le rang E, une clairière qui ne
-s'ouvre jamais ou se referme pour toujours sur une tête perdue (quête bloquée), une salle
+s'ouvre jamais ou se rouvre sur un second loup-garou, une salle
 sans loup-garou garanti, un charbonnier qui ne disparaît pas, une grille qui enferme le groupe."""
 
 import glob
@@ -116,17 +116,17 @@ def test_conditions_de_presence_et_d_acces_lisibles():
 		assert acces.conditions_pnj_invalides(doc) == [], doc["_id"]
 
 
-def test_la_clairiere_s_ouvre_tant_que_la_tete_reste_a_rapporter():
-	"""Fermée sans la quête ; ouverte quête en cours, MÊME après une victoire (une tête
-	perdue au sol ne doit pas bloquer la quête) ; refermée la tête REMISE (`progress`)."""
+def test_la_clairiere_s_ouvre_tant_que_la_bete_n_est_pas_tombee():
+	"""Fermée sans la quête ; ouverte quête en cours ; refermée dès la victoire (un loup-garou
+	tué, pas de deuxième — Auteur, 03/11), même tête perdue ; refermée la tête REMISE."""
 	clairiere = _docs()[CLAIRIERE]
 	sans = {"quetes_actives": [], "battle_maps_gagnees": [], "inventaire": []}
 	assert not acces.acces_autorise(sans, clairiere, lambda _id: None)[0]
 	pendant = {"quetes_actives": [_collecte()], "battle_maps_gagnees": [], "inventaire": []}
 	assert acces.acces_autorise(pendant, clairiere, lambda _id: None)[0]
 	tete_perdue = dict(pendant, battle_maps_gagnees=[CLAIRIERE])
-	assert acces.acces_autorise(tete_perdue, clairiere, lambda _id: None)[0]
-	remise = dict(tete_perdue, quetes_actives=[dict(_collecte(), progress=1)])
+	assert not acces.acces_autorise(tete_perdue, clairiere, lambda _id: None)[0]
+	remise = dict(pendant, quetes_actives=[dict(_collecte(), progress=1)])
 	assert not acces.acces_autorise(remise, clairiere, lambda _id: None)[0]
 
 
@@ -227,3 +227,22 @@ def test_les_villageois_ne_parlent_de_l_enquete_que_quete_en_cours():
 		fini = _accueil(pnj_id, reussies=[QUETE], flags=flags)
 		attendu = {"fin"} if apres is None else {"apres", "fin"}
 		assert fini == attendu, pnj_id
+
+
+def test_jacotte_rend_la_tete_oubliee_dans_la_clairiere():
+	"""La clairière ne se rouvre plus (un seul loup-garou) : une tête laissée sur place, c'est
+	Jacotte qui la rend (Auteur, 03/11) — bête tombée, quête en cours, aucune tête au sac."""
+	jacotte = _docs()[MENEUSE]
+	don = jacotte["services"]["don"]
+	assert don["item"] == TETE and don["unique"] and don["cout_cuivre"] == 0
+	# Compagnons et montures comptent (`unique_porteurs`), pas le sol (Auteur, 03/11).
+	assert don["unique_porteurs"] is True
+	assert set(don["noeuds"]) == set(lint_dialogues.NOEUDS_REQUIS["don"])
+	assert "tete" in _accueil(MENEUSE, actives=[QUETE], flags={"acces_libere": True})
+	# Tête déjà au sac, bête debout, ou quête rendue : rien à rendre.
+	assert "tete" not in _accueil(MENEUSE, actives=[QUETE], flags={"acces_libere": True, "don_recu": True})
+	assert "tete" not in _accueil(MENEUSE, actives=[QUETE])
+	assert "tete" not in _accueil(MENEUSE, reussies=[QUETE], flags={"acces_libere": True})
+	# Le don se lit bien par le moteur (`pnj.don_effectif`) : une tête, gratuite.
+	effectif = pnj.don_effectif(jacotte, {"relations": {}})
+	assert effectif["item"] == TETE and effectif["quantite"] == 1 and effectif["cout_cuivre"] == 0
