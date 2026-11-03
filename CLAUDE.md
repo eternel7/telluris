@@ -186,6 +186,8 @@ utils/
                          #   d'arrivée), tiré par tranche de l'epoch (`PORTAIL_FENETRE_MINUTES`), cristal jaune par passage
   traversee.py           # traversées maritimes (pur) : route `traversee:*`, chemin case à case, danger
                          #   par segment, embarquer/avancer/débarquer, lieu « vu du navire » pour start_combat
+  passe_muraille.py      # réglage 🧱 du menu ⚙️ de /play (pur) : lien vers une porte de rempart ⇒ case de la cité
+                         #   au bout de la paire (lue dans les connexions, indécidable ⇒ pas ordinaire) ; les deux portes restent éprouvées
   acces.py               # barrière d'accès à un lieu gardée par un PNJ (pur) : conditions, laissez-passer, cycle
   intro.py               # intro narrative (pur) : démarrage, overlay, raisons, conclusion en zone sûre
   simulateur.py          # duel 1D Monte Carlo (pur) : belligérants, politique de duel, équipement d'essai
