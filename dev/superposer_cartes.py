@@ -121,11 +121,32 @@ def depuis_toile(lieu, info):
 	return lambda px, py: (int((px - ox) // cw), int((py - oy) // ch))
 
 
+def enregistrer_paires_geo(docs):
+	"""Les paires GÉORÉFÉRENCÉES des générateurs d'Europe orientale et d'Afrique
+	(`dev/georeferencement_cartes.py`) ajoutées à `PAIRES`, et leurs ancres à `ANCRES`."""
+	import importlib
+	from dev import georeferencement_cartes
+	for nom in ("gen_europe_orientale", "gen_afrique"):
+		try:
+			cfg = importlib.import_module(f"dev.{nom}")
+		except ImportError:
+			continue
+		paires = [(f"lieu:{f}", f"lieu:{v}") for f, v, _ in getattr(cfg, "PAIRES_CALEES", ())]
+		dims = {d["_id"]: (len(d["cells"][0]), len(d["cells"])) for d in docs.values()
+			if d.get("type") == "lieu" and d.get("cells")}
+		paires = [p for p in paires if p[0] in dims and p[1] in dims]
+		georeferencement_cartes.enregistrer(paires, dims)
+		for slug, ancre in getattr(cfg, "ANCRES", {}).items():
+			ANCRES.setdefault(f"lieu:{slug}", ancre)
+
+
 def zone(doc):
-	"""Cases de la zone de terre de `doc` (celle de son ancre)."""
+	"""Cases de la zone de terre de `doc` (celle de son ancre ; ancre fermée ⇒ la plus grande)."""
 	z, _tailles = grille_image.zones(doc["cells"], doc.get("nav") or {})
 	ax, ay = ANCRES[doc["_id"]]
 	n = z[ay][ax]
+	if n == -1 and _tailles:
+		n = max(range(len(_tailles)), key=_tailles.__getitem__)
 	return {(x, y) for y, ligne in enumerate(z) for x, v in enumerate(ligne) if v == n and n != -1}
 
 
@@ -173,12 +194,13 @@ def main() -> int:
 	ap.add_argument("--sans-frontieres", action="store_true")
 	ap.add_argument("--import", dest="lot")
 	args = ap.parse_args()
+	docs, dump = charger_dump(args.lot)
+	enregistrer_paires_geo(docs)
 	paires = args.paires or list(PAIRES)
 	inconnues = [p for p in paires if p not in PAIRES]
 	if inconnues:
 		print(f"✗ paire(s) inconnue(s) : {', '.join(inconnues)} — connues : {', '.join(PAIRES)}")
 		return 2
-	docs, dump = charger_dump(args.lot)
 	print(dump)
 	os.makedirs(SORTIES, exist_ok=True)
 	for paire in paires:

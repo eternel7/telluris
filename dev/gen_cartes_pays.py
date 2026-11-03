@@ -55,6 +55,19 @@ CARTES = {
 	"plaine_europeenne.jpg": ("Plaine européenne", "region"),
 	"roumanie.png": ("Roumanie", "pays"),
 	"world.png": ("Monde", "monde"),
+	# Europe jusqu'à l'Oural (découpage du 02/11/2026, docs/prompts_cartes_europe_afrique.md).
+	"scandinavie_meridionale.jpg": ("Scandinavie méridionale", "region"),
+	"laponie.jpg": ("Laponie", "region"),
+	"germanie_du_sud.jpg": ("Germanie du Sud", "region"),
+	"baltique_orientale.jpg": ("Baltique orientale", "region"),
+	"pologne_ruthenie.jpg": ("Pologne et Ruthénie", "region"),
+	"balkans.jpg": ("Balkans", "region"),
+	"steppe_pontique.jpg": ("Steppe pontique", "region"),
+	"moscovie.jpg": ("Moscovie", "region"),
+	"grand_nord.jpg": ("Grand Nord", "region"),
+	"volga_oural.jpg": ("Volga et Oural", "region"),
+	"basse_volga.jpg": ("Basse-Volga", "region"),
+	"caucase.jpg": ("Caucase", "region"),
 }
 
 
