@@ -227,3 +227,20 @@ def test_les_villageois_ne_parlent_de_l_enquete_que_quete_en_cours():
 		fini = _accueil(pnj_id, reussies=[QUETE], flags=flags)
 		attendu = {"fin"} if apres is None else {"apres", "fin"}
 		assert fini == attendu, pnj_id
+
+
+def test_jacotte_rend_la_tete_oubliee_dans_la_clairiere():
+	"""La clairière ne se rouvre plus (un seul loup-garou) : une tête laissée sur place, c'est
+	Jacotte qui la rend (Auteur, 03/11) — bête tombée, quête en cours, aucune tête au sac."""
+	jacotte = _docs()[MENEUSE]
+	don = jacotte["services"]["don"]
+	assert don["item"] == TETE and don["unique"] and don["cout_cuivre"] == 0
+	assert set(don["noeuds"]) == set(lint_dialogues.NOEUDS_REQUIS["don"])
+	assert "tete" in _accueil(MENEUSE, actives=[QUETE], flags={"acces_libere": True})
+	# Tête déjà au sac, bête debout, ou quête rendue : rien à rendre.
+	assert "tete" not in _accueil(MENEUSE, actives=[QUETE], flags={"acces_libere": True, "don_recu": True})
+	assert "tete" not in _accueil(MENEUSE, actives=[QUETE])
+	assert "tete" not in _accueil(MENEUSE, reussies=[QUETE], flags={"acces_libere": True})
+	# Le don se lit bien par le moteur (`pnj.don_effectif`) : une tête, gratuite.
+	effectif = pnj.don_effectif(jacotte, {"relations": {}})
+	assert effectif["item"] == TETE and effectif["quantite"] == 1 and effectif["cout_cuivre"] == 0
