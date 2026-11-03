@@ -9,6 +9,8 @@
 # (`apport_en_cours`) : son « Dun-les-Places… rappelle-moi » la dit déjà, avec Jacotte.
 # Borin, Milo et Malakor tutoient ; narration au « vous » ; le joueur vouvoie le révérend.
 #
+# Part de l'état CORRIGÉ (`gen_correctifs_dialogues.CORRECTIFS` appliqués au dump) : un second
+# fichier portant Borin écraserait l'autre au PUT complet de l'import.
 # Relit le dump le plus récent, n'écrit que les docs qui CHANGENT (CLAUDE.md §11, §18) →
 # jsons/direction_dun_les_places_a_importer.json. Rejouable : un second passage ne change rien.
 #
@@ -19,6 +21,10 @@ import glob
 import json
 import os
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import gen_correctifs_dialogues as correctifs  # noqa: E402
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SORTIE = os.path.join(RACINE, "jsons", "direction_dun_les_places_a_importer.json")
@@ -106,13 +112,21 @@ def appliquer(doc):
 	return doc
 
 
+def etat_vise(doc):
+	"""Copie de `doc` : correctifs de dialogue, puis le chemin de Dun-les-Places."""
+	doc = copy.deepcopy(doc)
+	if doc["_id"] in correctifs.CORRECTIFS:
+		correctifs.CORRECTIFS[doc["_id"]](doc)
+	return appliquer(doc)
+
+
 def modifies(docs):
 	"""Docs qui changent par rapport à `docs` (sans `_rev`)."""
 	sortie = []
 	for pid in DIRECTIONS:
 		if pid not in docs:
 			sys.exit(f"ERREUR : {pid} absent du dump")
-		apres = appliquer(copy.deepcopy(docs[pid]))
+		apres = etat_vise(docs[pid])
 		if apres != docs[pid]:
 			apres.pop("_rev", None)
 			sortie.append(apres)

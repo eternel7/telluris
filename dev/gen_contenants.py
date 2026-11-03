@@ -16,8 +16,8 @@ docs/lore/monde/20261102_sacs_des_legendes.md (tableau « Ce qui est retenu »).
 - Tous : catégorie `outil`, sous-catégorie `contenant`, aucun slot (jamais équipés), tag
   `non_personnalisable` (une variante sur mesure changerait d'`_id`).
 
-Docs NEUFS : refus d'écrire si un `_id` existe déjà dans le dump le plus récent (le PUT
-complet de l'import l'écraserait en silence). Relancer régénère le fichier à l'identique."""
+Docs NEUFS : refus d'écrire si un `_id` existe déjà dans le dump le plus récent avec un autre
+contenu (le PUT complet de l'import l'écraserait en silence) ; identique = déjà importé. Relancer régénère le fichier à l'identique."""
 
 import glob
 import json
@@ -126,14 +126,18 @@ def _dernier_dump() -> str:
 	return dumps[-1]
 
 
-def collisions(docs: list, ids_existants: set) -> list:
-	return sorted(d["_id"] for d in docs if d["_id"] in ids_existants)
+def collisions(docs: list, existants: dict) -> list:
+	"""`_id` déjà en base avec un AUTRE contenu (`_rev` ignoré) : le PUT complet l'écraserait.
+	Un doc identique est l'import déjà fait — le rejouer ne change rien."""
+	def _sans_rev(doc):
+		return {k: v for k, v in doc.items() if k != "_rev"}
+	return sorted(d["_id"] for d in docs if d["_id"] in existants and _sans_rev(existants[d["_id"]]) != d)
 
 
 def main() -> None:
 	dump = _dernier_dump()
 	with open(dump, encoding="utf-8") as f:
-		existants = {d.get("_id") for d in json.load(f).get("docs", [])}
+		existants = {d.get("_id"): d for d in json.load(f).get("docs", [])}
 	pris = collisions(DOCS, existants)
 	if pris:
 		sys.exit(f"Refus : _id déjà en base ({os.path.basename(dump)}) : {', '.join(pris)}")

@@ -62,11 +62,11 @@ MOQUERIES = {
 		"perdue entre ici et le désert, aucun traité ne dit où la chercher. » Elle déroule son papyrus et "
 		"retrouve votre nom. « Rang {rang}, inchangé. Les astres sont plus fidèles que vos poches. »"),
 	BORIN: (
-		"Borin te regarde longuement, puis sa barbe se met à trembler. Le rire finit par sortir, énorme, "
-		"et deux aventuriers se retournent au fond de la salle. « Perdue ! Vous entendez ça, là-bas ? Ça "
+		"Borin vous regarde longuement, puis sa barbe se met à trembler. Le rire finit par sortir, énorme, "
+		"et deux aventuriers se retournent au fond de la salle. « Perdue ! Hé, là-bas, écoutez-moi ça ! Ça "
 		"m'a porté des caisses de sanglier jusqu'au fumoir sans en lâcher une, et ça me perd une plaque "
 		"de cuir grande comme ma main ! » Il s'essuie les yeux, tire le registre à lui et grave une carte "
-		"neuve sans même chercher ton nom : il le connaît. « Rang {rang}, comme avant. Ça, personne ne te "
+		"neuve sans même chercher votre nom : il le connaît. « Rang {rang}, comme avant. Ça, personne ne te "
 		"le prendra. Mais attache-la, {prenom}. La prochaine que je refais, tu paies la tournée. »"),
 	"pnj:cornelia_sept_collines": (
 		"Cornélia efface sa tablette d'un geste lent, en savourant l'instant. « L'or, la gloire ou la "

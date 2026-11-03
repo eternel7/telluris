@@ -160,6 +160,12 @@ def borin(doc):
 	texte(doc, "bucherons_appel_qui", "de vous envoyer le voir dès que vous mettriez les pieds ici.",
 		  "de t'envoyer le voir dès que tu mettrais les pieds ici.")
 	texte(doc, "bucherons_appel_escalier", "Montez. Il vous dira le reste.", "Monte. Il te dira le reste.")
+	# Carte perdue (gen_carte_perdue) : narration au « vous » ; il prend la salle à témoin sans
+	# « vous », qui se lirait comme un vouvoiement du joueur.
+	texte(doc, "carte_remplacee", "« Perdue ! Vous entendez ça, là-bas ? Ça",
+		  "« Perdue ! Hé, là-bas, écoutez-moi ça ! Ça")
+	texte(doc, "carte_remplacee", "Borin te regarde longuement", "Borin vous regarde longuement")
+	texte(doc, "carte_remplacee", "sans même chercher ton nom", "sans même chercher votre nom")
 	# Le joueur vouvoie Borin partout ailleurs (« Vous vous souvenez de moi ? »).
 	libelle(doc, "morvan_propose", "details", "« Et toi, tu y crois ? »", "« Et vous, vous y croyez ? »")
 

@@ -3,7 +3,6 @@
 # rejoué contre le DERNIER dump : réplique de géographie, visible avant / pendant / après l'enquête
 # du Morvan — sauf chez Borin pendant sa quête d'apport, où son rappel la dit déjà.
 
-import copy
 import glob
 import json
 import os
@@ -29,7 +28,7 @@ def _dump():
 @pytest.fixture(scope="module")
 def docs():
 	base = _dump()
-	return {pid: g.appliquer(copy.deepcopy(base[pid])) for pid in g.DIRECTIONS}
+	return {pid: g.etat_vise(base[pid]) for pid in g.DIRECTIONS}
 
 
 def _visibles(doc, actives=(), reussies=(), flags=None):
