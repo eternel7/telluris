@@ -230,38 +230,52 @@ def nav_sans_cases_fermees(nav, cells):
 		if cells[int(k.split(",")[1])][int(k.split(",")[0])]}
 
 
-def lieu_neuf(slug, W, H):
-	image, label = CARTES[slug]
+def _cfg(cfg):
+	"""La configuration (module) : celui-ci par défaut ; `dev/gen_afrique.py` passe le sien."""
+	return cfg or sys.modules[__name__]
+
+
+EAUX = geo.EAUX
+
+
+def lieu_neuf(slug, W, H, cfg=None):
+	c = _cfg(cfg)
+	image, label = c.CARTES[slug]
+	sous_categorie = getattr(c, "SOUS_CATEGORIES", {}).get(slug, "region")
 	return {"_id": lid(slug), "type": "lieu", "label": label, "image": image,
-		"categorie": "pays", "sous_categorie": "region", "dimensions": {"x": W, "y": H},
+		"categorie": "pays", "sous_categorie": sous_categorie, "dimensions": {"x": W, "y": H},
 		"cells": None, "nav": None, "tags": []}
 
 
-def grille_de(slug, chemin_image, W, H):
+def grille_de(slug, chemin_image, W, H, cfg=None):
 	"""Doc neuf avec sa grille nettoyée et ses territoires voisins fermés (Pillow)."""
 	from dev import gen_grille_image as ggi
 	from utils import grille_image
-	doc = lieu_neuf(slug, W, H)
+	c = _cfg(cfg)
+	doc = lieu_neuf(slug, W, H, c)
 	prop = ggi.proposer_pour_image(chemin_image, W, H, {"categorie": "pays"}, profil="pays")
 	couleurs, _, _ = ggi.echantillonner(chemin_image, W, H)
-	cfg = geo.EAUX[slug]
-	g = geo.grille_nettoyee(prop["cells"], couleurs, W, H, cfg["graines"], cfg["tolerance"],
+	eaux = c.EAUX[slug]
+	g = geo.grille_nettoyee(prop["cells"], couleurs, W, H, eaux["graines"], eaux["tolerance"],
 		grille_image.murer_barrieres, grille_image.zones)
 	cells = g["cells"]
-	haut, bas, gauche, droite = CADRE_MINIMUM.get(slug, (0, 0, 0, 0))
+	haut, bas, gauche, droite = c.CADRE_MINIMUM.get(slug, (0, 0, 0, 0))
 	fermer_territoires(cells, ((0, W - 1, 0, haut - 1), (0, W - 1, H - bas, H - 1),
 		(0, gauche - 1, 0, H - 1), (W - droite, W - 1, 0, H - 1)))
-	fermer_territoires(cells, TERRITOIRES.get(slug, ()))
+	fermer_territoires(cells, c.TERRITOIRES.get(slug, ()))
 	doc["cells"] = cells
 	doc["nav"] = nav_sans_cases_fermees(g["nav"], cells)
 	return doc
 
 
 # ── Lot ──────────────────────────────────────────────────────────────────────────────────
-def construire(docs_dump, grille_fn):
+def construire(docs_dump, grille_fn, cfg=None):
 	"""(lieux à émettre, liens, suppressions, rapport). `grille_fn(slug) -> doc` : grille d'une
-	carte absente du dump (injectée : Pillow côté CLI)."""
+	carte absente du dump (injectée : Pillow côté CLI). `cfg.extras(par_id, cartes, zones)`,
+	s'il existe, rend (docs, suppressions, lignes de rapport) en plus (cités déplacées…)."""
 	from dev.gen_plaine_europeenne import zone_de
+	c = _cfg(cfg)
+	CARTES, FRONTIERES, ANCRES = c.CARTES, c.FRONTIERES, c.ANCRES
 	par_id = {d.get("_id"): d for d in docs_dump}
 	lieux, cartes = [], {}
 	for slug in CARTES:
@@ -293,6 +307,11 @@ def construire(docs_dump, grille_fn):
 		if d.get("type") == "connection" and d["_id"] not in produits
 		and any(d["_id"].startswith(p) for p in prefixes)]
 	a_emettre = [l for l in liens if _differe(l, par_id.get(l["_id"]))]
+	if hasattr(c, "extras"):
+		docs, suppr, lignes = c.extras(par_id, cartes, zones)
+		a_emettre += [d for d in docs if d.get("type") != "connection" or _differe(d, par_id.get(d["_id"]))]
+		suppressions += suppr
+		rapport += lignes
 	return lieux, a_emettre, suppressions, rapport
 
 
@@ -303,8 +322,9 @@ def _differe(lien, en_base):
 		!= [(n.get("lieu"), n.get("pos"), n.get("label")) for n in en_base.get("nodes") or []])
 
 
-def main() -> int:
+def main(cfg=None) -> int:
 	from dev import gen_grille_image as ggi
+	c = _cfg(cfg)
 	args = sys.argv[1:]
 	chemin_dump = args[args.index("--dump") + 1] if "--dump" in args else None
 	docs = ggi.charger_dump(chemin_dump)
@@ -314,11 +334,11 @@ def main() -> int:
 	from dev.gen_villes_images import _taille_image
 
 	def grille_fn(slug):
-		image = CARTES[slug][0]
+		image = c.CARTES[slug][0]
 		l, h = _taille_image(image)
-		return grille_de(slug, ggi.trouver_image(image), round(l / 16), round(h / 16))
+		return grille_de(slug, ggi.trouver_image(image), round(l / 16), round(h / 16), c)
 
-	lieux, liens, suppressions, rapport = construire(docs, grille_fn)
+	lieux, liens, suppressions, rapport = construire(docs, grille_fn, c)
 	for ligne in rapport:
 		print(ligne)
 	if rapport and rapport[0].startswith("✗"):
@@ -332,10 +352,10 @@ def main() -> int:
 	if not sortants:
 		print("Rien à émettre : le dump est à jour.")
 		return 0
-	with open(SORTIE, "w", encoding="utf-8") as f:
+	with open(c.SORTIE, "w", encoding="utf-8") as f:
 		json.dump(sortants, f, ensure_ascii=False, indent=2)
 		f.write("\n")
-	print(f"✎ {os.path.relpath(SORTIE, RACINE)} — {len(lieux)} lieu(x), {len(liens)} lien(s), "
+	print(f"✎ {os.path.relpath(c.SORTIE, RACINE)} — {len(lieux)} lieu(x), {len(liens)} lien(s), "
 		f"{len(suppressions)} suppression(s)")
 	return 0
 

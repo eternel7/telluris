@@ -244,7 +244,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 **Tableau (26/08)** : « héritage de Salomon », portail ancien, coûteux, mal compris, pas un passage libre. Salomon a bâti le transversal **Aksoum ↔ Jérusalem** pour la reine de Saba (Auteur, 01/11).
 
 ## Aksoum — [cites/20261101_histoire_d_aksoum.md]
-**Auteur** (01/11, trois questionnaires) — carte `towns/aksoum_capital.jpg` (retenue ; **enceinte ouverte à l'ouest voulue** : palais, haras, bassin hors des murs) ; en jeu : `lieu:aksoum` (`dev/gen_aksoum.py`), coin sud-est de `lieu:afrique_du_nord` en (85, 45).
+**Auteur** (01/11, trois questionnaires) — carte `towns/aksoum_capital.jpg` (retenue ; **enceinte ouverte à l'ouest voulue** : palais, haras, bassin hors des murs) ; en jeu : `lieu:aksoum` (`dev/gen_aksoum.py`), parent `lieu:abyssinie` en (31, 13) depuis le 03/11 (`dev/gen_afrique.py` ; avant : coin sud-est de l'Afrique du Nord).
 - Identité, par ordre : **cité de la reine** · des **éleveurs de pégases** · **marchande** (Adulis, mer Rouge, or, ivoire, encens) · des **stèles**.
 - **Une seule lignée** : Céphée et Cassiopée → Andromède → bien plus tard la **reine de Saba**. **Arwé** (roi-serpent des terres) ≠ monstre marin d'Andromède ; **tué par Angabo**, devenu roi, père de Saba. Persée et Andromède = récit ancien.
 - **Donjon** au **sanctuaire de la reine** (Sainte-Marie-de-Sion, Templiers) ; l'**Arche d'alliance** y est, gardée par un **être du donjon** unique. Deux **transversaux** : → **Jérusalem** (bâti par **Salomon**, pour la reine) ; → **Muziris** (Inde, à créer).

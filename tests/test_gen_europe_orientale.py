@@ -128,3 +128,42 @@ def test_construire_n_emet_que_le_delta():
 	perime = {"_id": "link:moscovie_to_volga_oural_99", "type": "connection", "nodes": []}
 	_, _, suppr3, _ = geo_gen.construire(dump + lieux + liens + [perime], carte)
 	assert suppr3 == [{"_id": perime["_id"], "_deleted": True}]
+
+
+# ── Afrique : même moteur, configuration de dev/gen_afrique.py ─────────────────────────────
+def test_afrique_specification_coherente():
+	from dev import gen_afrique as af
+	en_jeu = {"afrique_du_nord", "egypte"}
+	for nom, a, ligne_a, b, ligne_b in af.FRONTIERES:
+		for slug, ligne in ((a, ligne_a), (b, ligne_b)):
+			assert slug in af.CARTES or slug in en_jeu, (nom, slug)
+			w = 86 if slug in af.CARTES else 88
+			assert all(0 <= x < w and 0 <= y < 48 for x, y in ligne), (nom, slug)
+	assert set(af.CARTES) == set(af.EAUX) and set(af.CARTES) <= set(af.ANCRES)
+	# L'Égypte n'est pas touchée : aucune frontière vers elle, aucun territoire fermé dessus.
+	assert all("egypte" not in (a, b) for _, a, _, b, _ in af.FRONTIERES)
+
+
+def test_afrique_aksoum_passe_sur_l_abyssinie():
+	from dev import gen_afrique as af
+
+	def carte(slug):
+		W = 88 if slug == "afrique_du_nord" else 86
+		return {"_id": f"lieu:{slug}", "type": "lieu", "label": slug,
+			"cells": [[1] * W for _ in range(48)], "nav": {}}
+
+	anciens = [{"_id": f"link:afrique_du_nord_to_aksoum_{n}", "type": "connection",
+		"nodes": [{"lieu": "lieu:afrique_du_nord", "pos": [85, 45]},
+			{"lieu": "lieu:aksoum", "pos": [i, 20], "label": f"Aksoum — {n}"}]}
+		for i, n in enumerate(af.SORTIES_AKSOUM)]
+	aksoum = {"_id": "lieu:aksoum", "_rev": "2-x", "type": "lieu", "label": "Aksoum",
+		"lieu_parent": "lieu:afrique_du_nord"}
+	dump = [carte("afrique_du_nord"), aksoum] + anciens
+	lieux, liens, suppr, _ = geo_gen.construire(dump, carte, af)
+	par_id = {d["_id"]: d for d in liens}
+	assert par_id["lieu:aksoum"]["lieu_parent"] == "lieu:abyssinie" and "_rev" not in par_id["lieu:aksoum"]
+	for i, n in enumerate(af.SORTIES_AKSOUM):
+		lien = par_id[f"link:abyssinie_to_aksoum_{n}"]
+		assert lien["nodes"][0]["lieu"] == "lieu:abyssinie"
+		assert lien["nodes"][1]["pos"] == [i, 20]
+	assert {s["_id"] for s in suppr} == {a["_id"] for a in anciens}
