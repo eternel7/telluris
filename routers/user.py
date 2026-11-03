@@ -257,8 +257,8 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 	# taverne fige dans `auteur_nom` et montre à TOUS LES AUTRES JOUEURS — il doit être borné
 	# AVANT d'y entrer. ⚠️ On BORNE sans échapper (Convention §9) : c'est `escapeHtml` qui
 	# neutralise au rendu, échapper ici produirait un double échappement.
-	prenom = auberge.nettoyer_ligne(characterinfo.get("prenom") if characterinfo else "", 30)
-	nom = auberge.nettoyer_ligne(characterinfo.get("nom") if characterinfo else "", 30)
+	prenom = auberge.nettoyer_ligne(characterinfo.get("prenom") if characterinfo else "", IDENTITE_MAX)
+	nom = auberge.nettoyer_ligne(characterinfo.get("nom") if characterinfo else "", IDENTITE_MAX)
 	if not prenom or not nom:
 		raise HTTPException(status_code=422, detail="Un prénom et un nom sont requis pour créer un personnage.")
 
@@ -498,6 +498,30 @@ async def update_character_portrait(
 			raise HTTPException(status_code=406, detail="Incorrect info for character portrait update")
 	else:
 		raise HTTPException(status_code=405, detail="No info for character portrait update")
+
+# Prénom et nom : MÊME règle à la création et au renommage (`/renommer_personnage`).
+IDENTITE_MAX = 30
+
+
+@user_router.post("/renommer_personnage")
+async def renommer_personnage(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...)):
+	"""Change le prénom et le nom du personnage SÉLECTIONNÉ. Pas de `_acteur` : un compagnon
+	ne se rebaptise pas. Même nettoyage qu'à la création (on BORNE sans échapper, §9). Les
+	copies déjà figées ailleurs (`auteur_nom` d'une table de taverne) restent historiques."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	prenom = auberge.nettoyer_ligne((body or {}).get("prenom"), IDENTITE_MAX)
+	nom = auberge.nettoyer_ligne((body or {}).get("nom"), IDENTITE_MAX)
+	if not prenom or not nom:
+		raise HTTPException(status_code=422, detail="Un prénom et un nom sont requis.")
+	character["prenom"], character["nom"] = prenom, nom
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	return {"prenom": prenom, "nom": nom}
+
 
 def _set_ressource_recoltable(character: dict, zone_event: dict | None, lieu_doc: dict,
 	favori: tuple | None = None) -> None:

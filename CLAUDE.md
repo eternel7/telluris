@@ -45,7 +45,7 @@ main.py                  # FastAPI app, page routes (/play, /combat/{id}, /reini
                          #   /admin/sorts, /admin/competences, /admin/lore (+ /chronologie), /admin/personnages-recents), static mounts
 routers/
   user.py                # /api/* : auth (dont sceau oublié : mot-de-passe/oubli + /reinitialiser),
-                         #   character CRUD, movement, equip/unequip, drop/pickup, spend_xp
+                         #   character CRUD (dont renommer_personnage), movement, equip/unequip, drop/pickup, spend_xp
   combat.py              # /api/combat/* : start, get, action, collect (loot)
   zones.py               # /api/* : zones d'influence + tables de rencontres/ressources par lieu + GET /api/items
   bestiaire.py           # /admin/* : CRUD espece:* / profil:* (+ éditeur)

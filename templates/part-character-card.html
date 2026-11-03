@@ -35,7 +35,7 @@
 {% macro character_card(card_id='', porteur_id='', nom='', voc_icon='', voc_label='',
                         voc_niveau=0, race='', niveau=0, rang='', rang_title='', pv=0, pv_max=0,
                         pm=0, pm_max=0, image='', zoom=50, editable=true, classes='',
-                        vitaux=true, identite=true, points=none, aide=false) %}
+                        vitaux=true, identite=true, points=none, aide=false, renommer=false) %}
 {% set _pv_max = pv_max or 1 %}
 {% set _pm_max = pm_max or 1 %}
 {% set pv_pct = [(pv / _pv_max * 100)|int, 100]|min %}
@@ -84,6 +84,9 @@
 			   classe `aide-masquee` de <html> (réglage du menu ⚙️). #}
 			<div class="char-name-row">
 				<div class="char-name" data-role="nom">{{ nom }}</div>
+				{# `renommer` = ✏️ du nom du JOUEUR (carte de la fiche) : `ouvrirRenommagePerso()` vit
+				   dans play_town_telluris.html ; masqué en mode compagnon (`body.sheet-compagnon`). #}
+				{% if renommer %}<button type="button" class="renommer-perso-btn" onclick="ouvrirRenommagePerso(this)" title="Changer de nom" aria-label="Changer de nom">✏️</button>{% endif %}
 				{% if aide %}<button type="button" class="aide-btn" data-role="aide" onclick="ouvrirAide()" title="Aide au démarrage" aria-label="Aide au démarrage">?</button>{% endif %}
 			</div>
 			{# ⚠️ Le RANG n'appartient qu'au personnage principal : seul lui en a un (`rangs_guilde`,

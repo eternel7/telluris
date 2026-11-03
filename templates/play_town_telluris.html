@@ -2257,7 +2257,7 @@
 					<img src="{{ url_for('characters', path=character['image']) }}" alt="">
 				</div>
 				<div class="sheet-left-info">
-					<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
+					<div class="char-name-row"><div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div><button type="button" class="renommer-perso-btn" onclick="ouvrirRenommagePerso(this)" title="Changer de nom" aria-label="Changer de nom">✏️</button></div>
 					<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.<span id="niv-voc-left-info" class="voc-niveau niveau-nb">{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}}</span> - {{character["race"]}} Niv.<span id="niv-left-info" class="race-niveau niveau-nb">{{character.get("niveau",'0')}}</span> ·<span id="rang-left-info"{% if character.get("rangs_guilde_title") %} title="{{ character['rangs_guilde_title'] }}"{% endif %}> Rang {{character.get("rang",'aucun')}}</span></div>
 					<div class="char-vitals" style="margin-top:8px">
 						<span class="pv-val">PV {{_pv}}/<span id="stat-left-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
@@ -2273,7 +2273,7 @@
 				{# Carte du joueur, exemplaire de la fiche (mobile). Le mode compagnon la rebascule sur
 				   un compagnon : c'est la MÊME carte, un autre porteur (renderCharacterCard / setSujet). #}
 				<div id="personnage">
-					{{ cards.character_card(card_id="charac-sheet", aide=true, points=character.get("attribute_points", 0), **carte_joueur) }}
+					{{ cards.character_card(card_id="charac-sheet", aide=true, renommer=true, points=character.get("attribute_points", 0), **carte_joueur) }}
 				</div>
 				<!-- Tab bar -->
 				<nav class="sheet-tab-bar" role="tablist">
@@ -2959,6 +2959,18 @@
 		<div class="sell-topbar">
 			<header class="location-desc" aria-label="Gestion du groupe">
 			<h2>👥 Votre groupe (<span id="grp-plafond"></span>)</h2>
+			{# Nom de la compagnie : visible dès qu'elle existe (fondée au 1er engagement durable). #}
+			<div id="grp-compagnie" class="grp-compagnie" hidden>
+				<span>✦ <span id="grp-compagnie-nom"></span></span>
+				<button type="button" class="renommer-cie-btn" onclick="ouvrirRenommageCompagnie()" title="Renommer la compagnie" aria-label="Renommer la compagnie">✏️</button>
+			</div>
+			<div id="grp-compagnie-form" class="renommer-form" hidden>
+				<span>✦</span>
+				<input id="grp-compagnie-input" type="text" maxlength="40" placeholder="Nom de la compagnie"
+					onkeydown="if(event.key==='Enter'){validerRenommageCompagnie();}else if(event.key==='Escape'){event.stopPropagation();annulerRenommageCompagnie();}">
+				<button class="sh-equip-btn" onclick="validerRenommageCompagnie()">Valider</button>
+				<button class="sh-drop-btn" onclick="annulerRenommageCompagnie()">Annuler</button>
+			</div>
 			</header>
 			<button class="sheet-tab-btn close-sheet-btn" onclick="closeGroupe()" role="button">✕ Fermer</button>
 		</div>
@@ -3529,6 +3541,20 @@
 		}
 		.aide-btn:hover, .aide-btn:focus-visible { background: #e6c98e; outline: none; }
 		.aide-masquee .aide-btn { display: none; }
+		/* ✏️ Renommer (nom du joueur sur la fiche, compagnie dans 👥) : discret au repos. */
+		.renommer-perso-btn, .renommer-cie-btn {
+			flex-shrink: 0; padding: 0 .2rem; background: none; border: none; cursor: pointer;
+			font-size: .9em; opacity: .55;
+		}
+		.renommer-perso-btn:hover, .renommer-perso-btn:focus-visible,
+		.renommer-cie-btn:hover, .renommer-cie-btn:focus-visible { opacity: 1; outline: none; }
+		body.sheet-compagnon .renommer-perso-btn { display: none; }
+		.renommer-form { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; margin: .2rem 0; }
+		.renommer-form label { display: flex; align-items: center; gap: .3rem; flex: 1 1 100%; }
+		.renommer-form input { flex: 1; min-width: 0; }
+		.grp-compagnie { display: flex; align-items: center; gap: .3rem; margin: .1rem 0 0; }
+		/* `display:flex` l'emporterait sur l'attribut `hidden` sans ceci. */
+		.char-name-row[hidden], .renommer-form[hidden], .grp-compagnie[hidden] { display: none; }
 		/* Pouls des boutons d'aide — même halo que les marques de passage (`passage-pouls`).
 		   🧭/🎯 (`data-focus-key`), Carte et 🗣️ Interroger (`data-aide-pouls`) : seulement sans
 		   focalisation en cours (`html.sans-focalisation`, posée par `_syncFocusBtns`) ; « ? » :
@@ -9903,6 +9929,52 @@ const EST_AUBERGE = {{ est_auberge | tojson }};
 
 function _majCompagnie(data) {
 	if (data && 'compagnie' in data) _compagnieNom = (data.compagnie || {}).nom || '';
+	_rendreLigneCompagnie();
+}
+
+// Ligne « ✦ <compagnie> ✏️ » de l'en-tête 👥 — `textContent` : c'est une saisie du joueur.
+function _rendreLigneCompagnie() {
+	const ligne = document.getElementById('grp-compagnie');
+	const nomEl = document.getElementById('grp-compagnie-nom');
+	const form = document.getElementById('grp-compagnie-form');
+	if (!ligne || !nomEl) return;
+	nomEl.textContent = _compagnieNom;
+	ligne.hidden = !_compagnieNom || (form && !form.hidden);
+}
+function ouvrirRenommageCompagnie() {
+	const form = document.getElementById('grp-compagnie-form');
+	const input = document.getElementById('grp-compagnie-input');
+	if (!form || !input || !_compagnieNom) return;
+	form.hidden = false;
+	_rendreLigneCompagnie();
+	input.value = _compagnieNom;   // par `.value`, jamais dans le HTML
+	input.focus();
+	input.select();
+}
+function annulerRenommageCompagnie() {
+	const form = document.getElementById('grp-compagnie-form');
+	if (form) form.hidden = true;
+	_rendreLigneCompagnie();
+}
+async function validerRenommageCompagnie() {
+	const input = document.getElementById('grp-compagnie-input');
+	const nom = ((input && input.value) || '').trim();
+	if (!nom) { showToast('Donnez un nom à votre compagnie.'); if (input) input.focus(); return; }
+	try {
+		const res = await fetch('api/groupe/compagnie', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ nom })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		document.getElementById('grp-compagnie-form').hidden = true;
+		_majCompagnie(data);
+		// Comme l'engagement : ce payload ne porte pas les INVENTAIRES, on re-tire l'état
+		// complet du panneau (pieds « ✦ compagnie » des cartes compris).
+		const r2 = await fetch('api/groupe');
+		if (r2.ok) renderGroupe(await r2.json());
+		showToast(`✦ Votre compagnie s'appelle désormais ${_compagnieNom}`);
+	} catch (err) { console.error('Erreur renommage compagnie', err); }
 }
 
 function _majLieuDeGuilde(data) {
@@ -12354,6 +12426,75 @@ function _applySheetIdentite(p) {
 	});
 }
 
+// ── ✏️ Changer de nom (fiche 👤, joueur seulement) ─────────────────────────────
+// Édition SUR PLACE : la ligne du nom cliquée cède la place à un petit formulaire (prénom,
+// nom). Construit en DOM, pré-rempli par `.value` — jamais de saisie dans du HTML (§9).
+// Masqué en mode compagnon (CSS `body.sheet-compagnon`, colonne gauche réécrite).
+function _fermerRenommagePerso() {
+	document.querySelectorAll('.renommer-perso-form').forEach(f => {
+		const row = f.previousElementSibling;
+		if (row) row.hidden = false;
+		f.remove();
+	});
+}
+function ouvrirRenommagePerso(btn) {
+	const row = btn && btn.closest('.char-name-row');
+	if (!row) return;
+	_fermerRenommagePerso();
+	const form = document.createElement('div');
+	form.className = 'renommer-form renommer-perso-form';
+	const champ = (label, valeur) => {
+		const l = document.createElement('label');
+		l.append(label);
+		const i = document.createElement('input');
+		i.type = 'text'; i.maxLength = 30; i.value = valeur || '';
+		i.addEventListener('keydown', e => {
+			if (e.key === 'Enter') validerRenommagePerso(form);
+			else if (e.key === 'Escape') { e.stopPropagation(); _fermerRenommagePerso(); }
+		});
+		l.append(i);
+		form.append(l);
+		return i;
+	};
+	const prenom = champ('Prénom', IDENTITE_JOUEUR.prenom);
+	champ('Nom', IDENTITE_JOUEUR.nom);
+	const ok = document.createElement('button');
+	ok.className = 'sh-equip-btn'; ok.textContent = 'Valider';
+	ok.onclick = () => validerRenommagePerso(form);
+	const non = document.createElement('button');
+	non.className = 'sh-drop-btn'; non.textContent = 'Annuler';
+	non.onclick = _fermerRenommagePerso;
+	form.append(ok, non);
+	row.hidden = true;
+	row.after(form);
+	prenom.focus();
+	prenom.select();
+}
+async function validerRenommagePerso(form) {
+	const [iPrenom, iNom] = form.querySelectorAll('input');
+	const prenom = iPrenom.value.trim(), nom = iNom.value.trim();
+	const vide = !prenom ? iPrenom : (!nom ? iNom : null);
+	if (vide) { showToast('Un prénom et un nom sont requis.'); vide.focus(); return; }
+	try {
+		const res = await fetch('api/renommer_personnage', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ prenom, nom })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		IDENTITE_JOUEUR.prenom = data.prenom;
+		IDENTITE_JOUEUR.nom = data.nom;
+		const complet = `${data.prenom} ${data.nom}`;
+		// Toutes les vues du JOUEUR : carte latérale, carte de la fiche (le bouton n'existe
+		// qu'hors mode compagnon), colonne gauche de la fiche.
+		document.querySelectorAll('.character-card[data-card="sidebar"] [data-role="nom"], '
+			+ '.character-card[data-card="charac-sheet"] [data-role="nom"], .sheet-left-info .char-name')
+			.forEach(el => { el.textContent = complet; });
+		_fermerRenommagePerso();
+		showToast(`✏️ Vous vous nommez désormais ${complet}`);
+	} catch (err) { console.error('Erreur renommage personnage', err); }
+}
+
 // Le joueur tel que la carte l'attend (l'identité vient des globales, tenues à jour : niveaux
 // dépensés, vitaux régénérés) — de quoi rendre la fiche au joueur en sortant du mode compagnon.
 function _identiteJoueur() {
@@ -12448,6 +12589,7 @@ function _appliquerFiche(f) {
 }
 
 async function openCompagnonSheet(avId) {
+	_fermerRenommagePerso();   // sinon le formulaire partirait dans le snapshot de la colonne gauche
 	try {
 		const res = await fetch('api/groupe/compagnon/' + encodeURIComponent(avId));
 		const p = await res.json();

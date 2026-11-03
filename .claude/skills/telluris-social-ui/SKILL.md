@@ -60,6 +60,8 @@ Une liste longue ne pousse plus le panneau : elle **scrolle chez elle**. Une seu
 
 ⚠️ **Les vitaux appartiennent à quelqu'un.** `updateVitals(v, porteurId = PRINCIPAL_ID)`, `_refreshDerivedStats` et `spendXpVocation` n'écrivent QUE dans les cartes du porteur visé (`cartesDuPorteur(id)` sur `data-porteur`) — un `querySelectorAll('.pv-val')` global recopierait les PV du joueur sur toutes les cartes de compagnons. Les actions de fiche (`consommer`, `lancer_sort`, `utiliser_competence`, `apprendre_competence`) passent par `_actionBody` → elles visent **`porteurActifId()`**. `_setCardVitals` / `_setCardIdentite` = seules fonctions qui écrivent dans une carte. `_identiteJoueur()` (globales + `_vitalsJoueur`) reconstruit la carte du joueur à la sortie du mode compagnon — rien n'est snapshotté en HTML.
 
+**✏️ Changer de nom** (joueur seul) : paramètre de macro **`renommer`** (carte `charac-sheet`) + bouton dans `.sheet-left-info` → `ouvrirRenommagePerso(btn)` remplace la `.char-name-row` par un formulaire bâti en DOM (`.value`, jamais de HTML) → `POST /api/renommer_personnage` (sélectionné, pas `_acteur` ; règle `IDENTITE_MAX` de la création). Au succès : `IDENTITE_JOUEUR` + noms des cartes `sidebar`/`charac-sheet` + colonne gauche. Masqué en mode compagnon (`body.sheet-compagnon`), formulaire fermé à `openCompagnonSheet`. Verrouillé par `tests/test_renommer_personnage.py`.
+
 **Payload** : `routers/recrutement.py::_recrue_view` = source unique des recrues ET du groupe → porte `voc_niveau`, `portrait_zoom`, `portrait_translate`, `permanent` et les **vitaux** (`vitaux_de`), tout ce que la carte affiche.
 
 
