@@ -2094,6 +2094,8 @@
 							<button type="button" role="menuitemcheckbox" class="affichage-item" id="affichage-son" aria-checked="true" onclick="basculerSonsMenu()">🔊 Sons</button>
 							{# Bouton « ? » d'aide des cartes du joueur (classe `aide-masquee` de <html>). #}
 							<button type="button" role="menuitemcheckbox" class="affichage-item" id="affichage-aide" aria-checked="true" onclick="basculerAideMenu()">❓ Bouton d'aide</button>
+							{# Porte de rempart franchie d'un geste : `passe_muraille` de `moveTo` (utils/passe_muraille.py). #}
+							<button type="button" role="menuitemcheckbox" class="affichage-item" id="affichage-passe-muraille" aria-checked="false" title="Une porte de rempart mène directement de l'autre côté du mur, sans passer par ses deux postes de garde" onclick="basculerPasseMurailleMenu()">🧱 Passe-muraille</button>
 							<button type="button" role="menuitem" class="affichage-item" id="affichage-fs" aria-pressed="false" hidden onclick="fermerMenuAffichage()"><span id="affichage-fs-ico" aria-hidden="true">⛶</span> <span id="affichage-fs-txt">Plein écran</span></button>
 						</span>
 					</span>
@@ -4678,6 +4680,20 @@
 		fermerMenuAffichage();
 	}
 	_majMenuAide();
+	// Passe-muraille : préférence du joueur, envoyée avec chaque lien (`moveTo`) ; le serveur
+	// ne saute que les portes de rempart dont la paire se lit sans ambiguïté.
+	const PASSE_MURAILLE_CLE = 'telluris.play.passe_muraille';
+	function passeMurailleActif() { return _paveLire(PASSE_MURAILLE_CLE) === '1'; }
+	function _majMenuPasseMuraille() {
+		const b = document.getElementById('affichage-passe-muraille');
+		if (b) b.setAttribute('aria-checked', passeMurailleActif() ? 'true' : 'false');
+	}
+	function basculerPasseMurailleMenu() {
+		_paveEcrire(PASSE_MURAILLE_CLE, passeMurailleActif() ? '0' : '1');
+		_majMenuPasseMuraille();
+		fermerMenuAffichage();
+	}
+	_majMenuPasseMuraille();
 
 	// ── Aide au démarrage (#aide-overlay) ──────────────────────────────────────
 	// Section 0 = sommaire en tuiles ; 1..N = une section à la fois. Rouvrir l'aide repart
@@ -4800,6 +4816,7 @@
 	}
 	async function moveTo(linkId, guideAdieu = false) {
 		const moveData = guideAdieu ? {link: linkId, guide_adieu: true} : {link: linkId};
+		if (passeMurailleActif()) moveData.passe_muraille = true;
 		// Au clic et non au retour : la page se recharge dès la réponse, le son y serait coupé net.
 		jouerSonUi('porte');
 		try {

@@ -49,6 +49,7 @@ from utils import intro
 from utils import transport
 from utils import recrutement
 from utils import acces
+from utils import passe_muraille
 from utils import pnj as pnj_util
 from utils import proprietes
 from utils import cadence
@@ -785,6 +786,24 @@ async def move_character(
 						# règle que get_lieu_links, qui ne filtre jamais le lieu courant) et on
 						# n'ouvre aucune descente de donjon. Tout le reste est un déplacement RÉEL :
 						# sol vidé, événement de zone, escortes, tour de monde.
+						# PASSE-MURAILLE (réglage 🧱 du menu ⚙️, utils/passe_muraille.py) : un lien
+						# vers une porte de rempart dépose sur la case de la cité au bout de la
+						# paire. Les DEUX portes restent des barrières : chacune est éprouvée comme
+						# la destination (garde ci-dessous), aucun accès n'est contourné. Paire
+						# indécidable ⇒ déplacement ordinaire.
+						if not interne and move.get("passe_muraille") and passe_muraille.est_porte(lieu_doc):
+							saut = passe_muraille.traversee(destination, connexions_du_lieu, get_doc)
+							sortie_doc = get_doc(saut[1]["lieu"]) if saut else None
+							jumelle_doc = get_doc(saut[0]) if saut else None
+							if saut and sortie_doc and jumelle_doc:
+								for doc_porte in (lieu_doc, jumelle_doc):
+									ok, raison = acces.acces_autorise(character_to_update, doc_porte, get_doc)
+									if not ok:
+										raise HTTPException(status_code=403, detail=raison)
+								node, destination, lieu_doc = saut[1], saut[1]["lieu"], sortie_doc
+								# Retour dans le lieu où l'on est (cité de part et d'autre du mur) :
+								# aucune barrière à éprouver, comme une connexion interne.
+								interne = destination == lieu_courant
 						if not interne:
 							ok, raison = acces.acces_autorise(character_to_update, lieu_doc, get_doc)
 							if not ok:
