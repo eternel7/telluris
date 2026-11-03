@@ -1,0 +1,2465 @@
+[
+  {
+    "_id": "pnj:borin_barbe_de_jais",
+    "type": "pnj",
+    "nom": "Borin Barbe-de-Jais",
+    "race": "nain",
+    "vocation": "receptionniste",
+    "portrait": "nain_m_receptioniste01.png",
+    "description": "Réceptionniste du Bastion de l'Yonne. Ses yeux pétillent d'une malice bienveillante, mais rien n'échappe à son regard.",
+    "services": {
+      "transport": {
+        "offre": {
+          "id": "quete:transport_borin_premiere_mission",
+          "destination": "lieu:fumee_de_l_yonne",
+          "cargaison": [
+            {
+              "item": "item:viande_sanglier_gobelin",
+              "quantite": 2,
+              "poids": 5
+            }
+          ],
+          "duree": 3600,
+          "proba": 1,
+          "unique": true,
+          "retour": true,
+          "rang": "F",
+          "titre": "Première mission : les caisses du Bastion",
+          "description": "Borin Barbe-de-Jais vous confie deux caisses de viande de sanglier-gobelin — dix bons kilos — à porter au fumoir de la Guilde, Fumée de l'Yonne. Elles y deviendront les provisions des expéditions. Revenez ensuite lui en rendre compte au comptoir : ce n'est pas la viande qu'il met à l'épreuve.",
+          "recompenses": {
+            "xp": 30,
+            "cuivre": 200,
+            "items": [
+              {
+                "item": "item:carte_aventurier",
+                "poids": 0.05,
+                "lieu_parent": "auto"
+              }
+            ],
+            "rang_guilde": "F"
+          }
+        },
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "rapporte": "transport_rapporte"
+        }
+      },
+      "rang": {
+        "noeuds": {
+          "propose": "rang_propose",
+          "accepte": "rang_accepte",
+          "rapporte": "rang_rapporte"
+        }
+      },
+      "acces": {
+        "lieu": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+        "noeuds": {
+          "ouvre": "acces_ouvre",
+          "refus": "acces_refus",
+          "deja": "acces_deja"
+        }
+      },
+      "escorte": {
+        "recherche": {
+          "cite": "lieu:auxerre",
+          "proba": 0.25,
+          "recompenses": {
+            "xp": 30,
+            "cuivre": 250
+          }
+        },
+        "noeuds": {
+          "accepte": "escorte_acceptee"
+        }
+      },
+      "apport": {
+        "offre": {
+          "id": "quete:la_bete_de_dun_les_places",
+          "titre": "La bête de Dun-les-Places",
+          "description": "Une bête décime les troupeaux de Dun-les-Places, au fond des forêts du Morvan, et a tué un jeune berger. Les villageois parlent de loup-garou. Trouvez où elle se couche — la vieille Jacotte, la meneuse de loups, le sait peut-être — et rapportez sa tête à Borin Barbe-de-Jais, au comptoir du Bastion de l'Yonne.",
+          "item": "item:loup_garou_tete",
+          "quantite": 1,
+          "unique": true,
+          "recompenses": {
+            "xp": 70,
+            "cuivre": 800
+          }
+        },
+        "noeuds": {
+          "accepte": "morvan_accepte",
+          "partiel": "morvan_partiel",
+          "remis": "morvan_remis"
+        }
+      },
+      "don": {
+        "item": "item:carte_aventurier",
+        "quantite": 1,
+        "cout_cuivre": 0,
+        "lieu_parent": "auto",
+        "unique": true,
+        "noeuds": {
+          "fait": "carte_remplacee",
+          "remplacement": "carte_remplacee",
+          "sans_fonds": "carte_sans_fonds",
+          "trop_charge": "carte_trop_charge"
+        },
+        "rang_guilde": "F"
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le nain vous observe quelques secondes avant d'esquisser un sourire. « Bienvenue au Bastion de l'Yonne ! Approche donc, {prenom}. Tu viens chercher fortune, ou simplement vérifier que les histoires sont vraies ? »",
+          "choix": [
+            {
+              "id": "mission",
+              "label": "Je voudrais devenir aventurier.",
+              "next": "premiere_mission",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "rapport",
+              "label": "C'est fait. {destinataire} a sa viande.",
+              "action": {
+                "service": "transport",
+                "op": "rapporter"
+              },
+              "condition": {
+                "transport_a_rapporter": true
+              }
+            },
+            {
+              "id": "relance",
+              "label": "Où en est ma livraison, déjà ?",
+              "next": "transport_relance",
+              "condition": {
+                "transport_en_cours": true
+              }
+            },
+            {
+              "id": "veteran",
+              "label": "Vous vous souvenez de moi ?",
+              "next": "transport_veteran",
+              "condition": {
+                "transport_accompli": true
+              }
+            },
+            {
+              "id": "rang_proposer",
+              "label": "Une épreuve pour m'élever dans la Guilde ?",
+              "next": "rang_propose",
+              "condition": {
+                "rang_offert": true
+              }
+            },
+            {
+              "id": "rang_rapporter",
+              "label": "C'est fait. Le « {espece} {rang_vise} » a fini couché.",
+              "action": {
+                "service": "rang",
+                "op": "rapporter"
+              },
+              "condition": {
+                "rang_a_rapporter": true
+              }
+            },
+            {
+              "id": "rang_sommet",
+              "label": "Reste-t-il une épreuve à ma hauteur ?",
+              "next": "rang_sommet",
+              "condition": {
+                "rang_max": true
+              }
+            },
+            {
+              "id": "acces_passer",
+              "label": "Je voudrais voir le maître de la Guilde.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "acces_deja",
+              "label": "Je remonte au bureau.",
+              "condition": {
+                "acces_ouvert": true
+              },
+              "next": "acces_deja"
+            },
+            {
+              "id": "acces_pourquoi",
+              "label": "Qui dirige la Guilde, ici ?",
+              "condition": {
+                "acces_refuse": true
+              },
+              "next": "acces_refus"
+            },
+            {
+              "id": "escorte_offre",
+              "label": "Un avis de recherche, peut-être ?",
+              "next": "escorte_propose",
+              "condition": {
+                "escorte_offerte": true
+              }
+            },
+            {
+              "id": "escorte_relance",
+              "label": "Au sujet de {protege}…",
+              "next": "escorte_relance",
+              "condition": {
+                "escorte_en_cours": true
+              }
+            },
+            {
+              "id": "bucherons_appel",
+              "label": "On me dit que le maître de la Guilde me cherche ?",
+              "condition": {
+                "acces_ouvrable": true,
+                "relation_min": {
+                  "lieux": [
+                    "lieu:le_bastion_de_l_yonne_comptoir"
+                  ],
+                  "seuil": 51
+                },
+                "quete_active": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                }
+              },
+              "next": "bucherons_appel"
+            },
+            {
+              "id": "bucherons_appel_habitue",
+              "label": "On me dit que le maître de la Guilde me cherche ?",
+              "condition": {
+                "acces_ouvert": true,
+                "relation_min": {
+                  "lieux": [
+                    "lieu:le_bastion_de_l_yonne_comptoir"
+                  ],
+                  "seuil": 51
+                },
+                "quete_active": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                }
+              },
+              "next": "bucherons_appel"
+            },
+            {
+              "id": "morvan_offre",
+              "label": "« Il paraît qu'une bête court le Morvan ? »",
+              "condition": {
+                "apport_offert": true,
+                "rang_min": {
+                  "cite": "lieu:auxerre",
+                  "rang": "E"
+                }
+              },
+              "next": "morvan_propose"
+            },
+            {
+              "id": "morvan_rappel",
+              "label": "« Dun-les-Places… rappelle-moi. »",
+              "condition": {
+                "apport_en_cours": true,
+                "apport_possible": false
+              },
+              "next": "morvan_rappel"
+            },
+            {
+              "id": "morvan_remettre",
+              "label": "« Voilà la tête de ta bête. »",
+              "condition": {
+                "apport_possible": true
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
+              "id": "morvan_souvenir",
+              "label": "« Des nouvelles du Morvan ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
+              "next": "morvan_souvenir"
+            },
+            {
+              "id": "carte_perdue",
+              "label": "« J'ai… perdu ma carte d'aventurier. »",
+              "condition": {
+                "don_a_remplacer": true
+              },
+              "action": {
+                "service": "don"
+              }
+            },
+            {
+              "id": "dun_les_places",
+              "label": "« Où se trouve Dun-les-Places ? »",
+              "next": "dun_les_places",
+              "condition": {
+                "apport_en_cours": false
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "premiere_mission": {
+          "texte": "« Beaucoup le disent. Peu comprennent ce que cela signifie. » Il ouvre un grand registre relié de cuir et y inscrit soigneusement votre nom. « Les recrues pensent souvent que leur première mission sera de tuer un monstre. C'est faux. Avant de savoir combattre, il faut apprendre à être digne de confiance. »",
+          "choix": [
+            {
+              "id": "ecouter",
+              "label": "Qu'attendez-vous de moi ?",
+              "next": "transport_propose"
+            },
+            {
+              "id": "refuser",
+              "label": "Je préfère chercher fortune ailleurs.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "Borin disparaît derrière une porte donnant sur les réserves, et revient avec {colis} solides caisses de bois fermées par des courroies de cuir. Une odeur puissante s'en échappe. « {poids} kilos de viande de sanglier-gobelin, toute fraîche. Tu la livreras au fumoir de la Guilde. Destination : {destination}. Tu as {delai} minutes — après, la marchandise ne vaut plus rien, et ce ne sont pas deux caisses qui disparaissent : ce sont les provisions de tes futurs compagnons. » Il glisse un jeton de cuivre dans votre main. « {xp} points d'expérience et {prime} pièces de cuivre à ton retour. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Ce n'est... qu'une livraison.",
+              "next": "transport_lecon"
+            }
+          ]
+        },
+        "transport_lecon": {
+          "texte": "Le sourire du nain s'efface doucement. « Tu crois ? » Il se penche vers vous. « Les plus grands héros commencent rarement en terrassant un dragon. Ils commencent en accomplissant parfaitement une tâche que tout le monde croit ordinaire. » Puis il reprend son éternel sourire. « Et entre nous... l'odeur attirera sans doute quelques renards, des chiens errants, peut-être même un jeune loup ou deux. Tu devras garder la tête froide. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "Donnez-moi ces caisses.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas aujourd'hui.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "Il pose un doigt épais sur une carte de la région. « Tu quitteras la ville et tu suivras la route : c'est {direction}. Le bâtiment de pierre aux hautes cheminées, tu ne peux pas le manquer. Présente le jeton à {destinataire} : on saura que tu viens de notre part. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "Borin contourne le comptoir et vous aide à charger les {colis} caisses dans une solide hotte de portage. « Destination : {destination}, dans les {delai} minutes. Et reviens me voir ensuite : je veux te l'entendre dire. Tu découvriras bientôt une vérité que tous les vétérans connaissent. » Il vous adresse un clin d'œil et referme son registre.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_rapporte": {
+          "texte": "Le vieux nain rouvre son grand registre et trace une ligne à côté de votre nom. « Les caisses sont arrivées, et à l'heure. » Il fait glisser sur le chêne une plaque de cuir bouilli frappée du blason du Bastion, puis {prime} pièces de cuivre. « Ce n'était pas la viande que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. Les aventuriers capables de protéger une simple cargaison sont souvent ceux à qui l'on confiera, un jour, des compagnons... et peut-être le destin d'une cité entière. » Il désigne le grand tableau de la salle commune. « Rang F, le cuivre — le premier échelon, celui par lequel tout le monde a commencé. Va choisir ta prochaine quête. Tu es des nôtres. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "Le nain soupèse votre barda d'un regard et éclate de rire. « Par les enclumes des anciens ! Tu ploies déjà sous ton propre bagage, {prenom}. Déleste-toi et reviens : la viande ne s'envolera pas... enfin, pas tout de suite. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai le sac plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_relance": {
+          "texte": "Borin lève un sourcil au-dessus de son registre. « Toujours là ? Ces caisses ne se porteront pas toutes seules. Destination : {destination}, c'est {direction}. Il te reste {delai} minutes, et la viande n'attend pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y cours.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_veteran": {
+          "texte": "« Si je me souviens de toi ? » Le vieux nain caresse distraitement une tresse de sa barbe noire de jais. « {destinataire} a reçu sa viande, et à l'heure. Ce n'était pas la marchandise que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. » Il tapote la couverture de son registre. « Ton nom y est toujours. Ceux qui tiennent parole, je ne les raye jamais. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_propose": {
+          "texte": "Borin referme son registre et vous jauge d'un œil neuf. « Tu veux t'élever dans la Guilde, {prenom} ? Alors il te faut une prise digne de ce nom. Nos éclaireurs ont repéré un {espece} d'exception qui écume {lieu} — une bête énorme, couverte du sang de ses victimes. Ramène-moi sa dépouille et le rang {rang_vise} sera à toi. {xp} points d'expérience à la clef, et la fierté qui va avec. »",
+          "choix": [
+            {
+              "id": "rang_accepter",
+              "label": "Je m'en occupe.",
+              "action": {
+                "service": "rang",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "rang_reflechir",
+              "label": "Une telle bête... laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "rang_accepte": {
+          "texte": "« Bien. » Le nain grave quelque chose à côté de votre nom. « La bête rôde du côté de {lieu}. Ne reviens pas sans sa dépouille — et reviens en un seul morceau, {prenom} : ce serait un comble de perdre une recrue prometteuse sur une épreuve de rang. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_rapporte": {
+          "texte": "Borin examine la dépouille encore fumante, hoche lentement la tête, puis trace une marque nette sur votre plaque de cuir bouilli. « Peu en reviennent, {prenom}. Toi, si. » Il repousse le registre. « Te voilà rang {rang}. La Guilde n'oublie pas ceux qui montent — et elle en attend d'autant plus. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_sommet": {
+          "texte": "Le vieux nain éclate d'un rire franc qui fait trembler sa barbe de jais. « Une épreuve à ta hauteur ? {prenom}, tu es rang {rang} — le plus haut que le Bastion sache reconnaître. » Il redevient sérieux et tapote la couverture de son registre. « Ce n'est pas de la fausse modestie : nos bois et nos collines n'abritent plus rien qui puisse te grandir. Pour monter au-delà, il te faudra une autre guilde, dans une autre cité, et du gibier à la mesure. Le Bastion, lui, gardera ton nom. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un honneur.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_ouvre": {
+          "texte": "« Rang {rang}, et mon registre en témoigne. » Borin repose sa plume, se hisse sur la pointe des pieds et désigne l'escalier du fond. « Monte. C'est là-haut : {portail}. Frappe, entre, et surtout — écoute. On ne ressort jamais de ce bureau sans avoir appris quelque chose, même quand on croyait n'y venir que pour un contrat. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Monter l'escalier.",
+              "next": "fin",
+              "deplacer": "lieu:bureau_du_maitre_de_guilde_d_auxerre"
+            }
+          ]
+        },
+        "acces_refus": {
+          "texte": "Le nain referme son registre d'un coup sec. « Le maître de la Guilde, {prenom} ? Son bureau n'est pas une salle d'attente. On y monte quand la Guilde sait ce qu'on vaut — rang D, pas moins. Tu en es à {rang}. » Il se radoucit et tapote la couverture de cuir. « Fais allonger la ligne à côté de ton nom. Je t'y conduirai moi-même. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y travaille.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_deja": {
+          "texte": "« Je sais, je sais — tu connais le chemin. » Il agite sa plume vers l'escalier du fond sans même relever la tête. « Monte, {prenom}. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Monter l'escalier.",
+              "next": "fin",
+              "deplacer": "lieu:bureau_du_maitre_de_guilde_d_auxerre"
+            }
+          ]
+        },
+        "escorte_propose": {
+          "texte": "Borin fait glisser un registre plus mince que les autres et l'ouvre à une page cornée. « Celui-là, je n'aime pas le tenir. » Il tourne le livre vers vous. « {protege}. Une famille d'Auxerre, un enfant qui n'est pas rentré. On a vu l'enfant du côté de {lieu_rencontre}. La Guilde paie ceux qui les ramènent — et elle se souvient de ceux qui les ramènent vivants. »",
+          "choix": [
+            {
+              "id": "escorte_details",
+              "label": "Où, exactement ?",
+              "next": "escorte_details"
+            },
+            {
+              "id": "escorte_refuser",
+              "label": "Ce n'est pas pour moi.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_details": {
+          "texte": "« {direction}. » Le doigt épais s'arrête et ne bouge plus. « Tu rendras l'enfant à sa famille, pas à moi : {destinataire}, à : {destination}. Moi, je me contente d'inscrire que c'est fait — {xp} points d'expérience et {prime} pièces de cuivre ce jour-là. »",
+          "choix": [
+            {
+              "id": "escorte_accepter",
+              "label": "Je m'en charge.",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "escorte_refuser",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_acceptee": {
+          "texte": "Le nain trace une croix dans la marge et souffle sur l'encre. « C'est noté à ton nom. » Le sourire revient, un peu plus grave que d'habitude. « Une chose, {prenom} : {protege} ne se battra pas et ne pourra pas s'enfuir. Ce n'est pas un colis — ramène l'enfant, pas son panier. »",
+          "choix": [
+            {
+              "id": "partir",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Encore une chose, Borin…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_relance": {
+          "texte": "« Toujours en chemin ? » Le registre reste ouvert à la page cornée. « Cherche {direction}. Et souviens-toi : c'est à : {destination} qu'on attend, pas ici. Une croix dans mon livre ne vaut rien tant que la porte ne s'est pas rouverte. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "J'y retourne.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Je m'en occupe.",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_appel": {
+          "texte": "« Hé ! Toi. Oui, toi. » Le nain pose le registre qu'il compulsait et se penche par-dessus le comptoir. « Le maître de la guilde te cherche. » Il lève une main avant que vous ayez ouvert la bouche. « Et avant que tu demandes : non, ce n'est ni une histoire de dette, ni une bagarre de taverne, ni un poulet volé. » Il marque un temps. « Cette fois, c'est sérieux. »",
+          "choix": [
+            {
+              "id": "quoi",
+              "label": "« Que me veut-il ? »",
+              "next": "bucherons_appel_qui"
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Il attendra. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_appel_qui": {
+          "texte": "« Il ne m'a rien expliqué. Il a seulement dit de t'envoyer le voir dès que tu mettrais les pieds ici. » Le ton descend d'un cran, et la malice avec. « Ça concerne des gens qui ne sont pas revenus de la forêt. »",
+          "choix": [
+            {
+              "id": "aventuriers",
+              "label": "« Des aventuriers ? »",
+              "next": "bucherons_appel_escalier"
+            },
+            {
+              "id": "monter",
+              "label": "« J'y vais. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_appel_escalier": {
+          "texte": "« Des bûcherons. Trois hommes. » Borin referme le registre d'un geste. « Ils coupent pour plusieurs exploitants de la région, ils connaissent ces bois depuis toujours, et voilà deux jours qu'on les attend. Ça commence à faire beaucoup de temps, pour des gens qui ne se perdent pas. » Il désigne du pouce l'escalier du fond. « Le maître de la guilde est dans son bureau. Monte. Il te dira le reste. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Merci, Borin. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Monter l'escalier.",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_propose": {
+          "texte": "Borin pose sur le comptoir une lettre au papier taché, pliée en quatre. « Ça vient de Dun-les-Places, dans le Morvan. Des hameaux de charbonniers au fond des bois, à quatre jours d'ici. » Il tapote le papier. « Une bête leur mange les moutons depuis la dernière lune. Ils ont doublé les pieux des enclos ; elle a arraché la porte de la bergerie. Et la semaine passée, elle a tué un berger. Un gamin. » Il lève les yeux vers vous. « Ils disent loup-garou. Ils disent toujours loup-garou, là-haut. »",
+          "choix": [
+            {
+              "id": "details",
+              "label": "« Et vous, vous y croyez ? »",
+              "next": "morvan_details"
+            },
+            {
+              "id": "accepter",
+              "label": "« J'y vais. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas tout de suite. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "morvan_details": {
+          "texte": "« Moi ? » Borin hausse ses larges épaules. « J'ai vu des loups gros comme des veaux, dans les forêts de l'est. J'ai vu des gens courir les bois les nuits de pleine lune, aussi, et revenir au matin les mains griffées. Je ne sais pas ce que c'était. » Il replie la lettre. « La Guilde paie au résultat, comme les primes au loup d'autrefois : tu me rapportes {objet}, et on écrit ce que c'était dans le registre. Là-haut, va voir la vieille Jacotte. On dit qu'elle mène les loups. Si quelqu'un sait où la bête se couche, c'est elle. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« J'y vais. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas tout de suite. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "morvan_accepte": {
+          "texte": "Borin inscrit votre nom au registre, d'une écriture lourde et appliquée. « Par la porte du sud-est, et puis les bois, toujours les bois. » Il ajoute, sans relever la tête : « Prends une bonne lame. Une bête comme ça, tu ne la ramèneras pas entière sur ton dos. La tête suffit. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_rappel": {
+          "texte": "« Dun-les-Places, au sud-est, dans le Morvan. Demande la vieille Jacotte. Et moi, j'attends {objet}, pas une histoire de veillée. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_partiel": {
+          "texte": "Borin regarde ce que vous posez sur le comptoir. « Il en manque. Encore {reste}. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_remis": {
+          "texte": "Borin défait le linge et recule d'un demi-pas. La tête est celle d'un loup, mais trop large, le front trop haut, et les yeux, à demi clos, n'ont pas tout à fait la couleur d'un œil de bête. Il la recouvre. « Loup-garou », dit-il, et il l'écrit au registre. Il pousse vers vous {prime} pièces de cuivre et porte {xp} points à votre nom. Puis, plus bas : « Ou un très grand loup. C'est ce qu'ils diront, là-haut, la moitié d'entre eux. Moi, j'écris ce que la Guilde a payé. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Ça me va. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_souvenir": {
+          "texte": "« Plus une brebis de perdue, à ce qu'on m'écrit de Dun-les-Places. » Borin lisse une natte de sa barbe. « Et leur charbonnier n'est jamais revenu. Ils ont brûlé sa cabane. Moi, je dis que ça ne prouve rien, ni dans un sens ni dans l'autre. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "carte_trop_charge": {
+          "texte": "« Pas même la place d'une carte dans ton sac, {prenom} ? Allège-toi d'abord. Ton nom ne bougera pas du registre. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviens le sac plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "carte_sans_fonds": {
+          "texte": "« Une carte refaite ne coûte rien au Bastion, {prenom}. Si quelqu'un t'a dit le contraire, envoie-le-moi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai.",
+              "next": "fin"
+            }
+          ]
+        },
+        "carte_remplacee": {
+          "texte": "Borin vous regarde longuement, puis sa barbe se met à trembler. Le rire finit par sortir, énorme, et deux aventuriers se retournent au fond de la salle. « Perdue ! Hé, là-bas, écoutez-moi ça ! Ça m'a porté des caisses de sanglier jusqu'au fumoir sans en lâcher une, et ça me perd une plaque de cuir grande comme ma main ! » Il s'essuie les yeux, tire le registre à lui et grave une carte neuve sans même chercher votre nom : il le connaît. « Rang {rang}, comme avant. Ça, personne ne te le prendra. Mais attache-la, {prenom}. La prochaine que je refais, tu paies la tournée. »",
+          "choix": [
+            {
+              "id": "merci",
+              "label": "« Merci, Borin. »",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Autre chose…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "dun_les_places": {
+          "texte": "Borin tend un doigt épais vers le sud-est, comme si le mur du comptoir n'existait pas. « Dun-les-Places ? Un village de charbonniers, dans le Morvan. Tu remontes l'Yonne vers ses sources, au sud-est d'ici. Quand la rivière n'est plus qu'un ruisseau qu'on enjambe et que la forêt te barre l'horizon, tu y es : le village tient la lisière, juste avant les grands bois. Quatre jours de marche, si tes jambes valent les miennes. »",
+          "choix": [
+            {
+              "id": "merci",
+              "label": "« Merci, Borin. »",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Autre chose…",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:milo_cartographe",
+    "type": "pnj",
+    "nom": "Milo",
+    "race": "hobbit",
+    "vocation": "cartographe",
+    "portrait": "cartographe_Milo_hobbit_m.jpg",
+    "description": "Jeune hobbit employé comme aide-cartographe par une compagnie de voyageurs : il porte les affaires du cartographe et recopie ses relevés. Piètre combattant, il connaît en revanche les routes, les gués et les petits chemins autour d'Auxerre, et se souvient du nom de chaque voyageur, de chaque village. Il n'a qu'une obsession : dresser la carte complète de la région. À ceux qui reviennent vivants, il demande ce qu'il y a derrière la colline.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "À une table près de la fenêtre, un jeune hobbit a déroulé un parchemin plus large que lui, coincé aux quatre coins par une chope, un encrier, une boussole et un quignon de pain. Une plume derrière l'oreille, il compare deux relevés en marmonnant des noms de villages.",
+          "choix": [
+            {
+              "id": "s4",
+              "label": "« Ne perds pas la carte » — La veille du départ du convoi.",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:escorte_convoi_de_lutecia",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre"
+                }
+              },
+              "next": "s4_01"
+            },
+            {
+              "id": "s3",
+              "label": "« Notre carte » — Lui raconter votre dernière mission.",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre"
+                }
+              },
+              "next": "s3_01"
+            },
+            {
+              "id": "s2",
+              "label": "— Lui parler de la forêt au-delà de la porte nord.",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:transport_borin_premiere_mission"
+                },
+                "passages": {
+                  "lieu": "lieu:auberge_de_la_tour_de_l_horloge",
+                  "min": 2
+                }
+              },
+              "next": "s2_01"
+            },
+            {
+              "id": "s1",
+              "label": "— Passer près de sa table.",
+              "condition": {
+                "passages": {
+                  "lieu": "lieu:auberge_de_la_tour_de_l_horloge",
+                  "max": 1
+                }
+              },
+              "next": "s1_01"
+            },
+            {
+              "id": "dun_les_places",
+              "label": "« Dun-les-Places, tu sais où c'est ? »",
+              "next": "dun_les_places"
+            },
+            {
+              "id": "fin",
+              "label": "(Le laisser à sa carte.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "s1_01": {
+          "texte": "Une petite voix vous hèle depuis une table encombrée de rouleaux. « Hé ! Toi ! »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Moi ? »",
+              "next": "s1_02"
+            }
+          ]
+        },
+        "s1_02": {
+          "texte": "« Oui, toi. Tu reviens de Saint-Bris ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Oui. »",
+              "next": "s1_03"
+            }
+          ]
+        },
+        "s1_03": {
+          "texte": "« Tu as pris la vieille route ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« La route qui longe les vignes ? »",
+              "next": "s1_04"
+            }
+          ]
+        },
+        "s1_04": {
+          "texte": "« Oui ! Celle-là. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Oui. Pourquoi ? »",
+              "next": "s1_05"
+            }
+          ]
+        },
+        "s1_05": {
+          "texte": "« Elle continue après la colline ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Évidemment. »",
+              "next": "s1_06"
+            }
+          ]
+        },
+        "s1_06": {
+          "texte": "« Non, pas « évidemment ». Elle continue jusqu'où ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Jusqu'à une vieille borne de pierre. Après, elle devient un chemin forestier. »",
+              "next": "s1_07"
+            }
+          ]
+        },
+        "s1_07": {
+          "texte": "Il trempe sa plume et trace un trait rapide. « Ah ! »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Quoi ? »",
+              "next": "s1_08"
+            }
+          ]
+        },
+        "s1_08": {
+          "texte": "« Rien. C'est important. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Pour quoi ? »",
+              "next": "s1_09"
+            }
+          ]
+        },
+        "s1_09": {
+          "texte": "« Pour ma carte. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu dessines des cartes ? »",
+              "next": "s1_10"
+            }
+          ]
+        },
+        "s1_10": {
+          "texte": "« J'aide le cartographe de la compagnie. Enfin… surtout, je porte ses affaires et je recopie ses relevés. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Donc tu es cartographe. »",
+              "next": "s1_11"
+            }
+          ]
+        },
+        "s1_11": {
+          "texte": "« Pas encore. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et tu comptes cartographier toute la région ? »",
+              "next": "s1_12"
+            }
+          ]
+        },
+        "s1_12": {
+          "texte": "« Toute la région autour d'Auxerre. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Pourquoi ? »",
+              "next": "s1_13"
+            }
+          ]
+        },
+        "s1_13": {
+          "texte": "« Parce que personne ne l'a fait correctement. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Les cartes existent pourtant. »",
+              "next": "s1_14"
+            }
+          ]
+        },
+        "s1_14": {
+          "texte": "Il fait pivoter le parchemin vers vous et pose un doigt taché d'encre sur un grand vide. « Les cartes des routes principales, oui. Mais regarde. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Il n'y a presque rien sur cette partie. »",
+              "next": "s1_15"
+            }
+          ]
+        },
+        "s1_15": {
+          "texte": "« Exactement. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'est une forêt. »",
+              "next": "s1_16"
+            }
+          ]
+        },
+        "s1_16": {
+          "texte": "« Peut-être. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu ne sais pas ? »",
+              "next": "s1_17"
+            }
+          ]
+        },
+        "s1_17": {
+          "texte": "« C'est précisément pour ça que je pose des questions. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et qu'est-ce que tu veux savoir ? »",
+              "next": "s1_18"
+            }
+          ]
+        },
+        "s1_18": {
+          "texte": "« Si le chemin continue derrière la colline. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Il continue. »",
+              "next": "s1_19"
+            }
+          ]
+        },
+        "s1_19": {
+          "texte": "« Parfait. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'était tout ? »",
+              "next": "s1_20"
+            }
+          ]
+        },
+        "s1_20": {
+          "texte": "« Pour aujourd'hui. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu aurais pu demander à quelqu'un d'autre. »",
+              "next": "s1_21"
+            }
+          ]
+        },
+        "s1_21": {
+          "texte": "Il se replonge dans sa carte. « Oui. Mais toi, tu en reviens. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "(Le laisser à sa carte.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "s2_01": {
+          "texte": "Le hobbit se redresse si vite que son tabouret manque de basculer. « Te revoilà ! »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je vois que tu m'attendais. »",
+              "next": "s2_02"
+            }
+          ]
+        },
+        "s2_02": {
+          "texte": "« Pas du tout. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu as posé ta carte devant toi avant même que j'arrive. »",
+              "next": "s2_03"
+            }
+          ]
+        },
+        "s2_03": {
+          "texte": "« C'est une coïncidence. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Bien sûr. »",
+              "next": "s2_04"
+            }
+          ]
+        },
+        "s2_04": {
+          "texte": "« Alors ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Alors quoi ? »",
+              "next": "s2_05"
+            }
+          ]
+        },
+        "s2_05": {
+          "texte": "« La forêt. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Quelle forêt ? »",
+              "next": "s2_06"
+            }
+          ]
+        },
+        "s2_06": {
+          "texte": "« Ne fais pas ça. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Quoi ? »",
+              "next": "s2_07"
+            }
+          ]
+        },
+        "s2_07": {
+          "texte": "« Faire semblant de ne pas savoir. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Celle après la porte nord ? »",
+              "next": "s2_08"
+            }
+          ]
+        },
+        "s2_08": {
+          "texte": "« Oui ! »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Il y a un ancien chemin à l'intérieur. »",
+              "next": "s2_09"
+            }
+          ]
+        },
+        "s2_09": {
+          "texte": "« Un chemin ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Très ancien. Il part vers l'est. »",
+              "next": "s2_10"
+            }
+          ]
+        },
+        "s2_10": {
+          "texte": "« Et il mène où ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je ne sais pas. »",
+              "next": "s2_11"
+            }
+          ]
+        },
+        "s2_11": {
+          "texte": "« Tu ne l'as pas suivi ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Non. »",
+              "next": "s2_12"
+            }
+          ]
+        },
+        "s2_12": {
+          "texte": "« Pourquoi ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Parce qu'on avait une mission. »",
+              "next": "s2_13"
+            }
+          ]
+        },
+        "s2_13": {
+          "texte": "« Ah. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Mais j'ai vu quelque chose. »",
+              "next": "s2_14"
+            }
+          ]
+        },
+        "s2_14": {
+          "texte": "« Quoi ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Des pierres dressées. Une dizaine. Toutes couvertes de mousse. »",
+              "next": "s2_15"
+            }
+          ]
+        },
+        "s2_15": {
+          "texte": "« Des bornes ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Peut-être. »",
+              "next": "s2_16"
+            }
+          ]
+        },
+        "s2_16": {
+          "texte": "« Elles formaient une ligne ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Oui. »",
+              "next": "s2_17"
+            }
+          ]
+        },
+        "s2_17": {
+          "texte": "« Tu plaisantes. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Pourquoi ? »",
+              "next": "s2_18"
+            }
+          ]
+        },
+        "s2_18": {
+          "texte": "« Parce que si elles forment une ligne, elles doivent indiquer quelque chose. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Ou elles indiquent simplement que quelqu'un les a plantées là. »",
+              "next": "s2_19"
+            }
+          ]
+        },
+        "s2_19": {
+          "texte": "« C'est exactement ce que dirait quelqu'un qui n'a aucun sens de l'aventure. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et c'est exactement ce que dirait quelqu'un qui n'a aucun sens du danger. »",
+              "next": "s2_20"
+            }
+          ]
+        },
+        "s2_20": {
+          "texte": "« Touché. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu veux que je regarde la prochaine fois ? »",
+              "next": "s2_21"
+            }
+          ]
+        },
+        "s2_21": {
+          "texte": "« Oui. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Même si c'est dangereux ? »",
+              "next": "s2_22"
+            }
+          ]
+        },
+        "s2_22": {
+          "texte": "« Surtout si c'est dangereux. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Pourquoi ? »",
+              "next": "s2_23"
+            }
+          ]
+        },
+        "s2_23": {
+          "texte": "« Parce que les endroits dangereux sont toujours les moins bien cartographiés. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu sais que tu pourrais devenir aventurier. »",
+              "next": "s2_24"
+            }
+          ]
+        },
+        "s2_24": {
+          "texte": "« Certainement pas. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Pourquoi ? »",
+              "next": "s2_25"
+            }
+          ]
+        },
+        "s2_25": {
+          "texte": "« Parce que je préfère entendre parler des monstres plutôt que les rencontrer. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Sage décision. »",
+              "next": "s2_26"
+            }
+          ]
+        },
+        "s2_26": {
+          "texte": "Il trace une rangée de petits points à l'est de la porte nord. « Et puis quelqu'un doit dessiner la carte pendant que les idiots vont voir ce qu'il y a derrière. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "(Le laisser tracer ses pierres.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "s3_01": {
+          "texte": "Il ne lève pas les yeux de son parchemin. « Tu es en retard. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Bonsoir à toi aussi. »",
+              "next": "s3_02"
+            }
+          ]
+        },
+        "s3_02": {
+          "texte": "« Deux jours. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« La mission a pris plus longtemps que prévu. »",
+              "next": "s3_03"
+            }
+          ]
+        },
+        "s3_03": {
+          "texte": "« Je sais. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Comment ? »",
+              "next": "s3_04"
+            }
+          ]
+        },
+        "s3_04": {
+          "texte": "« J'ai vu passer la caravane. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu surveilles les routes maintenant ? »",
+              "next": "s3_05"
+            }
+          ]
+        },
+        "s3_05": {
+          "texte": "« Je suis cartographe. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu es toujours aide-cartographe. »",
+              "next": "s3_06"
+            }
+          ]
+        },
+        "s3_06": {
+          "texte": "« Pour toi, peut-être. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Alors, monsieur le cartographe, qu'est-ce que j'ai à raconter ? »",
+              "next": "s3_07"
+            }
+          ]
+        },
+        "s3_07": {
+          "texte": "« Tu as trouvé le pont ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Oui. »",
+              "next": "s3_08"
+            }
+          ]
+        },
+        "s3_08": {
+          "texte": "« Il était toujours là ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« À moitié. »",
+              "next": "s3_09"
+            }
+          ]
+        },
+        "s3_09": {
+          "texte": "« À moitié ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« L'autre moitié était au fond de la rivière. »",
+              "next": "s3_10"
+            }
+          ]
+        },
+        "s3_10": {
+          "texte": "« Dommage. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu dis ça comme si c'était personnel. »",
+              "next": "s3_11"
+            }
+          ]
+        },
+        "s3_11": {
+          "texte": "« J'avais besoin de ce pont. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Pour ta carte ? »",
+              "next": "s3_12"
+            }
+          ]
+        },
+        "s3_12": {
+          "texte": "« Pour notre carte. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Notre carte ? »",
+              "next": "s3_13"
+            }
+          ]
+        },
+        "s3_13": {
+          "texte": "« Tu crois vraiment que je fais tout ça pour moi ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Je croyais que ton obsession était de cartographier la région. »",
+              "next": "s3_14"
+            }
+          ]
+        },
+        "s3_14": {
+          "texte": "« C'est toujours le cas. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Alors pourquoi « notre » ? »",
+              "next": "s3_15"
+            }
+          ]
+        },
+        "s3_15": {
+          "texte": "« Parce que toi, tu vas dans les endroits où je ne peux pas aller. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et toi, tu transformes mes mauvaises décisions en lignes sur du papier. »",
+              "next": "s3_16"
+            }
+          ]
+        },
+        "s3_16": {
+          "texte": "« Exactement. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« On forme une bonne équipe. »",
+              "next": "s3_17"
+            }
+          ]
+        },
+        "s3_17": {
+          "texte": "« Une excellente équipe. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu sais, je pourrais apprendre à lire une carte. »",
+              "next": "s3_18"
+            }
+          ]
+        },
+        "s3_18": {
+          "texte": "« Tu sais déjà la lire. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Alors pourquoi tu me l'expliques à chaque fois ? »",
+              "next": "s3_19"
+            }
+          ]
+        },
+        "s3_19": {
+          "texte": "« Parce que tu la tiens toujours à l'envers. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'est faux. »",
+              "next": "s3_20"
+            }
+          ]
+        },
+        "s3_20": {
+          "texte": "Il tapote le haut du parchemin, du côté de la rose des vents. « Elle est à l'envers. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'est toi qui la tiens à l'envers. »",
+              "next": "s3_21"
+            }
+          ]
+        },
+        "s3_21": {
+          "texte": "« Tu veux vraiment me faire croire que le nord est en bas ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Dans ma tête, oui. »",
+              "next": "s3_22"
+            }
+          ]
+        },
+        "s3_22": {
+          "texte": "« Voilà pourquoi je suis indispensable. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et si un jour la carte est terminée ? »",
+              "next": "s3_23"
+            }
+          ]
+        },
+        "s3_23": {
+          "texte": "« Alors on saura enfin ce qu'il y a partout autour d'Auxerre. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et après ? »",
+              "next": "s3_24"
+            }
+          ]
+        },
+        "s3_24": {
+          "texte": "« Après ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu feras quoi ? »",
+              "next": "s3_25"
+            }
+          ]
+        },
+        "s3_25": {
+          "texte": "« Je commencerai une autre carte. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Évidemment. »",
+              "next": "s3_26"
+            }
+          ]
+        },
+        "s3_26": {
+          "texte": "« Celle de toute la France. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu es complètement fou. »",
+              "next": "s3_27"
+            }
+          ]
+        },
+        "s3_27": {
+          "texte": "« Peut-être. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et moi qui pensais que tu voulais éviter les endroits dangereux. »",
+              "next": "s3_28"
+            }
+          ]
+        },
+        "s3_28": {
+          "texte": "« Je veux les dessiner. C'est différent. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "(Vous pencher avec lui sur la carte.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "s4_01": {
+          "texte": "Le hobbit boucle une sacoche de cuir, plus grosse que lui. « Tu pars demain ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Oui. »",
+              "next": "s4_02"
+            }
+          ]
+        },
+        "s4_02": {
+          "texte": "« Avec la caravane ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Oui. »",
+              "next": "s4_03"
+            }
+          ]
+        },
+        "s4_03": {
+          "texte": "« C'est seulement jusqu'à la prochaine ville. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Seulement. »",
+              "next": "s4_04"
+            }
+          ]
+        },
+        "s4_04": {
+          "texte": "« Je viens avec vous. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Depuis quand les cartographes accompagnent les caravanes ? »",
+              "next": "s4_05"
+            }
+          ]
+        },
+        "s4_05": {
+          "texte": "« Depuis que les aventuriers oublient de regarder autour d'eux. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu sais te battre ? »",
+              "next": "s4_06"
+            }
+          ]
+        },
+        "s4_06": {
+          "texte": "« Non. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Courir ? »",
+              "next": "s4_07"
+            }
+          ]
+        },
+        "s4_07": {
+          "texte": "« Assez vite. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Te cacher ? »",
+              "next": "s4_08"
+            }
+          ]
+        },
+        "s4_08": {
+          "texte": "« Très bien. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Alors tu as toutes les qualités requises. »",
+              "next": "s4_09"
+            }
+          ]
+        },
+        "s4_09": {
+          "texte": "« Je savais que tu comprendrais. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu prends quoi avec toi ? »",
+              "next": "s4_10"
+            }
+          ]
+        },
+        "s4_10": {
+          "texte": "« Le nécessaire. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'est-à-dire ? »",
+              "next": "s4_11"
+            }
+          ]
+        },
+        "s4_11": {
+          "texte": "Il compte sur ses doigts. « De l'encre. Des plumes. Du papier. Une règle. Une boussole. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et ça ? »",
+              "next": "s4_12"
+            }
+          ]
+        },
+        "s4_12": {
+          "texte": "« Quoi ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Le gros rouleau. »",
+              "next": "s4_13"
+            }
+          ]
+        },
+        "s4_13": {
+          "texte": "« Ah. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Milo. »",
+              "next": "s4_14"
+            }
+          ]
+        },
+        "s4_14": {
+          "texte": "« C'est la carte. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Toute la carte ? »",
+              "next": "s4_15"
+            }
+          ]
+        },
+        "s4_15": {
+          "texte": "« Presque. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu l'emmènes vraiment ? »",
+              "next": "s4_16"
+            }
+          ]
+        },
+        "s4_16": {
+          "texte": "« Je ne vais pas laisser notre travail ici. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« C'est encombrant. »",
+              "next": "s4_17"
+            }
+          ]
+        },
+        "s4_17": {
+          "texte": "« Je préfère être encombré que perdre dix mois de travail. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« D'accord. Mais si quelque chose arrive, tu la laisses. »",
+              "next": "s4_18"
+            }
+          ]
+        },
+        "s4_18": {
+          "texte": "« Quoi ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« La carte. »",
+              "next": "s4_19"
+            }
+          ]
+        },
+        "s4_19": {
+          "texte": "« Tu plaisantes ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Non. »",
+              "next": "s4_20"
+            }
+          ]
+        },
+        "s4_20": {
+          "texte": "« Elle représente tout ce qu'on a découvert. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Ce n'est qu'un morceau de papier. »",
+              "next": "s4_21"
+            }
+          ]
+        },
+        "s4_21": {
+          "texte": "« Pour toi. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Milo… »",
+              "next": "s4_22"
+            }
+          ]
+        },
+        "s4_22": {
+          "texte": "« Je sais. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Promets-moi. »",
+              "next": "s4_23"
+            }
+          ]
+        },
+        "s4_23": {
+          "texte": "« Je promets de faire attention. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Ce n'est pas ce que j'ai demandé. »",
+              "next": "s4_24"
+            }
+          ]
+        },
+        "s4_24": {
+          "texte": "« Je sais. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Alors ? »",
+              "next": "s4_25"
+            }
+          ]
+        },
+        "s4_25": {
+          "texte": "Il soupire, les deux mains posées à plat sur le rouleau. « D'accord. Je la laisserai. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Bien. »",
+              "next": "s4_26"
+            }
+          ]
+        },
+        "s4_26": {
+          "texte": "« Mais seulement si je suis absolument certain qu'elle est en sécurité. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Milo. »",
+              "next": "s4_27"
+            }
+          ]
+        },
+        "s4_27": {
+          "texte": "« Quoi ? »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Tu es incorrigible. »",
+              "next": "s4_28"
+            }
+          ]
+        },
+        "s4_28": {
+          "texte": "« Et toi, tu reviens toujours. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Toujours. »",
+              "next": "s4_29"
+            }
+          ]
+        },
+        "s4_29": {
+          "texte": "« Alors à demain. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« À demain. »",
+              "next": "s4_30"
+            }
+          ]
+        },
+        "s4_30": {
+          "texte": "« Et n'oublie pas. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Quoi ? »",
+              "next": "s4_31"
+            }
+          ]
+        },
+        "s4_31": {
+          "texte": "« Si on trouve quelque chose de nouveau… »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Oui ? »",
+              "next": "s4_32"
+            }
+          ]
+        },
+        "s4_32": {
+          "texte": "« Tu me le racontes en premier. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Promis. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "dun_les_places": {
+          "texte": "Le jeune hobbit repousse l'encrier pour dégager un coin du parchemin. « Dun-les-Places ? Attends… là. » Son doigt part d'Auxerre et descend vers le sud-est, le long d'un trait bleu qui s'amincit. « Tu remontes l'Yonne, toujours elle, jusqu'à ses sources. Au bout, ce n'est plus qu'un filet d'eau qui sort de la forêt, et le village est là, à la lisière du Morvan. » Il tapote l'endroit : au-delà, une grande tache verte, sans un seul nom. « Après, ma carte s'arrête. Si tu y vas, regarde bien ce qu'il y a derrière les arbres, et reviens me le dire. »",
+          "choix": [
+            {
+              "id": "merci",
+              "label": "« Promis. »",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "(Rester près de sa table.)",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:reverend_malakor",
+    "type": "pnj",
+    "nom": "Révérend Malakor",
+    "race": "ogre",
+    "vocation": "pretre",
+    "portrait": "ogre_m_pretre01.png",
+    "description": "Prêtre ogre du temple de Saint-Eusèbe à Auxerre — une carrure colossale, une voix douce, un calme que rien ne semble pouvoir troubler.",
+    "services": {
+      "soin": {
+        "cout_cuivre": 1,
+        "fraction_pv": 0.5,
+        "gratuit_si": {
+          "lieux": [
+            "lieu:auxerre",
+            "lieu:le_bastion_de_l_yonne_interieur"
+          ],
+          "seuil": 70,
+          "fraction_pv": 1
+        },
+        "noeuds": {
+          "fait": "soin_fait",
+          "sans_fonds": "soin_sans_fonds",
+          "inutile": "soin_inutile"
+        }
+      },
+      "don": {
+        "item": "item:Eau_benite",
+        "quantite": 1,
+        "cout_cuivre": 5,
+        "gratuit_si": {
+          "lieux": [
+            "lieu:auxerre",
+            "lieu:le_bastion_de_l_yonne_interieur"
+          ],
+          "seuil": 70
+        },
+        "noeuds": {
+          "fait": "eau_benite_fait",
+          "sans_fonds": "eau_benite_sans_fonds",
+          "trop_charge": "eau_benite_trop_charge"
+        }
+      },
+      "escorte": {
+        "offre": {
+          "id": "quete:escorte_progeniture_l_athanor_de_saint_germain_aline",
+          "titre": "Escorte : Aline Varnepierre",
+          "description": "La fille de l'apothicaire d'Auxerre est partie cueillir des herbes sous les feuillus, hors des remparts, et n'est pas rentrée. Retrouvez-la et ramenez-la vivante à son père, à L'Athanor de Saint-Germain.",
+          "destination": "lieu:l_athanor_de_saint_germain",
+          "rencontre": {
+            "lieu": "lieu:auxerre",
+            "zones": [
+              "zone:foret_feuillus"
+            ]
+          },
+          "proteges": [
+            {
+              "prenom": "Aline",
+              "nom": "Varnepierre",
+              "race": "humain",
+              "sex": "F",
+              "image": "druide_f_humain03.jpg",
+              "description": "La fille de l'apothicaire d'Auxerre. Elle connaît les herbes mieux que personne — et les loups bien moins qu'elle ne le croyait.",
+              "inventaire": [
+                {
+                  "item": "item:Herbes_medicinales",
+                  "poids": 0.1
+                }
+              ]
+            }
+          ],
+          "unique": true,
+          "rang_min": {
+            "cite": "lieu:auxerre",
+            "rang": "E"
+          },
+          "recompenses": {
+            "xp": 40,
+            "cuivre": 500
+          }
+        },
+        "noeuds": {
+          "accepte": "escorte_acceptee"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Que la paix de Saint-Eusèbe soit sur toi. Je suis le révérend Malakor, gardien de ce temple. Prends le temps de souffler : ces murs n'ont jamais repoussé personne. Que puis-je pour toi ?",
+          "choix": [
+            {
+              "id": "escorte_offre",
+              "label": "Vous semblez soucieux, révérend.",
+              "next": "escorte_propose",
+              "condition": {
+                "escorte_offerte": true
+              }
+            },
+            {
+              "id": "escorte_rang",
+              "label": "Vous semblez soucieux, révérend.",
+              "next": "escorte_rang_insuffisant",
+              "condition": {
+                "escorte_rang_insuffisant": true
+              }
+            },
+            {
+              "id": "escorte_relance",
+              "label": "Au sujet de {protege}…",
+              "next": "escorte_relance",
+              "condition": {
+                "escorte_en_cours": true
+              }
+            },
+            {
+              "id": "escorte_merci",
+              "label": "Vous vous souvenez de {protege} ?",
+              "next": "escorte_merci",
+              "condition": {
+                "escorte_accomplie": true
+              }
+            },
+            {
+              "id": "guilde",
+              "label": "Je cherche la guilde des aventuriers.",
+              "next": "guilde"
+            },
+            {
+              "id": "conseils",
+              "label": "Auriez-vous un conseil pour qui arrive en ville ?",
+              "next": "conseils"
+            },
+            {
+              "id": "soin",
+              "label": "Pouvez-vous soigner mes blessures ? ({cout})",
+              "next": "soin_propose"
+            },
+            {
+              "id": "eau_benite",
+              "label": "Auriez-vous une fiole d'eau bénite ?",
+              "next": "eau_benite_propose"
+            },
+            {
+              "id": "dun_les_places",
+              "label": "Connaissez-vous le chemin de Dun-les-Places ?",
+              "next": "dun_les_places"
+            },
+            {
+              "id": "fin",
+              "label": "Je vais reprendre ma route.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "escorte_propose": {
+          "texte": "Soucieux… oui. Une famille est venue prier ici ce matin, et elle priait mal — comme on prie quand on ne sait plus quoi faire d'autre. {protege} n'est pas rentrée. Elle est partie hier au petit jour cueillir sous les feuillus, du côté de {lieu_rencontre}, et son panier devait être plein bien avant les vêpres.",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "Que craignez-vous, exactement ?",
+              "next": "escorte_dangers"
+            },
+            {
+              "id": "refus",
+              "label": "Ce n'est pas mon affaire, révérend.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_dangers": {
+          "texte": "Ce que craint tout le monde ici, {prenom}. Les feuillus sont beaux au matin et tout autres le soir venu : loups, gobelins, et des choses qu'on préfère ne pas nommer sous un toit béni. Elle connaît les plantes mieux que quiconque — elle ne connaît rien des crocs. Si elle vit encore, elle vit terrée quelque part, et elle ne rentrera pas seule.",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "J'irai la chercher.",
+              "next": "escorte_engagement"
+            },
+            {
+              "id": "refus",
+              "label": "Je ne suis pas de taille pour cela.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_engagement": {
+          "texte": "Alors écoute-moi bien, car ce n'est pas un colis que je te confie. Cherche-la {direction} — sous les feuillus, en te tenant loin des futaies denses. Quand tu la trouveras, elle marchera derrière toi : elle ne se battra pas, elle ne pourra pas fuir, et chaque coup qu'on lui portera sera un coup que tu n'auras pas arrêté. Ramène-la à son père — {destinataire}, à : {destination}. Il a promis une pièce d'or à qui la lui rendrait vivante ; moi, je te promets seulement que Saint-Eusèbe s'en souviendra.",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "Je vous la ramènerai vivante.",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "refus",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_acceptee": {
+          "texte": "Que la route te soit clémente. Ne perds pas de temps en chemin : sous les feuillus, une nuit de plus vaut une semaine ailleurs. Et quand tu l'auras, ne joue pas les héros — la ramener vaut mieux que venger quoi que ce soit.",
+          "choix": [
+            {
+              "id": "partir",
+              "label": "J'y vais de ce pas.",
+              "next": "au_revoir"
+            },
+            {
+              "id": "retour",
+              "label": "Encore une chose, révérend…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_rang_insuffisant": {
+          "texte": "Soucieux… oui, mais ce n'est pas un souci que je peux partager avec toi. Une famille attend une nouvelle, et ce qu'il faudrait pour la leur rapporter, ce n'est pas de la bonne volonté — c'est un nom que la guilde a déjà éprouvé. Va au Bastion de l'Yonne, prends leurs contrats, monte jusqu'au rang {rang_requis}. Reviens me voir ce jour-là : je te dirai tout, et j'espère qu'il ne sera pas trop tard.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "J'y travaillerai, révérend.",
+              "next": "accueil"
+            },
+            {
+              "id": "guilde",
+              "label": "Où trouve-t-on cette guilde ?",
+              "next": "guilde"
+            },
+            {
+              "id": "fin",
+              "label": "Je reviendrai.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "escorte_relance": {
+          "texte": "Rien de neuf, hélas. Cherche-la {direction}, sous les feuillus — et si elle est déjà à ton côté, cesse de me parler et conduis-la à : {destination}. Son père n'a pas fermé l'œil.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "J'y retourne.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Je m'en occupe.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "escorte_merci": {
+          "texte": "Si je m'en souviens… Son père a fait dire une messe, et il a pleuré tout du long comme un enfant. {protege} vient allumer un cierge ici chaque semaine, maintenant. Tu as ramené quelqu'un du bois, {prenom} — peu de gens dans cette cité peuvent en dire autant.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "C'était la moindre des choses.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Que la paix soit sur vous, révérend.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "guilde": {
+          "texte": "La guilde des aventuriers ? Tu y es presque, mon enfant. Longe le mur du temple : le Bastion de l'Yonne se trouve sur le côté, vers l'arrière. Dis-leur que tu viens de ma part — ils ont bon cœur, même s'ils parlent fort.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Merci, révérend.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "J'y vais de ce pas.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "conseils": {
+          "texte": "Bien sûr. Les anciens disent que la sagesse pèse moins lourd qu'une armure, et protège parfois davantage. Que veux-tu savoir ?",
+          "choix": [
+            {
+              "id": "zones",
+              "label": "Les environs sont-ils sûrs ?",
+              "next": "conseil_zones"
+            },
+            {
+              "id": "reputation",
+              "label": "Comment me faire une place ici ?",
+              "next": "conseil_reputation"
+            },
+            {
+              "id": "repos",
+              "label": "Comment reprendre des forces ?",
+              "next": "conseil_repos"
+            },
+            {
+              "id": "retour",
+              "label": "C'est tout ce que je voulais savoir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "conseil_zones": {
+          "texte": "Le cœur d'Auxerre est sûr ; ses forêts ne le sont pas. Loups, gobelins, serpents… Ne t'enfonce pas sous les feuillus sans forces, et méfie-toi des futaies denses du sud — même nos chasseurs les évitent seuls.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Autre chose ?",
+              "next": "conseils"
+            },
+            {
+              "id": "fin",
+              "label": "Je m'en souviendrai.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "conseil_reputation": {
+          "texte": "Rends service. Le tableau du Bastion de l'Yonne affiche toujours des contrats, et cette cité a la mémoire longue — pour le bien comme pour le reste. Un nom qu'on respecte ouvre plus de portes qu'une bourse pleine.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Autre chose ?",
+              "next": "conseils"
+            },
+            {
+              "id": "fin",
+              "label": "Voilà qui est dit.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "conseil_repos": {
+          "texte": "Marche calmement et le corps se répare de lui-même ; les herbes des sous-bois font aussi de bonnes tisanes entre les mains d'un apothicaire. Et si le mal est plus profond, le temple soigne pour une petite offrande.",
+          "choix": [
+            {
+              "id": "soin",
+              "label": "Justement… pouvez-vous me soigner ? ({cout})",
+              "next": "soin_propose"
+            },
+            {
+              "id": "retour",
+              "label": "Autre chose ?",
+              "next": "conseils"
+            },
+            {
+              "id": "fin",
+              "label": "Merci du conseil.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "soin_propose": {
+          "texte": "Approche. Une offrande d'une pièce de cuivre suffira — elle ira aux plus démunis de la cité.",
+          "texte_gratuit": "Ta bonté envers cette cité te précède, {prenom}. Approche : je te soignerai de bon cœur, sans rien te demander.",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "J'accepte. ({cout})",
+              "action": {
+                "service": "soin"
+              }
+            },
+            {
+              "id": "refuser",
+              "label": "Une autre fois, peut-être.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "soin_fait": {
+          "texte": "Voilà. Respire… La douleur s'éloigne déjà. Va en paix, et prends soin de toi.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Merci, révérend.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Je me sens mieux. Adieu.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "soin_sans_fonds": {
+          "texte": "Tu n'as pas même une piécette ?… Garde ton bien, alors. Reviens quand tu pourras faire une offrande — ou rends service à la cité : Saint-Eusèbe voit tout.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Je reviendrai.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "…",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "soin_inutile": {
+          "texte": "Des blessures ? Je n'en vois aucune, mon enfant. Ménage plutôt tes forces — elles te serviront mieux que mes prières.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Vous avez raison.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Au revoir, révérend.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "au_revoir": {
+          "texte": "Va en paix. Et si le chemin devient sombre, souviens-toi : la porte du temple reste ouverte.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Adieu.",
+              "next": "fin"
+            }
+          ]
+        },
+        "eau_benite_propose": {
+          "texte": "L'eau bénite de Saint-Eusèbe ? Le temple en partage volontiers. Aux âmes que la cité tient en estime, je la donne sans rien demander ; aux autres, une offrande de cinq cuivres soutient l'ouvrage. En veux-tu une fiole ?",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "Volontiers, révérend.",
+              "action": {
+                "service": "don"
+              }
+            },
+            {
+              "id": "refuser",
+              "label": "Pas aujourd'hui, merci.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "eau_benite_fait": {
+          "texte": "Tiens, mon enfant. Que cette eau bénie garde ton cœur ferme et ton bras sûr. Va, et fais-en bon usage.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Merci, révérend.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Qu'elle me protège. Adieu.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "eau_benite_sans_fonds": {
+          "texte": "Pas même cinq cuivres ?… Garde ta bourse, alors. Reviens quand tu le pourras — ou gagne l'estime de la cité, et l'eau bénite te sera offerte.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Je reviendrai.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "…",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "eau_benite_trop_charge": {
+          "texte": "Tu ploies déjà sous ton fardeau, mon enfant — pas même une main libre pour une fiole. Allège-toi d'abord, puis reviens la chercher.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Vous avez raison.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "J'y penserai. Adieu.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "dun_les_places": {
+          "texte": "Le révérend joint ses larges mains. « Dun-les-Places… Au sud-est, mon enfant, aux confins du Morvan. Remonte l'Yonne : elle descend de là-bas. Là où elle prend sa source, la forêt commence, et le village se tient à sa lisière, entre les champs et les grands arbres. Les charbonniers de là-haut passent parfois par ce temple. Ce sont des gens rudes, mais leur porte s'ouvre à qui frappe poliment. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Merci, révérend.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "J'y vais de ce pas.",
+              "next": "au_revoir"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

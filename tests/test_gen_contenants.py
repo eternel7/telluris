@@ -60,9 +60,13 @@ def test_aucune_collision_avec_le_dump_le_plus_recent():
 	dumps = sorted(glob.glob(os.path.join(gen.RACINE, "jsons", "telluris-dump-*.json")))
 	assert dumps
 	with open(dumps[-1], encoding="utf-8") as f:
-		existants = {d.get("_id") for d in json.load(f)["docs"]}
+		existants = {d.get("_id"): d for d in json.load(f)["docs"]}
 	assert gen.collisions(gen.DOCS, existants) == []
-	assert gen.collisions(gen.DOCS, {"item:kibisis"}) == ["item:kibisis"]
+	# Un `_id` pris par un AUTRE contenu est une collision ; le même doc (`_rev` en plus) est
+	# l'import déjà fait.
+	kibisis = next(d for d in gen.DOCS if d["_id"] == "item:kibisis")
+	assert gen.collisions(gen.DOCS, {"item:kibisis": {"_id": "item:kibisis"}}) == ["item:kibisis"]
+	assert gen.collisions(gen.DOCS, {"item:kibisis": {**kibisis, "_rev": "3-x"}}) == []
 
 
 def test_fichier_livre_identique_au_generateur():
