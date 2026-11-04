@@ -984,9 +984,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			for n in conn.get("nodes") or []))
 	# Traces de la pire menace possible à la position (`utils/traces.py`) : annoncées au
 	# chargement, puis à chaque pas qui change la lecture (bloc `traces` de move_character).
-	traces_ici = traces_util.traces_ici(character, lieu, get_doc, find_docs,
+	# ⚠️ `lieu` est ici l'IDENTIFIANT ; le doc est `grid_doc`.
+	traces_ici = traces_util.traces_ici(character, grid_doc, get_doc, find_docs,
 										expedition_util.membres(character, get_doc),
-										lieu_est_ville_image(lieu))
+										lieu_est_ville_image(grid_doc))
 
 	# Dérivées bufées (équipement, passives, consommables/sorts), charge max exceptée : elle
 	# reste brute, c'est la limite réellement appliquée par la garde de surcharge. Les stats
