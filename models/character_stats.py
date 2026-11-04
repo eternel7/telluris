@@ -394,8 +394,9 @@ QUETE_CHASSE_PROBA_RANG: float = 0.5
 # promotion nulle part (symptôme bruyant, préféré à un plafond silencieusement trop permissif).
 RANG_GUILDE_MAX_DEFAUT: str = "D"
 # PLANCHER DE PUISSANCE de la cible d'une épreuve de rang : rang VISÉ → `potentiel_combat`
-# minimum de l'espèce sous son profil résolu, ÉQUIPEMENT ESPÉRÉ et bonus humanoïde compris
-# (`potentiel.potentiel_espece`, la colonne de /admin/table). Une cible sous le plancher est
+# minimum de l'espèce sous son profil résolu, ÉQUIPEMENT ESPÉRÉ et bonus humanoïde compris,
+# × le facteur de FUITE INTERDITE (`potentiel.potentiel_menace`, la mesure du rang de
+# /admin/table ; facteur ajouté le 04/11, après la calibration ci-dessous). Une cible sous le plancher est
 # écartée ; plus aucune ⇒ pas d'épreuve (fail-closed). Rang absent ⇒ aucun plancher. Calibré
 # sur le dump du 2026-10-13 : à Auxerre, le grade max (`combattant`) va de 8 (écureuil) à 57
 # (grand sanglier) — E garde loup/sanglier/cerf/gobelin armé/grand sanglier, D le seul grand

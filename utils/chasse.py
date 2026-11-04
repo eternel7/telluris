@@ -24,8 +24,8 @@
 # Aller plus haut demande la guilde d'une AUTRE cité — c'est le plafond, et non le sommet de
 # l'échelle, qui coupe les offres (`rang_plafond_atteint`) et arme le flag de dialogue `rang_max`.
 #
-# ⚠️ PLANCHER de puissance : la cible d'une épreuve de rang doit atteindre le `potentiel_combat`
-# minimum du rang VISÉ (world-var `QUETE_RANG_POTENTIEL_MIN`), sans quoi on montait de rang en
+# ⚠️ PLANCHER de puissance : la cible d'une épreuve de rang doit atteindre le potentiel
+# (`potentiel.potentiel_menace` : combat × fuite interdite) minimum du rang VISÉ (world-var `QUETE_RANG_POTENTIEL_MIN`), sans quoi on montait de rang en
 # abattant un écureuil. Aucune cible au niveau ⇒ pas d'épreuve (fail-closed, comme le plafond).
 #
 # Logique pure (DB injectée : get_doc_fn / find_docs_fn), mute sans save — l'endpoint persiste.
@@ -628,9 +628,9 @@ def potentiel_min_pour(rang_vise: str) -> float | None:
 
 
 def potentiel_cible(espece_doc: dict, profil_id: str, get_doc_fn) -> float | None:
-	"""Potentiel de combat de l'espèce sous ce profil, ÉQUIPEMENT ESPÉRÉ et bonus humanoïde
-	compris (`potentiel.potentiel_espece`, la valeur de /admin/table). Déterministe. None si le
-	belligérant ne se construit pas.
+	"""Dangerosité de l'espèce sous ce profil : potentiel de combat, ÉQUIPEMENT ESPÉRÉ et bonus
+	humanoïde compris, × le facteur de FUITE INTERDITE (`potentiel.potentiel_menace`, la mesure
+	du rang de /admin/table). Déterministe. None si le belligérant ne se construit pas.
 	Import PARESSEUX : `potentiel → simulateur → combat → quetes`, et ce module tient à ne pas
 	tirer le moteur de combat (cf. `case_praticable_proche`)."""
 	from utils import potentiel
@@ -641,7 +641,7 @@ def potentiel_cible(espece_doc: dict, profil_id: str, get_doc_fn) -> float | Non
 	def _get(doc_id):
 		return espece_doc if doc_id == eid else get_doc_fn(doc_id)
 	try:
-		return float(potentiel.potentiel_espece(eid, profil_id, _get)["total"])
+		return float(potentiel.potentiel_menace(eid, profil_id, _get)[0])
 	except Exception:
 		return None
 

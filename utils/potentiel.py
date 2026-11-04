@@ -266,13 +266,21 @@ def facteur_inescapable(initiative: int, regles: dict | None = None) -> tuple[fl
 	return fuite, 1.0 + r["poids_inescapable"] * piege
 
 
-def rang_espece(espece_id: str, get_doc_fn, regles: dict | None = None) -> dict:
-	"""`{potentiel_rang, fuite_pct, rang, rang_libelle}` d'une espèce : potentiel sous le grade
-	de référence (`RANG_PROFIL_REFERENCE`, équipement espéré compris) × le facteur de fuite
-	interdite (`facteur_inescapable`), et son rang. Lève comme `potentiel_espece`."""
-	pe = potentiel_espece(espece_id, RANG_PROFIL_REFERENCE, get_doc_fn, regles)
+def potentiel_menace(espece_id: str, profil_id: str | None, get_doc_fn,
+					 regles: dict | None = None) -> tuple[float, float]:
+	"""`(potentiel, fuite)` d'une espèce sous ce profil : `potentiel_espece` (équipement espéré
+	compris) × `facteur_inescapable`. SOURCE UNIQUE de la mesure de dangerosité partagée par le
+	rang (`rang_espece`) et le PLANCHER des épreuves de rang (`chasse.potentiel_cible`).
+	Lève comme `potentiel_espece`."""
+	pe = potentiel_espece(espece_id, profil_id, get_doc_fn, regles)
 	fuite, facteur = facteur_inescapable(pe["initiative"], regles)
-	v = round(pe["total"] * facteur, 1)
+	return round(pe["total"] * facteur, 1), fuite
+
+
+def rang_espece(espece_id: str, get_doc_fn, regles: dict | None = None) -> dict:
+	"""`{potentiel_rang, fuite_pct, rang, rang_libelle}` d'une espèce : `potentiel_menace` sous
+	le grade de référence (`RANG_PROFIL_REFERENCE`), et son rang. Lève comme `potentiel_espece`."""
+	v, fuite = potentiel_menace(espece_id, RANG_PROFIL_REFERENCE, get_doc_fn, regles)
 	rang = rang_de_potentiel(v)
 	return {"potentiel_rang": v, "fuite_pct": round(fuite * 100), "rang": rang,
 			"rang_libelle": RANG_LIBELLES.get(rang, "")}
