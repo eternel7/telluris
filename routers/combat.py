@@ -18,6 +18,7 @@ from utils.competences import (
 from routers.user import _take_ref
 from utils.zones import (
     load_zone_defs_for_lieu, compute_zone_intensity, resolve_profil_weights,
+    especes_rencontrables,
     terrain_tags_actifs,
 )
 from utils import focalisation
@@ -36,7 +37,7 @@ from utils.combat import (
 )
 from utils import donjon
 from utils import tresor as tresor_util
-from utils.lieux import connexions_du_lieu
+from utils.lieux import connexions_du_lieu, lieu_est_ville_image
 from utils.characters import lieu_label
 from utils import chasse
 from models import character_stats
@@ -50,8 +51,7 @@ TOWNS_IMAGES_PATH = "templates/resources/towns"
 
 def _is_town_lieu(lieu: dict | None) -> bool:
     """Le lieu est-il associé à une image du dossier TOWNS ?"""
-    img = (lieu or {}).get("image")
-    return bool(img) and os.path.exists(os.path.join(TOWNS_IMAGES_PATH, img))
+    return lieu_est_ville_image(lieu)
 
 
 def _active_zone_placements(lieu: dict, character: dict) -> tuple[list, dict]:
@@ -176,11 +176,7 @@ async def start_combat(
         _active_zone_placements(depart_lieu, character) if depart_lieu else ([], {})
     )
     actives = {p.get("zone") for p in active_placements}
-    rencontres = (depart_lieu or {}).get("rencontres", [])
-    espece_ids = {
-        r["espece"] for r in rencontres
-        if r.get("espece") and (set(r.get("zones", [])) & actives)
-    }
+    espece_ids = especes_rencontrables(depart_lieu, actives)
     pool_especes = [e for e in especes_all if e["_id"] in espece_ids]
 
     # Aucune espèce associée aux zones actives → pas de combat.

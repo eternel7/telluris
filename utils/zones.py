@@ -224,6 +224,38 @@ def resolve_profil_weights(active_placements: list, lieu: dict) -> dict | None:
     return (lieu or {}).get("profil_weights") or None
 
 
+def especes_rencontrables(lieu: dict | None, zones_actives: set) -> set:
+    """Ids d'espèces que les `rencontres` du lieu ([{espece, zones:[zone_def_id]}]) rattachent
+    à au moins une des `zones_actives`. SOURCE UNIQUE du pool d'un combat de zone
+    (`routers/combat.start_combat`) et de la lecture des traces (`utils/traces.py`)."""
+    return {
+        r["espece"] for r in (lieu or {}).get("rencontres", []) or []
+        if r.get("espece") and (set(r.get("zones", []) or []) & set(zones_actives or ()))
+    }
+
+
+def profils_candidats(profils: list, profil_weights: dict | None) -> tuple[list, list | None]:
+    """`(candidats, poids)` du tirage de grade parmi `profils` (déjà filtrés : cap ville,
+    compatibilité d'espèce). Avec des `profil_weights` dont au moins un id est présent dans
+    `profils` avec un poids > 0 : ces profils-là et leurs poids. Sinon tous les `profils`, et
+    `poids = None` (tirage uniforme).
+
+    SOURCE UNIQUE de « quels grades PEUVENT sortir » : le tirage (`combat._pick_profil`) et la
+    lecture des traces (`utils/traces.py`, grade le plus haut possible) la partagent.
+    """
+    if profil_weights:
+        by_id = {p["_id"]: p for p in profils}
+        candidats, poids = [], []
+        for pid, w in profil_weights.items():
+            p = by_id.get(pid)
+            if p is not None and isinstance(w, (int, float)) and not isinstance(w, bool) and w > 0:
+                candidats.append(p)
+                poids.append(w)
+        if candidats:
+            return candidats, poids
+    return list(profils), None
+
+
 def profil_compatible(profil: dict, espece: dict) -> bool:
     """Ce profil peut-il coiffer cette espèce ? `restriction_tags ⊆ tags de l'espèce`.
 

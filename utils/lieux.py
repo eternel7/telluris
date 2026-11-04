@@ -14,6 +14,14 @@ TOWNS_IMAGES_PATH = "templates/resources/towns"
 PNJ_IMAGES_PATH = "templates/resources/pnj"
 IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp")
 
+
+def lieu_est_ville_image(lieu: dict | None) -> bool:
+	"""Le lieu est-il associé à une image du dossier TOWNS ? (grades plafonnés à
+	`TOWN_PROFIL_NIVEAU_MAX` : `start_combat` ET la lecture des traces)."""
+	img = (lieu or {}).get("image")
+	return bool(img) and os.path.exists(os.path.join(TOWNS_IMAGES_PATH, img))
+
+
 class User(BaseModel):
 	email: str
 	username: str | None = None

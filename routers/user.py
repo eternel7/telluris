@@ -28,7 +28,7 @@ from utils.marche import (
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
 	relations_lieux_payload,
 )
-from utils.lieux import get_lieu_links, get_lieu_directions, est_cite_de_depart, connexions_du_lieu, noeud_destination
+from utils.lieux import get_lieu_links, get_lieu_directions, est_cite_de_depart, connexions_du_lieu, noeud_destination, lieu_est_ville_image
 from utils import donjon
 from utils import tresor as tresor_util
 from utils.combat import instantiate_monsters, create_combat_doc, resolve_first_turns, finalize_combat
@@ -60,6 +60,7 @@ from utils import contenants
 from utils import escorte
 from utils import indicateurs
 from utils import expedition
+from utils import traces as traces_util
 from utils import auberge
 from utils import fiche as fiche_util
 from utils import scriptorium
@@ -911,7 +912,7 @@ async def move_character(
 				# docs relation + un doc lieu complet par lieu connu).
 				relations_lieux = (relations_lieux_payload(character_to_update)
 								   if (transports_echoues or escorte_maj["depose"]) else None)
-				return {"transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "lieux_marques": indicateurs.marques_lieux(character_to_update), "access": access, "volant": vol_util.vol_actif(character_to_update), "chute": chute, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp, "proprietes_offre": proprietes.offre_ici(lieu_doc, character_to_update["position"], auberge.lieu_est_taverne(lieu_doc), proprietes.catalogue(get_doc), get_doc), "pnjs_ici": _pnjs_ici(character_to_update, lieu_doc)}
+				return {"transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "lieux_marques": indicateurs.marques_lieux(character_to_update), "access": access, "volant": vol_util.vol_actif(character_to_update), "chute": chute, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp, "proprietes_offre": proprietes.offre_ici(lieu_doc, character_to_update["position"], auberge.lieu_est_taverne(lieu_doc), proprietes.catalogue(get_doc), get_doc), "pnjs_ici": _pnjs_ici(character_to_update, lieu_doc), "traces": traces_util.traces_ici(character_to_update, lieu_doc, get_doc, find_docs, expedition.membres(character_to_update, get_doc), lieu_est_ville_image(lieu_doc))}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 

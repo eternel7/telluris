@@ -49,6 +49,8 @@ from utils import sorts as sorts_util
 from utils import competences as competences_util
 from utils import slots_actions
 from utils import focalisation
+from utils import traces as traces_util
+from utils import expedition as expedition_util
 from utils import pnj as pnj_util
 from utils import intro as intro_util
 from utils import transport as transport_util
@@ -82,7 +84,8 @@ from utils.marche import (tick_atelier, reset_prix_cache, besoins_lieu, appro_le
 						  est_negociant)
 from utils import graphe_recettes
 from utils.lieux import (get_lieu_links, get_lieu_directions, get_lieux_ids, cites_de_depart, lieu_router,
-						 connexions_du_lieu, noeud_ferme, passages_carte, voile_hors_pays)
+						 connexions_du_lieu, noeud_ferme, passages_carte, voile_hors_pays,
+						 lieu_est_ville_image)
 from utils.grille_image import CATEGORIE_PAYS
 from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, xp_seuil_niveau, load_world_variables
@@ -979,6 +982,11 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	passages = passages_carte(connexions_du_lieu(lieu), lieu,
 		lambda conn: any(noeud_ferme(character, lieu, n.get("lieu"), get_doc(n.get("lieu")))
 			for n in conn.get("nodes") or []))
+	# Traces de la pire menace possible à la position (`utils/traces.py`) : annoncées au
+	# chargement, puis à chaque pas qui change la lecture (bloc `traces` de move_character).
+	traces_ici = traces_util.traces_ici(character, lieu, get_doc, find_docs,
+										expedition_util.membres(character, get_doc),
+										lieu_est_ville_image(lieu))
 
 	# Dérivées bufées (équipement, passives, consommables/sorts), charge max exceptée : elle
 	# reste brute, c'est la limite réellement appliquée par la garde de surcharge. Les stats
@@ -1170,6 +1178,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"access" : access,
 			"carte_voile": carte_voile,
 			"passages": passages,
+			"traces": traces_ici,
 			# Règle de marche du pavé : `>= 1` en vol, `=== 1` à pied (scripts/deplacement.js).
 			"volant": vol_util.vol_actif(character),
 			"chute_vol": chute_vol,

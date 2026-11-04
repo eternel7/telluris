@@ -4335,6 +4335,7 @@
 				_refreshGuidage();
 				buildLocationslist();
 				_majHaloPassages();
+				_annoncerTraces(rep.traces);
 				updateControls();
 				updateVitals(rep.vitals);
 				_notifierTransportsEchoues(rep);
@@ -4482,6 +4483,32 @@
 	function clePassageAnnonce(p) {
 		return p.metier ? 'metier|' + p.metier : p.link_id + '|' + p.label;
 	}
+	// Pure (même harnais) : « a », « a et b », « a, b et c ».
+	function listeFr(items) {
+		const l = (items || []).filter(Boolean);
+		return l.length <= 1 ? (l[0] || '') : l.slice(0, -1).join(', ') + ' et ' + l[l.length - 1];
+	}
+	// Pure (même harnais) : les toasts d'un pas, FUSIONNÉS par type — UN pour toutes les
+	// boutiques nouvellement proches, UN pour tous les autres passages. Un seul élément d'un
+	// type garde le texte unitaire (`textePassageProche`).
+	function textesPassagesProches(passages) {
+		const boutiques = (passages || []).filter(p => p && p.metier);
+		const autres = (passages || []).filter(p => p && !p.metier);
+		const out = [];
+		if (boutiques.length === 1) out.push(textePassageProche(boutiques[0]));
+		else if (boutiques.length > 1) {
+			const metiers = [...new Set(boutiques.map(p => p.metier))];
+			out.push(metiers.length === 1
+				? textePassageProche(boutiques[0])
+				: 'À proximité : ' + listeFr(metiers) + '.');
+		}
+		if (autres.length === 1) out.push(textePassageProche(autres[0]));
+		else if (autres.length > 1) {
+			const noms = [...new Set(autres.map(p => p.label || 'route'))];
+			out.push('Des passages sont proches : ' + listeFr(noms) + '.');
+		}
+		return out;
+	}
 	function _dessinerVoile() {
 		const cv = document.getElementById('carte-voile');
 		if (!cv || !Array.isArray(CARTE_VOILE) || !CARTE_VOILE.length) return;
@@ -4526,6 +4553,7 @@
 		if (!calque) return;
 		const proches = new Set(passagesProches(PASSAGES, POSITIONS.x, POSITIONS.y, RAYON_PASSAGE));
 		const aAnnoncer = new Set(passagesAAnnoncer(PASSAGES, POSITIONS.x, POSITIONS.y, RAYON_PASSAGE));
+		const nouveaux = [];
 		calque.querySelectorAll('.passage-marque').forEach(m => {
 			const p = PASSAGES[m.dataset.i];
 			const proche = proches.has(p);
@@ -4539,14 +4567,28 @@
 			if (p.x === POSITIONS.x && p.y === POSITIONS.y) _passagesAnnonces.add(cle);
 			if (aAnnoncer.has(p) && !_passagesAnnonces.has(cle)) {
 				_passagesAnnonces.add(cle);
-				showToast(textePassageProche(p));
+				nouveaux.push(p);
 			}
 		});
+		// Un toast par TYPE (boutiques / passages), pas un par marqueur.
+		textesPassagesProches(nouveaux).forEach(t => showToast(t));
+	}
+	// ── Traces de monstres (`utils/traces.py`) ──────────────────────────────────
+	// Bloc `traces` de /play puis de chaque pas : on n'annonce qu'un CHANGEMENT de lecture
+	// (`cle` : rang sans forestier, espèce + grade avec) ; hors de toute zone, la lecture
+	// s'efface et y revenir l'annonce de nouveau.
+	let _traceCle = null;
+	function _annoncerTraces(t) {
+		if (!t) { _traceCle = null; return; }
+		if (t.cle === _traceCle) return;
+		_traceCle = t.cle;
+		showToast(t.texte);
 	}
 	_dessinerVoile();
 	_poserPassages();
 	// Après le chargement : `showToast` est défini dans un script plus bas.
 	window.addEventListener('load', _majHaloPassages);
+	window.addEventListener('load', () => _annoncerTraces({{ traces | tojson | safe }}));
 	// Les deux fonctions ci-dessous ne font plus que POSER LEURS PRÉDICATS : le parcours du
 	// DOM vit dans `templates/scripts/deplacement.js`, partagé avec le combat et le mode test
 	// de l'éditeur (cf. CLAUDE.md § Pavé de déplacement partagé).
