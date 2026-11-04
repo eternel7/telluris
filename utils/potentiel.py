@@ -18,6 +18,7 @@ import math
 from models import character_stats
 from utils import combat, simulateur
 from utils.simulateur import moyenne_de_des, options_offensives_statiques
+from utils.recrutement import RANGS
 
 # ── LES RÈGLES — tout se règle ici ───────────────────────────────────────────────────
 REGLES_POTENTIEL = {
@@ -207,3 +208,43 @@ def potentiel_espece(espece_id: str, profil_id: str | None, get_doc_fn,
 	detail.sort(key=lambda d: -d["gain"])
 	return {"total": round(total, 1), "nu": nu, "equipement": round(equipement, 1),
 			"bonus_humanoide": bonus, "detail": detail}
+
+
+# ── RANG de dangerosité d'une espèce ─────────────────────────────────────────────────
+# Colonnes calculées `rang` / `rang_libelle` de /admin/table (jamais stockées). Même échelle
+# que le PLANCHER des épreuves de rang (`QUETE_RANG_POTENTIEL_MIN`, world-var relue à chaque
+# appel) : l'espèce prend le plus haut rang dont elle atteint le seuil, sinon le plancher F.
+# Mesurée sous un grade de RÉFÉRENCE fixe — `combattant`, celui sur lequel les seuils ont été
+# calibrés (cf. le commentaire de QUETE_RANG_POTENTIEL_MIN) — et pas sous le grade tiré en
+# jeu, qui dépend de la zone : le rang dit ce qu'EST l'espèce, pas un spécimen donné.
+RANG_PROFIL_REFERENCE = "profil:combattant"
+# Libellé de dangerosité par rang (proposition du 04/11) — destiné aux traces de monstres.
+RANG_LIBELLES = {
+	"F": "Vermine",
+	"E": "Bête dangereuse",
+	"D": "Monstre",
+	"C": "Fléau",
+	"B": "Calamité",
+	"A": "Cataclysme",
+	"S": "Légende vivante",
+	"S+": "Apocalypse",
+}
+
+
+def rang_de_potentiel(valeur: float) -> str:
+	"""Rang de dangerosité d'un potentiel : le seuil le plus HAUT atteint parmi
+	`QUETE_RANG_POTENTIEL_MIN`, sinon le premier rang de l'échelle (aucun plancher)."""
+	rang, meilleur = RANGS[0], float("-inf")
+	for r, seuil in (character_stats.QUETE_RANG_POTENTIEL_MIN or {}).items():
+		if valeur >= seuil > meilleur:
+			rang, meilleur = r, seuil
+	return rang
+
+
+def rang_espece(espece_id: str, get_doc_fn, regles: dict | None = None) -> dict:
+	"""`{potentiel_rang, rang, rang_libelle}` d'une espèce : potentiel sous le grade de
+	référence (`RANG_PROFIL_REFERENCE`, équipement espéré compris) et son rang.
+	Lève comme `potentiel_espece`."""
+	v = potentiel_espece(espece_id, RANG_PROFIL_REFERENCE, get_doc_fn, regles)["total"]
+	rang = rang_de_potentiel(v)
+	return {"potentiel_rang": v, "rang": rang, "rang_libelle": RANG_LIBELLES.get(rang, "")}

@@ -148,3 +148,35 @@ def test_casque_rapporte_moins_que_cotte(monkeypatch):
 	monkeypatch.setattr(characters, "get_doc", docs.get)
 	g = {d["item"]: d["gain"] for d in potentiel.potentiel_espece("espece:orc", None, docs.get)["detail"]}
 	assert g["item:cotte"] > g["item:heaume"] > 0
+
+
+# ── Rang de dangerosité (colonnes `rang` / `rang_libelle` de /admin/table) ─────────────
+
+def test_rang_suit_les_seuils_de_la_world_var(monkeypatch):
+	"""Seuils RELUS dans `QUETE_RANG_POTENTIEL_MIN` : le plus haut seuil atteint l'emporte
+	(seuil inclus), sous le premier seuil c'est le plancher de l'échelle."""
+	from utils.recrutement import RANGS
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 10.0, "D": 20.0})
+	assert potentiel.rang_de_potentiel(9.9) == RANGS[0]
+	assert potentiel.rang_de_potentiel(10) == "E"
+	assert potentiel.rang_de_potentiel(19.9) == "E"
+	assert potentiel.rang_de_potentiel(500) == "D"
+
+
+def test_chaque_rang_de_l_echelle_a_un_libelle():
+	from utils.recrutement import RANGS
+	assert set(potentiel.RANG_LIBELLES) == set(RANGS)
+	assert all(potentiel.RANG_LIBELLES.values())
+
+
+def test_rang_espece_mesure_sous_le_grade_de_reference(monkeypatch):
+	vus = []
+
+	def faux(eid, profil_id, get_doc_fn, regles=None):
+		vus.append(profil_id)
+		return {"total": 60.0}
+	monkeypatch.setattr(potentiel, "potentiel_espece", faux)
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 25.0, "D": 50.0})
+	assert potentiel.rang_espece("espece:orc", DOCS.get) == {
+		"potentiel_rang": 60.0, "rang": "D", "rang_libelle": potentiel.RANG_LIBELLES["D"]}
+	assert vus == [potentiel.RANG_PROFIL_REFERENCE]

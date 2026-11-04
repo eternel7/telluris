@@ -2086,6 +2086,11 @@ def admin_simulateur_profil(
 				"profil": simulateur_util.fiche_snapshot(bel["snapshot_reference"])}
 
 
+# Colonnes calculées de /admin/table, dans leur ordre d'affichage.
+POTENTIEL_COLONNES = ["potentiel_combat", "potentiel_survie", "potentiel_support"]
+RANG_COLONNES = ["potentiel_rang", "rang", "rang_libelle"]
+
+
 @app.get("/admin/simulateur/potentiels")
 def admin_simulateur_potentiels(
 	current_user: Annotated[User, Depends(get_current_user)],
@@ -2133,7 +2138,15 @@ def admin_simulateur_potentiels(
 			}
 		except Exception:
 			continue
-	return {"type": t, "potentiels": potentiels}
+		if t == "espece":
+			# Rang de dangerosité (`potentiel.rang_espece`) : calcul à part, sous le grade de
+			# référence — son échec n'efface pas les potentiels déjà obtenus.
+			try:
+				potentiels[did].update(potentiel_util.rang_espece(did, _get_doc_local))
+			except Exception:
+				pass
+	return {"type": t, "potentiels": potentiels,
+			"colonnes": POTENTIEL_COLONNES + (RANG_COLONNES if t == "espece" else [])}
 
 # ── Pages legal ───────────────────────────────────────────────────────
 

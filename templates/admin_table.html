@@ -280,8 +280,10 @@ async function loadType() {
 			try {
 				const pRes = await fetch('/admin/simulateur/potentiels?type=' + encodeURIComponent(t));
 				if (pRes.ok) {
-					calcules = ((await pRes.json()).potentiels) || {};
-					virtualCols = POTENTIEL_COLS.slice();
+					const pData = await pRes.json();
+					calcules = pData.potentiels || {};
+					// Le serveur liste ses colonnes (espèce : + rang de dangerosité et libellé).
+					virtualCols = (pData.colonnes || POTENTIEL_COLS).slice();
 					virtualActive = true;
 				} else { note = ' (potentiels indisponibles : ' + pRes.status + ')'; }
 			} catch (e) { note = ' (potentiels indisponibles)'; }
