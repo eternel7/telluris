@@ -32,7 +32,7 @@ from models import character_stats
 from models.character_stats import BaseStats, compute_derived_stats, xp_seuil_niveau
 from utils.characters import (
 	item_ref_id, item_ref_lieu, item_ref_weight, resolve_item_ref, sync_equipment_bonus,
-	credit_character, carried_weight, charge_max_of, grant_xp,
+	credit_character, carried_weight, charge_max_of, grant_xp, liberer_pour_deux_mains,
 )
 from utils.consommables import caracts_avec_buffs
 from utils import montures
@@ -597,20 +597,36 @@ def _equiper_defaut(aventurier: dict) -> None:
 	"""Équipe l'inventaire de départ dans les `slots` (mute en place) : chaque item est
 	posé dans son premier slot compatible libre (champ item `slots`). Indispensable —
 	`_weapon_attacks` et `recompute_equipment_bonus` ne lisent QUE les slots ; un item
-	sans slot libre reste dans le sac."""
-	restants = []
-	for ref in aventurier.get("inventaire", []):
-		item = resolve_item_ref(ref)
+	sans slot libre reste dans le sac. Une arme `deux_mains` exige les DEUX mains libres
+	et bloque l'autre SANS y rien écrire (`liberer_pour_deux_mains`, comme l'équipement
+	joueur) : elle est posée en premier, l'arme d'appoint (couteau du forestier) reste
+	au sac."""
+	slots = aventurier["slots"]
+	bloquees: set[str] = set()
+	inventaire = list(aventurier.get("inventaire", []))
+	items = [resolve_item_ref(ref) or {} for ref in inventaire]
+	# Arme à deux mains d'abord (tri STABLE : l'ordre de la vocation tient sinon).
+	ordre = sorted(range(len(inventaire)), key=lambda i: not items[i].get("deux_mains"))
+	gardes: set[int] = set()
+	for i in ordre:
+		ref, item = inventaire[i], items[i]
 		place = None
-		for slot in (item or {}).get("slots") or []:
-			if slot in aventurier["slots"] and aventurier["slots"][slot] is None:
-				place = slot
-				break
+		for slot in item.get("slots") or []:
+			if slot not in slots or slots[slot] is not None or slot in bloquees:
+				continue
+			autre = liberer_pour_deux_mains(slots, item, slot)
+			if autre and (slots.get(autre) is not None or autre in bloquees):
+				continue
+			place = slot
+			break
 		if place:
-			aventurier["slots"][place] = ref
+			slots[place] = ref
+			autre = liberer_pour_deux_mains(slots, item, place)
+			if autre:
+				bloquees.add(autre)
 		else:
-			restants.append(ref)
-	aventurier["inventaire"] = restants
+			gardes.add(i)
+	aventurier["inventaire"] = [inventaire[i] for i in range(len(inventaire)) if i in gardes]
 
 
 def _derives_de(aventurier: dict):
