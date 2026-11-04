@@ -2088,7 +2088,7 @@ def admin_simulateur_profil(
 
 # Colonnes calculées de /admin/table, dans leur ordre d'affichage.
 POTENTIEL_COLONNES = ["potentiel_combat", "potentiel_survie", "potentiel_support"]
-RANG_COLONNES = ["potentiel_rang", "rang", "rang_libelle"]
+RANG_COLONNES = ["potentiel_rang", "fuite_pct", "rang", "rang_libelle"]
 
 
 @app.get("/admin/simulateur/potentiels")

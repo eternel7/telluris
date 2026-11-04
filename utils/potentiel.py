@@ -42,6 +42,13 @@ REGLES_POTENTIEL = {
 	"bonus_humanoide": 0.10,      # +10 % pour un humanoïde qui a des objets à porter
 	                              # (maniement, tactique), en plus du gain espéré des objets
 
+	# RANG d'une espèce (`rang_espece`) — la VITESSE qui interdit la fuite :
+	"initiative_reference": 40,   # initiative du fuyard étalon = humain de départ (V 5, Ag 20 :
+	                              # (Ag + 20 V) // 3), contre qui se joue `combat._flee_threshold`
+	"poids_inescapable": 1.0,     # potentiel × (1 + poids × piège) ; piège = 0 tant que la fuite
+	                              # vaut celle d'initiative égale, 1 quand elle tombe à 0 % —
+	                              # au plancher de 5 % du moteur : × 1,9
+
 	# Potentiel de SUPPORT = Σ des soutiens de la barre, pondérés par la castabilité :
 	"poids_soin": 1.0,            # par PV rendu instantanément
 	"poids_pm_rendus": 0.5,       # par PM rendu (instantané ou régénéré × durée)
@@ -207,13 +214,17 @@ def potentiel_espece(espece_id: str, profil_id: str | None, get_doc_fn,
 	total = (nu + equipement) * (1 + bonus)
 	detail.sort(key=lambda d: -d["gain"])
 	return {"total": round(total, 1), "nu": nu, "equipement": round(equipement, 1),
-			"bonus_humanoide": bonus, "detail": detail}
+			"bonus_humanoide": bonus, "detail": detail,
+			"initiative": int(nu_snap.get("initiative", 0) or 0)}
 
 
 # ── RANG de dangerosité d'une espèce ─────────────────────────────────────────────────
 # Colonnes calculées `rang` / `rang_libelle` de /admin/table (jamais stockées). Même échelle
 # que le PLANCHER des épreuves de rang (`QUETE_RANG_POTENTIEL_MIN`, world-var relue à chaque
 # appel) : l'espèce prend le plus haut rang dont elle atteint le seuil, sinon le plancher F.
+# La VITESSE y pèse deux fois : dans les actions par tour (déjà dans l'offense de
+# `potentiel_combat`) et, propre au rang, par la FUITE qu'elle interdit (`facteur_inescapable`) :
+# une bête plus vive que le fuyard étalon ne se fuit plus, ce qui rend chaque combat mortel.
 # Mesurée sous un grade de RÉFÉRENCE fixe — `combattant`, celui sur lequel les seuils ont été
 # calibrés (cf. le commentaire de QUETE_RANG_POTENTIEL_MIN) — et pas sous le grade tiré en
 # jeu, qui dépend de la zone : le rang dit ce qu'EST l'espèce, pas un spécimen donné.
@@ -241,10 +252,27 @@ def rang_de_potentiel(valeur: float) -> str:
 	return rang
 
 
+def facteur_inescapable(initiative: int, regles: dict | None = None) -> tuple[float, float]:
+	"""`(fuite, facteur)` face à un ennemi de cette initiative. `fuite` = chance de fuir du
+	fuyard étalon, par la règle du MOTEUR (`combat._flee_threshold`) ; `facteur` multiplie le
+	potentiel : 1 tant que la fuite vaut au moins celle d'une initiative égale, jusqu'à
+	1 + `poids_inescapable` quand elle tombe à 0. Une bête LENTE n'est pas rabaissée : la
+	lenteur ne retire rien à ce qu'elle frappe."""
+	r = _regles(regles)
+	ref = int(r["initiative_reference"])
+	fuite = combat._flee_threshold(ref, int(initiative or 0)) / 100.0
+	egale = combat._flee_threshold(ref, ref) / 100.0
+	piege = max(0.0, 1.0 - fuite / egale) if egale > 0 else 0.0
+	return fuite, 1.0 + r["poids_inescapable"] * piege
+
+
 def rang_espece(espece_id: str, get_doc_fn, regles: dict | None = None) -> dict:
-	"""`{potentiel_rang, rang, rang_libelle}` d'une espèce : potentiel sous le grade de
-	référence (`RANG_PROFIL_REFERENCE`, équipement espéré compris) et son rang.
-	Lève comme `potentiel_espece`."""
-	v = potentiel_espece(espece_id, RANG_PROFIL_REFERENCE, get_doc_fn, regles)["total"]
+	"""`{potentiel_rang, fuite_pct, rang, rang_libelle}` d'une espèce : potentiel sous le grade
+	de référence (`RANG_PROFIL_REFERENCE`, équipement espéré compris) × le facteur de fuite
+	interdite (`facteur_inescapable`), et son rang. Lève comme `potentiel_espece`."""
+	pe = potentiel_espece(espece_id, RANG_PROFIL_REFERENCE, get_doc_fn, regles)
+	fuite, facteur = facteur_inescapable(pe["initiative"], regles)
+	v = round(pe["total"] * facteur, 1)
 	rang = rang_de_potentiel(v)
-	return {"potentiel_rang": v, "rang": rang, "rang_libelle": RANG_LIBELLES.get(rang, "")}
+	return {"potentiel_rang": v, "fuite_pct": round(fuite * 100), "rang": rang,
+			"rang_libelle": RANG_LIBELLES.get(rang, "")}

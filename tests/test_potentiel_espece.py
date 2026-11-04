@@ -174,9 +174,50 @@ def test_rang_espece_mesure_sous_le_grade_de_reference(monkeypatch):
 
 	def faux(eid, profil_id, get_doc_fn, regles=None):
 		vus.append(profil_id)
-		return {"total": 60.0}
+		return {"total": 60.0, "initiative": potentiel.REGLES_POTENTIEL["initiative_reference"]}
 	monkeypatch.setattr(potentiel, "potentiel_espece", faux)
 	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 25.0, "D": 50.0})
 	assert potentiel.rang_espece("espece:orc", DOCS.get) == {
-		"potentiel_rang": 60.0, "rang": "D", "rang_libelle": potentiel.RANG_LIBELLES["D"]}
+		"potentiel_rang": 60.0, "fuite_pct": 50, "rang": "D",
+		"rang_libelle": potentiel.RANG_LIBELLES["D"]}
 	assert vus == [potentiel.RANG_PROFIL_REFERENCE]
+
+
+# ── Vitesse : la fuite interdite ──────────────────────────────────────────────────────
+
+REF = potentiel.REGLES_POTENTIEL["initiative_reference"]
+
+
+def test_fuite_lue_dans_la_regle_du_moteur():
+	"""La chance de fuir est celle de `combat._flee_threshold`, pas une copie."""
+	for init in (0, REF, REF + 20, REF + 200):
+		fuite, _ = potentiel.facteur_inescapable(init)
+		assert fuite == combat._flee_threshold(REF, init) / 100
+
+
+def test_lenteur_ne_rabaisse_pas():
+	"""Initiative égale ou plus lente ⇒ facteur neutre."""
+	assert potentiel.facteur_inescapable(REF)[1] == 1.0
+	assert potentiel.facteur_inescapable(0)[1] == 1.0
+
+
+def test_plus_vif_plus_dangereux_jusqu_au_plancher_de_fuite():
+	f_mi = potentiel.facteur_inescapable(REF + 20)[1]
+	f_max = potentiel.facteur_inescapable(REF + 500)[1]
+	assert 1.0 < f_mi < f_max
+	# Au plancher de fuite du moteur, piège = 1 − plancher / fuite à égalité.
+	plancher = combat._flee_threshold(REF, REF + 500) / combat._flee_threshold(REF, REF)
+	poids = potentiel.REGLES_POTENTIEL["poids_inescapable"]
+	assert f_max == pytest.approx(1 + poids * (1 - plancher))
+
+
+def test_poids_inescapable_reglable():
+	assert potentiel.facteur_inescapable(REF + 500, {"poids_inescapable": 0})[1] == 1.0
+
+
+def test_rang_monte_avec_la_vitesse(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 25.0, "D": 50.0})
+	monkeypatch.setattr(potentiel, "potentiel_espece",
+						lambda *a, **k: {"total": 30.0, "initiative": REF + 500})
+	r = potentiel.rang_espece("espece:x", DOCS.get)
+	assert r["rang"] == "D" and r["fuite_pct"] == combat._flee_threshold(REF, REF + 500)
