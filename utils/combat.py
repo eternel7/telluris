@@ -32,7 +32,7 @@ from utils.sorts import (
 from utils.zones_effet import axe_facing, cases_effet, placement_visuel
 from utils.quetes import maj_progress_kills, maj_progress_chasse
 # `utils/zones.py` est une FEUILLE (math/random seulement) : aucun cycle possible.
-from utils.zones import profils_compatibles
+from utils.zones import profils_compatibles, profils_candidats
 from utils.focalisation import effacer_si_objectif_atteint
 from utils import recrutement
 from utils import montures as montures_util
@@ -3577,17 +3577,11 @@ def _pick_profil(profils: list, profil_weights: dict | None):
 	"""
 	if not profils:
 		return None
-	if profil_weights:
-		by_id = {p["_id"]: p for p in profils}
-		candidates, poids = [], []
-		for pid, w in profil_weights.items():
-			p = by_id.get(pid)
-			if p is not None and isinstance(w, (int, float)) and not isinstance(w, bool) and w > 0:
-				candidates.append(p)
-				poids.append(w)
-		if candidates:
-			return random.choices(candidates, weights=poids, k=1)[0]
-	return random.choice(profils)
+	# Candidats PARTAGÉS avec la lecture des traces (`zones.profils_candidats`).
+	candidats, poids = profils_candidats(profils, profil_weights)
+	if poids:
+		return random.choices(candidats, weights=poids, k=1)[0]
+	return random.choice(candidats)
 
 
 def instantiate_monsters(

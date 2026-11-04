@@ -148,3 +148,76 @@ def test_casque_rapporte_moins_que_cotte(monkeypatch):
 	monkeypatch.setattr(characters, "get_doc", docs.get)
 	g = {d["item"]: d["gain"] for d in potentiel.potentiel_espece("espece:orc", None, docs.get)["detail"]}
 	assert g["item:cotte"] > g["item:heaume"] > 0
+
+
+# ── Rang de dangerosité (colonnes `rang` / `rang_libelle` de /admin/table) ─────────────
+
+def test_rang_suit_les_seuils_de_la_world_var(monkeypatch):
+	"""Seuils RELUS dans `QUETE_RANG_POTENTIEL_MIN` : le plus haut seuil atteint l'emporte
+	(seuil inclus), sous le premier seuil c'est le plancher de l'échelle."""
+	from utils.recrutement import RANGS
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 10.0, "D": 20.0})
+	assert potentiel.rang_de_potentiel(9.9) == RANGS[0]
+	assert potentiel.rang_de_potentiel(10) == "E"
+	assert potentiel.rang_de_potentiel(19.9) == "E"
+	assert potentiel.rang_de_potentiel(500) == "D"
+
+
+def test_chaque_rang_de_l_echelle_a_un_libelle():
+	from utils.recrutement import RANGS
+	assert set(potentiel.RANG_LIBELLES) == set(RANGS)
+	assert all(potentiel.RANG_LIBELLES.values())
+
+
+def test_rang_espece_mesure_sous_le_grade_de_reference(monkeypatch):
+	vus = []
+
+	def faux(eid, profil_id, get_doc_fn, regles=None):
+		vus.append(profil_id)
+		return {"total": 60.0, "initiative": potentiel.REGLES_POTENTIEL["initiative_reference"]}
+	monkeypatch.setattr(potentiel, "potentiel_espece", faux)
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 25.0, "D": 50.0})
+	assert potentiel.rang_espece("espece:orc", DOCS.get) == {
+		"potentiel_rang": 60.0, "fuite_pct": 50, "rang": "D",
+		"rang_libelle": potentiel.RANG_LIBELLES["D"]}
+	assert vus == [potentiel.RANG_PROFIL_REFERENCE]
+
+
+# ── Vitesse : la fuite interdite ──────────────────────────────────────────────────────
+
+REF = potentiel.REGLES_POTENTIEL["initiative_reference"]
+
+
+def test_fuite_lue_dans_la_regle_du_moteur():
+	"""La chance de fuir est celle de `combat._flee_threshold`, pas une copie."""
+	for init in (0, REF, REF + 20, REF + 200):
+		fuite, _ = potentiel.facteur_inescapable(init)
+		assert fuite == combat._flee_threshold(REF, init) / 100
+
+
+def test_lenteur_ne_rabaisse_pas():
+	"""Initiative égale ou plus lente ⇒ facteur neutre."""
+	assert potentiel.facteur_inescapable(REF)[1] == 1.0
+	assert potentiel.facteur_inescapable(0)[1] == 1.0
+
+
+def test_plus_vif_plus_dangereux_jusqu_au_plancher_de_fuite():
+	f_mi = potentiel.facteur_inescapable(REF + 20)[1]
+	f_max = potentiel.facteur_inescapable(REF + 500)[1]
+	assert 1.0 < f_mi < f_max
+	# Au plancher de fuite du moteur, piège = 1 − plancher / fuite à égalité.
+	plancher = combat._flee_threshold(REF, REF + 500) / combat._flee_threshold(REF, REF)
+	poids = potentiel.REGLES_POTENTIEL["poids_inescapable"]
+	assert f_max == pytest.approx(1 + poids * (1 - plancher))
+
+
+def test_poids_inescapable_reglable():
+	assert potentiel.facteur_inescapable(REF + 500, {"poids_inescapable": 0})[1] == 1.0
+
+
+def test_rang_monte_avec_la_vitesse(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 25.0, "D": 50.0})
+	monkeypatch.setattr(potentiel, "potentiel_espece",
+						lambda *a, **k: {"total": 30.0, "initiative": REF + 500})
+	r = potentiel.rang_espece("espece:x", DOCS.get)
+	assert r["rang"] == "D" and r["fuite_pct"] == combat._flee_threshold(REF, REF + 500)

@@ -583,6 +583,20 @@ def test_offre_rang_plancher_par_defaut_sur_le_vrai_potentiel(monkeypatch):
 	assert chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc, _find_docs) is None
 
 
+def test_potentiel_cible_compte_la_fuite_interdite(monkeypatch):
+	"""Plancher des épreuves = la mesure du RANG (`potentiel.potentiel_menace`) : une cible plus
+	vive que le fuyard étalon pèse plus lourd que son seul potentiel de combat."""
+	from utils import potentiel
+	ref = potentiel.REGLES_POTENTIEL["initiative_reference"]
+	monkeypatch.setattr(potentiel, "potentiel_espece",
+						lambda *a, **k: {"total": 40.0, "initiative": ref})
+	assert chasse.potentiel_cible(LOUP, "profil:novice", _get_doc) == 40.0
+	monkeypatch.setattr(potentiel, "potentiel_espece",
+						lambda *a, **k: {"total": 40.0, "initiative": ref + 500})
+	vif = chasse.potentiel_cible(LOUP, "profil:novice", _get_doc)
+	assert vif == round(40.0 * potentiel.facteur_inescapable(ref + 500)[1], 1) > 40.0
+
+
 def test_planchers_par_defaut_sur_lechelle_et_croissants():
 	planchers = character_stats.CODE_DEFAULTS["QUETE_RANG_POTENTIEL_MIN"]
 	assert planchers and set(planchers) <= set(RANGS)

@@ -162,6 +162,8 @@ utils/
                          #   indépendante de l'ordre des matières, item + recette déterministes
                          #   et idempotents ; la recette porte `sur_commande` (hors tick)
   focalisation.py        # 🧭 lieu (BFS) / 🎯 quête (biais probabiliste)
+  traces.py              # traces de monstres (pur) : pire menace possible à la position (pool et grades du combat
+                         #   de zone), libellé de rang ; forestier du groupe ⇒ espèce + grade
   enseignes.py           # noms d'enseigne (pur) : tournures par métier × toponymes de cité
   enseignes_icones.py    # marqueur d'une connexion sur la carte de /play (pur) : famille (couleur du halo),
                          #   pictogramme et métier (« une boucherie », toast) du lieu destination

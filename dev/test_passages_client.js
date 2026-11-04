@@ -120,5 +120,35 @@ t('deux routes : une clé par destination', () => {
 	assert.notStrictEqual(clePassageAnnonce({ label: 'A', link_id: 'l' }), clePassageAnnonce({ label: 'B', link_id: 'l' }));
 });
 
+vm.runInThisContext(extraire('listeFr'));
+vm.runInThisContext(extraire('textesPassagesProches'));
+
+t('listeFr : un, deux, trois éléments', () => {
+	assert.strictEqual(listeFr(['a']), 'a');
+	assert.strictEqual(listeFr(['a', 'b']), 'a et b');
+	assert.strictEqual(listeFr(['a', 'b', 'c']), 'a, b et c');
+	assert.strictEqual(listeFr([]), '');
+});
+const B = (metier, label) => ({ label, metier, link_id: 'link:' + label });
+t('trois boutiques : UN seul toast qui les nomme toutes', () => {
+	const r = textesPassagesProches([B('une boucherie', 'A'), B('une forge', 'B'), B('une taverne', 'C')]);
+	assert.deepStrictEqual(r, ['À proximité : une boucherie, une forge et une taverne.']);
+});
+t('trois passages : UN seul toast', () => {
+	const r = textesPassagesProches([{ label: 'Chartres' }, { label: 'Auxerre' }, { label: 'Rhemi' }]);
+	assert.deepStrictEqual(r, ['Des passages sont proches : Chartres, Auxerre et Rhemi.']);
+});
+t('boutiques ET passages : un toast par type', () => {
+	const r = textesPassagesProches([B('une forge', 'F'), { label: 'Chartres' }, B('une taverne', 'T')]);
+	assert.deepStrictEqual(r, ['À proximité : une forge et une taverne.', 'Un passage est proche : Chartres']);
+});
+t('un seul élément : texte unitaire inchangé', () => {
+	assert.deepStrictEqual(textesPassagesProches([B('une boucherie', 'A')]), ['Une boucherie est proche.']);
+	assert.deepStrictEqual(textesPassagesProches([]), []);
+});
+t('deux boutiques du même métier : le texte unitaire', () => {
+	assert.deepStrictEqual(textesPassagesProches([B('une forge', 'A'), B('une forge', 'B')]), ['Une forge est proche.']);
+});
+
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).\n`);
 process.exit(echecs ? 1 : 0);
