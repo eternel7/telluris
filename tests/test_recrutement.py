@@ -1233,3 +1233,42 @@ def test_vue_contrat_echu_recalcule_les_termes(monde):
 	assert vue["cout_cuivre"] == attendu["cout_cuivre"] > 1
 	assert vue["part_butin_pct"] == attendu["part_butin_pct"]
 	assert vue["id"] == av["_id"] and vue["prenom"] == "Aldric"
+
+
+# ── Équipement de départ : arme à deux mains ─────────────────────────────────────
+
+ARC = {"_id": "item:Arc_court", "type": "item", "nom": "Arc court", "categorie": "arme",
+	   "slots": ["main_droite", "main_gauche"], "deux_mains": True, "poids": 1}
+COUTEAU = {"_id": "item:Couteau_de_chasse", "type": "item", "nom": "Couteau de chasse",
+		   "categorie": "arme", "slots": ["main_droite", "main_gauche"], "poids": 1}
+
+
+def _aventurier_equipe(inventaire):
+	av = {"inventaire": list(inventaire),
+		  "slots": {s: None for s in recrutement.SLOTS_PERSONNAGE}}
+	recrutement._equiper_defaut(av)
+	return av
+
+
+@pytest.mark.parametrize("inventaire", [
+	["item:Arc_court", "item:Couteau_de_chasse"],
+	["item:Couteau_de_chasse", "item:Arc_court"],  # l'ordre de la vocation ne compte pas
+])
+def test_equiper_defaut_deux_mains_laisse_l_appoint_au_sac(monde, inventaire):
+	"""Forestier (arc court + couteau) : l'arc prend les deux mains, le couteau reste au sac."""
+	monde["docs"].update({ARC["_id"]: ARC, COUTEAU["_id"]: COUTEAU})
+	av = _aventurier_equipe(inventaire)
+	en_main = [av["slots"]["main_droite"], av["slots"]["main_gauche"]]
+	assert en_main.count("item:Arc_court") == 1
+	assert None in en_main
+	assert av["inventaire"] == ["item:Couteau_de_chasse"]
+
+
+def test_equiper_defaut_une_main_remplit_les_deux_mains(monde):
+	"""Sans arme à deux mains, deux armes à une main occupent chacune une main."""
+	autre = dict(COUTEAU, _id="item:Couteau_2")
+	monde["docs"].update({COUTEAU["_id"]: COUTEAU, autre["_id"]: autre})
+	av = _aventurier_equipe(["item:Couteau_de_chasse", "item:Couteau_2"])
+	assert av["slots"]["main_droite"] == "item:Couteau_de_chasse"
+	assert av["slots"]["main_gauche"] == "item:Couteau_2"
+	assert av["inventaire"] == []
