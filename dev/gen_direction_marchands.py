@@ -53,8 +53,10 @@ _SUITE = [
 
 NOEUDS_DIALOGUE_DIRECTION = {
 	"direction_demande": {
+		# Tout lieu de la ville (`transport.lieux_par_type`, Auteur 05/11) : delta en base par
+		# `dev/gen_direction_textes_lieux.py`.
 		"texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? "
-				 "Une enseigne, ou un genre de boutique ? »",
+				 "Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
 		"choix": [
 			# `saisie` : le client affiche un champ texte, sa valeur part avec ce choix.
 			{"id": "direction_chercher", "label": "Demander", "saisie": True,
@@ -84,7 +86,9 @@ NOEUDS_DIALOGUE_DIRECTION = {
 		],
 	},
 	"direction_type_inconnu": {
-		"texte": "« Alors je ne connais pas de magasin de ce type, {prenom}. »",
+		# Tout lieu de la ville, pas seulement les magasins (`transport.lieux_par_type`, Auteur 05/11) :
+		# delta en base par `dev/gen_direction_textes_lieux.py`.
+		"texte": "« Alors je ne vois aucun endroit de ce genre en ville, {prenom}. »",
 		"choix": _SUITE,
 	},
 }

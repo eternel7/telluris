@@ -365,9 +365,15 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		flags.update(sorts_util.etat_enseignement(character, sort_e, get_doc("rules:vocations")))
 		placeholders["sort"] = (sort_e or {}).get("nom", "—")
 		placeholders["cout"] = sorts_util.cout_apprentissage(sort_e) if sort_e else 0
+	# Condition `commission_donjon` : le donjon de la commission EN COURS, pour TOUT PNJ (Borin
+	# indique le temple-portail pendant une commission de la mine). Une lecture `find_docs`
+	# seulement quand une commission court.
+	com = donjon.commission_active(character)
+	don_com = donjon.donjon_de_lieu((com or {}).get("objectif", {}).get("lieu"), find_docs) if com else None
 	return pnj.contexte_dialogue(character, pnj_doc, _rel, flags, placeholders,
 								 quetes.quetes_reussies(character),
-								 quetes.quetes_actives_ids(character))
+								 quetes.quetes_actives_ids(character),
+								 {don_com["_id"]} if don_com and don_com.get("_id") else None)
 
 
 def marque_pnj(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
@@ -864,8 +870,8 @@ def _resoudre_direction(pnj_doc: dict, lieu_doc: dict, saisie) -> tuple[str | No
 	Dans l'ordre :
 	1. nom exact À LA LETTRE (casse ignorée) → `trouve`, avec la phrase d'orientation des
 	   courses ({direction} : « au sud-est d'ici, tout près de … ») ;
-	2. TYPE de magasin exact (sa catégorie) → `trouve` aussi, MÊME FORME que par le nom, pour
-	   le magasin de ce type le plus proche (`transport.plus_proche`) — AVANT le nom à
+	2. TYPE de lieu exact (sa catégorie, magasin ou non : `transport.lieux_par_type`) →
+	   `trouve` aussi, MÊME FORME que par le nom, pour le lieu de ce type le plus proche (`transport.plus_proche`) — AVANT le nom à
 	   article près : « fumoir » est le type, pas l'enseigne « Le Fumoir » ;
 	3. nom exact à article près → `trouve` ;
 	4. type à `TYPE_LEVENSHTEIN_MAX` au plus → `type_propose` ({type}) ; le « Oui » (`_type`,
@@ -875,7 +881,7 @@ def _resoudre_direction(pnj_doc: dict, lieu_doc: dict, saisie) -> tuple[str | No
 	noeuds = ((pnj_doc.get("services") or {}).get("direction") or {}).get("noeuds") or {}
 	nom = transport.nettoyer_recherche_lieu(saisie)
 	trouve = transport.chercher_lieu_nomme(nom, lieu_doc, find_docs)
-	par_type = transport.magasins_par_type(lieu_doc, find_docs)
+	par_type = transport.lieux_par_type(lieu_doc, find_docs)
 	type_trouve = transport.chercher_type(nom, par_type)
 	if trouve.get("exact") and (trouve["exact"][1].casefold() == nom.casefold()
 								or not type_trouve.get("exact")):

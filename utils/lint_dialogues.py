@@ -70,7 +70,7 @@ PLACEHOLDERS_CONNUS = {
 # clé de trop laisserait passer une vraie faute.
 CONDITIONS_STRUCTUREES = {
 	"relation_min", "intro_raison", "quete_reussie", "quete_active", "passages", "rang_min",
-	"offre"}
+	"offre", "commission_donjon"}
 
 # Les conditions qui NOMMENT une quête. ⚠️ Miroir de `utils.pnj.CONDITIONS_QUETE` : elles
 # partagent la forme `{id, attendu}` et le même prédicat côté moteur, donc le même contrôle.
@@ -538,6 +538,15 @@ def analyser_doc(doc: dict) -> list:
 				if not isinstance(qid, str) or qid not in ids_offres(doc):
 					erreur(f"choix `{cid}` : `offre` {qid!r} ne désigne aucune offre écrite de "
 						   f"ce PNJ — fail-closed, le choix ne s'affichera JAMAIS.", nid)
+
+			# `commission_donjon` : nomme un DONJON (`donjon:...`) — un id fautif laisse le
+			# choix caché pour toujours (fail-closed, `pnj.condition_ok`).
+			if "commission_donjon" in conditions:
+				did = (choix.get("condition") or {}).get("commission_donjon")
+				if not isinstance(did, str) or not did.startswith("donjon:"):
+					erreur(f"choix `{cid}` : `commission_donjon` doit être un id de donjon "
+						   f"(`donjon:...`), reçu {did!r} — fail-closed, le choix ne "
+						   f"s'affichera JAMAIS.", nid)
 
 			# `rang_min` : même comparateur fail-closed que la barrière de lieu.
 			if "rang_min" in conditions:

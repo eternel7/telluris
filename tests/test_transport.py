@@ -402,6 +402,27 @@ def test_types_connus_magasins_de_la_ville_hors_soi():
 	assert transport.magasins_par_type(VILLE, find_docs) == {}
 
 
+def test_direction_par_type_connait_tous_les_lieux_de_la_ville():
+	"""Le service `direction` cherche par type parmi TOUS les lieux de la ville (Auteur, 05/11) :
+	temple et guilde compris, la boutique où l'on parle exclue."""
+	par_type = transport.lieux_par_type(BOUCHERIE, find_docs)
+	assert set(transport.magasins_par_type(BOUCHERIE, find_docs)) < set(par_type)
+	assert par_type["temple"] == [("lieu:temple", "Le Temple")]
+	assert "guilde_aventurier" in par_type and "guilde_aventurier_comptoir" in par_type
+	assert "boucherie" not in par_type
+	assert transport.lieux_par_type(VILLE, find_docs) == {}
+
+
+def test_resoudre_direction_vers_un_lieu_qui_n_est_pas_un_magasin(monkeypatch):
+	from routers import pnj as rp
+	monkeypatch.setattr(rp, "get_doc", get_doc)
+	monkeypatch.setattr(rp, "find_docs", find_docs)
+	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "un temple") \
+		== rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "Le Temple")
+	assert rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "un temple")[0] == "n_trouve"
+	focalisation.reset_graphe_cache()
+
+
 def test_type_exact_puis_proche_a_levenshtein_borne():
 	types = ["salaison", "fumoir"]
 	assert transport.chercher_type("une Salaison", types) == {"exact": "salaison"}
