@@ -147,6 +147,22 @@ def test_actions_max_et_charge_max_restent_figes():
     assert snap["charge_max"] == charge_max
 
 
+def test_charge_max_du_snapshot_ignore_les_buffs_de_force(monkeypatch):
+    # Anti-régression (Scarmouche : F 16 + Collier de crocs +1 F) : le butin (/collect)
+    # bornait sur 17×5 = 85 kg, l'inventaire sur charge_max_of = 16×5 = 80 kg → surcharge.
+    vrai = combat_mod.caracts_avec_buffs
+
+    def avec_bijou(character, origines=None, **kw):
+        stats = dict(vrai(character, origines=origines, **kw))
+        stats["F"] = stats.get("F", 0) + 1
+        return stats
+
+    monkeypatch.setattr(combat_mod, "caracts_avec_buffs", avec_bijou)
+    char = _character()
+    snap = build_joueur_snapshot(char)
+    assert snap["charge_max"] == combat_mod.charge_max_of(char)
+
+
 # ── Tick : durée = tours du porteur ──────────────────────────────────────────────
 
 def test_effet_expire_apres_sa_duree_en_tours_du_porteur():
