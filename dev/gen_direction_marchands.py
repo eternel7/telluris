@@ -84,7 +84,9 @@ NOEUDS_DIALOGUE_DIRECTION = {
 		],
 	},
 	"direction_type_inconnu": {
-		"texte": "« Alors je ne connais pas de magasin de ce type, {prenom}. »",
+		# Tout lieu de la ville, pas seulement les magasins (`transport.lieux_par_type`, Auteur 05/11) :
+		# delta en base par `dev/gen_direction_type_inconnu.py`.
+		"texte": "« Alors je ne vois aucun endroit de ce genre en ville, {prenom}. »",
 		"choix": _SUITE,
 	},
 }
