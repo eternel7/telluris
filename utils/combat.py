@@ -13,7 +13,7 @@ from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import (
 	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, tirer_poids, item_ref_id,
 	lieu_label, noter_victoire, resolve_item_ref, recompute_equipment_bonus, autre_main,
-	credit_character, marquer_joue,
+	credit_character, marquer_joue, charge_max_of,
 )
 from utils.consommables import (
 	caracts_avec_buffs, canalisation_bonus, est_consommable, effet_instantane, effets_de,
@@ -3430,8 +3430,8 @@ def _profil_arme_monstre(monstre: dict) -> dict:
 
 def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 	# Buffs de consommables inclus : un combat démarré pendant un buff en profite
-	# intégralement (pv_max, cc, dégâts, initiative, actions, déplacement — et donc
-	# charge_max, bonus de portage en combat seulement). Ces effets sont désormais VIVANTS
+	# intégralement (pv_max, cc, dégâts, initiative, actions, déplacement) — mais PAS
+	# charge_max, brute comme en exploration (charge_max_of). Ces effets sont désormais VIVANTS
 	# dans le snapshot : décrémentés au tour de leur porteur (_tick_effets_combat) puis
 	# reversés sur le personnage (_finalize_membre). Une potion bue juste avant d'entrer
 	# ne dure donc plus tout le combat.
@@ -3457,8 +3457,13 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 	derived = compute_derived_stats(base, niveau=voc_niveau, equipment=equipment)
 
 	# Charge portée à l'entrée en combat → malus de déplacement si > charge_max/2.
+	# ⚠️ `charge_max_of` (Force BRUTE, CLAUDE.md §3), jamais `derived.charge_max` qui lit la
+	# Force buffée (équipement, potions) : la répartition du butin (/collect) borne sur
+	# cette valeur, et l'inventaire d'exploration sur `charge_max_of` — un bijou de F
+	# promettait sinon des kilos que l'inventaire déclarait ensuite en surcharge.
 	charge = round(carried_weight(character), 2)
-	deplacement = _charge_penalized_deplacement(derived.deplacement, charge, derived.charge_max)
+	charge_max = charge_max_of(character)
+	deplacement = _charge_penalized_deplacement(derived.deplacement, charge, charge_max)
 	# Charge MAGIQUE (poids × coefficient `charge_magique` des items) et aide à la
 	# canalisation : figées sur le snapshot parce que la résolution d'un coup n'a PAS le
 	# droit de lire la base. Recalculées aux mêmes deux sites que `charge` (ramassage,
@@ -3502,7 +3507,7 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"deplacement": deplacement,            # après malus de charge
 		"deplacement_base": derived.deplacement,  # sans malus (pour recalcul au ramassage)
 		"charge": charge,
-		"charge_max": derived.charge_max,
+		"charge_max": charge_max,
 		"charge_magique": charge_mag,
 		"canalisation": canalisation,
 		"portee": portee_cac,
@@ -4124,7 +4129,7 @@ def create_combat_doc(
 		snap["est_monture"] = True
 		snap["deplacement"] = 0
 		snap["deplacement_base"] = 0
-		# `derived.charge_max` vaut F×5 : sur une monture il faut le multiplicateur
+		# `charge_max_of` vaut F×5 : sur une monture il faut le multiplicateur
 		# d'espèce, sinon la répartition du butin de fin lui refuserait des carcasses
 		# qu'elle peut parfaitement porter (/collect borne sur CETTE valeur).
 		snap["charge_max"] = montures_util.charge_max_porteur(m)
