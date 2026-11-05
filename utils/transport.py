@@ -313,12 +313,13 @@ def choix_suggestions(noms: list, noeud_id: str, choix_id: str) -> list:
 
 
 # ---------------------------------------------------------------------------
-# Demander son chemin PAR TYPE de magasin (même service `direction`)
+# Demander son chemin PAR TYPE de lieu (même service `direction`)
 # ---------------------------------------------------------------------------
-# Le « type » d'un magasin est sa `categorie` (aucun libellé en base : l'identifiant fait foi,
-# underscores lus comme des espaces — cf. routers/proprietes.categorie_label). Le PNJ ne
-# connaît que les types des MAGASINS de sa ville (`tient_boutique`, négociant compris),
-# hors sa propre boutique. La réponse a la forme de la demande par nom (nœud `trouve`).
+# Le « type » d'un lieu est sa `categorie` (aucun libellé en base : l'identifiant fait foi,
+# underscores lus comme des espaces — cf. routers/proprietes.categorie_label). Le PNJ
+# connaît les types de TOUS les lieux de sa ville (`lieux_par_type` : magasins, négociant,
+# mais aussi temples, auberges, guilde, portes), hors sa propre boutique. La réponse a la
+# forme de la demande par nom (nœud `trouve`).
 
 # Distance de Levenshtein maximale pour proposer « Vous cherchez … ? » sur une saisie qui
 # n'est le nom d'aucun type connu (règle de l'Auteur : 3 au plus).
@@ -373,6 +374,14 @@ def magasins_par_type(giver_doc: dict, find_docs_fn, est_magasin_fn=None) -> dic
 			continue
 		par_type.setdefault(d["categorie"], []).append((d["_id"], lieu_label(d, d["_id"])))
 	return par_type
+
+
+def lieux_par_type(giver_doc: dict, find_docs_fn) -> dict:
+	"""{categorie: [(lieu_id, libellé), …]} — TOUS les lieux de la ville de `giver_doc` (lui
+	exclu), groupés par type : temple, auberge, guilde, porte de rempart… et pas seulement les
+	magasins. C'est le vivier du service `direction` (Auteur, 05/11) ; un marchand indique
+	tout lieu de sa ville, comme la recherche par nom (`chercher_lieu_nomme`)."""
+	return magasins_par_type(giver_doc, find_docs_fn, lambda _d: True)
 
 
 def chercher_type(nom: str, categories) -> dict:

@@ -1,0 +1,813 @@
+[
+  {
+    "_id": "pnj:borin_barbe_de_jais",
+    "type": "pnj",
+    "nom": "Borin Barbe-de-Jais",
+    "race": "nain",
+    "vocation": "receptionniste",
+    "portrait": "nain_m_receptioniste01.png",
+    "description": "Réceptionniste du Bastion de l'Yonne. Ses yeux pétillent d'une malice bienveillante, mais rien n'échappe à son regard.",
+    "services": {
+      "transport": {
+        "offre": {
+          "id": "quete:transport_borin_premiere_mission",
+          "destination": "lieu:fumee_de_l_yonne",
+          "cargaison": [
+            {
+              "item": "item:viande_sanglier_gobelin",
+              "quantite": 2,
+              "poids": 5
+            }
+          ],
+          "duree": 3600,
+          "proba": 1,
+          "unique": true,
+          "retour": true,
+          "rang": "F",
+          "titre": "Première mission : les caisses du Bastion",
+          "description": "Borin Barbe-de-Jais vous confie deux caisses de viande de sanglier-gobelin — dix bons kilos — à porter au fumoir de la Guilde, Fumée de l'Yonne. Elles y deviendront les provisions des expéditions. Revenez ensuite lui en rendre compte au comptoir : ce n'est pas la viande qu'il met à l'épreuve.",
+          "recompenses": {
+            "xp": 30,
+            "cuivre": 200,
+            "items": [
+              {
+                "item": "item:carte_aventurier",
+                "poids": 0.05,
+                "lieu_parent": "auto"
+              }
+            ],
+            "rang_guilde": "F"
+          }
+        },
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "rapporte": "transport_rapporte"
+        }
+      },
+      "rang": {
+        "noeuds": {
+          "propose": "rang_propose",
+          "accepte": "rang_accepte",
+          "rapporte": "rang_rapporte"
+        }
+      },
+      "acces": {
+        "lieu": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+        "noeuds": {
+          "ouvre": "acces_ouvre",
+          "refus": "acces_refus",
+          "deja": "acces_deja"
+        }
+      },
+      "escorte": {
+        "recherche": {
+          "cite": "lieu:auxerre",
+          "proba": 0.25,
+          "recompenses": {
+            "xp": 30,
+            "cuivre": 250
+          }
+        },
+        "noeuds": {
+          "accepte": "escorte_acceptee"
+        }
+      },
+      "apport": {
+        "offre": {
+          "id": "quete:la_bete_de_dun_les_places",
+          "titre": "La bête de Dun-les-Places",
+          "description": "Une bête décime les troupeaux de Dun-les-Places, au fond des forêts du Morvan, et a tué un jeune berger. Les villageois parlent de loup-garou. Trouvez où elle se couche — la vieille Jacotte, la meneuse de loups, le sait peut-être — et rapportez sa tête à Borin Barbe-de-Jais, au comptoir du Bastion de l'Yonne.",
+          "item": "item:loup_garou_tete",
+          "quantite": 1,
+          "unique": true,
+          "recompenses": {
+            "xp": 70,
+            "cuivre": 800
+          }
+        },
+        "noeuds": {
+          "accepte": "morvan_accepte",
+          "partiel": "morvan_partiel",
+          "remis": "morvan_remis"
+        }
+      },
+      "don": {
+        "item": "item:carte_aventurier",
+        "quantite": 1,
+        "cout_cuivre": 0,
+        "lieu_parent": "auto",
+        "unique": true,
+        "noeuds": {
+          "fait": "carte_remplacee",
+          "remplacement": "carte_remplacee",
+          "sans_fonds": "carte_sans_fonds",
+          "trop_charge": "carte_trop_charge"
+        },
+        "rang_guilde": "F"
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le nain vous observe quelques secondes avant d'esquisser un sourire. « Bienvenue au Bastion de l'Yonne ! Approche donc, {prenom}. Tu viens chercher fortune, ou simplement vérifier que les histoires sont vraies ? »",
+          "choix": [
+            {
+              "id": "mission",
+              "label": "Je voudrais devenir aventurier.",
+              "next": "premiere_mission",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "rapport",
+              "label": "C'est fait. {destinataire} a sa viande.",
+              "action": {
+                "service": "transport",
+                "op": "rapporter"
+              },
+              "condition": {
+                "transport_a_rapporter": true
+              }
+            },
+            {
+              "id": "relance",
+              "label": "Où en est ma livraison, déjà ?",
+              "next": "transport_relance",
+              "condition": {
+                "transport_en_cours": true
+              }
+            },
+            {
+              "id": "veteran",
+              "label": "Vous vous souvenez de moi ?",
+              "next": "transport_veteran",
+              "condition": {
+                "transport_accompli": true
+              }
+            },
+            {
+              "id": "rang_proposer",
+              "label": "Une épreuve pour m'élever dans la Guilde ?",
+              "next": "rang_propose",
+              "condition": {
+                "rang_offert": true
+              }
+            },
+            {
+              "id": "rang_rapporter",
+              "label": "C'est fait. Le « {espece} {rang_vise} » a fini couché.",
+              "action": {
+                "service": "rang",
+                "op": "rapporter"
+              },
+              "condition": {
+                "rang_a_rapporter": true
+              }
+            },
+            {
+              "id": "rang_sommet",
+              "label": "Reste-t-il une épreuve à ma hauteur ?",
+              "next": "rang_sommet",
+              "condition": {
+                "rang_max": true
+              }
+            },
+            {
+              "id": "acces_passer",
+              "label": "Je voudrais voir le maître de la Guilde.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "acces_deja",
+              "label": "Je remonte au bureau.",
+              "condition": {
+                "acces_ouvert": true
+              },
+              "next": "acces_deja"
+            },
+            {
+              "id": "acces_pourquoi",
+              "label": "Qui dirige la Guilde, ici ?",
+              "condition": {
+                "acces_refuse": true
+              },
+              "next": "acces_refus"
+            },
+            {
+              "id": "escorte_offre",
+              "label": "Un avis de recherche, peut-être ?",
+              "next": "escorte_propose",
+              "condition": {
+                "escorte_offerte": true
+              }
+            },
+            {
+              "id": "escorte_relance",
+              "label": "Au sujet de {protege}…",
+              "next": "escorte_relance",
+              "condition": {
+                "escorte_en_cours": true
+              }
+            },
+            {
+              "id": "bucherons_appel",
+              "label": "On me dit que le maître de la Guilde me cherche ?",
+              "condition": {
+                "acces_ouvrable": true,
+                "relation_min": {
+                  "lieux": [
+                    "lieu:le_bastion_de_l_yonne_comptoir"
+                  ],
+                  "seuil": 51
+                },
+                "quete_active": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                }
+              },
+              "next": "bucherons_appel"
+            },
+            {
+              "id": "bucherons_appel_habitue",
+              "label": "On me dit que le maître de la Guilde me cherche ?",
+              "condition": {
+                "acces_ouvert": true,
+                "relation_min": {
+                  "lieux": [
+                    "lieu:le_bastion_de_l_yonne_comptoir"
+                  ],
+                  "seuil": 51
+                },
+                "quete_active": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                }
+              },
+              "next": "bucherons_appel"
+            },
+            {
+              "id": "morvan_offre",
+              "label": "« Il paraît qu'une bête court le Morvan ? »",
+              "condition": {
+                "apport_offert": true,
+                "rang_min": {
+                  "cite": "lieu:auxerre",
+                  "rang": "E"
+                }
+              },
+              "next": "morvan_propose"
+            },
+            {
+              "id": "morvan_rappel",
+              "label": "« Dun-les-Places… rappelle-moi. »",
+              "condition": {
+                "apport_en_cours": true,
+                "apport_possible": false
+              },
+              "next": "morvan_rappel"
+            },
+            {
+              "id": "morvan_remettre",
+              "label": "« Voilà la tête de ta bête. »",
+              "condition": {
+                "apport_possible": true
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
+              "id": "morvan_souvenir",
+              "label": "« Des nouvelles du Morvan ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:la_bete_de_dun_les_places"
+                }
+              },
+              "next": "morvan_souvenir"
+            },
+            {
+              "id": "carte_perdue",
+              "label": "« J'ai… perdu ma carte d'aventurier. »",
+              "condition": {
+                "don_a_remplacer": true
+              },
+              "action": {
+                "service": "don"
+              }
+            },
+            {
+              "id": "mine_temple",
+              "label": "« Par où descend-on à la mine ? »",
+              "next": "mine_temple",
+              "condition": {
+                "commission_donjon": "donjon:mine_de_saint_austrelin"
+              }
+            },
+            {
+              "id": "dun_les_places",
+              "label": "« Où se trouve Dun-les-Places ? »",
+              "next": "dun_les_places",
+              "condition": {
+                "apport_en_cours": false
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "premiere_mission": {
+          "texte": "« Beaucoup le disent. Peu comprennent ce que cela signifie. » Il ouvre un grand registre relié de cuir et y inscrit soigneusement votre nom. « Les recrues pensent souvent que leur première mission sera de tuer un monstre. C'est faux. Avant de savoir combattre, il faut apprendre à être digne de confiance. »",
+          "choix": [
+            {
+              "id": "ecouter",
+              "label": "Qu'attendez-vous de moi ?",
+              "next": "transport_propose"
+            },
+            {
+              "id": "refuser",
+              "label": "Je préfère chercher fortune ailleurs.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "Borin disparaît derrière une porte donnant sur les réserves, et revient avec {colis} solides caisses de bois fermées par des courroies de cuir. Une odeur puissante s'en échappe. « {poids} kilos de viande de sanglier-gobelin, toute fraîche. Tu la livreras au fumoir de la Guilde. Destination : {destination}. Tu as {delai} minutes — après, la marchandise ne vaut plus rien, et ce ne sont pas deux caisses qui disparaissent : ce sont les provisions de tes futurs compagnons. » Il glisse un jeton de cuivre dans votre main. « {xp} points d'expérience et {prime} pièces de cuivre à ton retour. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Ce n'est... qu'une livraison.",
+              "next": "transport_lecon"
+            }
+          ]
+        },
+        "transport_lecon": {
+          "texte": "Le sourire du nain s'efface doucement. « Tu crois ? » Il se penche vers vous. « Les plus grands héros commencent rarement en terrassant un dragon. Ils commencent en accomplissant parfaitement une tâche que tout le monde croit ordinaire. » Puis il reprend son éternel sourire. « Et entre nous... l'odeur attirera sans doute quelques renards, des chiens errants, peut-être même un jeune loup ou deux. Tu devras garder la tête froide. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "Donnez-moi ces caisses.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas aujourd'hui.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "Il pose un doigt épais sur une carte de la région. « Tu quitteras la ville et tu suivras la route : c'est {direction}. Le bâtiment de pierre aux hautes cheminées, tu ne peux pas le manquer. Présente le jeton à {destinataire} : on saura que tu viens de notre part. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "Borin contourne le comptoir et vous aide à charger les {colis} caisses dans une solide hotte de portage. « Destination : {destination}, dans les {delai} minutes. Et reviens me voir ensuite : je veux te l'entendre dire. Tu découvriras bientôt une vérité que tous les vétérans connaissent. » Il vous adresse un clin d'œil et referme son registre.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_rapporte": {
+          "texte": "Le vieux nain rouvre son grand registre et trace une ligne à côté de votre nom. « Les caisses sont arrivées, et à l'heure. » Il fait glisser sur le chêne une plaque de cuir bouilli frappée du blason du Bastion, puis {prime} pièces de cuivre. « Ce n'était pas la viande que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. Les aventuriers capables de protéger une simple cargaison sont souvent ceux à qui l'on confiera, un jour, des compagnons... et peut-être le destin d'une cité entière. » Il désigne le grand tableau de la salle commune. « Rang F, le cuivre — le premier échelon, celui par lequel tout le monde a commencé. Va choisir ta prochaine quête. Tu es des nôtres. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "Le nain soupèse votre barda d'un regard et éclate de rire. « Par les enclumes des anciens ! Tu ploies déjà sous ton propre bagage, {prenom}. Déleste-toi et reviens : la viande ne s'envolera pas... enfin, pas tout de suite. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai le sac plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_relance": {
+          "texte": "Borin lève un sourcil au-dessus de son registre. « Toujours là ? Ces caisses ne se porteront pas toutes seules. Destination : {destination}, c'est {direction}. Il te reste {delai} minutes, et la viande n'attend pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y cours.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_veteran": {
+          "texte": "« Si je me souviens de toi ? » Le vieux nain caresse distraitement une tresse de sa barbe noire de jais. « {destinataire} a reçu sa viande, et à l'heure. Ce n'était pas la marchandise que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. » Il tapote la couverture de son registre. « Ton nom y est toujours. Ceux qui tiennent parole, je ne les raye jamais. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_propose": {
+          "texte": "Borin referme son registre et vous jauge d'un œil neuf. « Tu veux t'élever dans la Guilde, {prenom} ? Alors il te faut une prise digne de ce nom. Nos éclaireurs ont repéré un {espece} d'exception qui écume {lieu} — une bête énorme, couverte du sang de ses victimes. Ramène-moi sa dépouille et le rang {rang_vise} sera à toi. {xp} points d'expérience à la clef, et la fierté qui va avec. »",
+          "choix": [
+            {
+              "id": "rang_accepter",
+              "label": "Je m'en occupe.",
+              "action": {
+                "service": "rang",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "rang_reflechir",
+              "label": "Une telle bête... laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "rang_accepte": {
+          "texte": "« Bien. » Le nain grave quelque chose à côté de votre nom. « La bête rôde du côté de {lieu}. Ne reviens pas sans sa dépouille — et reviens en un seul morceau, {prenom} : ce serait un comble de perdre une recrue prometteuse sur une épreuve de rang. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_rapporte": {
+          "texte": "Borin examine la dépouille encore fumante, hoche lentement la tête, puis trace une marque nette sur votre plaque de cuir bouilli. « Peu en reviennent, {prenom}. Toi, si. » Il repousse le registre. « Te voilà rang {rang}. La Guilde n'oublie pas ceux qui montent — et elle en attend d'autant plus. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_sommet": {
+          "texte": "Le vieux nain éclate d'un rire franc qui fait trembler sa barbe de jais. « Une épreuve à ta hauteur ? {prenom}, tu es rang {rang} — le plus haut que le Bastion sache reconnaître. » Il redevient sérieux et tapote la couverture de son registre. « Ce n'est pas de la fausse modestie : nos bois et nos collines n'abritent plus rien qui puisse te grandir. Pour monter au-delà, il te faudra une autre guilde, dans une autre cité, et du gibier à la mesure. Le Bastion, lui, gardera ton nom. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un honneur.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_ouvre": {
+          "texte": "« Rang {rang}, et mon registre en témoigne. » Borin repose sa plume, se hisse sur la pointe des pieds et désigne l'escalier du fond. « Monte. C'est là-haut : {portail}. Frappe, entre, et surtout — écoute. On ne ressort jamais de ce bureau sans avoir appris quelque chose, même quand on croyait n'y venir que pour un contrat. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Monter l'escalier.",
+              "next": "fin",
+              "deplacer": "lieu:bureau_du_maitre_de_guilde_d_auxerre"
+            }
+          ]
+        },
+        "acces_refus": {
+          "texte": "Le nain referme son registre d'un coup sec. « Le maître de la Guilde, {prenom} ? Son bureau n'est pas une salle d'attente. On y monte quand la Guilde sait ce qu'on vaut — rang D, pas moins. Tu en es à {rang}. » Il se radoucit et tapote la couverture de cuir. « Fais allonger la ligne à côté de ton nom. Je t'y conduirai moi-même. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y travaille.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_deja": {
+          "texte": "« Je sais, je sais — tu connais le chemin. » Il agite sa plume vers l'escalier du fond sans même relever la tête. « Monte, {prenom}. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Monter l'escalier.",
+              "next": "fin",
+              "deplacer": "lieu:bureau_du_maitre_de_guilde_d_auxerre"
+            }
+          ]
+        },
+        "escorte_propose": {
+          "texte": "Borin fait glisser un registre plus mince que les autres et l'ouvre à une page cornée. « Celui-là, je n'aime pas le tenir. » Il tourne le livre vers vous. « {protege}. Une famille d'Auxerre, un enfant qui n'est pas rentré. On a vu l'enfant du côté de {lieu_rencontre}. La Guilde paie ceux qui les ramènent — et elle se souvient de ceux qui les ramènent vivants. »",
+          "choix": [
+            {
+              "id": "escorte_details",
+              "label": "Où, exactement ?",
+              "next": "escorte_details"
+            },
+            {
+              "id": "escorte_refuser",
+              "label": "Ce n'est pas pour moi.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_details": {
+          "texte": "« {direction}. » Le doigt épais s'arrête et ne bouge plus. « Tu rendras l'enfant à sa famille, pas à moi : {destinataire}, à : {destination}. Moi, je me contente d'inscrire que c'est fait — {xp} points d'expérience et {prime} pièces de cuivre ce jour-là. »",
+          "choix": [
+            {
+              "id": "escorte_accepter",
+              "label": "Je m'en charge.",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "escorte_refuser",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_acceptee": {
+          "texte": "Le nain trace une croix dans la marge et souffle sur l'encre. « C'est noté à ton nom. » Le sourire revient, un peu plus grave que d'habitude. « Une chose, {prenom} : {protege} ne se battra pas et ne pourra pas s'enfuir. Ce n'est pas un colis — ramène l'enfant, pas son panier. »",
+          "choix": [
+            {
+              "id": "partir",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Encore une chose, Borin…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_relance": {
+          "texte": "« Toujours en chemin ? » Le registre reste ouvert à la page cornée. « Cherche {direction}. Et souviens-toi : c'est à : {destination} qu'on attend, pas ici. Une croix dans mon livre ne vaut rien tant que la porte ne s'est pas rouverte. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "J'y retourne.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Je m'en occupe.",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_appel": {
+          "texte": "« Hé ! Toi. Oui, toi. » Le nain pose le registre qu'il compulsait et se penche par-dessus le comptoir. « Le maître de la guilde te cherche. » Il lève une main avant que vous ayez ouvert la bouche. « Et avant que tu demandes : non, ce n'est ni une histoire de dette, ni une bagarre de taverne, ni un poulet volé. » Il marque un temps. « Cette fois, c'est sérieux. »",
+          "choix": [
+            {
+              "id": "quoi",
+              "label": "« Que me veut-il ? »",
+              "next": "bucherons_appel_qui"
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Il attendra. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_appel_qui": {
+          "texte": "« Il ne m'a rien expliqué. Il a seulement dit de t'envoyer le voir dès que tu mettrais les pieds ici. » Le ton descend d'un cran, et la malice avec. « Ça concerne des gens qui ne sont pas revenus de la forêt. »",
+          "choix": [
+            {
+              "id": "aventuriers",
+              "label": "« Des aventuriers ? »",
+              "next": "bucherons_appel_escalier"
+            },
+            {
+              "id": "monter",
+              "label": "« J'y vais. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_appel_escalier": {
+          "texte": "« Des bûcherons. Trois hommes. » Borin referme le registre d'un geste. « Ils coupent pour plusieurs exploitants de la région, ils connaissent ces bois depuis toujours, et voilà deux jours qu'on les attend. Ça commence à faire beaucoup de temps, pour des gens qui ne se perdent pas. » Il désigne du pouce l'escalier du fond. « Le maître de la guilde est dans son bureau. Monte. Il te dira le reste. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Merci, Borin. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Monter l'escalier.",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_propose": {
+          "texte": "Borin pose sur le comptoir une lettre au papier taché, pliée en quatre. « Ça vient de Dun-les-Places, dans le Morvan. Des hameaux de charbonniers au fond des bois, à quatre jours d'ici. » Il tapote le papier. « Une bête leur mange les moutons depuis la dernière lune. Ils ont doublé les pieux des enclos ; elle a arraché la porte de la bergerie. Et la semaine passée, elle a tué un berger. Un gamin. » Il lève les yeux vers vous. « Ils disent loup-garou. Ils disent toujours loup-garou, là-haut. »",
+          "choix": [
+            {
+              "id": "details",
+              "label": "« Et vous, vous y croyez ? »",
+              "next": "morvan_details"
+            },
+            {
+              "id": "accepter",
+              "label": "« J'y vais. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas tout de suite. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "morvan_details": {
+          "texte": "« Moi ? » Borin hausse ses larges épaules. « J'ai vu des loups gros comme des veaux, dans les forêts de l'est. J'ai vu des gens courir les bois les nuits de pleine lune, aussi, et revenir au matin les mains griffées. Je ne sais pas ce que c'était. » Il replie la lettre. « La Guilde paie au résultat, comme les primes au loup d'autrefois : tu me rapportes {objet}, et on écrit ce que c'était dans le registre. Là-haut, va voir la vieille Jacotte. On dit qu'elle mène les loups. Si quelqu'un sait où la bête se couche, c'est elle. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« J'y vais. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas tout de suite. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "morvan_accepte": {
+          "texte": "Borin inscrit votre nom au registre, d'une écriture lourde et appliquée. « Par la porte du sud-est, et puis les bois, toujours les bois. » Il ajoute, sans relever la tête : « Prends une bonne lame. Une bête comme ça, tu ne la ramèneras pas entière sur ton dos. La tête suffit. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Compris. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_rappel": {
+          "texte": "« Dun-les-Places, au sud-est, dans le Morvan. Demande la vieille Jacotte. Et moi, j'attends {objet}, pas une histoire de veillée. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_partiel": {
+          "texte": "Borin regarde ce que vous posez sur le comptoir. « Il en manque. Encore {reste}. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_remis": {
+          "texte": "Borin défait le linge et recule d'un demi-pas. La tête est celle d'un loup, mais trop large, le front trop haut, et les yeux, à demi clos, n'ont pas tout à fait la couleur d'un œil de bête. Il la recouvre. « Loup-garou », dit-il, et il l'écrit au registre. Il pousse vers vous {prime} pièces de cuivre et porte {xp} points à votre nom. Puis, plus bas : « Ou un très grand loup. C'est ce qu'ils diront, là-haut, la moitié d'entre eux. Moi, j'écris ce que la Guilde a payé. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Ça me va. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "morvan_souvenir": {
+          "texte": "« Plus une brebis de perdue, à ce qu'on m'écrit de Dun-les-Places. » Borin lisse une natte de sa barbe. « Et leur charbonnier n'est jamais revenu. Ils ont brûlé sa cabane. Moi, je dis que ça ne prouve rien, ni dans un sens ni dans l'autre. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "carte_trop_charge": {
+          "texte": "« Pas même la place d'une carte dans ton sac, {prenom} ? Allège-toi d'abord. Ton nom ne bougera pas du registre. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviens le sac plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "carte_sans_fonds": {
+          "texte": "« Une carte refaite ne coûte rien au Bastion, {prenom}. Si quelqu'un t'a dit le contraire, envoie-le-moi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai.",
+              "next": "fin"
+            }
+          ]
+        },
+        "carte_remplacee": {
+          "texte": "Borin vous regarde longuement, puis sa barbe se met à trembler. Le rire finit par sortir, énorme, et deux aventuriers se retournent au fond de la salle. « Perdue ! Hé, là-bas, écoutez-moi ça ! Ça m'a porté des caisses de sanglier jusqu'au fumoir sans en lâcher une, et ça me perd une plaque de cuir grande comme ma main ! » Il s'essuie les yeux, tire le registre à lui et grave une carte neuve sans même chercher votre nom : il le connaît. « Rang {rang}, comme avant. Ça, personne ne te le prendra. Mais attache-la, {prenom}. La prochaine que je refais, tu paies la tournée. »",
+          "choix": [
+            {
+              "id": "merci",
+              "label": "« Merci, Borin. »",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Autre chose…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "dun_les_places": {
+          "texte": "Borin tend un doigt épais vers le sud-est, comme si le mur du comptoir n'existait pas. « Dun-les-Places ? Un village de charbonniers, dans le Morvan. Tu remontes l'Yonne vers ses sources, au sud-est d'ici. Quand la rivière n'est plus qu'un ruisseau qu'on enjambe et que la forêt te barre l'horizon, tu y es : le village tient la lisière, juste avant les grands bois. Quatre jours de marche, si tes jambes valent les miennes. »",
+          "choix": [
+            {
+              "id": "merci",
+              "label": "« Merci, Borin. »",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Autre chose…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "mine_temple": {
+          "texte": "Borin jette un œil au sceau de Gautier, puis pointe le pouce vers l'est, par-dessus son épaule. « La mine ? On n'y entre pas par un trou dans la colline, {prenom} : on y descend par le Temple-Portail de Saint-Austrelin. Sors du Bastion et file à l'est, à travers la ville, jusqu'au parvis du temple. Passe le seuil du sanctuaire : un templier tient l'escalier du portail, montre-lui ta commission. Plus bas, un autre garde l'arche de la mine. Après, c'est toi et ce qui vit dans les galeries. »",
+          "choix": [
+            {
+              "id": "merci",
+              "label": "« Merci, Borin. »",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Autre chose…",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

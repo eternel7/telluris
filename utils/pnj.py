@@ -368,7 +368,8 @@ def _lieux_cites(pnj_doc: dict) -> set:
 def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 					  flags: dict | None = None, placeholders: dict | None = None,
 					  quetes_reussies: set | None = None,
-					  quetes_actives: set | None = None) -> dict:
+					  quetes_actives: set | None = None,
+					  donjons_commission: set | None = None) -> dict:
 	"""Contexte d'évaluation des conditions : relations du personnage avec les lieux
 	cités par l'arbre/les services (`relation_value_fn(lieu_id) -> int`, injectée par le
 	router) + raison d'intro éventuelle. Ajoute aussi `prenom` pour les placeholders.
@@ -407,6 +408,10 @@ def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 		# Lu par la condition `offre` : ids des offres que ce PNJ tient maintenant, posés sur
 		# la VUE du doc par `utils/offres.vue_pnj` (jamais en base).
 		"offres_retenues": set((pnj_doc or {}).get("_offres_retenues") or ()),
+		# Lu par la condition `commission_donjon` : donjon(s) visé(s) par la commission
+		# d'éradication EN COURS (ids générés, donc innommables par `quete_active`). Injecté
+		# par le router (`donjon.donjon_de_lieu`), même seam que les quêtes.
+		"donjons_commission": set(donjons_commission or ()),
 	}
 
 
@@ -416,7 +421,7 @@ def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 # linter serait signalée comme flag inconnu, et l'inverse ferait passer une faute en silence.
 CONDITIONS_STRUCTUREES = frozenset({
 	"relation_min", "intro_raison", "quete_reussie", "quete_active", "passages", "rang_min",
-	"offre"})
+	"offre", "commission_donjon"})
 
 # Les deux conditions qui nomment une QUÊTE : même forme `{id, attendu}`, même sémantique
 # fail-closed, seul l'ensemble consulté change — d'où UN prédicat partagé plutôt que deux
@@ -498,6 +503,13 @@ def condition_ok(condition: dict | None, contexte: dict) -> bool:
 		# plusieurs `offres` (utils/offres.py). Fail-closed : id non textuel ⇒ faux.
 		qid = condition["offre"]
 		if not isinstance(qid, str) or qid not in (contexte.get("offres_retenues") or ()):
+			return False
+	if "commission_donjon" in condition:
+		# Une commission d'éradication EN COURS vise-t-elle une salle de CE donjon ? Les ids de
+		# commission sont générés : seule cette forme permet à un tiers (Borin) d'y réagir.
+		# Fail-closed : id non textuel ⇒ faux.
+		did = condition["commission_donjon"]
+		if not isinstance(did, str) or did not in (contexte.get("donjons_commission") or ()):
 			return False
 	flags = contexte.get("flags") or {}
 	for cle, attendu in condition.items():
