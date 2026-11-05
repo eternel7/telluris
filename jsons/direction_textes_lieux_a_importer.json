@@ -325,7 +325,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -741,7 +741,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -1157,7 +1157,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -1573,7 +1573,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -1989,7 +1989,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -2405,7 +2405,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -2821,7 +2821,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -3237,7 +3237,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -3653,7 +3653,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -4069,7 +4069,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -4485,7 +4485,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -4901,7 +4901,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -5317,7 +5317,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -5733,7 +5733,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -6149,7 +6149,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -6565,7 +6565,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -7011,7 +7011,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -7427,7 +7427,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -7843,7 +7843,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -8259,7 +8259,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -8675,7 +8675,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -9091,7 +9091,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -9507,7 +9507,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -9923,7 +9923,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -10339,7 +10339,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -10755,7 +10755,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -11171,7 +11171,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -11587,7 +11587,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -12003,7 +12003,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -12419,7 +12419,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -12835,7 +12835,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -13251,7 +13251,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -13667,7 +13667,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -14083,7 +14083,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -14499,7 +14499,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -14915,7 +14915,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -15331,7 +15331,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -15747,7 +15747,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -16163,7 +16163,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -16579,7 +16579,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -16995,7 +16995,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -17142,7 +17142,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -17606,7 +17606,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -18022,7 +18022,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -18438,7 +18438,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -18854,7 +18854,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -19270,7 +19270,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -19686,7 +19686,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -20102,7 +20102,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
@@ -20518,7 +20518,7 @@
           ]
         },
         "direction_demande": {
-          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre de boutique ? »",
+          "texte": "« Je connais la ville comme ma poche, {prenom}. Quel lieu cherchez-vous ? Une enseigne, ou un genre d'endroit : un temple, une auberge, une boutique ? »",
           "choix": [
             {
               "id": "direction_chercher",
