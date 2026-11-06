@@ -16,12 +16,42 @@
 		{% include "part-root-css.html" without context %}
 		{% include "part-accessibility-css.html" without context %}
 		{% include "part-input-css.html" without context %}
-		
+		{% include "part-nav-css.html" without context %}
+
 		/* ── BASE & SCROLL LOCK ─────────────────────────────────── */
 		body {
 			padding: 20px;
+			/* Le bandeau du site est FIXE (part-nav-css) : la carte commence sous lui. */
+			padding-top: 72px;
 			box-sizing: border-box;
 			scrollbar-gutter: stable;
+		}
+
+		/* ── SORTIES : bandeau du site + « ⟵ Accueil » ──────────────── */
+		/* Le logo mène à l'accueil SANS déconnecter ; la déconnexion est un geste à part,
+		   visible aussi sur mobile (part-nav-css masque `.nav-links` sous 768px). */
+		.nav-droite { display: flex; align-items: center; gap: 36px; }
+		.nav-sortir {
+			font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+			color: var(--parch2); background: rgba(14, 11, 8, 0.6); cursor: pointer;
+			border: 1px solid var(--gold); border-radius: 2px; padding: 6px 12px;
+			transition: color 0.2s, border-color 0.2s;
+		}
+		.nav-sortir:hover, .nav-sortir:focus-visible { color: var(--gold2); border-color: var(--gold2); }
+		/* Même geste que les « ⟵ Retour » de /play : remonter d'un cran, ici vers l'accueil. */
+		.retour-accueil {
+			position: absolute; top: 14px; left: 14px; z-index: 2;
+			font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+			color: var(--bronze); text-decoration: none;
+			padding: 5px 12px; border: 1px solid var(--gold); border-radius: 2px;
+			background: rgba(255, 255, 255, 0.35);
+			transition: background 0.2s, color 0.2s;
+		}
+		.retour-accueil:hover, .retour-accueil:focus-visible { background: var(--gold); color: var(--parch); }
+		@media (max-width: 768px) {
+			body { padding-top: 64px; }
+			.nav-droite { gap: 16px; }
+			.retour-accueil { top: 10px; left: 10px; padding: 4px 9px; font-size: 11px; }
 		}
 		
 		#main-content {
@@ -199,6 +229,12 @@
 			display: grid;
 			grid-column-gap: 6px;
 			grid-row-gap: 6px;
+		}
+		/* ⚠️ part-nav-css style l'ÉLÉMENT `nav` (bandeau fixe) : la liste des personnages en
+		   est un aussi, on lui rend un flux normal. */
+		nav.char-list {
+			position: static; z-index: auto; padding: 0; background: none;
+			align-items: normal; justify-content: normal;
 		}
 		.char-card {
 			display: flex;
@@ -1063,9 +1099,21 @@
 		</filter>
 	</svg>
 	<a href="#main-content" class="skip-link">Aller au contenu principal</a>
+	<nav role="navigation" aria-label="Menu principal">
+		<a href="/" class="nav-logo">Telluris</a>
+		<div class="nav-droite">
+			<ul class="nav-links">
+				<li><a href="/#monde">Le monde</a></li>
+				<li><a href="/#guildes">Guildes</a></li>
+				<li><a href="/#vocations">Vocations</a></li>
+			</ul>
+			<button type="button" class="nav-sortir" onclick="seDeconnecter()">Se déconnecter</button>
+		</div>
+	</nav>
 	<main id="main-content">
 		<section class="user-main" aria-labelledby="User">
 		<div class="user-container">
+			<a href="/" class="retour-accueil" title="Revenir à l'accueil (vous restez connecté)">⟵ Accueil</a>
 			<div class="ornament"></div>
 			<div class="logo">{{ user_doc["username"] }}</div>
 			<div id="user-subtitle" class="subtitle">{{ user_doc["email"] }}</div>
@@ -1835,6 +1883,13 @@
 
 
 	// ── VOS FONCTIONS DE DESTINATION ──
+
+	// Déconnexion (bandeau) : révoque la session côté serveur, puis l'accueil. Hors ligne,
+	// on part quand même — le jeton d'accès expirera de lui-même.
+	async function seDeconnecter() {
+		try { await fetch('/api/auth/deconnexion', { method: 'POST' }); } catch (e) { /* hors ligne */ }
+		window.location.href = '/';
+	}
 
 	async function jouer(character, cindex) {
 		// Logique de selection cote serveur
