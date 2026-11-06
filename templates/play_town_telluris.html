@@ -691,14 +691,42 @@
 			border-color: var(--accent-color);
 			color: var(--accent-color);
 		}
+		/* « ⟵ Retour » (ex-« ✕ Fermer ») : remonter d'un cran, jamais quitter — d'où l'or et
+		   non le rouge. La sortie vers l'Emblème est un bouton à part (#retour-embleme). */
 		.close-sheet-btn {
 			flex-shrink: 0;
 			margin-left: 4px;
 			border-left: 2px solid var(--border-color);
 			position: relative;
-			color:#ff4757;
+			color: var(--accent-color);
 			margin-left:auto;
 		}
+		/* Fiche d'un compagnon : le même bouton rend la main au panneau 👥 (closeCompagnonSheet). */
+		.retour-lib-compagnon { display: none; }
+		body.sheet-compagnon .retour-lib-joueur { display: none; }
+		body.sheet-compagnon .retour-lib-compagnon { display: inline; }
+		/* 🛡 Emblème : dernier cran, à l'emplacement des « ⟵ Retour » des panneaux (bord droit
+		   du bandeau de titre). Plein et doré : c'est le seul bouton qui quitte /play. Le titre
+		   garde son centrage : le bandeau réserve la même marge des deux côtés. */
+		#game-container > .location-desc { position: relative; padding: 0 7.5rem; }
+		.retour-embleme {
+			position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+			display: inline-flex; align-items: center; gap: 5px;
+			padding: 4px 12px; border-radius: 4px; cursor: pointer;
+			font-family: 'Cinzel', serif; font-size: 0.8rem; font-weight: 700; white-space: nowrap;
+			background: var(--accent-color); color: #1a1408; border: 1px solid #b8860b;
+			transition: opacity .2s;
+		}
+		.retour-embleme:hover { filter: brightness(1.08); }
+		.retour-embleme:focus-visible { outline: 2px solid var(--text-color); outline-offset: 2px; }
+		/* Garde anti double-clic : inerte un instant après la fermeture d'un panneau. */
+		.retour-embleme.inerte { opacity: .45; cursor: wait; }
+		@media (max-width: 560px) {
+			#game-container > .location-desc { padding: 0 3rem; }
+			.retour-embleme { padding: 4px 8px; }
+			.retour-embleme-txt { display: none; }
+		}
+		.affichage-sep { height: 1px; margin: 4px 6px; background: var(--border-color); }
 		#close-sheet::before {
 			content: '';
 			position: absolute;
@@ -2051,6 +2079,10 @@
 	<div id="game-container" class="panel-frame">
 		<header class="location-desc" aria-label="Fiche personnage">
 			<h2>{{title}}</h2>
+			{# Dernier cran de « ⟵ Retour » : la liste des personnages. Même bord que les
+			   « ⟵ Retour » des panneaux, inerte un instant après leur fermeture (allerEmbleme). #}
+			<button type="button" id="retour-embleme" class="retour-embleme" onclick="allerEmbleme(this)"
+				title="Revenir à la liste de vos personnages" aria-label="Emblème : revenir à la liste de vos personnages"><span aria-hidden="true">🛡</span><span class="retour-embleme-txt">Emblème</span></button>
 		</header>
 		<main class="map-area{% if dimensions %} map-grille{% endif %}">
 			{% if dimensions %}
@@ -2097,6 +2129,11 @@
 							{# Porte de rempart franchie d'un geste : `passe_muraille` de `moveTo` (utils/passe_muraille.py). #}
 							<button type="button" role="menuitemcheckbox" class="affichage-item" id="affichage-passe-muraille" aria-checked="false" title="Une porte de rempart mène directement de l'autre côté du mur, sans passer par ses deux postes de garde" onclick="basculerPasseMurailleMenu()">🧱 Passe-muraille</button>
 							<button type="button" role="menuitem" class="affichage-item" id="affichage-fs" aria-pressed="false" hidden onclick="fermerMenuAffichage()"><span id="affichage-fs-ico" aria-hidden="true">⛶</span> <span id="affichage-fs-txt">Plein écran</span></button>
+							{# Sorties de /play : mêmes gestes que 🛡 du bandeau de titre (allerEmbleme), plus la
+							   déconnexion. Ici, aucune garde : ouvrir le menu est déjà un geste délibéré. #}
+							<span class="affichage-sep" role="separator"></span>
+							<button type="button" role="menuitem" class="affichage-item" onclick="allerEmbleme()">🛡 Changer de personnage</button>
+							<button type="button" role="menuitem" class="affichage-item" onclick="seDeconnecter()">🚪 Se déconnecter</button>
 						</span>
 					</span>
 				</h3>
@@ -2287,7 +2324,7 @@
 						<button class="sheet-tab-btn tab-principal-only" onclick="sheetTab('relations', this)"  role="tab">🤝 Relations</button>
 						<button class="sheet-tab-btn tab-principal-only" onclick="sheetTab('journal', this)"    role="tab">📖 Journal</button>
 					</div>
-					<button id="close-sheet" class="sheet-tab-btn close-sheet-btn" onclick="closeSheet()" role="button">✕ Fermer</button>
+					<button id="close-sheet" class="sheet-tab-btn close-sheet-btn" onclick="closeSheet()" role="button"><span class="retour-lib-joueur">⟵ Retour</span><span class="retour-lib-compagnon">⟵ Groupe</span></button>
 				</nav>
 				<div class="sheet-body">
 					<!-- ── STATS ── -->
@@ -2728,7 +2765,7 @@
 			<header class="location-desc" aria-label="Magasin - vente au marchand">
 			<h2>{{title}}</h2>
 			</header>
-			<button class="sheet-tab-btn  close-sheet-btn" style="" onclick="closeSellPanel()" role="button">✕ Fermer</button>
+			<button class="sheet-tab-btn  close-sheet-btn" style="" onclick="closeSellPanel()" role="button">⟵ Retour</button>
 		</div>
 		<div class="sh-finance-row">
 			<div class="sell-relation" id="sell-relation">🤝 Relation : —</div>
@@ -2810,7 +2847,7 @@
 			<header class="location-desc" aria-label="Guilde - tableau des quêtes">
 			<h2>📜 {{title}}</h2>
 			</header>
-			<button class="sheet-tab-btn close-sheet-btn" onclick="closeQuetesPanel()" role="button">✕ Fermer</button>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeQuetesPanel()" role="button">⟵ Retour</button>
 		</div>
 		<h2 style="margin:.6rem 0 0">⚔️ Quêtes en cours</h2>
 		<ul id="quetes-actives-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
@@ -2822,7 +2859,7 @@
 			<header class="location-desc" aria-label="Recrutement d'aventuriers">
 			<h2>🤝 {{title}}</h2>
 			</header>
-			<button class="sheet-tab-btn close-sheet-btn" onclick="closeRecrutementPanel()" role="button">✕ Fermer</button>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeRecrutementPanel()" role="button">⟵ Retour</button>
 		</div>
 		<h2 style="margin:.6rem 0 0">👥 Votre groupe (<span id="rec-plafond"></span>)</h2>
 		<div id="rec-groupe-list" class="cards-list"></div>
@@ -2834,7 +2871,7 @@
 			<header class="location-desc" aria-label="Montures de transport">
 			<h2>🐴 {{title}}</h2>
 			</header>
-			<button class="sheet-tab-btn close-sheet-btn" onclick="closeEtable()" role="button">✕ Fermer</button>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeEtable()" role="button">⟵ Retour</button>
 		</div>
 		<h2 style="margin:.6rem 0 0">🐴 Vos montures (<span id="mnt-plafond"></span>)</h2>
 		<div id="mnt-possedees-list" class="cards-list"></div>
@@ -2849,7 +2886,7 @@
 			<header class="location-desc" aria-label="Propriétés">
 			<h2>🏠 {{title}}</h2>
 			</header>
-			<button class="sheet-tab-btn close-sheet-btn" onclick="closeProprietes()" role="button">✕ Fermer</button>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeProprietes()" role="button">⟵ Retour</button>
 		</div>
 		<div id="prop-contenu"></div>
 	</div><!-- /#proprietes-panel -->
@@ -2861,7 +2898,7 @@
 			<header class="location-desc" aria-label="Coffre">
 			<h2>📦 {{title}}</h2>
 			</header>
-			<button class="sheet-tab-btn close-sheet-btn" onclick="closeCoffre()" role="button">✕ Fermer</button>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeCoffre()" role="button">⟵ Retour</button>
 		</div>
 		<p id="pcf-etat" class="q-desc"></p>
 		<div class="grp-inv-wrap">
@@ -2888,7 +2925,7 @@
 			<header class="location-desc" aria-label="Embauche">
 			<h2>🤝 {{title}}</h2>
 			</header>
-			<button class="sheet-tab-btn close-sheet-btn" onclick="closeEmbauche()" role="button">✕ Fermer</button>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeEmbauche()" role="button">⟵ Retour</button>
 		</div>
 		<h2 style="margin:.6rem 0 0">👥 Votre personnel (<span id="pem-plafond"></span>)</h2>
 		<div id="pem-employes" class="cards-list"></div>
@@ -2900,7 +2937,7 @@
 			<header class="location-desc" aria-label="Salle commune">
 			<h2>🍺 {{title}}</h2>
 			</header>
-			<button class="sheet-tab-btn close-sheet-btn" onclick="closeAuberge()" role="button">✕ Fermer</button>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeAuberge()" role="button">⟵ Retour</button>
 		</div>
 		<div id="aub-guides-bloc" hidden>
 			<h2 style="margin:.6rem 0 0">🧭 Guides locaux</h2>
@@ -2931,7 +2968,7 @@
 			<header class="location-desc" aria-label="Scriptorium">
 			<h2>🖋️ {{title}}</h2>
 			</header>
-			<button class="sheet-tab-btn close-sheet-btn" onclick="closeScriptorium()" role="button">✕ Fermer</button>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeScriptorium()" role="button">⟵ Retour</button>
 		</div>
 		<h2 style="margin:.6rem 0 0">✒️ Écrire un manuscrit</h2>
 		<div class="aub-ecrire">
@@ -2974,7 +3011,7 @@
 				<button class="sh-drop-btn" onclick="annulerRenommageCompagnie()">Annuler</button>
 			</div>
 			</header>
-			<button class="sheet-tab-btn close-sheet-btn" onclick="closeGroupe()" role="button">✕ Fermer</button>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeGroupe()" role="button">⟵ Retour</button>
 		</div>
 		<!-- Accordéon : une section ouverte à la fois (choix mémorisé par personnage). -->
 		<section class="acc-section">
@@ -3670,7 +3707,7 @@
 			   d'ouvrir — c'est le payload de `/api/pnj/dialogue` qui le nomme. #}
 			<h2>🗣 <span id="pnj-nom"></span></h2>
 			</header>
-			<button class="sheet-tab-btn close-sheet-btn" onclick="closePnjPanel()" role="button">✕ Fermer</button>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closePnjPanel()" role="button">⟵ Retour</button>
 		</div>
 		<div class="pnj-corps">
 			<img class="pnj-portrait" id="pnj-portrait" src="" alt="" style="display:none">
@@ -4698,6 +4735,45 @@
 		if (wrap && !wrap.contains(e.target)) fermerMenuAffichage();
 	});
 	document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerMenuAffichage(); });
+
+	// ── Sorties de /play : 🛡 Emblème et 🚪 déconnexion ──────────────────────────
+	// « ⟵ Retour » referme un panneau et rend la vue du lieu ; 🛡, au même bord, quitte /play.
+	// Garde anti double-clic : 🛡 reste INERTE `RETOUR_GARDE_MS` après que la vue du lieu
+	// réapparaît, sans quoi un double-clic sur « ⟵ Retour » ferait quitter la partie. Rien à
+	// sauver avant de partir : chaque action est déjà un POST. Échap ne quitte jamais (il
+	// referme les panneaux, cf. la cascade de keydown).
+	const RETOUR_GARDE_MS = 600;
+	let _lieuVisibleDepuis = 0;
+	function _emblemePermis(visibleDepuis, maintenant, garde) {
+		return maintenant - visibleDepuis >= garde;
+	}
+	function allerEmbleme(btn) {
+		if (btn && !_emblemePermis(_lieuVisibleDepuis, Date.now(), RETOUR_GARDE_MS)) return;
+		window.location.href = '/embleme';
+	}
+	async function seDeconnecter() {
+		fermerMenuAffichage();
+		try { await fetch('/api/auth/deconnexion', { method: 'POST' }); } catch (e) { /* hors ligne : on part quand même */ }
+		window.location.href = '/';
+	}
+	(function () {
+		const gc = document.getElementById('game-container');
+		const btn = document.getElementById('retour-embleme');
+		if (!gc || !btn) return;
+		let cache = gc.classList.contains('panel-hidden');
+		let minuteur = null;
+		new MutationObserver(() => {
+			const now = gc.classList.contains('panel-hidden');
+			if (cache && !now) {
+				_lieuVisibleDepuis = Date.now();
+				btn.classList.add('inerte');
+				clearTimeout(minuteur);
+				minuteur = setTimeout(() => btn.classList.remove('inerte'), RETOUR_GARDE_MS);
+			}
+			cache = now;
+		}).observe(gc, { attributes: true, attributeFilter: ['class'] });
+	})();
+
 	function _majMenuSons() {
 		const b = document.getElementById('affichage-son');
 		if (b) b.setAttribute('aria-checked', sonsCoupes() ? 'false' : 'true');
@@ -5372,7 +5448,7 @@ function openSheet() {
 	window.scrollTo({ top: 0, behavior: 'instant' });
 }
 function closeSheet() {
-	// En mode compagnon, ✕ Fermer (et Échap) rendent la main au groupe, pas à la ville :
+	// En mode compagnon, « ⟵ Retour » (et Échap) rendent la main au groupe, pas à la ville :
 	// on restaure d'abord la fiche du joueur (cf. closeCompagnonSheet).
 	if (_compagnonActif) { closeCompagnonSheet(); return; }
 	document.getElementById('game-container').classList.remove('panel-hidden');

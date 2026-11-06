@@ -143,6 +143,14 @@ Défini dans `play_town_telluris.html` seul (`combat_telluris.html` a le sien). 
 - ⚠️ **Double `requestAnimationFrame`** avant `.show` : une transition n'interpole rien sur un élément né dans la frame (même piège que les jetons de combat). Garde `prefers-reduced-motion` **locale** (ce template n'inclut pas `part-accessibility-css.html`).
 - Écrit en `textContent` : jamais d'`escapeHtml` (CLAUDE.md §9). `_fideliteSuffixe` / `_xpCompagnieSuffixe` restent — une vente et son bonus de fidélité sont **un** événement, pas deux.
 
+### Sorties — /play → Emblème → accueil
+Un cran à la fois, au bord DROIT du bandeau (là où était « ✕ Fermer ») :
+- **« ⟵ Retour »** (`.close-sheet-btn`, or et non rouge) : referme le panneau, ne quitte jamais. Fiche d'un compagnon : **« ⟵ Groupe »** (spans basculés par `body.sheet-compagnon`, aucun JS). Classe gardée : c'est le sélecteur du son `fermer`.
+- **🛡 Emblème** (`#retour-embleme`, bandeau de `#game-container`, plein et doré) : quitte `/play`. `allerEmbleme(this)` est **inerte `RETOUR_GARDE_MS`** après la réapparition de la vue du lieu (MutationObserver sur `#game-container`) — sinon un double-clic sur « ⟵ Retour » fait sortir. Échap ne quitte jamais. Sous 560 px : icône seule.
+- **Menu ⚙️** : « 🛡 Changer de personnage » (`allerEmbleme()` SANS bouton = sans garde) et « 🚪 Se déconnecter » (`seDeconnecter` → `POST /api/auth/deconnexion` → `/`). ⚠️ Menu absent hors `a_ligne_actions` : 🛡 du bandeau reste la sortie partout.
+- **/embleme** : bandeau du site (`part-nav-css` ; logo → `/` sans déconnecter, « Se déconnecter » visible aussi sur mobile, hors `.nav-links`) + « ⟵ Accueil » en coin de la carte. ⚠️ `part-nav-css` style l'**élément** `nav` : `nav.char-list` remis en flux normal, sinon la liste des personnages devient fixe et avale les clics.
+- Verrouillé par `dev/test_sorties_client.js` (garde, libellés, câblage, reset de `nav.char-list`).
+
 ### Sons d'action et musique — `scripts/sons.js`
 Brique partagée `/play` ↔ `/combat`. Les sons de **coup** (impacts, sorts) restent des docs `animation:*` joués par `jouerSon` (`telluris-combat` § Animations) ; ce module ne porte que les bruits d'interface et la musique.
 - **Sonothèque à plat** `templates/resources/sounds` (mount `/sounds`) : Fantasy Sound Library (MP3 — ses WAV sont les mêmes sons) et RPG Sound Pack (WAV, renommés `<dossier>-<nom>`, `npc-<créature>N`). ⚠️ Pas de sous-dossier : les URL passent par `encodeURIComponent` (`/` → `%2F`).
