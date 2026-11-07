@@ -204,6 +204,21 @@ def test_sans_cristal_rien_ne_bouge(rp):
 	assert c["lieu"] == ANCRAGE and not rp._arrivees
 
 
+def test_le_cristal_range_dans_un_contenant_paie_le_passage(rp, monkeypatch):
+	"""Un contenant ouvert est un porteur de plus (utils/contenants.py) : le cristal rangé
+	paie le passage — celui du sac d'abord — et le flag du dialogue le voit aussi."""
+	besace = {"_id": "item:besace", "nom": "Besace profonde", "contenant": {"capacite_kg": 100}}
+	sous = rp.get_doc
+	monkeypatch.setattr(rp, "get_doc", lambda i: besace if i == besace["_id"] else sous(i))
+	seuil = portails.seuils_ouverts(ARRIVEES, ANCRAGE, rp._t0)[0]
+	c = {"lieu": ANCRAGE, "position": {"x": 0, "y": 0},
+		 "inventaire": [{"item": "item:besace", "poids": 0.5, "contenu": [CRISTAL, "item:pain"]}]}
+	assert rp.quetes.compter_sacs(rp._sacs_portail(c), CRISTAL) == 1
+	assert rp._resoudre_portail(c, PNJ, {"_id": ANCRAGE}, "franchir", seuil["cle"], {}) == "ouvert"
+	assert c["lieu"] == seuil["lieu"]
+	assert c["inventaire"] == [{"item": "item:besace", "poids": 0.5, "contenu": ["item:pain"]}]
+
+
 def test_seuil_referme_ou_inconnu(rp):
 	c = {"lieu": ANCRAGE, "inventaire": [CRISTAL]}
 	assert rp._resoudre_portail(c, PNJ, {"_id": ANCRAGE}, "franchir", "inconnu", {}) == "ferme"

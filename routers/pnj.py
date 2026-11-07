@@ -348,8 +348,8 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		arrivees = _arrivees_portail(conf_p)
 		ouverts = arrivees if fixe else portails.seuils_ouverts(arrivees, conf_p.get("ancrage"), now)
 		cout = conf_p.get("cout") or {}
-		flags["cristal_jaune_porte"] = not cout.get("item") or quetes._count_inventaire(
-			character, cout["item"]) >= int(cout.get("quantite", 1) or 1)
+		flags["cristal_jaune_porte"] = not cout.get("item") or quetes.compter_sacs(
+			_sacs_portail(character), cout["item"]) >= int(cout.get("quantite", 1) or 1)
 		flags["seuils_ouverts"] = bool(ouverts)
 		placeholders["fermeture"] = (portails.texte_duree(ouverts[0]["ferme_dans_s"])
 									 if ouverts and not fixe else "—")
@@ -829,6 +829,13 @@ def _noeud_seuils(character: dict, pnj_doc: dict, lieu_doc: dict, contexte: dict
 	return noeud
 
 
+def _sacs_portail(character: dict) -> list:
+	"""De quoi payer le passage : le sac du personnage PUIS ses contenants ouverts — porteurs de
+	plus (utils/contenants.py). ⚠️ Pas les compagnons : c'est le voyageur qui paie, comme avant.
+	Le cristal du sac part d'abord."""
+	return contenants.avec_contenants([character], get_doc, quetes.now_epoch())
+
+
 def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, saisie,
 					  reponse: dict, guide_adieu: bool = False) -> str | None:
 	"""Service `portail`, op `franchir` : l'ancrage court-circuite le lien portail choisi et
@@ -858,7 +865,8 @@ def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, s
 		return noeuds.get("ferme")
 	cout = conf.get("cout") or {}
 	item_id, quantite = cout.get("item", ""), int(cout.get("quantite", 1) or 1)
-	if item_id and quetes._count_inventaire(character, item_id) < quantite:
+	sacs = _sacs_portail(character)
+	if item_id and quetes.compter_sacs(sacs, item_id) < quantite:
 		return noeuds.get("refus_cristal")
 	dest_doc = get_doc(seuil["lieu"])
 	if not dest_doc:
@@ -872,7 +880,8 @@ def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, s
 		reponse["guide_avertissement"] = avertir["guide_avertissement"]
 		return None
 	if item_id:
-		quetes.retirer_items(character, item_id, quantite)
+		quetes.retirer_items_sacs(sacs, item_id, quantite)
+		contenants.reporter(sacs)   # un cristal rangé quitte son contenant, sur le doc du personnage
 	arrivee = _effets_arrivee(character, seuil["lieu"],
 							  {"x": seuil["pos"][0], "y": seuil["pos"][1]}, dest_doc)
 	# Doc ANNEXE, sauvé après le personnage (déjà sorti de son groupe).
