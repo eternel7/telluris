@@ -716,12 +716,14 @@
 		.retour-lib-compagnon { display: none; }
 		body.sheet-compagnon .retour-lib-joueur { display: none; }
 		body.sheet-compagnon .retour-lib-compagnon { display: inline; }
-		/* ⟵ Emblème : dernier cran, collé au titre du lieu (il en fait partie : ni marge ni
-		   padding, l'écart vient du padding du h2). Fond noir du bandeau, simple cadre, flèche
-		   or comme les « ⟵ Retour » des panneaux — pas le SVG du pavé de déplacement.
-		   `align-self:center` : centrée verticalement si le titre passe sur deux lignes. */
+		/* ⟵ Emblème : dernier cran, au bout du titre du lieu (il en fait partie : ni marge ni
+		   padding), calé au fond à droite du bandeau. Fond noir, simple cadre, flèche or comme
+		   les « ⟵ Retour » des panneaux — pas le SVG du pavé de déplacement. Centrée
+		   verticalement (titre sur deux lignes compris). Le bandeau réserve la largeur du
+		   bouton des DEUX côtés : le titre reste centré et ne passe jamais dessous. */
+		#game-container > .location-desc { position: relative; padding: 0 var(--embleme-l); --embleme-l: 1.87rem; }
 		.retour-embleme {
-			flex: 0 0 auto; align-self: center;
+			position: absolute; right: 0; top: 50%; transform: translateY(-50%);
 			display: inline-flex; align-items: center; justify-content: center;
 			width: 1.7em; height: 1.7em; margin: 0; padding: 0;
 			font-size: 1.1rem; line-height: 1; cursor: pointer;
@@ -733,7 +735,10 @@
 		.retour-embleme:focus-visible { outline: 2px solid var(--text-color); outline-offset: 2px; }
 		/* Garde anti double-clic : inerte un instant après la fermeture d'un panneau. */
 		.retour-embleme.inerte { opacity: .45; cursor: wait; }
-		@media (max-width: 768px) { .retour-embleme { font-size: 0.9rem; } }
+		@media (max-width: 768px) {
+			#game-container > .location-desc { --embleme-l: 1.53rem; }
+			.retour-embleme { font-size: 0.9rem; }
+		}
 		.affichage-sep { height: 1px; margin: 4px 6px; background: var(--border-color); }
 		#close-sheet::before {
 			content: '';
@@ -2086,11 +2091,11 @@
 <body>
 	<div id="game-container" class="panel-frame">
 		<header class="location-desc" aria-label="Fiche personnage">
-			{# Dernier cran de « ⟵ Retour » : la liste des personnages. Fait partie du titre (à sa
-			   gauche), inerte un instant après la fermeture d'un panneau (allerEmbleme). #}
+			<h2>{{title}}</h2>
+			{# Dernier cran de « ⟵ Retour » : la liste des personnages. Fait partie du titre (calé
+			   au fond à droite), inerte un instant après la fermeture d'un panneau (allerEmbleme). #}
 			<button type="button" id="retour-embleme" class="retour-embleme" onclick="allerEmbleme(this)"
 				title="Revenir à la liste de vos personnages" aria-label="Emblème : revenir à la liste de vos personnages"><span aria-hidden="true">⟵</span></button>
-			<h2>{{title}}</h2>
 		</header>
 		<main class="map-area{% if dimensions %} map-grille{% endif %}">
 			{% if dimensions %}
@@ -4792,7 +4797,7 @@
 	document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerMenuAffichage(); });
 
 	// ── Sorties de /play : ⟵ Emblème et 🚪 déconnexion ──────────────────────────
-	// « ⟵ Retour » referme un panneau et rend la vue du lieu ; ⟵ du bandeau, collé au titre, quitte /play.
+	// « ⟵ Retour » referme un panneau et rend la vue du lieu ; ⟵ du bandeau, au même bord, quitte /play.
 	// Garde anti double-clic : ⟵ reste INERTE `RETOUR_GARDE_MS` après que la vue du lieu
 	// réapparaît, sans quoi un double-clic sur « ⟵ Retour » ferait quitter la partie. Rien à
 	// sauver avant de partir : chaque action est déjà un POST. Échap ne quitte jamais (il
