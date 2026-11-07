@@ -371,8 +371,8 @@ VALEURS = {
 
 # Docs déjà en base complétés par ce lot.
 MODIFS = {
-	"item:Crochet_serrurier": {"bonus_desamorcage": 5},
-	"item:Crochets": {"bonus_desamorcage": 10},
+	"item:Crochet_serrurier": {"bonus_desamorcage": 10},
+	"item:Crochets": {"bonus_desamorcage": 5},
 	# Existait sans effet (produite par l'armurerie) : elle gagne l'entretien de lame.
 	"item:Pierre_a_aiguiser": {"effets": {"buffs": {"F": 2}, "duree": 3}},
 }

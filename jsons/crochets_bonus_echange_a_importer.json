@@ -1,0 +1,28 @@
+[
+  {
+    "_id": "item:Crochets",
+    "type": "item",
+    "nom": "Crochets",
+    "sous_categorie": "",
+    "icon": "🔓",
+    "description": "Trousse de crochets fins, pour forcer les serrures.",
+    "rarete": "commun",
+    "categorie": "outil",
+    "slots": [],
+    "poids": 0.1,
+    "bonus_desamorcage": 5
+  },
+  {
+    "_id": "item:Crochet_serrurier",
+    "type": "item",
+    "nom": "Crochet de serrurier",
+    "sous_categorie": "",
+    "icon": "🔓",
+    "description": "Crochet de serrurier, pour les serrures dont on n'a pas la clé.",
+    "rarete": "commun",
+    "categorie": "outil",
+    "slots": [],
+    "poids": 0.05,
+    "bonus_desamorcage": 10
+  }
+]
