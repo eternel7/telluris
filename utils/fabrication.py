@@ -63,6 +63,85 @@ CLES_FACTEUR = ("poids", "valeur")
 
 CLES_MODIFIABLES = frozenset(CLES_ADDITIVES + CLES_FUSIONNEES + CLES_MAX + CLES_FACTEUR + ("rarete",))
 
+# ── Bonus selon la FAMILLE de la pièce ───────────────────────────────────────────
+# Une matière porte UN bloc de modificateurs, quelle que soit la pièce où elle entre ; la
+# pièce n'en retient que les bonus de SON rôle. Sans ce filtre, un casque en mithril donnait
+# +7 dégâts à toutes les attaques, et un fouet +6 PA — hors de toute zone, donc PARTOUT.
+# Bonus hors famille : ignoré si le base ne le porte pas, sinon la valeur finale est plafonnée
+# à base × `FABRICATION_PLAFOND_HORS_FAMILLE` (Dague de parade, Pelta : la matière renforce ce
+# que la pièce sait déjà faire, elle ne lui donne pas un rôle neuf).
+# `effets` n'est pas filtré ici : sa direction (cible vs porteur) est contrôlée par matière
+# à la génération (`dev/gen_fabrication_matieres.effets_mal_diriges`) et le lecteur d'une
+# pièce portée n'en lit que les clés de porteur. `restriction`, `poids`, `valeur` et `rarete`
+# ne sont pas des bonus : jamais filtrés.
+CLES_FILTREES_FAMILLE = CLES_ADDITIVES + ("bonus",)
+_PORTE = frozenset({"bonus_pv", "bonus_pm", "bonus"})
+CLES_PAR_FAMILLE = {
+	"arme": frozenset({"bonus_degats", "bonus_degats_dice", "bonus_cc", "bonus_cd", "portee",
+					   "bonus_initiative", "bonus"}),
+	"armure": _PORTE | {"bonus_pa", "bonus_malus_depl"},
+	"bijou": _PORTE,
+	"catalyseur": _PORTE,
+	"consommable": frozenset(),
+}
+# Emplacements d'une `armure` qui ne PROTÈGENT pas : une pièce qui n'occupe qu'eux est un bijou.
+SLOTS_BIJOU = frozenset({"cou", "ceinture", "anneau_1", "anneau_2"})
+
+
+def famille_piece(base_doc) -> str | None:
+	"""Famille de la pièce à façonner, au sens des bonus qu'elle peut recevoir (cf.
+	`CLES_PAR_FAMILLE`). `None` = catégorie hors de la table : aucun filtre (comportement
+	d'avant)."""
+	doc = base_doc or {}
+	categorie = doc.get("categorie")
+	if categorie == "armure":
+		slots = set(doc.get("slots") or [])
+		return "bijou" if slots and slots <= SLOTS_BIJOU else "armure"
+	return categorie if categorie in CLES_PAR_FAMILLE else None
+
+
+def _borne(base_val, val, plafond):
+	"""Valeur hors famille : celle du base si le base ne porte pas ce bonus (≤ 0), sinon
+	`val` plafonnée à base × plafond. Rend `None` quand la clé doit disparaître."""
+	b = _nombre(base_val)
+	if b <= 0:
+		return base_val if base_val is not None else None
+	return min(_nombre(val), b * plafond)
+
+
+def borner_hors_famille(base_doc, valeurs: dict) -> dict:
+	"""Applique la règle de famille aux bonus déjà composés (`valeurs`, mutée et rendue) :
+	clés de `CLES_FILTREES_FAMILLE` hors de la famille de `base_doc` ramenées au base ou
+	plafonnées. Source unique : `appliquer_modificateurs` et `dev/gen_bonus_famille_variantes.py`
+	(correction des variantes déjà en base)."""
+	famille = famille_piece(base_doc)
+	if famille is None:
+		return valeurs
+	permises = CLES_PAR_FAMILLE[famille]
+	plafond = float(character_stats.FABRICATION_PLAFOND_HORS_FAMILLE)
+	base = base_doc or {}
+	for cle in CLES_FILTREES_FAMILLE:
+		if cle in permises or cle not in valeurs:
+			continue
+		if cle == "bonus":
+			base_bonus = base.get("bonus") if isinstance(base.get("bonus"), dict) else {}
+			bonus = {}
+			for car, val in (valeurs.get("bonus") or {}).items():
+				borne = _borne(base_bonus.get(car), val, plafond)
+				if borne is not None:
+					bonus[car] = int(round(borne)) if isinstance(borne, float) else borne
+			if bonus:
+				valeurs["bonus"] = bonus
+			else:
+				valeurs.pop("bonus")
+			continue
+		borne = _borne(base.get(cle), valeurs[cle], plafond)
+		if borne is None:
+			valeurs.pop(cle)
+		else:
+			valeurs[cle] = int(round(borne)) if isinstance(borne, float) else borne
+	return valeurs
+
 # Bornes de sécurité : une matière ne peut pas transformer un objet en autre chose. Un dé de
 # dégâts reste un dé plausible, un facteur reste dans un ordre de grandeur crédible.
 DICE_MAX = 20
@@ -239,6 +318,7 @@ def appliquer_modificateurs(base_doc: dict, matieres_docs: list) -> dict:
 		nettoye = _nettoyer(val)
 		if nettoye:
 			sortie[cle] = nettoye
+	borner_hors_famille(base_doc, sortie)
 	if rarete:
 		sortie["rarete"] = rarete
 	sortie["_facteurs"] = facteurs   # consommés par `variante_doc`, jamais écrits sur le doc

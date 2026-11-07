@@ -674,6 +674,11 @@ COMMANDE_MATIERES_MAX: int = 3
 # par sa quantité (`fabrication.appliquer_modificateurs`) : sans borne, « acier ×20 » donnait
 # +40 dégâts. Le client envoie toujours 1 ; ce plafond ferme la requête forgée.
 COMMANDE_QUANTITE_MAX: int = 1
+# Bonus d'une matière HORS de la famille de la pièce (`fabrication.borner_hors_famille`) :
+# des dégâts sur une armure, des points d'armure sur une arme. Ignoré si l'objet de base ne
+# porte pas déjà ce bonus ; sinon la valeur finale ne dépasse pas base × ce plafond (une
+# Dague de parade à 2 PA plafonne à 10). La matière RENFORCE un rôle, elle n'en crée pas.
+FABRICATION_PLAFOND_HORS_FAMILLE: float = 5.0
 # Marge du sur-mesure : borne HAUTE de la `valeur` d'une variante = coût de revient × marge
 # (`fabrication.valeur_variante`), elle-même plafonnée au moins qu'on puisse payer la pièce à
 # la commande — la revente ne rapporte jamais plus que la commande n'a coûté.
@@ -1113,6 +1118,7 @@ def current_world_variables() -> dict:
 		"COMMANDE_PEREMPTION_SECONDES": COMMANDE_PEREMPTION_SECONDES,
 		"COMMANDE_MATIERES_MAX": COMMANDE_MATIERES_MAX,
 		"COMMANDE_QUANTITE_MAX": COMMANDE_QUANTITE_MAX,
+		"FABRICATION_PLAFOND_HORS_FAMILLE": FABRICATION_PLAFOND_HORS_FAMILLE,
 		"COMMANDE_MARGE": COMMANDE_MARGE,
 		"COMMANDE_FACTEUR_VALEUR_MAX": COMMANDE_FACTEUR_VALEUR_MAX,
 		"COMMANDE_FACON_PART": COMMANDE_FACON_PART,
@@ -1198,6 +1204,7 @@ def load_world_variables() -> dict:
 	global JOURNAL_LONGUEUR_MAX, JOURNAL_ENTREES_MAX, JOURNAL_BESTIAIRE_LIEUX_MAX
 	global SCRIPTORIUM_LIVRE_LONGUEUR_MAX, SCRIPTORIUM_LIVRE_PAPIER, SCRIPTORIUM_LIVRE_ENCRE
 	global COMMANDE_DELAI_SECONDES, COMMANDE_PEREMPTION_SECONDES, COMMANDE_MATIERES_MAX, COMMANDE_QUANTITE_MAX
+	global FABRICATION_PLAFOND_HORS_FAMILLE
 	global COMMANDE_MARGE, COMMANDE_FACON_PART, COMMANDE_COMPLEXITE_PART, COMMANDE_FACTEUR_VALEUR_MAX
 	global ACCES_GARDIEN_ACTIF, INDICATEURS_ACTIFS
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
@@ -1485,6 +1492,7 @@ def load_world_variables() -> dict:
 	COMMANDE_PEREMPTION_SECONDES = max(1, int(v.get("COMMANDE_PEREMPTION_SECONDES", COMMANDE_PEREMPTION_SECONDES)))
 	COMMANDE_MATIERES_MAX = max(1, int(v.get("COMMANDE_MATIERES_MAX", COMMANDE_MATIERES_MAX)))
 	COMMANDE_QUANTITE_MAX = max(1, int(v.get("COMMANDE_QUANTITE_MAX", COMMANDE_QUANTITE_MAX)))
+	FABRICATION_PLAFOND_HORS_FAMILLE = max(1.0, float(v.get("FABRICATION_PLAFOND_HORS_FAMILLE", FABRICATION_PLAFOND_HORS_FAMILLE)))
 	COMMANDE_MARGE = max(1.0, float(v.get("COMMANDE_MARGE", COMMANDE_MARGE)))
 	COMMANDE_FACTEUR_VALEUR_MAX = max(1.0, float(v.get("COMMANDE_FACTEUR_VALEUR_MAX", COMMANDE_FACTEUR_VALEUR_MAX)))
 	COMMANDE_FACON_PART = max(0.0, float(v.get("COMMANDE_FACON_PART", COMMANDE_FACON_PART)))
