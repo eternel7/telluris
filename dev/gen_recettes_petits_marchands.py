@@ -196,7 +196,7 @@ ITEMS = {
 	"Crochets_d_os": _outil(
 		"Crochets d'os", "🔓", 0.05,
 		"Deux tiges d'os limées en crochet et en tension. Elles cassent plus vite que le fer, "
-		"mais ne sonnent pas dans la serrure.", bonus_desamorcage=5),
+		"mais ne sonnent pas dans la serrure.", bonus_desamorcage=2),
 	"Trousse_de_crochetage_fine": _outil(
 		"Trousse de crochetage fine", "🧰", 0.2,
 		"Un rouleau de cuir où dorment crochets, tensions et aiguilles, chacun dans sa "
@@ -204,7 +204,7 @@ ITEMS = {
 	"Passe_partout": _outil(
 		"Passe-partout", "🗝️", 0.1,
 		"Une clef de fer limée sur un crochet de serrurier : sans dents, elle trouve d'elle-"
-		"même les gorges d'un mécanisme.", bonus_desamorcage=10),
+		"même les gorges d'un mécanisme.", bonus_desamorcage=20),
 	"Colle_d_os": _composant(
 		"Colle d'os", "🍯", 0.2,
 		"Os concassés bouillis des heures, puis la gelée coulée en plaques. On la refond au "
@@ -371,7 +371,8 @@ VALEURS = {
 
 # Docs déjà en base complétés par ce lot.
 MODIFS = {
-	"item:Crochet_serrurier": {"bonus_desamorcage": 10},
+	# Un cran au-dessus des Crochets (125–375 cu par la recette, identique) : +20 %.
+	"item:Crochet_serrurier": {"bonus_desamorcage": 10, "valeur": [{"cu": 150}, {"cu": 450}]},
 	"item:Crochets": {"bonus_desamorcage": 5},
 	# Existait sans effet (produite par l'armurerie) : elle gagne l'entretien de lame.
 	"item:Pierre_a_aiguiser": {"effets": {"buffs": {"F": 2}, "duree": 3}},

@@ -54,7 +54,12 @@ def test_les_outils_de_crochetage_portent_un_bonus_croissant():
 	lot = _lot()
 	bonus = {i: d.get(pieges.CLE_BONUS_OUTIL) for i, d in lot.items() if d.get(pieges.CLE_BONUS_OUTIL)}
 	bonus |= {i: m[pieges.CLE_BONUS_OUTIL] for i, m in gen.MODIFS.items() if pieges.CLE_BONUS_OUTIL in m}
-	assert bonus["item:Trousse_de_crochetage_fine"] == max(bonus.values())
+	# Échelle voulue : os < crochets < serrurier < trousse fine < passe-partout.
+	echelle = ["item:Crochets_d_os", "item:Crochets", "item:Crochet_serrurier",
+			   "item:Trousse_de_crochetage_fine", "item:Passe_partout"]
+	assert [bonus[i] for i in echelle] == sorted(bonus[i] for i in echelle)
+	assert len({bonus[i] for i in echelle}) == len(echelle)
+	assert bonus["item:Passe_partout"] == max(bonus.values())
 	assert set(bonus) >= {"item:Crochets_d_os", "item:Passe_partout", "item:Crochets", "item:Crochet_serrurier"}
 
 
