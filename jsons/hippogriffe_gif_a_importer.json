@@ -1,0 +1,55 @@
+[
+  {
+    "_id": "espece:hippogriffe",
+    "type": "espece",
+    "nom": "Hippogriffe",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "triangle"
+    },
+    "image": "hippogriffe_transparent.gif",
+    "description": "Hybride de griffon et de cheval, monture noble et farouche qui ne se laisse approcher que par les braves.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 10,
+        "max": 25
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "vol"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_08"
+  }
+]
