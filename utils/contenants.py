@@ -7,9 +7,10 @@
 #   texte d'un livre écrit ou `nom_perso` : il suit le contenant partout (sac, compagnon,
 #   monture, coffre, sol) sans une ligne de code ailleurs.
 # - RANGÉ = INERTE : tout ce qui lit `inventaire` ne voit que la référence du contenant —
-#   vente groupée, quêtes, grimoires, outils, combat, charge physique ET magique (Auteur,
-#   02/11 : « il ne pèse rien »). `item_ref_weight` ignore `contenu` : le contenant pèse
-#   son seul poids, plein ou vide.
+#   grimoires, outils, combat, charge physique ET magique (Auteur, 02/11 : « il ne pèse
+#   rien »). `item_ref_weight` ignore `contenu` : le contenant pèse son seul poids.
+# - SAUF vente en boutique et remises de quête (Auteur, 07/11) : le contenant y est un
+#   PORTEUR de plus, comme un compagnon (§ Contenants comme porteurs).
 # - Aucun contenant dans un autre (Auteur) ; aucune migration : `contenu` absent = vide, une
 #   référence chaîne devient un dict à la première mise.
 # - Marée (`contenant.maree`, Sac de Manannán) : temps RÉEL, aucune horloge (cf. portails) ;
@@ -162,6 +163,99 @@ def sortir(porteur: dict, pos_c: int, j: int) -> object:
 	inv.append(ref)
 	porteur["inventaire"] = inv
 	return ref
+
+
+# ── Contenants comme porteurs (vente, remises de quête) ─────────────────────────
+#
+# Auteur, 07/11 : à la vente en boutique et aux remises de quête, un contenant est un PORTEUR
+# de plus, comme un compagnon ou une monture : son contenu se vend et se remet sans être
+# sorti. Partout ailleurs (charge, combat, grimoires, outils) il reste INERTE.
+#
+# Un « sac virtuel » = `{"inventaire": copie du contenu, CLE_VIRTUEL: {porteur, ref, index, doc}}` :
+# les fonctions qui vident des sacs (`quetes.retirer_items_sacs`, `chasse.retirer_objet_apport`,
+# `transport.livrer_transport`) le traitent comme n'importe quel sac ; `reporter` réécrit
+# ensuite son inventaire sur la référence du contenant — AVANT le save du porteur réel.
+
+CLE_VIRTUEL = "_contenant"
+
+
+def est_virtuel(sac) -> bool:
+	return isinstance(sac, dict) and CLE_VIRTUEL in sac
+
+
+def sacs_ouverts(sacs: list, get_doc_fn, now: int) -> list:
+	"""Un sac virtuel par contenant NON VIDE et ACCESSIBLE (marée) de ces sacs, dans leur ordre.
+
+	`_id` = `<id du porteur>#<position du contenant>` : la commande adresse ses sacs par id
+	(`retenus`, pièce apportée) — deux contenants ne doivent pas se confondre. ⚠️ Jamais
+	sauvé : `porteurs_reels` renvoie au doc réel. `nom` = celui du contenant (libellés)."""
+	out = []
+	for sac in sacs or []:
+		for i, ref in enumerate((sac or {}).get("inventaire") or []):
+			if not contenu(ref):
+				continue
+			doc = get_doc_fn(item_ref_id(ref))
+			if not est_contenant(doc) or not accessible(doc, now):
+				continue
+			out.append({"_id": f"{(sac or {}).get('_id') or ''}#{i}",
+						"nom": (ref.get("nom_perso") if isinstance(ref, dict) else "") or doc.get("nom") or "",
+						"inventaire": list(ref["contenu"]),
+						CLE_VIRTUEL: {"porteur": sac, "ref": ref, "index": i, "doc": doc}})
+	return out
+
+
+def avec_contenants(sacs: list, get_doc_fn, now: int) -> list:
+	"""Les sacs réels EN TÊTE (principal d'abord, Convention §7 : à égalité, le sac porté se
+	vide avant le contenant), puis leurs contenants ouverts."""
+	return list(sacs or []) + sacs_ouverts(sacs, get_doc_fn, now)
+
+
+def reporter(sacs: list) -> None:
+	"""Réécrit l'inventaire de chaque sac virtuel sur la référence de son contenant (un
+	contenant vidé perd sa clé `contenu`, comme dans `sortir`). Mute sans sauver."""
+	for s in sacs or []:
+		if not est_virtuel(s):
+			continue
+		ref, inv = s[CLE_VIRTUEL]["ref"], list(s.get("inventaire") or [])
+		if inv:
+			ref["contenu"] = inv
+		else:
+			ref.pop("contenu", None)
+
+
+def porteurs_reels(sacs: list, exclure=None) -> list:
+	"""Les docs à persister derrière ces sacs : un virtuel renvoie à son porteur ; sans doublon,
+	sans `exclure` (le principal, sauvé à part et en premier)."""
+	out = []
+	for s in sacs or []:
+		p = s[CLE_VIRTUEL]["porteur"] if est_virtuel(s) else s
+		if p is exclure or any(p is o for o in out):
+			continue
+		out.append(p)
+	return out
+
+
+def sac_vise(porteur: dict, index_c, item_id_c, get_doc_fn, now: int) -> tuple[list, dict | None, tuple | None]:
+	"""Liste où chercher l'objet d'une action adressée (vente, marchandage) : l'inventaire du
+	porteur, ou le contenu d'un de ses contenants si `index_c`/`item_id_c` est donné.
+	→ (liste, ref du contenant ou None, refus `(code HTTP, raison)` ou None)."""
+	inv = porteur.setdefault("inventaire", [])
+	if index_c is None and item_id_c is None:
+		return inv, None, None
+	pos = localiser(inv, index_c, item_id_c)
+	doc = get_doc_fn(item_ref_id(inv[pos])) if pos is not None else None
+	if pos is None or not est_contenant(doc):
+		return [], None, (422, "Contenant introuvable dans ce sac.")
+	if not accessible(doc, now):
+		return [], None, (409, "La mer s'est retirée : le sac semble vide jusqu'à la prochaine marée haute.")
+	ref_c = inv[pos]
+	return contenu(ref_c), (ref_c if isinstance(ref_c, dict) else None), None
+
+
+def nettoyer(ref_c) -> None:
+	"""Un contenant vidé par une vente perd sa clé `contenu`."""
+	if isinstance(ref_c, dict) and not ref_c.get("contenu"):
+		ref_c.pop("contenu", None)
 
 
 # ── Vues ─────────────────────────────────────────────────────────────────────────

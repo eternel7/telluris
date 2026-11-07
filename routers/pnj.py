@@ -35,6 +35,7 @@ from utils import montures
 from utils import escorte
 from utils import indicateurs
 from utils import apport
+from utils import contenants
 from utils import expedition
 from utils import traversee as traversee_util
 from utils import portails
@@ -235,7 +236,8 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			ouvert = chasse.apport_offert(character, cite_apport, spec_apport)
 			flags["rang_apport_offert"] = ouvert
 			flags["rang_apport_possible"] = ouvert and chasse.sac_avec_apport(
-				[character] + recrutement.porteurs_effectifs(character, get_doc), spec_apport) is not None
+				_sacs_remise(character, recrutement.porteurs_effectifs(character, get_doc)),
+				spec_apport) is not None
 			rec_apport = spec_apport.get("recompenses") or {}
 			# `setdefault` : une épreuve de CHASSE offerte ou en cours garde ses propres valeurs.
 			placeholders.setdefault("rang", chasse.rang_de(character, cite_apport))
@@ -320,7 +322,7 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 	# service déjà posé gardent leur valeur.
 	if lieu_doc and (pnj_doc.get("services") or {}).get("apport"):
 		flags.update(apport.etat(character, pnj_doc, lieu_doc.get("_id"),
-								 recrutement.porteurs_effectifs(character, get_doc)))
+								 _sacs_remise(character, recrutement.porteurs_effectifs(character, get_doc))[1:]))
 		for cle, val in apport.placeholders(character, pnj_doc, lieu_doc.get("_id"),
 											_nom_item).items():
 			placeholders.setdefault(cle, val)
@@ -346,8 +348,8 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		arrivees = _arrivees_portail(conf_p)
 		ouverts = arrivees if fixe else portails.seuils_ouverts(arrivees, conf_p.get("ancrage"), now)
 		cout = conf_p.get("cout") or {}
-		flags["cristal_jaune_porte"] = not cout.get("item") or quetes._count_inventaire(
-			character, cout["item"]) >= int(cout.get("quantite", 1) or 1)
+		flags["cristal_jaune_porte"] = not cout.get("item") or quetes.compter_sacs(
+			_sacs_portail(character), cout["item"]) >= int(cout.get("quantite", 1) or 1)
 		flags["seuils_ouverts"] = bool(ouverts)
 		placeholders["fermeture"] = (portails.texte_duree(ouverts[0]["ferme_dans_s"])
 									 if ouverts and not fixe else "—")
@@ -518,10 +520,11 @@ def _resoudre_apport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		# ⚠️ Groupe chargé AVANT la récompense et repassé : mêmes dicts que ceux qu'on sauve —
 		# et que ceux dont les sacs fournissent les pièces (compagnons puis montures).
 		groupe = recrutement.groupe_effectif(character, get_doc)
-		porteurs = groupe + montures.montures_effectives(character, get_doc)
-		q, n, complete, touches = apport.remettre(character, pnj_doc, lieu_id, porteurs)
+		sacs = _sacs_remise(character, groupe + montures.montures_effectives(character, get_doc))
+		q, n, complete, touches = apport.remettre(character, pnj_doc, lieu_id, sacs[1:])
 		if not q or n <= 0:
 			raise HTTPException(status_code=422, detail="Vous n'avez rien de ce qui est demandé.")
+		touches = _reporter_remise(character, sacs, touches)
 		dits = apport.placeholders(character, pnj_doc, lieu_id, _nom_item)
 		recap = None
 		if complete:
@@ -574,6 +577,20 @@ def _xp_compagnie(recap: dict) -> dict | None:
 		(recap or {}).get("compagnie") or [],
 		((recap or {}).get("xp") or {}).get("xp_gain", 0),
 	)
+
+
+def _sacs_remise(character: dict, porteurs: list) -> list:
+	"""Sacs d'une REMISE de quête : le principal EN TÊTE, ses porteurs, puis les contenants
+	ouverts de tous — porteurs de plus, comme un compagnon (utils/contenants.py)."""
+	return contenants.avec_contenants([character] + list(porteurs or []), get_doc, quetes.now_epoch())
+
+
+def _reporter_remise(character: dict, sacs: list, touches: list) -> list:
+	"""Après une remise : réécrit le contenu des contenants sur leur référence, et renvoie les
+	docs RÉELS à persister (hors principal). ⚠️ AVANT le `save_doc(character)` autoritatif :
+	un contenant du principal voyage sur son doc."""
+	contenants.reporter(sacs)
+	return contenants.porteurs_reels(touches, exclure=character)
 
 
 def _sauver_porteurs(touches: list) -> None:
@@ -812,6 +829,13 @@ def _noeud_seuils(character: dict, pnj_doc: dict, lieu_doc: dict, contexte: dict
 	return noeud
 
 
+def _sacs_portail(character: dict) -> list:
+	"""De quoi payer le passage : le sac du personnage PUIS ses contenants ouverts — porteurs de
+	plus (utils/contenants.py). ⚠️ Pas les compagnons : c'est le voyageur qui paie, comme avant.
+	Le cristal du sac part d'abord."""
+	return contenants.avec_contenants([character], get_doc, quetes.now_epoch())
+
+
 def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, saisie,
 					  reponse: dict, guide_adieu: bool = False) -> str | None:
 	"""Service `portail`, op `franchir` : l'ancrage court-circuite le lien portail choisi et
@@ -841,7 +865,8 @@ def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, s
 		return noeuds.get("ferme")
 	cout = conf.get("cout") or {}
 	item_id, quantite = cout.get("item", ""), int(cout.get("quantite", 1) or 1)
-	if item_id and quetes._count_inventaire(character, item_id) < quantite:
+	sacs = _sacs_portail(character)
+	if item_id and quetes.compter_sacs(sacs, item_id) < quantite:
 		return noeuds.get("refus_cristal")
 	dest_doc = get_doc(seuil["lieu"])
 	if not dest_doc:
@@ -855,7 +880,8 @@ def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, s
 		reponse["guide_avertissement"] = avertir["guide_avertissement"]
 		return None
 	if item_id:
-		quetes.retirer_items(character, item_id, quantite)
+		quetes.retirer_items_sacs(sacs, item_id, quantite)
+		contenants.reporter(sacs)   # un cristal rangé quitte son contenant, sur le doc du personnage
 	arrivee = _effets_arrivee(character, seuil["lieu"],
 							  {"x": seuil["pos"][0], "y": seuil["pos"][1]}, dest_doc)
 	# Doc ANNEXE, sauvé après le personnage (déjà sorti de son groupe).
@@ -1316,10 +1342,11 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		# ⚠️ Ces MÊMES dicts sont repassés au solde et à la fin de contrat (un seul dict par doc).
 		groupe = recrutement.groupe_effectif(character, get_doc)
 		touches: list = []
-		if not transport.livrer_transport(
-				character, q, groupe + montures.montures_effectives(character, get_doc), touches):
+		sacs = _sacs_remise(character, groupe + montures.montures_effectives(character, get_doc))
+		if not transport.livrer_transport(character, q, sacs[1:], touches):
 			# Cargaison incomplète (vendue, jetée) : la quête reste active, le délai court.
 			return noeuds.get("incomplet"), dits
+		touches = _reporter_remise(character, sacs, touches)
 		if q.get("retour"):
 			# Course à retour : le destinataire prend la marchandise mais ne paie pas — tout se
 			# solde chez le donneur, à qui il faut aller rendre compte.
@@ -1511,11 +1538,12 @@ def _resoudre_rang(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		# joueur qui se vide (§7). ⚠️ Les MÊMES dicts de compagnons servent au solde et à la fin
 		# de contrat : un seul dict par doc `aventurier:*`.
 		groupe = recrutement.groupe_effectif(character, get_doc)
-		sacs = [character] + groupe + montures.montures_effectives(character, get_doc)
+		sacs = _sacs_remise(character, groupe + montures.montures_effectives(character, get_doc))
 		i = chasse.sac_avec_apport(sacs, spec)
 		if i is None:
 			raise HTTPException(status_code=422, detail="Vous n'avez rien de ce qui est demandé.")
 		objet_id = chasse.retirer_objet_apport(sacs[i], spec)
+		touches = _reporter_remise(character, sacs, [sacs[i]])
 		resultat = chasse.solder_apport(character, cite, spec, compagnons=groupe)
 		libres = _cloturer_contrats(character, lieu_doc, compagnons=groupe)
 		if save_doc(character) is None:
@@ -1523,8 +1551,7 @@ def _resoudre_rang(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		# ⚠️ Le sac d'un PORTEUR après le save autoritatif, best-effort : le rang atteint referme
 		# l'apport (`apport_offert`), un échec ici laisse au pire l'objet dans la sacoche — jamais un
 		# second rang.
-		if i > 0:
-			_sauver_porteurs([sacs[i]])
+		_sauver_porteurs(touches)
 		_sauver_compagnie(resultat["recompenses"])
 		_sauver_contrats(libres, reponse)
 		relation_gain = quetes.recompenser_donneur(character, lieu_doc, get_doc, save_doc)

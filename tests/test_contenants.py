@@ -6,6 +6,8 @@ Ce que ces tests verrouillent :
 2. Capacité, aucun contenant dans un autre, sortir borné par la charge du porteur.
 3. Marée en temps réel (Sac de Manannán) : dépôt toujours, reprise seulement en fenêtre.
 4. Gardes : vente et don à un atelier refusés plein, limite de vol au poids RÉEL, combat.
+5. Vente en boutique et remises de quête (collecte, transport, apport) : le contenant est un
+   PORTEUR de plus, comme un compagnon (Auteur, 07/11) ; marée basse = contenu hors d'atteinte.
 """
 
 import asyncio
@@ -243,3 +245,142 @@ def test_vendre_un_contenant_plein_refuse(db, monkeypatch):
 	with pytest.raises(HTTPException) as e:
 		asyncio.run(ru.sell_item({"_id": "user:a"}, {"index": 0, "item_id": "item:besace"}))
 	assert e.value.status_code == 409 and e.value.detail == contenants.REFUS_PLEIN
+
+
+# ── Contenants comme porteurs : vente en boutique et remises de quête (Auteur, 07/11) ─
+
+from utils import chasse
+from utils import quetes
+from utils import transport
+
+
+def _besace(*contenu):
+	return {"item": "item:besace", "poids": 0.5, "contenu": list(contenu)}
+
+
+def test_avec_contenants_reels_en_tete_puis_contenants_ouverts(db, maree):
+	ouvert = _besace("item:pomme")
+	perso = _perso(["item:pierre", ouvert, {"item": "item:besace", "poids": 0.5}])
+	compagnon = {"_id": "aventurier:b", "inventaire": [{"item": "item:sac_maree", "poids": 0.5,
+														 "contenu": ["item:pierre"]}]}
+	# Mer basse (t = 500) : le Sac de Manannán ne s'ouvre pas ; la besace VIDE n'est pas un sac.
+	sacs = contenants.avec_contenants([perso, compagnon], db["docs"].get, 500)
+	assert sacs[:2] == [perso, compagnon] and len(sacs) == 3
+	assert sacs[2]["inventaire"] == ["item:pomme"]
+	assert sacs[2][contenants.CLE_VIRTUEL]["porteur"] is perso and sacs[2][contenants.CLE_VIRTUEL]["index"] == 1
+	# Mer haute (t = 0) : il devient un porteur de plus.
+	assert len(contenants.avec_contenants([perso, compagnon], db["docs"].get, 0)) == 4
+
+
+def test_depot_de_collecte_puise_dans_les_contenants(db):
+	perso = _perso(["item:pierre", _besace("item:pierre", "item:pomme")])
+	compagnon = {"_id": "aventurier:b", "inventaire": [_besace("item:pierre")]}
+	q = {"objectif": {"type": "collect", "cible": "item:pierre", "quantite": 3}, "progress": 0}
+	sacs = contenants.avec_contenants([perso, compagnon], db["docs"].get, 0)
+	n, touches = quetes.deposer_collect(perso, q, sacs[1:])
+	contenants.reporter(sacs)
+	assert n == 3 and q["progress"] == 3
+	# Le sac porté se vide d'abord ; la besace du principal garde la pomme ; celle du
+	# compagnon, vidée, perd sa clé `contenu`.
+	assert perso["inventaire"] == [_besace("item:pomme")]
+	assert compagnon["inventaire"] == [{"item": "item:besace", "poids": 0.5}]
+	# À persister : le compagnon (son contenant a bougé), jamais le principal ni un sac virtuel.
+	assert contenants.porteurs_reels(touches, exclure=perso) == [compagnon]
+
+
+def test_livraison_de_transport_depuis_un_contenant(db):
+	perso = _perso([_besace("item:pomme", "item:pierre")])
+	q = {"cargaison": [{"item": "item:pierre", "poids": 4.0}], "objectif": {"quantite": 1}}
+	assert transport.cargaison_manquante(perso, q) == {"item:pierre": 1}
+	sacs = contenants.avec_contenants([perso], db["docs"].get, 0)
+	touches = []
+	assert transport.livrer_transport(perso, q, sacs[1:], touches)
+	contenants.reporter(sacs)
+	assert perso["inventaire"] == [_besace("item:pomme")]
+	assert contenants.porteurs_reels(touches, exclure=perso) == []
+
+
+def test_epreuve_d_apport_depuis_un_contenant(db):
+	perso = _perso([_besace("item:pierre")])
+	spec = {"items": ["item:pierre"]}
+	sacs = contenants.avec_contenants([perso], db["docs"].get, 0)
+	i = chasse.sac_avec_apport(sacs, spec)
+	assert i == 1 and chasse.retirer_objet_apport(sacs[i], spec) == "item:pierre"
+	contenants.reporter(sacs)
+	assert perso["inventaire"] == [{"item": "item:besace", "poids": 0.5}]
+
+
+def test_sac_vise_refus(db, maree):
+	perso = _perso(["item:pierre", {"item": "item:sac_maree", "poids": 0.5, "contenu": ["item:pomme"]}])
+	assert contenants.sac_vise(perso, None, None, db["docs"].get, 0)[0] is perso["inventaire"]
+	assert contenants.sac_vise(perso, 0, "item:pierre", db["docs"].get, 0)[2][0] == 422
+	assert contenants.sac_vise(perso, 1, "item:sac_maree", db["docs"].get, 500)[2][0] == 409
+	refs, ref_c, refus = contenants.sac_vise(perso, 1, "item:sac_maree", db["docs"].get, 0)
+	assert refus is None and refs == ["item:pomme"] and ref_c is perso["inventaire"][1]
+
+
+@pytest.fixture
+def boutique(db, monkeypatch):
+	"""Une échoppe qui achète tout à 10 cu ; écritures neutralisées."""
+	monkeypatch.setattr(ru, "get_doc", db["docs"].get)
+	monkeypatch.setattr(ru, "_current_lieu_doc", lambda p: {"_id": "lieu:echoppe"})
+	monkeypatch.setattr(ru.proprietes, "vend_au_proprietaire", lambda *a: False)
+	monkeypatch.setattr(ru, "get_relation", lambda *a: {})
+	monkeypatch.setattr(ru, "relation_value", lambda r: 50)
+	monkeypatch.setattr(ru, "lieu_buys", lambda lieu, item: True)
+	monkeypatch.setattr(ru, "_prix_vente_joueur", lambda *a: (10, 5, 15))
+	monkeypatch.setattr(ru, "now_epoch", lambda: 0)
+	for nom in ("convertir_apres_achat", "save_doc", "persister_flux", "_save_acteur", "_appliquer_fidelite"):
+		monkeypatch.setattr(ru, nom, lambda *a, **k: None)
+	monkeypatch.setattr(ru, "flux_cite", lambda *a: None)
+	monkeypatch.setattr(ru, "resolve_stock_vente", lambda *a: [])
+	monkeypatch.setattr(ru, "_inventory_payload", lambda c, p=None: {})
+	monkeypatch.setattr(ru, "_fiche_payload", lambda c: None)
+	monkeypatch.setattr(ru.recrutement, "porteurs_effectifs", lambda *a: [])
+
+
+def test_vendables_listent_le_contenu_des_contenants(boutique, maree, monkeypatch):
+	perso = _perso(["item:pierre", _besace("item:pomme"),
+					{"item": "item:sac_maree", "poids": 0.5, "contenu": ["item:pierre"]}])
+	monkeypatch.setattr(ru, "now_epoch", lambda: 500)   # mer basse : le Sac de Manannán semble vide
+	v = ru._marchand_vendables(perso, {"_id": "lieu:echoppe"})
+	dedans = [e for e in v if e["contenant"]]
+	assert [e["item_id"] for e in dedans] == ["item:pomme"]
+	assert dedans[0]["index"] == 0 and dedans[0]["contenant"] == {
+		"index": 1, "item_id": "item:besace", "nom": "Besace profonde"}
+	# Les objets du sac restent listés sans bloc `contenant` (les contenants eux-mêmes aussi).
+	assert sorted(e["item_id"] for e in v if not e["contenant"]) == ["item:besace", "item:pierre", "item:sac_maree"]
+
+
+def test_vendre_un_objet_range_dans_un_contenant(boutique, monkeypatch):
+	perso = _perso([_besace("item:pomme")])
+	monkeypatch.setattr(ru, "_acteur", lambda _u, _b: (perso, perso))
+	out = asyncio.run(ru.sell_item({"_id": "user:a"}, {
+		"index": 0, "item_id": "item:pomme", "index_contenant": 0, "item_id_contenant": "item:besace"}))
+	assert out["vendu"]["nom"] == "Pomme"
+	# Vidé par la vente : la besace perd sa clé `contenu`, et se vend désormais elle-même.
+	assert perso["inventaire"] == [{"item": "item:besace", "poids": 0.5}]
+	with pytest.raises(HTTPException) as e:
+		asyncio.run(ru.sell_item({"_id": "user:a"}, {
+			"index": 0, "item_id": "item:pomme", "index_contenant": 0, "item_id_contenant": "item:besace"}))
+	assert e.value.status_code == 422
+
+
+def test_l_artisan_puise_dans_les_contenants_sans_confondre_deux_contenants(db, monkeypatch):
+	"""Commande chez un artisan : les matières rangées se fournissent comme celles d'un sac de
+	compagnon. Deux contenants ont chacun leur `_id` virtuel : la même position dans deux
+	contenus ne se « retient » pas une seule fois pour les deux."""
+	from routers import commande as rcmd
+	from utils import commande as cmd_util
+	perso = _perso([_besace("item:pierre"), _besace("item:pierre", "item:pomme")])
+	sacs = contenants.avec_contenants([perso], db["docs"].get, 0)
+	assert [s["_id"] for s in sacs[1:]] == ["character:a#0", "character:a#1"]
+	trouves, manquants = cmd_util.emplacements_fournis([("item:pierre", 2)], sacs, db["docs"].get)
+	assert not manquants and len(trouves) == 2
+	cmd_util.retirer_fournitures(trouves)
+	sauves = []
+	monkeypatch.setattr(rcmd, "save_doc", lambda d: sauves.append(d) or d)
+	rcmd._save_porteurs(perso, list({id(t["porteur"]): t["porteur"] for t in trouves}.values()))
+	# Réécrit sur les références AVANT l'unique save du principal ; aucun sac virtuel sauvé.
+	assert sauves == [perso]
+	assert perso["inventaire"] == [{"item": "item:besace", "poids": 0.5}, _besace("item:pomme")]

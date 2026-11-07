@@ -294,6 +294,21 @@ t('atelier : rayon repris, matières confiées, sur-mesure annoncé', () => {
 	assert.ok(noeuds['pcf-principal'].innerHTML.includes('atelierDonner'));
 });
 
+t('atelier : le contenu d\'un contenant ouvert se confie, adressé par data-ctn (échappé)', () => {
+	globalThis._pcfSel = 'employe:x'; globalThis._pcfGauche = '';
+	renderCoffre(coffre('proprietaire', { contenants: { '': [{ index: 3, item_id: 'item:besace', nom: XSS, icon: '👜',
+		contenu: [{ _id: 'item:herbe', item: 'item:herbe', nom: 'Herbe', poids: 1, idx: 0 }] }] } }));
+	const g = noeuds['pcf-principal'].innerHTML;
+	assert.ok(g.includes('Pomme') && g.includes('Herbe'), g);
+	assert.ok(/data-idx="0" data-item="item:herbe" data-ctn="3" data-ctn-item="item:besace"/.test(g), g);
+	assert.ok(!g.includes(XSS) && g.includes('&lt;img'));
+	globalThis._pcfGauche = 'aventurier:x';   // un autre sac : ses contenants à lui seulement
+	renderCoffre(coffre('proprietaire', { porteurs: PORTEURS, contenants: { '': [{ index: 3, item_id: 'item:besace', nom: 'B',
+		contenu: [{ _id: 'item:herbe', item: 'item:herbe', nom: 'Herbe', poids: 1, idx: 0 }] }] } }));
+	assert.ok(!noeuds['pcf-principal'].innerHTML.includes('Herbe'));
+	globalThis._pcfGauche = '';
+});
+
 t('atelier : un visiteur ne confie rien', () => {
 	globalThis._pcfSel = 'employe:x';
 	renderCoffre(coffre('visiteur'));

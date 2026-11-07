@@ -16,6 +16,7 @@ from utils.characters import (
 from utils import quetes
 from utils import focalisation
 from utils import recrutement
+from utils import contenants
 from utils import escorte
 from utils import chasse
 from utils import indicateurs
@@ -325,11 +326,15 @@ async def quetes_deposer(
 	if q.get("objectif", {}).get("type") != "collect":
 		raise HTTPException(status_code=422, detail="Cette quête ne se dépose pas.")
 
-	# Les pièces portées par les compagnons et les montures comptent aussi (le principal en tête).
-	n, touches = quetes.deposer_collect(
-		character, q, recrutement.porteurs_effectifs(character, get_doc))
+	# Les pièces portées par les compagnons et les montures comptent aussi (le principal en tête),
+	# et celles RANGÉES dans un contenant ouvert, porteur de plus (utils/contenants.py).
+	sacs = contenants.avec_contenants(
+		[character] + recrutement.porteurs_effectifs(character, get_doc), get_doc, quetes.now_epoch())
+	n, touches = quetes.deposer_collect(character, q, sacs[1:])
 	if n <= 0:
 		raise HTTPException(status_code=422, detail="Rien à déposer (aucune pièce portée ou objectif déjà atteint).")
+	contenants.reporter(sacs)   # AVANT le save : un contenant du principal voyage sur son doc
+	touches = contenants.porteurs_reels(touches, exclure=character)
 	# Collecte complétée par ce dépôt → la focalisation tombe (même save).
 	focalisation.effacer_si_objectif_atteint(character)
 	if save_doc(character) is None:
