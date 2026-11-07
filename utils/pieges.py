@@ -61,6 +61,11 @@ PIEGE_DIFFICULTE_PAR_DANGER = 15
 # compétence.
 PIEGE_BONUS_FOUILLE = 20
 
+# Bonus de l'EXAMEN d'un coffre au trésor (1 action, au contact, réservé à « Détection des
+# pièges ») : une inspection ciblée, mains sur le couvercle — le double de la fouille, qui
+# balaie toute la portée de détection à distance.
+PIEGE_BONUS_EXAMEN = 2 * PIEGE_BONUS_FOUILLE
+
 # XP PERSONNELLE au détecteur / au désamorceur — valeurs demandées.
 XP_DETECTION = 5
 XP_DESAMORCAGE = 10
