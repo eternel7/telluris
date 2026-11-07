@@ -87,7 +87,7 @@ test('fiche : « ⟵ Groupe » en mode compagnon, basculé par body.sheet-compag
 	assert.ok(/classList\.add\('sheet-compagnon'\)/.test(jsPlay), 'openCompagnonSheet ne pose plus sheet-compagnon');
 });
 
-test('🛡 du bandeau passe son bouton (garde) ; le menu ⚙️ non (geste délibéré)', () => {
+test('⟵ du bandeau passe son bouton (garde) ; le menu ⚙️ non (geste délibéré)', () => {
 	const bandeau = play.match(/<button[^>]*id="retour-embleme"[^>]*>/);
 	assert.ok(bandeau, 'bouton #retour-embleme absent');
 	assert.ok(/onclick="allerEmbleme\(this\)"/.test(bandeau[0]), bandeau[0]);
