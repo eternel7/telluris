@@ -10802,9 +10802,11 @@ function _pcfAppliquer(data) {
 
 // Une ligne d'objet, mêmes classes que les sacs du groupe. `geste` = nom de la fonction
 // appelée au clic ; l'index et l'id passent par data-* (Conventions §9).
-function _pcfLigne(item, idx, fleche, geste, actif, titre, cote, source) {
+// `ctn` (facultatif) : objet RANGÉ dans un contenant du sac — son adresse part en data-*.
+function _pcfLigne(item, idx, fleche, geste, actif, titre, cote, source, ctn) {
+	const adr = ctn ? ` data-ctn="${+ctn.index}" data-ctn-item="${escapeHtml(ctn.item_id || '')}"` : '';
 	const btn = `<button class="grp-move-btn" ${actif ? '' : 'disabled'} title="${escapeHtml(titre)}"
-		data-idx="${idx}" data-item="${escapeHtml(item.item || item._id || item.item_id || '')}"
+		data-idx="${idx}" data-item="${escapeHtml(item.item || item._id || item.item_id || '')}"${adr}
 		onclick="${geste}(this)">${fleche}</button>`;
 	const poids = item.poids !== undefined ? `${(+item.poids || 0).toFixed(1)} kg` : `× ${item.qty}`;
 	const ouvre = source ? ` sh-inv-open" onclick="openItemDetail('${source}',${+idx})" title="Voir la fiche` : '';
@@ -10874,9 +10876,14 @@ function renderCoffre(data) {
 	const gere = data.role === 'proprietaire';
 	const cd = document.getElementById('pcf-charge-droite');
 	if (cd) cd.textContent = a.caisse !== null && a.caisse !== undefined ? `💰 ${_prixTexte(a.caisse)}` : '';
-	_grpRemplirSac('pcf-principal', inv, inv.length ? ordInv.map(i =>
+	// Contenants ouverts du sac de gauche : porteurs de plus, on confie leur contenu sans le sortir.
+	const ctns = ((data.contenants || {})[_pcfGauche] || []);
+	const lignesCtn = ctns.map(c => `<div class="grp-sous-titre">${c.icon || '👜'} ${escapeHtml(c.nom || 'Contenant')}</div>`
+		+ _sortedOrder(c.contenu || [], 'asc').map(j => { const it = c.contenu[j];
+			return _pcfLigne(it, it.idx, '→', 'atelierDonner', gere, 'Confier à ce marchand', 'droite', '', c); }).join('')).join('');
+	_grpRemplirSac('pcf-principal', inv.concat(...ctns.map(c => c.contenu || [])), (inv.length ? ordInv.map(i =>
 		_pcfLigne(inv[i], i, '→', 'atelierDonner', gere, gere ? 'Confier à ce marchand' : 'Seul le propriétaire confie des matières', 'droite', 'pcf_sac')).join('')
-		: '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>');
+		: '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>') + lignesCtn);
 	const prodsAtelier = a.produits || [];
 	// Pas de poids d'instance au rayon : la flèche reste active, le serveur tranche (409).
 	const produits = _sortedOrder(prodsAtelier, 'asc').map(i => prodsAtelier[i]).map(p => _pcfLigne(p, 0, '←', 'atelierReprendre', gere, 'Reprendre un exemplaire', 'gauche')).join('');
@@ -10916,6 +10923,7 @@ async function coffrePrendre(btn) {
 
 function atelierDonner(btn) {
 	const corps = { employe_id: _pcfSel, index: +btn.dataset.idx, item_id: btn.dataset.item || null };
+	if (btn.dataset.ctn !== undefined) { corps.index_contenant = +btn.dataset.ctn; corps.item_id_contenant = btn.dataset.ctnItem || null; }
 	if (_pcfGauche) corps.compagnon_id = _pcfGauche;
 	return _pcfPost('api/proprietes/atelier/donner', corps);
 }

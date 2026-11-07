@@ -13,7 +13,7 @@
 | Marée (Sac de Manannán) | **temps réel**, vraie période semi-diurne **12 h 25**, fenêtre **3 h**, même moment pour tous |
 | Équiper | **jamais** : objet du sac |
 | Vol au coffre sans gardien | le contenant plein part **avec tout** ; la limite de vol compte le contenant **et** son contenu |
-| Vendre / confier à un atelier | **refusé s'il n'est pas vide** |
+| Vendre / confier à un atelier | **refusé s'il n'est pas vide** (le contenant lui-même ; son contenu, lui, se vend et se confie sans être sorti — 07/11) |
 | Combat | contenu **inaccessible** ; ranger et sortir hors combat seulement |
 | Où ranger et sortir | **partout** hors combat (sauf la marée de Manannán) |
 | Charge magique | ce qui est rangé **ne gêne pas la magie** non plus (« il ne pèse rien ») |
@@ -42,7 +42,7 @@ Rappel du lore arbitré : inventaire séparé à limite propre ; **aucun contena
 - Même patron que le texte d'un livre écrit (`scriptorium`) ou `nom_perso` : l'état de l'**exemplaire** sur sa référence, jamais sur le doc générique.
 - **Le contenu suit le contenant partout** sans code : sac, compagnon, monture (`groupe/transferer`), coffre de propriété, sol, butin.
 - **Rangé = inerte** : les 27 fichiers qui lisent `inventaire` ne voient que la référence du contenant. Grimoires de « 📖 Apprendre », outils partagés, pièges, combat, charge magique : rien à modifier, l'objet doit être **sorti** pour servir.
-- **Exception (Auteur, 07/11)** : à la **vente en boutique** et aux **remises de quête** (collecte, apport, épreuve d'apport, cargaison de transport), le contenant est un **porteur de plus**, comme un compagnon ou une monture — son contenu se vend et se remet sans être sorti (`contenants.avec_contenants` / `sac_vise`). Hors marée, le contenu du Sac de Manannán reste hors d'atteinte.
+- **Exception (Auteur, 07/11 — l'inaccessible, c'est surtout la barre d'action et le combat)** : à la **vente en boutique**, aux **remises de quête** (collecte, apport, épreuve d'apport, cargaison de transport) et aux **dons à un artisan** (matières et pièce d'une commande, objet confié au marchand d'une propriété), le contenant est un **porteur de plus**, comme un compagnon ou une monture — son contenu se vend et se remet sans être sorti (`contenants.avec_contenants` / `sac_vise`). Hors marée, le contenu du Sac de Manannán reste hors d'atteinte.
 - **Charge magique** : `charge_magie.charge_magique_portee` lit l'inventaire, donc ignore aussi le contenu — voulu (décision de l'Auteur).
 - **Poids** : `item_ref_weight` ignore déjà `contenu` → `carried_weight`, `peut_porter`, `poids_coffre` comptent le seul contenant **sans changement**.
 - **Aucune migration** : une référence chaîne devient un dict à la première mise (comme `renommer_ref`) ; `contenu` absent = vide.

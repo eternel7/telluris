@@ -516,6 +516,26 @@ def test_le_proprietaire_confie_une_matiere(monde):
 	assert data["ateliers"][0]["matieres"] == [{"cle": "herbe", "qty": 1}]
 
 
+def test_confier_un_objet_range_dans_un_contenant(monde):
+	"""Un contenant ouvert est un porteur de plus (utils/contenants.py) : on confie son
+	contenu sans le sortir ; vidé, il perd sa clé `contenu`."""
+	monde["docs"]["item:besace"] = {"_id": "item:besace", "type": "item", "nom": "Besace profonde",
+									"categorie": "outil", "slots": [], "poids": 0.5,
+									"contenant": {"capacite_kg": 100}}
+	proprio = _perso(inventaire=[{"item": "item:besace", "poids": 0.5,
+								  "contenu": [{"item": "item:herbe", "poids": 1}]}])
+	_entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	vue = _appel(monde, proprio, monde["rp"].coffre, None)
+	ctn = vue["contenants"][""][0]
+	assert (ctn["index"], ctn["nom"], [d["idx"] for d in ctn["contenu"]]) == (0, "Besace profonde", [0])
+	data = _appel(monde, proprio, monde["rp"].atelier_donner, None,
+				  {"employe_id": e["_id"], "index": 0, "item_id": "item:herbe",
+				   "index_contenant": 0, "item_id_contenant": "item:besace"})
+	assert proprio["inventaire"] == [{"item": "item:besace", "poids": 0.5}]
+	assert e["stock_matieres"] == {"herbe": 1} and data["contenants"] == {}
+
+
 def test_confier_et_reprendre_depuis_le_sac_d_un_compagnon(monde):
 	proprio = _perso()
 	_entrer(monde, proprio)

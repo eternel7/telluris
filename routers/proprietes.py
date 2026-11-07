@@ -11,6 +11,7 @@
 #
 # ⚠️ Aucune route ne change `type_propriete` : il n'existe pas de conversion de type.
 
+import time
 import unicodedata
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Body
@@ -19,7 +20,7 @@ from db.config import get_doc, save_doc, delete_doc, find_docs
 from utils.auth import get_current_user
 from utils.characters import (
 	get_selected_character, cuivre_to_purse, money_to_cuivre, resolve_item_ref,
-	credit_character, tirer_poids, poids_bounds, carried_weight, charge_max_of, item_ref_weight,
+	credit_character, tirer_poids, poids_bounds, carried_weight, charge_max_of, item_ref_weight, item_ref_id,
 )
 from utils.marche import debit_character
 from utils import marche as marche_util
@@ -27,6 +28,7 @@ from utils import auberge
 from utils import recrutement
 from utils import montures
 from utils import proprietes
+from utils import contenants
 from utils import escorte
 from utils import commande as commande_util
 from utils import fiche as fiche_util
@@ -616,6 +618,10 @@ def _payload_coffre(character: dict, prop: dict, cat: dict, role: str, employes:
 			) if coffre_visible else [],
 		},
 		"ateliers": ateliers,
+		# Contenu des contenants OUVERTS de chaque sac, par id de porteur ("" = le vôtre) : un
+		# contenant est un porteur de plus pour CONFIER à un marchand (utils/contenants.py).
+		# `index` = position du contenant dans le sac ; `idx` de chaque objet = dans le contenu.
+		"contenants": _contenants_sacs(character) if gere else {},
 		"caisse_totale": sum(int(e.get("caisse_cuivre") or 0) for e in employes),
 		"caisse_accessible": gere or (role == proprietes.VISITEUR and not gardien
 									  and prop.get("mode") == proprietes.MODE_ACHAT),
@@ -629,6 +635,20 @@ def _payload_coffre(character: dict, prop: dict, cat: dict, role: str, employes:
 	if extra:
 		payload.update(extra)
 	return payload
+
+
+def _contenants_sacs(character: dict) -> dict:
+	sacs = [character] + recrutement.porteurs_effectifs(character, get_doc)
+	out = {}
+	for v in contenants.sacs_ouverts(sacs, get_doc, int(time.time())):
+		c = v[contenants.CLE_VIRTUEL]
+		cle = "" if c["porteur"] is character else c["porteur"].get("_id")
+		out.setdefault(cle, []).append({
+			"index": c["index"], "item_id": item_ref_id(c["ref"]),
+			"nom": v["nom"], "icon": (c["doc"] or {}).get("icon") or "👜",
+			"contenu": [dict(d, idx=j) for j, r in enumerate(v["inventaire"]) if (d := resolve_item_ref(r))],
+		})
+	return out
 
 
 def _porteur(character: dict, compagnon_id) -> dict:
@@ -710,7 +730,11 @@ async def atelier_donner(current_user: Annotated[dict, Depends(get_current_user)
 	_exiger(role, proprietes.PROPRIETAIRE)
 	atelier = _atelier_de(prop, body.get("employe_id"))
 	porteur = _porteur(character, body.get("compagnon_id"))
-	refs = porteur.get("inventaire") or []
+	# L'objet peut être RANGÉ dans un contenant du porteur (`index_contenant`/`item_id_contenant`).
+	refs, ref_c, refus = contenants.sac_vise(porteur, body.get("index_contenant"),
+											 body.get("item_id_contenant"), get_doc, int(time.time()))
+	if refus:
+		raise HTTPException(status_code=refus[0], detail=refus[1])
 	pos = proprietes.localiser(refs, body.get("index"), body.get("item_id"))
 	if pos is None:
 		raise HTTPException(status_code=404, detail="Objet absent de l'inventaire.")
@@ -723,7 +747,7 @@ async def atelier_donner(current_user: Annotated[dict, Depends(get_current_user)
 	if not ok:
 		raise HTTPException(status_code=409, detail=raison)
 	refs.pop(pos)
-	porteur["inventaire"] = refs
+	contenants.nettoyer(ref_c)
 	_sauver(atelier, porteur)
 	marche_util.persister_flux(flux, save_doc)  # best-effort, seulement si le pool a bougé
 	return _payload_coffre(character, prop, cat, role)

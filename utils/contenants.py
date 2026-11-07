@@ -184,7 +184,11 @@ def est_virtuel(sac) -> bool:
 
 
 def sacs_ouverts(sacs: list, get_doc_fn, now: int) -> list:
-	"""Un sac virtuel par contenant NON VIDE et ACCESSIBLE (marée) de ces sacs, dans leur ordre."""
+	"""Un sac virtuel par contenant NON VIDE et ACCESSIBLE (marée) de ces sacs, dans leur ordre.
+
+	`_id` = `<id du porteur>#<position du contenant>` : la commande adresse ses sacs par id
+	(`retenus`, pièce apportée) — deux contenants ne doivent pas se confondre. ⚠️ Jamais
+	sauvé : `porteurs_reels` renvoie au doc réel. `nom` = celui du contenant (libellés)."""
 	out = []
 	for sac in sacs or []:
 		for i, ref in enumerate((sac or {}).get("inventaire") or []):
@@ -193,7 +197,9 @@ def sacs_ouverts(sacs: list, get_doc_fn, now: int) -> list:
 			doc = get_doc_fn(item_ref_id(ref))
 			if not est_contenant(doc) or not accessible(doc, now):
 				continue
-			out.append({"inventaire": list(ref["contenu"]),
+			out.append({"_id": f"{(sac or {}).get('_id') or ''}#{i}",
+						"nom": (ref.get("nom_perso") if isinstance(ref, dict) else "") or doc.get("nom") or "",
+						"inventaire": list(ref["contenu"]),
 						CLE_VIRTUEL: {"porteur": sac, "ref": ref, "index": i, "doc": doc}})
 	return out
 

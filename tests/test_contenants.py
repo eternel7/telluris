@@ -364,3 +364,23 @@ def test_vendre_un_objet_range_dans_un_contenant(boutique, monkeypatch):
 		asyncio.run(ru.sell_item({"_id": "user:a"}, {
 			"index": 0, "item_id": "item:pomme", "index_contenant": 0, "item_id_contenant": "item:besace"}))
 	assert e.value.status_code == 422
+
+
+def test_l_artisan_puise_dans_les_contenants_sans_confondre_deux_contenants(db, monkeypatch):
+	"""Commande chez un artisan : les matières rangées se fournissent comme celles d'un sac de
+	compagnon. Deux contenants ont chacun leur `_id` virtuel : la même position dans deux
+	contenus ne se « retient » pas une seule fois pour les deux."""
+	from routers import commande as rcmd
+	from utils import commande as cmd_util
+	perso = _perso([_besace("item:pierre"), _besace("item:pierre", "item:pomme")])
+	sacs = contenants.avec_contenants([perso], db["docs"].get, 0)
+	assert [s["_id"] for s in sacs[1:]] == ["character:a#0", "character:a#1"]
+	trouves, manquants = cmd_util.emplacements_fournis([("item:pierre", 2)], sacs, db["docs"].get)
+	assert not manquants and len(trouves) == 2
+	cmd_util.retirer_fournitures(trouves)
+	sauves = []
+	monkeypatch.setattr(rcmd, "save_doc", lambda d: sauves.append(d) or d)
+	rcmd._save_porteurs(perso, list({id(t["porteur"]): t["porteur"] for t in trouves}.values()))
+	# Réécrit sur les références AVANT l'unique save du principal ; aucun sac virtuel sauvé.
+	assert sauves == [perso]
+	assert perso["inventaire"] == [{"item": "item:besace", "poids": 0.5}, _besace("item:pomme")]

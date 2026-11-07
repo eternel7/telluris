@@ -31,6 +31,7 @@ from utils.characters import (
 from utils import commande as commande_util
 from utils import fabrication
 from utils import marche
+from utils import contenants
 from utils import recrutement
 from utils import proprietes
 from utils.marche import (
@@ -120,6 +121,14 @@ def _prix_piece(relation, lieu_doc, item_doc, item_id) -> int:
 	return prix_marche(relation, item_id, pmin, pmax, "achat", 0, cible)
 
 
+def _porteurs(character: dict) -> list:
+	"""Les sacs que l'artisan peut puiser : le principal EN TÊTE, ses porteurs, puis leurs
+	contenants ouverts — porteurs de plus, comme un compagnon (utils/contenants.py). ⚠️ Source
+	UNIQUE de `_resoudre` et de la liste des matières : les deux doivent voir les mêmes sacs."""
+	return contenants.avec_contenants([character] + recrutement.porteurs_effectifs(character, get_doc),
+									  get_doc, commande_util.now_epoch())
+
+
 def _save_porteurs(principal: dict, porteurs_mutes: list) -> None:
 	"""Persiste le principal (AUTORITATIF : 409 s'il ne passe pas — c'est lui qui porte la
 	commande et qui a payé) puis chaque porteur dont le sac a été allégé, en best-effort.
@@ -128,6 +137,10 @@ def _save_porteurs(principal: dict, porteurs_mutes: list) -> None:
 	atomique en CouchDB. L'ordre est celui qui perd le moins : si un compagnon ne passe pas,
 	il garde sa matière alors que la commande est enregistrée — le joueur est servi. L'inverse
 	lui prendrait sa matière sans rien lui promettre."""
+	# Un sac VIRTUEL (contenant ouvert, porteur de plus — utils/contenants.py) réécrit son
+	# contenu sur la référence du contenant AVANT le save : celui du principal voyage sur son doc.
+	contenants.reporter(porteurs_mutes)
+	porteurs_mutes = contenants.porteurs_reels(porteurs_mutes)
 	if save_doc(principal) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 	for porteur in porteurs_mutes:
@@ -301,7 +314,7 @@ def matieres_sur_mesure(
 	if not base_doc:
 		raise HTTPException(status_code=422, detail="Objet introuvable")
 	_garde_sur_mesure(lieu_doc, base_doc)
-	porteurs = [character] + recrutement.porteurs_effectifs(character, get_doc)
+	porteurs = _porteurs(character)
 	return {"item_id": item_id, "matieres": _matieres_vue(lieu_doc, base_doc, porteurs),
 			"exemplaires": _exemplaires_vue(character, base_doc, porteurs)}
 
@@ -395,7 +408,7 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 	#
 	# ⚠️ Les deux passes PARTAGENT leurs emplacements retenus : sans quoi le même lingot
 	# serait crédité comme ingrédient ET fourni gratuitement comme matière sur mesure.
-	porteurs = [character] + recrutement.porteurs_effectifs(character, get_doc)
+	porteurs = _porteurs(character)
 	retenus = set()
 
 	# Pièce de base APPORTÉE (`body.base` = {porteur, index}) : sur mesure seulement. Elle
