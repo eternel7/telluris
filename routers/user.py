@@ -2259,9 +2259,24 @@ def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None =
 		icon = "🐴" if montures.est_monture(c) else "👤"
 		porteurs.append((c.get("_id"), c, c.get("prenom") or c.get("nom") or "Porteur", icon))
 
-	vendables = []
+	# Chaque contenant ouvert d'un porteur est un porteur de plus (utils/contenants.py,
+	# § Contenants comme porteurs) : `index` est alors la position dans SON contenu, et le
+	# bloc `contenant` l'adresse dans le sac de son porteur.
+	sacs = []
+	now = now_epoch()
 	for compagnon_id, porteur, nom, porteur_icon in porteurs:
-		for idx, ref in enumerate(porteur.get("inventaire", [])):
+		sacs.append((compagnon_id, porteur.get("inventaire", []), nom, porteur_icon, None))
+		for v in contenants.sacs_ouverts([porteur], get_doc, now):
+			c = v[contenants.CLE_VIRTUEL]
+			doc_c = c["doc"] or {}
+			nom_c = (resolve_item_ref(c["ref"]) or {}).get("nom") or doc_c.get("nom") or "Contenant"
+			sacs.append((compagnon_id, c["ref"]["contenu"], f"{nom_c} · {nom}" if nom else nom_c,
+						 doc_c.get("icon") or "👜",
+						 {"index": c["index"], "item_id": item_ref_id(c["ref"]), "nom": nom_c}))
+
+	vendables = []
+	for compagnon_id, refs, nom, porteur_icon, contenant in sacs:
+		for idx, ref in enumerate(refs):
 			item = resolve_item_ref(ref)
 			if not item or not lieu_buys(lieu_doc, item):
 				continue
@@ -2274,6 +2289,7 @@ def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None =
 				"compagnon_id": compagnon_id,
 				"porteur_nom": nom,
 				"porteur_icon": porteur_icon,
+				"contenant": contenant,
 				"item_id": item_id,
 				"nom": item.get("nom"),
 				"icon": item.get("icon"),
@@ -2384,8 +2400,13 @@ async def sell_item(
 	if relation_value(relation) <= 0:
 		raise HTTPException(status_code=403, detail="Ce marchand refuse de traiter avec vous.")
 
-	inventaire = porteur.get("inventaire", [])
-	ref = _take_ref(inventaire, body.get("index"), body.get("item_id"))
+	# L'objet peut être RANGÉ dans un contenant du porteur (`index_contenant`/`item_id_contenant`) :
+	# le contenant est alors un porteur de plus (utils/contenants.py).
+	refs, ref_c, refus = contenants.sac_vise(porteur, body.get("index_contenant"),
+											 body.get("item_id_contenant"), get_doc, now_epoch())
+	if refus:
+		raise HTTPException(status_code=refus[0], detail=refus[1])
+	ref = _take_ref(refs, body.get("index"), body.get("item_id"))
 	if ref is None:
 		raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
 
@@ -2403,7 +2424,7 @@ async def sell_item(
 	item_id = item.get("item") or item.get("_id")
 	prix, _, _ = _prix_vente_joueur(lieu_doc, relation, item, item_id, ref)
 	purse = credit_character(principal, prix)   # l'argent va au principal, l'objet quitte le porteur
-	porteur["inventaire"] = inventaire
+	contenants.nettoyer(ref_c)
 
 	if proprietes.est_atelier(lieu_doc):
 		# Marchand employé d'une propriété : l'objet entre comme un objet confié, puis un tick
@@ -2573,7 +2594,11 @@ async def marchander_item(
 		if est_negociant(lieu_doc):
 			raise HTTPException(status_code=403,
 								detail="Le négociant ne marchande pas : sa commission suit votre relation.")
-		ref = _find_ref(porteur.get("inventaire", []), body.get("index"), item_id)
+		refs, _ref_c, refus = contenants.sac_vise(porteur, body.get("index_contenant"),
+												  body.get("item_id_contenant"), get_doc, now)
+		if refus:
+			raise HTTPException(status_code=refus[0], detail=refus[1])
+		ref = _find_ref(refs, body.get("index"), item_id)
 		if ref is None:
 			raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
 		item = resolve_item_ref(ref)

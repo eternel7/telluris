@@ -41,7 +41,8 @@ Rappel du lore arbitré : inventaire séparé à limite propre ; **aucun contena
 ```
 - Même patron que le texte d'un livre écrit (`scriptorium`) ou `nom_perso` : l'état de l'**exemplaire** sur sa référence, jamais sur le doc générique.
 - **Le contenu suit le contenant partout** sans code : sac, compagnon, monture (`groupe/transferer`), coffre de propriété, sol, butin.
-- **Rangé = inerte** : les 27 fichiers qui lisent `inventaire` ne voient que la référence du contenant. Vente groupée, quêtes (cargaison comprise), grimoires de « 📖 Apprendre », outils partagés, pièges, combat, charge magique : rien à modifier, l'objet doit être **sorti** pour servir.
+- **Rangé = inerte** : les 27 fichiers qui lisent `inventaire` ne voient que la référence du contenant. Grimoires de « 📖 Apprendre », outils partagés, pièges, combat, charge magique : rien à modifier, l'objet doit être **sorti** pour servir.
+- **Exception (Auteur, 07/11)** : à la **vente en boutique** et aux **remises de quête** (collecte, apport, épreuve d'apport, cargaison de transport), le contenant est un **porteur de plus**, comme un compagnon ou une monture — son contenu se vend et se remet sans être sorti (`contenants.avec_contenants` / `sac_vise`). Hors marée, le contenu du Sac de Manannán reste hors d'atteinte.
 - **Charge magique** : `charge_magie.charge_magique_portee` lit l'inventaire, donc ignore aussi le contenu — voulu (décision de l'Auteur).
 - **Poids** : `item_ref_weight` ignore déjà `contenu` → `carried_weight`, `peut_porter`, `poids_coffre` comptent le seul contenant **sans changement**.
 - **Aucune migration** : une référence chaîne devient un dict à la première mise (comme `renommer_ref`) ; `contenu` absent = vide.
