@@ -718,14 +718,14 @@
 		body.sheet-compagnon .retour-lib-compagnon { display: inline; }
 		/* ⟵ Emblème : dernier cran, au bout du titre du lieu (il en fait partie : ni marge ni
 		   padding), calé au fond à droite du bandeau. Fond noir, simple cadre, flèche or comme
-		   les « ⟵ Retour » des panneaux — pas le SVG du pavé de déplacement. Centrée
-		   verticalement (titre sur deux lignes compris). Le bandeau réserve la largeur du
+		   les « ⟵ Retour » des panneaux — pas le SVG du pavé de déplacement. Le cadre court
+		   sur toute la hauteur du bandeau (titre sur plusieurs lignes compris), flèche au milieu. Le bandeau réserve la largeur du
 		   bouton des DEUX côtés : le titre reste centré et ne passe jamais dessous. */
 		#game-container > .location-desc { position: relative; padding: 0 var(--embleme-l); --embleme-l: 1.87rem; }
 		.retour-embleme {
-			position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+			position: absolute; right: 0; top: 0; bottom: 0;
 			display: inline-flex; align-items: center; justify-content: center;
-			width: 1.7em; height: 1.7em; margin: 0; padding: 0;
+			width: 1.7em; margin: 0; padding: 0;
 			font-size: 1.1rem; line-height: 1; cursor: pointer;
 			background: transparent; color: var(--accent-color);
 			border: 1px solid var(--border-color); border-radius: 3px;
