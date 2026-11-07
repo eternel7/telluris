@@ -97,6 +97,9 @@ def test_divers():
 	assert fb.filtres_item({"categorie": "outil", "tags": ["piege"]}) == ["divers.piege"]
 	assert fb.filtres_item({"categorie": "outil", "sous_categorie": "contenant", "tags": ["contenant"]}) == ["divers.contenant"]
 	assert fb.filtres_item({"categorie": "outil"}) == ["divers.outil"]
+	# Outil de crochetage : sa propre pastille (usage non évident), pas « Outils ».
+	assert fb.filtres_item({"categorie": "outil", "bonus_desamorcage": 15}) == ["divers.crochetage"]
+	assert fb.filtres_item({"categorie": "outil", "bonus_desamorcage": 0}) == ["divers.outil"]
 	assert fb.filtres_item({"categorie": "document"}) == ["divers.livre"]
 	assert fb.filtres_item({"categorie": "munition"}) == ["divers.munition"]
 
@@ -113,6 +116,7 @@ def test_toute_cle_produite_existe_au_catalogue():
 		{"categorie": "livre", "sous_categorie": "grimoire"},
 		{"categorie": "composant", "fabrication": {"nom": "x"}},
 		{"categorie": "outil", "tags": ["piege", "contenant"]},
+		{"categorie": "outil", "bonus_desamorcage": 5},
 	]
 	produites = {c for it in echantillon for c in fb.filtres_item(it, frozenset({"item:x"}))}
 	assert produites <= connues, produites - connues

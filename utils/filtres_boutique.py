@@ -19,13 +19,15 @@ Tout se RELIT dans la donnée existante — aucun champ neuf sur les items, aucu
             `fabrication` bien formé (`fabrication.apporte`, source unique). ⚠️ Une VARIANTE
             déjà fabriquée porte aussi un bloc `fabrication` (`base_item`…), qui n'apporte rien :
             elle n'est pas une matière de fabrication ;
-- divers  : outils, pièges, contenants, livres et documents, munitions.
+- divers  : outils, pièges, outils de CROCHETAGE (`bonus_desamorcage` > 0 : leur usage n'est
+            pas évident, la pastille le met en avant), contenants, livres et documents, munitions.
 
 ⚠️ « Ingrédient de sort » ne distingue pas consommé / conservé : le même objet est consommé
 par un sort et conservé par un autre (12 des 38 ingrédients du dump du 2026-11-05).
 """
 
 from utils import fabrication
+from utils import pieges
 
 # ── Catalogue des pastilles ─────────────────────────────────────────────────────
 # Ordre = ordre d'affichage dans l'overlay. (clé de groupe, icône, libellé, pastilles) ;
@@ -57,7 +59,7 @@ GROUPES = (
 		("ameliore", "Améliore une pièce"),
 	)),
 	("divers", "🎒", "Divers", (
-		("outil", "Outils"), ("piege", "Pièges"), ("contenant", "Contenants"),
+		("outil", "Outils"), ("piege", "Pièges"), ("crochetage", "Crochetage"), ("contenant", "Contenants"),
 		("livre", "Livres & documents"), ("munition", "Munitions"),
 	)),
 )
@@ -170,9 +172,12 @@ def filtres_item(item: dict, ingredients: frozenset = frozenset()) -> list:
 	est_contenant = "contenant" in tags or sc == "contenant" or isinstance(item.get("contenant"), dict)
 	if est_piege:
 		cles.append("divers.piege")
+	est_crochetage = _nombre_positif(item.get(pieges.CLE_BONUS_OUTIL))
+	if est_crochetage:
+		cles.append("divers.crochetage")
 	if est_contenant:
 		cles.append("divers.contenant")
-	if cat == "outil" and not est_piege and not est_contenant:
+	if cat == "outil" and not (est_piege or est_contenant or est_crochetage):
 		cles.append("divers.outil")
 	if cat == "document" or (cat == "livre" and sc not in _SC_GRIMOIRE):
 		cles.append("divers.livre")
