@@ -30,6 +30,7 @@ from utils.characters import (
 )
 from utils import commande as commande_util
 from utils import fabrication
+from utils import filtres_boutique
 from utils import marche
 from utils import contenants
 from utils import recrutement
@@ -184,6 +185,7 @@ def _catalogue_vue(lieu_doc: dict, relation, voisins=None) -> list:
 		trophees.setdefault(produit, [
 			(get_doc(marche.matiere_item_id(c)) or {}).get("nom") or c
 			for c in sorted(marche.cles_trophee(r))])
+	ingredients = None   # lu à la première pièce seulement
 	for item_id in commande_util.catalogue_commandable(lieu_doc, get_doc, voisins):
 		item = resolve_item_ref(item_id)
 		if not item:
@@ -203,6 +205,9 @@ def _catalogue_vue(lieu_doc: dict, relation, voisins=None) -> list:
 			"sur_mesure": marche.est_personnalisable(item),
 			**marche.fiche_item_fields(item),
 		})
+		if ingredients is None:
+			ingredients = marche.ingredients_sorts_monde()
+		lignes[-1]["filtres"] = filtres_boutique.filtres_item(item, ingredients)
 	return sorted(lignes, key=lambda l: l["nom"] or "")
 
 

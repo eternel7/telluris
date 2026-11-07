@@ -38,6 +38,7 @@ from utils import session as session_util
 from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of, credit_character, marquer_joue
 from utils import derniers_joues as derniers_joues_util
 from utils import aide as aide_util
+from utils import filtres_boutique
 from utils.statiques import PortraitsStatic
 from utils import quetes
 from utils import donjon as donjon_util
@@ -1205,6 +1206,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"est_scriptorium": est_scriptorium,
 			"est_commande": est_commande,
 			"est_sur_mesure": est_sur_mesure,
+			# Pastilles de l'entonnoir du panneau marchand (catalogue statique, cf. utils/filtres_boutique).
+			"filtres_boutique": filtres_boutique.catalogue(),
 			"auberge_nuit": auberge_nuit,
 			"est_propriete": est_propriete,
 			"proprietes_offre": proprietes_offre,

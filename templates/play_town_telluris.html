@@ -595,7 +595,17 @@
 		#sell-panel .acc-section.open { flex: 1 1 auto; }
 		#sell-panel .acc-body { padding: .5rem .6rem; min-height: 0; }
 		#sell-panel .acc-section.open .acc-body { display: flex; flex-direction: column; flex: 1 1 auto; }
-		#sell-panel .sell-acc-tools { display: flex; justify-content: flex-end; flex: 0 0 auto; margin-bottom: .35rem; }
+		#sell-panel .sell-acc-tools { display: flex; justify-content: flex-end; gap: .35rem; flex: 0 0 auto; margin-bottom: .35rem; }
+		/* Tri et entonnoir : des icônes, pas des libellés (place comptée sur mobile). */
+		#sell-panel .sell-ico-btn { min-width: 2.2rem; padding: 3px 6px; display: inline-flex; align-items: center; justify-content: center; font-size: .78rem; letter-spacing: -.02em; }
+		#sell-panel .sell-ico-btn:not(.active):not(.is-actif) { opacity: .75; }
+		#cmd-sort-btn.active { border-color: var(--accent-color); color: var(--accent-color); }
+		/* Filtre actif : couleur d'accent + halo FIXE (pas de clignotement). */
+		#sell-panel .sell-filtre-btn.is-actif {
+			border-color: var(--accent-color); color: var(--accent-color);
+			box-shadow: 0 0 7px 2px color-mix(in srgb, var(--accent-color, #b98c4a) 65%, transparent);
+		}
+		#sell-panel .sell-filtre-btn.is-actif svg path { fill: currentColor; fill-opacity: .35; }
 		#sell-panel .cmd-aide { flex: 0 0 auto; }
 		/* Filtre du catalogue : prend la place à gauche de « Trier », sans la marge basse du filtre des Relations. */
 		#sell-panel .sell-acc-tools .cmd-filtre { flex: 1 1 auto; min-width: 0; width: auto; margin: 0 .5rem 0 0; padding: 4px 8px; }
@@ -2782,7 +2792,7 @@
 		   Une seule section ouverte à la fois, et elle prend TOUTE la hauteur restante :
 		   c'est ce qui tient le panneau dans la fenêtre. Empilées, quatre listes à hauteur
 		   fixe débordaient les 100vh et faisaient défiler la page entière.
-		   ⚠️ « Trier » descend DANS le corps : un <button> ne s'imbrique pas dans le
+		   ⚠️ Tri (A↓Z) et entonnoir descendent DANS le corps : un <button> ne s'imbrique pas dans le
 		   <button> d'en-tête. Le compte reste dans l'en-tête — c'est la seule chose qui
 		   dise ce qu'il y a derrière une section repliée. #}
 		<section class="acc-section">
@@ -2791,8 +2801,10 @@
 			</button>
 			<div class="acc-body" id="acc-body-vente">
 				<div class="sell-acc-tools">
-					<button type="button" id="sell-sort-btn" class="sh-drop-btn" onclick="cycleSellSort()"
-						title="Trier la vente par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+					<button type="button" id="sell-sort-btn" class="sh-drop-btn sell-ico-btn" onclick="cycleSellSort()"
+						title="Trier la vente par nom (clic : A→Z, Z→A, puis annuler)" aria-label="Trier par nom">A↓Z</button>
+					<button type="button" class="sh-drop-btn sell-ico-btn sell-filtre-btn" onclick="ouvrirFiltresBoutique('vente')"
+						title="Filtrer par type d'objet" aria-label="Filtrer par type d'objet"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M3 4h18l-7 8.5V19l-4 2v-8.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
 				</div>
 				<div class="sh-inv-scroll sh-scroll" id="sell-scroll"><ul id="sell-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
 			</div>
@@ -2803,8 +2815,10 @@
 			</button>
 			<div class="acc-body" id="acc-body-achat">
 				<div class="sell-acc-tools">
-					<button type="button" id="buy-sort-btn" class="sh-drop-btn" onclick="cycleBuySort()"
-						title="Trier l'achat par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+					<button type="button" id="buy-sort-btn" class="sh-drop-btn sell-ico-btn" onclick="cycleBuySort()"
+						title="Trier l'achat par nom (clic : A→Z, Z→A, puis annuler)" aria-label="Trier par nom">A↓Z</button>
+					<button type="button" class="sh-drop-btn sell-ico-btn sell-filtre-btn" onclick="ouvrirFiltresBoutique('achat')"
+						title="Filtrer par type d'objet" aria-label="Filtrer par type d'objet"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M3 4h18l-7 8.5V19l-4 2v-8.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
 				</div>
 				<div class="sh-inv-scroll sh-scroll" id="buy-scroll"><ul id="buy-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
 			</div>
@@ -2825,8 +2839,10 @@
 			<div class="acc-body" id="acc-body-commande">
 				<div class="sell-acc-tools">
 					<input id="cmd-filtre" class="sh-rel-filter cmd-filtre" type="search" placeholder="🔍 Filtrer…" autocomplete="off" oninput="renderCmdCatalogue({ catalogue: MARCHAND.catalogue })">
-					<button type="button" id="cmd-sort-btn" class="sh-drop-btn" onclick="cycleCmdSort()"
-						title="Trier le catalogue par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+					<button type="button" id="cmd-sort-btn" class="sh-drop-btn sell-ico-btn" onclick="cycleCmdSort()"
+						title="Trier le catalogue par nom (clic : A→Z, Z→A, puis annuler)" aria-label="Trier par nom">A↓Z</button>
+					<button type="button" class="sh-drop-btn sell-ico-btn sell-filtre-btn" onclick="ouvrirFiltresBoutique('commande')"
+						title="Filtrer par type d'objet" aria-label="Filtrer par type d'objet"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M3 4h18l-7 8.5V19l-4 2v-8.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
 				</div>
 				<p class="cmd-aide">Ce que l'artisan sait faire, même sans exemplaire en vitrine. Prix façon comprise, sans rien apporter — ce que vous fournissez le fait baisser.</p>
 				<div class="sh-inv-scroll sh-scroll" id="cmd-scroll"><ul id="cmd-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
@@ -3564,6 +3580,32 @@
 			display: flex; align-items: center; justify-content: center; padding: 1rem;
 		}
 		#sur-mesure-overlay.clauses-hidden { display: none; }
+		/* ── Entonnoir du panneau marchand ── */
+		#filtres-boutique-overlay {
+			position: fixed; inset: 0; z-index: 9300;
+			background: rgba(10, 8, 5, .78);
+			display: flex; align-items: center; justify-content: center; padding: 1rem;
+		}
+		#filtres-boutique-overlay.clauses-hidden { display: none; }
+		#filtres-boutique-overlay .item-detail-card { max-width: 640px; padding-top: .9rem; }
+		.fb-tete { display: flex; align-items: center; gap: .6rem; padding-right: 2.4rem; margin-bottom: .6rem; }
+		.fb-reset:disabled { opacity: .45; cursor: default; }
+		.fb-compte { font-size: .85rem; opacity: .8; }
+		.fb-groupe { margin: .55rem 0 0; }
+		.fb-groupe-titre { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; opacity: .7; margin: 0 0 .3rem; }
+		.fb-pills { display: flex; flex-wrap: wrap; gap: .35rem; }
+		.fb-pill {
+			border: 1px solid var(--border-color); background: var(--btn-bg); color: var(--text-color);
+			border-radius: 999px; padding: 3px 10px; font-size: .85rem; cursor: pointer; line-height: 1.3;
+		}
+		.fb-pill .fb-n { font-size: .75rem; opacity: .65; margin-left: .25rem; }
+		.fb-pill.is-on { border-color: var(--accent-color); color: var(--accent-color); background: color-mix(in srgb, var(--accent-color, #b98c4a) 18%, transparent); }
+		.fb-pill.is-vide { opacity: .45; }
+		.fb-vide { opacity: .75; font-style: italic; }
+		@media (max-width: 600px) {
+			#filtres-boutique-overlay { padding: .4rem; }
+			#filtres-boutique-overlay .item-detail-card { max-height: 94vh; padding: .8rem .9rem; }
+		}
 		#sur-mesure-overlay .item-detail-card { max-width: 520px; }
 		/* ── Aide au démarrage (bouton « ? » des cartes du joueur) ──────────────────
 		   Sommaire en TUILES (tous les sujets visibles d'un coup, 2 colonnes en portrait)
@@ -4047,6 +4089,20 @@
 	{# Sur mesure : ✕ / Échap / clic hors carte = ANNULER sans rien engager. L'appel est en
 	   attente d'une promesse (le bouton « Commander » de la liste est désactivé le temps du
 	   choix) : l'annulation doit la RÉSOUDRE À NULL, sinon le bouton reste mort pour toujours. #}
+	{# Entonnoir du panneau marchand (utils/filtres_boutique.py) : pastilles par type d'objet,
+	   INCLUSIVES (une ligne reste dès qu'UNE de ses clés est active). Ce n'est pas une décision
+	   bloquante : le filtre s'applique en direct, ✕ / Échap / fond ne font que refermer. #}
+	<div id="filtres-boutique-overlay" class="clauses-hidden" role="dialog" aria-modal="true" aria-label="Filtrer les objets"
+		 onclick="if(event.target===this)fermerFiltresBoutique()">
+		<div class="item-detail-card">
+			<div class="fb-tete">
+				<button type="button" id="fb-reset" class="sh-drop-btn fb-reset" onclick="resetFiltresBoutique()">↺ Tout effacer</button>
+				<span id="fb-compte" class="fb-compte"></span>
+			</div>
+			<button type="button" class="item-detail-close" onclick="fermerFiltresBoutique()" aria-label="Fermer">✕</button>
+			<div id="fb-groupes" class="fb-groupes"></div>
+		</div>
+	</div>
 	<div id="sur-mesure-overlay" class="clauses-hidden" aria-label="Commander sur mesure"
 		 onclick="if(event.target===this)closeSurMesure()">
 		<div class="item-detail-card">
@@ -6148,7 +6204,9 @@ function _sortedOrder(arr, state) {
 function _updateSortBtn(id, state) {
 	const b = document.getElementById(id);
 	if (!b) return;
-	b.textContent = state === 'asc' ? 'Trier ▲' : (state === 'desc' ? 'Trier ▼' : 'Trier');
+	// Bouton à icône (panneau marchand) : A↓Z / Z↓A, l'état neutre se lit à la couleur.
+	if (b.classList.contains('sell-ico-btn')) b.textContent = state === 'desc' ? 'Z↓A' : 'A↓Z';
+	else b.textContent = state === 'asc' ? 'Trier ▲' : (state === 'desc' ? 'Trier ▼' : 'Trier');
 	b.classList.toggle('active', !!state);
 }
 
@@ -8845,6 +8903,101 @@ function marchBtn(index, itemId, sens, compagnonId, contenant) {
 // Tri par nom + scroll : même pattern que le sac/le sol (_sortedOrder rend un ordre
 // d'AFFICHAGE seulement — chaque entrée porte son index/item_id d'origine). Les listes
 // sont mémorisées sur MARCHAND pour re-rendre au clic de tri sans re-fetch.
+// ── Entonnoir : filtre par type d'objet (utils/filtres_boutique.py) ─────────────
+// Chaque ligne (vente, achat, catalogue) porte `filtres` — calculé par le SERVEUR, jamais
+// reclassé ici (§10). UN état pour tout le panneau : « je cherche un casque » vaut pour le
+// rayon comme pour le catalogue. Remis à zéro à chaque ouverture du panneau (une visite).
+const FILTRES_BOUTIQUE = {{ filtres_boutique | default([]) | tojson }};
+let _fbActifs = new Set();
+let _fbSection = 'achat';
+// Inclusion : sans filtre tout passe ; sinon une ligne reste dès qu'UNE de ses clés est active.
+function _fbGarde(entree, actifs) {
+	if (!actifs || !actifs.size) return true;
+	return ((entree && entree.filtres) || []).some(k => actifs.has(k));
+}
+// Nombre de lignes par clé, sur une ou plusieurs listes.
+function _fbComptes(listes) {
+	const n = {};
+	(listes || []).forEach(l => (l || []).forEach(e => ((e && e.filtres) || []).forEach(k => { n[k] = (n[k] || 0) + 1; })));
+	return n;
+}
+// Pastilles à montrer : celles qui ont un objet QUELQUE PART dans le panneau (le filtre est
+// commun aux sections) ou qui sont actives ; un groupe sans pastille disparaît. Le compte est
+// celui de la section d'où l'entonnoir a été ouvert — 0 ⇒ pastille estompée.
+function _fbGroupesHtml(catalogue, comptesSection, presents, actifs) {
+	return (catalogue || []).map(g => {
+		const pills = (g.pastilles || []).filter(p => presents[p.cle] || actifs.has(p.cle));
+		if (!pills.length) return '';
+		return `<div class="fb-groupe"><p class="fb-groupe-titre">${g.icon} ${escapeHtml(g.nom)}</p><div class="fb-pills">`
+			+ pills.map(p => {
+				const n = comptesSection[p.cle] || 0;
+				return `<button type="button" class="fb-pill${actifs.has(p.cle) ? ' is-on' : ''}${n ? '' : ' is-vide'}"`
+					+ ` aria-pressed="${actifs.has(p.cle)}" onclick="basculerFiltreBoutique('${p.cle}')">`
+					+ `${escapeHtml(p.nom)}<span class="fb-n">${n}</span></button>`;
+			}).join('')
+			+ '</div></div>';
+	}).join('');
+}
+// Ordre d'affichage filtré : `_sortedOrder` puis l'entonnoir — les index d'origine restent.
+function _fbOrdre(arr, sortState) { return _sortedOrder(arr, sortState).filter(idx => _fbGarde(arr[idx], _fbActifs)); }
+// Compte d'en-tête de section : « vus/total » quand un filtre est actif.
+function _fbCompteTexte(vus, total) { return _fbActifs.size ? `${vus}/${total}` : String(total); }
+function _fbListe(section) {
+	if (section === 'vente') return MARCHAND.vendables || [];
+	if (section === 'commande') return MARCHAND.catalogue || [];
+	return MARCHAND.achetables || [];
+}
+function _fbMajBoutons() {
+	const n = _fbActifs.size;
+	document.querySelectorAll('.sell-filtre-btn').forEach(b => {
+		b.classList.toggle('is-actif', n > 0);
+		b.title = n ? `Filtrer par type d'objet (${n} filtre${n > 1 ? 's' : ''} actif${n > 1 ? 's' : ''})` : "Filtrer par type d'objet";
+	});
+}
+function _fbRenderOverlay() {
+	const box = document.getElementById('fb-groupes');
+	if (!box) return;
+	const listes = ['vente', 'achat', 'commande'].map(_fbListe);
+	const presents = _fbComptes(listes);
+	const html = _fbGroupesHtml(FILTRES_BOUTIQUE, _fbComptes([_fbListe(_fbSection)]), presents, _fbActifs);
+	box.innerHTML = html || '<p class="fb-vide">Aucun objet à filtrer ici.</p>';
+	const reset = document.getElementById('fb-reset');
+	if (reset) reset.disabled = !_fbActifs.size;
+	const liste = _fbListe(_fbSection);
+	const vus = liste.filter(e => _fbGarde(e, _fbActifs)).length;
+	const compte = document.getElementById('fb-compte');
+	if (compte) compte.textContent = _fbActifs.size ? `${vus} / ${liste.length} objet${liste.length > 1 ? 's' : ''}` : '';
+}
+// Re-rend les listes du panneau depuis l'état mémorisé (aucun appel serveur).
+function _fbAppliquer() {
+	_fbMajBoutons();
+	renderSellList({ vendables: MARCHAND.vendables });
+	renderBuyList({ achetables: MARCHAND.achetables });
+	if (document.getElementById('cmd-list')) renderCmdCatalogue({ catalogue: MARCHAND.catalogue });
+	_fbRenderOverlay();
+	_sellOmbres();
+}
+function ouvrirFiltresBoutique(section) {
+	_fbSection = section || 'achat';
+	_fbRenderOverlay();
+	const ov = document.getElementById('filtres-boutique-overlay');
+	ov.classList.remove('clauses-hidden');
+	ov.querySelector('.item-detail-close')?.focus();
+}
+function fermerFiltresBoutique() {
+	document.getElementById('filtres-boutique-overlay')?.classList.add('clauses-hidden');
+}
+function basculerFiltreBoutique(cle) {
+	if (_fbActifs.has(cle)) _fbActifs.delete(cle); else _fbActifs.add(cle);
+	_fbAppliquer();
+}
+function resetFiltresBoutique() { _fbActifs.clear(); _fbAppliquer(); }
+document.addEventListener('keydown', ev => {
+	if (ev.key !== 'Escape') return;
+	const ov = document.getElementById('filtres-boutique-overlay');
+	if (ov && !ov.classList.contains('clauses-hidden')) fermerFiltresBoutique();
+});
+
 let _sellSort = _loadSort('telluris.play.sell_sort');
 let _buySort  = _loadSort('telluris.play.buy_sort');
 function cycleSellSort() { _sellSort = _cycleSort(_sellSort); _saveSort('telluris.play.sell_sort', _sellSort); renderSellList({ vendables: MARCHAND.vendables }); }
@@ -8931,7 +9084,14 @@ function renderSellList(data) {
 		if (scrollEl) scrollEl.classList.remove('scrollable');
 		return;
 	}
-	list.innerHTML = _sortedOrder(vendables, _sellSort).map(idx => {
+	const ordre = _fbOrdre(vendables, _sellSort);
+	_sellCompte('sell-compte', _fbCompteTexte(ordre.length, vendables.length));
+	if (!ordre.length) {
+		list.innerHTML = '<li class="sell-empty">Aucun objet ne correspond au filtre.</li>';
+		if (scrollEl) scrollEl.classList.remove('scrollable');
+		return;
+	}
+	list.innerHTML = ordre.map(idx => {
 		const v = vendables[idx];
 		const owner = (v.compagnon_id || v.contenant) ? `<span class="sell-owner" title="${v.contenant ? 'Rangé dans' : 'Objet de'} ${v.porteur_nom}">${v.porteur_icon || '👤'} ${v.porteur_nom}</span>` : '';
 		return `<li class="sh-inv-item">
@@ -8960,7 +9120,14 @@ function renderBuyList(data) {
 		if (scrollEl) scrollEl.classList.remove('scrollable');
 		return;
 	}
-	list.innerHTML = _sortedOrder(achetables, _buySort).map(idx => {
+	const ordre = _fbOrdre(achetables, _buySort);
+	_sellCompte('buy-compte', _fbCompteTexte(ordre.length, achetables.length));
+	if (!ordre.length) {
+		list.innerHTML = '<li class="sell-empty">Aucun objet ne correspond au filtre.</li>';
+		if (scrollEl) scrollEl.classList.remove('scrollable');
+		return;
+	}
+	list.innerHTML = ordre.map(idx => {
 		const v = achetables[idx];
 		return `<li class="sh-inv-item">
 		<span class="sh-inv-open" onclick="openMarchandDetail('achat',${idx})" title="Voir la fiche">${v.icon || '📦'}</span>
@@ -9060,6 +9227,8 @@ function _sellChargement() {
 async function openSellPanel() {
 	if (_sellLoading) return;
 	_sellLoading = true;
+	_fbActifs.clear();   // une visite = un filtre neuf
+	_fbMajBoutons();
 	_sellChargement();
 	document.getElementById('game-container').classList.add('panel-hidden');
 	document.getElementById('sell-panel').classList.remove('panel-hidden');
@@ -9192,7 +9361,9 @@ function renderCmdCatalogue(data) {
 	const _plier = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 	const fEl = document.getElementById('cmd-filtre');
 	const terme = _plier(fEl ? fEl.value.trim() : '');
-	const ordre = _sortedOrder(cat, _cmdSort).filter(idx => !terme || _plier(cat[idx].nom).includes(terme));
+	// Recherche texte ET entonnoir (les pastilles, elles, s'additionnent entre elles).
+	const ordre = _fbOrdre(cat, _cmdSort).filter(idx => !terme || _plier(cat[idx].nom).includes(terme));
+	_sellCompte('cmd-compte', (_fbActifs.size || terme) ? `${ordre.length}/${cat.length}` : cat.length);
 	if (!ordre.length) {
 		list.innerHTML = '<li class="sell-empty">Aucun objet ne correspond au filtre.</li>';
 		if (scrollEl) scrollEl.classList.remove('scrollable');
