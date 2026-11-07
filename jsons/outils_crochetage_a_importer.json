@@ -1,0 +1,64 @@
+[
+  {
+    "_id": "item:Crochets",
+    "type": "item",
+    "nom": "Crochets",
+    "sous_categorie": "",
+    "icon": "🔓",
+    "description": "Trousse de crochets fins, pour forcer les serrures.",
+    "rarete": "commun",
+    "categorie": "outil",
+    "slots": [],
+    "poids": 0.1,
+    "bonus_desamorcage": 5
+  },
+  {
+    "_id": "item:Crochet_serrurier",
+    "type": "item",
+    "nom": "Crochet de serrurier",
+    "sous_categorie": "",
+    "icon": "🔓",
+    "description": "Crochet de serrurier, pour les serrures dont on n'a pas la clé.",
+    "rarete": "commun",
+    "categorie": "outil",
+    "slots": [],
+    "poids": 0.05,
+    "bonus_desamorcage": 10,
+    "valeur": [
+      {
+        "cu": 150
+      },
+      {
+        "cu": 450
+      }
+    ]
+  },
+  {
+    "_id": "item:Crochets_d_os",
+    "type": "item",
+    "nom": "Crochets d'os",
+    "icon": "🔓",
+    "description": "Deux tiges d'os limées en crochet et en tension. Elles cassent plus vite que le fer, mais ne sonnent pas dans la serrure.",
+    "rarete": "commun",
+    "categorie": "outil",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.05,
+    "bonus_desamorcage": 2
+  },
+  {
+    "_id": "item:Passe_partout",
+    "type": "item",
+    "nom": "Passe-partout",
+    "icon": "🗝️",
+    "description": "Une clef de fer limée sur un crochet de serrurier : sans dents, elle trouve d'elle-même les gorges d'un mécanisme.",
+    "rarete": "commun",
+    "categorie": "outil",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.1,
+    "bonus_desamorcage": 20
+  }
+]
