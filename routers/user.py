@@ -24,7 +24,7 @@ from utils.marche import (
 	convertir_apres_achat, resolve_stock_vente, tick_atelier, lieu_buys, params_vente_lieu,
 	fiche_item_fields, flux_cite, persister_flux, est_negociant, cles_consommees,
 	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
-	compter_transaction,
+	compter_transaction, ingredients_sorts_monde,
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
 	relations_lieux_payload,
 )
@@ -61,6 +61,7 @@ from utils import escorte
 from utils import indicateurs
 from utils import expedition
 from utils import traces as traces_util
+from utils import filtres_boutique
 from utils import auberge
 from utils import fiche as fiche_util
 from utils import scriptorium
@@ -2275,6 +2276,7 @@ def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None =
 						 {"index": c["index"], "item_id": item_ref_id(c["ref"]), "nom": nom_c}))
 
 	vendables = []
+	ingredients = None   # lu au premier objet vendable seulement
 	for compagnon_id, refs, nom, porteur_icon, contenant in sacs:
 		for idx, ref in enumerate(refs):
 			item = resolve_item_ref(ref)
@@ -2301,6 +2303,9 @@ def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None =
 				"negocie": negocie,
 				**fiche_item_fields(item),
 			})
+			if ingredients is None:
+				ingredients = ingredients_sorts_monde()
+			vendables[-1]["filtres"] = filtres_boutique.filtres_item(item, ingredients)
 	return vendables
 
 

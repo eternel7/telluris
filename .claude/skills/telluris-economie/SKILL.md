@@ -63,6 +63,13 @@ Catégorie de lieu `negociant` (`CATEGORIES_NEGOCE`, prédicat `marche.est_negoc
 - Client : `quotes` porte `negociant` + `commission` (%, aussi renvoyée par `sell_item`) ; 🤝 masqué côté vente ; 🏷️ affiché via `est_negociant` de `/play`.
 
 
+### Entonnoir du panneau marchand — filtre par type d'objet (`utils/filtres_boutique.py`)
+Chaque ligne de `vendables`, `achetables` (`resolve_stock_vente`) et du `catalogue` de commande porte `filtres: [clé]`, **calculé au serveur** (§10) ; `/play` sème le catalogue des pastilles (`FILTRES_BOUTIQUE`). Verrouillé par `tests/test_filtres_boutique.py` et `dev/test_filtres_boutique_client.js`.
+- **Tout est relu**, aucun champ neuf : armure ← `slots` (bouclier : sous-cat. `bouclier`, ou main gauche sans sous-cat.) ; arme ← tags `cac`/`jet`/`tir` (exactement un par arme) + `hast`/`tranchant`, sous-cat. `instrument` ; prise ← `deux_mains` + slots de main (« Main gauche » = une main ET slot `main_gauche`) ; magie ← catégorie `catalyseur`, items cités par un `sort.composants` (consommé OU non : un même objet est l'un ou l'autre selon le sort), livres `grimoire`/`livre_sort` ; consommable ← les EFFETS (soin, mana, renfort) + sous-cat. ; matière ← `metal`/`composant` (bois, dépouille, autre) ; fabrication ← `fabrication.apporte` (⚠️ pas le bloc d'une VARIANTE) ; divers (dont « Crochetage » ← `bonus_desamorcage` > 0, sorti des « Outils » pour montrer un usage non évident).
+- Ingrédients : `marche.ingredients_sorts_monde()` (find_docs de contenu, mémoïsé), lu **une fois par liste**, jamais pour une liste vide.
+- Client : **inclusion** (une ligne reste dès qu'UNE clé est active) ; **un état PAR SECTION** (`_fbActifs.vente|achat|commande`, un entonnoir chacune), tout effacé en quittant la boutique (`closeSellPanel`) ; pastilles proposées = présentes dans la section OU actives. Le tri par nom est une icône A↓Z / Z↓A **partout** dans /play (`.ico-btn`, `_updateSortBtn`). Un objet sans clé (bougie sans effet) disparaît dès qu'un filtre est actif.
+
+
 ### Marchandage & relations
 `prix_courant` = prix négocié ou prix de base pondéré par la relation (0-100, neutre 50) ; **prix appliqué** = `prix_marche` (re-clampé par le facteur de stock). La négociation est persistée comme **FRACTION de la fourchette**, pas comme montant fixe. Relation = doc `type:"relation"` (char × lieu), avec crit ok/fail sur `POST /api/marchander` et blocage temporaire en cas d'échec critique. Formules, fidélité (`marche.compter_transaction`, +1 relation tous les N échanges sous un seuil) et persistance sont couverts par `tests/test_marche_recettes.py` et `tests/test_quetes_relation.py`.
 

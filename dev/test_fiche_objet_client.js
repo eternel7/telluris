@@ -13,6 +13,7 @@
 //      ligne « Au coup → ennemi|soi », pas « Effets ».
 //   3. Un consommable garde toute sa lecture (effet à l'ingestion).
 //   4. La portée d'une arme de JET ajoute F // JET_PORTEE_F_DIV.
+//   5. Un outil de crochetage (`bonus_desamorcage`, utils/pieges.py) dit son usage et son bonus.
 //
 // MÉTHODE : identique à dev/test_proprietes_client.js — extraction par nom, `runInThisContext`.
 
@@ -39,7 +40,8 @@ function extraire(nom, source = js) {
 
 const capacites = fs.readFileSync(path.join(__dirname, '..', 'templates', 'scripts', 'capacites_texte.js'), 'utf8');
 vm.runInThisContext(extraire('regenTexte', capacites));
-for (const nom of ['_itemMode', '_porteeArme', '_effetsLecture', '_effetsChips', '_cibleCoup', '_effetsRow']) {
+for (const nom of ['_itemMode', '_porteeArme', '_effetsLecture', '_effetsChips', '_cibleCoup', '_effetsRow',
+	'_textRow', '_desamorcageBonus', '_desamorcageText', '_desamorcageNote']) {
 	vm.runInThisContext(extraire(nom));
 }
 globalThis._charStats = { F: 30 };
@@ -104,6 +106,26 @@ test('portée hors jet : celle de l\'objet ; hors arme : null', () => {
 	assert.strictEqual(_porteeArme(baguette), 1);
 	assert.strictEqual(_porteeArme({ categorie: 'arme', tags: ['tir'], portee: 8 }), 8);
 	assert.strictEqual(_porteeArme(calotte), null);
+});
+
+// Outils de crochetage du dump : Trousse de crochetage fine (15), Crochets (10).
+const trousse = { categorie: 'outil', bonus_desamorcage: 15 };
+const crochets = { categorie: 'outil', bonus_desamorcage: 10 };
+test('outil de crochetage : bonus et usage sur la ligne 🪤 Désamorçage', () => {
+	const ligne = _textRow('🪤 Désamorçage', _desamorcageText(trousse), null, false);
+	assert.ok(ligne.includes('+15 % pour désamorcer un piège'), ligne);
+	assert.ok(_desamorcageNote(trousse, null).includes('compétence requise'));
+	assert.ok(_desamorcageNote(trousse, null).includes('briser'));
+});
+test('comparaison : chaque colonne porte son bonus, une seule note', () => {
+	const ligne = _textRow('🪤 Désamorçage', _desamorcageText(crochets), _desamorcageText(trousse), true);
+	assert.ok(ligne.includes('+10 %') && ligne.includes('+15 %'), ligne);
+	assert.strictEqual((_desamorcageNote(crochets, trousse).match(/Outil de crochetage/g) || []).length, 1);
+});
+test('objet sans bonus de désamorçage : ni ligne ni note', () => {
+	assert.strictEqual(_textRow('🪤 Désamorçage', _desamorcageText(calotte), null, false), '');
+	assert.strictEqual(_desamorcageNote(calotte, null), '');
+	assert.strictEqual(_desamorcageText({ bonus_desamorcage: 0 }), '');
 });
 
 console.log(`✓ ${ok} tests fiche objet`);

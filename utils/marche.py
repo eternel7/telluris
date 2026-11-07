@@ -12,6 +12,7 @@ from collections import Counter
 from db.config import get_doc, find_docs, save_doc
 from models import character_stats
 from utils import fabrication
+from utils import filtres_boutique
 from utils import montures
 from utils.characters import (
 	resolve_item_ref,
@@ -37,6 +38,8 @@ _FICHE_ITEM_KEYS = (
 	"bonus", "magies",
 	"bonus_pa", "bonus_pv", "bonus_pm", "bonus_cc", "bonus_cd",
 	"bonus_degats", "bonus_degats_dice", "bonus_initiative", "bonus_malus_depl",
+	# `bonus_desamorcage` : outil de crochetage (utils/pieges.py) — la fiche dit son usage et son bonus.
+	"bonus_desamorcage",
 	# `description` : texte libre de l'objet (manuscrit, traité, recueil du scriptorium…) —
 	# sans elle, la fiche marchand n'affichait AUCUN texte d'objet, même pour un livre qu'on
 	# s'apprête à acheter. `carte` : bout de carte d'un livre_carte (mêmes clés que
@@ -45,6 +48,12 @@ _FICHE_ITEM_KEYS = (
 	# qu'on paie, il ne se lit pas en vitrine.
 	"description", "carte",
 )
+
+
+def ingredients_sorts_monde() -> frozenset:
+	"""Items cités par un sort (`filtres_boutique.ingredients_sorts`) : une lecture de contenu
+	mémoïsée par process (`find_docs` sur un type de contenu), à faire UNE fois par liste."""
+	return filtres_boutique.ingredients_sorts(find_docs({"type": "sort"}, fields=["_id", "composants"]) or [])
 
 
 def fiche_item_fields(item: dict) -> dict:
@@ -2082,6 +2091,7 @@ def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> lis
 	Import tardif : `scriptorium` importe ce module."""
 	from utils import scriptorium
 	out = []
+	ingredients = None   # lu à la première ligne seulement : un rayon vide ne lit rien
 	for entry in (lieu_doc or {}).get("stock_vente", []):
 		item_id = entry.get("item_id")
 		qty = int(entry.get("qty", 0))
@@ -2109,6 +2119,9 @@ def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> lis
 			"negocie": negocie,
 			**fiche_item_fields(item),
 		}
+		if ingredients is None:
+			ingredients = ingredients_sorts_monde()
+		ligne["filtres"] = filtres_boutique.filtres_item(item, ingredients)
 		if scriptorium.contenu_scelle(item):
 			ligne.pop("description", None)
 			ligne.pop("carte", None)

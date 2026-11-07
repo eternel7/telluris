@@ -2463,6 +2463,61 @@ def _peut_ouvrir_tresor(combat_doc: dict, joueur: dict | None) -> bool:
 				and not _menace_au_contact(combat_doc, joueur))
 
 
+def _peut_examiner_tresor(combat_doc: dict, joueur: dict | None) -> bool:
+	"""Garde UNIQUE de l'examen (action et bouton du client) : « Détection des pièges », coffre
+	FERMÉ au contact, pas d'ennemi au corps à corps. ⚠️ Proposé que le coffre soit piégé ou
+	non — ne le masquer que sans piège trahirait le coffre ; il disparaît seulement quand le
+	piège est déjà connu de tous (repéré, désamorcé ou déclenché)."""
+	etat = _tresor_courant(combat_doc)
+	if not (joueur and _eff_int(joueur.get("detection_pieges")) > 0
+			and joueur.get("character_id") and joueur.get("pos") and _debout(joueur)
+			and joueur.get("jouable", True) is not False
+			and _etat_tresor(combat_doc, etat) == tresor_util.ETAT_FERME
+			and tresor_util.a_portee(etat, jetons.cases_emprise(joueur))
+			and not _menace_au_contact(combat_doc, joueur)):
+		return False
+	piege = _piege_du_tresor(combat_doc, etat)
+	return piege is None or piege.get("etat") == pieges_util.ETAT_CACHE
+
+
+def _action_examiner_tresor(combat_doc: dict, joueur: dict, rand_fn=None) -> dict:
+	"""Examiner le coffre avant de l'ouvrir : 1 action, nouveau jet de détection sur SON seul
+	piège avec `PIEGE_BONUS_EXAMEN`. Repéré ⇒ détecté (+XP_DETECTION), donc désamorçable au
+	contact par qui sait désamorcer. Répétable, une action à chaque fois.
+	⚠️ L'échec et l'absence de piège s'écrivent pareil : le journal ne trahit rien."""
+	if _eff_int(joueur.get("detection_pieges")) <= 0:
+		return {"error": "Vous ne savez pas chercher les pièges."}
+	if not _peut_examiner_tresor(combat_doc, joueur):
+		return {"error": "Aucun coffre à examiner ici."}
+	err = _garde_action(joueur)
+	if err:
+		return {"error": err}
+	_payer_action(joueur)
+	etat = _tresor_courant(combat_doc)
+	tour, nom = combat_doc["tour"], joueur["nom"]
+	combat_doc["log"].append({"tour": tour, "acteur": nom, "kind": "sys",
+							  "texte": f"🔎 {nom} examine {etat['nom']}."})
+	piege = _piege_du_tresor(combat_doc, etat)
+	if piege is not None:
+		aid = joueur.get("id", "")
+		if aid not in piege.setdefault("tentes", []):
+			piege["tentes"].append(aid)
+		seuil = pieges_util.seuil_detection(joueur, piege, pieges_util.PIEGE_BONUS_EXAMEN)
+		roll = _d100(rand_fn)
+		if roll <= seuil:
+			piege["etat"] = pieges_util.ETAT_DETECTE
+			joueur["xp_pieges"] = _eff_int(joueur.get("xp_pieges")) + pieges_util.XP_DETECTION
+			combat_doc["log"].append({
+				"tour": tour, "acteur": nom, "kind": "sys",
+				"texte": f"🪤 {nom} repère un piège sur le coffre (jet {roll} / seuil {seuil}) "
+						 f"(+{pieges_util.XP_DETECTION} XP).",
+			})
+			return {"examen": True, "repere": True}
+	combat_doc["log"].append({"tour": tour, "acteur": nom, "kind": "sys",
+							  "texte": f"🔎 {nom} ne trouve rien de suspect."})
+	return {"examen": True, "repere": False}
+
+
 def _action_ouvrir_tresor(combat_doc: dict, joueur: dict, grid: dict) -> dict:
 	"""Ouvrir le coffre de l'étage : 1 action, au contact, même en plein combat — mais pas
 	avec un ennemi au corps à corps (règle du ramassage d'une carcasse).
@@ -2568,6 +2623,7 @@ def vue_client(combat_doc: dict) -> dict:
 	vue["peut_fouiller"] = bool(acteur and _eff_int(acteur.get("detection_pieges")) > 0)
 	vue["peut_desamorcer"] = bool(acteur and _eff_int(acteur.get("desamorcage")) > 0)
 	vue["peut_ouvrir_tresor"] = _peut_ouvrir_tresor(combat_doc, acteur)
+	vue["peut_examiner_tresor"] = _peut_examiner_tresor(combat_doc, acteur)
 	return vue
 
 
@@ -6805,6 +6861,11 @@ def _resoudre_action_joueur(
 
 	elif action_type == "ouvrir_tresor":
 		result = _action_ouvrir_tresor(combat_doc, joueur, grid)
+		if result.get("error"):
+			return result
+
+	elif action_type == "examiner_tresor":
+		result = _action_examiner_tresor(combat_doc, joueur)
 		if result.get("error"):
 			return result
 

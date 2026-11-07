@@ -1581,6 +1581,8 @@ const SERVER_DATA = {
 	// TRÉSOR de l'étage : la vue publique vit dans `etages.tresor` ; l'acteur courant peut-il
 	// l'ouvrir maintenant (au contact, sans ennemi au corps à corps) — jugé au serveur.
 	peut_ouvrir_tresor:   {{ (combat.peut_ouvrir_tresor or false) | tojson | safe }},
+	// … et l'EXAMINER (« Détection des pièges », coffre fermé au contact) — jugé au serveur.
+	peut_examiner_tresor: {{ (combat.peut_examiner_tresor or false) | tojson | safe }},
 };
 
 // Grille de combat : statique pour toute la durée du combat (cells appartient au
@@ -2709,24 +2711,33 @@ function renderPassages(data) {
 	const tresor = (data.etages || {}).tresor;
 	row.style.display = (tous.length || tresor) ? '' : 'none';
 	row.replaceChildren();
-	// Coffre de l'étage au contact (`peut_ouvrir_tresor`, jugé au serveur) : même pastille.
-	if (peutAgir && tresor && data.peut_ouvrir_tresor) {
-		const nom = tresor.nom || 'Coffre';
+	// Coffre de l'étage au contact (`peut_examiner_tresor` / `peut_ouvrir_tresor`, jugés au
+	// serveur) : même pastille. On examine AVANT d'ouvrir, d'où l'ordre des boutons.
+	const nomCoffre = (tresor && tresor.nom) || 'Coffre';
+	const boutonCoffre = (icone, libelle, titre, action) => {
 		const b = document.createElement('button');
 		b.type = 'button';
 		b.className = 'passage-btn';
-		b.title = `${nom} — ouvrir, 1 action`;
-		b.setAttribute('aria-label', `Ouvrir : ${nom}`);
+		b.title = titre;
+		b.setAttribute('aria-label', `${libelle} : ${nomCoffre}`);
 		const ico = document.createElement('span');
 		ico.className = 'passage-ico';
 		ico.setAttribute('aria-hidden', 'true');
-		ico.textContent = tresor.icon || '🧰';
+		ico.textContent = icone;
 		const lbl = document.createElement('span');
 		lbl.className = 'passage-lbl';
-		lbl.textContent = tresor.etat === 'ouvert' ? 'Fouiller le coffre' : 'Ouvrir le coffre';
+		lbl.textContent = libelle;
 		b.append(ico, lbl);
-		b.onclick = () => doAction('ouvrir_tresor', null);
+		b.onclick = () => doAction(action, null);
 		row.appendChild(b);
+	};
+	if (peutAgir && tresor && data.peut_examiner_tresor) {
+		boutonCoffre('🔎', 'Examiner le coffre',
+			`${nomCoffre} — chercher un piège avant d'ouvrir, 1 action`, 'examiner_tresor');
+	}
+	if (peutAgir && tresor && data.peut_ouvrir_tresor) {
+		boutonCoffre(tresor.icon || '🧰', tresor.etat === 'ouvert' ? 'Fouiller le coffre' : 'Ouvrir le coffre',
+			`${nomCoffre} — ouvrir, 1 action`, 'ouvrir_tresor');
 	}
 	actifs.forEach(p => {
 		// Icône et libellé séparés : sous 768 px seule l'icône reste (CSS), le nom passe

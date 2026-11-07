@@ -351,3 +351,78 @@ def test_la_bourse_et_les_objets_vont_au_membre_a_la_fin(db):
 	combat_util._finalize_membre(doc, j, perso, "defaite")
 	assert perso["inventaire"] == [{"item": "item:cristal", "poids": 1}]
 	assert (perso["or"], perso["argent"], perso["cuivre"]) == (1, 2, 50)
+
+
+# ── Examiner (« Détection des pièges ») ───────────────────────────────────────────
+
+def _examinateur(**kw):
+	return joueur_snap("joueur_0", "character:u_1", x=8, y=7, charge_max=500,
+					   int=30, detection_pieges=10, **kw)
+
+
+def _texte_log(doc):
+	return [l["texte"] for l in doc["log"]]
+
+
+def test_examiner_reserve_a_la_detection_des_pieges(db):
+	db.update(ITEMS)
+	j = joueur_snap("joueur_0", "character:u_1", x=8, y=7)
+	doc = _doc_coffre([j], piege={"danger": 1, "effet": "degats"})
+	assert combat_util.vue_client(doc)["peut_examiner_tresor"] is False
+	assert "error" in combat_util.resolve_action(doc, "examiner_tresor")
+
+
+def test_examiner_au_contact_et_sans_ennemi_au_corps_a_corps(db):
+	db.update(ITEMS)
+	loin = _doc_coffre([joueur_snap("joueur_0", "character:u_1", x=5, y=5, detection_pieges=10)])
+	assert combat_util.vue_client(loin)["peut_examiner_tresor"] is False
+	menace = _doc_coffre([_examinateur()], [monstre_snap(x=7, y=7)])
+	assert combat_util.vue_client(menace)["peut_examiner_tresor"] is False
+
+
+def test_examiner_repere_le_piege_qui_devient_desamorcable(db, monkeypatch):
+	db.update(ITEMS)
+	j = _examinateur(desamorcage=10)
+	doc = _doc_coffre([j], piege={"danger": 1, "effet": "degats"})
+	assert combat_util.vue_client(doc)["peut_examiner_tresor"] is True
+	monkeypatch.setattr(combat_util.random, "random", lambda: 0.0)   # jet 1 : réussite
+	res = combat_util.resolve_action(doc, "examiner_tresor")
+	piege = doc["pieges"][0]
+	assert res == {"examen": True, "repere": True} and piege["etat"] == "detecte"
+	assert j["xp_pieges"] == pieges_util.XP_DETECTION and j["actions_restantes"] == 1
+	vue = combat_util.vue_client(doc)
+	# Piège connu : plus rien à examiner, mais désamorçable au contact.
+	assert vue["peut_examiner_tresor"] is False
+	assert vue["pieges_desamorcables"] == [piege["id"]]
+
+
+def test_examiner_le_bonus_est_celui_de_l_examen(db, monkeypatch):
+	db.update(ITEMS)
+	j = _examinateur()
+	doc = _doc_coffre([j], piege={"danger": 3, "effet": "degats"})
+	piege = doc["pieges"][0]
+	seuil = pieges_util.seuil_detection(j, piege, pieges_util.PIEGE_BONUS_EXAMEN)
+	assert seuil > pieges_util.seuil_detection(j, piege, pieges_util.PIEGE_BONUS_FOUILLE)
+	monkeypatch.setattr(combat_util.random, "random", lambda: seuil / 100)   # jet seuil+1
+	assert combat_util.resolve_action(doc, "examiner_tresor")["repere"] is False
+	monkeypatch.setattr(combat_util.random, "random", lambda: (seuil - 1) / 100)   # jet = seuil
+	assert combat_util.resolve_action(doc, "examiner_tresor")["repere"] is True
+
+
+def test_examiner_l_echec_et_l_absence_de_piege_s_ecrivent_pareil(db, monkeypatch):
+	db.update(ITEMS)
+	monkeypatch.setattr(combat_util.random, "random", lambda: 0.99)   # jet 100 : échec
+	rate = _doc_coffre([_examinateur()], piege={"danger": 5, "effet": "degats"})
+	sans = _doc_coffre([_examinateur()])
+	# Proposé aussi sans piège : le masquer trahirait le coffre.
+	assert combat_util.vue_client(sans)["peut_examiner_tresor"] is True
+	assert combat_util.resolve_action(rate, "examiner_tresor") == {"examen": True, "repere": False}
+	assert combat_util.resolve_action(sans, "examiner_tresor") == {"examen": True, "repere": False}
+	assert _texte_log(rate) == _texte_log(sans)
+	assert rate["pieges"][0]["etat"] == "cache"
+
+
+def test_examiner_seulement_un_coffre_ferme(db):
+	db.update(ITEMS)
+	doc = _doc_coffre([_examinateur()], etat="ouvert")
+	assert combat_util.vue_client(doc)["peut_examiner_tresor"] is False
