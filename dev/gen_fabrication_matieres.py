@@ -302,7 +302,7 @@ MATIERES = {
 											"effets": {"regen_pm": 1, "pv": 5, "pm": 5, "duree": 3}},
 							 [TAG_ARMURE, TAG_CATALYSEUR, TAG_CONSOMMABLE]),
 
-	# ── Lingots précieux : paliers 4-5 par leur PRIX (1, 2 et 20 or) ─────────────
+	# ── Lingots précieux : paliers 4-5 par leur PRIX (4, 9 et 20 or — dev/gen_prix_lingots.py) ─────────────
 	# Aucune recette ne les consomme : c'est `APPRO_EXTRA` qui les fait livrer au grand arsenal
 	# (réserve + comptoir), seule source du jeu — cf. models/character_stats.py.
 	"item:mithril": _matiere("en mithril", 4, {"bonus_degats": 3, "bonus_pa": 3, "bonus_cc": 2,

@@ -162,7 +162,9 @@ def test_un_sous_bloc_du_base_survit_a_la_variante():
 	nombre, le sous-bloc partait avec les zéros. 53 items du dump portent `effets.buffs`."""
 	mods = fabrication.appliquer_modificateurs(BOUGIE, [(RITUEL, 1)])
 	assert mods["effets"] == {"duree": 8, "regen_pm": 3, "buffs": {"Int": 5}}
-	assert mods["bonus_pm"] == 1
+	# Un consommable ne reçoit que des `effets` : le +1 PM du composant n'aurait servi à rien
+	# (la bougie ne s'équipe pas) — cf. test_bonus_hors_famille_*.
+	assert "bonus_pm" not in mods
 
 
 def test_le_doc_de_base_nest_jamais_mute():
@@ -436,3 +438,66 @@ def test_id_occupe_par_autre_chose_leve():
 	except ValueError:
 		return
 	raise AssertionError("une collision d'_id doit lever, pas écraser")
+
+
+# ── Bonus selon la famille de la pièce (`borner_hors_famille`) ──────────────────
+
+MITHRIL = {
+	"_id": "item:mithril", "type": "item", "nom": "Lingot de mithril", "categorie": "metal",
+	"tags": ["fabrication_arme", "fabrication_armure"],
+	"fabrication": {"nom": "en mithril",
+					"modificateurs": {"bonus_degats": 3, "bonus_pa": 3, "bonus_cc": 2,
+									  "bonus_pm": 4, "bonus": {"Ag": 2}}},
+}
+CASQUE = {"_id": "item:Casque", "type": "item", "nom": "Casque", "categorie": "armure",
+		  "slots": ["tete"], "bonus_pa": 2, "poids": 2.0}
+FOUET = {"_id": "item:Fouet", "type": "item", "nom": "Fouet", "categorie": "arme",
+		 "slots": ["main_droite", "main_gauche"], "bonus_degats": 1, "poids": 1.0}
+DAGUE_PARADE = {"_id": "item:Dague_de_parade", "type": "item", "nom": "Dague de parade",
+				"categorie": "arme", "slots": ["main_gauche"], "bonus_pa": 2, "bonus_degats": 1}
+ANNEAU = {"_id": "item:Anneau", "type": "item", "nom": "Anneau", "categorie": "armure",
+		  "slots": ["anneau_1", "anneau_2"], "bonus_pm": 2}
+
+
+def test_famille_de_la_piece():
+	assert fabrication.famille_piece(EPEE) == "arme"
+	assert fabrication.famille_piece(CASQUE) == "armure"
+	assert fabrication.famille_piece(ANNEAU) == "bijou"
+	assert fabrication.famille_piece({"categorie": "armure", "slots": ["main_gauche"]}) == "armure"
+	assert fabrication.famille_piece(BOUGIE) == "consommable"
+	assert fabrication.famille_piece({"categorie": "outil"}) is None
+
+
+def test_bonus_hors_famille_une_armure_ne_donne_pas_de_degats():
+	mods = fabrication.appliquer_modificateurs(CASQUE, [(MITHRIL, 1)])
+	assert "bonus_degats" not in mods and "bonus_cc" not in mods
+	assert mods["bonus_pa"] == 5 and mods["bonus_pm"] == 4 and mods["bonus"] == {"Ag": 2}
+
+
+def test_bonus_hors_famille_une_arme_ne_donne_pas_de_points_d_armure():
+	mods = fabrication.appliquer_modificateurs(FOUET, [(MITHRIL, 1)])
+	assert "bonus_pa" not in mods and "bonus_pm" not in mods
+	assert mods["bonus_degats"] == 4 and mods["bonus_cc"] == 2 and mods["bonus"] == {"Ag": 2}
+
+
+def test_bonus_hors_famille_renforce_ce_que_le_base_porte_deja_plafonne(monkeypatch):
+	"""Dague de parade : ses PA de base sont renforcés, jusqu'à base × plafond."""
+	plafond = character_stats.FABRICATION_PLAFOND_HORS_FAMILLE
+	mods = fabrication.appliquer_modificateurs(DAGUE_PARADE, [(MITHRIL, 1)])
+	assert mods["bonus_pa"] == min(2 + 3, 2 * plafond)
+	monkeypatch.setattr(character_stats, "FABRICATION_PLAFOND_HORS_FAMILLE", 1.5)
+	mods = fabrication.appliquer_modificateurs(DAGUE_PARADE, [(MITHRIL, 1)])
+	assert mods["bonus_pa"] == 3   # 2 × 1,5
+
+
+def test_bonus_hors_famille_un_bijou_ne_protege_ni_ne_blesse():
+	mods = fabrication.appliquer_modificateurs(ANNEAU, [(MITHRIL, 1)])
+	assert "bonus_pa" not in mods and "bonus_degats" not in mods
+	assert mods["bonus_pm"] == 6
+
+
+def test_borner_une_variante_existante():
+	"""Correction d'un doc déjà composé (générateur) : même règle, valeurs lues sur la variante."""
+	variante = {"bonus_degats": 7, "bonus_pa": 8, "bonus": {"F": 3, "R": 3}}
+	fabrication.borner_hors_famille(CASQUE, variante)
+	assert variante == {"bonus_pa": 8, "bonus": {"F": 3, "R": 3}}

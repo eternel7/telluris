@@ -1,0 +1,83 @@
+[
+  {
+    "_id": "item:mithril",
+    "type": "item",
+    "nom": "Lingot de mithril",
+    "sous_categorie": "metaux_precieux",
+    "icon": "✨",
+    "description": "Lingot de mithril, métal argenté plus léger qu'une plume et plus dur que l'acier.",
+    "rarete": "rare",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "poids": 1,
+    "valeur": [
+      {
+        "or": 4
+      }
+    ],
+    "fabrication": {
+      "nom": "en mithril",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_pa": 3,
+        "bonus_cc": 2,
+        "bonus": {
+          "Ag": 2
+        },
+        "poids": {
+          "facteur": 0.6
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:orichalque",
+    "type": "item",
+    "nom": "Lingot d'orichalque",
+    "sous_categorie": "metaux_precieux",
+    "icon": "🌟",
+    "description": "Lingot d'orichalque aux reflets cuivrés, métal légendaire que la magie traverse sans peine.",
+    "rarete": "rare",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal",
+      "fabrication_arme",
+      "fabrication_armure",
+      "fabrication_catalyseur"
+    ],
+    "poids": 2.5,
+    "valeur": [
+      {
+        "or": 9
+      }
+    ],
+    "fabrication": {
+      "nom": "en orichalque",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_pm": 4,
+        "bonus": {
+          "Int": 2,
+          "Vol": 2
+        },
+        "effets": {
+          "canalisation": 1
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  }
+]
