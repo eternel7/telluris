@@ -240,11 +240,21 @@ def test_un_groupe_de_sept_en_diagonale_franchit(db):
 	assert combat_util.passage_franchissable(diagonale, p) is True
 
 
-def test_la_file_part_du_principal(db):
-	"""Un compagnon sur le passage ne suffit pas : c'est le principal qui l'emprunte."""
+def test_un_compagnon_sur_le_passage_suffit(db):
+	"""La tête de file n'est pas forcément le principal : un compagnon sur le passage, le
+	principal dans la file derrière lui, et le groupe l'emprunte."""
 	p = _passage("connection:surface", 17, 10)
 	compagnon_dessus = combat_doc(_trio((17, 9), (17, 10), (17, 8)), [], etages=_etages([p]))
-	assert combat_util.passage_franchissable(compagnon_dessus, p) is False
+	assert combat_util.passage_franchissable(compagnon_dessus, p) is True
+
+
+def test_un_compagnon_sur_le_passage_ne_part_pas_sans_le_principal(db):
+	"""Le groupe change d'étage ENSEMBLE : un compagnon à l'escalier pendant que le
+	principal fouille l'étage ne franchit pas."""
+	p = _passage("connection:surface", 17, 10)
+	principal_loin = combat_doc(_trio((3, 3), (17, 10), (17, 9)), [], etages=_etages([p]))
+	assert combat_util.passage_franchissable(principal_loin, p) is False
+	assert "error" in combat_util.resolve_action(principal_loin, "emprunter", "connection:surface")
 
 
 def test_principal_a_terre_la_file_part_d_un_combattant_debout(db):
