@@ -11,8 +11,9 @@
 //      familles, pas les seuls casques tranchants (il n'y en a aucun).
 //   2. Filtre qui casse l'adressage : l'ordre filtré doit rester des INDEX D'ORIGINE (la fiche
 //      et les boutons relisent `MARCHAND.<liste>[idx]`).
-//   3. Pastille absente du panneau proposée quand même (un entonnoir d'armurerie qui affiche
+//   3. Pastille absente de la section proposée quand même (un entonnoir d'armurerie qui affiche
 //      « Bougies »), ou pastille ACTIVE qui disparaît (impossible à désactiver hors « reset »).
+//   5. État partagé entre sections : chaque section (vente, achat, commande) a SON filtre.
 //   4. Texte saisi injecté tel quel : les libellés passent par `escapeHtml`.
 //
 // HORS DE PORTÉE (sans jsdom) : l'overlay, le halo, la remise à zéro à l'ouverture du
@@ -41,7 +42,7 @@ function extraire(nom, source) {
 ['_fbGarde', '_fbComptes', '_fbGroupesHtml', '_fbOrdre', '_sortedOrder', 'escapeHtml']
 	.forEach(n => vm.runInThisContext(extraire(n, js)));
 // Globale lue par `_fbOrdre` (semée ; `let` dans la page).
-globalThis._fbActifs = new Set();
+globalThis._fbActifs = { vente: new Set(), achat: new Set(), commande: new Set() };
 
 let ok = 0;
 function test(nom, fn) {
@@ -71,12 +72,21 @@ test('une ligne sans clé disparaît dès qu’un filtre est actif', () => {
 
 test('l’ordre filtré reste en index d’origine, tri compris', () => {
 	const liste = [PAIN, CASQUE, ARC, HACHE];
-	globalThis._fbActifs = new Set(['arme.tir', 'arme.tranchant']);
-	assert.deepStrictEqual(_fbOrdre(liste, 'asc'), [2, 3]);    // Arc, Hache
-	assert.deepStrictEqual(_fbOrdre(liste, 'desc'), [3, 2]);   // Hache, Arc
-	assert.deepStrictEqual(_fbOrdre(liste, null), [2, 3]);
-	globalThis._fbActifs = new Set();
-	assert.deepStrictEqual(_fbOrdre(liste, null), [0, 1, 2, 3]);
+	_fbActifs.achat = new Set(['arme.tir', 'arme.tranchant']);
+	assert.deepStrictEqual(_fbOrdre(liste, 'asc', 'achat'), [2, 3]);    // Arc, Hache
+	assert.deepStrictEqual(_fbOrdre(liste, 'desc', 'achat'), [3, 2]);   // Hache, Arc
+	assert.deepStrictEqual(_fbOrdre(liste, null, 'achat'), [2, 3]);
+	_fbActifs.achat = new Set();
+	assert.deepStrictEqual(_fbOrdre(liste, null, 'achat'), [0, 1, 2, 3]);
+});
+
+test('le filtre d’une section ne touche pas les autres', () => {
+	const liste = [PAIN, CASQUE, ARC, HACHE];
+	_fbActifs.vente = new Set(['armure.tete']);
+	assert.deepStrictEqual(_fbOrdre(liste, null, 'vente'), [1]);
+	assert.deepStrictEqual(_fbOrdre(liste, null, 'achat'), [0, 1, 2, 3]);
+	assert.deepStrictEqual(_fbOrdre(liste, null, 'commande'), [0, 1, 2, 3]);
+	_fbActifs.vente = new Set();
 });
 
 test('les comptes s’additionnent sur plusieurs listes', () => {
@@ -92,29 +102,29 @@ const CATALOGUE = [
 	{ cle: 'arme', icon: '⚔️', nom: 'Arme', pastilles: [{ cle: 'arme.tranchant', nom: 'Tranchante <b>' }] },
 ];
 
-test('seules les pastilles présentes dans le panneau sont proposées ; un groupe vide disparaît', () => {
-	const presents = _fbComptes([[CASQUE]]);
-	const html = _fbGroupesHtml(CATALOGUE, presents, presents, new Set());
+test('seules les pastilles présentes dans la section sont proposées ; un groupe vide disparaît', () => {
+	const html = _fbGroupesHtml(CATALOGUE, _fbComptes([[CASQUE]]), new Set());
 	assert.ok(html.includes('armure.tete'));
 	assert.ok(!html.includes('armure.pieds'), 'pastille sans objet proposée');
 	assert.ok(!html.includes('Consommable'), 'groupe vide affiché');
 });
 
 test('une pastille ACTIVE reste affichée même sans objet (pour pouvoir la désactiver)', () => {
-	const html = _fbGroupesHtml(CATALOGUE, {}, {}, new Set(['conso.soin']));
+	const html = _fbGroupesHtml(CATALOGUE, {}, new Set(['conso.soin']));
 	assert.ok(html.includes("basculerFiltreBoutique('conso.soin')"));
 	assert.ok(html.includes('is-on'));
 	assert.ok(html.includes('aria-pressed="true"'));
 });
 
-test('présente ailleurs mais absente de la section : estompée, compte 0', () => {
-	const html = _fbGroupesHtml(CATALOGUE, {}, { 'armure.tete': 3 }, new Set());
-	assert.ok(/class="fb-pill is-vide"[^>]*armure\.tete/.test(html), html);
+test('active mais sans objet dans la section (la liste a bougé) : estompée, compte 0', () => {
+	const html = _fbGroupesHtml(CATALOGUE, {}, new Set(['armure.tete']));
+	assert.ok(/class="fb-pill is-on is-vide"[^>]*armure\.tete/.test(html), html);
 	assert.ok(html.includes('<span class="fb-n">0</span>'));
+	assert.ok(!html.includes('armure.pieds'));
 });
 
 test('les libellés sont échappés', () => {
-	const html = _fbGroupesHtml(CATALOGUE, { 'arme.tranchant': 1 }, { 'arme.tranchant': 1 }, new Set());
+	const html = _fbGroupesHtml(CATALOGUE, { 'arme.tranchant': 1 }, new Set());
 	assert.ok(html.includes('Tranchante &lt;b&gt;'));
 });
 

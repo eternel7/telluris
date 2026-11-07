@@ -596,18 +596,19 @@
 		#sell-panel .acc-body { padding: .5rem .6rem; min-height: 0; }
 		#sell-panel .acc-section.open .acc-body { display: flex; flex-direction: column; flex: 1 1 auto; }
 		#sell-panel .sell-acc-tools { display: flex; justify-content: flex-end; gap: .35rem; flex: 0 0 auto; margin-bottom: .35rem; }
-		/* Tri et entonnoir : des icônes, pas des libellés (place comptée sur mobile). */
-		#sell-panel .sell-ico-btn { min-width: 2.2rem; padding: 3px 6px; display: inline-flex; align-items: center; justify-content: center; font-size: .78rem; letter-spacing: -.02em; }
-		#sell-panel .sell-ico-btn:not(.active):not(.is-actif) { opacity: .75; }
+		/* Tri (A↓Z / Z↓A, partout) et entonnoir : des icônes, pas des libellés (place comptée
+		   sur mobile). L'état neutre du tri se lit à la couleur (estompé), l'actif à l'accent. */
+		.ico-btn { min-width: 2.2rem; padding: 3px 6px; display: inline-flex; align-items: center; justify-content: center; font-size: .78rem; letter-spacing: -.02em; }
+		.ico-btn:not(.active):not(.is-actif) { opacity: .75; }
 		#cmd-sort-btn.active { border-color: var(--accent-color); color: var(--accent-color); }
 		/* Filtre actif : couleur d'accent + halo FIXE (pas de clignotement). */
-		#sell-panel .sell-filtre-btn.is-actif {
+		.filtre-btn.is-actif {
 			border-color: var(--accent-color); color: var(--accent-color);
 			box-shadow: 0 0 7px 2px color-mix(in srgb, var(--accent-color, #b98c4a) 65%, transparent);
 		}
-		#sell-panel .sell-filtre-btn.is-actif svg path { fill: currentColor; fill-opacity: .35; }
+		.filtre-btn.is-actif svg path { fill: currentColor; fill-opacity: .35; }
 		#sell-panel .cmd-aide { flex: 0 0 auto; }
-		/* Filtre du catalogue : prend la place à gauche de « Trier », sans la marge basse du filtre des Relations. */
+		/* Filtre du catalogue : prend la place à gauche du tri, sans la marge basse du filtre des Relations. */
 		#sell-panel .sell-acc-tools .cmd-filtre { flex: 1 1 auto; min-width: 0; width: auto; margin: 0 .5rem 0 0; padding: 4px 8px; }
 		/* La liste n'a plus de hauteur fixe : elle prend ce que la section lui laisse. */
 		#sell-panel .sh-inv-scroll { display: flex; height: auto; flex: 1 1 auto; min-height: 0; }
@@ -2511,8 +2512,8 @@
 						   celui de l'équipement (la marge par défaut de .sh-section suffit). #}
 						<div class="sh-section" style="display:flex; align-items:center; justify-content:space-between">
 							<span>🎒 Sac</span>
-							<button type="button" id="inv-sort-btn" class="sh-drop-btn" onclick="cycleInvSort()"
-								title="Trier le sac par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+							<button type="button" id="inv-sort-btn" class="sh-drop-btn ico-btn" onclick="cycleInvSort()"
+								title="Trier le sac par nom (clic : A→Z, Z→A, puis annuler)" aria-label="Trier par nom">A↓Z</button>
 						</div>
 						<div class="sh-inv-scroll sh-scroll" id="sh-sac-scroll"><div id="sh-inv-sac" class="sh-inv-box"></div></div>
 						</div><!-- /.sh-inv-col (sac) -->
@@ -2529,8 +2530,8 @@
 
 						<div class="sh-section" id="sh-sol-section" style="margin-top:14px;display:none; align-items:center; justify-content:space-between">
 								<span>⬇️ Au sol</span>
-								<button type="button" id="sol-sort-btn" class="sh-drop-btn" onclick="cycleSolSort()"
-									title="Trier les objets au sol par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+								<button type="button" id="sol-sort-btn" class="sh-drop-btn ico-btn" onclick="cycleSolSort()"
+									title="Trier les objets au sol par nom (clic : A→Z, Z→A, puis annuler)" aria-label="Trier par nom">A↓Z</button>
 							</div>
 						<div class="sh-inv-scroll sh-scroll" id="sh-sol-scroll"><div id="sh-inv-sol" class="sh-inv-box"></div></div>
 					</div>
@@ -2570,8 +2571,8 @@
 							<div class="capa-outils">
 								<input id="capa-recherche" class="sh-rel-filter" type="search" placeholder="🔍 Chercher une action…"
 									autocomplete="off" aria-label="Chercher une attaque, une compétence, un sort ou une école" oninput="capaRafraichir()">
-								<button type="button" id="capa-sort-btn" class="sh-drop-btn" onclick="cycleCapaSort()"
-									title="Trier par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+								<button type="button" id="capa-sort-btn" class="sh-drop-btn ico-btn" onclick="cycleCapaSort()"
+									title="Trier par nom (clic : A→Z, Z→A, puis annuler)" aria-label="Trier par nom">A↓Z</button>
 							</div>
 							<div class="capa-filtres" aria-label="Filtrer">
 								<button type="button" class="capa-filtre" data-filtre="tout" onclick="capaFiltre('tout')">Tout</button>
@@ -2801,9 +2802,9 @@
 			</button>
 			<div class="acc-body" id="acc-body-vente">
 				<div class="sell-acc-tools">
-					<button type="button" id="sell-sort-btn" class="sh-drop-btn sell-ico-btn" onclick="cycleSellSort()"
+					<button type="button" id="sell-sort-btn" class="sh-drop-btn ico-btn" onclick="cycleSellSort()"
 						title="Trier la vente par nom (clic : A→Z, Z→A, puis annuler)" aria-label="Trier par nom">A↓Z</button>
-					<button type="button" class="sh-drop-btn sell-ico-btn sell-filtre-btn" onclick="ouvrirFiltresBoutique('vente')"
+					<button type="button" class="sh-drop-btn ico-btn filtre-btn" data-section="vente" onclick="ouvrirFiltresBoutique('vente')"
 						title="Filtrer par type d'objet" aria-label="Filtrer par type d'objet"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M3 4h18l-7 8.5V19l-4 2v-8.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
 				</div>
 				<div class="sh-inv-scroll sh-scroll" id="sell-scroll"><ul id="sell-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
@@ -2815,9 +2816,9 @@
 			</button>
 			<div class="acc-body" id="acc-body-achat">
 				<div class="sell-acc-tools">
-					<button type="button" id="buy-sort-btn" class="sh-drop-btn sell-ico-btn" onclick="cycleBuySort()"
+					<button type="button" id="buy-sort-btn" class="sh-drop-btn ico-btn" onclick="cycleBuySort()"
 						title="Trier l'achat par nom (clic : A→Z, Z→A, puis annuler)" aria-label="Trier par nom">A↓Z</button>
-					<button type="button" class="sh-drop-btn sell-ico-btn sell-filtre-btn" onclick="ouvrirFiltresBoutique('achat')"
+					<button type="button" class="sh-drop-btn ico-btn filtre-btn" data-section="achat" onclick="ouvrirFiltresBoutique('achat')"
 						title="Filtrer par type d'objet" aria-label="Filtrer par type d'objet"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M3 4h18l-7 8.5V19l-4 2v-8.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
 				</div>
 				<div class="sh-inv-scroll sh-scroll" id="buy-scroll"><ul id="buy-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
@@ -2839,9 +2840,9 @@
 			<div class="acc-body" id="acc-body-commande">
 				<div class="sell-acc-tools">
 					<input id="cmd-filtre" class="sh-rel-filter cmd-filtre" type="search" placeholder="🔍 Filtrer…" autocomplete="off" oninput="renderCmdCatalogue({ catalogue: MARCHAND.catalogue })">
-					<button type="button" id="cmd-sort-btn" class="sh-drop-btn sell-ico-btn" onclick="cycleCmdSort()"
+					<button type="button" id="cmd-sort-btn" class="sh-drop-btn ico-btn" onclick="cycleCmdSort()"
 						title="Trier le catalogue par nom (clic : A→Z, Z→A, puis annuler)" aria-label="Trier par nom">A↓Z</button>
-					<button type="button" class="sh-drop-btn sell-ico-btn sell-filtre-btn" onclick="ouvrirFiltresBoutique('commande')"
+					<button type="button" class="sh-drop-btn ico-btn filtre-btn" data-section="commande" onclick="ouvrirFiltresBoutique('commande')"
 						title="Filtrer par type d'objet" aria-label="Filtrer par type d'objet"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M3 4h18l-7 8.5V19l-4 2v-8.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
 				</div>
 				<p class="cmd-aide">Ce que l'artisan sait faire, même sans exemplaire en vitrine. Prix façon comprise, sans rien apporter — ce que vous fournissez le fait baisser.</p>
@@ -6204,9 +6205,8 @@ function _sortedOrder(arr, state) {
 function _updateSortBtn(id, state) {
 	const b = document.getElementById(id);
 	if (!b) return;
-	// Bouton à icône (panneau marchand) : A↓Z / Z↓A, l'état neutre se lit à la couleur.
-	if (b.classList.contains('sell-ico-btn')) b.textContent = state === 'desc' ? 'Z↓A' : 'A↓Z';
-	else b.textContent = state === 'asc' ? 'Trier ▲' : (state === 'desc' ? 'Trier ▼' : 'Trier');
+	// Icône A↓Z / Z↓A ; l'état neutre (sans tri) se lit à la couleur, pas au libellé.
+	b.textContent = state === 'desc' ? 'Z↓A' : 'A↓Z';
 	b.classList.toggle('active', !!state);
 }
 
@@ -8905,11 +8905,13 @@ function marchBtn(index, itemId, sens, compagnonId, contenant) {
 // sont mémorisées sur MARCHAND pour re-rendre au clic de tri sans re-fetch.
 // ── Entonnoir : filtre par type d'objet (utils/filtres_boutique.py) ─────────────
 // Chaque ligne (vente, achat, catalogue) porte `filtres` — calculé par le SERVEUR, jamais
-// reclassé ici (§10). UN état pour tout le panneau : « je cherche un casque » vaut pour le
-// rayon comme pour le catalogue. Remis à zéro à chaque ouverture du panneau (une visite).
+// reclassé ici (§10). UN état PAR SECTION (vente, achat, commande) : chacune a son entonnoir.
+// Tout est effacé quand on quitte la boutique (`closeSellPanel`, et par sûreté à l'ouverture).
 const FILTRES_BOUTIQUE = {{ filtres_boutique | default([]) | tojson }};
-let _fbActifs = new Set();
+const FB_SECTIONS = ['vente', 'achat', 'commande'];
+let _fbActifs = { vente: new Set(), achat: new Set(), commande: new Set() };
 let _fbSection = 'achat';
+function _fbEffacer() { FB_SECTIONS.forEach(s => _fbActifs[s].clear()); _fbMajBoutons(); }
 // Inclusion : sans filtre tout passe ; sinon une ligne reste dès qu'UNE de ses clés est active.
 function _fbGarde(entree, actifs) {
 	if (!actifs || !actifs.size) return true;
@@ -8921,12 +8923,12 @@ function _fbComptes(listes) {
 	(listes || []).forEach(l => (l || []).forEach(e => ((e && e.filtres) || []).forEach(k => { n[k] = (n[k] || 0) + 1; })));
 	return n;
 }
-// Pastilles à montrer : celles qui ont un objet QUELQUE PART dans le panneau (le filtre est
-// commun aux sections) ou qui sont actives ; un groupe sans pastille disparaît. Le compte est
-// celui de la section d'où l'entonnoir a été ouvert — 0 ⇒ pastille estompée.
-function _fbGroupesHtml(catalogue, comptesSection, presents, actifs) {
+// Pastilles à montrer : celles qui ont un objet dans la SECTION ou qui sont actives (sans quoi
+// on ne pourrait plus la désactiver qu'en effaçant tout) ; un groupe sans pastille disparaît.
+// Active et sans objet (la liste a bougé : achat, vente) ⇒ estompée, compte 0.
+function _fbGroupesHtml(catalogue, comptesSection, actifs) {
 	return (catalogue || []).map(g => {
-		const pills = (g.pastilles || []).filter(p => presents[p.cle] || actifs.has(p.cle));
+		const pills = (g.pastilles || []).filter(p => comptesSection[p.cle] || actifs.has(p.cle));
 		if (!pills.length) return '';
 		return `<div class="fb-groupe"><p class="fb-groupe-titre">${g.icon} ${escapeHtml(g.nom)}</p><div class="fb-pills">`
 			+ pills.map(p => {
@@ -8938,18 +8940,22 @@ function _fbGroupesHtml(catalogue, comptesSection, presents, actifs) {
 			+ '</div></div>';
 	}).join('');
 }
-// Ordre d'affichage filtré : `_sortedOrder` puis l'entonnoir — les index d'origine restent.
-function _fbOrdre(arr, sortState) { return _sortedOrder(arr, sortState).filter(idx => _fbGarde(arr[idx], _fbActifs)); }
-// Compte d'en-tête de section : « vus/total » quand un filtre est actif.
-function _fbCompteTexte(vus, total) { return _fbActifs.size ? `${vus}/${total}` : String(total); }
+// Ordre d'affichage filtré : `_sortedOrder` puis l'entonnoir DE LA SECTION — les index
+// d'origine restent.
+function _fbOrdre(arr, sortState, section) {
+	const actifs = _fbActifs[section];
+	return _sortedOrder(arr, sortState).filter(idx => _fbGarde(arr[idx], actifs));
+}
+// Compte d'en-tête de section : « vus/total » quand un filtre de la section est actif.
+function _fbCompteTexte(section, vus, total) { return _fbActifs[section].size ? `${vus}/${total}` : String(total); }
 function _fbListe(section) {
 	if (section === 'vente') return MARCHAND.vendables || [];
 	if (section === 'commande') return MARCHAND.catalogue || [];
 	return MARCHAND.achetables || [];
 }
 function _fbMajBoutons() {
-	const n = _fbActifs.size;
-	document.querySelectorAll('.sell-filtre-btn').forEach(b => {
+	document.querySelectorAll('.filtre-btn[data-section]').forEach(b => {
+		const n = (_fbActifs[b.dataset.section] || new Set()).size;
 		b.classList.toggle('is-actif', n > 0);
 		b.title = n ? `Filtrer par type d'objet (${n} filtre${n > 1 ? 's' : ''} actif${n > 1 ? 's' : ''})` : "Filtrer par type d'objet";
 	});
@@ -8957,16 +8963,15 @@ function _fbMajBoutons() {
 function _fbRenderOverlay() {
 	const box = document.getElementById('fb-groupes');
 	if (!box) return;
-	const listes = ['vente', 'achat', 'commande'].map(_fbListe);
-	const presents = _fbComptes(listes);
-	const html = _fbGroupesHtml(FILTRES_BOUTIQUE, _fbComptes([_fbListe(_fbSection)]), presents, _fbActifs);
+	const actifs = _fbActifs[_fbSection];
+	const liste = _fbListe(_fbSection);
+	const html = _fbGroupesHtml(FILTRES_BOUTIQUE, _fbComptes([liste]), actifs);
 	box.innerHTML = html || '<p class="fb-vide">Aucun objet à filtrer ici.</p>';
 	const reset = document.getElementById('fb-reset');
-	if (reset) reset.disabled = !_fbActifs.size;
-	const liste = _fbListe(_fbSection);
-	const vus = liste.filter(e => _fbGarde(e, _fbActifs)).length;
+	if (reset) reset.disabled = !actifs.size;
+	const vus = liste.filter(e => _fbGarde(e, actifs)).length;
 	const compte = document.getElementById('fb-compte');
-	if (compte) compte.textContent = _fbActifs.size ? `${vus} / ${liste.length} objet${liste.length > 1 ? 's' : ''}` : '';
+	if (compte) compte.textContent = actifs.size ? `${vus} / ${liste.length} objet${liste.length > 1 ? 's' : ''}` : '';
 }
 // Re-rend les listes du panneau depuis l'état mémorisé (aucun appel serveur).
 function _fbAppliquer() {
@@ -8988,10 +8993,11 @@ function fermerFiltresBoutique() {
 	document.getElementById('filtres-boutique-overlay')?.classList.add('clauses-hidden');
 }
 function basculerFiltreBoutique(cle) {
-	if (_fbActifs.has(cle)) _fbActifs.delete(cle); else _fbActifs.add(cle);
+	const actifs = _fbActifs[_fbSection];
+	if (actifs.has(cle)) actifs.delete(cle); else actifs.add(cle);
 	_fbAppliquer();
 }
-function resetFiltresBoutique() { _fbActifs.clear(); _fbAppliquer(); }
+function resetFiltresBoutique() { _fbActifs[_fbSection].clear(); _fbAppliquer(); }
 document.addEventListener('keydown', ev => {
 	if (ev.key !== 'Escape') return;
 	const ov = document.getElementById('filtres-boutique-overlay');
@@ -9084,8 +9090,8 @@ function renderSellList(data) {
 		if (scrollEl) scrollEl.classList.remove('scrollable');
 		return;
 	}
-	const ordre = _fbOrdre(vendables, _sellSort);
-	_sellCompte('sell-compte', _fbCompteTexte(ordre.length, vendables.length));
+	const ordre = _fbOrdre(vendables, _sellSort, 'vente');
+	_sellCompte('sell-compte', _fbCompteTexte('vente', ordre.length, vendables.length));
 	if (!ordre.length) {
 		list.innerHTML = '<li class="sell-empty">Aucun objet ne correspond au filtre.</li>';
 		if (scrollEl) scrollEl.classList.remove('scrollable');
@@ -9120,8 +9126,8 @@ function renderBuyList(data) {
 		if (scrollEl) scrollEl.classList.remove('scrollable');
 		return;
 	}
-	const ordre = _fbOrdre(achetables, _buySort);
-	_sellCompte('buy-compte', _fbCompteTexte(ordre.length, achetables.length));
+	const ordre = _fbOrdre(achetables, _buySort, 'achat');
+	_sellCompte('buy-compte', _fbCompteTexte('achat', ordre.length, achetables.length));
 	if (!ordre.length) {
 		list.innerHTML = '<li class="sell-empty">Aucun objet ne correspond au filtre.</li>';
 		if (scrollEl) scrollEl.classList.remove('scrollable');
@@ -9227,8 +9233,7 @@ function _sellChargement() {
 async function openSellPanel() {
 	if (_sellLoading) return;
 	_sellLoading = true;
-	_fbActifs.clear();   // une visite = un filtre neuf
-	_fbMajBoutons();
+	_fbEffacer();   // par sûreté : une visite = des filtres neufs (effacés aussi en sortant)
 	_sellChargement();
 	document.getElementById('game-container').classList.add('panel-hidden');
 	document.getElementById('sell-panel').classList.remove('panel-hidden');
@@ -9261,6 +9266,8 @@ function closeSellPanel() {
 	// la silhouette, qui redeviennent visibles juste après (cf. _renderInventaireDiffere).
 	_viderRenduInventaireDiffere();
 	_arreterCmdTimer();   // plus rien à décompter une fois le comptoir refermé
+	fermerFiltresBoutique();
+	_fbEffacer();         // quitter la boutique efface ses filtres
 	document.getElementById('game-container').classList.remove('panel-hidden');
 	document.getElementById('sell-panel').classList.add('panel-hidden');
 	window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -9362,8 +9369,8 @@ function renderCmdCatalogue(data) {
 	const fEl = document.getElementById('cmd-filtre');
 	const terme = _plier(fEl ? fEl.value.trim() : '');
 	// Recherche texte ET entonnoir (les pastilles, elles, s'additionnent entre elles).
-	const ordre = _fbOrdre(cat, _cmdSort).filter(idx => !terme || _plier(cat[idx].nom).includes(terme));
-	_sellCompte('cmd-compte', (_fbActifs.size || terme) ? `${ordre.length}/${cat.length}` : cat.length);
+	const ordre = _fbOrdre(cat, _cmdSort, 'commande').filter(idx => !terme || _plier(cat[idx].nom).includes(terme));
+	_sellCompte('cmd-compte', (_fbActifs.commande.size || terme) ? `${ordre.length}/${cat.length}` : cat.length);
 	if (!ordre.length) {
 		list.innerHTML = '<li class="sell-empty">Aucun objet ne correspond au filtre.</li>';
 		if (scrollEl) scrollEl.classList.remove('scrollable');
