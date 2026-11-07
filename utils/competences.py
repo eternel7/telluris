@@ -553,6 +553,8 @@ def liste_competences_payload(character: dict, get_doc, contexte: str,
 			"portee": max(1, portee_effective(comp, caracts) or 1),
 			# Étiquette de la case + aperçu des cases touchées, comme pour les sorts.
 			"zone": comp["zone"],
+			# Condition de terrain (`battle_map_tags`) : affichée sous la compétence.
+			"condition": comp.get("condition") or {},
 			# Une PASSIVE se résout sur la caract BRUTE (cf. `consommables.competences_bonus_resolu`) :
 			# l'afficher sur les caracts buffées annoncerait une valeur que le jeu n'applique pas.
 			"effets": apercu_effets(comp["effets"], caracts if not est_passive(comp)

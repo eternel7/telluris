@@ -72,3 +72,13 @@ def test_competence_passive_et_active():
 								   cible="ennemi", cout_pm=4, effets={"degats": "1D6"}))
 	assert p["mode"] == "passive" and p["effets"]["buffs"]["R"] == 8
 	assert a["mode"] == "active" and a["jet"] == "cc" and a["cout_pm"] == 4
+
+
+def test_competence_condition_de_terrain_transmise():
+	p = cc.entree_competence(_comp("competence:p", vocation="assassin", mode="passive",
+								   effets={"furtivite": 4},
+								   condition={"battle_map_tags": ["grotte"]}))
+	assert p["condition"] == {"battle_map_tags": ["grotte"]}
+	assert p["effets"]["furtivite"] == 4
+	assert cc.entree_competence(_comp("competence:q", vocation="assassin", mode="passive",
+									  effets={"furtivite": 1}))["condition"] == {}

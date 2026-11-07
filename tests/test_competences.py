@@ -309,6 +309,22 @@ def test_liste_competences_payload_contextes():
     assert [c["competence_id"] for c in combat] == ["competence:frappe"]
 
 
+def test_payload_porte_la_condition_de_terrain_et_la_furtivite():
+    """L'onglet ⚡ affiche la valeur de furtivité ET la condition : sans la clé `condition`
+    dans le payload des connues, « Pas feutrés » s'afficherait comme valant partout."""
+    docs = {"competence:pas_feutres": _passive(
+        _id="competence:pas_feutres", nom="Pas feutrés", effets={"furtivite": 4},
+        condition={"battle_map_tags": ["grotte", "mine"]})}
+    perso = _perso(competences_connues=["competence:pas_feutres"])
+    (c,) = liste_competences_payload(perso, docs.get, "exploration")
+    assert c["effets"]["furtivite"] == 4
+    assert c["condition"] == {"battle_map_tags": ["grotte", "mine"]}
+    # Sans condition : bloc vide (le client n'affiche rien).
+    (f,) = liste_competences_payload(perso, {"competence:pas_feutres": _passive(
+        _id="competence:pas_feutres")}.get, "exploration")
+    assert f["condition"] == {}
+
+
 # ── resolve_action "competence" (combat) ─────────────────────────────────────────
 
 def _monstre(mid, x, y, **extra):

@@ -58,7 +58,8 @@ function _sortEffetsLabel(e, prefixeDegats) {
 	if (e.regen_pv) parts.push(_regenFx(e, 'regen_pv', 'PV'));
 	if (e.regen_pm) parts.push(_regenFx(e, 'regen_pm', 'PM'));
 	if (e.esquive) parts.push(`esquive +${_fx(e, 'esquive', e.esquive)}`);
-	if (e.furtivite) parts.push(`🥷 furtivité`);
+	// La valeur s'AJOUTE à l'Ag dans la difficulté du jet de détection (cf. combat._detection_threshold).
+	if (e.furtivite) parts.push(`🥷 furtivité +${_fx(e, 'furtivite', e.furtivite)}`);
 	// Les six clés d'effet du « temps magique ». ⚠️ Sans elles, un sort de drain ou de saut
 	// s'afficherait sans le moindre effet annoncé — même défaut que les invocations avant
 	// `_invocationLabel`, et le TACTILE n'a pas de survol pour compenser.
@@ -177,10 +178,16 @@ function _compJetLabel(c) {
 	const j = COMP_JETS[c.jet];
 	return j ? ` · <span title="${j[1]}">${j[0]}</span>` : '';
 }
+// Condition d'activation (`condition.battle_map_tags`, cf. competences.condition_remplie) :
+// la capacité n'agit que si le terrain du combat porte l'un de ces tags. Vide sans condition.
+function _conditionLabel(c) {
+	const tags = ((c && c.condition) || {}).battle_map_tags || [];
+	return tags.length ? ` · 🗺️ seulement en terrain : ${tags.join(', ')}` : '';
+}
 // Ligne d'effets d'une compétence connue, sous sa description.
 function _compLigneDesc(c) {
 	let portee = '';
 	if (c.mode === 'active' && c.cible === 'ennemi') portee = ` · portée ${c.portee}`;
 	else if (c.mode === 'active' && c.cible === 'allie') portee = ' · 🤝 sur un allié';
-	return `${_sortEffetsLabel(c.effets, _compArme(c) ? '+' : '')}${_sortTempsLabel(c)}${portee}${_zoneLabel(c)}`;
+	return `${_sortEffetsLabel(c.effets, _compArme(c) ? '+' : '')}${_sortTempsLabel(c)}${portee}${_zoneLabel(c)}${_conditionLabel(c)}`;
 }

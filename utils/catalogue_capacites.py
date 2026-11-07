@@ -104,6 +104,7 @@ def entree_competence(doc: dict) -> dict:
 		"jet": vue["jet"],
 		"portee": _portee(vue),
 		"zone": vue["zone"],
+		"condition": vue.get("condition") or {},
 		"effets": _apercu(vue["effets"]),
 		"sensibilite_charge": vue["sensibilite_charge"],
 	}
