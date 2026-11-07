@@ -894,3 +894,11 @@ def test_la_detection_a_l_approche_vaut_sans_case_de_barre(monkeypatch):
 	doc["pieges"] = [piege_monde(5, 5)]
 	resolve_action(doc, "deplacer", dx=1, dy=0)
 	assert doc["pieges"][0]["etat"] == pieges.ETAT_DETECTE
+
+
+def test_la_fiche_marchande_porte_le_bonus_de_desamorcage():
+	"""Un outil de crochetage vu en boutique (vente, achat, commande) doit pouvoir dire son
+	bonus sur la fiche : `fiche_item_fields` est la liste blanche de ces lignes."""
+	from utils import marche
+	outil = {"_id": "item:Trousse", "categorie": "outil", pieges.CLE_BONUS_OUTIL: 15}
+	assert marche.fiche_item_fields(outil)[pieges.CLE_BONUS_OUTIL] == 15

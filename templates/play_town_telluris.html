@@ -3454,6 +3454,7 @@
 		/* Texte libre d'un objet (manuscrit, traité, recueil…) — préserve les sauts de ligne,
 		   comme .sh-journal-txt : écraser le \n annulerait le soin pris au serveur. */
 		.item-detail-desc { white-space: pre-wrap; margin: .5rem 0; opacity: .85; font-size: .92rem; }
+		.item-detail-note { margin: .5rem 0 0; font-size: .85rem; opacity: .85; line-height: 1.35; }
 		/* Nom propre d'un exemplaire : l'objet d'origine en sous-titre, et la saisie en ligne. */
 		.item-detail-origine { margin: -.3rem 2rem .5rem 0; opacity: .7; font-size: .85rem; font-style: italic; }
 		.item-rename-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: .3rem 0 .6rem; }
@@ -6649,6 +6650,21 @@ function _bonusRow(left, right, compare) {
 	return html + `</div>`;
 }
 
+// Outil de crochetage (`bonus_desamorcage`, utils/pieges.py) : son seul usage est le
+// désamorçage d'un piège en combat. Le bonus s'ajoute au seuil de réussite (en %), il ne
+// donne pas le droit d'essayer ; seul le meilleur outil du sac compte ; un échec peut le briser.
+function _desamorcageBonus(item) { return Math.max(0, Math.trunc(+((item || {}).bonus_desamorcage) || 0)); }
+function _desamorcageText(item) {
+	const b = _desamorcageBonus(item);
+	return b ? `+${b} % pour désamorcer un piège` : '';
+}
+function _desamorcageNote(left, right) {
+	if (!_desamorcageBonus(left) && !_desamorcageBonus(right)) return '';
+	return `<p class="item-detail-note">🪤 <strong>Outil de crochetage.</strong> Gardé dans le sac, il augmente vos chances
+		de désamorcer un piège en combat — à condition de savoir déjà désamorcer (compétence requise).
+		Seul le meilleur outil du sac compte, et un désamorçage raté peut le briser.</p>`;
+}
+
 // Table comparaison (right null → mono-colonne).
 function _renderCmpTable(left, right, roleLeft, roleRight) {
 	const compare = !!right;
@@ -6667,7 +6683,8 @@ function _renderCmpTable(left, right, roleLeft, roleRight) {
 	rows += _restrictionRow(left, right, compare);
 	rows += _bonusRow(left, right, compare);
 	rows += _effetsRow(left, right, compare);
-	return `<div class="item-cmp ${compare ? 'compare' : 'mono'}">${hd}${rows}</div>`;
+	rows += _textRow('🪤 Désamorçage', _desamorcageText(left), compare ? _desamorcageText(right) : null, compare);
+	return `<div class="item-cmp ${compare ? 'compare' : 'mono'}">${hd}${rows}</div>` + _desamorcageNote(left, compare ? right : null);
 }
 
 function _restrictionTitle(chk) {

@@ -38,6 +38,8 @@ _FICHE_ITEM_KEYS = (
 	"bonus", "magies",
 	"bonus_pa", "bonus_pv", "bonus_pm", "bonus_cc", "bonus_cd",
 	"bonus_degats", "bonus_degats_dice", "bonus_initiative", "bonus_malus_depl",
+	# `bonus_desamorcage` : outil de crochetage (utils/pieges.py) — la fiche dit son usage et son bonus.
+	"bonus_desamorcage",
 	# `description` : texte libre de l'objet (manuscrit, traité, recueil du scriptorium…) —
 	# sans elle, la fiche marchand n'affichait AUCUN texte d'objet, même pour un livre qu'on
 	# s'apprête à acheter. `carte` : bout de carte d'un livre_carte (mêmes clés que
