@@ -90,6 +90,9 @@
 			--panel-bg: #2c2c38;
 			--border-color: #4a4a5a;
 			--accent-color: #ffd700;
+			/* Bronze des retours (⟵) : même famille que l'or des titres, assez en retrait pour
+			   que la commande ne se confonde pas avec le contenu. Or vif au survol. */
+			--retour-color: #c8a96e;
 			--text-color: #e0e0e0;
 			--text-card-color: #aaa;
 			--btn-bg: #3a3a4a;
@@ -702,22 +705,23 @@
 			border-color: var(--accent-color);
 			color: var(--accent-color);
 		}
-		/* « ⟵ Retour » (ex-« ✕ Fermer ») : remonter d'un cran, jamais quitter — d'où l'or et
-		   non le rouge. La sortie vers l'Emblème est un bouton à part (#retour-embleme). */
+		/* « ⟵ Retour » (ex-« ✕ Fermer ») : remonter d'un cran, jamais quitter — d'où le bronze
+		   (--retour-color) et non le rouge. La sortie vers l'Emblème est un bouton à part (#retour-embleme). */
 		.close-sheet-btn {
 			flex-shrink: 0;
 			margin-left: 4px;
 			border-left: 2px solid var(--border-color);
 			position: relative;
-			color: var(--accent-color);
+			color: var(--retour-color);
 			margin-left:auto;
 		}
+		.close-sheet-btn:hover { color: var(--accent-color); border-color: var(--accent-color); }
 		/* Fiche d'un compagnon : le même bouton rend la main au panneau 👥 (closeCompagnonSheet). */
 		.retour-lib-compagnon { display: none; }
 		body.sheet-compagnon .retour-lib-joueur { display: none; }
 		body.sheet-compagnon .retour-lib-compagnon { display: inline; }
 		/* ⟵ Emblème : dernier cran, au bout du titre du lieu (il en fait partie : ni marge ni
-		   padding), calé au fond à droite du bandeau. Fond noir, simple cadre, flèche or comme
+		   padding), calé au fond à droite du bandeau. Fond noir, simple cadre, flèche bronze comme
 		   les « ⟵ Retour » des panneaux — pas le SVG du pavé de déplacement. Le cadre court
 		   sur toute la hauteur du bandeau (titre sur plusieurs lignes compris), flèche au milieu. Le bandeau réserve la largeur du
 		   bouton des DEUX côtés : le titre reste centré et ne passe jamais dessous. */
@@ -727,11 +731,11 @@
 			display: inline-flex; align-items: center; justify-content: center;
 			width: 1.7em; margin: 0; padding: 0;
 			font-size: 1.1rem; line-height: 1; cursor: pointer;
-			background: transparent; color: var(--accent-color);
+			background: transparent; color: var(--retour-color);
 			border: 1px solid var(--border-color); border-radius: 3px;
-			transition: opacity .2s, border-color .2s;
+			transition: opacity .2s, border-color .2s, color .2s;
 		}
-		.retour-embleme:hover { border-color: var(--accent-color); }
+		.retour-embleme:hover { color: var(--accent-color); border-color: var(--accent-color); }
 		.retour-embleme:focus-visible { outline: 2px solid var(--text-color); outline-offset: 2px; }
 		/* Garde anti double-clic : inerte un instant après la fermeture d'un panneau. */
 		.retour-embleme.inerte { opacity: .45; cursor: wait; }
