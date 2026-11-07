@@ -4506,12 +4506,13 @@ def _appliquer_fumble(combat_doc: dict, acteur: dict) -> None:
 
 
 def passage_franchissable(combat_doc: dict, passage: dict) -> bool:
-	"""Le groupe peut-il emprunter ce passage ? Le personnage PRINCIPAL doit être SUR sa
-	case, et tous les combattants debout former avec lui une FILE continue : chacun adjacent
-	(Chebyshev ≤ 1, entre emprises) à un autre, de proche en proche depuis le principal —
-	un groupe de 7 peut s'étirer sur 7 cases, diagonale comprise. Montures, personnes
-	escortées, invocations et membres à terre suivent sans condition ; le principal à terre
-	aussi, la file part alors de n'importe quel combattant debout sur la case.
+	"""Le groupe peut-il emprunter ce passage ? Un combattant debout — principal OU
+	compagnon — doit être SUR sa case, et tous les autres former avec lui une FILE continue :
+	chacun adjacent (Chebyshev ≤ 1, entre emprises) à un autre, de proche en proche depuis
+	cette tête — un groupe de 7 peut s'étirer sur 7 cases, diagonale comprise. Montures,
+	personnes escortées, invocations et membres à terre (principal compris) suivent sans
+	condition. Le groupe change d'étage ENSEMBLE : personne ne fouille l'étage pendant qu'un
+	autre attend à l'escalier (cf. `test_un_compagnon_sur_le_passage_ne_part_pas_sans_le_principal`).
 
 	⚠️ Surtout pas « tous à une case du passage » : au fond d'un couloir d'une case de large,
 	le passage n'a qu'UNE voisine praticable, et un groupe de trois y restait enfermé pour
@@ -4521,10 +4522,7 @@ def passage_franchissable(combat_doc: dict, passage: dict) -> bool:
 	if x is None or y is None:
 		return False
 	combattants = _combattants_vivants(combat_doc)
-	principal = next((j for j in combattants
-					  if j.get("character_id") == combat_doc.get("character_id")), None)
-	candidats = [principal] if principal else combattants
-	tete = next((j for j in candidats if jetons.couvre(j, x, y)), None)
+	tete = next((j for j in combattants if jetons.couvre(j, x, y)), None)
 	if tete is None:
 		return False
 	relies, frontiere = [tete], [tete]
