@@ -1859,6 +1859,12 @@
 		.viewport .controls-carte .btn:hover:not(:disabled) { background: rgba(0, 0, 0, 0.65); }
 		.viewport .controls-carte .btn:active:not(:disabled) { background: rgba(0, 0, 0, 0.8); }
 		.viewport .controls-carte .btn:disabled { background: rgba(0, 0, 0, 0.12); border-color: transparent; }
+		/* Flèche recommandée 🧭 sur la carte : la règle translucide ci-dessus (0,3,0, plus bas que
+		   celle de la macro) reprendrait liseré et fond — l'exergue dorée est reposée au-dessus. */
+		.viewport .controls-carte .btn.btn-highlight {
+			border-color: var(--accent-color); background: rgba(58, 50, 18, 0.8);
+		}
+		.viewport .controls-carte .btn.btn-highlight:hover:not(:disabled) { background: rgba(74, 64, 24, 0.9); }
 		.viewport .controls-carte [data-sdx="-1"] { grid-column: 1; justify-self: start; }
 		.viewport .controls-carte [data-sdx="0"]  { grid-column: 2; justify-self: center; }
 		.viewport .controls-carte [data-sdx="1"]  { grid-column: 3; justify-self: end; }
