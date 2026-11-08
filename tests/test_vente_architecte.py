@@ -210,16 +210,17 @@ def test_prix_des_copies_multiplies_par_cinq():
 
 
 def test_les_havresacs_exigent_un_morceau_de_monstre_du_dump():
-	"""Auteur, 08/11 : 200 kg, 1,5 kg, 10 or + un trophée — aile de Dragon (rencontré en France),
-	carcasse de Mimique (coffre des catacombes de Lutecia) ; deux espèces existantes."""
+	"""Auteur, 08/11 : 1,5 kg + un trophée — aile de Dragon (rencontré en France) : 200 kg, 10 or ;
+	carcasse de Mimique (coffre des catacombes de Lutecia) : 150 kg, 8 or ; espèces existantes."""
+	attendus = {"item:havresac_de_grendel": (200, 100000), "item:havresac_de_mimique": (150, 80000)}
 	dump = _dump()
 	pnj_doc, *_ = gen.generer(dump)
 	articles = {a["item"]: a for a in pnj_doc["services"]["vente"]["articles"]}
 	for sac, trophee in gen.SACS_A_DOS.items():
-		assert articles[sac]["trophee"] == trophee and articles[sac]["cout_cuivre"] == 100000
+		assert articles[sac]["trophee"] == trophee and articles[sac]["cout_cuivre"] == attendus[sac][1]
 		assert dump[trophee].get("source_espece") in ("espece:dragon", "espece:mimique")
 		doc = next(d for d in gen.copies() if d["_id"] == sac)
-		assert (doc["contenant"]["capacite_kg"], doc["poids"]) == (200, 1.5)
+		assert (doc["contenant"]["capacite_kg"], doc["poids"]) == (attendus[sac][0], 1.5)
 	assert "sans_trophee" in pnj_doc["dialogue"]["noeuds"]
 
 

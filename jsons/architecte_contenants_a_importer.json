@@ -30,7 +30,7 @@
             },
             {
               "item": "item:havresac_de_mimique",
-              "cout_cuivre": 100000,
+              "cout_cuivre": 80000,
               "trophee": "item:mimique"
             }
           ],
@@ -146,7 +146,7 @@
               },
               {
                 "id": "acheter_havresac_de_mimique",
-                "label": "Acheter : 🎒 Havresac de mimique — contient 200 kg, pèse 1,5 kg — 10 or + Carcasse de Mimique",
+                "label": "Acheter : 🎒 Havresac de mimique — contient 150 kg, pèse 1,5 kg — 8 or + Carcasse de Mimique",
                 "action": {
                   "service": "vente",
                   "op": "acheter",
@@ -461,15 +461,15 @@
       "rarete": "tres_rare",
       "poids": 1.5,
       "contenant": {
-        "capacite_kg": 200
+        "capacite_kg": 150
       },
       "description": "Un sac à dos de cuir sombre, taillé dans la panse d'une mimique, ce coffre qui mord. Vivante, elle était plus vaste dedans que dehors ; tannée, sa peau s'en souvient. On dit que ses coutures se resserrent parfois d'elles-mêmes.",
       "valeur": [
         {
-          "cu": 100000
+          "cu": 80000
         },
         {
-          "cu": 100000
+          "cu": 80000
         }
       ]
     }
