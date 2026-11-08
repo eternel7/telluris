@@ -38,7 +38,7 @@ SORTIE = os.path.join(RACINE, "jsons", "architecte_contenants_a_importer.json")
 
 PNJ_ID = "pnj:villard_de_honnecourt"
 LIEU_ID = "lieu:la_cour_des_arches"
-PORTRAIT = "architecte_nain_m_cour01.png"
+PORTRAIT = "architecte_nain_m_cour02.jpg"  # cour01 garde le maître architecte des missions B-A
 
 # Les trois copies d'Architectes, du plus petit au plus grand (docs/conception_contenants.md).
 COPIES = ("item:besace_profonde", "item:urne_interieure", "item:coffre_de_retrait")
