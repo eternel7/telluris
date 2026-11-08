@@ -178,6 +178,18 @@ async def start_combat(
     actives = {p.get("zone") for p in active_placements}
     espece_ids = especes_rencontrables(depart_lieu, actives)
     pool_especes = [e for e in especes_all if e["_id"] in espece_ids]
+    # ÉPREUVE DE RANG : dans le 3×3 de l'élite traquée, la rencontre est GARANTIE — le pool se
+    # réduit à son espèce (même si la case praticable retenue sort de ses zones) et l'opposition
+    # de base à un seul monstre, que `chasse.marquer_elites` promeut plus bas. Sans quoi l'élite
+    # ne sortait qu'au gré du tirage, entre des bêtes bien pires qu'elle (`chasse.epreuve_rang_ici`).
+    epreuve = chasse.epreuve_rang_ici(character, depart_lieu["_id"]) if depart_lieu else None
+    if epreuve:
+        cible_epreuve = (epreuve.get("objectif") or {}).get("cible")
+        pool_epreuve = [e for e in especes_all if e["_id"] == cible_epreuve]
+        if pool_epreuve:
+            pool_especes = pool_epreuve
+        else:
+            epreuve = None
 
     # Aucune espèce associée aux zones actives → pas de combat.
     if not pool_especes:
@@ -201,7 +213,7 @@ async def start_combat(
     # l'opposition : accepter de protéger quelqu'un ne doit pas rendre les rencontres plus
     # dures — c'est déjà une cible de plus à couvrir.
     proteges_groupe = escorte.proteges_effectifs(character, get_doc)
-    nb_monstres = max(1, round(body.intensite * 3)) + len(compagnons) // 2
+    nb_monstres = (1 if epreuve else max(1, round(body.intensite * 3))) + len(compagnons) // 2
     # Espèces déjà filtrées par zone → pas de re-filtrage par tags (zone_tags vide).
     # Focalisation : l'espèce ciblée pèse plus lourd dans le tirage (si présente au pool).
     monstres = instantiate_monsters(
@@ -213,8 +225,8 @@ async def start_combat(
 
     # Quêtes de « chasse » : si un combat tire NATURELLEMENT l'espèce cible dans ce lieu, UN
     # monstre de cette espèce est promu en élite — on lui applique le profil déjà résolu à la
-    # génération (pas de re-résolution ici). On ne force PAS l'espèce à apparaître : si elle
-    # n'est pas au pool, rien n'est marqué. La variante « rang » (comptoir) porte une narration
+    # génération (pas de re-résolution ici). Hors épreuve de rang (pool réduit plus haut), on ne
+    # force PAS l'espèce à apparaître : si elle n'est pas au pool, rien n'est marqué. La variante « rang » (comptoir) porte une narration
     # pré-combat, affichée en overlay au chargement du combat. Toute la règle (chasses encore à
     # faire, une bête par contrat, partage en dernier recours) vit dans `chasse.marquer_elites`,
     # pur et testable.
