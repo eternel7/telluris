@@ -20,6 +20,7 @@
 | Reliques | **une par personnage** : chacun peut obtenir la sienne une fois |
 | Vente des copies | **PNJ Architecte de l'institut, vente à prix fixe**, sans stock ni fabrication ; un institut pareil à Petra et dans les cités à portail à venir |
 | Vendeur de Lutecia (08/11) | **à la Cour des Arches, avec Aélis** — Maître Villard de Honnecourt |
+| Sacs à dos à trophée (08/11) | **deux sacs à dos** chez Maître Villard, 1,5 kg **+ un morceau de monstre laissé** : Sac de Grendel (aile de Dragon) 200 kg · 10 or, Havresac de mimique (carcasse de Mimique) 150 kg · 8 or |
 | Objets du lore (08/11) | **pas uniques** : coffres de Thot, tente, outre, gourde, kibisis peuvent exister en plusieurs exemplaires, sans trace « une par personnage » |
 | Cinq objets du lore | contenance / poids selon leur légende (§ Contenu) |
 
@@ -95,6 +96,7 @@ Capacité, emboîtement refusé, chaîne → dict, poids porté inchangé, `sort
 - `services.vente = {articles: [{item, cout_cuivre}], noeuds: {fait, sans_fonds, trop_charge}}` ; un choix par article, action `{"service": "vente", "op": "acheter", "item": "item:x"}` ; placeholders `{objet}`, `{prix}` (`utils/pnj.article_en_vente`, `routers/pnj._resoudre_vente`).
 - Prix **fixe**, écrit dans l'article par le générateur depuis la `valeur` du doc item (min = max) ; ni stock, ni relation, ni marchandage, ni rang. Principal seul : charge contrôlée, puis débit, puis remise — un refus ne touche à rien.
 - Vendeur : `pnj:villard_de_honnecourt` (nain, maître d'œuvre de l'Institut), toujours présent à `lieu:la_cour_des_arches` à côté d'Aélis — `dev/gen_architecte_contenants.py` → `jsons/architecte_contenants_a_importer.json`. Verrouillé par `tests/test_vente_architecte.py`.
+- **Article à trophée** (`trophee: "item:…"`) : un exemplaire laissé au vendeur en plus du prix, pris dans les sacs de l'expédition (principal en tête, compagnons, montures, contenants) ; absent ⇒ nœud `sans_trophee`, rien n'est pris ; la charge compte ce que le trophée libère du sac du principal. ⚠️ Le négociant rachète tout et peut remettre un trophée en rayon (une carcasse de Mimique au Comptoir d'or de Saint-André, Chartres, au dump du 08/11) : rien n'interdit de l'y acheter.
 - Restent : un institut à **Petra**, puis chaque cité à portail transversal décrite (même service, autre vendeur).
 
 ## Contenu (générateur, plus tard)
@@ -102,7 +104,7 @@ Un `dev/gen_contenants.py` → **un** `jsons/contenants_a_importer.json`, chiffr
 
 | Objet | Contenance | Poids | Nature |
 |---|---|---|---|
-| Besace profonde · Urne intérieure · Coffre de retrait | 100 · 300 · 1 000 kg | 0,5 · 8 · 20 kg | copies, 10 000 · 40 000 · 150 000 cu |
+| Besace profonde · Urne intérieure · Coffre de retrait | 100 · 300 · 1 000 kg | 0,5 · 8 · 20 kg | copies, 50 000 · 200 000 · 750 000 cu (×5, Auteur 08/11) |
 | Carquois d'Arjuna · Pot d'Anansi | 300 kg | 1 · 3 kg | relique · plusieurs pots |
 | Sac de Manannán (marée) · Sac de Rhiannon | 500 · 1 000 kg | 0,5 kg | reliques |
 | Coquille d'Oduduwa | 2 000 kg | 0,1 kg | relique |

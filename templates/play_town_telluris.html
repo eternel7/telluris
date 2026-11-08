@@ -13264,7 +13264,8 @@ async function choisirPnj(choixId, extra) {
 		}
 		if (data.vente) {
 			// Service `vente` (prix fixe) : la bourse arrive par data.purse, le sac par l'inventaire.
-			showToast('Achat : ' + (data.vente.icon || '🛒') + ' ' + data.vente.nom);
+			showToast('Achat : ' + (data.vente.icon || '🛒') + ' ' + data.vente.nom
+				+ (data.vente.trophee ? ' — contre ' + data.vente.trophee : ''));
 			if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
 		}
 		if (data.transport) {

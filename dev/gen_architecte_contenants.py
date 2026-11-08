@@ -12,12 +12,13 @@
 #   Le doute (règle de l'Auteur) : les sacs des légendes ont-ils inspiré les copies, ou n'ont-ils
 #   jamais été pliés par des Anthropes ? Il ne tranche pas.
 #
-# Prix, noms, poids et contenances RELUS du dump (les docs item sont la source) ; les libellés
-# du catalogue en sont dérivés.
+# Prix, noms, poids et contenances : les docs item de `dev/gen_contenants.py` (leur source) ;
+# les articles et les libellés du catalogue en sont dérivés. Prix des copies ×5 (Auteur, 08/11).
 #
 # ⚠️ UN SEUL FICHIER À IMPORTER (CLAUDE.md §18) : jsons/architecte_contenants_a_importer.json —
 # `lieu:la_cour_des_arches` RELU du dernier dump (seule l'entrée `pnj` de l'Architecte s'y
-# ajoute : régénération idempotente) + `pnj:villard_de_honnecourt` neuf, chacun COMPLET (PUT, §11).
+# ajoute : régénération idempotente) + `pnj:villard_de_honnecourt` + les copies dont le doc
+# diffère du dump (prix), chacun COMPLET (PUT, §11).
 #
 # Usage : python dev/gen_architecte_contenants.py [jsons/telluris-dump-….json]
 
@@ -31,6 +32,7 @@ RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, RACINE)
 
 from utils.traversee import texte_bourse  # noqa: E402
+from dev import gen_contenants  # noqa: E402
 
 SORTIE = os.path.join(RACINE, "jsons", "architecte_contenants_a_importer.json")
 
@@ -40,6 +42,13 @@ PORTRAIT = "architecte_nain_m_cour01.png"
 
 # Les trois copies d'Architectes, du plus petit au plus grand (docs/conception_contenants.md).
 COPIES = ("item:besace_profonde", "item:urne_interieure", "item:coffre_de_retrait")
+# Les sacs à dos à TROPHÉE (Auteur, 08/11) → le morceau de monstre laissé à l'Architecte, en plus
+# du prix. Dragon : rencontré en France ; Mimique : gardienne du coffre des catacombes de Lutecia.
+SACS_A_DOS = {
+	"item:sac_de_grendel": "item:dragon_aile",
+	"item:havresac_de_mimique": "item:mimique",
+}
+ARTICLES = COPIES + tuple(SACS_A_DOS)
 
 ENTREE_LIEU = {
 	"character": PNJ_ID,
@@ -59,26 +68,32 @@ def _kg(valeur) -> str:
 
 
 def article(item_doc: dict) -> dict:
-	"""Article du service `vente` : prix fixe = `valeur` du doc item (min = max)."""
+	"""Article du service `vente` : prix fixe = `valeur` du doc item (min = max), et le trophée
+	exigé pour un sac à dos."""
 	valeur = item_doc.get("valeur") or []
 	prix = {int((v or {}).get("cu", 0)) for v in valeur}
 	if len(prix) != 1 or min(prix) <= 0:
 		sys.exit(f"{item_doc['_id']} : `valeur` doit être un prix fixe (min = max > 0), reçu {valeur!r}.")
-	return {"item": item_doc["_id"], "cout_cuivre": prix.pop()}
+	art = {"item": item_doc["_id"], "cout_cuivre": prix.pop()}
+	if item_doc["_id"] in SACS_A_DOS:
+		art["trophee"] = SACS_A_DOS[item_doc["_id"]]
+	return art
 
 
-def choix_achat(item_doc: dict, art: dict) -> dict:
+def choix_achat(item_doc: dict, art: dict, noms_trophees: dict) -> dict:
 	slug = item_doc["_id"].split(":", 1)[1]
+	contre = f" + {noms_trophees[art['trophee']]}" if art.get("trophee") else ""
 	return {
 		"id": f"acheter_{slug}",
 		"label": f"Acheter : {item_doc.get('icon', '')} {item_doc['nom']} — contient "
 				 f"{_kg(item_doc['contenant']['capacite_kg'])}, pèse {_kg(item_doc['poids'])} — "
-				 f"{texte_bourse(art['cout_cuivre'])}",
+				 f"{texte_bourse(art['cout_cuivre'])}{contre}",
 		"action": {"service": "vente", "op": "acheter", "item": item_doc["_id"]},
 	}
 
 
-def doc_pnj(items: list) -> dict:
+def doc_pnj(items: list, noms_trophees: dict) -> dict:
+	"""`noms_trophees` : id → nom de chaque morceau de monstre exigé (relu du dump)."""
 	articles = [article(d) for d in items]
 	return {
 		"_id": PNJ_ID,
@@ -94,7 +109,8 @@ def doc_pnj(items: list) -> dict:
 		"services": {
 			"vente": {
 				"articles": articles,
-				"noeuds": {"fait": "vendu", "sans_fonds": "sans_fonds", "trop_charge": "trop_charge"},
+				"noeuds": {"fait": "vendu", "sans_fonds": "sans_fonds", "trop_charge": "trop_charge",
+						   "sans_trophee": "sans_trophee"},
 			},
 		},
 		"dialogue": {
@@ -146,10 +162,44 @@ def doc_pnj(items: list) -> dict:
 				"catalogue": {
 					"texte": "« Trois tailles, trois prix, et je ne marchande pas : le prix est celui du "
 							 "travail. La besace pour l'aventurier, l'urne pour qui transporte minerais et "
-							 "marchandises, le coffre pour qui veut emporter une salle entière. »",
+							 "marchandises, le coffre pour qui veut emporter une salle entière. Et deux "
+							 "sacs à dos, si vous m'apportez de quoi les tailler. »",
 					"choix": [
-						*(choix_achat(d, a) for d, a in zip(items, articles)),
+						*(choix_achat(d, a, noms_trophees) for d, a in zip(items, articles)),
+						{"id": "peaux", "label": "Tailler un sac dans un monstre ?", "next": "peaux_01"},
 						{"id": "art", "label": "Que faites-vous, au juste ?", "next": "art_01"},
+						{"id": "fin", "label": "Une autre fois.", "next": "fin"},
+					],
+				},
+				"peaux_01": {
+					"texte": "« Certaines bêtes savent déjà tenir plus qu'elles ne montrent. Je ne fais "
+							 "que les y aider. Les récits du Nord parlent d'un monstre, Grendel, qui "
+							 "portait une poche immense, cousue de peaux de dragon : la membrane d'une aile "
+							 "se plie mieux que n'importe quelle toile. Et la mimique, ce coffre qui mord : "
+							 "vivante, elle était plus vaste dedans que dehors. Sa panse s'en souvient. »",
+					"choix": [
+						{"id": "lustig", "label": "Un sac à dos qui avale tout, ça existe ?", "next": "peaux_02"},
+						{"id": "voir", "label": "Montrez-moi ce que vous vendez.", "next": "catalogue"},
+					],
+				},
+				"peaux_02": {
+					"texte": "« On raconte l'histoire d'un soldat congédié, Frère Lustig, dont le havresac "
+							 "avalait tout ce qu'il lui ordonnait d'y entrer, jusqu'à des diables. Un autre "
+							 "conte, plus à l'est, prête la même besace à un soldat qui y enferma la Mort. "
+							 "Des diables, je n'en mets pas : rien de vivant n'entre dans mes sacs. Quant à "
+							 "savoir d'où ces soldats tenaient le leur… certains ici disent d'un Architecte, "
+							 "d'autres d'un saint. Je n'ai pas tranché. Rapportez-moi la peau, je "
+							 "m'occupe du reste. »",
+					"choix": [
+						{"id": "voir", "label": "Montrez-moi ce que vous vendez.", "next": "catalogue"},
+						{"id": "fin", "label": "Merci, maître.", "next": "fin"},
+					],
+				},
+				"sans_trophee": {
+					"texte": "« Sans {trophee}, je n'ai rien à plier : la peau fait la moitié du travail. "
+							 "Revenez avec, votre bourse fera le reste. »",
+					"choix": [
+						{"id": "encore", "label": "Voir les autres.", "next": "catalogue"},
 						{"id": "fin", "label": "Une autre fois.", "next": "fin"},
 					],
 				},
@@ -197,15 +247,28 @@ def _dernier_dump() -> str:
 	return dumps[-1]
 
 
+def copies() -> list:
+	"""Les articles (copies puis sacs à dos) tels que `gen_contenants` les écrit (source des prix)."""
+	par_id = {d["_id"]: d for d in gen_contenants.DOCS}
+	return [copy.deepcopy(par_id[i]) for i in ARTICLES]
+
+
+def copies_a_importer(docs_dump: dict) -> list:
+	"""Les articles dont le doc diffère du dump ou y manque (`_rev` ignoré) : le delta."""
+	return [d for d in copies()
+			if {k: v for k, v in (docs_dump.get(d["_id"]) or {}).items() if k != "_rev"} != d]
+
+
 def generer(docs_dump: dict) -> list:
-	manquants = [i for i in (*COPIES, LIEU_ID) if i not in docs_dump]
+	manquants = [i for i in (LIEU_ID, *SACS_A_DOS.values()) if i not in docs_dump]
 	if manquants:
 		sys.exit(f"Absents du dump : {', '.join(manquants)}")
+	noms_trophees = {t: docs_dump[t]["nom"] for t in SACS_A_DOS.values()}
 	# `pnj:villard_de_honnecourt` n'appartient qu'à ce générateur : déjà en base, c'est son
 	# import précédent, que le PUT remplace. Un autre type sous cet _id serait une collision.
 	if docs_dump.get(PNJ_ID, {}).get("type", "pnj") != "pnj":
 		sys.exit(f"Refus : {PNJ_ID} existe déjà dans le dump sous un autre type.")
-	return [doc_pnj([docs_dump[i] for i in COPIES]), lieu_avec_architecte(docs_dump[LIEU_ID])]
+	return [doc_pnj(copies(), noms_trophees), lieu_avec_architecte(docs_dump[LIEU_ID]), *copies_a_importer(docs_dump)]
 
 
 def main() -> None:

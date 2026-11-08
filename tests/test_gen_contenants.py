@@ -19,6 +19,8 @@ from utils import contenants, marche
 DOCS = {d["_id"]: d for d in gen.DOCS}
 # Les trois copies d'Architectes : seuls objets vendus à prix fixe (décision du 02/11).
 COPIES = ("item:besace_profonde", "item:urne_interieure", "item:coffre_de_retrait")
+# Les deux sacs à dos à trophée (08/11) : prix fixe aussi, hors de l'échelle des copies.
+SACS_A_DOS = ("item:sac_de_grendel", "item:havresac_de_mimique")
 
 
 def test_chaque_doc_est_un_contenant_du_sac():
@@ -41,14 +43,17 @@ def test_copies_a_prix_fixe_et_contenance_croissante():
 	caps = [contenants.capacite(DOCS[i]) for i in COPIES]
 	prix = [DOCS[i]["valeur"][0]["cu"] for i in COPIES]
 	assert caps == sorted(caps) and prix == sorted(prix)
-	assert all("valeur" not in d for i, d in DOCS.items() if i not in COPIES)
+	assert all("valeur" not in d for i, d in DOCS.items() if i not in COPIES + SACS_A_DOS)
+	for i in SACS_A_DOS:
+		v = DOCS[i]["valeur"]
+		assert v[0] == v[1], i
 
 
 def test_reliques_marquees_et_pots_d_anansi_non():
 	reliques = {i for i, d in DOCS.items() if "relique" in d["tags"]}
 	assert "item:pot_d_anansi" not in reliques               # « plusieurs pots » (Auteur)
 	assert {"item:sac_de_manannan", "item:sac_de_rhiannon", "item:coquille_d_oduduwa"} <= reliques
-	assert not reliques & set(COPIES)
+	assert not reliques & set(COPIES + SACS_A_DOS)
 
 
 def test_la_coquille_d_oduduwa_est_la_plus_vaste():
@@ -62,11 +67,12 @@ def test_aucune_collision_avec_le_dump_le_plus_recent():
 	with open(dumps[-1], encoding="utf-8") as f:
 		existants = {d.get("_id"): d for d in json.load(f)["docs"]}
 	assert gen.collisions(gen.DOCS, existants) == []
-	# Un `_id` pris par un AUTRE contenu est une collision ; le même doc (`_rev` en plus) est
-	# l'import déjà fait.
+	# Un `_id` pris par un doc qui n'est pas un contenant est une collision ; un contenant déjà en
+	# base est l'import précédent (mis à jour, ex. prix des copies du 08/11).
 	kibisis = next(d for d in gen.DOCS if d["_id"] == "item:kibisis")
 	assert gen.collisions(gen.DOCS, {"item:kibisis": {"_id": "item:kibisis"}}) == ["item:kibisis"]
 	assert gen.collisions(gen.DOCS, {"item:kibisis": {**kibisis, "_rev": "3-x"}}) == []
+	assert gen.collisions(gen.DOCS, {"item:kibisis": {**kibisis, "poids": 9}}) == []
 
 
 def test_fichier_livre_identique_au_generateur():

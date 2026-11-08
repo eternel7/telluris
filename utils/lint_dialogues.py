@@ -61,8 +61,9 @@ PLACEHOLDERS_CONNUS = {
 	"fermeture", "seuils_suivants", "cristal",
 	# Enseignement d'un maître (service `enseignement`) : nom du sort, coût en points.
 	"sort", "cout",
-	# Vente à prix fixe (service `vente`) : prix de l'article ({objet} partagé).
-	"prix",
+	# Vente à prix fixe (service `vente`) : prix de l'article, morceau de monstre laissé en
+	# échange ({objet} partagé).
+	"prix", "trophee",
 }
 
 # Clés de `condition` : deux formes structurées, tout le reste est traité comme un FLAG
@@ -205,6 +206,8 @@ NOEUDS_REQUIS = {
 # parfaitement correct (le réceptionniste de guilde ne reçoit jamais de colis).
 # Nœud OPTIONNEL du don : carte perdue refaite (repli sur `fait` s'il manque).
 DON_REMPLACEMENT = {"remplacement"}
+# Vente : nœud exigé dès qu'un article demande un TROPHÉE (morceau de monstre absent des sacs).
+VENTE_TROPHEE = {"sans_trophee"}
 TRANSPORT_DONNEUR = {"accepte", "trop_charge"}
 TRANSPORT_DESTINATAIRE = {"livre", "incomplet"}
 TRANSPORT_RETOUR = {"rapporte"}   # course `retour` : le donneur solde au retour
@@ -675,7 +678,10 @@ def analyser_doc(doc: dict) -> list:
 					if not (isinstance(item, str) and item.startswith("item:")) \
 							or pnj_util.article_en_vente(doc, item) is None:
 						erreur(f"`services.vente.articles` : article illisible {article!r} — "
-							   f"`item` (`item:…`) et `cout_cuivre` (entier ≥ 0) sont requis.")
+							   f"`item` (`item:…`), `cout_cuivre` (entier ≥ 0) et, s'il y en a un, "
+							   f"`trophee` (`item:…`) sont requis.")
+					elif article.get("trophee"):
+						attendus |= VENTE_TROPHEE
 		elif service == "portail" and (conf or {}).get("fixe"):
 			# Tableau fixe : aucun seuil ne se referme ; sans `cout`, rien à payer ; la
 			# barrière de la porte, elle, peut refuser.

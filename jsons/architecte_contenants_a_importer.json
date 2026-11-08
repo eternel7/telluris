@@ -13,21 +13,32 @@
           "articles": [
             {
               "item": "item:besace_profonde",
-              "cout_cuivre": 10000
+              "cout_cuivre": 50000
             },
             {
               "item": "item:urne_interieure",
-              "cout_cuivre": 40000
+              "cout_cuivre": 200000
             },
             {
               "item": "item:coffre_de_retrait",
-              "cout_cuivre": 150000
+              "cout_cuivre": 750000
+            },
+            {
+              "item": "item:sac_de_grendel",
+              "cout_cuivre": 100000,
+              "trophee": "item:dragon_aile"
+            },
+            {
+              "item": "item:havresac_de_mimique",
+              "cout_cuivre": 80000,
+              "trophee": "item:mimique"
             }
           ],
           "noeuds": {
             "fait": "vendu",
             "sans_fonds": "sans_fonds",
-            "trop_charge": "trop_charge"
+            "trop_charge": "trop_charge",
+            "sans_trophee": "sans_trophee"
           }
         }
       },
@@ -95,11 +106,11 @@
             ]
           },
           "catalogue": {
-            "texte": "« Trois tailles, trois prix, et je ne marchande pas : le prix est celui du travail. La besace pour l'aventurier, l'urne pour qui transporte minerais et marchandises, le coffre pour qui veut emporter une salle entière. »",
+            "texte": "« Trois tailles, trois prix, et je ne marchande pas : le prix est celui du travail. La besace pour l'aventurier, l'urne pour qui transporte minerais et marchandises, le coffre pour qui veut emporter une salle entière. Et deux sacs à dos, si vous m'apportez de quoi les tailler. »",
             "choix": [
               {
                 "id": "acheter_besace_profonde",
-                "label": "Acheter : 👜 Besace profonde — contient 100 kg, pèse 0,5 kg — 1 or",
+                "label": "Acheter : 👜 Besace profonde — contient 100 kg, pèse 0,5 kg — 5 or",
                 "action": {
                   "service": "vente",
                   "op": "acheter",
@@ -108,7 +119,7 @@
               },
               {
                 "id": "acheter_urne_interieure",
-                "label": "Acheter : 🏺 Urne intérieure — contient 300 kg, pèse 8 kg — 4 or",
+                "label": "Acheter : 🏺 Urne intérieure — contient 300 kg, pèse 8 kg — 20 or",
                 "action": {
                   "service": "vente",
                   "op": "acheter",
@@ -117,7 +128,7 @@
               },
               {
                 "id": "acheter_coffre_de_retrait",
-                "label": "Acheter : 🗃️ Coffre de retrait — contient 1 000 kg, pèse 20 kg — 15 or",
+                "label": "Acheter : 🗃️ Coffre de retrait — contient 1 000 kg, pèse 20 kg — 75 or",
                 "action": {
                   "service": "vente",
                   "op": "acheter",
@@ -125,9 +136,77 @@
                 }
               },
               {
+                "id": "acheter_sac_de_grendel",
+                "label": "Acheter : 🎒 Sac de Grendel — contient 200 kg, pèse 1,5 kg — 10 or + Aile de Dragon",
+                "action": {
+                  "service": "vente",
+                  "op": "acheter",
+                  "item": "item:sac_de_grendel"
+                }
+              },
+              {
+                "id": "acheter_havresac_de_mimique",
+                "label": "Acheter : 🎒 Havresac de mimique — contient 150 kg, pèse 1,5 kg — 8 or + Carcasse de Mimique",
+                "action": {
+                  "service": "vente",
+                  "op": "acheter",
+                  "item": "item:havresac_de_mimique"
+                }
+              },
+              {
+                "id": "peaux",
+                "label": "Tailler un sac dans un monstre ?",
+                "next": "peaux_01"
+              },
+              {
                 "id": "art",
                 "label": "Que faites-vous, au juste ?",
                 "next": "art_01"
+              },
+              {
+                "id": "fin",
+                "label": "Une autre fois.",
+                "next": "fin"
+              }
+            ]
+          },
+          "peaux_01": {
+            "texte": "« Certaines bêtes savent déjà tenir plus qu'elles ne montrent. Je ne fais que les y aider. Les récits du Nord parlent d'un monstre, Grendel, qui portait une poche immense, cousue de peaux de dragon : la membrane d'une aile se plie mieux que n'importe quelle toile. Et la mimique, ce coffre qui mord : vivante, elle était plus vaste dedans que dehors. Sa panse s'en souvient. »",
+            "choix": [
+              {
+                "id": "lustig",
+                "label": "Un sac à dos qui avale tout, ça existe ?",
+                "next": "peaux_02"
+              },
+              {
+                "id": "voir",
+                "label": "Montrez-moi ce que vous vendez.",
+                "next": "catalogue"
+              }
+            ]
+          },
+          "peaux_02": {
+            "texte": "« On raconte l'histoire d'un soldat congédié, Frère Lustig, dont le havresac avalait tout ce qu'il lui ordonnait d'y entrer, jusqu'à des diables. Un autre conte, plus à l'est, prête la même besace à un soldat qui y enferma la Mort. Des diables, je n'en mets pas : rien de vivant n'entre dans mes sacs. Quant à savoir d'où ces soldats tenaient le leur… certains ici disent d'un Architecte, d'autres d'un saint. Je n'ai pas tranché. Rapportez-moi la peau, je m'occupe du reste. »",
+            "choix": [
+              {
+                "id": "voir",
+                "label": "Montrez-moi ce que vous vendez.",
+                "next": "catalogue"
+              },
+              {
+                "id": "fin",
+                "label": "Merci, maître.",
+                "next": "fin"
+              }
+            ]
+          },
+          "sans_trophee": {
+            "texte": "« Sans {trophee}, je n'ai rien à plier : la peau fait la moitié du travail. Revenez avec, votre bourse fera le reste. »",
+            "choix": [
+              {
+                "id": "encore",
+                "label": "Voir les autres.",
+                "next": "catalogue"
               },
               {
                 "id": "fin",
@@ -256,6 +335,141 @@
           "portrait": "architecte_nain_m_cour01.png",
           "probabilite": 1,
           "description": "Un nain à la barbe tressée de fil de cuivre, penché sur un établi chargé de besaces, d'urnes et d'un petit coffre ferré."
+        }
+      ]
+    },
+    {
+      "_id": "item:besace_profonde",
+      "type": "item",
+      "nom": "Besace profonde",
+      "icon": "👜",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "rare",
+      "poids": 0.5,
+      "contenant": {
+        "capacite_kg": 100
+      },
+      "description": "Une besace de cuir souple, ordinaire à l'œil. Les Architectes y ont plié un espace bien plus vaste que sa toile : on y range de quoi charger une mule, et l'épaule n'en sent rien.",
+      "valeur": [
+        {
+          "cu": 50000
+        },
+        {
+          "cu": 50000
+        }
+      ]
+    },
+    {
+      "_id": "item:urne_interieure",
+      "type": "item",
+      "nom": "Urne intérieure",
+      "icon": "🏺",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "tres_rare",
+      "poids": 8,
+      "contenant": {
+        "capacite_kg": 300
+      },
+      "description": "Une urne de terre cuite au col étroit, cerclée de bronze. Son ventre ouvre sur une réserve où tiennent minerais, matériaux et marchandises ; son poids ne change jamais, qu'elle soit vide ou pleine.",
+      "valeur": [
+        {
+          "cu": 200000
+        },
+        {
+          "cu": 200000
+        }
+      ]
+    },
+    {
+      "_id": "item:coffre_de_retrait",
+      "type": "item",
+      "nom": "Coffre de retrait",
+      "icon": "🗃️",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "tres_rare",
+      "poids": 20,
+      "contenant": {
+        "capacite_kg": 1000
+      },
+      "description": "Un petit coffre ferré qu'un homme seul porte sur le dos. Le couvercle soulevé, on devine une salle entière derrière ses planches. Les Architectes qui savent en bâtir se comptent sur les doigts d'une main.",
+      "valeur": [
+        {
+          "cu": 750000
+        },
+        {
+          "cu": 750000
+        }
+      ]
+    },
+    {
+      "_id": "item:sac_de_grendel",
+      "type": "item",
+      "nom": "Sac de Grendel",
+      "icon": "🎒",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "tres_rare",
+      "poids": 1.5,
+      "contenant": {
+        "capacite_kg": 200
+      },
+      "description": "Un sac à dos taillé dans la membrane d'une aile de dragon, souple comme un gant. Les récits du Nord prêtent au monstre Grendel une poche immense, cousue de peaux de dragon par un art de diable ; les Architectes n'en ont gardé que la peau, et l'espace qu'elle consent à plier.",
+      "valeur": [
+        {
+          "cu": 100000
+        },
+        {
+          "cu": 100000
+        }
+      ]
+    },
+    {
+      "_id": "item:havresac_de_mimique",
+      "type": "item",
+      "nom": "Havresac de mimique",
+      "icon": "🎒",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "tres_rare",
+      "poids": 1.5,
+      "contenant": {
+        "capacite_kg": 150
+      },
+      "description": "Un sac à dos de cuir sombre, taillé dans la panse d'une mimique, ce coffre qui mord. Vivante, elle était plus vaste dedans que dehors ; tannée, sa peau s'en souvient. On dit que ses coutures se resserrent parfois d'elles-mêmes.",
+      "valeur": [
+        {
+          "cu": 80000
+        },
+        {
+          "cu": 80000
         }
       ]
     }

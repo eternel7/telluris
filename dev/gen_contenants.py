@@ -9,15 +9,20 @@ Mécanique : utils/contenants.py, docs/conception_contenants.md (bloc `contenant
 contenu porté par la RÉFÉRENCE d'inventaire). Chiffres arbitrés par l'Auteur le 02/11/2026 :
 docs/lore/monde/20261102_sacs_des_legendes.md (tableau « Ce qui est retenu »).
 
-- Trois COPIES d'Architectes, à prix fixe (`valeur` min = max).
+- Trois COPIES d'Architectes, à prix fixe (`valeur` min = max) : 50 000 · 200 000 · 750 000 cu
+  (Auteur, 08/11 : les prix du 02/11 multipliés par 5).
+- Deux SACS À DOS d'Architectes faits d'un morceau de monstre (Auteur, 08/11), 1,5 kg, prix fixe
+  + le trophée laissé à Maître Villard : aile de Dragon → 200 kg, 100 000 cu ; carcasse de
+  Mimique → 150 kg, 80 000 cu.
 - Quatre RELIQUES (tag `relique` : une par personnage, règle à appliquer à l'obtention).
 - Les pots d'Anansi (plusieurs exemplaires) et les cinq objets du lore : ni tag `relique`, ni
   `valeur` (non arbitrés) — prix dérivé du poids, seul un négociant les rachète.
 - Tous : catégorie `outil`, sous-catégorie `contenant`, aucun slot (jamais équipés), tag
   `non_personnalisable` (une variante sur mesure changerait d'`_id`).
 
-Docs NEUFS : refus d'écrire si un `_id` existe déjà dans le dump le plus récent avec un autre
-contenu (le PUT complet de l'import l'écraserait en silence) ; identique = déjà importé. Relancer régénère le fichier à l'identique."""
+Refus d'écrire si un `_id` existe déjà dans le dump le plus récent sous un autre contenu QUI N'EST
+PAS un contenant (le PUT complet de l'import écraserait en silence un doc étranger) ; un contenant
+déjà en base est l'import précédent de ce générateur, que le PUT remplace. Relancer régénère le fichier à l'identique."""
 
 import glob
 import json
@@ -62,15 +67,26 @@ DOCS = [
 	_doc("besace_profonde", "Besace profonde", "👜", 0.5, 100, "rare",
 		 "Une besace de cuir souple, ordinaire à l'œil. Les Architectes y ont plié un espace "
 		 "bien plus vaste que sa toile : on y range de quoi charger une mule, et l'épaule n'en "
-		 "sent rien.", valeur=10000),
+		 "sent rien.", valeur=50000),
 	_doc("urne_interieure", "Urne intérieure", "🏺", 8, 300, "tres_rare",
 		 "Une urne de terre cuite au col étroit, cerclée de bronze. Son ventre ouvre sur une "
 		 "réserve où tiennent minerais, matériaux et marchandises ; son poids ne change jamais, "
-		 "qu'elle soit vide ou pleine.", valeur=40000),
+		 "qu'elle soit vide ou pleine.", valeur=200000),
 	_doc("coffre_de_retrait", "Coffre de retrait", "🗃️", 20, 1000, "tres_rare",
 		 "Un petit coffre ferré qu'un homme seul porte sur le dos. Le couvercle soulevé, on "
 		 "devine une salle entière derrière ses planches. Les Architectes qui savent en bâtir se "
-		 "comptent sur les doigts d'une main.", valeur=150000),
+		 "comptent sur les doigts d'une main.", valeur=750000),
+
+	# ── Sacs à dos d'Architectes, taillés dans un morceau de monstre que le client apporte ──
+	_doc("sac_de_grendel", "Sac de Grendel", "🎒", 1.5, 200, "tres_rare",
+		 "Un sac à dos taillé dans la membrane d'une aile de dragon, souple comme un gant. Les "
+		 "récits du Nord prêtent au monstre Grendel une poche immense, cousue de peaux de dragon "
+		 "par un art de diable ; les Architectes n'en ont gardé que la peau, et l'espace qu'elle "
+		 "consent à plier.", valeur=100000),
+	_doc("havresac_de_mimique", "Havresac de mimique", "🎒", 1.5, 150, "tres_rare",
+		 "Un sac à dos de cuir sombre, taillé dans la panse d'une mimique, ce coffre qui mord. "
+		 "Vivante, elle était plus vaste dedans que dehors ; tannée, sa peau s'en souvient. On dit "
+		 "que ses coutures se resserrent parfois d'elles-mêmes.", valeur=80000),
 
 	# ── Reliques (une par personnage) ──
 	_doc("sac_de_manannan", "Sac de Manannán", "🌊", 0.5, 500, "legendaire",
@@ -127,11 +143,12 @@ def _dernier_dump() -> str:
 
 
 def collisions(docs: list, existants: dict) -> list:
-	"""`_id` déjà en base avec un AUTRE contenu (`_rev` ignoré) : le PUT complet l'écraserait.
-	Un doc identique est l'import déjà fait — le rejouer ne change rien."""
-	def _sans_rev(doc):
-		return {k: v for k, v in doc.items() if k != "_rev"}
-	return sorted(d["_id"] for d in docs if d["_id"] in existants and _sans_rev(existants[d["_id"]]) != d)
+	"""`_id` déjà en base sous un AUTRE contenu qui n'est pas un contenant : le PUT complet
+	l'écraserait. Un contenant déjà en base (même `_id`, `sous_categorie: contenant`) est l'import
+	précédent de ce générateur : le rejouer le met à jour (prix des copies, 08/11)."""
+	def _a_nous(doc):
+		return doc.get("type") == "item" and doc.get("sous_categorie") == "contenant"
+	return sorted(d["_id"] for d in docs if d["_id"] in existants and not _a_nous(existants[d["_id"]]))
 
 
 def main() -> None:

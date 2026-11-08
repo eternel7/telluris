@@ -20,10 +20,10 @@
       "description": "Une besace de cuir souple, ordinaire à l'œil. Les Architectes y ont plié un espace bien plus vaste que sa toile : on y range de quoi charger une mule, et l'épaule n'en sent rien.",
       "valeur": [
         {
-          "cu": 10000
+          "cu": 50000
         },
         {
-          "cu": 10000
+          "cu": 50000
         }
       ]
     },
@@ -47,10 +47,10 @@
       "description": "Une urne de terre cuite au col étroit, cerclée de bronze. Son ventre ouvre sur une réserve où tiennent minerais, matériaux et marchandises ; son poids ne change jamais, qu'elle soit vide ou pleine.",
       "valeur": [
         {
-          "cu": 40000
+          "cu": 200000
         },
         {
-          "cu": 40000
+          "cu": 200000
         }
       ]
     },
@@ -74,10 +74,64 @@
       "description": "Un petit coffre ferré qu'un homme seul porte sur le dos. Le couvercle soulevé, on devine une salle entière derrière ses planches. Les Architectes qui savent en bâtir se comptent sur les doigts d'une main.",
       "valeur": [
         {
-          "cu": 150000
+          "cu": 750000
         },
         {
-          "cu": 150000
+          "cu": 750000
+        }
+      ]
+    },
+    {
+      "_id": "item:sac_de_grendel",
+      "type": "item",
+      "nom": "Sac de Grendel",
+      "icon": "🎒",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "tres_rare",
+      "poids": 1.5,
+      "contenant": {
+        "capacite_kg": 200
+      },
+      "description": "Un sac à dos taillé dans la membrane d'une aile de dragon, souple comme un gant. Les récits du Nord prêtent au monstre Grendel une poche immense, cousue de peaux de dragon par un art de diable ; les Architectes n'en ont gardé que la peau, et l'espace qu'elle consent à plier.",
+      "valeur": [
+        {
+          "cu": 100000
+        },
+        {
+          "cu": 100000
+        }
+      ]
+    },
+    {
+      "_id": "item:havresac_de_mimique",
+      "type": "item",
+      "nom": "Havresac de mimique",
+      "icon": "🎒",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "tres_rare",
+      "poids": 1.5,
+      "contenant": {
+        "capacite_kg": 150
+      },
+      "description": "Un sac à dos de cuir sombre, taillé dans la panse d'une mimique, ce coffre qui mord. Vivante, elle était plus vaste dedans que dehors ; tannée, sa peau s'en souvient. On dit que ses coutures se resserrent parfois d'elles-mêmes.",
+      "valeur": [
+        {
+          "cu": 80000
+        },
+        {
+          "cu": 80000
         }
       ]
     },

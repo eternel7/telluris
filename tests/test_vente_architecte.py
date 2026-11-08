@@ -24,8 +24,11 @@ URNE = {"_id": "item:urne_interieure", "type": "item", "nom": "Urne intérieure"
 		"poids": 8, "contenant": {"capacite_kg": 300}, "valeur": [{"cu": 40000}, {"cu": 40000}]}
 COFFRE = {"_id": "item:coffre_de_retrait", "type": "item", "nom": "Coffre de retrait", "icon": "🗃️",
 		  "poids": 20, "contenant": {"capacite_kg": 1000}, "valeur": [{"cu": 150000}, {"cu": 150000}]}
-ITEMS = {d["_id"]: d for d in (BESACE, URNE, COFFRE)}
-VENDEUR = gen.doc_pnj([BESACE, URNE, COFFRE])
+HAVRESAC = {"_id": "item:sac_de_grendel", "type": "item", "nom": "Sac de Grendel", "icon": "🎒",
+			"poids": 1.5, "contenant": {"capacite_kg": 200}, "valeur": [{"cu": 100000}, {"cu": 100000}]}
+AILE = {"_id": "item:dragon_aile", "type": "item", "nom": "Aile de Dragon", "poids": [16, 85]}
+ITEMS = {d["_id"]: d for d in (BESACE, URNE, COFFRE, HAVRESAC, AILE)}
+VENDEUR = gen.doc_pnj([BESACE, URNE, COFFRE, HAVRESAC], {AILE["_id"]: AILE["nom"]})
 
 
 def _dump() -> dict:
@@ -38,7 +41,10 @@ def _dump() -> dict:
 
 def test_article_en_vente_lit_le_prix_fixe_de_l_article():
 	for d in (BESACE, URNE, COFFRE):
-		assert pnj.article_en_vente(VENDEUR, d["_id"]) == {"item": d["_id"], "cout_cuivre": d["valeur"][0]["cu"]}
+		assert pnj.article_en_vente(VENDEUR, d["_id"]) == {"item": d["_id"], "cout_cuivre": d["valeur"][0]["cu"],
+														   "trophee": None}
+	assert pnj.article_en_vente(VENDEUR, HAVRESAC["_id"]) == {"item": HAVRESAC["_id"], "cout_cuivre": 100000,
+															  "trophee": AILE["_id"]}
 
 
 def test_article_absent_ou_illisible_n_est_pas_vendu():
@@ -48,13 +54,20 @@ def test_article_absent_ou_illisible_n_est_pas_vendu():
 	for cout in (None, "beaucoup", -1):
 		doc = {"services": {"vente": {"articles": [{"item": BESACE["_id"], "cout_cuivre": cout}]}}}
 		assert pnj.article_en_vente(doc, BESACE["_id"]) is None, cout   # jamais gratuit par défaut
+	# Un trophée illisible rend l'article invendable, jamais vendu sans trophée.
+	doc = {"services": {"vente": {"articles": [{"item": BESACE["_id"], "cout_cuivre": 1, "trophee": "aile"}]}}}
+	assert pnj.article_en_vente(doc, BESACE["_id"]) is None
 
 
 # ── Router : routers/pnj._resoudre_vente ──────────────────────────────────────
 
-def _router(monkeypatch, sauves, charge=0.0, charge_max=100.0):
+def _router(monkeypatch, sauves, charge=0.0, charge_max=100.0, porteurs=()):
 	from routers import pnj as rp
 	monkeypatch.setattr(rp, "get_doc", lambda _id: ITEMS.get(_id))
+	monkeypatch.setattr(rp.recrutement, "porteurs_effectifs", lambda c, g=None: list(porteurs))
+	# Sacs de remise sans contenant ouvert : principal en tête, puis les porteurs.
+	monkeypatch.setattr(rp, "_sacs_remise", lambda c, p: [c] + list(p))
+	monkeypatch.setattr(rp, "_reporter_remise", lambda c, sacs, touches: touches)
 	monkeypatch.setattr(rp, "save_doc", lambda d: sauves.append(d) or d)
 	monkeypatch.setattr(rp, "carried_weight", lambda c: charge)
 	monkeypatch.setattr(rp, "charge_max_of", lambda c: charge_max)
@@ -112,6 +125,49 @@ def test_objet_non_vendu_ou_op_inconnue_refuse_en_422(monkeypatch):
 	assert char["inventaire"] == [] and char["or"] == 99
 
 
+def test_sans_le_trophee_rien_n_est_pris(monkeypatch):
+	sauves = []
+	rp = _router(monkeypatch, sauves)
+	char = {"_id": "character:x", "or": 50, "inventaire": []}
+	suivant, dits, reponse = _achat(rp, char, HAVRESAC["_id"])
+	assert suivant == "sans_trophee" and dits["trophee"] == "Aile de Dragon"
+	assert char["or"] == 50 and char["inventaire"] == [] and sauves == [] and "vente" not in reponse
+
+
+def test_le_trophee_porte_par_la_mule_est_laisse_au_vendeur(monkeypatch):
+	sauves = []
+	mule = {"_id": "monture:m", "inventaire": [{"item": AILE["_id"], "poids": 60.0}, "item:foin"]}
+	rp = _router(monkeypatch, sauves, porteurs=[mule])
+	char = {"_id": "character:x", "or": 50, "inventaire": []}
+	suivant, _, reponse = _achat(rp, char, HAVRESAC["_id"])
+	assert suivant == "vendu" and char["or"] == 40
+	assert char["inventaire"] == [{"item": HAVRESAC["_id"], "poids": 1.5}]
+	assert mule["inventaire"] == ["item:foin"]
+	assert sauves == [char, mule]                  # principal d'abord, porteur ensuite
+	assert reponse["vente"]["trophee"] == "Aile de Dragon"
+
+
+def test_le_trophee_du_sac_du_principal_part_en_premier_et_libere_sa_charge(monkeypatch):
+	sauves = []
+	mule = {"_id": "monture:m", "inventaire": [{"item": AILE["_id"], "poids": 60.0}]}
+	# 99 kg portés dont l'aile de 50 kg, 100 kg de charge max : le havresac passe parce que l'aile part.
+	rp = _router(monkeypatch, sauves, charge=99.0, charge_max=100.0, porteurs=[mule])
+	char = {"_id": "character:x", "or": 50, "inventaire": [{"item": AILE["_id"], "poids": 50.0}]}
+	suivant, _, _ = _achat(rp, char, HAVRESAC["_id"])
+	assert suivant == "vendu"
+	assert char["inventaire"] == [{"item": HAVRESAC["_id"], "poids": 1.5}]
+	assert len(mule["inventaire"]) == 1 and sauves == [char]
+
+
+def test_bourse_vide_garde_le_trophee(monkeypatch):
+	sauves = []
+	rp = _router(monkeypatch, sauves)
+	char = {"_id": "character:x", "or": 9, "inventaire": [{"item": AILE["_id"], "poids": 20.0}]}
+	suivant, _, _ = _achat(rp, char, HAVRESAC["_id"])
+	assert suivant == "sans_fonds" and char["inventaire"] == [{"item": AILE["_id"], "poids": 20.0}]
+	assert sauves == []
+
+
 # ── Linter ────────────────────────────────────────────────────────────────────
 
 def test_le_linter_accepte_l_architecte():
@@ -130,21 +186,47 @@ def test_le_linter_refuse_un_achat_hors_catalogue_et_un_article_illisible():
 
 # ── Contenu, contre le dernier dump ───────────────────────────────────────────
 
-def test_le_contenu_vend_les_trois_copies_au_prix_du_dump():
+def test_le_contenu_vend_les_trois_copies_au_prix_de_leur_doc():
 	dump = _dump()
-	pnj_doc, lieu = gen.generer(dump)
-	assert [a["item"] for a in pnj_doc["services"]["vente"]["articles"]] == list(gen.COPIES)
+	pnj_doc, lieu, *items = gen.generer(dump)
+	par_id = {d["_id"]: d for d in gen.copies()}
+	assert [a["item"] for a in pnj_doc["services"]["vente"]["articles"]] == list(gen.ARTICLES)
 	for a in pnj_doc["services"]["vente"]["articles"]:
-		valeur = dump[a["item"]]["valeur"]
+		valeur = par_id[a["item"]]["valeur"]
 		assert a["cout_cuivre"] == valeur[0]["cu"] == valeur[1]["cu"]
 	# Un choix d'achat par copie, chacun lisible par le moteur.
 	achats = [c["action"]["item"] for c in pnj_doc["dialogue"]["noeuds"]["catalogue"]["choix"] if c.get("action")]
-	assert achats == list(gen.COPIES)
+	assert achats == list(gen.ARTICLES)
+	# Le fichier porte les copies modifiées (et elles seules) : le prix vendu = le prix en base.
+	for d in items:
+		assert d["_id"] in gen.ARTICLES and d == par_id[d["_id"]]
+	assert {d["_id"] for d in items} == {i for i in gen.ARTICLES
+										 if {k: v for k, v in dump.get(i, {}).items() if k != "_rev"} != par_id[i]}
+
+
+def test_prix_des_copies_multiplies_par_cinq():
+	"""Auteur, 08/11 : les prix du 02/11 (10 000 · 40 000 · 150 000 cu) multipliés par 5."""
+	assert [d["valeur"][0]["cu"] for d in gen.copies()[:len(gen.COPIES)]] == [5 * p for p in (10000, 40000, 150000)]
+
+
+def test_les_sacs_a_dos_exigent_un_morceau_de_monstre_du_dump():
+	"""Auteur, 08/11 : 1,5 kg + un trophée — aile de Dragon (rencontré en France) : 200 kg, 10 or ;
+	carcasse de Mimique (coffre des catacombes de Lutecia) : 150 kg, 8 or ; espèces existantes."""
+	attendus = {"item:sac_de_grendel": (200, 100000), "item:havresac_de_mimique": (150, 80000)}
+	dump = _dump()
+	pnj_doc, *_ = gen.generer(dump)
+	articles = {a["item"]: a for a in pnj_doc["services"]["vente"]["articles"]}
+	for sac, trophee in gen.SACS_A_DOS.items():
+		assert articles[sac]["trophee"] == trophee and articles[sac]["cout_cuivre"] == attendus[sac][1]
+		assert dump[trophee].get("source_espece") in ("espece:dragon", "espece:mimique")
+		doc = next(d for d in gen.copies() if d["_id"] == sac)
+		assert (doc["contenant"]["capacite_kg"], doc["poids"]) == (attendus[sac][0], 1.5)
+	assert "sans_trophee" in pnj_doc["dialogue"]["noeuds"]
 
 
 def test_l_architecte_rejoint_aelis_a_la_cour_sans_rien_lui_retirer():
 	dump = _dump()
-	_, lieu = gen.generer(dump)
+	_, lieu, *_ = gen.generer(dump)
 	avant = dump[gen.LIEU_ID]
 	assert lieu["_id"] == gen.LIEU_ID and "_rev" not in lieu
 	assert lieu["pnj"][:-1] == avant["pnj"]                 # Aélis et ses conditions intactes

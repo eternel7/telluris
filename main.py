@@ -1561,6 +1561,7 @@ def _vocabulaire_dialogues() -> dict:
 			acces=sorted(set(lint_dialogues.NOEUDS_REQUIS["acces"]) | {"deja"}),
 			rang=sorted(set(lint_dialogues.NOEUDS_REQUIS["rang"]) | lint_dialogues.RANG_APPORT),
 			apport=sorted(lint_dialogues.APPORT_DONNEUR | lint_dialogues.APPORT_RECEVEUR),
+			vente=sorted(set(lint_dialogues.NOEUDS_REQUIS["vente"]) | lint_dialogues.VENTE_TROPHEE),
 		),
 		"actions": [
 			{"service": service, "op": op, "flag": flag}
