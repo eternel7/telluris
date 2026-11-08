@@ -60,7 +60,7 @@ MASCULINS = {
 	"petit_dragon", "petits_animaux_divers", "phenix", "polar_kraken", "poney", "prince_demon", "qudar",
 	"rat_geant", "rejeton_demoniaque", "renard", "revenant", "roi_des_tombes", "roi_liche",
 	"sanglier", "sanglier_apprivoise", "satyre", "scorpion_geant", "seigneur_du_sang", "seraphin", "serpent",
-	"serpent_geant", "serpopard", "spectre", "sphinx", "squelette", "strigoi", "taureau",
+	"serpent_de_marcel", "serpent_geant", "serpopard", "spectre", "sphinx", "squelette", "strigoi", "taureau",
 	"triton",
 	"troglodyte", "troll", "twrch_trwyth", "ulfhedinn", "uturuncu", "vampire", "xiuhcoatl", "yamata_no_orochi",
 	"zmey_gorynych", "zombie",

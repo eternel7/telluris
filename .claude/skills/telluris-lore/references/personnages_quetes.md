@@ -63,7 +63,7 @@ Trame **retenue** (D–B de la première version, A–S+ de la version gardée) 
 | Rang | Quête | Lieu | Thème |
 |---|---|---|---|
 | D | « Les rats de la crypte » | catacombes de Lutecia | ouvriers disparus, crypte rouverte, objet au symbole de portail ancien |
-| C | « La route de Saint-Denis » | route nord, avec un paladin du Sacré-Cœur | les monstres **précèdent** les donjons |
+| C | « La route de Saint-Denis » | route nord ; **4ᵉ escorte de Bouchard** (Montmartre), pas une épreuve de rang (Jumièges l'est) — arbitrée le 08/11 : [personnages/20261108_la_route_de_saint_denis.md] | les monstres **précèdent** les donjons : loups et corneilles rabattent vers le **Chemin du Saint**, serpent de Marcel (être unique) ; légendes de Denis et de Marcel, sans christianisme |
 | B | « La porte qui ne devait pas s'ouvrir » | temple templier près de Lutecia | l'extraction de cristaux **modifie** un donjon |
 | A | Mu : « Le serpent sous la cité » | Mu | rencontre avec **Échidna**, « mère des serpents » des traditions de Mu, sous Mu-la-Centrale près de la porte fermée (11/10) : la combattre ou parler. « Vous appelez monstres mes enfants. » |
 | A+ | Rome → **Paradis** | Rome | des anges aux réponses ambiguës (« Vos dieux vous ont menti. » — est-ce vrai ?) |

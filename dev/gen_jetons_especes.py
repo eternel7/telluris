@@ -200,6 +200,7 @@ TABLE = {
 	"seigneur_du_sang": None,
 	"seraphin": ("3x2", "triangle"),
 	"serpent": None,
+	"serpent_de_marcel": ("3x2", "ellipse"),
 	"serpent_geant": ("1x2", "ellipse"),
 	"serpopard": ("1x2", "ellipse"),
 	"silat": None,

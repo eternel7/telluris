@@ -1,0 +1,2435 @@
+[
+  {
+    "_id": "lieu:montmartre",
+    "type": "lieu",
+    "label": "Montmartre",
+    "image": "montmartre.jpg",
+    "categorie": "bastion_paladin",
+    "lieu_parent": "lieu:lutecia",
+    "texte": "Au pied des grands escaliers qui montent vers la basilique, un chemin boueux mène à une cour fortifiée, à quelques pas de la Porte Montmartre. Plus haut, les paladins de la basilique veillent sur le ciel de la capitale ; ici, on veille sur les routes. Des chevaux attendent près d'un chariot chargé de ballots, un marchand discute avec un garde, et sous un auvent de toile, un greffier tient le registre des convois qui partent vers les cités de France.",
+    "pnj": [
+      {
+        "character": "pnj:bouchard_de_clignancourt",
+        "nom": "Bouchard de Clignancourt",
+        "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+        "image": "pnj_paladin_Bouchard_de_Clignancourt_nain_m_montmartre.jpg",
+        "probabilite": 1,
+        "description": "Un paladin nain en tunique ivoire, qui vérifie les sangles d'un paquetage.",
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_montmartre_convoi_de_chartres",
+              "attendu": false
+            }
+          }
+        ]
+      },
+      {
+        "character": "pnj:bouchard_de_clignancourt_reims",
+        "nom": "Bouchard de Clignancourt",
+        "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+        "image": "pnj_paladin_Bouchard_de_Clignancourt_nain_m_montmartre.jpg",
+        "probabilite": 1,
+        "description": "Le paladin nain, penché sur le registre des convois, ses deux nattes de barbe glissées sous le manteau.",
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_montmartre_convoi_de_chartres"
+            }
+          },
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_montmartre_pelerins_de_reims",
+              "attendu": false
+            }
+          }
+        ]
+      },
+      {
+        "character": "pnj:bouchard_de_clignancourt_route_silencieuse",
+        "nom": "Bouchard de Clignancourt",
+        "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+        "image": "pnj_paladin_Bouchard_de_Clignancourt_nain_m_montmartre.jpg",
+        "probabilite": 1,
+        "description": "Le paladin nain, debout près de la porte fortifiée, les yeux sur la route du nord.",
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_montmartre_pelerins_de_reims"
+            }
+          },
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_montmartre_route_silencieuse",
+              "attendu": false
+            }
+          }
+        ]
+      },
+      {
+        "character": "pnj:bouchard_de_clignancourt_saint_denis",
+        "nom": "Bouchard de Clignancourt",
+        "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+        "image": "pnj_paladin_Bouchard_de_Clignancourt_nain_m_montmartre.jpg",
+        "probabilite": 1,
+        "description": "Le paladin nain, sous l'auvent, une carte de la route du nord tenue à plat de ses deux mains.",
+        "conditions": [
+          {
+            "quete_reussie": {
+              "id": "quete:escorte_montmartre_route_silencieuse"
+            }
+          }
+        ]
+      },
+      {
+        "character": "pnj:genevieve_du_sacre_coeur",
+        "nom": "Dame Geneviève",
+        "portrait": "race_paladin_f_humain01.jpg",
+        "probabilite": 1,
+        "description": "Une paladine aux cheveux gris coupés court, descendue des terrasses de la basilique, qui regarde le ciel plus souvent que les convois."
+      },
+      {
+        "character": "pnj:gace_le_fauconnier",
+        "nom": "Maître Gace",
+        "portrait": "maitre_gace_le_fauconnier01.jpg",
+        "probabilite": 1,
+        "description": "Un ménestrel elfe au gant de fauconnier, qui chante à mi-voix sur la terrasse et regarde les griffons tourner au-dessus de la Butte."
+      }
+    ]
+  },
+  {
+    "_id": "pnj:genevieve_du_sacre_coeur",
+    "type": "pnj",
+    "nom": "Dame Geneviève",
+    "race": "humain",
+    "vocation": "paladin",
+    "portrait": "paladin_humain_f_montmartre01.jpg",
+    "description": "Maîtresse de guet du Sacré-Cœur. Les vieux de Lutecia disent qu'une Geneviève a déjà gardé la ville quand tout le monde fuyait ; elle répond que c'était une autre, et qu'on raconte n'importe quoi.",
+    "services": {
+      "apport": {
+        "offre": {
+          "id": "quete:epreuve_lance_montmartre",
+          "titre": "Les griffons de la Butte",
+          "description": "Des griffons sauvages chassent au-dessus des faubourgs nord de Lutecia. Dame Geneviève veut trois têtes de griffon, rapportées à Montmartre, avant de vous parler de la Lance.",
+          "item": "item:griffon_tete",
+          "quantite": 3,
+          "unique": true,
+          "recompenses": {
+            "xp": 300,
+            "cuivre": 2500
+          }
+        },
+        "noeuds": {
+          "accepte": "epreuve_accepte",
+          "partiel": "epreuve_partiel",
+          "remis": "epreuve_remis"
+        }
+      },
+      "enseignement": {
+        "sort": "sort:lance_de_lumiere",
+        "noeuds": {
+          "appris": "appris",
+          "refus": "refus"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Dame Geneviève ne quitte pas des yeux le ciel au-dessus des toits. « Les convois, c'est en bas. Ici, on regarde en l'air. »",
+          "choix": [
+            {
+              "id": "lance",
+              "label": "« On parle d'une Lance de lumière. »",
+              "next": "lance_01"
+            },
+            {
+              "id": "epreuve",
+              "label": "« Que faut-il pour l'apprendre ? »",
+              "condition": {
+                "apport_offert": true
+              },
+              "next": "epreuve_propose"
+            },
+            {
+              "id": "remettre",
+              "label": "(Montrer les trophées.)",
+              "condition": {
+                "apport_possible": true
+              },
+              "action": {
+                "service": "apport",
+                "op": "remettre"
+              }
+            },
+            {
+              "id": "apprendre",
+              "label": "« Je viens recevoir la Lance. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:epreuve_lance_montmartre"
+                },
+                "enseignement_possible": true
+              },
+              "action": {
+                "service": "enseignement",
+                "op": "apprendre"
+              }
+            },
+            {
+              "id": "rayon",
+              "label": "« Je viens recevoir la Lance. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:epreuve_lance_montmartre"
+                },
+                "enseignement_connu": false,
+                "enseignement_prerequis_manquant": true
+              },
+              "next": "pas_pret_rayon"
+            },
+            {
+              "id": "niveau",
+              "label": "« Je viens recevoir la Lance. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:epreuve_lance_montmartre"
+                },
+                "enseignement_connu": false,
+                "enseignement_prerequis_manquant": false,
+                "enseignement_niveau_insuffisant": true
+              },
+              "next": "pas_pret_niveau"
+            },
+            {
+              "id": "points",
+              "label": "« Je viens recevoir la Lance. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:epreuve_lance_montmartre"
+                },
+                "enseignement_connu": false,
+                "enseignement_prerequis_manquant": false,
+                "enseignement_niveau_insuffisant": false,
+                "enseignement_points_insuffisants": true
+              },
+              "next": "pas_pret_points"
+            },
+            {
+              "id": "deja",
+              "label": "« Une question sur la Lance. »",
+              "condition": {
+                "enseignement_connu": true
+              },
+              "next": "deja"
+            },
+            {
+              "id": "saint_denis_pendant",
+              "label": "« On m'envoie au Relais de Saint-Denis. »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:escorte_montmartre_route_de_saint_denis"
+                }
+              },
+              "next": "saint_denis_pendant"
+            },
+            {
+              "id": "saint_denis_apres",
+              "label": "« Le Chemin du Saint… »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_montmartre_route_de_saint_denis"
+                }
+              },
+              "next": "saint_denis_apres"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "lance_01": {
+          "texte": "« La Lance ? C'est le Rayon, en vrai. Le livre vous apprend à tirer. Ici, on apprend à tirer sans toucher les toits de Lutecia, ni le paladin qui se tient devant vous. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et contre un dragon ? »",
+              "next": "lance_02"
+            }
+          ]
+        },
+        "lance_02": {
+          "texte": "« Seule, elle n'abat pas un grand dragon. Dix paladins sur dix terrasses, l'un après l'autre, oui. C'est pour ça que je ne l'apprends pas à n'importe qui. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "(Revenir à la conversation.)",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "epreuve_propose": {
+          "texte": "« Les griffons chassent sur les faubourgs du nord. Rapportez-m'en trois têtes. Je verrai comment vous visez. » (Récompense : {xp} XP, {prime}.)",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« J'y vais. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Pas encore. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "epreuve_accepte": {
+          "texte": "« {quantite} × {objet}. Je serai là. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Partir.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "epreuve_partiel": {
+          "texte": "{pnj} examine les trophées et les pose de côté. « Il en manque encore {reste}. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Repartir chasser.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "epreuve_remis": {
+          "texte": "{pnj} regarde longtemps les trophées. « Bien. Si le Rayon vous obéit déjà, je vous montrerai la Lance. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "(Revenir à la conversation.)",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "appris": {
+          "texte": "La leçon dure jusqu'au soir. Quand elle finit, {pnj} montre le ciel vide. « Maintenant, vous savez où elle s'arrête. C'est le plus important. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "refus": {
+          "texte": "{pnj} secoue la tête. « Pas aujourd'hui. Revenez plus tard. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "pas_pret_rayon": {
+          "texte": "« La Lance part du Rayon. Apprenez d'abord le Rayon de lumière, dans un grimoire. Ensuite, revenez. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "pas_pret_niveau": {
+          "texte": "« Votre magie sainte n'est pas encore assez sûre pour ça. Revenez plus tard. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "pas_pret_points": {
+          "texte": "« Il vous faudra {cout} points pour la retenir. Vous ne les avez pas encore. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "deja": {
+          "texte": "« Vous l'avez. Tirez haut, et regardez qui se tient sur la ligne. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Prendre congé.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "saint_denis_pendant": {
+          "texte": "Elle ne quitte pas le ciel des yeux. « Au nord. » Elle tend le bras, sans hâte, vers un point au-delà des toits des faubourgs. « Regardez là. Des corneilles qui tournent toujours au même endroit, depuis trois lunes. D'ici, on dirait qu'elles attendent quelque chose. » Elle baisse le bras. « Un griffon, je saurais quoi en faire. Ça, je ne sais pas. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "saint_denis_apres": {
+          "texte": "Elle ne quitte pas le ciel des yeux. « D'ici, le Chemin du Saint dessine un coude autour de rien. Je le regarde depuis des années. » Un silence. « Les vieux du faubourg disent qu'on l'a emmenée là. Marcel, avec son bâton. Le frère portier de Saint-Denis dit qu'elle s'est arrêtée derrière Denis. » Elle hausse les épaules. « Moi, je dis qu'une bête ne s'arrête pas pour un mort. Les corneilles sont parties, en tout cas. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:bouchard_de_clignancourt_saint_denis",
+    "type": "pnj",
+    "nom": "Bouchard de Clignancourt",
+    "race": "nain",
+    "vocation": "paladin",
+    "portrait": "paladin_Bouchard_de_Clignancourt_nain_m.jpg",
+    "description": "Paladin des routes, responsable des escortes terrestres au départ de Montmartre. Il vous confie désormais les convois que les escortes ordinaires ne savent plus mener.",
+    "services": {
+      "escorte": {
+        "offre": {
+          "id": "quete:escorte_montmartre_route_de_saint_denis",
+          "titre": "La route de Saint-Denis",
+          "description": "Trois convois sont arrivés au Relais de Saint-Denis, au nord de Lutecia, griffés, blessés, mais sans un mort : des bêtes les ont fait sortir de la grande route, toujours au même coude. Escortez une marchande, un charretier et un novice jusqu'au relais, et regardez où l'on vous emmène avant de regarder qui vous pousse.",
+          "destination": "lieu:relais_de_saint_denis",
+          "proteges": [
+            {
+              "prenom": "Perrine",
+              "nom": "Lenoir",
+              "race": "humain",
+              "sex": "F",
+              "description": "Marchande de cire et de chandelles pour le relais. Elle a déjà fait la route deux fois et a été rabattue deux fois. Elle refuse qu'on la plaigne.",
+              "inventaire": [
+                "item:Cierge",
+                "item:Cire_d_abeille"
+              ]
+            },
+            {
+              "prenom": "Aubry",
+              "nom": "Tanneguy",
+              "race": "nain",
+              "sex": "M",
+              "description": "Charretier. Il conduit le chariot et ne le quittera pour rien au monde, pas même quand il le faudrait.",
+              "se_defend": true,
+              "equipement": {
+                "torse": "item:Cuirasse_cuir_brut",
+                "main_droite": "item:Hachette"
+              }
+            },
+            {
+              "prenom": "",
+              "nom": "Ysoré",
+              "race": "elfe",
+              "sex": "M",
+              "description": "Novice qui rejoint le relais. Il récite la marche de Denis à voix basse, et la récite de travers quand il a peur.",
+              "inventaire": [
+                "item:Cierge"
+              ]
+            }
+          ],
+          "unique": true,
+          "proba": 1,
+          "rang_min": {
+            "cite": "lieu:lutecia",
+            "rang": "C"
+          },
+          "recompenses": {
+            "xp": 200,
+            "cuivre": 3000
+          }
+        },
+        "noeuds": {
+          "accepte": "saint_denis_accepte"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Bouchard a déroulé une carte sur le registre, sous l'auvent, et la tient à plat de ses deux larges mains. Il lève les yeux en vous entendant. « {prenom}. »",
+          "choix": [
+            {
+              "id": "saint_denis_annonce",
+              "label": "« Qu'est-ce que vous regardez ? »",
+              "condition": {
+                "escorte_offerte": true
+              },
+              "next": "saint_denis_annonce"
+            },
+            {
+              "id": "saint_denis_annonce_rang",
+              "label": "« Qu'est-ce que vous regardez ? »",
+              "condition": {
+                "escorte_rang_insuffisant": true
+              },
+              "next": "saint_denis_annonce"
+            },
+            {
+              "id": "saint_denis_relance",
+              "label": "« Au sujet de Saint-Denis… »",
+              "condition": {
+                "escorte_en_cours": true
+              },
+              "next": "saint_denis_relance"
+            },
+            {
+              "id": "saint_denis_rapport",
+              "label": "« Le coude du vieux chemin… »",
+              "condition": {
+                "escorte_accomplie": true
+              },
+              "next": "saint_denis_rapport"
+            },
+            {
+              "id": "saint_denis_souvenir",
+              "label": "« Des nouvelles du relais ? »",
+              "condition": {
+                "escorte_accomplie": true
+              },
+              "next": "saint_denis_souvenir"
+            },
+            {
+              "id": "route_rapport",
+              "label": "« Ceux que je vous ai ramenés de la route de Rhemi… »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_montmartre_route_silencieuse"
+                }
+              },
+              "next": "route_rapport"
+            },
+            {
+              "id": "preparation",
+              "label": "« Pourquoi insistez-vous tant sur la préparation ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_montmartre_route_silencieuse"
+                }
+              },
+              "next": "passe"
+            },
+            {
+              "id": "principes",
+              "label": "« Vos consignes, encore une fois ? »",
+              "next": "principes"
+            },
+            {
+              "id": "rien",
+              "label": "« Je repasserai. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "saint_denis_annonce": {
+          "texte": "Il tapote trois croix au crayon, serrées au même endroit, juste au nord de la capitale. « Trois convois pour le Relais de Saint-Denis. Tous arrivés. Des chariots griffés, des blessés, et pas un mort. » Il retire ses mains, la carte se roule toute seule. « Une bête qui attaque, elle tue ou elle mange. Celles-là poussaient. Elles faisaient sortir les chariots de la route, toujours au même coude. Je n'aime pas ce que je ne comprends pas. »",
+          "choix": [
+            {
+              "id": "saint_denis_offre",
+              "label": "« Qui faut-il conduire ? »",
+              "condition": {
+                "escorte_offerte": true
+              },
+              "next": "saint_denis_propose"
+            },
+            {
+              "id": "saint_denis_rang",
+              "label": "« Qui faut-il conduire ? »",
+              "condition": {
+                "escorte_rang_insuffisant": true
+              },
+              "next": "saint_denis_rang_insuffisant"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "saint_denis_propose": {
+          "texte": "« Trois voyageurs : {protege}. Une marchande de cire qui a déjà été rabattue deux fois et qui y retourne quand même, un charretier qui ne lâchera pas son chariot, un novice pour le relais. » Il les désigne du menton, sur le banc. « Les loups ferment la grande route au coude depuis trois lunes. Vous passerez par où ils vous pousseront, il n'y a pas d'autre chemin. Mais cette fois, quelqu'un regardera où ils mènent. »",
+          "choix": [
+            {
+              "id": "loups",
+              "label": "« Des loups qui ne tuent pas ? »",
+              "next": "saint_denis_loups"
+            },
+            {
+              "id": "instructions",
+              "label": "« Où est ce coude ? »",
+              "next": "saint_denis_instructions"
+            },
+            {
+              "id": "refus",
+              "label": "« Ce n'est pas pour moi. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "saint_denis_loups": {
+          "texte": "« Des loups, et des corneilles au-dessus. » Il tire sur une de ses nattes. « Les corneilles volent devant, les loups suivent. Les vieux chasseurs disent que ça se fait, entre ces deux-là : l'une trouve, l'autre ouvre, et chacune mange. » Il secoue la tête. « Ce que je ne sais pas, c'est pour qui ils ouvrent la route, cette fois. »",
+          "choix": [
+            {
+              "id": "instructions",
+              "label": "« Où est ce coude ? »",
+              "next": "saint_denis_instructions"
+            }
+          ]
+        },
+        "saint_denis_instructions": {
+          "texte": "« Sortez par la Porte Montmartre et prenez au nord. Deux lieues à peine. Quand le vieux chemin quitte la grande route, vous le reconnaîtrez : des ronces, un muret, et des corneilles sur toutes les bornes. » Il roule la carte. « Amenez-les tous au relais, {destination}. {xp} points d'expérience et {prime} pièces de cuivre. Et dites-moi ce qu'il y a au bout du coude. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« On part ce matin. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "refus",
+              "label": "« Laissez-moi me préparer. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "saint_denis_accepte": {
+          "texte": "Le greffier inscrit votre nom au bas de la ligne. Le charretier nain monte sur son siège sans un mot ; la marchande vérifie ses caisses de cire, deux fois ; le jeune elfe serre son cierge contre lui. Bouchard vient jusqu'au chariot. « Ne les laissez pas s'éparpiller quand les loups viendront. Une bête qui rabat cherche toujours celui qui s'écarte. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Je les ramènerai au relais. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "saint_denis_rang_insuffisant": {
+          "texte": "Il secoue la tête, sans dureté. « Pas encore. Ce qui attend au bout de ce coude, je ne le connais pas, et je n'y envoie que quelqu'un dont la Guilde répond au rang {rang_requis}. Revenez quand le Grand Relais vous l'aura accordé. Les convois attendront. Ils ont l'habitude. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« J'y travaillerai. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je reviendrai. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "saint_denis_relance": {
+          "texte": "Il ne lève pas les yeux de la carte. « {protege}. Encore ici ? » Il pose le doigt sur les trois croix. « Le relais attend sa cire, et les loups, eux, n'attendent personne. Allez, {prenom}. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "saint_denis_rapport": {
+          "texte": "Bouchard écoute jusqu'au bout : les corneilles sur les bornes, les loups sur les flancs, le vieux chemin sous les ronces, et ce qui attendait au coude. Il ne vous interrompt qu'une fois, pour demander si les loups sont entrés dans le combat. Vous lui dites que non, qu'ils sont restés à la lisière. Il hoche la tête. « Pas un donjon à deux lieues. J'ai fait demander à l'Enclos du Temple : les Templiers n'ont rien. » Il replie la carte. « Elle était là avant la route. Avant le relais, peut-être avant les murs. On a fait un coude pour l'éviter, puis on a oublié pourquoi, et un jour quelqu'un a coupé au plus court. »",
+          "choix": [
+            {
+              "id": "pourquoi",
+              "label": "« Et pourquoi maintenant ? »",
+              "next": "saint_denis_pourquoi"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "saint_denis_pourquoi": {
+          "texte": "« Les loups ? » Il hausse les épaules. « Je n'en sais rien. Une bête vieillit, elle a faim, elle a moins faim. Un hiver dure trop. Ou quelque chose que nous ne voyons pas d'ici. » Il range la carte dans le registre. « Je ne demande pas aux routes de m'expliquer pourquoi elles tuent. Je demande qu'on ramène les gens. Vous les avez ramenés. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "saint_denis_souvenir": {
+          "texte": "« Le relais a eu sa cire. » Bouchard a presque un sourire dans la barbe. « Et le frère portier m'a écrit une lettre de trois pages pour me raconter que c'était la bête de Denis. Il écrit beaucoup, ce frère. » Il range la lettre sous le registre. « Moi, je dis qu'une route qui fait un coude a toujours une raison. On la retrouve rarement. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "route_rapport": {
+          "texte": "Bouchard a tout écouté sans vous interrompre une seule fois : les ornières, la borne, le feu mal éteint, les deux survivants derrière l'éboulis. Puis il s'est agenouillé près de la paladine, a posé ses larges mains sur son flanc, et une lumière pâle a laissé sur ses paumes une brûlure de plus. Quand il se relève, il a l'air plus vieux. « Deux. Sur quatre. » Il le dit sans détour, comme on note un chiffre au registre. « Et sans vous, aucun. Vous avez regardé au lieu de poursuivre. C'est pour cela que vous êtes là, et c'est pour cela qu'eux sont revenus. »",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "« Et maintenant ? »",
+              "next": "route_suite"
+            },
+            {
+              "id": "fin",
+              "label": "« Je vous laisse les soigner. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "route_suite": {
+          "texte": "« Maintenant, j'ai des convois que je ne confie pas à n'importe qui. » Il regarde le registre, sous l'auvent, sans s'en approcher. « Des cargaisons qui comptent, des voyageurs qu'on ne peut pas perdre, des routes devenues trop dangereuses pour les escortes ordinaires. » Il revient à vous. « Je ne fais pas confiance aux promesses, {prenom}. Je fais confiance à ceux qui ramènent les gens. Vous en faites partie. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Messire. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "passe": {
+          "texte": "Il reste longtemps silencieux. « Il y a des années, je conduisais un convoi de marchands. Une route ordinaire, des destinations ordinaires. J'étais pressé, et j'étais sûr de moi. » Il passe le pouce sur la cicatrice de son sourcil. « Je ne les ai pas tous ramenés. Pas même la moitié. » Il remet ses mains derrière son dos. « Depuis, je prépare. Je fais préparer. Et je regarde derrière moi. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Ne rien ajouter.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "principes": {
+          "texte": "« Vous les connaissez mieux que moi, maintenant. » Il les dit quand même, un doigt après l'autre. « Une escorte n'est pas une chasse aux monstres. Une route sûre se mérite. On juge un paladin à ceux qu'il ramène, pas à ceux qu'il tue. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:chemin_du_saint",
+    "type": "lieu",
+    "label": "Le Chemin du Saint",
+    "image": "chemin_vers_les_collines_boisees01.png",
+    "categorie": "chemin",
+    "lieu_parent": "lieu:france",
+    "texte": "La grande route du nord fait un coude ; un vieux chemin s'en détache tout droit, sous les ronces et le lierre, entre deux murets de pierres sèches. Des corneilles sont posées sur chaque borne. Sur les talus, derrière vous, des loups sont assis et vous regardent passer.",
+    "pnj": [
+      {
+        "character": "pnj:perrine_lenoir_chemin_du_saint",
+        "nom": "Perrine",
+        "portrait": "marchand_dame_bertrade_atelier_cirier.png",
+        "probabilite": 1,
+        "description": "Perrine Lenoir, debout sur le chariot, qui regarde le vieux chemin.",
+        "conditions": [
+          {
+            "quete_active": {
+              "types": [
+                "escorte"
+              ],
+              "cible": "lieu:relais_de_saint_denis"
+            }
+          }
+        ]
+      }
+    ],
+    "acces": {
+      "refus": "La route du nord file vers Saint-Denis ; un vieux chemin s'en écarte sous les ronces.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "escorte"
+            ],
+            "cible": "lieu:relais_de_saint_denis"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:france_to_chemin_du_saint",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          45,
+          11
+        ],
+        "label": "Reprendre la route"
+      },
+      {
+        "lieu": "lieu:chemin_du_saint",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Des loups sur les talus"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "pnj:perrine_lenoir_chemin_du_saint",
+    "type": "pnj",
+    "nom": "Perrine Lenoir",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "marchand_dame_bertrade_atelier_cirier.png",
+    "description": "Perrine Lenoir, marchande de cire, debout sur le chariot pour voir par-dessus les ronces.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:coude_du_chemin_du_saint",
+        "noeuds": {
+          "ouvre": "coude_ouvert",
+          "refus": "coude_vide"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "La marchande s'est hissée debout sur le chariot, une main sur une caisse de cire, et regarde le vieux chemin par-dessus les ronces. Derrière vous, sur le talus de la grande route, des loups sont assis et ne bougent plus. « Voilà. Ils s'arrêtent toujours là. »",
+          "choix": [
+            {
+              "id": "ici",
+              "label": "« C'est ici qu'ils vous ont poussés ? »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "next": "ici"
+            },
+            {
+              "id": "libre",
+              "label": "« Le coude est libre. »",
+              "condition": {
+                "acces_libere": true
+              },
+              "next": "libre"
+            },
+            {
+              "id": "fin",
+              "label": "(Rester sur le chemin.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "ici": {
+          "texte": "« Deux fois. Les deux fois, ils nous ont laissés là, et les deux fois on a suivi le chemin, parce qu'on ne pouvait pas faire autrement. » Elle descend du chariot. « Après le muret, il fait un coude. Au coude, la première fois, j'ai senti l'odeur. La deuxième, j'ai vu bouger le lierre. On a fouetté les bêtes et on est passés. Le convoi d'après, il a laissé un homme dans les ronces, à ce qu'on m'a dit. Il est revenu, mais il ne parle plus. »",
+          "choix": [
+            {
+              "id": "avancer",
+              "label": "« Restez derrière moi. »",
+              "next": "seuil"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "seuil": {
+          "texte": "Vous passez le muret de pierres sèches. Le chemin s'enfonce sous les ronces et le lierre, les ornières pleines d'eau verte. Les corneilles se sont toutes posées sur les branches, d'un coup, et se taisent. Le jeune novice a commencé à réciter quelque chose, et s'est trompé deux fois. Le coude est devant vous.",
+          "choix": [
+            {
+              "id": "entrer",
+              "label": "Avancer jusqu'au coude.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "attendre",
+              "label": "« Pas encore. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "coude_ouvert": {
+          "texte": "Ce que vous preniez pour un talus couvert de lierre se soulève. Une tête plate et grise, large comme une porte de grange, se tourne lentement vers le chariot ; le corps derrière elle n'en finit pas de se dérouler hors des ronces. Aubry a déjà la hachette à la main. Perrine ne crie pas.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Tirer votre arme.",
+              "next": "fin"
+            }
+          ]
+        },
+        "coude_vide": {
+          "texte": "Le coude est vide. Le lierre est arraché sur toute sa longueur, et les corneilles sont parties.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Reculer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "libre": {
+          "texte": "Perrine regarde longtemps le lierre arraché. « Deux fois, je suis passée à côté de ça. » Elle remonte sur le chariot. « Le relais est juste derrière la colline. On voit déjà la basilique. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "« Allons-y. »",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:coude_du_chemin_du_saint",
+    "type": "lieu",
+    "label": "Le coude du Chemin du Saint",
+    "image": "map0002.jpg",
+    "categorie": "battle_map",
+    "dimensions": {
+      "x": 22,
+      "y": 30
+    },
+    "cells": [
+      [
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        3
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        3,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        1
+      ],
+      [
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1
+      ]
+    ],
+    "nav": {
+      "6,6": 193,
+      "7,10": 193,
+      "3,9": 193,
+      "2,5": 193,
+      "4,2": 193,
+      "17,2": 193,
+      "21,9": 193,
+      "18,9": 193,
+      "15,5": 193,
+      "17,15": 193,
+      "15,14": 193,
+      "9,15": 193,
+      "4,12": 129,
+      "1,11": 193,
+      "4,15": 193,
+      "10,17": 224,
+      "10,16": 96,
+      "10,18": 192,
+      "10,6": 192,
+      "10,5": 224,
+      "9,1": 224,
+      "9,2": 192,
+      "13,4": 192,
+      "12,7": 192,
+      "12,8": 192,
+      "12,16": 192,
+      "12,15": 224,
+      "12,14": 96,
+      "12,18": 96,
+      "12,19": 192,
+      "12,26": 192,
+      "12,25": 224,
+      "9,28": 224,
+      "9,27": 96,
+      "9,21": 6,
+      "9,20": 12,
+      "9,4": 12,
+      "12,3": 12
+    },
+    "tags": [
+      "chemin",
+      "foret",
+      "bois",
+      "ruines",
+      "donjon"
+    ],
+    "acces": {
+      "gardien": "pnj:perrine_lenoir_chemin_du_saint",
+      "refus": "Le coude est vide. Le lierre est arraché sur toute sa longueur.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "escorte"
+            ],
+            "cible": "lieu:relais_de_saint_denis"
+          }
+        },
+        {
+          "combat_gagne": {
+            "lieu": "lieu:coude_du_chemin_du_saint",
+            "attendu": false
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "donjon:chemin_du_saint",
+    "type": "donjon",
+    "nom": "Le coude du Chemin du Saint",
+    "description": "Au nord de Lutecia, là où le vieux chemin de Saint-Denis fait un coude sous les ronces, une bête plus vieille que la route. Les loups et les corneilles lui rabattent les convois.",
+    "portail": "lieu:chemin_du_saint",
+    "niveau_min": 2,
+    "niveau_max": 3,
+    "battle_maps": [
+      {
+        "lieu": "lieu:coude_du_chemin_du_saint",
+        "especes": [
+          "espece:serpent_de_marcel"
+        ],
+        "nb_monstres": 1,
+        "niveau_min": 2,
+        "niveau_max": 3
+      }
+    ]
+  },
+  {
+    "_id": "lieu:relais_de_saint_denis",
+    "type": "lieu",
+    "label": "Le Relais de Saint-Denis",
+    "image": "auberge_europe05.jpg",
+    "categorie": "chemin",
+    "lieu_parent": "lieu:france",
+    "texte": "Un monastère-relais fortifié, au pied d'une haute basilique de pierre claire : une cour, une écurie, un réfectoire où la soupe est toujours chaude, et une porte qu'on ferme à la nuit. Au pied de la basilique, une dalle usée que les voyageurs évitent de piétiner.",
+    "pnj": [
+      {
+        "character": "pnj:frere_hilduin",
+        "nom": "Frère Hilduin",
+        "portrait": "marchand_elfe_m_grand_scriptorium01.jpg",
+        "probabilite": 1,
+        "description": "Le frère portier, sous le porche, son registre ouvert."
+      }
+    ],
+    "acces": {
+      "refus": "Loups sur les talus, corneilles sur les bornes : la grande route du nord est fermée.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "combat_gagne": {
+            "lieu": "lieu:coude_du_chemin_du_saint"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:france_to_relais_de_saint_denis",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:france",
+        "pos": [
+          45,
+          10
+        ],
+        "label": "Reprendre la route"
+      },
+      {
+        "lieu": "lieu:relais_de_saint_denis",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Le Relais de Saint-Denis"
+      }
+    ],
+    "metadata": {
+      "type": "chemin",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "pnj:frere_hilduin",
+    "type": "pnj",
+    "nom": "Frère Hilduin",
+    "race": "elfe",
+    "vocation": "lettre",
+    "portrait": "marchand_elfe_m_grand_scriptorium01.jpg",
+    "description": "Frère Hilduin, frère portier du Relais de Saint-Denis, un très vieil elfe à la peau de parchemin.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Sous le porche du relais, un elfe si vieux que sa peau semble de parchemin tient le registre des arrivées, une plume à la main. « Soyez le bienvenu au Relais de Saint-Denis. La soupe est chaude, et la porte ferme à la nuit. »",
+          "choix": [
+            {
+              "id": "bonjour",
+              "label": "« Merci, mon frère. »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:escorte_montmartre_route_de_saint_denis",
+                  "attendu": false
+                },
+                "quete_reussie": {
+                  "id": "quete:escorte_montmartre_route_de_saint_denis",
+                  "attendu": false
+                }
+              },
+              "next": "bonjour"
+            },
+            {
+              "id": "convoi",
+              "label": "« Je vous amène le convoi de Montmartre. »",
+              "condition": {
+                "quete_active": {
+                  "id": "quete:escorte_montmartre_route_de_saint_denis"
+                }
+              },
+              "next": "convoi"
+            },
+            {
+              "id": "apres",
+              "label": "« Le coude du vieux chemin est libre. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_montmartre_route_de_saint_denis"
+                }
+              },
+              "next": "apres"
+            },
+            {
+              "id": "denis",
+              "label": "« Qui était Denis ? »",
+              "next": "denis"
+            },
+            {
+              "id": "fin",
+              "label": "(Le laisser à son registre.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "bonjour": {
+          "texte": "Il incline la tête et revient à son registre. « Que la route vous soit légère. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Entrer.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "convoi": {
+          "texte": "Le frère portier pose sa plume. « Vous êtes passés par le Chemin du Saint. » Ce n'est pas une question. Il vous mène jusqu'à une dalle usée, au pied de la basilique, et la touche du bout de sa sandale. « Il est tombé ici, sa tête entre les mains. La bête qui le suivait s'est arrêtée au coude, et elle n'a jamais passé ce point. C'est pour cela qu'on a bâti le relais ici, et pas ailleurs. Pour que la route ne l'oublie pas. »",
+          "choix": [
+            {
+              "id": "vrai",
+              "label": "« Vous en êtes sûr ? »",
+              "next": "vrai"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "vrai": {
+          "texte": "Il sourit à peine. « C'est moi qui ai écrit sa Vie, pour les novices. Il y a bien longtemps. J'y ai mis ce qu'on m'a raconté, et ce que les vieux frères avaient écrit avant moi, qui l'avaient entendu raconter aussi. » Il revient vers son registre. « Je ne jurerais pas que tout est vrai. Mais la bête, elle, ne passe pas le coude. Ça, je l'ai vu. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "Le frère portier écrit longtemps avant de répondre. « Alors elle ne passera plus le coude. » Il lève sa plume. « Ou bien elle n'a jamais voulu le passer, et c'est nous qui avons vu un miracle dans une bête qui avait son territoire, comme un loup a le sien. » Il trempe la plume dans l'encre. « J'écrirai les deux. Les novices choisiront. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "(Le laisser écrire.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "denis": {
+          "texte": "« Un paladin de la Butte, du temps où il n'y avait pas encore de portes entre les cités, seulement des murs et des routes. » Il parle comme on récite. « Une bête l'a décapité sur la Butte, là où l'on veille aujourd'hui sur le ciel de Lutecia. Il s'est relevé, il a pris sa tête dans ses mains, et il a marché vers le nord. La bête l'a suivi sans jamais le rattraper. » Il hausse ses épaules étroites. « Dans les faubourgs, ils racontent une autre histoire : un vieil homme au bâton, un Marcel, qui aurait emmené un serpent hors de la ville. Les deux histoires ne peuvent pas être vraies. Ou alors il y a deux bêtes. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "espece:serpent_de_marcel",
+    "type": "espece",
+    "nom": "Serpent de Marcel",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "serpent_geant_transparent.png",
+    "description": "Serpent monstrueux des abords de Lutecia, gros comme un tronc de chêne et long de plusieurs chariots, aux écailles vert-de-gris couvertes de lichen, et dont on ne voit les quatre courtes pattes griffues qu'une fois qu'il se dresse. On raconte dans les faubourgs qu'un vieil homme au bâton le fit sortir jadis de la ville et le perdit de vue ; au Relais de Saint-Denis, on dit qu'il suivit un paladin décapité jusqu'au coude du vieux chemin, et qu'il ne l'a jamais passé. Les loups et les corneilles du pays vivent de ses restes.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 65,
+        "max": 95
+      },
+      "R": {
+        "min": 65,
+        "max": 95
+      },
+      "Ag": {
+        "min": 25,
+        "max": 40
+      },
+      "Vol": {
+        "min": 50,
+        "max": 70
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 55
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_12"
+  },
+  {
+    "_id": "item:serpent_de_marcel",
+    "type": "item",
+    "nom": "Carcasse de Serpent de Marcel",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      600,
+      1500
+    ],
+    "description": "Dépouille de Serpent de Marcel récupérée à l'issue du combat.",
+    "source_espece": "espece:serpent_de_marcel",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:serpent_de_marcel_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:serpent_de_marcel_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:serpent_de_marcel_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:serpent_de_marcel_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:serpent_de_marcel_corps",
+    "type": "item",
+    "nom": "Corps de Serpent de Marcel",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      312.0,
+      780.0
+    ],
+    "description": "Corps de Serpent de Marcel, débité sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "reptile"
+    ],
+    "source_espece": "espece:serpent_de_marcel",
+    "portion_de": "item:serpent_de_marcel",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:serpent_de_marcel_corps_morceau",
+        "quantite": 8,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:serpent_de_marcel_corps_morceau",
+    "type": "item",
+    "nom": "Morceau de corps de Serpent de Marcel",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      39.0,
+      97.5
+    ],
+    "description": "Morceau de corps de Serpent de Marcel, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_corps",
+      "reptile"
+    ],
+    "source_espece": "espece:serpent_de_marcel",
+    "portion_de": "item:serpent_de_marcel_corps",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:serpent_de_marcel_patte",
+    "type": "item",
+    "nom": "Patte de Serpent de Marcel",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      42.0,
+      105.0
+    ],
+    "description": "Patte de Serpent de Marcel, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "reptile"
+    ],
+    "source_espece": "espece:serpent_de_marcel",
+    "portion_de": "item:serpent_de_marcel",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:serpent_de_marcel_patte_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:serpent_de_marcel_patte_morceau",
+    "type": "item",
+    "nom": "Morceau de patte de Serpent de Marcel",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      21.0,
+      52.5
+    ],
+    "description": "Morceau de patte de Serpent de Marcel, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "reptile"
+    ],
+    "source_espece": "espece:serpent_de_marcel",
+    "portion_de": "item:serpent_de_marcel_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:serpent_de_marcel_queue",
+    "type": "item",
+    "nom": "Queue de Serpent de Marcel",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      48.0,
+      120.0
+    ],
+    "description": "Queue de Serpent de Marcel, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "reptile"
+    ],
+    "source_espece": "espece:serpent_de_marcel",
+    "portion_de": "item:serpent_de_marcel",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:serpent_de_marcel_queue_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:serpent_de_marcel_queue_morceau",
+    "type": "item",
+    "nom": "Morceau de queue de Serpent de Marcel",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      24.0,
+      60.0
+    ],
+    "description": "Morceau de queue de Serpent de Marcel, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "reptile"
+    ],
+    "source_espece": "espece:serpent_de_marcel",
+    "portion_de": "item:serpent_de_marcel_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:serpent_de_marcel_tete",
+    "type": "item",
+    "nom": "Tête de Serpent de Marcel",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      72.0,
+      180.0
+    ],
+    "description": "Tête de Serpent de Marcel, débitée sur place.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "reptile"
+    ],
+    "source_espece": "espece:serpent_de_marcel",
+    "portion_de": "item:serpent_de_marcel",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:serpent_de_marcel_tete_morceau",
+        "quantite": 2,
+        "fraction": 1.0
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:serpent_de_marcel_tete_morceau",
+    "type": "item",
+    "nom": "Morceau de tête de Serpent de Marcel",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      36.0,
+      90.0
+    ],
+    "description": "Morceau de tête de Serpent de Marcel, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "reptile"
+    ],
+    "source_espece": "espece:serpent_de_marcel",
+    "portion_de": "item:serpent_de_marcel_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  }
+]
