@@ -250,6 +250,16 @@ def test_le_coude_est_une_salle_jouable():
 	assert vues == praticables
 
 
+def test_la_grille_suit_le_quadrillage_de_la_carte():
+	"""30 × 16 cases sur une image rognée à 1376×733 : 45,9 × 45,8 px par case, le
+	quadrillage dessiné (cf. en-tête de `GRILLE_COUDE` dans le générateur)."""
+	from PIL import Image
+	coude = _docs()[gen.COUDE]
+	chemin = os.path.join(RACINE, "templates", "resources", "battle_maps", coude["image"])
+	assert Image.open(chemin).size == (1376, 733)
+	assert coude["dimensions"] == {"x": 30, "y": 16}
+
+
 def test_le_chemin_et_le_relais_sur_des_cases_libres_de_la_carte_de_france():
 	docs, base = _docs(), _dump()
 	liens = (gen.LIEN_CHEMIN, gen.LIEN_RELAIS)
@@ -275,6 +285,9 @@ def test_images_presentes():
 		os.path.join(ressources, "towns", docs[gen.RELAIS]["image"]),
 		os.path.join(ressources, "monsters", docs[gen.SERPENT]["image"]),
 	]
+	for p in docs[gen.BOUCHARD]["services"]["escorte"]["offre"]["proteges"]:
+		if p.get("image"):
+			chemins.append(os.path.join(ressources, "pnj", p["image"]))
 	for d in docs.values():
 		if d.get("type") == "pnj":
 			chemins.append(os.path.join(ressources, "pnj", d["portrait"]))

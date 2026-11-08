@@ -20,10 +20,9 @@
 # qui a écrit la légende), le faubourg par Geneviève (Marcel l'y a menée). Pourquoi les loups
 # rabattent MAINTENANT reste sans réponse.
 #
-# Images D'ATTENTE (à remplacer quand les prompts du § 6 de la séance seront livrés) : le
-# coude emprunte la carte et la grille de `lieu:chemin1`, le chemin et le relais des images
-# du stock, le serpent l'image du serpent géant, Hilduin et Perrine des portraits de
-# marchands. Constantes `IMAGE_*` / `PORTRAIT_*` ci-dessous.
+# Images propres livrées le 08/11 (constantes `IMAGE_*` / `PORTRAIT_*`) ; la carte du coude
+# a été rognée pour que son quadrillage dessiné tombe sur 30 × 16 cases (`GRILLE_COUDE`).
+# Aubry et Ysoré, protégés, n'ont pas de portrait (initiale sur la carte 👥).
 #
 # ⚠️ UN SEUL FICHIER À IMPORTER (CLAUDE.md §18) : jsons/route_saint_denis_a_importer.json —
 # `lieu:montmartre` et `pnj:genevieve_du_sacre_coeur` RELUS du dernier dump (seules la
@@ -80,15 +79,45 @@ SERPENT = "espece:" + SLUG_SERPENT
 POS_CHEMIN = [45, 11]
 POS_RELAIS = [45, 10]
 
-# Images d'attente (cf. en-tête).
-GRILLE_EMPRUNTEE = "lieu:chemin1"
-IMAGE_CHEMIN = "chemin_vers_les_collines_boisees01.png"
-IMAGE_RELAIS = "auberge_europe05.jpg"
-IMAGE_SERPENT = "serpent_geant_transparent.png"
+# Images livrées le 08/11 (prompts : réponse de la séance du 08/11).
+IMAGE_COUDE = "coude_du_chemin_du_saint.jpg"
+IMAGE_CHEMIN = "chemin_du_saint.jpg"
+IMAGE_RELAIS = "relais_de_saint_denis.jpg"
+IMAGE_SERPENT = "serpent_de_marcel_transparent.png"
 PORTRAIT_BOUCHARD = "paladin_Bouchard_de_Clignancourt_nain_m.jpg"
 IMAGE_BOUCHARD = "pnj_paladin_Bouchard_de_Clignancourt_nain_m_montmartre.jpg"
-PORTRAIT_PERRINE = "marchand_dame_bertrade_atelier_cirier.png"
-PORTRAIT_HILDUIN = "marchand_elfe_m_grand_scriptorium01.jpg"
+PORTRAIT_PERRINE = "marchande_de_cire_Perrine_Lenoir_humain_f.jpg"
+PORTRAIT_HILDUIN = "frere_portier_Hilduin_elfe_m.jpg"
+
+# ── Grille du coude (image 1376×733, quadrillage de 30 × 16 cases) ─────────────────────────
+# L'image livrée (1376×768) a été rognée de 20 px en haut et 15 px en bas : son quadrillage
+# dessiné (45,9 × 45,8 px) commence à y = 20 et finit à y = 753 ; rognée, elle tombe juste.
+# '#' = 0 (bois) · '.' = 1 (chemin, herbe, lierre, ronces basses) · 'x' = 3 (murets de pierres
+# sèches, borne renversée, roue brisée : on ne marche pas dessus, un volant les survole) ·
+# '~' = 5 (ornières pleines d'eau verte).
+GRILLE_COUDE = [
+	"###########...xxxxx..#########",  # 0  muret nord
+	"#########.xxxx......xx.#######",
+	"#####.xxxx......~~....xx######",
+	"###..xx...........~~~..x.#####",  # 3  la grande ornière d'eau verte
+	".................~~~~...x.####",
+	"........................x.####",  # 5  le vieux chemin entre par l'ouest
+	"...........xx.........~.xx.###",  # 6  muret intérieur du coude
+	".........xx...........~..x.###",
+	"##.xxxxxx.x..........~.~.x.###",  # 8  borne renversée (10,8)-(11,9)
+	"###..xxxx.xx.........~.~xx.###",
+	"####...........xx...~...xx..##",  # 10 roue brisée (15,10)-(16,11)
+	"#####..........xx..~~...x..###",
+	"######............~~~..xx.####",
+	"######..##........~....x..####",
+	"###########...........x#######",
+	"#############.........x#######",  # 15 le chemin ressort par le sud
+]
+CODES = {"#": 0, ".": 1, "x": 3, "~": 5}
+
+
+def cells_coude() -> list:
+	return [[CODES[c] for c in ligne] for ligne in GRILLE_COUDE]
 
 # Barème des quêtes écrites (gen_recalage_primes.py) : C ≈ 3 000 cu.
 RECOMPENSES = {"xp": 200, "cuivre": 3000}
@@ -124,7 +153,7 @@ SERPENT_SPEC = {
 # ── Bouchard : la quatrième escorte ──────────────────────────────────────────────────────
 
 PROTEGES = [
-	{"prenom": "Perrine", "nom": "Lenoir", "race": "humain", "sex": "F",
+	{"prenom": "Perrine", "nom": "Lenoir", "race": "humain", "sex": "F", "image": PORTRAIT_PERRINE,
 	 "description": "Marchande de cire et de chandelles pour le relais. Elle a déjà fait la route "
 					"deux fois et a été rabattue deux fois. Elle refuse qu'on la plaigne.",
 	 "inventaire": ["item:Cierge", "item:Cire_d_abeille"]},
@@ -560,16 +589,15 @@ def hilduin() -> dict:
 
 
 def docs_neufs(base: dict) -> list:
-	grille = base[GRILLE_EMPRUNTEE]
 	coude = {
 		"_id": COUDE,
 		"type": "lieu",
 		"label": "Le coude du Chemin du Saint",
-		"image": grille["image"],
+		"image": IMAGE_COUDE,
 		"categorie": "battle_map",
-		"dimensions": copy.deepcopy(grille["dimensions"]),
-		"cells": copy.deepcopy(grille["cells"]),
-		"nav": copy.deepcopy(grille.get("nav") or {}),
+		"dimensions": {"x": len(GRILLE_COUDE[0]), "y": len(GRILLE_COUDE)},
+		"cells": cells_coude(),
+		"nav": {},
 		"tags": ["chemin", "foret", "bois", "ruines", "donjon"],
 		"acces": {
 			"gardien": PERRINE,
@@ -705,7 +733,9 @@ def dernier_dump(argv):
 
 
 def generer(base: dict) -> list:
-	for requis in (MONTMARTRE, BOUCHARD_PRECEDENT, GENEVIEVE, GRILLE_EMPRUNTEE, "lieu:france", CITE,
+	if len({len(l) for l in GRILLE_COUDE}) != 1:
+		sys.exit("ERREUR : grille du coude irrégulière")
+	for requis in (MONTMARTRE, BOUCHARD_PRECEDENT, GENEVIEVE, "lieu:france", CITE,
 				   "item:Cierge", "item:Cire_d_abeille", "item:Cuirasse_cuir_brut", "item:Hachette"):
 		if requis not in base:
 			sys.exit(f"ERREUR : {requis} absent du dump")

@@ -185,7 +185,7 @@ Verrouillé par `tests/test_enquete_morvan.py`.
 Contenu : `dev/gen_route_saint_denis.py` → **un seul** `jsons/route_saint_denis_a_importer.json` (`lieu:montmartre` et Geneviève relus du dump + docs neufs). Scénario et arbitrage : `docs/lore/personnages/20261108_la_route_de_saint_denis.md`.
 - Chaîne de Bouchard à Montmartre = **une variante par quête**, présences `quete_reussie` : la variante de la route silencieuse porte désormais `quete_reussie … attendu:false` de sa propre quête, et la variante Saint-Denis **recopie** ses scènes d'après (rapport, suite, passé) — un seul Bouchard à chaque étape (verrouillé).
 - Escorte sans `rencontre` (départ de Montmartre) vers `lieu:relais_de_saint_denis`, **fermé par `combat_gagne` du coude** (modèle Archives des Seuils) : on n'y dépose le convoi qu'après le serpent. Le coude est ouvert par la voix de Perrine (service `acces`), protégés DANS la salle, un seul `espece:serpent_de_marcel` (grades 2-3, potentiel verrouillé entre les planchers C et B).
-- Images d'attente : constantes `IMAGE_*` / `PORTRAIT_*` du générateur.
+- Coude : image rognée à 1376×733 pour que son quadrillage dessiné tombe sur 30 × 16 cases (`GRILLE_COUDE`, verrouillé).
 
 Verrouillé par `tests/test_route_saint_denis.py`.
 
