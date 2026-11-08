@@ -19,6 +19,7 @@ from models import character_stats
 
 from utils import acces
 from utils.pnj import PASSAGES_CLES
+from utils import pnj as pnj_util
 from utils import apport as apport_util
 from utils import offres as offres_util
 
@@ -60,6 +61,8 @@ PLACEHOLDERS_CONNUS = {
 	"fermeture", "seuils_suivants", "cristal",
 	# Enseignement d'un maître (service `enseignement`) : nom du sort, coût en points.
 	"sort", "cout",
+	# Vente à prix fixe (service `vente`) : prix de l'article ({objet} partagé).
+	"prix",
 }
 
 # Clés de `condition` : deux formes structurées, tout le reste est traité comme un FLAG
@@ -189,6 +192,8 @@ NOEUDS_REQUIS = {
 	"portail": {"ouvert", "ferme", "refus_cristal"},
 	# Enseignement d'un maître : sort transmis, ou refus (règle d'apprentissage non remplie).
 	"enseignement": {"appris", "refus"},
+	# Vente à prix fixe : objet remis, bourse trop légère, ou sac trop lourd.
+	"vente": {"fait", "sans_fonds", "trop_charge"},
 }
 
 # Le transport a DEUX rôles, et presque aucun PNJ ne tient les deux :
@@ -564,6 +569,14 @@ def analyser_doc(doc: dict) -> list:
 					   f"reçu {dep!r} — le déplacement serait ignoré en silence.", nid)
 
 			action = choix.get("action") or {}
+			# Vente : l'objet du choix doit être un article du service, sinon 422 au clic.
+			if action.get("service") == "vente":
+				if action.get("op") != "acheter":
+					erreur(f"choix `{cid}` : le service `vente` n'a que l'op `acheter`, "
+						   f"reçu {action.get('op')!r}.", nid)
+				elif pnj_util.article_en_vente(doc, action.get("item")) is None:
+					erreur(f"choix `{cid}` : `action.item` {action.get('item')!r} n'est pas un "
+						   f"article lisible de `services.vente.articles` — le clic échouerait.", nid)
 			attendu = ACTIONS_A_CONDITIONNER.get((action.get("service"), action.get("op")))
 			if attendu and attendu not in (conditions | gardes.get(nid, set())):
 				erreur(f"choix `{cid}` déclenche `{action['service']}/{action['op']}` sans "
@@ -650,6 +663,19 @@ def analyser_doc(doc: dict) -> list:
 			elif apport_util.quete_id_de({"services": {"apport": conf}}) is None:
 				erreur("`services.apport` sans `offre` ni `quete` (`quete:…`) : ce PNJ ne "
 					   "recevrait aucune remise.")
+		elif service == "vente":
+			attendus = set(NOEUDS_REQUIS["vente"])
+			articles = (conf or {}).get("articles")
+			if not isinstance(articles, list) or not articles:
+				erreur("`services.vente.articles` doit lister au moins un article "
+					   "`{item, cout_cuivre}` — ce PNJ ne vendrait rien.")
+			else:
+				for article in articles:
+					item = article.get("item") if isinstance(article, dict) else None
+					if not (isinstance(item, str) and item.startswith("item:")) \
+							or pnj_util.article_en_vente(doc, item) is None:
+						erreur(f"`services.vente.articles` : article illisible {article!r} — "
+							   f"`item` (`item:…`) et `cout_cuivre` (entier ≥ 0) sont requis.")
 		elif service == "portail" and (conf or {}).get("fixe"):
 			# Tableau fixe : aucun seuil ne se referme ; sans `cout`, rien à payer ; la
 			# barrière de la porte, elle, peut refuser.

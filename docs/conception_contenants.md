@@ -1,6 +1,6 @@
 # Conception — inventaire de contenant
 
-- **Créée :** 02/11/2026. **Statut :** conception arbitrée par l'Auteur (trois questionnaires, § Décisions). **Mécanique implémentée** le 02/11 (`utils/contenants.py`, `routers/contenants.py`, fenêtre 👜 de `/play`) ; contenu : `dev/gen_contenants.py` → `jsons/contenants_a_importer.json` ; restent le service `vente` et l'obtention des reliques.
+- **Créée :** 02/11/2026. **Statut :** conception arbitrée par l'Auteur (trois questionnaires, § Décisions). **Mécanique implémentée** le 02/11 (`utils/contenants.py`, `routers/contenants.py`, fenêtre 👜 de `/play`) ; contenu : `dev/gen_contenants.py` → `jsons/contenants_a_importer.json` ; service `vente` et vendeur des copies (Maître Villard de Honnecourt, Cour des Arches) le 08/11 ; reste l'obtention des reliques et des objets du lore.
 - **Lore :** `docs/lore/monde/20261102_sacs_des_legendes.md` (reliques, copies d'Architectes, chiffres).
 - **Besoin :** un objet à poids fixe qui contient un poids supérieur ; ce qui est dedans ne pèse rien pour le porteur.
 
@@ -19,6 +19,8 @@
 | Charge magique | ce qui est rangé **ne gêne pas la magie** non plus (« il ne pèse rien ») |
 | Reliques | **une par personnage** : chacun peut obtenir la sienne une fois |
 | Vente des copies | **PNJ Architecte de l'institut, vente à prix fixe**, sans stock ni fabrication ; un institut pareil à Petra et dans les cités à portail à venir |
+| Vendeur de Lutecia (08/11) | **à la Cour des Arches, avec Aélis** — Maître Villard de Honnecourt |
+| Objets du lore (08/11) | **pas uniques** : coffres de Thot, tente, outre, gourde, kibisis peuvent exister en plusieurs exemplaires, sans trace « une par personnage » |
 | Cinq objets du lore | contenance / poids selon leur légende (§ Contenu) |
 
 Rappel du lore arbitré : inventaire séparé à limite propre ; **aucun contenant magique dans un autre** ; **aucun être vivant** (aucun objet du jeu n'en est un : rien à garder) ; on dépose dans le Sac de Manannán à tout moment, on ne reprend (ni ne voit) qu'à marée haute.
@@ -89,10 +91,11 @@ Tous par **`_acteur(current_user, body)`** : le contenant peut être dans le sac
 ## Tests (`tests/test_contenants.py`)
 Capacité, emboîtement refusé, chaîne → dict, poids porté inchangé, `sortir` refusé en surcharge, marée sur `now` injecté (bords de fenêtre, période), refus de vente plein, limite de vol au poids total, contenu conservé par `groupe/transferer` et `coffre/transferer`.
 
-## Vente des copies — service neuf
-Aucun service de vente n'existe parmi ceux des PNJ (`soin`, `don`, `transport`, `escorte`, `rang`, `commission`, `acces`, `apport`, `traversee`, `enseignement`, `portail`, `direction`) ni au marché sans stock. À construire :
-- service **`vente`** d'un PNJ Architecte (`{"service": "vente", "items": [...]}` dans son arbre de dialogue) : liste à **prix fixe** relu sur le doc item (`valeur`), aucun stock, aucune relation ni marchandage ; achat refusé si la bourse ou la charge du porteur ne suit pas ;
-- lieux : la Cour des Arches et les Archives des Seuils (`institut_des_architectes`, Lutecia) ; un institut à **Petra** (à créer) ; puis chaque cité à portail transversal décrite.
+## Vente des copies — service `vente` (08/11)
+- `services.vente = {articles: [{item, cout_cuivre}], noeuds: {fait, sans_fonds, trop_charge}}` ; un choix par article, action `{"service": "vente", "op": "acheter", "item": "item:x"}` ; placeholders `{objet}`, `{prix}` (`utils/pnj.article_en_vente`, `routers/pnj._resoudre_vente`).
+- Prix **fixe**, écrit dans l'article par le générateur depuis la `valeur` du doc item (min = max) ; ni stock, ni relation, ni marchandage, ni rang. Principal seul : charge contrôlée, puis débit, puis remise — un refus ne touche à rien.
+- Vendeur : `pnj:villard_de_honnecourt` (nain, maître d'œuvre de l'Institut), toujours présent à `lieu:la_cour_des_arches` à côté d'Aélis — `dev/gen_architecte_contenants.py` → `jsons/architecte_contenants_a_importer.json`. Verrouillé par `tests/test_vente_architecte.py`.
+- Restent : un institut à **Petra**, puis chaque cité à portail transversal décrite (même service, autre vendeur).
 
 ## Contenu (générateur, plus tard)
 Un `dev/gen_contenants.py` → **un** `jsons/contenants_a_importer.json`, chiffres du tableau de la séance de lore :
@@ -112,5 +115,5 @@ Un `dev/gen_contenants.py` → **un** `jsons/contenants_a_importer.json`, chiffr
 **Une relique par personnage** : l'obtention (quête, coffre de donjon) vérifie qu'il ne l'a jamais reçue — trace sur le personnage, comme une quête unique réussie.
 
 ## Points ouverts
-- **Où trouver** le carquois d'Arjuna (Muziris, plus tard) et les cinq objets du lore (coffres de Thot, gourde, tente, kibisis, outre) ; **unique ou non** pour ces cinq.
+- **Où trouver** le carquois d'Arjuna (Muziris, plus tard) et les cinq objets du lore (coffres de Thot, gourde, tente, kibisis, outre — **pas uniques**, Auteur 08/11).
 - **Obtention des reliques** : quelle quête ou quel coffre de donjon pour chacune (île de Man, Annwn, zones blanches).

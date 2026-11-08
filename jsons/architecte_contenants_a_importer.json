@@ -1,0 +1,263 @@
+{
+  "docs": [
+    {
+      "_id": "pnj:villard_de_honnecourt",
+      "type": "pnj",
+      "nom": "Villard de Honnecourt",
+      "race": "nain",
+      "vocation": "lettre",
+      "portrait": "architecte_nain_m_cour01.png",
+      "description": "Maître d'œuvre venu de Honnecourt, sur l'Escaut, l'un des rares Architectes de l'Institut à savoir plier un espace dans une enveloppe : besaces, urnes, coffres. Son carnet de croquis ne le quitte jamais. Il vend ses copies à la Cour des Arches, au prix du travail, sans marchander.",
+      "services": {
+        "vente": {
+          "articles": [
+            {
+              "item": "item:besace_profonde",
+              "cout_cuivre": 10000
+            },
+            {
+              "item": "item:urne_interieure",
+              "cout_cuivre": 40000
+            },
+            {
+              "item": "item:coffre_de_retrait",
+              "cout_cuivre": 150000
+            }
+          ],
+          "noeuds": {
+            "fait": "vendu",
+            "sans_fonds": "sans_fonds",
+            "trop_charge": "trop_charge"
+          }
+        }
+      },
+      "dialogue": {
+        "noeud_depart": "etabli",
+        "noeuds": {
+          "etabli": {
+            "texte": "Sous l'une des arches, un établi encombré de besaces de cuir, d'urnes cerclées de bronze et d'un petit coffre ferré. Un nain à la barbe tressée de fil de cuivre y trace des cercles au compas sur une toile tendue, un carnet de croquis ouvert près du coude.",
+            "choix": [
+              {
+                "id": "a_vendre",
+                "label": "Ces besaces sont-elles à vendre ?",
+                "next": "catalogue"
+              },
+              {
+                "id": "art",
+                "label": "Que faites-vous, au juste ?",
+                "next": "art_01"
+              },
+              {
+                "id": "fin",
+                "label": "(Passer votre chemin.)",
+                "next": "fin"
+              }
+            ]
+          },
+          "art_01": {
+            "texte": "Le nain lève enfin les yeux. « Je plie. Un portail a deux bouts, n'est-ce pas ? Il relie un lieu à un autre. Moi, j'en fais qui n'ont qu'une ouverture : ce qu'on y range part dans un espace qui n'est nulle part ailleurs. Villard de Honnecourt, maître d'œuvre de l'Institut. »",
+            "choix": [
+              {
+                "id": "poids",
+                "label": "Et ce qu'on y range ne pèse rien ?",
+                "next": "art_02"
+              }
+            ]
+          },
+          "art_02": {
+            "texte": "« Pour votre épaule, rien. Pour votre magie non plus : ce qui est rangé ne gêne pas un mage. Seule l'enveloppe pèse. Deux règles, et je n'y déroge pas : rien de vivant dedans, et jamais un de ces objets dans un autre. Ceux qui ont essayé n'ont jamais su dire où était passé le second. »",
+            "choix": [
+              {
+                "id": "legendes",
+                "label": "On parle de sacs des légendes, plus vastes encore…",
+                "next": "legendes"
+              },
+              {
+                "id": "voir",
+                "label": "Montrez-moi ce que vous vendez.",
+                "next": "catalogue"
+              }
+            ]
+          },
+          "legendes": {
+            "texte": "« Le sac de Manannán, celui de Rhiannon… Je les ai cherchés dans les relevés de l'Institut, et je ne les ai jamais vus. Certains ici disent que nos copies en descendent, qu'un ancien maître en aurait ouvert un pour comprendre comment il était plié. D'autres jurent que ces sacs-là ne furent jamais l'œuvre de mains d'Anthropes. Je n'ai pas tranché. Mes copies, elles, je sais comment elles sont faites. »",
+            "choix": [
+              {
+                "id": "voir",
+                "label": "Montrez-moi ce que vous vendez.",
+                "next": "catalogue"
+              },
+              {
+                "id": "fin",
+                "label": "Merci, maître.",
+                "next": "fin"
+              }
+            ]
+          },
+          "catalogue": {
+            "texte": "« Trois tailles, trois prix, et je ne marchande pas : le prix est celui du travail. La besace pour l'aventurier, l'urne pour qui transporte minerais et marchandises, le coffre pour qui veut emporter une salle entière. »",
+            "choix": [
+              {
+                "id": "acheter_besace_profonde",
+                "label": "Acheter : 👜 Besace profonde — contient 100 kg, pèse 0,5 kg — 1 or",
+                "action": {
+                  "service": "vente",
+                  "op": "acheter",
+                  "item": "item:besace_profonde"
+                }
+              },
+              {
+                "id": "acheter_urne_interieure",
+                "label": "Acheter : 🏺 Urne intérieure — contient 300 kg, pèse 8 kg — 4 or",
+                "action": {
+                  "service": "vente",
+                  "op": "acheter",
+                  "item": "item:urne_interieure"
+                }
+              },
+              {
+                "id": "acheter_coffre_de_retrait",
+                "label": "Acheter : 🗃️ Coffre de retrait — contient 1 000 kg, pèse 20 kg — 15 or",
+                "action": {
+                  "service": "vente",
+                  "op": "acheter",
+                  "item": "item:coffre_de_retrait"
+                }
+              },
+              {
+                "id": "art",
+                "label": "Que faites-vous, au juste ?",
+                "next": "art_01"
+              },
+              {
+                "id": "fin",
+                "label": "Une autre fois.",
+                "next": "fin"
+              }
+            ]
+          },
+          "vendu": {
+            "texte": "« Marché conclu : {objet}, pour {prix}. La première fois, ouvrez doucement : l'espace a besoin d'un instant pour se déplier. »",
+            "choix": [
+              {
+                "id": "encore",
+                "label": "Autre chose…",
+                "next": "catalogue"
+              },
+              {
+                "id": "fin",
+                "label": "Merci, maître.",
+                "next": "fin"
+              }
+            ]
+          },
+          "sans_fonds": {
+            "texte": "« {objet} coûte {prix}, et votre bourse n'y est pas. Je ne fais ni crédit ni rabais : revenez quand elle sera plus lourde. »",
+            "choix": [
+              {
+                "id": "encore",
+                "label": "Voir les autres.",
+                "next": "catalogue"
+              },
+              {
+                "id": "fin",
+                "label": "Une autre fois.",
+                "next": "fin"
+              }
+            ]
+          },
+          "trop_charge": {
+            "texte": "« Vous portez déjà tout ce que vous pouvez : {objet} ne tiendrait pas sur votre dos. Allégez-vous, puis revenez. »",
+            "choix": [
+              {
+                "id": "encore",
+                "label": "Voir les autres.",
+                "next": "catalogue"
+              },
+              {
+                "id": "fin",
+                "label": "Une autre fois.",
+                "next": "fin"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "_id": "lieu:la_cour_des_arches",
+      "type": "lieu",
+      "label": "La Cour des Arches",
+      "image": "institut_des_architectes_lutecia01.jpg",
+      "categorie": "institut_des_architectes",
+      "lieu_parent": "lieu:lutecia",
+      "pnj": [
+        {
+          "character": "pnj:aelis_de_montfaucon_cour_des_arches",
+          "nom": "Aélis",
+          "portrait": "architecte_Aélis_de_Montfaucon_cour_des_arches.jpg",
+          "probabilite": 1,
+          "conditions": [
+            {
+              "quete_reussie": {
+                "id": "quete:escorte_aelis_abbaye_de_jumieges",
+                "attendu": false
+              }
+            },
+            {
+              "quete_active": {
+                "types": [
+                  "escorte"
+                ],
+                "cible": "lieu:les_archives_des_seuils",
+                "attendu": false
+              }
+            },
+            {
+              "ou": [
+                {
+                  "quete_reussie": {
+                    "id": "quete:escorte_convoi_de_lutecia"
+                  }
+                },
+                {
+                  "quete_active": {
+                    "types": [
+                      "escorte"
+                    ],
+                    "cible": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+                    "giver_categorie": "bureau_maitre_guilde",
+                    "attendu": false
+                  }
+                }
+              ]
+            },
+            {
+              "ou": [
+                {
+                  "quete_reussie": {
+                    "id": "quete:escorte_convoi_de_lutecia"
+                  }
+                },
+                {
+                  "quete_reussie": {
+                    "id": "quete:escorte_bucherons_d_auxerre",
+                    "attendu": false
+                  }
+                }
+              ]
+            }
+          ],
+          "description": "Une jeune architecte penchée sur un plan, un compas dans une main et un carnet épais sous le bras."
+        },
+        {
+          "character": "pnj:villard_de_honnecourt",
+          "nom": "Maître Villard",
+          "portrait": "architecte_nain_m_cour01.png",
+          "probabilite": 1,
+          "description": "Un nain à la barbe tressée de fil de cuivre, penché sur un établi chargé de besaces, d'urnes et d'un petit coffre ferré."
+        }
+      ]
+    }
+  ]
+}
