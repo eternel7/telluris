@@ -19,6 +19,8 @@ from utils import contenants, marche
 DOCS = {d["_id"]: d for d in gen.DOCS}
 # Les trois copies d'Architectes : seuls objets vendus à prix fixe (décision du 02/11).
 COPIES = ("item:besace_profonde", "item:urne_interieure", "item:coffre_de_retrait")
+# Les deux sacs à dos à trophée (08/11) : prix fixe aussi, hors de l'échelle des copies.
+SACS_A_DOS = ("item:havresac_de_grendel", "item:havresac_de_mimique")
 
 
 def test_chaque_doc_est_un_contenant_du_sac():
@@ -41,14 +43,17 @@ def test_copies_a_prix_fixe_et_contenance_croissante():
 	caps = [contenants.capacite(DOCS[i]) for i in COPIES]
 	prix = [DOCS[i]["valeur"][0]["cu"] for i in COPIES]
 	assert caps == sorted(caps) and prix == sorted(prix)
-	assert all("valeur" not in d for i, d in DOCS.items() if i not in COPIES)
+	assert all("valeur" not in d for i, d in DOCS.items() if i not in COPIES + SACS_A_DOS)
+	for i in SACS_A_DOS:
+		v = DOCS[i]["valeur"]
+		assert v[0] == v[1], i
 
 
 def test_reliques_marquees_et_pots_d_anansi_non():
 	reliques = {i for i, d in DOCS.items() if "relique" in d["tags"]}
 	assert "item:pot_d_anansi" not in reliques               # « plusieurs pots » (Auteur)
 	assert {"item:sac_de_manannan", "item:sac_de_rhiannon", "item:coquille_d_oduduwa"} <= reliques
-	assert not reliques & set(COPIES)
+	assert not reliques & set(COPIES + SACS_A_DOS)
 
 
 def test_la_coquille_d_oduduwa_est_la_plus_vaste():

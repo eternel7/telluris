@@ -31,10 +31,13 @@
 # - `services.don` : {item, quantite, cout_cuivre, gratuit_si:{lieux, seuil},
 #   noeuds:{fait, sans_fonds, trop_charge}} — remise d'un objet (ex. eau bénite),
 #   gratuit si bonne réputation ; contrôle de charge côté router.
-# - `services.vente` : {articles:[{item, cout_cuivre}], noeuds:{fait, sans_fonds, trop_charge}}
+# - `services.vente` : {articles:[{item, cout_cuivre, trophee?}], noeuds:{fait, sans_fonds,
+#   trop_charge, sans_trophee?}}
 #   — VENTE À PRIX FIXE de plusieurs objets (`article_en_vente`) : un choix par article,
 #   action `{"service":"vente", "op":"acheter", "item":"item:x"}` ; placeholders {objet},
-#   {prix}. Ni stock, ni fabrication, ni relation. Principal seul, contrôle de charge côté router.
+#   {prix}, {trophee}. Ni stock, ni fabrication, ni relation. Principal seul, contrôle de charge
+#   côté router ; le `trophee` (morceau de monstre laissé au vendeur) se prend dans les sacs du
+#   groupe (principal en tête, compagnons, montures, contenants).
 # - `services.transport` : {noeuds:{propose, infos, accepte, trop_charge, livre, incomplet},
 #   offre?:{id, destination, cargaison, duree, proba, unique, titre, description, recompenses}}
 #   — quête de course (utils/transport.py). Sans `offre`, la course est TIRÉE AU HASARD et le
@@ -962,9 +965,12 @@ def appliquer_don(character: dict, item_id: str, poids: list,
 
 
 def article_en_vente(pnj_doc: dict, item_id) -> dict | None:
-	"""Article du service `vente` que désigne un choix (`action.item`) : `{item, cout_cuivre}`,
-	ou None si ce PNJ ne vend pas cet objet. Schéma data :
-	`services.vente = {articles: [{item, cout_cuivre}], noeuds: {fait, sans_fonds, trop_charge}}`.
+	"""Article du service `vente` que désigne un choix (`action.item`) : `{item, cout_cuivre,
+	trophee}`, ou None si ce PNJ ne vend pas cet objet. Schéma data :
+	`services.vente = {articles: [{item, cout_cuivre, trophee?}], noeuds: {fait, sans_fonds,
+	trop_charge, sans_trophee?}}`.
+	`trophee` (`item:…`, optionnel) : un morceau de monstre que le client LAISSE au vendeur en
+	plus du prix (un exemplaire, pris dans les sacs de l'expédition) — None sans trophée.
 	Prix FIXE, écrit dans l'article : ni stock, ni fabrication, ni marchandage, ni relation
 	(l'Architecte de l'institut et ses copies, Auteur 02/11). Un prix illisible ou négatif rend
 	l'article invendable (None) plutôt que gratuit."""
@@ -978,7 +984,10 @@ def article_en_vente(pnj_doc: dict, item_id) -> dict | None:
 			cout = int(article.get("cout_cuivre"))
 		except (TypeError, ValueError):
 			return None
-		return {"item": item_id, "cout_cuivre": cout} if cout >= 0 else None
+		trophee = article.get("trophee")
+		if trophee is not None and not (isinstance(trophee, str) and trophee.startswith("item:")):
+			return None
+		return {"item": item_id, "cout_cuivre": cout, "trophee": trophee} if cout >= 0 else None
 	return None
 
 

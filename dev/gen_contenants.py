@@ -11,6 +11,8 @@ docs/lore/monde/20261102_sacs_des_legendes.md (tableau « Ce qui est retenu »).
 
 - Trois COPIES d'Architectes, à prix fixe (`valeur` min = max) : 50 000 · 200 000 · 750 000 cu
   (Auteur, 08/11 : les prix du 02/11 multipliés par 5).
+- Deux SACS À DOS d'Architectes faits d'un morceau de monstre (Auteur, 08/11) : 200 kg, 1,5 kg,
+  100 000 cu fixes + le trophée laissé à Maître Villard (aile de Dragon, carcasse de Mimique).
 - Quatre RELIQUES (tag `relique` : une par personnage, règle à appliquer à l'obtention).
 - Les pots d'Anansi (plusieurs exemplaires) et les cinq objets du lore : ni tag `relique`, ni
   `valeur` (non arbitrés) — prix dérivé du poids, seul un négociant les rachète.
@@ -73,6 +75,17 @@ DOCS = [
 		 "Un petit coffre ferré qu'un homme seul porte sur le dos. Le couvercle soulevé, on "
 		 "devine une salle entière derrière ses planches. Les Architectes qui savent en bâtir se "
 		 "comptent sur les doigts d'une main.", valeur=750000),
+
+	# ── Sacs à dos d'Architectes, taillés dans un morceau de monstre que le client apporte ──
+	_doc("havresac_de_grendel", "Havresac de Grendel", "🎒", 1.5, 200, "tres_rare",
+		 "Un havresac taillé dans la membrane d'une aile de dragon, souple comme un gant. Les "
+		 "récits du Nord prêtent au monstre Grendel une poche immense, cousue de peaux de dragon "
+		 "par un art de diable ; les Architectes n'en ont gardé que la peau, et l'espace qu'elle "
+		 "consent à plier.", valeur=100000),
+	_doc("havresac_de_mimique", "Havresac de mimique", "🎒", 1.5, 200, "tres_rare",
+		 "Un sac à dos de cuir sombre, taillé dans la panse d'une mimique, ce coffre qui mord. "
+		 "Vivante, elle était plus vaste dedans que dehors ; tannée, sa peau s'en souvient. On dit "
+		 "que ses coutures se resserrent parfois d'elles-mêmes.", valeur=100000),
 
 	# ── Reliques (une par personnage) ──
 	_doc("sac_de_manannan", "Sac de Manannán", "🌊", 0.5, 500, "legendaire",

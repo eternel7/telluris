@@ -217,5 +217,15 @@ Copies : vendues à **Lutecia** et dans les **cités à portail transversal**, *
 - **Carquois d'Arjuna** : unicité, lieu, rang — quand Muziris ou l'Inde seront décrites.
 - **Pots d'Anansi** : « plusieurs pots » mais obtention au rang S dans les zones blanches (point 20) — à confirmer.
 - **Treize Trésors** : séance Camelot à venir.
+
+## Sacs à dos taillés dans un monstre (Auteur, 08/11)
+
+Légendes terrestres relevées (Claude, 08/11) :
+- **Le havresac de Frère Lustig** (Grimm, *Bruder Lustig*, KHM 81) : un soldat congédié reçoit de saint Pierre un havresac où entre tout ce qu'il ordonne, diables compris. Seul vrai **sac à dos** des contes à propriété de ce genre.
+- **La besace du soldat** (Afanassiev, *Le Soldat et la Mort*) : même motif à l'est, le soldat y enferme la Mort.
+- **Le « glof » de Grendel** (*Beowulf*, v. 2085-2091) : une poche immense, « faite par l'art du diable et de peaux de dragon », où le monstre voulait fourrer le héros — le cuir d'un monstre comme matière d'un sac plus vaste qu'il ne paraît.
+- La **crane bag** de Manannán, en peau d'une femme changée en grue, est du même ordre (déjà retenue).
+
+Retenu par l'Auteur : **deux havresacs** vendus par l'Architecte de l'Institut à condition de lui **laisser un morceau de monstre** — **aile de Dragon** (Grendel) et **carcasse de Mimique** (le coffre qui mord, plus vaste dedans que dehors) ; **200 kg, 1,5 kg, 10 or** chacun. Noms « Havresac de Grendel » et « Havresac de mimique » : proposés, non tranchés. Frère Lustig et la besace du soldat restent des **récits** (Maître Villard les cite sans trancher : un Architecte ou un saint ?).
 - **Mécanique en jeu** : conçue et arbitrée dans `../../conception_contenants.md`, implémentée le 02/11 (reste le contenu à importer).
 - Aucune date : rien à reporter dans `chronologie.json` tant que l'Auteur ne place pas ces récits dans une ère.

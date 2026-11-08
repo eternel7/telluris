@@ -15,6 +15,7 @@ from utils.characters import (
 	get_selected_character, sync_equipment_bonus,
 	money_to_cuivre, cuivre_to_purse,
 	tirer_poids, carried_weight, charge_max_of, item_ref_id, item_ref_lieu, resolve_item_ref,
+	item_ref_weight,
 	lieu_label,
 )
 from utils.marche import (
@@ -1268,8 +1269,13 @@ async def pnj_dialogue_choix(
 def _resoudre_vente(character: dict, pnj_doc: dict, action: dict, contexte: dict,
 					reponse: dict) -> str | None:
 	"""Service `vente` (op `acheter`) : l'article désigné par `action.item`, à son prix FIXE,
-	au sac du principal. Séquence du `don` : charge contrôlée, puis débit, puis remise ; un
-	refus ne touche à rien. Placeholders {objet} et {prix} posés pour les trois issues."""
+	au sac du principal. Séquence du `don` : trophée présent, charge, débit, puis remise ; un
+	refus ne touche à rien. Placeholders {objet}, {prix} et {trophee} posés pour toutes les issues.
+
+	Article à TROPHÉE (`trophee: "item:…"`) : un exemplaire laissé au vendeur, pris dans les
+	sacs de l'expédition, principal EN TÊTE (Convention §7) puis compagnons, montures et
+	contenants (`_sacs_remise`) — une aile de dragon voyage souvent sur la mule. Absent ⇒
+	`sans_trophee`. La charge du principal compte ce que le trophée libère de SON sac."""
 	article = pnj.article_en_vente(pnj_doc, action.get("item"))
 	if action.get("op") != "acheter" or not article:
 		raise HTTPException(status_code=422, detail="Ce personnage ne vend pas cet objet.")
@@ -1279,22 +1285,38 @@ def _resoudre_vente(character: dict, pnj_doc: dict, action: dict, contexte: dict
 	noeuds = ((pnj_doc.get("services") or {}).get("vente") or {}).get("noeuds") or {}
 	contexte["placeholders"]["objet"] = item_doc.get("nom", article["item"])
 	contexte["placeholders"]["prix"] = traversee_util.texte_bourse(article["cout_cuivre"])
+	trophee = article["trophee"]
+	sacs, libere = [], 0.0
+	if trophee:
+		contexte["placeholders"]["trophee"] = _nom_item(trophee)
+		sacs = _sacs_remise(character, recrutement.porteurs_effectifs(character, get_doc))
+		# Le premier exemplaire retiré est celui du sac du principal, s'il en porte un.
+		ref = next((r for r in character.get("inventaire") or [] if item_ref_id(r) == trophee), None)
+		libere = item_ref_weight(ref) if ref is not None else 0.0
 	poids = tirer_poids(item_doc)
-	if carried_weight(character) + poids > charge_max_of(character):
+	if trophee and quetes.compter_sacs(sacs, trophee) < 1:
+		suivant = noeuds.get("sans_trophee")
+	elif carried_weight(character) - libere + poids > charge_max_of(character):
 		suivant = noeuds.get("trop_charge")
 	elif article["cout_cuivre"] > 0 and debit_character(character, article["cout_cuivre"]) is None:
 		# Bourse trop légère : debit_character n'a pas muté les fonds, rien n'est sauvé.
 		suivant = noeuds.get("sans_fonds")
 	else:
+		touches = []
+		if trophee:
+			_, touches = quetes.retirer_items_sacs(sacs, trophee, 1)
+			touches = _reporter_remise(character, sacs, touches)
 		pnj.appliquer_don(character, article["item"], [poids])
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		_sauver_porteurs(touches)
 		suivant = noeuds.get("fait")
 		reponse["vente"] = {
 			"item": article["item"],
 			"nom": item_doc.get("nom"),
 			"icon": item_doc.get("icon"),
 			"cout": article["cout_cuivre"],
+			"trophee": contexte["placeholders"].get("trophee"),
 		}
 		reponse["inventaire_payload"] = _inventory_payload(character)
 	reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
