@@ -151,9 +151,17 @@
 {{ controls }} .move_btn:disabled > svg { display: none; }
 {{ controls }} .btn:disabled { cursor: default; }
 {{ controls }} .btn.center:disabled { opacity: 0.35; }
-/* Flèche recommandée par le guidage 🧭 : renforce le liseré, l'icône restant claire.
-   SCOPÉE, jamais nue (cf. l'avertissement ci-dessus). */
-{{ controls }} .btn.btn-highlight { border-width: 2px; }
+/* Flèche recommandée par le guidage 🧭 : liseré, fond et halo DORÉS, l'icône restant claire.
+   SCOPÉE, jamais nue (cf. l'avertissement ci-dessus). ⚠️ Couleurs reposées ICI : le
+   `.btn-highlight` générique (0,1,0) perd contre `{{ controls }} .btn` (0,2,0), qui remet le
+   liseré gris et le fond #222 — il n'en restait qu'un halo pâle. Halo en partie INTÉRIEUR :
+   une flèche de coin sur la carte (`overflow:hidden`) rogne l'extérieur. */
+{{ controls }} .btn.btn-highlight {
+	border-width: 2px; border-color: var(--accent-color, #ffd700);
+	background: #3a3212;
+	box-shadow: 0 0 10px 2px rgba(255, 215, 0, 0.45), inset 0 0 10px rgba(255, 215, 0, 0.35);
+}
+{{ controls }} .btn.btn-highlight:hover:not(:disabled) { background: #4a4018; }
 /* Cellule vide du centre quand la page n'a pas de tour à passer : elle occupe sa case pour
    que la croix garde sa forme. */
 {{ controls }} .move-spacer { display: block; }
