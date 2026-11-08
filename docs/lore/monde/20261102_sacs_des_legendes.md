@@ -182,7 +182,7 @@ Réponses de l'Auteur ; elles **font foi** et complètent le premier arbitrage.
 22. **Contenance des reliques** (la plus modeste des échelles proposées) : Carquois d'Arjuna et Pot d'Anansi **300 kg** · Sac de Manannán **500 kg** · Sac de Rhiannon **1 000 kg** · Coquille d'Oduduwa **2 000 kg**.
 23. **Copie au-dessus d'une relique** : le Coffre de retrait (1 000 kg) dépasse le Sac de Manannán et égale celui de Rhiannon — **« c'est voulu »** : une relique vaut par sa légèreté et sa légende, pas par son volume.
 24. **Poids propre** : **celui de l'objet ordinaire** qu'il imite — sac 0,5 kg, carquois 1 kg, pot 3 kg, urne 8 kg, coffre 20 kg, coquille 0,1 kg (valeurs proposées par Claude Code dans la question, retenues avec l'option).
-25. **Prix des copies** : Besace profonde **10 000 cuivres** · Urne intérieure **40 000** · Coffre de retrait **150 000**.
+25. **Prix des copies** : Besace profonde **10 000 cuivres** · Urne intérieure **40 000** · Coffre de retrait **150 000**. — **Révisé (Auteur, 08/11) : ×5**, soit **50 000** · **200 000** · **750 000**.
 26. **Vendeurs** : **Lutecia** (institut des Architectes) **et les cités qui entretiennent un portail transversal** (Rome, Constantinople, Petra…).
 27. **Rang des copies** : **aucun** — « Pourquoi il devrait y avoir des limites de rang ? Le prix et le fait d'arriver à tel endroit qui en propose est déjà amplement suffisant. »
 28. **Carquois d'Arjuna** (unicité, lieu) : **plus tard**, quand Muziris ou l'Inde seront décrites.
@@ -199,9 +199,9 @@ Réponses de l'Auteur ; elles **font foi** et complètent le premier arbitrage.
 | **Carquois d'Arjuna** | relique | 300 kg | 1 kg | — | **plus tard** |
 | **Coquille d'Oduduwa** | relique unique, la plus vaste | 2 000 kg | 0,1 kg | — | zones blanches, rang **S** |
 | **Pots d'Anansi** | plusieurs exemplaires | 300 kg | 3 kg | — | zones blanches, rang **S** |
-| **Besace profonde** | copie d'Architectes | 100 kg | 0,5 kg | — | 10 000 cuivres |
-| **Urne intérieure** | copie d'Architectes | 300 kg | 8 kg | — | 40 000 cuivres |
-| **Coffre de retrait** | copie d'Architectes | 1 000 kg | 20 kg | — | 150 000 cuivres |
+| **Besace profonde** | copie d'Architectes | 100 kg | 0,5 kg | — | 50 000 cuivres |
+| **Urne intérieure** | copie d'Architectes | 300 kg | 8 kg | — | 200 000 cuivres |
+| **Coffre de retrait** | copie d'Architectes | 1 000 kg | 20 kg | — | 750 000 cuivres |
 | **Coffres du Livre de Thot** | objet | 1 000 kg | 30 kg | — | à trancher |
 | **Tente de Pari Banou** | objet | 1 500 kg | 2 kg | — | à trancher |
 | **Outre d'Éole** | objet | 300 kg | 1,5 kg | — | à trancher |

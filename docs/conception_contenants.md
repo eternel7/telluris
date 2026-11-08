@@ -102,7 +102,7 @@ Un `dev/gen_contenants.py` → **un** `jsons/contenants_a_importer.json`, chiffr
 
 | Objet | Contenance | Poids | Nature |
 |---|---|---|---|
-| Besace profonde · Urne intérieure · Coffre de retrait | 100 · 300 · 1 000 kg | 0,5 · 8 · 20 kg | copies, 10 000 · 40 000 · 150 000 cu |
+| Besace profonde · Urne intérieure · Coffre de retrait | 100 · 300 · 1 000 kg | 0,5 · 8 · 20 kg | copies, 50 000 · 200 000 · 750 000 cu (×5, Auteur 08/11) |
 | Carquois d'Arjuna · Pot d'Anansi | 300 kg | 1 · 3 kg | relique · plusieurs pots |
 | Sac de Manannán (marée) · Sac de Rhiannon | 500 · 1 000 kg | 0,5 kg | reliques |
 | Coquille d'Oduduwa | 2 000 kg | 0,1 kg | relique |

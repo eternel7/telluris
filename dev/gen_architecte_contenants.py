@@ -12,12 +12,13 @@
 #   Le doute (règle de l'Auteur) : les sacs des légendes ont-ils inspiré les copies, ou n'ont-ils
 #   jamais été pliés par des Anthropes ? Il ne tranche pas.
 #
-# Prix, noms, poids et contenances RELUS du dump (les docs item sont la source) ; les libellés
-# du catalogue en sont dérivés.
+# Prix, noms, poids et contenances : les docs item de `dev/gen_contenants.py` (leur source) ;
+# les articles et les libellés du catalogue en sont dérivés. Prix des copies ×5 (Auteur, 08/11).
 #
 # ⚠️ UN SEUL FICHIER À IMPORTER (CLAUDE.md §18) : jsons/architecte_contenants_a_importer.json —
 # `lieu:la_cour_des_arches` RELU du dernier dump (seule l'entrée `pnj` de l'Architecte s'y
-# ajoute : régénération idempotente) + `pnj:villard_de_honnecourt` neuf, chacun COMPLET (PUT, §11).
+# ajoute : régénération idempotente) + `pnj:villard_de_honnecourt` + les copies dont le doc
+# diffère du dump (prix), chacun COMPLET (PUT, §11).
 #
 # Usage : python dev/gen_architecte_contenants.py [jsons/telluris-dump-….json]
 
@@ -31,6 +32,7 @@ RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, RACINE)
 
 from utils.traversee import texte_bourse  # noqa: E402
+from dev import gen_contenants  # noqa: E402
 
 SORTIE = os.path.join(RACINE, "jsons", "architecte_contenants_a_importer.json")
 
@@ -197,15 +199,26 @@ def _dernier_dump() -> str:
 	return dumps[-1]
 
 
+def copies() -> list:
+	"""Les trois copies telles que `gen_contenants` les écrit (source des prix)."""
+	par_id = {d["_id"]: d for d in gen_contenants.DOCS}
+	return [copy.deepcopy(par_id[i]) for i in COPIES]
+
+
+def copies_a_importer(docs_dump: dict) -> list:
+	"""Les copies dont le doc diffère du dump (`_rev` ignoré) : le delta de la demande."""
+	return [d for d in copies()
+			if {k: v for k, v in (docs_dump.get(d["_id"]) or {}).items() if k != "_rev"} != d]
+
+
 def generer(docs_dump: dict) -> list:
-	manquants = [i for i in (*COPIES, LIEU_ID) if i not in docs_dump]
-	if manquants:
-		sys.exit(f"Absents du dump : {', '.join(manquants)}")
+	if LIEU_ID not in docs_dump:
+		sys.exit(f"Absent du dump : {LIEU_ID}")
 	# `pnj:villard_de_honnecourt` n'appartient qu'à ce générateur : déjà en base, c'est son
 	# import précédent, que le PUT remplace. Un autre type sous cet _id serait une collision.
 	if docs_dump.get(PNJ_ID, {}).get("type", "pnj") != "pnj":
 		sys.exit(f"Refus : {PNJ_ID} existe déjà dans le dump sous un autre type.")
-	return [doc_pnj([docs_dump[i] for i in COPIES]), lieu_avec_architecte(docs_dump[LIEU_ID])]
+	return [doc_pnj(copies()), lieu_avec_architecte(docs_dump[LIEU_ID]), *copies_a_importer(docs_dump)]
 
 
 def main() -> None:

@@ -13,15 +13,15 @@
           "articles": [
             {
               "item": "item:besace_profonde",
-              "cout_cuivre": 10000
+              "cout_cuivre": 50000
             },
             {
               "item": "item:urne_interieure",
-              "cout_cuivre": 40000
+              "cout_cuivre": 200000
             },
             {
               "item": "item:coffre_de_retrait",
-              "cout_cuivre": 150000
+              "cout_cuivre": 750000
             }
           ],
           "noeuds": {
@@ -99,7 +99,7 @@
             "choix": [
               {
                 "id": "acheter_besace_profonde",
-                "label": "Acheter : 👜 Besace profonde — contient 100 kg, pèse 0,5 kg — 1 or",
+                "label": "Acheter : 👜 Besace profonde — contient 100 kg, pèse 0,5 kg — 5 or",
                 "action": {
                   "service": "vente",
                   "op": "acheter",
@@ -108,7 +108,7 @@
               },
               {
                 "id": "acheter_urne_interieure",
-                "label": "Acheter : 🏺 Urne intérieure — contient 300 kg, pèse 8 kg — 4 or",
+                "label": "Acheter : 🏺 Urne intérieure — contient 300 kg, pèse 8 kg — 20 or",
                 "action": {
                   "service": "vente",
                   "op": "acheter",
@@ -117,7 +117,7 @@
               },
               {
                 "id": "acheter_coffre_de_retrait",
-                "label": "Acheter : 🗃️ Coffre de retrait — contient 1 000 kg, pèse 20 kg — 15 or",
+                "label": "Acheter : 🗃️ Coffre de retrait — contient 1 000 kg, pèse 20 kg — 75 or",
                 "action": {
                   "service": "vente",
                   "op": "acheter",
@@ -256,6 +256,87 @@
           "portrait": "architecte_nain_m_cour01.png",
           "probabilite": 1,
           "description": "Un nain à la barbe tressée de fil de cuivre, penché sur un établi chargé de besaces, d'urnes et d'un petit coffre ferré."
+        }
+      ]
+    },
+    {
+      "_id": "item:besace_profonde",
+      "type": "item",
+      "nom": "Besace profonde",
+      "icon": "👜",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "rare",
+      "poids": 0.5,
+      "contenant": {
+        "capacite_kg": 100
+      },
+      "description": "Une besace de cuir souple, ordinaire à l'œil. Les Architectes y ont plié un espace bien plus vaste que sa toile : on y range de quoi charger une mule, et l'épaule n'en sent rien.",
+      "valeur": [
+        {
+          "cu": 50000
+        },
+        {
+          "cu": 50000
+        }
+      ]
+    },
+    {
+      "_id": "item:urne_interieure",
+      "type": "item",
+      "nom": "Urne intérieure",
+      "icon": "🏺",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "tres_rare",
+      "poids": 8,
+      "contenant": {
+        "capacite_kg": 300
+      },
+      "description": "Une urne de terre cuite au col étroit, cerclée de bronze. Son ventre ouvre sur une réserve où tiennent minerais, matériaux et marchandises ; son poids ne change jamais, qu'elle soit vide ou pleine.",
+      "valeur": [
+        {
+          "cu": 200000
+        },
+        {
+          "cu": 200000
+        }
+      ]
+    },
+    {
+      "_id": "item:coffre_de_retrait",
+      "type": "item",
+      "nom": "Coffre de retrait",
+      "icon": "🗃️",
+      "categorie": "outil",
+      "sous_categorie": "contenant",
+      "slots": [],
+      "tags": [
+        "contenant",
+        "non_personnalisable"
+      ],
+      "rarete": "tres_rare",
+      "poids": 20,
+      "contenant": {
+        "capacite_kg": 1000
+      },
+      "description": "Un petit coffre ferré qu'un homme seul porte sur le dos. Le couvercle soulevé, on devine une salle entière derrière ses planches. Les Architectes qui savent en bâtir se comptent sur les doigts d'une main.",
+      "valeur": [
+        {
+          "cu": 750000
+        },
+        {
+          "cu": 750000
         }
       ]
     }

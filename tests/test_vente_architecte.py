@@ -130,21 +130,32 @@ def test_le_linter_refuse_un_achat_hors_catalogue_et_un_article_illisible():
 
 # ── Contenu, contre le dernier dump ───────────────────────────────────────────
 
-def test_le_contenu_vend_les_trois_copies_au_prix_du_dump():
+def test_le_contenu_vend_les_trois_copies_au_prix_de_leur_doc():
 	dump = _dump()
-	pnj_doc, lieu = gen.generer(dump)
+	pnj_doc, lieu, *items = gen.generer(dump)
+	par_id = {d["_id"]: d for d in gen.copies()}
 	assert [a["item"] for a in pnj_doc["services"]["vente"]["articles"]] == list(gen.COPIES)
 	for a in pnj_doc["services"]["vente"]["articles"]:
-		valeur = dump[a["item"]]["valeur"]
+		valeur = par_id[a["item"]]["valeur"]
 		assert a["cout_cuivre"] == valeur[0]["cu"] == valeur[1]["cu"]
 	# Un choix d'achat par copie, chacun lisible par le moteur.
 	achats = [c["action"]["item"] for c in pnj_doc["dialogue"]["noeuds"]["catalogue"]["choix"] if c.get("action")]
 	assert achats == list(gen.COPIES)
+	# Le fichier porte les copies modifiées (et elles seules) : le prix vendu = le prix en base.
+	for d in items:
+		assert d["_id"] in gen.COPIES and d == par_id[d["_id"]]
+	assert {d["_id"] for d in items} == {i for i in gen.COPIES
+										 if {k: v for k, v in dump[i].items() if k != "_rev"} != par_id[i]}
+
+
+def test_prix_des_copies_multiplies_par_cinq():
+	"""Auteur, 08/11 : les prix du 02/11 (10 000 · 40 000 · 150 000 cu) multipliés par 5."""
+	assert [d["valeur"][0]["cu"] for d in gen.copies()] == [5 * p for p in (10000, 40000, 150000)]
 
 
 def test_l_architecte_rejoint_aelis_a_la_cour_sans_rien_lui_retirer():
 	dump = _dump()
-	_, lieu = gen.generer(dump)
+	_, lieu, *_ = gen.generer(dump)
 	avant = dump[gen.LIEU_ID]
 	assert lieu["_id"] == gen.LIEU_ID and "_rev" not in lieu
 	assert lieu["pnj"][:-1] == avant["pnj"]                 # Aélis et ses conditions intactes

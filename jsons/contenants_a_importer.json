@@ -20,10 +20,10 @@
       "description": "Une besace de cuir souple, ordinaire à l'œil. Les Architectes y ont plié un espace bien plus vaste que sa toile : on y range de quoi charger une mule, et l'épaule n'en sent rien.",
       "valeur": [
         {
-          "cu": 10000
+          "cu": 50000
         },
         {
-          "cu": 10000
+          "cu": 50000
         }
       ]
     },
@@ -47,10 +47,10 @@
       "description": "Une urne de terre cuite au col étroit, cerclée de bronze. Son ventre ouvre sur une réserve où tiennent minerais, matériaux et marchandises ; son poids ne change jamais, qu'elle soit vide ou pleine.",
       "valeur": [
         {
-          "cu": 40000
+          "cu": 200000
         },
         {
-          "cu": 40000
+          "cu": 200000
         }
       ]
     },
@@ -74,10 +74,10 @@
       "description": "Un petit coffre ferré qu'un homme seul porte sur le dos. Le couvercle soulevé, on devine une salle entière derrière ses planches. Les Architectes qui savent en bâtir se comptent sur les doigts d'une main.",
       "valeur": [
         {
-          "cu": 150000
+          "cu": 750000
         },
         {
-          "cu": 150000
+          "cu": 750000
         }
       ]
     },

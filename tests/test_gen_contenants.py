@@ -62,11 +62,12 @@ def test_aucune_collision_avec_le_dump_le_plus_recent():
 	with open(dumps[-1], encoding="utf-8") as f:
 		existants = {d.get("_id"): d for d in json.load(f)["docs"]}
 	assert gen.collisions(gen.DOCS, existants) == []
-	# Un `_id` pris par un AUTRE contenu est une collision ; le même doc (`_rev` en plus) est
-	# l'import déjà fait.
+	# Un `_id` pris par un doc qui n'est pas un contenant est une collision ; un contenant déjà en
+	# base est l'import précédent (mis à jour, ex. prix des copies du 08/11).
 	kibisis = next(d for d in gen.DOCS if d["_id"] == "item:kibisis")
 	assert gen.collisions(gen.DOCS, {"item:kibisis": {"_id": "item:kibisis"}}) == ["item:kibisis"]
 	assert gen.collisions(gen.DOCS, {"item:kibisis": {**kibisis, "_rev": "3-x"}}) == []
+	assert gen.collisions(gen.DOCS, {"item:kibisis": {**kibisis, "poids": 9}}) == []
 
 
 def test_fichier_livre_identique_au_generateur():
