@@ -78,8 +78,8 @@ DOCS = [
 		 "comptent sur les doigts d'une main.", valeur=750000),
 
 	# ── Sacs à dos d'Architectes, taillés dans un morceau de monstre que le client apporte ──
-	_doc("havresac_de_grendel", "Havresac de Grendel", "🎒", 1.5, 200, "tres_rare",
-		 "Un havresac taillé dans la membrane d'une aile de dragon, souple comme un gant. Les "
+	_doc("sac_de_grendel", "Sac de Grendel", "🎒", 1.5, 200, "tres_rare",
+		 "Un sac à dos taillé dans la membrane d'une aile de dragon, souple comme un gant. Les "
 		 "récits du Nord prêtent au monstre Grendel une poche immense, cousue de peaux de dragon "
 		 "par un art de diable ; les Architectes n'en ont gardé que la peau, et l'espace qu'elle "
 		 "consent à plier.", valeur=100000),

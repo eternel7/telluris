@@ -82,9 +82,9 @@
       ]
     },
     {
-      "_id": "item:havresac_de_grendel",
+      "_id": "item:sac_de_grendel",
       "type": "item",
-      "nom": "Havresac de Grendel",
+      "nom": "Sac de Grendel",
       "icon": "🎒",
       "categorie": "outil",
       "sous_categorie": "contenant",
@@ -98,7 +98,7 @@
       "contenant": {
         "capacite_kg": 200
       },
-      "description": "Un havresac taillé dans la membrane d'une aile de dragon, souple comme un gant. Les récits du Nord prêtent au monstre Grendel une poche immense, cousue de peaux de dragon par un art de diable ; les Architectes n'en ont gardé que la peau, et l'espace qu'elle consent à plier.",
+      "description": "Un sac à dos taillé dans la membrane d'une aile de dragon, souple comme un gant. Les récits du Nord prêtent au monstre Grendel une poche immense, cousue de peaux de dragon par un art de diable ; les Architectes n'en ont gardé que la peau, et l'espace qu'elle consent à plier.",
       "valeur": [
         {
           "cu": 100000

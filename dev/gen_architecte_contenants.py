@@ -45,7 +45,7 @@ COPIES = ("item:besace_profonde", "item:urne_interieure", "item:coffre_de_retrai
 # Les sacs à dos à TROPHÉE (Auteur, 08/11) → le morceau de monstre laissé à l'Architecte, en plus
 # du prix. Dragon : rencontré en France ; Mimique : gardienne du coffre des catacombes de Lutecia.
 SACS_A_DOS = {
-	"item:havresac_de_grendel": "item:dragon_aile",
+	"item:sac_de_grendel": "item:dragon_aile",
 	"item:havresac_de_mimique": "item:mimique",
 }
 ARTICLES = COPIES + tuple(SACS_A_DOS)
@@ -163,10 +163,10 @@ def doc_pnj(items: list, noms_trophees: dict) -> dict:
 					"texte": "« Trois tailles, trois prix, et je ne marchande pas : le prix est celui du "
 							 "travail. La besace pour l'aventurier, l'urne pour qui transporte minerais et "
 							 "marchandises, le coffre pour qui veut emporter une salle entière. Et deux "
-							 "havresacs, si vous m'apportez de quoi les tailler. »",
+							 "sacs à dos, si vous m'apportez de quoi les tailler. »",
 					"choix": [
 						*(choix_achat(d, a, noms_trophees) for d, a in zip(items, articles)),
-						{"id": "peaux", "label": "Tailler un havresac dans un monstre ?", "next": "peaux_01"},
+						{"id": "peaux", "label": "Tailler un sac dans un monstre ?", "next": "peaux_01"},
 						{"id": "art", "label": "Que faites-vous, au juste ?", "next": "art_01"},
 						{"id": "fin", "label": "Une autre fois.", "next": "fin"},
 					],

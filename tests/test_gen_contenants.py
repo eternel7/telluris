@@ -20,7 +20,7 @@ DOCS = {d["_id"]: d for d in gen.DOCS}
 # Les trois copies d'Architectes : seuls objets vendus à prix fixe (décision du 02/11).
 COPIES = ("item:besace_profonde", "item:urne_interieure", "item:coffre_de_retrait")
 # Les deux sacs à dos à trophée (08/11) : prix fixe aussi, hors de l'échelle des copies.
-SACS_A_DOS = ("item:havresac_de_grendel", "item:havresac_de_mimique")
+SACS_A_DOS = ("item:sac_de_grendel", "item:havresac_de_mimique")
 
 
 def test_chaque_doc_est_un_contenant_du_sac():

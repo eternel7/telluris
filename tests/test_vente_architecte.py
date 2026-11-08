@@ -24,7 +24,7 @@ URNE = {"_id": "item:urne_interieure", "type": "item", "nom": "Urne intérieure"
 		"poids": 8, "contenant": {"capacite_kg": 300}, "valeur": [{"cu": 40000}, {"cu": 40000}]}
 COFFRE = {"_id": "item:coffre_de_retrait", "type": "item", "nom": "Coffre de retrait", "icon": "🗃️",
 		  "poids": 20, "contenant": {"capacite_kg": 1000}, "valeur": [{"cu": 150000}, {"cu": 150000}]}
-HAVRESAC = {"_id": "item:havresac_de_grendel", "type": "item", "nom": "Havresac de Grendel", "icon": "🎒",
+HAVRESAC = {"_id": "item:sac_de_grendel", "type": "item", "nom": "Sac de Grendel", "icon": "🎒",
 			"poids": 1.5, "contenant": {"capacite_kg": 200}, "valeur": [{"cu": 100000}, {"cu": 100000}]}
 AILE = {"_id": "item:dragon_aile", "type": "item", "nom": "Aile de Dragon", "poids": [16, 85]}
 ITEMS = {d["_id"]: d for d in (BESACE, URNE, COFFRE, HAVRESAC, AILE)}
@@ -209,10 +209,10 @@ def test_prix_des_copies_multiplies_par_cinq():
 	assert [d["valeur"][0]["cu"] for d in gen.copies()[:len(gen.COPIES)]] == [5 * p for p in (10000, 40000, 150000)]
 
 
-def test_les_havresacs_exigent_un_morceau_de_monstre_du_dump():
+def test_les_sacs_a_dos_exigent_un_morceau_de_monstre_du_dump():
 	"""Auteur, 08/11 : 1,5 kg + un trophée — aile de Dragon (rencontré en France) : 200 kg, 10 or ;
 	carcasse de Mimique (coffre des catacombes de Lutecia) : 150 kg, 8 or ; espèces existantes."""
-	attendus = {"item:havresac_de_grendel": (200, 100000), "item:havresac_de_mimique": (150, 80000)}
+	attendus = {"item:sac_de_grendel": (200, 100000), "item:havresac_de_mimique": (150, 80000)}
 	dump = _dump()
 	pnj_doc, *_ = gen.generer(dump)
 	articles = {a["item"]: a for a in pnj_doc["services"]["vente"]["articles"]}

@@ -24,7 +24,7 @@
               "cout_cuivre": 750000
             },
             {
-              "item": "item:havresac_de_grendel",
+              "item": "item:sac_de_grendel",
               "cout_cuivre": 100000,
               "trophee": "item:dragon_aile"
             },
@@ -106,7 +106,7 @@
             ]
           },
           "catalogue": {
-            "texte": "« Trois tailles, trois prix, et je ne marchande pas : le prix est celui du travail. La besace pour l'aventurier, l'urne pour qui transporte minerais et marchandises, le coffre pour qui veut emporter une salle entière. Et deux havresacs, si vous m'apportez de quoi les tailler. »",
+            "texte": "« Trois tailles, trois prix, et je ne marchande pas : le prix est celui du travail. La besace pour l'aventurier, l'urne pour qui transporte minerais et marchandises, le coffre pour qui veut emporter une salle entière. Et deux sacs à dos, si vous m'apportez de quoi les tailler. »",
             "choix": [
               {
                 "id": "acheter_besace_profonde",
@@ -136,12 +136,12 @@
                 }
               },
               {
-                "id": "acheter_havresac_de_grendel",
-                "label": "Acheter : 🎒 Havresac de Grendel — contient 200 kg, pèse 1,5 kg — 10 or + Aile de Dragon",
+                "id": "acheter_sac_de_grendel",
+                "label": "Acheter : 🎒 Sac de Grendel — contient 200 kg, pèse 1,5 kg — 10 or + Aile de Dragon",
                 "action": {
                   "service": "vente",
                   "op": "acheter",
-                  "item": "item:havresac_de_grendel"
+                  "item": "item:sac_de_grendel"
                 }
               },
               {
@@ -155,7 +155,7 @@
               },
               {
                 "id": "peaux",
-                "label": "Tailler un havresac dans un monstre ?",
+                "label": "Tailler un sac dans un monstre ?",
                 "next": "peaux_01"
               },
               {
@@ -420,9 +420,9 @@
       ]
     },
     {
-      "_id": "item:havresac_de_grendel",
+      "_id": "item:sac_de_grendel",
       "type": "item",
-      "nom": "Havresac de Grendel",
+      "nom": "Sac de Grendel",
       "icon": "🎒",
       "categorie": "outil",
       "sous_categorie": "contenant",
@@ -436,7 +436,7 @@
       "contenant": {
         "capacite_kg": 200
       },
-      "description": "Un havresac taillé dans la membrane d'une aile de dragon, souple comme un gant. Les récits du Nord prêtent au monstre Grendel une poche immense, cousue de peaux de dragon par un art de diable ; les Architectes n'en ont gardé que la peau, et l'espace qu'elle consent à plier.",
+      "description": "Un sac à dos taillé dans la membrane d'une aile de dragon, souple comme un gant. Les récits du Nord prêtent au monstre Grendel une poche immense, cousue de peaux de dragon par un art de diable ; les Architectes n'en ont gardé que la peau, et l'espace qu'elle consent à plier.",
       "valeur": [
         {
           "cu": 100000

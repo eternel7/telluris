@@ -20,7 +20,7 @@
 | Reliques | **une par personnage** : chacun peut obtenir la sienne une fois |
 | Vente des copies | **PNJ Architecte de l'institut, vente à prix fixe**, sans stock ni fabrication ; un institut pareil à Petra et dans les cités à portail à venir |
 | Vendeur de Lutecia (08/11) | **à la Cour des Arches, avec Aélis** — Maître Villard de Honnecourt |
-| Sacs à dos à trophée (08/11) | **deux havresacs** chez Maître Villard, 1,5 kg **+ un morceau de monstre laissé** : Havresac de Grendel (aile de Dragon) 200 kg · 10 or, Havresac de mimique (carcasse de Mimique) 150 kg · 8 or |
+| Sacs à dos à trophée (08/11) | **deux sacs à dos** chez Maître Villard, 1,5 kg **+ un morceau de monstre laissé** : Sac de Grendel (aile de Dragon) 200 kg · 10 or, Havresac de mimique (carcasse de Mimique) 150 kg · 8 or |
 | Objets du lore (08/11) | **pas uniques** : coffres de Thot, tente, outre, gourde, kibisis peuvent exister en plusieurs exemplaires, sans trace « une par personnage » |
 | Cinq objets du lore | contenance / poids selon leur légende (§ Contenu) |
 
