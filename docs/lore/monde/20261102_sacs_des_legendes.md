@@ -212,8 +212,8 @@ Copies : vendues à **Lutecia** et dans les **cités à portail transversal**, *
 
 ## Points encore ouverts
 
-- **Cinq nouveaux objets** : contenance et poids arbitrés (02/11, « selon leur légende », `../../conception_contenants.md`) ; restent nature (unique ou non), lieu et rang.
-- **Reliques** : **une par personnage** ; copies vendues **à prix fixe par un PNJ Architecte de l'institut** (Auteur, 02/11).
+- **Cinq nouveaux objets** : contenance et poids arbitrés (02/11, « selon leur légende », `../../conception_contenants.md`) ; **pas uniques** (Auteur, 08/11) ; restent lieu et rang.
+- **Reliques** : **une par personnage** ; copies vendues **à prix fixe par un PNJ Architecte de l'institut** (Auteur, 02/11) — à Lutecia, **à la Cour des Arches, avec Aélis** (Auteur, 08/11) : Maître Villard de Honnecourt.
 - **Carquois d'Arjuna** : unicité, lieu, rang — quand Muziris ou l'Inde seront décrites.
 - **Pots d'Anansi** : « plusieurs pots » mais obtention au rang S dans les zones blanches (point 20) — à confirmer.
 - **Treize Trésors** : séance Camelot à venir.

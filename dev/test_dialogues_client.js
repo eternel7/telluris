@@ -190,6 +190,14 @@ t('soin et don n_ont pas d_op', () => {
 	assert.deepStrictEqual(out.action, { service: 'soin' });
 });
 
+t('l_item d_une vente/acheter survit à la fusion, pas à un changement d_action', () => {
+	const ancien = { id: 'a', label: 'A', action: { service: 'vente', op: 'acheter', item: 'item:besace_profonde' } };
+	const garde = _dlgFusionChoix(ancien, { id: 'a', label: 'B', action: { service: 'vente', op: 'acheter' } });
+	assert.deepStrictEqual(garde.action, { service: 'vente', op: 'acheter', item: 'item:besace_profonde' });
+	const change = _dlgFusionChoix(ancien, { id: 'a', label: 'B', action: { service: 'acces', op: 'passer' } });
+	assert.deepStrictEqual(change.action, { service: 'acces', op: 'passer' });
+});
+
 t('un champ vidé est SUPPRIMÉ, jamais écrit à vide', () => {
 	const ancien = { id: 'a', label: 'A', next: 'b', condition: { x: true }, deplacer: 'lieu:z' };
 	const out = _dlgFusionChoix(ancien, { id: 'a', label: 'A', next: '', condition: {}, deplacer: '' });

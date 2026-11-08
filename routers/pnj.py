@@ -1151,6 +1151,8 @@ async def pnj_dialogue_choix(
 					"detail": chasse.rangs_guilde_title(rangs_guilde, get_doc),
 				}
 		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
+	elif action.get("service") == "vente":
+		suivant = _resoudre_vente(character, pnj_doc, action, contexte, reponse)
 	elif action.get("service") == "transport":
 		suivant, dits = _resoudre_transport(character, pnj_doc, lieu_doc, action.get("op"), reponse)
 		# Le contexte a changé (course acceptée/livrée) → refiltrer les choix du nœud suivant
@@ -1261,6 +1263,42 @@ async def pnj_dialogue_choix(
 	if "fiche_actives" in reponse or "inventaire_payload" in reponse:
 		reponse["fiche"] = fiche_util.fiche_resync(character, get_doc, find_docs)
 	return reponse
+
+
+def _resoudre_vente(character: dict, pnj_doc: dict, action: dict, contexte: dict,
+					reponse: dict) -> str | None:
+	"""Service `vente` (op `acheter`) : l'article désigné par `action.item`, à son prix FIXE,
+	au sac du principal. Séquence du `don` : charge contrôlée, puis débit, puis remise ; un
+	refus ne touche à rien. Placeholders {objet} et {prix} posés pour les trois issues."""
+	article = pnj.article_en_vente(pnj_doc, action.get("item"))
+	if action.get("op") != "acheter" or not article:
+		raise HTTPException(status_code=422, detail="Ce personnage ne vend pas cet objet.")
+	item_doc = get_doc(article["item"])
+	if not item_doc:
+		raise HTTPException(status_code=422, detail="Objet introuvable.")
+	noeuds = ((pnj_doc.get("services") or {}).get("vente") or {}).get("noeuds") or {}
+	contexte["placeholders"]["objet"] = item_doc.get("nom", article["item"])
+	contexte["placeholders"]["prix"] = traversee_util.texte_bourse(article["cout_cuivre"])
+	poids = tirer_poids(item_doc)
+	if carried_weight(character) + poids > charge_max_of(character):
+		suivant = noeuds.get("trop_charge")
+	elif article["cout_cuivre"] > 0 and debit_character(character, article["cout_cuivre"]) is None:
+		# Bourse trop légère : debit_character n'a pas muté les fonds, rien n'est sauvé.
+		suivant = noeuds.get("sans_fonds")
+	else:
+		pnj.appliquer_don(character, article["item"], [poids])
+		if save_doc(character) is None:
+			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		suivant = noeuds.get("fait")
+		reponse["vente"] = {
+			"item": article["item"],
+			"nom": item_doc.get("nom"),
+			"icon": item_doc.get("icon"),
+			"cout": article["cout_cuivre"],
+		}
+		reponse["inventaire_payload"] = _inventory_payload(character)
+	reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
+	return suivant
 
 
 def _resoudre_enseignement(character: dict, pnj_doc: dict, op: str, reponse: dict) -> str | None:

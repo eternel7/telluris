@@ -13262,6 +13262,11 @@ async function choisirPnj(choixId, extra) {
 			showToast((data.don.icon || '🎁') + ' ' + data.don.nom + q + (data.don.gratuit ? ' — offert' : ''));
 			if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
 		}
+		if (data.vente) {
+			// Service `vente` (prix fixe) : la bourse arrive par data.purse, le sac par l'inventaire.
+			showToast('Achat : ' + (data.vente.icon || '🛒') + ' ' + data.vente.nom);
+			if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
+		}
 		if (data.transport) {
 			if (data.transport.accepte) showToast('📦 Course acceptée : ' + data.transport.accepte);
 			// Course à retour : la marchandise est remise ici, mais c'est le donneur qui paie — on

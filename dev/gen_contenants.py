@@ -58,7 +58,7 @@ def _doc(slug, nom, icon, poids, capacite, rarete, description, *, tags=(), vale
 
 
 DOCS = [
-	# ── Copies d'Architectes (vendues à prix fixe : service `vente`, à venir) ──
+	# ── Copies d'Architectes (vendues à prix fixe : service `vente`, dev/gen_architecte_contenants.py) ──
 	_doc("besace_profonde", "Besace profonde", "👜", 0.5, 100, "rare",
 		 "Une besace de cuir souple, ordinaire à l'œil. Les Architectes y ont plié un espace "
 		 "bien plus vaste que sa toile : on y range de quoi charger une mule, et l'épaule n'en "

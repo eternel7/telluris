@@ -431,6 +431,12 @@ function _dlgFusionChoix(ancien, champs) {
 		choix.action = champs.action.op
 			? { service: champs.action.service, op: champs.action.op }
 			: { service: champs.action.service };
+		// Paramètres que le formulaire ne modélise pas (`item` d'une `vente/acheter`) : gardés
+		// tant que service et op restent ceux de l'ancienne action.
+		const avant = (ancien || {}).action || {};
+		if (avant.service === choix.action.service && (avant.op || '') === (choix.action.op || '')) {
+			choix.action = Object.assign({}, avant, choix.action);
+		}
 		delete choix.next;
 	} else {
 		delete choix.action;
@@ -963,7 +969,7 @@ function rendreChoix(choix) {
 				const sel = (action.service === s && !action.op) ? ' selected' : '';
 				return `<option value="${escapeHtml(s)}"${sel}>${escapeHtml(s)} (sans op)</option>`;
 			}),
-			['transport/accepter', 'escorte/accepter', 'rang/accepter', 'commission/accepter', 'apport/accepter'].map(v => {
+			['transport/accepter', 'escorte/accepter', 'rang/accepter', 'commission/accepter', 'apport/accepter', 'vente/acheter'].map(v => {
 				const bouts = v.split('/');
 				const sel = (action.service === bouts[0] && action.op === bouts[1]) ? ' selected' : '';
 				return `<option value="${escapeHtml(v)}"${sel}>${escapeHtml(v)}</option>`;

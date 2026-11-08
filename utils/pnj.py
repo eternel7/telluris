@@ -31,6 +31,10 @@
 # - `services.don` : {item, quantite, cout_cuivre, gratuit_si:{lieux, seuil},
 #   noeuds:{fait, sans_fonds, trop_charge}} — remise d'un objet (ex. eau bénite),
 #   gratuit si bonne réputation ; contrôle de charge côté router.
+# - `services.vente` : {articles:[{item, cout_cuivre}], noeuds:{fait, sans_fonds, trop_charge}}
+#   — VENTE À PRIX FIXE de plusieurs objets (`article_en_vente`) : un choix par article,
+#   action `{"service":"vente", "op":"acheter", "item":"item:x"}` ; placeholders {objet},
+#   {prix}. Ni stock, ni fabrication, ni relation. Principal seul, contrôle de charge côté router.
 # - `services.transport` : {noeuds:{propose, infos, accepte, trop_charge, livre, incomplet},
 #   offre?:{id, destination, cargaison, duree, proba, unique, titre, description, recompenses}}
 #   — quête de course (utils/transport.py). Sans `offre`, la course est TIRÉE AU HASARD et le
@@ -955,6 +959,27 @@ def appliquer_don(character: dict, item_id: str, poids: list,
 			ref["lieu_parent"] = lieu_parent
 		inv.append(ref)
 	return len(poids)
+
+
+def article_en_vente(pnj_doc: dict, item_id) -> dict | None:
+	"""Article du service `vente` que désigne un choix (`action.item`) : `{item, cout_cuivre}`,
+	ou None si ce PNJ ne vend pas cet objet. Schéma data :
+	`services.vente = {articles: [{item, cout_cuivre}], noeuds: {fait, sans_fonds, trop_charge}}`.
+	Prix FIXE, écrit dans l'article : ni stock, ni fabrication, ni marchandage, ni relation
+	(l'Architecte de l'institut et ses copies, Auteur 02/11). Un prix illisible ou négatif rend
+	l'article invendable (None) plutôt que gratuit."""
+	if not isinstance(item_id, str):
+		return None
+	service = (((pnj_doc or {}).get("services") or {}).get("vente")) or {}
+	for article in service.get("articles") or []:
+		if not isinstance(article, dict) or article.get("item") != item_id:
+			continue
+		try:
+			cout = int(article.get("cout_cuivre"))
+		except (TypeError, ValueError):
+			return None
+		return {"item": item_id, "cout_cuivre": cout} if cout >= 0 else None
+	return None
 
 
 def don_deja_recu(character: dict, item_id: str, lieu_parent: str | None,
