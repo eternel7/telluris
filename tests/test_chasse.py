@@ -597,6 +597,46 @@ def test_potentiel_cible_compte_la_fuite_interdite(monkeypatch):
 	assert vif == round(40.0 * potentiel.facteur_inescapable(ref + 500)[1], 1) > 40.0
 
 
+# ── Plafond préféré : sous le plancher du rang d'APRÈS ───────────────────────────
+# Lutecia (B → A) envoyait traquer un griffon de puissance S : parmi les cibles au plancher, on
+# préfère celles qui restent sous le plancher du rang suivant ; à défaut, la plus faible.
+
+def _cibles_rang(n=30):
+	return {
+		chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc_deux_proies, _find_docs,
+		                       potentiel_fn=_potentiel_fixe)["objectif"]["cible"]
+		for _ in range(n)
+	}
+
+
+def test_offre_rang_prefere_les_cibles_sous_le_plancher_du_rang_suivant(monkeypatch):
+	# Perso F → vise E (plancher 5) ; plafond = plancher de D (50) : le loup (60) est trop fort.
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 5.0, "D": 50.0})
+	random.seed(2)
+	assert _cibles_rang() == {"espece:lapin"}
+
+
+def test_offre_rang_sans_cible_sous_le_plafond_garde_la_plus_faible(monkeypatch):
+	# Les deux dépassent le plafond (5) : l'épreuve n'est PAS supprimée, la plus faible reste.
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 5.0, "D": 5.0})
+	random.seed(2)
+	assert _cibles_rang() == {"espece:lapin"}
+
+
+def test_offre_rang_plafond_large_garde_toutes_les_cibles(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 5.0, "D": 100.0})
+	random.seed(3)
+	assert _cibles_rang() == {"espece:loup", "espece:lapin"}
+
+
+def test_potentiel_max_pour_est_le_plancher_du_rang_d_apres(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"C": 105.0, "B": 175.0})
+	assert chasse.potentiel_max_pour("C") == 175.0
+	assert chasse.potentiel_max_pour("B") is None           # A sans plancher
+	assert chasse.potentiel_max_pour(RANGS[-1]) is None     # sommet : rien au-dessus
+	assert chasse.potentiel_max_pour("rang_inconnu") is None
+
+
 def test_planchers_par_defaut_sur_lechelle_et_croissants():
 	planchers = character_stats.CODE_DEFAULTS["QUETE_RANG_POTENTIEL_MIN"]
 	assert planchers and set(planchers) <= set(RANGS)
