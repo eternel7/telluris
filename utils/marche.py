@@ -658,6 +658,13 @@ def est_negociant(lieu_doc: dict | None) -> bool:
 	return bool(cat) and cat in character_stats.CATEGORIES_NEGOCE
 
 
+def est_variante(item_doc: dict | None) -> bool:
+	"""Pièce façonnée sur mesure : son doc porte `fabrication.base_item`
+	(`fabrication.variante_doc`). Pur, doc en main."""
+	bloc = (item_doc or {}).get("fabrication")
+	return isinstance(bloc, dict) and bool(bloc.get("base_item"))
+
+
 def lieu_buys(lieu_doc: dict, item_doc: dict) -> bool:
 	"""True si le marchand du lieu achète cet item : son id OU sa sous-catégorie ∈ besoins
 	(intrants des recettes, item-refs compris) **OU** c'est un bien que le lieu produit
@@ -738,11 +745,16 @@ def params_vente_lieu(lieu_doc: dict, item_doc: dict, item_id: str, ref=None) ->
 	80 cu et le revendait 98 dans la foulée (+55 à relation 70), indéfiniment. C'est exactement
 	le trou que `RACHAT_FACTEUR` bouche depuis toujours pour les biens produits ; il ne s'ouvrait
 	pas avant parce qu'aucune matière première n'était vendue nulle part. Épinglé par
-	`tests/test_appro_comptoir.py::test_aucun_arbitrage_...`."""
+	`tests/test_appro_comptoir.py::test_aucun_arbitrage_...`.
+
+	⚠️ **Une variante sur mesure (`est_variante`) ne se rachète QU'EN BANDE**, où que ce soit :
+	sa fourchette va du plancher de commande au devis le plus cher
+	(`fabrication.valeur_variante`), seul son BAS est sous ce que coûte la commande — la
+	racheter sur la fourchette pleine ferait de « commander puis revendre » une machine à or."""
 	pmin, pmax = prix_range_cuivre(item_doc, ref if ref is not None else item_id)
 	en_rayon = next((int(e.get("qty", 0)) for e in (lieu_doc or {}).get("stock_vente", [])
 					 if e.get("item_id") == item_id), 0)
-	if en_rayon > 0 or lieu_produit(lieu_doc, item_doc):
+	if en_rayon > 0 or lieu_produit(lieu_doc, item_doc) or est_variante(item_doc):
 		pmin_r = max(1, int(round(pmin * float(character_stats.RACHAT_FACTEUR))))
 		return pmin_r, pmin, en_rayon
 	cle = cle_matiere_lieu((lieu_doc or {}).get("categorie"), item_doc, lieu_doc)

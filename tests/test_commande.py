@@ -681,48 +681,80 @@ def test_commander_ne_coute_jamais_le_prix_plus_les_ingredients():
 	assert commandee == rayon + int(round(rayon * character_stats.COMMANDE_FACON_PART))
 
 
-# ── Prix d'une variante : coût de revient, et jamais d'arbitrage ───────────────
+# ── Prix d'une variante : le devis de sa fabrication, et jamais d'arbitrage ────
 
-# Fourchettes de test (pmin, coût de revient) : le coût vaut le pmin, comme dans le moteur
-# pour un doc sans `valeur` à deux bornes (`prix_range_cuivre`).
+# Fourchettes de test (pmin, pmax) : pmax = 3 × pmin, comme `PRIX_MAX_FACTEUR` sur un doc
+# sans `valeur` à deux bornes (`prix_range_cuivre`).
 _PMIN = {"item:piece": 105, "item:lingot": 200_000, "item:poudre": 133, "item:relique": 100}
 
 
-def _cout(item_id, doc):
-	return _PMIN[item_id]
+def _range(item_id, doc):
+	return _PMIN[item_id], 3 * _PMIN[item_id]
 
 
 def _variante(base, mats):
 	docs = [({"_id": m, "fabrication": _fab(m, valeur={"facteur": f})}, 1) for m, f in mats]
-	kw =commande.prix_variante({"_id": base}, docs, _cout, _cout)
+	kw = commande.prix_variante({"_id": base}, docs, _range)
 	return kw, fabrication.variante_doc({"_id": base, "nom": "Pièce"}, docs, **kw)
 
 
-def test_prix_variante_compte_toutes_les_matieres_au_cout():
-	# L'adamantite APPORTÉE comptait 0 : la bandoulière se revendait 7 158 cu pour 200 338 de revient.
-	kw, _doc = _variante("item:piece", [("item:lingot", 3.5), ("item:poudre", 1.3)])
-	assert kw["cout_base_cuivre"] == 105
-	assert kw["cout_matieres_cuivre"] == 200_000 + 133
-
-
-def test_plafond_de_variante_est_le_plancher_de_commande():
-	kw, _doc = _variante("item:piece", [("item:lingot", 3.5), ("item:poudre", 1.3), ("item:relique", 1.8)])
-	assert kw["plafond_cuivre"] == commande.devis(105, 200_000 + 133 + 100, 0, 3)["total"]
-
-
-@pytest.mark.parametrize("mats", [
+_MATS = [
 	[("item:lingot", 3.5)],
 	[("item:lingot", 3.5), ("item:poudre", 1.3), ("item:relique", 1.8)],
 	[("item:poudre", 1.3), ("item:relique", 1.8)],
 	[("item:relique", 10.0)],
-])
-def test_commander_puis_revendre_ne_rapporte_jamais(mats):
-	"""Invariant anti-arbitrage. La meilleure revente (relation 100, marchand à sec, donc la
-	borne HAUTE) ne dépasse jamais la commande la moins chère (relation 100 aussi, matières
-	achetées à leur pmin). Avant : une calotte commandée 441 000 cu se revendait 8,1 M."""
+]
+
+
+def test_prix_variante_compte_toutes_les_matieres():
+	# L'adamantite APPORTÉE comptait 0 : la bandoulière se revendait 7 158 cu pour 200 338 de revient.
+	kw, _doc = _variante("item:piece", [("item:lingot", 3.5), ("item:poudre", 1.3)])
+	assert kw["haut_base_cuivre"] == 3 * 105
+	assert kw["haut_matieres_cuivre"] == 3 * (200_000 + 133)
+	assert kw["matieres_distinctes"] == 2
+
+
+def test_bas_de_variante_est_le_plancher_de_commande():
+	kw, doc = _variante("item:piece", _MATS[1])
+	assert kw["plancher_cuivre"] == commande.devis(105, 200_000 + 133 + 100, 0, 3)["total"]
+	assert doc["valeur"][0] == {"cu": kw["plancher_cuivre"]}
+
+
+@pytest.mark.parametrize("mats", _MATS)
+def test_variante_vaut_au_moins_ce_qui_la_faite(mats):
+	"""Règle de l'Auteur (08/11) : chaque borne de la variante ≥ borne homologue du base +
+	celles des matières. Avant, le haut était plafonné au plancher de commande : la dague
+	façonnée de l'Arsenal s'affichait 1 333 cu, la dague simple 1 869."""
 	_kw, doc = _variante("item:piece", mats)
 	pmin, pmax = marche.prix_range_cuivre(doc, doc["_id"])
-	revente = marche.prix_marche({"value": 100}, doc["_id"], pmin, pmax, "vente", 0, 1)
+	assert pmin >= 105 + sum(_PMIN[m] for m, _f in mats)
+	assert pmax >= 3 * 105 + sum(3 * _PMIN[m] for m, _f in mats)
+
+
+@pytest.mark.parametrize("relation", [0, 50, 100])
+@pytest.mark.parametrize("stock", [0, 1, 25, 60])
+def test_variante_plus_chere_que_son_base_en_rayon(relation, stock):
+	# Même relation, même stock, même cible : la pièce façonnée ne s'affiche jamais sous la simple.
+	_kw, doc = _variante("item:piece", [("item:poudre", 1.0)])
+	pmin, pmax = marche.prix_range_cuivre(doc, doc["_id"])
+	rel = {"value": relation}
+	variante = marche.prix_marche(rel, doc["_id"], pmin, pmax, "achat", stock, 25)
+	simple = marche.prix_marche(rel, "item:piece", 105, 315, "achat", stock, 25)
+	assert variante > simple
+
+
+@pytest.mark.parametrize("mats", _MATS)
+def test_commander_puis_revendre_ne_rapporte_jamais(mats):
+	"""Invariant anti-arbitrage, sur la revente RÉELLE : une variante ne se rachète qu'en
+	bande (`params_vente_lieu`, ≤ son bas), même chez un lieu qui ne la produit pas et dont
+	une recette consommerait sa sous-catégorie. La meilleure revente (relation 100, marchand à
+	sec) ne dépasse jamais la commande la moins chère (relation 100, matières à leur pmin).
+	Avant le 04/10 : une calotte commandée 441 000 cu se revendait 8,1 M."""
+	_kw, doc = _variante("item:piece", mats)
+	acheteur = {"_id": "lieu:x", "categorie": "inconnue", "stock_vente": [], "stock_matieres": {}}
+	pmin_v, pmax_v, stock = marche.params_vente_lieu(acheteur, doc, doc["_id"])
+	assert pmax_v == marche.prix_range_cuivre(doc, doc["_id"])[0]
+	revente = marche.prix_marche({"value": 100}, doc["_id"], pmin_v, pmax_v, "vente", 0, 1)
 	piece = marche.prix_marche({"value": 100}, "item:piece", 105, 315, "achat", 0, 1)
 	commande_min = commande.devis(piece, sum(_PMIN[m] for m, _f in mats), 0, len(mats))["total"]
 	assert revente <= commande_min

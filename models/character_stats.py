@@ -679,13 +679,10 @@ COMMANDE_QUANTITE_MAX: int = 1
 # porte pas déjà ce bonus ; sinon la valeur finale ne dépasse pas base × ce plafond (une
 # Dague de parade à 2 PA plafonne à 10). La matière RENFORCE un rôle, elle n'en crée pas.
 FABRICATION_PLAFOND_HORS_FAMILLE: float = 5.0
-# Marge du sur-mesure : borne HAUTE de la `valeur` d'une variante = coût de revient × marge
-# (`fabrication.valeur_variante`), elle-même plafonnée au moins qu'on puisse payer la pièce à
-# la commande — la revente ne rapporte jamais plus que la commande n'a coûté.
-# ⚠️ Délibérément distincte de MARGE_TRANSFO (×5 par étape) : l'objet de base est DÉJÀ le
-# produit d'une transformation, réutiliser la même marge le facturerait ×25.
-COMMANDE_MARGE: float = 1.6
-# Plafond du PRODUIT des facteurs `valeur` des matières d'une variante (appliqué au seul coût
+# ⚠️ Plus de marge propre au sur-mesure (`COMMANDE_MARGE`, retirée le 08/11) : la `valeur`
+# d'une variante est le devis de sa fabrication, du plus favorable au moins favorable
+# (`fabrication.valeur_variante`) — façon et complexité ci-dessous en sont la marge.
+# Plafond du PRODUIT des facteurs `valeur` des matières d'une variante (appliqué au seul HAUT
 # du base, la matière étant déjà comptée à son coût). Sans lui, trois matières précieuses se
 # composaient à ×8 ; 3.0 = l'ordre de grandeur de PRIX_MAX_FACTEUR.
 COMMANDE_FACTEUR_VALEUR_MAX: float = 3.0
@@ -1119,7 +1116,6 @@ def current_world_variables() -> dict:
 		"COMMANDE_MATIERES_MAX": COMMANDE_MATIERES_MAX,
 		"COMMANDE_QUANTITE_MAX": COMMANDE_QUANTITE_MAX,
 		"FABRICATION_PLAFOND_HORS_FAMILLE": FABRICATION_PLAFOND_HORS_FAMILLE,
-		"COMMANDE_MARGE": COMMANDE_MARGE,
 		"COMMANDE_FACTEUR_VALEUR_MAX": COMMANDE_FACTEUR_VALEUR_MAX,
 		"COMMANDE_FACON_PART": COMMANDE_FACON_PART,
 		"COMMANDE_COMPLEXITE_PART": COMMANDE_COMPLEXITE_PART,
@@ -1205,7 +1201,7 @@ def load_world_variables() -> dict:
 	global SCRIPTORIUM_LIVRE_LONGUEUR_MAX, SCRIPTORIUM_LIVRE_PAPIER, SCRIPTORIUM_LIVRE_ENCRE
 	global COMMANDE_DELAI_SECONDES, COMMANDE_PEREMPTION_SECONDES, COMMANDE_MATIERES_MAX, COMMANDE_QUANTITE_MAX
 	global FABRICATION_PLAFOND_HORS_FAMILLE
-	global COMMANDE_MARGE, COMMANDE_FACON_PART, COMMANDE_COMPLEXITE_PART, COMMANDE_FACTEUR_VALEUR_MAX
+	global COMMANDE_FACON_PART, COMMANDE_COMPLEXITE_PART, COMMANDE_FACTEUR_VALEUR_MAX
 	global ACCES_GARDIEN_ACTIF, INDICATEURS_ACTIFS
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	global CARCASSE_TRANCHANT_TAG, CARCASSE_DECOUPE_POIDS_MIN
@@ -1493,7 +1489,6 @@ def load_world_variables() -> dict:
 	COMMANDE_MATIERES_MAX = max(1, int(v.get("COMMANDE_MATIERES_MAX", COMMANDE_MATIERES_MAX)))
 	COMMANDE_QUANTITE_MAX = max(1, int(v.get("COMMANDE_QUANTITE_MAX", COMMANDE_QUANTITE_MAX)))
 	FABRICATION_PLAFOND_HORS_FAMILLE = max(1.0, float(v.get("FABRICATION_PLAFOND_HORS_FAMILLE", FABRICATION_PLAFOND_HORS_FAMILLE)))
-	COMMANDE_MARGE = max(1.0, float(v.get("COMMANDE_MARGE", COMMANDE_MARGE)))
 	COMMANDE_FACTEUR_VALEUR_MAX = max(1.0, float(v.get("COMMANDE_FACTEUR_VALEUR_MAX", COMMANDE_FACTEUR_VALEUR_MAX)))
 	COMMANDE_FACON_PART = max(0.0, float(v.get("COMMANDE_FACON_PART", COMMANDE_FACON_PART)))
 	COMMANDE_COMPLEXITE_PART = max(0.0, float(v.get("COMMANDE_COMPLEXITE_PART", COMMANDE_COMPLEXITE_PART)))

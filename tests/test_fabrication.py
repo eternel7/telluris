@@ -15,7 +15,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from utils import fabrication  # noqa: E402
+from utils import commande, fabrication  # noqa: E402
 from models import character_stats  # noqa: E402
 
 
@@ -293,49 +293,58 @@ def test_poids_min_max_conserve_sa_forme():
 	assert doc["poids"] == [round(1.0 * 1.1, 2), round(3.0 * 1.1, 2)]
 
 
+def _maj(base, distinctes):
+	"""Base + façon + complexité : la majoration d'un devis (`facon_et_complexite`)."""
+	facon, sup = fabrication.facon_et_complexite(base, distinctes)
+	return base + facon + sup
+
+
 def test_valeur_explicite_figee_a_la_creation():
-	# ACIER ne porte aucun facteur `valeur` : socle = coût de revient, haut = socle × marge.
-	doc = fabrication.variante_doc(EPEE, [(ACIER, 1)], cout_base_cuivre=100, cout_matieres_cuivre=50)
-	assert doc["valeur"][0] == {"cu": 150}
-	assert doc["valeur"][1] == {"cu": int(round(150 * character_stats.COMMANDE_MARGE))}
+	# ACIER ne porte aucun facteur `valeur` : bas = plancher de commande, haut = le même devis
+	# aux bornes hautes du base et des matières.
+	doc = fabrication.variante_doc(EPEE, [(ACIER, 1)], plancher_cuivre=180,
+								   haut_base_cuivre=300, haut_matieres_cuivre=150, matieres_distinctes=1)
+	assert doc["valeur"][0] == {"cu": 180}
+	assert doc["valeur"][1] == {"cu": _maj(300, 1) + 150}
 
 
-def test_facteur_valeur_ne_multiplie_que_le_base():
-	# La matière est déjà comptée à son coût : la multiplier aussi la comptait deux fois
-	# (adamantite à 200 000 cu × 3,5 → une calotte revendue 8 M).
+def test_facteur_valeur_ne_multiplie_que_le_haut_du_base():
+	# La matière est déjà comptée à son prix : la multiplier aussi la comptait deux fois
+	# (adamantite à 200 000 cu × 3,5 → une calotte revendue 8 M). Le bas reste le plancher.
 	facteur = CRISTAL["fabrication"]["modificateurs"]["valeur"]["facteur"]
-	doc = fabrication.variante_doc(EPEE, [(CRISTAL, 1)], cout_base_cuivre=100, cout_matieres_cuivre=10_000)
-	assert doc["valeur"][0] == {"cu": 10_100}      # socle = coût brut des intrants
-	assert doc["valeur"][1] == {"cu": int(round((100 * facteur + 10_000) * character_stats.COMMANDE_MARGE))}
+	doc = fabrication.variante_doc(EPEE, [(CRISTAL, 1)], plancher_cuivre=10_200,
+								   haut_base_cuivre=300, haut_matieres_cuivre=30_000, matieres_distinctes=1)
+	assert doc["valeur"][0] == {"cu": 10_200}
+	assert doc["valeur"][1] == {"cu": _maj(int(round(300 * facteur)), 1) + 30_000}
 
 
 def test_produit_des_facteurs_plafonne():
 	enorme = dict(CRISTAL, _id="item:Enorme", fabrication={
 		"nom": "énorme", "modificateurs": {"valeur": {"facteur": fabrication.FACTEUR_MAX}}})
-	doc = fabrication.variante_doc(EPEE, [(enorme, 1), (CRISTAL, 1)], cout_base_cuivre=100)
-	assert doc["valeur"][1] == {"cu": int(round(100 * character_stats.COMMANDE_FACTEUR_VALEUR_MAX
-												 * character_stats.COMMANDE_MARGE))}
+	doc = fabrication.variante_doc(EPEE, [(enorme, 1), (CRISTAL, 1)], plancher_cuivre=1,
+								   haut_base_cuivre=100, matieres_distinctes=2)
+	base = int(round(100 * character_stats.COMMANDE_FACTEUR_VALEUR_MAX))
+	assert doc["valeur"][1] == {"cu": _maj(base, 2)}
 
 
-def test_plafond_borne_les_deux_bornes():
-	# Le plafond (moins qu'on puisse payer la pièce) gagne sur la marge ET sur le socle.
-	assert fabrication.valeur_variante(100, 50, plafond_cuivre=160) == [{"cu": 150}, {"cu": 160}]
-	assert fabrication.valeur_variante(100, 50, plafond_cuivre=120) == [{"cu": 120}, {"cu": 120}]
-	assert fabrication.valeur_variante(100, 50, plafond_cuivre=0)[1]["cu"] > 150   # 0 = sans plafond
+def test_haut_jamais_sous_le_bas():
+	assert fabrication.valeur_variante(500, 10, 0, 1) == [{"cu": 500}, {"cu": 500}]
+	assert fabrication.valeur_variante(0, 0) == [{"cu": 1}, {"cu": 1}]
+
+
+def test_devis_et_valeur_partagent_facon_et_complexite():
+	# Le haut d'une variante est EXACTEMENT un devis aux bornes hautes (facteur 1).
+	d = commande.devis(2400, 279, 0, 3)
+	assert fabrication.valeur_variante(1, 2400, 279, 3)[1] == {"cu": d["total"]}
 
 
 def test_valeur_independante_du_devis_du_client():
-	# Mêmes coûts ⇒ même valeur : la relation, le stock et ce que le client apporte n'entrent
-	# plus dans le prix d'une variante (ils faisaient varier trois anneaux de ×2,4).
-	a = fabrication.variante_doc(EPEE, [(CRISTAL, 1), (ACIER, 1)], cout_base_cuivre=100, cout_matieres_cuivre=80)
-	b = fabrication.variante_doc(EPEE, [(ACIER, 1), (CRISTAL, 1)], cout_base_cuivre=100, cout_matieres_cuivre=80)
+	# Mêmes fourchettes ⇒ même valeur : la relation, le stock et ce que le client apporte
+	# n'entrent pas dans le prix d'une variante (ils faisaient varier trois anneaux de ×2,4).
+	kw = dict(plancher_cuivre=200, haut_base_cuivre=300, haut_matieres_cuivre=240, matieres_distinctes=2)
+	a = fabrication.variante_doc(EPEE, [(CRISTAL, 1), (ACIER, 1)], **kw)
+	b = fabrication.variante_doc(EPEE, [(ACIER, 1), (CRISTAL, 1)], **kw)
 	assert a["valeur"] == b["valeur"]
-
-
-def test_marge_du_sur_mesure_distincte_de_marge_transfo():
-	# La raison d'être de COMMANDE_MARGE : réutiliser MARGE_TRANSFO facturerait la variante
-	# d'un objet DÉJÀ transformé une seconde fois à ×5.
-	assert character_stats.COMMANDE_MARGE < character_stats.MARGE_TRANSFO
 
 
 def test_bloc_de_tracabilite_complet():
@@ -420,10 +429,10 @@ def test_doc_existant_jamais_retouche():
 	# Le contenu d'une variante déjà vendue ne doit pas bouger sous son acheteur.
 	db, get_doc, save_doc = _fausse_db()
 	doc, _ = fabrication.assurer_variante(EPEE, [(ACIER, 1)], {"_id": "lieu:forge", "categorie": "armurerie"},
-										  get_doc, save_doc, cout_base_cuivre=100)
+										  get_doc, save_doc, haut_base_cuivre=100)
 	doc["nom"] = "Nom gravé par le premier artisan"
 	relu, cree = fabrication.assurer_variante(EPEE, [(ACIER, 1)], {"_id": "lieu:autre", "categorie": "grand_arsenal"},
-											  get_doc, save_doc, cout_base_cuivre=99999)
+											  get_doc, save_doc, haut_base_cuivre=99999)
 	assert cree is False
 	assert relu["nom"] == "Nom gravé par le premier artisan"
 

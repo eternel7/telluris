@@ -29,24 +29,33 @@ def _variante(valeur):
 
 
 def _audit(valeur):
-	# Revient 1 000, plancher de commande 1 200 ; la fourchette se lit telle quelle.
+	# Plancher de commande 1 200, haut de l'objet de base 3 000 ; la fourchette se lit telle quelle.
 	return variantes_mal_cotees(
 		[BASE, LINGOT, _variante(valeur)],
-		prix_variante=lambda b, m: {"cout_base_cuivre": 100, "cout_matieres_cuivre": 900,
-									"plafond_cuivre": 1_200},
+		prix_variante=lambda b, m: _KW,
 		prix_range=lambda d, i: (d["valeur"][0]["cu"], d["valeur"][1]["cu"]))
 
 
+_KW = {"plancher_cuivre": 1_200, "haut_base_cuivre": 3_000, "haut_matieres_cuivre": 2_000,
+	   "matieres_distinctes": 1}
+
+
 def test_variante_dans_sa_fourchette_nest_pas_signalee():
-	assert _audit([{"cu": 1_000}, {"cu": 1_200}]) == []
+	assert _audit([{"cu": 1_200}, {"cu": 6_000}]) == []
 
 
-def test_revente_au_dessus_du_plancher_de_commande_est_un_arbitrage():
-	assert [l["defaut"] for l in _audit([{"cu": 1_000}, {"cu": 1_201}])] == ["arbitrage"]
+def test_bas_au_dessus_du_plancher_de_commande_est_un_arbitrage():
+	# Le rachat (toujours en bande, ≤ bas) rapporterait plus que la commande n'a coûté.
+	assert [l["defaut"] for l in _audit([{"cu": 1_201}, {"cu": 6_000}])] == ["arbitrage"]
 
 
-def test_borne_basse_sous_le_revient_est_une_perte():
-	assert [l["defaut"] for l in _audit([{"cu": 999}, {"cu": 1_100}])] == ["perte"]
+def test_bas_sous_le_plancher_est_une_perte():
+	assert [l["defaut"] for l in _audit([{"cu": 1_199}, {"cu": 6_000}])] == ["perte"]
+
+
+def test_haut_sous_celui_du_base_est_signale():
+	# La dague façonnée de l'Arsenal, 08/11 : moins chère en rayon que la dague simple.
+	assert [l["defaut"] for l in _audit([{"cu": 1_200}, {"cu": 2_999}])] == ["sous_base"]
 
 
 def test_variante_a_matiere_absente_est_ignoree():
@@ -56,8 +65,7 @@ def test_variante_a_matiere_absente_est_ignoree():
 
 def test_une_variante_ecrite_par_valeur_variante_nest_jamais_signalee():
 	# Ce qu'écrit le moteur passe le contrôle de l'audit : les deux règles sont la même.
-	valeur = fabrication.valeur_variante(100, 900, facteur_valeur=fabrication.FACTEUR_MAX,
-										 plafond_cuivre=1_200)
+	valeur = fabrication.valeur_variante(facteur_valeur=fabrication.FACTEUR_MAX, **_KW)
 	assert _audit(valeur) == []
 
 
