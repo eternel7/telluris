@@ -12,8 +12,10 @@ Deux corrections, dans cet ordre (la seconde lit la première) :
      qu'un palier de plus que sa propre rareté (`RARETE_ECART_MAX`). Seul le champ `rarete`
      change ; sans `valeur` explicite, le coût d'une matière en dépend, d'où l'ordre ;
   2. **valeur des variantes** — la règle même des commandes neuves :
-     `commande.prix_variante` (coûts de revient + plafond = plancher de commande) passé à
+     `commande.prix_variante` (plancher de commande + hauts du base et des matières) passé à
      `fabrication.valeur_variante` avec le facteur des matières. Seul `valeur` change.
+     Depuis le 08/11, la fourchette d'une variante est le devis de sa fabrication, du plus
+     favorable au moins favorable : elle vaut au moins son objet de base + ses matières.
 
     python dev/gen_prix_variantes.py [--dump jsons/telluris-dump-*.json]
 

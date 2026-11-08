@@ -857,9 +857,7 @@ def devis(prix_base: int, cout_matieres: int = 0, credit_matieres: int = 0,
 	prix_base = max(0, int(prix_base or 0))
 	cout_matieres = max(0, int(cout_matieres or 0))
 	credit = min(prix_base, max(0, int(credit_matieres or 0)))
-	facon = int(round(prix_base * float(character_stats.COMMANDE_FACON_PART)))
-	sup = int(round(prix_base * float(character_stats.COMMANDE_COMPLEXITE_PART)
-					* max(0, int(matieres_distinctes or 0) - 1)))
+	facon, sup = fabrication.facon_et_complexite(prix_base, matieres_distinctes)
 	return {
 		"prix_base": prix_base,
 		"credit_matieres": credit,
@@ -870,44 +868,48 @@ def devis(prix_base: int, cout_matieres: int = 0, credit_matieres: int = 0,
 	}
 
 
-def prix_variante(base_doc: dict, matieres_docs, cout_fn=None, prix_min_fn=None) -> dict:
-	"""Arguments de prix de `fabrication.assurer_variante` : `cout_base_cuivre`,
-	`cout_matieres_cuivre`, `plafond_cuivre`. SOURCE UNIQUE — l'endpoint de commande, la
-	relance et `dev/gen_prix_variantes.py` passent tous par ici.
+def prix_variante(base_doc: dict, matieres_docs, prix_range_fn=None) -> dict:
+	"""Arguments de prix de `fabrication.valeur_variante` (et donc de `assurer_variante`) :
+	`plancher_cuivre`, `haut_base_cuivre`, `haut_matieres_cuivre`, `matieres_distinctes`.
+	SOURCE UNIQUE — l'endpoint de commande, la relance, `dev/gen_prix_variantes.py` et
+	`dev/gen_trophees.py` passent tous par ici.
 
-	- **coûts de REVIENT** (`cout_fn`, défaut `marche.cout_production_cuivre`) : TOUTES les
-	  matières, apportées ou achetées — la valeur ne dépend ni du client, ni de sa relation,
-	  ni du stock du jour (même combinaison ⇒ même variante ⇒ même valeur) ;
-	- **plafond = plancher de commande** : `devis` lui-même, nourri des bas de fourchette
-	  (`prix_min_fn`, défaut `marche.prix_range_cuivre(…)[0]`). `_prix_piece` est clampé dans
-	  `[pmin, pmax]` du base, une matière achetée coûte au moins son pmin, et une matière de
-	  recette apportée est remise à son coût de revient : aucun client ne paie la pièce moins
-	  cher, en cuivre et en matières. Plafonner la valeur là ferme « commander puis revendre ».
+	Lus dans les FOURCHETTES (`prix_range_fn`, défaut `marche.prix_range_cuivre`) du base et
+	de TOUTES les matières, apportées ou achetées — la valeur ne dépend ni du client, ni de sa
+	relation, ni du stock du jour (même combinaison ⇒ même variante ⇒ même valeur) :
+	- **plancher** = `devis` nourri des bas de fourchette : le moins qu'un client puisse payer
+	  la pièce (`_prix_piece` est clampé dans `[pmin, pmax]` du base, une matière achetée coûte
+	  au moins son pmin). C'est le BAS de la variante ;
+	- **hauts** du base et des matières : le HAUT de la variante est le même devis à ces
+	  bornes (`fabrication.valeur_variante`).
 
 	`matieres_docs` = `[(item_doc, quantite), …]`."""
-	if cout_fn is None:
-		def cout_fn(item_id, doc):
-			return marche.cout_production_cuivre(item_id, doc)
-	if prix_min_fn is None:
-		def prix_min_fn(item_id, doc):
-			return marche.prix_range_cuivre(doc, item_id)[0]
+	if prix_range_fn is None:
+		def prix_range_fn(item_id, doc):
+			return marche.prix_range_cuivre(doc, item_id)
 
 	def _id(doc):
 		return (doc or {}).get("_id") or (doc or {}).get("item") or ""
 
-	base_id = _id(base_doc)
-	cout_matieres = plancher_matieres = 0
+	def _bornes(doc):
+		bas, haut = prix_range_fn(_id(doc), doc)
+		bas = max(0, int(bas or 0))
+		return bas, max(bas, int(haut or 0))
+
+	bas_matieres = haut_matieres = 0
 	for doc, quantite in matieres_docs or []:
 		qte = max(1, int(quantite or 1))
-		cout_matieres += int(cout_fn(_id(doc), doc) or 0) * qte
-		plancher_matieres += int(prix_min_fn(_id(doc), doc) or 0) * qte
+		bas, haut = _bornes(doc)
+		bas_matieres += bas * qte
+		haut_matieres += haut * qte
 	distinctes = len(fabrication.normaliser_matieres(
 		[{"item": _id(d), "quantite": q} for d, q in matieres_docs or []]))
-	plancher = devis(int(prix_min_fn(base_id, base_doc) or 0), plancher_matieres, 0, distinctes)
+	bas_base, haut_base = _bornes(base_doc)
 	return {
-		"cout_base_cuivre": int(cout_fn(base_id, base_doc) or 0),
-		"cout_matieres_cuivre": cout_matieres,
-		"plafond_cuivre": plancher["total"],
+		"plancher_cuivre": devis(bas_base, bas_matieres, 0, distinctes)["total"],
+		"haut_base_cuivre": haut_base,
+		"haut_matieres_cuivre": haut_matieres,
+		"matieres_distinctes": distinctes,
 	}
 
 
