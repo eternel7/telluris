@@ -6,7 +6,7 @@
       "nom": "Villard de Honnecourt",
       "race": "nain",
       "vocation": "lettre",
-      "portrait": "architecte_nain_m_cour01.png",
+      "portrait": "architecte_nain_m_cour02.jpg",
       "description": "Maître d'œuvre venu de Honnecourt, sur l'Escaut, l'un des rares Architectes de l'Institut à savoir plier un espace dans une enveloppe : besaces, urnes, coffres. Son carnet de croquis ne le quitte jamais. Il vend ses copies à la Cour des Arches, au prix du travail, sans marchander.",
       "services": {
         "vente": {
@@ -332,7 +332,7 @@
         {
           "character": "pnj:villard_de_honnecourt",
           "nom": "Maître Villard",
-          "portrait": "architecte_nain_m_cour01.png",
+          "portrait": "architecte_nain_m_cour02.jpg",
           "probabilite": 1,
           "description": "Un nain à la barbe tressée de fil de cuivre, penché sur un établi chargé de besaces, d'urnes et d'un petit coffre ferré."
         }
