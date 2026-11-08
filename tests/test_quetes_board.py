@@ -304,6 +304,54 @@ def test_pays_relies_ne_vaut_que_pour_une_capitale_et_une_route_ouverte(board):
 	assert quetes.pays_relies(cite, liens, lambda i: dict(docs.get(i), categorie="ville")) == []
 
 
+# ── Rayon de chasse d'une capitale dans son pays (QUETE_PAYS_RAYON) ──────────────
+# Lutecia envoyait traquer un griffon au cœur des Alpes : seules les zones proches des portes de
+# la capitale sur la carte du pays restent visées.
+
+PAYS_ETENDU = {
+	"_id": "lieu:royaume", "type": "lieu", "categorie": "pays", "label": "Royaume",
+	"zone_influences": [{"zone": "zone:pres", "x": 3, "y": 4},
+	                    {"zone": "zone:mixte", "x": 40, "y": 40},
+	                    {"zone": "zone:mixte", "x": 5, "y": 1},
+	                    {"zone": "zone:loin", "x": 60, "y": 30}],
+	"rencontres": [{"espece": "espece:proche", "zones": ["zone:pres", "zone:loin"]},
+	               {"espece": "espece:alpine", "zones": ["zone:loin"]},
+	               {"espece": "espece:sans_zone"}],
+	"ressources": [{"ressource": "item:edelweiss", "zones": ["zone:loin"]},
+	               {"ressource": "item:herbe", "zones": ["zone:mixte"]}],
+}
+
+
+def test_pays_a_portee_ne_garde_que_les_zones_proches_des_portes():
+	reduit = quetes.pays_a_portee(PAYS_ETENDU, [(1, 1)], 5)
+	assert [(p["x"], p["y"]) for p in reduit["zone_influences"]] == [(3, 4), (5, 1)]
+	assert reduit["rencontres"] == [{"espece": "espece:proche", "zones": ["zone:pres"]},
+	                                {"espece": "espece:sans_zone"}]   # non localisable : gardée
+	assert reduit["ressources"] == [{"ressource": "item:herbe", "zones": ["zone:mixte"]}]
+	# Le doc d'origine (mis en cache par get_doc) n'est jamais muté.
+	assert len(PAYS_ETENDU["zone_influences"]) == 4 and len(PAYS_ETENDU["rencontres"]) == 3
+	# Distance de Chebyshev, borne incluse : (5,1) est à 4 de (1,1), (3,4) à 3.
+	assert len(quetes.pays_a_portee(PAYS_ETENDU, [(1, 1)], 3)["zone_influences"]) == 1
+
+
+def test_pays_a_portee_sans_rayon_ni_ancrage_rend_le_pays_entier():
+	assert quetes.pays_a_portee(PAYS_ETENDU, [(1, 1)], 0) is PAYS_ETENDU
+	assert quetes.pays_a_portee(PAYS_ETENDU, [], 5) is PAYS_ETENDU
+
+
+def test_pays_relies_reduit_le_pays_autour_des_portes_de_la_capitale(board, monkeypatch):
+	docs = board["docs"]
+	cite, _, _ = _monde_capitale(docs)
+	docs["lieu:royaume"] = PAYS_ETENDU
+	liens = [docs["link:capitale_royaume"]]   # porte côté pays en (1,1)
+	monkeypatch.setattr(character_stats, "QUETE_PAYS_RAYON", 5)
+	(pays,) = quetes.pays_relies(cite, liens, docs.get)
+	assert quetes.especes_du_parent(pays) == ["espece:proche", "espece:sans_zone"]
+	# Rayon passé explicitement ou désactivé : le pays entier.
+	(entier,) = quetes.pays_relies(cite, liens, docs.get, rayon=0)
+	assert "espece:alpine" in quetes.especes_du_parent(entier)
+
+
 def test_la_capitale_offre_les_cibles_du_pays_hors_les_murs(board):
 	docs = board["docs"]
 	cite, pays, guilde = _monde_capitale(docs)

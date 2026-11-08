@@ -27,6 +27,8 @@
 # ⚠️ PLANCHER de puissance : la cible d'une épreuve de rang doit atteindre le potentiel
 # (`potentiel.potentiel_menace` : combat × fuite interdite) minimum du rang VISÉ (world-var `QUETE_RANG_POTENTIEL_MIN`), sans quoi on montait de rang en
 # abattant un écureuil. Aucune cible au niveau ⇒ pas d'épreuve (fail-closed, comme le plafond).
+# PLAFOND préféré : sous le plancher du rang d'APRÈS (`potentiel_max_pour`) ; à défaut, la cible
+# la plus faible au-dessus — une épreuve pour B n'exige plus une bête de rang S.
 #
 # Logique pure (DB injectée : get_doc_fn / find_docs_fn), mute sans save — l'endpoint persiste.
 # Pattern de utils/transport.py. World-vars lues via le module (jamais from-import).
@@ -627,6 +629,15 @@ def potentiel_min_pour(rang_vise: str) -> float | None:
 	return None if seuil is None else float(seuil)
 
 
+def potentiel_max_pour(rang_vise: str) -> float | None:
+	"""Plafond PRÉFÉRÉ de la cible d'une épreuve visant `rang_vise` : le plancher du rang D'APRÈS
+	(`QUETE_RANG_POTENTIEL_MIN`, aucune table de plus). None au sommet de l'échelle ou si le rang
+	d'après n'a pas de plancher. Cf. `offre_rang_pour` : préférence, jamais exclusion."""
+	if rang_vise not in RANGS or rang_vise == RANGS[-1]:
+		return None
+	return potentiel_min_pour(rang_suivant(rang_vise))
+
+
 def potentiel_cible(espece_doc: dict, profil_id: str, get_doc_fn) -> float | None:
 	"""Dangerosité de l'espèce sous ce profil : potentiel de combat, ÉQUIPEMENT ESPÉRÉ et bonus
 	humanoïde compris, × le facteur de FUITE INTERDITE (`potentiel.potentiel_menace`, la mesure
@@ -654,7 +665,12 @@ def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_f
 	de cette cité déjà active, ou aucune cible résolvable au grade MAX dont la puissance atteint le
 	PLANCHER du rang visé (`potentiel_min_pour` ; potentiel illisible ⇒ cible écartée). Ne tire PAS
 	la probabilité (c'est `poser_rang_offert` qui la gère). `potentiel_fn(espece, profil_id,
-	get_doc_fn)` injectable, défaut `potentiel_cible`."""
+	get_doc_fn)` injectable, défaut `potentiel_cible`.
+
+	PLAFOND (`potentiel_max_pour`) : parmi les cibles au plancher, on préfère celles qui restent
+	SOUS le plancher du rang d'après — une épreuve pour B ne doit pas exiger une bête de rang S
+	(le griffon de Lutecia). S'il n'y en a aucune, on garde la ou les plus FAIBLES au-dessus : le
+	plafond adoucit l'épreuve, il ne la supprime jamais."""
 	cite = (comptoir_doc or {}).get("lieu_parent")
 	if not cite:
 		return None
@@ -667,7 +683,9 @@ def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_f
 		return None
 	if _rang_deja_actif(character, cite):
 		return None
-	plancher = potentiel_min_pour(rang_suivant(rang_courant))
+	rang_vise = rang_suivant(rang_courant)
+	plancher = potentiel_min_pour(rang_vise)
+	plafond = potentiel_max_pour(rang_vise)
 	potentiel_fn = potentiel_fn or potentiel_cible
 	candidats = []
 	# Capitale : l'élite peut aussi écumer le pays où mènent ses routes (`pays_de_chasse`).
@@ -686,14 +704,22 @@ def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_f
 			profil_id = resoudre_profil_chasse(L, espece, TIER_MAX, position, get_doc_fn)
 			if not profil_id:
 				continue
-			if plancher is not None:
+			pot = None
+			if plancher is not None or plafond is not None:
 				pot = potentiel_fn(espece, profil_id, get_doc_fn)
-				if pot is None or pot < plancher:
+				if pot is None or (plancher is not None and pot < plancher):
 					continue
-			candidats.append((L, espece, position, profil_id))
+			candidats.append((L, espece, position, profil_id, pot))
 	if not candidats:
 		return None
-	L, espece, position, profil_id = random.choice(candidats)
+	if plafond is not None:
+		sous = [c for c in candidats if c[4] < plafond]
+		if sous:
+			candidats = sous
+		else:
+			pot_min = min(c[4] for c in candidats)
+			candidats = [c for c in candidats if c[4] == pot_min]
+	L, espece, position, profil_id, _ = random.choice(candidats)
 	return _construire_quete_rang(comptoir_doc, cite, L, espece, position, profil_id, rang_courant, get_doc_fn)
 
 

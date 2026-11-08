@@ -110,30 +110,83 @@ def especes_du_parent(parent_doc: dict) -> list:
 	return out
 
 
-def pays_relies(cite_doc: dict, connexions: list, get_doc_fn=None) -> list:
+def pays_relies(cite_doc: dict, connexions: list, get_doc_fn=None, rayon: int | None = None) -> list:
 	"""Pays (`categorie:"pays"`) qu'une CAPITALE (`sous_categorie:"capitale"`) relie par une
 	connexion ouverte — ses quêtes `kill`/`collect`/`chasse` peuvent viser leurs rencontres,
 	leurs ressources et leurs élites, hors les murs. Une ville ordinaire n'en a aucun : son tableau reste local.
-	Lu sur les CONNEXIONS, jamais sur `lieu_parent` : c'est la route qui fait la portée."""
+	Lu sur les CONNEXIONS, jamais sur `lieu_parent` : c'est la route qui fait la portée.
+
+	Chaque pays est rendu RÉDUIT à sa portée (`pays_a_portee`) : les zones à ≤ `rayon` cases
+	(défaut world-var `QUETE_PAYS_RAYON`) des portes de la capitale sur la carte du pays — les
+	`pos` du côté pays de ces mêmes connexions. Copie : le doc (mis en cache) n'est jamais muté."""
 	get_doc_fn = get_doc_fn or get_doc
 	cite_id = (cite_doc or {}).get("_id")
 	if not cite_id or cite_doc.get("sous_categorie") != "capitale":
 		return []
-	out, vus = [], set()
+	if rayon is None:
+		rayon = int(character_stats.QUETE_PAYS_RAYON)
+	ordre, ancrages = [], {}
 	for c in connexions or []:
 		if (c.get("metadata") or {}).get("status", "ouvert") != "ouvert":
 			continue
-		lieux = [n.get("lieu") for n in c.get("nodes") or []]
-		if cite_id not in lieux:
+		nodes = c.get("nodes") or []
+		if cite_id not in [n.get("lieu") for n in nodes]:
 			continue
-		for lid in lieux:
-			if not lid or lid == cite_id or lid in vus:
+		for n in nodes:
+			lid = n.get("lieu")
+			if not lid or lid == cite_id:
 				continue
-			vus.add(lid)
-			doc = get_doc_fn(lid)
-			if doc and doc.get("categorie") == "pays":
-				out.append(doc)
+			if lid not in ancrages:
+				ordre.append(lid)
+				ancrages[lid] = []
+			pos = n.get("pos")
+			if isinstance(pos, (list, tuple)) and len(pos) >= 2:
+				ancrages[lid].append((int(pos[0]), int(pos[1])))
+	out = []
+	for lid in ordre:
+		doc = get_doc_fn(lid)
+		if doc and doc.get("categorie") == "pays":
+			out.append(pays_a_portee(doc, ancrages[lid], rayon))
 	return out
+
+
+def pays_a_portee(pays_doc: dict, ancrages: list, rayon: int) -> dict:
+	"""Copie du pays ne gardant que ce qu'une capitale peut viser : placements de
+	`zone_influences` dont le CENTRE (la case que vise `chasse.position_de_chasse`) est à distance
+	de Chebyshev ≤ `rayon` d'un ancrage, puis `rencontres` et `ressources` réduites aux zones qui
+	gardent au moins un placement (une entrée qui n'en garde aucune disparaît).
+
+	Rien n'est réduit — doc rendu tel quel — si `rayon <= 0` ou sans ancrage mesurable (connexion
+	sans `pos`) : sans point de départ, aucune distance n'a de sens. Une entrée SANS clé `zones`
+	n'est pas localisable : gardée telle quelle."""
+	if rayon <= 0 or not ancrages:
+		return pays_doc
+
+	def _a_portee(p):
+		try:
+			x, y = int(p.get("x", 0)), int(p.get("y", 0))
+		except (TypeError, ValueError):
+			return False
+		return any(max(abs(x - ax), abs(y - ay)) <= rayon for ax, ay in ancrages)
+
+	placements = [p for p in pays_doc.get("zone_influences") or [] if _a_portee(p)]
+	zones = {p.get("zone") for p in placements}
+
+	def _reduire(entrees):
+		out = []
+		for e in entrees or []:
+			if "zones" not in e:
+				out.append(e)
+				continue
+			gardees = [z for z in e.get("zones") or [] if z in zones]
+			if gardees:
+				out.append(dict(e, zones=gardees))
+		return out
+
+	copie = dict(pays_doc, zone_influences=placements, rencontres=_reduire(pays_doc.get("rencontres")))
+	if "ressources" in pays_doc:
+		copie["ressources"] = _reduire(pays_doc.get("ressources"))
+	return copie
 
 
 def ressources_du_parent(parent_doc: dict) -> list:
