@@ -185,6 +185,29 @@ def apporte(item_doc) -> bool:
 	return bool(props["nom"] or props["modificateurs"])
 
 
+# ── Un seul métal par pièce ──────────────────────────────────────────────────────
+# Les lingots et l'acier plissé (« damasquiné ») ne se COMBINENT pas : une pièce sur mesure
+# reçoit au plus un métal. Le métal se lit sur le tag `metal` de la DONNÉE (choix de
+# l'Auteur : la Grenaille précieuse, catégorie `metal` sans le tag, reste combinable) —
+# poser ou retirer le tag suffit, aucune matière n'est nommée ici.
+TAG_METAL = "metal"
+MATIERES_METAL_MAX = 1   # règle de jeu voulue : « un seul métal sur les trois matières »
+
+
+def est_metal(item_doc) -> bool:
+	"""Cette matière est-elle un métal au sens de la règle « un seul métal par pièce » ?"""
+	return TAG_METAL in ((item_doc or {}).get("tags") or [])
+
+
+def metaux_combines(matieres_docs: list) -> list:
+	"""Les docs métal de `[(item_doc, quantite), …]` SI la pièce en compte plus que
+	`MATIERES_METAL_MAX`, sinon `[]`. La quantité compte : deux lingots du même métal sont
+	deux métaux — la règle ne dépend pas du plafond `COMMANDE_QUANTITE_MAX`."""
+	metaux = [(doc, q) for doc, q in (matieres_docs or []) if est_metal(doc)]
+	total = sum(max(0, int(q or 0)) for _doc, q in metaux)
+	return [doc for doc, _q in metaux] if total > MATIERES_METAL_MAX else []
+
+
 def _rang_rarete(rarete) -> float:
 	"""Position d'une rareté dans l'échelle des prix. Sert à prendre « la plus haute » sans
 	recopier l'ordre : `MULT_RARETE` EST l'échelle (cf. CLAUDE.md §14, aucune valeur en dur)."""

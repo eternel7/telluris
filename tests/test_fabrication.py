@@ -510,3 +510,38 @@ def test_borner_une_variante_existante():
 	variante = {"bonus_degats": 7, "bonus_pa": 8, "bonus": {"F": 3, "R": 3}}
 	fabrication.borner_hors_famille(CASQUE, variante)
 	assert variante == {"bonus_pa": 8, "bonus": {"F": 3, "R": 3}}
+
+
+# ── Un seul métal par pièce ─────────────────────────────────────────────────────
+
+LINGOT_FER = {"_id": "item:fer", "nom": "Lingot de fer", "categorie": "metal", "tags": ["metal"]}
+LINGOT_ACIER = {"_id": "item:acier", "nom": "Lingot d'acier", "categorie": "metal", "tags": ["metal"]}
+ACIER_PLISSE = {"_id": "item:acier_plisse", "nom": "Acier plissé", "categorie": "composant",
+				"tags": ["metal"]}
+GRENAILLE = {"_id": "item:metaux_precieux", "nom": "Grenaille précieuse", "categorie": "metal",
+			 "tags": ["fabrication_arme"]}
+GEMME = {"_id": "item:gemmes", "nom": "Gemme brute", "categorie": "composant",
+		 "tags": ["fabrication_arme"]}
+
+
+def test_le_metal_se_lit_sur_le_tag_seul():
+	# La catégorie ne compte pas : la Grenaille (catégorie metal, sans tag) reste combinable,
+	# l'acier plissé (catégorie composant, tag metal) est un métal.
+	assert fabrication.est_metal(LINGOT_FER) and fabrication.est_metal(ACIER_PLISSE)
+	assert not fabrication.est_metal(GRENAILLE)
+	assert not fabrication.est_metal(GEMME) and not fabrication.est_metal(None)
+
+
+def test_deux_metaux_ne_se_combinent_pas():
+	assert fabrication.metaux_combines([(LINGOT_FER, 1), (ACIER_PLISSE, 1)]) == [LINGOT_FER, ACIER_PLISSE]
+	assert fabrication.metaux_combines([(LINGOT_FER, 1), (LINGOT_ACIER, 1), (GEMME, 1)])
+
+
+def test_un_metal_avec_d_autres_matieres_passe():
+	assert fabrication.metaux_combines([(LINGOT_FER, 1), (GEMME, 1), (GRENAILLE, 1)]) == []
+	assert fabrication.metaux_combines([(GEMME, 1)]) == []
+
+
+def test_deux_exemplaires_du_meme_metal_comptent_deux():
+	# Indépendant du plafond COMMANDE_QUANTITE_MAX : la règle porte sur le nombre de métaux.
+	assert fabrication.metaux_combines([(LINGOT_FER, fabrication.MATIERES_METAL_MAX + 1)])
