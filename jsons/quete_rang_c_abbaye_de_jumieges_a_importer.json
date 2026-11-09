@@ -824,7 +824,7 @@
       {
         "character": "pnj:aelis_de_montfaucon_jumieges",
         "nom": "Aélis",
-        "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+        "portrait": "architecte_Aélis_de_Montfaucon_jumieges.jpg",
         "probabilite": 1,
         "conditions": [
           {
@@ -872,7 +872,7 @@
     "nom": "Aélis de Montfaucon",
     "race": "humain",
     "vocation": "lettre",
-    "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+    "portrait": "architecte_Aélis_de_Montfaucon_jumieges.jpg",
     "description": "Aélis, devant les ruines de Jumièges, entre son carnet et le portail.",
     "services": {
       "acces": {

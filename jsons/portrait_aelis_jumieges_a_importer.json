@@ -1,0 +1,129 @@
+[
+  {
+    "_id": "lieu:abbaye_de_jumieges",
+    "type": "lieu",
+    "label": "Les ruines de l'abbaye de Jumièges",
+    "image": "abbaye_de_jumieges.jpg",
+    "categorie": "chemin",
+    "lieu_parent": "lieu:france",
+    "pnj": [
+      {
+        "character": "pnj:aelis_de_montfaucon_jumieges",
+        "nom": "Aélis",
+        "portrait": "architecte_Aélis_de_Montfaucon_jumieges.jpg",
+        "probabilite": 1,
+        "conditions": [
+          {
+            "quete_active": {
+              "types": [
+                "escorte"
+              ],
+              "cible": "lieu:les_archives_des_seuils"
+            }
+          }
+        ],
+        "description": "Aélis, au bord du sentier, son carnet ouvert sur les ruines."
+      }
+    ]
+  },
+  {
+    "_id": "pnj:aelis_de_montfaucon_jumieges",
+    "type": "pnj",
+    "nom": "Aélis de Montfaucon",
+    "race": "humain",
+    "vocation": "lettre",
+    "portrait": "architecte_Aélis_de_Montfaucon_jumieges.jpg",
+    "description": "Aélis, devant les ruines de Jumièges, entre son carnet et le portail.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:nef_de_l_abbaye_de_jumieges",
+        "noeuds": {
+          "ouvre": "nef_ouverte",
+          "refus": "nef_close"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Les deux tours de l'abbaye tiennent encore, ouvertes au ciel. Le chemin monte entre les haies jusqu'au portail effondré de la nef. Aélis s'est arrêtée au bord du sentier, carnet ouvert, et compte à mi-voix. « Quarante-deux pas de la porte à la croisée, d'après les vieux relevés. » Elle lève le menton vers les ruines. « Écoutez. »",
+          "choix": [
+            {
+              "id": "ecouter",
+              "label": "Tendre l'oreille.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "next": "seuil"
+            },
+            {
+              "id": "apres",
+              "label": "« C'est fini. Vous avez vos mesures ? »",
+              "condition": {
+                "acces_libere": true
+              },
+              "next": "apres"
+            },
+            {
+              "id": "fin",
+              "label": "(S'éloigner des ruines.)",
+              "next": "fin"
+            }
+          ]
+        },
+        "seuil": {
+          "texte": "Rien, d'abord. Puis un bourdonnement très bas, qui ne vient d'aucune direction et vous serre les dents. Entre les arcs du chœur, une lueur violette pulse, lente comme une respiration. Aélis a pâli, mais sa main n'a pas lâché le crayon. « Il n'a pas la couleur d'un portail entretenu. Il n'a la couleur d'aucun portail que je connaisse. » Quelque chose racle les dalles, dans la nef. Plusieurs choses. « Ils sont sortis de là. Il faut que j'approche à moins de dix pas. »",
+          "choix": [
+            {
+              "id": "entrer",
+              "label": "« Veuillez rester dehors, nous allons inspecter les lieux. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "attendre",
+              "label": "« Pas encore. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "nef_ouverte": {
+          "texte": "« À moins de dix pas, j'ai dit… » Aélis s'arrête pourtant sur le seuil, le carnet serré contre elle. Vous entrez sans elle. Vos pas sonnent sur les dalles de la nef. Trois silhouettes se retournent ensemble, cornes basses, et la lueur du portail allume dans leurs yeux un reflet de braise. Derrière vous, depuis la porte, la voix d'Aélis, très basse : « Des démons. Ils ne s'éloignent pas du portail. Ils le gardent. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Tirer votre arme.",
+              "next": "fin"
+            }
+          ]
+        },
+        "nef_close": {
+          "texte": "Aélis secoue la tête sans quitter la nef des yeux. « Pas maintenant. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Reculer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "apres": {
+          "texte": "La nef enfin sûre, Aélis y est entrée sans attendre qu'on l'y invite. Elle est assise sur une marche du chœur, à dix pas du portail, le carnet couvert de chiffres jusque dans les marges. La lueur violette n'a pas faibli ; elle respire toujours. « J'ai mes mesures. J'en ai même trop : aucune ne ressemble à ce qu'on m'a appris. » Elle referme le carnet sur son crayon. « Il est stable. Pas d'ancrage, pas de cristal, personne pour l'entretenir — et il est stable. » Elle se lève, s'époussette. « Merci de m'avoir fait attendre. Je ne l'aurais pas dit avant. Ramenez-moi à la Cour, {prenom}. Il faut que je pose tout cela à plat aux Archives avant de ne plus me souvenir que de ce que j'ai noté. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« En route pour Lutecia. »",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

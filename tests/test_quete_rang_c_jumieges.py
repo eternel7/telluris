@@ -174,6 +174,27 @@ def test_images_presentes():
 	assert "image" not in entree and entree["portrait"] != docs["lieu:la_cour_des_arches"]["image"]
 
 
+def test_portrait_d_aelis_devant_jumieges():
+	"""L'image de l'Auteur (Aélis devant l'abbaye) est son portrait à Jumièges — entrée du lieu
+	ET doc pnj —, dans l'épreuve comme dans le delta d'import, qui ne change rien d'autre."""
+	portrait = "architecte_Aélis_de_Montfaucon_jumieges.jpg"
+	assert os.path.exists(os.path.join(RESSOURCES, "pnj", portrait))
+	delta = {d["_id"]: d for d in _charger(os.path.join(JSONS, "portrait_aelis_jumieges_a_importer.json"))}
+	assert set(delta) == {"lieu:abbaye_de_jumieges", "pnj:aelis_de_montfaucon_jumieges"}
+	dump = _dump()
+	for docs in (_docs(), delta):
+		assert docs["pnj:aelis_de_montfaucon_jumieges"]["portrait"] == portrait
+		entree = next(e for e in docs["lieu:abbaye_de_jumieges"]["pnj"]
+					  if e["character"] == "pnj:aelis_de_montfaucon_jumieges")
+		assert entree["portrait"] == portrait
+	# Seul le portrait change : on l'efface des deux côtés avant de comparer.
+	ancien = dump["pnj:aelis_de_montfaucon_jumieges"]["portrait"]
+	for _id, d in delta.items():
+		avant = {k: v for k, v in dump[_id].items() if k != "_rev"}
+		assert json.dumps(d, sort_keys=True, ensure_ascii=False).replace(portrait, "X") == \
+			json.dumps(avant, sort_keys=True, ensure_ascii=False).replace(ancien, "X"), _id
+
+
 def test_le_rapport_a_maelys_monte_au_rang_c():
 	docs = _docs()
 	spec = transport.offre_spec(docs["pnj:maelys"])

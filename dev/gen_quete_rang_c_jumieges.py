@@ -47,6 +47,8 @@ PORTRAIT_AELIS = "architecte_Aélis_de_Montfaucon_humain_f03.jpg"
 # Image 3 de l'Auteur (Aélis devant l'Institut) : PORTRAIT du dialogue à la Cour tant que la
 # mission n'est pas faite — l'image du lieu reste celle SANS elle.
 PORTRAIT_AELIS_COUR = "architecte_Aélis_de_Montfaucon_cour_des_arches.jpg"
+# Image de l'Auteur (Aélis devant les ruines de Jumièges) : son portrait devant l'abbaye.
+PORTRAIT_AELIS_JUMIEGES = "architecte_Aélis_de_Montfaucon_jumieges.jpg"
 # Case de la carte de France : boucle de la Seine en aval de Rouen.
 POS_FRANCE = [37, 11]
 # « Ne plus rejouer » une scène d'ouverture : même valeur que les retrouvailles de la Cour.
@@ -440,7 +442,7 @@ def docs_neufs() -> list:
 			"pnj": [{
 				"character": AELIS_JUMIEGES,
 				"nom": "Aélis",
-				"portrait": PORTRAIT_AELIS,
+				"portrait": PORTRAIT_AELIS_JUMIEGES,
 				"probabilite": 1,
 				"conditions": [escorte_active],
 				"description": "Aélis, au bord du sentier, son carnet ouvert sur les ruines.",
@@ -461,7 +463,7 @@ def docs_neufs() -> list:
 			"nom": "Aélis de Montfaucon",
 			"race": "humain",
 			"vocation": "lettre",
-			"portrait": PORTRAIT_AELIS,
+			"portrait": PORTRAIT_AELIS_JUMIEGES,
 			"description": "Aélis, devant les ruines de Jumièges, entre son carnet et le portail.",
 			"services": {
 				"acces": {"lieu": NEF, "noeuds": {"ouvre": "nef_ouverte", "refus": "nef_close"}},
