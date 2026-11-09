@@ -239,6 +239,8 @@ def _matieres_vue(lieu_doc: dict, base_doc: dict, porteurs: list) -> list:
 			"qty_sac": entree["qty_sac"],
 			"apporte": apporte["nom"],
 			"modificateurs": apporte["modificateurs"],
+			# Drapeau calculé ICI (§10) : le client refuse un second métal sans redériver la règle.
+			"metal": fabrication.est_metal(item),
 		})
 	return sorted(lignes, key=lambda l: (0 if l["qty_sac"] else (1 if l["qty"] else 2),
 										 l["nom"] or ""))
@@ -404,6 +406,15 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 				detail="%s n'entre pas dans le tour de main de cette maison."
 					   % (doc.get("nom") or entree["item"]))
 		matieres_docs.append((doc, entree["quantite"]))
+
+	# Un seul métal par pièce (`fabrication.metaux_combines`) — tenu ICI, donc pour `devis`,
+	# `passer` et « Relancer » : le client refuse déjà le second, une requête forgée aussi.
+	metaux = fabrication.metaux_combines(matieres_docs)
+	if metaux:
+		raise HTTPException(
+			status_code=422,
+			detail="Un seul métal par pièce (%s) : les métaux ne se combinent pas."
+				   % ", ".join(dict.fromkeys(d.get("nom") or d.get("_id") or "?" for d in metaux)))
 
 	# ── DEUX passes, et elles ne se facturent pas pareil ────────────────────────────
 	# Les ingrédients de la RECETTE sont déjà compris dans `prix_base` (le coût de revient se

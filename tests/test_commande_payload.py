@@ -42,6 +42,12 @@ _DB = {
 	"item:fer": {"_id": "item:fer", "nom": "Lingot de fer", "categorie": "metal",
 				 "sous_categorie": "fer", "slots": [], "poids": 3.0,
 				 "fabrication": {"nom": "en fer", "modificateurs": {"bonus_degats": 1}}},
+	"item:acier": {"_id": "item:acier", "nom": "Lingot d'acier", "categorie": "metal",
+				   "sous_categorie": "acier", "slots": [], "poids": 3.0, "tags": ["metal", "fabrication_arme"],
+				   "fabrication": {"nom": "en acier", "modificateurs": {"bonus_degats": 2}}},
+	"item:gemme": {"_id": "item:gemme", "nom": "Gemme", "categorie": "composant",
+				   "sous_categorie": "gemme", "slots": [], "poids": 0.1, "tags": ["fabrication_arme"],
+				   "fabrication": {"nom": "serti", "modificateurs": {"bonus_cc": 1}}},
 }
 
 LIEU = {"_id": "lieu:grand_arsenal", "categorie": CATEGORIE_SUR_MESURE,
@@ -193,3 +199,38 @@ def test_une_commande_de_catalogue_en_attente_ne_devient_pas_sur_mesure(atelier,
 	enr = character["commandes"][0]
 	assert enr["statut"] == commande_util.ETAT_ATTENTE_MATERIAUX
 	assert enr["base_item"] == "" and enr["matieres"] == []
+
+
+# ── Un seul métal par pièce ─────────────────────────────────────────────────────
+
+def _metal(doc_id):
+	# `item:fer` de la fixture n'a pas de tag : on le dote du tag `metal` pour ces tests.
+	return dict(_DB[doc_id], tags=["metal"])
+
+
+def test_deux_metaux_sont_refuses_avant_tout_ecrit(atelier, monkeypatch):
+	from fastapi import HTTPException
+	monkeypatch.setitem(_MONDE, "item:fer", _metal("item:fer"))
+	character = _character()
+	with pytest.raises(HTTPException) as e:
+		_passer(monkeypatch, character, {"item_id": "item:Epee_longue", "matieres": [
+			{"item": "item:fer", "quantite": 1}, {"item": "item:acier", "quantite": 1}]})
+	assert e.value.status_code == 422
+	assert "Un seul métal" in e.value.detail
+	assert character["commandes"] == []
+
+
+def test_un_metal_et_une_autre_matiere_passent(atelier, monkeypatch):
+	monkeypatch.setitem(_MONDE, "item:fer", _metal("item:fer"))
+	character = _character()
+	_passer(monkeypatch, character, {"item_id": "item:Epee_longue", "matieres": [
+		{"item": "item:fer", "quantite": 1}, {"item": "item:gemme", "quantite": 1}]})
+	assert len(character["commandes"]) == 1
+
+
+def test_la_liste_des_matieres_signale_les_metaux(atelier, monkeypatch):
+	monkeypatch.setitem(_MONDE, "item:fer", _metal("item:fer"))
+	monkeypatch.setattr(marche, "_matieres_fab_memo", ["item:fer", "item:gemme"])
+	lignes = {l["item_id"]: l for l in rc._matieres_vue(LIEU, _DB["item:Epee_longue"], [_character()])}
+	assert lignes["item:fer"]["metal"] is True
+	assert lignes["item:gemme"]["metal"] is False

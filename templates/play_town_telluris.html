@@ -9633,9 +9633,18 @@ function _smToggle(btn) {
 	else if (_smEtat.choisies.length >= MARCHAND.cmdMatieresMax) {
 		showToast('Pas plus de ' + MARCHAND.cmdMatieresMax + ' matières dans une même pièce.');
 		return;
+	} else if (_smEstMetal(id) && _smEtat.choisies.some(_smEstMetal)) {
+		// Drapeau `metal` servi par le serveur, qui revérifie à `devis`/`passer`.
+		showToast('Un seul métal par pièce : les métaux ne se combinent pas.');
+		return;
 	} else _smEtat.choisies.push(id);
 	_smRender();
 	_smRafraichirDevis();
+}
+
+function _smEstMetal(id) {
+	const m = (MARCHAND.cmdMatieres || []).find(x => x.item_id === id);
+	return !!(m && m.metal);
 }
 
 // D'où sort cette matière ? Les trois provenances du serveur, lues sur les deux compteurs :
@@ -9675,13 +9684,14 @@ function _smRender() {
 	const cat = (MARCHAND.catalogue || []).find(c => c.item_id === _smEtat.itemId);
 	document.getElementById('sur-mesure-body').innerHTML =
 		`<h3 style="margin:.1rem 0 .2rem">✨ ${escapeHtml((cat && cat.nom) || 'Sur mesure')}</h3>
-		<p class="cmd-aide">Jusqu'à ${MARCHAND.cmdMatieresMax} matières. Ce que vous avez dans vos sacs (🎒) est pris d'abord ; ce qui est en rayon est acheté à l'artisan ; ce qui reste à trouver (🔎) met la commande en attente.</p>
+		<p class="cmd-aide">Jusqu'à ${MARCHAND.cmdMatieresMax} matières, dont un seul métal (⚒️). Ce que vous avez dans vos sacs (🎒) est pris d'abord ; ce qui est en rayon est acheté à l'artisan ; ce qui reste à trouver (🔎) met la commande en attente.</p>
 		${_smChoixBase()}
 		<div class="sm-liste">${
 			mats.length ? mats.map(m => `<button type="button" class="sm-matiere${_smEtat.choisies.includes(m.item_id) ? ' choisie' : ''}"
 				data-item="${escapeHtml(m.item_id)}" onclick="_smToggle(this)">
 				<span>${m.icon || '🧱'}</span>
 				<span class="sm-matiere-nom">${escapeHtml(m.nom)}</span>
+				${m.metal ? '<span class="sm-source" title="Métal — un seul par pièce">⚒️</span>' : ''}
 				${_smProvenance(m)}
 				<span class="sm-apporte">${escapeHtml(m.apporte || '—')}</span>
 			</button>`).join('')
