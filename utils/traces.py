@@ -123,11 +123,20 @@ def traces_ici(character: dict, lieu_doc: dict | None, get_doc_fn, find_docs_fn,
 	`expedition.membres(character)` ; `ville` = lieu à image de ville (grades plafonnés)."""
 	if not lieu_doc or not lieu_doc.get("rencontres") or not lieu_doc.get("zone_influences"):
 		return None
+	profils = find_docs_fn({"type": "profil"}) or []
+	menace = menace_lieu(lieu_doc, character.get("position") or {}, get_doc_fn, profils, ville)
+	return payload(menace, pisteur(membres))
+
+
+def menace_lieu(lieu_doc: dict | None, position: dict, get_doc_fn, profils: list,
+				ville: bool) -> dict | None:
+	"""`pire_menace` à `position` dans `lieu_doc`, zones et espèces relues (DB injectée) :
+	la lecture même des traces, partagée avec le choix de cible d'une épreuve de rang
+	(`chasse.offre_rang_pour`). `profils` = tous les docs profil ; `ville` ⇒ grades plafonnés."""
+	if not lieu_doc or not lieu_doc.get("rencontres") or not lieu_doc.get("zone_influences"):
+		return None
 	zone_defs = load_zone_defs_for_lieu(lieu_doc, get_doc_fn)
 	ids = {r.get("espece") for r in lieu_doc.get("rencontres", []) if r.get("espece")}
 	especes = {i: d for i, d in ((i, get_doc_fn(i)) for i in ids) if d}
-	profils = find_docs_fn({"type": "profil"}) or []
-	menace = pire_menace(lieu_doc, character.get("position") or {}, zone_defs, especes, profils,
-						 get_doc_fn,
-						 cap_niveau=character_stats.TOWN_PROFIL_NIVEAU_MAX if ville else None)
-	return payload(menace, pisteur(membres))
+	return pire_menace(lieu_doc, position or {}, zone_defs, especes, profils, get_doc_fn,
+					   cap_niveau=character_stats.TOWN_PROFIL_NIVEAU_MAX if ville else None)

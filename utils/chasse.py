@@ -29,6 +29,10 @@
 # abattant un écureuil. Aucune cible au niveau ⇒ pas d'épreuve (fail-closed, comme le plafond).
 # PLAFOND préféré : sous le plancher du rang d'APRÈS (`potentiel_max_pour`) ; à défaut, la cible
 # la plus faible au-dessus — une épreuve pour B n'exige plus une bête de rang S.
+# ZONE préférée (avant le plafond) : la pire rencontre possible autour de la cible reste sous le
+# plancher du rang visé + 2 (`menace_zone_max_pour`) — plus de nosferatu D au milieu des dragons S+.
+# RENCONTRE GARANTIE : un combat lancé dans le 3×3 d'une épreuve de rang n'oppose que l'espèce
+# traquée (`epreuve_rang_ici`, appliqué par `start_combat`) — plus de loterie dans un pool de 20.
 #
 # Logique pure (DB injectée : get_doc_fn / find_docs_fn), mute sans save — l'endpoint persiste.
 # Pattern de utils/transport.py. World-vars lues via le module (jamais from-import).
@@ -73,14 +77,16 @@ def lieux_chasse_de(cite_id: str, get_doc_fn, find_docs_fn) -> list:
 	⚠️ Requête PROJETÉE sur les seuls champs consommés en aval — sans quoi elle rapatrie les
 	`cells` de chaque enfant de la cité (44 docs, ~30 Ko à Auxerre) pour n'en garder que des
 	`_id`. Les champs listés sont exactement ceux que lisent `especes_du_parent`,
-	`position_de_chasse`, `_profils_compatibles` et `_construire_quete_rang` (`label`)."""
+	`position_de_chasse`, `_profils_compatibles` et `_construire_quete_rang` (`label`), plus
+	`image` (lieu de ville ⇒ grades plafonnés dans la menace de zone, `menace_zone`)."""
 	out = []
 	cite = get_doc_fn(cite_id) if cite_id else None
 	if cite is not None:
 		out.append(cite)
 	enfants = (find_docs_fn(
 		{"type": "lieu", "lieu_parent": cite_id},
-		["_id", "type", "label", "nom", "rencontres", "zone_influences", "profil_weights", "dimensions"],
+		["_id", "type", "label", "nom", "rencontres", "zone_influences", "profil_weights", "dimensions",
+		 "image"],
 	) or []) if cite_id else []
 	for l in enfants:
 		if l.get("_id") == cite_id:
@@ -322,13 +328,29 @@ def chasse_accomplie(q: dict) -> bool:
 	return int((q or {}).get("progress", 0) or 0) >= int(obj.get("quantite", 1) or 1)
 
 
+def epreuve_rang_ici(character: dict, lieu_id: str) -> dict | None:
+	"""Épreuve de RANG encore à faire dans ce lieu dont la zone 3×3 contient le joueur, ou None.
+	`start_combat` y GARANTIT la rencontre : pool réduit à l'espèce traquée, opposition de base à
+	un seul monstre (l'élite, que `marquer_elites` promeut ensuite) — sans quoi l'élite ne sortait
+	qu'au gré du tirage, une fois sur vingt dans une zone peuplée, entre deux bêtes bien pires.
+	Les chasses du TABLEAU gardent la rencontre naturelle. Première épreuve de la liste."""
+	for q in quetes_chasse_actives(character, lieu_id):
+		if q.get("source") != "rang" or chasse_accomplie(q):
+			continue
+		obj = q.get("objectif") or {}
+		if obj.get("cible") and dans_zone_chasse(obj, (character or {}).get("position")):
+			return q
+	return None
+
+
 def marquer_elites(character: dict, monstres: list, lieu_id: str, pool_especes: list,
                    get_doc_fn, snapshot_fn) -> str | None:
 	"""Promeut en élite un monstre par chasse EN COURS dans ce lieu, dont la zone 3×3 contient
 	le joueur : le grade a été résolu à la génération, on l'applique tel quel (`snapshot_fn` =
 	`combat.build_monster_snapshot`, injecté pour garder ce module pur). Mute `monstres` en
 	place ; renvoie la narration pré-combat de la variante « rang », s'il y en a une. On ne
-	force JAMAIS l'apparition de l'espèce : si elle n'est pas au pool, rien n'est marqué.
+	force JAMAIS l'apparition de l'espèce ICI : si elle n'est pas au pool, rien n'est marqué
+	(c'est `start_combat` qui réduit le pool d'une épreuve de rang, cf. `epreuve_rang_ici`).
 
 	⚠️ Une chasse ACCOMPLIE mais pas encore rendue reste dans `quetes_actives` : sans le filtre
 	`chasse_accomplie`, elle réclamerait encore son élite et la VOLERAIT au contrat encore à
@@ -638,6 +660,35 @@ def potentiel_max_pour(rang_vise: str) -> float | None:
 	return potentiel_min_pour(rang_suivant(rang_vise))
 
 
+def menace_zone_max_pour(rang_vise: str) -> float | None:
+	"""Menace de ZONE tolérée autour de la cible d'une épreuve visant `rang_vise` : la pire
+	rencontre possible à sa position (`traces.pire_menace`, la lecture 🐾 du joueur) doit rester
+	sous le plancher du rang DEUX crans au-dessus — une épreuve pour D tolère une zone de rang C,
+	pas le dragon S+ qui partageait la zone du nosferatu. None (aucune limite) si ce rang n'existe
+	pas ou n'a pas de plancher."""
+	if rang_vise not in RANGS:
+		return None
+	i = RANGS.index(rang_vise) + 2
+	if i >= len(RANGS):
+		return None
+	return potentiel_min_pour(RANGS[i])
+
+
+def menace_zone(lieu_doc: dict, position: dict | None, get_doc_fn, profils: list) -> float | None:
+	"""Potentiel de la pire rencontre possible à `position` dans `lieu_doc` (`traces.menace_lieu`,
+	grades plafonnés dans un lieu de ville comme au combat), ou None (rien de lisible). Import
+	PARESSEUX : `traces → potentiel → simulateur → combat → quetes` (cf. `potentiel_cible`)."""
+	if position is None:
+		return None
+	from utils import traces
+	from utils.lieux import lieu_est_ville_image
+	try:
+		m = traces.menace_lieu(lieu_doc, position, get_doc_fn, profils, lieu_est_ville_image(lieu_doc))
+	except Exception:
+		return None
+	return None if m is None else float(m["potentiel"])
+
+
 def potentiel_cible(espece_doc: dict, profil_id: str, get_doc_fn) -> float | None:
 	"""Dangerosité de l'espèce sous ce profil : potentiel de combat, ÉQUIPEMENT ESPÉRÉ et bonus
 	humanoïde compris, × le facteur de FUITE INTERDITE (`potentiel.potentiel_menace`, la mesure
@@ -658,7 +709,7 @@ def potentiel_cible(espece_doc: dict, profil_id: str, get_doc_fn) -> float | Non
 
 
 def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_fn,
-                    potentiel_fn=None) -> dict | None:
+                    potentiel_fn=None, menace_zone_fn=None) -> dict | None:
 	"""Construit une épreuve de rang au comptoir, ou `None` si : pas de `lieu_parent`, personnage
 	non inscrit à la guilde de la cité (`inscrit_a_la_guilde`), PLAFOND DE
 	CE COMPTOIR déjà atteint (`rang_max_de`, défaut `D` — pas le sommet du monde), épreuve de rang
@@ -670,7 +721,13 @@ def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_f
 	PLAFOND (`potentiel_max_pour`) : parmi les cibles au plancher, on préfère celles qui restent
 	SOUS le plancher du rang d'après — une épreuve pour B ne doit pas exiger une bête de rang S
 	(le griffon de Lutecia). S'il n'y en a aucune, on garde la ou les plus FAIBLES au-dessus : le
-	plafond adoucit l'épreuve, il ne la supprime jamais."""
+	plafond adoucit l'épreuve, il ne la supprime jamais.
+
+	ZONE (`menace_zone_max_pour`) : AVANT le plafond, on préfère les cibles dont la pire rencontre
+	possible à la position (`menace_zone`, la lecture des 🐾 traces) reste sous la limite du rang
+	visé — un nosferatu de puissance D ne vaut rien s'il rôde parmi des dragons S+. Aucune ⇒ celles
+	dont la zone est la MOINS dangereuse (préférence, jamais suppression). `menace_zone_fn(lieu,
+	position, get_doc_fn, profils)` injectable, défaut `menace_zone` ; profils lus une fois."""
 	cite = (comptoir_doc or {}).get("lieu_parent")
 	if not cite:
 		return None
@@ -712,6 +769,19 @@ def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_f
 			candidats.append((L, espece, position, profil_id, pot))
 	if not candidats:
 		return None
+	zone_max = menace_zone_max_pour(rang_vise)
+	if zone_max is not None:
+		menace_zone_fn = menace_zone_fn or menace_zone
+		profils = find_docs_fn({"type": "profil"}) or []
+		menaces = [menace_zone_fn(c[0], c[2], get_doc_fn, profils) for c in candidats]
+		# Illisible ⇒ 0 : une zone qu'on ne sait pas mesurer n'est pas réputée dangereuse.
+		menaces = [0.0 if m is None else m for m in menaces]
+		sures = [c for c, m in zip(candidats, menaces) if m < zone_max]
+		if sures:
+			candidats = sures
+		else:
+			m_min = min(menaces)
+			candidats = [c for c, m in zip(candidats, menaces) if m == m_min]
 	if plafond is not None:
 		sous = [c for c in candidats if c[4] < plafond]
 		if sous:

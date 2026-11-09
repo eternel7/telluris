@@ -637,6 +637,105 @@ def test_potentiel_max_pour_est_le_plancher_du_rang_d_apres(monkeypatch):
 	assert chasse.potentiel_max_pour("rang_inconnu") is None
 
 
+# ── Zone préférée : la pire rencontre AUTOUR de la cible (menace_zone_max_pour) ──
+# Lutecia (E → D) envoyait abattre un nosferatu de puissance D… dans la zone des dragons S+.
+# Le lapin rôde dans un col à part, le loup dans la forêt : deux positions, deux menaces.
+COL_DEF = {"_id": "zone:col", "type": "zone", "nom": "Col", "intensite_max": 1.0}
+AUXERRE_DEUX_ZONES = {**AUXERRE,
+	"zone_influences": [PLACEMENT, {"zone": "zone:col", "x": 14, "y": 14, "w": 4, "h": 4,
+	                                "forme": "rectangle", "rot": 0}],
+	"rencontres": AUXERRE["rencontres"] + [{"espece": "espece:lapin", "zones": ["zone:col"]}]}
+
+
+def _get_doc_deux_zones(doc_id):
+	if doc_id == "lieu:auxerre":
+		return AUXERRE_DEUX_ZONES
+	return COL_DEF if doc_id == "zone:col" else _DOCS.get(doc_id)
+
+
+def _menace_par_x(table):
+	"""`menace_zone_fn` de test : menace lue sur la colonne de la position (5 = forêt, 14 = col)."""
+	return lambda lieu, position, get_doc_fn, profils: table.get(position["x"])
+
+
+def _cibles_zone(menaces, n=30):
+	return {
+		chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc_deux_zones, _find_docs,
+		                       potentiel_fn=_potentiel_fixe,
+		                       menace_zone_fn=_menace_par_x(menaces))["objectif"]["cible"]
+		for _ in range(n)
+	}
+
+
+def test_offre_rang_prefere_une_zone_sous_la_limite(monkeypatch):
+	# Vise E : zone tolérée sous le plancher de C (100). La forêt du loup (500) est écartée.
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 5.0, "D": 200.0, "C": 100.0})
+	random.seed(4)
+	assert _cibles_zone({5: 500.0, 14: 20.0}) == {"espece:lapin"}
+
+
+def test_offre_rang_toutes_zones_trop_dangereuses_garde_la_moins_dangereuse(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 5.0, "D": 200.0, "C": 100.0})
+	random.seed(4)
+	assert _cibles_zone({5: 300.0, 14: 900.0}) == {"espece:loup"}   # jamais supprimée
+
+
+def test_offre_rang_la_zone_passe_avant_le_plafond(monkeypatch):
+	# Le plafond (D = 50) préférerait le lapin (10) au loup (60) — mais le lapin rôde en zone
+	# trop dangereuse : la zone tranche d'abord, le plafond ne départage plus que le loup.
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 5.0, "D": 50.0, "C": 100.0})
+	random.seed(4)
+	assert _cibles_zone({5: 20.0, 14: 900.0}) == {"espece:loup"}
+
+
+def test_offre_rang_zone_illisible_nest_pas_reputee_dangereuse(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"E": 5.0, "D": 200.0, "C": 100.0})
+	random.seed(4)
+	assert _cibles_zone({5: 500.0}) == {"espece:lapin"}             # col : None ⇒ 0
+
+
+def test_menace_zone_max_pour_est_le_plancher_deux_rangs_au_dessus(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_RANG_POTENTIEL_MIN", {"C": 105.0, "B": 175.0})
+	assert chasse.menace_zone_max_pour("D") == 175.0                # D tolère une zone C
+	assert chasse.menace_zone_max_pour("E") == 105.0
+	assert chasse.menace_zone_max_pour("C") is None                 # A sans plancher
+	assert chasse.menace_zone_max_pour(RANGS[-2]) is None           # au-delà du sommet
+	assert chasse.menace_zone_max_pour("rang_inconnu") is None
+
+
+def test_menace_zone_lit_les_traces_de_la_position():
+	# Défaut : `traces.menace_lieu`, la lecture 🐾 du joueur. Le loup rôde en forêt, rien au col.
+	profils = [NOVICE, APPRENTI, COMBATTANT, VETERAN, MAGE]
+	foret = chasse.menace_zone(AUXERRE_DEUX_ZONES, {"x": 5, "y": 5}, _get_doc_deux_zones, profils)
+	assert foret is not None and foret > 0
+	assert chasse.menace_zone(AUXERRE, {"x": 19, "y": 19}, _get_doc, profils) is None
+	assert chasse.menace_zone(AUXERRE, None, _get_doc, profils) is None
+
+
+# ── Rencontre garantie d'une épreuve de rang (epreuve_rang_ici) ─────────────────
+
+def _epreuve(source="rang", progress=0):
+	return {"id": "q1", "source": source, "progress": progress,
+	        "objectif": {"type": "chasse", "cible": "espece:loup", "profil": "profil:veteran",
+	                     "lieu": "lieu:france", "position": {"x": 10, "y": 10}, "quantite": 1}}
+
+
+def test_epreuve_rang_ici_dans_le_3x3_seulement():
+	q = _epreuve()
+	perso = {"quetes_actives": [q], "position": {"x": 11, "y": 9}}
+	assert chasse.epreuve_rang_ici(perso, "lieu:france") is q
+	assert chasse.epreuve_rang_ici({**perso, "position": {"x": 12, "y": 10}}, "lieu:france") is None
+	assert chasse.epreuve_rang_ici(perso, "lieu:lutecia") is None   # autre lieu
+
+
+def test_epreuve_rang_ici_ignore_le_tableau_et_les_epreuves_faites():
+	pos = {"x": 10, "y": 10}
+	assert chasse.epreuve_rang_ici({"quetes_actives": [_epreuve("genere")], "position": pos},
+	                               "lieu:france") is None
+	assert chasse.epreuve_rang_ici({"quetes_actives": [_epreuve(progress=1)], "position": pos},
+	                               "lieu:france") is None
+
+
 def test_planchers_par_defaut_sur_lechelle_et_croissants():
 	planchers = character_stats.CODE_DEFAULTS["QUETE_RANG_POTENTIEL_MIN"]
 	assert planchers and set(planchers) <= set(RANGS)
