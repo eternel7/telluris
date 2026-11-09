@@ -44,7 +44,7 @@ import uuid
 
 from models import character_stats
 from utils.characters import item_ref_id, poids_bounds, tirer_poids, lieu_label
-from utils import focalisation, marche, quetes
+from utils import capacites, enseignes_icones, focalisation, marche, quetes
 
 
 # Sentinelle de `recompenses.items[].lieu_parent` dans une offre écrite : « le lieu parent du
@@ -264,14 +264,20 @@ def chercher_lieu_nomme(nom: str, giver_doc: dict, find_docs_fn) -> dict:
 	`giver_doc` lui-même est exclu. Renvoie {"exact": (id, nom)} (casse ignorée ; article de
 	tête ignoré si un SEUL lieu correspond), {"suggestions": [nom, …]} (au plus
 	SUGGESTIONS_MAX, les plus ressemblants d'abord), ou {} si rien n'approche."""
-	parent_id = (giver_doc or {}).get("lieu_parent")
-	if not nom or not parent_id:
+	if not nom:
 		return {}
+	return chercher_parmi(nom, lieux_nommes(giver_doc, find_docs_fn))
+
+
+def lieux_nommes(giver_doc: dict, find_docs_fn) -> list:
+	"""[(lieu_id, libellé)] des lieux de la ville de `giver_doc`, lui exclu. [] sans ville."""
+	parent_id = (giver_doc or {}).get("lieu_parent")
+	if not parent_id:
+		return []
 	giver_id = (giver_doc or {}).get("_id")
-	candidats = [(d["_id"], lieu_label(d, d["_id"]))
-				 for d in find_docs_fn({"type": "lieu", "lieu_parent": parent_id}) or []
-				 if d.get("_id") and d["_id"] != giver_id]
-	return chercher_parmi(nom, candidats)
+	return [(d["_id"], lieu_label(d, d["_id"]))
+			for d in find_docs_fn({"type": "lieu", "lieu_parent": parent_id}) or []
+			if d.get("_id") and d["_id"] != giver_id]
 
 
 def chercher_parmi(nom: str, candidats: list) -> dict:
@@ -333,6 +339,68 @@ def libelle_type(categorie) -> str:
 	return str(categorie or "").replace("_", " ").strip()
 
 
+# Mots-outils ignorés DANS un type (« guilde d'aventuriers » = « guilde des aventuriers » =
+# « guilde_aventurier ») ; le pluriel final d'un mot l'est aussi (`cle_type`).
+_MOTS_OUTILS_TYPE = {"de", "des", "du", "d", "la", "le", "les", "l"}
+
+# Capacités (`utils/capacites`) dont le TAG et le LIBELLÉ servent d'alias de type :
+# « taverne » mène à l'auberge, « guilde » à la maison de guilde. Pas `sur_mesure` : « fabrication
+# sur mesure » n'est pas un genre d'endroit que l'on demande dans la rue.
+CAPACITES_ALIAS_TYPE = tuple(enseignes_icones.CAPACITE_METIER)
+
+# Capacités dont TOUTES les catégories accordantes forment UN SEUL type de recherche : la maison
+# de guilde est éclatée en quatre lieux (façade, réception, comptoir, bureau du maître), le joueur
+# demande « la guilde ». Le type canonique est la catégorie de `enseignes_icones.CAPACITE_METIER`.
+CAPACITES_TYPE_UNIQUE = ("guilde",)
+
+
+def type_canonique(categorie) -> str:
+	"""Type de recherche d'une catégorie : elle-même, sauf les catégories d'une capacité de
+	`CAPACITES_TYPE_UNIQUE` (relues dans `capacites`), regroupées sous un seul type."""
+	for cap_id in CAPACITES_TYPE_UNIQUE:
+		if categorie in capacites.categories_de(capacites.PAR_ID.get(cap_id)):
+			return enseignes_icones.CAPACITE_METIER[cap_id]
+	return categorie
+
+
+def _categories_du_type(type_id) -> list:
+	"""Les catégories regroupées sous `type_id` (lui-même compris)."""
+	for cap_id in CAPACITES_TYPE_UNIQUE:
+		if enseignes_icones.CAPACITE_METIER.get(cap_id) == type_id:
+			return capacites.categories_de(capacites.PAR_ID.get(cap_id)) or [type_id]
+	return [type_id]
+
+
+def libelle_type_joueur(type_id) -> str:
+	"""Nom d'un type tel qu'un passant le dit, SANS article : celui du marqueur de carte
+	(`enseignes_icones.METIERS` — « fletcher » → « archerie », « guilde_aventurier » → « guilde
+	des aventuriers »), sinon la catégorie en clair."""
+	metier = enseignes_icones.METIERS.get(type_id)
+	if not metier:
+		return libelle_type(type_id)
+	texte = metier[2]
+	for art in ("une ", "un ", "des ", "la ", "le ", "les ", "l'"):
+		if texte.startswith(art):
+			return texte[len(art):]
+	return texte
+
+
+def alias_type(type_id) -> set:
+	"""Clés (`cle_type`) sous lesquelles on reconnaît un type : chacune de ses catégories en
+	clair et par son métier, plus le tag et le libellé des capacités qu'elles accordent
+	(`CAPACITES_ALIAS_TYPE`)."""
+	textes = {libelle_type_joueur(type_id)}
+	for cat in _categories_du_type(type_id):
+		textes.add(libelle_type(cat))
+		textes.add(libelle_type_joueur(cat))
+		caps = capacites.capacites_de({"categorie": cat})
+		for cap_id in CAPACITES_ALIAS_TYPE:
+			if caps.get(cap_id):
+				textes.add(capacites.PAR_ID[cap_id]["tag"])
+				textes.add(capacites.PAR_ID[cap_id]["label"])
+	return {k for k in (cle_type(t) for t in textes) if k}
+
+
 def cle_type(texte) -> str:
 	"""Clé de comparaison d'un type : casse et accents ignorés, underscores = espaces, blancs
 	écrasés, article de tête retiré (« une Boulangerie » = « boulangerie »)."""
@@ -342,8 +410,10 @@ def cle_type(texte) -> str:
 		if t.startswith(art) and len(t) > len(art):
 			t = t[len(art):]
 			break
-	# « laboratoire d'alchimie » = « laboratoire_d_alchimie ».
-	return " ".join(t.replace("'", " ").split())
+	# « laboratoire d'alchimie » = « laboratoire_d_alchimie » ; « guilde d'aventuriers » =
+	# « guilde des aventuriers » = « guilde_aventurier » : mots-outils et pluriel ignorés.
+	mots = [m for m in t.replace("'", " ").split() if m not in _MOTS_OUTILS_TYPE]
+	return " ".join(m[:-1] if len(m) > 3 and m.endswith("s") else m for m in mots)
 
 
 def levenshtein(a: str, b: str) -> int:
@@ -361,8 +431,8 @@ def levenshtein(a: str, b: str) -> int:
 
 
 def magasins_par_type(giver_doc: dict, find_docs_fn, est_magasin_fn=None) -> dict:
-	"""{categorie: [(lieu_id, libellé), …]} — les magasins de la ville de `giver_doc`, lui
-	exclu, groupés par type. {} sans ville."""
+	"""{type: [(lieu_id, libellé), …]} — les magasins de la ville de `giver_doc`, lui
+	exclu, groupés par type (`type_canonique` de leur catégorie). {} sans ville."""
 	est_magasin_fn = est_magasin_fn or tient_boutique
 	parent_id = (giver_doc or {}).get("lieu_parent")
 	if not parent_id:
@@ -372,7 +442,7 @@ def magasins_par_type(giver_doc: dict, find_docs_fn, est_magasin_fn=None) -> dic
 	for d in find_docs_fn({"type": "lieu", "lieu_parent": parent_id}) or []:
 		if not d.get("_id") or d["_id"] == giver_id or not d.get("categorie") or not est_magasin_fn(d):
 			continue
-		par_type.setdefault(d["categorie"], []).append((d["_id"], lieu_label(d, d["_id"])))
+		par_type.setdefault(type_canonique(d["categorie"]), []).append((d["_id"], lieu_label(d, d["_id"])))
 	return par_type
 
 
@@ -385,19 +455,19 @@ def lieux_par_type(giver_doc: dict, find_docs_fn) -> dict:
 
 
 def chercher_type(nom: str, categories) -> dict:
-	"""La saisie désigne-t-elle un type connu ? {"exact": categorie} ; sinon le type le plus
-	proche à TYPE_LEVENSHTEIN_MAX au plus → {"proche": categorie} (ex æquo : ordre
+	"""La saisie désigne-t-elle un type connu (l'un de ses `alias_type`) ? {"exact": type} ;
+	sinon le type le plus proche à TYPE_LEVENSHTEIN_MAX au plus → {"proche": categorie} (ex æquo : ordre
 	alphabétique, pour un résultat stable) ; sinon {}."""
 	cle = cle_type(nom)
 	if not cle:
 		return {}
-	cles = {c: cle_type(libelle_type(c)) for c in sorted(categories or ())}
-	for cat, k in cles.items():
-		if k == cle:
+	cles = {c: alias_type(c) for c in sorted(categories or ())}
+	for cat, alias in cles.items():
+		if cle in alias:
 			return {"exact": cat}
 	meilleur, meilleure_d = None, None
-	for cat, k in cles.items():
-		d = levenshtein(cle, k)
+	for cat, alias in cles.items():
+		d = min(levenshtein(cle, k) for k in alias)
 		if d <= TYPE_LEVENSHTEIN_MAX and (meilleure_d is None or d < meilleure_d):
 			meilleur, meilleure_d = cat, d
 	return {"proche": meilleur} if meilleur else {}
@@ -411,11 +481,14 @@ def plus_proche(giver_doc: dict, candidats: list, find_docs_fn) -> tuple:
 	portes = portes_du_parent(graphe, (giver_doc or {}).get("lieu_parent"))
 	porte_x = porte_effective(graphe, portes, (giver_doc or {}).get("_id"))
 
+	# À porte égale, le lieu qui DONNE sur la ville passe devant ceux qu'il abrite : demander
+	# « la guilde » mène à sa façade, pas à son comptoir (même porte effective).
 	def eloignement(c):
 		porte = porte_effective(graphe, portes, c[0])
+		imbrique = 0 if c[0] in portes else 1
 		if not (porte and porte_x):
-			return (1, 0, c[1])
-		return (0, (porte[0] - porte_x[0]) ** 2 + (porte[1] - porte_x[1]) ** 2, c[1])
+			return (1, 0, imbrique, c[1])
+		return (0, (porte[0] - porte_x[0]) ** 2 + (porte[1] - porte_x[1]) ** 2, imbrique, c[1])
 
 	return min(candidats, key=eloignement)
 
@@ -430,8 +503,18 @@ def choix_confirmation_type(categorie: str, noeud_id: str, choix_id: str) -> lis
 		"action": False,
 		"marque": None,
 		"saisie": False,
-		"rejouer": {"noeud": noeud_id, "saisie": libelle_type(categorie)},
+		"rejouer": {"noeud": noeud_id, "saisie": libelle_type_joueur(categorie)},
 	}]
+
+
+def aide_saisie_direction(giver_doc: dict, find_docs_fn) -> list:
+	"""Aide à la saisie du service `direction` (`<datalist>` du champ) : les types de lieux de
+	la ville (`libelle_type_joueur`), puis les noms des lieux — exactement ce que
+	`_resoudre_direction` sait trouver. Triée, dédoublonnée, sans casse ni accent distincts."""
+	types = sorted({libelle_type_joueur(t) for t in lieux_par_type(giver_doc, find_docs_fn)},
+				   key=cle_type)
+	noms = sorted({label for _, label in lieux_nommes(giver_doc, find_docs_fn)}, key=str.casefold)
+	return types + [n for n in noms if n not in types]
 
 
 # ---------------------------------------------------------------------------

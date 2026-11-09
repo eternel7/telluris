@@ -13171,8 +13171,8 @@ function renderPnjNoeud(noeud) {
 		? `<li><button class="sub-loc-btn" data-index="${i}"${c.rebours
 			? ` data-echeance="${recu + c.rebours.ferme_dans_s * 1000}"` : ''} onclick="choisirPnjRejouer(${i})">${escapeHtml(c.label)}</button></li>`
 		: c.saisie
-		? `<li class="pnj-saisie"><input type="text" id="pnj-saisie-${c.id}" maxlength="80"
-				placeholder="Nom ou type de lieu…" onkeydown="if(event.key==='Enter'){choisirPnjSaisie('${c.id}');}">
+		? `<li class="pnj-saisie"><input type="text" id="pnj-saisie-${c.id}" maxlength="80"${_pnjAideAttr(c)}
+				placeholder="Nom ou type de lieu…" onkeydown="if(event.key==='Enter'){setTimeout(()=>choisirPnjSaisie('${c.id}'));}">${_pnjAideListe(c)}
 			<button class="sub-loc-btn" onclick="choisirPnjSaisie('${c.id}')">${c.label}</button></li>`
 		: `<li><button class="sub-loc-btn" onclick="choisirPnj('${c.id}')">${_marquePastille(c.marque)}${c.action ? '✨ ' : ''}${c.label}</button></li>`
 	).join('') || '<li><button class="sub-loc-btn" onclick="closePnjPanel()">✕ Prendre congé</button></li>';
@@ -13183,6 +13183,19 @@ function renderPnjNoeud(noeud) {
 	}
 	const champ = liste.querySelector('.pnj-saisie input');
 	if (champ) champ.focus();
+}
+
+// Aide à la saisie d'un choix `saisie` (service `direction`) : `c.aide` = types de lieux puis
+// noms des lieux de la ville, servis par le serveur. Rendu en `list=` + `<datalist>` collé à
+// l'`<input>` (attributs échappés : ce sont des noms d'enseigne). Sans `aide`, rien.
+// Le `setTimeout` du Entrée laisse le navigateur recopier la proposition choisie au clavier.
+function _pnjAideAttr(c) {
+	return Array.isArray(c.aide) && c.aide.length ? ` list="pnj-aide-${c.id}" autocomplete="off"` : '';
+}
+function _pnjAideListe(c) {
+	if (!Array.isArray(c.aide) || !c.aide.length) return '';
+	return `<datalist id="pnj-aide-${c.id}">`
+		+ c.aide.map(v => `<option value="${escapeHtml(v)}"></option>`).join('') + '</datalist>';
 }
 
 function choisirPnjSaisie(choixId) {

@@ -892,12 +892,31 @@ def _resoudre_portail(character: dict, pnj_doc: dict, lieu_doc: dict, op: str, s
 	return noeuds.get("ouvert")
 
 
+def _aide_saisie_direction(pnj_doc: dict, lieu_doc: dict, noeud: dict | None) -> None:
+	"""Pose `aide` (liste de propositions du `<datalist>` du champ) sur chaque choix à SAISIE
+	du nœud servi dont l'action est le service `direction` : types de lieux puis noms des lieux
+	de la ville (`transport.aide_saisie_direction`). Rien à lire si aucun tel choix n'est visible."""
+	if not noeud:
+		return
+	brut = ((((pnj_doc or {}).get("dialogue") or {}).get("noeuds") or {}).get(noeud.get("id")) or {})
+	actions = {c.get("id"): c.get("action") for c in brut.get("choix") or []}
+	aide = None
+	for c in noeud.get("choix") or []:
+		action = actions.get(c.get("id"))
+		if not (c.get("saisie") and isinstance(action, dict) and action.get("service") == "direction"):
+			continue
+		if aide is None:
+			aide = transport.aide_saisie_direction(lieu_doc, find_docs)
+		c["aide"] = aide
+
+
 def _resoudre_direction(pnj_doc: dict, lieu_doc: dict, saisie) -> tuple[str | None, dict]:
 	"""Service `direction` : le PNJ cherche le lieu SAISI par le joueur parmi ceux de sa ville.
 	Dans l'ordre :
 	1. nom exact À LA LETTRE (casse ignorée) → `trouve`, avec la phrase d'orientation des
 	   courses ({direction} : « au sud-est d'ici, tout près de … ») ;
-	2. TYPE de lieu exact (sa catégorie, magasin ou non : `transport.lieux_par_type`) →
+	2. TYPE de lieu exact (sa catégorie ou l'un de ses `transport.alias_type` — « guilde »,
+	   « taverne » —, magasin ou non : `transport.lieux_par_type`) →
 	   `trouve` aussi, MÊME FORME que par le nom, pour le lieu de ce type le plus proche (`transport.plus_proche`) — AVANT le nom à
 	   article près : « fumoir » est le type, pas l'enseigne « Le Fumoir » ;
 	3. nom exact à article près → `trouve` ;
@@ -922,7 +941,7 @@ def _resoudre_direction(pnj_doc: dict, lieu_doc: dict, saisie) -> tuple[str | No
 	if type_trouve.get("proche"):
 		# `_type` n'est pas un placeholder : le router le retire pour bâtir le « Oui ».
 		return noeuds.get("type_propose"), {
-			"recherche": nom, "type": transport.libelle_type(type_trouve["proche"]),
+			"recherche": nom, "type": transport.libelle_type_joueur(type_trouve["proche"]),
 			"_type": type_trouve["proche"]}
 	if trouve.get("suggestions"):
 		noms = trouve["suggestions"]
@@ -1004,6 +1023,7 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)],
 	reponse["noeud"] = pnj.noeud_client(pnj_doc, depart, contexte,
 										pnj.soin_effectif(pnj_doc, contexte))
 	_choix_portail(character, pnj_doc, reponse["noeud"])
+	_aide_saisie_direction(pnj_doc, lieu_doc, reponse["noeud"])
 	# Badge du bouton 🗣 : recalculé sur le contexte SERVI (une course échue vient peut-être
 	# de faire tomber une offre). Marque de lieux gratuite (0 lecture), cf. utils/indicateurs.
 	reponse["pnj_marque"] = pnj.marque_noeud(pnj_doc, depart, contexte)
@@ -1249,6 +1269,7 @@ async def pnj_dialogue_choix(
 		if reponse["noeud"] and suggestions_direction:
 			reponse["noeud"]["choix"] = suggestions_direction + reponse["noeud"]["choix"]
 		_choix_portail(character, pnj_doc, reponse["noeud"])
+		_aide_saisie_direction(pnj_doc, lieu_doc, reponse["noeud"])
 	# Badge du 🗣 et marques de lieux, sur le contexte DÉJÀ reconstruit par les branches de
 	# service ci-dessus : aucune lecture supplémentaire. Indispensable — accepter une course
 	# doit faire DISPARAÎTRE le « ! » quand le joueur ferme le panneau, sinon le badge paraît
