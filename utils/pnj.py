@@ -52,7 +52,10 @@
 #   {recherche} (inconnu). Recherche pure : utils/transport.chercher_lieu_nomme.
 #   La saisie peut aussi être un TYPE de magasin (sa catégorie) : réponse `trouve` pour le
 #   plus proche de ce type ; {recherche} + {type} (type_propose : type à Levenshtein ≤ 3,
-#   « Oui » ajouté par le router, « Non » écrit → type_inconnu).
+#   « Oui » ajouté par le router, « Non » écrit → type_inconnu). Un type se reconnaît aussi par
+#   ses alias (`transport.alias_type` : « guilde », « taverne »…) ; la maison de guilde éclatée
+#   n'est qu'UN type. Aide à la saisie : le router pose `aide` (types puis noms des lieux de la
+#   ville) sur le choix `saisie` → `<datalist>` du champ.
 # Placeholders substitués serveur dans texte/label : {prenom}, {cout}, plus toute clé de
 # `contexte["placeholders"]` posée par le router — {pnj} (le nom EFFECTIF de celui à qui l'on
 # parle, cf. `nom_effectif`), {destinataire} / {donneur} (les PNJ des deux bouts d'une course),

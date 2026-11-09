@@ -408,7 +408,10 @@ def test_direction_par_type_connait_tous_les_lieux_de_la_ville():
 	par_type = transport.lieux_par_type(BOUCHERIE, find_docs)
 	assert set(transport.magasins_par_type(BOUCHERIE, find_docs)) < set(par_type)
 	assert par_type["temple"] == [("lieu:temple", "Le Temple")]
-	assert "guilde_aventurier" in par_type and "guilde_aventurier_comptoir" in par_type
+	# Les lieux éclatés de la maison de guilde forment UN SEUL type (`type_canonique`).
+	assert sorted(par_type["guilde_aventurier"]) == [("lieu:guilde", "Le Bastion"),
+													 ("lieu:guilde_comptoir", "Le comptoir")]
+	assert "guilde_aventurier_comptoir" not in par_type
 	assert "boucherie" not in par_type
 	assert transport.lieux_par_type(VILLE, find_docs) == {}
 
@@ -432,6 +435,48 @@ def test_type_exact_puis_proche_a_levenshtein_borne():
 	assert transport.chercher_type("fumoir"[:-n] + "x" * n, types) == {"proche": "fumoir"}
 	assert transport.chercher_type("x" * (n + 1) + "fumoir"[n + 1:], types) == {}
 	assert transport.chercher_type("", types) == {}
+
+
+def test_cle_type_ignore_mots_outils_et_pluriel():
+	cle = transport.cle_type("guilde_aventurier")
+	assert transport.cle_type("Guilde d'aventuriers") == cle
+	assert transport.cle_type("la guilde des aventuriers") == cle
+
+
+def test_la_guilde_se_demande_par_son_nom_courant():
+	"""« guilde », « guilde d'aventuriers », « maison de guilde » : alias du type de la guilde,
+	relus dans `capacites` (tag, libellé) et `enseignes_icones` (métier)."""
+	types = ["guilde_aventurier", "temple", "auberge"]
+	for saisie in ("guilde", "Guilde d'aventuriers", "la guilde des aventuriers",
+				   "maison de guilde", "le comptoir de la guilde", "guilde aventurier"):
+		assert transport.chercher_type(saisie, types) == {"exact": "guilde_aventurier"}, saisie
+	assert transport.chercher_type("une taverne", types) == {"exact": "auberge"}
+	assert transport.chercher_type("guild", types) == {"proche": "guilde_aventurier"}
+	assert transport.libelle_type_joueur("guilde_aventurier") == "guilde des aventuriers"
+	assert transport.libelle_type_joueur("fletcher") == "archerie"
+	assert transport.libelle_type_joueur("temple") == "temple"
+
+
+def test_demander_la_guilde_mene_a_sa_facade(monkeypatch):
+	"""Réception et comptoir partagent la même porte effective : c'est le lieu qui DONNE sur la
+	ville qui est indiqué, pas celui qu'il abrite."""
+	from routers import pnj as rp
+	monkeypatch.setattr(rp, "get_doc", get_doc)
+	monkeypatch.setattr(rp, "find_docs", find_docs)
+	noeud, dits = rp._resoudre_direction(DOC_DIRECTION, BOUCHERIE, "guilde")
+	assert noeud == "n_trouve" and dits["lieu"] == "Le Bastion"
+	focalisation.reset_graphe_cache()
+
+
+def test_aide_saisie_direction_types_puis_noms():
+	aide = transport.aide_saisie_direction(BOUCHERIE, find_docs)
+	types = sorted({transport.libelle_type_joueur(t) for t in transport.lieux_par_type(BOUCHERIE, find_docs)},
+				   key=transport.cle_type)
+	assert aide[:len(types)] == types
+	assert "guilde des aventuriers" in types
+	assert set(aide[len(types):]) == {label for _, label in transport.lieux_nommes(BOUCHERIE, find_docs)}
+	assert BOUCHERIE["label"] not in aide          # le donneur est exclu
+	assert transport.aide_saisie_direction(VILLE, find_docs) == []
 
 
 def test_le_plus_proche_du_type_depuis_le_donneur():
