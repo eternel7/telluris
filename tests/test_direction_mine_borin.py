@@ -95,7 +95,9 @@ def test_visible_seulement_pendant_une_commission_de_la_mine(borin):
 
 
 def test_garde_les_autres_choix_de_borin(base, borin):
-	avant = [c["id"] for c in base[g.PNJ]["dialogue"]["noeuds"]["accueil"]["choix"]]
+	# Le dump peut déjà porter le choix (delta importé) : on l'écarte des deux côtés.
+	avant = [c["id"] for c in base[g.PNJ]["dialogue"]["noeuds"]["accueil"]["choix"]
+			 if c["id"] != g.CHOIX_ID]
 	apres = [c["id"] for c in borin["dialogue"]["noeuds"]["accueil"]["choix"]]
 	assert [i for i in apres if i != g.CHOIX_ID] == avant
 	assert apres.index(g.CHOIX_ID) == apres.index(g.AVANT) - 1

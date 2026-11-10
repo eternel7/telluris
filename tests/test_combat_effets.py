@@ -201,6 +201,28 @@ def test_effet_entrant_tick_aussi():
     assert snap["effets_actifs"][0]["restants"] == 1
 
 
+def test_effet_en_temps_reel_ne_s_use_pas_au_tour(monkeypatch):
+    # Réveil chez soi (`expire_a`, minutes réelles) : aucun tour de combat ne l'use ; il tombe
+    # à l'échéance, et survit à la sortie du combat tant qu'elle n'est pas passée.
+    char = _character(effets_actifs=[
+        {"source_id": "amenagement:salon", "nom": "Bien reposé", "icon": "🌅",
+         "buffs": {"F": 10}, "regen_pv": 0, "regen_pm": 0, "esquive": 0, "expire_a": 2000},
+    ])
+    snap = build_joueur_snapshot(char)
+    combat = _combat(snap)
+    monkeypatch.setattr(combat_mod, "now_epoch", lambda: 1999)
+    for tour in range(1, 30):
+        combat["tour"] = tour
+        _tick_effets_combat(combat, snap)
+    assert [e["expire_a"] for e in snap["effets_actifs"]] == [2000]
+    assert [e["expire_a"] for e in combat_mod._effets_a_reverser(snap)] == [2000]
+    monkeypatch.setattr(combat_mod, "now_epoch", lambda: 2000)
+    assert combat_mod._effets_a_reverser(snap) == []
+    combat["tour"] = 30
+    _tick_effets_combat(combat, snap)
+    assert snap["effets_actifs"] == []
+
+
 def test_regen_applique_au_tour_du_porteur_et_clampe():
     snap = build_joueur_snapshot(_character(currentPV=10, currentPM=0))
     combat = _combat(snap)

@@ -902,6 +902,13 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# reposées paresseusement ici — un compagnon parti ou une aura apprise se voit au
 	# prochain rendu. Même motif que la purge ci-dessus : compagnons persistés à part.
 	_montures = montures_util.montures_effectives(character, get_doc)
+	# Effets en TEMPS RÉEL échus (réveil chez soi, `expire_a`) : purgés PARESSEUSEMENT ici, sans
+	# attendre un pas — sinon un bonus échu compterait tant que le joueur ne bouge pas.
+	_maintenant = consommables.now_epoch()
+	change |= bool(consommables.purger_expires(character, _maintenant))
+	for _doc in [*_compagnons, *_montures]:
+		if consommables.purger_expires(_doc, _maintenant) and _doc not in _a_sauver:
+			_a_sauver.append(_doc)
 	for _m in competences_util.appliquer_auras_groupe([character, *_compagnons], _montures):
 		if _m is character:
 			change = True

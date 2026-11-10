@@ -32,18 +32,18 @@ def test_les_textes_ne_se_limitent_plus_aux_boutiques():
 
 
 def test_seuls_les_deux_textes_changent(dump):
-	avant = {d["_id"]: d for d in dump}
-	sortie = g.modifies(dump)
-	assert sortie
-	for doc in sortie:
-		ref = dict(avant[doc["_id"]])
-		ref.pop("_rev", None)
+	# Raisonne sur `appliquer` de CHAQUE PNJ à `direction`, et non sur `modifies` : vaut avant
+	# comme après import du delta (dump à jour ⇒ `modifies` vide, rien à vérifier).
+	portes = [d for d in dump if g.a_direction(d)]
+	assert portes
+	for d in portes:
+		doc = g.appliquer(d)
 		vises = g.noeuds_vises(doc)
 		assert set(vises) == {g.NOEUD_DEMANDE, doc["services"]["direction"]["noeuds"]["type_inconnu"]}
 		for nid, texte in vises.items():
 			assert doc["dialogue"]["noeuds"][nid]["texte"] == texte
-			doc["dialogue"]["noeuds"][nid]["texte"] = ref["dialogue"]["noeuds"][nid]["texte"]
-		assert doc == ref
+			doc["dialogue"]["noeuds"][nid]["texte"] = d["dialogue"]["noeuds"][nid]["texte"]
+		assert doc == d          # rien d'autre n'a bougé
 
 
 def test_regeneration_idempotente_et_lint(dump):

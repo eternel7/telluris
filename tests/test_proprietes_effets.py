@@ -148,14 +148,41 @@ def test_dormeurs_bornes_par_les_places():
 def test_reveil_remplace_et_ne_s_empile_jamais():
 	p = bien("maison", "salon")
 	moi = perso()
-	proprietes.appliquer_reveil(p, CAT, [], [moi], [])
-	moi["effets_actifs"][0]["restants"] = 1
-	proprietes.appliquer_reveil(p, CAT, [], [moi], [])
+	proprietes.appliquer_reveil(p, CAT, [], [moi], [], maintenant=1000)
+	proprietes.appliquer_reveil(p, CAT, [], [moi], [], maintenant=5000)
 	assert sources(moi) == ["amenagement:salon"]
-	assert moi["effets_actifs"][0]["restants"] == adef("salon")["effets"]["reveil"]["duree"]
+	# Durée relancée depuis la DERNIÈRE nuit, en minutes réelles.
+	assert moi["effets_actifs"][0]["expire_a"] == 5000 + 60 * adef("salon")["effets"]["reveil"]["duree"]
 	# Le même aménagement dans un AUTRE bien : même clé, toujours une seule entrée.
 	proprietes.appliquer_reveil(bien("maison", "salon"), CAT, [], [moi], [])
 	assert sources(moi) == ["amenagement:salon"]
+
+
+def test_reveil_dure_des_minutes_reelles_et_non_des_tours():
+	p = bien("maison", "salon")
+	moi = perso(effets_actifs=[{"item_id": "item:potion", "buffs": {"F": 1}, "restants": 2}])
+	proprietes.appliquer_reveil(p, CAT, [], [moi], [], maintenant=1000)
+	reveil = next(e for e in moi["effets_actifs"] if e.get("source_id") == "amenagement:salon")
+	assert "restants" not in reveil
+	echeance = reveil["expire_a"]
+	# Cent pas avant l'échéance : le réveil tient, la potion (en tours) est tombée.
+	for _ in range(100):
+		consommables.tick_effets(moi, maintenant=echeance - 1)
+	assert sources(moi) == ["amenagement:salon"]
+	expires = consommables.tick_effets(moi, maintenant=echeance)
+	assert [e["source_id"] for e in expires] == ["amenagement:salon"] and moi["effets_actifs"] == []
+
+
+def test_purge_paresseuse_des_effets_en_temps_reel():
+	potion = {"item_id": "item:potion", "buffs": {"F": 1}, "restants": 2}
+	moi = perso(effets_actifs=[potion, {"source_id": "amenagement:salon", "expire_a": 2000}])
+	assert consommables.purger_expires(moi, 1999) == [] and len(moi["effets_actifs"]) == 2
+	assert len(consommables.purger_expires(moi, 2000)) == 1
+	assert moi["effets_actifs"] == [potion]          # l'effet en tours n'est pas touché
+
+
+def test_texte_du_reveil_en_minutes():
+	assert proprietes._texte_reveil({"buffs": {"F": 2}, "duree": 20}).endswith("pendant 20 min")
 
 
 def test_reveil_ne_l_emporte_pas_sur_un_consommable_plus_fort():
@@ -189,6 +216,16 @@ def test_compagnon_bien_loge_ne_part_pas(monkeypatch):
 	monkeypatch.setattr(recrutement, "groupe_effectif", lambda ch, g=None: [c])
 	assert recrutement.departs_volontaires(moi, None) == []
 	c["effets_actifs"] = []
+	assert recrutement.departs_volontaires(moi, None) == [c]
+
+
+def test_compagnon_bien_loge_en_temps_reel(monkeypatch):
+	c = compagnon(1, effets_actifs=[{"source_id": "amenagement:x", "fidele": True, "expire_a": 2000}])
+	moi = perso(groupe=[c["_id"]], affinites={c["_id"]: 0})
+	monkeypatch.setattr(recrutement, "groupe_effectif", lambda ch, g=None: [c])
+	monkeypatch.setattr(recrutement.time, "time", lambda: 1999)
+	assert recrutement.departs_volontaires(moi, None) == []
+	monkeypatch.setattr(recrutement.time, "time", lambda: 2000)
 	assert recrutement.departs_volontaires(moi, None) == [c]
 
 

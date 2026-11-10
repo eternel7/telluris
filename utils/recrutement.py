@@ -34,7 +34,7 @@ from utils.characters import (
 	item_ref_id, item_ref_lieu, item_ref_weight, resolve_item_ref, sync_equipment_bonus,
 	credit_character, carried_weight, charge_max_of, grant_xp, liberer_pour_deux_mains,
 )
-from utils.consommables import caracts_avec_buffs
+from utils.consommables import caracts_avec_buffs, effet_en_cours
 from utils import montures
 
 
@@ -1337,11 +1337,12 @@ def departs_volontaires(character: dict, get_doc_fn=None) -> list:
 	propriété — `proprietes.appliquer_reveil`) ne part pas non plus tant que l'effet dure.
 	Le test vit ici et non dans `utils/proprietes` : ce module-là importe celui-ci."""
 	seuil = int(character_stats.AFFINITE_SEUIL_DEPART)
+	maintenant = int(time.time())
 	partis = []
 	for av in groupe_effectif(character, get_doc_fn):
 		if av.get("permanent"):
 			continue
-		if any((e or {}).get("fidele") and int((e or {}).get("restants") or 0) > 0
+		if any((e or {}).get("fidele") and effet_en_cours(e, maintenant)
 			   for e in av.get("effets_actifs") or []):
 			continue
 		if affinite_de(character, av["_id"]) < seuil:
