@@ -36,6 +36,7 @@ from utils.characters import (
 )
 from utils.consommables import caracts_avec_buffs, effet_en_cours
 from utils import montures
+from utils import mercenaires
 
 
 def now_epoch() -> int:
@@ -801,7 +802,10 @@ def purger_recrues_perimees(recrues: list, now: int) -> list:
 def recrues_du_giver(guild_id: str) -> list:
 	"""Recrues OFFERTES au tableau d'un lieu recruteur."""
 	docs = find_docs({"type": "aventurier"}) or []
-	return [d for d in docs if d.get("giver") == guild_id and d.get("statut") == "offert"]
+	# ⚠️ Un compagnon-JOUEUR (`mercenaires`) n'est jamais une recrue de tableau : il s'engage
+	# par son offre `service:*`, et un ancien clone ne se ré-offre pas.
+	return [d for d in docs if d.get("giver") == guild_id and d.get("statut") == "offert"
+			and not mercenaires.est_clone(d)]
 
 
 def anciens_compagnons_disponibles(character: dict, guild_id: str) -> list:
@@ -813,6 +817,7 @@ def anciens_compagnons_disponibles(character: dict, guild_id: str) -> list:
 	return [
 		d for d in docs
 		if d.get("giver") == guild_id and d.get("statut") == "parti"
+		and not mercenaires.est_clone(d)
 		and int(affinites.get(d.get("_id"), 0) or 0) >= seuil
 	]
 
@@ -859,12 +864,20 @@ def taille_max_groupe() -> int:
 def groupe_effectif(character: dict, get_doc_fn=None) -> list:
 	"""Docs des compagnons ACTIFS du groupe : ids de `character["groupe"]` résolus,
 	filtrés sur statut `embauche` + embauché PAR CE personnage (l'état du compagnon
-	vit sur SON doc — un id périmé est ignoré silencieusement)."""
+	vit sur SON doc — un id périmé est ignoré silencieusement).
+
+	⚠️ Compagnon-JOUEUR : progression et équipement porté RELUS ici sur l'original
+	(`mercenaires.synchroniser`) — chokepoint unique, que traversent `porteurs_effectifs`,
+	`expedition.membres`, `_acteur`, la fiche et le départ en combat. Original disparu ⇒
+	ignoré (son départ est acté par `departs_volontaires`)."""
 	lire = get_doc_fn or get_doc
 	out = []
 	for av_id in character.get("groupe", []) or []:
 		av = lire(av_id)
 		if av and av.get("statut") == "embauche" and av.get("embauche_par") == character.get("_id"):
+			if mercenaires.est_clone(av) and not mercenaires.synchroniser(
+					av, lire(av["source_character"])):
+				continue
 			out.append(av)
 	return out
 
@@ -1257,6 +1270,7 @@ def congedier(character: dict, av: dict, lieu_doc: dict | None = None) -> tuple[
 				 if character.get("quetes_actives") else character_stats.AFFINITE_DELTA_CONGEDIE)
 	av.pop("contrat", None)
 	ajuster_affinite(character, av["_id"], delta)
+	verser_sac_clone(character, av)   # compagnon-JOUEUR : son sac reste au sol
 	return True, ""
 
 
@@ -1281,7 +1295,10 @@ def nettoyer_nom_compagnie(brut) -> str:
 
 
 def peut_engager(character: dict, av: dict) -> tuple[bool, str]:
-	"""(ok, raison) : compagnon actif, pas déjà permanent, confiance au seuil."""
+	"""(ok, raison) : compagnon actif, pas déjà permanent, confiance au seuil. Jamais un
+	compagnon-JOUEUR : ses conditions sont celles qu'a saisies son joueur."""
+	if mercenaires.est_clone(av):
+		return False, "Le personnage d'un autre joueur ne s'engage pas durablement."
 	if (av or {}).get("permanent"):
 		return False, "Ce compagnon est déjà engagé durablement."
 	if not av or av.get("_id") not in (character.get("groupe", []) or []):
@@ -1338,7 +1355,7 @@ def departs_volontaires(character: dict, get_doc_fn=None) -> list:
 	Le test vit ici et non dans `utils/proprietes` : ce module-là importe celui-ci."""
 	seuil = int(character_stats.AFFINITE_SEUIL_DEPART)
 	maintenant = int(time.time())
-	partis = []
+	partis = _departs_clones(character, get_doc_fn)
 	for av in groupe_effectif(character, get_doc_fn):
 		if av.get("permanent"):
 			continue
@@ -1349,6 +1366,39 @@ def departs_volontaires(character: dict, get_doc_fn=None) -> list:
 			character["groupe"].remove(av["_id"])
 			av["statut"] = "parti"
 			av.pop("auras_recues", None)   # hors du groupe, plus d'aura
+			verser_sac_clone(character, av)
+			partis.append(av)
+	return partis
+
+
+def verser_sac_clone(character: dict, av: dict) -> list:
+	"""Compagnon-JOUEUR qui quitte le groupe (congé, départ, retrait de l'offre) : son sac
+	est posé au SOL du principal — ce qu'on lui a donné se reprend, rien ne part avec lui.
+	Sans effet pour un compagnon ordinaire. Mute les deux docs, ne sauve pas."""
+	if not mercenaires.est_clone(av):
+		return []
+	sac = mercenaires.vider_sac(av)
+	if sac:
+		character["objets_au_sol"] = list(character.get("objets_au_sol") or []) + sac
+	return sac
+
+
+def _departs_clones(character: dict, get_doc_fn=None) -> list:
+	"""Compagnons-JOUEURS dont l'original a disparu ou a retiré ses services : ils quittent
+	le groupe (statut `parti`), sac au sol. Lit les ids BRUTS du groupe — `groupe_effectif`
+	écarte justement un clone sans original."""
+	lire = get_doc_fn or get_doc
+	partis = []
+	for av_id in list(character.get("groupe", []) or []):
+		av = lire(av_id)
+		if not av or not mercenaires.est_clone(av) or av.get("statut") != "embauche" \
+				or av.get("embauche_par") != character.get("_id"):
+			continue
+		if mercenaires.doit_partir(av, lire):
+			character["groupe"].remove(av_id)
+			av["statut"] = "parti"
+			av.pop("auras_recues", None)
+			verser_sac_clone(character, av)
 			partis.append(av)
 	return partis
 
@@ -1441,6 +1491,8 @@ def regler_part_butin(character: dict, groupe_docs: list, cuivre_total: int) -> 
 		montant = min(reste, total * max(0, part_pct) // 100)
 		if montant > 0:
 			credit_character(av, montant)
+			# Compagnon-JOUEUR : la part revient à l'original, encaissée à son /play.
+			mercenaires.crediter_cuivre(av, montant)
 			reste -= montant
 		parts[av["_id"]] = montant
 	return {"parts": parts, "reste": reste}

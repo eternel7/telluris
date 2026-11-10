@@ -57,6 +57,7 @@ from utils import intro as intro_util
 from utils import transport as transport_util
 from utils import chasse as chasse_util
 from utils import recrutement as recrutement_util
+from utils import mercenaires as mercenaires_util
 from utils import montures as montures_util
 from utils import proprietes as proprietes_util
 from utils import auberge as auberge_util
@@ -881,6 +882,14 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	for _av in compagnons_partis:
 		save_doc(_av)
 	change |= bool(compagnons_partis)
+	# Compagnon-JOUEUR : ce que mes clones (mon personnage engagé par d'autres) ont gagné
+	# depuis mon dernier passage — XP et part de butin, encaissées par DELTA (idempotent).
+	# L'offre (doc annexe) est sauvée à part ; le principal part avec le `change` ci-dessous.
+	_offre_services = get_doc(mercenaires_util.id_offre(character["_id"]))
+	gains_services = mercenaires_util.encaisser(character, _offre_services, get_doc)
+	if gains_services["offre_mutee"]:
+		save_doc(_offre_services)
+	change |= bool(gains_services["xp"] or gains_services["cuivre"])
 	# Sorts d'une école que la vocation ne pratique plus (sa `magie` a changé en base) :
 	# retirés PARESSEUSEMENT ici, avec réécriture du doc — `sorts_connus` n'est relu contre
 	# l'école nulle part ailleurs, le répertoire perdu se lancerait donc indéfiniment. Même
@@ -1239,6 +1248,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			# ci-dessus) : annoncés UNE fois, au rendu qui les a retirés — le doc étant déjà
 			# réécrit, le rendu suivant n'aura plus rien à dire.
 			"sorts_perdus": [f"{s.get('icon', '🔮')} {s.get('nom', '')}" for s in sorts_perdus],
+			"gains_services": {"xp": gains_services["xp"], "cuivre": gains_services["cuivre"]},
 			"compagnons_partis": [
 				f"{av.get('prenom', '')} {av.get('nom', '')}".strip() for av in compagnons_partis
 			],
