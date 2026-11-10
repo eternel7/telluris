@@ -48,6 +48,7 @@ from utils import guides
 from utils import intro
 from utils import transport
 from utils import recrutement
+from utils import mercenaires
 from utils import acces
 from utils import passe_muraille
 from utils import pnj as pnj_util
@@ -1097,6 +1098,16 @@ def _acteur(current_user, body: dict) -> tuple[dict, dict]:
 	return av, principal
 
 
+def _refuser_clone(porteur: dict) -> None:
+	"""Compagnon-JOUEUR : progression et équipement porté sont ceux de l'ORIGINAL, relus à
+	chaque lecture (`mercenaires.synchroniser`). Rien de ce qui s'y écrit (équiper, ôter,
+	dépenser des points, apprendre) ne se propage : on le refuse plutôt que de le perdre en
+	silence. Son sac, lui, se manipule librement."""
+	if mercenaires.est_clone(porteur):
+		raise HTTPException(status_code=403,
+							detail="Son équipement et sa progression appartiennent à son joueur.")
+
+
 def _cible_alliee(principal: dict, lanceur: dict, body: dict) -> dict:
 	"""Résout la CIBLE d'un effet bénéfique hors combat (`cible: "allie"`) : le personnage
 	principal, un compagnon ou une monture du groupe, désigné par `cible_id`.
@@ -1181,6 +1192,7 @@ async def spend_xp(
 		raise HTTPException(status_code=422, detail="Paramètres invalides")
 
 	character, _principal = _acteur(current_user, body)
+	_refuser_clone(character)
 
 	races = get_doc("rules:races")
 	race  = next((r for r in races["value"] if r["id"] == character["race"]), None)
@@ -1275,6 +1287,7 @@ async def equip_item(
 		raise HTTPException(status_code=422, detail="Paramètres invalides")
 
 	character, _principal = _acteur(current_user, body)
+	_refuser_clone(character)
 	if not montures.slot_admis(character, slot):
 		raise HTTPException(status_code=422, detail=(
 			"Seul le harnachement va sur une monture." if montures.est_monture(character)
@@ -1380,6 +1393,7 @@ async def unequip_item(
 		raise HTTPException(status_code=422, detail="Slot invalide")
 
 	character, _principal = _acteur(current_user, body)
+	_refuser_clone(character)
 	# Son équipement est à lui : l'ôter puis le transférer revendrait une arme fournie par le jeu.
 	if montures.est_guide(character):
 		raise HTTPException(status_code=403, detail="Un guide garde son équipement.")
@@ -1834,6 +1848,7 @@ async def apprendre_sort(
 	compagnon apprend avec SES points et le grimoire porté dans SON sac (d'où le transfert
 	d'objets du groupe)."""
 	character, _principal = _acteur(current_user, body)
+	_refuser_clone(character)
 
 	sort = sorts_util.normaliser_sort(get_doc(body.get("sort_id")))
 	if not sort:
@@ -1934,6 +1949,7 @@ async def apprendre_competence(
 	`apprendre_sort`, sans grimoire (l'équivalent viendra avec l'arbre de compétences).
 	Ajoute l'id à `competences_connues` et re-dénormalise le bonus des passives."""
 	character, _principal = _acteur(current_user, body)
+	_refuser_clone(character)
 
 	comp = competences_util.normaliser_competence(get_doc(body.get("competence_id")))
 	if not comp:
@@ -1997,6 +2013,7 @@ async def apprendre_magie(
 	polyvalentes — le lettré). Coût en points de caractéristique = cout_ecole(0). Ajoute
 	l'école à `magies_apprises` au niveau 0 ; débloque l'apprentissage de ses sorts."""
 	character, _principal = _acteur(current_user, body)
+	_refuser_clone(character)
 	if not sorts_util.peut_apprendre_magie(character):
 		raise HTTPException(status_code=403, detail="Cette vocation ne peut pas apprendre d'autres écoles de magie.")
 
@@ -2033,6 +2050,7 @@ async def monter_magie(
 	"""Monte d'un niveau une école ACHETÉE (dans `magies_apprises`). Coût =
 	cout_ecole(niveau courant). L'école native se monte via spend_xp_vocation."""
 	character, _principal = _acteur(current_user, body)
+	_refuser_clone(character)
 
 	vocations = get_doc("rules:vocations")
 	ecole = str(body.get("ecole") or "").strip()
@@ -2713,6 +2731,7 @@ async def spend_xp_vocation(
 		raise HTTPException(status_code=401, detail="Invalid session credentials")
 
 	character, _principal = _acteur(current_user, body)
+	_refuser_clone(character)
 
 	voc = character.get("voc", "")
 	vocations_niveaux = character.get("vocations_niveaux", {})

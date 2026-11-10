@@ -19,6 +19,7 @@ from utils.characters import (
 # `credit_character` et la bourse) : c'est le seul débit du jeu, il refuse en rendant None.
 from utils.marche import debit_character
 from utils import recrutement
+from utils import mercenaires
 from utils import montures
 from utils import escorte
 from utils import fiche as fiche_util
@@ -105,6 +106,9 @@ def _recrue_view(character: dict, av: dict, lieu_doc: dict | None = None) -> dic
 			av, recrutement.affinite_de(character, av["_id"])),
 		"affinite": affinite_brute,
 		"permanent": bool(av.get("permanent")),
+		# Compagnon-JOUEUR (personnage d'un autre joueur) : badge, ni engagement durable ni
+		# équipement modifiable côté client.
+		"joueur": mercenaires.est_clone(av),
 		# Points d'attribut non dépensés : le client en dérive la pastille verte du bouton
 		# 👥 Groupe (`_majPointsCompagnons`). Servi ici parce que ce payload est la SEULE vue
 		# qui liste tous les compagnons à la fois — la fiche d'un compagnon ne dit rien des autres.
@@ -370,6 +374,7 @@ async def recrutement_congedier(
 	# c'est `congedier` qui en décide. Le mode est relevé avant, le bloc étant retiré ensuite.
 	lieu_doc = get_doc(character.get("lieu", ""))
 	mission = ((av.get("contrat") or {}).get("mode") == "mission")
+	au_sol_avant = len(character.get("objets_au_sol") or [])
 
 	ok, raison = recrutement.congedier(character, av, lieu_doc)
 	if not ok:
@@ -389,6 +394,10 @@ async def recrutement_congedier(
 		# pas que rompre ailleurs lui aurait coûté quelque chose.
 		"sans_frais": bool(mission and recrutement.lieu_de_guilde(lieu_doc)),
 	}
+	# Compagnon-JOUEUR : son sac vient d'être posé au sol du principal (Convention §10).
+	if len(character.get("objets_au_sol") or []) != au_sol_avant:
+		payload["congedie"]["sac_au_sol"] = True
+		payload["inventaire_payload"] = _inventory_payload(character)
 	return payload
 
 
@@ -602,6 +611,8 @@ async def groupe_compagnon(
 		"exigences_effectives": recrutement.conditions_effectives(
 			av, recrutement.affinite_de(character, av["_id"])),
 		"affinite": recrutement.affinite_de(character, av["_id"]),
+		# Compagnon-JOUEUR : paperdoll en lecture seule (le serveur refuse de toute façon, 403).
+		"est_clone": mercenaires.est_clone(av),
 	}
 	payload.update(_inventory_payload(av, character))
 	payload.update(fiche_util.bloc_fiche(av, get_doc, find_docs, race))

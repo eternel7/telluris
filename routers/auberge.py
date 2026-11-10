@@ -24,6 +24,7 @@ from utils.characters import get_selected_character, cuivre_to_purse, money_to_c
 from utils.marche import debit_character, tick_atelier, appro_leaves_lieu, flux_cite, persister_flux
 from utils import auberge
 from utils import recrutement
+from utils import mercenaires
 from utils import montures
 from utils import scriptorium
 from utils import commande as commande_util
@@ -190,6 +191,51 @@ def _payload(character: dict, lieu_doc: dict, tables=None, messages=None,
 		# est en vol. Le recevoir après coup ne couvrirait plus rien — or c'est justement
 		# l'attente des dizaines d'étals qu'il est là pour habiller.
 		"nuit_log": auberge.messages_nuit(lieu_doc, auberge.NUIT_LOG_LIGNES),
+		# Compagnons-JOUEURS : offres libres de CE tableau (hors celles de mon compte, que je
+		# ne peux pas engager) + l'état de la mienne.
+		**_services_payload(character, lieu_id),
+	}
+
+
+def _offre_view(offre: dict) -> dict:
+	"""Vue d'une offre de services : identité DÉNORMALISÉE (`mercenaires.identite_de`) +
+	conditions saisies par son joueur. Même forme qu'une recrue (`id`, `exigences_effectives`),
+	pour que le client en fasse la même carte de personnage."""
+	return {
+		"id": offre.get("_id"),
+		**(offre.get("identite") or {}),
+		"exigences_effectives": {**(offre.get("exigences") or {}), "mode": ""},
+		"joueur": True,
+	}
+
+
+def _mon_offre_view(character: dict, lieu_id: str) -> dict | None:
+	offre = get_doc(mercenaires.id_offre(character.get("_id", "")))
+	if not offre or offre.get("statut") != "affiche":
+		return None
+	vue = {"exigences": offre.get("exigences") or {}, "ici": offre.get("lieu") == lieu_id,
+		   "engage_par": None}
+	clone = mercenaires.clone_courant(offre, get_doc)
+	if clone:
+		recruteur = get_doc(clone.get("embauche_par") or "") or {}
+		vue["engage_par"] = auberge.nom_affichable(recruteur)
+	return vue
+
+
+def _services_payload(character: dict, lieu_id: str) -> dict:
+	"""⚠️ Sur le chemin du SONDAGE : une lecture de recherche + une lecture par offre occupée
+	(le clone courant) — l'identité, elle, est sur l'offre."""
+	offres = find_docs({"type": mercenaires.TYPE_OFFRE, "lieu": lieu_id}) or []
+	user_id = character.get("user_id")
+	libres = [o for o in offres
+			  if o.get("user_id") != user_id and mercenaires.offre_disponible(o, get_doc)]
+	libres.sort(key=lambda o: o.get("maj_at", 0), reverse=True)
+	return {
+		"services": [_offre_view(o) for o in libres],
+		"mon_offre": _mon_offre_view(character, lieu_id),
+		"clauses_max": int(character_stats.MERCENAIRE_CLAUSES_MAX),
+		"clause_longueur_max": int(character_stats.MERCENAIRE_CLAUSE_LONGUEUR_MAX),
+		"part_butin_max": int(character_stats.RECRUTEMENT_PART_BUTIN_MAX),
 	}
 
 
@@ -421,6 +467,85 @@ async def retirer_annonce(
 	if delete_doc(doc) is None:
 		raise HTTPException(status_code=409, detail="Conflit de suppression — réessayez.")
 	return _payload(character, lieu_doc)
+
+
+@auberge_router.post("/auberge/services")
+async def proposer_services(
+	current_user: Annotated[dict, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Inscrire SON personnage au tableau (ou mettre à jour ses conditions) : part de butin
+	et clauses saisies par le joueur, bornées (`mercenaires.nettoyer_exigences`). Gratuit.
+	⚠️ Seul le PRINCIPAL s'inscrit (`get_selected_character`) ; et on ne change pas les
+	termes d'un contrat en cours (409)."""
+	character, lieu_doc = _acces_auberge(current_user)
+	ancienne = get_doc(mercenaires.id_offre(character["_id"]))
+	if ancienne and mercenaires.clone_courant(ancienne, get_doc):
+		raise HTTPException(status_code=409,
+							detail="Vous êtes engagé : vos conditions ne changent pas en cours de contrat.")
+	exigences = mercenaires.nettoyer_exigences(body)
+	offre = mercenaires.nouvelle_offre(character, lieu_doc, exigences, ancienne)
+	if save_doc(offre) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	return _payload(character, lieu_doc)
+
+
+@auberge_router.post("/auberge/services/retirer")
+async def retirer_services(current_user: Annotated[dict, Depends(get_current_user)]):
+	"""Retirer ses services. L'offre est GARDÉE (statut `retire`) : elle tient l'historique des
+	clones dont l'XP reste à encaisser. Un clone en service quitte le groupe de son recruteur
+	au prochain passage de celui-ci (`recrutement.departs_volontaires`), sac au sol."""
+	character, lieu_doc = _acces_auberge(current_user)
+	offre = get_doc(mercenaires.id_offre(character["_id"]))
+	if not offre or offre.get("statut") != "affiche":
+		raise HTTPException(status_code=404, detail="Vous ne proposez pas vos services.")
+	offre["statut"] = "retire"
+	if save_doc(offre) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	return _payload(character, lieu_doc)
+
+
+@auberge_router.post("/auberge/services/engager")
+async def engager_services(
+	current_user: Annotated[dict, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Engager le personnage d'un autre joueur : un CLONE neuf (sac vide) rejoint le groupe.
+	Le client n'appelle qu'après acceptation des conditions (dialogue d'embauche).
+
+	⚠️ Ordre d'écriture : l'OFFRE d'abord, autoritative — deux recruteurs qui se croisent
+	butent sur son `_rev` (409), il n'y en a jamais deux. Puis le personnage, puis le clone."""
+	character, lieu_doc = _acces_auberge(current_user)
+	offre_id = str(body.get("offre_id") or "")
+	offre = get_doc(offre_id) if offre_id.startswith(mercenaires.PREFIXE_OFFRE) else None
+	if offre and offre.get("lieu") != lieu_doc.get("_id"):
+		offre = None   # on n'engage qu'au tableau où l'offre est clouée
+	ok, raison, code = mercenaires.peut_engager(character, offre, get_doc)
+	if not ok:
+		raise HTTPException(status_code=code, detail=raison)
+	original = get_doc(offre.get("character_id") or "")
+	if not original:
+		raise HTTPException(status_code=404, detail="Ce personnage n'existe plus.")
+
+	clone = mercenaires.creer_clone(original, offre)
+	ok, raison = recrutement.embaucher(character, clone, get_doc)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	offre["clone_id"] = clone["_id"]
+	offre["clones"] = list(offre.get("clones") or []) + [clone["_id"]]
+	if save_doc(offre) is None:
+		raise HTTPException(status_code=409, detail="Quelqu'un vient de l'engager avant vous.")
+	# Personnage AVANT le clone : un clone non sauvé laisse un id mort dans le groupe (ignoré
+	# par `groupe_effectif`) et une offre de nouveau libre — jamais l'inverse, un clone
+	# `embauche` qu'aucun groupe ne contient, qui bloquerait l'offre pour toujours.
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	if save_doc(clone) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	payload = _payload(character, lieu_doc)
+	payload["engage"] = {"nom": f"{clone.get('prenom', '')} {clone.get('nom', '')}".strip()}
+	payload["groupe_visible"] = True
+	return payload
 
 
 @auberge_router.post("/auberge/nuit")

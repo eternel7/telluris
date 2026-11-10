@@ -57,7 +57,8 @@ routers/
                          #   ici, occuper/quitter, vendre/abandonner, installer, embauche/engager/renvoyer,
                          #   heberger/reprendre, coffre (+transferer, vol sans gardien),
                          #   atelier/donner|reprendre|choisir, caisse/relever
-  auberge.py             # /api/auberge/* : salle commune (tables, tableau d'information), nuit
+  auberge.py             # /api/auberge/* : salle commune (tables, tableau d'information), nuit,
+                         #   services (compagnons-joueurs : s'inscrire, retirer, engager)
   scriptorium.py         # /api/scriptorium(/ecrire) : écrit personnel (papier+encre+plume → livre)
   commande.py            # /api/commande(/devis,/passer,/relancer,/retirer,/annuler) : commande chez un artisan
   animations.py          # /admin/animations/* : scan des feuilles de sprites, liaison au contenu
@@ -139,6 +140,8 @@ utils/
                          #   EFFETS des aménagements (`effets` / `effets_poste`) : réveil à durée NON
                          #   cumulatif, médecin, écurie (plafond conservé), bibliothèque → scriptorium par vue
   auberge.py             # tavernes (pur) : tables-chatrooms, tableau d'information, nuit
+  mercenaires.py         # compagnons-JOUEURS (pur) : offre `service:*` au tableau, clone synchronisé (progression +
+                         #   équipement porté, sac propre), un seul recruteur, XP/part → original par compteurs, mort = sac au sol
   scriptorium.py         # scriptorium (pur) : écrit personnel transportable + livres de contenu générés au tick d'atelier
   escorte.py             # escortes (pur) : personne à retrouver, à protéger, à déposer vivante
   offres.py              # PLUSIEURS offres écrites par service (`offres`, pur) : vue du PNJ réduite au bloc retenu

@@ -2992,6 +2992,24 @@
 			</div>
 		</div>
 		<div id="aub-tableau-list" class="aub-tableau"></div>
+		<!-- Compagnons-JOUEURS : personnages d'autres joueurs à engager, et son propre
+			 personnage à proposer. Le formulaire est un markup FIXE : le sondage de la salle
+			 ne le redessine jamais (on ne réécrit pas un champ en cours de frappe). -->
+		<h2 style="margin:1rem 0 0">⚔ Aventuriers à louer</h2>
+		<div id="aub-services-list" class="cards-list"></div>
+		<details id="aub-services-mien" class="aub-ecrire">
+			<summary>🤝 Proposer mes services</summary>
+			<div id="aub-services-etat" class="q-desc"></div>
+			<label class="aub-services-part">💰 Part de butin exigée
+				<input type="number" id="aub-services-part" min="0" max="30" step="1" value="10"> %</label>
+			<textarea id="aub-services-clauses" class="aub-annonce-txt" rows="3"
+					  placeholder="Vos clauses de conduite, une par ligne (facultatif)…"></textarea>
+			<div class="aub-ecrire-bas">
+				<span class="q-desc">Joué par un autre joueur, votre personnage garde son équipement ; vous gagnez son XP et sa part.</span>
+				<button class="sub-loc-btn" id="aub-services-btn" onclick="proposerServices()">📌 S'inscrire</button>
+				<button class="sub-loc-btn" id="aub-services-retirer" onclick="retirerServices()" hidden>✕ Retirer</button>
+			</div>
+		</details>
 	</div><!-- /#auberge-panel -->
 	<div id="scriptorium-panel" class="panel-hidden panel-frame board-panel" aria-label="Scriptorium">
 		<div class="sell-topbar">
@@ -3253,6 +3271,9 @@
 			display: flex; align-items: center; justify-content: space-between;
 			gap: .6rem; margin-top: .35rem; font-size: .85em; opacity: .8;
 		}
+		.aub-services-part { display: block; margin: .4rem 0; }
+		.aub-services-part input { width: 4.5em; }
+		#aub-services-mien summary { cursor: pointer; font-weight: bold; }
 		.aub-ecrivain-ligne {
 			display: flex; align-items: center; gap: .4rem;
 			font-size: .85em; margin-bottom: .35rem;
@@ -8201,7 +8222,17 @@ function equipFromSac(itemId, btn, idx) {
 
 // `idx` = l'EXEMPLAIRE du sac : deux objets identiques ne se valent plus dès que l'un porte un
 // nom propre. Sans lui, le serveur prend le premier exemplaire de l'item (comportement d'avant).
+// Compagnon-JOUEUR à l'écran : son équipement appartient à son joueur.
+function _cloneVerrouille() {
+	if (_compagnonActif && _compagnonActif.est_clone) {
+		showToast("Son équipement appartient à son joueur : vous ne pouvez pas y toucher.");
+		return true;
+	}
+	return false;
+}
+
 async function equip(itemId, slot, idx) {
+	if (_cloneVerrouille()) return;
 	try {
 		const payload = {item_id: itemId, slot};
 		if (Number.isInteger(idx)) payload.index = idx;
@@ -8223,6 +8254,7 @@ async function equip(itemId, slot, idx) {
 }
 
 async function unequip(slot) {
+	if (_cloneVerrouille()) return;
 	try {
 		const res  = await fetch('api/unequip', {
 			method: 'POST',
@@ -10392,7 +10424,9 @@ function _piedCompagnon(c) {
 	// Trois modes de lien, trois pieds : engagement durable (compagnie), contrat d'UNE
 	// MISSION (payé d'avance, il s'achève à la prochaine quête rendue en guilde), contrat
 	// ordinaire (sans terme).
-	const contrat = c.permanent
+	const contrat = c.joueur
+		? `<span title="Personnage d'un autre joueur : équipement et progression synchronisés">🤝 joueur — part ${part}%</span>`
+		: c.permanent
 		? `<span title="Engagé durablement : aucune part de butin">✦ ${escapeHtml(_compagnieNom || 'Compagnie')}</span>`
 		: _modeContrat(c) === 'mission'
 		? `<span title="Contrat d'une mission : il vous quittera à la prochaine quête rendue à la guilde">📜 mission — part ${part}%</span>`
@@ -10422,7 +10456,7 @@ function _btnCongedier(c) {
 	const label = perm ? "✕ Rompre l'engagement"
 		: mission ? "✕ Mettre fin au contrat" : "✕ Congédier";
 	return `<button class="sh-drop-btn sh-abandon-btn"
-		onclick="congedierAventurier('${c.id}', ${perm}, ${mission})"
+		onclick="congedierAventurier('${c.id}', ${perm}, ${mission}, ${!!c.joueur})"
 		title="${titre}">${label}</button>`;
 }
 
@@ -10431,7 +10465,7 @@ function _btnCongedier(c) {
 // sans ce repli, la comparaison `null >= 90` serait fausse par accident et non par règle.
 function _btnEngager(c, seuil) {
 	const aff = (c.affinite === null || c.affinite === undefined) ? 50 : c.affinite;
-	if (c.permanent || seuil === undefined || aff < seuil) return '';
+	if (c.permanent || c.joueur || seuil === undefined || aff < seuil) return '';
 	return `<button class="sh-drop-btn" onclick="ouvrirEngagement('${c.id}')"
 		title="L'attacher durablement à votre compagnie">✦ Engager durablement</button>`;
 }
@@ -11512,6 +11546,8 @@ function renderAuberge(data) {
 		_aubSigsOcc = new Map(tables.map(t => [t.id, _aubSigOcc(t)]));
 	}
 
+	_aubMajServices(data);
+
 	// Qui signe, puis ce que CET écrivain a dans son sac : le second dépend du premier.
 	_aubMajEcrivains(data);
 	_aubMajEcriture();
@@ -11539,6 +11575,112 @@ function renderAuberge(data) {
 				tab.appendChild(avis);
 			}
 		}
+	}
+}
+
+// ── Compagnons-joueurs : offres de services ──────────────────────────────────────
+// Offres affichées (id → vue), relues par le dialogue d'embauche (`openClauses`), qui ne
+// reçoit qu'un id. Signatures : le sondage (4 s) ne redessine les cartes — et ne recharge
+// le formulaire — que si la donnée a changé (Convention §17, et un champ en cours de
+// frappe n'est jamais réécrit).
+let _aubServicesEtat = {};
+let _aubServicesSig = null;
+let _aubMonOffreSig = null;
+
+function _aubMajServices(data) {
+	if (!('services' in data)) return;
+	const services = data.services || [];
+	const sig = JSON.stringify(services);
+	const liste = document.getElementById('aub-services-list');
+	if (liste && sig !== _aubServicesSig) {
+		_aubServicesSig = sig;
+		_aubServicesEtat = {};
+		clearCharacterCards(liste);
+		liste.innerHTML = '';
+		if (!services.length) {
+			const vide = document.createElement('div');
+			vide.className = 'sell-empty';
+			vide.textContent = "Personne ne propose ses services ici pour l'instant.";
+			liste.appendChild(vide);
+		}
+		services.forEach(o => {
+			_aubServicesEtat[o.id] = o;
+			const ex = o.exigences_effectives || {};
+			const clauses = (ex.clauses || [])
+				.map(c => `<span class="q-desc">• ${escapeHtml(c)}</span>`).join('');
+			renderCharacterCard(liste, o, {
+				editable: false,
+				footer: `<span class="q-desc">🤝 Personnage d'un autre joueur</span>`
+					+ `<span class="sell-prix">💰 part de butin : ${+(ex.part_butin_pct || 0)} %</span>`
+					+ clauses,
+				actions: `<button class="sh-drop-btn" data-offre="${escapeHtml(o.id)}"
+					onclick="openClauses(this.dataset.offre)"
+					title="Entendre ses conditions — rien n'est engagé avant votre réponse">Engager</button>`,
+			});
+		});
+	}
+
+	const mien = data.mon_offre || null;
+	const partEl = document.getElementById('aub-services-part');
+	if (partEl && data.part_butin_max !== undefined) partEl.max = data.part_butin_max;
+	const etat = document.getElementById('aub-services-etat');
+	const btn = document.getElementById('aub-services-btn');
+	const retirer = document.getElementById('aub-services-retirer');
+	if (etat) {
+		etat.textContent = !mien ? "Vous ne proposez pas vos services."
+			: mien.engage_par ? `Vous êtes engagé par ${mien.engage_par}.`
+			: !mien.ici ? "Votre offre est affichée dans une autre auberge."
+			: "Votre offre est affichée ici.";
+	}
+	if (btn) {
+		btn.textContent = mien ? '📌 Mettre à jour' : "📌 S'inscrire";
+		btn.disabled = !!(mien && mien.engage_par);
+	}
+	if (retirer) retirer.hidden = !mien;
+	// Les champs ne se rechargent qu'au CHANGEMENT de l'offre enregistrée.
+	const sigMien = JSON.stringify(mien);
+	if (sigMien !== _aubMonOffreSig) {
+		_aubMonOffreSig = sigMien;
+		const clausesEl = document.getElementById('aub-services-clauses');
+		if (mien) {
+			if (partEl) partEl.value = (mien.exigences || {}).part_butin_pct || 0;
+			if (clausesEl) clausesEl.value = ((mien.exigences || {}).clauses || []).join('\n');
+		}
+	}
+}
+
+async function proposerServices() {
+	const partEl = document.getElementById('aub-services-part');
+	const clausesEl = document.getElementById('aub-services-clauses');
+	const data = await _aubFetch('api/auberge/services', {
+		part_butin_pct: parseInt(partEl ? partEl.value : '0', 10) || 0,
+		clauses: clausesEl ? clausesEl.value : '',
+	});
+	if (!data) return;
+	_aubMonOffreSig = null;   // recharger les champs bornés par le serveur
+	renderAuberge(data);
+	showToast('📌 Vos services sont affichés au tableau.');
+}
+
+async function retirerServices() {
+	if (!confirm("Retirer vos services ? Si quelqu'un vous emploie, votre personnage quittera son groupe.")) return;
+	const data = await _aubFetch('api/auberge/services/retirer', {});
+	if (!data) return;
+	renderAuberge(data);
+	showToast('Vos services ne sont plus proposés.');
+}
+
+async function engagerServices(offreId) {
+	const data = await _aubFetch('api/auberge/services/engager', { offre_id: offreId });
+	if (!data) return;
+	_majBoutonGroupe(data);
+	renderAuberge(data);
+	if (data.engage) showToast('🤝 ' + data.engage.nom + ' rejoint votre groupe.');
+	// Le panneau 👥 ouvert doit montrer le nouveau venu (son payload n'est pas celui-ci).
+	const grp = document.getElementById('groupe-panel');
+	if (grp && !grp.classList.contains('panel-hidden')) {
+		const r2 = await fetch('api/groupe');
+		if (r2.ok) renderGroupe(await r2.json());
 	}
 }
 
@@ -11638,6 +11780,8 @@ function closeAuberge() {
 	clearCharacterCards(document.getElementById('aub-tables-list'));
 	clearCharacterCards(document.getElementById('aub-tableau-list'));
 	clearCharacterCards(document.getElementById('aub-guides-list'));
+	clearCharacterCards(document.getElementById('aub-services-list'));
+	_aubServicesSig = null;   // la liste purgée se redessine à la réouverture
 	_aubSigs = new Map();
 	_aubSigsOcc = new Map();
 	document.getElementById('game-container').classList.remove('panel-hidden');
@@ -11938,10 +12082,15 @@ function fermerNuit() {
 // elle est générée, et sa seule réplique est le contrat qu'elle propose.
 function demanderEmbauche(avId) { openClauses(avId); }
 
+// Id de l'offre de compagnon-JOUEUR en cours d'examen : le bouton d'accord le relit ici
+// plutôt que de le porter dans un `onclick` (Convention §9).
+let _clausesOffreId = null;
+
 function openClauses(avId) {
-	const r = _recEtat[avId];
+	const r = _recEtat[avId] || _aubServicesEtat[avId];
 	const ov = document.getElementById('clauses-overlay');
 	if (!r || !ov) return;
+	if (r.joueur) { _openClausesJoueur(r, ov); return; }
 	const ex = r.exigences_effectives || {};
 	const nom = `${r.prenom || ''} ${r.nom || ''}`.trim();
 	const clauses = ex.clauses || [];
@@ -11986,6 +12135,39 @@ function openClauses(avId) {
 		+ `<div class="clauses-avert">Écarter ses conditions clôt l'entretien : la recrue quitte le tableau, sans retour.</div>`
 		+ `</div></div>`;
 	ov.classList.remove('clauses-hidden');
+}
+
+// Variante du dialogue pour le personnage d'un AUTRE joueur : conditions saisies par lui,
+// un seul accord, et pas de refus définitif — l'offre reste au tableau pour les autres.
+function _openClausesJoueur(r, ov) {
+	_clausesOffreId = r.id;
+	const ex = r.exigences_effectives || {};
+	const nom = `${r.prenom || ''} ${r.nom || ''}`.trim();
+	const clauses = ex.clauses || [];
+	const part = +(ex.part_butin_pct || 0);
+	document.getElementById('clauses-body').innerHTML =
+		`<h3>🗣 ${escapeHtml(nom)}</h3>`
+		+ `<div class="rec-dial">`
+		+ (r.image ? `<img class="rec-dial-portrait" src="/characters/${escapeHtml(r.image)}" alt="">` : '')
+		+ `<div class="rec-dial-corps">`
+		+ `<div class="pnj-ambiance">Le personnage d'un autre joueur. Son équipement reste le sien ; ce que vous lui confiez, vous pouvez le reprendre.</div>`
+		+ `<div class="clauses-part">💰 Part de butin : <strong>${part} %</strong></div>`
+		+ (clauses.length
+			? `<ul class="clauses-list">${clauses.map(c => `<li>• ${escapeHtml(c)}</li>`).join('')}</ul>`
+			: '')
+		+ `<ul class="rec-dial-choix">`
+		+ `<li><button class="sub-loc-btn" onclick="_clausesAccepterJoueur()">✔ « J'accepte vos conditions. »</button></li>`
+		+ `<li><button class="sub-loc-btn" onclick="closeClauses()">↩ « Laissez-moi y réfléchir. »</button></li>`
+		+ `</ul>`
+		+ `<div class="clauses-avert">S'il tombe au combat, il quitte le groupe et son sac reste au sol.</div>`
+		+ `</div></div>`;
+	ov.classList.remove('clauses-hidden');
+}
+
+function _clausesAccepterJoueur() {
+	const id = _clausesOffreId;
+	closeClauses();
+	if (id) engagerServices(id);
 }
 
 // ⚠️ Fermer ≠ décider : ✕, Échap et clic hors carte laissent la recrue au tableau. Le
@@ -12109,7 +12291,7 @@ async function embaucherAventurier(avId, mode) {
 // payload ne porte pas de recrues → seuls groupe + fiche 👥 sont resynchronisés.
 // `permanent` : rompre un ENGAGEMENT n'est pas résilier un contrat — la confirmation doit
 // dire ce que ça coûte, sinon le joueur découvre la sanction après coup.
-async function congedierAventurier(avId, permanent, mission) {
+async function congedierAventurier(avId, permanent, mission, joueur) {
 	// TROIS ruptures, trois confirmations : l'engagement blesse durablement ; le contrat
 	// d'une mission se rompt SANS FRAIS à la guilde (et coûte de l'affinité ailleurs — le
 	// dire ici est la seule occasion qu'a le joueur de l'apprendre AVANT) ; le congédiement
@@ -12120,6 +12302,8 @@ async function congedierAventurier(avId, permanent, mission) {
 		? (LIEU_DE_GUILDE
 			? "Mettre fin au contrat ici, à la guilde ? Le marché est rempli : il s'en ira sans rancune."
 			: "Rompre le contrat loin de la guilde ? Il le prendra mal — à la guilde, cela ne lui coûterait rien.")
+		: joueur
+		? 'Congédier ce personnage ? Ce que vous lui avez confié sera posé au sol.'
 		: 'Congédier ce compagnon ? Il gardera le souvenir de vos aventures.';
 	if (!confirm(question)) return;
 	try {
@@ -12139,9 +12323,11 @@ async function congedierAventurier(avId, permanent, mission) {
 			const r2 = await fetch('api/groupe');
 			if (r2.ok) renderGroupe(await r2.json());
 		}
+		if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
 		if (data.congedie) {
 			showToast('👋 ' + data.congedie.nom + ' quitte le groupe.'
-				+ (data.congedie.sans_frais ? ' 📜 Contrat rempli, sans rancune.' : ''));
+				+ (data.congedie.sans_frais ? ' 📜 Contrat rempli, sans rancune.' : '')
+				+ (data.congedie.sac_au_sol ? ' Son sac est posé au sol.' : ''));
 		}
 	} catch(err) { console.error('Erreur congédiement', err); }
 }
@@ -12238,6 +12424,10 @@ async function reprendreAventurier(avId) {
 const AFFINITES_INIT = {{ affinites_detail | tojson | safe }};
 renderFicheCompagnons(AFFINITES_INIT);
 {{ compagnons_partis | tojson | safe }}.forEach(n => showToast('👋 ' + n + ' a quitté le groupe.'));
+// Compagnon-JOUEUR : ce que mon personnage, engagé par d'autres joueurs, m'a rapporté.
+(g => { if (g && (g.xp || g.cuivre)) showToast('⚔ Vos services vous ont rapporté '
+	+ [g.xp ? g.xp + ' XP' : '', g.cuivre ? _prixTexte(g.cuivre) : ''].filter(Boolean).join(' et ') + '.',
+	{major: true}); })({{ (gains_services or {}) | tojson | safe }});
 // Intendant au Bureau administratif : la caisse des ateliers a été relevée à l'arrivée
 // (`proprietes.releve_auto`, déjà créditée et persistée — ce toast ne reviendra pas).
 const RELEVE_CAISSE = {{ releve_caisse | tojson | safe }};
@@ -13065,6 +13255,9 @@ async function openCompagnonSheet(avId) {
 		_affecterFiche(p);
 
 		document.body.classList.add('sheet-compagnon');
+		// Compagnon-JOUEUR : équipement et progression sont ceux de son joueur (le serveur
+		// refuse en 403) — la classe masque les gestes qui les modifieraient.
+		document.body.classList.toggle('sheet-clone', !!p.est_clone);
 		_applySheetIdentite(p);
 		_sheetRendreTout();
 
@@ -13095,6 +13288,7 @@ async function closeCompagnonSheet() {
 	_compagnonActif = null;
 	_sheetSnap = null;
 	document.body.classList.remove('sheet-compagnon');
+	document.body.classList.remove('sheet-clone');
 	if (s) {
 		_inventaire = s.inventaire; _slots = s.slots;   // `_objetsAuSol` : cf. openCompagnonSheet
 		_chargeMax = s.chargeMax; _effetsActifs = s.effetsActifs;

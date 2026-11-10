@@ -35,6 +35,7 @@ from utils.quetes import maj_progress_kills, maj_progress_chasse
 from utils.zones import profils_compatibles, profils_candidats
 from utils.focalisation import effacer_si_objectif_atteint
 from utils import recrutement
+from utils import mercenaires
 from utils import montures as montures_util
 from utils import escorte as escorte_util
 from utils import animations as animations_util
@@ -7358,6 +7359,38 @@ def verser_butin_au_sol(character: dict, combat_doc: dict, deja=None) -> list[di
 	return verses
 
 
+def _crediter_xp_membre(doc: dict, xp: int) -> None:
+	"""XP d'un membre. Compagnon-JOUEUR : la même XP remonte AUSSI à son original, par le
+	compteur monotone du clone (`mercenaires.crediter_xp`, encaissé au /play de l'original) —
+	même doc que la garde `combats_recompenses`, donc exactly-once."""
+	grant_xp(doc, xp)
+	mercenaires.crediter_xp(doc, xp)
+
+
+def _finalize_clone_mort(combat_doc: dict, snap: dict, doc: dict, character: dict) -> bool:
+	"""Compagnon-JOUEUR tombé à 0 PV, QUELLE QUE SOIT L'ISSUE : il quitte le groupe et son
+	SAC se répand au sol du principal (sauvé par `_finalize_membre` du principal, sous SON
+	garde exactly-once — même schéma que `_finalize_monture`). Son équipement reste : il
+	appartient à l'original. Garde d'idempotence PAR DOC, comme les autres passes."""
+	combat_id = combat_doc.get("_id")
+	rewarded = doc.get("combats_recompenses", [])
+	if combat_id in rewarded:
+		return False
+	ramasse = [i for i in snap.get("butin_ramasse", []) if i]
+	if ramasse:
+		doc["inventaire"] = list(doc.get("inventaire") or []) + ramasse
+	verser_butin_contenants(snap, doc)
+	# XP des pièges : acquise au geste, elle remonte quand même à l'original.
+	if _eff_int(snap.get("xp_pieges")) > 0:
+		mercenaires.crediter_xp(doc, _eff_int(snap.get("xp_pieges")))
+	sac = mercenaires.mourir(character, doc)
+	if sac:
+		character["objets_au_sol"] = list(character.get("objets_au_sol") or []) + sac
+	rewarded.append(combat_id)
+	doc["combats_recompenses"] = rewarded[-MEMOIRE_COMBATS_MAX:]
+	return save_doc(doc) is not None
+
+
 def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> bool:
 	"""Applique l'issue du combat au doc d'UN membre du groupe (principal ou compagnon,
 	les docs `aventurier:*` étant des miroirs du character) : PV (KO → relevé à 1),
@@ -7374,7 +7407,7 @@ def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> 
 		doc["currentPV"] = max(1, joueur.get("currentPV", 0))
 		# XP + montée de niveau : règle partagée avec la découverte de lieux. XP
 		# pleine pour chaque membre (v1, pas de partage).
-		grant_xp(doc, combat_doc.get("xp_gagnee", 0))
+		_crediter_xp_membre(doc, combat_doc.get("xp_gagnee", 0))
 	elif status == "defaite":
 		doc["currentPV"] = 1
 	elif status == "fuite":
@@ -7382,7 +7415,7 @@ def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> 
 	# XP des PIÈGES (détection / désamorçage) : personnelle et acquise AU GESTE, donc créditée
 	# quelle que soit l'issue — sous la même garde d'idempotence que l'XP de victoire.
 	if _eff_int(joueur.get("xp_pieges")) > 0:
-		grant_xp(doc, _eff_int(joueur.get("xp_pieges")))
+		_crediter_xp_membre(doc, _eff_int(joueur.get("xp_pieges")))
 	# PM réappliqués pour TOUTES les issues (le PM n'est pas la ressource de KO ; une
 	# potion de PM bue en combat doit persister).
 	doc["currentPM"] = max(0, joueur.get("currentPM", doc.get("currentPM", 0)))
@@ -7562,6 +7595,7 @@ def finalize_combat(combat_doc: dict) -> bool:
 	compagnons_traites = []
 	montures_traitees = []
 	proteges_traites = []
+	clones_morts = []
 	joueur_principal = None
 	for j in combat_doc["joueurs"]:
 		cid = j.get("character_id")
@@ -7581,6 +7615,11 @@ def finalize_combat(combat_doc: dict) -> bool:
 		# elle meurt (et fait échouer sa quête) au lieu d'être relevée. Passe dédiée, plus bas.
 		if j.get("est_protege"):
 			proteges_traites.append((j, doc))
+			continue
+		# ⚠️ Ni un compagnon-JOUEUR tombé : il MEURT (hors du groupe, sac au sol) au lieu
+		# d'être relevé. Passe dédiée, plus bas, sous le garde du principal.
+		if mercenaires.est_clone(doc) and j.get("currentPV", 0) <= 0:
+			clones_morts.append((j, doc))
 			continue
 		_finalize_membre(combat_doc, j, doc, status)
 		compagnons_traites.append((j, doc))
@@ -7617,6 +7656,10 @@ def finalize_combat(combat_doc: dict) -> bool:
 	# juste en dessous, dans le même save que l'XP.
 	for j, doc in proteges_traites:
 		_finalize_protege(combat_doc, j, doc, status, character)
+
+	# Compagnons-joueurs tombés : même place, même motif (sac versé sur le principal).
+	for j, doc in clones_morts:
+		_finalize_clone_mort(combat_doc, j, doc, character)
 
 	# Progression des quêtes de chasse : compte les monstres tués (toute issue), sous le
 	# même garde exactly-once que l'XP → pas de double comptage si /play re-finalise.
