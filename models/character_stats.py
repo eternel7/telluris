@@ -115,6 +115,17 @@ LOCALISATION_TOUCHES: dict[str, int] = {
 # Bonus de portée des armes de JET dérivé de la Force : portee_jet = item.portee + F // JET_PORTEE_F_DIV.
 # Sur l'échelle ×10 (F ≈ 10-100), un diviseur de 20 donne +0 à +5 cases selon la puissance.
 JET_PORTEE_F_DIV: int = 20
+
+# TYPOLOGIE de précision des armes de corps à corps ET de jet, posée par tag sur l'item :
+# `lourde`, `legere`, aucun des deux ⇒ « equilibree ». Poids (F, Ag) de la précision,
+# divisée par 4 : lourde (3F+Ag), équilibrée (2F+2Ag), légère (F+3Ag). La légère EST le `cc`
+# d'avant la typologie : mains nues et attaques naturelles des monstres la gardent. Le tir
+# n'est pas concerné (`cd`). Tags posés par `dev/gen_typologie_armes.py`.
+TAG_ARME_LOURDE: str = "lourde"
+TAG_ARME_LEGERE: str = "legere"
+TYPOLOGIE_CC: dict[str, tuple] = {
+	"lourde": (3, 1), "equilibree": (2, 2), "legere": (1, 3),
+}
 # Facteur multipliant la distance entre 2 protagoniste dont l'un est furtif. 
 # Le resultat obtenu vient augmenté la difficulte du jet de detection
 DETECTION_DISTANCE_FACTEUR: int = 5

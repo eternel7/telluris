@@ -396,6 +396,16 @@ CATALOGUE = [
 			"n'ont ni sous-catégorie ni description d'où « a un fil » se déduirait.",
 	},
 	{
+		"id": "gen_typologie_armes",
+		"label": "⚖️ Typologie des armes : lourdes / équilibrées / légères",
+		"argv": _py("gen_typologie_armes.py"),
+		"ecrit": "Écrit jsons/typologie_armes_a_importer.json.",
+		"description": "Pose `lourde` ou `legere` sur les armes de corps à corps et de jet "
+			"(aucun tag = équilibrée), d'après la restriction F/Ag, le poids et les deux mains, "
+			"plus une liste d'exceptions (daishō, hast d'adresse). Ne porte que le delta avec le "
+			"dump ; le tir n'est pas concerné.",
+	},
+	{
 		"id": "gen_coherence_france",
 		"label": "🗺️ Corriger la cohérence de lieu:france",
 		"argv": _py("gen_coherence_france.py"),
