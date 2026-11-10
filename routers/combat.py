@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from db.config import get_doc, save_doc, find_docs
 from utils.auth import get_current_user
-from utils.characters import get_selected_character, carried_weight, charge_max_of, resolve_item_ref, item_ref_weight
+from utils.characters import get_selected_character, carried_weight, charge_max_of, resolve_item_ref, item_ref_weight, item_ref_id
+from utils import contenants
 from utils.consommables import liste_consommables_combat
 from utils.sorts import (
     normaliser_sort, sort_utilisable_combat, composants_etat, effets_effectifs,
@@ -102,6 +103,10 @@ class LootAttribution(BaseModel):
     # objets équipés, plusieurs lignes par monstre. Absente (ancien client) ⇒ `monstre_id`.
     cle: str | None = None
     beneficiaire_id: str  # character_id d'un membre du combat (character:* ou aventurier:*)
+    # Destinataire = un CONTENANT du sac de ce bénéficiaire (utils/contenants.py) : la ligne y
+    # est rangée et ne pèse rien pour lui ; seule la capacité du contenant borne.
+    contenant_index: int | None = None
+    contenant_item_id: str | None = None
 
 
 class ActionRequest(BaseModel):
@@ -397,24 +402,47 @@ async def collect_loot(
     ]
 
     # Regroupement par bénéficiaire ; carcasses non proposées / déjà encaissées ignorées.
+    # Une attribution à un CONTENANT de ce bénéficiaire part dans `par_contenant`, clé
+    # (cid, index, item_id) : elle ne charge pas son sac.
     par_benef: dict[str, list[str]] = {}
+    par_contenant: dict[tuple, list[str]] = {}
     for a in attributions:
         cle = a.cle or a.monstre_id
         if cle not in dispo or cle in deja:
             continue
         if a.beneficiaire_id not in snap_par_cid:
             raise HTTPException(status_code=422, detail="Bénéficiaire hors du groupe de combat.")
-        par_benef.setdefault(a.beneficiaire_id, []).append(cle)
+        if a.contenant_index is not None or a.contenant_item_id:
+            par_contenant.setdefault(
+                (a.beneficiaire_id, a.contenant_index, a.contenant_item_id), []).append(cle)
+        else:
+            par_benef.setdefault(a.beneficiaire_id, []).append(cle)
 
     # Docs des bénéficiaires : le principal est déjà chargé (ne pas le re-fetcher → éviter
     # deux versions du même doc / conflit _rev).
     docs: dict[str, dict] = {principal_id: character}
-    for cid in par_benef:
+    for cid in list(par_benef) + [k[0] for k in par_contenant]:
         if cid not in docs:
             d = get_doc(cid)
             if not d:
                 raise HTTPException(status_code=404, detail="Bénéficiaire introuvable.")
             docs[cid] = d
+
+    # Contenants : localisés, capacité CUMULÉE par contenant, aucun contenant dedans — refus
+    # global, comme la surcharge. Deux clés peuvent viser le même contenant (index désaligné) :
+    # on regroupe par position réelle.
+    vers_contenant: dict[tuple, list[str]] = {}
+    for (cid, idx_c, iid_c), cles in par_contenant.items():
+        pos, _doc_c = contenants.contenant_de(docs[cid], idx_c, iid_c, get_doc)
+        if pos is None:
+            raise HTTPException(status_code=422, detail="Contenant introuvable dans ce sac.")
+        vers_contenant.setdefault((cid, pos), []).extend(cles)
+    for (cid, pos), cles in vers_contenant.items():
+        ref_c = docs[cid]["inventaire"][pos]
+        refs = [{"item": dispo[c]["item_id"], "poids": dispo[c]["poids"]} for c in cles]
+        ok, raison = contenants.peut_recevoir(ref_c, get_doc(item_ref_id(ref_c)), refs, get_doc)
+        if not ok:
+            raise HTTPException(status_code=422, detail=raison)
 
     # Contrôle de charge PAR bénéficiaire — refus global (aucune carcasse encaissée) pour
     # que la validation reste atomique. charge_max = celle du snapshot (cohérente avec l'UI).
@@ -438,6 +466,14 @@ async def collect_loot(
             noms.append(dispo[cle]["nom"])
             encaisses.add(cle)
         doc["inventaire"] = inventaire
+    for (cid, pos), cles in vers_contenant.items():
+        doc = docs[cid]
+        for cle in cles:
+            ref = {"item": dispo[cle]["item_id"], "poids": dispo[cle]["poids"]}
+            contenants.deposer(doc, pos, item_ref_id(doc["inventaire"][pos]), ref, get_doc,
+                               controler=False)
+            noms.append(dispo[cle]["nom"])
+            encaisses.add(cle)
 
     # Ce que PERSONNE n'a emporté tombe au SOL du principal (transitoire, perdu au premier
     # pas) plutôt que de disparaître : une carcasse est indivisible dans l'overlay, mais au
@@ -627,7 +663,8 @@ async def combat_action(
                      "poids_consomme": round(item_ref_weight(ref), 2)}
 
     attributions = None if body.attributions is None else [
-        {"monstre_id": a.monstre_id, "cle": a.cle, "beneficiaire_id": a.beneficiaire_id}
+        {"monstre_id": a.monstre_id, "cle": a.cle, "beneficiaire_id": a.beneficiaire_id,
+         "contenant_index": a.contenant_index, "contenant_item_id": a.contenant_item_id}
         for a in body.attributions]
     action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens, body.mode, item=item_doc, sort=sort_arg, competence=competence_arg, attributions=attributions, piege=piege_arg)
     # Donjon à étages : le passage vers un autre étage est validé par le moteur, l'étage

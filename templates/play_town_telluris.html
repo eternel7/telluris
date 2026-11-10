@@ -8050,6 +8050,8 @@ async function pickupItem(index, itemId) {
 // compter qu'un escorté, qui ne porte rien : le choix le dira alors).
 function _groupeAPorteurs() {
 	if (_compagnonActif) return true;
+	// Un contenant du sac ouvert (sac dimensionnel…) est un destinataire à lui seul.
+	if ((_inventaire || []).some(it => it && it.contenant)) return true;
 	const btn = document.getElementById('btn-groupe');
 	return !!btn && !btn.hidden;
 }
@@ -8072,6 +8074,18 @@ function _porteursPourRamasser(item) {
 	(d.groupe || []).forEach(c => ajouter(c, '🧑‍🤝‍🧑', sacs[c.id]));
 	(d.montures || []).forEach(m => ajouter(m, '🐴', sacs[m.id]));
 	if (d.guide) ajouter(d.guide, '🧭', sacs[d.guide.id]);
+	// Contenants de TOUT le groupe, ceux du porteur de la fiche compris : l'objet y est rangé
+	// et ne pèse rien pour son porteur. `libre` null = marée basse : place inconnue, le serveur
+	// tranche. Un contenant ne se range pas dans un autre (contenants.peut_ranger).
+	(d.contenants || []).forEach(c => {
+		const libre = c.libre == null ? null : +c.libre;
+		out.push({
+			id: c.cle, contenant: c,
+			nom: `${c.nom || 'Contenant'} (${c.porteur_nom || '?'})`,
+			icon: c.icon || '👜', libre,
+			rentre: !item.contenant && (libre == null || +(item.poids || 0) <= libre + 1e-6),
+		});
+	});
 	return out;
 }
 
@@ -8085,7 +8099,7 @@ function demanderPorteur(item, porteurs) {
 		+ porteurs.map(p => `<button type="button" class="cible-allie-btn" ${p.rentre ? '' : 'disabled'}
 			onclick="_choisirCibleAllie('${p.id}')">
 			<span>${p.icon}</span><span class="cible-allie-nom">${escapeHtml(p.nom)}</span>
-			<span class="cible-allie-pv${p.rentre ? '' : ' cible-allie-trop'}">${Math.max(0, p.libre).toFixed(1)} kg libres${p.rentre ? '' : ' · trop lourd'}</span>
+			<span class="cible-allie-pv${p.rentre ? '' : ' cible-allie-trop'}">${p.libre == null ? 'place inconnue (marée basse)' : Math.max(0, p.libre).toFixed(1) + ' kg libres'}${p.rentre ? '' : (item.contenant && p.contenant ? ' · pas un contenant dans un autre' : ' · trop lourd')}</span>
 		</button>`).join('');
 	document.getElementById('cible-allie-overlay').classList.remove('clauses-hidden');
 	return new Promise(resolve => { _cibleAllieResolve = resolve; });
@@ -8102,12 +8116,18 @@ async function donnerDuSol(index, itemId) {
 	if (!porteurs.length) { showToast('Personne d\'autre dans le groupe ne peut porter.'); return; }
 	const dest = await demanderPorteur(item, porteurs);
 	if (!dest) return;
+	// Un contenant : son PORTEUR est le destinataire, le contenant est adressé à part.
+	const ctn = (porteurs.find(p => p.id === dest) || {}).contenant;
+	const corps = ctn
+		? { index, item_id: itemId, destinataire_id: ctn.porteur_id,
+			contenant_index: ctn.index, contenant_item_id: ctn.item_id }
+		: { index, item_id: itemId, destinataire_id: dest };
 	try {
 		// `compagnon_id` (via _actionBody) = la fiche ouverte : la réponse est SON sac, le sol
 		// à jour ; le sac du destinataire voyage à part (`destinataire`), jamais à sa place.
 		const res = await fetch('api/pickup_item', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify(_actionBody({ index, item_id: itemId, destinataire_id: dest }))
+			body: JSON.stringify(_actionBody(corps))
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
@@ -12501,9 +12521,12 @@ function renderGroupeInventaire() {
 	const data = _grpEtat || {};
 	const groupe = data.groupe || [];
 	const montures = data.montures || [];
+	// Contenants (sac dimensionnel…) portés par vous, un compagnon ou une monture : une
+	// colonne de droite comme un autre porteur, adressée par sa clé `porteur#index`.
+	const ctns = (data.contenants || []).map(c => ({ id: c.cle, prenom: '', nom: `${c.icon || '👜'} ${c.nom || 'Contenant'} — ${c.porteur_nom || '?'}` }));
 	// Compagnons PUIS montures : tout ce qui peut porter pour vous. Une monture est un
 	// porteur comme un autre ici — c'est même le meilleur.
-	const porteurs = groupe.concat(montures);
+	const porteurs = groupe.concat(montures, ctns);
 	const vide = document.getElementById('grp-inv-vide');
 	const wrap = document.getElementById('grp-inv-wrap');
 	if (!wrap) return;
@@ -12526,7 +12549,8 @@ function renderGroupeInventaire() {
 			+ `${`${c.prenom || ''} ${c.nom || ''}`.trim()}</option>`;
 		// Les montures dans leur propre groupe : on ne confond pas un compagnon et une bête.
 		sel.innerHTML = groupe.map(opt).join('')
-			+ (montures.length ? `<optgroup label="🐴 Montures">${montures.map(opt).join('')}</optgroup>` : '');
+			+ (montures.length ? `<optgroup label="🐴 Montures">${montures.map(opt).join('')}</optgroup>` : '')
+			+ (ctns.length ? `<optgroup label="👜 Contenants">${ctns.map(c => opt(Object.assign({}, c, { nom: escapeHtml(c.nom) }))).join('')}</optgroup>` : '');
 		// Un seul porteur : le sélecteur n'a rien à sélectionner, il devient une étiquette.
 		sel.disabled = porteurs.length < 2;
 	}
@@ -12535,6 +12559,12 @@ function renderGroupeInventaire() {
 	const compagnon = (data.sacs || {})[_grpSelId] || {inventaire: [], charge: 0, charge_max: 0};
 	_grpCharge('grp-inv-charge-principal', principal);
 	_grpCharge('grp-inv-charge-compagnon', compagnon);
+	// Contenant hors marée : on ne voit ni sa charge ni son contenu (le sac « semble vide »).
+	const ctnSel = compagnon.contenant;
+	if (ctnSel && !ctnSel.accessible) {
+		const el = document.getElementById('grp-inv-charge-compagnon');
+		if (el) { el.textContent = `? / ${ctnSel.capacite_kg} kg`; el.classList.remove('grp-charge-over'); }
+	}
 	_grpRemplirSac('grp-inv-principal', principal.inventaire, _grpSac(principal.inventaire, compagnon, 'vers_compagnon'));
 	_grpRemplirSac('grp-inv-compagnon', compagnon.inventaire,
 		_grpSac(compagnon.inventaire, principal, 'vers_principal', !!compagnon.harnachement));
@@ -12634,7 +12664,13 @@ function _grpPorteurs(source) {
 		: { src: compagnon, dest: principal };
 }
 // Même arithmétique que `peut_porter` côté serveur, qui refuserait (409).
+// Vers un CONTENANT : miroir de `contenants.peut_ranger` — jamais un contenant dedans (lui-même
+// compris), et hors marée la place est inconnue : on laisse passer, le serveur tranche.
 function _grpRentre(item, dest) {
+	if (dest && dest.contenant) {
+		if (item.contenant) return false;
+		if (!dest.contenant.accessible) return true;
+	}
 	return +(item.poids || 0) <= (+(dest.charge_max || 0) - +(dest.charge || 0)) + 1e-6;
 }
 
@@ -12671,10 +12707,16 @@ function onGroupeInvSelect(avId) {
 }
 
 async function transfererItem(sens, index, itemId) {
+	// Colonne de droite = un CONTENANT : `compagnon_id` est son porteur (vous compris), le
+	// contenant est adressé à part (index vérifié par item_id).
+	const ctn = (((_grpEtat || {}).sacs || {})[_grpSelId] || {}).contenant;
+	const corps = ctn
+		? { compagnon_id: ctn.porteur_id, contenant_index: ctn.index, contenant_item_id: ctn.item_id, sens, index, item_id: itemId }
+		: { compagnon_id: _grpSelId, sens, index, item_id: itemId };
 	try {
 		const res = await fetch('api/groupe/transferer', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ compagnon_id: _grpSelId, sens, index, item_id: itemId })
+			body: JSON.stringify(corps)
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
@@ -12692,10 +12734,20 @@ async function transfererItem(sens, index, itemId) {
 			});
 			// Object.assign : garde le `harnachement` d'une monture, que le transfert ne touche pas.
 			const sacs = _grpEtat.sacs || {};
-			sacs[data.compagnon_id] = Object.assign({}, sacs[data.compagnon_id], {
+			// Le porteur d'un contenant peut être le principal lui-même : son sac est déjà ci-dessus.
+			if (sacs[data.compagnon_id]) sacs[data.compagnon_id] = Object.assign({}, sacs[data.compagnon_id], {
 				inventaire: data.compagnon.inventaire,
 				charge: data.compagnon.charge, charge_max: data.compagnon.charge_max,
 			});
+			// Contenants recalculés (clés, charges, contenu) : la position du contenant visé a pu
+			// glisser dans le sac du principal — `contenant_cle` est sa nouvelle clé.
+			if (data.contenants) {
+				(_grpEtat.contenants || []).forEach(c => { delete sacs[c.cle]; });
+				_grpEtat.contenants = data.contenants;
+				Object.assign(sacs, data.sacs_contenants || {});
+				if (data.contenant_cle) { _grpSelId = data.contenant_cle; _grpLsSet(GRP_INV_KEY, _grpSelId); }
+			}
+			_grpEtat.sacs = sacs;
 			// La carte d'une monture affiche sa charge en pied : sans cette resynchro elle
 			// resterait figée sur l'état d'avant le transfert jusqu'à la réouverture du panneau.
 			const mnt = [..._grpEtat.montures || [], ...(_grpEtat.guide ? [_grpEtat.guide] : [])].find(m => m.id === data.compagnon_id);
