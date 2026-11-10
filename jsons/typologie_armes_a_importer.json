@@ -1,0 +1,3175 @@
+[
+  {
+    "_id": "item:Angon",
+    "_rev": "7-07fa95b06eb89c582e2d18271357075f",
+    "type": "item",
+    "nom": "Angon",
+    "sous_categorie": "",
+    "icon": "🔻",
+    "description": "Javelot franc à longue douille de fer barbelée : planté dans un bouclier, il l'alourdit jusqu'à le rendre inutile.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.2,
+    "tags": [
+      "jet",
+      "lourde"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 19
+    },
+    "bonus_cd": 2,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Atlatl",
+    "_rev": "2-1f0a5c6cd818633a6aa975ce3b0080f8",
+    "type": "item",
+    "nom": "Atlatl",
+    "description": "Propulseur de bois qui allonge le bras et double la portée d'un javelot.",
+    "icon": "🎯",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.6,
+    "tags": [
+      "jet",
+      "legere"
+    ],
+    "portee": 5,
+    "restriction": {
+      "F": 12,
+      "Ag": 15
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_cd": 3
+  },
+  {
+    "_id": "item:Attrape_coquin",
+    "_rev": "2-781120ec95bd47d02bb818e2e028a291",
+    "type": "item",
+    "nom": "Attrape-coquin",
+    "description": "Pince à ressort au bout d'une perche, garnie de pointes : on capture, on ne tue pas.",
+    "icon": "🪤",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac",
+      "hast",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 15
+    },
+    "bonus_degats_dice": 2,
+    "bonus_cc": 4,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Azagay",
+    "_rev": "7-56083ee33e4a758afe292c73dfe68c15",
+    "type": "item",
+    "nom": "Azagay",
+    "sous_categorie": "",
+    "icon": "🏜️",
+    "description": "Sagaie légère à pointe de fer, faite pour être lancée vite et de loin.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.9,
+    "tags": [
+      "jet",
+      "legere"
+    ],
+    "portee": 4,
+    "restriction": {
+      "F": 12,
+      "Ag": 17
+    },
+    "bonus_cd": 4,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Baguette_houx",
+    "_rev": "13-5cb0e26183282932da590bdceb0ede30",
+    "type": "item",
+    "nom": "Baguette de bois de houx",
+    "sous_categorie": "",
+    "icon": "🪄",
+    "description": "Baguette de houx poli. Le houx garde sa verdure en hiver ; on dit qu'il garde aussi la magie.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.2,
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_pm": 6,
+    "bonus": {
+      "Int": 3
+    },
+    "bonus_degats_dice": 2,
+    "restriction": {
+      "Int": 13,
+      "Vol": 12
+    }
+  },
+  {
+    "_id": "item:Baguette_ouvragee",
+    "_rev": "4-59b5dd48aa64a9043fc1a246e12bc334",
+    "type": "item",
+    "nom": "Baguette ouvragée",
+    "description": "Houx tourné par le tabletier, virole et gemme posées par l'orfèvre.",
+    "icon": "🪄",
+    "rarete": "rare",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "poids": 0.8,
+    "portee": 1,
+    "bonus_degats_dice": 2,
+    "bonus": {
+      "Int": 5
+    },
+    "restriction": {
+      "Int": 40
+    },
+    "effets": {
+      "regen_pm": 2
+    }
+  },
+  {
+    "_id": "item:Bardiche",
+    "_rev": "2-8f27b3e05defc85f6595c4599c9bfd0a",
+    "type": "item",
+    "nom": "Bardiche",
+    "description": "Longue lame de hache de 60 à 80 cm montée sur une hampe de 1,5 à 2,4 m.",
+    "icon": "🪓",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 20
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Bec_de_corbin",
+    "_rev": "9-e8070690207d3a099fbba4b40db13d28",
+    "type": "item",
+    "nom": "Bec de corbin",
+    "sous_categorie": "",
+    "icon": "⛏️",
+    "description": "Arme d'hast à pointe recourbée en bec, faite pour percer heaumes et plates.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.2,
+    "tags": [
+      "cac",
+      "hast",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 20
+    },
+    "bonus_degats": 5,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Bolas",
+    "_rev": "8-ad263b0fb291424d825c3a28fa25974f",
+    "type": "item",
+    "nom": "Bolas",
+    "sous_categorie": "",
+    "icon": "➰",
+    "description": "Pierres lestées reliées par des lanières : lancées dans les jambes, elles entravent la course.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "jet",
+      "legere"
+    ],
+    "portee": 3,
+    "restriction": {
+      "Ag": 19
+    },
+    "bonus_cd": 5,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "cible": "ennemi",
+    "effets": {
+      "buffs": {
+        "V": -2
+      },
+      "duree": 2
+    }
+  },
+  {
+    "_id": "item:Boomerang_de_chasse",
+    "_rev": "7-d6cb05bd72d30d4da280586bb907ae48",
+    "type": "item",
+    "nom": "Boomerang de chasse",
+    "sous_categorie": "",
+    "icon": "🪃",
+    "description": "Bâton courbe de chasseur, lancé à ras de terre pour briser les pattes du gibier.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.5,
+    "tags": [
+      "jet",
+      "legere"
+    ],
+    "portee": 4,
+    "restriction": {
+      "Ag": 19
+    },
+    "bonus_cd": 4,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Cabillot",
+    "_rev": "1-229c87cf5655c7fcf696f2b340988c84",
+    "type": "item",
+    "nom": "Cabillot",
+    "description": "Cheville de bois des gréements, toujours à portée de main sur un navire.",
+    "icon": "⚓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.6,
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus_cc": 2
+  },
+  {
+    "_id": "item:Canne_ferree",
+    "_rev": "12-063d122ddfe45511a9eebff00db380e4",
+    "type": "item",
+    "nom": "Canne de marche ferrée",
+    "sous_categorie": "",
+    "icon": "🦯",
+    "description": "Canne de voyageur à embout de fer. On s'y appuie en chemin, on s'en sert quand le chemin tourne mal.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.9,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "portee": 1
+  },
+  {
+    "_id": "item:Cestus_de_jet",
+    "_rev": "7-c2362578c72fde5aef241c91d7455de3",
+    "type": "item",
+    "nom": "Cestus de jet",
+    "sous_categorie": "",
+    "icon": "🥊",
+    "description": "Poing de cuir lesté de plomb, assez lourd pour être lancé à courte distance.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.5,
+    "tags": [
+      "jet",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 20
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Chakram",
+    "_rev": "9-338a96d0e56412ed2b5b9a1ef28a2d23",
+    "type": "item",
+    "nom": "Chakram",
+    "sous_categorie": "",
+    "icon": "⭕",
+    "description": "Anneau d'acier au tranchant extérieur aiguisé, lancé à plat d'un mouvement du poignet.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.3,
+    "tags": [
+      "jet",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 4,
+    "restriction": {
+      "Ag": 23
+    },
+    "bonus_cd": 5,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Chat_a_neuf_queues",
+    "_rev": "1-8bad1879c885351fb0344fd5d5da72b3",
+    "type": "item",
+    "nom": "Chat à neuf queues",
+    "description": "Neuf cordelettes de cuir à nœuds de métal ; un instrument de châtiment.",
+    "icon": "🐈‍⬛",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus_cc": 3
+  },
+  {
+    "_id": "item:Chaine_de_combat",
+    "_rev": "2-666c8319c5ba62fedf78ee0d4c58a18f",
+    "type": "item",
+    "nom": "Chaîne de combat",
+    "description": "Chaîne lestée qu'on fait tournoyer ; elle entrave autant qu'elle frappe.",
+    "icon": "⛓️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.5,
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "portee": 2,
+    "restriction": {
+      "Ag": 19
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 2,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Claymore",
+    "_rev": "2-84cc2b64e285898798b0f25fa6c603c9",
+    "type": "item",
+    "nom": "Claymore",
+    "description": "Grande épée des Highlands, quillons inclinés vers la pointe.",
+    "icon": "🗡️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 21
+    },
+    "bonus_degats": 5,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Corseque",
+    "_rev": "2-84643694095ffae9b1a812c5a0aaab77",
+    "type": "item",
+    "nom": "Corsèque",
+    "description": "Fer de lance à deux ailerons pointus (spetum) : il blesse en profondeur.",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac",
+      "hast",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 18
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 2,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Couteau",
+    "_rev": "1-f9883da17e320689c1b1dcd9c76d26cc",
+    "type": "item",
+    "nom": "Couteau",
+    "description": "Couteau de tous les jours ; on le lance au besoin, sans grande précision.",
+    "icon": "🔪",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.2,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus_cc": 4
+  },
+  {
+    "_id": "item:Couteau_de_chasse",
+    "_rev": "14-e8b7d617e134e2385c9cacb7ea218907",
+    "type": "item",
+    "nom": "Couteau de chasse",
+    "sous_categorie": "",
+    "icon": "🔪",
+    "description": "Lame solide à dos épais, faite pour saigner le gibier comme pour se défendre.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.3,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_cc": 5,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Couteau_de_jet_africain",
+    "_rev": "10-3966ff1a4a8dd904bb402b177a9553db",
+    "type": "item",
+    "nom": "Couteau de jet africain",
+    "sous_categorie": "",
+    "icon": "🔀",
+    "description": "Lame à plusieurs branches tranchantes : quelle que soit sa rotation, une pointe frappe.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.5,
+    "tags": [
+      "jet",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 2,
+    "restriction": {
+      "Ag": 19
+    },
+    "bonus_cd": 5,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 5
+  },
+  {
+    "_id": "item:Da_dao",
+    "_rev": "9-4aaa63ba8f98320b8e211898950a060e",
+    "type": "item",
+    "nom": "Da dao",
+    "sous_categorie": "",
+    "icon": "🐲",
+    "description": "Grand sabre à deux mains à la lame lourde et large, qui tranche plus qu'il ne pique.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 21
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 5,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Dague",
+    "_rev": "15-02cbe5c37f60fa980de38a64ee06f4af",
+    "type": "item",
+    "nom": "Dague",
+    "sous_categorie": "",
+    "icon": "🔪",
+    "description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.3,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_cc": 6,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus_initiative": 3,
+    "bonus": {
+      "Ag": 3
+    }
+  },
+  {
+    "_id": "item:Dague_ac8fbfec",
+    "_rev": "1-1f266a0dac5b82801c1b61bcfe4bb55a",
+    "type": "item",
+    "nom": "Dague Bestial Empoisonné Démoniaque",
+    "icon": "🔪",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Poison de base, Sang de démon séché.",
+    "bonus_degats": 7,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 6,
+    "bonus_initiative": 3,
+    "portee": 1,
+    "bonus": {
+      "Ag": 3,
+      "F": 2,
+      "V": 1,
+      "Vol": 1
+    },
+    "effets": {
+      "regen_pv": -2,
+      "duree": 4,
+      "buffs": {
+        "Vol": -1
+      }
+    },
+    "rarete": "rare",
+    "poids": 0.3,
+    "valeur": [
+      {
+        "cu": 898
+      },
+      {
+        "cu": 1338
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:Poison_de_base",
+          "quantite": 1
+        },
+        {
+          "item": "item:Sang_demon_seche",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_ac8fbfec",
+      "cree_at": 1794082206,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_5f96ac46",
+    "_rev": "1-ef9af684141fc8ac5885058d3562d40c",
+    "type": "item",
+    "nom": "Dague Bestial Empoisonné Ténébreux",
+    "icon": "🔪",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Poison de base, Sel noir.",
+    "bonus_degats": 5,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 6,
+    "bonus_initiative": 3,
+    "portee": 1,
+    "bonus": {
+      "Ag": 3,
+      "F": 1,
+      "V": 1,
+      "Vol": 1
+    },
+    "effets": {
+      "regen_pv": -2,
+      "duree": 4,
+      "buffs": {
+        "Int": -1
+      }
+    },
+    "rarete": "peu_commun",
+    "poids": 0.3,
+    "valeur": [
+      {
+        "cu": 893
+      },
+      {
+        "cu": 1333
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:Poison_de_base",
+          "quantite": 1
+        },
+        {
+          "item": "item:Sel_noir",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_5f96ac46",
+      "cree_at": 1794082227,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_65c53764",
+    "_rev": "1-a3f293e011905a1e6c9e5c37da8a4123",
+    "type": "item",
+    "nom": "Dague Bestial en mithril",
+    "icon": "🔪",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Lingot de mithril.",
+    "bonus_degats": 5,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 8,
+    "bonus_initiative": 3,
+    "portee": 1,
+    "bonus_pa": 3,
+    "bonus": {
+      "Ag": 5,
+      "F": 1,
+      "V": 1
+    },
+    "rarete": "tres_rare",
+    "poids": 0.18,
+    "valeur": [
+      {
+        "cu": 10828
+      },
+      {
+        "cu": 11148
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:mithril",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_65c53764",
+      "cree_at": 1794047515,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_aa3f9aa7",
+    "_rev": "1-272347328ae2cb533dbe6d1eed9f3815",
+    "type": "item",
+    "nom": "Dague Bestial en orichalque",
+    "icon": "🔪",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "description": "Lame courte à double tranchant, l'arme qu'on porte toujours sur soi. Façonné sur mesure : Fiole de sang de bête, Lingot d'orichalque.",
+    "bonus_degats": 5,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 6,
+    "bonus_initiative": 3,
+    "portee": 1,
+    "bonus_pm": 4,
+    "bonus": {
+      "Ag": 3,
+      "F": 1,
+      "V": 1,
+      "Int": 2,
+      "Vol": 2
+    },
+    "effets": {
+      "canalisation": 1
+    },
+    "rarete": "tres_rare",
+    "poids": 0.3,
+    "valeur": [
+      {
+        "cu": 20828
+      },
+      {
+        "cu": 21148
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Dague",
+      "matieres": [
+        {
+          "item": "item:Fiole_sang_bete",
+          "quantite": 1
+        },
+        {
+          "item": "item:orichalque",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Dague_aa3f9aa7",
+      "cree_at": 1794047576,
+      "lieu": "lieu:l_arsenal_de_lutecia"
+    }
+  },
+  {
+    "_id": "item:Dague_de_jet",
+    "_rev": "9-158fc320d7f91b7afe1d210b808178a5",
+    "type": "item",
+    "nom": "Dague de jet",
+    "sous_categorie": "",
+    "icon": "🔪",
+    "description": "Dague équilibrée par la pointe, faite pour voler droit plutôt que pour parer.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 0.35,
+    "tags": [
+      "jet",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 2,
+    "restriction": {
+      "Ag": 19
+    },
+    "bonus_cd": 4,
+    "bonus_pa": 1,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 4,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Dague_de_parade",
+    "_rev": "16-9ca7fe9f750c4d62964e01fb091e1cd4",
+    "type": "item",
+    "nom": "Dague de parade",
+    "sous_categorie": "",
+    "icon": "🗡️",
+    "description": "Dague à large garde, tenue dans la main gauche pour détourner la lame adverse.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 0.3,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_cc": 5,
+    "bonus_pa": 2,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene",
+    "_rev": "14-ae0fde86a316aeb441c8dccb34aafc60",
+    "type": "item",
+    "nom": "Dague de scène",
+    "sous_categorie": "",
+    "icon": "🗡️",
+    "description": "Dague de saltimbanque, assez fine pour un tour d'adresse, assez vraie pour un vrai coup.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.2,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_cc": 4,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 2,
+    "bonus": {
+      "Ag": 3
+    }
+  },
+  {
+    "_id": "item:dague_rituelle",
+    "_rev": "12-e69327f8521a9d2628b7fe121b1c6f7d",
+    "type": "item",
+    "nom": "Dague rituelle",
+    "sous_categorie": "",
+    "icon": "🗡️",
+    "description": "Dague à lame noircie, gravée de signes ; elle sert aux offrandes plus qu'aux combats.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.4,
+    "bonus_cc": 1,
+    "bonus_degats": 1,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_degats_dice": 2,
+    "bonus": {
+      "Vol": 2,
+      "Int": 1
+    },
+    "restriction": {
+      "Int": 13,
+      "Vol": 12
+    }
+  },
+  {
+    "_id": "item:Doloire",
+    "_rev": "2-b403564d761aafcbf70d978b950bac1f",
+    "type": "item",
+    "nom": "Doloire",
+    "description": "Large hache de charpentier emmanchée long, détournée pour la guerre.",
+    "icon": "🪓",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 20
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Drusus",
+    "_rev": "2-847960a6b21902027d204420efb3931c",
+    "type": "item",
+    "nom": "Drusus",
+    "description": "Épée courte d'un acier exceptionnel, à l'équilibre parfait.",
+    "icon": "⚔️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.0,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 12,
+      "Ag": 15
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 3
+  },
+  {
+    "_id": "item:Esponton",
+    "_rev": "2-7ade4a90ec3dab91ca209b4083645b2e",
+    "type": "item",
+    "nom": "Esponton",
+    "description": "Pointe de lance flanquée de deux crocs (ranseur) : elle pique et désarme.",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac",
+      "hast",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 18
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 2,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Fagot_de_traits_lestes",
+    "_rev": "4-25d8a1c5c6af4d55c78596931b264789",
+    "type": "item",
+    "nom": "Fagot de traits lestés",
+    "description": "Des plombées liées en fagot sur une sangle d'épaule. On en tire six sans reprendre son souffle.",
+    "icon": "🎯",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "jet",
+      "legere"
+    ],
+    "poids": 1.5,
+    "portee": 6,
+    "bonus_cd": 3,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "restriction": {
+      "Ag": 27
+    }
+  },
+  {
+    "_id": "item:Falarique",
+    "_rev": "7-018b119ec06949d3031613338b639f2f",
+    "type": "item",
+    "nom": "Falarique",
+    "sous_categorie": "",
+    "icon": "🔥",
+    "description": "Lourd javelot à longue tige de fer, lancé à deux mains pour transpercer bouclier et porteur.",
+    "rarete": "rare",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.2,
+    "tags": [
+      "jet",
+      "lourde"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 21
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8
+  },
+  {
+    "_id": "item:Fauchard_crochet",
+    "_rev": "2-9a40acd75c4cce811d46c2c0b2e91b39",
+    "type": "item",
+    "nom": "Fauchard-crochet",
+    "description": "Fauchard au dos armé d'un crochet qui tire l'adversaire à terre.",
+    "icon": "🪝",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.2,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 17
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 3,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Faucharde",
+    "_rev": "11-357828d24228f776f7605ce451c0c4c4",
+    "type": "item",
+    "nom": "Faucharde",
+    "sous_categorie": "",
+    "icon": "🌾",
+    "description": "Lame de faux redressée au bout d'une hampe : l'arme des paysans levés en armes.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.2,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 18
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Faucille",
+    "_rev": "1-b734eba79c702288e7fc3d3a7aa1017c",
+    "type": "item",
+    "nom": "Faucille",
+    "description": "Outil de moisson devenu arme ; les druides la portent volontiers.",
+    "icon": "🌙",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.6,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 2
+  },
+  {
+    "_id": "item:Fleau_asiatique",
+    "_rev": "6-dba6608a934a3aeeabb4c5ed3fd77caf",
+    "type": "item",
+    "nom": "Fléau asiatique",
+    "sous_categorie": "",
+    "icon": "🥋",
+    "description": "Deux bâtons courts reliés par une chaîne, maniés en moulinets rapides.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1,
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "portee": 1,
+    "restriction": {
+      "Ag": 21
+    },
+    "bonus_cc": 5,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus_initiative": 4
+  },
+  {
+    "_id": "item:Fleau_monte",
+    "_rev": "9-86b67e1743bbd97b37e6e66a4f5e8feb",
+    "type": "item",
+    "nom": "Fléau d'armes monté",
+    "sous_categorie": "",
+    "icon": "⛓️",
+    "description": "Grand fléau de cavalier à long manche, qui frappe de haut avec tout l'élan de la monture.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.8,
+    "tags": [
+      "cac",
+      "hast",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 18,
+      "Ag": 12
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Flechettes",
+    "_rev": "2-57aa0ae72883c7f080a9f7cddeacb085",
+    "type": "item",
+    "nom": "Fléchettes",
+    "description": "Une poignée de courtes fléchettes lestées, lancées d'un coup de poignet.",
+    "icon": "📌",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.1,
+    "tags": [
+      "jet",
+      "legere"
+    ],
+    "portee": 3,
+    "restriction": {
+      "Ag": 17
+    },
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus_cd": 6,
+    "bonus_initiative": 2
+  },
+  {
+    "_id": "item:Fouet",
+    "_rev": "2-34d5ccf9e191b0b1254e70c6967067e7",
+    "type": "item",
+    "nom": "Fouet",
+    "description": "Long fouet de cuir tressé : inefficace contre l'armure, redoutable pour désarmer.",
+    "icon": "➰",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.0,
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "portee": 2,
+    "restriction": {
+      "Ag": 17
+    },
+    "bonus_degats_dice": 2,
+    "bonus_cc": 4
+  },
+  {
+    "_id": "item:Fouet_31f6c52c",
+    "_rev": "4-5d92f345acc41410cccbdf963be53b81",
+    "type": "item",
+    "nom": "Fouet Empoisonné Démoniaque en adamantite",
+    "icon": "➰",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "description": "Long fouet de cuir tressé : inefficace contre l'armure, redoutable pour désarmer. Façonné sur mesure : Poison de base, Sang de démon séché, Lingot d'adamantite.",
+    "bonus_degats_dice": 2,
+    "bonus_cc": 4,
+    "portee": 2,
+    "bonus_degats": 11,
+    "effets": {
+      "regen_pv": -2,
+      "duree": 4,
+      "buffs": {
+        "Vol": -1
+      }
+    },
+    "bonus": {
+      "F": 1,
+      "Vol": 1,
+      "R": 3
+    },
+    "restriction": {
+      "Ag": 17
+    },
+    "rarete": "legendaire",
+    "poids": 1.2,
+    "valeur": [
+      {
+        "cu": 200370
+      },
+      {
+        "cu": 200535
+      }
+    ],
+    "fabrication": {
+      "base_item": "item:Fouet",
+      "matieres": [
+        {
+          "item": "item:Poison_de_base",
+          "quantite": 1
+        },
+        {
+          "item": "item:Sang_demon_seche",
+          "quantite": 1
+        },
+        {
+          "item": "item:adamantite",
+          "quantite": 1
+        }
+      ],
+      "recette": "recette:commande_Fouet_31f6c52c",
+      "cree_at": 1792613232,
+      "lieu": "lieu:la_grande_megisserie"
+    }
+  },
+  {
+    "_id": "item:Fouet_dard_de_manticore",
+    "_rev": "1-7e6c8e6be968d57f9a2eb934f0b7e529",
+    "type": "item",
+    "nom": "Fouet-dard de Manticore",
+    "icon": "🦂",
+    "description": "La queue d'une manticore, tressée de cuir jusqu'au dard. Les vieux récits de Perse disent que la bête lançait ses dards comme des flèches ; celui-ci se contente de mordre, et le venin fait le reste.",
+    "rarete": "rare",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.0,
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "portee": 2,
+    "restriction": {
+      "Ag": 17
+    },
+    "bonus_degats_dice": 2,
+    "bonus_cc": 4,
+    "bonus_degats": 2,
+    "effets": {
+      "buffs": {
+        "R": -3
+      },
+      "duree": 3
+    },
+    "valeur": [
+      {
+        "cu": 394
+      },
+      {
+        "cu": 559
+      }
+    ]
+  },
+  {
+    "_id": "item:Fourche_de_guerre",
+    "_rev": "2-aa7b6c17e1daaeb679dd70386fba5c6c",
+    "type": "item",
+    "nom": "Fourche de guerre",
+    "description": "Fourche de paysan redressée et ferrée : deux dents longues et solides.",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.2,
+    "tags": [
+      "cac",
+      "hast",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 18
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Fourche_fauchard",
+    "_rev": "2-cfe6b4c644faaa47f1436b675aafb227",
+    "type": "item",
+    "nom": "Fourche-fauchard",
+    "description": "Lame de fauchard prolongée d'une longue dent de fourche.",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 18
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 2,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Francisque",
+    "_rev": "9-86ea11acf1e590dc6fb2a7bd8d0780dc",
+    "type": "item",
+    "nom": "Francisque",
+    "sous_categorie": "",
+    "icon": "🪓",
+    "description": "Hache de jet franque au fer arqué : elle rebondit de façon imprévisible et tranche ce qu'elle touche.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.2,
+    "tags": [
+      "jet",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 19
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Glaive",
+    "_rev": "2-62e127eadba111df808baeed97b75247",
+    "type": "item",
+    "nom": "Glaive",
+    "description": "Lame de couteau d'une soixantaine de centimètres au bout d'une hampe.",
+    "icon": "🗡️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.4,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 19
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Glaive_croc_de_basilic",
+    "_rev": "1-3e1cd1739add5e7dcca9b8c3d50990d3",
+    "type": "item",
+    "nom": "Glaive-croc de Basilic",
+    "icon": "🐍",
+    "description": "Un croc de basilic emmanché au bout d'une hampe, à la place du fer. Le regard de la bête n'y est plus, mais ce qu'il entaille se raidit encore.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 19
+    },
+    "bonus_degats": 6,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 1,
+    "deux_mains": true,
+    "effets": {
+      "buffs": {
+        "Ag": -2
+      },
+      "duree": 2
+    },
+    "valeur": [
+      {
+        "cu": 3785
+      },
+      {
+        "cu": 4940
+      }
+    ]
+  },
+  {
+    "_id": "item:Glaive_guisarme",
+    "_rev": "2-ddeb87dbd2e864909b6a8e46c6714fe8",
+    "type": "item",
+    "nom": "Glaive-guisarme",
+    "description": "Glaive muni d'un crochet arrière pour désarçonner les cavaliers.",
+    "icon": "🪝",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 4.0,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 20
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 2,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Grand_cimeterre",
+    "_rev": "2-d0a38b1c2b0f172cce629c236afd4671",
+    "type": "item",
+    "nom": "Grand cimeterre",
+    "description": "Cimeterre démesuré, manié à deux mains en larges arcs.",
+    "icon": "🌙",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 21
+    },
+    "bonus_degats": 5,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Guisarme",
+    "_rev": "10-f03d4b37019f5dba2c8bb76d3ab3e80d",
+    "type": "item",
+    "nom": "Guisarme",
+    "sous_categorie": "",
+    "icon": "🪝",
+    "description": "Arme d'hast à crochet : on accroche, on tire, et le cavalier se retrouve à terre.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 15,
+      "Ag": 14
+    },
+    "bonus_cc": 3,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Guisarme_vouge",
+    "_rev": "2-4ddac7c072c8c91c35664615bea109f4",
+    "type": "item",
+    "nom": "Guisarme-vouge",
+    "description": "Vouge doté d'un crochet et d'une pointe : trois armes en une, et lourde.",
+    "icon": "🪝",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 4.5,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 21
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 2,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Hache_a_deux_mains",
+    "_rev": "2-201e159573620a9825483548366e33dc",
+    "type": "item",
+    "nom": "Hache à deux mains",
+    "description": "Manche de 1,2 à 1,5 m et un fer très lourd : lente, mais rien ne lui résiste.",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 4.0,
+    "tags": [
+      "cac",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 21
+    },
+    "bonus_degats": 5,
+    "bonus_degats_dice": 10,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Hachette",
+    "_rev": "1-a2230223774bd52f1f2ee363aa5333f0",
+    "type": "item",
+    "nom": "Hachette",
+    "description": "Petite hache à une main, aussi utile au bivouac qu'en mêlée.",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 1
+  },
+  {
+    "_id": "item:Hallebarde",
+    "_rev": "10-80f36dec4031de1ebd99dc34bbfa0260",
+    "type": "item",
+    "nom": "Hallebarde",
+    "sous_categorie": "",
+    "icon": "🪓",
+    "description": "Hache, pique et crochet au bout d'une même hampe : la reine des armes d'hast.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 20
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Harpon",
+    "_rev": "2-18cd2ade9cef40a1fe74c85a9cebb4e3",
+    "type": "item",
+    "nom": "Harpon",
+    "description": "Fer barbelé sur une courte hampe, fait pour ne plus ressortir.",
+    "icon": "🎣",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.5,
+    "tags": [
+      "jet",
+      "lourde"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 17
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_cd": 2
+  },
+  {
+    "_id": "item:Javeline",
+    "_rev": "2-0de9d9c4d579834cf1aeab02d28d7654",
+    "type": "item",
+    "nom": "Javeline",
+    "description": "Trait de jet d'1,5 m à hampe fine et fer étroit.",
+    "icon": "🎯",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "jet",
+      "legere"
+    ],
+    "portee": 4,
+    "restriction": {
+      "Ag": 17
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 4,
+    "bonus_cd": 4
+  },
+  {
+    "_id": "item:Javelot_ethiopien",
+    "_rev": "6-5c1c7acb74bc61b22f42dbfcec5fc85b",
+    "type": "item",
+    "nom": "Javelot d'apparat éthiopien",
+    "sous_categorie": "",
+    "icon": "❇️",
+    "description": "Javelot de parade à fer ouvragé, porté par les dignitaires autant que lancé.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1,
+    "tags": [
+      "jet",
+      "legere"
+    ],
+    "portee": 4,
+    "restriction": {
+      "Ag": 21
+    },
+    "bonus_cd": 5,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 8,
+    "bonus": {
+      "Cha": 2
+    }
+  },
+  {
+    "_id": "item:Javelot_polynesien",
+    "_rev": "6-0bf4711150b3e6b268796ec2363b9dfd",
+    "type": "item",
+    "nom": "Javelot polynésien",
+    "sous_categorie": "",
+    "icon": "🌴",
+    "description": "Javelot léger de bois dur, à pointe durcie au feu.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "jet",
+      "legere"
+    ],
+    "portee": 4,
+    "restriction": {
+      "F": 12,
+      "Ag": 15
+    },
+    "bonus_cd": 3,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Jian",
+    "_rev": "7-1fa3a1a42eb04debb9f6f5b990da2d74",
+    "type": "item",
+    "nom": "Jian",
+    "sous_categorie": "",
+    "icon": "🐉",
+    "description": "Épée droite à double tranchant, fine et vive. On la dit « gentilhomme des armes ».",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "restriction": {
+      "Ag": 21
+    },
+    "bonus_cc": 5,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus_initiative": 3,
+    "bonus": {
+      "Ag": 2,
+      "Cha": 2
+    }
+  },
+  {
+    "_id": "item:Jitte",
+    "_rev": "1-a5371e40839092b824b008f649057258",
+    "type": "item",
+    "nom": "Jitte",
+    "description": "Matraque de fer à un seul croc, l'arme des gardes qui capturent.",
+    "icon": "🔱",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.6,
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 4,
+    "bonus_pa": 1
+  },
+  {
+    "_id": "item:Kama",
+    "_rev": "2-38934a387c8e8f3123938ded776c9c71",
+    "type": "item",
+    "nom": "Kama",
+    "description": "Faucille de riziculteur au manche de bois dur, souvent maniée par paire.",
+    "icon": "🌾",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "restriction": {
+      "Ag": 17
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 3
+  },
+  {
+    "_id": "item:Kanabo",
+    "_rev": "6-14fd16258133002c8ef7df936b6ed645",
+    "type": "item",
+    "nom": "Kanabō",
+    "sous_categorie": "",
+    "icon": "🧱",
+    "description": "Massue de bois cerclée de fer et hérissée de clous : il faut la force d'un ogre pour la manier.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 4,
+    "tags": [
+      "cac",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 22
+    },
+    "bonus_degats": 6,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Katar",
+    "_rev": "2-f09b07766bf9e533cc28672717a8ab5d",
+    "type": "item",
+    "nom": "Katar",
+    "description": "Dague à poignée transversale qui prolonge le poing ; on frappe en boxant.",
+    "icon": "🗡️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.5,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 15
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 4
+  },
+  {
+    "_id": "item:Kestros",
+    "_rev": "6-cecba8d0685698d74a6952a2ad2760d8",
+    "type": "item",
+    "nom": "Kestros",
+    "sous_categorie": "",
+    "icon": "💫",
+    "description": "Fléchette à empennage de bois, lancée à la fronde.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.5,
+    "tags": [
+      "jet",
+      "legere"
+    ],
+    "portee": 5,
+    "restriction": {
+      "F": 12,
+      "Ag": 19
+    },
+    "bonus_cd": 4,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Kpinga",
+    "_rev": "8-d4c12f15c7800662078f5bbdf02f5baa",
+    "type": "item",
+    "nom": "Kpinga",
+    "sous_categorie": "",
+    "icon": "⚜️",
+    "description": "Couteau de jet à trois lames rayonnantes, insigne du guerrier qui le porte.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.9,
+    "tags": [
+      "jet",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 15,
+      "Ag": 17
+    },
+    "bonus_cd": 2,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_initiative": 2
+  },
+  {
+    "_id": "item:Kukri",
+    "_rev": "2-5762c92fed89ed0f9840ca7450b14add",
+    "type": "item",
+    "nom": "Kukri",
+    "description": "Lame recourbée vers l'avant, lourde du bout : elle tranche comme une hachette.",
+    "icon": "🔪",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.6,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 15
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 3
+  },
+  {
+    "_id": "item:Kunai",
+    "_rev": "8-700a0760c1cd045f99126ae03464330b",
+    "type": "item",
+    "nom": "Kunai",
+    "sous_categorie": "",
+    "icon": "🔧",
+    "description": "Outil de maçon devenu arme : une pointe à tout faire, qu'on plante ou qu'on lance.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.3,
+    "tags": [
+      "jet",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 2,
+    "restriction": {
+      "Ag": 17
+    },
+    "bonus_cd": 3,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 4
+  },
+  {
+    "_id": "item:Kusarigama",
+    "_rev": "2-da9de960bf31b0cf718c071b0390c12d",
+    "type": "item",
+    "nom": "Kusarigama",
+    "description": "Faucille reliée à une chaîne lestée : on entrave d'une main, on tranche de l'autre.",
+    "icon": "⛓️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.5,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 2,
+    "restriction": {
+      "Ag": 20
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 3,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Lame_courte",
+    "_rev": "13-455b3fcf0ea62fb3551733ed7e7ffc6a",
+    "type": "item",
+    "nom": "Lame courte",
+    "sous_categorie": "",
+    "icon": "🗡️",
+    "description": "Lame courte sans garde, discrète sous un manteau.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.5,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_cc": 3,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Lance_de_cavalerie_lourde",
+    "_rev": "2-f470a1c849ad8ea54f6069c854533cf5",
+    "type": "item",
+    "nom": "Lance de cavalerie lourde",
+    "description": "Lance de chevalier d'environ 4,2 m, avec rondelle de garde.",
+    "icon": "🐎",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 7.0,
+    "tags": [
+      "cac",
+      "hast",
+      "lourde"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 22
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -2,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Lance_de_cavalerie_moyenne",
+    "_rev": "2-8ad6290d927d2f0f3cef6f49dad0c8ef",
+    "type": "item",
+    "nom": "Lance de cavalerie moyenne",
+    "description": "Lance d'environ 3,6 m, l'arme de charge des sergents montés.",
+    "icon": "🐎",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 4.5,
+    "tags": [
+      "cac",
+      "hast",
+      "lourde"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 19
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Lance_de_joute",
+    "_rev": "2-bf8d30cc6202d716eeb6ed3b25a311dd",
+    "type": "item",
+    "nom": "Lance de joute",
+    "description": "Lance creuse à pointe émoussée, faite pour se briser sur l'écu en tournoi.",
+    "icon": "🏇",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 9.0,
+    "tags": [
+      "cac",
+      "hast",
+      "lourde"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 21
+    },
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus_malus_depl": -2,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Lance_longue",
+    "_rev": "2-1a1dc7743342e49c7995d9e43f6f65e7",
+    "type": "item",
+    "nom": "Lance longue",
+    "description": "Lance de plus de trois mètres, tenue en rangs serrés.",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac",
+      "hast",
+      "lourde"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 18
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 8,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Maillet_de_guerre",
+    "_rev": "2-cdc35a252b1791b535cd5e9e2cc829bc",
+    "type": "item",
+    "nom": "Maillet de guerre",
+    "description": "Masse de fer au bout d'un long manche, maniée à deux mains.",
+    "icon": "🔨",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 5.0,
+    "tags": [
+      "cac",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 22
+    },
+    "bonus_degats": 5,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Mambele",
+    "_rev": "8-e23229971a174390b68d9b6cb7b4233b",
+    "type": "item",
+    "nom": "Mambele",
+    "sous_categorie": "",
+    "icon": "🦅",
+    "description": "Fer de jet en forme de faucille à crochet, venu des forêts du sud.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.6,
+    "tags": [
+      "jet",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 3,
+    "restriction": {
+      "Ag": 18
+    },
+    "bonus_cd": 4,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Marteau_de_lucerne",
+    "_rev": "2-608a555e8918ed898a9287d1e3a56e1f",
+    "type": "item",
+    "nom": "Marteau de Lucerne",
+    "description": "Tête de marteau à trois becs sur longue hampe, coiffée d'une pointe.",
+    "icon": "🔨",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 4.0,
+    "tags": [
+      "cac",
+      "hast",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 20
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 1,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Masse_cannelee_perse",
+    "_rev": "5-64c869ff120af8962afd81535e12c196",
+    "type": "item",
+    "nom": "Masse cannelée perse",
+    "sous_categorie": "",
+    "icon": "🕌",
+    "description": "Masse à tête cannelée venue de Perse, aussi belle que lourde.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 2.6,
+    "tags": [
+      "cac",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 20
+    },
+    "bonus_degats": 5,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Masse_de_fantassin",
+    "_rev": "2-1cf78727db44f50e1debfe551cc72855",
+    "type": "item",
+    "nom": "Masse de fantassin",
+    "description": "Masse d'armes lourde du piéton : elle bosselle le heaume et la tête dessous.",
+    "icon": "🔨",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 19
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Masse_poing_de_troll",
+    "_rev": "1-4c342845c1a3508f712a1409b20d364f",
+    "type": "item",
+    "nom": "Masse-poing de Troll",
+    "icon": "👊",
+    "description": "Un avant-bras de troll, poing fermé, durci au feu et ferré aux phalanges. Les forgerons qui l'ont cerclé jurent qu'il serrait un peu plus chaque matin.",
+    "rarete": "rare",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 6.0,
+    "tags": [
+      "cac",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 28
+    },
+    "bonus_degats": 10,
+    "bonus_degats_dice": 10,
+    "bonus_malus_depl": -1,
+    "deux_mains": true,
+    "valeur": [
+      {
+        "cu": 1136
+      },
+      {
+        "cu": 1672
+      }
+    ]
+  },
+  {
+    "_id": "item:Massue",
+    "_rev": "2-2f3da7b4ec60a83e780325465e2e0700",
+    "type": "item",
+    "nom": "Massue",
+    "description": "Gourdin énorme qu'on manie à deux mains, souvent cerclé ou clouté.",
+    "icon": "🏏",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 19
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:massue_de_fer_du_geant",
+    "_rev": "1-b10e43374b64f1efa07207510f37a34c",
+    "type": "item",
+    "nom": "Massue de fer du géant",
+    "description": "Massue forgée d'une seule masse de fer, noircie par le sel des grèves. Le géant du Mont la traîne derrière lui dans la baie ; ceux qui l'ont vue tomber disent qu'il faut quatre hommes et des leviers pour la soulever.",
+    "icon": "🏏",
+    "rarete": "legendaire",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 150.0,
+    "tags": [
+      "cac",
+      "non_personnalisable",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 90
+    },
+    "bonus_degats": 9,
+    "bonus_degats_dice": 12,
+    "deux_mains": true,
+    "valeur": [
+      {
+        "cu": 2500
+      },
+      {
+        "cu": 5000
+      }
+    ]
+  },
+  {
+    "_id": "item:Morgenstern",
+    "_rev": "6-bdee9d86fe164695e88af4559045cf77",
+    "type": "item",
+    "nom": "Morgenstern",
+    "sous_categorie": "",
+    "icon": "🌟",
+    "description": "Massue à tête hérissée de pointes, l'« étoile du matin » des milices.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3,
+    "tags": [
+      "cac",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 20
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 10,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:No_dachi",
+    "_rev": "2-be6f1d5e7d9a5e2683ade0cecbd72fd1",
+    "type": "item",
+    "nom": "No-dachi",
+    "description": "Très long sabre de champ de bataille, porté dans le dos.",
+    "icon": "🌸",
+    "rarete": "rare",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.5,
+    "tags": [
+      "cac",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 17,
+      "Ag": 16
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 10,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Partisane",
+    "_rev": "2-ec73931ce642cc7fb00f2f5a8ded6d46",
+    "type": "item",
+    "nom": "Partisane",
+    "description": "Large fer de lance à deux ailerons, apprécié des gardes de palais.",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.4,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 19
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 2,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Pic_de_fantassin",
+    "_rev": "2-dcf02ce94727a7115b214a72d097fcc7",
+    "type": "item",
+    "nom": "Pic de fantassin",
+    "description": "Version plus longue et plus lourde du pic de cavalier.",
+    "icon": "⛏️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 19
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Pilum",
+    "_rev": "7-de0b0052f002a68e7a525b9ab1d24eb0",
+    "type": "item",
+    "nom": "Pilum",
+    "sous_categorie": "",
+    "icon": "🏛️",
+    "description": "Javelot de légionnaire : sa tige de fer plie à l'impact, il ne peut pas être renvoyé.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.8,
+    "tags": [
+      "jet",
+      "lourde"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 20
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Pique",
+    "_rev": "8-eb87d1a56a8b753d17bc789332c6b118",
+    "type": "item",
+    "nom": "Pique",
+    "sous_categorie": "",
+    "icon": "📍",
+    "description": "Longue hampe à pointe de fer : en rang serré, un mur que nulle charge ne franchit.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 4,
+    "tags": [
+      "cac",
+      "hast",
+      "lourde"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 19
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Poignard",
+    "_rev": "1-26b3787f8946d283a518a6510085828c",
+    "type": "item",
+    "nom": "Poignard",
+    "description": "Long poignard à double tranchant, l'arme de ceinture du soldat.",
+    "icon": "🔪",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.4,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 5,
+    "bonus_initiative": 2,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Rapiere",
+    "_rev": "14-dbd5ab3f0c47d183ca851f92df41336d",
+    "type": "item",
+    "nom": "Rapière",
+    "sous_categorie": "",
+    "icon": "🤺",
+    "description": "Épée fine et longue, faite pour l'estoc et la botte bien placée.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.9,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_cc": 4,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 6,
+    "bonus_initiative": 5,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Sai",
+    "_rev": "2-e39237dd4c4ed80ebf5954cc9e35c665",
+    "type": "item",
+    "nom": "Sai",
+    "description": "Barre de métal à grande garde fourchue : elle bloque, pare et désarme.",
+    "icon": "🔱",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "portee": 1,
+    "restriction": {
+      "Ag": 17
+    },
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 5,
+    "bonus_pa": 2
+  },
+  {
+    "_id": "item:Sarisse",
+    "_rev": "5-62d241990468e1f52df2892596bb9152",
+    "type": "item",
+    "nom": "Sarisse",
+    "sous_categorie": "",
+    "icon": "📏",
+    "description": "Pique démesurée de la phalange : elle tient l'ennemi à cinq pas de soi.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 5.5,
+    "tags": [
+      "cac",
+      "hast",
+      "lourde"
+    ],
+    "portee": 4,
+    "restriction": {
+      "F": 21
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -2,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Sestiere",
+    "_rev": "4-387b447fa09e9b8c6e60613ae06d4463",
+    "type": "item",
+    "nom": "Sestiere",
+    "sous_categorie": "",
+    "icon": "🎣",
+    "description": "Fer de jet en étoile, lancé dans les jambes pour ralentir la course.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.2,
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 13,
+      "Ag": 17
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "cible": "ennemi",
+    "effets": {
+      "buffs": {
+        "V": -1
+      },
+      "duree": 1
+    }
+  },
+  {
+    "_id": "item:Shuriken",
+    "_rev": "5-0b61148d5ecd3c34c68f1b6ff112748c",
+    "type": "item",
+    "nom": "Shuriken",
+    "sous_categorie": "",
+    "icon": "✴️",
+    "description": "Étoile de jet en acier, cachée dans une manche jusqu'au dernier instant.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.1,
+    "tags": [
+      "jet",
+      "legere"
+    ],
+    "portee": 2,
+    "restriction": {
+      "Ag": 20
+    },
+    "bonus_cd": 6,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus_initiative": 3
+  },
+  {
+    "_id": "item:Sheitan",
+    "_rev": "5-ae4c076b0e8c5c42e5422dc20b42821b",
+    "type": "item",
+    "nom": "Shéïtan",
+    "sous_categorie": "",
+    "icon": "🐍",
+    "description": "Lame de jet en forme de croissant, à la pointe recourbée comme une corne.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.4,
+    "tags": [
+      "jet",
+      "legere"
+    ],
+    "portee": 3,
+    "restriction": {
+      "Ag": 19
+    },
+    "bonus_cd": 3,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Stylet",
+    "_rev": "1-f196e66bc7052a7ad07fbb86ea9f8cc5",
+    "type": "item",
+    "nom": "Stylet",
+    "description": "Lame fine à section carrée, sans tranchant : elle cherche le défaut de l'armure.",
+    "icon": "🗡️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.25,
+    "tags": [
+      "cac",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 6,
+    "bonus_initiative": 3,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Tetsubo",
+    "_rev": "2-31caa2f70dc0159439ce2a43ce03b031",
+    "type": "item",
+    "nom": "Tetsubo",
+    "description": "Long bâton dont l'extrémité est cerclée de bandes de fer cloutées.",
+    "icon": "🏏",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 20
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Vouge",
+    "_rev": "2-24c1b6bc29606358ed1fbc7c083d634a",
+    "type": "item",
+    "nom": "Vouge",
+    "description": "Couperet de boucher fixé au bout d'une hampe ; l'arme des milices.",
+    "icon": "🪓",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 19
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Wakizashi",
+    "_rev": "2-8bacbc124f9af41282eb5526054869f7",
+    "type": "item",
+    "nom": "Wakizashi",
+    "description": "Sabre court qui accompagne le katana, forgé de la même manière.",
+    "icon": "🌸",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.9,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "restriction": {
+      "Ag": 17
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 4,
+    "bonus_initiative": 2
+  },
+  {
+    "_id": "item:Woludo",
+    "_rev": "6-33008db78da6425f132081ebdb265b5c",
+    "type": "item",
+    "nom": "Woludo",
+    "sous_categorie": "",
+    "icon": "🌀",
+    "description": "Arme d'hast à lame large et courbe, venue des royaumes du sud.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3,
+    "tags": [
+      "cac",
+      "hast",
+      "lourde"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 19
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Epee_courte_rune",
+    "_rev": "16-b0331b2353955fef30c538261dac46e2",
+    "type": "item",
+    "nom": "Épée courte enchantée",
+    "sous_categorie": "",
+    "icon": "✨",
+    "description": "Épée courte dont la lame porte des runes gravées ; elles s'éclairent faiblement quand on incante.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "cac",
+      "tranchant",
+      "legere"
+    ],
+    "portee": 1,
+    "bonus_pm": 5,
+    "bonus_degats_dice": 4,
+    "bonus_degats": 2,
+    "bonus": {
+      "Int": 3
+    },
+    "restriction": {
+      "Int": 15,
+      "Vol": 10
+    }
+  },
+  {
+    "_id": "item:Epee_a_deux_mains",
+    "_rev": "2-5e1a06939d5ee72721b921def7832b39",
+    "type": "item",
+    "nom": "Épée à deux mains",
+    "description": "Lame immense maniée à deux mains ; elle fauche les rangs de piquiers.",
+    "icon": "🗡️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "tranchant",
+      "lourde"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 22
+    },
+    "bonus_degats": 5,
+    "bonus_degats_dice": 10,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  }
+]

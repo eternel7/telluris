@@ -17,7 +17,7 @@ import math
 
 from models import character_stats
 from utils import combat, simulateur
-from utils.simulateur import moyenne_de_des, options_offensives_statiques
+from utils.simulateur import esperance_option, options_offensives_statiques
 from utils.recrutement import RANGS
 
 # ── LES RÈGLES — tout se règle ici ───────────────────────────────────────────────────
@@ -88,16 +88,18 @@ def potentiel_combat(snapshot: dict, arsenal: dict, regles: dict | None = None) 
 
 	meilleure, option_retenue = 0.0, ""
 	for opt in options_offensives_statiques(snapshot, arsenal):
-		if opt["jet"] == "magique":
-			seuil = combat._magic_hit_threshold(
-				snapshot.get("toucher_magique", 0), r["pm_def_reference"])
-		else:
-			skill = snapshot.get("cd", 0) if opt["jet"] == "cd" else snapshot.get("cc", 0)
-			seuil = combat._hit_threshold(skill, r["defense_reference"])
+		def seuil_de(coup, opt=opt):
+			if opt["jet"] == "magique":
+				return combat._magic_hit_threshold(
+					snapshot.get("toucher_magique", 0), r["pm_def_reference"])
+			# Précision résolue par le moteur (typologie, deux armes, compétence martiale).
+			skill = coup.get("skill")
+			if skill is None:
+				skill = snapshot.get("cd", 0) if opt["jet"] == "cd" else snapshot.get("cc", 0)
+			return combat._hit_threshold(skill, r["defense_reference"])
 		# Dégâts par la formule PARTAGÉE (espérance des dés au lieu du tirage) : changer
-		# la règle du jeu met ce score à jour tout seul.
-		par_coup = (seuil / 100.0) * combat.calculer_degats(
-			snapshot, etalon, opt["notation"], 1, opt["jet"], des_fn=moyenne_de_des)
+		# la règle du jeu met ce score à jour tout seul. Deux armes ⇒ deux coups par action.
+		par_coup = esperance_option(snapshot, etalon, opt, seuil_de)
 		par_round = par_coup * actions_max * (1 + r["bonus_portee"] * (opt["portee"] - 1))
 		if opt["cout_pm"] > 0:
 			castabilite = min(1.0, pm_max / (opt["cout_pm"] * actions_max)) if pm_max else 0.0

@@ -578,7 +578,8 @@ def options_offensives_statiques(snapshot: dict, arsenal: dict) -> list:
 			continue
 		out.append({"kind": "arme", "label": profil.get("label", "Arme"),
 					"jet": profil.get("toucher", "cc"), "portee": max(1, int(profil.get("portee", 1) or 1)),
-					"ranged": bool(profil.get("ranged")), "notation": notation, "cout_pm": 0})
+					"ranged": bool(profil.get("ranged")), "notation": notation, "cout_pm": 0,
+					"coups": _coups_option(snapshot, profil)})
 	for sort in arsenal.get("sorts") or []:
 		notation = sort["effets"].get("degats") or ""
 		if not notation:
@@ -596,8 +597,46 @@ def options_offensives_statiques(snapshot: dict, arsenal: dict) -> list:
 		portee, ranged = combat._portee_competence(snapshot, comp)
 		out.append({"kind": "competence", "label": comp["nom"], "jet": comp.get("jet", "cc"),
 					"portee": portee, "ranged": ranged,
-					"notation": notation, "cout_pm": comp["cout_pm"]})
+					"notation": notation, "cout_pm": comp["cout_pm"],
+					"skill": _skill_competence(snapshot, comp)})
 	return out
+
+
+def _skill_competence(actor: dict, comp: dict) -> int | None:
+	"""Précision physique d'une compétence par le helper du MOTEUR (typologie de l'arme
+	empruntée) ; None pour une compétence magique (le seuil passe par la pm_def)."""
+	jet = comp.get("jet", "cc")
+	if jet == "magique":
+		return None
+	return combat.skill_capacite(actor, comp, comp.get("effets") or {}, jet, "competence")
+
+
+def _coups_option(actor: dict, profil: dict) -> list:
+	"""Les coups d'une option d'ARME, par la source unique du moteur (`coups_du_profil`) :
+	un seul pour une arme seule, un par arme en combat à deux armes. Chaque entrée porte
+	sa précision, sa notation et la part durative de SON arme."""
+	coups = []
+	for sous, skill, notation in combat.coups_du_profil(actor, profil):
+		coups.append({"skill": skill, "notation": notation, "jet": sous.get("toucher", "cc"),
+					  "label": sous.get("label", "Arme"),
+					  "portee": max(1, int(sous.get("portee", 1) or 1)),
+					  "effets": sous.get("effets"),
+					  "effets_cible": sous.get("effets_cible", "ennemi"),
+					  "source": {"id": sous.get("effets_source_id") or sous.get("item_id", ""),
+								 "nom": sous.get("label", "Arme"), "icon": "⚔"}})
+	return coups
+
+
+def esperance_option(actor: dict, cible: dict, option: dict, seuil_fn) -> float:
+	"""Espérance de dégâts d'UNE action pour une option : Σ sur ses coups de
+	p(touche) × E[dégâts] par la formule partagée — deux termes en combat à deux armes.
+	`seuil_fn(coup) -> int` donne le seuil de chaque coup (duel : contre la cible ;
+	potentiels : contre l'étalon)."""
+	total = 0.0
+	for coup in option.get("coups") or [option]:
+		total += (seuil_fn(coup) / 100.0) * combat.calculer_degats(
+			actor, cible, coup["notation"], 1, coup["jet"], des_fn=moyenne_de_des)
+	return total
 
 
 # ── Politique de duel ────────────────────────────────────────────────────────────────
@@ -615,7 +654,11 @@ def _seuil_de(actor: dict, cible: dict, option: dict) -> int:
 	"""Seuil de toucher de CETTE option contre CETTE cible — les trois helpers du moteur."""
 	if option["jet"] == "magique":
 		return combat._magic_hit_threshold(actor.get("toucher_magique", 0), cible.get("pm_def", 0))
-	skill = actor.get("cd", 0) if option["jet"] == "cd" else actor.get("cc", 0)
+	# Précision résolue à la construction de l'option (typologie de l'arme, combat à deux
+	# armes, compétence martiale) ; à défaut, la règle d'avant.
+	skill = option.get("skill")
+	if skill is None:
+		skill = actor.get("cd", 0) if option["jet"] == "cd" else actor.get("cc", 0)
 	return combat._hit_threshold(skill, combat._defense_physique(cible))
 
 
@@ -629,8 +672,13 @@ def _options_jouables(actor: dict, arsenal: dict, distance: int):
 		notation = actor.get(profil.get("degats", "degats_cc")) or actor.get("degats_cc") or ""
 		if not notation:
 			continue
+		coups = _coups_option(actor, profil)
+		# Deux armes : un coup dont l'arme n'atteint pas la cible ne part pas (moteur idem).
+		if len(coups) > 1:
+			coups = [c for c in coups if c["portee"] >= distance] or coups
 		yield {"kind": "arme", "label": profil.get("label", "Arme"),
-			   "jet": profil.get("toucher", "cc"), "notation": notation, "cout_pm": 0,
+			   "jet": profil.get("toucher", "cc"), "notation": coups[0]["notation"], "cout_pm": 0,
+			   "skill": coups[0]["skill"], "coups": coups,
 			   "ranged": bool(profil.get("ranged")),
 			   "effets": profil.get("effets"), "effets_cible": profil.get("effets_cible", "ennemi"),
 			   "source": {"id": profil.get("effets_source_id") or profil.get("item_id", ""),
@@ -667,6 +715,7 @@ def _options_jouables(actor: dict, arsenal: dict, distance: int):
 			continue
 		yield {"kind": "competence", "label": comp["nom"], "jet": comp.get("jet", "cc"),
 			   "notation": notation, "cout_pm": cout_pm, "effets": comp["effets"],
+			   "skill": _skill_competence(actor, comp),
 			   "ranged": ranged,
 			   "effets_cible": "ennemi", "source": comp, "compteur": "competences"}
 
@@ -676,11 +725,11 @@ def _meilleure_offensive(actor: dict, cible: dict, arsenal: dict, distance: int)
 	du SCORE (ils jouent dans l'exécution) — le score départage, il ne prédit pas."""
 	meilleure, meilleur_score = None, -1.0
 	for option in _options_jouables(actor, arsenal, distance):
-		p = _seuil_de(actor, cible, option) / 100.0
 		# Même formule que le coup réel, l'espérance des dés remplaçant le tirage : le
-		# score classe les options selon ce qu'elles feront VRAIMENT.
-		score = p * combat.calculer_degats(actor, cible, option["notation"],
-										   1, option["jet"], des_fn=moyenne_de_des)
+		# score classe les options selon ce qu'elles feront VRAIMENT (deux coups en combat
+		# à deux armes).
+		score = esperance_option(actor, cible, option,
+								 lambda coup, o=option: _seuil_de(actor, cible, dict(o, **coup)))
 		if score > meilleur_score:
 			meilleure, meilleur_score = option, score
 	return meilleure
@@ -707,19 +756,40 @@ def _poser_positions(actor: dict, adversaire: dict, distance: int) -> None:
 
 
 def _executer_attaque(actor: dict, cible: dict, option: dict, etat: dict) -> None:
-	"""Un coup, résolu comme au moteur : PM débités AVANT le jet (un sort raté coûte),
+	"""Une attaque, résolue comme au moteur : PM débités AVANT le jet (un sort raté coûte),
 	critique ×2 (×4 en furtivité, où tout coup touché est critique) sur les dés avant la
 	soustraction des PA, magie sans PA, fumble = une
 	action de plus perdue, part durative posée sur la cible touchée vivante. Un
 	attaquant FURTIF en sort comme au moteur : corps à corps = révélation, à distance =
-	la cible seule tente un jet (_furtivite_apres_offensive)."""
+	la cible seule tente un jet (_furtivite_apres_offensive).
+
+	Combat à deux armes (`option["coups"]`) : un jet par arme, la furtivité évaluée une fois
+	pour les deux, le second perdu si le premier tue, une seule action et une seule pénalité
+	d'échec critique — comme `combat._frapper_monstre`."""
 	pseudo = etat["pseudo"]
 	if option["cout_pm"]:
 		actor["currentPM"] = max(0, int(actor.get("currentPM", 0)) - option["cout_pm"])
-	seuil = _seuil_de(actor, cible, option)
-	jet = combat._resoudre_jet(actor, cible, seuil, furtif=combat._attaque_furtive(actor, cible))
+	furtif = combat._attaque_furtive(actor, cible)
+	fumble = False
+	for n, coup in enumerate(option.get("coups") or [{}]):
+		if n and not _vivant(cible):
+			break
+		fumble = _coup_simule(actor, cible, dict(option, **coup), pseudo, furtif) or fumble
 	actor[option["compteur"]] = actor.get(option["compteur"], 0) + 1
 	combat._refresh_actions(actor)
+	if fumble:
+		combat._appliquer_fumble(pseudo, actor)
+	# Rupture de furtivité — APRÈS la résolution (vivant à jour), touché ou raté,
+	# exactement comme les trois sites joueur du moteur.
+	if actor.get("furtif"):
+		_poser_positions(actor, cible, etat["distance"])
+		combat._furtivite_apres_offensive(pseudo, actor, cible, bool(option.get("ranged")))
+
+
+def _coup_simule(actor: dict, cible: dict, option: dict, pseudo: dict, furtif: bool) -> bool:
+	"""UN coup de `_executer_attaque`. Renvoie True sur un échec critique."""
+	seuil = _seuil_de(actor, cible, option)
+	jet = combat._resoudre_jet(actor, cible, seuil, furtif=furtif)
 	if jet["touche"]:
 		# Formule PARTAGÉE avec le moteur (combat.calculer_degats) : un duel simulé et un
 		# coup joué en jeu doivent blesser exactement pareil — localisation comprise.
@@ -746,13 +816,7 @@ def _executer_attaque(actor: dict, cible: dict, option: dict, etat: dict) -> Non
 		_log(pseudo, actor, "miss",
 			 f"{actor.get('nom', '?')} manque {cible.get('nom', '?')} ({option['label']}, "
 			 f"jet {jet['roll']} > seuil {seuil}).")
-	if jet["fumble"]:
-		combat._appliquer_fumble(pseudo, actor)
-	# Rupture de furtivité — APRÈS la résolution (vivant à jour), touché ou raté,
-	# exactement comme les trois sites joueur du moteur.
-	if actor.get("furtif"):
-		_poser_positions(actor, cible, etat["distance"])
-		combat._furtivite_apres_offensive(pseudo, actor, cible, bool(option.get("ranged")))
+	return bool(jet["fumble"])
 
 
 def _utiliser_soutien(actor: dict, soutien: dict, pseudo: dict) -> bool:

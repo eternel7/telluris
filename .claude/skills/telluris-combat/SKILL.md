@@ -34,6 +34,12 @@ Un combat est un doc `combat:*` (snapshots `joueurs[]`/`monstres[]`, `ordre_init
 ### Attaques par mode — corps à corps / jet / tir
 Mode déterminé par tag : `tir` (arcs), `jet` (lancer), sinon **cac** (hast = cac de `portee ≥ 2`). `_weapon_attacks` produit `joueur["attaque_profils"]` (1 par mode, poings toujours présents) ; `resolve_action` sélectionne le profil. Restrictions d'équipement, règle ranged (interdit si engagé) et allonge sont couvertes par `tests/test_combat_ranged.py` et `tests/test_competences.py`.
 
+### Typologie des armes et combat à deux armes
+- **Précision par typologie** (cac ET jet ; tir = `cd`) : tag `lourde` (3F+Ag)/4, `legere` (F+3Ag)/4, aucun = équilibrée (2F+2Ag)/4 — `character_stats.TYPOLOGIE_CC`. Snapshot : `cc_lourde`, `cc_equilibree`, et **`cc` = la légère** (mains nues, attaques naturelles, combats en base). Profil : `toucher` nomme la clé ; lecture par **`combat.skill_du_profil`** (clé absente ⇒ `cc`). Tags posés par `dev/gen_typologie_armes.py`.
+- **Deux armes de mêlée en main** ⇒ profil `cac` avec `coups` (main droite d'abord). **`combat.coups_du_profil`** = source unique (jeu, simulateur, potentiels) : chaque arme sous les MÊMES règles — précision de SA typologie − `bonus_cc` de l'autre (le snapshot les somme), dégâts = `degats_cc` − dés/plat de l'autre (`retirer_des_arme`) ⇒ dé + bonus de F pour chacune. Une action, un jet par arme, PA par touche ; furtivité évaluée une fois pour les deux ; second coup perdu si le premier tue ; une seule pénalité d'échec critique ; coup hors d'allonge sauté. Arme à deux mains ou bouclier ⇒ un coup.
+- **Compétence martiale `cc`** : `combat.skill_capacite` (typologie de l'arme empruntée) ; à deux armes, dégâts et allonge de la main droite seule. Un sort « au toucher » garde `cc`.
+- Verrouillé par `tests/test_combat_deux_armes.py`.
+
 ### Ligne de vue et dos — tout coup porté
 - **Ligne de vue pour TOUTE arme**, mêlée comprise (un fouet `cac` portée 2 ne frappe pas à travers un mur), et pour toute capacité offensive, contact allongé compris. L'engagement reste réservé au `ranged`.
 - **Pas de frappe dans le dos** : devant et les cases DIRECTEMENT à gauche/droite oui ; dès une rangée en arrière, refus « Cible dans votre dos : pivotez d'abord. ». `_dans_le_dos(a, b)` : projection des emprises sur l'axe de `a` (`b` tout entier derrière la rangée arrière de `a`). Soins/buffs alliés exemptés.
