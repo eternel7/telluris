@@ -1601,7 +1601,7 @@ class DerivedStats(BaseModel):
 	# Combat
 	initiative:  int
 	deplacement: int   # cases par action
-	cc:		  int   # compétence corps à corps
+	cc:		  int   # compétence corps à corps (arme LÉGÈRE, mains nues, attaque naturelle)
 	cd:		  int   # compétence à distance
 	pa:		  int   # points d'armure TOTAUX (armure naturelle + toutes les pièces)
 	# Localisation des touches : ce qui protège PARTOUT (armure naturelle + bouclier,
@@ -1613,6 +1613,10 @@ class DerivedStats(BaseModel):
 	toucher_magique: int   # compétence de lancer de sorts offensifs
 	degats_cc:   str   # ex: "1D6+3"
 	degats_cd:   str   # ex: "1D4+1"
+	# Précision des armes LOURDES / ÉQUILIBRÉES (cf. TYPOLOGIE_CC). Valeurs par défaut :
+	# un DerivedStats construit à la main (tests, appelants anciens) reste valide.
+	cc_lourde:   int = 0
+	cc_equilibree: int = 0
 
 	# Divers
 	charge_max:  int   # kg
@@ -1651,7 +1655,11 @@ def compute_derived_stats(
 	deplacement = max(1, base.v)
 
 	# ── Corps à corps ────────────────────────────────────────────────
-	cc = (base.f + (base.ag *3)) // 4 + equipment.cc_bonus
+	# Une précision par TYPOLOGIE d'arme (`TYPOLOGIE_CC`) ; `cc` reste la LÉGÈRE (F + 3Ag),
+	# celle des mains nues et des attaques naturelles — la valeur d'avant la typologie.
+	cc = precision_typologie(base.f, base.ag, "legere") + equipment.cc_bonus
+	cc_lourde = precision_typologie(base.f, base.ag, "lourde") + equipment.cc_bonus
+	cc_equilibree = precision_typologie(base.f, base.ag, "equilibree") + equipment.cc_bonus
 
 	# ── À distance ──────────────────────────────────────────────────
 	cd = ((3*base.ag) + (base.v *10)) // 4 + equipment.cd_bonus
@@ -1699,6 +1707,8 @@ def compute_derived_stats(
 		initiative=initiative,
 		deplacement=deplacement,
 		cc=cc,
+		cc_lourde=cc_lourde,
+		cc_equilibree=cc_equilibree,
 		cd=cd,
 		pa=pa,
 		pa_global=pa_global,
@@ -1836,6 +1846,55 @@ def _format_damage(base_die: int, stat_bonus: int, equipment: EquipmentBonus,
 
 	expr = "+".join(f"{count}D{sides}" for sides, count in dice.items())
 	flat = stat_bonus + equipment.degats_bonus
+	if flat:
+		expr += f"{flat:+d}"
+	return expr
+
+
+def precision_typologie(f: int, ag: int, typologie: str) -> int:
+	"""Précision de corps à corps/jet d'une TYPOLOGIE d'arme, sans bonus d'équipement :
+	(poids_F·F + poids_Ag·Ag) // 4 d'après `TYPOLOGIE_CC`. Typologie inconnue ⇒ légère."""
+	wf, wag = TYPOLOGIE_CC.get(typologie) or TYPOLOGIE_CC["legere"]
+	return (wf * int(f or 0) + wag * int(ag or 0)) // 4
+
+
+def typologie_arme(item: dict) -> str:
+	"""Typologie d'un doc d'arme lue dans ses tags : `lourde`, `legere`, sinon `equilibree`."""
+	tags = set((item or {}).get("tags") or [])
+	if TAG_ARME_LOURDE in tags:
+		return "lourde"
+	if TAG_ARME_LEGERE in tags:
+		return "legere"
+	return "equilibree"
+
+
+# Clé du snapshot qui porte la précision d'une typologie (`cc` = la légère, historique).
+CLE_PRECISION_TYPOLOGIE: dict[str, str] = {
+	"lourde": "cc_lourde", "equilibree": "cc_equilibree", "legere": "cc",
+}
+
+
+_TERME_DEGATS_RE = re.compile(r"([+-]?)(\d*)D(\d+)|([+-]?\d+)", re.IGNORECASE)
+
+
+def retirer_des_arme(notation: str, des: str = "", plat: int = 0) -> str:
+	"""Retire d'une notation de dégâts les dés et le plat d'UNE arme.
+
+	Sert au combat à deux armes : `degats_cc` additionne les dés et plats de toutes les
+	armes portées (`_format_damage`) ; le coup d'une arme en retire ceux de l'AUTRE pour ne
+	garder que la F, les objets qui ne sont pas des armes, et ses propres dés. Même format de
+	sortie que `_format_damage` (dés groupés par taille, dans l'ordre, plat signé)."""
+	dice: dict[int, int] = {}
+	flat = 0
+	for signe, n, faces, constante in _TERME_DEGATS_RE.findall(notation or ""):
+		if faces:
+			dice[int(faces)] = dice.get(int(faces), 0) + (-1 if signe == "-" else 1) * int(n or "1")
+		elif constante:
+			flat += int(constante)
+	for n, faces in _DICE_RE.findall(des or ""):
+		dice[int(faces)] = dice.get(int(faces), 0) - int(n or "1")
+	flat -= int(plat or 0)
+	expr = "+".join(f"{c}D{f}" for f, c in dice.items() if c > 0) or "1D4"
 	if flat:
 		expr += f"{flat:+d}"
 	return expr

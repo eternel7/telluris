@@ -2461,7 +2461,8 @@
 						{% for lbl, key, unit in [
 							("PV max","pv_max",""),("PM max","pm_max",""),
 							("Initiative","initiative",""),("Déplacement","deplacement"," cases"),
-							("Corps à corps","cc",""),("À distance","cd",""),
+							("CàC arme lourde","cc_lourde",""),("CàC arme équilibrée","cc_equilibree",""),
+							("CàC arme légère","cc",""),("À distance","cd",""),
 							("Armure (PA)","pa",""),("Déf. magique","pm_def",""),
 							("Dégâts CàC","degats_cc",""),("Charge max","charge_max"," kg")
 						] %}
@@ -3900,8 +3901,10 @@
 							<tr><td>🔷 PM max</td><td><code>Vol × 2 + Int × 2</code> + objets</td><td>La réserve qui paie les sorts et certaines compétences.</td></tr>
 							<tr><td>⚡ Initiative</td><td><code>(Ag + V × 20) ÷ 3</code> + objets</td><td>Ordre de jeu en combat ; aide aussi à <strong>fuir</strong>.</td></tr>
 							<tr><td>🚶 Déplacement</td><td><code>V</code> (au moins 1)</td><td>Cases parcourues par action de déplacement. Divisé par deux si vous portez plus de la moitié de votre charge max.</td></tr>
-							<tr><td>🗡️ Corps à corps</td><td><code>(F + Ag × 3) ÷ 4</code> + arme</td><td>Chance de toucher au contact.</td></tr>
-							<tr><td>🏹 Distance</td><td><code>(Ag × 3 + V × 10) ÷ 4</code> + arme</td><td>Chance de toucher en tirant ou en lançant.</td></tr>
+							<tr><td>🗡️ Arme lourde</td><td><code>(F × 3 + Ag) ÷ 4</code> + arme</td><td>Chance de toucher avec une arme lourde (corps à corps ou jet).</td></tr>
+							<tr><td>🗡️ Arme équilibrée</td><td><code>(F × 2 + Ag × 2) ÷ 4</code> + arme</td><td>Chance de toucher avec une arme équilibrée (corps à corps ou jet).</td></tr>
+							<tr><td>🗡️ Arme légère</td><td><code>(F + Ag × 3) ÷ 4</code> + arme</td><td>Chance de toucher avec une arme légère ou à mains nues. Avec une arme dans chaque main, chacune frappe à son tour : un jet par arme.</td></tr>
+							<tr><td>🏹 Tir</td><td><code>(Ag × 3 + V × 10) ÷ 4</code> + arme</td><td>Chance de toucher à l'arc, à l'arbalète, à la fronde.</td></tr>
 							<tr><td>💥 Dégâts contact</td><td>dé selon F <code>+ F ÷ {{ _fa }}</code> + arme</td><td>Dégâts d'un coup au corps à corps.</td></tr>
 							<tr><td>💥 Dégâts distance</td><td>dé selon Ag <code>+ Ag ÷ {{ _fa }}</code> + arme</td><td>Dégâts d'un tir.</td></tr>
 							<tr><td>🛡️ Armure (PA)</td><td><code>R ÷ {{ _fa }}</code> + pièces portées</td><td>Retranchée des dégâts physiques. Une pièce ne protège que la partie du corps qu'elle couvre ; l'armure naturelle et le bouclier protègent partout. N'arrête pas la magie.</td></tr>
@@ -5864,7 +5867,7 @@ let _derivedCur = {{ character.get("derived_stats", {}) | tojson | safe }};
 function _refreshDerivedStats(d) {
 	if (d) _derivedCur = d;
 	const units = {deplacement: ' cases', charge_max: ' kg'};
-	for (const key of ['pv_max','pm_max','initiative','deplacement','cc','cd','pa','pm_def','degats_cc','degats_cd','charge_max']) {
+	for (const key of ['pv_max','pm_max','initiative','deplacement','cc_lourde','cc_equilibree','cc','cd','pa','pm_def','degats_cc','degats_cd','charge_max']) {
 		const el = document.getElementById('sh-drv-' + key);
 		if (el && d[key] !== undefined) el.textContent = d[key] + (units[key] || '');
 		const el2 = document.getElementById('stat-drv-' + key);
@@ -6495,7 +6498,14 @@ function _magiesText(item) {
 function _weaponModeText(item) {
 	if (!item || item.categorie !== 'arme') return '';
 	const m = _itemMode(item);
-	return m === 'tir' ? 'Tir' : (m === 'jet' ? 'Jet' : 'Corps à corps');
+	const mode = m === 'tir' ? 'Tir' : (m === 'jet' ? 'Jet' : 'Corps à corps');
+	if (m === 'tir') return mode;
+	// Typologie de précision (tags `lourde` / `legere`, aucun = équilibrée) :
+	// miroir de models/character_stats.typologie_arme.
+	const tags = item.tags || [];
+	const typo = tags.includes('lourde') ? 'arme lourde'
+		: (tags.includes('legere') ? 'arme légère' : 'arme équilibrée');
+	return `${mode} · ${typo}`;
 }
 // Prise : `deux_mains` est un booléen du doc item (absent ⇒ une main), tandis que `slots`
 // liste les emplacements ACCEPTÉS. Un objet qui ne se tient pas en main n'a pas de prise

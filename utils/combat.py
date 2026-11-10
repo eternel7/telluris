@@ -253,6 +253,8 @@ def _refresh_snapshot_stats(acteur: dict) -> None:
 									des_cc=int(acteur.get("des_cc_base", 1) or 1))
 
 	acteur["cc"] = derived.cc
+	acteur["cc_lourde"] = derived.cc_lourde
+	acteur["cc_equilibree"] = derived.cc_equilibree
 	acteur["cd"] = derived.cd
 	acteur["ag"] = base.ag
 	acteur["ch"] = base.ch
@@ -910,6 +912,21 @@ def _recalculer_auras(combat_doc: dict, grid: dict | None = None) -> None:
 		_poser_entrees_aura(j, attendues.get(j.get("id"), []))
 
 
+def skill_capacite(joueur: dict, source: dict, effets: dict, mode_jet: str, kind: str) -> int:
+	"""Précision PHYSIQUE (`cc`/`cd`) d'un sort ou d'une compétence — SOURCE UNIQUE du moteur,
+	du simulateur et des potentiels. `cd` ⇒ `cd` ; `cc` ⇒ `cc`, sauf une frappe MARTIALE de
+	COMPÉTENCE (`kind == "competence"`, à dés), portée AVEC l'arme de mêlée
+	(`_profil_emprunte`) : elle touche sous la typologie de cette arme — la main droite en
+	combat à deux armes (premier de `coups_du_profil`)."""
+	if mode_jet == "cd":
+		return int(joueur.get("cd", 0) or 0)
+	if kind == "competence":
+		emprunte = _profil_emprunte(joueur, dict(source or {}, effets=effets))
+		if emprunte is not None:
+			return coups_du_profil(joueur, emprunte)[0][1]
+	return int(joueur.get("cc", 0) or 0)
+
+
 def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, source: dict,
 							effets: dict, notation: str, mode_jet: str, canal: str,
 							textes: dict, noms: dict) -> tuple:
@@ -930,7 +947,7 @@ def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, sourc
 	if mode_jet == "magique":
 		seuil = _magic_hit_threshold(joueur.get("toucher_magique", 0), monstre.get("pm_def", 0))
 	else:
-		skill = joueur["cd"] if mode_jet == "cd" else joueur["cc"]
+		skill = skill_capacite(joueur, source, effets, mode_jet, canal)
 		seuil = _hit_threshold(skill, _defense_physique(monstre))
 	jet = _resoudre_jet(joueur, monstre, seuil, furtif=_attaque_furtive(joueur, monstre))
 	ctx = {"acteur": joueur["nom"], "cible": monstre["nom"], "roll": jet["roll"],
@@ -3418,6 +3435,19 @@ def _espece_midpoint(espece: dict) -> BaseStats:
 	)
 
 
+def _poser_effets_arme(profil: dict, item: dict) -> None:
+	"""Pose sur un profil (ou un coup) la part DURATIVE du bloc `effets` de l'arme.
+	La part durative SEULE : les dégâts d'une arme passent par ses `bonus_degats*`, pas
+	par ce bloc. Rien à empiler ⇒ pas de clé, donc pas de test à l'impact."""
+	effets, cible = effets_d_arme(item)
+	if part_durative(effets):
+		profil["effets"] = effets
+		profil["effets_cible"] = cible
+		# Identité de non-cumul ancrée sur l'ID de l'arme, pas sur son nom : deux docs
+		# peuvent partager un `nom`, jamais un `_id` (cf. cle_source).
+		profil["effets_source_id"] = item.get("_id", "")
+
+
 def _weapon_attacks(character: dict, base: BaseStats) -> list:
 	"""Profils d'attaque disponibles selon les armes équipées.
 
@@ -3425,11 +3455,15 @@ def _weapon_attacks(character: dict, base: BaseStats) -> list:
 	mode. Le mode vient d'un tag de l'item (`tir`/`jet`, défaut `cac`) ; les armes d'hast
 	sont du `cac` à `portee >= 2` (pas de mode dédié). Une attaque de mêlée (poings,
 	portée 1) est TOUJOURS disponible. Chaque profil porte les clés à lire dans le
-	snapshot joueur : `toucher` (cc|cd) et `degats` (degats_cc|degats_cd).
+	snapshot joueur : `toucher` (cc|cc_equilibree|cc_lourde|cd) et `degats`
+	(degats_cc|degats_cd).
 
-	- cac : toucher cc, dégâts degats_cc (basé F), portée = item.portee (>=1).
-	- jet : toucher cd, dégâts degats_cc (basé F), portée = item.portee + F//JET_PORTEE_F_DIV.
+	- cac : toucher selon la TYPOLOGIE de l'arme (tag `lourde`/`legere`, sinon équilibrée ;
+	  `cc` = légère), dégâts degats_cc (basé F), portée = item.portee (>=1).
+	- jet : même typologie, dégâts degats_cc (basé F), portée = item.portee + F//JET_PORTEE_F_DIV.
 	- tir : toucher cd, dégâts degats_cd (basé Ag), portée = item.portee.
+	- deux armes de mêlée en main : le profil `cac` porte `coups` (une entrée par arme, main
+	  droite d'abord), résolus en deux jets par `coups_du_profil`.
 
 	Un profil emporte aussi la part DURATIVE du bloc `effets` de l'arme qui l'a gagné
 	(`effets`/`effets_cible`), appliquée à l'impact par `_appliquer_effet_arme`. C'est le
@@ -3440,8 +3474,10 @@ def _weapon_attacks(character: dict, base: BaseStats) -> list:
 	"""
 	jet_div = max(1, character_stats.JET_PORTEE_F_DIV)
 	best: dict = {}
+	# Armes de MÊLÉE en main, pour le combat à deux armes : (slot, item, portée).
+	armes_cac: list = []
 
-	def consider(mode, portee, ranged, toucher, degats, item):
+	def consider(mode, portee, ranged, toucher, degats, item, typologie=None):
 		cur = best.get(mode)
 		if cur is not None and portee <= cur["portee"]:
 			return
@@ -3454,18 +3490,12 @@ def _weapon_attacks(character: dict, base: BaseStats) -> list:
 				  # L'id de l'arme n'était posé (`effets_source_id`) que si elle portait un
 				  # effet duratif : une arme ordinaire était anonyme dans le snapshot.
 				  "item_id": str(item.get("_id") or "")}
-		# La part durative SEULE : les dégâts d'une arme passent par ses `bonus_degats*`,
-		# pas par ce bloc. Rien à empiler ⇒ pas de clé, donc pas de test à l'impact.
-		effets, cible = effets_d_arme(item)
-		if part_durative(effets):
-			profil["effets"] = effets
-			profil["effets_cible"] = cible
-			# Identité de non-cumul ancrée sur l'ID de l'arme, pas sur son nom : deux docs
-			# peuvent partager un `nom`, jamais un `_id` (cf. cle_source).
-			profil["effets_source_id"] = item.get("_id", "")
+		if typologie:
+			profil["typologie"] = typologie
+		_poser_effets_arme(profil, item)
 		best[mode] = profil
 
-	for ref in (character.get("slots") or {}).values():
+	for slot, ref in (character.get("slots") or {}).items():
 		item_id = item_ref_id(ref)
 		if not item_id:
 			continue
@@ -3478,15 +3508,44 @@ def _weapon_attacks(character: dict, base: BaseStats) -> list:
 			item = dict(item, nom=ref["nom_perso"])
 		tags = set(item.get("tags", []))
 		base_portee = int(item.get("portee", 1) or 1)
+		# TYPOLOGIE (lourde / équilibrée / légère) : décide de la clé de précision du profil
+		# pour la mêlée ET le jet ; le tir reste sous `cd`.
+		typo = character_stats.typologie_arme(item)
+		cle = character_stats.CLE_PRECISION_TYPOLOGIE[typo]
 		if "tir" in tags:
 			consider("tir", base_portee, True, "cd", "degats_cd", item)
 		elif "jet" in tags:
-			consider("jet", base_portee + base.f // jet_div, True, "cd", "degats_cc", item)
+			consider("jet", base_portee + base.f // jet_div, True, cle, "degats_cc", item, typo)
 		else:  # cac par défaut (inclut les armes d'hast, portee >= 2)
-			consider("cac", base_portee, False, "cc", "degats_cc", item)
+			consider("cac", base_portee, False, cle, "degats_cc", item, typo)
+			if slot in ("main_droite", "main_gauche"):
+				armes_cac.append((slot, item, base_portee))
+
+	# COMBAT À DEUX ARMES : une arme de mêlée dans CHAQUE main ⇒ UN COUP PAR ARME, chacun
+	# sous sa propre typologie et son propre `bonus_cc`, avec les mêmes règles de dégâts
+	# (cf. `coups_du_profil`). La main droite frappe la première. Une arme à deux mains
+	# n'occupe qu'un slot (`liberer_pour_deux_mains`) : elle reste seule, comme le bouclier.
+	if len(armes_cac) >= 2 and "cac" in best:
+		armes_cac.sort(key=lambda a: 0 if a[0] == "main_droite" else 1)
+		coups = []
+		for slot, item, portee in armes_cac:
+			typo = character_stats.typologie_arme(item)
+			coup = {"slot": slot, "item_id": str(item.get("_id") or ""),
+					"label": item.get("nom", "Arme"), "typologie": typo,
+					"toucher": character_stats.CLE_PRECISION_TYPOLOGIE[typo],
+					"portee": max(1, int(portee)),
+					"bonus_cc": int(item.get("bonus_cc", 0) or 0),
+					"des": character_stats.normalize_dice(item.get("bonus_degats_dice")),
+					"plat": int(item.get("bonus_degats", 0) or 0),
+					"animation": str(item.get("animation") or "")}
+			_poser_effets_arme(coup, item)
+			coups.append(coup)
+		best["cac"]["coups"] = coups
+		best["cac"]["label"] = " + ".join(c["label"] for c in coups)
 
 	best.setdefault("cac", {"mode": "cac", "portee": 1, "ranged": False,
-							"toucher": "cc", "degats": "degats_cc", "label": "Mains nues"})
+							"toucher": "cc", "degats": "degats_cc", "label": "Mains nues",
+							"typologie": "legere"})
 	return [best[m] for m in ("cac", "jet", "tir") if m in best]
 
 
@@ -3504,6 +3563,57 @@ def _profil_attaque(joueur: dict, mode: str | None = None) -> dict:
 		profil = {"mode": "cac", "portee": joueur.get("portee", 1), "ranged": False,
 				  "toucher": "cc", "degats": "degats_cc"}
 	return profil
+
+
+def skill_du_profil(acteur: dict, profil: dict) -> int:
+	"""Précision d'un acteur pour un profil d'attaque — SOURCE UNIQUE des sites qui
+	résolvent (ou estiment) un coup d'arme. `toucher` nomme la clé du snapshot : `cd` au tir,
+	sinon la clé de la typologie (`cc`, `cc_equilibree`, `cc_lourde`). Clé absente (combat
+	déjà en base, snapshot d'avant la typologie) ⇒ `cc` : aucune migration."""
+	cle = (profil or {}).get("toucher", "cc")
+	if cle == "cd":
+		return int(acteur.get("cd", 0) or 0)
+	val = acteur.get(cle)
+	return int((acteur.get("cc", 0) if val is None else val) or 0)
+
+
+def notation_du_profil(acteur: dict, profil: dict) -> str:
+	"""Notation de dégâts d'un profil d'attaque (repli `degats_cc`, puis 1D4)."""
+	return (acteur.get((profil or {}).get("degats", "degats_cc"))
+			or acteur.get("degats_cc", "1D4"))
+
+
+def coups_du_profil(acteur: dict, profil: dict) -> list:
+	"""Les COUPS d'une attaque : `[(sous_profil, skill, notation)]` — SOURCE UNIQUE du
+	combat à deux armes, pour le jeu, le simulateur et les potentiels.
+
+	Un profil sans `coups` (une seule arme, mains nues, jet, tir, combat déjà en base) donne
+	UN coup, exactement celui d'avant. Avec `coups` (une arme de mêlée dans chaque main),
+	chaque arme frappe sous les MÊMES règles :
+	- précision = celle de SA typologie, moins le `bonus_cc` de l'autre arme (le snapshot les
+	  additionne tous : il reste la formule, les objets qui ne sont pas des armes et le sien) ;
+	- dégâts = `degats_cc` moins les dés et le plat de l'autre arme (`retirer_des_arme`) :
+	  il reste le dé et le bonus de F, les objets qui ne sont pas des armes et les siens.
+	Les deux restent recalculés depuis le snapshot : un buff de F ou d'Ag pèse sur les deux."""
+	coups = (profil or {}).get("coups") or []
+	if len(coups) < 2:
+		return [(profil, skill_du_profil(acteur, profil), notation_du_profil(acteur, profil))]
+	base_notation = acteur.get("degats_cc") or "1D4"
+	resultat = []
+	for i, coup in enumerate(coups):
+		autres = [c for j, c in enumerate(coups) if j != i]
+		sous = {k: v for k, v in profil.items()
+				if k not in ("coups", "effets", "effets_cible", "effets_source_id")}
+		for k in ("label", "animation", "item_id", "toucher", "portee", "typologie",
+				  "effets", "effets_cible", "effets_source_id"):
+			if k in coup:
+				sous[k] = coup[k]
+		skill = skill_du_profil(acteur, sous) - sum(int(c.get("bonus_cc", 0) or 0) for c in autres)
+		des_autres = "+".join(c.get("des", "") for c in autres if c.get("des"))
+		plat_autres = sum(int(c.get("plat", 0) or 0) for c in autres)
+		notation = character_stats.retirer_des_arme(base_notation, des_autres, plat_autres)
+		resultat.append((sous, skill, notation))
+	return resultat
 
 
 def _profil_arme_monstre(monstre: dict) -> dict:
@@ -3581,6 +3691,8 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"actions_restantes": _compute_actions_max(base.ag, base.v),
 		"actions_max": _compute_actions_max(base.ag, base.v),
 		"cc": derived.cc,
+		"cc_lourde": derived.cc_lourde,
+		"cc_equilibree": derived.cc_equilibree,
 		"cd": derived.cd,
 		"ag": base.ag,
 		# Ch : écart de Chance attaquant/cible = glissement des fenêtres de critique
@@ -3893,6 +4005,8 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int, equiper:
 		"actions_restantes": _compute_actions_max(base_stats.ag, base_stats.v),
 		"actions_max": _compute_actions_max(base_stats.ag, base_stats.v),
 		"cc": derived.cc,
+		"cc_lourde": derived.cc_lourde,
+		"cc_equilibree": derived.cc_equilibree,
 		"ag": base_stats.ag,
 		# Vol/Int alimentent le jet de DÉTECTION contre un joueur furtif (repli
 		# Int−10 puis Ag−30 pour les créatures sans volonté/intelligence).
@@ -4425,6 +4539,9 @@ def _degats_competence(joueur: dict, competence: dict, effets: dict) -> str:
 	profil = _profil_emprunte(joueur, dict(competence or {}, effets=effets))
 	if not base or profil is None:
 		return base
+	# Deux armes de mêlée : la compétence frappe avec la SEULE main droite (premier coup).
+	if profil.get("coups"):
+		return concat_degats(coups_du_profil(joueur, profil)[0][2], base)
 	return concat_degats(joueur.get(profil.get("degats", "degats_cc"), ""), base)
 
 
@@ -4452,7 +4569,9 @@ def _portee_competence(joueur: dict, competence: dict) -> tuple:
 	comp = competence or {}
 	portee = max(1, int(portee_effective(comp, caracts_effectives(joueur)) or 1))
 	profil = _profil_emprunte(joueur, comp)
-	allonge = max(1, int(profil.get("portee", 1) or 1)) if profil else 1
+	# Deux armes de mêlée : l'allonge est celle de la main droite, qui porte le coup.
+	porteur = ((profil.get("coups") or [profil])[0]) if profil else None
+	allonge = max(1, int(porteur.get("portee", 1) or 1)) if porteur else 1
 	portee = max(portee, allonge)
 	return portee, portee > allonge or bool(profil and profil.get("ranged"))
 
@@ -5200,14 +5319,33 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict,
 	(ou l'endette pour le tour suivant), ce qui exige que le budget soit déjà à jour."""
 	profil = profil or {"mode": "cac", "toucher": "cc", "degats": "degats_cc",
 						 "portee": attaquant.get("portee", 1)}
-	skill = attaquant.get("cd" if profil.get("toucher") == "cd" else "cc", 0)
-	notation = attaquant.get(profil.get("degats", "degats_cc")) or attaquant.get("degats_cc", "1D4")
+	attaquant["attaques"] = attaquant.get("attaques", 0) + 1
+	_refresh_actions(attaquant)
+	# COMBAT À DEUX ARMES (humanoïde armé) : un coup par arme, mêmes règles que le joueur
+	# (`coups_du_profil`) ; le second est perdu si le premier a mis la cible à terre ; une
+	# seule pénalité d'échec critique pour toute l'attaque.
+	coups = coups_du_profil(attaquant, profil)
+	if len(coups) > 1 and attaquant.get("pos") and defenseur.get("pos"):
+		dist = _cheby(attaquant, defenseur)
+		coups = [c for c in coups if int(c[0].get("portee", 1) or 1) >= dist] or coups
+	fumble = False
+	for n, (sous, skill, notation) in enumerate(coups):
+		if n and (defenseur.get("currentPV", 0) <= 0 or defenseur.get("vivant") is False
+				  or combat_doc.get("status") != "active"):
+			break
+		fumble = _coup_sur(combat_doc, attaquant, defenseur, sous, skill, notation) or fumble
+	if fumble:
+		_appliquer_fumble(combat_doc, attaquant)
+
+
+def _coup_sur(combat_doc: dict, attaquant: dict, defenseur: dict, profil: dict,
+			  skill: int, notation: str) -> bool:
+	"""UN coup d'arme d'un monstre (cf. `_do_attack_on`) : jet, dégâts, journal, KO.
+	Renvoie True sur un échec critique — la pénalité est appliquée par l'appelant, une fois."""
 	est_joueur = str(defenseur.get("id", "")).startswith("joueur_")
 	seuil = _hit_threshold(skill, _defense_physique(defenseur))
 	jet = _resoudre_jet(attaquant, defenseur, seuil)
 	roll = jet["roll"]
-	attaquant["attaques"] = attaquant.get("attaques", 0) + 1
-	_refresh_actions(attaquant)
 	if jet["touche"]:
 		# Formule partagée avec le joueur, les sorts, les compétences et le simulateur.
 		# La zone frappée décide des PA opposés (pièce couvrante + protections globales).
@@ -5286,8 +5424,7 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict,
 			),
 		}, "fumble" if jet["fumble"] else "miss", defenseur.get("id", ""),
 			acteur_id=attaquant.get("id", "")), attaquant))
-		if jet["fumble"]:
-			_appliquer_fumble(combat_doc, attaquant)
+	return bool(jet["fumble"])
 
 
 def _joueurs_vivants(combat_doc: dict) -> list:
@@ -5832,7 +5969,7 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 
 
 def _frapper_monstre(combat_doc: dict, attaquant: dict, monstre: dict, profil: dict) -> tuple:
-	"""Résout UN coup d'un acteur du camp du joueur sur un monstre, selon un profil d'attaque :
+	"""Résout UNE attaque d'un acteur du camp du joueur sur un monstre, selon un profil d'attaque :
 	jet, localisation, dégâts, ligne de journal (kill/hit/miss) et effet d'arme. Renvoie
 	`(result, jet)`.
 
@@ -5840,11 +5977,46 @@ def _frapper_monstre(combat_doc: dict, attaquant: dict, monstre: dict, profil: d
 	(`_run_defenseur_turn`) : même jet, même formule, même journal — aucun coup gratuit.
 	⚠️ Le DÉCOMPTE reste à l'appelant (furtivité, `attaques`, fumble, victoire) : la personne
 	escortée n'est jamais furtive, et l'ordre des lignes de journal du joueur ne doit pas bouger.
-	Ni portée ni ligne de vue ne sont contrôlées ici."""
-	skill = attaquant.get("cd" if profil.get("toucher") == "cd" else "cc", 0)
-	notation = attaquant.get(profil.get("degats", "degats_cc")) or attaquant.get("degats_cc", "1D4")
+	Ni portée ni ligne de vue ne sont contrôlées ici.
+
+	⚠️ COMBAT À DEUX ARMES (`coups_du_profil`) : un coup PAR ARME, main droite d'abord, sous
+	les mêmes règles ; la furtivité est évaluée UNE fois, pour toute l'attaque (les deux jets en
+	profitent) ; un coup dont l'arme n'atteint pas la cible est sauté ; si le premier tue, le
+	second est perdu. `result` agrège les coups (`coups` = le détail), `jet.fumble` vaut si
+	l'UN des jets est un échec critique — l'appelant n'applique qu'une pénalité.
+	"""
+	furtif = _attaque_furtive(attaquant, monstre)
+	coups = coups_du_profil(attaquant, profil)
+	if len(coups) > 1 and attaquant.get("pos") and monstre.get("pos"):
+		dist = _cheby(attaquant, monstre)
+		a_portee = [c for c in coups if int(c[0].get("portee", 1) or 1) >= dist]
+		coups = a_portee or coups
+	resultats, jets = [], []
+	for sous, skill, notation in coups:
+		if resultats and (not monstre.get("vivant", True) or monstre.get("currentPV", 0) <= 0):
+			break
+		r, j = _frapper_monstre_coup(combat_doc, attaquant, monstre, sous, skill, notation, furtif)
+		resultats.append(r)
+		jets.append(j)
+	if len(resultats) == 1:
+		return resultats[0], jets[0]
+	touches = [r for r in resultats if r.get("hit")]
+	result = dict(touches[-1] if touches else resultats[-1])
+	result["hit"] = bool(touches)
+	if touches:
+		result["dmg"] = sum(r.get("dmg", 0) for r in touches)
+		result["critique"] = any(r.get("critique") for r in touches)
+	result["coups"] = resultats
+	jet = dict(jets[0], fumble=any(j.get("fumble") for j in jets))
+	return result, jet
+
+
+def _frapper_monstre_coup(combat_doc: dict, attaquant: dict, monstre: dict, profil: dict,
+						  skill: int, notation: str, furtif: bool) -> tuple:
+	"""UN coup d'une arme (cf. `_frapper_monstre`) : jet, localisation, dégâts, journal,
+	effet d'arme. `skill`/`notation` viennent de `coups_du_profil`, `furtif` de l'attaque."""
 	seuil = _hit_threshold(skill, _defense_physique(monstre))
-	jet = _resoudre_jet(attaquant, monstre, seuil, furtif=_attaque_furtive(attaquant, monstre))
+	jet = _resoudre_jet(attaquant, monstre, seuil, furtif=furtif)
 	roll = jet["roll"]
 	if not jet["touche"]:
 		combat_doc["log"].append(_avec_vfx({
