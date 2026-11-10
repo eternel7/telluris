@@ -91,4 +91,76 @@ test('durée courte : jamais « 0 min » ni négatif', () => {
 	assert.strictEqual(_dureeCourte(3600), '1 h 00');
 });
 
+// ── Contenants comme DESTINATAIRES (sol 🤝, panneau 👥, butin de combat) ─────────
+// Classes de bug : un contenant oublié de la liste (celui du porteur de la fiche compris),
+// un contenant proposé comme destination d'un autre contenant, une place masquée (marée
+// basse) prise pour « plein » ou « vide ».
+for (const nom of ['_grpRentre', '_porteursPourRamasser']) vm.runInThisContext(extraire(nom));
+
+globalThis.porteurActifId = () => 'character:moi';
+globalThis._grpEtat = {
+	principal: { id: 'character:moi', prenom: 'Moi', nom: '', charge: 10, charge_max: 20 },
+	groupe: [], montures: [], sacs: {},
+	contenants: [
+		{ cle: 'character:moi#2', porteur_id: 'character:moi', porteur_nom: 'Moi', index: 2,
+		  item_id: 'item:besace', nom: 'Besace', libre: 3, accessible: true },
+		{ cle: 'monture:ane#0', porteur_id: 'monture:ane', porteur_nom: 'Grison', index: 0,
+		  item_id: 'item:sac_maree', nom: 'Sac de Manannán', libre: null, accessible: false },
+	],
+};
+
+test('sol 🤝 : les contenants du groupe, celui de la fiche ouverte compris', () => {
+	const out = _porteursPourRamasser({ poids: 4 });
+	assert.deepStrictEqual(out.map(p => p.id), ['character:moi#2', 'monture:ane#0']);
+	assert.strictEqual(out[0].rentre, false, 'besace : 3 kg libres pour 4 kg');
+	assert.strictEqual(out[1].rentre, true, 'marée basse : place inconnue, le serveur tranche');
+	assert.strictEqual(out[1].contenant.porteur_id, 'monture:ane');
+});
+
+test('sol 🤝 : un contenant ne va jamais dans un autre', () => {
+	assert.ok(_porteursPourRamasser({ poids: 0.5, contenant: {} }).every(p => !p.rentre));
+});
+
+test('panneau 👥 : _grpRentre vers un contenant', () => {
+	const dest = { charge: 7, charge_max: 10, contenant: { accessible: true } };
+	assert.strictEqual(_grpRentre({ poids: 3 }, dest), true);
+	assert.strictEqual(_grpRentre({ poids: 3.5 }, dest), false);
+	assert.strictEqual(_grpRentre({ poids: 1, contenant: {} }, dest), false);
+	assert.strictEqual(_grpRentre({ poids: 999 }, { charge: 0, charge_max: 5, contenant: { accessible: false } }), true);
+	// Sac ordinaire : arithmétique inchangée.
+	assert.strictEqual(_grpRentre({ poids: 10 }, { charge: 10, charge_max: 20 }), true);
+});
+
+// Combat : clés d'attribution et jauges (templates/combat_telluris.html).
+const COMBAT = path.join(__dirname, '..', 'templates', 'combat_telluris.html');
+const jsCombat = scriptsInline(lireAvecIncludes(COMBAT));
+for (const nom of ['lootMembers', 'lootContenants', 'lootCle', 'lootJauge', '_lootEsc']) {
+	vm.runInThisContext(extraire(nom, jsCombat));
+}
+globalThis.state = {
+	joueurs: [{ id: 'joueur_0', character_id: 'character:moi', nom: 'Moi', charge: 5, charge_max: 50 },
+			  { id: 'joueur_1', character_id: 'protege:x', est_protege: true }],
+	contenants_butin: [
+		{ character_id: 'character:moi', index: 1, nom: 'Besace', charge_kg: 2, capacite_kg: 10, libre: 8 },
+		{ character_id: 'protege:x', index: 0, nom: 'Sac', charge_kg: 0, capacite_kg: 10, libre: 10 },
+	],
+};
+
+test('butin : un contenant d\'un non-bénéficiaire (escorté) n\'est pas proposé', () => {
+	assert.deepStrictEqual(lootContenants().map(c => c.character_id), ['character:moi']);
+});
+
+test('butin : clé membre vs contenant, jauge du contenant', () => {
+	assert.strictEqual(lootCle('character:moi', ''), 'character:moi');
+	assert.strictEqual(lootCle('character:moi', '1'), 'character:moi#1');
+	assert.strictEqual(lootCle('', '1'), '');
+	const g = lootJauge('character:moi#1');
+	assert.strictEqual(g.base, 2); assert.strictEqual(g.max, 10); assert.strictEqual(g.inconnu, false);
+	assert.strictEqual(lootJauge('character:moi').max, 50);
+});
+
+test('butin : le nom d\'un contenant est échappé', () => {
+	assert.strictEqual(_lootEsc('<b>"Fonte" d\'Ané</b>'), '&lt;b&gt;&quot;Fonte&quot; d&#39;Ané&lt;/b&gt;');
+});
+
 console.log(`OK — ${ok} tests contenants (client).`);

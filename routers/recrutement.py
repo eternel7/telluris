@@ -22,6 +22,9 @@ from utils import recrutement
 from utils import montures
 from utils import escorte
 from utils import fiche as fiche_util
+from utils import contenants
+from utils.characters import item_ref_id
+import time
 # Une monture est un porteur du groupe : le panneau 👥 la rend avec la même carte que les
 # compagnons. On réutilise sa vue plutôt que de la recopier — même précédent que
 # `_inventory_payload` importé de routers/user.py juste en dessous.
@@ -496,6 +499,28 @@ def _harnachement_view(porteur: dict) -> dict:
 							 for s in montures.SLOTS_MONTURE}}
 
 
+def _contenants_view(character: dict) -> dict:
+	"""Contenants du groupe comme DESTINATAIRES (principal, compagnons, montures, guide) :
+	`contenants` (liste, principal en tête) et `sacs` — une entrée par clé, au format d'un sac
+	de porteur pour que le panneau 👥 les affiche en colonne de droite sans code à part :
+	contenu résolu (vide hors marée), charge = poids rangé, plafond = capacité."""
+	now = int(time.time())
+	porteurs = [character] + _porteurs_du_groupe(character)
+	liste = contenants.destinations(porteurs, get_doc, now)
+	par_id = {p.get("_id"): p for p in porteurs}
+	sacs = {}
+	for c in liste:
+		ref_c = (par_id[c["porteur_id"]].get("inventaire") or [])[c["index"]]
+		vue = contenants.vue(ref_c, get_doc(c["item_id"]), now, resolve_item_ref)
+		sacs[c["cle"]] = {
+			"charge": c["charge_kg"] if c["accessible"] else 0,
+			"charge_max": c["capacite_kg"],
+			"inventaire": [{k: v for k, v in d.items() if k != "idx"} for d in vue.get("contenu") or []],
+			"contenant": c,
+		}
+	return {"contenants": liste, "sacs": sacs}
+
+
 @recrutement_router.get("/groupe")
 async def groupe_etat(current_user: Annotated[dict, Depends(get_current_user)]):
 	"""État du groupe pour le panneau 👥, disponible PARTOUT (contrairement au board de
@@ -525,6 +550,9 @@ async def groupe_etat(current_user: Annotated[dict, Depends(get_current_user)]):
 		}
 		for p in _porteurs_du_groupe(character)
 	}
+	ctn = _contenants_view(character)
+	payload["contenants"] = ctn["contenants"]
+	payload["sacs"].update(ctn["sacs"])
 	if departs:
 		payload["departs"] = departs
 	return payload
@@ -594,6 +622,9 @@ async def groupe_transferer(
 	if not character:
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
 
+	if body.get("contenant_index") is not None or body.get("contenant_item_id"):
+		return _transferer_contenant(character, body)
+
 	av = _porteur_du_groupe(character, body.get("compagnon_id") or "")
 	sens = body.get("sens")
 	if sens not in ("vers_compagnon", "vers_principal"):
@@ -614,11 +645,87 @@ async def groupe_transferer(
 	save_doc(av)
 
 	doc = resolve_item_ref(ref)
+	# Un objet sorti d'un sac décale les positions des contenants qui le suivent : leurs clés
+	# (`porteur#index`) sont recalculées, sinon le panneau adresserait le mauvais exemplaire.
+	ctn = _contenants_view(character)
 	return {
 		"principal": _inventory_payload(character),
 		"compagnon": _inventory_payload(av, character),
 		"compagnon_id": av["_id"],
+		"contenants": ctn["contenants"],
+		"sacs_contenants": ctn["sacs"],
 		# Un grimoire passé d'un sac à l'autre ouvre ou ferme un sort du principal.
+		"fiche": _fiche_payload(character),
+		"transfere": {
+			"nom": (doc or {}).get("nom", "?"),
+			"icon": (doc or {}).get("icon", "📦"),
+			"poids": item_ref_weight(ref),
+			"vers": "compagnon" if sens == "vers_compagnon" else "principal",
+		},
+	}
+
+
+def _transferer_contenant(character: dict, body: dict) -> dict:
+	"""Branche CONTENANT de `/groupe/transferer` : `compagnon_id` désigne le porteur du
+	contenant (le principal compris), `contenant_index`/`contenant_item_id` le contenant.
+	`vers_compagnon` = sac du principal → contenant (toujours permis, marée basse comprise) ;
+	`vers_principal` = contenant → sac du principal (marée haute, charge du principal).
+
+	⚠️ Le contenant peut être dans le sac du principal : on retire la réf par IDENTITÉ et on
+	renvoie `contenant_cle`, la clé recalculée (l'index du contenant a pu glisser)."""
+	porteur_id = body.get("compagnon_id") or ""
+	porteur = character if porteur_id == character.get("_id") else _porteur_du_groupe(character, porteur_id)
+	sens = body.get("sens")
+	if sens not in ("vers_compagnon", "vers_principal"):
+		raise HTTPException(status_code=422, detail="Sens de transfert invalide")
+	idx_c, iid_c = body.get("contenant_index"), body.get("contenant_item_id")
+	pos_c, _doc_c = contenants.contenant_de(porteur, idx_c, iid_c, get_doc)
+	if pos_c is None:
+		raise HTTPException(status_code=404, detail="Contenant introuvable dans ce sac.")
+	ref_c = porteur["inventaire"][pos_c]
+
+	if sens == "vers_compagnon":
+		inv = character.get("inventaire") or []
+		pos = recrutement._localiser_ref(inv, body.get("index"), body.get("item_id"))
+		if pos is None:
+			raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
+		ref = inv[pos]
+		ok, raison, ref_c = contenants.deposer(porteur, pos_c, item_ref_id(ref_c), ref, get_doc)
+		if not ok:
+			raise HTTPException(status_code=409, detail=raison)
+		inv.pop(next(i for i, r in enumerate(inv) if r is ref))
+		character["inventaire"] = inv
+	else:
+		now = int(time.time())
+		ref = contenants.trouver_dedans(porteur, pos_c, item_ref_id(ref_c),
+										body.get("index"), body.get("item_id"), get_doc)
+		if ref is None:
+			raise HTTPException(status_code=422, detail="Cet objet n'est plus dans le contenant.")
+		if not recrutement.peut_porter(character, ref):
+			raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage.")
+		ok, raison, ref = contenants.retirer(porteur, pos_c, item_ref_id(ref_c),
+											 body.get("index"), body.get("item_id"), get_doc, now)
+		if not ok:
+			raise HTTPException(status_code=409, detail=raison)
+		character.setdefault("inventaire", []).append(ref)
+		ref_c = porteur["inventaire"][pos_c]
+
+	# Principal autoritatif, porteur du contenant en best-effort (même séquence bi-doc).
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	if porteur is not character:
+		save_doc(porteur)
+
+	pos_apres = next((i for i, r in enumerate(porteur.get("inventaire") or []) if r is ref_c), pos_c)
+	ctn = _contenants_view(character)
+	doc = resolve_item_ref(ref)
+	return {
+		"principal": _inventory_payload(character),
+		"compagnon": _inventory_payload(porteur, character),
+		"compagnon_id": porteur["_id"],
+		"contenants": ctn["contenants"],
+		"sacs_contenants": ctn["sacs"],
+		"contenant_cle": contenants.cle(porteur["_id"], pos_apres),
 		"fiche": _fiche_payload(character),
 		"transfere": {
 			"nom": (doc or {}).get("nom", "?"),

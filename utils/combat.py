@@ -44,6 +44,7 @@ from utils import pieges as pieges_util
 from utils import tresor as tresor_util
 from utils import vol as vol_util
 from utils import images_monstres
+from utils import contenants as contenants_util
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -2629,7 +2630,35 @@ def vue_client(combat_doc: dict) -> dict:
 	vue["peut_desamorcer"] = bool(acteur and _eff_int(acteur.get("desamorcage")) > 0)
 	vue["peut_ouvrir_tresor"] = _peut_ouvrir_tresor(combat_doc, acteur)
 	vue["peut_examiner_tresor"] = _peut_examiner_tresor(combat_doc, acteur)
+	vue["contenants_butin"] = contenants_butin(combat_doc)
 	return vue
+
+
+def contenants_butin(combat_doc: dict) -> list:
+	"""Contenants des membres éligibles au butin (ni monture morte, ni personne escortée —
+	mêmes filtres que `/collect`), comme destinataires de l'overlay de répartition. Calculé
+	seulement quand une répartition est ouverte (victoire, ou butin d'étage en attente) : il
+	relit le doc de chaque membre. Chaque entrée porte `character_id` = son porteur."""
+	if combat_doc.get("status") != "victoire" and not (combat_doc.get("etages") or {}).get("butin_etage"):
+		return []
+	import time
+	out = []
+	for j in combat_doc.get("joueurs") or []:
+		cid = j.get("character_id")
+		if not cid or j.get("morte") or j.get("est_protege"):
+			continue
+		doc = get_doc(cid)
+		if not doc:
+			continue
+		# Déjà finalisé pour ce membre : le butin d'étage est DANS le contenant, ne pas le recompter.
+		deja_verse = combat_doc.get("_id") in (doc.get("combats_recompenses") or [])
+		attente = {} if deja_verse else {
+			contenants_util.cle(cid, i): kg for i, kg in butin_contenant_en_attente(j).items()}
+		for c in contenants_util.destinations([doc], get_doc, int(time.time()), en_attente=attente):
+			c["character_id"] = cid
+			c["porteur_nom"] = j.get("nom") or c["porteur_nom"]
+			out.append(c)
+	return out
 
 
 def _effets_a_reverser(snap: dict) -> list:
@@ -4587,6 +4616,28 @@ def butin_d_etage(combat_doc: dict) -> list:
 			if d.get("slot") or d.get("monstre_id") not in loote]
 
 
+def butin_contenant_en_attente(snap: dict) -> dict:
+	"""kg promis à chaque contenant (position dans le sac du membre) par un butin d'étage
+	pas encore versé (`butin_contenants` du snapshot)."""
+	out: dict = {}
+	for e in (snap or {}).get("butin_contenants") or []:
+		out[e.get("index")] = round(out.get(e.get("index"), 0)
+									+ sum(float((r or {}).get("poids") or 0) for r in e.get("refs") or []), 2)
+	return out
+
+
+def verser_butin_contenants(snap: dict, doc: dict) -> None:
+	"""Range dans leur contenant les lignes de butin d'étage qui lui ont été attribuées
+	(capacité déjà validée à l'attribution). Contenant introuvable ⇒ la réf part au sac,
+	comme `butin_ramasse` : rien ne se perd. Mute sans sauver."""
+	for e in (snap or {}).get("butin_contenants") or []:
+		for ref in e.get("refs") or []:
+			ok, _r, _c = contenants_util.deposer(doc, e.get("index"), e.get("item_id"), ref,
+												 get_doc, controler=False)
+			if not ok:
+				doc.setdefault("inventaire", []).append(ref)
+
+
 def _repartir_butin_d_etage(combat_doc: dict, dispo: list, attributions: list) -> str | None:
 	"""Met les carcasses attribuées dans le `butin_ramasse` de leur bénéficiaire — celui que
 	`_finalize_membre` verse au sac quelle que soit l'issue. Ce que personne n'emporte reste à
@@ -4597,18 +4648,62 @@ def _repartir_butin_d_etage(combat_doc: dict, dispo: list, attributions: list) -
 	membres = {j["character_id"]: j for j in combat_doc["joueurs"]
 			   if j.get("character_id") and not j.get("morte") and not j.get("est_protege")}
 	par_benef: dict = {}
+	# CONTENANT d'un bénéficiaire (utils/contenants.py) : clé (cid, index, item_id). Le doc
+	# du membre est lu pour localiser le contenant ; la ligne attend sur le snapshot
+	# (`butin_contenants`) que `_finalize_membre` la range — sans charger le sac.
+	par_contenant: dict = {}
 	for a in attributions or []:
 		cle, cid = a.get("cle") or a.get("monstre_id"), a.get("beneficiaire_id")
 		if cle not in par_cle:
 			continue
 		if cid not in membres:
 			return "Bénéficiaire hors du groupe de combat."
-		par_benef.setdefault(cid, []).append(cle)
+		if a.get("contenant_index") is not None or a.get("contenant_item_id"):
+			par_contenant.setdefault((cid, a.get("contenant_index"), a.get("contenant_item_id")), []).append(cle)
+		else:
+			par_benef.setdefault(cid, []).append(cle)
 	for cid, cles in par_benef.items():
 		j = membres[cid]
 		if j.get("charge", 0) + sum(par_cle[c]["poids"] for c in cles) > j.get("charge_max", 0) + 1e-6:
 			return f"Charge maximale dépassée pour {j.get('nom', 'ce personnage')}."
+	vers_contenant: dict = {}
+	docs_membres: dict = {}
+	for (cid, idx_c, iid_c), cles in par_contenant.items():
+		doc = docs_membres.setdefault(cid, get_doc(cid) or {})
+		pos, _doc_c = contenants_util.contenant_de(doc, idx_c, iid_c, get_doc)
+		if pos is None:
+			return "Contenant introuvable dans ce sac."
+		vers_contenant.setdefault((cid, pos), []).extend(cles)
+	for (cid, pos), cles in vers_contenant.items():
+		ref_c = docs_membres[cid]["inventaire"][pos]
+		refs = [{"item": par_cle[c]["item_id"], "poids": par_cle[c]["poids"]} for c in cles]
+		ok, raison = contenants_util.peut_recevoir(
+			ref_c, get_doc(item_ref_id(ref_c)), refs, get_doc,
+			deja_kg=butin_contenant_en_attente(membres[cid]).get(pos, 0))
+		if not ok:
+			return raison
 	monstres = {m["id"]: m for m in combat_doc.get("monstres") or []}
+	for (cid, pos), cles in vers_contenant.items():
+		j = membres[cid]
+		iid = item_ref_id(docs_membres[cid]["inventaire"][pos])
+		entree = next((e for e in j.setdefault("butin_contenants", [])
+					   if e.get("index") == pos and e.get("item_id") == iid), None)
+		if entree is None:
+			entree = {"index": pos, "item_id": iid, "refs": []}
+			j["butin_contenants"].append(entree)
+		for cle in cles:
+			d = par_cle[cle]
+			if not d.get("slot"):
+				_ensure_loot_item((monstres.get(d.get("monstre_id")) or {}).get("espece_id", ""),
+								  (monstres.get(d.get("monstre_id")) or {}).get("nom", ""))
+				(monstres.get(d.get("monstre_id")) or {})["loote"] = True
+			entree["refs"].append({"item": d["item_id"], "poids": d["poids"]})
+			combat_doc["log"].append({
+				"tour": combat_doc["tour"],
+				"acteur": j.get("nom", ""),
+				"kind": "sys",
+				"texte": f"{j.get('nom', '')} range {d.get('nom', 'une carcasse')} dans un contenant.",
+			})
 	for cid, cles in par_benef.items():
 		j = membres[cid]
 		for cle in cles:
@@ -7138,6 +7233,9 @@ def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> 
 		inventaire = doc.get("inventaire", [])
 		inventaire.extend(ramasse)
 		doc["inventaire"] = inventaire
+	# Butin d'étage attribué à un CONTENANT de ce membre : rangé dedans (même garde).
+	# ⚠️ AVANT `retirer_outils_brises`, qui peut décaler les positions du sac.
+	verser_butin_contenants(joueur, doc)
 	# Outils de crochetage brisés en désamorçant : retirés du sac de CE membre, sous la même
 	# garde d'idempotence (sinon /play qui re-finalise en retirerait un second).
 	if joueur.get("outils_brises"):
@@ -7191,6 +7289,8 @@ def _finalize_monture(combat_doc: dict, snap: dict, doc: dict, status: str,
 	ramasse = [i for i in snap.get("butin_ramasse", []) if i]
 	if ramasse:
 		doc["inventaire"] = list(doc.get("inventaire") or []) + ramasse
+	# Butin rangé dans un contenant de la bête : AVANT `tuer`, le contenant plein se répand alors avec la cargaison.
+	verser_butin_contenants(snap, doc)
 
 	if snap.get("morte") and character_stats.MONTURE_MORT_DEFINITIVE:
 		cargaison = montures_util.tuer(character, doc)

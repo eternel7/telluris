@@ -1122,7 +1122,7 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 .loot-item .loot-poids { color: #9a8a66; font-size: 12px; }
 /* Sélecteur de bénéficiaire : une pastille-portrait par membre du groupe + « personne ».
    Remplace la case à cocher — la carcasse va au sac du membre choisi. */
-.loot-benefs { display: flex; gap: 4px; flex: 0 0 auto; margin-left: auto; }
+.loot-benefs { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; flex: 0 1 auto; margin-left: auto; }
 .loot-benef-btn {
 	width: 28px; height: 28px; padding: 0; border-radius: 50%;
 	border: 2px solid rgba(255,255,255,0.15); background: #1a1a20;
@@ -1136,6 +1136,8 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 	display: flex; align-items: center; justify-content: center;
 	color: #cbb98a; font-size: 12px; font-weight: 600;
 }
+/* Un CONTENANT du groupe (sac dimensionnel…) : carré arrondi, pour ne pas le confondre avec un membre. */
+.loot-benef-btn.loot-benef-ctn { border-radius: 7px; font-size: 15px; line-height: 1; }
 .loot-benef-btn.selected { border-color: #cda349; box-shadow: 0 0 6px rgba(205,163,73,0.55); }
 .loot-benef-btn.disabled { opacity: 0.28; cursor: not-allowed; }
 /* « Laisser au sol » : ocre et non rouge — ce geste ne DÉTRUIT plus rien, il pose par terre
@@ -4703,6 +4705,26 @@ function lootMembers() {
 	return (state.joueurs || []).filter(j => j && j.character_id && !j.est_protege && !j.morte);
 }
 
+// Contenants du groupe (sac dimensionnel…) portés par un membre éligible : servis par le
+// serveur (`contenants_butin`, mêmes filtres). Un objet rangé ne pèse rien pour le porteur ;
+// seule la capacité borne. `libre` null = marée basse : on ne grise pas, le serveur tranche.
+function lootContenants() {
+	const cids = new Set(lootMembers().map(j => j.character_id));
+	return (state.contenants_butin || []).filter(c => c && cids.has(c.character_id));
+}
+
+// Le nom d'un contenant peut être celui que le JOUEUR lui a donné (`nom_perso`) : échappé
+// avant tout innerHTML (Convention §9 ; ce template n'a pas d'`escapeHtml` global).
+function _lootEsc(s) {
+	return String(s == null ? '' : s).replace(/[&<>"']/g, ch =>
+		({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+}
+
+// Clé d'attribution d'une ligne / d'un bouton : le membre seul, ou `membre#index` pour un contenant.
+function lootCle(benef, ctn) {
+	return benef ? (ctn !== undefined && ctn !== '' ? `${benef}#${ctn}` : benef) : '';
+}
+
 // Une LIGNE par élément de butin (`cle`) : un humanoïde en donne plusieurs — sa carcasse puis
 // chacun de ses objets équipés, attribuables séparément.
 // Une pastille-portrait cliquable par membre : reproduit le cadrage de play_town via
@@ -4718,14 +4740,19 @@ function buildLootList(dispo) {
 		const inner = st
 			? `<span class="lb-portrait"></span>`
 			: `<span class="lb-portrait">${(j.nom || '?').charAt(0).toUpperCase()}</span>`;
-		return `<button type="button" class="loot-benef-btn" data-benef="${j.character_id}" data-jid="${j.id}" title="${j.nom || ''}">${inner}</button>`;
+		return `<button type="button" class="loot-benef-btn" data-benef="${j.character_id}" data-ctn="" data-jid="${j.id}" title="${j.nom || ''}">${inner}</button>`;
 	};
+	const ctnHtml = c => `<button type="button" class="loot-benef-btn loot-benef-ctn" data-benef="${c.character_id}"
+		data-ctn="${c.index}" data-ctn-item="${_lootEsc(c.item_id || '')}"
+		title="${_lootEsc(`${c.nom || 'Contenant'} — porté par ${c.porteur_nom || '?'}`)}">${c.icon || '👜'}</button>`;
+	const ctns = lootContenants();
 	document.getElementById('loot-list').innerHTML = dispo.map(d =>
-		`<div class="loot-item" data-mid="${d.monstre_id}" data-cle="${d.cle || d.monstre_id}" data-poids="${d.poids}" data-benef="${principalCid}">
+		`<div class="loot-item" data-mid="${d.monstre_id}" data-cle="${d.cle || d.monstre_id}" data-poids="${d.poids}" data-benef="${principalCid}" data-ctn="" data-ctn-item="">
 			<span class="loot-nom">${d.nom}</span>
 			<span class="loot-poids">${(+d.poids).toFixed(1)} kg</span>
 			<div class="loot-benefs">
 				${membres.map(btnHtml).join('')}
+				${ctns.map(ctnHtml).join('')}
 				<button type="button" class="loot-benef-btn loot-benef-none" data-benef="" title="${laisserTitre}">🫳</button>
 			</div>
 		</div>`
@@ -4741,6 +4768,8 @@ function buildLootList(dispo) {
 			btn.addEventListener('click', () => {
 				if (btn.classList.contains('disabled')) return;
 				row.dataset.benef = btn.dataset.benef;
+				row.dataset.ctn = btn.dataset.ctn || '';
+				row.dataset.ctnItem = btn.dataset.ctnItem || '';
 				recomputeCharge();
 			});
 		});
@@ -4750,56 +4779,66 @@ function buildLootList(dispo) {
 
 function lootRows() { return Array.from(document.querySelectorAll('#loot-list .loot-item')); }
 
-// Poids attribué à chaque membre (character_id → kg de carcasses qui lui reviennent).
+// Poids attribué à chaque destinataire (clé `lootCle` → kg qui lui reviennent).
 function lootParBenef() {
 	const par = {};
 	lootRows().forEach(row => {
-		const b = row.dataset.benef;
-		if (b) par[b] = (par[b] || 0) + (parseFloat(row.dataset.poids) || 0);
+		const k = lootCle(row.dataset.benef, row.dataset.ctn);
+		if (k) par[k] = (par[k] || 0) + (parseFloat(row.dataset.poids) || 0);
 	});
 	return par;
 }
 
+// Charge de départ et plafond d'un destinataire : le sac du membre (snapshot), ou un contenant
+// (`charge_kg` / `capacite_kg` ; marée basse ⇒ inconnus, jamais grisé).
+function lootJauge(cle) {
+	const c = lootContenants().find(x => lootCle(x.character_id, String(x.index)) === cle);
+	if (c) return { nom: `${c.nom || 'Contenant'} · ${c.porteur_nom || '?'}`, icon: c.icon || '👜',
+					base: c.charge_kg, max: c.capacite_kg, inconnu: c.libre == null, jid: null };
+	const j = lootMembers().find(m => m.character_id === cle) || {};
+	return { nom: j.nom || '', base: j.charge || 0, max: j.charge_max || 0, inconnu: false, jid: j.id };
+}
+
 // Reflète la sélection : bouton actif surligné, bouton grisé si l'attribuer surchargerait
-// ce membre (miroir exact du contrôle serveur), et jauges de charge par membre concerné.
+// ce destinataire (miroir exact du contrôle serveur), et jauges par destinataire concerné.
 function recomputeCharge() {
-	const membres = lootMembers();
 	const par = lootParBenef();
 	lootRows().forEach(row => {
 		const p = parseFloat(row.dataset.poids) || 0;
-		const cur = row.dataset.benef;
+		const cur = lootCle(row.dataset.benef, row.dataset.ctn);
 		row.querySelectorAll('.loot-benef-btn').forEach(btn => {
-			const b = btn.dataset.benef;
+			const b = lootCle(btn.dataset.benef, btn.dataset.ctn);
 			btn.classList.toggle('selected', b === cur);
 			if (!b) { btn.classList.remove('disabled'); return; }   // « au sol » : toujours dispo
-			const j = membres.find(m => m.character_id === b) || {};
+			const g = lootJauge(b);
 			const dejaSansCeLigne = (par[b] || 0) - (cur === b ? p : 0);
-			const surcharge = (j.charge || 0) + dejaSansCeLigne + p > (j.charge_max || 0) + 1e-6;
+			const surcharge = !g.inconnu && (g.base || 0) + dejaSansCeLigne + p > (g.max || 0) + 1e-6;
 			btn.classList.toggle('disabled', surcharge && cur !== b);
 		});
 	});
-	renderLootCharges(membres, par);
+	renderLootCharges(par);
 }
 
-function renderLootCharges(membres, par) {
+function renderLootCharges(par) {
 	const cont = document.getElementById('loot-charges');
 	if (!cont) return;
-	const rows = membres.filter(j => (par[j.character_id] || 0) > 0);
-	cont.innerHTML = rows.map(j => {
-		const base = j.charge || 0, max = j.charge_max || 0;
-		const total = base + (par[j.character_id] || 0), half = max / 2;
-		const pct = max > 0 ? Math.min(100, total / max * 100) : 0;
-		const over = total > max + 1e-6, warn = !over && total > half;
+	const rows = Object.keys(par).filter(k => par[k] > 0).map(k => Object.assign({ cle: k }, lootJauge(k)));
+	cont.innerHTML = rows.map(g => {
+		const base = g.base || 0, max = g.max || 0;
+		const total = base + (par[g.cle] || 0), half = max / 2;
+		const pct = !g.inconnu && max > 0 ? Math.min(100, total / max * 100) : 0;
+		const over = !g.inconnu && total > max + 1e-6, warn = !g.inconnu && !over && total > half;
 		const fillCls = over ? 'over-max' : (warn ? 'over-half' : '');
 		const lblCls = over ? 'err' : (warn ? 'warn' : '');
-		const st = portraitStyle(j.id);
+		const st = g.jid ? portraitStyle(g.jid) : null;
+		const lbl = g.inconnu ? `+${(par[g.cle] || 0).toFixed(1)} / ${max} kg` : `${total.toFixed(1)} / ${max} kg`;
 		return `<div class="loot-charge-row">
-			<span class="lcr-portrait" data-jid="${j.id}">${st ? '' : (j.nom || '?').charAt(0).toUpperCase()}</span>
+			<span class="lcr-portrait"${g.jid ? ` data-jid="${g.jid}"` : ''}>${g.jid ? (st ? '' : (g.nom || '?').charAt(0).toUpperCase()) : _lootEsc(g.icon || '👜')}</span>
 			<div class="lcr-body">
-				<div class="lcr-name">${j.nom || ''}</div>
+				<div class="lcr-name">${_lootEsc(g.nom || '')}</div>
 				<div class="charge-bar"><div class="charge-fill ${fillCls}" style="width:${pct}%"></div><div class="charge-pip"></div></div>
 			</div>
-			<span class="lcr-label ${lblCls}">${total.toFixed(1)} / ${max} kg</span>
+			<span class="lcr-label ${lblCls}">${lbl}</span>
 		</div>`;
 	}).join('');
 	cont.querySelectorAll('.lcr-portrait[data-jid]').forEach(el => {
@@ -4817,18 +4856,26 @@ function renderLootCharges(membres, par) {
 async function leaveCombat() {
 	const section = document.getElementById('loot-section');
 	if (section.style.display !== 'none') {
-		const membres = lootMembers();
 		const par = lootParBenef();
-		const trop = membres.find(j => (par[j.character_id] || 0) > 0
-			&& (j.charge || 0) + par[j.character_id] > (j.charge_max || 0) + 1e-6);
+		const trop = Object.keys(par)
+			.map(k => Object.assign({ ajout: par[k] }, lootJauge(k)))
+			.find(g => g.ajout > 0 && !g.inconnu && (g.base || 0) + g.ajout > (g.max || 0) + 1e-6);
 		if (trop) {
 			document.getElementById('charge-label').innerHTML =
-				`<span class="err">${trop.nom || 'Un membre'} est en surcharge — réattribuez ou laissez au sol.</span>`;
+				`<span class="err">${_lootEsc(trop.nom || 'Un membre')} est en surcharge — réattribuez ou laissez au sol.</span>`;
 			return;
 		}
 		const attributions = lootRows()
 			.filter(row => row.dataset.benef)
-			.map(row => ({ monstre_id: row.dataset.mid, cle: row.dataset.cle, beneficiaire_id: row.dataset.benef }));
+			.map(row => {
+				const a = { monstre_id: row.dataset.mid, cle: row.dataset.cle, beneficiaire_id: row.dataset.benef };
+				// Contenant : rangé dedans, ne charge pas le sac du membre (utils/contenants.py).
+				if (row.dataset.ctn !== '' && row.dataset.ctn !== undefined) {
+					a.contenant_index = +row.dataset.ctn;
+					a.contenant_item_id = row.dataset.ctnItem || null;
+				}
+				return a;
+			});
 		const btn = document.getElementById('end-btn');
 		btn.disabled = true;
 		if (lootEtagePassage !== null) {

@@ -258,6 +258,130 @@ def nettoyer(ref_c) -> None:
 		ref_c.pop("contenu", None)
 
 
+# ── Contenants comme DESTINATAIRES (butin, sol, inventaire de groupe) ───────────
+#
+# Chaque contenant porté par le principal, un compagnon ou une monture reçoit comme un porteur
+# de plus : butin de combat (`/collect`, butin d'étage), objet du sol (🤝), transfert du panneau
+# 👥. Adressage : porteur + `contenant_index` vérifié par `contenant_item_id` (`localiser`).
+# Déposer reste possible à marée basse ; reprendre non (même règle que ranger / sortir).
+
+def cle(porteur_id, index) -> str:
+	"""Clé client d'un contenant — même format que l'`_id` des sacs virtuels."""
+	return f"{porteur_id or ''}#{index}"
+
+
+def _nom_porteur(p: dict) -> str:
+	return f"{p.get('prenom', '') or ''} {p.get('nom', '') or ''}".strip() or "?"
+
+
+def destinations(porteurs: list, get_doc_fn, now: int, poids_fn=item_ref_weight,
+				 en_attente: dict | None = None) -> list:
+	"""Un destinataire par contenant des sacs de `porteurs`, dans leur ordre (Convention §7 :
+	principal en tête). `charge_kg`/`libre` à None hors marée (le sac « semble vide » : le
+	client ne grise rien, le serveur tranche). `en_attente` : kg déjà promis par clé (butin
+	d'étage pas encore versé)."""
+	out = []
+	for p in porteurs or []:
+		for i, ref in enumerate((p or {}).get("inventaire") or []):
+			doc = get_doc_fn(item_ref_id(ref))
+			if not est_contenant(doc):
+				continue
+			k = cle(p.get("_id"), i)
+			ouvert = accessible(doc, now)
+			cap = capacite(doc)
+			charge = round(poids_contenu(ref, poids_fn) + float((en_attente or {}).get(k, 0) or 0), 2)
+			out.append({
+				"cle": k,
+				"porteur_id": p.get("_id"),
+				"porteur_nom": _nom_porteur(p),
+				"index": i,
+				"item_id": item_ref_id(ref),
+				"nom": (ref.get("nom_perso") if isinstance(ref, dict) else "") or doc.get("nom") or "",
+				"icon": doc.get("icon", ""),
+				"capacite_kg": cap,
+				"maree": a_maree(doc),
+				"accessible": ouvert,
+				"charge_kg": charge if ouvert else None,
+				"libre": round(max(0.0, cap - charge), 2) if ouvert else None,
+			})
+	return out
+
+
+def contenant_de(porteur: dict, index_c, item_id_c, get_doc_fn) -> tuple[int | None, dict | None]:
+	"""(position, doc) du contenant adressé dans le sac du porteur, (None, None) sinon."""
+	inv = (porteur or {}).get("inventaire") or []
+	pos = localiser(inv, index_c, item_id_c)
+	doc = get_doc_fn(item_ref_id(inv[pos])) if pos is not None else None
+	if pos is None or not est_contenant(doc):
+		return None, None
+	return pos, doc
+
+
+def peut_recevoir(ref_c, doc_c, refs: list, get_doc_fn, poids_fn=item_ref_weight,
+				  deja_kg: float = 0) -> tuple[bool, str]:
+	"""Plusieurs objets d'un coup (lignes de butin) : aucun contenant parmi eux, et la place
+	cumulée tient — `deja_kg` = poids promis mais pas encore rangé."""
+	if not est_contenant(doc_c):
+		return False, "Cet objet n'est pas un contenant."
+	for r in refs or []:
+		if est_contenant(get_doc_fn(item_ref_id(r))):
+			return False, "Un contenant magique ne se range pas dans un autre."
+	cap = capacite(doc_c)
+	if poids_contenu(ref_c, poids_fn) + float(deja_kg or 0) + sum(poids_fn(r) for r in refs or []) > cap + 1e-9:
+		return False, f"Le contenant est plein ({cap:g} kg)."
+	return True, ""
+
+
+def deposer(porteur: dict, index_c, item_id_c, ref, get_doc_fn, poids_fn=item_ref_weight,
+			controler: bool = True) -> tuple[bool, str, dict | None]:
+	"""Range `ref` (venue d'AILLEURS que ce sac : sol, butin, autre porteur) dans le contenant
+	adressé. `controler=False` : capacité déjà validée (versement du butin d'étage). Mute sans
+	sauver. → (ok, raison, réf du contenant)."""
+	pos, doc = contenant_de(porteur, index_c, item_id_c, get_doc_fn)
+	if pos is None:
+		return False, "Contenant introuvable dans ce sac.", None
+	inv = porteur["inventaire"]
+	if ref is inv[pos]:
+		return False, "Un contenant ne se range pas en lui-même.", None
+	if controler:
+		ok, raison = peut_ranger(inv[pos], doc, ref, get_doc_fn(item_ref_id(ref)), poids_fn)
+		if not ok:
+			return False, raison, None
+	ref_c = figer_ref(inv[pos], poids_fn)
+	inv[pos] = ref_c
+	ref_c.setdefault("contenu", []).append(ref)
+	return True, "", ref_c
+
+
+def retirer(porteur: dict, index_c, item_id_c, idx, item_id, get_doc_fn, now: int) -> tuple[bool, str, object]:
+	"""Sort du contenant adressé l'objet `idx`/`item_id` SANS le poser nulle part (l'appelant
+	le remet à un autre sac, après avoir vérifié sa charge avec `trouver_dedans`). Refus hors
+	marée. Mute sans sauver. → (ok, raison, réf retirée)."""
+	pos, doc = contenant_de(porteur, index_c, item_id_c, get_doc_fn)
+	if pos is None:
+		return False, "Contenant introuvable dans ce sac.", None
+	if not accessible(doc, now):
+		return False, "La mer s'est retirée : le sac semble vide jusqu'à la prochaine marée haute.", None
+	ref_c = porteur["inventaire"][pos]
+	dedans = contenu(ref_c)
+	j = localiser(dedans, idx, item_id)
+	if j is None:
+		return False, "Cet objet n'est plus dans le contenant.", None
+	ref = dedans.pop(j)
+	nettoyer(ref_c)
+	return True, "", ref
+
+
+def trouver_dedans(porteur: dict, index_c, item_id_c, idx, item_id, get_doc_fn):
+	"""La réf visée dans le contenant, en LECTURE (contrôle de charge avant `retirer`)."""
+	pos, _doc = contenant_de(porteur, index_c, item_id_c, get_doc_fn)
+	if pos is None:
+		return None
+	dedans = contenu(porteur["inventaire"][pos])
+	j = localiser(dedans, idx, item_id)
+	return dedans[j] if j is not None else None
+
+
 # ── Vues ─────────────────────────────────────────────────────────────────────────
 
 def resume(ref, doc, now: int, poids_fn=item_ref_weight) -> dict | None:

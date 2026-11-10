@@ -1511,6 +1511,8 @@ async def pickup_item(
 
 	au_sol = principal.get("objets_au_sol", [])
 	dest_id = body.get("destinataire_id")
+	if body.get("contenant_index") is not None or body.get("contenant_item_id"):
+		return _ramasser_dans_contenant(character, principal, au_sol, dest_id, body)
 	if dest_id and dest_id != character.get("_id"):
 		dest = _membre_du_groupe(principal, character, dest_id)
 		if dest is None:
@@ -1564,6 +1566,47 @@ async def pickup_item(
 	payload["auto_dropped"] = auto_dropped
 	payload["fiche"] = _fiche_payload(character)
 	return payload
+
+
+def _ramasser_dans_contenant(character: dict, principal: dict, au_sol: list, dest_id, body: dict) -> dict:
+	"""Objet du sol → contenant d'un membre du groupe (`destinataire_id`, à défaut l'acteur),
+	adressé par `contenant_index`/`contenant_item_id`. Rangé = ne pèse rien : seule la capacité
+	du contenant borne (`contenants.deposer`). Le sol n'est amputé qu'APRÈS le contrôle.
+	Réponse = fiche ouverte (CLAUDE.md §1) + `destinataire` à part, comme le ramassage pour un
+	autre porteur."""
+	from utils import contenants   # import tardif : contenants dépend de utils.characters
+	porteur = character
+	if dest_id and dest_id != character.get("_id"):
+		porteur = _membre_du_groupe(principal, character, dest_id)
+		if porteur is None:
+			raise HTTPException(status_code=403, detail="Ce porteur ne fait pas partie de votre groupe")
+	pos = contenants.localiser(au_sol, body.get("index"), body.get("item_id"))
+	if pos is None:
+		raise HTTPException(status_code=422, detail="Objet absent du sol")
+	ok, raison, ref_c = contenants.deposer(porteur, body.get("contenant_index"),
+										   body.get("contenant_item_id"), au_sol[pos], get_doc)
+	if not ok:
+		raise HTTPException(status_code=404 if raison.startswith("Contenant introuvable") else 409,
+							detail=raison)
+	ref = au_sol.pop(pos)
+	principal["objets_au_sol"] = au_sol
+	_save_acteur(porteur, principal)
+	doc = resolve_item_ref(ref) or {}
+	doc_c = resolve_item_ref(ref_c) or {}
+	payload = _inventory_payload(character, principal)
+	payload["destinataire"] = {
+		"id":       porteur["_id"],
+		"nom":      f"{doc_c.get('nom') or 'Contenant'} ({_nom_porteur(porteur)})",
+		"contenant": doc_c.get("contenant"),
+	}
+	payload["pris"] = {"nom": doc.get("nom") or item_ref_id(ref), "icon": doc.get("icon", ""),
+					   "poids": round(item_ref_weight(ref), 2)}
+	# Pas de bloc `fiche` : un objet rangé est inerte (contenants.py), rien ne s'ouvre ni ne ferme.
+	return payload
+
+
+def _nom_porteur(p: dict) -> str:
+	return f"{p.get('prenom', '') or ''} {p.get('nom', '') or ''}".strip() or "?"
 
 
 @user_router.post("/renommer_objet")
