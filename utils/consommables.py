@@ -11,6 +11,8 @@
 # restriction_satisfaite (équipement) : un buff expiré ne doit ni bloquer un déplacement
 # (surcharge), ni permettre d'équiper/monter ce qu'on ne pourrait pas sans lui.
 
+import time
+
 from utils.characters import item_ref_id
 
 
@@ -426,14 +428,50 @@ def appliquer_instantane(character: dict, item_doc: dict, pv_max: int, pm_max: i
 	}
 
 
-def tick_effets(character: dict) -> list:
-	"""Décrémente `restants` de chaque effet actif, purge ceux à 0 (mute en place).
+# ── Effets en TEMPS RÉEL ─────────────────────────────────────────────────────────
+# Une entrée qui porte `expire_a` (epoch, secondes) dure des minutes RÉELLES, pas des tours :
+# jamais décrémentée (ni au tour monde ni en combat), elle tombe quand l'horloge la dépasse —
+# contrôle PARESSEUX aux points de passage (pas, tour de combat, sortie de combat, `/play`).
+# Posée par le réveil chez soi (`proprietes.entree_reveil`). Sans `expire_a` : compte à rebours
+# `restants` en tours, comme avant (aucune migration).
+
+def now_epoch() -> int:
+	return int(time.time())
+
+
+def en_temps_reel(eff: dict) -> bool:
+	return (eff or {}).get("expire_a") is not None
+
+
+def effet_en_cours(eff: dict, maintenant: int | None = None) -> bool:
+	"""L'effet dure-t-il encore ? Échéance réelle si `expire_a`, sinon `restants > 0`."""
+	if en_temps_reel(eff):
+		return _as_int(eff.get("expire_a")) > (now_epoch() if maintenant is None else maintenant)
+	return _as_int((eff or {}).get("restants")) > 0
+
+
+def purger_expires(porteur: dict, maintenant: int | None = None) -> list:
+	"""Retire les effets en temps réel échus (mute en place) ; renvoie les retirés."""
+	actifs = (porteur or {}).get("effets_actifs") or []
+	expires = [e for e in actifs if en_temps_reel(e) and not effet_en_cours(e, maintenant)]
+	if expires:
+		porteur["effets_actifs"] = [e for e in actifs if e not in expires]
+	return expires
+
+
+def tick_effets(character: dict, maintenant: int | None = None) -> list:
+	"""Décrémente `restants` de chaque effet actif, purge ceux à 0 (mute en place). Un effet en
+	TEMPS RÉEL n'est pas décrémenté : il n'est purgé qu'à échéance (`expire_a`).
 	Renvoie les entrées expirées (l'appelant re-clampe PV/PM si un buff R/Vol tombe)."""
 	actifs = (character or {}).get("effets_actifs") or []
 	if not actifs:
 		return []
+	maintenant = now_epoch() if maintenant is None else maintenant
 	restants, expires = [], []
 	for eff in actifs:
+		if en_temps_reel(eff):
+			(restants if effet_en_cours(eff, maintenant) else expires).append(eff)
+			continue
 		eff["restants"] = _as_int(eff.get("restants")) - 1
 		(restants if eff["restants"] > 0 else expires).append(eff)
 	character["effets_actifs"] = restants

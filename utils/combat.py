@@ -19,7 +19,7 @@ from utils.consommables import (
 	caracts_avec_buffs, canalisation_bonus, est_consommable, effet_instantane, effets_de,
 	esquive_bonus, regen_bonus,
 	cumul_effets, identite_source, poser_effet, _as_int as _eff_int,
-	_as_signed_int as _regen_int,
+	_as_signed_int as _regen_int, effet_en_cours, en_temps_reel, now_epoch,
 )
 from utils import charge_magie
 from utils.sorts import (
@@ -1173,11 +1173,16 @@ def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
 	# son lanceur à payer l'entretien (cf. `_payer_maintiens`, qui la retire quand il ne le
 	# peut plus). La décrémenter ferait tomber le sort au bout de `duree` tours alors même
 	# que le mage paie, ce qui est exactement ce que « sort maintenu » exclut. Une AURA non
-	# plus : elle dure tant que sa zone couvre le porteur (`_recalculer_auras`).
+	# plus : elle dure tant que sa zone couvre le porteur (`_recalculer_auras`). Une entrée en
+	# TEMPS RÉEL (`expire_a`, réveil chez soi) ne s'use pas au tour : elle tombe à l'échéance.
 	restants, expires = [], []
+	maintenant = now_epoch()
 	for eff in actifs:
 		if eff.get("maintenu") or eff.get("aura") or int(eff.get("pose_tour", -1)) == tour:
 			restants.append(eff)
+			continue
+		if en_temps_reel(eff):
+			(restants if effet_en_cours(eff, maintenant) else expires).append(eff)
 			continue
 		eff["restants"] = _eff_int(eff.get("restants")) - 1
 		(restants if eff["restants"] > 0 else expires).append(eff)
@@ -2638,12 +2643,14 @@ def _effets_a_reverser(snap: dict) -> list:
 	que quelqu'un paie son entretien chaque round, et il n'y a pas de round en exploration.
 	Le reverser tel quel poserait sur le personnage un buff que plus rien ne prélève et que
 	plus rien ne fait tomber — permanent et gratuit, donc un exploit. Même raison pour une
-	AURA : elle n'existe que tant que son porteur est à côté.
+	AURA : elle n'existe que tant que son porteur est à côté. Un effet en TEMPS RÉEL suit
+	tant que son échéance n'est pas passée (`effet_en_cours`).
 	"""
+	maintenant = now_epoch()
 	return [
 		{k: v for k, v in eff.items() if k not in ("pose_tour", "maintenu", "maintien")}
 		for eff in (snap or {}).get("effets_actifs") or []
-		if _eff_int(eff.get("restants")) > 0 and not eff.get("maintenu") and not eff.get("aura")
+		if effet_en_cours(eff, maintenant) and not eff.get("maintenu") and not eff.get("aura")
 	]
 
 

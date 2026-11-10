@@ -7187,7 +7187,10 @@ function _renderEffetsActifs(list) {
 		if (e.vol) details.push('🪽 vol');
 		// Une AURA du groupe n'a pas de compte à rebours (elle tient tant que son porteur
 		// est du groupe) : « aura » plutôt qu'un « ⏳ » qui ne bougerait jamais.
-		const suffixe = e.aura ? 'aura' : `⏳${e.restants}`;
+		// Un effet en TEMPS RÉEL (`expire_a`, réveil chez soi) se compte en minutes réelles.
+		const suffixe = e.aura ? 'aura'
+			: e.expire_a != null ? `⏳${Math.max(1, Math.ceil((e.expire_a - Date.now() / 1000) / 60))} min`
+			: `⏳${e.restants}`;
 		return `<span class="sh-effet-chip">${e.icon || '✨'} ${e.nom || 'Effet'}${details.length ? ' (' + details.join(', ') + ')' : ''}<span class="sh-effet-restants">${suffixe}</span></span>`;
 	}).join('');
 	['sh-effets-actifs', 'sh-effets-actifs-stats', 'sh-effets-actifs-panel'].forEach(id => {

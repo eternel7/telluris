@@ -1946,7 +1946,10 @@ function renderEffetsActifs(list) {
 			? `<span class="sh-effet-restants">🔄${e.maintien || 0} PM/round</span>`
 			: e.aura
 				? `<span class="sh-effet-restants">aura</span>`
-				: `<span class="sh-effet-restants">⏳${e.restants}</span>`;
+				// Effet en TEMPS RÉEL (`expire_a`, réveil chez soi) : minutes réelles, pas des tours.
+				: e.expire_a != null
+					? `<span class="sh-effet-restants">⏳${Math.max(1, Math.ceil((e.expire_a - Date.now() / 1000) / 60))} min</span>`
+					: `<span class="sh-effet-restants">⏳${e.restants}</span>`;
 		const titre = e.maintenu
 			? ` title="Cliquer pour cesser d'entretenir ce sort (gratuit)"`
 			: e.aura ? ` title="Aura d'un allié proche : active tant que vous restez dans sa zone"` : '';

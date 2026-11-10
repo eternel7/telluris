@@ -858,8 +858,10 @@ def dormeurs(character: dict, prop: dict, cat: dict, compagnons: list, heberges:
 	return out
 
 
-def entree_reveil(am_id, adef: dict, bloc: dict) -> dict:
-	"""Effet à durée d'un réveil, au format d'`effets_actifs` (celui des consommables)."""
+def entree_reveil(am_id, adef: dict, bloc: dict, maintenant: int) -> dict:
+	"""Effet à durée d'un réveil, au format d'`effets_actifs` (celui des consommables).
+	⚠️ `duree` se lit en MINUTES RÉELLES : l'entrée porte `expire_a` (epoch), jamais `restants`
+	— ni le pas ni le tour de combat ne l'usent (cf. `consommables.en_temps_reel`)."""
 	entry = {
 		"source_id": SOURCE_AMENAGEMENT + str(am_id),
 		"nom": bloc.get("nom") or adef.get("nom", am_id),
@@ -869,7 +871,7 @@ def entree_reveil(am_id, adef: dict, bloc: dict) -> dict:
 		"regen_pm": _int(bloc.get("regen_pm")),
 		"esquive": _int(bloc.get("esquive")),
 		"canalisation": 0,
-		"restants": _int(bloc.get("duree")),
+		"expire_a": int(maintenant) + 60 * _int(bloc.get("duree")),
 	}
 	if bloc.get("fidele"):
 		entry["fidele"] = True
@@ -901,11 +903,12 @@ def _est_compagnon(doc: dict) -> bool:
 
 
 def appliquer_reveil(prop: dict, cat: dict, employes: list, dormeurs_: list,
-					 montures_: list) -> dict:
+					 montures_: list, maintenant: int | None = None) -> dict:
 	"""Effets du réveil chez soi, sur les DORMEURS (`dormeurs`) et les montures présentes :
 	malus dissipés d'abord (médecin), puis effets à durée posés — remplacés, jamais empilés.
 	Mute les docs, sans save. Renvoie {doc_id: [libellés]} de ce qui a changé pour chacun."""
 	bilan = {}
+	maintenant = now_epoch() if maintenant is None else maintenant
 
 	def noter(doc, libelle):
 		bilan.setdefault(doc.get("_id"), []).append(libelle)
@@ -927,7 +930,7 @@ def appliquer_reveil(prop: dict, cat: dict, employes: list, dormeurs_: list,
 			for doc in docs:
 				if bloc.get("compagnons_seuls") and not _est_compagnon(doc):
 					continue
-				entry = consommables.poser_effet(doc, entree_reveil(am_id, adef, bloc))
+				entry = consommables.poser_effet(doc, entree_reveil(am_id, adef, bloc, maintenant))
 				noter(doc, f"{entry['icon']} {entry['nom']}")
 	return bilan
 
@@ -1137,7 +1140,7 @@ def _texte_reveil(bloc: dict) -> str:
 			parts.append(f"{lib} {_int(bloc[cle]):+d}")
 	if bloc.get("fidele"):
 		parts.append("ne quitte pas le groupe")
-	return f"{', '.join(parts)} pendant {_int(bloc.get('duree'))} tours"
+	return f"{', '.join(parts)} pendant {_int(bloc.get('duree'))} min"
 
 
 def textes_effets(adef: dict, cat: dict) -> list:
