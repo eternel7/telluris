@@ -536,6 +536,72 @@ def test_confier_un_objet_range_dans_un_contenant(monde):
 	assert e["stock_matieres"] == {"herbe": 1} and data["contenants"] == {}
 
 
+BESACE = {"_id": "item:besace", "type": "item", "nom": "Besace profonde", "categorie": "outil",
+		  "slots": [], "poids": 0.5, "contenant": {"capacite_kg": 2}}
+
+
+def test_coffre_expose_les_contenants_comme_sacs(monde):
+	"""Tout contenant porté, vide compris, est un sac de gauche du coffre (comme au 👥)."""
+	monde["docs"]["item:besace"] = dict(BESACE)
+	char = _perso()
+	_entrer(monde, char)
+	_compagnon(monde, char, inventaire=[{"item": "item:herbe", "poids": 1}, {"item": "item:besace", "poids": 0.5,
+										"contenu": [{"item": "item:herbe", "poids": 1}]}])
+	vue = _appel(monde, char, monde["rp"].coffre, None)
+	(c,) = vue["sacs_contenants"]
+	assert (c["cle"], c["porteur_id"], c["index"], c["item_id"]) == ("aventurier:x#1", "aventurier:x", 1, "item:besace")
+	assert (c["charge"], c["charge_max"], [d["idx"] for d in c["inventaire"]]) == (1, 2, [0])
+
+
+def test_coffre_vers_un_contenant_et_retour(monde):
+	"""Prendre au coffre DANS un contenant : rangé sans peser, borné par sa capacité, jamais un
+	contenant dedans ; déposer depuis un contenant : il perd sa clé `contenu` une fois vide."""
+	monde["docs"]["item:besace"] = dict(BESACE)
+	monde["docs"]["item:sac2"] = dict(BESACE, _id="item:sac2", nom="Autre sac")
+	char = _perso(inventaire=[{"item": "item:besace", "poids": 0.5}])
+	prop = _entrer(monde, char)
+	prop["coffre"] = [{"item": "item:herbe", "poids": 1.5}, {"item": "item:sac2", "poids": 0.5},
+					  {"item": "item:herbe", "poids": 1}]
+	adr = {"compagnon_id": char["_id"], "index_contenant": 0, "item_id_contenant": "item:besace"}
+	data = _appel(monde, char, monde["rp"].coffre_transferer, None,
+				  {"sens": "vers_principal", "index": 0, "item_id": "item:herbe", **adr})
+	assert char["inventaire"] == [{"item": "item:besace", "poids": 0.5, "contenu": [{"item": "item:herbe", "poids": 1.5}]}]
+	assert data["sacs_contenants"][0]["charge"] == 1.5 and data["principal"]["charge"] == 0.5
+	for idx, iid in ((0, "item:sac2"), (1, "item:herbe")):   # un contenant ; puis 1,5 + 1 > 2 kg
+		with pytest.raises(HTTPException) as e:
+			_appel(monde, char, monde["rp"].coffre_transferer, None,
+				   {"sens": "vers_principal", "index": idx, "item_id": iid, **adr})
+		assert e.value.status_code == 409
+	_appel(monde, char, monde["rp"].coffre_transferer, None,
+		   {"sens": "vers_coffre", "index": 0, "item_id": "item:herbe", **adr})
+	assert char["inventaire"] == [{"item": "item:besace", "poids": 0.5}]
+	assert prop["coffre"][-1] == {"item": "item:herbe", "poids": 1.5}
+
+
+def test_le_voleur_remplit_son_contenant(monde):
+	monde["docs"]["item:besace"] = dict(BESACE)
+	prop = _entrer(monde, _perso())
+	prop["coffre"] = [{"item": "item:herbe", "poids": 1}]
+	voleur = _perso(_id="character:b", lieu=prop["_id"], inventaire=["item:besace"])
+	data = _appel(monde, voleur, monde["rp"].coffre_transferer, None,
+				  {"sens": "vers_principal", "index": 0, "item_id": "item:herbe",
+				   "index_contenant": 0, "item_id_contenant": "item:besace"})
+	assert data["vol"] is True and prop["coffre"] == []
+	assert voleur["inventaire"] == [{"item": "item:besace", "poids": 0.5, "contenu": [{"item": "item:herbe", "poids": 1}]}]
+
+
+def test_reprendre_du_rayon_dans_un_contenant(monde):
+	monde["docs"]["item:besace"] = dict(BESACE)
+	proprio = _perso(inventaire=[{"item": "item:besace", "poids": 0.5}])
+	_entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	e["stock_vente"] = [{"item_id": "item:elixir", "qty": 1}]
+	_appel(monde, proprio, monde["rp"].atelier_reprendre, None,
+		   {"employe_id": e["_id"], "item_id": "item:elixir", "index_contenant": 0, "item_id_contenant": "item:besace"})
+	assert [item_ref_id(r) for r in proprio["inventaire"][0]["contenu"]] == ["item:elixir"]
+	assert len(proprio["inventaire"]) == 1
+
+
 def test_confier_et_reprendre_depuis_le_sac_d_un_compagnon(monde):
 	proprio = _perso()
 	_entrer(monde, proprio)

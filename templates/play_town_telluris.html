@@ -11037,7 +11037,8 @@ async function choisirAtelier(btn) {
 // À droite, le COFFRE ou l'atelier d'un marchand (matières confiées, rayon, caisse).
 let _pcfEtat = null;
 let _pcfSel = 'coffre';
-// Sac de gauche : '' = le vôtre, sinon l'id d'un porteur (compagnon ou monture) du groupe.
+// Sac de gauche : '' = le vôtre, sinon l'id d'un porteur (compagnon ou monture) du groupe,
+// ou la clé `porteur#index` d'un CONTENANT de ces sacs (`sacs_contenants`).
 let _pcfGauche = '';
 
 function _pcfAfficher() {
@@ -11073,10 +11074,23 @@ function onCoffreGauche(v) { _pcfGauche = v; renderCoffre(_pcfEtat); }
 
 // Le sac affiché à gauche — coffre comme atelier : ce que l'on dépose, confie ou reprend
 // part de ce sac ou y arrive.
+// Un contenant à gauche a la forme d'un sac du panneau 👥 (`contenant` = son adresse, lue
+// par `_grpRentre` : jamais un contenant dedans, place inconnue à marée basse).
 function _pcfSacGauche(data) {
 	const moi = (data && data.principal) || { inventaire: [], charge: 0, charge_max: 0 };
 	if (!_pcfGauche) return moi;
+	const c = ((data && data.sacs_contenants) || []).find(x => x.cle === _pcfGauche);
+	if (c) return { inventaire: c.inventaire || [], charge: c.charge, charge_max: c.charge_max, contenant: c };
 	return ((data && data.porteurs) || []).find(p => p.id === _pcfGauche) || moi;
+}
+
+// Adresse du sac de gauche dans un corps de requête (Conventions §1) : rien pour le vôtre,
+// `compagnon_id` pour un porteur ; pour un contenant, son porteur (vous compris) + le
+// contenant vérifié par son item_id.
+function _pcfAdresse() {
+	const c = _pcfSacGauche(_pcfEtat).contenant;
+	if (c) return { compagnon_id: c.porteur_id, index_contenant: c.index, item_id_contenant: c.item_id };
+	return _pcfGauche ? { compagnon_id: _pcfGauche } : {};
 }
 
 function _pcfAppliquer(data) {
@@ -11089,13 +11103,15 @@ function _pcfAppliquer(data) {
 // Une ligne d'objet, mêmes classes que les sacs du groupe. `geste` = nom de la fonction
 // appelée au clic ; l'index et l'id passent par data-* (Conventions §9).
 // `ctn` (facultatif) : objet RANGÉ dans un contenant du sac — son adresse part en data-*.
-function _pcfLigne(item, idx, fleche, geste, actif, titre, cote, source, ctn) {
+// `ficheIdx` (facultatif) : position de la fiche quand elle diffère de l'adresse serveur
+// (contenu d'un contenant : `idx` réel, la fiche lit le tableau affiché).
+function _pcfLigne(item, idx, fleche, geste, actif, titre, cote, source, ctn, ficheIdx) {
 	const adr = ctn ? ` data-ctn="${+ctn.index}" data-ctn-item="${escapeHtml(ctn.item_id || '')}"` : '';
 	const btn = `<button class="grp-move-btn" ${actif ? '' : 'disabled'} title="${escapeHtml(titre)}"
 		data-idx="${idx}" data-item="${escapeHtml(item.item || item._id || item.item_id || '')}"${adr}
 		onclick="${geste}(this)">${fleche}</button>`;
 	const poids = item.poids !== undefined ? `${(+item.poids || 0).toFixed(1)} kg` : `× ${item.qty}`;
-	const ouvre = source ? ` sh-inv-open" onclick="openItemDetail('${source}',${+idx})" title="Voir la fiche` : '';
+	const ouvre = source ? ` sh-inv-open" onclick="openItemDetail('${source}',${+(ficheIdx ?? idx)})" title="Voir la fiche` : '';
 	const row = `<span class="sh-inv-name${ouvre}">${item.icon || '📦'} ${escapeHtml(item.nom || '—')}</span>
 		<span class="sh-inv-poids">${poids}</span>`;
 	return `<div class="sh-inv-item">${cote === 'gauche' ? btn + row : row + btn}</div>`;
@@ -11116,19 +11132,35 @@ function renderCoffre(data) {
 		: (data.role === 'visiteur' ? '⚠️ Personne ne surveille : vous pouvez vous servir…' : '');
 
 	const porteurs = data.porteurs || [];
-	if (_pcfGauche && !porteurs.some(p => p.id === _pcfGauche)) _pcfGauche = '';
+	// Contenants (sac dimensionnel…) portés par vous, un compagnon ou une monture : un sac de
+	// gauche comme un autre, adressé par sa clé `porteur#index`.
+	const ctnsG = (data.sacs_contenants || []).map(c => ({ id: c.cle,
+		nom: `${c.icon || '👜'} ${c.nom || 'Contenant'} — ${c.porteur_nom || '?'}` }));
+	if (_pcfGauche && !porteurs.concat(ctnsG).some(p => p.id === _pcfGauche)) _pcfGauche = '';
 	const selG = document.getElementById('pcf-select-gauche');
 	if (selG) {
 		const opt = p => `<option value="${escapeHtml(p.id)}">${escapeHtml(`${p.prenom || ''} ${p.nom || ''}`.trim() || '—')}</option>`;
 		const compagnons = porteurs.filter(p => !p.monture), montures = porteurs.filter(p => p.monture);
 		selG.innerHTML = `<option value="">Vous</option>` + compagnons.map(opt).join('')
-			+ (montures.length ? `<optgroup label="🐴 Montures">${montures.map(opt).join('')}</optgroup>` : '');
-		selG.disabled = !porteurs.length;
+			+ (montures.length ? `<optgroup label="🐴 Montures">${montures.map(opt).join('')}</optgroup>` : '')
+			+ (ctnsG.length ? `<optgroup label="👜 Contenants">${ctnsG.map(opt).join('')}</optgroup>` : '');
+		selG.disabled = !porteurs.length && !ctnsG.length;
 		selG.value = _pcfGauche;
 	}
 	const moi = _pcfSacGauche(data);
+	const ctnG = moi.contenant || null;
 	_grpCharge('pcf-charge-principal', moi);
+	// Contenant hors marée : ni charge ni contenu visibles (le sac « semble vide »).
+	if (ctnG && !ctnG.accessible) {
+		const el = document.getElementById('pcf-charge-principal');
+		if (el) { el.textContent = `? / ${ctnG.capacite_kg} kg`; el.classList.remove('grp-charge-over'); }
+	}
 	const inv = moi.inventaire || [];
+	// Adresse serveur d'une ligne de gauche : position dans le sac, ou `idx` réel dans le contenant.
+	const posG = i => (ctnG && inv[i].idx !== undefined ? inv[i].idx : i);
+	const videG = ctnG ? (ctnG.accessible ? '<div class="sh-empty"><span class="sh-empty-icon">👜</span>Contenant vide</div>'
+		: '<div class="sh-empty"><span class="sh-empty-icon">🌊</span>La mer s\'est retirée : le sac semble vide.</div>')
+		: '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>';
 	// Aucun tri manuel dans ce panneau : le tri par nom est OBLIGATOIRE. Les index d'origine
 	// sont conservés pour l'adressage serveur (ordre d'affichage seulement).
 	const ordInv = _sortedOrder(inv, 'asc');
@@ -11139,10 +11171,9 @@ function renderCoffre(data) {
 		const libre = (+c.charge_max || 0) - (+c.charge || 0);
 		_grpRemplirSac('pcf-principal', inv, inv.length ? ordInv.map(i => {
 			const it = inv[i];
-			return _pcfLigne(it, i, '→', 'coffreDeposer', c.depot && (+it.poids || 0) <= libre + 1e-6,
-				c.depot ? 'Ranger dans le coffre' : 'Vous ne pouvez rien déposer ici', 'droite', 'pcf_sac');
-		}).join('')
-			: '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>');
+			return _pcfLigne(it, posG(i), '→', 'coffreDeposer', c.depot && (+it.poids || 0) <= libre + 1e-6,
+				c.depot ? 'Ranger dans le coffre' : 'Vous ne pouvez rien déposer ici', 'droite', 'pcf_sac', null, i);
+		}).join('') : videG);
 		const items = c.inventaire || [];
 		const ordCoffre = _sortedOrder(items, 'asc').map(i => items[i]);
 		_grpRemplirSac('pcf-droite', items, !c.visible
@@ -11150,7 +11181,8 @@ function renderCoffre(data) {
 			: items.length ? ordCoffre.map(it => {
 				const rentre = _grpRentre(it, moi);
 				return _pcfLigne(it, it.idx, '←', 'coffrePrendre', rentre,
-					!rentre ? 'Trop lourd — le destinataire est à sa charge maximale'
+					!rentre ? (ctnG && it.contenant ? 'Un contenant magique ne se range pas dans un autre'
+						: ctnG ? 'Trop lourd — le contenant est plein' : 'Trop lourd — le destinataire est à sa charge maximale')
 					: data.role === 'visiteur' ? 'Dérober' : 'Prendre', 'gauche', 'pcf_coffre');
 			}).join('')
 			: '<div class="sh-empty"><span class="sh-empty-icon">📦</span>Coffre vide</div>');
@@ -11168,8 +11200,8 @@ function renderCoffre(data) {
 		+ _sortedOrder(c.contenu || [], 'asc').map(j => { const it = c.contenu[j];
 			return _pcfLigne(it, it.idx, '→', 'atelierDonner', gere, 'Confier à ce marchand', 'droite', '', c); }).join('')).join('');
 	_grpRemplirSac('pcf-principal', inv.concat(...ctns.map(c => c.contenu || [])), (inv.length ? ordInv.map(i =>
-		_pcfLigne(inv[i], i, '→', 'atelierDonner', gere, gere ? 'Confier à ce marchand' : 'Seul le propriétaire confie des matières', 'droite', 'pcf_sac')).join('')
-		: '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>') + lignesCtn);
+		_pcfLigne(inv[i], posG(i), '→', 'atelierDonner', gere, gere ? 'Confier à ce marchand' : 'Seul le propriétaire confie des matières', 'droite', 'pcf_sac', ctnG, i)).join('')
+		: videG) + lignesCtn);
 	const prodsAtelier = a.produits || [];
 	// Pas de poids d'instance au rayon : la flèche reste active, le serveur tranche (409).
 	const produits = _sortedOrder(prodsAtelier, 'asc').map(i => prodsAtelier[i]).map(p => _pcfLigne(p, 0, '←', 'atelierReprendre', gere, 'Reprendre un exemplaire', 'gauche')).join('');
@@ -11191,11 +11223,9 @@ async function _pcfPost(url, body) {
 	return data;
 }
 
-// `compagnon_id` : le sac de gauche (Conventions §1) — absent, c'est le vôtre.
+// Le sac de gauche (`_pcfAdresse`) : source de `vers_coffre`, destinataire de `vers_principal`.
 function _pcfCorps(sens, btn) {
-	const corps = { sens, index: +btn.dataset.idx, item_id: btn.dataset.item || null };
-	if (_pcfGauche) corps.compagnon_id = _pcfGauche;
-	return corps;
+	return { sens, index: +btn.dataset.idx, item_id: btn.dataset.item || null, ..._pcfAdresse() };
 }
 
 function coffreDeposer(btn) {
@@ -11208,16 +11238,15 @@ async function coffrePrendre(btn) {
 }
 
 function atelierDonner(btn) {
-	const corps = { employe_id: _pcfSel, index: +btn.dataset.idx, item_id: btn.dataset.item || null };
+	const corps = { employe_id: _pcfSel, index: +btn.dataset.idx, item_id: btn.dataset.item || null, ..._pcfAdresse() };
+	// Ligne rangée dans un contenant : son adresse (data-ctn) prime sur celle du sac de gauche.
 	if (btn.dataset.ctn !== undefined) { corps.index_contenant = +btn.dataset.ctn; corps.item_id_contenant = btn.dataset.ctnItem || null; }
-	if (_pcfGauche) corps.compagnon_id = _pcfGauche;
 	return _pcfPost('api/proprietes/atelier/donner', corps);
 }
 
+// Vers le sac de gauche — contenant compris : l'exemplaire y est rangé sans peser.
 function atelierReprendre(btn) {
-	const corps = { employe_id: _pcfSel, item_id: btn.dataset.item };
-	if (_pcfGauche) corps.compagnon_id = _pcfGauche;
-	return _pcfPost('api/proprietes/atelier/reprendre', corps);
+	return _pcfPost('api/proprietes/atelier/reprendre', { employe_id: _pcfSel, item_id: btn.dataset.item, ..._pcfAdresse() });
 }
 
 async function releverCaisse() {
