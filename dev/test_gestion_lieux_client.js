@@ -57,7 +57,7 @@ vm.runInThisContext(extraireDeclaration(/const PORTE_CATEGORIE = [^;]+;/, 'PORTE
 vm.runInThisContext(extraireDeclaration(/const GUILDE_EXTERIEUR_CATEGORIE = [^;]+;/, 'GUILDE_EXTERIEUR_CATEGORIE'));
 vm.runInThisContext(extraireDeclaration(/const COLS_LIEN = [^;]+;/, 'COLS_LIEN'));
 vm.runInThisContext(extraireDeclaration(/const LIEUX_HOTE_REQUIS = \[[\s\S]*?\];/, 'LIEUX_HOTE_REQUIS'));
-for (const f of ['_escHtml', '_connDest', '_connInterne', 'etatPnjDeLieu', 'lieuxLigneHtml', '_ljConnexion',
+for (const f of ['_escHtml', '_connDest', '_connInterne', '_noeudsRepositionnables', 'etatPnjDeLieu', 'lieuxLigneHtml', '_ljConnexion',
 				 'valeurLigne', 'colonnesDe', 'lieuxMarchandsVisibles', 'portesDeVille',
 				 '_posValide', '_proposerCases']) {
 	vm.runInThisContext(extraire(f));
@@ -87,6 +87,22 @@ const PORTE = conn('link:porte_nord', [49, 6], 'lieu:porte_nord_interieur',
 	{ label: "Porte <nord> l'intérieur", categorie: 'Porte de rempart' });
 const GUILDE = conn('link:guilde_aventurier_exterieur01_to_lutecia', [34, 20], 'lieu:le_grand_relais_des_frontieres_exterieur',
 	{ label: 'Le Grand Relais des Frontières', categorie: 'guilde_aventurier_exterieur' });
+
+console.log('\n── 🎯 Repositionner : nœuds déplaçables ──');
+
+t('un 🎯 par nœud posé sur la carte courante, quel que soit le type de connexion', () => {
+	// Vers un autre lieu : le seul nœud de la ville, où qu'il soit dans le doc.
+	assert.deepStrictEqual(_noeudsRepositionnables(AUBERGE, VILLE), [0]);
+	assert.deepStrictEqual(_noeudsRepositionnables(BOUCHERIE, VILLE), [1]);
+	assert.deepStrictEqual(_noeudsRepositionnables(PORTE, VILLE), [0]);
+	// Interne : les deux bouts.
+	const interne = { _id: 'link:x', nodes: [{ lieu: VILLE, pos: [1, 2] }, { lieu: VILLE, pos: [3, 4] }] };
+	assert.deepStrictEqual(_noeudsRepositionnables(interne, VILLE), [0, 1]);
+	// Maillon sans nœud sur la carte, doc abîmé : rien.
+	assert.deepStrictEqual(_noeudsRepositionnables(AUBERGE, 'lieu:ailleurs_hors_reseau'), []);
+	assert.deepStrictEqual(_noeudsRepositionnables({ nodes: [null, {}] }, VILLE), []);
+	assert.deepStrictEqual(_noeudsRepositionnables(null, VILLE), []);
+});
 
 console.log('\n── Valeurs de colonne ──');
 

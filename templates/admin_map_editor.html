@@ -1570,7 +1570,8 @@ const LIEUX_HOTE = {
 		desarmer: () => { canvas.style.cursor = ''; if (grid.length) renderGrid(); },
 	},
 	repositionnement: {
-		actif: connId => !!(lieuxRepos && lieuxRepos.connId === connId),
+		actif: (connId, idx) => !!(lieuxRepos && lieuxRepos.connId === connId
+			&& (idx === undefined || lieuxRepos.idx === idx)),
 		// Sans re-rendu : l'appelant repeint lui-même (cf. `closeLieuJson`).
 		oublier: () => { lieuxRepos = null; canvas.style.cursor = ''; _reposPulseMaj(); },
 	},
@@ -5094,8 +5095,9 @@ function _reposPulseMaj(cw, ch) {
 	if (!el) return;
 	const conn = (cw && editMode === 'lieux' && lieuxRepos)
 		? lieuxConnections.find(c => c._id === lieuxRepos.connId) : null;
-	const node = conn && (conn.nodes || []).find(n => n.lieu === currentLocId && n.pos);
-	if (!node) { el.style.display = 'none'; return; }
+	// Le nœud VISÉ (`idx`) : une connexion interne en a deux sur cette carte.
+	const node = conn && _noeudRepos(conn.nodes, lieuxRepos.idx);
+	if (!node || !Array.isArray(node.pos)) { el.style.display = 'none'; return; }
 	// Diamètre = celui du disque de la porte (r = 0,4 case) + une marge, pour l'entourer.
 	const d = 2 * Math.max(5, Math.min(cw, ch) * 0.4) + 8;
 	el.style.left = (node.pos[0] * cw + cw / 2) + 'px';
@@ -5104,7 +5106,16 @@ function _reposPulseMaj(cw, ch) {
 	el.style.display = 'block';
 }
 
-function armerRepositionnement(connId, destId) {
+// Le nœud que 🎯 déplace : celui d'indice `idx` s'il est bien sur la carte courante, sinon le
+// premier nœud de ce lieu (connexion vers un autre lieu : il n'y en a qu'un).
+function _noeudRepos(nodes, idx) {
+	const ns = nodes || [];
+	const vise = Number.isInteger(idx) ? ns[idx] : null;
+	if (vise && vise.lieu === currentLocId) return vise;
+	return ns.find(n => n && n.lieu === currentLocId) || null;
+}
+
+function armerRepositionnement(connId, destId, idx) {
 	if (!grid.length) { _ljMsg('conn', "Ce lieu n'a pas de grille : aucune case où poser la porte.", true); return; }
 	// ⚠️ Refusé pendant un redimensionnement en aperçu : cet outil écrit la porte EN BASE tout de
 	// suite, alors que la grille, elle, n'est pas encore enregistrée. La position posée à la main
@@ -5114,7 +5125,7 @@ function armerRepositionnement(connId, destId) {
 			+ "déplacer une porte à la main.", true);
 		return;
 	}
-	lieuxRepos = { connId, destId };
+	lieuxRepos = { connId, destId, idx: Number.isInteger(idx) ? idx : null };
 	canvas.style.cursor = 'crosshair';
 	renderLieuJsonOverlay();
 	renderGrid();
@@ -5141,8 +5152,16 @@ async function _poserPorte(cx, cy) {
 	let doc;
 	try { doc = JSON.parse(area.value); }
 	catch (err) { _ljMsg('conn', `JSON invalide : ${err.message}`, true); return; }
-	const node = (doc.nodes || []).find(n => n.lieu === currentLocId);
+	const node = _noeudRepos(doc.nodes, lieuxRepos.idx);
 	if (!node) { _ljMsg('conn', "Aucun nœud de ce lieu dans le JSON.", true); return; }
+	// Connexion INTERNE : ses deux bouts sur la même case ne mèneraient nulle part (même refus
+	// que `_cxValider`) — on refuse et on RESTE armé, comme sur une case inaccessible.
+	const autre = (doc.nodes || []).find(n => n && n !== node && n.lieu === currentLocId
+		&& Array.isArray(n.pos) && n.pos[0] === cx && n.pos[1] === cy);
+	if (autre) {
+		_ljMsg('conn', `✗ Case [${cx},${cy}] déjà occupée par l'autre bout de cette connexion interne.`, true);
+		return;
+	}
 	node.pos = [cx, cy];
 	area.value = JSON.stringify(doc, null, 2);   // affichage ; l'écriture, elle, part de `doc`
 	// ⚠️ AVANT le save : la liste de gauche est filtrée par la case sélectionnée — la connexion

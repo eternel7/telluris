@@ -42,7 +42,8 @@ const LIEUX_PNJ_RANG = Object.fromEntries(LIEUX_PNJ_ETATS.map((e, i) => [e.cle, 
 //   statut(html)      → barre de statut de la page
 //   fermerAutres()    → fermer les panneaux PROPRES à la page qui partagent la place à droite
 //   visee             → {refus(), armer(), desarmer()} | null — null masque la visée 🎯
-//   repositionnement  → {actif(connId), oublier()} | null — null masque 🎯 Repositionner
+//   repositionnement  → {actif(connId, idx?), oublier()} | null — null masque 🎯 Repositionner
+//                       (`idx` : nœud visé dans `conn.nodes` ; omis = n'importe lequel)
 const LIEUX_HOTE_REQUIS = ['lieuCourant', 'caseCourante', 'connexions', 'grille', 'blocage',
 	'apresEcriture', 'rendreListe', 'statut', 'fermerAutres', 'visee', 'repositionnement'];
 
@@ -67,6 +68,17 @@ function _connDest(conn, ici) {
 function _connInterne(conn) {
 	const n = (conn && conn.nodes) || [];
 	return n.length === 2 && !!n[0] && !!n[1] && !!n[0].lieu && n[0].lieu === n[1].lieu;
+}
+
+// Indices (dans `conn.nodes`) des nœuds que 🎯 Repositionner peut déplacer : ceux posés sur
+// `ici` — un pour une connexion vers un autre lieu, deux pour une connexion interne, aucun pour
+// un maillon sans nœud sur la carte. PURE (test_gestion_lieux_client.js).
+function _noeudsRepositionnables(conn, ici) {
+	const idx = [];
+	((conn && conn.nodes) || []).forEach((n, i) => {
+		if (n && typeof n === 'object' && n.lieu && n.lieu === ici) idx.push(i);
+	});
+	return idx;
 }
 
 // Le nœud où mène `conn` pour qui se tient en `pos` ([x, y]) dans `ici` — miroir de
@@ -169,17 +181,29 @@ function _sousLieuJsonHtml(conn, destId) {
 	const connTxt = JSON.stringify(_connNu(conn), null, 2);
 	// ⚠️ Connexion INTERNE : son « lieu de destination » est la carte COURANTE. Offrir son JSON
 	// ici, c'est offrir un PUT complet de la carte, grille comprise, par-dessus l'édition en
-	// cours — on ne le propose pas. Pas de 🎯 non plus : deux nœuds sont sur cette carte, le
-	// formulaire 🔗 (deux visées) dit lequel on déplace.
+	// cours — on ne le propose pas. Ses deux nœuds sont sur cette carte : un 🎯 par bout.
 	const interne = _connInterne(conn);
 	// L'état armé est porté par le BOUTON lui-même : le corps de l'overlay étant réécrit à
 	// chaque rendu, il n'y a rien à basculer, seulement à composer depuis l'état de l'hôte.
 	// Sans carte (`repositionnement` null), l'outil n'est pas proposé du tout.
-	// 🎯 déplace le nœud posé sur la carte courante : une connexion qui n'en a pas (maillon d'une
-	// maison de guilde) n'a rien à repositionner.
-	const surCarte = (conn.nodes || []).some(n => n.lieu === LIEUX_HOTE.lieuCourant());
-	const repo = (surCarte && !interne) ? LIEUX_HOTE.repositionnement : null;
+	// Un 🎯 par nœud posé sur la carte courante : un seul pour une connexion vers un autre lieu,
+	// deux pour une connexion interne (chaque bout se déplace à part). Une connexion sans nœud
+	// sur la carte (maillon d'une maison de guilde) n'a rien à repositionner.
+	const idxRepo = _noeudsRepositionnables(conn, LIEUX_HOTE.lieuCourant());
+	const repo = idxRepo.length ? LIEUX_HOTE.repositionnement : null;
 	const repos = !!(repo && repo.actif(conn._id));
+	const btnRepo = idx => {
+		if (repo.actif(conn._id, idx)) {
+			return `<button class="btn btn-inline lj-repos-on" style="font-size:.6rem;" onclick="desarmerRepositionnement()" title="Annuler le repositionnement">✕ Annuler</button>`;
+		}
+		// Interne : « 1 » / « 2 » = rang du nœud dans le doc (le libellé complet prenait trop de
+		// place) ; le titre au survol dit lequel.
+		const n = conn.nodes[idx];
+		const quel = interne ? ` ${Number(idx) + 1}` : '';
+		const titre = !interne ? '' : ` « ${_escHtml(n.label || 'sans label')} »`
+			+ (Array.isArray(n.pos) ? ` [${Number(n.pos[0])},${Number(n.pos[1])}]` : '');
+		return `<button class="btn btn-inline" style="font-size:.6rem;" onclick="armerRepositionnement('${conn._id}','${destId}',${Number(idx)})" title="Déplacer la porte${titre} : cliquez ensuite une case de la carte">🎯 Repositionner${quel}</button>`;
+	};
 	const lieuHtml = interne
 		? `<div class="lj-desc">🔀 Connexion interne à cette carte : pas de lieu à éditer ici.
 			Ses deux cases se déplacent par le formulaire 🔗 Connexion.</div>`
@@ -193,9 +217,7 @@ function _sousLieuJsonHtml(conn, destId) {
 	return `${lieuHtml}
 		<div class="lj-head">
 			<span>🔗 ${_escHtml(conn._id)}</span>
-			${!repo ? '' : repos
-				? `<button class="btn btn-inline lj-repos-on" style="font-size:.6rem;" onclick="desarmerRepositionnement()" title="Annuler le repositionnement">✕ Annuler</button>`
-				: `<button class="btn btn-inline" style="font-size:.6rem;" onclick="armerRepositionnement('${conn._id}','${destId}')" title="Déplacer la porte : cliquez ensuite une case de la carte">🎯 Repositionner</button>`}
+			${!repo ? '' : idxRepo.map(btnRepo).join('')}
 			<button class="btn btn-inline" style="font-size:.6rem;" onclick="sauverDocJson('conn','${destId}')">💾</button>
 			<button class="btn btn-inline danger" style="font-size:.6rem;" onclick="supprimerDocJson('conn','${destId}')">🗑</button>
 		</div>
