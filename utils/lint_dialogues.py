@@ -663,6 +663,12 @@ def analyser_doc(doc: dict) -> list:
 					erreur("`services.apport.offre` illisible : `id` (`quete:…`), `item` "
 						   "(`item:…`) et `quantite` (entier ≥ 1) sont requis — l'offre "
 						   "serait ignorée.")
+				elif "localisation" in (conf.get("offre") or {}) \
+						and apport_util.localisation_spec(conf["offre"]["localisation"]) is None:
+					erreur("`services.apport.offre.localisation` illisible : `{lieu: \"lieu:…\", "
+						   "position: {x, y}}` (entiers ≥ 0), `rencontre` éventuelle `{espece, "
+						   "accompagnants: [\"espece:…\"], nb_accompagnants ≥ 0}` — ni carte 🗺️ "
+						   "ni rencontre garantie.")
 			elif apport_util.quete_id_de({"services": {"apport": conf}}) is None:
 				erreur("`services.apport` sans `offre` ni `quete` (`quete:…`) : ce PNJ ne "
 					   "recevrait aucune remise.")

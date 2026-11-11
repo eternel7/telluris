@@ -46,6 +46,95 @@ def test_le_receveur_ne_offre_rien_mais_connait_la_quete():
 	assert apport.quete_id_de(_donneur()) == QID
 
 
+# ── Localisation (bouton 🗺️) ─────────────────────────────────────────────────
+
+LOC = {"lieu": "lieu:france", "position": {"x": 55, "y": 32}}
+
+
+def test_localisation_lisible_ou_ignoree():
+	assert apport.offre_spec(_donneur())["localisation"] is None
+	assert apport.offre_spec(_donneur(localisation=LOC))["localisation"] == LOC
+	for faute in ({"lieu": "france", "position": {"x": 1, "y": 1}},
+				  {"lieu": "lieu:france"},
+				  {"lieu": "lieu:france", "position": {"x": -1, "y": 1}},
+				  {"lieu": "lieu:france", "position": {"x": True, "y": 1}},
+				  {"lieu": "lieu:france", "position": [55, 32]}):
+		assert apport.localisation_spec(faute) is None, faute
+		# Une localisation illisible n'invalide pas l'offre : seulement la carte.
+		assert apport.offre_spec(_donneur(localisation=faute))["id"] == QID
+
+
+def test_rencontre_lisible_sinon_toute_la_localisation_tombe():
+	r = {"espece": "espece:bete", "accompagnants": ["espece:loup"], "nb_accompagnants": 3}
+	assert apport.localisation_spec(dict(LOC, rencontre=r))["rencontre"] == r
+	assert apport.rencontre_spec({"espece": "espece:bete"}) == {
+		"espece": "espece:bete", "accompagnants": [], "nb_accompagnants": 0}
+	assert apport.rencontre_spec({"espece": "espece:bete", "nb_accompagnants": 2})["nb_accompagnants"] == 0
+	for faute in ({"espece": "bete"}, dict(r, accompagnants=["loup"]), dict(r, nb_accompagnants=-1),
+				  dict(r, nb_accompagnants=True), dict(r, accompagnants="espece:loup")):
+		assert apport.localisation_spec(dict(LOC, rencontre=faute)) is None, faute
+
+
+def test_rencontre_situee_ici_dans_le_3x3_tant_que_rien_n_est_remis():
+	r = {"espece": "espece:bete", "accompagnants": ["espece:loup"], "nb_accompagnants": 3}
+	c = {"position": {"x": 54, "y": 33}}
+	q = apport.accepter(c, _donneur(localisation=dict(LOC, rencontre=r)), COQ)
+	assert apport.rencontre_situee_ici(c, "lieu:france") is q
+	assert apport.rencontre_situee_ici(dict(c, position={"x": 53, "y": 32}), "lieu:france") is None
+	assert apport.rencontre_situee_ici(c, COQ) is None
+	assert apport.rencontre_situee_ici({k: v for k, v in c.items() if k != "position"}, "lieu:france") is None
+	q["progress"] = q["objectif"]["quantite"]
+	assert apport.rencontre_situee_ici(c, "lieu:france") is None
+	# Localisation SANS rencontre : carte seule, aucune garantie.
+	c2 = {"position": {"x": 55, "y": 32}}
+	apport.accepter(c2, _donneur(localisation=LOC), COQ)
+	assert apport.rencontre_situee_ici(c2, "lieu:france") is None
+
+
+def test_instantiate_rencontre_une_cible_et_ses_seuls_accompagnants():
+	from utils import combat
+	cible = {"_id": "espece:bete", "nom": "Bête", "base_attributes": {}}
+	loup = {"_id": "espece:loup", "nom": "Loup", "base_attributes": {}}
+	monstres = combat.instantiate_rencontre(cible, [loup], [], 3)
+	assert [m["espece_id"] for m in monstres] == ["espece:bete"] + ["espece:loup"] * 3
+	assert len({m["id"] for m in monstres}) == 4
+	assert [m["espece_id"] for m in combat.instantiate_rencontre(cible, [], [], 3)] == ["espece:bete"]
+	assert combat.instantiate_rencontre(None, [loup], [], 3) == []
+
+
+def test_accepter_recopie_la_localisation_hors_de_l_objectif():
+	c = {}
+	q = apport.accepter(c, _donneur(localisation=LOC), COQ)
+	assert q["localisation"] == LOC and "lieu" not in q["objectif"]
+	q["localisation"]["position"]["x"] = 0
+	assert LOC["position"]["x"] == 55, "copie, jamais l'offre du doc"
+	assert "localisation" not in apport.accepter({}, _donneur(), COQ)
+
+
+def test_quete_detail_carte_d_un_apport_situe(monkeypatch):
+	"""Même crop que les chasses (`_carte_chasse`), ancré sur le DONNEUR, repère dans la
+	progression ; sans localisation, aucune carte."""
+	from utils import focalisation, marche
+	docs = {"lieu:france": {"_id": "lieu:france", "label": "France", "dimensions": {"x": 88, "y": 48}},
+			COQ: {"_id": COQ, "label": "Le Coq de Lutèce", "lieu_parent": "lieu:lutecia"},
+			"lieu:lutecia": {"_id": "lieu:lutecia", "label": "Lutecia"}}
+	monkeypatch.setattr(marche, "_lieu_image_route", lambda lieu: ("france.png", "maps"))
+	monkeypatch.setattr(focalisation, "charger_graphe", lambda fd: {})
+	monkeypatch.setattr(focalisation, "prochaine_etape", lambda g, d, v: {"porte": (44, 12)})
+	monkeypatch.setattr(quetes, "find_docs", lambda *a, **k: [])
+	c = {"inventaire": []}
+	q = apport.accepter(c, _donneur(localisation=LOC), COQ)
+	detail = quetes.quete_detail(c, q, docs.get)
+	assert detail["carte"]["position"] == LOC["position"]
+	assert detail["carte"]["image"] == "france.png" and detail["carte"]["lieu_nom"] == "France"
+	assert detail["carte"]["direction_texte"] == "Au sud-est de Lutecia"
+	assert detail["progress_txt"].endswith("· Au sud-est de Lutecia")
+	assert quetes._ancre_de({"label": "Le Coq de Lutèce"}) == "du Coq de Lutèce"
+	assert quetes._ancre_de({"label": "La capitale Lutecia"}) == "de la capitale Lutecia"
+	sans = apport.accepter({}, _donneur(), COQ)
+	assert "carte" not in quetes.quete_detail({"inventaire": []}, sans, docs.get)
+
+
 # ── Cycle de vie ─────────────────────────────────────────────────────────────
 
 def test_accepter_pose_une_quete_collect_ordinaire():
@@ -150,6 +239,16 @@ def test_linter_offre_illisible_et_remise_non_conditionnee():
 	messages = [t["message"] for t in lint_dialogues.analyser([doc])["trouvailles"]]
 	assert any("services.apport.offre" in m for m in messages)
 	assert any("apport/remettre" in m and "apport_possible" in m for m in messages)
+
+
+def test_linter_localisation_illisible():
+	noeuds = {"remis": "ok", "partiel": "ok", "accepte": "ok"}
+	choix = [{"id": "f", "label": ".", "next": "ok"}]
+	offre = {"id": QID, "item": ITEM, "quantite": 1}
+	bonne = _doc_lint({"apport": {"offre": dict(offre, localisation=LOC), "noeuds": noeuds}}, choix)
+	assert not any("localisation" in t["message"] for t in lint_dialogues.analyser([bonne])["trouvailles"])
+	mauvaise = _doc_lint({"apport": {"offre": dict(offre, localisation={"lieu": "france"}), "noeuds": noeuds}}, choix)
+	assert any("localisation" in t["message"] for t in lint_dialogues.analyser([mauvaise])["trouvailles"])
 
 
 def test_linter_receveur_sans_quete():

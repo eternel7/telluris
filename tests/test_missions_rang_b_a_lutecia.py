@@ -290,6 +290,75 @@ def test_les_trophees_existent_et_leurs_especes_rodent_en_france():
 		assert zones & zones_carte, espece
 
 
+# ── La Bête : située, carte 🗺️ (dev/gen_carte_bete_gevaudan.py) ─────────────────
+
+def _offre_bete():
+	return next(e["offre"] for e in MAELYS["services"]["apport"]["offres"] if e["offre"]["id"] == GEN.A_BETE)
+
+
+def test_la_bete_est_situee_dans_une_zone_ou_elle_rode():
+	"""Tout le 3×3 du crop tombe dans un placement de la zone où la Bête est aux rencontres,
+	sur des cases praticables de la carte de France : la carte ne ment pas sur le terrain."""
+	from utils import zones
+	loc = apport.localisation_spec(_offre_bete().get("localisation"))
+	assert loc == GEN.LOCALISATION_BETE and loc["lieu"] == GEN.FRANCE
+	france = DOCS[GEN.FRANCE]
+	assert any(r["espece"] == "espece:bete_du_gevaudan" and GEN.ZONE_BETE in r["zones"]
+			   for r in france["rencontres"])
+	px, py = loc["position"]["x"], loc["position"]["y"]
+	for dx in (-1, 0, 1):
+		for dy in (-1, 0, 1):
+			assert zones.est_dans_zone(px + dx, py + dy, GEN.ZONE_BETE, france["zone_influences"]), (dx, dy)
+			assert france["cells"][py + dy][px + dx] > 0, (dx, dy)
+
+
+def test_la_carte_de_la_bete_part_de_lutecia(monkeypatch):
+	"""De bout en bout sur le dump : Maëlys confie la quête, l'onglet 📜 reçoit la carte de
+	France (image servable) et le repère part de Lutecia, la cité du bureau."""
+	from utils import focalisation
+	monkeypatch.setattr(quetes, "find_docs", lambda sel: [d for d in DUMP.values() if d.get("type") == sel.get("type")])
+	monkeypatch.setitem(focalisation._graphe_cache, "graphe", None)
+	c = {"inventaire": [], "rangs_guilde": {GEN.LUTECIA: "B"},
+		 "offres_tirees": {"lieu": GEN.BUREAU, "tirages": {GEN.MAELYS: {"apport": GEN.A_BETE}}}}
+	vue = offres.vue_pnj(MAELYS, c, BUREAU)
+	q = apport.accepter(c, vue, GEN.BUREAU)
+	assert q and q["id"] == GEN.A_BETE
+	detail = quetes.quete_detail(c, q, lambda i: DOCS.get(i) or DUMP.get(i))
+	carte = detail["carte"]
+	assert carte["position"] == GEN.LOCALISATION_BETE["position"]
+	assert carte["image"] == DUMP[GEN.FRANCE]["image"] and carte["image_route"]
+	assert carte["direction_texte"] == "Au sud-est de la capitale Lutecia", carte
+	monkeypatch.setitem(focalisation._graphe_cache, "graphe", None)
+
+
+def test_maelys_ne_situe_la_bete_qu_en_la_proposant():
+	"""« Où la chercher ? » n'existe qu'à l'offre (AVANT) ; la relance (PENDANT) redit le lieu."""
+	n = MAELYS["dialogue"]["noeuds"]
+	assert any(c.get("next") == "a_bete_carte" for c in n["a_bete_propose"]["choix"])
+	sources = [k for k, nd in n.items() for c in nd.get("choix") or [] if c.get("next") == "a_bete_carte"]
+	assert sources == ["a_bete_propose"]
+	assert "Gévaudan" in n["a_bete_relance"]["texte"] and "Gévaudan" in n["a_bete_accepte"]["texte"]
+
+
+def test_le_delta_de_la_carte_est_a_jour_et_ne_touche_que_la_bete():
+	chemin = os.path.join(RACINE, "dev", "gen_carte_bete_gevaudan.py")
+	spec = importlib.util.spec_from_file_location("gen_carte_bete_gevaudan", chemin)
+	delta = importlib.util.module_from_spec(spec)
+	spec.loader.exec_module(delta)
+	docs = delta.generer(DUMP)
+	with open(delta.SORTIE, encoding="utf-8") as f:
+		assert json.load(f) == docs, "relancer dev/gen_carte_bete_gevaudan.py"
+	assert lint_dialogues.analyser(docs)["erreurs"] == 0
+	(doc,) = docs
+	avant = DUMP[GEN.MAELYS]
+	assert {k for k in doc if doc[k] != avant.get(k)} <= {"services", "dialogue", "_rev"}
+	changes = {k for k, v in doc["dialogue"]["noeuds"].items() if v != avant["dialogue"]["noeuds"].get(k)}
+	assert changes and all(k.startswith("a_bete_") for k in changes)
+	autres = lambda d: [e for e in d["services"]["apport"]["offres"] if e["offre"]["id"] != GEN.A_BETE]
+	assert autres(doc) == autres(avant)
+	assert delta.generer({**DUMP, GEN.MAELYS: doc}) == docs, "idempotent"
+
+
 def test_les_portes_sont_sur_des_cases_praticables():
 	for lieu, (cite, _cible) in GEN.CIBLES_PORTES.items():
 		lien = next(d for d in DOCS.values() if d.get("type") == "connection"
@@ -316,3 +385,70 @@ def test_deux_minotaures_passent_le_plancher_du_rang_a(monkeypatch):
 	for p in profils:
 		seul = potentiel.potentiel_espece(GEN.MINOTAURE, p["_id"], DUMP.get)["total"]
 		assert seul < plancher <= salle["nb_monstres"] * seul, (p["_id"], seul)
+
+
+# ── La Bête : rencontre garantie dans le 3×3 (apport.rencontre_situee_ici) ───────
+
+class _Capture(Exception):
+	pass
+
+
+def _lancer_combat(monkeypatch, character):
+	"""`start_combat` réel sur le dump ; `create_combat_doc` intercepté → monstres tirés."""
+	import asyncio
+	from routers import combat as rc
+	monkeypatch.setattr(rc, "get_selected_character", lambda u: character)
+	monkeypatch.setattr(rc, "get_doc", lambda i: DOCS.get(i) or DUMP.get(i))
+	monkeypatch.setattr(rc, "find_docs", lambda sel: [] if sel.get("type") == "combat" else
+						[d for d in DUMP.values() if d.get("type") == sel.get("type")])
+
+	def capture(_c, monstres, *a, **k):
+		raise _Capture(monstres)
+	monkeypatch.setattr(rc, "create_combat_doc", capture)
+	try:
+		asyncio.run(rc.start_combat(rc.StartCombatRequest(), {"_id": "user:test"}))
+	except _Capture as e:
+		return e.args[0]
+	return None
+
+
+def _chasseur(x, y, localisation=None):
+	q = {"id": GEN.A_BETE, "giver": GEN.BUREAU, "progress": 0,
+		 "objectif": {"type": "collect", "cible": GEN.TETE_BETE, "quantite": 1},
+		 "localisation": copy.deepcopy(localisation or _offre_bete()["localisation"])}
+	return {"_id": "character:test", "lieu": GEN.FRANCE, "position": {"x": x, "y": y},
+			"inventaire": [], "quetes_actives": [q]}
+
+
+def test_la_bete_vient_avec_ses_loups_et_rien_d_autre(monkeypatch):
+	loc = _offre_bete()["localisation"]
+	assert loc["rencontre"] == {"espece": "espece:bete_du_gevaudan", "accompagnants": [GEN.LOUP],
+								"nb_accompagnants": 3}
+	assert GEN.LOUP in DUMP and "espece:bete_du_gevaudan" in DUMP
+	px, py = loc["position"]["x"], loc["position"]["y"]
+	for dx, dy in ((0, 0), (-1, 1), (1, -1)):
+		monstres = _lancer_combat(monkeypatch, _chasseur(px + dx, py + dy))
+		especes = [m["espece_id"] for m in monstres]
+		assert especes.count("espece:bete_du_gevaudan") == 1, especes
+		assert sorted(especes) == sorted(["espece:bete_du_gevaudan"] + [GEN.LOUP] * 3), especes
+		assert len({m["id"] for m in monstres}) == len(monstres)
+
+
+def test_hors_du_3x3_ou_tete_remise_la_rencontre_redevient_ordinaire(monkeypatch):
+	from utils import apport as ap
+	loc = _offre_bete()["localisation"]
+	px, py = loc["position"]["x"], loc["position"]["y"]
+	assert ap.rencontre_situee_ici(_chasseur(px, py), GEN.FRANCE)
+	assert ap.rencontre_situee_ici(_chasseur(px + 2, py), GEN.FRANCE) is None
+	assert ap.rencontre_situee_ici(_chasseur(px, py), GEN.LUTECIA) is None
+	remise = _chasseur(px, py)
+	remise["quetes_actives"][0]["progress"] = 1
+	assert ap.rencontre_situee_ici(remise, GEN.FRANCE) is None
+	# Hors du 3×3, `start_combat` ne compose pas la rencontre : tirage ordinaire de la zone.
+	from routers import combat as rc
+	appels = []
+	monkeypatch.setattr(rc, "instantiate_rencontre", lambda *a, **k: appels.append(a) or [])
+	_lancer_combat(monkeypatch, _chasseur(px + 2, py))
+	assert appels == []
+	_lancer_combat(monkeypatch, _chasseur(px, py))
+	assert len(appels) == 1

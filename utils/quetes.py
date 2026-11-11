@@ -759,6 +759,21 @@ def quete_detail(character: dict, q: dict, get_doc_fn=None) -> dict:
 		)
 	else:
 		progress_txt = f"{_cible_nom(obj)} : {min(prog, qte) if qte else prog}/{qte}"
+		# Apport SITUÉ par son donneur (`apport.localisation_spec`) : même crop que les
+		# chasses, objectif SYNTHÉTIQUE `{lieu, position}` (cf. escorte). Ancre = la CITÉ du
+		# donneur (`lieu_parent`) : sur une carte de pays, on part d'une porte de ville, pas
+		# d'un bureau (« Au sud de Lutecia ») ; donneur sans parent ⇒ le donneur lui-même.
+		loc = q.get("localisation") or {}
+		if loc.get("lieu") and loc.get("position"):
+			giver_doc = lire(q.get("giver")) if q.get("giver") else None
+			parent = (giver_doc or {}).get("lieu_parent")
+			ancre_doc = (lire(parent) if parent else None) or giver_doc
+			carte_chasse = _carte_chasse(
+				{"lieu": loc["lieu"], "position": loc["position"]},
+				q.get("giver"), lire(loc["lieu"]), ancre=_ancre_de(ancre_doc))
+			repere = (carte_chasse or {}).get("direction_texte")
+			if repere:
+				progress_txt += f" · {repere}"
 	detail = {
 		"id": q.get("id") or q.get("_id"),
 		"titre": q.get("titre", "—"),
@@ -799,7 +814,14 @@ def _ancre_de(giver_doc: dict | None) -> str:
 	"""Groupe nominal désignant le donneur dans la ligne d'orientation (« du temple de
 	Saint-Eusèbe »). Repli sur l'ancre historique quand le donneur n'est pas joignable."""
 	nom = (giver_doc or {}).get("label") or (giver_doc or {}).get("nom")
-	return f"de {nom}" if nom else ANCRE_DEFAUT
+	if not nom:
+		return ANCRE_DEFAUT
+	# Article de tête contracté : « de La capitale Lutecia » → « de la capitale Lutecia »,
+	# « de Le Coq » → « du Coq ».
+	for article, contraction in (("Le ", "du "), ("Les ", "des "), ("La ", "de la "), ("L'", "de l'"), ("L’", "de l’")):
+		if nom.startswith(article):
+			return contraction + nom[len(article):]
+	return f"de {nom}"
 
 
 def _phrase_direction(direction: str, ancre: str = ANCRE_DEFAUT) -> str:
