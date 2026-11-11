@@ -50,6 +50,7 @@ from utils import transport
 from utils import recrutement
 from utils import mercenaires
 from utils import acces
+from utils import chasse as chasse_util
 from utils import passe_muraille
 from utils import pnj as pnj_util
 from utils import proprietes
@@ -786,6 +787,10 @@ async def move_character(
 					destination = node["lieu"]
 					lieu_doc = get_doc(destination)
 					if lieu_doc:
+						# Carte d'une capitale reconnue dans la cité d'arrivée : son rang est recopié
+						# au registre AVANT les barrières (bureau d'un maître au rang D…). Mute
+						# seulement ; persisté avec le déplacement.
+						chasse_util.reconnaitre_rang_carte(character_to_update, lieu_doc.get("lieu_parent"), get_doc)
 						# ⚠️ Interne : on ne franchit aucune barrière (on est déjà dans ce lieu — même
 						# règle que get_lieu_links, qui ne filtre jamais le lieu courant) et on
 						# n'ouvre aucune descente de donjon. Tout le reste est un déplacement RÉEL :

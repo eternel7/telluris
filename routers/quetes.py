@@ -40,6 +40,9 @@ def _guild_lieu(character: dict) -> dict:
 	lieu_doc = get_doc(character.get("lieu", ""))
 	if not lieu_doc or lieu_doc.get("categorie") != GUILDE_CATEGORIE:
 		raise HTTPException(status_code=403, detail="Vous n'êtes pas dans une guilde d'aventuriers.")
+	# Carte d'une capitale reconnue ici : son rang est recopié au registre de la cité.
+	if chasse.reconnaitre_rang_carte(character, lieu_doc.get("lieu_parent"), get_doc):
+		save_doc(character)
 	return lieu_doc
 
 

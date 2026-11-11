@@ -46,7 +46,7 @@ from utils.zones import (
 	profils_compatibles,
 )
 from utils.characters import lieu_label, item_ref_id, item_ref_lieu
-from utils.recrutement import RANGS, CARTE_AVENTURIER_ITEM_ID, porte_carte_valable
+from utils.recrutement import RANGS, CARTE_AVENTURIER_ITEM_ID, porte_carte_valable, carte_valable_dans
 from utils import accord_espece, quetes
 
 
@@ -520,6 +520,24 @@ def reconnaitre_rang(character: dict, cite_source: str, cite_cible: str) -> str 
 		return None
 	rang = ((character or {}).get("rangs_guilde") or {}).get(cite_source)
 	return crediter_rang(character, {"cite": cite_cible, "rang": rang})
+
+
+def reconnaitre_rang_carte(character: dict, cite_id: str | None, get_doc_fn) -> str | None:
+	"""La carte d'une CAPITALE reconnue ici (`recrutement.carte_valable_dans`) fait RECOPIER son
+	rang au registre de cette cité (Auteur, 11/11) — `reconnaitre_rang`, donc jamais de
+	rétrogradation, rien sans rang dans la capitale. Mute sans save ; appelé au CONTACT d'une
+	guilde (dialogue PNJ, tableaux de quêtes et de recrues, déplacement vers un lieu de la cité),
+	donc relu à chaque visite : une promotion dans la capitale suit au passage suivant. Le
+	rang recopié reste au registre, carte perdue ou non. Renvoie le rang si le doc a CHANGÉ."""
+	if not cite_id:
+		return None
+	promu = None
+	for ref in (character or {}).get("inventaire") or []:
+		source = item_ref_lieu(ref)
+		if (item_ref_id(ref) == CARTE_AVENTURIER_ITEM_ID and source and source != cite_id
+				and carte_valable_dans(source, cite_id, get_doc_fn)):
+			promu = reconnaitre_rang(character, source, cite_id) or promu
+	return promu
 
 
 def inscrit_a_la_guilde(character: dict, cite_id: str) -> bool:

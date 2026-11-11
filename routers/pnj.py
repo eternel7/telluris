@@ -77,6 +77,14 @@ def _pnj_du_lieu(character: dict, pnj_id: str | None = None) -> tuple[dict, dict
 	return entree, pnj_doc, lieu_doc
 
 
+def _inscrit_sans_carte_valable(character: dict, cite: str | None) -> bool:
+	"""Garde de la carte PERDUE : inscrit à cette cité ET aucune carte qui y vaille au sac. Le
+	porteur d'une carte de capitale reconnue n'a rien perdu — son rang recopié l'inscrit, mais
+	la réceptionniste ne se moque pas d'une carte locale qu'elle ne lui a jamais remise."""
+	return (chasse.inscrit_a_la_guilde(character, cite)
+			and not recrutement.porte_carte_valable(character, cite, get_doc))
+
+
 def _lieu_parent_don(don: dict, lieu_doc: dict | None) -> str | None:
 	"""`lieu_parent` RÉSOLU de l'exemplaire qu'un don remet, None s'il n'en déclare pas.
 	`"auto"` = la cité du lieu, par le MÊME résolveur que les récompenses de transport
@@ -260,7 +268,7 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		# Carte PERDUE par un inscrit : le choix « j'ai perdu ma carte » remplace l'inscription.
 		# `{rang}` = celui du registre, que la nouvelle carte porte à l'identique.
 		flags["don_a_remplacer"] = pnj.don_a_remplacer(
-			character, don_conf, cite_don, flags["don_recu"], chasse.inscrit_a_la_guilde)
+			character, don_conf, cite_don, flags["don_recu"], _inscrit_sans_carte_valable)
 		if flags["don_a_remplacer"]:
 			placeholders.setdefault("rang", chasse.rang_de(character, cite_don))
 		# Commissions d'éradication (maître de guilde) : `services.commission.donjon` (ou
@@ -1001,7 +1009,9 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)],
 	# Une course dont le délai vient d'expirer ne doit pas être livrable : on solde les
 	# échéances (et leur sanction de réputation) avant de composer le dialogue.
 	echues = transport.traiter_expirations(character, quetes.now_epoch(), get_doc, save_doc)
-	if echues:
+	# Carte d'une capitale reconnue ici : son rang est recopié au registre de la cité.
+	rang_recopie = chasse.reconnaitre_rang_carte(character, (lieu_doc or {}).get("lieu_parent"), get_doc)
+	if echues or rang_recopie:
 		save_doc(character)
 	contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 	# Un dialogue encore sous délai s'ouvre sur son `noeud_attente` (refus parlé) et non sur son
@@ -1068,7 +1078,9 @@ async def pnj_dialogue_choix(
 
 	entree, pnj_doc, lieu_doc = _pnj_du_lieu(character, body.get("pnj_id"))
 	echues = transport.traiter_expirations(character, quetes.now_epoch(), get_doc, save_doc)
-	if echues:
+	# Carte d'une capitale reconnue ici : son rang est recopié au registre de la cité.
+	rang_recopie = chasse.reconnaitre_rang_carte(character, (lieu_doc or {}).get("lieu_parent"), get_doc)
+	if echues or rang_recopie:
 		save_doc(character)
 	contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 	noeud_id = body.get("noeud")
@@ -1125,7 +1137,7 @@ async def pnj_dialogue_choix(
 		noeuds_don = (pnj_doc.get("services", {}).get("don", {}).get("noeuds", {}))
 		# Lu AVANT la remise : une fois la carte au sac, elle n'est plus « à remplacer ».
 		remplacement = pnj.don_a_remplacer(character, don, lieu_parent_don, False,
-										   chasse.inscrit_a_la_guilde)
+										   _inscrit_sans_carte_valable)
 		# Un poids d'instance TIRÉ par exemplaire (`tirer_poids`, fixe ⇒ sans tirage), contrôlé
 		# sur leur total.
 		poids = [tirer_poids(item_doc) for _ in range(max(1, int(don["quantite"])))]
