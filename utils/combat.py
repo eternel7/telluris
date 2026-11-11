@@ -3590,16 +3590,26 @@ def coups_du_profil(acteur: dict, profil: dict) -> list:
 
 	Un profil sans `coups` (une seule arme, mains nues, jet, tir, combat déjà en base) donne
 	UN coup, exactement celui d'avant. Avec `coups` (une arme de mêlée dans chaque main),
-	chaque arme frappe sous les MÊMES règles :
+	chaque arme frappe :
 	- précision = celle de SA typologie, moins le `bonus_cc` de l'autre arme (le snapshot les
 	  additionne tous : il reste la formule, les objets qui ne sont pas des armes et le sien) ;
 	- dégâts = `degats_cc` moins les dés et le plat de l'autre arme (`retirer_des_arme`) :
 	  il reste le dé et le bonus de F, les objets qui ne sont pas des armes et les siens.
-	Les deux restent recalculés depuis le snapshot : un buff de F ou d'Ag pèse sur les deux."""
+	La PREMIÈRE arme (main droite) s'arrête là. Les SUIVANTES :
+	- perdent la part de la Force (`character_stats.part_de_force_cc` : dé et bonus de F) —
+	  la Force ne frappe qu'une fois par attaque ; snapshot sans `caracts_base` (combat déjà
+	  en base) ⇒ part gardée, comportement d'avant ;
+	- prennent `DEUX_ARMES_MALUS_SECOND` en précision, sauf passive `ambidextre` (snapshot).
+	Tout reste recalculé depuis le snapshot : un buff de F ou d'Ag pèse sur chaque coup."""
 	coups = (profil or {}).get("coups") or []
 	if len(coups) < 2:
 		return [(profil, skill_du_profil(acteur, profil), notation_du_profil(acteur, profil))]
 	base_notation = acteur.get("degats_cc") or "1D4"
+	force = caracts_effectives(acteur).get("F")
+	des_force, plat_force = (character_stats.part_de_force_cc(force) if force is not None
+							 else ("", 0))
+	malus = 0 if _eff_int(acteur.get("ambidextre")) > 0 else int(
+		character_stats.DEUX_ARMES_MALUS_SECOND or 0)
 	resultat = []
 	for i, coup in enumerate(coups):
 		autres = [c for j, c in enumerate(coups) if j != i]
@@ -3610,11 +3620,29 @@ def coups_du_profil(acteur: dict, profil: dict) -> list:
 			if k in coup:
 				sous[k] = coup[k]
 		skill = skill_du_profil(acteur, sous) - sum(int(c.get("bonus_cc", 0) or 0) for c in autres)
-		des_autres = "+".join(c.get("des", "") for c in autres if c.get("des"))
+		des_autres = [c.get("des", "") for c in autres if c.get("des")]
 		plat_autres = sum(int(c.get("plat", 0) or 0) for c in autres)
-		notation = character_stats.retirer_des_arme(base_notation, des_autres, plat_autres)
+		if i:
+			skill -= malus
+			if des_force:
+				des_autres.append(des_force)
+			plat_autres += plat_force
+		notation = character_stats.retirer_des_arme(base_notation, "+".join(des_autres),
+													plat_autres)
 		resultat.append((sous, skill, notation))
 	return resultat
+
+
+def degats_cc_par_arme(character: dict, base: BaseStats, degats_cc: str) -> str | None:
+	"""Dégâts de corps à corps AFFICHÉS d'un combattant à deux armes : la notation de chaque
+	coup séparée par « / » (`1D5+1D8+4 / 1D6+2`), par `coups_du_profil` — l'affichage ne
+	peut pas diverger du jet. None avec une seule arme : `degats_cc` dit déjà le vrai.
+	`base` = caracts BUFFÉES (celles qui ont donné `degats_cc`)."""
+	cac = next((a for a in _weapon_attacks(character, base) if a.get("mode") == "cac"), None)
+	if not cac or len(cac.get("coups") or []) < 2:
+		return None
+	acteur = {"degats_cc": degats_cc, "caracts_base": {"F": base.f}}
+	return " / ".join(notation for _, _, notation in coups_du_profil(acteur, cac))
 
 
 def _profil_arme_monstre(monstre: dict) -> dict:
@@ -3766,6 +3794,9 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"int": base.int_,
 		"detection_pieges": _eff_int((character.get("competences_bonus") or {}).get("detection_pieges")),
 		"desamorcage": _eff_int((character.get("competences_bonus") or {}).get("desamorcage")),
+		# AMBIDEXTRE (passive) : pas de malus de précision à la seconde arme
+		# (`coups_du_profil`). Absent (agrégat d'avant, monstre) ⇒ malus.
+		"ambidextre": _eff_int((character.get("competences_bonus") or {}).get("ambidextre")),
 		# Outils de crochetage du SAC (meilleur en tête) : ils n'augmentent le seuil que de qui
 		# sait déjà désamorcer — sans la compétence, inutile de relire l'inventaire.
 		"outils_desamorcage": (pieges_util.outils_desamorcage(character.get("inventaire"), get_doc)
@@ -4563,10 +4594,46 @@ def _degats_competence(joueur: dict, competence: dict, effets: dict) -> str:
 	profil = _profil_emprunte(joueur, dict(competence or {}, effets=effets))
 	if not base or profil is None:
 		return base
-	# Deux armes de mêlée : la compétence frappe avec la SEULE main droite (premier coup).
+	# Deux armes de mêlée : les dés de la compétence passent par la main droite (premier
+	# coup) ; la seconde arme frappe ensuite à part (`coups_seconde_arme_competence`).
 	if profil.get("coups"):
 		return concat_degats(coups_du_profil(joueur, profil)[0][2], base)
 	return concat_degats(joueur.get(profil.get("degats", "degats_cc"), ""), base)
+
+
+def coups_seconde_arme_competence(joueur: dict, competence: dict, effets: dict) -> list:
+	"""Coups de la SECONDE arme (et suivantes) qui accompagnent une frappe martiale de
+	compétence à deux armes — SOURCE UNIQUE du moteur et du simulateur.
+
+	`[(sous_profil, skill, notation)]` tirés de `coups_du_profil` après le premier : ni les
+	dés ni les effets de la compétence (déjà portés par la main droite), la part de Force
+	retirée et le malus de seconde arme. Vide hors deux armes ou sans profil emprunté (pur
+	debuff, compétence magique, tir)."""
+	if not (effets or {}).get("degats"):
+		return []
+	profil = _profil_emprunte(joueur, dict(competence or {}, effets=effets))
+	if profil is None or len(profil.get("coups") or []) < 2:
+		return []
+	return coups_du_profil(joueur, profil)[1:]
+
+
+def _coups_seconde_arme(combat_doc: dict, joueur: dict, monstre: dict, competence: dict,
+						effets: dict, furtif: bool) -> tuple:
+	"""Joue sur la cible DÉSIGNÉE les coups de la seconde arme d'une compétence à deux armes
+	(cf. `coups_seconde_arme_competence`), mêmes règles que l'action `attaquer` : un coup
+	hors d'allonge est sauté, rien ne part sur une cible abattue. Rend `(résultats, fumble)` ;
+	le décompte (action, fumble, victoire) reste au lancement."""
+	resultats, fumble = [], False
+	for sous, skill, notation in coups_seconde_arme_competence(joueur, competence, effets):
+		if not monstre.get("vivant", True) or monstre.get("currentPV", 0) <= 0:
+			break
+		if (joueur.get("pos") and monstre.get("pos")
+				and _cheby(joueur, monstre) > int(sous.get("portee", 1) or 1)):
+			continue
+		r, j = _frapper_monstre_coup(combat_doc, joueur, monstre, sous, skill, notation, furtif)
+		resultats.append(r)
+		fumble = fumble or bool(j.get("fumble"))
+	return resultats, fumble
 
 
 def _portee_competence(joueur: dict, competence: dict) -> tuple:
@@ -6474,10 +6541,21 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		cibles_sort = cibles_de_zone(combat_doc, joueur, monstre, sdoc.get("zone"), grid)
 		notation = _notation_capacite(joueur, sdoc, effets, profil)
 		premiere_ligne = len(combat_doc.setdefault("log", []))
+		# Furtivité lue AVANT le coup, pour toute l'attaque (seconde arme comprise).
+		furtif_attaque = _attaque_furtive(joueur, monstre)
 		result, jet = _resoudre_capacite_offensive(
 			combat_doc, joueur, cibles_sort, sdoc, effets, notation,
 			mode_jet, cle, profil["textes"],
 			{"nom": nom_capacite, "nom_fumble": nom_capacite})
+		# DEUX ARMES : une frappe martiale de COMPÉTENCE porte ses dés par la main droite,
+		# puis la seconde arme frappe à son tour sur la cible désignée (`coups_du_profil`).
+		if cle == "competence" and mode_jet != "magique":
+			coups_sec, fumble_sec = _coups_seconde_arme(combat_doc, joueur, monstre, sdoc,
+														 effets, furtif_attaque)
+			if coups_sec:
+				result["coups_arme"] = coups_sec
+				if fumble_sec and jet is not None and not jet.get("fumble"):
+					jet = dict(jet, fumble=True)   # une seule pénalité pour toute l'action
 		# TIR AMI (`zone.tir_ami`) : les alliés sur la trajectoire, APRÈS les monstres.
 		allies_pris = allies_de_zone(combat_doc, joueur, monstre, sdoc.get("zone"), grid)
 		if allies_pris:

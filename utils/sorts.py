@@ -353,6 +353,7 @@ def _bonus_dict(raw) -> dict:
 	- `lien_vie` : {part, reduction} — cf. `_lien_vie_dict`.
 	- `detection_pieges` / `desamorcage` : PASSIVES de compétence — bonus aux seuils de
 	  `utils/pieges.py`, et droit d'agir (> 0) : repérer à l'approche, fouiller, désamorcer.
+	- `ambidextre` : PASSIVE de compétence — pas de malus de précision à la seconde arme.
 
 	⚠️ Toutes les clés neuves sont ≥ 0 par nature : le clamp d'`_as_int` reste valide, et
 	un doc déjà en base les reçoit à leur valeur neutre (aucune migration, CLAUDE.md §4)."""
@@ -429,6 +430,9 @@ def _bonus_dict(raw) -> dict:
 		# de désamorçage — et droit d'agir.
 		"detection_pieges": _as_int(raw.get("detection_pieges")),
 		"desamorcage": _as_int(raw.get("desamorcage")),
+		# AMBIDEXTRE (1, passive) : lève le malus de précision des coups de la seconde arme
+		# (`DEUX_ARMES_MALUS_SECOND`, cf. combat.coups_du_profil).
+		"ambidextre": min(1, _as_int(raw.get("ambidextre"))),
 	}
 	# Champ entier à formule : il ne garde que sa part constante (0) — la formule fait foi.
 	for k in formules:

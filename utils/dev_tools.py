@@ -225,6 +225,15 @@ CATALOGUE = [
 			"n'ajoute que le tag : régénération idempotente.",
 	},
 	{
+		"id": "gen_ambidextre",
+		"label": "⚔️ Passive Ambidextre (combat à deux armes)",
+		"argv": _py("gen_ambidextre.py"),
+		"ecrit": "Écrit jsons/competences_ambidextre_a_importer.json.",
+		"description": "Une passive « Ambidextre » par vocation (assassin 2, duelliste 3, voleur 6, "
+			"barbare 6, guerrier 8) : pas de malus de précision à la seconde arme. N'écrit que les "
+			"docs absents du dump le plus récent ou qui en diffèrent : régénération idempotente.",
+	},
+	{
 		"id": "gen_animations_capacites",
 		"label": "🎬 Animations et sons des sorts et compétences",
 		"argv": _py("gen_animations_capacites.py"),

@@ -72,6 +72,8 @@ function _sortEffetsLabel(e, prefixeDegats) {
 	if (e.echange) parts.push('🔄 échange de place');
 	if (e.vol) parts.push('🪽 vol (eau, falaises)');
 	if (e.abattre) parts.push('🪢 abat les volants');
+	// Passive : lève le malus de précision de la seconde arme (combat.coups_du_profil).
+	if (e.ambidextre) parts.push('⚔️ seconde arme sans malus');
 	if (e.lien_vie) {
 		parts.push(`🔗 lien de vie ${_fx(e, 'lien_vie.part', e.lien_vie.part)} %`
 			+ (e.lien_vie.reduction ? ` (−${e.lien_vie.reduction} % absorbés)` : ''));

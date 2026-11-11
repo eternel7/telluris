@@ -43,4 +43,9 @@ test('sans condition : rien d\'ajouté', () => {
 	assert.strictEqual(_compLigneDesc(furtivite), '🥷 furtivité +1');
 });
 
+test('passive Ambidextre : son effet est annoncé (dev/gen_ambidextre.py)', () => {
+	assert.strictEqual(_compLigneDesc({ mode: 'passive', effets: { ambidextre: 1 } }),
+		'⚔️ seconde arme sans malus');
+});
+
 console.log(`✓ ${ok} tests capacites_texte`);
