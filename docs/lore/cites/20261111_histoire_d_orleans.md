@@ -182,6 +182,95 @@ Les cinq questionnaires reposés en huit formulaires. **Ces réponses font foi**
 - **Charles d'Orléans** : **PNJ vivant**, **noble sans pouvoir**, héritier d'une vieille famille, poète ; **revenu de la Crue** (Tourelles) après **vingt-cinq ans** — il dit avoir vu **la source, à Petra** : la rumeur de la traversée vient de lui.
 - **Suite** : lore **et** contenu en jeu.
 
+## 9. Contenu en jeu — étape 1 : les images
+
+Même marche qu'à Petra : prompts d'abord, puis, les images livrées, un générateur `dev/gen_orleans.py` → **un seul** `jsons/orleans_a_importer.json`. Les cases des battlemaps et les cases des connexions se relèvent sur les images.
+
+**Prévu au générateur** (rien n'est encore écrit) :
+- Sur `lieu:orleans` (88 × 48, carte `orleans_start_city.png`, qui dessine déjà la cathédrale et le pont fortifié) : **Sainte-Croix** (temple, la cathédrale du centre), **les Tourelles** (temple, le fort du pont et le bourg de la rive gauche), **Saint-Jean-le-Blanc** (temple, rive gauche, à l'est du bourg), **Saint-Loup** (temple, dehors à l'est, lisière de la forêt), **port du Châtelet** (quais de la rive droite, transversal → Lyon, rang A de Lutecia), **porte de Bourgogne** (porte est, transversal → Bruges, rang A de Lutecia).
+- Un **temple** (`temple_portail`) et une **salle** (`battle_map`) par donjon, `rang_min` D / C / B / B ; un Templier à chaque porte (portraits réemployés des gardes de temple, comme à Petra) ; **Agnan le Gabarrier** mandate les quatre donjons (`services.commission.donjons`).
+- Monstres **du bestiaire existant** : forêt — `loup_geant`, `grand_sanglier`, `araignee_geante`, `homme_arbre` ; Crue — `marid`, `ondin`, `naiade`, `serpent_geant` ; ciel — `harpie`, `wyvern`, `griffon`, `gargouille` ; la Croix — `doppleganger`, `revenant`, `spectre`, `demon_mineur`.
+- PNJ : **Charles d'Orléans** (humain, noble, poète ; aux quais), une **Architecte de Lutecia en résidence** au port du Châtelet (naine).
+- Ambiances et rumeurs : la fête du 8 mai, les théories sur Jeanne, Gilles de Rais, la traversée de la Crue.
+
+### 9.1 Lieux — `templates/resources/towns/` (paysage 16:9)
+
+`temple_orleans_sainte_croix.jpg` :
+
+```
+Réalise l'image de la cathédrale Sainte-Croix d'Orléans devenue temple-forteresse des Templiers, au cœur d'une cité fluviale d'un monde médiéval fantastique, format paysage 16:9. Une immense cathédrale gothique de pierre blonde, à deux hautes tours carrées ajourées et à grande façade de portails sculptés, se dresse sur un parvis dallé. Les Templiers l'ont enserrée d'une forteresse : une muraille basse et épaisse ceinture le parvis, percée d'une seule poterne cerclée de fer face au grand portail ; deux chaires de pierre en encorbellement surplombent l'entrée pour les magiciens de garde ; les portes de la cathédrale sont closes et barrées. Une garde de Templiers en haubert sous des surcots clairs se tient sur le parvis. Au pied de la poterne, quatre chemins pavés partent dans quatre directions et semblent s'effacer après quelques pas, comme s'ils ne menaient nulle part ; une borne de pierre usée marque leur croisement. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`temple_orleans_tourelles.jpg` :
+
+```
+Réalise l'image du fort des Tourelles devenu temple-forteresse des Templiers, à l'extrémité sud du vieux pont de pierre d'une cité fluviale, sur un grand fleuve large et sableux, dans un monde médiéval fantastique, format paysage 16:9. Un petit château carré à deux tours rondes coiffées de toits pointus se dresse sur les dernières arches du pont, les pieds dans le fleuve. Les Templiers en ont muré les arches : sous l'une d'elles, l'eau tourbillonne d'une couleur plus sombre que le reste du fleuve et remonte contre le courant. Une muraille neuve ferme l'accès du pont, percée d'une seule poterne cerclée de fer ; une chaire de pierre surplombe la porte pour les magiciens de garde ; une garde de Templiers en haubert sous des surcots clairs se tient sur le tablier du pont. Les dalles portent les marques de crues anciennes et des traînées de limon ; des bateliers amarrent des barques à fond plat au pied des piles. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`temple_orleans_saint_loup.jpg` :
+
+```
+Réalise l'image du temple-forteresse de Saint-Loup, à la lisière d'une immense forêt de chênes et de pins, à l'est d'une cité fluviale d'un monde médiéval fantastique, format paysage 16:9. Une ancienne bastide de pierre et de bois, rebâtie en forteresse par les Templiers : une enceinte carrée flanquée de tours trapues, une palissade de pieux épointés tournée vers la forêt, une seule poterne cerclée de fer ; une chaire de pierre surplombe la porte pour les magiciens de garde. Derrière la palissade, les arbres sont plus grands et plus sombres qu'ailleurs, et des racines énormes soulèvent le sol jusqu'au pied de la muraille. Une garde de Templiers en haubert sous des surcots clairs se tient devant la poterne ; des chasseurs y déposent des peaux de loups géants et des défenses de sanglier. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`temple_orleans_saint_jean_le_blanc.jpg` :
+
+```
+Réalise l'image du temple-forteresse de Saint-Jean-le-Blanc, sur la rive gauche d'un grand fleuve large et sableux, face à une cité fluviale fortifiée, dans un monde médiéval fantastique, format paysage 16:9. Une forteresse de pierre blanche bâtie par les Templiers autour d'une haute tour ronde sans toit, dont le sommet ouvert sur le ciel est entouré de nuées tournoyantes plus sombres que le reste du ciel. Autour, une enceinte crénelée percée d'une seule poterne cerclée de fer ; une chaire de pierre surplombe la porte pour les magiciens de garde. Sur les murs, des tours de guet à terrasses où des paladins en armure claire scrutent le ciel ; des filets de chaînes tendus entre les tours ; des plumes immenses et des écailles tombées jonchent la cour. Une garde de Templiers en haubert sous des surcots clairs se tient devant la poterne. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`orleans_chatelet_portail.jpg` — portail transversal vers Lyon :
+
+```
+Réalise l'image d'une halle portuaire de pierre et de charpente sur les quais d'une cité fluviale, au bord d'un grand fleuve large et sableux, dans un monde médiéval fantastique, format paysage 16:9. Au fond de la halle, une grande arche ancienne de pierre sombre, couverte de motifs gravés usés par les siècles, encadre un voile de lumière ondoyante dont la couleur hésite entre le bleu et le jaune pâle. Autour de l'arche, des échafaudages, des cristaux jaunes sertis dans des montures de bronze, des instruments de mesure et des carnets posés sur un établi : on entretient le passage. Devant, des tonneaux, des sacs de sel, des ballots de draps et des caisses de vin attendent leur tour, sous l'œil de commis de quai. Par les grandes portes ouvertes de la halle, on voit les quais, des gabarres à voile carrée et le fleuve. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+`orleans_bourgogne_portail.jpg` — portail transversal vers Bruges :
+
+```
+Réalise l'image de la cour intérieure d'une grande porte fortifiée à l'est d'une cité fluviale, dans un monde médiéval fantastique, format paysage 16:9. Entre les deux tours rondes de la porte, dans une cour pavée fermée de murs épais, une arche ancienne de pierre sombre aux motifs gravés usés encadre un voile de lumière stable et calme, d'un bleu limpide. Des charrettes chargées de sacs de grain et de tonneaux de vin attendent d'un côté ; de l'autre, arrivent des ballots de draps de laine colorés et des rouleaux d'étoffe. Des commis vérifient les chargements sur des tablettes de cire, une balance de péage est installée sous un auvent, des gardes en tabards surveillent le passage. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation. En proportions égales, les humains ne sont pas plus nombreux que les autres. Pas de texte visible. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane.
+```
+
+### 9.2 Cartes de combat — `templates/resources/battle_maps/` (paysage 16:9)
+
+`orleans_donjon_foret.jpg` — Saint-Loup :
+
+```
+Réalise l'image d'une carte de combat de jeu de rôle tactique, vue strictement du dessus, format paysage. Une clairière au cœur d'une forêt sans fin de chênes et de pins démesurés : des troncs énormes aux couronnes qui se rejoignent, des racines géantes qui serpentent à la surface du sol et forment des murets naturels, des fourrés de ronces et de fougères, un arbre abattu en travers, un ruisseau étroit, des rochers moussus. Des ossements rongés, des terriers, une souille de sanglier boueuse, de grandes toiles d'araignée tendues entre deux troncs. La lumière tombe en taches à travers le feuillage. Un quadrillage fin et régulier de cases carrées couvre toute l'image, et une petite flèche indique le nord en haut à droite. Pas de personnages. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
+```
+
+`orleans_donjon_crue.jpg` — les Tourelles, l'aval de la Crue :
+
+```
+Réalise l'image d'une carte de combat de jeu de rôle tactique, vue strictement du dessus, format paysage. Le cours aval d'un grand fleuve en crue, large et limoneux : une eau brune et rapide traverse la carte de gauche à droite, avec des remous, de l'écume et des troncs charriés. Des bancs de sable blond émergent en îlots, des saules à demi noyés, les ruines d'une levée de terre éventrée par le courant, des pieux de bois d'un ancien gué, une barque à fond plat retournée sur un banc. Des flaques profondes, des roseaux couchés, des filets de pêche emmêlés. Lumière grise d'après l'orage reflétée dans l'eau. Un quadrillage fin et régulier de cases carrées couvre toute l'image, et une petite flèche indique le nord en haut à droite. Pas de personnages. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
+```
+
+`orleans_donjon_ciel.jpg` — Saint-Jean-le-Blanc :
+
+```
+Réalise l'image d'une carte de combat de jeu de rôle tactique, vue strictement du dessus, format paysage. Le sommet de hautes falaises de roche claire flottant au-dessus d'une mer de nuages : plusieurs plateaux de pierre séparés par des gouffres où l'on voit les nuées tout en bas, reliés par d'étroites arêtes rocheuses et par un pont de cordes. Des nids immenses de branches et d'os sur les rebords, des plumes géantes, des écailles, des œufs brisés, des rochers en équilibre, quelques arbustes tordus par le vent. Des écharpes de nuages traversent la carte. Lumière vive et froide de haute altitude. Un quadrillage fin et régulier de cases carrées couvre toute l'image, et une petite flèche indique le nord en haut à droite. Pas de personnages. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
+```
+
+`orleans_donjon_croix.jpg` — Sainte-Croix, la Croix :
+
+```
+Réalise l'image d'une carte de combat de jeu de rôle tactique, vue strictement du dessus, format paysage. Un carrefour de chemins dans une lande grise sans fin : au centre, une borne de pierre usée à quatre faces ; de là partent plusieurs routes pavées qui se divisent encore en d'autres carrefours identiques, chacun avec sa borne, avant de s'effacer dans un brouillard blanc sur les bords de la carte. Entre les routes, des murets de pierre sèche effondrés, des fossés, des arbres morts, une potence vide, une charrette abandonnée, des traces de pas qui tournent en rond. Le même carrefour semble se répéter, légèrement décalé, comme un reflet. Lumière blafarde sans ombre. Un quadrillage fin et régulier de cases carrées couvre toute l'image, et une petite flèche indique le nord en haut à droite. Pas de personnages. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
+```
+
+### 9.3 Portraits — `templates/resources/pnj/` (paysage 16:9)
+
+`pnj_humain_m_charles_d_orleans01.jpg` — Charles d'Orléans :
+
+```
+Réalise l'image du portrait illustré d'un personnage de fantasy médiévale, format paysage large. Un humain d'une soixantaine d'années, mince, au visage fin et pâle, aux cheveux gris mi-longs, aux yeux clairs un peu absents, noble d'une vieille famille d'une cité fluviale, poète revenu après de longues années perdu dans un autre monde. Il se tient légèrement décalé du centre, sur un quai de pierre, et regarde droit vers le spectateur avec une douceur mélancolique ; il tient contre lui une liasse de feuillets pliés, sans texte lisible, et une plume. Tenue noble démodée et usée : houppelande de velours bleu passé aux manches larges, col de fourrure élimé, bagues trop grandes pour ses doigts, ourlet du manteau taché de limon séché. Décor de part et d'autre : un grand fleuve large et sableux, un vieux pont de pierre fortifié, des gabarres à voile carrée amarrées. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, chacun différent par l'âge, la carrure, les cheveux et la tenue. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle chaude, palette chaude et terreuse relevée de touches de couleurs vives, proportions crédibles ; pas une photographie. Image entièrement dépourvue d'écriture : aucun nom, aucune lettre, aucune signature, aucun monogramme, aucun filigrane, aucune enseigne lisible.
+```
+
+`architecte_nain_f_orleans01.jpg` — l'Architecte de Lutecia en résidence :
+
+```
+Réalise l'image du portrait illustré d'un personnage de fantasy médiévale, format paysage large. Une naine d'âge mûr, nettement plus petite qu'un humain, aux proportions de naine, sans barbe, aux bras forts, aux cheveux roux tressés et relevés sous un foulard, au regard concentré, architecte des portails venue d'une grande capitale pour entretenir un passage ancien dans une cité fluviale. Elle se tient légèrement décalée du centre et regarde droit vers le spectateur avec l'assurance d'une maîtresse d'œuvre ; elle lui présente un cristal jaune serti dans une monture de bronze. Tenue de travail usée et crédible : tablier de cuir aux nombreuses poches, compas et règle de bronze à la ceinture, manches retroussées, lunettes de verre relevées sur le front. Décor de part et d'autre : une halle portuaire de pierre et de charpente, une grande arche ancienne aux motifs gravés, des échafaudages, des tonneaux et des ballots sur les quais. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, chacun différent par l'âge, la carrure, les cheveux et la tenue. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle chaude, palette chaude et terreuse relevée de touches de couleurs vives, proportions crédibles ; pas une photographie. Image entièrement dépourvue d'écriture : aucun nom, aucune lettre, aucune signature, aucun monogramme, aucun filigrane, aucune enseigne lisible.
+```
+
 ## 8. Points ouverts
 
 - Origine de Jeanne, sa fin, la nature de ses voix, ce que cherchait Gilles de Rais : **ouverts par décision**.
