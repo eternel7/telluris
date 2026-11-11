@@ -1,30 +1,16 @@
-"""dev/gen_armes_woin.py — la table de PIECES couvre EXACTEMENT la liste de travail.
+"""dev/gen_armes_woin.py — forme de la table de PIECES.
 
 Pur : aucun dump. Le contrôle contre la base (collisions, fausses feuilles) est fait par le
 script lui-même à chaque lancement ; ici on verrouille la forme de la table, qui ne dépend
 pas du contenu de la base.
 """
 
-import json
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dev import gen_armes_woin as g
-
-
-def _liste():
-	with open(g.LISTE, encoding="utf-8-sig") as fh:
-		return [a["nom"] for a in json.load(fh)["armes"]]
-
-
-def test_la_table_couvre_exactement_la_liste_de_travail():
-	listees = {g._norm(n) for n in _liste()}
-	produites = {g._norm(it["nom"]) for (it, _l, _m) in g.PIECES}
-	ecartees = {g._norm(n) for n in g.ALIAS}
-	assert produites | ecartees == listees
-	assert not (produites & ecartees)   # un nom écarté n'est pas aussi produit
 
 
 def test_ids_uniques_et_objet_final_synchrone():

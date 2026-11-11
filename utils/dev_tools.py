@@ -225,6 +225,15 @@ CATALOGUE = [
 			"n'ajoute que le tag : régénération idempotente.",
 	},
 	{
+		"id": "gen_vocations_transitions",
+		"label": "🔀 Transitions entre vocations",
+		"argv": _py("gen_vocations_transitions.py"),
+		"ecrit": "Écrit jsons/vocations_transitions_a_importer.json.",
+		"description": "Doc `rules:vocations_transitions` ({vocation: [vocations nouvelles accessibles]}) "
+			"lu par le changement de vocation et la page d'accueil. Contrôle les ids contre "
+			"`rules:vocations` du dump le plus récent ; n'écrit le doc que s'il en diffère.",
+	},
+	{
 		"id": "gen_pistage",
 		"label": "🐾 Passive Lecture des traces (forestier)",
 		"argv": _py("gen_pistage.py"),

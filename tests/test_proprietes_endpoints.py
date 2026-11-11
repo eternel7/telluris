@@ -25,7 +25,7 @@ from utils import marche
 from utils import proprietes
 
 
-with open(os.path.join(os.path.dirname(__file__), "..", "jsons", "proprietes_a_importer.json"),
+with open(os.path.join(os.path.dirname(__file__), "donnees", "proprietes.json"),
 		  encoding="utf-8") as _f:
 	CATALOGUE_DOCS = json.load(_f)["docs"]
 

@@ -273,6 +273,21 @@ def test_niveau_ecole_native_achetee_absente():
     assert magies_pratiquees(perso, _RULES_VOCS) == {"Illusoire": 3, "Noire": 1}
 
 
+def test_ecole_achetee_n_ouvre_l_apprentissage_que_chez_le_lettre():
+    """Changement de vocation : un ancien lettré garde ses sorts (aucune purge) mais n'apprend
+    plus dans les écoles achetées — il lui faut revenir au lettré. `magies_apprises` intact."""
+    ancien = _perso(voc="elementaliste", vocations_niveaux={"lettre": 3, "elementaliste": 1},
+                    magies_apprises={"Noire": 2})
+    assert niveau_ecole(ancien, "Noire", _RULES_VOCS) is None
+    assert magies_pratiquees(ancien, _RULES_VOCS) == {"Élémentaire": 1}
+    assert ancien["magies_apprises"] == {"Noire": 2}
+    # L'école NATIVE suit la vocation courante, pas le meilleur niveau passé.
+    assert niveau_ecole(ancien, "Illusoire", _RULES_VOCS) is None
+    retour = dict(ancien, voc="lettre")
+    assert niveau_ecole(retour, "Noire", _RULES_VOCS) == 2
+    assert niveau_ecole(retour, "Illusoire", _RULES_VOCS) == 3
+
+
 def test_peut_apprendre_magie_et_achetables(monkeypatch):
     monkeypatch.setattr(character_stats, "MAGIE_POLYVALENTE_VOCATIONS", ["lettre"])
     lettre = _perso(voc="lettre", vocations_niveaux={"lettre": 0})

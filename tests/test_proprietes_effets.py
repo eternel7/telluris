@@ -12,7 +12,7 @@ Ce que ces tests verrouillent :
 6. Écurie : la monture laissée ne suit plus le groupe mais reste dans le plafond du troupeau.
 7. Récolte une fois par délai ; vol limité à une fraction par fenêtre.
 
-Catalogue : le fichier LIVRÉ (`jsons/proprietes_a_importer.json`), relu, jamais recopié.
+Catalogue : copie figée de la base (`tests/donnees/proprietes.json`, 6 docs tirés d'un dump).
 """
 
 import json
@@ -27,7 +27,7 @@ from utils import proprietes
 from utils import recrutement
 from utils import sorts as sorts_util
 
-CHEMIN_JSON = os.path.join(os.path.dirname(__file__), "..", "jsons", "proprietes_a_importer.json")
+CHEMIN_JSON = os.path.join(os.path.dirname(__file__), "donnees", "proprietes.json")
 with open(CHEMIN_JSON, encoding="utf-8") as _f:
 	LIVRE = {d["_id"]: d for d in json.load(_f)["docs"]}
 CAT = proprietes.catalogue(LIVRE.get)

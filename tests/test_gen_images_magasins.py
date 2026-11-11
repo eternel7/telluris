@@ -32,6 +32,8 @@ def test_chaque_toponyme_de_reims_a_son_decor():
 	# Relu dans enseignes : un toponyme ajouté sans décor casserait ce test, pas le lot.
 	for cite in ("lieu:rhemi", "lieu:chartres", "lieu:auxerre"):
 		assert set(QUARTIERS_EN[cite]) == set(TOPONYMES_PAR_LIEU[cite]), cite
+	# Orléans : enseignes authorées (dev/gen_orleans_magasins.py) ⇒ des décors EN PLUS des toponymes.
+	assert set(TOPONYMES_PAR_LIEU["lieu:orleans"]) <= set(QUARTIERS_EN["lieu:orleans"])
 
 
 def test_chaque_trait_tire_a_sa_traduction():

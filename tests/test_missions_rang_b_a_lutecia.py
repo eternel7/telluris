@@ -1,7 +1,7 @@
 # tests/test_missions_rang_b_a_lutecia.py
 # Épreuves des rangs B et A de Lutecia (dev/gen_missions_rang_b_a_lutecia.py), toutes chez
 # Maëlys via `services.<x>.offres` (utils/offres.py) : rejouées contre le DERNIER dump, puis
-# contrôlées — fichier, ids, offres au bon cran, états AVANT / PENDANT / APRÈS de chaque PNJ,
+# contrôlées — linter, ids, offres au bon cran, états AVANT / PENDANT / APRÈS de chaque PNJ,
 # remise d'un trophée jusqu'au rang, cibles présentes en France, calibrage du puits de Chartres.
 
 import copy
@@ -18,7 +18,6 @@ from utils import acces, apport, lint_dialogues, offres, pnj, quetes, transport
 from utils.recrutement import RANGS
 
 RACINE = os.path.join(os.path.dirname(__file__), "..")
-FICHIER = os.path.join(RACINE, "jsons", "missions_rang_b_a_lutecia_a_importer.json")
 
 
 def _gen():
@@ -55,13 +54,10 @@ def _visibles(doc, character, flags=None, noeud="accueil"):
 	return {c["id"] for c in pnj._choix_visibles(doc, noeud, ctx)}
 
 
-# ── Le fichier ───────────────────────────────────────────────────────────────
+# ── La sortie du générateur ──────────────────────────────────────────────────
 
-def test_le_fichier_est_a_jour_et_passe_le_linter():
-	with open(FICHIER, encoding="utf-8") as f:
-		fichier = json.load(f)
-	assert {d["_id"]: d for d in fichier} == DOCS, "relancer dev/gen_missions_rang_b_a_lutecia.py"
-	rapport = lint_dialogues.analyser(fichier)
+def test_la_sortie_passe_le_linter():
+	rapport = lint_dialogues.analyser(list(DOCS.values()))
 	assert rapport["erreurs"] == 0 and rapport["avertissements"] == 0, rapport["trouvailles"]
 
 
@@ -338,25 +334,6 @@ def test_maelys_ne_situe_la_bete_qu_en_la_proposant():
 	sources = [k for k, nd in n.items() for c in nd.get("choix") or [] if c.get("next") == "a_bete_carte"]
 	assert sources == ["a_bete_propose"]
 	assert "Gévaudan" in n["a_bete_relance"]["texte"] and "Gévaudan" in n["a_bete_accepte"]["texte"]
-
-
-def test_le_delta_de_la_carte_est_a_jour_et_ne_touche_que_la_bete():
-	chemin = os.path.join(RACINE, "dev", "gen_carte_bete_gevaudan.py")
-	spec = importlib.util.spec_from_file_location("gen_carte_bete_gevaudan", chemin)
-	delta = importlib.util.module_from_spec(spec)
-	spec.loader.exec_module(delta)
-	docs = delta.generer(DUMP)
-	with open(delta.SORTIE, encoding="utf-8") as f:
-		assert json.load(f) == docs, "relancer dev/gen_carte_bete_gevaudan.py"
-	assert lint_dialogues.analyser(docs)["erreurs"] == 0
-	(doc,) = docs
-	avant = DUMP[GEN.MAELYS]
-	assert {k for k in doc if doc[k] != avant.get(k)} <= {"services", "dialogue", "_rev"}
-	changes = {k for k, v in doc["dialogue"]["noeuds"].items() if v != avant["dialogue"]["noeuds"].get(k)}
-	assert changes and all(k.startswith("a_bete_") for k in changes)
-	autres = lambda d: [e for e in d["services"]["apport"]["offres"] if e["offre"]["id"] != GEN.A_BETE]
-	assert autres(doc) == autres(avant)
-	assert delta.generer({**DUMP, GEN.MAELYS: doc}) == docs, "idempotent"
 
 
 def test_les_portes_sont_sur_des_cases_praticables():

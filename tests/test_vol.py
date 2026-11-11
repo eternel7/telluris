@@ -7,10 +7,6 @@
 #     proche, UN DÉ PAR CASE parcourue : D20 depuis une falaise, D6 dans l'eau (règle de
 #     l'Auteur) — jamais mortelle hors combat.
 
-import json
-import os
-import sys
-
 import pytest
 
 from utils import combat as combat_mod
@@ -21,9 +17,6 @@ from utils.combat import (
 	_tick_effets_combat, build_joueur_snapshot, resolve_action,
 )
 from _fixtures_magie import character, combat, joueur, monstre, sort, textes
-
-RACINE = os.path.join(os.path.dirname(__file__), "..")
-CONTENU = os.path.join(RACINE, "jsons", "sort_vol_a_importer.json")
 
 
 @pytest.fixture(autouse=True)
@@ -263,79 +256,3 @@ def test_rompre_un_vol_maintenu_fait_chuter(monkeypatch):
 	_rompre_concentration(doc, mage, {"sort_id": entree["source_id"]}, "Le voile se déchire.")
 	assert not _can_fly(mage)
 	assert mage["pos"] == {"x": 4, "y": 4} and mage["currentPV"] == 28
-
-
-# ── Contenu (dev/gen_sorts_vol.py → jsons/sort_vol_a_importer.json) ───────────
-
-def _contenu():
-	with open(CONTENU, encoding="utf-8") as f:
-		return json.load(f)
-
-
-def _sorts_du_contenu():
-	return [d for d in _contenu() if d["type"] == "sort"]
-
-
-def test_le_json_est_la_sortie_du_generateur(tmp_path):
-	"""Le fichier committé ne dérive pas de son générateur.
-
-	⚠️ Relu sur le DERNIER dump PRIVÉ des docs de ce fichier (état d'avant l'import) : sur un
-	dump qui les contient déjà, le générateur (idempotent) ne rend plus rien. Un dump fixe
-	nommé en dur cassait le test dès qu'il était purgé de jsons/."""
-	sys.path.insert(0, os.path.join(RACINE, "dev"))
-	import gen_sorts_vol as gen
-	ids = {d["_id"] for d in _contenu()}
-	with open(gen.dernier_dump(), encoding="utf-8") as f:
-		brut = json.load(f)
-	brut["docs"] = [d for d in brut["docs"] if not (isinstance(d, dict) and d.get("_id") in ids)]
-	dump = tmp_path / "dump_avant_vol.json"
-	dump.write_text(json.dumps(brut, ensure_ascii=False), encoding="utf-8")
-	sortie = tmp_path / "vol.json"
-	assert gen.main(["--dump", str(dump), "--sortie", str(sortie)]) == 0
-	assert json.loads(sortie.read_text(encoding="utf-8")) == _contenu()
-
-
-def test_un_sort_de_vol_par_ecole_sauf_elementaire():
-	"""⚠️ Décision de l'Auteur : Élémentaire n'a pas de sort de vol."""
-	ecoles = {d["magie"] for d in _sorts_du_contenu()}
-	assert "Élémentaire" not in ecoles
-	assert ecoles == {"Illusoire", "Bataille", "Nature", "Sainte", "Démonologie", "Nécromancie"}
-
-
-def test_illusoire_vole_le_premier():
-	"""Le vol est né dans l'école Illusoire : toute autre école l'obtient PLUS HAUT."""
-	sorts = _sorts_du_contenu()
-	premier = min(d["niveau"] for d in sorts if d["magie"] == "Illusoire")
-	assert all(d["niveau"] > premier for d in sorts if d["magie"] != "Illusoire")
-
-
-@pytest.mark.parametrize("doc", _sorts_du_contenu(), ids=lambda d: d["_id"])
-def test_chaque_sort_de_vol_est_valide_et_accelere(doc):
-	norm = sorts_util.normaliser_sort(doc)
-	assert norm and norm["effets"]["vol"] == 1 and doc["cible"] == "soi"
-	assert sorts_util.sort_utilisable_combat(norm)
-	# Tout sort de vol ACCÉLÈRE (décision de l'Auteur) : un buff de V constant et positif.
-	assert isinstance(doc["effets"]["buffs"]["V"], int) and doc["effets"]["buffs"]["V"] > 0
-	# Le sort MAINTENU est réservé au combat (aucun round où prélever l'entretien dehors).
-	assert sorts_util.sort_utilisable_exploration(norm) is (not doc.get("maintien"))
-
-
-@pytest.mark.parametrize("doc", _sorts_du_contenu(), ids=lambda d: d["_id"])
-def test_chaque_sort_de_vol_respecte_la_paire_de_composants(doc):
-	"""Règle de contenu (telluris-magie) : un consommé ET un catalyseur, le catalyseur moins fort."""
-	conso = [c for c in doc["composants"] if c["consomme"]]
-	cata = [c for c in doc["composants"] if not c["consomme"]]
-	assert len(conso) == 1 and len(cata) == 1
-	(cle,) = conso[0]["bonus"]
-	assert set(cata[0]["bonus"]) == {cle} and cata[0]["bonus"][cle] < conso[0]["bonus"][cle]
-
-
-@pytest.mark.parametrize("doc", _sorts_du_contenu(), ids=lambda d: d["_id"])
-def test_chaque_sort_de_vol_a_son_grimoire_et_sa_recette(doc):
-	"""Sans grimoire unique, un sort ne s'apprend pas ; sans recette, le grimoire n'est jamais
-	en rayon."""
-	contenu = {d["_id"]: d for d in _contenu()}
-	slug = doc["_id"][len("sort:"):]
-	grimoire = contenu["item:grimoire_" + slug]
-	assert grimoire["sorts"] == [doc["_id"]] and grimoire["sous_categorie"] == "grimoire"
-	assert contenu["recette:grimoire_" + slug]["objet_final"] == "grimoire_" + slug

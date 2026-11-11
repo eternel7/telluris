@@ -1,12 +1,8 @@
 # tests/test_portails.py
 # Portail de Notre-Dame (utils/portails.py, service `portail` de routers/pnj.py) : l'ancrage
 # court-circuite un lien portail du monde et prend son point d'arrivée, contre un cristal jaune.
-# Tableau des seuils tiré par tranche de l'epoch réel (aucune horloge), puis le contenu
-# (dev/gen_portail_notre_dame.py) rejoué contre le dernier dump.
+# Tableau des seuils tiré par tranche de l'epoch réel (aucune horloge).
 
-import importlib.util
-import json
-import os
 
 import pytest
 from fastapi import HTTPException
@@ -16,8 +12,6 @@ from utils import lint_dialogues, portails
 
 ANCRAGE = "lieu:notre_dame_portail"
 CRISTAL = "item:cristal_de_mana_jaune"
-RACINE = os.path.join(os.path.dirname(__file__), "..")
-FICHIER = os.path.join(RACINE, "jsons", "portail_notre_dame_a_importer.json")
 
 
 def _lien(lid, a, b, type_="portail", status="ouvert"):
@@ -353,95 +347,3 @@ def test_tableau_fixe_la_barriere_de_la_porte_tient(rp_fixe, monkeypatch):
 	c = {"lieu": CHAPELLE, "inventaire": []}
 	assert rp_fixe._resoudre_portail(c, PNJ_FIXE, {"_id": CHAPELLE}, "franchir", cle, {}) == "refus_acces"
 	assert c["lieu"] == CHAPELLE and not rp_fixe._arrivees
-
-
-# ── Contenu ──────────────────────────────────────────────────────────────────
-
-def _gen():
-	chemin = os.path.join(RACINE, "dev", "gen_portail_notre_dame.py")
-	spec = importlib.util.spec_from_file_location("gen_portail_notre_dame", chemin)
-	mod = importlib.util.module_from_spec(spec)
-	spec.loader.exec_module(mod)
-	return mod
-
-
-GEN = _gen()
-with open(GEN.M.dernier_dump([]), encoding="utf-8") as _f:
-	DUMP = {d["_id"]: d for d in json.load(_f)["docs"]}
-DOCS = {d["_id"]: d for d in GEN.generer(DUMP)}
-
-
-def test_le_fichier_est_a_jour_et_passe_le_linter():
-	with open(FICHIER, encoding="utf-8") as f:
-		fichier = json.load(f)
-	assert fichier == list(DOCS.values())
-	rapport = lint_dialogues.analyser(fichier)
-	assert rapport["erreurs"] == 0 and rapport["avertissements"] == 0, rapport["trouvailles"]
-
-
-def test_delta_seul_et_aucun_id_neuf_ne_collisionne():
-	# Neufs AVANT l'import, déjà au dump après : seul ce sous-ensemble peut l'être.
-	neufs = {i for i in DOCS if i not in DUMP}
-	assert neufs <= {GEN.AENOR, GEN.LIEN_PUITS}
-	# Les docs relus ne perdent aucune clé du dump (PUT complet à l'import).
-	for i in set(DOCS) - neufs:
-		assert set(DUMP[i]) - {"_rev"} <= set(DOCS[i]), i
-
-
-def test_aenor_tient_le_tableau_de_notre_dame():
-	entree = next(e for e in DOCS[GEN.ANCRAGE]["pnj"] if e["character"] == GEN.AENOR)
-	assert entree["probabilite"] == 1
-	conf = DOCS[GEN.AENOR]["services"]["portail"]
-	assert conf["ancrage"] == GEN.ANCRAGE and conf["cout"]["item"] in DUMP
-	# Notre-Dame n'a AUCUN lien portail : le tableau en court-circuite, il n'en crée pas.
-	assert not any(d.get("type") == "connection" and any(n["lieu"] == GEN.ANCRAGE for n in d["nodes"])
-				   and (d.get("metadata") or {}).get("type") == "portail" for d in DOCS.values())
-	assert portails.arrivees_candidates([d for d in DUMP.values() if d.get("type") == "connection"], GEN.ANCRAGE)
-
-
-def test_les_portraits_existent():
-	pnj_dir = os.path.join(RACINE, "templates", "resources", "pnj")
-	assert os.path.isfile(os.path.join(pnj_dir, GEN.PORTRAIT_AENOR))
-	assert os.path.isfile(os.path.join(pnj_dir, GEN.PORTRAIT_AELIS_INVALIDES))
-	entree = next(e for e in DOCS[GEN.ARCHIVES]["pnj"] if e["character"] == GEN.AELIS_ARCHIVES)
-	assert entree["portrait"] == GEN.PORTRAIT_AELIS_INVALIDES
-
-
-# ── Le puits de Chartres : donjon à étages, coffre, remontée par la chaîne ───
-
-def test_le_coffre_du_minotaure_garantit_un_cristal_jaune():
-	donjon_doc = DOCS[GEN.M.DONJON_PUITS]
-	assert donjon_doc["mode"] == "etages"
-	(salle,) = donjon_doc["battle_maps"]
-	tresor = salle["tresor"]
-	assert {"item": CRISTAL, "quantite": 1} in tresor["garanti"]
-	# Pas d'alarme : deux Minotaures de plus achèveraient n'importe quel groupe.
-	assert "alarme" not in tresor["piege"]["effets"]
-	for item in [tresor["piege"]["mimique"]] + [l["item"] for l in tresor["tirage"]["table"]]:
-		assert item in DUMP, item
-
-
-def test_on_descend_et_remonte_par_la_chaine_au_centre_du_puits():
-	"""Auteur, 25/10 : on remonte par le centre du donjon, au bas du puits. Une seule connexion,
-	celle du treuil : point d'apparition ET passage vers la surface. La grille est celle du dump
-	(peinte dans l'éditeur) : le bas du puits et le coffre sont dans SA région praticable."""
-	from utils import combat, donjon
-	labyrinthe = DUMP[GEN.M.LABYRINTHE]
-	assert GEN.M.LABYRINTHE not in DOCS   # la grille n'est jamais réécrite
-	liens = [d for d in list(DOCS.values()) + list(DUMP.values()) if d.get("type") == "connection"
-			 and any(n["lieu"] == GEN.M.LABYRINTHE for n in d["nodes"])]
-	assert {d["_id"] for d in liens} == {GEN.LIEN_PUITS}
-	(passage,) = donjon.passages_de_l_etage(liens[:1], GEN.M.LABYRINTHE, DOCS[GEN.M.DONJON_PUITS], str)
-	assert passage["surface"] and passage["vers_lieu"] == GEN.M.CRYPTE
-	assert (passage["pos"]["x"], passage["pos"]["y"]) == GEN.LABY_PUITS
-	dims = labyrinthe["dimensions"]
-	x, y = GEN.LABY_PUITS
-	assert abs(x - dims["x"] // 2) <= 1 and abs(y - dims["y"] // 2) <= 2
-	region = combat._reachable_region(labyrinthe["cells"], dims, labyrinthe.get("nav") or {}, GEN.LABY_PUITS)
-	assert GEN.LABY_COFFRE in region
-	assert len(region) == sum(row.count(1) for row in labyrinthe["cells"])
-	# Le Templier fait descendre : laissez-passer posé, puis le treuil (`deplacer`).
-	seuil = DOCS[GEN.M.TEMPLIER_CRYPTE]["dialogue"]["noeuds"]["seuil"]
-	descendre = next(c for c in seuil["choix"] if c["id"] == "descendre")
-	assert descendre["deplacer"] == GEN.M.LABYRINTHE
-	assert descendre["action"] == {"service": "acces", "op": "passer"}

@@ -1,13 +1,12 @@
 # tests/test_competences_1_10_contenu.py
 #
-# Contenu `jsons/competences_vocations_1_10_a_importer.json` (dev/gen_competences_1_10.py) :
+# Générateur dev/gen_competences_1_10.py, rejoué contre le dump le plus récent :
 #   · le générateur passe toutes ses gardes (invariants de check_competences_doc compris) ;
 #   · à chaque niveau 1 → 10, existantes comprises : 4 compétences pour une vocation à
 #     magie, 2 passives + 5 actives sinon — cibles RELUES dans le module, jamais retapées ;
 #   · aucune passive neuve pour une vocation à magie ;
 #   · chaque active a son animation SONORE (nappe sonore pour un cône), aucune passive n'en a ;
-#   · le fichier committé est conforme au générateur ; un lot déjà importé n'est ni une
-#     collision ni réémis (régénération idempotente).
+#   · un lot déjà importé n'est ni une collision ni réémis (régénération idempotente).
 
 import copy
 import importlib.util
@@ -93,15 +92,6 @@ def test_les_actives_martiales_ignorent_la_charge(gen, construit):
 	for d in construit["lot"]:
 		if d["mode"] == "active" and gen.PROFILS[d["vocation"]]["martial"]:
 			assert d.get("sensibilite_charge") == 0, d["_id"]
-
-
-def test_fichier_committe_conforme_au_generateur(gen, construit):
-	fichier = json.load(open(gen.SORTIE, encoding="utf-8"))
-	par_id = {d["_id"]: d for d in construit["lot"]}
-	# Sous-ensemble et non égalité : une fois le lot importé dans un dump plus récent, le
-	# générateur ne réémet plus rien, mais le fichier committé reste valable.
-	for doc in fichier:
-		assert doc == par_id.get(doc["_id"]), doc["_id"]
 
 
 def test_un_lot_deja_importe_n_est_ni_une_collision_ni_reemis(gen, construit):

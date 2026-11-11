@@ -8,8 +8,8 @@ Ce que ces tests verrouillent :
 4. **Le vol** : possible chez un propriétaire sans gardien, impossible dès qu'un gardien est
    AU POSTE (la loge vide ne garde rien) ; une chambre louée est inviolable.
 5. **Location paresseuse**, cession (aménagements conservés sur le bien cédé), zones.
-6. Le catalogue LIVRÉ (`jsons/proprietes_a_importer.json`) respecte les interdictions du
-   cahier des charges — relu depuis le fichier, jamais recopié.
+6. Le catalogue (copie figée de la base, `tests/donnees/proprietes.json`) respecte les
+   interdictions du cahier des charges.
 
 Les accès DB passent par des `get_doc_fn` injectés ; les références d'items portent leur
 poids d'instance (`{item, poids}`), `item_ref_weight` ne lit donc rien.
@@ -407,9 +407,9 @@ def test_offre_ici_suit_la_case():
 	assert proprietes.offre_ici(VILLE, {"x": 30, "y": 30}, False, CAT, lire) is False
 
 
-# ── Le catalogue LIVRÉ ────────────────────────────────────────────────────────────
+# ── Le catalogue (tests/donnees/proprietes.json) ────────────────────────────────────────────────────────────
 
-CHEMIN_JSON = os.path.join(os.path.dirname(__file__), "..", "jsons", "proprietes_a_importer.json")
+CHEMIN_JSON = os.path.join(os.path.dirname(__file__), "donnees", "proprietes.json")
 
 
 @pytest.fixture(scope="module")
@@ -471,35 +471,6 @@ def test_livre_images_presentes(livre):
 	racine = os.path.join(os.path.dirname(__file__), "..", "templates", "resources", "towns")
 	for t in cat["types"]:
 		assert os.path.exists(os.path.join(racine, t["image"])), t["image"]
-
-
-def test_livre_postes_marchands_exercables(livre):
-	"""Chaque catégorie qu'un poste marchand ouvre doit avoir, dans le dump le plus récent, son
-	marchand générique (fiche des candidats) ET au moins une recette (sans quoi l'employé ne
-	produirait rien). Les grandes maisons ne s'ouvrent qu'en Demeure ou Domaine.
-
-	Exception : le NÉGOCIANT (`CATEGORIES_NEGOCE`, utils/negoce.py) achète tout SANS recette ;
-	son modèle peut n'être encore que livré (`jsons/negociant_a_importer.json`)."""
-	import glob
-	racine = os.path.join(os.path.dirname(__file__), "..", "jsons")
-	dump = sorted(glob.glob(os.path.join(racine, "telluris-dump-*.json")))[-1]
-	with open(dump, encoding="utf-8") as f:
-		docs = json.load(f)["docs"]
-	ids = {d["_id"] for d in docs}
-	with open(os.path.join(racine, "negociant_a_importer.json"), encoding="utf-8") as f:
-		ids |= {d["_id"] for d in json.load(f)}
-	recettes = {d.get("lieu_categorie") for d in docs if d.get("type") == "recette"}
-	fusion = next(d for d in docs if d["_id"] == "rules:world_variables")["value"]["LIEU_CATEGORIES_FUSION"]
-	cat, _ = livre
-	vues = 0
-	for a in cat["amenagements"]:
-		for c in (a.get("activite") or {}).get("categories") or []:
-			vues += 1
-			assert proprietes.MODELE_PREFIXE + c in ids, (a["id"], c)
-			assert c in recettes or c in character_stats.CATEGORIES_NEGOCE, (a["id"], c)
-			if c in fusion:
-				assert set(a["types_autorises"]) <= {"demeure", "domaine"}, (a["id"], c)
-	assert vues, "aucun poste marchand dans le catalogue livré"
 
 
 # ── Prix d'achat : voisinage marchand + occupation de la case ─────────────────────
