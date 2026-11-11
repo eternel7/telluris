@@ -665,11 +665,23 @@ def est_variante(item_doc: dict | None) -> bool:
 	return isinstance(bloc, dict) and bool(bloc.get("base_item"))
 
 
+# Objets qu'AUCUN marchand ne rachète, négociant compris : la carte d'aventurier atteste une
+# inscription, elle ne se revend pas (Auteur, 11/11). Absents de tout panneau de vente.
+SOUS_CATEGORIES_INVENDABLES = frozenset({"carte_aventurier"})
+
+
+def item_invendable(item_doc: dict | None) -> bool:
+	return (item_doc or {}).get("sous_categorie") in SOUS_CATEGORIES_INVENDABLES
+
+
 def lieu_buys(lieu_doc: dict, item_doc: dict) -> bool:
 	"""True si le marchand du lieu achète cet item : son id OU sa sous-catégorie ∈ besoins
 	(intrants des recettes, item-refs compris) **OU** c'est un bien que le lieu produit
 	(rachat à moindre coût). Portée géographique comprise (`besoins_lieu`).
-	Un NÉGOCIANT achète tout objet résolu (`est_negociant`)."""
+	Un NÉGOCIANT achète tout objet résolu (`est_negociant`) — sauf un `item_invendable`,
+	refusé partout : c'est ce qui le retire de tous les panneaux de vente et de `sell_item`."""
+	if item_invendable(item_doc):
+		return False
 	if est_negociant(lieu_doc):
 		return bool(item_doc)
 	if lieu_produit(lieu_doc, item_doc):

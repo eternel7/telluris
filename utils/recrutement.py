@@ -47,6 +47,31 @@ def now_epoch() -> int:
 # c'est le `lieu_parent` de l'INSTANCE en sac qui dit de quelle cité on est membre.
 CARTE_AVENTURIER_ITEM_ID = "item:carte_aventurier"
 
+# Cartes RECONNUES hors de leur cité : la carte de la guilde de Lutecia vaut dans toutes les
+# guildes de France (Auteur, 11/11). Cité émettrice → pays (`lieu_parent` de la cité) où ses
+# guildes la reconnaissent. Reconnaître la carte = être reçu en MEMBRE (tableaux, épreuve de
+# rang) ; le RANG, lui, reste celui de chaque cité (`rangs_guilde`, jamais sur la carte).
+CARTES_RECONNUES = {"lieu:lutecia": "lieu:france"}
+
+
+def carte_valable_dans(cite_carte: str | None, cite: str | None, get_doc_fn) -> bool:
+	"""Une carte émise par `cite_carte` vaut-elle à la guilde de `cite` ? Oui pour la sienne,
+	et pour une carte de `CARTES_RECONNUES` dans une cité de son pays. Le doc de la cité n'est
+	lu QUE pour une carte reconnue d'ailleurs. Fail-closed : cité absente ⇒ False."""
+	if not cite_carte or not cite:
+		return False
+	if cite_carte == cite:
+		return True
+	pays = CARTES_RECONNUES.get(cite_carte)
+	return bool(pays) and ((get_doc_fn(cite) or {}).get("lieu_parent") == pays)
+
+
+def porte_carte_valable(character: dict, cite: str | None, get_doc_fn) -> bool:
+	"""Le PRINCIPAL porte-t-il, dans son sac, une carte d'aventurier qui vaut à `cite` ?"""
+	return any(item_ref_id(ref) == CARTE_AVENTURIER_ITEM_ID
+			   and carte_valable_dans(item_ref_lieu(ref), cite, get_doc_fn)
+			   for ref in (character or {}).get("inventaire") or [])
+
 # Slots d'équipement d'un personnage (miroir exact d'add_character, routers/user.py).
 SLOTS_PERSONNAGE = [
 	"main_droite", "main_gauche", "torse", "tete", "epaules", "jambes", "pieds",
@@ -502,17 +527,15 @@ def offre_du_lieu(lieu_doc: dict, parent_doc: dict | None) -> dict:
 	return offre
 
 
-def acces_autorise(character: dict, lieu_doc: dict) -> tuple[bool, str]:
+def acces_autorise(character: dict, lieu_doc: dict, get_doc_fn=None) -> tuple[bool, str]:
 	"""Le personnage peut-il consulter le tableau ? Si RECRUTEMENT_CARTE_REQUISE, il
-	doit porter une carte d'aventurier dont l'instance vient de la CITÉ du lieu
-	(`item_ref_lieu == lieu_parent`) — la carte générique d'une autre guilde ne vaut
-	rien ici. Retourne (ok, raison)."""
+	doit porter une carte d'aventurier qui vaut à la CITÉ du lieu (`porte_carte_valable` : la
+	sienne, ou une carte de `CARTES_RECONNUES` dans son pays) — la carte d'une autre guilde
+	ne vaut rien ici. Retourne (ok, raison)."""
 	if not character_stats.RECRUTEMENT_CARTE_REQUISE:
 		return True, ""
-	cite = (lieu_doc or {}).get("lieu_parent")
-	for ref in character.get("inventaire", []):
-		if item_ref_id(ref) == CARTE_AVENTURIER_ITEM_ID and item_ref_lieu(ref) == cite:
-			return True, ""
+	if porte_carte_valable(character, (lieu_doc or {}).get("lieu_parent"), get_doc_fn or get_doc):
+		return True, ""
 	return False, "La carte d'aventurier de cette cité est requise pour consulter le tableau."
 
 

@@ -424,6 +424,18 @@ def test_inscrit_a_la_guilde_par_le_rang_ou_par_l_archive():
 	assert not chasse.inscrit_a_la_guilde(rate, "lieu:auxerre")
 
 
+def test_la_carte_de_lutecia_fait_membre_en_france_sans_inscrire():
+	"""Carte de Lutecia au sac : MEMBRE des guildes de France (tableau, épreuve de rang),
+	sans être inscrit au registre — la carte perdue (`don_a_remplacer`) reste muette."""
+	carte = {"inventaire": [{"item": "item:carte_aventurier", "poids": 0.05, "lieu_parent": "lieu:lutecia"}]}
+	pays = {"lieu:auxerre": {"lieu_parent": "lieu:france"}, "lieu:rome": {"lieu_parent": "lieu:italie"}}.get
+	assert chasse.membre_de_la_guilde(carte, "lieu:auxerre", pays)
+	assert not chasse.inscrit_a_la_guilde(carte, "lieu:auxerre")
+	assert not chasse.membre_de_la_guilde(carte, "lieu:rome", pays)
+	assert not chasse.membre_de_la_guilde({}, "lieu:auxerre", pays)
+	assert chasse.membre_de_la_guilde(_inscrit(), "lieu:auxerre", pays)
+
+
 def test_offre_rang_tire_une_epreuve_max():
 	random.seed(1)
 	offre = chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc, _find_docs)

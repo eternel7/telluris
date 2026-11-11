@@ -46,7 +46,7 @@ from utils.zones import (
 	profils_compatibles,
 )
 from utils.characters import lieu_label, item_ref_id, item_ref_lieu
-from utils.recrutement import RANGS, CARTE_AVENTURIER_ITEM_ID
+from utils.recrutement import RANGS, CARTE_AVENTURIER_ITEM_ID, porte_carte_valable
 from utils import accord_espece, quetes
 
 
@@ -551,6 +551,16 @@ def inscrit_a_la_guilde(character: dict, cite_id: str) -> bool:
 	return False
 
 
+def membre_de_la_guilde(character: dict, cite_id: str, get_doc_fn) -> bool:
+	"""La guilde de cette cité REÇOIT-elle le personnage en membre ? Inscrit à son registre
+	(`inscrit_a_la_guilde`), OU porteur d'une carte qu'elle reconnaît
+	(`recrutement.porte_carte_valable` : la carte de Lutecia dans toute la France). Garde du
+	tableau de quêtes, du registre des disparitions et de l'épreuve de rang.
+	⚠️ Pas de la carte PERDUE (`pnj.don_a_remplacer`) : elle suppose le registre de CETTE cité,
+	sans quoi Lyon se moquerait d'une carte de Lyon jamais remise."""
+	return inscrit_a_la_guilde(character, cite_id) or porte_carte_valable(character, cite_id, get_doc_fn)
+
+
 # ── Offre de rang au comptoir (miroir simplifié du transport authoré) ─────────────
 
 # Qualificatifs de l'élite traquée, INDEXÉS PAR NIVEAU DE PROFIL (1 → 6). Le `nom` du doc
@@ -711,7 +721,7 @@ def potentiel_cible(espece_doc: dict, profil_id: str, get_doc_fn) -> float | Non
 def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_fn,
                     potentiel_fn=None, menace_zone_fn=None) -> dict | None:
 	"""Construit une épreuve de rang au comptoir, ou `None` si : pas de `lieu_parent`, personnage
-	non inscrit à la guilde de la cité (`inscrit_a_la_guilde`), PLAFOND DE
+	non membre de la guilde de la cité (`membre_de_la_guilde`), PLAFOND DE
 	CE COMPTOIR déjà atteint (`rang_max_de`, défaut `D` — pas le sommet du monde), épreuve de rang
 	de cette cité déjà active, ou aucune cible résolvable au grade MAX dont la puissance atteint le
 	PLANCHER du rang visé (`potentiel_min_pour` ; potentiel illisible ⇒ cible écartée). Ne tire PAS
@@ -733,7 +743,7 @@ def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_f
 		return None
 	# Une épreuve de rang élève un MEMBRE : pas d'épreuve avant l'inscription (première
 	# mission, inscription au Grand Relais), sinon on montait de « non inscrit » à E.
-	if not inscrit_a_la_guilde(character, cite):
+	if not membre_de_la_guilde(character, cite, get_doc_fn):
 		return None
 	rang_courant = rang_de(character, cite)
 	if rang_plafond_atteint(rang_courant, comptoir_doc):

@@ -272,6 +272,22 @@ def test_acces_autorise_exige_la_carte_de_la_cite(monde):
 	assert recrutement.acces_autorise(perso(), GUILDE)[0] is False
 
 
+def test_la_carte_de_lutecia_vaut_dans_toute_la_france():
+	"""Auteur, 11/11 : les guildes de France reconnaissent la carte de Lutecia — pas celles
+	d'ailleurs, et aucune autre cité ne voit la sienne reconnue hors de chez elle."""
+	cites = {"lieu:lyon": {"lieu_parent": "lieu:france"}, "lieu:bruges": {"lieu_parent": "lieu:plaine_europeenne"},
+			 "lieu:auxerre": {"lieu_parent": "lieu:france"}}
+	get = cites.get
+	assert recrutement.CARTES_RECONNUES["lieu:lutecia"] == "lieu:france"
+	carte = lambda cite: perso(inventaire=[{"item": "item:carte_aventurier", "poids": 0.05, "lieu_parent": cite}])
+	guilde = lambda cite: {"_id": "lieu:g", "type": "lieu", "lieu_parent": cite}
+	assert recrutement.acces_autorise(carte("lieu:lutecia"), guilde("lieu:lyon"), get)[0] is True
+	assert recrutement.acces_autorise(carte("lieu:lutecia"), guilde("lieu:bruges"), get)[0] is False
+	assert recrutement.acces_autorise(carte("lieu:auxerre"), guilde("lieu:lyon"), get)[0] is False
+	assert recrutement.acces_autorise(carte("lieu:lyon"), guilde("lieu:lutecia"), get)[0] is False
+	assert recrutement.carte_valable_dans("lieu:lutecia", None, get) is False   # fail-closed
+
+
 def test_acces_libre_si_carte_non_requise(monde, monkeypatch):
 	monkeypatch.setattr(character_stats, "RECRUTEMENT_CARTE_REQUISE", False)
 	assert recrutement.acces_autorise(perso(), GUILDE)[0] is True
