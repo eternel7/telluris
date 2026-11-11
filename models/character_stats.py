@@ -151,6 +151,9 @@ TOWN_PROFIL_NIVEAU_MAX: int = 2
 # V coûte 10× plus cher, toutes les autres stats coûtent 1 par point au-dessus du min racial
 XP_COEFF: dict[str, int] = {"V": 10}
 XP_VOC_COEFF: int = 5
+# Plafond du niveau de VOCATION (principal comme compagnon) : `spend_xp_vocation` refuse
+# au-delà, la fiche masque le bouton « Monter ». 10 = le contenu des compétences (1 → 10).
+VOC_NIVEAU_MAX: int = 10
 
 # Réduction du plafond pour les stats hors quota d'accessibilité
 # V perd 1 point, toutes les autres perdent 10 points sous le max racial
@@ -1003,6 +1006,7 @@ def current_world_variables() -> dict:
 		"TOWN_PROFIL_NIVEAU_MAX": TOWN_PROFIL_NIVEAU_MAX,
 		"XP_COEFF": dict(XP_COEFF),
 		"XP_VOC_COEFF": XP_VOC_COEFF,
+		"VOC_NIVEAU_MAX": VOC_NIVEAU_MAX,
 		"SUB_CAP_REDUCTION": dict(_SUB_CAP_REDUCTION),
 		"PRIX_DERIVE_BASE": PRIX_DERIVE_BASE,
 		"MULT_RARETE": dict(MULT_RARETE),
@@ -1182,7 +1186,7 @@ def load_world_variables() -> dict:
 	"""
 	global MONSTRE_DES_CC_NATURELS, MONSTRE_EQUIPEMENT_PROBA
 	global FACTEUR_DEGATS_ARMURE, JET_PORTEE_F_DIV, DETECTION_DISTANCE_FACTEUR, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
-	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT, DEUX_ARMES_MALUS_SECOND
+	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT, DEUX_ARMES_MALUS_SECOND, VOC_NIVEAU_MAX
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, RACHAT_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
 	global NEGOCE_COMMISSION_MIN, NEGOCE_COMMISSION_MAX, NEGOCE_SEUIL_REVENTE_CUIVRE, NEGOCE_BONUS_CONVERSION
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION, VENTE_PNJ_REDISTRIB
@@ -1255,6 +1259,7 @@ def load_world_variables() -> dict:
 	XP_NIVEAU_INCREMENT        = max(0, int(v.get("XP_NIVEAU_INCREMENT", XP_NIVEAU_INCREMENT)))
 	TOWN_PROFIL_NIVEAU_MAX     = int(v.get("TOWN_PROFIL_NIVEAU_MAX", TOWN_PROFIL_NIVEAU_MAX))
 	XP_VOC_COEFF               = int(v.get("XP_VOC_COEFF", XP_VOC_COEFF))
+	VOC_NIVEAU_MAX             = max(0, int(v.get("VOC_NIVEAU_MAX", VOC_NIVEAU_MAX)))
 	if isinstance(v.get("XP_COEFF"), dict):
 		XP_COEFF.clear()
 		XP_COEFF.update({k: int(x) for k, x in v["XP_COEFF"].items()})

@@ -2738,6 +2738,12 @@ async def spend_xp_vocation(
 	voc_niveau = vocations_niveaux.get(voc, 0)
 	cout = (voc_niveau + 1) * character_stats.XP_VOC_COEFF
 
+	# Plafond AVANT le contrôle des points : au maximum, rien ne se dépense (le bouton de la
+	# fiche est masqué, cette garde arrête l'appel forgé). Lu via le module : variable de monde.
+	voc_max = character_stats.VOC_NIVEAU_MAX
+	if voc_niveau >= voc_max:
+		raise HTTPException(status_code=422, detail=f"Niveau de vocation maximal atteint ({voc_max})")
+
 	attribute_points = character.get("attribute_points", 0)
 	if attribute_points < cout:
 		raise HTTPException(status_code=422, detail=f"Points insuffisants (besoin {cout}, disponible {attribute_points})")
@@ -2750,7 +2756,10 @@ async def spend_xp_vocation(
 	return {
 		"attribute_points": character["attribute_points"],
 		"voc_niveau":    voc_niveau + 1,
-		"xp_cout_next":  (voc_niveau + 2) * 5,
+		"voc_niveau_max": voc_max,
+		"xp_cout_next":  (voc_niveau + 2) * character_stats.XP_VOC_COEFF,
+		# Le niveau débloque des compétences / sorts : « 📖 Apprendre » se resynchronise (§10).
+		"fiche": _fiche_payload(character),
 	}
 
 

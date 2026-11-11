@@ -2379,7 +2379,7 @@
 								<span><span id="sh-voc-label">{{ vocation["label"] }}</span> Niv. : <strong id="sh-voc-niveau" class="voc-niveau niveau-nb">{{ voc_niveau }}</strong></span>
 								<button class="sh-xp-btn" id="sh-btn-voc-niveau"
 										{% if attribute_points < voc_cout %}disabled{% endif %}
-										{% if attribute_points == 0 %}style="display:none"{% endif %}
+										{% if attribute_points == 0 or voc_niveau >= voc_niveau_max %}style="display:none"{% endif %}
 										onclick="spendXpVocation()">
 									Monter — <span id="sh-voc-cout">{{ voc_cout }}</span> P<small>oints</small>
 								</button>
@@ -5696,6 +5696,7 @@ function _majPointsCompagnons(groupe) {
 }
 const _STAT_COEFF = {{ xp_coeff | tojson | safe }};
 const _VOC_COEFF = {{ xp_voc_coeff | tojson | safe }};
+const _VOC_NIVEAU_MAX = {{ voc_niveau_max | tojson | safe }};
 const _JET_F_DIV = {{ jet_portee_f_div | tojson | safe }};
 // Grille « Profil modifié » : {code: {base, total, delta, sources:[{origine,nom,icon,delta}]}}
 let _caractsDetail = {{ caracts_detail | tojson | safe }};
@@ -5822,8 +5823,9 @@ function _refreshStatBoxes() {
 	const btn = document.getElementById('sh-btn-voc-niveau');
 	if (btn) {
 		const cost_vocation = (_vocNiveau + 1) * _VOC_COEFF;
-		btn.style.display = (_attributePoints > 0 && _vocNiveau < 5) ? '' : 'none';
-		btn.disabled = _vocNiveau >= 5 || _attributePoints < cost_vocation;
+		// Au plafond (variable de monde VOC_NIVEAU_MAX), le bouton n'existe plus pour le joueur.
+		btn.style.display = (_attributePoints > 0 && _vocNiveau < _VOC_NIVEAU_MAX) ? '' : 'none';
+		btn.disabled = _vocNiveau >= _VOC_NIVEAU_MAX || _attributePoints < cost_vocation;
 	}
 }
 
@@ -5934,6 +5936,8 @@ async function spendXpVocation() {
 		const elCout = document.getElementById('sh-voc-cout');
 		if (elCout) elCout.textContent = data.xp_cout_next;
 		_syncPoints(data.attribute_points);
+		// Le nouveau niveau débloque des compétences / sorts : « 📖 Apprendre » suit (§10).
+		_appliquerFiche(data.fiche);
 	} catch (err) { console.error('Erreur spend_xp_vocation', err); }
 }
 

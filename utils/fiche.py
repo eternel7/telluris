@@ -99,6 +99,7 @@ def bloc_fiche(character: dict, get_doc_fn, find_docs_fn, race: dict | None = No
 		"max_bonus_used": character.get("max_bonus_used"),
 		"xp_coeff": character_stats.XP_COEFF,
 		"xp_voc_coeff": character_stats.XP_VOC_COEFF,
+		"voc_niveau_max": character_stats.VOC_NIVEAU_MAX,
 		"xp_niv_prev": xp_seuil_niveau(niveau),
 		"xp_niv_next": xp_seuil_niveau(niveau + 1),
 		"effets_actifs": consommables.effets_actifs_payload(character),
