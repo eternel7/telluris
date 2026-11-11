@@ -437,32 +437,33 @@ def test_la_carte_d_une_capitale_fait_membre_sous_son_parent_sans_inscrire():
 	assert chasse.membre_de_la_guilde(_inscrit(), "lieu:auxerre", pays)
 
 
-def test_la_carte_d_une_capitale_recopie_son_rang_sans_jamais_retrograder():
-	"""Auteur, 11/11 : la carte d'une capitale reconnue fait recopier son rang au registre de la
-	cité — à la hausse seulement, et rien hors du même `lieu_parent` ni sans rang à la source."""
+def test_l_inscription_remet_la_carte_au_rang_de_la_capitale_au_minimum():
+	"""Auteur, 11/11 : à l'INSCRIPTION (et seulement là), la carte d'une capitale reconnue au sac
+	fait du rang de la capitale le rang minimum de la nouvelle carte — jamais à la baisse, rien
+	hors du même `lieu_parent`, rien sans rang à la source."""
 	docs = {"lieu:lutecia": {"sous_categorie": "capitale", "lieu_parent": "lieu:france"},
 			"lieu:auxerre": {"sous_categorie": "ville", "lieu_parent": "lieu:france"},
 			"lieu:rome": {"sous_categorie": "capitale", "lieu_parent": "lieu:italie"}}
 	get = docs.get
 	carte = {"item": "item:carte_aventurier", "poids": 0.05, "lieu_parent": "lieu:lutecia"}
+	f_auxerre = {"cite": "lieu:auxerre", "rang": "F"}
 	perso = {"inventaire": [carte], "rangs_guilde": {"lieu:lutecia": "B"}}
-	assert chasse.reconnaitre_rang_carte(perso, "lieu:auxerre", get) == "B"
+	assert chasse.inscrire(perso, f_auxerre, get) == "B"
 	assert perso["rangs_guilde"]["lieu:auxerre"] == "B"
-	assert chasse.inscrit_a_la_guilde(perso, "lieu:auxerre")
-	assert chasse.reconnaitre_rang_carte(perso, "lieu:auxerre", get) is None   # déjà recopié
-	perso["rangs_guilde"]["lieu:lutecia"] = "A"                                   # promu à Lutecia
-	assert chasse.reconnaitre_rang_carte(perso, "lieu:auxerre", get) == "A"
+	# Rang local déjà meilleur : rien ne baisse.
 	mieux = {"inventaire": [carte], "rangs_guilde": {"lieu:lutecia": "D", "lieu:auxerre": "C"}}
-	assert chasse.reconnaitre_rang_carte(mieux, "lieu:auxerre", get) is None
+	assert chasse.inscrire(mieux, f_auxerre, get) is None
 	assert mieux["rangs_guilde"]["lieu:auxerre"] == "C"
-	assert chasse.reconnaitre_rang_carte(perso, "lieu:rome", get) is None        # autre pays
-	assert "lieu:rome" not in perso["rangs_guilde"]
+	# Autre pays, ou aucun rang à Lutecia : inscription au rang du don.
+	rome = {"inventaire": [carte], "rangs_guilde": {"lieu:lutecia": "B"}}
+	assert chasse.inscrire(rome, {"cite": "lieu:rome", "rang": "F"}, get) == "F"
 	sans_rang = {"inventaire": [carte], "rangs_guilde": {}}
-	assert chasse.reconnaitre_rang_carte(sans_rang, "lieu:auxerre", get) is None
-	assert chasse.reconnaitre_rang_carte(perso, None, get) is None
-	# Une carte d'Auxerre ne recopie rien à Lutecia : seule une CAPITALE est reconnue.
+	assert chasse.inscrire(sans_rang, f_auxerre, get) == "F"
+	# Spec illisible : fail-closed, rien n'est écrit.
+	assert chasse.inscrire(perso, {"cite": "lieu:auxerre", "rang": "Z"}, get) is None
+	# Une carte d'Auxerre ne relève rien à Lutecia : seule une CAPITALE est reconnue.
 	auxerrois = {"inventaire": [dict(carte, lieu_parent="lieu:auxerre")], "rangs_guilde": {"lieu:auxerre": "B"}}
-	assert chasse.reconnaitre_rang_carte(auxerrois, "lieu:lutecia", get) is None
+	assert chasse.inscrire(auxerrois, {"cite": "lieu:lutecia", "rang": "F"}, get) == "F"
 
 
 def test_offre_rang_tire_une_epreuve_max():

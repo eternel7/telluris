@@ -523,12 +523,10 @@ def reconnaitre_rang(character: dict, cite_source: str, cite_cible: str) -> str 
 
 
 def reconnaitre_rang_carte(character: dict, cite_id: str | None, get_doc_fn) -> str | None:
-	"""La carte d'une CAPITALE reconnue ici (`recrutement.carte_valable_dans`) fait RECOPIER son
-	rang au registre de cette cité (Auteur, 11/11) — `reconnaitre_rang`, donc jamais de
-	rétrogradation, rien sans rang dans la capitale. Mute sans save ; appelé au CONTACT d'une
-	guilde (dialogue PNJ, tableaux de quêtes et de recrues, déplacement vers un lieu de la cité),
-	donc relu à chaque visite : une promotion dans la capitale suit au passage suivant. Le
-	rang recopié reste au registre, carte perdue ou non. Renvoie le rang si le doc a CHANGÉ."""
+	"""La carte d'une CAPITALE reconnue ici (`recrutement.carte_valable_dans`) fait recopier son
+	rang au registre de cette cité (`reconnaitre_rang` : jamais à la baisse, rien sans rang dans
+	la capitale). Mute sans save. ⚠️ À l'INSCRIPTION seulement (`inscrire`), jamais au simple
+	passage (Auteur, 11/11). Renvoie le rang si le doc a CHANGÉ, None sinon."""
 	if not cite_id:
 		return None
 	promu = None
@@ -538,6 +536,17 @@ def reconnaitre_rang_carte(character: dict, cite_id: str | None, get_doc_fn) -> 
 				and carte_valable_dans(source, cite_id, get_doc_fn)):
 			promu = reconnaitre_rang(character, source, cite_id) or promu
 	return promu
+
+
+def inscrire(character: dict, spec, get_doc_fn) -> str | None:
+	"""INSCRIPTION à une guilde (`{cite, rang}` d'un don de carte ou d'une première mission) :
+	`crediter_rang`, puis le rang d'une carte de capitale reconnue au sac sert de MINIMUM
+	(`reconnaitre_rang_carte`) — la carte de Lyon remise à qui porte celle de Lutecia au rang B
+	est une carte de rang B. Mute sans save ; renvoie le rang si le doc a CHANGÉ."""
+	if not isinstance(spec, dict) or not spec.get("cite") or spec.get("rang") not in RANGS:
+		return None   # fail-closed, comme `crediter_rang` : aucune inscription, rien à recopier
+	promu = crediter_rang(character, spec)
+	return reconnaitre_rang_carte(character, spec["cite"], get_doc_fn) or promu
 
 
 def inscrit_a_la_guilde(character: dict, cite_id: str) -> bool:

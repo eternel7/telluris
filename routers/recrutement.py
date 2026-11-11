@@ -19,7 +19,6 @@ from utils.characters import (
 # `credit_character` et la bourse) : c'est le seul débit du jeu, il refuse en rendant None.
 from utils.marche import debit_character
 from utils import recrutement
-from utils import chasse
 from utils import mercenaires
 from utils import montures
 from utils import escorte
@@ -60,9 +59,6 @@ def _acces_tableau(current_user: dict) -> tuple[dict, dict]:
 	ok, raison = recrutement.acces_autorise(character, lieu_doc)
 	if not ok:
 		raise HTTPException(status_code=403, detail=raison)
-	# Carte d'une capitale reconnue ici : son rang est recopié au registre de la cité.
-	if chasse.reconnaitre_rang_carte(character, lieu_doc.get("lieu_parent"), get_doc):
-		save_doc(character)
 	return character, lieu_doc
 
 

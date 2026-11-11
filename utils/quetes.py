@@ -933,9 +933,10 @@ def appliquer_recompenses(character: dict, q: dict, compagnons: list | None = No
 	# la guilde, là où l'épreuve de rang le fait MONTER (`chasse.promouvoir`).
 	# ⚠️ Import PARESSEUX : `chasse` importe ce module, un import de tête boucle.
 	rang = None
+	# Une carte de CAPITALE reconnue au sac relève ce rang au sien (`chasse.inscrire`).
 	if rec.get("rang_guilde"):
-		from utils.chasse import crediter_rang
-		rang = crediter_rang(character, rec["rang_guilde"])
+		from utils.chasse import inscrire
+		rang = inscrire(character, rec["rang_guilde"], get_doc_fn or get_doc)
 	return {"xp": xp_info, "purse": purse, "compagnie": compagnie, "rang": rang}
 
 

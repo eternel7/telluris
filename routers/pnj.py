@@ -79,8 +79,8 @@ def _pnj_du_lieu(character: dict, pnj_id: str | None = None) -> tuple[dict, dict
 
 def _inscrit_sans_carte_valable(character: dict, cite: str | None) -> bool:
 	"""Garde de la carte PERDUE : inscrit à cette cité ET aucune carte qui y vaille au sac. Le
-	porteur d'une carte de capitale reconnue n'a rien perdu — son rang recopié l'inscrit, mais
-	la réceptionniste ne se moque pas d'une carte locale qu'elle ne lui a jamais remise."""
+	porteur d'une carte de capitale reconnue y est reçu en membre : rien à remplacer, il
+	peut toujours s'inscrire (et faire recopier le rang de la capitale, `chasse.inscrire`)."""
 	return (chasse.inscrit_a_la_guilde(character, cite)
 			and not recrutement.porte_carte_valable(character, cite, get_doc))
 
@@ -1009,9 +1009,7 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)],
 	# Une course dont le délai vient d'expirer ne doit pas être livrable : on solde les
 	# échéances (et leur sanction de réputation) avant de composer le dialogue.
 	echues = transport.traiter_expirations(character, quetes.now_epoch(), get_doc, save_doc)
-	# Carte d'une capitale reconnue ici : son rang est recopié au registre de la cité.
-	rang_recopie = chasse.reconnaitre_rang_carte(character, (lieu_doc or {}).get("lieu_parent"), get_doc)
-	if echues or rang_recopie:
+	if echues:
 		save_doc(character)
 	contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 	# Un dialogue encore sous délai s'ouvre sur son `noeud_attente` (refus parlé) et non sur son
@@ -1078,9 +1076,7 @@ async def pnj_dialogue_choix(
 
 	entree, pnj_doc, lieu_doc = _pnj_du_lieu(character, body.get("pnj_id"))
 	echues = transport.traiter_expirations(character, quetes.now_epoch(), get_doc, save_doc)
-	# Carte d'une capitale reconnue ici : son rang est recopié au registre de la cité.
-	rang_recopie = chasse.reconnaitre_rang_carte(character, (lieu_doc or {}).get("lieu_parent"), get_doc)
-	if echues or rang_recopie:
+	if echues:
 		save_doc(character)
 	contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 	noeud_id = body.get("noeud")
@@ -1152,7 +1148,9 @@ async def pnj_dialogue_choix(
 			# Inscription portée par le don (`rang_guilde`), résolue comme une récompense de
 			# transport : la cité est celle du lieu. `crediter_rang` ne rétrograde jamais.
 			spec_rang = transport.rang_guilde_recompense(don["rang_guilde"], lieu_doc).get("rang_guilde")
-			promu = chasse.crediter_rang(character, spec_rang) if spec_rang else None
+			# Une carte de CAPITALE reconnue ici, au sac, relève ce rang d'inscription au sien
+			# (`chasse.inscrire`) : la carte de la ville est remise à ce rang au minimum.
+			promu = chasse.inscrire(character, spec_rang, get_doc) if spec_rang else None
 			# Rang d'une autre cité RECONNU à l'inscription (`rang_reconnu`) : jamais en dessous
 			# du rang d'inscription, `crediter_rang` ne rétrogradant pas.
 			if spec_rang and don.get("rang_reconnu"):
