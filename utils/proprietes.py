@@ -40,6 +40,7 @@ from db.config import get_doc
 from models import character_stats
 from utils.characters import item_ref_weight, resolve_item_ref, poids_bounds, tirer_poids
 from utils import consommables
+from utils import enseignes_icones
 from utils import contenants
 from utils import marche
 from utils import negoce
@@ -496,7 +497,7 @@ def peut_ceder(prop: dict, employes: list | None = None) -> tuple[bool, str]:
 	if any(_int(e.get("caisse_cuivre")) for e in employes or []):
 		return False, "Relevez d'abord la caisse de vos marchands."
 	if prop.get("coffre"):
-		return False, "Videz le coffre avant de céder la propriété."
+		return False, "Videz le rangement avant de céder la propriété."
 	if prop.get("heberges"):
 		return False, "Reprenez d'abord les compagnons hébergés ici."
 	if prop.get("ecurie"):
@@ -633,7 +634,7 @@ def peut_deposer(role: str, prop: dict, cat: dict, ref) -> tuple[bool, str]:
 		return False, "Vous ne pouvez rien déposer ici."
 	plafond = capacites(prop, cat)["stockage_kg"]
 	if poids_coffre(prop) + item_ref_weight(ref) > plafond:
-		return False, f"Le coffre est plein ({plafond} kg)."
+		return False, f"Le rangement est plein ({plafond} kg)."
 	return True, ""
 
 
@@ -646,7 +647,7 @@ def peut_retirer(role: str, prop: dict, gardien: bool) -> tuple[bool, str]:
 		if gardien:
 			return False, "Un gardien veille : impossible de se servir ici."
 		return True, ""
-	return False, "Ce coffre ne vous est pas accessible."
+	return False, "Ce rangement ne vous est pas accessible."
 
 
 def deposer(character: dict, prop: dict, pos: int) -> object:
@@ -1166,7 +1167,7 @@ def textes_effets(adef: dict, cat: dict) -> list:
 			elif cle == "garde":
 				# Lu par `gardien_present`, qui exige le poste tenu : jamais actif à vide.
 				t = (f"avec un(e) {label_poste} au poste : " if label_poste and not prefixe else "") \
-					+ "protège le coffre et la caisse du vol"
+					+ "protège le rangement et la caisse du vol"
 			elif cle == "vol_limite":
 				t = (f"sans gardien, un voleur n'emporte que {int(float(val.get('fraction', 1)) * 100)} %"
 					 f" {_periode(val.get('delai_s'))}")
@@ -1175,7 +1176,7 @@ def textes_effets(adef: dict, cat: dict) -> list:
 			elif cle == "registre":
 				t = "relève d'ici les caisses de vos biens de la cité"
 			elif cle == "grimoires_coffre":
-				t = "les grimoires du coffre comptent comme portés pour apprendre"
+				t = "les grimoires du rangement comptent comme portés pour apprendre"
 			elif cle == "scriptorium":
 				t = "on peut y écrire comme au scriptorium"
 			elif cle == "releve_auto":
@@ -1186,9 +1187,27 @@ def textes_effets(adef: dict, cat: dict) -> list:
 				t = f"récolte {_int(val.get('quantite'), 1)} objet(s) {_periode(val.get('delai_s'))}"
 			if t:
 				out.append(prefixe + t)
-	ec = _int((adef.get("capacite") or {}).get("ecurie"))
+	cap = adef.get("capacite") or {}
+	ec = _int(cap.get("ecurie"))
 	if ec:
 		out.append(f"{ec} place(s) d'écurie")
+	# Ce que l'aménagement OUVRE, lu dans `capacite` / `activite` : toute fiche dit ce qu'on achète.
+	kg = _int(cap.get("stockage_kg"))
+	if kg:
+		out.append(f"+{kg} kg de rangement")
+	occ = _int(cap.get("occupants"))
+	if occ:
+		out.append(f"+{occ} occupant(s)")
+	for metier, n in (cap.get("postes") or {}).items():
+		if _int(n) > 0:
+			out.append(f"{_int(n)} poste(s) : {(metier_def(cat, metier) or {}).get('label', metier)}")
+	act = adef.get("activite") or {}
+	if act.get("label"):
+		# « une cuisine, une boulangerie » : libellés de métier de la carte, l'id brut à défaut.
+		cats = ", ".join((enseignes_icones.METIERS.get(c) or (None, None, c))[2]
+						 for c in act.get("categories") or [])
+		out.append(f"ouvre l'activité {act['label']}"
+				   + (f" : produit et vend comme {cats}" if cats else ""))
 	return out
 
 

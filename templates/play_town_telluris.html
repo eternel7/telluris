@@ -2199,7 +2199,7 @@
 					{% for a in proprietes_ateliers %}
 					<li class="prop-atelier-li"><button class="sub-loc-btn" data-id="{{ a.id }}" onclick="choisirAtelier(this)">🏷️ {{ a.nom }} — {{ a.metier }}{% if a.grande %} ✦{% endif %}</button></li>
 					{% endfor %}
-					<li id="prop-coffre-li"><button class="sub-loc-btn" onclick="openCoffre()">📦 Coffre</button></li>
+					<li id="prop-coffre-li"><button class="sub-loc-btn" onclick="openCoffre()">📦 Rangement</button></li>
 					{% if role_propriete == 'proprietaire' %}
 					<li><button class="sub-loc-btn" onclick="openEmbauche()">🤝 Embaucher</button></li>
 					{% endif %}
@@ -2929,9 +2929,9 @@
 	{# Coffre du lieu : MÊME présentation que l'inventaire du groupe (#grp-inv-wrap) — à gauche
 	   votre sac ou celui d'un compagnon / d'une monture, à droite le coffre ou l'atelier d'un
 	   marchand, chacun choisi à son sélecteur. #}
-	<div id="prop-coffre-panel" class="panel-hidden panel-frame board-panel" aria-label="Coffre">
+	<div id="prop-coffre-panel" class="panel-hidden panel-frame board-panel" aria-label="Rangement">
 		<div class="sell-topbar">
-			<header class="location-desc" aria-label="Coffre">
+			<header class="location-desc" aria-label="Rangement">
 			<h2>📦 {{title}}</h2>
 			</header>
 			<button class="sheet-tab-btn close-sheet-btn" onclick="closeCoffre()" role="button">⟵ Retour</button>
@@ -10942,11 +10942,11 @@ function renderProprietesOffre(data) {
 		const l = data.location, ch = l.chambre;
 		const etat = !ch ? 'Aucune chambre louée ici.'
 			: ch.statut === 'louee' ? `Votre chambre est louée jusqu'au ${_propDate(ch.expire_at)}.`
-			: `Votre location a expiré : relouez avant le ${_propDate(ch.expire_at + (l.grace_s || 0))} ou l'aubergiste reprendra la chambre et son coffre.`;
+			: `Votre location a expiré : relouez avant le ${_propDate(ch.expire_at + (l.grace_s || 0))} ou l'aubergiste reprendra la chambre et son rangement.`;
 		html += `<section class="prop-section"><h3>🛏️ Chambre à louer</h3><div class="prop-ligne"><div class="prop-txt">
 			<span class="q-desc">${escapeHtml(l.type.description || '')}</span>
 			<span class="q-desc">Durée : ${Math.round(l.duree_s / 86400 * 10) / 10} jour(s) · inviolable</span>
-			<span class="q-desc">⚠️ Non renouvelée ${Math.round((l.grace_s || 0) / 86400 * 10) / 10} jour(s) après l'échéance, la chambre est reprise : les affaires laissées dans son coffre sont perdues.</span>
+			<span class="q-desc">⚠️ Non renouvelée ${Math.round((l.grace_s || 0) / 86400 * 10) / 10} jour(s) après l'échéance, la chambre est reprise : les affaires laissées dans son rangement sont perdues.</span>
 			<span class="q-desc">${etat}</span>
 			<span class="sell-prix">💰 ${_prixTexte(l.prix)}</span>
 		</div><button class="sh-drop-btn" ${l.prix > bourse ? 'disabled' : ''} onclick="propLouer()">${ch ? 'Prolonger' : 'Louer'}</button></div></section>`;
@@ -10981,11 +10981,11 @@ function renderPropriete(data) {
 	}
 
 	html += `<section class="prop-section"><h3>📐 Capacités</h3>${_propCaps(data.capacites)}
-		<span class="q-desc">${data.gardien ? '🛡️ Un gardien veille sur les lieux.' : (loc ? '🔒 Chambre inviolable.' : '⚠️ Aucun gardien : un visiteur peut se servir dans le coffre.')}</span></section>`;
+		<span class="q-desc">${data.gardien ? '🛡️ Un gardien veille sur les lieux.' : (loc ? '🔒 Chambre inviolable.' : '⚠️ Aucun gardien : un visiteur peut se servir dans le rangement.')}</span></section>`;
 
 	html += `<section class="prop-section"><h3>🛠️ Aménagements installés</h3><div class="prop-liste">`
 		+ (data.installes.map(a => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(a.nom)}</strong>
-			<span class="q-desc">${_propCategorie(a.categorie)}</span>${_propEffets(a, true)}</div></div>`).join('')
+			<span class="q-desc">${_propCategorie(a.categorie)}${a.description ? ' · ' + escapeHtml(a.description) : ''}</span>${_propEffets(a, true)}</div></div>`).join('')
 		|| '<div class="sell-empty">Aucun aménagement.</div>') + `</div></section>`;
 
 	if (gere) html += _propQuotidien(data);
@@ -11081,7 +11081,7 @@ async function propEcurie(btn, geste) {
 // (serveur, au passage). ⚠️ `showToast` écrit en textContent : rien à échapper.
 function _notifierChambresReprises(rep) {
 	((rep && rep.chambres_reprises) || []).forEach(c => {
-		showToast(`🛏️ ${c.auberge ? "L'aubergiste de " + c.auberge : "L'aubergiste"} a repris votre chambre faute de paiement : les affaires laissées dans son coffre sont perdues.`, { major: true });
+		showToast(`🛏️ ${c.auberge ? "L'aubergiste de " + c.auberge : "L'aubergiste"} a repris votre chambre faute de paiement : les affaires laissées dans son rangement sont perdues.`, { major: true });
 	});
 }
 
@@ -11285,7 +11285,7 @@ function renderCoffre(data) {
 	const sel = document.getElementById('pcf-select');
 	if (_pcfSel !== 'coffre' && !ateliers.some(a => a.id === _pcfSel)) _pcfSel = 'coffre';
 	if (sel) {
-		sel.innerHTML = `<option value="coffre">📦 Coffre</option>` + ateliers.map(a =>
+		sel.innerHTML = `<option value="coffre">📦 Rangement</option>` + ateliers.map(a =>
 			`<option value="${escapeHtml(a.id)}">🏷️ ${escapeHtml(a.nom)} — ${escapeHtml(a.metier_label)}</option>`).join('');
 		sel.value = _pcfSel;
 	}
@@ -11334,7 +11334,7 @@ function renderCoffre(data) {
 		_grpRemplirSac('pcf-principal', inv, inv.length ? ordInv.map(i => {
 			const it = inv[i];
 			return _pcfLigne(it, posG(i), '→', 'coffreDeposer', c.depot && (+it.poids || 0) <= libre + 1e-6,
-				c.depot ? 'Ranger dans le coffre' : 'Vous ne pouvez rien déposer ici', 'droite', 'pcf_sac', null, i);
+				c.depot ? 'Ranger ici' : 'Vous ne pouvez rien déposer ici', 'droite', 'pcf_sac', null, i);
 		}).join('') : videG);
 		const items = c.inventaire || [];
 		const ordCoffre = _sortedOrder(items, 'asc').map(i => items[i]);
@@ -11347,7 +11347,7 @@ function renderCoffre(data) {
 						: ctnG ? 'Trop lourd — le contenant est plein' : 'Trop lourd — le destinataire est à sa charge maximale')
 					: data.role === 'visiteur' ? 'Dérober' : 'Prendre', 'gauche', 'pcf_coffre');
 			}).join('')
-			: '<div class="sh-empty"><span class="sh-empty-icon">📦</span>Coffre vide</div>');
+			: '<div class="sh-empty"><span class="sh-empty-icon">📦</span>Rangement vide</div>');
 		_pcfOmbres();
 		return;
 	}
@@ -11396,7 +11396,7 @@ function coffreDeposer(btn) {
 
 async function coffrePrendre(btn) {
 	const data = await _pcfPost('api/proprietes/coffre/transferer', _pcfCorps('vers_principal', btn));
-	if (data && data.vol) showToast('🫳 Vous vous êtes servi dans le coffre…');
+	if (data && data.vol) showToast('🫳 Vous vous êtes servi dans le rangement…');
 }
 
 function atelierDonner(btn) {
