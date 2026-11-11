@@ -1,0 +1,2279 @@
+{
+	"docs": [
+		{
+			"_id": "pnj:andecombe_coteaux",
+			"type": "pnj",
+			"nom": "Andécombe des Coteaux",
+			"race": "humain",
+			"vocation": "receptionniste",
+			"portrait": "guilde_humain_f_rhemi01.jpg",
+			"description": "Réceptionniste du Carrefour des Rèmes. Une jeune humaine sèche au regard franc, fille de vignerons, qui délivre les sauf-conduits comme on rend un verdict.",
+			"services": {
+				"don": {
+					"item": "item:carte_aventurier",
+					"quantite": 1,
+					"cout_cuivre": 0,
+					"lieu_parent": "auto",
+					"rang_guilde": "F",
+					"unique": true,
+					"noeuds": {
+						"fait": "inscription_faite",
+						"sans_fonds": "inscription_sans_fonds",
+						"trop_charge": "inscription_trop_charge",
+						"remplacement": "carte_remplacee"
+					}
+				},
+				"rang": {
+					"noeuds": {
+						"propose": "rang_propose",
+						"accepte": "rang_accepte",
+						"rapporte": "rang_rapporte"
+					}
+				},
+				"acces": {
+					"lieu": "lieu:le_carrefour_des_remes_bureau_du_maitre",
+					"noeuds": {
+						"ouvre": "acces_ouvre",
+						"refus": "acces_refus",
+						"deja": "acces_deja"
+					}
+				}
+			},
+			"dialogue": {
+				"noeud_depart": "accueil",
+				"noeuds": {
+					"accueil": {
+						"texte": "Une jeune femme vous regarde droit dans les yeux en posant une lanterne de route sur le comptoir. « Le Carrefour des Rèmes, {prenom}. Andécombe. Vous êtes en route, et c'est ici que tout le monde s'arrête : par où arrivez-vous, et où comptez-vous aller ? »",
+						"choix": [
+							{
+								"id": "inscription",
+								"label": "« Je voudrais ma carte d'aventurier. »",
+								"condition": {
+									"don_recu": false,
+									"don_a_remplacer": false
+								},
+								"next": "inscription_propose"
+							},
+							{
+								"id": "carte_perdue",
+								"label": "« J'ai… perdu ma carte d'aventurier. »",
+								"condition": {
+									"don_a_remplacer": true
+								},
+								"action": {
+									"service": "don"
+								}
+							},
+							{
+								"id": "rang_proposer",
+								"label": "« Une épreuve pour monter en rang ? »",
+								"condition": {
+									"rang_offert": true
+								},
+								"next": "rang_propose"
+							},
+							{
+								"id": "rang_rapporter",
+								"label": "« C'est fait. Le « {espece} {rang_vise} » est tombé. »",
+								"condition": {
+									"rang_a_rapporter": true
+								},
+								"action": {
+									"service": "rang",
+									"op": "rapporter"
+								}
+							},
+							{
+								"id": "rang_sommet",
+								"label": "« Reste-t-il une épreuve à ma mesure ? »",
+								"condition": {
+									"rang_max": true
+								},
+								"next": "rang_sommet"
+							},
+							{
+								"id": "bureau",
+								"label": "« Je voudrais voir le maître de la Guilde. »",
+								"condition": {
+									"acces_ouvrable": true
+								},
+								"action": {
+									"service": "acces",
+									"op": "passer"
+								}
+							},
+							{
+								"id": "bureau_deja",
+								"label": "« Je monte voir le maître. »",
+								"condition": {
+									"acces_ouvert": true
+								},
+								"next": "acces_deja"
+							},
+							{
+								"id": "bureau_refus",
+								"label": "« Qui dirige la Guilde, ici ? »",
+								"condition": {
+									"acces_refuse": true
+								},
+								"next": "acces_refus"
+							},
+							{
+								"id": "q1",
+								"label": "« Pourquoi un carrefour ? »",
+								"next": "q1"
+							},
+							{
+								"id": "q2",
+								"label": "« Et ce vin qui fait éclater les fûts ? »",
+								"next": "q2"
+							},
+							{
+								"id": "rien",
+								"label": "« Rien pour l'instant. »",
+								"next": "fin"
+							}
+						]
+					},
+					"inscription_propose": {
+						"texte": "{pnj} ouvre le registre de la maison. « Votre nom, votre lignée, ce que vous savez faire. Chaque maison tient son registre, mais celui de la Guilde de Lutecia fait foi dans tout le pays : si vous portez sa carte, montrez-la-moi, et la vôtre portera au moins le même rang. Sans elle, on commence ici au premier échelon. »",
+						"choix": [
+							{
+								"id": "inscrire",
+								"label": "« Inscrivez-moi. »",
+								"action": {
+									"service": "don"
+								}
+							},
+							{
+								"id": "attendre",
+								"label": "« Pas encore. »",
+								"next": "accueil"
+							}
+						]
+					},
+					"inscription_faite": {
+						"texte": "Quelques lignes, un coup de buvard, et {pnj} fait glisser vers vous une plaque de cuir frappée de quatre routes qui se croisent. « Votre carte de Reims, {prenom}. Si vous portez un rang de Lutecia, il est recopié. Le tableau est dans la salle commune. »",
+						"choix": [
+							{
+								"id": "merci",
+								"label": "« Merci. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"inscription_sans_fonds": {
+						"texte": "« L'inscription ne coûte rien, {prenom}. Si quelqu'un vous a dit le contraire, envoyez-le-moi. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je reviendrai. »",
+								"next": "fin"
+							}
+						]
+					},
+					"inscription_trop_charge": {
+						"texte": "« Pas même la place d'une carte dans votre sac, {prenom} ? Allégez-vous. Le registre vous attendra. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je reviens le sac plus léger. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_propose": {
+						"texte": "{pnj} parcourt les signalements du jour et s'arrête sur une ligne. « Une épreuve, {prenom} ? Un {espece} d'exception écume {lieu}. Abattez-le, et le rang {rang_vise} sera à vous, avec {xp} points d'expérience. »",
+						"choix": [
+							{
+								"id": "rang_accepter",
+								"label": "« Je m'en occupe. »",
+								"action": {
+									"service": "rang",
+									"op": "accepter"
+								}
+							},
+							{
+								"id": "rang_reflechir",
+								"label": "« Laissez-moi y réfléchir. »",
+								"next": "accueil"
+							}
+						]
+					},
+					"rang_accepte": {
+						"texte": "{pnj} note l'épreuve à côté de votre nom. « Du côté de {lieu}. Revenez en un seul morceau, {prenom} : le registre n'aime pas les ratures. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« J'y vais. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_rapporte": {
+						"texte": "{pnj} écoute votre récit jusqu'au bout, puis trace une marque nette sur votre carte. « Vous voilà rang {rang}, {prenom}. La maison s'en souviendra. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_sommet": {
+						"texte": "« Rang {rang} : c'est tout ce que le Carrefour des Rèmes peut reconnaître, {prenom}. Pour monter plus haut, il faudra une capitale et son gibier. Votre nom restera ici. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je comprends. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"acces_ouvre": {
+						"texte": "« Rang {rang}, le registre en témoigne. » {pnj} désigne l'escalier de craie. « C'est là-haut : {portail}. Allez-y. »",
+						"choix": [
+							{
+								"id": "monter",
+								"label": "Monter au bureau.",
+								"next": "fin",
+								"deplacer": "lieu:le_carrefour_des_remes_bureau_du_maitre"
+							}
+						]
+					},
+					"acces_deja": {
+						"texte": "« Vous connaissez le chemin. » Un geste vers l'escalier de craie. « Montez, {prenom}. »",
+						"choix": [
+							{
+								"id": "monter",
+								"label": "Monter au bureau.",
+								"next": "fin",
+								"deplacer": "lieu:le_carrefour_des_remes_bureau_du_maitre"
+							}
+						]
+					},
+					"acces_refus": {
+						"texte": "« Iccios le Rème. Le maître de la Guilde. Le bureau ne reçoit qu'à partir du rang D de Reims, {prenom}, et vous en êtes à {rang}. Faites allonger la ligne à côté de votre nom : je vous y conduirai. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« J'y travaille. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"q1": {
+						"texte": "« Parce que c'est tout ce que nous avons. » Elle le dit sans regret. « Aucun portail ne s'allumera jamais ici : la craie boit le mana. La Porte de Mars n'a jamais servi, même si mon oncle jure l'avoir vue luire une fois. Alors on marche, vers Lutecia, vers Aix, vers Bruges, et la route passe chez nous. »",
+						"choix": [
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							},
+							{
+								"id": "fin",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"q2": {
+						"texte": "« Le vin du diable. » Elle sourit pour la première fois. « Mes parents en ont perdu trois tonneaux l'an dernier. Les crayères gardent le vin et les cristaux à l'abri du mana, et quand ça éclate là-dessous, on croit à une attaque. On a déjà payé des aventuriers pour descendre tuer une barrique. »",
+						"choix": [
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							},
+							{
+								"id": "fin",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"carte_remplacee": {
+						"texte": "Andécombe vous fixe sans ciller, comme un témoin qui vient de se contredire. « Votre sauf-conduit. Perdu. Sur la route. Au carrefour où passe toute la Champagne. » Le coin de sa bouche se relève à peine : chez elle, c'est un éclat de rire. Elle recopie votre nom d'une plume sèche. « Rang {rang}, le registre l'atteste. Votre carte, {prenom}. La prochaine, je vous la cloue au ceinturon. »",
+						"choix": [
+							{
+								"id": "merci",
+								"label": "« Merci. Je ferai attention. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"_id": "pnj:cynan_de_winchester",
+			"type": "pnj",
+			"nom": "Cynan de Winchester",
+			"race": "humain",
+			"vocation": "receptionniste",
+			"portrait": "guilde_humain_m_camelot01.jpg",
+			"description": "Réceptionniste de la Halle des Brèches. Un vieil humain bourru et fort, venu du bourg voisin, qui note chaque signalement de la campagne sur une grande carte.",
+			"services": {
+				"don": {
+					"item": "item:carte_aventurier",
+					"quantite": 1,
+					"cout_cuivre": 0,
+					"lieu_parent": "auto",
+					"rang_guilde": "F",
+					"unique": true,
+					"noeuds": {
+						"fait": "inscription_faite",
+						"sans_fonds": "inscription_sans_fonds",
+						"trop_charge": "inscription_trop_charge",
+						"remplacement": "carte_remplacee"
+					}
+				},
+				"rang": {
+					"noeuds": {
+						"propose": "rang_propose",
+						"accepte": "rang_accepte",
+						"rapporte": "rang_rapporte"
+					}
+				},
+				"acces": {
+					"lieu": "lieu:la_halle_des_breches_bureau_du_maitre",
+					"noeuds": {
+						"ouvre": "acces_ouvre",
+						"refus": "acces_refus",
+						"deja": "acces_deja"
+					}
+				}
+			},
+			"dialogue": {
+				"noeud_depart": "accueil",
+				"noeuds": {
+					"accueil": {
+						"texte": "Un vieil homme plante une épingle dans une carte déjà hérissée, puis seulement vous regarde. « La Halle des Brèches. Cynan. Si vous venez signaler une porte qui n'y était pas hier, dites-moi où. Si vous venez la fermer, dites-moi quand. Et vous, {prenom} ? »",
+						"choix": [
+							{
+								"id": "inscription",
+								"label": "« Je voudrais ma carte d'aventurier. »",
+								"condition": {
+									"don_recu": false,
+									"don_a_remplacer": false
+								},
+								"next": "inscription_propose"
+							},
+							{
+								"id": "carte_perdue",
+								"label": "« J'ai… perdu ma carte d'aventurier. »",
+								"condition": {
+									"don_a_remplacer": true
+								},
+								"action": {
+									"service": "don"
+								}
+							},
+							{
+								"id": "rang_proposer",
+								"label": "« Une épreuve pour monter en rang ? »",
+								"condition": {
+									"rang_offert": true
+								},
+								"next": "rang_propose"
+							},
+							{
+								"id": "rang_rapporter",
+								"label": "« C'est fait. Le « {espece} {rang_vise} » est tombé. »",
+								"condition": {
+									"rang_a_rapporter": true
+								},
+								"action": {
+									"service": "rang",
+									"op": "rapporter"
+								}
+							},
+							{
+								"id": "rang_sommet",
+								"label": "« Reste-t-il une épreuve à ma mesure ? »",
+								"condition": {
+									"rang_max": true
+								},
+								"next": "rang_sommet"
+							},
+							{
+								"id": "bureau",
+								"label": "« Je voudrais voir la maîtresse de la Guilde. »",
+								"condition": {
+									"acces_ouvrable": true
+								},
+								"action": {
+									"service": "acces",
+									"op": "passer"
+								}
+							},
+							{
+								"id": "bureau_deja",
+								"label": "« Je monte voir la maîtresse. »",
+								"condition": {
+									"acces_ouvert": true
+								},
+								"next": "acces_deja"
+							},
+							{
+								"id": "bureau_refus",
+								"label": "« Qui dirige la Guilde, ici ? »",
+								"condition": {
+									"acces_refuse": true
+								},
+								"next": "acces_refus"
+							},
+							{
+								"id": "q1",
+								"label": "« Qu'indiquent ces épingles ? »",
+								"next": "q1"
+							},
+							{
+								"id": "q2",
+								"label": "« Et Camelot, alors ? »",
+								"next": "q2"
+							},
+							{
+								"id": "rien",
+								"label": "« Rien pour l'instant. »",
+								"next": "fin"
+							}
+						]
+					},
+					"inscription_propose": {
+						"texte": "{pnj} ouvre le registre de la maison. « Votre nom, votre lignée, ce que vous savez faire. Chaque maison tient son registre, mais celui de la Guilde de Londres fait foi dans tout le pays : si vous portez sa carte, montrez-la-moi, et la vôtre portera au moins le même rang. Sans elle, on commence ici au premier échelon. »",
+						"choix": [
+							{
+								"id": "inscrire",
+								"label": "« Inscrivez-moi. »",
+								"action": {
+									"service": "don"
+								}
+							},
+							{
+								"id": "attendre",
+								"label": "« Pas encore. »",
+								"next": "accueil"
+							}
+						]
+					},
+					"inscription_faite": {
+						"texte": "Quelques lignes, un coup de buvard, et {pnj} fait glisser vers vous une plaque de cuir frappée d'un cor de chasse. « Votre carte de Camelot, {prenom}. Si vous portez un rang de Londres, il est recopié. Le tableau est dans la salle commune. »",
+						"choix": [
+							{
+								"id": "merci",
+								"label": "« Merci. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"inscription_sans_fonds": {
+						"texte": "« L'inscription ne coûte rien, {prenom}. Si quelqu'un vous a dit le contraire, envoyez-le-moi. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je reviendrai. »",
+								"next": "fin"
+							}
+						]
+					},
+					"inscription_trop_charge": {
+						"texte": "« Pas même la place d'une carte dans votre sac, {prenom} ? Allégez-vous. Le registre vous attendra. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je reviens le sac plus léger. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_propose": {
+						"texte": "{pnj} parcourt les signalements du jour et s'arrête sur une ligne. « Une épreuve, {prenom} ? Un {espece} d'exception écume {lieu}. Abattez-le, et le rang {rang_vise} sera à vous, avec {xp} points d'expérience. »",
+						"choix": [
+							{
+								"id": "rang_accepter",
+								"label": "« Je m'en occupe. »",
+								"action": {
+									"service": "rang",
+									"op": "accepter"
+								}
+							},
+							{
+								"id": "rang_reflechir",
+								"label": "« Laissez-moi y réfléchir. »",
+								"next": "accueil"
+							}
+						]
+					},
+					"rang_accepte": {
+						"texte": "{pnj} note l'épreuve à côté de votre nom. « Du côté de {lieu}. Revenez en un seul morceau, {prenom} : le registre n'aime pas les ratures. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« J'y vais. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_rapporte": {
+						"texte": "{pnj} écoute votre récit jusqu'au bout, puis trace une marque nette sur votre carte. « Vous voilà rang {rang}, {prenom}. La maison s'en souviendra. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_sommet": {
+						"texte": "« Rang {rang} : c'est tout ce que la Halle des Brèches peut reconnaître, {prenom}. Pour monter plus haut, il faudra une capitale et son gibier. Votre nom restera ici. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je comprends. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"acces_ouvre": {
+						"texte": "« Rang {rang}, le registre en témoigne. » {pnj} désigne l'escalier de pierre. « C'est là-haut : {portail}. Allez-y. »",
+						"choix": [
+							{
+								"id": "monter",
+								"label": "Monter au bureau.",
+								"next": "fin",
+								"deplacer": "lieu:la_halle_des_breches_bureau_du_maitre"
+							}
+						]
+					},
+					"acces_deja": {
+						"texte": "« Vous connaissez le chemin. » Un geste vers l'escalier de pierre. « Montez, {prenom}. »",
+						"choix": [
+							{
+								"id": "monter",
+								"label": "Monter au bureau.",
+								"next": "fin",
+								"deplacer": "lieu:la_halle_des_breches_bureau_du_maitre"
+							}
+						]
+					},
+					"acces_refus": {
+						"texte": "« Énide de Caerleon. La maîtresse de la Guilde. Le bureau ne reçoit qu'à partir du rang D de Camelot, {prenom}, et vous en êtes à {rang}. Faites allonger la ligne à côté de votre nom : je vous y conduirai. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« J'y travaille. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"q1": {
+						"texte": "« Des portes qui surgissent dans la campagne. Certaines restent, la plupart s'éteignent. » Il en retire une, en replante une autre. « Il en sort des bêtes qu'on n'a pas de nom pour désigner. Ici, on ne les cherche pas : on suit ce qui en sort. Ça, c'est le métier de la Table ronde et le nôtre. »",
+						"choix": [
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							},
+							{
+								"id": "fin",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"q2": {
+						"texte": "« Arthur l'a fondée juste après la Vague, à la croisée de tout ce qui débordait. » Il hausse les épaules. « Il y a une épée dans la cathédrale, et personne n'y touche. Caerleon, Cadbury et Tintagel se disent le vrai Camelot : allez-y, on vous y servira le même récit, en plus cher. »",
+						"choix": [
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							},
+							{
+								"id": "fin",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"carte_remplacee": {
+						"texte": "Cynan plante une épingle dans sa carte, à un endroit précis, sans un mot. « Là. C'est là que je mets ce qu'on perd, d'ordinaire : des moutons, des hameaux, des porteurs de lanterne. Pas des cartes de la Guilde. » Il grogne, ce qui pourrait passer pour un rire. Une plaque neuve frappée du cor de chasse glisse vers vous. « Rang {rang}. Le registre ne perd rien, lui. Si quelqu'un me rapporte l'autre, {prenom}, je saurai où vous l'avez semée. »",
+						"choix": [
+							{
+								"id": "merci",
+								"label": "« Merci. Je ferai attention. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"_id": "pnj:edith_des_cinq_ports",
+			"type": "pnj",
+			"nom": "Édith des Cinq-Ports",
+			"race": "humain",
+			"vocation": "receptionniste",
+			"portrait": "guilde_humain_f_douvres01.jpg",
+			"description": "Réceptionniste de la Tour des Falaises. Une humaine bedonnante à l'air bourru, en caban de grosse laine, qui fait sonner sa cloche quand on la fait attendre.",
+			"services": {
+				"don": {
+					"item": "item:carte_aventurier",
+					"quantite": 1,
+					"cout_cuivre": 0,
+					"lieu_parent": "auto",
+					"rang_guilde": "F",
+					"unique": true,
+					"noeuds": {
+						"fait": "inscription_faite",
+						"sans_fonds": "inscription_sans_fonds",
+						"trop_charge": "inscription_trop_charge",
+						"remplacement": "carte_remplacee"
+					}
+				},
+				"rang": {
+					"noeuds": {
+						"propose": "rang_propose",
+						"accepte": "rang_accepte",
+						"rapporte": "rang_rapporte"
+					}
+				},
+				"acces": {
+					"lieu": "lieu:la_tour_des_falaises_bureau_du_maitre",
+					"noeuds": {
+						"ouvre": "acces_ouvre",
+						"refus": "acces_refus",
+						"deja": "acces_deja"
+					}
+				}
+			},
+			"dialogue": {
+				"noeud_depart": "accueil",
+				"noeuds": {
+					"accueil": {
+						"texte": "Une humaine en caban de laine fait tinter une petite cloche de bronze, moins pour vous saluer que pour se faire entendre du vent. « La Tour des Falaises, {prenom}. Édith. Si vous venez de débarquer, buvez quelque chose de chaud. Si vous voulez embarquer, buvez deux fois. »",
+						"choix": [
+							{
+								"id": "inscription",
+								"label": "« Je voudrais ma carte d'aventurier. »",
+								"condition": {
+									"don_recu": false,
+									"don_a_remplacer": false
+								},
+								"next": "inscription_propose"
+							},
+							{
+								"id": "carte_perdue",
+								"label": "« J'ai… perdu ma carte d'aventurier. »",
+								"condition": {
+									"don_a_remplacer": true
+								},
+								"action": {
+									"service": "don"
+								}
+							},
+							{
+								"id": "rang_proposer",
+								"label": "« Une épreuve pour monter en rang ? »",
+								"condition": {
+									"rang_offert": true
+								},
+								"next": "rang_propose"
+							},
+							{
+								"id": "rang_rapporter",
+								"label": "« C'est fait. Le « {espece} {rang_vise} » est tombé. »",
+								"condition": {
+									"rang_a_rapporter": true
+								},
+								"action": {
+									"service": "rang",
+									"op": "rapporter"
+								}
+							},
+							{
+								"id": "rang_sommet",
+								"label": "« Reste-t-il une épreuve à ma mesure ? »",
+								"condition": {
+									"rang_max": true
+								},
+								"next": "rang_sommet"
+							},
+							{
+								"id": "bureau",
+								"label": "« Je voudrais voir le maître de la Guilde. »",
+								"condition": {
+									"acces_ouvrable": true
+								},
+								"action": {
+									"service": "acces",
+									"op": "passer"
+								}
+							},
+							{
+								"id": "bureau_deja",
+								"label": "« Je monte voir le maître. »",
+								"condition": {
+									"acces_ouvert": true
+								},
+								"next": "acces_deja"
+							},
+							{
+								"id": "bureau_refus",
+								"label": "« Qui dirige la Guilde, ici ? »",
+								"condition": {
+									"acces_refuse": true
+								},
+								"next": "acces_refus"
+							},
+							{
+								"id": "q1",
+								"label": "« Qui passe par ici ? »",
+								"next": "q1"
+							},
+							{
+								"id": "q2",
+								"label": "« À quoi sert la cloche ? »",
+								"next": "q2"
+							},
+							{
+								"id": "rien",
+								"label": "« Rien pour l'instant. »",
+								"next": "fin"
+							}
+						]
+					},
+					"inscription_propose": {
+						"texte": "{pnj} ouvre le registre de la maison. « Votre nom, votre lignée, ce que vous savez faire. Chaque maison tient son registre, mais celui de la Guilde de Londres fait foi dans tout le pays : si vous portez sa carte, montrez-la-moi, et la vôtre portera au moins le même rang. Sans elle, on commence ici au premier échelon. »",
+						"choix": [
+							{
+								"id": "inscrire",
+								"label": "« Inscrivez-moi. »",
+								"action": {
+									"service": "don"
+								}
+							},
+							{
+								"id": "attendre",
+								"label": "« Pas encore. »",
+								"next": "accueil"
+							}
+						]
+					},
+					"inscription_faite": {
+						"texte": "Quelques lignes, un coup de buvard, et {pnj} fait glisser vers vous une plaque de cuir frappée d'une falaise et une vague. « Votre carte de Douvres, {prenom}. Si vous portez un rang de Londres, il est recopié. Le tableau est dans la salle commune. »",
+						"choix": [
+							{
+								"id": "merci",
+								"label": "« Merci. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"inscription_sans_fonds": {
+						"texte": "« L'inscription ne coûte rien, {prenom}. Si quelqu'un vous a dit le contraire, envoyez-le-moi. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je reviendrai. »",
+								"next": "fin"
+							}
+						]
+					},
+					"inscription_trop_charge": {
+						"texte": "« Pas même la place d'une carte dans votre sac, {prenom} ? Allégez-vous. Le registre vous attendra. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je reviens le sac plus léger. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_propose": {
+						"texte": "{pnj} parcourt les signalements du jour et s'arrête sur une ligne. « Une épreuve, {prenom} ? Un {espece} d'exception écume {lieu}. Abattez-le, et le rang {rang_vise} sera à vous, avec {xp} points d'expérience. »",
+						"choix": [
+							{
+								"id": "rang_accepter",
+								"label": "« Je m'en occupe. »",
+								"action": {
+									"service": "rang",
+									"op": "accepter"
+								}
+							},
+							{
+								"id": "rang_reflechir",
+								"label": "« Laissez-moi y réfléchir. »",
+								"next": "accueil"
+							}
+						]
+					},
+					"rang_accepte": {
+						"texte": "{pnj} note l'épreuve à côté de votre nom. « Du côté de {lieu}. Revenez en un seul morceau, {prenom} : le registre n'aime pas les ratures. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« J'y vais. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_rapporte": {
+						"texte": "{pnj} écoute votre récit jusqu'au bout, puis trace une marque nette sur votre carte. « Vous voilà rang {rang}, {prenom}. La maison s'en souviendra. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_sommet": {
+						"texte": "« Rang {rang} : c'est tout ce que la Tour des Falaises peut reconnaître, {prenom}. Pour monter plus haut, il faudra une capitale et son gibier. Votre nom restera ici. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je comprends. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"acces_ouvre": {
+						"texte": "« Rang {rang}, le registre en témoigne. » {pnj} désigne l'escalier de la tour carrée. « C'est là-haut : {portail}. Allez-y. »",
+						"choix": [
+							{
+								"id": "monter",
+								"label": "Monter au bureau.",
+								"next": "fin",
+								"deplacer": "lieu:la_tour_des_falaises_bureau_du_maitre"
+							}
+						]
+					},
+					"acces_deja": {
+						"texte": "« Vous connaissez le chemin. » Un geste vers l'escalier de la tour carrée. « Montez, {prenom}. »",
+						"choix": [
+							{
+								"id": "monter",
+								"label": "Monter au bureau.",
+								"next": "fin",
+								"deplacer": "lieu:la_tour_des_falaises_bureau_du_maitre"
+							}
+						]
+					},
+					"acces_refus": {
+						"texte": "« Hubert du Burgh. Le maître de la Guilde. Le bureau ne reçoit qu'à partir du rang D de Douvres, {prenom}, et vous en êtes à {rang}. Faites allonger la ligne à côté de votre nom : je vous y conduirai. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« J'y travaille. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"q1": {
+						"texte": "« Tout ce qui entre sur l'île ou qui en sort : les marchands, les fous, et ceux qui vont voir Camelot pour se dire qu'ils l'ont vue. » Elle sort un registre. « Je note qui part. Je note qui revient. Ce n'est pas la même liste. »",
+						"choix": [
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							},
+							{
+								"id": "fin",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"q2": {
+						"texte": "« Quand le brouillard tombe, on sonne pour les navires. Quand quelque chose monte des falaises, on sonne pour nous. » Elle la repose. « C'est la même cloche. Il faut apprendre à écouter à qui elle parle. »",
+						"choix": [
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							},
+							{
+								"id": "fin",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"carte_remplacee": {
+						"texte": "Édith fait sonner sa cloche trois fois, très fort. Toute la salle se retourne. « Avis à l'équipage ! {prenom} a perdu sa carte ! » Elle laisse rire les marins tout leur soûl, puis vous tend une plaque neuve frappée de la falaise et de la vague. « Rang {rang}, comme c'était écrit. Voilà. Maintenant, tout Douvres la cherchera avec vous. C'est le prix, et il est doux. »",
+						"choix": [
+							{
+								"id": "merci",
+								"label": "« Merci. Je ferai attention. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"_id": "pnj:eustache_bourgeois",
+			"type": "pnj",
+			"nom": "Eustache le Bourgeois",
+			"race": "nain",
+			"vocation": "receptionniste",
+			"portrait": "guilde_nain_m_calais01.jpg",
+			"description": "Réceptionniste du Fanal du Détroit. Un nain blond au regard vif, qui passe plus de temps la longue-vue à l'œil que la plume à la main.",
+			"services": {
+				"don": {
+					"item": "item:carte_aventurier",
+					"quantite": 1,
+					"cout_cuivre": 0,
+					"lieu_parent": "auto",
+					"rang_guilde": "F",
+					"unique": true,
+					"noeuds": {
+						"fait": "inscription_faite",
+						"sans_fonds": "inscription_sans_fonds",
+						"trop_charge": "inscription_trop_charge",
+						"remplacement": "carte_remplacee"
+					}
+				},
+				"rang": {
+					"noeuds": {
+						"propose": "rang_propose",
+						"accepte": "rang_accepte",
+						"rapporte": "rang_rapporte"
+					}
+				},
+				"acces": {
+					"lieu": "lieu:le_fanal_du_detroit_bureau_du_maitre",
+					"noeuds": {
+						"ouvre": "acces_ouvre",
+						"refus": "acces_refus",
+						"deja": "acces_deja"
+					}
+				}
+			},
+			"dialogue": {
+				"noeud_depart": "accueil",
+				"noeuds": {
+					"accueil": {
+						"texte": "Un nain blond abaisse sa longue-vue de cuivre, non sans un dernier regard vers la mer. « Le Fanal du Détroit, {prenom}. Eustache, dit le Bourgeois, parce que j'ai une maison et que j'y dors parfois. Vous arrivez par terre, ou vous cherchez à repartir par l'eau ? »",
+						"choix": [
+							{
+								"id": "inscription",
+								"label": "« Je voudrais ma carte d'aventurier. »",
+								"condition": {
+									"don_recu": false,
+									"don_a_remplacer": false
+								},
+								"next": "inscription_propose"
+							},
+							{
+								"id": "carte_perdue",
+								"label": "« J'ai… perdu ma carte d'aventurier. »",
+								"condition": {
+									"don_a_remplacer": true
+								},
+								"action": {
+									"service": "don"
+								}
+							},
+							{
+								"id": "rang_proposer",
+								"label": "« Une épreuve pour monter en rang ? »",
+								"condition": {
+									"rang_offert": true
+								},
+								"next": "rang_propose"
+							},
+							{
+								"id": "rang_rapporter",
+								"label": "« C'est fait. Le « {espece} {rang_vise} » est tombé. »",
+								"condition": {
+									"rang_a_rapporter": true
+								},
+								"action": {
+									"service": "rang",
+									"op": "rapporter"
+								}
+							},
+							{
+								"id": "rang_sommet",
+								"label": "« Reste-t-il une épreuve à ma mesure ? »",
+								"condition": {
+									"rang_max": true
+								},
+								"next": "rang_sommet"
+							},
+							{
+								"id": "bureau",
+								"label": "« Je voudrais voir la maîtresse de la Guilde. »",
+								"condition": {
+									"acces_ouvrable": true
+								},
+								"action": {
+									"service": "acces",
+									"op": "passer"
+								}
+							},
+							{
+								"id": "bureau_deja",
+								"label": "« Je monte voir la maîtresse. »",
+								"condition": {
+									"acces_ouvert": true
+								},
+								"next": "acces_deja"
+							},
+							{
+								"id": "bureau_refus",
+								"label": "« Qui dirige la Guilde, ici ? »",
+								"condition": {
+									"acces_refuse": true
+								},
+								"next": "acces_refus"
+							},
+							{
+								"id": "q1",
+								"label": "« Pourquoi ce fanal ? »",
+								"next": "q1"
+							},
+							{
+								"id": "q2",
+								"label": "« On peut traverser ? »",
+								"next": "q2"
+							},
+							{
+								"id": "rien",
+								"label": "« Rien pour l'instant. »",
+								"next": "fin"
+							}
+						]
+					},
+					"inscription_propose": {
+						"texte": "{pnj} ouvre le registre de la maison. « Votre nom, votre lignée, ce que vous savez faire. Chaque maison tient son registre, mais celui de la Guilde de Lutecia fait foi dans tout le pays : si vous portez sa carte, montrez-la-moi, et la vôtre portera au moins le même rang. Sans elle, on commence ici au premier échelon. »",
+						"choix": [
+							{
+								"id": "inscrire",
+								"label": "« Inscrivez-moi. »",
+								"action": {
+									"service": "don"
+								}
+							},
+							{
+								"id": "attendre",
+								"label": "« Pas encore. »",
+								"next": "accueil"
+							}
+						]
+					},
+					"inscription_faite": {
+						"texte": "Quelques lignes, un coup de buvard, et {pnj} fait glisser vers vous une plaque de cuir frappée d'un fanal allumé. « Votre carte de Calais, {prenom}. Si vous portez un rang de Lutecia, il est recopié. Le tableau est dans la salle commune. »",
+						"choix": [
+							{
+								"id": "merci",
+								"label": "« Merci. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"inscription_sans_fonds": {
+						"texte": "« L'inscription ne coûte rien, {prenom}. Si quelqu'un vous a dit le contraire, envoyez-le-moi. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je reviendrai. »",
+								"next": "fin"
+							}
+						]
+					},
+					"inscription_trop_charge": {
+						"texte": "« Pas même la place d'une carte dans votre sac, {prenom} ? Allégez-vous. Le registre vous attendra. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je reviens le sac plus léger. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_propose": {
+						"texte": "{pnj} parcourt les signalements du jour et s'arrête sur une ligne. « Une épreuve, {prenom} ? Un {espece} d'exception écume {lieu}. Abattez-le, et le rang {rang_vise} sera à vous, avec {xp} points d'expérience. »",
+						"choix": [
+							{
+								"id": "rang_accepter",
+								"label": "« Je m'en occupe. »",
+								"action": {
+									"service": "rang",
+									"op": "accepter"
+								}
+							},
+							{
+								"id": "rang_reflechir",
+								"label": "« Laissez-moi y réfléchir. »",
+								"next": "accueil"
+							}
+						]
+					},
+					"rang_accepte": {
+						"texte": "{pnj} note l'épreuve à côté de votre nom. « Du côté de {lieu}. Revenez en un seul morceau, {prenom} : le registre n'aime pas les ratures. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« J'y vais. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_rapporte": {
+						"texte": "{pnj} écoute votre récit jusqu'au bout, puis trace une marque nette sur votre carte. « Vous voilà rang {rang}, {prenom}. La maison s'en souviendra. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_sommet": {
+						"texte": "« Rang {rang} : c'est tout ce que le Fanal du Détroit peut reconnaître, {prenom}. Pour monter plus haut, il faudra une capitale et son gibier. Votre nom restera ici. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je comprends. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"acces_ouvre": {
+						"texte": "« Rang {rang}, le registre en témoigne. » {pnj} désigne l'escalier de la tour de guet. « C'est là-haut : {portail}. Allez-y. »",
+						"choix": [
+							{
+								"id": "monter",
+								"label": "Monter au bureau.",
+								"next": "fin",
+								"deplacer": "lieu:le_fanal_du_detroit_bureau_du_maitre"
+							}
+						]
+					},
+					"acces_deja": {
+						"texte": "« Vous connaissez le chemin. » Un geste vers l'escalier de la tour de guet. « Montez, {prenom}. »",
+						"choix": [
+							{
+								"id": "monter",
+								"label": "Monter au bureau.",
+								"next": "fin",
+								"deplacer": "lieu:le_fanal_du_detroit_bureau_du_maitre"
+							}
+						]
+					},
+					"acces_refus": {
+						"texte": "« Aude de Wissant. La maîtresse de la Guilde. Le bureau ne reçoit qu'à partir du rang D de Calais, {prenom}, et vous en êtes à {rang}. Faites allonger la ligne à côté de votre nom : je vous y conduirai. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« J'y travaille. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"q1": {
+						"texte": "« Pour les navires, d'abord. Il brûle toutes les nuits, et ceux qui le perdent de vue dans le détroit ne reviennent pas toujours. » Il range la longue-vue. « Ensuite pour nous : quand il change de cadence, c'est que la vigie a vu quelque chose. Alors on sort les contrats. »",
+						"choix": [
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							},
+							{
+								"id": "fin",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"q2": {
+						"texte": "« On paie un capitaine, sur les quais, et on prie ce qu'on veut. Douvres est en face, on la voit par beau temps. » Il sourit. « Serpents de mer, pieuvres, et ce qu'on n'a pas encore nommé. La traversée est courte. C'est tout ce qu'on peut dire de bien sur elle. »",
+						"choix": [
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							},
+							{
+								"id": "fin",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"carte_remplacee": {
+						"texte": "Eustache lève sa longue-vue, la braque sur vous, puis sur la mer, puis de nouveau sur vous. « Non. Je ne la vois nulle part. Ni sur le quai, ni au fond du détroit. » Il range l'instrument, hilare. « Une carte de la Guilde, ça ne flotte pas, {prenom}. C'est le genre de chose qu'on devrait savoir, quand on vit d'aventure. » Une plaque neuve frappée du fanal passe le comptoir. « Rang {rang}. Ça, la mer ne vous le prendra pas. »",
+						"choix": [
+							{
+								"id": "merci",
+								"label": "« Merci. Je ferai attention. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"_id": "pnj:fulberte_du_tertre",
+			"type": "pnj",
+			"nom": "Fulberte du Tertre",
+			"race": "nain",
+			"vocation": "receptionniste",
+			"portrait": "guilde_nain_f_chartres01.jpg",
+			"description": "Réceptionniste du Relais de la Beauce. Une naine rusée, formée à l'école de Chartres, qui mesure le grain et les aventuriers avec la même exactitude.",
+			"services": {
+				"don": {
+					"item": "item:carte_aventurier",
+					"quantite": 1,
+					"cout_cuivre": 0,
+					"lieu_parent": "auto",
+					"rang_guilde": "F",
+					"unique": true,
+					"noeuds": {
+						"fait": "inscription_faite",
+						"sans_fonds": "inscription_sans_fonds",
+						"trop_charge": "inscription_trop_charge",
+						"remplacement": "carte_remplacee"
+					}
+				},
+				"rang": {
+					"noeuds": {
+						"propose": "rang_propose",
+						"accepte": "rang_accepte",
+						"rapporte": "rang_rapporte"
+					}
+				},
+				"acces": {
+					"lieu": "lieu:le_relais_de_la_beauce_bureau_du_maitre",
+					"noeuds": {
+						"ouvre": "acces_ouvre",
+						"refus": "acces_refus",
+						"deja": "acces_deja"
+					}
+				}
+			},
+			"dialogue": {
+				"noeud_depart": "accueil",
+				"noeuds": {
+					"accueil": {
+						"texte": "Dans la grande grange, une naine aux cheveux noirs arase une mesure à grain du plat de la main. « Le Relais de la Beauce, {prenom}. Fulberte du Tertre. Ici on nourrit Lutecia, et il arrive qu'on vous paie pour que ça continue. Que puis-je pour vous ? »",
+						"choix": [
+							{
+								"id": "inscription",
+								"label": "« Je voudrais ma carte d'aventurier. »",
+								"condition": {
+									"don_recu": false,
+									"don_a_remplacer": false
+								},
+								"next": "inscription_propose"
+							},
+							{
+								"id": "carte_perdue",
+								"label": "« J'ai… perdu ma carte d'aventurier. »",
+								"condition": {
+									"don_a_remplacer": true
+								},
+								"action": {
+									"service": "don"
+								}
+							},
+							{
+								"id": "rang_proposer",
+								"label": "« Une épreuve pour monter en rang ? »",
+								"condition": {
+									"rang_offert": true
+								},
+								"next": "rang_propose"
+							},
+							{
+								"id": "rang_rapporter",
+								"label": "« C'est fait. Le « {espece} {rang_vise} » est tombé. »",
+								"condition": {
+									"rang_a_rapporter": true
+								},
+								"action": {
+									"service": "rang",
+									"op": "rapporter"
+								}
+							},
+							{
+								"id": "rang_sommet",
+								"label": "« Reste-t-il une épreuve à ma mesure ? »",
+								"condition": {
+									"rang_max": true
+								},
+								"next": "rang_sommet"
+							},
+							{
+								"id": "bureau",
+								"label": "« Je voudrais voir le maître de la Guilde. »",
+								"condition": {
+									"acces_ouvrable": true
+								},
+								"action": {
+									"service": "acces",
+									"op": "passer"
+								}
+							},
+							{
+								"id": "bureau_deja",
+								"label": "« Je monte voir le maître. »",
+								"condition": {
+									"acces_ouvert": true
+								},
+								"next": "acces_deja"
+							},
+							{
+								"id": "bureau_refus",
+								"label": "« Qui dirige la Guilde, ici ? »",
+								"condition": {
+									"acces_refuse": true
+								},
+								"next": "acces_refus"
+							},
+							{
+								"id": "q1",
+								"label": "« Pourquoi une grange ? »",
+								"next": "q1"
+							},
+							{
+								"id": "q2",
+								"label": "« Vous avez étudié ici ? »",
+								"next": "q2"
+							},
+							{
+								"id": "rien",
+								"label": "« Rien pour l'instant. »",
+								"next": "fin"
+							}
+						]
+					},
+					"inscription_propose": {
+						"texte": "{pnj} ouvre le registre de la maison. « Votre nom, votre lignée, ce que vous savez faire. Chaque maison tient son registre, mais celui de la Guilde de Lutecia fait foi dans tout le pays : si vous portez sa carte, montrez-la-moi, et la vôtre portera au moins le même rang. Sans elle, on commence ici au premier échelon. »",
+						"choix": [
+							{
+								"id": "inscrire",
+								"label": "« Inscrivez-moi. »",
+								"action": {
+									"service": "don"
+								}
+							},
+							{
+								"id": "attendre",
+								"label": "« Pas encore. »",
+								"next": "accueil"
+							}
+						]
+					},
+					"inscription_faite": {
+						"texte": "Quelques lignes, un coup de buvard, et {pnj} fait glisser vers vous une plaque de cuir frappée d'une gerbe de blé croisée d'une épée. « Votre carte de Chartres, {prenom}. Si vous portez un rang de Lutecia, il est recopié. Le tableau est dans la salle commune. »",
+						"choix": [
+							{
+								"id": "merci",
+								"label": "« Merci. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"inscription_sans_fonds": {
+						"texte": "« L'inscription ne coûte rien, {prenom}. Si quelqu'un vous a dit le contraire, envoyez-le-moi. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je reviendrai. »",
+								"next": "fin"
+							}
+						]
+					},
+					"inscription_trop_charge": {
+						"texte": "« Pas même la place d'une carte dans votre sac, {prenom} ? Allégez-vous. Le registre vous attendra. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je reviens le sac plus léger. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_propose": {
+						"texte": "{pnj} parcourt les signalements du jour et s'arrête sur une ligne. « Une épreuve, {prenom} ? Un {espece} d'exception écume {lieu}. Abattez-le, et le rang {rang_vise} sera à vous, avec {xp} points d'expérience. »",
+						"choix": [
+							{
+								"id": "rang_accepter",
+								"label": "« Je m'en occupe. »",
+								"action": {
+									"service": "rang",
+									"op": "accepter"
+								}
+							},
+							{
+								"id": "rang_reflechir",
+								"label": "« Laissez-moi y réfléchir. »",
+								"next": "accueil"
+							}
+						]
+					},
+					"rang_accepte": {
+						"texte": "{pnj} note l'épreuve à côté de votre nom. « Du côté de {lieu}. Revenez en un seul morceau, {prenom} : le registre n'aime pas les ratures. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« J'y vais. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_rapporte": {
+						"texte": "{pnj} écoute votre récit jusqu'au bout, puis trace une marque nette sur votre carte. « Vous voilà rang {rang}, {prenom}. La maison s'en souviendra. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_sommet": {
+						"texte": "« Rang {rang} : c'est tout ce que le Relais de la Beauce peut reconnaître, {prenom}. Pour monter plus haut, il faudra une capitale et son gibier. Votre nom restera ici. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je comprends. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"acces_ouvre": {
+						"texte": "« Rang {rang}, le registre en témoigne. » {pnj} désigne l'échelle de meunier. « C'est là-haut : {portail}. Allez-y. »",
+						"choix": [
+							{
+								"id": "monter",
+								"label": "Monter au bureau.",
+								"next": "fin",
+								"deplacer": "lieu:le_relais_de_la_beauce_bureau_du_maitre"
+							}
+						]
+					},
+					"acces_deja": {
+						"texte": "« Vous connaissez le chemin. » Un geste vers l'échelle de meunier. « Montez, {prenom}. »",
+						"choix": [
+							{
+								"id": "monter",
+								"label": "Monter au bureau.",
+								"next": "fin",
+								"deplacer": "lieu:le_relais_de_la_beauce_bureau_du_maitre"
+							}
+						]
+					},
+					"acces_refus": {
+						"texte": "« Bernard Gerbier. Le maître de la Guilde. Le bureau ne reçoit qu'à partir du rang D de Chartres, {prenom}, et vous en êtes à {rang}. Faites allonger la ligne à côté de votre nom : je vous y conduirai. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« J'y travaille. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"q1": {
+						"texte": "« Parce qu'on escorte du blé. » Elle tapote la mesure. « La Beauce remplit Lutecia, convoi après convoi, par la porte de la capitale. On a voulu une maison de guilde, et le bâtiment assez grand pour nos chariots servait déjà à ça. Personne n'a trouvé le courage de le contredire. »",
+						"choix": [
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							},
+							{
+								"id": "fin",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"q2": {
+						"texte": "« Des nains juchés sur des épaules de géants. Dans mon cas, à la lettre : un ogre de mes amis me portait pour lire les rayons du haut. » Elle sourit. « L'école forme des lettrés. Elle ne vous apprendra aucun sort. Elle vous apprendra pourquoi votre question était mal posée. »",
+						"choix": [
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							},
+							{
+								"id": "fin",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"carte_remplacee": {
+						"texte": "Fulberte arase sa mesure à grain sans se presser, puis vous la tend, vide. « Voilà ce qu'il reste de votre carte. » Elle rit, d'un rire court et sec de comptable. « Ici, on compte chaque grain qui sort du grenier, {prenom}, et vous perdez la seule chose que la maison vous ait confiée. » Elle retrouve votre ligne au registre. « Rang {rang}, exact au grain près. Tenez. Et ne la semez pas dans la Beauce : elle n'y repoussera pas. »",
+						"choix": [
+							{
+								"id": "merci",
+								"label": "« Merci. Je ferai attention. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"_id": "pnj:louise_labe",
+			"type": "pnj",
+			"nom": "Louise la Cordière",
+			"race": "ogre",
+			"vocation": "receptionniste",
+			"portrait": "guilde_ogre_f_lyon01.jpg",
+			"description": "Réceptionniste de la Maison des Deux Fleuves. Une ogresse au foulard de soie vive, fille de cordiers, qui connaît le prix de chaque balle et le nom de chaque batelier.",
+			"services": {
+				"don": {
+					"item": "item:carte_aventurier",
+					"quantite": 1,
+					"cout_cuivre": 0,
+					"lieu_parent": "auto",
+					"rang_guilde": "F",
+					"unique": true,
+					"noeuds": {
+						"fait": "inscription_faite",
+						"sans_fonds": "inscription_sans_fonds",
+						"trop_charge": "inscription_trop_charge",
+						"remplacement": "carte_remplacee"
+					}
+				},
+				"rang": {
+					"noeuds": {
+						"propose": "rang_propose",
+						"accepte": "rang_accepte",
+						"rapporte": "rang_rapporte"
+					}
+				},
+				"acces": {
+					"lieu": "lieu:la_maison_des_deux_fleuves_bureau_du_maitre",
+					"noeuds": {
+						"ouvre": "acces_ouvre",
+						"refus": "acces_refus",
+						"deja": "acces_deja"
+					}
+				}
+			},
+			"dialogue": {
+				"noeud_depart": "accueil",
+				"noeuds": {
+					"accueil": {
+						"texte": "Une ogresse au foulard de soie pose sa balance de marchand sans se presser. « La Maison des Deux Fleuves, {prenom}. Ici, tout finit par passer devant ce comptoir : la soie, les contrats et les mauvaises nouvelles. Que vous faut-il ? »",
+						"choix": [
+							{
+								"id": "inscription",
+								"label": "« Je voudrais ma carte d'aventurier. »",
+								"condition": {
+									"don_recu": false,
+									"don_a_remplacer": false
+								},
+								"next": "inscription_propose"
+							},
+							{
+								"id": "carte_perdue",
+								"label": "« J'ai… perdu ma carte d'aventurier. »",
+								"condition": {
+									"don_a_remplacer": true
+								},
+								"action": {
+									"service": "don"
+								}
+							},
+							{
+								"id": "rang_proposer",
+								"label": "« Une épreuve pour monter en rang ? »",
+								"condition": {
+									"rang_offert": true
+								},
+								"next": "rang_propose"
+							},
+							{
+								"id": "rang_rapporter",
+								"label": "« C'est fait. Le « {espece} {rang_vise} » est tombé. »",
+								"condition": {
+									"rang_a_rapporter": true
+								},
+								"action": {
+									"service": "rang",
+									"op": "rapporter"
+								}
+							},
+							{
+								"id": "rang_sommet",
+								"label": "« Reste-t-il une épreuve à ma mesure ? »",
+								"condition": {
+									"rang_max": true
+								},
+								"next": "rang_sommet"
+							},
+							{
+								"id": "bureau",
+								"label": "« Je voudrais voir le maître de la Guilde. »",
+								"condition": {
+									"acces_ouvrable": true
+								},
+								"action": {
+									"service": "acces",
+									"op": "passer"
+								}
+							},
+							{
+								"id": "bureau_deja",
+								"label": "« Je monte voir le maître. »",
+								"condition": {
+									"acces_ouvert": true
+								},
+								"next": "acces_deja"
+							},
+							{
+								"id": "bureau_refus",
+								"label": "« Qui dirige la Guilde, ici ? »",
+								"condition": {
+									"acces_refuse": true
+								},
+								"next": "acces_refus"
+							},
+							{
+								"id": "q1",
+								"label": "« Pourquoi deux fleuves ? »",
+								"next": "q1"
+							},
+							{
+								"id": "q2",
+								"label": "« Pourquoi « la Cordière » ? »",
+								"next": "q2"
+							},
+							{
+								"id": "rien",
+								"label": "« Rien pour l'instant. »",
+								"next": "fin"
+							}
+						]
+					},
+					"inscription_propose": {
+						"texte": "{pnj} ouvre le registre de la maison. « Votre nom, votre lignée, ce que vous savez faire. Chaque maison tient son registre, mais celui de la Guilde de Lutecia fait foi dans tout le pays : si vous portez sa carte, montrez-la-moi, et la vôtre portera au moins le même rang. Sans elle, on commence ici au premier échelon. »",
+						"choix": [
+							{
+								"id": "inscrire",
+								"label": "« Inscrivez-moi. »",
+								"action": {
+									"service": "don"
+								}
+							},
+							{
+								"id": "attendre",
+								"label": "« Pas encore. »",
+								"next": "accueil"
+							}
+						]
+					},
+					"inscription_faite": {
+						"texte": "Quelques lignes, un coup de buvard, et {pnj} fait glisser vers vous une plaque de cuir frappée de deux fleuves qui se rejoignent. « Votre carte de Lyon, {prenom}. Si vous portez un rang de Lutecia, il est recopié. Le tableau est dans la salle commune. »",
+						"choix": [
+							{
+								"id": "merci",
+								"label": "« Merci. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"inscription_sans_fonds": {
+						"texte": "« L'inscription ne coûte rien, {prenom}. Si quelqu'un vous a dit le contraire, envoyez-le-moi. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je reviendrai. »",
+								"next": "fin"
+							}
+						]
+					},
+					"inscription_trop_charge": {
+						"texte": "« Pas même la place d'une carte dans votre sac, {prenom} ? Allégez-vous. Le registre vous attendra. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je reviens le sac plus léger. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_propose": {
+						"texte": "{pnj} parcourt les signalements du jour et s'arrête sur une ligne. « Une épreuve, {prenom} ? Un {espece} d'exception écume {lieu}. Abattez-le, et le rang {rang_vise} sera à vous, avec {xp} points d'expérience. »",
+						"choix": [
+							{
+								"id": "rang_accepter",
+								"label": "« Je m'en occupe. »",
+								"action": {
+									"service": "rang",
+									"op": "accepter"
+								}
+							},
+							{
+								"id": "rang_reflechir",
+								"label": "« Laissez-moi y réfléchir. »",
+								"next": "accueil"
+							}
+						]
+					},
+					"rang_accepte": {
+						"texte": "{pnj} note l'épreuve à côté de votre nom. « Du côté de {lieu}. Revenez en un seul morceau, {prenom} : le registre n'aime pas les ratures. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« J'y vais. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_rapporte": {
+						"texte": "{pnj} écoute votre récit jusqu'au bout, puis trace une marque nette sur votre carte. « Vous voilà rang {rang}, {prenom}. La maison s'en souviendra. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_sommet": {
+						"texte": "« Rang {rang} : c'est tout ce que la Maison des Deux Fleuves peut reconnaître, {prenom}. Pour monter plus haut, il faudra une capitale et son gibier. Votre nom restera ici. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je comprends. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"acces_ouvre": {
+						"texte": "« Rang {rang}, le registre en témoigne. » {pnj} désigne l'escalier de la tour. « C'est là-haut : {portail}. Allez-y. »",
+						"choix": [
+							{
+								"id": "monter",
+								"label": "Monter au bureau.",
+								"next": "fin",
+								"deplacer": "lieu:la_maison_des_deux_fleuves_bureau_du_maitre"
+							}
+						]
+					},
+					"acces_deja": {
+						"texte": "« Vous connaissez le chemin. » Un geste vers l'escalier de la tour. « Montez, {prenom}. »",
+						"choix": [
+							{
+								"id": "monter",
+								"label": "Monter au bureau.",
+								"next": "fin",
+								"deplacer": "lieu:la_maison_des_deux_fleuves_bureau_du_maitre"
+							}
+						]
+					},
+					"acces_refus": {
+						"texte": "« Bertin le Naute. Le maître de la Guilde. Le bureau ne reçoit qu'à partir du rang D de Lyon, {prenom}, et vous en êtes à {rang}. Faites allonger la ligne à côté de votre nom : je vous y conduirai. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« J'y travaille. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"q1": {
+						"texte": "« Parce que personne n'a jamais su lequel commande. » Elle rit. « Le Rhône arrive pressé, la Saône prend son temps, et Lyon vit là où ils se rencontrent. Toute marchandise qui remonte ou qui descend change ici de mains, donc d'escorte. C'est de ça que vit la Maison. »",
+						"choix": [
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							},
+							{
+								"id": "fin",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"q2": {
+						"texte": "« Mon père tressait les cordes des halages, et les miennes tenaient mieux. » Elle montre ses mains énormes. « On a cru que ces doigts-là ne sauraient tenir qu'un cordage. Ils tiennent aussi une plume, et personne ne s'en plaint depuis que les comptes tombent juste. »",
+						"choix": [
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							},
+							{
+								"id": "fin",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"carte_remplacee": {
+						"texte": "Louise repose sa balance avec un soupir de théâtre. « Tout finit par passer devant ce comptoir. Même les aventuriers qui perdent leur carte. » Elle rit, d'un rire large qui fait danser son foulard. « Les bateliers me rapportent tout ce que charrient les deux fleuves, {prenom}. Une plaque de cuir, jamais. » Elle vous en tend une neuve. « Rang {rang}, toujours. Et passez-y un cordon : c'est le métier de ma famille, je vous le ferai à bon prix. »",
+						"choix": [
+							{
+								"id": "merci",
+								"label": "« Merci. Je ferai attention. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"_id": "pnj:perrine_boucher",
+			"type": "pnj",
+			"nom": "Perrine Boucher",
+			"race": "nain",
+			"vocation": "receptionniste",
+			"portrait": "guilde_nain_f_orleans01.jpg",
+			"description": "Réceptionniste du Relais de la Loire. Une naine sèche et lasse, qui tient les connaissements du fleuve au grain de sel près.",
+			"services": {
+				"don": {
+					"item": "item:carte_aventurier",
+					"quantite": 1,
+					"cout_cuivre": 0,
+					"lieu_parent": "auto",
+					"rang_guilde": "F",
+					"unique": true,
+					"noeuds": {
+						"fait": "inscription_faite",
+						"sans_fonds": "inscription_sans_fonds",
+						"trop_charge": "inscription_trop_charge",
+						"remplacement": "carte_remplacee"
+					}
+				},
+				"rang": {
+					"noeuds": {
+						"propose": "rang_propose",
+						"accepte": "rang_accepte",
+						"rapporte": "rang_rapporte"
+					}
+				},
+				"acces": {
+					"lieu": "lieu:le_relais_de_la_loire_bureau_du_maitre",
+					"noeuds": {
+						"ouvre": "acces_ouvre",
+						"refus": "acces_refus",
+						"deja": "acces_deja"
+					}
+				}
+			},
+			"dialogue": {
+				"noeud_depart": "accueil",
+				"noeuds": {
+					"accueil": {
+						"texte": "Une naine aux cheveux roux compte des sacs de sel sur ses doigts avant de lever les yeux. « Le Relais de la Loire, {prenom}. Perrine Boucher, pour vous servir. Si c'est pour le sel, c'est la porte d'à côté. Si c'est pour la Guilde, c'est moi. »",
+						"choix": [
+							{
+								"id": "inscription",
+								"label": "« Je voudrais ma carte d'aventurier. »",
+								"condition": {
+									"don_recu": false,
+									"don_a_remplacer": false
+								},
+								"next": "inscription_propose"
+							},
+							{
+								"id": "carte_perdue",
+								"label": "« J'ai… perdu ma carte d'aventurier. »",
+								"condition": {
+									"don_a_remplacer": true
+								},
+								"action": {
+									"service": "don"
+								}
+							},
+							{
+								"id": "rang_proposer",
+								"label": "« Une épreuve pour monter en rang ? »",
+								"condition": {
+									"rang_offert": true
+								},
+								"next": "rang_propose"
+							},
+							{
+								"id": "rang_rapporter",
+								"label": "« C'est fait. Le « {espece} {rang_vise} » est tombé. »",
+								"condition": {
+									"rang_a_rapporter": true
+								},
+								"action": {
+									"service": "rang",
+									"op": "rapporter"
+								}
+							},
+							{
+								"id": "rang_sommet",
+								"label": "« Reste-t-il une épreuve à ma mesure ? »",
+								"condition": {
+									"rang_max": true
+								},
+								"next": "rang_sommet"
+							},
+							{
+								"id": "bureau",
+								"label": "« Je voudrais voir le maître de la Guilde. »",
+								"condition": {
+									"acces_ouvrable": true
+								},
+								"action": {
+									"service": "acces",
+									"op": "passer"
+								}
+							},
+							{
+								"id": "bureau_deja",
+								"label": "« Je monte voir le maître. »",
+								"condition": {
+									"acces_ouvert": true
+								},
+								"next": "acces_deja"
+							},
+							{
+								"id": "bureau_refus",
+								"label": "« Qui dirige la Guilde, ici ? »",
+								"condition": {
+									"acces_refuse": true
+								},
+								"next": "acces_refus"
+							},
+							{
+								"id": "q1",
+								"label": "« Pourquoi tout ce sel ? »",
+								"next": "q1"
+							},
+							{
+								"id": "q2",
+								"label": "« Comment est le fleuve ? »",
+								"next": "q2"
+							},
+							{
+								"id": "rien",
+								"label": "« Rien pour l'instant. »",
+								"next": "fin"
+							}
+						]
+					},
+					"inscription_propose": {
+						"texte": "{pnj} ouvre le registre de la maison. « Votre nom, votre lignée, ce que vous savez faire. Chaque maison tient son registre, mais celui de la Guilde de Lutecia fait foi dans tout le pays : si vous portez sa carte, montrez-la-moi, et la vôtre portera au moins le même rang. Sans elle, on commence ici au premier échelon. »",
+						"choix": [
+							{
+								"id": "inscrire",
+								"label": "« Inscrivez-moi. »",
+								"action": {
+									"service": "don"
+								}
+							},
+							{
+								"id": "attendre",
+								"label": "« Pas encore. »",
+								"next": "accueil"
+							}
+						]
+					},
+					"inscription_faite": {
+						"texte": "Quelques lignes, un coup de buvard, et {pnj} fait glisser vers vous une plaque de cuir frappée d'une barque à voile carrée. « Votre carte d'Orléans, {prenom}. Si vous portez un rang de Lutecia, il est recopié. Le tableau est dans la salle commune. »",
+						"choix": [
+							{
+								"id": "merci",
+								"label": "« Merci. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"inscription_sans_fonds": {
+						"texte": "« L'inscription ne coûte rien, {prenom}. Si quelqu'un vous a dit le contraire, envoyez-le-moi. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je reviendrai. »",
+								"next": "fin"
+							}
+						]
+					},
+					"inscription_trop_charge": {
+						"texte": "« Pas même la place d'une carte dans votre sac, {prenom} ? Allégez-vous. Le registre vous attendra. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je reviens le sac plus léger. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_propose": {
+						"texte": "{pnj} parcourt les signalements du jour et s'arrête sur une ligne. « Une épreuve, {prenom} ? Un {espece} d'exception écume {lieu}. Abattez-le, et le rang {rang_vise} sera à vous, avec {xp} points d'expérience. »",
+						"choix": [
+							{
+								"id": "rang_accepter",
+								"label": "« Je m'en occupe. »",
+								"action": {
+									"service": "rang",
+									"op": "accepter"
+								}
+							},
+							{
+								"id": "rang_reflechir",
+								"label": "« Laissez-moi y réfléchir. »",
+								"next": "accueil"
+							}
+						]
+					},
+					"rang_accepte": {
+						"texte": "{pnj} note l'épreuve à côté de votre nom. « Du côté de {lieu}. Revenez en un seul morceau, {prenom} : le registre n'aime pas les ratures. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« J'y vais. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_rapporte": {
+						"texte": "{pnj} écoute votre récit jusqu'au bout, puis trace une marque nette sur votre carte. « Vous voilà rang {rang}, {prenom}. La maison s'en souviendra. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"rang_sommet": {
+						"texte": "« Rang {rang} : c'est tout ce que le Relais de la Loire peut reconnaître, {prenom}. Pour monter plus haut, il faudra une capitale et son gibier. Votre nom restera ici. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« Je comprends. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"acces_ouvre": {
+						"texte": "« Rang {rang}, le registre en témoigne. » {pnj} désigne l'escalier de bois. « C'est là-haut : {portail}. Allez-y. »",
+						"choix": [
+							{
+								"id": "monter",
+								"label": "Monter au bureau.",
+								"next": "fin",
+								"deplacer": "lieu:le_relais_de_la_loire_bureau_du_maitre"
+							}
+						]
+					},
+					"acces_deja": {
+						"texte": "« Vous connaissez le chemin. » Un geste vers l'escalier de bois. « Montez, {prenom}. »",
+						"choix": [
+							{
+								"id": "monter",
+								"label": "Monter au bureau.",
+								"next": "fin",
+								"deplacer": "lieu:le_relais_de_la_loire_bureau_du_maitre"
+							}
+						]
+					},
+					"acces_refus": {
+						"texte": "« Agnan le Gabarrier. Le maître de la Guilde. Le bureau ne reçoit qu'à partir du rang D de Orléans, {prenom}, et vous en êtes à {rang}. Faites allonger la ligne à côté de votre nom : je vous y conduirai. »",
+						"choix": [
+							{
+								"id": "ok",
+								"label": "« J'y travaille. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					},
+					"q1": {
+						"texte": "« Il remonte la Loire depuis la mer, et il vaut plus cher à chaque banc de sable franchi. » Elle hausse un sourcil. « Qui garde le sel garde les gens de l'amont. Alors on escorte des gabarres, et les aventuriers s'imaginent qu'ils partent chasser le monstre. Ça arrive aussi. »",
+						"choix": [
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							},
+							{
+								"id": "fin",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"q2": {
+						"texte": "« Menteur. » Elle n'hésite pas. « Il n'est jamais deux saisons au même endroit. Un chenal d'hier est un banc aujourd'hui, et ce qui dort sous le sable n'aime pas qu'on l'échoue dessus. Demandez à n'importe quel marinier : ils vous donneront tous un conseil différent. »",
+						"choix": [
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							},
+							{
+								"id": "fin",
+								"label": "« Merci. »",
+								"next": "fin"
+							}
+						]
+					},
+					"carte_remplacee": {
+						"texte": "Perrine compte sur ses doigts, s'arrête, recommence. « Dix-huit sacs de sel ce matin, pas un de travers. Et vous, une carte. Une seule. » Elle soupire d'une lassitude qu'on dirait très ancienne, mais ses yeux rient. « Rang {rang}, au grain de sel près. La voilà, {prenom}. La prochaine fois, je vous la fais livrer par la barque, avec un connaissement. »",
+						"choix": [
+							{
+								"id": "merci",
+								"label": "« Merci. Je ferai attention. »",
+								"next": "fin"
+							},
+							{
+								"id": "retour",
+								"label": "Une autre question…",
+								"next": "accueil"
+							}
+						]
+					}
+				}
+			}
+		}
+	]
+}
