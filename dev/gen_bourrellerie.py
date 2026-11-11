@@ -286,7 +286,8 @@ def main(items: dict = None, recettes: dict = None, sortie: str = None, modifs: 
 
 	`items` peut être une fonction rendant la table, appelée une fois le moteur branché.
 	`modifs` = `{_id: {champ: valeur}}` : champs posés sur un doc DÉJÀ en base, repris du dump
-	(PUT complet : ses autres clés survivent) ; absent du dump ⇒ erreur, déjà à jour ⇒ sauté."""
+	(PUT complet : ses autres clés survivent) ; absent du dump ⇒ erreur, déjà à jour ⇒ sauté.
+	`modifs` peut aussi être une fonction `(index du dump) -> dict`, appelée moteur branché."""
 	items, recettes, sortie = items or ITEMS, recettes or RECETTES, sortie or SORTIE
 	try:
 		sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -304,6 +305,8 @@ def main(items: dict = None, recettes: dict = None, sortie: str = None, modifs: 
 	marche = brancher_moteur(docs)
 	if callable(items):
 		items = items()          # table qui importe `utils.*` : APRÈS le branchement du moteur
+	if callable(modifs):
+		modifs = modifs(index)   # idem, et calculée contre le dump lu ici
 	from models import character_stats
 	from utils import montures
 

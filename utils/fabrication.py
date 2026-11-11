@@ -45,7 +45,8 @@ SIGNATURE_LONGUEUR = 8
 # Trois façons de composer, choisies par le champ et non par la matière :
 #   ADDITIF      : les `bonus_*` scalaires s'ajoutent au base puis entre matières.
 #   FUSION       : `bonus` (par caractéristique) et `effets` (par clé d'effet) s'ajoutent
-#                  clé à clé — deux matières qui donnent +1 F donnent +2 F — et de sous-dict
+#                  clé à clé — deux matières qui donnent +1 F donnent +2 F (⚠️ SAUF un bonus
+#                  de V POSITIF, composé par MAX : sang + cœur = +1 V) — et de sous-dict
 #                  en sous-dict : `effets.buffs` d'un consommable se fusionne comme le reste,
 #                  il ne se perd pas parce qu'il n'est pas un nombre.
 #   MAX          : `restriction` prend le plus exigeant — alourdir une arme ne peut pas la
@@ -58,6 +59,8 @@ CLES_ADDITIVES = (
 	"portee",
 )
 CLES_FUSIONNEES = ("bonus", "effets")
+# Exception à la FUSION de `bonus` : la Vitesse se compose par MAX (cf. `appliquer_modificateurs`).
+CARACT_VITESSE = "V"
 CLES_MAX = ("restriction",)
 CLES_FACTEUR = ("poids", "valeur")
 
@@ -314,6 +317,14 @@ def appliquer_modificateurs(base_doc: dict, matieres_docs: list) -> dict:
 			  if isinstance((base_doc or {}).get(k), dict)}
 	facteurs = {k: 1.0 for k in CLES_FACTEUR}
 	rarete = (base_doc or {}).get("rarete")
+	# Vitesse NON CUMULATIVE (miroir de `characters._appliquer_vitesse_max`) : parmi le base et
+	# les matières, seul le plus fort bonus de V compte, quantité comprise ; les malus de V
+	# s'additionnent comme le reste de `bonus`.
+	v_max = 0.0
+	if "bonus" in fusions:
+		v_max = max(0.0, _nombre(fusions["bonus"].get(CARACT_VITESSE)))
+		if v_max:
+			fusions["bonus"].pop(CARACT_VITESSE)
 
 	for item_doc, quantite in matieres_docs:
 		mods = proprietes_matiere(item_doc)["modificateurs"]
@@ -321,6 +332,10 @@ def appliquer_modificateurs(base_doc: dict, matieres_docs: list) -> dict:
 		for cle, val in mods.items():
 			if cle in CLES_ADDITIVES:
 				additifs[cle] = additifs.get(cle, 0.0) + _nombre(val) * qte
+			elif cle == "bonus" and isinstance(val, dict) and _nombre(val.get(CARACT_VITESSE)) > 0:
+				v_max = max(v_max, _nombre(val[CARACT_VITESSE]))
+				reste = {c: d for c, d in val.items() if c != CARACT_VITESSE}
+				_fusionner(fusions.setdefault(cle, {}), reste, qte)
 			elif cle in CLES_FUSIONNEES and isinstance(val, dict):
 				_fusionner(fusions.setdefault(cle, {}), val, qte)
 			elif cle in CLES_MAX and isinstance(val, dict):
@@ -331,6 +346,10 @@ def appliquer_modificateurs(base_doc: dict, matieres_docs: list) -> dict:
 				facteurs[cle] = facteurs[cle] * _facteur(val)
 			elif cle == "rarete" and _rang_rarete(val) > _rang_rarete(rarete):
 				rarete = val
+
+	if v_max:
+		bonus = fusions.setdefault("bonus", {})
+		bonus[CARACT_VITESSE] = _nombre(bonus.get(CARACT_VITESSE)) + v_max
 
 	for cle, val in additifs.items():
 		arrondi = int(round(val))

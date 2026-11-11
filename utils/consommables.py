@@ -307,7 +307,8 @@ def caracts_detail(character: dict) -> dict:
 	⚠️ `actif` = ce contributeur pèse-t-il RÉELLEMENT sur le total ? Un effet à durée dominé
 	par un autre sur la même caract (non-cumul) est listé mais marqué inactif — sans quoi le
 	tooltip afficherait un Δ que le joueur ne touche pas. L'équipement et les passives, eux,
-	sont toujours actifs (ils s'additionnent).
+	sont toujours actifs (ils s'additionnent) — SAUF un bonus de Vitesse d'objet dominé par un
+	plus fort (`domines` de la source), listé inactif.
 	"""
 	base = dict((character or {}).get("caracteristiques_current") or {})
 	total = caracts_avec_buffs(character)
@@ -345,6 +346,17 @@ def caracts_detail(character: dict) -> dict:
 					"delta":   delta,
 					"actif":   actif,
 				})
+			# Bonus d'équipement DOMINÉ (Vitesse non cumulative : cf.
+			# characters._appliquer_vitesse_max) — listé, jamais compté.
+			for code, delta in (src.get("domines") or {}).items():
+				if code in detail and delta:
+					detail[code]["sources"].append({
+						"origine": origine,
+						"nom":     src.get("nom", "?"),
+						"icon":    src.get("icon", "✨"),
+						"delta":   int(delta),
+						"actif":   False,
+					})
 	return detail
 
 
