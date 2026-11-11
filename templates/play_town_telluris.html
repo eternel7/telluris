@@ -7202,7 +7202,7 @@ function renderContenant() {
 	document.getElementById('ctn-sac').innerHTML = sac || '<p class="q-desc">Sac vide.</p>';
 	const dedans = (c.contenu || []).map(it => {
 		const g = _ctnPeutSortir(it, charge, _chargeMax);
-		return _pcfLigne(it, it.idx, '←', '_ctnSortir', g.ok, g.titre, 'gauche', null);
+		return _pcfLigne(it, it.idx, '←', '_ctnSortir', g.ok, g.titre, 'gauche', null, null, null, _ctnBoutonPoser(it));
 	}).join('');
 	document.getElementById('ctn-contenu').innerHTML = dedans
 		|| `<p class="q-desc">${c.accessible ? 'Rien à l’intérieur.' : 'Le sac semble vide.'}</p>`;
@@ -7227,6 +7227,17 @@ function _ctnRanger(btn) {
 function _ctnSortir(btn) {
 	btn.disabled = true;
 	return _ctnAction('api/contenant/sortir', { index_contenu: +btn.dataset.idx, item_id: btn.dataset.item });
+}
+// Poser au sol sans passer par le sac : aucune charge à vérifier (un contenant porte plus que
+// son porteur). Le sol reste transitoire : perdu au prochain déplacement.
+function _ctnBoutonPoser(item) {
+	return `<button class="grp-move-btn" title="Poser au sol (perdu si vous vous déplacez)"
+		data-idx="${+item.idx}" data-item="${escapeHtml(item.item || item._id || item.item_id || '')}"
+		onclick="_ctnPoser(this)">⬇</button>`;
+}
+function _ctnPoser(btn) {
+	btn.disabled = true;
+	return _ctnAction('api/contenant/poser', { index_contenu: +btn.dataset.idx, item_id: btn.dataset.item });
 }
 
 // Fiche d'un objet du marchand (vente/achat) : même carte, avec comparaison à
@@ -11267,7 +11278,7 @@ function _pcfAppliquer(data) {
 // `ctn` (facultatif) : objet RANGÉ dans un contenant du sac — son adresse part en data-*.
 // `ficheIdx` (facultatif) : position de la fiche quand elle diffère de l'adresse serveur
 // (contenu d'un contenant : `idx` réel, la fiche lit le tableau affiché).
-function _pcfLigne(item, idx, fleche, geste, actif, titre, cote, source, ctn, ficheIdx) {
+function _pcfLigne(item, idx, fleche, geste, actif, titre, cote, source, ctn, ficheIdx, apres) {
 	const adr = ctn ? ` data-ctn="${+ctn.index}" data-ctn-item="${escapeHtml(ctn.item_id || '')}"` : '';
 	const btn = `<button class="grp-move-btn" ${actif ? '' : 'disabled'} title="${escapeHtml(titre)}"
 		data-idx="${idx}" data-item="${escapeHtml(item.item || item._id || item.item_id || '')}"${adr}
@@ -11276,7 +11287,7 @@ function _pcfLigne(item, idx, fleche, geste, actif, titre, cote, source, ctn, fi
 	const ouvre = source ? ` sh-inv-open" onclick="openItemDetail('${source}',${+(ficheIdx ?? idx)})" title="Voir la fiche` : '';
 	const row = `<span class="sh-inv-name${ouvre}">${item.icon || '📦'} ${escapeHtml(item.nom || '—')}</span>
 		<span class="sh-inv-poids">${poids}</span>`;
-	return `<div class="sh-inv-item">${cote === 'gauche' ? btn + row : row + btn}</div>`;
+	return `<div class="sh-inv-item">${cote === 'gauche' ? btn + row : row + btn}${apres || ''}</div>`;
 }
 
 function renderCoffre(data) {

@@ -69,6 +69,7 @@ Tous par **`_acteur(current_user, body)`** : le contenant peut être dans le sac
 - `GET /api/contenant?index=&item_id=&compagnon_id=` → bloc `contenant` : `capacite_kg`, `charge_kg`, `accessible`, `prochaine_maree_at`, `contenu` résolu (`resolve_item_ref`) — **vide hors marée** (« le sac semble vide »).
 - `POST /api/contenant/ranger {index_contenant, item_id_contenant, index, item_id, compagnon_id}`.
 - `POST /api/contenant/sortir {index_contenant, item_id_contenant, index_contenu, item_id, compagnon_id}` — 409 hors marée.
+- `POST /api/contenant/poser {…mêmes champs que sortir}` (11/11) — contenu → **sol du principal** sans passer par le sac : **aucun contrôle de charge** (ce qu'on ne peut pas porter se pose quand même). Sol transitoire : gardé tant qu'on ne bouge pas, repris par le ramassage ordinaire (sac ou contenant). 409 hors marée. Bouton ⬇ de la fenêtre 👜.
 - **Refus 409 en combat** : doc `combat` du personnage au `status` `active` (même test que l'anti-doublon de `routers/combat.py`). L'interface n'existe que dans `/play`, qui redirige déjà vers un combat actif : la garde serveur vise la requête forgée.
 - Réponse : `_inventory_payload` + bloc `contenant` + `fiche` (sortir un grimoire ouvre un sort, convention 10).
 

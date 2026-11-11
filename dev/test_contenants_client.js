@@ -91,6 +91,20 @@ test('durée courte : jamais « 0 min » ni négatif', () => {
 	assert.strictEqual(_dureeCourte(3600), '1 h 00');
 });
 
+// ── Poser au sol depuis le contenu (⬇) : aucune garde de charge côté client non plus ──
+// Classe de bug : le bouton greffé hors de la ligne, ou désactivé par la charge du sac.
+for (const nom of ['_pcfLigne', '_ctnBoutonPoser']) vm.runInThisContext(extraire(nom));
+globalThis.escapeHtml = s => String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+
+test('ligne du contenu : ← sortir ET ⬇ poser, dans la même ligne', () => {
+	const it = { idx: 2, item: 'item:pierre', nom: 'Pierre', poids: 40 };
+	const html = _pcfLigne(it, it.idx, '←', '_ctnSortir', false, 'Trop lourd', 'gauche', null, null, null, _ctnBoutonPoser(it));
+	assert.ok(/^<div class="sh-inv-item">[\s\S]*_ctnSortir[\s\S]*_ctnPoser\(this\)">⬇<\/button><\/div>$/.test(html));
+	const poser = _ctnBoutonPoser(it);
+	assert.ok(!/disabled/.test(poser), 'trop lourd pour le sac ne bloque pas la pose au sol');
+	assert.ok(/data-idx="2"/.test(poser) && /data-item="item:pierre"/.test(poser));
+});
+
 // ── Contenants comme DESTINATAIRES (sol 🤝, panneau 👥, butin de combat) ─────────
 // Classes de bug : un contenant oublié de la liste (celui du porteur de la fiche compris),
 // un contenant proposé comme destination d'un autre contenant, une place masquée (marée
