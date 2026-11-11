@@ -330,6 +330,7 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 	épinglé par les tests : `pa == pa_hors_zone + somme(pa_zones)`.
 	"""
 	bonus = EquipmentBonus()
+	vitesses = []  # [(bonus V > 0, source)] — non cumulatifs, cf. _appliquer_vitesse_max
 	for slot, ref in slots.items():
 		item_id = item_ref_id(ref)
 		if not item_id:
@@ -361,6 +362,8 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 		# Buffs de caractéristiques portés par l'objet : le champ `bonus` = {caract: delta},
 		# PLUS `bonus_malus_depl`, qui est lui aussi un delta sur V (données : -1, -2 pour les
 		# armures lourdes) et se cumule donc naturellement avec un éventuel `bonus.V`.
+		# ⚠️ V POSITIF NON CUMULATIF entre objets : seul le plus fort bonus de Vitesse compte
+		# (`_appliquer_vitesse_max`, après la boucle). Les malus de V, eux, s'additionnent.
 		buffs = {}
 		for caract, delta in (item.get("bonus") or {}).items():
 			try:
@@ -373,16 +376,22 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 			malus_v = int(item.get("bonus_malus_depl", 0) or 0)
 		except (TypeError, ValueError):
 			malus_v = 0
-		if malus_v:
-			buffs["V"] = buffs.get("V", 0) + malus_v
-		if buffs:
+		v_bonus = max(0, buffs.get(CARACT_VITESSE, 0))
+		v_malus = min(0, buffs.get(CARACT_VITESSE, 0)) + malus_v
+		buffs.pop(CARACT_VITESSE, None)
+		if v_malus:
+			buffs[CARACT_VITESSE] = v_malus
+		if buffs or v_bonus:
 			for caract, delta in buffs.items():
 				bonus.buffs[caract] = bonus.buffs.get(caract, 0) + delta
-			bonus.buffs_sources.append({
+			source = {
 				"nom":   item.get("nom", item_id),
 				"icon":  item.get("icon", "⚔"),
 				"buffs": buffs,
-			})
+			}
+			if v_bonus:
+				vitesses.append((v_bonus, source))
+			bonus.buffs_sources.append(source)
 
 		# Régén, esquive et aide à la canalisation conférées par l'objet PORTÉ (focus
 		# magique, talisman, robe de mage…) : tant qu'il est équipé, elles jouent en
@@ -403,7 +412,39 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 			bonus.regen_pm += _effet_int(effets_portes.get("regen_pm"))
 			bonus.esquive  += _effet_int(effets_portes.get("esquive"))
 			bonus.canalisation += _effet_int(effets_portes.get("canalisation"))
+	_appliquer_vitesse_max(bonus, vitesses)
 	return bonus
+
+
+# Code de la Vitesse dans `bonus` / `caracteristiques_current`.
+CARACT_VITESSE = "V"
+
+
+def _appliquer_vitesse_max(bonus: EquipmentBonus, vitesses: list) -> None:
+	"""Non-cumul des bonus de Vitesse portés : parmi `vitesses` = [(bonus_v > 0, source)],
+	seul le PLUS FORT s'ajoute à `bonus.buffs["V"]` (ex æquo : le premier slot gagne). Les
+	autres restent nommés dans leur source sous `domines` — `consommables.caracts_detail`
+	les liste INACTIFS, comme un effet à durée dominé. La source retenue porte son bonus dans
+	`buffs` (net de son propre malus éventuel), si bien que la somme des sources = le total.
+	Mute `bonus` en place."""
+	if not vitesses:
+		return
+	v_max, gagnante = max(vitesses, key=lambda e: e[0])  # max garde le PREMIER ex æquo
+	net = bonus.buffs.get(CARACT_VITESSE, 0) + v_max
+	if net:
+		bonus.buffs[CARACT_VITESSE] = net
+	else:
+		bonus.buffs.pop(CARACT_VITESSE, None)
+	propre = gagnante["buffs"].get(CARACT_VITESSE, 0) + v_max
+	if propre:
+		gagnante["buffs"][CARACT_VITESSE] = propre
+	else:
+		gagnante["buffs"].pop(CARACT_VITESSE, None)
+	for v, source in vitesses:
+		if source is not gagnante:
+			source["domines"] = {CARACT_VITESSE: v}
+	# Une source sans plus aucun buff n'est gardée que si elle porte un bonus dominé.
+	bonus.buffs_sources[:] = [s for s in bonus.buffs_sources if s["buffs"] or s.get("domines")]
 
 
 def sync_equipment_bonus(character: dict) -> EquipmentBonus:

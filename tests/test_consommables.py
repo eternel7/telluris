@@ -187,6 +187,56 @@ def test_recompute_equipment_bonus_agrege_bonus_et_malus_depl(monkeypatch):
     assert {s["nom"] for s in eq.buffs_sources} == {"Dague", "Harnois"}
 
 
+def test_recompute_equipment_bonus_vitesse_non_cumulative(monkeypatch):
+    # Bonus de V portés : seul le PLUS FORT compte ; les malus (armure lourde) s'additionnent.
+    import utils.characters as characters
+    items = {
+        "item:bottes":  {"nom": "Bottes", "bonus": {"V": 2, "Ag": 1}},
+        "item:dague":   {"nom": "Dague", "bonus": {"V": 1, "Ag": 3}},
+        "item:cape":    {"nom": "Cape", "bonus": {"V": 3}},
+        "item:harnois": {"nom": "Harnois", "bonus_malus_depl": -2},
+        "item:pique":   {"nom": "Pique", "bonus_malus_depl": -1},
+    }
+    monkeypatch.setattr(characters, "get_doc", lambda i: items.get(i))
+
+    eq = characters.recompute_equipment_bonus(
+        {"pieds": "item:bottes", "main_droite": "item:dague", "dos": "item:cape"})
+    assert eq.buffs == {"V": 3, "Ag": 4}
+    sources = {s["nom"]: s for s in eq.buffs_sources}
+    assert sources["Cape"]["buffs"] == {"V": 3} and "domines" not in sources["Cape"]
+    assert sources["Bottes"]["buffs"] == {"Ag": 1} and sources["Bottes"]["domines"] == {"V": 2}
+    assert sources["Dague"]["domines"] == {"V": 1}
+    # La somme des sources retenues redonne le total.
+    assert sum(s["buffs"].get("V", 0) for s in eq.buffs_sources) == eq.buffs["V"]
+
+    eq = characters.recompute_equipment_bonus(
+        {"pieds": "item:bottes", "torse": "item:harnois", "main_gauche": "item:pique"})
+    assert eq.buffs["V"] == 2 - 2 - 1
+
+
+def test_recompute_equipment_bonus_vitesse_ex_aequo_premier_slot(monkeypatch):
+    import utils.characters as characters
+    items = {"item:a": {"nom": "A", "bonus": {"V": 2}}, "item:b": {"nom": "B", "bonus": {"V": 2}}}
+    monkeypatch.setattr(characters, "get_doc", lambda i: items.get(i))
+    eq = characters.recompute_equipment_bonus({"pieds": "item:a", "dos": "item:b"})
+    assert eq.buffs == {"V": 2}
+    assert [(s["nom"], s["buffs"], s.get("domines")) for s in eq.buffs_sources] == [
+        ("A", {"V": 2}, None), ("B", {}, {"V": 2})]
+
+
+def test_caracts_detail_vitesse_dominee_listee_inactive(monkeypatch):
+    import utils.characters as characters
+    items = {"item:bottes": {"nom": "Bottes", "icon": "👢", "bonus": {"V": 2}},
+             "item:dague":  {"nom": "Dague", "icon": "🗡️", "bonus": {"V": 1}}}
+    monkeypatch.setattr(characters, "get_doc", lambda i: items.get(i))
+    perso = _perso(slots={"pieds": "item:bottes", "main_droite": "item:dague"})
+    characters.sync_equipment_bonus(perso)
+    detail = caracts_detail(perso)
+    assert detail["V"]["delta"] == 2
+    assert {(s["nom"], s["delta"], s["actif"]) for s in detail["V"]["sources"]} == {
+        ("Bottes", 2, True), ("Dague", 1, False)}
+
+
 def test_sync_equipment_bonus_denormalise_sur_le_perso(monkeypatch):
     import utils.characters as characters
     monkeypatch.setattr(characters, "get_doc",
