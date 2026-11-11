@@ -1221,7 +1221,7 @@
           ]
         },
         "a_bete_accepte": {
-          "texte": "Maëlys trace une ligne dans son registre, puis plie la carte de France et vous la tend : un rond de charbon sur les monts du Gévaudan, au sud-ouest de Lyon. « C'est là que les battues l'ont perdue. Elle ne se laisse pas chercher : allez-y, et laissez-la vous trouver. Soyez sur vos gardes quand elle le fera. » Puis, sans lever les yeux : « Et si, une fois tombée, elle a un visage, je veux le savoir aussi. »",
+          "texte": "Maëlys trace une ligne dans son registre, puis plie la carte de France et vous la tend : un rond de charbon sur les monts du Gévaudan, au sud-ouest de Lyon. « C'est là que les battues l'ont perdue. Allez-y, et laissez-la vous trouver : elle viendra avec ses loups. Soyez sur vos gardes quand elle le fera. » Puis, sans lever les yeux : « Et si, une fois tombée, elle a un visage, je veux le savoir aussi. »",
           "choix": [
             {
               "id": "ok",
@@ -1524,7 +1524,7 @@
           ]
         },
         "a_bete_carte": {
-          "texte": "Maëlys déplie sur la table une carte de France, usée aux plis. Son doigt descend de Lutecia, passe la Loire, contourne le Massif central par le sud et s'arrête sur des hauteurs, à l'ouest du Rhône, au sud-ouest de Lyon. « Le Gévaudan. Des landes, des bois de pins, des rochers. Trois battues l'ont perdue là, au même endroit, à des mois d'écart. Elle y revient. » Elle prend un bâton de charbon et trace un rond. « Le quatrième rapport la place la même nuit à l'autre bout de la France. Je ne l'ai pas cru. » Elle repousse la carte vers vous. « Elle est à vous si vous acceptez. »",
+          "texte": "Maëlys déplie sur la table une carte de France, usée aux plis. Son doigt descend de Lutecia, passe la Loire, contourne le Massif central par le sud et s'arrête sur des hauteurs, à l'ouest du Rhône, au sud-ouest de Lyon. « Le Gévaudan. Des landes, des bois de pins, des rochers. Trois battues l'ont perdue là, au même endroit, à des mois d'écart. Elle y revient. » Elle prend un bâton de charbon et trace un rond. « Elle ne chasse pas seule : chaque battue a compté des loups autour d'elle, trois au moins, qui se jettent sur les chiens pendant qu'elle choisit son homme. Le quatrième rapport la place la même nuit à l'autre bout de la France. Je ne l'ai pas cru. » Elle repousse la carte vers vous. « Elle est à vous si vous acceptez. »",
           "choix": [
             {
               "id": "infos",
@@ -1708,6 +1708,13 @@
                 "position": {
                   "x": 55,
                   "y": 32
+                },
+                "rencontre": {
+                  "espece": "espece:bete_du_gevaudan",
+                  "accompagnants": [
+                    "espece:loup"
+                  ],
+                  "nb_accompagnants": 3
                 }
               }
             },

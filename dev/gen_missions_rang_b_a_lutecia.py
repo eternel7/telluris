@@ -104,10 +104,14 @@ ZONE_GARGOUILLE = "zone:riviere"
 # bouton 🗺️ de l'onglet 📜 (`apport.localisation_spec`). Monts du Gévaudan, au sud du Massif
 # central, à l'ouest du Rhône : CENTRE d'un placement `zone:tres_dangereuse` de la carte de
 # France, où la Bête est aux `rencontres` — tout le 3×3 du crop y reste (verrouillé par
-# `test_la_bete_est_situee_dans_une_zone_ou_elle_rode`). Une indication, pas une rencontre
-# garantie : la Bête y sort au gré du tirage de la zone.
+# `test_la_bete_est_situee_dans_une_zone_ou_elle_rode`). RENCONTRE GARANTIE dans le 3×3
+# (Auteur, 11/11, `apport.rencontre_situee_ici`) : la Bête et ses loups, rien d'autre —
+# plus de dragon ni de chimère à ses côtés. Grades : ceux de la zone.
 ZONE_BETE = "zone:tres_dangereuse"
-LOCALISATION_BETE = {"lieu": FRANCE, "position": {"x": 55, "y": 32}}
+LOUP = "espece:loup"
+LOCALISATION_BETE = {"lieu": FRANCE, "position": {"x": 55, "y": 32},
+					 "rencontre": {"espece": "espece:bete_du_gevaudan", "accompagnants": [LOUP],
+								   "nb_accompagnants": 3}}
 
 # Portraits et images : images DÉFINITIVES (prompts : docs/lore/personnages/
 # 20261025_missions_rang_b_a_lutecia.md § 4) ; chancelier, gardienne, gardien de la Porte de
@@ -647,7 +651,7 @@ def noeuds_maelys():
 		],
 	}
 	n["a_bete_carte"] = {
-		"texte": "Maëlys déplie sur la table une carte de France, usée aux plis. Son doigt descend de Lutecia, passe la Loire, contourne le Massif central par le sud et s'arrête sur des hauteurs, à l'ouest du Rhône, au sud-ouest de Lyon. « Le Gévaudan. Des landes, des bois de pins, des rochers. Trois battues l'ont perdue là, au même endroit, à des mois d'écart. Elle y revient. » Elle prend un bâton de charbon et trace un rond. « Le quatrième rapport la place la même nuit à l'autre bout de la France. Je ne l'ai pas cru. » Elle repousse la carte vers vous. « Elle est à vous si vous acceptez. »",
+		"texte": "Maëlys déplie sur la table une carte de France, usée aux plis. Son doigt descend de Lutecia, passe la Loire, contourne le Massif central par le sud et s'arrête sur des hauteurs, à l'ouest du Rhône, au sud-ouest de Lyon. « Le Gévaudan. Des landes, des bois de pins, des rochers. Trois battues l'ont perdue là, au même endroit, à des mois d'écart. Elle y revient. » Elle prend un bâton de charbon et trace un rond. « Elle ne chasse pas seule : chaque battue a compté des loups autour d'elle, trois au moins, qui se jettent sur les chiens pendant qu'elle choisit son homme. Le quatrième rapport la place la même nuit à l'autre bout de la France. Je ne l'ai pas cru. » Elle repousse la carte vers vous. « Elle est à vous si vous acceptez. »",
 		"choix": [
 			{"id": "infos", "label": "« Un loup-garou ? »", "next": "a_bete_infos"},
 			_accepter("apport", "« Je prends la carte. Je vous rapporte sa tête. »"),
@@ -659,7 +663,7 @@ def noeuds_maelys():
 		"choix": [_accepter("apport", "« Je vous la rapporte. »"), _plus_tard("« Laissez-moi y réfléchir. »")],
 	}
 	n["a_bete_accepte"] = {
-		"texte": "Maëlys trace une ligne dans son registre, puis plie la carte de France et vous la tend : un rond de charbon sur les monts du Gévaudan, au sud-ouest de Lyon. « C'est là que les battues l'ont perdue. Elle ne se laisse pas chercher : allez-y, et laissez-la vous trouver. Soyez sur vos gardes quand elle le fera. » Puis, sans lever les yeux : « Et si, une fois tombée, elle a un visage, je veux le savoir aussi. »",
+		"texte": "Maëlys trace une ligne dans son registre, puis plie la carte de France et vous la tend : un rond de charbon sur les monts du Gévaudan, au sud-ouest de Lyon. « C'est là que les battues l'ont perdue. Allez-y, et laissez-la vous trouver : elle viendra avec ses loups. Soyez sur vos gardes quand elle le fera. » Puis, sans lever les yeux : « Et si, une fois tombée, elle a un visage, je veux le savoir aussi. »",
 		"choix": _ok("« Compris. »"),
 	}
 	n["a_bete_relance"] = {

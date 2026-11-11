@@ -31,7 +31,7 @@ from utils import sorts as sorts_util
 from utils import competences as competences_util
 from utils import slots_actions
 from utils.combat import (
-    BATTLE_MAPS, instantiate_monsters, create_combat_doc, build_monster_snapshot,
+    BATTLE_MAPS, instantiate_monsters, instantiate_rencontre, create_combat_doc, build_monster_snapshot,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
     verser_butin_au_sol, cle_butin, etat_charge_snapshot, bloc_charge_snapshot,
     changer_d_etage, annoter_passages, vue_client, caracts_effectives,
@@ -41,6 +41,7 @@ from utils import tresor as tresor_util
 from utils.lieux import connexions_du_lieu, lieu_est_ville_image
 from utils.characters import lieu_label
 from utils import chasse
+from utils import apport
 from models import character_stats
 
 combat_router = APIRouter()
@@ -195,6 +196,23 @@ async def start_combat(
             pool_especes = pool_epreuve
         else:
             epreuve = None
+    # APPORT SITUÉ à rencontre garantie (la Bête de Maëlys) : dans le 3×3 de la carte 🗺️, la
+    # cible et ses seuls accompagnants écrits (`apport.rencontre_situee_ici`), jamais le reste
+    # du pool de la zone. L'épreuve de rang garde la priorité. Cible absente du bestiaire ⇒
+    # rencontre ordinaire.
+    situee, cible_situee, accompagnants_situes, nb_situes = None, None, [], 0
+    if depart_lieu and not epreuve:
+        situee = apport.rencontre_situee_ici(character, depart_lieu["_id"])
+        if situee:
+            rencontre = situee["localisation"]["rencontre"]
+            par_id = {e["_id"]: e for e in especes_all}
+            cible_situee = par_id.get(rencontre["espece"])
+            accompagnants_situes = [par_id[e] for e in rencontre["accompagnants"] if e in par_id]
+            nb_situes = rencontre["nb_accompagnants"] if accompagnants_situes else 0
+            if cible_situee:
+                pool_especes = [cible_situee] + accompagnants_situes
+            else:
+                situee = None
 
     # Aucune espèce associée aux zones actives → pas de combat.
     if not pool_especes:
@@ -221,10 +239,17 @@ async def start_combat(
     nb_monstres = (1 if epreuve else max(1, round(body.intensite * 3))) + len(compagnons) // 2
     # Espèces déjà filtrées par zone → pas de re-filtrage par tags (zone_tags vide).
     # Focalisation : l'espèce ciblée pèse plus lourd dans le tirage (si présente au pool).
-    monstres = instantiate_monsters(
-        pool_especes, profils, nb_monstres, [], profil_weights=profil_weights,
-        espece_weights=focalisation.espece_weights_focus(character),
-    )
+    if situee:
+        monstres = instantiate_rencontre(
+            cible_situee, accompagnants_situes, profils,
+            nb_situes + (len(compagnons) // 2 if accompagnants_situes else 0),
+            profil_weights=profil_weights,
+        )
+    else:
+        monstres = instantiate_monsters(
+            pool_especes, profils, nb_monstres, [], profil_weights=profil_weights,
+            espece_weights=focalisation.espece_weights_focus(character),
+        )
     if not monstres:
         return {"combat_id": None}
 

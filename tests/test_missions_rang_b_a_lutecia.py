@@ -384,3 +384,70 @@ def test_deux_minotaures_passent_le_plancher_du_rang_a(monkeypatch):
 	for p in profils:
 		seul = potentiel.potentiel_espece(GEN.MINOTAURE, p["_id"], DUMP.get)["total"]
 		assert seul < plancher <= salle["nb_monstres"] * seul, (p["_id"], seul)
+
+
+# ── La Bête : rencontre garantie dans le 3×3 (apport.rencontre_situee_ici) ───────
+
+class _Capture(Exception):
+	pass
+
+
+def _lancer_combat(monkeypatch, character):
+	"""`start_combat` réel sur le dump ; `create_combat_doc` intercepté → monstres tirés."""
+	import asyncio
+	from routers import combat as rc
+	monkeypatch.setattr(rc, "get_selected_character", lambda u: character)
+	monkeypatch.setattr(rc, "get_doc", lambda i: DOCS.get(i) or DUMP.get(i))
+	monkeypatch.setattr(rc, "find_docs", lambda sel: [] if sel.get("type") == "combat" else
+						[d for d in DUMP.values() if d.get("type") == sel.get("type")])
+
+	def capture(_c, monstres, *a, **k):
+		raise _Capture(monstres)
+	monkeypatch.setattr(rc, "create_combat_doc", capture)
+	try:
+		asyncio.run(rc.start_combat(rc.StartCombatRequest(), {"_id": "user:test"}))
+	except _Capture as e:
+		return e.args[0]
+	return None
+
+
+def _chasseur(x, y, localisation=None):
+	q = {"id": GEN.A_BETE, "giver": GEN.BUREAU, "progress": 0,
+		 "objectif": {"type": "collect", "cible": GEN.TETE_BETE, "quantite": 1},
+		 "localisation": copy.deepcopy(localisation or _offre_bete()["localisation"])}
+	return {"_id": "character:test", "lieu": GEN.FRANCE, "position": {"x": x, "y": y},
+			"inventaire": [], "quetes_actives": [q]}
+
+
+def test_la_bete_vient_avec_ses_loups_et_rien_d_autre(monkeypatch):
+	loc = _offre_bete()["localisation"]
+	assert loc["rencontre"] == {"espece": "espece:bete_du_gevaudan", "accompagnants": [GEN.LOUP],
+								"nb_accompagnants": 3}
+	assert GEN.LOUP in DUMP and "espece:bete_du_gevaudan" in DUMP
+	px, py = loc["position"]["x"], loc["position"]["y"]
+	for dx, dy in ((0, 0), (-1, 1), (1, -1)):
+		monstres = _lancer_combat(monkeypatch, _chasseur(px + dx, py + dy))
+		especes = [m["espece_id"] for m in monstres]
+		assert especes.count("espece:bete_du_gevaudan") == 1, especes
+		assert sorted(especes) == sorted(["espece:bete_du_gevaudan"] + [GEN.LOUP] * 3), especes
+		assert len({m["id"] for m in monstres}) == len(monstres)
+
+
+def test_hors_du_3x3_ou_tete_remise_la_rencontre_redevient_ordinaire(monkeypatch):
+	from utils import apport as ap
+	loc = _offre_bete()["localisation"]
+	px, py = loc["position"]["x"], loc["position"]["y"]
+	assert ap.rencontre_situee_ici(_chasseur(px, py), GEN.FRANCE)
+	assert ap.rencontre_situee_ici(_chasseur(px + 2, py), GEN.FRANCE) is None
+	assert ap.rencontre_situee_ici(_chasseur(px, py), GEN.LUTECIA) is None
+	remise = _chasseur(px, py)
+	remise["quetes_actives"][0]["progress"] = 1
+	assert ap.rencontre_situee_ici(remise, GEN.FRANCE) is None
+	# Hors du 3×3, `start_combat` ne compose pas la rencontre : tirage ordinaire de la zone.
+	from routers import combat as rc
+	appels = []
+	monkeypatch.setattr(rc, "instantiate_rencontre", lambda *a, **k: appels.append(a) or [])
+	_lancer_combat(monkeypatch, _chasseur(px + 2, py))
+	assert appels == []
+	_lancer_combat(monkeypatch, _chasseur(px, py))
+	assert len(appels) == 1

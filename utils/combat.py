@@ -3837,6 +3837,29 @@ def instantiate_monsters(
 	return monstres
 
 
+def instantiate_rencontre(
+	cible: dict, accompagnants: list, profils: list, nb_accompagnants: int,
+	profil_weights: dict | None = None,
+) -> list:
+	"""Rencontre COMPOSÉE (apport situé, `apport.rencontre_situee_ici`) : exactement UN
+	spécimen de `cible`, puis `nb_accompagnants` monstres tirés uniformément parmi les docs
+	`accompagnants` — jamais une autre espèce. Grade par le même tirage que
+	`instantiate_monsters` (profils compatibles, poids de la zone). Indices contigus : les ids
+	des snapshots restent uniques."""
+	if not cible:
+		return []
+	especes = [cible] + [random.choice(accompagnants) for _ in range(max(0, nb_accompagnants))
+						 if accompagnants]
+	compat: dict = {}
+	monstres = []
+	for i, espece in enumerate(especes):
+		eid = espece.get("_id")
+		if eid not in compat:
+			compat[eid] = profils_compatibles(profils, espece)
+		monstres.append(build_monster_snapshot(espece, _pick_profil(compat[eid], profil_weights), i))
+	return monstres
+
+
 def des_cc_espece(espece: dict) -> int:
 	"""Nombre de dés de Force au corps à corps pour l'attaque NATURELLE de cette espèce.
 

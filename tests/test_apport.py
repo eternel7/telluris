@@ -64,6 +64,44 @@ def test_localisation_lisible_ou_ignoree():
 		assert apport.offre_spec(_donneur(localisation=faute))["id"] == QID
 
 
+def test_rencontre_lisible_sinon_toute_la_localisation_tombe():
+	r = {"espece": "espece:bete", "accompagnants": ["espece:loup"], "nb_accompagnants": 3}
+	assert apport.localisation_spec(dict(LOC, rencontre=r))["rencontre"] == r
+	assert apport.rencontre_spec({"espece": "espece:bete"}) == {
+		"espece": "espece:bete", "accompagnants": [], "nb_accompagnants": 0}
+	assert apport.rencontre_spec({"espece": "espece:bete", "nb_accompagnants": 2})["nb_accompagnants"] == 0
+	for faute in ({"espece": "bete"}, dict(r, accompagnants=["loup"]), dict(r, nb_accompagnants=-1),
+				  dict(r, nb_accompagnants=True), dict(r, accompagnants="espece:loup")):
+		assert apport.localisation_spec(dict(LOC, rencontre=faute)) is None, faute
+
+
+def test_rencontre_situee_ici_dans_le_3x3_tant_que_rien_n_est_remis():
+	r = {"espece": "espece:bete", "accompagnants": ["espece:loup"], "nb_accompagnants": 3}
+	c = {"position": {"x": 54, "y": 33}}
+	q = apport.accepter(c, _donneur(localisation=dict(LOC, rencontre=r)), COQ)
+	assert apport.rencontre_situee_ici(c, "lieu:france") is q
+	assert apport.rencontre_situee_ici(dict(c, position={"x": 53, "y": 32}), "lieu:france") is None
+	assert apport.rencontre_situee_ici(c, COQ) is None
+	assert apport.rencontre_situee_ici({k: v for k, v in c.items() if k != "position"}, "lieu:france") is None
+	q["progress"] = q["objectif"]["quantite"]
+	assert apport.rencontre_situee_ici(c, "lieu:france") is None
+	# Localisation SANS rencontre : carte seule, aucune garantie.
+	c2 = {"position": {"x": 55, "y": 32}}
+	apport.accepter(c2, _donneur(localisation=LOC), COQ)
+	assert apport.rencontre_situee_ici(c2, "lieu:france") is None
+
+
+def test_instantiate_rencontre_une_cible_et_ses_seuls_accompagnants():
+	from utils import combat
+	cible = {"_id": "espece:bete", "nom": "Bête", "base_attributes": {}}
+	loup = {"_id": "espece:loup", "nom": "Loup", "base_attributes": {}}
+	monstres = combat.instantiate_rencontre(cible, [loup], [], 3)
+	assert [m["espece_id"] for m in monstres] == ["espece:bete"] + ["espece:loup"] * 3
+	assert len({m["id"] for m in monstres}) == 4
+	assert [m["espece_id"] for m in combat.instantiate_rencontre(cible, [], [], 3)] == ["espece:bete"]
+	assert combat.instantiate_rencontre(None, [loup], [], 3) == []
+
+
 def test_accepter_recopie_la_localisation_hors_de_l_objectif():
 	c = {}
 	q = apport.accepter(c, _donneur(localisation=LOC), COQ)

@@ -20,8 +20,16 @@
 #
 # LOCALISATION (optionnelle) : `offre.localisation = {lieu: "lieu:…", position: {x, y}}` — le
 # donneur SITUE la proie (la Bête du Gévaudan de Maëlys). Recopiée dans le snapshot, elle
-# donne le bouton 🗺️ de l'onglet 📜 (`quetes.quete_detail`, même crop que les chasses). Elle
-# n'influe sur AUCUN tirage : c'est une indication, pas une rencontre garantie.
+# donne le bouton 🗺️ de l'onglet 📜 (`quetes.quete_detail`, même crop que les chasses).
+#
+# RENCONTRE GARANTIE (optionnelle) : `localisation.rencontre = {espece, accompagnants?:
+# ["espece:…"], nb_accompagnants?}` — tant que la quête court et que l'objet n'est pas remis,
+# un combat lancé dans le 3×3 de la position oppose EXACTEMENT l'espèce ciblée (un spécimen)
+# et `nb_accompagnants` monstres tirés parmi les `accompagnants` (+1 par 2 compagnons, comme
+# toute rencontre) — plus de dragon ni de chimère à côté de la Bête (Auteur, 11/11). Lu par
+# `start_combat` via `rencontre_situee_ici`, APRÈS l'épreuve de rang (qui garde la priorité).
+
+import copy
 
 from utils import quetes
 
@@ -29,9 +37,29 @@ NOEUDS_DONNEUR = frozenset({"accepte"})
 NOEUDS_RECEVEUR = frozenset({"remis", "partiel"})
 
 
+def _espece_id(v) -> bool:
+	return isinstance(v, str) and v.startswith("espece:")
+
+
+def rencontre_spec(raw) -> dict | None:
+	"""`{espece, accompagnants, nb_accompagnants}` normalisé, ou None si illisible. Sans
+	accompagnant, `nb_accompagnants` vaut 0 (la cible seule)."""
+	if not isinstance(raw, dict) or not _espece_id(raw.get("espece")):
+		return None
+	accompagnants = raw.get("accompagnants", [])
+	if not isinstance(accompagnants, list) or not all(_espece_id(e) for e in accompagnants):
+		return None
+	nb = raw.get("nb_accompagnants", 0)
+	if isinstance(nb, bool) or not isinstance(nb, int) or nb < 0:
+		return None
+	return {"espece": raw["espece"], "accompagnants": list(accompagnants),
+			"nb_accompagnants": nb if accompagnants else 0}
+
+
 def localisation_spec(raw) -> dict | None:
-	"""`{lieu, position:{x, y}}` normalisé, ou None si absent ou illisible (lieu hors
-	`lieu:`, coordonnées non entières ou négatives). Le linter signale une forme illisible."""
+	"""`{lieu, position:{x, y}, rencontre?}` normalisé, ou None si absent ou illisible (lieu
+	hors `lieu:`, coordonnées non entières ou négatives, `rencontre` présente mais illisible —
+	fail-closed : ni carte ni garantie sur une donnée fautive). Le linter signale ces fautes."""
 	if not isinstance(raw, dict):
 		return None
 	lieu, pos = raw.get("lieu"), raw.get("position")
@@ -40,7 +68,32 @@ def localisation_spec(raw) -> dict | None:
 	x, y = pos.get("x"), pos.get("y")
 	if any(isinstance(v, bool) or not isinstance(v, int) or v < 0 for v in (x, y)):
 		return None
-	return {"lieu": lieu, "position": {"x": x, "y": y}}
+	loc = {"lieu": lieu, "position": {"x": x, "y": y}}
+	if "rencontre" in raw:
+		rencontre = rencontre_spec(raw["rencontre"])
+		if rencontre is None:
+			return None
+		loc["rencontre"] = rencontre
+	return loc
+
+
+def rencontre_situee_ici(character: dict, lieu_id: str) -> dict | None:
+	"""Quête d'apport SITUÉE à rencontre garantie, encore à remettre, dont le 3×3 autour de la
+	position contient le joueur dans CE lieu — ou None. Première de la liste."""
+	pos = (character or {}).get("position") or {}
+	jx, jy = pos.get("x"), pos.get("y")
+	if jx is None or jy is None:
+		return None
+	for q in (character or {}).get("quetes_actives", []):
+		loc = localisation_spec(q.get("localisation"))
+		if not loc or not loc.get("rencontre") or loc["lieu"] != lieu_id:
+			continue
+		if (q.get("objectif") or {}).get("type") != "collect" or reste_a_remettre(q) <= 0:
+			continue
+		p = loc["position"]
+		if abs(int(jx) - p["x"]) <= 1 and abs(int(jy) - p["y"]) <= 1:
+			return q
+	return None
 
 
 def offre_spec(pnj_doc: dict) -> dict | None:
@@ -163,8 +216,8 @@ def accepter(character: dict, pnj_doc: dict, lieu_id: str) -> dict | None:
 	})
 	if spec.get("localisation"):
 		# Hors de `objectif` : une collecte n'a pas de lieu de remise ailleurs que chez le donneur.
-		q["localisation"] = {"lieu": spec["localisation"]["lieu"],
-							 "position": dict(spec["localisation"]["position"])}
+		# Copie PROFONDE : le snapshot ne partage rien avec l'offre du doc PNJ.
+		q["localisation"] = copy.deepcopy(spec["localisation"])
 	character.setdefault("quetes_actives", []).append(q)
 	return q
 

@@ -49,7 +49,7 @@ def maelys(doc):
 
 
 def generer(par_id):
-	for requis in (GEN.MAELYS, GEN.FRANCE, GEN.TETE_BETE):
+	for requis in (GEN.MAELYS, GEN.FRANCE, GEN.TETE_BETE, GEN.LOUP, GEN.LOCALISATION_BETE["rencontre"]["espece"]):
 		if requis not in par_id:
 			sys.exit(f"ERREUR : {requis} absent du dump")
 	return [maelys(par_id[GEN.MAELYS])]
