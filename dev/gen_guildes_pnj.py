@@ -8,6 +8,8 @@ capitales, `rang_max` y changent (PUT complet, §11).
 - Comptoir d'une CAPITALE (`sous_categorie` du doc de la cité) : `rang_max: "S+"` (demande de
   l'Auteur, 31/10). Les autres gardent le plafond par défaut.
 - Cités lointaines (`LOINTAINES`) : le rang de Lutecia est reconnu à l'inscription, comme à Petra.
+- ⚠️ Cités à CAPITALE SŒUR (même `lieu_parent`) : leur texte d'inscription est corrigé par
+  `dev/gen_inscription_capitale.py` (11/11) — réimporter ce fichier-ci l'effacerait.
 - Maître : dialogue seul. Aucun `services.commission` : ces cités n'ont pas de donjon à mandater.
 - Portraits : noms relus dans dev/batch/guildes_pnj/manifeste.json (`gen_images_guildes_pnj.py`).
 - Noms et Lignées : PROPOSITIONS, docs/lore/cites/20261029_maisons_de_guilde_des_cites.md.

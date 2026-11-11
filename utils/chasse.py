@@ -46,7 +46,7 @@ from utils.zones import (
 	profils_compatibles,
 )
 from utils.characters import lieu_label, item_ref_id, item_ref_lieu
-from utils.recrutement import RANGS, CARTE_AVENTURIER_ITEM_ID
+from utils.recrutement import RANGS, CARTE_AVENTURIER_ITEM_ID, porte_carte_valable, carte_valable_dans
 from utils import accord_espece, quetes
 
 
@@ -522,6 +522,33 @@ def reconnaitre_rang(character: dict, cite_source: str, cite_cible: str) -> str 
 	return crediter_rang(character, {"cite": cite_cible, "rang": rang})
 
 
+def reconnaitre_rang_carte(character: dict, cite_id: str | None, get_doc_fn) -> str | None:
+	"""La carte d'une CAPITALE reconnue ici (`recrutement.carte_valable_dans`) fait recopier son
+	rang au registre de cette cité (`reconnaitre_rang` : jamais à la baisse, rien sans rang dans
+	la capitale). Mute sans save. ⚠️ À l'INSCRIPTION seulement (`inscrire`), jamais au simple
+	passage (Auteur, 11/11). Renvoie le rang si le doc a CHANGÉ, None sinon."""
+	if not cite_id:
+		return None
+	promu = None
+	for ref in (character or {}).get("inventaire") or []:
+		source = item_ref_lieu(ref)
+		if (item_ref_id(ref) == CARTE_AVENTURIER_ITEM_ID and source and source != cite_id
+				and carte_valable_dans(source, cite_id, get_doc_fn)):
+			promu = reconnaitre_rang(character, source, cite_id) or promu
+	return promu
+
+
+def inscrire(character: dict, spec, get_doc_fn) -> str | None:
+	"""INSCRIPTION à une guilde (`{cite, rang}` d'un don de carte ou d'une première mission) :
+	`crediter_rang`, puis le rang d'une carte de capitale reconnue au sac sert de MINIMUM
+	(`reconnaitre_rang_carte`) — la carte de Lyon remise à qui porte celle de Lutecia au rang B
+	est une carte de rang B. Mute sans save ; renvoie le rang si le doc a CHANGÉ."""
+	if not isinstance(spec, dict) or not spec.get("cite") or spec.get("rang") not in RANGS:
+		return None   # fail-closed, comme `crediter_rang` : aucune inscription, rien à recopier
+	promu = crediter_rang(character, spec)
+	return reconnaitre_rang_carte(character, spec["cite"], get_doc_fn) or promu
+
+
 def inscrit_a_la_guilde(character: dict, cite_id: str) -> bool:
 	"""Le personnage est-il INSCRIT à la guilde de cette cité ? Garde des services réservés
 	aux membres : épreuve de rang, avis de recherche du registre, tableau de quêtes.
@@ -549,6 +576,17 @@ def inscrit_a_la_guilde(character: dict, cite_id: str) -> bool:
 			if item_ref_id(ref) == CARTE_AVENTURIER_ITEM_ID and item_ref_lieu(ref) == cite_id:
 				return True
 	return False
+
+
+def membre_de_la_guilde(character: dict, cite_id: str, get_doc_fn) -> bool:
+	"""La guilde de cette cité REÇOIT-elle le personnage en membre ? Inscrit à son registre
+	(`inscrit_a_la_guilde`), OU porteur d'une carte qu'elle reconnaît
+	(`recrutement.porte_carte_valable` : la carte d'une capitale dans les cités de même
+	`lieu_parent` — Lutecia dans toute la France). Garde du
+	tableau de quêtes, du registre des disparitions et de l'épreuve de rang.
+	⚠️ Pas de la carte PERDUE (`pnj.don_a_remplacer`) : elle suppose le registre de CETTE cité,
+	sans quoi Lyon se moquerait d'une carte de Lyon jamais remise."""
+	return inscrit_a_la_guilde(character, cite_id) or porte_carte_valable(character, cite_id, get_doc_fn)
 
 
 # ── Offre de rang au comptoir (miroir simplifié du transport authoré) ─────────────
@@ -711,7 +749,7 @@ def potentiel_cible(espece_doc: dict, profil_id: str, get_doc_fn) -> float | Non
 def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_fn,
                     potentiel_fn=None, menace_zone_fn=None) -> dict | None:
 	"""Construit une épreuve de rang au comptoir, ou `None` si : pas de `lieu_parent`, personnage
-	non inscrit à la guilde de la cité (`inscrit_a_la_guilde`), PLAFOND DE
+	non membre de la guilde de la cité (`membre_de_la_guilde`), PLAFOND DE
 	CE COMPTOIR déjà atteint (`rang_max_de`, défaut `D` — pas le sommet du monde), épreuve de rang
 	de cette cité déjà active, ou aucune cible résolvable au grade MAX dont la puissance atteint le
 	PLANCHER du rang visé (`potentiel_min_pour` ; potentiel illisible ⇒ cible écartée). Ne tire PAS
@@ -733,7 +771,7 @@ def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_f
 		return None
 	# Une épreuve de rang élève un MEMBRE : pas d'épreuve avant l'inscription (première
 	# mission, inscription au Grand Relais), sinon on montait de « non inscrit » à E.
-	if not inscrit_a_la_guilde(character, cite):
+	if not membre_de_la_guilde(character, cite, get_doc_fn):
 		return None
 	rang_courant = rang_de(character, cite)
 	if rang_plafond_atteint(rang_courant, comptoir_doc):

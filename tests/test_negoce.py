@@ -116,6 +116,15 @@ def test_le_negociant_achete_tout_les_autres_inchanges():
 	assert not marche.est_negociant(TANNERIE) and marche.est_negociant(NEGOCIANT)
 
 
+def test_la_carte_d_aventurier_ne_se_vend_nulle_part():
+	"""Auteur, 11/11 : la carte atteste une inscription — aucun marchand, négociant compris."""
+	carte = {"_id": "item:carte_aventurier", "type": "item", "categorie": "document",
+			 "sous_categorie": "carte_aventurier", "poids": 0.05}
+	assert marche.item_invendable(carte)
+	assert not marche.lieu_buys(NEGOCIANT, carte)
+	assert not marche.lieu_buys(TANNERIE, carte)
+
+
 # ── Destin de l'objet ─────────────────────────────────────────────────────────────
 
 def test_au_dessus_du_seuil_au_rayon():

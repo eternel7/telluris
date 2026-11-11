@@ -272,6 +272,29 @@ def test_acces_autorise_exige_la_carte_de_la_cite(monde):
 	assert recrutement.acces_autorise(perso(), GUILDE)[0] is False
 
 
+def test_la_carte_d_une_capitale_vaut_sous_le_meme_lieu_parent():
+	"""Auteur, 11/11 : la carte d'une CAPITALE est reconnue dans les cités de même `lieu_parent`
+	— pas ailleurs ; une cité ordinaire ne voit pas la sienne reconnue hors de chez elle ; une
+	capitale sans parent ne reconnaît rien (fail-closed)."""
+	cites = {
+		"lieu:lutecia": {"sous_categorie": "capitale", "lieu_parent": "lieu:france"},
+		"lieu:lyon": {"sous_categorie": "ville", "lieu_parent": "lieu:france"},
+		"lieu:auxerre": {"sous_categorie": "ville", "lieu_parent": "lieu:france"},
+		"lieu:bruges": {"sous_categorie": "ville", "lieu_parent": "lieu:plaine_europeenne"},
+		"lieu:atlantis": {"sous_categorie": "capitale"},
+		"lieu:mu": {"sous_categorie": "capitale"},
+	}
+	get = cites.get
+	carte = lambda cite: perso(inventaire=[{"item": "item:carte_aventurier", "poids": 0.05, "lieu_parent": cite}])
+	guilde = lambda cite: {"_id": "lieu:g", "type": "lieu", "lieu_parent": cite}
+	assert recrutement.acces_autorise(carte("lieu:lutecia"), guilde("lieu:lyon"), get)[0] is True
+	assert recrutement.acces_autorise(carte("lieu:lutecia"), guilde("lieu:bruges"), get)[0] is False
+	assert recrutement.acces_autorise(carte("lieu:auxerre"), guilde("lieu:lyon"), get)[0] is False
+	assert recrutement.acces_autorise(carte("lieu:lyon"), guilde("lieu:lutecia"), get)[0] is False
+	assert recrutement.carte_valable_dans("lieu:atlantis", "lieu:mu", get) is False
+	assert recrutement.carte_valable_dans("lieu:lutecia", None, get) is False
+
+
 def test_acces_libre_si_carte_non_requise(monde, monkeypatch):
 	monkeypatch.setattr(character_stats, "RECRUTEMENT_CARTE_REQUISE", False)
 	assert recrutement.acces_autorise(perso(), GUILDE)[0] is True

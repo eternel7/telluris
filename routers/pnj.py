@@ -77,6 +77,14 @@ def _pnj_du_lieu(character: dict, pnj_id: str | None = None) -> tuple[dict, dict
 	return entree, pnj_doc, lieu_doc
 
 
+def _inscrit_sans_carte_valable(character: dict, cite: str | None) -> bool:
+	"""Garde de la carte PERDUE : inscrit à cette cité ET aucune carte qui y vaille au sac. Le
+	porteur d'une carte de capitale reconnue y est reçu en membre : rien à remplacer, il
+	peut toujours s'inscrire (et faire recopier le rang de la capitale, `chasse.inscrire`)."""
+	return (chasse.inscrit_a_la_guilde(character, cite)
+			and not recrutement.porte_carte_valable(character, cite, get_doc))
+
+
 def _lieu_parent_don(don: dict, lieu_doc: dict | None) -> str | None:
 	"""`lieu_parent` RÉSOLU de l'exemplaire qu'un don remet, None s'il n'en déclare pas.
 	`"auto"` = la cité du lieu, par le MÊME résolveur que les récompenses de transport
@@ -260,7 +268,7 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		# Carte PERDUE par un inscrit : le choix « j'ai perdu ma carte » remplace l'inscription.
 		# `{rang}` = celui du registre, que la nouvelle carte porte à l'identique.
 		flags["don_a_remplacer"] = pnj.don_a_remplacer(
-			character, don_conf, cite_don, flags["don_recu"], chasse.inscrit_a_la_guilde)
+			character, don_conf, cite_don, flags["don_recu"], _inscrit_sans_carte_valable)
 		if flags["don_a_remplacer"]:
 			placeholders.setdefault("rang", chasse.rang_de(character, cite_don))
 		# Commissions d'éradication (maître de guilde) : `services.commission.donjon` (ou
@@ -1125,7 +1133,7 @@ async def pnj_dialogue_choix(
 		noeuds_don = (pnj_doc.get("services", {}).get("don", {}).get("noeuds", {}))
 		# Lu AVANT la remise : une fois la carte au sac, elle n'est plus « à remplacer ».
 		remplacement = pnj.don_a_remplacer(character, don, lieu_parent_don, False,
-										   chasse.inscrit_a_la_guilde)
+										   _inscrit_sans_carte_valable)
 		# Un poids d'instance TIRÉ par exemplaire (`tirer_poids`, fixe ⇒ sans tirage), contrôlé
 		# sur leur total.
 		poids = [tirer_poids(item_doc) for _ in range(max(1, int(don["quantite"])))]
@@ -1140,7 +1148,9 @@ async def pnj_dialogue_choix(
 			# Inscription portée par le don (`rang_guilde`), résolue comme une récompense de
 			# transport : la cité est celle du lieu. `crediter_rang` ne rétrograde jamais.
 			spec_rang = transport.rang_guilde_recompense(don["rang_guilde"], lieu_doc).get("rang_guilde")
-			promu = chasse.crediter_rang(character, spec_rang) if spec_rang else None
+			# Une carte de CAPITALE reconnue ici, au sac, relève ce rang d'inscription au sien
+			# (`chasse.inscrire`) : la carte de la ville est remise à ce rang au minimum.
+			promu = chasse.inscrire(character, spec_rang, get_doc) if spec_rang else None
 			# Rang d'une autre cité RECONNU à l'inscription (`rang_reconnu`) : jamais en dessous
 			# du rang d'inscription, `crediter_rang` ne rétrogradant pas.
 			if spec_rang and don.get("rang_reconnu"):

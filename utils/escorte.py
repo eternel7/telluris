@@ -573,8 +573,8 @@ def _offre_du_registre(character: dict, lieu_doc: dict, recherche: dict, find_do
 	confiée — seul le `giver` change (le comptoir), et c'est lui qui encaissera le +1 en plus
 	du magasin."""
 	cite = recherche.get("cite") or (lieu_doc or {}).get("lieu_parent")
-	# Le registre de la guilde ne s'ouvre qu'à ses MEMBRES (`chasse.inscrit_a_la_guilde`).
-	if not chasse.inscrit_a_la_guilde(character, cite):
+	# Le registre de la guilde ne s'ouvre qu'à ses MEMBRES (`chasse.membre_de_la_guilde`).
+	if not chasse.membre_de_la_guilde(character, cite, get_doc_fn):
 		return None
 	if not rang_suffisant(character, recherche):
 		return None

@@ -94,10 +94,11 @@ def _board_payload(character: dict, lieu_doc: dict, completer: bool = False) -> 
 	et l'acceptation. `terminer`/`déposer`/`abandonner` ne retirent AUCUNE offre — la quête
 	a quitté le tableau à l'acceptation —, ils se contentent donc de lister l'existant
 	(`lister_offres`) au lieu de payer une génération complète pour un tableau identique."""
-	# Tableau réservé aux MEMBRES de la guilde de la cité (`chasse.inscrit_a_la_guilde`) : un
+	# Tableau réservé aux MEMBRES de la guilde de la cité (`chasse.membre_de_la_guilde` : inscrit,
+	# ou porteur d'une carte reconnue — celle d'une capitale dans les cités de même parent) : un
 	# non-inscrit voit ses quêtes en cours (il doit pouvoir les rendre) mais aucune offre, et
 	# rien n'est généré pour lui. `inscription_requise` porte le refus PARLÉ du client.
-	inscrit = chasse.inscrit_a_la_guilde(character, lieu_doc.get("lieu_parent"))
+	inscrit = chasse.membre_de_la_guilde(character, lieu_doc.get("lieu_parent"), get_doc)
 	if not inscrit:
 		offres = []
 	else:
@@ -145,7 +146,7 @@ async def quetes_accepter(
 		raise HTTPException(status_code=404, detail="Quête introuvable")
 	if quete_doc.get("giver") != lieu_doc.get("_id"):
 		raise HTTPException(status_code=403, detail="Cette quête n'est pas proposée ici.")
-	if not chasse.inscrit_a_la_guilde(character, lieu_doc.get("lieu_parent")):
+	if not chasse.membre_de_la_guilde(character, lieu_doc.get("lieu_parent"), get_doc):
 		raise HTTPException(status_code=403, detail=INSCRIPTION_REQUISE)
 	if quete_doc.get("statut", "offerte") != "offerte":
 		raise HTTPException(status_code=409, detail="Quête déjà prise.")

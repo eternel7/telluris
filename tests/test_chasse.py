@@ -424,6 +424,48 @@ def test_inscrit_a_la_guilde_par_le_rang_ou_par_l_archive():
 	assert not chasse.inscrit_a_la_guilde(rate, "lieu:auxerre")
 
 
+def test_la_carte_d_une_capitale_fait_membre_sous_son_parent_sans_inscrire():
+	"""Carte de Lutecia au sac : MEMBRE des guildes de France (tableau, épreuve de rang),
+	sans être inscrit au registre — la carte perdue (`don_a_remplacer`) reste muette."""
+	carte = {"inventaire": [{"item": "item:carte_aventurier", "poids": 0.05, "lieu_parent": "lieu:lutecia"}]}
+	pays = {"lieu:lutecia": {"sous_categorie": "capitale", "lieu_parent": "lieu:france"},
+			"lieu:auxerre": {"lieu_parent": "lieu:france"}, "lieu:rome": {"lieu_parent": "lieu:italie"}}.get
+	assert chasse.membre_de_la_guilde(carte, "lieu:auxerre", pays)
+	assert not chasse.inscrit_a_la_guilde(carte, "lieu:auxerre")
+	assert not chasse.membre_de_la_guilde(carte, "lieu:rome", pays)
+	assert not chasse.membre_de_la_guilde({}, "lieu:auxerre", pays)
+	assert chasse.membre_de_la_guilde(_inscrit(), "lieu:auxerre", pays)
+
+
+def test_l_inscription_remet_la_carte_au_rang_de_la_capitale_au_minimum():
+	"""Auteur, 11/11 : à l'INSCRIPTION (et seulement là), la carte d'une capitale reconnue au sac
+	fait du rang de la capitale le rang minimum de la nouvelle carte — jamais à la baisse, rien
+	hors du même `lieu_parent`, rien sans rang à la source."""
+	docs = {"lieu:lutecia": {"sous_categorie": "capitale", "lieu_parent": "lieu:france"},
+			"lieu:auxerre": {"sous_categorie": "ville", "lieu_parent": "lieu:france"},
+			"lieu:rome": {"sous_categorie": "capitale", "lieu_parent": "lieu:italie"}}
+	get = docs.get
+	carte = {"item": "item:carte_aventurier", "poids": 0.05, "lieu_parent": "lieu:lutecia"}
+	f_auxerre = {"cite": "lieu:auxerre", "rang": "F"}
+	perso = {"inventaire": [carte], "rangs_guilde": {"lieu:lutecia": "B"}}
+	assert chasse.inscrire(perso, f_auxerre, get) == "B"
+	assert perso["rangs_guilde"]["lieu:auxerre"] == "B"
+	# Rang local déjà meilleur : rien ne baisse.
+	mieux = {"inventaire": [carte], "rangs_guilde": {"lieu:lutecia": "D", "lieu:auxerre": "C"}}
+	assert chasse.inscrire(mieux, f_auxerre, get) is None
+	assert mieux["rangs_guilde"]["lieu:auxerre"] == "C"
+	# Autre pays, ou aucun rang à Lutecia : inscription au rang du don.
+	rome = {"inventaire": [carte], "rangs_guilde": {"lieu:lutecia": "B"}}
+	assert chasse.inscrire(rome, {"cite": "lieu:rome", "rang": "F"}, get) == "F"
+	sans_rang = {"inventaire": [carte], "rangs_guilde": {}}
+	assert chasse.inscrire(sans_rang, f_auxerre, get) == "F"
+	# Spec illisible : fail-closed, rien n'est écrit.
+	assert chasse.inscrire(perso, {"cite": "lieu:auxerre", "rang": "Z"}, get) is None
+	# Une carte d'Auxerre ne relève rien à Lutecia : seule une CAPITALE est reconnue.
+	auxerrois = {"inventaire": [dict(carte, lieu_parent="lieu:auxerre")], "rangs_guilde": {"lieu:auxerre": "B"}}
+	assert chasse.inscrire(auxerrois, {"cite": "lieu:lutecia", "rang": "F"}, get) == "F"
+
+
 def test_offre_rang_tire_une_epreuve_max():
 	random.seed(1)
 	offre = chasse.offre_rang_pour(_inscrit(), COMPTOIR, _get_doc, _find_docs)
