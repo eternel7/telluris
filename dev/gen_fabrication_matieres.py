@@ -351,7 +351,11 @@ MATIERES = {
 	# DARDS (Auteur, 27/10 : « venin d'abord ») : tout le budget du palier dans le poison, aucun
 	# dégât en plus — scorpion géant ≈252, manticore ≈256, hydre ≈291 (le sang de l'Hydre de
 	# Lerne), wyvern ≈304. Ouverts aux seules armes.
-	"item:manticore_queue": _partie("au Dard de Manticore", 3, "queue", {"effets": _poison(4, 4)}),
+	# ⚠️ DÉROGATION (demande du 11/11) : la manticore est palier 3 par sa dangerosité (≈256), sa
+	# queue est rangée au palier 4 — c'est l'organe à venin que l'on rapporte, 32-64 kg, seule
+	# partie gardée de 400-800 kg de bête. Poison le plus fort du jeu : 5 PV × 5 tours = 25 PV.
+	# `rarete_item` suit (très rare) : la queue elle-même se revend plus cher.
+	"item:manticore_queue": _partie("au Dard de Manticore", 4, "queue", {"effets": _poison(5, 5)}),
 	"item:scorpion_geant_queue": _partie("au Venin de Scorpion", 3, "queue", {"effets": _poison(4, 4)}),
 	"item:wyvern_queue": _partie("au Venin de Wyvern", 3, "queue", {"effets": _poison(4, 4)}),
 	"item:hydre_tete": _partie("au Sang d'Hydre", 3, "tete", {"effets": _poison(4, 4)}, [TAG_ARME]),

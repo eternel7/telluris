@@ -17,7 +17,11 @@ Chaque pièce part d'un SOCLE existant (mêmes slots, portée, tags, restriction
 s'ajoute l'APPORT du trophée. Le gain suit la dangerosité de l'espèce : le palier 1-5 de
 dev/gen_fabrication_matieres.py (somme des attributs de base) fixe le budget de points de
 l'apport — mesuré comme score(pièce) − score(socle) par `score_matiere` — et la rareté
-minimale de la pièce.
+minimale de la pièce. Une ligne peut porter `palier` : DÉROGATION décidée, commentée sur place
+(`palier_piece` ; Fouet-dard de Manticore, 11/11).
+
+⚠️ Ne crée que des pièces NEUVES (un `_id` pris par un doc différent est une erreur) : la
+retouche d'une pièce déjà en base passe par un script dédié (dev/gen_venin_manticore.py).
 
 ⚠️ Garde-fous — rien n'est écrit si l'un d'eux échoue :
   · aucun `_id` déjà pris par un AUTRE doc ; un doc identique en base est sauté (idempotent) ;
@@ -116,7 +120,12 @@ PIECES = {
 					   "celui-ci se contente de mordre, et le venin fait le reste.",
 		"socle": "item:Fouet", "trophee": "item:manticore_queue",
 		"categorie": "grande_manufacture_du_cuir", "intrants": [("cuir", 1), ("tendons", 1)],
-		"apport": {"bonus_degats": 2, "effets": {"buffs": {"R": -3}, "duree": 3}},
+		# Venin d'abord (Auteur, 27/10, pour les dards) : le R −3 cède la place au poison.
+		# ⚠️ Palier 4 par DÉROGATION (demande du 11/11), comme la queue dans la table de
+		# dev/gen_fabrication_matieres.py : 6 PV × 4 tours = 24 PV — plus vif que la variante sur
+		# mesure (5 × 5), le tressage garde +1 dégât. Gain 13 = haut du budget 9-13.
+		"palier": 4,
+		"apport": {"bonus_degats": 1, "effets": {"regen_pv": -6, "duree": 4}},
 	},
 	"Masse_poing_de_troll": {
 		"nom": "Masse-poing de Troll", "icon": "👊", "poids": 6.0,
@@ -231,6 +240,12 @@ def palier_espece(espece_doc: dict) -> int:
 		if total <= seuil:
 			return palier
 	return PALIER_MAX
+
+
+def palier_piece(slug: str, espece_doc: dict) -> int:
+	"""Palier d'une pièce : `palier` de sa ligne (DÉROGATION décidée, commentée dans la table),
+	sinon celui de l'espèce du trophée."""
+	return PIECES[slug].get("palier") or palier_espece(espece_doc)
 
 
 def appliquer_apport(socle: dict, apport: dict) -> dict:
@@ -365,7 +380,7 @@ def main():
 		if not trophee or not trophee.get("portion_de") or not trophee.get("source_espece"):
 			erreurs.append("%s : %s n'est pas une portion de créature du dump" % (slug, p["trophee"]))
 			continue
-		palier = palier_espece(index.get(trophee["source_espece"]))
+		palier = palier_piece(slug, index.get(trophee["source_espece"]))
 		doc = item_doc(slug, socle, gfm.PALIERS[palier]["rarete"])
 		erreurs += erreurs_de_budget(slug, socle, doc, palier)
 		if p["categorie"] not in character_stats.LIEU_CATEGORIES_FUSION:
