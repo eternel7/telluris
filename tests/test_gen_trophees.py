@@ -37,6 +37,23 @@ def test_palier_suit_la_dangerosite():
 	assert gen.palier_espece(espece(bornes[-1] + 1)) == gen.PALIER_MAX
 
 
+def test_le_palier_de_la_ligne_deroge_a_celui_de_l_espece():
+	espece = {"base_attributes": {"F": {"min": 1, "max": 1}}}
+	assert gen.palier_piece("Fouet_dard_de_manticore", espece) == gen.PIECES["Fouet_dard_de_manticore"]["palier"]
+	sans = next(s for s, p in gen.PIECES.items() if "palier" not in p)
+	assert gen.palier_piece(sans, espece) == gen.palier_espece(espece)
+
+
+def test_le_fouet_dard_mord_plus_fort_que_sa_variante():
+	# Venin d'abord : le Fouet-dard pose un poison (régén NÉGATIVE à durée) sur la cible, et
+	# frappe plus vite que la variante sur mesure « au Dard de Manticore ».
+	import dev.gen_fabrication_matieres as gfm
+	eff = gen.PIECES["Fouet_dard_de_manticore"]["apport"]["effets"]
+	var = gfm.MATIERES["item:manticore_queue"]["modificateurs"]["effets"]
+	assert eff["regen_pv"] < var["regen_pv"] < 0
+	assert not eff.get("buffs")
+
+
 def test_apport_compose_sur_le_socle():
 	socle = {"_id": "item:socle", "nom": "Socle", "rarete": "commun", "poids": 1, "valeur": 9,
 			 "categorie": "arme", "slots": ["main_droite"], "bonus_degats": 2,

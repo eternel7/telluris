@@ -1,0 +1,96 @@
+[
+	{
+		"_id": "item:manticore_queue",
+		"type": "item",
+		"nom": "Queue de Manticore",
+		"icon": "🦴",
+		"categorie": "composant",
+		"sous_categorie": "carcasse",
+		"rarete": "tres_rare",
+		"slots": [],
+		"poids": [
+			32.0,
+			64.0
+		],
+		"description": "Queue de Manticore, débitée sur place.",
+		"tags": [
+			"hybride",
+			"monstre",
+			"partie_queue",
+			"predateur",
+			"venin",
+			"fabrication_arme"
+		],
+		"source_espece": "espece:manticore",
+		"portion_de": "item:manticore",
+		"partie": "queue",
+		"depecage": [
+			[
+				"cuir_brut",
+				1
+			],
+			[
+				"item:Poison_de_base",
+				1
+			],
+			[
+				"os",
+				1
+			],
+			[
+				"tendons",
+				1
+			]
+		],
+		"fabrication": {
+			"nom": "au Dard de Manticore",
+			"modificateurs": {
+				"effets": {
+					"regen_pv": -5,
+					"duree": 5
+				},
+				"valeur": {
+					"facteur": 2.5
+				},
+				"rarete": "tres_rare"
+			}
+		}
+	},
+	{
+		"_id": "item:Fouet_dard_de_manticore",
+		"type": "item",
+		"nom": "Fouet-dard de Manticore",
+		"icon": "🦂",
+		"description": "La queue d'une manticore, tressée de cuir jusqu'au dard. Les vieux récits de Perse disent que la bête lançait ses dards comme des flèches ; celui-ci se contente de mordre, et le venin fait le reste.",
+		"rarete": "tres_rare",
+		"categorie": "arme",
+		"sous_categorie": "",
+		"slots": [
+			"main_droite",
+			"main_gauche"
+		],
+		"poids": 2.0,
+		"tags": [
+			"cac"
+		],
+		"portee": 2,
+		"restriction": {
+			"Ag": 17
+		},
+		"bonus_degats_dice": 2,
+		"bonus_cc": 4,
+		"bonus_degats": 1,
+		"effets": {
+			"regen_pv": -6,
+			"duree": 4
+		},
+		"valeur": [
+			{
+				"cu": 6895
+			},
+			{
+				"cu": 22777
+			}
+		]
+	}
+]
