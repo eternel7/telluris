@@ -49,7 +49,7 @@ function extraireConst(nom) {
 // dans `prop-contenu` ; le coffre écrit dans ses deux colonnes, son sélecteur et ses charges).
 function noeud() {
 	return { innerHTML: '', textContent: '', value: '',
-		classList: { toggle() {} }, parentElement: { classList: { toggle() {} } } };
+		classList: { toggle() {}, remove() {} }, parentElement: { classList: { toggle() {} } } };
 }
 const noeuds = {};
 const el = id => (noeuds[id] = noeuds[id] || noeud());
@@ -64,7 +64,7 @@ vm.runInThisContext(extraireConst('_PROP_CATEGORIES'));
 vm.runInThisContext(extraireConst('INV_VISIBLE'));
 for (const f of ['escapeHtml', '_propCategorie', '_purseEnCuivre', '_prixTexte', '_propCaps', '_propDate',
 	'_propMesProprietes', '_propMajoration', '_propEffets', '_propQuotidien', 'renderProprietesOffre', 'renderPropriete', '_majSidebarPropriete',
-	'_sortedOrder', '_grpCharge', '_grpRemplirSac', '_grpRentre', '_pcfLigne', '_pcfSacGauche', '_majOmbreScroll', '_pcfOmbres', 'renderCoffre']) {
+	'_sortedOrder', '_grpCharge', '_grpRemplirSac', '_grpRentre', '_pcfLigne', '_pcfSacGauche', '_pcfAdresse', '_majOmbreScroll', '_pcfOmbres', 'renderCoffre']) {
 	vm.runInThisContext(extraire(f));
 }
 
@@ -306,6 +306,50 @@ t('atelier : le contenu d\'un contenant ouvert se confie, adressé par data-ctn 
 	renderCoffre(coffre('proprietaire', { porteurs: PORTEURS, contenants: { '': [{ index: 3, item_id: 'item:besace', nom: 'B',
 		contenu: [{ _id: 'item:herbe', item: 'item:herbe', nom: 'Herbe', poids: 1, idx: 0 }] }] } }));
 	assert.ok(!noeuds['pcf-principal'].innerHTML.includes('Herbe'));
+	globalThis._pcfGauche = '';
+});
+
+// Contenants de vos sacs comme sac de gauche (`sacs_contenants`, routers/proprietes._sacs_contenants).
+const BESACE = { cle: 'aventurier:x#2', porteur_id: 'aventurier:x', porteur_nom: 'Ulf', index: 2, item_id: 'item:besace',
+	nom: XSS, icon: '👜', capacite_kg: 10, accessible: true, charge: 9.5, charge_max: 10,
+	inventaire: [{ _id: 'item:herbe', item: 'item:herbe', nom: 'Herbe', poids: 1, idx: 4 }] };
+
+t('coffre : un contenant au sélecteur de gauche, dépôt et prise adressés au contenant', () => {
+	globalThis._pcfSel = 'coffre'; globalThis._pcfGauche = 'aventurier:x#2';
+	const data = coffre('proprietaire', { porteurs: PORTEURS, sacs_contenants: [BESACE] });
+	globalThis._pcfEtat = data;
+	renderCoffre(data);
+	const sel = noeuds['pcf-select-gauche'].innerHTML;
+	assert.ok(sel.includes('👜 Contenants') && sel.includes('aventurier:x#2') && !sel.includes(XSS));
+	const g = noeuds['pcf-principal'].innerHTML;
+	assert.ok(g.includes('Herbe') && !g.includes('Pomme'), g);
+	assert.ok(/data-idx="4" data-item="item:herbe"[\s\S]*coffreDeposer/.test(g), 'idx réel du contenu');
+	assert.strictEqual(noeuds['pcf-charge-principal'].textContent, '9.5 / 10 kg');
+	// Pomme (1 kg) ne tient plus dans 0,5 kg libre : prise grisée.
+	assert.ok(/disabled[\s\S]*le contenant est plein[\s\S]*coffrePrendre/.test(noeuds['pcf-droite'].innerHTML));
+	assert.deepStrictEqual(_pcfAdresse(), { compagnon_id: 'aventurier:x', index_contenant: 2, item_id_contenant: 'item:besace' });
+	globalThis._pcfGauche = '';
+	assert.deepStrictEqual(_pcfAdresse(), {});
+	globalThis._pcfGauche = 'aventurier:x';
+	assert.deepStrictEqual(_pcfAdresse(), { compagnon_id: 'aventurier:x' });
+	globalThis._pcfGauche = '';
+});
+
+t('coffre : contenant à marée basse — charge inconnue, prise laissée au serveur', () => {
+	globalThis._pcfSel = 'coffre'; globalThis._pcfGauche = 'aventurier:x#2';
+	const basse = Object.assign({}, BESACE, { accessible: false, charge: 0, inventaire: [] });
+	renderCoffre(coffre('proprietaire', { porteurs: PORTEURS, sacs_contenants: [basse] }));
+	assert.strictEqual(noeuds['pcf-charge-principal'].textContent, '? / 10 kg');
+	assert.ok(noeuds['pcf-principal'].innerHTML.includes('semble vide'));
+	assert.ok(!/disabled[\s\S]*coffrePrendre/.test(noeuds['pcf-droite'].innerHTML), 'prise grisée à tort');
+	globalThis._pcfGauche = '';
+});
+
+t('atelier : contenant à gauche — on en confie le contenu (data-ctn)', () => {
+	globalThis._pcfSel = 'employe:x'; globalThis._pcfGauche = 'aventurier:x#2';
+	renderCoffre(coffre('proprietaire', { porteurs: PORTEURS, sacs_contenants: [BESACE] }));
+	const g = noeuds['pcf-principal'].innerHTML;
+	assert.ok(/data-idx="4" data-item="item:herbe" data-ctn="2" data-ctn-item="item:besace"/.test(g), g);
 	globalThis._pcfGauche = '';
 });
 

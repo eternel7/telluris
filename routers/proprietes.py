@@ -622,6 +622,9 @@ def _payload_coffre(character: dict, prop: dict, cat: dict, role: str, employes:
 		# contenant est un porteur de plus pour CONFIER à un marchand (utils/contenants.py).
 		# `index` = position du contenant dans le sac ; `idx` de chaque objet = dans le contenu.
 		"contenants": _contenants_sacs(character) if gere else {},
+		# Contenants de vos sacs comme SAC DE GAUCHE à part entière (comme au panneau 👥) :
+		# déposer au coffre, en prendre, confier ou reprendre directement, sans rien sortir.
+		"sacs_contenants": _sacs_contenants(character),
 		"caisse_totale": sum(int(e.get("caisse_cuivre") or 0) for e in employes),
 		"caisse_accessible": gere or (role == proprietes.VISITEUR and not gardien
 									  and prop.get("mode") == proprietes.MODE_ACHAT),
@@ -651,6 +654,35 @@ def _contenants_sacs(character: dict) -> dict:
 	return out
 
 
+def _sacs_contenants(character: dict) -> list:
+	"""Chaque contenant porté (vous, compagnons, montures), vide ou plein, au format d'un sac :
+	`cle` (`porteur#index`, sélecteur), `porteur_id` (= `compagnon_id` des transferts, vous
+	compris), `index`/`item_id` (adresse), `charge`/`charge_max` (rangé / capacité) et contenu
+	indexé par sa position réelle. Hors marée : rien de visible, `accessible` faux."""
+	now = int(time.time())
+	porteurs = [character] + recrutement.porteurs_effectifs(character, get_doc)
+	par_id = {p.get("_id"): p for p in porteurs}
+	out = []
+	for c in contenants.destinations(porteurs, get_doc, now):
+		ref_c = (par_id[c["porteur_id"]].get("inventaire") or [])[c["index"]]
+		vue = contenants.vue(ref_c, get_doc(c["item_id"]), now, resolve_item_ref)
+		out.append(dict(c, charge=c["charge_kg"] if c["accessible"] else 0,
+						charge_max=c["capacite_kg"], inventaire=vue.get("contenu") or []))
+	return out
+
+
+def _contenant_vise(porteur: dict, body: dict) -> tuple[int | None, dict | None]:
+	"""(position, doc) du contenant DESTINATAIRE adressé par `index_contenant`/`item_id_contenant`
+	dans ce sac ; (None, None) sans adresse ; 404 si l'adresse ne désigne plus un contenant."""
+	idx_c, iid_c = body.get("index_contenant"), body.get("item_id_contenant")
+	if idx_c is None and not iid_c:
+		return None, None
+	pos_c, doc_c = contenants.contenant_de(porteur, idx_c, iid_c, get_doc)
+	if pos_c is None:
+		raise HTTPException(status_code=404, detail="Contenant introuvable dans ce sac.")
+	return pos_c, doc_c
+
+
 def _porteur(character: dict, compagnon_id) -> dict:
 	"""Le sac visé : le personnage, ou l'un de ses porteurs (compagnon OU monture). Un doc
 	`aventurier:*`/`monture:*` n'a pas de `user_id` : `porteurs_effectifs` (statut + lien vers
@@ -674,19 +706,29 @@ async def coffre_transferer(current_user: Annotated[dict, Depends(get_current_us
 	"""Sac ↔ coffre. `vers_coffre` : propriétaire ou locataire, borné par le stockage dérivé.
 	`vers_principal` : ses affaires, ou un VISITEUR chez un propriétaire sans gardien — le vol
 	(`vol: true`). Le sac est celui du personnage, ou d'un de ses porteurs (compagnon ou
-	monture) si le corps porte un `compagnon_id` ; le RÔLE reste celui du personnage."""
+	monture) si le corps porte un `compagnon_id` ; le RÔLE reste celui du personnage.
+	`index_contenant`/`item_id_contenant` : un CONTENANT de ce sac en est la source
+	(`vers_coffre`, marée haute) ou le destinataire (`vers_principal`, marée basse comprise,
+	borné par sa capacité, jamais un contenant dedans) — utils/contenants.py."""
 	character, prop, cat, role = _ici(current_user)
 	porteur = _porteur(character, body.get("compagnon_id"))
 	sens = body.get("sens")
 	if sens == "vers_coffre":
-		refs = porteur.get("inventaire") or []
+		refs, ref_c, refus = contenants.sac_vise(porteur, body.get("index_contenant"),
+												 body.get("item_id_contenant"), get_doc, int(time.time()))
+		if refus:
+			raise HTTPException(status_code=refus[0], detail=refus[1])
 		pos = proprietes.localiser(refs, body.get("index"), body.get("item_id"))
 		if pos is None:
 			raise HTTPException(status_code=404, detail="Objet absent de l'inventaire.")
 		ok, raison = proprietes.peut_deposer(role, prop, cat, refs[pos])
 		if not ok:
 			raise HTTPException(status_code=409, detail=raison)
-		proprietes.deposer(porteur, prop, pos)
+		if ref_c is None:
+			proprietes.deposer(porteur, prop, pos)
+		else:
+			prop.setdefault("coffre", []).append(refs.pop(pos))
+			contenants.nettoyer(ref_c)
 		_sauver(prop, porteur)
 		return _payload_coffre(character, prop, cat, role)
 	if sens != "vers_principal":
@@ -699,7 +741,13 @@ async def coffre_transferer(current_user: Annotated[dict, Depends(get_current_us
 	pos = proprietes.localiser(refs, body.get("index"), body.get("item_id"))
 	if pos is None:
 		raise HTTPException(status_code=404, detail="Cet objet n'est plus dans le coffre.")
-	if not recrutement.peut_porter(porteur, refs[pos]):
+	pos_c, doc_c = _contenant_vise(porteur, body)
+	if pos_c is not None:
+		ok, raison = contenants.peut_ranger(porteur["inventaire"][pos_c], doc_c, refs[pos],
+											resolve_item_ref(refs[pos]) or {})
+		if not ok:
+			raise HTTPException(status_code=409, detail=raison)
+	elif not recrutement.peut_porter(porteur, refs[pos]):
 		raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage."
 							if porteur is character else "Ce porteur ne peut pas porter davantage.")
 	# Dispositifs défensifs : un voleur n'emporte qu'une fraction du coffre par fenêtre.
@@ -708,7 +756,12 @@ async def coffre_transferer(current_user: Annotated[dict, Depends(get_current_us
 	if not ok:
 		raise HTTPException(status_code=403, detail=raison)
 	proprietes.noter_vol_coffre(prop, limite, refs[pos])
-	proprietes.retirer(porteur, prop, pos)
+	if pos_c is None:
+		proprietes.retirer(porteur, prop, pos)
+	else:
+		ref = refs.pop(pos)
+		contenants.deposer(porteur, pos_c, item_ref_id(porteur["inventaire"][pos_c]), ref, get_doc,
+						   controler=False)
 	_sauver(prop, porteur)
 	return _payload_coffre(character, prop, cat, role, employes, {"vol": role == proprietes.VISITEUR})
 
@@ -756,7 +809,8 @@ async def atelier_donner(current_user: Annotated[dict, Depends(get_current_user)
 @proprietes_router.post("/proprietes/atelier/reprendre")
 async def atelier_reprendre(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
 	"""Le propriétaire reprend un exemplaire du rayon de son marchand (gratuit), dans son sac
-	ou celui d'un porteur (`compagnon_id`)."""
+	ou celui d'un porteur (`compagnon_id`), ou dans un CONTENANT de ce sac
+	(`index_contenant`/`item_id_contenant` : borné par sa capacité, sans peser)."""
 	character, prop, cat, role = _ici(current_user)
 	_exiger(role, proprietes.PROPRIETAIRE)
 	atelier = _atelier_de(prop, body.get("employe_id"))
@@ -766,14 +820,24 @@ async def atelier_reprendre(current_user: Annotated[dict, Depends(get_current_us
 	if not item:
 		raise HTTPException(status_code=404, detail="Objet introuvable.")
 	poids = tirer_poids(item)
+	pmin, pmax = poids_bounds(item)
+	ref = {"item": item_id, "poids": poids} if pmax > pmin else item_id
+	pos_c, doc_c = _contenant_vise(porteur, body)
+	if pos_c is not None:
+		ok, raison = contenants.peut_ranger(porteur["inventaire"][pos_c], doc_c, ref, item)
+		if not ok:
+			raise HTTPException(status_code=409, detail=raison)
 	# `charge_max_porteur` : aiguille entre `charge_max_of` et la capacité d'une monture.
-	if carried_weight(porteur) + poids > montures.charge_max_porteur(porteur):
+	elif carried_weight(porteur) + poids > montures.charge_max_porteur(porteur):
 		raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage."
 							if porteur is character else "Ce porteur ne peut pas porter davantage.")
 	if not proprietes.reprendre_produit(atelier, item_id):
 		raise HTTPException(status_code=404, detail="Ce produit n'est plus en rayon.")
-	pmin, pmax = poids_bounds(item)
-	porteur.setdefault("inventaire", []).append({"item": item_id, "poids": poids} if pmax > pmin else item_id)
+	if pos_c is None:
+		porteur.setdefault("inventaire", []).append(ref)
+	else:
+		contenants.deposer(porteur, pos_c, item_ref_id(porteur["inventaire"][pos_c]), ref, get_doc,
+						   controler=False)
 	_sauver(atelier, porteur)
 	return _payload_coffre(character, prop, cat, role)
 
