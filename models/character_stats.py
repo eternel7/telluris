@@ -116,6 +116,10 @@ LOCALISATION_TOUCHES: dict[str, int] = {
 # Sur l'échelle ×10 (F ≈ 10-100), un diviseur de 20 donne +0 à +5 cases selon la puissance.
 JET_PORTEE_F_DIV: int = 20
 
+# COMBAT À DEUX ARMES : malus de précision des coups de la SECONDE arme (et des suivantes),
+# levé par la passive `ambidextre` (cf. combat.coups_du_profil). 0 = aucun malus.
+DEUX_ARMES_MALUS_SECOND: int = 20
+
 # TYPOLOGIE de précision des armes de corps à corps ET de jet, posée par tag sur l'item :
 # `lourde`, `legere`, aucun des deux ⇒ « equilibree ». Poids (F, Ag) de la précision,
 # divisée par 4 : lourde (3F+Ag), équilibrée (2F+2Ag), légère (F+3Ag). La légère EST le `cc`
@@ -991,6 +995,7 @@ def current_world_variables() -> dict:
 		"MONSTRE_EQUIPEMENT_PROBA": MONSTRE_EQUIPEMENT_PROBA,
 		"LOCALISATION_TOUCHES": dict(LOCALISATION_TOUCHES),
 		"JET_PORTEE_F_DIV": JET_PORTEE_F_DIV,
+		"DEUX_ARMES_MALUS_SECOND": DEUX_ARMES_MALUS_SECOND,
 		"DETECTION_DISTANCE_FACTEUR": DETECTION_DISTANCE_FACTEUR,
 		"XP_DECOUVERTE_LIEU": XP_DECOUVERTE_LIEU,
 		"XP_NIVEAU_BASE": XP_NIVEAU_BASE,
@@ -1177,7 +1182,7 @@ def load_world_variables() -> dict:
 	"""
 	global MONSTRE_DES_CC_NATURELS, MONSTRE_EQUIPEMENT_PROBA
 	global FACTEUR_DEGATS_ARMURE, JET_PORTEE_F_DIV, DETECTION_DISTANCE_FACTEUR, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
-	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT
+	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT, DEUX_ARMES_MALUS_SECOND
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, RACHAT_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
 	global NEGOCE_COMMISSION_MIN, NEGOCE_COMMISSION_MAX, NEGOCE_SEUIL_REVENTE_CUIVRE, NEGOCE_BONUS_CONVERSION
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION, VENTE_PNJ_REDISTRIB
@@ -1243,6 +1248,7 @@ def load_world_variables() -> dict:
 	MONSTRE_DES_CC_NATURELS = max(1, int(v.get("MONSTRE_DES_CC_NATURELS", MONSTRE_DES_CC_NATURELS)))
 	MONSTRE_EQUIPEMENT_PROBA = max(0.0, min(1.0, float(v.get("MONSTRE_EQUIPEMENT_PROBA", MONSTRE_EQUIPEMENT_PROBA))))
 	JET_PORTEE_F_DIV           = max(1, int(v.get("JET_PORTEE_F_DIV", JET_PORTEE_F_DIV)))
+	DEUX_ARMES_MALUS_SECOND    = max(0, int(v.get("DEUX_ARMES_MALUS_SECOND", DEUX_ARMES_MALUS_SECOND)))
 	DETECTION_DISTANCE_FACTEUR = max(0, int(v.get("DETECTION_DISTANCE_FACTEUR", DETECTION_DISTANCE_FACTEUR)))
 	XP_DECOUVERTE_LIEU         = int(v.get("XP_DECOUVERTE_LIEU", XP_DECOUVERTE_LIEU))
 	XP_NIVEAU_BASE             = max(1, int(v.get("XP_NIVEAU_BASE", XP_NIVEAU_BASE)))
@@ -1884,6 +1890,15 @@ CLE_PRECISION_TYPOLOGIE: dict[str, str] = {
 
 
 _TERME_DEGATS_RE = re.compile(r"([+-]?)(\d*)D(\d+)|([+-]?\d+)", re.IGNORECASE)
+
+
+def part_de_force_cc(f: int) -> tuple[str, int]:
+	"""Part de la FORCE dans `degats_cc` : `(dé, plat)` — le dé dérivé de F et le bonus
+	F // FACTEUR, exactement ce que `compute_derived_stats` y met. Le combat à deux armes la
+	retire des coups de la seconde arme (cf. combat.coups_du_profil) : la Force ne frappe
+	qu'une fois par attaque."""
+	f = int(f or 0)
+	return f"1D{_caract_to_dice_(f)}", f // facteur_degats_armure()
 
 
 def retirer_des_arme(notation: str, des: str = "", plat: int = 0) -> str:

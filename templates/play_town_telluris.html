@@ -2468,7 +2468,7 @@
 						] %}
 						<div class="sh-derived-row">
 							<span class="sh-derived-lbl">{{ lbl }}</span>
-							<span class="sh-derived-val" id="sh-drv-{{ key }}">{{ d.get(key,"—") }}{{ unit }}</span>
+							<span class="sh-derived-val" id="sh-drv-{{ key }}">{{ (d.get("degats_cc_affiche") if key == "degats_cc" else None) or d.get(key,"—") }}{{ unit }}</span>
 						</div>
 						{% endfor %}
 
@@ -5889,12 +5889,14 @@ function _refreshDerivedStats(d) {
 	if (d) _derivedCur = d;
 	const units = {deplacement: ' cases', charge_max: ' kg'};
 	for (const key of ['pv_max','pm_max','initiative','deplacement','cc_lourde','cc_equilibree','cc','cd','pa','pm_def','degats_cc','degats_cd','charge_max']) {
+		// Deux armes : un terme par arme (« X / Y », fiche.avec_degats_par_arme) plutôt que la somme.
+		const val = (key === 'degats_cc' && d.degats_cc_affiche) ? d.degats_cc_affiche : d[key];
 		const el = document.getElementById('sh-drv-' + key);
-		if (el && d[key] !== undefined) el.textContent = d[key] + (units[key] || '');
+		if (el && val !== undefined) el.textContent = val + (units[key] || '');
 		const el2 = document.getElementById('stat-drv-' + key);
-		if (el2 && d[key] !== undefined) el2.textContent = d[key] + (units[key] || '');
+		if (el2 && val !== undefined) el2.textContent = val + (units[key] || '');
 		const el3 = document.getElementById('stat-left-drv-' + key);
-		if (el3 && d[key] !== undefined) el3.textContent = d[key] + (units[key] || '');
+		if (el3 && val !== undefined) el3.textContent = val + (units[key] || '');
 	}
 	// Les max PV/PM affichés par les cartes du porteur de la fiche (l'ancien id
 	// `stat-right-drv-*` était unique : il ne pouvait pas servir N cartes).

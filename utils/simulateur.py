@@ -595,10 +595,14 @@ def options_offensives_statiques(snapshot: dict, arsenal: dict) -> list:
 		if not notation:
 			continue
 		portee, ranged = combat._portee_competence(snapshot, comp)
-		out.append({"kind": "competence", "label": comp["nom"], "jet": comp.get("jet", "cc"),
-					"portee": portee, "ranged": ranged,
-					"notation": notation, "cout_pm": comp["cout_pm"],
-					"skill": _skill_competence(snapshot, comp)})
+		option = {"kind": "competence", "label": comp["nom"], "jet": comp.get("jet", "cc"),
+				  "portee": portee, "ranged": ranged,
+				  "notation": notation, "cout_pm": comp["cout_pm"],
+				  "skill": _skill_competence(snapshot, comp)}
+		coups = _coups_competence(snapshot, comp, notation)
+		if coups:
+			option["coups"] = coups
+		out.append(option)
 	return out
 
 
@@ -615,8 +619,29 @@ def _coups_option(actor: dict, profil: dict) -> list:
 	"""Les coups d'une option d'ARME, par la source unique du moteur (`coups_du_profil`) :
 	un seul pour une arme seule, un par arme en combat à deux armes. Chaque entrée porte
 	sa précision, sa notation et la part durative de SON arme."""
+	return _coups_de(combat.coups_du_profil(actor, profil))
+
+
+def _coups_competence(actor: dict, comp: dict, notation: str, distance: int | None = None) -> list | None:
+	"""Coups d'une option de COMPÉTENCE à deux armes, comme au moteur (`_coups_seconde_arme`) :
+	la compétence (ses dés par la main droite, ses effets) puis chaque coup de la seconde arme
+	(`combat.coups_seconde_arme_competence`), hors d'allonge sauté si `distance` est connue.
+	None hors deux armes : l'option reste celle d'avant, un seul coup."""
+	jet = comp.get("jet", "cc")
+	if jet == "magique":
+		return None
+	secondes = [c for c in _coups_de(combat.coups_seconde_arme_competence(
+		actor, comp, comp.get("effets") or {}))
+		if distance is None or c["portee"] >= distance]
+	if not secondes:
+		return None
+	return [{"notation": notation, "jet": jet, "skill": _skill_competence(actor, comp)}] + secondes
+
+
+def _coups_de(triplets) -> list:
+	"""`[(sous_profil, skill, notation)]` du moteur → coups d'option du simulateur."""
 	coups = []
-	for sous, skill, notation in combat.coups_du_profil(actor, profil):
+	for sous, skill, notation in triplets:
 		coups.append({"skill": skill, "notation": notation, "jet": sous.get("toucher", "cc"),
 					  "label": sous.get("label", "Arme"),
 					  "portee": max(1, int(sous.get("portee", 1) or 1)),
@@ -713,11 +738,16 @@ def _options_jouables(actor: dict, arsenal: dict, distance: int):
 		notation = combat._degats_competence(actor, comp, comp["effets"])
 		if not notation:
 			continue
-		yield {"kind": "competence", "label": comp["nom"], "jet": comp.get("jet", "cc"),
-			   "notation": notation, "cout_pm": cout_pm, "effets": comp["effets"],
-			   "skill": _skill_competence(actor, comp),
-			   "ranged": ranged,
-			   "effets_cible": "ennemi", "source": comp, "compteur": "competences"}
+		option = {"kind": "competence", "label": comp["nom"], "jet": comp.get("jet", "cc"),
+				  "notation": notation, "cout_pm": cout_pm, "effets": comp["effets"],
+				  "skill": _skill_competence(actor, comp),
+				  "ranged": ranged,
+				  "effets_cible": "ennemi", "source": comp, "compteur": "competences"}
+		# Deux armes : la seconde arme suit la compétence (moteur : `_coups_seconde_arme`).
+		coups = _coups_competence(actor, comp, notation, distance)
+		if coups:
+			option["coups"] = coups
+		yield option
 
 
 def _meilleure_offensive(actor: dict, cible: dict, arsenal: dict, distance: int) -> dict | None:
@@ -1009,9 +1039,19 @@ def fiche_snapshot(snap: dict) -> dict:
 		"pm_def": int(snap.get("pm_def", 0) or 0),
 		"toucher_magique": int(snap.get("toucher_magique", 0) or 0),
 		"esquive": int(snap.get("esquive", 0) or 0),
-		"degats_cc": snap.get("degats_cc", "") or "",
+		"degats_cc": _degats_affiches(snap, combat._profil_attaque(snap, "cac")),
 		"degats_cd": snap.get("degats_cd", "") or "",
 	}
+
+
+def _degats_affiches(snap: dict, profil: dict) -> str:
+	"""Dégâts d'un profil d'attaque tels que l'écran les affiche : à deux armes, la notation
+	de CHAQUE coup séparée par « / » (`combat.coups_du_profil`) — la somme `degats_cc`
+	n'est infligée par aucun coup."""
+	coups = combat.coups_du_profil(snap, profil)
+	if len(coups) > 1:
+		return " / ".join(notation for _, _, notation in coups)
+	return snap.get((profil or {}).get("degats", "degats_cc"), "") or ""
 
 
 def equipement_du_snapshot(snap: dict) -> dict:
@@ -1027,7 +1067,7 @@ def _recap_arsenal(bel: dict) -> dict:
 	return {
 		"attaques": [{"label": p.get("label", ""), "mode": p.get("mode", ""),
 					  "portee": max(1, int(p.get("portee", 1) or 1)),
-					  "degats": snap.get(p.get("degats", "degats_cc"), "")}
+					  "degats": _degats_affiches(snap, p)}
 					 for p in snap.get("attaque_profils") or []],
 		# ⚠️ Coût EFFECTIF, comme la portée juste en dessous : le récap doit montrer ce que
 		# le duel paie vraiment, charge comprise.

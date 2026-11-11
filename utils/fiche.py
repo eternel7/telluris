@@ -21,6 +21,7 @@ from utils import sorts as sorts_util
 from utils import competences as competences_util
 from utils import slots_actions
 from utils import proprietes
+from utils import combat as combat_util
 
 
 CARACTS = ["V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch"]
@@ -66,7 +67,21 @@ def derived_de(character: dict) -> dict:
 	derived = compute_derived_stats(base=base, niveau=voc_niveau, equipment=eq)
 	out = derived.model_dump()
 	out["charge_max"] = charge_max_of(character)
-	return out
+	return avec_degats_par_arme(character, out)
+
+
+def avec_degats_par_arme(character: dict, derived: dict) -> dict:
+	"""Ajoute aux dérivées `degats_cc_affiche` — « X / Y », un terme par arme — quand le
+	personnage porte deux armes de mêlée (`combat.degats_cc_par_arme`). `degats_cc` (la
+	somme) reste intact ; le client affiche la clé neuve si elle est là. Mute et rend."""
+	buffs = consommables.caracts_avec_buffs(character)
+	base = BaseStats(f=max(0, int(buffs.get("F", 0) or 0)))
+	affiche = combat_util.degats_cc_par_arme(character, base, derived.get("degats_cc") or "")
+	if affiche:
+		derived["degats_cc_affiche"] = affiche
+	else:
+		derived.pop("degats_cc_affiche", None)
+	return derived
 
 
 def bloc_fiche(character: dict, get_doc_fn, find_docs_fn, race: dict | None = None) -> dict:

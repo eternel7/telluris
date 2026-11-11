@@ -1270,7 +1270,7 @@ async def spend_xp(
 		# Le bonus racial vient peut-être d'être consommé : sans ce retour, le client
 		# continuerait à offrir le geste sur les AUTRES caracts jusqu'au prochain /play.
 		"max_bonus_used": character.get("max_bonus_used"),
-		"derived_stats": derived.model_dump(),
+		"derived_stats": fiche_util.avec_degats_par_arme(character, derived.model_dump()),
 		"caracts_detail": consommables.caracts_detail(character),
 	}
 
@@ -1375,7 +1375,7 @@ def _reponse_equipement(character: dict, slots: dict, inventaire: list, derived)
 		"slots":           {s: resolve_item_ref(v) if v else None for s, v in slots.items()},
 		"inventaire":      [d for r in inventaire if (d := resolve_item_ref(r))],
 		"equipment_bonus": character["equipment_bonus"],
-		"derived_stats":   derived.model_dump(),
+		"derived_stats":   fiche_util.avec_degats_par_arme(character, derived.model_dump()),
 		"caracts_detail":  consommables.caracts_detail(character),
 		"charge":          round(carried_weight(character), 2),
 		"charge_max":      montures.charge_max_porteur(character),
