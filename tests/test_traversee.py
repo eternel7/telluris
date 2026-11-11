@@ -180,6 +180,9 @@ def base(monkeypatch):
 	for mod in (rp, rt):
 		monkeypatch.setattr(mod, "get_doc", get_doc_fn, raising=False)
 		monkeypatch.setattr(mod, "save_doc", save_doc_fn, raising=False)
+	# Docs du groupe : écriture groupée (`_apply_world_turn_groupe`), même base en mémoire.
+	from routers import user as ru
+	monkeypatch.setattr(ru, "save_docs", lambda ds: [bool(save_doc_fn(d)) for d in ds])
 	return {"docs": docs, "sauves": sauves, "rp": rp, "rt": rt}
 
 

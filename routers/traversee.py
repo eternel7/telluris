@@ -67,12 +67,12 @@ async def traversee_avancer(current_user: Annotated[dict, Depends(get_current_us
 	# Courses de transport échues (expiration paresseuse : pas de tick de fond).
 	transports_echoues = transport.traiter_expirations(
 		character, quetes.now_epoch(), get_doc, save_doc)
-	compagnons, montures_groupe = _auras_du_groupe(character)
+	compagnons, montures_groupe, groupe_avant = _auras_du_groupe(character)
 	_apply_world_turn_regen(character)
 	marquer_joue(character)
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
-	_apply_world_turn_groupe(character, 0, compagnons, montures_groupe)
+	_apply_world_turn_groupe(character, 0, compagnons, montures_groupe, groupe_avant)
 	return {
 		"arrive": False,
 		"position": character["position"],

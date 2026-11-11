@@ -3,12 +3,13 @@ from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Reques
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 import bcrypt
+import copy
 import math
 import re
 import uuid
 import random
 import os
-from db.config import save_doc, get_doc, delete_doc, find_docs
+from db.config import save_doc, save_docs, get_doc, delete_doc, find_docs
 from utils.auth import get_current_user, create_access_token, ouvrir_session, fermer_session, revoquer_sessions
 from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
@@ -693,7 +694,7 @@ def _effets_arrivee(character: dict, destination: str, destination_pos: dict,
 		xp_partage += int(escorte_maj["depose"].get("xp") or 0)
 		niveau_up = niveau_up or bool(escorte_maj["depose"].get("niveau_up"))
 		niveau_new = compute_character_level(character.get("xp_total", 0))
-	compagnons, montures_groupe = _auras_du_groupe(character)
+	compagnons, montures_groupe, groupe_avant = _auras_du_groupe(character)
 	_apply_world_turn_regen(character)
 	marquer_joue(character)
 	save_doc(character)
@@ -701,7 +702,7 @@ def _effets_arrivee(character: dict, destination: str, destination_pos: dict,
 	# XP partagée de la compagnie, cf. _apply_world_turn_groupe).
 	xp_compagnie = recrutement.xp_compagnie_payload(
 		_apply_world_turn_groupe(character, xp_partage, compagnons,
-								 montures_groupe),
+								 montures_groupe, groupe_avant),
 		xp_partage)
 	return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character), "ressource_recoltable": _recolte_payload(character), "effets_actifs": consommables.effets_actifs_payload(character), "caracts_detail": _caracts_payload(character), "focalisation_atteinte": {"lieu": destination, "nom": lieu_label(lieu_doc, destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
 
@@ -892,7 +893,7 @@ async def move_character(
 					get_doc, save_doc, find_docs)
 				if escorte_maj["depose"]:
 					xp_partage += int(escorte_maj["depose"].get("xp") or 0)
-				compagnons, montures_groupe = _auras_du_groupe(character_to_update)
+				compagnons, montures_groupe, groupe_avant = _auras_du_groupe(character_to_update)
 				_apply_world_turn_regen(character_to_update)
 				# VOL MAGIQUE (utils/vol.py) : le tour de monde a pu l'éteindre au-dessus de l'eau
 				# ou d'une falaise — chute sur la case de sol la plus proche. APRÈS le tick, donc
@@ -904,7 +905,7 @@ async def move_character(
 				save_doc(character_to_update)
 				# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage. Un pas ne
 				# rapporte pas d'XP — seule une conclusion d'intro peut en partager ici.
-				_apply_world_turn_groupe(character_to_update, xp_partage, compagnons, montures_groupe)
+				_apply_world_turn_groupe(character_to_update, xp_partage, compagnons, montures_groupe, groupe_avant)
 				links = get_lieu_links(current_user)
 				# Un pas ne recharge pas la page : la sanction de réputation (−1 chez le donneur ET
 				# sa maison) doit repartir avec la réponse, sinon l'onglet 🤝 — rendu 100 % client —
@@ -1010,21 +1011,30 @@ def _apply_world_turn_regen(character: dict) -> None:
         character["currentPM"] = min(character["currentPM"], derived.pm_max)
 
 
-def _auras_du_groupe(character: dict) -> tuple[list, list]:
+def _auras_du_groupe(character: dict) -> tuple[list, list, dict]:
     """AURAS hors combat (passives à zone) : tout le groupe profite de celles de chacun.
     Pose `auras_recues` sur le principal, ses compagnons ET ses montures — AVANT la régén
-    du tour, qui les lit — et rend `(compagnons, montures)` chargés, à repasser à
+    du tour, qui les lit — et rend `(compagnons, montures, avant)` chargés, à repasser à
     `_apply_world_turn_groupe` : les recharger là-bas donnerait un SECOND dict du même doc
     (cf. sa docstring), et l'aura posée ici serait perdue. Rien n'est sauvé ici."""
     compagnons = recrutement.groupe_effectif(character, get_doc)
     montures_groupe = montures.montures_effectives(character, get_doc)
+    # Empreinte prise AVANT l'aura : `_apply_world_turn_groupe` ne sauve que ce qui a bougé.
+    avant = _empreintes(compagnons + montures_groupe)
     competences_util.appliquer_auras_groupe([character, *compagnons], montures_groupe)
-    return compagnons, montures_groupe
+    return compagnons, montures_groupe, avant
+
+
+def _empreintes(porteurs: list) -> dict:
+    """`{_id: copie profonde}` des docs du groupe tels que CHARGÉS — le témoin contre lequel
+    `_apply_world_turn_groupe` décide qui a changé pendant le tour."""
+    return {p.get("_id"): copy.deepcopy(p) for p in porteurs if p}
 
 
 def _apply_world_turn_groupe(character: dict, xp_partage: int = 0,
                              compagnons: list | None = None,
-                             montures_groupe: list | None = None) -> list:
+                             montures_groupe: list | None = None,
+                             avant: dict | None = None) -> list:
     """Le tour monde vaut pour TOUT le groupe : chaque compagnon régénère PV/PM et
     décrémente ses effets actifs exactement comme le joueur — un doc `aventurier:*` est
     un miroir du character, `_apply_world_turn_regen` s'y applique tel quel. Les docs
@@ -1045,10 +1055,18 @@ def _apply_world_turn_groupe(character: dict, xp_partage: int = 0,
         compagnons = recrutement.groupe_effectif(character, get_doc)
     if montures_groupe is None:
         montures_groupe = montures.montures_effectives(character, get_doc)
+    # ⚠️ Une écriture coûte ~40 lectures (relevé du journal : ~166 ms contre ~4) : on ne
+    # sauve QUE les docs que le tour a changés (aura, régén, effet, XP), en UN envoi groupé.
+    # Un groupe en pleine forme n'écrit rien. Porteur sans témoin ⇒ sauvé (repli sûr).
+    if avant is None:
+        avant = _empreintes(compagnons + montures_groupe)
     recrutement.partager_xp(character, xp_partage, compagnons=compagnons)
+    modifies = []
     for porteur in compagnons + montures_groupe:
         _apply_world_turn_regen(porteur)
-        save_doc(porteur)
+        if porteur != avant.get(porteur.get("_id")):
+            modifies.append(porteur)
+    save_docs(modifies)
     return compagnons
 
 

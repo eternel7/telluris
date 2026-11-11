@@ -855,6 +855,17 @@ def tour_monde(monde, monkeypatch):
 	docs = monde["docs"]
 	monkeypatch.setattr(user_router, "get_doc", lambda doc_id: docs.get(doc_id))
 	monkeypatch.setattr(user_router, "save_doc", lambda doc: docs.__setitem__(doc["_id"], doc) or doc)
+	# Écriture groupée des docs du groupe : chaque envoi est noté (`monde["lots"]`).
+	lots = monde["lots"] = []
+
+	def save_docs_fn(ds):
+		if ds:
+			lots.append([d["_id"] for d in ds])
+		for d in ds:
+			docs[d["_id"]] = d
+		return [True] * len(ds)
+
+	monkeypatch.setattr(user_router, "save_docs", save_docs_fn)
 	return user_router
 
 
@@ -913,6 +924,82 @@ def test_tour_monde_groupe_partage_l_xp_de_decouverte(tour_monde, monde):
 
 	assert docs["aventurier:a"]["xp_total"] == 25   # la compagnie progresse avec le joueur
 	assert docs["aventurier:b"]["xp_total"] == 0    # le contrat ne gagne que l'XP de combat
+
+
+def _compagnon_en_forme(rid, **champs):
+	"""Compagnon actif à PV/PM pleins, passé une fois par le tour pour que tout champ posé
+	à la première régén (bonus d'équipement…) soit déjà sur le doc."""
+	av = recrutement.generer_aventurier(GUILDE, VILLE, 1, portraits=PORTRAITS)
+	av.update({"_id": rid, "statut": "embauche", "embauche_par": "character:u_1"})
+	av.update(champs)
+	vitaux = recrutement.vitaux_de(av)
+	av["currentPV"], av["currentPM"] = vitaux["pv_max"], vitaux["pm_max"]
+	return av
+
+
+def test_tour_monde_groupe_en_forme_n_ecrit_rien(tour_monde, monde):
+	"""Une écriture est l'essentiel du coût d'un pas : un groupe que le tour ne change pas
+	(PV/PM pleins, aucun effet) ne doit déclencher AUCUN envoi."""
+	docs = monde["docs"]
+	docs["aventurier:a"] = _compagnon_en_forme("aventurier:a")
+	docs["aventurier:b"] = _compagnon_en_forme("aventurier:b")
+	c = perso(groupe=["aventurier:a", "aventurier:b"])
+	tour_monde._apply_world_turn_groupe(c)   # 1er tour : pose les champs dérivés
+	monde["lots"].clear()
+
+	tour_monde._apply_world_turn_groupe(c)
+
+	assert monde["lots"] == []
+
+
+def test_tour_monde_groupe_ne_sauve_que_le_membre_change_en_un_envoi(tour_monde, monde):
+	docs = monde["docs"]
+	docs["aventurier:a"] = _compagnon_en_forme("aventurier:a")
+	docs["aventurier:b"] = _compagnon_en_forme("aventurier:b")
+	c = perso(groupe=["aventurier:a", "aventurier:b"])
+	tour_monde._apply_world_turn_groupe(c)
+	monde["lots"].clear()
+	docs["aventurier:b"]["currentPV"] = 1
+
+	tour_monde._apply_world_turn_groupe(c)
+
+	assert monde["lots"] == [["aventurier:b"]]   # un seul envoi, le seul blessé
+	assert docs["aventurier:b"]["currentPV"] > 1
+
+
+def test_tour_monde_groupe_sauve_l_xp_partagee(tour_monde, monde):
+	docs = monde["docs"]
+	docs["aventurier:a"] = _compagnon_en_forme("aventurier:a", permanent=True, xp_total=0)
+	c = perso(groupe=["aventurier:a"])
+	tour_monde._apply_world_turn_groupe(c)
+	monde["lots"].clear()
+
+	tour_monde._apply_world_turn_groupe(c, 25)
+
+	assert monde["lots"] == [["aventurier:a"]]
+
+
+def test_tour_monde_aura_posee_avant_le_tour_est_sauvee(tour_monde, monde):
+	"""⚠️ Le témoin est pris AVANT la pose de l'aura (`_auras_du_groupe`) : une aura neuve
+	est un changement à persister, même si la régén qui suit ne bouge rien."""
+	docs = monde["docs"]
+	docs["aventurier:a"] = _compagnon_en_forme("aventurier:a")
+	c = perso(groupe=["aventurier:a"])
+	tour_monde._apply_world_turn_groupe(c)
+	monde["lots"].clear()
+	c["competences_bonus"] = {"auras": [{"id": "aura_test", "nom": "Aura", "icon": "✨",
+		"zone": {}, "buffs": {}, "regen_pv": 0, "regen_pm": 0, "esquive": 0}]}
+
+	compagnons, montures_groupe, avant = tour_monde._auras_du_groupe(c)
+	tour_monde._apply_world_turn_groupe(c, 0, compagnons, montures_groupe, avant)
+
+	assert monde["lots"] == [["aventurier:a"]]
+	assert docs["aventurier:a"]["auras_recues"][0]["id"] == "aura_test"
+	# Tour suivant : l'aura est déjà là, plus rien à écrire.
+	monde["lots"].clear()
+	compagnons, montures_groupe, avant = tour_monde._auras_du_groupe(c)
+	tour_monde._apply_world_turn_groupe(c, 0, compagnons, montures_groupe, avant)
+	assert monde["lots"] == []
 	assert docs["aventurier:a"]["currentPV"] >= 1   # et la régén a bien été persistée aussi
 
 
