@@ -271,6 +271,19 @@ Réalise l'image du portrait illustré d'un personnage de fantasy médiévale, f
 Réalise l'image du portrait illustré d'un personnage de fantasy médiévale, format paysage large. Une naine d'âge mûr, nettement plus petite qu'un humain, aux proportions de naine, sans barbe, aux bras forts, aux cheveux roux tressés et relevés sous un foulard, au regard concentré, architecte des portails venue d'une grande capitale pour entretenir un passage ancien dans une cité fluviale. Elle se tient légèrement décalée du centre et regarde droit vers le spectateur avec l'assurance d'une maîtresse d'œuvre ; elle lui présente un cristal jaune serti dans une monture de bronze. Tenue de travail usée et crédible : tablier de cuir aux nombreuses poches, compas et règle de bronze à la ceinture, manches retroussées, lunettes de verre relevées sur le front. Décor de part et d'autre : une halle portuaire de pierre et de charpente, une grande arche ancienne aux motifs gravés, des échafaudages, des tonneaux et des ballots sur les quais. Des ogres, des nains, des hobbits, des elfes et des humains vaquent à leur occupation, chacun différent par l'âge, la carrure, les cheveux et la tenue. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle chaude, palette chaude et terreuse relevée de touches de couleurs vives, proportions crédibles ; pas une photographie. Image entièrement dépourvue d'écriture : aucun nom, aucune lettre, aucune signature, aucun monogramme, aucun filigrane, aucune enseigne lisible.
 ```
 
+## ✍️ Auteur — les douze images (11/11/2026)
+
+Les douze images livrées, enregistrées sous les noms du § 9 (1376 × 768).
+
+## 10. Le contenu en jeu (`dev/gen_orleans.py` → `jsons/orleans_a_importer.json`, 11/11/2026)
+
+- **Lieux** : quatre temples `lieu:orleans_temple_{saint_loup,tourelles,saint_jean_le_blanc,sainte_croix}` et leurs salles `lieu:orleans_donjon_{foret,crue,ciel,croix}` ; `lieu:orleans_chatelet` → Lyon et `lieu:orleans_bourgogne` → Bruges (rang A de Lutecia). `lieu:orleans` n'est **pas réécrit** : connexions posées sur des cases praticables de sa grille (parvis de la cathédrale, bout sud du pont, rive gauche, lisière est, porte du pont, porte est).
+- **Donjons** : Saint-Loup (rang D, grades 2-3 : loup géant, grand sanglier, araignée géante, homme-arbre), Tourelles (C, 3-4, réinfesté à chaque crue : marid, ondin, naïade, serpent géant), Saint-Jean-le-Blanc (B, 4-5 : harpie, wyvern, griffon, gargouille), Sainte-Croix (B, 4-5 : doppelgänger, revenant, spectre, démon mineur). Chaque salle donne une cible de commission pour chacune de ses espèces (vérifié contre les profils du dump).
+- **PNJ** : Templiers **Florent d'Illiers** (nain, Saint-Loup), **Raoul de Gaucourt** (humain, Tourelles), **Archambaud de Villars** (ogre, Saint-Jean-le-Blanc), **Jamet du Tillay** (ogre, Sainte-Croix) — noms d'Orléanais du siège réel, portraits réemployés des gardes de temple ; **Charles d'Orléans** aux Tourelles (présence 70 %, cite son rondeau « Le temps a laissié son manteau ») ; **Maîtresse Ermengarde des Arches** (naine, Architecte de Lutecia) au port du Châtelet.
+- **Docs relus et complétés** : **Agnan le Gabarrier** mandate les quatre donjons (+ répliques sur les temples et sur Jeanne) ; **Natiru** (Petra) dit que le seuil de l'Urne menait à Orléans avant la Vague.
+- **Cartes de combat** : quadrillage dessiné relevé à l'œil (la Croix et la Crue 60 × 33, le ciel et la forêt 30 × 17) — ⚠️ première passe **à valider en jeu**.
+- Remarques sur les images : des **ogres verts** (Architecte, port du Châtelet) ; « N » / « NORD » sur les roses des vents ; croix rouges sur les surcots des Templiers de Saint-Loup.
+
 ## 8. Points ouverts
 
 - Origine de Jeanne, sa fin, la nature de ses voix, ce que cherchait Gilles de Rais : **ouverts par décision**.

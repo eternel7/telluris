@@ -253,6 +253,7 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 - **Communauté des marchands fréquentant la rivière de Loire** ; vinaigre d'Orléans (contre le penanggalan), cotignac, sel, bois, tonnellerie, chantiers navals.
 - **Charles d'Orléans** : PNJ vivant, noble sans pouvoir, poète, revenu de la Crue après **vingt-cinq ans** ; dit avoir vu la source à Petra.
 - Au dump : guilde **Le Relais de la Loire** (Perrine Boucher, naine ; Agnan le Gabarrier, ogre).
+- En jeu (11/11) : `dev/gen_orleans.py` → `jsons/orleans_a_importer.json` — temples `lieu:orleans_temple_*`, salles `lieu:orleans_donjon_{foret,crue,ciel,croix}`, `lieu:orleans_chatelet` (→ Lyon) et `lieu:orleans_bourgogne` (→ Bruges), Templiers Florent d'Illiers (nain, Saint-Loup), Raoul de Gaucourt (humain, Tourelles), Archambaud de Villars (ogre, Saint-Jean-le-Blanc), Jamet du Tillay (ogre, Sainte-Croix) ; Charles d'Orléans aux Tourelles ; Maîtresse Ermengarde des Arches (naine, Architecte de Lutecia) au Châtelet ; Agnan mandate les quatre donjons.
 
 ## Aksoum — [cites/20261101_histoire_d_aksoum.md]
 **Auteur** (01/11, trois questionnaires) — carte `towns/aksoum_capital.jpg` (retenue ; **enceinte ouverte à l'ouest voulue** : palais, haras, bassin hors des murs) ; en jeu : `lieu:aksoum` (`dev/gen_aksoum.py`), parent `lieu:abyssinie` en (31, 13) depuis le 03/11 (`dev/gen_afrique.py` ; avant : coin sud-est de l'Afrique du Nord).
