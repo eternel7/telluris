@@ -232,7 +232,8 @@ def test_maelys_ne_solde_le_temple_qu_apres_l_ossuaire():
 def test_le_cristal_jaune_ne_vient_que_des_coffres_de_donjon():
 	"""La preuve de la descente ne vaut que si le cristal n'a d'autre source qu'un coffre de
 	donjon — l'ossuaire des catacombes, et le coffre du Minotaure de Chartres (Auteur, 25/10) :
-	ni boutique, ni recette (personnages du dump exclus : c'est l'état d'un joueur). Le
+	ni boutique, ni recette (personnages et propriétés du dump exclus : c'est l'état d'un
+	joueur — le coffre d'un domaine garde ce que son propriétaire y a rangé). Le
 	commandeur DEMANDE le cristal (objet de son apport) : une fois l'import passé il est dans le
 	dump, d'où son exclusion — tant qu'il ne fait que le demander."""
 	if GEN.COMMANDEUR in DUMP:
@@ -240,7 +241,7 @@ def test_le_cristal_jaune_ne_vient_que_des_coffres_de_donjon():
 		assert commandeur["services"]["apport"]["offre"].pop("item") == GEN.CRISTAL_JAUNE
 		assert f'"{GEN.CRISTAL_JAUNE}"' not in json.dumps(commandeur, ensure_ascii=False)
 	sources = [d["_id"] for d in DUMP.values()
-			   if d["_id"] not in (GEN.CRISTAL_JAUNE, GEN.COMMANDEUR) and d.get("type") != "character"
+			   if d["_id"] not in (GEN.CRISTAL_JAUNE, GEN.COMMANDEUR) and d.get("type") not in ("character", "propriete")
 			   and f'"{GEN.CRISTAL_JAUNE}"' in json.dumps(d, ensure_ascii=False)]
 	# Le Notre-Dame de dev/gen_portail_notre_dame.py le DEMANDE (prix du passage), il n'en
 	# donne pas : écarté s'il est déjà importé.
