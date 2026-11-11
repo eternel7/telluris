@@ -229,7 +229,10 @@ def test_l_architecte_rejoint_aelis_a_la_cour_sans_rien_lui_retirer():
 	_, lieu, *_ = gen.generer(dump)
 	avant = dump[gen.LIEU_ID]
 	assert lieu["_id"] == gen.LIEU_ID and "_rev" not in lieu
-	assert lieu["pnj"][:-1] == avant["pnj"]                 # Aélis et ses conditions intactes
+	# Aélis et ses conditions intactes ; l'entrée de l'Architecte, si l'import est déjà passé,
+	# est REMPLACÉE (jamais doublée) — le dump peut la porter.
+	autres = [e for e in avant["pnj"] if e.get("character") != gen.PNJ_ID]
+	assert lieu["pnj"][:-1] == autres
 	assert lieu["pnj"][-1]["character"] == gen.PNJ_ID and lieu["pnj"][-1]["probabilite"] == 1
 	assert {k: v for k, v in lieu.items() if k != "pnj"} == {k: v for k, v in avant.items()
 															 if k not in ("pnj", "_rev")}

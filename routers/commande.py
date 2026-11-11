@@ -424,6 +424,12 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 	#
 	# ⚠️ Les deux passes PARTAGENT leurs emplacements retenus : sans quoi le même lingot
 	# serait crédité comme ingrédient ET fourni gratuitement comme matière sur mesure.
+	#
+	# ⚠️ ORDRE des sacs : ce qui n'a AUCUN autre recours se sert en premier. 1) les trophées de
+	# la recette (sacs seuls), 2) les matières sur mesure (sinon le comptoir, souvent vide),
+	# 3) le reste de la recette (que l'artisan trouve aussi de son côté). Recette d'abord, un
+	# seul croc en sac partait dans le Collier de crocs et le croc « sur mesure » manquait,
+	# alors que l'artisan avait de quoi fournir ceux de la recette.
 	porteurs = _porteurs(character)
 	retenus = set()
 
@@ -449,13 +455,20 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 	voisins = ([] if proprietes.est_atelier(lieu_doc)
 			   else commande_util.voisins_cite(lieu_doc, find_docs))
 	# Le trophée d'une recette à trophée ne vient que des sacs (`marche.est_recette_trophee`).
-	src_recette = commande_util.sourcer(besoins_recette, porteurs, lieu_doc, get_doc,
-										retenus=retenus, atelier=True, flux=flux,
-										voisins=voisins, trophees=marche.cles_trophee(recette))
+	trophees = marche.cles_trophee(recette)
+	src_trophees = commande_util.sourcer([b for b in besoins_recette if b[0] in trophees],
+										 porteurs, lieu_doc, get_doc, retenus=retenus,
+										 atelier=True, flux=flux, voisins=voisins,
+										 trophees=trophees)
 
 	besoins_sur_mesure = [(e["item"], e["quantite"]) for e in matieres_demandees]
 	src_sur_mesure = commande_util.sourcer(besoins_sur_mesure, porteurs, lieu_doc, get_doc,
 										   _prix_achat(relation, lieu_doc), retenus)
+
+	src_reste = commande_util.sourcer([b for b in besoins_recette if b[0] not in trophees],
+									  porteurs, lieu_doc, get_doc, retenus=retenus,
+									  atelier=True, flux=flux, voisins=voisins)
+	src_recette = {k: src_trophees[k] + src_reste[k] for k in ("fournies", "atelier", "manquantes")}
 
 	# Remise : ce que l'artisan n'aura pas à acheter parce que le client l'a apporté, au coût
 	# de revient (pas au prix de vente — le joueur contribue, il ne revend pas).
