@@ -554,7 +554,8 @@ def inscrit_a_la_guilde(character: dict, cite_id: str) -> bool:
 def membre_de_la_guilde(character: dict, cite_id: str, get_doc_fn) -> bool:
 	"""La guilde de cette cité REÇOIT-elle le personnage en membre ? Inscrit à son registre
 	(`inscrit_a_la_guilde`), OU porteur d'une carte qu'elle reconnaît
-	(`recrutement.porte_carte_valable` : la carte de Lutecia dans toute la France). Garde du
+	(`recrutement.porte_carte_valable` : la carte d'une capitale dans les cités de même
+	`lieu_parent` — Lutecia dans toute la France). Garde du
 	tableau de quêtes, du registre des disparitions et de l'épreuve de rang.
 	⚠️ Pas de la carte PERDUE (`pnj.don_a_remplacer`) : elle suppose le registre de CETTE cité,
 	sans quoi Lyon se moquerait d'une carte de Lyon jamais remise."""

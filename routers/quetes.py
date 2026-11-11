@@ -95,7 +95,7 @@ def _board_payload(character: dict, lieu_doc: dict, completer: bool = False) -> 
 	a quitté le tableau à l'acceptation —, ils se contentent donc de lister l'existant
 	(`lister_offres`) au lieu de payer une génération complète pour un tableau identique."""
 	# Tableau réservé aux MEMBRES de la guilde de la cité (`chasse.membre_de_la_guilde` : inscrit,
-	# ou porteur d'une carte reconnue — celle de Lutecia dans toute la France) : un
+	# ou porteur d'une carte reconnue — celle d'une capitale dans les cités de même parent) : un
 	# non-inscrit voit ses quêtes en cours (il doit pouvoir les rendre) mais aucune offre, et
 	# rien n'est généré pour lui. `inscription_requise` porte le refus PARLÉ du client.
 	inscrit = chasse.membre_de_la_guilde(character, lieu_doc.get("lieu_parent"), get_doc)

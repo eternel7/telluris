@@ -47,23 +47,27 @@ def now_epoch() -> int:
 # c'est le `lieu_parent` de l'INSTANCE en sac qui dit de quelle cité on est membre.
 CARTE_AVENTURIER_ITEM_ID = "item:carte_aventurier"
 
-# Cartes RECONNUES hors de leur cité : la carte de la guilde de Lutecia vaut dans toutes les
-# guildes de France (Auteur, 11/11). Cité émettrice → pays (`lieu_parent` de la cité) où ses
-# guildes la reconnaissent. Reconnaître la carte = être reçu en MEMBRE (tableaux, épreuve de
-# rang) ; le RANG, lui, reste celui de chaque cité (`rangs_guilde`, jamais sur la carte).
-CARTES_RECONNUES = {"lieu:lutecia": "lieu:france"}
+# Carte d'une CAPITALE reconnue hors de sa cité (Auteur, 11/11) : elle vaut dans toutes les
+# guildes des cités qui partagent son `lieu_parent` (Lutecia → toute la France). Reconnaître la
+# carte = être reçu en MEMBRE (tableaux, épreuve de rang) ; le RANG, lui, reste celui de chaque
+# cité (`rangs_guilde`, jamais sur la carte). Capitale = `sous_categorie` du doc de la cité.
+CAPITALE_SOUS_CATEGORIE = "capitale"
 
 
 def carte_valable_dans(cite_carte: str | None, cite: str | None, get_doc_fn) -> bool:
 	"""Une carte émise par `cite_carte` vaut-elle à la guilde de `cite` ? Oui pour la sienne,
-	et pour une carte de `CARTES_RECONNUES` dans une cité de son pays. Le doc de la cité n'est
-	lu QUE pour une carte reconnue d'ailleurs. Fail-closed : cité absente ⇒ False."""
+	et pour celle d'une capitale dans une cité de MÊME `lieu_parent`. Les docs de cité ne sont
+	lus QUE pour une carte d'ailleurs. Fail-closed : cité absente, ou capitale sans parent
+	(Atlantis, Pékin…) ⇒ False — sinon toutes les cités orphelines se reconnaîtraient."""
 	if not cite_carte or not cite:
 		return False
 	if cite_carte == cite:
 		return True
-	pays = CARTES_RECONNUES.get(cite_carte)
-	return bool(pays) and ((get_doc_fn(cite) or {}).get("lieu_parent") == pays)
+	emettrice = get_doc_fn(cite_carte) or {}
+	if emettrice.get("sous_categorie") != CAPITALE_SOUS_CATEGORIE:
+		return False
+	parent = emettrice.get("lieu_parent")
+	return bool(parent) and (get_doc_fn(cite) or {}).get("lieu_parent") == parent
 
 
 def porte_carte_valable(character: dict, cite: str | None, get_doc_fn) -> bool:
@@ -530,7 +534,7 @@ def offre_du_lieu(lieu_doc: dict, parent_doc: dict | None) -> dict:
 def acces_autorise(character: dict, lieu_doc: dict, get_doc_fn=None) -> tuple[bool, str]:
 	"""Le personnage peut-il consulter le tableau ? Si RECRUTEMENT_CARTE_REQUISE, il
 	doit porter une carte d'aventurier qui vaut à la CITÉ du lieu (`porte_carte_valable` : la
-	sienne, ou une carte de `CARTES_RECONNUES` dans son pays) — la carte d'une autre guilde
+	sienne, ou celle d'une capitale de même `lieu_parent`) — la carte d'une autre guilde
 	ne vaut rien ici. Retourne (ok, raison)."""
 	if not character_stats.RECRUTEMENT_CARTE_REQUISE:
 		return True, ""
