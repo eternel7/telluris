@@ -9,7 +9,7 @@
 #                     escorte · la Porte de Mars (Rhemi, portail mort-né)
 #                     transport `retour` · la porte qui ne devait pas s'ouvrir (Enclos du Temple)
 #   Rang A (cran B) : apport · le géant de la baie              (trophée au hasard)
-#                     apport · la Bête du Gévaudan              (trophée au hasard)
+#                     apport · la Bête du Gévaudan              (trophée au hasard, SITUÉE : carte 🗺️)
 #                     apport · le puits de Chartres             (donjon : 2 Minotaures, grade 4-5)
 #                     escorte · l'Ampoule du Sacre (Rhemi → Chapelle Palatine d'Aix)
 #                     escorte · la délégation palatine (Lutecia → Hôtel de Ville d'Aix)
@@ -99,6 +99,15 @@ RECOMPENSES_A = {"xp": 2117, "cuivre": 8000, "rang_guilde": "A"}
 # Zone de la carte de France où la Gargouille rejoint les rencontres : les berges (la Seine
 # traverse Lutecia et Rouen). Trophée au hasard, grade de la zone (Auteur, 25/10).
 ZONE_GARGOUILLE = "zone:riviere"
+
+# Où Maëlys SITUE la Bête (demande de l'Auteur, 11/11) : `offre.localisation` de l'apport →
+# bouton 🗺️ de l'onglet 📜 (`apport.localisation_spec`). Monts du Gévaudan, au sud du Massif
+# central, à l'ouest du Rhône : CENTRE d'un placement `zone:tres_dangereuse` de la carte de
+# France, où la Bête est aux `rencontres` — tout le 3×3 du crop y reste (verrouillé par
+# `test_la_bete_est_situee_dans_une_zone_ou_elle_rode`). Une indication, pas une rencontre
+# garantie : la Bête y sort au gré du tirage de la zone.
+ZONE_BETE = "zone:tres_dangereuse"
+LOCALISATION_BETE = {"lieu": FRANCE, "position": {"x": 55, "y": 32}}
 
 # Portraits et images : images DÉFINITIVES (prompts : docs/lore/personnages/
 # 20261025_missions_rang_b_a_lutecia.md § 4) ; chancelier, gardienne, gardien de la Porte de
@@ -280,10 +289,12 @@ def retour_accueil():
 
 # ── Maëlys : neuf épreuves, une offre par service à chaque visite ────────────────────────
 
-def _apport(qid, titre, description, item, rang, rec, noeuds):
-	return {"offre": {"id": qid, "titre": titre, "description": description, "item": item,
-					  "quantite": 1, "unique": True, "rang": rang, "recompenses": dict(rec)},
-			"noeuds": noeuds}
+def _apport(qid, titre, description, item, rang, rec, noeuds, localisation=None):
+	offre = {"id": qid, "titre": titre, "description": description, "item": item,
+			 "quantite": 1, "unique": True, "rang": rang, "recompenses": dict(rec)}
+	if localisation:
+		offre["localisation"] = copy.deepcopy(localisation)
+	return {"offre": offre, "noeuds": noeuds}
 
 
 def _transport(qid, titre, description, destination, duree, rang, rec, noeuds):
@@ -351,8 +362,8 @@ def entrees_maelys():
 					"Maëlys veut la tête du géant qui hante la baie du Mont, à l'ouest de la Normandie, là où les grèves se couvrent et se découvrent. Rapportez-la au bureau de la maîtresse : le rang A est au bout.",
 					TETE_GEANT, "A", RECOMPENSES_A, n_apport("a_geant")),
 			_apport(A_BETE, "Rang A : la Bête",
-					"Maëlys veut la tête de la Bête qui rôde dans les régions les plus dangereuses de France, des monts du Gévaudan aux confins de la carte. Rapportez-la au bureau de la maîtresse : le rang A est au bout.",
-					TETE_BETE, "A", RECOMPENSES_A, n_apport("a_bete")),
+					"Maëlys veut la tête de la Bête. Les derniers rapports de la Guilde la situent dans les monts du Gévaudan, au sud du Massif central, à l'ouest du Rhône : la maîtresse a marqué l'endroit sur votre carte. Rapportez la tête à son bureau : le rang A est au bout.",
+					TETE_BETE, "A", RECOMPENSES_A, n_apport("a_bete"), localisation=LOCALISATION_BETE),
 			_apport(A_MINOTAURE, "Rang A : le puits de Chartres",
 					"Les Templiers de Chartres demandent à la Guilde une descente dans le puits de la crypte, jusqu'au labyrinthe du Minotaure. Présentez-vous au Templier de la crypte, descendez, et rapportez une tête au bureau de la maîtresse : le rang A est au bout.",
 					TETE_MINOTAURE, "A", RECOMPENSES_A, n_apport("a_minotaure")),
@@ -629,9 +640,18 @@ def noeuds_maelys():
 	n["a_bete_propose"] = {
 		"texte": "« La Bête. » Maëlys ne précise pas laquelle. Elle tire d'un casier une liasse de rapports, dont certains ont jauni. « Une bête rousse, une raie noire sur le dos, plus rapide qu'un cheval et plus rusée qu'un chasseur. On l'a vue dans le Gévaudan, au sud-ouest de Lyon, puis partout où la France est la plus dangereuse. Les battues reviennent bredouilles. » Elle repose la liasse. « Rapportez-moi sa tête, {prenom}. Le rang A est au bout. »",
 		"choix": [
+			{"id": "carte", "label": "« Où la chercher ? »", "next": "a_bete_carte"},
 			{"id": "infos", "label": "« Un loup-garou ? »", "next": "a_bete_infos"},
 			_accepter("apport", "« Je vous la rapporte. »"),
 			_plus_tard(),
+		],
+	}
+	n["a_bete_carte"] = {
+		"texte": "Maëlys déplie sur la table une carte de France, usée aux plis. Son doigt descend de Lutecia, passe la Loire, contourne le Massif central par le sud et s'arrête sur des hauteurs, à l'ouest du Rhône, au sud-ouest de Lyon. « Le Gévaudan. Des landes, des bois de pins, des rochers. Trois battues l'ont perdue là, au même endroit, à des mois d'écart. Elle y revient. » Elle prend un bâton de charbon et trace un rond. « Le quatrième rapport la place la même nuit à l'autre bout de la France. Je ne l'ai pas cru. » Elle repousse la carte vers vous. « Elle est à vous si vous acceptez. »",
+		"choix": [
+			{"id": "infos", "label": "« Un loup-garou ? »", "next": "a_bete_infos"},
+			_accepter("apport", "« Je prends la carte. Je vous rapporte sa tête. »"),
+			_plus_tard("« Laissez-moi y réfléchir. »"),
 		],
 	}
 	n["a_bete_infos"] = {
@@ -639,11 +659,11 @@ def noeuds_maelys():
 		"choix": [_accepter("apport", "« Je vous la rapporte. »"), _plus_tard("« Laissez-moi y réfléchir. »")],
 	}
 	n["a_bete_accepte"] = {
-		"texte": "Maëlys trace une ligne dans son registre. « Elle ne se laisse pas chercher. Laissez-la vous trouver, et soyez sur vos gardes quand elle le fera. » Puis, sans lever les yeux : « Et si, une fois tombée, elle a un visage, je veux le savoir aussi. »",
+		"texte": "Maëlys trace une ligne dans son registre, puis plie la carte de France et vous la tend : un rond de charbon sur les monts du Gévaudan, au sud-ouest de Lyon. « C'est là que les battues l'ont perdue. Elle ne se laisse pas chercher : allez-y, et laissez-la vous trouver. Soyez sur vos gardes quand elle le fera. » Puis, sans lever les yeux : « Et si, une fois tombée, elle a un visage, je veux le savoir aussi. »",
 		"choix": _ok("« Compris. »"),
 	}
 	n["a_bete_relance"] = {
-		"texte": "« La Bête court toujours. » Maëlys ne lève pas les yeux de ses rapports. « Les régions les plus dangereuses, {prenom}. Elle n'aime pas les autres. »",
+		"texte": "« La Bête court toujours. » Maëlys ne lève pas les yeux de ses rapports. « Le rond de charbon, {prenom} : les monts du Gévaudan, au sud du Massif central, à l'ouest du Rhône. Elle revient toujours là. Si elle n'y est pas, attendez : elle y sera. »",
 		"choix": _ok("« J'y retourne. »"),
 	}
 	n["a_bete_partiel"] = {

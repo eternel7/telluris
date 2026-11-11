@@ -1178,6 +1178,11 @@
           "texte": "« La Bête. » Maëlys ne précise pas laquelle. Elle tire d'un casier une liasse de rapports, dont certains ont jauni. « Une bête rousse, une raie noire sur le dos, plus rapide qu'un cheval et plus rusée qu'un chasseur. On l'a vue dans le Gévaudan, au sud-ouest de Lyon, puis partout où la France est la plus dangereuse. Les battues reviennent bredouilles. » Elle repose la liasse. « Rapportez-moi sa tête, {prenom}. Le rang A est au bout. »",
           "choix": [
             {
+              "id": "carte",
+              "label": "« Où la chercher ? »",
+              "next": "a_bete_carte"
+            },
+            {
               "id": "infos",
               "label": "« Un loup-garou ? »",
               "next": "a_bete_infos"
@@ -1216,7 +1221,7 @@
           ]
         },
         "a_bete_accepte": {
-          "texte": "Maëlys trace une ligne dans son registre. « Elle ne se laisse pas chercher. Laissez-la vous trouver, et soyez sur vos gardes quand elle le fera. » Puis, sans lever les yeux : « Et si, une fois tombée, elle a un visage, je veux le savoir aussi. »",
+          "texte": "Maëlys trace une ligne dans son registre, puis plie la carte de France et vous la tend : un rond de charbon sur les monts du Gévaudan, au sud-ouest de Lyon. « C'est là que les battues l'ont perdue. Elle ne se laisse pas chercher : allez-y, et laissez-la vous trouver. Soyez sur vos gardes quand elle le fera. » Puis, sans lever les yeux : « Et si, une fois tombée, elle a un visage, je veux le savoir aussi. »",
           "choix": [
             {
               "id": "ok",
@@ -1226,7 +1231,7 @@
           ]
         },
         "a_bete_relance": {
-          "texte": "« La Bête court toujours. » Maëlys ne lève pas les yeux de ses rapports. « Les régions les plus dangereuses, {prenom}. Elle n'aime pas les autres. »",
+          "texte": "« La Bête court toujours. » Maëlys ne lève pas les yeux de ses rapports. « Le rond de charbon, {prenom} : les monts du Gévaudan, au sud du Massif central, à l'ouest du Rhône. Elle revient toujours là. Si elle n'y est pas, attendez : elle y sera. »",
           "choix": [
             {
               "id": "ok",
@@ -1517,6 +1522,29 @@
               "next": "conge"
             }
           ]
+        },
+        "a_bete_carte": {
+          "texte": "Maëlys déplie sur la table une carte de France, usée aux plis. Son doigt descend de Lutecia, passe la Loire, contourne le Massif central par le sud et s'arrête sur des hauteurs, à l'ouest du Rhône, au sud-ouest de Lyon. « Le Gévaudan. Des landes, des bois de pins, des rochers. Trois battues l'ont perdue là, au même endroit, à des mois d'écart. Elle y revient. » Elle prend un bâton de charbon et trace un rond. « Le quatrième rapport la place la même nuit à l'autre bout de la France. Je ne l'ai pas cru. » Elle repousse la carte vers vous. « Elle est à vous si vous acceptez. »",
+          "choix": [
+            {
+              "id": "infos",
+              "label": "« Un loup-garou ? »",
+              "next": "a_bete_infos"
+            },
+            {
+              "id": "accepter",
+              "label": "« Je prends la carte. Je vous rapporte sa tête. »",
+              "action": {
+                "service": "apport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
         }
       }
     },
@@ -1665,7 +1693,7 @@
             "offre": {
               "id": "quete:rang_a_bete_du_gevaudan",
               "titre": "Rang A : la Bête",
-              "description": "Maëlys veut la tête de la Bête qui rôde dans les régions les plus dangereuses de France, des monts du Gévaudan aux confins de la carte. Rapportez-la au bureau de la maîtresse : le rang A est au bout.",
+              "description": "Maëlys veut la tête de la Bête. Les derniers rapports de la Guilde la situent dans les monts du Gévaudan, au sud du Massif central, à l'ouest du Rhône : la maîtresse a marqué l'endroit sur votre carte. Rapportez la tête à son bureau : le rang A est au bout.",
               "item": "item:bete_du_gevaudan_tete",
               "quantite": 1,
               "unique": true,
@@ -1674,6 +1702,13 @@
                 "xp": 2117,
                 "cuivre": 8000,
                 "rang_guilde": "A"
+              },
+              "localisation": {
+                "lieu": "lieu:france",
+                "position": {
+                  "x": 55,
+                  "y": 32
+                }
               }
             },
             "noeuds": {

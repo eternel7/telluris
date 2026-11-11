@@ -289,6 +289,75 @@ def test_les_trophees_existent_et_leurs_especes_rodent_en_france():
 		assert zones & zones_carte, espece
 
 
+# ── La Bête : située, carte 🗺️ (dev/gen_carte_bete_gevaudan.py) ─────────────────
+
+def _offre_bete():
+	return next(e["offre"] for e in MAELYS["services"]["apport"]["offres"] if e["offre"]["id"] == GEN.A_BETE)
+
+
+def test_la_bete_est_situee_dans_une_zone_ou_elle_rode():
+	"""Tout le 3×3 du crop tombe dans un placement de la zone où la Bête est aux rencontres,
+	sur des cases praticables de la carte de France : la carte ne ment pas sur le terrain."""
+	from utils import zones
+	loc = apport.localisation_spec(_offre_bete().get("localisation"))
+	assert loc == GEN.LOCALISATION_BETE and loc["lieu"] == GEN.FRANCE
+	france = DOCS[GEN.FRANCE]
+	assert any(r["espece"] == "espece:bete_du_gevaudan" and GEN.ZONE_BETE in r["zones"]
+			   for r in france["rencontres"])
+	px, py = loc["position"]["x"], loc["position"]["y"]
+	for dx in (-1, 0, 1):
+		for dy in (-1, 0, 1):
+			assert zones.est_dans_zone(px + dx, py + dy, GEN.ZONE_BETE, france["zone_influences"]), (dx, dy)
+			assert france["cells"][py + dy][px + dx] > 0, (dx, dy)
+
+
+def test_la_carte_de_la_bete_part_de_lutecia(monkeypatch):
+	"""De bout en bout sur le dump : Maëlys confie la quête, l'onglet 📜 reçoit la carte de
+	France (image servable) et le repère part de Lutecia, la cité du bureau."""
+	from utils import focalisation
+	monkeypatch.setattr(quetes, "find_docs", lambda sel: [d for d in DUMP.values() if d.get("type") == sel.get("type")])
+	monkeypatch.setitem(focalisation._graphe_cache, "graphe", None)
+	c = {"inventaire": [], "rangs_guilde": {GEN.LUTECIA: "B"},
+		 "offres_tirees": {"lieu": GEN.BUREAU, "tirages": {GEN.MAELYS: {"apport": GEN.A_BETE}}}}
+	vue = offres.vue_pnj(MAELYS, c, BUREAU)
+	q = apport.accepter(c, vue, GEN.BUREAU)
+	assert q and q["id"] == GEN.A_BETE
+	detail = quetes.quete_detail(c, q, lambda i: DOCS.get(i) or DUMP.get(i))
+	carte = detail["carte"]
+	assert carte["position"] == GEN.LOCALISATION_BETE["position"]
+	assert carte["image"] == DUMP[GEN.FRANCE]["image"] and carte["image_route"]
+	assert carte["direction_texte"] == "Au sud-est de la capitale Lutecia", carte
+	monkeypatch.setitem(focalisation._graphe_cache, "graphe", None)
+
+
+def test_maelys_ne_situe_la_bete_qu_en_la_proposant():
+	"""« Où la chercher ? » n'existe qu'à l'offre (AVANT) ; la relance (PENDANT) redit le lieu."""
+	n = MAELYS["dialogue"]["noeuds"]
+	assert any(c.get("next") == "a_bete_carte" for c in n["a_bete_propose"]["choix"])
+	sources = [k for k, nd in n.items() for c in nd.get("choix") or [] if c.get("next") == "a_bete_carte"]
+	assert sources == ["a_bete_propose"]
+	assert "Gévaudan" in n["a_bete_relance"]["texte"] and "Gévaudan" in n["a_bete_accepte"]["texte"]
+
+
+def test_le_delta_de_la_carte_est_a_jour_et_ne_touche_que_la_bete():
+	chemin = os.path.join(RACINE, "dev", "gen_carte_bete_gevaudan.py")
+	spec = importlib.util.spec_from_file_location("gen_carte_bete_gevaudan", chemin)
+	delta = importlib.util.module_from_spec(spec)
+	spec.loader.exec_module(delta)
+	docs = delta.generer(DUMP)
+	with open(delta.SORTIE, encoding="utf-8") as f:
+		assert json.load(f) == docs, "relancer dev/gen_carte_bete_gevaudan.py"
+	assert lint_dialogues.analyser(docs)["erreurs"] == 0
+	(doc,) = docs
+	avant = DUMP[GEN.MAELYS]
+	assert {k for k in doc if doc[k] != avant.get(k)} <= {"services", "dialogue", "_rev"}
+	changes = {k for k, v in doc["dialogue"]["noeuds"].items() if v != avant["dialogue"]["noeuds"].get(k)}
+	assert changes and all(k.startswith("a_bete_") for k in changes)
+	autres = lambda d: [e for e in d["services"]["apport"]["offres"] if e["offre"]["id"] != GEN.A_BETE]
+	assert autres(doc) == autres(avant)
+	assert delta.generer({**DUMP, GEN.MAELYS: doc}) == docs, "idempotent"
+
+
 def test_les_portes_sont_sur_des_cases_praticables():
 	for lieu, (cite, _cible) in GEN.CIBLES_PORTES.items():
 		lien = next(d for d in DOCS.values() if d.get("type") == "connection"

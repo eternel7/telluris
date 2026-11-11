@@ -17,11 +17,30 @@
 #
 # Remise PARTIELLE permise (les pièces portées sont déposées jusqu'au reste à faire) : sans
 # elle, une seule feuille cueillie en trop peu de temps obligerait à tout garder sur soi.
+#
+# LOCALISATION (optionnelle) : `offre.localisation = {lieu: "lieu:…", position: {x, y}}` — le
+# donneur SITUE la proie (la Bête du Gévaudan de Maëlys). Recopiée dans le snapshot, elle
+# donne le bouton 🗺️ de l'onglet 📜 (`quetes.quete_detail`, même crop que les chasses). Elle
+# n'influe sur AUCUN tirage : c'est une indication, pas une rencontre garantie.
 
 from utils import quetes
 
 NOEUDS_DONNEUR = frozenset({"accepte"})
 NOEUDS_RECEVEUR = frozenset({"remis", "partiel"})
+
+
+def localisation_spec(raw) -> dict | None:
+	"""`{lieu, position:{x, y}}` normalisé, ou None si absent ou illisible (lieu hors
+	`lieu:`, coordonnées non entières ou négatives). Le linter signale une forme illisible."""
+	if not isinstance(raw, dict):
+		return None
+	lieu, pos = raw.get("lieu"), raw.get("position")
+	if not (isinstance(lieu, str) and lieu.startswith("lieu:")) or not isinstance(pos, dict):
+		return None
+	x, y = pos.get("x"), pos.get("y")
+	if any(isinstance(v, bool) or not isinstance(v, int) or v < 0 for v in (x, y)):
+		return None
+	return {"lieu": lieu, "position": {"x": x, "y": y}}
 
 
 def offre_spec(pnj_doc: dict) -> dict | None:
@@ -48,6 +67,8 @@ def offre_spec(pnj_doc: dict) -> dict | None:
 		"recompenses": dict(offre.get("recompenses") or {}),
 		# Rang AFFICHÉ de la quête (badge de la fiche) ; absent ⇒ le défaut du snapshot.
 		"rang": offre.get("rang"),
+		# Où chercher (bouton 🗺️) ; None ⇒ aucune carte.
+		"localisation": localisation_spec(offre.get("localisation")),
 	}
 
 
@@ -140,6 +161,10 @@ def accepter(character: dict, pnj_doc: dict, lieu_id: str) -> dict | None:
 		"recompenses": spec["recompenses"],
 		**({"rang": spec["rang"]} if spec.get("rang") else {}),
 	})
+	if spec.get("localisation"):
+		# Hors de `objectif` : une collecte n'a pas de lieu de remise ailleurs que chez le donneur.
+		q["localisation"] = {"lieu": spec["localisation"]["lieu"],
+							 "position": dict(spec["localisation"]["position"])}
 	character.setdefault("quetes_actives", []).append(q)
 	return q
 
