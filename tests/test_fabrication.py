@@ -154,6 +154,31 @@ def test_fusion_des_bonus_de_caracteristique_et_des_effets():
 	assert mods["effets"] == {"degats_feu": 8}
 
 
+SANG = {"_id": "item:sang", "nom": "Sang", "categorie": "composant",
+		"fabrication": {"nom": "Sanglante", "modificateurs": {"bonus_pv": 2, "bonus": {"V": 1}}}}
+COEUR = {"_id": "item:coeur", "nom": "Cœur", "categorie": "composant",
+		 "fabrication": {"nom": "du Courage", "modificateurs": {"bonus": {"V": 1, "F": 1}}}}
+AILE = {"_id": "item:pegase_aile", "nom": "Aile de Pégase", "categorie": "composant",
+		"fabrication": {"nom": "Ailé", "modificateurs": {"bonus": {"V": 3, "Ag": 1}}}}
+LOURD = {"_id": "item:plomb", "nom": "Plomb", "categorie": "composant",
+		 "fabrication": {"nom": "plombé", "modificateurs": {"bonus": {"V": -1}}}}
+BOTTES = {"_id": "item:Bottes", "type": "item", "nom": "Bottes", "categorie": "armure",
+		  "slots": ["pieds"], "bonus_pa": 1, "bonus": {"V": 1}}
+
+
+def test_vitesse_composee_par_max_entre_matieres_et_base():
+	# Sang + Cœur ne font pas +2 V, et le +1 V du base ne s'ajoute pas au +3 de l'aile.
+	assert fabrication.appliquer_modificateurs(BOTTES, [(SANG, 1), (COEUR, 1)])["bonus"] == {"V": 1, "F": 1}
+	assert fabrication.appliquer_modificateurs(BOTTES, [(AILE, 1), (SANG, 1)])["bonus"] == {"V": 3, "Ag": 1}
+	# La quantité ne multiplie pas la Vitesse ; les autres bonus, si.
+	assert fabrication.appliquer_modificateurs(BOTTES, [(COEUR, 3)])["bonus"] == {"V": 1, "F": 3}
+
+
+def test_malus_de_vitesse_additif_contre_le_meilleur_bonus():
+	assert fabrication.appliquer_modificateurs(BOTTES, [(AILE, 1), (LOURD, 1)])["bonus"] == {"V": 2, "Ag": 1}
+	assert "bonus" not in fabrication.appliquer_modificateurs(CASQUE, [(SANG, 1), (LOURD, 1)])
+
+
 # ── Les sous-blocs d'un consommable (`effets.buffs`) ────────────────────────────
 
 def test_un_sous_bloc_du_base_survit_a_la_variante():

@@ -414,6 +414,40 @@ MATIERES = {
 		"bonus_degats": 8, "bonus_cc": 2, "bonus": {"F": 4, "Ag": 2}, "poids": _val(1.1)}),
 	"item:bete_de_l_apocalypse_queue": _partie("de l’Apocalypse", 5, "queue", {
 		"bonus_degats": 8, "bonus_cd": 3, "bonus": {"F": 3}, "effets": _deb("Ag", 2, 2), "poids": _val(1.1)}),
+
+	# ── Matières de VITESSE (V +2 / +3 ; dev/gen_vitesse_matieres.py, Auteur 11/11) ─────
+	# La V d'équipement ne se cumule pas (`characters._appliquer_vitesse_max`, `fabrication`
+	# composée par MAX) : ces matières sont le seul chemin vers +2 et +3, on s'arrête là.
+	# Palier = dangerosité de l'espèce, comme le reste de la table ; la V est fixée par l'Auteur,
+	# le budget du palier se complète de bonus secondaires. Pattes et queues ouvertes aux
+	# ARMURES aussi (des bottes, pas seulement des armes) ; une matière à esquive ou à régén
+	# n'entre jamais dans une arme (`effets_mal_diriges`).
+	# V +2
+	"item:aigle_geant_aile": _partie("de l’Aigle", 2, "aile", {"bonus": {"V": 2, "Vol": 1},
+															   "effets": {"esquive": 1}}),
+	"item:grand_faucon_aile": _partie("du Faucon", 2, "aile", {"bonus": {"V": 2, "Ag": 1},
+															   "effets": {"esquive": 1}}),
+	"item:coursier_elfique_queue": _partie("au Crin elfique", 2, "queue", {"bonus_pm": 2,
+																		   "bonus": {"V": 2, "Cha": 1}},
+										   ARME_ARMURE),
+	"item:hippogriffe_aile": _partie("Hippogriffin", 3, "aile", {"bonus_pv": 2, "bonus": {"V": 2, "F": 1, "Ag": 1},
+																 "effets": {"esquive": 1}}),
+	"item:cwn_annwn_patte": _partie("de la Chasse sauvage", 3, "patte", {
+		"bonus_degats": 1, "bonus_initiative": 2, "bonus": {"V": 2, "Ag": 1}}, ARME_ARMURE),
+	"item:bete_glatissante_patte": _partie("de la Quête sans fin", 4, "patte", {
+		"bonus_pv": 4, "bonus": {"V": 2, "R": 3, "Ag": 1}, "effets": {"esquive": 1}}, [TAG_ARMURE]),
+	"item:twrch_trwyth_patte": _partie("de la Grande Traque", 4, "patte", {
+		"bonus_degats": 2, "bonus_pv": 2, "bonus": {"V": 2, "F": 2, "R": 2}}, ARME_ARMURE),
+	# V +3
+	"item:pegase_aile": _partie("Ailé", 3, "aile", {"bonus": {"V": 3, "Ag": 2}, "effets": {"esquive": 1}}),
+	"item:monture_angelique_aile": _partie("Séraphique", 3, "aile", {"bonus_pv": 2, "bonus": {"V": 3, "Vol": 2}}),
+	"item:licorne_queue": _partie("au Crin de licorne", 3, "queue", {"bonus": {"V": 3, "Cha": 1},
+																	 "effets": {"regen_pv": 1}}, [TAG_ARMURE]),
+	"item:grand_phenix_aile": _partie("du Phénix", 4, "aile", {"bonus_pv": 2, "bonus": {"V": 3, "Vol": 2},
+															   "effets": {"regen_pv": 1, "esquive": 1}}),
+	# Le seul +2 sans chasse : concentré de Tisane du marcheur (apothicairerie). Palier 2 :
+	# même gain que l'aile d'aigle, aucun +3 hors des grandes bêtes.
+	"item:Elixir_du_coureur": _matiere("du Coureur", 2, {"bonus_pv": 2, "bonus": {"V": 2}}, [TAG_ARMURE]),
 }
 
 
