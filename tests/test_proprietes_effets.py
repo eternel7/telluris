@@ -120,8 +120,7 @@ def test_livre_tout_amenagement_sans_capacite_a_desormais_un_effet():
 				 or a.get("effets") or a.get("effets_poste")
 				 or ((a.get("activite") or {}).get("categories")))
 		assert utile, a["id"]
-		assert proprietes.textes_effets(a, CAT) or cap.get("stockage_kg") or cap.get("occupants") \
-			or (a.get("activite") or {}).get("categories"), a["id"]
+		assert proprietes.textes_effets(a, CAT), a["id"]   # la fiche dit toujours ce qu'on achète
 
 
 # ── Effets actifs : installation vs poste ────────────────────────────────────────
@@ -419,3 +418,22 @@ def test_textes_d_effets_lisibles():
 	assert any("Volonté +3" in t for t in proprietes.textes_effets(adef("salon"), CAT))
 	assert any(t.startswith("avec un(e) Médecin") for t in proprietes.textes_effets(adef("infirmerie"), CAT))
 	assert any("écurie" in t for t in proprietes.textes_effets(adef("ecuries"), CAT))
+
+
+def test_textes_d_effets_disent_ce_que_la_capacite_ouvre():
+	"""Stockage, occupants, postes et activité : relus dans `capacite` / `activite`, jamais en dur."""
+	def premier(cle):
+		return next(a for a in CAT["amenagements"]
+					if (a.get("capacite") or {}).get(cle) or (cle == "activite" and (a.get("activite") or {}).get("categories")))
+	a = premier("stockage_kg")
+	assert f"+{a['capacite']['stockage_kg']} kg de rangement" in proprietes.textes_effets(a, CAT)
+	a = premier("occupants")
+	assert f"+{a['capacite']['occupants']} occupant(s)" in proprietes.textes_effets(a, CAT)
+	a = premier("postes")
+	metier, n = next(iter(a["capacite"]["postes"].items()))
+	label = proprietes.metier_def(CAT, metier)["label"]
+	assert f"{n} poste(s) : {label}" in proprietes.textes_effets(a, CAT)
+	a = premier("activite")
+	t = next(x for x in proprietes.textes_effets(a, CAT) if x.startswith("ouvre l'activité"))
+	assert a["activite"]["label"] in t and "produit et vend comme" in t
+	assert "_" not in t.split(" comme ", 1)[1]   # libellés de métier, pas d'ids bruts

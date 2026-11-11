@@ -740,7 +740,7 @@ async def coffre_transferer(current_user: Annotated[dict, Depends(get_current_us
 	refs = prop.get("coffre") or []
 	pos = proprietes.localiser(refs, body.get("index"), body.get("item_id"))
 	if pos is None:
-		raise HTTPException(status_code=404, detail="Cet objet n'est plus dans le coffre.")
+		raise HTTPException(status_code=404, detail="Cet objet n'est plus dans le rangement.")
 	pos_c, doc_c = _contenant_vise(porteur, body)
 	if pos_c is not None:
 		ok, raison = contenants.peut_ranger(porteur["inventaire"][pos_c], doc_c, refs[pos],

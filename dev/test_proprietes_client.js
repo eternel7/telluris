@@ -113,6 +113,14 @@ t('les sections exigées sont distinctes', () => {
 	assert.ok(h.includes('exercée par Jehan Ferrant'));
 });
 
+t('un aménagement INSTALLÉ montre sa description (échappée) et ce qu\'il ouvre', () => {
+	renderPropriete(ici('visiteur', { disponibles: [], embauches: [], installes: [{ id: 'cave', nom: 'Cave',
+		categorie: 'vie', cout: 2500, description: 'Un niveau voûté ' + XSS, effets: ['+600 kg de rangement'] }] }));
+	const h = cible.innerHTML;
+	assert.ok(h.includes('Un niveau voûté &lt;img'), 'description absente ou non échappée');
+	assert.ok(h.includes('+600 kg de rangement'));
+});
+
 t('toute chaîne saisie est échappée', () => {
 	renderPropriete(ici('proprietaire'));
 	assert.ok(!cible.innerHTML.includes(XSS), 'nom injecté tel quel');
