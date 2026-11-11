@@ -1,0 +1,113 @@
+[
+  {
+    "_id": "rules:vocations_transitions",
+    "type": "rules",
+    "value": {
+      "guerrier": [
+        "paladin",
+        "repurgateur",
+        "templier"
+      ],
+      "barbare": [
+        "druide",
+        "forestier",
+        "moine"
+      ],
+      "forestier": [
+        "barbare",
+        "elementaliste",
+        "voleur"
+      ],
+      "duelliste": [
+        "assassin",
+        "illusionniste",
+        "menestrel"
+      ],
+      "moine": [
+        "barbare",
+        "druide",
+        "chaman"
+      ],
+      "elementaliste": [
+        "druide",
+        "forestier",
+        "lettre",
+        "mage"
+      ],
+      "mage": [
+        "duelliste",
+        "necromancien",
+        "templier",
+        "demoniste"
+      ],
+      "illusionniste": [
+        "assassin",
+        "duelliste",
+        "lettre"
+      ],
+      "lettre": [
+        "menestrel",
+        "moine",
+        "pretre"
+      ],
+      "druide": [
+        "chaman",
+        "elementaliste",
+        "forestier"
+      ],
+      "chaman": [
+        "druide",
+        "moine",
+        "elementaliste"
+      ],
+      "pretre": [
+        "elementaliste",
+        "paladin",
+        "demoniste"
+      ],
+      "paladin": [
+        "guerrier",
+        "pretre",
+        "templier"
+      ],
+      "templier": [
+        "guerrier",
+        "mage",
+        "repurgateur"
+      ],
+      "repurgateur": [
+        "guerrier",
+        "necromancien",
+        "paladin",
+        "demoniste"
+      ],
+      "necromancien": [
+        "moine",
+        "pretre",
+        "repurgateur",
+        "demoniste"
+      ],
+      "assassin": [
+        "duelliste",
+        "necromancien",
+        "voleur",
+        "demoniste"
+      ],
+      "voleur": [
+        "assassin",
+        "illusionniste",
+        "menestrel"
+      ],
+      "menestrel": [
+        "illusionniste",
+        "lettre",
+        "voleur"
+      ],
+      "demoniste": [
+        "necromancien",
+        "repurgateur",
+        "illusionniste"
+      ]
+    }
+  }
+]

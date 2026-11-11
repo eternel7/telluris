@@ -65,6 +65,7 @@ from utils import traces as traces_util
 from utils import filtres_boutique
 from utils import auberge
 from utils import fiche as fiche_util
+from utils import vocations as vocations_util
 from utils import scriptorium
 from utils import negoce
 from utils import journal as journal_util
@@ -2759,6 +2760,66 @@ async def spend_xp_vocation(
 		"voc_niveau_max": voc_max,
 		"xp_cout_next":  (voc_niveau + 2) * character_stats.XP_VOC_COEFF,
 		# Le niveau débloque des compétences / sorts : « 📖 Apprendre » se resynchronise (§10).
+		"fiche": _fiche_payload(character),
+	}
+
+
+def _acteur_vocation(current_user, body: dict) -> dict:
+	"""Porteur d'une action de changement de vocation : principal ou compagnon RECRUTÉ
+	(chokepoint `_acteur`). ⚠️ Ni clone (sa progression est celle de son joueur), ni monture."""
+	if not current_user:
+		raise HTTPException(status_code=401, detail="Invalid session credentials")
+	character, _principal = _acteur(current_user, body)
+	_refuser_clone(character)
+	if str(character.get("_id", "")).startswith("monture:"):
+		raise HTTPException(status_code=403, detail="Une monture n'a pas de vocation.")
+	return character
+
+
+def _vocation_payload(character: dict) -> dict:
+	"""État de l'écran « Changer de vocation » : vocation courante, accessibles et leur prix."""
+	rules_vocations = get_doc("rules:vocations")
+	rules_transitions = get_doc(vocations_util.TRANSITIONS_DOC_ID)
+	return {
+		"voc": character.get("voc", ""),
+		"voc_niveau": vocations_util.niveau_courant(character),
+		"attribute_points": character.get("attribute_points", 0),
+		"options": vocations_util.options(character, rules_vocations, rules_transitions),
+	}
+
+
+@user_router.post("/vocation/options")
+async def vocation_options(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(default={}),
+):
+	"""Vocations accessibles depuis celle du porteur (`compagnon_id` via `_actionBody`)."""
+	return _vocation_payload(_acteur_vocation(current_user, body))
+
+
+@user_router.post("/changer_vocation")
+async def changer_vocation(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(default={}),
+):
+	"""Change la vocation du porteur (`vocation` = id visé). Règles et prix : utils/vocations.py.
+	Rien ne se perd (sorts, compétences, niveaux) ; on repart aspirant dans la nouvelle voie.
+	Renvoie la fiche recalculée (§10) — « 📖 Apprendre » change avec la vocation."""
+	character = _acteur_vocation(current_user, body)
+	rules_vocations = get_doc("rules:vocations")
+	rules_transitions = get_doc(vocations_util.TRANSITIONS_DOC_ID)
+	cible = (body or {}).get("vocation")
+	motif = vocations_util.refus(character, cible, rules_vocations, rules_transitions)
+	if motif:
+		raise HTTPException(status_code=motif[0], detail=motif[1])
+	recap = vocations_util.appliquer_changement(character, cible, rules_vocations, rules_transitions)
+	save_doc(character)
+	return {
+		**recap,
+		"voc": character["voc"],
+		"voc_niveau": vocations_util.niveau_courant(character),
+		"attribute_points": character["attribute_points"],
+		"specialite": character.get("specialite"),
 		"fiche": _fiche_payload(character),
 	}
 

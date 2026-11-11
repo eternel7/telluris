@@ -381,6 +381,12 @@ TOPONYMES_PAR_LIEU = {
 		"de la Porte Guillaume", "de l'Eure", "de la Basse-Ville", "du Cloître", "du Tertre",
 		"de Saint-André", "du Pont Bouju", "des Épars",
 	],
+	# Lore : docs/lore/cites/20261111_histoire_d_orleans.md (Martroi et halage retenus par l'auteur).
+	"lieu:orleans": [
+		"du Martroi", "du Halage", "de la Loire", "du Châtelet", "des Tourelles", "de Sainte-Croix",
+		"de la Porte Bannier", "de la Porte de Bourgogne", "des Turcies", "des Quais", "du Vieux Pont",
+		"de Genabum",
+	],
 }
 
 TOPONYMES_DEFAUT = [

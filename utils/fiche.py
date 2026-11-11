@@ -143,6 +143,8 @@ def fiche_resync(character: dict, get_doc_fn, find_docs_fn, race: dict | None = 
 		"xp_total": character.get("xp_total", 0),
 		"niveau": compute_character_level(character.get("xp_total", 0)),
 		"attribute_points": character.get("attribute_points", 0),
+		# `voc` : la vocation peut CHANGER (`/api/changer_vocation`) — libellés et listes suivent.
+		"voc": character.get("voc", ""),
 		"voc_niveau": character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0),
 		"caracteristiques_current": dict(character.get("caracteristiques_current", {})),
 		"derived_stats": derived_de(character),

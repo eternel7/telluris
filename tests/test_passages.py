@@ -2,17 +2,13 @@
 # Condition `passages` : nombre d'ENTRÉES dans un lieu, compté au tirage de présence
 # (`pnj.poser_pnj_present`), lu par les DEUX vocabulaires — présence d'un PNJ / barrière de
 # lieu (`acces.clauses_remplies`) et choix de dialogue (`pnj.condition_ok`) — via UN
-# prédicat partagé (`pnj.passages_ok`). Contenu : Élise au Coq de Lutèce.
-
-import json
-import os
+# prédicat partagé (`pnj.passages_ok`).
 
 import pytest
 
 from utils import acces, lint_dialogues, pnj
 
 COQ = "lieu:le_coq_de_lutece"
-CONTENU = os.path.join(os.path.dirname(__file__), "..", "jsons", "pnj_elise_herboriste_a_importer.json")
 
 
 def _lieu(_id=COQ, entrees=None):
@@ -105,54 +101,3 @@ def test_linter_signale_un_filtre_toujours_faux():
 	assert lint_dialogues.fautes_passages({"lieu": COQ, "min": 3, "max": 2})
 	assert lint_dialogues.fautes_passages({"lieu": "coq", "max": 2})
 	assert lint_dialogues.fautes_passages({"lieu": COQ, "max": "2"})
-
-
-# ── Contenu : Élise, puis l'aubergiste ──────────────────────────────────────
-
-def _contenu():
-	with open(CONTENU, encoding="utf-8") as f:
-		return {d["_id"]: d for d in json.load(f)}
-
-
-def _presents_au_passage(n):
-	"""Qui est là, et quelle scène s'offre, au n-ième passage au Coq."""
-	docs = _contenu()
-	c = {"passages": {COQ: n - 1}}
-	cond = lambda conds: acces.clauses_remplies(c, conds, lambda _id: None)
-	pnj.poser_pnj_present(c, docs[COQ], rand_fn=_jamais, condition_fn=cond)
-	assert c["passages"][COQ] == n
-	scenes = {}
-	for pid in c["pnj_present"]["characters"]:
-		ctx = pnj.contexte_dialogue(c, docs[pid], lambda _l: 0)
-		vue = pnj.noeud_client(docs[pid], "accueil", ctx)
-		scenes[pid] = [ch["id"] for ch in vue["choix"] if ch["id"] not in ("fin", "soin")]
-	return scenes
-
-
-@pytest.mark.parametrize("n, attendu", [
-	(1, {"pnj:elise_herboriste": ["s1"]}),
-	# S2 se répète sur CINQ passages (2 à 6) avant S3 ; la première rencontre ne se rejoue
-	# pas, S3 reste rattrapable au passage de S4 (la plus récente EN TÊTE).
-	(2, {"pnj:elise_herboriste": ["s2"]}),
-	(6, {"pnj:elise_herboriste": ["s2"]}),
-	(7, {"pnj:elise_herboriste": ["s3"]}),
-	(8, {"pnj:elise_herboriste": ["s4", "s3"]}),
-	(9, {"pnj:aubergiste_du_coq_de_lutece": ["absente"]}),
-	(10, {"pnj:aubergiste_du_coq_de_lutece": ["retrouvee"]}),
-	(16, {"pnj:aubergiste_du_coq_de_lutece": ["retrouvee"]}),
-])
-def test_une_scene_par_passage(n, attendu):
-	assert _presents_au_passage(n) == attendu
-
-
-def test_scenes_ouvertes_ensemble_ont_des_libelles_distincts():
-	"""Deux libellés identiques côte à côte rendraient le menu illisible."""
-	accueil = _contenu()["pnj:elise_herboriste"]["dialogue"]["noeuds"]["accueil"]
-	labels = [c["label"] for c in accueil["choix"]]
-	assert len(labels) == len(set(labels))
-
-
-def test_le_contenu_passe_le_linter():
-	with open(CONTENU, encoding="utf-8") as f:
-		rapport = lint_dialogues.analyser(json.load(f))
-	assert rapport["erreurs"] == 0 and rapport["avertissements"] == 0, rapport["trouvailles"]

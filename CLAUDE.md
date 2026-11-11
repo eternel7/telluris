@@ -29,7 +29,7 @@ node dev/check_js.js               # syntaxe du JS inline des templates ET de te
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Harnais : `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
+Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
 - ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
 - **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
@@ -76,6 +76,8 @@ utils/
   aide.py                # aide au démarrage de /play (pur) : chiffres RELUS (facteur d'armure, dés, monnaie) ;
                          #   texte dans `#aide-overlay`, bouton « ? » = `aide=true` de la carte, masquable par ⚙️
   fiche.py               # source unique du contenu des onglets Stats et ⚡ (bloc_fiche, derived_de, stat_caps, race_de)
+  vocations.py           # changement de vocation (pur) : graphe `rules:vocations_transitions` (nouvelles), retour libre,
+                         #   prix exponentiel n + k (variables de monde VOC_*), rien ne se perd, on repart aspirant (niv. 0)
   derniers_joues.py      # /admin/personnages-recents (pur) : tri sur `dernier_jeu`, emplacement (lieu + parents, combat, mer)
   lieux.py               # lieu_router, movement logic, navigation bitmask
   combat.py              # logique de combat pure (snapshots, A*, résolution, loot, finalize)
@@ -279,7 +281,7 @@ Règles qui valent **partout** ; les compétences ne répètent que ce qui leur 
 
 **4. Aucune migration de base.** Champ absent ⇒ comportement d'avant ; une forme neuve est reconstruite **À LA LECTURE** (`slots_effectifs`, `_slots_derives`, replis `.get(..., 0)` sur les snapshots). Un doc déjà en base doit toujours continuer de tourner.
 
-**5. Péremption et vérification PARESSEUSES** — **aucun tick de fond n'existe**. Tout ce qui expire est contrôlé au passage : tableaux de quêtes et de recrues (`purger_*`), délais de course (`traiter_expirations` : `/play`, les **deux** branches de `move_character`, entrée du dialogue PNJ), départs volontaires de compagnons, laissez-passer, sorts d'une école que la vocation ne pratique plus (`purger_sorts_hors_ecole`, `/play`).
+**5. Péremption et vérification PARESSEUSES** — **aucun tick de fond n'existe**. Tout ce qui expire est contrôlé au passage : tableaux de quêtes et de recrues (`purger_*`), délais de course (`traiter_expirations` : `/play`, les **deux** branches de `move_character`, entrée du dialogue PNJ), départs volontaires de compagnons, laissez-passer. ⚠️ Un sort appris ne se purge JAMAIS (changement de vocation compris) : seul l'apprentissage suit la vocation courante.
 
 **6. Champs transitoires du personnage** : `pnj_present`, `transport_offert`, `rang_offert`, `ressource_recoltable`, `objets_au_sol`. Tirés à l'**ENTRÉE** dans le lieu et persistés (un refresh ne re-tire pas ; ressortir/rentrer re-tire), vidés dès un déplacement réel.
 
@@ -310,6 +312,8 @@ Règles qui valent **partout** ; les compétences ne répètent que ce qui leur 
 **18. Un seul fichier à importer par demande.** Quand l'utilisateur demande de générer du contenu à importer, produire **UN SEUL** `jsons/*_a_importer.json` (fusionner les générateurs/lots dans ce fichier), jamais plusieurs à charger l'un après l'autre. ⚠️ **Il ne porte QUE le delta de la demande** : les docs neufs ou modifiés qu'elle exige, comparés au dump le plus récent — jamais les docs d'une demande antérieure qu'un générateur partagé ressort aussi (filtrer sa sortie, fichier propre à la demande).
 
 **19. Lien de téléchargement systématique.** Tout fichier à importer généré est **envoyé dans l'interface** (`SendUserFile`, `display:"attach"`) ET cité dans la réponse avec son lien GitHub brut `https://github.com/eternel7/telluris/raw/<sha>/jsons/<fichier>` (sha du commit poussé) — l'utilisateur doit pouvoir le télécharger en un clic.
+
+**20. `jsons/` est TEMPORAIRE — aucun test n'en dépend.** Les `*_a_importer.json` ne vivent que jusqu'à leur import, les dumps environ deux mois (nettoyage périodique par l'auteur). ⚠️ Un test ne lit **jamais** un `*_a_importer.json` (ni un dump NOMMÉ ; « le plus récent » par glob est toléré) : un contrôle de contenu à livrer (validité, collision d'`_id`, sortie conforme au générateur) se fait au lancement du générateur, pas en test ; une donnée nécessaire au moteur va **dans le test** (constante) ou, si elle est volumineuse, en copie figée sous `tests/donnees/` (ex. `proprietes.json`, 6 docs tirés d'un dump).
 
 ## Core Design Patterns
 

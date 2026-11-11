@@ -3,4 +3,4 @@ type: llm
 focus: last_message
 weight: 1
 ---
-The answer says spells of the old school are removed from characters' known spells (and from pinned spells if that key exists), because otherwise they would stay castable forever. It says this happens lazily when the character is loaded or rendered (not as a database migration), and that a spell is only removed if its document resolves and its school is identifiable and not practised.
+The answer says spells characters already know are NOT removed: there is no purge of known spells (a learned spell is kept for life and stays castable, since casting only checks that the spell is known). What changes is LEARNING: the vocation's new school opens its own "to learn" list, and the old school's spells can no longer be newly learned by that vocation. The answer must not claim that old-school spells are removed from known spells.

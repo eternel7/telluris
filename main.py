@@ -241,10 +241,20 @@ app.include_router(oauth_router)
 	
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
+	# Lignes « Transitions → … » des cartes de vocation : relues dans `rules:vocations_transitions`
+	# (source unique, celle du changement de vocation), libellés dans `rules:vocations`.
+	# Page publique : une base injoignable ou un doc absent n'y affiche simplement aucune ligne.
+	try:
+		transitions_voc = (get_doc("rules:vocations_transitions") or {}).get("value") or {}
+		voc_labels = {str(v.get("id")): v.get("label") or v.get("id")
+					  for v in (get_doc("rules:vocations") or {}).get("value") or []}
+	except Exception:
+		transitions_voc, voc_labels = {}, {}
 	return templates.TemplateResponse(
-		request=request, 
-		name="home_telluris.html", 
-		context={"title": "Ubi Chartae Finiunt"}
+		request=request,
+		name="home_telluris.html",
+		context={"title": "Ubi Chartae Finiunt", "transitions_voc": transitions_voc,
+				 "voc_labels": voc_labels}
 	)
 
 # Application installable (PWA) : ouverte depuis l'icône, elle tourne sans barre de navigateur
@@ -890,26 +900,17 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	if gains_services["offre_mutee"]:
 		save_doc(_offre_services)
 	change |= bool(gains_services["xp"] or gains_services["cuivre"])
-	# Sorts d'une école que la vocation ne pratique plus (sa `magie` a changé en base) :
-	# retirés PARESSEUSEMENT ici, avec réécriture du doc — `sorts_connus` n'est relu contre
-	# l'école nulle part ailleurs, le répertoire perdu se lancerait donc indéfiniment. Même
-	# place et même motif que les départs volontaires juste au-dessus : les compagnons sont
-	# des docs annexes, persistés séparément ; le principal part avec le `change` ci-dessous.
-	_vocations = get_doc("rules:vocations")
-	sorts_perdus = sorts_util.purger_sorts_hors_ecole(character, get_doc, _vocations)
-	change |= bool(sorts_perdus)
+	# ⚠️ AUCUNE purge de sorts : un sort appris l'est à vie, changement de vocation compris
+	# (seul l'APPRENTISSAGE suit la vocation courante, cf. sorts.niveau_ecole).
 	# VOL MAGIQUE éteint au-dessus de l'eau ou d'une falaise hors d'un pas (fin de combat —
 	# la position d'exploration est celle d'avant la rencontre) : chute PARESSEUSE, ici.
 	chute_vol = vol_util.chute_exploration(character, grid_doc)
 	change |= bool(chute_vol)
 	_compagnons = recrutement_util.groupe_effectif(character, get_doc)
 	_a_sauver = []
-	for _av in _compagnons:
-		if sorts_util.purger_sorts_hors_ecole(_av, get_doc, _vocations):
-			_a_sauver.append(_av)
 	# AURAS hors combat : tout le groupe profite de celles de chacun (`auras_recues`),
 	# reposées paresseusement ici — un compagnon parti ou une aura apprise se voit au
-	# prochain rendu. Même motif que la purge ci-dessus : compagnons persistés à part.
+	# prochain rendu. Compagnons persistés à part.
 	_montures = montures_util.montures_effectives(character, get_doc)
 	# Effets en TEMPS RÉEL échus (réveil chez soi, `expire_a`) : purgés PARESSEUSEMENT ici, sans
 	# attendre un pas — sinon un bonus échu compterait tant que le joueur ne bouge pas.
@@ -1244,10 +1245,6 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			# Bouton 👥 Groupe masqué tant que personne n'accompagne le joueur.
 			"groupe_visible": recrutement_util.groupe_visible(character, get_doc),
 			# Compagnons partis d'eux-mêmes pendant l'absence (affinité sous le seuil) : toast.
-			# Sorts perdus avec le changement d'école de la vocation (purge paresseuse
-			# ci-dessus) : annoncés UNE fois, au rendu qui les a retirés — le doc étant déjà
-			# réécrit, le rendu suivant n'aura plus rien à dire.
-			"sorts_perdus": [f"{s.get('icon', '🔮')} {s.get('nom', '')}" for s in sorts_perdus],
 			"gains_services": {"xp": gains_services["xp"], "cuivre": gains_services["cuivre"]},
 			"compagnons_partis": [
 				f"{av.get('prenom', '')} {av.get('nom', '')}".strip() for av in compagnons_partis

@@ -154,6 +154,13 @@ XP_VOC_COEFF: int = 5
 # Plafond du niveau de VOCATION (principal comme compagnon) : `spend_xp_vocation` refuse
 # au-delà, la fiche masque le bouton « Monter ». 10 = le contenu des compétences (1 → 10).
 VOC_NIVEAU_MAX: int = 10
+# CHANGEMENT DE VOCATION (utils/vocations.py). Vers une vocation NOUVELLE :
+# round(BASE × FACTEUR^(n + k)), n = niveau de la vocation quittée, k = vocations déjà
+# pratiquées hors la courante (le correctif contre le papillonnage). Vers une vocation déjà
+# CONNUE : min(RETOUR, prix d'un changement neuf).
+VOC_CHANGEMENT_BASE: int = 5
+VOC_CHANGEMENT_FACTEUR: float = 1.5
+VOC_RETOUR_COUT: int = 10
 
 # Réduction du plafond pour les stats hors quota d'accessibilité
 # V perd 1 point, toutes les autres perdent 10 points sous le max racial
@@ -1007,6 +1014,9 @@ def current_world_variables() -> dict:
 		"XP_COEFF": dict(XP_COEFF),
 		"XP_VOC_COEFF": XP_VOC_COEFF,
 		"VOC_NIVEAU_MAX": VOC_NIVEAU_MAX,
+		"VOC_CHANGEMENT_BASE": VOC_CHANGEMENT_BASE,
+		"VOC_CHANGEMENT_FACTEUR": VOC_CHANGEMENT_FACTEUR,
+		"VOC_RETOUR_COUT": VOC_RETOUR_COUT,
 		"SUB_CAP_REDUCTION": dict(_SUB_CAP_REDUCTION),
 		"PRIX_DERIVE_BASE": PRIX_DERIVE_BASE,
 		"MULT_RARETE": dict(MULT_RARETE),
@@ -1187,6 +1197,7 @@ def load_world_variables() -> dict:
 	global MONSTRE_DES_CC_NATURELS, MONSTRE_EQUIPEMENT_PROBA
 	global FACTEUR_DEGATS_ARMURE, JET_PORTEE_F_DIV, DETECTION_DISTANCE_FACTEUR, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
 	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT, DEUX_ARMES_MALUS_SECOND, VOC_NIVEAU_MAX
+	global VOC_CHANGEMENT_BASE, VOC_CHANGEMENT_FACTEUR, VOC_RETOUR_COUT
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, RACHAT_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
 	global NEGOCE_COMMISSION_MIN, NEGOCE_COMMISSION_MAX, NEGOCE_SEUIL_REVENTE_CUIVRE, NEGOCE_BONUS_CONVERSION
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION, VENTE_PNJ_REDISTRIB
@@ -1260,6 +1271,10 @@ def load_world_variables() -> dict:
 	TOWN_PROFIL_NIVEAU_MAX     = int(v.get("TOWN_PROFIL_NIVEAU_MAX", TOWN_PROFIL_NIVEAU_MAX))
 	XP_VOC_COEFF               = int(v.get("XP_VOC_COEFF", XP_VOC_COEFF))
 	VOC_NIVEAU_MAX             = max(0, int(v.get("VOC_NIVEAU_MAX", VOC_NIVEAU_MAX)))
+	VOC_CHANGEMENT_BASE        = max(0, int(v.get("VOC_CHANGEMENT_BASE", VOC_CHANGEMENT_BASE)))
+	# Plancher à 1 : un facteur < 1 rendrait le changement MOINS cher en montant de niveau.
+	VOC_CHANGEMENT_FACTEUR     = max(1.0, float(v.get("VOC_CHANGEMENT_FACTEUR", VOC_CHANGEMENT_FACTEUR)))
+	VOC_RETOUR_COUT            = max(0, int(v.get("VOC_RETOUR_COUT", VOC_RETOUR_COUT)))
 	if isinstance(v.get("XP_COEFF"), dict):
 		XP_COEFF.clear()
 		XP_COEFF.update({k: int(x) for k, x in v["XP_COEFF"].items()})

@@ -1,3 +1,9 @@
+{#- Ligne « Transitions → … » d'une carte : relue dans rules:vocations_transitions (main.read_root),
+    libellés de rules:vocations ; doc absent ⇒ aucune ligne. -#}
+{% macro transitions(vid) -%}
+{%- set cibles = (transitions_voc or {}).get(vid) or [] -%}
+{%- if cibles %}<p class="voc-transitions">Transitions → <span>{% for c in cibles %}{{ (voc_labels or {}).get(c, c) }}{% if not loop.last %}, {% endif %}{% endfor %}</span></p>{% endif -%}
+{%- endmacro -%}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -965,31 +971,31 @@
 			<span class="voc-icon" aria-hidden="true">🗡</span>
 			<span class="voc-name">Guerrier</span>
 			<p class="voc-desc">Maître des armes blanches et de la mêlée. Robuste, polyvalent, le pilier de toute troupe en terrain hostile.</p>
-			<p class="voc-transitions">Transitions → <span>Paladin, Répurgateur, Templier</span></p>
+			{{ transitions('guerrier') }}
 			</article>
 			<article class="voc-card reveal reveal-delay-2">
 			<span class="voc-icon" aria-hidden="true">🪓</span>
 			<span class="voc-name">Barbare</span>
 			<p class="voc-desc">Guerrier des steppes et des forêts, mu par la rage. Sa furie en combat est une ressource aussi précieuse que dangereuse.</p>
-			<p class="voc-transitions">Transitions → <span>Druide, Forestier, Moine</span></p>
+			{{ transitions('barbare') }}
 			</article>
 			<article class="voc-card reveal reveal-delay-3">
 			<span class="voc-icon" aria-hidden="true">🏹</span>
 			<span class="voc-name">Forestier</span>
 			<p class="voc-desc">Chasseur et éclaireur hors pair. Aucune zone sauvage ne lui résiste. Il connaît les routes que les cartes n'indiquent pas.</p>
-			<p class="voc-transitions">Transitions → <span>Barbare, Élémentaliste, Voleur</span></p>
+			{{ transitions('forestier') }}
 			</article>
 			<article class="voc-card reveal reveal-delay-4">
 			<span class="voc-icon" aria-hidden="true">🤺</span>
 			<span class="voc-name">Duelliste</span>
 			<p class="voc-desc">Escrimeur élégant, spécialiste du combat singulier. Sa précision chirurgicale compense l'absence de robustesse.</p>
-			<p class="voc-transitions">Transitions → <span>Assassin, Illusionniste, Ménestrel</span></p>
+			{{ transitions('duelliste') }}
 			</article>
 			<article class="voc-card reveal reveal-delay-5">
 			<span class="voc-icon" aria-hidden="true">🥋</span>
 			<span class="voc-name">Moine</span>
 			<p class="voc-desc">Corps comme arme, esprit comme bouclier. Les moines canalisent une énergie intérieure rare que peu de mages comprennent.</p>
-			<p class="voc-transitions">Transitions → <span>Barbare, Druide, Chaman</span></p>
+			{{ transitions('moine') }}
 			</article>
 		</div>
 
@@ -999,25 +1005,25 @@
 			<span class="voc-icon" aria-hidden="true">🔥</span>
 			<span class="voc-name">Élémentaliste</span>
 			<p class="voc-desc">Maître des forces naturelles : feu, glace, foudre, terre. Ses sorts exigent des composants physiques : leur puissance est illimitée, leur coût aussi.</p>
-			<p class="voc-transitions">Transitions → <span>Druide, Forestier, Lettré, Mage de batailles</span></p>
+			{{ transitions('elementaliste') }}
 			</article>
 			<article class="voc-card reveal reveal-delay-2">
 			<span class="voc-icon" aria-hidden="true">🌀</span>
 			<span class="voc-name">Mage de batailles</span>
 			<p class="voc-desc">La guerre est son laboratoire. Il renforce les armes, érige des boucliers arcaniques et libère de violentes explosions au plus près de ses ennemis.</p>
-			<p class="voc-transitions">Transitions → <span>Duelliste, Nécromancien, Templier, Démoniste</span></p>
+			{{ transitions('mage') }}
 			</article>
 			<article class="voc-card reveal reveal-delay-3">
 			<span class="voc-icon" aria-hidden="true">🎭</span>
 			<span class="voc-name">Illusionniste</span>
 			<p class="voc-desc">Manipulateur de perceptions, maître du mensonge visuel. Ses illusions peuvent détourner des armées entières sans verser une goutte de sang.</p>
-			<p class="voc-transitions">Transitions → <span>Assassin, Duelliste, Lettré</span></p>
+			{{ transitions('illusionniste') }}
 			</article>
 			<article class="voc-card reveal reveal-delay-4">
 			<span class="voc-icon" aria-hidden="true">📜</span>
 			<span class="voc-name">Lettré</span>
 			<p class="voc-desc">Érudit insatiable, aucun domaine arcanique ne lui est étranger. À force d’étude et de patience, il devient une bibliothèque vivante capable de puiser dans des savoirs oubliés et des pouvoirs insoupçonnés.</p>
-			<p class="voc-transitions">Transitions → <span>Ménestrel, Moine, Prêtre</span></p>
+			{{ transitions('lettre') }}
 			</article>
 		</div>
 
@@ -1027,13 +1033,13 @@
 			<span class="voc-icon" aria-hidden="true">🌳</span>
 			<span class="voc-name">Druide</span>
 			<p class="voc-desc">Gardien des cycles naturels. Sa magie élémentaire puise dans la terre et le vivant. Les animaux lui obéissent, les plantes l'écoutent.</p>
-			<p class="voc-transitions">Transitions → <span>Chaman, Élémentaliste, Forestier</span></p>
+			{{ transitions('druide') }}
 			</article>
 			<article class="voc-card reveal reveal-delay-2">
 			<span class="voc-icon" aria-hidden="true">🐺</span>
 			<span class="voc-name">Chaman</span>
 			<p class="voc-desc">Communique avec les esprits totems par des rituels ancestraux. Il peut se métamorphoser en Ours, Loup, Sanglier, Chat sauvage ou Faucon et puiser dans leurs attributs naturels.</p>
-			<p class="voc-transitions">Transitions → <span>Druide, Moine, Élémentaliste</span></p>
+			{{ transitions('chaman') }}
 			</article>
 		</div>
 
@@ -1043,25 +1049,25 @@
 				<span class="voc-icon" aria-hidden="true">✝</span>
 				<span class="voc-name">Prêtre</span>
 				<p class="voc-desc">Guérisseur et soutien indispensable. Peut ressusciter les tombés au combat à condition d'avoir les ressources sacrées nécessaires.</p>
-				<p class="voc-transitions">Transitions → <span>Élémentaliste, Paladin, Démoniste</span></p>
+				{{ transitions('pretre') }}
 				</article>
 			<article class="voc-card reveal reveal-delay-2">
 				<span class="voc-icon" aria-hidden="true">🛡</span>
 				<span class="voc-name">Paladin</span>
 				<p class="voc-desc">Guerrier sacré mariant foi et acier. Ses auras protègent ses alliés tandis que sa lame brûle d'une lumière que les morts-vivants redoutent.</p>
-				<p class="voc-transitions">Transitions → <span>Guerrier, Prêtre, Templier</span></p>
+				{{ transitions('paladin') }}
 			</article>
 			<article class="voc-card reveal reveal-delay-3">
 				<span class="voc-icon" aria-hidden="true">⚜️</span>
 				<span class="voc-name">Templier</span>
 				<p class="voc-desc">Ordre militaire au service d'une cité-état. Défenseur de la cité, gardien des temples. L'épée de l'institution autant que celle des dieux.</p>
-				<p class="voc-transitions">Transitions → <span>Guerrier, Mage de batailles, Répurgateur</span></p>
+				{{ transitions('templier') }}
 			</article>
 			<article class="voc-card reveal reveal-delay-4">
 				<span class="voc-icon" aria-hidden="true">🔱</span>
 				<span class="voc-name">Répurgateur</span>
 				<p class="voc-desc">Pourfendeur des êtres maudits, il consacre son existence à l’extermination des morts-vivants et des démons. Chaque traque est menée avec un sang-froid inflexible et une précision méthodique.</p>
-				<p class="voc-transitions">Transitions → <span>Guerrier, Nécromancien, Paladin, Démoniste</span></p>
+				{{ transitions('repurgateur') }}
 			</article>
 		</div>
 
@@ -1071,31 +1077,31 @@
 				<span class="voc-icon" aria-hidden="true">💀</span>
 				<span class="voc-name">Nécromancien</span>
 				<p class="voc-desc">Maître de la magie noire et des morts. Invoque des serviteurs, draine la vie de ses ennemis. Ce sont les maîtres des invocations et peuvent lever à eux seuls de terribles armées pour défendre ou prendre une cité.</p>
-				<p class="voc-transitions">Transitions → <span>Moine, Prêtre, Répurgateur, Démoniste</span></p>
+				{{ transitions('necromancien') }}
 			</article>
 			<article class="voc-card reveal reveal-delay-2">
 				<span class="voc-icon" aria-hidden="true">🗡</span>
 				<span class="voc-name">Assassin</span>
 				<p class="voc-desc">L'ombre faite chair. Spécialiste de l'élimination silencieuse, des poisons et de l'infiltration. Une quête par un assassin ne laisse pas de témoins.</p>
-				<p class="voc-transitions">Transitions → <span>Duelliste, Nécromancien, Voleur, Démoniste</span></p>
+				{{ transitions('assassin') }}
 			</article>
 			<article class="voc-card reveal reveal-delay-3">
 				<span class="voc-icon" aria-hidden="true">🔑</span>
 				<span class="voc-name">Voleur</span>
 				<p class="voc-desc">Doigts légers, esprit plus léger encore. Maître des serrures, des pièges et des marchés douteux. Son réseau d'informateurs vaut parfois une armée.</p>
-				<p class="voc-transitions">Transitions → <span>Assassin, Illusionniste, Ménestrel</span></p>
+				{{ transitions('voleur') }}
 			</article>
 			<article class="voc-card reveal reveal-delay-4">
 				<span class="voc-icon" aria-hidden="true">🎶</span>
 				<span class="voc-name">Ménestrel</span>
 				<p class="voc-desc">Chanteur, espion, négociateur. Sa musique peut inspirer les alliés ou déstabiliser les ennemis. Ses chansons ouvrent des portes que les épées ne peuvent forcer.</p>
-				<p class="voc-transitions">Transitions → <span>Illusionniste, Lettré, Voleur</span></p>
+				{{ transitions('menestrel') }}
 			</article>
 			<article class="voc-card reveal reveal-delay-5">
 				<span class="voc-icon" aria-hidden="true">😈</span>
 				<span class="voc-name">Démoniste</span>
 				<p class="voc-desc">Invocateur de créatures infernales, le Démoniste tire sa puissance des abysses. Chaque pacte conclu avec un démon consume une part de son âme et accroît sa puissance.</p>
-				<p class="voc-transitions">Transitions → <span>Nécromancien, Répurgateur, Illusionniste</span></p>
+				{{ transitions('demoniste') }}
 			 </article>
 		</div>
 

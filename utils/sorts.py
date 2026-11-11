@@ -1095,54 +1095,6 @@ def sorts_connus_docs(character: dict, get_doc) -> list:
 	return out
 
 
-def purger_sorts_hors_ecole(character: dict, get_doc, rules_vocations) -> list:
-	"""Retire de `sorts_connus` (et de `sorts_epingles`) les sorts dont l'ÉCOLE n'est plus
-	pratiquée par le personnage. MUTE, NE SAUVEGARDE PAS — l'appelant persiste.
-	Renvoie `[{id, nom, icon, magie}]` de ce qui est parti (liste vide = rien à faire).
-
-	POURQUOI. Changer la `magie` d'une vocation en base ferme sa liste « à apprendre », mais
-	`sorts_connus` n'est jamais relu contre l'école : un répurgateur passé en Démonologie
-	continuerait de lancer indéfiniment les sorts Saints qu'il avait déjà achetés. Ce contrôle
-	est PARESSEUX, comme tout ce qui périme dans le jeu (CLAUDE.md §5) — aucun tick de fond,
-	aucune migration de base : il se fait au passage, et réécrit le doc à ce moment-là.
-
-	⚠️ Un sort n'est retiré QUE si son doc a été résolu ET que son école est identifiable ET
-	qu'elle n'est pas pratiquée. Un id mort, un doc illisible ou une école non résoluble sont
-	LAISSÉS EN PLACE : une lecture qui échoue ne doit jamais détruire ce qu'un joueur a payé.
-	⚠️ Aucun contrôle de NIVEAU : l'école pratiquée à un niveau devenu insuffisant garde ses
-	sorts. Ce qui se perd est un répertoire entier, jamais un sort trop cher pour son
-	propriétaire actuel.
-	⚠️ La barre d'action n'a rien à purger : `slots_actions.slots_effectifs` écarte déjà à la
-	lecture toute case qui pointe un sort absent de `sorts_connus`.
-	"""
-	character = character or {}
-	connus = character.get("sorts_connus") or []
-	if not connus:
-		return []
-
-	partis, gardes = [], []
-	for sort_id in connus:
-		sort = normaliser_sort(get_doc(sort_id))
-		ecole = magie_de_sort(sort, rules_vocations) if sort else None
-		if sort is None or ecole is None or niveau_ecole(character, ecole, rules_vocations) is not None:
-			gardes.append(sort_id)
-			continue
-		partis.append({"id": sort["id"], "nom": sort["nom"], "icon": sort["icon"],
-					   "magie": ecole})
-	if not partis:
-		return []
-
-	character["sorts_connus"] = gardes
-	# ⚠️ Épinglés filtrés SEULEMENT si la clé existe : l'absence est un état à part entière
-	# (auto-épinglage du premier sort connu, cf. `sorts_epingles_effectifs`) — la poser ici
-	# figerait le choix du joueur sur ce qui lui reste, sans qu'il ait rien décidé.
-	if "sorts_epingles" in character:
-		restants = set(gardes)
-		character["sorts_epingles"] = [s for s in (character.get("sorts_epingles") or [])
-									   if s in restants]
-	return partis
-
-
 def sorts_epingles_effectifs(character: dict) -> list:
 	"""Sorts d'accès rapide (barre d'icônes en combat), ids ordonnés.
 
@@ -1243,29 +1195,41 @@ def ecoles_de_grimoire(item_doc: dict, get_doc, rules_vocations) -> list:
 	return sorted(out)
 
 
+def _apprises_actives(character: dict) -> dict:
+	"""Écoles ACHETÉES qui ouvrent l'apprentissage : seulement tant que la vocation COURANTE
+	est polyvalente (lettré). Un ancien lettré garde ses sorts appris (aucune purge, ils se
+	lancent toujours) mais n'apprend plus dans ces écoles — il lui faut revenir au lettré
+	(changement de vocation, prix d'un retour). `magies_apprises` reste intact en base."""
+	if not peut_apprendre_magie(character):
+		return {}
+	return (character or {}).get("magies_apprises") or {}
+
+
 def niveau_ecole(character: dict, ecole, rules_vocations) -> int | None:
-	"""Niveau effectif d'une école POUR CE PERSONNAGE, ou None si non pratiquée.
-	École native → niveau de la vocation native ; école achetée → magies_apprises."""
+	"""Niveau d'une école OUVERTE À L'APPRENTISSAGE pour ce personnage, ou None.
+	École native → niveau de la vocation COURANTE ; école achetée → magies_apprises, si la
+	vocation courante est polyvalente. ⚠️ Ne gouverne que l'APPRENTISSAGE : un sort connu se
+	lance quelle que soit l'école (aucune purge, changement de vocation compris)."""
 	character = character or {}
 	if not ecole:
 		return None
 	native = ecole_native(character.get("voc"), rules_vocations)
 	if ecole == native:
 		return _as_int((character.get("vocations_niveaux") or {}).get(character.get("voc", ""), 0))
-	apprises = character.get("magies_apprises") or {}
+	apprises = _apprises_actives(character)
 	if ecole in apprises:
 		return _as_int(apprises[ecole])
 	return None
 
 
 def magies_pratiquees(character: dict, rules_vocations) -> dict:
-	"""{ecole: niveau} de toutes les écoles pratiquées : native + achetées."""
+	"""{ecole: niveau} des écoles ouvertes à l'apprentissage : native + achetées (lettré)."""
 	character = character or {}
 	out = {}
 	native = ecole_native(character.get("voc"), rules_vocations)
 	if native:
 		out[native] = _as_int((character.get("vocations_niveaux") or {}).get(character.get("voc", ""), 0))
-	for ecole, niv in (character.get("magies_apprises") or {}).items():
+	for ecole, niv in _apprises_actives(character).items():
 		out[str(ecole)] = _as_int(niv)
 	return out
 

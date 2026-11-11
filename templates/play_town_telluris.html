@@ -2320,7 +2320,7 @@
 				</div>
 				<div class="sheet-left-info">
 					<div class="char-name-row"><div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div><button type="button" class="renommer-perso-btn" onclick="ouvrirRenommagePerso(this)" title="Changer de nom" aria-label="Changer de nom">✏️</button></div>
-					<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.<span id="niv-voc-left-info" class="voc-niveau niveau-nb">{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}}</span> - {{character["race"]}} Niv.<span id="niv-left-info" class="race-niveau niveau-nb">{{character.get("niveau",'0')}}</span> ·<span id="rang-left-info"{% if character.get("rangs_guilde_title") %} title="{{ character['rangs_guilde_title'] }}"{% endif %}> Rang {{character.get("rang",'aucun')}}</span></div>
+					<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} {% set _nv = character.get("vocations_niveaux", {}).get(character.get("voc",""), 0) %}<span id="niv-voc-left-info" class="voc-niveau niveau-nb">{% if _nv %}Niv.{{ _nv }}{% else %}Aspirant{% endif %}</span> - {{character["race"]}} Niv.<span id="niv-left-info" class="race-niveau niveau-nb">{{character.get("niveau",'0')}}</span> ·<span id="rang-left-info"{% if character.get("rangs_guilde_title") %} title="{{ character['rangs_guilde_title'] }}"{% endif %}> Rang {{character.get("rang",'aucun')}}</span></div>
 					<div class="char-vitals" style="margin-top:8px">
 						<span class="pv-val">PV {{_pv}}/<span id="stat-left-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
 						<span class="pm-val">PM {{_pm}}/<span id="stat-left-drv-pm_max">{{d.get("pm_max","—")}}</span></span>
@@ -2376,13 +2376,19 @@
 								<div class="sh-xp-fill" id="sh-xp-fill" style="width:{{ xp_bar_pct }}%"></div>
 							</div>
 							<div class="val-niveau">
-								<span><span id="sh-voc-label">{{ vocation["label"] }}</span> Niv. : <strong id="sh-voc-niveau" class="voc-niveau niveau-nb">{{ voc_niveau }}</strong></span>
+								<span><span id="sh-voc-label">{{ vocation["label"] }}</span> : <strong id="sh-voc-niveau" class="voc-niveau niveau-nb">{% if voc_niveau %}Niv.{{ voc_niveau }}{% else %}Aspirant{% endif %}</strong></span>
 								<button class="sh-xp-btn" id="sh-btn-voc-niveau"
 										{% if attribute_points < voc_cout %}disabled{% endif %}
 										{% if attribute_points == 0 or voc_niveau >= voc_niveau_max %}style="display:none"{% endif %}
 										onclick="spendXpVocation()">
 									Monter — <span id="sh-voc-cout">{{ voc_cout }}</span> P<small>oints</small>
 								</button>
+							</div>
+							{# Changement de vocation (utils/vocations.py) : le porteur affiché, compagnon
+							   recruté compris (`_actionBody`) ; on repart aspirant, rien ne se perd. #}
+							<div class="val-niveau">
+								<button type="button" class="sh-xp-btn" id="sh-btn-voc-changer"
+										onclick="ouvrirChangementVocation()">🔀 Changer de vocation</button>
 							</div>
 						</div>
 
@@ -3597,6 +3603,24 @@
 		#max-bonus-overlay.clauses-hidden { display: none; }
 		#max-bonus-overlay .item-detail-card { max-width: 460px; }
 		.max-bonus-cap { color: #b9a3ee; font-size: 1.1rem; margin: .2rem 0 .8rem; }
+		/* ── Changement de vocation ── même calque ; liste des vocations accessibles, puis la
+		   confirmation (on redevient aspirant). */
+		#vocation-overlay {
+			position: fixed; inset: 0; z-index: 9400;
+			background: rgba(10, 8, 5, .78);
+			display: flex; align-items: center; justify-content: center; padding: 1rem;
+		}
+		#vocation-overlay.clauses-hidden { display: none; }
+		#vocation-overlay .item-detail-card { max-width: 520px; max-height: 90vh; overflow-y: auto; }
+		.voc-section { color: var(--muted); font-size: .8rem; text-transform: uppercase;
+			letter-spacing: .06em; margin: .8rem 0 .2rem; }
+		.voc-choix { list-style: none; padding: 0; margin: 0; }
+		.voc-choix li { display: flex; align-items: center; gap: .6rem; padding: 7px 0;
+			border-bottom: 1px solid rgba(74, 74, 90, .3); }
+		.voc-choix-nom { flex: 1; min-width: 0; }
+		.voc-choix-nom small { display: block; color: var(--muted); font-size: .8rem; }
+		.voc-choix button { width: auto; margin: 0; white-space: nowrap; }
+		#sh-btn-voc-changer { width: auto; margin: 0; }
 		/* ── Commande auprès d'un artisan ──
 		   La troisième liste du panneau marchand réutilise .sh-inv-item / .sell-prix : c'est
 		   le même objet marchand, seule l'action change. */
@@ -4124,6 +4148,16 @@
 			<div id="max-bonus-body"></div>
 		</div>
 	</div><!-- /#max-bonus-overlay -->
+	{# Changement de vocation : ✕ / Échap / clic hors carte = annuler sans rien engager — seul
+	   le bouton de la CONFIRMATION envoie `changer_vocation`. Rien n'est en attente d'une
+	   promesse : refermer suffit. #}
+	<div id="vocation-overlay" class="clauses-hidden" aria-label="Changer de vocation"
+		 onclick="if(event.target===this)closeVocation()">
+		<div class="item-detail-card">
+			<button class="item-detail-close" onclick="closeVocation()" title="Annuler">✕</button>
+			<div id="vocation-body"></div>
+		</div>
+	</div><!-- /#vocation-overlay -->
 	{# Sur mesure : ✕ / Échap / clic hors carte = ANNULER sans rien engager. L'appel est en
 	   attente d'une promesse (le bouton « Commander » de la liste est désactivé le temps du
 	   choix) : l'annulation doit la RÉSOUDRE À NULL, sinon le bouton reste mort pour toujours. #}
@@ -5455,7 +5489,7 @@ function _setCardIdentite(card, p) {
 	const voc = VOC_LABELS[p.voc] || {};
 	card.dataset.porteur = p.id || PRINCIPAL_ID;
 	set('nom', `${p.prenom || ''} ${p.nom || ''}`.trim());
-	set('voc-niveau', p.voc_niveau !== undefined ? p.voc_niveau : 0);
+	set('voc-niveau', _nivVocTexte(p.voc_niveau));
 	set('race', p.race || '');
 	set('race-niveau', p.niveau !== undefined ? p.niveau : 0);
 	// ⚠️ Le rang n'appartient QU'AU PRINCIPAL : un compagnon, une recrue, une monture ou une
@@ -5470,11 +5504,11 @@ function _setCardIdentite(card, p) {
 		// Détail par ville en infobulle — seul le joueur le porte (`rang_detail`).
 		if (p.rang_detail) rangEl.title = p.rang_detail; else rangEl.removeAttribute('title');
 	}
-	// La ligne « ⚔ Guerrier Niv.<span> - <race> Niv.<span> · Rang <span> » : seul son premier
+	// La ligne « ⚔ Guerrier <span>Niv.N|Aspirant</span> - <race> Niv.<span> · Rang <span> » : seul son premier
 	// nœud TEXTE porte l'icône et le libellé de vocation (le reste est déjà en data-role).
 	const classeEl = _q(card, 'classe');
 	if (classeEl && classeEl.firstChild) {
-		classeEl.firstChild.nodeValue = `${voc.icon || ''} ${voc.label || p.voc || ''} Niv.`;
+		classeEl.firstChild.nodeValue = `${voc.icon || ''} ${voc.label || p.voc || ''} `;
 	}
 	_setCardVitals(card, p.vitals || p);
 }
@@ -5583,6 +5617,12 @@ document.addEventListener('keydown', e => {
 	// le bonus n'est engagé que par le bouton « Dépasser » de la carte.
 	const maxBonus = document.getElementById('max-bonus-overlay');
 	if (maxBonus && !maxBonus.classList.contains('clauses-hidden')) { closeMaxBonus(); return; }
+	// Changement de vocation : de la confirmation, Échap revient à la liste ; de la liste, ferme.
+	const vocOv = document.getElementById('vocation-overlay');
+	if (vocOv && !vocOv.classList.contains('clauses-hidden')) {
+		if (_vocChoix && _vocChoix.confirmation) _rendreChoixVocation(); else closeVocation();
+		return;
+	}
 	// Engagement durable AVANT les clauses : il porte un champ de saisie, c'est lui que le
 	// joueur cherche à fermer en premier. Rien n'est engagé tant qu'il n'a pas validé.
 	const engagement = document.getElementById('engagement-overlay');
@@ -5712,6 +5752,12 @@ let _vocId     = {{ character.get("voc", "") | tojson | safe }};
 let _sexe      = {{ character.get("sex", "m") | tojson | safe }};
 // Icône + libellé par vocation : un compagnon n'a pas forcément celle du joueur.
 const VOC_LABELS = {{ vocations_labels | tojson | safe }};
+// Niveau de vocation affiché : « Niv.N », ou « Aspirant » au niveau 0 — on n'est alors
+// reconnu par personne dans cette vocation (aide « Un simple aspirant », changement de vocation).
+function _nivVocTexte(n) {
+	n = Number(n) || 0;
+	return n > 0 ? 'Niv.' + n : 'Aspirant';
+}
 function _vocLabel(voc) {
 	const v = VOC_LABELS[voc] || {};
 	return `${v.icon || ''} ${v.label || voc || ''}`.trim();
@@ -5765,7 +5811,7 @@ function _renderXp() {
 	set('sh-race-niveau', _niveau);
 	set('sh-xp-next-lbl', `Niv. ${_niveau + 1} à ${_xpNivNext} XP`);
 	set('sh-voc-label', (VOC_LABELS[_vocId] || {}).label || _vocId);
-	set('sh-voc-niveau', _vocNiveau);
+	set('sh-voc-niveau', _nivVocTexte(_vocNiveau));
 	set('sh-voc-cout', (_vocNiveau + 1) * _VOC_COEFF);
 	const fill = document.getElementById('sh-xp-fill');
 	if (fill) {
@@ -5932,7 +5978,7 @@ async function spendXpVocation() {
 			document.querySelector('.sheet-left-col'),
 			document.getElementById('sh-stats'),
 		].filter(Boolean).flatMap(root => [...root.querySelectorAll('.voc-niveau')]);
-		nivEls.forEach(el => { el.textContent = _vocNiveau; });
+		nivEls.forEach(el => { el.textContent = _nivVocTexte(_vocNiveau); });
 		const elCout = document.getElementById('sh-voc-cout');
 		if (elCout) elCout.textContent = data.xp_cout_next;
 		_syncPoints(data.attribute_points);
@@ -5969,6 +6015,116 @@ function demanderMaxBonus(code) {
 function confirmerMaxBonus(code) {
 	closeMaxBonus();
 	spendXp(code, true);
+}
+
+// ── Changement de vocation (utils/vocations.py, /api/vocation/options + /api/changer_vocation)
+// Le porteur est celui de la fiche (`_actionBody` : compagnon recruté compris). Prix, graphe des
+// transitions et refus : SERVEUR seul — le client n'affiche que ce que `options` lui donne.
+let _vocChoix = null;   // {options, voc, voc_niveau, attribute_points, confirmation?}
+
+function closeVocation() {
+	_vocChoix = null;
+	document.getElementById('vocation-overlay').classList.add('clauses-hidden');
+}
+
+async function ouvrirChangementVocation() {
+	try {
+		const res = await fetch('api/vocation/options', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify(_actionBody({})),
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		_vocChoix = data;
+		_rendreChoixVocation();
+		document.getElementById('vocation-overlay').classList.remove('clauses-hidden');
+	} catch (err) { console.error('Erreur vocation/options', err); }
+}
+
+function _vocLigne(o) {
+	const peut = _vocChoix.attribute_points >= o.cout;
+	const etat = o.connue ? `retour · ${_nivVocTexte(o.niveau)}` : 'nouvelle voie · Aspirant';
+	return `<li><span class="voc-choix-nom">${escapeHtml(o.icon)} ${escapeHtml(o.label)}`
+		+ `<small>${etat}${o.magie ? ' · magie ' + escapeHtml(o.magie) : ''}</small></span>`
+		+ `<button class="sh-xp-btn" data-voc="${escapeHtml(o.id)}" ${peut ? '' : 'disabled'}`
+		+ ` onclick="choisirVocation(this.dataset.voc)">${o.cout} P<small>oints</small></button></li>`;
+}
+
+function _rendreChoixVocation() {
+	if (!_vocChoix) return;
+	_vocChoix.confirmation = null;
+	const cur = VOC_LABELS[_vocChoix.voc] || {};
+	const connues = _vocChoix.options.filter(o => o.connue);
+	const neuves = _vocChoix.options.filter(o => !o.connue);
+	document.getElementById('vocation-body').innerHTML = `
+		<h3>🔀 Changer de vocation</h3>
+		<p>Aujourd'hui : <strong>${escapeHtml(cur.icon || '')} ${escapeHtml(cur.label || _vocChoix.voc)}</strong>,
+		   ${_nivVocTexte(_vocChoix.voc_niveau)}. Vous gardez tout ce que vous avez acquis ; seul ce que
+		   vous apprendrez ensuite change.</p>
+		${connues.length ? `<div class="voc-section">Voies déjà pratiquées</div><ul class="voc-choix">${connues.map(_vocLigne).join('')}</ul>` : ''}
+		${neuves.length ? `<div class="voc-section">Voies nouvelles</div><ul class="voc-choix">${neuves.map(_vocLigne).join('')}</ul>` : ''}
+		${_vocChoix.options.length ? '' : '<p class="clauses-avert">Aucune autre voie ne s\'ouvre à vous d\'ici.</p>'}
+		<p class="clauses-avert">Points disponibles : ${_vocChoix.attribute_points}.</p>`;
+}
+
+// Texte de confirmation : on (re)devient un débutant que personne ne reconnaît. Le joueur au
+// NEUTRE (règle de l'Auteur) ; « aspirant » reste le terme officiel, poli.
+function _texteConfirmationVocation(o) {
+	const cur = VOC_LABELS[_vocChoix.voc] || {};
+	const curNom = escapeHtml(cur.label || _vocChoix.voc);
+	const nom = escapeHtml(o.label);
+	if (o.connue) {
+		return `<h3>🔀 Reprendre la voie de ${nom} ?</h3>
+			<p>Vous reprenez cette voie là où vous l'aviez laissée : <strong>${_nivVocTexte(o.niveau)}</strong>.
+			   Rien de ce que vous avez acquis ailleurs ne se perd, mais vous n'apprendrez plus que ce
+			   qu'enseigne cette voie.</p>`;
+	}
+	const monde = _vocChoix.voc_niveau > 0
+		? `Pour le monde entier, vous restez ${curNom} de niveau ${_vocChoix.voc_niveau} : c'est ce que
+		   vous savez faire, et c'est tout ce qu'on connaît de vous.`
+		: `Vous n'étiez déjà qu'au rang d'aspirant ${curNom} ; vous voilà aspirant à tout autre chose.`;
+	return `<h3>🔀 Devenir ${nom} ?</h3>
+		<p>${monde} <strong>${nom}, vous ne l'êtes pas.</strong> Vous avez seulement envie de le devenir,
+		   et vous êtes bien la seule personne à y croire.</p>
+		<p>Ceux qui pratiquent cette voie verront en vous un <strong>aspirant</strong> : poliment dit, un
+		   débutant qui ne sait rien et qu'on ne prend pas au sérieux. Tout est à prouver, en partant
+		   de rien.</p>
+		<p>Vous gardez tout ce que vous avez acquis : sorts, compétences, niveaux. Mais vous
+		   n'apprendrez plus que ce qu'enseigne votre nouvelle voie.</p>`;
+}
+
+function choisirVocation(id) {
+	const o = (_vocChoix && _vocChoix.options || []).find(x => x.id === id);
+	if (!o) return;
+	_vocChoix.confirmation = id;
+	document.getElementById('vocation-body').innerHTML = _texteConfirmationVocation(o) + `
+		<p class="clauses-avert">Coût : ${o.cout} points.</p>
+		<div class="item-detail-actions">
+			<button onclick="_rendreChoixVocation()">Retour</button>
+			<button class="sh-bonus-btn" data-voc="${escapeHtml(o.id)}"
+					onclick="confirmerVocation(this.dataset.voc)">🔀 ${o.connue ? 'Reprendre cette voie' : 'Devenir aspirant'}</button>
+		</div>`;
+}
+
+async function confirmerVocation(id) {
+	const o = (_vocChoix && _vocChoix.options || []).find(x => x.id === id);
+	closeVocation();
+	try {
+		const res = await fetch('api/changer_vocation', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify(_actionBody({vocation: id})),
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		_vocId = data.voc;
+		_vocNiveau = data.voc_niveau;
+		_syncPoints(data.attribute_points);
+		// Fiche recalculée (§10) : listes « 📖 Apprendre », libellés de la carte, niveau affiché.
+		_appliquerFiche(data.fiche);
+		const nom = o ? o.label : data.voc;
+		showToast(data.retour ? `🔀 Vous reprenez la voie de ${nom}.`
+							  : `🔀 Vous voilà aspirant ${nom}. Tout reste à prouver.`, {major: true});
+	} catch (err) { console.error('Erreur changer_vocation', err); }
 }
 
 async function spendXp(statKey, useMaxBonus = false) {
@@ -12471,10 +12627,6 @@ if (RELEVE_CAISSE) showToast(`💰 Votre intendant vous remet la caisse : ${_pri
 // rendu (`vol.chute_exploration`), déjà persistée — ce toast ne reviendra pas.
 const CHUTE_VOL = {{ chute_vol | tojson | safe }};
 if (CHUTE_VOL) showToast(`🪂 Votre vol a pris fin : ${_texteChute(CHUTE_VOL)}`);
-// Sorts perdus : la vocation ne pratique plus leur école. Même check paresseux, même
-// rendu unique — le doc a déjà été réécrit, ce toast ne reviendra pas.
-// ⚠️ Pas d'escapeHtml : showToast écrit en textContent (CLAUDE.md §9).
-{{ sorts_perdus | tojson | safe }}.forEach(n => showToast(n + ' vous échappe : votre vocation ne pratique plus cette magie.', {major: true}));
 
 // ── Panneau 👥 Groupe ───────────────────────────────────────────────────────────
 // Deux sections en accordéon : les compagnons (→ fiche complète de chacun) et l'inventaire
@@ -13061,7 +13213,7 @@ function _applySheetIdentite(p) {
 	const pmPct = v.pm_max ? Math.min(100, Math.round(v.currentPM / v.pm_max * 100)) : 0;
 	if (els.gauche) {
 		// ⚠️ Mention de rang réservée au principal (cf. _setCardIdentite) : un compagnon n'en a pas.
-		const classe = `${_vocLabel(p.voc)} Niv.<span class="voc-niveau niveau-nb">${p.voc_niveau}</span>`
+		const classe = `${_vocLabel(p.voc)} <span class="voc-niveau niveau-nb">${_nivVocTexte(p.voc_niveau)}</span>`
 			+ ` - ${p.race} Niv.<span class="race-niveau niveau-nb">${p.niveau}</span>`
 			+ (p.rang ? ` · Rang ${escapeHtml(p.rang)}` : '');
 		// Mêmes ids que le gabarit Jinja : _refreshDerivedStats continue d'y écrire les max.
@@ -13207,6 +13359,8 @@ function _affecterFiche(f) {
 	// la montée passe par le chokepoint `_acteur`, elle écrit sur SON doc.
 	_MAX_BONUS = f.max_bonus || {}; _maxBonusUsed = f.max_bonus_used || null;
 	_attributePoints = f.attribute_points; _vocNiveau = f.voc_niveau;
+	// `voc` n'est porté que par `fiche_resync` (la vocation peut changer) : absent ⇒ inchangée.
+	if (f.voc) _vocId = f.voc;
 	_caractsDetail = f.caracts_detail; _derivedCur = f.derived_stats;
 	_xpTotal = f.xp_total; _niveau = f.niveau;
 	_xpNivPrev = f.xp_niv_prev; _xpNivNext = f.xp_niv_next;
@@ -13230,6 +13384,7 @@ function _appliquerFiche(f) {
 			charStats: f.caracteristiques_current, statCaps: f.stat_caps,
 			maxBonus: f.max_bonus || {}, maxBonusUsed: f.max_bonus_used || null,
 			attributePoints: f.attribute_points, vocNiveau: f.voc_niveau,
+			vocId: f.voc || _sheetSnap.vocId,
 			caractsDetail: f.caracts_detail, derived: f.derived_stats,
 			xpTotal: f.xp_total, niveau: f.niveau, xpNivPrev: f.xp_niv_prev, xpNivNext: f.xp_niv_next,
 			sorts: f.sorts, sortsApprenables: f.sorts_apprenables, sortsMagies: f.sorts_magies,
@@ -13244,7 +13399,14 @@ function _appliquerFiche(f) {
 	[...cartesDuPorteur(f.id), document.querySelector('.sheet-left-col')]
 		.filter(Boolean).forEach(root => {
 			root.querySelectorAll('.race-niveau').forEach(el => { el.textContent = _niveau; });
-			root.querySelectorAll('.voc-niveau').forEach(el => { el.textContent = _vocNiveau; });
+			root.querySelectorAll('.voc-niveau').forEach(el => { el.textContent = _nivVocTexte(_vocNiveau); });
+			// La vocation elle-même peut avoir CHANGÉ (`/api/changer_vocation`) : le premier
+			// nœud texte de la ligne de classe porte son icône et son libellé.
+			const classe = root.querySelector('.char-class');
+			if (classe && classe.firstChild && classe.firstChild.nodeType === Node.TEXT_NODE) {
+				const v = VOC_LABELS[_vocId] || {};
+				classe.firstChild.nodeValue = `${v.icon || ''} ${v.label || _vocId || ''} `;
+			}
 		});
 	_rendreFiche();
 }
