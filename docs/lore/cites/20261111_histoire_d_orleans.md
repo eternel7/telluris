@@ -2,7 +2,7 @@
 
 - **Source :** séance Claude Code du 11/11/2026, sur une proposition de ChatGPT apportée par l'Auteur.
 - **Créée :** 11/11/2026
-- **Statut :** **en cours d'arbitrage**. Seul le message de l'Auteur (§ Auteur) fait foi ; le texte de ChatGPT (§ 1) et les propositions de Claude Code (§ 3 à 6) attendent les réponses aux questionnaires (§ 7).
+- **Statut :** **arbitré** le 11/11/2026 par le questionnaire interactif : la section « ✍️ Auteur — réponses au questionnaire interactif » **fait foi** et l'emporte sur les propositions des § 3 à 6 (le portail vers Lutecia, le duc et Clovis y sont écartés).
 - **Au dump (08/11)** : `lieu:orleans` (ville, parent `lieu:france`, carte `orleans_start_city.png`, quatre sorties vers la France), la guilde **Le Relais de la Loire** (comptoir, réception, bureau ouvert au rang D d'Orléans), sa réceptionniste **Perrine Boucher** (naine, « tient les connaissements du fleuve au grain de sel près ») et son maître **Agnan le Gabarrier** (ogre, ancien convoyeur de gabarres). **Aucun portail, aucun PNJ d'histoire, aucun monument.** Au dump encore : `sort:rayon_de_lumiere` (« On l'enseigne dans les livres ; les paladins des tours de guet savent qu'il n'en est que l'ébauche ») et `sort:lance_de_lumiere` (« Aucun livre ne l'enseigne : un maître le transmet »).
 
 ---
@@ -145,7 +145,46 @@ Répondre par le numéro et la lettre (« 1.1 A ») ; la première option est la
 - **5.5 Charles d'Orléans**, prince-poète perdu vingt-cinq ans dans un donjon et revenu — A. Gardé (PNJ ou récit) · B. Retiré.
 - **5.6 En jeu ensuite** — A. Carte et lieux d'Orléans (Sainte-Croix, Tourelles, quais) avec prompts d'image · B. Lore seulement pour l'instant · C. Les deux, le lore d'abord.
 
+## ✍️ Auteur — réponses au questionnaire interactif (11/11/2026)
+
+Les cinq questionnaires reposés en huit formulaires. **Ces réponses font foi** et l'emportent sur les § 3 à 6 où elles divergent.
+
+**Jeanne**
+- **Date** : **juste après la Vague**, du temps d'Arthur, un siècle avant Charlemagne.
+- **Origine** : **mystère** — des PNJ défendent des théories contradictoires (bergère d'un village des marches, envoyée de ses voix, venue d'un portail) ; jamais tranché.
+- **Ce qu'elle apporte** : le Rayon de lumière existait dans les livres ; elle apporte son **évolution en Lance**, transmise **de maître à élève** depuis elle.
+- **Fin** : **repartie comme elle est venue** ; nul ne sait où ni comment.
+- **Voix** gardées, **nature ouverte** ; **dernier foyer aux Tourelles** ; **fête du 8 mai** en jeu (ambiances, rumeurs).
+- **Compagnons** : **Dunois**, **La Hire**, **Xaintrailles**, **Gilles de Rais** — pour ce dernier, un **récit ambigu** : des rumeurs (Barbe-Bleue) jamais prouvées, que certains réfutent.
+- **Vagues de monstres** : des **portails d'Orléans devenus donjons** à la Vague, qui débordent (forêt, ciel, fleuve).
+
+**Sainte-Croix**
+- **Temple-forteresse** des Templiers autour d'un **quatrième donjon, au cœur de la ville**, relevée **dans le siècle qui suit Jeanne**.
+- Ce donjon ouvre sur **la Croix** : un **carrefour de chemins qui ne mènent nulle part**, labyrinthe de routes — écho du nom et d'une cité des passages.
+
+**Portails**
+- **Transversaux** (bâtis par les **héritiers des frères**, entretenus par les Architectes de Lutecia depuis Jeanne) : **Lyon** (port du Châtelet ; Loire vers Rhône) et **Bruges** (porte de Bourgogne ↔ Notre-Dame de Bruges ; **actif** : draps de Flandre contre grain et vin). **Pas de transversal vers Lutecia** : les deux cités restent reliées par la route et par la Loire, sous escorte paladine.
+- Accès du joueur aux transversaux : **rang A**, comme le reste du monde.
+- **Donjons** : les **quatre** — Saint-Loup (forêt), les Tourelles (la Crue), Saint-Jean-le-Blanc (ciel), Sainte-Croix (la Croix) — **échelonnés du rang D au rang B** : Saint-Loup D, Tourelles C, Saint-Jean-le-Blanc B, Sainte-Croix B.
+
+**Petra**
+- **Le portail des deux crues** : avant la Vague, un transversal reliait les **Tourelles** et le **tombeau de l'Urne** ; depuis, les deux seuils ouvrent sur **la même Crue**. Petra garde ses trois transversaux vivants.
+- **Un seul monde** : **aval** à Orléans (rang C), **source** à Petra (rang A) ; la traversée de l'un à l'autre reste une **rumeur de guilde**.
+- L'**École des Turcies** et les **gardiens des sources** sont des **écoles sœurs** : échange de maîtres, aujourd'hui par Notre-Dame et Alexandrie.
+
+**Orléans aujourd'hui**
+- **Identité** : cité de négociants, bateliers, passeurs ; devise « **Le fleuve nous relie, le commerce nous unit.** »
+- **Union avec Lutecia** : **pacte perpétuel sans lien dynastique** — Lutecia fournit les Architectes, Orléans ouvre ses voies. **Pas de duc.**
+- **Gouvernement** : un **conseil**, avec **droit de veto de l'École des Turcies** sur l'eau (fleuve, levées) ; le **maître de la guilde des aventuriers** y siège (aujourd'hui Agnan le Gabarrier, du Relais de la Loire).
+- **Corporation** : la **Communauté des marchands fréquentant la rivière de Loire**. **École** : l'**École des Turcies**.
+- **Spécialités** : **vinaigre d'Orléans** (faiblesse du penanggalan ; on en charge les navires vers les mers de Mu), **cotignac**, **sel** remonté de l'estuaire, **bois** de la forêt d'Orléans, **tonnellerie**, **chantiers navals** à faible tirant d'eau.
+- **Histoire ancienne** : **Genabum**, comptoir carnute de l'Âge des Remparts, port des sages de Chartres ; **Aurelianum**, nom savant de l'Âge des Portails (les vieilles familles disent Genabum). **Clovis retiré** d'Orléans.
+- **Charles d'Orléans** : **PNJ vivant**, **noble sans pouvoir**, héritier d'une vieille famille, poète ; **revenu de la Crue** (Tourelles) après **vingt-cinq ans** — il dit avoir vu **la source, à Petra** : la rumeur de la traversée vient de lui.
+- **Suite** : lore **et** contenu en jeu.
+
 ## 8. Points ouverts
 
-- Toutes les propositions des § 3 à 6, en attente des questionnaires.
-- Origine de Jeanne, sa fin, la nature de ses voix : à laisser ouvertes quelle que soit la réponse.
+- Origine de Jeanne, sa fin, la nature de ses voix, ce que cherchait Gilles de Rais : **ouverts par décision**.
+- Ce que Charles d'Orléans a vu dans la Crue, et si la traversée est possible : rumeur, jamais tranchée.
+- Sur quoi débouchent les chemins de la Croix.
+- Membres du conseil autres que l'École des Turcies et la guilde.
