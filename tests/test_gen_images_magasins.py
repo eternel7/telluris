@@ -471,3 +471,63 @@ def test_grande_maison_un_grand_batiment_pas_une_maison_boutique():
 		assert "image 1" in f and "No hanging shop sign" in f
 		assert "no written label" in f and "not orcs, goblins or trolls" in f
 		assert "small size inside the shop" in f   # échelle d'un hobbit gardée
+
+
+def test_facade_tenancier_a_l_echelle_de_la_scene():
+	"""Revue de l'auteur (11/11) : tenancier peint bien plus grand que la foule (référence en gros
+	plan), pire en nain ou en hobbit — échelle absolue, taille de la lignée, jamais la plus grande figure."""
+	from dev.gen_images_magasins import BATIMENT_GRANDE_MAISON, FRACTIONS_IMAGE, TAILLES, echelle_scene
+	for race in LIGNEES_EN:
+		assert race in TAILLES
+		p = prompt_magasin("boucherie", race, "M", [], "lieu:orleans", "Orléans", "X")
+		assert "never the largest figure" in p and "do not copy its framing or its scale" in p
+		assert "never in the foreground" in p
+	assert f"about {FRACTIONS_IMAGE[6]} of the image height" in echelle_scene("hobbit")
+	assert f"about {FRACTIONS_IMAGE[2]} of the image height" in echelle_scene("ogre")
+	assert "as tall as a human" in echelle_scene("elfe")
+	assert "The shopkeeper, being" not in echelle_scene(None)   # lignée inconnue : règle générale seule
+	grande = prompt_magasin(next(iter(BATIMENT_GRANDE_MAISON)), "nain", "F", [], "lieu:orleans", "Orléans", "X")
+	assert "never the largest figure" in grande and "stands in the foreground" not in grande
+
+
+def test_animation_de_la_rue_tiree_par_lieu():
+	"""Revue de l'auteur (11/11) : la rue toujours bondée — l'animation est tirée par lieu, stable,
+	et FOULE ne dit plus combien de monde passe."""
+	from dev.gen_images_magasins import ANIMATIONS_RUE, FOULE, animation_rue
+	phrases = {phrase for _, _, phrase in ANIMATIONS_RUE}
+	assert "crowd" not in FOULE.split(".")[0]
+	assert animation_rue("lieu:a") == animation_rue("lieu:a")
+	tirees = {animation_rue(f"lieu:{i}")[1] for i in range(200)}
+	assert tirees == phrases   # toutes atteignables sur 200 lieux
+	p = prompt_magasin("boucherie", "humain", "M", [], "lieu:orleans", "Orléans", "X", 0, "lieu:b")
+	assert animation_rue("lieu:b")[1] in p
+	assert sum(ph in prompt_auberge("lieu:orleans", "Orléans", None, "lieu:c") for ph in phrases) == 1
+
+
+def test_axes_de_variete_de_la_facade():
+	"""Choix de l'auteur (11/11) : point de vue, petite scène de rue, état de la maison — tirés par
+	lieu, stables, tous atteignables, chacun présent UNE fois dans la façade et l'auberge."""
+	from dev.gen_images_magasins import ETATS_MAISON, POINTS_DE_VUE, SCENES_RUE, tirage_axe
+	for axe, opts in (("vue", POINTS_DE_VUE), ("scene", SCENES_RUE), ("etat", ETATS_MAISON)):
+		assert tirage_axe(axe, opts, "lieu:a") == tirage_axe(axe, opts, "lieu:a")
+		assert {tirage_axe(axe, opts, f"lieu:{i}") for i in range(300)} == set(opts)
+		for p in (prompt_magasin("boucherie", "humain", "M", [], "lieu:orleans", "Orléans", "X", 0, "lieu:d"),
+				  prompt_auberge("lieu:orleans", "Orléans", None, "lieu:d")):
+			assert sum(phrase in p for _, phrase in opts) == 1
+	assert all("corner" not in phrase for _, phrase in POINTS_DE_VUE)   # façade de face, pans murés
+
+
+def test_grand_magasin_jamais_deprecie():
+	"""Consigne de l'auteur (11/11) : un grand magasin ou grand atelier (toute catégorie de
+	LIEU_CATEGORIES_FUSION, relue) ne tire jamais « vieille » ni « modeste et rapiécée »."""
+	from dev.gen_images_magasins import (BATIMENT_GRANDE_MAISON, CATEGORIES_GRANDES, ETATS_DEPRECIATIFS,
+		ETATS_MAISON, variete_facade)
+	assert set(BATIMENT_GRANDE_MAISON) <= CATEGORIES_GRANDES and "boucherie" not in CATEGORIES_GRANDES
+	assert ETATS_DEPRECIATIFS <= {lib for lib, _ in ETATS_MAISON}
+	mauvaises = {ph for lib, ph in ETATS_MAISON if lib in ETATS_DEPRECIATIFS}
+	for cat in CATEGORIES_GRANDES:
+		for i in range(60):
+			assert not any(ph in variete_facade(f"lieu:{i}", cat) for ph in mauvaises), cat
+	assert any(ph in variete_facade(f"lieu:{i}", "boucherie") for i in range(60) for ph in mauvaises)
+	assert not any(ph in prompt_magasin("grandes_halles_alimentaires", "hobbit", "M", [], "lieu:orleans",
+										"Orléans", "X", 0, "lieu:les_halles_du_martroi") for ph in mauvaises)

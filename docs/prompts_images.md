@@ -18,7 +18,9 @@ Gabarits de prompts pour générer les illustrations du jeu (Gemini). Chaque gab
 
 (Phrase d'origine de l'auteur, à garder **telle quelle** dans tout prompt peuplé — portraits de tenanciers compris.) ⚠️ **Répartition ÉGALE entre les cinq Lignées** (consigne de l'auteur, 10/10/2026) : avec un tenancier humain, le modèle peuplait la rue d'humains — le prompt précise « en proportions égales… les humains ne sont pas plus nombreux que les autres, même si le tenancier est humain » (`FOULE_FR` / `FOULE` de `dev/gen_images_magasins.py`).
 
-- ⚠️ **Âge des tenanciers** (même date) : des **adultes de tous âges** (`AGES` : huit âges, un seul vieux), et l'âge tiré est **redit** dans le prompt pour que le modèle ne le vieillisse pas — le vieillissement touchait toutes les Lignées (hobbits peut-être exceptés).
+- ⚠️ **Combien de monde** (Auteur, 11/11/2026 : rue toujours bondée) : `FOULE` ne dit que QUI passe ; la densité est tirée par lieu (`animation_rue`, `ANIMATIONS_RUE` pondérées : presque déserte → bondée, la cohue en exception), façades ET auberges.
+- ⚠️ **Échelle du tenancier en façade** (même date : tenancier peint plus grand que tout le monde, pire en nain/hobbit — le portrait joint est un gros plan dont le modèle gardait la taille) : `echelle_scene` pose un repère absolu (humain = un tiers de l'image), la taille de la lignée, « jamais la plus grande figure », plan moyen.
+- ⚠️ **Âge des tenanciers** (10/10/2026) : des **adultes de tous âges** (`AGES` : huit âges, un seul vieux), et l'âge tiré est **redit** dans le prompt pour que le modèle ne le vieillisse pas — le vieillissement touchait toutes les Lignées (hobbits peut-être exceptés).
 
 ### 0.2 bis Modèle
 

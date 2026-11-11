@@ -375,8 +375,10 @@ TRAITS_EN = {
 # tous en gilet vert, elfes tous blonds, ogres tous chauves torse nu). L'auteur préfère la foule
 # d'Auxerre : chaque passant DIFFÉRENT — d'où les variations explicites par lignée.
 # Répartition ÉGALE entre les cinq Lignées (consigne de l'auteur, 10/10) — cf. FOULE_FR.
-FOULE = ("A lively, varied crowd of ogres, dwarves, halflings, elves and humans goes about its business in "
-		 "the street, in EQUAL numbers: roughly as many ogres as dwarves, halflings, elves and humans, "
+# Combien de monde : `animation_rue` (consigne de l'auteur, 11/11 : « toujours un nombre important
+# de personnes ») — FOULE ne dit plus que QUI passe, jamais combien.
+FOULE = ("The people in the street are ogres, dwarves, halflings, elves and humans going about their business, "
+		 "in EQUAL numbers: roughly as many ogres as dwarves, halflings, elves and humans, "
 		 "evenly mixed — humans are no more numerous than any other people, even when the shopkeeper is "
 		 "human. Every passer-by is different in age, build, hair and outfit, never the same costume "
 		 "twice: elves with fine faces and slightly pointed ears, with dark, auburn, black, silver or fair "
@@ -391,6 +393,127 @@ FOULE = ("A lively, varied crowd of ogres, dwarves, halflings, elves and humans 
 		 "or armor, towering over the crowd; humans of every origin: adventurers, guards, merchants, "
 		 "pilgrims, peasants. Everyone, elves included, has a natural human skin tone. Everyone wears "
 		 "medieval clothing; nothing modern.")
+
+# Animation de la rue, tirée par lieu (consigne de l'auteur, 11/11 : les façades se ressemblent, la
+# rue est TOUJOURS bondée). Poids : les rues calmes l'emportent, la cohue devient l'exception.
+ANIMATIONS_RUE = [
+	(2, "presque déserte", "The street is almost empty at this hour: only two or three people in the whole "
+						   "image besides the shopkeeper, wide stretches of bare cobblestones, a cat or a few "
+						   "pigeons. The few people present still belong to different peoples."),
+	(3, "calme", "The street is quiet: five or six passers-by at most, spaced well apart, someone lingering "
+				 "or chatting, plenty of empty pavement between them."),
+	(3, "passante", "Moderate traffic: about a dozen people, walking past in ones and twos or in a small group, "
+					"the pavement clearly visible between them; nobody crowds the shop window."),
+	(2, "animée", "A busy street with a steady flow of passers-by heading somewhere, carrying loads or "
+				  "leading an animal, but the cobblestones still show between the groups."),
+	(1, "bondée", "A packed market-day crowd fills the street from side to side, people jostling past the shop."),
+]
+
+
+def animation_rue(cle):
+	"""PURE. (libellé, phrase) de l'animation de la rue : graine propre au lieu, stable d'un rejeu à l'autre."""
+	rng = random.Random(zlib.crc32(("rue|" + str(cle)).encode()))
+	_, libelle, phrase = rng.choices(ANIMATIONS_RUE, weights=[p for p, _, _ in ANIMATIONS_RUE])[0]
+	return libelle, phrase
+
+
+# Trois axes de variété retenus par l'auteur (11/11) : point de vue, petite scène de rue, état de la
+# maison — chacun tiré par lieu, graine propre à l'axe. Les points de vue restent compatibles avec
+# la façade VUE DE FACE aux pans latéraux murés (lot des caves, 10/10) : jamais une maison d'angle.
+POINTS_DE_VUE = [
+	("face, hauteur d'yeux", "Viewpoint: at eye level from the opposite side of the street, the house facing the viewer."),
+	("surplomb", "Viewpoint: slightly from above, as if seen from an upper window across the street, the cobbles "
+				 "and the heads of the passers-by visible below."),
+	("contre-plongée", "Viewpoint: a low angle from the cobblestones, the upper floors and the roof rising "
+					   "against the sky."),
+	("rue à droite", "Viewpoint: the house on the left part of the image, the street receding into the distance on "
+					 "the right, with the neighbouring houses in perspective."),
+	("rue à gauche", "Viewpoint: the house on the right part of the image, the street receding into the distance on "
+					 "the left, with the neighbouring houses in perspective."),
+	("entre deux maisons", "Viewpoint: from a little further back, the house framed between the walls of its two "
+						   "neighbours, a strip of sky above."),
+]
+SCENES_RUE = [
+	("livraison", "One small scene in the street, and only one: a cart being unloaded, sacks and crates passed "
+				  "from hand to hand."),
+	("patrouille", "One small scene in the street, and only one: two town guards walking their round, spears on "
+				   "their shoulders."),
+	("enfants", "One small scene in the street, and only one: children playing, chasing a hoop or each other."),
+	("chien", "One small scene in the street, and only one: a dog asleep in a patch of sun by the doorstep."),
+	("porteur d'eau", "One small scene in the street, and only one: a water carrier with two buckets hanging "
+					  "from a yoke."),
+	("colporteur", "One small scene in the street, and only one: a street hawker with a tray of small wares "
+				   "calling out to passers-by."),
+	("dispute", "One small scene in the street, and only one: two neighbours arguing loudly, hands raised."),
+	("oies", "One small scene in the street, and only one: a goose girl driving a few geese along the cobbles."),
+	("musicien", "One small scene in the street, and only one: a wandering musician playing a fiddle by a wall."),
+	("mule", "One small scene in the street, and only one: a stubborn mule refusing to move, its owner pulling "
+			 "on the halter."),
+]
+ETATS_MAISON = [
+	("neuve", "The house is recent and well kept: fresh whitewash between clean timbers, new roof tiles."),
+	("vieille", "The house is old and weathered: sagging beams, worn steps, moss on the roof tiles, a slight lean."),
+	("fleurie", "Flower boxes overflow from the windows and a climbing plant frames the door."),
+	("lierre", "Ivy climbs over a whole side of the facade up to the roof."),
+	("travaux", "The upper floor is under repair: a wooden scaffolding and a ladder against the wall, fresh "
+				"stones and planks waiting."),
+	("prospère", "The house looks prosperous: carved and painted beams, small leaded windows, a polished "
+				 "brass door knocker."),
+	("modeste", "The house is modest and patched: mended shutters, mismatched tiles, a plank nailed over a crack."),
+]
+
+
+# Grands magasins et grands ateliers (consigne de l'auteur, 11/11) : jamais un état dépréciatif
+# (« modeste et rapiécé » tiré pour Les Halles du Martroi). Grands = catégories de
+# `LIEU_CATEGORIES_FUSION`, RELUES dans models/character_stats.py (jamais recopiées).
+ETATS_DEPRECIATIFS = {"vieille", "modeste"}
+from gen_spec_rhemi import constantes_source  # noqa: E402
+CATEGORIES_GRANDES = frozenset(constantes_source(
+	os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models", "character_stats.py"),
+	{"LIEU_CATEGORIES_FUSION"})["LIEU_CATEGORIES_FUSION"])
+
+
+def tirage_axe(axe, options, cle):
+	"""PURE. (libellé, phrase) d'un axe de variété : graine propre à l'axe ET au lieu, stable d'un rejeu
+	à l'autre (deux axes ne tirent jamais du même hasard)."""
+	return random.Random(zlib.crc32(f"{axe}|{cle}".encode())).choice(options)
+
+
+def variete_facade(cle, categorie=None):
+	"""PURE. Point de vue, scène de rue, état de la maison, densité — dans cet ordre, en une phrase.
+	Grand magasin ou grand atelier (`CATEGORIES_GRANDES`) : aucun état dépréciatif."""
+	etats = ([e for e in ETATS_MAISON if e[0] not in ETATS_DEPRECIATIFS] if categorie in CATEGORIES_GRANDES
+			 else ETATS_MAISON)
+	return " ".join(tirage_axe(axe, opts, cle)[1] for axe, opts in
+					(("vue", POINTS_DE_VUE), ("scene", SCENES_RUE), ("etat", etats))) \
+		+ " " + animation_rue(cle)[1]
+
+
+# Échelle de la scène (consigne de l'auteur, 11/11 : le tenancier peint bien plus grand que tout le
+# monde, pire en nain ou en hobbit) : le portrait joint est un GROS PLAN, le modèle en gardait la
+# taille et posait le tenancier au premier plan. Repère absolu (un humain = un tiers de l'image) +
+# taille de la lignée + interdiction d'être la plus grande figure.
+FRACTIONS_IMAGE = {2: "half", 3: "a third", 4: "a quarter", 5: "a fifth", 6: "a sixth"}
+PEUPLES_EN = {"humain": "a human", "elfe": "an elf", "nain": "a dwarf", "hobbit": "a halfling", "ogre": "an ogre"}
+
+
+def echelle_scene(race):
+	"""PURE. Phrase d'échelle de la façade : le tenancier à la taille de sa lignée, jamais grandi par
+	la référence. `race` None (portrait existant de lignée inconnue) : la règle générale seule."""
+	texte = ("Image 1 is a close-up portrait used ONLY to recognize the shopkeeper: do not copy its framing "
+			 "or its scale. In this scene everyone is drawn at true scale: a human standing at the shop "
+			 "front is about a third of the image height. ")
+	if race in TAILLES and race in PEUPLES_EN:
+		t = TAILLES[race]
+		taille = ("as tall as a human" if abs(t - 1) < 0.1 else
+				  f"about {t:.1f} times the height of a human")
+		texte += (f"The shopkeeper, being {PEUPLES_EN[race]}, is {taille}, so standing they would be about "
+				  f"{FRACTIONS_IMAGE[max(2, min(6, round(3 / t)))]} of the image height. ")
+	return texte + ("The shopkeeper is NOT drawn larger than the people around: their head is no bigger than "
+					"the heads of the passers-by at the same distance, passers-by nearer the viewer look "
+					"bigger than the shopkeeper, and the shopkeeper is never the largest figure in the image. "
+					"The shopkeeper works in the middle ground, set back at the shop front, never in the "
+					"foreground of the street. ")
 # Style d'Auxerre (§0.1), préféré par l'auteur au photoréaliste du lot de Rhemi (09/10).
 STYLE = ("Detailed semi-realistic medieval fantasy illustration in the style of a high-end narrative 2D "
 		 "RPG: rich digital painting, warm natural light, warm earthy palette with touches of vivid color "
@@ -459,6 +582,8 @@ def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label, variant
 		echelle = (" Keep the shopkeeper's small size inside the shop too: the counter reaches the "
 				   "shopkeeper's chest, the furniture and tools are made for humans and look large "
 				   "next to the shopkeeper, and any human customer at the window is twice as tall.")
+	echelle = " " + echelle_scene(race) + echelle.lstrip()
+	rue = variete_facade(lid or label, categorie)
 	# Grande maison : un grand bâtiment (`BATIMENT_GRANDE_MAISON`), pas la maison-boutique d'un
 	# seul comptoir — mêmes garde-fous de tenancier, d'écriture, de foule et de style.
 	if categorie in BATIMENT_GRANDE_MAISON:
@@ -470,13 +595,13 @@ def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label, variant
 				f"The building is {BATIMENT_GRANDE_MAISON[categorie]}. It is one large permanent building, "
 				f"much bigger than an ordinary shop, and fills about 80% of the image, seen from the street "
 				f"at a slight angle so that its full size reads at once. The shopkeeper stands in the "
-				f"foreground at a counter or table just inside the main entrance, clearly visible and "
+				f"middle ground at a counter or table just inside the main entrance, clearly visible and "
 				f"recognizable, while clerks, porters and workers are busy behind. "
 				f"No hanging shop sign, no signboard, no name board or plaque on the building. "
 				f"The goods of the house are displayed and handled everywhere through its open doors and "
 				f"arches, and are immediately recognizable — for instance {marchandises}, or any other "
 				f"goods of the trade you find more telling. {LIBERTE}"
-				f"{echelle} {FOULE} {STYLE}")
+				f"{echelle} {rue} {FOULE} {STYLE}")
 	# Le portrait le montre face à nous, souriant, qui vend ; la boutique le montre AU TRAVAIL :
 	# lot du 09/10, la pose du portrait était recopiée (consigne de l'auteur).
 	return (f"The person shown in image 1 is the shopkeeper: keep exactly the same face, hair, facial hair, "
@@ -503,7 +628,7 @@ def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label, variant
 			f"The goods are displayed on shelves, racks and counters seen through the window and the "
 			f"door, and on the shutter counter, and are immediately recognizable — for instance "
 			f"{marchandises}, or any other goods of the trade you find more telling. {LIBERTE}"
-			f"{echelle} {FOULE} {STYLE}")
+			f"{echelle} {rue} {FOULE} {STYLE}")
 
 
 # Lieux HORS LES MURS : leur décor remplace la rue de la cité (consigne de l'auteur, 10/10 :
@@ -540,7 +665,7 @@ def prompt_auberge(cite, cite_nom, quartier, lid=None):
 			f"timber-framed building with bare facade beams — no hanging sign, no signboard, no name board "
 			f"or plaque above the door —, wide open door and "
 			f"windows revealing a warm firelit common room with long tables, travelers eating and drinking, "
-			f"barrels and benches outside the door, a stable yard to one side. {FOULE} {STYLE}")
+			f"barrels and benches outside the door, a stable yard to one side. {variete_facade(lid or quartier or cite)} {FOULE} {STYLE}")
 
 
 # ══ Lot ═══════════════════════════════════════════════════════════════════════════
@@ -581,7 +706,7 @@ def entrees_de_cite(lieux, cite, cite_nom, sauf=()):
 			"portrait": {"base": f"marchand_{race}_{sexe.lower()}_{cat}",
 						 "prompt": prompt_tenancier(race, sexe, cat, cite_nom, tirage, v, client_de(lid))},
 			"image": {"base": base_image(lieu["image"], cite),
-					  "prompt": prompt_magasin(cat, race, sexe, traits_en(tirage), cite, cite_nom, label, v)},
+					  "prompt": prompt_magasin(cat, race, sexe, traits_en(tirage), cite, cite_nom, label, v, lid)},
 		})
 	return entrees, ignores
 
