@@ -165,7 +165,8 @@
 			"stonehenge": "Stonehenge",
 			"glastonbury": "Glastonbury",
 			"dinas_emrys": "Dinas Emrys",
-			"petra": "Petra"
+			"petra": "Petra",
+			"orleans": "Orléans"
 		},
 		"institutions": {
 			"paladins": "Paladins",
@@ -1350,6 +1351,46 @@
 			"tags": {"peuples": ["nabateens"], "lieux": ["petra"], "institutions": ["templiers", "paladins"], "themes": ["vague", "donjons", "portails"]},
 			"sources": [{"fichier": "cites/20261024_histoire_de_petra.md", "date": "2026-10-24", "citation": "La vague et les séismes ont lieux en même temps et les canaux d'irriguation sont rapidement réparés"}],
 			"apres": ["vague"]
+		},
+		{
+			"id": "cite_orleans",
+			"titre": "Orléans, la cité du fleuve et des passages",
+			"titre_court": "Orléans",
+			"resume": "Au coude de la Loire, Genabum naît comptoir de bateliers carnutes ; le fleuve est une route avant d'être une frontière. Cité de négociants, de bateliers et de passeurs, unie à Lutecia depuis Jeanne.",
+			"quand": {"de": {"ere": "remparts", "inconnu": true}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "proposition", "note": "Genabum à l'Âge des Remparts : proposé (séance du 11/11, questionnaire 1.4)."},
+			"couche": "histoire", "categorie": "cite", "autorite": "proposition", "visibilite": "public",
+			"origine": ["gaule"],
+			"tags": {"peuples": ["carnutes"], "lieux": ["orleans"], "themes": ["commerce", "remparts"]},
+			"sources": [{"fichier": "cites/20261111_histoire_d_orleans.md", "date": "2026-11-11", "citation": "un comptoir de bateliers carnutes au coude de la Loire"}],
+			"liens": ["jeanne_arc", "cathedrale_sainte_croix"]
+		},
+		{
+			"id": "jeanne_arc",
+			"titre": "Jeanne, la paladine qui sauva Orléans",
+			"titre_court": "Jeanne d'Arc",
+			"resume": "Sortie de nulle part, une paladine brise les vagues successives de monstres terrestres, volants et aquatiques qui assaillent Orléans. Elle apporte à Lutecia l'évolution du Rayon de lumière, la Lance, et unit les deux cités pour toujours : Lutecia fournit les Architectes des portails d'Orléans, Orléans ouvre ses voies à Lutecia.",
+			"quand": {"moment": {"ere": "donjons", "entre": [780, 680]}, "autorite": "proposition", "note": "Option A de la séance du 11/11 (questionnaire 2.1) : juste après la Vague, les vagues de monstres étant les premiers débordements des portails d'Orléans devenus donjons ; du temps d'Arthur, avant Charlemagne."},
+			"couche": "histoire", "categorie": "figure", "autorite": "auteur", "visibilite": "public",
+			"origine": ["gaule"],
+			"tags": {"lieux": ["orleans", "lutecia"], "institutions": ["paladins", "architectes"], "themes": ["donjons", "portails", "mythes"]},
+			"sources": [
+				{"fichier": "cites/20261111_histoire_d_orleans.md", "date": "2026-11-11", "citation": "Pour moi Jeanne d'Arc est une paladinne sortie de nulle part ayant sauvé Orléans de vagues successives d'attaques de monstres terrestres, volants et aquatiques."},
+				{"fichier": "cites/20261111_histoire_d_orleans.md", "date": "2026-11-11", "citation": "Elle a apporté à Lutecia la maîtrise de l'évolution du rayon de lumière, protection anti aérienne ultime."}
+			],
+			"apres": ["vague"],
+			"liens": ["cite_orleans", "cathedrale_sainte_croix", "paladins"]
+		},
+		{
+			"id": "cathedrale_sainte_croix",
+			"titre": "La cathédrale Sainte-Croix d'Orléans",
+			"titre_court": "Sainte-Croix",
+			"resume": "Relevée dans le siècle qui suit Jeanne. Sa fonction tellurienne reste à trancher : bastion paladin aux tours de guet sur la Loire, édifice autour du portail vers Lutecia, ou temple-forteresse autour d'un donjon.",
+			"quand": {"de": {"ere": "donjons", "entre": [700, 600]}, "a": {"ere": "donjons", "ouvert": true}, "autorite": "proposition", "note": "Proposé (séance du 11/11, questionnaires 2.4 et 2.5) ; suit la date de Jeanne."},
+			"couche": "histoire", "categorie": "evenement", "autorite": "proposition", "visibilite": "public",
+			"origine": ["gaule"],
+			"tags": {"lieux": ["orleans"], "institutions": ["paladins"], "themes": ["remparts"]},
+			"sources": [{"fichier": "cites/20261111_histoire_d_orleans.md", "date": "2026-11-11", "citation": "relevée dans le siècle qui suit Jeanne"}],
+			"apres": ["jeanne_arc"]
 		},
 		{
 			"id": "predecesseur_maelys",

@@ -3,7 +3,7 @@
 Chaque entrée sépare **Auteur** (décision, niveau 2) et **Proposé** (réponse ChatGPT non adoptée, niveau 4). Source : le fichier entre crochets dans `docs/lore/`. Lieux réellement en jeu : `lieu:*` du dump (catégories `ville`, `pays`, `portail`, `temple`, `guilde_aventurier`).
 
 ## Sommaire
-France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri · Camelot — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem · Petra · Aksoum · Sydney — Mythiques : Mu · Atlantis — Réseau des portails
+France : Lutecia · Auxerre · Rhemi · Chartres · Orléans — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri · Camelot — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem · Petra · Aksoum · Sydney — Mythiques : Mu · Atlantis — Réseau des portails
 
 ---
 
@@ -242,6 +242,13 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 **Auteur** : **Salomon a vécu après les trois frères** et le début de l'ère des portails. David est **reconnu par Jérusalem comme son roi** (pas de prise) ; « le royaume se divise » → « les cités avoisinantes diminuent leurs relations » ; réduire « royaume » au profit de « Cité-État » (11/10). Colonne réécrite : `monde/20261011_frise_chronologique_fusionnee.md` § 6.
 
 **Tableau (26/08)** : « héritage de Salomon », portail ancien, coûteux, mal compris, pas un passage libre. Salomon a bâti le transversal **Aksoum ↔ Jérusalem** pour la reine de Saba (Auteur, 01/11).
+
+## Orléans — `lieu:orleans` · [cites/20261111_histoire_d_orleans.md]
+**Auteur** (11/11, en cours d'arbitrage : cinq questionnaires posés)
+- **Jeanne d'Arc** = **paladine sortie de nulle part** qui sauve Orléans de **vagues successives** de monstres **terrestres, volants et aquatiques** ; elle **unit Lutecia à Orléans** définitivement, apporte à Lutecia **l'évolution du Rayon de lumière** (protection anti-aérienne ultime : `sort:rayon_de_lumiere` → `sort:lance_de_lumiere` au dump) et lui fait voir que les voies d'Orléans la servent tant que les deux cités s'entendent ; Lutecia **fournit les Architectes** qui entretiennent les portails d'Orléans.
+- Au dump : guilde **Le Relais de la Loire** (Perrine Boucher, naine ; Agnan le Gabarrier, ogre, maître). Aucun portail ni monument.
+
+**Proposé, non tranché** : Genabum carnute (Âge des Remparts) ; Jeanne juste après la Vague (au JSON, date = proposition) ; Sainte-Croix relevée après elle, fonction à trancher ; portails (Lutecia, Lyon, Bruges ; donjons Tourelles, Saint-Loup, Saint-Jean-le-Blanc) ; **portail des deux crues** : ancien transversal Orléans ↔ Petra dont les deux seuils ouvrent sur la Crue (tombeau de l'Urne) ; Communauté des marchands fréquentant la Loire ; école des Architectes des eaux ; duc d'Orléans.
 
 ## Aksoum — [cites/20261101_histoire_d_aksoum.md]
 **Auteur** (01/11, trois questionnaires) — carte `towns/aksoum_capital.jpg` (retenue ; **enceinte ouverte à l'ouest voulue** : palais, haras, bassin hors des murs) ; en jeu : `lieu:aksoum` (`dev/gen_aksoum.py`), parent `lieu:abyssinie` en (31, 13) depuis le 03/11 (`dev/gen_afrique.py` ; avant : coin sud-est de l'Afrique du Nord).
