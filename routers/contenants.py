@@ -102,3 +102,27 @@ async def contenant_sortir(current_user: Annotated[dict, Depends(get_current_use
 	_save_acteur(porteur, principal)
 	return _reponse(porteur, principal, pos_c, doc_c, now,
 					{"sorti": (resolve_item_ref(ref) or {}).get("nom")})
+
+
+@contenants_router.post("/contenant/poser")
+async def contenant_poser(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Contenant → sol du PRINCIPAL (un compagnon n'a ni lieu ni position, cf. drop_item), sans
+	passer par le sac : aucun contrôle de charge, un contenant porte plus que son porteur.
+	Transitoire comme tout objet au sol : perdu au prochain déplacement, repris par le
+	ramassage ordinaire (sac ou contenant). Refus hors marée, comme « sortir »."""
+	porteur, principal = _acteur(current_user, body)
+	_refuser_en_combat(current_user, principal)
+	now = int(time.time())
+	pos_c, doc_c = _contenant(porteur, body.get("index_contenant"), body.get("item_id_contenant"))
+	if not contenants.accessible(doc_c, now):
+		raise HTTPException(status_code=409, detail="La mer s'est retirée : le sac semble vide jusqu'à la prochaine marée haute.")
+	dedans = contenants.contenu((porteur.get("inventaire") or [])[pos_c])
+	j = contenants.localiser(dedans, body.get("index_contenu"), body.get("item_id"))
+	if j is None:
+		raise HTTPException(status_code=404, detail="Cet objet n'est plus dans le contenant.")
+	au_sol = principal.get("objets_au_sol") or []
+	ref = contenants.poser(porteur, pos_c, j, au_sol)
+	principal["objets_au_sol"] = au_sol
+	_save_acteur(porteur, principal)
+	return _reponse(porteur, principal, pos_c, doc_c, now,
+					{"pose": (resolve_item_ref(ref) or {}).get("nom")})

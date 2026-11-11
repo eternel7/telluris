@@ -152,16 +152,31 @@ def ranger(porteur: dict, pos_c: int, pos: int, poids_fn=item_ref_weight) -> dic
 	return ref
 
 
-def sortir(porteur: dict, pos_c: int, j: int) -> object:
-	"""Remet `contenu[j]` du contenant `inventaire[pos_c]` dans le sac du porteur (charge
-	vérifiée par l'appelant). Un contenant vidé perd sa clé `contenu`."""
-	inv = porteur.get("inventaire") or []
-	conteneur = inv[pos_c]
+def _extraire(porteur: dict, pos_c: int, j: int) -> object:
+	"""Retire `contenu[j]` du contenant `inventaire[pos_c]`. Un contenant vidé perd sa clé `contenu`."""
+	conteneur = (porteur.get("inventaire") or [])[pos_c]
 	ref = conteneur["contenu"].pop(j)
 	if not conteneur["contenu"]:
 		conteneur.pop("contenu", None)
+	return ref
+
+
+def sortir(porteur: dict, pos_c: int, j: int) -> object:
+	"""Remet `contenu[j]` du contenant `inventaire[pos_c]` dans le sac du porteur (charge
+	vérifiée par l'appelant). Un contenant vidé perd sa clé `contenu`."""
+	ref = _extraire(porteur, pos_c, j)
+	inv = porteur.get("inventaire") or []
 	inv.append(ref)
 	porteur["inventaire"] = inv
+	return ref
+
+
+def poser(porteur: dict, pos_c: int, j: int, au_sol: list) -> object:
+	"""Pose `contenu[j]` du contenant `inventaire[pos_c]` sur `au_sol` (le sol du PRINCIPAL),
+	sans passer par le sac : AUCUN contrôle de charge — c'est tout l'intérêt, un contenant
+	porte plus que son porteur. Le sol reste transitoire (perdu au prochain déplacement)."""
+	ref = _extraire(porteur, pos_c, j)
+	au_sol.append(ref)
 	return ref
 
 

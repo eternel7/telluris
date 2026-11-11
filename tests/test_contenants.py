@@ -201,6 +201,36 @@ def test_sortir_refuse_si_le_porteur_ne_peut_pas_porter(db, monkeypatch):
 	assert e.value.status_code == 409 and len(pleine["contenu"]) == 4
 
 
+def test_poser_au_sol_sans_controle_de_charge(db, monkeypatch):
+	"""Ce que le porteur ne peut pas sortir dans son sac, il peut le poser par terre : le sol
+	est celui du PRINCIPAL, la charge n'est pas vérifiée."""
+	pleine = {"item": "item:urne", "poids": 8, "contenu": ["item:pierre"] * 4}
+	perso = _perso([pleine, "item:pierre", "item:pierre", "item:pierre"], objets_au_sol=["item:pomme"])
+	r = _appel(monkeypatch, perso, rc.contenant_poser,
+			   {"index_contenant": 0, "item_id_contenant": "item:urne", "index_contenu": 0, "item_id": "item:pierre"})
+	assert r["pose"] == "Pierre" and len(pleine["contenu"]) == 3
+	assert perso["objets_au_sol"] == ["item:pomme", "item:pierre"]
+	assert characters.carried_weight(perso) == 20
+
+
+def test_un_compagnon_pose_sur_le_sol_du_principal(db, monkeypatch):
+	principal = _perso([])
+	compagnon = _perso([{"item": "item:besace", "contenu": ["item:pomme"]}], _id="aventurier:x")
+	_appel(monkeypatch, compagnon, rc.contenant_poser,
+		   {"index_contenant": 0, "item_id_contenant": "item:besace", "index_contenu": 0}, principal=principal)
+	assert principal["objets_au_sol"] == ["item:pomme"] and "objets_au_sol" not in compagnon
+	assert "contenu" not in compagnon["inventaire"][0]   # contenant vidé : clé retirée
+
+
+def test_poser_refuse_a_maree_basse(db, maree, monkeypatch):
+	monkeypatch.setattr(rc.time, "time", lambda: 500)
+	perso = _perso([{"item": "item:sac_maree", "poids": 0.5, "contenu": ["item:pierre"]}])
+	with pytest.raises(HTTPException) as e:
+		_appel(monkeypatch, perso, rc.contenant_poser,
+			   {"index_contenant": 0, "item_id_contenant": "item:sac_maree", "index_contenu": 0})
+	assert e.value.status_code == 409 and not perso.get("objets_au_sol")
+
+
 def test_maree_basse_on_depose_mais_on_ne_reprend_pas(db, maree, monkeypatch):
 	monkeypatch.setattr(rc.time, "time", lambda: 500)
 	perso = _perso([{"item": "item:sac_maree", "poids": 0.5, "contenu": ["item:pierre"]}, "item:pomme"])
