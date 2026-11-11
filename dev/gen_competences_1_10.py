@@ -50,6 +50,10 @@ sys.path.insert(0, RACINE)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import check_competences_doc as check  # noqa: E402
+import gen_ambidextre  # noqa: E402
+
+# Ids hors de la règle de compte (cf. `charger_referentiel`).
+HORS_COMPTE = frozenset(d["_id"] for d in gen_ambidextre.docs_ambidextre())
 
 NOM_IMPORT = "competences_vocations_1_10_a_importer.json"
 SORTIE = os.path.join(check.DOSSIER_JSONS, NOM_IMPORT)
@@ -357,6 +361,11 @@ def charger_referentiel():
 		for d in (contenu if isinstance(contenu, list) else [contenu]):
 			if isinstance(d, dict) and str(d.get("_id", "")).startswith("competence:"):
 				competences.setdefault(d["_id"], d)
+	# HORS COMPTE : compétences ajoutées EN SUS de la règle 2 + 5 par décision de l'Auteur
+	# (Ambidextre, 11/11, option « exception ») — ni comptées ni remplacées par ce lot, qu'elles
+	# soient encore à importer ou déjà en base.
+	for cid in HORS_COMPTE:
+		competences.pop(cid, None)
 	vocations = {}
 	for v in (par_id.get("rules:vocations") or {}).get("value") or []:
 		vocations[str(v.get("id"))] = v

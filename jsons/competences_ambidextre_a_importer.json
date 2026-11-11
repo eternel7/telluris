@@ -1,0 +1,67 @@
+[
+  {
+    "_id": "competence:ambidextre_assassin",
+    "type": "competence",
+    "nom": "Ambidextre",
+    "icon": "🗡️",
+    "description": "Deux lames dans le noir, et nul ne sait laquelle frappera la première.",
+    "vocation": "assassin",
+    "niveau": 2,
+    "mode": "passive",
+    "effets": {
+      "ambidextre": 1
+    }
+  },
+  {
+    "_id": "competence:ambidextre_duelliste",
+    "type": "competence",
+    "nom": "Ambidextre",
+    "icon": "🤺",
+    "description": "La main gauche ne fait plus que parer : elle porte l'estoc à l'égal de la droite, comme le veut l'école de la rapière et de la main-gauche.",
+    "vocation": "duelliste",
+    "niveau": 3,
+    "mode": "passive",
+    "effets": {
+      "ambidextre": 1
+    }
+  },
+  {
+    "_id": "competence:ambidextre_voleur",
+    "type": "competence",
+    "nom": "Ambidextre",
+    "icon": "🔪",
+    "description": "Les ruelles ont appris aux deux mains le même métier : la seconde lame ne tremble plus.",
+    "vocation": "voleur",
+    "niveau": 6,
+    "mode": "passive",
+    "effets": {
+      "ambidextre": 1
+    }
+  },
+  {
+    "_id": "competence:ambidextre_barbare",
+    "type": "competence",
+    "nom": "Ambidextre",
+    "icon": "🪓",
+    "description": "Une hache dans chaque poing : la seconde tombe aussi juste que la première.",
+    "vocation": "barbare",
+    "niveau": 6,
+    "mode": "passive",
+    "effets": {
+      "ambidextre": 1
+    }
+  },
+  {
+    "_id": "competence:ambidextre_guerrier",
+    "type": "competence",
+    "nom": "Ambidextre",
+    "icon": "⚔️",
+    "description": "Des années de salle d'armes : le bras faible ne l'est plus.",
+    "vocation": "guerrier",
+    "niveau": 8,
+    "mode": "passive",
+    "effets": {
+      "ambidextre": 1
+    }
+  }
+]
