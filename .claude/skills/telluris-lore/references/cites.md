@@ -3,7 +3,7 @@
 Chaque entrée sépare **Auteur** (décision, niveau 2) et **Proposé** (réponse ChatGPT non adoptée, niveau 4). Source : le fichier entre crochets dans `docs/lore/`. Lieux réellement en jeu : `lieu:*` du dump (catégories `ville`, `pays`, `portail`, `temple`, `guilde_aventurier`).
 
 ## Sommaire
-France : Lutecia · Auxerre · Rhemi · Chartres — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri · Camelot — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem · Petra · Aksoum · Sydney — Mythiques : Mu · Atlantis — Réseau des portails
+France : Lutecia · Auxerre · Rhemi · Chartres · Orléans — Italie : Rome · Venise · Gênes — Nord : Bruges · Aix-la-Chapelle · Reykjavik · Akureyri · Camelot — Méditerranée et Orient : Constantinople · Cordoue · Alexandrie · Abou Simbel · Babylone · Jérusalem · Petra · Aksoum · Sydney — Mythiques : Mu · Atlantis — Réseau des portails
 
 ---
 
@@ -242,6 +242,18 @@ Peuplée en jeu ; quartiers : Porte Guillaume, Eure, Basse-Ville, Cloître, Tert
 **Auteur** : **Salomon a vécu après les trois frères** et le début de l'ère des portails. David est **reconnu par Jérusalem comme son roi** (pas de prise) ; « le royaume se divise » → « les cités avoisinantes diminuent leurs relations » ; réduire « royaume » au profit de « Cité-État » (11/10). Colonne réécrite : `monde/20261011_frise_chronologique_fusionnee.md` § 6.
 
 **Tableau (26/08)** : « héritage de Salomon », portail ancien, coûteux, mal compris, pas un passage libre. Salomon a bâti le transversal **Aksoum ↔ Jérusalem** pour la reine de Saba (Auteur, 01/11).
+
+## Orléans — `lieu:orleans` · [cites/20261111_histoire_d_orleans.md]
+**Auteur** (11/11, message + questionnaire interactif)
+- Cité de négociants, bateliers, passeurs ; devise « **Le fleuve nous relie, le commerce nous unit.** » **Genabum** (comptoir carnute, Âge des Remparts, port des sages de Chartres) ; **Aurelianum**, nom savant de l'Âge des Portails. Clovis **retiré**.
+- **Jeanne d'Arc** = **paladine sortie de nulle part** (origine : **théories contradictoires**), **juste après la Vague** : brise les **vagues** de monstres **terrestres, volants et aquatiques** sorties des **portails d'Orléans devenus donjons** ; dernier foyer aux **Tourelles**, **fête du 8 mai**. Apporte à Lutecia l'**évolution du Rayon de lumière en Lance** (`sort:rayon_de_lumiere` → `sort:lance_de_lumiere`), transmise **de maître à élève** ; **repartie comme elle est venue**. Voix gardées, nature ouverte. Compagnons : Dunois, La Hire, Xaintrailles, **Gilles de Rais** (récit ambigu, Barbe-Bleue jamais prouvé).
+- **Pacte perpétuel sans dynastie** avec Lutecia (Architectes contre voies) ; **pas de duc** ; **conseil** avec **veto de l'École des Turcies** sur l'eau, où siège le **maître de la guilde** (Agnan le Gabarrier).
+- Portails : transversaux (héritiers des frères) **Lyon** (port du Châtelet) et **Bruges** (porte de Bourgogne, actif) — **aucun vers Lutecia** ; joueur au **rang A**. **Quatre donjons**, D → B : **Saint-Loup** (forêt, D), **Tourelles** (la Crue, C), **Saint-Jean-le-Blanc** (ciel, B), **Sainte-Croix** (cathédrale = temple-forteresse relevé après Jeanne, ouvre sur **la Croix**, carrefour de chemins qui ne mènent nulle part, B).
+- **Portail des deux crues** : ancien transversal Tourelles ↔ tombeau de l'**Urne** (Petra) ; depuis la Vague, **même Crue** (aval Orléans, source Petra), traversée = rumeur. **École des Turcies** ↔ gardiens des sources : écoles sœurs.
+- **Communauté des marchands fréquentant la rivière de Loire** ; vinaigre d'Orléans (contre le penanggalan), cotignac, sel, bois, tonnellerie, chantiers navals.
+- **Charles d'Orléans** : PNJ vivant, noble sans pouvoir, poète, revenu de la Crue après **vingt-cinq ans** ; dit avoir vu la source à Petra.
+- Au dump : guilde **Le Relais de la Loire** (Perrine Boucher, naine ; Agnan le Gabarrier, ogre).
+- En jeu (11/11) : `dev/gen_orleans.py` → `jsons/orleans_a_importer.json` — temples `lieu:orleans_temple_*`, salles `lieu:orleans_donjon_{foret,crue,ciel,croix}`, `lieu:orleans_chatelet` (→ Lyon) et `lieu:orleans_bourgogne` (→ Bruges), Templiers Florent d'Illiers (nain, Saint-Loup), Raoul de Gaucourt (humain, Tourelles), Archambaud de Villars (ogre, Saint-Jean-le-Blanc), Jamet du Tillay (ogre, Sainte-Croix) ; Charles d'Orléans aux Tourelles ; Maîtresse Ermengarde des Arches (naine, Architecte de Lutecia) au Châtelet ; Agnan mandate les quatre donjons.
 
 ## Aksoum — [cites/20261101_histoire_d_aksoum.md]
 **Auteur** (01/11, trois questionnaires) — carte `towns/aksoum_capital.jpg` (retenue ; **enceinte ouverte à l'ouest voulue** : palais, haras, bassin hors des murs) ; en jeu : `lieu:aksoum` (`dev/gen_aksoum.py`), parent `lieu:abyssinie` en (31, 13) depuis le 03/11 (`dev/gen_afrique.py` ; avant : coin sud-est de l'Afrique du Nord).
