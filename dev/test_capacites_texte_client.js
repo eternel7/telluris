@@ -48,4 +48,9 @@ test('passive Ambidextre : son effet est annoncé (dev/gen_ambidextre.py)', () =
 		'⚔️ seconde arme sans malus');
 });
 
+test('passive Lecture des traces : son effet est annoncé (dev/gen_pistage.py)', () => {
+	assert.strictEqual(_compLigneDesc({ mode: 'passive', effets: { pistage: 1 } }),
+		'🐾 lit les traces (espèce et grade)');
+});
+
 console.log(`✓ ${ok} tests capacites_texte`);

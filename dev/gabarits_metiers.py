@@ -406,6 +406,55 @@ PORTRAIT = {
 		("un ruban de soie", "habit élégant", "rubans, soieries"),
 		("une couverture épaisse", "gilet de laine", "couvertures pliées, toisons"),
 	]),
+	# Grandes maisons (Orléans, 11/11) : plusieurs métiers sous un toit, des commis autour.
+	"grande_corderie": ("dirige une grande corderie", [
+		("un cordage de marine gainé de feutre", "tablier de cuir poissé, mains calleuses", "longue allée de corderie, roues à commettre, câbles tendus sur des chevalets"),
+		("une haussière lovée sur l'épaule", "chemise de grosse toile, gilet de cuir", "rouleaux de haussières, poulies, ancres de gabarre"),
+		("un filet de pêche aux mailles serrées", "foulard noué, manches retroussées", "filets suspendus aux poutres, flotteurs de liège, commis qui ravaudent"),
+		("une poignée de chanvre peigné", "blouse de lin claire, peigne de fer à la ceinture", "bottes de chanvre, peignes à filasse, poussière dorée dans la lumière"),
+		("une corde de halage tressée", "habit de batelier, bonnet de laine", "longues cordes de halage, colliers de chevaux, bittes d'amarrage"),
+		("un écheveau de fil de boyau", "tablier humide, bras nus", "cuves, fils de boyau qui sèchent, cordes d'arc en bottes"),
+		("une échelle de corde roulée", "pourpoint sobre de maître d'atelier, registre sous le bras", "échelles de corde, cordages classés par grosseur, balance à fléau"),
+		("un pot de goudron fumant et un pinceau", "tablier noirci de goudron", "chaudron de goudron, câbles goudronnés, odeur de résine"),
+		("une tresse de lin teinte", "robe de travail, rubans aux poignets", "tresses colorées, métiers à galons, bobines"),
+		("un lasso de cuir et de chanvre", "veste de voyage, bottes", "lassos, cordes de bât, sacs de jute empilés"),
+	]),
+	"maison_des_conserves": ("dirige une maison des conserves", [
+		("un pot de grès scellé à la cire", "tablier blanc, manches roulées", "étagères de pots scellés, jarres de saumure, commis qui étiquettent de signes"),
+		("un jambon salé", "tablier de cuir, coiffe de toile", "jambons pendus aux poutres, bacs de sel, saloir de pierre"),
+		("une anguille fumée", "gilet de laine, foulard au cou", "fumoir au fond, poissons fumés en rangs, claies de bois"),
+		("un biscuit de mer dur", "habit de commis aux vivres, registre à la main", "sacs de biscuits, tonneaux de vivres prêts pour les expéditions"),
+		("un tonnelet de harengs saurs", "tablier taché de saumure", "tonnelets alignés, cuves de saumure, sel en tas"),
+		("un saucisson sec", "chemise ouverte, couteau à la ceinture", "saucissons en guirlandes, planches à découper, ficelles"),
+		("un pain de voyage cuit deux fois", "tablier fariné, bonnet", "four à pain au fond, pains secs en piles, sacs de farine"),
+		("un pot de confit de canard", "robe de travail, tablier épais", "pots de graisse, chaudrons, crochets de volailles"),
+		("une ration de route nouée dans un linge", "tenue soignée de maître d'entrepôt", "caisses de rations pour les auberges-relais, charrettes en chargement"),
+		("une poignée de fruits séchés", "manches retroussées, panier au bras", "claies de fruits séchés, paniers de noix, bocaux de miel"),
+	]),
+	"grande_manufacture_textile": ("dirige une grande manufacture de draps", [
+		("un drap de laine épais aux couleurs vives", "pourpoint de bon drap, ciseaux de tailleur à la ceinture", "rouleaux de draps empilés, grands métiers, commis qui mesurent à l'aune"),
+		("une aune de bois et un coupon", "robe longue de marchand drapier", "comptoir de mesure, draps déroulés, balance pour la laine"),
+		("un écheveau teint de pourpre", "mains teintées, tablier de cuir", "cuves de teinture fumantes, laines suspendues"),
+		("une plume d'apparat", "habit élégant de plumassier", "panaches, plumes triées par couleur, chapeaux garnis"),
+		("une brosse à carder", "gilet de laine, foulard", "cardes, toisons, brosses de drapier"),
+		("une tapisserie roulée", "robe brodée", "tapisseries suspendues, cadres, broderies"),
+		("un rouleau de lin fin", "chemise de lin, bésicles", "rouleaux de lin, ciseaux, tables de coupe"),
+		("une navette de tisserand", "tablier, cheveux tressés", "rangée de métiers à tisser, fils tendus, tisserands au travail"),
+		("un drap foulé encore humide", "tablier mouillé, sabots", "fouloir, bacs d'eau, draps étendus"),
+		("une étoffe de laine venue des Flandres", "manteau de voyage, sacoche de marchand", "ballots de draps des Flandres juste déchargés, cordes, sceaux de plomb"),
+	]),
+	"grandes_halles_alimentaires": ("dirige de grandes halles", [
+		("un panier de poissons de Loire", "tablier de toile, bottes", "étals de poissons sur la glace, anguilles, brochets, commis qui crient"),
+		("une pièce de bœuf sur un billot", "tablier de boucher, couperet", "carcasses pendues, billots, crochets"),
+		("un jambon fumé", "gilet de cuir, bonnet", "jambons et saucissons pendus, odeur de fumée"),
+		("une marmite fumante", "tablier de cuisinier, louche à la main", "fourneaux, chaudrons, bancs de mangeurs"),
+		("une poignée de sel gris", "tablier taché de saumure", "sacs de sel de l'estuaire, saloirs, tonneaux"),
+		("un pâté en croûte", "tenue de traiteur, coiffe", "comptoir de pâtés et tourtes, plats couverts"),
+		("une volaille plumée", "manches retroussées, tablier", "volailles pendues, cages, paniers d'œufs"),
+		("un plateau de cotignac", "robe de travail, tablier propre", "pâtes de coings en boîtes, pots de confiture, coings frais"),
+		("une balance chargée", "habit sobre de maître des halles, registre", "grande halle à charpente, étals alignés, porteurs et charrettes"),
+		("une grappe de saucisses", "chemise ouverte, couteau à la ceinture", "étals de charcuterie, ficelles, planches"),
+	]),
 }
 
 FACADE = {
@@ -805,4 +854,74 @@ FACADE = {
 		"ribbons, silks",
 		"folded blankets, fleeces",
 	]),
+	"grande_corderie": ("great rope works and cordage house", [
+		"long hemp cables stretched on trestles, rope-making wheels",
+		"coiled river-boat hawsers, pulleys, small anchors",
+		"fishing nets hanging, cork floats, workers mending",
+		"bundles of combed hemp, flax combs, golden dust",
+		"towing ropes for river barges, horse collars",
+		"drying gut strings, bowstrings in bundles",
+		"rope ladders, ropes sorted by thickness, a beam scale",
+		"a tar cauldron, tarred cables",
+		"dyed braids, ribbon looms, bobbins",
+		"lassos, pack ropes, stacked jute sacks",
+	]),
+	"maison_des_conserves": ("great house of preserved provisions", [
+		"shelves of wax-sealed stoneware jars, brine jars",
+		"salted hams hanging from the beams, salt tubs",
+		"rows of smoked fish on wooden racks",
+		"sacks of hard ship's biscuit, barrels of travel provisions",
+		"small barrels of salted herring, heaps of salt",
+		"garlands of dry sausages, cutting boards",
+		"stacks of twice-baked travel bread, flour sacks",
+		"pots of preserved duck, cauldrons, hooks",
+		"crates of travel rations being loaded on carts",
+		"racks of dried fruit, baskets of nuts, jars of honey",
+	]),
+	"grande_manufacture_textile": ("great cloth hall and weaving house", [
+		"stacked rolls of brightly dyed woollen cloth, measuring rods",
+		"cloth unrolled on a long measuring counter, a wool scale",
+		"steaming dye vats, hanging wool skeins",
+		"plumes and feathers sorted by colour, plumed hats",
+		"carding brushes, fleeces",
+		"hanging tapestries, embroidery frames",
+		"rolls of fine linen, cutting tables",
+		"a row of looms with weavers at work",
+		"a fulling mill, cloth stretched to dry",
+		"freshly unloaded bales of Flemish cloth with lead seals",
+	]),
+	"grandes_halles_alimentaires": ("great covered food market hall", [
+		"river fish laid on stalls, eels, pike",
+		"hanging carcasses, butcher's blocks",
+		"smoked hams and sausages hanging",
+		"steaming cauldrons and cooking stoves, benches for eaters",
+		"sacks of grey sea salt, salting tubs, barrels",
+		"counters of pies and tarts",
+		"hanging poultry, cages, baskets of eggs",
+		"boxes of quince paste, jars of jam, fresh quinces",
+		"a vast timber-roofed hall with rows of stalls, porters and carts",
+		"charcuterie stalls, strings of sausages",
+	]),
+}
+
+# Bâtiment d'une GRANDE MAISON (plusieurs métiers sous un toit) — anglais, remplace la maison-
+# boutique de deux ou trois étages du gabarit ordinaire (§1 bis) : sur les façades d'Orléans
+# (11/11), « Les Halles du Martroi » sortaient en échoppe de rue, la halle reléguée au fond.
+BATIMENT_GRANDE_MAISON = {
+	"grande_corderie": (
+		"a very long, low ropewalk building of stone and timber, many times longer than a house, "
+		"stretching far into the distance, with a row of wide doors open along its length onto long "
+		"hemp cables stretched on trestles, and a tall warehouse gable with a hoist beam at the near end"),
+	"maison_des_conserves": (
+		"a large stone warehouse of three or four storeys with a steep roof, hoist beams and pulleys "
+		"above stacked loading doors, and a wide ground floor of broad arches open onto barrels, sealed "
+		"jars and sacks, carts being loaded in front"),
+	"grande_manufacture_textile": (
+		"a grand cloth hall of pale stone, much wider than the houses around, with a long arcade of "
+		"pointed arches on the ground floor, tall upper storeys with rows of windows where looms can be "
+		"seen, and lengths of dyed cloth hanging to dry from an upper gallery"),
+	"grandes_halles_alimentaires": (
+		"a vast covered market hall with a huge steep tiled roof carried on rows of massive timber posts, "
+		"open on its sides, sheltering dozens of stalls under one roof — far larger than any house "
+		"around it, the houses of the square looking small beside it"),
 }

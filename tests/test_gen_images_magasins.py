@@ -450,3 +450,22 @@ def test_lot_des_caves_ni_ecriteau_ni_orc_ni_naine_a_taille_humaine():
 	assert "no written label" in facade
 	assert "not orcs, goblins or trolls" in facade
 	assert "never as a corner building" in facade and "side walls of the house are closed masonry" in facade
+
+def test_grande_maison_un_grand_batiment_pas_une_maison_boutique():
+	"""Façades d'Orléans (11/11) : « Les Halles du Martroi » sortaient en échoppe de rue. Une grande
+	maison a son bâtiment propre ; les garde-fous d'écriture, de foule et de style restent."""
+	from dev.gabarits_metiers import BATIMENT_GRANDE_MAISON, FACADE, PORTRAIT
+	from dev.gen_spec_rhemi import constantes_source
+	racine = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+	fusion = constantes_source(os.path.join(racine, "models", "character_stats.py"),
+							   {"LIEU_CATEGORIES_FUSION"})["LIEU_CATEGORIES_FUSION"]
+	assert BATIMENT_GRANDE_MAISON and set(BATIMENT_GRANDE_MAISON) <= set(fusion)
+	ordinaire = prompt_magasin("cave", "ogre", "M", [], "lieu:orleans", "Orléans", "La Barrique des Quais")
+	for cat, batiment in BATIMENT_GRANDE_MAISON.items():
+		assert cat in FACADE and cat in PORTRAIT
+		f = prompt_magasin(cat, "hobbit", "M", [], "lieu:orleans", "Orléans", "Les Halles du Martroi")
+		assert batiment in f
+		assert "town house of two or three storeys" not in f and "town house of two or three storeys" in ordinaire
+		assert "image 1" in f and "No hanging shop sign" in f
+		assert "no written label" in f and "not orcs, goblins or trolls" in f
+		assert "small size inside the shop" in f   # échelle d'un hobbit gardée

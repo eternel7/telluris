@@ -1,0 +1,2061 @@
+[
+	{
+		"_id": "lieu:le_comptoir_de_genabum",
+		"type": "lieu",
+		"label": "Le Comptoir de Genabum",
+		"image": "negoce_europe01.jpg",
+		"categorie": "negociant",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_negociant",
+				"portrait": "marchand_ogre_f_negoce01.jpg",
+				"nom": "Ugra Tord-Boyaux"
+			}
+		]
+	},
+	{
+		"_id": "link:negociant01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					60,
+					21
+				]
+			},
+			{
+				"lieu": "lieu:le_comptoir_de_genabum",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "negociant",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_connaissement_du_chatelet",
+		"type": "lieu",
+		"label": "Le Connaissement du Châtelet",
+		"image": "negoce_europe_chartres01.jpg",
+		"categorie": "negociant",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_negociant",
+				"portrait": "marchand_humain_m_negociant01.jpg",
+				"nom": "Elan Wang"
+			}
+		]
+	},
+	{
+		"_id": "link:negociant02_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					17,
+					22
+				]
+			},
+			{
+				"lieu": "lieu:le_connaissement_du_chatelet",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "negociant",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_pesee_juste_du_martroi",
+		"type": "lieu",
+		"label": "La Pesée Juste du Martroi",
+		"image": "negoce_europe_lutecia01.jpg",
+		"categorie": "negociant",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_negociant",
+				"portrait": "marchand_hobbit_f_negociant01.jpg",
+				"nom": "Michelle Petit-Pas"
+			}
+		]
+	},
+	{
+		"_id": "link:negociant03_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					58,
+					14
+				]
+			},
+			{
+				"lieu": "lieu:la_pesee_juste_du_martroi",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "negociant",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_maison_de_negoce_des_gabarres",
+		"type": "lieu",
+		"label": "La Maison de Négoce des Gabarres",
+		"image": "negoce_europe_lutecia02.jpg",
+		"categorie": "negociant",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_negociant",
+				"portrait": "marchand_hobbit_m_negociant01.jpg",
+				"nom": "Martial Troisquarts"
+			}
+		]
+	},
+	{
+		"_id": "link:negociant04_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					41,
+					12
+				]
+			},
+			{
+				"lieu": "lieu:la_maison_de_negoce_des_gabarres",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "negociant",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_vinaigrier_du_chatelet",
+		"type": "lieu",
+		"label": "Le Vinaigrier du Châtelet",
+		"image": "cave_europe_auxerre01.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_nain_f_cave01.jpg",
+				"nom": "Pendo Lourde-Hache"
+			}
+		]
+	},
+	{
+		"_id": "link:cave01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					43,
+					8
+				]
+			},
+			{
+				"lieu": "lieu:le_vinaigrier_du_chatelet",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_barrique_des_quais",
+		"type": "lieu",
+		"label": "La Barrique des Quais",
+		"image": "cave_europe_auxerre02.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_elfe_f_cave03.jpg",
+				"nom": "Éliane Écorcelune"
+			}
+		]
+	},
+	{
+		"_id": "link:cave02_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					51,
+					21
+				]
+			},
+			{
+				"lieu": "lieu:la_barrique_des_quais",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_pressoir_de_la_porte_de_bourgogne",
+		"type": "lieu",
+		"label": "Le Pressoir de la Porte de Bourgogne",
+		"image": "cave_europe_auxerre03.jpg",
+		"categorie": "cave",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cave",
+				"portrait": "marchand_humain_f_cave01.jpg",
+				"nom": "Kaori de Châtelet"
+			}
+		]
+	},
+	{
+		"_id": "link:cave03_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					47,
+					24
+				]
+			},
+			{
+				"lieu": "lieu:le_pressoir_de_la_porte_de_bourgogne",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cave",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_grenier_a_sel_des_quais",
+		"type": "lieu",
+		"label": "Le Grenier à Sel des Quais",
+		"image": "salaison_europe01.png",
+		"categorie": "salaison",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_salaison",
+				"portrait": "marchand_ogre_m_salaison01.jpg",
+				"nom": "Tupak Lourde-Patte"
+			}
+		]
+	},
+	{
+		"_id": "link:salaison01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					27,
+					13
+				]
+			},
+			{
+				"lieu": "lieu:le_grenier_a_sel_des_quais",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "salaison",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_saumure_de_la_loire",
+		"type": "lieu",
+		"label": "La Saumure de la Loire",
+		"image": "salaison_europe02.png",
+		"categorie": "salaison",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_salaison",
+				"portrait": "marchand_ogre_m_salaison01.jpg",
+				"nom": "Gark Deux-Massues"
+			}
+		]
+	},
+	{
+		"_id": "link:salaison02_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					54,
+					11
+				]
+			},
+			{
+				"lieu": "lieu:la_saumure_de_la_loire",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "salaison",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_cable_des_gabarres",
+		"type": "lieu",
+		"label": "Le Câble des Gabarres",
+		"image": "corderie_europe01.png",
+		"categorie": "corderie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_corderie",
+				"portrait": "marchand_humain_m_corderie05.jpg",
+				"nom": "Günther Ek"
+			}
+		]
+	},
+	{
+		"_id": "link:corderie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					35,
+					26
+				]
+			},
+			{
+				"lieu": "lieu:le_cable_des_gabarres",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "corderie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_haussiere_du_halage",
+		"type": "lieu",
+		"label": "La Haussière du Halage",
+		"image": "corderie_europe02.png",
+		"categorie": "corderie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_corderie",
+				"portrait": "marchand_ogre_m_corderie.png",
+				"nom": "Morg Avale-Tout"
+			}
+		]
+	},
+	{
+		"_id": "link:corderie02_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					18,
+					17
+				]
+			},
+			{
+				"lieu": "lieu:la_haussiere_du_halage",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "corderie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_douelle_des_turcies",
+		"type": "lieu",
+		"label": "La Douelle des Turcies",
+		"image": "atelier_d_artisan_europe01.png",
+		"categorie": "atelier_d_artisan",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_d_artisan",
+				"portrait": "marchand_nain_m_atelier_d_artisan02.jpg",
+				"nom": "Kazrag Piochefer"
+			}
+		]
+	},
+	{
+		"_id": "link:atelier_d_artisan01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					39,
+					31
+				]
+			},
+			{
+				"lieu": "lieu:la_douelle_des_turcies",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "atelier_d_artisan",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_chantier_du_fil_de_l_eau",
+		"type": "lieu",
+		"label": "Le Chantier du Fil de l'Eau",
+		"image": "atelier_d_artisan_europe02.png",
+		"categorie": "atelier_d_artisan",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_d_artisan",
+				"portrait": "marchand_nain_m_atelier_d_artisan01.png",
+				"nom": "Grimnur Piochefer"
+			}
+		]
+	},
+	{
+		"_id": "link:atelier_d_artisan02_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					50,
+					11
+				]
+			},
+			{
+				"lieu": "lieu:le_chantier_du_fil_de_l_eau",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "atelier_d_artisan",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_billot_du_martroi",
+		"type": "lieu",
+		"label": "Le Billot du Martroi",
+		"image": "boucherie_europe01.png",
+		"categorie": "boucherie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boucherie",
+				"portrait": "marchand_hobbit_f_boucherie01.jpg",
+				"nom": "Mirabelle Verte-Herbe"
+			}
+		]
+	},
+	{
+		"_id": "link:boucherie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					31,
+					26
+				]
+			},
+			{
+				"lieu": "lieu:le_billot_du_martroi",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "boucherie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_hampe_de_la_porte_bannier",
+		"type": "lieu",
+		"label": "La Hampe de la Porte Bannier",
+		"image": "boucherie_europe02.png",
+		"categorie": "boucherie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boucherie",
+				"portrait": "marchand_humain_f_boucherie04.jpg",
+				"nom": "Vanessa Kamau"
+			}
+		]
+	},
+	{
+		"_id": "link:boucherie02_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					45,
+					31
+				]
+			},
+			{
+				"lieu": "lieu:la_hampe_de_la_porte_bannier",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "boucherie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_miche_de_sainte_croix",
+		"type": "lieu",
+		"label": "La Miche de Sainte-Croix",
+		"image": "boulangerie_europe01.jpg",
+		"categorie": "boulangerie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boulangerie",
+				"portrait": "marchand_elfe_f_boulangerie.jpg",
+				"nom": "Nimloth Rondevalle"
+			}
+		]
+	},
+	{
+		"_id": "link:boulangerie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					28,
+					10
+				]
+			},
+			{
+				"lieu": "lieu:la_miche_de_sainte_croix",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "boulangerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:l_epi_de_la_porte_bannier",
+		"type": "lieu",
+		"label": "L'Épi de la Porte Bannier",
+		"image": "boulangerie_europe02.jpg",
+		"categorie": "boulangerie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boulangerie",
+				"portrait": "marchand_elfe_f_boulangerie07.jpg",
+				"nom": "Safiya Fleurépine"
+			}
+		]
+	},
+	{
+		"_id": "link:boulangerie02_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					32,
+					13
+				]
+			},
+			{
+				"lieu": "lieu:l_epi_de_la_porte_bannier",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "boulangerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_cotignac_du_martroi",
+		"type": "lieu",
+		"label": "Le Cotignac du Martroi",
+		"image": "cuisine_europe01.jpg",
+		"categorie": "cuisine",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cuisine",
+				"portrait": "marchand_nain_m_cuisine01.jpg",
+				"nom": "Thorin Grave-Enclume"
+			}
+		]
+	},
+	{
+		"_id": "link:cuisine01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					52,
+					15
+				]
+			},
+			{
+				"lieu": "lieu:le_cotignac_du_martroi",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cuisine",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_marmite_des_bateliers",
+		"type": "lieu",
+		"label": "La Marmite des Bateliers",
+		"image": "cuisine_europe02.jpg",
+		"categorie": "cuisine",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_cuisine",
+				"portrait": "marchand_elfe_f_cuisine01.jpg",
+				"nom": "Yasmine Feuillargent"
+			}
+		]
+	},
+	{
+		"_id": "link:cuisine02_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					62,
+					12
+				]
+			},
+			{
+				"lieu": "lieu:la_marmite_des_bateliers",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cuisine",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_clos_aux_coings",
+		"type": "lieu",
+		"label": "Le Clos aux Coings",
+		"image": "jardinier_europe01.png",
+		"categorie": "jardinier",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_jardinier",
+				"portrait": "marchand_hobbit_f_jardinier01.jpg",
+				"nom": "Salvia Pied-Léger"
+			}
+		]
+	},
+	{
+		"_id": "link:jardinier01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					54,
+					27
+				]
+			},
+			{
+				"lieu": "lieu:le_clos_aux_coings",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "jardinier",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_verger_des_turcies",
+		"type": "lieu",
+		"label": "Le Verger des Turcies",
+		"image": "jardinier_europe02.png",
+		"categorie": "jardinier",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_jardinier",
+				"portrait": "marchand_humain_f_jardinier02.jpg",
+				"nom": "Yīnuò Romano"
+			}
+		]
+	},
+	{
+		"_id": "link:jardinier02_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					43,
+					17
+				]
+			},
+			{
+				"lieu": "lieu:le_verger_des_turcies",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "jardinier",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_haloir_a_poissons_des_quais",
+		"type": "lieu",
+		"label": "Le Haloir à Poissons des Quais",
+		"image": "fumoir_europe01.png",
+		"categorie": "fumoir",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_fumoir",
+				"portrait": "marchand_nain_m_fumoir01.jpg",
+				"nom": "Morgrim Fendroc"
+			}
+		]
+	},
+	{
+		"_id": "link:fumoir01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					59,
+					26
+				]
+			},
+			{
+				"lieu": "lieu:le_haloir_a_poissons_des_quais",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "fumoir",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:les_chevaux_du_halage",
+		"type": "lieu",
+		"label": "Les Chevaux du Halage",
+		"image": "etable_europe01.png",
+		"categorie": "etable",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_etable",
+				"portrait": "marchand_ogre_f_etable01.jpg",
+				"nom": "Brakka Grande-Faim"
+			}
+		]
+	},
+	{
+		"_id": "link:etable01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					42,
+					20
+				]
+			},
+			{
+				"lieu": "lieu:les_chevaux_du_halage",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "etable",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_corroi_de_la_loire",
+		"type": "lieu",
+		"label": "Le Corroi de la Loire",
+		"image": "tannerie_europe01.png",
+		"categorie": "tannerie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_tannerie",
+				"portrait": "marchand_elfe_f_tannerie03.jpg",
+				"nom": "Yavielle Astrebrillant"
+			}
+		]
+	},
+	{
+		"_id": "link:tannerie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					64,
+					20
+				]
+			},
+			{
+				"lieu": "lieu:le_corroi_de_la_loire",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "tannerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:l_herbier_de_sainte_croix",
+		"type": "lieu",
+		"label": "L'Herbier de Sainte-Croix",
+		"image": "apothicairerie_europe01.png",
+		"categorie": "apothicairerie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_apothicairerie",
+				"portrait": "marchand_elfe_f_apothicairerie.png",
+				"nom": "Melian Astrebrillant"
+			}
+		]
+	},
+	{
+		"_id": "link:apothicairerie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					38,
+					27
+				]
+			},
+			{
+				"lieu": "lieu:l_herbier_de_sainte_croix",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "apothicairerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:l_enclume_des_tourelles",
+		"type": "lieu",
+		"label": "L'Enclume des Tourelles",
+		"image": "armurerie_europe01.jpg",
+		"categorie": "armurerie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_armurerie",
+				"portrait": "marchand_humain_m_armurerie02.jpg",
+				"nom": "Kofi Foster"
+			}
+		]
+	},
+	{
+		"_id": "link:armurerie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					46,
+					28
+				]
+			},
+			{
+				"lieu": "lieu:l_enclume_des_tourelles",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "armurerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_cierge_du_huit_mai",
+		"type": "lieu",
+		"label": "Le Cierge du Huit-Mai",
+		"image": "atelier_de_cirier_europe01.png",
+		"categorie": "atelier_de_cirier",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_de_cirier",
+				"portrait": "marchand_nain_m_cirier.png",
+				"nom": "Grimnur Brise-Mine"
+			}
+		]
+	},
+	{
+		"_id": "link:atelier_de_cirier01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					39,
+					8
+				]
+			},
+			{
+				"lieu": "lieu:le_cierge_du_huit_mai",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "atelier_de_cirier",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_penne_de_la_foret",
+		"type": "lieu",
+		"label": "La Penne de la Forêt",
+		"image": "atelier_de_l_empenneur_europe01.png",
+		"categorie": "atelier_de_l_empenneur",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_de_l_empenneur",
+				"portrait": "marchand_hobbit_m_atelier_de_l_empenneur01.jpg",
+				"nom": "Auguste Troisquarts"
+			}
+		]
+	},
+	{
+		"_id": "link:atelier_de_l_empenneur01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					42,
+					27
+				]
+			},
+			{
+				"lieu": "lieu:la_penne_de_la_foret",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "atelier_de_l_empenneur",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:l_arc_de_la_hire",
+		"type": "lieu",
+		"label": "L'Arc de La Hire",
+		"image": "archerie_europe01.png",
+		"categorie": "fletcher",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_fletcher",
+				"portrait": "marchand_hobbit_m_fletcher04.jpg",
+				"nom": "Jean-Baptiste Souscolline"
+			}
+		]
+	},
+	{
+		"_id": "link:fletcher01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					35,
+					9
+				]
+			},
+			{
+				"lieu": "lieu:l_arc_de_la_hire",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "fletcher",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_sertissure_du_chatelet",
+		"type": "lieu",
+		"label": "La Sertissure du Châtelet",
+		"image": "bijouterie_europe01.png",
+		"categorie": "bijouterie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_bijouterie",
+				"portrait": "marchand_elfe_f_bijouterie05.jpg",
+				"nom": "Gertrud Rondevalle"
+			}
+		]
+	},
+	{
+		"_id": "link:bijouterie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					23,
+					13
+				]
+			},
+			{
+				"lieu": "lieu:la_sertissure_du_chatelet",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "bijouterie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_collier_de_halage",
+		"type": "lieu",
+		"label": "Le Collier de Halage",
+		"image": "bourrellerie_europe01.png",
+		"categorie": "bourrellerie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_bourrellerie",
+				"portrait": "marchand_humain_m_bourrellerie04.jpg",
+				"nom": "Lucas Kobayashi"
+			}
+		]
+	},
+	{
+		"_id": "link:bourrellerie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					57,
+					11
+				]
+			},
+			{
+				"lieu": "lieu:le_collier_de_halage",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "bourrellerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_baudruche_des_quais",
+		"type": "lieu",
+		"label": "La Baudruche des Quais",
+		"image": "boyauderie_europe01.png",
+		"categorie": "boyauderie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_boyauderie",
+				"portrait": "marchand_ogre_m_boyauderie02.jpg",
+				"nom": "Aimé Pousse-Rocs"
+			}
+		]
+	},
+	{
+		"_id": "link:boyauderie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					32,
+					9
+				]
+			},
+			{
+				"lieu": "lieu:la_baudruche_des_quais",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "boyauderie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:l_epoussette_de_genabum",
+		"type": "lieu",
+		"label": "L'Époussette de Genabum",
+		"image": "brosserie_europe01.png",
+		"categorie": "brosserie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_brosserie",
+				"portrait": "marchand_ogre_m_brosserie.png",
+				"nom": "Thok Gros-Bide"
+			}
+		]
+	},
+	{
+		"_id": "link:brosserie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					26,
+					25
+				]
+			},
+			{
+				"lieu": "lieu:l_epoussette_de_genabum",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "brosserie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_mortier_des_deux_crues",
+		"type": "lieu",
+		"label": "Le Mortier des Deux Crues",
+		"image": "cabinet_alchimie_europe01.png",
+		"categorie": "laboratoire_d_alchimie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_laboratoire_d_alchimie",
+				"portrait": "marchand_elfe_f_laboratoire_d_alchimie03.jpg",
+				"nom": "Tinuviel Feuillargent"
+			}
+		]
+	},
+	{
+		"_id": "link:laboratoire_d_alchimie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					25,
+					20
+				]
+			},
+			{
+				"lieu": "lieu:le_mortier_des_deux_crues",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "laboratoire_d_alchimie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_rondeau_du_martroi",
+		"type": "lieu",
+		"label": "Le Rondeau du Martroi",
+		"image": "lutherie_europe01.png",
+		"categorie": "lutherie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_lutherie",
+				"portrait": "marchand_humain_m_lutherie04.jpg",
+				"nom": "Gustave Hunter"
+			}
+		]
+	},
+	{
+		"_id": "link:lutherie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					51,
+					18
+				]
+			},
+			{
+				"lieu": "lieu:le_rondeau_du_martroi",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "lutherie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_gibeciere_du_passeur",
+		"type": "lieu",
+		"label": "La Gibecière du Passeur",
+		"image": "maroquinerie_europe01.png",
+		"categorie": "maroquinerie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_maroquinerie",
+				"portrait": "marchand_nain_f_maroquinerie.png",
+				"nom": "Jacqueline Brise-Mine"
+			}
+		]
+	},
+	{
+		"_id": "link:maroquinerie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					46,
+					20
+				]
+			},
+			{
+				"lieu": "lieu:la_gibeciere_du_passeur",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "maroquinerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_linceul_des_tourelles",
+		"type": "lieu",
+		"label": "Le Linceul des Tourelles",
+		"image": "necromancie_europe01.png",
+		"categorie": "necromancie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_necromancie",
+				"portrait": "marchand_humain_m_necromancie.png",
+				"nom": "Jun Anderson"
+			}
+		]
+	},
+	{
+		"_id": "link:necromancie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					57,
+					23
+				]
+			},
+			{
+				"lieu": "lieu:le_linceul_des_tourelles",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "necromancie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_duvet_des_greves",
+		"type": "lieu",
+		"label": "Le Duvet des Grèves",
+		"image": "plumasserie_europe01.png",
+		"categorie": "plumasserie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_plumasserie",
+				"portrait": "marchand_hobbit_f_plumasserie02.jpg",
+				"nom": "Eglantine Souscolline"
+			}
+		]
+	},
+	{
+		"_id": "link:plumasserie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					55,
+					16
+				]
+			},
+			{
+				"lieu": "lieu:le_duvet_des_greves",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "plumasserie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_battoir_de_la_loire",
+		"type": "lieu",
+		"label": "Le Battoir de la Loire",
+		"image": "savonnerie_europe01.png",
+		"categorie": "savonnerie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_savonnerie",
+				"portrait": "marchand_ogre_m_savonnerie.png",
+				"nom": "Gor Tord-Boyaux"
+			}
+		]
+	},
+	{
+		"_id": "link:savonnerie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					50,
+					24
+				]
+			},
+			{
+				"lieu": "lieu:le_battoir_de_la_loire",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "savonnerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_velin_d_aurelianum",
+		"type": "lieu",
+		"label": "Le Vélin d'Aurelianum",
+		"image": "scriptorium_europe01.png",
+		"categorie": "scriptorium",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_scriptorium",
+				"portrait": "marchand_humain_m_scriptorium04.jpg",
+				"nom": "Jean de Valmont"
+			}
+		]
+	},
+	{
+		"_id": "link:scriptorium01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					20,
+					24
+				]
+			},
+			{
+				"lieu": "lieu:le_velin_d_aurelianum",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "scriptorium",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_plaquette_du_vieux_pont",
+		"type": "lieu",
+		"label": "La Plaquette du Vieux Pont",
+		"image": "tabletterie_europe01.png",
+		"categorie": "tabletterie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_tabletterie",
+				"portrait": "marchand_hobbit_f_tabletterie02.jpg",
+				"nom": "Amaranthe Basse-Vallée"
+			}
+		]
+	},
+	{
+		"_id": "link:tabletterie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					36,
+					22
+				]
+			},
+			{
+				"lieu": "lieu:la_plaquette_du_vieux_pont",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "tabletterie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_grande_corderie_des_gabarriers",
+		"type": "lieu",
+		"label": "La Grande Corderie des Gabarriers",
+		"image": "grande_corderie_europe01.jpg",
+		"categorie": "grande_corderie",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_grande_corderie",
+				"portrait": "marchand_humain_m_grande_corderie01.jpg",
+				"nom": "Liam Rossi"
+			}
+		]
+	},
+	{
+		"_id": "link:grande_corderie01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					22,
+					19
+				]
+			},
+			{
+				"lieu": "lieu:la_grande_corderie_des_gabarriers",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "grande_corderie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_grenier_des_expeditions",
+		"type": "lieu",
+		"label": "Le Grenier des Expéditions",
+		"image": "maison_des_conserves_europe01.jpg",
+		"categorie": "maison_des_conserves",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_maison_des_conserves",
+				"portrait": "marchand_hobbit_f_maison_des_conserves01.jpg",
+				"nom": "Lobelia Fouilleterre"
+			}
+		]
+	},
+	{
+		"_id": "link:maison_des_conserves01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					48,
+					17
+				]
+			},
+			{
+				"lieu": "lieu:le_grenier_des_expeditions",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "maison_des_conserves",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_halle_aux_draps_de_bourgogne",
+		"type": "lieu",
+		"label": "La Halle aux Draps de Bourgogne",
+		"image": "grande_manufacture_textile_europe01.jpg",
+		"categorie": "grande_manufacture_textile",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_grande_manufacture_textile",
+				"portrait": "marchand_ogre_m_grande_manufacture_textile01.jpg",
+				"nom": "Gronk Deux-Massues"
+			}
+		]
+	},
+	{
+		"_id": "link:grande_manufacture_textile01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					36,
+					13
+				]
+			},
+			{
+				"lieu": "lieu:la_halle_aux_draps_de_bourgogne",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "grande_manufacture_textile",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:les_halles_du_martroi",
+		"type": "lieu",
+		"label": "Les Halles du Martroi",
+		"image": "grandes_halles_alimentaires_europe01.jpg",
+		"categorie": "grandes_halles_alimentaires",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": [],
+		"pnj": [
+			{
+				"character": "pnj:marchand_grandes_halles_alimentaires",
+				"portrait": "marchand_hobbit_m_grandes_halles_alimentaires01.jpg",
+				"nom": "Kaito Fouilleterre"
+			}
+		]
+	},
+	{
+		"_id": "link:grandes_halles_alimentaires01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					44,
+					23
+				]
+			},
+			{
+				"lieu": "lieu:les_halles_du_martroi",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "grandes_halles_alimentaires",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:au_passeur_de_loire",
+		"type": "lieu",
+		"label": "Au Passeur de Loire",
+		"image": "auberge_europe01.png",
+		"categorie": "auberge",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:auberge01_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					23,
+					23
+				]
+			},
+			{
+				"lieu": "lieu:au_passeur_de_loire",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "auberge",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_gabarre_amarree",
+		"type": "lieu",
+		"label": "La Gabarre Amarrée",
+		"image": "auberge_europe03.png",
+		"categorie": "auberge",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:auberge02_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					47,
+					8
+				]
+			},
+			{
+				"lieu": "lieu:la_gabarre_amarree",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "auberge",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:l_auberge_du_huit_mai",
+		"type": "lieu",
+		"label": "L'Auberge du Huit-Mai",
+		"image": "auberge_europe04.png",
+		"categorie": "auberge",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:auberge03_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					33,
+					18
+				]
+			},
+			{
+				"lieu": "lieu:l_auberge_du_huit_mai",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "auberge",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:a_l_etendard_de_dunois",
+		"type": "lieu",
+		"label": "À l'Étendard de Dunois",
+		"image": "auberge_europe07.jpg",
+		"categorie": "auberge",
+		"lieu_parent": "lieu:orleans",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:auberge04_to_orleans",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:orleans",
+				"pos": [
+					63,
+					16
+				]
+			},
+			{
+				"lieu": "lieu:a_l_etendard_de_dunois",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "auberge",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "item:Vinaigre_d_Orleans",
+		"type": "item",
+		"nom": "Vinaigre d'Orléans",
+		"description": "Vinaigre des vinaigriers du Châtelet, mûri sans hâte en fûts de chêne au bord de la Loire. On en charge les navires qui partent vers les mers de Mu : le penanggalan le craint.",
+		"icon": "🫙",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "condiment",
+		"slots": [],
+		"tags": [],
+		"poids": 0.8,
+		"valeur": [
+			{
+				"cu": 12
+			},
+			{
+				"cu": 30
+			}
+		]
+	},
+	{
+		"_id": "recette:specialite_vinaigre_d_orleans",
+		"type": "recette",
+		"lieu_categorie": "cave",
+		"lieu_portee": "lieu:orleans",
+		"objet_final": "Vinaigre_d_Orleans",
+		"quantite_produite": 3,
+		"matieres_premieres": [
+			{
+				"item": "item:Vin_de_pays",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "item:Moutarde_d_Orleans",
+		"type": "item",
+		"nom": "Moutarde d'Orléans",
+		"description": "Graines broyées au vinaigre d'Orléans, à la meule de pierre. Douce d'abord, puis elle mord.",
+		"icon": "🟡",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "condiment",
+		"slots": [],
+		"tags": [],
+		"poids": 0.4,
+		"valeur": [
+			{
+				"cu": 18
+			},
+			{
+				"cu": 45
+			}
+		]
+	},
+	{
+		"_id": "recette:specialite_moutarde_d_orleans",
+		"type": "recette",
+		"lieu_categorie": "cave",
+		"lieu_portee": "lieu:orleans",
+		"objet_final": "Moutarde_d_Orleans",
+		"quantite_produite": 3,
+		"matieres_premieres": [
+			{
+				"item": "item:Graines_de_moutarde",
+				"quantite": 3
+			},
+			{
+				"item": "item:Vinaigre_d_Orleans",
+				"quantite": 1
+			},
+			{
+				"item": "item:Sel",
+				"quantite": 1
+			}
+		]
+	}
+]

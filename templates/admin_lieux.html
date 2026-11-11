@@ -300,6 +300,10 @@ const COLS_DEFAUT = ['lieu', 'categorie', 'image', 'pnj', 'lien_type', 'pos_ici'
 // Distance (Chebyshev) à une porte de boutique existante pour qu'une case soit « sur une rue
 // commerçante ». Au-delà, 📍 ne la propose qu'en dernier recours.
 const PROPOSITION_RAYON = 2;
+// Plancher de taille de la région visée par le colimaçon de `_regionCible` : en dessous, une poche
+// (cour, îlot) tombée au centre de la carte n'est pas la ville. Mesuré sur le dump du 11/11 : la
+// poche centrale de Tokyo fait 10 cases, la plus petite cité intra-muros (Camelot) 109.
+const REGION_TAILLE_MIN = 50;
 
 let villeId = '';
 let villeDoc = null;      // doc de la ville : cells, nav, dimensions
@@ -390,19 +394,60 @@ function _posValide(pos) {
 	return Array.isArray(pos) && pos.length === 2 && pos.every(v => Number.isInteger(v) && v >= 0);
 }
 
+// Région où poser les boutiques : la VILLE, pas la plus grande région (souvent la campagne hors
+// les murs — Rhemi, Chartres, Auxerre, Orléans). `region` = rangs de `voiesRegions` (y*W+x),
+// calculés sur cells + nav SANS les connexions : un intra-muros dont les portes ne sont pas encore
+// posées reste visé. Par ordre :
+//   1. `zone` [x, y] (spec) dans une région → celle-ci (rive gauche, faubourg voulu) ;
+//   2. la région qui porte le plus de portes existantes (`ancres`) — ville déjà peuplée, même
+//      excentrée (Douvres, port au bord de la carte) ; égalité → la plus grande (rang le plus bas) ;
+//   3. colimaçon depuis le centre de la carte (anneaux de Chebyshev, puis angle) : la première
+//      région d'au moins `plancher` cases ;
+//   4. région 0.
+// Rend { rang, raison } (raison ∈ 'zone' | 'portes' | 'centre' | 'principale'), rang -1 sans case.
+function _regionCible(region, W, H, ancres, zone, plancher) {
+	const tailles = [];
+	for (let i = 0; i < region.length; i++) {
+		const r = region[i];
+		if (r >= 0) tailles[r] = (tailles[r] || 0) + 1;
+	}
+	if (!tailles.length) return { rang: -1, raison: 'principale' };
+	const rangEn = p => (Array.isArray(p) && p.length === 2 && Number.isInteger(p[0]) && Number.isInteger(p[1])
+		&& p[0] >= 0 && p[1] >= 0 && p[0] < W && p[1] < H) ? region[p[1] * W + p[0]] : -1;
+	const rz = rangEn(zone);
+	if (rz >= 0) return { rang: rz, raison: 'zone' };
+	const parRang = new Array(tailles.length).fill(0);
+	for (const a of (ancres || [])) { const r = rangEn(a); if (r >= 0) parRang[r]++; }
+	let meilleur = -1;
+	parRang.forEach((n, r) => { if (n > 0 && (meilleur < 0 || n > parRang[meilleur])) meilleur = r; });
+	if (meilleur >= 0) return { rang: meilleur, raison: 'portes' };
+	const cx = (W - 1) / 2, cy = (H - 1) / 2;
+	const ordre = [];
+	for (let i = 0; i < region.length; i++) {
+		if (region[i] < 0 || (tailles[region[i]] || 0) < (plancher || 0)) continue;
+		const x = i % W, y = Math.floor(i / W);
+		ordre.push([Math.max(Math.abs(x - cx), Math.abs(y - cy)), Math.atan2(y - cy, x - cx), i]);
+	}
+	ordre.sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]);
+	if (ordre.length) return { rang: region[ordre[0][2]], raison: 'centre' };
+	return { rang: 0, raison: 'principale' };
+}
+
 // Cases proposées pour `n` nouvelles portes. `region` = rangs de `voiesRegions` (index y*W+x) :
-// seules les cases de la région PRINCIPALE (rang 0) sont candidates — atteignables à pied
-// depuis l'essentiel de la carte, sous la règle de marche de deplacement.js.
+// seules les cases de la région `cible` (rang, défaut 0 ; cf. `_regionCible`) sont candidates —
+// atteignables à pied entre elles, sous la règle de marche de deplacement.js.
 // Parmi elles, on préfère celles à ≤ `rayon` d'une porte de boutique (`ancres`) : une rue
 // commerçante plutôt qu'un champ hors les murs. Puis tirage « le plus loin » : la case la plus
 // éloignée des `repoussoirs` (portes du même métier, cases déjà proposées) ; à égalité, la plus
 // proche d'une boutique, puis l'ordre de lecture. Jamais sur un repoussoir. DÉTERMINISTE.
-function _proposerCases(region, W, ancres, repoussoirs, n, rayon) {
+function _proposerCases(region, W, ancres, repoussoirs, n, rayon, cible) {
+	const visee = cible == null ? 0 : cible;
+	if (visee < 0) return [];   // -1 marque les cases HORS région : jamais candidates
 	const cheb = (ax, ay, bx, by) => Math.max(Math.abs(ax - bx), Math.abs(ay - by));
 	const dMin = (x, y, pts) => pts.reduce((m, p) => Math.min(m, cheb(x, y, p[0], p[1])), Infinity);
 	const lesAncres = ancres || [];
 	const libres = [];
-	for (let i = 0; i < region.length; i++) if (region[i] === 0) libres.push([i % W, Math.floor(i / W)]);
+	for (let i = 0; i < region.length; i++) if (region[i] === visee) libres.push([i % W, Math.floor(i / W)]);
 	const proches = lesAncres.length ? libres.filter(([x, y]) => dMin(x, y, lesAncres) <= rayon) : [];
 	const candidats = proches.length ? proches : libres;
 	const repousse = (repoussoirs || []).map(p => [p[0], p[1]]);
@@ -817,8 +862,9 @@ async function importerSortie() {
 }
 
 // 📍 Compléter les positions : une case ACCESSIBLE pour chaque magasin de la spec qui n'en a pas.
-// Accessible = région principale de la ville sous la règle d'exploration (voies.js prend la
-// règle de marche dans deplacement.js) — le serveur refusera de toute façon une case ≠ 1.
+// Accessible = région de la VILLE (`_regionCible` ; `spec.zone` [x, y] la force) sous la règle
+// d'exploration (voies.js prend la règle de marche dans deplacement.js) — le serveur refusera de
+// toute façon une case ≠ 1.
 function completerPositions() {
 	let spec;
 	try { spec = JSON.parse($('p-json').value || '{}'); } catch (e) { setJsonStatus('JSON invalide : ' + e.message, 'err'); return; }
@@ -830,16 +876,18 @@ function completerPositions() {
 	if (!cells || !cells.length) { setJsonStatus("Cette ville n'a pas de grille chargée.", 'err'); return; }
 	const dims = (villeDoc.dimensions && villeDoc.dimensions.x)
 		? villeDoc.dimensions : { x: (cells[0] || []).length, y: cells.length };
-	const { region } = voiesRegions(voiesGraphe(cells, villeDoc.nav || {}, dims, 'exploration'));
+	const { region, tailles } = voiesRegions(voiesGraphe(cells, villeDoc.nav || {}, dims, 'exploration'));
 	const portes = portesDeVille(connexions, villeId);
 	const ancres = portes.filter(p => p.categorie && p.categorie !== PORTE_CATEGORIE && p.categorie !== 'pays').map(p => p.pos);
+	const cible = _regionCible(region, dims.x, dims.y, ancres, spec.zone, REGION_TAILLE_MIN);
+	const pourquoi = { zone: 'zone de la spec', portes: 'le plus de portes existantes', centre: 'centre de la carte', principale: 'région principale' }[cible.raison];
 	const poses = [];
 	const lignes = [];
 	spec.magasins.forEach(m => {
 		if (!m || typeof m !== 'object') return;
 		if (_posValide(m.pos)) { poses.push(m.pos); return; }
 		const repoussoirs = portes.filter(p => p.categorie === m.categorie).map(p => p.pos).concat(poses);
-		const [pos] = _proposerCases(region, dims.x, ancres, repoussoirs, 1, PROPOSITION_RAYON);
+		const [pos] = _proposerCases(region, dims.x, ancres, repoussoirs, 1, PROPOSITION_RAYON, cible.rang);
 		if (pos) {
 			m.pos = pos;
 			poses.push(pos);
@@ -848,8 +896,9 @@ function completerPositions() {
 	});
 	spec.cite = villeId;
 	$('p-json').value = JSON.stringify(spec, null, 2);
+	const zoneTxt = cible.rang >= 0 ? ` Zone : ${tailles[cible.rang]} cases (${pourquoi}).` : '';
 	setJsonStatus(lignes.length
-		? `📍 ${lignes.length} position(s) proposée(s) — ${lignes.join(' · ')}. Relisez avant ▶.`
+		? `📍 ${lignes.length} position(s) proposée(s) — ${lignes.join(' · ')}.${zoneTxt} Relisez avant ▶.`
 		: 'Aucune position manquante.', 'ok');
 }
 

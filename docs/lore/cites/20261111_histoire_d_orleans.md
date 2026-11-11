@@ -284,6 +284,12 @@ Les douze images livrées, enregistrées sous les noms du § 9 (1376 × 768).
 - **Cartes de combat** : quadrillage dessiné relevé à l'œil (la Croix et la Crue 60 × 33, le ciel et la forêt 30 × 17) — ⚠️ première passe **à valider en jeu**.
 - Remarques sur les images : des **ogres verts** (Architecte, port du Châtelet) ; « N » / « NORD » sur les roses des vents ; croix rouges sur les surcots des Templiers de Saint-Loup.
 
+## ✍️ Auteur — ancrages ajoutés (11/11/2026, préparation des boutiques)
+
+- **Le Martroi** : la grande place d'Orléans (nom réel), retenu comme toponyme de la cité.
+- **Le halage** : chemins de halage le long de la Loire, chevaux et haleurs qui remontent les gabarres à contre-courant ; retenu.
+- Boutiques : **4 négociants** et **2 corderies** validés ; le **vinaigre d'Orléans** entre dans la même demande.
+
 ## 8. Points ouverts
 
 - Origine de Jeanne, sa fin, la nature de ses voix, ce que cherchait Gilles de Rais : **ouverts par décision**.

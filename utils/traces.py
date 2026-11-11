@@ -6,9 +6,10 @@
 # ville, le tirage même de `combat._pick_profil`), mesurée par `potentiel.potentiel_menace`
 # (combat × fuite interdite, la mesure du rang de /admin/table et des épreuves).
 #
-# - Sans forestier : le seul LIBELLÉ de dangerosité (`potentiel.RANG_LIBELLES`) et le rang.
-# - Avec un FORESTIER dans le groupe (`expedition.membres`, principal ou compagnon, vocation
-#   `forestier`) : il nomme l'espèce et son grade.
+# - Sans pisteur : le seul LIBELLÉ de dangerosité (`potentiel.RANG_LIBELLES`) et le rang.
+# - Avec un PISTEUR dans le groupe (`expedition.membres`, principal ou compagnon, qui connaît
+#   une passive à effet `pistage` — « Lecture des traces », forestier niveau 0, cf.
+#   dev/gen_pistage.py) : il nomme l'espèce et son grade.
 #
 # Rien n'est stocké sur le personnage : la lecture est refaite à chaque pas (aucune
 # migration, rien à périmer). Le client n'annonce qu'un CHANGEMENT de lecture (`cle`).
@@ -22,8 +23,6 @@ from utils.zones import (
 	compute_zone_intensity, load_zone_defs_for_lieu, especes_rencontrables, profils_candidats, profils_compatibles,
 	resolve_profil_weights,
 )
-
-VOCATION_PISTEUR = "forestier"
 
 _MENACE_CACHE: dict = {}
 
@@ -84,8 +83,12 @@ def pire_menace(lieu: dict, position: dict, zone_defs: dict, especes: dict, prof
 
 
 def pisteur(membres: list) -> dict | None:
-	"""Le premier membre du groupe de vocation forestier (principal EN TÊTE), ou None."""
-	return next((m for m in membres or [] if (m or {}).get("voc") == VOCATION_PISTEUR), None)
+	"""Le premier membre du groupe qui CONNAÎT une passive de pistage (principal EN TÊTE), ou
+	None. Lu sur l'agrégat `competences_bonus` (clé `pistage`, cf. `competences.bonus_passifs`),
+	comme l'ambidextrie au snapshot de combat : la vocation COURANTE n'y est pour rien — un
+	ancien forestier garde sa lecture, un aspirant forestier ne l'a qu'une fois apprise."""
+	return next((m for m in membres or []
+				 if int(((m or {}).get("competences_bonus") or {}).get("pistage") or 0) > 0), None)
 
 
 def _nom_membre(m: dict) -> str:

@@ -245,7 +245,7 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 	sources: list = []
 	auras: list = []
 	regen_pv = regen_pm = esquive = 0
-	detection_pieges = desamorcage = ambidextre = 0
+	detection_pieges = desamorcage = ambidextre = pistage = 0
 	for comp in competences_connues_docs(character, get_doc):
 		if not est_passive(comp) or comp.get("condition"):
 			continue
@@ -279,6 +279,7 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 		detection_pieges += _as_int(eff.get("detection_pieges"))
 		desamorcage += _as_int(eff.get("desamorcage"))
 		ambidextre = max(ambidextre, min(1, _as_int(eff.get("ambidextre"))))
+		pistage = max(pistage, min(1, _as_int(eff.get("pistage"))))
 	# Pièges, ambidextrie : clés lues `.get(…, 0)` partout (snapshot de combat) — un agrégat
 	# d'avant ne les porte pas, et n'en a pas besoin : apprendre la compétence le recalcule.
 	bonus = {"buffs": buffs, "regen_pv": regen_pv, "regen_pm": regen_pm, "esquive": esquive,
@@ -288,6 +289,8 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 	# recalcul et `synchroniser_competences_bonus` réécrirait tous les personnages.
 	if ambidextre:
 		bonus["ambidextre"] = ambidextre
+	if pistage:
+		bonus["pistage"] = pistage
 	return bonus
 
 

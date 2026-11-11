@@ -1,0 +1,15 @@
+[
+  {
+    "_id": "competence:lecture_des_traces",
+    "type": "competence",
+    "nom": "Lecture des traces",
+    "icon": "🐾",
+    "description": "Une empreinte, une branche brisée, une touffe de poils accrochée aux ronces : la bête est nommée, et sa force jaugée, avant même d'être vue.",
+    "vocation": "forestier",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "pistage": 1
+    }
+  }
+]

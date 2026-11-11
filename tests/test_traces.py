@@ -95,12 +95,23 @@ def test_forestier_nomme_espece_et_grade():
 	assert p["cle"] != traces.payload(m, None)["cle"]
 
 
+PISTAGE = {"competences_bonus": {"pistage": 1}}
+
+
 def test_pisteur_principal_puis_compagnon():
 	principal = {"voc": "guerrier", "nom": "Moi"}
-	compagnon = {"voc": "forestier", "prenom": "Aubin"}
+	compagnon = dict(PISTAGE, voc="guerrier", prenom="Aubin")
 	assert traces.pisteur([principal, compagnon]) is compagnon
 	assert traces.pisteur([principal]) is None
-	assert traces.pisteur([{"voc": "forestier", "nom": "Moi"}, compagnon])["nom"] == "Moi"
+	assert traces.pisteur([dict(PISTAGE, nom="Moi"), compagnon])["nom"] == "Moi"
+
+
+def test_pisteur_tient_a_la_competence_pas_a_la_vocation():
+	# Un forestier qui n'a pas appris la passive ne lit rien ; un ancien forestier passé à
+	# une autre vocation garde sa lecture (les compétences s'empilent).
+	assert traces.pisteur([{"voc": "forestier", "competences_bonus": {}}]) is None
+	assert traces.pisteur([{"voc": "forestier"}]) is None
+	assert traces.pisteur([dict(PISTAGE, voc="templier", nom="Ex")])["nom"] == "Ex"
 
 
 def test_aucune_menace_aucun_bloc():

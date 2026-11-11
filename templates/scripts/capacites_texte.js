@@ -74,6 +74,8 @@ function _sortEffetsLabel(e, prefixeDegats) {
 	if (e.abattre) parts.push('🪢 abat les volants');
 	// Passive : lève le malus de précision de la seconde arme (combat.coups_du_profil).
 	if (e.ambidextre) parts.push('⚔️ seconde arme sans malus');
+	// Passive : nomme l'espèce et le grade des traces relevées (utils/traces.pisteur).
+	if (e.pistage) parts.push('🐾 lit les traces (espèce et grade)');
 	if (e.lien_vie) {
 		parts.push(`🔗 lien de vie ${_fx(e, 'lien_vie.part', e.lien_vie.part)} %`
 			+ (e.lien_vie.reduction ? ` (−${e.lien_vie.reduction} % absorbés)` : ''));

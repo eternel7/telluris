@@ -225,6 +225,15 @@ CATALOGUE = [
 			"n'ajoute que le tag : régénération idempotente.",
 	},
 	{
+		"id": "gen_pistage",
+		"label": "🐾 Passive Lecture des traces (forestier)",
+		"argv": _py("gen_pistage.py"),
+		"ecrit": "Écrit jsons/competence_pistage_a_importer.json.",
+		"description": "Passive « Lecture des traces » du forestier, niveau 0 : nomme l'espèce et le "
+			"grade des traces relevées. Remplace l'ancien test sur la vocation. N'écrit que le doc "
+			"absent du dump le plus récent ou qui en diffère : régénération idempotente.",
+	},
+	{
 		"id": "gen_ambidextre",
 		"label": "⚔️ Passive Ambidextre (combat à deux armes)",
 		"argv": _py("gen_ambidextre.py"),

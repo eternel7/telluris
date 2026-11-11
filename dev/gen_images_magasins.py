@@ -99,7 +99,8 @@ CHEVEUX = ["aux cheveux noirs", "aux cheveux châtains", "aux cheveux roux", "au
 # dev/gabarits_metiers.py (consigne de l'auteur, 10/10). `METIERS` garde la forme d'avant (1re
 # variante) pour les appelants qui ne lisent que « qui » ou les clés.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from gabarits_metiers import FACADE as FACADE_VARIANTES, PORTRAIT as PORTRAIT_VARIANTES  # noqa: E402
+from gabarits_metiers import (  # noqa: E402
+	BATIMENT_GRANDE_MAISON, FACADE as FACADE_VARIANTES, PORTRAIT as PORTRAIT_VARIANTES)
 
 METIERS = {cat: (qui, *variantes[0]) for cat, (qui, variantes) in PORTRAIT_VARIANTES.items()}
 NB_VARIANTES = 10
@@ -289,6 +290,31 @@ QUARTIERS_EN = {
 		"des Fossés": "on a street following the old filled-in moat at the foot of the ramparts",
 		"du Faubourg": "in a street just outside the town walls, vineyards on the slopes beyond the houses",
 	},
+	# Orléans (11/11/2026) : toponymes des enseignes de dev/gen_orleans_magasins.py — lore
+	# docs/lore/cites/20261111_histoire_d_orleans.md (Martroi et halage retenus par l'auteur).
+	"lieu:orleans": {
+		"du Martroi": "on the Martroi, the great central market square of Orléans, busy with carts and stalls",
+		"du Châtelet": ("near the Châtelet, the old fortified harbour of the right bank of the wide sandy river "
+						"Loire, warehouses and moored flat-bottomed barges"),
+		"de la Porte Bannier": "beside the northern city gate, a fortified gate with round towers on the road to the wheat plains",
+		"de la Porte de Bourgogne": "beside the eastern city gate, a fortified gate flanked by two round towers, laden carts passing",
+		"de Bourgogne": "in a street near the eastern city gate, laden carts of cloth bales passing",
+		"de la Loire": "on a quay along the wide sandy river Loire, sandbanks and flat-bottomed barges with square sails",
+		"des Quais": "on the busy river quays of the Loire, barrels, salt sacks and timber unloaded from barges",
+		"du Halage": ("by the towpath along the Loire, draught horses and haulers towing a barge upstream "
+					  "with long ropes"),
+		"de Halage": "by the towpath along the Loire, draught horses in harness resting near the bank",
+		"du Vieux Pont": "at the foot of the old stone bridge with many arches crossing the wide river Loire, houses on its piers",
+		"des Turcies": "on a street running along the top of a long earthen levee holding back the Loire, willows below",
+		"de Sainte-Croix": ("near the great gothic cathedral of Sainte-Croix with its two openwork square towers, "
+							"enclosed by a low fortified wall"),
+		"des Tourelles": ("near the southern end of the old bridge, a small square fort with two round towers "
+						  "standing in the river"),
+		"des Grèves": "on a riverside of sand and gravel banks of the Loire, herons and reeds",
+		"de Genabum": "in an old lane of the oldest quarter by the river, low ancient stone houses",
+		"des Gabarres": "on a quay where flat-bottomed river barges with square sails are loaded and unloaded",
+		"des Gabarriers": "near the boatyards on the Loire, river barges being built on the bank",
+	},
 }
 
 # Lignée : (homme, femme, repère d'échelle) — repère reconnaissable, jamais une règle de corps.
@@ -382,6 +408,10 @@ QUARTIERS_AUBERGES = {
 	"lieu:le_relais_de_l_eure": "de l'Eure",
 	"lieu:au_grenier_de_beauce": "de la Porte Guillaume",
 	"lieu:la_halte_des_pelerins": "de la Basse-Ville",
+	"lieu:au_passeur_de_loire": "de la Loire",
+	"lieu:la_gabarre_amarree": "des Gabarres",
+	"lieu:l_auberge_du_huit_mai": "du Martroi",
+	"lieu:a_l_etendard_de_dunois": "de la Porte Bannier",
 }
 
 
@@ -429,6 +459,24 @@ def prompt_magasin(categorie, race, sexe, traits, cite, cite_nom, label, variant
 		echelle = (" Keep the shopkeeper's small size inside the shop too: the counter reaches the "
 				   "shopkeeper's chest, the furniture and tools are made for humans and look large "
 				   "next to the shopkeeper, and any human customer at the window is twice as tall.")
+	# Grande maison : un grand bâtiment (`BATIMENT_GRANDE_MAISON`), pas la maison-boutique d'un
+	# seul comptoir — mêmes garde-fous de tenancier, d'écriture, de foule et de style.
+	if categorie in BATIMENT_GRANDE_MAISON:
+		return (f"The person shown in image 1 is the shopkeeper: keep exactly the same face, hair, facial hair, "
+				f"body, skin and clothes as in image 1{tenancier}, but NOT the same pose or expression. "
+				f"Do not reuse the background of image 1. Show this shopkeeper at work at the main entrance "
+				f"of a medieval fantasy {boutique} {situation}, busy with the trade, absorbed in the task, "
+				f"not looking at the camera, not posing, not presenting anything to the viewer. "
+				f"The building is {BATIMENT_GRANDE_MAISON[categorie]}. It is one large permanent building, "
+				f"much bigger than an ordinary shop, and fills about 80% of the image, seen from the street "
+				f"at a slight angle so that its full size reads at once. The shopkeeper stands in the "
+				f"foreground at a counter or table just inside the main entrance, clearly visible and "
+				f"recognizable, while clerks, porters and workers are busy behind. "
+				f"No hanging shop sign, no signboard, no name board or plaque on the building. "
+				f"The goods of the house are displayed and handled everywhere through its open doors and "
+				f"arches, and are immediately recognizable — for instance {marchandises}, or any other "
+				f"goods of the trade you find more telling. {LIBERTE}"
+				f"{echelle} {FOULE} {STYLE}")
 	# Le portrait le montre face à nous, souriant, qui vend ; la boutique le montre AU TRAVAIL :
 	# lot du 09/10, la pose du portrait était recopiée (consigne de l'auteur).
 	return (f"The person shown in image 1 is the shopkeeper: keep exactly the same face, hair, facial hair, "

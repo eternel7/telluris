@@ -57,9 +57,10 @@ vm.runInThisContext(extraireDeclaration(/const PORTE_CATEGORIE = [^;]+;/, 'PORTE
 vm.runInThisContext(extraireDeclaration(/const GUILDE_EXTERIEUR_CATEGORIE = [^;]+;/, 'GUILDE_EXTERIEUR_CATEGORIE'));
 vm.runInThisContext(extraireDeclaration(/const COLS_LIEN = [^;]+;/, 'COLS_LIEN'));
 vm.runInThisContext(extraireDeclaration(/const LIEUX_HOTE_REQUIS = \[[\s\S]*?\];/, 'LIEUX_HOTE_REQUIS'));
+vm.runInThisContext(extraireDeclaration(/const REGION_TAILLE_MIN = [^;]+;/, 'REGION_TAILLE_MIN'));
 for (const f of ['_escHtml', '_connDest', '_connInterne', '_noeudsRepositionnables', 'etatPnjDeLieu', 'lieuxLigneHtml', '_ljConnexion',
 				 'valeurLigne', 'colonnesDe', 'lieuxMarchandsVisibles', 'portesDeVille',
-				 '_posValide', '_proposerCases']) {
+				 '_posValide', '_regionCible', '_proposerCases']) {
 	vm.runInThisContext(extraire(f));
 }
 
@@ -183,6 +184,61 @@ t('plusieurs cases : elles s\'écartent l\'une de l\'autre, et le tirage est dé
 t('épuisement : rend moins de cases plutôt qu\'un doublon', () => {
 	const petite = new Int32Array(2).fill(0);
 	assert.strictEqual(_proposerCases(petite, 2, [], [], 5, 2).length, 2);
+});
+
+t('`cible` : seules les cases de la région visée sont proposées', () => {
+	const cases = _proposerCases(REGION, W, [], [], 5, 2, 1);
+	assert.deepStrictEqual(cases, [[7, 0]]);
+});
+
+console.log('\n── 📍 Région de la ville (_regionCible) ──');
+
+// Grille 20×12 bâtie par rectangles de rangs : la CAMPAGNE (rang 0, la plus grande) encadre tout.
+function grilleRegions(W2, H2, blocs) {
+	const g = new Int32Array(W2 * H2).fill(0);
+	for (const [r, x0, y0, x1, y1] of blocs) {
+		for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) g[y * W2 + x] = r;
+	}
+	return g;
+}
+const GW = 20, GH = 12;
+
+t('sans boutique : la ville au CENTRE, pas la campagne plus grande (cas Rhemi, Chartres, Auxerre, Orléans)', () => {
+	const g = grilleRegions(GW, GH, [[-1, 5, 3, 14, 8], [1, 6, 4, 13, 7]]);   // mur, puis ville 8×4 = 32 cases
+	assert.deepStrictEqual(_regionCible(g, GW, GH, [], null, 20), { rang: 1, raison: 'centre' });
+});
+
+t('une poche sous le plancher au centre est ignorée (cas Tokyo)', () => {
+	const g = grilleRegions(GW, GH, [[-1, 3, 2, 16, 9], [1, 4, 3, 8, 8], [2, 9, 5, 10, 6]]);  // ville 30 cases, poche 4 au centre
+	assert.strictEqual(_regionCible(g, GW, GH, [], null, 20).rang, 1);
+	assert.strictEqual(_regionCible(g, GW, GH, [], null, 0).rang, 2, 'sans plancher, la poche gagnerait');
+});
+
+t('ville déjà peuplée : la région qui porte le plus de portes, même excentrée (cas Douvres)', () => {
+	const g = grilleRegions(GW, GH, [[-1, 6, 3, 13, 8], [1, 7, 4, 12, 7], [2, 0, 0, 3, 3]]);
+	const ancres = [[0, 0], [1, 1], [2, 2], [8, 5]];
+	assert.deepStrictEqual(_regionCible(g, GW, GH, ancres, null, 0), { rang: 2, raison: 'portes' });
+});
+
+t('`zone` de la spec prime sur tout ; hors région ou illisible, elle est ignorée', () => {
+	const g = grilleRegions(GW, GH, [[-1, 6, 3, 13, 8], [1, 7, 4, 12, 7]]);
+	assert.deepStrictEqual(_regionCible(g, GW, GH, [[8, 5]], [0, 0], 0), { rang: 0, raison: 'zone' });
+	for (const z of [[6, 3], [99, 0], [1.5, 2], 'x', null]) {
+		assert.strictEqual(_regionCible(g, GW, GH, [[8, 5]], z, 0).raison, 'portes', JSON.stringify(z));
+	}
+});
+
+t('égalité de portes : la plus grande région ; aucune case praticable : rang -1', () => {
+	const g = grilleRegions(GW, GH, [[1, 0, 0, 1, 1]]);
+	assert.strictEqual(_regionCible(g, GW, GH, [[0, 0], [10, 10]], null, 0).rang, 0);
+	const vide = new Int32Array(GW * GH).fill(-1);
+	assert.strictEqual(_regionCible(vide, GW, GH, [], null, 0).rang, -1);
+	assert.deepStrictEqual(_proposerCases(vide, GW, [], [], 3, 2, -1), []);
+});
+
+t('REGION_TAILLE_MIN : au-dessus des poches mesurées, sous la plus petite cité intra-muros', () => {
+	// Mesures du dump du 11/11 citées au commentaire du template : poche de Tokyo 10, Camelot 109.
+	assert.ok(REGION_TAILLE_MIN > 10 && REGION_TAILLE_MIN < 109, String(REGION_TAILLE_MIN));
 });
 
 t('_posValide : deux entiers positifs', () => {
