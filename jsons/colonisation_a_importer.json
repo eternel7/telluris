@@ -1,0 +1,207 @@
+{
+  "docs": [
+    {
+      "_id": "rules:colonisation",
+      "type": "rules",
+      "value": {
+        "paliers": [
+          {
+            "id": "campement",
+            "label": "Campement",
+            "rang": 1,
+            "population_min": 0,
+            "postes_min": 0,
+            "prix_statut_cuivre": 0,
+            "fortification_min": "feu et surveillance",
+            "menace": "danger permanent",
+            "ouvre": [
+              "logement du fondateur",
+              "stockage",
+              "feu"
+            ]
+          },
+          {
+            "id": "hameau",
+            "label": "Hameau",
+            "rang": 2,
+            "population_min": 5,
+            "postes_min": 4,
+            "prix_statut_cuivre": 160000,
+            "fortification_min": "palissade complète et porte",
+            "menace": "attaques occasionnelles",
+            "ouvre": [
+              "premiers PNJ",
+              "cultures",
+              "élevage"
+            ]
+          },
+          {
+            "id": "bourgade",
+            "label": "Bourgade",
+            "rang": 3,
+            "population_min": 15,
+            "postes_min": 12,
+            "prix_statut_cuivre": 600000,
+            "fortification_min": "fossé et tours",
+            "menace": "attaques occasionnelles",
+            "ouvre": [
+              "métiers spécialisés",
+              "bâtiments spécialisés",
+              "boutique",
+              "auberge"
+            ]
+          },
+          {
+            "id": "village",
+            "label": "Village",
+            "rang": 4,
+            "population_min": 40,
+            "postes_min": 24,
+            "prix_statut_cuivre": 2000000,
+            "fortification_min": "enceinte et portes fortifiées",
+            "menace": "menaces contrôlables",
+            "ouvre": [
+              "production locale",
+              "auberge d'aventuriers"
+            ]
+          },
+          {
+            "id": "bourg",
+            "label": "Bourg",
+            "rang": 5,
+            "population_min": 100,
+            "postes_min": 40,
+            "prix_statut_cuivre": 6000000,
+            "fortification_min": "murailles",
+            "menace": "menaces exceptionnelles",
+            "ouvre": [
+              "marché",
+              "grande auberge",
+              "administration"
+            ]
+          },
+          {
+            "id": "petite_ville",
+            "label": "Petite ville",
+            "rang": 6,
+            "population_min": 250,
+            "postes_min": 64,
+            "prix_statut_cuivre": 20000000,
+            "fortification_min": "murailles",
+            "menace": "menaces exceptionnelles",
+            "ouvre": [
+              "quartiers spécialisés",
+              "nombreux services"
+            ]
+          },
+          {
+            "id": "ville",
+            "label": "Ville",
+            "rang": 7,
+            "population_min": 600,
+            "postes_min": 100,
+            "prix_statut_cuivre": 60000000,
+            "fortification_min": "système défensif complet",
+            "menace": "rares mais majeures",
+            "ouvre": [
+              "infrastructure complète",
+              "guilde d'aventuriers"
+            ]
+          }
+        ],
+        "reglages": {
+          "charte_cuivre": 40000,
+          "rang_min": "C",
+          "distance_cite_min": 6,
+          "distance_implantation_min": 4,
+          "implantations_par_pays": 1,
+          "rattrapage_max_s": 259200,
+          "visible_des_le": "campement"
+        },
+        "stocks": [
+          "nourriture",
+          "bois",
+          "materiaux",
+          "medicaments"
+        ],
+        "axes_site": [
+          "eau",
+          "nourriture",
+          "materiaux",
+          "commerce",
+          "defense",
+          "danger"
+        ],
+        "facteurs_securite": [
+          "defense_physique",
+          "defense_humaine",
+          "environnement",
+          "logistique",
+          "connaissance_territoire"
+        ],
+        "feu": [
+          "grand",
+          "reduit"
+        ],
+        "etapes_menace": [
+          "presente",
+          "a_remarque_le_lieu",
+          "attaque_troupeaux_et_reserves",
+          "taniere_localisee"
+        ],
+        "metiers": [
+          "agriculteur",
+          "eleveur",
+          "intendant",
+          "bucheron",
+          "chasseur",
+          "aubergiste",
+          "garde",
+          "batisseur",
+          "carrier",
+          "pecheur"
+        ],
+        "batiments": [
+          "habitation",
+          "entrepot",
+          "ferme",
+          "etable",
+          "auberge",
+          "boutique",
+          "atelier",
+          "poste_de_garde"
+        ],
+        "guilde": {
+          "independante": true,
+          "echelons": [
+            {
+              "id": "auberge_aventuriers",
+              "label": "Auberge d'aventuriers",
+              "palier": "village"
+            },
+            {
+              "id": "maison_aventuriers",
+              "label": "Maison d'aventuriers",
+              "palier": "bourg"
+            },
+            {
+              "id": "demeure_aventuriers",
+              "label": "Demeure des aventuriers",
+              "palier": "petite_ville"
+            },
+            {
+              "id": "guilde_aventuriers",
+              "label": "Guilde d'aventuriers",
+              "palier": "ville"
+            },
+            {
+              "id": "grande_guilde_aventuriers",
+              "label": "Grande guilde d'aventuriers",
+              "palier": "ville"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
