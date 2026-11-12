@@ -442,7 +442,7 @@ async def delete_character(
 	return get_user_characters(current_user)	
 	
 @user_router.post("/select_character")
-async def select_character(
+def select_character(
 	response: Response, 
 	current_user: Annotated[User, Depends(get_current_user)], 
 	characterinfo: dict = Body(...)):
@@ -469,7 +469,8 @@ async def select_character(
 			characterSelected["prenom"] == character["prenom"]
 		 ):
 			db_user["selected_character"] = character_id
-			save_doc(db_user)
+			if save_doc(db_user) is None:
+				raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 			return characterSelected
 		else:
 			raise HTTPException(status_code=404, detail="Character not found")
@@ -477,7 +478,7 @@ async def select_character(
 		raise HTTPException(status_code=404, detail="Invalid character selection")
 
 @user_router.post("/update_character_portrait")
-async def update_character_portrait(
+def update_character_portrait(
 	response: Response, 
 	current_user: Annotated[User, Depends(get_current_user)], 
 	portrait_info: dict = Body(...)):
@@ -498,7 +499,8 @@ async def update_character_portrait(
 			y = float(match.group(2))
 			character_to_update["portrait_translate"] = {"x": x, "y": y}
 			character_to_update["portrait_zoom"] = zoom
-			save_doc(character_to_update)
+			if save_doc(character_to_update) is None:
+				raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 			return character_to_update
 		else:
 			raise HTTPException(status_code=406, detail="Incorrect info for character portrait update")
@@ -510,7 +512,7 @@ IDENTITE_MAX = 30
 
 
 @user_router.post("/renommer_personnage")
-async def renommer_personnage(
+def renommer_personnage(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...)):
 	"""Change le prénom et le nom du personnage SÉLECTIONNÉ. Pas de `_acteur` : un compagnon
@@ -927,7 +929,7 @@ def move_character(
 
 
 @user_router.post("/focaliser")
-async def focaliser(
+def focaliser(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...)):
 	"""Pose / retire (toggle) la focalisation du personnage.
@@ -1202,7 +1204,7 @@ def _save_acteur(porteur: dict, principal: dict) -> None:
 
 
 @user_router.post("/spend_xp")
-async def spend_xp(
+def spend_xp(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1268,7 +1270,8 @@ async def spend_xp(
 	if use_bonus:
 		character["max_bonus_used"] = stat_key
 
-	save_doc(character)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
 	# Dérivées bufées + équipées (mêmes valeurs que la fiche : le client les recopie tel
 	# quel dans #sh-drv-*). Les plafonds, eux, restent calculés sur les caracts BRUTES.
@@ -1301,7 +1304,7 @@ async def spend_xp(
 
 
 @user_router.post("/equip")
-async def equip_item(
+def equip_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1378,7 +1381,8 @@ async def equip_item(
 	_garde_harnachement(character)
 
 	eq_bonus = sync_equipment_bonus(character)
-	save_doc(character)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
 	derived = _derived_from_character(character, eq_bonus)
 	return _reponse_equipement(character, slots, inventaire, derived)
@@ -1408,7 +1412,7 @@ def _reponse_equipement(character: dict, slots: dict, inventaire: list, derived)
 
 
 @user_router.post("/unequip")
-async def unequip_item(
+def unequip_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1436,7 +1440,8 @@ async def unequip_item(
 	_garde_harnachement(character)
 
 	eq_bonus = sync_equipment_bonus(character)
-	save_doc(character)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
 	derived = _derived_from_character(character, eq_bonus)
 	return _reponse_equipement(character, slots, inventaire, derived)
@@ -1502,7 +1507,7 @@ def _take_ref(refs: list, idx, item_id):
 
 
 @user_router.post("/drop_item")
-async def drop_item(
+def drop_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1528,7 +1533,7 @@ async def drop_item(
 
 
 @user_router.post("/pickup_item")
-async def pickup_item(
+def pickup_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1649,7 +1654,7 @@ def _nom_porteur(p: dict) -> str:
 
 
 @user_router.post("/renommer_objet")
-async def renommer_objet(
+def renommer_objet(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1701,7 +1706,7 @@ async def renommer_objet(
 
 
 @user_router.post("/consommer")
-async def consommer_item(
+def consommer_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1756,7 +1761,7 @@ def _partager_soin_exploration(lanceur: dict, cible: dict, effets: dict, pv_rend
 
 
 @user_router.post("/lancer_sort")
-async def lancer_sort(
+def lancer_sort(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1862,7 +1867,7 @@ async def lancer_sort(
 
 
 @user_router.post("/apprendre_sort")
-async def apprendre_sort(
+def apprendre_sort(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1903,7 +1908,7 @@ async def apprendre_sort(
 
 
 @user_router.post("/utiliser_competence")
-async def utiliser_competence(
+def utiliser_competence(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1965,7 +1970,7 @@ async def utiliser_competence(
 
 
 @user_router.post("/apprendre_competence")
-async def apprendre_competence(
+def apprendre_competence(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -2030,7 +2035,7 @@ async def apprendre_competence(
 
 
 @user_router.post("/apprendre_magie")
-async def apprendre_magie(
+def apprendre_magie(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -2068,7 +2073,7 @@ async def apprendre_magie(
 
 
 @user_router.post("/monter_magie")
-async def monter_magie(
+def monter_magie(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -2103,7 +2108,7 @@ async def monter_magie(
 
 
 @user_router.post("/slot_action")
-async def slot_action(
+def slot_action(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -2130,7 +2135,7 @@ async def slot_action(
 
 
 @user_router.post("/slot_deplacer")
-async def slot_deplacer(
+def slot_deplacer(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -2150,7 +2155,7 @@ async def slot_deplacer(
 
 
 @user_router.post("/recolter")
-async def recolter_ressource(
+def recolter_ressource(
 	current_user: Annotated[User, Depends(get_current_user)],
 ):
 	"""Récolte la ressource rendue disponible par le dernier événement de zone « ressource »
@@ -2207,7 +2212,7 @@ async def recolter_ressource(
 
 
 @user_router.post("/couper")
-async def couper_item(
+def couper_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -2748,7 +2753,7 @@ async def marchander_item(
 
 
 @user_router.post("/spend_xp_vocation")
-async def spend_xp_vocation(
+def spend_xp_vocation(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(default={}),
 ):
@@ -2776,7 +2781,8 @@ async def spend_xp_vocation(
 	vocations_niveaux[voc] = voc_niveau + 1
 	character["vocations_niveaux"] = vocations_niveaux
 	character["attribute_points"] = attribute_points - cout
-	save_doc(character)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
 	return {
 		"attribute_points": character["attribute_points"],
@@ -2813,7 +2819,7 @@ def _vocation_payload(character: dict) -> dict:
 
 
 @user_router.post("/vocation/options")
-async def vocation_options(
+def vocation_options(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(default={}),
 ):
@@ -2822,7 +2828,7 @@ async def vocation_options(
 
 
 @user_router.post("/changer_vocation")
-async def changer_vocation(
+def changer_vocation(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(default={}),
 ):
@@ -2837,7 +2843,8 @@ async def changer_vocation(
 	if motif:
 		raise HTTPException(status_code=motif[0], detail=motif[1])
 	recap = vocations_util.appliquer_changement(character, cible, rules_vocations, rules_transitions)
-	save_doc(character)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 	return {
 		**recap,
 		"voc": character["voc"],
@@ -2849,7 +2856,7 @@ async def changer_vocation(
 
 
 @user_router.post("/journal")
-async def ecrire_journal(
+def ecrire_journal(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):

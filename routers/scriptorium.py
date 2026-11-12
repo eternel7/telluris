@@ -60,7 +60,7 @@ def _ecrivain(character: dict, body: dict) -> tuple[dict, list]:
 
 
 @scriptorium_router.get("/scriptorium")
-async def salle_scriptorium(current_user: Annotated[dict, Depends(get_current_user)]):
+def salle_scriptorium(current_user: Annotated[dict, Depends(get_current_user)]):
 	"""État du panneau d'écriture : qui peut écrire, et avec quoi."""
 	character, _ = _acces_scriptorium(current_user)
 	membres = auberge.ecrivains(character, get_doc)
@@ -71,7 +71,7 @@ async def salle_scriptorium(current_user: Annotated[dict, Depends(get_current_us
 
 
 @scriptorium_router.post("/scriptorium/ecrire")
-async def ecrire_scriptorium(
+def ecrire_scriptorium(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	body: dict = Body(...),
 ):

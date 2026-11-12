@@ -4,7 +4,6 @@ Même règle qu'à la création (`IDENTITE_MAX`, `auberge.nettoyer_ligne`) : bor
 (Convention §9), vide refusé (422), rien d'écrit en cas de refus.
 """
 
-import asyncio
 import os
 import sys
 
@@ -27,7 +26,7 @@ def perso(monkeypatch):
 
 
 def _appel(body):
-	return asyncio.run(user_router.renommer_personnage(None, body))
+	return user_router.renommer_personnage(None, body)
 
 
 def test_renomme_et_nettoie(perso):

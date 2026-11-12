@@ -47,7 +47,9 @@ def db(monkeypatch):
 
 def _appel(monkeypatch, porteur, principal, fn, body):
 	monkeypatch.setattr(user_router, "_acteur", lambda _u, _b: (porteur, principal))
-	return asyncio.run(fn(None, body))
+	# Endpoint `def` (threadpool) ou `async def` selon la route : les deux se jouent ici.
+	rendu = fn(None, body)
+	return asyncio.run(rendu) if asyncio.iscoroutine(rendu) else rendu
 
 
 def test_renommer_au_sac_puis_le_nom_suit_equiper_desequiper_poser(db, monkeypatch):

@@ -70,7 +70,9 @@ def db(monkeypatch):
 def _appel(monkeypatch, porteur, fn, body, principal=None):
 	principal = principal or porteur
 	monkeypatch.setattr(rc, "_acteur", lambda _u, _b: (porteur, principal))
-	return asyncio.run(fn({"_id": "user:a"}, body))
+	# Endpoint `def` (threadpool) ou `async def` selon la route : les deux se jouent ici.
+	rendu = fn({"_id": "user:a"}, body)
+	return asyncio.run(rendu) if asyncio.iscoroutine(rendu) else rendu
 
 
 # ── Pur ──────────────────────────────────────────────────────────────────────────

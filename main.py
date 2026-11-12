@@ -680,7 +680,7 @@ async def read_page_reinitialisation(request: Request):
 	)
 
 @app.get("/embleme", response_class=HTMLResponse)
-async def get_embleme(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+def get_embleme(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
 	if not current_user:
 		return RedirectResponse(url="/auth", headers=request.headers)
 	# rules :
@@ -1283,7 +1283,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 	)
 
 @app.get("/combat/{combat_id}", response_class=HTMLResponse)
-async def get_combat_page(
+def get_combat_page(
 	request: Request,
 	combat_id: str,
 	current_user: Annotated[User, Depends(get_current_user)],

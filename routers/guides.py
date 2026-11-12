@@ -128,7 +128,7 @@ async def congedier(current_user: Annotated[dict, Depends(get_current_user)]):
 
 
 @guides_router.get("/guides/dialogue")
-async def dialogue(current_user: Annotated[dict, Depends(get_current_user)]):
+def dialogue(current_user: Annotated[dict, Depends(get_current_user)]):
 	character = _perso(current_user)
 	guide = _guide(character)
 	regles = guides.regles_de(get_doc)
@@ -184,7 +184,7 @@ def _cap_saisie(character: dict, guide: dict, regles: dict, saisie, index: dict,
 
 
 @guides_router.post("/guides/demander")
-async def demander(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+def demander(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
 	"""Body {quete_id} ou {saisie}. Pose le cap et renvoie la réponse du guide."""
 	character = _perso(current_user)
 	guide = _guide(character)

@@ -68,7 +68,9 @@ def db(monkeypatch):
 
 def _appel(monkeypatch, porteur, fn, body):
 	monkeypatch.setattr(user_router, "_acteur", lambda _u, _b: (porteur, porteur))
-	return asyncio.run(fn(None, body))
+	# Endpoint `def` (threadpool) ou `async def` selon la route : les deux se jouent ici.
+	rendu = fn(None, body)
+	return asyncio.run(rendu) if asyncio.iscoroutine(rendu) else rendu
 
 
 # ── Logique pure ─────────────────────────────────────────────────────────────────

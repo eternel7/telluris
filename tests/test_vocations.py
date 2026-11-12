@@ -156,7 +156,9 @@ def endpoint(monkeypatch, prix_auteur):
 
 	def appeler(fonction, character, body):
 		monkeypatch.setattr(user_router, "_acteur", lambda _u, _b: (character, character))
-		return asyncio.run(getattr(user_router, fonction)(object(), body))
+		# Endpoint `def` (threadpool) ou `async def` selon la route : les deux se jouent ici.
+		rendu = getattr(user_router, fonction)(object(), body)
+		return asyncio.run(rendu) if asyncio.iscoroutine(rendu) else rendu
 	return appeler, docs
 
 

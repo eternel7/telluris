@@ -12,7 +12,6 @@
 # L'endpoint ne touche la base qu'à travers `get_doc`/`save_doc` (importés dans le module),
 # et le porteur par `_acteur` : les trois sont monkeypatchés, pas de CouchDB requis.
 
-import asyncio
 
 import pytest
 from fastapi import HTTPException
@@ -74,7 +73,7 @@ def endpoint(monkeypatch):
 	def appeler(character, sort_id="sort:soin_mineur"):
 		docs[character["_id"]] = character
 		monkeypatch.setattr(user_router, "_acteur", lambda _u, _b: (character, character))
-		return asyncio.run(user_router.apprendre_sort(None, {"sort_id": sort_id}))
+		return user_router.apprendre_sort(None, {"sort_id": sort_id})
 
 	return appeler, docs
 

@@ -715,7 +715,7 @@ async def relancer_commande(
 # ── POST : retirer ──────────────────────────────────────────────────────────────
 
 @commande_router.post("/commande/retirer")
-async def retirer_commande(
+def retirer_commande(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -776,7 +776,7 @@ async def retirer_commande(
 # ── POST : annuler / oublier ────────────────────────────────────────────────────
 
 @commande_router.post("/commande/annuler")
-async def annuler_commande(
+def annuler_commande(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
