@@ -871,13 +871,30 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
 }
 .stat-label { color: #aaa; font-size: 11px; }
 .stat-value { font-weight: bold; color: #eee; font-family: monospace; font-size: 11px; }
-.actions-pips { display: flex; gap: 4px; margin-top: 4px; }
-/* Rangée des pips d'actions : même hauteur pour tout membre (zéro pip, beaucoup de pips), sans
-   repli — c'est elle qui pose la jauge de charge juste en dessous. */
-.sheet-left-info > .stat-row:first-child { height: 18px; flex-wrap: nowrap; margin-bottom: 8px; }
-.sheet-left-info > .stat-row:first-child .actions-pips { margin-top: 0; flex-wrap: nowrap; overflow: hidden; }
-.pip       { width: 10px; height: 10px; border-radius: 50%; background: #ffa502; border: 1px solid #cc8400; }
-.pip.empty { background: #333; border-color: #555; }
+/* ─── Pastille des ACTIONS restantes ───────────────────────────────
+   FIXE en haut à droite de l'écran (hors grille : ne défile pas), du membre actif.
+   Au-dessus des barres du bas (90), sous le pavé (100) et les overlays de fin (100/120).
+   Ancrée à DROITE : un membre au budget différent l'allonge vers la gauche, rien d'autre ne
+   bouge (§17). Tour d'un monstre : atténuée (`.attente`), jamais masquée — même place. */
+.actions-hud {
+	position: fixed; z-index: 95;
+	top: calc(8px + env(safe-area-inset-top, 0px)); right: calc(8px + env(safe-area-inset-right, 0px));
+	display: flex; align-items: center; gap: 10px;
+	padding: 6px 14px; border-radius: 18px;
+	background: var(--panel-bg); border: 1.5px solid var(--gold2);
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 0, 0, 0.5);
+	pointer-events: none;
+	transition: opacity 200ms ease, filter 200ms ease;
+}
+html.vue-portrait .actions-hud { background: rgba(44, 44, 56, 0.75); }
+.actions-hud.attente { opacity: 0.4; filter: grayscale(0.7); }
+.actions-hud-label {
+	font-family: 'Cinzel', serif; font-size: 12px; font-weight: 700; color: var(--gold2);
+	text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap;
+}
+.actions-pips { display: flex; flex-wrap: nowrap; gap: 5px; }
+.pip       { width: 14px; height: 14px; border-radius: 50%; background: #ffa502; border: 1px solid #cc8400; box-shadow: 0 0 5px rgba(255, 165, 2, 0.55); }
+.pip.empty { background: #333; border-color: #555; box-shadow: none; }
 
 /* ─── Combat Center ────────────────────────────────────────────── */
 .combat-center { 
@@ -1237,6 +1254,17 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 </head>
 <body>
 
+<!-- Actions restantes du membre actif : pastille FIXE en haut à droite (cf. .actions-hud). -->
+{% set acteur_hud = (combat.ordre_initiative[combat.acteur_courant_index] if combat.acteur_courant_index < (combat.ordre_initiative | length) else '') | string %}
+<div class="actions-hud{{ '' if acteur_hud.startswith('joueur_') else ' attente' }}" id="actions-hud" role="status" aria-label="Actions restantes">
+	<span class="actions-hud-label">Actions :</span>
+	<div class="actions-pips" id="joueur-actions">
+		{% for i in range(combat.joueurs[0].actions_max) %}
+			<div class="pip {{ '' if i < combat.joueurs[0].actions_restantes else 'empty' }}"></div>
+		{% endfor %}
+	</div>
+</div>
+
 <div class="combat-layout">
 	<!-- Panel gauche : personnage dont c'est le tour (mise en page character-panel :
 	     portrait encadré à gauche, identité + PV/PM à droite dans .char-header). -->
@@ -1265,15 +1293,6 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 			</div>
 		</div>
 		<div class="sheet-left-info">
-			<div class="stat-row">
-				<span class="stat-label">Actions</span>
-				<div class="actions-pips" id="joueur-actions">
-					{% for i in range(combat.joueurs[0].actions_max) %}
-						<div class="pip {{ '' if i < combat.joueurs[0].actions_restantes else 'empty' }}"></div>
-					{% endfor %}
-				</div>
-			</div>
-
 			<!-- Charge portée : même jauge que la sélection de butin (pip à 50 % = seuil
 				 du malus de déplacement). Mise à jour en temps réel à chaque ramassage. -->
 			<div class="char-charge">
@@ -1893,7 +1912,7 @@ const me = () => activePlayer(state);
 // Noms des membres du groupe (colorisation du log : coup allié vs coup ennemi).
 function playerNames() { return (state.joueurs || []).map(j => j.nom); }
 
-function updateJoueur(j) {
+function updateJoueur(j, tourJoueur = true) {
 	// Panneau gauche : identité + vitals du MEMBRE ACTIF. Le portrait (#left-portrait.pt-crop)
 	// reçoit le cadrage via applyPlayerPortrait (re-appliqué au changement d'acteur).
 	const nameEl = document.getElementById('left-name');
@@ -1912,6 +1931,9 @@ function updateJoueur(j) {
 	// Barres verticales du portrait.
 	setPortraitBar(document.getElementById('left-pv-bar'), j.currentPV, j.pv_max);
 	setPortraitBar(document.getElementById('left-pm-bar'), j.currentPM, j.pm_max);
+	// Pastille fixe des actions : atténuée pendant le tour d'un monstre (`tourJoueur` faux).
+	const hudEl = document.getElementById('actions-hud');
+	if (hudEl) hudEl.classList.toggle('attente', !tourJoueur);
 	const pipsEl = document.getElementById('joueur-actions');
 	pipsEl.innerHTML = Array.from({length: j.actions_max}, (_, i) =>
 		`<div class="pip${i < j.actions_restantes ? '' : ' empty'}"></div>`
@@ -3380,7 +3402,7 @@ function _gelerActeurs(avant, data) {
 // les jetons sont placés relativement à me().pos, bouger l'un sans l'autre décalerait
 // toute la carte d'une case.
 function _rafraichirAffichage() {
-	updateJoueur(activePlayer(state));
+	updateJoueur(activePlayer(state), isPlayerTurn(state));
 	renderEnemyPortrait(state);
 	updateInitiativeStrip(state);
 	renderTokens();
@@ -3952,7 +3974,7 @@ function updateUI(data) {
 			syncActorResources();
 		}
 	}
-	updateJoueur(activePlayer(data));
+	updateJoueur(activePlayer(data), isPlayerTurn(data));
 	renderEnemyPortrait(data);
 	document.getElementById('tour-num').textContent = data.tour;
 	// Badge 🥷 : visible tant que le MEMBRE ACTIF est furtif (posé à l'entrée ou par une capacité).
@@ -4936,7 +4958,7 @@ updateAttackButtons(state);  // aligne currentMode sur un mode réellement équi
 renderSlots();               // grille de la barre d'action (avant updateButtons, qui règle l'état de chaque case)
 refreshTargetSelect();
 updateButtons(state);
-updateJoueur(activePlayer(state));
+updateJoueur(activePlayer(state), isPlayerTurn(state));
 updateInitiativeStrip(state);   // pose les anneaux de vie des ennemis dans le header dès le chargement
 document.getElementById('furtif-badge').style.visibility = (activePlayer(state) || {}).furtif ? '' : 'hidden';
 renderEnemyPortrait(state);
