@@ -80,6 +80,11 @@ t('les pages du lore chargent partage.js et portent un bouton data-partager', ()
 		const html = fs.readFileSync(path.join(RACINE, 'templates', f), 'utf8');
 		assert.ok(html.includes("script_url('partage.js')"), f + ' : script absent');
 		assert.ok(/<button[^>]*data-partager/.test(html), f + ' : bouton absent');
+		// Icône seule, monochrome (SVG en currentColor), sans libellé ni émoji.
+		const btn = html.match(/<button[^>]*data-partager[\s\S]*?<\/button>/)[0];
+		assert.ok(/<svg[^>]*stroke="currentColor"/.test(btn), f + ' : icône SVG monochrome attendue');
+		assert.strictEqual(btn.replace(/<[^>]*>/g, '').trim(), '', f + ' : libellé visible');
+		assert.ok(/aria-label="[^"]+"/.test(btn), f + ' : aria-label absent');
 	}
 	// La lecture d'un fichier et l'index partagent admin_lore.html : bouton HORS de tout {% if %}.
 	const html = fs.readFileSync(path.join(RACINE, 'templates', 'admin_lore.html'), 'utf8');
