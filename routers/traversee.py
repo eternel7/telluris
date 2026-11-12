@@ -35,8 +35,11 @@ def nom_port(route: dict) -> str:
 	return lieu_label(parent or arrivee, (route.get("arrivee") or {}).get("lieu", ""))
 
 
+# ⚠️ `def`, PAS `async def` : l'accès base est synchrone — en coroutine il gèlerait la boucle
+# d'événements (donc TOUS les joueurs) le temps de la requête ; en `def`, FastAPI l'exécute
+# dans son threadpool. Cf. telluris-db § Endpoints hors de la boucle.
 @traversee_router.post("/traversee/avancer")
-async def traversee_avancer(current_user: Annotated[dict, Depends(get_current_user)]):
+def traversee_avancer(current_user: Annotated[dict, Depends(get_current_user)]):
 	"""Une case de plus. En mer : rencontre éventuelle (combat seul, comme un pas à terre).
 	Sur la dernière case : débarquement sur les quais d'arrivée, `arrive: true`."""
 	if not current_user:

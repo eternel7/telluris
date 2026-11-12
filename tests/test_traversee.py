@@ -15,7 +15,6 @@ Ce que ces tests verrouillent :
    `avancer` refuse à terre.
 """
 
-import asyncio
 
 import pytest
 from fastapi import HTTPException
@@ -230,7 +229,7 @@ def test_avancer_refuse_a_terre(base, monkeypatch):
 	rt = base["rt"]
 	monkeypatch.setattr(rt, "get_selected_character", lambda _u: _perso())
 	with pytest.raises(HTTPException) as e:
-		asyncio.run(rt.traversee_avancer({"_id": "u"}))
+		rt.traversee_avancer({"_id": "u"})
 	assert e.value.status_code == 409
 
 
@@ -247,7 +246,7 @@ def test_avancer_debarque_par_les_effets_d_arrivee(base, monkeypatch):
 
 	monkeypatch.setattr(rt, "get_selected_character", lambda _u: char)
 	monkeypatch.setattr(rt, "_effets_arrivee", effets)
-	data = asyncio.run(rt.traversee_avancer({"_id": "u"}))
+	data = rt.traversee_avancer({"_id": "u"})
 	assert data == {"moved": 1, "arrive": True, "port": "Bport"}
 	assert appels == [("lieu:b_quais", {"x": 3, "y": 4}, "lieu:b_quais")]
 	assert not traversee.en_mer(char)
@@ -260,5 +259,5 @@ def test_move_character_refuse_tout_pas_en_mer(monkeypatch):
 	monkeypatch.setattr(ru, "get_selected_character", lambda _u: char)
 	for move in ({"x": 1, "y": 0}, {"x": 0, "y": 0}, {"link": "link:x"}):
 		with pytest.raises(HTTPException) as e:
-			asyncio.run(ru.move_character(None, {"_id": "u"}, move))
+			ru.move_character(None, {"_id": "u"}, move)
 		assert e.value.status_code == 409

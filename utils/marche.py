@@ -392,8 +392,10 @@ def _get_marche_map() -> dict:
 		outputs_ids = {objet_final_item_id(o) for o in outputs if o}
 		feuilles = {k for k in inputs_all
 					if k not in outputs and k not in outputs_ids} - {"carcasse"}
-		_marche_map = {"besoins": besoins, "produits": produits, "feuilles": feuilles}
+		# ⚠️ La SENTINELLE (`_marche_map`) se publie EN DERNIER : des endpoints tournent en
+		# threadpool, un autre fil qui la voit posée doit trouver l'index des portées déjà là.
 		_marche_map_portee = portee
+		_marche_map = {"besoins": besoins, "produits": produits, "feuilles": feuilles}
 	return _marche_map
 
 
@@ -1405,9 +1407,10 @@ def lieu_recettes(lieu_categorie: str) -> list:
 				portees.setdefault(scope, {}).setdefault(cat, []).append(r)
 			else:
 				index.setdefault(cat, []).append(r)
-		_recettes_par_lieu = index
+		# ⚠️ Sentinelle (`_recettes_par_lieu`) publiée EN DERNIER, cf. `_get_marche_map`.
 		_recettes_par_portee = portees
 		_recettes_trophee = trophees
+		_recettes_par_lieu = index
 	incluses = categories_incluses(lieu_categorie)
 	if len(incluses) == 1:
 		return _recettes_par_lieu.get(lieu_categorie, [])

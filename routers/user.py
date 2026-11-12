@@ -742,8 +742,11 @@ def _pnjs_ici(character: dict, lieu_doc: dict) -> list:
 		lambda conds: acces.clauses_remplies(character, conds, get_doc))]
 
 
+# ⚠️ `def`, PAS `async def` : l'accès base est synchrone — en coroutine il gèlerait la boucle
+# d'événements (donc TOUS les joueurs) le temps de la requête ; en `def`, FastAPI l'exécute
+# dans son threadpool. Cf. telluris-db § Endpoints hors de la boucle.
 @user_router.post("/move_character")
-async def move_character(
+def move_character(
 	response: Response, 
 	current_user: Annotated[User, Depends(get_current_user)], 
 	move: dict = Body(...)):
@@ -902,7 +905,10 @@ async def move_character(
 				if chute:
 					access = get_lieu_directions(current_user, lieu_doc, character_to_update["position"])
 				marquer_joue(character_to_update)
-				save_doc(character_to_update)
+				# Hors de la boucle d'événements, une autre action du MÊME joueur peut avoir
+				# écrit entre-temps : CouchDB refuse (`_rev`) — le dire, le client rebondit.
+				if save_doc(character_to_update) is None:
+					raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 				# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage. Un pas ne
 				# rapporte pas d'XP — seule une conclusion d'intro peut en partager ici.
 				_apply_world_turn_groupe(character_to_update, xp_partage, compagnons, montures_groupe, groupe_avant)
