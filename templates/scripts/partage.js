@@ -2,7 +2,7 @@
 // Tout bouton `[data-partager]` partage l'URL COURANTE (ancre comprise) : feuille de partage
 // native si le navigateur en a une (mobile), sinon copie dans le presse-papiers ; repli
 // `execCommand('copy')` hors contexte sécurisé (http sur une IP du réseau : pas de clipboard).
-// Bouton à icône seule (SVG gris) : le retour s'affiche à la place de l'icône (✓ / ✗), puis
+// Bouton à icône seule (SVG, couleur `--muted` de la page) : le retour s'affiche à la place de l'icône (✓ / ✗), puis
 // l'icône revient ; le libellé passe dans `title`. Verrouillé par dev/test_partage_client.js.
 
 /** Copie `texte` ; résout `true` si la copie a eu lieu. */

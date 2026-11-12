@@ -237,7 +237,7 @@ templates/
                          #   deplacable.js (panneaux flottants à glisser : éditeur, 🔗 connexion ↔ pavé flottant de /play)
                          #   capacites_texte.js (texte d'un sort/compétence connu : onglet ⚡ de /play ↔ /admin/sorts, /admin/competences)
                          #   session.js (session morte : 401 / `x-session: aucune` → /auth ; <head> des pages connectées)
-                         #   partage.js (bouton `data-partager`, icône SVG grise sans libellé : partage natif, sinon copie de l'URL ; pages du lore)
+                         #   partage.js (bouton `data-partager`, icône SVG sans libellé, couleur `--muted` de la page : partage natif, sinon copie de l'URL ; pages du lore)
                          #   conflit.js (409 « Conflit de sauvegarde » dit en douceur : bulle unique via `showToast`, /play ↔ /combat)
                          #   sons.js (sons d'action : chokepoint `installerSonsApi` des POST, coupe-son /play ↔ /combat, musique de donjon)
   resources/sounds/      # sonothèque À PLAT (mount /sounds, `encodeURIComponent` : pas de sous-dossier) ; détail : telluris-social-ui § Sons

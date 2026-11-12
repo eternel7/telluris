@@ -85,6 +85,8 @@ t('les pages du lore chargent partage.js et portent un bouton data-partager', ()
 		assert.ok(/<svg[^>]*stroke="currentColor"/.test(btn), f + ' : icône SVG monochrome attendue');
 		assert.strictEqual(btn.replace(/<[^>]*>/g, '').trim(), '', f + ' : libellé visible');
 		assert.ok(/aria-label="[^"]+"/.test(btn), f + ' : aria-label absent');
+		// Couleur NON imposée : celle, atténuée, de la page (sombre ou parchemin).
+		assert.ok(/button\.partager\s*\{[^}]*color:\s*var\(--muted\)/.test(html), f + ' : couleur figée au lieu de --muted');
 	}
 	// La lecture d'un fichier et l'index partagent admin_lore.html : bouton HORS de tout {% if %}.
 	const html = fs.readFileSync(path.join(RACINE, 'templates', 'admin_lore.html'), 'utf8');
