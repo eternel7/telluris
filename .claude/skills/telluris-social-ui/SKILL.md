@@ -140,6 +140,7 @@ World-vars (`models/character_stats.py`, même module que `FACTEUR_DEGATS_ARMURE
 Défini dans `play_town_telluris.html` seul (`combat_telluris.html` a le sien). `#toast` / `#toast-major` sont des **conteneurs** : un appel = une `.toast-item` à durée de vie propre, pile plafonnée à `TOAST_MAX` (4). Avant, l'élément était unique et réécrit : deux messages coup sur coup n'en montraient qu'un, en silence.
 
 - `showToast(msg)` inchangé sur la centaine de sites d'appel ; `{major:true}` = bulle haute, grande, 7 s, réservée aux **moments de jeu** (dépose d'escorte), jamais aux accusés de réception.
+- **Conflit d'écriture (409)** : `showToast` fait passer tout message par `scripts/conflit.js` — un « Conflit de sauvegarde… » devient « ⏳ Action non prise en compte — recommencez. », sans « Erreur », et **une seule bulle à la fois**. Les `alert()` d'erreur d'action passent par `_erreurAction` (bulle si conflit, alerte sinon). `/combat` : l'action recharge l'état en silence, le butin et la barre adoucissent leur ligne. Verrouillé par `test_conflit_client`.
 - ⚠️ **Double `requestAnimationFrame`** avant `.show` : une transition n'interpole rien sur un élément né dans la frame (même piège que les jetons de combat). Garde `prefers-reduced-motion` **locale** (ce template n'inclut pas `part-accessibility-css.html`).
 - Écrit en `textContent` : jamais d'`escapeHtml` (CLAUDE.md §9). `_fideliteSuffixe` / `_xpCompagnieSuffixe` restent — une vente et son bonus de fidélité sont **un** événement, pas deux.
 

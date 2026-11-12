@@ -10,6 +10,7 @@
 <head>
 	{# Session expirée (401 / x-session: aucune) → /auth. AVANT les scripts de la page. #}
 	<script src="{{ script_url('session.js') }}"></script>
+	<script src="{{ script_url('conflit.js') }}"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Combat - {{ title }}</title>
@@ -4551,7 +4552,7 @@ async function postSlots(url, body) {
 			body: JSON.stringify(compagnonId ? { ...body, compagnon_id: compagnonId } : body),
 		});
 		const data = await res.json();
-		if (!res.ok) { logSys(data.detail || 'Modification impossible'); return; }
+		if (!res.ok) { logSys(adoucirConflit(data.detail || 'Modification impossible')); return; }
 		SLOTS = data.slots || SLOTS;
 		renderSlots();
 		updateButtons(state);
@@ -4900,7 +4901,7 @@ async function leaveCombat() {
 			if (!res.ok) {
 				const err = await res.json().catch(() => ({}));
 				document.getElementById('charge-label').innerHTML =
-					`<span class="err">${(err && err.detail) || 'Échec du ramassage'}</span>`;
+					`<span class="err">${adoucirConflit((err && err.detail) || 'Échec du ramassage')}</span>`;
 				btn.disabled = false;
 				return;
 			}
