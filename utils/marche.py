@@ -1768,9 +1768,18 @@ def flux_cite(cite_doc: dict | None) -> dict | None:
 	les spécialités de terroir. Sans elle, une cité qui tique elle-même verserait son flux sur
 	le doc du PAYS, et les villes se fourniraient entre elles d'un bout à l'autre du royaume.
 	Même garde, pour la même raison, que celle de `quetes.lieux_solidaires`."""
-	if not cite_doc or (cite_doc or {}).get("categorie") != "ville":
+	if not est_cite(cite_doc):
 		return None
 	return ouvrir_flux(cite_doc)
+
+
+def est_cite(doc: dict | None) -> bool:
+	"""Ce lieu est-il une CITÉ — le doc qui porte le flux de ses boutiques et auquel s'arrête
+	toute remontée d'ancêtres (`flux_cite`, `quetes.lieux_solidaires`, les échanges des biens
+	`utils/echanges_cite`) ? Prédicat UNIQUE : une implantation de la voie de colonisation s'y
+	ajoutera le jour où elle existera, et tous ces systèmes la traiteront d'un coup comme une
+	ville (docs/lore/systemes/20261112_voie_de_colonisation.md)."""
+	return (doc or {}).get("categorie") == "ville"
 
 
 def ouvrir_flux(doc: dict) -> dict:
@@ -2089,24 +2098,35 @@ def convertir_apres_achat(lieu_doc: dict, item_doc: dict, flux: dict | None = No
 	# recettes virtuelles (sort/recette/carte), scopées à SON lieu_parent.
 	from utils import scriptorium
 	recettes = scriptorium.recettes_effectives(lieu_doc, find_docs, get_doc, save_doc)
+	absorber_achat(lieu_doc, item_doc, recettes)
+	return tick_atelier(lieu_doc, recettes, flux)
 
+
+def absorber_achat(lieu_doc: dict, item_doc: dict, recettes: list | None = None, qty: int = 1) -> None:
+	"""Ce qu'une boutique fait d'un objet qu'elle vient d'acheter, SANS tick : un bien qu'elle
+	produit repart en rayon (revendable), tout autre objet entre en réserve (`stock_matieres`),
+	une carcasse décomposée par la table du dépeçage (recettes `carcasse → X` du lieu).
+	Source unique de `convertir_apres_achat` (vente d'un joueur) et des ventes d'un bien de
+	joueur à la cité (`utils/echanges_cite`). Mute `lieu_doc`."""
+	qty = max(0, int(qty))
+	if not qty:
+		return
 	# Rachat d'un bien que le lieu produit : il repart en rayon (re-vendable), pas en matières.
 	if lieu_produit(lieu_doc, item_doc):
 		item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")
 		if item_id:
-			_stock_vente_add(lieu_doc.setdefault("stock_vente", []), item_id, 1)
-		return tick_atelier(lieu_doc, recettes, flux)
-
+			_stock_vente_add(lieu_doc.setdefault("stock_vente", []), item_id, qty)
+		return
+	recettes = recettes if recettes is not None else recettes_lieu(lieu_doc)
 	stock_mat = lieu_doc.setdefault("stock_matieres", {})
 	# Table de quantités du dépeçage : recettes `carcasse → <matiere>` du lieu (boucherie).
 	qmap = {
 		r.get("objet_final"): int(r.get("quantite_produite", 1) or 1)
 		for r in recettes if r.get("matiere_premiere_sous_categorie") == "carcasse"
 	}
-	for cle, qty in _matieres_entrantes(item_doc, qmap, lieu_doc.get("categorie"), lieu_doc):
-		stock_mat[cle] = int(stock_mat.get(cle, 0)) + qty
-
-	return tick_atelier(lieu_doc, recettes, flux)
+	for _ in range(qty):
+		for cle, q in _matieres_entrantes(item_doc, qmap, lieu_doc.get("categorie"), lieu_doc):
+			stock_mat[cle] = int(stock_mat.get(cle, 0)) + q
 
 
 def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> list[dict]:

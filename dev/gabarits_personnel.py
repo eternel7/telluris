@@ -20,7 +20,7 @@ GROUPES = {
 		("un petit bouclier rond sans aucun motif", "cape courte, épaulières de cuir", "passage voûté, ombre et lumière"),
 		("une chope de ronde, l'autre main sur le pommeau", "tunique rapiécée, ceinturon usé", "banc de pierre près d'une poterne"),
 	]),
-	"lettre": (["erudit", "bibliothecaire", "intendant"], "met son savoir et son sens de l'ordre au service d'une maison", [
+	"lettre": (["erudit", "bibliothecaire", "intendant", "teneur_livres"], "met son savoir et son sens de l'ordre au service d'une maison", [
 		("un gros registre fermé", "robe sombre aux manches larges", "pièce lambrissée, étagères de livres aux dos sans aucune lettre"),
 		("une plume et un encrier", "pourpoint sobre, col clair", "bureau de chêne éclairé d'une chandelle"),
 		("un trousseau de petites clés", "longue tunique de laine fine", "couloir tapissé d'une demeure"),
@@ -44,7 +44,7 @@ GROUPES = {
 		("une boîte à onguents en bois", "robe de laine fine, ceinture à fioles", "armoire à tiroirs sans aucune étiquette"),
 		("une chandelle et un cristal terne", "tunique sombre aux manches larges", "cabinet encombré de bocaux et de cornues"),
 	]),
-	"atelier": (["artisan", "marchand"], "tient atelier et comptoir, fabrique et vend ses ouvrages", [
+	"atelier": (["artisan", "marchand", "commis"], "tient atelier et comptoir, fabrique et vend ses ouvrages", [
 		("une petite balance de marchand", "gilet de cuir, chemise claire", "comptoir de bois chargé d'ouvrages"),
 		("un maillet de bois", "tablier de cuir, manches retroussées", "établi d'atelier ouvert sur une cour"),
 		("un coffret de marchandises ouvert", "pourpoint soigné, chapeau de feutre", "boutique aux étagères garnies, sans aucune enseigne"),
@@ -80,7 +80,7 @@ GROUPES = {
 		("un trousseau de petites clés et un panier à linge", "robe de drap bleu passé, ceinture de cuir", "lingerie aux armoires ouvertes"),
 		("une nappe qu'on déplie", "tenue de service claire, foulard noué", "grande table qu'on dresse, chandeliers"),
 	]),
-	"service": (["jardinier", "palefrenier"], "assure les travaux de chaque jour des terres et des dépendances d'une maison", [
+	"service": (["jardinier", "palefrenier", "charretier", "crieur"], "assure les travaux de chaque jour des terres et des dépendances d'une maison", [
 		("un seau de bois", "tunique de toile, sabots", "arrière-cour d'une maison de pierre"),
 		("un panier d'osier", "tablier simple, foulard", "porte de service au matin"),
 		("une brosse de crin", "gilet de laine, manches retroussées", "cour pavée près d'un puits"),

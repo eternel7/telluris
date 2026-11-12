@@ -1184,7 +1184,24 @@ def textes_effets(adef: dict, cat: dict) -> list:
 			elif cle == "candidats_bonus":
 				t = f"+{_int(val)} candidat(s) par poste à l'embauche"
 			elif cle == "recolte":
-				t = f"récolte {_int(val.get('quantite'), 1)} objet(s) {_periode(val.get('delai_s'))}"
+				t = (f"récolte {_int(val.get('quantite'), 1)} objet(s) {_periode(val.get('delai_s'))}"
+					 " — cueillie d'elle-même, confiée au négociant ou rangée")
+			# Échanges avec la cité (utils/echanges_cite) : un état du bien, jamais une somme.
+			elif cle == "achats_cite":
+				t = "achète aux boutiques de la cité les matières de vos ateliers"
+			elif cle == "prospection":
+				t = f"vos ateliers comparent {_int(val)} boutique(s) de plus avant de vendre"
+			elif cle == "portage_kg":
+				t = f"+{_int(val)} kg échangés avec la cité à chaque passe"
+			elif cle == "remise_achat":
+				t = f"achats à la cité {int(round(float(val) * 100))} % plus près du prix le plus bas"
+			elif cle == "caisse_facteur":
+				t = f"caisse des ateliers ×{float(val):g} avant la pause des ventes"
+			elif cle == "crieur":
+				t = (f"vend aux habitants {_int(val.get('unites'), 1)} objet(s) par passe"
+					 " que nulle boutique ne prend, au plus bas prix")
+			elif cle == "autoproduction":
+				t = "la terre fournit ses semences : produit sans rien recevoir"
 			if t:
 				out.append(prefixe + t)
 	cap = adef.get("capacite") or {}
@@ -1222,7 +1239,8 @@ MODELE_PREFIXE = "pnj:marchand_"
 
 
 def reglages(cat: dict) -> dict:
-	"""`rules:proprietes.reglages` : durée du tableau d'embauche, vente automatique."""
+	"""`rules:proprietes.reglages` : durée du tableau d'embauche, prix d'achat, échanges avec
+	la cité et négociant (`utils/echanges_cite`, défauts dans le code)."""
 	return cat.get("reglages") or {}
 
 
@@ -1279,7 +1297,8 @@ GROUPE_PORTRAIT = {
 	"garde": "garde", "gardien": "garde",
 	"erudit": "lettre", "bibliothecaire": "lettre", "intendant": "lettre",
 	"medecin": "soin", "apothicaire": "soin", "alchimiste": "soin",
-	"artisan": "atelier", "marchand": "atelier",
+	"artisan": "atelier", "marchand": "atelier", "commis": "atelier",
+	"teneur_livres": "lettre", "charretier": "service", "crieur": "service",
 	"cuisinier": "bouche", "boucher": "bouche",
 	"domestique": "domestique",
 	"jardinier": "service", "palefrenier": "service",
@@ -1487,34 +1506,6 @@ def reprendre_produit(employe: dict, item_id) -> bool:
 	return True
 
 
-def prix_vente_auto(item_id) -> int:
-	"""Prix d'une vente automatique : le prix médian du marché (relation neutre, sans stock)."""
-	doc = resolve_item_ref(item_id) or {}
-	pmin, pmax = marche.prix_range_cuivre(doc, item_id)
-	return marche.prix_base_cuivre(pmin, pmax, 50, "achat")
-
-
-def ecouler_employe(employe: dict, regl: dict, rand=random) -> list:
-	"""Vente automatique du rayon d'un marchand à domicile : chaque produit tire sa demande
-	(`vente_auto.proba`) et en écoule une fraction (`fraction`, au moins 1), en gardant
-	`reserve` exemplaires pour les visiteurs. ⚠️ Pas `ecouler_produits_pnj` : celle-ci
-	n'écoule que l'excédent au-dessus d'une cible de boutique (25) — ici, rien ne partirait."""
-	va = regl.get("vente_auto") or {}
-	proba = float(va.get("proba", 0.5))
-	frac = float(va.get("fraction", 0.34))
-	reserve = _int(va.get("reserve"), 1)
-	ecoules = []
-	for entree in employe.get("stock_vente") or []:
-		qty = _int(entree.get("qty"))
-		if qty <= reserve or rand.random() >= proba:
-			continue
-		vendu = max(1, int(round((qty - reserve) * frac)))
-		entree["qty"] = qty - vendu
-		ecoules.append({"item_id": entree.get("item_id"), "qty": vendu})
-	employe["stock_vente"] = [e for e in employe.get("stock_vente") or [] if _int(e.get("qty")) > 0]
-	return ecoules
-
-
 def flux_propriete(prop: dict) -> dict:
 	"""Le flux PROPRE du bien — même mécanique que celui d'une ville (`flux_marchand`), clos par
 	`marche.persister_flux`. Il prend son sens avec plusieurs marchands : ce que l'un écoule
@@ -1522,23 +1513,22 @@ def flux_propriete(prop: dict) -> dict:
 	return marche.ouvrir_flux(prop)
 
 
-def produire(employe: dict, flux: dict | None, passes: int, cat: dict,
-			 prix_fn=prix_vente_auto, rand=random) -> tuple[bool, int]:
-	"""`passes` ticks d'atelier SANS approvisionnement gratuit ; les ventes automatiques vont
-	dans la caisse. Renvoie (changé, gain en cuivre). Mute l'employé et le flux, sans save."""
+def produire(employe: dict, flux: dict | None, passes: int, cat: dict | None = None,
+			 ecouler=None) -> bool:
+	"""`passes` ticks d'atelier SANS approvisionnement gratuit. `ecouler(employe)` = la vente
+	de la passe, fournie par `utils/echanges_cite` (boutiques de la cité, crieur) et qui rend
+	toujours [] : ce qui part à la cité n'est pas reversé au flux du bien. Absent (achat ou
+	vente d'un visiteur) ⇒ production seule. Renvoie True si l'employé a changé ; mute
+	l'employé et le flux, sans save. `cat` n'est plus lu (signature d'appel conservée)."""
 	if not est_atelier(employe):
-		return False, 0
+		return False
 	recettes = marche.recettes_lieu(employe)
-	regl = reglages(cat)
-	change, gain = False, 0
+	hook = ecouler or (lambda _d: [])
+	change = False
 	for _ in range(max(0, int(passes))):
-		ch, ecoules = marche.tick_detaille(employe, recettes, flux, appro=False,
-										   ecouler=lambda d: ecouler_employe(d, regl, rand))
+		ch, _ecoules = marche.tick_detaille(employe, recettes, flux, appro=False, ecouler=hook)
 		change = change or ch
-		gain += sum(_int(e.get("qty")) * prix_fn(e.get("item_id")) for e in ecoules)
-	if gain:
-		encaisser(employe, gain)
-	return change or bool(gain), gain
+	return change
 
 
 def encaisser(employe: dict, cuivre: int) -> None:

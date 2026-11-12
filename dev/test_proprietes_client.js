@@ -62,8 +62,9 @@ globalThis._pcfGauche = '';
 vm.runInThisContext(extraireConst('_PROP_STATUTS'));
 vm.runInThisContext(extraireConst('_PROP_CATEGORIES'));
 vm.runInThisContext(extraireConst('INV_VISIBLE'));
+vm.runInThisContext(extraireConst('_ECH_ICONES'));
 for (const f of ['escapeHtml', '_propCategorie', '_purseEnCuivre', '_prixTexte', '_propCaps', '_propDate',
-	'_propMesProprietes', '_propMajoration', '_propEffets', '_propQuotidien', 'renderProprietesOffre', 'renderPropriete', '_majSidebarPropriete',
+	'_propMesProprietes', '_propMajoration', '_propEffets', '_propQuotidien', '_propNomPnj', '_propNegoce', 'renderProprietesOffre', 'renderPropriete', '_majSidebarPropriete',
 	'_sortedOrder', '_grpCharge', '_grpRemplirSac', '_grpRentre', '_pcfLigne', '_pcfSacGauche', '_pcfAdresse', '_majOmbreScroll', '_pcfOmbres', 'renderCoffre']) {
 	vm.runInThisContext(extraire(f));
 }
@@ -185,6 +186,42 @@ t('au quotidien : écurie pleine ⇒ rien à laisser ; rien d\'ouvert ⇒ pas de
 	assert.ok(!cible.innerHTML.includes('Au quotidien'), 'section vide affichée');
 	renderPropriete(ici('visiteur', { disponibles: [], registre: true, recoltes: [{ amenagement: 'x', nom: 'x', pret: true }] }));
 	assert.ok(!cible.innerHTML.includes('Au quotidien'), 'gestes du quotidien offerts au visiteur');
+});
+
+t('PNJ marchand : son nom ouvre l\'option de vente à la cité, au maître seulement', () => {
+	const emp = { id: 'employe:x', nom: XSS, metier: 'boucher', metier_label: 'Boucher', poste_nom: 'Salle',
+		marchand: true, vente_cite: false };
+	renderPropriete(ici('proprietaire', { employes: [emp] }));
+	let h = cible.innerHTML;
+	assert.ok(h.includes('onclick="propPnjOptions(this)"') && h.includes('data-emp="employe:x"'));
+	assert.ok(/data-emp="employe:x"\s+onchange="propVenteCite\(this\)"/.test(h), 'case cochée alors que la vente est interdite');
+	assert.ok(h.includes('ne vend pas à la cité') && !h.includes(XSS));
+	renderPropriete(ici('visiteur', { employes: [emp] }));
+	h = cible.innerHTML;
+	assert.ok(!h.includes('propPnjOptions') && !h.includes('propVenteCite'), 'option offerte au visiteur');
+});
+
+t('négoce : fiche du négociant, Lettré seul aux livres, journal échappé', () => {
+	const negoce = { id: 'employe:n', nom: XSS, niveau: 2, niveau_max: 5, xp: 600, xp_suivant: 2000,
+		bonus_prix: 0.05, prospection: 5, lettre: false, livres_dans_s: 0, formation_dans_s: 0,
+		formation_cout: 700, seance_xp: 350, achats: true };
+	const journal = [{ sens: 'vente', item: XSS, lieu: XSS, qty: 3, cuivre: 57, t: 0 },
+		{ sens: 'achat', item: 'Peau', lieu: 'Boucherie', qty: 2, cuivre: -12, t: 0 }];
+	renderPropriete(ici('proprietaire', { negoce, journal_echanges: journal }));
+	let h = cible.innerHTML;
+	assert.ok(h.includes('Négoce avec la cité') && h.includes('niveau 2/5') && h.includes('600 / 2000'));
+	assert.ok(!h.includes("propNegoce('livres')"), 'livres offerts à un non-Lettré');
+	assert.ok(h.includes("propNegoce('former')") && h.includes('🏪 3 ×') && h.includes('🛒 2 ×'));
+	assert.ok(!h.includes(XSS), 'nom non échappé');
+	renderPropriete(ici('proprietaire', { negoce: Object.assign({}, negoce, { lettre: true, livres_dans_s: 7200 }) }));
+	h = cible.innerHTML;
+	assert.ok(/disabled onclick="propNegoce\('livres'\)">📒 Tenir les livres \(dans 2 h\)/.test(h), 'délai des livres non affiché');
+	renderPropriete(ici('proprietaire', { negoce: Object.assign({}, negoce, { formation_cout: 10 ** 9 }) }));
+	assert.ok(/disabled onclick="propNegoce\('former'\)"/.test(cible.innerHTML), 'formation hors budget non grisée');
+	renderPropriete(ici('proprietaire'));
+	assert.ok(!cible.innerHTML.includes('Négoce avec la cité'), 'section vide affichée');
+	renderPropriete(ici('visiteur', { negoce, journal_echanges: journal }));
+	assert.ok(!cible.innerHTML.includes('Négoce avec la cité'), 'négoce montré au visiteur');
 });
 
 t('offre : types de la zone et chambre à louer', () => {

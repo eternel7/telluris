@@ -60,6 +60,7 @@ from utils import recrutement as recrutement_util
 from utils import mercenaires as mercenaires_util
 from utils import montures as montures_util
 from utils import proprietes as proprietes_util
+from utils import echanges_cite
 from utils import auberge as auberge_util
 from utils import scriptorium as scriptorium_util
 from utils import commande as commande_util
@@ -1105,20 +1106,26 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 	est_propriete = proprietes_util.est_propriete(grid_doc)
 	dort_chez_soi = est_propriete and proprietes_util.peut_dormir(character, grid_doc)
 	_cat_proprietes = proprietes_util.catalogue(get_doc)
-	# Dans une propriété, chaque visite fait travailler ses marchands employés (une passe,
-	# comme la visite d'une boutique tique son atelier) — sur le flux du BIEN, jamais celui
-	# de la ville. Ils se présentent ensuite comme les PNJ d'un lieu : une ligne d'action chacun.
+	# Dans une propriété, chaque visite RATTRAPE le temps écoulé (`utils/echanges_cite` : une
+	# passe par heure réelle environ, plafonnée) — production, échanges avec les boutiques de la
+	# cité, récoltes. Le propriétaire n'a même pas à entrer : n'importe quel lieu de sa cité
+	# rattrape ses biens. Les marchands se présentent ensuite comme les PNJ d'un lieu.
 	role_propriete = proprietes_util.role_de(character, grid_doc) if est_propriete else None
 	proprietes_ateliers = []
 	releve_caisse = 0
 	caisse_accessible = False
+	gain_echanges = 0
 	if est_propriete:
 		_employes = proprietes_util.employes_effectifs(grid_doc, get_doc)
-		_flux_prop = proprietes_util.flux_propriete(grid_doc)
-		for _e in _employes:
-			if proprietes_util.produire(_e, _flux_prop, 1, _cat_proprietes)[0]:
-				save_doc(_e)
-		persister_flux(_flux_prop, save_doc)
+		_bilan = echanges_cite.rattraper(grid_doc, _cat_proprietes, get_doc, find_docs, employes=_employes)
+		echanges_cite.persister(_bilan, save_doc)
+		if role_propriete == proprietes_util.PROPRIETAIRE:
+			gain_echanges += _bilan["gain"]
+	if character.get("proprietes"):
+		gain_echanges += echanges_cite.rattraper_biens(
+			echanges_cite.biens_a_rattraper(character, grid_doc, get_doc), _cat_proprietes,
+			get_doc, find_docs, save_doc, exclure=(grid_doc.get("_id"),))
+	if est_propriete:
 		# Intendant au Bureau administratif : la caisse est relevée à l'arrivée du maître.
 		# Les caisses d'abord (jamais de double relevé), le personnage ensuite.
 		if (role_propriete == proprietes_util.PROPRIETAIRE
@@ -1234,6 +1241,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			"role_propriete": role_propriete,
 			"proprietes_ateliers": proprietes_ateliers,
 			"releve_caisse": releve_caisse,
+			"gain_echanges": gain_echanges,
 			"caisse_accessible": caisse_accessible,
 			# Compagnons connus + affinités (onglet 🤝 section 👥, rendu client) — resynchronisé
 			# après embauche/congédiement/retour de combat.

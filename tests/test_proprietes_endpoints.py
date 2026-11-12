@@ -818,3 +818,78 @@ def test_revente_suit_la_decoration(monde):
 	assert data["revente"]["prix"] > sans
 	deco = next(a for a in data["installes"] if a["id"] == "decoration")
 	assert deco["effets"] and deco["actif"] is True and deco["poste_requis"] is False
+
+
+# ── Échanges avec la cité (utils/echanges_cite) ───────────────────────────────────
+
+def _negociant(monde, prop, proprio):
+	cand = {"id": "n1", "amenagement": "bureau_professionnel", "metier": "marchand", "prenom": "Jehan",
+			"nom": "Lombard", "sex": "M", "race": "humain", "portrait": "x.jpg",
+			"categorie": "negociant", "modele": proprietes.MODELE_PREFIXE + "negociant"}
+	neg = proprietes.creer_employe(prop, cand, proprio)
+	proprietes.engager(prop, neg)
+	monde["docs"][neg["_id"]] = neg
+	return neg
+
+
+def test_option_de_vente_par_pnj_au_clic_du_proprietaire(monde):
+	proprio = _perso()
+	prop = _entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	vue = _appel(monde, proprio, monde["rp"].ici, None)
+	assert next(x for x in vue["employes"] if x["id"] == e["_id"])["vente_cite"] is True
+	data = _appel(monde, proprio, monde["rp"].employe_vente, None, {"employe_id": e["_id"], "autorisee": False})
+	assert e["vente_cite"] is False
+	assert next(x for x in data["employes"] if x["id"] == e["_id"])["vente_cite"] is False
+	visiteur = _perso(_id="character:b", lieu=prop["_id"])
+	with pytest.raises(HTTPException) as err:
+		_appel(monde, visiteur, monde["rp"].employe_vente, None, {"employe_id": e["_id"], "autorisee": True})
+	assert err.value.status_code == 403
+
+
+def test_tenir_les_livres_seulement_pour_un_lettre(monde):
+	from utils import echanges_cite
+	proprio = _perso(voc="guerrier")
+	prop = _entrer(monde, proprio)
+	neg = _negociant(monde, prop, proprio)
+	vue = _appel(monde, proprio, monde["rp"].ici, None)
+	assert vue["negoce"]["id"] == neg["_id"] and vue["negoce"]["lettre"] is False
+	with pytest.raises(HTTPException) as err:
+		_appel(monde, proprio, monde["rp"].negociant_livres, None)
+	assert err.value.status_code == 409
+	proprio["voc"] = "lettre"
+	data = _appel(monde, proprio, monde["rp"].negociant_livres, None)
+	assert data["negoce_xp_gagne"] > 0 and data["negoce"]["xp"] == neg["negoce_xp"]
+	assert data["negoce"]["livres_dans_s"] > 0
+	assert echanges_cite.niveau_negociant(neg, echanges_cite.reglages_negociant(_cat(monde))) >= 1
+
+
+def test_formation_du_negociant_debitee(monde):
+	proprio = _perso()
+	prop = _entrer(monde, proprio)
+	neg = _negociant(monde, prop, proprio)
+	cout = _appel(monde, proprio, monde["rp"].ici, None)["negoce"]["formation_cout"]
+	avant = characters_util.money_to_cuivre(proprio)
+	data = _appel(monde, proprio, monde["rp"].negociant_former, None)
+	assert data["formation_payee"] == cout > 0 and characters_util.money_to_cuivre(proprio) == avant - cout
+	assert neg["negoce_xp"] == data["negoce_xp_gagne"]
+	with pytest.raises(HTTPException) as err:            # une fois par délai
+		_appel(monde, proprio, monde["rp"].negociant_former, None)
+	assert err.value.status_code == 409
+
+
+def test_registre_rattrape_avant_de_relever(monde):
+	from utils import echanges_cite
+	char = _perso()
+	prop = _entrer(monde, char)
+	_marchand(monde, char)
+	_appel(monde, char, monde["rp"].installer, None, {"amenagement": "bureau"})
+	appels = []
+	origine = echanges_cite.rattraper_biens
+	try:
+		echanges_cite.rattraper_biens = lambda biens, *a, **k: appels.append([b["_id"] for b in biens]) or 0
+		with pytest.raises(HTTPException):                # caisses vides : 409, mais rattrapées d'abord
+			_appel(monde, char, monde["rp"].registre_relever, None)
+	finally:
+		echanges_cite.rattraper_biens = origine
+	assert appels == [[prop["_id"]]]

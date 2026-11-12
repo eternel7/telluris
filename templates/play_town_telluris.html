@@ -3187,6 +3187,13 @@
 		.prop-caps { display: flex; flex-wrap: wrap; gap: .4rem .9rem; }
 		.prop-etat-on { color: #3d7a2e; font-weight: bold; }
 		.prop-etat-off { opacity: .7; }
+		/* PNJ du bien : son nom ouvre ses options (vente à la cité). */
+		.prop-pnj-btn { background: none; border: 0; padding: 0; font: inherit; color: inherit;
+			cursor: pointer; text-align: left; }
+		.prop-pnj-btn:hover strong, .prop-pnj-btn:focus-visible strong { text-decoration: underline; }
+		.prop-pnj-options { display: flex; align-items: center; gap: .35rem; font-size: .9em; }
+		.prop-pnj-options[hidden] { display: none; }
+		.pem-vente { display: inline-flex; align-items: center; gap: .3rem; font-size: .85em; }
 		.mnt-offre {
 			display: flex; align-items: center; gap: .75rem; padding: .5rem;
 			border-radius: 6px;  background: rgba(255, 255, 255, 0.03);
@@ -11013,6 +11020,7 @@ function renderPropriete(data) {
 		|| '<div class="sell-empty">Aucun aménagement.</div>') + `</div></section>`;
 
 	if (gere) html += _propQuotidien(data);
+	if (gere) html += _propNegoce(data);
 
 	if (gere) {
 		const bourse = _purseEnCuivre(data.purse);
@@ -11030,8 +11038,10 @@ function renderPropriete(data) {
 	html += data.heberges.map(a => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(a.nom)}</strong>
 		<span class="q-desc">compagnon hébergé</span></div>
 		${gere ? `<button class="sh-drop-btn" data-av="${escapeHtml(a.id)}" onclick="propCompagnon(this, 'reprendre')">Reprendre</button>` : ''}</div>`).join('');
-	html += data.employes.map(e => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(e.nom)}</strong>
-		<span class="q-desc">${escapeHtml(e.metier_label)} · ${escapeHtml(e.poste_nom)}</span></div>
+	html += data.employes.map(e => `<div class="prop-ligne"><div class="prop-txt">${_propNomPnj(e, gere)}
+		<span class="q-desc">${escapeHtml(e.metier_label)} · ${escapeHtml(e.poste_nom)}${e.marchand ? (e.vente_cite ? ' · 💰 vend à la cité' : ' · 🚫 ne vend pas à la cité') : ''}</span>
+		${gere && e.marchand ? `<label class="prop-pnj-options" hidden><input type="checkbox" data-emp="${escapeHtml(e.id)}" ${e.vente_cite ? 'checked' : ''} onchange="propVenteCite(this)">
+			Vente automatique à la cité (boutiques, crieur) — les visiteurs peuvent toujours lui acheter</label>` : ''}</div>
 		${gere ? `<button class="sh-drop-btn" data-emp="${escapeHtml(e.id)}" onclick="propRenvoyer(this)">Renvoyer</button>` : ''}</div>`).join('');
 	if (!p.residence && !data.heberges.length && !data.employes.length) html += '<div class="sell-empty">Personne ne vit ni ne travaille ici.</div>';
 	html += `</div>`;
@@ -11083,6 +11093,59 @@ function _propQuotidien(data) {
 			<button class="sh-drop-btn" data-mt="${escapeHtml(m.id)}" ${m.charge ? 'disabled' : ''} onclick="propEcurie(this, 'loger')">Laisser ici</button></div>`).join('');
 	}
 	return html + `</div></section>`;
+}
+
+// Nom d'un PNJ du bien : chez le maître, celui d'un marchand est un bouton qui déplie ses
+// options (vente à la cité). Id par data-* (Convention §9), nom échappé.
+function _propNomPnj(e, gere) {
+	if (!(gere && e.marchand)) return `<strong>${escapeHtml(e.nom)}</strong>`;
+	return `<button class="prop-pnj-btn" aria-expanded="false" title="Options de ${escapeHtml(e.nom)}"
+		onclick="propPnjOptions(this)"><strong>${escapeHtml(e.nom)}</strong> ⚙️</button>`;
+}
+
+function propPnjOptions(btn) {
+	const opt = btn.closest('.prop-txt').querySelector('.prop-pnj-options');
+	if (!opt) return;
+	opt.hidden = !opt.hidden;
+	btn.setAttribute('aria-expanded', String(!opt.hidden));
+}
+
+async function propVenteCite(cb) {
+	const data = await _propPost('api/proprietes/employe/vente', { employe_id: cb.dataset.emp, autorisee: cb.checked });
+	if (data) showToast(cb.checked ? '💰 Il vendra de nouveau à la cité.' : '🚫 Il ne vendra plus à la cité : sa production reste au bien.');
+	else cb.checked = !cb.checked;
+}
+
+// Négoce avec la cité (utils/echanges_cite) : fiche du négociant, ses séances, et le journal
+// des derniers échanges (ventes aux boutiques, achats, crieur, récoltes). Textes du serveur,
+// échappés : un nom de lieu ou d'objet est une chaîne de contenu.
+const _ECH_ICONES = { vente: '🏪', achat: '🛒', crieur: '📣', recolte: '🌿' };
+
+function _propNegoce(data) {
+	const n = data.negoce, j = data.journal_echanges || [];
+	if (!n && !j.length) return '';
+	let html = `<section class="prop-section"><h3>⚖️ Négoce avec la cité</h3><div class="prop-liste">`;
+	if (n) {
+		const prog = n.xp_suivant == null ? 'niveau maximal' : `${n.xp} / ${n.xp_suivant} pts`;
+		const attente = s => s ? ` (dans ${Math.max(1, Math.ceil(s / 3600))} h)` : '';
+		const bourse = _purseEnCuivre(data.purse);
+		html += `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(n.nom)} — négociant, niveau ${n.niveau}/${n.niveau_max}</strong>
+			<span class="q-desc">${prog} · prix ${Math.round(n.bonus_prix * 100)} % plus près du meilleur · compare ${n.prospection} boutiques${n.achats ? ' · achète les matières de vos ateliers' : ''}</span></div>
+			${n.lettre ? `<button class="sh-drop-btn" ${(n.livres_dans_s || !n.seance_xp) ? 'disabled' : ''} onclick="propNegoce('livres')">📒 Tenir les livres${attente(n.livres_dans_s)}</button>` : ''}
+			<button class="sh-drop-btn" ${(n.formation_dans_s || !n.seance_xp || n.formation_cout > bourse) ? 'disabled' : ''} onclick="propNegoce('former')">🎓 Former · ${_prixTexte(n.formation_cout)}${attente(n.formation_dans_s)}</button></div>`;
+	} else {
+		html += `<div class="sell-empty">Sans négociant, vos ateliers vendent seuls, moins cher, et n'achètent rien.</div>`;
+	}
+	if (j.length) {
+		html += j.map(l => `<div class="prop-ligne"><div class="prop-txt"><span>${_ECH_ICONES[l.sens] || '•'} ${l.qty} × ${escapeHtml(String(l.item))} → ${escapeHtml(String(l.lieu))}</span>
+			<span class="q-desc">${l.cuivre ? (l.cuivre > 0 ? '+' : '−') + _prixTexte(Math.abs(l.cuivre)) : ''}${l.t ? (l.cuivre ? ' · ' : '') + _propDate(l.t) : ''}</span></div></div>`).join('');
+	}
+	return html + `</div></section>`;
+}
+
+async function propNegoce(geste) {
+	const data = await _propPost(`api/proprietes/negociant/${geste}`, {});
+	if (data && data.negoce_xp_gagne) showToast(`${geste === 'livres' ? '📒' : '🎓'} Votre négociant gagne ${data.negoce_xp_gagne} points d'expérience.`);
 }
 
 async function propRecolter(btn) {
@@ -11487,7 +11550,9 @@ function renderEmbauche(data) {
 	clearCharacterCards(emp);
 	(data.employes || []).forEach(e => _carteMarchand(emp, e,
 		`<span>${escapeHtml(e.poste_nom)}</span>`,
-		`<button class="sh-drop-btn" data-emp="${escapeHtml(e.id)}" onclick="pemRenvoyer(this)">Renvoyer</button>`));
+		(e.marchand ? `<label class="pem-vente" title="Vente automatique aux boutiques de la cité et au crieur"><input type="checkbox" data-emp="${escapeHtml(e.id)}"
+			${e.vente_cite ? 'checked' : ''} onchange="pemVenteCite(this)"> 💰 Vend à la cité</label>` : '')
+		+ `<button class="sh-drop-btn" data-emp="${escapeHtml(e.id)}" onclick="pemRenvoyer(this)">Renvoyer</button>`));
 	if (emp && !(data.employes || []).length) emp.innerHTML = '<div class="sell-empty">Personne ne travaille ici.</div>';
 	const cand = document.getElementById('pem-candidats');
 	clearCharacterCards(cand);
@@ -11506,6 +11571,12 @@ async function pemEngager(btn) {
 	updatePurse(data.purse);
 	renderEmbauche(data);
 	if (data.engage) showToast(`🤝 ${data.engage} prend son poste.`);
+}
+
+async function pemVenteCite(cb) {
+	const data = await _aubFetch('api/proprietes/employe/vente', { employe_id: cb.dataset.emp, autorisee: cb.checked });
+	if (!data) { cb.checked = !cb.checked; return; }
+	showToast(cb.checked ? '💰 Il vendra de nouveau à la cité.' : '🚫 Il ne vendra plus à la cité : sa production reste au bien.');
 }
 
 async function pemRenvoyer(btn) {
@@ -12647,6 +12718,10 @@ renderFicheCompagnons(AFFINITES_INIT);
 // (`proprietes.releve_auto`, déjà créditée et persistée — ce toast ne reviendra pas).
 const RELEVE_CAISSE = {{ releve_caisse | tojson | safe }};
 if (RELEVE_CAISSE) showToast(`💰 Votre intendant vous remet la caisse : ${_prixTexte(RELEVE_CAISSE)}.`);
+// Rattrapage des biens (utils/echanges_cite) : ce que vos ateliers ont gagné avec la cité depuis
+// votre dernier passage — déjà en caisse, ce toast ne reviendra pas.
+const GAIN_ECHANGES = {{ gain_echanges | tojson | safe }};
+if (GAIN_ECHANGES) showToast(`🏪 Vos ateliers ont commercé avec la cité : ${_prixTexte(GAIN_ECHANGES)} en caisse.`);
 // Vol magique éteint au-dessus du vide hors d'un pas (fin de combat) : chute paresseuse au
 // rendu (`vol.chute_exploration`), déjà persistée — ce toast ne reviendra pas.
 const CHUTE_VOL = {{ chute_vol | tojson | safe }};

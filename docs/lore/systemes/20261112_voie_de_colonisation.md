@@ -134,6 +134,17 @@ Les soignants en poste et le stock de médicaments en limitent la gravité.
 
 **Production** : fermes, élevages et coupes de bois alimentent les stocks. Ateliers et boutiques tournent comme les ateliers des propriétés urbaines.
 
+**Échanges des ateliers** (Auteur, 12/11, en jeu pour les biens urbains) : la mécanique des biens urbains s'applique telle quelle. L'implantation **est elle-même la cité** : ses ateliers échangent avec ses propres boutiques, sans cité de rattachement ni distance.
+
+- **Temps** : une passe par heure réelle environ (tirée entre 30 et 90 minutes), rattrapée au passage, au plus **2 jours** d'absence. Ce plafond est propre aux ateliers ; celui du lieu reste de 3 jours (§ 6).
+- **Vente** : chaque boutique est un acheteur distinct. Elle paie le prix qu'obtiendrait le **fondateur** chez elle (sa relation, ses prix négociés). Elle n'achète plus dès que son stock atteint sa cible. Le plus offrant passe d'abord ; la marchandise arrive vraiment chez lui.
+- **Négociant** : sans lui, les ateliers vendent moins cher et n'achètent rien. Avec lui, ils achètent leurs matières aux seules boutiques qui en ont trop. Il progresse : par le commerce, par une formation payée, et par la séance « Tenir les livres » si le fondateur est **Lettré**.
+- **Personnel du négoce** : commis (compare plus de boutiques), charretier (porte davantage), teneur de livres (achats plus justes, caisse plus grande), crieur (vend aux habitants ce que nulle boutique ne prend).
+- **Ce qui produit le fait seul** : fermes, jardins, potagers et vergers (la terre fournit ses semences), ainsi que les récoltes.
+- **Option par PNJ** : le fondateur décide, en cliquant sur un PNJ, si sa production se vend. Interdite, elle reste au lieu.
+
+Moteur : `utils/echanges_cite.py` ; une implantation y entrera en devenant une cité (`marche.est_cite`).
+
 ## 9. La guilde du joueur
 
 Elle est **indépendante** de la Guilde existante. Cinq échelons, étalés sur les paliers :
@@ -166,6 +177,6 @@ Portail propre à la ville : perspective lointaine, non décidée.
 | Progression | cinq types figés | sept paliers, évolution sur place |
 | PNJ | personnel et spécialistes | postes nommés + population comptée |
 | Défense | assurée par la ville | à construire, exigée par palier |
-| Économie | celle de la cité | quatre stocks + production des PNJ |
+| Économie | celle de la cité : ateliers échangeant avec chaque boutique | quatre stocks + production des PNJ, échanges avec ses propres boutiques |
 | Limite | Domaine | Ville |
 | Guilde | impossible à fonder | cinq échelons, du Village à la Ville |

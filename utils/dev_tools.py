@@ -197,6 +197,15 @@ CATALOGUE = [
 			"neuf : refus si l'_id existe déjà dans le dump.",
 	},
 	{
+		"id": "gen_echanges_cite",
+		"label": "🏪 Générer les échanges des biens avec leur cité (rules:proprietes)",
+		"argv": _py("gen_echanges_cite.py"),
+		"ecrit": "Écrit jsons/echanges_cite_a_importer.json.",
+		"description": "Commis, charretier, teneur de livres, crieur et leurs aménagements ; achats "
+			"ouverts par les bureaux de négoce, jardins qui produisent seuls, réglages des échanges "
+			"et du négociant (utils/echanges_cite.py). Relit le dump : n'ajoute que ce qui manque.",
+	},
+	{
 		"id": "gen_contenants",
 		"label": "👜 Générer les contenants (copies d'Architectes, reliques)",
 		"argv": _py("gen_contenants.py"),
