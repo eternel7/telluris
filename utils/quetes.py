@@ -966,14 +966,14 @@ def lieux_solidaires(giver_doc: dict, find_docs_fn=None) -> list:
 	# — Auxerre et Reims portent toutes deux `"ville"` — deviendraient sœurs, et un
 	# renoncement à Auxerre sanctionnerait la réputation à Reims. On le dit donc explicitement
 	# au lieu de compter sur une forme de données qui a changé.
-	if (giver_doc or {}).get("categorie") == "ville":
+	if marche.est_cite(giver_doc):
 		return [giver_doc]
 	freres = (find_docs_fn or find_docs)({"type": "lieu", "lieu_parent": parent}) or []
 	lieux = [giver_doc]
 	vus = {(giver_doc or {}).get("_id")}
 	for d in freres:
 		if (d.get("_id") not in vus and sous_categorie_lieu(d) == sous_cat
-				and d.get("categorie") != "ville"):
+				and not marche.est_cite(d)):
 			lieux.append(d)
 			vus.add(d.get("_id"))
 	return lieux

@@ -5,8 +5,8 @@ Ce que ces tests verrouillent :
    qu'on lui confie (`donner`) et du flux de SA propriété.
 2. **Le flux du lieu** : ce qu'un employé écoule nourrit l'atelier d'un autre employé du même
    bien — et jamais le `flux_marchand` de la ville.
-3. **La caisse** : les ventes automatiques y tombent ; relevée, elle se vide ; pleine, elle
-   interdit de céder le bien.
+3. **La caisse** : relevée, elle se vide ; pleine, elle interdit de céder le bien. Les ventes
+   automatiques (boutiques de la cité) : `tests/test_echanges_cite.py`.
 4. **Commandes** : simples pour tout marchand, sur mesure pour une grande maison seulement —
    tranché par les prédicats EXISTANTS de `utils/commande.py` appliqués à l'employé.
 5. **Candidats** : fiche du marchand générique recopiée, nom tiré, un par poste libre.
@@ -55,8 +55,7 @@ CAT = {
 	],
 	"metiers": [{"id": "meunier", "label": "Meunier", "cout_embauche_cuivre": 10},
 				{"id": "gardien", "label": "Gardien", "cout_embauche_cuivre": 5}],
-	"reglages": {"candidats_duree_s": 100,
-				 "vente_auto": {"proba": 1.0, "fraction": 1.0, "reserve": 1}},
+	"reglages": {"candidats_duree_s": 100},
 }
 
 
@@ -164,28 +163,38 @@ def test_reprendre_un_produit():
 
 def test_produire_sans_approvisionnement_gratuit():
 	e = atelier("moulin_test")
-	proprietes.produire(e, None, 1, CAT, prix_fn=lambda _i: 10, rand=_Toujours())
+	proprietes.produire(e, None, 1, CAT)
 	# APPRO_DEBIT_DEFAUT = 5 : une boutique aurait reçu du blé ; l'employé, rien.
 	assert e["stock_matieres"] == {} and e["stock_vente"] == [] and e["caisse_cuivre"] == 0
 
 
-def test_produire_transforme_vend_et_encaisse():
+def test_produire_transforme_sans_vendre_seul():
+	"""Sans `ecouler` (achat ou vente d'un visiteur) : production seule, rien ne part, la caisse
+	reste intacte — la vente passe par les boutiques de la cité (utils/echanges_cite)."""
 	e = atelier("moulin_test", stock_matieres={"ble": 6})
-	change, gain = proprietes.produire(e, None, 1, CAT, prix_fn=lambda _i: 10, rand=_Toujours())
-	reserve = CAT["reglages"]["vente_auto"]["reserve"]
-	# 6 blés → 3 farines ; tout part sauf la réserve, au prix injecté.
-	assert change and gain == (3 - reserve) * 10 and e["caisse_cuivre"] == gain
-	assert e["stock_vente"] == [{"item_id": "item:farine", "qty": reserve}]
+	assert proprietes.produire(e, None, 1, CAT)
+	assert e["stock_vente"] == [{"item_id": "item:farine", "qty": 3}] and e["caisse_cuivre"] == 0
 
 
-def test_flux_du_lieu_entre_deux_marchands_jamais_celui_de_la_ville():
+def test_produire_passe_la_vente_par_le_crochet_et_ne_la_reverse_pas_au_flux():
+	vus = []
+	e = atelier("moulin_test", stock_matieres={"ble": 6})
+	flux = proprietes.flux_propriete(propriete())
+	proprietes.produire(e, flux, 1, CAT, ecouler=lambda d: vus.append(d["_id"]) or [])
+	assert vus == [e["_id"]] and flux["pool"] == {}
+
+
+def test_flux_du_lieu_entre_deux_marchands_jamais_celui_de_la_ville(monkeypatch):
+	monkeypatch.setattr(character_stats, "FLUX_SURPLUS_PART", 1.0)
 	prop = propriete()
-	moulin = atelier("moulin_test", stock_matieres={"ble": 6})
+	cible = int(character_stats.STOCK_CIBLE_DEFAUT)
+	# Assez de blé pour dépasser la cible du rayon : le surplus de farine part au flux DU BIEN.
+	moulin = atelier("moulin_test", stock_matieres={"ble": 2 * (cible + 4)})
 	boulanger = atelier("boulangerie_test")
 	flux = proprietes.flux_propriete(prop)
-	proprietes.produire(moulin, flux, 1, CAT, prix_fn=lambda _i: 1, rand=_Toujours())
+	proprietes.produire(moulin, flux, 1, CAT)
 	assert flux["pool"].get("item:farine", 0) > 0 and flux["doc"] is prop
-	proprietes.produire(boulanger, flux, 1, CAT, prix_fn=lambda _i: 1, rand=_Toujours())
+	proprietes.produire(boulanger, flux, 1, CAT)
 	assert boulanger["stock_vente"] or boulanger["stock_matieres"], "le boulanger n'a rien reçu"
 	marche.persister_flux(flux, lambda d: d)
 	assert VILLE["flux_marchand"] == {"farine": 7}             # la ville n'a pas bougé

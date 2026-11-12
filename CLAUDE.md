@@ -56,7 +56,8 @@ routers/
   proprietes.py          # /api/proprietes/* : offre, acheter (zone habitable), louer (auberge),
                          #   ici, occuper/quitter, vendre/abandonner, installer, embauche/engager/renvoyer,
                          #   heberger/reprendre, coffre (+transferer, vol sans gardien),
-                         #   atelier/donner|reprendre|choisir, caisse/relever
+                         #   atelier/donner|reprendre|choisir, caisse/relever,
+                         #   employe/vente, negociant/livres|former
   auberge.py             # /api/auberge/* : salle commune (tables, tableau d'information), nuit,
                          #   services (compagnons-joueurs : s'inscrire, retirer, engager)
   scriptorium.py         # /api/scriptorium(/ecrire) : écrit personnel (papier+encre+plume → livre)
@@ -141,6 +142,10 @@ utils/
                          #   ATELIERS : PNJ marchands employés (flux du bien, jamais de la ville ; caisse) ;
                          #   EFFETS des aménagements (`effets` / `effets_poste`) : réveil à durée NON
                          #   cumulatif, médecin, écurie (plafond conservé), bibliothèque → scriptorium par vue
+  echanges_cite.py       # échanges des ateliers d'un bien avec CHAQUE boutique de sa cité (pur) : rattrapage
+                         #   paresseux (`echanges_at`, ~1 passe/h, 48 h max), prix du PROPRIÉTAIRE, refus à la
+                         #   cible, plus offrant d'abord ; achats (négociant) aux seules boutiques en surplus ;
+                         #   négociant à niveau dérivé, crieur, jardins autoproduits, récoltes, `vente_cite`
   auberge.py             # tavernes (pur) : tables-chatrooms, tableau d'information, nuit
   mercenaires.py         # compagnons-JOUEURS (pur) : offre `service:*` au tableau, clone synchronisé (progression +
                          #   équipement porté, sac propre), un seul recruteur, XP/part → original par compteurs, mort = sac au sol

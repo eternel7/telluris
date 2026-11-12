@@ -28,6 +28,7 @@ from utils import auberge
 from utils import recrutement
 from utils import montures
 from utils import proprietes
+from utils import echanges_cite
 from utils import contenants
 from utils import escorte
 from utils import commande as commande_util
@@ -196,6 +197,9 @@ def _payload_ici(character: dict, prop: dict, cat: dict, role: str, extra: dict 
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 		# Lignes 🏷️/💰 de la sidebar : un renvoi ou un gardien installé les fait bouger.
 		"sidebar": proprietes.vue_sidebar(prop, cat, employes, role),
+		# Échanges avec la cité (utils/echanges_cite) : fiche du négociant et journal, au maître.
+		"negoce": _negoce_view(character, prop, cat, employes) if gere else None,
+		"journal_echanges": list(prop.get("echanges_journal") or []) if gere else [],
 	}
 	if extra:
 		payload.update(extra)
@@ -217,6 +221,27 @@ def _employe_view(cat: dict, e: dict) -> dict:
 		"categorie_label": categorie_label(e.get("categorie", "")) if e.get("categorie") else "",
 		"marchand": proprietes.est_atelier(e),
 		"grande": proprietes.grande_maison(e),
+		# Option du propriétaire (clic sur la carte) : vend-il à la cité ? Absent ⇒ oui.
+		"vente_cite": echanges_cite.vente_autorisee(e),
+	}
+
+
+def _negoce_view(character: dict, prop: dict, cat: dict, employes: list) -> dict | None:
+	"""Fiche du négociant du bien : capacités dérivées, séances (livres réservées au Lettré)."""
+	neg = echanges_cite.negociant_du_bien(employes)
+	if not neg:
+		return None
+	regln = echanges_cite.reglages_negociant(cat)
+	now = int(time.time())
+	return {
+		"id": neg["_id"], "nom": proprietes.nom_personnage(neg),
+		**echanges_cite.capacites_negociant(neg, regln),
+		"lettre": character.get("voc") == regln.get("vocation_livres", "lettre"),
+		"livres_dans_s": echanges_cite._delai_restant(neg, "livres_at", regln, now),
+		"formation_dans_s": echanges_cite._delai_restant(neg, "formation_at", regln, now),
+		"formation_cout": echanges_cite.cout_formation(neg, regln),
+		"seance_xp": echanges_cite.gain_seance(neg, regln),
+		"achats": proprietes.effet_actif(prop, cat, employes, "achats_cite"),
 	}
 
 
@@ -535,6 +560,63 @@ async def renvoyer(current_user: Annotated[dict, Depends(get_current_user)], bod
 	_sauver(prop)
 	save_doc(employe)
 	return _payload_ici(character, prop, cat, role)
+
+
+def _employe_ici(prop: dict, employe_id) -> dict:
+	employe = next((e for e in proprietes.employes_effectifs(prop, get_doc)
+					if e.get("_id") == employe_id), None)
+	if employe is None:
+		raise HTTPException(status_code=404, detail="Cet employé ne travaille pas ici.")
+	return employe
+
+
+@proprietes_router.post("/proprietes/employe/vente")
+async def employe_vente(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Clic sur la carte d'un PNJ producteur : le propriétaire autorise ou interdit sa vente
+	automatique (boutiques de la cité, crieur). Les visiteurs peuvent toujours lui acheter."""
+	character, prop, cat, role = _ici(current_user)
+	_exiger(role, proprietes.PROPRIETAIRE)
+	employe = _employe_ici(prop, body.get("employe_id"))
+	if not proprietes.est_atelier(employe):
+		raise HTTPException(status_code=409, detail="Ce PNJ ne vend rien.")
+	employe["vente_cite"] = bool(body.get("autorisee"))
+	_sauver(employe)
+	return _payload_ici(character, prop, cat, role)
+
+
+@proprietes_router.post("/proprietes/negociant/livres")
+async def negociant_livres(current_user: Annotated[dict, Depends(get_current_user)]):
+	"""« 📒 Tenir les livres » : le propriétaire Lettré fait progresser son négociant."""
+	character, prop, cat, role = _ici(current_user)
+	_exiger(role, proprietes.PROPRIETAIRE)
+	neg = echanges_cite.negociant_du_bien(proprietes.employes_effectifs(prop, get_doc))
+	if not neg:
+		raise HTTPException(status_code=409, detail="Il n'y a pas de négociant ici.")
+	ok, raison, pts = echanges_cite.tenir_les_livres(character, neg, echanges_cite.reglages_negociant(cat))
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	_sauver(neg)
+	return _payload_ici(character, prop, cat, role, {"negoce_xp_gagne": pts})
+
+
+@proprietes_router.post("/proprietes/negociant/former")
+async def negociant_former(current_user: Annotated[dict, Depends(get_current_user)]):
+	"""Formation payée du négociant : prix calculé AVANT la séance, débité si elle a lieu."""
+	character, prop, cat, role = _ici(current_user)
+	_exiger(role, proprietes.PROPRIETAIRE)
+	neg = echanges_cite.negociant_du_bien(proprietes.employes_effectifs(prop, get_doc))
+	if not neg:
+		raise HTTPException(status_code=409, detail="Il n'y a pas de négociant ici.")
+	regln = echanges_cite.reglages_negociant(cat)
+	cout = echanges_cite.cout_formation(neg, regln)
+	if cout > money_to_cuivre(character):
+		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi payer la formation.")
+	ok, raison, pts = echanges_cite.former(neg, regln)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	debit_character(character, cout)
+	_sauver(neg, character)
+	return _payload_ici(character, prop, cat, role, {"negoce_xp_gagne": pts, "formation_payee": cout})
 
 
 def _compagnon(aventurier_id) -> dict:
@@ -895,8 +977,11 @@ async def registre_relever(current_user: Annotated[dict, Depends(get_current_use
 	_exiger(role, proprietes.PROPRIETAIRE)
 	if not proprietes.registre(prop, cat):
 		raise HTTPException(status_code=403, detail="Il faut un bureau pour tenir le registre.")
+	biens = proprietes.biens_du_registre(character, prop, get_doc)
+	# Le temps écoulé d'abord : on relève ce que les ateliers ont gagné jusqu'à cet instant.
+	echanges_cite.rattraper_biens(biens, cat, get_doc, find_docs, save_doc)
 	ateliers = []
-	for bien in proprietes.biens_du_registre(character, prop, get_doc):
+	for bien in biens:
 		ateliers += [e for e in proprietes.employes_effectifs(bien, get_doc) if proprietes.est_atelier(e)]
 	total = proprietes.relever_caisse(ateliers)
 	if not total:

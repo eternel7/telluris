@@ -29,6 +29,7 @@ from utils import montures
 from utils import scriptorium
 from utils import commande as commande_util
 from utils import proprietes
+from utils import echanges_cite
 from utils import fiche as fiche_util
 # ⚠️ Sens d'import : `routers/auberge` → `routers/user`, jamais l'inverse (précédent :
 # `routers/recrutement`). `routers/user` importe `utils/auberge`, pas ce module.
@@ -621,23 +622,20 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 	magasins = sum(save_docs(a_sauver))
 	persister_flux(flux, save_doc)
 
-	# 3 bis. Chez soi : les marchands employés travaillent la nuit comme les étals de la cité,
-	#    mais sur le flux de LA PROPRIÉTÉ (jamais celui de la ville) et sans approvisionnement
-	#    gratuit ; leurs ventes remplissent leur caisse. Le tableau d'embauche se renouvelle.
+	# 3 bis. Chez soi : le temps écoulé est rattrapé, PLUS les passes de la nuit, comme les étals
+	#    de la cité (`utils/echanges_cite`) : production sur le flux du BIEN, échanges avec les
+	#    boutiques de la cité (les `voisins` déjà tickés ci-dessus, sans second `find_docs`),
+	#    récoltes. Le tableau d'embauche se renouvelle. Le bien est sauvé une fois, en dernier.
 	ateliers = 0
 	if chez_soi:
-		flux_prop = proprietes.flux_propriete(lieu_doc)
-		for e in employes:
-			change, _gain = proprietes.produire(e, flux_prop, passes, cat_prop)
-			if change and save_doc(e) is not None:
-				ateliers += 1
+		bilan = echanges_cite.rattraper(lieu_doc, cat_prop, get_doc, lambda _q: voisins,
+										passes_extra=passes, employes=employes)
+		ateliers = sum(1 for e in employes if proprietes.est_atelier(e))
 		proprietes.rafraichir_candidats(lieu_doc, cat_prop, employes, get_doc,
 										recrutement.portraits_disponibles(), force=True,
 										portraits_personnel=proprietes.portraits_personnel_disponibles())
-		# Le flux se referme SUR le doc de la propriété : s'il n'a pas bougé, on sauve quand
-		# même le doc pour ses candidats renouvelés.
-		if not persister_flux(flux_prop, save_doc):
-			save_doc(lieu_doc)
+		bilan["a_sauver"] = [d for d in bilan["a_sauver"] if d is not lieu_doc] + [lieu_doc]
+		echanges_cite.persister(bilan, save_doc)
 
 	# 4. Les recrues. ⚠️ On PÉRIME au lieu de supprimer : c'est ce qui fait traverser
 	#    `retirer_du_tableau`, le chokepoint qui sait qu'un ANCIEN COMPAGNON repasse `parti`
