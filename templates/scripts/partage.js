@@ -1,8 +1,9 @@
-// Bouton 🔗 Partager des pages du lore (/admin/lore, une lecture, /admin/lore/chronologie).
+// Bouton de partage (icône) des pages du lore (/admin/lore, une lecture, /admin/lore/chronologie).
 // Tout bouton `[data-partager]` partage l'URL COURANTE (ancre comprise) : feuille de partage
 // native si le navigateur en a une (mobile), sinon copie dans le presse-papiers ; repli
 // `execCommand('copy')` hors contexte sécurisé (http sur une IP du réseau : pas de clipboard).
-// Retour visuel dans le bouton lui-même. Verrouillé par dev/test_partage_client.js.
+// Bouton à icône seule (SVG, couleur `--muted` de la page) : le retour s'affiche à la place de l'icône (✓ / ✗), puis
+// l'icône revient ; le libellé passe dans `title`. Verrouillé par dev/test_partage_client.js.
 
 /** Copie `texte` ; résout `true` si la copie a eu lieu. */
 async function partageCopier(texte, nav, doc) {
@@ -35,20 +36,25 @@ async function partagerLien(url, titre, nav, doc) {
 	return (await partageCopier(url, nav, doc)) ? 'copie' : 'echec';
 }
 
-const PARTAGE_LIBELLES = { partage: '✓ Partagé', copie: '✓ Lien copié', echec: '✗ Copie impossible' };
+const PARTAGE_RETOURS = {
+	partage: ['✓', 'Lien partagé'],
+	copie: ['✓', 'Lien copié'],
+	echec: ['✗', 'Copie impossible : '],
+};
 
 function installerPartage(racine) {
 	for (const btn of racine.querySelectorAll('[data-partager]')) {
-		const libelle = btn.textContent;
+		const icone = btn.innerHTML;
+		const titre = btn.title;
 		let minuteur = null;
 		btn.addEventListener('click', async () => {
 			const r = await partagerLien(window.location.href, document.title, navigator, document);
-			const texte = PARTAGE_LIBELLES[r];
-			if (!texte) return;
-			btn.textContent = texte;
-			if (r === 'echec') btn.title = window.location.href;
+			const retour = PARTAGE_RETOURS[r];
+			if (!retour) return;
+			btn.textContent = retour[0];
+			btn.title = retour[1] + (r === 'echec' ? window.location.href : '');
 			clearTimeout(minuteur);
-			minuteur = setTimeout(() => { btn.textContent = libelle; }, 1800);
+			minuteur = setTimeout(() => { btn.innerHTML = icone; btn.title = titre; }, 1800);
 		});
 	}
 }
