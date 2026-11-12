@@ -75,6 +75,23 @@ guilde = {
 	],
 }
 
+# Les autres joueurs (personnage PRINCIPAL seul ; ni clone de compagnon, ni monture).
+autres_joueurs = {
+	"statuts": ["visiteur", "soutien", "associe"],  # soutien = a donné ; associé = accepté par le fondateur
+	"don_libre": True,                    # tout visiteur donne aux stocks, sans accord
+	"associe_vaut_presence": True,        # combat joué ET rattrapage déclenché par sa visite
+	"entrepot_associe": "depot",          # retrait seulement si le fondateur l'autorise, associé par associé
+	"roles_associe": ["approvisionner", "financer_chantier", "pacifier_territoire", "amener_colons", "loger"],
+	"recompenses_associe": ["prix_de_faveur", "membre_fondateur_guilde"],  # pas de parts sur la caisse
+	"tableau_besoins": True,              # dérivé des stocks bas, sans récompense
+	"associations_actives_max": 1,        # par personnage, en plus de ses propres implantations
+	"expiration_s": None,                 # aucune : départ volontaire ou exclusion seulement
+	# 1, 2, 4… : doublement par palier (valeurs de départ)
+	"associes_max": {p["id"]: 2 ** n for n, p in enumerate(paliers)},
+	"reserve_au_fondateur": ["engager_pnj", "renvoyer_pnj", "choisir_amenagement", "regler_feu",
+							 "vendre_production", "caisse", "accepter_associe", "exclure_associe"],
+}
+
 # ── Contrôles au lancement ─────────────────────────────────────────────────────
 ids = [p["id"] for p in paliers]
 assert len(set(ids)) == len(ids)
@@ -83,6 +100,7 @@ for a, b in zip(paliers, paliers[1:]):
 	assert a["prix_statut_cuivre"] < b["prix_statut_cuivre"], b["id"]
 assert all(e["palier"] in ids for e in guilde["echelons"])
 assert reglages["visible_des_le"] in ids
+assert list(autres_joueurs["associes_max"]) == ids
 
 dumps = sorted(glob.glob(os.path.join(JSONS, "telluris-dump-*.json")))
 if dumps:
@@ -92,7 +110,8 @@ if dumps:
 doc = {"_id": ID, "type": "rules",
 	   "value": {"paliers": paliers, "reglages": reglages, "stocks": stocks, "axes_site": axes_site,
 				 "facteurs_securite": facteurs_securite, "feu": feu, "etapes_menace": etapes_menace,
-				 "metiers": metiers, "batiments": batiments, "guilde": guilde}}
+				 "metiers": metiers, "batiments": batiments, "guilde": guilde,
+				 "autres_joueurs": autres_joueurs}}
 with open(SORTIE, "w", encoding="utf-8") as f:
 	json.dump({"docs": [doc]}, f, ensure_ascii=False, indent=2)
 	f.write("\n")

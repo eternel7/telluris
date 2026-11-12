@@ -200,6 +200,49 @@
               "palier": "ville"
             }
           ]
+        },
+        "autres_joueurs": {
+          "statuts": [
+            "visiteur",
+            "soutien",
+            "associe"
+          ],
+          "don_libre": true,
+          "associe_vaut_presence": true,
+          "entrepot_associe": "depot",
+          "roles_associe": [
+            "approvisionner",
+            "financer_chantier",
+            "pacifier_territoire",
+            "amener_colons",
+            "loger"
+          ],
+          "recompenses_associe": [
+            "prix_de_faveur",
+            "membre_fondateur_guilde"
+          ],
+          "tableau_besoins": true,
+          "associations_actives_max": 1,
+          "expiration_s": null,
+          "associes_max": {
+            "campement": 1,
+            "hameau": 2,
+            "bourgade": 4,
+            "village": 8,
+            "bourg": 16,
+            "petite_ville": 32,
+            "ville": 64
+          },
+          "reserve_au_fondateur": [
+            "engager_pnj",
+            "renvoyer_pnj",
+            "choisir_amenagement",
+            "regler_feu",
+            "vendre_production",
+            "caisse",
+            "accepter_associe",
+            "exclure_associe"
+          ]
         }
       }
     }
