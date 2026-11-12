@@ -243,10 +243,11 @@ Arrêté le 12/11/2026, par questionnaire. L'implantation se joue comme une vill
 
 ### 12.3 Lien au modèle
 
-Proposition de Claude Code, à valider à l'implémentation.
-
-- Le lieu de l'implantation garde la référence de son modèle et en **recopie** l'image et la grille : à la fondation, à chaque palier, et au passage du fondateur si le modèle a été corrigé depuis (paresseux, § 1).
-- L'état — palier, bâtiments posés, stocks — vit dans un doc à part : la grille n'est jamais réécrite en jeu.
+- **Lien pur** : le lieu de l'implantation ne porte que la référence de son modèle. L'image et la grille sont **lues sur le modèle** à chaque passage, jamais recopiées.
+- Corriger un modèle corrige aussitôt toutes les implantations qui s'y réfèrent.
+- Conséquence pour le moteur : toute lecture de grille d'un lieu passe par un point unique, qui suit la référence.
+- L'état — palier, modèle retenu, bâtiments posés, stocks — vit sur l'implantation ; un modèle n'est jamais écrit en jeu.
+- Tag de pays d'un modèle : **`pays_<slug>`** (`pays_abyssinie` pour `lieu:abyssinie`) ; un modèle peut en porter plusieurs.
 
 ### 12.4 Poser un bâtiment
 
@@ -258,10 +259,13 @@ Proposition de Claude Code, à valider à l'implémentation.
 | Nature | Bâtiments | Sur la carte | Au contact |
 |---|---|---|---|
 | Sous-lieu | boutique, atelier, auberge, étable | icône du métier | on entre |
-| Repère | habitation, entrepôt, ferme, poste de garde | icône propre | une fiche : occupants, stock, PNJ en poste |
+| Repère | habitation, entrepôt, ferme, poste de garde | pictogramme, halo d'une famille à part | une fiche : occupants, stock, PNJ en poste |
+
+Pictogrammes des repères : 🏠 habitation, 📦 entrepôt, 🌾 ferme, 🛡️ poste de garde. Leur halo, d'une couleur qu'aucun métier ne porte, dit qu'on n'y entre pas.
 
 ### 12.5 Changer de palier
 
+- Le **choix du modèle est reproposé** : mêmes vignettes qu'à la fondation, le modèle qui partage le plus de tags avec le modèle actuel en tête et présélectionné.
 - Nouvelle image, nouvelle grille.
 - Chaque bâtiment est **replacé seul** : même position relative, case libre la plus proche.
 - Le fondateur ou un associé corrige ensuite, par le geste de déplacement.
@@ -286,10 +290,4 @@ Précise le § 10. Tous voient la même carte et les mêmes icônes.
 | Associé | non | oui, une fois l'aménagement déclenché |
 | Soutien, visiteur | non | non |
 
-**Écartés** : parcelles peintes ou typées ; calque de fortification par-dessus l'image ; clic sur la carte pour poser ; gestion dans le panneau des propriétés ; visiteur sans carte ; grille identique aux sept paliers.
-
-**Non décidé** :
-
-- à la montée de palier, le choix du modèle est-il reproposé, ou suit-il le milieu retenu à la fondation ;
-- la forme du tag « pays » d'un modèle ;
-- les icônes des repères.
+**Écartés** : parcelles peintes ou typées ; calque de fortification par-dessus l'image ; clic sur la carte pour poser ; gestion dans le panneau des propriétés ; visiteur sans carte ; grille identique aux sept paliers ; grille recopiée sur l'implantation (figée ou resynchronisée) ; modèle imposé à la montée de palier ; modèle rangé sous son pays par `lieu_parent` ; vignettes dédiées pour les repères.
