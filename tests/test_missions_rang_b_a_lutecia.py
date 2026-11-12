@@ -372,7 +372,6 @@ class _Capture(Exception):
 
 def _lancer_combat(monkeypatch, character):
 	"""`start_combat` réel sur le dump ; `create_combat_doc` intercepté → monstres tirés."""
-	import asyncio
 	from routers import combat as rc
 	monkeypatch.setattr(rc, "get_selected_character", lambda u: character)
 	monkeypatch.setattr(rc, "get_doc", lambda i: DOCS.get(i) or DUMP.get(i))
@@ -383,7 +382,7 @@ def _lancer_combat(monkeypatch, character):
 		raise _Capture(monstres)
 	monkeypatch.setattr(rc, "create_combat_doc", capture)
 	try:
-		asyncio.run(rc.start_combat(rc.StartCombatRequest(), {"_id": "user:test"}))
+		rc.start_combat(rc.StartCombatRequest(), {"_id": "user:test"})
 	except _Capture as e:
 		return e.args[0]
 	return None

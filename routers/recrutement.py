@@ -442,7 +442,7 @@ async def recrutement_engager(
 
 
 @recrutement_router.post("/groupe/compagnie")
-async def groupe_renommer_compagnie(
+def groupe_renommer_compagnie(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -531,7 +531,7 @@ def _contenants_view(character: dict) -> dict:
 
 
 @recrutement_router.get("/groupe")
-async def groupe_etat(current_user: Annotated[dict, Depends(get_current_user)]):
+def groupe_etat(current_user: Annotated[dict, Depends(get_current_user)]):
 	"""État du groupe pour le panneau 👥, disponible PARTOUT (contrairement au board de
 	recrutement, qui exige un lieu recruteur et la carte d'aventurier)."""
 	character = get_selected_character(current_user)
@@ -568,7 +568,7 @@ async def groupe_etat(current_user: Annotated[dict, Depends(get_current_user)]):
 
 
 @recrutement_router.get("/groupe/compagnon/{av_id:path}")
-async def groupe_compagnon(
+def groupe_compagnon(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	av_id: str,
 ):
@@ -620,7 +620,7 @@ async def groupe_compagnon(
 
 
 @recrutement_router.post("/groupe/transferer")
-async def groupe_transferer(
+def groupe_transferer(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	body: dict = Body(...),
 ):

@@ -9,7 +9,6 @@ du panneau 👥 (`/groupe/transferer`). Ce que ces tests verrouillent :
 4. Butin d'étage : en attente sur le snapshot (`butin_contenants`), rangé à la finalisation.
 """
 
-import asyncio
 
 import pytest
 from fastapi import HTTPException
@@ -103,7 +102,7 @@ def _pickup(monkeypatch, acteur, principal, body, compagnons=()):
 	monkeypatch.setattr(ru, "_acteur", lambda _u, _b: (acteur, principal))
 	monkeypatch.setattr(ru, "_save_acteur", lambda porteur, p: None)
 	monkeypatch.setattr(ru.recrutement, "porteurs_effectifs", lambda c, g: list(compagnons))
-	return asyncio.run(ru.pickup_item({"_id": "user:u"}, body))
+	return ru.pickup_item({"_id": "user:u"}, body)
 
 
 def test_ramasser_dans_le_contenant_d_un_compagnon(docs, monkeypatch):
@@ -142,7 +141,7 @@ def _transferer(monkeypatch, p, body, porteurs=()):
 	monkeypatch.setattr(rrec, "save_doc", lambda d: d)
 	monkeypatch.setattr(rrec, "_inventory_payload", lambda c, s=None: {"inventaire": list(c.get("inventaire") or [])})
 	monkeypatch.setattr(rrec, "_fiche_payload", lambda c: None)
-	return asyncio.run(rrec.groupe_transferer({"_id": "user:u"}, body))
+	return rrec.groupe_transferer({"_id": "user:u"}, body)
 
 
 def test_transferer_vers_son_propre_contenant_recalcule_la_cle(docs, monkeypatch):
@@ -196,7 +195,7 @@ def _collect(monkeypatch, docs, attributions):
 	monkeypatch.setattr(rcombat, "save_doc", lambda d: d)
 	monkeypatch.setattr(rcombat, "verser_butin_au_sol", lambda c, cd, deja=None: [])
 	body = rcombat.CollectLootRequest(attributions=[rcombat.LootAttribution(**a) for a in attributions])
-	return asyncio.run(rcombat.collect_loot("combat:1", body, {"_id": "user:u"}))
+	return rcombat.collect_loot("combat:1", body, {"_id": "user:u"})
 
 
 def test_collect_range_dans_un_contenant(docs, monkeypatch):

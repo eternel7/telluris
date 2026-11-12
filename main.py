@@ -680,7 +680,7 @@ async def read_page_reinitialisation(request: Request):
 	)
 
 @app.get("/embleme", response_class=HTMLResponse)
-async def get_embleme(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+def get_embleme(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
 	if not current_user:
 		return RedirectResponse(url="/auth", headers=request.headers)
 	# rules :
@@ -754,8 +754,11 @@ def get_tableau(x: int, y: int):
 			  },
 			  "cells": tableau}
 	
+# ⚠️ `def`, PAS `async def` : l'accès base est synchrone — en coroutine il gèlerait la boucle
+# d'événements (donc TOUS les joueurs) le temps de la requête ; en `def`, FastAPI l'exécute
+# dans son threadpool. Cf. telluris-db § Endpoints hors de la boucle.
 @app.get("/play", response_class=HTMLResponse)
-async def get_playground(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+def get_playground(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
 	if not current_user:
 		return RedirectResponse(url="/auth", headers=request.headers)
 	
@@ -1280,7 +1283,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	)
 
 @app.get("/combat/{combat_id}", response_class=HTMLResponse)
-async def get_combat_page(
+def get_combat_page(
 	request: Request,
 	combat_id: str,
 	current_user: Annotated[User, Depends(get_current_user)],

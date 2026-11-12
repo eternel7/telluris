@@ -1040,7 +1040,7 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)],
 
 
 @pnj_router.get("/pnj/portail/seuils")
-async def pnj_portail_seuils(current_user: Annotated[dict, Depends(get_current_user)],
+def pnj_portail_seuils(current_user: Annotated[dict, Depends(get_current_user)],
 							 noeud: str, pnj_id: str | None = None):
 	"""Tableau des seuils RAFRAÎCHI quand la tranche tourne (compte à rebours client à zéro) :
 	le nœud `noeud` re-rendu, sans aucun effet (cf. `_noeud_seuils`). 422 hors du nœud des seuils."""
@@ -1885,7 +1885,7 @@ def _resoudre_acces(current_user: dict, character: dict, pnj_doc: dict, lieu_doc
 
 
 @pnj_router.post("/intro/raison")
-async def intro_raison(
+def intro_raison(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	body: dict = Body(...)):
 	"""Persiste la raison de la fuite choisie dans l'overlay d'intro. Body {"raison": id}.

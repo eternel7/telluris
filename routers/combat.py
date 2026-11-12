@@ -3,6 +3,7 @@ import random
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+import threading
 from db.config import get_doc, save_doc, find_docs
 from utils.auth import get_current_user
 from utils.characters import get_selected_character, carried_weight, charge_max_of, resolve_item_ref, item_ref_weight, item_ref_id
@@ -143,11 +144,25 @@ class CollectLootRequest(BaseModel):
     monstre_ids: list[str] = []
 
 
+# Les endpoints de ce routeur sont des `def` (threadpool) : un combat n'appartient qu'à un
+# joueur, il n'a pas à attendre ceux des autres. Cf. telluris-db § Endpoints hors de la boucle.
+#
+# ⚠️ Le démarrage est « chercher un combat actif, sinon en créer un » : deux requêtes du même
+# joueur en parallèle en créeraient DEUX. Les démarrages passent donc l'un après l'autre
+# (ils sont rares et brefs) ; actions et butin, eux, sont protégés par le `_rev` du combat.
+_VERROU_DEMARRAGE = threading.Lock()
+
+
 @combat_router.post("/combat/start")
-async def start_combat(
+def start_combat(
     body: StartCombatRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
 ):
+    with _VERROU_DEMARRAGE:
+        return _demarrer_combat(body, current_user)
+
+
+def _demarrer_combat(body: StartCombatRequest, current_user: dict):
     if not current_user:
         raise HTTPException(status_code=401, detail="Non authentifié")
 
@@ -296,7 +311,7 @@ async def start_combat(
 
 
 @combat_router.get("/combat/{combat_id}")
-async def get_combat(
+def get_combat(
     combat_id: str,
     current_user: Annotated[dict, Depends(get_current_user)],
 ):
@@ -315,7 +330,7 @@ async def get_combat(
 
 
 @combat_router.get("/combat/{combat_id}/acteur")
-async def combat_acteur(
+def combat_acteur(
     combat_id: str,
     current_user: Annotated[dict, Depends(get_current_user)],
 ):
@@ -366,7 +381,7 @@ async def combat_acteur(
 
 
 @combat_router.post("/combat/{combat_id}/collect")
-async def collect_loot(
+def collect_loot(
     combat_id: str,
     body: CollectLootRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
@@ -562,7 +577,7 @@ def _passer_a_l_etage(combat_doc: dict, passage: dict) -> None:
 
 
 @combat_router.post("/combat/{combat_id}/action")
-async def combat_action(
+def combat_action(
     combat_id: str,
     body: ActionRequest,
     current_user: Annotated[dict, Depends(get_current_user)],

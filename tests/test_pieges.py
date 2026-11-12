@@ -11,7 +11,6 @@
 #
 # Le hasard passe par `random.random` (jets d100 `_d100`) et `roll_dice`, fixés ici.
 
-import asyncio
 import copy
 import json
 import os
@@ -681,7 +680,7 @@ def _poser_http(monde, inventaire, x=4, y=5):
 		"_id": "character:test_0", "competences_connues": [COMP["_id"]],
 		"inventaire": inventaire}
 	body = rc.ActionRequest(type="poser_piege", competence_id=COMP["_id"], x=x, y=y)
-	return asyncio.run(rc.combat_action("combat:test", body, {"_id": "user:u"}))
+	return rc.combat_action("combat:test", body, {"_id": "user:u"})
 
 
 def test_poser_retire_exactement_un_objet(monde):

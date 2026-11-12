@@ -22,7 +22,6 @@
 # Tests PURS pour le module ; la partie endpoint monte une base en mémoire, gabarit de
 # `tests/test_auberge_endpoints.py`.
 
-import asyncio
 
 import pytest
 
@@ -315,7 +314,7 @@ def monde(monkeypatch):
 
 def _ecrire(monde, character, texte):
 	monde["docs"][character["_id"]] = character
-	return asyncio.run(monde["ru"].ecrire_journal({"_id": "user:u"}, {"texte": texte}))
+	return monde["ru"].ecrire_journal({"_id": "user:u"}, {"texte": texte})
 
 
 def _sac_complet():

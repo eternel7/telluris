@@ -118,7 +118,7 @@ def _payload(character: dict, lieu_doc: dict | None = None) -> dict:
 
 
 @montures_router.get("/montures/etable")
-async def etable_board(current_user: Annotated[dict, Depends(get_current_user)]):
+def etable_board(current_user: Annotated[dict, Depends(get_current_user)]):
 	character, lieu_doc = _acces_etable(current_user)
 	return _payload(character, lieu_doc)
 

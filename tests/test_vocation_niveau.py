@@ -10,7 +10,6 @@
 # Base en mémoire (même câblage que tests/test_apprendre_sort.py) ; `_fiche_payload` est
 # remplacé par une sentinelle : on vérifie que le bloc part, pas son contenu.
 
-import asyncio
 
 import pytest
 from fastapi import HTTPException
@@ -37,7 +36,7 @@ def monter(monkeypatch):
 
 	def appeler(character):
 		monkeypatch.setattr(user_router, "_acteur", lambda _u, _b: (character, character))
-		return asyncio.run(user_router.spend_xp_vocation(object(), {}))
+		return user_router.spend_xp_vocation(object(), {})
 
 	return appeler
 
@@ -56,6 +55,17 @@ def test_monte_jusquau_plafond(monter):
 	assert perso["vocations_niveaux"]["moine"] == character_stats.VOC_NIVEAU_MAX
 	# Le nouveau niveau débloque des capacités : la fiche se resynchronise (§10).
 	assert rep["fiche"] == {"id": perso["_id"]}
+
+
+def test_ecriture_refusee_par_la_base_rend_409(monter, monkeypatch):
+	"""Endpoint hors de la boucle d'événements : une écriture concurrente du même joueur peut
+	faire refuser celle-ci par CouchDB — la réponse le dit au lieu d'annoncer un niveau acquis."""
+	from fastapi import HTTPException
+	from routers import user as user_router
+	monkeypatch.setattr(user_router, "save_doc", lambda doc: None)
+	with pytest.raises(HTTPException) as e:
+		monter(_perso(0, _cout(0)))
+	assert e.value.status_code == 409
 
 
 def test_au_plafond_refuse_sans_rien_depenser(monter):

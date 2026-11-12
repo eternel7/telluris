@@ -20,6 +20,7 @@
 <head>
 	{# Session expirée (401 / x-session: aucune) → /auth. AVANT les scripts de la page. #}
 	<script src="{{ script_url('session.js') }}"></script>
+	<script src="{{ script_url('conflit.js') }}"></script>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Telluris — {{ title }}</title>
@@ -5086,7 +5087,7 @@
 			} else {
 				const error = await response.json();
 				console.log(error.detail)
-				alert("Erreur : " + error.detail);
+				_erreurAction(error.detail);
 			}
 		} catch (err) { console.error("Erreur de connexion", err); }
 	}
@@ -5368,7 +5369,7 @@ function makePortraitViewport(card) {
 			if (!response.ok) {
 				const error = await response.json();
 				console.log(error.detail);
-				alert("Erreur : " + error.detail);
+				_erreurAction(error.detail);
 			}
 		} catch (err) { console.error("Erreur de connexion", err); }
 	}
@@ -5968,7 +5969,7 @@ async function spendXpVocation() {
 			body: JSON.stringify(_actionBody({}))
 		});
 		const data = await res.json();
-		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		if (!res.ok) { _erreurAction(data.detail); return; }
 
 		_vocNiveau       = data.voc_niveau;
 		// Le niveau de vocation monté est celui du PORTEUR : ne le recopier que sur SES cartes
@@ -6143,7 +6144,7 @@ async function spendXp(statKey, useMaxBonus = false) {
 			))
 		});
 		const data = await res.json();
-		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		if (!res.ok) { _erreurAction(data.detail); return; }
 
 		_charStats[statKey]  = newVal;
 		_statCaps = data.stat_caps;
@@ -6229,10 +6230,22 @@ async function spendXp(statKey, useMaxBonus = false) {
 	// bougent pas.
 	// ⚠️ textContent et jamais innerHTML : c'est ce qui dispense d'échapper les noms saisis
 	// par le joueur partout où l'on toaste (règle XSS, CLAUDE.md §9).
+	// Erreur d'une action : un conflit d'écriture n'est qu'un avis (bulle discrète) ; toute
+	// autre erreur garde sa boîte d'alerte.
+	function _erreurAction(detail) {
+		if (estConflit(detail)) showToast(detail);
+		else alert('Erreur : ' + detail);
+	}
 	function showToast(msg, opts) {
 		const major = !!(opts && opts.major);
 		const pile = document.getElementById(major ? 'toast-major' : 'toast');
 		if (!pile) return;
+		// Conflit d'écriture (409) : message adouci (scripts/conflit.js), et UNE bulle à la
+		// fois — plusieurs actions refusées d'un coup ne doivent pas empiler le même avis.
+		if (estConflit(msg)) {
+			msg = adoucirConflit(msg);
+			if ([...pile.children].some(e => e.textContent === msg)) return;
+		}
 		const el = document.createElement('div');
 		el.className = 'toast-item' + (major ? ' toast-major' : '');
 		el.textContent = msg;
@@ -8227,7 +8240,7 @@ async function dropItem(index, itemId) {
 			body: JSON.stringify(_actionBody({index, item_id: itemId}))
 		});
 		const data = await res.json();
-		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		if (!res.ok) { _erreurAction(data.detail); return; }
 		_applyInventoryPayload(data);
 		_appliquerFiche(data.fiche);   // un grimoire posé ferme son sort à l'apprentissage
 	} catch(err) { console.error('Erreur drop', err); }
@@ -8243,7 +8256,7 @@ async function pickupItem(index, itemId) {
 			body: JSON.stringify(_actionBody({index, item_id: itemId}))
 		});
 		const data = await res.json();
-		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		if (!res.ok) { _erreurAction(data.detail); return; }
 		_applyInventoryPayload(data);
 		_appliquerFiche(data.fiche);   // un grimoire ramassé ouvre son sort à l'apprentissage
 		if (data.auto_dropped && data.auto_dropped.length) {
@@ -8415,7 +8428,7 @@ async function equip(itemId, slot, idx) {
 			body: JSON.stringify(_actionBody(payload))
 		});
 		const data = await res.json();
-		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		if (!res.ok) { _erreurAction(data.detail); return; }
 		_slots      = data.slots;
 		_inventaire = data.inventaire;
 		_refreshPaperdoll();
@@ -8435,7 +8448,7 @@ async function unequip(slot) {
 			body: JSON.stringify(_actionBody({slot}))
 		});
 		const data = await res.json();
-		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		if (!res.ok) { _erreurAction(data.detail); return; }
 		_slots      = data.slots;
 		_inventaire = data.inventaire;
 		_refreshPaperdoll();

@@ -35,8 +35,11 @@ def nom_port(route: dict) -> str:
 	return lieu_label(parent or arrivee, (route.get("arrivee") or {}).get("lieu", ""))
 
 
+# ⚠️ `def`, PAS `async def` : l'accès base est synchrone — en coroutine il gèlerait la boucle
+# d'événements (donc TOUS les joueurs) le temps de la requête ; en `def`, FastAPI l'exécute
+# dans son threadpool. Cf. telluris-db § Endpoints hors de la boucle.
 @traversee_router.post("/traversee/avancer")
-async def traversee_avancer(current_user: Annotated[dict, Depends(get_current_user)]):
+def traversee_avancer(current_user: Annotated[dict, Depends(get_current_user)]):
 	"""Une case de plus. En mer : rencontre éventuelle (combat seul, comme un pas à terre).
 	Sur la dernière case : débarquement sur les quais d'arrivée, `arrive: true`."""
 	if not current_user:
@@ -67,12 +70,12 @@ async def traversee_avancer(current_user: Annotated[dict, Depends(get_current_us
 	# Courses de transport échues (expiration paresseuse : pas de tick de fond).
 	transports_echoues = transport.traiter_expirations(
 		character, quetes.now_epoch(), get_doc, save_doc)
-	compagnons, montures_groupe = _auras_du_groupe(character)
+	compagnons, montures_groupe, groupe_avant = _auras_du_groupe(character)
 	_apply_world_turn_regen(character)
 	marquer_joue(character)
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
-	_apply_world_turn_groupe(character, 0, compagnons, montures_groupe)
+	_apply_world_turn_groupe(character, 0, compagnons, montures_groupe, groupe_avant)
 	return {
 		"arrive": False,
 		"position": character["position"],

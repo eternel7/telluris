@@ -24,13 +24,13 @@ def _clean_profil_weights(raw) -> dict:
 
 
 @zones_router.get("/zones")
-async def list_zones(current_user: Annotated[dict, Depends(get_current_user)]):
+def list_zones(current_user: Annotated[dict, Depends(get_current_user)]):
     _require_admin(current_user)
     return find_docs({"type": "zone_influence"}) or []
 
 
 @zones_router.get("/zones/{zone_id:path}")
-async def get_zone(zone_id: str, current_user: Annotated[dict, Depends(get_current_user)]):
+def get_zone(zone_id: str, current_user: Annotated[dict, Depends(get_current_user)]):
     _require_admin(current_user)
     doc = get_doc(unquote(zone_id))
     if not doc:
@@ -166,7 +166,7 @@ async def update_lieu_ressources(
 
 
 @zones_router.get("/items")
-async def list_items(
+def list_items(
     current_user: Annotated[dict, Depends(get_current_user)],
     categorie: str | None = None,
     sous_categorie: str | None = None,

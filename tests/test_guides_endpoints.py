@@ -90,7 +90,9 @@ def _appel(monde, char, fn, *args):
 	origine = rg.get_selected_character
 	rg.get_selected_character = lambda _u: char
 	try:
-		return asyncio.run(fn(*args))
+		# Endpoint `def` (threadpool) ou `async def` selon la route : les deux se jouent ici.
+		rendu = fn(*args)
+		return asyncio.run(rendu) if asyncio.iscoroutine(rendu) else rendu
 	finally:
 		rg.get_selected_character = origine
 
@@ -387,5 +389,5 @@ def test_impossible_d_oter_l_equipement_d_un_guide(monkeypatch):
 		 "slots": {"main_droite": "item:canne"}, "inventaire": []}
 	monkeypatch.setattr(ru, "_acteur", lambda u, b: (g, {}))
 	with pytest.raises(HTTPException) as e:
-		asyncio.run(ru.unequip_item({"user_id": "u"}, {"slot": "main_droite", "compagnon_id": g["_id"]}))
+		ru.unequip_item({"user_id": "u"}, {"slot": "main_droite", "compagnon_id": g["_id"]})
 	assert e.value.status_code == 403 and g["slots"]["main_droite"] == "item:canne" and g["inventaire"] == []

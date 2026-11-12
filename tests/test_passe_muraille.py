@@ -122,7 +122,6 @@ def test_paires_du_dump_se_traversent_vers_la_cite_parente():
 def _deplacer(monkeypatch, move, docs_porte=None):
 	"""Joue `move_character` depuis la case extérieure de la paire ; rend (lieu, pos) passés à
 	`_effets_arrivee`."""
-	import asyncio
 	from routers import user as ru
 	connexions_fn, get_doc_fn = _monde(PAIRE, docs_porte)
 	char = {"_id": "character:u_1", "lieu": CITE, "position": {"x": 64, "y": 26}}
@@ -139,7 +138,7 @@ def _deplacer(monkeypatch, move, docs_porte=None):
 		lambda _c, doc, _g: (not (doc or {}).get("ferme"), "Le garde vous arrête."))
 	monkeypatch.setattr(ru, "_effets_arrivee",
 		lambda _c, dest, pos, _doc: arrivee.update(lieu=dest, pos=pos) or {"moved": 1})
-	asyncio.run(ru.move_character(None, {"_id": "u"}, move))
+	ru.move_character(None, {"_id": "u"}, move)
 	return arrivee["lieu"], arrivee["pos"]
 
 

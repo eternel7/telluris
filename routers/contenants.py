@@ -58,7 +58,7 @@ def contenant_ouvrir(current_user: Annotated[dict, Depends(get_current_user)],
 
 
 @contenants_router.post("/contenant/ranger")
-async def contenant_ranger(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+def contenant_ranger(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
 	"""Sac → contenant. Toujours possible, marée basse comprise (on dépose à tout moment)."""
 	porteur, principal = _acteur(current_user, body)
 	_refuser_en_combat(current_user, principal)
@@ -81,7 +81,7 @@ async def contenant_ranger(current_user: Annotated[dict, Depends(get_current_use
 
 
 @contenants_router.post("/contenant/sortir")
-async def contenant_sortir(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+def contenant_sortir(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
 	"""Contenant → sac du même porteur. Refus hors marée (Sac de Manannán) ou si le porteur
 	ne peut pas porter l'objet."""
 	porteur, principal = _acteur(current_user, body)
@@ -105,7 +105,7 @@ async def contenant_sortir(current_user: Annotated[dict, Depends(get_current_use
 
 
 @contenants_router.post("/contenant/poser")
-async def contenant_poser(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+def contenant_poser(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
 	"""Contenant → sol du PRINCIPAL (un compagnon n'a ni lieu ni position, cf. drop_item), sans
 	passer par le sac : aucun contrôle de charge, un contenant porte plus que son porteur.
 	Transitoire comme tout objet au sol : perdu au prochain déplacement, repris par le

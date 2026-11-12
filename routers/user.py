@@ -3,12 +3,13 @@ from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Reques
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 import bcrypt
+import copy
 import math
 import re
 import uuid
 import random
 import os
-from db.config import save_doc, get_doc, delete_doc, find_docs
+from db.config import save_doc, save_docs, get_doc, delete_doc, find_docs
 from utils.auth import get_current_user, create_access_token, ouvrir_session, fermer_session, revoquer_sessions
 from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
@@ -441,7 +442,7 @@ async def delete_character(
 	return get_user_characters(current_user)	
 	
 @user_router.post("/select_character")
-async def select_character(
+def select_character(
 	response: Response, 
 	current_user: Annotated[User, Depends(get_current_user)], 
 	characterinfo: dict = Body(...)):
@@ -468,7 +469,8 @@ async def select_character(
 			characterSelected["prenom"] == character["prenom"]
 		 ):
 			db_user["selected_character"] = character_id
-			save_doc(db_user)
+			if save_doc(db_user) is None:
+				raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 			return characterSelected
 		else:
 			raise HTTPException(status_code=404, detail="Character not found")
@@ -476,7 +478,7 @@ async def select_character(
 		raise HTTPException(status_code=404, detail="Invalid character selection")
 
 @user_router.post("/update_character_portrait")
-async def update_character_portrait(
+def update_character_portrait(
 	response: Response, 
 	current_user: Annotated[User, Depends(get_current_user)], 
 	portrait_info: dict = Body(...)):
@@ -497,7 +499,8 @@ async def update_character_portrait(
 			y = float(match.group(2))
 			character_to_update["portrait_translate"] = {"x": x, "y": y}
 			character_to_update["portrait_zoom"] = zoom
-			save_doc(character_to_update)
+			if save_doc(character_to_update) is None:
+				raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 			return character_to_update
 		else:
 			raise HTTPException(status_code=406, detail="Incorrect info for character portrait update")
@@ -509,7 +512,7 @@ IDENTITE_MAX = 30
 
 
 @user_router.post("/renommer_personnage")
-async def renommer_personnage(
+def renommer_personnage(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...)):
 	"""Change le prénom et le nom du personnage SÉLECTIONNÉ. Pas de `_acteur` : un compagnon
@@ -693,7 +696,7 @@ def _effets_arrivee(character: dict, destination: str, destination_pos: dict,
 		xp_partage += int(escorte_maj["depose"].get("xp") or 0)
 		niveau_up = niveau_up or bool(escorte_maj["depose"].get("niveau_up"))
 		niveau_new = compute_character_level(character.get("xp_total", 0))
-	compagnons, montures_groupe = _auras_du_groupe(character)
+	compagnons, montures_groupe, groupe_avant = _auras_du_groupe(character)
 	_apply_world_turn_regen(character)
 	marquer_joue(character)
 	save_doc(character)
@@ -701,7 +704,7 @@ def _effets_arrivee(character: dict, destination: str, destination_pos: dict,
 	# XP partagée de la compagnie, cf. _apply_world_turn_groupe).
 	xp_compagnie = recrutement.xp_compagnie_payload(
 		_apply_world_turn_groupe(character, xp_partage, compagnons,
-								 montures_groupe),
+								 montures_groupe, groupe_avant),
 		xp_partage)
 	return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character), "ressource_recoltable": _recolte_payload(character), "effets_actifs": consommables.effets_actifs_payload(character), "caracts_detail": _caracts_payload(character), "focalisation_atteinte": {"lieu": destination, "nom": lieu_label(lieu_doc, destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
 
@@ -741,8 +744,11 @@ def _pnjs_ici(character: dict, lieu_doc: dict) -> list:
 		lambda conds: acces.clauses_remplies(character, conds, get_doc))]
 
 
+# ⚠️ `def`, PAS `async def` : l'accès base est synchrone — en coroutine il gèlerait la boucle
+# d'événements (donc TOUS les joueurs) le temps de la requête ; en `def`, FastAPI l'exécute
+# dans son threadpool. Cf. telluris-db § Endpoints hors de la boucle.
 @user_router.post("/move_character")
-async def move_character(
+def move_character(
 	response: Response, 
 	current_user: Annotated[User, Depends(get_current_user)], 
 	move: dict = Body(...)):
@@ -892,7 +898,7 @@ async def move_character(
 					get_doc, save_doc, find_docs)
 				if escorte_maj["depose"]:
 					xp_partage += int(escorte_maj["depose"].get("xp") or 0)
-				compagnons, montures_groupe = _auras_du_groupe(character_to_update)
+				compagnons, montures_groupe, groupe_avant = _auras_du_groupe(character_to_update)
 				_apply_world_turn_regen(character_to_update)
 				# VOL MAGIQUE (utils/vol.py) : le tour de monde a pu l'éteindre au-dessus de l'eau
 				# ou d'une falaise — chute sur la case de sol la plus proche. APRÈS le tick, donc
@@ -901,10 +907,13 @@ async def move_character(
 				if chute:
 					access = get_lieu_directions(current_user, lieu_doc, character_to_update["position"])
 				marquer_joue(character_to_update)
-				save_doc(character_to_update)
+				# Hors de la boucle d'événements, une autre action du MÊME joueur peut avoir
+				# écrit entre-temps : CouchDB refuse (`_rev`) — le dire, le client rebondit.
+				if save_doc(character_to_update) is None:
+					raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 				# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage. Un pas ne
 				# rapporte pas d'XP — seule une conclusion d'intro peut en partager ici.
-				_apply_world_turn_groupe(character_to_update, xp_partage, compagnons, montures_groupe)
+				_apply_world_turn_groupe(character_to_update, xp_partage, compagnons, montures_groupe, groupe_avant)
 				links = get_lieu_links(current_user)
 				# Un pas ne recharge pas la page : la sanction de réputation (−1 chez le donneur ET
 				# sa maison) doit repartir avec la réponse, sinon l'onglet 🤝 — rendu 100 % client —
@@ -920,7 +929,7 @@ async def move_character(
 
 
 @user_router.post("/focaliser")
-async def focaliser(
+def focaliser(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...)):
 	"""Pose / retire (toggle) la focalisation du personnage.
@@ -1010,21 +1019,30 @@ def _apply_world_turn_regen(character: dict) -> None:
         character["currentPM"] = min(character["currentPM"], derived.pm_max)
 
 
-def _auras_du_groupe(character: dict) -> tuple[list, list]:
+def _auras_du_groupe(character: dict) -> tuple[list, list, dict]:
     """AURAS hors combat (passives à zone) : tout le groupe profite de celles de chacun.
     Pose `auras_recues` sur le principal, ses compagnons ET ses montures — AVANT la régén
-    du tour, qui les lit — et rend `(compagnons, montures)` chargés, à repasser à
+    du tour, qui les lit — et rend `(compagnons, montures, avant)` chargés, à repasser à
     `_apply_world_turn_groupe` : les recharger là-bas donnerait un SECOND dict du même doc
     (cf. sa docstring), et l'aura posée ici serait perdue. Rien n'est sauvé ici."""
     compagnons = recrutement.groupe_effectif(character, get_doc)
     montures_groupe = montures.montures_effectives(character, get_doc)
+    # Empreinte prise AVANT l'aura : `_apply_world_turn_groupe` ne sauve que ce qui a bougé.
+    avant = _empreintes(compagnons + montures_groupe)
     competences_util.appliquer_auras_groupe([character, *compagnons], montures_groupe)
-    return compagnons, montures_groupe
+    return compagnons, montures_groupe, avant
+
+
+def _empreintes(porteurs: list) -> dict:
+    """`{_id: copie profonde}` des docs du groupe tels que CHARGÉS — le témoin contre lequel
+    `_apply_world_turn_groupe` décide qui a changé pendant le tour."""
+    return {p.get("_id"): copy.deepcopy(p) for p in porteurs if p}
 
 
 def _apply_world_turn_groupe(character: dict, xp_partage: int = 0,
                              compagnons: list | None = None,
-                             montures_groupe: list | None = None) -> list:
+                             montures_groupe: list | None = None,
+                             avant: dict | None = None) -> list:
     """Le tour monde vaut pour TOUT le groupe : chaque compagnon régénère PV/PM et
     décrémente ses effets actifs exactement comme le joueur — un doc `aventurier:*` est
     un miroir du character, `_apply_world_turn_regen` s'y applique tel quel. Les docs
@@ -1045,10 +1063,18 @@ def _apply_world_turn_groupe(character: dict, xp_partage: int = 0,
         compagnons = recrutement.groupe_effectif(character, get_doc)
     if montures_groupe is None:
         montures_groupe = montures.montures_effectives(character, get_doc)
+    # ⚠️ Une écriture coûte ~40 lectures (relevé du journal : ~166 ms contre ~4) : on ne
+    # sauve QUE les docs que le tour a changés (aura, régén, effet, XP), en UN envoi groupé.
+    # Un groupe en pleine forme n'écrit rien. Porteur sans témoin ⇒ sauvé (repli sûr).
+    if avant is None:
+        avant = _empreintes(compagnons + montures_groupe)
     recrutement.partager_xp(character, xp_partage, compagnons=compagnons)
+    modifies = []
     for porteur in compagnons + montures_groupe:
         _apply_world_turn_regen(porteur)
-        save_doc(porteur)
+        if porteur != avant.get(porteur.get("_id")):
+            modifies.append(porteur)
+    save_docs(modifies)
     return compagnons
 
 
@@ -1178,7 +1204,7 @@ def _save_acteur(porteur: dict, principal: dict) -> None:
 
 
 @user_router.post("/spend_xp")
-async def spend_xp(
+def spend_xp(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1244,7 +1270,8 @@ async def spend_xp(
 	if use_bonus:
 		character["max_bonus_used"] = stat_key
 
-	save_doc(character)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
 	# Dérivées bufées + équipées (mêmes valeurs que la fiche : le client les recopie tel
 	# quel dans #sh-drv-*). Les plafonds, eux, restent calculés sur les caracts BRUTES.
@@ -1277,7 +1304,7 @@ async def spend_xp(
 
 
 @user_router.post("/equip")
-async def equip_item(
+def equip_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1354,7 +1381,8 @@ async def equip_item(
 	_garde_harnachement(character)
 
 	eq_bonus = sync_equipment_bonus(character)
-	save_doc(character)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
 	derived = _derived_from_character(character, eq_bonus)
 	return _reponse_equipement(character, slots, inventaire, derived)
@@ -1384,7 +1412,7 @@ def _reponse_equipement(character: dict, slots: dict, inventaire: list, derived)
 
 
 @user_router.post("/unequip")
-async def unequip_item(
+def unequip_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1412,7 +1440,8 @@ async def unequip_item(
 	_garde_harnachement(character)
 
 	eq_bonus = sync_equipment_bonus(character)
-	save_doc(character)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
 	derived = _derived_from_character(character, eq_bonus)
 	return _reponse_equipement(character, slots, inventaire, derived)
@@ -1478,7 +1507,7 @@ def _take_ref(refs: list, idx, item_id):
 
 
 @user_router.post("/drop_item")
-async def drop_item(
+def drop_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1504,7 +1533,7 @@ async def drop_item(
 
 
 @user_router.post("/pickup_item")
-async def pickup_item(
+def pickup_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1625,7 +1654,7 @@ def _nom_porteur(p: dict) -> str:
 
 
 @user_router.post("/renommer_objet")
-async def renommer_objet(
+def renommer_objet(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1677,7 +1706,7 @@ async def renommer_objet(
 
 
 @user_router.post("/consommer")
-async def consommer_item(
+def consommer_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1732,7 +1761,7 @@ def _partager_soin_exploration(lanceur: dict, cible: dict, effets: dict, pv_rend
 
 
 @user_router.post("/lancer_sort")
-async def lancer_sort(
+def lancer_sort(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1838,7 +1867,7 @@ async def lancer_sort(
 
 
 @user_router.post("/apprendre_sort")
-async def apprendre_sort(
+def apprendre_sort(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1879,7 +1908,7 @@ async def apprendre_sort(
 
 
 @user_router.post("/utiliser_competence")
-async def utiliser_competence(
+def utiliser_competence(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -1941,7 +1970,7 @@ async def utiliser_competence(
 
 
 @user_router.post("/apprendre_competence")
-async def apprendre_competence(
+def apprendre_competence(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -2006,7 +2035,7 @@ async def apprendre_competence(
 
 
 @user_router.post("/apprendre_magie")
-async def apprendre_magie(
+def apprendre_magie(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -2044,7 +2073,7 @@ async def apprendre_magie(
 
 
 @user_router.post("/monter_magie")
-async def monter_magie(
+def monter_magie(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -2079,7 +2108,7 @@ async def monter_magie(
 
 
 @user_router.post("/slot_action")
-async def slot_action(
+def slot_action(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -2106,7 +2135,7 @@ async def slot_action(
 
 
 @user_router.post("/slot_deplacer")
-async def slot_deplacer(
+def slot_deplacer(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -2126,7 +2155,7 @@ async def slot_deplacer(
 
 
 @user_router.post("/recolter")
-async def recolter_ressource(
+def recolter_ressource(
 	current_user: Annotated[User, Depends(get_current_user)],
 ):
 	"""Récolte la ressource rendue disponible par le dernier événement de zone « ressource »
@@ -2183,7 +2212,7 @@ async def recolter_ressource(
 
 
 @user_router.post("/couper")
-async def couper_item(
+def couper_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
@@ -2724,7 +2753,7 @@ async def marchander_item(
 
 
 @user_router.post("/spend_xp_vocation")
-async def spend_xp_vocation(
+def spend_xp_vocation(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(default={}),
 ):
@@ -2752,7 +2781,8 @@ async def spend_xp_vocation(
 	vocations_niveaux[voc] = voc_niveau + 1
 	character["vocations_niveaux"] = vocations_niveaux
 	character["attribute_points"] = attribute_points - cout
-	save_doc(character)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
 	return {
 		"attribute_points": character["attribute_points"],
@@ -2789,7 +2819,7 @@ def _vocation_payload(character: dict) -> dict:
 
 
 @user_router.post("/vocation/options")
-async def vocation_options(
+def vocation_options(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(default={}),
 ):
@@ -2798,7 +2828,7 @@ async def vocation_options(
 
 
 @user_router.post("/changer_vocation")
-async def changer_vocation(
+def changer_vocation(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(default={}),
 ):
@@ -2813,7 +2843,8 @@ async def changer_vocation(
 	if motif:
 		raise HTTPException(status_code=motif[0], detail=motif[1])
 	recap = vocations_util.appliquer_changement(character, cible, rules_vocations, rules_transitions)
-	save_doc(character)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 	return {
 		**recap,
 		"voc": character["voc"],
@@ -2825,7 +2856,7 @@ async def changer_vocation(
 
 
 @user_router.post("/journal")
-async def ecrire_journal(
+def ecrire_journal(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
