@@ -169,7 +169,48 @@ Les groupes envoyés en mission sont résolus au passage.
 
 Portail propre à la ville : perspective lointaine, non décidée.
 
-## 10. Les deux voies côte à côte
+## 10. Les autres joueurs
+
+Arrêté le 12/11/2026, par questionnaire. Dès le campement, l'implantation est une connexion (point bleu) dans laquelle on entre. Seul le **personnage principal** a un statut : ni le clone d'un compagnon-joueur, ni une monture.
+
+**Trois statuts** :
+
+| Statut | S'obtient | Accord du fondateur |
+|---|---|---|
+| Visiteur | en entrant | non |
+| Soutien | par un premier don | non |
+| Associé | par une demande écrite, acceptée | oui |
+
+**Le visiteur** :
+
+- lit le site : nom, fondateur, palier, sécurité et moral **en mots** (le détail chiffré reste au fondateur) ;
+- se sert de ce qui existe : repos au feu, boutique et auberge dès la Bourgade ;
+- **donne librement** aux quatre stocks ; le don est noté au carnet du fondateur ;
+- voit le **tableau des besoins** : dérivé des stocks bas, sans récompense ;
+- rien d'hostile : ni vol, ni attaque.
+
+**L'associé** : le fondateur décide, l'associé contribue.
+
+- **Approvisionner** : récoltes et chasses du site livrées au lieu, comptées comme apports.
+- **Financer** : verser une part d'un chantier ouvert par le fondateur (fortification, aménagement de statut).
+- **Pacifier** : suivre les traces de la faune, localiser la tanière, la vider.
+- **Amener des colons** : escorter des habitants depuis une cité proche ; la population comptée augmente.
+- **Loger** : nuit gratuite dans une habitation, petit coffre personnel.
+- **Présence** : il vaut le fondateur. Une attaque pendant sa visite se joue en combat, et sa visite déclenche le rattrapage du temps écoulé.
+- **Entrepôt commun** : dépôt seulement ; le retrait, si le fondateur l'autorise, associé par associé.
+
+**Ce que l'associé y gagne** : des **prix de faveur** dans les boutiques et à l'auberge du lieu, et le titre de **membre fondateur** de la guilde quand elle ouvre (rang d'office). Pas de parts sur la caisse. Rejoindre la guilde plus tard reste possible sans avoir été associé.
+
+**Réservé au fondateur** : engager ou renvoyer les PNJ nommés, choisir les aménagements, régler le feu, vendre la production, la caisse, accepter ou exclure un associé.
+
+**Garde-fous** :
+
+- places d'associés par palier : 1, 2, 4, puis doublement (Campement 1 … Ville 64) ;
+- une seule association active par personnage, en plus de ses propres implantations ;
+- **pas d'expiration** : l'association prend fin par départ volontaire ou par exclusion ; les apports restent au lieu ;
+- tout est asynchrone : la demande attend le fondateur, chacun lit les actes de l'autre dans son carnet.
+
+## 11. Les deux voies côte à côte
 
 | | Voie urbaine (en jeu) | Voie de colonisation |
 |---|---|---|
