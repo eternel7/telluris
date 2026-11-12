@@ -221,3 +221,75 @@ Arrêté le 12/11/2026, par questionnaire. Dès le campement, l'implantation est
 | Économie | celle de la cité : ateliers échangeant avec chaque boutique | quatre stocks + production des PNJ, échanges avec ses propres boutiques |
 | Limite | Domaine | Ville |
 | Guilde | impossible à fonder | cinq échelons, du Village à la Ville |
+| Carte | celle de la cité, le bien est une porte | la sienne : un modèle par palier, bâtiments posés par le fondateur (§ 12) |
+
+## 12. Interface de l'implantation
+
+Arrêté le 12/11/2026, par questionnaire. L'implantation se joue comme une ville : une carte sur laquelle on marche, des icônes de métier près des bâtiments, des lieux où l'on entre.
+
+### 12.1 Lieux modèles
+
+- Une **image par palier et par milieu** : un campement de désert n'est pas un campement de forêt.
+- Chaque image a son **lieu modèle**, qui porte l'image, les dimensions, la grille (`cells`, `nav`), les **entrées** et ses tags : `modele_colonie`, le palier, un ou plusieurs milieux, éventuellement un pays.
+- **Taille de grille libre par modèle** : le campement tient sur une petite carte, la ville sur une grande. Monter de palier, c'est voir le lieu grandir.
+- Un milieu peut être **incomplet** : un palier sans image de son milieu prend le modèle **générique** de ce palier. Le jeu générique des sept paliers est le seul prérequis.
+- **Fortifications peintes dans l'image du palier** et murées dans sa grille : la palissade du Hameau, les murailles du Bourg se voient et arrêtent le pas. Une défense au-delà du minimum exigé ne se lit que dans le panneau.
+
+### 12.2 Choisir son modèle
+
+- Tags du site : ceux de la **zone d'influence** qui couvre la case, puis ceux du **pays** parent.
+- Le fondateur **choisit** parmi les modèles du palier, présentés en vignettes avec les tags qu'ils partagent avec le site : **meilleur recouvrement en tête, générique en dernier**.
+- S'il existe des modèles **propres au pays**, seuls ceux-là sont proposés — le générique toujours en plus.
+
+### 12.3 Lien au modèle
+
+Proposition de Claude Code, à valider à l'implémentation.
+
+- Le lieu de l'implantation garde la référence de son modèle et en **recopie** l'image et la grille : à la fondation, à chaque palier, et au passage du fondateur si le modèle a été corrigé depuis (paresseux, § 1).
+- L'état — palier, bâtiments posés, stocks — vit dans un doc à part : la grille n'est jamais réécrite en jeu.
+
+### 12.4 Poser un bâtiment
+
+- **Pose libre** : toute case marchable et libre, hors entrées ; un bâtiment par case.
+- Geste : **« Poser ici »**. On marche jusqu'à la case, on choisit le bâtiment dans le panneau, il se pose sous ses pieds. Un refus (case prise, entrée) se dit en toast.
+- L'**icône** du bâtiment s'affiche à proximité, comme l'enseigne d'une boutique en cité.
+- **Déplacer** : même geste, disponible en tout temps.
+
+| Nature | Bâtiments | Sur la carte | Au contact |
+|---|---|---|---|
+| Sous-lieu | boutique, atelier, auberge, étable | icône du métier | on entre |
+| Repère | habitation, entrepôt, ferme, poste de garde | icône propre | une fiche : occupants, stock, PNJ en poste |
+
+### 12.5 Changer de palier
+
+- Nouvelle image, nouvelle grille.
+- Chaque bâtiment est **replacé seul** : même position relative, case libre la plus proche.
+- Le fondateur ou un associé corrige ensuite, par le geste de déplacement.
+
+### 12.6 Entrées
+
+- **Une à quatre cases** déclarées sur le modèle : les portes de l'enceinte peinte.
+- Le joueur arrive par la première ; les attaquants (§ 6) partent des entrées ; rien ne s'y pose.
+
+### 12.7 Panneau de l'implantation
+
+- Un bouton visible seulement sur la carte de l'implantation ; onglets **Site, Population, Bâtiments, Défense**.
+- Le visiteur en a la lecture : site en mots, tableau des besoins, dons (§ 10).
+
+### 12.8 Qui fait quoi sur la carte
+
+Précise le § 10. Tous voient la même carte et les mêmes icônes.
+
+| Statut | Déclencher un aménagement | Poser, déplacer |
+|---|---|---|
+| Fondateur | oui | oui |
+| Associé | non | oui, une fois l'aménagement déclenché |
+| Soutien, visiteur | non | non |
+
+**Écartés** : parcelles peintes ou typées ; calque de fortification par-dessus l'image ; clic sur la carte pour poser ; gestion dans le panneau des propriétés ; visiteur sans carte ; grille identique aux sept paliers.
+
+**Non décidé** :
+
+- à la montée de palier, le choix du modèle est-il reproposé, ou suit-il le milieu retenu à la fondation ;
+- la forme du tag « pays » d'un modèle ;
+- les icônes des repères.
