@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Telluris — {{ title }}</title>
+	<script src="{{ script_url('partage.js') }}" defer></script>
 	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
 	{#
 	  Lecture du lore (/admin/lore) : INDEX (sans `entree`) ou LECTURE d'un fichier (avec).
@@ -43,6 +44,12 @@
 			color: var(--accent); border: 1px solid var(--accent); border-radius: 6px; padding: 4px 9px;
 		}
 		header a.chrono:hover { background: rgba(200,168,75,0.12); }
+		header button.partager {
+			color: var(--muted); font-size: 0.8rem; white-space: nowrap; font-family: inherit;
+			background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 9px; cursor: pointer;
+		}
+		header button.partager:hover { color: var(--accent); border-color: var(--accent); }
+		header nav { align-items: center; }
 		.main { max-width: 1180px; margin: 0 auto; padding: 14px 16px 40px; }
 		a { color: var(--accent2); }
 
@@ -73,6 +80,9 @@
 			display: block; padding: 8px 14px; text-decoration: none; color: var(--text);
 			border-top: 1px solid var(--border);
 		}
+		/* ⚠️ `display:block` ci-dessus l'emporte sur l'attribut `hidden` : le filtre ne masquait
+		   que les groupes vides, jamais les fichiers non retenus d'un groupe gardé. */
+		a.fichier[hidden], .groupe[hidden] { display: none; }
 		a.fichier:hover, a.fichier:focus-visible { background: var(--panel2); outline: none; }
 		a.fichier .t { font-size: 0.88rem; }
 		a.fichier .d { color: var(--muted); font-size: 0.72rem; margin-left: 8px; white-space: nowrap; }
@@ -228,6 +238,7 @@
 			{% if entree %}<a href="/admin/lore/chronologie" class="chrono">🕰 Chronologie</a>
 			<a href="/admin/lore">← Lore</a>{% endif %}
 			<a href="/admin">← Administration</a>
+			<button type="button" class="partager" data-partager title="Partager le lien de cette page">🔗 Partager</button>
 		</nav>
 	</header>
 	<div class="main">
@@ -250,7 +261,7 @@
 		<div class="compte" id="compte"></div>
 		{% for section, libelle, entrees in groupes %}
 		<section class="groupe" data-groupe>
-			<h2>{{ libelle }} <span class="nb">{{ entrees|length }}</span></h2>
+			<h2>{{ libelle }} <span class="nb" data-nb="{{ entrees|length }}">{{ entrees|length }}</span></h2>
 			{% for e in entrees %}
 			<a class="fichier{{ ' canon' if e.canon }}{{ ' redige' if e.redige }}" href="/admin/lore/{{ e.cle }}"
 			   data-texte="{{ (e.titre ~ ' ' ~ e.resume ~ ' ' ~ e.date ~ ' ' ~ e.cle)|lower }}">
@@ -359,7 +370,10 @@
 					if (ok) n++;
 				}
 				for (const g of document.querySelectorAll('[data-groupe]')) {
-					g.hidden = !g.querySelector('a.fichier:not([hidden])');
+					const vus = g.querySelectorAll('a.fichier:not([hidden])').length;
+					g.hidden = !vus;
+					const nb = g.querySelector('.nb');
+					if (nb) nb.textContent = mots.length ? `${vus} / ${nb.dataset.nb}` : nb.dataset.nb;
 				}
 				compte.textContent = mots.length ? `${n} / ${total} fichiers` : `${total} fichiers`;
 			};

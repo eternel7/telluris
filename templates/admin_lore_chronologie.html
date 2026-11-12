@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Telluris — Chronologie du lore</title>
+	<script src="{{ script_url('partage.js') }}" defer></script>
 	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
 	{#
 	  Frise du lore (/admin/lore/chronologie) — source : docs/lore/chronologie.json, lue et
@@ -48,6 +49,12 @@
 		header nav { display: flex; gap: 14px; justify-content: flex-end; flex-wrap: wrap; }
 		header a { color: var(--muted); font-size: 0.85rem; text-decoration: none; white-space: nowrap; font-family: var(--titre); }
 		header a:hover { color: var(--accent); }
+		header nav { align-items: center; }
+		header button.partager {
+			color: var(--muted); font-size: 0.85rem; white-space: nowrap; font-family: var(--titre);
+			background: none; border: 1px solid currentColor; border-radius: 4px; padding: 1px 8px; cursor: pointer;
+		}
+		header button.partager:hover { color: var(--accent); }
 		.cartouche {
 			margin: 4px auto 0; max-width: 900px; padding: 12px 28px 10px;
 			border: 3px double var(--text); outline: 1px solid var(--or); outline-offset: 4px;
@@ -191,7 +198,7 @@
 </head>
 <body>
 	<header>
-		<nav><a href="/admin/lore">← Lore</a><a href="/admin">← Administration</a></nav>
+		<nav><a href="/admin/lore">← Lore</a><a href="/admin">← Administration</a><button type="button" class="partager" data-partager title="Partager le lien de cette page">🔗 Partager</button></nav>
 		<div class="cartouche">
 			<h1><span class="rubrique">F</span>rise des <span class="rubrique">Â</span>ges de Telluris</h1>
 			<div class="filet">✦</div>
