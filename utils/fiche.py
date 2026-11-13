@@ -74,7 +74,7 @@ def avec_degats_par_arme(character: dict, derived: dict) -> dict:
 	"""Deux armes de mêlée en main (`combat.coups_par_arme`) : ajoute aux dérivées
 	- `degats_cc_affiche` — « X / Y », un terme par arme (ambidextrie comprise) ;
 	- `cc_deux_armes_affiche` — « D x / G y », la précision du bras droit et du bras gauche,
-	  SANS ambidextrie seulement : c'est l'impact du malus de seconde arme qu'elle montre.
+	  dès que les deux valeurs DIFFÈRENT (malus de seconde arme, typologies distinctes).
 	`degats_cc` et les `cc*` restent intacts ; le client affiche les clés neuves si elles
 	sont là (absentes ⇒ retirées). Mute et rend."""
 	buffs = consommables.caracts_avec_buffs(character)
@@ -84,8 +84,8 @@ def avec_degats_par_arme(character: dict, derived: dict) -> dict:
 	derived.pop("cc_deux_armes_affiche", None)
 	if coups:
 		derived["degats_cc_affiche"] = " / ".join(n for _, n in coups)
-		if not consommables._as_int((character.get("competences_bonus") or {}).get("ambidextre")):
-			droite, gauche = coups[0][0], coups[1][0]
+		droite, gauche = coups[0][0], coups[1][0]
+		if droite != gauche:
 			derived["cc_deux_armes_affiche"] = f"D {droite} / G {gauche}"
 	return derived
 

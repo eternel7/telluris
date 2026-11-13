@@ -3603,8 +3603,8 @@ def coups_du_profil(acteur: dict, profil: dict) -> list:
 	  la Force ne frappe qu'une fois par attaque ; snapshot sans `caracts_base` (combat déjà
 	  en base) ⇒ part gardée, comportement d'avant ;
 	- prennent `DEUX_ARMES_MALUS_SECOND` en précision.
-	La passive `ambidextre` (snapshot) lève le malus de précision ET rend le DÉ de F à la
-	seconde arme — le bonus plat de F reste à la seule main droite.
+	La passive `ambidextre` (snapshot) lève le malus de précision ET rend TOUTE la part de F
+	(dé et bonus) à la seconde arme.
 	Tout reste recalculé depuis le snapshot : un buff de F ou d'Ag pèse sur chaque coup."""
 	coups = (profil or {}).get("coups") or []
 	if len(coups) < 2:
@@ -3627,9 +3627,9 @@ def coups_du_profil(acteur: dict, profil: dict) -> list:
 		skill = skill_du_profil(acteur, sous) - sum(int(c.get("bonus_cc", 0) or 0) for c in autres)
 		des_autres = [c.get("des", "") for c in autres if c.get("des")]
 		plat_autres = sum(int(c.get("plat", 0) or 0) for c in autres)
-		if i:
+		if i and not ambidextre:
 			skill -= malus
-			if des_force and not ambidextre:
+			if des_force:
 				des_autres.append(des_force)
 			plat_autres += plat_force
 		notation = character_stats.retirer_des_arme(base_notation, "+".join(des_autres),

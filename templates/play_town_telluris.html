@@ -2498,7 +2498,7 @@
 						{# « CàC deux armes » : bras droit / bras gauche, malus de seconde arme compris —
 						   rendue même absente (masquée) pour que `_refreshDerivedStats` l'allume. #}
 						<div class="sh-derived-row" id="sh-drv-row-{{ key }}"{% if key == "cc_deux_armes_affiche" and not d.get(key) %} style="display:none"{% endif %}
-							 {% if key == "cc_deux_armes_affiche" %}title="Précision du bras droit / du bras gauche, malus de seconde arme compris"{% endif %}>
+							 {% if key == "cc_deux_armes_affiche" %}title="Précision du bras droit / du bras gauche (malus de seconde arme, typologies)"{% endif %}>
 							<span class="sh-derived-lbl">{{ lbl }}</span>
 							<span class="sh-derived-val" id="sh-drv-{{ key }}">{{ (d.get("degats_cc_affiche") if key == "degats_cc" else None) or d.get(key,"—") }}{{ unit }}</span>
 						</div>
@@ -6075,8 +6075,8 @@ let _derivedCur = {{ character.get("derived_stats", {}) | tojson | safe }};
 function _refreshDerivedStats(d) {
 	if (d) _derivedCur = d;
 	const units = {deplacement: ' cases', charge_max: ' kg'};
-	// Deux armes sans ambidextrie : précision bras droit / bras gauche (fiche.avec_degats_par_arme),
-	// ligne masquée dès que la clé manque (une arme, ou ambidextre).
+	// Deux armes : précision bras droit / bras gauche (fiche.avec_degats_par_arme), ligne
+	// masquée dès que la clé manque (une arme, ou deux précisions égales).
 	const rowDeux = document.getElementById('sh-drv-row-cc_deux_armes_affiche');
 	if (rowDeux) {
 		rowDeux.style.display = d.cc_deux_armes_affiche ? '' : 'none';

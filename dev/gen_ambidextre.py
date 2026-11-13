@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # dev/gen_ambidextre.py
 # Passive « Ambidextre » : lève le malus de précision des coups de la SECONDE arme
-# (`DEUX_ARMES_MALUS_SECOND`) et lui rend le dé de F (cf. utils/combat.coups_du_profil). Clé d'effet `ambidextre`,
+# (`DEUX_ARMES_MALUS_SECOND`) et lui rend la part de F (cf. utils/combat.coups_du_profil). Clé d'effet `ambidextre`,
 # agrégée par `competences.bonus_passifs`, posée au snapshot de combat.
 #
 # Une compétence n'appartient qu'à UNE vocation (`vocation` obligatoire) : un doc par

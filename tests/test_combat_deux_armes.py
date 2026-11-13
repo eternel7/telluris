@@ -195,12 +195,13 @@ def test_l_ambidextre_ne_prend_pas_le_malus_de_seconde_arme():
 	assert avec[1][1] == sans[1][1] + cs.DEUX_ARMES_MALUS_SECOND
 
 
-def test_l_ambidextre_rend_le_de_de_force_a_la_seconde_arme_pas_le_bonus():
+def test_l_ambidextre_rend_toute_la_force_a_la_seconde_arme():
 	joueur = build_joueur_snapshot(_character(DAISHO))
 	joueur["ambidextre"] = 1
 	n_w = combat_mod.coups_du_profil(joueur, _profil_cac(joueur))[1][2]
-	# Le dé de F revient ; le bonus plat de F reste à la seule main droite.
-	assert n_w == f"1D{cs._caract_to_dice_(F)}+1D6{WAKIZASHI['bonus_degats']:+d}"
+	# Dé ET bonus de F, comme la main droite.
+	bonus_f = F // cs.facteur_degats_armure()
+	assert n_w == f"1D{cs._caract_to_dice_(F)}+1D6{bonus_f + WAKIZASHI['bonus_degats']:+d}"
 
 
 def test_l_ambidextrie_vient_d_une_passive_jusqu_au_snapshot(monkeypatch):
@@ -412,14 +413,23 @@ def test_affichage_des_degats_par_arme():
 		== build_joueur_snapshot(seule)["degats_cc"]
 
 
-def test_affichage_ambidextre_degats_avec_de_de_force_sans_ligne_de_precision():
+def test_affichage_ambidextre_degats_avec_la_force_et_ligne_d_g_si_les_precisions_different():
 	perso = _character(DAISHO)
 	perso["competences_bonus"] = {"ambidextre": 1}
 	joueur = build_joueur_snapshot(perso)
 	assert joueur["ambidextre"] == 1
+	coups = combat_mod.coups_du_profil(joueur, _profil_cac(joueur))
 	derived = fiche.derived_de(perso)
-	assert derived["degats_cc_affiche"] == " / ".join(
-		n for _, _, n in combat_mod.coups_du_profil(joueur, _profil_cac(joueur)))
+	assert derived["degats_cc_affiche"] == " / ".join(n for _, _, n in coups)
 	assert derived["degats_cc_affiche"].split(" / ")[1].startswith(f"1D{cs._caract_to_dice_(F)}+")
-	# Sans malus à montrer, pas de ligne bras droit / bras gauche.
+	# Katana équilibré / wakizashi léger : sans malus, les typologies diffèrent encore.
+	assert coups[0][1] != coups[1][1]
+	assert derived["cc_deux_armes_affiche"] == f"D {coups[0][1]} / G {coups[1][1]}"
+
+
+def test_pas_de_ligne_d_g_quand_les_deux_precisions_sont_egales():
+	perso = _character({"main_droite": "item:Wakizashi", "main_gauche": "item:Wakizashi"})
+	perso["competences_bonus"] = {"ambidextre": 1}
+	derived = fiche.derived_de(perso)
+	assert "degats_cc_affiche" in derived
 	assert "cc_deux_armes_affiche" not in derived
