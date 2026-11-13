@@ -50,8 +50,9 @@ function extraireLet(nom) {
 }
 
 // ── Modèle de mise en page ──────────────────────────────────────────────────────
-const MAX_H = 10;   // rangées visibles devant (MAX_H du template)
-// Rangée(s) DERRIÈRE le joueur (--floor) : RELUE du template, jamais recopiée.
+// Rangées du champ (MAX_H) et derrière le joueur (FLOOR) : RELUES du template, jamais recopiées.
+const MAX_H = Number((js.match(/^const MAX_H = (\d+);/m) || [])[1]);
+assert.ok(MAX_H > 0, 'const MAX_H introuvable dans le template');
 const FLOOR = Number((js.match(/^const FLOOR = (\d+);/m) || [])[1]);
 assert.ok(Number.isInteger(FLOOR), 'const FLOOR introuvable dans le template');
 const monde = {};
@@ -127,8 +128,8 @@ console.log('\n── Rétroaction barre de défilement ↔ largeur mesurée ─
 
 // Hauteur de fenêtre du scénario d'oscillation (colonne de 1200 px, barre de 17 px) : la barre
 // doit apparaître au grand pas et disparaître au petit, pour les DEUX formules — entière (69 / 68)
-// et ancienne (69,59 / 68,59). 68,9 × rangées tombe dans les deux fenêtres (1040 pour 9 rangées,
-// la valeur historique ; 1109 pour 10). Rangées = MAX_H − 1 + FLOOR, relues du template.
+// et ancienne (69,59 / 68,59). 68,9 × rangées tombe dans les deux fenêtres (1040 pour 9 rangées ;
+// 1109 pour 10). Rangées = MAX_H − 1 + FLOOR, relues du template.
 const H_OSC = 420 + Math.floor(68.9 * (MAX_H - 1 + FLOOR));
 t('le modèle REPRODUIT l’oscillation avec l’ancienne formule', () => {
 	page({ hauteur: H_OSC });

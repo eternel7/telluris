@@ -1777,13 +1777,15 @@ if (GRID && GRID.dims) {
 	document.documentElement.style.setProperty('--bg-h', GRID.dims.y);
 }
 
-// Profondeur du champ visible : nombre de rangées affichées vers le fond. Source unique
-// pour --max-height (hauteur du viewport) ET le clip-path iso (buildViewportClipPath).
-const MAX_H = 10;
+// Profondeur du champ visible : rangée du joueur + rangées affichées vers le fond (MAX_H − 1 = 8
+// devant). Source unique de --max-height (hauteur du viewport).
+// ⚠️ 9 et non plus 10 depuis la rangée arrière (FLOOR) : la plus lointaine est rognée pour que la
+// carte garde sa taille — mêmes jetons en portrait, bandeau de tour à l'écran sur un portable.
+const MAX_H = 9;
 document.documentElement.style.setProperty('--max-height', MAX_H);
-// Rangées visibles DERRIÈRE le membre joué (--floor) : la carte s'allonge d'autant (paysage :
-// plus haute ; portrait : une colonne de plus dans la même largeur, donc un pas plus petit).
-// Les flèches du bord arrière du mode « sur la carte » s'y posent.
+// Rangées visibles DERRIÈRE le membre joué (--floor), prises sur le fond (cf. MAX_H) : la carte
+// compte toujours MAX_H − 1 + FLOOR rangées. Les flèches du bord arrière du mode « sur la carte »
+// s'y posent.
 const FLOOR = 1;
 document.documentElement.style.setProperty('--floor', FLOOR);
 
