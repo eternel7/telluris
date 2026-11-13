@@ -641,7 +641,9 @@ def _effets_arrivee(character: dict, destination: str, destination_pos: dict,
 	# (une fois, comme tout lieu) ; le sien, jamais — chaque achat en crée un.
 	if destination not in lieux_visites and not (
 			proprietes.est_propriete(lieu_doc)
-			and lieu_doc.get("proprietaire") == character.get("_id")):
+			and lieu_doc.get("proprietaire") == character.get("_id")) and not (
+			lieu_doc.get("type") == "implantation"          # la sienne : aucune XP de découverte
+			and lieu_doc.get("fondateur") == character.get("_id")):
 		lieux_visites.append(destination)
 		character["lieux_visites"] = lieux_visites
 		xp_gain = lieu_doc.get("xp_decouverte", character_stats.XP_DECOUVERTE_LIEU)

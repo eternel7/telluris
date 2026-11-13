@@ -22,6 +22,8 @@ from routers.recrutement import recrutement_router
 from routers.montures import montures_router
 from routers.guides import guides_router
 from routers.proprietes import proprietes_router
+from routers.colonisation import colonisation_router
+from routers import colonisation as colonisation_routes
 from routers.auberge import auberge_router
 from routers.scriptorium import scriptorium_router
 from routers.commande import commande_router
@@ -60,6 +62,7 @@ from utils import recrutement as recrutement_util
 from utils import mercenaires as mercenaires_util
 from utils import montures as montures_util
 from utils import proprietes as proprietes_util
+from utils import colonisation as colonisation_util
 from utils import echanges_cite
 from utils import auberge as auberge_util
 from utils import scriptorium as scriptorium_util
@@ -230,6 +233,7 @@ app.include_router(recrutement_router, prefix="/api")
 app.include_router(montures_router, prefix="/api")
 app.include_router(guides_router, prefix="/api")
 app.include_router(proprietes_router, prefix="/api")
+app.include_router(colonisation_router, prefix="/api")
 app.include_router(auberge_router, prefix="/api")
 app.include_router(scriptorium_router, prefix="/api")
 app.include_router(commande_router, prefix="/api")
@@ -823,6 +827,32 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			save_doc(character)
 			lieu = character["lieu"]
 			grid_doc = get_doc(lieu)
+	# Implantation (voie de colonisation) : le temps écoulé est rattrapé PARESSEUSEMENT par la
+	# présence du fondateur ou d'un associé ; un changement de palier a pu changer la grille
+	# sous les pieds de quiconque s'y trouvait — on le ramène à la première entrée.
+	est_implantation = colonisation_util.est_implantation(grid_doc)
+	role_implantation, colonie_evenements, colonie_reperes = None, [], []
+	if character.get("association") or character.get("demande_association"):
+		if colonisation_util.synchroniser_association(character, get_doc):
+			save_doc(character)
+	if est_implantation:
+		_reg_col = colonisation_util.regles(get_doc)
+		role_implantation = colonisation_util.role_de(character, grid_doc)
+		_pos = character.get("position") or {}
+		_entrees = colonisation_util.entrees_de(grid_doc)
+		if _entrees and not colonisation_util.case_marchable(grid_doc, _pos.get("x", -1), _pos.get("y", -1)):
+			character["position"] = {"x": _entrees[0][0], "y": _entrees[0][1]}
+			save_doc(character)
+		if colonisation_util.vaut_presence(role_implantation):
+			colonie_evenements = colonisation_routes.rattraper_ici(
+				character, grid_doc, _reg_col, role_implantation,
+				colonisation_routes.site_de(grid_doc, _reg_col),
+				colonisation_util.employes_effectifs(grid_doc, get_doc))
+		colonie_reperes = colonisation_util.reperes_carte(grid_doc, _reg_col)
+	# Le bouton « Fonder » s'offre sur toute carte de pays à qui tient le rang de la charte ;
+	# la case elle-même est jugée à l'ouverture du panneau (un pas ne recharge pas la page).
+	colonie_offre = (bool(grid_doc) and grid_doc.get("categorie") == CATEGORIE_PAYS
+					 and colonisation_util.rang_suffisant(character, colonisation_util.regles(get_doc)))
 	# Atelier : chaque visite du lieu lance un tick marché (approvisionnement + production +
 	# écoulement PNJ des produits finis), comme à chaque vente. On ne déclenche que s'il y a de la
 	# matière/produits en stock OU un approvisionnement configuré pour la catégorie (sinon le lieu
@@ -1004,6 +1034,8 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 	passages = passages_carte(connexions_du_lieu(lieu), lieu,
 		lambda conn: any(noeud_ferme(character, lieu, n.get("lieu"), get_doc(n.get("lieu")))
 			for n in conn.get("nodes") or []))
+	# Bâtiments posés d'une implantation : pictogramme et halo des REPÈRES (on n'y entre pas).
+	passages += colonie_reperes
 	# Traces de la pire menace possible à la position (`utils/traces.py`) : annoncées au
 	# chargement, puis à chaque pas qui change la lecture (bloc `traces` de move_character).
 	# ⚠️ `lieu` est ici l'IDENTIFIANT ; le doc est `grid_doc`.
@@ -1237,6 +1269,10 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			"filtres_boutique": filtres_boutique.catalogue(),
 			"auberge_nuit": auberge_nuit,
 			"est_propriete": est_propriete,
+			"est_implantation": est_implantation,
+			"role_implantation": role_implantation,
+			"colonie_evenements": colonie_evenements,
+			"colonie_offre": colonie_offre,
 			"proprietes_offre": proprietes_offre,
 			"role_propriete": role_propriete,
 			"proprietes_ateliers": proprietes_ateliers,

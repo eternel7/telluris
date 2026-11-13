@@ -2,7 +2,7 @@
 
 - **Arrêtées le :** 12/11/2026, par questionnaire
 - **Séance d'origine :** [Progression des lieux de guilde](20260924_progression_des_lieux_de_guilde.md) (24 au 28/09/2026)
-- **Statut :** tout ce qui suit est **décidé par l'Auteur**. Rien n'est encore en jeu.
+- **Statut :** tout ce qui suit est **décidé par l'Auteur**. Une première tranche est en jeu depuis le 13/11/2026 (liste en fin de page).
 - **Chiffres :** valeurs de départ, portées par le doc de règles `rules:colonisation` (`dev/gen_colonisation.py`).
 
 La voie de colonisation est le pendant de la voie urbaine (Chambre → Logement → Maison → Demeure → Domaine, déjà en jeu).
@@ -291,3 +291,22 @@ Précise le § 10. Tous voient la même carte et les mêmes icônes.
 | Soutien, visiteur | non | non |
 
 **Écartés** : parcelles peintes ou typées ; calque de fortification par-dessus l'image ; clic sur la carte pour poser ; gestion dans le panneau des propriétés ; visiteur sans carte ; grille identique aux sept paliers ; grille recopiée sur l'implantation (figée ou resynchronisée) ; modèle imposé à la montée de palier ; modèle rangé sous son pays par `lieu_parent` ; vignettes dédiées pour les repères.
+
+## 13. Ce qui est en jeu
+
+État au 13/11/2026. Moteur : `utils/colonisation.py`.
+
+| En jeu | Reste à faire |
+|---|---|
+| Fonder : case, distances, rang, charte, une par pays (§ 2) | — |
+| Fiche de site, lue sur la carte (§ 3) | — |
+| Sept paliers, seuils, chantier de statut (§ 4) | — |
+| Sécurité et moral dérivés, feu à deux réglages (§ 5) | nuit et repos au feu |
+| Menace par étapes, attaque résolue en l'absence, rattrapage plafonné (§ 6) | attaque jouée en combat, tanière à vider |
+| Quatre stocks, santé (§ 7) | — |
+| PNJ nommés, population comptée, bâtiments repères (§ 8) | boutique, atelier, auberge, étable et leurs échanges |
+| — | guilde du joueur (§ 9) |
+| Visiteur, soutien, associé ; dons, besoins, financement, pose (§ 10) | colons escortés, coffre d'associé, prix de faveur |
+| Lieu modèle en lien pur, choix par tags, pose libre, changement de palier, panneau (§ 12) | images et grilles définitives des modèles |
+
+Valeurs de départ ajoutées avec le moteur, à régler dans `rules:colonisation` : prix et capacités des bâtiments, fortifications, production des métiers, consommation, barèmes de sécurité et de moral, probabilités de la menace.

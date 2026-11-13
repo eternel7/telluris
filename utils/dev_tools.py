@@ -206,6 +206,15 @@ CATALOGUE = [
 			"et du négociant (utils/echanges_cite.py). Relit le dump : n'ajoute que ce qui manque.",
 	},
 	{
+		"id": "gen_colonisation",
+		"label": "🏕️ Générer la voie de colonisation (rules:colonisation + lieux modèles)",
+		"argv": _py("gen_colonisation.py"),
+		"ecrit": "Écrit jsons/colonisation_moteur_a_importer.json.",
+		"description": "Chiffres du moteur (bâtiments, fortifications, métiers, sécurité, moral, menace) "
+			"et sept lieux modèles génériques, un par palier (utils/colonisation.py). Relit le dump : "
+			"n'ajoute que les blocs et les modèles qui manquent.",
+	},
+	{
 		"id": "gen_contenants",
 		"label": "👜 Générer les contenants (copies d'Architectes, reliques)",
 		"argv": _py("gen_contenants.py"),

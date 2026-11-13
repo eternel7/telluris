@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from db.config import db, get_doc, save_doc, find_docs
 from utils.characters import get_selected_character
 from utils.auth import get_current_user
-from utils import acces, capacites, enseignes, enseignes_icones, pnj as pnj_util, proprietes
+from utils import acces, capacites, colonisation, enseignes, enseignes_icones, pnj as pnj_util, proprietes
 from models import character_stats
 
 # Répertoires d'images servis par les mounts /towns et /pnj (cf. main.py).
@@ -66,6 +66,9 @@ def get_lieu_links(current_user: dict = Body(...), filtrer_acces: bool = True):
 			doc.pop("_rev",None)
 			doc.pop("_id",None)
 			doc.pop("acces",None)
+			# Implantation : seul ce que lit un VISITEUR part au client (le carnet, les
+			# réserves et les demandes restent au fondateur).
+			doc = colonisation.details_publics(doc)
 			node["details"] = doc
 			node["details"]["label"] = node.get("label") or doc.get("label")
 		if not ferme:

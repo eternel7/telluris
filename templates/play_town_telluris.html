@@ -2135,7 +2135,7 @@
 				   déplacement et plein écran. ⚠️ Ce menu n'existe que sous la condition de cette
 				   ligne (`a_ligne_actions`) — hors d'elle, la pastille ⛶ flottante reste émise
 				   (bas de page), sans quoi le plein écran disparaîtrait de ces lieux. #}
-				{% set a_ligne_actions = dimensions or achat_sous_categories or est_negociant or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or est_propriete or proprietes_offre or pnjs_presents %}
+				{% set a_ligne_actions = dimensions or achat_sous_categories or est_negociant or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or est_propriete or proprietes_offre or est_implantation or colonie_offre or pnjs_presents %}
 				{% if a_ligne_actions %}
 				<h3 id="sub-actions-title"><span>Actions</span>
 					<span class="affichage-wrap">
@@ -2192,6 +2192,8 @@
 					{% endif %}
 					{# Toujours émis, masqué hors offre : un pas ne recharge pas la page, `_majProprietesOffre`
 					   le bascule d'après la réponse de `move_character`. #}
+					{% if colonie_offre %}<li><button class="sub-loc-btn" onclick="openColonieSite()">🏕️ Fonder une implantation</button></li>{% endif %}
+					{% if est_implantation %}<li><button class="sub-loc-btn" onclick="openColonie()">🏕️ {% if role_implantation == 'fondateur' %}Gérer l'implantation{% else %}L'implantation{% endif %}</button></li>{% endif %}
 					<li id="prop-offre-li"{% if not proprietes_offre %} hidden style="display:none"{% endif %}><button class="sub-loc-btn" onclick="openProprietesOffre()">🏠 Propriétés</button></li>
 					{% if est_propriete %}
 					{# La propriété se présente comme un LIEU : ses PNJ marchands d'abord (une ligne
@@ -2918,6 +2920,17 @@
 	{# Propriétés : UN panneau, deux vues — l'offre (acheter en zone habitable, louer à
 	   l'auberge) et le logis où l'on se tient. Type, capacités, aménagements installés /
 	   disponibles, occupants et PNJ, activités et coffre sont des sections DISTINCTES. #}
+	{# Voie de colonisation : fonder (carte d'un pays) et panneau de l'implantation (onglets
+	   Site, Population, Bâtiments, Défense) — rendu par scripts/colonisation.js. #}
+	<div id="colonie-panel" class="panel-hidden panel-frame board-panel" aria-label="Implantation">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Implantation">
+			<h2 id="colonie-titre">🏕️ Implantation</h2>
+			</header>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeColonie()" role="button">⟵ Retour</button>
+		</div>
+		<div id="colonie-contenu"></div>
+	</div><!-- /#colonie-panel -->
 	<div id="proprietes-panel" class="panel-hidden panel-frame board-panel" aria-label="Propriétés">
 		<div class="sell-topbar">
 			<header class="location-desc" aria-label="Propriétés">
@@ -3185,6 +3198,12 @@
 			padding: .35rem .5rem; border: 1px solid rgba(120, 90, 50, .35); border-radius: 6px; }
 		.prop-ligne .prop-txt { flex: 1 1 12rem; display: flex; flex-direction: column; gap: .1rem; }
 		.prop-caps { display: flex; flex-wrap: wrap; gap: .4rem .9rem; }
+		/* Voie de colonisation (scripts/colonisation.js) : onglets du panneau, vignettes des lieux modèles. */
+		.col-onglets { display: flex; flex-wrap: wrap; gap: .35rem; margin: .7rem 0 0; }
+		.col-modeles { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: .6rem; margin: .4rem 0; }
+		.col-modele { display: flex; flex-direction: column; gap: .2rem; cursor: pointer; }
+		.col-modele img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; }
+		.col-modele input:checked ~ img { outline: 2px solid currentColor; }
 		.prop-etat-on { color: #3d7a2e; font-weight: bold; }
 		.prop-etat-off { opacity: .7; }
 		/* PNJ du bien : son nom ouvre ses options (vente à la cité). */
@@ -4203,6 +4222,7 @@
 {# Libellés d'une capacité connue (onglet ⚡), partagés avec /admin/sorts et /admin/competences.
    APRÈS zones_effet.js (`libelleZone`) ; `_coutPmCharge` est défini plus bas. #}
 <script src="{{ script_url('capacites_texte.js') }}"></script>
+<script src="{{ script_url('colonisation.js') }}"></script>
 {# Sons d'action (chokepoint `installerSonsApi`), coupe-son partagé avec le combat. #}
 <script src="{{ script_url('sons.js') }}"></script>
 <script>
@@ -10264,6 +10284,8 @@ renderFicheQuetes({
 _notifierTransportsEchoues({ transports_echoues: {{ transports_echoues | tojson | safe }} });
 // Chambres d'auberge délaissées : reprises par le serveur au rendu.
 _notifierChambresReprises({ chambres_reprises: {{ chambres_reprises | tojson | safe }} });
+// Implantation : ce qui s'est passé depuis le dernier passage (rattrapage paresseux).
+({{ colonie_evenements | tojson | safe }} || []).forEach(t => showToast(t));
 // Course expirée pendant un changement de lieu : le toast a été mis de côté avant le reload.
 (function () {
 	const differe = sessionStorage.getItem('transports_echoues_notif');

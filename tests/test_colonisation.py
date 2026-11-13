@@ -1,0 +1,771 @@
+"""Voie de colonisation — logique pure (`utils/colonisation.py`) et son générateur.
+
+Décisions verrouillées : docs/lore/systemes/20261112_voie_de_colonisation.md. Règles en
+mémoire, bâties par le générateur (`gen.generer` sur un dump vide) : aucun fichier de `jsons/`."""
+
+import copy
+import os
+import random
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dev"))
+
+import gen_colonisation as gen  # noqa: E402
+
+from db import config as db_config  # noqa: E402
+from utils import colonisation as col  # noqa: E402
+from utils import enseignes_icones  # noqa: E402
+from utils.recrutement import RANGS  # noqa: E402
+
+DOCS = gen.generer({})
+REGLES_DOC = next(d for d in DOCS if d["_id"] == col.REGLES_ID)
+MODELES = [d for d in DOCS if d["_id"] != col.REGLES_ID]
+
+
+def _reg():
+	return col.regles({col.REGLES_ID: copy.deepcopy(REGLES_DOC)}.get)
+
+
+W, H = 30, 20
+ZONE_FORET = {"_id": "zone:foret", "terrain_tags": ["foret", "riviere", "colline"], "modificateurs": {"danger": 2}}
+ZONE_DEFS = {"zone:foret": ZONE_FORET}
+
+
+def _pays():
+	cells = [[1] * W for _ in range(H)]
+	cells[10][21] = 5                       # une case d'eau près du site
+	cells[0][0] = 0                         # hors pays
+	return {"_id": "lieu:pays", "type": "lieu", "categorie": "pays", "label": "Pays", "tags": ["tempere"],
+			"dimensions": {"x": W, "y": H}, "cells": cells,
+			"zone_influences": [{"x": 20, "y": 10, "w": 8, "h": 8, "rot": 0, "forme": "rectangle", "zone": "zone:foret"}],
+			"rencontres": [{"espece": "espece:loup", "zones": ["zone:foret"]}],
+			"ressources": [{"ressource": "item:Baies", "zones": ["zone:foret"]}]}
+
+
+RELIES = [{"id": "lieu:cite", "label": "Cité", "categorie": "ville", "pos": [5, 5]},
+		  {"id": "lieu:autre", "label": "Autre", "categorie": "ville", "pos": [29, 19]},
+		  {"id": "lieu:grotte", "label": "Grotte", "categorie": "grotte", "pos": [22, 12]}]
+SITE_POS = {"x": 20, "y": 10}
+
+
+def _perso(rang="C", **champs):
+	base = {"_id": "character:a", "prenom": "Greta", "nom": "Hazgard", "rangs_guilde": {"lieu:cite": rang}}
+	base.update(champs)
+	return base
+
+
+def _modele(palier="campement"):
+	return copy.deepcopy(next(m for m in MODELES if palier in m["tags"]))
+
+
+def _imp(reg=None, palier="campement", **champs):
+	"""Implantation fondée, grille de son modèle posée comme le fait `db.config.get_doc`."""
+	reg = reg or _reg()
+	m = _modele("campement")
+	imp = col.creer_implantation(_perso(), _pays(), SITE_POS, m, reg, espece="espece:loup", now=1000)
+	if palier != "campement":
+		m = _modele(palier)
+		imp["palier"], imp["modele"] = palier, m["_id"]
+	imp.update(champs)
+	return db_config.suivre_modele(imp, {m["_id"]: m}.get)
+
+
+def _site(reg):
+	return col.fiche_site(_pays(), SITE_POS, ZONE_DEFS, RELIES, reg)
+
+
+def _employe(imp, metier, poste, n=0):
+	e = {"_id": f"employe:{metier}_{n}", "type": "employe", "metier": metier, "poste": poste,
+		 "prenom": "Aldo", "nom": f"N{n}", "statut": "employe", "propriete": imp["_id"]}
+	imp.setdefault("employes", []).append(e["_id"])
+	return e
+
+
+class Hasard:
+	"""`rand` injecté : `random()` rend une valeur fixe, les tirages bornés leur minimum."""
+
+	def __init__(self, valeur=0.99):
+		self.valeur = valeur
+
+	def random(self):
+		return self.valeur
+
+	def randint(self, a, b):
+		return a
+
+	def uniform(self, a, b):
+		return a
+
+	def choice(self, seq):
+		return seq[0]
+
+	def randrange(self, n):
+		return 0
+
+
+# ── Lien pur au modèle (§ 12.3) : le point unique de `db/config.py` ──────────────────
+
+def test_la_grille_est_lue_sur_le_modele_et_jamais_ecrite():
+	m = _modele()
+	imp = {"_id": "implantation:x", "type": "implantation", "modele": m["_id"], "label": "X"}
+	lu = db_config.suivre_modele(dict(imp), {m["_id"]: m}.get)
+	assert all(lu[c] == m[c] for c in db_config.CHAMPS_MODELE)
+	ecrit = db_config.sans_modele(lu)
+	assert not set(db_config.CHAMPS_MODELE) & set(ecrit) and ecrit["modele"] == m["_id"]
+	assert lu["cells"] is m["cells"] or lu["cells"] == m["cells"]      # l'exemplaire lu garde sa grille
+
+
+def test_corriger_le_modele_corrige_l_implantation_et_un_lieu_ordinaire_n_est_pas_touche():
+	m = _modele()
+	imp = {"_id": "implantation:x", "modele": m["_id"], "cells": [[0]], "image": "vieille.png"}
+	m["image"] = "neuve.png"
+	assert db_config.suivre_modele(imp, {m["_id"]: m}.get)["image"] == "neuve.png"
+	# modèle introuvable : aucune grille périmée ne survit
+	assert "cells" not in db_config.suivre_modele({"_id": "implantation:y", "modele": "lieu:absent", "cells": [[1]]}, {}.get)
+	lieu = {"_id": "lieu:ville", "modele": m["_id"], "cells": [[1]]}
+	assert db_config.suivre_modele(lieu, {m["_id"]: m}.get)["cells"] == [[1]]
+	assert db_config.sans_modele(lieu) is lieu
+
+
+# ── Fonder (§ 2) ─────────────────────────────────────────────────────────────────────
+
+def test_fonder_exige_le_rang_de_la_charte():
+	reg = _reg()
+	minimum = reg["reglages"]["rang_min"]
+	dessous = RANGS[RANGS.index(minimum) - 1]
+	assert col.peut_fonder(_perso(minimum), _pays(), SITE_POS, RELIES, [], reg) == (True, "")
+	assert not col.peut_fonder(_perso(dessous), _pays(), SITE_POS, RELIES, [], reg)[0]
+	assert not col.peut_fonder(_perso(rangs_guilde={}), _pays(), SITE_POS, RELIES, [], reg)[0]
+	# le MEILLEUR rang compte, toutes cités confondues
+	assert col.rang_suffisant({"rangs_guilde": {"a": RANGS[0], "b": RANGS[-1]}}, reg)
+
+
+def test_fonder_respecte_les_distances_et_la_case():
+	reg = _reg()
+	d_cite, d_imp = reg["reglages"]["distance_cite_min"], reg["reglages"]["distance_implantation_min"]
+	cite = RELIES[0]["pos"]
+	trop_pres = {"x": cite[0] + d_cite - 1, "y": cite[1]}
+	juste = {"x": cite[0] + d_cite, "y": cite[1]}
+	assert "Cité-État" in col.peut_fonder(_perso(), _pays(), trop_pres, RELIES, [], reg)[1]
+	assert col.peut_fonder(_perso(), _pays(), juste, RELIES, [], reg)[0]
+	voisine = {"fondateur": "character:b", "origine": {"pos": [SITE_POS["x"] + d_imp - 1, SITE_POS["y"]]}}
+	assert "autre implantation" in col.peut_fonder(_perso(), _pays(), SITE_POS, RELIES, [voisine], reg)[1]
+	voisine["origine"]["pos"][0] += 1
+	assert col.peut_fonder(_perso(), _pays(), SITE_POS, RELIES, [voisine], reg)[0]
+	# une seule par pays et par personnage, où qu'elle soit
+	mienne = {"fondateur": "character:a", "origine": {"pos": [0, 19]}}
+	assert "déjà une implantation" in col.peut_fonder(_perso(), _pays(), SITE_POS, RELIES, [mienne], reg)[1]
+	# case non marchable, case déjà reliée, hors d'un pays
+	assert not col.peut_fonder(_perso(), _pays(), {"x": 0, "y": 0}, RELIES, [], reg)[0]
+	assert not col.peut_fonder(_perso(), _pays(), {"x": 22, "y": 12}, RELIES, [], reg)[0]
+	assert not col.peut_fonder(_perso(), {**_pays(), "categorie": "ville"}, SITE_POS, RELIES, [], reg)[0]
+
+
+def test_la_charte_va_aux_cites_les_plus_proches_a_egalite_toutes():
+	assert [c["id"] for c in col.cites_de_la_charte(RELIES, SITE_POS)] == ["lieu:autre"]
+	egal = [{"id": "a", "label": "A", "categorie": "ville", "pos": [0, 0]},
+			{"id": "b", "label": "B", "categorie": "ville", "pos": [10, 0]},
+			{"id": "g", "label": "G", "categorie": "grotte", "pos": [5, 0]}]
+	assert {c["id"] for c in col.cites_de_la_charte(egal, {"x": 5, "y": 0})} == {"a", "b"}
+
+
+def test_creer_implantation_part_au_premier_palier_sans_grille_propre():
+	reg = _reg()
+	m = _modele()
+	imp = col.creer_implantation(_perso(), _pays(), SITE_POS, m, reg, nom="  Val   <b>Clair</b>  ", espece="espece:loup", now=5)
+	assert imp["_id"].startswith(db_config.PREFIXE_MODELE) and imp["type"] == col.TYPE_DOC
+	assert imp["palier"] == col.paliers(reg)[0]["id"] and imp["modele"] == m["_id"]
+	assert not set(db_config.CHAMPS_MODELE) & set(imp)          # lien PUR : rien de recopié
+	assert imp["label"] == "Val <b>Clair</b>"                    # borné, pas échappé (le rendu échappe)
+	assert imp["stocks"] == {s: reg["stocks_depart"][s] for s in reg["stocks"]}
+	assert imp["menace"] == {"espece": "espece:loup", "etape": 1} and imp["rattrape_at"] == 5
+	lien = col.creer_lien(imp, col.entrees_de(m)[0])
+	assert lien["nodes"][0] == {"lieu": "lieu:pays", "pos": [20, 10]}
+	assert lien["nodes"][1] == {"lieu": imp["_id"], "pos": col.entrees_de(m)[0]}
+
+
+# ── Fiche de site (§ 3) et tags (§ 12.2) ─────────────────────────────────────────────
+
+def test_fiche_de_site_six_axes_lus_sur_la_carte():
+	reg = _reg()
+	fiche = _site(reg)
+	assert set(fiche) == set(reg["axes_site"])
+	assert all(0 <= b["note"] <= 3 and b["mots"] for b in fiche.values())
+	assert fiche["eau"]["note"] >= 2 and "eau à portée" in fiche["eau"]["details"]   # rivière + case d'eau
+	assert fiche["danger"]["note"] >= 2 and "un donjon proche" in fiche["danger"]["details"]
+	# hors de toute zone, loin de l'eau : un site nu
+	nu = col.fiche_site(_pays(), {"x": 2, "y": 17}, ZONE_DEFS, RELIES, reg)
+	assert nu["eau"]["note"] == 0 and nu["materiaux"]["note"] == 0 and nu["danger"]["note"] == 0
+
+
+def test_tags_du_site_zone_puis_pays_puis_tag_de_pays():
+	assert col.tags_site(_pays(), SITE_POS, ZONE_DEFS) == ["foret", "riviere", "colline", "tempere", "pays_pays"]
+	assert col.tags_site(_pays(), {"x": 2, "y": 17}, ZONE_DEFS) == ["tempere", "pays_pays"]
+
+
+# ── Lieux modèles (§ 12.1, § 12.2) ───────────────────────────────────────────────────
+
+def _m(ident, *tags):
+	return {"_id": ident, "tags": [col.TAG_MODELE, "campement", *tags]}
+
+
+def test_modeles_meilleur_recouvrement_en_tete_generique_en_dernier():
+	reg = _reg()
+	modeles = [_m("lieu:gen"), _m("lieu:desert", "desert", "sable"), _m("lieu:foret", "foret", "riviere"),
+			   _m("lieu:bois", "foret"), {"_id": "lieu:hameau", "tags": [col.TAG_MODELE, "hameau"]}]
+	ordre = col.modeles_proposes(modeles, "campement", ["foret", "riviere"], "lieu:pays", reg)
+	assert [p["modele"]["_id"] for p in ordre] == ["lieu:foret", "lieu:bois", "lieu:desert", "lieu:gen"]
+	assert ordre[0]["partages"] == ["foret", "riviere"] and ordre[-1]["generique"]
+
+
+def test_modeles_propres_au_pays_seuls_proposes_le_generique_en_plus():
+	reg = _reg()
+	modeles = [_m("lieu:gen"), _m("lieu:foret", "foret"), _m("lieu:ici", "pays_pays"), _m("lieu:ailleurs", "pays_autre")]
+	ids = lambda pays: [p["modele"]["_id"] for p in col.modeles_proposes(modeles, "campement", ["foret"], pays, reg)]
+	assert ids("lieu:pays") == ["lieu:ici", "lieu:gen"]
+	# sans modèle propre : ceux des AUTRES pays ne se proposent pas
+	assert ids("lieu:tiers") == ["lieu:foret", "lieu:gen"]
+
+
+def test_le_generateur_livre_un_modele_generique_valide_par_palier():
+	reg = _reg()
+	for p in col.paliers(reg):
+		[m] = [x for x in MODELES if p["id"] in x["tags"]]
+		assert col.modele_generique(m, reg) and col.modele_valide(m)
+		assert 1 <= len(col.entrees_de(m)) <= 4
+	aires = [m["dimensions"]["x"] * m["dimensions"]["y"] for m in MODELES]
+	assert aires == sorted(aires) and len(set(aires)) == len(aires)      # le lieu grandit à chaque palier
+
+
+def test_le_generateur_n_ajoute_que_ce_qui_manque():
+	dump = {d["_id"]: copy.deepcopy(d) for d in DOCS}
+	assert gen.generer(dump) == []                                        # idempotent
+	# un bloc retouché par l'Auteur n'est jamais réécrit ; un bloc absent revient seul
+	dump[col.REGLES_ID]["value"]["stockage_base"] = 999
+	del dump[col.REGLES_ID]["value"]["sante"]
+	dump[col.REGLES_ID]["_rev"] = "3-x"
+	[doc] = gen.generer(dump)
+	assert doc["value"]["stockage_base"] == 999 and doc["value"]["sante"] == col.DEFAUTS["sante"]
+	assert "_rev" not in doc
+	gen.controler(DOCS, {})
+
+
+# ── Bâtiments (§ 8, § 12.4) ──────────────────────────────────────────────────────────
+
+def _construit(imp, reg, type_id, pos=None):
+	imp["stocks"].update({"bois": 500, "materiaux": 500})
+	b = col.construire(imp, reg, type_id, now=1)
+	if pos:
+		col.poser(imp, b["id"], pos)
+	return b
+
+
+def test_construire_paie_les_stocks_et_respecte_le_palier():
+	reg = _reg()
+	imp = _imp(reg)
+	entrepot = col.batiment_def(reg, "entrepot")
+	imp["stocks"].update({"bois": entrepot["bois"], "materiaux": entrepot["materiaux"] - 1})
+	assert "manque" in col.peut_construire(imp, reg, "entrepot")[1]
+	imp["stocks"]["materiaux"] = entrepot["materiaux"]
+	assert col.peut_construire(imp, reg, "entrepot") == (True, "")
+	b = col.construire(imp, reg, "entrepot", now=1)
+	assert imp["stocks"]["bois"] == 0 and imp["stocks"]["materiaux"] == 0 and b["pos"] is None
+	imp["stocks"].update({"bois": 500, "materiaux": 500})
+	assert "palier" in col.peut_construire(imp, reg, "ferme")[1]          # la ferme s'ouvre au Hameau
+	assert col.peut_construire(_imp(reg, "hameau", stocks={"bois": 500, "materiaux": 500}), reg, "ferme")[0]
+	# un sous-lieu (où l'on entre) attend sa tranche
+	assert all(not col.peut_construire(_imp(reg, "ville", stocks={"bois": 9999, "materiaux": 9999}), reg, d["id"])[0]
+			   for d in reg["batiments_def"] if d["nature"] == col.SOUS_LIEU)
+
+
+def test_pose_libre_hors_entrees_un_batiment_par_case():
+	reg = _reg()
+	imp = _imp(reg)
+	a, b = _construit(imp, reg, "habitation"), _construit(imp, reg, "entrepot")
+	entree = col.entrees_de(imp)[0]
+	assert "entrée" in col.peut_poser(imp, a["id"], entree)[1]
+	assert not col.peut_poser(imp, a["id"], {"x": -1, "y": 0})[0]
+	assert col.peut_poser(imp, a["id"], {"x": 3, "y": 3}) == (True, "")
+	col.poser(imp, a["id"], {"x": 3, "y": 3})
+	assert "prise" in col.peut_poser(imp, b["id"], [3, 3])[1]
+	assert col.peut_poser(imp, a["id"], [3, 3])[0]                         # se reposer sur sa propre case
+	col.poser(imp, a["id"], [4, 4])                                        # déplacer : même geste
+	assert col.batiment(imp, a["id"])["pos"] == [4, 4]
+	assert col.peut_agir_sur_carte(col.FONDATEUR) and col.peut_agir_sur_carte(col.ASSOCIE)
+	assert not col.peut_agir_sur_carte(col.SOUTIEN) and not col.peut_agir_sur_carte(col.VISITEUR)
+
+
+def test_reperes_sur_la_carte_halo_d_une_famille_a_part():
+	reg = _reg()
+	imp = _imp(reg)
+	a = _construit(imp, reg, "habitation", [3, 3])
+	_construit(imp, reg, "entrepot")                                       # non posé : pas de marqueur
+	[m] = col.reperes_carte(imp, reg)
+	assert (m["x"], m["y"], m["icone"], m["batiment"]) == (3, 3, col.batiment_def(reg, "habitation")["icone"], a["id"])
+	assert m["link_id"] is None and m["metier"] is None                    # on n'y entre pas
+	assert col.RGB_REPERE not in enseignes_icones.FAMILLES.values()        # une couleur qu'aucun métier ne porte
+
+
+def test_changer_de_palier_replace_chaque_batiment_au_plus_pres():
+	reg = _reg()
+	imp = _imp(reg)
+	anciennes = dict(imp["dimensions"])
+	coin = [anciennes["x"] - 1, anciennes["y"] - 1]
+	a = _construit(imp, reg, "habitation", coin)
+	b = _construit(imp, reg, "entrepot", [0, 0])
+	c = _construit(imp, reg, "poste_de_garde")
+	nouveau = _modele("hameau")
+	nw, nh = nouveau["dimensions"]["x"], nouveau["dimensions"]["y"]
+	col.replacer_batiments(imp, anciennes, nouveau)
+	assert col.batiment(imp, a["id"])["pos"] == [nw - 1, nh - 1]           # même position relative
+	assert col.batiment(imp, b["id"])["pos"] == [0, 0] and col.batiment(imp, c["id"])["pos"] is None
+	# la case visée est une entrée ou un mur : la case libre la plus proche
+	e = col.entrees_de(nouveau)[0]
+	assert col.case_libre_proche(nouveau, e, set()) != e
+	assert col.case_libre_proche(nouveau, [5, 5], {(5, 5)}) == [4, 4]
+
+
+# ── Paliers et chantiers (§ 4, § 10 « Financer ») ────────────────────────────────────
+
+def _pret_pour_hameau(reg):
+	imp = _imp(reg)
+	suivant = col.palier_suivant(reg, imp["palier"])
+	imp["population"] = suivant["population_min"]
+	imp["fortifications"] = [col.fortification_requise(reg, suivant["id"])["id"]]
+	employes = [_employe(imp, "garde", "b_x", n) for n in range(suivant["postes_min"])]
+	return imp, employes, suivant
+
+
+def test_le_palier_suivant_exige_population_postes_et_fortification():
+	reg = _reg()
+	imp, employes, suivant = _pret_pour_hameau(reg)
+	c = col.conditions_palier(imp, reg, employes)
+	assert c["pret"] and c["prix"] == suivant["prix_statut_cuivre"] and len(c["conditions"]) == 3
+	for casse in ({"population": suivant["population_min"] - 1}, {"fortifications": []}):
+		assert not col.conditions_palier({**imp, **casse}, reg, employes)["pret"]
+	assert not col.conditions_palier(imp, reg, employes[:-1])["pret"]
+	assert col.conditions_palier(_imp(reg, col.paliers(reg)[-1]["id"]), reg, []) is None
+
+
+def test_chantier_de_statut_finance_a_plusieurs_puis_changement_de_palier():
+	reg = _reg()
+	imp, employes, suivant = _pret_pour_hameau(reg)
+	a = _construit(imp, reg, "habitation", [2, 2])
+	ok, _, chantier = col.peut_ouvrir_chantier(imp, reg, employes, col.CHANTIER_STATUT)
+	assert ok and chantier["cout"] == suivant["prix_statut_cuivre"]
+	col.ouvrir_chantier(imp, reg, chantier, now=1)
+	assert not col.peut_ouvrir_chantier(imp, reg, employes, col.CHANTIER_STATUT)[0]      # un seul à la fois
+	associe = {"_id": "character:b", "prenom": "Milo", "nom": ""}
+	imp["associes"] = [{"id": "character:b", "nom": "Milo", "apports": {}}]
+	moitie = chantier["cout"] // 2
+	assert col.financer(imp, associe, moitie, now=2) == moitie
+	assert imp["associes"][0]["apports"] == {"cuivre": moitie}                           # compté, sans part de caisse
+	assert not col.changer_palier(imp, reg, _modele("hameau"), imp["dimensions"], now=3)  # pas encore payé
+	assert col.financer(imp, _perso(), 10 ** 9, now=4) == chantier["cout"] - moitie      # jamais plus que le reste
+	assert col.chantier_pret(imp) and not col.achever_fortification(imp)
+	nouveau = _modele("hameau")
+	assert col.changer_palier(imp, reg, nouveau, imp["dimensions"], now=5)
+	assert imp["palier"] == suivant["id"] and imp["modele"] == nouveau["_id"] and "chantier" not in imp
+	assert col.batiment(imp, a["id"])["pos"] is not None
+	assert col.places_associes(imp, reg) == reg["autres_joueurs"]["associes_max"][suivant["id"]]
+
+
+def test_chantier_de_fortification_les_stocks_partent_a_l_ouverture():
+	reg = _reg()
+	imp = _imp(reg)
+	f = col.fortification_requise(reg, "hameau")
+	assert "manque" in col.peut_ouvrir_chantier(imp, reg, [], col.CHANTIER_FORTIFICATION, f["id"])[1]
+	imp["stocks"].update({"bois": f["bois"] + 1, "materiaux": f["materiaux"]})
+	ok, _, chantier = col.peut_ouvrir_chantier(imp, reg, [], col.CHANTIER_FORTIFICATION, f["id"])
+	assert ok
+	col.ouvrir_chantier(imp, reg, chantier, now=1)
+	assert imp["stocks"]["bois"] == 1 and imp["stocks"]["materiaux"] == 0
+	col.financer(imp, _perso(), f["prix_cuivre"], now=2)
+	assert col.achever_fortification(imp, now=3) and imp["fortifications"] == [f["id"]]
+	assert "déjà" in col.peut_ouvrir_chantier(imp, reg, [], col.CHANTIER_FORTIFICATION, f["id"])[1]
+	# une défense d'un palier plus haut n'est pas à portée
+	loin = next(x for x in reg["fortifications"] if x["palier_min"] == "petite_ville")
+	imp["stocks"].update({"bois": 99999, "materiaux": 99999})
+	assert not col.peut_ouvrir_chantier(imp, reg, [], col.CHANTIER_FORTIFICATION, loin["id"])[0]
+
+
+def test_chaque_palier_a_sa_fortification_minimale_ou_la_repete():
+	reg = _reg()
+	requises = [col.fortification_requise(reg, p["id"]) for p in col.paliers(reg)[1:]]
+	# seule la Petite ville répète celle du Bourg (« murailles » aux deux lignes du tableau)
+	assert [bool(f) for f in requises] == [p["id"] != "petite_ville" for p in col.paliers(reg)[1:]]
+
+
+# ── Personnel nommé (§ 8) ────────────────────────────────────────────────────────────
+
+CAT_PROP = {"metiers": [{"id": "garde", "label": "Garde", "cout_embauche_cuivre": 800},
+						{"id": "medecin", "label": "Médecin", "cout_embauche_cuivre": 2000},
+						{"id": "intendant", "label": "Intendant", "cout_embauche_cuivre": 1500}]}
+
+
+def test_metiers_ceux_des_proprietes_plus_ceux_de_la_colonisation():
+	reg = _reg()
+	ids = [m["id"] for m in col.metiers(reg, CAT_PROP)]
+	assert len(ids) == len(set(ids)) and {"garde", "medecin", "agriculteur", "bucheron"} <= set(ids)
+	# tout poste d'un bâtiment constructible a son métier
+	manquants = {m for d in reg["batiments_def"] if d["nature"] in col.NATURES_OUVERTES
+				 for m in d.get("postes") or {}} - set(ids)
+	assert not manquants
+
+
+def test_un_candidat_par_poste_libre_et_l_embauche_cree_le_pnj_nomme():
+	reg = _reg()
+	imp = _imp(reg)
+	b = _construit(imp, reg, "poste_de_garde", [2, 2])
+	places = sum(col.batiment_def(reg, "poste_de_garde")["postes"].values())
+	rand = random.Random(1)
+	assert col.rafraichir_candidats(imp, reg, CAT_PROP, [], {}.get, ["p.jpg"], now=10, rand=rand)
+	assert len(imp["candidats"]) == len(col.batiment_def(reg, "poste_de_garde")["postes"])
+	assert not col.rafraichir_candidats(imp, reg, CAT_PROP, [], {}.get, ["p.jpg"], now=11, rand=rand)   # encore valide
+	candidat = next(c for c in imp["candidats"] if c["metier"] == "garde")
+	assert col.peut_engager(imp, reg, [], candidat) == (True, "")
+	employe = col.engager(imp, candidat, _perso(), now=12)
+	assert employe["propriete"] == imp["_id"] and employe["poste"] == b["id"] and employe["_id"] in imp["employes"]
+	assert candidat not in imp["candidats"]
+	libres = sum(p["libres"] for p in col.postes_libres(imp, reg, [employe]))
+	assert libres == places - 1
+	col.renvoyer(imp, employe, now=13)
+	assert imp["employes"] == [] and employe["statut"] == "renvoye"
+
+
+def test_un_batiment_endommage_arrete_ses_pnj_jusqu_a_reparation():
+	reg = _reg()
+	imp = _imp(reg)
+	b = _construit(imp, reg, "poste_de_garde", [2, 2])
+	garde = _employe(imp, "garde", b["id"])
+	assert col.au_poste(imp, reg, [garde]) == [garde]
+	b["endommage"] = True
+	assert col.au_poste(imp, reg, [garde]) == [] and col.postes(imp, reg) == []
+	imp["stocks"]["materiaux"] = reg["reparation_materiaux"] - 1
+	assert not col.reparer(imp, reg, b["id"], now=1)[0]
+	imp["stocks"]["materiaux"] = reg["reparation_materiaux"]
+	assert col.reparer(imp, reg, b["id"], now=1) == (True, "") and imp["stocks"]["materiaux"] == 0
+	assert col.au_poste(imp, reg, [garde]) == [garde]
+
+
+# ── Stocks, dons, besoins (§ 7, § 10) ────────────────────────────────────────────────
+
+def test_un_objet_donne_rejoint_le_stock_que_sa_regle_reconnait():
+	reg = _reg()
+	pain = {"nom": "Pain", "sous_categorie": "boulangerie", "poids": 2}
+	assert col.stock_de_item(pain, [], reg)["stock"] == "nourriture"
+	assert col.stock_de_item({"sous_categorie": "herbe"}, [], reg)["stock"] == "medicaments"
+	assert col.stock_de_item({}, ["matiere.bois"], reg)["stock"] == "bois"
+	assert col.stock_de_item({}, ["matiere.metal"], reg)["stock"] == "materiaux"
+	assert col.stock_de_item({"sous_categorie": "grimoire"}, ["magie.grimoire"], reg) is None
+	regle = col.stock_de_item(pain, [], reg)
+	assert col.unites_de_item(pain, regle) == 2 * regle["unites_par_kg"]
+	assert col.unites_de_item({"poids": [1, 3]}, regle) == 2 * regle["unites_par_kg"]      # poids en fourchette
+	assert {r["stock"] for r in reg["depots"]} == set(reg["stocks"])                       # les quatre stocks s'alimentent
+
+
+def test_le_don_est_borne_par_la_reserve_note_au_carnet_et_fait_un_soutien():
+	reg = _reg()
+	imp = _imp(reg)
+	capacite = col.stockage(imp, reg)
+	visiteur = {"_id": "character:v", "prenom": "Milo", "nom": ""}
+	assert col.role_de(visiteur, imp) == col.VISITEUR
+	imp["stocks"]["bois"] = capacite - 3
+	assert col.deposer(imp, reg, visiteur, "bois", 5, "Rondin", now=1) == 3            # la réserve est pleine au-delà
+	assert imp["stocks"]["bois"] == capacite
+	assert col.role_de(visiteur, imp) == col.SOUTIEN and imp["soutiens"]["character:v"]["dons"] == {"bois": 3}
+	assert "Milo donne Rondin" in imp["journal"][-1]["texte"]
+	# le fondateur verse sans se compter ni s'écrire à lui-même
+	n = len(imp["journal"])
+	col.deposer(imp, reg, _perso(), "nourriture", 1, now=2)
+	assert len(imp["journal"]) == n and "character:a" not in imp["soutiens"]
+	# l'associé : ses dépôts sont des APPORTS
+	imp["associes"] = [{"id": "character:b", "nom": "Bo", "apports": {}}]
+	col.deposer(imp, reg, {"_id": "character:b", "prenom": "Bo", "nom": ""}, "nourriture", 2, now=3)
+	assert imp["associes"][0]["apports"] == {"nourriture": 2} and "character:b" not in imp["soutiens"]
+
+
+def test_l_entrepot_agrandit_les_reserves_et_davantage_a_chaque_palier():
+	reg = _reg()
+	imp = _imp(reg)
+	base = col.stockage(imp, reg)
+	assert base == reg["stockage_base"]
+	_construit(imp, reg, "entrepot")
+	gain = col.stockage(imp, reg) - base
+	assert gain == col.batiment_def(reg, "entrepot")["stockage"]
+	imp["palier"] = "hameau"
+	assert col.stockage(imp, reg) - base == 2 * gain
+
+
+def test_le_tableau_des_besoins_est_derive_des_stocks_bas():
+	reg = _reg()
+	imp = _imp(reg, stocks={"nourriture": 0, "bois": 999, "materiaux": 999, "medicaments": 999})
+	assert [b["stock"] for b in col.besoins(imp, reg, [])] == ["nourriture"]
+	imp["stocks"]["nourriture"] = 999
+	assert col.besoins(imp, reg, []) == []
+	# plus de bouches, plus de besoin
+	seuil = col.seuils_stocks(imp, reg, [])["nourriture"]
+	imp["population"] = 10
+	assert col.seuils_stocks(imp, reg, [])["nourriture"] > seuil
+
+
+# ── Sécurité et moral (§ 5) ──────────────────────────────────────────────────────────
+
+def test_la_securite_a_cinq_familles_et_n_atteint_jamais_le_maximum():
+	reg = _reg()
+	imp = _imp(reg, stocks={s: 9999 for s in reg["stocks"]})
+	imp["fortifications"] = [f["id"] for f in reg["fortifications"]]
+	imp["menace"] = {"espece": None, "etape": 0}
+	b = _construit(imp, reg, "poste_de_garde")
+	site = {a: {"note": 3 if a == "defense" else 0} for a in reg["axes_site"]}
+	s = col.securite(imp, reg, site, [_employe(imp, "garde", b["id"], n) for n in range(5)])
+	assert [f["id"] for f in s["facteurs"]] == reg["facteurs_securite"]
+	assert all(f["valeur"] == f["max"] for f in s["facteurs"])                # tout est au plus haut…
+	assert s["valeur"] == reg["securite"]["plafond"] < 100                    # …et pourtant jamais le maximum
+	assert s["mot"] == reg["securite"]["mots"][-1][1]
+
+
+def test_gardes_fortifications_et_feu_relevent_la_securite():
+	reg = _reg()
+	imp = _imp(reg)
+	site = _site(reg)
+	nue = col.securite(imp, reg, site, [])["valeur"]
+	b = _construit(imp, reg, "poste_de_garde")
+	garde = _employe(imp, "garde", b["id"])
+	gardee = col.securite(imp, reg, site, [garde])["valeur"]
+	assert gardee > col.securite(imp, reg, site, [])["valeur"]
+	imp["fortifications"] = ["palissade"]
+	fortifiee = col.securite(imp, reg, site, [garde])["valeur"]
+	assert fortifiee > gardee
+	imp["feu"] = "reduit"
+	assert col.securite(imp, reg, site, [garde])["valeur"] < fortifiee
+	assert nue < fortifiee
+	# la tanière localisée : le territoire est connu
+	imp["menace"]["etape"] = 4
+	connue = next(f for f in col.securite(imp, reg, site, [garde])["facteurs"] if f["id"] == "connaissance_territoire")
+	assert connue["valeur"] == connue["max"]
+
+
+def test_le_moral_suit_nourriture_morts_attaques_et_feu():
+	reg = _reg()
+	imp = _imp(reg, stocks={s: 9999 for s in reg["stocks"]})
+	site = _site(reg)
+	now = 100 * col.JOUR_S
+	m = lambda: col.moral(imp, reg, site, [], now)["valeur"]
+	serein = m()
+	imp["stocks"]["nourriture"] = 0
+	assert m() < serein
+	imp["stocks"]["nourriture"] = 9999
+	imp["morts"] = [now - 10]
+	endeuille = m()
+	assert endeuille < serein
+	imp["morts"] = [now - reg["moral"]["fenetre_s"] - 10]                     # hors de la fenêtre : oublié
+	assert m() == serein
+	imp["attaques"] = [{"at": now - 10, "repoussee": False}]
+	assert m() < serein
+	imp["attaques"] = [{"at": now - 10, "repoussee": True}]                   # repoussée : le moral tient
+	assert m() == serein
+	imp["feu"] = "reduit"
+	assert m() < serein
+	assert col.moral(imp, reg, site, [], now)["mot"]
+
+
+# ── Le temps : rattrapage paresseux (§ 1, § 6, § 7) ──────────────────────────────────
+
+def test_le_rattrapage_est_plafonne_et_garde_le_reliquat():
+	reg = _reg()
+	pas = reg["temps"]["passe_s"]
+	plafond = reg["reglages"]["rattrapage_max_s"]
+	imp = _imp(reg, rattrape_at=1000)
+	assert col.passes_dues(imp, reg, 1000 + pas - 1) == 0
+	assert col.passes_dues(imp, reg, 1000 + 2 * pas + 5) == 2
+	assert col.passes_dues(imp, reg, 1000 + 100 * plafond) == plafond // pas
+	site = _site(reg)
+	bilan = col.rattraper(imp, reg, site, [], now=1000 + 2 * pas + 5, rand=Hasard())
+	assert bilan["passes"] == 2 and imp["rattrape_at"] == 1000 + 2 * pas       # 5 s restent dues
+	assert col.rattraper(imp, reg, site, [], now=1000 + 2 * pas + 6, rand=Hasard())["passes"] == 0
+	# absence longue : seules les dernières passes sont rejouées, l'horloge repart de maintenant
+	loin = 1000 + 50 * plafond
+	assert col.rattraper(imp, reg, site, [], now=loin, rand=Hasard())["passes"] == plafond // pas
+	assert imp["rattrape_at"] == loin
+
+
+def test_une_passe_produit_et_consomme_selon_le_site():
+	reg = _reg()
+	pas = reg["temps"]["passe_s"]
+	site = _site(reg)
+	imp = _imp(reg, stocks={"nourriture": 50.0, "bois": 50.0, "materiaux": 0.0, "medicaments": 0.0}, rattrape_at=0)
+	imp["stocks"].update({"bois": 500, "materiaux": 500})
+	b = col.construire(imp, reg, "entrepot", now=0)
+	imp["stocks"] = {"nourriture": 50.0, "bois": 50.0, "materiaux": 0.0, "medicaments": 0.0}
+	bucheron = _employe(imp, "bucheron", b["id"])
+	jour = col.JOUR_S // pas
+	col.rattraper(imp, reg, site, [bucheron], now=jour * pas, rand=Hasard())
+	c = reg["consommation"]
+	produit = next(m for m in reg["metiers_def"] if m["id"] == "bucheron")["produit"]
+	attendu_bois = 50 + produit["par_jour"] * col.facteur_axe(site, produit["axe"], reg) - c["bois_feu_jour"]["grand"]
+	assert abs(imp["stocks"]["bois"] - attendu_bois) < 0.05
+	attendu_nourriture = 50 - 2 * c["nourriture_par_habitant_jour"]            # le bûcheron et le fondateur
+	assert abs(imp["stocks"]["nourriture"] - attendu_nourriture) < 0.05
+	assert imp["stocks"]["materiaux"] == 0
+
+
+def test_sans_bois_le_grand_feu_tombe_et_un_pecheur_sans_eau_ne_peche_rien():
+	reg = _reg()
+	pas = reg["temps"]["passe_s"]
+	site = _site(reg)
+	imp = _imp(reg, stocks={"nourriture": 0.0, "bois": 0.0, "materiaux": 0.0, "medicaments": 0.0}, rattrape_at=0)
+	b = {"id": "b_ferme", "type": "ferme", "pos": None}
+	imp["batiments"] = [b]
+	pecheur = _employe(imp, "pecheur", "b_ferme")
+	sec = {**site, "eau": {"note": 0}}
+	bilan = col.rattraper(imp, reg, sec, [pecheur], now=pas, rand=Hasard())
+	assert imp["feu"] == "reduit" and any("feu" in e for e in bilan["evenements"])
+	assert imp["stocks"]["nourriture"] == 0
+	col.rattraper(imp, reg, site, [pecheur], now=2 * pas, rand=Hasard())
+	assert imp["stocks"]["nourriture"] > 0 or site["eau"]["note"] == 0
+
+
+def test_la_population_arrive_d_elle_meme_si_le_lieu_est_sur_et_loge():
+	reg = _reg()
+	pas = reg["temps"]["passe_s"]
+	imp = _imp(reg, stocks={s: 9999 for s in reg["stocks"]}, rattrape_at=0)
+	imp["fortifications"] = [f["id"] for f in reg["fortifications"]]
+	imp["menace"] = {"espece": None, "etape": 0}
+	site = {a: {"note": 3 if a == "defense" else 0} for a in reg["axes_site"]}
+	libres = col.logements(imp, reg)
+	col.rattraper(imp, reg, site, [], now=20 * pas, rand=Hasard(0.0001))      # tous les tirages réussissent
+	assert imp["population"] == libres                                          # jamais plus que de logements
+	# un moral à terre fait partir : la famine, sans feu ni réserve
+	imp["stocks"] = {s: 0.0 for s in reg["stocks"]}
+	imp["fortifications"], imp["morts"] = [], [20 * pas] * 5
+	avant = imp["population"]
+	bilan = col.rattraper(imp, reg, {a: {"note": 3 if a == "danger" else 0} for a in reg["axes_site"]}, [],
+						  now=30 * pas, rand=Hasard(0.0001))
+	assert imp["population"] < avant and any("quitté" in e for e in bilan["evenements"])
+
+
+def test_la_menace_avance_par_etapes_jusqu_a_la_taniere_localisee():
+	reg = _reg()
+	pas = reg["temps"]["passe_s"]
+	imp = _imp(reg, stocks={s: 9999 for s in reg["stocks"]}, rattrape_at=0)
+	site = _site(reg)
+	assert imp["menace"]["etape"] == 1
+	textes = []
+	for i in range(1, 4):
+		textes += col.rattraper(imp, reg, site, [], now=i * pas, rand=Hasard(0.0))["evenements"]
+		assert imp["menace"]["etape"] == i + 1
+	assert len(reg["etapes_menace"]) == imp["menace"]["etape"] == 4
+	assert any("remarqué" in t for t in textes) and any("tanière" in t for t in textes)
+	# sans espèce, aucune menace ne naît
+	calme = _imp(reg, rattrape_at=0, menace={"espece": None, "etape": 0})
+	col.rattraper(calme, reg, site, [], now=50 * pas, rand=Hasard(0.0))
+	assert calme["menace"]["etape"] == 0 and calme["attaques"] == []
+
+
+def test_une_attaque_en_l_absence_coute_mais_jamais_le_lieu():
+	reg = _reg()
+	imp = _imp(reg, stocks={"nourriture": 100.0, "bois": 100.0, "materiaux": 0.0, "medicaments": 0.0}, population=3)
+	b = {"id": "b_g", "type": "poste_de_garde", "pos": [1, 1]}
+	imp["batiments"] = [b]
+	nomme = _employe(imp, "garde", "b_g")
+	employes = [nomme]
+	bilan = {"evenements": [], "employes_touches": []}
+	col._attaque(imp, reg, employes, 500, Hasard(0.0), bilan, {"valeur": 0})    # la sécurité ne retient rien
+	assert imp["attaques"] == [{"at": 500, "repoussee": False}]
+	assert imp["souffrants"] >= 1 and imp["stocks"]["nourriture"] < 100 and b.get("endommage")
+	assert any("attaqué" in e for e in bilan["evenements"])
+	assert imp["_id"] and imp["palier"] == "campement"                          # jamais la perte du lieu
+	# repoussée : aucune perte de réserve
+	imp2 = _imp(reg, stocks={"nourriture": 100.0, "bois": 100.0, "materiaux": 0.0, "medicaments": 0.0})
+	col._attaque(imp2, reg, [], 500, Hasard(0.5), {"evenements": [], "employes_touches": []}, {"valeur": 90})
+	assert imp2["attaques"][0]["repoussee"] and imp2["stocks"]["nourriture"] == 100
+
+
+def test_la_mort_d_un_pnj_nomme_est_definitive_et_les_comptes_partent_d_abord():
+	reg = _reg()
+	imp = _imp(reg, population=1)
+	nomme = _employe(imp, "garde", "b_x")
+	employes = [nomme]
+	bilan = {"evenements": [], "employes_touches": []}
+	col._mort(imp, employes, Hasard(), 10, bilan, "de maladie")
+	assert imp["population"] == 0 and employes == [nomme] and bilan["employes_touches"] == []
+	col._mort(imp, employes, Hasard(), 11, bilan, "de maladie")
+	assert employes == [] and imp["employes"] == [] and nomme["statut"] == col.EMPLOYE_MORT
+	assert bilan["employes_touches"] == [nomme] and "Aldo" in bilan["evenements"][-1]
+	assert imp["morts"] == [10, 11]
+
+
+# ── Les autres joueurs (§ 10) ────────────────────────────────────────────────────────
+
+def test_association_demande_ecrite_acceptee_places_par_palier():
+	reg = _reg()
+	imp = _imp(reg)
+	places = col.places_associes(imp, reg)
+	assert places == reg["autres_joueurs"]["associes_max"]["campement"] == 1
+	b = {"_id": "character:b", "prenom": "Bo", "nom": ""}
+	c = {"_id": "character:c", "prenom": "Cy", "nom": ""}
+	assert not col.peut_demander(_perso(), imp, reg)[0]                         # le fondateur
+	assert col.peut_demander(b, imp, reg) == (True, "")
+	col.demander(b, imp, "  Je  porte du bois.  ", now=1)
+	assert imp["demandes"][0]["texte"] == "Je porte du bois." and b["demande_association"] == imp["_id"]
+	assert not col.peut_demander(b, imp, reg)[0]
+	col.demander(c, imp, "Moi aussi", now=2)
+	assert col.repondre(imp, reg, "character:b", True, now=3)[0]
+	assert col.role_de(b, imp) == col.ASSOCIE and col.vaut_presence(col.ASSOCIE)
+	ok, raison, _ = col.repondre(imp, reg, "character:c", True, now=4)
+	assert not ok and "places" in raison                                        # une seule place au Campement
+	assert col.repondre(imp, reg, "character:c", False, now=5)[0] and imp["demandes"] == []
+	# le personnage suit le doc du lieu, paresseusement
+	lire = {imp["_id"]: imp}.get
+	assert col.synchroniser_association(b, lire) and b == {**b, "association": imp["_id"]} and "demande_association" not in b
+	assert col.synchroniser_association(c, lire) and "demande_association" not in c and "association" not in c
+	# une seule association active
+	autre = _imp(reg)
+	assert "déjà associé" in col.peut_demander(b, autre, reg)[1]
+	# exclusion : les apports restent au lieu, l'association tombe au passage suivant
+	imp["stocks"]["bois"] = 0
+	col.deposer(imp, reg, b, "bois", 4, now=6)
+	assert col.retirer_associe(imp, "character:b", exclu=True, now=7)
+	assert imp["stocks"]["bois"] == 4 and col.role_de(b, imp) == col.VISITEUR
+	assert col.synchroniser_association(b, lire) and "association" not in b
+
+
+def test_le_visiteur_lit_en_mots_le_fondateur_a_les_chiffres():
+	reg = _reg()
+	imp = _imp(reg)
+	site = _site(reg)
+	col.noter(imp, "secret du carnet", 1)
+	visiteur = col.vue(imp, reg, col.VISITEUR, site, [], CAT_PROP, now=10)
+	assert visiteur["securite"] == {"mot": col.securite(imp, reg, site, [])["mot"]}
+	assert set(visiteur["moral"]) == {"mot"} and all(set(b) == {"mots"} for b in visiteur["site"].values())
+	assert not {"stocks", "journal", "batiments", "demandes", "population", "chantier"} & set(visiteur)
+	assert visiteur["fondateur_nom"] == "Greta Hazgard" and visiteur["palier"]["label"] == "Campement"
+	assert "besoins" in visiteur and len(visiteur["stocks_ouverts"]) == len(reg["stocks"])
+	fondateur = col.vue(imp, reg, col.FONDATEUR, site, [], CAT_PROP, now=10)
+	assert "valeur" in fondateur["securite"] and "facteurs" in fondateur["moral"]
+	assert fondateur["journal"][0]["texte"] == "secret du carnet" and len(fondateur["stocks"]) == len(reg["stocks"])
+	associe = col.vue(imp, reg, col.ASSOCIE, site, [], CAT_PROP, now=10)
+	assert "stocks" in associe and "journal" not in associe and "demandes" not in associe
+	# le catalogue ne montre que ce qui se construit, les sept paliers ont leur libellé de menace
+	assert {c["id"] for c in fondateur["catalogue"]} == {d["id"] for d in reg["batiments_def"] if d["nature"] in col.NATURES_OUVERTES}
+	assert set(reg["menace"]["attaque_proba"]) == {p["id"] for p in col.paliers(reg)}
+
+
+def test_regles_absentes_rien_ne_se_fonde_et_les_blocs_manquants_retombent_sur_les_defauts():
+	vide = col.regles({}.get)
+	assert col.paliers(vide) == [] and not col.peut_fonder(_perso(), _pays(), SITE_POS, RELIES, [], vide)[0]
+	partiel = col.regles({col.REGLES_ID: {"value": {"securite": {"plafond": 80}}}}.get)
+	assert partiel["securite"]["plafond"] == 80 and partiel["securite"]["mots"] == col.DEFAUTS["securite"]["mots"]
+	assert partiel["sante"] == col.DEFAUTS["sante"]
+
+
+def test_la_liste_des_lieux_ne_montre_d_une_implantation_que_le_public():
+	reg = _reg()
+	imp = _imp(reg)
+	col.noter(imp, "secret", 1)
+	public = col.details_publics(dict(imp))
+	assert set(public) <= set(col.CHAMPS_PUBLICS) and public["label"] == imp["label"]
+	assert not {"journal", "stocks", "demandes", "cells", "nav", "fondateur"} & set(public)
+	ville = {"type": "lieu", "categorie": "ville", "flux_marchand": {}}
+	assert col.details_publics(ville) is ville

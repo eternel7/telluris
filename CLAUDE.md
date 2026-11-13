@@ -29,7 +29,7 @@ node dev/check_js.js               # syntaxe du JS inline des templates ET de te
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte` · `conflit` · `partage`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
+Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte` · `conflit` · `partage` · `colonisation`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
 - ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
 - **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
@@ -66,6 +66,9 @@ routers/
   pnj.py                 # /api/pnj/dialogue (+ /choix) : dialogues PNJ + services (dont `portail` de Notre-Dame, `enseignement` d'un maître, `vente` à prix fixe) ; /api/intro/raison
   traversee.py           # /api/traversee/avancer : une case de traversée maritime (rencontre, débarquement)
   contenants.py          # /api/contenant (+ /ranger, /sortir) : ouvrir un contenant du sac (porteur via _acteur, hors combat)
+  colonisation.py        # /api/colonisation/* : site, fonder (carte d'un pays), puis DANS l'implantation : ici, donner,
+                         #   feu, construire, poser, reparer, chantier/ouvrir|financer, palier, embauche/engager/renvoyer,
+                         #   association/demander|repondre|exclure|quitter
 utils/
   auth.py                # JWT d'accès + get_current_user() ; ouvrir/fermer/révoquer la session
   session.py             # session (pur + middleware) : accès 15 min, rafraîchissement 30 j OPAQUE
@@ -142,6 +145,10 @@ utils/
                          #   ATELIERS : PNJ marchands employés (flux du bien, jamais de la ville ; caisse) ;
                          #   EFFETS des aménagements (`effets` / `effets_poste`) : réveil à durée NON
                          #   cumulatif, médecin, écurie (plafond conservé), bibliothèque → scriptorium par vue
+  colonisation.py        # voie de colonisation (pur) : implantation fondée sur une case de pays, sept paliers, fiche de
+                         #   site LUE sur la carte, lieu modèle en LIEN PUR (grille posée par `db.config.get_doc`), bâtiments
+                         #   posés sous les pieds, PNJ nommés, quatre stocks, sécurité et moral DÉRIVÉS, rattrapage paresseux
+                         #   (menace, santé, population), chantiers, visiteur / soutien / associé
   echanges_cite.py       # échanges des ateliers d'un bien avec CHAQUE boutique de sa cité (pur) : rattrapage
                          #   paresseux (`echanges_at`, ~1 passe/h, 48 h max), prix du PROPRIÉTAIRE, refus à la
                          #   cible, plus offrant d'abord ; achats (négociant) aux seules boutiques en surplus ;
@@ -221,7 +228,8 @@ utils/
   serveur.py             # carte 🖥 Serveur de /admin : mise à jour `fetch` + `merge --ff-only` NON destructive
                          #   (instantané stash + refus si fichier local touché), redémarrage par re-exec d'uvicorn
 db/
-  config.py              # CouchDB connection, get_doc / save_doc / find_docs helpers, cache de requête
+  config.py              # CouchDB connection, get_doc / save_doc / find_docs helpers, cache de requête ;
+                         #   point unique du lien d'une implantation à son lieu modèle (`suivre_modele` / `sans_modele`)
 models/
   character_stats.py     # BaseStats, DerivedStats, EquipmentBonus, compute_derived_stats(), variables de monde
   character_document.py  # Pydantic spec d'un doc personnage (référence seule — cf. note ci-dessous)
@@ -244,6 +252,7 @@ templates/
                          #   session.js (session morte : 401 / `x-session: aucune` → /auth ; <head> des pages connectées)
                          #   partage.js (bouton `data-partager`, icône SVG sans libellé, couleur `--muted` de la page : partage natif, sinon copie de l'URL ; pages du lore)
                          #   conflit.js (409 « Conflit de sauvegarde » dit en douceur : bulle unique via `showToast`, /play ↔ /combat)
+                         #   colonisation.js (panneau de l'implantation : fonder, onglets Site / Population / Bâtiments / Défense)
                          #   sons.js (sons d'action : chokepoint `installerSonsApi` des POST, coupe-son /play ↔ /combat, musique de donjon)
   resources/sounds/      # sonothèque À PLAT (mount /sounds, `encodeURIComponent` : pas de sous-dossier) ; détail : telluris-social-ui § Sons
   resources/             # assets statiques (characters, towns, maps, monsters, icons, pnj, sounds)
@@ -268,6 +277,7 @@ Chaque mécanique est documentée dans une compétence `.claude/skills/telluris-
 | quêtes (guilde, transport, chasse, escorte), PNJ et dialogues, `/admin/dialogues`, accès, donjons, intro | `telluris-quetes-pnj` |
 | recrutement, groupe, compagnie, contrat de mission, montures | `telluris-recrutement` |
 | propriétés du joueur (achat, location, aménagements, personnel, coffre, zones habitables) | `telluris-proprietes` |
+| voie de colonisation (fonder, paliers, lieux modèles, bâtiments, stocks, sécurité, moral, menace, associés) | `telluris-colonisation` |
 | sorts, compétences de vocation, zones d'effet, focalisation | `telluris-magie` |
 | pièges (cases piégées, détection, désamorçage, pose) | `telluris-combat` § Pièges |
 | journal, relations, cartes/portraits, listes scrollables, tavernes, scriptorium, toasts, sons d'action et musique | `telluris-social-ui` |
