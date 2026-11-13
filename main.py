@@ -1056,6 +1056,9 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			for n in conn.get("nodes") or []))
 	# Bâtiments posés d'une implantation : pictogramme et halo des REPÈRES (on n'y entre pas).
 	passages += colonie_reperes
+	# Rayon de visibilité des marqueurs (Tchebychev) : 2 cases dans une ville (rues denses,
+	# boutiques serrées), 1 ailleurs.
+	rayon_passage = 2 if grid_doc.get("categorie") == "ville" else 1
 	# Traces de la pire menace possible à la position (`utils/traces.py`) : annoncées au
 	# chargement, puis à chaque pas qui change la lecture (bloc `traces` de move_character).
 	# ⚠️ `lieu` est ici l'IDENTIFIANT ; le doc est `grid_doc`.
@@ -1259,6 +1262,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			"access" : access,
 			"carte_voile": carte_voile,
 			"passages": passages,
+			"rayon_passage": rayon_passage,
 			# Déplacement au clic (mode ⚙️) : la grille ENTIÈRE, car le client calcule chemin et
 			# cases joignables (aucune règle de marche côté serveur, scripts/deplacement.js).
 			"carte_clic": ({"cells": grid_doc["cells"], "nav": grid_doc.get("nav") or {}}

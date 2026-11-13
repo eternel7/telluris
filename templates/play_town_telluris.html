@@ -1751,7 +1751,7 @@
 			pointer-events: auto;   /* le calque est transparent aux clics, pas son infobulle */
 			cursor: help;
 		}
-		/* Seuls les passages à ≤ RAYON_PASSAGE du personnage sont montrés (`.proche`). */
+		/* Seuls les passages à ≤ RAYON_PASSAGE (2 en ville, 1 ailleurs) du personnage sont montrés (`.proche`). */
 		.passage-marque:not(.proche) { display: none; }
 		.passage-marque::before {
 			content: '';
@@ -4726,8 +4726,9 @@
 	const PASSAGES = {{ passages | tojson | safe }} || [];
 	// Rayon de VISIBILITÉ d'un passage, en cases (Tchebychev) : un marqueur n'apparaît (et ne
 	// pulse) que sur les cases voisines du personnage — le joueur découvre les passages en
-	// longeant la frontière, la carte n'en est pas constellée.
-	const RAYON_PASSAGE = 1;
+	// longeant la frontière, la carte n'en est pas constellée. 2 dans une ville, 1 ailleurs
+	// (main.py /play, `rayon_passage`).
+	const RAYON_PASSAGE = {{ rayon_passage | default(1) | tojson }};
 	// Portée de recherche de la frontière autour d'un passage, en cases. Au-delà, le passage
 	// est intérieur au pays (entrée de ville) : pas de chevron.
 	const RAYON_FRONTIERE = 4;
