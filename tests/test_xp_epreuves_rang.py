@@ -41,8 +41,11 @@ def test_l_epreuve_ajoute_la_part_sans_toucher_au_cuivre(monkeypatch):
 	espece = {"_id": "espece:x", "nom": "Bête", "base_attributes": {"FOR": {"min": 100, "max": 100}}}
 	profil = {"_id": "profil:x", "niveau": 5, "nom": "Élite"}
 	lire = {"profil:x": profil}.get
+	# XP de la bête figée : sa courbe a ses propres tests (test_xp_monstre) ; ici, seule compte
+	# la part de promotion ajoutée par-dessus. 30 = valeur arbitraire.
+	monkeypatch.setattr(chasse.quetes.xp_monstre, "xp_specimen", lambda eid, pid, get: 30)
 	q = chasse._construire_quete_rang(comptoir, "lieu:c", lieu, espece, None, "profil:x", "A", lire)
-	base = round((5 * 4 + 100 // 10) * character_stats.QUETE_CHASSE_XP_FACTEUR)
+	base = round(30 * character_stats.QUETE_CHASSE_XP_FACTEUR)
 	assert q["rang_vise"] == "S"
 	assert q["recompenses"]["xp"] == base + chasse.xp_promotion("S")
 	assert q["recompenses"]["cuivre"] == round(base * character_stats.QUETE_CUIVRE_PAR_XP)

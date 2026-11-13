@@ -35,7 +35,7 @@ from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, instantiate_rencontre, create_combat_doc, build_monster_snapshot,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
     verser_butin_au_sol, cle_butin, etat_charge_snapshot, bloc_charge_snapshot,
-    changer_d_etage, ajouter_proteges, annoter_passages, vue_client, caracts_effectives,
+    changer_d_etage, ajouter_proteges, annoter_passages, vue_client, caracts_effectives, ref_de_butin,
 )
 from utils import donjon
 from utils import tresor as tresor_util
@@ -479,7 +479,7 @@ def collect_loot(
         vers_contenant.setdefault((cid, pos), []).extend(cles)
     for (cid, pos), cles in vers_contenant.items():
         ref_c = docs[cid]["inventaire"][pos]
-        refs = [{"item": dispo[c]["item_id"], "poids": dispo[c]["poids"]} for c in cles]
+        refs = [ref_de_butin(dispo[c]) for c in cles]
         ok, raison = contenants.peut_recevoir(ref_c, get_doc(item_ref_id(ref_c)), refs, get_doc)
         if not ok:
             raise HTTPException(status_code=422, detail=raison)
@@ -502,14 +502,14 @@ def collect_loot(
         inventaire = doc.get("inventaire", [])
         for cle in cles:
             # Référence {item, poids} : on conserve le poids d'instance tiré au butin.
-            inventaire.append({"item": dispo[cle]["item_id"], "poids": dispo[cle]["poids"]})
+            inventaire.append(ref_de_butin(dispo[cle]))
             noms.append(dispo[cle]["nom"])
             encaisses.add(cle)
         doc["inventaire"] = inventaire
     for (cid, pos), cles in vers_contenant.items():
         doc = docs[cid]
         for cle in cles:
-            ref = {"item": dispo[cle]["item_id"], "poids": dispo[cle]["poids"]}
+            ref = ref_de_butin(dispo[cle])
             contenants.deposer(doc, pos, item_ref_id(doc["inventaire"][pos]), ref, get_doc,
                                controler=False)
             noms.append(dispo[cle]["nom"])

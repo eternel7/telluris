@@ -444,6 +444,22 @@ QUETE_RANG_NIVEAU_ENTREE: dict[str, int] = {
 }
 QUETE_RANG_PART_NIVEAU: float = 1 / 3
 
+# ── XP d'un monstre et prix de sa dépouille (utils/xp_monstre.py) ─────────────────────────
+# XP = courbe en PALIERS sur la menace du SPÉCIMEN (`potentiel.potentiel_menace`, espèce × grade
+# tiré) : au plancher du rang R (`QUETE_RANG_POTENTIEL_MIN`), une bête rapporte XP_MONSTRE_PART_NIVEAU
+# du coût du niveau d'entrée de R (`QUETE_RANG_NIVEAU_ENTREE`), interpolation linéaire entre deux
+# planchers, prolongée au-delà du dernier (Auteur, 13/11 : un monstre S ≈ 1/10 du niveau 61, soit
+# ≈ 9 victimes de son rang par niveau à TOUS les rangs). Aucune table de plus : les deux tables
+# des rangs en sont la seule source.
+XP_MONSTRE_PART_NIVEAU: float = 0.1
+# Prix d'une DÉPOUILLE (carcasse, portion, ossements, résidu — tout item à `source_espece`) :
+# CARCASSE_PRIX_REF_CUIVRE × (xp / CARCASSE_PRIX_REF_XP) ^ CARCASSE_PRIX_EXPOSANT, × poids de
+# l'instance / poids moyen de la carcasse. Calibré sur le dump du 12/11 (Auteur, 13/11) : rang F
+# médian (59 XP) ≈ 50 cu, rang S médian (726 XP) ≈ 40 000 cu.
+CARCASSE_PRIX_REF_XP: float = 700.0
+CARCASSE_PRIX_REF_CUIVRE: float = 36000.0
+CARCASSE_PRIX_EXPOSANT: float = 2.66
+
 # ── Focalisation ─────────────────────────────────────────────────────────────────
 # Le personnage peut se focaliser sur une quête active : les tirages aléatoires sont
 # biaisés vers son objectif. FOCUS_EVENEMENT_MULT multiplie le poids des entrées de
@@ -1109,6 +1125,10 @@ def current_world_variables() -> dict:
 		"QUETE_RANG_POTENTIEL_MIN": dict(QUETE_RANG_POTENTIEL_MIN),
 		"QUETE_RANG_NIVEAU_ENTREE": dict(QUETE_RANG_NIVEAU_ENTREE),
 		"QUETE_RANG_PART_NIVEAU": QUETE_RANG_PART_NIVEAU,
+		"XP_MONSTRE_PART_NIVEAU": XP_MONSTRE_PART_NIVEAU,
+		"CARCASSE_PRIX_REF_XP": CARCASSE_PRIX_REF_XP,
+		"CARCASSE_PRIX_REF_CUIVRE": CARCASSE_PRIX_REF_CUIVRE,
+		"CARCASSE_PRIX_EXPOSANT": CARCASSE_PRIX_EXPOSANT,
 		"FOCUS_EVENEMENT_MULT": FOCUS_EVENEMENT_MULT,
 		"FOCUS_CIBLE_MULT": FOCUS_CIBLE_MULT,
 		"SORT_COUT_COEFF": SORT_COUT_COEFF,
@@ -1247,7 +1267,8 @@ def load_world_variables() -> dict:
 	global QUETE_REUSSITE_RELATION_DELTA
 	global QUETE_TRANSPORT_STOCK_PROBA, QUETE_TRANSPORT_RELATION_MIN
 	global QUETE_CHASSE_XP_FACTEUR, QUETE_CHASSE_PROBA_RANG, RANG_GUILDE_MAX_DEFAUT
-	global QUETE_RANG_PART_NIVEAU
+	global QUETE_RANG_PART_NIVEAU, XP_MONSTRE_PART_NIVEAU
+	global CARCASSE_PRIX_REF_XP, CARCASSE_PRIX_REF_CUIVRE, CARCASSE_PRIX_EXPOSANT
 	global FOCUS_EVENEMENT_MULT, FOCUS_CIBLE_MULT
 	global SORT_COUT_COEFF, MAGIE_ECOLE_COUT_COEFF, COMPETENCE_COUT_COEFF
 	global CHARGE_MAGIE_FRANCHISE, CHARGE_MAGIE_PEN_MAX, CHARGE_MAGIE_PENTE_SURCHARGE
@@ -1451,6 +1472,10 @@ def load_world_variables() -> dict:
 		QUETE_RANG_NIVEAU_ENTREE.clear()
 		QUETE_RANG_NIVEAU_ENTREE.update(entrees)
 	QUETE_RANG_PART_NIVEAU = max(0.0, float(v.get("QUETE_RANG_PART_NIVEAU", QUETE_RANG_PART_NIVEAU)))
+	XP_MONSTRE_PART_NIVEAU = max(0.0, float(v.get("XP_MONSTRE_PART_NIVEAU", XP_MONSTRE_PART_NIVEAU)))
+	CARCASSE_PRIX_REF_XP = max(1.0, float(v.get("CARCASSE_PRIX_REF_XP", CARCASSE_PRIX_REF_XP)))
+	CARCASSE_PRIX_REF_CUIVRE = max(0.0, float(v.get("CARCASSE_PRIX_REF_CUIVRE", CARCASSE_PRIX_REF_CUIVRE)))
+	CARCASSE_PRIX_EXPOSANT = max(0.0, float(v.get("CARCASSE_PRIX_EXPOSANT", CARCASSE_PRIX_EXPOSANT)))
 
 	FOCUS_EVENEMENT_MULT = float(v.get("FOCUS_EVENEMENT_MULT", FOCUS_EVENEMENT_MULT))
 	FOCUS_CIBLE_MULT     = float(v.get("FOCUS_CIBLE_MULT", FOCUS_CIBLE_MULT))

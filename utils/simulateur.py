@@ -136,7 +136,7 @@ def _snapshot_median(espece: dict, profil: dict | None) -> dict:
 			milieu = (int(borne.get("min", 0)) + int(borne.get("max", 0))) // 2
 			mods[caract] = {"min": milieu, "max": milieu}
 		profil_median = {**profil, "attributs_modifier": mods}
-	return _normaliser_snapshot(combat.build_monster_snapshot(espece, profil_median, 0, equiper=False))
+	return _normaliser_snapshot(combat.build_monster_snapshot(espece, profil_median, 0, equiper=False, calculer_xp=False))
 
 
 # ── Stats FORCÉES (overlay JSON de l'écran) ──────────────────────────────────────────
@@ -492,7 +492,7 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = T
 			if not espece_equipable(espece):
 				raise ValueError(
 					f"{espece.get('nom', doc_id)} n'est pas humanoïde : rien à équiper")
-			nu = (_normaliser_snapshot(combat.build_monster_snapshot(espece, profil, 0, equiper=False))
+			nu = (_normaliser_snapshot(combat.build_monster_snapshot(espece, profil, 0, equiper=False, calculer_xp=False))
 				  if borne else _snapshot_median(espece, profil))
 			equipement = normaliser_slots_equipes(
 				spec.get("slots"), get_doc_fn, nu.get("caracts_base") or {})
@@ -500,7 +500,7 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = T
 		def fabrique():
 			# Re-tirage PAR PASSE : fidèle au jeu, où chaque rencontre re-tire les stats.
 			# Avec une borne, le profil synthétique rend ce tirage déterministe.
-			return _fini(combat.build_monster_snapshot(espece, profil, 0))
+			return _fini(combat.build_monster_snapshot(espece, profil, 0, calculer_xp=False))
 
 		return {"type": "espece", "label": label, "fabrique": fabrique,
 				"arsenal": {"sorts": [], "competences": [], "soutiens": [], "consommables": []},
@@ -509,7 +509,7 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = T
 				# La référence porte les mêmes stats forcées : les potentiels doivent
 				# décrire ce qui est simulé.
 				# Humanoïde NU dans les deux cas (cf. `_snapshot_median`).
-				"snapshot_reference": (_fini(combat.build_monster_snapshot(espece, profil, 0, equiper=False))
+				"snapshot_reference": (_fini(combat.build_monster_snapshot(espece, profil, 0, equiper=False, calculer_xp=False))
 									   if borne
 									   else _fini(_snapshot_median(espece, profil))),
 				# Route servable de l'image — c'est le SERVEUR qui sait où elle vit

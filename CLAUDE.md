@@ -217,6 +217,8 @@ utils/
   intro.py               # intro narrative (pur) : démarrage, overlay, raisons, conclusion en zone sûre
   simulateur.py          # duel 1D Monte Carlo (pur) : belligérants, politique de duel, équipement d'essai
   potentiel.py           # potentiels combat/survie/support (pur) : `REGLES_POTENTIEL` = le point d'édition
+  xp_monstre.py          # XP d'un monstre (paliers sur la menace du SPÉCIMEN) et prix de sa DÉPOUILLE (puissance
+                         #   de cette XP × poids d'instance) ; grade sur la réf de butin (`combat.ref_de_butin`)
   motdepasse.py          # sceau oublié (pur) : jeton `reset:<empreinte>` à usage unique, cadence max
                          #   par compte (lue sur les jetons en base), règle du sceau — celle de
                          #   l'inscription AUSSI (`verifier_force`) —, corps du courriel

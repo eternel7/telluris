@@ -99,7 +99,7 @@ def item_est_decoupable(item_doc, poids=None) -> bool:
 
 
 def decouper_ref(source_ref, source_item_doc) -> list | None:
-	"""Débite une réf de carcasse → liste de réfs `{item, poids}` (une par pièce), ou None
+	"""Débite une réf de carcasse → liste de réfs `{item, poids[, profil]}` (une par pièce), ou None
 	si l'item n'est pas découpable.
 
 	Le poids de chaque pièce = `fraction / quantite × poids de l'instance` ; la DERNIÈRE
@@ -110,11 +110,17 @@ def decouper_ref(source_ref, source_item_doc) -> list | None:
 		return None
 	entrees = entrees_decoupe(source_item_doc)
 
+	# Le GRADE du spécimen (`profil`, posé au butin) suit chaque portion : il fixe leur prix
+	# (`xp_monstre.prix_depouille`), dont la somme retombe ainsi sur celui de la carcasse.
+	profil = source_ref.get("profil") if isinstance(source_ref, dict) else None
 	pieces = []
 	for e in entrees:
 		part = total * e["fraction"] / e["quantite"]
 		for _ in range(e["quantite"]):
-			pieces.append({"item": e["item"], "poids": round(part, 2)})
+			piece = {"item": e["item"], "poids": round(part, 2)}
+			if profil:
+				piece["profil"] = profil
+			pieces.append(piece)
 	if not pieces:
 		return None
 	# Reliquat sur la dernière pièce : les fractions somment à 1.0 mais les arrondis, eux,

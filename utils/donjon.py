@@ -455,10 +455,9 @@ def construire_commission(bureau_doc: dict, cible: dict) -> dict | None:
 		return None
 	espece_doc, profil = cible["espece"], cible["profil"]
 	lieu_doc = cible.get("lieu_doc") or {}
-	niv = int(profil.get("niveau", 1) or 1)
 	grade = chasse.qualificatif_de(profil)
 	lieu_nom = lieu_label(lieu_doc, cible.get("lieu") or "")
-	xp = max(1, round(quetes._xp_unitaire(espece_doc, niv) * character_stats.QUETE_CHASSE_XP_FACTEUR))
+	xp = max(1, round(quetes._xp_unitaire(espece_doc, profil.get("_id")) * character_stats.QUETE_CHASSE_XP_FACTEUR))
 	cuivre = max(0, round(xp * character_stats.QUETE_CUIVRE_PAR_XP))
 	sub = (bureau_doc.get("_id", "") or "").split(":", 1)[-1]
 	return {

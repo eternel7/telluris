@@ -22,6 +22,7 @@ from utils import accord_espece, bois, marche
 # ⚠️ Acyclique, et déjà tiré transitivement (quetes → bois → expedition → recrutement) :
 # `recrutement` n'importe que characters/consommables/montures, jamais quetes.
 from utils import recrutement
+from utils import xp_monstre
 
 
 def now_epoch() -> int:
@@ -292,26 +293,36 @@ def _cible_nom(objectif: dict, lire=None) -> str:
 
 # ── XP / récompenses ─────────────────────────────────────────────────────────────
 
-def _xp_unitaire(espece_doc: dict, niveau: int) -> int:
-	"""XP estimée pour tuer un individu de l'espèce au niveau donné — réutilise la formule
-	du combat (`max(1, niveau*4 + somme_attrs_moyens // 10)`, cf. utils/combat.py)."""
-	attrs = (espece_doc or {}).get("base_attributes", {}) or {}
-	somme = 0.0
-	for v in attrs.values():
-		if isinstance(v, dict):
-			somme += (float(v.get("min", 0) or 0) + float(v.get("max", 0) or 0)) / 2.0
-	return max(1, int(niveau) * 4 + int(somme) // 10)
+def _xp_unitaire(espece_doc: dict, profil_id: str | None, get_doc_fn=None) -> int:
+	"""XP d'un individu de l'espèce sous ce grade — la MÊME que le combat (`xp_monstre.xp_specimen`,
+	dangerosité du spécimen)."""
+	return xp_monstre.xp_specimen((espece_doc or {}).get("_id"), profil_id, get_doc_fn or get_doc)
 
 
-def _xp_unitaire_item(item_doc: dict, niveau: int, get_doc_fn=None) -> int:
-	"""Valeur unitaire d'une cible de collecte. Carcasse (item lié à une espèce) → XP de
-	chasse de l'espèce ; ressource brute → effort de récolte modéré pondéré par la rareté."""
+# Rang à partir duquel une cible MONSTRE est « difficile » (objectif de quantité minimal). Repère
+# repris de l'ancienne formule : ses ~40 XP/unité valaient une bête de rang B (dump du 12/11).
+RANG_CIBLE_DIFFICILE = "B"
+# Même rôle pour une ressource brute de collecte (échelle de `_xp_unitaire_item`, inchangée).
+XP_CIBLE_DIFFICILE_RESSOURCE = 40.0
+
+
+def _xp_cible_difficile(monstre: bool) -> float:
+	if not monstre:
+		return XP_CIBLE_DIFFICILE_RESSOURCE
+	seuil = (character_stats.QUETE_RANG_POTENTIEL_MIN or {}).get(RANG_CIBLE_DIFFICILE)
+	return float(xp_monstre.xp_de_potentiel(seuil or 0))
+
+
+def _xp_unitaire_item(item_doc: dict, niveau: int, get_doc_fn=None, profil_weights: dict | None = None) -> int:
+	"""Valeur unitaire d'une cible de collecte. Dépouille (item lié à une espèce) → XP ESPÉRÉE
+	de l'espèce sous les grades du lieu (`xp_monstre.xp_attendue`) ; ressource brute → effort
+	de récolte modéré pondéré par la rareté."""
 	get_doc_fn = get_doc_fn or get_doc
 	src = (item_doc or {}).get("source_espece")
 	if src:
 		esp = get_doc_fn(src)
 		if esp:
-			return _xp_unitaire(esp, niveau)
+			return xp_monstre.xp_attendue(src, profil_weights, get_doc_fn)
 	rarete = (item_doc or {}).get("rarete", "commun")
 	mult = character_stats.MULT_RARETE.get(rarete, 1) or 1
 	return max(1, int(niveau) * 2 + min(20, int(mult)))
@@ -338,11 +349,10 @@ def _generer_chasse(guild_doc: dict, parent_doc: dict, cible, get_doc_fn=None) -
 	if not profil_id:
 		return None
 	profil = get_doc_fn(profil_id) or {}
-	niv = int(profil.get("niveau", 1))
 	grade = chasse.qualificatif_de(profil)
 	lieu_nom = lieu_label(lieu_doc, lieu_id)
 
-	xp = max(1, round(_xp_unitaire(espece_doc, niv) * character_stats.QUETE_CHASSE_XP_FACTEUR))
+	xp = max(1, round(_xp_unitaire(espece_doc, profil_id, get_doc_fn) * character_stats.QUETE_CHASSE_XP_FACTEUR))
 	cuivre = max(0, round(xp * character_stats.QUETE_CUIVRE_PAR_XP))
 	objectif = {"type": "chasse", "cible": espece_id, "lieu": lieu_id, "profil": profil_id, "quantite": 1}
 	if position is not None:
@@ -383,15 +393,19 @@ def generer_quete(guild_doc: dict, parent_doc: dict, type_obj: str, cible, nivea
 	if type_obj == "chasse":
 		return _generer_chasse(guild_doc, parent_doc, cible, get_doc_fn)
 	ailleurs = f" hors les murs ({lieu_label(pays_doc, pays_doc.get('_id', ''))})" if pays_doc else ""
+	# Grades rencontrés là où se trouve la cible : XP ESPÉRÉE d'un individu (kill, dépouille).
+	profil_weights = (pays_doc or parent_doc or {}).get("profil_weights")
+	monstre = type_obj == "kill"
 	if type_obj == "kill":
 		esp = get_doc_fn(cible)
-		xp_unit = _xp_unitaire(esp, niveau) if esp else max(1, int(niveau) * 4)
+		xp_unit = xp_monstre.xp_attendue(cible, profil_weights, get_doc_fn) if esp else max(1, int(niveau) * 4)
 		nom = (esp.get("nom") if esp else None) or _nom_espece(cible)
 		titre = random.choice(_TITRES_KILL).format(nom=nom)
 		desc_tpl = "La guilde demande d'abattre {q} {nom} qui rôdent" + (ailleurs or " dans les environs") + "."
 	else:  # collect
 		item = get_doc_fn(cible)
-		xp_unit = _xp_unitaire_item(item, niveau, get_doc_fn)
+		monstre = bool((item or {}).get("source_espece"))
+		xp_unit = _xp_unitaire_item(item, niveau, get_doc_fn, profil_weights)
 		nom = (item.get("nom") if item else None) or _nom_item(cible)
 		titre = random.choice(_TITRES_COLLECT).format(nom=nom)
 		desc_tpl = "Rapportez {q} {nom} à la guilde" + (f" — on en trouve{ailleurs}" if pays_doc else "") + "."
@@ -401,7 +415,7 @@ def generer_quete(guild_doc: dict, parent_doc: dict, type_obj: str, cible, nivea
 	qmin = int(character_stats.QUETE_QTE_MIN)
 	qmax = max(qmin, int(character_stats.QUETE_QTE_MAX))
 	plage = qmax - qmin
-	facteur_diff = min(1.0, xp_unit / 40.0)  # ~40 XP/unité = cible difficile
+	facteur_diff = min(1.0, xp_unit / _xp_cible_difficile(monstre))
 	borne_haute = max(qmin, int(round(qmax - plage * facteur_diff)))
 	quantite = random.randint(qmin, borne_haute)
 
