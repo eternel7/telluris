@@ -80,7 +80,7 @@
 			{% endif %}
 			--portraitW: 100;
 			--portraitH: 100;
-			--dist-view: 20;   /* cases visibles par côté de la carte d'exploration */
+			--dist-view: 15;   /* cases visibles par côté de la carte d'exploration ; impair : le joueur au centre, 7 cases ENTIÈRES de chaque côté */
 			--map-anim: 600ms;   /* glissement de la carte à chaque pas */
 			--bg: #0e0e0e;
 			--surface: #181818;
@@ -4666,7 +4666,7 @@
 		if (document.body.classList.contains('en-traversee')) return;   // le navire avance seul
 		const vue = ev.currentTarget;
 		const r = vue.getBoundingClientRect();
-		const dist = parseFloat(getComputedStyle(vue).getPropertyValue('--dist-view')) || 20;
+		const dist = parseFloat(getComputedStyle(vue).getPropertyValue('--dist-view')) || 15;
 		const cible = caseCliquee(ev.clientX - r.left, ev.clientY - r.top, r.width, dist, POSITIONS);
 		if (cible.x === POSITIONS.x && cible.y === POSITIONS.y) return;
 		const surcharge = (typeof _currentCharge === 'function' && typeof _chargeMax !== 'undefined')

@@ -362,5 +362,16 @@ t('caseCliquee : le centre de la vue est la case du joueur, les bords (demi-case
 	}
 });
 
+t('caseCliquee : distView IMPAIR (15, la valeur de /play) — 7 cases entières de chaque côté', () => {
+	const pos = { x: 30, y: 40 };
+	const dv = 15, cote = 600, c = cote / dv;
+	assert.deepStrictEqual(caseCliquee(cote / 2, cote / 2, cote, dv, pos), pos);
+	assert.deepStrictEqual(caseCliquee(0, 0, cote, dv, pos), { x: pos.x - 7, y: pos.y - 7 });
+	assert.deepStrictEqual(caseCliquee(cote - 1, cote - 1, cote, dv, pos), { x: pos.x + 7, y: pos.y + 7 });
+	// La case du joueur va EXACTEMENT de 7c à 8c : ses deux bords tombent sur une limite de case.
+	assert.deepStrictEqual(caseCliquee(7 * c + 0.01, 7 * c + 0.01, cote, dv, pos), pos);
+	assert.deepStrictEqual(caseCliquee(7 * c - 0.01, 8 * c + 0.01, cote, dv, pos), { x: pos.x - 1, y: pos.y + 1 });
+});
+
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).`);
 process.exit(echecs ? 1 : 0);
