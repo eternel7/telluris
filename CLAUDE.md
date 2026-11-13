@@ -66,9 +66,10 @@ routers/
   pnj.py                 # /api/pnj/dialogue (+ /choix) : dialogues PNJ + services (dont `portail` de Notre-Dame, `enseignement` d'un maître, `vente` à prix fixe) ; /api/intro/raison
   traversee.py           # /api/traversee/avancer : une case de traversée maritime (rencontre, débarquement)
   contenants.py          # /api/contenant (+ /ranger, /sortir) : ouvrir un contenant du sac (porteur via _acteur, hors combat)
-  colonisation.py        # /api/colonisation/* : site, fonder (carte d'un pays), puis DANS l'implantation : ici, donner,
-                         #   feu, construire, poser, reparer, chantier/ouvrir|financer, palier, embauche/engager/renvoyer,
-                         #   association/demander|repondre|exclure|quitter
+  colonisation.py        # /api/colonisation/* : charte (bureau d'un maître de guilde), site, fonder (carte d'un pays),
+                         #   colons (auberge d'une cité), puis DANS l'implantation : ici, donner, feu, construire, poser,
+                         #   reparer, chantier/ouvrir|financer, palier, embauche/engager/renvoyer, caisse, negociant,
+                         #   defendre, taniere, rangements, guilde/*, association/*
 utils/
   auth.py                # JWT d'accès + get_current_user() ; ouvrir/fermer/révoquer la session
   session.py             # session (pur + middleware) : accès 15 min, rafraîchissement 30 j OPAQUE

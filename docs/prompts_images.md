@@ -202,6 +202,66 @@ Traduction des tags en `{posture}` :
 
 ---
 
+## 6. Lieux modèles génériques de la voie de colonisation
+
+Un par palier (docs/lore/systemes/20261112_voie_de_colonisation.md § 12.1), milieu tempéré neutre. La carte se **parcourt** (cases tirées de l'image) **et sert de carte de combat** quand le lieu est attaqué : vue verticale, phrase du § 0.5 quater, aucun personnage (§ 0.5 ter), aucun portail (§ 0.5 bis). Les **entrées** déclarées sur le modèle (`entrees`, `dev/gen_colonisation.py`) sont au milieu des bords — une au campement, deux au hameau, quatre ensuite : les portes peintes doivent y tomber. Les fortifications du palier (§ 4) sont **peintes**. Le joueur pose ses bâtiments sur les cases libres : l'image en laisse beaucoup. Pas de lieu de culte (§ 8).
+
+Enregistrement : `templates/resources/towns/colonie_<palier>_generique01.jpg` — `dev/gen_colonisation.py` remplace alors l'image provisoire du modèle ; refaire ensuite sa grille dans `/admin/lieux` (et vérifier `entrees`).
+
+| Palier | Format | Fichier | Entrées |
+|---|---|---|---|
+| Campement | 16:9 | `colonie_campement_generique01.jpg` | un seul sentier au milieu du bord inférieur |
+| Hameau | 3:2 | `colonie_hameau_generique01.jpg` | deux portes : milieu du bord inférieur et milieu du bord supérieur |
+| Bourgade | 3:2 | `colonie_bourgade_generique01.jpg` | quatre portes : milieu de chaque bord |
+| Village | 3:2 | `colonie_village_generique01.jpg` | quatre portes fortifiées : milieu de chaque bord |
+| Bourg | 5:4 | `colonie_bourg_generique01.jpg` | quatre portes : milieu de chaque bord |
+| Petite ville | 5:4 | `colonie_petite_ville_generique01.jpg` | quatre portes : milieu de chaque bord |
+| Ville | 5:4 | `colonie_ville_generique01.jpg` | quatre grandes portes : milieu de chaque bord, ponts sur les douves |
+
+### 6.1 Campement
+
+```
+Réalise l'image d'un campement de colons au cœur d'une clairière herbeuse d'une contrée tempérée, au format paysage 16:9. Au centre, un grand feu de camp cerclé de pierres ; autour, la tente du fondateur, deux ou trois tentes plus petites, des caisses, des sacs et des tonneaux empilés sous une bâche, un tas de bois coupé et un poste de guet en rondins. Aucune enceinte : le camp s'ouvre sur l'herbe, et un seul sentier de terre en sort, au milieu du bord inférieur de l'image. Quelques buissons et arbres isolés bordent la clairière. Vue parfaitement verticale, vue du dessus, sans perspective, pour qu'une grille de cases se pose sur la carte : les zones où l'on marche (terre battue, herbe rase, pavés) se distinguent nettement des bâtiments, des murs et des obstacles. De larges espaces dégagés restent libres entre les constructions. Aucun lieu de culte : ni église, ni chapelle, ni clocher. Aucun portail magique. Le lieu et la campagne autour sont entièrement vides de personnages, de cavaliers et d'animaux de trait. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
+```
+
+### 6.2 Hameau
+
+```
+Réalise l'image d'un jeune hameau de colons dans une plaine tempérée, au format paysage 3:2. Une palissade complète de pieux taillés en pointe l'entoure ; elle s'ouvre par deux portes de bois, l'une au milieu du bord inférieur de l'image, l'autre au milieu du bord supérieur, reliées par un chemin de terre. Dedans : quatre ou cinq maisons à colombages au toit de chaume, un enclos à bétail vide, des potagers, un puits et un feu central, avec de larges cours de terre battue et d'herbe entre les bâtiments. Dehors, des champs labourés et des prés. Vue parfaitement verticale, vue du dessus, sans perspective, pour qu'une grille de cases se pose sur la carte : les zones où l'on marche (terre battue, herbe rase, pavés) se distinguent nettement des bâtiments, des murs et des obstacles. De larges espaces dégagés restent libres entre les constructions. Aucun lieu de culte : ni église, ni chapelle, ni clocher. Aucun portail magique. Le lieu et la campagne autour sont entièrement vides de personnages, de cavaliers et d'animaux de trait. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
+```
+
+### 6.3 Bourgade
+
+```
+Réalise l'image d'une bourgade de colons dans une plaine tempérée, au format paysage 3:2. Une palissade doublée d'un fossé sec l'entoure, avec des tours de guet en bois aux angles ; quatre portes de bois flanquées de tours la percent, au milieu de chacun des quatre bords de l'image, et deux rues de terre se croisent au centre pour les relier. Autour d'une petite place dégagée : une dizaine de maisons à colombages, une grange, des ateliers sous appentis, des potagers et plusieurs terrains libres. Vue parfaitement verticale, vue du dessus, sans perspective, pour qu'une grille de cases se pose sur la carte : les zones où l'on marche (terre battue, herbe rase, pavés) se distinguent nettement des bâtiments, des murs et des obstacles. De larges espaces dégagés restent libres entre les constructions. Aucun lieu de culte : ni église, ni chapelle, ni clocher. Aucun portail magique. Le lieu et la campagne autour sont entièrement vides de personnages, de cavaliers et d'animaux de trait. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
+```
+
+### 6.4 Village
+
+```
+Réalise l'image d'un village fortifié de colons dans une plaine tempérée, au format paysage 3:2. Une enceinte de pierre maçonnée, basse mais continue, l'entoure ; quatre portes fortifiées, chacune entre deux tourelles, la percent au milieu de chacun des quatre bords de l'image. Deux rues de galets se croisent sur une place centrale avec une fontaine. Maisons de pierre et de colombages, potagers, vergers et cours dégagées emplissent l'enceinte ; dehors, des champs en lanières. Vue parfaitement verticale, vue du dessus, sans perspective, pour qu'une grille de cases se pose sur la carte : les zones où l'on marche (terre battue, herbe rase, pavés) se distinguent nettement des bâtiments, des murs et des obstacles. De larges espaces dégagés restent libres entre les constructions. Aucun lieu de culte : ni église, ni chapelle, ni clocher. Aucun portail magique. Le lieu et la campagne autour sont entièrement vides de personnages, de cavaliers et d'animaux de trait. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
+```
+
+### 6.5 Bourg
+
+```
+Réalise l'image d'un bourg fortifié dans une plaine tempérée, au format 5:4. Des murailles de pierre crénelées, rythmées de tours carrées, l'entourent ; quatre portes à herse les percent, au milieu de chacun des quatre bords de l'image. Au centre, une vaste place de marché dégagée avec une halle couverte ; des rues pavées en croix mènent aux portes, bordées de maisons serrées entrecoupées de cours, de jardins et de petites places. Une grande auberge et une maison commune donnent sur la place. Dehors, des champs. Vue parfaitement verticale, vue du dessus, sans perspective, pour qu'une grille de cases se pose sur la carte : les zones où l'on marche (terre battue, herbe rase, pavés) se distinguent nettement des bâtiments, des murs et des obstacles. De larges espaces dégagés restent libres entre les constructions. Aucun lieu de culte : ni église, ni chapelle, ni clocher. Aucun portail magique. Le lieu et la campagne autour sont entièrement vides de personnages, de cavaliers et d'animaux de trait. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
+```
+
+### 6.6 Petite ville
+
+```
+Réalise l'image d'une petite ville fortifiée dans une plaine tempérée, au format 5:4. De hautes murailles de pierre à tours rondes l'entourent ; quatre portes monumentales les percent, au milieu de chacun des quatre bords de l'image. Deux grandes rues pavées se croisent sur une place centrale ; des quartiers distincts s'organisent autour : quartier des artisans aux cours d'ateliers, quartier marchand aux halles et entrepôts, quartiers d'habitation aux jardins. Plusieurs places secondaires et des esplanades restent dégagées. Vue parfaitement verticale, vue du dessus, sans perspective, pour qu'une grille de cases se pose sur la carte : les zones où l'on marche (terre battue, herbe rase, pavés) se distinguent nettement des bâtiments, des murs et des obstacles. De larges espaces dégagés restent libres entre les constructions. Aucun lieu de culte : ni église, ni chapelle, ni clocher. Aucun portail magique. Le lieu et la campagne autour sont entièrement vides de personnages, de cavaliers et d'animaux de trait. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
+```
+
+### 6.7 Ville
+
+```
+Réalise l'image d'une ville fortifiée dans une plaine tempérée, au format 5:4. Un système défensif complet l'entoure : double enceinte de pierre aux tours massives, chemin de ronde, et douves en eau au pied du mur extérieur ; quatre grandes portes fortifiées, chacune avec un pont sur les douves, percent les murailles au milieu de chacun des quatre bords de l'image. Dedans, une grande place centrale, des rues pavées hiérarchisées, des quartiers denses entrecoupés de places, de jardins et d'esplanades dégagées, et une vaste cour libre devant une grande bâtisse à plusieurs ailes. Vue parfaitement verticale, vue du dessus, sans perspective, pour qu'une grille de cases se pose sur la carte : les zones où l'on marche (terre battue, herbe rase, pavés) se distinguent nettement des bâtiments, des murs et des obstacles. De larges espaces dégagés restent libres entre les constructions. Aucun lieu de culte : ni église, ni chapelle, ni clocher. Aucun portail magique. Le lieu et la campagne autour sont entièrement vides de personnages, de cavaliers et d'animaux de trait. Illustration de fantasy médiévale semi-réaliste, dans le style d'un RPG narratif 2D haut de gamme : peinture numérique détaillée, lumière naturelle, palette chaude et terreuse, proportions crédibles. Aucun texte, aucune lettre, aucune inscription, aucun panneau lisible, aucun logo, aucune signature, aucun filigrane. La vue est aérienne. C'est une battlemap.
+```
+
+---
+
 ## Annexe — versions d'origine
 
 ### MAGASIN

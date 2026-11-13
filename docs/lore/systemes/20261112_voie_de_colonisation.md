@@ -22,6 +22,7 @@ La voie de colonisation est le pendant de la voie urbaine (Chambre → Logement 
 - **Site** : une case libre d'un lieu de type pays.
 - **Distance** : au moins **6 cases** de toute Cité-État et **4 cases** d'une autre implantation.
 - **Charte** : **4 or**, payée au maître de guilde d'aventuriers de la cité la plus proche. À égale distance, toutes les cités concernées se valent.
+- **Où l'acheter** (Auteur, 13/11) : au **bureau du maître de guilde**, avant de partir ; elle porte le nom de sa cité et ne vaut que sur une case dont cette cité est la plus proche. Une charte à la fois, remise à la fondation.
 - **Prérequis** : **rang C** de la guilde au minimum.
 - **Nombre** : une implantation par pays et par personnage.
 - **Visibilité** : les autres joueurs la voient dès le campement.
@@ -298,15 +299,15 @@ Précise le § 10. Tous voient la même carte et les mêmes icônes.
 
 | En jeu | Reste à faire |
 |---|---|
-| Fonder : case, distances, rang, charte, une par pays (§ 2) | — |
+| Fonder : case, distances, rang, une par pays ; charte achetée au bureau d'un maître de guilde, valable près de sa cité (§ 2, Auteur 13/11) | — |
 | Fiche de site, lue sur la carte (§ 3) | — |
 | Sept paliers, seuils, chantier de statut (§ 4) | — |
-| Sécurité et moral dérivés, feu à deux réglages (§ 5) | nuit et repos au feu |
-| Menace par étapes, attaque résolue en l'absence, rattrapage plafonné (§ 6) | attaque jouée en combat, tanière à vider |
+| Sécurité et moral dérivés, feu à deux réglages, repos au feu (§ 5) | — |
+| Menace par étapes, attaque jouée aux côtés des gardes ou résolue en l'absence, tanière à vider, rattrapage plafonné (§ 6) | — |
 | Quatre stocks, santé (§ 7) | — |
-| PNJ nommés, population comptée, bâtiments repères (§ 8) | boutique, atelier, auberge, étable et leurs échanges |
-| — | guilde du joueur (§ 9) |
-| Visiteur, soutien, associé ; dons, besoins, financement, pose (§ 10) | colons escortés, coffre d'associé, prix de faveur |
-| Lieu modèle en lien pur, choix par tags, pose libre, changement de palier, panneau (§ 12) | images et grilles définitives des modèles |
+| PNJ nommés, population comptée, repères ; boutique, atelier, auberge, étable où l'on entre ; vente de la production aux boutiques du lieu, négociant et son personnel (§ 8) | — |
+| Guilde du joueur : échelons, maison, membres fondateurs, recrues, expéditions, matériel commun (§ 9) | — |
+| Visiteur, soutien, associé ; dons, besoins, financement, pose, prix de faveur, entrepôt commun, coffre, colons escortés (§ 10) | — |
+| Lieu modèle en lien pur, choix par tags, pose libre, changement de palier, panneau (§ 12) | images définitives des modèles génériques (prompts : `docs/prompts_images.md` § 6) et leurs grilles |
 
 Valeurs de départ ajoutées avec le moteur, à régler dans `rules:colonisation` : prix et capacités des bâtiments, fortifications, production des métiers, consommation, barèmes de sécurité et de moral, probabilités de la menace.

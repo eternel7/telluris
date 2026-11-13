@@ -1233,3 +1233,13 @@ def test_des_colons_escortes_depuis_une_cite_proche_s_installent_a_l_arrivee():
 	# un convoi périmé s'est dispersé
 	col.recruter_colons(b, imp, {"_id": "lieu:autre"}, 1, reg, now=20)
 	assert col.deposer_colons(b, imp, reg, [], now=convoi["expire_at"] + 20) == 0 and "colons" not in b
+
+
+def test_l_image_definitive_d_un_modele_remplace_la_provisoire(monkeypatch):
+	dump = {d["_id"]: copy.deepcopy(d) for d in DOCS}
+	monkeypatch.setattr(gen, "image_definitive", lambda p: "colonie_hameau_generique01.jpg" if p == "hameau" else None)
+	[maj] = gen.generer(dump)
+	assert maj["_id"] == "lieu:modele_colonie_hameau" and maj["image"] == "colonie_hameau_generique01.jpg"
+	assert maj["cells"] == dump[maj["_id"]]["cells"]                         # seul le champ `image` change
+	dump[maj["_id"]]["image"] = "retouchee.jpg"                              # posée à la main : on n'y touche pas
+	assert gen.generer(dump) == []

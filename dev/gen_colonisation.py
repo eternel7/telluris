@@ -91,15 +91,32 @@ SOCLE = {
 
 # ── Lieux modèles génériques : (palier, image provisoire, largeur, hauteur) ──────────
 # La grille grandit avec le palier (§ 12.1) ; ses proportions suivent celles de l'image.
+# Proportions = celles des prompts (docs/prompts_images.md § 6) : 16:9, 3:2, puis 5:4.
 MODELES = [
 	("campement", "clairiere_du_charbonnier.jpg", 22, 12),
 	("hameau", "hameau.png", 21, 14),
 	("bourgade", "hameau.png", 27, 18),
 	("village", "hameau.png", 33, 22),
-	("bourg", "fortifications.png", 32, 28),
-	("petite_ville", "fortifications.png", 40, 35),
-	("ville", "fortifications.png", 48, 42),
+	("bourg", "fortifications.png", 35, 28),
+	("petite_ville", "fortifications.png", 45, 36),
+	("ville", "fortifications.png", 55, 44),
 ]
+# Image DÉFINITIVE d'un modèle générique (prompts § 6) : dès qu'elle est sur le disque, elle
+# remplace la provisoire — dans un modèle neuf, ou dans un modèle du dump qui porte encore la
+# provisoire (seul son champ `image` change). La grille se refait ensuite sur l'image (/admin/lieux).
+DOSSIERS_IMAGES = ("towns", "maps", "battle_maps")
+
+
+def image_definitive(palier_id: str) -> str | None:
+	for dossier in DOSSIERS_IMAGES:
+		chemin = os.path.join(RACINE, "templates", "resources", dossier)
+		try:
+			noms = sorted(f for f in os.listdir(chemin) if f.startswith(f"colonie_{palier_id}_generique"))
+		except OSError:
+			noms = []
+		if noms:
+			return noms[0]
+	return None
 
 
 def modele(palier: dict, image: str, w: int, h: int) -> dict:
@@ -173,9 +190,15 @@ def generer(par_id: dict) -> list:
 	# 2. Les modèles génériques qui manquent.
 	paliers = {p["id"]: p for p in valeur.get("paliers") or []}
 	for palier_id, image, w, h in MODELES:
-		doc = modele(paliers[palier_id], image, w, h)
-		if doc["_id"] not in par_id:
+		definitive = image_definitive(palier_id)
+		doc = modele(paliers[palier_id], definitive or image, w, h)
+		existant = par_id.get(doc["_id"])
+		if existant is None:
 			docs.append(doc)
+		elif definitive and existant.get("image") == image:
+			maj = {k: v for k, v in existant.items() if k != "_rev"}
+			maj["image"] = definitive
+			docs.append(maj)
 	return docs
 
 
@@ -198,7 +221,7 @@ def controler(docs: list, par_id: dict) -> None:
 					assert set(b.get("postes") or {}) <= metiers, (b["id"], set(b.get("postes") or {}) - metiers)
 			assert {r["stock"] for r in v["depots"]} <= set(v["stocks"])
 		else:
-			assert d["_id"] not in par_id, f"{d['_id']} existe déjà"
+			assert d["_id"] not in par_id or d["image"].startswith("colonie_"), f"{d['_id']} existe déjà"
 			assert colonisation.modele_valide(d), d["_id"]
 			assert any(os.path.exists(os.path.join(RACINE, "templates", "resources", r, d["image"]))
 					   for r in ("towns", "maps", "battle_maps")), d["image"]
