@@ -606,7 +606,7 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
 	gap: 12px;
 	margin: 10px;
 }
-.tour-label { font-family: 'Cinzel', serif; font-size: 12px; color: #c9c2b4; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
+.tour-label { display: inline-flex; align-items: center; font-family: 'Cinzel', serif; font-size: 12px; color: #c9c2b4; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
 .tour-label span { color: var(--accent-color); font-weight: bold; }
 /* Bandeau sur UNE ligne qui DÉFILE, jamais un retour à la ligne : passé quelques ennemis,
    le wrap faisait grandir le header en hauteur et repoussait la carte hors de l'écran.
@@ -1069,18 +1069,19 @@ html.vue-portrait .viewport .controls-carte [data-sdx="0"]  { grid-row: 2; align
 html.vue-portrait .viewport .controls-carte [data-sdx="1"]  { grid-row: 3; align-self: end; }
 html.vue-portrait .viewport .controls-carte .rot-btn[data-sens="-1"] { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
 html.vue-portrait .viewport .controls-carte .rot-btn[data-sens="1"]  { grid-column: 1; grid-row: 3; justify-self: start; align-self: end; }
-/* Sablier dans le bandeau de tour (mode carte) : rond, au gabarit de l'écrou ⚙️ du même
-   bandeau. Hors du pavé, plus aucune règle `.controls .btn` ne le dessine. */
-.passer-tour { display: inline-flex; flex-shrink: 0; }
+/* Sablier dans le libellé « Tour N » (mode carte) : petit, collé au numéro, pour former UN
+   groupe avec lui et non un badge de plus du bandeau. Hors du pavé, plus aucune règle
+   `.controls .btn` ne le dessine. */
+.passer-tour { display: inline-flex; flex-shrink: 0; margin-left: 8px; }
 .passer-tour:empty { display: none; }
 .passer-tour #btn-passer {
-	width: 32px; height: 32px; border-radius: 50%; padding: 0;
+	width: 26px; height: 26px; border-radius: 50%; padding: 0;
 	display: flex; align-items: center; justify-content: center;
 	background: #2a2a36; border: 1.5px solid var(--border-color); cursor: pointer;
 }
 .passer-tour #btn-passer:hover:not(:disabled) { border-color: var(--accent-color); }
 .passer-tour #btn-passer:disabled { opacity: 0.35; cursor: default; }
-.passer-tour #btn-passer > svg { width: 18px; height: 18px; }
+.passer-tour #btn-passer > svg { width: 15px; height: 15px; }
 /* Séparateur du menu ⚙️ (comme `.affichage-sep` de /play) : pavé d'un côté, sons de l'autre. */
 .reglages-sep { display: block; height: 1px; margin: 4px 6px; background: var(--border-color); }
 /* ── Barre d'action : cases à positions STABLES ────────────────────────────────── */
@@ -1487,10 +1488,10 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 		</div>
 		<!-- Tour header + Initiative strip -->
 		<div class="tour-header">
-			<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span><span id="furtif-badge" style="visibility:hidden" title="Furtif : les ennemis marqués d'un œil barré ne vous ont pas repéré et ne viennent pas à vous. Frapper au corps à corps vous révèle à tous ; une attaque à distance laisse seulement à la cible une chance de vous repérer.">🥷</span></span>
-			<!-- Mode « Flèches sur la carte » : le sablier `#btn-passer` est DÉPLACÉ ici
-			     (`appliquerModePave`), à côté du numéro de tour. Vide en mode flottant. -->
-			<span class="passer-tour" id="passer-tour"></span>
+			<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span><!-- Mode « Flèches sur la carte » : le sablier `#btn-passer` est DÉPLACÉ ici
+			     (`appliquerModePave`), DANS le libellé, collé au numéro de tour — à part, il se
+			     lisait comme un badge de plus du bandeau d'initiative. Vide en mode flottant.
+			--><span class="passer-tour" id="passer-tour"></span><span id="furtif-badge" style="visibility:hidden" title="Furtif : les ennemis marqués d'un œil barré ne vous ont pas repéré et ne viennent pas à vous. Frapper au corps à corps vous révèle à tous ; une attaque à distance laisse seulement à la cible une chance de vous repérer.">🥷</span></span>
 			<div id="initiative-strip">
 				{% for actor_id in combat.ordre_initiative %}
 					{% set active = 'active' if loop.index0 == combat.acteur_courant_index else '' %}
