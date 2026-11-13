@@ -1259,6 +1259,11 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			"access" : access,
 			"carte_voile": carte_voile,
 			"passages": passages,
+			# Déplacement au clic (mode ⚙️) : la grille ENTIÈRE, car le client calcule chemin et
+			# cases joignables (aucune règle de marche côté serveur, scripts/deplacement.js).
+			"carte_clic": ({"cells": grid_doc["cells"], "nav": grid_doc.get("nav") or {}}
+				if dimensions and grid_doc.get("cells") else None),
+			"clic_portee": character_stats.CLIC_PORTEE_MAX,
 			"traces": traces_ici,
 			# Règle de marche du pavé : `>= 1` en vol, `=== 1` à pied (scripts/deplacement.js).
 			"volant": vol_util.vol_actif(character),
