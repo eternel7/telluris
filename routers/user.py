@@ -594,6 +594,14 @@ def _ouvrir_donjon_a_etages(character: dict, donjon_doc: dict, lieu_doc: dict,
 			return c["_id"]
 	compagnons = recrutement.groupe_effectif(character, get_doc)
 	montures_groupe = montures.montures_effectives(character, get_doc)
+	# SECOURS : des aventuriers attendus sur ce PREMIER étage y sont retrouvés (rendez-vous de
+	# donjon). Character d'abord (autoritatif, 409), docs `protege:*` ensuite.
+	retrouves = escorte.rencontres_en_combat(character, lieu_doc["_id"], get_doc)
+	if retrouves:
+		if save_doc(character) is None:
+			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		for doc in retrouves:
+			save_doc(doc)
 	proteges_groupe = escorte.proteges_effectifs(character, get_doc)
 	profils = find_docs({"type": "profil"}) or []
 	monstres = donjon.monstres_de_salle(

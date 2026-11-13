@@ -626,6 +626,25 @@ ESCORTE_PROGENITURE_RELATION_MIN: int = 60
 ESCORTE_GUILDE_PROBA: float = 0.25
 ESCORTE_PROGENITURE_XP: int = 25
 
+# Escortes de SECOURS (utils/secours.py) — le comptoir de la guilde confie le sauvetage de 2 à 3
+# aventuriers en péril autour de la cité ou dans un donjon proche (bloc `services.escorte.secours`).
+# PROBA : tirage à l'entrée du comptoir (le bloc peut la surcharger), APRÈS le registre des
+#   disparitions s'il n'a rien rendu.
+# XP : par NIVEAU du lieu de péril (`niveau_min` de la salle, 1 pour un lieu explorable) ; la
+#   prime en cuivre en dérive par QUETE_CUIVRE_PAR_XP. `recompenses.xp` du bloc surcharge.
+# DELAI_H : ils ne tiendront pas indéfiniment — passé ce délai depuis l'acceptation, la quête
+#   échoue SANS sanction de réputation (on n'accuse pas le joueur d'un délai écoulé). 0 = aucun délai.
+# PV_DEPART : fraction des PV max avec laquelle on les retrouve (blessés : c'est le « péril »).
+# FENETRE_H : un même lieu ne peut porter qu'UN secours par fenêtre (id stable sur la tranche).
+# NB_MIN / NB_MAX : taille du groupe à secourir.
+SECOURS_PROBA: float = 0.25
+SECOURS_XP: int = 20
+SECOURS_DELAI_H: int = 48
+SECOURS_PV_DEPART: float = 0.5
+SECOURS_FENETRE_H: int = 24
+SECOURS_NB_MIN: int = 2
+SECOURS_NB_MAX: int = 3
+
 # ── Tavernes (tables, tableau d'information, nuit) ───────────────────────────────
 # Une auberge (`categorie: "auberge"` ou tag `taverne`) offre trois choses : des TABLES
 # où les joueurs se parlent, un TABLEAU d'information où l'on épingle une annonce, et la
@@ -1134,6 +1153,13 @@ def current_world_variables() -> dict:
 		"ESCORTE_PROGENITURE_RELATION_MIN": ESCORTE_PROGENITURE_RELATION_MIN,
 		"ESCORTE_GUILDE_PROBA": ESCORTE_GUILDE_PROBA,
 		"ESCORTE_PROGENITURE_XP": ESCORTE_PROGENITURE_XP,
+		"SECOURS_PROBA": SECOURS_PROBA,
+		"SECOURS_XP": SECOURS_XP,
+		"SECOURS_DELAI_H": SECOURS_DELAI_H,
+		"SECOURS_PV_DEPART": SECOURS_PV_DEPART,
+		"SECOURS_FENETRE_H": SECOURS_FENETRE_H,
+		"SECOURS_NB_MIN": SECOURS_NB_MIN,
+		"SECOURS_NB_MAX": SECOURS_NB_MAX,
 		"AUBERGE_NUIT_COUT_CUIVRE": AUBERGE_NUIT_COUT_CUIVRE,
 		"TRAVERSEE_PAS_MS": TRAVERSEE_PAS_MS,
 		"PORTAIL_FENETRE_MINUTES": PORTAIL_FENETRE_MINUTES,
@@ -1237,6 +1263,8 @@ def load_world_variables() -> dict:
 	global ESCORTE_MORT_DEFINITIVE
 	global ESCORTE_PROGENITURE_PROBA, ESCORTE_PROGENITURE_RELATION_MIN
 	global ESCORTE_GUILDE_PROBA, ESCORTE_PROGENITURE_XP
+	global SECOURS_PROBA, SECOURS_XP, SECOURS_DELAI_H, SECOURS_PV_DEPART
+	global SECOURS_FENETRE_H, SECOURS_NB_MIN, SECOURS_NB_MAX
 	global AUBERGE_NUIT_COUT_CUIVRE, AUBERGE_NUIT_PASSES_ATELIER, TRAVERSEE_PAS_MS
 	global PORTAIL_FENETRE_MINUTES, PORTAIL_SEUILS_OUVERTS
 	global MAREE_PERIODE_S, MAREE_FENETRE_S, MAREE_REFERENCE_EPOCH
@@ -1506,6 +1534,14 @@ def load_world_variables() -> dict:
 	ESCORTE_PROGENITURE_RELATION_MIN = int(v.get("ESCORTE_PROGENITURE_RELATION_MIN", ESCORTE_PROGENITURE_RELATION_MIN))
 	ESCORTE_GUILDE_PROBA = float(v.get("ESCORTE_GUILDE_PROBA", ESCORTE_GUILDE_PROBA))
 	ESCORTE_PROGENITURE_XP = max(0, int(v.get("ESCORTE_PROGENITURE_XP", ESCORTE_PROGENITURE_XP)))
+	SECOURS_PROBA = float(v.get("SECOURS_PROBA", SECOURS_PROBA))
+	SECOURS_XP = max(0, int(v.get("SECOURS_XP", SECOURS_XP)))
+	SECOURS_DELAI_H = max(0, int(v.get("SECOURS_DELAI_H", SECOURS_DELAI_H)))
+	# Jamais 0 PV : un protégé retrouvé mort ferait échouer la quête sans un coup porté.
+	SECOURS_PV_DEPART = min(1.0, max(0.05, float(v.get("SECOURS_PV_DEPART", SECOURS_PV_DEPART))))
+	SECOURS_FENETRE_H = max(1, int(v.get("SECOURS_FENETRE_H", SECOURS_FENETRE_H)))
+	SECOURS_NB_MIN = max(1, int(v.get("SECOURS_NB_MIN", SECOURS_NB_MIN)))
+	SECOURS_NB_MAX = max(SECOURS_NB_MIN, int(v.get("SECOURS_NB_MAX", SECOURS_NB_MAX)))
 	AUBERGE_NUIT_COUT_CUIVRE = max(0, int(v.get("AUBERGE_NUIT_COUT_CUIVRE", AUBERGE_NUIT_COUT_CUIVRE)))
 	# Plancher à 150 ms : en dessous, l'animation de caméra (`--map-anim`) n'a plus le temps
 	# de montrer la case avant la suivante.

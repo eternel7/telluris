@@ -159,6 +159,8 @@ utils/
                          #   équipement porté, sac propre), un seul recruteur, XP/part → original par compteurs, mort = sac au sol
   scriptorium.py         # scriptorium (pur) : écrit personnel transportable + livres de contenu générés au tick d'atelier
   escorte.py             # escortes (pur) : personne à retrouver, à protéger, à déposer vivante
+  secours.py             # secours (pur) : aventuriers en péril autour de la cité / dans un donjon proche, 4ᵉ source
+                         #   d'escorte (comptoir), périmètre DÉRIVÉ opt-out, délai, rendez-vous EN COMBAT de donjon
   offres.py              # PLUSIEURS offres écrites par service (`offres`, pur) : vue du PNJ réduite au bloc retenu
                          #   (quête active, sinon tirée à l'entrée), épreuve de rang au seul cran du dessous ; condition `offre`
   expedition.py          # capacités MISES EN COMMUN par le groupe (pur) : membres, outil partagé, négociateur

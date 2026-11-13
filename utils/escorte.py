@@ -195,6 +195,11 @@ def bloc_rencontre(spec: dict, get_doc_fn) -> dict | None:
 	if not rdv or not rdv.get("lieu"):
 		return None
 	bloc = {"lieu": rdv["lieu"]}
+	if rdv.get("donjon"):
+		# Rendez-vous DANS un combat de donjon (secours, `rencontres_en_combat`) : la salle n'a
+		# ni zone ni marche d'exploration, aucune case à tirer — on la retrouve en y entrant.
+		bloc["donjon"] = rdv["donjon"]
+		return bloc
 	pos = position_de_rencontre(get_doc_fn(rdv["lieu"]), rdv.get("zones"))
 	if pos is not None:
 		bloc["position"] = pos
@@ -259,7 +264,7 @@ def generer_escorte_authoree(spec: dict, giver_doc: dict, find_docs_fn, get_doc_
 	# que la course écrite — `"B"` seul vaut la cité du donneur. Absent ⇒ rien, comme avant.
 	from utils import transport
 	recompenses.update(transport.rang_guilde_recompense(rec.get("rang_guilde"), giver_doc))
-	return {
+	offre = {
 		"id": spec.get("id") or ("quete:escorte_" + uuid.uuid4().hex[:12]),
 		"type_quete": "escorte",
 		"titre": spec.get("titre") or f"Escorte : {qui}",
@@ -280,6 +285,13 @@ def generer_escorte_authoree(spec: dict, giver_doc: dict, find_docs_fn, get_doc_
 		"recompenses": recompenses,
 		"progress": 0,
 	}
+	# Secours (utils/secours.py) : marque de la source (flag de dialogue `secours_offert`) et
+	# délai, posé en `expire_at` à l'acceptation. Absents ⇒ escorte d'avant.
+	if spec.get("type_secours"):
+		offre["type_secours"] = True
+	if spec.get("expire_h"):
+		offre["expire_h"] = int(spec["expire_h"])
+	return offre
 
 
 def _indice(giver_doc: dict, dest_id: str, find_docs_fn, get_doc_fn) -> dict:
@@ -600,13 +612,15 @@ def donneur_present(paires: list) -> tuple:
 	`paires` = les `(entrée du lieu, doc PNJ)` présents, dans l'ordre du lieu.
 
 	⚠️ Existe pour le CUMUL des présences (miroir de `transport.donneur_present`), avec les
-	TROIS branches de `poser_escorte_offerte` comme ordre de priorité — écrite, puis
-	progéniture, puis registre : ce qu'un seul PNJ arbitrait entre ses propres services se
+	QUATRE branches de `poser_escorte_offerte` comme ordre de priorité — écrite, puis
+	progéniture, puis registre, puis secours : ce qu'un seul PNJ arbitrait entre ses propres services se
 	tranche maintenant entre plusieurs, et le choisir au hasard de l'ordre de la liste
 	rendrait muette la mission écrite d'un lieu qui tient aussi un registre."""
+	from utils import secours
 	for porte in (lambda e, d: offre_spec(d),
 				  lambda e, d: progeniture_de(e, d),
-				  lambda e, d: recherche_spec(d)):
+				  lambda e, d: recherche_spec(d),
+				  lambda e, d: secours.secours_spec(d) is not None):
 		for entree, pnj_doc in paires:
 			if porte(entree, pnj_doc):
 				return entree, pnj_doc
@@ -616,7 +630,8 @@ def donneur_present(paires: list) -> tuple:
 def poser_escorte_offerte(character: dict, lieu_doc: dict, find_docs_fn, get_doc_fn,
 						  rand_fn=random.random, pnj_doc: dict | None = None,
 						  entree: dict | None = None, choix_fn=random.choice,
-						  now: int | None = None) -> bool:
+						  now: int | None = None, connexions_fn=None,
+						  generer_fn=None) -> bool:
 	"""Tire (une seule fois par entrée) l'escorte que ce lieu peut confier et la pose dans le
 	champ transitoire `escorte_offerte` (mute sans save). Miroir de
 	`transport.poser_transport_offert`, avec TROIS branches ordonnées au lieu de deux :
@@ -626,7 +641,9 @@ def poser_escorte_offerte(character: dict, lieu_doc: dict, find_docs_fn, get_doc
 	2. **progéniture** — le tenancier se saisit lui-même du cas de son enfant. Exige la
 	   CONFIANCE (`confiance_suffisante`) en plus du tirage ;
 	3. **registre de guilde** — `services.escorte.recherche` : le comptoir recense les
-	   disparitions de toute la cité.
+	   disparitions de toute la cité ;
+	4. **secours** — `services.escorte.secours` (utils/secours.py) : des aventuriers en péril
+	   autour de la cité. Tenté AUSSI quand le registre du même comptoir n'a rien rendu.
 
 	No-op si le tirage a déjà été fait pour ce lieu → un refresh ne re-tire pas, ressortir et
 	rentrer re-tire. Aucune offre tant qu'une escorte est en cours (pas d'empilement).
@@ -640,7 +657,9 @@ def poser_escorte_offerte(character: dict, lieu_doc: dict, find_docs_fn, get_doc
 	spec = offre_spec(pnj_doc)
 	bloc = progeniture_de(entree, pnj_doc)
 	recherche = recherche_spec(pnj_doc)
-	if not lieu_id or not (spec or bloc or recherche):
+	from utils import secours
+	bloc_secours = secours.secours_spec(pnj_doc)
+	if not lieu_id or not (spec or bloc or recherche or bloc_secours is not None):
 		# Lieu sans donneur : on nettoie l'offre restée sur l'ancien lieu.
 		if (character.get("escorte_offerte") or {}).get("lieu"):
 			character["escorte_offerte"] = None
@@ -663,8 +682,13 @@ def poser_escorte_offerte(character: dict, lieu_doc: dict, find_docs_fn, get_doc
 				quete = generer_escorte_progeniture(character, lieu_doc, bloc, lieu_doc,
 													find_docs_fn, get_doc_fn, pnj_doc, choix_fn)
 		else:
-			quete = _offre_du_registre(character, lieu_doc, recherche, find_docs_fn, get_doc_fn,
-									   rand_fn, choix_fn)
+			if recherche:
+				quete = _offre_du_registre(character, lieu_doc, recherche, find_docs_fn,
+										   get_doc_fn, rand_fn, choix_fn)
+			if quete is None and bloc_secours is not None:
+				quete = secours.offre_secours(character, lieu_doc, bloc_secours, find_docs_fn,
+											  get_doc_fn, connexions_fn, rand_fn, choix_fn,
+											  generer_fn, now)
 	character["escorte_offerte"] = {"lieu": lieu_id, "quete": quete}
 	return True
 
@@ -737,6 +761,11 @@ def accepter_escorte(character: dict, offre: dict, get_doc_fn,
 		"progress": 0,
 		"accepte_at": now,
 	}
+	if offre.get("type_secours"):
+		snapshot["type_secours"] = True
+	if int(offre.get("expire_h", 0) or 0) > 0:
+		# Délai PARESSEUX (`secours.expirer`, au déplacement et à l'entrée du dialogue).
+		snapshot["expire_at"] = now + int(offre["expire_h"]) * 3600
 	character.setdefault("quetes_actives", []).append(snapshot)
 	character["escorte_offerte"] = None
 	docs = []
@@ -856,6 +885,14 @@ def creer_protege(spec_p: dict, character: dict, quete_id: str, get_doc_fn,
 	derived = _derives_de(protege)
 	protege["currentPV"] = derived.pv_max
 	protege["currentPM"] = derived.pm_max
+	# `pv_depart` (fraction des PV max, secours) : on la retrouve BLESSÉE. Jamais 0 — une
+	# personne retrouvée morte ferait échouer la quête sans un coup porté. Absent ⇒ PV pleins.
+	try:
+		frac = float(spec_p.get("pv_depart") or 0)
+	except (TypeError, ValueError):
+		frac = 0.0
+	if 0 < frac < 1:
+		protege["currentPV"] = max(1, round(derived.pv_max * frac))
 	return protege
 
 
@@ -1042,7 +1079,30 @@ def _rendez_vous_ici(q: dict, lieu_id: str, position: dict | None) -> bool:
 	rdv = (q.get("objectif") or {}).get("rencontre") or {}
 	if not rdv.get("lieu") or rdv["lieu"] != lieu_id:
 		return False
+	# Un rendez-vous de DONJON se joue en combat (`rencontres_en_combat`), jamais par un pas.
+	if rdv.get("donjon"):
+		return False
 	return chasse.dans_zone_chasse(rdv, position)
+
+
+def rencontres_en_combat(character: dict, lieu_id: str, get_doc_fn,
+						 now: int | None = None) -> list:
+	"""Rendez-vous DANS un combat de donjon : les escortes dont `objectif.rencontre` porte un
+	`donjon` et vise la salle / l'étage `lieu_id` y retrouvent leurs personnes. Appelé à
+	l'ouverture d'une descente, au passage d'étage et au lancement d'une salle gardée.
+
+	Mute le character sans save (index `proteges`, `rencontre_at`) ; renvoie les docs
+	`protege:*` NÉS ici — ANNEXES, à persister APRÈS le save autoritatif du personnage, puis à
+	injecter dans le combat. Idempotent (`incarner` est un no-op une fois `rencontre_at` posé)."""
+	docs = []
+	if not lieu_id:
+		return docs
+	for q in escortes_actives(character):
+		rdv = (q.get("objectif") or {}).get("rencontre") or {}
+		if q.get("rencontre_at") or not rdv.get("donjon") or rdv.get("lieu") != lieu_id:
+			continue
+		docs.extend(incarner(character, q, get_doc_fn, now))
+	return docs
 
 
 def traiter_deplacement(character: dict, lieu_doc: dict, position: dict | None,
@@ -1065,8 +1125,14 @@ def traiter_deplacement(character: dict, lieu_doc: dict, position: dict | None,
 	lieu_id = (lieu_doc or {}).get("_id")
 	rencontres: list = []
 	depose = None
+	# Secours dont le délai est passé (paresseux, comme les courses) : échec SANS sanction.
+	from utils import secours
+	echus, liberes = secours.expirer(character, now, get_doc_fn)
+	for doc in liberes:
+		save_doc_fn(doc)
+	secours_echoues = [{"titre": q.get("titre", "—")} for q in echus]
 	if not lieu_id:
-		return {"rencontres": rencontres, "depose": depose}
+		return {"rencontres": rencontres, "depose": depose, "secours_echoues": secours_echoues}
 
 	for q in list(escortes_actives(character)):
 		# (a) On les retrouve.
@@ -1106,4 +1172,4 @@ def traiter_deplacement(character: dict, lieu_doc: dict, position: dict | None,
 			"relation": recap["relation"],
 			"lieu": lieu_id,
 		}
-	return {"rencontres": rencontres, "depose": depose}
+	return {"rencontres": rencontres, "depose": depose, "secours_echoues": secours_echoues}
