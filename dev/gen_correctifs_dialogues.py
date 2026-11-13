@@ -168,6 +168,13 @@ def borin(doc):
 	texte(doc, "carte_remplacee", "sans même chercher ton nom", "sans même chercher votre nom")
 	# Le joueur vouvoie Borin partout ailleurs (« Vous vous souvenez de moi ? »).
 	libelle(doc, "morvan_propose", "details", "« Et toi, tu y crois ? »", "« Et vous, vous y croyez ? »")
+	# Secours (gen_secours, nœuds communs à tous les comptoirs, écrits au « vous ») : Borin
+	# tutoie là aussi ; la narration et les libellés du joueur restent au « vous ».
+	texte(doc, "secours_details", "« Ne traînez pas : passé quelques jours",
+		  "« Ne traîne pas : passé quelques jours")
+	texte(doc, "secours_acceptee", "« C'est inscrit à votre nom, {prenom}. »",
+		  "« C'est inscrit à ton nom, {prenom}. »")
+	texte(doc, "secours_acceptee", "c'est à vous de les couvrir", "c'est à toi de les couvrir")
 
 
 # ── Gautier : la scène du retour ne se rejoue plus après le départ du convoi ───────

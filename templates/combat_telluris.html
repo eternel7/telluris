@@ -41,9 +41,10 @@
 		--view-width: 100vw;
 		--step: 24px;
 		--max-height: 9;
-		/* Distance (en --step) du joueur au bas du viewport. 1 = bande de sol derrière le
-		   joueur (historique) ; 0 = joueur collé en bas, viewport raccourci d'1 --step. */
-		--floor: 0;
+		/* Distance (en --step) du joueur au bas du viewport : 1 = une rangée de cases visible
+		   DERRIÈRE le membre joué (en portrait, une colonne à sa gauche). Piloté en JS (FLOOR) ;
+		   valeur de repli avant le script. */
+		--floor: 1;
 		/* Taille de la grille en cases — écrasée au chargement depuis GRID.dims.
 		   L'image de fond doit couvrir exactement dims.x × dims.y cases pour
 		   que la case (x,y) corresponde au bon pixel (défaut = repli grille ouverte). */
@@ -222,7 +223,6 @@ html.vue-portrait #tokens-layer {
    à gauche. Ses `data-sdx/sdy` ne changent pas (cf. screenToWorld). Le sablier, lui, est
    remis droit. */
 html.vue-portrait #move-controls { transform: rotate(90deg); }
-html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); }
 /* Ancre commune aux jetons : left/bottom FIXES, l'écart à l'acteur actif est porté par
    `transform` (posé en JS par _placerToken). C'est ce qui rend le pas animable sans
    relayout — et le `transition` ci-dessous n'anime que si le jeton SURVIT d'un rendu
@@ -606,7 +606,7 @@ html.vue-portrait #move-controls #btn-passer > svg { transform: rotate(-90deg); 
 	gap: 12px;
 	margin: 10px;
 }
-.tour-label { font-family: 'Cinzel', serif; font-size: 12px; color: #c9c2b4; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
+.tour-label { display: inline-flex; align-items: center; font-family: 'Cinzel', serif; font-size: 12px; color: #c9c2b4; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
 .tour-label span { color: var(--accent-color); font-weight: bold; }
 /* Bandeau sur UNE ligne qui DÉFILE, jamais un retour à la ligne : passé quelques ennemis,
    le wrap faisait grandir le header en hauteur et repoussait la carte hors de l'écran.
@@ -1004,6 +1004,92 @@ html.vue-portrait .bv-ligne.kg .bv-jauge { height: 5px; }
 	color: var(--accent-color); font-size: 14px; letter-spacing: 0.3em;
 	cursor: move; user-select: none; touch-action: none;
 }
+.move-section[hidden] { display: none; }
+/* Mode « 🗺️ Flèches sur la carte » (menu ⚙️, comme /play) : `#move-controls` est DÉPLACÉ dans
+   `#viewport` (`appliquerModePave`, jamais cloné) et prend `controls-carte` — chaque flèche sur
+   un bord ou un coin, mêmes règles que `.viewport .controls-carte` de play_town. Les flèches
+   du bord ARRIÈRE (reculer, deux pivots) se centrent sur la rangée derrière le joueur
+   (`--floor`) : elles ne recouvrent plus son jeton. Le centre (`.move-spacer`) est masqué ;
+   « Passer le tour » vit dans le bandeau, à côté du numéro de tour.
+   ⚠️ Calque `pointer-events:none` : les jetons dessous restent cliquables, seuls les boutons
+   rétablissent le clic. */
+.viewport .controls-carte {
+	position: absolute; inset: 0; z-index: 20;
+	--fleche: clamp(34px, calc(var(--step) * 0.9), 50px);
+	grid-template-columns: repeat(3, 1fr);
+	grid-template-rows: repeat(3, 1fr);
+	/* Haut dégagé des deux pastilles FIXES (vitals à gauche, actions à droite, ~50 px de
+	   haut à 8 px du bord) : sans lui, ↖ et ↗ passaient dessous. */
+	gap: 0; padding: 60px 6px 6px; margin: 0;
+	/* Bord ARRIÈRE : la flèche centrée dans la rangée `--floor` (repli 2 px sans rangée). */
+	padding-bottom: max(2px, calc((var(--step) * var(--floor) - var(--fleche)) / 2));
+	pointer-events: none;
+}
+.viewport .controls-carte .move-spacer { display: none; }
+.viewport .controls-carte .btn {
+	width: var(--fleche); height: var(--fleche);
+	pointer-events: auto;
+	background: rgba(0, 0, 0, 0.45);
+	border-color: rgba(255, 255, 255, 0.25);
+}
+.viewport .controls-carte .btn > svg { width: calc(var(--fleche) * 0.5); height: calc(var(--fleche) * 0.5); }
+.viewport .controls-carte .btn:hover:not(:disabled) { background: rgba(0, 0, 0, 0.65); }
+.viewport .controls-carte .btn:active:not(:disabled) { background: rgba(0, 0, 0, 0.8); }
+.viewport .controls-carte .btn:disabled { background: rgba(0, 0, 0, 0.12); border-color: transparent; }
+/* Paysage : placement EXPLICITE par `data-sdx/sdy` (les pivots n'en ont pas : `data-sens`). */
+.viewport .controls-carte [data-sdx="-1"] { grid-column: 1; justify-self: start; }
+.viewport .controls-carte [data-sdx="0"]  { grid-column: 2; justify-self: center; }
+.viewport .controls-carte [data-sdx="1"]  { grid-column: 3; justify-self: end; }
+.viewport .controls-carte [data-sdy="-1"] { grid-row: 1; align-self: start; }
+.viewport .controls-carte [data-sdy="0"]  { grid-row: 2; align-self: center; }
+.viewport .controls-carte [data-sdy="1"]  { grid-row: 3; align-self: end; }
+.viewport .controls-carte .rot-btn[data-sens="-1"] { grid-column: 1; grid-row: 3; justify-self: start; align-self: end; }
+.viewport .controls-carte .rot-btn[data-sens="1"]  { grid-column: 3; grid-row: 3; justify-self: end; align-self: end; }
+/* Portrait : la carte est tournée d'un quart de tour (le joueur à gauche regarde à droite).
+   Le pavé flottant tourne d'un bloc (`rotate(90deg)` plus haut) ; posé sur la carte, il ne
+   peut pas — la grille épouse le viewport, haut et étroit. Chaque bouton est donc REPLACÉ au
+   quart de tour (écran = (−sdy, sdx)) et seul son pictogramme pivote. Les `data-sdx/sdy` ne
+   changent pas : `screenToWorld` reste juste. */
+/* Portrait : la carte dépasse l'écran (la page défile) — le calque est FIXÉ sur la partie
+   visible, entre les pastilles du haut et les barres du bas (`--barre-h`), pour que les
+   neuf boutons restent à portée comme les barres. Le `clip-path` du viewport le rogne à la
+   carte (un `overflow` ne coupe pas un descendant fixe) : en défilant jusqu'au journal, les
+   flèches s'en vont avec elle. */
+html.vue-portrait.pave-carte .viewport { clip-path: inset(0 round 10px); }
+/* ⚠️ Sélecteur à id : il doit battre le `rotate(90deg)` du pavé flottant (même id). */
+html.vue-portrait #move-controls.controls-carte {
+	position: fixed; inset: auto;
+	top: 0; left: 50%; width: var(--view-width); transform: translateX(-50%);
+	/* Au-dessus de la pastille ⛶ (part-plein-ecran, coin bas-gauche, posée à `--barre-h` +
+	   18 px, ~36 px de haut) : elle recouvrait le pivot du coin bas. */
+	bottom: calc(var(--barre-h, 0px) + 18px + 42px);
+	/* Le bord arrière est la colonne de GAUCHE : c'est elle qui accueille la rangée `--floor`. */
+	padding-bottom: 6px;
+	padding-left: max(2px, calc((var(--step) * var(--floor) - var(--fleche)) / 2));
+}
+html.vue-portrait #move-controls.controls-carte .btn > svg { transform: rotate(90deg); }
+html.vue-portrait .viewport .controls-carte [data-sdy="1"]  { grid-column: 1; justify-self: start; }
+html.vue-portrait .viewport .controls-carte [data-sdy="0"]  { grid-column: 2; justify-self: center; }
+html.vue-portrait .viewport .controls-carte [data-sdy="-1"] { grid-column: 3; justify-self: end; }
+html.vue-portrait .viewport .controls-carte [data-sdx="-1"] { grid-row: 1; align-self: start; }
+html.vue-portrait .viewport .controls-carte [data-sdx="0"]  { grid-row: 2; align-self: center; }
+html.vue-portrait .viewport .controls-carte [data-sdx="1"]  { grid-row: 3; align-self: end; }
+html.vue-portrait .viewport .controls-carte .rot-btn[data-sens="-1"] { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
+html.vue-portrait .viewport .controls-carte .rot-btn[data-sens="1"]  { grid-column: 1; grid-row: 3; justify-self: start; align-self: end; }
+/* Sablier dans le libellé « Tour N » (les deux modes) : petit, collé au numéro, pour former UN
+   groupe avec lui et non un badge de plus du bandeau. Hors du pavé, plus aucune règle
+   `.controls .btn` ne le dessine. */
+.passer-tour { display: inline-flex; flex-shrink: 0; margin-left: 8px; }
+.passer-tour #btn-passer {
+	width: 26px; height: 26px; border-radius: 50%; padding: 0;
+	display: flex; align-items: center; justify-content: center;
+	background: #2a2a36; border: 1.5px solid var(--border-color); cursor: pointer;
+}
+.passer-tour #btn-passer:hover:not(:disabled) { border-color: var(--accent-color); }
+.passer-tour #btn-passer:disabled { opacity: 0.35; cursor: default; }
+.passer-tour #btn-passer > svg { width: 15px; height: 15px; }
+/* Séparateur du menu ⚙️ (comme `.affichage-sep` de /play) : pavé d'un côté, sons de l'autre. */
+.reglages-sep { display: block; height: 1px; margin: 4px 6px; background: var(--border-color); }
 /* ── Barre d'action : cases à positions STABLES ────────────────────────────────── */
 #btn-slots-edit { grid-area: gear; width: 45px; margin: 5px;}
 {{ slotbar.slot_bar_css('.slot-grid', '.slot-btn', slots_max, '.slot-plus') }}
@@ -1408,7 +1494,10 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 		</div>
 		<!-- Tour header + Initiative strip -->
 		<div class="tour-header">
-			<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span><span id="furtif-badge" style="visibility:hidden" title="Furtif : les ennemis marqués d'un œil barré ne vous ont pas repéré et ne viennent pas à vous. Frapper au corps à corps vous révèle à tous ; une attaque à distance laisse seulement à la cible une chance de vous repérer.">🥷</span></span>
+			<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span><!-- Sablier « Passer le tour » : DANS le libellé, collé au numéro de tour, dans
+			     les DEUX modes du pavé — à part, il se lisait comme un badge de plus du bandeau
+			     d'initiative ; le pavé, lui, garde une case vide au centre.
+			--><span class="passer-tour"><button class="btn center" id="btn-passer" onclick="doAction('passer', null)" title="Passer le tour">{{ movepanel.sablier() }}</button></span><span id="furtif-badge" style="visibility:hidden" title="Furtif : les ennemis marqués d'un œil barré ne vous ont pas repéré et ne viennent pas à vous. Frapper au corps à corps vous révèle à tous ; une attaque à distance laisse seulement à la cible une chance de vous repérer.">🥷</span></span>
 			<div id="initiative-strip">
 				{% for actor_id in combat.ordre_initiative %}
 					{% set active = 'active' if loop.index0 == combat.acteur_courant_index else '' %}
@@ -1490,6 +1579,10 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 				<button type="button" id="reglages-btn" class="reglages-btn" title="Réglages"
 					aria-haspopup="menu" aria-expanded="false" aria-controls="reglages-menu">⚙️</button>
 				<span class="reglages-menu" id="reglages-menu" role="menu" hidden>
+					{# Mode du pavé : mêmes libellés que le menu ⚙️ de /play (`appliquerModePave`). #}
+					<button type="button" role="menuitemradio" class="reglages-item" data-pave="carte" aria-checked="false">🗺️ Flèches sur la carte</button>
+					<button type="button" role="menuitemradio" class="reglages-item" data-pave="flottant" aria-checked="true">🕹️ Flèches flottantes</button>
+					<span class="reglages-sep" role="separator"></span>
 					<button type="button" role="menuitemcheckbox" class="reglages-item" id="reglage-son" aria-checked="true">🔊 Sons</button>
 					{% if musique %}
 					<button type="button" role="menuitemcheckbox" class="reglages-item" id="reglage-musique" aria-checked="true">🎵 Musique</button>
@@ -1531,7 +1624,7 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 		<div class="move-section" id="move-section">
 			<div class="move-head" id="move-head" title="Glisser pour déplacer" aria-hidden="true">⠿</div>
 			{{ movepanel.move_panel('move-controls', fn='doMove', rotation=true,
-				centre={'id': 'btn-passer', 'onclick': "doAction('passer', null)", 'title': 'Passer le tour'}) }}
+				centre=None) }}
 		</div>
 			
 	</div><!-- /enemy-panel -->
@@ -1684,10 +1777,17 @@ if (GRID && GRID.dims) {
 	document.documentElement.style.setProperty('--bg-h', GRID.dims.y);
 }
 
-// Profondeur du champ visible : nombre de rangées affichées vers le fond. Source unique
-// pour --max-height (hauteur du viewport) ET le clip-path iso (buildViewportClipPath).
-const MAX_H = 10;
+// Profondeur du champ visible : rangée du joueur + rangées affichées vers le fond (MAX_H − 1 = 8
+// devant). Source unique de --max-height (hauteur du viewport).
+// ⚠️ 9 et non plus 10 depuis la rangée arrière (FLOOR) : la plus lointaine est rognée pour que la
+// carte garde sa taille — mêmes jetons en portrait, bandeau de tour à l'écran sur un portable.
+const MAX_H = 9;
 document.documentElement.style.setProperty('--max-height', MAX_H);
+// Rangées visibles DERRIÈRE le membre joué (--floor), prises sur le fond (cf. MAX_H) : la carte
+// compte toujours MAX_H − 1 + FLOOR rangées. Les flèches du bord arrière du mode « sur la carte »
+// s'y posent.
+const FLOOR = 1;
+document.documentElement.style.setProperty('--floor', FLOOR);
 
 // Échelle du viewport iso : --step est borné par la SEULE largeur (--view-width = step×17 ≤ w),
 // pour que la carte grandisse en hauteur (step×(MAX_H-1+floor)) dans tous les formats sans jamais
@@ -1727,7 +1827,7 @@ function tailleVue(largeur) {
 // ⚠️ MOBILE SEULEMENT : `pointer: coarse` (écran tactile) en plus de la forme — une fenêtre de
 // bureau étroite et haute garde la vue paysage.
 const LIGNES_PORTRAIT = 17;                 // = les 17 colonnes du paysage (cf. tailleVue)
-const PROFONDEUR_PORTRAIT = MAX_H - 1;      // = les rangées du paysage (--floor vaut 0)
+const PROFONDEUR_PORTRAIT = MAX_H - 1 + FLOOR;  // = les rangées du paysage, rangée arrière comprise
 document.documentElement.style.setProperty('--vue-lignes', LIGNES_PORTRAIT);
 const _mqPortrait = window.matchMedia ? window.matchMedia('(max-width: 768px) and (orientation: portrait) and (pointer: coarse)') : null;
 let VUE_PORTRAIT = !!(_mqPortrait && _mqPortrait.matches);
@@ -3191,6 +3291,53 @@ const PAVE_POS_CLE = 'telluris.combat.pave_pos';
 	});
 })();
 
+// ── Pavé : sur la carte ou flottant (menu ⚙️, mêmes libellés que /play) ──────────────
+// UN SEUL nœud `#move-controls`, DÉPLACÉ entre `#move-section` (flottant) et `#viewport`
+// (calque `controls-carte`) — jamais cloné : `updateButtons`/`majFleches` le retrouvent par
+// son id dans les deux modes. Préférence du joueur, par navigateur ; défaut = flottant
+// (le comportement d'avant). Clé distincte de /play : son défaut à lui est la carte.
+const PAVE_MODE_CLE = 'telluris.combat.pave_mode';
+function _paveModeCourant() {
+	let m = null;
+	try { m = localStorage.getItem(PAVE_MODE_CLE); } catch (e) { m = null; }
+	return m === 'carte' ? 'carte' : 'flottant';
+}
+function appliquerModePave(mode) {
+	const controls = document.getElementById('move-controls');
+	const section = document.getElementById('move-section');
+	const carte = document.getElementById('viewport');
+	if (!controls || !section || !carte) return;
+	const surCarte = mode === 'carte';
+	// ⚠️ Pas de script dans <head> pour poser ce mode plus tôt (comme /play) : les harnais
+	// dev/test_*_client.js lisent le PREMIER bloc <script> inline de ce template.
+	document.documentElement.classList.toggle('pave-carte', surCarte);
+	if (surCarte) {
+		carte.appendChild(controls);
+		controls.classList.add('controls-carte');
+		section.hidden = true;
+	} else {
+		section.appendChild(controls);
+		controls.classList.remove('controls-carte');
+		section.hidden = false;
+		// APRÈS l'affichage : un panneau caché n'a pas de taille, sa place serait fausse.
+		if (window._combatReady) _placerPaveParDefaut();
+	}
+	document.querySelectorAll('#reglages-menu [data-pave]').forEach(b => {
+		b.setAttribute('aria-checked', b.dataset.pave === mode ? 'true' : 'false');
+	});
+}
+(function initModePave() {
+	document.querySelectorAll('#reglages-menu [data-pave]').forEach(b => {
+		b.onclick = () => {
+			try { localStorage.setItem(PAVE_MODE_CLE, b.dataset.pave); } catch (e) { /* mode privé */ }
+			appliquerModePave(b.dataset.pave);
+			// Comme /play : choisir un mode referme le menu (les coches son/musique, elles, le laissent ouvert).
+			fermerReglages();
+		};
+	});
+	appliquerModePave(_paveModeCourant());
+})();
+
 // Place par DÉFAUT du pavé (jamais posé à la main) : en portrait, la barre d'action est fixée en
 // bas de la fenêtre — le pavé, fixé en bas lui aussi par le CSS `flottant`, la recouvrirait. Il
 // est donc posé à droite, juste au-dessus de la barre. Hors portrait, le CSS reprend la
@@ -3879,7 +4026,7 @@ function updateButtons(data) {
 	// rallume tout (et `doAction` qui couvre les jetons/badges, dont le clic ne passe pas
 	// par `disabled`).
 	if (revealing) {
-		document.querySelectorAll('#move-controls .btn, .action-btn, .slot-btn')
+		document.querySelectorAll('#move-controls .btn, #btn-passer, .action-btn, .slot-btn')
 			.forEach(el => el.disabled = true);
 		return;
 	}
@@ -4654,7 +4801,7 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 	// fin de l'action si le même membre garde la main (`finally`), sinon avec `/acteur`.
 	if (type === 'passer') _effacerPalierCharge();
 	busy = true;
-	document.querySelectorAll('#move-controls .btn, .action-btn, .slot-btn')
+	document.querySelectorAll('#move-controls .btn, #btn-passer, .action-btn, .slot-btn')
 		.forEach(el => el.disabled = true);
 	try {
 		const res = await fetch(`/api/combat/${SERVER_DATA.combat_id}/action`, {
