@@ -631,14 +631,21 @@ def item_sous_categorie(item_doc: dict) -> str | None:
 
 def item_sale_price_cuivre(item_doc: dict, ref) -> int:
 	"""Prix de vente proposé (en cuivre). Si l'item porte un champ `valeur`, on propose
-	le MIN (laisse la place au marchandage futur vers le max) ; sinon prix dérivé
-	`poids × MULT_RARETE × PRIX_DERIVE_BASE`, minimum 1."""
+	le MIN (laisse la place au marchandage futur vers le max) ; sinon, pour une dépouille,
+	`xp_monstre.prix_depouille` ; sinon prix dérivé `poids × MULT_RARETE × PRIX_DERIVE_BASE`,
+	minimum 1."""
 	valeur = (item_doc or {}).get("valeur")
 	if valeur is not None:
 		entry = valeur[0] if isinstance(valeur, (list, tuple)) and valeur else valeur
 		prix = valeur_entry_to_cuivre(entry)
 		if prix > 0:
 			return prix
+	# DÉPOUILLE (item à `source_espece`) : prix tiré de la dangerosité du spécimen, pas de son
+	# poids × rareté (cf. utils/xp_monstre). Import paresseux : xp_monstre → potentiel → combat.
+	from utils import xp_monstre
+	if xp_monstre.est_depouille(item_doc):
+		instance = ref if isinstance(ref, dict) else {}
+		return xp_monstre.prix_depouille(item_doc, instance.get("poids"), instance.get("profil"), get_doc)
 	mult = character_stats.MULT_RARETE.get((item_doc or {}).get("rarete"), 1)
 	poids = item_ref_weight(ref)
 	return max(1, round(poids * mult * character_stats.PRIX_DERIVE_BASE))

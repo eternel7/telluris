@@ -636,12 +636,11 @@ def _construire_quete_rang(comptoir_doc: dict, cite: str, lieu_doc: dict, espece
                            position: dict | None, profil_id: str, rang_courant: str, get_doc_fn) -> dict:
 	"""Doc `quete:*` d'une épreuve de rang (non persisté ; l'accept en fait un snapshot)."""
 	profil = get_doc_fn(profil_id) or {}
-	niv = int(profil.get("niveau", 1))
 	grade = qualificatif_de(profil)
 	nom = espece_doc.get("nom", "créature")
 	lieu_nom = _lieu_nom(lieu_doc)
 	rang_vise = rang_suivant(rang_courant)
-	xp_bete = max(1, round(quetes._xp_unitaire(espece_doc, niv) * character_stats.QUETE_CHASSE_XP_FACTEUR))
+	xp_bete = max(1, round(quetes._xp_unitaire(espece_doc, profil_id, get_doc_fn) * character_stats.QUETE_CHASSE_XP_FACTEUR))
 	xp = xp_bete + xp_promotion(rang_vise)
 	cuivre = max(0, round(xp_bete * character_stats.QUETE_CUIVRE_PAR_XP))
 	objectif = {

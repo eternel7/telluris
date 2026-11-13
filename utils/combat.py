@@ -46,6 +46,7 @@ from utils import tresor as tresor_util
 from utils import vol as vol_util
 from utils import images_monstres
 from utils import contenants as contenants_util
+from utils import xp_monstre
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -3978,14 +3979,18 @@ def roll_monster_sorts(espece: dict, niveau: int) -> list[str]:
 	return [s["id"] for s in random.sample(pool, x)]
 
 
-def build_monster_snapshot(espece: dict, profil: dict | None, idx: int, equiper: bool = True) -> dict:
+def build_monster_snapshot(espece: dict, profil: dict | None, idx: int, equiper: bool = True,
+						   calculer_xp: bool = True) -> dict:
 	"""Snapshot d'UN monstre (stats dérivées + XP) pour un profil donné. `profil is None`
 	→ repli sur le point médian de l'espèce (niveau 1). Extrait de la boucle
 	d'`instantiate_monsters` pour pouvoir reconstruire un monstre à profil FORCÉ (quête de
 	chasse : l'élite recherchée) sans dupliquer la dérivation des stats.
 	`equiper=False` saute le TIRAGE d'équipement d'un humanoïde (il reste nu) : le snapshot de
 	référence des potentiels doit être déterministe — l'équipement y est compté en espérance
-	(`potentiel.potentiel_espece`)."""
+	(`potentiel.potentiel_espece`).
+	`calculer_xp=False` laisse `xp_reward` à 0 : le simulateur (donc le potentiel, qui construit
+	ses belligérants par ICI) n'en a pas besoin — et calculer l'XP demande le potentiel, ce qui
+	bouclerait sans fin."""
 	if profil:
 		base_stats = roll_monster_stats(espece, profil)
 		niveau = profil.get("niveau", 1)
@@ -4007,12 +4012,9 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int, equiper:
 		attaque_profils = _weapon_attacks({"slots": slots_monstre}, base_stats)
 	derived = compute_derived_stats(base_stats, niveau=niveau, equipment=equipment, des_cc=des_cc)
 	portee = max(1, int(_profil_arme_monstre({"attaque_profils": attaque_profils or []}).get("portee", 1)))
-	# XP dérivée de la difficulté : niveau du profil + somme des stats du monstre.
-	sum_stats = (
-		base_stats.v + base_stats.f + base_stats.r + base_stats.ag
-		+ base_stats.vol + base_stats.int_ + base_stats.cha + base_stats.ch
-	)
-	xp_reward = max(1, niveau * 4 + sum_stats // 10)
+	# XP dérivée de la DANGEROSITÉ du spécimen (espèce × grade tiré) : courbe en paliers de
+	# `utils/xp_monstre`, la même que lisent les récompenses des quêtes.
+	xp_reward = xp_monstre.xp_specimen(espece["_id"], profil_id, get_doc) if calculer_xp else 0
 
 	snap = {
 		"id": f"monstre_{idx}",
@@ -4937,7 +4939,7 @@ def _repartir_butin_d_etage(combat_doc: dict, dispo: list, attributions: list) -
 		vers_contenant.setdefault((cid, pos), []).extend(cles)
 	for (cid, pos), cles in vers_contenant.items():
 		ref_c = docs_membres[cid]["inventaire"][pos]
-		refs = [{"item": par_cle[c]["item_id"], "poids": par_cle[c]["poids"]} for c in cles]
+		refs = [ref_de_butin(par_cle[c]) for c in cles]
 		ok, raison = contenants_util.peut_recevoir(
 			ref_c, get_doc(item_ref_id(ref_c)), refs, get_doc,
 			deja_kg=butin_contenant_en_attente(membres[cid]).get(pos, 0))
@@ -4958,7 +4960,7 @@ def _repartir_butin_d_etage(combat_doc: dict, dispo: list, attributions: list) -
 				_ensure_loot_item((monstres.get(d.get("monstre_id")) or {}).get("espece_id", ""),
 								  (monstres.get(d.get("monstre_id")) or {}).get("nom", ""))
 				(monstres.get(d.get("monstre_id")) or {})["loote"] = True
-			entree["refs"].append({"item": d["item_id"], "poids": d["poids"]})
+			entree["refs"].append(ref_de_butin(d))
 			combat_doc["log"].append({
 				"tour": combat_doc["tour"],
 				"acteur": j.get("nom", ""),
@@ -4976,7 +4978,7 @@ def _repartir_butin_d_etage(combat_doc: dict, dispo: list, attributions: list) -
 			else:
 				item = _ensure_loot_item(monstre.get("espece_id", ""), monstre.get("nom", ""))
 				monstre["loote"] = True
-			j.setdefault("butin_ramasse", []).append({"item": d["item_id"], "poids": d["poids"]})
+			j.setdefault("butin_ramasse", []).append(ref_de_butin(d))
 			j["charge"] = round(j.get("charge", 0) + d["poids"], 2)
 			_ajuster_charge_magique(j, d["poids"], charge_magie.coefficient_item(item or {}))
 			combat_doc["log"].append({
@@ -7070,7 +7072,10 @@ def _resoudre_action_joueur(
 
 		monstre["loote"] = True
 		# Référence {item, poids} : le poids d'instance tiré est conservé dans l'inventaire.
-		joueur.setdefault("butin_ramasse", []).append({"item": item["_id"], "poids": poids})
+		ref = {"item": item["_id"], "poids": poids}
+		if monstre.get("profil_id"):
+			ref["profil"] = monstre["profil_id"]   # grade du spécimen → prix (cf. ref_de_butin)
+		joueur.setdefault("butin_ramasse", []).append(ref)
 		joueur["charge"] = round(joueur.get("charge", 0) + poids, 2)
 		_ajuster_charge_magique(joueur, poids, charge_magie.coefficient_item(item))
 		_recompute_player_deplacement(joueur)  # malus de charge éventuel
@@ -7402,7 +7407,19 @@ def _carcasse_payload(monstre: dict) -> dict | None:
 		"item_id": item["_id"],
 		"nom": item.get("nom", item["_id"]),
 		"poids": _roll_carcasse_weight(item, monstre.get("niveau", 1)),
+		# Grade du spécimen : il fixe le prix de la dépouille (`xp_monstre.prix_depouille`) et
+		# voyage sur la référence (`ref_de_butin`). Absent pour un monstre sans profil.
+		**({"profil": monstre["profil_id"]} if monstre.get("profil_id") else {}),
 	}
+
+
+def ref_de_butin(d: dict) -> dict:
+	"""Référence d'inventaire `{item, poids[, profil]}` d'une ligne de butin. SEUL constructeur :
+	le grade d'une carcasse (son prix) ne doit se perdre sur aucun chemin — sac, contenant, sol."""
+	ref = {"item": d["item_id"], "poids": d["poids"]}
+	if d.get("profil"):
+		ref["profil"] = d["profil"]
+	return ref
 
 
 def cle_butin(d: dict) -> str:
@@ -7497,7 +7514,7 @@ def verser_butin_au_sol(character: dict, combat_doc: dict, deja=None) -> list[di
 		cle = cle_butin(d)
 		if cle in traites:
 			continue
-		au_sol.append({"item": d["item_id"], "poids": d["poids"]})
+		au_sol.append(ref_de_butin(d))
 		verses.append({"nom": d.get("nom", d["item_id"]), "poids": d["poids"]})
 		traites.add(cle)
 	character["objets_au_sol"] = au_sol
