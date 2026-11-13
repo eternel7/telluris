@@ -71,7 +71,9 @@ def _acces_nuit(current_user: dict) -> tuple[dict, dict, int]:
 		return character, lieu_doc, 0
 	if not lieu_doc or not auberge.lieu_est_taverne(lieu_doc):
 		raise HTTPException(status_code=403, detail="Il n'y a pas de salle commune ici.")
-	return character, lieu_doc, auberge.cout_nuit(lieu_doc)
+	# Auberge d'une implantation : prix de faveur pour son fondateur et ses associés (§ 10).
+	remise = colonisation.remise_auberge(character, lieu_doc, get_doc) if lieu_doc.get("colonie") else 0.0
+	return character, lieu_doc, int(round(auberge.cout_nuit(lieu_doc) * (1 - remise)))
 
 
 def _ecrivain(character: dict, body: dict) -> tuple[dict, list]:

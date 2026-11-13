@@ -7810,6 +7810,9 @@ def finalize_combat(combat_doc: dict) -> bool:
 	# même garde exactly-once que l'XP → pas de double comptage si /play re-finalise.
 	# Donjon à étages : les monstres des étages quittés comptent aussi (archivés).
 	tous_monstres = _monstres_de_l_expedition(combat_doc)
+	# Colons escortés (voie de colonisation) : une défaite les disperse. Persisté avec l'XP.
+	if status == "defaite":
+		character.pop("colons", None)
 	maj_progress_kills(character, tous_monstres)
 	# Quêtes de « chasse » (élite marquée) : complétées si le monstre porteur du quete_chasse
 	# est tombé. Même fenêtre d'idempotence que les kills ci-dessus.

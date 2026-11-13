@@ -1166,3 +1166,70 @@ def test_le_tableau_de_la_maison_de_guilde_est_aux_membres():
 	c = {"_id": "character:c", "prenom": "Cy", "nom": ""}
 	col.rejoindre(c, imp)
 	assert col.peut_retirer_coffre_guilde(_perso(), imp) and not col.peut_retirer_coffre_guilde(c, imp)
+
+
+# ── Ce que l'associé y gagne (§ 10) ──────────────────────────────────────────────────
+
+def test_prix_de_faveur_pour_le_fondateur_et_les_associes_seulement():
+	from utils import marche
+	reg = _reg()
+	imp = _imp(reg)
+	imp["associes"] = [{"id": "character:b", "nom": "Bo", "apports": {}}]
+	boutique = {"_id": "lieu:colonie_x", "categorie": "boulangerie", "colonie": imp["_id"]}
+	docs = {imp["_id"]: imp, col.REGLES_ID: REGLES_DOC}
+	faveur = reg["associes_reglages"]["faveur_relation"]
+	assert col.faveur(_perso(), boutique, docs.get) == faveur
+	assert col.faveur({"_id": "character:b"}, boutique, docs.get) == faveur
+	assert col.faveur({"_id": "character:z"}, boutique, docs.get) == 0
+	rel = marche.get_relation(_perso(), boutique, docs.get)
+	assert rel["faveur"] == faveur and rel["value"] < faveur                 # la relation elle-même ne bouge pas
+	neutre = marche.get_relation({"_id": "character:z"}, boutique, docs.get)
+	assert "faveur" not in neutre
+	assert marche.prix_courant(rel, "item:x", 10, 100, "achat") < marche.prix_courant(neutre, "item:x", 10, 100, "achat")
+	assert marche.prix_courant(rel, "item:x", 10, 100, "vente") > marche.prix_courant(neutre, "item:x", 10, 100, "vente")
+	# une ancienne faveur restée en base ne vaut rien après une exclusion
+	imp["associes"] = []
+	stale = {"_id": "relation:character:b::lieu:colonie_x", "value": 10, "faveur": faveur}
+	docs[stale["_id"]] = stale
+	assert "faveur" not in marche.get_relation({"_id": "character:b"}, boutique, docs.get)
+	assert col.remise_auberge(_perso(), boutique, docs.get) == reg["associes_reglages"]["remise_auberge"]
+
+
+def test_entrepot_commun_depot_libre_retrait_autorise_associe_par_associe():
+	reg = _reg()
+	imp = _imp(reg)
+	assert col.entrepot_kg(imp, reg) == 0
+	imp["batiments"] = [{"id": "b_e", "type": "entrepot", "pos": [1, 1]}, {"id": "b_e2", "type": "entrepot", "pos": [2, 2]}]
+	assert col.entrepot_kg(imp, reg) == 2 * reg["associes_reglages"]["entrepot_kg_par_entrepot"]
+	imp["associes"] = [{"id": "character:b", "nom": "Bo", "apports": {}}]
+	b = {"_id": "character:b"}
+	assert col.peut_retirer_entrepot(_perso(), imp) and not col.peut_retirer_entrepot(b, imp)
+	assert col.autoriser_retrait(imp, "character:b", True) and col.peut_retirer_entrepot(b, imp)
+	assert not col.autoriser_retrait(imp, "character:z", True)
+	assert col.coffre_associe_kg(imp, reg) == 0                              # il faut une habitation
+	imp["batiments"].append({"id": "b_h", "type": "habitation", "pos": [3, 3]})
+	assert col.coffre_associe_kg(imp, reg) == reg["associes_reglages"]["coffre_associe_kg"]
+
+
+def test_des_colons_escortes_depuis_une_cite_proche_s_installent_a_l_arrivee():
+	reg = _reg()
+	imp = _imp(reg)
+	imp["associes"] = [{"id": "character:b", "nom": "Bo", "apports": {}}]
+	b = {"_id": "character:b", "prenom": "Bo", "nom": ""}
+	dmax = reg["associes_reglages"]["colons_distance_max"]
+	loin = {"id": "lieu:loin", "label": "Loin", "categorie": "ville", "pos": [SITE_POS["x"] + dmax + 1, SITE_POS["y"]]}
+	relies = RELIES + [loin]
+	assert "loin" in col.peut_recruter_colons(b, imp, "lieu:loin", relies, reg, [])[1]
+	assert not col.peut_recruter_colons({"_id": "character:z"}, imp, "lieu:autre", relies, reg, [])[0]
+	ok, _r, n = col.peut_recruter_colons(b, imp, "lieu:autre", relies, reg, [])
+	libres = col.logements(imp, reg) - col.habitants(imp, [])
+	assert ok and n == min(reg["associes_reglages"]["colons_max"], libres)
+	convoi = col.recruter_colons(b, imp, {"_id": "lieu:autre"}, n, reg, now=10)
+	assert not col.peut_recruter_colons(b, imp, "lieu:autre", relies, reg, [], now=11)[0]   # un convoi à la fois
+	ailleurs = {**_imp(reg), "_id": "implantation:autre"}
+	assert col.deposer_colons(b, ailleurs, reg, [], now=12) == 0 and b.get("colons")       # pas ici
+	assert col.deposer_colons(b, imp, reg, [], now=12) == n
+	assert imp["population"] == n and imp["associes"][0]["apports"] == {"colons": n} and "colons" not in b
+	# un convoi périmé s'est dispersé
+	col.recruter_colons(b, imp, {"_id": "lieu:autre"}, 1, reg, now=20)
+	assert col.deposer_colons(b, imp, reg, [], now=convoi["expire_at"] + 20) == 0 and "colons" not in b

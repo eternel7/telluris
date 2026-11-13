@@ -863,6 +863,158 @@ async def guilde_coffre_retirer(current_user: Annotated[dict, Depends(get_curren
 	return _payload_guilde(character, imp, reg, {"inventaire_payload": _inventory_payload(character)})
 
 
+# ── Ce que l'associé y gagne : entrepôt commun, coffre personnel, colons (§ 10) ───────
+
+def _poids(refs: list) -> float:
+	return round(sum(item_ref_weight(r) for r in refs or []), 2)
+
+
+def _sac(character: dict) -> list:
+	return [{"index": i, "item_id": item_ref_id(r), "nom": (resolve_item_ref(r) or {}).get("nom", ""),
+			 "icon": (resolve_item_ref(r) or {}).get("icon", "")} for i, r in enumerate(character.get("inventaire") or [])]
+
+
+def _objets(refs: list) -> list:
+	return [{"index": i, "nom": (resolve_item_ref(r) or {}).get("nom", ""), "icon": (resolve_item_ref(r) or {}).get("icon", "")}
+			for i, r in enumerate(refs or [])]
+
+
+def _payload_rangements(character: dict, imp: dict, reg: dict, extra=None) -> dict:
+	role = colonisation.role_de(character, imp)
+	mien = (imp.get("coffres") or {}).get(character.get("_id")) or []
+	payload = {
+		"entrepot": {"objets": _objets(imp.get("entrepot")), "kg": _poids(imp.get("entrepot")),
+					 "kg_max": colonisation.entrepot_kg(imp, reg),
+					 "peut_retirer": colonisation.peut_retirer_entrepot(character, imp)},
+		"coffre": ({"objets": _objets(mien), "kg": _poids(mien), "kg_max": colonisation.coffre_associe_kg(imp, reg)}
+				   if role == colonisation.ASSOCIE else None),
+		"associes": ([{"id": a.get("id"), "nom": a.get("nom"), "retrait": bool(a.get("retrait"))}
+					  for a in imp.get("associes") or []] if role == colonisation.FONDATEUR else None),
+		"sac": _sac(character), "role": role,
+		"inventaire_payload": _inventory_payload(character),
+	}
+	if extra:
+		payload.update(extra)
+	return payload
+
+
+def _refs_cible(character: dict, imp: dict, reg: dict, cible: str) -> tuple[list, float]:
+	if cible == "coffre":
+		if colonisation.role_de(character, imp) != colonisation.ASSOCIE:
+			raise HTTPException(status_code=403, detail="Le petit coffre est celui d'un associé.")
+		return imp.setdefault("coffres", {}).setdefault(character["_id"], []), colonisation.coffre_associe_kg(imp, reg)
+	if colonisation.role_de(character, imp) not in (colonisation.FONDATEUR, colonisation.ASSOCIE):
+		raise HTTPException(status_code=403, detail="L'entrepôt commun est au fondateur et aux associés.")
+	return imp.setdefault("entrepot", []), colonisation.entrepot_kg(imp, reg)
+
+
+@colonisation_router.get("/colonisation/rangements")
+async def rangements(current_user: Annotated[dict, Depends(get_current_user)]):
+	character, imp, reg, _role = _ici(current_user)
+	return _payload_rangements(character, imp, reg)
+
+
+@colonisation_router.post("/colonisation/rangements/deposer")
+async def rangements_deposer(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	character, imp, reg, _role = _ici(current_user)
+	refs, kg_max = _refs_cible(character, imp, reg, body.get("cible"))
+	sac = character.get("inventaire") or []
+	pos = proprietes.localiser(sac, body.get("index"), body.get("item_id"))
+	if pos is None:
+		raise HTTPException(status_code=404, detail="Objet absent de l'inventaire.")
+	if _poids(refs) + item_ref_weight(sac[pos]) > kg_max:
+		raise HTTPException(status_code=409, detail="Il n'y a plus de place.")
+	refs.append(sac.pop(pos))
+	_sauver(imp, character)
+	return _payload_rangements(character, imp, reg)
+
+
+@colonisation_router.post("/colonisation/rangements/retirer")
+async def rangements_retirer(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	character, imp, reg, _role = _ici(current_user)
+	refs, _kg = _refs_cible(character, imp, reg, body.get("cible"))
+	if body.get("cible") != "coffre" and not colonisation.peut_retirer_entrepot(character, imp):
+		raise HTTPException(status_code=403, detail="Le fondateur ne vous a pas autorisé à retirer.")
+	try:
+		pos = int(body.get("index"))
+	except (TypeError, ValueError):
+		pos = -1
+	if not 0 <= pos < len(refs):
+		raise HTTPException(status_code=404, detail="Cet objet n'y est plus.")
+	if not recrutement.peut_porter(character, refs[pos]):
+		raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage.")
+	character.setdefault("inventaire", []).append(refs.pop(pos))
+	_sauver(imp, character)
+	return _payload_rangements(character, imp, reg)
+
+
+@colonisation_router.post("/colonisation/rangements/autoriser")
+async def rangements_autoriser(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	character, imp, reg, role = _ici(current_user)
+	_exiger(role, colonisation.FONDATEUR)
+	if not colonisation.autoriser_retrait(imp, body.get("id"), bool(body.get("retrait"))):
+		raise HTTPException(status_code=404, detail="Cet associé n'est plus là.")
+	_sauver(imp)
+	return _payload_rangements(character, imp, reg)
+
+
+def _implantations_gerees(character: dict) -> list:
+	ids = list(colonisation.implantations_de(character)) + ([character["association"]] if character.get("association") else [])
+	return [i for i in (get_doc(x) for x in ids) if i and colonisation.role_de(character, i) in
+			(colonisation.FONDATEUR, colonisation.ASSOCIE)]
+
+
+def _payload_colons(character: dict, cite: dict, reg: dict, extra=None) -> dict:
+	offres = []
+	for imp in _implantations_gerees(character):
+		pays = (imp.get("origine") or {}).get("lieu")
+		relies = colonisation.lieux_relies(connexions_du_lieu(pays), pays, get_doc) if pays else []
+		ok, raison, n = colonisation.peut_recruter_colons(character, imp, cite.get("_id"), relies, reg,
+														   colonisation.employes_effectifs(imp, get_doc))
+		offres.append({"id": imp["_id"], "label": imp.get("label", ""), "nombre": n, "refus": raison})
+	payload = {"cite": cite.get("label", ""), "offres": offres, "convoi": character.get("colons")}
+	if extra:
+		payload.update(extra)
+	return payload
+
+
+def _taverne_de_cite(character: dict) -> dict:
+	from utils import auberge as auberge_util
+	from utils import marche as marche_util
+	lieu = get_doc(character.get("lieu", "")) or {}
+	cite = get_doc(lieu.get("lieu_parent") or "") or {}
+	if not auberge_util.lieu_est_taverne(lieu) or not marche_util.est_cite(cite) or colonisation.est_implantation(cite):
+		raise HTTPException(status_code=403, detail="Les colons se trouvent à l'auberge d'une cité.")
+	return cite
+
+
+@colonisation_router.get("/colonisation/colons")
+async def colons(current_user: Annotated[dict, Depends(get_current_user)]):
+	character = _personnage(current_user)
+	return _payload_colons(character, _taverne_de_cite(character), colonisation.regles(get_doc))
+
+
+@colonisation_router.post("/colonisation/colons/recruter")
+async def colons_recruter(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""« Amener des colons » : à l'auberge d'une cité proche, des habitants prêts à partir ;
+	ils s'installent quand on arrive au lieu, se dispersent sur une défaite ou au bout du délai."""
+	character = _personnage(current_user)
+	cite = _taverne_de_cite(character)
+	reg = colonisation.regles(get_doc)
+	imp = next((i for i in _implantations_gerees(character) if i["_id"] == body.get("implantation")), None)
+	if not imp:
+		raise HTTPException(status_code=403, detail="Il faut être fondateur ou associé du lieu.")
+	pays = (imp.get("origine") or {}).get("lieu")
+	relies = colonisation.lieux_relies(connexions_du_lieu(pays), pays, get_doc) if pays else []
+	ok, raison, n = colonisation.peut_recruter_colons(character, imp, cite.get("_id"), relies, reg,
+													   colonisation.employes_effectifs(imp, get_doc))
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	convoi = colonisation.recruter_colons(character, imp, cite, n, reg)
+	_sauver(character)
+	return _payload_colons(character, cite, reg, {"recrutes": convoi["nombre"]})
+
+
 # ── Association (§ 10) ───────────────────────────────────────────────────────────────
 
 @colonisation_router.post("/colonisation/association/demander")

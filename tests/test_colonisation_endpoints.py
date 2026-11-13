@@ -503,3 +503,39 @@ def test_le_materiel_commun_s_ouvre_a_la_demeure_des_aventuriers(monde):
 	assert _refus(monde, membre, rc.guilde_coffre_retirer, None, {"index": 0}) == 403
 	_appel(monde, fondateur, rc.guilde_coffre_retirer, None, {"index": 0})
 	assert fondateur["inventaire"] == ["item:pain"]
+
+
+def test_entrepot_commun_et_petit_coffre_par_les_routes(monde):
+	rc = monde["rc"]
+	fondateur = _perso(inventaire=["item:pain"])
+	imp_id = _fonder(monde, fondateur)
+	imp = monde["docs"][imp_id]
+	imp["batiments"] = [{"id": "b_e", "type": "entrepot", "pos": [1, 1]}, {"id": "b_h", "type": "habitation", "pos": [2, 2]}]
+	imp["associes"] = [{"id": "character:b", "nom": "Milo", "apports": {}}]
+	associe = _perso("b", lieu=imp_id, position={"x": 3, "y": 3}, inventaire=["item:pain", "item:pain"], association=imp_id)
+	_appel(monde, associe, rc.rangements_deposer, None, {"cible": "entrepot", "index": 0, "item_id": "item:pain"})
+	assert monde["docs"][imp_id]["entrepot"] == ["item:pain"]
+	assert _refus(monde, associe, rc.rangements_retirer, None, {"cible": "entrepot", "index": 0}) == 403
+	_appel(monde, fondateur, rc.rangements_autoriser, None, {"id": "character:b", "retrait": True})
+	_appel(monde, associe, rc.rangements_retirer, None, {"cible": "entrepot", "index": 0})
+	assert associe["inventaire"] == ["item:pain", "item:pain"]
+	rep = _appel(monde, associe, rc.rangements_deposer, None, {"cible": "coffre", "index": 0, "item_id": "item:pain"})
+	assert monde["docs"][imp_id]["coffres"]["character:b"] == ["item:pain"] and rep["coffre"]["objets"]
+	assert _refus(monde, fondateur, rc.rangements_deposer, None, {"cible": "coffre", "index": 0, "item_id": "item:pain"}) == 403
+	visiteur = _perso("v", lieu=imp_id, position={"x": 1, "y": 1}, inventaire=["item:pain"])
+	assert _refus(monde, visiteur, rc.rangements_deposer, None, {"cible": "entrepot", "index": 0, "item_id": "item:pain"}) == 403
+
+
+def test_les_colons_se_trouvent_a_l_auberge_d_une_cite(monde):
+	rc = monde["rc"]
+	fondateur = _perso()
+	imp_id = _fonder(monde, fondateur)
+	monde["docs"]["lieu:auberge"] = {"_id": "lieu:auberge", "type": "lieu", "categorie": "auberge", "lieu_parent": "lieu:cite"}
+	fondateur.update(lieu="lieu:auberge", position={"x": 0, "y": 0})
+	rep = _appel(monde, fondateur, rc.colons, None)
+	[offre] = rep["offres"]
+	assert offre["id"] == imp_id and offre["nombre"] > 0 and not offre["refus"]
+	rep = _appel(monde, fondateur, rc.colons_recruter, None, {"implantation": imp_id})
+	assert rep["recrutes"] == offre["nombre"] and fondateur["colons"]["implantation"] == imp_id
+	assert _refus(monde, fondateur, rc.colons_recruter, None, {"implantation": imp_id}) == 409
+	assert _refus(monde, _perso(lieu=imp_id), rc.colons, None) == 403            # pas dans une auberge de cité

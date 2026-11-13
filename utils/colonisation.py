@@ -223,6 +223,11 @@ DEFAUTS = {
 		"Le ciel pâlit à l'est. Quelqu'un attise déjà le feu pour la soupe.",
 		"Un enfant s'est endormi contre un sac de grain, une miche entamée à la main.",
 	],
+	# Ce que l'associé y gagne (§ 10) : prix de faveur (relation minimale dans les boutiques du
+	# lieu, remise à l'auberge), entrepôt commun, petit coffre dans une habitation, colons.
+	"associes_reglages": {"faveur_relation": 80, "remise_auberge": 0.5, "entrepot_kg_par_entrepot": 300,
+						  "coffre_associe_kg": 30, "colons_max": 5, "colons_distance_max": 25,
+						  "colons_duree_s": 2 * JOUR_S},
 	"intendant_economie": 0.1,    # part de nourriture épargnée (non cumulatif)
 	"reparation_materiaux": 5,
 	"candidats_duree_s": JOUR_S,
@@ -849,6 +854,112 @@ def synchroniser_association(character: dict, get_doc_fn) -> bool:
 		character.pop("association", None)
 		change = True
 	return change
+
+
+# ── Ce que l'associé y gagne (§ 10) ─────────────────────────────────────────────────
+
+def _conf_associes(reg: dict) -> dict:
+	return reg.get("associes_reglages") or {}
+
+
+def faveur(character: dict, lieu_doc: dict, get_doc_fn) -> int:
+	"""Relation minimale du fondateur et des associés dans un sous-lieu de LEUR implantation."""
+	imp = get_doc_fn((lieu_doc or {}).get("colonie") or "") or {}
+	if role_de(character, imp) not in (FONDATEUR, ASSOCIE):
+		return 0
+	return _int(_conf_associes(regles(get_doc_fn)).get("faveur_relation"))
+
+
+def remise_auberge(character: dict, lieu_doc: dict, get_doc_fn) -> float:
+	imp = get_doc_fn((lieu_doc or {}).get("colonie") or "") or {}
+	if role_de(character, imp) not in (FONDATEUR, ASSOCIE):
+		return 0.0
+	return _num(_conf_associes(regles(get_doc_fn)).get("remise_auberge"))
+
+
+def entrepot_kg(imp: dict, reg: dict) -> float:
+	"""L'entrepôt commun : sa capacité vient des entrepôts debout."""
+	n = sum(1 for b in imp.get("batiments") or [] if b.get("type") == "entrepot" and not b.get("endommage"))
+	return n * _num(_conf_associes(reg).get("entrepot_kg_par_entrepot"))
+
+
+def peut_retirer_entrepot(character: dict, imp: dict) -> bool:
+	"""Dépôt seulement pour l'associé ; le retrait, si le fondateur l'autorise, associé par associé."""
+	role = role_de(character, imp)
+	if role == FONDATEUR:
+		return True
+	a = next((x for x in imp.get("associes") or [] if x.get("id") == character.get("_id")), None)
+	return bool(a and a.get("retrait"))
+
+
+def autoriser_retrait(imp: dict, associe_id, autorise: bool) -> bool:
+	a = next((x for x in imp.get("associes") or [] if x.get("id") == associe_id), None)
+	if a is None:
+		return False
+	a["retrait"] = bool(autorise)
+	return True
+
+
+def coffre_associe_kg(imp: dict, reg: dict) -> float:
+	"""Le petit coffre personnel d'un associé : il lui faut une habitation debout."""
+	if not any(b.get("type") == "habitation" and not b.get("endommage") for b in imp.get("batiments") or []):
+		return 0.0
+	return _num(_conf_associes(reg).get("coffre_associe_kg"))
+
+
+def cites_proches(imp: dict, relies: list, reg: dict) -> list:
+	"""Les cités d'où l'on escorte des colons : à `colons_distance_max` cases au plus."""
+	pos = (imp.get("origine") or {}).get("pos") or [0, 0]
+	dmax = _int(_conf_associes(reg).get("colons_distance_max"), 25)
+	return [c for c in cites(relies) if distance(c["pos"], pos) <= dmax]
+
+
+def peut_recruter_colons(character: dict, imp: dict, cite_id, relies: list, reg: dict,
+						 employes: list, now: int | None = None) -> tuple[bool, str, int]:
+	"""« Amener des colons » : depuis une auberge d'une cité proche, autant que le lieu a de
+	logements libres (au plus `colons_max`). Un convoi à la fois."""
+	if role_de(character, imp) not in (FONDATEUR, ASSOCIE):
+		return False, "Il faut être fondateur ou associé du lieu.", 0
+	now = now_epoch() if now is None else now
+	if character.get("colons") and now < _int(character["colons"].get("expire_at")):
+		return False, "Vous escortez déjà des colons.", 0
+	if cite_id not in {c["id"] for c in cites_proches(imp, relies, reg)}:
+		return False, "Cette cité est trop loin du lieu.", 0
+	n = min(_int(_conf_associes(reg).get("colons_max"), 5), logements(imp, reg) - habitants(imp, employes))
+	if n <= 0:
+		return False, "Le lieu n'a plus de logement libre.", 0
+	return True, "", n
+
+
+def recruter_colons(character: dict, imp: dict, cite_doc: dict, n: int, reg: dict, now: int | None = None) -> dict:
+	now = now_epoch() if now is None else now
+	convoi = {"implantation": imp["_id"], "label": imp.get("label", ""), "nombre": int(n),
+			  "cite": cite_doc.get("_id"), "depuis": now,
+			  "expire_at": now + _int(_conf_associes(reg).get("colons_duree_s"), 2 * JOUR_S)}
+	character["colons"] = convoi
+	return convoi
+
+
+def deposer_colons(character: dict, imp: dict, reg: dict, employes: list, now: int | None = None) -> int:
+	"""À l'arrivée dans le lieu : les colons s'y installent (dans la limite des logements) et
+	comptent comme un apport de l'associé. Un convoi périmé s'est dispersé. Rend le nombre
+	installé (0 si rien)."""
+	now = now_epoch() if now is None else now
+	convoi = character.get("colons")
+	if not convoi:
+		return 0
+	if now >= _int(convoi.get("expire_at")):
+		character.pop("colons", None)
+		return 0
+	if convoi.get("implantation") != imp.get("_id"):
+		return 0
+	n = max(0, min(_int(convoi.get("nombre")), logements(imp, reg) - habitants(imp, employes)))
+	character.pop("colons", None)
+	if n:
+		imp["population"] = _int(imp.get("population")) + n
+		_compter_apport(imp, character, "colons", n)
+		noter(imp, f"{proprietes.nom_personnage(character)} amène {n} colon(s).", now)
+	return n
 
 
 # ── Journal (le carnet du fondateur) ─────────────────────────────────────────────────

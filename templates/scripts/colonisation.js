@@ -225,6 +225,9 @@ function colSousLieuxHtml(d) {
 
 function colOngletSiteHtml(d) {
 	let html = colSiteHtml(d.site, _colGere(d)) + colSousLieuxHtml(d) + colBesoinsHtml(d) + colDonsHtml(d) + colAssociationHtml(d);
+	if (_colGere(d)) html += `<section class="prop-section"><div class="prop-ligne"><div class="prop-txt">
+		<span class="q-desc">Entrepôt commun${d.role === 'associe' ? ' et votre petit coffre' : ''}.</span></div>
+		<button class="sh-drop-btn" onclick="openColonieRangements()">📦 Rangements</button></div></section>`;
 	if (d.role === 'fondateur' && (d.journal || []).length) {
 		html += `<section class="prop-section"><h3>📓 Carnet</h3><div class="prop-liste">`
 			+ d.journal.slice(0, 20).map(j => `<div class="prop-ligne"><div class="prop-txt"><span class="q-desc">${_colE(new Date(j.at * 1000).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }))} — ${_colE(j.texte)}</span></div></div>`).join('')
@@ -484,6 +487,64 @@ function colOuvrirGuilde() {
 	const nom = (document.getElementById('col-guilde-nom') || {}).value || '';
 	_colAction('api/colonisation/chantier/ouvrir', { genre: 'guilde', nom });
 }
+// ── Rangements : entrepôt commun, petit coffre de l'associé (§ 10) ─────────────────
+function colRangementsHtml(d) {
+	const liste = (objets, cible, peut) => (objets || []).map(o => `<div class="prop-ligne"><div class="prop-txt"><strong>${_colE(o.icon)} ${_colE(o.nom)}</strong></div>
+		${peut ? `<button class="sh-drop-btn" data-cible="${cible}" data-index="${_colE(o.index)}" onclick="colRetirer(this)">Prendre</button>` : ''}</div>`).join('');
+	const sac = cible => (d.sac || []).map(o => `<div class="prop-ligne"><div class="prop-txt"><span class="q-desc">${_colE(o.icon)} ${_colE(o.nom)}</span></div>
+		<button class="sh-drop-btn" data-cible="${cible}" data-index="${_colE(o.index)}" data-item="${_colE(o.item_id)}" onclick="colDeposer(this)">Déposer</button></div>`).join('');
+	const e = d.entrepot;
+	let html = `<section class="prop-section"><div class="prop-ligne"><div class="prop-txt"></div>
+			<button class="sh-drop-btn" onclick="openColonie()">⟵ L'implantation</button></div></section>
+		<section class="prop-section"><h3>📦 Entrepôt commun (${_colE(e.kg)} / ${_colE(e.kg_max)} kg)</h3>
+		<span class="q-desc">${e.kg_max ? (e.peut_retirer ? 'Vous pouvez y prendre.' : 'Dépôt seulement : le fondateur autorise le retrait.') : 'Il faut un entrepôt debout.'}</span>
+		<div class="prop-liste">${liste(e.objets, 'entrepot', e.peut_retirer) || '<div class="sell-empty">Vide.</div>'}</div>
+		${e.kg_max ? `<h3>🎒 Déposer depuis votre sac</h3><div class="prop-liste">${sac('entrepot')}</div>` : ''}</section>`;
+	if (d.coffre) {
+		html += `<section class="prop-section"><h3>🔒 Votre petit coffre (${_colE(d.coffre.kg)} / ${_colE(d.coffre.kg_max)} kg)</h3>
+			${d.coffre.kg_max ? '' : '<span class="q-desc">Il faut une habitation debout.</span>'}
+			<div class="prop-liste">${liste(d.coffre.objets, 'coffre', true) || '<div class="sell-empty">Vide.</div>'}</div>
+			${d.coffre.kg_max ? `<h3>🎒 Y ranger</h3><div class="prop-liste">${sac('coffre')}</div>` : ''}</section>`;
+	}
+	if (d.associes) {
+		html += `<section class="prop-section"><h3>🤝 Retrait de l'entrepôt</h3><div class="prop-liste">` + d.associes.map(a => `<div class="prop-ligne"><div class="prop-txt"><strong>${_colE(a.nom)}</strong>
+			<span class="q-desc">${a.retrait ? 'peut prendre' : 'dépôt seulement'}</span></div>
+			<button class="sh-drop-btn" data-id="${_colE(a.id)}" data-retrait="${a.retrait ? '' : '1'}" onclick="colAutoriser(this)">${a.retrait ? 'Retirer l\'autorisation' : 'Autoriser'}</button></div>`).join('')
+			+ `</div></section>`;
+	}
+	return html;
+}
+function _colRangementsRendre(d) {
+	if (!d) return;
+	if (d.inventaire_payload) _applyInventoryPayload(d.inventaire_payload);
+	_colEcrire('📦 Rangements', colRangementsHtml(d));
+}
+async function openColonieRangements() { _colRangementsRendre(await _aubFetch('api/colonisation/rangements')); }
+async function colDeposer(btn) { _colRangementsRendre(await _aubFetch('api/colonisation/rangements/deposer', { cible: btn.dataset.cible, index: +btn.dataset.index, item_id: btn.dataset.item })); }
+async function colRetirer(btn) { _colRangementsRendre(await _aubFetch('api/colonisation/rangements/retirer', { cible: btn.dataset.cible, index: +btn.dataset.index })); }
+async function colAutoriser(btn) { _colRangementsRendre(await _aubFetch('api/colonisation/rangements/autoriser', { id: btn.dataset.id, retrait: !!btn.dataset.retrait })); }
+
+// ── Colons, à l'auberge d'une cité (§ 10) ───────────────────────────────────────────
+function colColonsHtml(d) {
+	const c = d.convoi;
+	const convoi = c ? `<section class="prop-section"><div class="sell-empty">Vous escortez ${_colE(c.nombre)} colon(s) vers ${_colE(c.label)} : ils s'installeront à votre arrivée — une défaite les disperse.</div></section>` : '';
+	return convoi + `<section class="prop-section"><h3>🏕️ Colons à ${_colE(d.cite)}</h3><div class="prop-liste">` + (d.offres || []).map(o => `<div class="prop-ligne"><div class="prop-txt">
+		<strong>${_colE(o.label)}</strong><span class="q-desc">${o.refus ? '⚠️ ' + _colE(o.refus) : _colE(o.nombre) + ' famille(s) prête(s) à partir'}</span></div>
+		<button class="sh-drop-btn" data-id="${_colE(o.id)}" ${o.refus ? 'disabled' : ''} onclick="colRecruterColons(this)">Les escorter</button></div>`).join('') + `</div></section>`;
+}
+async function openColonieColons() {
+	const d = await _aubFetch('api/colonisation/colons');
+	if (!d) return;
+	_colEcrire('🏕️ Colons', colColonsHtml(d));
+	_colAfficher();
+}
+async function colRecruterColons(btn) {
+	const d = await _aubFetch('api/colonisation/colons/recruter', { implantation: btn.dataset.id });
+	if (!d) return;
+	if (d.recrutes) showToast(`${d.recrutes} colon(s) vous suivent.`, { major: true });
+	_colEcrire('🏕️ Colons', colColonsHtml(d));
+}
+
 // Depuis la maison de guilde (sous-lieu) : la guilde seule.
 async function openColonieGuilde() {
 	const d = await _aubFetch('api/colonisation/guilde');

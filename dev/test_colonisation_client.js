@@ -172,4 +172,17 @@ test('guilde : le visiteur la rejoint, le maître ouvre l\'échelon, seuls les r
 	assert.ok(avant.includes('Fonder la guilde') && !avant.includes('colOuvrirGuilde'));
 });
 
+test('rangements : l\'associé dépose, ne prend que s\'il est autorisé ; seul le fondateur autorise', () => {
+	const base = { entrepot: { objets: [{ index: 0, nom: MECHANT, icon: '' }], kg: 1, kg_max: 300, peut_retirer: false },
+		coffre: { objets: [], kg: 0, kg_max: 30 }, associes: null, sac: [{ index: 0, item_id: 'item:a', nom: MECHANT, icon: '' }] };
+	const associe = colRangementsHtml(base);
+	assert.ok(!associe.includes('<script>') && associe.includes('colDeposer') && !associe.includes('data-cible="entrepot" data-index="0" onclick="colRetirer'));
+	assert.ok(!associe.includes('colAutoriser'));
+	const fondateur = colRangementsHtml(Object.assign({}, base, { entrepot: Object.assign({}, base.entrepot, { peut_retirer: true }),
+		coffre: null, associes: [{ id: 'character:b', nom: MECHANT, retrait: false }] }));
+	assert.ok(fondateur.includes('colRetirer') && fondateur.includes('colAutoriser') && !fondateur.includes('petit coffre'));
+	const colons = colColonsHtml({ cite: MECHANT, convoi: { nombre: 3, label: MECHANT }, offres: [{ id: 'i', label: MECHANT, nombre: 0, refus: MECHANT }] });
+	assert.ok(!colons.includes('<script>') && /disabled/.test(colons) && colons.includes('3 colon'));
+});
+
 console.log(`OK — ${n} tests du panneau de colonisation.`);
