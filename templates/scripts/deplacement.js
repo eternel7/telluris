@@ -112,6 +112,62 @@ function pasAutoriseRegle(regle, cells, nav, dims, x, y, dx, dy) {
 	return { ok: true, raison: '' };
 }
 
+// ── Déplacement AU CLIC de play_town (mode ⚙️ « Déplacement au clic ») ──────────────
+// Même règle que les flèches de play_town, appliquée de proche en proche : case
+// `accesExploration` (vol compris) et pas `navAllows`. Bornes = celles de `cells`.
+
+// Cases joignables à pied (ou en vol) depuis (x, y) en `portee` pas au plus : BFS 8 directions.
+// Rend une Map "x,y" → { d, px, py } (d = nombre de pas, px/py = case précédente ; le
+// départ a d = 0 et px = py = null).
+function casesJoignablesExploration(cells, nav, x, y, portee, volant) {
+	const out = new Map();
+	if (!Array.isArray(cells) || !cells.length) return out;
+	const rows = cells.length;
+	out.set(`${x},${y}`, { d: 0, px: null, py: null });
+	let front = [[x, y]];
+	for (let d = 1; d <= portee && front.length; d++) {
+		const suivant = [];
+		for (const [cx, cy] of front) {
+			for (const [, dx, dy] of VALID_MOVES) {
+				const nx = cx + dx, ny = cy + dy;
+				if (ny < 0 || ny >= rows || nx < 0 || nx >= (cells[ny] || []).length) continue;
+				const cle = `${nx},${ny}`;
+				if (out.has(cle)) continue;
+				if (!accesExploration(cells[ny][nx], volant)) continue;
+				if (!navAllows(nav, cx, cy, dx, dy)) continue;
+				out.set(cle, { d, px: cx, py: cy });
+				suivant.push([nx, ny]);
+			}
+		}
+		front = suivant;
+	}
+	return out;
+}
+
+// Pas successifs {dx, dy} du départ jusqu'à (cx, cy), lus dans le résultat de
+// `casesJoignablesExploration` ; `null` si la case n'y est pas.
+function cheminVers(joignables, cx, cy) {
+	let n = joignables && joignables.get(`${cx},${cy}`);
+	if (!n) return null;
+	const pas = [];
+	let x = cx, y = cy;
+	while (n && n.px !== null) {
+		pas.unshift({ dx: x - n.px, dy: y - n.py });
+		x = n.px; y = n.py;
+		n = joignables.get(`${x},${y}`);
+	}
+	return pas;
+}
+
+// Case du monde sous un point (px, py) de la vue — `cote` = côté en px de la vue carrée,
+// `distView` = cases visibles par côté, `pos` = case du personnage. Miroir du `transform`
+// de `img#bg-image` : la case (pos.x, pos.y) commence à `(distView/2 - 0.5) × case`.
+function caseCliquee(px, py, cote, distView, pos) {
+	const c = cote / distView;
+	const o = distView / 2 - 0.5;
+	return { x: pos.x + Math.floor(px / c - o), y: pos.y + Math.floor(py / c - o) };
+}
+
 // Grisage des flèches d'un pavé — LE SEUL JOINT partagé par les trois pages.
 //
 // ⚠️ Prend des PRÉDICATS, pas des données : play_town lit un masque et une matrice d'accès

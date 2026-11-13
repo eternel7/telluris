@@ -298,5 +298,69 @@ t('verrouillerFleches ferme puis rouvre tout le pavé', () => {
 	assert.ok(racine._btns.every(b => !b.disabled));
 });
 
+console.log('\n── Déplacement au clic (play_town) ────────────────────────────────────────');
+
+t('casesJoignablesExploration : départ à 0, voisins à 1, terrain ≠ 1 refusé à pied', () => {
+	const j = casesJoignablesExploration(CELLS, {}, 0, 0, 5, false);
+	assert.strictEqual(j.get('0,0').d, 0);
+	assert.strictEqual(j.get('1,0').d, 1);
+	assert.ok(!j.has('1,1'), 'terrain difficile 2');
+	assert.ok(!j.has('2,1'), 'falaise 3');
+	assert.ok(!j.has('3,1'), 'mur 0');
+	assert.strictEqual(j.get('4,3').d, 5, 'contourne la ligne y=1 (2, 3, 0) en diagonale');
+});
+
+t('casesJoignablesExploration : la portée borne la profondeur', () => {
+	const j = casesJoignablesExploration(CELLS, {}, 0, 0, 2, false);
+	assert.ok([...j.values()].every(n => n.d <= 2));
+	assert.ok(j.has('1,2'), 'à 2 pas en passant par (0,1)');
+	assert.ok(!j.has('2,2'), 'à 3 pas');
+});
+
+t('casesJoignablesExploration : en vol, terrain difficile et falaise se franchissent, jamais un mur', () => {
+	const j = casesJoignablesExploration(CELLS, {}, 0, 1, 5, true);
+	assert.strictEqual(j.get('1,1').d, 1);
+	assert.strictEqual(j.get('2,1').d, 2);
+	assert.ok(!j.has('3,1'));
+});
+
+t('casesJoignablesExploration : un mur nav ferme le pas (dans les deux sens)', () => {
+	// Toute sortie de (0,0) interdite sauf vers le bas.
+	const nav = { '0,0': 255 & ~DIRS.BAS };
+	const j = casesJoignablesExploration(CELLS, nav, 0, 0, 1, false);
+	assert.deepStrictEqual([...j.keys()].sort(), ['0,0', '0,1']);
+	// Depuis (1,0), entrer en (0,0) est refusé par la cible.
+	const k = casesJoignablesExploration(CELLS, nav, 1, 0, 1, false);
+	assert.ok(!k.has('0,0'));
+});
+
+t('casesJoignablesExploration : grille vide ⇒ rien', () => {
+	assert.strictEqual(casesJoignablesExploration(null, {}, 0, 0, 5, false).size, 0);
+});
+
+t('cheminVers : autant de pas que `d`, chacun permis par la règle d’exploration', () => {
+	const j = casesJoignablesExploration(CELLS, {}, 0, 0, 5, false);
+	const ch = cheminVers(j, 4, 0);
+	assert.strictEqual(ch.length, j.get('4,0').d);
+	let x = 0, y = 0;
+	for (const p of ch) {
+		assert.ok(pasAutoriseLocal(CELLS, {}, DIMS, x, y, p.dx, p.dy).ok, `pas ${x},${y} → ${p.dx},${p.dy}`);
+		x += p.dx; y += p.dy;
+	}
+	assert.deepStrictEqual([x, y], [4, 0]);
+	assert.deepStrictEqual(cheminVers(j, 0, 0), [], 'déjà sur place');
+	assert.strictEqual(cheminVers(j, 3, 1), null, 'case injoignable');
+});
+
+t('caseCliquee : le centre de la vue est la case du joueur, les bords (demi-cases) à ±distView/2', () => {
+	const pos = { x: 30, y: 40 };
+	for (const dv of [10, 20]) {
+		const cote = 600;
+		assert.deepStrictEqual(caseCliquee(cote / 2, cote / 2, cote, dv, pos), pos, `centre, distView ${dv}`);
+		assert.deepStrictEqual(caseCliquee(0, 0, cote, dv, pos), { x: pos.x - dv / 2, y: pos.y - dv / 2 });
+		assert.deepStrictEqual(caseCliquee(cote - 1, cote - 1, cote, dv, pos), { x: pos.x + dv / 2, y: pos.y + dv / 2 });
+	}
+});
+
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).`);
 process.exit(echecs ? 1 : 0);

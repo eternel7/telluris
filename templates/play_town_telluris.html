@@ -29,8 +29,9 @@
 	{# Mode du pavé lu AVANT le premier rendu : sans lui, le pavé s'affichait sur la carte
 	   puis sautait dans le panneau flottant une fois les scripts de fin de page chargés.
 	   `html.pave-flottant` masque le pavé tant qu'il est encore sur la carte ;
-	   `appliquerModePave` le déplace et tient la classe à jour. Clé = PAVE_MODE_CLE. #}
-	<script>try { if (localStorage.getItem('telluris.play.pave_mode') === 'flottant') document.documentElement.classList.add('pave-flottant'); } catch (e) {}</script>
+	   `appliquerModePave` le déplace et tient la classe à jour. Clé = PAVE_MODE_CLE.
+	   Mode « clic » : `html.deplacement-clic` masque le pavé dès le premier rendu. #}
+	<script>try { var m = localStorage.getItem('telluris.play.pave_mode'); if (m === 'flottant') document.documentElement.classList.add('pave-flottant'); else if (m === 'clic') document.documentElement.classList.add('deplacement-clic'); } catch (e) {}</script>
 	{# Bouton « ? » de l'aide masqué AVANT le premier rendu (réglage ❓ du menu ⚙️). Clé = AIDE_MASQUEE_CLE. #}
 	<script>try { if (localStorage.getItem('telluris.play.aide_masquee') === '1') document.documentElement.classList.add('aide-masquee'); } catch (e) {}</script>
 	{# `--app-h` = hauteur RÉELLE de la fenêtre, plancher du cadre en portrait mobile.
@@ -79,7 +80,7 @@
 			{% endif %}
 			--portraitW: 100;
 			--portraitH: 100;
-			--dist-view: 10;
+			--dist-view: 20;   /* cases visibles par côté de la carte d'exploration */
 			--map-anim: 600ms;   /* glissement de la carte à chaque pas */
 			--bg: #0e0e0e;
 			--surface: #181818;
@@ -1727,6 +1728,15 @@
 		/* Sous le jeton (10) et le pavé (20) ; n'intercepte rien (survol de la carte). */
 		#carte-calque { z-index: 5; pointer-events: none; }
 		#carte-voile { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+		/* Déplacement au clic : cases joignables surlignées quelques secondes (`_surlignerJoignables`),
+		   1 px par case comme le voile ; apparaît/s'efface en fondu. */
+		#carte-joignables {
+			position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated;
+			opacity: 0; transition: opacity 0.4s ease-out;
+		}
+		#carte-joignables.visible { opacity: 1; }
+		@media (prefers-reduced-motion: reduce) { #carte-joignables { transition: none; } }
+		html.deplacement-clic .viewport { cursor: pointer; }
 		/* Passage : un point de lumière sur la case, et un chevron translucide tourné vers la
 		   frontière qu'il franchit (`--angle`, posé par `directionFrontiere` — carte de pays
 		   seulement). Une seule teinte, `--passage-rgb`, déclinée en opacités : bleue par défaut,
@@ -1851,6 +1861,8 @@
 		/* Mode flottant retenu (classe posée dans <head>) : rien n'apparaît sur la carte en
 		   attendant que `appliquerModePave` emporte le pavé dans #move-flottant. */
 		html.pave-flottant .viewport .controls-carte { visibility: hidden; }
+		/* Déplacement au clic : la carte EST la commande, le pavé n'a plus lieu d'être. */
+		html.deplacement-clic .viewport .controls-carte { display: none; }
 		.viewport .controls-carte .btn {
 			width: var(--fleche); height: var(--fleche);
 			pointer-events: auto;
@@ -2113,7 +2125,7 @@
 			<div class="grid-placeholder">
 				<div class="viewport" id="swipe-zone">
 					<img id="bg-image" src="{{ url_for(image_route, path=image) }}">
-					{% if carte_voile is not none or passages %}<div id="carte-calque">{% if carte_voile is not none %}<canvas id="carte-voile"></canvas>{% endif %}</div>{% endif %}
+					<div id="carte-calque">{% if carte_voile is not none %}<canvas id="carte-voile"></canvas>{% endif %}{% if carte_clic %}<canvas id="carte-joignables"></canvas>{% endif %}</div>
 					<div class="token"></div>
 					<!-- Pavé de déplacement : markup et CSS viennent de part-move-panel.html, partagés
 					     avec la page de combat et le mode test de l'éditeur. Ici il est posé SUR la
@@ -2145,6 +2157,7 @@
 							{% if dimensions %}
 							<button type="button" role="menuitemradio" class="affichage-item" data-pave="carte" aria-checked="true" onclick="choisirModePave('carte')">🗺️ Flèches sur la carte</button>
 							<button type="button" role="menuitemradio" class="affichage-item" data-pave="flottant" aria-checked="false" onclick="choisirModePave('flottant')">🕹️ Flèches flottantes</button>
+							{% if carte_clic %}<button type="button" role="menuitemradio" class="affichage-item" data-pave="clic" aria-checked="false" title="Cliquez la case où aller ; trop loin ou inaccessible, les cases joignables s'allument" onclick="choisirModePave('clic')">🖱️ Déplacement au clic</button>{% endif %}
 							{% endif %}
 							{# Coupe-son : même réglage que le 🔊 du combat (scripts/sons.js). #}
 							<button type="button" role="menuitemcheckbox" class="affichage-item" id="affichage-son" aria-checked="true" onclick="basculerSonsMenu()">🔊 Sons</button>
@@ -4489,9 +4502,13 @@
 			: 'vous chutez';
 		return `${recit} (${c.notation} : −${c.degats} PV).`;
 	}
+	// Rend `true` quand le pas a abouti sur la case prévue SANS rien qui mérite d'arrêter un
+	// trajet au clic (`_allerVers`) : combat, chute, escorte, fin d'intro, ressource à récolter,
+	// erreur. Les flèches et `waitTurn` ignorent ce retour.
 	async function move(viewDx, viewDy) {
-		if (isMoving) return;
+		if (isMoving) return false;
 		isMoving = true;
+		let continuer = false;
 		setMoveButtonsDisabled(true);
 		const moveData = {x: viewDx, y: viewDy};
 		// Animation OPTIMISTE : la carte part dès le clic et le fetch roule en parallèle,
@@ -4550,7 +4567,11 @@
 					_refreshSol();
 					_refreshChargeGauge();
 				}
-				if (await _lancerCombatZone(rep.zone_event)) return;
+				const esc = rep.escorte || {};
+				continuer = optimiste && rep.position.x === prevu.x && rep.position.y === prevu.y
+					&& !rep.chute && !rep.zone_event && !rep.intro_terminee && !rep.ressource_recoltable
+					&& !esc.depose && !(esc.rencontres || []).length && !(esc.secours_echoues || []).length;
+				if (await _lancerCombatZone(rep.zone_event)) return false;
 				// Bouton « Récolter » de la sidebar (déplacement par lien = SPA, pas de reload).
 				_ressourceRecoltable = rep.ressource_recoltable || null;
 				_refreshRecolte();
@@ -4588,6 +4609,78 @@
 			isMoving = false;
 			updateControls();
 		}
+		return continuer;
+	}
+
+	// ── Déplacement au clic (mode ⚙️ « Déplacement au clic ») ─────────────────────
+	// Grille ENTIÈRE (`carte_clic`, /play) : le chemin et les cases joignables se calculent
+	// ici avec la règle des flèches (`casesJoignablesExploration`, scripts/deplacement.js —
+	// il n'y a aucune règle de marche côté serveur). Le trajet est une suite de pas ORDINAIRES
+	// (`move`), chacun avec son événement de zone et son tour de monde.
+	const CARTE_CLIC = {{ carte_clic | tojson | safe }};
+	// Pas maximal d'un trajet (variable de monde CLIC_PORTEE_MAX).
+	const CLIC_PORTEE = {{ clic_portee | tojson | safe }};
+	// Durée du surlignage des cases joignables après un clic refusé.
+	const SURLIGNAGE_MS = 3000;
+	let _surlignageTimer = null;
+	function _surlignerJoignables(joignables) {
+		const cv = document.getElementById('carte-joignables');
+		if (!cv || !CARTE_CLIC) return;
+		const cells = CARTE_CLIC.cells;
+		cv.width = (cells[0] || []).length; cv.height = cells.length;
+		const ctx = cv.getContext('2d');
+		ctx.clearRect(0, 0, cv.width, cv.height);
+		ctx.fillStyle = 'rgba(120, 200, 255, 0.38)';
+		joignables.forEach((n, cle) => {
+			if (n.d === 0) return;   // la case du joueur porte déjà le jeton
+			const [x, y] = cle.split(',').map(Number);
+			ctx.fillRect(x, y, 1, 1);
+		});
+		cv.classList.add('visible');
+		clearTimeout(_surlignageTimer);
+		_surlignageTimer = setTimeout(() => cv.classList.remove('visible'), SURLIGNAGE_MS);
+	}
+	function _modeClicActif() {
+		return !!CARTE_CLIC && document.documentElement.classList.contains('deplacement-clic');
+	}
+	// Jeton du trajet en cours : un nouveau clic l'incrémente, l'ancien trajet s'arrête
+	// après son pas en vol (jamais deux pas en parallèle : garde `isMoving` de `move`).
+	let _trajetId = 0;
+	const _attendre = ms => new Promise(r => setTimeout(r, ms));
+	async function _allerVers(chemin) {
+		const id = ++_trajetId;
+		while (isMoving) await _attendre(50);
+		const ms = parseFloat(getComputedStyle(root).getPropertyValue('--map-anim')) || 600;
+		for (const p of chemin) {
+			if (id !== _trajetId) return;
+			// Revérifié avec l'accès CONFIRMÉ du pas précédent (un vol peut finir en route).
+			const a = ACCESS && ACCESS.access;
+			if (!Array.isArray(a) || !accesExploration(a[p.dy + 1][p.dx + 1], VOLANT)
+				|| (ACCESS.nav & DIR_BIT[`${p.dx},${p.dy}`]) === 0) return;
+			if (!(await move(p.dx, p.dy))) return;
+			await _attendre(ms);
+		}
+	}
+	function _surClicCarte(ev) {
+		if (!_modeClicActif() || ev.button !== 0 || ev.target.closest('button')) return;
+		if (document.body.classList.contains('en-traversee')) return;   // le navire avance seul
+		const vue = ev.currentTarget;
+		const r = vue.getBoundingClientRect();
+		const dist = parseFloat(getComputedStyle(vue).getPropertyValue('--dist-view')) || 20;
+		const cible = caseCliquee(ev.clientX - r.left, ev.clientY - r.top, r.width, dist, POSITIONS);
+		if (cible.x === POSITIONS.x && cible.y === POSITIONS.y) return;
+		const surcharge = (typeof _currentCharge === 'function' && typeof _chargeMax !== 'undefined')
+			&& _currentCharge() > _chargeMax + 1e-6;
+		if (surcharge) { showToast('Trop chargé pour vous déplacer — déposez un objet.'); return; }
+		const joignables = casesJoignablesExploration(CARTE_CLIC.cells, CARTE_CLIC.nav,
+			POSITIONS.x, POSITIONS.y, CLIC_PORTEE, VOLANT);
+		const chemin = cheminVers(joignables, cible.x, cible.y);
+		if (!chemin) { _surlignerJoignables(joignables); return; }
+		_allerVers(chemin);
+	}
+	{
+		const vue = document.getElementById('swipe-zone');
+		if (vue) vue.addEventListener('click', _surClicCarte);
 	}
 	/* lieux accessibles */
 	function buildLocationslist() {
@@ -4831,7 +4924,11 @@
 	const PAVE_POS_CLE  = 'telluris.play.pave_pos';
 	function _paveLire(cle) { try { return localStorage.getItem(cle); } catch (e) { return null; } }
 	function _paveEcrire(cle, v) { try { localStorage.setItem(cle, v); } catch (e) {} }
-	function _paveModeCourant() { return _paveLire(PAVE_MODE_CLE) === 'flottant' ? 'flottant' : 'carte'; }
+	function _paveModeCourant() {
+		const m = _paveLire(PAVE_MODE_CLE);
+		// « clic » n'existe que sur une carte à grille (`CARTE_CLIC`) : sinon, les flèches.
+		return m === 'flottant' ? 'flottant' : (m === 'clic' && CARTE_CLIC ? 'clic' : 'carte');
+	}
 	function _paveRestaurerPos(panneau) {
 		let pos = null;
 		try { pos = JSON.parse(_paveLire(PAVE_POS_CLE) || 'null'); } catch (e) { pos = null; }
@@ -4845,6 +4942,8 @@
 		if (!controls || !panneau || !corps || !carte) return;
 		const flottant = mode === 'flottant';
 		document.documentElement.classList.toggle('pave-flottant', flottant);
+		// Mode clic : le pavé reste sur la carte, masqué en CSS (`html.deplacement-clic`).
+		document.documentElement.classList.toggle('deplacement-clic', mode === 'clic');
 		if (flottant) {
 			corps.appendChild(controls);
 			controls.classList.remove('controls-carte');

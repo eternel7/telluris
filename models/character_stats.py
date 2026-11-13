@@ -672,6 +672,11 @@ MERCENAIRE_CLAUSE_LONGUEUR_MAX: int = 120
 #   ce délai après chaque pas avant de demander le suivant (pur confort de lecture).
 TRAVERSEE_PAS_MS: int = 900
 
+# --- Déplacement au clic de /play (mode ⚙️ « Déplacement au clic », scripts/deplacement.js) ---
+# PORTEE_MAX : nombre maximal de pas d'un trajet déclenché par un clic sur la carte ; au-delà
+#   (ou case injoignable), les cases joignables sont surlignées au lieu de marcher.
+CLIC_PORTEE_MAX: int = 5
+
 # --- Portail de Notre-Dame : tableau des seuils (utils/portails.py) ---
 # FENETRE_MINUTES : durée d'une tranche — le tirage des seuils ouverts change à chaque
 #   tranche de l'epoch réel (aucune horloge, aucun tick). SEUILS_OUVERTS : combien de points
@@ -1162,6 +1167,7 @@ def current_world_variables() -> dict:
 		"SECOURS_NB_MAX": SECOURS_NB_MAX,
 		"AUBERGE_NUIT_COUT_CUIVRE": AUBERGE_NUIT_COUT_CUIVRE,
 		"TRAVERSEE_PAS_MS": TRAVERSEE_PAS_MS,
+		"CLIC_PORTEE_MAX": CLIC_PORTEE_MAX,
 		"PORTAIL_FENETRE_MINUTES": PORTAIL_FENETRE_MINUTES,
 		"PORTAIL_SEUILS_OUVERTS": PORTAIL_SEUILS_OUVERTS,
 		"MAREE_PERIODE_S": MAREE_PERIODE_S,
@@ -1265,7 +1271,7 @@ def load_world_variables() -> dict:
 	global ESCORTE_GUILDE_PROBA, ESCORTE_PROGENITURE_XP
 	global SECOURS_PROBA, SECOURS_XP, SECOURS_DELAI_H, SECOURS_PV_DEPART
 	global SECOURS_FENETRE_H, SECOURS_NB_MIN, SECOURS_NB_MAX
-	global AUBERGE_NUIT_COUT_CUIVRE, AUBERGE_NUIT_PASSES_ATELIER, TRAVERSEE_PAS_MS
+	global AUBERGE_NUIT_COUT_CUIVRE, AUBERGE_NUIT_PASSES_ATELIER, TRAVERSEE_PAS_MS, CLIC_PORTEE_MAX
 	global PORTAIL_FENETRE_MINUTES, PORTAIL_SEUILS_OUVERTS
 	global MAREE_PERIODE_S, MAREE_FENETRE_S, MAREE_REFERENCE_EPOCH
 	global AUBERGE_MESSAGE_DUREE_SECONDES, AUBERGE_TABLE_MESSAGES_MAX
@@ -1546,6 +1552,7 @@ def load_world_variables() -> dict:
 	# Plancher à 150 ms : en dessous, l'animation de caméra (`--map-anim`) n'a plus le temps
 	# de montrer la case avant la suivante.
 	TRAVERSEE_PAS_MS = max(150, int(v.get("TRAVERSEE_PAS_MS", TRAVERSEE_PAS_MS)))
+	CLIC_PORTEE_MAX = max(1, int(v.get("CLIC_PORTEE_MAX", CLIC_PORTEE_MAX)))
 	PORTAIL_FENETRE_MINUTES = max(1, int(v.get("PORTAIL_FENETRE_MINUTES", PORTAIL_FENETRE_MINUTES)))
 	PORTAIL_SEUILS_OUVERTS = max(1, int(v.get("PORTAIL_SEUILS_OUVERTS", PORTAIL_SEUILS_OUVERTS)))
 	# Planchers : une période nulle diviserait par zéro ; la fenêtre reste dans la période.
