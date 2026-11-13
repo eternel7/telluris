@@ -1008,15 +1008,13 @@ html.vue-portrait .bv-ligne.kg .bv-jauge { height: 5px; }
 /* Mode « 🗺️ Flèches sur la carte » (menu ⚙️, comme /play) : `#move-controls` est DÉPLACÉ dans
    `#viewport` (`appliquerModePave`, jamais cloné) et prend `controls-carte` — chaque flèche sur
    un bord ou un coin, mêmes règles que `.viewport .controls-carte` de play_town. Le sablier
-   « Passer le tour » n'a pas d'autre place dans le combat : il se pose à côté du pivot droit,
-   dans un coin — jamais près du joueur (bas-centre), où il recouvrirait les jetons alliés
-   qu'on clique pour cibler : un clic manqué finirait le tour.
+   « Passer le tour » quitte le pavé pour le bandeau, à côté du numéro de tour (`#passer-tour`) :
+   sur la carte, il recouvrait les jetons qu'on clique pour cibler.
    ⚠️ Calque `pointer-events:none` : les jetons dessous restent cliquables, seuls les boutons
    rétablissent le clic. */
 .viewport .controls-carte {
 	position: absolute; inset: 0; z-index: 20;
 	--fleche: clamp(34px, calc(var(--step) * 0.9), 50px);
-	--fleche-gap: 6px;
 	grid-template-columns: repeat(3, 1fr);
 	grid-template-rows: repeat(3, 1fr);
 	/* Haut dégagé des deux pastilles FIXES (vitals à gauche, actions à droite, ~50 px de
@@ -1034,7 +1032,6 @@ html.vue-portrait .bv-ligne.kg .bv-jauge { height: 5px; }
 .viewport .controls-carte .btn:hover:not(:disabled) { background: rgba(0, 0, 0, 0.65); }
 .viewport .controls-carte .btn:active:not(:disabled) { background: rgba(0, 0, 0, 0.8); }
 .viewport .controls-carte .btn:disabled { background: rgba(0, 0, 0, 0.12); border-color: transparent; }
-.viewport .controls-carte .btn.center:disabled { opacity: 0.35; }
 /* Paysage : placement EXPLICITE par `data-sdx/sdy` (les pivots n'en ont pas : `data-sens`). */
 .viewport .controls-carte [data-sdx="-1"] { grid-column: 1; justify-self: start; }
 .viewport .controls-carte [data-sdx="0"]  { grid-column: 2; justify-self: center; }
@@ -1044,10 +1041,6 @@ html.vue-portrait .bv-ligne.kg .bv-jauge { height: 5px; }
 .viewport .controls-carte [data-sdy="1"]  { grid-row: 3; align-self: end; }
 .viewport .controls-carte .rot-btn[data-sens="-1"] { grid-column: 1; grid-row: 3; justify-self: start; align-self: end; }
 .viewport .controls-carte .rot-btn[data-sens="1"]  { grid-column: 3; grid-row: 3; justify-self: end; align-self: end; }
-.viewport .controls-carte #btn-passer {
-	grid-column: 3; grid-row: 3; justify-self: end; align-self: end;
-	transform: translateX(calc(-1 * (var(--fleche) + var(--fleche-gap))));
-}
 /* Portrait : la carte est tournée d'un quart de tour (le joueur à gauche regarde à droite).
    Le pavé flottant tourne d'un bloc (`rotate(90deg)` plus haut) ; posé sur la carte, il ne
    peut pas — la grille épouse le viewport, haut et étroit. Chaque bouton est donc REPLACÉ au
@@ -1068,7 +1061,6 @@ html.vue-portrait #move-controls.controls-carte {
 	bottom: calc(var(--barre-h, 0px) + 18px + 42px);
 }
 html.vue-portrait #move-controls.controls-carte .btn > svg { transform: rotate(90deg); }
-html.vue-portrait #move-controls.controls-carte #btn-passer > svg { transform: none; }
 html.vue-portrait .viewport .controls-carte [data-sdy="1"]  { grid-column: 1; justify-self: start; }
 html.vue-portrait .viewport .controls-carte [data-sdy="0"]  { grid-column: 2; justify-self: center; }
 html.vue-portrait .viewport .controls-carte [data-sdy="-1"] { grid-column: 3; justify-self: end; }
@@ -1077,10 +1069,18 @@ html.vue-portrait .viewport .controls-carte [data-sdx="0"]  { grid-row: 2; align
 html.vue-portrait .viewport .controls-carte [data-sdx="1"]  { grid-row: 3; align-self: end; }
 html.vue-portrait .viewport .controls-carte .rot-btn[data-sens="-1"] { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
 html.vue-portrait .viewport .controls-carte .rot-btn[data-sens="1"]  { grid-column: 1; grid-row: 3; justify-self: start; align-self: end; }
-html.vue-portrait .viewport .controls-carte #btn-passer {
-	grid-column: 1; grid-row: 3; justify-self: start; align-self: end;
-	transform: translateY(calc(-1 * (var(--fleche) + var(--fleche-gap))));
+/* Sablier dans le bandeau de tour (mode carte) : rond, au gabarit de l'écrou ⚙️ du même
+   bandeau. Hors du pavé, plus aucune règle `.controls .btn` ne le dessine. */
+.passer-tour { display: inline-flex; flex-shrink: 0; }
+.passer-tour:empty { display: none; }
+.passer-tour #btn-passer {
+	width: 32px; height: 32px; border-radius: 50%; padding: 0;
+	display: flex; align-items: center; justify-content: center;
+	background: #2a2a36; border: 1.5px solid var(--border-color); cursor: pointer;
 }
+.passer-tour #btn-passer:hover:not(:disabled) { border-color: var(--accent-color); }
+.passer-tour #btn-passer:disabled { opacity: 0.35; cursor: default; }
+.passer-tour #btn-passer > svg { width: 18px; height: 18px; }
 /* Séparateur du menu ⚙️ (comme `.affichage-sep` de /play) : pavé d'un côté, sons de l'autre. */
 .reglages-sep { display: block; height: 1px; margin: 4px 6px; background: var(--border-color); }
 /* ── Barre d'action : cases à positions STABLES ────────────────────────────────── */
@@ -1488,6 +1488,9 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 		<!-- Tour header + Initiative strip -->
 		<div class="tour-header">
 			<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span><span id="furtif-badge" style="visibility:hidden" title="Furtif : les ennemis marqués d'un œil barré ne vous ont pas repéré et ne viennent pas à vous. Frapper au corps à corps vous révèle à tous ; une attaque à distance laisse seulement à la cible une chance de vous repérer.">🥷</span></span>
+			<!-- Mode « Flèches sur la carte » : le sablier `#btn-passer` est DÉPLACÉ ici
+			     (`appliquerModePave`), à côté du numéro de tour. Vide en mode flottant. -->
+			<span class="passer-tour" id="passer-tour"></span>
 			<div id="initiative-strip">
 				{% for actor_id in combat.ordre_initiative %}
 					{% set active = 'active' if loop.index0 == combat.acteur_courant_index else '' %}
@@ -3294,13 +3297,20 @@ function appliquerModePave(mode) {
 	// ⚠️ Pas de script dans <head> pour poser ce mode plus tôt (comme /play) : les harnais
 	// dev/test_*_client.js lisent le PREMIER bloc <script> inline de ce template.
 	document.documentElement.classList.toggle('pave-carte', surCarte);
+	// Sablier : à côté du numéro de tour en mode carte, au CENTRE du pavé sinon (devant la
+	// flèche →, qui le suit dans la grille 3×3). Même nœud, jamais cloné.
+	const passer = document.getElementById('btn-passer');
+	const slotTour = document.getElementById('passer-tour');
 	if (surCarte) {
 		carte.appendChild(controls);
 		controls.classList.add('controls-carte');
+		if (passer && slotTour) slotTour.appendChild(passer);
 		section.hidden = true;
 	} else {
 		section.appendChild(controls);
 		controls.classList.remove('controls-carte');
+		const droite = controls.querySelector('[data-sdx="1"][data-sdy="0"]');
+		if (passer && droite) controls.insertBefore(passer, droite);
 		section.hidden = false;
 		// APRÈS l'affichage : un panneau caché n'a pas de taille, sa place serait fausse.
 		if (window._combatReady) _placerPaveParDefaut();
@@ -4009,7 +4019,7 @@ function updateButtons(data) {
 	// rallume tout (et `doAction` qui couvre les jetons/badges, dont le clic ne passe pas
 	// par `disabled`).
 	if (revealing) {
-		document.querySelectorAll('#move-controls .btn, .action-btn, .slot-btn')
+		document.querySelectorAll('#move-controls .btn, #btn-passer, .action-btn, .slot-btn')
 			.forEach(el => el.disabled = true);
 		return;
 	}
@@ -4784,7 +4794,7 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 	// fin de l'action si le même membre garde la main (`finally`), sinon avec `/acteur`.
 	if (type === 'passer') _effacerPalierCharge();
 	busy = true;
-	document.querySelectorAll('#move-controls .btn, .action-btn, .slot-btn')
+	document.querySelectorAll('#move-controls .btn, #btn-passer, .action-btn, .slot-btn')
 		.forEach(el => el.disabled = true);
 	try {
 		const res = await fetch(`/api/combat/${SERVER_DATA.combat_id}/action`, {
