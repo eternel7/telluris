@@ -185,4 +185,18 @@ test('rangements : l\'associé dépose, ne prend que s\'il est autorisé ; seul 
 	assert.ok(!colons.includes('<script>') && /disabled/.test(colons) && colons.includes('3 colon'));
 });
 
+test('boutiques : une ligne « Acheter » par métier, sans bois ni matériaux, à part des bâtiments', () => {
+	const d = gerant('fondateur', { catalogue: [
+		{ id: 'habitation', nature: 'repere', label: 'Habitation', icone: '🏠', description: '', prix: 5000, bois: 10, materiaux: 2, refus: '', categorie: null },
+		{ id: 'boutique', nature: 'sous_lieu', label: MECHANT, icone: '🍞', description: '', prix: 20000, bois: 0, materiaux: 0, refus: '', categorie: 'boulangerie', grande: false },
+		{ id: 'boutique', nature: 'sous_lieu', label: 'Grande boulangerie', icone: '🍞', description: '', prix: 200000, bois: 0, materiaux: 0, refus: 'palier', categorie: 'grande_boulangerie', grande: true }],
+		purse: { cuivre: 999999 } });
+	const html = colOngletBatimentsHtml(d);
+	assert.ok(!html.includes('<script>') && html.includes('Boutiques — comme en ville'));
+	assert.strictEqual((html.match(/>Acheter</g) || []).length, 2);
+	assert.ok(html.includes('data-categorie="boulangerie"') && html.includes('grande maison'));
+	assert.ok(/data-categorie="grande_boulangerie" disabled/.test(html), 'la grande maison attend son palier');
+	assert.ok(!html.includes('col-categorie'), 'plus de sélecteur de métier');
+});
+
 console.log(`OK — ${n} tests du panneau de colonisation.`);

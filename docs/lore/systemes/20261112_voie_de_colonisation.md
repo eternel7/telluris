@@ -254,6 +254,7 @@ Arrêté le 12/11/2026, par questionnaire. L'implantation se joue comme une vill
 
 - **Pose libre** : toute case marchable et libre, hors entrées ; un bâtiment par case.
 - Geste : **« Poser ici »**. On marche jusqu'à la case, on choisit le bâtiment dans le panneau, il se pose sous ses pieds. Un refus (case prise, entrée) se dit en toast.
+- **Boutiques** (Auteur, 13/11) : achetées **une par une**, puis posées ; elles fonctionnent **exactement comme dans une ville** — leur marchand les tient aussitôt, aucun PNJ à engager.
 - L'**icône** du bâtiment s'affiche à proximité, comme l'enseigne d'une boutique en cité.
 - **Déplacer** : même geste, disponible en tout temps.
 
@@ -305,7 +306,7 @@ Précise le § 10. Tous voient la même carte et les mêmes icônes.
 | Sécurité et moral dérivés, feu à deux réglages, repos au feu (§ 5) | — |
 | Menace par étapes, attaque jouée aux côtés des gardes ou résolue en l'absence, tanière à vider, rattrapage plafonné (§ 6) | — |
 | Quatre stocks, santé (§ 7) | — |
-| PNJ nommés, population comptée, repères ; boutique, atelier, auberge, étable où l'on entre ; vente de la production aux boutiques du lieu, négociant et son personnel (§ 8) | — |
+| PNJ nommés, population comptée, repères ; boutiques achetées une par une et tenues comme en ville (dont auberge, étable, grandes maisons dès le Bourg) ; vente de la production aux boutiques du lieu, négociant et son personnel (§ 8) | — |
 | Guilde du joueur : échelons, maison, membres fondateurs, recrues, expéditions, matériel commun (§ 9) | — |
 | Visiteur, soutien, associé ; dons, besoins, financement, pose, prix de faveur, entrepôt commun, coffre, colons escortés (§ 10) | — |
 | Lieu modèle en lien pur, choix par tags, pose libre, changement de palier, panneau (§ 12) | images définitives des modèles génériques (prompts : `docs/prompts_images.md` § 6) et leurs grilles |

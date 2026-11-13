@@ -101,22 +101,25 @@ DEFAUTS = {
 		{"id": "ferme", "label": "Ferme", "icone": "🌾", "nature": REPERE, "palier_min": "hameau",
 		 "prix_cuivre": 10000, "bois": 20, "materiaux": 5, "postes": {"agriculteur": 2, "eleveur": 1, "pecheur": 1},
 		 "description": "Cultures, élevage et pêche nourrissent le lieu."},
-		# Sous-lieux : `categorie` fixe, ou choisie à la construction parmi les métiers des
-		# FAMILLES d'enseigne (`enseignes_icones.METIERS`) dont le marchand générique existe.
+		# Boutiques (Auteur, 13/11) : achetées UNE PAR UNE, posées, et elles fonctionnent EXACTEMENT
+		# comme en ville (`comme_en_ville`) : une boutique de cité, son tenancier générique, aucun
+		# PNJ à engager, aucun bois ni matériau. `toutes_categories` : chaque métier de cité
+		# (marchand générique et image présents) est un achat ; une grande maison coûte
+		# `prix_grande_maison` et attend `palier_grande_maison`.
 		{"id": "etable", "label": "Étable", "icone": "🐴", "nature": SOUS_LIEU, "palier_min": "bourgade",
-		 "prix_cuivre": 20000, "bois": 30, "materiaux": 10, "postes": {"palefrenier": 1}, "categorie": "etable",
-		 "description": "Un palefrenier y tient l'écurie : montures à vendre."},
+		 "prix_cuivre": 20000, "bois": 0, "materiaux": 0, "categorie": "etable", "comme_en_ville": True,
+		 "description": "Une étable comme en ville : montures et harnachement."},
 		{"id": "auberge", "label": "Auberge", "icone": "🍺", "nature": SOUS_LIEU, "palier_min": "bourgade",
-		 "prix_cuivre": 30000, "bois": 40, "materiaux": 15, "postes": {"aubergiste": 1}, "categorie": "auberge",
-		 "description": "Salle commune, tableau d'information et chambres : un aubergiste la tient."},
+		 "prix_cuivre": 30000, "bois": 0, "materiaux": 0, "categorie": "auberge", "comme_en_ville": True,
+		 "description": "Une auberge comme en ville : salle commune, tableau d'information, nuit."},
 		{"id": "boutique", "label": "Boutique", "icone": "🧺", "nature": SOUS_LIEU, "palier_min": "bourgade",
-		 "prix_cuivre": 20000, "bois": 30, "materiaux": 10, "postes": {"marchand": 1},
-		 "familles": ["vivres", "savoir"],
-		 "description": "Un marchand y vend et y achète ; elle rachète aussi la production du lieu."},
+		 "prix_cuivre": 20000, "bois": 0, "materiaux": 0, "comme_en_ville": True, "toutes_categories": True,
+		 "prix_grande_maison": 200000, "palier_grande_maison": "bourg",
+		 "description": "Une boutique comme en ville : elle vend, achète, fabrique et prend commande."},
+		# Ancien atelier à métier choisi : fondu dans `boutique` (chaque atelier de cité y est un achat).
 		{"id": "atelier", "label": "Atelier", "icone": "⚒️", "nature": SOUS_LIEU, "palier_min": "bourgade",
-		 "prix_cuivre": 25000, "bois": 30, "materiaux": 20, "postes": {"artisan": 1},
-		 "familles": ["armes", "soins", "artisanat"],
-		 "description": "Un artisan y fabrique sur place, puise et reverse au flux du lieu, prend commande."},
+		 "prix_cuivre": 25000, "bois": 0, "materiaux": 0, "comme_en_ville": True, "catalogue": False,
+		 "familles": ["armes", "soins", "artisanat"]},
 		# La maison de la guilde du joueur (§ 9) : née avec la guilde (jamais au catalogue), posée
 		# comme tout sous-lieu ; tenue par le fondateur lui-même, elle n'attend aucun tenancier.
 		# Ses spécialistes ne servent qu'à partir de l'échelon qui les ouvre.
@@ -1016,11 +1019,29 @@ def categories_possibles(reg: dict, type_id, disponibles) -> list:
 	bdef = batiment_def(reg, type_id) or {}
 	if bdef.get("categorie"):
 		return [bdef["categorie"]]
+	if bdef.get("toutes_categories"):
+		return sorted(c for c in set(disponibles or ()) if c not in ("auberge", "etable"))
 	familles = set(bdef.get("familles") or [])
 	grandes = set(character_stats.LIEU_CATEGORIES_FUSION or {})
 	return sorted(c for c, (famille, _i, _l) in enseignes_icones.METIERS.items()
 				  if famille in familles and c in set(disponibles or ()) and c not in grandes
 				  and c not in ("auberge", "etable") and c not in character_stats.CATEGORIES_NEGOCE)
+
+
+def _choisit_metier(bdef: dict) -> bool:
+	return bool(bdef.get("familles") or bdef.get("toutes_categories"))
+
+
+def est_grande_maison(categorie) -> bool:
+	from models import character_stats
+	return categorie in (character_stats.LIEU_CATEGORIES_FUSION or {})
+
+
+def prix_batiment(bdef: dict, categorie=None) -> int:
+	"""Prix d'achat : celui du bâtiment, ou de la grande maison pour une boutique qui en est une."""
+	if categorie and bdef.get("toutes_categories") and est_grande_maison(categorie):
+		return _int(bdef.get("prix_grande_maison"), _int(bdef.get("prix_cuivre")))
+	return _int(bdef.get("prix_cuivre"))
 
 
 def libelle_metier(categorie) -> str:
@@ -1042,9 +1063,13 @@ def peut_construire(imp: dict, reg: dict, type_id, categorie=None, disponibles=(
 	if not palier_atteint(reg, imp.get("palier"), bdef.get("palier_min")):
 		p = palier_def(reg, bdef.get("palier_min")) or {}
 		return False, f"Ce bâtiment s'ouvre au palier {p.get('label', bdef.get('palier_min'))}."
-	if bdef.get("familles") and categorie is not None \
+	if (bdef.get("familles") or bdef.get("toutes_categories")) and categorie is not None \
 			and categorie not in categories_possibles(reg, type_id, disponibles):
 		return False, "Ce métier ne peut pas s'y tenir."
+	if categorie and bdef.get("toutes_categories") and est_grande_maison(categorie) \
+			and not palier_atteint(reg, imp.get("palier"), bdef.get("palier_grande_maison")):
+		p = palier_def(reg, bdef.get("palier_grande_maison")) or {}
+		return False, f"Une grande maison s'ouvre au palier {p.get('label', bdef.get('palier_grande_maison'))}."
 	manque = _stocks_suffisants(imp, bdef)
 	return (False, manque) if manque else (True, "")
 
@@ -1060,8 +1085,31 @@ def construire(imp: dict, reg: dict, type_id, now: int | None = None, categorie=
 		b["categorie"] = bdef.get("categorie") or categorie
 	imp.setdefault("batiments", []).append(b)
 	noter(imp, f"Construction : {bdef.get('label', type_id)}"
-			   + (f" ({libelle_metier(b['categorie'])})" if b.get("categorie") and bdef.get("familles") else "") + ".", now)
+			   + (f" ({libelle_metier(b['categorie'])})" if b.get("categorie") and _choisit_metier(bdef) else "") + ".", now)
 	return b
+
+
+def catalogue_achats(imp: dict, reg: dict, disponibles=()) -> list:
+	"""Ce qui s'achète, une ligne par achat : chaque bâtiment, et — pour la boutique — chaque
+	métier de cité (Auteur, 13/11 : « on les achète un par un »), avec le pictogramme de son
+	enseigne. `categorie` part dans le corps de `construire`."""
+	from utils import enseignes_icones
+	out = []
+	for d in reg.get("batiments_def") or []:
+		if d.get("nature") not in NATURES_OUVERTES or not d.get("catalogue", True):
+			continue
+		base = {"id": d.get("id"), "nature": d.get("nature"), "description": d.get("description", ""),
+				"bois": _int(d.get("bois")), "materiaux": _int(d.get("materiaux"))}
+		if _choisit_metier(d):
+			for c in categories_possibles(reg, d.get("id"), disponibles):
+				out.append({**base, "categorie": c, "label": libelle_metier(c),
+							"icone": (enseignes_icones.METIERS.get(c) or (None, d.get("icone")))[1] or d.get("icone"),
+							"grande": est_grande_maison(c), "prix": prix_batiment(d, c),
+							"refus": peut_construire(imp, reg, d.get("id"), c, disponibles)[1]})
+		else:
+			out.append({**base, "categorie": None, "label": d.get("label"), "icone": d.get("icone"),
+						"grande": False, "prix": prix_batiment(d), "refus": peut_construire(imp, reg, d.get("id"))[1]})
+	return out
 
 
 # ── Sous-lieux : où l'on entre (§ 12.4) ──────────────────────────────────────────────
@@ -1078,7 +1126,7 @@ def creer_sous_lieu(imp: dict, b: dict, reg: dict, image: str) -> tuple[dict, di
 	ident = uuid.uuid4().hex[:12]
 	cat = b.get("categorie") or bdef.get("categorie")
 	lieu = {"_id": f"{PREFIXE_SOUS_LIEU}{ident}", "type": "lieu",
-			"label": f"{libelle_metier(cat) if bdef.get('familles') else bdef.get('label', '')} de {imp.get('label', '')}",
+			"label": f"{libelle_metier(cat) if _choisit_metier(bdef) else bdef.get('label', '')} de {imp.get('label', '')}",
 			"image": image, "categorie": cat, "lieu_parent": imp["_id"], "colonie": imp["_id"],
 			"batiment": b["id"], "pnj": [], "stock_matieres": {}, "stock_vente": []}
 	if bdef.get("sans_tenancier"):
@@ -1108,9 +1156,23 @@ def tenancier(imp: dict, reg: dict, employes: list, bid) -> dict | None:
 	return next((e for e in au_poste(imp, reg, employes) if e.get("poste") == bid), None)
 
 
+def pnj_comme_en_ville(lieu: dict, modele: dict | None, reg: dict) -> list:
+	"""Le tenancier d'une boutique COMME EN VILLE : le marchand générique du métier
+	(`pnj:marchand_<cat>`), sous son propre nom et son visage. L'auberge n'en porte pas (aucun
+	aubergiste générique) ; l'étable vend ses montures."""
+	cat = lieu.get("categorie")
+	if cat == "auberge" or not modele:
+		return []
+	entree = {"character": modele.get("_id") or f"pnj:marchand_{cat}", "nom": modele.get("nom", ""),
+			  "portrait": modele.get("portrait", "")}
+	if cat == "etable":
+		entree["montures"] = list(reg.get("montures_etable") or [])
+	return [entree]
+
+
 def pnj_du_sous_lieu(lieu: dict, e: dict | None, reg: dict) -> list:
-	"""L'entrée `pnj` du sous-lieu : le marchand générique du métier, sous le nom et le visage du
-	PNJ nommé. L'auberge n'en porte pas (aucun aubergiste générique) ; l'étable vend ses montures."""
+	"""L'entrée `pnj` d'un sous-lieu tenu par un PNJ NOMMÉ : le marchand générique du métier, sous
+	le nom et le visage de ce PNJ. L'auberge n'en porte pas ; l'étable vend ses montures."""
 	cat = lieu.get("categorie")
 	if not e or cat == "auberge":
 		return []
@@ -1130,7 +1192,8 @@ def synchroniser_tenanciers(imp: dict, reg: dict, employes: list, get_doc_fn) ->
 		lieu = get_doc_fn(b["lieu"])
 		if not lieu:
 			continue
-		if (batiment_def(reg, b.get("type")) or {}).get("sans_tenancier"):
+		bdef_b = batiment_def(reg, b.get("type")) or {}
+		if bdef_b.get("sans_tenancier") or bdef_b.get("comme_en_ville"):
 			continue
 		voulu = pnj_du_sous_lieu(lieu, tenancier(imp, reg, employes, b["id"]), reg)
 		if lieu.get("pnj") != voulu:
@@ -1151,7 +1214,8 @@ def sous_lieu_ouvert(lieu_doc: dict, get_doc_fn) -> tuple[bool, str]:
 		return False, "Ce bâtiment n'existe plus."
 	if b.get("endommage"):
 		return False, "Ce bâtiment est endommagé : il attend sa réparation."
-	if (batiment_def(reg, b.get("type")) or {}).get("sans_tenancier"):
+	bdef_b = batiment_def(reg, b.get("type")) or {}
+	if bdef_b.get("sans_tenancier") or bdef_b.get("comme_en_ville"):
 		return True, ""
 	if not tenancier(imp, reg, employes_effectifs(imp, get_doc_fn), b["id"]):
 		return False, "Personne n'y tient le comptoir : c'est fermé."
@@ -2396,7 +2460,10 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 		"attaque_en_cours": bool(imp.get("attaque_en_cours")),
 		"sous_lieux": [{"label": (batiment_def(reg, b.get("type")) or {}).get("label", ""),
 						"metier": libelle_metier(b.get("categorie")), "pos": b.get("pos"),
-						"ouvert": bool(tenancier(imp, reg, employes, b["id"])) and not b.get("endommage")}
+						"ouvert": not b.get("endommage") and (
+							bool((batiment_def(reg, b.get("type")) or {}).get("comme_en_ville")
+								 or (batiment_def(reg, b.get("type")) or {}).get("sans_tenancier"))
+							or bool(tenancier(imp, reg, employes, b["id"])))}
 					   for b in imp.get("batiments") or [] if b.get("lieu")],
 	}
 	if role not in (FONDATEUR, ASSOCIE):
@@ -2416,7 +2483,7 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 		"batiments": [{
 			"id": b["id"], "type": b.get("type"), "pos": b.get("pos"), "endommage": bool(b.get("endommage")),
 			"label": (batiment_def(reg, b.get("type")) or {}).get("label", "")
-			+ (f" — {libelle_metier(b['categorie'])}" if b.get("categorie") and (batiment_def(reg, b.get("type")) or {}).get("familles") else ""),
+			+ (f" — {libelle_metier(b['categorie'])}" if b.get("categorie") and _choisit_metier(batiment_def(reg, b.get("type")) or {}) else ""),
 			"nature": (batiment_def(reg, b.get("type")) or {}).get("nature"),
 			"icone": (batiment_def(reg, b.get("type")) or {}).get("icone", ""),
 			"postes": [{"metier": m, "label": (metier_def(reg, cat_proprietes, m) or {}).get("label", m), "places": n,
@@ -2425,14 +2492,7 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 								  for e in par_poste.get(b["id"], []) if e.get("metier") == m]}
 					   for bid, m, n in postes(imp, reg) if bid == b["id"]],
 		} for b in imp.get("batiments") or []],
-		"catalogue": [{
-			"id": d.get("id"), "label": d.get("label"), "icone": d.get("icone"), "nature": d.get("nature"),
-			"description": d.get("description", ""), "prix": _int(d.get("prix_cuivre")),
-			"bois": _int(d.get("bois")), "materiaux": _int(d.get("materiaux")),
-			"refus": peut_construire(imp, reg, d.get("id"))[1],
-			"categories": ([{"id": c, "label": libelle_metier(c)} for c in categories_possibles(reg, d.get("id"), disponibles)]
-						   if d.get("familles") else []),
-		} for d in reg.get("batiments_def") or [] if d.get("nature") in NATURES_OUVERTES and d.get("catalogue", True)],
+		"catalogue": catalogue_achats(imp, reg, disponibles),
 		"fortifications": [{
 			"id": f.get("id"), "label": f.get("label"), "prix": _int(f.get("prix_cuivre")),
 			"bois": _int(f.get("bois")), "materiaux": _int(f.get("materiaux")), "defense": _num(f.get("defense")),

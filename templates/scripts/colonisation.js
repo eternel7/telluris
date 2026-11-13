@@ -295,12 +295,18 @@ function colOngletBatimentsHtml(d) {
 		<div class="prop-liste">${bat || '<div class="sell-empty">Aucun bâtiment.</div>'}</div></section>`;
 	if (d.role === 'fondateur') {
 		const bourse = _purseEnCuivre(d.purse);
-		html += `<section class="prop-section"><h3>🛠️ Construire</h3><div class="prop-liste">` + (d.catalogue || []).map(c => `<div class="prop-ligne"><div class="prop-txt">
-			<strong>${_colE(c.icone)} ${_colE(c.label)}</strong><span class="q-desc">${_colE(c.description)}</span>
-			<span class="sell-prix">💰 ${_prixTexte(c.prix)} · 🪵 ${_colE(c.bois)} · 🧱 ${_colE(c.materiaux)}</span>
+		// Une ligne par achat (Auteur, 13/11) : chaque bâtiment, puis chaque boutique de cité.
+		const ligne = c => `<div class="prop-ligne"><div class="prop-txt">
+			<strong>${_colE(c.icone)} ${_colE(c.label)}${c.grande ? ' — grande maison' : ''}</strong>${c.categorie ? '' : `<span class="q-desc">${_colE(c.description)}</span>`}
+			<span class="sell-prix">💰 ${_prixTexte(c.prix)}${c.bois || c.materiaux ? ` · 🪵 ${_colE(c.bois)} · 🧱 ${_colE(c.materiaux)}` : ''}</span>
 			${c.refus ? `<span class="q-desc">⚠️ ${_colE(c.refus)}</span>` : ''}</div>
-			${(c.categories || []).length ? `<select class="col-categorie" data-type="${_colE(c.id)}">${c.categories.map(k => `<option value="${_colE(k.id)}">${_colE(k.label)}</option>`).join('')}</select>` : ''}
-			<button class="sh-drop-btn" data-type="${_colE(c.id)}" ${c.refus || c.prix > bourse ? 'disabled' : ''} onclick="colConstruire(this)">Construire</button></div>`).join('') + `</div></section>`;
+			<button class="sh-drop-btn" data-type="${_colE(c.id)}" data-categorie="${_colE(c.categorie || '')}" ${c.refus || c.prix > bourse ? 'disabled' : ''} onclick="colConstruire(this)">${c.nature === 'sous_lieu' ? 'Acheter' : 'Construire'}</button></div>`;
+		const batiments = (d.catalogue || []).filter(c => c.nature !== 'sous_lieu');
+		const boutiques = (d.catalogue || []).filter(c => c.nature === 'sous_lieu');
+		html += `<section class="prop-section"><h3>🛠️ Construire</h3><div class="prop-liste">${batiments.map(ligne).join('')}</div></section>`;
+		if (boutiques.length) html += `<section class="prop-section"><h3>🏪 Boutiques — comme en ville</h3>
+			<span class="q-desc">Achetées une par une, posées sous vos pieds ; leur marchand les tient aussitôt.</span>
+			<div class="prop-liste">${boutiques.map(ligne).join('')}</div></section>`;
 		html += colNegoceHtml(d);
 	}
 	return html;
@@ -439,10 +445,9 @@ function colDonner(btn) {
 }
 function colFeu(btn) { _colAction('api/colonisation/feu', { reglage: btn.dataset.reglage }); }
 function colConstruire(btn) {
-	// Le métier d'un sous-lieu est LU dans son sélecteur (jamais interpolé dans un onclick).
-	const sel = document.querySelector(`select.col-categorie[data-type="${btn.dataset.type}"]`);
-	_colAction('api/colonisation/construire', { type: btn.dataset.type, categorie: sel ? sel.value : null },
-		() => showToast('Bâtiment prêt : marchez jusqu\'à sa case, puis « Poser ici ».'));
+	// Le métier voyage en `data-*` (jamais interpolé dans un onclick).
+	_colAction('api/colonisation/construire', { type: btn.dataset.type, categorie: btn.dataset.categorie || null },
+		() => showToast('Acheté : marchez jusqu\'à sa case, puis « Poser ici ».'));
 }
 // Combat joué (§ 6) : la défense du lieu attaqué, la tanière localisée. On part au combat.
 async function colDefendre() {

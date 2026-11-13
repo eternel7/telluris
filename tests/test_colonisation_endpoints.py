@@ -330,44 +330,39 @@ def test_hors_d_une_implantation_les_routes_du_lieu_refusent(monde):
 	assert _refus(monde, _perso(), rc.donner, None, {"index": 0}) == 403
 
 
-def test_un_sous_lieu_se_construit_se_pose_et_ouvre_avec_son_tenancier(monde):
+def test_une_boutique_s_achete_se_pose_et_ouvre_comme_en_ville(monde):
 	rc = monde["rc"]
 	reg = _reg(monde)
-	monde["docs"]["pnj:marchand_boulangerie"] = {"_id": "pnj:marchand_boulangerie", "type": "pnj", "nom": "Aubry"}
+	monde["docs"]["pnj:marchand_boulangerie"] = {"_id": "pnj:marchand_boulangerie", "type": "pnj",
+												 "nom": "Maître Fromond", "portrait": "humain_m_guerrier01.jpg"}
 	fondateur = _perso(**{"or": 1000})
 	imp_id = _fonder(monde, fondateur)
-	monde["docs"][imp_id].update(palier="bourgade", stocks={"nourriture": 50, "bois": 500, "materiaux": 500, "medicaments": 0})
+	monde["docs"][imp_id].update(palier="bourgade", stocks={"nourriture": 50, "bois": 0, "materiaux": 0, "medicaments": 0})
 	ici = _appel(monde, fondateur, rc.ici, None)
-	boutique = next(c for c in ici["catalogue"] if c["id"] == "boutique")
-	assert boutique["categories"] == [{"id": "boulangerie", "label": "Boulangerie"}]
-	assert _refus(monde, fondateur, rc.construire, None, {"type": "boutique"}) == 409          # métier à choisir
+	[ligne] = [c for c in ici["catalogue"] if c["id"] == "boutique"]
+	assert ligne["categorie"] == "boulangerie" and ligne["label"] == "Boulangerie" and not ligne["refus"]
+	assert _refus(monde, fondateur, rc.construire, None, {"type": "boutique"}) == 409          # quel métier ?
 	assert _refus(monde, fondateur, rc.construire, None, {"type": "boutique", "categorie": "armurerie"}) == 409
+	avant = money_to_cuivre(fondateur)
 	bid = _appel(monde, fondateur, rc.construire, None, {"type": "boutique", "categorie": "boulangerie"})["construit"]
+	assert money_to_cuivre(fondateur) == avant - ligne["prix"]                                 # sans bois ni matériaux
 	fondateur["position"] = {"x": 4, "y": 4}
 	rep = _appel(monde, fondateur, rc.poser, None, {"batiment": bid})
 	b = col.batiment(monde["docs"][imp_id], bid)
 	lieu, lien = monde["docs"][b["lieu"]], monde["docs"][b["lien"]]
 	assert lieu["categorie"] == "boulangerie" and lieu["lieu_parent"] == imp_id and lieu["image"].startswith("boulangerie_europe")
 	assert lien["nodes"][0] == {"lieu": imp_id, "pos": [4, 4]} and "links" in rep
-	assert lieu["pnj"] == [] and not col.sous_lieu_ouvert(lieu, monde["get"])[0]
+	assert lieu["pnj"] == [{"character": "pnj:marchand_boulangerie", "nom": "Maître Fromond",
+							"portrait": "humain_m_guerrier01.jpg"}]
+	assert col.sous_lieu_ouvert(lieu, monde["get"]) == (True, "")
 	# déplacer : la porte suit, aucun second lieu
 	fondateur["position"] = {"x": 6, "y": 5}
 	_appel(monde, fondateur, rc.poser, None, {"batiment": bid})
 	assert monde["docs"][b["lien"]]["nodes"][0]["pos"] == [6, 5]
 	assert len([d for d in monde["docs"] if d.startswith(col.PREFIXE_SOUS_LIEU)]) == 1
-	# engager le marchand : le sous-lieu ouvre sous son nom
-	tableau = _appel(monde, fondateur, rc.embauche, None)
-	cand = next(c for c in tableau["candidats"] if c["poste_nom"] == "Boutique")
-	_appel(monde, fondateur, rc.engager, None, {"candidat_id": cand["id"]})
-	lieu = monde["docs"][b["lieu"]]
-	assert lieu["pnj"][0]["character"] == "pnj:marchand_boulangerie" and lieu["pnj"][0]["nom"].startswith(cand["prenom"])
-	assert col.sous_lieu_ouvert(lieu, monde["get"]) == (True, "")
 	visiteur = _perso("v", lieu=imp_id, position={"x": 1, "y": 1})
-	assert any(s["ouvert"] for s in _appel(monde, visiteur, rc.ici, None)["sous_lieux"])
-	# renvoyé : fermé de nouveau
-	employe_id = next(e for e in monde["docs"][imp_id]["employes"])
-	_appel(monde, fondateur, rc.renvoyer, None, {"employe_id": employe_id})
-	assert monde["docs"][b["lieu"]]["pnj"] == []
+	assert any(x["ouvert"] for x in _appel(monde, visiteur, rc.ici, None)["sous_lieux"])
+	assert not _appel(monde, fondateur, rc.embauche, None)["candidats"]                       # rien à engager
 
 
 def test_la_caisse_se_releve_et_la_vente_se_regle_par_pnj(monde):

@@ -401,13 +401,11 @@
       "nature": "sous_lieu",
       "palier_min": "bourgade",
       "prix_cuivre": 20000,
-      "bois": 30,
-      "materiaux": 10,
-      "postes": {
-       "palefrenier": 1
-      },
+      "bois": 0,
+      "materiaux": 0,
       "categorie": "etable",
-      "description": "Un palefrenier y tient l'écurie : montures à vendre."
+      "comme_en_ville": true,
+      "description": "Une étable comme en ville : montures et harnachement."
      },
      {
       "id": "auberge",
@@ -416,13 +414,11 @@
       "nature": "sous_lieu",
       "palier_min": "bourgade",
       "prix_cuivre": 30000,
-      "bois": 40,
-      "materiaux": 15,
-      "postes": {
-       "aubergiste": 1
-      },
+      "bois": 0,
+      "materiaux": 0,
       "categorie": "auberge",
-      "description": "Salle commune, tableau d'information et chambres : un aubergiste la tient."
+      "comme_en_ville": true,
+      "description": "Une auberge comme en ville : salle commune, tableau d'information, nuit."
      },
      {
       "id": "boutique",
@@ -431,16 +427,13 @@
       "nature": "sous_lieu",
       "palier_min": "bourgade",
       "prix_cuivre": 20000,
-      "bois": 30,
-      "materiaux": 10,
-      "postes": {
-       "marchand": 1
-      },
-      "familles": [
-       "vivres",
-       "savoir"
-      ],
-      "description": "Un marchand y vend et y achète ; elle rachète aussi la production du lieu."
+      "bois": 0,
+      "materiaux": 0,
+      "comme_en_ville": true,
+      "toutes_categories": true,
+      "prix_grande_maison": 200000,
+      "palier_grande_maison": "bourg",
+      "description": "Une boutique comme en ville : elle vend, achète, fabrique et prend commande."
      },
      {
       "id": "atelier",
@@ -449,17 +442,15 @@
       "nature": "sous_lieu",
       "palier_min": "bourgade",
       "prix_cuivre": 25000,
-      "bois": 30,
-      "materiaux": 20,
-      "postes": {
-       "artisan": 1
-      },
+      "bois": 0,
+      "materiaux": 0,
+      "comme_en_ville": true,
+      "catalogue": false,
       "familles": [
        "armes",
        "soins",
        "artisanat"
-      ],
-      "description": "Un artisan y fabrique sur place, puise et reverse au flux du lieu, prend commande."
+      ]
      },
      {
       "id": "maison_guilde",

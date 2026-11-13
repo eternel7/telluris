@@ -137,20 +137,39 @@ def rattraper_ici(character: dict, imp: dict, reg: dict, role: str, site: dict, 
 	return evenements
 
 
-def categories_disponibles() -> list:
-	"""Métiers dont le marchand générique `pnj:marchand_<cat>` existe (tenancier d'un sous-lieu)."""
-	prefixe = "pnj:marchand_"
-	return sorted(d["_id"][len(prefixe):] for d in (find_docs({"type": "pnj"}, ["_id"]) or [])
-				  if str(d.get("_id", "")).startswith(prefixe))
+def _images_des_villes() -> dict:
+	"""{categorie: image} des boutiques de cité existantes (la première par `_id`) : une boutique
+	de colonie prend l'intérieur d'une boutique de ville du même métier."""
+	out = {}
+	for d in sorted(find_docs({"type": "lieu"}, ["_id", "categorie", "image"]) or [], key=lambda d: str(d.get("_id"))):
+		if d.get("categorie") and d.get("image") and os.path.exists(os.path.join(TOWNS_IMAGES_PATH, d["image"])):
+			out.setdefault(d["categorie"], d["image"])
+	return out
 
 
-def image_sous_lieu(categorie: str) -> str:
-	"""Première image `<categorie>_europe*` du dossier des villes (intérieur générique d'un métier)."""
+def image_sous_lieu(categorie: str, prefixe: str | None = None, images_villes: dict | None = None) -> str:
+	"""Image d'intérieur : la première `<prefixe ou categorie>_europe*` du dossier des villes, sinon
+	celle d'une boutique de cité du même métier."""
+	debut = prefixe or f"{categorie}_europe"
 	try:
-		fichiers = sorted(f for f in os.listdir(TOWNS_IMAGES_PATH) if f.startswith(f"{categorie}_europe"))
+		fichiers = sorted(f for f in os.listdir(TOWNS_IMAGES_PATH) if f.startswith(debut))
 	except OSError:
 		fichiers = []
-	return fichiers[0] if fichiers else ""
+	if fichiers:
+		return fichiers[0]
+	if prefixe:
+		return ""
+	return (images_villes if images_villes is not None else _images_des_villes()).get(categorie, "")
+
+
+def categories_disponibles() -> list:
+	"""Métiers achetables comme en ville : le marchand générique `pnj:marchand_<cat>` existe (il
+	tient la boutique) et une image d'intérieur aussi. L'auberge s'y ajoute (sans tenancier)."""
+	prefixe = "pnj:marchand_"
+	images = _images_des_villes()
+	cats = [d["_id"][len(prefixe):] for d in (find_docs({"type": "pnj"}, ["_id"]) or [])
+			if str(d.get("_id", "")).startswith(prefixe)]
+	return sorted(c for c in set(cats) if image_sous_lieu(c, images_villes=images))
 
 
 def _payload(character: dict, imp: dict, reg: dict, role: str, site: dict | None = None,
@@ -362,15 +381,16 @@ async def construire(current_user: Annotated[dict, Depends(get_current_user)], b
 	character, imp, reg, role = _ici(current_user)
 	_exiger(role, colonisation.FONDATEUR)
 	bdef = colonisation.batiment_def(reg, body.get("type")) or {}
-	categorie = body.get("categorie") if bdef.get("familles") else None
-	if bdef.get("familles") and not categorie:
-		raise HTTPException(status_code=409, detail="Choisissez le métier qui s'y tiendra.")
+	choix = bool(bdef.get("familles") or bdef.get("toutes_categories"))
+	categorie = body.get("categorie") if choix else None
+	if choix and not categorie:
+		raise HTTPException(status_code=409, detail="Choisissez le métier de la boutique.")
 	ok, raison = colonisation.peut_construire(imp, reg, body.get("type"), categorie, categories_disponibles())
 	if not ok:
 		raise HTTPException(status_code=409, detail=raison)
 	if bdef.get("nature") == colonisation.SOUS_LIEU and not image_sous_lieu(bdef.get("categorie") or categorie):
 		raise HTTPException(status_code=409, detail="Aucune image d'intérieur pour ce métier.")
-	prix = int(bdef.get("prix_cuivre") or 0)
+	prix = colonisation.prix_batiment(bdef, categorie)
 	if debit_character(character, prix) is None:
 		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi payer ce bâtiment.")
 	b = colonisation.construire(imp, reg, body["type"], categorie=categorie)
@@ -395,9 +415,13 @@ async def poser(current_user: Annotated[dict, Depends(get_current_user)], body: 
 	if bdef.get("nature") == colonisation.SOUS_LIEU:
 		if not b.get("lieu"):
 			# Première pose : le sous-lieu naît, avec sa porte sur cette case (vue de tous).
-			lieu, lien = colonisation.creer_sous_lieu(imp, b, reg, image_sous_lieu(b.get("categorie")))
-			employes = colonisation.employes_effectifs(imp, get_doc)
-			lieu["pnj"] = colonisation.pnj_du_sous_lieu(lieu, colonisation.tenancier(imp, reg, employes, b["id"]), reg)
+			lieu, lien = colonisation.creer_sous_lieu(imp, b, reg, image_sous_lieu(b.get("categorie"), bdef.get("image_prefixe")))
+			if bdef.get("comme_en_ville"):
+				# Comme en ville : le marchand générique du métier tient la boutique, tout de suite.
+				lieu["pnj"] = colonisation.pnj_comme_en_ville(lieu, get_doc(f"pnj:marchand_{lieu['categorie']}"), reg)
+			else:
+				employes = colonisation.employes_effectifs(imp, get_doc)
+				lieu["pnj"] = colonisation.pnj_du_sous_lieu(lieu, colonisation.tenancier(imp, reg, employes, b["id"]), reg)
 			annexes = [lieu, lien]
 		else:
 			lien = get_doc(b.get("lien") or "")

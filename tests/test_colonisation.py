@@ -773,8 +773,10 @@ def test_le_visiteur_lit_en_mots_le_fondateur_a_les_chiffres():
 	associe = col.vue(imp, reg, col.ASSOCIE, site, [], CAT_PROP, now=10)
 	assert "stocks" in associe and "journal" not in associe and "demandes" not in associe
 	# le catalogue ne montre que ce qui se construit, les sept paliers ont leur libellé de menace
+	# sans métier disponible, une boutique « toutes catégories » n'a aucune ligne d'achat
 	assert {c["id"] for c in fondateur["catalogue"]} == {d["id"] for d in reg["batiments_def"]
-														  if d["nature"] in col.NATURES_OUVERTES and d.get("catalogue", True)}
+														  if d["nature"] in col.NATURES_OUVERTES and d.get("catalogue", True)
+														  and not d.get("toutes_categories")}
 	assert set(reg["menace"]["attaque_proba"]) == {p["id"] for p in col.paliers(reg)}
 
 
@@ -802,22 +804,29 @@ def test_la_liste_des_lieux_ne_montre_d_une_implantation_que_le_public():
 DISPONIBLES = ["boulangerie", "armurerie", "grande_boulangerie", "negociant", "etable", "auberge", "inconnue"]
 
 
-def test_un_sous_lieu_tient_un_metier_de_ses_familles_d_enseigne():
-	from utils import enseignes_icones
+def test_chaque_boutique_de_cite_s_achete_une_par_une():
 	reg = _reg()
-	boutique = col.categories_possibles(reg, "boutique", DISPONIBLES)
-	atelier = col.categories_possibles(reg, "atelier", DISPONIBLES)
-	assert boutique == ["boulangerie"] and atelier == ["armurerie"]        # ni grande maison, ni négociant
-	assert all(enseignes_icones.METIERS[c][0] in col.batiment_def(reg, "atelier")["familles"] for c in atelier)
+	boutique = col.batiment_def(reg, "boutique")
+	assert col.categories_possibles(reg, "boutique", DISPONIBLES) == sorted(
+		c for c in DISPONIBLES if c not in ("auberge", "etable"))              # grandes maisons et négociant compris
 	assert col.categories_possibles(reg, "auberge", []) == ["auberge"]
-	imp = _imp(reg, "bourgade", stocks={"bois": 999, "materiaux": 999})
-	assert "métier" in col.peut_construire(imp, reg, "boutique", "armurerie", DISPONIBLES)[1]
-	assert col.peut_construire(imp, reg, "boutique", "boulangerie", DISPONIBLES) == (True, "")
+	imp = _imp(reg, "bourgade", stocks={"bois": 0, "materiaux": 0})
+	lignes = col.catalogue_achats(imp, reg, DISPONIBLES)
+	par_cat = {l["categorie"]: l for l in lignes if l["id"] == "boutique"}
+	assert set(par_cat) == set(col.categories_possibles(reg, "boutique", DISPONIBLES))
+	assert par_cat["boulangerie"]["prix"] == boutique["prix_cuivre"] and par_cat["boulangerie"]["refus"] == ""
+	assert par_cat["boulangerie"]["bois"] == par_cat["boulangerie"]["materiaux"] == 0   # acheté, sans stock
+	grande = par_cat["grande_boulangerie"]
+	assert grande["grande"] and grande["prix"] == boutique["prix_grande_maison"] and "palier" in grande["refus"]
+	assert col.peut_construire(_imp(reg, boutique["palier_grande_maison"]), reg, "boutique", "grande_boulangerie", DISPONIBLES)[0]
+	assert "métier" in col.peut_construire(imp, reg, "boutique", "etable", DISPONIBLES)[1]
+	assert "métier" in col.peut_construire(imp, reg, "boutique", "absente", DISPONIBLES)[1]
 	b = col.construire(imp, reg, "boutique", now=1, categorie="boulangerie")
 	assert b["categorie"] == "boulangerie" and "Boulangerie" in imp["journal"][-1]["texte"]
 	assert col.construire(imp, reg, "auberge", now=1)["categorie"] == "auberge"
 	assert "categorie" not in col.construire(imp, reg, "habitation", now=1)
 	assert col.libelle_metier("boulangerie") == "Boulangerie"
+	assert not any(l["id"] == "atelier" for l in lignes)                     # fondu dans la boutique
 
 
 def test_premiere_pose_d_un_sous_lieu_cree_le_lieu_et_sa_porte():
@@ -838,24 +847,23 @@ def test_premiere_pose_d_un_sous_lieu_cree_le_lieu_et_sa_porte():
 	assert marche.est_cite(imp) and not marche.est_cite(lieu)             # l'implantation EST sa cité
 
 
-def test_sans_pnj_au_poste_le_sous_lieu_est_ferme():
+def test_une_boutique_fonctionne_comme_en_ville_sans_pnj_a_engager():
 	reg = _reg()
 	imp = _imp(reg, "bourgade", stocks={"bois": 999, "materiaux": 999})
 	b = col.construire(imp, reg, "etable", now=1)
 	col.poser(imp, b["id"], [4, 4])
 	lieu, _ = col.creer_sous_lieu(imp, b, reg, "etable_europe01.png")
 	docs = {imp["_id"]: imp, lieu["_id"]: lieu}
-	assert "fermé" in col.sous_lieu_ouvert(lieu, docs.get)[1]
-	palefrenier = _employe(imp, "palefrenier", b["id"])
-	docs[palefrenier["_id"]] = palefrenier
-	assert col.sous_lieu_ouvert(lieu, docs.get) == (True, "")
-	[change] = col.synchroniser_tenanciers(imp, reg, [palefrenier], docs.get)
-	assert change["pnj"] == [{"character": "pnj:marchand_etable", "nom": "Aldo N0", "portrait": "",
-							  "montures": reg["montures_etable"]}]
-	assert col.synchroniser_tenanciers(imp, reg, [palefrenier], docs.get) == []     # déjà d'accord
+	assert col.sous_lieu_ouvert(lieu, docs.get) == (True, "")                # ouverte tout de suite
+	assert col.postes(imp, reg) == []                                       # aucun poste à pourvoir
+	modele = {"_id": "pnj:marchand_etable", "nom": "Throlgar", "portrait": "t.png"}
+	assert col.pnj_comme_en_ville(lieu, modele, reg) == [{"character": "pnj:marchand_etable", "nom": "Throlgar",
+														   "portrait": "t.png", "montures": reg["montures_etable"]}]
+	assert col.pnj_comme_en_ville({"categorie": "auberge"}, modele, reg) == []
+	lieu["pnj"] = col.pnj_comme_en_ville(lieu, modele, reg)
+	assert col.synchroniser_tenanciers(imp, reg, [], docs.get) == []         # son marchand reste
 	b["endommage"] = True
 	assert "endommagé" in col.sous_lieu_ouvert(lieu, docs.get)[1]
-	assert col.synchroniser_tenanciers(imp, reg, [palefrenier], docs.get)[0]["pnj"] == []
 	assert col.sous_lieu_ouvert({"_id": "lieu:auxerre", "categorie": "ville"}, docs.get) == (True, "")
 
 
