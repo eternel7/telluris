@@ -18,6 +18,7 @@ from db.config import get_doc, save_doc, find_docs
 from utils.auth import get_current_user
 from utils.characters import (
 	get_selected_character, cuivre_to_purse, money_to_cuivre, resolve_item_ref, item_ref_id, credit_character,
+	item_ref_weight,
 )
 from utils.marche import debit_character
 from utils import colonisation
@@ -165,6 +166,7 @@ def _payload(character: dict, imp: dict, reg: dict, role: str, site: dict | None
 	payload["position"] = character.get("position")
 	payload["dons_possibles"] = _dons_possibles(character, reg)
 	payload["reperes"] = colonisation.reperes_carte(imp, reg)
+	payload["guilde"] = _vue_guilde(character, imp, reg, employes)
 	if role == colonisation.FONDATEUR and colonisation.chantier_pret(imp) \
 			and imp["chantier"]["genre"] == colonisation.CHANTIER_STATUT:
 		# § 12.5 : le choix du modèle est reproposé — celui qui partage le plus de tags avec
@@ -423,7 +425,12 @@ async def chantier_ouvrir(current_user: Annotated[dict, Depends(get_current_user
 	character, imp, reg, role = _ici(current_user)
 	_exiger(role, colonisation.FONDATEUR)
 	employes = colonisation.employes_effectifs(imp, get_doc)
-	ok, raison, chantier = colonisation.peut_ouvrir_chantier(imp, reg, employes, body.get("genre"), body.get("objet"))
+	if body.get("genre") == colonisation.CHANTIER_GUILDE:
+		ok, raison, chantier = colonisation.peut_ouvrir_echelon(imp, reg)
+		if chantier and not colonisation.guilde_de(imp):
+			chantier["nom"] = colonisation.nettoyer_nom(body.get("nom"))      # nom de la guilde, au premier échelon
+	else:
+		ok, raison, chantier = colonisation.peut_ouvrir_chantier(imp, reg, employes, body.get("genre"), body.get("objet"))
 	if not ok:
 		raise HTTPException(status_code=409, detail=raison)
 	colonisation.ouvrir_chantier(imp, reg, chantier)
@@ -449,7 +456,8 @@ async def chantier_financer(current_user: Annotated[dict, Depends(get_current_us
 	if debit_character(character, montant) is None:
 		raise HTTPException(status_code=409, detail="Fonds insuffisants.")
 	colonisation.financer(imp, character, montant)
-	acheve = colonisation.achever_fortification(imp)
+	nom_guilde = (imp.get("chantier") or {}).get("nom")
+	acheve = colonisation.achever_fortification(imp) or colonisation.achever_guilde(imp, reg, nom_guilde)
 	_sauver(imp, character)
 	return _payload(character, imp, reg, role, extra={"verse": montant, "acheve": acheve})
 
@@ -707,6 +715,152 @@ async def negociant_livres(current_user: Annotated[dict, Depends(get_current_use
 		raise HTTPException(status_code=409, detail=raison)
 	_sauver(negociant)
 	return _payload(character, imp, reg, role, employes=employes, extra={"livres": gain})
+
+
+# ── La guilde du joueur (§ 9) ────────────────────────────────────────────────────────
+
+def _compagnons_envoyables(character: dict) -> list:
+	from utils import mercenaires
+	return [c for c in recrutement.groupe_effectif(character, get_doc) if not mercenaires.est_clone(c)]
+
+
+def _vue_guilde(character: dict, imp: dict, reg: dict, employes: list) -> dict:
+	vue = colonisation.vue_guilde(character, imp, reg, employes, _compagnons_envoyables(character))
+	if vue.get("coffre") is not None:
+		vue["sac"] = [{"index": i, "item_id": item_ref_id(r), "nom": (resolve_item_ref(r) or {}).get("nom", ""),
+					   "icon": (resolve_item_ref(r) or {}).get("icon", "")}
+					  for i, r in enumerate(character.get("inventaire") or [])]
+	return vue
+
+
+def _ici_guilde(current_user: dict) -> tuple[dict, dict, dict, str]:
+	"""Dans l'implantation OU dans sa maison de guilde (un sous-lieu de la colonie)."""
+	character = _personnage(current_user)
+	lieu = get_doc(character.get("lieu", "")) or {}
+	if colonisation.est_sous_lieu(lieu):
+		imp = get_doc(lieu["colonie"])
+		if not imp:
+			raise HTTPException(status_code=404, detail="Implantation introuvable.")
+		return character, imp, colonisation.regles(get_doc), colonisation.role_de(character, imp)
+	return _ici(current_user)
+
+
+def _payload_guilde(character: dict, imp: dict, reg: dict, extra: dict | None = None) -> dict:
+	payload = {"guilde": _vue_guilde(character, imp, reg, colonisation.employes_effectifs(imp, get_doc)),
+			   "purse": cuivre_to_purse(money_to_cuivre(character))}
+	if extra:
+		payload.update(extra)
+	return payload
+
+
+def _guilde_ou_409(imp: dict) -> dict:
+	g = colonisation.guilde_de(imp)
+	if not g:
+		raise HTTPException(status_code=409, detail="Ce lieu n'a pas encore de guilde.")
+	return g
+
+
+@colonisation_router.get("/colonisation/guilde")
+async def guilde(current_user: Annotated[dict, Depends(get_current_user)]):
+	character, imp, reg, _role = _ici_guilde(current_user)
+	return _payload_guilde(character, imp, reg)
+
+
+@colonisation_router.post("/colonisation/guilde/rejoindre")
+async def guilde_rejoindre(current_user: Annotated[dict, Depends(get_current_user)]):
+	character, imp, reg, _role = _ici_guilde(current_user)
+	ok, raison = colonisation.rejoindre(character, imp)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	_sauver(imp)
+	return _payload_guilde(character, imp, reg)
+
+
+@colonisation_router.post("/colonisation/guilde/quitter")
+async def guilde_quitter(current_user: Annotated[dict, Depends(get_current_user)]):
+	character, imp, reg, _role = _ici_guilde(current_user)
+	ok, raison = colonisation.quitter_guilde(character, imp)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	_sauver(imp)
+	return _payload_guilde(character, imp, reg)
+
+
+@colonisation_router.post("/colonisation/guilde/envoyer")
+async def guilde_envoyer(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Un membre envoie des compagnons de SON groupe en mission (résolue à leur retour)."""
+	character, imp, reg, _role = _ici_guilde(current_user)
+	_guilde_ou_409(imp)
+	par_id = {c["_id"]: c for c in _compagnons_envoyables(character)}
+	choisis = [par_id[i] for i in (body.get("compagnons") or []) if i in par_id]
+	if len(choisis) != len(body.get("compagnons") or []):
+		raise HTTPException(status_code=409, detail="Ce compagnon n'est pas dans votre groupe.")
+	mission = colonisation.mission_def(reg, body.get("mission"))
+	ok, raison = colonisation.peut_envoyer(character, imp, reg, mission, choisis)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	exp = colonisation.envoyer(character, imp, reg, colonisation.employes_effectifs(imp, get_doc), mission, choisis)
+	_sauver(*choisis, imp, character)
+	return _payload_guilde(character, imp, reg, {"envoyee": exp["id"]})
+
+
+@colonisation_router.post("/colonisation/guilde/accueillir")
+async def guilde_accueillir(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Le groupe revenu rejoint son membre : récompense moins la commission de la guilde."""
+	character, imp, reg, _role = _ici_guilde(current_user)
+	g = _guilde_ou_409(imp)
+	exp = next((e for e in g.get("expeditions") or [] if e.get("id") == body.get("expedition")), None)
+	if not exp:
+		raise HTTPException(status_code=404, detail="Cette expédition n'existe plus.")
+	compagnons = [c for c in (get_doc(i) for i in exp.get("compagnons") or [])
+				  if c and (c.get("en_mission") or {}).get("expedition") == exp["id"]]
+	libres = recrutement.taille_max_groupe() - recrutement.places_occupees(character, get_doc)
+	ok, raison, issue = colonisation.accueillir(character, imp, reg, colonisation.employes_effectifs(imp, get_doc),
+												exp["id"], compagnons, places_libres=libres)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	if issue["gain"]:
+		credit_character(character, issue["gain"])
+	_sauver(*compagnons, imp, character)
+	return _payload_guilde(character, imp, reg, {"issue": issue})
+
+
+@colonisation_router.post("/colonisation/guilde/coffre/deposer")
+async def guilde_coffre_deposer(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	character, imp, reg, _role = _ici_guilde(current_user)
+	g = _guilde_ou_409(imp)
+	if "coffre" not in colonisation.fonctions(imp, reg) or not colonisation.titre_de(character, imp):
+		raise HTTPException(status_code=403, detail="Le matériel commun est aux membres, dès la Demeure des aventuriers.")
+	refs = character.get("inventaire") or []
+	pos = proprietes.localiser(refs, body.get("index"), body.get("item_id"))
+	if pos is None:
+		raise HTTPException(status_code=404, detail="Objet absent de l'inventaire.")
+	poids = sum(item_ref_weight(r) for r in g.get("coffre") or []) + item_ref_weight(refs[pos])
+	if poids > colonisation.coffre_guilde_kg(imp, reg):
+		raise HTTPException(status_code=409, detail="Le coffre de la guilde est plein.")
+	g.setdefault("coffre", []).append(refs.pop(pos))
+	_sauver(imp, character)
+	return _payload_guilde(character, imp, reg, {"inventaire_payload": _inventory_payload(character)})
+
+
+@colonisation_router.post("/colonisation/guilde/coffre/retirer")
+async def guilde_coffre_retirer(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	character, imp, reg, _role = _ici_guilde(current_user)
+	g = _guilde_ou_409(imp)
+	if not colonisation.peut_retirer_coffre_guilde(character, imp):
+		raise HTTPException(status_code=403, detail="Seuls le maître et les membres fondateurs en retirent.")
+	refs = g.get("coffre") or []
+	try:
+		pos = int(body.get("index"))
+	except (TypeError, ValueError):
+		pos = -1
+	if not 0 <= pos < len(refs):
+		raise HTTPException(status_code=404, detail="Cet objet n'est plus au coffre.")
+	if not recrutement.peut_porter(character, refs[pos]):
+		raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage.")
+	character.setdefault("inventaire", []).append(refs.pop(pos))
+	_sauver(imp, character)
+	return _payload_guilde(character, imp, reg, {"inventaire_payload": _inventory_payload(character)})
 
 
 # ── Association (§ 10) ───────────────────────────────────────────────────────────────

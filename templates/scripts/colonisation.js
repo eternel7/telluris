@@ -333,15 +333,73 @@ function colOngletDefenseHtml(d) {
 	return html + `</div></section>` + colChantierHtml(d);
 }
 
-const COL_ONGLETS = [['site', '🧭 Site'], ['population', '👥 Population'], ['batiments', '🏘️ Bâtiments'], ['defense', '🛡️ Défense']];
+const COL_ONGLETS = [['site', '🧭 Site'], ['population', '👥 Population'], ['batiments', '🏘️ Bâtiments'], ['defense', '🛡️ Défense'], ['guilde', '🏰 Guilde']];
+const COL_TITRES = { maitre: 'Maître', fondateur: 'Membre fondateur', membre: 'Membre' };
+const COL_FONCTIONS = { recrutement: 'tableau de recrues', expeditions: 'expéditions', missions: 'missions et contrats',
+	specialistes: 'spécialistes', coffre: 'matériel commun', donjons: 'donjons alentour', defense: 'défense du lieu',
+	attraction: 'attire les habitants' };
+
+// La guilde du joueur (pure) : échelon, membres, missions, expéditions, matériel commun. `role`
+// = rôle dans l'IMPLANTATION (le fondateur ouvre les échelons) ; le titre dans la guilde décide du reste.
+function colGuildeHtml(g, role, purse) {
+	if (!g) return '';
+	let html = '';
+	if (!g.existe) {
+		const s = g.suivant;
+		if (!s) return '';
+		html += `<section class="prop-section"><h3>🏰 Fonder la guilde</h3><div class="prop-ligne"><div class="prop-txt">
+			<span class="q-desc">${_colE(s.label)} : s'ouvre au palier ${_colE(s.palier)}. Les associés d'alors en seront membres fondateurs.</span>
+			<span class="sell-prix">💰 ${_prixTexte(s.prix)}</span>
+			${s.refus ? `<span class="q-desc">⚠️ ${_colE(s.refus)}</span>` : ''}
+			${role === 'fondateur' && !s.refus ? '<input type="text" id="col-guilde-nom" maxlength="40" placeholder="Nom de la guilde (facultatif)">' : ''}</div>
+			${role === 'fondateur' ? `<button class="sh-drop-btn" ${s.refus ? 'disabled' : ''} onclick="colOuvrirGuilde()">Ouvrir le chantier</button>` : ''}</div></section>`;
+		return html;
+	}
+	const membres = (g.membres || []).map(m => `<span>${_colE(m.nom)} — ${_colE(COL_TITRES[m.titre] || m.titre)}</span>`).join('');
+	html += `<section class="prop-section"><h3>🏰 ${_colE(g.nom)} — ${_colE(g.echelon)}</h3>
+		<div class="prop-caps"><span>${(g.fonctions || []).map(f => _colE(COL_FONCTIONS[f] || f)).join(' · ')}</span></div>
+		<div class="prop-ligne"><div class="prop-txt"><div class="prop-caps">${membres}</div></div>
+		${g.titre ? (g.titre !== 'maitre' ? '<button class="sh-drop-btn" onclick="colGuilde(\'quitter\')">Quitter la guilde</button>' : '')
+			: '<button class="sh-drop-btn" onclick="colGuilde(\'rejoindre\')">Rejoindre la guilde</button>'}</div></section>`;
+	if (g.suivant && role === 'fondateur') {
+		html += `<section class="prop-section"><div class="prop-ligne"><div class="prop-txt">
+			<strong>⬆️ ${_colE(g.suivant.label)}</strong><span class="sell-prix">💰 ${_prixTexte(g.suivant.prix)}</span>
+			${g.suivant.refus ? `<span class="q-desc">⚠️ ${_colE(g.suivant.refus)}</span>` : ''}</div>
+			<button class="sh-drop-btn" ${g.suivant.refus ? 'disabled' : ''} onclick="colOuvrirGuilde()">Ouvrir le chantier</button></div></section>`;
+	}
+	const exps = (g.expeditions || []).map(e => `<div class="prop-ligne"><div class="prop-txt">
+		<strong>${_colE(e.mission)}</strong><span class="q-desc">${_colE(e.par)} · ${e.revenue ? 'de retour' : 'retour le ' + _colE(new Date(e.retour * 1000).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }))} · chances ${Math.round((e.chance || 0) * 100)} %</span></div>
+		${e.mienne && e.revenue ? `<button class="sh-drop-btn" data-id="${_colE(e.id)}" onclick="colAccueillir(this)">Accueillir le groupe</button>` : ''}</div>`).join('');
+	if (exps) html += `<section class="prop-section"><h3>🧭 Expéditions</h3><div class="prop-liste">${exps}</div></section>`;
+	if ((g.missions || []).length) {
+		const comp = (g.compagnons || []).map(c => `<label><input type="checkbox" class="col-comp" value="${_colE(c.id)}"> ${_colE(c.nom)} (niv. ${_colE(c.niveau)})</label>`).join(' ');
+		html += `<section class="prop-section"><h3>📜 Missions</h3>
+			<div class="prop-caps">${comp || '<span>Aucun compagnon dans votre groupe.</span>'}</div><div class="prop-liste">`
+			+ g.missions.map(m => `<div class="prop-ligne"><div class="prop-txt"><strong>${_colE(m.label)}</strong>
+				<span class="q-desc">${Math.round(m.duree_s / 3600)} h · difficulté ${_colE(m.difficulte)}</span>
+				<span class="sell-prix">💰 ${_prixTexte(m.recompense)}</span></div>
+				<button class="sh-drop-btn" data-mission="${_colE(m.id)}" ${(g.compagnons || []).length ? '' : 'disabled'} onclick="colEnvoyer(this)">Envoyer</button></div>`).join('')
+			+ `</div></section>`;
+	}
+	if (g.coffre) {
+		const objets = g.coffre.map(o => `<div class="prop-ligne"><div class="prop-txt"><strong>${_colE(o.icon)} ${_colE(o.nom)}</strong></div>
+			${g.peut_retirer ? `<button class="sh-drop-btn" data-index="${_colE(o.index)}" onclick="colCoffreRetirer(this)">Prendre</button>` : ''}</div>`).join('');
+		const sac = (g.sac || []).map(o => `<div class="prop-ligne"><div class="prop-txt"><span class="q-desc">${_colE(o.icon)} ${_colE(o.nom)}</span></div>
+			<button class="sh-drop-btn" data-index="${_colE(o.index)}" data-item="${_colE(o.item_id)}" onclick="colCoffreDeposer(this)">Déposer</button></div>`).join('');
+		html += `<section class="prop-section"><h3>📦 Matériel commun</h3><div class="prop-liste">${objets || '<div class="sell-empty">Le coffre est vide.</div>'}</div>
+			${sac ? `<h3>🎒 Votre sac</h3><div class="prop-liste">${sac}</div>` : ''}</section>`;
+	}
+	return html;
+}
 
 // Rendu complet (pure : rend une chaîne). Le visiteur n'a que la lecture : site en mots,
 // tableau des besoins, dons (§ 12.7).
 function colImplantationHtml(d, onglet) {
-	if (!_colGere(d)) return colEnteteHtml(d) + colOngletSiteHtml(d);
+	if (!_colGere(d)) return colEnteteHtml(d) + colOngletSiteHtml(d) + (d.guilde && d.guilde.existe ? colGuildeHtml(d.guilde, d.role, d.purse) : '');
 	const tabs = `<div class="col-onglets">` + COL_ONGLETS.map(([id, nom]) =>
 		`<button class="sheet-tab-btn${id === onglet ? ' active' : ''}" data-onglet="${id}" onclick="colOnglet(this)">${nom}</button>`).join('') + `</div>`;
 	const corps = onglet === 'population' ? colOngletPopulationHtml(d)
+		: onglet === 'guilde' ? colGuildeHtml(d.guilde, d.role, d.purse)
 		: onglet === 'batiments' ? colOngletBatimentsHtml(d)
 		: onglet === 'defense' ? colOngletDefenseHtml(d) : colOngletSiteHtml(d);
 	return colEnteteHtml(d) + tabs + corps;
@@ -404,6 +462,37 @@ function colPoser(btn) {
 	_colAction('api/colonisation/poser', { batiment: btn.dataset.batiment }, () => { window.location.reload(); });
 }
 function colReparer(btn) { _colAction('api/colonisation/reparer', { batiment: btn.dataset.batiment }); }
+function _colGuildeRendre(d) {
+	if (!d) return;
+	updatePurse(d.purse);
+	if (d.inventaire_payload) _applyInventoryPayload(d.inventaire_payload);
+	if (d.issue) showToast(d.issue.reussie ? `Mission réussie : ${_prixTexte(d.issue.gain)} pour vous, ${_prixTexte(d.issue.commission)} pour la guilde.`
+		: 'Mission manquée : le groupe revient blessé.', { major: true });
+	if (_colVue === 'guilde') { _colEcrire('🏰 ' + (d.guilde.nom || 'Guilde'), colGuildeHtml(d.guilde, null, d.purse)); return; }
+	if (_colData) colRendre(Object.assign({}, _colData, { guilde: d.guilde, purse: d.purse, evenements: [] }));
+}
+async function _colGuildeAction(url, corps) { _colGuildeRendre(await _aubFetch(url, corps || {})); }
+function colGuilde(geste) { _colGuildeAction('api/colonisation/guilde/' + geste); }
+function colEnvoyer(btn) {
+	const ids = [...document.querySelectorAll('input.col-comp:checked')].map(c => c.value);
+	_colGuildeAction('api/colonisation/guilde/envoyer', { mission: btn.dataset.mission, compagnons: ids });
+}
+function colAccueillir(btn) { _colGuildeAction('api/colonisation/guilde/accueillir', { expedition: btn.dataset.id }); }
+function colCoffreDeposer(btn) { _colGuildeAction('api/colonisation/guilde/coffre/deposer', { index: +btn.dataset.index, item_id: btn.dataset.item }); }
+function colCoffreRetirer(btn) { _colGuildeAction('api/colonisation/guilde/coffre/retirer', { index: +btn.dataset.index }); }
+function colOuvrirGuilde() {
+	const nom = (document.getElementById('col-guilde-nom') || {}).value || '';
+	_colAction('api/colonisation/chantier/ouvrir', { genre: 'guilde', nom });
+}
+// Depuis la maison de guilde (sous-lieu) : la guilde seule.
+async function openColonieGuilde() {
+	const d = await _aubFetch('api/colonisation/guilde');
+	if (!d) return;
+	_colVue = 'guilde';
+	updatePurse(d.purse);
+	_colEcrire('🏰 ' + (d.guilde.nom || 'Guilde'), colGuildeHtml(d.guilde, null, d.purse));
+	_colAfficher();
+}
 function colChantier(btn) {
 	_colAction('api/colonisation/chantier/ouvrir', { genre: btn.dataset.genre, objet: btn.dataset.objet || null });
 }

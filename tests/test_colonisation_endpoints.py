@@ -106,7 +106,8 @@ def monde(monkeypatch):
 		return [copy.deepcopy(d) for d in docs.values() if _correspond(d, selecteur)]
 
 	from utils import combat as combat_util
-	for mod in (rc, ru, characters_util, proprietes, marche, combat_util):
+	from utils import recrutement as recrutement_util
+	for mod in (rc, ru, characters_util, proprietes, marche, combat_util, recrutement_util):
 		monkeypatch.setattr(mod, "get_doc", get_doc_fn, raising=False)
 		monkeypatch.setattr(mod, "save_doc", save_doc_fn, raising=False)
 		monkeypatch.setattr(mod, "find_docs", find_docs_fn, raising=False)
@@ -442,3 +443,63 @@ def test_la_taniere_localisee_se_vide_en_combat(monde):
 	assert not [j for j in combat["joueurs"] if j.get("est_garde")]
 	combat_util._finalize_colonie(combat, "victoire")
 	assert monde["docs"][imp_id]["menace"]["etape"] == 0
+
+
+def test_la_guilde_se_fonde_se_rejoint_et_envoie_ses_groupes_en_mission(monde):
+	import time
+	rc = monde["rc"]
+	reg = _reg(monde)
+	fondateur = _perso(**{"or": 10 ** 6})
+	imp_id = _fonder(monde, fondateur)
+	monde["docs"][imp_id]["palier"] = "village"
+	rep = _appel(monde, fondateur, rc.chantier_ouvrir, None, {"genre": "guilde", "nom": "Les Loups"})
+	assert rep["chantier"]["genre"] == col.CHANTIER_GUILDE
+	rep = _appel(monde, fondateur, rc.chantier_financer, None, {"montant": rep["chantier"]["cout"]})
+	assert rep["acheve"] and rep["guilde"]["nom"] == "Les Loups" and rep["guilde"]["titre"] == col.MAITRE
+	# la maison se pose comme un sous-lieu, ouverte sans tenancier, tableau de recrues
+	imp = monde["docs"][imp_id]
+	maison = next(b for b in imp["batiments"] if b["type"] == "maison_guilde")
+	fondateur["position"] = {"x": 4, "y": 4}
+	_appel(monde, fondateur, rc.poser, None, {"batiment": maison["id"]})
+	lieu = monde["docs"][col.batiment(monde["docs"][imp_id], maison["id"])["lieu"]]
+	assert lieu["categorie"] == "guilde_colonie" and lieu["tags"] == ["recrutement"]
+	assert col.sous_lieu_ouvert(lieu, monde["get"]) == (True, "")
+	# un visiteur la rejoint depuis la maison de guilde
+	visiteur = _perso("v", lieu=lieu["_id"], position={"x": 0, "y": 0})
+	assert _appel(monde, visiteur, rc.guilde, None)["guilde"]["titre"] is None
+	assert _appel(monde, visiteur, rc.guilde_rejoindre, None)["guilde"]["titre"] == col.MEMBRE
+	# le maître envoie un compagnon en mission, puis l'accueille
+	av = {"_id": "aventurier:1", "type": "aventurier", "statut": "embauche", "embauche_par": fondateur["_id"],
+		  "prenom": "Bo", "nom": "", "xp_total": 0, "caracteristiques_current": dict(CARACTS), "currentPV": 10}
+	monde["docs"][av["_id"]] = av
+	fondateur["groupe"] = [av["_id"]]
+	mission = col.missions_ouvertes(monde["docs"][imp_id], reg)[0]
+	rep = _appel(monde, fondateur, rc.guilde_envoyer, None, {"mission": mission["id"], "compagnons": [av["_id"]]})
+	assert fondateur["groupe"] == [] and monde["docs"][av["_id"]]["en_mission"]["expedition"] == rep["envoyee"]
+	assert _refus(monde, fondateur, rc.guilde_accueillir, None, {"expedition": rep["envoyee"]}) == 409   # pas revenu
+	exp = col.guilde_de(monde["docs"][imp_id])["expeditions"][0]
+	exp["retour"], exp["chance"] = int(time.time()) - 1, 1.0
+	avant = money_to_cuivre(fondateur)
+	rep = _appel(monde, fondateur, rc.guilde_accueillir, None, {"expedition": exp["id"]})
+	assert rep["issue"]["reussie"] and money_to_cuivre(fondateur) == avant + rep["issue"]["gain"]
+	assert fondateur["groupe"] == [av["_id"]] and "en_mission" not in monde["docs"][av["_id"]]
+	assert monde["docs"][imp_id]["caisse_cuivre"] == rep["issue"]["commission"]
+
+
+def test_le_materiel_commun_s_ouvre_a_la_demeure_des_aventuriers(monde):
+	rc = monde["rc"]
+	reg = _reg(monde)
+	fondateur = _perso(inventaire=["item:pain"])
+	imp_id = _fonder(monde, fondateur)
+	imp = monde["docs"][imp_id]
+	imp["guilde"] = {"echelon": col.echelons(reg)[0]["id"], "nom": "G", "membres": {
+		fondateur["_id"]: {"nom": "Greta", "titre": col.MAITRE}}, "coffre": [], "expeditions": []}
+	assert _refus(monde, fondateur, rc.guilde_coffre_deposer, None, {"index": 0, "item_id": "item:pain"}) == 403
+	imp["guilde"]["echelon"] = next(e["id"] for e in col.echelons(reg) if "coffre" in e["fonctions"])
+	rep = _appel(monde, fondateur, rc.guilde_coffre_deposer, None, {"index": 0, "item_id": "item:pain"})
+	assert fondateur["inventaire"] == [] and [o["nom"] for o in rep["guilde"]["coffre"]] == ["Pain"]
+	membre = _perso("m", lieu=imp_id, position={"x": 1, "y": 1})
+	imp["guilde"]["membres"][membre["_id"]] = {"nom": "Milo", "titre": col.MEMBRE}
+	assert _refus(monde, membre, rc.guilde_coffre_retirer, None, {"index": 0}) == 403
+	_appel(monde, fondateur, rc.guilde_coffre_retirer, None, {"index": 0})
+	assert fondateur["inventaire"] == ["item:pain"]

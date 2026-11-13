@@ -297,7 +297,9 @@ def test_construire_paie_les_stocks_et_respecte_le_palier():
 	assert col.peut_construire(_imp(reg, "hameau", stocks={"bois": 500, "materiaux": 500}), reg, "ferme")[0]
 	# un sous-lieu (où l'on entre) se construit dès son palier
 	ville = _imp(reg, "ville", stocks={"bois": 9999, "materiaux": 9999})
-	assert all(col.peut_construire(ville, reg, d["id"])[0] for d in reg["batiments_def"] if d["nature"] == col.SOUS_LIEU)
+	assert all(col.peut_construire(ville, reg, d["id"])[0] for d in reg["batiments_def"]
+			   if d["nature"] == col.SOUS_LIEU and d.get("catalogue", True))
+	assert not col.peut_construire(ville, reg, "maison_guilde")[0]          # elle naît avec la guilde
 
 
 def test_pose_libre_hors_entrees_un_batiment_par_case():
@@ -771,7 +773,8 @@ def test_le_visiteur_lit_en_mots_le_fondateur_a_les_chiffres():
 	associe = col.vue(imp, reg, col.ASSOCIE, site, [], CAT_PROP, now=10)
 	assert "stocks" in associe and "journal" not in associe and "demandes" not in associe
 	# le catalogue ne montre que ce qui se construit, les sept paliers ont leur libellé de menace
-	assert {c["id"] for c in fondateur["catalogue"]} == {d["id"] for d in reg["batiments_def"] if d["nature"] in col.NATURES_OUVERTES}
+	assert {c["id"] for c in fondateur["catalogue"]} == {d["id"] for d in reg["batiments_def"]
+														  if d["nature"] in col.NATURES_OUVERTES and d.get("catalogue", True)}
 	assert set(reg["menace"]["attaque_proba"]) == {p["id"] for p in col.paliers(reg)}
 
 
@@ -1020,3 +1023,146 @@ def test_la_nuit_d_une_implantation_se_raconte_au_feu():
 	assert lu["nuit_messages"] == reg["nuit_feu"] and "nuit_messages" not in imp
 	ville = {"type": "lieu", "categorie": "ville"}
 	assert col.lieu_de_nuit(ville, {}.get) is ville
+
+
+# ── La guilde du joueur (§ 9) ────────────────────────────────────────────────────────
+
+def _guilde(reg, palier="village", associes=()):
+	imp = _imp(reg, palier)
+	imp["associes"] = [{"id": a, "nom": a, "apports": {}} for a in associes]
+	ok, _r, chantier = col.peut_ouvrir_echelon(imp, reg)
+	assert ok
+	col.ouvrir_chantier(imp, reg, chantier, now=1)
+	col.financer(imp, _perso(), chantier["cout"], now=2)
+	assert col.achever_guilde(imp, reg, "  Les  Loups  ", now=3)
+	return imp
+
+
+def test_la_guilde_s_ouvre_au_village_et_les_associes_d_alors_sont_fondateurs():
+	reg = _reg()
+	premier = col.echelons(reg)[0]
+	assert col.palier_def(reg, premier["palier"])
+	assert "palier" in col.peut_ouvrir_echelon(_imp(reg, "bourgade"), reg)[1]
+	imp = _guilde(reg, associes=["character:b"])
+	g = col.guilde_de(imp)
+	assert g["nom"] == "Les Loups" and g["echelon"] == premier["id"]
+	assert g["membres"]["character:a"]["titre"] == col.MAITRE
+	assert g["membres"]["character:b"]["titre"] == col.MEMBRE_FONDATEUR
+	assert col.fonctions(imp, reg) == set(premier["fonctions"])
+	[maison] = [b for b in imp["batiments"] if b["type"] == "maison_guilde"]
+	assert maison["pos"] is None                                             # elle attend sa pose
+	# rejoindre plus tard : simple membre
+	c = {"_id": "character:c", "prenom": "Cy", "nom": ""}
+	assert col.rejoindre(c, imp) == (True, "") and col.titre_de(c, imp) == col.MEMBRE
+	assert not col.rejoindre(c, imp)[0]
+	assert not col.quitter_guilde(_perso(), imp)[0]                          # le maître reste
+	assert col.quitter_guilde(c, imp) == (True, "") and col.titre_de(c, imp) is None
+
+
+def test_les_fonctions_des_echelons_sont_cumulatives_et_suivent_le_palier():
+	reg = _reg()
+	imp = _guilde(reg)
+	suivant = col.echelon_suivant(imp, reg)
+	assert "palier" in col.peut_ouvrir_echelon(imp, reg)[1]                  # la Maison attend le Bourg
+	imp["palier"] = suivant["palier"]
+	ok, _r, chantier = col.peut_ouvrir_echelon(imp, reg)
+	col.ouvrir_chantier(imp, reg, chantier, now=4)
+	col.financer(imp, _perso(), chantier["cout"], now=5)
+	assert col.achever_guilde(imp, reg, now=6)
+	attendu = set(col.echelons(reg)[0]["fonctions"]) | set(suivant["fonctions"])
+	assert col.fonctions(imp, reg) == attendu
+	assert len([b for b in imp["batiments"] if b["type"] == "maison_guilde"]) == 1   # une seule maison
+
+
+def test_defense_et_attraction_de_la_guilde():
+	reg = _reg()
+	imp = _guilde(reg)
+	site = _site(reg)
+	sans = col.securite(imp, reg, site, [])
+	g = col.guilde_de(imp)
+	g["echelon"] = next(e["id"] for e in col.echelons(reg) if "defense" in e["fonctions"])
+	avec = col.securite(imp, reg, site, [])
+	h = lambda s: next(f["valeur"] for f in s["facteurs"] if f["id"] == "defense_humaine")
+	assert h(avec) == min(20, h(sans) + reg["guilde_reglages"]["defense"])
+	assert col.facteur_attraction(imp, reg) == 1.0
+	g["echelon"] = col.echelons(reg)[-1]["id"]
+	assert col.facteur_attraction(imp, reg) == reg["guilde_reglages"]["attraction"]
+
+
+def _compagnon(n, xp=0, **extra):
+	c = {"_id": f"aventurier:{n}", "statut": "embauche", "embauche_par": "character:a", "xp_total": xp,
+		 "prenom": f"C{n}", "nom": "", "caracteristiques_current": {"V": 5, "F": 30, "R": 30}, "currentPV": 20}
+	c.update(extra)
+	return c
+
+
+def test_une_expedition_part_revient_et_paie_son_membre_moins_la_commission():
+	reg = _reg()
+	imp = _guilde(reg)
+	membre = _perso(groupe=["aventurier:1", "aventurier:2"])
+	c1, c2 = _compagnon(1), _compagnon(2)
+	mission = col.missions_ouvertes(imp, reg)[0]
+	assert not col.peut_envoyer({"_id": "character:z"}, imp, reg, mission, [c1])[0]      # pas membre
+	assert not col.peut_envoyer(membre, imp, reg, None, [c1])[0]
+	assert not col.peut_envoyer(membre, imp, reg, mission, [])[0]
+	assert not col.peut_envoyer(membre, imp, reg, mission, [_compagnon(3)])[0]          # hors du groupe
+	assert col.peut_envoyer(membre, imp, reg, mission, [c1, c2]) == (True, "")
+	fermee = next(m for m in reg["missions"] if m not in col.missions_ouvertes(imp, reg))
+	assert not col.peut_envoyer(membre, imp, reg, fermee, [c1])[0]                       # échelon trop bas
+	exp = col.envoyer(membre, imp, reg, [], mission, [c1, c2], now=100)
+	assert membre["groupe"] == [] and c1["en_mission"]["expedition"] == exp["id"]
+	assert exp["retour"] == 100 + mission["duree_s"] and 0.1 <= exp["chance"] <= 0.95
+	assert not col.accueillir(membre, imp, reg, [], exp["id"], [c1, c2], now=exp["retour"] - 1)[0]
+	assert "complet" in col.accueillir(membre, imp, reg, [], exp["id"], [c1, c2], now=exp["retour"], places_libres=1)[1]
+	ok, _r, issue = col.accueillir(membre, imp, reg, [], exp["id"], [c1, c2], now=exp["retour"], rand=Hasard(0.0))
+	assert ok and issue["reussie"]
+	assert issue["commission"] == int(mission["recompense_cuivre"] * reg["guilde_reglages"]["commission"])
+	assert issue["gain"] + issue["commission"] == mission["recompense_cuivre"]
+	assert imp["caisse_cuivre"] == issue["commission"] and imp["expeditions_reussies"] == 1
+	assert membre["groupe"] == ["aventurier:1", "aventurier:2"] and "en_mission" not in c1
+	assert c1["xp_total"] == mission["xp"] and col.guilde_de(imp)["expeditions"] == []
+
+
+def test_une_expedition_manquee_ramene_ses_compagnons_blesses():
+	reg = _reg()
+	imp = _guilde(reg)
+	membre = _perso(groupe=["aventurier:1"])
+	c1 = _compagnon(1)
+	exp = col.envoyer(membre, imp, reg, [], col.missions_ouvertes(imp, reg)[0], [c1], now=0)
+	ok, _r, issue = col.accueillir(membre, imp, reg, [], exp["id"], [c1], now=exp["retour"], rand=Hasard(0.999))
+	assert ok and not issue["reussie"] and issue["gain"] == 0 and c1["currentPV"] == 1
+	assert not col.accueillir(membre, imp, reg, [], exp["id"], [c1], now=exp["retour"])[0]   # déjà accueilli
+
+
+def test_la_chance_suit_la_puissance_du_groupe_et_le_maitre_d_armes():
+	reg = _reg()
+	imp = _guilde(reg)
+	mission = col.missions_ouvertes(imp, reg)[0]
+	faible = col.chance_reussite(imp, reg, [], mission, [_compagnon(1)])
+	fort = col.chance_reussite(imp, reg, [], mission, [_compagnon(1, xp=10 ** 6), _compagnon(2, xp=10 ** 6)])
+	assert faible < fort <= 0.95
+	maison = next(b for b in imp["batiments"] if b["type"] == "maison_guilde")
+	maitre = _employe(imp, "maitre_d_armes", maison["id"])
+	assert col.chance_reussite(imp, reg, [maitre], mission, [_compagnon(1)]) == faible      # spécialistes pas encore
+	col.guilde_de(imp)["echelon"] = next(e["id"] for e in col.echelons(reg) if "specialistes" in e["fonctions"])
+	assert col.chance_reussite(imp, reg, [maitre], mission, [_compagnon(1)]) > faible
+
+
+def test_le_tableau_de_la_maison_de_guilde_est_aux_membres():
+	reg = _reg()
+	imp = _guilde(reg)
+	maison = next(b for b in imp["batiments"] if b["type"] == "maison_guilde")
+	col.poser(imp, maison["id"], [4, 4])
+	lieu, _lien = col.creer_sous_lieu(imp, maison, reg, "guilde.png")
+	assert lieu["tags"] == ["recrutement"] and "stock_vente" not in lieu
+	docs = {imp["_id"]: imp, col.REGLES_ID: REGLES_DOC}
+	assert col.sous_lieu_ouvert(lieu, docs.get) == (True, "")                # tenue par le fondateur
+	assert col.acces_tableau_guilde(_perso(), lieu, docs.get) == (True, "")
+	assert "membres" in col.acces_tableau_guilde({"_id": "character:z"}, lieu, docs.get)[1]
+	from utils import recrutement
+	assert recrutement.lieu_recrute(lieu)
+	assert recrutement.acces_autorise({"_id": "character:z"}, lieu, docs.get)[0] is False
+	# le coffre : chacun dépose, le maître et les fondateurs retirent
+	c = {"_id": "character:c", "prenom": "Cy", "nom": ""}
+	col.rejoindre(c, imp)
+	assert col.peut_retirer_coffre_guilde(_perso(), imp) and not col.peut_retirer_coffre_guilde(c, imp)

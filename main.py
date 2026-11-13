@@ -858,6 +858,8 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 	# s'achète au bureau d'un maître de guilde (bouton « 📜 Charte de colonisation »).
 	colonie_offre = (bool(grid_doc) and grid_doc.get("categorie") == CATEGORIE_PAYS
 					 and bool(colonisation_util.charte_de(character)))
+	colonie_maison_guilde = bool(grid_doc) and colonisation_util.est_sous_lieu(grid_doc) \
+		and grid_doc.get("categorie") == "guilde_colonie"
 	colonie_charte = (colonisation_util.est_bureau_de_guilde(grid_doc)
 					  and colonisation_util.rang_suffisant(character, colonisation_util.regles(get_doc)))
 	# Atelier : chaque visite du lieu lance un tick marché (approvisionnement + production +
@@ -1282,6 +1284,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			"colonie_offre": colonie_offre,
 			"colonie_attaque": colonie_attaque,
 			"colonie_charte": colonie_charte,
+			"colonie_maison_guilde": colonie_maison_guilde,
 			"proprietes_offre": proprietes_offre,
 			"role_propriete": role_propriete,
 			"proprietes_ateliers": proprietes_ateliers,

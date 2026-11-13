@@ -117,6 +117,14 @@ DEFAUTS = {
 		 "prix_cuivre": 25000, "bois": 30, "materiaux": 20, "postes": {"artisan": 1},
 		 "familles": ["armes", "soins", "artisanat"],
 		 "description": "Un artisan y fabrique sur place, puise et reverse au flux du lieu, prend commande."},
+		# La maison de la guilde du joueur (§ 9) : née avec la guilde (jamais au catalogue), posée
+		# comme tout sous-lieu ; tenue par le fondateur lui-même, elle n'attend aucun tenancier.
+		# Ses spécialistes ne servent qu'à partir de l'échelon qui les ouvre.
+		{"id": "maison_guilde", "label": "Maison de la guilde", "icone": "🏰", "nature": SOUS_LIEU,
+		 "palier_min": "village", "prix_cuivre": 0, "bois": 0, "materiaux": 0, "catalogue": False,
+		 "categorie": "guilde_colonie", "image_prefixe": "guilde_aventuriers_interieur_europe", "sans_tenancier": True,
+		 "postes": {"maitre_d_armes": 1, "archiviste": 1},
+		 "description": "Le siège de votre guilde : tableau de recrues, missions, matériel commun."},
 		# Le négoce (§ 8) : le négociant et son personnel vendent la production du lieu à ses boutiques.
 		{"id": "comptoir", "label": "Comptoir de négoce", "icone": "⚖️", "nature": REPERE, "palier_min": "bourgade",
 		 "prix_cuivre": 15000, "bois": 20, "materiaux": 10,
@@ -163,6 +171,8 @@ DEFAUTS = {
 		{"id": "carrier", "label": "Carrier", "cout_embauche_cuivre": 500,
 		 "produit": {"stock": "materiaux", "par_jour": 3, "axe": "materiaux", "items": ["item:pierre"]}},
 		{"id": "batisseur", "label": "Bâtisseur", "cout_embauche_cuivre": 800},
+		{"id": "maitre_d_armes", "label": "Maître d'armes", "cout_embauche_cuivre": 3000},
+		{"id": "archiviste", "label": "Archiviste", "cout_embauche_cuivre": 2000},
 		{"id": "aubergiste", "label": "Aubergiste", "cout_embauche_cuivre": 800},
 	],
 	"metiers_roles": {"gardes": ["garde", "gardien"], "soignants": ["medecin", "apothicaire"],
@@ -173,6 +183,29 @@ DEFAUTS = {
 				 "prospection_base": 3, "portage_kg": 20, "decote_sans_negociant": 0.2,
 				 "seuil_refus": 1, "caisse_max_par_rang": 5000, "journal_max": 20},
 	"montures_etable": ["espece:ane", "espece:mulet", "espece:cheval"],
+	# La guilde du joueur (§ 9) : ce que chaque échelon coûte et ouvre (CUMULATIF). Les échelons
+	# eux-mêmes (id, libellé, palier) sont dans `guilde.echelons` (première livraison).
+	"guilde_echelons": {
+		"auberge_aventuriers": {"prix_cuivre": 100 * OR, "fonctions": ["recrutement", "expeditions"]},
+		"maison_aventuriers": {"prix_cuivre": 300 * OR, "fonctions": ["missions"]},
+		"demeure_aventuriers": {"prix_cuivre": 1000 * OR, "fonctions": ["specialistes", "coffre"]},
+		"guilde_aventuriers": {"prix_cuivre": 3000 * OR, "fonctions": ["donjons", "defense"]},
+		"grande_guilde_aventuriers": {"prix_cuivre": 8000 * OR, "fonctions": ["attraction"]},
+	},
+	"guilde_reglages": {"commission": 0.2, "coffre_kg": 500, "defense": 5, "attraction": 1.5,
+						"bonus_maitre_d_armes": 0.1, "bonus_archiviste": 0.25},
+	# Missions confiées aux compagnons d'un membre, résolues au passage (§ 9). `fonction` :
+	# celle de l'échelon qui les ouvre.
+	"missions": [
+		{"id": "patrouille", "label": "Patrouille des environs", "fonction": "expeditions",
+		 "duree_s": 4 * 3600, "difficulte": 6, "recompense_cuivre": 2000, "xp": 60},
+		{"id": "escorte_marchande", "label": "Escorte d'un convoi marchand", "fonction": "missions",
+		 "duree_s": 8 * 3600, "difficulte": 15, "recompense_cuivre": 6000, "xp": 150},
+		{"id": "prime", "label": "Prime sur une bête", "fonction": "missions",
+		 "duree_s": 12 * 3600, "difficulte": 25, "recompense_cuivre": 12000, "xp": 250},
+		{"id": "donjon_proche", "label": "Exploration d'un donjon alentour", "fonction": "donjons",
+		 "duree_s": 24 * 3600, "difficulte": 45, "recompense_cuivre": 40000, "xp": 600},
+	],
 	# Un garde nommé, quand il se bat aux côtés du fondateur (§ 6) : un combattant standard.
 	"garde_combattant": {"voc": "guerrier", "niveau": 2,
 						 "caracts": {"V": 6, "F": 30, "R": 30, "Ag": 25, "Vol": 20, "Int": 15, "Cha": 15, "Ch": 15},
@@ -891,7 +924,7 @@ def libelle_metier(categorie) -> str:
 
 def peut_construire(imp: dict, reg: dict, type_id, categorie=None, disponibles=()) -> tuple[bool, str]:
 	bdef = batiment_def(reg, type_id)
-	if not bdef:
+	if not bdef or bdef.get("catalogue") is False:
 		return False, "Bâtiment inconnu."
 	if bdef.get("nature") not in NATURES_OUVERTES:
 		return False, "Ce bâtiment ne se construit pas encore."
@@ -937,6 +970,10 @@ def creer_sous_lieu(imp: dict, b: dict, reg: dict, image: str) -> tuple[dict, di
 			"label": f"{libelle_metier(cat) if bdef.get('familles') else bdef.get('label', '')} de {imp.get('label', '')}",
 			"image": image, "categorie": cat, "lieu_parent": imp["_id"], "colonie": imp["_id"],
 			"batiment": b["id"], "pnj": [], "stock_matieres": {}, "stock_vente": []}
+	if bdef.get("sans_tenancier"):
+		# Maison de guilde : ni étal ni stock ; son tableau de recrues passe par le tag.
+		lieu.pop("stock_matieres"), lieu.pop("stock_vente")
+		lieu["tags"] = ["recrutement"]
 	lien = {"_id": f"link:colonie_{ident}", "type": "connection",
 			"nodes": [{"lieu": imp["_id"], "pos": list(b["pos"])}, {"lieu": lieu["_id"], "pos": [0, 0]}],
 			"metadata": {"type": cat, "status": "ouvert"}}
@@ -982,6 +1019,8 @@ def synchroniser_tenanciers(imp: dict, reg: dict, employes: list, get_doc_fn) ->
 		lieu = get_doc_fn(b["lieu"])
 		if not lieu:
 			continue
+		if (batiment_def(reg, b.get("type")) or {}).get("sans_tenancier"):
+			continue
 		voulu = pnj_du_sous_lieu(lieu, tenancier(imp, reg, employes, b["id"]), reg)
 		if lieu.get("pnj") != voulu:
 			lieu["pnj"] = voulu
@@ -1001,6 +1040,8 @@ def sous_lieu_ouvert(lieu_doc: dict, get_doc_fn) -> tuple[bool, str]:
 		return False, "Ce bâtiment n'existe plus."
 	if b.get("endommage"):
 		return False, "Ce bâtiment est endommagé : il attend sa réparation."
+	if (batiment_def(reg, b.get("type")) or {}).get("sans_tenancier"):
+		return True, ""
 	if not tenancier(imp, reg, employes_effectifs(imp, get_doc_fn), b["id"]):
 		return False, "Personne n'y tient le comptoir : c'est fermé."
 	return True, ""
@@ -1414,7 +1455,7 @@ def securite(imp: dict, reg: dict, site: dict, employes: list) -> dict:
 		physique += _num(conf.get("feu_grand"))
 	besoin = max(1, math.ceil(max(1, habitants(imp, employes)) / max(1, _int(conf.get("habitants_par_garde"), 8))))
 	gardes = len(_du_role(imp, reg, employes, "gardes"))
-	humaine = 20.0 * min(1.0, gardes / besoin)
+	humaine = 20.0 * min(1.0, gardes / besoin) + bonus_defense_guilde(imp, reg)
 	note = lambda axe: _int(((site or {}).get(axe) or {}).get("note"))
 	environnement = 10 + (note("defense") - note("danger")) * 10 / 3
 	seuils = seuils_stocks(imp, reg, employes)
@@ -1592,7 +1633,7 @@ def _passe(imp: dict, reg: dict, site: dict, employes: list, instant: int, pas: 
 	libres = logements(imp, reg) - habitants(imp, employes)
 	if libres > 0 and mor["valeur"] >= _num(pop.get("arrivee_moral_min")) \
 			and secu["valeur"] >= _num(pop.get("arrivee_securite_min")) \
-			and rand.random() < _num(pop.get("arrivee_proba")) * mor["valeur"] / 50:
+			and rand.random() < _num(pop.get("arrivee_proba")) * mor["valeur"] / 50 * facteur_attraction(imp, reg):
 		imp["population"] = _int(imp.get("population")) + 1
 	elif mor["valeur"] < _num(pop.get("depart_moral")):
 		if _int(imp.get("population")) > 0:
@@ -1822,6 +1863,279 @@ def lieu_de_nuit(lieu_doc: dict, get_doc_fn) -> dict:
 	return {**lieu_doc, "nuit_messages": list(regles(get_doc_fn).get("nuit_feu") or [])}
 
 
+# ── La guilde du joueur (§ 9) ────────────────────────────────────────────────────────
+MAITRE, MEMBRE_FONDATEUR, MEMBRE = "maitre", "fondateur", "membre"
+CHANTIER_GUILDE = "guilde"
+
+
+def echelons(reg: dict) -> list:
+	"""Les échelons, dans l'ordre, chacun complété de son prix et de ses fonctions."""
+	extra = reg.get("guilde_echelons") or {}
+	return [{**e, **(extra.get(e.get("id")) or {})} for e in ((reg.get("guilde") or {}).get("echelons") or [])]
+
+
+def guilde_de(imp: dict) -> dict | None:
+	g = (imp or {}).get("guilde")
+	return g if isinstance(g, dict) and g.get("echelon") else None
+
+
+def fonctions(imp: dict, reg: dict) -> set:
+	"""Fonctions ouvertes : celles de chaque échelon jusqu'à l'actuel (cumulatif)."""
+	g = guilde_de(imp)
+	if not g:
+		return set()
+	out = set()
+	for e in echelons(reg):
+		out |= set(e.get("fonctions") or [])
+		if e.get("id") == g["echelon"]:
+			break
+	return out
+
+
+def echelon_suivant(imp: dict, reg: dict) -> dict | None:
+	liste = echelons(reg)
+	g = guilde_de(imp)
+	if not g:
+		return liste[0] if liste else None
+	i = next((k for k, e in enumerate(liste) if e.get("id") == g["echelon"]), len(liste))
+	return liste[i + 1] if i + 1 < len(liste) else None
+
+
+def titre_de(character: dict, imp: dict) -> str | None:
+	g = guilde_de(imp)
+	return ((g or {}).get("membres") or {}).get((character or {}).get("_id"), {}).get("titre")
+
+
+def peut_ouvrir_echelon(imp: dict, reg: dict) -> tuple[bool, str, dict | None]:
+	suivant = echelon_suivant(imp, reg)
+	if not suivant:
+		return False, "La guilde a atteint son dernier échelon.", None
+	if imp.get("chantier"):
+		return False, "Un chantier est déjà ouvert.", None
+	if not palier_atteint(reg, imp.get("palier"), suivant.get("palier")):
+		p = palier_def(reg, suivant.get("palier")) or {}
+		return False, f"Cet échelon s'ouvre au palier {p.get('label', suivant.get('palier'))}.", None
+	return True, "", {"genre": CHANTIER_GUILDE, "objet": suivant["id"], "label": suivant.get("label", ""),
+					  "cout": _int(suivant.get("prix_cuivre")), "verse": 0, "parts": {}}
+
+
+def achever_guilde(imp: dict, reg: dict, nom=None, now: int | None = None) -> bool:
+	"""Chantier d'échelon payé. Au PREMIER : la guilde naît, le fondateur en est le maître, les
+	associés d'ALORS en sont membres fondateurs (rang d'office, § 10), et sa maison attend sa
+	pose. Ensuite, l'échelon monte."""
+	now = now_epoch() if now is None else now
+	c = imp.get("chantier") or {}
+	if c.get("genre") != CHANTIER_GUILDE or not chantier_pret(imp):
+		return False
+	g = guilde_de(imp)
+	if not g:
+		membres = {imp.get("fondateur"): {"nom": imp.get("fondateur_nom", ""), "titre": MAITRE, "depuis": now}}
+		for a in imp.get("associes") or []:
+			membres[a.get("id")] = {"nom": a.get("nom", ""), "titre": MEMBRE_FONDATEUR, "depuis": now}
+		imp["guilde"] = g = {"echelon": c["objet"], "nom": nettoyer_nom(nom) or f"Guilde de {imp.get('label', '')}",
+							 "ouverte_at": now, "membres": membres, "coffre": [], "expeditions": []}
+		imp.setdefault("batiments", []).append(
+			{"id": f"b_{uuid.uuid4().hex[:8]}", "type": "maison_guilde", "pos": None, "categorie": "guilde_colonie"})
+	else:
+		g["echelon"] = c["objet"]
+	imp.pop("chantier", None)
+	noter(imp, f"La guilde devient {c.get('label', '')}.", now)
+	return True
+
+
+def rejoindre(character: dict, imp: dict) -> tuple[bool, str]:
+	"""Rejoindre la guilde plus tard reste possible sans avoir été associé (§ 10)."""
+	g = guilde_de(imp)
+	if not g:
+		return False, "Ce lieu n'a pas encore de guilde."
+	if character.get("_id") in g["membres"]:
+		return False, "Vous en êtes déjà."
+	g["membres"][character["_id"]] = {"nom": proprietes.nom_personnage(character), "titre": MEMBRE,
+									  "depuis": now_epoch()}
+	noter(imp, f"{proprietes.nom_personnage(character)} rejoint la guilde.")
+	return True, ""
+
+
+def quitter_guilde(character: dict, imp: dict) -> tuple[bool, str]:
+	g = guilde_de(imp)
+	titre = titre_de(character, imp)
+	if not titre:
+		return False, "Vous n'en êtes pas."
+	if titre == MAITRE:
+		return False, "Le maître ne quitte pas sa guilde."
+	if any(e.get("par") == character.get("_id") for e in g.get("expeditions") or []):
+		return False, "Vos compagnons sont encore en mission."
+	g["membres"].pop(character["_id"], None)
+	noter(imp, f"{proprietes.nom_personnage(character)} quitte la guilde.")
+	return True, ""
+
+
+def acces_tableau_guilde(character: dict, lieu_doc: dict, get_doc_fn) -> tuple[bool, str]:
+	"""Le tableau de recrues de la maison de guilde : réservé à ses membres (la carte
+	d'aventurier d'une cité n'y vaut rien, et n'y est pas exigée)."""
+	imp = get_doc_fn((lieu_doc or {}).get("colonie") or "") or {}
+	if "recrutement" not in fonctions(imp, regles(get_doc_fn)):
+		return False, "La guilde ne recrute pas encore."
+	if not titre_de(character, imp):
+		return False, "Le tableau est réservé aux membres de la guilde."
+	return True, ""
+
+
+def mission_def(reg: dict, mid) -> dict | None:
+	return _par_id(reg.get("missions"), mid)
+
+
+def missions_ouvertes(imp: dict, reg: dict) -> list:
+	ouvertes = fonctions(imp, reg)
+	return [m for m in reg.get("missions") or [] if m.get("fonction") in ouvertes]
+
+
+def puissance(compagnons: list) -> int:
+	"""Somme des niveaux (+1 chacun) des compagnons envoyés."""
+	from models.character_stats import compute_character_level
+	return sum(compute_character_level(_int(c.get("xp_total"))) + 1 for c in compagnons)
+
+
+def chance_reussite(imp: dict, reg: dict, employes: list, mission: dict, compagnons: list) -> float:
+	diff = max(1, _int(mission.get("difficulte"), 1))
+	p = 0.5 + (puissance(compagnons) - diff) / (2 * diff)
+	if "specialistes" in fonctions(imp, reg) and any(e.get("metier") == "maitre_d_armes" for e in au_poste(imp, reg, employes)):
+		p += _num((reg.get("guilde_reglages") or {}).get("bonus_maitre_d_armes"))
+	return round(max(0.1, min(0.95, p)), 3)
+
+
+def peut_envoyer(character: dict, imp: dict, reg: dict, mission: dict | None, compagnons: list) -> tuple[bool, str]:
+	from utils import mercenaires
+	if not titre_de(character, imp):
+		return False, "Seuls les membres de la guilde y prennent des missions."
+	if not mission or mission not in missions_ouvertes(imp, reg):
+		return False, "Cette mission n'est pas ouverte."
+	if not compagnons:
+		return False, "Choisissez au moins un compagnon."
+	for c in compagnons:
+		if c.get("statut") != "embauche" or c.get("embauche_par") != character.get("_id") \
+				or c.get("_id") not in (character.get("groupe") or []):
+			return False, "Ce compagnon n'est pas dans votre groupe."
+		if mercenaires.est_clone(c):
+			return False, "Un compagnon-joueur ne part pas en mission sans son joueur."
+	return True, ""
+
+
+def envoyer(character: dict, imp: dict, reg: dict, employes: list, mission: dict, compagnons: list,
+			now: int | None = None) -> dict:
+	"""Le groupe part : les compagnons quittent le groupe du membre (`en_mission`) et
+	reviennent à `retour` ; l'issue est tirée à l'accueil (résolue au passage, § 9)."""
+	now = now_epoch() if now is None else now
+	exp = {"id": f"x_{uuid.uuid4().hex[:8]}", "par": character["_id"], "par_nom": proprietes.nom_personnage(character),
+		   "mission": mission["id"], "compagnons": [c["_id"] for c in compagnons], "depart": now,
+		   "retour": now + _int(mission.get("duree_s"), 3600),
+		   "chance": chance_reussite(imp, reg, employes, mission, compagnons)}
+	guilde_de(imp).setdefault("expeditions", []).append(exp)
+	ids = set(exp["compagnons"])
+	character["groupe"] = [g for g in character.get("groupe") or [] if g not in ids]
+	for c in compagnons:
+		c["en_mission"] = {"implantation": imp["_id"], "expedition": exp["id"]}
+		c.pop("auras_recues", None)
+	noter(imp, f"{exp['par_nom']} envoie {len(compagnons)} compagnon(s) : {mission.get('label', '')}.", now)
+	return exp
+
+
+def accueillir(character: dict, imp: dict, reg: dict, employes: list, exp_id, compagnons: list,
+			   now: int | None = None, rand=random, places_libres: int = 99) -> tuple[bool, str, dict]:
+	"""Le groupe revenu rejoint son membre : issue tirée, récompense versée au membre moins la
+	commission de la guilde (caisse du lieu), XP aux compagnons ; un échec les ramène blessés.
+	`places_libres` : places du groupe (un compagnon de la compagnie n'en prend pas)."""
+	from utils.characters import grant_xp
+	now = now_epoch() if now is None else now
+	g = guilde_de(imp) or {}
+	exp = next((e for e in g.get("expeditions") or [] if e.get("id") == exp_id), None)
+	if not exp or exp.get("par") != character.get("_id"):
+		return False, "Cette expédition n'est pas la vôtre.", {}
+	if now < _int(exp.get("retour")):
+		return False, "Le groupe n'est pas encore revenu.", {}
+	besoin = sum(1 for c in compagnons if not c.get("permanent"))
+	if besoin > places_libres:
+		return False, "Votre groupe est complet : faites-leur de la place.", {}
+	mission = mission_def(reg, exp.get("mission")) or {}
+	conf = reg.get("guilde_reglages") or {}
+	reussie = rand.random() < _num(exp.get("chance"), 0.5)
+	issue = {"reussie": reussie, "gain": 0, "commission": 0, "xp": 0, "mission": mission.get("label", "")}
+	if reussie:
+		brut = _int(mission.get("recompense_cuivre"))
+		issue["commission"] = int(brut * _num(conf.get("commission")))
+		issue["gain"] = brut - issue["commission"]
+		imp["caisse_cuivre"] = _int(imp.get("caisse_cuivre")) + issue["commission"]
+		xp = _int(mission.get("xp"))
+		if "specialistes" in fonctions(imp, reg) and any(e.get("metier") == "archiviste" for e in au_poste(imp, reg, employes)):
+			xp = int(xp * (1 + _num(conf.get("bonus_archiviste"))))
+		issue["xp"] = xp
+		for c in compagnons:
+			grant_xp(c, xp)
+		imp["expeditions_reussies"] = _int(imp.get("expeditions_reussies")) + 1
+	else:
+		for c in compagnons:
+			c["currentPV"] = 1
+	groupe = character.setdefault("groupe", [])
+	for c in compagnons:
+		c.pop("en_mission", None)
+		if c["_id"] not in groupe:
+			groupe.append(c["_id"])
+	g["expeditions"] = [e for e in g["expeditions"] if e.get("id") != exp_id]
+	noter(imp, f"Retour de mission ({issue['mission']}) : {'réussite' if reussie else 'échec'}.", now)
+	return True, "", issue
+
+
+def coffre_guilde_kg(imp: dict, reg: dict) -> float:
+	return _num((reg.get("guilde_reglages") or {}).get("coffre_kg"), 500)
+
+
+def peut_retirer_coffre_guilde(character: dict, imp: dict) -> bool:
+	"""Le matériel commun : chaque membre y dépose ; le maître et les membres fondateurs en retirent."""
+	return titre_de(character, imp) in (MAITRE, MEMBRE_FONDATEUR)
+
+
+def bonus_defense_guilde(imp: dict, reg: dict) -> float:
+	return _num((reg.get("guilde_reglages") or {}).get("defense")) if "defense" in fonctions(imp, reg) else 0.0
+
+
+def facteur_attraction(imp: dict, reg: dict) -> float:
+	return _num((reg.get("guilde_reglages") or {}).get("attraction"), 1) if "attraction" in fonctions(imp, reg) else 1.0
+
+
+def vue_guilde(character: dict, imp: dict, reg: dict, employes: list, compagnons_dispo: list,
+			   now: int | None = None) -> dict:
+	now = now_epoch() if now is None else now
+	g = guilde_de(imp)
+	suivant = echelon_suivant(imp, reg)
+	ok, refus, _c = peut_ouvrir_echelon(imp, reg)
+	base = {"existe": bool(g), "suivant": ({"id": suivant["id"], "label": suivant.get("label"),
+											"prix": _int(suivant.get("prix_cuivre")),
+											"palier": (palier_def(reg, suivant.get("palier")) or {}).get("label"),
+											"refus": refus} if suivant else None)}
+	if not g:
+		return base
+	from utils.characters import resolve_item_ref
+	titre = titre_de(character, imp)
+	base.update({
+		"nom": g.get("nom"), "echelon": next((e.get("label") for e in echelons(reg) if e.get("id") == g["echelon"]), ""),
+		"fonctions": sorted(fonctions(imp, reg)), "titre": titre,
+		"membres": [{"nom": m.get("nom"), "titre": m.get("titre")} for m in g.get("membres", {}).values()],
+		"missions": [{"id": m["id"], "label": m.get("label"), "duree_s": _int(m.get("duree_s")),
+					  "difficulte": _int(m.get("difficulte")), "recompense": _int(m.get("recompense_cuivre"))}
+					 for m in missions_ouvertes(imp, reg)] if titre else [],
+		"compagnons": [{"id": c["_id"], "nom": proprietes.nom_personnage(c),
+						"niveau": puissance([c]) - 1} for c in compagnons_dispo] if titre else [],
+		"expeditions": [{"id": e["id"], "mission": (mission_def(reg, e.get("mission")) or {}).get("label", ""),
+						 "par": e.get("par_nom"), "retour": _int(e.get("retour")), "revenue": now >= _int(e.get("retour")),
+						 "chance": e.get("chance"), "mienne": e.get("par") == character.get("_id")}
+						for e in g.get("expeditions") or []],
+		"coffre": ([{"index": i, "nom": (resolve_item_ref(r) or {}).get("nom", ""), "icon": (resolve_item_ref(r) or {}).get("icon", "")}
+					for i, r in enumerate(g.get("coffre") or [])] if titre and "coffre" in fonctions(imp, reg) else None),
+		"peut_retirer": peut_retirer_coffre_guilde(character, imp),
+	})
+	return base
+
+
 # ── Combats joués : défense du lieu et tanière (§ 6) ─────────────────────────────────
 DEFENSE = "defense"
 TANIERE = "taniere"
@@ -2007,7 +2321,7 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 			"refus": peut_construire(imp, reg, d.get("id"))[1],
 			"categories": ([{"id": c, "label": libelle_metier(c)} for c in categories_possibles(reg, d.get("id"), disponibles)]
 						   if d.get("familles") else []),
-		} for d in reg.get("batiments_def") or [] if d.get("nature") in NATURES_OUVERTES],
+		} for d in reg.get("batiments_def") or [] if d.get("nature") in NATURES_OUVERTES and d.get("catalogue", True)],
 		"fortifications": [{
 			"id": f.get("id"), "label": f.get("label"), "prix": _int(f.get("prix_cuivre")),
 			"bois": _int(f.get("bois")), "materiaux": _int(f.get("materiaux")), "defense": _num(f.get("defense")),

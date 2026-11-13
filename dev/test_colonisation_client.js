@@ -101,9 +101,9 @@ test('une demande en attente remplace le champ de demande', () => {
 	assert.ok(html.includes('attend la réponse') && !html.includes('colDemander()'));
 });
 
-test('le fondateur a les quatre onglets, les chiffres et toutes les décisions', () => {
+test('le fondateur a tous les onglets, les chiffres et toutes les décisions', () => {
 	const d = gerant('fondateur');
-	assert.strictEqual((colImplantationHtml(d, 'site').match(/data-onglet=/g) || []).length, 4);
+	assert.strictEqual((colImplantationHtml(d, 'site').match(/data-onglet=/g) || []).length, COL_ONGLETS.length);
 	const html = tout(d);
 	for (const attendu of ['colConstruire', 'colPoser', 'colChantier', 'colFeu', 'colOuvrirEmbauche', 'colExclure',
 		'colRepondre', 'colReparer', 'Carnet', '(2/3)', 'Défense physique : 4/20', 'Morts récentes : -8', 'Feu : +5'])
@@ -152,6 +152,24 @@ test('charte : prix, règles, bouton fermé sans les fonds ou avec une charte en
 	assert.ok(/disabled/.test(colCharteHtml(Object.assign({}, base, { purse: { cuivre: 1 } }))));
 	const tenue = colCharteHtml(Object.assign({}, base, { peut_acheter: false, refus: 'déjà', charte: { label: 'Sens' }, purse: { cuivre: 99999 } }));
 	assert.ok(/disabled/.test(tenue) && tenue.includes('signée à Sens'));
+});
+
+test('guilde : le visiteur la rejoint, le maître ouvre l\'échelon, seuls les retours se reçoivent', () => {
+	const g = { existe: true, nom: MECHANT, echelon: 'Auberge', fonctions: ['recrutement', 'expeditions', 'coffre'], titre: null,
+		membres: [{ nom: MECHANT, titre: 'maitre' }], missions: [], compagnons: [], expeditions: [], coffre: null, suivant: null };
+	const vis = colGuildeHtml(g, 'visiteur', {});
+	assert.ok(!vis.includes('<script>') && vis.includes("colGuilde('rejoindre')") && !vis.includes('colOuvrirGuilde'));
+	const maitre = colGuildeHtml(Object.assign({}, g, { titre: 'maitre', suivant: { label: 'Maison', prix: 1, refus: '' },
+		missions: [{ id: 'patrouille', label: MECHANT, duree_s: 3600, difficulte: 5, recompense: 10 }],
+		compagnons: [{ id: 'aventurier:1', nom: MECHANT, niveau: 2 }],
+		expeditions: [{ id: 'x1', mission: MECHANT, par: MECHANT, retour: 1, revenue: true, chance: 0.5, mienne: true },
+			{ id: 'x2', mission: 'm', par: 'p', retour: 1, revenue: false, chance: 0.5, mienne: true }],
+		coffre: [{ index: 0, nom: MECHANT, icon: '' }], peut_retirer: true, sac: [{ index: 0, item_id: 'item:a', nom: MECHANT, icon: '' }] }), 'fondateur', {});
+	assert.ok(!maitre.includes('<script>') && maitre.includes('colOuvrirGuilde()') && !maitre.includes("colGuilde('quitter')"));
+	assert.strictEqual((maitre.match(/colAccueillir/g) || []).length, 1, 'seul le groupe revenu se reçoit');
+	assert.ok(maitre.includes('colEnvoyer(this)') && maitre.includes('colCoffreRetirer') && maitre.includes('colCoffreDeposer'));
+	const avant = colGuildeHtml({ existe: false, suivant: { label: 'Auberge', prix: 1, palier: 'Village', refus: 'palier' } }, 'associe', {});
+	assert.ok(avant.includes('Fonder la guilde') && !avant.includes('colOuvrirGuilde'));
 });
 
 console.log(`OK — ${n} tests du panneau de colonisation.`);

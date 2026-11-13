@@ -536,6 +536,11 @@ def acces_autorise(character: dict, lieu_doc: dict, get_doc_fn=None) -> tuple[bo
 	doit porter une carte d'aventurier qui vaut à la CITÉ du lieu (`porte_carte_valable` : la
 	sienne, ou celle d'une capitale de même `lieu_parent`) — la carte d'une autre guilde
 	ne vaut rien ici. Retourne (ok, raison)."""
+	# Maison de guilde d'une implantation (voie de colonisation) : la guilde du joueur est
+	# INDÉPENDANTE de celle des cités — ses membres y recrutent, sans carte.
+	if (lieu_doc or {}).get("colonie"):
+		from utils import colonisation
+		return colonisation.acces_tableau_guilde(character, lieu_doc, get_doc_fn or get_doc)
 	if not character_stats.RECRUTEMENT_CARTE_REQUISE:
 		return True, ""
 	if porte_carte_valable(character, (lieu_doc or {}).get("lieu_parent"), get_doc_fn or get_doc):
