@@ -1086,12 +1086,21 @@ def grimoire_pour(character: dict, sort_id: str, resolve_ref, refs_extra=None) -
 
 
 def sorts_connus_docs(character: dict, get_doc) -> list:
-	"""Docs normalisés des sorts connus du personnage (ids morts ignorés)."""
+	"""Docs normalisés des sorts connus du personnage (ids morts ignorés), puis ceux qu'un
+	objet PORTÉ accorde (`pouvoirs_objets`, marqués `accorde_par` = nom de l'objet)."""
+	from utils import pouvoirs_objets
 	out = []
-	for sort_id in (character or {}).get("sorts_connus") or []:
+	connus = list((character or {}).get("sorts_connus") or [])
+	for sort_id in connus:
 		sort = normaliser_sort(get_doc(sort_id))
 		if sort:
 			out.append(sort)
+	for sort_id, objet in pouvoirs_objets.accordes(character, get_doc, "sort:").items():
+		if sort_id in connus:
+			continue
+		sort = normaliser_sort(get_doc(sort_id))
+		if sort:
+			out.append({**sort, "accorde_par": objet})
 	return out
 
 
@@ -1464,5 +1473,7 @@ def liste_sorts_payload(character: dict, get_doc, contexte: str,
 			"cout_pm_effectif": charge_magie.cout_pm_effectif(sort["cout_pm"], _pen(sort)),
 			"maintien_effectif": charge_magie.maintien_effectif(temps["maintien"], _pen(sort)),
 			"composants": _composants_payload(sort, character, get_doc),
+			# Pouvoir d'un objet porté (🏆) : nom de l'objet, sinon None (sort appris).
+			"accorde_par": sort.get("accorde_par"),
 		})
 	return out

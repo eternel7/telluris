@@ -53,4 +53,11 @@ test('passive Lecture des traces : son effet est annoncé (dev/gen_pistage.py)',
 		'🐾 lit les traces (espèce et grade)');
 });
 
+test('pouvoir d\'un objet porté : « 🏆 accordé par », nom échappé (utils/pouvoirs_objets)', () => {
+	const s = { effets: { degats: '2D6' }, cible: 'soi', accorde_par: 'Épée <b>croc</b>' };
+	assert.ok(_sortLigneDesc(s).includes('🏆 accordé par Épée &lt;b&gt;croc&lt;/b&gt;'));
+	assert.ok(_compLigneDesc({ mode: 'active', cible: 'soi', effets: {}, accorde_par: 'Sceptre' }).includes('🏆 accordé par Sceptre'));
+	assert.ok(!_sortLigneDesc({ effets: {}, cible: 'soi' }).includes('🏆'));
+});
+
 console.log(`✓ ${ok} tests capacites_texte`);

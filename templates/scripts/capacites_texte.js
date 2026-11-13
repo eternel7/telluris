@@ -145,12 +145,21 @@ function _sortPorteeTexte(s) {
 }
 
 // ── Lignes d'une capacité CONNUE (onglet ⚡) ─────────────────────────────────
+// Pouvoir d'un objet PORTÉ (`accorde_par`, cf. utils/pouvoirs_objets) : rien n'est appris,
+// le pouvoir part avec l'objet. Nom d'objet = contenu, échappé quand même (innerHTML).
+function _accordeLabel(x) {
+	if (!x || !x.accorde_par) return '';
+	const nom = String(x.accorde_par).replace(/[&<>"']/g, ch => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[ch]);
+	return ` · <span title="Pouvoir de l'objet porté : il disparaît si vous l'ôtez">🏆 accordé par ${nom}</span>`;
+}
+
 // Ligne d'effets d'un sort connu, sous son nom.
 function _sortLigneDesc(s) {
 	return `${_invocationLabel(s) || _sortEffetsLabel(s.effets)}${_sortTempsLabel(s)}`
 		+ `${s.cible === 'ennemi' ? ' · portée ' + s.portee : ''}${_zoneLabel(s)}`
 		+ `${s.cible === 'allie' ? ' · 🤝 sur un allié' : ''}`
-		+ `${s.enseignement ? ' · 🎓 enseigné par un maître' : ''}`;
+		+ `${s.enseignement ? ' · 🎓 enseigné par un maître' : ''}`
+		+ _accordeLabel(s);
 }
 // Pastilles des composants d'un sort connu (`.sh-sort-compo`, grisée si indisponible).
 function _sortComposHtml(s) {
@@ -193,5 +202,5 @@ function _compLigneDesc(c) {
 	let portee = '';
 	if (c.mode === 'active' && c.cible === 'ennemi') portee = ` · portée ${c.portee}`;
 	else if (c.mode === 'active' && c.cible === 'allie') portee = ' · 🤝 sur un allié';
-	return `${_sortEffetsLabel(c.effets, _compArme(c) ? '+' : '')}${_sortTempsLabel(c)}${portee}${_zoneLabel(c)}${_conditionLabel(c)}`;
+	return `${_sortEffetsLabel(c.effets, _compArme(c) ? '+' : '')}${_sortTempsLabel(c)}${portee}${_zoneLabel(c)}${_conditionLabel(c)}` + _accordeLabel(c);
 }

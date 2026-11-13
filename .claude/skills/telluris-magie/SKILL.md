@@ -239,3 +239,10 @@ Une zone vaut pour **les trois `cible`**. La forme est toujours filtrée par le 
 ### Focalisation — 🧭 lieu / 🎯 quête
 Un personnage focalise **UNE seule chose à la fois** (`character["focalisation"]`). Guidage (lieu) par BFS sur le graphe de `connection` + direction A* ; biais (quête) sur le tirage d'événement/espèce (`FOCUS_EVENEMENT_MULT`/`FOCUS_CIBLE_MULT`) ; effacement automatique à l'arrivée, à la fin de quête ou à l'objectif atteint. Logique pure `utils/focalisation.py`, couverte par `tests/test_focalisation.py`. `POST /api/focaliser` → `{focalisation, guidage}`. UI : boutons 🧭 (onglet 🤝) et 🎯 (onglet 📜).
 
+
+### Pouvoirs d'un objet porté — `utils/pouvoirs_objets.py`
+- Champ item `competences` : ids `sort:` / `competence:` EXISTANTS, ou `{id, restriction}`. Actif tant que l'objet est **équipé** ; rien n'est appris ni écrit (`sorts_connus` intact).
+- **Hors vocation** ; exigence lue sur `caracteristiques_current` **brut** (convention 3).
+- `connait(character, id, get_doc)` = contrôle d'appartenance UNIQUE : routes de lancement (combat, exploration), `slots_actions._entree_possedee` (la case de barre reste stockée, revient au rééquipement). `sorts_connus_docs` / `competences_connues_docs` ajoutent les pouvoirs marqués `accorde_par` → payload ⚡ → « 🏆 accordé par » (`capacites_texte._accordeLabel`).
+- Passive accordée : `synchroniser_competences_bonus` à l'equip/unequip ; réponse d'équipement porte le bloc `fiche`.
+- Contenu : trophées de `dev/gen_trophees_legendaires.py`. Verrouillé par `tests/test_trophees_legendaires.py`.

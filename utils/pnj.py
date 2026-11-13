@@ -38,6 +38,11 @@
 #   {prix}, {trophee}. Ni stock, ni fabrication, ni relation. Principal seul, contrôle de charge
 #   côté router ; le `trophee` (morceau de monstre laissé au vendeur) se prend dans les sacs du
 #   groupe (principal en tête, compagnons, montures, contenants).
+# - `services.rachat` : {articles:[{item, cout_cuivre, prime_signee?}], noeuds:{fait, sans_objet}}
+#   — le COLLECTIONNEUR rachète à prix fixe (`article_rachete`), action
+#   `{"service":"rachat", "op":"vendre"[, "item":"item:x"]}` : sans `item`, TOUT ce que le groupe
+#   porte parmi ses articles ; placeholders {objet}, {prix}. Pièce signée payée + `prime_signee`
+#   (50 % par défaut). Flag `rachat_possible` : au moins un article est porté.
 # - `services.transport` : {noeuds:{propose, infos, accepte, trop_charge, livre, incomplet},
 #   offre?:{id, destination, cargaison, duree, proba, unique, titre, description, recompenses}}
 #   — quête de course (utils/transport.py). Sans `offre`, la course est TIRÉE AU HASARD et le
@@ -992,6 +997,68 @@ def article_en_vente(pnj_doc: dict, item_id) -> dict | None:
 			return None
 		return {"item": item_id, "cout_cuivre": cout, "trophee": trophee} if cout >= 0 else None
 	return None
+
+
+# Collectionneur (`docs/conception_trophees_legendaires.md` § 9) : service `rachat`, miroir de
+# `vente` — le PNJ RACHÈTE à prix fixe une liste de parties de bêtes précises.
+PRIME_SIGNEE_DEFAUT = 0.5   # +50 % pour une pièce signée du chasseur (utils/chasse_signee)
+
+
+def article_rachete(pnj_doc: dict, item_id) -> dict | None:
+	"""`{item, cout_cuivre, prime_signee}` de l'article que ce PNJ rachète, ou None.
+	`services.rachat` : {articles:[{item, cout_cuivre, prime_signee?}], noeuds:{fait, sans_objet}}.
+	Un prix illisible, nul ou négatif rend l'article non rachetable."""
+	if not isinstance(item_id, str):
+		return None
+	service = (((pnj_doc or {}).get("services") or {}).get("rachat")) or {}
+	for article in service.get("articles") or []:
+		if not isinstance(article, dict) or article.get("item") != item_id:
+			continue
+		try:
+			cout = int(article.get("cout_cuivre"))
+			prime = float(article.get("prime_signee", PRIME_SIGNEE_DEFAUT))
+		except (TypeError, ValueError):
+			return None
+		if cout <= 0 or prime < 0:
+			return None
+		return {"item": item_id, "cout_cuivre": cout, "prime_signee": prime}
+	return None
+
+
+def exemplaire_a_racheter(sacs: list, item_id: str, ref_id_fn) -> tuple | None:
+	"""`(index du sac, index de la ref)` de l'exemplaire à céder : une pièce SIGNÉE d'abord (la
+	prime revient au joueur), sinon la première, sacs dans l'ordre (principal en tête)."""
+	premier = None
+	for i, sac in enumerate(sacs or []):
+		for j, ref in enumerate((sac or {}).get("inventaire") or []):
+			if ref_id_fn(ref) != item_id:
+				continue
+			if isinstance(ref, dict) and isinstance(ref.get("chasse"), dict):
+				return i, j
+			if premier is None:
+				premier = (i, j)
+	return premier
+
+
+def articles_rachetes(pnj_doc: dict) -> list:
+	"""Tous les articles lisibles du service `rachat`, dans l'ordre de la donnée."""
+	service = (((pnj_doc or {}).get("services") or {}).get("rachat")) or {}
+	out = []
+	for article in service.get("articles") or []:
+		lu = article_rachete(pnj_doc, (article or {}).get("item") if isinstance(article, dict) else None)
+		if lu:
+			out.append(lu)
+	return out
+
+
+def rachat_possible(pnj_doc: dict, sacs: list, ref_id_fn) -> bool:
+	"""Le groupe porte-t-il au moins une pièce que ce collectionneur recherche ?"""
+	return any(exemplaire_a_racheter(sacs, a["item"], ref_id_fn) for a in articles_rachetes(pnj_doc))
+
+
+def prix_rachat(article: dict, ref) -> int:
+	signee = isinstance(ref, dict) and isinstance(ref.get("chasse"), dict)
+	return int(round(article["cout_cuivre"] * (1 + (article["prime_signee"] if signee else 0))))
 
 
 def don_deja_recu(character: dict, item_id: str, lieu_parent: str | None,

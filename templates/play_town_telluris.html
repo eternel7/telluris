@@ -7071,6 +7071,7 @@ function _carteBtn(item) {
 function _titreObjet(item) {
 	let html = `<h3>${item.icon || '📦'} ${item.nom || '—'}</h3>`;
 	if (item.nom_origine) html += `<div class="item-detail-origine">${item.nom_origine}</div>`;
+	if (item.chasse) html += `<div class="item-detail-origine" title="Trophée signé">🏹 ${escapeHtml(item.chasse)}</div>`;
 	if (_itemDetailState && _itemDetailState.renommer) {
 		html += `<div class="item-rename-row">
 			<input id="item-rename-input" type="text" maxlength="80" placeholder="Nom de l'objet"
@@ -8570,6 +8571,7 @@ async function equip(itemId, slot, idx) {
 		_refreshDerivedStats(data.derived_stats);
 		_renderCaractsMod(data.caracts_detail);
 		_refreshChargeGauge();
+		_appliquerFiche(data.fiche);   // pouvoir d'un objet porté (🏆) : ⚡ et barre suivent
 	} catch(err) { console.error('Erreur equip', err); }
 }
 
@@ -8590,6 +8592,7 @@ async function unequip(slot) {
 		_refreshDerivedStats(data.derived_stats);
 		_renderCaractsMod(data.caracts_detail);
 		_refreshChargeGauge();
+		_appliquerFiche(data.fiche);   // pouvoir d'un objet porté (🏆) : ⚡ et barre suivent
 	} catch(err) { console.error('Erreur unequip', err); }
 }
 
@@ -13986,6 +13989,11 @@ async function choisirPnj(choixId, extra) {
 			// Service `vente` (prix fixe) : la bourse arrive par data.purse, le sac par l'inventaire.
 			showToast('Achat : ' + (data.vente.icon || '🛒') + ' ' + data.vente.nom
 				+ (data.vente.trophee ? ' — contre ' + data.vente.trophee : ''));
+			if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
+		}
+		if (data.rachat) {
+			// Service `rachat` (collectionneur) : la bourse arrive par data.purse, le sac par l'inventaire.
+			showToast('Vendu : ' + data.rachat.nom + (data.rachat.signee ? ' — pièce signée, prime comprise' : ''));
 			if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
 		}
 		if (data.transport) {

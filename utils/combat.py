@@ -4,6 +4,7 @@ import os
 import random
 import uuid
 import copy
+import time
 from db.config import get_doc, save_doc, find_docs
 from models import character_stats
 from models.character_stats import (
@@ -47,6 +48,7 @@ from utils import vol as vol_util
 from utils import images_monstres
 from utils import contenants as contenants_util
 from utils import xp_monstre
+from utils import chasse_signee
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -4871,6 +4873,7 @@ def butin_d_etage(combat_doc: dict) -> list:
 			if m.get("vivant", True):
 				continue
 			dispo.extend(_butin_du_monstre(m))
+		_signer_butin(dispo, combat_doc)
 		memo = {"etage": etages.get("etage"), "dispo": dispo}
 		etages["butin_etage"] = memo
 	# `loote` (ramassage en combat) ne retire que la CARCASSE ; les objets restent proposés.
@@ -7075,6 +7078,10 @@ def _resoudre_action_joueur(
 		ref = {"item": item["_id"], "poids": poids}
 		if monstre.get("profil_id"):
 			ref["profil"] = monstre["profil_id"]   # grade du spécimen → prix (cf. ref_de_butin)
+		chasse = chasse_signee.signature(item, item.get("nom"), int(time.time()))
+		if chasse:
+			chasse["par"] = chasse_signee.nom_des_chasseurs([joueur.get("nom")])
+			ref["chasse"] = chasse
 		joueur.setdefault("butin_ramasse", []).append(ref)
 		joueur["charge"] = round(joueur.get("charge", 0) + poids, 2)
 		_ajuster_charge_magique(joueur, poids, charge_magie.coefficient_item(item))
@@ -7407,6 +7414,8 @@ def _carcasse_payload(monstre: dict) -> dict | None:
 		"item_id": item["_id"],
 		"nom": item.get("nom", item["_id"]),
 		"poids": _roll_carcasse_weight(item, monstre.get("niveau", 1)),
+		# Signature du chasseur (bête rare+) : `par` posé par `_signer_butin`, au combat.
+		**({"chasse": c} if (c := chasse_signee.signature(item, item.get("nom"), int(time.time()))) else {}),
 		# Grade du spécimen : il fixe le prix de la dépouille (`xp_monstre.prix_depouille`) et
 		# voyage sur la référence (`ref_de_butin`). Absent pour un monstre sans profil.
 		**({"profil": monstre["profil_id"]} if monstre.get("profil_id") else {}),
@@ -7419,7 +7428,16 @@ def ref_de_butin(d: dict) -> dict:
 	ref = {"item": d["item_id"], "poids": d["poids"]}
 	if d.get("profil"):
 		ref["profil"] = d["profil"]
+	if isinstance(d.get("chasse"), dict):
+		ref["chasse"] = dict(d["chasse"])   # copie : deux refs ne partagent jamais un dict
 	return ref
+
+
+def _signer_butin(dispo: list, combat_doc: dict) -> list:
+	"""Pose le nom du chasseur (le PRINCIPAL du combat) sur les dépouilles signées."""
+	pid = combat_doc.get("character_id")
+	noms = [j.get("nom") for j in combat_doc.get("joueurs") or [] if j.get("character_id") == pid]
+	return chasse_signee.signer_par(dispo, noms[:1])
 
 
 def cle_butin(d: dict) -> str:
@@ -7840,6 +7858,7 @@ def finalize_combat(combat_doc: dict) -> bool:
 			if m.get("vivant", False):
 				continue
 			dispo.extend(_butin_du_monstre(m))
+		_signer_butin(dispo, combat_doc)
 		combat_doc["butin_disponible"] = dispo
 
 	# Montures : une bête tombée quitte le troupeau et déverse sa cargaison au SOL du

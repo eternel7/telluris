@@ -10,6 +10,7 @@ import uuid
 import random
 import os
 from db.config import save_doc, save_docs, get_doc, delete_doc, find_docs
+from utils import pouvoirs_objets
 from utils.auth import get_current_user, create_access_token, ouvrir_session, fermer_session, revoquer_sessions
 from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
@@ -1396,6 +1397,8 @@ def equip_item(
 	_garde_harnachement(character)
 
 	eq_bonus = sync_equipment_bonus(character)
+	# Une passive accordée par un objet porté (utils/pouvoirs_objets) entre ou sort de l'agrégat.
+	competences_util.synchroniser_competences_bonus(character, get_doc)
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
@@ -1423,6 +1426,8 @@ def _reponse_equipement(character: dict, slots: dict, inventaire: list, derived)
 		"caracts_detail":  consommables.caracts_detail(character),
 		"charge":          round(carried_weight(character), 2),
 		"charge_max":      montures.charge_max_porteur(character),
+		# Fiche (⚡, barre de combat) : un objet porté peut accorder un pouvoir (🏆).
+		"fiche":           _fiche_payload(character),
 	}
 
 
@@ -1455,6 +1460,8 @@ def unequip_item(
 	_garde_harnachement(character)
 
 	eq_bonus = sync_equipment_bonus(character)
+	# Une passive accordée par un objet porté (utils/pouvoirs_objets) entre ou sort de l'agrégat.
+	competences_util.synchroniser_competences_bonus(character, get_doc)
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
@@ -1796,7 +1803,7 @@ def lancer_sort(
 	character, principal = _acteur(current_user, body)
 
 	sort_id = body.get("sort_id")
-	if sort_id not in (character.get("sorts_connus") or []):
+	if not pouvoirs_objets.connait(character, sort_id, get_doc):
 		raise HTTPException(status_code=422, detail="Sort inconnu du personnage")
 	sort = sorts_util.normaliser_sort(get_doc(sort_id))
 	if not sort or not sorts_util.sort_utilisable_exploration(sort):
@@ -1939,7 +1946,7 @@ def utiliser_competence(
 	character, principal = _acteur(current_user, body)
 
 	competence_id = body.get("competence_id")
-	if competence_id not in (character.get("competences_connues") or []):
+	if not pouvoirs_objets.connait(character, competence_id, get_doc):
 		raise HTTPException(status_code=422, detail="Compétence inconnue du personnage")
 	comp = competences_util.normaliser_competence(get_doc(competence_id))
 	if not comp or not competences_util.competence_utilisable_exploration(comp):

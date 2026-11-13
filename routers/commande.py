@@ -28,6 +28,7 @@ from utils.characters import (
 	get_selected_character, carried_weight, charge_max_of, credit_character,
 	cuivre_to_purse, money_to_cuivre, resolve_item_ref, lieu_label,
 )
+from utils import chasse_signee
 from utils import commande as commande_util
 from utils import fabrication
 from utils import filtres_boutique
@@ -610,7 +611,7 @@ async def passer_commande(
 
 	# ⚠️ Retrait en MÉMOIRE d'abord, sauvegarde ensuite (même séquence que le scriptorium) :
 	# un échec de save laisse les sacs intacts en base.
-	commande_util.retirer_fournitures(source["fournies"])
+	retirees = commande_util.retirer_fournitures(source["fournies"])
 	commande_util.retirer_du_rayon(lieu_doc, source["achetees"])
 
 	enr = commande_util.nouvelle_commande(
@@ -618,7 +619,8 @@ async def passer_commande(
 		matieres=resolu["matieres"],
 		fournies=[{"cle": f["cle"], "item_id": f["item_id"]} for f in source["fournies"]],
 		achetees=source["achetees"], poids=poids,
-		nom_perso=(exemplaire or {}).get("nom_perso", ""))
+		nom_perso=(exemplaire or {}).get("nom_perso", ""),
+		chasse=chasse_signee.chasse_des_refs(retirees))
 	character.setdefault("commandes", []).append(enr)
 
 	mutes = {id(f["porteur"]): f["porteur"] for f in source["fournies"]}
@@ -689,7 +691,7 @@ async def relancer_commande(
 		# Marchand employé : la commande se paie dans SA caisse (relevée par le propriétaire).
 		proprietes.encaisser(lieu_doc, resolu["detail"]["total"])
 
-	commande_util.retirer_fournitures(source["fournies"])
+	retirees = commande_util.retirer_fournitures(source["fournies"])
 	commande_util.retirer_du_rayon(lieu_doc, source["achetees"])
 
 	# L'entrée est REMPLACÉE à la même place : le délai de fabrication court à partir de
@@ -699,7 +701,8 @@ async def relancer_commande(
 		matieres=resolu["matieres"],
 		fournies=[{"cle": f["cle"], "item_id": f["item_id"]} for f in source["fournies"]],
 		achetees=source["achetees"],
-		poids=commande_util.poids_attendu(item_doc))
+		poids=commande_util.poids_attendu(item_doc),
+		chasse=cmd.get("chasse") or chasse_signee.chasse_des_refs(retirees))
 	neuve["id"] = cmd["id"]
 	neuve["cree_at"] = int(cmd.get("cree_at", now) or now)
 	character["commandes"] = [neuve if c is cmd else c for c in character.get("commandes", [])]

@@ -214,12 +214,21 @@ def empiler_effet_competence(character: dict, comp: dict) -> dict | None:
 # ── Passives : bonus permanent dénormalisé ───────────────────────────────────────
 
 def competences_connues_docs(character: dict, get_doc) -> list:
-	"""Docs normalisés des compétences connues du personnage (ids morts ignorés)."""
+	"""Docs normalisés des compétences connues du personnage (ids morts ignorés), puis celles
+	qu'un objet PORTÉ accorde (`pouvoirs_objets`, marquées `accorde_par`)."""
+	from utils import pouvoirs_objets
 	out = []
-	for cid in (character or {}).get("competences_connues") or []:
+	connues = list((character or {}).get("competences_connues") or [])
+	for cid in connues:
 		comp = normaliser_competence(get_doc(cid))
 		if comp:
 			out.append(comp)
+	for cid, objet in pouvoirs_objets.accordes(character, get_doc, "competence:").items():
+		if cid in connues:
+			continue
+		comp = normaliser_competence(get_doc(cid))
+		if comp:
+			out.append({**comp, "accorde_par": objet})
 	return out
 
 
@@ -302,6 +311,11 @@ def recompute_competences_bonus(character: dict, get_doc) -> dict:
 	return bonus
 
 
+def _porte_un_pouvoir(character: dict, get_doc) -> bool:
+	from utils import pouvoirs_objets
+	return bool(pouvoirs_objets.accordes(character, get_doc, "competence:"))
+
+
 def synchroniser_competences_bonus(character: dict, get_doc) -> bool:
 	"""Recale `competences_bonus` sur les docs ACTUELS de ses compétences connues ; True si
 	l'agrégat a changé (à persister par l'appelant). `competences_bonus` n'est réécrit qu'à
@@ -310,7 +324,8 @@ def synchroniser_competences_bonus(character: dict, get_doc) -> bool:
 	sans compétence connue n'a rien à relire. Coût : une lecture par compétence connue, servie
 	par le cache de requête (`competence:` est un préfixe de contenu)."""
 	character = character or {}
-	if not character.get("competences_connues"):
+	if not character.get("competences_connues") and not character.get("competences_bonus") \
+			and not _porte_un_pouvoir(character, get_doc):
 		return False
 	frais = bonus_passifs(character, get_doc)
 	if character.get("competences_bonus") == frais:
@@ -574,5 +589,7 @@ def liste_competences_payload(character: dict, get_doc, contexte: str,
 			"sensibilite_charge": comp["sensibilite_charge"],
 			"cout_pm_effectif": charge_magie.cout_pm_effectif(comp["cout_pm"], _pen(comp)),
 			"maintien_effectif": charge_magie.maintien_effectif(temps["maintien"], _pen(comp)),
+			# Pouvoir d'un objet porté (🏆) : nom de l'objet, sinon None (compétence apprise).
+			"accorde_par": comp.get("accorde_par"),
 		})
 	return out

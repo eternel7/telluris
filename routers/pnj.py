@@ -15,7 +15,7 @@ from utils.characters import (
 	get_selected_character, sync_equipment_bonus,
 	money_to_cuivre, cuivre_to_purse,
 	tirer_poids, carried_weight, charge_max_of, item_ref_id, item_ref_lieu, resolve_item_ref,
-	item_ref_weight,
+	item_ref_weight, credit_character,
 	lieu_label,
 )
 from utils.marche import (
@@ -258,6 +258,12 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			placeholders.setdefault("rang_vise", spec_apport["rang_vise"])
 			placeholders.setdefault("xp", rec_apport.get("xp", 0))
 			placeholders.setdefault("prime", rec_apport.get("cuivre", 0))
+		# Collectionneur (`services.rachat`) : le choix de vente ne s'affiche que si le groupe
+		# porte au moins une pièce recherchée.
+		if (pnj_doc.get("services") or {}).get("rachat"):
+			flags["rachat_possible"] = pnj.rachat_possible(
+				pnj_doc, _sacs_remise(character, recrutement.porteurs_effectifs(character, get_doc)),
+				item_ref_id)
 		# Don UNIQUE (la carte de guilde remise à l'inscription) : le choix se masque tant que
 		# l'exemplaire est dans le sac, et revient s'il est perdu.
 		don_conf = (pnj_doc.get("services") or {}).get("don") or {}
@@ -1203,6 +1209,8 @@ async def pnj_dialogue_choix(
 		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
 	elif action.get("service") == "vente":
 		suivant = _resoudre_vente(character, pnj_doc, action, contexte, reponse)
+	elif action.get("service") == "rachat":
+		suivant = _resoudre_rachat(character, pnj_doc, action, contexte, reponse)
 	elif action.get("service") == "transport":
 		suivant, dits = _resoudre_transport(character, pnj_doc, lieu_doc, action.get("op"), reponse)
 		# Le contexte a changé (course acceptée/livrée) → refiltrer les choix du nœud suivant
@@ -1371,6 +1379,56 @@ def _resoudre_vente(character: dict, pnj_doc: dict, action: dict, contexte: dict
 		reponse["inventaire_payload"] = _inventory_payload(character)
 	reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
 	return suivant
+
+
+def _resoudre_rachat(character: dict, pnj_doc: dict, action: dict, contexte: dict,
+					 reponse: dict) -> str | None:
+	"""Service `rachat` (op `vendre`) : le collectionneur paie à prix fixe les pièces qu'il
+	recherche, prises dans les sacs du groupe (principal en tête, `_sacs_remise`). Avec
+	`action.item`, un exemplaire de cet article ; sans, TOUS les exemplaires de tous ses
+	articles. Une pièce signée est payée avec sa prime (`pnj.prix_rachat`). Rien ⇒ `sans_objet`."""
+	if action.get("op") != "vendre":
+		raise HTTPException(status_code=422, detail="Ce personnage ne rachète pas cela.")
+	if action.get("item") is not None:
+		article = pnj.article_rachete(pnj_doc, action.get("item"))
+		if not article:
+			raise HTTPException(status_code=422, detail="Ce personnage ne rachète pas cet objet.")
+		articles, un_seul = [article], True
+	else:
+		articles, un_seul = pnj.articles_rachetes(pnj_doc), False
+	noeuds = ((pnj_doc.get("services") or {}).get("rachat") or {}).get("noeuds") or {}
+	sacs = _sacs_remise(character, recrutement.porteurs_effectifs(character, get_doc))
+	vendus, total, signees, touches_idx = [], 0, 0, set()
+	for article in articles:
+		while True:
+			place = pnj.exemplaire_a_racheter(sacs, article["item"], item_ref_id)
+			if place is None:
+				break
+			i, j = place
+			ref = sacs[i]["inventaire"].pop(j)
+			if i > 0:
+				touches_idx.add(i)
+			total += pnj.prix_rachat(article, ref)
+			signees += int(isinstance(ref, dict) and isinstance(ref.get("chasse"), dict))
+			vendus.append(_nom_item(article["item"]))
+			if un_seul:
+				break
+	contexte["placeholders"]["objet"] = ", ".join(dict.fromkeys(vendus)) or (
+		_nom_item(articles[0]["item"]) if articles else "")
+	contexte["placeholders"]["prix"] = traversee_util.texte_bourse(total)
+	if not vendus:
+		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
+		return noeuds.get("sans_objet")
+	touches = _reporter_remise(character, sacs, [sacs[i] for i in sorted(touches_idx)])
+	credit_character(character, total)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	_sauver_porteurs(touches)
+	reponse["rachat"] = {"nom": contexte["placeholders"]["objet"], "nombre": len(vendus),
+						 "prix": total, "signee": signees > 0}
+	reponse["inventaire_payload"] = _inventory_payload(character)
+	reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
+	return noeuds.get("fait")
 
 
 def _resoudre_enseignement(character: dict, pnj_doc: dict, op: str, reponse: dict) -> str | None:

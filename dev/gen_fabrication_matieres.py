@@ -451,6 +451,17 @@ MATIERES = {
 }
 
 
+# ── Chasses légendaires (dev/legendaires_table.py, Auteur 13/11) ─────────────────
+# Parties rare+ des ~35 bêtes légendaires (un morceau = MÊME bloc que sa partie) et matières
+# nommées (Écailles du Dragon rouge…, créées par dev/gen_trophees_legendaires.py). Données à
+# part pour que les deux générateurs lisent la même vérité.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import legendaires_table  # noqa: E402
+
+for _id, _entree in legendaires_table.entrees_fabrication(_partie, _matiere).items():
+	MATIERES.setdefault(_id, _entree)
+
+
 # ── Barème ──────────────────────────────────────────────────────────────────────
 
 def bloc_fabrication(entree: dict) -> dict:

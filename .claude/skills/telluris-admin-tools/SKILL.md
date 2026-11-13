@@ -125,3 +125,5 @@ Doc CouchDB `rules:world_variables`, chargé au démarrage par `load_world_varia
 - **Compétences** : `COMPETENCE_COUT_COEFF` (2). ⚠️ Pas de liste de vocations : le périmètre du choix à la création est le **complément exact de `SORT_VOCATIONS_DEPART`**.
 - **Donjons** : **aucune world-var** (l'effectif d'une salle est lui aussi une donnée du doc — `nb_monstres`, cf. plus haut) (`RANG_COMMISSION_DEFAUT = "D"` est une constante de module, pas un réglage : le rang d'une commission se dérive de sa barrière, cf. `donjon.rang_commission`). La fourchette de difficulté est une **donnée du doc `donjon:*`** (`niveau_max` / `niveau_min`, par salle ou global) et non un réglage de monde : deux donjons n'ont aucune raison de partager leur calibre. Récompenses reprises de la chasse.
 
+
+- `dev/gen_trophees_legendaires.py` → `jsons/trophees_legendaires_a_importer.json` : chasses légendaires (blocs des parties rare+, matières nommées, matériau d'armure, trophées, panoplies, mur, collectionneur) ; données partagées avec `gen_fabrication_matieres` dans `dev/legendaires_table.py`. Détail : `telluris-economie` § Chasses légendaires.

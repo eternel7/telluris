@@ -1,5 +1,7 @@
 # Trophées et matières des chasses légendaires — cahier des charges
 
+**Livré le 13/11** : moteur (`utils/pouvoirs_objets.py`, `utils/chasse_signee.py`, panoplies dans `utils/characters.py`, matériau dans `utils/commande.py`, mur dans `utils/proprietes.py`, service `rachat`) + `dev/gen_trophees_legendaires.py` (données : `dev/legendaires_table.py`). Tests : `tests/test_trophees_legendaires.py`.
+
 Décisions de l'Auteur (questionnaires du 13/11/2026). Livraison **en une seule passe** : moteur + contenu, **un seul** `jsons/trophees_legendaires_a_importer.json`.
 
 ## Constat (dump du 13/11)
@@ -17,9 +19,8 @@ Décisions de l'Auteur (questionnaires du 13/11/2026). Livraison **en une seule 
 
 ## 2. Matières raffinées nommées — les ~35 espèces rare+
 
-- Le `depecage` rend une matière **propre à l'espèce** (Écailles de Dragon rouge, Cuir de Tarasque, Soie d'aile de Séraphin, Os de Léviathan, Sang de Grand Phénix…) **à la place** du générique correspondant.
-- Chaque matière porte son bloc `fabrication` (≈ 80 % du budget de sa partie : elle est plus légère) et ses tags matériau d'armure (§ 3).
-- ⚠️ Contrôle de flux : une matière nommée n'est jamais une feuille livrée (pas de vente au comptoir, rachat par le négociant seul).
+- Une matière **propre à l'espèce** (Écailles du Dragon rouge, Éclats de carapace de la Tarasque, Plumes du Séraphin, Os du Géant de ʿĀd, Cendre du Prince Démon…), légère (0,5 à 5 kg), avec son bloc `fabrication` (≈ 80 % du budget de la partie) et ses tags de matériau (§ 3).
+- ⚠️ **Écart à la proposition** (constaté au code) : le dépeçage ne remplit que la RÉSERVE du boucher, jamais le sac du joueur — une matière nommée y serait restée invisible. Elle s'obtient donc par une **commande à trophée** : on apporte le corps (ou son morceau) à la grande maison de la sorte, qui rend la matière (tag `commandable`, sous-catégorie `matiere_legendaire` consommée par aucune recette : jamais livrée ni vendue au comptoir). La signature du chasseur passe sur la matière.
 
 ## 3. Matériau d'armure — tags
 
@@ -47,7 +48,7 @@ Budget du barème ; `valeur` = variante sur mesure du socle. Trophée = la parti
 ## 5. Compétence accordée par un objet porté (moteur neuf)
 
 - Champ item `competences: ["sort:souffle_de_feu", …]` (ids de **sorts ou compétences existants**, jamais de capacité neuve).
-- Actif **tant que l'objet est équipé** : apparaît dans ⚡ et dans la barre de combat, sans être appris ; retirer l'objet le retire (slot de barre conservé, grisé ; cf. `slots_effectifs`).
+- Actif **tant que l'objet est équipé** : apparaît dans ⚡ et dans la barre de combat, sans être appris ; retirer l'objet le retire (la case de barre reste stockée, masquée, et revient au rééquipement ; cf. `slots_effectifs`).
 - **Hors vocation autorisé** ; coûts PM/PA normaux.
 - **Exigence de caractéristique** : le pouvoir ne s'éveille que si la `restriction` de l'objet est satisfaite (lue BRUT, convention 3).
 - Pouvoirs de l'espèce : Souffle de feu (Dragon rouge), Regard glacial (Dragon blanc), Envol du griffon (pièces d'ailes), Terreur (Bête du Gévaudan), Raz-de-marée (Léviathan), Souffle de soufre (Prince démon), Main de venin (Grootslang)… Réservés aux trophées `tres_rare`/`legendaire`.
@@ -67,8 +68,8 @@ Budget du barème ; `valeur` = variante sur mesure du socle. Trophée = la parti
 
 ## 9. Collectionneurs et commandes de guilde
 
-- PNJ collectionneur (service `vente` inversé : rachat d'une liste de parties précises au prix fort + relation).
-- Commandes de guilde « rapporter <partie> de <espèce> » : réutiliser le moteur de quêtes de chasse (récompense + rang).
+- Service PNJ `rachat` sur Maître Théobald (`pnj:marchand_cabinet_des_specimens`) : il rachète les **têtes** des bêtes légendaires à 1,5 × leur coût de marché, **tout ce que le groupe porte en une fois** (choix affiché seulement si `rachat_possible`), +50 % pour une pièce signée.
+- Commandes de guilde : déjà couvertes par les quêtes de collecte de dépouille (#313) — rien de neuf ici.
 
 ## Garde-fous
 

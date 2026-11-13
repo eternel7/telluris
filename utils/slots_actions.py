@@ -27,6 +27,7 @@
 
 from models import character_stats
 from utils import competences as competences_util
+from utils import pouvoirs_objets
 from utils import sorts as sorts_util
 from utils.characters import item_ref_id
 from utils.consommables import est_consommable, effet_instantane
@@ -128,9 +129,9 @@ def _entree_possedee(entree: dict, character: dict, get_doc) -> bool:
 	if type_ in ("attaque", "ramasser", "fuir"):
 		return True
 	if type_ == "sort":
-		return ref in (character.get("sorts_connus") or [])
+		return pouvoirs_objets.connait(character, ref, get_doc)
 	if type_ == "competence":
-		if ref not in (character.get("competences_connues") or []):
+		if not pouvoirs_objets.connait(character, ref, get_doc):
 			return False
 		comp = competences_util.normaliser_competence(get_doc(ref))
 		return bool(comp and (competences_util.est_active(comp)

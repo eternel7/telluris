@@ -903,8 +903,24 @@ def _est_compagnon(doc: dict) -> bool:
 	return (doc or {}).get("type") == "aventurier"
 
 
+# Mur des trophées (`docs/conception_trophees_legendaires.md` § 8) : un réveil `requiert_trophee`
+# ne joue que si le COFFRE du bien expose un objet portant ce tag (têtes naturalisées des bêtes
+# rares, `dev/gen_trophees_legendaires.py`).
+TAG_TROPHEE_EXPOSE = "trophee_expose"
+
+
+def trophee_expose(prop: dict, get_doc_fn) -> bool:
+	"""Le coffre du bien contient-il au moins un trophée à exposer ?"""
+	from utils.characters import item_ref_id
+	for ref in (prop or {}).get("coffre") or []:
+		doc = get_doc_fn(item_ref_id(ref)) if get_doc_fn else None
+		if TAG_TROPHEE_EXPOSE in ((doc or {}).get("tags") or []):
+			return True
+	return False
+
+
 def appliquer_reveil(prop: dict, cat: dict, employes: list, dormeurs_: list,
-					 montures_: list, maintenant: int | None = None) -> dict:
+					 montures_: list, maintenant: int | None = None, get_doc_fn=None) -> dict:
 	"""Effets du réveil chez soi, sur les DORMEURS (`dormeurs`) et les montures présentes :
 	malus dissipés d'abord (médecin), puis effets à durée posés — remplacés, jamais empilés.
 	Mute les docs, sans save. Renvoie {doc_id: [libellés]} de ce qui a changé pour chacun."""
@@ -927,6 +943,8 @@ def appliquer_reveil(prop: dict, cat: dict, employes: list, dormeurs_: list,
 			if not bloc or _int(bloc.get("duree")) <= 0:
 				continue
 			if bloc.get("requiert_metier") and not metier_present(prop, cat, employes, bloc["requiert_metier"]):
+				continue
+			if bloc.get("requiert_trophee") and not trophee_expose(prop, get_doc_fn):
 				continue
 			for doc in docs:
 				if bloc.get("compagnons_seuls") and not _est_compagnon(doc):
@@ -1160,6 +1178,8 @@ def textes_effets(adef: dict, cat: dict) -> list:
 				t = f"au réveil ({qui}) : {_texte_reveil(val)}"
 				if val.get("requiert_metier"):
 					t += f" — s'il y a un(e) {(metier_def(cat, val['requiert_metier']) or {}).get('label', val['requiert_metier'])} en cuisine"
+				if val.get("requiert_trophee"):
+					t += " — si un trophée naturalisé est exposé (rangé au coffre)"
 			elif cle == "reveil_montures":
 				t = f"au réveil (montures) : {_texte_reveil(val)}"
 			elif cle == "dissipe_malus":

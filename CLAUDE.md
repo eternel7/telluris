@@ -123,6 +123,9 @@ utils/
   jetons.py              # jetons de taille variable (pur) : emprise LxP selon le cap, distance entre
                          #   emprises, pas avec pivot, A* ; miroir scripts/jetons.js
   consommables.py        # chokepoint des buffs : sources, cumul, effets_actifs
+  pouvoirs_objets.py     # pouvoirs d'un objet PORTÉ (pur) : champ item `competences` (sorts/compétences existants),
+                         #   actif équipé + `restriction` BRUTE, hors vocation ; `connait` = contrôle unique d'appartenance
+  chasse_signee.py       # trophée signé (pur) : `chasse` sur la RÉFÉRENCE d'une dépouille rare+, suit découpe et commande
   contenants.py          # contenants (pur) : capacité sur le doc item (`contenant`), CONTENU sur la RÉFÉRENCE
                          #   (`ref.contenu`) → suit l'objet partout, ne pèse rien (physique ET magique), INERTE
                          #   pour tout autre système ; aucun contenant dans un autre ; marée en temps réel
