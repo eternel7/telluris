@@ -849,10 +849,13 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 				colonisation_routes.site_de(grid_doc, _reg_col),
 				colonisation_util.employes_effectifs(grid_doc, get_doc))
 		colonie_reperes = colonisation_util.reperes_carte(grid_doc, _reg_col)
-	# Le bouton « Fonder » s'offre sur toute carte de pays à qui tient le rang de la charte ;
-	# la case elle-même est jugée à l'ouverture du panneau (un pas ne recharge pas la page).
+	# Le bouton « Fonder » s'offre sur toute carte de pays à qui tient une charte ; la case
+	# elle-même est jugée à l'ouverture du panneau (un pas ne recharge pas la page). La charte
+	# s'achète au bureau d'un maître de guilde (bouton « 📜 Charte de colonisation »).
 	colonie_offre = (bool(grid_doc) and grid_doc.get("categorie") == CATEGORIE_PAYS
-					 and colonisation_util.rang_suffisant(character, colonisation_util.regles(get_doc)))
+					 and bool(colonisation_util.charte_de(character)))
+	colonie_charte = (colonisation_util.est_bureau_de_guilde(grid_doc)
+					  and colonisation_util.rang_suffisant(character, colonisation_util.regles(get_doc)))
 	# Atelier : chaque visite du lieu lance un tick marché (approvisionnement + production +
 	# écoulement PNJ des produits finis), comme à chaque vente. On ne déclenche que s'il y a de la
 	# matière/produits en stock OU un approvisionnement configuré pour la catégorie (sinon le lieu
@@ -1273,6 +1276,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			"role_implantation": role_implantation,
 			"colonie_evenements": colonie_evenements,
 			"colonie_offre": colonie_offre,
+			"colonie_charte": colonie_charte,
 			"proprietes_offre": proprietes_offre,
 			"role_propriete": role_propriete,
 			"proprietes_ateliers": proprietes_ateliers,

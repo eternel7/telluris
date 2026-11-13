@@ -54,6 +54,7 @@ from utils import acces
 from utils import passe_muraille
 from utils import pnj as pnj_util
 from utils import proprietes
+from utils import colonisation
 from utils import cadence
 from utils import courriel
 from utils import motdepasse
@@ -829,6 +830,10 @@ def move_character(
 								ok, raison = proprietes.acces_propriete(character_to_update, lieu_doc)
 								if not ok:
 									raise HTTPException(status_code=403, detail=raison)
+							# Sous-lieu d'une implantation : fermé sans PNJ au poste (ou endommagé).
+							ok, raison = colonisation.sous_lieu_ouvert(lieu_doc, get_doc)
+							if not ok:
+								raise HTTPException(status_code=403, detail=raison)
 						# Donjon à étages : la connexion ne DÉPLACE pas le personnage, elle ouvre
 						# la descente — un combat dont il ne sort que par un passage vers la
 						# surface. Son `lieu` reste celui d'où il est descendu.

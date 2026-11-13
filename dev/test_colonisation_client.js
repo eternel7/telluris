@@ -77,7 +77,7 @@ const tout = (d) => ['site', 'population', 'batiments', 'defense'].map(o => colI
 
 test('aucune chaîne saisie ne sort sans échappement', () => {
 	for (const html of [tout(visiteur()), tout(gerant('fondateur')), tout(gerant('associe')),
-		colFonderHtml({ site: SITE_CHIFFRES, charte: 40000, cites: [{ id: 'c', label: MECHANT }], peut_fonder: false, refus: MECHANT,
+		colFonderHtml({ site: SITE_CHIFFRES, charte: { cite: 'c', label: MECHANT }, cites: [{ id: 'c', label: MECHANT }], peut_fonder: false, refus: MECHANT,
 			palier: { label: 'Campement' }, modeles: [], mes_implantations: [{ label: MECHANT, palier: MECHANT }], purse: {} }),
 		colModelesHtml([{ id: MECHANT, label: MECHANT, image: 'a b.png', route: 'maps', partages: [MECHANT] }]),
 		colEmbaucheHtml({ candidats: [{ id: MECHANT, prenom: MECHANT, nom: MECHANT, metier_label: MECHANT, poste_nom: MECHANT, cout: 1 }],
@@ -134,16 +134,24 @@ test('un chantier ouvert ferme les autres ; un statut payé repropose les modèl
 	assert.ok(!colOngletPopulationHtml(gerant('associe', { chantier: paye.chantier, modeles: paye.modeles })).includes('colPalier()'));
 });
 
-test('fonder : le refus se dit, le bouton attend la bourse et un modèle', () => {
-	const base = { site: SITE_CHIFFRES, charte: 40000, cites: [{ id: 'c', label: 'Auxerre' }, { id: 'd', label: 'Sens' }],
+test('fonder : le refus se dit, le bouton attend un modèle', () => {
+	const base = { site: SITE_CHIFFRES, charte: { cite: 'c', label: 'Auxerre' }, cites: [{ id: 'c', label: 'Auxerre' }, { id: 'd', label: 'Sens' }],
 		palier: { label: 'Campement' }, mes_implantations: [],
 		modeles: [{ id: 'lieu:m1', label: 'Campement', image: 'c.jpg', route: 'battle_maps', partages: [], generique: true }] };
 	const refuse = colFonderHtml(Object.assign({}, base, { peut_fonder: false, refus: 'Trop près d\'une Cité-État', purse: { cuivre: 99999 } }));
 	assert.ok(refuse.includes('Trop près') && !refuse.includes('colFonder()') && refuse.includes('Auxerre ou Sens'));
-	const pauvre = colFonderHtml(Object.assign({}, base, { peut_fonder: true, purse: { cuivre: 10 } }));
-	assert.ok(/<button class="sh-drop-btn" disabled/.test(pauvre));
 	const riche = colFonderHtml(Object.assign({}, base, { peut_fonder: true, purse: { cuivre: 40000 } }));
 	assert.ok(riche.includes('colFonder()') && !/<button class="sh-drop-btn" disabled/.test(riche) && riche.includes('id="col-nom"'));
+});
+
+test('charte : prix, règles, bouton fermé sans les fonds ou avec une charte en main', () => {
+	const base = { cite: MECHANT, maitre: MECHANT, prix: 40000, peut_acheter: true, refus: '', charte: null,
+		reglages: { rang_min: 'C', distance_cite_min: 6, distance_implantation_min: 4, implantations_par_pays: 1 } };
+	const ok = colCharteHtml(Object.assign({}, base, { purse: { cuivre: 40000 } }));
+	assert.ok(!ok.includes('<script>') && ok.includes('colAcheterCharte()') && !/disabled/.test(ok) && ok.includes('Rang C'));
+	assert.ok(/disabled/.test(colCharteHtml(Object.assign({}, base, { purse: { cuivre: 1 } }))));
+	const tenue = colCharteHtml(Object.assign({}, base, { peut_acheter: false, refus: 'déjà', charte: { label: 'Sens' }, purse: { cuivre: 99999 } }));
+	assert.ok(/disabled/.test(tenue) && tenue.includes('signée à Sens'));
 });
 
 console.log(`OK — ${n} tests du panneau de colonisation.`);

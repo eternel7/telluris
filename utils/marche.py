@@ -1776,10 +1776,11 @@ def flux_cite(cite_doc: dict | None) -> dict | None:
 def est_cite(doc: dict | None) -> bool:
 	"""Ce lieu est-il une CITÉ — le doc qui porte le flux de ses boutiques et auquel s'arrête
 	toute remontée d'ancêtres (`flux_cite`, `quetes.lieux_solidaires`, les échanges des biens
-	`utils/echanges_cite`) ? Prédicat UNIQUE : une implantation de la voie de colonisation s'y
-	ajoutera le jour où elle existera, et tous ces systèmes la traiteront d'un coup comme une
-	ville (docs/lore/systemes/20261112_voie_de_colonisation.md)."""
-	return (doc or {}).get("categorie") == "ville"
+	`utils/echanges_cite`) ? Prédicat UNIQUE : une implantation de la voie de colonisation
+	(`type:"implantation"`) l'est aussi — tous ces systèmes la traitent comme une ville
+	(docs/lore/systemes/20261112_voie_de_colonisation.md) : ses boutiques partagent SON
+	flux, ses PNJ vendent leur production à ses boutiques (`colonisation.echanger`)."""
+	return (doc or {}).get("categorie") == "ville" or (doc or {}).get("type") == "implantation"
 
 
 def ouvrir_flux(doc: dict) -> dict:

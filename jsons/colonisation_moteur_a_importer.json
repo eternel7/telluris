@@ -405,7 +405,9 @@
       "materiaux": 10,
       "postes": {
        "palefrenier": 1
-      }
+      },
+      "categorie": "etable",
+      "description": "Un palefrenier y tient l'écurie : montures à vendre."
      },
      {
       "id": "auberge",
@@ -418,7 +420,9 @@
       "materiaux": 15,
       "postes": {
        "aubergiste": 1
-      }
+      },
+      "categorie": "auberge",
+      "description": "Salle commune, tableau d'information et chambres : un aubergiste la tient."
      },
      {
       "id": "boutique",
@@ -431,7 +435,12 @@
       "materiaux": 10,
       "postes": {
        "marchand": 1
-      }
+      },
+      "familles": [
+       "vivres",
+       "savoir"
+      ],
+      "description": "Un marchand y vend et y achète ; elle rachète aussi la production du lieu."
      },
      {
       "id": "atelier",
@@ -444,7 +453,51 @@
       "materiaux": 20,
       "postes": {
        "artisan": 1
-      }
+      },
+      "familles": [
+       "armes",
+       "soins",
+       "artisanat"
+      ],
+      "description": "Un artisan y fabrique sur place, puise et reverse au flux du lieu, prend commande."
+     },
+     {
+      "id": "comptoir",
+      "label": "Comptoir de négoce",
+      "icone": "⚖️",
+      "nature": "repere",
+      "palier_min": "bourgade",
+      "prix_cuivre": 15000,
+      "bois": 20,
+      "materiaux": 10,
+      "postes": {
+       "marchand": 1,
+       "commis": 1,
+       "charretier": 1,
+       "teneur_livres": 1,
+       "crieur": 1
+      },
+      "activite": {
+       "metier": "marchand",
+       "categories": [
+        "negociant"
+       ]
+      },
+      "effets_metier": {
+       "commis": {
+        "prospection": 2
+       },
+       "charretier": {
+        "portage_kg": 200
+       },
+       "teneur_livres": {
+        "caisse_facteur": 2
+       },
+       "crieur": {
+        "crieur": 2
+       }
+      },
+      "description": "Le négociant vend aux boutiques du lieu la production des fermes, coupes et carrières ; commis, charretier, teneur de livres et crieur l'épaulent."
      }
     ],
     "fortifications": [
@@ -525,7 +578,12 @@
       "produit": {
        "stock": "nourriture",
        "par_jour": 4,
-       "axe": "nourriture"
+       "axe": "nourriture",
+       "items": [
+        "item:grain_de_froment",
+        "item:grain_d_orge",
+        "item:grain_de_seigle"
+       ]
       }
      },
      {
@@ -535,7 +593,11 @@
       "produit": {
        "stock": "nourriture",
        "par_jour": 3,
-       "axe": "nourriture"
+       "axe": "nourriture",
+       "items": [
+        "item:oeufs_de_ferme",
+        "item:motte_de_beurre"
+       ]
       }
      },
      {
@@ -545,7 +607,10 @@
       "produit": {
        "stock": "nourriture",
        "par_jour": 2,
-       "axe": "nourriture"
+       "axe": "nourriture",
+       "items": [
+        "item:viande"
+       ]
       }
      },
      {
@@ -566,7 +631,10 @@
       "produit": {
        "stock": "bois",
        "par_jour": 5,
-       "axe": "materiaux"
+       "axe": "materiaux",
+       "items": [
+        "item:Rondin_de_Chene"
+       ]
       }
      },
      {
@@ -576,7 +644,10 @@
       "produit": {
        "stock": "materiaux",
        "par_jour": 3,
-       "axe": "materiaux"
+       "axe": "materiaux",
+       "items": [
+        "item:pierre"
+       ]
       }
      },
      {
@@ -609,6 +680,22 @@
       "batisseur"
      ]
     },
+    "echanges": {
+     "passes_max": 48,
+     "surplus_facteur": 2,
+     "unites_par_objet": 1,
+     "prospection_base": 3,
+     "portage_kg": 20,
+     "decote_sans_negociant": 0.2,
+     "seuil_refus": 1,
+     "caisse_max_par_rang": 5000,
+     "journal_max": 20
+    },
+    "montures_etable": [
+     "espece:ane",
+     "espece:mulet",
+     "espece:cheval"
+    ],
     "intendant_economie": 0.1,
     "reparation_materiaux": 5,
     "candidats_duree_s": 86400,

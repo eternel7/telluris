@@ -8,8 +8,9 @@ Décisions de l'Auteur : docs/lore/systemes/20261112_voie_de_colonisation.md ; m
 utils/colonisation.py (compétence `telluris-colonisation`).
 
 1. `rules:colonisation` — ⚠️ l'import fait un PUT COMPLET : le doc est RELU dans le dump le
-   plus récent et on n'y AJOUTE que les blocs de `colonisation.DEFAUTS` qui manquent (un bloc
-   déjà présent, donc peut-être retouché par l'Auteur, n'est jamais réécrit). Sans le doc dans
+   plus récent et on n'y AJOUTE que ce qui manque de `colonisation.DEFAUTS` (`completer` : bloc,
+   clé, entrée à `id`, clé d'une entrée) — une valeur déjà présente, peut-être retouchée par
+   l'Auteur, n'est jamais réécrite. Sans le doc dans
    le dump, il est posé en entier (paliers, réglages et listes de la première livraison).
 2. Sept lieux modèles GÉNÉRIQUES `lieu:modele_colonie_<palier>` (§ 12.1 : le seul prérequis),
    posés seulement s'ils manquent au dump. Images PROVISOIRES (une clairière, un hameau, des
@@ -18,6 +19,7 @@ utils/colonisation.py (compétence `telluris-colonisation`).
 
 Régénérer sur un dump à jour n'écrit aucun doc (idempotent)."""
 
+import copy
 import glob
 import json
 import os
@@ -127,15 +129,44 @@ def dernier_dump(chemin=None) -> dict:
 		return {d.get("_id"): d for d in json.load(f)["docs"]}
 
 
+def completer(valeur: dict, attendu: dict) -> list:
+	"""Ajoute à `valeur` ce qui MANQUE d'`attendu`, sans jamais réécrire l'existant : un bloc
+	absent ; dans un bloc dict, une clé absente ; dans une liste d'entrées à `id`, une entrée
+	absente et, dans une entrée présente, une clé absente (une valeur retouchée par l'Auteur
+	reste la sienne). Rend la liste des chemins ajoutés."""
+	ajouts = []
+	for cle, defaut in attendu.items():
+		if cle not in valeur:
+			valeur[cle] = copy.deepcopy(defaut)
+			ajouts.append(cle)
+		elif isinstance(defaut, dict) and isinstance(valeur[cle], dict):
+			for sous, v in defaut.items():
+				if sous not in valeur[cle]:
+					valeur[cle][sous] = copy.deepcopy(v)
+					ajouts.append(f"{cle}.{sous}")
+		elif isinstance(defaut, list) and isinstance(valeur[cle], list) \
+				and all(isinstance(x, dict) and "id" in x for x in defaut):
+			par_id = {x.get("id"): x for x in valeur[cle] if isinstance(x, dict)}
+			for entree in defaut:
+				present = par_id.get(entree["id"])
+				if present is None:
+					valeur[cle].append(copy.deepcopy(entree))
+					ajouts.append(f"{cle}[{entree['id']}]")
+					continue
+				for sous, v in entree.items():
+					if sous not in present:
+						present[sous] = copy.deepcopy(v)
+						ajouts.append(f"{cle}[{entree['id']}].{sous}")
+	return ajouts
+
+
 def generer(par_id: dict) -> list:
 	docs = []
 	# 1. Les règles : le doc du dump, complété des blocs absents.
 	existant = par_id.get(ID)
 	regles = {k: v for k, v in (existant or {"_id": ID, "type": "rules"}).items() if k != "_rev"}
-	valeur = dict(regles.get("value") or {})
-	ajouts = [cle for cle in list(SOCLE) + list(colonisation.DEFAUTS) if cle not in valeur]
-	for cle in ajouts:
-		valeur[cle] = SOCLE[cle] if cle in SOCLE else colonisation.DEFAUTS[cle]
+	valeur = copy.deepcopy(regles.get("value") or {})
+	ajouts = completer(valeur, {**colonisation.DEFAUTS, **SOCLE})
 	if ajouts:
 		regles["value"] = valeur
 		docs.append(regles)

@@ -2135,7 +2135,7 @@
 				   déplacement et plein écran. ⚠️ Ce menu n'existe que sous la condition de cette
 				   ligne (`a_ligne_actions`) — hors d'elle, la pastille ⛶ flottante reste émise
 				   (bas de page), sans quoi le plein écran disparaîtrait de ces lieux. #}
-				{% set a_ligne_actions = dimensions or achat_sous_categories or est_negociant or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or est_propriete or proprietes_offre or est_implantation or colonie_offre or pnjs_presents %}
+				{% set a_ligne_actions = dimensions or achat_sous_categories or est_negociant or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or est_propriete or proprietes_offre or est_implantation or colonie_offre or colonie_charte or pnjs_presents %}
 				{% if a_ligne_actions %}
 				<h3 id="sub-actions-title"><span>Actions</span>
 					<span class="affichage-wrap">
@@ -2192,6 +2192,7 @@
 					{% endif %}
 					{# Toujours émis, masqué hors offre : un pas ne recharge pas la page, `_majProprietesOffre`
 					   le bascule d'après la réponse de `move_character`. #}
+					{% if colonie_charte %}<li><button class="sub-loc-btn" onclick="openColonieCharte()">📜 Charte de colonisation</button></li>{% endif %}
 					{% if colonie_offre %}<li><button class="sub-loc-btn" onclick="openColonieSite()">🏕️ Fonder une implantation</button></li>{% endif %}
 					{% if est_implantation %}<li><button class="sub-loc-btn" onclick="openColonie()">🏕️ {% if role_implantation == 'fondateur' %}Gérer l'implantation{% else %}L'implantation{% endif %}</button></li>{% endif %}
 					<li id="prop-offre-li"{% if not proprietes_offre %} hidden style="display:none"{% endif %}><button class="sub-loc-btn" onclick="openProprietesOffre()">🏠 Propriétés</button></li>

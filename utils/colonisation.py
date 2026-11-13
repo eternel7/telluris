@@ -43,9 +43,10 @@ VISITEUR = "visiteur"
 
 REPERE = "repere"
 SOUS_LIEU = "sous_lieu"
-# Natures de bâtiment que le moteur sait faire vivre. Les sous-lieux (où l'on entre) attendent
-# leur tranche : ils restent au catalogue, refusés à la construction.
-NATURES_OUVERTES = (REPERE,)
+# Natures de bâtiment que le moteur sait faire vivre : le REPÈRE (une fiche au contact) et le
+# SOUS-LIEU (un `lieu:colonie_*` où l'on entre, né à la première pose, § 12.4).
+NATURES_OUVERTES = (REPERE, SOUS_LIEU)
+PREFIXE_SOUS_LIEU = "lieu:colonie_"
 
 EMPLOYE_MORT = "mort"
 EMPLOYE_PARTI = "parti"
@@ -100,14 +101,31 @@ DEFAUTS = {
 		{"id": "ferme", "label": "Ferme", "icone": "🌾", "nature": REPERE, "palier_min": "hameau",
 		 "prix_cuivre": 10000, "bois": 20, "materiaux": 5, "postes": {"agriculteur": 2, "eleveur": 1, "pecheur": 1},
 		 "description": "Cultures, élevage et pêche nourrissent le lieu."},
+		# Sous-lieux : `categorie` fixe, ou choisie à la construction parmi les métiers des
+		# FAMILLES d'enseigne (`enseignes_icones.METIERS`) dont le marchand générique existe.
 		{"id": "etable", "label": "Étable", "icone": "🐴", "nature": SOUS_LIEU, "palier_min": "bourgade",
-		 "prix_cuivre": 20000, "bois": 30, "materiaux": 10, "postes": {"palefrenier": 1}},
+		 "prix_cuivre": 20000, "bois": 30, "materiaux": 10, "postes": {"palefrenier": 1}, "categorie": "etable",
+		 "description": "Un palefrenier y tient l'écurie : montures à vendre."},
 		{"id": "auberge", "label": "Auberge", "icone": "🍺", "nature": SOUS_LIEU, "palier_min": "bourgade",
-		 "prix_cuivre": 30000, "bois": 40, "materiaux": 15, "postes": {"aubergiste": 1}},
+		 "prix_cuivre": 30000, "bois": 40, "materiaux": 15, "postes": {"aubergiste": 1}, "categorie": "auberge",
+		 "description": "Salle commune, tableau d'information et chambres : un aubergiste la tient."},
 		{"id": "boutique", "label": "Boutique", "icone": "🧺", "nature": SOUS_LIEU, "palier_min": "bourgade",
-		 "prix_cuivre": 20000, "bois": 30, "materiaux": 10, "postes": {"marchand": 1}},
+		 "prix_cuivre": 20000, "bois": 30, "materiaux": 10, "postes": {"marchand": 1},
+		 "familles": ["vivres", "savoir"],
+		 "description": "Un marchand y vend et y achète ; elle rachète aussi la production du lieu."},
 		{"id": "atelier", "label": "Atelier", "icone": "⚒️", "nature": SOUS_LIEU, "palier_min": "bourgade",
-		 "prix_cuivre": 25000, "bois": 30, "materiaux": 20, "postes": {"artisan": 1}},
+		 "prix_cuivre": 25000, "bois": 30, "materiaux": 20, "postes": {"artisan": 1},
+		 "familles": ["armes", "soins", "artisanat"],
+		 "description": "Un artisan y fabrique sur place, puise et reverse au flux du lieu, prend commande."},
+		# Le négoce (§ 8) : le négociant et son personnel vendent la production du lieu à ses boutiques.
+		{"id": "comptoir", "label": "Comptoir de négoce", "icone": "⚖️", "nature": REPERE, "palier_min": "bourgade",
+		 "prix_cuivre": 15000, "bois": 20, "materiaux": 10,
+		 "postes": {"marchand": 1, "commis": 1, "charretier": 1, "teneur_livres": 1, "crieur": 1},
+		 "activite": {"metier": "marchand", "categories": ["negociant"]},
+		 "effets_metier": {"commis": {"prospection": 2}, "charretier": {"portage_kg": 200},
+						   "teneur_livres": {"caisse_facteur": 2}, "crieur": {"crieur": 2}},
+		 "description": "Le négociant vend aux boutiques du lieu la production des fermes, coupes et carrières ; "
+						"commis, charretier, teneur de livres et crieur l'épaulent."},
 	],
 	# `requis_pour` : la fortification minimale du palier à ATTEINDRE (§ 4) ; sans ce champ,
 	# une défense au-delà du minimum, lue dans le panneau seul (§ 12.1).
@@ -131,22 +149,30 @@ DEFAUTS = {
 	# jour et par PNJ au poste, pondérées par l'axe `axe` de la fiche de site.
 	"metiers_def": [
 		{"id": "agriculteur", "label": "Agriculteur", "cout_embauche_cuivre": 400,
-		 "produit": {"stock": "nourriture", "par_jour": 4, "axe": "nourriture"}},
+		 "produit": {"stock": "nourriture", "par_jour": 4, "axe": "nourriture",
+					 "items": ["item:grain_de_froment", "item:grain_d_orge", "item:grain_de_seigle"]}},
 		{"id": "eleveur", "label": "Éleveur", "cout_embauche_cuivre": 400,
-		 "produit": {"stock": "nourriture", "par_jour": 3, "axe": "nourriture"}},
+		 "produit": {"stock": "nourriture", "par_jour": 3, "axe": "nourriture",
+					 "items": ["item:oeufs_de_ferme", "item:motte_de_beurre"]}},
 		{"id": "chasseur", "label": "Chasseur", "cout_embauche_cuivre": 600,
-		 "produit": {"stock": "nourriture", "par_jour": 2, "axe": "nourriture"}},
+		 "produit": {"stock": "nourriture", "par_jour": 2, "axe": "nourriture", "items": ["item:viande"]}},
 		{"id": "pecheur", "label": "Pêcheur", "cout_embauche_cuivre": 400,
 		 "produit": {"stock": "nourriture", "par_jour": 3, "axe": "eau", "exige_axe": True}},
 		{"id": "bucheron", "label": "Bûcheron", "cout_embauche_cuivre": 400,
-		 "produit": {"stock": "bois", "par_jour": 5, "axe": "materiaux"}},
+		 "produit": {"stock": "bois", "par_jour": 5, "axe": "materiaux", "items": ["item:Rondin_de_Chene"]}},
 		{"id": "carrier", "label": "Carrier", "cout_embauche_cuivre": 500,
-		 "produit": {"stock": "materiaux", "par_jour": 3, "axe": "materiaux"}},
+		 "produit": {"stock": "materiaux", "par_jour": 3, "axe": "materiaux", "items": ["item:pierre"]}},
 		{"id": "batisseur", "label": "Bâtisseur", "cout_embauche_cuivre": 800},
 		{"id": "aubergiste", "label": "Aubergiste", "cout_embauche_cuivre": 800},
 	],
 	"metiers_roles": {"gardes": ["garde", "gardien"], "soignants": ["medecin", "apothicaire"],
 					  "pisteurs": ["chasseur"], "intendants": ["intendant"], "batisseurs": ["batisseur"]},
+	# Vente de la production (§ 8) : au-delà de `surplus_facteur` × le seuil « bas » d'un stock,
+	# une unité d'objet part pour `unites_par_objet` unités du stock. Ateliers : 2 jours au plus.
+	"echanges": {"passes_max": 48, "surplus_facteur": 2, "unites_par_objet": 1,
+				 "prospection_base": 3, "portage_kg": 20, "decote_sans_negociant": 0.2,
+				 "seuil_refus": 1, "caisse_max_par_rang": 5000, "journal_max": 20},
+	"montures_etable": ["espece:ane", "espece:mulet", "espece:cheval"],
 	"intendant_economie": 0.1,    # part de nourriture épargnée (non cumulatif)
 	"reparation_materiaux": 5,
 	"candidats_duree_s": JOUR_S,
@@ -386,7 +412,61 @@ def peut_fonder(character: dict, pays_doc: dict, position, relies: list, implant
 		   for i in implantations or []):
 		return False, (f"Trop près d'une autre implantation : il faut au moins "
 					   f"{_int(r.get('distance_implantation_min'))} cases.")
+	return charte_valable(character, relies, pos)
+
+
+# ── La charte (§ 2) : achetée au bureau d'un maître de guilde ────────────────────────
+CATEGORIE_BUREAU = "bureau_maitre_guilde"
+CHAMP_CHARTE = "charte_colonie"
+
+
+def est_bureau_de_guilde(lieu_doc: dict | None) -> bool:
+	return (lieu_doc or {}).get("categorie") == CATEGORIE_BUREAU
+
+
+def charte_de(character: dict) -> dict | None:
+	c = (character or {}).get(CHAMP_CHARTE)
+	return c if isinstance(c, dict) and c.get("cite") else None
+
+
+def peut_acheter_charte(character: dict, bureau_doc: dict, reg: dict) -> tuple[bool, str]:
+	"""Au bureau du maître de guilde d'une cité : le rang de la charte, une charte à la fois."""
+	if not paliers(reg):
+		return False, "La colonisation n'est pas ouverte."
+	if not est_bureau_de_guilde(bureau_doc) or not bureau_doc.get("lieu_parent"):
+		return False, "La charte s'achète au bureau d'un maître de guilde."
+	if not rang_suffisant(character, reg):
+		return False, f"La charte exige le rang {(reg.get('reglages') or {}).get('rang_min', '?')} de la Guilde."
+	tenue = charte_de(character)
+	if tenue:
+		return False, f"Vous tenez déjà une charte de {tenue.get('label') or 'la Guilde'}."
 	return True, ""
+
+
+def delivrer_charte(character: dict, cite_doc: dict, prix: int, now: int | None = None) -> dict:
+	"""La charte est attachée à la CITÉ du maître qui l'a signée (son bureau pend à elle)."""
+	charte = {"cite": cite_doc.get("_id"), "label": cite_doc.get("label", ""), "prix": int(prix),
+			  "at": now_epoch() if now is None else now}
+	character[CHAMP_CHARTE] = charte
+	return charte
+
+
+def charte_valable(character: dict, relies: list, position) -> tuple[bool, str]:
+	"""La charte ne vaut que là où sa cité est la plus proche (à égale distance, toutes se
+	valent, § 2)."""
+	charte = charte_de(character)
+	plus_proches = cites_de_la_charte(relies, position)
+	noms = " ou ".join(c.get("label") or c["id"] for c in plus_proches) or "aucune cité"
+	if not charte:
+		return False, f"Il vous faut une charte, achetée au bureau du maître de guilde de {noms}."
+	if charte["cite"] not in {c["id"] for c in plus_proches}:
+		return False, (f"Votre charte vient de {charte.get('label') or charte['cite']} : ici, elle "
+					   f"doit être signée par le maître de guilde de {noms}.")
+	return True, ""
+
+
+def consommer_charte(character: dict) -> dict | None:
+	return character.pop(CHAMP_CHARTE, None)
 
 
 def placements_actifs(pays_doc: dict, position) -> list:
@@ -760,7 +840,33 @@ def _stocks_suffisants(imp: dict, definition: dict) -> str:
 	return ""
 
 
-def peut_construire(imp: dict, reg: dict, type_id) -> tuple[bool, str]:
+def categories_possibles(reg: dict, type_id, disponibles) -> list:
+	"""Métiers qu'un sous-lieu peut tenir : sa `categorie` fixe, ou ceux de ses `familles`
+	d'enseigne (`enseignes_icones.METIERS`, relu) parmi `disponibles` (catégories dont le
+	marchand générique `pnj:marchand_<cat>` existe). Ni grande maison ni négociant."""
+	from models import character_stats
+	from utils import enseignes_icones
+	bdef = batiment_def(reg, type_id) or {}
+	if bdef.get("categorie"):
+		return [bdef["categorie"]]
+	familles = set(bdef.get("familles") or [])
+	grandes = set(character_stats.LIEU_CATEGORIES_FUSION or {})
+	return sorted(c for c, (famille, _i, _l) in enseignes_icones.METIERS.items()
+				  if famille in familles and c in set(disponibles or ()) and c not in grandes
+				  and c not in ("auberge", "etable") and c not in character_stats.CATEGORIES_NEGOCE)
+
+
+def libelle_metier(categorie) -> str:
+	"""« Boulangerie » pour `boulangerie` (libellé d'enseigne relu, article retiré)."""
+	from utils import enseignes_icones
+	brut = (enseignes_icones.METIERS.get(categorie) or (None, None, str(categorie or "").replace("_", " ")))[2]
+	for article in ("une ", "un ", "des ", "l'"):
+		if brut.startswith(article):
+			brut = brut[len(article):]
+	return brut[:1].upper() + brut[1:]
+
+
+def peut_construire(imp: dict, reg: dict, type_id, categorie=None, disponibles=()) -> tuple[bool, str]:
 	bdef = batiment_def(reg, type_id)
 	if not bdef:
 		return False, "Bâtiment inconnu."
@@ -769,19 +875,112 @@ def peut_construire(imp: dict, reg: dict, type_id) -> tuple[bool, str]:
 	if not palier_atteint(reg, imp.get("palier"), bdef.get("palier_min")):
 		p = palier_def(reg, bdef.get("palier_min")) or {}
 		return False, f"Ce bâtiment s'ouvre au palier {p.get('label', bdef.get('palier_min'))}."
+	if bdef.get("familles") and categorie is not None \
+			and categorie not in categories_possibles(reg, type_id, disponibles):
+		return False, "Ce métier ne peut pas s'y tenir."
 	manque = _stocks_suffisants(imp, bdef)
 	return (False, manque) if manque else (True, "")
 
 
-def construire(imp: dict, reg: dict, type_id, now: int | None = None) -> dict:
+def construire(imp: dict, reg: dict, type_id, now: int | None = None, categorie=None) -> dict:
 	"""Déclenche l'aménagement (réservé au fondateur, § 12.8) : le bâtiment naît SANS case,
-	à poser ensuite par le geste « Poser ici » — du fondateur ou d'un associé."""
+	à poser ensuite par le geste « Poser ici » — du fondateur ou d'un associé. Un sous-lieu
+	garde le métier choisi (`categorie`)."""
 	bdef = batiment_def(reg, type_id) or {}
 	_payer_stocks(imp, bdef)
 	b = {"id": f"b_{uuid.uuid4().hex[:8]}", "type": type_id, "pos": None}
+	if bdef.get("nature") == SOUS_LIEU:
+		b["categorie"] = bdef.get("categorie") or categorie
 	imp.setdefault("batiments", []).append(b)
-	noter(imp, f"Construction : {bdef.get('label', type_id)}.", now)
+	noter(imp, f"Construction : {bdef.get('label', type_id)}"
+			   + (f" ({libelle_metier(b['categorie'])})" if b.get("categorie") and bdef.get("familles") else "") + ".", now)
 	return b
+
+
+# ── Sous-lieux : où l'on entre (§ 12.4) ──────────────────────────────────────────────
+
+def est_sous_lieu(lieu_doc: dict | None) -> bool:
+	return bool((lieu_doc or {}).get("colonie")) and str((lieu_doc or {}).get("_id", "")).startswith(PREFIXE_SOUS_LIEU)
+
+
+def creer_sous_lieu(imp: dict, b: dict, reg: dict, image: str) -> tuple[dict, dict]:
+	"""À la PREMIÈRE pose d'un sous-lieu : son `lieu:colonie_*` (forme d'une boutique de cité :
+	`categorie`, stocks, `lieu_parent` = l'implantation, qui EST sa cité) et la connexion qui
+	part de sa case. Les poses suivantes ne déplacent que le nœud (`deplacer_sous_lieu`)."""
+	bdef = batiment_def(reg, b.get("type")) or {}
+	ident = uuid.uuid4().hex[:12]
+	cat = b.get("categorie") or bdef.get("categorie")
+	lieu = {"_id": f"{PREFIXE_SOUS_LIEU}{ident}", "type": "lieu",
+			"label": f"{libelle_metier(cat) if bdef.get('familles') else bdef.get('label', '')} de {imp.get('label', '')}",
+			"image": image, "categorie": cat, "lieu_parent": imp["_id"], "colonie": imp["_id"],
+			"batiment": b["id"], "pnj": [], "stock_matieres": {}, "stock_vente": []}
+	lien = {"_id": f"link:colonie_{ident}", "type": "connection",
+			"nodes": [{"lieu": imp["_id"], "pos": list(b["pos"])}, {"lieu": lieu["_id"], "pos": [0, 0]}],
+			"metadata": {"type": cat, "status": "ouvert"}}
+	b["lieu"], b["lien"] = lieu["_id"], lien["_id"]
+	return lieu, lien
+
+
+def deplacer_sous_lieu(lien: dict, imp_id, pos) -> bool:
+	"""Le nœud de la connexion suit le bâtiment (déplacement, changement de palier)."""
+	for n in (lien or {}).get("nodes") or []:
+		if n.get("lieu") == imp_id:
+			if pos is None:
+				return False
+			n["pos"] = list(pos)
+			return True
+	return False
+
+
+def tenancier(imp: dict, reg: dict, employes: list, bid) -> dict | None:
+	"""Le PNJ nommé au poste du sous-lieu : sans lui, il est fermé (§ 8 : la fonction s'arrête)."""
+	return next((e for e in au_poste(imp, reg, employes) if e.get("poste") == bid), None)
+
+
+def pnj_du_sous_lieu(lieu: dict, e: dict | None, reg: dict) -> list:
+	"""L'entrée `pnj` du sous-lieu : le marchand générique du métier, sous le nom et le visage du
+	PNJ nommé. L'auberge n'en porte pas (aucun aubergiste générique) ; l'étable vend ses montures."""
+	cat = lieu.get("categorie")
+	if not e or cat == "auberge":
+		return []
+	entree = {"character": f"pnj:marchand_{cat}", "nom": proprietes.nom_personnage(e), "portrait": e.get("portrait", "")}
+	if cat == "etable":
+		entree["montures"] = list(reg.get("montures_etable") or [])
+	return [entree]
+
+
+def synchroniser_tenanciers(imp: dict, reg: dict, employes: list, get_doc_fn) -> list:
+	"""Remet l'entrée `pnj` de chaque sous-lieu d'accord avec son poste ; rend les docs changés
+	(l'appelant sauve). Appelé après embauche, renvoi et rattrapage (morts, départs)."""
+	out = []
+	for b in imp.get("batiments") or []:
+		if not b.get("lieu"):
+			continue
+		lieu = get_doc_fn(b["lieu"])
+		if not lieu:
+			continue
+		voulu = pnj_du_sous_lieu(lieu, tenancier(imp, reg, employes, b["id"]), reg)
+		if lieu.get("pnj") != voulu:
+			lieu["pnj"] = voulu
+			out.append(lieu)
+	return out
+
+
+def sous_lieu_ouvert(lieu_doc: dict, get_doc_fn) -> tuple[bool, str]:
+	"""Garde d'ENTRÉE (`move_character`) : un sous-lieu sans PNJ au poste est fermé, comme un
+	bâtiment endommagé."""
+	if not est_sous_lieu(lieu_doc):
+		return True, ""
+	imp = get_doc_fn(lieu_doc["colonie"]) or {}
+	reg = regles(get_doc_fn)
+	b = batiment(imp, lieu_doc.get("batiment"))
+	if not b:
+		return False, "Ce bâtiment n'existe plus."
+	if b.get("endommage"):
+		return False, "Ce bâtiment est endommagé : il attend sa réparation."
+	if not tenancier(imp, reg, employes_effectifs(imp, get_doc_fn), b["id"]):
+		return False, "Personne n'y tient le comptoir : c'est fermé."
+	return True, ""
 
 
 def peut_poser(imp: dict, bid, position) -> tuple[bool, str]:
@@ -1043,7 +1242,8 @@ def _cat_embauche(imp: dict, reg: dict, cat_proprietes: dict) -> dict:
 	"""Catalogue à la forme qu'attend `proprietes._candidats_pour` : un « aménagement » par
 	bâtiment de l'implantation."""
 	return {"metiers": metiers(reg, cat_proprietes),
-			"amenagements": [{"id": b["id"], "nom": (batiment_def(reg, b.get("type")) or {}).get("label", "")}
+			"amenagements": [{"id": b["id"], "nom": (batiment_def(reg, b.get("type")) or {}).get("label", ""),
+							  "activite": (batiment_def(reg, b.get("type")) or {}).get("activite")}
 							 for b in imp.get("batiments") or []]}
 
 
@@ -1457,10 +1657,128 @@ def _attaque(imp: dict, reg: dict, employes: list, instant: int, rand, bilan: di
 	bilan["evenements"].append("Le lieu a été attaqué : " + ", ".join(pertes) + ".")
 
 
+# ── Vente de la production (§ 8) : la mécanique des biens urbains, l'implantation pour cité ──
+
+def vente_autorisee(employe: dict) -> bool:
+	"""Option par PNJ : sa production se vend-elle ? Absent ⇒ oui (comme `echanges_cite`)."""
+	return (employe or {}).get("vente_cite") is not False
+
+
+def effets_negoce(imp: dict, reg: dict, employes: list) -> dict:
+	"""Effets du personnel du négoce AU POSTE (`effets_metier` des bâtiments) — le meilleur de
+	chaque clé, jamais une somme (même règle que les aménagements urbains)."""
+	out = {}
+	for e in au_poste(imp, reg, employes):
+		b = batiment(imp, e.get("poste")) or {}
+		bloc = ((batiment_def(reg, b.get("type")) or {}).get("effets_metier") or {}).get(e.get("metier")) or {}
+		for cle, v in bloc.items():
+			out[cle] = max(_num(out.get(cle)), _num(v))
+	return out
+
+
+def negociant_de(imp: dict, reg: dict, employes: list) -> dict | None:
+	from utils import echanges_cite
+	return next((e for e in au_poste(imp, reg, employes) if echanges_cite.est_negociant(e)), None)
+
+
+def caisse_max(imp: dict, reg: dict, employes: list) -> int:
+	base = _int((reg.get("echanges") or {}).get("caisse_max_par_rang"), 5000) * (rang_palier(reg, imp.get("palier")) + 1)
+	return int(base * max(1.0, _num(effets_negoce(imp, reg, employes).get("caisse_facteur"), 1)))
+
+
+def echanger(imp: dict, reg: dict, employes: list, boutiques: list, get_doc_fn, resolve_item, passes: int,
+			 rand=random, now: int | None = None) -> dict:
+	"""Les PNJ producteurs (fermes, coupes, carrières) vendent le SURPLUS de leur stock aux
+	boutiques du lieu — prix du FONDATEUR chez chacune, refus à la cible, plus offrant d'abord,
+	marchandise posée chez l'acheteur (`echanges_cite.prix_vente_boutique`, `marche.absorber_achat`).
+	Sans négociant : décote ; le crieur vend aux habitants ce que nulle boutique ne prend. Au
+	plus `echanges.passes_max` passes (2 jours, § 8). Recette → `imp.caisse_cuivre`. Rend
+	`{"gain", "touchees": [boutiques], "journal"}` ; mute `imp`, les boutiques, le négociant."""
+	from models import character_stats
+	from utils import echanges_cite, marche
+	now = now_epoch() if now is None else now
+	conf = reg.get("echanges") or {}
+	passes = max(0, min(int(passes), _int(conf.get("passes_max"), 48)))
+	bilan = {"gain": 0, "touchees": [], "journal": []}
+	if not passes:
+		return bilan
+	eff = effets_negoce(imp, reg, employes)
+	negociant = negociant_de(imp, reg, employes)
+	ctx = echanges_cite.Contexte.libre(
+		imp.get("fondateur"), conf, None, negociant, get_doc_fn, rand, now,
+		portage_kg=_num(conf.get("portage_kg"), 20) + _num(eff.get("portage_kg")),
+		crieur=_int(eff.get("crieur")), caisse_max=caisse_max(imp, reg, employes))
+	ctx.prospection = _int(ctx.prospection) + _int(eff.get("prospection"))
+	par_metier = {m.get("id"): m for m in reg.get("metiers_def") or []}
+	seuils = seuils_stocks(imp, reg, employes)
+	unites_objet = max(0.1, _num(conf.get("unites_par_objet"), 1))
+	stocks = imp.setdefault("stocks", {})
+	docs = {}
+
+	def item(i):
+		if i not in docs:
+			docs[i] = resolve_item(i) or {}
+		return docs[i]
+
+	for _ in range(passes):
+		ctx.portage = ctx.portage_passe
+		crieur = [ctx.crieur]
+		for e in au_poste(imp, reg, employes):
+			produit = (par_metier.get(e.get("metier")) or {}).get("produit") or {}
+			objets = [i for i in produit.get("items") or [] if item(i)]
+			s = produit.get("stock")
+			if not objets or not vente_autorisee(e):
+				continue
+			plancher = _num(conf.get("surplus_facteur"), 2) * seuils.get(s, 0)
+			tour = 0
+			while _num(stocks.get(s)) - unites_objet >= plancher and _int(imp.get("caisse_cuivre")) < ctx.caisse_max:
+				doc = item(objets[tour % len(objets)])
+				tour += 1
+				poids = _num(doc.get("poids") if not isinstance(doc.get("poids"), list) else sum(doc["poids"]) / 2, 1)
+				if poids > ctx.portage:
+					break
+				offres = [(p, b) for b in rand.sample(boutiques, min(len(boutiques), max(1, ctx.prospection)))
+						  if (p := echanges_cite.prix_vente_boutique(ctx, b, doc)) is not None]
+				if offres:
+					prix, acheteur = max(offres, key=lambda o: o[0])
+					marche.absorber_achat(acheteur, doc)
+					ctx.touchees[acheteur.get("_id")] = acheteur
+					ctx.noter("vente", doc, acheteur, 1, prix)
+				elif crieur[0] > 0:
+					pmin, _pmax = marche.prix_range_cuivre(doc, doc.get("_id"))
+					prix = max(1, int(round(pmin * float(character_stats.RACHAT_FACTEUR))))
+					crieur[0] -= 1
+					ctx.noter("crieur", doc, {"label": "les habitants"}, 1, prix)
+				else:
+					break
+				stocks[s] = round(_num(stocks.get(s)) - unites_objet, 4)
+				imp["caisse_cuivre"] = _int(imp.get("caisse_cuivre")) + prix
+				ctx.portage -= poids
+				ctx.gain += prix
+				ctx.echange += prix
+	if negociant and ctx.echange:
+		negociant["negoce_xp"] = _int(negociant.get("negoce_xp")) \
+			+ int(ctx.echange * float(ctx.regln["xp_par_cuivre"]))
+	journal = [dict(v, t=now) for v in ctx.journal.values()]
+	if journal:
+		imp["echanges_journal"] = (journal + list(imp.get("echanges_journal") or []))[:_int(conf.get("journal_max"), 20)]
+	bilan.update(gain=ctx.gain, touchees=list(ctx.touchees.values()), journal=journal)
+	return bilan
+
+
+def relever_caisse(imp: dict, fondateur: dict, now: int | None = None) -> int:
+	"""La caisse du lieu revient au fondateur (réservé au fondateur, § 10)."""
+	montant = _int(imp.get("caisse_cuivre"))
+	imp["caisse_cuivre"] = 0
+	if montant:
+		noter(imp, f"Caisse relevée : {montant} cu.", now)
+	return montant
+
+
 # ── Vues (§ 10, § 12.7) ──────────────────────────────────────────────────────────────
 
 def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprietes: dict | None = None,
-		now: int | None = None) -> dict:
+		now: int | None = None, disponibles=()) -> dict:
 	"""Ce que le panneau montre. Le VISITEUR (et le soutien) lit le site en MOTS, les besoins
 	et les dons ; le détail chiffré est au fondateur — et à l'associé, qui contribue."""
 	now = now_epoch() if now is None else now
@@ -1481,6 +1799,10 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 		"stocks_ouverts": [{"stock": s, "label": labels.get(s, s)} for s in reg.get("stocks") or []],
 		"places_associes": max(0, places_associes(imp, reg) - len(imp.get("associes") or [])),
 		"demande_en_attente": False,
+		"sous_lieux": [{"label": (batiment_def(reg, b.get("type")) or {}).get("label", ""),
+						"metier": libelle_metier(b.get("categorie")), "pos": b.get("pos"),
+						"ouvert": bool(tenancier(imp, reg, employes, b["id"])) and not b.get("endommage")}
+					   for b in imp.get("batiments") or [] if b.get("lieu")],
 	}
 	if role not in (FONDATEUR, ASSOCIE):
 		return base
@@ -1498,10 +1820,13 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 		"logements": logements(imp, reg), "souffrants": _int(imp.get("souffrants")),
 		"batiments": [{
 			"id": b["id"], "type": b.get("type"), "pos": b.get("pos"), "endommage": bool(b.get("endommage")),
-			"label": (batiment_def(reg, b.get("type")) or {}).get("label", ""),
+			"label": (batiment_def(reg, b.get("type")) or {}).get("label", "")
+			+ (f" — {libelle_metier(b['categorie'])}" if b.get("categorie") and (batiment_def(reg, b.get("type")) or {}).get("familles") else ""),
+			"nature": (batiment_def(reg, b.get("type")) or {}).get("nature"),
 			"icone": (batiment_def(reg, b.get("type")) or {}).get("icone", ""),
 			"postes": [{"metier": m, "label": (metier_def(reg, cat_proprietes, m) or {}).get("label", m), "places": n,
-						"tenus": [{"id": e["_id"], "nom": proprietes.nom_personnage(e)}
+						"tenus": [{"id": e["_id"], "nom": proprietes.nom_personnage(e),
+								   "vend": vente_autorisee(e) if ((next((m2 for m2 in reg.get("metiers_def") or [] if m2.get("id") == e.get("metier")), {}) .get("produit") or {}).get("items")) else None}
 								  for e in par_poste.get(b["id"], []) if e.get("metier") == m]}
 					   for bid, m, n in postes(imp, reg) if bid == b["id"]],
 		} for b in imp.get("batiments") or []],
@@ -1510,6 +1835,8 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 			"description": d.get("description", ""), "prix": _int(d.get("prix_cuivre")),
 			"bois": _int(d.get("bois")), "materiaux": _int(d.get("materiaux")),
 			"refus": peut_construire(imp, reg, d.get("id"))[1],
+			"categories": ([{"id": c, "label": libelle_metier(c)} for c in categories_possibles(reg, d.get("id"), disponibles)]
+						   if d.get("familles") else []),
 		} for d in reg.get("batiments_def") or [] if d.get("nature") in NATURES_OUVERTES],
 		"fortifications": [{
 			"id": f.get("id"), "label": f.get("label"), "prix": _int(f.get("prix_cuivre")),
@@ -1525,6 +1852,9 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 				   "mot": menace_mots.get(str(_int((imp.get("menace") or {}).get("etape"))), "")},
 		"associes": [{"id": a.get("id"), "nom": a.get("nom"), "apports": a.get("apports") or {}}
 					 for a in imp.get("associes") or []],
+		"negoce": {"negociant": bool(negociant_de(imp, reg, employes)), "caisse": _int(imp.get("caisse_cuivre")),
+				   "caisse_max": caisse_max(imp, reg, employes),
+				   "journal": list(imp.get("echanges_journal") or [])[:10]},
 	})
 	if role == FONDATEUR:
 		base.update({

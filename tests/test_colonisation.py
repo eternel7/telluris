@@ -48,8 +48,11 @@ RELIES = [{"id": "lieu:cite", "label": "Cité", "categorie": "ville", "pos": [5,
 SITE_POS = {"x": 20, "y": 10}
 
 
-def _perso(rang="C", **champs):
+def _perso(rang="C", charte="lieu:autre", **champs):
+	"""Par défaut, une charte de la cité la plus proche de SITE_POS (`lieu:autre`)."""
 	base = {"_id": "character:a", "prenom": "Greta", "nom": "Hazgard", "rangs_guilde": {"lieu:cite": rang}}
+	if charte:
+		base[col.CHAMP_CHARTE] = {"cite": charte, "label": charte}
 	base.update(champs)
 	return base
 
@@ -147,7 +150,7 @@ def test_fonder_respecte_les_distances_et_la_case():
 	trop_pres = {"x": cite[0] + d_cite - 1, "y": cite[1]}
 	juste = {"x": cite[0] + d_cite, "y": cite[1]}
 	assert "Cité-État" in col.peut_fonder(_perso(), _pays(), trop_pres, RELIES, [], reg)[1]
-	assert col.peut_fonder(_perso(), _pays(), juste, RELIES, [], reg)[0]
+	assert col.peut_fonder(_perso(charte="lieu:cite"), _pays(), juste, RELIES, [], reg)[0]
 	voisine = {"fondateur": "character:b", "origine": {"pos": [SITE_POS["x"] + d_imp - 1, SITE_POS["y"]]}}
 	assert "autre implantation" in col.peut_fonder(_perso(), _pays(), SITE_POS, RELIES, [voisine], reg)[1]
 	voisine["origine"]["pos"][0] += 1
@@ -182,6 +185,25 @@ def test_creer_implantation_part_au_premier_palier_sans_grille_propre():
 	lien = col.creer_lien(imp, col.entrees_de(m)[0])
 	assert lien["nodes"][0] == {"lieu": "lieu:pays", "pos": [20, 10]}
 	assert lien["nodes"][1] == {"lieu": imp["_id"], "pos": col.entrees_de(m)[0]}
+
+
+def test_la_charte_s_achete_au_bureau_et_ne_vaut_que_pres_de_sa_cite():
+	reg = _reg()
+	bureau = {"_id": "lieu:bureau", "categorie": col.CATEGORIE_BUREAU, "lieu_parent": "lieu:autre"}
+	sans = _perso(charte=None)
+	assert col.peut_acheter_charte(sans, bureau, reg) == (True, "")
+	assert not col.peut_acheter_charte(sans, {**bureau, "categorie": "guilde_aventurier"}, reg)[0]
+	dessous = RANGS[RANGS.index(reg["reglages"]["rang_min"]) - 1]
+	assert "rang" in col.peut_acheter_charte(_perso(dessous, charte=None), bureau, reg)[1]
+	assert "Autre" in col.peut_fonder(sans, _pays(), SITE_POS, RELIES, [], reg)[1]      # nomme où l'acheter
+	charte = col.delivrer_charte(sans, {"_id": "lieu:autre", "label": "Autre"}, 40000, now=7)
+	assert charte == {"cite": "lieu:autre", "label": "Autre", "prix": 40000, "at": 7}
+	assert "déjà" in col.peut_acheter_charte(sans, bureau, reg)[1]                     # une à la fois
+	assert col.peut_fonder(sans, _pays(), SITE_POS, RELIES, [], reg) == (True, "")
+	# signée ailleurs : elle ne vaut pas ici
+	ailleurs = _perso(charte="lieu:cite")
+	assert "signée par le maître de guilde de Autre" in col.peut_fonder(ailleurs, _pays(), SITE_POS, RELIES, [], reg)[1]
+	assert col.consommer_charte(sans) == charte and col.charte_de(sans) is None
 
 
 # ── Fiche de site (§ 3) et tags (§ 12.2) ─────────────────────────────────────────────
@@ -273,9 +295,9 @@ def test_construire_paie_les_stocks_et_respecte_le_palier():
 	imp["stocks"].update({"bois": 500, "materiaux": 500})
 	assert "palier" in col.peut_construire(imp, reg, "ferme")[1]          # la ferme s'ouvre au Hameau
 	assert col.peut_construire(_imp(reg, "hameau", stocks={"bois": 500, "materiaux": 500}), reg, "ferme")[0]
-	# un sous-lieu (où l'on entre) attend sa tranche
-	assert all(not col.peut_construire(_imp(reg, "ville", stocks={"bois": 9999, "materiaux": 9999}), reg, d["id"])[0]
-			   for d in reg["batiments_def"] if d["nature"] == col.SOUS_LIEU)
+	# un sous-lieu (où l'on entre) se construit dès son palier
+	ville = _imp(reg, "ville", stocks={"bois": 9999, "materiaux": 9999})
+	assert all(col.peut_construire(ville, reg, d["id"])[0] for d in reg["batiments_def"] if d["nature"] == col.SOUS_LIEU)
 
 
 def test_pose_libre_hors_entrees_un_batiment_par_case():
@@ -398,9 +420,10 @@ def test_chaque_palier_a_sa_fortification_minimale_ou_la_repete():
 
 # ── Personnel nommé (§ 8) ────────────────────────────────────────────────────────────
 
-CAT_PROP = {"metiers": [{"id": "garde", "label": "Garde", "cout_embauche_cuivre": 800},
-						{"id": "medecin", "label": "Médecin", "cout_embauche_cuivre": 2000},
-						{"id": "intendant", "label": "Intendant", "cout_embauche_cuivre": 1500}]}
+# Métiers de `rules:proprietes` que les bâtiments de la colonisation emploient (le dump les porte).
+CAT_PROP = {"metiers": [{"id": m, "label": m.capitalize(), "cout_embauche_cuivre": 500}
+						for m in ("garde", "medecin", "intendant", "palefrenier", "artisan", "marchand",
+								  "commis", "charretier", "teneur_livres", "crieur")]}
 
 
 def test_metiers_ceux_des_proprietes_plus_ceux_de_la_colonisation():
@@ -769,3 +792,130 @@ def test_la_liste_des_lieux_ne_montre_d_une_implantation_que_le_public():
 	assert not {"journal", "stocks", "demandes", "cells", "nav", "fondateur"} & set(public)
 	ville = {"type": "lieu", "categorie": "ville", "flux_marchand": {}}
 	assert col.details_publics(ville) is ville
+
+
+# ── Sous-lieux et vente de la production (§ 8, § 12.4) ───────────────────────────────
+
+DISPONIBLES = ["boulangerie", "armurerie", "grande_boulangerie", "negociant", "etable", "auberge", "inconnue"]
+
+
+def test_un_sous_lieu_tient_un_metier_de_ses_familles_d_enseigne():
+	from utils import enseignes_icones
+	reg = _reg()
+	boutique = col.categories_possibles(reg, "boutique", DISPONIBLES)
+	atelier = col.categories_possibles(reg, "atelier", DISPONIBLES)
+	assert boutique == ["boulangerie"] and atelier == ["armurerie"]        # ni grande maison, ni négociant
+	assert all(enseignes_icones.METIERS[c][0] in col.batiment_def(reg, "atelier")["familles"] for c in atelier)
+	assert col.categories_possibles(reg, "auberge", []) == ["auberge"]
+	imp = _imp(reg, "bourgade", stocks={"bois": 999, "materiaux": 999})
+	assert "métier" in col.peut_construire(imp, reg, "boutique", "armurerie", DISPONIBLES)[1]
+	assert col.peut_construire(imp, reg, "boutique", "boulangerie", DISPONIBLES) == (True, "")
+	b = col.construire(imp, reg, "boutique", now=1, categorie="boulangerie")
+	assert b["categorie"] == "boulangerie" and "Boulangerie" in imp["journal"][-1]["texte"]
+	assert col.construire(imp, reg, "auberge", now=1)["categorie"] == "auberge"
+	assert "categorie" not in col.construire(imp, reg, "habitation", now=1)
+	assert col.libelle_metier("boulangerie") == "Boulangerie"
+
+
+def test_premiere_pose_d_un_sous_lieu_cree_le_lieu_et_sa_porte():
+	reg = _reg()
+	imp = _imp(reg, "bourgade", stocks={"bois": 999, "materiaux": 999})
+	b = col.construire(imp, reg, "boutique", now=1, categorie="boulangerie")
+	col.poser(imp, b["id"], [4, 4])
+	lieu, lien = col.creer_sous_lieu(imp, b, reg, "boulangerie_europe01.jpg")
+	assert lieu["_id"].startswith(col.PREFIXE_SOUS_LIEU) and lieu["type"] == "lieu"
+	assert lieu["categorie"] == "boulangerie" and lieu["lieu_parent"] == imp["_id"] and col.est_sous_lieu(lieu)
+	assert lieu["label"] == f"Boulangerie de {imp['label']}"
+	assert lien["nodes"] == [{"lieu": imp["_id"], "pos": [4, 4]}, {"lieu": lieu["_id"], "pos": [0, 0]}]
+	assert (b["lieu"], b["lien"]) == (lieu["_id"], lien["_id"])
+	col.poser(imp, b["id"], [5, 6])
+	assert col.deplacer_sous_lieu(lien, imp["_id"], b["pos"]) and lien["nodes"][0]["pos"] == [5, 6]
+	assert not col.deplacer_sous_lieu(lien, imp["_id"], None)             # sans case, la porte reste
+	from utils import marche
+	assert marche.est_cite(imp) and not marche.est_cite(lieu)             # l'implantation EST sa cité
+
+
+def test_sans_pnj_au_poste_le_sous_lieu_est_ferme():
+	reg = _reg()
+	imp = _imp(reg, "bourgade", stocks={"bois": 999, "materiaux": 999})
+	b = col.construire(imp, reg, "etable", now=1)
+	col.poser(imp, b["id"], [4, 4])
+	lieu, _ = col.creer_sous_lieu(imp, b, reg, "etable_europe01.png")
+	docs = {imp["_id"]: imp, lieu["_id"]: lieu}
+	assert "fermé" in col.sous_lieu_ouvert(lieu, docs.get)[1]
+	palefrenier = _employe(imp, "palefrenier", b["id"])
+	docs[palefrenier["_id"]] = palefrenier
+	assert col.sous_lieu_ouvert(lieu, docs.get) == (True, "")
+	[change] = col.synchroniser_tenanciers(imp, reg, [palefrenier], docs.get)
+	assert change["pnj"] == [{"character": "pnj:marchand_etable", "nom": "Aldo N0", "portrait": "",
+							  "montures": reg["montures_etable"]}]
+	assert col.synchroniser_tenanciers(imp, reg, [palefrenier], docs.get) == []     # déjà d'accord
+	b["endommage"] = True
+	assert "endommagé" in col.sous_lieu_ouvert(lieu, docs.get)[1]
+	assert col.synchroniser_tenanciers(imp, reg, [palefrenier], docs.get)[0]["pnj"] == []
+	assert col.sous_lieu_ouvert({"_id": "lieu:auxerre", "categorie": "ville"}, docs.get) == (True, "")
+
+
+def _vente(reg, stock=200.0, **extra):
+	imp = _imp(reg, "bourgade", stocks={"nourriture": stock, "bois": 0, "materiaux": 0, "medicaments": 999})
+	imp["batiments"] = [{"id": "b_f", "type": "ferme", "pos": [1, 1]}]
+	agri = _employe(imp, "agriculteur", "b_f")
+	agri.update(extra)
+	return imp, agri
+
+
+class _Boutique(dict):
+	pass
+
+
+def test_le_surplus_de_production_se_vend_aux_boutiques_du_lieu(monkeypatch):
+	from utils import echanges_cite, marche
+	reg = _reg()
+	imp, agri = _vente(reg)
+	boulangerie = {"_id": "lieu:colonie_b", "categorie": "boulangerie", "stock_matieres": {}, "stock_vente": []}
+	monkeypatch.setattr(echanges_cite, "prix_vente_boutique", lambda ctx, b, doc: 7)
+	recus = []
+	monkeypatch.setattr(marche, "absorber_achat", lambda b, doc, *a, **k: recus.append((b["_id"], doc["_id"])))
+	items = {i: {"_id": i, "nom": i, "poids": 0.5} for i in col.DEFAUTS["metiers_def"][0]["produit"]["items"]}
+	plancher = reg["echanges"]["surplus_facteur"] * col.seuils_stocks(imp, reg, [agri])["nourriture"]
+	bilan = col.echanger(imp, reg, [agri], [boulangerie], {}.get, items.get, 1, rand=random.Random(0), now=5)
+	assert bilan["gain"] == 7 * len(recus) and imp["caisse_cuivre"] == bilan["gain"] and recus
+	assert imp["stocks"]["nourriture"] >= plancher                          # jamais sous le surplus
+	# le portage d'une passe borne ce qui part (20 kg ⇒ 40 objets de 0,5 kg)
+	assert len(recus) == int(reg["echanges"]["portage_kg"] / 0.5)
+	assert imp["echanges_journal"] and bilan["touchees"] == [boulangerie]
+	# interdite par le fondateur : la production reste au lieu
+	imp2, agri2 = _vente(reg, vente_cite=False)
+	assert col.echanger(imp2, reg, [agri2], [boulangerie], {}.get, items.get, 5, rand=random.Random(0))["gain"] == 0
+	# aucune boutique preneuse, pas de crieur : rien ne part
+	monkeypatch.setattr(echanges_cite, "prix_vente_boutique", lambda ctx, b, doc: None)
+	imp3, agri3 = _vente(reg)
+	assert col.echanger(imp3, reg, [agri3], [boulangerie], {}.get, items.get, 5, rand=random.Random(0))["gain"] == 0
+
+
+def test_le_personnel_du_comptoir_releve_portage_caisse_et_crieur():
+	reg = _reg()
+	imp = _imp(reg, "bourgade")
+	imp["batiments"] = [{"id": "b_c", "type": "comptoir", "pos": [1, 1]}]
+	base = col.caisse_max(imp, reg, [])
+	assert base == reg["echanges"]["caisse_max_par_rang"] * (col.rang_palier(reg, "bourgade") + 1)
+	staff = [_employe(imp, m, "b_c", n) for n, m in enumerate(("charretier", "teneur_livres", "crieur", "commis"))]
+	eff = col.effets_negoce(imp, reg, staff)
+	defs = col.batiment_def(reg, "comptoir")["effets_metier"]
+	assert eff == {k: v for bloc in defs.values() for k, v in bloc.items()}
+	assert col.caisse_max(imp, reg, staff) == base * defs["teneur_livres"]["caisse_facteur"]
+	assert col.relever_caisse({**imp, "caisse_cuivre": 30}, _perso(), now=1) == 30
+
+
+def test_le_generateur_complete_les_entrees_sans_reecrire_ce_qui_existe():
+	ancien = copy.deepcopy(REGLES_DOC)
+	b = next(x for x in ancien["value"]["batiments_def"] if x["id"] == "auberge")
+	del b["categorie"]
+	b["prix_cuivre"] = 1                                                     # retouché par l'Auteur
+	ancien["value"]["batiments_def"] = [x for x in ancien["value"]["batiments_def"] if x["id"] != "comptoir"]
+	dump = {d["_id"]: copy.deepcopy(d) for d in DOCS if d["_id"] != col.REGLES_ID}
+	dump[col.REGLES_ID] = ancien
+	[doc] = gen.generer(dump)
+	auberge = next(x for x in doc["value"]["batiments_def"] if x["id"] == "auberge")
+	assert auberge["categorie"] == "auberge" and auberge["prix_cuivre"] == 1
+	assert any(x["id"] == "comptoir" for x in doc["value"]["batiments_def"])

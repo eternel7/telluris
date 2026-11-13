@@ -45,7 +45,8 @@ EPEE = {"_id": "item:epee", "type": "item", "nom": "Épée", "categorie": "arme"
 METIERS = {"_id": "rules:proprietes", "type": "rules", "value": {"types": [], "amenagements": [], "metiers": [
 	{"id": "garde", "label": "Garde", "cout_embauche_cuivre": 800},
 	{"id": "medecin", "label": "Médecin", "cout_embauche_cuivre": 2000},
-	{"id": "intendant", "label": "Intendant", "cout_embauche_cuivre": 1500}]}}
+	{"id": "intendant", "label": "Intendant", "cout_embauche_cuivre": 1500},
+	{"id": "marchand", "label": "Marchand", "cout_embauche_cuivre": 1200}]}}
 CARACTS = {"V": 5, "F": 40, "R": 40, "Ag": 40, "Vol": 40, "Int": 40, "Cha": 40, "Ch": 40}
 
 
@@ -54,7 +55,8 @@ def _perso(ident="a", **champs):
 			"position": {"x": 20, "y": 10}, "prenom": "Greta" if ident == "a" else "Milo", "nom": "",
 			"cite": "lieu:cite", "inventaire": [], "slots": {}, "groupe": [], "montures": [],
 			"caracteristiques_current": dict(CARACTS), "currentPV": 1, "currentPM": 0,
-			"rangs_guilde": {"lieu:cite": "C"}, "or": 100, "argent": 0, "cuivre": 0}
+			"rangs_guilde": {"lieu:cite": "C"}, "or": 100, "argent": 0, "cuivre": 0,
+			col.CHAMP_CHARTE: {"cite": "lieu:cite", "label": "Cité"}}
 	base.update(champs)
 	return base
 
@@ -138,7 +140,7 @@ def test_site_lit_la_fiche_propose_les_modeles_et_nomme_la_cite_de_la_charte(mon
 	char = _perso()
 	rep = _appel(monde, char, rc.site, None)
 	assert rep["peut_fonder"] and rep["refus"] == ""
-	assert rep["charte"] == _reg(monde)["reglages"]["charte_cuivre"]
+	assert rep["charte"]["cite"] == "lieu:cite"
 	assert rep["cites"] == [{"id": "lieu:cite", "label": "Cité"}]
 	assert set(rep["site"]) == set(_reg(monde)["axes_site"])
 	assert [m["generique"] for m in rep["modeles"]] == [True] and rep["modeles"][0]["route"]
@@ -147,7 +149,26 @@ def test_site_lit_la_fiche_propose_les_modeles_et_nomme_la_cite_de_la_charte(mon
 	assert not _appel(monde, _perso(rangs_guilde={"lieu:cite": "D"}), rc.site, None)["peut_fonder"]
 
 
-def test_fonder_cree_le_lieu_et_sa_connexion_debite_la_charte_sans_recopier_la_grille(monde):
+def test_la_charte_s_achete_au_bureau_du_maitre_de_la_cite(monde):
+	rc = monde["rc"]
+	monde["docs"]["lieu:bureau"] = {"_id": "lieu:bureau", "type": "lieu", "categorie": col.CATEGORIE_BUREAU,
+									"lieu_parent": "lieu:cite", "pnj": [{"nom": "Gautier"}]}
+	char = _perso(lieu="lieu:bureau")
+	char.pop(col.CHAMP_CHARTE)
+	avant = money_to_cuivre(char)
+	rep = _appel(monde, char, rc.charte, None)
+	assert rep["peut_acheter"] and rep["cite"] == "Cité" and rep["maitre"] == "Gautier"
+	rep = _appel(monde, char, rc.charte_acheter, None)
+	assert rep["achetee"] and rep["charte"]["cite"] == "lieu:cite"
+	assert money_to_cuivre(char) == avant - _reg(monde)["reglages"]["charte_cuivre"]
+	assert _refus(monde, char, rc.charte_acheter, None) == 409                 # une à la fois
+	assert _refus(monde, _perso(), rc.charte, None) == 403                     # hors d'un bureau
+	pauvre = _perso(lieu="lieu:bureau", **{"or": 0})
+	pauvre.pop(col.CHAMP_CHARTE)
+	assert _refus(monde, pauvre, rc.charte_acheter, None) == 409
+
+
+def test_fonder_cree_le_lieu_et_sa_connexion_remet_la_charte_sans_recopier_la_grille(monde):
 	rc = monde["rc"]
 	char = _perso()
 	avant = money_to_cuivre(char)
@@ -156,7 +177,7 @@ def test_fonder_cree_le_lieu_et_sa_connexion_debite_la_charte_sans_recopier_la_g
 	assert not set(db_config.CHAMPS_MODELE) & set(stocke)                    # lien PUR en base
 	assert stocke["label"] == "Val-Clair" and stocke["fondateur"] == char["_id"]
 	assert stocke["menace"]["espece"] == "espece:loup"
-	assert money_to_cuivre(char) == avant - _reg(monde)["reglages"]["charte_cuivre"]
+	assert money_to_cuivre(char) == avant and col.CHAMP_CHARTE not in char     # payée au bureau, remise ici
 	assert char["implantations"] == [imp_id]
 	lien = monde["docs"][stocke["lien"]]
 	assert lien["nodes"][0] == {"lieu": "lieu:pays", "pos": [20, 10]} and lien["metadata"]["type"] == col.CATEGORIE
@@ -168,12 +189,14 @@ def test_fonder_cree_le_lieu_et_sa_connexion_debite_la_charte_sans_recopier_la_g
 	assert _refus(monde, dehors, rc.fonder, None, {"modele": stocke["modele"]}) == 403
 
 
-def test_fonder_refuse_un_modele_non_propose_et_une_bourse_vide(monde):
+def test_fonder_refuse_un_modele_non_propose_et_sans_charte(monde):
 	rc = monde["rc"]
 	assert _refus(monde, _perso(), rc.fonder, None, {"modele": "lieu:modele_colonie_ville"}) == 409
-	pauvre = _perso(**{"or": 0})
-	site = _appel(monde, pauvre, rc.site, None)
-	assert _refus(monde, pauvre, rc.fonder, None, {"modele": site["modeles"][0]["id"]}) == 409
+	sans = _perso()
+	sans.pop(col.CHAMP_CHARTE)
+	site = _appel(monde, sans, rc.site, None)
+	assert not site["peut_fonder"] and "Cité" in site["refus"]
+	assert _refus(monde, sans, rc.fonder, None, {"modele": site["modeles"][0]["id"]}) == 403
 	assert not [d for d in monde["docs"] if d.startswith("implantation:")]
 
 
@@ -288,3 +311,66 @@ def test_hors_d_une_implantation_les_routes_du_lieu_refusent(monde):
 	rc = monde["rc"]
 	assert _refus(monde, _perso(), rc.ici, None) == 403
 	assert _refus(monde, _perso(), rc.donner, None, {"index": 0}) == 403
+
+
+def test_un_sous_lieu_se_construit_se_pose_et_ouvre_avec_son_tenancier(monde):
+	rc = monde["rc"]
+	reg = _reg(monde)
+	monde["docs"]["pnj:marchand_boulangerie"] = {"_id": "pnj:marchand_boulangerie", "type": "pnj", "nom": "Aubry"}
+	fondateur = _perso(**{"or": 1000})
+	imp_id = _fonder(monde, fondateur)
+	monde["docs"][imp_id].update(palier="bourgade", stocks={"nourriture": 50, "bois": 500, "materiaux": 500, "medicaments": 0})
+	ici = _appel(monde, fondateur, rc.ici, None)
+	boutique = next(c for c in ici["catalogue"] if c["id"] == "boutique")
+	assert boutique["categories"] == [{"id": "boulangerie", "label": "Boulangerie"}]
+	assert _refus(monde, fondateur, rc.construire, None, {"type": "boutique"}) == 409          # métier à choisir
+	assert _refus(monde, fondateur, rc.construire, None, {"type": "boutique", "categorie": "armurerie"}) == 409
+	bid = _appel(monde, fondateur, rc.construire, None, {"type": "boutique", "categorie": "boulangerie"})["construit"]
+	fondateur["position"] = {"x": 4, "y": 4}
+	rep = _appel(monde, fondateur, rc.poser, None, {"batiment": bid})
+	b = col.batiment(monde["docs"][imp_id], bid)
+	lieu, lien = monde["docs"][b["lieu"]], monde["docs"][b["lien"]]
+	assert lieu["categorie"] == "boulangerie" and lieu["lieu_parent"] == imp_id and lieu["image"].startswith("boulangerie_europe")
+	assert lien["nodes"][0] == {"lieu": imp_id, "pos": [4, 4]} and "links" in rep
+	assert lieu["pnj"] == [] and not col.sous_lieu_ouvert(lieu, monde["get"])[0]
+	# déplacer : la porte suit, aucun second lieu
+	fondateur["position"] = {"x": 6, "y": 5}
+	_appel(monde, fondateur, rc.poser, None, {"batiment": bid})
+	assert monde["docs"][b["lien"]]["nodes"][0]["pos"] == [6, 5]
+	assert len([d for d in monde["docs"] if d.startswith(col.PREFIXE_SOUS_LIEU)]) == 1
+	# engager le marchand : le sous-lieu ouvre sous son nom
+	tableau = _appel(monde, fondateur, rc.embauche, None)
+	cand = next(c for c in tableau["candidats"] if c["poste_nom"] == "Boutique")
+	_appel(monde, fondateur, rc.engager, None, {"candidat_id": cand["id"]})
+	lieu = monde["docs"][b["lieu"]]
+	assert lieu["pnj"][0]["character"] == "pnj:marchand_boulangerie" and lieu["pnj"][0]["nom"].startswith(cand["prenom"])
+	assert col.sous_lieu_ouvert(lieu, monde["get"]) == (True, "")
+	visiteur = _perso("v", lieu=imp_id, position={"x": 1, "y": 1})
+	assert any(s["ouvert"] for s in _appel(monde, visiteur, rc.ici, None)["sous_lieux"])
+	# renvoyé : fermé de nouveau
+	employe_id = next(e for e in monde["docs"][imp_id]["employes"])
+	_appel(monde, fondateur, rc.renvoyer, None, {"employe_id": employe_id})
+	assert monde["docs"][b["lieu"]]["pnj"] == []
+
+
+def test_la_caisse_se_releve_et_la_vente_se_regle_par_pnj(monde):
+	rc = monde["rc"]
+	fondateur = _perso()
+	imp_id = _fonder(monde, fondateur)
+	monde["docs"][imp_id]["caisse_cuivre"] = 120
+	avant = money_to_cuivre(fondateur)
+	assert _appel(monde, fondateur, rc.caisse_relever, None)["releve"] == 120
+	assert money_to_cuivre(fondateur) == avant + 120 and monde["docs"][imp_id]["caisse_cuivre"] == 0
+	assert _refus(monde, fondateur, rc.caisse_relever, None) == 409
+	monde["docs"][imp_id]["batiments"] = [{"id": "b_f", "type": "ferme", "pos": [2, 2]}]
+	e = {"_id": "employe:agri", "type": "employe", "metier": "agriculteur", "poste": "b_f", "statut": "employe",
+		 "propriete": imp_id, "prenom": "A", "nom": "B"}
+	monde["docs"][e["_id"]] = e
+	monde["docs"][imp_id]["employes"] = [e["_id"]]
+	rep = _appel(monde, fondateur, rc.employe_vente, None, {"employe_id": "employe:agri", "vente": False})
+	assert monde["docs"]["employe:agri"]["vente_cite"] is False
+	ferme = next(b for b in rep["batiments"] if b["id"] == "b_f")
+	assert ferme["postes"][0]["tenus"][0]["vend"] is False
+	visiteur = _perso("v", lieu=imp_id, position={"x": 1, "y": 1})
+	assert _refus(monde, visiteur, rc.caisse_relever, None) == 403
+	assert _refus(monde, visiteur, rc.employe_vente, None, {"employe_id": "employe:agri", "vente": True}) == 403

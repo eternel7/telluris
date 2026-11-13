@@ -81,18 +81,17 @@ function colFonderHtml(d) {
 	const cites = (d.cites || []).map(c => _colE(c.label)).join(' ou ');
 	let html = colSiteHtml(d.site, true);
 	html += `<section class="prop-section"><h3>📜 Charte</h3><div class="prop-ligne"><div class="prop-txt">
-		<span class="q-desc">${_prixTexte(d.charte)}, versés au maître de la Guilde d'Aventuriers${cites ? ' de ' + cites : ''}.</span>
+		<span class="q-desc">${d.charte ? `Charte signée à ${_colE(d.charte.label)}.` : 'Aucune charte en main.'}
+			Ici, elle doit l'être par le maître de guilde${cites ? ' de ' + cites : ''}.</span>
 		${d.peut_fonder ? '' : `<span class="q-desc">⚠️ ${_colE(d.refus)}</span>`}
 	</div></div></section>`;
 	if (d.peut_fonder) {
-		const pauvre = d.charte > _purseEnCuivre(d.purse);
 		html += `<section class="prop-section"><h3>🏕️ ${_colE(d.palier.label)} — choisir le lieu</h3>
 			${colModelesHtml(d.modeles)}
 			<div class="prop-ligne"><div class="prop-txt">
 				<input type="text" id="col-nom" maxlength="40" placeholder="Nom du lieu (facultatif)">
 			</div>
-			<button class="sh-drop-btn" ${pauvre || !(d.modeles || []).length ? 'disabled' : ''}
-				${pauvre ? 'title="Vous n\'avez pas de quoi payer la charte"' : ''} onclick="colFonder()">Fonder ici</button></div>
+			<button class="sh-drop-btn" ${!(d.modeles || []).length ? 'disabled' : ''} onclick="colFonder()">Fonder ici</button></div>
 		</section>`;
 	}
 	const miennes = (d.mes_implantations || []).map(i => `<div class="prop-ligne"><div class="prop-txt">
@@ -100,6 +99,37 @@ function colFonderHtml(d) {
 	html += `<section class="prop-section"><h3>🗺️ Mes implantations</h3><div class="prop-liste">
 		${miennes || '<div class="sell-empty">Vous n\'avez fondé aucun lieu.</div>'}</div></section>`;
 	return html;
+}
+
+// ── La charte, au bureau d'un maître de guilde ──────────────────────────────────────
+function colCharteHtml(d) {
+	const r = d.reglages || {};
+	const tenue = d.charte ? `<span class="q-desc">📜 Vous tenez une charte signée à ${_colE(d.charte.label)}.</span>` : '';
+	return `<section class="prop-section"><h3>📜 Charte de colonisation — ${_colE(d.cite)}</h3><div class="prop-ligne"><div class="prop-txt">
+		<span class="q-desc">${d.maitre ? _colE(d.maitre) + ' signe' : 'Le maître de guilde signe'} la charte qui autorise à fonder une implantation en pleine contrée,
+			sur une case dont ${_colE(d.cite)} est la cité la plus proche.</span>
+		<span class="q-desc">Rang ${_colE(r.rang_min)} au moins · ${_colE(r.distance_cite_min)} cases de toute Cité-État ·
+			${_colE(r.distance_implantation_min)} cases d'une autre implantation · ${_colE(r.implantations_par_pays)} par pays.</span>
+		${tenue}${!d.peut_acheter && d.refus && !d.charte ? `<span class="q-desc">⚠️ ${_colE(d.refus)}</span>` : ''}
+		<span class="sell-prix">💰 ${_prixTexte(d.prix)}</span></div>
+		<button class="sh-drop-btn" ${!d.peut_acheter || d.prix > _purseEnCuivre(d.purse) ? 'disabled' : ''} onclick="colAcheterCharte()">Acheter la charte</button>
+	</div></section>`;
+}
+
+async function openColonieCharte() {
+	const d = await _aubFetch('api/colonisation/charte');
+	if (!d) return;
+	updatePurse(d.purse);
+	_colEcrire('📜 Charte de colonisation', colCharteHtml(d));
+	_colAfficher();
+}
+
+async function colAcheterCharte() {
+	const d = await _aubFetch('api/colonisation/charte/acheter', {});
+	if (!d) return;
+	updatePurse(d.purse);
+	if (d.achetee) showToast(`Charte signée à ${d.cite}.`, { major: true });
+	_colEcrire('📜 Charte de colonisation', colCharteHtml(d));
 }
 
 async function openColonieSite() {
@@ -188,8 +218,13 @@ function _colApports(a) {
 	return Object.keys(a || {}).map(k => `${_colE(a[k])} ${COL_APPORTS[k] || _colE(k)}`).join(' · ');
 }
 
+function colSousLieuxHtml(d) {
+	const l = (d.sous_lieux || []).map(x => `<span>${x.ouvert ? '🟢' : '⚫'} ${_colE(x.label)}${x.metier && x.metier !== x.label ? ' — ' + _colE(x.metier) : ''}${x.pos ? '' : ' (à poser)'}</span>`).join('');
+	return l ? `<section class="prop-section"><h3>🚪 Où entrer</h3><div class="prop-caps">${l}</div></section>` : '';
+}
+
 function colOngletSiteHtml(d) {
-	let html = colSiteHtml(d.site, _colGere(d)) + colBesoinsHtml(d) + colDonsHtml(d) + colAssociationHtml(d);
+	let html = colSiteHtml(d.site, _colGere(d)) + colSousLieuxHtml(d) + colBesoinsHtml(d) + colDonsHtml(d) + colAssociationHtml(d);
 	if (d.role === 'fondateur' && (d.journal || []).length) {
 		html += `<section class="prop-section"><h3>📓 Carnet</h3><div class="prop-liste">`
 			+ d.journal.slice(0, 20).map(j => `<div class="prop-ligne"><div class="prop-txt"><span class="q-desc">${_colE(new Date(j.at * 1000).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }))} — ${_colE(j.texte)}</span></div></div>`).join('')
@@ -242,7 +277,9 @@ function colChantierHtml(d) {
 function colOngletBatimentsHtml(d) {
 	const peutPoser = _colGere(d);
 	const bat = (d.batiments || []).map(b => {
-		const postes = (b.postes || []).map(p => `${_colE(p.label)} ${p.tenus.length}/${_colE(p.places)}${p.tenus.length ? ' (' + p.tenus.map(t => _colE(t.nom)).join(', ') + ')' : ''}`).join(' · ');
+		const tenu = t => _colE(t.nom) + (t.vend === null || t.vend === undefined || d.role !== 'fondateur' ? ''
+			: ` <button class="sh-drop-btn" data-id="${_colE(t.id)}" data-vente="${t.vend ? '' : '1'}" onclick="colVente(this)">${t.vend ? '💰 vend' : '🔒 garde'}</button>`);
+		const postes = (b.postes || []).map(p => `${_colE(p.label)} ${p.tenus.length}/${_colE(p.places)}${p.tenus.length ? ' (' + p.tenus.map(tenu).join(', ') + ')' : ''}`).join(' · ');
 		return `<div class="prop-ligne"><div class="prop-txt">
 			<strong>${_colE(b.icone)} ${_colE(b.label)}${b.endommage ? ' — endommagé' : ''}</strong>
 			<span class="q-desc">${b.pos ? `case ${_colE(b.pos[0])}, ${_colE(b.pos[1])}` : '⚠️ à poser'}${postes ? ' · ' + postes : ''}</span></div>
@@ -259,9 +296,25 @@ function colOngletBatimentsHtml(d) {
 			<strong>${_colE(c.icone)} ${_colE(c.label)}</strong><span class="q-desc">${_colE(c.description)}</span>
 			<span class="sell-prix">💰 ${_prixTexte(c.prix)} · 🪵 ${_colE(c.bois)} · 🧱 ${_colE(c.materiaux)}</span>
 			${c.refus ? `<span class="q-desc">⚠️ ${_colE(c.refus)}</span>` : ''}</div>
+			${(c.categories || []).length ? `<select class="col-categorie" data-type="${_colE(c.id)}">${c.categories.map(k => `<option value="${_colE(k.id)}">${_colE(k.label)}</option>`).join('')}</select>` : ''}
 			<button class="sh-drop-btn" data-type="${_colE(c.id)}" ${c.refus || c.prix > bourse ? 'disabled' : ''} onclick="colConstruire(this)">Construire</button></div>`).join('') + `</div></section>`;
+		html += colNegoceHtml(d);
 	}
 	return html;
+}
+
+// Caisse du lieu et journal du négoce (fondateur) : la production vendue aux boutiques du lieu.
+function colNegoceHtml(d) {
+	const n = d.negoce;
+	if (!n) return '';
+	const lignes = (n.journal || []).map(j => `<div class="prop-ligne"><div class="prop-txt"><span class="q-desc">${j.sens === 'crieur' ? '📣' : '⚖️'} ${_colE(j.qty)} × ${_colE(j.item)} → ${_colE(j.lieu)} : ${_prixTexte(j.cuivre)}</span></div></div>`).join('');
+	return `<section class="prop-section"><h3>⚖️ Négoce</h3><div class="prop-ligne"><div class="prop-txt">
+		<span class="q-desc">${n.negociant ? 'Le négociant vend le surplus de production aux boutiques du lieu.' : 'Sans négociant au comptoir, le surplus se vend moins cher.'}</span>
+		<span class="sell-prix">💰 Caisse : ${_prixTexte(n.caisse)} / ${_prixTexte(n.caisse_max)}</span></div>
+		<button class="sh-drop-btn" ${n.caisse ? '' : 'disabled'} onclick="colReleverCaisse()">Relever la caisse</button>
+		${n.negociant ? `<button class="sh-drop-btn" onclick="colNegociant('former')">Former le négociant</button>
+		<button class="sh-drop-btn" onclick="colNegociant('livres')">📒 Tenir les livres</button>` : ''}</div>
+		<div class="prop-liste">${lignes}</div></section>`;
 }
 
 function colOngletDefenseHtml(d) {
@@ -323,8 +376,17 @@ function colDonner(btn) {
 }
 function colFeu(btn) { _colAction('api/colonisation/feu', { reglage: btn.dataset.reglage }); }
 function colConstruire(btn) {
-	_colAction('api/colonisation/construire', { type: btn.dataset.type },
+	// Le métier d'un sous-lieu est LU dans son sélecteur (jamais interpolé dans un onclick).
+	const sel = document.querySelector(`select.col-categorie[data-type="${btn.dataset.type}"]`);
+	_colAction('api/colonisation/construire', { type: btn.dataset.type, categorie: sel ? sel.value : null },
 		() => showToast('Bâtiment prêt : marchez jusqu\'à sa case, puis « Poser ici ».'));
+}
+function colVente(btn) { _colAction('api/colonisation/employe/vente', { employe_id: btn.dataset.id, vente: !!btn.dataset.vente }); }
+function colReleverCaisse() {
+	_colAction('api/colonisation/caisse/relever', {}, d => showToast(`Caisse relevée : ${_prixTexte(d.releve)}.`));
+}
+function colNegociant(seance) {
+	_colAction('api/colonisation/negociant/' + seance, {}, () => showToast('Le négociant progresse.'));
 }
 function colPoser(btn) {
 	// La carte porte les repères : on recharge pour voir l'icône à sa case.

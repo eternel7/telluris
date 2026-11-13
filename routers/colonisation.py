@@ -17,16 +17,17 @@ from fastapi import APIRouter, Depends, HTTPException, Body
 from db.config import get_doc, save_doc, find_docs
 from utils.auth import get_current_user
 from utils.characters import (
-	get_selected_character, cuivre_to_purse, money_to_cuivre, resolve_item_ref, item_ref_id,
+	get_selected_character, cuivre_to_purse, money_to_cuivre, resolve_item_ref, item_ref_id, credit_character,
 )
 from utils.marche import debit_character
 from utils import colonisation
+from utils import echanges_cite
 from utils import filtres_boutique
 from utils import proprietes
 from utils import recrutement
 from utils import escorte
 from utils.zones import load_zone_defs_for_lieu
-from utils.lieux import connexions_du_lieu, get_lieu_links, ORIGINES_IMAGE_LIEU
+from utils.lieux import connexions_du_lieu, get_lieu_links, ORIGINES_IMAGE_LIEU, TOWNS_IMAGES_PATH
 # Sens d'import : `routers/colonisation` → `routers/user`, jamais l'inverse.
 from routers.user import _inventory_payload
 
@@ -117,11 +118,37 @@ def rattraper_ici(character: dict, imp: dict, reg: dict, role: str, site: dict, 
 	if role == colonisation.FONDATEUR:
 		colonisation.noter_rang(imp, character)
 	bilan = colonisation.rattraper(imp, reg, site, employes)
+	evenements = list(bilan["evenements"])
 	if bilan["passes"] or imp.get("fondateur_rang") != avant:
-		for e in bilan["employes_touches"]:
-			save_doc(e)
+		# La production vend son surplus aux boutiques du lieu (2 jours au plus, § 8).
+		vente = colonisation.echanger(imp, reg, employes, echanges_cite.boutiques_cite(imp["_id"], find_docs),
+									  get_doc, resolve_item_ref, bilan["passes"])
+		if vente["gain"]:
+			evenements.append(f"La production s'est vendue : {vente['gain']} cu en caisse.")
+		for d in (bilan["employes_touches"] + vente["touchees"]
+				  + colonisation.synchroniser_tenanciers(imp, reg, employes, get_doc)):
+			save_doc(d)
+		negociant = colonisation.negociant_de(imp, reg, employes)
+		if negociant and vente["gain"]:
+			save_doc(negociant)
 		save_doc(imp)        # best-effort : un conflit sera rejoué au prochain passage
-	return bilan["evenements"]
+	return evenements
+
+
+def categories_disponibles() -> list:
+	"""Métiers dont le marchand générique `pnj:marchand_<cat>` existe (tenancier d'un sous-lieu)."""
+	prefixe = "pnj:marchand_"
+	return sorted(d["_id"][len(prefixe):] for d in (find_docs({"type": "pnj"}, ["_id"]) or [])
+				  if str(d.get("_id", "")).startswith(prefixe))
+
+
+def image_sous_lieu(categorie: str) -> str:
+	"""Première image `<categorie>_europe*` du dossier des villes (intérieur générique d'un métier)."""
+	try:
+		fichiers = sorted(f for f in os.listdir(TOWNS_IMAGES_PATH) if f.startswith(f"{categorie}_europe"))
+	except OSError:
+		fichiers = []
+	return fichiers[0] if fichiers else ""
 
 
 def _payload(character: dict, imp: dict, reg: dict, role: str, site: dict | None = None,
@@ -129,7 +156,8 @@ def _payload(character: dict, imp: dict, reg: dict, role: str, site: dict | None
 	site = site if site is not None else site_de(imp, reg)
 	employes = employes if employes is not None else colonisation.employes_effectifs(imp, get_doc)
 	cat = proprietes.catalogue(get_doc)
-	payload = colonisation.vue(imp, reg, role, site, employes, cat)
+	payload = colonisation.vue(imp, reg, role, site, employes, cat,
+							   disponibles=categories_disponibles() if role == colonisation.FONDATEUR else ())
 	payload["purse"] = cuivre_to_purse(money_to_cuivre(character))
 	payload["demande_en_attente"] = any(d.get("id") == character.get("_id") for d in imp.get("demandes") or [])
 	payload["peut_demander"] = colonisation.peut_demander(character, imp, reg)[0]
@@ -174,11 +202,10 @@ def _payload_site(character: dict, pays_doc: dict, reg: dict) -> dict:
 	implantations = _implantations_du_pays(pays_doc.get("_id"))
 	ok, raison = colonisation.peut_fonder(character, pays_doc, position, lu["relies"], implantations, reg)
 	premier = (colonisation.paliers(reg) or [{}])[0]
-	charte = int((reg.get("reglages") or {}).get("charte_cuivre") or 0)
 	return {
 		"site": lu["fiche"], "tags": lu["tags"],
 		"peut_fonder": ok, "refus": raison,
-		"charte": charte,
+		"charte": colonisation.charte_de(character),
 		"cites": [{"id": c["id"], "label": c["label"]} for c in colonisation.cites_de_la_charte(lu["relies"], position)],
 		"palier": {"id": premier.get("id"), "label": premier.get("label")},
 		"modeles": _vignettes(colonisation.modeles_proposes(
@@ -202,7 +229,7 @@ async def site(current_user: Annotated[dict, Depends(get_current_user)]):
 
 @colonisation_router.post("/colonisation/fonder")
 async def fonder(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
-	"""Fonde une implantation sur CETTE case : charte payée, lieu et connexion créés."""
+	"""Fonde une implantation sur CETTE case : la charte est remise, lieu et connexion créés."""
 	character = _personnage(current_user)
 	pays_doc = get_doc(character.get("lieu", "")) or {}
 	reg = colonisation.regles(get_doc)
@@ -218,22 +245,65 @@ async def fonder(current_user: Annotated[dict, Depends(get_current_user)], body:
 	if body.get("modele") not in proposes:
 		raise HTTPException(status_code=409, detail="Ce modèle n'est pas proposé pour ce site.")
 	modele = get_doc(body["modele"])
-	charte = int((reg.get("reglages") or {}).get("charte_cuivre") or 0)
-	if money_to_cuivre(character) < charte:
-		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi payer la charte.")
 	especes = colonisation.especes_du_site(pays_doc, position)
 	imp = colonisation.creer_implantation(
 		character, pays_doc, position, modele, reg, nom=body.get("nom"),
 		espece=colonisation.random.choice(especes) if especes else None)
 	lien = colonisation.creer_lien(imp, colonisation.entrees_de(modele)[0])
-	if debit_character(character, charte) is None:
-		raise HTTPException(status_code=409, detail="Fonds insuffisants.")
+	colonisation.consommer_charte(character)
 	colonisation.inscrire(character, imp)
 	_sauver(imp, lien, character)
 	payload = _payload_site(character, pays_doc, reg)
 	payload["fondee"] = {"id": imp["_id"], "label": imp["label"]}
 	payload["links"] = get_lieu_links(current_user)     # la connexion vient de naître sur cette case
 	return payload
+
+
+# ── La charte, au bureau d'un maître de guilde (§ 2) ─────────────────────────────────
+
+def _bureau(character: dict) -> tuple[dict, dict]:
+	bureau = get_doc(character.get("lieu", "")) or {}
+	if not colonisation.est_bureau_de_guilde(bureau):
+		raise HTTPException(status_code=403, detail="La charte s'achète au bureau d'un maître de guilde.")
+	return bureau, get_doc(bureau.get("lieu_parent") or "") or {}
+
+
+def _payload_charte(character: dict, bureau: dict, cite: dict, reg: dict, extra=None) -> dict:
+	ok, raison = colonisation.peut_acheter_charte(character, bureau, reg)
+	payload = {"prix": int((reg.get("reglages") or {}).get("charte_cuivre") or 0),
+			   "cite": cite.get("label", ""), "maitre": ((bureau.get("pnj") or [{}])[0]).get("nom", ""),
+			   "peut_acheter": ok, "refus": raison, "charte": colonisation.charte_de(character),
+			   "reglages": {k: (reg.get("reglages") or {}).get(k) for k in
+							("rang_min", "distance_cite_min", "distance_implantation_min", "implantations_par_pays")},
+			   "purse": cuivre_to_purse(money_to_cuivre(character))}
+	if extra:
+		payload.update(extra)
+	return payload
+
+
+@colonisation_router.get("/colonisation/charte")
+async def charte(current_user: Annotated[dict, Depends(get_current_user)]):
+	character = _personnage(current_user)
+	bureau, cite = _bureau(character)
+	return _payload_charte(character, bureau, cite, colonisation.regles(get_doc))
+
+
+@colonisation_router.post("/colonisation/charte/acheter")
+async def charte_acheter(current_user: Annotated[dict, Depends(get_current_user)]):
+	"""Le maître de guilde signe la charte de SA cité : elle ne vaudra que sur une case dont
+	cette cité est la plus proche."""
+	character = _personnage(current_user)
+	bureau, cite = _bureau(character)
+	reg = colonisation.regles(get_doc)
+	ok, raison = colonisation.peut_acheter_charte(character, bureau, reg)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	prix = int((reg.get("reglages") or {}).get("charte_cuivre") or 0)
+	if debit_character(character, prix) is None:
+		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi payer la charte.")
+	colonisation.delivrer_charte(character, cite, prix)
+	_sauver(character)
+	return _payload_charte(character, bureau, cite, reg, {"achetee": True})
 
 
 # ── Dans l'implantation ──────────────────────────────────────────────────────────────
@@ -288,13 +358,19 @@ async def construire(current_user: Annotated[dict, Depends(get_current_user)], b
 	attend d'être posé."""
 	character, imp, reg, role = _ici(current_user)
 	_exiger(role, colonisation.FONDATEUR)
-	ok, raison = colonisation.peut_construire(imp, reg, body.get("type"))
+	bdef = colonisation.batiment_def(reg, body.get("type")) or {}
+	categorie = body.get("categorie") if bdef.get("familles") else None
+	if bdef.get("familles") and not categorie:
+		raise HTTPException(status_code=409, detail="Choisissez le métier qui s'y tiendra.")
+	ok, raison = colonisation.peut_construire(imp, reg, body.get("type"), categorie, categories_disponibles())
 	if not ok:
 		raise HTTPException(status_code=409, detail=raison)
-	prix = int((colonisation.batiment_def(reg, body["type"]) or {}).get("prix_cuivre") or 0)
+	if bdef.get("nature") == colonisation.SOUS_LIEU and not image_sous_lieu(bdef.get("categorie") or categorie):
+		raise HTTPException(status_code=409, detail="Aucune image d'intérieur pour ce métier.")
+	prix = int(bdef.get("prix_cuivre") or 0)
 	if debit_character(character, prix) is None:
 		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi payer ce bâtiment.")
-	b = colonisation.construire(imp, reg, body["type"])
+	b = colonisation.construire(imp, reg, body["type"], categorie=categorie)
 	_sauver(imp, character)
 	return _payload(character, imp, reg, role, extra={"construit": b["id"]})
 
@@ -310,8 +386,22 @@ async def poser(current_user: Annotated[dict, Depends(get_current_user)], body: 
 	if not ok:
 		raise HTTPException(status_code=409, detail=raison)
 	colonisation.poser(imp, body["batiment"], character["position"])
-	_sauver(imp)
-	return _payload(character, imp, reg, role, extra={"pose": body["batiment"]})
+	b = colonisation.batiment(imp, body["batiment"])
+	bdef = colonisation.batiment_def(reg, b.get("type")) or {}
+	annexes = []
+	if bdef.get("nature") == colonisation.SOUS_LIEU:
+		if not b.get("lieu"):
+			# Première pose : le sous-lieu naît, avec sa porte sur cette case (vue de tous).
+			lieu, lien = colonisation.creer_sous_lieu(imp, b, reg, image_sous_lieu(b.get("categorie")))
+			employes = colonisation.employes_effectifs(imp, get_doc)
+			lieu["pnj"] = colonisation.pnj_du_sous_lieu(lieu, colonisation.tenancier(imp, reg, employes, b["id"]), reg)
+			annexes = [lieu, lien]
+		else:
+			lien = get_doc(b.get("lien") or "")
+			if lien and colonisation.deplacer_sous_lieu(lien, imp["_id"], b["pos"]):
+				annexes = [lien]
+	_sauver(*annexes, imp)
+	return _payload(character, imp, reg, role, extra={"pose": body["batiment"], "links": get_lieu_links(current_user)})
 
 
 @colonisation_router.post("/colonisation/reparer")
@@ -386,7 +476,13 @@ async def palier(current_user: Annotated[dict, Depends(get_current_user)], body:
 			if n.get("lieu") == imp["_id"]:
 				n["pos"] = list(entree)
 	character["position"] = {"x": entree[0], "y": entree[1]}
-	_sauver(imp, *([lien] if lien else []), character)
+	# Les portes des sous-lieux suivent leurs bâtiments replacés.
+	portes = []
+	for b in imp.get("batiments") or []:
+		porte = get_doc(b.get("lien") or "") if b.get("lien") else None
+		if porte and colonisation.deplacer_sous_lieu(porte, imp["_id"], b.get("pos")):
+			portes.append(porte)
+	_sauver(*portes, imp, *([lien] if lien else []), character)
 	# La carte a changé sous les pieds du joueur : le client recharge la page.
 	return {"palier": (colonisation.palier_def(reg, imp["palier"]) or {}).get("label", ""), "recharger": True}
 
@@ -451,7 +547,7 @@ async def engager(current_user: Annotated[dict, Depends(get_current_user)], body
 	employe = colonisation.engager(imp, candidat, character)
 	employes.append(employe)
 	_rafraichir(imp, reg, employes)
-	_sauver(employe, imp, character)
+	_sauver(employe, *colonisation.synchroniser_tenanciers(imp, reg, employes, get_doc), imp, character)
 	return _payload_embauche(character, imp, reg, employes, {"engage": proprietes.nom_personnage(employe)})
 
 
@@ -464,9 +560,77 @@ async def renvoyer(current_user: Annotated[dict, Depends(get_current_user)], bod
 	if employe is None:
 		raise HTTPException(status_code=404, detail="Ce PNJ ne travaille pas ici.")
 	colonisation.renvoyer(imp, employe)
-	_sauver(imp)
+	restants = colonisation.employes_effectifs(imp, get_doc)
+	restants = [e for e in restants if e.get("_id") != employe.get("_id")]
+	_sauver(*colonisation.synchroniser_tenanciers(imp, reg, restants, get_doc), imp)
 	save_doc(employe)
 	return _payload(character, imp, reg, role)
+
+
+# ── Négoce : caisse, option par PNJ, progression du négociant (§ 8) ─────────────────
+
+@colonisation_router.post("/colonisation/caisse/relever")
+async def caisse_relever(current_user: Annotated[dict, Depends(get_current_user)]):
+	character, imp, reg, role = _ici(current_user)
+	_exiger(role, colonisation.FONDATEUR)
+	montant = colonisation.relever_caisse(imp, character)
+	if not montant:
+		raise HTTPException(status_code=409, detail="La caisse est vide.")
+	credit_character(character, montant)
+	_sauver(imp, character)
+	return _payload(character, imp, reg, role, extra={"releve": montant})
+
+
+@colonisation_router.post("/colonisation/employe/vente")
+async def employe_vente(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Le fondateur décide si la production de CE PNJ se vend ; interdite, elle reste au lieu."""
+	character, imp, reg, role = _ici(current_user)
+	_exiger(role, colonisation.FONDATEUR)
+	employe = next((e for e in colonisation.employes_effectifs(imp, get_doc)
+					if e.get("_id") == body.get("employe_id")), None)
+	if employe is None:
+		raise HTTPException(status_code=404, detail="Ce PNJ ne travaille pas ici.")
+	employe["vente_cite"] = bool(body.get("vente"))
+	_sauver(employe)
+	return _payload(character, imp, reg, role)
+
+
+def _seance_negociant(current_user: dict, fn) -> dict:
+	character, imp, reg, role = _ici(current_user)
+	_exiger(role, colonisation.FONDATEUR)
+	employes = colonisation.employes_effectifs(imp, get_doc)
+	negociant = colonisation.negociant_de(imp, reg, employes)
+	if not negociant:
+		raise HTTPException(status_code=409, detail="Aucun négociant au comptoir.")
+	return character, imp, reg, role, employes, negociant
+
+
+@colonisation_router.post("/colonisation/negociant/former")
+async def negociant_former(current_user: Annotated[dict, Depends(get_current_user)]):
+	"""Formation payée (mêmes règles que le négociant d'un bien urbain)."""
+	character, imp, reg, role, employes, negociant = _seance_negociant(current_user, None)
+	regln = echanges_cite.reglages_negociant(proprietes.catalogue(get_doc))
+	cout = echanges_cite.cout_formation(negociant, regln)
+	if money_to_cuivre(character) < cout:
+		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi payer la formation.")
+	ok, raison, gain = echanges_cite.former(negociant, regln)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	debit_character(character, cout)
+	_sauver(negociant, character)
+	return _payload(character, imp, reg, role, employes=employes, extra={"formation": gain})
+
+
+@colonisation_router.post("/colonisation/negociant/livres")
+async def negociant_livres(current_user: Annotated[dict, Depends(get_current_user)]):
+	"""« Tenir les livres » : séance offerte par un fondateur LETTRÉ."""
+	character, imp, reg, role, employes, negociant = _seance_negociant(current_user, None)
+	regln = echanges_cite.reglages_negociant(proprietes.catalogue(get_doc))
+	ok, raison, gain = echanges_cite.tenir_les_livres(character, negociant, regln)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	_sauver(negociant)
+	return _payload(character, imp, reg, role, employes=employes, extra={"livres": gain})
 
 
 # ── Association (§ 10) ───────────────────────────────────────────────────────────────
