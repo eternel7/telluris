@@ -917,11 +917,11 @@ html.vue-portrait .actions-hud { background: rgba(44, 44, 56, 0.75); }
     margin: 5px;
 	padding: 0;
 	display: grid;
-	grid-template-columns: 45px 1fr;
+	grid-template-columns: 45px 1fr auto;
 	grid-template-areas:
-		"gear grid"
-		"editrow editrow"
-		"targetrow targetrow";
+		"gear grid vitals"
+		"editrow editrow editrow"
+		"targetrow targetrow targetrow";
 	align-items: end;
 }
 /* ⚠️ `.move-section` (fixe en bas, séparant le déplacement de l'attaque/fuite) et le pavé
@@ -1011,6 +1011,55 @@ html.vue-portrait .slot-edit-hint {
 	border-radius: 6px; box-shadow: 0 4px 14px rgba(0, 0, 0, .6);
 }
 html.vue-portrait .slot-edit-hint.ouverte { display: block; }
+/* ── Vitals du MEMBRE ACTIF, en face du ⚙ : petit portrait + PV/PM chiffrés + deux barres
+   horizontales (fraction du max). Largeur FIXE : un chiffre plus long ne doit ni
+   rééchelonner les cases (elles se taillent sur la largeur restante) ni faire bouger le
+   bloc d'un tour à l'autre (§17). Tenu par updatePlayerVitals / applyPlayerPortrait. */
+.barre-vitals {
+	grid-area: vitals; align-self: center;
+	width: 168px; margin: 5px 8px 5px 2px;
+	display: flex; align-items: center; gap: 8px;
+}
+.barre-vitals .bv-portrait {
+	position: relative; flex: none;
+	width: 50px; height: 50px; overflow: hidden;
+	border: 1.5px solid var(--gold2); border-radius: 8px;
+	box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+	background-color: #1a1a1a;
+}
+#bar-portrait { position: absolute; inset: 0; background-repeat: no-repeat; }
+.barre-vitals .bv-stats { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.bv-ligne { display: flex; flex-direction: column; gap: 2px; }
+.bv-texte {
+	font-size: 11px; line-height: 1; white-space: nowrap;
+	overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums;
+}
+.bv-ligne.pv .bv-texte { color: #ff4757; }
+.bv-ligne.pm .bv-texte { color: #4a9eff; }
+.bv-jauge {
+	height: 7px; border-radius: 4px; overflow: hidden;
+	background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.bv-fill { height: 100%; width: 0; border-radius: 3px; transition: width 0.3s ease; }
+.bv-ligne.pv .bv-fill { background: linear-gradient(to right, #a51d2a, #ff4757); }
+.bv-ligne.pm .bv-fill { background: linear-gradient(to right, #1d5bb0, #4a9eff); }
+/* Au-delà du max (buff de PV/PM) : la barre reste pleine, liseré doré. */
+.bv-fill.is-overflow { box-shadow: inset 0 0 0 1px rgba(255, 200, 50, 0.9); }
+/* Vue PORTRAIT : pas la largeur d'un bloc à côté des cases (elles passeraient sous leur
+   plancher de 28 px) — une rangée compacte AU-DESSUS de la grille, toujours à la même place. */
+html.vue-portrait .action-bar {
+	grid-template-columns: 45px 1fr;
+	grid-template-areas:
+		"vitals vitals"
+		"gear grid"
+		"editrow editrow"
+		"targetrow targetrow";
+}
+html.vue-portrait .barre-vitals { width: auto; margin: 5px 8px 0; gap: 8px; }
+html.vue-portrait .barre-vitals .bv-portrait { width: 30px; height: 30px; border-radius: 6px; }
+html.vue-portrait .barre-vitals .bv-stats { flex-direction: row; gap: 10px; }
+html.vue-portrait .bv-ligne { flex: 1; min-width: 0; }
+html.vue-portrait .bv-jauge { height: 6px; }
 #target-row {
 	grid-area: targetrow;
 	display: none; gap: 8px; align-items: center; justify-content: center;
@@ -1381,6 +1430,20 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 			     personnage. C'est le SEUL accès aux sorts, compétences et consommables —
 			     ce qui n'a pas été préparé ne se joue pas, sauf à passer par ⚙ (1 action). -->
 			<div class="slot-grid" id="slot-grid"></div>
+			<!-- Vitals du MEMBRE ACTIF, en face du ⚙ (place fixe) : portrait recadré + PV/PM. -->
+			<div class="barre-vitals" id="barre-vitals" aria-label="Points de vie et de magie du personnage actif">
+				<div class="bv-portrait"><div id="bar-portrait"></div></div>
+				<div class="bv-stats">
+					<div class="bv-ligne pv">
+						<span class="bv-texte" id="bv-pv-text">PV {{ combat.joueurs[0].currentPV }}/{{ combat.joueurs[0].pv_max }}</span>
+						<div class="bv-jauge"><div class="bv-fill" id="bv-pv-fill"></div></div>
+					</div>
+					<div class="bv-ligne pm">
+						<span class="bv-texte" id="bv-pm-text">PM {{ combat.joueurs[0].currentPM }}/{{ combat.joueurs[0].pm_max }}</span>
+						<div class="bv-jauge"><div class="bv-fill" id="bv-pm-fill"></div></div>
+					</div>
+				</div>
+			</div>
 			<div class="slot-edit-bar" id="slot-edit-row" style="display:none">
 				<select id="slot-assign-select"></select>
 				<button class="action-btn" id="btn-slot-assign" onclick="confirmSlotAssign()">✓ Affecter</button>
@@ -1867,7 +1930,7 @@ function applyPortraitTo(el, st) {
 // changement d'acteur — le monde re-pivote autour de lui).
 function applyPlayerPortrait(jid) {
 	const st = portraitStyle(jid || (activePlayer(state) || {}).id || 'joueur_0');
-	['token-portrait', 'left-portrait'].forEach(id => applyPortraitTo(document.getElementById(id), st));
+	['token-portrait', 'left-portrait', 'bar-portrait'].forEach(id => applyPortraitTo(document.getElementById(id), st));
 }
 // Badges du bandeau d'initiative : chaque joueur garde SON portrait (posé une fois).
 function applyBadgePortraits() {
@@ -1892,6 +1955,18 @@ function updatePlayerVitals(j) {
 	const pmFrac = j.pm_max > 0 ? j.currentPM / j.pm_max : 0;
 	setArc(document.getElementById('pt-pv'), pvFrac);
 	setArc(document.getElementById('pt-pm'), pmFrac);
+	// Vitals de la barre d'action : chiffres + barres horizontales (fraction du max).
+	const barre = (cle, cur, max) => {
+		const t = document.getElementById(`bv-${cle}-text`);
+		if (t) t.textContent = `${cle.toUpperCase()} ${cur}/${max}`;
+		const f = document.getElementById(`bv-${cle}-fill`);
+		if (f) {
+			f.style.width = (max > 0 ? Math.max(0, Math.min(100, cur / max * 100)) : 0) + '%';
+			f.classList.toggle('is-overflow', cur > max);
+		}
+	};
+	barre('pv', j.currentPV, j.pv_max);
+	barre('pm', j.currentPM, j.pm_max);
 }
 
 let state    = JSON.parse(JSON.stringify(SERVER_DATA));
