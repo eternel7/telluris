@@ -14,7 +14,7 @@
 // et leurs deux `let` sont extraits PAR NOM du template (lu par `_template_js`, includes
 // développés), dans UN seul script — les `let` sont des liaisons lexicales de script. Le DOM est
 // remplacé par un MODÈLE DE MISE EN PAGE : la colonne perd la largeur de la barre de défilement
-// dès que la page (autres blocs + carte de step×(MAX_H−1) px) dépasse la hauteur de fenêtre.
+// dès que la page (autres blocs + carte de step×(MAX_H−1+FLOOR) px) dépasse la hauteur de fenêtre.
 //
 // HORS DE PORTÉE (à vérifier à l'écran) : la mise en page réelle du navigateur (grille à trois
 // colonnes, largeur des panneaux latéraux, largeur effective de la barre).
@@ -50,12 +50,15 @@ function extraireLet(nom) {
 }
 
 // ── Modèle de mise en page ──────────────────────────────────────────────────────
-const MAX_H = 10;   // rangées visibles (MAX_H du template) ; --floor vaut 0
+const MAX_H = 10;   // rangées visibles devant (MAX_H du template)
+// Rangée(s) DERRIÈRE le joueur (--floor) : RELUE du template, jamais recopiée.
+const FLOOR = Number((js.match(/^const FLOOR = (\d+);/m) || [])[1]);
+assert.ok(Number.isInteger(FLOOR), 'const FLOOR introuvable dans le template');
 const monde = {};
 const ROOT = { vars: {}, ecritures: 0,
 			   style: { setProperty(k, v) { ROOT.vars[k] = v; ROOT.ecritures++; } } };
 function stepPx() { return parseFloat(ROOT.vars['--step']) || 24; }   // 24px : repli CSS de :root
-function barreVisible() { return monde.autresHauteurs + stepPx() * (MAX_H - 1) > monde.hauteur; }
+function barreVisible() { return monde.autresHauteurs + stepPx() * (MAX_H - 1 + FLOOR) > monde.hauteur; }
 const CENTRE = {
 	get clientWidth() {
 		if (monde.colonneMasquee) return 0;
@@ -75,7 +78,7 @@ const LIGNES = Number((js.match(/^const LIGNES_PORTRAIT = (\d+);/m) || [])[1]);
 const exprProfondeur = (js.match(/^const PROFONDEUR_PORTRAIT = ([^;]+);/m) || [])[1];
 assert.ok(LIGNES > 0, 'const LIGNES_PORTRAIT introuvable dans le template');
 assert.ok(exprProfondeur, 'const PROFONDEUR_PORTRAIT introuvable dans le template');
-const PROFONDEUR = new Function('MAX_H', 'return ' + exprProfondeur)(MAX_H);
+const PROFONDEUR = new Function('MAX_H', 'FLOOR', 'return ' + exprProfondeur)(MAX_H, FLOOR);
 vm.runInThisContext([
 	'const LIGNES_PORTRAIT = ' + LIGNES + ';',
 	'const PROFONDEUR_PORTRAIT = ' + PROFONDEUR + ';',
@@ -122,15 +125,20 @@ t('pas entier, plancher à 8, jamais plus large que la colonne, croissant', () =
 
 console.log('\n── Rétroaction barre de défilement ↔ largeur mesurée ───────────────────────');
 
+// Hauteur de fenêtre du scénario d'oscillation (colonne de 1200 px, barre de 17 px) : la barre
+// doit apparaître au grand pas et disparaître au petit, pour les DEUX formules — entière (69 / 68)
+// et ancienne (69,59 / 68,59). 68,9 × rangées tombe dans les deux fenêtres (1040 pour 9 rangées,
+// la valeur historique ; 1109 pour 10). Rangées = MAX_H − 1 + FLOOR, relues du template.
+const H_OSC = 420 + Math.floor(68.9 * (MAX_H - 1 + FLOOR));
 t('le modèle REPRODUIT l’oscillation avec l’ancienne formule', () => {
-	page({ hauteur: 1040 });
+	page({ hauteur: H_OSC });
 	const a = ancienneSync(), b = ancienneSync(), c = ancienneSync();
 	assert.notStrictEqual(a, b, 'aucune oscillation : le scénario ne teste rien');
 	assert.strictEqual(a, c);
 });
 
 t('même scénario : deux appels successifs rendent la même échelle et n’écrivent plus rien', () => {
-	page({ hauteur: 1040 });
+	page({ hauteur: H_OSC });
 	const r1 = syncViewSize();
 	const vars = Object.assign({}, ROOT.vars), ecritures = ROOT.ecritures, coupe = coupures;
 	for (let i = 0; i < 10; i++) assert.deepStrictEqual(syncViewSize(), r1, 'appel ' + (i + 2));
@@ -192,7 +200,7 @@ console.log('\n── Vue portrait (tailleVuePortrait) ────────�
 
 t('la vue PAYSAGE debout : mêmes cases, tournées', () => {
 	assert.strictEqual(LIGNES, 17, 'rangées de flanc ≠ colonnes du paysage (tailleVue : step × 17)');
-	assert.strictEqual(PROFONDEUR, MAX_H - 1, 'profondeur ≠ rangées du paysage (--floor vaut 0)');
+	assert.strictEqual(PROFONDEUR, MAX_H - 1 + FLOOR, 'profondeur ≠ rangées du paysage (rangée arrière comprise)');
 });
 
 t('la LARGEUR seule fixe le pas : profondeur pleine colonne, jamais au-delà', () => {
