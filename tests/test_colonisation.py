@@ -1244,7 +1244,10 @@ def test_des_colons_escortes_depuis_une_cite_proche_s_installent_a_l_arrivee():
 
 
 def test_l_image_definitive_d_un_modele_remplace_la_provisoire(monkeypatch):
+	# Le dump porte les images PROVISOIRES (les définitives sont peut-être déjà sur le disque).
 	dump = {d["_id"]: copy.deepcopy(d) for d in DOCS}
+	for palier_id, provisoire, _w, _h in gen.MODELES:
+		dump[f"lieu:{col.TAG_MODELE}_{palier_id}"]["image"] = provisoire
 	monkeypatch.setattr(gen, "image_definitive", lambda p: "colonie_hameau_generique01.jpg" if p == "hameau" else None)
 	[maj] = gen.generer(dump)
 	assert maj["_id"] == "lieu:modele_colonie_hameau" and maj["image"] == "colonie_hameau_generique01.jpg"
