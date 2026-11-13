@@ -1097,7 +1097,7 @@
    "_id": "lieu:modele_colonie_campement",
    "type": "lieu",
    "label": "Campement (modèle générique)",
-   "image": "clairiere_du_charbonnier.jpg",
+   "image": "colonie_campement_generique01.jpg",
    "categorie": "modele_colonie",
    "tags": [
     "modele_colonie",
@@ -1409,7 +1409,7 @@
    "_id": "lieu:modele_colonie_hameau",
    "type": "lieu",
    "label": "Hameau (modèle générique)",
-   "image": "hameau.png",
+   "image": "colonie_hameau_generique01.jpg",
    "categorie": "modele_colonie",
    "tags": [
     "modele_colonie",
@@ -1759,7 +1759,7 @@
    "_id": "lieu:modele_colonie_bourgade",
    "type": "lieu",
    "label": "Bourgade (modèle générique)",
-   "image": "hameau.png",
+   "image": "colonie_bourgade_generique01.jpg",
    "categorie": "modele_colonie",
    "tags": [
     "modele_colonie",
@@ -2317,7 +2317,7 @@
    "_id": "lieu:modele_colonie_village",
    "type": "lieu",
    "label": "Village (modèle générique)",
-   "image": "hameau.png",
+   "image": "colonie_village_generique01.jpg",
    "categorie": "modele_colonie",
    "tags": [
     "modele_colonie",
@@ -3123,7 +3123,7 @@
    "_id": "lieu:modele_colonie_bourg",
    "type": "lieu",
    "label": "Bourg (modèle générique)",
-   "image": "fortifications.png",
+   "image": "colonie_bourg_generique01.jpg",
    "categorie": "modele_colonie",
    "tags": [
     "modele_colonie",
@@ -4195,7 +4195,7 @@
    "_id": "lieu:modele_colonie_petite_ville",
    "type": "lieu",
    "label": "Petite ville (modèle générique)",
-   "image": "fortifications.png",
+   "image": "colonie_petite_ville_generique01.jpg",
    "categorie": "modele_colonie",
    "tags": [
     "modele_colonie",
@@ -5923,7 +5923,7 @@
    "_id": "lieu:modele_colonie_ville",
    "type": "lieu",
    "label": "Ville (modèle générique)",
-   "image": "fortifications.png",
+   "image": "colonie_ville_generique01.jpg",
    "categorie": "modele_colonie",
    "tags": [
     "modele_colonie",

@@ -206,7 +206,7 @@ Traduction des tags en `{posture}` :
 
 Un par palier (docs/lore/systemes/20261112_voie_de_colonisation.md § 12.1), milieu tempéré neutre. La carte se **parcourt** (cases tirées de l'image) **et sert de carte de combat** quand le lieu est attaqué : vue verticale, phrase du § 0.5 quater, aucun personnage (§ 0.5 ter), aucun portail (§ 0.5 bis). Les **entrées** déclarées sur le modèle (`entrees`, `dev/gen_colonisation.py`) sont au milieu des bords — une au campement, deux au hameau, quatre ensuite : les portes peintes doivent y tomber. Les fortifications du palier (§ 4) sont **peintes**. Le joueur pose ses bâtiments sur les cases libres : l'image en laisse beaucoup. Pas de lieu de culte (§ 8).
 
-Enregistrement : `templates/resources/towns/colonie_<palier>_generique01.jpg` — `dev/gen_colonisation.py` remplace alors l'image provisoire du modèle ; refaire ensuite sa grille dans `/admin/lieux` (et vérifier `entrees`).
+Livrées le 13/11/2026 (le Bourg en a deux : `…01` retenue, `…02` en réserve — grille visible, une enseigne au faux texte et un édifice d'allure religieuse ; Campement et Bourgade sortis en légère perspective). Enregistrement : `templates/resources/towns/colonie_<palier>_generique01.jpg` — `dev/gen_colonisation.py` remplace alors l'image provisoire du modèle ; refaire ensuite sa grille dans `/admin/lieux` (et vérifier `entrees`).
 
 | Palier | Format | Fichier | Entrées |
 |---|---|---|---|
