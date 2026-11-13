@@ -173,6 +173,23 @@ DEFAUTS = {
 				 "prospection_base": 3, "portage_kg": 20, "decote_sans_negociant": 0.2,
 				 "seuil_refus": 1, "caisse_max_par_rang": 5000, "journal_max": 20},
 	"montures_etable": ["espece:ane", "espece:mulet", "espece:cheval"],
+	# Un garde nommé, quand il se bat aux côtés du fondateur (§ 6) : un combattant standard.
+	"garde_combattant": {"voc": "guerrier", "niveau": 2,
+						 "caracts": {"V": 6, "F": 30, "R": 30, "Ag": 25, "Vol": 20, "Int": 15, "Cha": 15, "Ch": 15},
+						 "slots": {"main_droite": "item:Epee_courte", "torse": "item:Armure_matelassee"}},
+	# Repos au feu : les lignes de la nuit (chacune autonome, joueur au « vous »).
+	"nuit_feu": [
+		"Les braises claquent ; quelqu'un remet une bûche sans un mot.",
+		"Au-delà de la lueur, des yeux s'allument un instant, puis s'éteignent.",
+		"Un garde fait le tour du camp, sa lanterne balançant au bout du bras.",
+		"La fumée monte droit : demain sera clair.",
+		"Une chouette s'interroge dans les arbres ; personne ne lui répond.",
+		"Vous vous réveillez une fois, le dos froid, et vous rapprochez des braises.",
+		"On chuchote près du feu : une histoire de loup qui parlait, que nul ne croit.",
+		"Le vent tourne et rabat la fumée ; on tousse, on rit, on se rendort.",
+		"Le ciel pâlit à l'est. Quelqu'un attise déjà le feu pour la soupe.",
+		"Un enfant s'est endormi contre un sac de grain, une miche entamée à la main.",
+	],
 	"intendant_economie": 0.1,    # part de nourriture épargnée (non cumulatif)
 	"reparation_materiaux": 5,
 	"candidats_duree_s": JOUR_S,
@@ -236,6 +253,12 @@ DEFAUTS = {
 		"attaque_proba": {"campement": 0.03, "hameau": 0.015, "bourgade": 0.015, "village": 0.008,
 						  "bourg": 0.003, "petite_ville": 0.003, "ville": 0.001},
 		"nuit_sans_garde": 2.0,   # facteur d'attaque sans garde au poste (§ 5, Nuit)
+		# Présence du fondateur ou d'un associé : l'attaque se JOUE (§ 6). Laissée sans réponse
+		# `delai_defense_s`, elle se résout comme en son absence.
+		"delai_defense_s": 900,
+		"assaillants_base": 2,          # + rang du palier : « plus grave à mesure qu'il grandit »
+		"taniere_meute": 3,             # bêtes dans la tanière (+ rang du palier)
+		"repousse_s": 7 * JOUR_S,       # tanière vidée : une autre bête s'installe ensuite
 		"mots": {"0": "aucune menace connue", "1": "une bête rôde dans les environs",
 				 "2": "la bête a remarqué le lieu", "3": "elle s'en prend aux troupeaux et aux réserves",
 				 "4": "sa tanière est localisée"},
@@ -1470,7 +1493,15 @@ def rattraper(imp: dict, reg: dict, site: dict, employes: list, now: int | None 
 	if "rattrape_at" not in imp:
 		imp["rattrape_at"] = now
 		return bilan
+	# Attaque restée sans réponse : elle se résout comme en l'absence du fondateur (§ 6).
+	attente = imp.get("attaque_en_cours")
+	if attente and now - _int(attente.get("at")) >= _int((reg.get("menace") or {}).get("delai_defense_s"), 900):
+		imp.pop("attaque_en_cours", None)
+		_attaque(imp, reg, employes, _int(attente.get("at")), rand, bilan, securite(imp, reg, site, employes))
+		bilan["evenements_attente"] = True
 	if not n:
+		for texte in bilan["evenements"]:
+			noter(imp, texte, now)
 		return bilan
 	# Au-delà du plafond, le temps perdu l'est pour de bon : on ne rejoue que les dernières
 	# passes. En deçà, le reliquat (moins d'une passe) reste dû au prochain passage.
@@ -1589,9 +1620,17 @@ def _mort(imp: dict, employes: list, rand, instant: int, bilan: dict, cause: str
 def _menace(imp: dict, reg: dict, site: dict, employes: list, instant: int, rand, bilan: dict, secu: dict) -> None:
 	menace = imp.get("menace") or {}
 	etape = _int(menace.get("etape"))
+	conf = reg.get("menace") or {}
+	# Tanière vidée : la contrée se tait un temps, puis une autre bête s'installe.
+	if not etape and menace.get("espece") and menace.get("nettoyee_at") \
+			and instant - _int(menace["nettoyee_at"]) >= _int(conf.get("repousse_s"), 7 * JOUR_S):
+		menace["etape"] = 1
+		menace.pop("nettoyee_at", None)
+		imp["menace"] = menace
+		bilan["evenements"].append("Une autre bête s'est installée dans les environs.")
+		return
 	if not etape or not menace.get("espece"):
 		return
-	conf = reg.get("menace") or {}
 	danger = _int(((site or {}).get("danger") or {}).get("note"))
 	if etape == 1:
 		if rand.random() < _num(conf.get("remarque_proba")) * (1 + danger) * _num((conf.get("feu") or {}).get(imp.get("feu")), 1):
@@ -1775,6 +1814,136 @@ def relever_caisse(imp: dict, fondateur: dict, now: int | None = None) -> int:
 	return montant
 
 
+def lieu_de_nuit(lieu_doc: dict, get_doc_fn) -> dict:
+	"""Pour le log de la nuit (`auberge.messages_nuit`) : une implantation raconte le repos au
+	FEU (`nuit_feu`), jamais la salle commune. Copie de surface, jamais sauvée."""
+	if not est_implantation(lieu_doc) or (lieu_doc or {}).get("nuit_messages"):
+		return lieu_doc
+	return {**lieu_doc, "nuit_messages": list(regles(get_doc_fn).get("nuit_feu") or [])}
+
+
+# ── Combats joués : défense du lieu et tanière (§ 6) ─────────────────────────────────
+DEFENSE = "defense"
+TANIERE = "taniere"
+
+
+def attaque_presente(imp: dict, reg: dict, site: dict, employes: list, now: int | None = None, rand=random) -> bool:
+	"""Le fondateur ou un associé est là : au plus un tirage par passe écoulée depuis le
+	précédent, à la probabilité d'attaque du palier. Une attaque tirée ATTEND sa réponse
+	(`attaque_en_cours`) — combat joué — ou se résout seule après `delai_defense_s`. True si
+	elle vient d'être tirée."""
+	now = now_epoch() if now is None else now
+	conf = reg.get("menace") or {}
+	pas = max(60, _int((reg.get("temps") or {}).get("passe_s"), 3600))
+	menace = imp.get("menace") or {}
+	if imp.get("attaque_en_cours") or _int(menace.get("etape")) < 2 or not menace.get("espece"):
+		return False
+	if now - _int(imp.get("presence_at")) < pas:
+		return False
+	imp["presence_at"] = now
+	danger = _int(((site or {}).get("danger") or {}).get("note"))
+	proba = _num((conf.get("attaque_proba") or {}).get(imp.get("palier"))) * (1 + danger / 3)
+	if not _du_role(imp, reg, employes, "gardes"):
+		proba *= _num(conf.get("nuit_sans_garde"), 1)
+	if rand.random() >= proba:
+		return False
+	imp["attaque_en_cours"] = {"at": now, "espece": menace["espece"]}
+	noter(imp, "Le lieu est attaqué !", now)
+	return True
+
+
+def nb_adversaires(imp: dict, reg: dict, genre: str) -> int:
+	conf = reg.get("menace") or {}
+	base = _int(conf.get("assaillants_base" if genre == DEFENSE else "taniere_meute"), 2)
+	return base + rang_palier(reg, imp.get("palier"))
+
+
+def peut_vider_taniere(imp: dict, role: str) -> tuple[bool, str]:
+	"""« Pacifier » (§ 10) : fondateur ou associé, une fois la tanière localisée (étape 4)."""
+	if role not in (FONDATEUR, ASSOCIE):
+		return False, "Il faut être fondateur ou associé."
+	menace = imp.get("menace") or {}
+	if _int(menace.get("etape")) < 4 or not menace.get("espece"):
+		return False, "La tanière n'est pas encore localisée."
+	return True, ""
+
+
+def garde_combattant(employe: dict, reg: dict) -> dict:
+	"""Un garde nommé sous la forme d'un personnage de combat (`build_joueur_snapshot`) :
+	nom, visage et Lignée du PNJ, caractéristiques et équipement standards (`garde_combattant`)."""
+	conf = reg.get("garde_combattant") or {}
+	voc = conf.get("voc", "guerrier")
+	return {"_id": employe.get("_id"), "type": "employe", "prenom": employe.get("prenom", ""),
+			"nom": employe.get("nom", ""), "race": employe.get("race", ""), "sex": employe.get("sex", ""),
+			"image": employe.get("portrait", ""), "voc": voc, "vocations_niveaux": {voc: _int(conf.get("niveau"), 1)},
+			"caracteristiques_current": dict(conf.get("caracts") or {}), "currentPV": 10 ** 6, "currentPM": 0,
+			"slots": dict(conf.get("slots") or {}), "inventaire": [], "effets_actifs": []}
+
+
+def gardes_au_poste(imp: dict, reg: dict, employes: list) -> list:
+	return _du_role(imp, reg, employes, "gardes")
+
+
+def placer_assaillants(combat_doc: dict, lieu_doc: dict) -> None:
+	"""Les attaquants partent des ENTRÉES (§ 12.6) : chaque monstre d'une case est reposé au
+	plus près d'une entrée, en tournant de l'une à l'autre. Un grand jeton garde sa case."""
+	entrees = entrees_de(lieu_doc)
+	if not entrees:
+		return
+	prises = {(a["pos"]["x"], a["pos"]["y"]) for a in combat_doc.get("joueurs", []) + combat_doc.get("monstres", [])
+			  if a.get("pos")}
+	for i, m in enumerate(combat_doc.get("monstres") or []):
+		if (m.get("jeton") or {}).get("largeur", 1) != 1 or (m.get("jeton") or {}).get("profondeur", 1) != 1:
+			continue
+		ancienne = (m["pos"]["x"], m["pos"]["y"]) if m.get("pos") else None
+		case = case_libre_proche(lieu_doc, entrees[i % len(entrees)], prises - {ancienne})
+		if case:
+			prises.discard(ancienne)
+			prises.add(tuple(case))
+			m["pos"] = {"x": case[0], "y": case[1]}
+
+
+def issue_combat(imp: dict, reg: dict, info: dict, status: str, gardes_morts: list, employes: list,
+				 combat_id, now: int | None = None, rand=random) -> list | None:
+	"""Applique l'issue d'un combat joué sur l'implantation. Idempotent (`combats_traites`) :
+	None si déjà appliqué. Rend les docs PNJ touchés (gardes tombés, morts pour de bon).
+	- défense gagnée : attaque repoussée ; perdue ou fuie : pertes comme en l'absence, sans
+	  que la sécurité ne retienne rien ;
+	- tanière vidée : la menace se tait (`nettoyee_at`), une expédition réussie de plus."""
+	now = now_epoch() if now is None else now
+	traites = imp.setdefault("combats_traites", [])
+	if combat_id in traites:
+		return None
+	traites.append(combat_id)
+	del traites[:-20]
+	bilan = {"evenements": [], "employes_touches": []}
+	for gid in gardes_morts or []:
+		e = next((x for x in employes if x.get("_id") == gid), None)
+		if e is None:
+			continue
+		employes.remove(e)
+		e["statut"] = EMPLOYE_MORT
+		imp["employes"] = [x for x in imp.get("employes") or [] if x != gid]
+		imp.setdefault("morts", []).append(now)
+		bilan["employes_touches"].append(e)
+		bilan["evenements"].append(f"{proprietes.nom_personnage(e)} est tombé en défendant le lieu.")
+	if info.get("genre") == DEFENSE:
+		imp.pop("attaque_en_cours", None)
+		if status == "victoire":
+			imp.setdefault("attaques", []).append({"at": now, "repoussee": True})
+			bilan["evenements"].append("L'attaque a été repoussée.")
+		else:
+			_attaque(imp, reg, employes, now, rand, bilan, {"valeur": -1})
+	elif info.get("genre") == TANIERE and status == "victoire":
+		menace = imp.setdefault("menace", {})
+		menace.update(etape=0, nettoyee_at=now)
+		imp["expeditions_reussies"] = _int(imp.get("expeditions_reussies")) + 1
+		bilan["evenements"].append("La tanière est vidée : la contrée respire.")
+	for texte in bilan["evenements"]:
+		noter(imp, texte, now)
+	return bilan["employes_touches"]
+
+
 # ── Vues (§ 10, § 12.7) ──────────────────────────────────────────────────────────────
 
 def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprietes: dict | None = None,
@@ -1799,6 +1968,7 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 		"stocks_ouverts": [{"stock": s, "label": labels.get(s, s)} for s in reg.get("stocks") or []],
 		"places_associes": max(0, places_associes(imp, reg) - len(imp.get("associes") or [])),
 		"demande_en_attente": False,
+		"attaque_en_cours": bool(imp.get("attaque_en_cours")),
 		"sous_lieux": [{"label": (batiment_def(reg, b.get("type")) or {}).get("label", ""),
 						"metier": libelle_metier(b.get("categorie")), "pos": b.get("pos"),
 						"ouvert": bool(tenancier(imp, reg, employes, b["id"])) and not b.get("endommage")}
@@ -1849,7 +2019,8 @@ def vue(imp: dict, reg: dict, role: str, site: dict, employes: list, cat_proprie
 		"chantier": ({**imp["chantier"], "reste": reste_chantier(imp)} if imp.get("chantier") else None),
 		"palier_suivant": conditions_palier(imp, reg, employes),
 		"menace": {"etape": _int((imp.get("menace") or {}).get("etape")),
-				   "mot": menace_mots.get(str(_int((imp.get("menace") or {}).get("etape"))), "")},
+				   "mot": menace_mots.get(str(_int((imp.get("menace") or {}).get("etape"))), ""),
+				   "taniere": peut_vider_taniere(imp, role)[0]},
 		"associes": [{"id": a.get("id"), "nom": a.get("nom"), "apports": a.get("apports") or {}}
 					 for a in imp.get("associes") or []],
 		"negoce": {"negociant": bool(negociant_de(imp, reg, employes)), "caisse": _int(imp.get("caisse_cuivre")),

@@ -40,13 +40,27 @@ LIEN_CITE = {"_id": "link:cite", "type": "connection",
 			 "nodes": [{"lieu": "lieu:pays", "pos": [5, 5]}, {"lieu": "lieu:cite", "pos": [0, 0]}]}
 PAIN = {"_id": "item:pain", "type": "item", "nom": "Pain", "categorie": "consommable",
 		"sous_categorie": "boulangerie", "slots": [], "poids": 2.0, "rarete": "commun"}
-EPEE = {"_id": "item:epee", "type": "item", "nom": "Épée", "categorie": "arme", "sous_categorie": "",
+EPEE_SAC = {"_id": "item:epee", "type": "item", "nom": "Épée", "categorie": "arme", "sous_categorie": "",
 		"slots": ["main_droite"], "tags": ["cac"], "poids": 2.0, "rarete": "commun"}
 METIERS = {"_id": "rules:proprietes", "type": "rules", "value": {"types": [], "amenagements": [], "metiers": [
 	{"id": "garde", "label": "Garde", "cout_embauche_cuivre": 800},
 	{"id": "medecin", "label": "Médecin", "cout_embauche_cuivre": 2000},
 	{"id": "intendant", "label": "Intendant", "cout_embauche_cuivre": 1500},
 	{"id": "marchand", "label": "Marchand", "cout_embauche_cuivre": 1200}]}}
+# Combat de la colonisation : l'équipement standard du garde et l'espèce de la menace (dump).
+EPEE = {"_id": "item:Epee_courte", "type": "item", "nom": "Épée courte", "categorie": "arme", "sous_categorie": "",
+		"slots": ["main_droite", "main_gauche"], "bonus_cc": 1, "bonus_degats": 2, "bonus_degats_dice": 4,
+		"poids": 1.5, "tags": ["cac", "tranchant"], "portee": 1, "rarete": "commun"}
+GAMBISON = {"_id": "item:Armure_matelassee", "type": "item", "nom": "Armure matelassée", "categorie": "armure",
+			"sous_categorie": "", "slots": ["torse"], "poids": [3, 5], "tags": [], "bonus_pa": 5, "bonus": {"Ag": -2},
+			"rarete": "commun"}
+LOUP = {"_id": "espece:loup", "type": "espece", "nom": "Loup", "genre": "m", "image": "loup_transparent.png",
+		"base_attributes": {k: {"min": a, "max": b} for k, (a, b) in {"V": (4, 6), "F": (20, 35), "R": (20, 35),
+							"Ag": (35, 60), "Vol": (15, 30), "Int": (10, 20), "Cha": (0, 0), "Ch": (5, 15)}.items()},
+		"tags": ["animal", "predateur"], "proprietes": {}}
+NOVICE = {"_id": "profil:novice", "type": "profil", "niveau": 1, "nom": "Novice",
+		  "attributs_modifier": {k: {"min": 0, "max": 5} for k in ("F", "R", "Ag", "Vol", "Int", "Cha", "Ch")},
+		  "bonus_skills": []}
 CARACTS = {"V": 5, "F": 40, "R": 40, "Ag": 40, "Vol": 40, "Int": 40, "Cha": 40, "Ch": 40}
 
 
@@ -66,7 +80,8 @@ def monde(monkeypatch):
 	from routers import colonisation as rc
 	from routers import user as ru
 
-	docs = {d["_id"]: copy.deepcopy(d) for d in [*gen.generer({}), PAYS, ZONE, CITE, LIEN_CITE, PAIN, EPEE, METIERS]}
+	docs = {d["_id"]: copy.deepcopy(d) for d in [*gen.generer({}), PAYS, ZONE, CITE, LIEN_CITE, PAIN, EPEE_SAC, METIERS, EPEE,
+												 GAMBISON, LOUP, NOVICE]}
 
 	def brut(doc_id):
 		return copy.deepcopy(docs.get(doc_id))
@@ -90,7 +105,8 @@ def monde(monkeypatch):
 	def find_docs_fn(selecteur, fields=None):
 		return [copy.deepcopy(d) for d in docs.values() if _correspond(d, selecteur)]
 
-	for mod in (rc, ru, characters_util, proprietes, marche):
+	from utils import combat as combat_util
+	for mod in (rc, ru, characters_util, proprietes, marche, combat_util):
 		monkeypatch.setattr(mod, "get_doc", get_doc_fn, raising=False)
 		monkeypatch.setattr(mod, "save_doc", save_doc_fn, raising=False)
 		monkeypatch.setattr(mod, "find_docs", find_docs_fn, raising=False)
@@ -374,3 +390,55 @@ def test_la_caisse_se_releve_et_la_vente_se_regle_par_pnj(monde):
 	visiteur = _perso("v", lieu=imp_id, position={"x": 1, "y": 1})
 	assert _refus(monde, visiteur, rc.caisse_relever, None) == 403
 	assert _refus(monde, visiteur, rc.employe_vente, None, {"employe_id": "employe:agri", "vente": True}) == 403
+
+
+def test_l_attaque_se_joue_aux_cotes_des_gardes_et_son_issue_revient_au_lieu(monde):
+	from utils import combat as combat_util
+	rc = monde["rc"]
+	fondateur = _perso(user_id="user:a")
+	imp_id = _fonder(monde, fondateur)
+	imp = monde["docs"][imp_id]
+	assert _refus(monde, fondateur, rc.defendre, None) == 409                       # rien à repousser
+	imp["batiments"] = [{"id": "b_g", "type": "poste_de_garde", "pos": [2, 2]}]
+	garde = {"_id": "employe:g", "type": "employe", "metier": "garde", "poste": "b_g", "statut": "employe",
+			 "propriete": imp_id, "prenom": "Aldo", "nom": "Brun", "race": "nain"}
+	monde["docs"][garde["_id"]] = garde
+	imp["employes"] = [garde["_id"]]
+	imp["attaque_en_cours"] = {"at": 1, "espece": "espece:loup"}
+	visiteur = _perso("v", lieu=imp_id, position=dict(fondateur["position"]))
+	assert _refus(monde, visiteur, rc.defendre, None) == 403
+	rep = _appel(monde, fondateur, rc.defendre, None)
+	combat = monde["docs"][rep["combat_id"]]
+	assert combat["colonie"] == {"implantation": imp_id, "genre": col.DEFENSE}
+	assert combat["battle_map_id"] == imp_id and combat["map_route"]
+	[g] = [j for j in combat["joueurs"] if j.get("est_garde")]
+	assert g["character_id"] == garde["_id"] and g["se_defend"] and not g.get("jouable", True)
+	reg = _reg(monde)
+	assert len(combat["monstres"]) == col.nb_adversaires(imp, reg, col.DEFENSE)
+	# victoire, garde tombé : le lieu le sait, une seule fois
+	combat["status"] = "victoire"
+	g["currentPV"] = 0
+	combat_util._finalize_colonie(combat, "victoire")
+	combat_util._finalize_colonie(combat, "victoire")
+	imp = monde["docs"][imp_id]
+	assert "attaque_en_cours" not in imp and imp["employes"] == []
+	assert [a for a in imp["attaques"] if a["repoussee"]] == [imp["attaques"][-1]]
+	assert monde["docs"]["employe:g"]["statut"] == col.EMPLOYE_MORT
+
+
+def test_la_taniere_localisee_se_vide_en_combat(monde):
+	from utils import combat as combat_util
+	rc = monde["rc"]
+	monde["docs"]["lieu:carte_foret"] = {"_id": "lieu:carte_foret", "type": "lieu", "categorie": "battle_map",
+										 "image": "foret0001.png", "tags": ["foret"], "dimensions": {"x": 10, "y": 8},
+										 "cells": [[1] * 10 for _ in range(8)]}
+	fondateur = _perso(user_id="user:a")
+	imp_id = _fonder(monde, fondateur)
+	assert _refus(monde, fondateur, rc.taniere, None) == 409
+	monde["docs"][imp_id]["menace"]["etape"] = 4
+	rep = _appel(monde, fondateur, rc.taniere, None)
+	combat = monde["docs"][rep["combat_id"]]
+	assert combat["colonie"]["genre"] == col.TANIERE and combat["battle_map_id"] == "lieu:carte_foret"
+	assert not [j for j in combat["joueurs"] if j.get("est_garde")]
+	combat_util._finalize_colonie(combat, "victoire")
+	assert monde["docs"][imp_id]["menace"]["etape"] == 0

@@ -919,3 +919,104 @@ def test_le_generateur_complete_les_entrees_sans_reecrire_ce_qui_existe():
 	auberge = next(x for x in doc["value"]["batiments_def"] if x["id"] == "auberge")
 	assert auberge["categorie"] == "auberge" and auberge["prix_cuivre"] == 1
 	assert any(x["id"] == "comptoir" for x in doc["value"]["batiments_def"])
+
+
+# ── Combats joués : défense, tanière (§ 6) ; repos au feu ────────────────────────────
+
+def test_present_le_fondateur_peut_etre_pris_dans_une_attaque_au_plus_une_fois_par_passe():
+	reg = _reg()
+	pas = reg["temps"]["passe_s"]
+	site = _site(reg)
+	imp = _imp(reg, menace={"espece": "espece:loup", "etape": 1})
+	assert not col.attaque_presente(imp, reg, site, [], now=10 * pas, rand=Hasard(0.0))   # pas encore remarqué
+	imp["menace"]["etape"] = 2
+	assert col.attaque_presente(imp, reg, site, [], now=10 * pas, rand=Hasard(0.0))
+	assert imp["attaque_en_cours"] == {"at": 10 * pas, "espece": "espece:loup"}
+	assert not col.attaque_presente(imp, reg, site, [], now=20 * pas, rand=Hasard(0.0))   # une à la fois
+	imp.pop("attaque_en_cours")
+	assert not col.attaque_presente(imp, reg, site, [], now=10 * pas + 5, rand=Hasard(0.0))  # même passe
+	assert not col.attaque_presente(imp, reg, site, [], now=12 * pas, rand=Hasard(0.999))
+
+
+def test_une_attaque_laissee_sans_reponse_se_resout_seule():
+	reg = _reg()
+	delai = reg["menace"]["delai_defense_s"]
+	imp = _imp(reg, rattrape_at=1000, stocks={"nourriture": 100.0, "bois": 100.0, "materiaux": 0.0, "medicaments": 0.0})
+	imp["attaque_en_cours"] = {"at": 1000, "espece": "espece:loup"}
+	col.rattraper(imp, reg, _site(reg), [], now=1000 + delai - 1, rand=Hasard(0.99))
+	assert imp.get("attaque_en_cours")                                      # encore le temps de répondre
+	bilan = col.rattraper(imp, reg, _site(reg), [], now=1000 + delai, rand=Hasard(0.99))
+	assert "attaque_en_cours" not in imp and bilan.get("evenements_attente")
+	assert imp["attaques"][-1]["at"] == 1000 and imp["journal"]
+
+
+def test_issue_d_une_defense_gardes_tombes_et_idempotence():
+	reg = _reg()
+	imp = _imp(reg, stocks={"nourriture": 100.0, "bois": 100.0, "materiaux": 0.0, "medicaments": 0.0})
+	imp["batiments"] = [{"id": "b_g", "type": "poste_de_garde", "pos": [1, 1]}]
+	g1, g2 = _employe(imp, "garde", "b_g", 1), _employe(imp, "garde", "b_g", 2)
+	employes = [g1, g2]
+	imp["attaque_en_cours"] = {"at": 1, "espece": "espece:loup"}
+	info = {"implantation": imp["_id"], "genre": col.DEFENSE}
+	touches = col.issue_combat(imp, reg, info, "victoire", [g1["_id"]], employes, "combat:1", now=50, rand=Hasard())
+	assert touches == [g1] and g1["statut"] == col.EMPLOYE_MORT and imp["employes"] == [g2["_id"]]
+	assert imp["attaques"][-1] == {"at": 50, "repoussee": True} and "attaque_en_cours" not in imp
+	assert col.issue_combat(imp, reg, info, "victoire", [g1["_id"]], employes, "combat:1") is None   # déjà appliqué
+	# perdue : les pertes d'une attaque subie, sans que la sécurité ne retienne rien
+	col.issue_combat(imp, reg, info, "defaite", [], employes, "combat:2", now=60, rand=Hasard(0.0))
+	assert imp["attaques"][-1] == {"at": 60, "repoussee": False} and imp["stocks"]["nourriture"] < 100
+
+
+def test_la_taniere_videe_fait_taire_la_menace_puis_une_autre_bete_s_installe():
+	reg = _reg()
+	pas = reg["temps"]["passe_s"]
+	imp = _imp(reg, menace={"espece": "espece:loup", "etape": 3}, stocks={s: 9999 for s in reg["stocks"]})
+	assert "localisée" in col.peut_vider_taniere(imp, col.FONDATEUR)[1]
+	imp["menace"]["etape"] = 4
+	assert col.peut_vider_taniere(imp, col.ASSOCIE) == (True, "")
+	assert not col.peut_vider_taniere(imp, col.VISITEUR)[0]
+	info = {"implantation": imp["_id"], "genre": col.TANIERE}
+	assert col.issue_combat(imp, reg, info, "fuite", [], [], "combat:t0", now=100) == []
+	assert imp["menace"]["etape"] == 4                                      # fuir ne vide rien
+	col.issue_combat(imp, reg, info, "victoire", [], [], "combat:t1", now=100)
+	assert imp["menace"] == {"espece": "espece:loup", "etape": 0, "nettoyee_at": 100}
+	assert imp["expeditions_reussies"] == 1
+	imp["rattrape_at"] = 100
+	repousse = reg["menace"]["repousse_s"]
+	col.rattraper(imp, reg, _site(reg), [], now=100 + repousse - pas, rand=Hasard(0.99))
+	assert imp["menace"]["etape"] == 0
+	bilan = col.rattraper(imp, reg, _site(reg), [], now=100 + repousse + pas, rand=Hasard(0.99))
+	assert imp["menace"]["etape"] == 1 and any("autre bête" in e for e in bilan["evenements"])
+
+
+def test_les_assaillants_partent_des_entrees_et_la_meute_grossit_avec_le_palier():
+	reg = _reg()
+	imp = _imp(reg, "village")
+	entrees = col.entrees_de(imp)
+	combat = {"joueurs": [{"pos": {"x": 10, "y": 10}}],
+			  "monstres": [{"pos": {"x": 11, "y": 11}} for _ in range(len(entrees) + 1)] + [{"pos": {"x": 1, "y": 1}, "jeton": {"largeur": 2, "profondeur": 2}}]}
+	col.placer_assaillants(combat, imp)
+	cases = [(m["pos"]["x"], m["pos"]["y"]) for m in combat["monstres"]]
+	assert len(set(cases)) == len(cases)
+	assert all(col.distance(list(c), e) <= 1 for c, e in zip(cases, entrees))           # une par entrée
+	assert cases[-1] == (1, 1)                                               # un grand jeton garde sa case
+	assert col.nb_adversaires(_imp(reg, "ville"), reg, col.DEFENSE) > col.nb_adversaires(imp, reg, col.DEFENSE)
+
+
+def test_un_garde_se_bat_sous_son_nom_avec_l_equipement_standard():
+	reg = _reg()
+	e = {"_id": "employe:g", "prenom": "Aldo", "nom": "Brun", "race": "nain", "sex": "M", "portrait": "p.jpg"}
+	g = col.garde_combattant(e, reg)
+	conf = reg["garde_combattant"]
+	assert (g["_id"], g["prenom"], g["race"], g["image"]) == ("employe:g", "Aldo", "nain", "p.jpg")
+	assert g["caracteristiques_current"] == conf["caracts"] and g["slots"] == conf["slots"]
+	assert g["vocations_niveaux"] == {conf["voc"]: conf["niveau"]}
+
+
+def test_la_nuit_d_une_implantation_se_raconte_au_feu():
+	reg = _reg()
+	imp = _imp(reg)
+	lu = col.lieu_de_nuit(imp, {col.REGLES_ID: REGLES_DOC}.get)
+	assert lu["nuit_messages"] == reg["nuit_feu"] and "nuit_messages" not in imp
+	ville = {"type": "lieu", "categorie": "ville"}
+	assert col.lieu_de_nuit(ville, {}.get) is ville

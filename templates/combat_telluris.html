@@ -1334,7 +1334,7 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 		<!-- Battle Map Viewport -->
 		<div class="viewport" id="viewport">
 			<div id="rotation-pivot">
-				<img id="bg-image" src="{{ url_for('battle_maps', path=combat.map_image) }}" alt="Carte de combat">
+				<img id="bg-image" src="{{ url_for(combat.map_route or 'battle_maps', path=combat.map_image) }}" alt="Carte de combat">
 			</div>
 			<div id="tokens-layer"></div>
 			{# Découpes des jetons TRIANGLE (.gabarit .jt-forme.triangle) : en unités de la BOÎTE

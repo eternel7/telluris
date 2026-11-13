@@ -25,6 +25,7 @@ from utils import echanges_cite
 from utils import filtres_boutique
 from utils import proprietes
 from utils import recrutement
+from utils import montures
 from utils import escorte
 from utils.zones import load_zone_defs_for_lieu
 from utils.lieux import connexions_du_lieu, get_lieu_links, ORIGINES_IMAGE_LIEU, TOWNS_IMAGES_PATH
@@ -119,7 +120,7 @@ def rattraper_ici(character: dict, imp: dict, reg: dict, role: str, site: dict, 
 		colonisation.noter_rang(imp, character)
 	bilan = colonisation.rattraper(imp, reg, site, employes)
 	evenements = list(bilan["evenements"])
-	if bilan["passes"] or imp.get("fondateur_rang") != avant:
+	if bilan["passes"] or bilan.get("evenements_attente") or imp.get("fondateur_rang") != avant:
 		# La production vend son surplus aux boutiques du lieu (2 jours au plus, § 8).
 		vente = colonisation.echanger(imp, reg, employes, echanges_cite.boutiques_cite(imp["_id"], find_docs),
 									  get_doc, resolve_item_ref, bilan["passes"])
@@ -565,6 +566,81 @@ async def renvoyer(current_user: Annotated[dict, Depends(get_current_user)], bod
 	_sauver(*colonisation.synchroniser_tenanciers(imp, reg, restants, get_doc), imp)
 	save_doc(employe)
 	return _payload(character, imp, reg, role)
+
+
+# ── Combats joués : défense du lieu et tanière (§ 6) ─────────────────────────────────
+
+def _route_image(image: str) -> str | None:
+	return next((r for r, chemin in ORIGINES_IMAGE_LIEU if image and os.path.exists(os.path.join(chemin, image))), None)
+
+
+def _ouvrir_combat(character: dict, imp: dict, reg: dict, genre: str, battle_map: dict, image: str,
+				   route: str, gardes: list) -> dict:
+	"""Combat de la voie de colonisation : l'espèce de la menace, le groupe du personnage (et,
+	en défense, les gardes au poste), `colonie` posé pour `combat._finalize_colonie`."""
+	from utils.combat import create_combat_doc, instantiate_monsters, resolve_first_turns, finalize_combat
+	existant = [c for c in find_docs({"type": "combat", "user_id": character.get("user_id")}) or []
+				if c.get("character_id") == character["_id"] and c.get("status") == "active"]
+	if existant:
+		return {"combat_id": existant[0]["_id"]}
+	espece = get_doc((imp.get("menace") or {}).get("espece") or "")
+	if not espece:
+		raise HTTPException(status_code=409, detail="Aucune bête ne menace le lieu.")
+	monstres = instantiate_monsters([espece], find_docs({"type": "profil"}) or [],
+									colonisation.nb_adversaires(imp, reg, genre), [])
+	if not monstres:
+		raise HTTPException(status_code=409, detail="Aucun adversaire à affronter.")
+	pos = character.get("position") or {}
+	combat_doc = create_combat_doc(
+		character, monstres, ["colonie"], image, battle_map=battle_map,
+		compagnons=recrutement.groupe_effectif(character, get_doc),
+		montures=montures.montures_effectives(character, get_doc),
+		proteges=escorte.proteges_effectifs(character, get_doc),
+		point_apparition={"x": pos.get("x", 0), "y": pos.get("y", 0)} if genre == colonisation.DEFENSE else None,
+		gardes=gardes)
+	combat_doc["colonie"] = {"implantation": imp["_id"], "genre": genre}
+	combat_doc["map_route"] = route
+	if genre == colonisation.DEFENSE:
+		colonisation.placer_assaillants(combat_doc, battle_map)
+	resolve_first_turns(combat_doc)
+	if combat_doc["status"] != "active":
+		finalize_combat(combat_doc)
+	if save_doc(combat_doc) is None:
+		raise HTTPException(status_code=409, detail=CONFLIT)
+	return {"combat_id": combat_doc["_id"]}
+
+
+@colonisation_router.post("/colonisation/defendre")
+async def defendre(current_user: Annotated[dict, Depends(get_current_user)]):
+	"""Le lieu est attaqué pendant la visite du fondateur ou d'un associé : un combat joué sur
+	la carte du lieu, les assaillants aux entrées, les gardes au poste à ses côtés (§ 6)."""
+	character, imp, reg, role = _ici(current_user)
+	_exiger(role, colonisation.FONDATEUR, colonisation.ASSOCIE)
+	if not imp.get("attaque_en_cours"):
+		raise HTTPException(status_code=409, detail="Le lieu n'est pas attaqué.")
+	employes = colonisation.employes_effectifs(imp, get_doc)
+	gardes = [colonisation.garde_combattant(e, reg) for e in colonisation.gardes_au_poste(imp, reg, employes)]
+	return _ouvrir_combat(character, imp, reg, colonisation.DEFENSE, imp, imp.get("image", ""),
+						  _route_image(imp.get("image", "")) or "battle_maps", gardes)
+
+
+@colonisation_router.post("/colonisation/taniere")
+async def taniere(current_user: Annotated[dict, Depends(get_current_user)]):
+	"""« Pacifier » : la tanière localisée se vide en combat, sur une carte du terrain du site."""
+	from utils.combat import select_battle_map
+	character, imp, reg, role = _ici(current_user)
+	ok, raison = colonisation.peut_vider_taniere(imp, role)
+	if not ok:
+		raise HTTPException(status_code=409 if role in (colonisation.FONDATEUR, colonisation.ASSOCIE) else 403,
+							detail=raison)
+	origine = imp.get("origine") or {}
+	pays = get_doc(origine.get("lieu") or "") or {}
+	terrain = lire_site(pays, origine.get("pos") or [0, 0], reg)["tags"]
+	carte = select_battle_map(terrain, pays)
+	if not carte:
+		raise HTTPException(status_code=409, detail="Aucune carte de combat pour ce terrain.")
+	return _ouvrir_combat(character, imp, reg, colonisation.TANIERE, carte, carte.get("image", ""),
+						  "battle_maps", [])
 
 
 # ── Négoce : caisse, option par PNJ, progression du négociant (§ 8) ─────────────────

@@ -4359,8 +4359,12 @@ def create_combat_doc(
 	etages: dict | None = None,
 	furtivite_groupe: dict | None = None,
 	tresor: dict | None = None,
+	gardes: list | None = None,
 ) -> dict:
-	"""`etages` (donjon à étages) : état de la descente, posé tel quel sur le doc — il retire
+	"""`gardes` (voie de colonisation) : les PNJ gardes d'une implantation, aux côtés du
+	fondateur quand le lieu est attaqué — tour joué par le serveur (`se_defend`), jamais par
+	le joueur ; leur sort revient à l'implantation (`_finalize_colonie`).
+	`etages` (donjon à étages) : état de la descente, posé tel quel sur le doc — il retire
 	la fin par victoire et la fuite, et ouvre l'action `emprunter`. Le groupe entier y entre
 	furtif (`furtivite_groupe` = {character_id: bonus passif}), au `point_apparition` fixe.
 	`tresor` : trésor de ce premier étage (`tresor.preparer_tresor`), ou None."""
@@ -4431,6 +4435,18 @@ def create_combat_doc(
 			snap["se_defend"] = True
 		proteges_snaps.append(snap)
 	joueurs += proteges_snaps
+
+	# Gardes d'une implantation : même traitement qu'une personne qui sait se défendre — un
+	# tour joué par le serveur, sur l'ennemi au contact — mais marqués `est_garde` : ni XP,
+	# ni affinité, ni quête d'escorte (`finalize_combat` les met de côté).
+	for i, g in enumerate(gardes or []):
+		snap = build_joueur_snapshot(g, joueur_index=len(joueurs))
+		snap["jouable"] = False
+		snap["est_garde"] = True
+		snap["se_defend"] = True
+		snap["deplacement"] = 0
+		snap["deplacement_base"] = 0
+		joueurs.append(snap)
 
 	# Vol ou entrave sous COUVERT (tags de la battle map ∪ tags de zone), AVANT l'ordre
 	# d'initiative : V // 3 abaisse aussi l'initiative d'un volant entravé.
@@ -7666,6 +7682,26 @@ def _finalize_protege(combat_doc: dict, snap: dict, doc: dict, status: str,
 	return save_doc(doc) is not None
 
 
+def _finalize_colonie(combat_doc: dict, status: str) -> None:
+	"""Issue d'un combat de la voie de colonisation sur son implantation : attaque repoussée ou
+	subie, gardes tombés (morts pour de bon), tanière vidée (`colonisation.issue_combat`)."""
+	from utils import colonisation
+	info = combat_doc.get("colonie") or {}
+	imp = get_doc(info.get("implantation") or "")
+	if not imp:
+		return
+	morts = [j.get("character_id") for j in combat_doc.get("joueurs") or []
+			 if j.get("est_garde") and j.get("currentPV", 0) <= 0]
+	reg = colonisation.regles(get_doc)
+	employes = colonisation.employes_effectifs(imp, get_doc)
+	touches = colonisation.issue_combat(imp, reg, info, status, morts, employes, combat_doc.get("_id"))
+	if touches is None:
+		return
+	for d in touches + colonisation.synchroniser_tenanciers(imp, reg, employes, get_doc):
+		save_doc(d)
+	save_doc(imp)
+
+
 def finalize_combat(combat_doc: dict) -> bool:
 	"""Applique l'issue du combat (XP/PV/butin) à TOUS les membres du groupe en base —
 	compagnons (docs `aventurier:*`) d'abord, personnage principal en dernier.
@@ -7717,6 +7753,9 @@ def finalize_combat(combat_doc: dict) -> bool:
 		if j.get("est_protege"):
 			proteges_traites.append((j, doc))
 			continue
+		# ⚠️ Ni un garde d'implantation : son sort revient au lieu (`_finalize_colonie`).
+		if j.get("est_garde"):
+			continue
 		# ⚠️ Ni un compagnon-JOUEUR tombé : il MEURT (hors du groupe, sac au sol) au lieu
 		# d'être relevé. Passe dédiée, plus bas, sous le garde du principal.
 		if mercenaires.est_clone(doc) and j.get("currentPV", 0) <= 0:
@@ -7728,6 +7767,11 @@ def finalize_combat(combat_doc: dict) -> bool:
 		joueur_principal = combat_doc["joueurs"][0]
 
 	combat_id = combat_doc.get("_id")
+	# Implantation (défense ou tanière) : idempotent de son côté (`combats_traites` du lieu),
+	# donc AVANT le garde du principal — un save du lieu manqué se rattrape à la finalisation
+	# suivante, même si le principal est déjà servi.
+	if combat_doc.get("colonie"):
+		_finalize_colonie(combat_doc, status)
 	if combat_id in character.get("combats_recompenses", []):
 		combat_doc["recompense_appliquee"] = True  # déjà appliqué au principal
 		return False

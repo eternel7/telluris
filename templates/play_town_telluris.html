@@ -2194,7 +2194,10 @@
 					   le bascule d'après la réponse de `move_character`. #}
 					{% if colonie_charte %}<li><button class="sub-loc-btn" onclick="openColonieCharte()">📜 Charte de colonisation</button></li>{% endif %}
 					{% if colonie_offre %}<li><button class="sub-loc-btn" onclick="openColonieSite()">🏕️ Fonder une implantation</button></li>{% endif %}
-					{% if est_implantation %}<li><button class="sub-loc-btn" onclick="openColonie()">🏕️ {% if role_implantation == 'fondateur' %}Gérer l'implantation{% else %}L'implantation{% endif %}</button></li>{% endif %}
+					{% if est_implantation %}<li><button class="sub-loc-btn" onclick="openColonie()">🏕️ {% if role_implantation == 'fondateur' %}Gérer l'implantation{% else %}L'implantation{% endif %}</button></li>
+					{% if colonie_attaque %}<li><button class="sub-loc-btn" onclick="colDefendre()">⚔️ Repousser l'attaque</button></li>{% endif %}
+					{# Repos au feu : même flux que la nuit d'auberge, gratuit (`routers/auberge._acces_nuit`). #}
+					<li><button class="sub-loc-btn" id="aub-nuit-btn" onclick="passerLaNuit()">🌙 Repos au feu</button></li>{% endif %}
 					<li id="prop-offre-li"{% if not proprietes_offre %} hidden style="display:none"{% endif %}><button class="sub-loc-btn" onclick="openProprietesOffre()">🏠 Propriétés</button></li>
 					{% if est_propriete %}
 					{# La propriété se présente comme un LIEU : ses PNJ marchands d'abord (une ligne
@@ -10287,6 +10290,7 @@ _notifierTransportsEchoues({ transports_echoues: {{ transports_echoues | tojson 
 _notifierChambresReprises({ chambres_reprises: {{ chambres_reprises | tojson | safe }} });
 // Implantation : ce qui s'est passé depuis le dernier passage (rattrapage paresseux).
 ({{ colonie_evenements | tojson | safe }} || []).forEach(t => showToast(t));
+{% if colonie_attaque %}showToast("Le lieu est attaqué ! Repoussez l'attaque avant qu'elle ne se résolve sans vous.", { major: true });{% endif %}
 // Course expirée pendant un changement de lieu : le toast a été mis de côté avant le reload.
 (function () {
 	const differe = sessionStorage.getItem('transports_echoues_notif');

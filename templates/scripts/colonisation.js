@@ -319,7 +319,9 @@ function colNegoceHtml(d) {
 
 function colOngletDefenseHtml(d) {
 	let html = `<section class="prop-section"><h3>🛡️ Sécurité : ${_colE(d.securite.mot)} (${_colE(d.securite.valeur)})</h3><div class="prop-caps">${_colFacteurs(d.securite)}</div></section>
-		<section class="prop-section"><h3>🐺 Menace</h3><div class="prop-caps"><span>${_colE(d.menace.mot)}</span><span>${_colE(d.palier.menace)}</span></div></section>
+		<section class="prop-section"><h3>🐺 Menace</h3><div class="prop-ligne"><div class="prop-txt"><div class="prop-caps"><span>${_colE(d.menace.mot)}</span><span>${_colE(d.palier.menace)}</span></div></div>
+			${d.attaque_en_cours ? '<button class="sh-drop-btn" onclick="colDefendre()">⚔️ Repousser l\'attaque</button>' : ''}
+			${d.menace.taniere ? '<button class="sh-drop-btn" onclick="colTaniere()">🐺 Vider la tanière</button>' : ''}</div></section>
 		<section class="prop-section"><h3>🧱 Fortifications</h3><div class="prop-liste">`;
 	html += (d.fortifications || []).map(f => `<div class="prop-ligne"><div class="prop-txt">
 		<strong>${f.en_place ? '✅ ' : ''}${_colE(f.label)}</strong>
@@ -380,6 +382,15 @@ function colConstruire(btn) {
 	const sel = document.querySelector(`select.col-categorie[data-type="${btn.dataset.type}"]`);
 	_colAction('api/colonisation/construire', { type: btn.dataset.type, categorie: sel ? sel.value : null },
 		() => showToast('Bâtiment prêt : marchez jusqu\'à sa case, puis « Poser ici ».'));
+}
+// Combat joué (§ 6) : la défense du lieu attaqué, la tanière localisée. On part au combat.
+async function colDefendre() {
+	const d = await _aubFetch('api/colonisation/defendre', {});
+	if (d && d.combat_id) window.location.href = '/combat/' + encodeURIComponent(d.combat_id);
+}
+async function colTaniere() {
+	const d = await _aubFetch('api/colonisation/taniere', {});
+	if (d && d.combat_id) window.location.href = '/combat/' + encodeURIComponent(d.combat_id);
 }
 function colVente(btn) { _colAction('api/colonisation/employe/vente', { employe_id: btn.dataset.id, vente: !!btn.dataset.vente }); }
 function colReleverCaisse() {

@@ -831,7 +831,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 	# présence du fondateur ou d'un associé ; un changement de palier a pu changer la grille
 	# sous les pieds de quiconque s'y trouvait — on le ramène à la première entrée.
 	est_implantation = colonisation_util.est_implantation(grid_doc)
-	role_implantation, colonie_evenements, colonie_reperes = None, [], []
+	role_implantation, colonie_evenements, colonie_reperes, colonie_attaque = None, [], [], False
 	if character.get("association") or character.get("demande_association"):
 		if colonisation_util.synchroniser_association(character, get_doc):
 			save_doc(character)
@@ -844,10 +844,14 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			character["position"] = {"x": _entrees[0][0], "y": _entrees[0][1]}
 			save_doc(character)
 		if colonisation_util.vaut_presence(role_implantation):
+			_site_col = colonisation_routes.site_de(grid_doc, _reg_col)
+			_emp_col = colonisation_util.employes_effectifs(grid_doc, get_doc)
 			colonie_evenements = colonisation_routes.rattraper_ici(
-				character, grid_doc, _reg_col, role_implantation,
-				colonisation_routes.site_de(grid_doc, _reg_col),
-				colonisation_util.employes_effectifs(grid_doc, get_doc))
+				character, grid_doc, _reg_col, role_implantation, _site_col, _emp_col)
+			# Présent, il peut être pris dans une attaque : elle se JOUE (§ 6).
+			if colonisation_util.attaque_presente(grid_doc, _reg_col, _site_col, _emp_col):
+				save_doc(grid_doc)
+		colonie_attaque = bool(grid_doc.get("attaque_en_cours")) and colonisation_util.vaut_presence(role_implantation)
 		colonie_reperes = colonisation_util.reperes_carte(grid_doc, _reg_col)
 	# Le bouton « Fonder » s'offre sur toute carte de pays à qui tient une charte ; la case
 	# elle-même est jugée à l'ouverture du panneau (un pas ne recharge pas la page). La charte
@@ -1183,9 +1187,9 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 		grid_doc, character.get("position"), est_auberge, _cat_proprietes, get_doc)
 	auberge_nuit = ({
 		"cout": 0 if dort_chez_soi else auberge_util.cout_nuit(grid_doc),
-		"log": auberge_util.messages_nuit(grid_doc, auberge_util.NUIT_LOG_LIGNES,
+		"log": auberge_util.messages_nuit(colonisation_util.lieu_de_nuit(grid_doc, get_doc), auberge_util.NUIT_LOG_LIGNES,
 										   chez_soi=dort_chez_soi),
-	} if (est_auberge or dort_chez_soi) else None)
+	} if (est_auberge or dort_chez_soi or est_implantation) else None)
 
 	# Ressource récoltable (événement de zone « ressource ») : résolue pour l'affichage initial
 	# du bouton « Récolter » dans la sidebar (champ transitoire posé par move_character).
@@ -1276,6 +1280,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			"role_implantation": role_implantation,
 			"colonie_evenements": colonie_evenements,
 			"colonie_offre": colonie_offre,
+			"colonie_attaque": colonie_attaque,
 			"colonie_charte": colonie_charte,
 			"proprietes_offre": proprietes_offre,
 			"role_propriete": role_propriete,
