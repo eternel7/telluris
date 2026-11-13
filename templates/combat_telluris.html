@@ -1249,6 +1249,14 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 	border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
 }
 .end-btn:hover { background: #aa1122; }
+/* « Tout laisser au sol » : geste secondaire, ocre comme le 🫳 de ligne (rien n'est détruit). */
+.end-btn-sol {
+	display: block; margin: 10px auto 0; padding: 6px 14px; background: transparent;
+	color: #c9a24a; border: 1px solid rgba(201,162,74,0.45); border-radius: 6px;
+	font-size: 13px; cursor: pointer;
+}
+.end-btn-sol:hover { background: rgba(201,162,74,0.12); }
+.end-btn-sol:disabled { opacity: 0.4; cursor: not-allowed; }
 
 </style>
 </head>
@@ -1545,6 +1553,9 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 		</div>
 
 		<button class="end-btn" id="end-btn" onclick="leaveCombat()">Retour à la carte</button>
+		<!-- Raccourci : tout le butin à personne, puis le même envoi que « Récupérer ». -->
+		<button type="button" class="end-btn-sol" id="end-btn-sol" style="display:none"
+			onclick="toutLaisserAuSol()">🫳 Tout laisser au sol</button>
 	</div>
 </div>
 
@@ -4666,6 +4677,7 @@ function showButinEtage(passageId, dispo) {
 	const btn = document.getElementById('end-btn');
 	btn.textContent = 'Répartir et continuer';
 	btn.disabled = false;
+	_afficherToutLaisser(true, 'Tout laisser à cet étage');
 	document.getElementById('end-close').style.display = '';
 	document.getElementById('end-overlay').classList.add('visible');
 }
@@ -4713,11 +4725,38 @@ function showEndOverlay(status, xp) {
 		buildLootList(dispo);
 		recomputeCharge();
 		btn.textContent = 'Récupérer et continuer';
+		_afficherToutLaisser(true, 'Tout laisser au sol');
 	} else {
 		section.style.display = 'none';
 		btn.textContent = 'Retour à la carte';
+		_afficherToutLaisser(false);
 	}
 	document.getElementById('end-overlay').classList.add('visible');
+}
+
+// Bouton « 🫳 Tout laisser au sol / à cet étage » : visible avec la section butin seulement.
+function _afficherToutLaisser(visible, libelle) {
+	const b = document.getElementById('end-btn-sol');
+	if (!b) return;
+	b.style.display = visible ? '' : 'none';
+	b.disabled = false;
+	if (libelle) b.textContent = `🫳 ${libelle}`;
+}
+
+// Attribue TOUTES les lignes à personne puis envoie la répartition comme « Récupérer » :
+// le serveur verse au sol (ou laisse à l'étage) ce que personne n'emporte — aucun chemin neuf.
+async function toutLaisserAuSol() {
+	lootRows().forEach(row => {
+		row.dataset.benef = '';
+		row.dataset.ctn = '';
+		row.dataset.ctnItem = '';
+	});
+	recomputeCharge();
+	const b = document.getElementById('end-btn-sol');
+	if (b) b.disabled = true;
+	await leaveCombat();
+	// Échec (réseau, conflit, passage refusé) : on reste sur l'overlay, le bouton se rouvre.
+	if (b) b.disabled = false;
 }
 
 // Membres du combat = bénéficiaires possibles du butin (principal en tête). Un compagnon
