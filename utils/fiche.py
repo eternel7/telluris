@@ -71,16 +71,22 @@ def derived_de(character: dict) -> dict:
 
 
 def avec_degats_par_arme(character: dict, derived: dict) -> dict:
-	"""Ajoute aux dérivées `degats_cc_affiche` — « X / Y », un terme par arme — quand le
-	personnage porte deux armes de mêlée (`combat.degats_cc_par_arme`). `degats_cc` (la
-	somme) reste intact ; le client affiche la clé neuve si elle est là. Mute et rend."""
+	"""Deux armes de mêlée en main (`combat.coups_par_arme`) : ajoute aux dérivées
+	- `degats_cc_affiche` — « X / Y », un terme par arme (ambidextrie comprise) ;
+	- `cc_deux_armes_affiche` — « D x / G y », la précision du bras droit et du bras gauche,
+	  dès que les deux valeurs DIFFÈRENT (malus de seconde arme, typologies distinctes).
+	`degats_cc` et les `cc*` restent intacts ; le client affiche les clés neuves si elles
+	sont là (absentes ⇒ retirées). Mute et rend."""
 	buffs = consommables.caracts_avec_buffs(character)
 	base = BaseStats(f=max(0, int(buffs.get("F", 0) or 0)))
-	affiche = combat_util.degats_cc_par_arme(character, base, derived.get("degats_cc") or "")
-	if affiche:
-		derived["degats_cc_affiche"] = affiche
-	else:
-		derived.pop("degats_cc_affiche", None)
+	coups = combat_util.coups_par_arme(character, base, derived)
+	derived.pop("degats_cc_affiche", None)
+	derived.pop("cc_deux_armes_affiche", None)
+	if coups:
+		derived["degats_cc_affiche"] = " / ".join(n for _, n in coups)
+		droite, gauche = coups[0][0], coups[1][0]
+		if droite != gauche:
+			derived["cc_deux_armes_affiche"] = f"D {droite} / G {gauche}"
 	return derived
 
 

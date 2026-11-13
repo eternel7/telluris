@@ -2490,11 +2490,15 @@
 							("PV max","pv_max",""),("PM max","pm_max",""),
 							("Initiative","initiative",""),("Déplacement","deplacement"," cases"),
 							("CàC arme lourde","cc_lourde",""),("CàC arme équilibrée","cc_equilibree",""),
-							("CàC arme légère","cc",""),("À distance","cd",""),
+							("CàC arme légère","cc",""),("CàC deux armes","cc_deux_armes_affiche",""),
+							("À distance","cd",""),
 							("Armure (PA)","pa",""),("Déf. magique","pm_def",""),
 							("Dégâts CàC","degats_cc",""),("Charge max","charge_max"," kg")
 						] %}
-						<div class="sh-derived-row">
+						{# « CàC deux armes » : bras droit / bras gauche, malus de seconde arme compris —
+						   rendue même absente (masquée) pour que `_refreshDerivedStats` l'allume. #}
+						<div class="sh-derived-row" id="sh-drv-row-{{ key }}"{% if key == "cc_deux_armes_affiche" and not d.get(key) %} style="display:none"{% endif %}
+							 {% if key == "cc_deux_armes_affiche" %}title="Précision du bras droit / du bras gauche (malus de seconde arme, typologies)"{% endif %}>
 							<span class="sh-derived-lbl">{{ lbl }}</span>
 							<span class="sh-derived-val" id="sh-drv-{{ key }}">{{ (d.get("degats_cc_affiche") if key == "degats_cc" else None) or d.get(key,"—") }}{{ unit }}</span>
 						</div>
@@ -6071,6 +6075,14 @@ let _derivedCur = {{ character.get("derived_stats", {}) | tojson | safe }};
 function _refreshDerivedStats(d) {
 	if (d) _derivedCur = d;
 	const units = {deplacement: ' cases', charge_max: ' kg'};
+	// Deux armes : précision bras droit / bras gauche (fiche.avec_degats_par_arme), ligne
+	// masquée dès que la clé manque (une arme, ou deux précisions égales).
+	const rowDeux = document.getElementById('sh-drv-row-cc_deux_armes_affiche');
+	if (rowDeux) {
+		rowDeux.style.display = d.cc_deux_armes_affiche ? '' : 'none';
+		const v = document.getElementById('sh-drv-cc_deux_armes_affiche');
+		if (v) v.textContent = d.cc_deux_armes_affiche || '—';
+	}
 	for (const key of ['pv_max','pm_max','initiative','deplacement','cc_lourde','cc_equilibree','cc','cd','pa','pm_def','degats_cc','degats_cd','charge_max']) {
 		// Deux armes : un terme par arme (« X / Y », fiche.avec_degats_par_arme) plutôt que la somme.
 		const val = (key === 'degats_cc' && d.degats_cc_affiche) ? d.degats_cc_affiche : d[key];

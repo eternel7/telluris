@@ -3602,7 +3602,9 @@ def coups_du_profil(acteur: dict, profil: dict) -> list:
 	- perdent la part de la Force (`character_stats.part_de_force_cc` : dé et bonus de F) —
 	  la Force ne frappe qu'une fois par attaque ; snapshot sans `caracts_base` (combat déjà
 	  en base) ⇒ part gardée, comportement d'avant ;
-	- prennent `DEUX_ARMES_MALUS_SECOND` en précision, sauf passive `ambidextre` (snapshot).
+	- prennent `DEUX_ARMES_MALUS_SECOND` en précision.
+	La passive `ambidextre` (snapshot) lève le malus de précision ET rend TOUTE la part de F
+	(dé et bonus) à la seconde arme.
 	Tout reste recalculé depuis le snapshot : un buff de F ou d'Ag pèse sur chaque coup."""
 	coups = (profil or {}).get("coups") or []
 	if len(coups) < 2:
@@ -3611,8 +3613,8 @@ def coups_du_profil(acteur: dict, profil: dict) -> list:
 	force = caracts_effectives(acteur).get("F")
 	des_force, plat_force = (character_stats.part_de_force_cc(force) if force is not None
 							 else ("", 0))
-	malus = 0 if _eff_int(acteur.get("ambidextre")) > 0 else int(
-		character_stats.DEUX_ARMES_MALUS_SECOND or 0)
+	ambidextre = _eff_int(acteur.get("ambidextre")) > 0
+	malus = 0 if ambidextre else int(character_stats.DEUX_ARMES_MALUS_SECOND or 0)
 	resultat = []
 	for i, coup in enumerate(coups):
 		autres = [c for j, c in enumerate(coups) if j != i]
@@ -3625,7 +3627,7 @@ def coups_du_profil(acteur: dict, profil: dict) -> list:
 		skill = skill_du_profil(acteur, sous) - sum(int(c.get("bonus_cc", 0) or 0) for c in autres)
 		des_autres = [c.get("des", "") for c in autres if c.get("des")]
 		plat_autres = sum(int(c.get("plat", 0) or 0) for c in autres)
-		if i:
+		if i and not ambidextre:
 			skill -= malus
 			if des_force:
 				des_autres.append(des_force)
@@ -3636,16 +3638,19 @@ def coups_du_profil(acteur: dict, profil: dict) -> list:
 	return resultat
 
 
-def degats_cc_par_arme(character: dict, base: BaseStats, degats_cc: str) -> str | None:
-	"""Dégâts de corps à corps AFFICHÉS d'un combattant à deux armes : la notation de chaque
-	coup séparée par « / » (`1D5+1D8+4 / 1D6+2`), par `coups_du_profil` — l'affichage ne
-	peut pas diverger du jet. None avec une seule arme : `degats_cc` dit déjà le vrai.
-	`base` = caracts BUFFÉES (celles qui ont donné `degats_cc`)."""
+def coups_par_arme(character: dict, base: BaseStats, derived: dict) -> list | None:
+	"""Coups AFFICHÉS d'un combattant à deux armes, main droite d'abord : `[(précision,
+	notation)]` par `coups_du_profil` — l'affichage ne peut pas diverger du jet (malus de
+	seconde arme, part de F, ambidextrie compris). None avec une seule arme : les dérivées
+	disent déjà le vrai. `base` = caracts BUFFÉES, `derived` = les dérivées qui en sortent."""
 	cac = next((a for a in _weapon_attacks(character, base) if a.get("mode") == "cac"), None)
 	if not cac or len(cac.get("coups") or []) < 2:
 		return None
-	acteur = {"degats_cc": degats_cc, "caracts_base": {"F": base.f}}
-	return " / ".join(notation for _, _, notation in coups_du_profil(acteur, cac))
+	acteur = {k: derived[k] for k in character_stats.CLE_PRECISION_TYPOLOGIE.values() if k in derived}
+	acteur["degats_cc"] = derived.get("degats_cc") or "1D4"
+	acteur["caracts_base"] = {"F": base.f}
+	acteur["ambidextre"] = _eff_int((character.get("competences_bonus") or {}).get("ambidextre"))
+	return [(skill, notation) for _, skill, notation in coups_du_profil(acteur, cac)]
 
 
 def _profil_arme_monstre(monstre: dict) -> dict:

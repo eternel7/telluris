@@ -14,6 +14,7 @@ from models import character_stats as cs
 from models.character_stats import BaseStats, compute_derived_stats
 from utils import characters as characters_mod
 from utils import combat as combat_mod
+from utils import fiche
 from utils import simulateur
 from utils.combat import build_joueur_snapshot, build_monster_snapshot, resolve_action
 
@@ -190,10 +191,17 @@ def test_l_ambidextre_ne_prend_pas_le_malus_de_seconde_arme():
 	sans = combat_mod.coups_du_profil(joueur, _profil_cac(joueur))
 	joueur["ambidextre"] = 1
 	avec = combat_mod.coups_du_profil(joueur, _profil_cac(joueur))
-	assert avec[0][1] == sans[0][1]
+	assert avec[0] == sans[0]
 	assert avec[1][1] == sans[1][1] + cs.DEUX_ARMES_MALUS_SECOND
-	# L'ambidextrie lève le malus de PRÉCISION, jamais la règle de la Force.
-	assert avec[1][2] == sans[1][2]
+
+
+def test_l_ambidextre_rend_toute_la_force_a_la_seconde_arme():
+	joueur = build_joueur_snapshot(_character(DAISHO))
+	joueur["ambidextre"] = 1
+	n_w = combat_mod.coups_du_profil(joueur, _profil_cac(joueur))[1][2]
+	# Dé ET bonus de F, comme la main droite.
+	bonus_f = F // cs.facteur_degats_armure()
+	assert n_w == f"1D{cs._caract_to_dice_(F)}+1D6{bonus_f + WAKIZASHI['bonus_degats']:+d}"
 
 
 def test_l_ambidextrie_vient_d_une_passive_jusqu_au_snapshot(monkeypatch):
@@ -389,12 +397,39 @@ def test_le_simulateur_joue_aussi_la_seconde_arme_d_une_competence():
 
 def test_affichage_des_degats_par_arme():
 	joueur = build_joueur_snapshot(_character(DAISHO))
-	attendu = " / ".join(n for _, _, n in combat_mod.coups_du_profil(joueur, _profil_cac(joueur)))
-	base = BaseStats(f=F)
-	assert combat_mod.degats_cc_par_arme(_character(DAISHO), base, joueur["degats_cc"]) == attendu
+	coups = combat_mod.coups_du_profil(joueur, _profil_cac(joueur))
+	attendu = " / ".join(n for _, _, n in coups)
+	derived = fiche.derived_de(_character(DAISHO))
+	assert derived["degats_cc_affiche"] == attendu
 	assert simulateur.fiche_snapshot(joueur)["degats_cc"] == attendu
-	# Une seule arme : rien de neuf, `degats_cc` dit déjà le vrai.
+	# Précision bras droit / bras gauche, malus de seconde arme compris.
+	assert derived["cc_deux_armes_affiche"] == f"D {coups[0][1]} / G {coups[1][1]}"
+	# Une seule arme : rien de neuf, les dérivées disent déjà le vrai.
 	seule = _character({"main_droite": "item:Katana"})
-	assert combat_mod.degats_cc_par_arme(seule, base, "1D5+1D8+4") is None
+	derived_seule = fiche.derived_de(seule)
+	assert "degats_cc_affiche" not in derived_seule
+	assert "cc_deux_armes_affiche" not in derived_seule
 	assert simulateur.fiche_snapshot(build_joueur_snapshot(seule))["degats_cc"] \
 		== build_joueur_snapshot(seule)["degats_cc"]
+
+
+def test_affichage_ambidextre_degats_avec_la_force_et_ligne_d_g_si_les_precisions_different():
+	perso = _character(DAISHO)
+	perso["competences_bonus"] = {"ambidextre": 1}
+	joueur = build_joueur_snapshot(perso)
+	assert joueur["ambidextre"] == 1
+	coups = combat_mod.coups_du_profil(joueur, _profil_cac(joueur))
+	derived = fiche.derived_de(perso)
+	assert derived["degats_cc_affiche"] == " / ".join(n for _, _, n in coups)
+	assert derived["degats_cc_affiche"].split(" / ")[1].startswith(f"1D{cs._caract_to_dice_(F)}+")
+	# Katana équilibré / wakizashi léger : sans malus, les typologies diffèrent encore.
+	assert coups[0][1] != coups[1][1]
+	assert derived["cc_deux_armes_affiche"] == f"D {coups[0][1]} / G {coups[1][1]}"
+
+
+def test_pas_de_ligne_d_g_quand_les_deux_precisions_sont_egales():
+	perso = _character({"main_droite": "item:Wakizashi", "main_gauche": "item:Wakizashi"})
+	perso["competences_bonus"] = {"ambidextre": 1}
+	derived = fiche.derived_de(perso)
+	assert "degats_cc_affiche" in derived
+	assert "cc_deux_armes_affiche" not in derived
