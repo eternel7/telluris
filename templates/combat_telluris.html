@@ -1063,6 +1063,12 @@ html.vue-portrait #move-controls.controls-carte {
 	/* Au-dessus de la pastille ⛶ (part-plein-ecran, coin bas-gauche, posée à `--barre-h` +
 	   18 px, ~36 px de haut) : elle recouvrait le pivot du coin bas. */
 	bottom: calc(var(--barre-h, 0px) + 18px + 42px);
+	/* Bas de la carte remonté dans l'écran : le calque s'y CALE (`_caleFlechesCarte`) — la
+	   rangée du bas reste posée sur le bord de la carte, les autres s'empilent au-dessus, et
+	   le haut ne remonte (top négatif) que si la pile ne tient plus. Sans ces deux variables,
+	   le placement fixe d'avant. */
+	bottom: max(calc(var(--barre-h, 0px) + 18px + 42px), var(--pave-plancher, 0px));
+	top: var(--pave-haut, 0px);
 	/* Le bord arrière est la colonne de GAUCHE : c'est elle qui accueille la rangée `--floor`. */
 	padding-bottom: 6px;
 	padding-left: max(2px, calc((var(--step) * var(--floor) - var(--fleche)) / 2));
@@ -1856,6 +1862,7 @@ function _syncBarreFixe() {
 	document.documentElement.style.setProperty('--barre-h', h + 'px');
 	// Le pavé posé par défaut suit le haut de la barre (qui grandit en édition, au ciblage).
 	if (window._combatReady) _placerPaveParDefaut();
+	_caleFlechesCarte();
 }
 
 let _vueResolue = null;     // { largeurs: [px mesurés], step } — la dernière résolution
@@ -3325,6 +3332,7 @@ function appliquerModePave(mode) {
 	document.querySelectorAll('#reglages-menu [data-pave]').forEach(b => {
 		b.setAttribute('aria-checked', b.dataset.pave === mode ? 'true' : 'false');
 	});
+	_caleFlechesCarte();
 }
 (function initModePave() {
 	document.querySelectorAll('#reglages-menu [data-pave]').forEach(b => {
@@ -3337,6 +3345,43 @@ function appliquerModePave(mode) {
 	});
 	appliquerModePave(_paveModeCourant());
 })();
+
+// Portrait, pavé « sur la carte » : le calque est FIXÉ sur la fenêtre, donc en défilant jusqu'au
+// bas de la carte ses flèches du bas passaient sous le bord et le `clip-path` les rognait. Ici,
+// le plancher du calque suit le bas de la carte dès qu'il remonte dans l'écran, et la pile des
+// trois rangées (haut, milieu, bas) se TASSE vers le haut : chaque rangée se pose sur celle du
+// dessous, à la Tetris. Ne mesure que la carte et un bouton — ce qu'on écrit ne bouge ni l'un
+// ni l'autre (§17).
+function _caleFlechesCarte() {
+	const controls = document.getElementById('move-controls');
+	if (!controls) return;
+	const actif = VUE_PORTRAIT && controls.classList.contains('controls-carte');
+	const carte = document.getElementById('viewport');
+	if (!actif || !carte) {
+		controls.style.removeProperty('--pave-plancher');
+		controls.style.removeProperty('--pave-haut');
+		return;
+	}
+	const H = window.innerHeight;
+	const barreH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--barre-h')) || 0;
+	const plancherBase = barreH + 18 + 42;                         // = le `bottom` du CSS
+	const plancherCarte = H - carte.getBoundingClientRect().bottom + 6;
+	const plancher = Math.max(plancherBase, plancherCarte);
+	const btn = controls.querySelector('.btn:not(.move-spacer)');
+	const f = btn ? btn.getBoundingClientRect().height : 50;
+	// Pile minimale : marge du haut (pastilles, 60 px) + 3 rangées + 2 jours de 4 px + marge du bas.
+	const pile = 60 + 3 * f + 2 * 4 + 6;
+	const haut = Math.min(0, H - plancher - pile);
+	controls.style.setProperty('--pave-plancher', Math.round(plancher) + 'px');
+	controls.style.setProperty('--pave-haut', Math.round(haut) + 'px');
+}
+window.addEventListener('scroll', _caleFlechesCarte, { passive: true });
+window.addEventListener('resize', _caleFlechesCarte);
+if (window.ResizeObserver) {
+	const _vpCale = document.getElementById('viewport');
+	if (_vpCale) new ResizeObserver(_caleFlechesCarte).observe(_vpCale);
+}
+_caleFlechesCarte();
 
 // Place par DÉFAUT du pavé (jamais posé à la main) : en portrait, la barre d'action est fixée en
 // bas de la fenêtre — le pavé, fixé en bas lui aussi par le CSS `flottant`, la recouvrirait. Il
