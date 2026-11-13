@@ -35,7 +35,7 @@ from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, instantiate_rencontre, create_combat_doc, build_monster_snapshot,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
     verser_butin_au_sol, cle_butin, etat_charge_snapshot, bloc_charge_snapshot,
-    changer_d_etage, annoter_passages, vue_client, caracts_effectives,
+    changer_d_etage, ajouter_proteges, annoter_passages, vue_client, caracts_effectives,
 )
 from utils import donjon
 from utils import tresor as tresor_util
@@ -572,6 +572,18 @@ def _passer_a_l_etage(combat_doc: dict, passage: dict) -> None:
     bonus = donjon.bonus_furtivite_groupe(
         [get_doc(j["character_id"]) for j in membres],
         lieu_doc.get("tags") or [], furtivite_passive, get_doc)
+    # SECOURS : des aventuriers attendus à CET étage y sont retrouvés et entrent dans le combat
+    # AVANT le changement d'étage, qui les place et recompose l'initiative. Character d'abord
+    # (autoritatif, 409), docs `protege:*` ensuite.
+    principal_doc = get_doc(principal)
+    retrouves = (escorte.rencontres_en_combat(principal_doc, lieu_doc["_id"], get_doc)
+                 if principal_doc else [])
+    if retrouves:
+        if save_doc(principal_doc) is None:
+            raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+        for doc in retrouves:
+            save_doc(doc)
+        ajouter_proteges(combat_doc, retrouves)
     changer_d_etage(combat_doc, lieu_doc, passage.get("vers_pos") or {},
                     monstres, passages, bonus, tresor)
 

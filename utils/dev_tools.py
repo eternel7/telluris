@@ -339,6 +339,15 @@ CATALOGUE = [
 			"familles de la cité qui attendent un enfant et en confie la recherche.",
 	},
 	{
+		"id": "gen_secours",
+		"label": "🆘 Ouvrir les secours d'aventuriers aux comptoirs",
+		"argv": _py("gen_secours.py"),
+		"ecrit": "Écrit jsons/secours_a_importer.json.",
+		"description": "Pose `services.escorte.secours` et ses nœuds de dialogue sur le PNJ de "
+			"chaque comptoir de guilde : le comptoir confie le sauvetage d'aventuriers en péril "
+			"autour de la cité ou dans un donjon proche (utils/secours.py).",
+	},
+	{
 		"id": "gen_acces_donjon",
 		"label": "🗝️ Générer la chaîne d'accès du donjon-mine",
 		"argv": _py("gen_acces_donjon.py"),

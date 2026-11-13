@@ -4348,6 +4348,50 @@ def _purger_invocations(combat_doc: dict) -> None:
 	combat_doc["acteur_courant_index"] = max(0, idx)
 
 
+def _snapshot_protege(p: dict, joueur_index: int) -> dict:
+	"""Snapshot d'une personne ESCORTÉE (cf. `create_combat_doc`) : ciblable, non jouable,
+	immobile ; un tour SERVEUR si elle sait se défendre. Partagé avec `ajouter_proteges`."""
+	snap = build_joueur_snapshot(p, joueur_index=joueur_index)
+	snap["jouable"] = False
+	snap["est_protege"] = True
+	snap["deplacement"] = 0
+	snap["deplacement_base"] = 0
+	if p.get("se_defend"):
+		snap["se_defend"] = True
+	return snap
+
+
+def ajouter_proteges(combat_doc: dict, proteges: list) -> list:
+	"""Fait entrer dans un combat EN COURS des personnes retrouvées sur place (rendez-vous de
+	donjon d'un secours, `escorte.rencontres_en_combat`). Mute sans sauvegarder ; renvoie les
+	snapshots ajoutés.
+
+	⚠️ À appeler AVANT `changer_d_etage` : c'est lui qui les PLACE (`_place_actors`) et qui
+	recompose l'initiative à partir des ids présents dans `ordre_initiative` — d'où l'ajout
+	ici de celles qui se défendent (seules à avoir un tour, comme à la création). Ids
+	`joueur_<n>` pris à la suite des joueurs déjà présents : aucun doublon possible."""
+	snaps = []
+	deja = {j.get("character_id") for j in combat_doc.get("joueurs") or []}
+	for p in proteges or []:
+		if p.get("_id") in deja:
+			continue
+		snap = _snapshot_protege(p, len(combat_doc["joueurs"]))
+		combat_doc["joueurs"].append(snap)
+		if snap.get("se_defend"):
+			combat_doc.setdefault("ordre_initiative", []).append(snap["id"])
+		snaps.append(snap)
+	if snaps:
+		noms = ", ".join(s.get("nom", "?") for s in snaps)
+		combat_doc.setdefault("log", []).append({
+			"tour": int(combat_doc.get("tour", 0) or 0),
+			"acteur": "Système",
+			"kind": "sys",
+			# Formulation NEUTRE en genre : le groupe retrouvé peut être mixte.
+			"texte": f"Vous retrouvez {noms}. Reste à les ramener à l'air libre.",
+		})
+	return snaps
+
+
 def create_combat_doc(
 	character: dict, monstres: list, zone_tags: list, map_image: str,
 	battle_map: dict | None = None,
@@ -4424,16 +4468,7 @@ def create_combat_doc(
 	# finalisation (mort ⇒ échec de l'escorte) ne changent pas.
 	# ⚠️ Pas de `charge_max` recalculé, contrairement aux montures : un protégé ne porte pas
 	# pour le groupe (il est absent de `porteurs_effectifs`), la dérivée standard suffit.
-	proteges_snaps = []
-	for i, p in enumerate(proteges or []):
-		snap = build_joueur_snapshot(p, joueur_index=len(joueurs) + i)
-		snap["jouable"] = False
-		snap["est_protege"] = True
-		snap["deplacement"] = 0
-		snap["deplacement_base"] = 0
-		if p.get("se_defend"):
-			snap["se_defend"] = True
-		proteges_snaps.append(snap)
+	proteges_snaps = [_snapshot_protege(p, len(joueurs) + i) for i, p in enumerate(proteges or [])]
 	joueurs += proteges_snaps
 
 	# Gardes d'une implantation : même traitement qu'une personne qui sait se défendre — un

@@ -147,6 +147,10 @@ FLAGS_CONNUS = {
 	# flag le parent resterait muet pendant toute la mission menée en son nom.
 	# Complémentaire de `escorte_en_cours`, qui ne vaut que si le lieu est le DONNEUR.
 	"escorte_progeniture_en_cours",
+	# SECOURS (utils/secours.py) : offre et mission du comptoir, DISJOINTES de
+	# `escorte_offerte` / `escorte_en_cours` — le texte d'une escorte écrite (un enfant
+	# disparu) ne doit jamais présenter des aventuriers en péril.
+	"secours_offert", "secours_en_cours",
 	"acces_ouvrable", "acces_refuse", "acces_ouvert", "acces_accompli",
 	# Complémentaires : l'un ou l'autre, jamais les deux (cf. `_contexte`).
 	"acces_libere", "acces_menace",

@@ -545,7 +545,7 @@ MARQUE_RAPPORT = "?"
 # ⚠️ Sous-ensembles STRICTS de `lint_dialogues.FLAGS_CONNUS` (épinglé par un test) : un flag
 # mal orthographié ici vaudrait False en silence et la marque ne s'afficherait jamais.
 FLAGS_OFFRE = frozenset({
-	"transport_offert", "escorte_offerte", "rang_offert",
+	"transport_offert", "escorte_offerte", "secours_offert", "rang_offert",
 	"commission_offerte", "acces_ouvrable", "apport_offert",
 })
 FLAGS_RAPPORT = frozenset({

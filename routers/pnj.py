@@ -34,6 +34,7 @@ from utils import donjon
 from utils import recrutement
 from utils import montures
 from utils import escorte
+from utils import secours
 from utils import indicateurs
 from utils import apport
 from utils import contenants
@@ -181,8 +182,12 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		# toute la mission menée en son nom.
 		vers_esc = escorte.escorte_vers(character, lieu_doc.get("_id"))
 		flags.update({
-			"escorte_offerte": bool(offre_esc),
-			"escorte_en_cours": bool(en_cours_esc),
+			# Un SECOURS (utils/secours.py) a ses propres flags : le texte écrit d'une escorte
+			# (« un enfant qui n'est pas rentré ») ne doit jamais présenter des aventuriers.
+			"escorte_offerte": bool(offre_esc) and not secours.est_secours(offre_esc),
+			"escorte_en_cours": bool(en_cours_esc) and not secours.est_secours(en_cours_esc),
+			"secours_offert": secours.est_secours(offre_esc),
+			"secours_en_cours": secours.est_secours(en_cours_esc),
 			"escorte_progeniture_en_cours": bool(vers_esc) and vers_esc.get("giver") != lieu_doc.get("_id"),
 			"escorte_accomplie": bool(
 				(spec_esc and escorte.deja_reussie(character, spec_esc.get("id")))
@@ -682,9 +687,13 @@ def _placeholders_escorte(q: dict, lieu_doc: dict) -> dict:
 	obj = q.get("objectif") or {}
 	dest_id = obj.get("cible")
 	indice = transport.indice_destination(lieu_doc, dest_id, find_docs, get_doc)
-	rdv_id = (obj.get("rencontre") or {}).get("lieu")
+	rdv = obj.get("rencontre") or {}
+	rdv_id = rdv.get("lieu")
 	rdv_doc = get_doc(rdv_id) if rdv_id else None
 	rec = q.get("recompenses") or {}
+	# Une salle de donjon porte une DESCRIPTION en guise de label : on nomme le donjon et l'étage.
+	nom_rdv = (secours.nom_du_lieu({"lieu": rdv_id, "donjon": rdv["donjon"]}, get_doc)
+			   if rdv.get("donjon") else None)
 	return {
 		"protege": escorte.noms_proteges(q.get("proteges") or []),
 		"destination": indice["nom"],
@@ -693,8 +702,8 @@ def _placeholders_escorte(q: dict, lieu_doc: dict) -> dict:
 		"repere": indice.get("repere") or indice["nom"],
 		# Le lieu du rendez-vous : absent quand la personne attend chez le donneur (elle
 		# rejoint le groupe à l'acceptation), auquel cas on nomme le lieu où l'on parle.
-		"lieu_rencontre": (lieu_label(rdv_doc, rdv_id or "") if rdv_doc
-						   else lieu_label(lieu_doc)),
+		"lieu_rencontre": nom_rdv or (lieu_label(rdv_doc, rdv_id or "") if rdv_doc
+									  else lieu_label(lieu_doc)),
 		"xp": rec.get("xp", 0),
 		"prime": rec.get("cuivre", 0),
 	}
@@ -973,6 +982,8 @@ def _resoudre_escorte(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		offre = escorte.offre_courante(character, lieu_doc)
 		if not offre:
 			raise HTTPException(status_code=422, detail="Aucune escorte à prendre ici.")
+		# Un secours a son propre nœud de suite (le comptoir d'Auxerre parle aussi d'enfants).
+		cle_suite = "secours_accepte" if secours.est_secours(offre) and noeuds.get("secours_accepte") else "accepte"
 		# Calculés AVANT la mutation : l'offre disparaît du lieu une fois acceptée, mais le
 		# nœud « je compte sur vous » doit encore pouvoir nommer la personne et la destination.
 		dits = _placeholders_escorte(offre, lieu_doc)
@@ -989,7 +1000,7 @@ def _resoudre_escorte(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 			"rejoint": [escorte.nom_complet(d) for d in docs],
 		}
 		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
-		return noeuds.get("accepte"), dits
+		return noeuds.get(cle_suite), dits
 
 	raise HTTPException(status_code=422, detail="Action d'escorte inconnue.")
 
@@ -1009,8 +1020,12 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)],
 	# Une course dont le délai vient d'expirer ne doit pas être livrable : on solde les
 	# échéances (et leur sanction de réputation) avant de composer le dialogue.
 	echues = transport.traiter_expirations(character, quetes.now_epoch(), get_doc, save_doc)
-	if echues:
+	# Secours dont le délai est passé (échec SANS sanction) : même solde paresseux.
+	secours_echus, secours_liberes = secours.expirer(character, quetes.now_epoch(), get_doc)
+	if echues or secours_echus:
 		save_doc(character)
+	for doc in secours_liberes:
+		save_doc(doc)
 	contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 	# Un dialogue encore sous délai s'ouvre sur son `noeud_attente` (refus parlé) et non sur son
 	# nœud de départ. ⚠️ Le GET n'ARME jamais : un `delai_min` porté par le nœud de départ
@@ -1076,8 +1091,12 @@ async def pnj_dialogue_choix(
 
 	entree, pnj_doc, lieu_doc = _pnj_du_lieu(character, body.get("pnj_id"))
 	echues = transport.traiter_expirations(character, quetes.now_epoch(), get_doc, save_doc)
-	if echues:
+	# Secours dont le délai est passé (échec SANS sanction) : même solde paresseux.
+	secours_echus, secours_liberes = secours.expirer(character, quetes.now_epoch(), get_doc)
+	if echues or secours_echus:
 		save_doc(character)
+	for doc in secours_liberes:
+		save_doc(doc)
 	contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 	noeud_id = body.get("noeud")
 	choix = pnj.choix_valide(pnj_doc, noeud_id, body.get("choix_id"), contexte)
@@ -1781,6 +1800,15 @@ def _declencher_combat_donjon(character: dict, lieu_garde: dict) -> str | None:
 
 	compagnons = recrutement.groupe_effectif(character, get_doc)
 	montures_groupe = montures.montures_effectives(character, get_doc)
+	# SECOURS : des aventuriers attendus DANS cette salle y sont retrouvés (rendez-vous de
+	# donjon). Character d'abord (autoritatif, 409), docs `protege:*` ensuite.
+	if donjon.proteges_admis(lieu_garde):
+		retrouves = escorte.rencontres_en_combat(character, lieu_garde["_id"], get_doc)
+		if retrouves:
+			if save_doc(character) is None:
+				raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+			for doc in retrouves:
+				save_doc(doc)
 	# Une salle peut laisser les personnes escortées à la porte (`proteges_restent_dehors`).
 	proteges_groupe = (escorte.proteges_effectifs(character, get_doc)
 					   if donjon.proteges_admis(lieu_garde) else [])

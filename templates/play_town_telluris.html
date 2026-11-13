@@ -5088,7 +5088,8 @@
 			// Le changement de lieu recharge la page : le toast doit survivre au reload.
 			sessionStorage.setItem('transports_echoues_notif', JSON.stringify(data.transports_echoues));
 		}
-		if (data.escorte && ((data.escorte.rencontres || []).length || data.escorte.depose)) {
+		if (data.escorte && ((data.escorte.rencontres || []).length || data.escorte.depose
+				|| (data.escorte.secours_echoues || []).length)) {
 			// Même patron qu'`intro_fin_notif` : la branche « lien » recharge la page,
 			// donc le toast de DÉPOSE (« +1 or, quête accomplie ») ne survivrait pas.
 			sessionStorage.setItem('escorte_notif', JSON.stringify(data.escorte));
@@ -10109,6 +10110,10 @@ function _notifierEscorte(esc) {
 			+ 'Ramenez cette personne vivante : ' + (r.titre || '—'));
 	});
 	if (esc.depose) showToast(_escorteDeposeTexte(esc.depose), {major: true});
+	// Secours arrivé trop tard (délai dépassé) : échec SANS sanction de réputation.
+	(esc.secours_echoues || []).forEach(q => {
+		showToast('⌛ Secours échoué : ' + (q.titre || '—') + ' — trop tard.');
+	});
 }
 
 function _deadlineLocale(expireAt, nowServeur) {

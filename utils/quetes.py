@@ -729,6 +729,11 @@ def quete_detail(character: dict, q: dict, get_doc_fn=None) -> dict:
 			rdv = obj.get("rencontre") or {}
 			rdv_doc = lire(rdv.get("lieu")) if rdv.get("lieu") else None
 			rdv_nom = lieu_label(rdv_doc, rdv.get("lieu") or "")
+			if rdv.get("donjon"):
+				# Salle de donjon (secours) : son label est une description — on nomme le
+				# donjon et l'étage. Import PARESSEUX (`secours` dépend de ce module).
+				from utils.secours import nom_du_lieu
+				rdv_nom = nom_du_lieu({"lieu": rdv["lieu"], "donjon": rdv["donjon"]}, lire)
 			if rdv.get("position"):
 				# ⚠️ `_carte_chasse` est réutilisée SANS être modifiée : on lui passe un
 				# objectif SYNTHÉTIQUE `{lieu, position}` bâti depuis `rencontre`. L'ancre du
