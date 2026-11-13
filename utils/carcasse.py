@@ -113,6 +113,8 @@ def decouper_ref(source_ref, source_item_doc) -> list | None:
 	# Le GRADE du spécimen (`profil`, posé au butin) suit chaque portion : il fixe leur prix
 	# (`xp_monstre.prix_depouille`), dont la somme retombe ainsi sur celui de la carcasse.
 	profil = source_ref.get("profil") if isinstance(source_ref, dict) else None
+	# La signature du chasseur (`utils/chasse_signee`) suit aussi chaque portion.
+	chasse = source_ref.get("chasse") if isinstance(source_ref, dict) else None
 	pieces = []
 	for e in entrees:
 		part = total * e["fraction"] / e["quantite"]
@@ -120,6 +122,8 @@ def decouper_ref(source_ref, source_item_doc) -> list | None:
 			piece = {"item": e["item"], "poids": round(part, 2)}
 			if profil:
 				piece["profil"] = profil
+			if isinstance(chasse, dict):
+				piece["chasse"] = dict(chasse)
 			pieces.append(piece)
 	if not pieces:
 		return None

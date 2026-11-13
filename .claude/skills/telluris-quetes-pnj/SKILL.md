@@ -352,3 +352,6 @@ Verrouillé par `tests/test_bois.py`.
 
 ### Intro narrative — fuite du village natal
 Bloc `intro` sur le doc lieu de la cité : spawn en périphérie, choix de raison persisté, conclusion à l'entrée en zone sûre (`est_dans_zone`). Logique pure `utils/intro.py`, verrouillée par `tests/test_intro.py`. ⚠️ Le doc de la cité est complet (avec `cells`) : ne jamais le retaper à la main, partir du dump.
+
+### Service `rachat` — le collectionneur
+`services.rachat` : `{articles:[{item, cout_cuivre > 0, prime_signee?}], noeuds:{fait, sans_objet}}` ; action `{"service":"rachat","op":"vendre"[, "item"]}` — sans `item`, TOUT ce que le groupe porte parmi les articles (sacs `_sacs_remise`). Pièce signée (`ref.chasse`) prise d'abord, payée + prime (50 % par défaut). Flag `rachat_possible`. Linter : nœuds requis, articles lisibles. Hôte : `pnj:marchand_cabinet_des_specimens` (têtes des bêtes légendaires, 1,5 × coût de marché).

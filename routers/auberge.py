@@ -588,7 +588,8 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 		logees = proprietes.montures_logees(character, lieu_doc, get_doc)
 		annexes = heberges + logees                # ne font pas la nuit, mais en profitent
 		dormeurs = proprietes.dormeurs(character, lieu_doc, cat_prop, compagnons, heberges)
-		reveil = proprietes.appliquer_reveil(lieu_doc, cat_prop, employes, dormeurs, betes + logees)
+		reveil = proprietes.appliquer_reveil(lieu_doc, cat_prop, employes, dormeurs, betes + logees,
+												 get_doc_fn=get_doc)
 
 	# 2. Repos — le principal, puis chaque compagnon et chaque monture. Les trois docs sont
 	#    des miroirs, `reposer` s'y applique telle quelle.

@@ -130,6 +130,8 @@ FLAGS_CONNUS = {
 	"rang_offert", "rang_a_rapporter", "rang_max",
 	# Épreuve d'APPORT : ouverte au cran du dessous / l'un des objets est porté.
 	"rang_apport_offert", "rang_apport_possible",
+	# Collectionneur (`services.rachat`) : le groupe porte au moins une pièce recherchée.
+	"rachat_possible",
 	# Don UNIQUE (carte de guilde) : l'exemplaire est déjà dans le sac.
 	"don_recu",
 	# Carte PERDUE par un inscrit de cette cité (`pnj.don_a_remplacer`) : le choix de remplacement.
@@ -199,6 +201,7 @@ NOEUDS_REQUIS = {
 	"enseignement": {"appris", "refus"},
 	# Vente à prix fixe : objet remis, bourse trop légère, ou sac trop lourd.
 	"vente": {"fait", "sans_fonds", "trop_charge"},
+	"rachat": {"fait", "sans_objet"},
 }
 
 # Le transport a DEUX rôles, et presque aucun PNJ ne tient les deux :
@@ -584,6 +587,13 @@ def analyser_doc(doc: dict) -> list:
 				elif pnj_util.article_en_vente(doc, action.get("item")) is None:
 					erreur(f"choix `{cid}` : `action.item` {action.get('item')!r} n'est pas un "
 						   f"article lisible de `services.vente.articles` — le clic échouerait.", nid)
+			if action.get("service") == "rachat":
+				if action.get("op") != "vendre":
+					erreur(f"choix `{cid}` : le service `rachat` n'a que l'op `vendre`, "
+						   f"reçu {action.get('op')!r}.", nid)
+				elif action.get("item") is not None and pnj_util.article_rachete(doc, action.get("item")) is None:
+					erreur(f"choix `{cid}` : `action.item` {action.get('item')!r} n'est pas un "
+						   f"article lisible de `services.rachat.articles` — le clic échouerait.", nid)
 			attendu = ACTIONS_A_CONDITIONNER.get((action.get("service"), action.get("op")))
 			if attendu and attendu not in (conditions | gardes.get(nid, set())):
 				erreur(f"choix `{cid}` déclenche `{action['service']}/{action['op']}` sans "
@@ -692,6 +702,14 @@ def analyser_doc(doc: dict) -> list:
 							   f"`trophee` (`item:…`) sont requis.")
 					elif article.get("trophee"):
 						attendus |= VENTE_TROPHEE
+		elif service == "rachat":
+			attendus = set(NOEUDS_REQUIS["rachat"])
+			articles = (conf or {}).get("articles")
+			if not isinstance(articles, list) or not articles or any(
+					pnj_util.article_rachete(doc, (a or {}).get("item") if isinstance(a, dict) else None) is None
+					for a in articles):
+				erreur("`services.rachat.articles` : chaque article doit être `{item: \"item:…\", "
+					   "cout_cuivre > 0[, prime_signee ≥ 0]}` — ce PNJ ne rachèterait rien.")
 		elif service == "portail" and (conf or {}).get("fixe"):
 			# Tableau fixe : aucun seuil ne se referme ; sans `cout`, rien à payer ; la
 			# barrière de la porte, elle, peut refuser.

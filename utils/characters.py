@@ -262,6 +262,10 @@ def resolve_item_ref(ref):
 	if (lieu_id := item_ref_lieu(ref)):
 		doc["lieu_parent"] = lieu_id
 		doc["nom"] = item_label(doc.get("nom") or item_id, get_doc(lieu_id))
+	# Trophée signé du chasseur (utils/chasse_signee) : la ligne vit sur la RÉFÉRENCE.
+	if isinstance(ref, dict) and isinstance(ref.get("chasse"), dict):
+		from utils.chasse_signee import libelle
+		doc["chasse"] = libelle(ref["chasse"])
 	# Nom choisi par le joueur : EN DERNIER, il l'emporte sur tout libellé calculé. Le nom
 	# qu'il remplace part en `nom_origine`, que seule la fiche objet affiche en sous-titre.
 	if isinstance(ref, dict) and ref.get("nom_perso"):
@@ -331,6 +335,7 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 	"""
 	bonus = EquipmentBonus()
 	vitesses = []  # [(bonus V > 0, source)] — non cumulatifs, cf. _appliquer_vitesse_max
+	pieces_panoplies: dict[str, set] = {}  # {panoplie: {item_id}} — cf. panoplies_actives
 	for slot, ref in slots.items():
 		item_id = item_ref_id(ref)
 		if not item_id:
@@ -338,82 +343,133 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 		item = get_doc(item_id)
 		if not item:
 			continue
-		pa_item = item.get("bonus_pa", 0) or 0
-		bonus.pa += pa_item
-		if pa_item:
-			zone = SLOT_ZONE.get(str(slot))
-			if zone:
-				bonus.pa_zones[zone] = bonus.pa_zones.get(zone, 0) + pa_item
-			else:
-				bonus.pa_hors_zone += pa_item
-		bonus.pv           += item.get("bonus_pv", 0)
-		bonus.pm           += item.get("bonus_pm", 0)
-		bonus.malus_depl   += item.get("bonus_malus_depl", 0)
-		bonus.cc_bonus     += item.get("bonus_cc", 0)
-		bonus.cd_bonus     += item.get("bonus_cd", 0)
-		bonus.degats_bonus += item.get("bonus_degats", 0)
-		# `bonus_degats_dice` porte le NOMBRE DE FACES en base (6 = 1D6) — normalisé ici,
-		# sinon il serait concaténé en "+6", c.-à-d. lu comme un modificateur plat.
-		dice = normalize_dice(item.get("bonus_degats_dice"))
-		if dice:
-			bonus.degats_dice = f"{bonus.degats_dice}+{dice}" if bonus.degats_dice else dice
-		bonus.initiative   += item.get("bonus_initiative", 0)
-
-		# Buffs de caractéristiques portés par l'objet : le champ `bonus` = {caract: delta},
-		# PLUS `bonus_malus_depl`, qui est lui aussi un delta sur V (données : -1, -2 pour les
-		# armures lourdes) et se cumule donc naturellement avec un éventuel `bonus.V`.
-		# ⚠️ V POSITIF NON CUMULATIF entre objets : seul le plus fort bonus de Vitesse compte
-		# (`_appliquer_vitesse_max`, après la boucle). Les malus de V, eux, s'additionnent.
-		buffs = {}
-		for caract, delta in (item.get("bonus") or {}).items():
-			try:
-				delta = int(delta)
-			except (TypeError, ValueError):
-				continue
-			if delta:
-				buffs[str(caract)] = buffs.get(str(caract), 0) + delta
-		try:
-			malus_v = int(item.get("bonus_malus_depl", 0) or 0)
-		except (TypeError, ValueError):
-			malus_v = 0
-		v_bonus = max(0, buffs.get(CARACT_VITESSE, 0))
-		v_malus = min(0, buffs.get(CARACT_VITESSE, 0)) + malus_v
-		buffs.pop(CARACT_VITESSE, None)
-		if v_malus:
-			buffs[CARACT_VITESSE] = v_malus
-		if buffs or v_bonus:
-			for caract, delta in buffs.items():
-				bonus.buffs[caract] = bonus.buffs.get(caract, 0) + delta
-			source = {
-				"nom":   item.get("nom", item_id),
-				"icon":  item.get("icon", "⚔"),
-				"buffs": buffs,
-			}
-			if v_bonus:
-				vitesses.append((v_bonus, source))
-			bonus.buffs_sources.append(source)
-
-		# Régén, esquive et aide à la canalisation conférées par l'objet PORTÉ (focus
-		# magique, talisman, robe de mage…) : tant qu'il est équipé, elles jouent en
-		# permanence — à chaque tour de monde comme de combat pour la régén, à chaque
-		# attaque physique subie pour l'esquive, à chaque sort lancé pour la canalisation.
-		# ⚠️ Elles se déclarent dans `effets`, JAMAIS dans `bonus` : ce dernier ne porte que
-		# des CARACTÉRISTIQUES, et `caracts_avec_buffs` écarte toute clé absente de
-		# `caracteristiques_current` — un `bonus:{esquive:3}` serait silencieusement inerte.
-		# ⚠️ Le champ `effets` a DÉJÀ deux autres sens, qu'il ne faut pas rejouer ici :
-		# sur un `consommable` c'est l'effet de la potion (utils/consommables), sur une
-		# `arme` c'est l'effet porté par le coup, dont la cible par DÉFAUT est l'ENNEMI
-		# (utils/sorts.effets_d_arme) — replier les bolas ici donnerait à leur porteur un
-		# −2 en V permanent. D'où la liste d'exclusion, et elle seule.
-		if (str(item.get("categorie") or "") not in CATEGORIES_EFFETS_A_L_USAGE
-				or arme_effets_portes(item)):
-			effets_portes = item.get("effets") or {}
-			bonus.regen_pv += _effet_int(effets_portes.get("regen_pv"))
-			bonus.regen_pm += _effet_int(effets_portes.get("regen_pm"))
-			bonus.esquive  += _effet_int(effets_portes.get("esquive"))
-			bonus.canalisation += _effet_int(effets_portes.get("canalisation"))
+		_cumuler_item(bonus, item, item_id, slot, vitesses)
+		panoplie = item.get("panoplie")
+		if isinstance(panoplie, str) and panoplie:
+			pieces_panoplies.setdefault(panoplie, set()).add(item_id)
+	for source in panoplies_actives(pieces_panoplies):
+		_cumuler_item(bonus, source, source["_id"], None, vitesses)
 	_appliquer_vitesse_max(bonus, vitesses)
 	return bonus
+
+
+def panoplies_actives(pieces: dict, rules: dict | None = None) -> list:
+	"""Bonus de PANOPLIE d'espèce (`docs/conception_trophees_legendaires.md` § 6), calculé à
+	la lecture, jamais stocké. `pieces` = {panoplie: {ids d'items distincts équipés}} (champ
+	item `panoplie`) ; `rules` = doc `rules:panoplies` (relu si absent) :
+	`{"panoplies": {id: {"nom", "icon", "seuils": {"2": {bonus d'item…}, "3": {…}}}}}`.
+	Seul le PLUS HAUT seuil atteint s'applique (les seuils ne se cumulent pas : le 3 inclut
+	le 2). Rend une liste de pseudo-items `{_id, nom, icon, bonus_*…}` que
+	`recompute_equipment_bonus` cumule comme un objet porté sans slot (PA hors zone)."""
+	if not pieces:
+		return []
+	if rules is None:
+		rules = get_doc("rules:panoplies") or {}
+	table = (rules or {}).get("panoplies") or {}
+	out = []
+	for pid in sorted(pieces):
+		decl = table.get(pid)
+		if not isinstance(decl, dict):
+			continue
+		n = len(pieces[pid])
+		atteints = []
+		for seuil, modifs in (decl.get("seuils") or {}).items():
+			try:
+				k = int(seuil)
+			except (TypeError, ValueError):
+				continue
+			if 1 < k <= n and isinstance(modifs, dict):
+				atteints.append((k, modifs))
+		if not atteints:
+			continue
+		k, modifs = max(atteints, key=lambda e: e[0])
+		champs = {c: v for c, v in modifs.items() if c in CLES_PANOPLIE}
+		out.append({**champs, "_id": f"panoplie:{pid}", "categorie": "panoplie",
+					"nom": f"{decl.get('nom') or pid} ({k} pièces)", "icon": decl.get("icon") or "🛡"})
+	return out
+
+
+# Ce qu'un seuil de panoplie peut apporter : les champs de bonus d'un objet porté, rien d'autre.
+CLES_PANOPLIE = ("bonus_pa", "bonus_pv", "bonus_pm", "bonus_cc", "bonus_cd", "bonus_degats",
+				 "bonus_initiative", "bonus", "effets")
+
+
+def _cumuler_item(bonus: EquipmentBonus, item: dict, item_id: str, slot, vitesses: list) -> None:
+	"""Ajoute à `bonus` ce qu'apporte UN objet porté (`slot` None : hors zone du corps)."""
+	pa_item = item.get("bonus_pa", 0) or 0
+	bonus.pa += pa_item
+	if pa_item:
+		zone = SLOT_ZONE.get(str(slot))
+		if zone:
+			bonus.pa_zones[zone] = bonus.pa_zones.get(zone, 0) + pa_item
+		else:
+			bonus.pa_hors_zone += pa_item
+	bonus.pv           += item.get("bonus_pv", 0)
+	bonus.pm           += item.get("bonus_pm", 0)
+	bonus.malus_depl   += item.get("bonus_malus_depl", 0)
+	bonus.cc_bonus     += item.get("bonus_cc", 0)
+	bonus.cd_bonus     += item.get("bonus_cd", 0)
+	bonus.degats_bonus += item.get("bonus_degats", 0)
+	# `bonus_degats_dice` porte le NOMBRE DE FACES en base (6 = 1D6) — normalisé ici,
+	# sinon il serait concaténé en "+6", c.-à-d. lu comme un modificateur plat.
+	dice = normalize_dice(item.get("bonus_degats_dice"))
+	if dice:
+		bonus.degats_dice = f"{bonus.degats_dice}+{dice}" if bonus.degats_dice else dice
+	bonus.initiative   += item.get("bonus_initiative", 0)
+
+	# Buffs de caractéristiques portés par l'objet : le champ `bonus` = {caract: delta},
+	# PLUS `bonus_malus_depl`, qui est lui aussi un delta sur V (données : -1, -2 pour les
+	# armures lourdes) et se cumule donc naturellement avec un éventuel `bonus.V`.
+	# ⚠️ V POSITIF NON CUMULATIF entre objets : seul le plus fort bonus de Vitesse compte
+	# (`_appliquer_vitesse_max`, après la boucle). Les malus de V, eux, s'additionnent.
+	buffs = {}
+	for caract, delta in (item.get("bonus") or {}).items():
+		try:
+			delta = int(delta)
+		except (TypeError, ValueError):
+			continue
+		if delta:
+			buffs[str(caract)] = buffs.get(str(caract), 0) + delta
+	try:
+		malus_v = int(item.get("bonus_malus_depl", 0) or 0)
+	except (TypeError, ValueError):
+		malus_v = 0
+	v_bonus = max(0, buffs.get(CARACT_VITESSE, 0))
+	v_malus = min(0, buffs.get(CARACT_VITESSE, 0)) + malus_v
+	buffs.pop(CARACT_VITESSE, None)
+	if v_malus:
+		buffs[CARACT_VITESSE] = v_malus
+	if buffs or v_bonus:
+		for caract, delta in buffs.items():
+			bonus.buffs[caract] = bonus.buffs.get(caract, 0) + delta
+		source = {
+			"nom":   item.get("nom", item_id),
+			"icon":  item.get("icon", "⚔"),
+			"buffs": buffs,
+		}
+		if v_bonus:
+			vitesses.append((v_bonus, source))
+		bonus.buffs_sources.append(source)
+
+	# Régén, esquive et aide à la canalisation conférées par l'objet PORTÉ (focus
+	# magique, talisman, robe de mage…) : tant qu'il est équipé, elles jouent en
+	# permanence — à chaque tour de monde comme de combat pour la régén, à chaque
+	# attaque physique subie pour l'esquive, à chaque sort lancé pour la canalisation.
+	# ⚠️ Elles se déclarent dans `effets`, JAMAIS dans `bonus` : ce dernier ne porte que
+	# des CARACTÉRISTIQUES, et `caracts_avec_buffs` écarte toute clé absente de
+	# `caracteristiques_current` — un `bonus:{esquive:3}` serait silencieusement inerte.
+	# ⚠️ Le champ `effets` a DÉJÀ deux autres sens, qu'il ne faut pas rejouer ici :
+	# sur un `consommable` c'est l'effet de la potion (utils/consommables), sur une
+	# `arme` c'est l'effet porté par le coup, dont la cible par DÉFAUT est l'ENNEMI
+	# (utils/sorts.effets_d_arme) — replier les bolas ici donnerait à leur porteur un
+	# −2 en V permanent. D'où la liste d'exclusion, et elle seule.
+	if (str(item.get("categorie") or "") not in CATEGORIES_EFFETS_A_L_USAGE
+			or arme_effets_portes(item)):
+		effets_portes = item.get("effets") or {}
+		bonus.regen_pv += _effet_int(effets_portes.get("regen_pv"))
+		bonus.regen_pm += _effet_int(effets_portes.get("regen_pm"))
+		bonus.esquive  += _effet_int(effets_portes.get("esquive"))
+		bonus.canalisation += _effet_int(effets_portes.get("canalisation"))
 
 
 # Code de la Vitesse dans `bonus` / `caracteristiques_current`.

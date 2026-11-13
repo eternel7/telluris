@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 import threading
 from db.config import get_doc, save_doc, find_docs
+from utils import pouvoirs_objets
 from utils.auth import get_current_user
 from utils.characters import get_selected_character, carried_weight, charge_max_of, resolve_item_ref, item_ref_weight, item_ref_id
 from utils import contenants
@@ -640,7 +641,7 @@ def combat_action(
         character = get_doc(acteur_id)
         if not character:
             raise HTTPException(status_code=404, detail="Personnage introuvable")
-        if body.sort_id not in (character.get("sorts_connus") or []):
+        if not pouvoirs_objets.connait(character, body.sort_id, get_doc):
             raise HTTPException(status_code=422, detail="Sort inconnu du personnage")
         sort_norm = normaliser_sort(get_doc(body.sort_id))
         if sort_norm is None or not sort_utilisable_combat(sort_norm):
@@ -679,7 +680,7 @@ def combat_action(
         character = get_doc(acteur_id)
         if not character:
             raise HTTPException(status_code=404, detail="Personnage introuvable")
-        if body.competence_id not in (character.get("competences_connues") or []):
+        if not pouvoirs_objets.connait(character, body.competence_id, get_doc):
             raise HTTPException(status_code=422, detail="Compétence inconnue du personnage")
         competence_arg = normaliser_competence(get_doc(body.competence_id))
         if competence_arg is None or not competence_utilisable_combat(competence_arg):
@@ -695,7 +696,7 @@ def combat_action(
         character = get_doc(acteur_id)
         if not character:
             raise HTTPException(status_code=404, detail="Personnage introuvable")
-        if body.competence_id not in (character.get("competences_connues") or []):
+        if not pouvoirs_objets.connait(character, body.competence_id, get_doc):
             raise HTTPException(status_code=422, detail="Compétence inconnue du personnage")
         comp_pose = normaliser_competence(get_doc(body.competence_id))
         pose = (comp_pose or {}).get("pose_piege")

@@ -59,6 +59,8 @@ TAG_SUR_MESURE = "sur_mesure"
 # Préfixe des tags qui ouvrent une matière à une FAMILLE de pièces : `fabrication_arme`,
 # `fabrication_armure`, `fabrication_bijou`… La donnée dit elle-même ce à quoi elle sert.
 TAG_FABRICATION_PREFIXE = "fabrication_"
+# Matériau d'une armure, posé par `dev/gen_trophees_legendaires.py`.
+TAGS_MATERIAU_ARMURE = ("armure_tissu", "armure_cuir", "armure_metal")
 
 # États persistés sur la commande. Les états de DÉROULEMENT (`en_fabrication`, `terminee`,
 # `expiree`) ne sont jamais écrits : ils se lisent sur l'horloge.
@@ -194,7 +196,11 @@ def tags_fabrication(base_doc: dict) -> set:
 	`fabrication_<sous_categorie>` de l'objet à façonner (`arme`, `armure`, `bijou`…)."""
 	if not base_doc:
 		return set()
-	cles = (base_doc.get("categorie"), item_sous_categorie(base_doc))
+	cles = [base_doc.get("categorie"), item_sous_categorie(base_doc)]
+	# Matériau d'une armure (`armure_tissu` / `armure_cuir` / `armure_metal`) : une matière
+	# `fabrication_armure_metal` n'entre que dans le métal ; `fabrication_armure` reste
+	# ouverte à toutes les armures.
+	cles += [t for t in (base_doc.get("tags") or []) if str(t) in TAGS_MATERIAU_ARMURE]
 	return {TAG_FABRICATION_PREFIXE + str(c) for c in cles if c}
 
 
@@ -918,7 +924,7 @@ def prix_variante(base_doc: dict, matieres_docs, prix_range_fn=None) -> dict:
 def nouvelle_commande(lieu_doc: dict, item_id: str, detail: dict, now: int | None = None,
 					  base_item: str = "", matieres=None, fournies=None,
 					  achetees=None, manquantes=None, poids: float = 0.0,
-					  nom_perso: str = "") -> dict:
+					  nom_perso: str = "", chasse: dict | None = None) -> dict:
 	"""Enregistrement d'une commande, prêt à être poussé dans `character["commandes"]`.
 
 	Naît `payee` si tout est réuni, `en_attente_materiaux` sinon — jamais en échec (§7 cas C).
@@ -929,6 +935,9 @@ def nouvelle_commande(lieu_doc: dict, item_id: str, detail: dict, now: int | Non
 	instant = now_epoch() if now is None else int(now)
 	complet = not (manquantes or [])
 	extra = {"nom_perso": nom_perso} if nom_perso else {}
+	# Signature du trophée fourni (`utils/chasse_signee`) : elle passe sur la pièce livrée.
+	if isinstance(chasse, dict):
+		extra["chasse"] = dict(chasse)
 	return extra | {
 		"id": uuid.uuid4().hex,
 		"lieu": (lieu_doc or {}).get("_id", ""),
@@ -1000,6 +1009,8 @@ def ref_livree(commande: dict) -> dict:
 	# Le nom propre de la pièce apportée suit la pièce façonnée (`nouvelle_commande`).
 	if commande.get("nom_perso"):
 		ref["nom_perso"] = commande["nom_perso"]
+	if isinstance(commande.get("chasse"), dict):
+		ref["chasse"] = dict(commande["chasse"])
 	return ref
 
 

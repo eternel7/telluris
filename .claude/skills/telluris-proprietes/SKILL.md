@@ -48,3 +48,6 @@ description: Player residential properties — merchant NPC workshops (productio
 - Contenu : `dev/gen_proprietes.py` → `jsons/proprietes_a_importer.json` (docs neufs, idempotent).
 - Tests : `tests/test_proprietes.py` (pur + catalogue LIVRÉ relu, postes marchands contre le dump), `tests/test_proprietes_effets.py` (effets, non-cumul, catalogue relu), `tests/test_proprietes_ateliers.py`, `tests/test_proprietes_endpoints.py`, `tests/test_lieux_acces.py` (visibilité des liens).
 - Images des types : **provisoires** (auberge, maison des arts, chemin) — `/play` lève 404 sur une image absente, `test_livre_images_presentes` le verrouille.
+
+### Mur des trophées
+Aménagement `mur_trophees` (maison+, `dev/gen_trophees_legendaires.py`) : réveil `requiert_trophee` ⇒ ne joue que si le **coffre** contient un objet tagué `trophee_expose` (`proprietes.trophee_expose` ; `appliquer_reveil(..., get_doc_fn=)`, passé par `/auberge/nuit`). Verrouillé par `tests/test_trophees_legendaires.py`.
