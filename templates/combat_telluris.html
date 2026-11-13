@@ -1004,6 +1004,85 @@ html.vue-portrait .bv-ligne.kg .bv-jauge { height: 5px; }
 	color: var(--accent-color); font-size: 14px; letter-spacing: 0.3em;
 	cursor: move; user-select: none; touch-action: none;
 }
+.move-section[hidden] { display: none; }
+/* Mode « 🗺️ Flèches sur la carte » (menu ⚙️, comme /play) : `#move-controls` est DÉPLACÉ dans
+   `#viewport` (`appliquerModePave`, jamais cloné) et prend `controls-carte` — chaque flèche sur
+   un bord ou un coin, mêmes règles que `.viewport .controls-carte` de play_town. Le sablier
+   « Passer le tour » n'a pas d'autre place dans le combat : il se pose à côté du pivot droit,
+   dans un coin — jamais près du joueur (bas-centre), où il recouvrirait les jetons alliés
+   qu'on clique pour cibler : un clic manqué finirait le tour.
+   ⚠️ Calque `pointer-events:none` : les jetons dessous restent cliquables, seuls les boutons
+   rétablissent le clic. */
+.viewport .controls-carte {
+	position: absolute; inset: 0; z-index: 20;
+	--fleche: clamp(34px, calc(var(--step) * 0.9), 50px);
+	--fleche-gap: 6px;
+	grid-template-columns: repeat(3, 1fr);
+	grid-template-rows: repeat(3, 1fr);
+	/* Haut dégagé des deux pastilles FIXES (vitals à gauche, actions à droite, ~50 px de
+	   haut à 8 px du bord) : sans lui, ↖ et ↗ passaient dessous. */
+	gap: 0; padding: 60px 6px 6px; margin: 0;
+	pointer-events: none;
+}
+.viewport .controls-carte .btn {
+	width: var(--fleche); height: var(--fleche);
+	pointer-events: auto;
+	background: rgba(0, 0, 0, 0.45);
+	border-color: rgba(255, 255, 255, 0.25);
+}
+.viewport .controls-carte .btn > svg { width: calc(var(--fleche) * 0.5); height: calc(var(--fleche) * 0.5); }
+.viewport .controls-carte .btn:hover:not(:disabled) { background: rgba(0, 0, 0, 0.65); }
+.viewport .controls-carte .btn:active:not(:disabled) { background: rgba(0, 0, 0, 0.8); }
+.viewport .controls-carte .btn:disabled { background: rgba(0, 0, 0, 0.12); border-color: transparent; }
+.viewport .controls-carte .btn.center:disabled { opacity: 0.35; }
+/* Paysage : placement EXPLICITE par `data-sdx/sdy` (les pivots n'en ont pas : `data-sens`). */
+.viewport .controls-carte [data-sdx="-1"] { grid-column: 1; justify-self: start; }
+.viewport .controls-carte [data-sdx="0"]  { grid-column: 2; justify-self: center; }
+.viewport .controls-carte [data-sdx="1"]  { grid-column: 3; justify-self: end; }
+.viewport .controls-carte [data-sdy="-1"] { grid-row: 1; align-self: start; }
+.viewport .controls-carte [data-sdy="0"]  { grid-row: 2; align-self: center; }
+.viewport .controls-carte [data-sdy="1"]  { grid-row: 3; align-self: end; }
+.viewport .controls-carte .rot-btn[data-sens="-1"] { grid-column: 1; grid-row: 3; justify-self: start; align-self: end; }
+.viewport .controls-carte .rot-btn[data-sens="1"]  { grid-column: 3; grid-row: 3; justify-self: end; align-self: end; }
+.viewport .controls-carte #btn-passer {
+	grid-column: 3; grid-row: 3; justify-self: end; align-self: end;
+	transform: translateX(calc(-1 * (var(--fleche) + var(--fleche-gap))));
+}
+/* Portrait : la carte est tournée d'un quart de tour (le joueur à gauche regarde à droite).
+   Le pavé flottant tourne d'un bloc (`rotate(90deg)` plus haut) ; posé sur la carte, il ne
+   peut pas — la grille épouse le viewport, haut et étroit. Chaque bouton est donc REPLACÉ au
+   quart de tour (écran = (−sdy, sdx)) et seul son pictogramme pivote. Les `data-sdx/sdy` ne
+   changent pas : `screenToWorld` reste juste. */
+/* Portrait : la carte dépasse l'écran (la page défile) — le calque est FIXÉ sur la partie
+   visible, entre les pastilles du haut et les barres du bas (`--barre-h`), pour que les
+   neuf boutons restent à portée comme les barres. Le `clip-path` du viewport le rogne à la
+   carte (un `overflow` ne coupe pas un descendant fixe) : en défilant jusqu'au journal, les
+   flèches s'en vont avec elle. */
+html.vue-portrait.pave-carte .viewport { clip-path: inset(0 round 10px); }
+/* ⚠️ Sélecteur à id : il doit battre le `rotate(90deg)` du pavé flottant (même id). */
+html.vue-portrait #move-controls.controls-carte {
+	position: fixed; inset: auto;
+	top: 0; left: 50%; width: var(--view-width); transform: translateX(-50%);
+	/* Au-dessus de la pastille ⛶ (part-plein-ecran, coin bas-gauche, posée à `--barre-h` +
+	   18 px, ~36 px de haut) : elle recouvrait le pivot du coin bas. */
+	bottom: calc(var(--barre-h, 0px) + 18px + 42px);
+}
+html.vue-portrait #move-controls.controls-carte .btn > svg { transform: rotate(90deg); }
+html.vue-portrait #move-controls.controls-carte #btn-passer > svg { transform: none; }
+html.vue-portrait .viewport .controls-carte [data-sdy="1"]  { grid-column: 1; justify-self: start; }
+html.vue-portrait .viewport .controls-carte [data-sdy="0"]  { grid-column: 2; justify-self: center; }
+html.vue-portrait .viewport .controls-carte [data-sdy="-1"] { grid-column: 3; justify-self: end; }
+html.vue-portrait .viewport .controls-carte [data-sdx="-1"] { grid-row: 1; align-self: start; }
+html.vue-portrait .viewport .controls-carte [data-sdx="0"]  { grid-row: 2; align-self: center; }
+html.vue-portrait .viewport .controls-carte [data-sdx="1"]  { grid-row: 3; align-self: end; }
+html.vue-portrait .viewport .controls-carte .rot-btn[data-sens="-1"] { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
+html.vue-portrait .viewport .controls-carte .rot-btn[data-sens="1"]  { grid-column: 1; grid-row: 3; justify-self: start; align-self: end; }
+html.vue-portrait .viewport .controls-carte #btn-passer {
+	grid-column: 1; grid-row: 3; justify-self: start; align-self: end;
+	transform: translateY(calc(-1 * (var(--fleche) + var(--fleche-gap))));
+}
+/* Séparateur du menu ⚙️ (comme `.affichage-sep` de /play) : pavé d'un côté, sons de l'autre. */
+.reglages-sep { display: block; height: 1px; margin: 4px 6px; background: var(--border-color); }
 /* ── Barre d'action : cases à positions STABLES ────────────────────────────────── */
 #btn-slots-edit { grid-area: gear; width: 45px; margin: 5px;}
 {{ slotbar.slot_bar_css('.slot-grid', '.slot-btn', slots_max, '.slot-plus') }}
@@ -1490,6 +1569,10 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 				<button type="button" id="reglages-btn" class="reglages-btn" title="Réglages"
 					aria-haspopup="menu" aria-expanded="false" aria-controls="reglages-menu">⚙️</button>
 				<span class="reglages-menu" id="reglages-menu" role="menu" hidden>
+					{# Mode du pavé : mêmes libellés que le menu ⚙️ de /play (`appliquerModePave`). #}
+					<button type="button" role="menuitemradio" class="reglages-item" data-pave="carte" aria-checked="false">🗺️ Flèches sur la carte</button>
+					<button type="button" role="menuitemradio" class="reglages-item" data-pave="flottant" aria-checked="true">🕹️ Flèches flottantes</button>
+					<span class="reglages-sep" role="separator"></span>
 					<button type="button" role="menuitemcheckbox" class="reglages-item" id="reglage-son" aria-checked="true">🔊 Sons</button>
 					{% if musique %}
 					<button type="button" role="menuitemcheckbox" class="reglages-item" id="reglage-musique" aria-checked="true">🎵 Musique</button>
@@ -3189,6 +3272,53 @@ const PAVE_POS_CLE = 'telluris.combat.pave_pos';
 	window.addEventListener('resize', () => {
 		if (pave.style.left) placerPanneau(pave, parseFloat(pave.style.left) || 0, parseFloat(pave.style.top) || 0);
 	});
+})();
+
+// ── Pavé : sur la carte ou flottant (menu ⚙️, mêmes libellés que /play) ──────────────
+// UN SEUL nœud `#move-controls`, DÉPLACÉ entre `#move-section` (flottant) et `#viewport`
+// (calque `controls-carte`) — jamais cloné : `updateButtons`/`majFleches` le retrouvent par
+// son id dans les deux modes. Préférence du joueur, par navigateur ; défaut = flottant
+// (le comportement d'avant). Clé distincte de /play : son défaut à lui est la carte.
+const PAVE_MODE_CLE = 'telluris.combat.pave_mode';
+function _paveModeCourant() {
+	let m = null;
+	try { m = localStorage.getItem(PAVE_MODE_CLE); } catch (e) { m = null; }
+	return m === 'carte' ? 'carte' : 'flottant';
+}
+function appliquerModePave(mode) {
+	const controls = document.getElementById('move-controls');
+	const section = document.getElementById('move-section');
+	const carte = document.getElementById('viewport');
+	if (!controls || !section || !carte) return;
+	const surCarte = mode === 'carte';
+	// ⚠️ Pas de script dans <head> pour poser ce mode plus tôt (comme /play) : les harnais
+	// dev/test_*_client.js lisent le PREMIER bloc <script> inline de ce template.
+	document.documentElement.classList.toggle('pave-carte', surCarte);
+	if (surCarte) {
+		carte.appendChild(controls);
+		controls.classList.add('controls-carte');
+		section.hidden = true;
+	} else {
+		section.appendChild(controls);
+		controls.classList.remove('controls-carte');
+		section.hidden = false;
+		// APRÈS l'affichage : un panneau caché n'a pas de taille, sa place serait fausse.
+		if (window._combatReady) _placerPaveParDefaut();
+	}
+	document.querySelectorAll('#reglages-menu [data-pave]').forEach(b => {
+		b.setAttribute('aria-checked', b.dataset.pave === mode ? 'true' : 'false');
+	});
+}
+(function initModePave() {
+	document.querySelectorAll('#reglages-menu [data-pave]').forEach(b => {
+		b.onclick = () => {
+			try { localStorage.setItem(PAVE_MODE_CLE, b.dataset.pave); } catch (e) { /* mode privé */ }
+			appliquerModePave(b.dataset.pave);
+			// Comme /play : choisir un mode referme le menu (les coches son/musique, elles, le laissent ouvert).
+			fermerReglages();
+		};
+	});
+	appliquerModePave(_paveModeCourant());
 })();
 
 // Place par DÉFAUT du pavé (jamais posé à la main) : en portrait, la barre d'action est fixée en
