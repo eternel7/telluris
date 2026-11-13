@@ -287,6 +287,7 @@ Chaque mécanique est documentée dans une compétence `.claude/skills/telluris-
 | propriétés du joueur (achat, location, aménagements, personnel, coffre, zones habitables) | `telluris-proprietes` |
 | voie de colonisation (fonder, paliers, lieux modèles, bâtiments, stocks, sécurité, moral, menace, associés) | `telluris-colonisation` |
 | sorts, compétences de vocation, zones d'effet, focalisation | `telluris-magie` |
+| renseignement : 🔎 où trouver une espèce/ressource, méthodes par vocation, informateur (spécification, non implémenté) | `telluris-renseignement` |
 | pièges (cases piégées, détection, désamorçage, pose) | `telluris-combat` § Pièges |
 | journal, relations, cartes/portraits, listes scrollables, tavernes, scriptorium, toasts, sons d'action et musique | `telluris-social-ui` |
 | dump, exports, `/admin/table`, écritures PUT complet, cache de requête, caches process | `telluris-db` |
