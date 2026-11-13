@@ -2,7 +2,7 @@
 
 - **Arrêtées le :** 12/11/2026, par questionnaire
 - **Séance d'origine :** [Progression des lieux de guilde](20260924_progression_des_lieux_de_guilde.md) (24 au 28/09/2026)
-- **Statut :** tout ce qui suit est **décidé par l'Auteur**. Rien n'est encore en jeu.
+- **Statut :** tout ce qui suit est **décidé par l'Auteur**. Une première tranche est en jeu depuis le 13/11/2026 (liste en fin de page).
 - **Chiffres :** valeurs de départ, portées par le doc de règles `rules:colonisation` (`dev/gen_colonisation.py`).
 
 La voie de colonisation est le pendant de la voie urbaine (Chambre → Logement → Maison → Demeure → Domaine, déjà en jeu).
@@ -22,6 +22,7 @@ La voie de colonisation est le pendant de la voie urbaine (Chambre → Logement 
 - **Site** : une case libre d'un lieu de type pays.
 - **Distance** : au moins **6 cases** de toute Cité-État et **4 cases** d'une autre implantation.
 - **Charte** : **4 or**, payée au maître de guilde d'aventuriers de la cité la plus proche. À égale distance, toutes les cités concernées se valent.
+- **Où l'acheter** (Auteur, 13/11) : au **bureau du maître de guilde**, avant de partir ; elle porte le nom de sa cité et ne vaut que sur une case dont cette cité est la plus proche. Une charte à la fois, remise à la fondation.
 - **Prérequis** : **rang C** de la guilde au minimum.
 - **Nombre** : une implantation par pays et par personnage.
 - **Visibilité** : les autres joueurs la voient dès le campement.
@@ -253,6 +254,7 @@ Arrêté le 12/11/2026, par questionnaire. L'implantation se joue comme une vill
 
 - **Pose libre** : toute case marchable et libre, hors entrées ; un bâtiment par case.
 - Geste : **« Poser ici »**. On marche jusqu'à la case, on choisit le bâtiment dans le panneau, il se pose sous ses pieds. Un refus (case prise, entrée) se dit en toast.
+- **Boutiques** (Auteur, 13/11) : achetées **une par une**, puis posées ; elles fonctionnent **exactement comme dans une ville** — leur marchand les tient aussitôt, aucun PNJ à engager.
 - L'**icône** du bâtiment s'affiche à proximité, comme l'enseigne d'une boutique en cité.
 - **Déplacer** : même geste, disponible en tout temps.
 
@@ -291,3 +293,22 @@ Précise le § 10. Tous voient la même carte et les mêmes icônes.
 | Soutien, visiteur | non | non |
 
 **Écartés** : parcelles peintes ou typées ; calque de fortification par-dessus l'image ; clic sur la carte pour poser ; gestion dans le panneau des propriétés ; visiteur sans carte ; grille identique aux sept paliers ; grille recopiée sur l'implantation (figée ou resynchronisée) ; modèle imposé à la montée de palier ; modèle rangé sous son pays par `lieu_parent` ; vignettes dédiées pour les repères.
+
+## 13. Ce qui est en jeu
+
+État au 13/11/2026. Moteur : `utils/colonisation.py`.
+
+| En jeu | Reste à faire |
+|---|---|
+| Fonder : case, distances, rang, une par pays ; charte achetée au bureau d'un maître de guilde, valable près de sa cité (§ 2, Auteur 13/11) | — |
+| Fiche de site, lue sur la carte (§ 3) | — |
+| Sept paliers, seuils, chantier de statut (§ 4) | — |
+| Sécurité et moral dérivés, feu à deux réglages, repos au feu (§ 5) | — |
+| Menace par étapes, attaque jouée aux côtés des gardes ou résolue en l'absence, tanière à vider, rattrapage plafonné (§ 6) | — |
+| Quatre stocks, santé (§ 7) | — |
+| PNJ nommés, population comptée, repères ; boutiques achetées une par une et tenues comme en ville (dont auberge, étable, grandes maisons dès le Bourg) ; vente de la production aux boutiques du lieu, négociant et son personnel (§ 8) | — |
+| Guilde du joueur : échelons, maison, membres fondateurs, recrues, expéditions, matériel commun (§ 9) | — |
+| Visiteur, soutien, associé ; dons, besoins, financement, pose, prix de faveur, entrepôt commun, coffre, colons escortés (§ 10) | — |
+| Lieu modèle en lien pur, choix par tags, pose libre, changement de palier, panneau (§ 12) | images définitives des modèles génériques (prompts : `docs/prompts_images.md` § 6) et leurs grilles |
+
+Valeurs de départ ajoutées avec le moteur, à régler dans `rules:colonisation` : prix et capacités des bâtiments, fortifications, production des métiers, consommation, barèmes de sécurité et de moral, probabilités de la menace.

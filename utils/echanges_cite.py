@@ -261,6 +261,29 @@ class Contexte:
 		self.echange = 0
 		self.portage = self.portage_passe
 
+	@classmethod
+	def libre(cls, proprietaire_id, regl, regln, negociant, get_doc_fn, rand, now, prospection=None,
+			  portage_kg=None, crieur=0, caisse_max=5000):
+		"""Contexte sans bien urbain ni catalogue `rules:proprietes` : la voie de colonisation
+		(`utils/colonisation.echanger`) y vend la production de ses PNJ à ses propres boutiques,
+		avec les MÊMES prix (`prix_vente_boutique`) et le même journal."""
+		ctx = cls.__new__(cls)
+		ctx.prop, ctx.cat, ctx.employes, ctx.boutiques = None, None, [], []
+		ctx.get_doc, ctx.rand, ctx.now = get_doc_fn, rand, now
+		ctx.regl, ctx.regln = {**ECHANGES_DEFAUT, **(regl or {})}, {**NEGOCIANT_DEFAUT, **(regln or {})}
+		ctx.negociant = negociant
+		ctx.niveau = capacites_negociant(negociant, ctx.regln) if negociant else None
+		ctx.achats = False
+		ctx.prospection = prospection if prospection is not None else \
+			((ctx.niveau or {}).get("prospection") or _int(ctx.regl["prospection_base"], 3))
+		ctx.portage_passe = float(ctx.regl["portage_kg"] if portage_kg is None else portage_kg)
+		ctx.remise, ctx.crieur, ctx.caisse_max = 0.0, int(crieur), int(caisse_max)
+		ctx.proprietaire = {"_id": proprietaire_id}
+		ctx._relations, ctx.touchees, ctx.journal = {}, {}, {}
+		ctx.gain = ctx.echange = 0
+		ctx.portage = ctx.portage_passe
+		return ctx
+
 	def relation(self, boutique):
 		bid = boutique.get("_id")
 		if bid not in self._relations:

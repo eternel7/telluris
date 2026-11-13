@@ -229,7 +229,50 @@ def _db_get(doc_id: str) -> dict | None:
 		_compter_db(debut)
 
 
+# ── Lien PUR d'un lieu vers son MODÈLE (voie de colonisation § 12.3) ────────────────
+# Une implantation ne porte que la référence de son lieu modèle (`modele`) : image, grille
+# et entrées sont LUES sur le modèle à chaque passage, jamais recopiées. C'est ICI le point
+# unique : `get_doc` pose ces champs sur l'exemplaire rendu, `save_doc` / `save_docs` les
+# retirent de ce qui part en base. Tout le moteur (déplacement, /play, combat, guidage)
+# lit donc la grille comme celle de n'importe quel lieu, et corriger un modèle corrige
+# aussitôt toutes les implantations qui s'y réfèrent.
+PREFIXE_MODELE = "implantation:"
+CHAMPS_MODELE = ("image", "dimensions", "cells", "nav", "entrees")
+
+
+def suivre_modele(doc: dict | None, get_doc_fn) -> dict | None:
+	"""Pose sur `doc` les `CHAMPS_MODELE` de son lieu modèle (pur : lecteur injecté). Un doc
+	sans `modele`, ou d'un autre préfixe, est rendu tel quel ; modèle introuvable ⇒ aucun de
+	ces champs (jamais une grille périmée)."""
+	if not isinstance(doc, dict) or not doc.get("modele") \
+			or not str(doc.get("_id", "")).startswith(PREFIXE_MODELE):
+		return doc
+	modele = get_doc_fn(doc["modele"]) or {}
+	for champ in CHAMPS_MODELE:
+		if champ in modele:
+			doc[champ] = modele[champ]
+		else:
+			doc.pop(champ, None)
+	return doc
+
+
+def sans_modele(doc: dict) -> dict:
+	"""Ce qui part en BASE : `doc` lui-même, ou — pour un lieu lié à un modèle — une copie de
+	surface sans les `CHAMPS_MODELE` (l'exemplaire de l'appelant garde sa grille)."""
+	if not isinstance(doc, dict) or not doc.get("modele") \
+			or not str(doc.get("_id", "")).startswith(PREFIXE_MODELE):
+		return doc
+	return {k: v for k, v in doc.items() if k not in CHAMPS_MODELE}
+
+
 def get_doc(doc_id: str) -> dict | None:
+	doc = _get_doc_brut(doc_id)
+	if doc is not None and str(doc_id).startswith(PREFIXE_MODELE):
+		return suivre_modele(doc, _get_doc_brut)
+	return doc
+
+
+def _get_doc_brut(doc_id: str) -> dict | None:
 	cache = _doc_cache.get()
 	if cache is None:
 		# Tests purs, scripts dev/*, startup : chemin STRICTEMENT identique à avant.
@@ -302,7 +345,10 @@ def save_doc(doc: dict) -> dict:
 		cache.profonds.pop((doc or {}).get("_id"), None)
 	debut = time.perf_counter()
 	try:
-		db.put(doc)
+		a_ecrire = sans_modele(doc)
+		db.put(a_ecrire)
+		if a_ecrire is not doc:
+			doc["_rev"] = a_ecrire.get("_rev")
 		return doc
 	except Exception:
 		return None
@@ -331,7 +377,7 @@ def save_docs(docs: list) -> list[bool]:
 			cache.profonds.pop(d.get("_id"), None)
 	debut = time.perf_counter()
 	try:
-		resultats = db.update(docs)
+		resultats = db.update([sans_modele(d) for d in docs])
 	except Exception:
 		return [False] * len(docs)
 	finally:

@@ -894,7 +894,8 @@ def prix_courant(relation_doc: dict, item_id: str, pmin: int, pmax: int, sens: s
 	neg = prix_negocie(relation_doc, item_id, sens, pmin, pmax)
 	if neg is not None:
 		return max(1, neg)
-	return prix_base_cuivre(pmin, pmax, relation_value(relation_doc), sens)
+	valeur = max(relation_value(relation_doc), int((relation_doc or {}).get("faveur") or 0))
+	return prix_base_cuivre(pmin, pmax, valeur, sens)
 
 
 # ── Prix offre/demande (stock cible) ──────────────────────────────────────────────
@@ -986,8 +987,8 @@ def get_relation(character: dict, lieu_doc: dict, get_doc_fn=None) -> dict:
 	doc_id = relation_doc_id(character, lieu_doc)
 	existing = (get_doc_fn or get_doc)(doc_id)
 	if existing:
-		return existing
-	return {
+		return _avec_faveur(existing, character, lieu_doc, get_doc_fn)
+	return _avec_faveur({
 		"_id": doc_id,
 		"type": "relation",
 		"character_id": (character or {}).get("_id"),
@@ -997,7 +998,23 @@ def get_relation(character: dict, lieu_doc: dict, get_doc_fn=None) -> dict:
 		"value": int(character_stats.RELATION_INITIALE),
 		"prix_negocies": {},
 		"marchandage_bloque_jusqu": 0,
-	}
+	}, character, lieu_doc, get_doc_fn)
+
+
+def _avec_faveur(relation_doc: dict, character: dict, lieu_doc: dict, get_doc_fn=None) -> dict:
+	"""Prix de FAVEUR (voie de colonisation, § 10) : dans les boutiques d'une implantation, son
+	fondateur et ses associés achètent et vendent comme avec la relation `faveur` au moins.
+	RECALCULÉ à chaque lecture (posé ou retiré) : une valeur restée en base après une exclusion
+	ne vaut rien. Seul `prix_courant` le lit — la relation elle-même (`value`) ne bouge pas."""
+	if not (lieu_doc or {}).get("colonie"):
+		return relation_doc
+	from utils import colonisation
+	faveur = colonisation.faveur(character, lieu_doc, get_doc_fn or get_doc)
+	if faveur:
+		relation_doc["faveur"] = faveur
+	else:
+		relation_doc.pop("faveur", None)
+	return relation_doc
 
 
 def relation_value(relation_doc: dict) -> int:
@@ -1776,10 +1793,11 @@ def flux_cite(cite_doc: dict | None) -> dict | None:
 def est_cite(doc: dict | None) -> bool:
 	"""Ce lieu est-il une CITÉ — le doc qui porte le flux de ses boutiques et auquel s'arrête
 	toute remontée d'ancêtres (`flux_cite`, `quetes.lieux_solidaires`, les échanges des biens
-	`utils/echanges_cite`) ? Prédicat UNIQUE : une implantation de la voie de colonisation s'y
-	ajoutera le jour où elle existera, et tous ces systèmes la traiteront d'un coup comme une
-	ville (docs/lore/systemes/20261112_voie_de_colonisation.md)."""
-	return (doc or {}).get("categorie") == "ville"
+	`utils/echanges_cite`) ? Prédicat UNIQUE : une implantation de la voie de colonisation
+	(`type:"implantation"`) l'est aussi — tous ces systèmes la traitent comme une ville
+	(docs/lore/systemes/20261112_voie_de_colonisation.md) : ses boutiques partagent SON
+	flux, ses PNJ vendent leur production à ses boutiques (`colonisation.echanger`)."""
+	return (doc or {}).get("categorie") == "ville" or (doc or {}).get("type") == "implantation"
 
 
 def ouvrir_flux(doc: dict) -> dict:

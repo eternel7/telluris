@@ -29,6 +29,7 @@ from utils import montures
 from utils import scriptorium
 from utils import commande as commande_util
 from utils import proprietes
+from utils import colonisation
 from utils import echanges_cite
 from utils import fiche as fiche_util
 # ⚠️ Sens d'import : `routers/auberge` → `routers/user`, jamais l'inverse (précédent :
@@ -64,9 +65,15 @@ def _acces_nuit(current_user: dict) -> tuple[dict, dict, int]:
 		if not proprietes.peut_dormir(character, lieu_doc):
 			raise HTTPException(status_code=403, detail="Vous ne pouvez pas dormir ici.")
 		return character, lieu_doc, 0
+	# Implantation (voie de colonisation) : repos au feu, ouvert à tout visiteur, gratuit ; la
+	# nuit d'un associé dans une habitation l'est aussi (§ 10).
+	if lieu_doc and colonisation.est_implantation(lieu_doc):
+		return character, lieu_doc, 0
 	if not lieu_doc or not auberge.lieu_est_taverne(lieu_doc):
 		raise HTTPException(status_code=403, detail="Il n'y a pas de salle commune ici.")
-	return character, lieu_doc, auberge.cout_nuit(lieu_doc)
+	# Auberge d'une implantation : prix de faveur pour son fondateur et ses associés (§ 10).
+	remise = colonisation.remise_auberge(character, lieu_doc, get_doc) if lieu_doc.get("colonie") else 0.0
+	return character, lieu_doc, int(round(auberge.cout_nuit(lieu_doc) * (1 - remise)))
 
 
 def _ecrivain(character: dict, body: dict) -> tuple[dict, list]:
@@ -592,7 +599,10 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 	# 3. Les étals de la CITÉ. Même garde qu'à la visite (`main.py`) : on ne tick que ce qui
 	#    a du stock ou un approvisionnement configuré, sinon un lieu sans commerce ne
 	#    pourrait de toute façon rien produire.
-	parent_id = lieu_doc.get("lieu_parent") or character.get("cite") or ""
+	# ⚠️ Une implantation pend au PAYS : ses étals sont ceux qu'elle porte elle-même (elle EST
+	# leur cité) — jamais toutes les villes du pays.
+	parent_id = (lieu_doc["_id"] if colonisation.est_implantation(lieu_doc)
+				 else lieu_doc.get("lieu_parent") or character.get("cite") or "")
 	passes = int(character_stats.AUBERGE_NUIT_PASSES_ATELIER)
 	magasins = 0
 	voisins = (find_docs({"type": "lieu", "lieu_parent": parent_id}) or []) if parent_id else []
@@ -684,11 +694,11 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 	chez_soi = proprietes.est_propriete(lieu_doc)
 	payload.update({
 		# Chez soi ⇔ propriété : `_acces_nuit` n'y laisse entrer que qui peut y dormir.
-		"log": auberge.messages_nuit(lieu_doc, auberge.NUIT_LOG_LIGNES, chez_soi=chez_soi),
+		"log": auberge.messages_nuit(colonisation.lieu_de_nuit(lieu_doc, get_doc), auberge.NUIT_LOG_LIGNES, chez_soi=chez_soi),
 		# Récit de la PROCHAINE nuit, tiré à neuf : le client le garde pour l'égrener au prochain
 		# clic (sinon il rejouait le log figé de `/play`). Remplace celui de `_payload`, qui
 		# ignore le « chez soi ».
-		"nuit_log": auberge.messages_nuit(lieu_doc, auberge.NUIT_LOG_LIGNES, chez_soi=chez_soi),
+		"nuit_log": auberge.messages_nuit(colonisation.lieu_de_nuit(lieu_doc, get_doc), auberge.NUIT_LOG_LIGNES, chez_soi=chez_soi),
 		"vitals": vitals,
 		"vitals_porteurs": vitals_porteurs,
 		"cout": cout,
