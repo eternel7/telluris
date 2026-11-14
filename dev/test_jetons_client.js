@@ -68,6 +68,25 @@ t('taille inconnue ⇒ 1x1, forme seule gardée', () => {
 	assert.strictEqual(normaliserJeton({ taille: '2x2', forme: 'etoile' }).forme, 'ellipse');
 });
 
+t('paliers des plus grands : 4x3 et 5x4 (Dragon Empereur)', () => {
+	assert.deepStrictEqual(normaliserJeton({ taille: '4x3', forme: 'ellipse' }),
+		{ largeur: 4, profondeur: 3, forme: 'ellipse' });
+	assert.deepStrictEqual(normaliserJeton({ taille: '5x4', forme: 'triangle' }),
+		{ largeur: 5, profondeur: 4, forme: 'triangle' });
+	const maxi = Math.max.apply(null, Object.values(JETON_TAILLES).map(d => Math.max(d[0], d[1])));
+	assert.strictEqual(JETON_DIMENSION_MAX, maxi);
+	const empereur = acteur(2, 2, '5x4', 'triangle', 'bas');
+	assert.deepStrictEqual(empriseActeur(empereur), [2, 2, 5, 4]);
+	assert.deepStrictEqual(empriseActeur(Object.assign({}, empereur, { cap: 'gauche' })), [2, 2, 4, 5]);
+	assert.strictEqual(casesActeur(empereur).length, 20);
+});
+
+t('corps en longueur 2x5 (Ver des sables) : la longueur suit la marche', () => {
+	const ver = acteur(4, 1, '2x5', 'rectangle', 'bas');
+	assert.deepStrictEqual(empriseActeur(ver), [4, 1, 2, 5]);
+	assert.deepStrictEqual(empriseActeur(Object.assign({}, ver, { cap: 'droite' })), [4, 1, 5, 2]);
+});
+
 console.log('\n── Emprise ─────────────────────────────────────────────────────────────────');
 
 t('l’emprise suit le cap (la profondeur suit la marche)', () => {

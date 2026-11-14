@@ -1,0 +1,2181 @@
+[
+  {
+    "_id": "espece:aigle_geant",
+    "_rev": "8-fde0de7c31b9aa505c8d6ea9c52efbf2",
+    "type": "espece",
+    "nom": "Aigle Geant",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "chevron"
+    },
+    "genre": "m",
+    "image": "aigle_geant_transparent.png",
+    "description": "Rapace d'envergure colossale, capable d'emporter un homme dans ses serres et de planer des heures durant.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "vol",
+      "predateur",
+      "ia_hit_and_run"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_02"
+  },
+  {
+    "_id": "espece:ane",
+    "_rev": "8-a5baa5d89c4ba6a54f84ac366d2588da",
+    "type": "espece",
+    "nom": "Âne",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "image": "ane_transparent.png",
+    "description": "Animal de bât increvable, têtu mais d'une endurance remarquable sur les terrains difficiles.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 7
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 45
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "bete_de_somme",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 1.4,
+      "prix_cuivre": 800
+    },
+    "animation": "animation:son_bete_04"
+  },
+  {
+    "_id": "espece:apep",
+    "_rev": "6-c9d5e09e3afc2c2151d1727ea3d67f12",
+    "type": "espece",
+    "nom": "Apep, Serpent du Chaos",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "capsule"
+    },
+    "genre": "m",
+    "nom_propre": true,
+    "image": "apep_transparent.png",
+    "description": "Serpent du chaos lové sous le monde. Chaque nuit, dit-on en Égypte, il assaille la barque du soleil dans la Douat, et chaque nuit on le repousse sans jamais le tuer ; les orages et les éclipses seraient ses assauts. Sa seule présence éteint les torches et fend la pierre. Les prêtres écrivent son nom pour le brûler et piétinent sa figure de cire ; nul ne sait si cela l'affaiblit ou le rend furieux.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 85,
+        "max": 125
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 70,
+        "max": 100
+      },
+      "Int": {
+        "min": 40,
+        "max": 60
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "souterrain",
+      "magique",
+      "legendaire",
+      "boss",
+      "cataclysme"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_05",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:basilic",
+    "_rev": "7-f83065aed9d3daa60176256048e6efa9",
+    "type": "espece",
+    "nom": "Basilic",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "image": "basilic_transparent.png",
+    "description": "Le basilic est un reptile à six pattes, il ressemble à un gros lézard. Il pétrifie ses attaquants et possède une résistance naturelle à la magie.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 6
+      },
+      "F": {
+        "min": 20,
+        "max": 60
+      },
+      "R": {
+        "min": 40,
+        "max": 80
+      },
+      "Ag": {
+        "min": 20,
+        "max": 50
+      },
+      "Vol": {
+        "min": 50,
+        "max": 100
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "petrification"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_06",
+    "competences": [
+      "competence:monstre_regard_petrifiant"
+    ]
+  },
+  {
+    "_id": "espece:bete_de_l_apocalypse",
+    "_rev": "6-87c8d89a5f8748cf4ad9e8cc21446014",
+    "type": "espece",
+    "nom": "Bete de l Apocalypse",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "losange"
+    },
+    "genre": "f",
+    "image": "bete_de_l_apocalypse_transparent.png",
+    "description": "Entité cataclysmique annonçant la fin des temps, sa puissance dépasse l'entendement des mortels.",
+    "base_attributes": {
+      "V": {
+        "min": 8,
+        "max": 10
+      },
+      "F": {
+        "min": 110,
+        "max": 160
+      },
+      "R": {
+        "min": 105,
+        "max": 155
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 110,
+        "max": 150
+      },
+      "Int": {
+        "min": 50,
+        "max": 80
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 70,
+        "max": 105
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "boss",
+      "cataclysme",
+      "predateur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_07"
+  },
+  {
+    "_id": "espece:chauve_souris_geante",
+    "_rev": "9-2b85ae04bed969cada3096e21a7373d0",
+    "type": "espece",
+    "nom": "Chauve Souris Geante",
+    "jeton": {
+      "taille": "2x1",
+      "forme": "chevron"
+    },
+    "genre": "f",
+    "image": "chauve_souris_geante_transparent.png",
+    "description": "Chiroptère monstrueux assoiffé de sang, ses cris ultrasoniques désorientent ses proies.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "monstre",
+      "vol",
+      "nocturne",
+      "predateur",
+      "insensible_furtivite",
+      "ia_hit_and_run",
+      "ia_predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_13"
+  },
+  {
+    "_id": "espece:cu_sidhe",
+    "_rev": "3-d0d2ed086249a8c292b9fc53ed31732d",
+    "type": "espece",
+    "nom": "Cú Sídhe",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "image": "cu_sidhe_transparent.png",
+    "description": "Chien des tertres, grand comme un jeune taureau, au pelage vert sombre : il chasse en silence et n'aboie que trois fois — au troisième aboiement, qui l'entend meurt de peur. Il ne franchit pas l'eau courante.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 40,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 50,
+        "max": 75
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 40
+      }
+    },
+    "tags": [
+      "monstre",
+      "feerique",
+      "terreur",
+      "predateur",
+      "ia_meute"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_loup_01",
+    "competences": [
+      "competence:monstre_hurlement_terrifiant"
+    ]
+  },
+  {
+    "_id": "espece:dragon_blanc",
+    "_rev": "3-46bb67a755d5419b0d0c5e6fa288f7dd",
+    "type": "espece",
+    "nom": "Dragon blanc",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "croix"
+    },
+    "genre": "m",
+    "image": "dragon_blanc_transparent.png",
+    "description": "Le second dragon de Dinas Emrys, pâle comme la craie. Il ouvre chaque combat en furie et repousse le rouge jusqu'au bord du lac souterrain, puis faiblit et recule. On dit qu'il ne meurt jamais tout à fait, qu'il revient toujours pour une nouvelle lutte, et que la tour au-dessus n'a jamais tenu longtemps.",
+    "base_attributes": {
+      "V": {
+        "min": 17,
+        "max": 19
+      },
+      "F": {
+        "min": 80,
+        "max": 115
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 45,
+        "max": 65
+      },
+      "Vol": {
+        "min": 80,
+        "max": 115
+      },
+      "Int": {
+        "min": 50,
+        "max": 80
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_02",
+    "competences": [
+      "competence:monstre_souffle_de_givre"
+    ]
+  },
+  {
+    "_id": "espece:dragon_empereur",
+    "_rev": "7-30d53a2db7c92b0790d37bf81190a65b",
+    "type": "espece",
+    "nom": "Dragon Empereur",
+    "jeton": {
+      "taille": "5x4",
+      "forme": "croix"
+    },
+    "genre": "m",
+    "image": "dragon_empereur_transparent.png",
+    "description": "Souverain absolu parmi les dragons, dont la simple présence plie les volontés les plus fortes.",
+    "base_attributes": {
+      "V": {
+        "min": 18,
+        "max": 20
+      },
+      "F": {
+        "min": 95,
+        "max": 140
+      },
+      "R": {
+        "min": 95,
+        "max": 140
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 95,
+        "max": 135
+      },
+      "Int": {
+        "min": 65,
+        "max": 95
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 60,
+        "max": 95
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_01",
+    "competences": [
+      "competence:monstre_grand_souffle_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:dragon_hydre",
+    "_rev": "4-82e327862a20b5e843d88364dea2dd5c",
+    "type": "espece",
+    "nom": "Dragon-hydre",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "image": "dragon_hydre_transparent.png",
+    "description": "Dragon sans ailes au corps massif, dont cinq à sept cous jaillissent des épaules ; chaque gueule crache le feu. Une tête tranchée en fait repousser deux, sauf si le moignon est brûlé aussitôt. On raconte qu'une de ses têtes ne meurt jamais et qu'il faut l'enterrer sous un rocher.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 65,
+        "max": 100
+      },
+      "R": {
+        "min": 70,
+        "max": 105
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 55,
+        "max": 80
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 65
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "souffle",
+      "regeneration",
+      "legendaire",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_02",
+    "competences": [
+      "competence:monstre_souffle_empoisonne",
+      "competence:monstre_regeneration"
+    ]
+  },
+  {
+    "_id": "espece:dragon_rouge",
+    "_rev": "3-0b9b9e502e97fe4a49c799e5d66514e0",
+    "type": "espece",
+    "nom": "Dragon rouge",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "croix"
+    },
+    "genre": "m",
+    "image": "dragon_rouge_transparent.png",
+    "description": "L'un des deux dragons de Dinas Emrys. Un roi les aurait pris au centre de l'île, endormis dans une cuve d'hydromel, et enfermés sous la colline. Quand Vortigern voulut y bâtir sa tour, elle s'effondrait chaque nuit : les deux dragons se battaient dessous. Un enfant sans père, que certains appellent Merlin, l'annonça. Le blanc a l'avantage au début de chaque combat ; le rouge, celui que les Gallois peignent sur leurs bannières, l'emporte à la fin.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 85,
+        "max": 125
+      },
+      "R": {
+        "min": 85,
+        "max": 125
+      },
+      "Ag": {
+        "min": 40,
+        "max": 60
+      },
+      "Vol": {
+        "min": 80,
+        "max": 115
+      },
+      "Int": {
+        "min": 50,
+        "max": 80
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_01",
+    "competences": [
+      "competence:monstre_souffle_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:dragon_zombie",
+    "_rev": "7-ef2bf52034cc435509d8988780e23604",
+    "type": "espece",
+    "nom": "Dragon Zombie",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "croix"
+    },
+    "genre": "m",
+    "image": "dragon_zombie_transparent.png",
+    "description": "Carcasse draconique réanimée par nécromancie, son souffle putride remplace les flammes d'antan.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 60,
+        "max": 90
+      },
+      "R": {
+        "min": 60,
+        "max": 95
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 70
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "draconique",
+      "vol",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_02",
+    "competences": [
+      "competence:monstre_souffle_de_la_tombe"
+    ]
+  },
+  {
+    "_id": "espece:failinis",
+    "_rev": "2-1c33887133dbb3fdbb35fd8bb2be9904",
+    "type": "espece",
+    "nom": "Failinis",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "nom_propre": true,
+    "image": "failinis_transparent.png",
+    "description": "Le chien invincible du roi d'Ioruaidh, que Lugh voulut pour lui : nulle bête ne lui échappe, et toute bête qui le voit tombe. Nul ne sait s'il est chien, loup ou autre chose venu d'un tertre.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 60,
+        "max": 85
+      },
+      "R": {
+        "min": 55,
+        "max": 80
+      },
+      "Ag": {
+        "min": 70,
+        "max": 95
+      },
+      "Vol": {
+        "min": 55,
+        "max": 80
+      },
+      "Int": {
+        "min": 30,
+        "max": 45
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 75
+      }
+    },
+    "tags": [
+      "monstre",
+      "feerique",
+      "predateur",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_loup_02"
+  },
+  {
+    "_id": "espece:geant_ou_titan",
+    "_rev": "8-e35da47eef83f129a4065513b5976648",
+    "type": "espece",
+    "nom": "Geant ou Titan",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "rectangle"
+    },
+    "image": "geant_transparent.png",
+    "description": "Colosse aux proportions démesurées, capable d'arracher des arbres et de fracasser des murailles.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 10
+      },
+      "F": {
+        "min": 70,
+        "max": 110
+      },
+      "R": {
+        "min": 60,
+        "max": 95
+      },
+      "Ag": {
+        "min": 5,
+        "max": 20
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 55
+      }
+    },
+    "tags": [
+      "humanoide",
+      "geant"
+    ],
+    "proprietes": {},
+    "items": [
+      "item:Kanabo",
+      "item:Rungu",
+      "item:Braies_fourrure",
+      "item:Manteau_de_loup",
+      "item:Bracelets_os"
+    ],
+    "magies": {},
+    "sorts": [],
+    "animation": "animation:son_geant_03"
+  },
+  {
+    "_id": "espece:golem_de_chair",
+    "_rev": "5-6fc4047a63c0526af2b9b4c858c843aa",
+    "type": "espece",
+    "nom": "Golem de Chair",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "genre": "m",
+    "image": "golem_de_chair_transparent.png",
+    "description": "Construct assemblé de tissus organiques recousus, doté d'une force brute et d'une régénération limitée.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 45,
+        "max": 75
+      },
+      "R": {
+        "min": 50,
+        "max": 85
+      },
+      "Ag": {
+        "min": 5,
+        "max": 15
+      },
+      "Vol": {
+        "min": 35,
+        "max": 60
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "construct",
+      "humanoide",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_geant_04"
+  },
+  {
+    "_id": "espece:gorgone",
+    "_rev": "4-ae912526f3013c99761ee9f3c941d793",
+    "type": "espece",
+    "nom": "Gorgone",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "genre": "f",
+    "image": "gorgone_transparent.png",
+    "description": "Femme-monstre à la chevelure de serpents, son regard pétrifie quiconque la fixe.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 25,
+        "max": 45
+      },
+      "R": {
+        "min": 25,
+        "max": 45
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 55,
+        "max": 85
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 20,
+        "max": 40
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "petrification"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_15",
+    "competences": [
+      "competence:monstre_regard_petrifiant"
+    ]
+  },
+  {
+    "_id": "espece:grand_dragon",
+    "_rev": "7-d54dde816fc577947dcbb2e7c1148802",
+    "type": "espece",
+    "nom": "Grand Dragon",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "croix"
+    },
+    "genre": "m",
+    "image": "grand_dragon_transparent.png",
+    "description": "Dragon parvenu à un âge vénérable, dont la puissance et la sagesse rivalisent avec celles des plus grandes créatures du monde.",
+    "base_attributes": {
+      "V": {
+        "min": 17,
+        "max": 19
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 80,
+        "max": 115
+      },
+      "Int": {
+        "min": 55,
+        "max": 85
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_01",
+    "competences": [
+      "competence:monstre_souffle_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:grand_phenix",
+    "_rev": "6-60bb682d00a8f3266c8c60cc6064380d",
+    "type": "espece",
+    "nom": "Grand Phenix",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "chevron"
+    },
+    "genre": "m",
+    "image": "grand_phenix_transparent.png",
+    "description": "Variante ascendante du phénix, dont le souffle ardent embrase des champs entiers et la renaissance s'accompagne d'une vague de pure lumière.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 75,
+        "max": 110
+      },
+      "Int": {
+        "min": 40,
+        "max": 65
+      },
+      "Cha": {
+        "min": 45,
+        "max": 75
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "feu",
+      "renaissance",
+      "vol",
+      "magique",
+      "legendaire",
+      "magie_elementaire_8"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_03",
+    "competences": [
+      "competence:monstre_embrasement"
+    ]
+  },
+  {
+    "_id": "espece:grootslang",
+    "_rev": "4-3d18be9400e319142ce30ee16d187168",
+    "type": "espece",
+    "nom": "Grootslang",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "capsule"
+    },
+    "genre": "m",
+    "image": "grootslang_transparent.png",
+    "description": "Le « grand serpent » des légendes du Richtersveld, en Afrique australe : un colosse au corps d'éléphant prolongé d'une longue queue de serpent. On raconte qu'aux premiers temps, les dieux façonnèrent une créature trop forte et trop rusée, puis la séparèrent en éléphant et en serpent ; une seule leur aurait échappé. Il se terre au fond d'une caverne dont nul n'a vu le fond, le Trou des Merveilles, qu'on dit tapissé de diamants. Il y attire les éléphants pour les dévorer et convoite les pierres précieuses : plus d'un voyageur aurait racheté sa vie en lui offrant des gemmes.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 70,
+        "max": 110
+      },
+      "R": {
+        "min": 70,
+        "max": 105
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 35,
+        "max": 60
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 70
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "reptile",
+      "souterrain",
+      "predateur",
+      "insensible_furtivite",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_06",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:hydre",
+    "_rev": "5-0c6d364660b1663caf6f9a2e8feb38d3",
+    "type": "espece",
+    "nom": "Hydre",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "ellipse"
+    },
+    "genre": "f",
+    "image": "hydre_transparent.png",
+    "description": "Reptile à multiples têtes se régénérant lorsqu'elles sont tranchées, terreur des marécages.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 55,
+        "max": 90
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "monstre",
+      "regeneration",
+      "legendaire"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_visqueux_02",
+    "competences": [
+      "competence:monstre_regeneration"
+    ]
+  },
+  {
+    "_id": "espece:illuyanka",
+    "_rev": "4-5c559f048723c3c6120b4d611146d040",
+    "type": "espece",
+    "nom": "Illuyanka",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "capsule"
+    },
+    "genre": "m",
+    "nom_propre": true,
+    "image": "illuyanka_transparent.png",
+    "description": "Serpent-dragon des hauts plateaux d'Anatolie, terré dans un trou de la montagne : on raconte qu'il vainquit un jour le dieu de l'orage et lui prit son cœur et ses yeux. Sa gloutonnerie le perd : gavé de festin, il ne repasse plus par son trou, et un simple anthrope put le ligoter.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 15,
+        "max": 25
+      },
+      "Vol": {
+        "min": 60,
+        "max": 90
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 75
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "souterrain",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_09",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:kraken",
+    "_rev": "5-d1db9f68b5fe540a7dbaecb0e18a95f3",
+    "type": "espece",
+    "nom": "Kraken",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "image": "kraken_transparent.png",
+    "description": "Titan des mers aux tentacules monstrueux, capable de briser des navires entiers.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 8
+      },
+      "F": {
+        "min": 70,
+        "max": 110
+      },
+      "R": {
+        "min": 65,
+        "max": 100
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 50,
+        "max": 80
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "legendaire"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_visqueux_03",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:ladon",
+    "_rev": "4-e7237e63882ce2bcb0345ef8bfbbf9f6",
+    "type": "espece",
+    "nom": "Ladon",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "capsule"
+    },
+    "genre": "m",
+    "nom_propre": true,
+    "image": "ladon_transparent.png",
+    "description": "Serpent aux cent têtes et aux cent voix, enroulé autour de l'arbre aux pommes d'or du jardin des Hespérides, au-delà des Colonnes, que les marins disent apercevoir au couchant. Il ne dort jamais. Les uns le disent né de Cétô, les autres d'Échidna. Des flèches trempées dans le venin d'une hydre l'auraient déjà blessé ; une ruse l'aurait déjà détourné.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 80,
+        "max": 115
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 80,
+        "max": 110
+      },
+      "Int": {
+        "min": 50,
+        "max": 70
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "gardien",
+      "legendaire",
+      "boss",
+      "insensible_furtivite",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_10"
+  },
+  {
+    "_id": "espece:leviathan",
+    "_rev": "5-019e26edc41b9aa5327d627010d08d65",
+    "type": "espece",
+    "nom": "Leviathan",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "image": "leviathan_transparent.png",
+    "description": "Titan des abysses, créature primordiale dont le réveil peut engloutir des flottes entières.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 100,
+        "max": 150
+      },
+      "R": {
+        "min": 95,
+        "max": 145
+      },
+      "Ag": {
+        "min": 10,
+        "max": 25
+      },
+      "Vol": {
+        "min": 85,
+        "max": 125
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 60,
+        "max": 95
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_visqueux_04",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:minotaure",
+    "_rev": "5-c814a379239623ca74e1995b027c6169",
+    "type": "espece",
+    "nom": "Minotaure",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "genre": "m",
+    "image": "minotaure_transparent.png",
+    "description": "Humanoïde à tête de taureau, force brute et instinct de chasseur dans un dédale de muscles.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 10,
+        "max": 25
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "humanoide",
+      "hybride",
+      "ia_berserker"
+    ],
+    "items": [
+      "item:Kanabo",
+      "item:Hache_de_guerre",
+      "item:Morgenstern",
+      "item:Braies_fourrure",
+      "item:Harnais_d_ossements",
+      "item:Bracelets_os"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_geant_04"
+  },
+  {
+    "_id": "espece:mulet",
+    "_rev": "10-0361aed9216ae912b10e0ec3b6e86a94",
+    "type": "espece",
+    "nom": "Mulet",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "image": "mulet_transparent.png",
+    "description": "Animal de bât increvable, têtu mais d'une endurance remarquable sur les terrains difficiles.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 7
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 45
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "bete_de_somme",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 1.45,
+      "prix_cuivre": 1200
+    },
+    "animation": "animation:son_bete_05"
+  },
+  {
+    "_id": "espece:phenix",
+    "_rev": "6-3f6aa6a97428e6282a44d1e4fcbf572f",
+    "type": "espece",
+    "nom": "Phenix",
+    "jeton": {
+      "taille": "2x1",
+      "forme": "chevron"
+    },
+    "genre": "m",
+    "image": "phenix_transparent.png",
+    "description": "Oiseau de feu renaissant de ses cendres, symbole d'immortalité et de renouveau.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 25,
+        "max": 45
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 60,
+        "max": 95
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 30,
+        "max": 55
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "feu",
+      "renaissance",
+      "vol",
+      "magique",
+      "magie_elementaire_4"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_14",
+    "competences": [
+      "competence:monstre_embrasement"
+    ]
+  },
+  {
+    "_id": "espece:polar_kraken",
+    "_rev": "6-f4cc7abc0f2edbd5b525722771b6c98f",
+    "type": "espece",
+    "nom": "Polar Kraken",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "image": "polar_kraken_transparent.png",
+    "description": "Variante du Kraken adaptée aux mers glacées, ses tentacules gèlent au contact tout ce qu'elles enserrent.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 8
+      },
+      "F": {
+        "min": 70,
+        "max": 110
+      },
+      "R": {
+        "min": 65,
+        "max": 100
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 55,
+        "max": 85
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "froid",
+      "legendaire"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_visqueux_05",
+    "competences": [
+      "competence:monstre_souffle_de_givre",
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:poney",
+    "_rev": "6-c688e463a983a30ae34083828aecfd27",
+    "type": "espece",
+    "nom": "Poney",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "image": "poney_transparent.png",
+    "description": "Petit équidé robuste et docile, apprécié comme première monture par les jeunes cavaliers.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 10,
+        "max": 25
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "petite_taille"
+    ],
+    "proprietes": {
+      "charge_mult": 1.25,
+      "prix_cuivre": 600
+    },
+    "animation": "animation:son_bete_01"
+  },
+  {
+    "_id": "espece:sanglier_apprivoise",
+    "_rev": "6-a2d4fe0d020ad68f1883f9184c8d9970",
+    "type": "espece",
+    "nom": "Sanglier apprivoisé",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "image": "sanglier_apprivoise_transparent.png",
+    "description": "Sanglier dompté capable de porter vos lourdes charges.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 5,
+        "max": 15
+      }
+    },
+    "tags": [
+      "animal",
+      "proie",
+      "monture"
+    ],
+    "proprietes": {
+      "charge_mult": 1.35,
+      "prix_cuivre": 1500
+    },
+    "animation": "animation:son_bete_09"
+  },
+  {
+    "_id": "espece:seraphin",
+    "_rev": "9-8fc570a995a886353314aa9c1c185dca",
+    "type": "espece",
+    "nom": "Seraphin",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "triangle"
+    },
+    "genre": "m",
+    "image": "seraphin_transparent.png",
+    "description": "Plus haute hiérarchie angélique, entité de lumière pure dont la contemplation seule éblouit les mortels.",
+    "base_attributes": {
+      "V": {
+        "min": 18,
+        "max": 20
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 85,
+        "max": 125
+      },
+      "Ag": {
+        "min": 50,
+        "max": 75
+      },
+      "Vol": {
+        "min": 105,
+        "max": 145
+      },
+      "Int": {
+        "min": 70,
+        "max": 100
+      },
+      "Cha": {
+        "min": 65,
+        "max": 95
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "vol",
+      "boss",
+      "legendaire",
+      "divin",
+      "humanoide",
+      "insensible_furtivite",
+      "magie_sainte_10"
+    ],
+    "items": [
+      "item:Epee_une_main_benie",
+      "item:Masse_benie",
+      "item:Bouclier_sacre",
+      "item:Harnois_du_grand_arsenal",
+      "item:Epaulieres_benies",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:serpent_de_marcel",
+    "_rev": "2-f45de7187738422ec5b33cfe85e0761f",
+    "type": "espece",
+    "nom": "Serpent de Marcel",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "capsule"
+    },
+    "genre": "m",
+    "image": "serpent_de_marcel_transparent.png",
+    "description": "Serpent monstrueux des abords de Lutecia, gros comme un tronc de chêne et long de plusieurs chariots, aux écailles vert-de-gris couvertes de lichen, et dont on ne voit les quatre courtes pattes griffues qu'une fois qu'il se dresse. On raconte dans les faubourgs qu'un vieil homme au bâton le fit sortir jadis de la ville et le perdit de vue ; au Relais de Saint-Denis, on dit qu'il suivit un paladin décapité jusqu'au coude du vieux chemin, et qu'il ne l'a jamais passé. Les loups et les corneilles du pays vivent de ses restes.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 65,
+        "max": 95
+      },
+      "R": {
+        "min": 65,
+        "max": 95
+      },
+      "Ag": {
+        "min": 25,
+        "max": 40
+      },
+      "Vol": {
+        "min": 50,
+        "max": 70
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 55
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_12"
+  },
+  {
+    "_id": "espece:tarasque",
+    "_rev": "5-c4f02f2417c0f100f9796411c033135a",
+    "type": "espece",
+    "nom": "Tarasque",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "losange"
+    },
+    "genre": "f",
+    "image": "tarasque_transparent.png",
+    "description": "Bête légendaire de Provence à tête de lion aux oreilles de cheval, corps de bœuf porté par six courtes pattes d'ours, protégé par une carapace de tortue hérissée d'épines, et une queue écailleuse terminée par un dard. Sa carapace la rend presque invulnérable et elle peut cracher le feu.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 65,
+        "max": 100
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "souffle",
+      "gardien"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_02",
+    "competences": [
+      "competence:monstre_souffle_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:vers_des_sables",
+    "_rev": "5-aaa1bab7601f6f3a11ac268e071685e4",
+    "type": "espece",
+    "nom": "Vers des Sables",
+    "jeton": {
+      "taille": "2x5",
+      "forme": "capsule"
+    },
+    "genre": "m",
+    "pluriel": true,
+    "image": "vers_des_sables_transparent.png",
+    "description": "Créature titanesque vivant sous les déserts, surgissant pour engloutir tout ce qui traverse son territoire.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 75,
+        "max": 115
+      },
+      "R": {
+        "min": 70,
+        "max": 110
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 75
+      }
+    },
+    "tags": [
+      "monstre",
+      "desert",
+      "legendaire",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_visqueux_07"
+  },
+  {
+    "_id": "espece:vouivre",
+    "_rev": "11-8e816f3e0ce4d7837a0672d728e62cb2",
+    "type": "espece",
+    "nom": "Vouivre",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "genre": "f",
+    "image": "vouivre_transparent.png",
+    "description": "Femme d'une grande beauté au corps de serpent, bien vivante, héritière des légendes de Mélusine ; elle hante sources et rivières, et malheur à qui la surprend au bain.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 45,
+        "max": 75
+      },
+      "Ag": {
+        "min": 40,
+        "max": 70
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 40,
+        "max": 85
+      },
+      "Cha": {
+        "min": 60,
+        "max": 90
+      },
+      "Ch": {
+        "min": 30,
+        "max": 55
+      }
+    },
+    "tags": [
+      "humanoide",
+      "seduction"
+    ],
+    "items": [
+      "item:Jian",
+      "item:Naginata",
+      "item:Cape_soie_sombre",
+      "item:Gants_fins"
+    ],
+    "proprietes": {},
+    "competences": [
+      "competence:monstre_charme"
+    ]
+  },
+  {
+    "_id": "espece:yamata_no_orochi",
+    "_rev": "4-221c88b0d59661d6db3486b534d8d8a5",
+    "type": "espece",
+    "nom": "Yamata no Orochi",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "capsule"
+    },
+    "genre": "m",
+    "nom_propre": true,
+    "image": "yamata_no_orochi_transparent.png",
+    "description": "Serpent d'Izumo à huit têtes et huit queues, long de huit vallées et de huit collines : des cyprès poussent sur son dos, ses yeux sont rouges comme des cerises d'hiver, son ventre suinte le sang. Chaque année il exigeait une jeune fille. Le saké huit fois brassé endort ses têtes une à une ; on dit qu'une lame dort dans l'une de ses queues.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 100,
+        "max": 145
+      },
+      "R": {
+        "min": 95,
+        "max": 140
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 70,
+        "max": 100
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "legendaire",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_06",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:zmey_gorynych",
+    "_rev": "4-7174242258b8949f7d2d90c9a0543fd4",
+    "type": "espece",
+    "nom": "Zmeï Gorynytch",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "croix"
+    },
+    "genre": "m",
+    "nom_propre": true,
+    "image": "zmey_gorynych_transparent.png",
+    "description": "Dragon à trois têtes des terres de Kiev, aux griffes de fer, qui crache le feu et enlève qui lui plaît. Il garde le pont Kalinov sur la Smorodina, la rivière de feu ; on dit que ce pont mène au pays des morts, et nul n'en est revenu pour le confirmer. Ses têtes repoussent ; la terre, dit-on, refuse de boire son sang tant qu'on ne l'en supplie pas.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 80,
+        "max": 115
+      },
+      "R": {
+        "min": 75,
+        "max": 110
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 70,
+        "max": 100
+      },
+      "Int": {
+        "min": 45,
+        "max": 65
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "regeneration",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_02",
+    "competences": [
+      "competence:monstre_souffle_de_feu",
+      "competence:monstre_regeneration"
+    ]
+  }
+]

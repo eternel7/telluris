@@ -41,6 +41,7 @@ from utils import montures as montures_util
 from utils import escorte as escorte_util
 from utils import animations as animations_util
 from utils import jetons
+from utils import parties_corps
 from utils import journal
 from utils import pieges as pieges_util
 from utils import tresor as tresor_util
@@ -714,6 +715,11 @@ def _cases_zone_offensive(joueur: dict, monstre: dict, zone: dict, grid: dict) -
 	Grand jeton : la forme se pose sur la case de son emprise la plus proche du lanceur, et
 	une victime est prise dès qu'UNE de ses cases est dans la forme (utils/jetons.py)."""
 	jx, jy = joueur["pos"]["x"], joueur["pos"]["y"]
+	# Grand monstre à PARTIES DU CORPS : la zone part de sa case de TÊTE la plus proche de la
+	# cible (souffle, morsure), et non du coin haut-gauche de son emprise.
+	tete = parties_corps.ancre_tete(joueur, monstre) if monstre is not joueur else None
+	if tete is not None:
+		jx, jy = tete
 	return set(cases_effet(
 		zone,
 		(jx, jy),
@@ -975,8 +981,7 @@ def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, sourc
 				"cible": monstre["nom"], "cible_id": monstre.get("id")}, jet
 
 	if notation:
-		touchee = tirer_localisation()
-		ctx["ou"] = f" {ZONE_LIBELLE[touchee]}" if touchee in ZONE_LIBELLE else ""
+		touchee, ctx["ou"] = localiser_coup(joueur, monstre)
 		dmg = calculer_degats(joueur, monstre, notation, jet["mult_degats"], mode_jet,
 							  zone=touchee)
 	else:
@@ -985,6 +990,8 @@ def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, sourc
 	monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
 	ctx["dmg"] = dmg
 	ctx["pv"] = monstre["currentPV"]
+	if notation:
+		_ailes_touchees(combat_doc, monstre, touchee, avant_pv)
 
 	# ── DÉGÂTS AUX PM ────────────────────────────────────────────────────────────
 	# « Ils ne réduisent pas directement les PV. » Un sort peut porter les deux à la fois
@@ -1250,6 +1257,9 @@ def _can_fly(actor: dict) -> bool:
 	de magie, tant que l'entrée vit : à son expiration il reprend l'air sans rien d'autre."""
 	if vol_util.abattu(actor):
 		return False
+	# AILES BRISÉES (utils/parties_corps.py) : plus de vol d'espèce ; la magie porte encore.
+	if actor.get("ailes_brisees"):
+		return bool(actor.get("vol_magique"))
 	return bool(actor.get("volant") or actor.get("vol_magique"))
 
 
@@ -3341,6 +3351,32 @@ def _parts_de_zone() -> dict:
 	return parts
 
 
+def localiser_coup(attaquant: dict, defenseur: dict) -> tuple:
+	"""`(zone, « à la tête »…)` d'un coup qui touche. Grand monstre à PARTIES DU CORPS
+	(utils/parties_corps.py) : la partie la plus proche de l'attaquant, sans d100 ; sinon le
+	d100 de `tirer_localisation`. Chokepoint de TOUS les sites qui portent un coup."""
+	zone = parties_corps.partie_visee(defenseur, attaquant)
+	if zone is not None:
+		return zone, f" {parties_corps.LIBELLES[zone]}"
+	zone = tirer_localisation()
+	return zone, (f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else "")
+
+
+def _ailes_touchees(combat_doc: dict, monstre: dict, zone: str | None, avant_pv: int) -> None:
+	"""Coup porté AUX AILES : cumule les PV réellement retirés ; au seuil, le monstre perd le
+	vol d'espèce (ligne de journal) et chute s'il surplombait une falaise (`_atterrir`)."""
+	if zone != parties_corps.AILES:
+		return
+	if not parties_corps.blesser_ailes(monstre, avant_pv - int(monstre.get("currentPV", 0))):
+		return
+	if monstre.get("vivant", True) and monstre.get("currentPV", 0) > 0:
+		combat_doc["log"].append(_avec_etat({
+			"tour": combat_doc.get("tour"), "acteur": monstre["nom"], "kind": "sys",
+			"texte": f"Les ailes de {monstre['nom']} sont brisées : il ne peut plus voler !",
+		}, monstre))
+		_atterrir(combat_doc, monstre)
+
+
 def pa_de_zone(defenseur: dict, zone: str | None = None):
 	"""Points d'armure à opposer à un coup, selon l'endroit frappé.
 
@@ -3360,6 +3396,9 @@ def pa_de_zone(defenseur: dict, zone: str | None = None):
 	  • sinon ⇒ global + PA de la pièce couvrant cette zone (0 si elle est nue).
 	"""
 	total = int(defenseur.get("pa", 0) or 0)
+	if zone in parties_corps.MULT_PA:
+		# PARTIE DU CORPS d'un grand monstre (utils/parties_corps.py) : ses PA modulés.
+		return int(round(total * parties_corps.MULT_PA[zone]))
 	zones = {z: int(v or 0) for z, v in (defenseur.get("pa_zones") or {}).items()}
 	global_ = total - sum(zones.values())
 	if not zones:
@@ -5616,10 +5655,14 @@ def _coup_sur(combat_doc: dict, attaquant: dict, defenseur: dict, profil: dict,
 	if jet["touche"]:
 		# Formule partagée avec le joueur, les sorts, les compétences et le simulateur.
 		# La zone frappée décide des PA opposés (pièce couvrante + protections globales).
-		zone = tirer_localisation()
-		ou = f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else ""
+		zone, ou = localiser_coup(attaquant, defenseur)
 		dmg = calculer_degats(attaquant, defenseur, notation,
 							  jet["mult_degats"], profil.get("toucher", "cc"), zone=zone)
+		if profil.get("facteur_degats"):
+			# Coup de QUEUE (utils/parties_corps.py) : une fraction du coup, plancher à 1.
+			dmg = max(1, int(dmg * profil["facteur_degats"]))
+			ou = f"{ou} d'un coup de queue"
+		avant_pv_def = defenseur["currentPV"]
 		# LIEN DE VIE : une partie du coup peut être absorbée puis reportée sur un
 		# protecteur. ⚠️ Les DEUX déductions de PV avant le moindre `_traiter_ko` : la
 		# première cascade interroge `_combattants_vivants`, qui répondrait sur un état
@@ -5673,6 +5716,8 @@ def _coup_sur(combat_doc: dict, attaquant: dict, defenseur: dict, profil: dict,
 			_tester_concentration(combat_doc, protecteur, attaquant, dmg_prot)
 		if defenseur["currentPV"] <= 0:
 			_traiter_ko(combat_doc, defenseur, attaquant)
+		elif not est_joueur:
+			_ailes_touchees(combat_doc, defenseur, zone, avant_pv_def)
 		if protecteur is not None and protecteur["currentPV"] <= 0:
 			# Le protecteur peut tomber sous le coup qu'il absorbe — même cascade, et le
 			# même `attaquant` en est la cause, même s'il ne l'a jamais visé.
@@ -5867,8 +5912,7 @@ def _coup_capacite_monstre(combat_doc: dict, monstre: dict, victime: dict, cap: 
 	avant = victime["currentPV"]
 	notation = effets.get("degats") or ""
 	if notation:
-		zone = tirer_localisation()
-		ou = f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else ""
+		zone, ou = localiser_coup(monstre, victime)
 		dmg = calculer_degats(monstre, victime, notation, jet["mult_degats"], mode_jet, zone=zone)
 		critique = "COUP CRITIQUE — " if jet["critique"] else ""
 		_blesser_allie(combat_doc, monstre, victime, dmg, ligne,
@@ -6004,6 +6048,17 @@ def _pivoter_vers(combat_doc: dict, acteur: dict, cible: dict, grid: dict) -> bo
 		"texte": f"{acteur['nom']} pivote vers {cible['nom']}.",
 	}, acteur))
 	return True
+
+
+_PROFIL_MAINS_NUES_MONSTRE = {"mode": "cac", "toucher": "cc", "degats": "degats_cc"}
+
+
+def _coup_de_queue_possible(grid: dict, monstre: dict, cible: dict) -> bool:
+	"""Cible DANS LE DOS d'un grand monstre à parties et au contact de sa QUEUE, en vue :
+	seule exception à l'interdit de frapper dans son dos (utils/parties_corps.py)."""
+	return (parties_corps.a_des_parties(monstre) and _dans_le_dos(monstre, cible)
+			and parties_corps.queue_au_contact(monstre, cible)
+			and _vue_acteurs(grid["cells"], monstre, cible))
 
 
 def _pret_a_frapper(combat_doc: dict, acteur: dict, cible: dict, grid: dict) -> bool:
@@ -6487,8 +6542,16 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 		   and not (dep == "hit_and_run" and recule and coups >= 1)):
 		if joueur is None or joueur.get("currentPV", 0) <= 0:
 			joueur = _cible_joueur(combat_doc, monstre)
-		if (joueur is None or _cheby(monstre, joueur) > portee
-				or not _pret_a_frapper(combat_doc, monstre, joueur, grid)):
+		if joueur is None or _cheby(monstre, joueur) > portee:
+			break
+		if _coup_de_queue_possible(grid, monstre, joueur):
+			# Dans son dos, au contact de sa QUEUE : il frappe sans pivoter (utils/parties_corps).
+			_do_monster_attack(combat_doc, monstre, joueur, dict(
+				profil or _PROFIL_MAINS_NUES_MONSTRE, portee=monstre.get("portee", 1),
+				facteur_degats=parties_corps.COUP_DE_QUEUE_FACTEUR))
+			coups += 1
+			continue
+		if not _pret_a_frapper(combat_doc, monstre, joueur, grid):
 			break
 		_do_monster_attack(combat_doc, monstre, joueur, profil)   # décompte l'action lui-même
 		coups += 1
@@ -6680,11 +6743,12 @@ def _frapper_monstre_coup(combat_doc: dict, attaquant: dict, monstre: dict, prof
 			acteur_id=attaquant.get("id", "")))
 		return {"hit": False, "fumble": jet["fumble"], "roll": roll, "seuil": seuil}, jet
 
-	zone = tirer_localisation()
-	ou = f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else ""
+	zone, ou = localiser_coup(attaquant, monstre)
 	dmg = calculer_degats(attaquant, monstre, notation, jet["mult_degats"],
 						  profil.get("toucher", "cc"), zone=zone)
+	avant_pv = monstre["currentPV"]
 	monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
+	_ailes_touchees(combat_doc, monstre, zone, avant_pv)
 	# L'animation suit le MODE de l'arme (cac/jet/tir), avec celle de l'arme elle-même en
 	# priorité : le profil la porte depuis le snapshot, aucun doc n'est relu ici.
 	anim_arme = profil.get("animation")

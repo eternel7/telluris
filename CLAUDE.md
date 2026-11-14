@@ -126,6 +126,8 @@ utils/
                          #   ancre (lanceur/cible) + orientation ; miroir scripts/zones_effet.js
   jetons.py              # jetons de taille variable (pur) : emprise LxP selon le cap, distance entre
                          #   emprises, pas avec pivot, A* ; miroir scripts/jetons.js
+  parties_corps.py       # parties du corps des boss 4x3/5x4/2x5 (pur) : tête/queue/ailes/flancs DÉRIVÉES du cap,
+                         #   partie frappée selon le côté (PA modulés), ailes brisées, zone depuis la tête, coup de queue
   capacites_monstre.py   # magie et capacités des monstres (pur) : tags `magie_<école>_<niv>[_<profil>]`, compétences
                          #   innées `competence:monstre_*` (passives, venin à l'impact, actives à recharge), choix de l'IA
   ia_monstre.py          # types d'IA (pur) : tags `ia_<type>[_<n>][_<profil>]` — déplacement / cible / fuite

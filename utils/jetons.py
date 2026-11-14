@@ -7,8 +7,10 @@
 #
 #   • `L` = LARGEUR, en travers de la marche ; `P` = PROFONDEUR, dans le sens de la marche.
 #     Un cheval est 1x2, une envergure d'archange 2x1, un dragon 3x2 (3 cases d'ailes sur
-#     2 de corps).
-#   • `forme` (ellipse / rectangle / triangle) n'habille que le DESSIN : les cases occupées
+#     2 de corps). Paliers des plus grands : 4x3 (boss légendaires), 5x4 (le seul Dragon
+#     Empereur, plus gros monstre du bestiaire) ; 2x5 pour un corps tout en LONGUEUR (Ver des
+#     sables : 2 de large, 5 dans le sens de la marche).
+#   • `forme` (ellipse / rectangle / triangle / croix / capsule / losange / chevron) n'habille que le DESSIN : les cases occupées
 #     sont toujours le rectangle plein.
 #
 # Sur un snapshot de combat, le bloc est normalisé en `jeton: {largeur, profondeur, forme}`
@@ -27,10 +29,11 @@
 import heapq
 
 # Gabarits admis (largeur, profondeur). Une taille inconnue ⇒ 1x1 : on ne devine pas.
-TAILLES_JETON = {"1x1": (1, 1), "2x1": (2, 1), "1x2": (1, 2), "2x2": (2, 2), "3x2": (3, 2)}
-FORMES_JETON = ("ellipse", "rectangle", "triangle")
+TAILLES_JETON = {"1x1": (1, 1), "2x1": (2, 1), "1x2": (1, 2), "2x2": (2, 2), "3x2": (3, 2),
+				 "4x3": (4, 3), "5x4": (5, 4), "2x5": (2, 5)}
+FORMES_JETON = ("ellipse", "rectangle", "triangle", "croix", "capsule", "losange", "chevron")
 FORME_DEFAUT = "ellipse"
-DIMENSION_MAX = 3
+DIMENSION_MAX = 5  # = la plus grande dimension des gabarits (5x4)
 
 # Cap = direction de marche, repère MONDE (y croît vers le bas, comme `cells[y][x]`).
 CAPS = {"haut": (0, -1), "bas": (0, 1), "gauche": (-1, 0), "droite": (1, 0)}
