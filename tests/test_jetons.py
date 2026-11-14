@@ -75,6 +75,17 @@ def test_pivot_dun_5x4():
 	assert jetons.emprise(pivote) == (3, 0, 4, 5)
 
 
+def test_corps_en_longueur_2x5():
+	"""Ver des sables : 2 de large, 5 dans le sens de la marche. Cap bas (x 4..5, y 1..5) puis
+	pas à droite : il pivote couché (5x2), bord avant de x=5 à x=6 (x 2..6), centré en
+	travers sur l'ancienne emprise (y 2..3)."""
+	ver = _acteur(4, 1, "2x5", "rectangle", "bas")
+	assert jetons.emprise(ver) == (4, 1, 2, 5)
+	etat = jetons.pas_jeton(ver, 1, 0, set(), _ouvert(12, 12))
+	assert etat == ({"x": 2, "y": 2}, "droite")
+	assert jetons.emprise({"pos": etat[0], "jeton": ver["jeton"], "cap": etat[1]}) == (2, 2, 5, 2)
+
+
 def test_jeton_espece():
 	assert jetons.jeton_espece({"jeton": {"taille": "1x2"}})["profondeur"] == 2
 	assert jetons.jeton_espece({"nom": "Loup"}) is None

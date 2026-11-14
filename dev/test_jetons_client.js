@@ -81,6 +81,12 @@ t('paliers des plus grands : 4x3 et 5x4 (Dragon Empereur)', () => {
 	assert.strictEqual(casesActeur(empereur).length, 20);
 });
 
+t('corps en longueur 2x5 (Ver des sables) : la longueur suit la marche', () => {
+	const ver = acteur(4, 1, '2x5', 'rectangle', 'bas');
+	assert.deepStrictEqual(empriseActeur(ver), [4, 1, 2, 5]);
+	assert.deepStrictEqual(empriseActeur(Object.assign({}, ver, { cap: 'droite' })), [4, 1, 5, 2]);
+});
+
 console.log('\n── Emprise ─────────────────────────────────────────────────────────────────');
 
 t('l’emprise suit le cap (la profondeur suit la marche)', () => {

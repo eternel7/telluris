@@ -9,7 +9,7 @@
 # (ellipse / rectangle / triangle) n'habille que le dessin. Sans champ : 1x1 rond, comme avant.
 #
 # Principe de la table : triangle = ailés (envergure), rectangle = colosses bipèdes et
-# constructs, ellipse = corps organiques. Gabarits admis : 1x1, 2x1, 1x2, 2x2, 3x2, 4x3, 5x4.
+# constructs, ellipse = corps organiques. Gabarits admis : 1x1, 2x1, 1x2, 2x2, 3x2, 4x3, 5x4, 2x5.
 # Paliers des plus grands : 3x2 pour les dragons et grands monstres ordinaires, 4x3 pour les
 # boss légendaires, 5x4 pour le SEUL Dragon Empereur (le plus gros du bestiaire).
 #
@@ -25,10 +25,13 @@
 # N'écrit que les espèces dont le champ est à poser, à changer ou à retirer : une espèce déjà
 # à jour dans le dump n'est pas réimportée.
 #
-# Usage : python dev/gen_jetons_especes.py
+# Usage : python dev/gen_jetons_especes.py [--seulement slug,slug…] [--sortie jsons/x.json]
+#   --seulement : restreint le fichier aux espèces citées — quand une passe précédente n'est pas
+#                 encore dans le dump, sans quoi elle ressortirait (un fichier = une demande).
 # Sortie (à coller dans /admin → Import en masse) :
 #   jsons/jetons_especes_a_importer.json
 
+import argparse
 import glob
 import json
 import os
@@ -37,16 +40,16 @@ import sys
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SORTIE = "jsons/jetons_especes_a_importer.json"
 
-TAILLES = ("1x1", "2x1", "1x2", "2x2", "3x2", "4x3", "5x4")
+TAILLES = ("1x1", "2x1", "1x2", "2x2", "3x2", "4x3", "5x4", "2x5")
 FORMES = ("ellipse", "rectangle", "triangle")
 
 # slug d'espèce → (taille, forme), ou None pour 1x1 sans champ.
 TABLE = {
 	"abhartach": None,
 	"aicha_kandicha": None,
-	"aigle_geant": ("3x2", "triangle"),
+	"aigle_geant": ("2x2", "triangle"),
 	"ammit": ("2x2", "ellipse"),
-	"ane": None,
+	"ane": ("1x2", "ellipse"),
 	"ange_de_la_connaissance": None,
 	"ange_de_la_justice": None,
 	"apep": ("4x3", "ellipse"),
@@ -57,7 +60,7 @@ TABLE = {
 	"avatar": ("1x1", "rectangle"),
 	"balaur": ("3x2", "triangle"),
 	"banshee": None,
-	"basilic": ("3x2", "ellipse"),
+	"basilic": ("1x2", "ellipse"),
 	"besien": None,
 	"bete_de_l_apocalypse": ("4x3", "ellipse"),
 	"bete_du_gevaudan": ("1x2", "ellipse"),
@@ -81,7 +84,7 @@ TABLE = {
 	"coursier_elfique": ("1x2", "ellipse"),
 	"coursier_persan": ("1x2", "ellipse"),
 	"crocodile": ("1x2", "ellipse"),
-	"cu_sidhe": None,
+	"cu_sidhe": ("1x2", "ellipse"),
 	"cupidon": None,
 	"cwn_annwn": ("1x2", "ellipse"),
 	"cyclope": ("2x2", "rectangle"),
@@ -94,7 +97,7 @@ TABLE = {
 	"doppleganger": None,
 	"dobhar_chu": None,
 	"dragnard": ("1x2", "ellipse"),
-	"dragon_hydre": ("3x2", "ellipse"),
+	"dragon_hydre": ("4x3", "ellipse"),
 	"draugr": None,
 	"dragon": ("3x2", "triangle"),
 	"dragon_blanc": ("4x3", "triangle"),
@@ -105,7 +108,7 @@ TABLE = {
 	"dryade": None,
 	"ecureuil": None,
 	"elementaux": None,
-	"failinis": None,
+	"failinis": ("1x2", "ellipse"),
 	"familier": None,
 	"fantome": None,
 	"faoladh": None,
@@ -115,35 +118,35 @@ TABLE = {
 	"gargouille": None,
 	"geant_de_ad": ("2x2", "rectangle"),
 	"geant_du_mont_saint_michel": ("2x2", "rectangle"),
-	"geant_ou_titan": ("3x2", "rectangle"),
+	"geant_ou_titan": ("4x3", "rectangle"),
 	"genie": None,
 	"ghul_des_sables": None,
 	"gnome": None,
 	"gobelin": None,
 	"gobelin_chamanique": None,
 	"gobelin_des_marais": None,
-	"golem_de_chair": None,
+	"golem_de_chair": ("2x2", "rectangle"),
 	"golem_de_fer": ("2x2", "rectangle"),
 	"golem_de_pierre": ("2x2", "rectangle"),
-	"gorgone": None,
+	"gorgone": ("1x2", "ellipse"),
 	"goule": None,
 	"grand_dragon": ("4x3", "triangle"),
 	"grand_faucon": ("2x1", "triangle"),
 	"grand_phenix": ("3x2", "triangle"),
 	"grand_sanglier": ("1x2", "ellipse"),
 	"griffon": ("2x2", "triangle"),
-	"grootslang": ("3x2", "ellipse"),
+	"grootslang": ("4x3", "ellipse"),
 	"harpie": None,
 	"gwyn_ap_nudd": None,
 	"hippogriffe": ("2x2", "triangle"),
 	"homme_arbre": ("2x2", "ellipse"),
 	"horreur": None,
-	"hydre": ("3x2", "ellipse"),
+	"hydre": ("4x3", "ellipse"),
 	"ifrit": ("2x2", "ellipse"),
 	"illuyanka": ("4x3", "ellipse"),
 	"incube": None,
 	"jann": None,
-	"kraken": ("3x2", "ellipse"),
+	"kraken": ("4x3", "ellipse"),
 	"ladon": ("4x3", "ellipse"),
 	"leprechaun": None,
 	"leviathan": ("4x3", "ellipse"),
@@ -161,12 +164,12 @@ TABLE = {
 	"manticore": ("2x2", "ellipse"),
 	"marid": ("2x2", "ellipse"),
 	"mimique": None,
-	"minotaure": None,
+	"minotaure": ("2x2", "rectangle"),
 	"momie": None,
 	"monture_angelique": ("1x2", "ellipse"),
 	"monture_demoniaque": ("1x2", "ellipse"),
 	"monture_squelette": ("1x2", "ellipse"),
-	"mulet": None,
+	"mulet": ("1x2", "ellipse"),
 	"mushhushshu": ("1x2", "ellipse"),
 	"nahual": None,
 	"naiade": None,
@@ -185,8 +188,8 @@ TABLE = {
 	"petits_animaux_divers": None,
 	"phenix": ("2x1", "triangle"),
 	"poissons_mammiferes_marins": ("1x2", "ellipse"),
-	"polar_kraken": ("3x2", "ellipse"),
-	"poney": None,
+	"polar_kraken": ("4x3", "ellipse"),
+	"poney": ("1x2", "ellipse"),
 	"prince_demon": ("2x2", "rectangle"),
 	"rapaces": None,
 	"rat_geant": None,
@@ -197,7 +200,7 @@ TABLE = {
 	"roi_des_tombes": None,
 	"roi_liche": None,
 	"sanglier": None,
-	"sanglier_apprivoise": None,
+	"sanglier_apprivoise": ("1x2", "ellipse"),
 	"satyre": None,
 	"seigneur_du_sang": None,
 	"seraphin": ("4x3", "triangle"),
@@ -221,8 +224,8 @@ TABLE = {
 	"ulfhedinn": None,
 	"uturuncu": None,
 	"vampire": None,
-	"vers_des_sables": ("3x2", "ellipse"),
-	"vouivre": None,
+	"vers_des_sables": ("2x5", "rectangle"),
+	"vouivre": ("1x2", "ellipse"),
 	"wyvern": ("3x2", "triangle"),
 	"xiuhcoatl": ("1x2", "ellipse"),
 	"yamata_no_orochi": ("4x3", "ellipse"),
@@ -264,6 +267,14 @@ def _avec_jeton(doc: dict, jeton: dict | None) -> dict:
 
 
 def main() -> None:
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--seulement", default="")
+	parser.add_argument("--sortie", default=SORTIE)
+	args = parser.parse_args()
+	seulement = {x.strip() for x in args.seulement.split(",") if x.strip()}
+	inconnues = sorted(seulement - set(TABLE))
+	if inconnues:
+		sys.exit("ERREUR : --seulement cite des espèces absentes de la table : " + ", ".join(inconnues))
 	for slug, valeur in TABLE.items():
 		if valeur is not None and (valeur[0] not in TAILLES or valeur[1] not in FORMES):
 			sys.exit(f"ERREUR : gabarit invalide pour {slug} : {valeur}")
@@ -283,7 +294,7 @@ def main() -> None:
 		sys.exit(1)
 
 	docs, deja, compte = [], 0, {}
-	for slug in sorted(TABLE):
+	for slug in sorted(seulement or TABLE):
 		doc = especes[f"espece:{slug}"]
 		valeur = TABLE[slug]
 		jeton = {"taille": valeur[0], "forme": valeur[1]} if valeur else None
@@ -296,13 +307,13 @@ def main() -> None:
 		cle = f"{valeur[0]} {valeur[1]}" if valeur else "retrait"
 		compte[cle] = compte.get(cle, 0) + 1
 
-	chemin = os.path.join(RACINE, SORTIE)
+	chemin = os.path.join(RACINE, args.sortie)
 	with open(chemin, "w", encoding="utf-8") as f:
 		json.dump(docs, f, ensure_ascii=False, indent=2)
 		f.write("\n")
 	unites = sum(1 for v in TABLE.values() if v is None)
 	print(f"relu {os.path.relpath(source, RACINE)} ({len(especes)} espèces)")
-	print(f"écrit {SORTIE} : {len(docs)} doc(s), {unites} espèce(s) laissée(s) en 1x1")
+	print(f"écrit {args.sortie} : {len(docs)} doc(s), {unites} espèce(s) laissée(s) en 1x1")
 	for cle in sorted(compte):
 		print(f"   {cle} : {compte[cle]}")
 	if deja:

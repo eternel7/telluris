@@ -13,7 +13,7 @@
 // que rendaient les anciens calculs case à case.
 
 const JETON_TAILLES = { '1x1': [1, 1], '2x1': [2, 1], '1x2': [1, 2], '2x2': [2, 2], '3x2': [3, 2],
-	'4x3': [4, 3], '5x4': [5, 4] };
+	'4x3': [4, 3], '5x4': [5, 4], '2x5': [2, 5] };
 const JETON_FORMES = ['ellipse', 'rectangle', 'triangle'];
 const JETON_CAPS = { haut: [0, -1], bas: [0, 1], gauche: [-1, 0], droite: [1, 0] };
 const JETON_CAP_DEFAUT = 'bas';
