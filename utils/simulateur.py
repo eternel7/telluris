@@ -10,7 +10,8 @@
 #
 # Ce que le modèle 1D assume (écarts au vrai moteur, tous volontaires) :
 #   • distance de départ fixée par l'écran, chacun avance en ligne droite (min 1 case,
-#     deux acteurs ne partagent pas une case) ; pas de kiting — un archer ne recule pas ;
+#     deux acteurs ne partagent pas une case) ; pas de kiting — un archer ne recule pas
+#     (seul un `hit_and_run` se replie, cf. PLACEMENT ; la ligne n'a pas de bord) ;
 #   • interdit ranged du moteur traduit en 1D : distance <= 1 = engagé au corps à corps,
 #     donc pas de tir/jet ni de sort de portée > 1 ;
 #   • politique d'action simple et documentée (soin sous SEUIL_SOIN_PV, buffs d'ouverture
@@ -32,8 +33,15 @@
 #     corps = révélation, à distance = la cible seule tente un jet ;
 #   • les sorts/compétences à `condition` (battle_map_tags) ne sont engagés que si le
 #     terrain les remplit (condition_remplie) ;
-#   • hors périmètre : les actives/sorts qui POSENT la furtivité en cours de combat
-#     (l'arsenal ne retient pas un soutien à furtivité seule).
+#   • une active/un sort qui POSE la furtivité (`effets.furtivite > 0`, barre d'action)
+#     forme l'arsenal `dissimulations` : l'acteur révélé garde sa DERNIÈRE action pour se
+#     fondre à nouveau dans les ombres (`_se_dissimuler`, même effet que
+#     combat._activer_furtivite : l'adversaire doit réussir un nouveau jet).
+#
+# PLACEMENT — seul `hit_and_run` (tag `ia_hit_and_run`, figé au snapshot) est rejoué, comme
+# `_run_monster_turn` : un seul coup d'ARME par tour (une capacité innée, souffle compris,
+# ne compte pas), puis repli avec toutes les cases qui restent (`_fuir`). Ni berserker
+# (il ne recule jamais) ni autre placement (meute, embuscade, artilleur…) au banc d'essai.
 #
 # Un CHARACTER est simulé à PLEINE FORME (currentPV/PM forcés aux max — un banc d'essai
 # ne mesure pas l'état de jeu du moment) et n'engage que ce que sa barre d'action porte
@@ -373,7 +381,7 @@ def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=(), objets: bool = T
 	mesure alors ce que valent des belligérants sur leurs seules ressources propres —
 	stats, armes, sorts et compétences. Sorts et compétences ne sont PAS des objets et
 	restent en place ; l'équipement non plus (un duel aux poings ne se demande pas)."""
-	sorts_off, comps_off, soutiens, consommables = [], [], [], []
+	sorts_off, comps_off, soutiens, consommables, dissimulations = [], [], [], [], []
 	vus = set()
 	# Exigence d'arme (cf. utils/exigence_arme) : une compétence que le jeu refuserait faute
 	# de l'arme en main n'entre pas dans le duel. Lu une fois, sur l'équipement d'essai.
@@ -390,6 +398,8 @@ def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=(), objets: bool = T
 			if not sort or not sort_utilisable_combat(sort) or not condition_remplie(sort, map_tags):
 				continue
 			eff = sort["effets"]
+			if sort["cible"] != "ennemi" and _dissimule(eff):
+				dissimulations.append(_dissimulation(sort, "sorts"))
 			if sort["cible"] == "ennemi":
 				sorts_off.append(_resoudre_capacite(sort, caracts or {}))
 			elif eff.get("pv") or eff.get("soin") or eff.get("pm") or part_durative(eff):
@@ -406,6 +416,8 @@ def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=(), objets: bool = T
 			if exigence_arme.manquante(comp, armes):
 				continue
 			eff = comp["effets"]
+			if comp["cible"] != "ennemi" and _dissimule(eff):
+				dissimulations.append(_dissimulation(comp, "competences"))
 			if comp["cible"] == "ennemi":
 				comps_off.append(_resoudre_capacite(comp, caracts or {}))
 			elif eff.get("pv") or eff.get("soin") or eff.get("pm") or part_durative(eff):
@@ -427,7 +439,22 @@ def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=(), objets: bool = T
 			consommables.append(entry)
 			soutiens.append(entry)
 	return {"sorts": sorts_off, "competences": comps_off,
-			"soutiens": soutiens, "consommables": consommables}
+			"soutiens": soutiens, "consommables": consommables,
+			"dissimulations": dissimulations}
+
+
+def _dissimule(effets: dict) -> bool:
+	"""Capacité qui POSE la furtivité (même test que le moteur : `effets.furtivite > 0`)."""
+	try:
+		return int((effets or {}).get("furtivite") or 0) > 0
+	except (TypeError, ValueError):
+		return False
+
+
+def _dissimulation(capa: dict, compteur: str) -> dict:
+	return {"id": capa["id"], "label": capa["nom"], "icon": capa.get("icon") or "🫥",
+			"cout_pm": int(capa.get("cout_pm") or 0), "compteur": compteur, "source": capa,
+			"furtivite": int(capa["effets"]["furtivite"])}
 
 
 def _arsenal_d_espece(espece: dict, get_doc_fn, map_tags=(), caracts: dict | None = None) -> dict:
@@ -448,7 +475,8 @@ def _arsenal_d_espece(espece: dict, get_doc_fn, map_tags=(), caracts: dict | Non
 							 "icon": comp["icon"], "cout_pm": comp["cout_pm"],
 							 "effets": eff, "caracts": caracts or {},
 							 "compteur": "competences", "source": comp})
-	return {"sorts": [], "competences": comps_off, "soutiens": soutiens, "consommables": []}
+	return {"sorts": [], "competences": comps_off, "soutiens": soutiens, "consommables": [],
+			"dissimulations": []}
 
 
 def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = True) -> dict:
@@ -960,6 +988,10 @@ def _portee_visee(actor: dict, arsenal: dict) -> int:
 				and sort["effets"].get("degats")):
 			portees.append(max(1, sort["portee"]))
 	for comp in arsenal.get("competences") or []:
+		# En RECHARGE, elle ne vise rien : sans ce filtre, un dragon s'arrêtait à portée de
+		# souffle les tours où il ne pouvait pas souffler, et ne faisait plus rien.
+		if (actor.get("recharges") or {}).get(comp.get("id"), 0) > 0:
+			continue
 		if (combat._cout_pm_charge(actor, comp) <= actor.get("currentPM", 0)
 				and comp["effets"].get("degats")):
 			portees.append(comp["portee"])
@@ -981,6 +1013,54 @@ def _avancer_d_une_case(actor: dict, arsenal: dict, etat: dict) -> bool:
 	return True
 
 
+def _hit_and_run(actor: dict) -> bool:
+	"""Placement `hit_and_run` (tag figé au snapshot) — sauf berserker, qui ne recule jamais."""
+	ia = ia_monstre.ia_de(actor)
+	return ia.get("deplacement") == "hit_and_run" and not ia_monstre.berserker(ia)
+
+
+def _se_replier(actor: dict, etat: dict) -> None:
+	"""Repli du hit-and-run : toutes les cases qui restent (comme `combat._fuir`, borné par
+	`deplacement` et non par le budget d'actions). La ligne 1D n'a pas de bord."""
+	pas = max(0, int(actor.get("deplacement", 1) or 1) - int(actor.get("cells_moved", 0) or 0))
+	if not pas:
+		return
+	actor["cells_moved"] = actor.get("cells_moved", 0) + pas
+	etat["distance"] += pas
+	combat._refresh_actions(actor)
+	_log(etat["pseudo"], actor, "sys",
+		 f"{actor.get('nom', '?')} se replie hors d'atteinte ({pas} case(s), "
+		 f"distance {etat['distance']}).")
+
+
+def _dissimulation_payable(actor: dict, arsenal: dict) -> dict | None:
+	"""Première capacité de dissimulation finançable — None si l'acteur est déjà furtif,
+	n'a plus d'action, ou n'en porte aucune."""
+	if actor.get("furtif") or actor.get("actions_restantes", 0) <= 0:
+		return None
+	for d in arsenal.get("dissimulations") or []:
+		if combat._cout_pm_charge(actor, d["source"]) <= actor.get("currentPM", 0):
+			return d
+	return None
+
+
+def _se_dissimuler(actor: dict, adversaire: dict, arsenal: dict, pseudo: dict) -> bool:
+	"""Se fond dans les ombres (1 action) : même effet que `combat._activer_furtivite` —
+	bonus de furtivité = max(actuel, celui de la capacité), l'adversaire oublie sa
+	détection et devra réussir un nouveau jet (`combat._oublier_detection`)."""
+	d = _dissimulation_payable(actor, arsenal)
+	if d is None:
+		return False
+	actor["currentPM"] = int(actor.get("currentPM", 0)) - combat._cout_pm_charge(actor, d["source"])
+	actor[d["compteur"]] = actor.get(d["compteur"], 0) + 1
+	combat._refresh_actions(actor)
+	actor["furtif"] = True
+	actor["furtivite_bonus"] = max(int(actor.get("furtivite_bonus", 0) or 0), d["furtivite"])
+	combat._oublier_detection(adversaire)
+	_log(pseudo, actor, "sys", f"{actor.get('nom', '?')} se fond dans les ombres ({d['label']})…")
+	return True
+
+
 def _jouer_tour(actor: dict, adversaire: dict, arsenal: dict, etat: dict, round_no: int) -> None:
 	pseudo = etat["pseudo"]
 	# Tick des effets (régén, décrément, expiration → _refresh_snapshot_stats) + budget.
@@ -996,11 +1076,13 @@ def _jouer_tour(actor: dict, adversaire: dict, arsenal: dict, etat: dict, round_
 			pseudo, actor, adversaire,
 			echec_texte=f"{actor.get('nom', '?')} scrute les alentours sans repérer son adversaire !")
 	distance_avant = etat["distance"]
-	# FUITE (tag `ia_fuyard`) : seul axe d'IA qui ait un sens en duel 1D — le fuyard cesse
-	# d'attaquer. Placement (meute, hit-and-run, embuscade…) : hors banc d'essai, assumé.
+	# FUITE (tag `ia_fuyard`) : le fuyard cesse d'attaquer. Placement : seul le hit-and-run
+	# est rejoué (cf. PLACEMENT en tête de module).
 	if ia_monstre.doit_fuir(ia_monstre.ia_de(actor), actor):
 		_log(pseudo, actor, "sys", f"{actor.get('nom', '?')} cherche à fuir.")
 		return
+	hit_and_run = _hit_and_run(actor)
+	coups_arme = 0
 	while _vivant(actor) and _vivant(adversaire) and actor.get("actions_restantes", 0) > 0:
 		if _tenter_soin(actor, arsenal, pseudo):
 			continue
@@ -1011,16 +1093,28 @@ def _jouer_tour(actor: dict, adversaire: dict, arsenal: dict, etat: dict, round_
 		if adversaire.get("furtif") and not actor.get("detecte"):
 			_log(pseudo, actor, "sys", f"{actor.get('nom', '?')} erre sans trouver sa cible.")
 			break
+		# Révélé, il garde sa DERNIÈRE action pour se fondre à nouveau dans les ombres.
+		if actor.get("actions_restantes", 0) == 1 and _dissimulation_payable(actor, arsenal):
+			break
+		# HIT AND RUN : un seul coup d'arme par tour (comme `_run_monster_turn`).
+		if hit_and_run and coups_arme >= 1:
+			break
 		option = _meilleure_offensive(actor, adversaire, arsenal, etat["distance"])
 		if option is not None:
 			_executer_attaque(actor, adversaire, option, etat)
+			if option["kind"] == "arme":
+				coups_arme += 1
 			continue
 		if not _avancer_d_une_case(actor, arsenal, etat):
 			break   # rien à faire : hors de portée et plus de jambes — tour fini
-	if etat["distance"] != distance_avant:
+	if etat["distance"] < distance_avant:
 		_log(pseudo, actor, "sys",
 			 f"{actor.get('nom', '?')} avance de {distance_avant - etat['distance']} case(s) "
 			 f"(distance {etat['distance']}).")
+	if hit_and_run and coups_arme and _vivant(actor):
+		_se_replier(actor, etat)
+	if _vivant(actor) and _vivant(adversaire):
+		_se_dissimuler(actor, adversaire, arsenal, pseudo)
 
 
 # ── Duel & Monte Carlo ───────────────────────────────────────────────────────────────
@@ -1125,6 +1219,10 @@ def _recap_arsenal(bel: dict) -> dict:
 						 "degats": c["effets"].get("degats", "")} for c in arsenal["competences"]],
 		"soutiens": [{"label": s["label"], "cout_pm": s["cout_pm"], "stock": s.get("stock")}
 					 for s in arsenal["soutiens"]],
+		"dissimulations": [{"label": d["label"], "cout_pm": combat._cout_pm_charge(snap, d["source"])}
+						   for d in arsenal.get("dissimulations") or []],
+		# Placement rejoué par le banc d'essai (seul le hit-and-run l'est).
+		"placement": "hit_and_run" if _hit_and_run(snap) else "",
 	}
 
 

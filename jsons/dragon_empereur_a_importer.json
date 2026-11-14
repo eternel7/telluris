@@ -1,0 +1,63 @@
+[
+	{
+		"_id": "espece:dragon_empereur",
+		"type": "espece",
+		"nom": "Dragon Empereur",
+		"jeton": {
+			"taille": "5x4",
+			"forme": "croix"
+		},
+		"genre": "m",
+		"image": "dragon_empereur_transparent.png",
+		"description": "Souverain absolu parmi les dragons, dont la simple présence plie les volontés les plus fortes.",
+		"base_attributes": {
+			"V": {
+				"min": 18,
+				"max": 20
+			},
+			"F": {
+				"min": 95,
+				"max": 140
+			},
+			"R": {
+				"min": 95,
+				"max": 140
+			},
+			"Ag": {
+				"min": 45,
+				"max": 70
+			},
+			"Vol": {
+				"min": 155,
+				"max": 195
+			},
+			"Int": {
+				"min": 65,
+				"max": 95
+			},
+			"Cha": {
+				"min": 0,
+				"max": 0
+			},
+			"Ch": {
+				"min": 60,
+				"max": 95
+			}
+		},
+		"tags": [
+			"monstre",
+			"draconique",
+			"vol",
+			"souffle",
+			"legendaire",
+			"boss",
+			"predateur",
+			"ia_hit_and_run"
+		],
+		"proprietes": {},
+		"animation": "animation:son_dragon_01",
+		"competences": [
+			"competence:monstre_grand_souffle_de_feu"
+		]
+	}
+]

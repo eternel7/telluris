@@ -437,6 +437,80 @@ def test_adversaire_furtif_non_detecte_fait_errer(jets_surs, monkeypatch):
 				   and l["tour"] == 1 for l in journal)
 
 
+# ── Placement hit-and-run + retour dans les ombres ───────────────────────────────────
+
+ESPECE_HIT_AND_RUN = dict(ESPECE_FORTE, _id="espece:ours_hr", tags=["monstre", "ia_hit_and_run"])
+ESPECE_HR_BERSERKER = dict(ESPECE_FORTE, _id="espece:ours_hr_berserker",
+						   tags=["monstre", "ia_hit_and_run", "ia_berserker"])
+# Miroir de competence:furtivite (assassin) : active, sur soi, pose la furtivité.
+COMP_SE_CACHER = {
+	"_id": "competence:se_cacher_test", "type": "competence", "nom": "Furtivité",
+	"vocation": "assassin", "mode": "active", "niveau": 0, "cout_pm": 0,
+	"cible": "soi", "portee": 1, "effets": {"furtivite": 1},
+}
+CHARACTER_OMBRE = dict(
+	CHARACTER, _id="character:user:test_ombre",
+	competences_connues=["competence:se_cacher_test"],
+	slots_actions=[{"type": "attaque", "ref": "cac"}, {"type": "ramasser"}, {"type": "fuir"},
+				   {"type": "competence", "ref": "competence:se_cacher_test"}])
+DOCS_PLACEMENT = dict(DOCS, **{d["_id"]: d for d in (
+	ESPECE_HIT_AND_RUN, ESPECE_HR_BERSERKER, COMP_SE_CACHER, CHARACTER_OMBRE)})
+
+
+def _frappes(journal, camp, tour=1):
+	return [l for l in journal if l["kind"] in ("hit", "crit")
+			and l["acteur"].startswith(f"[{camp}]") and l["tour"] == tour]
+
+
+def test_hit_and_run_frappe_une_fois_puis_se_replie(jets_surs):
+	bel = simulateur.construire_belligerant({"type": "espece", "id": "espece:ours_hr"},
+											DOCS_PLACEMENT.get)
+	dep = bel["snapshot_reference"]["deplacement"]
+	res = simulateur.simuler_duel(
+		{"type": "espece", "id": "espece:ours_hr"}, {"type": "espece", "id": "espece:rat_test"},
+		distance=1, passes=1, get_doc_fn=DOCS_PLACEMENT.get, plafond_rounds=1)
+	assert len(_frappes(res["journal"], "A")) == 1
+	# Repli avec TOUTES ses cases (aucune dépensée pour approcher au contact).
+	assert any(f"se replie hors d'atteinte ({dep} case(s), distance {1 + dep})" in l["texte"]
+			   for l in res["journal"])
+	assert res["a"]["arsenal"]["placement"] == "hit_and_run"
+
+
+def test_hit_and_run_berserker_ne_recule_pas(jets_surs):
+	bel = simulateur.construire_belligerant({"type": "espece", "id": "espece:ours_hr_berserker"},
+											DOCS_PLACEMENT.get)
+	res = simulateur.simuler_duel(
+		{"type": "espece", "id": "espece:ours_hr_berserker"}, {"type": "espece", "id": "espece:rat_test"},
+		distance=1, passes=1, get_doc_fn=DOCS_PLACEMENT.get, plafond_rounds=1)
+	assert len(_frappes(res["journal"], "A")) == bel["snapshot_reference"]["actions_max"]
+	assert not any("se replie" in l["texte"] for l in res["journal"])
+	assert res["a"]["arsenal"]["placement"] == ""
+
+
+def test_revele_il_garde_sa_derniere_action_pour_se_cacher(jets_surs, monkeypatch):
+	monkeypatch.setattr(combat, "_tenter_detection", lambda doc, m, j, echec_texte=None: False)
+	bel = simulateur.construire_belligerant({"type": "character", "id": CHARACTER_OMBRE["_id"]},
+											DOCS_PLACEMENT.get)
+	assert [d["label"] for d in bel["arsenal"]["dissimulations"]] == ["Furtivité"]
+	res = simulateur.simuler_duel(
+		{"type": "character", "id": CHARACTER_OMBRE["_id"]}, {"type": "espece", "id": "espece:rat_test"},
+		distance=1, passes=1, get_doc_fn=DOCS_PLACEMENT.get, plafond_rounds=1)
+	journal = res["journal"]
+	actions = bel["snapshot_reference"]["actions_max"]
+	assert len(_frappes(journal, "A")) == actions - 1
+	lignes_a = [l["texte"] for l in journal if l["acteur"].startswith("[A]") and l["tour"] == 1]
+	assert "se fond dans les ombres" in lignes_a[-1]
+
+
+def test_portee_visee_ignore_une_capacite_en_recharge():
+	comp = {"id": "competence:souffle_test", "cout_pm": 0, "portee": 7, "effets": {"degats": "1D6"}}
+	acteur = {"attaque_profils": [{"portee": 1}], "currentPM": 0}
+	arsenal = {"competences": [comp]}
+	assert simulateur._portee_visee(acteur, arsenal) == 7
+	acteur["recharges"] = {"competence:souffle_test": 2}
+	assert simulateur._portee_visee(acteur, arsenal) == 1
+
+
 # ── Potentiels ───────────────────────────────────────────────────────────────────────
 
 REGLES_TEST = {
