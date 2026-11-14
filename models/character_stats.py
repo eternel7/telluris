@@ -721,6 +721,32 @@ JOURNAL_LONGUEUR_MAX: int = 800
 JOURNAL_ENTREES_MAX: int = 50
 JOURNAL_BESTIAIRE_LIEUX_MAX: int = 5
 
+# ── Renseignement 🔎 (utils/renseignement.py — compétence telluris-renseignement) ──
+# Défauts « jeu standard » validés par l'Auteur (13-14/11/2026).
+# DELAI_MINUTES : une recherche par personnage × lieu × méthode sur cette durée.
+# PORTEE_LIEUX : seuls les N lieux PORTEURS de piste les plus proches (en liens) comptent.
+# FAUSSE_PCT : part des rumeurs (échec du jet) qui désignent un endroit où la cible n'est pas.
+# EXACT_FACTEUR : jet ≤ seuil × facteur ⇒ lieu exact + grade (belle réussite).
+# RELATION_POIDS / RELATION_MAX : (relation − RELATION_INITIALE) × poids, borné à ± max, au seuil.
+# COUT_MULT : multiplicateur du coût de base par niveau obtenu (rumeur, cité/région, exact).
+# BRAS_DE_FER_PV : PV perdus au bras de fer (jamais sous 1). INFORMATEUR_MULT : surcoût de
+# l'informateur de taverne ; INFORMATEUR_PROBA : chance qu'il soit là à l'ENTRÉE.
+# POURBOIRE_FACTEUR / POURBOIRE_DES : pourboire d'une belle chanson = coût de base × facteur + dés.
+# XP_BELLE : XP de celui qui agit, sur belle réussite seulement.
+RENS_DELAI_MINUTES: int = 240
+RENS_PORTEE_LIEUX: int = 12
+RENS_FAUSSE_PCT: int = 20
+RENS_EXACT_FACTEUR: float = 0.5
+RENS_RELATION_POIDS: float = 0.2
+RENS_RELATION_MAX: int = 15
+RENS_COUT_MULT: dict = {"rumeur": 1.0, "region": 1.5, "exact": 2.0}
+RENS_BRAS_DE_FER_PV: str = "1D6"
+RENS_INFORMATEUR_MULT: float = 1.5
+RENS_INFORMATEUR_PROBA: float = 0.5
+RENS_POURBOIRE_FACTEUR: float = 2.0
+RENS_POURBOIRE_DES: str = "1D10"
+RENS_XP_BELLE: int = 10
+
 # ── Scriptorium (écrit personnel + production automatique de livres) ─────────────
 # LONGUEUR_MAX : signes d'un manuscrit personnel (même règle papier+encre+plume que
 # l'annonce/le journal, réglage INDÉPENDANT — cf. utils/scriptorium.py). PAPIER/ENCRE :
@@ -1203,6 +1229,19 @@ def current_world_variables() -> dict:
 		"JOURNAL_LONGUEUR_MAX": JOURNAL_LONGUEUR_MAX,
 		"JOURNAL_ENTREES_MAX": JOURNAL_ENTREES_MAX,
 		"JOURNAL_BESTIAIRE_LIEUX_MAX": JOURNAL_BESTIAIRE_LIEUX_MAX,
+		"RENS_DELAI_MINUTES": RENS_DELAI_MINUTES,
+		"RENS_PORTEE_LIEUX": RENS_PORTEE_LIEUX,
+		"RENS_FAUSSE_PCT": RENS_FAUSSE_PCT,
+		"RENS_EXACT_FACTEUR": RENS_EXACT_FACTEUR,
+		"RENS_RELATION_POIDS": RENS_RELATION_POIDS,
+		"RENS_RELATION_MAX": RENS_RELATION_MAX,
+		"RENS_COUT_MULT": dict(RENS_COUT_MULT),
+		"RENS_BRAS_DE_FER_PV": RENS_BRAS_DE_FER_PV,
+		"RENS_INFORMATEUR_MULT": RENS_INFORMATEUR_MULT,
+		"RENS_INFORMATEUR_PROBA": RENS_INFORMATEUR_PROBA,
+		"RENS_POURBOIRE_FACTEUR": RENS_POURBOIRE_FACTEUR,
+		"RENS_POURBOIRE_DES": RENS_POURBOIRE_DES,
+		"RENS_XP_BELLE": RENS_XP_BELLE,
 		"SCRIPTORIUM_LIVRE_LONGUEUR_MAX": SCRIPTORIUM_LIVRE_LONGUEUR_MAX,
 		"SCRIPTORIUM_LIVRE_PAPIER": SCRIPTORIUM_LIVRE_PAPIER,
 		"SCRIPTORIUM_LIVRE_ENCRE": SCRIPTORIUM_LIVRE_ENCRE,
@@ -1299,6 +1338,9 @@ def load_world_variables() -> dict:
 	global AUBERGE_TABLES_MAX, AUBERGE_ANNONCE_LONGUEUR_MAX
 	global MERCENAIRE_CLAUSES_MAX, MERCENAIRE_CLAUSE_LONGUEUR_MAX
 	global JOURNAL_LONGUEUR_MAX, JOURNAL_ENTREES_MAX, JOURNAL_BESTIAIRE_LIEUX_MAX
+	global RENS_DELAI_MINUTES, RENS_PORTEE_LIEUX, RENS_FAUSSE_PCT, RENS_EXACT_FACTEUR
+	global RENS_RELATION_POIDS, RENS_RELATION_MAX, RENS_BRAS_DE_FER_PV, RENS_INFORMATEUR_MULT
+	global RENS_INFORMATEUR_PROBA, RENS_POURBOIRE_FACTEUR, RENS_POURBOIRE_DES, RENS_XP_BELLE
 	global SCRIPTORIUM_LIVRE_LONGUEUR_MAX, SCRIPTORIUM_LIVRE_PAPIER, SCRIPTORIUM_LIVRE_ENCRE
 	global COMMANDE_DELAI_SECONDES, COMMANDE_PEREMPTION_SECONDES, COMMANDE_MATIERES_MAX, COMMANDE_QUANTITE_MAX
 	global FABRICATION_PLAFOND_HORS_FAMILLE
@@ -1600,6 +1642,22 @@ def load_world_variables() -> dict:
 	JOURNAL_LONGUEUR_MAX = max(1, int(v.get("JOURNAL_LONGUEUR_MAX", JOURNAL_LONGUEUR_MAX)))
 	JOURNAL_ENTREES_MAX = max(1, int(v.get("JOURNAL_ENTREES_MAX", JOURNAL_ENTREES_MAX)))
 	JOURNAL_BESTIAIRE_LIEUX_MAX = max(1, int(v.get("JOURNAL_BESTIAIRE_LIEUX_MAX", JOURNAL_BESTIAIRE_LIEUX_MAX)))
+	# Renseignement : planchers à 0 (délai nul = réglage de test), portée planchée à 1 (une
+	# portée nulle ferait taire toute recherche), pourcentages et facteurs bornés à [0, 1].
+	RENS_DELAI_MINUTES = max(0, int(v.get("RENS_DELAI_MINUTES", RENS_DELAI_MINUTES)))
+	RENS_PORTEE_LIEUX = max(1, int(v.get("RENS_PORTEE_LIEUX", RENS_PORTEE_LIEUX)))
+	RENS_FAUSSE_PCT = max(0, min(100, int(v.get("RENS_FAUSSE_PCT", RENS_FAUSSE_PCT))))
+	RENS_EXACT_FACTEUR = max(0.0, min(1.0, float(v.get("RENS_EXACT_FACTEUR", RENS_EXACT_FACTEUR))))
+	RENS_RELATION_POIDS = max(0.0, float(v.get("RENS_RELATION_POIDS", RENS_RELATION_POIDS)))
+	RENS_RELATION_MAX = max(0, int(v.get("RENS_RELATION_MAX", RENS_RELATION_MAX)))
+	if isinstance(v.get("RENS_COUT_MULT"), dict):
+		RENS_COUT_MULT.update({str(k): max(0.0, float(x)) for k, x in v["RENS_COUT_MULT"].items()})
+	RENS_BRAS_DE_FER_PV = str(v.get("RENS_BRAS_DE_FER_PV", RENS_BRAS_DE_FER_PV))
+	RENS_INFORMATEUR_MULT = max(0.0, float(v.get("RENS_INFORMATEUR_MULT", RENS_INFORMATEUR_MULT)))
+	RENS_INFORMATEUR_PROBA = max(0.0, min(1.0, float(v.get("RENS_INFORMATEUR_PROBA", RENS_INFORMATEUR_PROBA))))
+	RENS_POURBOIRE_FACTEUR = max(0.0, float(v.get("RENS_POURBOIRE_FACTEUR", RENS_POURBOIRE_FACTEUR)))
+	RENS_POURBOIRE_DES = str(v.get("RENS_POURBOIRE_DES", RENS_POURBOIRE_DES))
+	RENS_XP_BELLE = max(0, int(v.get("RENS_XP_BELLE", RENS_XP_BELLE)))
 	# Plancher à 1 : un manuscrit qui ne peut rien contenir ne serait pas un manuscrit ; un
 	# coût matière nul rendrait la production des livres gratuite (donc pas rare).
 	SCRIPTORIUM_LIVRE_LONGUEUR_MAX = max(1, int(v.get("SCRIPTORIUM_LIVRE_LONGUEUR_MAX", SCRIPTORIUM_LIVRE_LONGUEUR_MAX)))

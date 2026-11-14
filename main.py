@@ -29,6 +29,8 @@ from routers.scriptorium import scriptorium_router
 from routers.commande import commande_router
 from routers.traversee import traversee_router, payload_play as traversee_payload_play
 from routers.contenants import contenants_router
+from routers.renseignement import renseignement_router
+from routers import renseignement as renseignement_routes
 from routers.animations import animations_router
 from utils.combat import (
 	get_combat_grid, finalize_combat, verser_butin_au_sol, etat_charge_snapshot, caracts_effectives,
@@ -66,6 +68,7 @@ from utils import colonisation as colonisation_util
 from utils import echanges_cite
 from utils import auberge as auberge_util
 from utils import scriptorium as scriptorium_util
+from utils import renseignement as renseignement_util
 from utils import commande as commande_util
 from utils import escorte as escorte_util
 from utils import offres as offres_util
@@ -239,6 +242,7 @@ app.include_router(scriptorium_router, prefix="/api")
 app.include_router(commande_router, prefix="/api")
 app.include_router(traversee_router, prefix="/api")
 app.include_router(contenants_router, prefix="/api")
+app.include_router(renseignement_router, prefix="/api")
 # Sans préfixe : ce router porte des chemins des DEUX familles (`/api/admin/...` en
 # lecture, `/admin/...` en écriture, comme les endpoints d'admin de main.py).
 app.include_router(animations_router)
@@ -907,6 +911,10 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 	change |= pnj_util.poser_pnj_present(character, grid_doc,
 								  marchand_fn=transport_util.entree_marchand,
 								  condition_fn=conditions_pnj)
+	# Informateur de taverne (🔎 renseignement) : même sémantique de tirage à l'entrée. Index
+	# vide : la méthode d'informateur s'exerce sur des prédicats sans géographie (taverne).
+	change |= renseignement_util.poser_informateur(
+		character, grid_doc, renseignement_util.regles_de(get_doc), {})
 	# Les PNJ arrêtés pour cette entrée sont résolus AVANT l'offre de course : c'est parmi eux
 	# qu'on cherche celui qui porte une course écrite (`services.transport.offre`), auquel cas
 	# le lieu n'a pas à être un magasin (le réceptionniste de la guilde confie sa mission
@@ -1138,6 +1146,9 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 	# Un bien dont la bibliothèque est tenue en est un (vue en mémoire, jamais sauvée).
 	est_scriptorium = scriptorium_util.lieu_est_scriptorium(proprietes_util.lieu_effectif(grid_doc, get_doc))
 
+	# 🔎 Se renseigner : dès qu'une méthode du groupe s'exerce ici (ou l'informateur est là).
+	renseignement_dispo = renseignement_routes.disponible(character)
+
 	# Commande : DEUX flags, et ils ne disent pas la même chose.
 	# `est_commande` (dérivé : le lieu a-t-il des recettes ?) ouvre la section « Commande » du
 	# panneau marchand — tout atelier refait ce qu'il sait faire. `est_sur_mesure` n'ouvre que
@@ -1292,6 +1303,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			"est_etable": est_etable,
 			"est_auberge": est_auberge,
 			"est_scriptorium": est_scriptorium,
+			"renseignement_dispo": renseignement_dispo,
 			"est_commande": est_commande,
 			"est_sur_mesure": est_sur_mesure,
 			# Pastilles de l'entonnoir du panneau marchand (catalogue statique, cf. utils/filtres_boutique).

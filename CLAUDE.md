@@ -65,6 +65,7 @@ routers/
   animations.py          # /admin/animations/* : scan des feuilles de sprites, liaison au contenu
   pnj.py                 # /api/pnj/dialogue (+ /choix) : dialogues PNJ + services (dont `portail` de Notre-Dame, `enseignement` d'un maître, `vente` à prix fixe) ; /api/intro/raison
   traversee.py           # /api/traversee/avancer : une case de traversée maritime (rencontre, débarquement)
+  renseignement.py       # /api/renseignement/* : offre, catalogue, chercher, lire (🔎 Se renseigner)
   contenants.py          # /api/contenant (+ /ranger, /sortir) : ouvrir un contenant du sac (porteur via _acteur, hors combat)
   colonisation.py        # /api/colonisation/* : charte (bureau d'un maître de guilde), site, fonder (carte d'un pays),
                          #   colons (auberge d'une cité), puis DANS l'implantation : ici, donner, feu, construire, poser,
@@ -187,6 +188,9 @@ utils/
                          #   indépendante de l'ordre des matières, item + recette déterministes
                          #   et idempotents ; la recette porte `sur_commande` (hors tick)
   focalisation.py        # 🧭 lieu (BFS) / 🎯 quête (biais probabiliste)
+  renseignement.py       # 🔎 se renseigner (pur) : méthodes par vocation (`rules:renseignement`), pistes DÉRIVÉES
+                         #   (rencontres/ressources + zones, donjons, rayons), jet d100 à 3 niveaux, rumeur fausse,
+                         #   ouï-dire 👂 au bestiaire, note de renseignement, délai par lieu × méthode, informateur
   traces.py              # traces de monstres (pur) : pire menace possible à la position (pool et grades du combat
                          #   de zone), libellé de rang ; forestier du groupe ⇒ espèce + grade
   enseignes.py           # noms d'enseigne (pur) : tournures par métier × toponymes de cité
@@ -287,7 +291,7 @@ Chaque mécanique est documentée dans une compétence `.claude/skills/telluris-
 | propriétés du joueur (achat, location, aménagements, personnel, coffre, zones habitables) | `telluris-proprietes` |
 | voie de colonisation (fonder, paliers, lieux modèles, bâtiments, stocks, sécurité, moral, menace, associés) | `telluris-colonisation` |
 | sorts, compétences de vocation, zones d'effet, focalisation | `telluris-magie` |
-| renseignement : 🔎 où trouver une espèce/ressource, méthodes par vocation, informateur (spécification, non implémenté) | `telluris-renseignement` |
+| renseignement : 🔎 où trouver une espèce/ressource, méthodes par vocation, informateur, note de renseignement, ouï-dire 👂 | `telluris-renseignement` |
 | pièges (cases piégées, détection, désamorçage, pose) | `telluris-combat` § Pièges |
 | journal, relations, cartes/portraits, listes scrollables, tavernes, scriptorium, toasts, sons d'action et musique | `telluris-social-ui` |
 | dump, exports, `/admin/table`, écritures PUT complet, cache de requête, caches process | `telluris-db` |

@@ -118,6 +118,7 @@ Doc CouchDB `rules:world_variables`, chargé au démarrage par `load_world_varia
 - **Portail de Notre-Dame** : `PORTAIL_FENETRE_MINUTES` (2 — durée d'une tranche du tableau des seuils ; plancher 1) · `PORTAIL_SEUILS_OUVERTS` (3 — seuils proposés à la fois, bornés par le nombre de points d'arrivée).
 - **Déplacement au clic** (/play) : `CLIC_PORTEE_MAX` (5 — pas maximal d'un trajet au clic ; au-delà, les cases joignables s'allument ; plancher 1).
 - **Traversées** : `TRAVERSEE_PAS_MS` (900 — délai entre deux cases du navire en mer ; planché à 150 ms, sous quoi la caméra n'a plus le temps de montrer la case).
+- **Renseignement 🔎** : `RENS_*` (délai, portée, rumeur fausse, facteur exact, relation, coûts par niveau, bras de fer, informateur, pourboire, XP) — catalogue et défauts : compétence `telluris-renseignement` § Variables de monde.
 - **Journal du personnage** : `JOURNAL_LONGUEUR_MAX` (800 — signes d'une entrée), `JOURNAL_ENTREES_MAX` (50 — mémo borné, les plus **anciennes** sautent), `JOURNAL_BESTIAIRE_LIEUX_MAX` (5 — lieux retenus par espèce). Les trois sont planchés à 1. ⚠️ **Indépendants des réglages de la taverne** alors que la règle d'écriture est la même : on peut vouloir un avis public court et un carnet intime long.
 - **Accès** : `ACCES_GARDIEN_ACTIF` (True ; False = déverrouillage d'urgence, toutes les barrières tombent).
 - **Focalisation** : `FOCUS_EVENEMENT_MULT` (3.0), `FOCUS_CIBLE_MULT` (3.0).

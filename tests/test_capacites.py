@@ -12,7 +12,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils import capacites  # noqa: E402
-from utils import auberge, montures, scriptorium, recrutement, commande  # noqa: E402
+from utils import auberge, montures, scriptorium, recrutement, commande, renseignement  # noqa: E402
 from models import character_stats  # noqa: E402
 
 
@@ -24,6 +24,7 @@ PREDICATS = {
 	"recrutement": recrutement.lieu_recrute,
 	"guilde": recrutement.lieu_de_guilde,
 	"sur_mesure": commande.lieu_fabrique_sur_mesure,
+	"salle_d_armes": renseignement.lieu_salle_d_armes,
 }
 
 

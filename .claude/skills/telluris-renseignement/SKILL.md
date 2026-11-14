@@ -1,108 +1,68 @@
 ---
 name: telluris-renseignement
-description: Information gathering — "🔎 Se renseigner" lets a party member whose vocation has a method in the current place (tavern veterans, arm-wrestling, notice board, armoury gossip, scriptorium registers, minstrel's song and tale swapping, fences, informants, tracks, beasts and plants, the Falcon spirit) learn WHERE a species or a resource can be found, read automatically from the place `rencontres`/`ressources`, influence zones, dungeon rooms and shop stocks; d100 roll with three precision tiers, false rumours, a "hearsay" mark in the bestiary, a transportable note written by the Lettré, cost × reach, a per-place-and-method delay, place relation, generic tavern informant (planned: utils/renseignement.py, routers/renseignement.py, rules:renseignement). Load when working on rumours, informants, tracking a monster or resource location through an NPC or a place, or the 🔎 button — including French requests such as « se renseigner », « rumeur », « informateur », « où trouver ce monstre », « piste », « ouï-dire ».
+description: Information gathering — "🔎 Se renseigner" lets a party member whose vocation has a method in the current place (tavern veterans, arm-wrestling, notice board, armoury gossip, scriptorium registers, school treatises, minstrel's song and tale swapping, fences, informants, tracks, hunters, beasts and plants, the Falcon spirit) learn WHERE a species or a resource can be found, read automatically from the place `rencontres`/`ressources` and their zones, dungeon rooms and shop stocks; d100 roll with three precision tiers, false rumours, a "hearsay" 👂 mark in the bestiary, a transportable note written by the Lettré, cost × tier, a per-place-and-method delay, place relation, generic tavern informant (utils/renseignement.py, routers/renseignement.py, rules:renseignement, dev/gen_renseignement.py). Load when working on rumours, informants, tracking a monster or resource location through an NPC or a place, the note de renseignement, or the 🔎 button — including French requests such as « se renseigner », « rumeur », « informateur », « où trouver ce monstre », « piste », « ouï-dire ».
 ---
 
 # Renseignement — apprendre où se trouve une espèce ou une ressource
 
-> ⚠️ **SPÉCIFICATION VALIDÉE (13/11/2026), NON IMPLÉMENTÉE.** Les noms de modules, de champs et de variables ci-dessous sont ceux à créer en phase 2. Mettre à jour cette compétence au fil de l'implémentation : ce qui est fait remplace ce qui est prévu.
+Spécification validée par l'Auteur (13-14/11/2026), implémentée. Module pur `utils/renseignement.py`, router `routers/renseignement.py` (`/api/renseignement/*`), contenu `dev/gen_renseignement.py` → `jsons/renseignement_a_importer.json` (`rules:renseignement` + `item:note_renseignement`). Verrouillé par `tests/test_renseignement.py` (pur) et `tests/test_renseignement_endpoints.py` (base en mémoire, VRAI doc du générateur).
 
 ## Principe
-- **Aucune donnée écrite à la main par piste.** La réponse à « où trouver X » se **DÉRIVE à la lecture** des sources du monde ; le doc `rules:renseignement` ne dit que **qui** peut demander, **où**, **à quel prix** et **sur quelles cibles**.
-- **Ajouter une méthode = une entrée du doc**, sans toucher au code (convention 11 : générateur `dev/gen_renseignement.py`, PUT complet).
-- Module pur `utils/renseignement.py` (DB injectée, mute sans sauver, hasard par `rand_fn`), router `routers/renseignement.py` (`/api/renseignement/*`).
+- **Aucune piste écrite à la main** : la réponse se DÉRIVE à la lecture. `rules:renseignement` = `{tags_nature, methodes[]}` ne dit que qui, où, à quel prix, sur quelles cibles. Ajouter une méthode = une entrée du générateur.
+- **Méthode** (`normaliser_methode`) : `{id, nom, icon, vocations, informateur, lieu:{predicats, categories, tags}, test:[clés], cout, cout_pv ("monde" = `RENS_BRAS_DE_FER_PV`), cout_pm, connait, sources, portee_max, cibles:{especes, ressources, tags_espece, sous_categories, ecole_vocation, grade_min, elites}, modes, niveau_fixe, niveau_max, note, pourboire, repliques:{intro, description}}`.
+- ⚠️ **Clé de caractéristique hors `v f r ag vol int cha ch`, prédicat, source, niveau ou mode inconnus ⇒ méthode REFUSÉE** (`ValueError`) : `methodes_de` l'écarte et la nomme (journal serveur) ; le générateur s'arrête. Jamais un 0 silencieux.
 
-## Sources d'une piste (toutes, réunies)
-- **Lieux** : `rencontres[].espece` et `ressources[].ressource` — mêmes champs que `focalisation.boost_zone_event` et `guides.lieux_de_cible` (repli carcasse → espèce compris). ⚠️ Contenu mince (7 lieux à rencontres, 5 à ressources au dump du 13/11) : les zones et les donjons portent l'essentiel.
-- **Zones d'influence** : tables de rencontres/ressources des `zone_influence` peintes sur les cartes de pays → piste = (carte, zone), sans case.
-- **Donjons** : espèces des salles curatées (`utils/donjon.py`, mode à étages compris).
-- **Boutiques** : pour une ressource, la boutique qui l'a **en stock maintenant** (`marche`), en plus du lieu de récolte.
-- **Portée** : seuls les `RENS_PORTEE_LIEUX` lieux les plus proches comptent (`focalisation.distances_depuis` sur le graphe des connexions) ; une zone ou un donjon se mesure à son lieu porteur.
+## Sources (`pistes_de`) et portée (`a_portee`)
+- Lieux : entrée `rencontres`/`ressources` **avec** zones ⇒ une piste `zone` par zone (porteur = le lieu) ; **sans** zone ⇒ piste `lieu`. Matière sans récolte ⇒ repli carcasse → espèce (comme `guides.lieux_de_cible`).
+- Donjons : salles (`battle_maps[].especes`) ⇒ piste `donjon`, mesurée au **portail**, inscrite sur la **salle** (là où le combat confirme l'ouï-dire).
+- Boutiques : `stock_vente` à `qty > 0` ⇒ piste `boutique`.
+- Portée : distances en liens (`focalisation.distances_depuis`) ; injoignable ⇒ écarté ; seuls les **`RENS_PORTEE_LIEUX` lieux porteurs** les plus proches (⚠️ les porteurs de piste, pas tous les lieux : depuis une taverne, la ville et ses boutiques rempliraient la portée) ; `portee_max` de la méthode en liens (forestier 1, faucon 0).
 
-## Qui agit
-- **Le groupe** : le meilleur membre de `expedition.membres` (principal EN TÊTE, **jamais de monture**) dont la vocation a une méthode applicable ici — comme `traces.pisteur` ou le négociateur. Ex æquo : le premier gagne (le joueur).
-- Le coût en PV/PM est payé par **celui qui agit** ; le coût en monnaie par le **principal**. Sauvegarde : convention 1 (`_save_acteur`, porteur autoritatif d'abord).
-- **Vocations sans méthode** : informateur générique **tiré en taverne** (§ Informateur).
+## Qui agit (`applicables`)
+- Meilleur seuil parmi `expedition.membres` (principal EN TÊTE, jamais de monture) dont `voc` ∈ `vocations` et qui `connait` la compétence exigée (`pouvoirs_objets.connait`). Ex æquo : le premier.
+- PV/PM et XP ⇒ l'**acteur** ; monnaie, carnet, bestiaire ⇒ le **principal**. Sauvegarde : principal (409), puis compagnon acteur, puis doc relation.
+- **Informateur** : méthode `informateur:true`, offerte seulement si AUCUNE méthode de vocation ne s'applique et que `informateur_present` (champ transitoire tiré à l'entrée dans `main.py` après `poser_pnj_present`, `RENS_INFORMATEUR_PROBA`, même sémantique : no-op tant qu'on reste, re-tiré en revenant). Coût × `RENS_INFORMATEUR_MULT`, `niveau_max: region`.
 
-## Cible
-Désignée dans l'overlay 🔎, parmi :
-- **Quêtes actives** kill / collect, préremplies (comme `guides.sujets`) ; l'élite d'une **chasse** active pour l'Assassin seul ;
-- **Bestiaire** : toute espèce déjà rencontrée ;
-- **Recherche libre** : toute espèce ou matière du catalogue, **filtrée par la méthode** ;
-- **« Ce qui traîne »** : sans cible, une source tirée parmi celles de la méthode, pondérée vers les lieux proches.
+## Cibles (modes)
+`quete` (kill / collect / chasse ; chasse + `elites` ⇒ lieu exact et case, **sans jet**) · `bestiaire` · `libre` (`GET /renseignement/catalogue?methode&q`, ≥ 2 lettres, filtre de la méthode ; ⚠️ le `grade_min` n'est vérifié qu'à la recherche) · `hasard` (cibles du monde filtrées, couples déjà au bestiaire exclus, tirage pondéré 1/(1+d)) · `recit` (ménestrel : une paire VUE non encore cédée dans cette taverne, `recits_cedes`, contre une piste de rang ≤).
 
-## Jet et précision
-- **Seuil d100** (convention des pièges, `pieges.seuil_detection`) = `50 + moyenne(caractéristiques de la méthode) + bonus de relation`. Clés **du personnage uniquement** : `v f r ag vol int cha ch` — une clé inconnue est **refusée à la lecture** du doc (jamais un 0 silencieux).
-- **Trois niveaux** :
-  - jet > seuil → **rumeur** (§ Rumeur) ;
-  - jet ≤ seuil → **cité ou région** : premier ancêtre notable par `guides.chaine` (la cité, sinon la carte de pays) ; pour une zone : carte + nom de zone ;
-  - jet ≤ seuil × `RENS_EXACT_FACTEUR` (défaut 0,5) → **lieu exact + grade** de la pire menace (`traces.menace_lieu`, libellé de rang).
-- Méthode **sans test** (Paladin, Templier ; Assassin sur une élite) : directement le niveau que dit la méthode.
-
-## Rumeur (échec)
-- **Vague** : une direction ou un type de terrain du lieu visé (« du côté des forêts, vers le sud »).
-- **Fausse** une fois sur `RENS_FAUSSE_PCT` : elle désigne une source où la cible n'est **pas**. Le joueur ne sait pas laquelle des deux il a reçue.
-- Une rumeur **n'entre jamais au bestiaire** ; seulement au carnet.
+## Jet, niveaux, rumeur (`resoudre`)
+- Seuil = 50 + moyenne des caracs (avec buffs) + `bonus_relation` = (relation − `RELATION_INITIALE`) × `RENS_RELATION_POIDS`, borné ± `RENS_RELATION_MAX` ; seuil borné [5, 95].
+- d100 > seuil ⇒ **rumeur** ; ≤ seuil ⇒ **région** (`region_de` : cité, sinon pays) ; ≤ seuil × `RENS_EXACT_FACTEUR` ⇒ **exact** + grade (`rang_piste` : l'espèce, ou la pire espèce de l'endroit pour une ressource ; `potentiel.rang_espece` mémoïsé par révision).
+- Rumeur : terrain (`TERRAINS` sur tags de zone/lieu) + distance ; **fausse** une fois sur `RENS_FAUSSE_PCT` (piste d'une AUTRE cible ; en hasard, on nomme une autre cible au terrain de la piste tirée). Sans piste : rumeur toujours fausse, sinon « personne n'en a entendu parler » (`rien`). Le client ne sait jamais si une rumeur est fausse.
 
 ## Ce que reçoit le joueur
-- **Espèce** : le lieu entre au bestiaire **marqué 👂 « ouï-dire »** ; `journal.noter_rencontres` le passe en « vu » au premier combat contre l'espèce. Plus une ligne de carnet (`journal.nouvelle_entree`).
-- **Ressource** : **carnet seul** (pas de registre des ressources).
-- **Grade** de la menace au niveau « lieu exact ».
-- **Note de renseignement** — **Lettré seulement** :
-  - un **seul** doc item générique (« Note de renseignement ») ; la piste vit dans la **référence** (comme l'écrit personnel du scriptorium) : aucun doc par piste ;
-  - **la lire** inscrit la piste chez le lecteur (bestiaire 👂 + carnet), même achetée ou reçue ;
-  - **vendable aux négociants** : prix dérivé du grade décrit (paliers de `xp_monstre`).
-- **XP** : `grant_xp` de `RENS_XP_BELLE` à celui qui agit, **sur belle réussite seulement**.
-- Resync (convention 10) : bloc `fiche` si XP, bestiaire/carnet, `inventaire_payload` si note ou monnaie, PV/PM de l'acteur.
+- `apprendre` : espèce au niveau région/exact ⇒ `journal.noter_oui_dire` (lieu marqué `oui_dire`, payload préfixé **👂**, borné `JOURNAL_BESTIAIRE_LIEUX_MAX`) ; `journal.noter_rencontres` retire la marque au premier combat sur ce lieu. Carnet : une entrée par texte (relire ne répète rien). Ressource et rumeur : carnet seul.
+- **Note** (`note:true`, Lettré) au niveau région/exact, jamais sur rumeur : ref `{item: item:note_renseignement, piste, auteur_nom}` dans le sac de l'acteur (si la charge le permet). `resolve_item_ref` en fait la description et le titre ; `item_sale_price_cuivre` ⇒ `prix_note` (XP du plancher du rang, `xp_monstre.prix_de_xp`). `POST /renseignement/lire {index}` (sac du principal, bouton 📖 de la fiche objet) l'inscrit chez le lecteur.
+- XP `RENS_XP_BELLE` à l'acteur sur belle réussite **au jet** ; pourboire du ménestrel = `cout × RENS_POURBOIRE_FACTEUR + RENS_POURBOIRE_DES`.
 
-## Limites (vérifiées au passage, aucun tick — convention 5)
-- **Délai** : une recherche par personnage × **lieu × méthode** pendant `RENS_DELAI_MINUTES` ; horodatage sur le principal (`renseignements_at`, champ absent ⇒ jamais demandé). Deux vocations du groupe = deux méthodes = deux essais.
-- **Coût** : `cout` (cuivre) de la méthode × `RENS_COUT_MULT` selon l'échelon atteint (rumeur : coût de base seul) ; débité au serveur.
-- **Relation de lieu** (`marche` relations) : **bonus au seuil** = relation × `RENS_RELATION_POIDS`, plafonné à `RENS_RELATION_MAX` ; une recherche payée **améliore la relation** comme un achat.
+## Limites
+- Délai `RENS_DELAI_MINUTES` par lieu × méthode (`renseignements_at`, purgé au passage).
+- Bourse ≥ `cout_max` exigée AVANT le jet ; débit = `cout × RENS_COUT_MULT[niveau]` (`rien` ⇒ prix rumeur). PM vérifiés avant ; PV jamais sous 1.
+- Recherche payée ⇒ `marche.compter_transaction` sur la relation du lieu.
 
-## Méthodes
-| Id | Vocation(s) | Lieu (prédicats existants, OU) | Test | Coût | Cibles |
+## Méthodes livrées
+| Id | Vocation(s) | Lieu | Test | Coût | Cibles |
 |---|---|---|---|---|---|
-| `veterans` | guerrier | `auberge.lieu_est_taverne` | cha, f | cuivre | espèces, donjons (+ grade) |
-| `bras_de_fer` | barbare | taverne | f | **PV** : `RENS_BRAS_DE_FER_PV`, jamais sous 1 | espèces de grade ≥ `grade_min` |
-| `tableau` | paladin, templier | taverne (tableau d'information) | — | cuivre | espèces `undead` `non_mort` `demon` `infernal` `monstre`, donjons |
-| `salle_d_armes` | duelliste | catégories `armurerie`, `grand_arsenal` OU tag `salle_d_armes` | ag, cha | cuivre | espèces |
-| `registres` | lettre | `scriptorium.lieu_est_scriptorium` | int | cuivre | **toutes** sources ; produit la note |
-| `ouvrages` | elementaliste, mage, illusionniste | scriptorium | int | cuivre | composants des sorts de **l'école de la vocation** (dérivés de `sorts`, jamais recopiés), espèces `magique`/`elementaire`, items `sous_categorie: cristal` |
-| `chanson` | menestrel | taverne | cha | cuivre ; belle réussite ⇒ pourboire `RENS_POURBOIRE` | espèces, zones, donjons |
-| `recits` | menestrel | taverne | cha | une paire (espèce, lieu) du bestiaire, jamais échangée dans cette taverne ; il la **garde** | piste neuve de grade ≤ celle cédée |
-| `receleurs` | voleur | taverne OU catégorie `negociant` | ag, cha | cuivre | ressources (stocks des boutiques, lieux de vente) |
-| `indicateurs` | assassin | taverne | cha | cuivre **élevé** | espèces ; élite de chasse active : lieu exact, **sans jet**, coût maximal |
-| `pistes` | forestier | zone sauvage | int, ag | — | espèces et ressources des lieux **contigus** (prolonge `traces.py`) |
-| `chasseurs` | forestier | taverne OU catégorie `boucherie` | cha | cuivre | espèces `animal` `proie` `predateur` |
-| `betes_plantes` | druide | zone sauvage | int | **PM** | espèces `animal` `proie` `predateur` ; items `herbe` `baie` `graines` `fruit_sec` `arbre` `branche` |
-| `faucon` | chaman | catégorie `pays` + **connaît** `competence:il_du_faucon` | int | **PM** de la compétence | zones d'influence de la carte et leurs espèces |
+| `veterans` | guerrier | taverne | cha, f | 12 | espèces |
+| `bras_de_fer` | barbare | taverne | f | PV (`monde`) | espèces rang ≥ D |
+| `tableau` | paladin, templier | taverne | — (région) | 5 | espèces du Mal |
+| `salle_d_armes` | duelliste | `armurerie`, `grand_arsenal`, tag `salle_d_armes` | ag, cha | 10 | espèces |
+| `registres` | lettre | scriptorium | int | 15 | tout ; note |
+| `ouvrages` | elementaliste, mage, illusionniste | scriptorium | int | 15 | composants de l'école, espèces magiques, cristaux |
+| `chanson` | menestrel | taverne | cha | 8 + pourboire | espèces |
+| `recits` | menestrel | taverne | cha | — | récit contre piste |
+| `receleurs` | voleur | taverne, `negociant` | ag, cha | 12 | ressources (boutiques) |
+| `indicateurs` | assassin | taverne | cha | 40 | espèces, élites |
+| `pistes` | forestier | sauvage | int, ag | — | ici + contigus |
+| `chasseurs` | forestier | taverne, `boucherie` | cha | 8 | bêtes |
+| `betes_plantes` | druide | sauvage | int | 6 PM | bêtes, végétaux |
+| `faucon` | chaman | pays + Œil du faucon | int | PM de la compétence | zones de la carte |
+| `informateur` | — | taverne | cha | 10 × 1,5 | ≤ région |
 
-- **Zone sauvage** = catégorie `pays` OU tag nature (`foret` `bois` `clairiere` `clariere` `lande` `montagne` `gorge`…, liste dans la méthode) OU lieu à `rencontres`/`ressources` non vides OU lieu **hors cité** (`guides.cite_de` nul).
-- **Nouveau tag** `salle_d_armes` : à recopier dans `utils/capacites.py` ET dans le prédicat d'origine (verrouillé par `tests/test_capacites.py`).
-- Une méthode = `{id, vocations, lieu: {categories, tags, predicats}, test: [clés], cout, cout_pv, cout_pm, condition (connait), sources, filtre: {tags_espece, sous_categories, grade_min}, niveau_fixe, produit_note, repliques}`.
+- **Zone sauvage** (`est_sauvage`) = pays OU `tags_nature` OU rencontres/ressources OU hors cité.
+- **`salle_d_armes`** : recopié dans `utils/capacites.py` (case de l'éditeur), verrouillé par `tests/test_capacites.py`. ⚠️ Le prédicat `scriptorium` est recopié de `scriptorium.lieu_est_scriptorium` (verrouillé par `test_predicat_scriptorium_identique_au_vrai`).
+- Bouton 🔎 de `/play` : `routers/renseignement.disponible` (index réduit à la chaîne du lieu, pas les 700 lieux) ; panneau `#rens-panel` (⟵ / Échap ferment sans rien payer).
 
-## Informateur
-- PNJ générique **tiré à l'entrée** de chaque taverne (champ transitoire `pnj_present`, convention 6), pour un joueur dont le groupe n'a **aucune** méthode ici.
-- Même moteur : test sur cha, coût × `RENS_INFORMATEUR_MULT`, **jamais de belle réussite** (au mieux cité ou région).
-
-## Interface (/play)
-- Bouton **🔎 Se renseigner** dans le panneau du lieu, à côté des services, affiché **dès qu'une méthode s'applique** (dérivé à la lecture, renvoyé avec le payload du lieu).
-- Overlay : choix de la méthode si le groupe en a plusieurs → choix de la cible (onglets quêtes / bestiaire / recherche / ce qui traîne) → coût et délai affichés avant validation.
-- Convention 8 : ✕ / Échap / clic sur le fond ⇒ **annuler sans rien payer**, la promesse se résout à `null`.
-
-## Variables de monde (défauts « jeu standard »)
-| Variable | Défaut |
-|---|---|
-| `RENS_DELAI_MINUTES` | 240 |
-| `RENS_PORTEE_LIEUX` | 12 |
-| `RENS_FAUSSE_PCT` | 20 |
-| `RENS_EXACT_FACTEUR` | 0,5 |
-| `RENS_RELATION_POIDS` / `RENS_RELATION_MAX` | 0,2 / 15 |
-| `RENS_BRAS_DE_FER_PV` | `1D6` |
-| `RENS_INFORMATEUR_MULT` | 1,5 |
-| `RENS_COUT_MULT`, `RENS_POURBOIRE`, `RENS_XP_BELLE` | à fixer à l'implémentation (non tranchés) |
-
-## Tests à écrire (phase 2)
-- `tests/test_renseignement.py` : sources réunies, portée, filtres par méthode, trois niveaux (`rand_fn` injecté), rumeur fausse jamais au bestiaire, 👂 → « vu », délai par lieu × méthode, coût par échelon, PV jamais sous 1, clé de caractéristique inconnue refusée, monture jamais acteur.
-- Harnais Node si l'overlay porte une logique pure (annulation → `null`).
+## Variables de monde
+`RENS_DELAI_MINUTES` 240 · `RENS_PORTEE_LIEUX` 12 · `RENS_FAUSSE_PCT` 20 · `RENS_EXACT_FACTEUR` 0,5 · `RENS_RELATION_POIDS` 0,2 · `RENS_RELATION_MAX` 15 · `RENS_COUT_MULT` {rumeur 1, region 1,5, exact 2} · `RENS_BRAS_DE_FER_PV` 1D6 · `RENS_INFORMATEUR_MULT` 1,5 · `RENS_INFORMATEUR_PROBA` 0,5 · `RENS_POURBOIRE_FACTEUR` 2 · `RENS_POURBOIRE_DES` 1D10 · `RENS_XP_BELLE` 10.
