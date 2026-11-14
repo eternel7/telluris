@@ -119,6 +119,28 @@ def localiser(refs: list, idx, item_id) -> int | None:
 	return None
 
 
+def rang_homonyme(refs: list, pos: int) -> int:
+	"""Rang de `refs[pos]` parmi les exemplaires du MÊME item qui le précèdent (0 = le premier).
+	Adresse STABLE d'un contenant le temps d'un combat : retirer un remède, un piège ou un
+	composant du sac décale les positions, jamais ce rang (un contenant ne se consomme pas)."""
+	iid = item_ref_id(refs[pos])
+	return sum(1 for r in refs[:pos] if item_ref_id(r) == iid)
+
+
+def position_par_rang(refs: list, item_id, rang, index=None) -> int | None:
+	"""Position du `rang`-ième exemplaire de `item_id` (cf. `rang_homonyme`), None s'il n'y est
+	plus. Sans `rang` (adresse écrite avant lui) : `localiser(index, item_id)`."""
+	if rang is None:
+		return localiser(refs, index, item_id)
+	n = -1
+	for i, r in enumerate(refs):
+		if item_ref_id(r) == item_id:
+			n += 1
+			if n == rang:
+				return i
+	return None
+
+
 def figer_ref(ref, poids_fn=item_ref_weight) -> dict:
 	"""La référence en dict : une chaîne legacy prend son poids effectif (la charge portée
 	ne bouge pas), comme `characters.renommer_ref`."""

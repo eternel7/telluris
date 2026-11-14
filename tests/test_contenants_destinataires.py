@@ -249,5 +249,60 @@ def test_butin_d_etage_en_attente_puis_range_a_la_finalisation(docs, monkeypatch
 def test_contenant_introuvable_a_la_finalisation_le_butin_va_au_sac(docs):
 	doc_perso = character(inventaire=[])
 	snap = {"butin_contenants": [{"index": 0, "item_id": "item:besace", "refs": ["item:pomme"]}]}
-	combat_util.verser_butin_contenants(snap, doc_perso)
+	assert combat_util.verser_butin_contenants(snap, doc_perso) == []
 	assert doc_perso["inventaire"] == ["item:pomme"]
+
+
+def _descente(docs, monkeypatch, inventaire):
+	perso = character(inventaire=inventaire)
+	docs[perso["_id"]] = perso
+	snap = joueur_snap("joueur_0", perso["_id"], charge=0, charge_max=150)
+	doc = combat_doc([snap], [monstre_snap("monstre_0", vivant=False)])
+	doc["etages"] = {"etage": "lieu:e1"}
+	monkeypatch.setattr(combat_util, "_ensure_loot_item", lambda *a: PIERRE)
+	monkeypatch.setattr(combat_util, "save_doc", lambda d: d)
+	dispo = [{"monstre_id": "monstre_0", "item_id": "item:pierre", "nom": "Pierre", "poids": 7}]
+	return perso, snap, doc, dispo
+
+
+def _vers(perso, index):
+	return {"monstre_id": "monstre_0", "beneficiaire_id": perso["_id"],
+			"contenant_index": index, "contenant_item_id": "item:besace"}
+
+
+def test_objet_retire_entre_deux_etages_la_place_promise_compte_encore(docs, monkeypatch):
+	"""Havresac de Zora Scarmouche (dump du 14/11) : un piège posé AVANT le contenant décalait
+	sa position ; la place promise à l'étage précédent n'était plus comptée."""
+	perso, snap, doc, dispo = _descente(docs, monkeypatch, ["item:pomme", {"item": "item:besace"}])
+	assert combat_util._repartir_butin_d_etage(doc, dispo, [_vers(perso, 1)]) is None
+	perso["inventaire"].pop(0)   # piège posé / remède bu : sauvé aussitôt en combat
+	assert combat_util.contenants_butin(dict(doc, status="victoire"))[0]["libre"] == 3.0
+	assert "plein" in combat_util._repartir_butin_d_etage(doc, dispo, [_vers(perso, 0)])
+	combat_util._finalize_membre(doc, snap, perso, "victoire")
+	assert perso["inventaire"][0]["contenu"] == [{"item": "item:pierre", "poids": 7}]
+
+
+def test_deux_contenants_identiques_le_rang_garde_le_bon(docs, monkeypatch):
+	perso, snap, doc, dispo = _descente(
+		docs, monkeypatch, [{"item": "item:besace"}, "item:pomme", {"item": "item:besace"}])
+	assert combat_util._repartir_butin_d_etage(doc, dispo, [_vers(perso, 2)]) is None
+	perso["inventaire"].pop(1)
+	combat_util._finalize_membre(doc, snap, perso, "victoire")
+	assert "contenu" not in perso["inventaire"][0]
+	assert perso["inventaire"][1]["contenu"] == [{"item": "item:pierre", "poids": 7}]
+
+
+def test_finalisation_l_excedent_d_un_contenant_tombe_au_sol(docs, monkeypatch):
+	perso = character(inventaire=[{"item": "item:besace", "contenu": [{"item": "item:pierre", "poids": 8}]}])
+	snap = {"butin_contenants": [{"index": 0, "item_id": "item:besace", "rang": 0,
+								  "refs": [{"item": "item:pomme", "poids": 1}, {"item": "item:pierre", "poids": 4}]}]}
+	monkeypatch.setattr(combat_util, "save_doc", lambda d: d)
+	combat_util._finalize_membre({"_id": "combat:x", "joueurs": [snap]}, snap, perso, "fuite")
+	assert perso["inventaire"][0]["contenu"][-1] == {"item": "item:pomme", "poids": 1}
+	assert perso["objets_au_sol"] == [{"item": "item:pierre", "poids": 4}]
+	# Compagnon : son excédent tombe au sol du PRINCIPAL.
+	comp = dict(character(inventaire=[{"item": "item:besace", "contenu": [{"item": "item:pierre", "poids": 10}]}]),
+				_id="aventurier:a")
+	principal = character(inventaire=[])
+	combat_util._finalize_membre({"_id": "combat:x", "joueurs": [snap]}, snap, comp, "fuite", principal=principal)
+	assert len(principal["objets_au_sol"]) == 2 and "objets_au_sol" not in comp
