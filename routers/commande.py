@@ -208,7 +208,7 @@ def _catalogue_vue(lieu_doc: dict, relation, voisins=None) -> list:
 		})
 		if ingredients is None:
 			ingredients = marche.ingredients_sorts_monde()
-		lignes[-1]["filtres"] = filtres_boutique.filtres_item(item, ingredients)
+		lignes[-1]["filtres"] = filtres_boutique.filtres_item(item, ingredients, marche.items_issus_trophee())
 	return sorted(lignes, key=lambda l: l["nom"] or "")
 
 

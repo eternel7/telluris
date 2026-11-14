@@ -26,7 +26,7 @@ from utils.marche import (
 	convertir_apres_achat, resolve_stock_vente, tick_atelier, lieu_buys, params_vente_lieu,
 	fiche_item_fields, flux_cite, persister_flux, est_negociant, cles_consommees,
 	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
-	compter_transaction, ingredients_sorts_monde,
+	compter_transaction, ingredients_sorts_monde, items_issus_trophee,
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
 	relations_lieux_payload,
 )
@@ -2418,7 +2418,7 @@ def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None =
 			})
 			if ingredients is None:
 				ingredients = ingredients_sorts_monde()
-			vendables[-1]["filtres"] = filtres_boutique.filtres_item(item, ingredients)
+			vendables[-1]["filtres"] = filtres_boutique.filtres_item(item, ingredients, items_issus_trophee())
 	return vendables
 
 

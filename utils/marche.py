@@ -56,6 +56,14 @@ def ingredients_sorts_monde() -> frozenset:
 	return filtres_boutique.ingredients_sorts(find_docs({"type": "sort"}, fields=["_id", "composants"]) or [])
 
 
+def items_issus_trophee() -> frozenset:
+	"""`item:*` produits par au moins une recette à TROPHÉE (`est_recette_trophee`) : pastille
+	« 🔨 Trophée » du panneau marchand. Lu sur `_get_recipe_map` (mémoïsée par process, vidée
+	par `reset_prix_cache`)."""
+	return frozenset(oid for oid, rs in _get_recipe_map().items()
+					 if any(est_recette_trophee(r) for r in rs))
+
+
 def fiche_item_fields(item: dict) -> dict:
 	"""Sous-ensemble des champs d'un doc item nécessaires à la fiche/comparaison client."""
 	return {k: item[k] for k in _FICHE_ITEM_KEYS if k in (item or {})}
@@ -2186,7 +2194,7 @@ def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> lis
 		}
 		if ingredients is None:
 			ingredients = ingredients_sorts_monde()
-		ligne["filtres"] = filtres_boutique.filtres_item(item, ingredients)
+		ligne["filtres"] = filtres_boutique.filtres_item(item, ingredients, items_issus_trophee())
 		if scriptorium.contenu_scelle(item):
 			ligne.pop("description", None)
 			ligne.pop("carte", None)

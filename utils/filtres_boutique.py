@@ -18,7 +18,10 @@ Tout se RELIT dans la donnée existante — aucun champ neuf sur les items, aucu
 - fabrication : la matière APPORTE quelque chose à une pièce sur mesure — son bloc
             `fabrication` bien formé (`fabrication.apporte`, source unique). ⚠️ Une VARIANTE
             déjà fabriquée porte aussi un bloc `fabrication` (`base_item`…), qui n'apporte rien :
-            elle n'est pas une matière de fabrication ;
+            elle n'est pas une matière de fabrication ; « Trophée » = objet PRODUIT par une
+            recette à trophée (un intrant `trophee: true`, la pièce de monstre que seul le
+            client apporte — `marche.est_recette_trophee`), ensemble calculé par l'appelant
+            (`marche.items_issus_trophee`) ;
 - divers  : outils, pièges, outils de CROCHETAGE (`bonus_desamorcage` > 0 : leur usage n'est
             pas évident, la pastille le met en avant), contenants, livres et documents, munitions.
 
@@ -56,7 +59,7 @@ GROUPES = (
 		("metal", "Métaux"), ("bois", "Bois"), ("depouille", "Dépouilles"), ("autre", "Autres matières"),
 	)),
 	("fabrication", "🔨", "Fabrication", (
-		("ameliore", "Améliore une pièce"),
+		("ameliore", "Améliore une pièce"), ("trophee", "Trophée"),
 	)),
 	("divers", "🎒", "Divers", (
 		("outil", "Outils"), ("piege", "Pièges"), ("crochetage", "Crochetage"), ("contenant", "Contenants"),
@@ -105,10 +108,12 @@ def _nombre_positif(v) -> bool:
 		return False
 
 
-def filtres_item(item: dict, ingredients: frozenset = frozenset()) -> list:
+def filtres_item(item: dict, ingredients: frozenset = frozenset(),
+				 issus_trophee: frozenset = frozenset()) -> list:
 	"""Clés de pastilles d'un doc item (résolu), sans doublon.
 
-	`ingredients` : `ingredients_sorts(...)`, calculé UNE fois par liste par l'appelant."""
+	`ingredients` : `ingredients_sorts(...)`, calculé UNE fois par liste par l'appelant.
+	`issus_trophee` : `item:*` produits par une recette à trophée (`marche.items_issus_trophee`)."""
 	item = item or {}
 	cat = item.get("categorie") or ""
 	sc = item.get("sous_categorie") or ""
@@ -167,6 +172,8 @@ def filtres_item(item: dict, ingredients: frozenset = frozenset()) -> list:
 
 	if fabrication.apporte(item):
 		cles.append("fabrication.ameliore")
+	if item_id in issus_trophee:
+		cles.append("fabrication.trophee")
 
 	est_piege = "piege" in tags
 	est_contenant = "contenant" in tags or sc == "contenant" or isinstance(item.get("contenant"), dict)

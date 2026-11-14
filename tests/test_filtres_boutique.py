@@ -93,6 +93,34 @@ def test_fabrication_seulement_si_la_matiere_apporte():
 	assert "fabrication.ameliore" not in fb.filtres_item({"categorie": "composant"})
 
 
+def test_trophee_seulement_si_produit_par_une_recette_a_trophee():
+	issus = frozenset({"item:Tete_naturalisee_balaur"})
+	tete = {"_id": "item:Tete_naturalisee_balaur", "categorie": "decoration"}
+	assert "fabrication.trophee" in fb.filtres_item(tete, frozenset(), issus)
+	# La référence d'inventaire porte son id sous `item`.
+	assert "fabrication.trophee" in fb.filtres_item({"item": "item:Tete_naturalisee_balaur"}, frozenset(), issus)
+	assert "fabrication.trophee" not in fb.filtres_item(tete)
+	assert "fabrication.trophee" not in fb.filtres_item({"_id": "item:autre"}, frozenset(), issus)
+
+
+def test_items_issus_trophee_lus_sur_les_recettes(monkeypatch):
+	"""Seul un intrant `trophee: true` fait d'un produit un objet « à trophée » ; une dépouille
+	ordinaire en intrant n'y suffit pas."""
+	from utils import marche
+	recettes = [
+		{"_id": "recette:tete", "objet_final": "Tete_naturalisee_balaur", "lieu_categorie": "cabinet",
+		 "matieres_premieres": [{"item": "item:balaur_tete", "quantite": 1, "trophee": True}]},
+		{"_id": "recette:bottes", "objet_final": "Bottes_cuir", "lieu_categorie": "tannerie",
+		 "matieres_premieres": [{"sous_categorie": "carcasse", "quantite": 1}]},
+	]
+	monkeypatch.setattr(marche, "_all_recettes", lambda: recettes)
+	marche.reset_prix_cache()
+	try:
+		assert marche.items_issus_trophee() == frozenset({"item:Tete_naturalisee_balaur"})
+	finally:
+		marche.reset_prix_cache()
+
+
 def test_divers():
 	assert fb.filtres_item({"categorie": "outil", "tags": ["piege"]}) == ["divers.piege"]
 	assert fb.filtres_item({"categorie": "outil", "sous_categorie": "contenant", "tags": ["contenant"]}) == ["divers.contenant"]
@@ -118,7 +146,8 @@ def test_toute_cle_produite_existe_au_catalogue():
 		{"categorie": "outil", "tags": ["piege", "contenant"]},
 		{"categorie": "outil", "bonus_desamorcage": 5},
 	]
-	produites = {c for it in echantillon for c in fb.filtres_item(it, frozenset({"item:x"}))}
+	produites = {c for it in echantillon
+				 for c in fb.filtres_item(it, frozenset({"item:x"}), frozenset({"item:x"}))}
 	assert produites <= connues, produites - connues
 
 
