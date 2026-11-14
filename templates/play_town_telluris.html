@@ -723,13 +723,14 @@
 		body.sheet-compagnon .retour-lib-joueur { display: none; }
 		body.sheet-compagnon .retour-lib-compagnon { display: inline; }
 		/* ⟵ Emblème : dernier cran, au bout du titre du lieu (il en fait partie : ni marge ni
-		   padding), calé au fond à droite du bandeau. Fond noir, simple cadre, flèche bronze comme
+		   padding), calé à GAUCHE du bandeau — à l'opposé des « ⟵ Retour » des panneaux (à droite),
+		   pour qu'on ne confonde jamais quitter /play avec refermer un panneau. Fond noir, simple cadre, flèche bronze comme
 		   les « ⟵ Retour » des panneaux — pas le SVG du pavé de déplacement. Le cadre court
 		   sur toute la hauteur du bandeau (titre sur plusieurs lignes compris), flèche au milieu. Le bandeau réserve la largeur du
 		   bouton des DEUX côtés : le titre reste centré et ne passe jamais dessous. */
 		#game-container > .location-desc { position: relative; padding: 0 var(--embleme-l); --embleme-l: 1.87rem; }
 		.retour-embleme {
-			position: absolute; right: 0; top: 0; bottom: 0;
+			position: absolute; left: 0; top: 0; bottom: 0;
 			display: inline-flex; align-items: center; justify-content: center;
 			width: 1.7em; margin: 0; padding: 0;
 			font-size: 1.1rem; line-height: 1; cursor: pointer;
@@ -2130,7 +2131,7 @@
 		<header class="location-desc" aria-label="Fiche personnage">
 			<h2>{{title}}</h2>
 			{# Dernier cran de « ⟵ Retour » : la liste des personnages. Fait partie du titre (calé
-			   au fond à droite), inerte un instant après la fermeture d'un panneau (allerEmbleme). #}
+			   à gauche, à l'opposé des « ⟵ Retour » des panneaux), inerte un instant après la fermeture d'un panneau (allerEmbleme). #}
 			<button type="button" id="retour-embleme" class="retour-embleme" onclick="allerEmbleme(this)"
 				title="Revenir à la liste de vos personnages" aria-label="Emblème : revenir à la liste de vos personnages"><span aria-hidden="true">⟵</span></button>
 		</header>
@@ -5067,7 +5068,7 @@
 	document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerMenuAffichage(); });
 
 	// ── Sorties de /play : ⟵ Emblème et 🚪 déconnexion ──────────────────────────
-	// « ⟵ Retour » referme un panneau et rend la vue du lieu ; ⟵ du bandeau, au même bord, quitte /play.
+	// « ⟵ Retour » (à droite) referme un panneau et rend la vue du lieu ; ⟵ du bandeau, au bord GAUCHE, quitte /play.
 	// Garde anti double-clic : ⟵ reste INERTE `RETOUR_GARDE_MS` après que la vue du lieu
 	// réapparaît, sans quoi un double-clic sur « ⟵ Retour » ferait quitter la partie. Rien à
 	// sauver avant de partir : chaque action est déjà un POST. Échap ne quitte jamais (il
