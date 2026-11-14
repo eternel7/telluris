@@ -844,6 +844,10 @@ function renduArsenal(recap) {
 		const cout = s.stock != null ? `stock ${s.stock}` : `${s.cout_pm} PM`;
 		lignes.push(`<span class="titre">✨ soutien</span> <b>${escapeHtml(s.label)}</b> — ${cout}`);
 	}
+	if ((recap.sorts_possibles || []).length && recap.sorts_tires) {
+		lignes.push(`<span class="titre">🔮 sorts tirés</span> <b>${recap.sorts_tires}</b> par spécimen parmi `
+			+ recap.sorts_possibles.map(escapeHtml).join(', ') + ` · une capacité par tour`);
+	}
 	for (const d of recap.dissimulations || []) {
 		lignes.push(`<span class="titre">🫥 se cacher</span> <b>${escapeHtml(d.label)}</b>`
 			+ ` — ${d.cout_pm} PM · dernière action du tour une fois révélé`);

@@ -519,6 +519,59 @@ def test_revele_il_garde_sa_derniere_action_pour_se_cacher(jets_surs, monkeypatc
 	assert "se fond dans les ombres" in lignes_a[-1]
 
 
+# ── Sorts tirés par un monstre ───────────────────────────────────────────────────────
+
+SORT_TRAIT_A = {"_id": "sort:trait_a_test", "type": "sort", "nom": "Trait de givre",
+				"vocation": "mage", "niveau": 1, "cout_pm": 2, "cible": "ennemi", "portee": 6,
+				"jet": "magique", "effets": {"degats": "2D6"}}
+SORT_TRAIT_B = dict(SORT_TRAIT_A, _id="sort:trait_b_test", nom="Trait de feu")
+ESPECE_MAGE = {"_id": "espece:ours_mage", "type": "espece", "nom": "Ours mage",
+			   "base_attributes": _attrs(V=4, F=40, R=40, Ag=40, Vol=60, Int=60),
+			   "tags": ["monstre"], "sorts": ["sort:trait_a_test", "sort:trait_b_test"]}
+PROFIL_MAGE = {"_id": "profil:mage_test", "type": "profil", "nom": "Mage", "niveau": 2,
+			   "attributs_modifier": {}}
+DOCS_MAGIE = dict(DOCS, **{d["_id"]: d for d in (SORT_TRAIT_A, SORT_TRAIT_B, ESPECE_MAGE, PROFIL_MAGE)})
+
+
+@pytest.fixture
+def magie(monkeypatch):
+	"""Le tirage des sorts (`combat.roll_monster_sorts`) lit la base globale du moteur."""
+	monkeypatch.setattr(combat, "get_doc", DOCS_MAGIE.get)
+
+
+def test_un_monstre_lance_ses_sorts_tires_une_capacite_par_tour(jets_surs, magie):
+	spec = {"type": "espece", "id": "espece:ours_mage", "profil": "profil:mage_test"}
+	bel = simulateur.construire_belligerant(spec, DOCS_MAGIE.get)
+	snap = bel["fabrique"]()
+	assert sorted(snap["sorts_connus"]) == ["sort:trait_a_test", "sort:trait_b_test"]
+	assert len(snap["_sim_sorts"]) == 2 and snap["_sim_une_capacite"] is True
+	res = simulateur.simuler_duel(spec, {"type": "espece", "id": "espece:rat_test"},
+								  distance=5, passes=1, get_doc_fn=DOCS_MAGIE.get, plafond_rounds=1)
+	# Round 1 : deux sorts, des PM et la cible à portée même après son approche (distance 3),
+	# mais une seule capacité par tour. (Au contact ensuite, un sort à distance est interdit.)
+	sorts = [l for l in _frappes(res["journal"], "A", 1) if "Trait de" in l["texte"]]
+	assert len(sorts) == 1
+	assert any("avance" in l["texte"] and "distance 3" in l["texte"] for l in res["journal"]
+			   if l["acteur"].startswith("[A]") and l["tour"] == 1)
+	# Le récap dit ce qu'un spécimen tire, et parmi quoi.
+	assert res["a"]["arsenal"]["sorts_tires"] == 2
+	assert sorted(res["a"]["arsenal"]["sorts_possibles"]) == ["Trait de feu", "Trait de givre"]
+
+
+def test_un_monstre_lance_ses_sorts_au_contact(jets_surs, magie):
+	"""Moteur : un monstre lance sur toute cible à portée et en vue, contact compris ; l'interdit
+	« engagé » ne vaut que pour le joueur."""
+	spec = {"type": "espece", "id": "espece:ours_mage", "profil": "profil:mage_test"}
+	res = simulateur.simuler_duel(spec, {"type": "espece", "id": "espece:rat_test"},
+								  distance=1, passes=1, get_doc_fn=DOCS_MAGIE.get, plafond_rounds=1)
+	assert len([l for l in _frappes(res["journal"], "A") if "Trait de" in l["texte"]]) == 1
+
+
+def test_un_joueur_n_a_pas_la_limite_d_une_capacite():
+	assert simulateur._capacite_permise({"capacite_lancee": True})
+	assert not simulateur._capacite_permise({"capacite_lancee": True, "_sim_une_capacite": True})
+
+
 def test_portee_visee_ignore_une_capacite_en_recharge():
 	comp = {"id": "competence:souffle_test", "cout_pm": 0, "portee": 7, "effets": {"degats": "1D6"}}
 	acteur = {"attaque_profils": [{"portee": 1}], "currentPM": 0}
