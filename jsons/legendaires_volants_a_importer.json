@@ -853,5 +853,120 @@
 		"competences": [
 			"competence:monstre_embrasement"
 		]
+	},
+	{
+		"_id": "espece:geant_du_mont_saint_michel",
+		"type": "espece",
+		"nom": "Géant du Mont-Saint-Michel",
+		"genre": "m",
+		"jeton": {
+			"taille": "2x2",
+			"forme": "rectangle"
+		},
+		"image": "geant_du_mont_saint_michel_transparent.png",
+		"description": "Géant venu d'Ibérie qui s'installa sur le mont, au milieu des grèves de la baie, et dévorait les gens du pays. Il enleva Hélène, nièce d'un duc d'Armorique, qui mourut de terreur entre ses mains. Arthur gravit le mont avec Kaï et Bedwyr et l'abattit, dit-on. Pourtant il y a toujours un géant sur le mont : le même qui revient, ou un autre qui a pris sa place, les pêcheurs de la baie ne se risquent pas à trancher.",
+		"base_attributes": {
+			"V": {
+				"min": 7,
+				"max": 10
+			},
+			"F": {
+				"min": 125,
+				"max": 150
+			},
+			"R": {
+				"min": 110,
+				"max": 130
+			},
+			"Ag": {
+				"min": 20,
+				"max": 20
+			},
+			"Vol": {
+				"min": 35,
+				"max": 35
+			},
+			"Int": {
+				"min": 20,
+				"max": 25
+			},
+			"Cha": {
+				"min": 0,
+				"max": 0
+			},
+			"Ch": {
+				"min": 40,
+				"max": 55
+			}
+		},
+		"tags": [
+			"humanoide",
+			"geant",
+			"legendaire",
+			"boss",
+			"predateur"
+		],
+		"proprietes": {},
+		"items": [
+			"item:massue_de_fer_du_geant",
+			"item:tunique_de_barbes_du_geant"
+		],
+		"animation": "animation:son_geant_02"
+	},
+	{
+		"_id": "espece:failinis",
+		"type": "espece",
+		"nom": "Failinis",
+		"jeton": {
+			"taille": "1x2",
+			"forme": "ellipse"
+		},
+		"genre": "m",
+		"nom_propre": true,
+		"image": "failinis_transparent.png",
+		"description": "Le chien invincible du roi d'Ioruaidh, que Lugh voulut pour lui : nulle bête ne lui échappe, et toute bête qui le voit tombe. Nul ne sait s'il est chien, loup ou autre chose venu d'un tertre.",
+		"base_attributes": {
+			"V": {
+				"min": 7,
+				"max": 9
+			},
+			"F": {
+				"min": 70,
+				"max": 100
+			},
+			"R": {
+				"min": 65,
+				"max": 95
+			},
+			"Ag": {
+				"min": 70,
+				"max": 95
+			},
+			"Vol": {
+				"min": 55,
+				"max": 80
+			},
+			"Int": {
+				"min": 30,
+				"max": 45
+			},
+			"Cha": {
+				"min": 0,
+				"max": 0
+			},
+			"Ch": {
+				"min": 50,
+				"max": 75
+			}
+		},
+		"tags": [
+			"monstre",
+			"feerique",
+			"predateur",
+			"legendaire",
+			"boss"
+		],
+		"proprietes": {},
+		"animation": "animation:son_loup_02"
 	}
 ]
