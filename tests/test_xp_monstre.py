@@ -25,11 +25,12 @@ def test_au_plancher_de_chaque_rang_la_part_du_niveau_d_entree():
 		assert xp_monstre.xp_de_potentiel(seuil) == round(_cout(niveau) * part)
 
 
-def test_regle_de_l_auteur_un_monstre_s_vaut_un_dixieme_du_niveau_61():
-	# Auteur, 13/11 : « un monstre de rang S rapporte environ 1/10 du plus bas niveau visé ».
+def test_regle_de_l_auteur_un_monstre_s_vaut_un_vingtieme_du_niveau_61():
+	# Auteur : un monstre de rang S rapporte environ 1/20 du plus bas niveau visé (14/11 ;
+	# 1/10 le 13/11). Constante VOULUE : elle verrouille la valeur par défaut décidée.
 	seuil_s = character_stats.QUETE_RANG_POTENTIEL_MIN["S"]
 	niveau_s = character_stats.QUETE_RANG_NIVEAU_ENTREE["S"]
-	assert xp_monstre.xp_de_potentiel(seuil_s) == pytest.approx(_cout(niveau_s) / 10, rel=0.02)
+	assert xp_monstre.xp_de_potentiel(seuil_s) == pytest.approx(_cout(niveau_s) / 20, rel=0.02)
 
 
 def test_premier_rang_au_potentiel_zero():

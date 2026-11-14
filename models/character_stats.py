@@ -448,10 +448,10 @@ QUETE_RANG_PART_NIVEAU: float = 1 / 3
 # XP = courbe en PALIERS sur la menace du SPÉCIMEN (`potentiel.potentiel_menace`, espèce × grade
 # tiré) : au plancher du rang R (`QUETE_RANG_POTENTIEL_MIN`), une bête rapporte XP_MONSTRE_PART_NIVEAU
 # du coût du niveau d'entrée de R (`QUETE_RANG_NIVEAU_ENTREE`), interpolation linéaire entre deux
-# planchers, prolongée au-delà du dernier (Auteur, 13/11 : un monstre S ≈ 1/10 du niveau 61, soit
-# ≈ 9 victimes de son rang par niveau à TOUS les rangs). Aucune table de plus : les deux tables
-# des rangs en sont la seule source.
-XP_MONSTRE_PART_NIVEAU: float = 0.1
+# planchers, prolongée au-delà du dernier (Auteur, 14/11 : un monstre S ≈ 1/20 du niveau 61, soit
+# ≈ 20 victimes de son rang par niveau à TOUS les rangs ; 1/10 le 13/11). Aucune table de plus :
+# les deux tables des rangs en sont la seule source.
+XP_MONSTRE_PART_NIVEAU: float = 0.05
 # Prix d'une DÉPOUILLE (carcasse, portion, ossements, résidu — tout item à `source_espece`) :
 # CARCASSE_PRIX_REF_CUIVRE × (xp / CARCASSE_PRIX_REF_XP) ^ CARCASSE_PRIX_EXPOSANT, × poids de
 # l'instance / poids moyen de la carcasse. Calibré sur le dump du 12/11 (Auteur, 13/11) : rang F

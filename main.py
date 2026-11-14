@@ -915,6 +915,15 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 	# vide : la méthode d'informateur s'exerce sur des prédicats sans géographie (taverne).
 	change |= renseignement_util.poser_informateur(
 		character, grid_doc, renseignement_util.regles_de(get_doc), {})
+	# Réception de guilde : tableau des recrues purgé puis complété au passage, comme à
+	# l'ouverture du panneau de recrutement. Sans cela, des recrues toutes périmées (personne
+	# n'a rouvert le tableau) privent la pièce de son 🔎 — la méthode `recrues` interroge les
+	# recrues offertes. Tableau déjà plein ⇒ aucune écriture ; n'écrit que des docs `aventurier`.
+	if grid_doc.get("categorie") == "guilde_aventurier":
+		try:
+			recrutement_util.remplir_tableau_recrues(grid_doc, character)
+		except Exception as e:
+			print(f"[play] tableau des recrues illisible ({grid_doc.get('_id')}) : {e}")
 	# Les PNJ arrêtés pour cette entrée sont résolus AVANT l'offre de course : c'est parmi eux
 	# qu'on cherche celui qui porte une course écrite (`services.transport.offre`), auquel cas
 	# le lieu n'a pas à être un magasin (le réceptionniste de la guilde confie sa mission
