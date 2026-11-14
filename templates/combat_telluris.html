@@ -911,6 +911,21 @@ html.vue-portrait .bv-jauge { flex: none; height: 5px; }
 .bv-ligne.kg .charge-pip { top: -2px; bottom: -2px; width: 1px; }
 html.vue-portrait .bv-ligne.kg .bv-texte { display: none; }
 html.vue-portrait .bv-ligne.kg .bv-jauge { height: 5px; }
+/* GRAND ÉCRAN (souris, fenêtre large, paysage) : la pastille suit l'échelle de « Actions »
+   en face — portrait, chiffres et jauges agrandis. Largeur toujours FIXE (§17). */
+@media (hover: hover) and (min-width: 1000px) {
+	html:not(.vue-portrait) .hud-gauche { width: 250px; }
+	html:not(.vue-portrait) .vitals-hud { gap: 10px; padding: 5px 14px 5px 5px; border-radius: 28px; }
+	html:not(.vue-portrait) .vitals-hud .bv-portrait { width: 46px; height: 46px; }
+	html:not(.vue-portrait) .vitals-hud .bv-stats { gap: 4px; }
+	html:not(.vue-portrait) .bv-texte { width: 80px; font-size: 14px; }
+	html:not(.vue-portrait) .bv-ligne.kg .bv-texte { font-size: 12px; }
+	html:not(.vue-portrait) .bv-jauge { height: 9px; }
+	html:not(.vue-portrait) .bv-ligne.kg .bv-jauge { height: 6px; }
+	html:not(.vue-portrait) .bv-detail { font-size: 13px; line-height: 18px; }
+	html:not(.vue-portrait) .sh-effet-chip { font-size: 13px; line-height: 18px; }
+	html:not(.vue-portrait) .viewport .controls-carte { padding-top: 100px; }
+}
 /* INCANTATION : anneau violet autour du portrait, rempli à la part des PA investis. Absolu,
    hors flux : il n'influe sur aucune dimension (§17). Invisible hors canalisation. */
 .bv-portrait-wrap { position: relative; flex: none; }
@@ -1019,8 +1034,10 @@ html.vue-portrait .bv-ligne.kg .bv-jauge { height: 5px; }
 	grid-template-columns: repeat(3, 1fr);
 	grid-template-rows: repeat(3, 1fr);
 	/* Haut dégagé des deux pastilles FIXES (vitals à gauche, actions à droite, ~50 px de
-	   haut à 8 px du bord) : sans lui, ↖ et ↗ passaient dessous. */
-	gap: 0; padding: 60px 6px 6px; margin: 0;
+	   haut à 8 px du bord) ET d'une rangée de chips d'effets sous les vitals (~22 px) : sans
+	   lui, ↖ / ↗ (et en portrait le pivot du coin haut) passaient dessous. `_caleFlechesCarte`
+	   relit ce padding (aucune valeur recopiée). */
+	gap: 0; padding: 84px 6px 6px; margin: 0;
 	/* Bord ARRIÈRE : la flèche centrée dans la rangée `--floor` (repli 2 px sans rangée). */
 	padding-bottom: max(2px, calc((var(--step) * var(--floor) - var(--fleche)) / 2));
 	pointer-events: none;
@@ -3369,8 +3386,10 @@ function _caleFlechesCarte() {
 	const plancher = Math.max(plancherBase, plancherCarte);
 	const btn = controls.querySelector('.btn:not(.move-spacer)');
 	const f = btn ? btn.getBoundingClientRect().height : 50;
-	// Pile minimale : marge du haut (pastilles, 60 px) + 3 rangées + 2 jours de 4 px + marge du bas.
-	const pile = 60 + 3 * f + 2 * 4 + 6;
+	// Pile minimale : marge du haut (pastilles + chips d'effets, padding du CSS) + 3 rangées
+	// + 2 jours de 4 px + marge du bas. Le padding ne dépend pas de ce qu'on écrit (§17).
+	const margeHaut = parseFloat(getComputedStyle(controls).paddingTop) || 84;
+	const pile = margeHaut + 3 * f + 2 * 4 + 6;
 	const haut = Math.min(0, H - plancher - pile);
 	controls.style.setProperty('--pave-plancher', Math.round(plancher) + 'px');
 	controls.style.setProperty('--pave-haut', Math.round(haut) + 'px');
