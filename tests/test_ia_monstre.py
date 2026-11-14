@@ -27,6 +27,18 @@ def test_nombre_et_defauts():
 	assert ia.ia_de_tags(["ia_embuscade_1"])["rayon"] == 1
 
 
+def test_hit_and_run_a_n_coups():
+	assert ia.ia_de_tags(["ia_hit_and_run"])["coups"] == 0
+	r = ia.ia_de_tags(["ia_hit_and_run_2"])
+	assert (r["deplacement"], r["coups"]) == ("hit_and_run", 2)
+	assert ia.coups_hit_and_run(ia.ia_de_tags(["ia_hit_and_run"])) == 1
+	assert ia.coups_hit_and_run(r) == 2
+	# Repli : total sans nombre ; part du déplacement (arrondi bas, au moins 1) avec.
+	assert ia.repli_hit_and_run(ia.ia_de_tags(["ia_hit_and_run"]), 20) is None
+	assert ia.repli_hit_and_run(r, 20) == int(20 * ia.REPLI_HIT_AND_RUN_PART)
+	assert ia.repli_hit_and_run(r, 1) == 1
+
+
 def test_axes_cumulables():
 	r = ia.ia_de_tags(["ia_meute", "ia_predateur", "ia_fuyard_20"])
 	assert (r["deplacement"], r["cible"], r["fuite"]) == ("meute", "predateur", 20)
@@ -198,6 +210,20 @@ def test_hit_and_run_frappe_une_fois_puis_se_replie():
 	assert j["currentPV"] < 200
 	assert combat_mod._cheby(m, j) > 1
 	assert any("se replie" in l["texte"] for l in doc["log"])
+
+
+def test_hit_and_run_2_frappe_deux_fois_puis_repli_borne():
+	m = _monstre(["ia_hit_and_run_2"], x=5, y=3)
+	m["deplacement"] = 8
+	m["actions_max"] = 8
+	j = _joueur(0, 5, 5)
+	doc = _arene([m], [j])
+	_tour(doc, m)
+	assert m["attaques"] == 2
+	repli = ia.repli_hit_and_run(m["ia"], 8)
+	# Une case d'approche au contact, puis au plus `repli` cases de recul.
+	assert 1 < combat_mod._cheby(m, j) <= 1 + repli
+	assert any(f"se replie hors d'atteinte ({repli} case(s))" in l["texte"] for l in doc["log"])
 
 
 def test_brute_frappe_tant_qu_il_peut_et_reste():

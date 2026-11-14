@@ -437,6 +437,193 @@ def test_adversaire_furtif_non_detecte_fait_errer(jets_surs, monkeypatch):
 				   and l["tour"] == 1 for l in journal)
 
 
+# ── Placement hit-and-run + retour dans les ombres ───────────────────────────────────
+
+ESPECE_HIT_AND_RUN = dict(ESPECE_FORTE, _id="espece:ours_hr", tags=["monstre", "ia_hit_and_run"])
+ESPECE_HR_2 = dict(ESPECE_FORTE, _id="espece:ours_hr_2", tags=["monstre", "ia_hit_and_run_2"])
+ESPECE_HR_BERSERKER = dict(ESPECE_FORTE, _id="espece:ours_hr_berserker",
+						   tags=["monstre", "ia_hit_and_run", "ia_berserker"])
+# Miroir de competence:furtivite (assassin) : active, sur soi, pose la furtivité.
+COMP_SE_CACHER = {
+	"_id": "competence:se_cacher_test", "type": "competence", "nom": "Furtivité",
+	"vocation": "assassin", "mode": "active", "niveau": 0, "cout_pm": 0,
+	"cible": "soi", "portee": 1, "effets": {"furtivite": 1},
+}
+CHARACTER_OMBRE = dict(
+	CHARACTER, _id="character:user:test_ombre",
+	competences_connues=["competence:se_cacher_test"],
+	slots_actions=[{"type": "attaque", "ref": "cac"}, {"type": "ramasser"}, {"type": "fuir"},
+				   {"type": "competence", "ref": "competence:se_cacher_test"}])
+DOCS_PLACEMENT = dict(DOCS, **{d["_id"]: d for d in (
+	ESPECE_HIT_AND_RUN, ESPECE_HR_2, ESPECE_HR_BERSERKER, COMP_SE_CACHER, CHARACTER_OMBRE)})
+
+
+def _frappes(journal, camp, tour=1):
+	return [l for l in journal if l["kind"] in ("hit", "crit")
+			and l["acteur"].startswith(f"[{camp}]") and l["tour"] == tour]
+
+
+def test_hit_and_run_frappe_une_fois_puis_se_replie(jets_surs):
+	bel = simulateur.construire_belligerant({"type": "espece", "id": "espece:ours_hr"},
+											DOCS_PLACEMENT.get)
+	dep = bel["snapshot_reference"]["deplacement"]
+	res = simulateur.simuler_duel(
+		{"type": "espece", "id": "espece:ours_hr"}, {"type": "espece", "id": "espece:rat_test"},
+		distance=1, passes=1, get_doc_fn=DOCS_PLACEMENT.get, plafond_rounds=1)
+	assert len(_frappes(res["journal"], "A")) == 1
+	# Repli avec TOUTES ses cases (aucune dépensée pour approcher au contact).
+	assert any(f"se replie hors d'atteinte ({dep} case(s), distance {1 + dep})" in l["texte"]
+			   for l in res["journal"])
+	assert res["a"]["arsenal"]["placement"] == "hit_and_run"
+
+
+def test_hit_and_run_2_frappe_deux_fois_puis_repli_borne(jets_surs):
+	from utils import ia_monstre
+	bel = simulateur.construire_belligerant({"type": "espece", "id": "espece:ours_hr_2"},
+											DOCS_PLACEMENT.get)
+	snap = bel["snapshot_reference"]
+	repli = ia_monstre.repli_hit_and_run(snap["ia"], snap["deplacement"])
+	assert snap["actions_max"] >= 2 and repli < snap["deplacement"]
+	res = simulateur.simuler_duel(
+		{"type": "espece", "id": "espece:ours_hr_2"}, {"type": "espece", "id": "espece:rat_test"},
+		distance=1, passes=1, get_doc_fn=DOCS_PLACEMENT.get, plafond_rounds=1)
+	assert len(_frappes(res["journal"], "A")) == 2
+	assert any(f"se replie hors d'atteinte ({repli} case(s), distance {1 + repli})" in l["texte"]
+			   for l in res["journal"])
+	assert (res["a"]["arsenal"]["placement_coups"], res["a"]["arsenal"]["placement_repli"]) == (2, repli)
+
+
+def test_hit_and_run_berserker_ne_recule_pas(jets_surs):
+	bel = simulateur.construire_belligerant({"type": "espece", "id": "espece:ours_hr_berserker"},
+											DOCS_PLACEMENT.get)
+	res = simulateur.simuler_duel(
+		{"type": "espece", "id": "espece:ours_hr_berserker"}, {"type": "espece", "id": "espece:rat_test"},
+		distance=1, passes=1, get_doc_fn=DOCS_PLACEMENT.get, plafond_rounds=1)
+	assert len(_frappes(res["journal"], "A")) == bel["snapshot_reference"]["actions_max"]
+	assert not any("se replie" in l["texte"] for l in res["journal"])
+	assert res["a"]["arsenal"]["placement"] == ""
+
+
+def test_revele_il_garde_sa_derniere_action_pour_se_cacher(jets_surs, monkeypatch):
+	monkeypatch.setattr(combat, "_tenter_detection", lambda doc, m, j, echec_texte=None: False)
+	bel = simulateur.construire_belligerant({"type": "character", "id": CHARACTER_OMBRE["_id"]},
+											DOCS_PLACEMENT.get)
+	assert [d["label"] for d in bel["arsenal"]["dissimulations"]] == ["Furtivité"]
+	res = simulateur.simuler_duel(
+		{"type": "character", "id": CHARACTER_OMBRE["_id"]}, {"type": "espece", "id": "espece:rat_test"},
+		distance=1, passes=1, get_doc_fn=DOCS_PLACEMENT.get, plafond_rounds=1)
+	journal = res["journal"]
+	actions = bel["snapshot_reference"]["actions_max"]
+	assert len(_frappes(journal, "A")) == actions - 1
+	lignes_a = [l["texte"] for l in journal if l["acteur"].startswith("[A]") and l["tour"] == 1]
+	assert "se fond dans les ombres" in lignes_a[-1]
+
+
+# ── Sorts tirés par un monstre ───────────────────────────────────────────────────────
+
+SORT_TRAIT_A = {"_id": "sort:trait_a_test", "type": "sort", "nom": "Trait de givre",
+				"vocation": "mage", "niveau": 1, "cout_pm": 2, "cible": "ennemi", "portee": 6,
+				"jet": "magique", "effets": {"degats": "2D6"}}
+SORT_TRAIT_B = dict(SORT_TRAIT_A, _id="sort:trait_b_test", nom="Trait de feu")
+ESPECE_MAGE = {"_id": "espece:ours_mage", "type": "espece", "nom": "Ours mage",
+			   "base_attributes": _attrs(V=4, F=40, R=40, Ag=40, Vol=60, Int=60),
+			   "tags": ["monstre"], "sorts": ["sort:trait_a_test", "sort:trait_b_test"]}
+PROFIL_MAGE = {"_id": "profil:mage_test", "type": "profil", "nom": "Mage", "niveau": 2,
+			   "attributs_modifier": {}}
+DOCS_MAGIE = dict(DOCS, **{d["_id"]: d for d in (SORT_TRAIT_A, SORT_TRAIT_B, ESPECE_MAGE, PROFIL_MAGE)})
+
+
+@pytest.fixture
+def magie(monkeypatch):
+	"""Le tirage des sorts (`combat.roll_monster_sorts`) lit la base globale du moteur."""
+	monkeypatch.setattr(combat, "get_doc", DOCS_MAGIE.get)
+
+
+def test_un_monstre_lance_ses_sorts_tires_une_capacite_par_tour(jets_surs, magie):
+	spec = {"type": "espece", "id": "espece:ours_mage", "profil": "profil:mage_test"}
+	bel = simulateur.construire_belligerant(spec, DOCS_MAGIE.get)
+	snap = bel["fabrique"]()
+	assert sorted(snap["sorts_connus"]) == ["sort:trait_a_test", "sort:trait_b_test"]
+	assert len(snap["_sim_sorts"]) == 2 and snap["_sim_une_capacite"] is True
+	res = simulateur.simuler_duel(spec, {"type": "espece", "id": "espece:rat_test"},
+								  distance=5, passes=1, get_doc_fn=DOCS_MAGIE.get, plafond_rounds=1)
+	# Round 1 : deux sorts, des PM et la cible à portée même après son approche (distance 3),
+	# mais une seule capacité par tour. (Au contact ensuite, un sort à distance est interdit.)
+	sorts = [l for l in _frappes(res["journal"], "A", 1) if "Trait de" in l["texte"]]
+	assert len(sorts) == 1
+	assert any("avance" in l["texte"] and "distance 3" in l["texte"] for l in res["journal"]
+			   if l["acteur"].startswith("[A]") and l["tour"] == 1)
+	# Le récap dit ce qu'un spécimen tire, et parmi quoi.
+	assert res["a"]["arsenal"]["sorts_tires"] == 2
+	assert sorted(res["a"]["arsenal"]["sorts_possibles"]) == ["Trait de feu", "Trait de givre"]
+
+
+def test_un_monstre_lance_ses_sorts_au_contact(jets_surs, magie):
+	"""Moteur : un monstre lance sur toute cible à portée et en vue, contact compris ; l'interdit
+	« engagé » ne vaut que pour le joueur."""
+	spec = {"type": "espece", "id": "espece:ours_mage", "profil": "profil:mage_test"}
+	res = simulateur.simuler_duel(spec, {"type": "espece", "id": "espece:rat_test"},
+								  distance=1, passes=1, get_doc_fn=DOCS_MAGIE.get, plafond_rounds=1)
+	assert len([l for l in _frappes(res["journal"], "A") if "Trait de" in l["texte"]]) == 1
+
+
+ESPECE_ARTILLEUR = dict(ESPECE_MAGE, _id="espece:ours_artilleur", tags=["monstre", "ia_artilleur"])
+DOCS_MAGIE[ESPECE_ARTILLEUR["_id"]] = ESPECE_ARTILLEUR
+
+
+def test_artilleur_lance_puis_recule_sans_frapper_au_contact(jets_surs, magie):
+	spec = {"type": "espece", "id": "espece:ours_artilleur", "profil": "profil:mage_test"}
+	snap = simulateur.construire_belligerant(spec, DOCS_MAGIE.get)["snapshot_reference"]
+	dep, act = snap["deplacement"], snap["actions_max"]
+	res = simulateur.simuler_duel(spec, {"type": "espece", "id": "espece:rat_test"},
+								  distance=1, passes=1, get_doc_fn=DOCS_MAGIE.get, plafond_rounds=1)
+	frappes = _frappes(res["journal"], "A")
+	assert len(frappes) == 1 and "Trait de" in frappes[0]["texte"]     # le sort, pas le contact
+	# Recul : un pas tant qu'il reste une action (1 dépensée par le sort, un pas coûte
+	# actions_max / deplacement), une case et de la portée à gagner — `combat._deplacement_ia`.
+	pas = 0
+	while (pas < dep and 1 + pas < SORT_TRAIT_A["portee"]
+		   and act - 1 - combat._move_ap_used_for(snap, pas) > 0):
+		pas += 1
+	assert pas >= 1
+	assert any(f"recule prudemment ({pas} case(s), distance {1 + pas})" in l["texte"]
+			   for l in res["journal"])
+	assert res["a"]["arsenal"]["placement"] == "artilleur"
+
+
+def test_artilleur_approche_jusqu_a_sa_portee_seulement(jets_surs, magie):
+	spec = {"type": "espece", "id": "espece:ours_artilleur", "profil": "profil:mage_test"}
+	res = simulateur.simuler_duel(spec, {"type": "espece", "id": "espece:rat_test"},
+								  distance=9, passes=1, get_doc_fn=DOCS_MAGIE.get, plafond_rounds=1)
+	# Il s'arrête à la portée de ses sorts (6) et lance, au lieu de foncer au contact.
+	assert any(f"avance de 3 case(s) (distance {SORT_TRAIT_A['portee']})" in l["texte"]
+			   for l in res["journal"] if l["acteur"].startswith("[A]"))
+	assert all("Trait de" in l["texte"] for l in _frappes(res["journal"], "A"))
+
+
+def test_artilleur_sans_capacite_payable_se_bat_au_contact(jets_surs, magie):
+	spec = {"type": "espece", "id": "espece:ours_artilleur", "profil": "profil:mage_test",
+			"stats": {"pm_max": 0}}
+	res = simulateur.simuler_duel(spec, {"type": "espece", "id": "espece:rat_test"},
+								  distance=1, passes=1, get_doc_fn=DOCS_MAGIE.get, plafond_rounds=1)
+	assert not any("recule" in l["texte"] for l in res["journal"])
+	assert any("Attaque naturelle" in l["texte"] for l in _frappes(res["journal"], "A"))
+
+
+def test_un_joueur_n_a_pas_la_limite_d_une_capacite():
+	assert simulateur._capacite_permise({"capacite_lancee": True})
+	assert not simulateur._capacite_permise({"capacite_lancee": True, "_sim_une_capacite": True})
+
+
+def test_portee_visee_ignore_une_capacite_en_recharge():
+	comp = {"id": "competence:souffle_test", "cout_pm": 0, "portee": 7, "effets": {"degats": "1D6"}}
+	acteur = {"attaque_profils": [{"portee": 1}], "currentPM": 0}
+	arsenal = {"competences": [comp]}
+	assert simulateur._portee_visee(acteur, arsenal) == 7
+	acteur["recharges"] = {"competence:souffle_test": 2}
+	assert simulateur._portee_visee(acteur, arsenal) == 1
+
+
 # ── Potentiels ───────────────────────────────────────────────────────────────────────
 
 REGLES_TEST = {

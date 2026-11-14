@@ -13,6 +13,11 @@
 #       (venin) — même chemin que l'effet d'une arme empoisonnée (`combat._appliquer_effet_arme`).
 
 #
+# SORTS LONGS : un monstre invoque (ses créatures rejoignent SON camp), arme une incantation
+# longue et entretient un sort maintenu par les MÊMES chokepoints que le joueur
+# (`combat._lancer_capacite_monstre`) ; seuls les effets visant une case ou un allié du joueur
+# lui restent fermés (`EFFETS_HORS_IA`).
+#
 # IA : à son tour, un monstre peut lancer AU PLUS UNE capacité active (`choisir_capacite`),
 # payée en PM et suivie d'une RECHARGE en tours (`recharges` du snapshot, décrémenté au début
 # de chacun de ses tours). Le moteur (`combat._options_capacite_monstre`) construit les
@@ -34,6 +39,10 @@ VOCATION_MONSTRE = "monstre"
 BONUS_EFFET = 7.0
 # Un soin ne vaut que sous ce ratio de PV (bénéficiaire blessé).
 SEUIL_SOIN = 0.5
+# Valeur d'une créature invoquée, en points de dégâts : trois effets neufs — de quoi passer
+# devant un sort de dégâts moyen, pas devant un grand sort. Nulle tant que les créatures d'un
+# lancement précédent du MÊME sort tiennent encore (pas de file d'appels).
+BONUS_INVOCATION = 3 * BONUS_EFFET
 
 _TAG_MAGIE = re.compile(r"^magie_([a-z]+)_(\d+)(?:_([a-z0-9_]+))?$")
 
@@ -117,11 +126,10 @@ EFFETS_HORS_IA = ("saut", "echange", "vol", "lien_vie", "partage_soin", "provoca
 
 
 def sort_lancable_par_ia(sort: dict | None) -> bool:
-	"""Un sort tiré est-il jouable par l'IA ? Instantané (1 PA), ni maintenu, ni invocation,
-	sans effet visant une case ou un allié du joueur (`EFFETS_HORS_IA`)."""
+	"""Un sort tiré est-il jouable par l'IA ? Utilisable en combat — invocation, incantation
+	longue et sort maintenu compris —, sans effet visant une case ou un allié du joueur
+	(`EFFETS_HORS_IA`)."""
 	if not sort or not sort_utilisable_combat(sort):
-		return False
-	if est_incantation_longue(sort) or est_maintenu(sort) or sort.get("invocation"):
 		return False
 	eff = sort.get("effets") or {}
 	return not any(eff.get(k) for k in EFFETS_HORS_IA)
@@ -155,6 +163,10 @@ def score_option(option: dict, moyenne_fn) -> float:
 	une part à durée neuve pour `BONUS_EFFET`."""
 	eff = option.get("effets") or {}
 	sid = option.get("source_id", "")
+	if option.get("invocation"):
+		if _as_int(option.get("invocations_actives")) > 0:
+			return 0.0
+		return BONUS_INVOCATION * max(1, _as_int(option.get("nombre")) or 1)
 	duratif = part_durative(eff)
 	score = 0.0
 	if option.get("hostile"):

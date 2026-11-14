@@ -2333,6 +2333,35 @@ function _creerBadgeInvocation(p) {
 	return el;
 }
 
+// Badge d'une créature qu'un MONSTRE a invoquée en cours de combat : même markup que la
+// branche monstre du template (ids des anneaux et de l'œil compris), classe `invoque` en
+// plus pour que le bandeau sache la retirer quand elle se dissipe. Nom en `textContent`.
+function _creerBadgeMonstreInvoque(m) {
+	const el = document.createElement('div');
+	el.className = 'init-badge monstre invoque';
+	el.id = `badge-${m.id}`;
+	el.title = `${m.nom || ''} — appelé par ${m.invocateur_nom || 'un ennemi'}.`;
+	const img = document.createElement('div');
+	if (m.image) {
+		img.className = 'ib-img';
+		img.style.background = `url('/monsters/${encodeURI(m.image)}') center/cover no-repeat`;
+	} else {
+		img.className = 'ib-letter';
+		img.textContent = (m.nom || '?').charAt(0).toUpperCase();
+	}
+	el.appendChild(img);
+	el.insertAdjacentHTML('beforeend',
+		`<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">`
+		+ `<circle class="vit-track" cx="21" cy="21" r="17"></circle>`
+		+ `<circle class="vit-pv" id="mbadge-pv-${m.id}" cx="21" cy="21" r="17" transform="rotate(-90 21 21)"></circle>`
+		+ `</svg>`
+		+ `<span class="ib-eye" id="eye-${m.id}" hidden title="Ne vous a pas repéré : il ne vient pas à vous.">`
+		+ `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">`
+		+ `<path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z"></path><circle cx="12" cy="12" r="2.6"></circle>`
+		+ `<line x1="3" y1="21" x2="21" y2="3"></line></svg></span>`);
+	return el;
+}
+
 function updateInitiativeStrip(data) {
 	// L'œil barré a un sens dès qu'UN membre vivant du groupe est furtif.
 	const furtif = (data.joueurs || []).some(j => (j.currentPV || 0) > 0 && j.furtif);
@@ -2342,7 +2371,7 @@ function updateInitiativeStrip(data) {
 	// dans l'ordre — juste après le badge de l'acteur qui la précède.
 	const strip = document.getElementById('initiative-strip');
 	const dansOrdre = new Set(data.ordre_initiative);
-	if (strip) strip.querySelectorAll('.init-badge.invocation').forEach(el => {
+	if (strip) strip.querySelectorAll('.init-badge.invocation, .init-badge.invoque').forEach(el => {
 		if (!dansOrdre.has(el.id.slice('badge-'.length))) el.remove();
 	});
 	let precedent = null;
@@ -2350,8 +2379,10 @@ function updateInitiativeStrip(data) {
 		let el = document.getElementById(`badge-${id}`);
 		if (!el && strip) {
 			const p = (data.joueurs || []).find(x => x.id === id);
-			if (p && p.est_invocation) {
-				el = _creerBadgeInvocation(p);
+			const mi = (data.monstres || []).find(x => x.id === id);
+			if (p && p.est_invocation) el = _creerBadgeInvocation(p);
+			else if (mi && mi.est_invocation) el = _creerBadgeMonstreInvoque(mi);
+			if (el) {
 				if (precedent) precedent.after(el);
 				else strip.prepend(el);
 			}

@@ -1084,7 +1084,7 @@ def maj_progress_kills(character: dict, monstres: list) -> None:
 		return
 	morts = {}
 	for m in monstres or []:
-		if not m.get("vivant", True):
+		if not m.get("vivant", True) and not m.get("est_invocation"):
 			eid = m.get("espece_id")
 			if eid:
 				morts[eid] = morts.get(eid, 0) + 1

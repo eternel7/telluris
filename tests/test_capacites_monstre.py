@@ -44,13 +44,15 @@ def test_tag_mal_forme_ignore():
 	assert cm.magies_de_tags(tags, "profil:mage") == {}
 
 
+# Sorts JOUABLES par l'IA (cible ennemie + dégâts) : le tirage d'un monstre écarte les autres.
+_FRAPPE = {"cible": "ennemi", "portee": 4, "effets": {"degats": "1D6"}}
 SORTS = [
 	{"_id": "sort:flammerole", "type": "sort", "nom": "Flammerole", "magie": "Élémentaire",
-	 "niveau": 1, "cout_pm": 3},
+	 "niveau": 1, "cout_pm": 3, **_FRAPPE},
 	{"_id": "sort:meteore", "type": "sort", "nom": "Météore", "magie": "Élémentaire",
-	 "niveau": 7, "cout_pm": 30},
+	 "niveau": 7, "cout_pm": 30, **_FRAPPE},
 	{"_id": "sort:ronces", "type": "sort", "nom": "Ronces", "magie": "Nature",
-	 "niveau": 1, "cout_pm": 3},
+	 "niveau": 1, "cout_pm": 3, **_FRAPPE},
 ]
 
 
@@ -393,13 +395,29 @@ SOIN = {"_id": "sort:soin", "type": "sort", "nom": "Soin", "magie": "Sainte",
 CATALOGUE.update({d["_id"]: d for d in (TRAIT, INVOC, LONG, SOIN)})
 
 
+SAUT = {"_id": "sort:saut", "type": "sort", "nom": "Bond", "magie": "Élémentaire",
+		"niveau": 1, "cout_pm": 4, "cible": "soi", "effets": {"saut": 4}}
+CATALOGUE[SAUT["_id"]] = SAUT
+
+
 def test_sorts_jouables_par_l_ia():
+	"""Invocation, incantation longue et sort maintenu sont jouables par un monstre ; seuls les
+	effets visant une case ou un allié du joueur (`EFFETS_HORS_IA`) lui restent fermés."""
 	from utils.sorts import normaliser_sort
 	assert cm.sort_lancable_par_ia(normaliser_sort(TRAIT))
-	assert not cm.sort_lancable_par_ia(normaliser_sort(INVOC))
-	assert not cm.sort_lancable_par_ia(normaliser_sort(LONG))
-	m = {"sorts_connus": [TRAIT["_id"], INVOC["_id"], LONG["_id"], "sort:absent"]}
-	assert [c["id"] for c in cm.actives_du_monstre(m, CATALOGUE.get)] == [TRAIT["_id"]]
+	assert cm.sort_lancable_par_ia(normaliser_sort(INVOC))
+	assert cm.sort_lancable_par_ia(normaliser_sort(LONG))
+	assert not cm.sort_lancable_par_ia(normaliser_sort(SAUT))
+	m = {"sorts_connus": [TRAIT["_id"], INVOC["_id"], LONG["_id"], SAUT["_id"], "sort:absent"]}
+	assert [c["id"] for c in cm.actives_du_monstre(m, CATALOGUE.get)] == [
+		TRAIT["_id"], INVOC["_id"], LONG["_id"]]
+
+
+def test_score_d_une_invocation():
+	opt = {"invocation": True, "nombre": 2, "invocations_actives": 0, "effets": {}}
+	assert cm.score_option(opt, lambda n: 0) == cm.BONUS_INVOCATION * 2
+	# Ses créatures précédentes tiennent encore : pas de nouvel appel.
+	assert cm.score_option(dict(opt, invocations_actives=1), lambda n: 0) == 0
 
 
 def test_un_mage_monstre_lance_son_sort(catalogue, monkeypatch):
