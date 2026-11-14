@@ -6,7 +6,7 @@
     "nom": "Aigle Geant",
     "jeton": {
       "taille": "2x2",
-      "forme": "triangle"
+      "forme": "chevron"
     },
     "genre": "m",
     "image": "aigle_geant_transparent.png",
@@ -118,7 +118,7 @@
     "nom": "Apep, Serpent du Chaos",
     "jeton": {
       "taille": "4x3",
-      "forme": "ellipse"
+      "forme": "capsule"
     },
     "genre": "m",
     "nom_propre": true,
@@ -236,7 +236,7 @@
     "nom": "Bete de l Apocalypse",
     "jeton": {
       "taille": "4x3",
-      "forme": "ellipse"
+      "forme": "losange"
     },
     "genre": "f",
     "image": "bete_de_l_apocalypse_transparent.png",
@@ -285,6 +285,64 @@
     ],
     "proprietes": {},
     "animation": "animation:son_bete_07"
+  },
+  {
+    "_id": "espece:chauve_souris_geante",
+    "_rev": "9-2b85ae04bed969cada3096e21a7373d0",
+    "type": "espece",
+    "nom": "Chauve Souris Geante",
+    "jeton": {
+      "taille": "2x1",
+      "forme": "chevron"
+    },
+    "genre": "f",
+    "image": "chauve_souris_geante_transparent.png",
+    "description": "Chiroptère monstrueux assoiffé de sang, ses cris ultrasoniques désorientent ses proies.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "monstre",
+      "vol",
+      "nocturne",
+      "predateur",
+      "insensible_furtivite",
+      "ia_hit_and_run",
+      "ia_predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_13"
   },
   {
     "_id": "espece:cu_sidhe",
@@ -352,7 +410,7 @@
     "nom": "Dragon blanc",
     "jeton": {
       "taille": "4x3",
-      "forme": "triangle"
+      "forme": "croix"
     },
     "genre": "m",
     "image": "dragon_blanc_transparent.png",
@@ -412,7 +470,7 @@
     "nom": "Dragon Empereur",
     "jeton": {
       "taille": "5x4",
-      "forme": "triangle"
+      "forme": "croix"
     },
     "genre": "m",
     "image": "dragon_empereur_transparent.png",
@@ -534,7 +592,7 @@
     "nom": "Dragon rouge",
     "jeton": {
       "taille": "4x3",
-      "forme": "triangle"
+      "forme": "croix"
     },
     "genre": "m",
     "image": "dragon_rouge_transparent.png",
@@ -594,7 +652,7 @@
     "nom": "Dragon Zombie",
     "jeton": {
       "taille": "4x3",
-      "forme": "triangle"
+      "forme": "croix"
     },
     "genre": "m",
     "image": "dragon_zombie_transparent.png",
@@ -882,7 +940,7 @@
     "nom": "Grand Dragon",
     "jeton": {
       "taille": "4x3",
-      "forme": "triangle"
+      "forme": "croix"
     },
     "genre": "m",
     "image": "grand_dragon_transparent.png",
@@ -936,13 +994,74 @@
     ]
   },
   {
+    "_id": "espece:grand_phenix",
+    "_rev": "6-60bb682d00a8f3266c8c60cc6064380d",
+    "type": "espece",
+    "nom": "Grand Phenix",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "chevron"
+    },
+    "genre": "m",
+    "image": "grand_phenix_transparent.png",
+    "description": "Variante ascendante du phénix, dont le souffle ardent embrase des champs entiers et la renaissance s'accompagne d'une vague de pure lumière.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 75,
+        "max": 110
+      },
+      "Int": {
+        "min": 40,
+        "max": 65
+      },
+      "Cha": {
+        "min": 45,
+        "max": 75
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "feu",
+      "renaissance",
+      "vol",
+      "magique",
+      "legendaire",
+      "magie_elementaire_8"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_03",
+    "competences": [
+      "competence:monstre_embrasement"
+    ]
+  },
+  {
     "_id": "espece:grootslang",
     "_rev": "4-3d18be9400e319142ce30ee16d187168",
     "type": "espece",
     "nom": "Grootslang",
     "jeton": {
       "taille": "4x3",
-      "forme": "ellipse"
+      "forme": "capsule"
     },
     "genre": "m",
     "image": "grootslang_transparent.png",
@@ -1060,7 +1179,7 @@
     "nom": "Illuyanka",
     "jeton": {
       "taille": "4x3",
-      "forme": "ellipse"
+      "forme": "capsule"
     },
     "genre": "m",
     "nom_propre": true,
@@ -1177,7 +1296,7 @@
     "nom": "Ladon",
     "jeton": {
       "taille": "4x3",
-      "forme": "ellipse"
+      "forme": "capsule"
     },
     "genre": "m",
     "nom_propre": true,
@@ -1405,6 +1524,66 @@
       "prix_cuivre": 1200
     },
     "animation": "animation:son_bete_05"
+  },
+  {
+    "_id": "espece:phenix",
+    "_rev": "6-3f6aa6a97428e6282a44d1e4fcbf572f",
+    "type": "espece",
+    "nom": "Phenix",
+    "jeton": {
+      "taille": "2x1",
+      "forme": "chevron"
+    },
+    "genre": "m",
+    "image": "phenix_transparent.png",
+    "description": "Oiseau de feu renaissant de ses cendres, symbole d'immortalité et de renouveau.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 25,
+        "max": 45
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 60,
+        "max": 95
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 30,
+        "max": 55
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "feu",
+      "renaissance",
+      "vol",
+      "magique",
+      "magie_elementaire_4"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_14",
+    "competences": [
+      "competence:monstre_embrasement"
+    ]
   },
   {
     "_id": "espece:polar_kraken",
@@ -1653,7 +1832,7 @@
     "nom": "Serpent de Marcel",
     "jeton": {
       "taille": "4x3",
-      "forme": "ellipse"
+      "forme": "capsule"
     },
     "genre": "m",
     "image": "serpent_de_marcel_transparent.png",
@@ -1702,13 +1881,71 @@
     "animation": "animation:son_bete_12"
   },
   {
+    "_id": "espece:tarasque",
+    "_rev": "5-c4f02f2417c0f100f9796411c033135a",
+    "type": "espece",
+    "nom": "Tarasque",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "losange"
+    },
+    "genre": "f",
+    "image": "tarasque_transparent.png",
+    "description": "Bête légendaire de Provence à tête de lion aux oreilles de cheval, corps de bœuf porté par six courtes pattes d'ours, protégé par une carapace de tortue hérissée d'épines, et une queue écailleuse terminée par un dard. Sa carapace la rend presque invulnérable et elle peut cracher le feu.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 65,
+        "max": 100
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "souffle",
+      "gardien"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_02",
+    "competences": [
+      "competence:monstre_souffle_de_feu"
+    ]
+  },
+  {
     "_id": "espece:vers_des_sables",
     "_rev": "5-aaa1bab7601f6f3a11ac268e071685e4",
     "type": "espece",
     "nom": "Vers des Sables",
     "jeton": {
       "taille": "2x5",
-      "forme": "rectangle"
+      "forme": "capsule"
     },
     "genre": "m",
     "pluriel": true,
@@ -1825,7 +2062,7 @@
     "nom": "Yamata no Orochi",
     "jeton": {
       "taille": "4x3",
-      "forme": "ellipse"
+      "forme": "capsule"
     },
     "genre": "m",
     "nom_propre": true,
@@ -1885,7 +2122,7 @@
     "nom": "Zmeï Gorynytch",
     "jeton": {
       "taille": "4x3",
-      "forme": "triangle"
+      "forme": "croix"
     },
     "genre": "m",
     "nom_propre": true,

@@ -96,6 +96,14 @@ Un acteur peut occuper un RECTANGLE de cases. Géométrie pure `utils/jetons.py`
 - Verrouillé par `tests/test_jetons.py`, `tests/test_combat_jetons.py` et `dev/test_jetons_client.js` (mêmes cas d'emprise/distance que le pytest, + traversée extraite du template). ⚠️ Hors portée des tests : le rendu — à voir en jeu.
 
 
+### Parties du corps des boss géants (4x3, 5x4, 2x5)
+Module pur `utils/parties_corps.py`, découpage DÉRIVÉ de l'emprise et du cap (rien par espèce, rien stocké) : **ailes** = colonnes extérieures si `vol_espece` et largeur ≥ 3, **tête** = rangée avant, **queue** = rangée arrière, **flancs** = le reste. Branchements dans `utils/combat.py` :
+- **Partie frappée** : `localiser_coup(attaquant, defenseur)` = chokepoint des 5 sites qui portent un coup ; sur un monstre à parties, la case la plus proche de l'attaquant (contact ou distance) remplace le d100. `pa_de_zone` lit `MULT_PA` (tête ×1,5, queue ×1, flancs ×0,75, ailes ×0,5) pour les zones `corps_*`.
+- **Ailes brisées** : `_ailes_touchees` cumule les PV réellement retirés (`degats_ailes`) ; à `SEUIL_AILES` (25 % des PV max) ⇒ `ailes_brisees`, ligne de journal, `_atterrir`. `_can_fly` ignore alors `volant` (le vol magique porte encore), y compris après `_appliquer_couvert`.
+- **Zone depuis la tête** : `_cases_zone_offensive` prend pour origine `ancre_tete(lanceur, cible)`.
+- **Coup de queue** : boucle d'attaque de `_run_monster_turn` — cible dans le dos ET au contact de la queue ⇒ attaque normale au profil `facteur_degats = COUP_DE_QUEUE_FACTEUR` (×0,75, appliqué dans `_coup_sur`), sans pivot.
+- Verrouillé par `tests/test_parties_corps.py`.
+
 ### Critiques pilotés par la Chance
 Tout jet d100 offensif passe par `_seuils_critiques`/`_resoudre_jet` (`utils/combat.py`) : la Chance élargit symétriquement la fenêtre de réussite critique et repousse celle d'échec critique, bornées par les world-vars `CRIT_REUSSITE_MAX`/`CRIT_ECHEC_MIN`. Un critique double les dés **avant** soustraction des PA ; un échec critique coûte une action de plus (immédiate ou en dette au tour suivant). Couvert par `tests/test_combat_crit.py`.
 - **Furtivité** (`_attaque_furtive` : attaquant `furtif` ET cible non `detecte`, passé explicitement par les sites offensifs du joueur + simulateur, jamais par le test de concentration) : le jet reste fait ; un coup qui touche = critique ×2, une vraie réussite critique = ×4. Verrouillé par `test_combat_crit`.
