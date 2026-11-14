@@ -1,0 +1,8459 @@
+[
+  {
+    "_id": "competence:monstre_souffle_de_feu",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Souffle ardent",
+    "icon": "🔥",
+    "description": "Le feu monte de la gorge et balaie tout ce qui se tient devant la bête ; ce qu'il ne consume pas garde la brûlure.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 5,
+    "jet": "magique",
+    "cout_pm": 0,
+    "recharge": 3,
+    "effets": {
+      "degats": "4D6+{Vol/10}",
+      "regen_pv": -3,
+      "duree": 2
+    },
+    "zone": {
+      "forme": "cone",
+      "origine": "lanceur",
+      "orientation": "cible",
+      "decalage": 1,
+      "longueur": 4,
+      "angle": 90
+    },
+    "animation": "animation:capa_impact_brulure",
+    "animation_zone": "animation:capa_cone_souffle_feu"
+  },
+  {
+    "_id": "competence:monstre_grand_souffle_de_feu",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Grand souffle de feu",
+    "icon": "🔥",
+    "description": "Un fleuve de flammes que seuls les plus anciens dragons savent tenir si longtemps.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 7,
+    "jet": "magique",
+    "cout_pm": 0,
+    "recharge": 4,
+    "effets": {
+      "degats": "6D6+{Vol/8}",
+      "regen_pv": -5,
+      "duree": 2
+    },
+    "zone": {
+      "forme": "cone",
+      "origine": "lanceur",
+      "orientation": "cible",
+      "decalage": 1,
+      "longueur": 6,
+      "angle": 90
+    },
+    "animation": "animation:capa_impact_brulure",
+    "animation_zone": "animation:capa_cone_souffle_feu"
+  },
+  {
+    "_id": "competence:monstre_crachat_de_feu",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Crachat de feu",
+    "icon": "🔥",
+    "description": "Une gerbe brève, encore maladroite, mais qui brûle bel et bien.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 3,
+    "jet": "magique",
+    "cout_pm": 0,
+    "recharge": 3,
+    "effets": {
+      "degats": "2D6"
+    },
+    "zone": {
+      "forme": "cone",
+      "origine": "lanceur",
+      "orientation": "cible",
+      "decalage": 1,
+      "longueur": 2,
+      "angle": 90
+    },
+    "animation": "animation:capa_impact_brulure",
+    "animation_zone": "animation:capa_cone_souffle_feu"
+  },
+  {
+    "_id": "competence:monstre_souffle_de_givre",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Souffle de givre",
+    "icon": "❄️",
+    "description": "Un vent blanc qui gèle la peau et raidit les jambes.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 6,
+    "jet": "magique",
+    "cout_pm": 0,
+    "recharge": 3,
+    "effets": {
+      "degats": "4D6",
+      "buffs": {
+        "V": -2,
+        "Ag": -10
+      },
+      "duree": 2
+    },
+    "zone": {
+      "forme": "cone",
+      "origine": "lanceur",
+      "orientation": "cible",
+      "decalage": 1,
+      "longueur": 5,
+      "angle": 90
+    },
+    "animation": "animation:capa_givre",
+    "animation_zone": "animation:capa_cone_decharge"
+  },
+  {
+    "_id": "competence:monstre_souffle_empoisonne",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Souffle empoisonné",
+    "icon": "☠️",
+    "description": "Une haleine verte et lourde ; qui la respire la sent encore des heures après.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 5,
+    "jet": "magique",
+    "cout_pm": 0,
+    "recharge": 3,
+    "effets": {
+      "degats": "3D6",
+      "regen_pv": -4,
+      "duree": 3
+    },
+    "zone": {
+      "forme": "cone",
+      "origine": "lanceur",
+      "orientation": "cible",
+      "decalage": 1,
+      "longueur": 4,
+      "angle": 90
+    },
+    "animation": "animation:capa_poison",
+    "animation_zone": "animation:capa_cone_folie"
+  },
+  {
+    "_id": "competence:monstre_souffle_de_la_tombe",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Haleine de la tombe",
+    "icon": "💀",
+    "description": "L'air des os : il glace le sang et vide l'esprit de sa force.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 5,
+    "jet": "magique",
+    "cout_pm": 0,
+    "recharge": 3,
+    "effets": {
+      "degats": "3D6",
+      "regen_pm": -3,
+      "buffs": {
+        "Vol": -10
+      },
+      "duree": 2
+    },
+    "zone": {
+      "forme": "cone",
+      "origine": "lanceur",
+      "orientation": "cible",
+      "decalage": 1,
+      "longueur": 4,
+      "angle": 90
+    },
+    "animation": "animation:capa_tombeau",
+    "animation_zone": "animation:capa_cone_folie"
+  },
+  {
+    "_id": "competence:monstre_venin_faible",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Venin",
+    "icon": "🕷️",
+    "description": "Sa morsure laisse un poison qui brûle quelques instants.",
+    "mode": "passive",
+    "cible": "ennemi",
+    "cout_pm": 0,
+    "effets": {
+      "regen_pv": -2,
+      "duree": 3
+    }
+  },
+  {
+    "_id": "competence:monstre_venin",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Venin puissant",
+    "icon": "☠️",
+    "description": "Chaque coup qui porte injecte un poison qui affaiblit et ronge.",
+    "mode": "passive",
+    "cible": "ennemi",
+    "cout_pm": 0,
+    "effets": {
+      "regen_pv": -4,
+      "buffs": {
+        "F": -5
+      },
+      "duree": 3
+    }
+  },
+  {
+    "_id": "competence:monstre_dard_caudal",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Dard caudal",
+    "icon": "🦂",
+    "description": "La queue se cambre et décoche ses piquants à distance ; leur venin suit.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 4,
+    "jet": "cd",
+    "cout_pm": 0,
+    "recharge": 2,
+    "effets": {
+      "degats": "2D8",
+      "regen_pv": -5,
+      "duree": 3
+    },
+    "animation": "animation:capa_poison"
+  },
+  {
+    "_id": "competence:monstre_toile",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Toile",
+    "icon": "🕸️",
+    "description": "Un jet de soie collante qui entrave les jambes.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 3,
+    "jet": "cd",
+    "cout_pm": 0,
+    "recharge": 3,
+    "effets": {
+      "buffs": {
+        "V": -5,
+        "Ag": -10
+      },
+      "duree": 2
+    },
+    "animation": "animation:capa_lien"
+  },
+  {
+    "_id": "competence:monstre_regard_petrifiant",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Regard pétrifiant",
+    "icon": "🗿",
+    "description": "Croiser ce regard fige les membres comme la pierre.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 5,
+    "jet": "magique",
+    "cout_pm": 0,
+    "recharge": 4,
+    "effets": {
+      "buffs": {
+        "V": -5,
+        "Ag": -20
+      },
+      "duree": 2
+    },
+    "animation": "animation:capa_roc"
+  },
+  {
+    "_id": "competence:monstre_toucher_petrifiant",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Toucher pétrifiant",
+    "icon": "🗿",
+    "description": "Là où le bec touche, la chair se raidit en pierre.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 1,
+    "jet": "cc",
+    "cout_pm": 0,
+    "recharge": 3,
+    "effets": {
+      "degats": "1D6",
+      "buffs": {
+        "V": -5,
+        "Ag": -20
+      },
+      "duree": 2
+    },
+    "animation": "animation:capa_roc"
+  },
+  {
+    "_id": "competence:monstre_hurlement_terrifiant",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Hurlement terrifiant",
+    "icon": "😱",
+    "description": "Un cri qui fait trembler les mains et faiblir le cœur des plus braves.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 2,
+    "jet": "magique",
+    "cout_pm": 0,
+    "recharge": 4,
+    "effets": {
+      "buffs": {
+        "Vol": -15,
+        "F": -5
+      },
+      "duree": 3
+    },
+    "zone": {
+      "forme": "cercle",
+      "origine": "lanceur",
+      "rayon": 2
+    },
+    "animation": "animation:capa_spectre"
+  },
+  {
+    "_id": "competence:monstre_lamentation",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Plainte funèbre",
+    "icon": "👻",
+    "description": "Une plainte qui transperce les os de ceux qui l'entendent.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 3,
+    "jet": "magique",
+    "cout_pm": 5,
+    "recharge": 4,
+    "effets": {
+      "degats": "3D6",
+      "buffs": {
+        "Vol": -10
+      },
+      "duree": 2
+    },
+    "zone": {
+      "forme": "cercle",
+      "origine": "lanceur",
+      "rayon": 3
+    },
+    "animation": "animation:capa_spectre"
+  },
+  {
+    "_id": "competence:monstre_charme",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Charme envoûtant",
+    "icon": "💋",
+    "description": "Une voix, un regard : la volonté s'effrite et la magie se dérobe.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 4,
+    "jet": "magique",
+    "cout_pm": 5,
+    "recharge": 3,
+    "effets": {
+      "degats_pm": "2D6",
+      "buffs": {
+        "Vol": -15,
+        "Ag": -10
+      },
+      "duree": 2
+    },
+    "animation": "animation:capa_illusion"
+  },
+  {
+    "_id": "competence:monstre_morsure_vampirique",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Morsure vampirique",
+    "icon": "🩸",
+    "description": "Les crocs s'enfoncent ; le sang bu referme ses plaies.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 1,
+    "jet": "cc",
+    "cout_pm": 0,
+    "recharge": 2,
+    "effets": {
+      "degats": "3D6",
+      "drain_pv": 50
+    },
+    "animation": "animation:capa_drain"
+  },
+  {
+    "_id": "competence:monstre_toucher_spectral",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Toucher spectral",
+    "icon": "👻",
+    "description": "Une main froide traverse l'armure et boit la force de l'esprit.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 1,
+    "jet": "magique",
+    "cout_pm": 0,
+    "recharge": 1,
+    "effets": {
+      "degats_pm": "2D6",
+      "buffs": {
+        "Vol": -10
+      },
+      "duree": 2
+    },
+    "animation": "animation:capa_spectre"
+  },
+  {
+    "_id": "competence:monstre_etreinte",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Étreinte",
+    "icon": "🐍",
+    "description": "Les anneaux se referment et serrent jusqu'à couper le souffle.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 1,
+    "jet": "cc",
+    "cout_pm": 0,
+    "recharge": 3,
+    "effets": {
+      "degats": "2D8",
+      "buffs": {
+        "V": -5
+      },
+      "duree": 2
+    },
+    "animation": "animation:capa_lien"
+  },
+  {
+    "_id": "competence:monstre_malediction_du_tombeau",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Malédiction du tombeau",
+    "icon": "⚱️",
+    "description": "Qui trouble le repos des morts emporte leur malchance avec lui.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 3,
+    "jet": "magique",
+    "cout_pm": 5,
+    "recharge": 5,
+    "effets": {
+      "regen_pv": -3,
+      "buffs": {
+        "Ch": -20
+      },
+      "duree": 4
+    },
+    "animation": "animation:capa_tombeau"
+  },
+  {
+    "_id": "competence:monstre_embrasement",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Embrasement",
+    "icon": "🔥",
+    "description": "Le corps s'embrase et brûle tout ce qui l'approche.",
+    "mode": "active",
+    "cible": "ennemi",
+    "portee": 1,
+    "jet": "magique",
+    "cout_pm": 0,
+    "recharge": 3,
+    "effets": {
+      "degats": "3D6",
+      "regen_pv": -3,
+      "duree": 2
+    },
+    "zone": {
+      "forme": "cercle",
+      "origine": "lanceur",
+      "rayon": 1
+    },
+    "animation": "animation:capa_explosion_feu"
+  },
+  {
+    "_id": "competence:monstre_hurlement_de_meute",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Hurlement de meute",
+    "icon": "🐺",
+    "description": "Un appel qui rassemble la meute et la jette en avant.",
+    "mode": "active",
+    "cible": "soi",
+    "portee": 1,
+    "jet": "magique",
+    "cout_pm": 0,
+    "recharge": 5,
+    "effets": {
+      "buffs": {
+        "F": 8,
+        "Ag": 5
+      },
+      "duree": 3
+    },
+    "zone": {
+      "forme": "carre",
+      "origine": "lanceur",
+      "rayon": 3
+    },
+    "animation": "animation:capa_rage"
+  },
+  {
+    "_id": "competence:monstre_regeneration",
+    "type": "competence",
+    "vocation": "monstre",
+    "niveau": 0,
+    "nom": "Régénération",
+    "icon": "💚",
+    "description": "Ses plaies se referment à vue d'œil.",
+    "mode": "passive",
+    "cible": "soi",
+    "cout_pm": 0,
+    "effets": {
+      "regen_pv": "{R/10}"
+    }
+  },
+  {
+    "_id": "espece:aicha_kandicha",
+    "type": "espece",
+    "nom": "Aïcha Kandicha",
+    "genre": "f",
+    "nom_propre": true,
+    "image": "aicha_kandicha_transparent.png",
+    "description": "Dame des oasis aux pieds de chèvre cachés sous sa robe mouillée ; elle attire les voyageurs au bord de l'eau, et on ne les revoit pas.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 50,
+        "max": 80
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "esprit",
+      "aquatique",
+      "seduction",
+      "magique",
+      "humanoide",
+      "magie_illusoire_4",
+      "ia_artilleur"
+    ],
+    "items": [
+      "item:Dague",
+      "item:Faucille",
+      "item:Robe_lin_ceinturee",
+      "item:Jupe_longue_lin",
+      "item:Peigne_d_os"
+    ],
+    "proprietes": {},
+    "competences": [
+      "competence:monstre_charme"
+    ]
+  },
+  {
+    "_id": "espece:aigle_geant",
+    "type": "espece",
+    "nom": "Aigle Geant",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "aigle_geant_transparent.png",
+    "description": "Rapace d'envergure colossale, capable d'emporter un homme dans ses serres et de planer des heures durant.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "vol",
+      "predateur",
+      "ia_hit_and_run"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_02"
+  },
+  {
+    "_id": "espece:ammit",
+    "type": "espece",
+    "nom": "Ammit, la Dévoreuse",
+    "genre": "f",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "ammit_transparent.png",
+    "description": "Gueule de crocodile, garrot de lion, croupe d'hippopotame : elle rôde dans les salles de jugement des nécropoles et dévore le cœur des indignes.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 55,
+        "max": 85
+      },
+      "Ag": {
+        "min": 25,
+        "max": 40
+      },
+      "Vol": {
+        "min": 50,
+        "max": 75
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 55
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "gardien",
+      "predateur",
+      "legendaire",
+      "insensible_furtivite",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_03"
+  },
+  {
+    "_id": "espece:ange_de_la_connaissance",
+    "type": "espece",
+    "nom": "Ange de la Connaissance",
+    "genre": "m",
+    "image": "ange_de_la_connaissance_transparent.png",
+    "description": "Messager céleste gardien des savoirs sacrés, son intellect perçoit les vérités cachées de l'univers.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 55,
+        "max": 85
+      },
+      "Int": {
+        "min": 60,
+        "max": 90
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 30,
+        "max": 70
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "vol",
+      "magique",
+      "humanoide",
+      "insensible_furtivite",
+      "magie_sainte_5",
+      "ia_artilleur"
+    ],
+    "items": [
+      "item:Baton_canalisateur",
+      "item:Epee_argent",
+      "item:Robe_de_savant",
+      "item:Calotte_cuir_rune",
+      "item:Sandales_moine"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:apep",
+    "type": "espece",
+    "nom": "Apep, Serpent du Chaos",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "apep_transparent.png",
+    "description": "Serpent du chaos lové sous le monde. Chaque nuit, dit-on en Égypte, il assaille la barque du soleil dans la Douat, et chaque nuit on le repousse sans jamais le tuer ; les orages et les éclipses seraient ses assauts. Sa seule présence éteint les torches et fend la pierre. Les prêtres écrivent son nom pour le brûler et piétinent sa figure de cire ; nul ne sait si cela l'affaiblit ou le rend furieux.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 85,
+        "max": 125
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 70,
+        "max": 100
+      },
+      "Int": {
+        "min": 40,
+        "max": 60
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "souterrain",
+      "magique",
+      "legendaire",
+      "boss",
+      "cataclysme"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_05",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:araignee",
+    "type": "espece",
+    "nom": "Araignee",
+    "genre": "f",
+    "image": "araignee_transparent.png",
+    "description": "Arachnide tisseur de toiles, certaines espèces dotées d'un venin paralysant.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 1,
+        "max": 2
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 15,
+        "max": 25
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 5,
+        "max": 15
+      }
+    },
+    "tags": [
+      "animal",
+      "venin",
+      "proie",
+      "ia_fuyard_40"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_insecte_01",
+    "competences": [
+      "competence:monstre_venin_faible"
+    ]
+  },
+  {
+    "_id": "espece:araignee_geante",
+    "type": "espece",
+    "nom": "Araignee Geante",
+    "genre": "f",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "araignee_geante_transparent.png",
+    "description": "Arachnide monstrueux tissant des toiles capables de piéger un cheval, venin paralysant puissant.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 30,
+        "max": 50
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "monstre",
+      "venin",
+      "predateur",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_insecte_02",
+    "competences": [
+      "competence:monstre_venin",
+      "competence:monstre_toile"
+    ]
+  },
+  {
+    "_id": "espece:archange_du_savoir",
+    "type": "espece",
+    "nom": "Archange du Savoir",
+    "genre": "m",
+    "image": "archange_du_savoir_transparent.png",
+    "description": "Haut gardien des mystères célestes, sa sagesse dépasse l'entendement mortel et guide les destinées.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 75,
+        "max": 110
+      },
+      "Int": {
+        "min": 75,
+        "max": 105
+      },
+      "Cha": {
+        "min": 50,
+        "max": 80
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "vol",
+      "boss",
+      "legendaire",
+      "magique",
+      "humanoide",
+      "insensible_furtivite",
+      "magie_sainte_9",
+      "ia_artilleur"
+    ],
+    "items": [
+      "item:Baguette_ouvragee",
+      "item:Baton_canalisateur",
+      "item:Armure_cuir_runee",
+      "item:Epaulieres_benies",
+      "item:Calotte_cuir_rune"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:avatar",
+    "type": "espece",
+    "nom": "Avatar",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x1",
+      "forme": "rectangle"
+    },
+    "image": "avatar_transparent.png",
+    "description": "Manifestation incarnée d'une puissance divine sur le plan mortel, son pouvoir dépasse toute mesure conventionnelle.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 70,
+        "max": 105
+      },
+      "R": {
+        "min": 70,
+        "max": 105
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 90,
+        "max": 130
+      },
+      "Int": {
+        "min": 60,
+        "max": 90
+      },
+      "Cha": {
+        "min": 55,
+        "max": 85
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "boss",
+      "legendaire",
+      "divin",
+      "humanoide",
+      "insensible_furtivite",
+      "magie_sainte_10"
+    ],
+    "items": [
+      "item:Epee_une_main_benie",
+      "item:Morgenstern",
+      "item:Bouclier_sacre",
+      "item:Harnois_du_grand_arsenal",
+      "item:Epaulieres_benies",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates",
+      "item:Bottes_de_plates"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:balaur",
+    "type": "espece",
+    "nom": "Balaur",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "balaur_transparent.png",
+    "description": "Dragon-serpent des Carpates aux ailes de cuir, qui porte trois, sept ou douze têtes selon les récits. On dit que sa bave durcit en pierres précieuses, et qu'un balaur sorti d'un donjon qui débordait ravagea jadis les terres d'un prince de ces montagnes. Une tête tranchée repousse si le cou n'est pas brûlé ; certains assurent qu'il faut les abattre toutes d'un même élan.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 65,
+        "max": 95
+      },
+      "R": {
+        "min": 65,
+        "max": 95
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 55,
+        "max": 80
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "regeneration",
+      "legendaire",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_01",
+    "competences": [
+      "competence:monstre_souffle_de_feu",
+      "competence:monstre_regeneration"
+    ]
+  },
+  {
+    "_id": "espece:banshee",
+    "type": "espece",
+    "nom": "Banshee",
+    "genre": "f",
+    "image": "banshee_transparent.png",
+    "description": "Esprit féminin dont le cri funeste annonce la mort et peut briser l'esprit ou le corps des vivants.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 15,
+        "max": 25
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 55,
+        "max": 85
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "esprit",
+      "incorporel",
+      "insensible_furtivite",
+      "ia_artilleur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_01",
+    "competences": [
+      "competence:monstre_lamentation",
+      "competence:monstre_toucher_spectral"
+    ]
+  },
+  {
+    "_id": "espece:basilic",
+    "type": "espece",
+    "nom": "Basilic",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "basilic_transparent.png",
+    "description": "Le basilic est un reptile à six pattes, il ressemble à un gros lézard. Il pétrifie ses attaquants et possède une résistance naturelle à la magie.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 6
+      },
+      "F": {
+        "min": 20,
+        "max": 60
+      },
+      "R": {
+        "min": 40,
+        "max": 80
+      },
+      "Ag": {
+        "min": 20,
+        "max": 50
+      },
+      "Vol": {
+        "min": 50,
+        "max": 100
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "petrification"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_06",
+    "competences": [
+      "competence:monstre_regard_petrifiant"
+    ]
+  },
+  {
+    "_id": "espece:besien",
+    "type": "espece",
+    "nom": "Bésien",
+    "genre": "m",
+    "image": "besien_transparent.png",
+    "description": "Petit démon trapu à la grimace de masque ; il rit, danse et mord, et pullule dans les sanctuaires profanés.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 15,
+        "max": 25
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 5,
+        "max": 15
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "demon",
+      "petite_taille",
+      "monstre",
+      "ia_fuyard_40"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_gobelin_01"
+  },
+  {
+    "_id": "espece:bete_du_gevaudan",
+    "type": "espece",
+    "nom": "Bête du Gévaudan",
+    "genre": "f",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "bete_du_gevaudan_transparent.png",
+    "description": "Canidé monstrueux du folklore français, semblable à un loup démesuré à la fourrure brun roux striée d'une bande noire sur le dos. D'une rapidité et d'une ruse insaisissables, elle échappe à toutes les chasses organisées contre elle.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 35,
+        "max": 60
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 25,
+        "max": 45
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "rapide",
+      "predateur",
+      "insensible_furtivite",
+      "ia_hit_and_run",
+      "ia_predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_loup_01"
+  },
+  {
+    "_id": "espece:bete_glatissante",
+    "type": "espece",
+    "nom": "Bête glatissante",
+    "genre": "f",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "bete_glatissante_transparent.png",
+    "description": "Tête de serpent, corps de léopard, croupe de lion, pieds de cerf : de son ventre sort le vacarme de trente couples de chiens qui donnent de la voix, d'où son nom. Le roi Pellinore la traque depuis le temps d'Arthur et ne l'a jamais rattrapée. Certains disent que c'est la quête qui le garde en vie, et que la bête le sait.",
+    "base_attributes": {
+      "V": {
+        "min": 8,
+        "max": 10
+      },
+      "F": {
+        "min": 50,
+        "max": 75
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 60,
+        "max": 85
+      },
+      "Vol": {
+        "min": 50,
+        "max": 70
+      },
+      "Int": {
+        "min": 30,
+        "max": 45
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 70
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "legendaire",
+      "boss",
+      "rapide",
+      "terreur",
+      "insensible_furtivite",
+      "ia_berserker"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_08",
+    "competences": [
+      "competence:monstre_hurlement_terrifiant"
+    ]
+  },
+  {
+    "_id": "espece:boukhnoun",
+    "type": "espece",
+    "nom": "Boukhnoun",
+    "genre": "m",
+    "image": "boukhnoun_transparent.png",
+    "description": "Ombre bossue des ravins, on l'entend renifler avant de la voir ; la peur des bergers après le couchant.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 30,
+        "max": 45
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 40,
+        "max": 60
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 15,
+        "max": 30
+      }
+    },
+    "tags": [
+      "monstre",
+      "nocturne",
+      "terreur",
+      "furtif",
+      "predateur",
+      "insensible_furtivite",
+      "ia_predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_09",
+    "competences": [
+      "competence:monstre_hurlement_terrifiant"
+    ]
+  },
+  {
+    "_id": "espece:bunyip",
+    "type": "espece",
+    "nom": "Bunyip",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "bunyip_transparent.png",
+    "description": "Créature amphibie des marais et billabongs australiens, mi-chien mi-cheval, à la fourrure sombre et aux dents de morse. Son cri perçant peut paralyser ou hypnotiser ses proies avant qu'il ne les entraîne sous l'eau.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 35,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "marais",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_visqueux_01"
+  },
+  {
+    "_id": "espece:cath_palug",
+    "type": "espece",
+    "nom": "Cath Palug",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "cath_palug_transparent.png",
+    "description": "Chat monstrueux de l'île de Môn. Une truie errante, Henwen, l'aurait mis bas au pied d'un rocher ; des porchers jetèrent le chaton à la mer, et les fils de Palug le recueillirent sur l'île, où il dévora neuf-vingts guerriers. Les Bretons de l'île disent que Kaï l'affronta ; ceux du continent, qu'Arthur le tua au bord d'un lac des montagnes. Les deux récits ne peuvent pas être vrais, et il chasse encore.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 40,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 55
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "boss",
+      "rapide",
+      "predateur",
+      "ia_hit_and_run"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_10"
+  },
+  {
+    "_id": "espece:cerbere",
+    "type": "espece",
+    "nom": "Cerbere",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "cerbere_transparent.png",
+    "description": "Chien tricéphale gardien des enfers, chaque tête mordant avec une rage indépendante.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 45,
+        "max": 75
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "monstre",
+      "infernal",
+      "gardien",
+      "insensible_furtivite",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_loup_02"
+  },
+  {
+    "_id": "espece:cerf",
+    "type": "espece",
+    "nom": "Cerf",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "cerf_transparent.png",
+    "description": "Un cerf est un grand mammifère herbivore des forêts et des plaines. Le mâle porte des bois ramifiés qu'il renouvelle chaque année et se nourrit principalement d'herbes, de feuilles, de jeunes pousses et d'écorces.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "animal",
+      "proie",
+      "ia_fuyard_50"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_11"
+  },
+  {
+    "_id": "espece:chauve_souris_geante",
+    "type": "espece",
+    "nom": "Chauve Souris Geante",
+    "genre": "f",
+    "jeton": {
+      "taille": "2x1",
+      "forme": "triangle"
+    },
+    "image": "chauve_souris_geante_transparent.png",
+    "description": "Chiroptère monstrueux assoiffé de sang, ses cris ultrasoniques désorientent ses proies.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "monstre",
+      "vol",
+      "nocturne",
+      "predateur",
+      "insensible_furtivite",
+      "ia_hit_and_run",
+      "ia_predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_13"
+  },
+  {
+    "_id": "espece:chevalier_du_sang",
+    "type": "espece",
+    "nom": "Chevalier du Sang",
+    "genre": "m",
+    "image": "chevalier_du_sang_transparent.png",
+    "description": "Dragon de sang déchu : un paladin de l'Ordre du Dragon qui a perdu la foi. Le soleil le gêne, et de son serment il ne lui reste que la soif.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "guerrier"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_02",
+    "competences": [
+      "competence:monstre_morsure_vampirique"
+    ]
+  },
+  {
+    "_id": "espece:chimere",
+    "type": "espece",
+    "nom": "Chimere",
+    "genre": "f",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "chimere_transparent.png",
+    "description": "Hybride monstrueux mêlant lion, chèvre et serpent, crachant le feu par sa tête caprine.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "souffle",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_03",
+    "competences": [
+      "competence:monstre_souffle_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:cockatrice",
+    "type": "espece",
+    "nom": "Cockatrice",
+    "genre": "f",
+    "image": "cockatrice_transparent.png",
+    "description": "Hybride de coq et de serpent dont le simple contact ou regard transforme la chair en pierre.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 15,
+        "max": 30
+      }
+    },
+    "tags": [
+      "monstre",
+      "petrification",
+      "vol",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_04",
+    "competences": [
+      "competence:monstre_toucher_petrifiant"
+    ]
+  },
+  {
+    "_id": "espece:comte_vampire",
+    "type": "espece",
+    "nom": "Comte Vampire",
+    "genre": "m",
+    "image": "comte_vampire_transparent.png",
+    "description": "Aîné de la lignée de Dracula, noble et ancien ; son influence et sa puissance dépassent largement celles de ses cadets.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 50,
+        "max": 80
+      },
+      "Ag": {
+        "min": 50,
+        "max": 80
+      },
+      "Vol": {
+        "min": 60,
+        "max": 90
+      },
+      "Int": {
+        "min": 50,
+        "max": 75
+      },
+      "Cha": {
+        "min": 55,
+        "max": 85
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "magique",
+      "boss",
+      "humanoide",
+      "magie_necromancie_4",
+      "magie_illusoire_3",
+      "magie_necromancie_8_heros_mage",
+      "magie_necromancie_10_seigneur_mage",
+      "ia_predateur",
+      "ia_artilleur_mage",
+      "ia_artilleur_heros_mage",
+      "ia_artilleur_seigneur_mage"
+    ],
+    "items": [
+      "item:Rapiere",
+      "item:Epee_longue",
+      "item:Dague_de_parade",
+      "item:Manteau_de_cour_double",
+      "item:Pantalon_velours",
+      "item:Bottes_noires",
+      "item:Gants_fins_noirs"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_02",
+    "competences": [
+      "competence:monstre_morsure_vampirique"
+    ]
+  },
+  {
+    "_id": "espece:corneille_noire",
+    "type": "espece",
+    "nom": "Corneille Noire",
+    "genre": "f",
+    "image": "corneille_noire_transparent.png",
+    "description": "Oiseau charognard aux allures sinistres, souvent présage de mort et messager des nécromanciens.",
+    "base_attributes": {
+      "V": {
+        "min": 13,
+        "max": 15
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 10,
+        "max": 20
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "vol",
+      "predateur",
+      "ia_hit_and_run"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_05"
+  },
+  {
+    "_id": "espece:crocodile",
+    "type": "espece",
+    "nom": "Crocodile",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "crocodile_transparent.png",
+    "description": "Reptile aquatique embusqué, mâchoires puissantes et patience redoutable.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 10,
+        "max": 25
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "animal",
+      "aquatique",
+      "predateur",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_08"
+  },
+  {
+    "_id": "espece:cu_sidhe",
+    "type": "espece",
+    "nom": "Cú Sídhe",
+    "genre": "m",
+    "image": "cu_sidhe_transparent.png",
+    "description": "Chien des tertres, grand comme un jeune taureau, au pelage vert sombre : il chasse en silence et n'aboie que trois fois — au troisième aboiement, qui l'entend meurt de peur. Il ne franchit pas l'eau courante.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 40,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 50,
+        "max": 75
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 40
+      }
+    },
+    "tags": [
+      "monstre",
+      "feerique",
+      "terreur",
+      "predateur",
+      "ia_meute"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_loup_01",
+    "competences": [
+      "competence:monstre_hurlement_terrifiant"
+    ]
+  },
+  {
+    "_id": "espece:cwn_annwn",
+    "type": "espece",
+    "nom": "Chien d'Annwn",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "cwn_annwn_transparent.png",
+    "description": "Les Cŵn Annwn, chiens de l'Autre Monde, d'un blanc éclatant aux oreilles rouges. Certaines nuits ils sortent en meute des portails qui surgissent autour de Camelot, avec la Chasse sauvage. Leur aboiement est d'autant plus fort qu'ils sont loin, et se fait doux quand ils sont tout près : qui les entend chuchoter derrière lui n'a plus le temps de fuir. On dit qu'ils mènent les âmes jusqu'à Annwn ; les chevaliers de la Table ronde disent seulement qu'ils ne lâchent jamais une piste.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 45,
+        "max": 65
+      },
+      "R": {
+        "min": 40,
+        "max": 60
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 45,
+        "max": 65
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "monstre",
+      "feerique",
+      "nocturne",
+      "rapide",
+      "terreur",
+      "predateur",
+      "insensible_furtivite",
+      "ia_meute"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_loup_02",
+    "competences": [
+      "competence:monstre_hurlement_terrifiant"
+    ]
+  },
+  {
+    "_id": "espece:dearg_due",
+    "type": "espece",
+    "nom": "Dearg Due",
+    "genre": "f",
+    "nom_propre": true,
+    "image": "dearg_due_transparent.png",
+    "description": "Lamie d'Irlande : vendue par son père à un chef cruel qui l'enferma, elle se laissa mourir ; une lamie de passage la releva, et elle but le sang de son mari, puis celui de son père. Elle séduit encore les hommes avant de les vider ; le soleil la laisse inerte, le fer et les chevaux la tiennent à distance.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 60
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 55,
+        "max": 80
+      },
+      "Int": {
+        "min": 55,
+        "max": 80
+      },
+      "Cha": {
+        "min": 75,
+        "max": 95
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "magique",
+      "seduction",
+      "boss",
+      "humanoide",
+      "magie_necromancie_4",
+      "magie_illusoire_3"
+    ],
+    "items": [
+      "item:Rapiere",
+      "item:Dague",
+      "item:Robe_bordeaux",
+      "item:Cape_soie_sombre",
+      "item:Bottines_legeres",
+      "item:Gants_fins_noirs"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_03",
+    "competences": [
+      "competence:monstre_charme",
+      "competence:monstre_morsure_vampirique"
+    ]
+  },
+  {
+    "_id": "espece:demon_guerrier",
+    "type": "espece",
+    "nom": "Demon Guerrier",
+    "genre": "m",
+    "image": "demon_guerrier_transparent.png",
+    "description": "Démon façonné pour le combat, musculature démesurée et armure de chair endurcie par les flammes infernales.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "demon",
+      "infernal",
+      "guerrier",
+      "humanoide",
+      "ia_berserker"
+    ],
+    "items": [
+      "item:Talwar",
+      "item:Fleau_arme",
+      "item:Pilum",
+      "item:Bouclier_chauffe",
+      "item:Cuirasse_cuir_noir",
+      "item:Epaulieres_de_fer",
+      "item:Heaume_de_fer",
+      "item:Gantelets_acier"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:demon_majeur_de_la_destinee",
+    "type": "espece",
+    "nom": "Demon Majeur de la Destinee",
+    "genre": "m",
+    "image": "demon_majeur_de_la_destinee_transparent.png",
+    "description": "Seigneur infernal manipulant le fil du destin, ses machinations s'étendent sur des générations entières.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 75,
+        "max": 110
+      },
+      "Int": {
+        "min": 60,
+        "max": 90
+      },
+      "Cha": {
+        "min": 45,
+        "max": 70
+      },
+      "Ch": {
+        "min": 30,
+        "max": 70
+      }
+    },
+    "tags": [
+      "demon",
+      "infernal",
+      "boss",
+      "legendaire",
+      "magique",
+      "humanoide",
+      "insensible_furtivite",
+      "magie_demonologie_8",
+      "magie_demonologie_10_seigneur_mage",
+      "ia_artilleur_mage",
+      "ia_artilleur_heros_mage",
+      "ia_artilleur_seigneur_mage"
+    ],
+    "items": [
+      "item:Sceptre_os",
+      "item:Baton_cornu",
+      "item:dague_rituelle",
+      "item:Robe_noire_capuche",
+      "item:Cape_de_plumes_noires",
+      "item:Gants_runiques"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:dobhar_chu",
+    "type": "espece",
+    "nom": "Dobhar-chú",
+    "genre": "m",
+    "image": "dobhar_chu_transparent.png",
+    "description": "Chien des eaux, mi-chien mi-loutre, qui guette les lacs du nord-ouest de l'Irlande et tue qui s'y baigne. Quand on l'abat, son compagnon sort de l'eau pour le venger.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 45,
+        "max": 65
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 15,
+        "max": 30
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "predateur",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_loup_01"
+  },
+  {
+    "_id": "espece:dragon",
+    "type": "espece",
+    "nom": "Dragon",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "dragon_transparent.png",
+    "description": "Reptile ailé légendaire, souffle destructeur et intelligence redoutable, dominant son territoire sans partage.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 65,
+        "max": 100
+      },
+      "R": {
+        "min": 65,
+        "max": 100
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 65,
+        "max": 95
+      },
+      "Int": {
+        "min": 45,
+        "max": 70
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 65
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_01",
+    "competences": [
+      "competence:monstre_souffle_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:dragon_blanc",
+    "type": "espece",
+    "nom": "Dragon blanc",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "dragon_blanc_transparent.png",
+    "description": "Le second dragon de Dinas Emrys, pâle comme la craie. Il ouvre chaque combat en furie et repousse le rouge jusqu'au bord du lac souterrain, puis faiblit et recule. On dit qu'il ne meurt jamais tout à fait, qu'il revient toujours pour une nouvelle lutte, et que la tour au-dessus n'a jamais tenu longtemps.",
+    "base_attributes": {
+      "V": {
+        "min": 17,
+        "max": 19
+      },
+      "F": {
+        "min": 80,
+        "max": 115
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 45,
+        "max": 65
+      },
+      "Vol": {
+        "min": 80,
+        "max": 115
+      },
+      "Int": {
+        "min": 50,
+        "max": 80
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_02",
+    "competences": [
+      "competence:monstre_souffle_de_givre"
+    ]
+  },
+  {
+    "_id": "espece:dragon_de_sang",
+    "type": "espece",
+    "nom": "Dragon de sang",
+    "genre": "m",
+    "image": "",
+    "description": "Paladin de l'Ordre du Dragon relevé par le sang ; tant qu'il garde la foi, le soleil ne peut rien contre lui, et il protège encore les routes.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 60,
+        "max": 85
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 35,
+        "max": 55
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "guerrier",
+      "magique",
+      "humanoide",
+      "magie_necromancie_3",
+      "magie_bataille_4"
+    ],
+    "items": [
+      "item:Epee_une_main_benie",
+      "item:Masse_benie",
+      "item:Bouclier_sacre",
+      "item:Cotte_mailles_benie",
+      "item:Epaulieres_de_fer",
+      "item:Heaume_ouvert_grave"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_04"
+  },
+  {
+    "_id": "espece:dragon_empereur",
+    "type": "espece",
+    "nom": "Dragon Empereur",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "dragon_empereur_transparent.png",
+    "description": "Souverain absolu parmi les dragons, dont la simple présence plie les volontés les plus fortes.",
+    "base_attributes": {
+      "V": {
+        "min": 18,
+        "max": 20
+      },
+      "F": {
+        "min": 95,
+        "max": 140
+      },
+      "R": {
+        "min": 95,
+        "max": 140
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 95,
+        "max": 135
+      },
+      "Int": {
+        "min": 65,
+        "max": 95
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 60,
+        "max": 95
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_01",
+    "competences": [
+      "competence:monstre_grand_souffle_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:dragon_hydre",
+    "type": "espece",
+    "nom": "Dragon-hydre",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "dragon_hydre_transparent.png",
+    "description": "Dragon sans ailes au corps massif, dont cinq à sept cous jaillissent des épaules ; chaque gueule crache le feu. Une tête tranchée en fait repousser deux, sauf si le moignon est brûlé aussitôt. On raconte qu'une de ses têtes ne meurt jamais et qu'il faut l'enterrer sous un rocher.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 65,
+        "max": 100
+      },
+      "R": {
+        "min": 70,
+        "max": 105
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 55,
+        "max": 80
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 65
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "souffle",
+      "regeneration",
+      "legendaire",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_02",
+    "competences": [
+      "competence:monstre_souffle_empoisonne",
+      "competence:monstre_regeneration"
+    ]
+  },
+  {
+    "_id": "espece:dragon_rouge",
+    "type": "espece",
+    "nom": "Dragon rouge",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "dragon_rouge_transparent.png",
+    "description": "L'un des deux dragons de Dinas Emrys. Un roi les aurait pris au centre de l'île, endormis dans une cuve d'hydromel, et enfermés sous la colline. Quand Vortigern voulut y bâtir sa tour, elle s'effondrait chaque nuit : les deux dragons se battaient dessous. Un enfant sans père, que certains appellent Merlin, l'annonça. Le blanc a l'avantage au début de chaque combat ; le rouge, celui que les Gallois peignent sur leurs bannières, l'emporte à la fin.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 85,
+        "max": 125
+      },
+      "R": {
+        "min": 85,
+        "max": 125
+      },
+      "Ag": {
+        "min": 40,
+        "max": 60
+      },
+      "Vol": {
+        "min": 80,
+        "max": 115
+      },
+      "Int": {
+        "min": 50,
+        "max": 80
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_01",
+    "competences": [
+      "competence:monstre_souffle_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:dragon_zombie",
+    "type": "espece",
+    "nom": "Dragon Zombie",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "dragon_zombie_transparent.png",
+    "description": "Carcasse draconique réanimée par nécromancie, son souffle putride remplace les flammes d'antan.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 60,
+        "max": 90
+      },
+      "R": {
+        "min": 60,
+        "max": 95
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 70
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "draconique",
+      "vol",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_02",
+    "competences": [
+      "competence:monstre_souffle_de_la_tombe"
+    ]
+  },
+  {
+    "_id": "espece:dryade",
+    "type": "espece",
+    "nom": "Dryade",
+    "genre": "f",
+    "image": "dryade_transparent.png",
+    "description": "Nymphe des bois, intimement liée à un arbre dont elle tire sa vitalité et sa magie.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 35,
+        "max": 60
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "esprit",
+      "foret",
+      "magique",
+      "magie_nature_4",
+      "ia_protecteur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:ecureuil",
+    "type": "espece",
+    "nom": "Ecureuil",
+    "genre": "m",
+    "image": "ecureuil_transparent.png",
+    "description": "Faune commune et discrète — ecureuil — peu menaçant et utile à la survie.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 3,
+        "max": 5
+      },
+      "R": {
+        "min": 3,
+        "max": 5
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 10,
+        "max": 20
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "animal",
+      "proie",
+      "petite_taille",
+      "ia_fuyard_50"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_11"
+  },
+  {
+    "_id": "espece:elementaux",
+    "type": "espece",
+    "nom": "Elementaux",
+    "genre": "m",
+    "pluriel": true,
+    "image": "elementaux_transparent.png",
+    "description": "Manifestation pure d'un élément — feu, eau, terre ou air — animée par une volonté primordiale.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 7
+      },
+      "F": {
+        "min": 35,
+        "max": 65
+      },
+      "R": {
+        "min": 35,
+        "max": 65
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 50,
+        "max": 85
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "elementaire",
+      "magique",
+      "magie_elementaire_4"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:familier",
+    "type": "espece",
+    "nom": "Familier",
+    "genre": "m",
+    "image": "familier_transparent.png",
+    "description": "Petite créature liée magiquement à un sorcier, servant d'yeux, d'oreilles ou de relais de pouvoir.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 5,
+        "max": 15
+      },
+      "R": {
+        "min": 10,
+        "max": 20
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 25,
+        "max": 45
+      },
+      "Int": {
+        "min": 25,
+        "max": 45
+      },
+      "Cha": {
+        "min": 15,
+        "max": 30
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "humanoide",
+      "magique",
+      "petite_taille",
+      "magie_illusoire_1",
+      "ia_protecteur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_gobelin_02"
+  },
+  {
+    "_id": "espece:fantome",
+    "type": "espece",
+    "nom": "Fantome",
+    "genre": "m",
+    "image": "fantome_transparent.png",
+    "description": "Esprit errant attaché à un lieu ou un objet, oscillant entre tristesse et fureur destructrice.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 5,
+        "max": 15
+      },
+      "R": {
+        "min": 10,
+        "max": 20
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "esprit",
+      "incorporel",
+      "insensible_furtivite"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_05",
+    "competences": [
+      "competence:monstre_toucher_spectral"
+    ]
+  },
+  {
+    "_id": "espece:faoladh",
+    "type": "espece",
+    "nom": "Faoladh",
+    "genre": "m",
+    "image": "faoladh_transparent.png",
+    "description": "Loup-garou d'Irlande, héritier du don de Laignech Fáelad : il garde les enfants, les blessés et les égarés, et ne frappe que s'il les croit menacés. Pendant qu'il court, son corps anthrope dort là où il l'a laissé ; déplacé, l'esprit ne le retrouve plus.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 40,
+        "max": 60
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 45,
+        "max": 65
+      },
+      "Int": {
+        "min": 30,
+        "max": 45
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "metamorphe",
+      "gardien",
+      "nocturne",
+      "ia_meute"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_loup_01",
+    "competences": [
+      "competence:monstre_hurlement_de_meute"
+    ]
+  },
+  {
+    "_id": "espece:fauves",
+    "type": "espece",
+    "nom": "Fauves",
+    "genre": "m",
+    "pluriel": true,
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "fauves_transparent.png",
+    "description": "Grands félins prédateurs — lions, tigres, panthères — vitesse et puissance combinées.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 30,
+        "max": 50
+      },
+      "R": {
+        "min": 25,
+        "max": 45
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "animal",
+      "predateur",
+      "insensible_furtivite",
+      "ia_meute",
+      "ia_predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_loup_02"
+  },
+  {
+    "_id": "espece:fee",
+    "type": "espece",
+    "nom": "Fee",
+    "genre": "f",
+    "image": "fee_transparent.png",
+    "description": "Petit esprit féerique espiègle, manipulant illusions et enchantements mineurs.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 5,
+        "max": 10
+      },
+      "R": {
+        "min": 10,
+        "max": 20
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 40,
+        "max": 65
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "feerique",
+      "magique",
+      "petite_taille",
+      "magie_illusoire_2",
+      "ia_artilleur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:fils_de_sobek",
+    "type": "espece",
+    "nom": "Fils de Sobek",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "fils_de_sobek_transparent.png",
+    "description": "Crocodile sacré nourri par des siècles d'offrandes, gardien des temples du fleuve.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 60,
+        "max": 90
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "aquatique",
+      "divin",
+      "gardien",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_12"
+  },
+  {
+    "_id": "espece:gargouille",
+    "type": "espece",
+    "nom": "Gargouille",
+    "genre": "f",
+    "image": "gargouille_transparent.png",
+    "description": "Créature de pierre vivante, immobile en apparence puis foudroyante au combat, gardienne nocturne.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 55,
+        "max": 85
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "monstre",
+      "gardien",
+      "vol",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_13"
+  },
+  {
+    "_id": "espece:genie",
+    "type": "espece",
+    "nom": "Genie",
+    "genre": "m",
+    "image": "genie_transparent.png",
+    "description": "Esprit élémentaire enfermé dans un objet, capable de manipuler la réalité par des vœux ou des sortilèges.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 7
+      },
+      "F": {
+        "min": 20,
+        "max": 40
+      },
+      "R": {
+        "min": 20,
+        "max": 40
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 60,
+        "max": 95
+      },
+      "Int": {
+        "min": 50,
+        "max": 85
+      },
+      "Cha": {
+        "min": 40,
+        "max": 70
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "elementaire",
+      "magique",
+      "magie_elementaire_6",
+      "ia_artilleur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:ghul_des_sables",
+    "type": "espece",
+    "nom": "Ghûl des Sables",
+    "genre": "m",
+    "image": "ghul_des_sables_transparent.png",
+    "description": "Charognard des pistes qui revêt l'apparence de sa dernière proie pour en attirer une autre.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 30,
+        "max": 45
+      },
+      "R": {
+        "min": 30,
+        "max": 45
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 15,
+        "max": 30
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "metamorphe",
+      "desert",
+      "predateur",
+      "humanoide",
+      "ia_meute"
+    ],
+    "items": [
+      "item:Cimeterre",
+      "item:Coutelas",
+      "item:Couteau_de_chasse",
+      "item:Robe_lin_ceinturee",
+      "item:Pantalon_ample",
+      "item:Capuchon_de_lin",
+      "item:Sandales_de_corde"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_14"
+  },
+  {
+    "_id": "espece:gnome",
+    "type": "espece",
+    "nom": "Gnome",
+    "genre": "m",
+    "image": "gnome_transparent.png",
+    "description": "Petit humanoïde malicieux et inventif, doué pour l'artisanat et la manipulation de la magie mineure.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 10,
+        "max": 25
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 25,
+        "max": 50
+      },
+      "Vol": {
+        "min": 20,
+        "max": 40
+      },
+      "Int": {
+        "min": 40,
+        "max": 75
+      },
+      "Cha": {
+        "min": 20,
+        "max": 45
+      },
+      "Ch": {
+        "min": 20,
+        "max": 40
+      }
+    },
+    "tags": [
+      "humanoide",
+      "petite_taille",
+      "ia_fuyard_40"
+    ],
+    "items": [
+      "item:Dague",
+      "item:Epee_courte",
+      "item:Arbalete_legere",
+      "item:Veste_cuir_souple",
+      "item:Chapeau_mou",
+      "item:Gants_cuir_epais",
+      "item:Souliers_cuir"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_gobelin_03"
+  },
+  {
+    "_id": "espece:gobelin",
+    "type": "espece",
+    "nom": "Gobelin",
+    "genre": "m",
+    "image": "gobelin_transparent.png",
+    "description": "Petit humanoïde chétif et rusé, compensant sa faiblesse physique par le nombre et l'embuscade.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 10,
+        "max": 25
+      },
+      "R": {
+        "min": 10,
+        "max": 25
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 10,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 25
+      }
+    },
+    "tags": [
+      "humanoide",
+      "petite_taille",
+      "proie",
+      "ia_meute",
+      "ia_fuyard_30"
+    ],
+    "items": [
+      "item:Dague",
+      "item:Epee_courte",
+      "item:Arc_court",
+      "item:Sarbacane",
+      "item:Pourpoint_cuir_renf",
+      "item:Bandeau_de_cuir",
+      "item:Mocassins"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_gobelin_04"
+  },
+  {
+    "_id": "espece:gobelin_chamanique",
+    "type": "espece",
+    "nom": "Gobelin Chamanique",
+    "genre": "m",
+    "image": "gobelin_chamanique_transparent.png",
+    "description": "Gobelin initié aux esprits et à la magie tribale, moins endurant au combat mais capable d'invoquer de petits sortilèges.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 5,
+        "max": 15
+      },
+      "R": {
+        "min": 10,
+        "max": 20
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 30,
+        "max": 55
+      },
+      "Int": {
+        "min": 25,
+        "max": 45
+      },
+      "Cha": {
+        "min": 15,
+        "max": 30
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "humanoide",
+      "petite_taille",
+      "magique",
+      "proie",
+      "magie_nature_1",
+      "magie_nature_3_mage",
+      "ia_protecteur",
+      "ia_artilleur_apprenti"
+    ],
+    "items": [
+      "item:Sceptre_os",
+      "item:Baton_cornu",
+      "item:dague_rituelle",
+      "item:Vetements_totémiques",
+      "item:Coiffe_plumes",
+      "item:Bracelets_os"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_gobelin_05"
+  },
+  {
+    "_id": "espece:gobelin_des_marais",
+    "type": "espece",
+    "nom": "Gobelin des Marais",
+    "genre": "m",
+    "image": "gobelin_des_marais_transparent.png",
+    "description": "Variante de gobelin adaptée aux zones humides et fétides, sa peau visqueuse sécrète une légère toxine et il se déplace avec aisance dans la vase.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 10,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 15,
+        "max": 30
+      }
+    },
+    "tags": [
+      "humanoide",
+      "petite_taille",
+      "marais",
+      "proie",
+      "ia_meute",
+      "ia_fuyard_30"
+    ],
+    "items": [
+      "item:Couteau_de_chasse",
+      "item:Trident_barbele",
+      "item:Sarbacane",
+      "item:Jupe_de_chanvre",
+      "item:Bandeau_de_cuir",
+      "item:Sandales_de_corde"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_gobelin_01"
+  },
+  {
+    "_id": "espece:golem_de_chair",
+    "type": "espece",
+    "nom": "Golem de Chair",
+    "genre": "m",
+    "image": "golem_de_chair_transparent.png",
+    "description": "Construct assemblé de tissus organiques recousus, doté d'une force brute et d'une régénération limitée.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 45,
+        "max": 75
+      },
+      "R": {
+        "min": 50,
+        "max": 85
+      },
+      "Ag": {
+        "min": 5,
+        "max": 15
+      },
+      "Vol": {
+        "min": 35,
+        "max": 60
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "construct",
+      "humanoide",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_geant_04"
+  },
+  {
+    "_id": "espece:golem_de_fer",
+    "type": "espece",
+    "nom": "Golem de Fer",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "golem_de_fer_transparent.png",
+    "description": "Construct métallique impénétrable, son poids et sa carapace le rendent presque inarrêtable.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 5,
+        "max": 25
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 40
+      }
+    },
+    "tags": [
+      "construct",
+      "lent",
+      "humanoide",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_geant_05"
+  },
+  {
+    "_id": "espece:golem_de_pierre",
+    "type": "espece",
+    "nom": "Golem de Pierre",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "golem_de_pierre_transparent.png",
+    "description": "Construct massif sculpté dans la roche, lent mais d'une résistance quasi indestructible.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 45,
+        "max": 75
+      },
+      "R": {
+        "min": 70,
+        "max": 110
+      },
+      "Ag": {
+        "min": 5,
+        "max": 25
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "construct",
+      "lent",
+      "humanoide",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_geant_01"
+  },
+  {
+    "_id": "espece:gorgone",
+    "type": "espece",
+    "nom": "Gorgone",
+    "genre": "f",
+    "image": "gorgone_transparent.png",
+    "description": "Femme-monstre à la chevelure de serpents, son regard pétrifie quiconque la fixe.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 25,
+        "max": 45
+      },
+      "R": {
+        "min": 25,
+        "max": 45
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 55,
+        "max": 85
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 20,
+        "max": 40
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "petrification"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_15",
+    "competences": [
+      "competence:monstre_regard_petrifiant"
+    ]
+  },
+  {
+    "_id": "espece:goule",
+    "type": "espece",
+    "nom": "Goule",
+    "genre": "f",
+    "image": "goule_transparent.png",
+    "description": "Charognard mort-vivant vif et féroce, sa morsure peut paralyser ou infecter ses victimes.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 10,
+        "max": 20
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "humanoide",
+      "ia_meute"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_01"
+  },
+  {
+    "_id": "espece:grand_dragon",
+    "type": "espece",
+    "nom": "Grand Dragon",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "grand_dragon_transparent.png",
+    "description": "Dragon parvenu à un âge vénérable, dont la puissance et la sagesse rivalisent avec celles des plus grandes créatures du monde.",
+    "base_attributes": {
+      "V": {
+        "min": 17,
+        "max": 19
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 80,
+        "max": 115
+      },
+      "Int": {
+        "min": 55,
+        "max": 85
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_01",
+    "competences": [
+      "competence:monstre_souffle_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:grand_phenix",
+    "type": "espece",
+    "nom": "Grand Phenix",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "grand_phenix_transparent.png",
+    "description": "Variante ascendante du phénix, dont le souffle ardent embrase des champs entiers et la renaissance s'accompagne d'une vague de pure lumière.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 75,
+        "max": 110
+      },
+      "Int": {
+        "min": 40,
+        "max": 65
+      },
+      "Cha": {
+        "min": 45,
+        "max": 75
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "feu",
+      "renaissance",
+      "vol",
+      "magique",
+      "legendaire",
+      "magie_elementaire_8"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_03",
+    "competences": [
+      "competence:monstre_embrasement"
+    ]
+  },
+  {
+    "_id": "espece:griffon",
+    "type": "espece",
+    "nom": "Griffon",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "triangle"
+    },
+    "image": "griffon_transparent.png",
+    "description": "Créature mêlant lion et aigle, chasseur aérien féroce gardant son territoire avec ardeur.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 35,
+        "max": 60
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 40
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "vol",
+      "predateur",
+      "ia_hit_and_run"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_05"
+  },
+  {
+    "_id": "espece:grootslang",
+    "type": "espece",
+    "nom": "Grootslang",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "grootslang_transparent.png",
+    "description": "Le « grand serpent » des légendes du Richtersveld, en Afrique australe : un colosse au corps d'éléphant prolongé d'une longue queue de serpent. On raconte qu'aux premiers temps, les dieux façonnèrent une créature trop forte et trop rusée, puis la séparèrent en éléphant et en serpent ; une seule leur aurait échappé. Il se terre au fond d'une caverne dont nul n'a vu le fond, le Trou des Merveilles, qu'on dit tapissé de diamants. Il y attire les éléphants pour les dévorer et convoite les pierres précieuses : plus d'un voyageur aurait racheté sa vie en lui offrant des gemmes.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 70,
+        "max": 110
+      },
+      "R": {
+        "min": 70,
+        "max": 105
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 35,
+        "max": 60
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 70
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "reptile",
+      "souterrain",
+      "predateur",
+      "insensible_furtivite",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_06",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:gwyn_ap_nudd",
+    "type": "espece",
+    "nom": "Gwyn ap Nudd",
+    "genre": "m",
+    "nom_propre": true,
+    "image": "gwyn_ap_nudd_transparent.png",
+    "description": "Seigneur d'Annwn, qui mène la Chasse sauvage hors des portails par les nuits d'orage, son chien Dormarth au museau rouge à ses côtés. Chaque premier jour de mai il se bat contre Gwythyr pour la belle Creiddylad, et se battra ainsi jusqu'à la fin des temps sans qu'aucun ne l'emporte. Les uns disent qu'il demeure sous Glastonbury Tor ; ceux qui l'ont croisé disent qu'il leur a parlé avec courtoisie, puis a lâché ses chiens.",
+    "base_attributes": {
+      "V": {
+        "min": 8,
+        "max": 10
+      },
+      "F": {
+        "min": 65,
+        "max": 95
+      },
+      "R": {
+        "min": 60,
+        "max": 90
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 85,
+        "max": 120
+      },
+      "Int": {
+        "min": 65,
+        "max": 90
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "humanoide",
+      "feerique",
+      "magique",
+      "nocturne",
+      "legendaire",
+      "boss",
+      "insensible_furtivite",
+      "magie_nature_8",
+      "magie_necromancie_6",
+      "ia_artilleur_mage",
+      "ia_artilleur_heros_mage",
+      "ia_artilleur_seigneur_mage"
+    ],
+    "items": [
+      "item:Epee_batarde",
+      "item:Lance",
+      "item:Arc_du_grand_atelier",
+      "item:Manteau_de_cour_double",
+      "item:Mantelet_de_chasse",
+      "item:Gants_archer",
+      "item:Bottes_de_chasse"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:harpie",
+    "type": "espece",
+    "nom": "Harpie",
+    "genre": "f",
+    "h_aspire": true,
+    "image": "harpie_transparent.png",
+    "description": "Femme-oiseau au cri perçant, vole en groupe pour harceler et déchiqueter ses proies isolées.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 30,
+        "max": 50
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 15,
+        "max": 30
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "vol",
+      "ia_hit_and_run"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_07"
+  },
+  {
+    "_id": "espece:hippogriffe",
+    "type": "espece",
+    "nom": "Hippogriffe",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "triangle"
+    },
+    "image": "hippogriffe_transparent.gif",
+    "description": "Hybride de griffon et de cheval, monture noble et farouche qui ne se laisse approcher que par les braves.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 10,
+        "max": 25
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "vol",
+      "ia_hit_and_run"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_08"
+  },
+  {
+    "_id": "espece:homme_arbre",
+    "type": "espece",
+    "nom": "Homme Arbre",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "homme_arbre_transparent.png",
+    "description": "Esprit végétal ancestral animé, lent mais d'une force et d'une endurance presque géologiques.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 40,
+        "max": 70
+      },
+      "R": {
+        "min": 60,
+        "max": 95
+      },
+      "Ag": {
+        "min": 10,
+        "max": 30
+      },
+      "Vol": {
+        "min": 35,
+        "max": 60
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 15,
+        "max": 30
+      }
+    },
+    "tags": [
+      "monstre",
+      "foret",
+      "lent",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_geant_02"
+  },
+  {
+    "_id": "espece:horreur",
+    "type": "espece",
+    "nom": "Horreur",
+    "genre": "f",
+    "image": "horreur_transparent.png",
+    "description": "Entité morbide d'une nature indéfinissable, son apparence seule suffit à briser le courage des plus aguerris.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 50,
+        "max": 80
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 75
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "terreur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_06",
+    "competences": [
+      "competence:monstre_hurlement_terrifiant"
+    ]
+  },
+  {
+    "_id": "espece:hydre",
+    "type": "espece",
+    "nom": "Hydre",
+    "genre": "f",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "hydre_transparent.png",
+    "description": "Reptile à multiples têtes se régénérant lorsqu'elles sont tranchées, terreur des marécages.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 55,
+        "max": 90
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "monstre",
+      "regeneration",
+      "legendaire"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_visqueux_02",
+    "competences": [
+      "competence:monstre_regeneration"
+    ]
+  },
+  {
+    "_id": "espece:ifrit",
+    "type": "espece",
+    "nom": "Ifrit",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "ifrit_transparent.png",
+    "description": "Géant de flamme et de fumée né des terres brûlées, orgueilleux et implacable.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 25,
+        "max": 40
+      },
+      "Vol": {
+        "min": 60,
+        "max": 90
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 20,
+        "max": 40
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "elementaire",
+      "feu",
+      "infernal",
+      "magique",
+      "souterrain",
+      "magie_elementaire_6"
+    ],
+    "proprietes": {},
+    "competences": [
+      "competence:monstre_embrasement"
+    ]
+  },
+  {
+    "_id": "espece:illuyanka",
+    "type": "espece",
+    "nom": "Illuyanka",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "illuyanka_transparent.png",
+    "description": "Serpent-dragon des hauts plateaux d'Anatolie, terré dans un trou de la montagne : on raconte qu'il vainquit un jour le dieu de l'orage et lui prit son cœur et ses yeux. Sa gloutonnerie le perd : gavé de festin, il ne repasse plus par son trou, et un simple anthrope put le ligoter.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 15,
+        "max": 25
+      },
+      "Vol": {
+        "min": 60,
+        "max": 90
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 75
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "souterrain",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_09",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:incube",
+    "type": "espece",
+    "nom": "Incube",
+    "genre": "m",
+    "image": "incube_transparent.png",
+    "description": "Démon séducteur prenant forme masculine, se nourrissant de l'énergie vitale par la tentation et le rêve.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 45,
+        "max": 75
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "demon",
+      "infernal",
+      "seduction",
+      "humanoide",
+      "magie_demonologie_2"
+    ],
+    "items": [
+      "item:Rapiere",
+      "item:Dague",
+      "item:Pourpoint_colore",
+      "item:Pantalon_ajuste_noir",
+      "item:Bottes_noires",
+      "item:Gants_fins_noirs"
+    ],
+    "proprietes": {},
+    "competences": [
+      "competence:monstre_charme"
+    ]
+  },
+  {
+    "_id": "espece:jann",
+    "type": "espece",
+    "nom": "Djinn des Ruines",
+    "genre": "m",
+    "image": "jann_transparent.png",
+    "description": "Esprit tapi dans les cités ensevelies, tour à tour vent de sable, mirage ou murmure.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 25,
+        "max": 45
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "esprit",
+      "elementaire",
+      "magique",
+      "desert",
+      "incorporel",
+      "insensible_furtivite",
+      "magie_elementaire_4",
+      "ia_artilleur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_07"
+  },
+  {
+    "_id": "espece:kraken",
+    "type": "espece",
+    "nom": "Kraken",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "kraken_transparent.png",
+    "description": "Titan des mers aux tentacules monstrueux, capable de briser des navires entiers.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 8
+      },
+      "F": {
+        "min": 70,
+        "max": 110
+      },
+      "R": {
+        "min": 65,
+        "max": 100
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 50,
+        "max": 80
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "legendaire"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_visqueux_03",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:ladon",
+    "type": "espece",
+    "nom": "Ladon",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "ladon_transparent.png",
+    "description": "Serpent aux cent têtes et aux cent voix, enroulé autour de l'arbre aux pommes d'or du jardin des Hespérides, au-delà des Colonnes, que les marins disent apercevoir au couchant. Il ne dort jamais. Les uns le disent né de Cétô, les autres d'Échidna. Des flèches trempées dans le venin d'une hydre l'auraient déjà blessé ; une ruse l'aurait déjà détourné.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 80,
+        "max": 115
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 80,
+        "max": 110
+      },
+      "Int": {
+        "min": 50,
+        "max": 70
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "gardien",
+      "legendaire",
+      "boss",
+      "insensible_furtivite",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_10"
+  },
+  {
+    "_id": "espece:lamie",
+    "type": "espece",
+    "nom": "Lamie",
+    "genre": "f",
+    "image": "",
+    "description": "Vampire d'une beauté souveraine, fille de la reine Lamia, venue de Novgorod ; elle séduit avant de boire, et le soleil la laisse inerte comme une statue.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 30,
+        "max": 50
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 45,
+        "max": 70
+      },
+      "Cha": {
+        "min": 60,
+        "max": 90
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "magique",
+      "seduction",
+      "humanoide",
+      "magie_necromancie_3",
+      "magie_illusoire_3"
+    ],
+    "items": [
+      "item:Rapiere",
+      "item:Dague",
+      "item:Robe_bordeaux",
+      "item:Cape_soie_sombre",
+      "item:Bottines_legeres",
+      "item:Gants_fins_noirs"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_08",
+    "competences": [
+      "competence:monstre_charme"
+    ]
+  },
+  {
+    "_id": "espece:leprechaun",
+    "type": "espece",
+    "nom": "Leprechaun",
+    "genre": "m",
+    "image": "leprechaun_transparent.png",
+    "description": "Petit esprit rusé et avare, expert en illusions et en tours pour protéger son trésor.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 5,
+        "max": 10
+      },
+      "R": {
+        "min": 10,
+        "max": 20
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 30,
+        "max": 50
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "feerique",
+      "magique",
+      "petite_taille",
+      "humanoide",
+      "magie_illusoire_3",
+      "ia_artilleur",
+      "ia_fuyard_50"
+    ],
+    "items": [
+      "item:Canne_ferree",
+      "item:Bolas",
+      "item:Pourpoint_colore",
+      "item:Chapeau_a_plume",
+      "item:Souliers_cuir"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_gobelin_02"
+  },
+  {
+    "_id": "espece:leviathan",
+    "type": "espece",
+    "nom": "Leviathan",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "leviathan_transparent.png",
+    "description": "Titan des abysses, créature primordiale dont le réveil peut engloutir des flottes entières.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 100,
+        "max": 150
+      },
+      "R": {
+        "min": 95,
+        "max": 145
+      },
+      "Ag": {
+        "min": 10,
+        "max": 25
+      },
+      "Vol": {
+        "min": 85,
+        "max": 125
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 60,
+        "max": 95
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_visqueux_04",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:liche",
+    "type": "espece",
+    "nom": "Liche",
+    "genre": "f",
+    "image": "liche_transparent.png",
+    "description": "Sorcier ayant transcendé la mort par nécromancie, conservant une intelligence redoutable et un pouvoir arcanique immense.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 65,
+        "max": 100
+      },
+      "Int": {
+        "min": 60,
+        "max": 90
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 65
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "magique",
+      "nécromancie",
+      "humanoide",
+      "insensible_furtivite",
+      "magie_necromancie_3",
+      "magie_necromancie_5_mage",
+      "magie_necromancie_8_heros_mage",
+      "magie_necromancie_10_seigneur_mage",
+      "ia_artilleur"
+    ],
+    "items": [
+      "item:Sceptre_os",
+      "item:Baton_cornu",
+      "item:dague_rituelle",
+      "item:Robe_noire_capuche",
+      "item:Capuche_noire",
+      "item:Gants_peau_noire"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_09"
+  },
+  {
+    "_id": "espece:lievre",
+    "type": "espece",
+    "nom": "Lièvre",
+    "genre": "m",
+    "image": "lievre_transparent.png",
+    "description": "Faune commune et discrète — lièvre — peu menaçant et utile à la survie.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 5,
+        "max": 10
+      },
+      "R": {
+        "min": 5,
+        "max": 10
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 10,
+        "max": 20
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "animal",
+      "proie",
+      "petite_taille",
+      "ia_fuyard_50"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_13"
+  },
+  {
+    "_id": "espece:loup",
+    "type": "espece",
+    "nom": "Loup",
+    "genre": "m",
+    "image": "loup_transparent.png",
+    "description": "Prédateur agile chassant en meute, instinct affûté et coordination redoutable.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 5,
+        "max": 15
+      }
+    },
+    "tags": [
+      "animal",
+      "predateur",
+      "ia_meute",
+      "ia_predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_loup_01"
+  },
+  {
+    "_id": "espece:loup_garou",
+    "type": "espece",
+    "nom": "Loup Garou",
+    "genre": "m",
+    "image": "loup_garou_transparent.png",
+    "description": "Anthrope maudit que la pleine lune change en bête, comme on en conte dans les campagnes de France ; force et rage décuplées. Appelé par son nom, ou blessé jusqu'au sang, il redevient anthrope.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 45,
+        "max": 75
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "malediction",
+      "metamorphe",
+      "ia_berserker"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_loup_02",
+    "competences": [
+      "competence:monstre_hurlement_de_meute"
+    ]
+  },
+  {
+    "_id": "espece:lycaon",
+    "type": "espece",
+    "nom": "Lycaon",
+    "genre": "m",
+    "nom_propre": true,
+    "image": "lycaon_transparent.png",
+    "description": "Roi d'Arcadie qui servit de la chair anthrope à un dieu de passage : les dieux le changèrent en loup. La chair anthrope le garde loup ; qui s'en abstiendrait neuf ans redeviendrait anthrope, et il ne s'en abstient jamais.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 65,
+        "max": 90
+      },
+      "R": {
+        "min": 60,
+        "max": 85
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 60,
+        "max": 85
+      },
+      "Int": {
+        "min": 40,
+        "max": 60
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 60
+      }
+    },
+    "tags": [
+      "monstre",
+      "metamorphe",
+      "malediction",
+      "legendaire",
+      "boss",
+      "ia_meute"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_loup_02",
+    "competences": [
+      "competence:monstre_hurlement_de_meute"
+    ]
+  },
+  {
+    "_id": "espece:manticore",
+    "type": "espece",
+    "nom": "Manticore",
+    "genre": "f",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "manticore_transparent.png",
+    "description": "Bête à corps de lion, ailes et queue de scorpion empoisonnée, redoutable prédateur des contrées sauvages.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 35,
+        "max": 60
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "venin",
+      "predateur",
+      "ia_predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_15",
+    "competences": [
+      "competence:monstre_venin",
+      "competence:monstre_dard_caudal"
+    ]
+  },
+  {
+    "_id": "espece:marid",
+    "type": "espece",
+    "nom": "Marid",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "marid_transparent.png",
+    "description": "Djinn des eaux profondes, souverain des grandes oasis et des mers intérieures, d'une arrogance d'empereur.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 45,
+        "max": 75
+      },
+      "R": {
+        "min": 50,
+        "max": 80
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 65,
+        "max": 95
+      },
+      "Int": {
+        "min": 45,
+        "max": 70
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "elementaire",
+      "aquatique",
+      "magique",
+      "legendaire",
+      "magie_elementaire_8",
+      "ia_artilleur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:mimique",
+    "type": "espece",
+    "nom": "Mimique",
+    "genre": "f",
+    "image": "mimique_transparent.png",
+    "description": "Coffre de bois noirci cerclé de fer, en tout point semblable à ceux qu'on abandonne au fond des donjons — jusqu'à ce qu'on en soulève le couvercle. Le bois s'ouvre alors en gueule, frangée de dents d'ébène, et une langue poisseuse saisit la main qui fouillait. Les uns disent qu'un donjon imite ce qu'il a englouti, les autres qu'elle se nourrit de l'avidité des pilleurs ; aucun Templier n'a jamais vu une mimique se déplacer quand on la regardait.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 40,
+        "max": 60
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 30,
+        "max": 50
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "monstre",
+      "gardien",
+      "insensible_furtivite",
+      "ia_embuscade_1"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_01"
+  },
+  {
+    "_id": "espece:minotaure",
+    "type": "espece",
+    "nom": "Minotaure",
+    "genre": "m",
+    "image": "minotaure_transparent.png",
+    "description": "Humanoïde à tête de taureau, force brute et instinct de chasseur dans un dédale de muscles.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 10,
+        "max": 25
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "humanoide",
+      "hybride",
+      "ia_berserker"
+    ],
+    "items": [
+      "item:Kanabo",
+      "item:Hache_de_guerre",
+      "item:Morgenstern",
+      "item:Braies_fourrure",
+      "item:Harnais_d_ossements",
+      "item:Bracelets_os"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_geant_04"
+  },
+  {
+    "_id": "espece:momie",
+    "type": "espece",
+    "nom": "Momie",
+    "genre": "f",
+    "image": "momie_transparent.png",
+    "description": "Cadavre embaumé animé par une malédiction ancienne, lent mais porteur de pourriture et de fléaux.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 30,
+        "max": 50
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 5,
+        "max": 15
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "malediction",
+      "lent",
+      "humanoide"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_02",
+    "competences": [
+      "competence:monstre_malediction_du_tombeau"
+    ]
+  },
+  {
+    "_id": "espece:mushhushshu",
+    "type": "espece",
+    "nom": "Mušḫuššu",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "mushhushshu_transparent.png",
+    "description": "Le « serpent furieux » des déserts de Mésopotamie : tête de serpent cornue, pattes avant de lion, pattes arrière d'aigle, queue armée d'un dard de scorpion. Il fut l'un des onze monstres de Tiamat avant que Marduk ne le dompte ; Babylone l'a peint sur la porte d'Ishtar. Les prêtres de l'Esagil disent qu'il recule devant la bêche de Marduk.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 45,
+        "max": 65
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "venin",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_06",
+    "competences": [
+      "competence:monstre_venin"
+    ]
+  },
+  {
+    "_id": "espece:nahual",
+    "type": "espece",
+    "nom": "Nahual",
+    "genre": "m",
+    "image": "nahual_transparent.png",
+    "description": "Sorcier des terres de Teotihuacan qui revêt à volonté la forme de son double, un jaguar. On dit que Tepeyollotl, le Cœur de la montagne, donna le premier double ; d'autres le nient. Ce qui blesse le jaguar blesse le sorcier, et le sel jeté sur sa peau abandonnée lui interdit de la reprendre.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 50
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 55,
+        "max": 80
+      },
+      "Int": {
+        "min": 50,
+        "max": 75
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "monstre",
+      "metamorphe",
+      "magique",
+      "nocturne",
+      "magie_nature_3"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_07"
+  },
+  {
+    "_id": "espece:naiade",
+    "type": "espece",
+    "nom": "Naiade",
+    "genre": "f",
+    "image": "naiade_transparent.png",
+    "description": "Nymphe des sources et rivières, protectrice des eaux douces et des points d'eau sacrés.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 35,
+        "max": 60
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "esprit",
+      "aquatique",
+      "magique",
+      "humanoide",
+      "magie_elementaire_3",
+      "ia_protecteur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:nasnas",
+    "type": "espece",
+    "nom": "Nasnas",
+    "genre": "m",
+    "image": "nasnas_transparent.png",
+    "description": "Demi-créature des déserts : la moitié d'un corps, un œil, un bras, une jambe, qui avance par bonds plus vite qu'un chameau au trot. Les caravaniers de Petra disent qu'un djinn fendit un homme en deux ; d'autres, qu'elle cherche son autre moitié dans chaque voyageur qu'elle déchire. Aucun gardien des sources n'en a jamais vu deux ensemble.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 30,
+        "max": 45
+      },
+      "Ag": {
+        "min": 50,
+        "max": 75
+      },
+      "Vol": {
+        "min": 30,
+        "max": 45
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "desert",
+      "rapide",
+      "predateur",
+      "ia_hit_and_run"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_08"
+  },
+  {
+    "_id": "espece:nereide",
+    "type": "espece",
+    "nom": "Nereide",
+    "genre": "f",
+    "image": "nereide_transparent.png",
+    "description": "Nymphe marine gracieuse, escortant parfois les marins ou les attirant vers les profondeurs.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 35,
+        "max": 60
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "esprit",
+      "aquatique",
+      "magique",
+      "humanoide",
+      "magie_elementaire_3"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:nosferatu",
+    "type": "espece",
+    "nom": "Nosferatu",
+    "genre": "m",
+    "image": "nosferatu_transparent.png",
+    "description": "Vampire chauve et livide aux doigts trop longs, que nul ne prendrait pour un Anthrope ; héritier de la sorcellerie de Babylone, il manie une magie que peu de vivants atteignent.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 60,
+        "max": 85
+      },
+      "Int": {
+        "min": 60,
+        "max": 90
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "magique",
+      "nocturne",
+      "magie_necromancie_6",
+      "magie_necromancie_10_seigneur_mage",
+      "ia_predateur",
+      "ia_artilleur_mage",
+      "ia_artilleur_heros_mage",
+      "ia_artilleur_seigneur_mage"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_10",
+    "competences": [
+      "competence:monstre_morsure_vampirique"
+    ]
+  },
+  {
+    "_id": "espece:nuee_de_scarabees",
+    "type": "espece",
+    "nom": "Nuée de scarabées",
+    "genre": "f",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "nuee_de_scarabees_transparent.png",
+    "description": "Des centaines de scarabées noirs aux reflets de bronze qui roulent ensemble comme une seule bête dans les chambres du tombeau Corinthien. Les chercheurs de trésor jurent qu'ils gardent l'or du Pharaon ; les Templiers, qu'ils dévorent simplement tout ce qui entre.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 50,
+        "max": 70
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 10,
+        "max": 20
+      },
+      "Int": {
+        "min": 1,
+        "max": 5
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "monstre",
+      "insecte",
+      "essaim",
+      "souterrain"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_insecte_03",
+    "competences": [
+      "competence:monstre_venin"
+    ]
+  },
+  {
+    "_id": "espece:oceanide",
+    "type": "espece",
+    "nom": "Oceanide",
+    "genre": "f",
+    "image": "oceanide_transparent.png",
+    "description": "Nymphe des océans, gardienne des flots profonds et des courants marins.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 35,
+        "max": 60
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "esprit",
+      "aquatique",
+      "magique",
+      "humanoide",
+      "magie_elementaire_3"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:oiseaux_de_proies",
+    "type": "espece",
+    "nom": "Oiseaux de Proies",
+    "genre": "m",
+    "pluriel": true,
+    "image": "oiseaux_de_proies_transparent.png",
+    "description": "Aigles, faucons et autres chasseurs ailés, agilité et précision en plein vol.",
+    "base_attributes": {
+      "V": {
+        "min": 13,
+        "max": 15
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 8,
+        "max": 13
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "animal",
+      "vol",
+      "predateur",
+      "ia_hit_and_run"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_09"
+  },
+  {
+    "_id": "espece:ondin",
+    "type": "espece",
+    "nom": "Ondin",
+    "genre": "m",
+    "image": "ondin_transparent.png",
+    "description": "Esprit humanoïde des eaux douces, gracieux et changeant comme le courant qu'il habite.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 35,
+        "max": 60
+      },
+      "Int": {
+        "min": 25,
+        "max": 45
+      },
+      "Cha": {
+        "min": 30,
+        "max": 55
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "humanoide",
+      "aquatique",
+      "magique",
+      "humanoide",
+      "magie_elementaire_3"
+    ],
+    "items": [
+      "item:Trident_barbele",
+      "item:Dague",
+      "item:Javelot_ethiopien",
+      "item:Jupe_de_chanvre",
+      "item:Bracelets_os"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:orc",
+    "type": "espece",
+    "nom": "Orc",
+    "genre": "m",
+    "image": "orc_transparent.png",
+    "description": "Humanoïde guerrier brutal et endurant, vivant pour le combat et organisé en hordes redoutables.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 35,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 40
+      }
+    },
+    "tags": [
+      "humanoide",
+      "ia_meute",
+      "ia_berserker_champion",
+      "ia_berserker_seigneur"
+    ],
+    "items": [
+      "item:Hache_de_guerre",
+      "item:Kanabo",
+      "item:Francisque",
+      "item:Arbalete",
+      "item:Targe",
+      "item:Cuirasse_cuir_brut",
+      "item:Heaume_de_fer",
+      "item:Epaulieres_d_os",
+      "item:Bottes_cuir_epais"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_ogre_02"
+  },
+  {
+    "_id": "espece:oreade",
+    "type": "espece",
+    "nom": "Oreade",
+    "genre": "f",
+    "image": "oreade_transparent.png",
+    "description": "Nymphe des montagnes et des grottes, esprit discret lié à la roche et aux hauteurs.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 35,
+        "max": 60
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "esprit",
+      "nature",
+      "magique",
+      "humanoide",
+      "magie_nature_4"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:ours",
+    "type": "espece",
+    "nom": "Ours",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "ours_transparent.png",
+    "description": "Grand prédateur omnivore, puissant et imprévisible, capable de charges dévastatrices.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 35,
+        "max": 60
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "animal",
+      "predateur",
+      "ia_berserker"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_10"
+  },
+  {
+    "_id": "espece:penanggalan",
+    "type": "espece",
+    "nom": "Penanggalan",
+    "genre": "f",
+    "image": "penanggalan_transparent.png",
+    "description": "Tête de femme qui vole la nuit en traînant ses viscères : une morte de Mu rendue à la mer, qui n'a pas trouvé le chemin du royaume de Tangaroa et que les poissons ont dévorée. Le jour, elle passe pour une femme ordinaire ; l'aube qui la surprend loin de son corps la tue. Les épines l'accrochent, le vinaigre la brûle.",
+    "base_attributes": {
+      "V": {
+        "min": 10,
+        "max": 12
+      },
+      "F": {
+        "min": 15,
+        "max": 25
+      },
+      "R": {
+        "min": 15,
+        "max": 25
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 30,
+        "max": 45
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "vol",
+      "nocturne",
+      "ia_hit_and_run"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_11",
+    "competences": [
+      "competence:monstre_morsure_vampirique"
+    ]
+  },
+  {
+    "_id": "espece:petit_dragon",
+    "type": "espece",
+    "nom": "Petit Dragon",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "triangle"
+    },
+    "image": "petit_dragon_transparent.png",
+    "description": "Jeune dragon encore en pleine croissance, déjà redoutable malgré une taille modeste.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_02",
+    "competences": [
+      "competence:monstre_crachat_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:petits_animaux_divers",
+    "type": "espece",
+    "nom": "Lapin",
+    "genre": "m",
+    "image": "lapin_transparent.png",
+    "description": "Faune commune et discrète — lapins, renards, écureuils — peu menaçante mais utile à la survie.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 5,
+        "max": 10
+      },
+      "R": {
+        "min": 5,
+        "max": 10
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 10,
+        "max": 20
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "animal",
+      "petite_taille",
+      "proie",
+      "ia_fuyard_50"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_13"
+  },
+  {
+    "_id": "espece:phenix",
+    "type": "espece",
+    "nom": "Phenix",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x1",
+      "forme": "triangle"
+    },
+    "image": "phenix_transparent.png",
+    "description": "Oiseau de feu renaissant de ses cendres, symbole d'immortalité et de renouveau.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 25,
+        "max": 45
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 60,
+        "max": 95
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 30,
+        "max": 55
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "feu",
+      "renaissance",
+      "vol",
+      "magique",
+      "magie_elementaire_4"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_14",
+    "competences": [
+      "competence:monstre_embrasement"
+    ]
+  },
+  {
+    "_id": "espece:polar_kraken",
+    "type": "espece",
+    "nom": "Polar Kraken",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "polar_kraken_transparent.png",
+    "description": "Variante du Kraken adaptée aux mers glacées, ses tentacules gèlent au contact tout ce qu'elles enserrent.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 8
+      },
+      "F": {
+        "min": 70,
+        "max": 110
+      },
+      "R": {
+        "min": 65,
+        "max": 100
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 55,
+        "max": 85
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "froid",
+      "legendaire"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_visqueux_05",
+    "competences": [
+      "competence:monstre_souffle_de_givre",
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:prince_demon",
+    "type": "espece",
+    "nom": "Prince Demon",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "prince_demon_transparent.png",
+    "description": "Souverain des enfers, son autorité s'étend sur des légions entières et sa seule volonté peut déchaîner des guerres.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 85,
+        "max": 130
+      },
+      "R": {
+        "min": 85,
+        "max": 130
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 85,
+        "max": 125
+      },
+      "Int": {
+        "min": 55,
+        "max": 85
+      },
+      "Cha": {
+        "min": 45,
+        "max": 75
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "demon",
+      "infernal",
+      "boss",
+      "legendaire",
+      "humanoide",
+      "insensible_furtivite",
+      "magie_demonologie_9"
+    ],
+    "items": [
+      "item:Da_dao",
+      "item:Morgenstern",
+      "item:Talwar",
+      "item:Pavois",
+      "item:Harnois_du_grand_arsenal",
+      "item:Epaulieres_acier_gravees",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates",
+      "item:Bottes_de_plates"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:rapaces",
+    "type": "espece",
+    "nom": "Rapaces",
+    "genre": "m",
+    "pluriel": true,
+    "image": "rapaces_transparent.png",
+    "description": "Oiseaux chasseurs à la vue perçante, fondant sur leur proie depuis les hauteurs.",
+    "base_attributes": {
+      "V": {
+        "min": 13,
+        "max": 15
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 8,
+        "max": 13
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "animal",
+      "vol",
+      "predateur",
+      "ia_hit_and_run"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_03"
+  },
+  {
+    "_id": "espece:rat_geant",
+    "type": "espece",
+    "nom": "Rat Geant",
+    "genre": "m",
+    "image": "rat_geant_transparent.png",
+    "description": "Rongeur de taille anormale, prolifique et porteur de maladies dans les égouts et les ruines.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 10,
+        "max": 20
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 15,
+        "max": 25
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "animal",
+      "vermine",
+      "ia_meute",
+      "ia_fuyard_20"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_04"
+  },
+  {
+    "_id": "espece:renard",
+    "type": "espece",
+    "nom": "Renard",
+    "genre": "m",
+    "image": "renard_transparent01.png",
+    "description": "Faune commune et discrète — renard — peu menaçant et utile à la survie.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 8,
+        "max": 20
+      },
+      "R": {
+        "min": 8,
+        "max": 20
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 10,
+        "max": 20
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "animal",
+      "predateur",
+      "petite_taille",
+      "ia_fuyard_50"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_loup_01"
+  },
+  {
+    "_id": "espece:revenant",
+    "type": "espece",
+    "nom": "Revenant",
+    "genre": "m",
+    "image": "revenant_transparent.png",
+    "description": "Esprit vengeur revenu d'entre les morts, hanté par une obsession qui le pousse à traquer les vivants.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "esprit",
+      "insensible_furtivite"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_12",
+    "competences": [
+      "competence:monstre_toucher_spectral"
+    ]
+  },
+  {
+    "_id": "espece:roi_des_tombes",
+    "type": "espece",
+    "nom": "Roi des Tombes",
+    "genre": "m",
+    "image": "roi_des_tombes_transparent.png",
+    "description": "Souverain mort-vivant régnant sur une nécropole, commandant ses légions de squelettes et de zombies.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 45,
+        "max": 75
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "boss",
+      "humanoide"
+    ],
+    "items": [
+      "item:Epee_longue",
+      "item:Morgenstern",
+      "item:Arbalete",
+      "item:Ecu",
+      "item:Cotte_de_mailles",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates",
+      "item:Jambières_de_plates"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_07",
+    "competences": [
+      "competence:monstre_malediction_du_tombeau"
+    ]
+  },
+  {
+    "_id": "espece:roi_liche",
+    "type": "espece",
+    "nom": "Roi Liche",
+    "genre": "m",
+    "image": "roi_liche_transparent.png",
+    "description": "Liche ayant atteint un pouvoir suprême, régnant sur les morts-vivants comme un monarque sur ses sujets.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 30,
+        "max": 50
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 85,
+        "max": 125
+      },
+      "Int": {
+        "min": 75,
+        "max": 110
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "magique",
+      "nécromancie",
+      "boss",
+      "legendaire",
+      "humanoide",
+      "insensible_furtivite",
+      "magie_necromancie_10",
+      "ia_artilleur"
+    ],
+    "items": [
+      "item:Baguette_ouvragee",
+      "item:Sceptre_os",
+      "item:Baton_cornu",
+      "item:Robe_noire_capuche",
+      "item:Reliquaire_de_thanaturge",
+      "item:Cape_de_plumes_noires",
+      "item:Capuche_noire"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_13"
+  },
+  {
+    "_id": "espece:sanglier",
+    "type": "espece",
+    "nom": "Sanglier",
+    "genre": "m",
+    "image": "sanglier_transparent.png",
+    "description": "Bête sauvage agressive et imprévisible, chargeant ses adversaires sans hésitation.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 5,
+        "max": 15
+      }
+    },
+    "tags": [
+      "animal",
+      "ia_berserker"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_08"
+  },
+  {
+    "_id": "espece:scorpion_geant",
+    "type": "espece",
+    "nom": "Scorpion géant",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "scorpion_geant_transparent.png",
+    "description": "Scorpion du désert grand comme un cheval, dont le dard perle d'un venin vert pâle. Il gîte dans les chambres basses du tombeau Corinthien comme dans les sables qui bordent les pistes caravanières de Petra.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 55,
+        "max": 75
+      },
+      "R": {
+        "min": 60,
+        "max": 80
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 3,
+        "max": 8
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 40
+      }
+    },
+    "tags": [
+      "monstre",
+      "venin",
+      "desert",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_insecte_01",
+    "competences": [
+      "competence:monstre_venin"
+    ]
+  },
+  {
+    "_id": "espece:seigneur_du_sang",
+    "type": "espece",
+    "nom": "Seigneur du Sang",
+    "genre": "m",
+    "image": "seigneur_du_sang_transparent.png",
+    "description": "Dragon de sang déchu parmi les plus anciens, qui commande ses semblables avec une autorité née de siècles de carnage.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 55,
+        "max": 85
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 30,
+        "max": 45
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 70
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "guerrier",
+      "boss",
+      "humanoide"
+    ],
+    "items": [
+      "item:Epee_longue",
+      "item:Schiavona",
+      "item:Morgenstern",
+      "item:Bouclier_normand",
+      "item:Cotte_de_mailles",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates",
+      "item:Jambières_de_plates",
+      "item:Bottes_de_fer"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_10",
+    "competences": [
+      "competence:monstre_morsure_vampirique"
+    ]
+  },
+  {
+    "_id": "espece:seraphin",
+    "type": "espece",
+    "nom": "Seraphin",
+    "genre": "m",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "seraphin_transparent.png",
+    "description": "Plus haute hiérarchie angélique, entité de lumière pure dont la contemplation seule éblouit les mortels.",
+    "base_attributes": {
+      "V": {
+        "min": 18,
+        "max": 20
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 85,
+        "max": 125
+      },
+      "Ag": {
+        "min": 50,
+        "max": 75
+      },
+      "Vol": {
+        "min": 105,
+        "max": 145
+      },
+      "Int": {
+        "min": 70,
+        "max": 100
+      },
+      "Cha": {
+        "min": 65,
+        "max": 95
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "vol",
+      "boss",
+      "legendaire",
+      "divin",
+      "humanoide",
+      "insensible_furtivite",
+      "magie_sainte_10"
+    ],
+    "items": [
+      "item:Epee_une_main_benie",
+      "item:Masse_benie",
+      "item:Bouclier_sacre",
+      "item:Harnois_du_grand_arsenal",
+      "item:Epaulieres_benies",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:serpent",
+    "type": "espece",
+    "nom": "Serpent",
+    "genre": "m",
+    "image": "serpent_transparent.png",
+    "description": "Reptile silencieux, certaines espèces injectant un venin paralysant ou mortel.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 1,
+        "max": 3
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 15,
+        "max": 25
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 5,
+        "max": 15
+      }
+    },
+    "tags": [
+      "animal",
+      "venin",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_11",
+    "competences": [
+      "competence:monstre_venin_faible"
+    ]
+  },
+  {
+    "_id": "espece:serpent_geant",
+    "type": "espece",
+    "nom": "Serpent Geant",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "serpent_geant_transparent.png",
+    "description": "Reptile titanesque capable d'engloutir une proie entière, se dissimulant dans la végétation dense.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 45,
+        "max": 75
+      },
+      "R": {
+        "min": 45,
+        "max": 75
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 30,
+        "max": 50
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_12",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:serpopard",
+    "type": "espece",
+    "nom": "Serpopard",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "serpopard_transparent.png",
+    "description": "Félin des ruines au cou de serpent démesuré, qui frappe par-dessus les murets.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 30,
+        "max": 45
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 15,
+        "max": 30
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "predateur",
+      "rapide",
+      "desert",
+      "ia_hit_and_run"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_13"
+  },
+  {
+    "_id": "espece:silat",
+    "type": "espece",
+    "nom": "Si'lat",
+    "genre": "f",
+    "image": "silat_transparent.png",
+    "description": "La plus rusée des djinns errants : elle prend la voix d'une parente et suit les caravanes à l'écart des feux.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 30,
+        "max": 45
+      },
+      "Cha": {
+        "min": 30,
+        "max": 55
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "humanoide",
+      "metamorphe",
+      "magique",
+      "desert",
+      "furtif",
+      "magie_illusoire_3"
+    ],
+    "items": [
+      "item:Stylet",
+      "item:Cimeterre",
+      "item:Cape_soie_sombre",
+      "item:Capuche_soie",
+      "item:Pantalon_ample",
+      "item:Chaussons_silencieux"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:sirene",
+    "type": "espece",
+    "nom": "Sirene",
+    "genre": "f",
+    "image": "sirene_transparent.png",
+    "description": "Créature mi-femme mi-poisson, son chant envoûtant attire les marins vers une fin funeste.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 35,
+        "max": 60
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 45,
+        "max": 75
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "magique",
+      "magie_illusoire_4",
+      "ia_artilleur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_14",
+    "competences": [
+      "competence:monstre_charme"
+    ]
+  },
+  {
+    "_id": "espece:spectre",
+    "type": "espece",
+    "nom": "Spectre",
+    "genre": "m",
+    "image": "spectre_transparent.png",
+    "description": "Apparition immatérielle traversant les murs, son contact glacial draine la force vitale.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 10,
+        "max": 20
+      },
+      "R": {
+        "min": 15,
+        "max": 25
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 50,
+        "max": 80
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 55
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "esprit",
+      "incorporel",
+      "insensible_furtivite"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_15",
+    "competences": [
+      "competence:monstre_toucher_spectral"
+    ]
+  },
+  {
+    "_id": "espece:sphinx",
+    "type": "espece",
+    "nom": "Sphinx",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "sphinx_transparent.png",
+    "description": "Créature à corps de lion et tête humaine, gardienne d'énigmes et de savoirs anciens.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 50,
+        "max": 80
+      },
+      "Int": {
+        "min": 55,
+        "max": 85
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "gardien",
+      "magique",
+      "magie_illusoire_6",
+      "magie_sainte_4",
+      "ia_artilleur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_14"
+  },
+  {
+    "_id": "espece:strigoi",
+    "type": "espece",
+    "nom": "Strigoï",
+    "genre": "m",
+    "image": "strigoi_transparent.png",
+    "description": "Vampire difforme aux os mal ressoudés et au crâne enfoncé : son maître a brisé son cadavre avant de le relever par le sang. Il ne ruse pas, il fond sur sa proie.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "bestial",
+      "ia_predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_01",
+    "competences": [
+      "competence:monstre_morsure_vampirique"
+    ]
+  },
+  {
+    "_id": "espece:succube",
+    "type": "espece",
+    "nom": "Succube",
+    "genre": "f",
+    "image": "succube_transparent.png",
+    "description": "Démone séductrice prenant forme féminine, drainant la vitalité de ses victimes envoûtées par son charme.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 45,
+        "max": 75
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "demon",
+      "infernal",
+      "seduction",
+      "humanoide",
+      "magie_demonologie_2"
+    ],
+    "items": [
+      "item:Fleau_asiatique",
+      "item:Dague",
+      "item:Cape_soie_sombre",
+      "item:Jupe_lanieres_cuir",
+      "item:Bottines_legeres",
+      "item:Gants_fins_noirs"
+    ],
+    "proprietes": {},
+    "competences": [
+      "competence:monstre_charme"
+    ]
+  },
+  {
+    "_id": "espece:tarasque",
+    "type": "espece",
+    "nom": "Tarasque",
+    "genre": "f",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "tarasque_transparent.png",
+    "description": "Bête légendaire de Provence à tête de lion aux oreilles de cheval, corps de bœuf porté par six courtes pattes d'ours, protégé par une carapace de tortue hérissée d'épines, et une queue écailleuse terminée par un dard. Sa carapace la rend presque invulnérable et elle peut cracher le feu.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 65,
+        "max": 100
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "souffle",
+      "gardien"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_02",
+    "competences": [
+      "competence:monstre_souffle_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:taureau",
+    "type": "espece",
+    "nom": "Taureau",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "taureau_transparent.png",
+    "description": "Bovidé puissant et entêté, charge redoutable et résistance physique solide.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 5,
+        "max": 15
+      }
+    },
+    "tags": [
+      "animal",
+      "ia_berserker"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_geant_05"
+  },
+  {
+    "_id": "espece:troll",
+    "type": "espece",
+    "nom": "Troll",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "troll_transparent.png",
+    "description": "Créature massive à la régénération stupéfiante, vulnérable au feu mais quasiment increvable autrement.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 55,
+        "max": 90
+      },
+      "Ag": {
+        "min": 10,
+        "max": 25
+      },
+      "Vol": {
+        "min": 30,
+        "max": 50
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "humanoide",
+      "regeneration",
+      "ia_berserker"
+    ],
+    "items": [
+      "item:Kanabo",
+      "item:Hache_de_guerre",
+      "item:Braies_fourrure",
+      "item:Etole_de_fourrure",
+      "item:Bracelets_os"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_ogre_03",
+    "competences": [
+      "competence:monstre_regeneration"
+    ]
+  },
+  {
+    "_id": "espece:twrch_trwyth",
+    "type": "espece",
+    "nom": "Twrch Trwyth",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "twrch_trwyth_transparent.png",
+    "description": "Sanglier-roi aux soies d'argent : un roi changé en sanglier pour ses fautes, disent les Gallois. Entre ses oreilles il porte un peigne, un rasoir et des ciseaux. Il traversa la mer d'Irlande à la nage avec ses sept marcassins et ravagea le pays de Galles jusqu'à la Cornouailles ; Arthur et ses chevaliers le chassèrent d'une côte à l'autre, et il disparut dans la mer. Nul ne l'a vu mourir.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 80,
+        "max": 115
+      },
+      "R": {
+        "min": 80,
+        "max": 115
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 60,
+        "max": 85
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 70
+      }
+    },
+    "tags": [
+      "monstre",
+      "malediction",
+      "legendaire",
+      "boss",
+      "predateur",
+      "ia_berserker"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_03"
+  },
+  {
+    "_id": "espece:ulfhedinn",
+    "type": "espece",
+    "nom": "Ulfheðinn",
+    "genre": "m",
+    "image": "ulfhedinn_transparent.png",
+    "description": "Chasseur de monstres du Nord vêtu d'une peau de loup : la peau l'a pris, la rage le rend sourd à la douleur et il ne reconnaît plus personne. Brûlée, la peau perd son pouvoir.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 50,
+        "max": 75
+      },
+      "R": {
+        "min": 50,
+        "max": 70
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 50,
+        "max": 70
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 10,
+        "max": 25
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "metamorphe",
+      "guerrier",
+      "humanoide",
+      "ia_berserker"
+    ],
+    "items": [
+      "item:Hache_de_guerre",
+      "item:Hache_a_deux_mains",
+      "item:Ecu",
+      "item:Braies_fourrure",
+      "item:Etole_de_fourrure",
+      "item:Bracelets_os"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_loup_02"
+  },
+  {
+    "_id": "espece:vampire",
+    "type": "espece",
+    "nom": "Vampire",
+    "genre": "m",
+    "image": "vampire_transparent.png",
+    "description": "Vampire aristocrate de la lignée de Dracula : d'apparence toute anthrope, séducteur, aussi habile à l'épée qu'en magie, il craint le soleil.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 35,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 60
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 40,
+        "max": 65
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "magique",
+      "humanoide",
+      "magie_necromancie_2",
+      "magie_necromancie_5_mage",
+      "magie_necromancie_8_heros_mage",
+      "ia_predateur",
+      "ia_artilleur_mage",
+      "ia_artilleur_heros_mage",
+      "ia_artilleur_seigneur_mage"
+    ],
+    "items": [
+      "item:Rapiere",
+      "item:Epee_longue",
+      "item:Dague_de_parade",
+      "item:Cape_soie_sombre",
+      "item:Pantalon_ajuste_noir",
+      "item:Bottes_noires",
+      "item:Gants_fins_noirs"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_spectre_01",
+    "competences": [
+      "competence:monstre_morsure_vampirique"
+    ]
+  },
+  {
+    "_id": "espece:vers_des_sables",
+    "type": "espece",
+    "nom": "Vers des Sables",
+    "genre": "m",
+    "pluriel": true,
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "vers_des_sables_transparent.png",
+    "description": "Créature titanesque vivant sous les déserts, surgissant pour engloutir tout ce qui traverse son territoire.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 75,
+        "max": 115
+      },
+      "R": {
+        "min": 70,
+        "max": 110
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 75
+      }
+    },
+    "tags": [
+      "monstre",
+      "desert",
+      "legendaire",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_visqueux_07"
+  },
+  {
+    "_id": "espece:vouivre",
+    "type": "espece",
+    "nom": "Vouivre",
+    "genre": "f",
+    "image": "vouivre_transparent.png",
+    "description": "Femme d'une grande beauté au corps de serpent, bien vivante, héritière des légendes de Mélusine ; elle hante sources et rivières, et malheur à qui la surprend au bain.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 45,
+        "max": 75
+      },
+      "Ag": {
+        "min": 40,
+        "max": 70
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 40,
+        "max": 85
+      },
+      "Cha": {
+        "min": 60,
+        "max": 90
+      },
+      "Ch": {
+        "min": 30,
+        "max": 55
+      }
+    },
+    "tags": [
+      "humanoide",
+      "seduction"
+    ],
+    "items": [
+      "item:Jian",
+      "item:Naginata",
+      "item:Cape_soie_sombre",
+      "item:Gants_fins"
+    ],
+    "proprietes": {},
+    "competences": [
+      "competence:monstre_charme"
+    ]
+  },
+  {
+    "_id": "espece:wyvern",
+    "type": "espece",
+    "nom": "Wyvern",
+    "genre": "f",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "wyvern_transparent.png",
+    "description": "Dragon bipède aux ailes immenses et à la queue venimeuse, prédateur agile des cieux.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 45,
+        "max": 75
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 55
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "venin"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_01",
+    "competences": [
+      "competence:monstre_venin"
+    ]
+  },
+  {
+    "_id": "espece:xiuhcoatl",
+    "type": "espece",
+    "nom": "Xiuhcóatl",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "xiuhcoatl_transparent.png",
+    "description": "Serpent de feu des terres sèches des Mexicas, aux écailles couleur de turquoise et au museau retroussé : il brûle ce qu'il traverse. On dit que Huitzilopochtli en fit son arme sur la colline de Coatepec. La saison sèche l'appelle ; la pluie, dit-on, le rend aux braises.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 40,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 40,
+        "max": 60
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "souffle",
+      "magique",
+      "predateur",
+      "magie_elementaire_4"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_05",
+    "competences": [
+      "competence:monstre_souffle_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:yamata_no_orochi",
+    "type": "espece",
+    "nom": "Yamata no Orochi",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "yamata_no_orochi_transparent.png",
+    "description": "Serpent d'Izumo à huit têtes et huit queues, long de huit vallées et de huit collines : des cyprès poussent sur son dos, ses yeux sont rouges comme des cerises d'hiver, son ventre suinte le sang. Chaque année il exigeait une jeune fille. Le saké huit fois brassé endort ses têtes une à une ; on dit qu'une lame dort dans l'une de ses queues.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 100,
+        "max": 145
+      },
+      "R": {
+        "min": 95,
+        "max": 140
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 70,
+        "max": 100
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "legendaire",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_06",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:zmey_gorynych",
+    "type": "espece",
+    "nom": "Zmeï Gorynytch",
+    "genre": "m",
+    "nom_propre": true,
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "zmey_gorynych_transparent.png",
+    "description": "Dragon à trois têtes des terres de Kiev, aux griffes de fer, qui crache le feu et enlève qui lui plaît. Il garde le pont Kalinov sur la Smorodina, la rivière de feu ; on dit que ce pont mène au pays des morts, et nul n'en est revenu pour le confirmer. Ses têtes repoussent ; la terre, dit-on, refuse de boire son sang tant qu'on ne l'en supplie pas.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 80,
+        "max": 115
+      },
+      "R": {
+        "min": 75,
+        "max": 110
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 70,
+        "max": 100
+      },
+      "Int": {
+        "min": 45,
+        "max": 65
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "regeneration",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_02",
+    "competences": [
+      "competence:monstre_souffle_de_feu",
+      "competence:monstre_regeneration"
+    ]
+  }
+]

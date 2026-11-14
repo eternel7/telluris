@@ -250,7 +250,7 @@ def test_roll_monster_sorts_niveau_zero():
 	assert combat_mod.roll_monster_sorts(e, niveau=0) == []
 
 
-def test_build_monster_snapshot_stocke_sorts_connus_sans_les_lancer(monkeypatch):
+def test_build_monster_snapshot_stocke_sorts_connus(monkeypatch):
 	monkeypatch.setattr(combat_mod, "find_docs", lambda q: [SORT_FLAMME])
 	monkeypatch.setattr(combat_mod.random, "sample", lambda pop, k: pop[:k])
 	e = espece(["humanoide"])

@@ -4959,6 +4959,12 @@ document.getElementById('end-overlay').addEventListener('click', e => {
 
 function showEndOverlay(status, xp) {
 	lootEtagePassage = null;
+	// Contenant plein à la finalisation : l'excédent est tombé au sol. /combat n'a pas de
+	// toasts : relais jusqu'à /play par sessionStorage (patron `butin_sol_notif`).
+	if ((state.excedent_au_sol || []).length) {
+		try { sessionStorage.setItem('contenant_plein_notif', JSON.stringify(state.excedent_au_sol)); }
+		catch (e) { /* stockage indisponible : l'objet reste visible au sol */ }
+	}
 	// La scène est finie : la musique s'éteint en fondu, le jingle de l'issue la remplace.
 	arreterMusique(1500);
 	if (status === 'victoire' || status === 'defaite') jouerSonUi(status);

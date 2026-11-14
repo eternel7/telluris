@@ -71,6 +71,9 @@ def normaliser_competence(doc) -> dict | None:
 		"niveau": _as_int(doc.get("niveau")),
 		"mode": mode,
 		"cout_pm": _as_int(doc.get("cout_pm")),
+		# RECHARGE en tours (capacité innée d'un MONSTRE, cf. utils/capacites_monstre) :
+		# après usage, elle ne revient qu'au bout de N de ses tours. 0 = aucune.
+		"recharge": _as_int(doc.get("recharge")),
 		# ENTRETIEN en PM par round — une garde qu'on tient (cf. utils/sorts, § les trois
 		# notions du temps magique). Même borne, même défaut neutre, et même piège de liste
 		# blanche que `zone` et `animation` juste en dessous.

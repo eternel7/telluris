@@ -123,6 +123,9 @@ utils/
                          #   ancre (lanceur/cible) + orientation ; miroir scripts/zones_effet.js
   jetons.py              # jetons de taille variable (pur) : emprise LxP selon le cap, distance entre
                          #   emprises, pas avec pivot, A* ; miroir scripts/jetons.js
+  capacites_monstre.py   # magie et capacités des monstres (pur) : tags `magie_<école>_<niv>[_<profil>]`, compétences
+                         #   innées `competence:monstre_*` (passives, venin à l'impact, actives à recharge), choix de l'IA
+  ia_monstre.py          # types d'IA (pur) : tags `ia_<type>[_<n>][_<profil>]` — déplacement / cible / fuite
   consommables.py        # chokepoint des buffs : sources, cumul, effets_actifs
   pouvoirs_objets.py     # pouvoirs d'un objet PORTÉ (pur) : champ item `competences` (sorts/compétences existants),
                          #   actif équipé + `restriction` BRUTE, hors vocation ; `connait` = contrôle unique d'appartenance

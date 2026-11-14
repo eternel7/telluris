@@ -296,13 +296,31 @@ def test_finalisation_l_excedent_d_un_contenant_tombe_au_sol(docs, monkeypatch):
 	perso = character(inventaire=[{"item": "item:besace", "contenu": [{"item": "item:pierre", "poids": 8}]}])
 	snap = {"butin_contenants": [{"index": 0, "item_id": "item:besace", "rang": 0,
 								  "refs": [{"item": "item:pomme", "poids": 1}, {"item": "item:pierre", "poids": 4}]}]}
+	snap["nom"] = "Zora"
 	monkeypatch.setattr(combat_util, "save_doc", lambda d: d)
-	combat_util._finalize_membre({"_id": "combat:x", "joueurs": [snap]}, snap, perso, "fuite")
+	cdoc = {"_id": "combat:x", "joueurs": [snap]}
+	combat_util._finalize_membre(cdoc, snap, perso, "fuite")
 	assert perso["inventaire"][0]["contenu"][-1] == {"item": "item:pomme", "poids": 1}
 	assert perso["objets_au_sol"] == [{"item": "item:pierre", "poids": 4}]
-	# Compagnon : son excédent tombe au sol du PRINCIPAL.
+	# Annonce relayée au toast de /play : contenant, porteur, objets.
+	assert cdoc["excedent_au_sol"] == [
+		"🫳 Besace profonde de Zora est plein : Pierre tombe au sol — tout disparaît au premier pas."]
+	# Compagnon : son excédent attend dans la liste de `finalize_combat` (posée au sol du
+	# principal après la remontée d'un donjon), pas sur son propre doc.
 	comp = dict(character(inventaire=[{"item": "item:besace", "contenu": [{"item": "item:pierre", "poids": 10}]}]),
 				_id="aventurier:a")
-	principal = character(inventaire=[])
-	combat_util._finalize_membre({"_id": "combat:x", "joueurs": [snap]}, snap, comp, "fuite", principal=principal)
-	assert len(principal["objets_au_sol"]) == 2 and "objets_au_sol" not in comp
+	attente = []
+	cdoc2 = {"_id": "combat:y", "joueurs": [snap]}
+	combat_util._finalize_membre(cdoc2, snap, comp, "fuite", au_sol=attente)
+	assert len(attente) == 2 and "objets_au_sol" not in comp
+	assert "Pomme, Pierre tombent au sol" in cdoc2["excedent_au_sol"][0]
+
+
+def test_rien_a_annoncer_quand_tout_tient(docs, monkeypatch):
+	perso = character(inventaire=[{"item": "item:besace"}])
+	snap = {"butin_contenants": [{"index": 0, "item_id": "item:besace", "rang": 0,
+								  "refs": [{"item": "item:pierre", "poids": 4}]}]}
+	monkeypatch.setattr(combat_util, "save_doc", lambda d: d)
+	cdoc = {"_id": "combat:x", "joueurs": [snap]}
+	combat_util._finalize_membre(cdoc, snap, perso, "fuite")
+	assert "excedent_au_sol" not in cdoc and not perso.get("objets_au_sol")

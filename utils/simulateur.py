@@ -52,7 +52,9 @@ import re
 
 from models import character_stats
 from models.character_stats import BaseStats, compute_character_level
+from utils import capacites_monstre
 from utils import combat
+from utils import ia_monstre
 from utils import jetons
 from utils.characters import (SLOT_ZONE, item_ref_id, main_occupee_par_deux_mains,
 							  recompute_equipment_bonus, restriction_satisfaite)
@@ -422,6 +424,27 @@ def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=(), objets: bool = T
 			"soutiens": soutiens, "consommables": consommables}
 
 
+def _arsenal_d_espece(espece: dict, get_doc_fn, map_tags=(), caracts: dict | None = None) -> dict:
+	"""Arsenal d'une ESPÈCE = ses compétences innées ACTIVES (`espece.competences`), classées
+	comme celles d'une barre de joueur : offensives (`cible: ennemi`) et soutiens. Les
+	passives sont déjà dans le snapshot ; les sorts tirés varient d'un spécimen à l'autre et
+	n'entrent pas au banc d'essai."""
+	comps_off, soutiens = [], []
+	for comp in capacites_monstre.competences_espece(espece, get_doc_fn):
+		if (comp.get("mode") != "active" or not competence_utilisable_combat(comp)
+				or not condition_remplie(comp, map_tags)):
+			continue
+		eff = comp["effets"]
+		if comp["cible"] == "ennemi":
+			comps_off.append(_resoudre_capacite(comp, caracts or {}))
+		elif eff.get("pv") or eff.get("soin") or eff.get("pm") or part_durative(eff):
+			soutiens.append({"kind": "competence", "id": comp["id"], "label": comp["nom"],
+							 "icon": comp["icon"], "cout_pm": comp["cout_pm"],
+							 "effets": eff, "caracts": caracts or {},
+							 "compteur": "competences", "source": comp})
+	return {"sorts": [], "competences": comps_off, "soutiens": soutiens, "consommables": []}
+
+
 def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = True) -> dict:
 	"""`spec = {"type": "espece"|"character", "id", "profil"?}` → belligérant prêt à
 	dueller : `fabrique()` rend un snapshot FRAIS à chaque passe (les snapshots sont
@@ -502,16 +525,19 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = T
 			# Avec une borne, le profil synthétique rend ce tirage déterministe.
 			return _fini(combat.build_monster_snapshot(espece, profil, 0, calculer_xp=False))
 
+		reference = (_fini(combat.build_monster_snapshot(espece, profil, 0, equiper=False, calculer_xp=False))
+					 if borne else _fini(_snapshot_median(espece, profil)))
 		return {"type": "espece", "label": label, "fabrique": fabrique,
-				"arsenal": {"sorts": [], "competences": [], "soutiens": [], "consommables": []},
+				# Compétences innées ACTIVES (utils/capacites_monstre) : le banc d'essai, donc le
+				# potentiel et l'XP, mesure le dragon qui souffle et pas seulement ses crocs.
+				"arsenal": _arsenal_d_espece(espece, get_doc_fn, map_tags,
+											 combat.caracts_effectives(reference)),
 				# Avec une borne, la référence est le snapshot BORNÉ lui-même : les
 				# potentiels doivent décrire ce qui est simulé, pas le médian.
 				# La référence porte les mêmes stats forcées : les potentiels doivent
 				# décrire ce qui est simulé.
 				# Humanoïde NU dans les deux cas (cf. `_snapshot_median`).
-				"snapshot_reference": (_fini(combat.build_monster_snapshot(espece, profil, 0, equiper=False, calculer_xp=False))
-									   if borne
-									   else _fini(_snapshot_median(espece, profil))),
+				"snapshot_reference": reference,
 				# Route servable de l'image — c'est le SERVEUR qui sait où elle vit
 				# (mount /monsters), le client ne fait que la rendre.
 				"image_route": f"/monsters/{espece['image']}" if espece.get("image") else ""}
@@ -727,6 +753,10 @@ def _options_jouables(actor: dict, arsenal: dict, distance: int):
 			   "ranged": portee > 1,
 			   "effets_cible": "ennemi", "source": sort, "compteur": "sorts"}
 	for comp in arsenal.get("competences") or []:
+		# RECHARGE d'une capacité innée de monstre : indisponible tant qu'elle court
+		# (décrémentée par `combat._reset_turn_budget`, armée par `_executer_attaque`).
+		if (actor.get("recharges") or {}).get(comp.get("id"), 0) > 0:
+			continue
 		# Allonge de l'arme pour une frappe `cc` à dés, et drapeau `ranged` mesuré à cette
 		# allonge : une hast reste jouable au contact (cf. combat._portee_competence).
 		portee, ranged = combat._portee_competence(actor, comp)
@@ -807,6 +837,9 @@ def _executer_attaque(actor: dict, cible: dict, option: dict, etat: dict) -> Non
 		fumble = _coup_simule(actor, cible, dict(option, **coup), pseudo, furtif) or fumble
 	actor[option["compteur"]] = actor.get(option["compteur"], 0) + 1
 	combat._refresh_actions(actor)
+	recharge = int((option.get("source") or {}).get("recharge", 0) or 0)
+	if recharge:
+		actor.setdefault("recharges", {})[option["source"]["id"]] = recharge
 	if fumble:
 		combat._appliquer_fumble(pseudo, actor)
 	# Rupture de furtivité — APRÈS la résolution (vivant à jour), touché ou raté,
@@ -957,6 +990,11 @@ def _jouer_tour(actor: dict, adversaire: dict, arsenal: dict, etat: dict, round_
 			pseudo, actor, adversaire,
 			echec_texte=f"{actor.get('nom', '?')} scrute les alentours sans repérer son adversaire !")
 	distance_avant = etat["distance"]
+	# FUITE (tag `ia_fuyard`) : seul axe d'IA qui ait un sens en duel 1D — le fuyard cesse
+	# d'attaquer. Placement (meute, hit-and-run, embuscade…) : hors banc d'essai, assumé.
+	if ia_monstre.doit_fuir(ia_monstre.ia_de(actor), actor):
+		_log(pseudo, actor, "sys", f"{actor.get('nom', '?')} cherche à fuir.")
+		return
 	while _vivant(actor) and _vivant(adversaire) and actor.get("actions_restantes", 0) > 0:
 		if _tenter_soin(actor, arsenal, pseudo):
 			continue

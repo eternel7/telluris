@@ -48,6 +48,8 @@ from utils import vol as vol_util
 from utils import images_monstres
 from utils import contenants as contenants_util
 from utils import xp_monstre
+from utils import capacites_monstre
+from utils import ia_monstre
 from utils import chasse_signee
 
 BATTLE_MAPS = [
@@ -954,6 +956,7 @@ def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, sourc
 		skill = skill_capacite(joueur, source, effets, mode_jet, canal)
 		seuil = _hit_threshold(skill, _defense_physique(monstre))
 	jet = _resoudre_jet(joueur, monstre, seuil, furtif=_attaque_furtive(joueur, monstre))
+	_marquer_agression(monstre, joueur)
 	ctx = {"acteur": joueur["nom"], "cible": monstre["nom"], "roll": jet["roll"],
 		   "seuil": seuil, "ou": "", "dmg": 0,
 		   "pv": monstre["currentPV"], "pv_max": monstre["pv_max"], **noms}
@@ -1513,6 +1516,9 @@ def _reset_turn_budget(actor: dict, combat_doc: dict | None = None) -> None:
 	# ⚠️ Compté dans _refresh_actions ET remis à zéro ICI : sans cette ligne, réorganiser
 	# sa barre serait gratuit dès le deuxième tour.
 	actor["editions"] = 0
+	# RECHARGES des capacités innées d'un monstre : un tour de moins à chaque début de tour.
+	capacites_monstre.decrementer_recharges(actor)
+	actor.pop("capacite_lancee", None)   # au plus une capacité de monstre par tour
 	# Une dette d'action (échec critique commis alors qu'il ne restait rien à perdre)
 	# se paie MAINTENANT : elle devient la pénalité du nouveau tour, puis s'efface.
 	actor["penalites"] = actor.get("dette_actions", 0)
@@ -1825,7 +1831,8 @@ def _blesser_allie(combat_doc: dict, attaquant: dict, victime: dict, dmg: int,
 	`attaquant` tenant lieu d'agresseur. Rend True si la victime est encore debout.
 
 	Source unique des deux tirs amis : brûlure d'une zone persistante (`_bruler`) et zone
-	offensive à `tir_ami` au lancement (`_frapper_allies_de_zone`). `ligne(cible, texte)`
+	offensive à `tir_ami` au lancement (`_frapper_allies_de_zone`) — et des capacités
+	lancées par un MONSTRE (`_coup_capacite_monstre`). `ligne(cible, texte)`
 	écrit le journal (chaque appelant porte son vfx) ; `intro` ouvre la ligne de la victime."""
 	# ⚠️ Les DEUX déductions avant tout `_traiter_ko` (même raison que `_do_attack_on`).
 	dmg_def, dmg_prot, protecteur = _rediriger_lien_vie(combat_doc, victime, dmg)
@@ -2674,7 +2681,8 @@ def contenants_butin(combat_doc: dict) -> list:
 		# Déjà finalisé pour ce membre : le butin d'étage est DANS le contenant, ne pas le recompter.
 		deja_verse = combat_doc.get("_id") in (doc.get("combats_recompenses") or [])
 		attente = {} if deja_verse else {
-			contenants_util.cle(cid, i): kg for i, kg in butin_contenant_en_attente(j).items()}
+			contenants_util.cle(cid, i): kg
+			for i, kg in butin_contenant_en_attente(j, doc.get("inventaire")).items()}
 		for c in contenants_util.destinations([doc], get_doc, int(time.time()), en_attente=attente):
 			c["character_id"] = cid
 			c["porteur_nom"] = j.get("nom") or c["porteur_nom"]
@@ -3663,8 +3671,16 @@ def _profil_arme_monstre(monstre: dict) -> dict:
 		profil = next((a for a in attaques if a.get("mode") == mode), None)
 		if profil:
 			return profil
-	return {"mode": "cac", "portee": monstre.get("portee", 1), "ranged": False,
-			"toucher": "cc", "degats": "degats_cc"}
+	profil = {"mode": "cac", "portee": monstre.get("portee", 1), "ranged": False,
+			  "toucher": "cc", "degats": "degats_cc"}
+	# VENIN de l'attaque naturelle (passive innée `cible: ennemi`, cf. utils/capacites_monstre) :
+	# posé sur le profil comme l'effet d'une arme, donc par `_appliquer_effet_arme` à l'impact.
+	impact = monstre.get("effets_impact")
+	if impact and impact.get("effets"):
+		profil.update({"effets": impact["effets"], "effets_cible": "ennemi",
+					   "effets_source_id": impact.get("source_id", ""),
+					   "label": impact.get("nom") or "Attaque"})
+	return profil
 
 
 def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
@@ -3972,12 +3988,12 @@ def _fichiers_monstres() -> list[str]:
 		return []
 
 
-def roll_monster_sorts(espece: dict, niveau: int) -> list[str]:
-	"""Sorts ATTRIBUÉS à un monstre humanoïde à sa création : X = niveau du profil,
-	borné au nombre de sorts éligibles (`sorts.sorts_eligibles_espece`), tirés SANS
-	REMISE. Stockés tels quels (`sorts_connus`, même champ/forme que
-	`character['sorts_connus']`), jamais lancés par l'IA cette passe."""
-	pool = sorts_eligibles_espece(espece, get_doc, find_docs)
+def roll_monster_sorts(espece: dict, niveau: int, profil_id=None) -> list[str]:
+	"""Sorts ATTRIBUÉS à un monstre à sa création — toute espèce, humanoïde ou non : X =
+	niveau du profil, borné au nombre de sorts éligibles pour CE profil
+	(`sorts.sorts_eligibles_espece`, tags `magie_*` compris), tirés SANS REMISE. Stockés
+	tels quels (`sorts_connus`, même champ/forme que `character['sorts_connus']`)."""
+	pool = sorts_eligibles_espece(espece, get_doc, find_docs, profil_id)
 	if not pool:
 		return []
 	x = max(0, min(int(niveau or 0), len(pool)))
@@ -4009,6 +4025,20 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int, equiper:
 
 	des_cc = des_cc_espece(espece)
 	is_humanoide = character_stats.TAG_HUMANOIDE in (espece.get("tags") or [])
+	# COMPÉTENCES INNÉES (utils/capacites_monstre) : les passives `soi` s'ajoutent à ses
+	# caracts BRUTES avant la dérivation (un monstre n'a ni fiche ni plafond à protéger), la
+	# passive `ennemi` arme son attaque naturelle (venin). Formules résolues sur les caracts
+	# tirées, donc AVANT les passives elles-mêmes.
+	competences_innees = capacites_monstre.competences_espece(espece, get_doc)
+	caracts_tirees = {"V": base_stats.v, "F": base_stats.f, "R": base_stats.r, "Ag": base_stats.ag,
+					  "Vol": base_stats.vol, "Int": base_stats.int_, "Cha": base_stats.cha,
+					  "Ch": base_stats.ch}
+	passives = capacites_monstre.passives_permanentes(competences_innees, caracts_tirees)
+	effets_impact = capacites_monstre.effets_a_l_impact(competences_innees, caracts_tirees)
+	if passives["buffs"]:
+		c = {k: max(0, v + int(passives["buffs"].get(k, 0))) for k, v in caracts_tirees.items()}
+		base_stats = BaseStats(v=c["V"], f=c["F"], r=c["R"], ag=c["Ag"], vol=c["Vol"],
+							   int=c["Int"], cha=c["Cha"], ch=c["Ch"])
 	slots_monstre: dict = {}
 	equipment = EquipmentBonus()
 	attaque_profils = None
@@ -4041,9 +4071,9 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int, equiper:
 		# les autres `*_base`, et relu par `_refresh_snapshot_stats` : c'est ce qui fait
 		# survivre le dé supplémentaire à un buff ou à un debuff de Force.
 		"des_cc_base": des_cc,
-		"esquive_base": 0,
-		"regen_pv_base": 0,
-		"regen_pm_base": 0,
+		"esquive_base": passives["esquive"],
+		"regen_pv_base": passives["regen_pv"],
+		"regen_pm_base": passives["regen_pm"],
 		"effets_actifs": [],
 		"profil_id": profil_id,
 		# Variante d'image de l'espèce, FIGÉE au snapshot : l'arme équipée désigne
@@ -4086,6 +4116,9 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int, equiper:
 		# vide, exactement comme un joueur équipé — même formule, aucun cas particulier.
 		"pa_zones": dict(derived.pa_zones),
 		"pm_def": derived.pm_def,
+		# Précision des capacités MAGIQUES qu'il lance (sorts, souffles) — même dérivée que
+		# le joueur. Absente d'un combat déjà en base : lue `.get(..., 0)`.
+		"toucher_magique": derived.toucher_magique,
 		"degats_cc": derived.degats_cc,
 		"initiative": derived.initiative,
 		"deplacement": derived.deplacement,
@@ -4131,10 +4164,22 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int, equiper:
 		if attaque_profils and any(p.get("mode") in ("tir", "jet") for p in attaque_profils):
 			snap["cd"] = derived.cd
 			snap["degats_cd"] = derived.degats_cd
-	if is_humanoide:
-		sorts_connus = roll_monster_sorts(espece, niveau)
-		if sorts_connus:
-			snap["sorts_connus"] = sorts_connus
+	# Sorts : toute espèce dont les tags `magie_*` (ou `magies`/`sorts`) ouvrent un pool à
+	# CE profil — plus réservés aux humanoïdes.
+	sorts_connus = roll_monster_sorts(espece, niveau, profil_id)
+	if sorts_connus:
+		snap["sorts_connus"] = sorts_connus
+	# Compétences innées ACTIVES (lancées par l'IA) et venin de l'attaque naturelle : clés
+	# ABSENTES sinon, même parti pris que `jeton`.
+	actives = [c["id"] for c in competences_innees if c.get("mode") == "active"]
+	if actives:
+		snap["competences_monstre"] = actives
+	# Type d'IA (tags `ia_*`, utils/ia_monstre), FIGÉ au snapshot pour ce profil.
+	ia = ia_monstre.ia_du_snapshot(espece.get("tags"), profil_id)
+	if ia:
+		snap["ia"] = ia
+	if effets_impact:
+		snap["effets_impact"] = effets_impact
 	return snap
 
 
@@ -4887,26 +4932,76 @@ def butin_d_etage(combat_doc: dict) -> list:
 			if d.get("slot") or d.get("monstre_id") not in loote]
 
 
-def butin_contenant_en_attente(snap: dict) -> dict:
-	"""kg promis à chaque contenant (position dans le sac du membre) par un butin d'étage
-	pas encore versé (`butin_contenants` du snapshot)."""
+def _position_attente(inventaire: list, entree: dict) -> int | None:
+	"""Position ACTUELLE du contenant d'une entrée `butin_contenants` : par son rang parmi ses
+	homonymes (`rang`), jamais par la position notée à l'attribution — un piège posé, un remède
+	bu ou un composant payé en cours de descente retire un objet du sac (sauvé aussitôt) et
+	décale tout ce qui suit. Entrée sans `rang` (écrite avant lui) : ancienne adresse."""
+	return contenants_util.position_par_rang(inventaire or [], entree.get("item_id"),
+											 entree.get("rang"), entree.get("index"))
+
+
+def butin_contenant_en_attente(snap: dict, inventaire: list) -> dict:
+	"""kg promis à chaque contenant par un butin d'étage pas encore versé (`butin_contenants`
+	du snapshot), clé = sa position dans `inventaire`, le sac du membre RELU."""
 	out: dict = {}
 	for e in (snap or {}).get("butin_contenants") or []:
-		out[e.get("index")] = round(out.get(e.get("index"), 0)
-									+ sum(float((r or {}).get("poids") or 0) for r in e.get("refs") or []), 2)
+		pos = _position_attente(inventaire, e)
+		if pos is None:
+			continue
+		out[pos] = round(out.get(pos, 0)
+						 + sum(float((r or {}).get("poids") or 0) for r in e.get("refs") or []), 2)
 	return out
 
 
-def verser_butin_contenants(snap: dict, doc: dict) -> None:
-	"""Range dans leur contenant les lignes de butin d'étage qui lui ont été attribuées
-	(capacité déjà validée à l'attribution). Contenant introuvable ⇒ la réf part au sac,
-	comme `butin_ramasse` : rien ne se perd. Mute sans sauver."""
+def verser_butin_contenants(snap: dict, doc: dict) -> list:
+	"""Range dans leur contenant les lignes de butin d'étage qui lui ont été attribuées.
+	Contenant introuvable ⇒ la réf part au sac, comme `butin_ramasse` : rien ne se perd.
+	Capacité REVÉRIFIÉE (filet : l'attribution l'a déjà validée) : ce qui ne tient plus est
+	RENVOYÉ en `(item_id du contenant, réf)` — cf. `_excedent_au_sol`. Mute sans sauver."""
+	excedent = []
 	for e in (snap or {}).get("butin_contenants") or []:
+		pos = _position_attente(doc.get("inventaire") or [], e)
 		for ref in e.get("refs") or []:
-			ok, _r, _c = contenants_util.deposer(doc, e.get("index"), e.get("item_id"), ref,
-												 get_doc, controler=False)
-			if not ok:
+			if pos is None:
 				doc.setdefault("inventaire", []).append(ref)
+				continue
+			ok, _r, _c = contenants_util.deposer(doc, pos, e.get("item_id"), ref, get_doc)
+			if not ok:
+				excedent.append((e.get("item_id"), ref))
+	return excedent
+
+
+def _excedent_au_sol(combat_doc: dict, snap: dict, excedent: list) -> list:
+	"""Annonce l'excédent d'un contenant plein : une phrase par contenant dans
+	`combat_doc["excedent_au_sol"]` (relayée par le client jusqu'au toast de /play, patron
+	`butin_sol_notif`). Renvoie les réfs, à poser au sol du principal. Mute sans sauver."""
+	par_contenant: dict = {}
+	for iid, ref in excedent or []:
+		par_contenant.setdefault(iid, []).append(ref)
+	annonces = combat_doc.setdefault("excedent_au_sol", []) if par_contenant else []
+	for iid, refs in par_contenant.items():
+		contenant = (get_doc(iid) or {}).get("nom") or "Le contenant"
+		objets = ", ".join((get_doc(item_ref_id(r)) or {}).get("nom") or "un objet" for r in refs)
+		verbe = "tombe" if len(refs) == 1 else "tombent"
+		annonces.append(f"🫳 {contenant} de {(snap or {}).get('nom') or '?'} est plein : {objets} "
+						f"{verbe} au sol — tout disparaît au premier pas.")
+	return [ref for _iid, ref in excedent or []]
+
+
+def _poser_au_sol(character: dict, refs: list) -> None:
+	"""Pose `refs` au sol (transitoire, §6) du personnage principal. Mute sans sauver."""
+	if refs:
+		character["objets_au_sol"] = list(character.get("objets_au_sol") or []) + list(refs)
+
+
+def _vers_le_sol(character: dict, au_sol: list | None, refs: list) -> None:
+	"""`au_sol` (liste d'attente de `finalize_combat`, posée APRÈS la remontée d'un donjon qui
+	vide le sol) si fournie, sinon le sol du principal tout de suite."""
+	if au_sol is not None:
+		au_sol.extend(refs)
+	else:
+		_poser_au_sol(character, refs)
 
 
 def _repartir_butin_d_etage(combat_doc: dict, dispo: list, attributions: list) -> str | None:
@@ -4950,17 +5045,20 @@ def _repartir_butin_d_etage(combat_doc: dict, dispo: list, attributions: list) -
 		refs = [ref_de_butin(par_cle[c]) for c in cles]
 		ok, raison = contenants_util.peut_recevoir(
 			ref_c, get_doc(item_ref_id(ref_c)), refs, get_doc,
-			deja_kg=butin_contenant_en_attente(membres[cid]).get(pos, 0))
+			deja_kg=butin_contenant_en_attente(membres[cid], docs_membres[cid]["inventaire"]).get(pos, 0))
 		if not ok:
 			return raison
 	monstres = {m["id"]: m for m in combat_doc.get("monstres") or []}
 	for (cid, pos), cles in vers_contenant.items():
 		j = membres[cid]
-		iid = item_ref_id(docs_membres[cid]["inventaire"][pos])
+		inv = docs_membres[cid]["inventaire"]
+		iid = item_ref_id(inv[pos])
 		entree = next((e for e in j.setdefault("butin_contenants", [])
-					   if e.get("index") == pos and e.get("item_id") == iid), None)
+					   if _position_attente(inv, e) == pos), None)
 		if entree is None:
-			entree = {"index": pos, "item_id": iid, "refs": []}
+			# `rang` : adresse stable du contenant (cf. `_position_attente`) ; `index` informatif.
+			entree = {"index": pos, "item_id": iid, "rang": contenants_util.rang_homonyme(inv, pos),
+					  "refs": []}
 			j["butin_contenants"].append(entree)
 		for cle in cles:
 			d = par_cle[cle]
@@ -5562,6 +5660,10 @@ def _coup_sur(combat_doc: dict, attaquant: dict, defenseur: dict, profil: dict,
 			# Le protecteur peut tomber sous le coup qu'il absorbe — même cascade, et le
 			# même `attaquant` en est la cause, même s'il ne l'a jamais visé.
 			_traiter_ko(combat_doc, protecteur, attaquant)
+		# Part à durée du coup (venin d'une bête, arme empoisonnée d'un humanoïde) : même
+		# chokepoint que le coup d'un joueur. Rien sur un corps à terre.
+		if defenseur.get("currentPV", 0) > 0 and defenseur.get("vivant", True):
+			_appliquer_effet_arme(combat_doc, attaquant, defenseur, profil)
 	else:
 		# Rien n'a changé chez le défenseur, mais l'attaquant vient peut-être d'arriver
 		# (chasse d'une proie, sans ligne de déplacement) : sa position doit se poser ici.
@@ -5607,9 +5709,11 @@ def _provocateur(combat_doc: dict, monstre: dict) -> dict | None:
 
 
 def _cible_joueur(combat_doc: dict, monstre: dict) -> dict | None:
-	"""Cible de l'IA d'un monstre : le joueur VIVANT le plus proche (Chebyshev), en
-	excluant un joueur furtif non détecté (il ne le voit pas). None si aucun joueur
-	visible — tous furtifs non détectés (le monstre tentera une détection) ou tous KO.
+	"""Cible de l'IA d'un monstre parmi les joueurs VIVANTS qu'il voit (un furtif non
+	détecté est exclu) : le plus proche (Chebyshev) par défaut, sinon selon l'axe `cible` de
+	son IA (`ia_monstre.choisir_cible` : prédateur = le plus blessé qu'il atteint ce tour,
+	berserker = son dernier agresseur). None si aucun joueur visible — tous furtifs non
+	détectés (le monstre tentera une détection) ou tous KO.
 
 	PROVOCATION d'abord (`_provocateur`) : un monstre provoqué vise son provocateur, de
 	près comme de loin, même furtif — on ne provoque pas en restant caché. SEUL point de
@@ -5623,12 +5727,213 @@ def _cible_joueur(combat_doc: dict, monstre: dict) -> dict | None:
 	]
 	if not visibles:
 		return None
-	return min(visibles, key=lambda j: _cheby(monstre, j))
+	allonge = (_eff_int(monstre.get("deplacement")) - _eff_int(monstre.get("cells_moved"))
+			   + max(1, _eff_int(_profil_arme_monstre(monstre).get("portee")) or 1))
+	return ia_monstre.choisir_cible(
+		ia_monstre.ia_de(monstre), monstre, visibles,
+		lambda j: _cheby(monstre, j), lambda j: _cheby(monstre, j) <= allonge)
+
+
+def _marquer_agression(monstre: dict, agresseur: dict) -> None:
+	"""Un acteur du camp du joueur ATTAQUE ce monstre (touché ou non) : il devient son
+	dernier agresseur (cible d'un berserker) et un embusqué se réveille."""
+	if not str((monstre or {}).get("id", "")).startswith("monstre_"):
+		return
+	monstre["dernier_agresseur"] = agresseur.get("id")
+	if ia_monstre.ia_de(monstre)["deplacement"] == "embuscade":
+		monstre["eveille"] = True
 
 
 def _do_monster_attack(combat_doc: dict, monstre: dict, joueur: dict,
 						profil: dict | None = None) -> None:
 	_do_attack_on(combat_doc, monstre, joueur, profil)
+
+
+# ── Capacités lancées par un MONSTRE (utils/capacites_monstre) ───────────────────
+# Pendant « monstre → camp du joueur » de `_lancer_capacite`. Le coup passe par la MÊME
+# cascade qu'un coup de griffe (`_blesser_allie` : lien de vie, concentration, KO) et la
+# part à durée par le même chokepoint (`_appliquer_effet_sur_cible`).
+
+def _cibles_visibles(combat_doc: dict, monstre: dict) -> list:
+	"""Joueurs que ce monstre peut viser : son provocateur seul s'il est provoqué, sinon tout
+	joueur debout qu'il voit (un furtif non détecté est invisible) — règle de `_cible_joueur`."""
+	provocateur = _provocateur(combat_doc, monstre)
+	if provocateur is not None:
+		return [provocateur]
+	return [j for j in _joueurs_vivants(combat_doc)
+			if not (j.get("furtif") and not monstre.get("detecte"))]
+
+
+def _joueurs_de_zone(combat_doc: dict, monstre: dict, cible: dict, zone: dict | None,
+					 grid: dict) -> list:
+	"""Joueurs debout pris dans la zone d'une capacité du monstre visant `cible`, cible EN
+	TÊTE (même géométrie que les zones du joueur, `_cases_zone_offensive`). Une zone hostile
+	de monstre ne touche jamais un autre monstre."""
+	if not zone:
+		return [cible]
+	cases = _cases_zone_offensive(monstre, cible, zone, grid)
+	autres = [j for j in _joueurs_vivants(combat_doc)
+			  if j is not cible and j.get("pos") and any(c in cases for c in jetons.cases_emprise(j))]
+	return [cible] + autres
+
+
+def _monstres_de_zone(combat_doc: dict, monstre: dict, zone: dict | None, grid: dict) -> list:
+	"""Monstres vivants couverts par un SOUTIEN de zone ancré sur le lanceur (hurlement de
+	meute) ; sans zone, le lanceur seul."""
+	if not zone:
+		return [monstre]
+	cases = _cases_zone_offensive(monstre, monstre, zone, grid)
+	return [monstre] + [m for m in combat_doc["monstres"]
+						if m is not monstre and m.get("vivant") and m.get("pos")
+						and any(c in cases for c in jetons.cases_emprise(m))]
+
+
+def _options_capacite_monstre(combat_doc: dict, monstre: dict, grid: dict) -> list:
+	"""Options d'IA : chaque capacité active payable et rechargée, × chaque cible à portée et
+	en vue (hostile) ou ses bénéficiaires (soutien). Effets résolus sur ses caracts."""
+	caracts = caracts_effectives(monstre)
+	recharges = monstre.get("recharges") or {}
+	options = []
+	for cap in capacites_monstre.actives_du_monstre(monstre, get_doc):
+		if recharges.get(cap["id"], 0) > 0 or cap.get("cout_pm", 0) > _eff_int(monstre.get("currentPM")):
+			continue
+		effets = resoudre_effets(cap["effets"], caracts)
+		base = {"cap": cap, "effets": effets, "source_id": cap["id"]}
+		if cap["cible"] == "ennemi":
+			portee = max(1, int(portee_effective(cap, caracts) or 1))
+			for j in _cibles_visibles(combat_doc, monstre):
+				if _cheby(monstre, j) > portee or not _vue_acteurs(grid["cells"], monstre, j):
+					continue
+				options.append(dict(base, hostile=True, cible=j,
+									victimes=_joueurs_de_zone(combat_doc, monstre, j, cap.get("zone"), grid)))
+		elif cap["cible"] == "allie":
+			# Soin / buff d'allié (sort tiré) : un monstre allié à portée et en vue, lui compris.
+			portee = max(1, int(portee_effective(cap, caracts) or 1))
+			for m in combat_doc["monstres"]:
+				if (m.get("vivant") and m.get("pos") and _cheby(monstre, m) <= portee
+						and _vue_acteurs(grid["cells"], monstre, m)):
+					options.append(dict(base, hostile=False, cible=m, beneficiaires=[m]))
+		else:
+			options.append(dict(base, hostile=False, cible=monstre,
+								beneficiaires=_monstres_de_zone(combat_doc, monstre, cap.get("zone"), grid)))
+	return options
+
+
+def _coup_capacite_monstre(combat_doc: dict, monstre: dict, victime: dict, cap: dict,
+						   effets: dict) -> tuple:
+	"""UN coup de capacité de monstre sur UN joueur : jet, dégâts (cascade `_blesser_allie`),
+	dégâts aux PM, part à durée. Rend `(pv réellement retirés, jet)`."""
+	mode_jet = cap.get("jet") or "magique"
+	if mode_jet == "magique":
+		seuil = _magic_hit_threshold(_eff_int(monstre.get("toucher_magique")), _eff_int(victime.get("pm_def")))
+	else:
+		skill = _eff_int(monstre.get("cd")) if mode_jet == "cd" and monstre.get("cd") else _eff_int(monstre.get("cc"))
+		seuil = _hit_threshold(skill, _defense_physique(victime))
+	jet = _resoudre_jet(monstre, victime, seuil)
+	nom = cap.get("nom", "Capacité")
+	anim = cap.get("animation") or monstre.get("animation")
+	if not jet["touche"]:
+		combat_doc["log"].append(_avec_etat(_avec_vfx({
+			"tour": combat_doc["tour"], "acteur": monstre["nom"], "kind": "miss",
+			"texte": f"{victime['nom']} échappe à {nom} de {monstre['nom']} ! "
+					 f"(jet {jet['roll']} / seuil {seuil})",
+		}, "miss", victime.get("id", ""), acteur_id=monstre.get("id", "")), monstre))
+		return 0, jet
+
+	kind = "crit" if jet["critique"] else "hit"
+
+	def ligne(cible, texte):
+		combat_doc["log"].append(_avec_etat(_avec_vfx({
+			"tour": combat_doc["tour"], "acteur": monstre["nom"], "kind": kind, "texte": texte,
+		}, "monstre", cible.get("id", ""), anim, monstre.get("id", "")), monstre, cible))
+
+	avant = victime["currentPV"]
+	notation = effets.get("degats") or ""
+	if notation:
+		zone = tirer_localisation()
+		ou = f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else ""
+		dmg = calculer_degats(monstre, victime, notation, jet["mult_degats"], mode_jet, zone=zone)
+		critique = "COUP CRITIQUE — " if jet["critique"] else ""
+		_blesser_allie(combat_doc, monstre, victime, dmg, ligne,
+					   f"{critique}{nom} de {monstre['nom']} frappe {victime['nom']}{ou}")
+	else:
+		ligne(victime, f"{nom} de {monstre['nom']} atteint {victime['nom']}.")
+	if effets.get("degats_pm") and _debout(victime):
+		avant_pm = _eff_int(victime.get("currentPM"))
+		victime["currentPM"] = max(0, avant_pm - roll_dice(effets["degats_pm"]) * jet["mult_degats"])
+		if victime["currentPM"] != avant_pm:
+			combat_doc["log"].append(_avec_etat({
+				"tour": combat_doc["tour"], "acteur": monstre["nom"], "kind": "hit",
+				"texte": f"{victime['nom']} voit sa magie se vider : −{avant_pm - victime['currentPM']} PM "
+						 f"({victime['currentPM']}/{victime.get('pm_max', 0)}).",
+			}, victime))
+	if _debout(victime):
+		source = {"id": cap["id"], "nom": nom, "icon": cap.get("icon", "✨")}
+		_appliquer_effet_sur_cible(combat_doc, victime, source, effets, combat_doc["tour"])
+	return avant - victime["currentPV"], jet
+
+
+def _lancer_capacite_monstre(combat_doc: dict, monstre: dict, option: dict) -> None:
+	"""Le monstre lance l'option retenue : 1 action, ses PM, la recharge, puis le coup sur
+	chaque victime (hostile) ou le soutien sur chaque bénéficiaire. Le drain est sommé puis
+	plafonné UNE fois par lancement (`drain_max`), comme pour le joueur."""
+	cap, effets = option["cap"], option["effets"]
+	monstre["currentPM"] = max(0, _eff_int(monstre.get("currentPM")) - _eff_int(cap.get("cout_pm")))
+	monstre["attaques"] = monstre.get("attaques", 0) + 1
+	_refresh_actions(monstre)
+	if _eff_int(cap.get("recharge")):
+		monstre.setdefault("recharges", {})[cap["id"]] = _eff_int(cap["recharge"])
+	combat_doc["log"].append(_avec_etat({
+		"tour": combat_doc["tour"], "acteur": monstre["nom"], "kind": "sys",
+		"texte": f"{cap.get('icon', '✨')} {monstre['nom']} utilise {cap.get('nom', 'une capacité')} !",
+	}, monstre))
+	if not option.get("hostile"):
+		source = {"id": cap["id"], "nom": cap.get("nom", ""), "icon": cap.get("icon", "✨")}
+		for b in option.get("beneficiaires") or []:
+			if not _debout(b):
+				continue
+			if _eff_int(effets.get("pv")):
+				b["currentPV"] = min(b.get("pv_max", 0), b["currentPV"] + _eff_int(effets["pv"]))
+			if _eff_int(effets.get("pm")):
+				b["currentPM"] = min(b.get("pm_max", 0), _eff_int(b.get("currentPM")) + _eff_int(effets["pm"]))
+			_appliquer_effet_sur_cible(combat_doc, b, source, effets, combat_doc["tour"], hostile=False)
+		return
+	inflige = 0
+	fumble = False
+	for n, victime in enumerate(option.get("victimes") or []):
+		if combat_doc.get("status") != "active":
+			break
+		pv, jet = _coup_capacite_monstre(combat_doc, monstre, victime, cap, effets)
+		inflige += pv
+		fumble = fumble or (n == 0 and jet["fumble"])
+	drain = (inflige * _eff_int(effets.get("drain_pv"))) // 100
+	if _eff_int(effets.get("drain_max")):
+		drain = min(drain, _eff_int(effets["drain_max"]))
+	if drain and monstre.get("vivant"):
+		avant = monstre["currentPV"]
+		monstre["currentPV"] = min(monstre.get("pv_max", avant), avant + drain)
+		if monstre["currentPV"] != avant:
+			combat_doc["log"].append(_avec_etat({
+				"tour": combat_doc["tour"], "acteur": monstre["nom"], "kind": "sys",
+				"texte": f"{monstre['nom']} draine la vie de ses victimes (+{monstre['currentPV'] - avant} PV).",
+			}, monstre))
+	if fumble:
+		_appliquer_fumble(combat_doc, monstre)
+
+
+def _tenter_capacite_monstre(combat_doc: dict, monstre: dict, grid: dict, rand_fn=None) -> bool:
+	"""Au plus UNE capacité par tour : rend True si le monstre en a lancé une."""
+	if (monstre.get("capacite_lancee") or not monstre.get("vivant")
+			or monstre.get("actions_restantes", 0) <= 0 or combat_doc.get("status") != "active"):
+		return False
+	from utils.simulateur import moyenne_de_des   # import local : simulateur importe ce module
+	option = capacites_monstre.choisir_capacite(
+		_options_capacite_monstre(combat_doc, monstre, grid), moyenne_de_des, rand_fn)
+	if option is None:
+		return False
+	monstre["capacite_lancee"] = True
+	_lancer_capacite_monstre(combat_doc, monstre, option)
+	return True
 
 
 def _predicats_jeton(grid: dict, acteur: dict) -> tuple:
@@ -5717,8 +6022,11 @@ def _grand_pas_vers(combat_doc: dict, acteur: dict, cible: dict, grid: dict, blo
 	return True
 
 
-def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: dict) -> bool:
-	"""Avance le monstre d'une case vers le joueur via A*. Retourne True si déplacé."""
+def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: dict,
+						 jusqu_a_la_case: bool = False) -> bool:
+	"""Avance le monstre d'une case vers le joueur via A*. Retourne True si déplacé.
+	`jusqu_a_la_case` : `joueur` n'est qu'une CASE à atteindre (`{"pos": …}` — approche de
+	meute, retour au poste) ; le monstre peut y entrer."""
 	# Pièges du joueur que ce monstre a flairés : il ne s'y engage pas (`_flairer_pieges`).
 	blocked = _occupied_set(combat_doc, exclude=monstre) | _cases_evitees(combat_doc, monstre)
 	if jetons.est_grand(monstre):
@@ -5738,7 +6046,7 @@ def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: di
 		return False
 	nxt = path[1]
 	# Ne pas entrer sur la case du joueur (cible) ni une case occupée.
-	if jetons.couvre(joueur, nxt[0], nxt[1]) or nxt in blocked:
+	if (not jusqu_a_la_case and jetons.couvre(joueur, nxt[0], nxt[1])) or nxt in blocked:
 		return False
 	# Vérifier qu'il reste assez d'AP pour ce pas (coût proportionnel).
 	if not _pas_budget_ok(monstre):
@@ -6091,9 +6399,55 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 			return
 		joueur = cible_furtive
 
-	# Phase déplacement : se rapprocher du joueur, ou s'en écarter s'il est armé à
-	# distance et déjà trop proche (`_deplacement_ia`, cf. `_profil_arme_monstre`).
-	steps, verbe = _deplacement_ia(combat_doc, monstre, joueur, grid, profil)
+	# TYPE D'IA (tags `ia_*`, utils/ia_monstre) : défaut = brute / plus proche / jamais de fuite.
+	ia = ia_monstre.ia_de(monstre)
+	dep = ia["deplacement"]
+	recule = not ia_monstre.berserker(ia)   # un berserker ne recule jamais
+
+	# EMBUSCADE : immobile et silencieux tant qu'il dort.
+	if dep == "embuscade" and not _embuscade_eveillee(combat_doc, monstre, ia):
+		_avancer_tour(combat_doc)
+		return
+	# FUITE : sous son seuil de PV, il s'éloigne de tout joueur ; acculé, il se bat.
+	if ia_monstre.doit_fuir(ia, monstre):
+		pas = _fuir(combat_doc, monstre, joueur, grid)
+		if pas:
+			combat_doc["log"].append(_avec_etat({
+				"tour": combat_doc["tour"], "acteur": monstre["nom"], "kind": "move",
+				"texte": f"{monstre['nom']} prend la fuite ({pas} case(s)).",
+			}, monstre))
+			_avancer_tour(combat_doc)
+			return
+
+	# CAPACITÉ (souffle, regard, cri…) : tentée d'abord depuis sa case — un dragon souffle
+	# de loin —, sinon après son déplacement. Une seule par tour (`capacite_lancee`).
+	_tenter_capacite_monstre(combat_doc, monstre, grid)
+	if not monstre["vivant"] or combat_doc["status"] != "active":
+		_avancer_tour(combat_doc)
+		return
+	if joueur.get("currentPV", 0) <= 0:
+		joueur = _cible_joueur(combat_doc, monstre)
+		if joueur is None:
+			_avancer_tour(combat_doc)
+			return
+
+	# Phase déplacement, selon le type d'IA. Défaut : se rapprocher du joueur, ou s'en
+	# écarter s'il est armé à distance et déjà trop proche (`_deplacement_ia`).
+	vers = joueur
+	if dep == "protecteur" and (allie := _allie_a_couvrir(combat_doc, monstre)) is not None:
+		vers = allie
+		steps, verbe = _rejoindre(combat_doc, monstre, allie, grid,
+								  ia_monstre.DISTANCE_PROTECTEUR), "se porte auprès de"
+	elif dep == "embuscade" and _hors_laisse(monstre, joueur, ia, portee):
+		vers = {"nom": "son poste"}
+		steps, verbe = _rejoindre(combat_doc, monstre, {"pos": monstre["poste"]}, grid, 0), "regagne"
+	elif dep == "meute" and not jetons.est_grand(monstre):
+		steps, verbe = _approche_meute(combat_doc, monstre, joueur, grid, profil)
+	elif dep == "artilleur":
+		profil_dep = dict(profil, portee=_portee_visee_monstre(monstre, profil), ranged=recule)
+		steps, verbe = _deplacement_ia(combat_doc, monstre, joueur, grid, profil_dep)
+	else:
+		steps, verbe = _deplacement_ia(combat_doc, monstre, joueur, grid, profil)
 	# Mort en chemin (zone persistante) : la ligne de brûlure porte déjà sa position.
 	if steps > 0 and monstre["vivant"]:
 		# Le jeton ne saute plus à sa case d'arrivée dès la réponse : il y glisse quand
@@ -6103,21 +6457,144 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 			"tour": combat_doc["tour"],
 			"acteur": monstre["nom"],
 			"kind": "move",
-			"texte": f"{monstre['nom']} {verbe} {joueur['nom']} ({steps} case(s)).",
+			"texte": f"{monstre['nom']} {verbe} {vers.get('nom', 'son poste')} ({steps} case(s)).",
 		}, monstre))
+	_tenter_capacite_monstre(combat_doc, monstre, grid)
 
 	# Phase attaque : frapper tant qu'à portée et qu'il reste des actions. Si la cible
 	# tombe (KO) en cours de tour, le monstre se rabat sur le joueur visible suivant.
+	# HIT AND RUN : un seul coup, puis il se replie avec ce qui lui reste de jambes.
+	coups = 0
 	while (combat_doc["status"] == "active" and monstre["vivant"]
-		   and monstre["actions_restantes"] > 0):
+		   and monstre["actions_restantes"] > 0
+		   and not (dep == "hit_and_run" and recule and coups >= 1)):
 		if joueur is None or joueur.get("currentPV", 0) <= 0:
 			joueur = _cible_joueur(combat_doc, monstre)
 		if (joueur is None or _cheby(monstre, joueur) > portee
 				or not _pret_a_frapper(combat_doc, monstre, joueur, grid)):
 			break
 		_do_monster_attack(combat_doc, monstre, joueur, profil)   # décompte l'action lui-même
+		coups += 1
+	if dep == "hit_and_run" and recule and coups and joueur is not None and monstre["vivant"]:
+		pas = _fuir(combat_doc, monstre, joueur, grid)
+		if pas:
+			combat_doc["log"].append(_avec_etat({
+				"tour": combat_doc["tour"], "acteur": monstre["nom"], "kind": "move",
+				"texte": f"{monstre['nom']} se replie hors d'atteinte ({pas} case(s)).",
+			}, monstre))
 
 	_avancer_tour(combat_doc)
+
+
+# ── Types d'IA : briques de déplacement (utils/ia_monstre) ─────────────────────
+
+def _embuscade_eveillee(combat_doc: dict, monstre: dict, ia: dict) -> bool:
+	"""Un embusqué se réveille quand un joueur VISIBLE entre dans son rayon, quand on
+	l'attaque (`_marquer_agression`) ou quand on le provoque. Son poste = la case où il
+	attendait (posé à son premier tour, avant tout pas)."""
+	monstre.setdefault("poste", dict(monstre["pos"]))
+	if monstre.get("eveille"):
+		return True
+	rayon = int(ia.get("rayon") or ia_monstre.RAYON_EMBUSCADE_DEFAUT)
+	proches = [j for j in _cibles_visibles(combat_doc, monstre) if _cheby(monstre, j) <= rayon]
+	if _provocateur(combat_doc, monstre) is None and not proches:
+		return False
+	monstre["eveille"] = True
+	combat_doc["log"].append(_avec_etat({
+		"tour": combat_doc["tour"], "acteur": monstre["nom"], "kind": "sys",
+		"texte": f"{monstre['nom']} surgit de sa cachette !",
+	}, monstre))
+	return True
+
+
+def _hors_laisse(monstre: dict, cible: dict, ia: dict, portee: int) -> bool:
+	"""La cible est-elle trop loin du POSTE pour qu'un embusqué l'y frappe sans quitter sa
+	laisse (rayon + `LAISSE_MARGE`) ? Il regagne alors son poste au lieu de la poursuivre."""
+	poste = monstre.get("poste")
+	if not poste:
+		return False
+	laisse = int(ia.get("rayon") or ia_monstre.RAYON_EMBUSCADE_DEFAUT) + ia_monstre.LAISSE_MARGE
+	return _cheby({"pos": poste}, cible) > laisse + portee
+
+
+def _fuir(combat_doc: dict, monstre: dict, menace: dict, grid: dict) -> int:
+	"""S'éloigne de `menace` avec tout son déplacement restant ; rend le nombre de pas."""
+	pas = 0
+	while (combat_doc["status"] == "active" and _debout(monstre)
+		   and monstre["cells_moved"] < monstre.get("deplacement", 1) and pas < 100):
+		if not _monster_step_away(combat_doc, monstre, menace, grid, 99):
+			break
+		pas += 1
+	return pas
+
+
+def _rejoindre(combat_doc: dict, monstre: dict, but: dict, grid: dict, distance: int) -> int:
+	"""Marche vers `but` (allié à couvrir, ou case de poste : `{"pos": …}`) jusqu'à en être à
+	`distance` au plus ; rend le nombre de pas."""
+	case = "id" not in but
+	pas = 0
+	while (combat_doc["status"] == "active" and _debout(monstre)
+		   and _cheby(monstre, but) > distance
+		   and monstre["cells_moved"] < monstre.get("deplacement", 1) and pas < 100):
+		if not _monster_step_toward(combat_doc, monstre, but, grid, jusqu_a_la_case=case):
+			break
+		pas += 1
+	return pas
+
+
+def _allie_a_couvrir(combat_doc: dict, monstre: dict) -> dict | None:
+	"""Protecteur : le monstre allié le plus blessé, s'il est hors de sa portée de garde."""
+	allie = ia_monstre.le_plus_blesse([m for m in combat_doc["monstres"] if m is not monstre])
+	if allie is None or _cheby(monstre, allie) <= ia_monstre.DISTANCE_PROTECTEUR:
+		return None
+	return allie
+
+
+def _portee_visee_monstre(monstre: dict, profil: dict) -> int:
+	"""Artilleur : la plus grande portée entre son arme et ses capacités payables."""
+	portee = max(1, int(profil.get("portee", monstre.get("portee", 1)) or 1))
+	caracts = caracts_effectives(monstre)
+	recharges = monstre.get("recharges") or {}
+	for cap in capacites_monstre.actives_du_monstre(monstre, get_doc):
+		if (cap["cible"] == "ennemi" and recharges.get(cap["id"], 0) <= 0
+				and cap.get("cout_pm", 0) <= _eff_int(monstre.get("currentPM"))):
+			portee = max(portee, int(portee_effective(cap, caracts) or 1))
+	return portee
+
+
+def _approche_meute(combat_doc: dict, monstre: dict, cible: dict, grid: dict, profil: dict) -> tuple:
+	"""Meute : vise la case voisine de la cible la mieux placée — dos > flanc > face, une
+	case déjà visée par un congénère pénalisée (`ia_monstre.score_case_meute`) — et y marche.
+	Déjà au contact, ou aucune case libre : déplacement ordinaire."""
+	portee = max(1, int(profil.get("portee", monstre.get("portee", 1)) or 1))
+	if _cheby(monstre, cible) <= portee and _vue_acteurs(grid["cells"], monstre, cible):
+		return 0, "avance vers"
+	cells, dims = grid["cells"], grid["dims"]
+	bloque = _occupied_set(combat_doc, exclude=monstre) | _cases_evitees(combat_doc, monstre)
+	visees = {tuple(m["case_visee"]) for m in combat_doc["monstres"]
+			  if m is not monstre and m.get("vivant") and m.get("case_visee")}
+	fx, fy = _axe_acteur(cible)
+	tx, ty = cible["pos"]["x"], cible["pos"]["y"]
+	flying = _can_fly(monstre)
+	candidates = []
+	for dx, dy in MOVE_OFFSETS:
+		x, y = tx + dx, ty + dy
+		if not (0 <= x < dims["x"] and 0 <= y < dims["y"]) or (x, y) in bloque:
+			continue
+		if not _walkable(cells, x, y, flying):
+			continue
+		score = ia_monstre.score_case_meute(dx * fx + dy * fy, (x, y) in visees)
+		candidates.append((-score, _cheby(monstre, {"pos": {"x": x, "y": y}}), (x, y)))
+	if not candidates:
+		return _deplacement_ia(combat_doc, monstre, cible, grid, profil)
+	_, _, case = min(candidates)
+	monstre["case_visee"] = list(case)
+	pas = _rejoindre(combat_doc, monstre, {"pos": {"x": case[0], "y": case[1]}}, grid, 0)
+	if _cheby(monstre, cible) > portee:
+		# Chemin de flanc bouché : il finit son approche par le plus court.
+		suite, _ = _deplacement_ia(combat_doc, monstre, cible, grid, profil)
+		pas += suite
+	return pas, "encercle"
 
 
 def _frapper_monstre(combat_doc: dict, attaquant: dict, monstre: dict, profil: dict) -> tuple:
@@ -6138,6 +6615,7 @@ def _frapper_monstre(combat_doc: dict, attaquant: dict, monstre: dict, profil: d
 	l'UN des jets est un échec critique — l'appelant n'applique qu'une pénalité.
 	"""
 	furtif = _attaque_furtive(attaquant, monstre)
+	_marquer_agression(monstre, attaquant)
 	coups = coups_du_profil(attaquant, profil)
 	if len(coups) > 1 and attaquant.get("pos") and monstre.get("pos"):
 		dist = _cheby(attaquant, monstre)
@@ -7559,7 +8037,8 @@ def _crediter_xp_membre(doc: dict, xp: int) -> None:
 	mercenaires.crediter_xp(doc, xp)
 
 
-def _finalize_clone_mort(combat_doc: dict, snap: dict, doc: dict, character: dict) -> bool:
+def _finalize_clone_mort(combat_doc: dict, snap: dict, doc: dict, character: dict,
+						 au_sol: list | None = None) -> bool:
 	"""Compagnon-JOUEUR tombé à 0 PV, QUELLE QUE SOIT L'ISSUE : il quitte le groupe et son
 	SAC se répand au sol du principal (sauvé par `_finalize_membre` du principal, sous SON
 	garde exactly-once — même schéma que `_finalize_monture`). Son équipement reste : il
@@ -7571,7 +8050,7 @@ def _finalize_clone_mort(combat_doc: dict, snap: dict, doc: dict, character: dic
 	ramasse = [i for i in snap.get("butin_ramasse", []) if i]
 	if ramasse:
 		doc["inventaire"] = list(doc.get("inventaire") or []) + ramasse
-	verser_butin_contenants(snap, doc)
+	_vers_le_sol(character, au_sol, _excedent_au_sol(combat_doc, snap, verser_butin_contenants(snap, doc)))
 	# XP des pièges : acquise au geste, elle remonte quand même à l'original.
 	if _eff_int(snap.get("xp_pieges")) > 0:
 		mercenaires.crediter_xp(doc, _eff_int(snap.get("xp_pieges")))
@@ -7583,7 +8062,8 @@ def _finalize_clone_mort(combat_doc: dict, snap: dict, doc: dict, character: dic
 	return save_doc(doc) is not None
 
 
-def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> bool:
+def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str,
+					 au_sol: list | None = None) -> bool:
 	"""Applique l'issue du combat au doc d'UN membre du groupe (principal ou compagnon,
 	les docs `aventurier:*` étant des miroirs du character) : PV (KO → relevé à 1),
 	PM, XP pleine (v1) et butin ramassé par CE membre → SON sac. Garde d'idempotence
@@ -7630,9 +8110,11 @@ def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> 
 		inventaire = doc.get("inventaire", [])
 		inventaire.extend(ramasse)
 		doc["inventaire"] = inventaire
-	# Butin d'étage attribué à un CONTENANT de ce membre : rangé dedans (même garde).
-	# ⚠️ AVANT `retirer_outils_brises`, qui peut décaler les positions du sac.
-	verser_butin_contenants(joueur, doc)
+	# Butin d'étage attribué à un CONTENANT de ce membre : rangé dedans (même garde) ; ce qui
+	# n'y tient plus tombe au sol du PRINCIPAL (`au_sol` : liste d'attente de `finalize_combat`,
+	# sinon ce doc-ci). ⚠️ Compagnon : sauvé avant le principal — si le save du principal
+	# échoue ensuite, cet excédent est perdu.
+	_vers_le_sol(doc, au_sol, _excedent_au_sol(combat_doc, joueur, verser_butin_contenants(joueur, doc)))
 	# Outils de crochetage brisés en désamorçant : retirés du sac de CE membre, sous la même
 	# garde d'idempotence (sinon /play qui re-finalise en retirerait un second).
 	if joueur.get("outils_brises"):
@@ -7649,7 +8131,7 @@ def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> 
 
 
 def _finalize_monture(combat_doc: dict, snap: dict, doc: dict, status: str,
-					  character: dict) -> bool:
+					  character: dict, au_sol: list | None = None) -> bool:
 	"""Applique l'issue du combat au doc d'UNE monture. Elle ne gagne pas d'XP (elle porte,
 	elle ne se bat pas) et n'a pas d'affinité — seuls ses PV comptent, et sa survie.
 
@@ -7687,7 +8169,7 @@ def _finalize_monture(combat_doc: dict, snap: dict, doc: dict, status: str,
 	if ramasse:
 		doc["inventaire"] = list(doc.get("inventaire") or []) + ramasse
 	# Butin rangé dans un contenant de la bête : AVANT `tuer`, le contenant plein se répand alors avec la cargaison.
-	verser_butin_contenants(snap, doc)
+	_vers_le_sol(character, au_sol, _excedent_au_sol(combat_doc, snap, verser_butin_contenants(snap, doc)))
 
 	if snap.get("morte") and character_stats.MONTURE_MORT_DEFINITIVE:
 		cargaison = montures_util.tuer(character, doc)
@@ -7804,6 +8286,9 @@ def finalize_combat(combat_doc: dict) -> bool:
 	# Compagnons d'abord (best-effort chacun), principal en dernier : si le save du
 	# principal échoue, /play re-finalisera — les compagnons déjà servis sont protégés
 	# par leur propre garde d'idempotence.
+	# Excédent des contenants pleins des AUTRES membres : posé au sol du principal juste avant
+	# son `_finalize_membre`, APRÈS la remontée d'un donjon (qui vide le sol), donc à l'arrivée.
+	excedent_sol: list = []
 	compagnons_traites = []
 	montures_traitees = []
 	proteges_traites = []
@@ -7836,7 +8321,7 @@ def finalize_combat(combat_doc: dict) -> bool:
 		if mercenaires.est_clone(doc) and j.get("currentPV", 0) <= 0:
 			clones_morts.append((j, doc))
 			continue
-		_finalize_membre(combat_doc, j, doc, status)
+		_finalize_membre(combat_doc, j, doc, status, au_sol=excedent_sol)
 		compagnons_traites.append((j, doc))
 	if joueur_principal is None:
 		joueur_principal = combat_doc["joueurs"][0]
@@ -7870,7 +8355,7 @@ def finalize_combat(combat_doc: dict) -> bool:
 	# principal (elle ne passe plus par `butin_disponible`, qui n'est proposé qu'à la
 	# victoire — cf. `_finalize_monture`). Mute `character`, sauvé juste en dessous.
 	for j, doc in montures_traitees:
-		_finalize_monture(combat_doc, j, doc, status, character)
+		_finalize_monture(combat_doc, j, doc, status, character, au_sol=excedent_sol)
 
 	# Personnes escortées — même place, même motif que les montures : le personnage est muté
 	# ici (retrait du groupe, archivage de la quête en échec) et sauvé par `_finalize_membre`
@@ -7880,7 +8365,7 @@ def finalize_combat(combat_doc: dict) -> bool:
 
 	# Compagnons-joueurs tombés : même place, même motif (sac versé sur le principal).
 	for j, doc in clones_morts:
-		_finalize_clone_mort(combat_doc, j, doc, character)
+		_finalize_clone_mort(combat_doc, j, doc, character, au_sol=excedent_sol)
 
 	# Progression des quêtes de chasse : compte les monstres tués (toute issue), sous le
 	# même garde exactly-once que l'XP → pas de double comptage si /play re-finalise.
@@ -7941,6 +8426,7 @@ def finalize_combat(combat_doc: dict) -> bool:
 		if delta:
 			recrutement.ajuster_affinite(character, doc["_id"], delta)
 
+	_poser_au_sol(character, excedent_sol)  # persisté par `_finalize_membre`, même save que l'XP
 	marquer_joue(character)  # persisté par `_finalize_membre`, même save que l'XP
 	if not _finalize_membre(combat_doc, joueur_principal, character, status):
 		return False  # échec de sauvegarde → ne pas marquer, on réessaiera

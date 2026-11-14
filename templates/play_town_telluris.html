@@ -6524,6 +6524,15 @@ async function spendXp(statKey, useMaxBonus = false) {
 			}
 		} catch (e) { /* relais illisible : rien à annoncer, la pile est visible dans la fiche */ }
 	}
+	// Contenant plein à la fin du combat : son excédent est tombé au sol (phrases écrites par
+	// le serveur, `combat._excedent_au_sol`). Toast simple, une bulle par contenant.
+	const _contenantPlein = sessionStorage.getItem('contenant_plein_notif');
+	if (_contenantPlein) {
+		sessionStorage.removeItem('contenant_plein_notif');
+		try {
+			(JSON.parse(_contenantPlein) || []).forEach(t => showToast(String(t)));
+		} catch (e) { /* relais illisible : l'objet reste visible au sol */ }
+	}
 	// ── Intro narrative : choix de la raison + conclusion ─────────────────────
 	async function choisirRaisonIntro(raisonId) {
 		try {

@@ -1323,15 +1323,21 @@ def sorts_apprenables(character: dict, find_docs, resolve_ref, rules_vocations, 
 	return out
 
 
-def sorts_eligibles_espece(espece: dict, get_doc, find_docs) -> list:
-	"""Pool de sorts éligibles pour une espèce HUMANOÏDE (cf. `utils.combat.roll_monster_sorts`).
+def sorts_eligibles_espece(espece: dict, get_doc, find_docs, profil_id=None) -> list:
+	"""Pool de sorts éligibles pour un monstre de cette espèce et de ce profil
+	(cf. `utils.combat.roll_monster_sorts`).
 
 	Liste nominative `espece['sorts']` PRIORITAIRE si non vide (ids résolus via
-	`get_doc`, morts ignorés) ; sinon la carte `espece['magies']` ({ecole: niveau max})
-	filtre tous les `sort:*` du monde (école dans la carte, niveau ≤ son plafond).
+	`get_doc`, morts ignorés) ; sinon la carte d'écoles ({école: niveau max}) filtre tous
+	les `sort:*` du monde (école dans la carte, niveau ≤ son plafond). Cette carte réunit
+	`espece['magies']` et les tags `magie_<école>_<niveau>[_<profil>]` qui s'appliquent à
+	`profil_id` (`capacites_monstre.magies_de_tags`) — plafond le plus haut par école,
+	écoles comparées par slug (`Élémentaire` ↔ `elementaire`).
 	Pas de `rules_vocations` : un sort porte son école en propre (`magie`, cf.
 	`magie_de_sort`), le repli par vocation ne concerne que les sorts anciens sans ce
 	champ — non pertinent pour un pool d'espèce."""
+	# Import local : `capacites_monstre` importe `competences`, qui importe ce module.
+	from utils.capacites_monstre import magies_de_tags, slug_ecole
 	espece = espece or {}
 	nominatifs = [str(s) for s in espece.get("sorts") or [] if s]
 	if nominatifs:
@@ -1341,7 +1347,14 @@ def sorts_eligibles_espece(espece: dict, get_doc, find_docs) -> list:
 			if sort:
 				out.append(sort)
 		return out
-	magies = espece.get("magies") or {}
+	magies: dict = {}
+	for ecole, plafond in (espece.get("magies") or {}).items():
+		try:
+			magies[slug_ecole(ecole)] = max(magies.get(slug_ecole(ecole), 0), int(plafond))
+		except (TypeError, ValueError):
+			continue
+	for ecole, plafond in magies_de_tags(espece.get("tags"), profil_id).items():
+		magies[ecole] = max(magies.get(ecole, 0), plafond)
 	if not magies:
 		return []
 	out = []
@@ -1349,14 +1362,10 @@ def sorts_eligibles_espece(espece: dict, get_doc, find_docs) -> list:
 		sort = normaliser_sort(doc)
 		if not sort:
 			continue
-		ecole = magie_de_sort(sort, None)
+		ecole = slug_ecole(magie_de_sort(sort, None))
 		if not ecole or ecole not in magies:
 			continue
-		try:
-			plafond = int(magies[ecole])
-		except (TypeError, ValueError):
-			continue
-		if sort["niveau"] <= plafond:
+		if sort["niveau"] <= magies[ecole]:
 			out.append(sort)
 	return out
 

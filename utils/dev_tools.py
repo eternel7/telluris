@@ -724,6 +724,22 @@ CATALOGUE = [
 			"un doc déjà en base à l'identique est sauté.",
 	},
 	{
+		"id": "gen_capacites_monstres",
+		"label": "🐉 Monstres : capacités innées, tags de magie et d'IA",
+		# Dump frais : les espèces sont réémises ENTIÈRES (PUT complet) ; sur un dump périmé,
+		# une espèce retouchée depuis serait réécrite telle qu'avant.
+		"argv_fn": lambda v, f: _py("gen_capacites_monstres.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/capacites_monstres_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/capacites_monstres_a_importer.json. "
+			"Rien en base avant 📥 Importer.",
+		"description": "Compétences innées `competence:monstre_*` (souffles, venins, regards, "
+			"cris…) et, sur les espèces relues, le champ `competences` + les tags `magie_*` "
+			"(sorts tirés par profil) et `ia_*` (types d'IA). Delta seul, rien n'est retiré ; "
+			"refuse tout le lot sur une espèce ou un profil absent, ou un `_id` pris par "
+			"une autre vocation.",
+	},
+	{
 		"id": "gen_competences_1_10",
 		"label": "⚡ Compétences de vocation niveaux 1 → 10 (animation + son)",
 		"argv": _py("gen_competences_1_10.py"),
