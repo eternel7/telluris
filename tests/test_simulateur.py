@@ -440,6 +440,7 @@ def test_adversaire_furtif_non_detecte_fait_errer(jets_surs, monkeypatch):
 # ── Placement hit-and-run + retour dans les ombres ───────────────────────────────────
 
 ESPECE_HIT_AND_RUN = dict(ESPECE_FORTE, _id="espece:ours_hr", tags=["monstre", "ia_hit_and_run"])
+ESPECE_HR_2 = dict(ESPECE_FORTE, _id="espece:ours_hr_2", tags=["monstre", "ia_hit_and_run_2"])
 ESPECE_HR_BERSERKER = dict(ESPECE_FORTE, _id="espece:ours_hr_berserker",
 						   tags=["monstre", "ia_hit_and_run", "ia_berserker"])
 # Miroir de competence:furtivite (assassin) : active, sur soi, pose la furtivité.
@@ -454,7 +455,7 @@ CHARACTER_OMBRE = dict(
 	slots_actions=[{"type": "attaque", "ref": "cac"}, {"type": "ramasser"}, {"type": "fuir"},
 				   {"type": "competence", "ref": "competence:se_cacher_test"}])
 DOCS_PLACEMENT = dict(DOCS, **{d["_id"]: d for d in (
-	ESPECE_HIT_AND_RUN, ESPECE_HR_BERSERKER, COMP_SE_CACHER, CHARACTER_OMBRE)})
+	ESPECE_HIT_AND_RUN, ESPECE_HR_2, ESPECE_HR_BERSERKER, COMP_SE_CACHER, CHARACTER_OMBRE)})
 
 
 def _frappes(journal, camp, tour=1):
@@ -474,6 +475,22 @@ def test_hit_and_run_frappe_une_fois_puis_se_replie(jets_surs):
 	assert any(f"se replie hors d'atteinte ({dep} case(s), distance {1 + dep})" in l["texte"]
 			   for l in res["journal"])
 	assert res["a"]["arsenal"]["placement"] == "hit_and_run"
+
+
+def test_hit_and_run_2_frappe_deux_fois_puis_repli_borne(jets_surs):
+	from utils import ia_monstre
+	bel = simulateur.construire_belligerant({"type": "espece", "id": "espece:ours_hr_2"},
+											DOCS_PLACEMENT.get)
+	snap = bel["snapshot_reference"]
+	repli = ia_monstre.repli_hit_and_run(snap["ia"], snap["deplacement"])
+	assert snap["actions_max"] >= 2 and repli < snap["deplacement"]
+	res = simulateur.simuler_duel(
+		{"type": "espece", "id": "espece:ours_hr_2"}, {"type": "espece", "id": "espece:rat_test"},
+		distance=1, passes=1, get_doc_fn=DOCS_PLACEMENT.get, plafond_rounds=1)
+	assert len(_frappes(res["journal"], "A")) == 2
+	assert any(f"se replie hors d'atteinte ({repli} case(s), distance {1 + repli})" in l["texte"]
+			   for l in res["journal"])
+	assert (res["a"]["arsenal"]["placement_coups"], res["a"]["arsenal"]["placement_repli"]) == (2, repli)
 
 
 def test_hit_and_run_berserker_ne_recule_pas(jets_surs):

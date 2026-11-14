@@ -849,7 +849,9 @@ function renduArsenal(recap) {
 			+ ` — ${d.cout_pm} PM · dernière action du tour une fois révélé`);
 	}
 	if (recap.placement === 'hit_and_run') {
-		lignes.push(`<span class="titre">🦅 placement</span> <b>hit-and-run</b> — un coup d'arme par tour, puis repli`);
+		const coups = recap.placement_coups || 1;
+		const repli = recap.placement_repli ? `repli de ${recap.placement_repli} case(s)` : 'repli total';
+		lignes.push(`<span class="titre">🦅 placement</span> <b>hit-and-run</b> — ${coups} coup(s) d'arme par tour, puis ${repli}`);
 	}
 	return lignes.join('<br>') || '<i>rien</i>';
 }

@@ -38,9 +38,10 @@
 #     fondre à nouveau dans les ombres (`_se_dissimuler`, même effet que
 #     combat._activer_furtivite : l'adversaire doit réussir un nouveau jet).
 #
-# PLACEMENT — seul `hit_and_run` (tag `ia_hit_and_run`, figé au snapshot) est rejoué, comme
-# `_run_monster_turn` : un seul coup d'ARME par tour (une capacité innée, souffle compris,
-# ne compte pas), puis repli avec toutes les cases qui restent (`_fuir`). Ni berserker
+# PLACEMENT — seul `hit_and_run` (tag `ia_hit_and_run[_<n>]`, figé au snapshot) est rejoué,
+# comme `_run_monster_turn` : un coup d'ARME par tour (n avec `_<n>` ; une capacité innée,
+# souffle compris, ne compte pas), puis repli avec les cases qui restent (`_fuir`) — au plus
+# la moitié de son déplacement avec `_<n>` (`ia_monstre.repli_hit_and_run`). Ni berserker
 # (il ne recule jamais) ni autre placement (meute, embuscade, artilleur…) au banc d'essai.
 #
 # Un CHARACTER est simulé à PLEINE FORME (currentPV/PM forcés aux max — un banc d'essai
@@ -1020,9 +1021,14 @@ def _hit_and_run(actor: dict) -> bool:
 
 
 def _se_replier(actor: dict, etat: dict) -> None:
-	"""Repli du hit-and-run : toutes les cases qui restent (comme `combat._fuir`, borné par
-	`deplacement` et non par le budget d'actions). La ligne 1D n'a pas de bord."""
-	pas = max(0, int(actor.get("deplacement", 1) or 1) - int(actor.get("cells_moved", 0) or 0))
+	"""Repli du hit-and-run : les cases qui restent (comme `combat._fuir`, borné par
+	`deplacement` et non par le budget d'actions), au plus `ia_monstre.repli_hit_and_run`.
+	La ligne 1D n'a pas de bord."""
+	deplacement = int(actor.get("deplacement", 1) or 1)
+	pas = max(0, deplacement - int(actor.get("cells_moved", 0) or 0))
+	repli = ia_monstre.repli_hit_and_run(ia_monstre.ia_de(actor), deplacement)
+	if repli is not None:
+		pas = min(pas, repli)
 	if not pas:
 		return
 	actor["cells_moved"] = actor.get("cells_moved", 0) + pas
@@ -1096,8 +1102,8 @@ def _jouer_tour(actor: dict, adversaire: dict, arsenal: dict, etat: dict, round_
 		# Révélé, il garde sa DERNIÈRE action pour se fondre à nouveau dans les ombres.
 		if actor.get("actions_restantes", 0) == 1 and _dissimulation_payable(actor, arsenal):
 			break
-		# HIT AND RUN : un seul coup d'arme par tour (comme `_run_monster_turn`).
-		if hit_and_run and coups_arme >= 1:
+		# HIT AND RUN : n coups d'arme par tour (comme `_run_monster_turn`).
+		if hit_and_run and coups_arme >= ia_monstre.coups_hit_and_run(ia_monstre.ia_de(actor)):
 			break
 		option = _meilleure_offensive(actor, adversaire, arsenal, etat["distance"])
 		if option is not None:
@@ -1223,6 +1229,9 @@ def _recap_arsenal(bel: dict) -> dict:
 						   for d in arsenal.get("dissimulations") or []],
 		# Placement rejoué par le banc d'essai (seul le hit-and-run l'est).
 		"placement": "hit_and_run" if _hit_and_run(snap) else "",
+		"placement_coups": ia_monstre.coups_hit_and_run(ia_monstre.ia_de(snap)) if _hit_and_run(snap) else 0,
+		"placement_repli": (ia_monstre.repli_hit_and_run(ia_monstre.ia_de(snap), snap.get("deplacement", 1)) or 0)
+						   if _hit_and_run(snap) else 0,
 	}
 
 

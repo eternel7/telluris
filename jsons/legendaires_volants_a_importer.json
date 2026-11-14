@@ -1,0 +1,857 @@
+[
+	{
+		"_id": "espece:balaur",
+		"type": "espece",
+		"nom": "Balaur",
+		"genre": "m",
+		"jeton": {
+			"taille": "3x2",
+			"forme": "triangle"
+		},
+		"image": "balaur_transparent.png",
+		"description": "Dragon-serpent des Carpates aux ailes de cuir, qui porte trois, sept ou douze têtes selon les récits. On dit que sa bave durcit en pierres précieuses, et qu'un balaur sorti d'un donjon qui débordait ravagea jadis les terres d'un prince de ces montagnes. Une tête tranchée repousse si le cou n'est pas brûlé ; certains assurent qu'il faut les abattre toutes d'un même élan.",
+		"base_attributes": {
+			"V": {
+				"min": 14,
+				"max": 16
+			},
+			"F": {
+				"min": 65,
+				"max": 95
+			},
+			"R": {
+				"min": 65,
+				"max": 95
+			},
+			"Ag": {
+				"min": 30,
+				"max": 50
+			},
+			"Vol": {
+				"min": 90,
+				"max": 115
+			},
+			"Int": {
+				"min": 30,
+				"max": 50
+			},
+			"Cha": {
+				"min": 0,
+				"max": 0
+			},
+			"Ch": {
+				"min": 35,
+				"max": 60
+			}
+		},
+		"tags": [
+			"monstre",
+			"draconique",
+			"vol",
+			"regeneration",
+			"legendaire",
+			"predateur",
+			"ia_hit_and_run_2"
+		],
+		"proprietes": {},
+		"animation": "animation:son_dragon_01",
+		"competences": [
+			"competence:monstre_souffle_de_feu",
+			"competence:monstre_regeneration"
+		]
+	},
+	{
+		"_id": "espece:dragon",
+		"type": "espece",
+		"nom": "Dragon",
+		"genre": "m",
+		"jeton": {
+			"taille": "3x2",
+			"forme": "triangle"
+		},
+		"image": "dragon_transparent.png",
+		"description": "Reptile ailé légendaire, souffle destructeur et intelligence redoutable, dominant son territoire sans partage.",
+		"base_attributes": {
+			"V": {
+				"min": 16,
+				"max": 18
+			},
+			"F": {
+				"min": 65,
+				"max": 100
+			},
+			"R": {
+				"min": 65,
+				"max": 100
+			},
+			"Ag": {
+				"min": 35,
+				"max": 60
+			},
+			"Vol": {
+				"min": 105,
+				"max": 135
+			},
+			"Int": {
+				"min": 45,
+				"max": 70
+			},
+			"Cha": {
+				"min": 0,
+				"max": 0
+			},
+			"Ch": {
+				"min": 40,
+				"max": 65
+			}
+		},
+		"tags": [
+			"monstre",
+			"draconique",
+			"vol",
+			"souffle",
+			"legendaire",
+			"predateur",
+			"ia_hit_and_run_2"
+		],
+		"proprietes": {},
+		"animation": "animation:son_dragon_01",
+		"competences": [
+			"competence:monstre_souffle_de_feu"
+		]
+	},
+	{
+		"_id": "espece:dragon_blanc",
+		"type": "espece",
+		"nom": "Dragon blanc",
+		"jeton": {
+			"taille": "4x3",
+			"forme": "croix"
+		},
+		"genre": "m",
+		"image": "dragon_blanc_transparent.png",
+		"description": "Le second dragon de Dinas Emrys, pâle comme la craie. Il ouvre chaque combat en furie et repousse le rouge jusqu'au bord du lac souterrain, puis faiblit et recule. On dit qu'il ne meurt jamais tout à fait, qu'il revient toujours pour une nouvelle lutte, et que la tour au-dessus n'a jamais tenu longtemps.",
+		"base_attributes": {
+			"V": {
+				"min": 17,
+				"max": 19
+			},
+			"F": {
+				"min": 80,
+				"max": 115
+			},
+			"R": {
+				"min": 80,
+				"max": 120
+			},
+			"Ag": {
+				"min": 45,
+				"max": 65
+			},
+			"Vol": {
+				"min": 130,
+				"max": 165
+			},
+			"Int": {
+				"min": 50,
+				"max": 80
+			},
+			"Cha": {
+				"min": 0,
+				"max": 0
+			},
+			"Ch": {
+				"min": 55,
+				"max": 85
+			}
+		},
+		"tags": [
+			"monstre",
+			"draconique",
+			"vol",
+			"souffle",
+			"legendaire",
+			"boss",
+			"ia_hit_and_run_2"
+		],
+		"proprietes": {},
+		"animation": "animation:son_dragon_02",
+		"competences": [
+			"competence:monstre_souffle_de_givre"
+		]
+	},
+	{
+		"_id": "espece:dragon_empereur",
+		"type": "espece",
+		"nom": "Dragon Empereur",
+		"jeton": {
+			"taille": "5x4",
+			"forme": "croix"
+		},
+		"genre": "m",
+		"image": "dragon_empereur_transparent.png",
+		"description": "Souverain absolu parmi les dragons, dont la simple présence plie les volontés les plus fortes.",
+		"base_attributes": {
+			"V": {
+				"min": 18,
+				"max": 20
+			},
+			"F": {
+				"min": 95,
+				"max": 140
+			},
+			"R": {
+				"min": 95,
+				"max": 140
+			},
+			"Ag": {
+				"min": 45,
+				"max": 70
+			},
+			"Vol": {
+				"min": 155,
+				"max": 195
+			},
+			"Int": {
+				"min": 65,
+				"max": 95
+			},
+			"Cha": {
+				"min": 0,
+				"max": 0
+			},
+			"Ch": {
+				"min": 60,
+				"max": 95
+			}
+		},
+		"tags": [
+			"monstre",
+			"draconique",
+			"vol",
+			"souffle",
+			"legendaire",
+			"boss",
+			"predateur",
+			"ia_hit_and_run_2"
+		],
+		"proprietes": {},
+		"animation": "animation:son_dragon_01",
+		"competences": [
+			"competence:monstre_grand_souffle_de_feu"
+		]
+	},
+	{
+		"_id": "espece:dragon_hydre",
+		"type": "espece",
+		"nom": "Dragon-hydre",
+		"jeton": {
+			"taille": "4x3",
+			"forme": "ellipse"
+		},
+		"genre": "m",
+		"image": "dragon_hydre_transparent.png",
+		"description": "Dragon sans ailes au corps massif, dont cinq à sept cous jaillissent des épaules ; chaque gueule crache le feu. Une tête tranchée en fait repousser deux, sauf si le moignon est brûlé aussitôt. On raconte qu'une de ses têtes ne meurt jamais et qu'il faut l'enterrer sous un rocher.",
+		"base_attributes": {
+			"V": {
+				"min": 6,
+				"max": 8
+			},
+			"F": {
+				"min": 65,
+				"max": 100
+			},
+			"R": {
+				"min": 70,
+				"max": 105
+			},
+			"Ag": {
+				"min": 20,
+				"max": 35
+			},
+			"Vol": {
+				"min": 90,
+				"max": 115
+			},
+			"Int": {
+				"min": 20,
+				"max": 35
+			},
+			"Cha": {
+				"min": 0,
+				"max": 0
+			},
+			"Ch": {
+				"min": 40,
+				"max": 65
+			}
+		},
+		"tags": [
+			"monstre",
+			"draconique",
+			"souffle",
+			"regeneration",
+			"legendaire",
+			"predateur"
+		],
+		"proprietes": {},
+		"animation": "animation:son_dragon_02",
+		"competences": [
+			"competence:monstre_souffle_empoisonne",
+			"competence:monstre_regeneration"
+		]
+	},
+	{
+		"_id": "espece:dragon_rouge",
+		"type": "espece",
+		"nom": "Dragon rouge",
+		"jeton": {
+			"taille": "4x3",
+			"forme": "croix"
+		},
+		"genre": "m",
+		"image": "dragon_rouge_transparent.png",
+		"description": "L'un des deux dragons de Dinas Emrys. Un roi les aurait pris au centre de l'île, endormis dans une cuve d'hydromel, et enfermés sous la colline. Quand Vortigern voulut y bâtir sa tour, elle s'effondrait chaque nuit : les deux dragons se battaient dessous. Un enfant sans père, que certains appellent Merlin, l'annonça. Le blanc a l'avantage au début de chaque combat ; le rouge, celui que les Gallois peignent sur leurs bannières, l'emporte à la fin.",
+		"base_attributes": {
+			"V": {
+				"min": 16,
+				"max": 18
+			},
+			"F": {
+				"min": 85,
+				"max": 125
+			},
+			"R": {
+				"min": 85,
+				"max": 125
+			},
+			"Ag": {
+				"min": 40,
+				"max": 60
+			},
+			"Vol": {
+				"min": 130,
+				"max": 165
+			},
+			"Int": {
+				"min": 50,
+				"max": 80
+			},
+			"Cha": {
+				"min": 0,
+				"max": 0
+			},
+			"Ch": {
+				"min": 55,
+				"max": 85
+			}
+		},
+		"tags": [
+			"monstre",
+			"draconique",
+			"vol",
+			"souffle",
+			"legendaire",
+			"boss",
+			"ia_hit_and_run_2"
+		],
+		"proprietes": {},
+		"animation": "animation:son_dragon_01",
+		"competences": [
+			"competence:monstre_souffle_de_feu"
+		]
+	},
+	{
+		"_id": "espece:dragon_zombie",
+		"type": "espece",
+		"nom": "Dragon Zombie",
+		"jeton": {
+			"taille": "4x3",
+			"forme": "croix"
+		},
+		"genre": "m",
+		"image": "dragon_zombie_transparent.png",
+		"description": "Carcasse draconique réanimée par nécromancie, son souffle putride remplace les flammes d'antan.",
+		"base_attributes": {
+			"V": {
+				"min": 15,
+				"max": 17
+			},
+			"F": {
+				"min": 60,
+				"max": 90
+			},
+			"R": {
+				"min": 60,
+				"max": 95
+			},
+			"Ag": {
+				"min": 20,
+				"max": 35
+			},
+			"Vol": {
+				"min": 75,
+				"max": 100
+			},
+			"Int": {
+				"min": 15,
+				"max": 30
+			},
+			"Cha": {
+				"min": 0,
+				"max": 0
+			},
+			"Ch": {
+				"min": 45,
+				"max": 70
+			}
+		},
+		"tags": [
+			"undead",
+			"non_mort",
+			"draconique",
+			"vol",
+			"boss",
+			"predateur",
+			"ia_hit_and_run_2"
+		],
+		"proprietes": {},
+		"animation": "animation:son_dragon_02",
+		"competences": [
+			"competence:monstre_souffle_de_la_tombe"
+		]
+	},
+	{
+		"_id": "espece:grand_dragon",
+		"type": "espece",
+		"nom": "Grand Dragon",
+		"jeton": {
+			"taille": "4x3",
+			"forme": "croix"
+		},
+		"genre": "m",
+		"image": "grand_dragon_transparent.png",
+		"description": "Dragon parvenu à un âge vénérable, dont la puissance et la sagesse rivalisent avec celles des plus grandes créatures du monde.",
+		"base_attributes": {
+			"V": {
+				"min": 17,
+				"max": 19
+			},
+			"F": {
+				"min": 80,
+				"max": 120
+			},
+			"R": {
+				"min": 80,
+				"max": 120
+			},
+			"Ag": {
+				"min": 40,
+				"max": 65
+			},
+			"Vol": {
+				"min": 130,
+				"max": 165
+			},
+			"Int": {
+				"min": 55,
+				"max": 85
+			},
+			"Cha": {
+				"min": 0,
+				"max": 0
+			},
+			"Ch": {
+				"min": 50,
+				"max": 80
+			}
+		},
+		"tags": [
+			"monstre",
+			"draconique",
+			"vol",
+			"souffle",
+			"legendaire",
+			"predateur",
+			"ia_hit_and_run_2"
+		],
+		"proprietes": {},
+		"animation": "animation:son_dragon_01",
+		"competences": [
+			"competence:monstre_souffle_de_feu"
+		]
+	},
+	{
+		"_id": "espece:petit_dragon",
+		"type": "espece",
+		"nom": "Petit Dragon",
+		"genre": "m",
+		"jeton": {
+			"taille": "2x2",
+			"forme": "triangle"
+		},
+		"image": "petit_dragon_transparent.png",
+		"description": "Jeune dragon encore en pleine croissance, déjà redoutable malgré une taille modeste.",
+		"base_attributes": {
+			"V": {
+				"min": 15,
+				"max": 17
+			},
+			"F": {
+				"min": 45,
+				"max": 70
+			},
+			"R": {
+				"min": 45,
+				"max": 70
+			},
+			"Ag": {
+				"min": 30,
+				"max": 50
+			},
+			"Vol": {
+				"min": 75,
+				"max": 100
+			},
+			"Int": {
+				"min": 30,
+				"max": 50
+			},
+			"Cha": {
+				"min": 0,
+				"max": 0
+			},
+			"Ch": {
+				"min": 25,
+				"max": 45
+			}
+		},
+		"tags": [
+			"monstre",
+			"draconique",
+			"vol",
+			"ia_hit_and_run_2"
+		],
+		"proprietes": {},
+		"animation": "animation:son_dragon_02",
+		"competences": [
+			"competence:monstre_crachat_de_feu"
+		]
+	},
+	{
+		"_id": "espece:wyvern",
+		"type": "espece",
+		"nom": "Wyvern",
+		"genre": "f",
+		"jeton": {
+			"taille": "3x2",
+			"forme": "triangle"
+		},
+		"image": "wyvern_transparent.png",
+		"description": "Dragon bipède aux ailes immenses et à la queue venimeuse, prédateur agile des cieux.",
+		"base_attributes": {
+			"V": {
+				"min": 15,
+				"max": 17
+			},
+			"F": {
+				"min": 50,
+				"max": 80
+			},
+			"R": {
+				"min": 45,
+				"max": 75
+			},
+			"Ag": {
+				"min": 35,
+				"max": 55
+			},
+			"Vol": {
+				"min": 65,
+				"max": 95
+			},
+			"Int": {
+				"min": 15,
+				"max": 30
+			},
+			"Cha": {
+				"min": 0,
+				"max": 0
+			},
+			"Ch": {
+				"min": 30,
+				"max": 55
+			}
+		},
+		"tags": [
+			"monstre",
+			"draconique",
+			"vol",
+			"venin",
+			"ia_hit_and_run_2"
+		],
+		"proprietes": {},
+		"animation": "animation:son_dragon_01",
+		"competences": [
+			"competence:monstre_venin"
+		]
+	},
+	{
+		"_id": "espece:zmey_gorynych",
+		"type": "espece",
+		"nom": "Zmeï Gorynytch",
+		"jeton": {
+			"taille": "4x3",
+			"forme": "croix"
+		},
+		"genre": "m",
+		"nom_propre": true,
+		"image": "zmey_gorynych_transparent.png",
+		"description": "Dragon à trois têtes des terres de Kiev, aux griffes de fer, qui crache le feu et enlève qui lui plaît. Il garde le pont Kalinov sur la Smorodina, la rivière de feu ; on dit que ce pont mène au pays des morts, et nul n'en est revenu pour le confirmer. Ses têtes repoussent ; la terre, dit-on, refuse de boire son sang tant qu'on ne l'en supplie pas.",
+		"base_attributes": {
+			"V": {
+				"min": 14,
+				"max": 16
+			},
+			"F": {
+				"min": 80,
+				"max": 115
+			},
+			"R": {
+				"min": 75,
+				"max": 110
+			},
+			"Ag": {
+				"min": 35,
+				"max": 55
+			},
+			"Vol": {
+				"min": 115,
+				"max": 145
+			},
+			"Int": {
+				"min": 45,
+				"max": 65
+			},
+			"Cha": {
+				"min": 0,
+				"max": 0
+			},
+			"Ch": {
+				"min": 50,
+				"max": 80
+			}
+		},
+		"tags": [
+			"monstre",
+			"draconique",
+			"vol",
+			"souffle",
+			"regeneration",
+			"legendaire",
+			"boss",
+			"ia_hit_and_run_2"
+		],
+		"proprietes": {},
+		"animation": "animation:son_dragon_02",
+		"competences": [
+			"competence:monstre_souffle_de_feu",
+			"competence:monstre_regeneration"
+		]
+	},
+	{
+		"_id": "espece:seraphin",
+		"type": "espece",
+		"nom": "Seraphin",
+		"jeton": {
+			"taille": "4x3",
+			"forme": "triangle"
+		},
+		"genre": "m",
+		"image": "seraphin_transparent.png",
+		"description": "Plus haute hiérarchie angélique, entité de lumière pure dont la contemplation seule éblouit les mortels.",
+		"base_attributes": {
+			"V": {
+				"min": 18,
+				"max": 20
+			},
+			"F": {
+				"min": 80,
+				"max": 120
+			},
+			"R": {
+				"min": 85,
+				"max": 125
+			},
+			"Ag": {
+				"min": 50,
+				"max": 75
+			},
+			"Vol": {
+				"min": 170,
+				"max": 210
+			},
+			"Int": {
+				"min": 70,
+				"max": 100
+			},
+			"Cha": {
+				"min": 65,
+				"max": 95
+			},
+			"Ch": {
+				"min": 0,
+				"max": 0
+			}
+		},
+		"tags": [
+			"ange",
+			"celeste",
+			"vol",
+			"boss",
+			"legendaire",
+			"divin",
+			"humanoide",
+			"magie_sainte_10",
+			"ia_hit_and_run_2"
+		],
+		"items": [
+			"item:Epee_une_main_benie",
+			"item:Masse_benie",
+			"item:Bouclier_sacre",
+			"item:Harnois_du_grand_arsenal",
+			"item:Epaulieres_benies",
+			"item:Heaume_de_plates",
+			"item:Gantelets_de_plates"
+		],
+		"proprietes": {}
+	},
+	{
+		"_id": "espece:archange_de_l_ordre",
+		"type": "espece",
+		"nom": "Archange de l Ordre",
+		"genre": "m",
+		"jeton": {
+			"taille": "2x1",
+			"forme": "triangle"
+		},
+		"image": "archange_de_l_ordre_transparent.png",
+		"description": "Haut commandant des armées célestes, garant de l'équilibre cosmique et de la discipline divine.",
+		"base_attributes": {
+			"V": {
+				"min": 16,
+				"max": 18
+			},
+			"F": {
+				"min": 60,
+				"max": 90
+			},
+			"R": {
+				"min": 60,
+				"max": 90
+			},
+			"Ag": {
+				"min": 40,
+				"max": 65
+			},
+			"Vol": {
+				"min": 75,
+				"max": 110
+			},
+			"Int": {
+				"min": 50,
+				"max": 75
+			},
+			"Cha": {
+				"min": 50,
+				"max": 80
+			},
+			"Ch": {
+				"min": 0,
+				"max": 0
+			}
+		},
+		"tags": [
+			"ange",
+			"celeste",
+			"vol",
+			"boss",
+			"legendaire",
+			"humanoide",
+			"insensible_furtivite",
+			"ia_hit_and_run_2"
+		],
+		"items": [
+			"item:Epee_une_main_benie",
+			"item:Masse_benie",
+			"item:Arc_long",
+			"item:Bouclier_sacre",
+			"item:Cotte_mailles_benie",
+			"item:Epaulieres_benies",
+			"item:Heaume_de_plates",
+			"item:Gantelets_de_plates"
+		],
+		"proprietes": {}
+	},
+	{
+		"_id": "espece:grand_phenix",
+		"type": "espece",
+		"nom": "Grand Phenix",
+		"jeton": {
+			"taille": "3x2",
+			"forme": "chevron"
+		},
+		"genre": "m",
+		"image": "grand_phenix_transparent.png",
+		"description": "Variante ascendante du phénix, dont le souffle ardent embrase des champs entiers et la renaissance s'accompagne d'une vague de pure lumière.",
+		"base_attributes": {
+			"V": {
+				"min": 16,
+				"max": 18
+			},
+			"F": {
+				"min": 40,
+				"max": 65
+			},
+			"R": {
+				"min": 45,
+				"max": 70
+			},
+			"Ag": {
+				"min": 40,
+				"max": 65
+			},
+			"Vol": {
+				"min": 120,
+				"max": 160
+			},
+			"Int": {
+				"min": 40,
+				"max": 65
+			},
+			"Cha": {
+				"min": 45,
+				"max": 75
+			},
+			"Ch": {
+				"min": 0,
+				"max": 0
+			}
+		},
+		"tags": [
+			"monstre",
+			"feu",
+			"renaissance",
+			"vol",
+			"magique",
+			"legendaire",
+			"magie_elementaire_8",
+			"ia_hit_and_run_2"
+		],
+		"proprietes": {},
+		"animation": "animation:son_bete_03",
+		"competences": [
+			"competence:monstre_embrasement"
+		]
+	}
+]

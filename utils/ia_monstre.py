@@ -2,7 +2,7 @@
 # Types d'IA des monstres (pur) : tags d'espèce `ia_<type>[_<nombre>][_<profil>]`.
 #
 # Trois axes, cumulables, un type par axe après résolution :
-#   déplacement : brute (défaut) · hit_and_run · artilleur · meute · embuscade[_<rayon>] · protecteur
+#   déplacement : brute (défaut) · hit_and_run[_<coups>] · artilleur · meute · embuscade[_<rayon>] · protecteur
 #   cible       : proche (défaut) · predateur · berserker
 #   fuite       : aucune (défaut) · fuyard[_<pct de PV>]
 # Un tag suffixé d'un profil (`ia_berserker_champion`) l'emporte, POUR SON AXE, sur le tag
@@ -21,11 +21,15 @@ AXE = {**{t: "deplacement" for t in DEPLACEMENTS}, **{t: "cible" for t in CIBLES
 # Préfixe le plus long d'abord : `hit_and_run` contient des `_`.
 _TYPES = sorted(AXE, key=len, reverse=True)
 
-DEFAUT = {"deplacement": "brute", "cible": "proche", "fuite": 0, "rayon": 0}
+DEFAUT = {"deplacement": "brute", "cible": "proche", "fuite": 0, "rayon": 0, "coups": 0}
 # Seuil de fuite d'un `ia_fuyard` sans nombre, en % des PV max.
 FUITE_DEFAUT = 30
 # Rayon d'éveil d'un `ia_embuscade` sans nombre, en cases.
 RAYON_EMBUSCADE_DEFAUT = 3
+# `ia_hit_and_run_<n>` : n coups d'arme, puis repli de cette part de son déplacement (arrondi
+# bas, au moins 1 case) — assez court pour qu'un poursuivant rapide le rattrape. Sans nombre
+# (`ia_hit_and_run`) : un coup puis repli de TOUTES ses cases restantes (forme d'origine).
+REPLI_HIT_AND_RUN_PART = 0.5
 # Un embusqué éveillé ne s'éloigne pas de son poste au-delà de rayon + cette marge.
 LAISSE_MARGE = 2
 # Un protecteur reste à au plus cette distance de l'allié qu'il couvre.
@@ -75,6 +79,8 @@ def ia_de_tags(tags, profil_id=None) -> dict:
 			ia[axe] = t
 			if t == "embuscade":
 				ia["rayon"] = nombre if nombre is not None else RAYON_EMBUSCADE_DEFAUT
+			elif t == "hit_and_run" and nombre:
+				ia["coups"] = nombre
 	return ia
 
 
@@ -87,6 +93,19 @@ def ia_du_snapshot(tags, profil_id=None) -> dict | None:
 def ia_de(monstre: dict) -> dict:
 	"""IA d'un snapshot (combat déjà en base sans clé ⇒ défaut)."""
 	return {**DEFAUT, **((monstre or {}).get("ia") or {})}
+
+
+def coups_hit_and_run(ia: dict) -> int:
+	"""Coups d'arme d'un tour de hit-and-run avant le repli (1 pour la forme sans nombre)."""
+	return max(1, int((ia or {}).get("coups") or 0))
+
+
+def repli_hit_and_run(ia: dict, deplacement: int) -> int | None:
+	"""Cases du repli : None = toutes celles qui restent (forme sans nombre), sinon
+	`REPLI_HIT_AND_RUN_PART` du déplacement, au moins 1."""
+	if not int((ia or {}).get("coups") or 0):
+		return None
+	return max(1, int(int(deplacement or 0) * REPLI_HIT_AND_RUN_PART))
 
 
 def berserker(ia: dict) -> bool:

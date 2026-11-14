@@ -6535,11 +6535,12 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 
 	# Phase attaque : frapper tant qu'à portée et qu'il reste des actions. Si la cible
 	# tombe (KO) en cours de tour, le monstre se rabat sur le joueur visible suivant.
-	# HIT AND RUN : un seul coup, puis il se replie avec ce qui lui reste de jambes.
+	# HIT AND RUN : un coup (n avec `ia_hit_and_run_<n>`), puis il se replie avec ce qui lui
+	# reste de jambes (la moitié de son déplacement au plus avec `_<n>`).
 	coups = 0
 	while (combat_doc["status"] == "active" and monstre["vivant"]
 		   and monstre["actions_restantes"] > 0
-		   and not (dep == "hit_and_run" and recule and coups >= 1)):
+		   and not (dep == "hit_and_run" and recule and coups >= ia_monstre.coups_hit_and_run(ia))):
 		if joueur is None or joueur.get("currentPV", 0) <= 0:
 			joueur = _cible_joueur(combat_doc, monstre)
 		if joueur is None or _cheby(monstre, joueur) > portee:
@@ -6556,7 +6557,8 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 		_do_monster_attack(combat_doc, monstre, joueur, profil)   # décompte l'action lui-même
 		coups += 1
 	if dep == "hit_and_run" and recule and coups and joueur is not None and monstre["vivant"]:
-		pas = _fuir(combat_doc, monstre, joueur, grid)
+		pas = _fuir(combat_doc, monstre, joueur, grid,
+					ia_monstre.repli_hit_and_run(ia, monstre.get("deplacement", 1)))
 		if pas:
 			combat_doc["log"].append(_avec_etat({
 				"tour": combat_doc["tour"], "acteur": monstre["nom"], "kind": "move",
@@ -6597,11 +6599,14 @@ def _hors_laisse(monstre: dict, cible: dict, ia: dict, portee: int) -> bool:
 	return _cheby({"pos": poste}, cible) > laisse + portee
 
 
-def _fuir(combat_doc: dict, monstre: dict, menace: dict, grid: dict) -> int:
-	"""S'éloigne de `menace` avec tout son déplacement restant ; rend le nombre de pas."""
+def _fuir(combat_doc: dict, monstre: dict, menace: dict, grid: dict,
+		  max_pas: int | None = None) -> int:
+	"""S'éloigne de `menace` avec tout son déplacement restant (`max_pas` cases au plus) ;
+	rend le nombre de pas."""
 	pas = 0
+	limite = 100 if max_pas is None else min(100, int(max_pas))
 	while (combat_doc["status"] == "active" and _debout(monstre)
-		   and monstre["cells_moved"] < monstre.get("deplacement", 1) and pas < 100):
+		   and monstre["cells_moved"] < monstre.get("deplacement", 1) and pas < limite):
 		if not _monster_step_away(combat_doc, monstre, menace, grid, 99):
 			break
 		pas += 1
