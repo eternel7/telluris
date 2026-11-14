@@ -27,7 +27,14 @@ CLES_CARACS = {"v": "V", "f": "F", "r": "R", "ag": "Ag", "vol": "Vol", "int": "I
 NIVEAUX = ("rumeur", "region", "exact")
 SOURCES = ("lieu", "zone", "donjon", "boutique")
 PREDICATS = ("taverne", "scriptorium", "salle_d_armes", "sauvage", "pays")
-MODES_CIBLE = ("quete", "bestiaire", "libre", "hasard", "recit")
+# Modes « du coin » (salle commune de guilde) : bornés au PAYS de la cité de la guilde.
+MODES_COIN = ("dangers", "donjons", "ressources")
+MODES_CIBLE = ("quete", "bestiaire", "libre", "hasard", "recit") + MODES_COIN
+# Interlocuteurs de guilde : l'acteur n'est pas un membre du groupe mais un PNJ du lieu —
+# chaque recrue du tableau (réception), le réceptionniste (comptoir, ouvert par son dialogue).
+INTERLOCUTEURS = ("recrue", "receptionniste")
+# Types de quête dont la cible est un LIEU (rendez-vous, destination) : piste `lieu`.
+OBJECTIFS_LIEU = ("visite", "escorte", "transport")
 
 # Une salle d'armes : catégories d'armurerie OU tag `salle_d_armes`. ⚠️ Recopié dans
 # `utils/capacites.py` (verrouillé par tests/test_capacites.py) : modifier l'un, c'est modifier l'autre.
@@ -102,7 +109,12 @@ def normaliser_methode(raw: dict) -> dict:
 	if [x for x in modes if x not in MODES_CIBLE]:
 		raise ValueError(f"{m['id']} : mode de cible inconnu {modes}")
 	cibles = dict(m.get("cibles") or {})
+	interlocuteur = m.get("interlocuteur") or None
+	if interlocuteur and interlocuteur not in INTERLOCUTEURS:
+		raise ValueError(f"{m['id']} : interlocuteur inconnu {interlocuteur}")
 	return {
+		"interlocuteur": interlocuteur,
+		"via_pnj": bool(m.get("via_pnj")),
 		"id": str(m["id"]),
 		"nom": str(m.get("nom") or m["id"]),
 		"icon": str(m.get("icon") or "🔎"),
@@ -250,16 +262,35 @@ def membre_eligible(methode: dict, membre: dict, connait_fn) -> bool:
 	return True
 
 
+def methode_de_vocation(voc: str, methodes: list) -> dict | None:
+	"""La première méthode de cette vocation (ordre du doc) — le métier d'une recrue."""
+	return next((m for m in methodes if voc in m["vocations"] and not m["interlocuteur"]), None)
+
+
 def applicables(lieu_doc: dict | None, index: dict, membres: list, regles: dict, connait_fn,
-				relation_value: int | None = None, informateur_present: bool = False) -> list:
-	"""[{methode, acteur, seuil}] des méthodes exerçables ici par le groupe, dans l'ordre du doc.
-	Acteur = le membre éligible au plus haut seuil ; ex æquo : le premier (principal EN TÊTE).
-	Sans aucune méthode de vocation, l'informateur de taverne (s'il est là) prend le relais."""
+				relation_value: int | None = None, informateur_present: bool = False,
+				interlocuteurs: dict | None = None) -> list:
+	"""[{methode, acteur, seuil, cle, interlocuteur}] des méthodes exerçables ici, dans l'ordre
+	du doc. Acteur = le membre éligible au plus haut seuil ; ex æquo : le premier (principal EN
+	TÊTE). Méthode à `interlocuteur` : une entrée PAR PNJ de `interlocuteurs[type]` (recrue :
+	seuil de SA vocation sur SES caracs ; réceptionniste : Cha du JOUEUR). Sans aucune méthode
+	de vocation, l'informateur de taverne (s'il est là) prend le relais. `cle` = identité de
+	l'entrée (méthode, ou méthode|PNJ) : c'est elle qui porte le délai."""
 	methodes, _ = methodes_de(regles)
 	nature = tags_nature(regles)
 	sortie = []
 	for m in methodes:
 		if m["informateur"] or not lieu_ok(m, lieu_doc, index, nature):
+			continue
+		if m["interlocuteur"]:
+			for pnj in (interlocuteurs or {}).get(m["interlocuteur"]) or []:
+				if m["interlocuteur"] == "recrue":
+					metier = methode_de_vocation(pnj.get("voc"), methodes) or m
+					s = seuil(metier, pnj)
+				else:
+					s = seuil(m, membres[0], relation_value) if membres else SEUIL_MIN
+				sortie.append({"methode": m, "acteur": pnj, "seuil": s, "interlocuteur": pnj,
+							   "cle": f"{m['id']}|{pnj.get('_id')}"})
 			continue
 		meilleur = None
 		for membre in membres or []:
@@ -267,13 +298,13 @@ def applicables(lieu_doc: dict | None, index: dict, membres: list, regles: dict,
 				continue
 			s = seuil(m, membre, relation_value)
 			if meilleur is None or s > meilleur["seuil"]:
-				meilleur = {"methode": m, "acteur": membre, "seuil": s}
+				meilleur = {"methode": m, "acteur": membre, "seuil": s, "interlocuteur": None, "cle": m["id"]}
 		if meilleur:
 			sortie.append(meilleur)
-	if not sortie and informateur_present:
+	if not any(not a["interlocuteur"] for a in sortie) and informateur_present:
 		for m in methodes:
 			if m["informateur"] and lieu_ok(m, lieu_doc, index, nature) and membres:
-				sortie.append({"methode": m, "acteur": membres[0],
+				sortie.append({"methode": m, "acteur": membres[0], "interlocuteur": None, "cle": m["id"],
 							   "seuil": seuil(m, membres[0], relation_value)})
 				break
 	return sortie
@@ -686,6 +717,173 @@ def texte_resultat(res: dict, cible_txt: str, acteur_nom: str, index: dict, zone
 	return {"texte": (f"{debut}{acteur_nom} apprend qu'on trouve {cible_txt} {ou}"
 					  + (f" — {grade}" if grade else "") + "."),
 			"lieu_id": p["lieu"] if p["type"] != "zone" else p["porteur"], "lieu_label": lbl}
+
+
+# ── Salle commune de guilde ──────────────────────────────────────────────────────
+# Recrues du tableau (réception) et réceptionniste (comptoir). Bornes de rang : le rang de
+# l'interlocuteur ≥ grade du sujet (recrue seule ; le réceptionniste lit les archives) ET le
+# rang du joueur ≥ grade − 1. Un sujet bloqué se dit, ne se paie pas, ne lance aucun délai.
+
+def rang_de_niveau(niveau: int) -> str:
+	"""Rang d'un PNJ de ce niveau : le plus haut dont le niveau d'entrée
+	(`QUETE_RANG_NIVEAU_ENTREE`) est atteint, sinon le premier. Relu, jamais stocké."""
+	rang = RANGS[0]
+	for r, n in sorted((character_stats.QUETE_RANG_NIVEAU_ENTREE or {}).items(), key=lambda x: x[1]):
+		if int(niveau or 0) >= int(n):
+			rang = r
+	return rang
+
+
+def niveau_de(pnj: dict) -> int:
+	return character_stats.compute_character_level(int((pnj or {}).get("xp_total", 0) or 0))
+
+
+def pays_de(lieu_id: str, index: dict) -> dict | None:
+	return next((d for d in chaine(lieu_id, index) if d.get("categorie") == "pays"), None)
+
+
+def capitale_du_pays(pays_id: str, index: dict) -> dict | None:
+	"""La cité `sous_categorie: capitale` rattachée à ce pays (ordre d'id si plusieurs)."""
+	if not pays_id:
+		return None
+	return next((d for _, d in sorted(index.items())
+				 if d.get("categorie") == "ville" and d.get("sous_categorie") == "capitale"
+				 and any(a.get("_id") == pays_id for a in chaine(d["_id"], index))), None)
+
+
+def rang_joueur_guilde(character: dict, cite_id: str, capitale_id: str | None) -> str:
+	"""Meilleur rang entre celui de CETTE guilde et celui de la capitale du pays (F sans rang)."""
+	rangs = (character or {}).get("rangs_guilde") or {}
+	candidats = [rangs.get(cite_id), rangs.get(capitale_id) if capitale_id else None]
+	return max((r for r in candidats if r in RANGS), key=rang_index, default=RANGS[0])
+
+
+def borne_rang(grade: str | None, rang_pnj: str | None, rang_joueur: str) -> str | None:
+	"""Raison du refus, ou None. `rang_pnj` None = pas de borne pour l'interlocuteur."""
+	if not grade or grade not in RANGS:
+		return None
+	if rang_pnj is not None and rang_index(rang_pnj) < rang_index(grade):
+		return f"Ça me dépasse : une menace de rang {grade}, je n'en ai jamais approché."
+	if rang_index(rang_joueur) < rang_index(grade) - 1:
+		return f"Pas pour votre rang : la Guilde n'en parle qu'à partir du rang {RANGS[rang_index(grade) - 1]}."
+	return None
+
+
+def dans_pays(p: dict, pays_id: str | None, index: dict) -> bool:
+	"""La piste se rattache-t-elle à ce pays (porteur ou un de ses ancêtres) ?"""
+	return bool(pays_id) and any(d.get("_id") == pays_id for d in chaine(p["porteur"], index))
+
+
+def pistes_speciales(cible_id: str, index: dict, donjons: list) -> list | None:
+	"""Cibles qui ne sont ni espèce ni matière : un LIEU (quête de visite, d'escorte, de
+	transport) ou un DONJON (sujet « donjons du coin »). None pour les autres."""
+	if cible_id.startswith("lieu:"):
+		return [{"type": "lieu", "porteur": cible_id, "lieu": cible_id, "cible": cible_id}] if cible_id in index else []
+	if cible_id.startswith("donjon:"):
+		d = next((x for x in donjons or [] if x.get("_id") == cible_id), None)
+		salles = [s.get("lieu") for s in (d or {}).get("battle_maps") or [] if s.get("lieu")]
+		if not d or not d.get("portail") or not salles:
+			return []
+		return [{"type": "donjon", "porteur": d["portail"], "lieu": salles[0], "donjon": cible_id, "cible": cible_id}]
+	return None
+
+
+def especes_du_donjon(donjon: dict | None) -> list:
+	vues = []
+	for s in (donjon or {}).get("battle_maps") or []:
+		for e in s.get("especes") or []:
+			if e not in vues:
+				vues.append(e)
+	return vues
+
+
+def grade_sujet(cible_id: str, donjons: list, rang_fn) -> str | None:
+	"""Grade qui borne un sujet : l'espèce, ou la pire espèce d'un donjon ; rien sinon."""
+	if cible_id.startswith("espece:"):
+		return rang_fn(cible_id)
+	if cible_id.startswith("donjon:"):
+		d = next((x for x in donjons or [] if x.get("_id") == cible_id), None)
+		rangs = [r for r in (rang_fn(e) for e in especes_du_donjon(d)) if r]
+		return max(rangs, key=rang_index) if rangs else None
+	return None
+
+
+def affrontes(recrue_id: str, pistes_especes: list, rang_recrue: str, rang_fn) -> list:
+	"""Ce qu'une recrue a AFFRONTÉ : 2 à 3 pistes d'espèces de grade ≤ le sien, tirées avec son
+	id pour graine — déterministe, rien de stocké, valable pour une recrue déjà en base."""
+	tri = sorted((p for p in pistes_especes if p["cible"].startswith("espece:")
+				  and rang_index(rang_fn(p["cible"])) <= rang_index(rang_recrue)),
+				 key=lambda p: (p["cible"], p["porteur"], p.get("zone") or "", p.get("donjon") or ""))
+	if not tri:
+		return []
+	graine = random.Random(str(recrue_id))
+	return graine.sample(tri, min(len(tri), 2 + graine.randint(0, 1)))
+
+
+def savoir_recrue(cible_id: str, deja_affrontes: list, pistes_pays: list, pistes_metier: list) -> tuple:
+	"""Le MEILLEUR savoir de la recrue sur cette cible : (source, pistes, sans_jet).
+	affronté ⇒ lieu exact sans jet ; sinon sa région d'origine (pays de la guilde) ⇒ jet avec
+	bonus ; sinon la méthode de sa vocation ⇒ jet ; sinon rien."""
+	vus = [p for p in deja_affrontes if p["cible"] == cible_id]
+	if vus:
+		return "affronte", vus, True
+	if pistes_pays:
+		return "origine", pistes_pays, False
+	if pistes_metier:
+		return "metier", pistes_metier, False
+	return None, [], False
+
+
+def cout_recrue(niveau: str, niveau_recrue: int) -> int:
+	"""Pourboire : RENS_RECRUE_POURBOIRE × RENS_COUT_MULT[niveau] × (1 + niveau de la recrue / 10)."""
+	mult = float((character_stats.RENS_COUT_MULT or {}).get(niveau, 1.0))
+	return max(0, round(int(character_stats.RENS_RECRUE_POURBOIRE) * mult * (1 + int(niveau_recrue or 0) / 10)))
+
+
+def texte_lieu(res: dict, label: str, acteur_nom: str, index: dict, intro: str = "") -> dict:
+	"""Une quête dont la cible est un LIEU : où il se trouve (carnet seul)."""
+	debut = (intro.strip() + " ") if intro else ""
+	p, niveau = res["piste"], res["niveau"]
+	if niveau == "rien" or not p:
+		return {"texte": f"{debut}Personne ne sait où se trouve « {label} ».", "lieu_id": None, "lieu_label": ""}
+	if niveau == "rumeur":
+		return {"texte": f"{debut}{acteur_nom} croit savoir que « {label} » est {distance_txt(p.get('distance', 99))}.",
+				"lieu_id": None, "lieu_label": ""}
+	reg = region_de(p["porteur"], index) or {}
+	if niveau == "region" or reg.get("_id") == p["porteur"]:
+		return {"texte": f"{debut}{acteur_nom} situe « {label} » du côté {de(lieu_label(reg, p['porteur']))}.",
+				"lieu_id": None, "lieu_label": ""}
+	return {"texte": (f"{debut}{acteur_nom} situe « {label} » dans {lieu_label(reg, '')}, "
+					  f"à {p.get('distance', '?')} passage(s) d'ici."), "lieu_id": None, "lieu_label": ""}
+
+
+def etat_donjon(donjon: dict | None, purge_fn, reinfeste_fn) -> str:
+	"""« nettoyé par vous », « de nouveau infesté », ou « jamais nettoyé par vous »."""
+	salles = [s.get("lieu") for s in (donjon or {}).get("battle_maps") or [] if s.get("lieu")]
+	if any(reinfeste_fn(s) for s in salles):
+		return "de nouveau infesté"
+	if salles and all(purge_fn(s) for s in salles):
+		return "nettoyé par vous"
+	return "jamais nettoyé par vous"
+
+
+def texte_donjon(res: dict, donjon: dict, noms_especes: list, etat: str, acteur_nom: str,
+				 rang: str | None, intro: str = "") -> dict:
+	"""Sujet « donjon du coin » : rumeur = danger vague ; région = qui le peuple ; exact = qui
+	le peuple, fourchette de niveaux, grade et état pour vous."""
+	debut = (intro.strip() + " ") if intro else ""
+	nom = donjon.get("nom") or donjon.get("_id", "")
+	niveau = res["niveau"]
+	if niveau in ("rien", "rumeur"):
+		return {"texte": f"{debut}{acteur_nom} a seulement entendu dire que « {nom} » n'est pas un endroit pour les novices."}
+	peuple = ", ".join(noms_especes) or "des créatures sans nom"
+	if niveau == "region":
+		return {"texte": f"{debut}{acteur_nom} sait que « {nom} » abrite {peuple}."}
+	nmin, nmax = donjon.get("niveau_min"), donjon.get("niveau_max")
+	niveaux = f" (niveaux {nmin} à {nmax})" if nmin is not None and nmax is not None else ""
+	grade = rang_txt(rang)
+	return {"texte": (f"{debut}{acteur_nom} sait que « {nom} » abrite {peuple}{niveaux}"
+					  + (f" — {grade}" if grade else "") + f" ; {etat}.")}
 
 
 # ── Note de renseignement ────────────────────────────────────────────────────────

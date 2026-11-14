@@ -386,6 +386,105 @@ def test_note_porte_la_piste_et_vaut_selon_le_grade():
 	assert not rens.est_note({"item": rens.ITEM_NOTE_ID})
 
 
+# ── Salle commune de guilde ──────────────────────────────────────────────────────
+
+def test_rang_d_un_pnj_derive_de_son_niveau():
+	entrees = character_stats.QUETE_RANG_NIVEAU_ENTREE
+	rang_e, niveau_e = min(entrees.items(), key=lambda x: x[1])
+	assert rens.rang_de_niveau(0) == rens.RANGS[0]
+	assert rens.rang_de_niveau(niveau_e - 1) == rens.RANGS[0]
+	assert rens.rang_de_niveau(niveau_e) == rang_e
+	assert rens.rang_de_niveau(10 ** 6) == max(entrees, key=lambda r: entrees[r])
+
+
+def test_rang_du_joueur_meilleur_de_la_guilde_et_de_la_capitale():
+	c = {"rangs_guilde": {"lieu:cite": "E", "lieu:capitale": "C", "lieu:ailleurs": "S"}}
+	assert rens.rang_joueur_guilde(c, "lieu:cite", "lieu:capitale") == "C"
+	assert rens.rang_joueur_guilde(c, "lieu:cite", None) == "E"
+	assert rens.rang_joueur_guilde({}, "lieu:cite", "lieu:capitale") == rens.RANGS[0]
+
+
+def test_bornes_de_rang():
+	assert rens.borne_rang(None, "F", "F") is None
+	assert "dépasse" in rens.borne_rang("C", "D", "S")             # interlocuteur trop bas
+	assert rens.borne_rang("C", None, "D") is None                  # réceptionniste : joueur ≥ grade − 1
+	assert "rang D" in rens.borne_rang("C", None, "E")
+	assert rens.borne_rang("C", "C", "D") is None
+
+
+def test_capitale_et_pays():
+	index = dict(INDEX)
+	index["lieu:capitale"] = {"_id": "lieu:capitale", "categorie": "ville", "sous_categorie": "capitale",
+							  "lieu_parent": "lieu:france"}
+	assert rens.pays_de("lieu:auberge", index)["_id"] == "lieu:france"
+	assert rens.capitale_du_pays("lieu:france", index)["_id"] == "lieu:capitale"
+	assert rens.capitale_du_pays("lieu:autre", index) is None
+	assert rens.dans_pays({"porteur": "lieu:auberge"}, "lieu:france", index)
+	assert not rens.dans_pays({"porteur": "lieu:loin"}, "lieu:france", index)
+
+
+def test_pistes_d_un_lieu_et_d_un_donjon():
+	assert rens.pistes_speciales("lieu:clairiere", INDEX, DONJONS)[0]["type"] == "lieu"
+	d = rens.pistes_speciales("donjon:crypte", INDEX, DONJONS)[0]
+	assert (d["porteur"], d["lieu"]) == ("lieu:clairiere", "lieu:salle")
+	assert rens.pistes_speciales("espece:loup", INDEX, DONJONS) is None
+	assert rens.grade_sujet("donjon:crypte", DONJONS, {"espece:loup": "E", "espece:goule": "C"}.get) == "C"
+	assert rens.grade_sujet("item:Herbe", DONJONS, lambda e: "S") is None
+
+
+def test_ce_qu_une_recrue_a_affronte_est_stable_et_borne_par_son_rang():
+	pistes = [{"type": "zone", "porteur": "lieu:france", "zone": f"zone:{i}", "cible": e}
+			  for i, e in enumerate(["espece:loup", "espece:ours", "espece:rat", "espece:goule"])]
+	rangs = {"espece:loup": "F", "espece:ours": "E", "espece:rat": "F", "espece:goule": "B"}.get
+	vus = rens.affrontes("aventurier:x", pistes, "E", rangs)
+	assert vus == rens.affrontes("aventurier:x", list(reversed(pistes)), "E", rangs)   # même graine
+	assert 2 <= len(vus) <= 3 and all(p["cible"] != "espece:goule" for p in vus)
+	assert rens.affrontes("aventurier:x", pistes, "F", lambda e: "S") == []
+
+
+def test_le_meilleur_savoir_de_la_recrue_gagne():
+	vu = [{"cible": "espece:loup", "porteur": "lieu:france"}]
+	pays = [{"cible": "espece:loup", "porteur": "lieu:cite"}]
+	metier = [{"cible": "espece:loup", "porteur": "lieu:loin"}]
+	assert rens.savoir_recrue("espece:loup", vu, pays, metier) == ("affronte", vu, True)
+	assert rens.savoir_recrue("espece:loup", [], pays, metier) == ("origine", pays, False)
+	assert rens.savoir_recrue("espece:loup", [], [], metier) == ("metier", metier, False)
+	assert rens.savoir_recrue("espece:loup", [], [], []) == (None, [], False)
+
+
+def test_pourboire_de_la_recrue():
+	base = character_stats.RENS_RECRUE_POURBOIRE
+	assert rens.cout_recrue("rumeur", 0) == round(base * character_stats.RENS_COUT_MULT["rumeur"])
+	assert rens.cout_recrue("exact", 10) == round(base * character_stats.RENS_COUT_MULT["exact"] * 2)
+
+
+def test_textes_donjon_et_lieu():
+	donjon = DONJONS[0] | {"niveau_min": 2, "niveau_max": 4}
+	exact = rens.texte_donjon({"niveau": "exact"}, donjon, ["des loups"], "nettoyé par vous", "Bran", "E")
+	assert "niveaux 2 à 4" in exact["texte"] and "nettoyé par vous" in exact["texte"]
+	assert "des loups" not in rens.texte_donjon({"niveau": "rumeur"}, donjon, ["des loups"], "", "Bran", None)["texte"]
+	piste = {"type": "lieu", "porteur": "lieu:clairiere", "distance": 2}
+	assert "du côté de Lutèce" in rens.texte_lieu({"niveau": "region", "piste": piste}, "Clairière", "Bran", INDEX)["texte"]
+	assert rens.etat_donjon(DONJONS[0], lambda s: True, lambda s: False) == "nettoyé par vous"
+	assert rens.etat_donjon(DONJONS[0], lambda s: True, lambda s: True) == "de nouveau infesté"
+
+
+def test_un_interlocuteur_par_pnj_avec_sa_cle():
+	regles = {"methodes": [
+		{"id": "pistes", "vocations": ["forestier"], "lieu": {"predicats": ["sauvage"]}, "test": ["int"]},
+		{"id": "recrues", "interlocuteur": "recrue", "lieu": {"categories": ["guilde_aventurier"]}, "test": ["cha"]},
+		{"id": "receptionniste", "interlocuteur": "receptionniste", "via_pnj": True,
+		 "lieu": {"categories": ["guilde_aventurier"]}, "test": ["cha"]}]}
+	reception = {"_id": "lieu:reception", "categorie": "guilde_aventurier", "lieu_parent": "lieu:cite"}
+	recrue = dict(perso("forestier", Int=60), _id="aventurier:r1")
+	pnj = {"_id": "pnj:cynan", "nom": "Cynan"}
+	apps = rens.applicables(reception, INDEX, [perso("guerrier", Cha=20)], regles, lambda m, c: True,
+							interlocuteurs={"recrue": [recrue], "receptionniste": [pnj]})
+	assert [a["cle"] for a in apps] == ["recrues|aventurier:r1", "receptionniste|pnj:cynan"]
+	assert apps[0]["seuil"] == rens.seuil(rens.normaliser_methode(regles["methodes"][0]), recrue)   # SON métier
+	assert apps[1]["seuil"] == 70                                                                 # Cha du joueur
+
+
 def test_lancer():
 	assert rens.lancer("2D6+1", De([3, 4])) == 8
 	assert rens.lancer("1D10", De([7])) == 7

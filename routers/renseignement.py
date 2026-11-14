@@ -11,7 +11,8 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 
 from db.config import find_docs, get_doc, save_doc
 from models import character_stats
-from utils import expedition, fiche, focalisation, journal, marche, pouvoirs_objets, quetes
+from utils import donjon as donjon_util
+from utils import expedition, fiche, focalisation, journal, marche, pouvoirs_objets, quetes, recrutement
 from utils import renseignement as rens
 from utils.auth import get_current_user
 from utils.characters import (
@@ -28,6 +29,11 @@ CHAMPS_LIEU = ["_id", "label", "nom", "lieu_parent", "categorie", "sous_categori
 SUGGESTIONS_MAX = 12
 
 _RANGS: dict = {}
+
+
+def _hasard():
+	"""Le hasard d'une recherche — point unique, remplacé par les tests (jets contrôlés)."""
+	return random.Random()
 
 
 def _rang(espece_id: str) -> str | None:
@@ -63,24 +69,59 @@ def _index_chaine(lieu_doc: dict) -> dict:
 	return index
 
 
-def _contexte(character: dict, complet: bool = True) -> dict:
+def _index_complet() -> dict:
+	return {d["_id"]: d for d in (find_docs({"type": "lieu"}, fields=CHAMPS_LIEU) or []) if d.get("_id")}
+
+
+def _interlocuteurs(character: dict, lieu_doc: dict) -> dict:
+	"""PNJ de guilde qui renseignent ICI : les recrues encore offertes au tableau d'une réception,
+	et les PNJ présents (`pnj_present`, tirage d'entrée) qui portent `services.renseignement`."""
+	sortie = {"recrue": [], "receptionniste": []}
+	lieu_id = lieu_doc.get("_id")
+	if not lieu_id:
+		return sortie
+	if lieu_doc.get("categorie") == "guilde_aventurier":
+		maintenant = rens.now_epoch()
+		sortie["recrue"] = [r for r in recrutement.recrues_du_giver(lieu_id)
+							if int(r.get("expire_at") or maintenant + 1) > maintenant]
+	present = character.get("pnj_present") or {}
+	if present.get("lieu") == lieu_id:
+		for pid in present.get("characters") or []:
+			doc = get_doc(pid)
+			if doc and (doc.get("services") or {}).get("renseignement"):
+				sortie["receptionniste"].append(doc)
+	return sortie
+
+
+def _contexte(character: dict, complet=True) -> dict:
 	"""Tout ce que lit une recherche : lieu, index, membres, méthodes exerçables ici.
-	`complet=False` : index réduit à la chaîne du lieu (bouton 🔎 de /play)."""
+	`complet=False` : index réduit à la chaîne du lieu (bouton 🔎 de /play) ; `"auto"` : complet
+	seulement si un interlocuteur de guilde est là (ses sujets « du coin » balaient le pays)."""
 	lieu_doc = get_doc(character.get("lieu", "")) or {}
 	regles = rens.regles_de(get_doc)
 	_, erreurs = rens.methodes_de(regles)
 	for e in erreurs:
 		print(f"[renseignement] méthode écartée : {e}")
-	if complet:
-		index = {d["_id"]: d for d in (find_docs({"type": "lieu"}, fields=CHAMPS_LIEU) or []) if d.get("_id")}
-	else:
-		index = _index_chaine(lieu_doc)
+	index = _index_complet() if complet is True else _index_chaine(lieu_doc)
 	membres = expedition.membres(character, get_doc)
 	relation = marche.relation_value(marche.get_relation(character, lieu_doc)) if lieu_doc else None
 	apps = rens.applicables(lieu_doc, index, membres, regles,
 							lambda m, cid: pouvoirs_objets.connait(m, cid, get_doc), relation,
-							rens.informateur_ici(character, lieu_doc.get("_id", "")))
+							rens.informateur_ici(character, lieu_doc.get("_id", "")),
+							_interlocuteurs(character, lieu_doc))
+	if complet == "auto" and any(a["interlocuteur"] for a in apps):
+		index = _index_complet()
 	return {"lieu": lieu_doc, "regles": regles, "index": index, "membres": membres, "apps": apps}
+
+
+def _coin(character: dict, ctx: dict) -> dict:
+	"""Pays de la cité, rang retenu du joueur (cette guilde ou la capitale du pays)."""
+	index, lieu_id = ctx["index"], ctx["lieu"].get("_id", "")
+	cite = rens.cite_de(lieu_id, index) or {}
+	pays = rens.pays_de(lieu_id, index) or {}
+	capitale = rens.capitale_du_pays(pays.get("_id"), index) or {}
+	return {"cite": cite.get("_id"), "pays": pays.get("_id"),
+			"rang_joueur": rens.rang_joueur_guilde(character, cite.get("_id"), capitale.get("_id"))}
 
 
 def _nom(m: dict) -> str:
@@ -123,33 +164,130 @@ def _cibles(character: dict, app: dict) -> dict:
 	return {"quetes": quetes_l, "bestiaire": bestiaire_l, "recits": recits}
 
 
-def _vue_app(character: dict, app: dict, lieu_id: str) -> dict:
+def _rang_pnj(app: dict) -> str | None:
+	"""Rang qui borne l'interlocuteur : celui d'une recrue (dérivé de son niveau) ; aucun pour
+	le réceptionniste, qui lit les archives de la Guilde."""
+	if app["interlocuteur"] and app["methode"]["interlocuteur"] == "recrue":
+		return rens.rang_de_niveau(rens.niveau_de(app["acteur"]))
+	return None
+
+
+def _monde(ctx: dict) -> dict:
+	"""Donjons, zones, boutiques, distances depuis le lieu — lu une fois par requête."""
+	donjons, zones_noms, zones_terrains, boutiques = _sources_monde(ctx)
+	distances = focalisation.distances_depuis(focalisation.charger_graphe(find_docs), ctx["lieu"].get("_id", ""))
+	return {"donjons": donjons, "zones_noms": zones_noms, "zones_terrains": zones_terrains,
+			"boutiques": boutiques, "distances": distances}
+
+
+def _sujets_coin(ctx: dict, coin: dict, monde: dict) -> dict:
+	"""Ids des sujets « du coin », bornés au PAYS de la cité : espèces et matières des lieux du
+	pays (et de leurs zones), donjons dont le portail est dans le pays."""
+	pays, index = coin["pays"], ctx["index"]
+	dans = {lid for lid in index if pays and any(d.get("_id") == pays for d in rens.chaine(lid, index))}
+	dangers, ressources = set(), set()
+	for lid in dans:
+		dangers.update(e.get("espece") for e in index[lid].get("rencontres") or [] if e.get("espece"))
+		ressources.update(e.get("ressource") for e in index[lid].get("ressources") or [] if e.get("ressource"))
+	donjons = [d["_id"] for d in monde["donjons"] if d.get("portail") in dans]
+	return {"dangers": sorted(dangers), "donjons": sorted(donjons), "ressources": sorted(ressources)}
+
+
+def _nom_sujet(cid: str, monde: dict, index: dict) -> str:
+	if cid.startswith("donjon:"):
+		return next((d.get("nom") for d in monde["donjons"] if d.get("_id") == cid), None) or cid
+	if cid.startswith("lieu:"):
+		return lieu_label(index.get(cid) or {}, cid)
+	return (_doc_cible(cid) or {}).get("nom") or cid.split(":", 1)[-1]
+
+
+def _cible_de_quete(q: dict, index: dict) -> str | None:
+	"""Cible d'une quête pour la Guilde : bête, matière, élite — ou le LIEU d'une visite, d'une
+	escorte (rendez-vous, sinon destination), d'un transport (destination)."""
+	obj = (q or {}).get("objectif") or {}
+	if obj.get("type") in ("kill", "collect", "chasse"):
+		return obj.get("cible")
+	if obj.get("type") == "transport":
+		return obj.get("cible")
+	if obj.get("type") in rens.OBJECTIFS_LIEU:
+		from utils import guides
+		lieux = guides.lieux_de_cible(obj, index, q)
+		return lieux[0] if lieux else None
+	return None
+
+
+def _cibles_guilde(character: dict, ctx: dict, app: dict, coin: dict, monde: dict) -> dict:
+	"""Sujets d'un interlocuteur de guilde, chacun avec `bloque` (raison) si une borne de rang
+	l'interdit : visible mais grisé, rien ne se paie."""
+	rang_pnj = _rang_pnj(app)
+
+	def entree(cid, titre, cle):
+		grade = rens.grade_sujet(cid, monde["donjons"], _rang)
+		return {"id": cle, "nom": titre, "bloque": rens.borne_rang(grade, rang_pnj, coin["rang_joueur"])}
+
+	quetes_l = []
+	for q in character.get("quetes_actives") or []:
+		cid = _cible_de_quete(q, ctx["index"])
+		if cid and not quetes.objectif_atteint(character, q):
+			e = entree(cid, q.get("titre", ""), q.get("id"))
+			quetes_l.append({**e, "titre": e["nom"]})
+	sujets = _sujets_coin(ctx, coin, monde)
+	return {"quetes": quetes_l, "bestiaire": [], "recits": [],
+			**{mode: [entree(cid, _nom_sujet(cid, monde, ctx["index"]), cid) for cid in sujets[mode]]
+			   for mode in rens.MODES_COIN if mode in app["methode"]["modes"]}}
+
+
+def _cout_app(app: dict, niveau: str) -> int:
+	if app["interlocuteur"] and app["methode"]["interlocuteur"] == "recrue":
+		return rens.cout_recrue(niveau, rens.niveau_de(app["acteur"]))
+	return rens.cout_cuivre(app["methode"], niveau)
+
+
+def _vue_app(character: dict, app: dict, ctx: dict, extra: dict | None = None) -> dict:
 	m = app["methode"]
-	return {
-		"id": m["id"], "nom": m["nom"], "icon": m["icon"], "informateur": m["informateur"],
+	lieu_id = ctx["lieu"].get("_id", "")
+	vue = {
+		"id": m["id"], "cle": app["cle"], "nom": m["nom"], "icon": m["icon"], "informateur": m["informateur"],
 		"acteur_id": app["acteur"].get("_id"), "acteur_nom": _nom(app["acteur"]),
+		"interlocuteur": m["interlocuteur"], "interlocuteur_id": (app["interlocuteur"] or {}).get("_id"),
 		"seuil": app["seuil"], "sans_jet": bool(m["niveau_fixe"]),
 		"cout_max": rens.cout_max(m), "cout_base": rens.cout_cuivre(m, "rumeur"),
 		"cout_pv": m["cout_pv"], "cout_pm": rens.cout_pm(m, get_doc),
-		"modes": m["modes"], "disponible_dans": rens.disponible_dans(character, lieu_id, m["id"]),
+		"modes": m["modes"], "disponible_dans": rens.disponible_dans(character, lieu_id, app["cle"]),
 		"description": m["repliques"].get("description", ""),
-		"cibles": _cibles(character, app),
 	}
+	if app["interlocuteur"]:
+		vue["cout_base"], vue["cout_max"] = _cout_app(app, "rumeur"), _cout_app(app, "exact")
+		vue["cout_pv"], vue["cout_pm"] = None, 0
+		if m["interlocuteur"] == "recrue":
+			voc = next((v.get("label") for v in (get_doc("rules:vocations") or {}).get("value") or []
+						if v.get("id") == app["acteur"].get("voc")), "") or app["acteur"].get("voc", "")
+			vue["nom"] = f"{_nom(app['acteur'])} — {voc}, rang {_rang_pnj(app)}"
+		else:
+			vue["nom"] = f"{_nom(app['acteur'])} — {m['nom']}"
+		vue["cibles"] = _cibles_guilde(character, ctx, app, extra["coin"], extra["monde"])
+	else:
+		vue["cibles"] = _cibles(character, app)
+	return vue
 
 
 def _offre(character: dict, ctx: dict) -> dict:
 	lieu_id = ctx["lieu"].get("_id", "")
+	extra = None
+	if any(a["interlocuteur"] for a in ctx["apps"]):
+		extra = {"coin": _coin(character, ctx), "monde": _monde(ctx)}
 	return {
 		"lieu": lieu_label(ctx["lieu"], lieu_id),
-		"methodes": [_vue_app(character, a, lieu_id) for a in ctx["apps"]],
+		"methodes": [_vue_app(character, a, ctx, extra) for a in ctx["apps"]],
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 	}
 
 
 def disponible(character: dict) -> bool:
-	"""Le bouton 🔎 s'affiche-t-il ? (contexte de /play)."""
+	"""Le bouton 🔎 s'affiche-t-il ? (contexte de /play). Une méthode `via_pnj` (le réceptionniste)
+	s'ouvre par le dialogue de son PNJ, pas par ce bouton."""
 	try:
-		return bool(_contexte(character, complet=False)["apps"])
+		return any(not a["methode"]["via_pnj"] for a in _contexte(character, complet=False)["apps"])
 	except Exception as e:
 		print(f"[renseignement] disponibilité illisible : {e}")
 		return False
@@ -158,11 +296,12 @@ def disponible(character: dict) -> bool:
 @renseignement_router.get("/renseignement/offre")
 def offre(current_user: Annotated[dict, Depends(get_current_user)]):
 	character = _perso(current_user)
-	return _offre(character, _contexte(character, complet=False))
+	return _offre(character, _contexte(character, complet="auto"))
 
 
-def _app(ctx: dict, methode_id: str) -> dict:
-	app = next((a for a in ctx["apps"] if a["methode"]["id"] == methode_id), None)
+def _app(ctx: dict, methode_id: str, interlocuteur_id: str = "") -> dict:
+	cle = f"{methode_id}|{interlocuteur_id}" if interlocuteur_id else methode_id
+	app = next((a for a in ctx["apps"] if a["cle"] == cle), None)
 	if not app:
 		raise HTTPException(status_code=403, detail="Personne ici ne peut se renseigner ainsi.")
 	return app
@@ -226,14 +365,16 @@ def chercher(current_user: Annotated[dict, Depends(get_current_user)], body: dic
 	"""Body {methode, mode: quete|bestiaire|libre|hasard|recit, cible?, quete_id?, recit?}."""
 	character = _perso(current_user)
 	ctx = _contexte(character)
-	app = _app(ctx, str(body.get("methode") or ""))
+	app = _app(ctx, str(body.get("methode") or ""), str(body.get("interlocuteur") or ""))
+	if app["interlocuteur"]:
+		return _chercher_guilde(character, ctx, app, body)
 	m, acteur = app["methode"], app["acteur"]
 	lieu_doc, lieu_id = ctx["lieu"], ctx["lieu"].get("_id", "")
 	soi = acteur is character
 	mode = str(body.get("mode") or "")
 	if mode not in m["modes"]:
 		raise HTTPException(status_code=422, detail="Cette méthode ne cherche pas ainsi.")
-	attente = rens.disponible_dans(character, lieu_id, m["id"])
+	attente = rens.disponible_dans(character, lieu_id, app["cle"])
 	if attente:
 		raise HTTPException(status_code=409, detail=f"On vous a déjà tout dit ici — revenez dans {max(1, attente // 60)} min.")
 
@@ -274,7 +415,7 @@ def chercher(current_user: Annotated[dict, Depends(get_current_user)], body: dic
 		raise HTTPException(status_code=409, detail=f"{_nom(acteur)} n'a pas assez de PM ({pm}).")
 
 	# ── Pistes et jet ────────────────────────────────────────────────────────────
-	rand = random.Random()
+	rand = _hasard()
 	donjons, zones_noms, zones_terrains, boutiques = _sources_monde(ctx)
 	distances = focalisation.distances_depuis(focalisation.charger_graphe(find_docs), lieu_id)
 	donjons_noms = {d["_id"]: d.get("nom", "") for d in donjons}
@@ -364,7 +505,7 @@ def chercher(current_user: Annotated[dict, Depends(get_current_user)], body: dic
 		cedes = dict(character.get("recits_cedes") or {})
 		cedes[lieu_id] = list(cedes.get(lieu_id) or []) + [f"{recit['espece']}|{recit['lieu']}"]
 		character["recits_cedes"] = cedes
-	rens.marquer_delai(character, lieu_id, m["id"])
+	rens.marquer_delai(character, lieu_id, app["cle"])
 
 	# ── Persistance : le principal (bourse, carnet) d'abord, puis l'acteur compagnon. ──
 	relation = None
@@ -388,11 +529,145 @@ def chercher(current_user: Annotated[dict, Depends(get_current_user)], body: dic
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 		"journal": journal.journal_payload(character, get_doc),
 		"vitaux": {"id": acteur.get("_id"), **_vitaux(acteur)},
-		**_offre(character, _contexte(character, complet=False)),
+		**_offre(character, _contexte(character, complet="auto")),
 	}
 	if note and soi:
 		out["inventaire_payload"] = _inventory_payload(character)
 	if xp and soi:
+		out["fiche"] = fiche.fiche_resync(character, get_doc, find_docs)
+	return out
+
+
+def _chercher_guilde(character: dict, ctx: dict, app: dict, body: dict) -> dict:
+	"""Recrue du tableau ou réceptionniste. Body {methode, interlocuteur, mode: quete|dangers|
+	donjons|ressources, quete_id? | cible?}. Bornes de rang AVANT tout paiement ; le délai court
+	par interlocuteur ; une recrue répond avec son MEILLEUR savoir (affronté > origine > métier)."""
+	m, pnj = app["methode"], app["acteur"]
+	recrue = m["interlocuteur"] == "recrue"
+	lieu_doc, lieu_id, index = ctx["lieu"], ctx["lieu"].get("_id", ""), ctx["index"]
+	mode = str(body.get("mode") or "")
+	if mode not in m["modes"]:
+		raise HTTPException(status_code=422, detail="On ne vous renseigne pas là-dessus ici.")
+	attente = rens.disponible_dans(character, lieu_id, app["cle"])
+	if attente:
+		raise HTTPException(status_code=409, detail=f"{_nom(pnj)} vous a déjà tout dit — revenez dans {max(1, attente // 60)} min.")
+	coin, monde = _coin(character, ctx), _monde(ctx)
+	donjons, distances = monde["donjons"], monde["distances"]
+	sujets = _sujets_coin(ctx, coin, monde)
+
+	# ── Sujet ────────────────────────────────────────────────────────────────────
+	if mode == "quete":
+		q = quetes.quete_active(character, str(body.get("quete_id") or ""))
+		cible_id = _cible_de_quete(q, index) if q else None
+		if not cible_id:
+			raise HTTPException(status_code=404, detail="Quête introuvable dans vos quêtes actives.")
+	else:
+		cible_id = str(body.get("cible") or "")
+		if cible_id not in sujets.get(mode, []):
+			raise HTTPException(status_code=404, detail="Personne ici n'en a entendu parler.")
+	grade = rens.grade_sujet(cible_id, donjons, _rang)
+	raison = rens.borne_rang(grade, _rang_pnj(app), coin["rang_joueur"])
+	if raison:
+		raise HTTPException(status_code=403, detail=raison)
+	if money_to_cuivre(character) < _cout_app(app, "exact"):
+		raise HTTPException(status_code=409, detail=f"Il faut pouvoir donner jusqu'à {_cout_app(app, 'exact')} cuivres.")
+
+	# ── Pistes ───────────────────────────────────────────────────────────────────
+	speciales = rens.pistes_speciales(cible_id, index, donjons)
+	brutes = speciales if speciales is not None else rens.pistes_de(
+		cible_id, list(rens.SOURCES), index, donjons, monde["boutiques"])
+	tout = rens.a_portee(brutes, distances, portee_lieux=len(index) + 1)
+	pistes_pays = [p for p in tout if rens.dans_pays(p, coin["pays"], index)]
+	coin_seul = mode in rens.MODES_COIN
+	seuil_v, sans_jet = app["seuil"], False
+	if recrue:
+		pistes_dangers = [p for cid in sujets["dangers"]
+						  for p in rens.a_portee(rens.pistes_de(cid, ["lieu", "zone"], index, donjons, []),
+												 distances, portee_lieux=len(index) + 1)
+						  if rens.dans_pays(p, coin["pays"], index)]
+		vus = rens.affrontes(pnj.get("_id"), pistes_dangers, _rang_pnj(app), _rang)
+		metier = rens.methode_de_vocation(pnj.get("voc"), rens.methodes_de(ctx["regles"])[0])
+		pistes_metier = []
+		if metier and speciales is None and rens.cible_ok(metier, cible_id, _doc_cible(cible_id), _rang):
+			pistes_metier = rens.a_portee(rens.pistes_de(cible_id, metier["sources"], index, donjons, monde["boutiques"]),
+										  distances, portee_max=metier["portee_max"])
+			if coin_seul:
+				pistes_metier = [p for p in pistes_metier if rens.dans_pays(p, coin["pays"], index)]
+		source, pistes, sans_jet = rens.savoir_recrue(cible_id, vus, pistes_pays, pistes_metier)
+		if source == "origine":
+			seuil_v = max(rens.SEUIL_MIN, min(rens.SEUIL_MAX, seuil_v + int(character_stats.RENS_RECRUE_ORIGINE_BONUS)))
+	else:
+		pistes = pistes_pays if coin_seul else rens.a_portee(brutes, distances)
+	fausses = []
+	if speciales is None:
+		fausses = [p for cid in sujets["dangers"] + sujets["ressources"] if cid != cible_id
+				   for p in rens.a_portee(rens.pistes_de(cid, ["lieu", "zone"], index, donjons, []), distances)]
+	rand = _hasard()
+	res = rens.resoudre(m, seuil_v, pistes, rand=rand, fausses=fausses, sans_jet=sans_jet)
+	niveau = res["niveau"]
+
+	# ── Texte ────────────────────────────────────────────────────────────────────
+	intro = m["repliques"].get("intro", "")
+	nom_pnj = _nom(pnj)
+	oui_dire = []
+	if cible_id.startswith("donjon:"):
+		donjon = next(d for d in donjons if d.get("_id") == cible_id)
+		especes = rens.especes_du_donjon(donjon)
+		noms = [rens.nom_cible(e, _doc_cible(e)) for e in especes]
+		etat = rens.etat_donjon(donjon, lambda s: donjon_util.donjon_purge(character, s, get_doc(s)),
+								lambda s: donjon_util.donjon_reinfeste(character, get_doc(s)))
+		txt = {**rens.texte_donjon(res, donjon, noms, etat, nom_pnj, grade, intro), "lieu_id": None, "lieu_label": ""}
+		cible_txt = f"« {donjon.get('nom') or cible_id} »"
+		if niveau == "exact":
+			salle = (res["piste"] or {}).get("lieu")
+			oui_dire = [(e, salle, donjon.get("nom") or "") for e in especes]
+	elif cible_id.startswith("lieu:"):
+		cible_txt = _nom_sujet(cible_id, monde, index)
+		txt = rens.texte_lieu(res, cible_txt, nom_pnj, index, intro)
+	else:
+		doc_cible = _doc_cible(cible_id)
+		# Rumeur fausse : la cible reste celle demandée, seul le lieu ment.
+		cible_txt = rens.nom_cible(cible_id, doc_cible)
+		rang = rens.rang_piste(res["piste"], index, donjons, _rang) if niveau == "exact" and res["piste"] else None
+		txt = rens.texte_resultat(res, cible_txt, nom_pnj, index, monde["zones_noms"], monde["zones_terrains"],
+								  {d["_id"]: d.get("nom", "") for d in donjons}, rang, intro, cible_id)
+		if sans_jet and res["piste"]:
+			txt["texte"] = txt["texte"].replace(" apprend qu'on trouve ", " en a affronté de ses mains : on trouve ", 1)
+
+	# ── Paiement, liens ──────────────────────────────────────────────────────────
+	cuivre = _cout_app(app, niveau if niveau in rens.NIVEAUX else "rumeur")
+	if cuivre and debit_character(character, cuivre) is None:
+		raise HTTPException(status_code=409, detail="Fonds insuffisants.")
+	if recrue and int(character_stats.RENS_RECRUE_AFFINITE):
+		recrutement.ajuster_affinite(character, pnj["_id"], int(character_stats.RENS_RECRUE_AFFINITE))
+	xp = None
+	# XP au JOUEUR sur belle réussite au jet du réceptionniste (c'est son Cha qui joue) ; le jet
+	# d'une recrue est le sien : rien à gagner pour le joueur.
+	if not recrue and niveau == "exact" and res["jet"] is not None and int(character_stats.RENS_XP_BELLE) > 0:
+		xp = grant_xp(character, int(character_stats.RENS_XP_BELLE))
+	piste_info = {"texte": txt["texte"], "cible": cible_id if not cible_id.startswith(("lieu:", "donjon:")) else "",
+				  "cible_nom": cible_txt, "niveau": "rumeur" if res["fausse"] else niveau,
+				  "lieu_id": txt.get("lieu_id"), "lieu_label": txt.get("lieu_label", ""), "rang": grade}
+	rens.apprendre(character, piste_info, lieu_label(lieu_doc, lieu_id))
+	for eid, salle, label in oui_dire:
+		if salle:
+			journal.noter_oui_dire(character, eid, salle, label)
+	rens.marquer_delai(character, lieu_id, app["cle"])
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+
+	out = {
+		"resultat": {
+			"texte": txt["texte"], "niveau": niveau, "niveau_label": rens.LIBELLE_NIVEAU.get(niveau, ""),
+			"cout": cuivre, "pv_perdus": 0, "pm": 0, "pourboire": 0,
+			"xp": (xp or {}).get("xp_gain", 0), "note": False, "acteur": nom_pnj,
+			"affinite": int(character_stats.RENS_RECRUE_AFFINITE) if recrue else 0,
+		},
+		"purse": cuivre_to_purse(money_to_cuivre(character)),
+		"journal": journal.journal_payload(character, get_doc),
+		**_offre(character, _contexte(character, complet="auto")),
+	}
+	if xp:
 		out["fiche"] = fiche.fiche_resync(character, get_doc, find_docs)
 	return out
 

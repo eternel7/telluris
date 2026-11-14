@@ -3287,6 +3287,7 @@
 		.rens-modes { display: flex; flex-wrap: wrap; gap: .3rem; margin: .6rem 0 .3rem; }
 		.rens-modes .sub-loc-btn.actif { outline: 2px solid var(--accent, #b98c4a); }
 		.rens-cibles { display: flex; flex-wrap: wrap; gap: .3rem; }
+		.rens-cibles .sub-loc-btn:disabled { opacity: .55; cursor: not-allowed; }
 		.rens-recherche { width: 100%; box-sizing: border-box; margin: .3rem 0; }
 		.rens-resultat { margin: .6rem 0; padding: .5rem .7rem; border-left: 3px solid var(--accent, #b98c4a);
 			background: rgba(0, 0, 0, .18); white-space: normal; }
@@ -12454,7 +12455,8 @@ let _rensMethode = '';
 let _rensMode = '';
 let _rensMinuteur = null;
 const RENS_MODES = { quete: '📜 Mes quêtes', bestiaire: '🐾 Mon bestiaire', libre: '🔤 Chercher un nom',
-	hasard: '🎲 Ce qui traîne', recit: '🪕 Céder un récit' };
+	hasard: '🎲 Ce qui traîne', recit: '🪕 Céder un récit',
+	dangers: '⚠️ Dangers alentour', donjons: '🏰 Donjons du coin', ressources: '🌿 Ressources du coin' };
 
 function _rensEl(tag, cls, texte) {
 	const el = document.createElement(tag);
@@ -12465,7 +12467,7 @@ function _rensEl(tag, cls, texte) {
 
 function _rensCourante() {
 	const liste = (_rensEtat && _rensEtat.methodes) || [];
-	return liste.find(m => m.id === _rensMethode) || liste[0] || null;
+	return liste.find(m => m.cle === _rensMethode) || liste[0] || null;
 }
 
 function _rensCout(m) {
@@ -12480,20 +12482,28 @@ function _rensRenderMethodes() {
 	const box = document.getElementById('rens-methodes');
 	box.innerHTML = '';
 	for (const m of (_rensEtat.methodes || [])) {
-		const carte = _rensEl('div', 'aub-table rens-methode' + (m.id === _rensMethode ? ' choisie' : ''));
+		const carte = _rensEl('div', 'aub-table rens-methode' + (m.cle === _rensMethode ? ' choisie' : ''));
 		const tete = _rensEl('div', 'aub-table-tete');
 		tete.appendChild(_rensEl('span', 'aub-table-titre', `${m.icon} ${m.nom}`));
 		tete.appendChild(_rensEl('span', 'aub-table-occ', `${m.acteur_nom}${m.sans_jet ? ' · sans jet' : ` · ${m.seuil} %`} · ${_rensCout(m)}`));
 		carte.appendChild(tete);
 		if (m.description) carte.appendChild(_rensEl('span', 'q-desc', m.description));
 		if (m.disponible_dans) carte.appendChild(_rensEl('span', 'q-desc', `⏳ De nouveau dans ${Math.ceil(m.disponible_dans / 60)} min.`));
-		carte.addEventListener('click', () => { _rensMethode = m.id; _rensMode = ''; _rensRender(); });
+		carte.addEventListener('click', () => { _rensMethode = m.cle; _rensMode = ''; _rensRender(); });
 		box.appendChild(carte);
 	}
 }
 
-function _rensBoutonCible(texte, body) {
+// Un sujet que borne le rang (`bloque` = la raison, dite par l'interlocuteur) reste VISIBLE mais
+// grisé : rien ne se paie, aucun délai ne court.
+function _rensBoutonCible(texte, body, bloque) {
 	const b = _rensEl('button', 'sub-loc-btn', texte);
+	if (bloque) {
+		b.disabled = true;
+		b.title = bloque;
+		b.appendChild(_rensEl('span', 'q-desc', bloque));
+		return b;
+	}
 	b.addEventListener('click', () => chercherRenseignement(body, b));
 	return b;
 }
@@ -12533,7 +12543,10 @@ function _rensRenderCibles() {
 	const vide = t => box.appendChild(_rensEl('span', 'q-desc', t));
 	if (_rensMode === 'quete') {
 		if (!(c.quetes || []).length) vide('Aucune quête active que cette méthode puisse éclairer.');
-		for (const q of c.quetes || []) box.appendChild(_rensBoutonCible((q.elite ? '🎯 ' : '') + q.titre, { mode: 'quete', quete_id: q.id }));
+		for (const q of c.quetes || []) box.appendChild(_rensBoutonCible((q.elite ? '🎯 ' : '') + q.titre, { mode: 'quete', quete_id: q.id }, q.bloque));
+	} else if (['dangers', 'donjons', 'ressources'].includes(_rensMode)) {
+		if (!(c[_rensMode] || []).length) vide('Rien de tel n\'a été signalé dans le pays.');
+		for (const s of c[_rensMode] || []) box.appendChild(_rensBoutonCible(s.nom, { mode: _rensMode, cible: s.id }, s.bloque));
 	} else if (_rensMode === 'bestiaire') {
 		if (!(c.bestiaire || []).length) vide('Aucune créature de votre bestiaire ne convient.');
 		for (const b of c.bestiaire || []) box.appendChild(_rensBoutonCible(b.nom, { mode: 'bestiaire', cible: b.id }));
@@ -12551,17 +12564,20 @@ function _rensRenderCibles() {
 function _rensRender() {
 	if (!_rensEtat) return;
 	document.getElementById('rens-lieu').textContent = _rensEtat.lieu || '';
-	if (!(_rensEtat.methodes || []).some(m => m.id === _rensMethode)) _rensMethode = ((_rensEtat.methodes || [])[0] || {}).id || '';
+	if (!(_rensEtat.methodes || []).some(m => m.cle === _rensMethode)) _rensMethode = ((_rensEtat.methodes || [])[0] || {}).cle || '';
 	_rensRenderMethodes();
 	_rensRenderCibles();
 }
 
-async function openRenseignement() {
+// `pnjId` : ouvert par le dialogue d'un PNJ (service `renseignement`) — c'est lui qu'on présélectionne.
+async function openRenseignement(pnjId) {
 	const data = await _aubFetch('api/renseignement/offre');
 	if (!data) return;
 	_rensEtat = data;
 	document.getElementById('rens-resultat').textContent = '';
 	if (!(data.methodes || []).length) { showToast('Personne ici ne sait rien vous apprendre.'); return; }
+	const parPnj = pnjId ? (data.methodes || []).find(m => m.interlocuteur_id === pnjId) : null;
+	if (parPnj) { _rensMethode = parPnj.cle; _rensMode = ''; }
 	_rensRender();
 	document.getElementById('game-container').classList.add('panel-hidden');
 	document.getElementById('rens-panel').classList.remove('panel-hidden');
@@ -12579,7 +12595,8 @@ async function chercherRenseignement(body, bouton) {
 	const m = _rensCourante();
 	if (!m) return;
 	document.querySelectorAll('#rens-cibles button').forEach(b => { b.disabled = true; });
-	const data = await _aubFetch('api/renseignement/chercher', Object.assign({ methode: m.id }, body));
+	const data = await _aubFetch('api/renseignement/chercher',
+		Object.assign({ methode: m.id, interlocuteur: m.interlocuteur_id || '' }, body));
 	if (!data) { _rensRenderCibles(); return; }
 	const r = data.resultat || {};
 	const box = document.getElementById('rens-resultat');
@@ -12591,6 +12608,7 @@ async function chercherRenseignement(body, bouton) {
 	if (r.pm) extras.push(`${r.acteur} −${r.pm} PM`);
 	if (r.xp) extras.push(`${r.acteur} +${r.xp} XP`);
 	if (r.note) extras.push('🗒️ note de renseignement rédigée');
+	if (r.affinite) extras.push(`🤝 ${r.acteur} +${r.affinite} d'affinité`);
 	if (extras.length) box.appendChild(_rensEl('span', 'q-desc', extras.join(' · ')));
 	if (data.purse) updatePurse(data.purse);
 	if (data.journal) renderFicheJournal(data.journal);
@@ -14247,6 +14265,12 @@ async function choisirPnj(choixId, extra) {
 				// ville ne fait pas forcément remonter l'affichage si une autre était déjà meilleure.
 				updateRang(data.rang.meilleur, data.rang.detail);
 			}
+		}
+		if (data.renseignement) {
+			// Service `renseignement` (réceptionniste de guilde) : le panneau 🔎 s'ouvre sur CE PNJ.
+			closePnjPanel();
+			openRenseignement(data.renseignement.pnj);
+			return;
 		}
 		if (data.enseignement) {
 			// Service `enseignement` d'un maître : la fiche (⚡, points, barre) arrive par data.fiche.

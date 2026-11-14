@@ -79,7 +79,8 @@ def monde(monkeypatch):
 	def find_docs_fn(selector, fields=None):
 		return [d for d in list(docs.values()) if all(d.get(k) == v for k, v in (selector or {}).items())]
 
-	for mod in (rr, characters, marche):
+	from utils import recrutement
+	for mod in (rr, characters, marche, recrutement):
 		monkeypatch.setattr(mod, "get_doc", get_doc_fn, raising=False)
 		monkeypatch.setattr(mod, "save_doc", save_doc_fn, raising=False)
 		monkeypatch.setattr(mod, "find_docs", find_docs_fn, raising=False)
@@ -92,15 +93,15 @@ def monde(monkeypatch):
 def _appel(monde, character, fn, *args, jets=()):
 	rr = monde["rr"]
 	monde["docs"][character["_id"]] = character
-	origine, origine_rand = rr.get_selected_character, rr.random.Random
+	origine, origine_rand = rr.get_selected_character, rr._hasard
 	try:
 		rr.get_selected_character = lambda _u: character
-		rr.random.Random = lambda: De(jets)
+		rr._hasard = lambda: De(jets)
 		resultat = fn(None, *args)
 		return asyncio.run(resultat) if asyncio.iscoroutine(resultat) else resultat
 	finally:
 		rr.get_selected_character = origine
-		rr.random.Random = origine_rand
+		rr._hasard = origine_rand
 
 
 def test_offre_du_guerrier_en_taverne(monde):
@@ -179,3 +180,97 @@ def test_catalogue_filtre_par_methode(monde):
 	assert [s["id"] for s in data["suggestions"]] == ["item:Herbe"]
 	c = _perso("guerrier")
 	assert _appel(monde, c, rr.catalogue, "veterans", "her")["suggestions"] == []
+
+
+# ── Salle commune de guilde ──────────────────────────────────────────────────────
+
+GUILDE = [
+	{"_id": "lieu:reception", "type": "lieu", "label": "La Halle - réception", "categorie": "guilde_aventurier",
+	 "lieu_parent": "lieu:cite"},
+	{"_id": "lieu:comptoir", "type": "lieu", "label": "La Halle - comptoir", "categorie": "guilde_aventurier_comptoir",
+	 "lieu_parent": "lieu:cite"},
+	{"_id": "link:4", "type": "connection", "nodes": [{"lieu": "lieu:reception", "pos": [1, 1]}, {"lieu": "lieu:cite", "pos": [6, 6]}]},
+	{"_id": "link:5", "type": "connection", "nodes": [{"lieu": "lieu:comptoir", "pos": [1, 1]}, {"lieu": "lieu:cite", "pos": [7, 7]}]},
+	{"_id": "pnj:cynan", "type": "pnj", "nom": "Cynan", "services": {"renseignement": {"noeuds": {"ouvre": "x"}}}},
+	{"_id": "aventurier:r1", "type": "aventurier", "statut": "offert", "giver": "lieu:reception", "prenom": "Ysolde",
+	 "voc": "guerrier", "xp_total": 0, "caracteristiques_current": dict(CARACTS)},
+	{"_id": "espece:dragon", "type": "espece", "nom": "Dragon", "tags": ["monstre"]},
+]
+
+
+@pytest.fixture
+def guilde(monde):
+	for d in GUILDE:
+		monde["docs"][d["_id"]] = d
+	france = monde["docs"]["lieu:france"]
+	france["rencontres"] = france["rencontres"] + [{"espece": "espece:dragon", "zones": ["zone:foret"]}]
+	monde["rr"]._rang = lambda eid: {"espece:loup": "F", "espece:dragon": "B"}.get(eid)
+	return monde
+
+
+def test_les_recrues_renseignent_a_la_reception_et_le_bouton_s_affiche(guilde):
+	rr, c = guilde["rr"], _perso("lettre", lieu="lieu:reception")
+	data = _appel(guilde, c, rr.offre)
+	recrue = next(m for m in data["methodes"] if m["interlocuteur"] == "recrue")
+	assert recrue["cle"] == "recrues|aventurier:r1" and "Ysolde" in recrue["nom"]
+	dangers = {s["id"]: s for s in recrue["cibles"]["dangers"]}
+	assert dangers["espece:loup"]["bloque"] is None
+	assert "dépasse" in dangers["espece:dragon"]["bloque"]        # recrue de rang F, dragon de rang B
+	assert rr.disponible(c)
+
+
+def test_une_recrue_qui_a_affronte_donne_le_lieu_exact_contre_un_pourboire(guilde):
+	rr, c = guilde["rr"], _perso("lettre", lieu="lieu:reception")
+	data = _appel(guilde, c, rr.chercher, {"methode": "recrues", "interlocuteur": "aventurier:r1",
+										   "mode": "dangers", "cible": "espece:loup"})
+	r = data["resultat"]
+	assert r["niveau"] == "exact" and "affronté" in r["texte"]       # seule espèce à sa mesure : affrontée
+	assert r["cout"] == rr.rens.cout_recrue("exact", 0) and r["affinite"] == character_stats.RENS_RECRUE_AFFINITE
+	assert c["affinites"]["aventurier:r1"] > 0
+	assert c["bestiaire"]["espece:loup"]["lieux"][0]["oui_dire"]
+
+
+def test_sujet_bloque_rien_paye_aucun_delai(guilde):
+	rr, c = guilde["rr"], _perso("lettre", lieu="lieu:reception")
+	avant = rr.money_to_cuivre(c)
+	with pytest.raises(HTTPException) as e:
+		_appel(guilde, c, rr.chercher, {"methode": "recrues", "interlocuteur": "aventurier:r1",
+										"mode": "dangers", "cible": "espece:dragon"})
+	assert e.value.status_code == 403
+	assert rr.money_to_cuivre(c) == avant and not c.get("renseignements_at")
+
+
+def test_le_receptionniste_au_comptoir_via_son_dialogue(guilde):
+	rr = guilde["rr"]
+	c = _perso("lettre", lieu="lieu:comptoir", pnj_present={"lieu": "lieu:comptoir", "characters": ["pnj:cynan"]},
+			   rangs_guilde={"lieu:cite": "C"})
+	assert not rr.disponible(c)                                   # pas de bouton : on passe par Cynan
+	data = _appel(guilde, c, rr.offre)
+	m = data["methodes"][0]
+	assert m["cle"] == "receptionniste|pnj:cynan" and m["cout_max"] == 0
+	assert all(s["bloque"] is None for s in m["cibles"]["dangers"])   # rang C ≥ B − 1
+	data = _appel(guilde, c, rr.chercher, {"methode": "receptionniste", "interlocuteur": "pnj:cynan",
+										   "mode": "dangers", "cible": "espece:dragon"}, jets=[1])
+	assert data["resultat"]["niveau"] == "exact" and data["resultat"]["cout"] == 0
+	assert data["resultat"]["xp"] == character_stats.RENS_XP_BELLE
+	with pytest.raises(HTTPException) as e:                        # délai PAR interlocuteur
+		_appel(guilde, c, rr.chercher, {"methode": "receptionniste", "interlocuteur": "pnj:cynan",
+										"mode": "dangers", "cible": "espece:loup"})
+	assert e.value.status_code == 409
+
+
+def test_rang_du_joueur_trop_bas_pour_le_receptionniste(guilde):
+	rr = guilde["rr"]
+	c = _perso("lettre", lieu="lieu:comptoir", pnj_present={"lieu": "lieu:comptoir", "characters": ["pnj:cynan"]})
+	m = _appel(guilde, c, rr.offre)["methodes"][0]
+	assert "Pas pour votre rang" in {s["id"]: s for s in m["cibles"]["dangers"]}["espece:dragon"]["bloque"]
+
+
+def test_quete_de_visite_donne_le_lieu_au_carnet(guilde):
+	rr = guilde["rr"]
+	q = {"id": "q1", "titre": "Visiter la France", "objectif": {"type": "visite", "cible": "lieu:france", "quantite": 1}}
+	c = _perso("lettre", lieu="lieu:comptoir", pnj_present={"lieu": "lieu:comptoir", "characters": ["pnj:cynan"]},
+			   quetes_actives=[q])
+	data = _appel(guilde, c, rr.chercher, {"methode": "receptionniste", "interlocuteur": "pnj:cynan",
+										   "mode": "quete", "quete_id": "q1"}, jets=[50])
+	assert "« France »" in data["resultat"]["texte"] and "bestiaire" not in c

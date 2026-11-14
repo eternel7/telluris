@@ -59,10 +59,24 @@ Spécification validée par l'Auteur (13-14/11/2026), implémentée. Module pur 
 | `betes_plantes` | druide | sauvage | int | 6 PM | bêtes, végétaux |
 | `faucon` | chaman | pays + Œil du faucon | int | PM de la compétence | zones de la carte |
 | `informateur` | — | taverne | cha | 10 × 1,5 | ≤ région |
+| `recrues` | (chaque recrue) | réception de guilde | métier de la recrue | pourboire | quêtes, dangers, donjons, ressources |
+| `receptionniste` | (PNJ du comptoir) | comptoir, par son dialogue | cha du joueur | gratuit | idem |
 
 - **Zone sauvage** (`est_sauvage`) = pays OU `tags_nature` OU rencontres/ressources OU hors cité.
 - **`salle_d_armes`** : recopié dans `utils/capacites.py` (case de l'éditeur), verrouillé par `tests/test_capacites.py`. ⚠️ Le prédicat `scriptorium` est recopié de `scriptorium.lieu_est_scriptorium` (verrouillé par `test_predicat_scriptorium_identique_au_vrai`).
 - Bouton 🔎 de `/play` : `routers/renseignement.disponible` (index réduit à la chaîne du lieu, pas les 700 lieux) ; panneau `#rens-panel` (⟵ / Échap ferment sans rien payer).
 
+## Salle commune de guilde (Auteur, 14/11/2026)
+- **Interlocuteurs** : méthode à `interlocuteur` ⇒ une entrée PAR PNJ (`applicables(..., interlocuteurs=)`, `cle` = `methode|pnj`, qui porte le délai — une question par interlocuteur).
+  - `recrues` (réception, `categorie: guilde_aventurier`) : chaque recrue OFFERTE et non périmée du tableau (`recrutement.recrues_du_giver`). Seuil = méthode de SA vocation sur SES caracs (`methode_de_vocation`, sinon `cha`).
+  - `receptionniste` (`via_pnj`, comptoir) : PNJ présent (`pnj_present`) portant `services.renseignement` ; ouvert par le choix « Que sait-on… ? » de son dialogue (service `renseignement` de `routers/pnj.py` → `reponse.renseignement.pnj` → client `openRenseignement(pnj)`), JAMAIS par le bouton 🔎 (`disponible` ignore `via_pnj`). Jet sur le Cha du JOUEUR (+ relation), gratuit, XP de belle réussite au joueur.
+- **Sujets** (modes `quete` + `MODES_COIN`) : quêtes actives (kill/collect/chasse ⇒ la cible ; visite/escorte/transport ⇒ le LIEU, `pistes_speciales`, carnet seul) ; `dangers` / `ressources` = espèces et matières des lieux du **pays** de la cité ; `donjons` = portail dans le pays (`texte_donjon` : peuplement, niveaux, grade, `etat_donjon` nettoyé / réinfesté / jamais, oui-dire sur la salle).
+- **Bornes de rang** (`borne_rang`, AVANT tout paiement ; sujet grisé avec la raison, ni débit ni délai) : rang de l'interlocuteur ≥ grade du sujet (recrue : `rang_de_niveau`, dérivé de `QUETE_RANG_NIVEAU_ENTREE` ; réceptionniste : aucune) ET rang du joueur ≥ grade − 1, rang = meilleur de CETTE guilde et de la capitale du pays (`rang_joueur_guilde`). Grade = l'espèce, ou la pire du donjon ; matière et lieu : aucun.
+- **Savoir d'une recrue** (`savoir_recrue`, le meilleur gagne) : `affrontes` (2-3 espèces du pays de grade ≤ le sien, graine = son id, rien de stocké) ⇒ exact sans jet ; sinon pistes du pays (origine = cité de la guilde) ⇒ jet + `RENS_RECRUE_ORIGINE_BONUS` ; sinon méthode de sa vocation ⇒ jet ; sinon rien.
+- **Pourboire** (`cout_recrue`) = `RENS_RECRUE_POURBOIRE` × `RENS_COUT_MULT[niveau]` × (1 + niveau de la recrue / 10) ; `+RENS_RECRUE_AFFINITE` (`recrutement.ajuster_affinite`). Aucune XP au joueur (le jet est celui de la recrue).
+- **Contenu** : `dev/gen_renseignement_guilde.py` → `jsons/renseignement_guilde_a_importer.json` (règles + les 26 PNJ de comptoir, doc RELU fusionné : service, choix au nœud de départ, nœud `renseignement_ouvre` ; lint sans erreur). Lint : `NOEUDS_REQUIS["renseignement"] = {"ouvre"}`.
+- ⚠️ Un pays sans `rencontres`/`ressources` (Angleterre au dump du 13/11) ⇒ aucun sujet « du coin » : lacune de contenu, pas de repli.
+- Verrouillé par `tests/test_renseignement.py` § Salle commune et `tests/test_renseignement_endpoints.py` (fixture `guilde`).
+
 ## Variables de monde
-`RENS_DELAI_MINUTES` 240 · `RENS_PORTEE_LIEUX` 12 · `RENS_FAUSSE_PCT` 20 · `RENS_EXACT_FACTEUR` 0,5 · `RENS_RELATION_POIDS` 0,2 · `RENS_RELATION_MAX` 15 · `RENS_COUT_MULT` {rumeur 1, region 1,5, exact 2} · `RENS_BRAS_DE_FER_PV` 1D6 · `RENS_INFORMATEUR_MULT` 1,5 · `RENS_INFORMATEUR_PROBA` 0,5 · `RENS_POURBOIRE_FACTEUR` 2 · `RENS_POURBOIRE_DES` 1D10 · `RENS_XP_BELLE` 10.
+`RENS_DELAI_MINUTES` 240 · `RENS_PORTEE_LIEUX` 12 · `RENS_FAUSSE_PCT` 20 · `RENS_EXACT_FACTEUR` 0,5 · `RENS_RELATION_POIDS` 0,2 · `RENS_RELATION_MAX` 15 · `RENS_COUT_MULT` {rumeur 1, region 1,5, exact 2} · `RENS_BRAS_DE_FER_PV` 1D6 · `RENS_INFORMATEUR_MULT` 1,5 · `RENS_INFORMATEUR_PROBA` 0,5 · `RENS_POURBOIRE_FACTEUR` 2 · `RENS_POURBOIRE_DES` 1D10 · `RENS_XP_BELLE` 10 · `RENS_RECRUE_POURBOIRE` 5 · `RENS_RECRUE_ORIGINE_BONUS` 15 · `RENS_RECRUE_AFFINITE` 1.

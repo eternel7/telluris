@@ -100,6 +100,18 @@ METHODES = [
 	 "portee_max": 0, "sources": ["zone"], "cibles": {"ressources": False},
 	 "repliques": {"intro": "L'esprit du faucon survole la carte pour vous.",
 				   "description": "Les zones de cette carte et leurs espèces ; coûte les PM d'Œil du faucon."}},
+	# Salle commune de guilde (Auteur, 14/11) : un interlocuteur par PNJ — chaque recrue du
+	# tableau de la réception, le réceptionniste du comptoir (ouvert par son dialogue).
+	{"id": "recrues", "nom": "Interroger une recrue", "icon": "🧭", "interlocuteur": "recrue",
+	 "lieu": {"categories": ["guilde_aventurier"]}, "test": ["cha"], "cout": 0,
+	 "modes": ["quete", "dangers", "donjons", "ressources"],
+	 "repliques": {"intro": "Contre un pourboire, la recrue raconte ce qu'elle sait.",
+				   "description": "Ce qu'elle a affronté, ce que dit son pays, ce que sait son métier."}},
+	{"id": "receptionniste", "nom": "Les registres de la Guilde", "icon": "📒", "interlocuteur": "receptionniste",
+	 "via_pnj": True, "lieu": {"categories": ["guilde_aventurier_comptoir"]}, "test": ["cha"], "cout": 0,
+	 "modes": ["quete", "dangers", "donjons", "ressources"],
+	 "repliques": {"intro": "Les registres de la Guilde s'ouvrent sur le comptoir.",
+				   "description": "Gratuit : ce que la Guilde a consigné, selon votre rang."}},
 	{"id": "informateur", "nom": "Payer l'informateur", "icon": "🕵️", "informateur": True,
 	 "lieu": TAVERNE, "test": ["cha"], "cout": 10, "niveau_max": "region",
 	 "repliques": {"intro": "Contre quelques pièces, l'informateur de la taverne se penche vers vous.",
