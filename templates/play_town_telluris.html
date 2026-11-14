@@ -1182,6 +1182,7 @@
 		.sh-sort-compo { font-size: 0.75rem; color: var(--muted); background: rgba(74,74,90,0.25);
 			border: 1px solid rgba(74,74,90,0.5); border-radius: 8px; padding: 1px 7px; }
 		.sh-sort-compo.off { opacity: 0.45; text-decoration: line-through; }
+		.capa-arme-manque { color: #c0392b; font-weight: 600; }
 		.sh-sort-grim { font-size: 0.8rem; flex-shrink: 0; }
 		/* Affectation à une case de la barre de combat (cf. utils/slots_actions.py) :
 		   le sélecteur remplace l'ancien 📌, qui ne disait pas OÙ l'action atterrissait. */
@@ -8342,10 +8343,16 @@ function _renderCompetences(list) {
 		const actions = c.mode === 'passive'
 			? pin + (c.action_piege
 				? _aideCombat('Action de combat : à placer dans la barre')
-				: '<span class="sh-skill-lvl" title="Bonus permanent, déjà inclus dans vos caractéristiques">🛡 passive</span>')
+				: c.arme_ok === false
+					? '<span class="sh-skill-lvl" title="Sans l\'arme requise, ce bonus ne compte pas">🛡 inactive</span>'
+					: '<span class="sh-skill-lvl" title="Bonus permanent, déjà inclus dans vos caractéristiques">🛡 passive</span>')
 			: pin + (c.utilisable
 				? `<button type="button" class="sh-drop-btn" onclick="utiliserCompetence('${c.competence_id}', this)">Utiliser</button>`
-				: _aideCombat('Utilisable en combat seulement'));
+				// Exigence d'arme non remplie (`arme_ok`, décidé au serveur) : le motif est dans
+				// la ligne d'effets (`_armeLabel`), rien à « utiliser » tant que l'arme manque.
+				: c.arme_ok === false
+					? '<span class="sh-skill-lvl" title="Équipez l\'arme requise">⛔ arme requise</span>'
+					: _aideCombat('Utilisable en combat seulement'));
 		const pm = c.cout_pm ? `<span class="sh-sort-pm">${_pmLabel(c)}</span>` : '';
 		return `<div class="sh-skill" data-capa="c:${c.competence_id}">
 			<span class="sh-skill-icon">${c.icon || '⚡'}</span>

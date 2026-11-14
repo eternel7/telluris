@@ -3893,8 +3893,15 @@ function capaPortee(c) {
 // Profil d'arme emprunté par une compétence — miroir de combat._profil_emprunte. `cc` → la
 // mêlée (repli mains nues) ; `cd` → l'arc, sinon l'arme de lancer, STRICTEMENT (jamais le
 // repli `cac` d'attackProfile : on ne tire pas avec une épée) ; `magique` / sans dés → rien.
+// Exigence d'arme : `arme_profil` (cac / jet / tir, servi par le payload) désigne le profil de
+// l'arme qui la remplit — « Couteaux de lancer » emprunte le couteau même arc en main.
 function capaProfilEmprunte(c) {
 	if (!c.competence_id || !(c.effets || {}).degats) return null;
+	if ((c.jet === 'cc' || c.jet === 'cd') && c.arme_profil) {
+		if (c.arme_profil === 'cac') return attackProfile('cac');
+		const p = playerAttacks().find(a => a.mode === c.arme_profil);
+		if (p) return p;
+	}
 	if (c.jet === 'cc') return attackProfile('cac');
 	if (c.jet === 'cd') {
 		const list = playerAttacks();
@@ -4008,7 +4015,8 @@ function sortCastable(s) {
 function compTargets(c) { return capaCibles(c); }
 function compCastable(c) {
 	const j = me() || {};
-	return (j.currentPM || 0) >= coutPmCharge(c)
+	// Exigence d'arme : `arme_ok` décidé au serveur (utils/exigence_arme), qui refuse aussi.
+	return c.arme_ok !== false && (j.currentPM || 0) >= coutPmCharge(c)
 		&& coutPvPayable(c) && !canalise()
 		&& (c.cible === 'soi' || capaCibles(c).length > 0);
 }
@@ -4635,6 +4643,8 @@ function compLabel(c) {
 	// Zone d'effet : comme pour les sorts, c'est le seul canal sur mobile (pas de survol).
 	const zone = libelleZone(normaliserZone(c.zone), c.cible);
 	if (zone) parts.push(zone);
+	// Exigence d'arme : le motif d'une case grisée (texte du survol, jamais du HTML).
+	if (c.arme_requise) parts.push(`${c.arme_ok === false ? '⛔' : '🗡'} exige ${c.arme_requise}`);
 	return `${c.icon || '⚡'} ${c.nom}${c.cout_pm ? ` — ${pmTexte(c)}` : ''}`
 		+ (parts.length ? ` (${parts.join(', ')})` : '');
 }

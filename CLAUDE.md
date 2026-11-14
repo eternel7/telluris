@@ -29,7 +29,7 @@ node dev/check_js.js               # syntaxe du JS inline des templates ET de te
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte` · `conflit` · `partage` · `colonisation`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
+Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte` · `conflit` · `partage` · `colonisation` · `exigence_arme`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
 - ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
 - **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
@@ -95,6 +95,9 @@ utils/
                          #   FORMULES À CARACTÉRISTIQUES (`1D{Int/5}`, chokepoints `resoudre_effets` + `resoudre_temps`),
                          #   et les prédicats d'éligibilité PARTAGÉS avec les compétences
                          #   (capacite_utilisable_combat / effets_agissent_sur_cible / _exploration)
+  exigence_arme.py       # exigence d'ARME d'une compétence (pur) : champ `arme` {mode cac/jet/tir/bouclier/mains_nues/
+                         #   deux_armes (OU), tags (OU, sous_categorie comprise)} ; armes portées FIGÉES au snapshot,
+                         #   active refusée / passive inactive sans l'arme, profil emprunté aligné
   catalogue_capacites.py # /admin/sorts (par école) et /admin/competences (par vocation) (pur) : entrées au
                          #   format du payload ⚡ de /play + doc brut ; formules gardées en texte (aucun personnage)
   chronologie.py         # /admin/lore/chronologie (pur) : source docs/lore/chronologie.json, bornes (ans / entre /

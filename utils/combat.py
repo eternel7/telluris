@@ -51,6 +51,7 @@ from utils import xp_monstre
 from utils import capacites_monstre
 from utils import ia_monstre
 from utils import chasse_signee
+from utils import exigence_arme
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -3769,6 +3770,10 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"canalisation": canalisation,
 		"portee": portee_cac,
 		"attaque_profils": attaques,   # profils d'attaque (cac/jet/tir) ; ≠ "attaques" (compteur)
+		# Armes et bouclier en main (cf. utils/exigence_arme), FIGÉS à l'entrée comme les
+		# profils : garde de l'exigence d'arme des compétences et profil emprunté. Clé absente
+		# (combat déjà en base) ⇒ aucune vérification.
+		"armes_portees": exigence_arme.armes_portees(character, get_doc),
 		"pos": {"x": 0, "y": 0},
 		"facing": 0,
 		"cells_moved": 0,
@@ -4670,6 +4675,18 @@ def _profil_emprunte(joueur: dict, competence: dict) -> dict | None:
 	if not (comp.get("effets") or {}).get("degats"):
 		return None
 	jet = comp.get("jet", "cc")
+	# EXIGENCE D'ARME : l'emprunt suit l'arme qui la remplit — « Couteaux de lancer » prend
+	# le couteau même avec un arc en main. Mode non désigné (bouclier, mains nues), aucune
+	# exigence ou snapshot d'avant ⇒ règle ci-dessous, inchangée.
+	if jet in ("cc", "cd"):
+		mode = exigence_arme.mode_emprunte(comp.get("arme"), joueur.get("armes_portees"))
+		if mode == "cac":
+			return _profil_attaque(joueur, "cac")
+		if mode:
+			profil = next((a for a in joueur.get("attaque_profils") or []
+						   if a.get("mode") == mode), None)
+			if profil is not None:
+				return profil
 	if jet == "cc":
 		return _profil_attaque(joueur, "cac")
 	if jet == "cd":
@@ -7718,6 +7735,10 @@ def _resoudre_action_joueur(
 		# et se paie une seule fois, alors qu'une incantation longue traverse des tours.
 		if not competence:
 			return {"error": "Compétence invalide."}
+		# EXIGENCE D'ARME, AVANT tout débit (cf. utils/exigence_arme) : lue sur le snapshot.
+		manque = exigence_arme.manquante(competence, joueur.get("armes_portees"))
+		if manque:
+			return {"error": f"Cette compétence exige {manque}."}
 		competence = resoudre_temps(competence, caracts_effectives(joueur))
 		effets = resoudre_effets(competence.get("effets") or {}, caracts_effectives(joueur))
 		cout_pm = _cout_pm_charge(joueur, competence)

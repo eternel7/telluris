@@ -289,6 +289,17 @@ CATALOGUE = [
 			"docs absents du dump le plus récent ou qui en diffèrent : régénération idempotente.",
 	},
 	{
+		"id": "gen_competences_armes",
+		"label": "🗡 Exigence d'arme des compétences",
+		"argv": _py("gen_competences_armes.py"),
+		"ecrit": "Écrit jsons/competences_armes_a_importer.json et docs/competences_armes.md.",
+		"description": "Pose le champ `arme` sur les compétences (frappe cc → arme de mêlée, tir cd → "
+			"arme de tir, plus une table d'exceptions : moine, cris, fioles, jet, deux armes, boucliers, "
+			"lames, postures, passives), range deux boucliers en `sous_categorie: bouclier` et rend "
+			"aux variantes sur mesure les tags de leur base qui leur manquent (`legere`, `armure_cuir`…). "
+			"N'écrit que les docs qui changent : régénération idempotente.",
+	},
+	{
 		"id": "gen_animations_capacites",
 		"label": "🎬 Animations et sons des sorts et compétences",
 		"argv": _py("gen_animations_capacites.py"),

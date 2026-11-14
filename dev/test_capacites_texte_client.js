@@ -60,4 +60,20 @@ test('pouvoir d\'un objet porté : « 🏆 accordé par », nom échappé (utils
 	assert.ok(!_sortLigneDesc({ effets: {}, cible: 'soi' }).includes('🏆'));
 });
 
+test('exigence d\'arme : neutre, ⛔ si manquante, « inactive » pour une passive (utils/exigence_arme)', () => {
+	assert.strictEqual(_armeLabel({ arme_requise: '' }), '');
+	assert.strictEqual(_armeLabel({}), '');
+	// Catalogue d'admin : aucun porteur, donc pas d'`arme_ok` ⇒ neutre.
+	assert.ok(_armeLabel({ arme_requise: 'une arme de tir (arc)' }).includes('🗡 exige une arme de tir (arc)'));
+	assert.ok(_armeLabel({ mode: 'active', arme_requise: 'un bouclier', arme_ok: true }).includes('🗡 exige un bouclier'));
+	const manque = _armeLabel({ mode: 'active', arme_requise: 'un bouclier', arme_ok: false });
+	assert.ok(manque.includes('⛔ exige un bouclier') && manque.includes('capa-arme-manque'));
+	assert.ok(_armeLabel({ mode: 'passive', arme_requise: 'une arme de tir', arme_ok: false })
+		.includes('⛔ inactive : exige une arme de tir'));
+	// Libellé servi par le serveur, échappé quand même (innerHTML).
+	assert.ok(_armeLabel({ arme_requise: 'x <b>' }).includes('x &lt;b&gt;'));
+	assert.ok(_compLigneDesc({ mode: 'active', cible: 'soi', effets: {}, arme_requise: 'un bouclier' })
+		.includes('🗡 exige un bouclier'));
+});
+
 console.log(`✓ ${ok} tests capacites_texte`);

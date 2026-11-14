@@ -197,10 +197,23 @@ function _conditionLabel(c) {
 	const tags = ((c && c.condition) || {}).battle_map_tags || [];
 	return tags.length ? ` · 🗺️ seulement en terrain : ${tags.join(', ')}` : '';
 }
+// Exigence d'ARME (`arme_requise`, libellé servi par utils/exigence_arme ; `arme_ok` décidé au
+// serveur, qui seul connaît les tags des armes portées). `arme_ok === false` ⇒ ⛔, et une
+// passive s'annonce « inactive » ; absent (catalogues d'admin, sans personnage) ⇒ neutre.
+function _armeLabel(c) {
+	if (!c || !c.arme_requise) return '';
+	const txt = String(c.arme_requise).replace(/[&<>"']/g, ch => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[ch]);
+	if (c.arme_ok === false) {
+		const quoi = c.mode === 'passive' ? 'inactive : exige' : 'exige';
+		return ` · <span class="capa-arme-manque" title="Équipez l'arme requise">⛔ ${quoi} ${txt}</span>`;
+	}
+	return ` · <span title="Arme à avoir en main">🗡 exige ${txt}</span>`;
+}
 // Ligne d'effets d'une compétence connue, sous sa description.
 function _compLigneDesc(c) {
 	let portee = '';
 	if (c.mode === 'active' && c.cible === 'ennemi') portee = ` · portée ${c.portee}`;
 	else if (c.mode === 'active' && c.cible === 'allie') portee = ' · 🤝 sur un allié';
-	return `${_sortEffetsLabel(c.effets, _compArme(c) ? '+' : '')}${_sortTempsLabel(c)}${portee}${_zoneLabel(c)}${_conditionLabel(c)}` + _accordeLabel(c);
+	return `${_sortEffetsLabel(c.effets, _compArme(c) ? '+' : '')}${_sortTempsLabel(c)}${portee}${_zoneLabel(c)}${_conditionLabel(c)}`
+		+ _armeLabel(c) + _accordeLabel(c);
 }

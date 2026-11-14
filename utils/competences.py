@@ -37,6 +37,7 @@ from utils.sorts import (
 )
 from utils.zones_effet import normaliser_zone
 from utils import pieges
+from utils import exigence_arme
 
 MODES = ("passive", "active")
 # JETS vient de utils.sorts (source unique partagée avec les sorts) ; seul le DÉFAUT
@@ -107,6 +108,9 @@ def normaliser_competence(doc) -> dict | None:
 		# compétence n'agit en combat que si la carte porte l'un de ces tags
 		# (condition_remplie). Absente = toujours active.
 		"condition": dict(doc.get("condition") or {}),
+		# EXIGENCE D'ARME (cf. utils/exigence_arme) : {modes, tags} ou None. Active ⇒ refusée
+		# sans l'arme ; passive ⇒ sans effet sans l'arme (`bonus_passifs`).
+		"arme": exigence_arme.normaliser_arme(doc.get("arme")),
 		# Animation de combat (doc `animation:*`), optionnelle — même liste blanche, même
 		# piège que pour les sorts : sans ce champ, la liaison n'atteint jamais le moteur.
 		"animation": str(doc.get("animation") or ""),
@@ -235,6 +239,19 @@ def competences_connues_docs(character: dict, get_doc) -> list:
 	return out
 
 
+class _ArmesPortees:
+	"""Armes portées lues UNE fois, et seulement si une compétence a une exigence : un
+	personnage sans exigence ne relit aucun item de plus qu'avant."""
+
+	def __init__(self, character: dict, get_doc):
+		self._character, self._get_doc, self._liste = character, get_doc, None
+
+	def liste(self) -> list:
+		if self._liste is None:
+			self._liste = exigence_arme.armes_portees(self._character, self._get_doc)
+		return self._liste
+
+
 def bonus_passifs(character: dict, get_doc) -> dict:
 	"""Somme des buffs/régén/esquive des compétences PASSIVES connues :
 	{buffs, regen_pv, regen_pm, esquive, buffs_sources}. Les actives n'y contribuent jamais
@@ -258,8 +275,13 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 	auras: list = []
 	regen_pv = regen_pm = esquive = 0
 	detection_pieges = desamorcage = ambidextre = pistage = 0
+	armes = _ArmesPortees(character, get_doc)
 	for comp in competences_connues_docs(character, get_doc):
 		if not est_passive(comp) or comp.get("condition"):
+			continue
+		# Passive à EXIGENCE D'ARME : elle ne compte que l'arme en main. Recalculée à chaque
+		# équipement / retrait (`synchroniser_competences_bonus`, appelé par equip/unequip).
+		if comp.get("arme") and not exigence_arme.satisfaite(comp["arme"], armes.liste()):
 			continue
 		if est_aura(comp):
 			auras.append(entree_aura(comp))
@@ -343,8 +365,11 @@ def furtivite_passive(character: dict, get_doc, map_tags) -> int:
 	sources multiples on prend le MAX (être caché ne se cumule pas, on garde la
 	meilleure dissimulation)."""
 	best = 0
+	armes = _ArmesPortees(character, get_doc)
 	for comp in competences_connues_docs(character, get_doc):
 		if not est_passive(comp) or not condition_remplie(comp, map_tags):
+			continue
+		if comp.get("arme") and not exigence_arme.satisfaite(comp["arme"], armes.liste()):
 			continue
 		best = max(best, _as_int(comp["effets"].get("furtivite")))
 	return best
@@ -553,14 +578,26 @@ def liste_competences_payload(character: dict, get_doc, contexte: str,
 		from utils.consommables import caracts_avec_buffs
 		caracts = caracts_avec_buffs(character)
 
+	armes = _ArmesPortees(character, get_doc)
 	out = []
 	for comp in competences_connues_docs(character, get_doc):
 		if contexte == "combat" and not competence_utilisable_combat(comp):
 			continue
 		# Entretien et PA d'incantation FORMULÉS, résolus pour ce porteur (comme la portée).
 		temps = resoudre_temps(comp, caracts)
+		# EXIGENCE D'ARME : décidée ICI (le client ne connaît pas les tags des armes portées).
+		# En combat, les slots du doc sont ceux du snapshot : on ne s'équipe pas en combat.
+		arme_ok = not comp.get("arme") or exigence_arme.satisfaite(comp["arme"], armes.liste())
 		out.append({
-			"utilisable": True if contexte == "combat" else competence_utilisable_exploration(comp),
+			"utilisable": True if contexte == "combat"
+						  else (competence_utilisable_exploration(comp) and arme_ok),
+			# « une arme de tir (arc) » — vide sans exigence ; `arme_ok` faux ⇒ case grisée
+			# (active) ou « inactive » (passive). `arme_profil` : mode d'attaque emprunté
+			# (cac/jet/tir) quand l'exigence le désigne, miroir de `combat._profil_emprunte`.
+			"arme_requise": exigence_arme.libelle(comp.get("arme")),
+			"arme_ok": arme_ok,
+			"arme_profil": (exigence_arme.mode_emprunte(comp["arme"], armes.liste())
+							if comp.get("arme") else None),
 			"competence_id": comp["id"],
 			"nom": comp["nom"],
 			"icon": comp["icon"],

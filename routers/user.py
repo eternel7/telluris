@@ -11,6 +11,7 @@ import random
 import os
 from db.config import save_doc, save_docs, get_doc, delete_doc, find_docs
 from utils import pouvoirs_objets
+from utils import exigence_arme
 from utils.auth import get_current_user, create_access_token, ouvrir_session, fermer_session, revoquer_sessions
 from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
@@ -1951,6 +1952,10 @@ def utiliser_competence(
 	comp = competences_util.normaliser_competence(get_doc(competence_id))
 	if not comp or not competences_util.competence_utilisable_exploration(comp):
 		raise HTTPException(status_code=422, detail="Cette compétence ne peut pas être utilisée hors combat")
+	# Exigence d'arme (cf. utils/exigence_arme), sur l'équipement du LANCEUR, avant tout débit.
+	manque = exigence_arme.manquante(comp, exigence_arme.armes_portees(character, get_doc))
+	if manque:
+		raise HTTPException(status_code=422, detail=f"Cette compétence exige {manque}.")
 	# Même tarif de charge que les sorts : sorts et compétences partagent le contrat.
 	cout_pm = charge_magie.cout_pm_porteur(character, comp, resolve_item_ref)
 	if int(character.get("currentPM", 0) or 0) < cout_pm:

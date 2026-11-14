@@ -15,6 +15,7 @@ remplace la valeur.
 
 from utils import sorts
 from utils import competences
+from utils import exigence_arme
 
 SANS_ECOLE = "(sans école)"
 SANS_VOCATION = "(sans vocation)"
@@ -105,6 +106,8 @@ def entree_competence(doc: dict) -> dict:
 		"portee": _portee(vue),
 		"zone": vue["zone"],
 		"condition": vue.get("condition") or {},
+		# Exigence d'arme (libellé seul) : aucun porteur, donc ni `arme_ok` ni grisage.
+		"arme_requise": exigence_arme.libelle(vue.get("arme")),
 		"effets": _apercu(vue["effets"]),
 		"sensibilite_charge": vue["sensibilite_charge"],
 	}

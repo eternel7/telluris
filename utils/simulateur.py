@@ -54,6 +54,7 @@ from models import character_stats
 from models.character_stats import BaseStats, compute_character_level
 from utils import capacites_monstre
 from utils import combat
+from utils import exigence_arme
 from utils import ia_monstre
 from utils import jetons
 from utils.characters import (SLOT_ZONE, item_ref_id, main_occupee_par_deux_mains,
@@ -374,6 +375,9 @@ def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=(), objets: bool = T
 	restent en place ; l'équipement non plus (un duel aux poings ne se demande pas)."""
 	sorts_off, comps_off, soutiens, consommables = [], [], [], []
 	vus = set()
+	# Exigence d'arme (cf. utils/exigence_arme) : une compétence que le jeu refuserait faute
+	# de l'arme en main n'entre pas dans le duel. Lu une fois, sur l'équipement d'essai.
+	armes = exigence_arme.armes_portees(character, get_doc_fn)
 	for entree in slots_effectifs(character, get_doc_fn):
 		if not entree:
 			continue
@@ -398,6 +402,8 @@ def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=(), objets: bool = T
 		elif type_ == "competence":
 			comp = normaliser_competence(get_doc_fn(ref))
 			if not comp or not competence_utilisable_combat(comp) or not condition_remplie(comp, map_tags):
+				continue
+			if exigence_arme.manquante(comp, armes):
 				continue
 			eff = comp["effets"]
 			if comp["cible"] == "ennemi":
