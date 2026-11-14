@@ -89,18 +89,9 @@ def potentiel_combat(snapshot: dict, arsenal: dict, regles: dict | None = None) 
 
 	meilleure, option_retenue = 0.0, ""
 	for opt in options_offensives_statiques(snapshot, arsenal):
-		def seuil_de(coup, opt=opt):
-			if opt["jet"] == "magique":
-				return combat._magic_hit_threshold(
-					snapshot.get("toucher_magique", 0), r["pm_def_reference"])
-			# Précision résolue par le moteur (typologie, deux armes, compétence martiale).
-			skill = coup.get("skill")
-			if skill is None:
-				skill = snapshot.get("cd", 0) if opt["jet"] == "cd" else snapshot.get("cc", 0)
-			return combat._hit_threshold(skill, r["defense_reference"])
 		# Dégâts par la formule PARTAGÉE (espérance des dés au lieu du tirage) : changer
 		# la règle du jeu met ce score à jour tout seul. Deux armes ⇒ deux coups par action.
-		par_coup = esperance_option(snapshot, etalon, opt, seuil_de)
+		par_coup = _par_coup_etalon(snapshot, opt, r)
 		par_round = par_coup * actions_max * (1 + r["bonus_portee"] * (opt["portee"] - 1))
 		if opt["cout_pm"] > 0:
 			castabilite = min(1.0, pm_max / (opt["cout_pm"] * actions_max)) if pm_max else 0.0
@@ -121,29 +112,50 @@ def potentiel_combat(snapshot: dict, arsenal: dict, regles: dict | None = None) 
 			"survie": round(survie, 1), "option_retenue": option_retenue}
 
 
-# ── MAGIE d'une espèce : les sorts qu'un spécimen TIRE ───────────────────────────────
-# Un monstre tire `k` sorts (niveau de son profil, borné au pool) parmi ceux que son IA sait
-# lancer (`combat.roll_monster_sorts`), et lance AU PLUS UNE capacité par tour
-# (`combat._tenter_capacite_monstre`). Son offense de round avec le sort `s` vaut donc la
-# valeur de `s` + ses actions RESTANTES à l'arme — jamais moins que l'arme seule ; et comme
-# il joue chaque tour son meilleur sort, l'offense magique est l'ESPÉRANCE, sur le tirage,
-# du meilleur des `k` sorts tirés : loi exacte P(le i-ᵉ meilleur du pool est le meilleur
-# tiré) = C(n−i, k−1) / C(n, k) — déterministe, comme l'équipement en espérance.
+# ── CAPACITÉS d'une espèce : sorts tirés et capacités innées, UNE par tour ───────────────
+# Un monstre lance AU PLUS UNE capacité par tour (`combat._tenter_capacite_monstre`), sort tiré
+# ou compétence innée (souffle, étreinte…), celle-ci soumise à sa RECHARGE. Son round avec la
+# capacité `c` vaut donc la frappe de `c` + ses actions RESTANTES à l'arme — jamais moins que
+# l'arme seule. L'offense d'une espèce est la moyenne de ses rounds sur l'horizon
+# `tours_reference` :
+#   · SORTS : il en tire `k` (niveau de son profil, borné au pool des sorts que son IA sait
+#     lancer — `combat.roll_monster_sorts`) et joue son meilleur ; espérance du meilleur des
+#     `k` tirés, loi exacte P(le i-ᵉ meilleur du pool est le meilleur tiré) = C(n−i, k−1) /
+#     C(n, k) — déterministe, comme l'équipement en espérance ;
+#   · INNÉES : chacune n'occupe que la part des rounds que permettent sa recharge
+#     (`ceil(horizon / recharge)` lancers) et ses PM ; la plus forte d'abord, tant qu'elle
+#     bat le meilleur sort ; les rounds restants prennent le meilleur sort (ou l'arme).
+# Toute frappe de capacité reçoit le même bonus de portée que les armes (`bonus_portee`).
 
 
 def _offense_creature(invocation: dict, get_doc_fn, regles: dict) -> float:
-	"""Offense par round d'UNE créature invoquée (sans sa propre magie : pas de récursion)."""
+	"""Offense par round d'UNE créature invoquée : son arme et ses capacités INNÉES, une par
+	tour, sans sa propre magie (pas de récursion)."""
 	espece = get_doc_fn(str(invocation.get("espece") or ""))
 	if not espece or espece.get("type") != "espece":
 		return 0.0
 	spec = {"type": "espece", "id": espece["_id"]}
+	profil = None
 	if invocation.get("profil"):
 		spec["profil"] = invocation["profil"]
+		profil = get_doc_fn(invocation["profil"])
 	try:
 		bel = simulateur.construire_belligerant(spec, get_doc_fn)
 	except (ValueError, LookupError):
 		return 0.0
-	return potentiel_combat(bel["snapshot_reference"], bel["arsenal"], regles)["offense"]
+	snap, arsenal = bel["snapshot_reference"], bel["arsenal"]
+	arme = potentiel_combat(snap, _arsenal_arme(arsenal), regles)["offense"]
+	return offense_capacites(snap, arme, espece, profil, arsenal, get_doc_fn, regles,
+							 sorts=False)["offense"]
+
+
+def _arsenal_arme(arsenal: dict) -> dict:
+	"""L'arsenal réduit à l'arme : ni sort ni compétence (comptés une par tour, à part)."""
+	return {**(arsenal or {}), "sorts": [], "competences": []}
+
+
+def _bonus_portee(portee: int, r: dict) -> float:
+	return 1 + r["bonus_portee"] * (max(1, int(portee or 1)) - 1)
 
 
 def valeur_sort_monstre(snapshot: dict, sort: dict, get_doc_fn, regles: dict | None = None) -> tuple:
@@ -151,7 +163,8 @@ def valeur_sort_monstre(snapshot: dict, sort: dict, get_doc_fn, regles: dict | N
 
 	  · lançable `lances = min(tours_reference, pm_max // cout_pm)` fois sur l'horizon : sa
 		valeur est pondérée par `lances / tours_reference` ;
-	  · instantané (ou maintenu) offensif : espérance de toucher × dégâts, cible unique ;
+	  · instantané (ou maintenu) offensif : espérance de toucher × dégâts × bonus de portée,
+		cible unique ;
 	  · incantation longue : un seul départ pour `ceil(incantation / actions_max)` rounds ;
 	  · invocation : offense de la créature × leur nombre × la part de l'horizon où elles
 		restent (toute s'il est maintenu, sinon sa `duree`) ;
@@ -175,45 +188,100 @@ def valeur_sort_monstre(snapshot: dict, sort: dict, get_doc_fn, regles: dict | N
 		return _offense_creature(invocation, get_doc_fn, r) * nombre * tenue / horizon, 1
 	if sort.get("cible") != "ennemi" or not effets.get("degats"):
 		return 0.0, 1
+	portee = max(1, int(sort.get("portee", 1) or 1))
 	option = {"kind": "sort", "label": sort.get("nom", ""), "jet": sort.get("jet") or "magique",
-			  "portee": max(1, int(sort.get("portee", 1) or 1)), "ranged": True,
-			  "notation": effets["degats"], "cout_pm": cout}
-	etalon = {"pa": r["pa_reference"], "ag": r["defense_reference"],
-			  "pm_def": r["pm_def_reference"], "caracts_base": {}}
-
-	def seuil_de(coup):
-		if option["jet"] == "magique":
-			return combat._magic_hit_threshold(snapshot.get("toucher_magique", 0), r["pm_def_reference"])
-		return combat._hit_threshold(snapshot.get("cc", 0), r["defense_reference"])
-
-	valeur = simulateur.esperance_option(snapshot, etalon, option, seuil_de) * part
+			  "portee": portee, "ranged": True, "notation": effets["degats"], "cout_pm": cout}
+	valeur = _par_coup_etalon(snapshot, option, r) * _bonus_portee(portee, r) * part
 	incantation = max(1, int(sort.get("incantation", 1) or 1))
 	if incantation > actions:
 		return valeur / math.ceil(incantation / actions), actions
 	return valeur, incantation
 
 
-def offense_magique(snapshot: dict, offense_arme: float, espece: dict, profil: dict | None,
-					get_doc_fn, regles: dict | None = None) -> dict:
-	"""`{offense, pool, tires}` : offense par round d'un spécimen magique, en ESPÉRANCE sur le
-	tirage de ses sorts (cf. le bloc d'en-tête). Sans sort tirable : l'offense à l'arme."""
-	profil_id = (profil or {}).get("_id") if str((profil or {}).get("_id") or "").startswith("profil:") else None
-	pool = [s for s in sorts_eligibles_espece(espece, get_doc_fn, combat.find_docs, profil_id)
-			if capacites_monstre.sort_lancable_par_ia(s)]
-	niveau = int((profil or {}).get("niveau", 1) or 0) if profil else 1
-	k = max(0, min(niveau, len(pool)))
-	if not k:
-		return {"offense": offense_arme, "pool": len(pool), "tires": 0}
+def valeur_innee(snapshot: dict, comp: dict, regles: dict | None = None) -> tuple:
+	"""`(frappe par lancer, part des rounds)` d'une compétence INNÉE offensive (souffle…) : sa
+	frappe contre l'étalon × bonus de portée, et la part de l'horizon où elle est disponible —
+	`ceil(horizon / recharge)` lancers (tous sans recharge), bornés par ses PM."""
+	r = _regles(regles)
+	options = options_offensives_statiques({**snapshot, "attaque_profils": []},
+										   {"competences": [comp]})
+	if not options:
+		return 0.0, 0.0
+	opt = options[0]
+	frappe = _par_coup_etalon(snapshot, opt, r) * _bonus_portee(opt["portee"], r)
+	horizon = max(1, int(r["tours_reference"]))
+	recharge = max(0, int(comp.get("recharge", 0) or 0))
+	lances = math.ceil(horizon / recharge) if recharge else horizon
+	cout = max(0, int(comp.get("cout_pm", 0) or 0))
+	if cout:
+		lances = min(lances, int(snapshot.get("pm_max", 0) or 0) // cout)
+	return frappe, max(0.0, min(1.0, lances / horizon))
+
+
+def offense_capacites(snapshot: dict, offense_arme: float, espece: dict, profil: dict | None,
+					  arsenal: dict | None, get_doc_fn, regles: dict | None = None,
+					  sorts: bool = True) -> dict:
+	"""`{offense, pool, tires, innees}` : offense moyenne par round d'un spécimen, ses capacités
+	jouées UNE par tour (cf. le bloc d'en-tête). Sans capacité : l'offense à l'arme.
+	`sorts=False` ne compte que les innées (créature invoquée)."""
 	actions = max(1, int(snapshot.get("actions_max", 1) or 1))
 	par_action = offense_arme / actions
-	rounds = []
-	for sort in pool:
-		valeur, prises = valeur_sort_monstre(snapshot, sort, get_doc_fn, regles)
-		rounds.append(max(offense_arme, valeur + par_action * max(0, actions - prises)))
-	rounds.sort(reverse=True)
-	n = len(rounds)
-	esperance = sum(v * math.comb(n - 1 - i, k - 1) / math.comb(n, k) for i, v in enumerate(rounds))
-	return {"offense": esperance, "pool": n, "tires": k}
+
+	# 1. Le meilleur round de SORT, en espérance sur le tirage (l'arme seule à défaut).
+	meilleur_sort, n, k = offense_arme, 0, 0
+	if sorts:
+		profil_id = (profil or {}).get("_id") if str((profil or {}).get("_id") or "").startswith("profil:") else None
+		pool = [s for s in sorts_eligibles_espece(espece, get_doc_fn, combat.find_docs, profil_id)
+				if capacites_monstre.sort_lancable_par_ia(s)]
+		niveau = int((profil or {}).get("niveau", 1) or 0) if profil else 1
+		n, k = len(pool), max(0, min(niveau, len(pool)))
+		if k:
+			rounds = []
+			for sort in pool:
+				valeur, prises = valeur_sort_monstre(snapshot, sort, get_doc_fn, regles)
+				rounds.append(max(offense_arme, valeur + par_action * max(0, actions - prises)))
+			rounds.sort(reverse=True)
+			meilleur_sort = sum(v * math.comb(n - 1 - i, k - 1) / math.comb(n, k)
+								for i, v in enumerate(rounds))
+
+	# 2. Les INNÉES, sur la part des rounds que leur recharge permet, la plus forte d'abord.
+	innees = []
+	for comp in (arsenal or {}).get("competences") or []:
+		frappe, part = valeur_innee(snapshot, comp, regles)
+		if frappe > 0 and part > 0:
+			innees.append({"label": comp.get("nom", ""), "round": frappe + par_action * (actions - 1),
+						   "part": part, "frappe": round(frappe, 1)})
+	innees.sort(key=lambda c: -c["round"])
+	reste, offense = 1.0, 0.0
+	for c in innees:
+		if c["round"] <= meilleur_sort or reste <= 0:
+			break
+		prise = min(c["part"], reste)
+		offense += prise * c["round"]
+		reste -= prise
+	offense += reste * meilleur_sort
+	return {"offense": offense, "pool": n, "tires": k,
+			"innees": [{"label": c["label"], "frappe": c["frappe"], "part": round(c["part"], 2)}
+					   for c in innees]}
+
+
+def _etalon(r: dict) -> dict:
+	"""L'adversaire ÉTALON, sous la forme d'un dict de défenseur (cf. `potentiel_combat`)."""
+	return {"pa": r["pa_reference"], "ag": r["defense_reference"],
+			"pm_def": r["pm_def_reference"], "caracts_base": {}}
+
+
+def _par_coup_etalon(snapshot: dict, opt: dict, r: dict) -> float:
+	"""Espérance de dégâts d'UNE action `opt` contre l'étalon — seuils du moteur."""
+	def seuil_de(coup):
+		if opt["jet"] == "magique":
+			return combat._magic_hit_threshold(snapshot.get("toucher_magique", 0), r["pm_def_reference"])
+		# Précision résolue par le moteur (typologie, deux armes, compétence martiale).
+		skill = coup.get("skill")
+		if skill is None:
+			skill = snapshot.get("cd", 0) if opt["jet"] == "cd" else snapshot.get("cc", 0)
+		return combat._hit_threshold(skill, r["defense_reference"])
+	return esperance_option(snapshot, _etalon(r), opt, seuil_de)
 
 
 def potentiel_support(snapshot: dict, arsenal: dict, regles: dict | None = None) -> dict:
@@ -274,8 +342,9 @@ def potentiel_espece(espece_id: str, profil_id: str | None, get_doc_fn,
 	  · equipement = somme des groupes. ⚠️ Approximation assumée : les pièces sont supposées
 		additives (pas d'interaction entre elles) et une arme à deux mains bloque son groupe
 		seul, pas le bouclier d'un autre groupe ;
-	  · nu = sqrt(offense × survie) du spécimen de référence, son offense comptant ses SORTS
-		TIRÉS en espérance (`offense_magique`) ;
+	  · nu = sqrt(offense × survie) du spécimen de référence : offense à l'ARME, puis ses
+		capacités jouées une par tour — sorts tirés en espérance, innées selon leur recharge
+		(`offense_capacites`) ; équipement mesuré à l'arme seule (pièces additives) ;
 	  · total = (nu + equipement) × (1 + bonus_humanoide) si l'espèce est humanoïde ET a au
 		moins un objet à porter, sinon nu.
 	Lève comme `construire_belligerant` (ValueError / LookupError)."""
@@ -285,13 +354,13 @@ def potentiel_espece(espece_id: str, profil_id: str | None, get_doc_fn,
 		spec["profil"] = profil_id
 	bel = simulateur.construire_belligerant(spec, get_doc_fn)
 	nu_snap, arsenal = bel["snapshot_reference"], bel["arsenal"]
-	pc = potentiel_combat(nu_snap, arsenal, r)
+	# Arme SEULE : sorts et compétences innées sont comptés à part, une capacité par tour.
+	arme = _arsenal_arme(arsenal)
+	pc = potentiel_combat(nu_snap, arme, r)
 	espece = get_doc_fn(espece_id) or {}
-	# MAGIE : l'offense du spécimen nu est remplacée par son espérance avec ses sorts tirés.
-	# ⚠️ Les gains d'équipement ci-dessous restent mesurés sans magie (pièces additives).
 	profil = get_doc_fn(profil_id) if profil_id else None
-	magie = offense_magique(nu_snap, pc["offense"], espece, profil, get_doc_fn, r)
-	nu = round(math.sqrt(max(0.0, magie["offense"]) * max(0.0, pc["survie"])), 1)
+	capacites = offense_capacites(nu_snap, pc["offense"], espece, profil, arsenal, get_doc_fn, r)
+	nu = round(math.sqrt(max(0.0, capacites["offense"]) * max(0.0, pc["survie"])), 1)
 
 	items = combat.items_equipables_monstre(espece) if simulateur.espece_equipable(espece) else []
 	groupes: dict = {}
@@ -302,7 +371,7 @@ def potentiel_espece(espece_id: str, profil_id: str | None, get_doc_fn,
 			continue
 		snap = simulateur._equiper_snapshot(copy.deepcopy(nu_snap), {slots[0]: item_id})
 		# ⚠️ Gain mesuré contre le nu SANS magie (`pc`) : le potentiel équipé l'est aussi.
-		gain = max(0.0, potentiel_combat(snap, arsenal, r)["total"] - pc["total"])
+		gain = max(0.0, potentiel_combat(snap, arme, r)["total"] - pc["total"])
 		detail.append({"item": item_id, "slot": slots[0], "gain": round(gain, 1)})
 		cle = frozenset(slots)
 		groupe = groupes.setdefault(cle, {"gains": [], "deux_mains": False})
@@ -321,8 +390,9 @@ def potentiel_espece(espece_id: str, profil_id: str | None, get_doc_fn,
 	detail.sort(key=lambda d: -d["gain"])
 	return {"total": round(total, 1), "nu": nu, "equipement": round(equipement, 1),
 			"bonus_humanoide": bonus, "detail": detail,
-			"magie": {"offense_arme": pc["offense"], "offense": round(magie["offense"], 1),
-					  "pool": magie["pool"], "tires": magie["tires"]},
+			"capacites": {"offense_arme": pc["offense"], "offense": round(capacites["offense"], 1),
+						  "pool": capacites["pool"], "tires": capacites["tires"],
+						  "innees": capacites["innees"]},
 			"initiative": int(nu_snap.get("initiative", 0) or 0)}
 
 

@@ -1,9 +1,9 @@
 # tests/test_potentiel_magie.py
-# MAGIE dans le potentiel d'une espèce (`potentiel.offense_magique`, `valeur_sort_monstre`) :
-# un spécimen tire `k` sorts parmi ceux que son IA sait lancer et en lance un par round ;
-# son offense est l'ESPÉRANCE, sur le tirage, du meilleur round possible — sort + actions
-# restantes à l'arme, jamais moins que l'arme seule. Le rang, l'XP et les planchers de quête
-# lisent tous `potentiel_menace`, donc ce calcul.
+# CAPACITÉS dans le potentiel d'une espèce (`potentiel.offense_capacites`) : une capacité
+# par tour, sort tiré ou compétence innée (souffle) — round = sa frappe + les actions
+# restantes à l'arme, jamais moins que l'arme seule. Sorts : espérance sur le tirage du
+# meilleur des `k` sorts ; innées : sur la part des rounds que permet leur RECHARGE. Le rang,
+# l'XP et les planchers de quête lisent tous `potentiel_menace`, donc ce calcul.
 
 import math
 
@@ -40,7 +40,11 @@ SANS = {"_id": "espece:sans_pm", "type": "espece", "nom": "Brute", "tags": ["mon
 		"base_attributes": _attrs()}
 PROFIL_1 = {"_id": "profil:un_pm", "type": "profil", "nom": "Un", "niveau": 1, "attributs_modifier": {}}
 PROFIL_2 = dict(PROFIL_1, _id="profil:deux_pm", nom="Deux", niveau=2)
-DOCS = {d["_id"]: d for d in (TRAIT, FOUDRE, RITUEL, RUINE, LOUP, APPEL, SANS, PROFIL_1, PROFIL_2)}
+SOUFFLE = {"_id": "competence:souffle_pm", "type": "competence", "vocation": "monstre",
+		   "niveau": 0, "nom": "Souffle", "mode": "active", "cible": "ennemi", "portee": 5,
+		   "jet": "magique", "cout_pm": 0, "recharge": 3, "effets": {"degats": "8D6"}}
+DOCS = {d["_id"]: d for d in (TRAIT, FOUDRE, RITUEL, RUINE, LOUP, APPEL, SANS, PROFIL_1, PROFIL_2,
+							  SOUFFLE)}
 
 
 @pytest.fixture(autouse=True)
@@ -50,17 +54,19 @@ def db(monkeypatch):
 	monkeypatch.setattr(combat, "find_docs", lambda *a, **k: [])
 
 
-def _reference(espece):
+def _reference(espece, avec_arsenal=False):
+	"""Snapshot de référence et potentiel à l'ARME SEULE (sorts et innées comptés à part)."""
 	DOCS[espece["_id"]] = espece
 	bel = simulateur.construire_belligerant({"type": "espece", "id": espece["_id"]}, DOCS.get)
 	snap = bel["snapshot_reference"]
-	return snap, potentiel.potentiel_combat(snap, bel["arsenal"])
+	pc = potentiel.potentiel_combat(snap, potentiel._arsenal_arme(bel["arsenal"]))
+	return (snap, pc, bel["arsenal"]) if avec_arsenal else (snap, pc)
 
 
 def test_sans_sort_tirable_l_offense_reste_celle_de_l_arme():
 	snap, pc = _reference(SANS)
-	m = potentiel.offense_magique(snap, pc["offense"], SANS, PROFIL_2, DOCS.get)
-	assert m == {"offense": pc["offense"], "pool": 0, "tires": 0}
+	m = potentiel.offense_capacites(snap, pc["offense"], SANS, PROFIL_2, None, DOCS.get)
+	assert m == {"offense": pc["offense"], "pool": 0, "tires": 0, "innees": []}
 
 
 def test_esperance_exacte_du_meilleur_sort_tire():
@@ -75,8 +81,8 @@ def test_esperance_exacte_du_meilleur_sort_tire():
 	r_trait, r_foudre = round_avec(TRAIT), round_avec(FOUDRE)
 	assert r_foudre > r_trait > arme
 	# Un sort tiré sur deux : la moyenne des deux rounds ; deux tirés : toujours le meilleur.
-	un = potentiel.offense_magique(snap, arme, espece, PROFIL_1, DOCS.get)
-	deux = potentiel.offense_magique(snap, arme, espece, PROFIL_2, DOCS.get)
+	un = potentiel.offense_capacites(snap, arme, espece, PROFIL_1, None, DOCS.get)
+	deux = potentiel.offense_capacites(snap, arme, espece, PROFIL_2, None, DOCS.get)
 	assert (un["pool"], un["tires"], deux["tires"]) == (2, 1, 2)
 	assert math.isclose(un["offense"], (r_trait + r_foudre) / 2)
 	assert math.isclose(deux["offense"], r_foudre)
@@ -111,7 +117,7 @@ def test_la_magie_releve_le_potentiel_d_une_espece():
 	mage = _mage("espece:mage2_pm", [FOUDRE["_id"]])
 	DOCS[mage["_id"]] = mage
 	pe = potentiel.potentiel_espece(mage["_id"], PROFIL_2["_id"], DOCS.get)
-	assert pe["magie"]["offense"] > pe["magie"]["offense_arme"]
+	assert pe["capacites"]["offense"] > pe["capacites"]["offense_arme"]
 	assert pe["total"] > brute["total"]
 
 
@@ -133,3 +139,33 @@ def test_la_magie_ne_mange_pas_le_gain_de_l_equipement():
 		simulateur._equiper_snapshot(snap, {"main_droite": arme["_id"]}), bel["arsenal"])["total"]
 	assert equipe > sans
 	assert pe_arme["equipement"] > 0 and pe_arme["nu"] == pe_nu["nu"]
+
+
+# ── Capacités INNÉES : une par tour, selon leur recharge ──────────────────────────────
+
+DRAGON = {"_id": "espece:dragon_pm", "type": "espece", "nom": "Dragon", "tags": ["monstre"],
+		  "competences": [SOUFFLE["_id"]], "base_attributes": _attrs(V=10, Ag=60)}
+
+
+def test_le_souffle_ne_compte_que_sur_les_rounds_que_sa_recharge_permet():
+	snap, pc, arsenal = _reference(DRAGON, avec_arsenal=True)
+	arme, actions = pc["offense"], snap["actions_max"]
+	frappe, part = potentiel.valeur_innee(snap, arsenal["competences"][0])
+	horizon = potentiel.REGLES_POTENTIEL["tours_reference"]
+	assert math.isclose(part, math.ceil(horizon / SOUFFLE["recharge"]) / horizon)
+	m = potentiel.offense_capacites(snap, arme, DRAGON, None, arsenal, DOCS.get)
+	round_souffle = frappe + arme / actions * (actions - 1)
+	assert round_souffle > arme
+	assert math.isclose(m["offense"], part * round_souffle + (1 - part) * arme)
+	assert [c["label"] for c in m["innees"]] == ["Souffle"]
+
+
+def test_le_souffle_n_est_plus_compte_a_chaque_action():
+	"""Avant : le souffle était une « option » de `potentiel_combat`, rejouée à chaque action
+	du round. Une par tour et sous recharge, il pèse bien moins."""
+	snap, pc, arsenal = _reference(DRAGON, avec_arsenal=True)
+	a_chaque_action = potentiel.potentiel_combat(snap, arsenal)["offense"]
+	m = potentiel.offense_capacites(snap, pc["offense"], DRAGON, None, arsenal, DOCS.get)
+	assert pc["offense"] < m["offense"] < a_chaque_action
+	pe = potentiel.potentiel_espece(DRAGON["_id"], None, DOCS.get)
+	assert math.isclose(pe["capacites"]["offense"], m["offense"], rel_tol=1e-3)
