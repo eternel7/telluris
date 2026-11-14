@@ -88,7 +88,7 @@ from utils.consommables import effets_de as effets_de_consommable
 from utils.slots_actions import slots_effectifs
 from utils.sorts import (
 	normaliser_sort, part_durative, portee_effective, resoudre_effets, resoudre_temps,
-	sort_utilisable_combat, sorts_eligibles_espece,
+	sort_utilisable_combat, sorts_eligibles_espece, est_incantation_longue, est_maintenu,
 )
 
 # ── Politique de duel (réglages du simulateur, PAS des world-vars : un banc d'essai
@@ -392,6 +392,10 @@ def _armer_sorts_tires(snap: dict, get_doc_fn) -> dict:
 		sort = normaliser_sort(get_doc_fn(str(sid)))
 		if not capacites_monstre.sort_lancable_par_ia(sort):
 			continue
+		# Invocations, incantations longues et sorts maintenus : joués par le MOTEUR, pas par
+		# le duel 1D (une seule passe, aucun allié sur la ligne).
+		if sort.get("invocation") or est_incantation_longue(sort) or est_maintenu(sort):
+			continue
 		eff = sort["effets"]
 		if sort["cible"] == "ennemi":
 			offensifs.append(_resoudre_capacite(sort, caracts))
@@ -411,7 +415,8 @@ def _magie_d_espece(espece: dict, profil: dict | None, get_doc_fn) -> dict:
 	profil_id = profil_id if profil_id.startswith("profil:") else None
 	pool = sorts_eligibles_espece(espece, get_doc_fn, combat.find_docs, profil_id)
 	niveau = int((profil or {}).get("niveau", 1) or 0) if profil else 1
-	possibles = [s["nom"] for s in pool if capacites_monstre.sort_lancable_par_ia(s)]
+	possibles = [s["nom"] for s in pool if capacites_monstre.sort_lancable_par_ia(s)
+				 and not (s.get("invocation") or est_incantation_longue(s) or est_maintenu(s))]
 	return {"tires": max(0, min(niveau, len(pool))), "possibles": possibles}
 
 

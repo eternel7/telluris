@@ -228,11 +228,16 @@ def test_armure_roulee_peuple_pa_zones(monkeypatch):
 
 SORT_FLAMME = {
 	"_id": "sort:jet_flammes", "type": "sort", "nom": "Jet de flammes", "magie": "feu",
-	"niveau": 1, "cout_pm": 3,
+	"niveau": 1, "cout_pm": 3, "cible": "ennemi", "portee": 4, "effets": {"degats": "1D6"},
 }
 SORT_METEORE = {
 	"_id": "sort:meteore", "type": "sort", "nom": "Météore", "magie": "feu",
-	"niveau": 5, "cout_pm": 20,
+	"niveau": 5, "cout_pm": 20, "cible": "ennemi", "portee": 6, "effets": {"degats": "4D6"},
+}
+# Le saut vise une CASE : l'IA ne le joue pas (`EFFETS_HORS_IA`), il n'est donc jamais tiré.
+SORT_SAUT_FEU = {
+	"_id": "sort:bond_flamboyant", "type": "sort", "nom": "Bond flamboyant", "magie": "feu",
+	"niveau": 2, "cout_pm": 5, "cible": "soi", "portee": 0, "effets": {"saut": 4},
 }
 
 
@@ -243,6 +248,15 @@ def test_roll_monster_sorts_borne_au_pool(monkeypatch):
 	e = {"_id": "espece:test", "tags": ["humanoide"], "magies": {"feu": 5}}
 	assert combat_mod.roll_monster_sorts(e, niveau=5) == [SORT_FLAMME["_id"], SORT_METEORE["_id"]]
 	assert len(combat_mod.roll_monster_sorts(e, niveau=1)) == 1
+
+
+def test_roll_monster_sorts_ne_tire_que_des_sorts_jouables_par_l_ia(monkeypatch):
+	pool = [SORT_SAUT_FEU, SORT_FLAMME, SORT_METEORE]
+	monkeypatch.setattr(combat_mod, "find_docs", lambda q: pool)
+	monkeypatch.setattr(combat_mod.random, "sample", lambda pop, k: pop[:k])
+	e = {"_id": "espece:test", "tags": ["humanoide"], "magies": {"feu": 5}}
+	tires = combat_mod.roll_monster_sorts(e, niveau=5)
+	assert SORT_SAUT_FEU["_id"] not in tires and len(tires) == 2
 
 
 def test_roll_monster_sorts_niveau_zero():

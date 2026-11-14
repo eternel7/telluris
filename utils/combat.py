@@ -988,6 +988,7 @@ def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, sourc
 		dmg = 0   # capacité de pur debuff : elle touche sans blesser
 	avant_pv = monstre["currentPV"]
 	monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
+	_concentration_monstre(combat_doc, monstre, joueur, dmg)
 	ctx["dmg"] = dmg
 	ctx["pv"] = monstre["currentPV"]
 	if notation:
@@ -1633,8 +1634,9 @@ def _rompre_concentration(combat_doc: dict, acteur: dict, entree: dict, texte: s
 
 	# 2. Les créatures qu'il tenait. ⚠️ `_dissiper_invocation` et jamais un marquage à la
 	# main : elle pose aussi `currentPV = 0`, que lisent `_joueurs_vivants` et `_occupied_set`.
-	for invoc in list(combat_doc.get("joueurs") or []):
-		if invoc.get("est_invocation") and str(invoc.get("sort_maintenu") or "") == sort_id:
+	for invoc in list(combat_doc.get("joueurs") or []) + list(combat_doc.get("monstres") or []):
+		if (invoc.get("est_invocation") and str(invoc.get("sort_maintenu") or "") == sort_id
+				and invoc.get("invocateur_id") == acteur.get("id")):
 			_dissiper_invocation(combat_doc, invoc,
 								 f"{invoc['nom']} se dissipe : l'appel n'est plus tenu.")
 
@@ -1790,7 +1792,8 @@ def _bruler_zones(combat_doc: dict, acteur: dict) -> None:
 		# Une brûlure précédente a pu rompre une concentration, donc éteindre un mur.
 		if zone not in _zones_persistantes(combat_doc):
 			continue
-		lanceur = _get_joueur(combat_doc, zone.get("lanceur_id"))
+		lanceur = (_get_joueur(combat_doc, zone.get("lanceur_id"))
+				   or _get_monstre(combat_doc, zone.get("lanceur_id")))
 		if lanceur is None or lanceur.get("currentPV", 0) <= 0:
 			continue   # zone inerte : plus personne ne la nourrit
 		if not any((x, y) in emprise for x, y in zone.get("cases") or []):
@@ -2747,7 +2750,8 @@ def _payer_cout_pv(combat_doc: dict, joueur: dict, source: dict, cout_pv: int) -
 
 
 def _armer_incantation(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
-					   cible_id: str | None, dx, dy, kind: str = "sort") -> dict:
+					   cible_id: str | None, dx, dy, kind: str = "sort",
+					   camp: str = "joueur") -> dict:
 	"""Arme une incantation LONGUE, puis y verse déjà les PA du tour en cours.
 
 	Le sort ne part pas : il devient un état du snapshot que `_avancer_incantation` fera
@@ -2780,6 +2784,9 @@ def _armer_incantation(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		# chaque tranche ferait varier le prix d'un round à l'autre sous un ramassage.
 		"pm_total": _cout_pm_charge(joueur, sdoc),
 		"pm_verses": 0,
+		# Camp du lanceur : un MONSTRE achève par son propre chemin (`_achever_incantation_monstre`),
+		# le joueur par `_lancer_capacite`. Absent (bloc d'avant) ⇒ joueur.
+		"camp": camp,
 	}
 	combat_doc.setdefault("log", []).append(_avec_etat({
 		"tour": int(combat_doc.get("tour", 0) or 0),
@@ -2888,6 +2895,9 @@ def _avancer_incantation(combat_doc: dict, joueur: dict) -> None:
 	# ⚠️ None et non un retrait — même raison que dans `_rompre_incantation` : la clé doit
 	# rester présente pour que `_avec_etat` gèle sa disparition.
 	joueur["incantation"] = None
+	if inc.get("camp") == "monstre":
+		_achever_incantation_monstre(combat_doc, joueur, inc)
+		return
 	sdoc = dict(inc.get("doc") or {})
 	# ⚠️ Les PM ont été versés par tranches : les redébiter ferait payer le sort deux fois.
 	sdoc["cout_pm"] = 0
@@ -4036,8 +4046,11 @@ def roll_monster_sorts(espece: dict, niveau: int, profil_id=None) -> list[str]:
 	"""Sorts ATTRIBUÉS à un monstre à sa création — toute espèce, humanoïde ou non : X =
 	niveau du profil, borné au nombre de sorts éligibles pour CE profil
 	(`sorts.sorts_eligibles_espece`, tags `magie_*` compris), tirés SANS REMISE. Stockés
-	tels quels (`sorts_connus`, même champ/forme que `character['sorts_connus']`)."""
-	pool = sorts_eligibles_espece(espece, get_doc, find_docs, profil_id)
+	tels quels (`sorts_connus`, même champ/forme que `character['sorts_connus']`).
+	Seuls les sorts que son IA sait LANCER sont tirables (`capacites_monstre.sort_lancable_par_ia`) :
+	un tirage gâché sur un sort qu'il ne jouera jamais lui retirait sa magie."""
+	pool = [s for s in sorts_eligibles_espece(espece, get_doc, find_docs, profil_id)
+			if capacites_monstre.sort_lancable_par_ia(s)]
 	if not pool:
 		return []
 	x = max(0, min(int(niveau or 0), len(pool)))
@@ -4410,6 +4423,8 @@ def _dissiper_invocation(combat_doc: dict, invoc: dict, texte: str) -> None:
 	encaisser des coups et bloquer un passage jusqu'à la purge."""
 	invoc["dissipe"] = True
 	invoc["currentPV"] = 0
+	if "vivant" in invoc:   # créature d'un MONSTRE : c'est `vivant` qui fait foi de ce côté
+		invoc["vivant"] = False
 	combat_doc["log"].append(_avec_etat(_avec_vfx({
 		"tour": combat_doc["tour"],
 		"acteur": "Système",
@@ -4428,11 +4443,18 @@ def _purger_invocations(combat_doc: dict) -> None:
 	recalculé sur l'acteur qu'il désignait, par comptage des entrées supprimées avant lui —
 	jamais par recherche de son id, qui peut être justement celui qu'on retire.
 	"""
+	_nettoyer_monstres_tombes(combat_doc)
 	morts = {j["id"] for j in combat_doc["joueurs"]
 			 if j.get("est_invocation") and (j.get("dissipe") or j.get("currentPV", 0) <= 0)}
-	if not morts:
+	# Créatures d'un MONSTRE : retirées elles aussi (ni butin ni XP à garder d'elles).
+	morts_m = {m["id"] for m in combat_doc.get("monstres") or []
+			   if m.get("est_invocation") and (m.get("dissipe") or not m.get("vivant"))}
+	if not morts and not morts_m:
 		return
 	combat_doc["joueurs"] = [j for j in combat_doc["joueurs"] if j["id"] not in morts]
+	if morts_m:
+		combat_doc["monstres"] = [m for m in combat_doc["monstres"] if m["id"] not in morts_m]
+		morts = morts | morts_m
 	ordre = combat_doc["ordre_initiative"]
 	idx = combat_doc["acteur_courant_index"]
 	retires_avant = sum(1 for i, aid in enumerate(ordre) if i < idx and aid in morts)
@@ -4444,6 +4466,34 @@ def _purger_invocations(combat_doc: dict) -> None:
 		idx = 0
 		combat_doc["tour"] += 1
 	combat_doc["acteur_courant_index"] = max(0, idx)
+	# Les créatures d'un monstre parties, il ne reste peut-être plus que des morts en face.
+	if morts_m and combat_doc.get("status") == "active":
+		_check_victory(combat_doc)
+
+
+def _nettoyer_monstres_tombes(combat_doc: dict) -> None:
+	"""Un monstre tombé ne tient plus rien : ses sorts maintenus se rompent (`_rompre_concentration`
+	— créatures, zones persistantes et effets avec eux), son incantation se perd, et les
+	créatures qu'il avait appelées se dissipent. Appelé par `_purger_invocations`, donc en
+	tête de chaque itération de `_resolve_until_player` : paresseux, quel que soit le site
+	qui l'a abattu."""
+	monstres = combat_doc.get("monstres") or []
+	tombes = {m.get("id") for m in monstres if not m.get("vivant")}
+	for m in monstres:
+		if m.get("vivant"):
+			continue
+		for entree in list(_concentrations(m)):
+			_rompre_concentration(combat_doc, m, entree,
+								  f"{entree.get('icon', '✨')} {entree.get('nom', 'Le sort')} "
+								  f"s'éteint avec {m.get('nom', '?')}.")
+		if m.get("incantation"):
+			m["incantation"] = None
+	for m in monstres:
+		if (m.get("est_invocation") and m.get("vivant") and not m.get("dissipe")
+				and (m.get("invocateur_id") in tombes
+					 or _get_monstre(combat_doc, m.get("invocateur_id")) is None)):
+			_dissiper_invocation(combat_doc, m,
+								 f"{m['nom']} se dissipe : {m.get('invocateur_nom') or 'son maître'} est tombé.")
 
 
 def _snapshot_protege(p: dict, joueur_index: int) -> dict:
@@ -5456,6 +5506,13 @@ def _rediriger_lien_vie(combat_doc: dict, defenseur: dict, dmg: int) -> tuple:
 	return reduit - transfere, transfere, (protecteur if transfere > 0 else None)
 
 
+def _concentration_monstre(combat_doc: dict, monstre: dict, attaquant: dict, dmg: int) -> None:
+	"""Un MONSTRE frappé et encore debout teste sa concentration, comme un lanceur du camp du
+	joueur (`_tester_concentration`) : son incantation et ses sorts maintenus sont fragiles."""
+	if dmg > 0 and monstre.get("currentPV", 0) > 0:
+		_tester_concentration(combat_doc, monstre, attaquant, dmg)
+
+
 def _tester_concentration(combat_doc: dict, acteur: dict, attaquant: dict,
 						  degats_subis: int) -> None:
 	"""Un coup encaissé menace ce que l'acteur TIENT : son incantation et ses sorts maintenus.
@@ -5860,7 +5917,20 @@ def _options_capacite_monstre(combat_doc: dict, monstre: dict, grid: dict) -> li
 		if recharges.get(cap["id"], 0) > 0 or cap.get("cout_pm", 0) > _eff_int(monstre.get("currentPM")):
 			continue
 		effets = resoudre_effets(cap["effets"], caracts)
+		# Incantation et maintien FORMULÉS résolus sur ses caracts, comme pour le joueur.
+		cap = resoudre_temps(cap, caracts, effets)
 		base = {"cap": cap, "effets": effets, "source_id": cap["id"]}
+		if cap.get("invocation"):
+			# INVOCATION : la créature EST l'effet. Notée par `capacites_monstre.score_option`,
+			# nulle tant que celles d'un lancement précédent du même sort tiennent encore.
+			actives = sum(1 for m in combat_doc.get("monstres") or []
+						  if m.get("est_invocation") and m.get("vivant")
+						  and m.get("invocateur_id") == monstre.get("id")
+						  and m.get("sort_id") == cap["id"])
+			options.append(dict(base, hostile=False, cible=monstre, invocation=True,
+								nombre=_eff_int((cap.get("invocation") or {}).get("nombre")) or 1,
+								invocations_actives=actives))
+			continue
 		if cap["cible"] == "ennemi":
 			portee = max(1, int(portee_effective(cap, caracts) or 1))
 			for j in _cibles_visibles(combat_doc, monstre):
@@ -5882,7 +5952,7 @@ def _options_capacite_monstre(combat_doc: dict, monstre: dict, grid: dict) -> li
 
 
 def _coup_capacite_monstre(combat_doc: dict, monstre: dict, victime: dict, cap: dict,
-						   effets: dict) -> tuple:
+						   effets: dict, source: dict | None = None) -> tuple:
 	"""UN coup de capacité de monstre sur UN joueur : jet, dégâts (cascade `_blesser_allie`),
 	dégâts aux PM, part à durée. Rend `(pv réellement retirés, jet)`."""
 	mode_jet = cap.get("jet") or "magique"
@@ -5929,27 +5999,65 @@ def _coup_capacite_monstre(combat_doc: dict, monstre: dict, victime: dict, cap: 
 						 f"({victime['currentPM']}/{victime.get('pm_max', 0)}).",
 			}, victime))
 	if _debout(victime):
-		source = {"id": cap["id"], "nom": nom, "icon": cap.get("icon", "✨")}
+		source = source or {"id": cap["id"], "nom": nom, "icon": cap.get("icon", "✨")}
 		_appliquer_effet_sur_cible(combat_doc, victime, source, effets, combat_doc["tour"])
 	return avant - victime["currentPV"], jet
 
 
-def _lancer_capacite_monstre(combat_doc: dict, monstre: dict, option: dict) -> None:
+def _lancer_capacite_monstre(combat_doc: dict, monstre: dict, option: dict,
+							 grid: dict | None = None, depuis_incantation: bool = False) -> None:
 	"""Le monstre lance l'option retenue : 1 action, ses PM, la recharge, puis le coup sur
-	chaque victime (hostile) ou le soutien sur chaque bénéficiaire. Le drain est sommé puis
-	plafonné UNE fois par lancement (`drain_max`), comme pour le joueur."""
+	chaque victime (hostile), le soutien sur chaque bénéficiaire ou les créatures qu'il
+	appelle (invocation). Le drain est sommé puis plafonné UNE fois par lancement
+	(`drain_max`), comme pour le joueur.
+
+	Sorts LONGS, par les chokepoints du joueur :
+	  • incantation longue → ARMÉE (`_armer_incantation`, camp `monstre`) : ses PA et ses PM
+		s'y versent tour après tour, et elle revient ICI à son terme (`depuis_incantation`,
+		ni action ni PM de plus) par `_achever_incantation_monstre` ;
+	  • sort maintenu → inscrit dans ses concentrations (`_enregistrer_concentration`),
+		entretenu par `_payer_maintiens`, rompu par un coup (`_tester_concentration`) ;
+		offensif à zone ⇒ zone PERSISTANTE (`_poser_zone_persistante`)."""
 	cap, effets = option["cap"], option["effets"]
-	monstre["currentPM"] = max(0, _eff_int(monstre.get("currentPM")) - _eff_int(cap.get("cout_pm")))
-	monstre["attaques"] = monstre.get("attaques", 0) + 1
-	_refresh_actions(monstre)
+	if grid is None:
+		grid = get_combat_grid(combat_doc)
+	cible = option.get("cible") or {}
+	if est_incantation_longue(cap) and not depuis_incantation:
+		_armer_incantation(combat_doc, monstre, cap, effets, cible.get("id"), None, None,
+						   "sort", camp="monstre")
+		return
+	if not depuis_incantation:
+		monstre["currentPM"] = max(0, _eff_int(monstre.get("currentPM")) - _eff_int(cap.get("cout_pm")))
+		monstre["attaques"] = monstre.get("attaques", 0) + 1
+		_refresh_actions(monstre)
 	if _eff_int(cap.get("recharge")):
 		monstre.setdefault("recharges", {})[cap["id"]] = _eff_int(cap["recharge"])
 	combat_doc["log"].append(_avec_etat({
 		"tour": combat_doc["tour"], "acteur": monstre["nom"], "kind": "sys",
 		"texte": f"{cap.get('icon', '✨')} {monstre['nom']} utilise {cap.get('nom', 'une capacité')} !",
 	}, monstre))
+	# `maintien` sur la source : les parts duratives d'un sort maintenu portent `maintenu`
+	# (jamais décrémentées, balayées par `_rompre_concentration`), comme chez le joueur.
+	source = {"id": cap["id"], "nom": cap.get("nom", ""), "icon": cap.get("icon", "✨"),
+			  "maintien": _eff_int(cap.get("maintien"))}
+	if option.get("invocation"):
+		crees = invoquer_monstre(combat_doc, monstre, cap, grid)
+		if not crees:
+			combat_doc["log"].append(_avec_etat({
+				"tour": combat_doc["tour"], "acteur": monstre["nom"], "kind": "sys",
+				"texte": f"Rien ne répond à l'appel de {monstre['nom']} : pas de place.",
+			}, monstre))
+			return
+		for c in crees:
+			combat_doc["log"].append(_avec_etat(_avec_vfx({
+				"tour": combat_doc["tour"], "acteur": monstre["nom"], "kind": "sys",
+				"texte": f"{c['nom']} répond à l'appel de {monstre['nom']}"
+						 + (" — tenu par concentration." if est_maintenu(cap)
+							else f" ({c['invocation_restants']} tour(s))."),
+			}, "invocation", monstre.get("id", ""), cap.get("animation")), c))
+		_enregistrer_concentration(combat_doc, monstre, cap, None)
+		return
 	if not option.get("hostile"):
-		source = {"id": cap["id"], "nom": cap.get("nom", ""), "icon": cap.get("icon", "✨")}
 		for b in option.get("beneficiaires") or []:
 			if not _debout(b):
 				continue
@@ -5958,15 +6066,21 @@ def _lancer_capacite_monstre(combat_doc: dict, monstre: dict, option: dict) -> N
 			if _eff_int(effets.get("pm")):
 				b["currentPM"] = min(b.get("pm_max", 0), _eff_int(b.get("currentPM")) + _eff_int(effets["pm"]))
 			_appliquer_effet_sur_cible(combat_doc, b, source, effets, combat_doc["tour"], hostile=False)
+		_enregistrer_concentration(combat_doc, monstre, cap, cible.get("id"))
 		return
 	inflige = 0
 	fumble = False
 	for n, victime in enumerate(option.get("victimes") or []):
 		if combat_doc.get("status") != "active":
 			break
-		pv, jet = _coup_capacite_monstre(combat_doc, monstre, victime, cap, effets)
+		pv, jet = _coup_capacite_monstre(combat_doc, monstre, victime, cap, effets, source)
 		inflige += pv
 		fumble = fumble or (n == 0 and jet["fumble"])
+	# Sort MAINTENU offensif : entretien inscrit, et son feu reste sur la grille s'il a une zone.
+	if _enregistrer_concentration(combat_doc, monstre, cap, cible.get("id")) and cible:
+		_poser_zone_persistante(combat_doc, monstre, cible, cap, effets,
+								effets.get("degats") or "", cap.get("jet") or "magique",
+								"sort", grid)
 	drain = (inflige * _eff_int(effets.get("drain_pv"))) // 100
 	if _eff_int(effets.get("drain_max")):
 		drain = min(drain, _eff_int(effets["drain_max"]))
@@ -5982,6 +6096,104 @@ def _lancer_capacite_monstre(combat_doc: dict, monstre: dict, option: dict) -> N
 		_appliquer_fumble(combat_doc, monstre)
 
 
+def _achever_incantation_monstre(combat_doc: dict, monstre: dict, inc: dict) -> None:
+	"""L'incantation d'un MONSTRE aboutit : la cible est RE-VALIDÉE (vivante, à portée, en vue
+	— morte ou partie, le sort se perd, PM compris), puis le sort part par
+	`_lancer_capacite_monstre` sans action ni PM de plus (déjà versés par tranches).
+	⚠️ Vaut sa capacité du tour : `capacite_lancee`, posé APRÈS la remise du budget."""
+	grid = get_combat_grid(combat_doc)
+	cap = dict(inc.get("doc") or {}, cout_pm=0)
+	effets = dict(inc.get("effets") or {})
+	monstre["capacite_lancee"] = True
+	option = {"cap": cap, "effets": effets, "source_id": cap.get("id", "")}
+
+	def _vide(raison: str) -> None:
+		combat_doc.setdefault("log", []).append(_avec_etat({
+			"tour": int(combat_doc.get("tour", 0) or 0), "acteur": monstre.get("nom", "?"),
+			"kind": "sys",
+			"texte": f"{monstre.get('nom', '?')} achève son incantation dans le vide : {raison}",
+		}, monstre))
+
+	portee = max(1, int(portee_effective(cap, caracts_effectives(monstre)) or 1))
+	if cap.get("invocation"):
+		option.update(hostile=False, cible=monstre, invocation=True)
+	elif cap.get("cible") == "ennemi":
+		cible = _get_joueur(combat_doc, inc.get("cible_id"))
+		if (cible is None or cible.get("currentPV", 0) <= 0 or _cheby(monstre, cible) > portee
+				or not _vue_acteurs(grid["cells"], monstre, cible)):
+			_vide("sa cible n'est plus là.")
+			return
+		option.update(hostile=True, cible=cible,
+					  victimes=_joueurs_de_zone(combat_doc, monstre, cible, cap.get("zone"), grid))
+	elif cap.get("cible") == "allie":
+		cible = _get_monstre(combat_doc, inc.get("cible_id"))
+		if cible is None or not cible.get("vivant") or _cheby(monstre, cible) > portee:
+			_vide("son allié n'est plus là.")
+			return
+		option.update(hostile=False, cible=cible, beneficiaires=[cible])
+	else:
+		option.update(hostile=False, cible=monstre,
+					  beneficiaires=_monstres_de_zone(combat_doc, monstre, cap.get("zone"), grid))
+	_lancer_capacite_monstre(combat_doc, monstre, option, grid, depuis_incantation=True)
+	_check_victory(combat_doc)
+
+
+def _prochain_index_monstre(combat_doc: dict) -> int:
+	"""Prochain indice `monstre_*` JAMAIS attribué dans ce combat (même raison que
+	`_prochain_index_joueur` : un id réattribué hériterait des lignes de journal d'un autre)."""
+	suivant = combat_doc.get("prochain_monstre_index")
+	if not isinstance(suivant, int):
+		suivant = 0
+		for m in combat_doc.get("monstres") or []:
+			suffixe = str(m.get("id", "")).rsplit("_", 1)[-1]
+			if suffixe.isdigit():
+				suivant = max(suivant, int(suffixe) + 1)
+	combat_doc["prochain_monstre_index"] = suivant + 1
+	return suivant
+
+
+def invoquer_monstre(combat_doc: dict, monstre: dict, sort: dict, grid: dict) -> list:
+	"""Créatures du bloc `invocation` appelées par un MONSTRE : elles rejoignent SON camp
+	(`monstres`), jouent leur tour comme lui (`_run_monster_turn`, IA de leur espèce) et
+	s'insèrent dans `ordre_initiative` juste après l'acteur courant (cf. `invoquer`).
+
+	Ni XP, ni butin, ni progression de quête (`est_invocation`) ; elles se dissipent à
+	l'épuisement de leur durée, à la mort de leur invocateur (`_purger_invocations`), ou avec
+	la concentration qui les tient (sort maintenu, `sort_maintenu`)."""
+	invocation = sort.get("invocation") or {}
+	espece = get_doc(invocation.get("espece"))
+	if not espece or espece.get("type") != "espece":
+		return []
+	profil = get_doc(invocation["profil"]) if invocation.get("profil") else None
+	if profil is not None and profil.get("type") != "profil":
+		profil = None
+	places = _cases_invocation(combat_doc, grid, monstre, invocation.get("nombre", 1),
+							   jetons.jeton_espece(espece))
+	crees = []
+	for place in places:
+		snap = build_monster_snapshot(espece, profil, _prochain_index_monstre(combat_doc),
+									  calculer_xp=False)
+		snap["xp_reward"] = 0
+		snap["est_invocation"] = True
+		snap["invocation_restants"] = max(1, int(invocation.get("duree", 1) or 1))
+		snap["invocateur_id"] = str(monstre.get("id") or "")
+		snap["invocateur_nom"] = str(monstre.get("nom") or "")
+		snap["sort_id"] = sort.get("id", "")
+		_appliquer_couvert(snap, bool(combat_doc.get("couvert")))
+		snap["pos"] = place["pos"]
+		if place["cap"]:
+			snap["cap"] = place["cap"]
+		if place["reduit"]:
+			snap.pop("jeton", None)
+		combat_doc["monstres"].append(snap)
+		crees.append(snap)
+	ordre = combat_doc["ordre_initiative"]
+	insert_at = combat_doc["acteur_courant_index"] + 1
+	for i, snap in enumerate(crees):
+		ordre.insert(insert_at + i, snap["id"])
+	return crees
+
+
 def _tenter_capacite_monstre(combat_doc: dict, monstre: dict, grid: dict, rand_fn=None) -> bool:
 	"""Au plus UNE capacité par tour : rend True si le monstre en a lancé une."""
 	if (monstre.get("capacite_lancee") or not monstre.get("vivant")
@@ -5993,7 +6205,7 @@ def _tenter_capacite_monstre(combat_doc: dict, monstre: dict, grid: dict, rand_f
 	if option is None:
 		return False
 	monstre["capacite_lancee"] = True
-	_lancer_capacite_monstre(combat_doc, monstre, option)
+	_lancer_capacite_monstre(combat_doc, monstre, option, grid)
 	return True
 
 
@@ -6444,6 +6656,19 @@ def _chasse_ou_erre(combat_doc: dict, monstre: dict, grid: dict) -> None:
 
 
 def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
+	"""Tour d'un monstre (`_jouer_tour_monstre`), plus la DURÉE d'une créature qu'un monstre a
+	invoquée : décomptée à la fin de SON tour (elle agit `duree` fois, celui de son
+	apparition compris), gelée tant qu'un sort maintenu la tient — miroir de
+	`_run_invocation_turn`."""
+	_jouer_tour_monstre(combat_doc, monstre, grid)
+	if monstre.get("est_invocation") and monstre.get("vivant") and not monstre.get("sort_maintenu"):
+		monstre["invocation_restants"] = int(monstre.get("invocation_restants", 1)) - 1
+		if monstre["invocation_restants"] <= 0:
+			_dissiper_invocation(combat_doc, monstre,
+								 f"{monstre['nom']} retourne d'où il vient — l'appel est épuisé.")
+
+
+def _jouer_tour_monstre(combat_doc: dict, monstre: dict, grid: dict) -> None:
 	"""Tour d'un monstre : se rapprocher du joueur (A*) puis attaquer si à portée.
 	Joueur FURTIF : le monstre doit d'abord le détecter (jet en début de tour, réussite
 	définitive pour le combat) ; tant qu'il ne l'a pas repéré, il ne vient pas vers lui
@@ -6451,6 +6676,11 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 	_reset_turn_budget(monstre, combat_doc)
 	# Mort en commençant son tour dans une zone persistante (Mur de feu) : il ne joue pas.
 	if not monstre["vivant"] or combat_doc["status"] != "active":
+		_avancer_tour(combat_doc)
+		return
+	# INCANTATION longue en cours : `_reset_turn_budget` vient d'y verser ses PA. Il ne bouge
+	# ni ne frappe tant qu'il canalise (le repli d'un hit-and-run ne lit que ses cases).
+	if monstre.get("incantation"):
 		_avancer_tour(combat_doc)
 		return
 	# PIÈGES du joueur à portée : il les flaire (ou non) avant de choisir ses pas.
@@ -6754,6 +6984,7 @@ def _frapper_monstre_coup(combat_doc: dict, attaquant: dict, monstre: dict, prof
 	avant_pv = monstre["currentPV"]
 	monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
 	_ailes_touchees(combat_doc, monstre, zone, avant_pv)
+	_concentration_monstre(combat_doc, monstre, attaquant, dmg)
 	# L'animation suit le MODE de l'arme (cac/jet/tir), avec celle de l'arme elle-même en
 	# priorité : le profil la porte depuis le snapshot, aucun doc n'est relu ici.
 	anim_arme = profil.get("animation")
@@ -7322,7 +7553,9 @@ def _enregistrer_concentration(combat_doc: dict, joueur: dict, sdoc: dict,
 	# ce sort tenait se dissipent. ⚠️ Sans cela, l'entrée d'entretien ci-dessus étant
 	# remplacée, chaque relance ajoutait des créatures gelées pour un seul paiement.
 	# Les créatures de CE lancement n'ont pas encore `sort_maintenu` : elles restent.
-	for invoc in list(combat_doc.get("joueurs") or []):
+	# ⚠️ Les DEUX camps : un monstre aussi tient des créatures (`invoquer_monstre`).
+	camps = list(combat_doc.get("joueurs") or []) + list(combat_doc.get("monstres") or [])
+	for invoc in camps:
 		if (invoc.get("est_invocation") and not invoc.get("dissipe")
 				and invoc.get("invocateur_id") == joueur.get("id")
 				and str(invoc.get("sort_maintenu") or "") == sort_id):
@@ -7331,7 +7564,7 @@ def _enregistrer_concentration(combat_doc: dict, joueur: dict, sdoc: dict,
 
 	# Les créatures que CE sort vient d'appeler cessent de compter leurs tours : c'est
 	# l'entretien qui les tient désormais (cf. `_run_invocation_turn`).
-	for invoc in combat_doc.get("joueurs") or []:
+	for invoc in camps:
 		if (invoc.get("est_invocation") and not invoc.get("sort_maintenu")
 				and invoc.get("invocateur_id") == joueur.get("id")
 				and invoc.get("sort_id") == sort_id):
@@ -8044,6 +8277,8 @@ def _objets_payload(monstre: dict) -> list[dict]:
 def _butin_du_monstre(monstre: dict) -> list[dict]:
 	"""Butin d'un monstre MORT : sa carcasse (sauf déjà ramassée en combat, `loote` — qui ne
 	concerne QUE la carcasse) puis, pour un humanoïde, chacun de ses objets équipés."""
+	if monstre.get("est_invocation"):
+		return []   # une créature appelée retourne d'où elle vient : rien à dépecer
 	lignes = []
 	if not monstre.get("loote"):
 		payload = _carcasse_payload(monstre)
