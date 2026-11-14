@@ -1,0 +1,845 @@
+[
+  {
+    "_id": "espece:apep",
+    "_rev": "6-c9d5e09e3afc2c2151d1727ea3d67f12",
+    "type": "espece",
+    "nom": "Apep, Serpent du Chaos",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "nom_propre": true,
+    "image": "apep_transparent.png",
+    "description": "Serpent du chaos lové sous le monde. Chaque nuit, dit-on en Égypte, il assaille la barque du soleil dans la Douat, et chaque nuit on le repousse sans jamais le tuer ; les orages et les éclipses seraient ses assauts. Sa seule présence éteint les torches et fend la pierre. Les prêtres écrivent son nom pour le brûler et piétinent sa figure de cire ; nul ne sait si cela l'affaiblit ou le rend furieux.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 85,
+        "max": 125
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 70,
+        "max": 100
+      },
+      "Int": {
+        "min": 40,
+        "max": 60
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "souterrain",
+      "magique",
+      "legendaire",
+      "boss",
+      "cataclysme"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_05",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:bete_de_l_apocalypse",
+    "_rev": "6-87c8d89a5f8748cf4ad9e8cc21446014",
+    "type": "espece",
+    "nom": "Bete de l Apocalypse",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "ellipse"
+    },
+    "genre": "f",
+    "image": "bete_de_l_apocalypse_transparent.png",
+    "description": "Entité cataclysmique annonçant la fin des temps, sa puissance dépasse l'entendement des mortels.",
+    "base_attributes": {
+      "V": {
+        "min": 8,
+        "max": 10
+      },
+      "F": {
+        "min": 110,
+        "max": 160
+      },
+      "R": {
+        "min": 105,
+        "max": 155
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 110,
+        "max": 150
+      },
+      "Int": {
+        "min": 50,
+        "max": 80
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 70,
+        "max": 105
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "boss",
+      "cataclysme",
+      "predateur",
+      "insensible_furtivite"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_07"
+  },
+  {
+    "_id": "espece:dragon_blanc",
+    "_rev": "3-46bb67a755d5419b0d0c5e6fa288f7dd",
+    "type": "espece",
+    "nom": "Dragon blanc",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "triangle"
+    },
+    "genre": "m",
+    "image": "dragon_blanc_transparent.png",
+    "description": "Le second dragon de Dinas Emrys, pâle comme la craie. Il ouvre chaque combat en furie et repousse le rouge jusqu'au bord du lac souterrain, puis faiblit et recule. On dit qu'il ne meurt jamais tout à fait, qu'il revient toujours pour une nouvelle lutte, et que la tour au-dessus n'a jamais tenu longtemps.",
+    "base_attributes": {
+      "V": {
+        "min": 17,
+        "max": 19
+      },
+      "F": {
+        "min": 80,
+        "max": 115
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 45,
+        "max": 65
+      },
+      "Vol": {
+        "min": 80,
+        "max": 115
+      },
+      "Int": {
+        "min": 50,
+        "max": 80
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_02",
+    "competences": [
+      "competence:monstre_souffle_de_givre"
+    ]
+  },
+  {
+    "_id": "espece:dragon_empereur",
+    "_rev": "7-30d53a2db7c92b0790d37bf81190a65b",
+    "type": "espece",
+    "nom": "Dragon Empereur",
+    "jeton": {
+      "taille": "5x4",
+      "forme": "triangle"
+    },
+    "genre": "m",
+    "image": "dragon_empereur_transparent.png",
+    "description": "Souverain absolu parmi les dragons, dont la simple présence plie les volontés les plus fortes.",
+    "base_attributes": {
+      "V": {
+        "min": 18,
+        "max": 20
+      },
+      "F": {
+        "min": 95,
+        "max": 140
+      },
+      "R": {
+        "min": 95,
+        "max": 140
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 95,
+        "max": 135
+      },
+      "Int": {
+        "min": 65,
+        "max": 95
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 60,
+        "max": 95
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_01",
+    "competences": [
+      "competence:monstre_grand_souffle_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:dragon_rouge",
+    "_rev": "3-0b9b9e502e97fe4a49c799e5d66514e0",
+    "type": "espece",
+    "nom": "Dragon rouge",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "triangle"
+    },
+    "genre": "m",
+    "image": "dragon_rouge_transparent.png",
+    "description": "L'un des deux dragons de Dinas Emrys. Un roi les aurait pris au centre de l'île, endormis dans une cuve d'hydromel, et enfermés sous la colline. Quand Vortigern voulut y bâtir sa tour, elle s'effondrait chaque nuit : les deux dragons se battaient dessous. Un enfant sans père, que certains appellent Merlin, l'annonça. Le blanc a l'avantage au début de chaque combat ; le rouge, celui que les Gallois peignent sur leurs bannières, l'emporte à la fin.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 85,
+        "max": 125
+      },
+      "R": {
+        "min": 85,
+        "max": 125
+      },
+      "Ag": {
+        "min": 40,
+        "max": 60
+      },
+      "Vol": {
+        "min": 80,
+        "max": 115
+      },
+      "Int": {
+        "min": 50,
+        "max": 80
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_01",
+    "competences": [
+      "competence:monstre_souffle_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:dragon_zombie",
+    "_rev": "7-ef2bf52034cc435509d8988780e23604",
+    "type": "espece",
+    "nom": "Dragon Zombie",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "triangle"
+    },
+    "genre": "m",
+    "image": "dragon_zombie_transparent.png",
+    "description": "Carcasse draconique réanimée par nécromancie, son souffle putride remplace les flammes d'antan.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 60,
+        "max": 90
+      },
+      "R": {
+        "min": 60,
+        "max": 95
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 70
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "draconique",
+      "vol",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_02",
+    "competences": [
+      "competence:monstre_souffle_de_la_tombe"
+    ]
+  },
+  {
+    "_id": "espece:grand_dragon",
+    "_rev": "7-d54dde816fc577947dcbb2e7c1148802",
+    "type": "espece",
+    "nom": "Grand Dragon",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "triangle"
+    },
+    "genre": "m",
+    "image": "grand_dragon_transparent.png",
+    "description": "Dragon parvenu à un âge vénérable, dont la puissance et la sagesse rivalisent avec celles des plus grandes créatures du monde.",
+    "base_attributes": {
+      "V": {
+        "min": 17,
+        "max": 19
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 80,
+        "max": 115
+      },
+      "Int": {
+        "min": 55,
+        "max": 85
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_01",
+    "competences": [
+      "competence:monstre_souffle_de_feu"
+    ]
+  },
+  {
+    "_id": "espece:illuyanka",
+    "_rev": "4-5c559f048723c3c6120b4d611146d040",
+    "type": "espece",
+    "nom": "Illuyanka",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "nom_propre": true,
+    "image": "illuyanka_transparent.png",
+    "description": "Serpent-dragon des hauts plateaux d'Anatolie, terré dans un trou de la montagne : on raconte qu'il vainquit un jour le dieu de l'orage et lui prit son cœur et ses yeux. Sa gloutonnerie le perd : gavé de festin, il ne repasse plus par son trou, et un simple anthrope put le ligoter.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 15,
+        "max": 25
+      },
+      "Vol": {
+        "min": 60,
+        "max": 90
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 75
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "souterrain",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_09",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:ladon",
+    "_rev": "4-e7237e63882ce2bcb0345ef8bfbbf9f6",
+    "type": "espece",
+    "nom": "Ladon",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "nom_propre": true,
+    "image": "ladon_transparent.png",
+    "description": "Serpent aux cent têtes et aux cent voix, enroulé autour de l'arbre aux pommes d'or du jardin des Hespérides, au-delà des Colonnes, que les marins disent apercevoir au couchant. Il ne dort jamais. Les uns le disent né de Cétô, les autres d'Échidna. Des flèches trempées dans le venin d'une hydre l'auraient déjà blessé ; une ruse l'aurait déjà détourné.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 80,
+        "max": 115
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 80,
+        "max": 110
+      },
+      "Int": {
+        "min": 50,
+        "max": 70
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "gardien",
+      "legendaire",
+      "boss",
+      "insensible_furtivite",
+      "ia_embuscade"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_10"
+  },
+  {
+    "_id": "espece:leviathan",
+    "_rev": "5-019e26edc41b9aa5327d627010d08d65",
+    "type": "espece",
+    "nom": "Leviathan",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "image": "leviathan_transparent.png",
+    "description": "Titan des abysses, créature primordiale dont le réveil peut engloutir des flottes entières.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 100,
+        "max": 150
+      },
+      "R": {
+        "min": 95,
+        "max": 145
+      },
+      "Ag": {
+        "min": 10,
+        "max": 25
+      },
+      "Vol": {
+        "min": 85,
+        "max": 125
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 60,
+        "max": 95
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_visqueux_04",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:seraphin",
+    "_rev": "9-8fc570a995a886353314aa9c1c185dca",
+    "type": "espece",
+    "nom": "Seraphin",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "triangle"
+    },
+    "genre": "m",
+    "image": "seraphin_transparent.png",
+    "description": "Plus haute hiérarchie angélique, entité de lumière pure dont la contemplation seule éblouit les mortels.",
+    "base_attributes": {
+      "V": {
+        "min": 18,
+        "max": 20
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 85,
+        "max": 125
+      },
+      "Ag": {
+        "min": 50,
+        "max": 75
+      },
+      "Vol": {
+        "min": 105,
+        "max": 145
+      },
+      "Int": {
+        "min": 70,
+        "max": 100
+      },
+      "Cha": {
+        "min": 65,
+        "max": 95
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "vol",
+      "boss",
+      "legendaire",
+      "divin",
+      "humanoide",
+      "insensible_furtivite",
+      "magie_sainte_10"
+    ],
+    "items": [
+      "item:Epee_une_main_benie",
+      "item:Masse_benie",
+      "item:Bouclier_sacre",
+      "item:Harnois_du_grand_arsenal",
+      "item:Epaulieres_benies",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:serpent_de_marcel",
+    "_rev": "2-f45de7187738422ec5b33cfe85e0761f",
+    "type": "espece",
+    "nom": "Serpent de Marcel",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "image": "serpent_de_marcel_transparent.png",
+    "description": "Serpent monstrueux des abords de Lutecia, gros comme un tronc de chêne et long de plusieurs chariots, aux écailles vert-de-gris couvertes de lichen, et dont on ne voit les quatre courtes pattes griffues qu'une fois qu'il se dresse. On raconte dans les faubourgs qu'un vieil homme au bâton le fit sortir jadis de la ville et le perdit de vue ; au Relais de Saint-Denis, on dit qu'il suivit un paladin décapité jusqu'au coude du vieux chemin, et qu'il ne l'a jamais passé. Les loups et les corneilles du pays vivent de ses restes.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 65,
+        "max": 95
+      },
+      "R": {
+        "min": 65,
+        "max": 95
+      },
+      "Ag": {
+        "min": 25,
+        "max": 40
+      },
+      "Vol": {
+        "min": 50,
+        "max": 70
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 55
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_12"
+  },
+  {
+    "_id": "espece:yamata_no_orochi",
+    "_rev": "4-221c88b0d59661d6db3486b534d8d8a5",
+    "type": "espece",
+    "nom": "Yamata no Orochi",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "ellipse"
+    },
+    "genre": "m",
+    "nom_propre": true,
+    "image": "yamata_no_orochi_transparent.png",
+    "description": "Serpent d'Izumo à huit têtes et huit queues, long de huit vallées et de huit collines : des cyprès poussent sur son dos, ses yeux sont rouges comme des cerises d'hiver, son ventre suinte le sang. Chaque année il exigeait une jeune fille. Le saké huit fois brassé endort ses têtes une à une ; on dit qu'une lame dort dans l'une de ses queues.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 100,
+        "max": 145
+      },
+      "R": {
+        "min": 95,
+        "max": 140
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 70,
+        "max": 100
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile",
+      "legendaire",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_06",
+    "competences": [
+      "competence:monstre_etreinte"
+    ]
+  },
+  {
+    "_id": "espece:zmey_gorynych",
+    "_rev": "4-7174242258b8949f7d2d90c9a0543fd4",
+    "type": "espece",
+    "nom": "Zmeï Gorynytch",
+    "jeton": {
+      "taille": "4x3",
+      "forme": "triangle"
+    },
+    "genre": "m",
+    "nom_propre": true,
+    "image": "zmey_gorynych_transparent.png",
+    "description": "Dragon à trois têtes des terres de Kiev, aux griffes de fer, qui crache le feu et enlève qui lui plaît. Il garde le pont Kalinov sur la Smorodina, la rivière de feu ; on dit que ce pont mène au pays des morts, et nul n'en est revenu pour le confirmer. Ses têtes repoussent ; la terre, dit-on, refuse de boire son sang tant qu'on ne l'en supplie pas.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 80,
+        "max": 115
+      },
+      "R": {
+        "min": 75,
+        "max": 110
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 70,
+        "max": 100
+      },
+      "Int": {
+        "min": 45,
+        "max": 65
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "regeneration",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_dragon_02",
+    "competences": [
+      "competence:monstre_souffle_de_feu",
+      "competence:monstre_regeneration"
+    ]
+  }
+]

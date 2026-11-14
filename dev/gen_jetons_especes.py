@@ -9,7 +9,9 @@
 # (ellipse / rectangle / triangle) n'habille que le dessin. Sans champ : 1x1 rond, comme avant.
 #
 # Principe de la table : triangle = ailés (envergure), rectangle = colosses bipèdes et
-# constructs, ellipse = corps organiques. Gabarits admis : 1x1, 2x1, 1x2, 2x2, 3x2.
+# constructs, ellipse = corps organiques. Gabarits admis : 1x1, 2x1, 1x2, 2x2, 3x2, 4x3, 5x4.
+# Paliers des plus grands : 3x2 pour les dragons et grands monstres ordinaires, 4x3 pour les
+# boss légendaires, 5x4 pour le SEUL Dragon Empereur (le plus gros du bestiaire).
 #
 # ⚠️ LA TABLE EST EXHAUSTIVE : chaque espèce du dump y figure, `None` = 1x1 (aucun champ). Le
 # script ÉCHOUE si une espèce du dump manque à la table ou si la table cite une espèce absente —
@@ -20,8 +22,8 @@
 # injecte que `jeton` (placé juste après `nom`) : régénérer est idempotent, et une retouche faite
 # en base (stats, tags, animation) survit — à condition de relancer sur un dump FRAIS.
 #
-# N'écrit que les espèces dont le champ est à poser ou à retirer : les 1x1 déjà sans champ
-# ne sont pas réimportées.
+# N'écrit que les espèces dont le champ est à poser, à changer ou à retirer : une espèce déjà
+# à jour dans le dump n'est pas réimportée.
 #
 # Usage : python dev/gen_jetons_especes.py
 # Sortie (à coller dans /admin → Import en masse) :
@@ -35,7 +37,7 @@ import sys
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SORTIE = "jsons/jetons_especes_a_importer.json"
 
-TAILLES = ("1x1", "2x1", "1x2", "2x2", "3x2")
+TAILLES = ("1x1", "2x1", "1x2", "2x2", "3x2", "4x3", "5x4")
 FORMES = ("ellipse", "rectangle", "triangle")
 
 # slug d'espèce → (taille, forme), ou None pour 1x1 sans champ.
@@ -47,7 +49,7 @@ TABLE = {
 	"ane": None,
 	"ange_de_la_connaissance": None,
 	"ange_de_la_justice": None,
-	"apep": ("3x2", "ellipse"),
+	"apep": ("4x3", "ellipse"),
 	"araignee": None,
 	"araignee_geante": ("2x2", "ellipse"),
 	"archange_de_l_ordre": ("2x1", "triangle"),
@@ -57,7 +59,7 @@ TABLE = {
 	"banshee": None,
 	"basilic": ("3x2", "ellipse"),
 	"besien": None,
-	"bete_de_l_apocalypse": ("3x2", "ellipse"),
+	"bete_de_l_apocalypse": ("4x3", "ellipse"),
 	"bete_du_gevaudan": ("1x2", "ellipse"),
 	"bete_glatissante": ("1x2", "ellipse"),
 	"boukhnoun": None,
@@ -95,11 +97,11 @@ TABLE = {
 	"dragon_hydre": ("3x2", "ellipse"),
 	"draugr": None,
 	"dragon": ("3x2", "triangle"),
-	"dragon_blanc": ("3x2", "triangle"),
+	"dragon_blanc": ("4x3", "triangle"),
 	"dragon_de_sang": None,
-	"dragon_empereur": ("3x2", "triangle"),
-	"dragon_rouge": ("3x2", "triangle"),
-	"dragon_zombie": ("3x2", "triangle"),
+	"dragon_empereur": ("5x4", "triangle"),
+	"dragon_rouge": ("4x3", "triangle"),
+	"dragon_zombie": ("4x3", "triangle"),
 	"dryade": None,
 	"ecureuil": None,
 	"elementaux": None,
@@ -125,7 +127,7 @@ TABLE = {
 	"golem_de_pierre": ("2x2", "rectangle"),
 	"gorgone": None,
 	"goule": None,
-	"grand_dragon": ("3x2", "triangle"),
+	"grand_dragon": ("4x3", "triangle"),
 	"grand_faucon": ("2x1", "triangle"),
 	"grand_phenix": ("3x2", "triangle"),
 	"grand_sanglier": ("1x2", "ellipse"),
@@ -138,13 +140,13 @@ TABLE = {
 	"horreur": None,
 	"hydre": ("3x2", "ellipse"),
 	"ifrit": ("2x2", "ellipse"),
-	"illuyanka": ("3x2", "ellipse"),
+	"illuyanka": ("4x3", "ellipse"),
 	"incube": None,
 	"jann": None,
 	"kraken": ("3x2", "ellipse"),
-	"ladon": ("3x2", "ellipse"),
+	"ladon": ("4x3", "ellipse"),
 	"leprechaun": None,
-	"leviathan": ("3x2", "ellipse"),
+	"leviathan": ("4x3", "ellipse"),
 	"lamie": None,
 	"lhamia": ("1x2", "ellipse"),
 	"liche": None,
@@ -198,9 +200,9 @@ TABLE = {
 	"sanglier_apprivoise": None,
 	"satyre": None,
 	"seigneur_du_sang": None,
-	"seraphin": ("3x2", "triangle"),
+	"seraphin": ("4x3", "triangle"),
 	"serpent": None,
-	"serpent_de_marcel": ("3x2", "ellipse"),
+	"serpent_de_marcel": ("4x3", "ellipse"),
 	"serpent_geant": ("1x2", "ellipse"),
 	"serpopard": ("1x2", "ellipse"),
 	"silat": None,
@@ -223,8 +225,8 @@ TABLE = {
 	"vouivre": None,
 	"wyvern": ("3x2", "triangle"),
 	"xiuhcoatl": ("1x2", "ellipse"),
-	"yamata_no_orochi": ("3x2", "ellipse"),
-	"zmey_gorynych": ("3x2", "triangle"),
+	"yamata_no_orochi": ("4x3", "ellipse"),
+	"zmey_gorynych": ("4x3", "triangle"),
 	"zombie": None,
 	"nasnas": None,
 	"nuee_de_scarabees": ("2x2", "ellipse"),
@@ -286,10 +288,10 @@ def main() -> None:
 		valeur = TABLE[slug]
 		jeton = {"taille": valeur[0], "forme": valeur[1]} if valeur else None
 		if doc.get("jeton") == jeton or (jeton is None and "jeton" not in doc):
+			# Déjà à jour en base : hors du fichier, qui ne porte que le DELTA (CLAUDE.md §18).
 			if jeton is not None:
 				deja += 1
-			if jeton is None:
-				continue
+			continue
 		docs.append(_avec_jeton(doc, jeton))
 		cle = f"{valeur[0]} {valeur[1]}" if valeur else "retrait"
 		compte[cle] = compte.get(cle, 0) + 1
@@ -304,7 +306,7 @@ def main() -> None:
 	for cle in sorted(compte):
 		print(f"   {cle} : {compte[cle]}")
 	if deja:
-		print(f"   dont {deja} déjà à jour en base (réimport sans effet)")
+		print(f"   {deja} autre(s) déjà à jour en base, laissée(s) hors du fichier")
 
 
 if __name__ == "__main__":

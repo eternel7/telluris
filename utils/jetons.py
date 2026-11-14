@@ -7,7 +7,8 @@
 #
 #   • `L` = LARGEUR, en travers de la marche ; `P` = PROFONDEUR, dans le sens de la marche.
 #     Un cheval est 1x2, une envergure d'archange 2x1, un dragon 3x2 (3 cases d'ailes sur
-#     2 de corps).
+#     2 de corps). Paliers des plus grands : 4x3 (boss légendaires), 5x4 (le seul Dragon
+#     Empereur, plus gros monstre du bestiaire).
 #   • `forme` (ellipse / rectangle / triangle) n'habille que le DESSIN : les cases occupées
 #     sont toujours le rectangle plein.
 #
@@ -27,10 +28,11 @@
 import heapq
 
 # Gabarits admis (largeur, profondeur). Une taille inconnue ⇒ 1x1 : on ne devine pas.
-TAILLES_JETON = {"1x1": (1, 1), "2x1": (2, 1), "1x2": (1, 2), "2x2": (2, 2), "3x2": (3, 2)}
+TAILLES_JETON = {"1x1": (1, 1), "2x1": (2, 1), "1x2": (1, 2), "2x2": (2, 2), "3x2": (3, 2),
+				 "4x3": (4, 3), "5x4": (5, 4)}
 FORMES_JETON = ("ellipse", "rectangle", "triangle")
 FORME_DEFAUT = "ellipse"
-DIMENSION_MAX = 3
+DIMENSION_MAX = 5  # = la plus grande dimension des gabarits (5x4)
 
 # Cap = direction de marche, repère MONDE (y croît vers le bas, comme `cells[y][x]`).
 CAPS = {"haut": (0, -1), "bas": (0, 1), "gauche": (-1, 0), "droite": (1, 0)}
