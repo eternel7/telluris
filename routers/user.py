@@ -17,7 +17,7 @@ from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
 	sync_equipment_bonus, carried_weight, charge_max_of,
 	restriction_satisfaite,
-	main_occupee_par_deux_mains, liberer_pour_deux_mains,
+	main_occupee_par_deux_mains, liberer_pour_deux_mains, equiper_au_depart,
 	item_ref_id, item_ref_weight, resolve_item_ref, poids_bounds, tirer_poids, lieu_label,
 	money_to_cuivre, cuivre_to_purse, credit_character,
 	nettoyer_nom_objet, renommer_ref, marquer_joue,
@@ -390,19 +390,19 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'competences_connues': competences_init,
 			'competences_bonus': {},
 			}
+		# Équipement de départ EN MAIN, pas au sac : chaque objet va dans son premier slot
+		# libre (mêmes règles que l'équipement manuel). AVANT les passives : une passive
+		# exigeant une arme (utils/exigence_arme) ou accordée par un objet porté la voit.
+		equiper_au_depart(character_dict, lambda r: get_doc(item_ref_id(r)))
+		eq_bonus = sync_equipment_bonus(character_dict)
 		# Une compétence passive buffe en permanence : on dénormalise son bonus, puis on
 		# recalcule les max pour démarrer PV/PM pleins DANS les valeurs bufffées (une passive
-		# en R relève pv_max). `caracteristiques_current` reste la valeur brute, jamais bufffée.
+		# en R relève pv_max, l'équipement porté aussi). `caracteristiques_current` reste la
+		# valeur brute, jamais bufffée.
 		competences_util.recompute_competences_bonus(character_dict, get_doc)
-		if character_dict['competences_bonus'].get('buffs'):
-			stats = consommables.caracts_avec_buffs(character_dict)
-			derived = compute_derived_stats(base=BaseStats(
-				v=stats.get("V", 0), f=stats.get("F", 0), r=stats.get("R", 0),
-				ag=stats.get("Ag", 0), vol=stats.get("Vol", 0), int_=stats.get("Int", 0),
-				cha=stats.get("Cha", 0), ch=stats.get("Ch", 0),
-			), niveau=0)
-			character_dict['currentPV'] = derived.pv_max
-			character_dict['currentPM'] = derived.pm_max
+		derived = _derived_from_character(character_dict, eq_bonus)
+		character_dict['currentPV'] = derived.pv_max
+		character_dict['currentPM'] = derived.pm_max
 		# Intro narrative : si la cité porte un bloc `intro`, le personnage démarre à
 		# `position_depart` (périphérie) avec le statut en_cours — l'overlay du premier
 		# /play racontera la fuite du village natal. Sans bloc : comportement inchangé.

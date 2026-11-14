@@ -2175,6 +2175,7 @@
 							{% endif %}
 							{# Coupe-son : même réglage que le 🔊 du combat (scripts/sons.js). #}
 							<button type="button" role="menuitemcheckbox" class="affichage-item" id="affichage-son" aria-checked="true" onclick="basculerSonsMenu()">🔊 Sons</button>
+							{% if intro_musique %}<button type="button" role="menuitemcheckbox" class="affichage-item" id="affichage-musique" aria-checked="true" onclick="basculerMusiqueMenu()">🎵 Musique</button>{% endif %}
 							{# Bouton « ? » d'aide des cartes du joueur (classe `aide-masquee` de <html>). #}
 							<button type="button" role="menuitemcheckbox" class="affichage-item" id="affichage-aide" aria-checked="true" onclick="basculerAideMenu()">❓ Bouton d'aide</button>
 							{# Porte de rempart franchie d'un geste : `passe_muraille` de `moveTo` (utils/passe_muraille.py). #}
@@ -2422,7 +2423,7 @@
 										{% if attribute_points < voc_cout %}disabled{% endif %}
 										{% if attribute_points == 0 or voc_niveau >= voc_niveau_max %}style="display:none"{% endif %}
 										onclick="spendXpVocation()">
-									Monter — <span id="sh-voc-cout">{{ voc_cout }}</span> P<small>oints</small>
+									⬆️ <span id="sh-voc-cout">{{ voc_cout }}</span> P<small>oints</small>
 								</button>
 								{# Changement de vocation (utils/vocations.py) : le porteur affiché, compagnon
 								   recruté compris (`_actionBody`) ; on repart aspirant, rien ne se perd.
@@ -3496,6 +3497,17 @@
 		}
 		.intro-card h2 { margin: 0 0 .8rem; }
 		#intro-texte { line-height: 1.5; margin-bottom: 1rem; white-space: pre-line; }
+		/* ▶ Lecture à voix haute, coin haut droit de la carte (masqué sans speechSynthesis). */
+		.intro-card { position: relative; }
+		.intro-card h2 { padding-right: 2.4rem; }
+		.intro-lire {
+			position: absolute; top: .8rem; right: .8rem;
+			width: 2rem; height: 2rem; border-radius: 50%; cursor: pointer;
+			font-size: .9rem; line-height: 1; padding: 0;
+			background: transparent; color: var(--accent, #b98c4a);
+			border: 1px solid var(--accent, #b98c4a);
+		}
+		.intro-lire:hover, .intro-lire:focus-visible { background: rgba(185, 140, 74, .18); }
 		/* ── Fiche objet / comparaison d'équipement ── */
 		#item-detail-overlay {
 			position: fixed; inset: 0; z-index: 9200;
@@ -3924,6 +3936,8 @@
 	</div><!-- /#pnj-panel -->
 	<div id="intro-overlay" class="{{ '' if intro else 'intro-hidden' }}" aria-label="Introduction narrative">
 		<div class="intro-card">
+			<button type="button" id="intro-lire" class="intro-lire" hidden onclick="basculerLectureIntro()"
+				title="Lire à voix haute" aria-label="Lire à voix haute">▶</button>
 			<h2 id="intro-titre">{{ intro.titre if intro else '' }}</h2>
 			<div id="intro-texte">{{ intro.texte if intro else '' }}</div>
 			<ul id="intro-raisons" class="sub-locations-list" style="list-style:none;padding:0;margin:0">
@@ -5097,9 +5111,20 @@
 	function basculerSonsMenu() {
 		basculerSons();
 		_majMenuSons();
+		if (sonsCoupes()) taireIntro();   // la voix de l'intro suit le coupe-son
 		jouerSonUi('choix');   // muet si l'on vient de couper : c'est le retour attendu
 	}
 	_majMenuSons();
+	// 🎵 Musique : présent tant que l'intro a une musique (même réglage que le 🎵 du combat).
+	function _majMenuMusique() {
+		const b = document.getElementById('affichage-musique');
+		if (b) b.setAttribute('aria-checked', musiqueCoupee() ? 'false' : 'true');
+	}
+	function basculerMusiqueMenu() {
+		basculerMusique();
+		_majMenuMusique();
+	}
+	_majMenuMusique();
 	// Bouton « ? » de l'aide : préférence du joueur (localStorage, lue aussi dans le <head>
 	// pour ne pas clignoter). Le menu ⚙️ le réaffiche.
 	const AIDE_MASQUEE_CLE = 'telluris.play.aide_masquee';
@@ -6535,6 +6560,64 @@ async function spendXp(statKey, useMaxBonus = false) {
 		} catch (e) { /* relais illisible : l'objet reste visible au sol */ }
 	}
 	// ── Intro narrative : choix de la raison + conclusion ─────────────────────
+	// Musique (`intro.musique` de la cité, `utils/intro.musique`) : du premier dialogue à la
+	// fermeture de la conclusion. ⚠️ Le navigateur la bloque sans geste du joueur :
+	// `demarrerMusique` l'attend, elle part au premier clic ou touche.
+	// Voix : AUCUNE lecture automatique — le ▶ du coin de la carte lit le texte affiché
+	// (speechSynthesis), un second clic l'arrête ; changer d'écran la coupe.
+	const INTRO_MUSIQUE = {{ intro_musique | tojson | safe }};
+	let _introConclue = false;
+	const _introParle = typeof speechSynthesis !== 'undefined' && typeof SpeechSynthesisUtterance !== 'undefined';
+	if (_introParle) {
+		speechSynthesis.getVoices();   // amorce le chargement (asynchrone) des voix
+		document.getElementById('intro-lire').hidden = false;
+	}
+	function _voixFrancaise() {
+		const voix = speechSynthesis.getVoices().filter(v => /^fr\b/i.test(v.lang));
+		return voix.find(v => /fr[-_]FR/i.test(v.lang) && v.localService)
+			|| voix.find(v => /fr[-_]FR/i.test(v.lang)) || voix[0] || null;
+	}
+	function _majBoutonLecture(enCours) {
+		const b = document.getElementById('intro-lire');
+		if (!b) return;
+		b.textContent = enCours ? '⏹' : '▶';
+		b.title = enCours ? 'Arrêter la lecture' : 'Lire à voix haute';
+		b.setAttribute('aria-label', b.title);
+	}
+	// Jeton de lecture : la fin (même annulée) d'une lecture ANCIENNE ne touche pas au bouton.
+	let _lectureIntroId = 0;
+	function taireIntro() {
+		_lectureIntroId++;
+		if (_introParle) speechSynthesis.cancel();
+		_majBoutonLecture(false);
+	}
+	// Une phrase par énoncé : certaines voix de Chrome s'arrêtent net après ~15 s de lecture.
+	function lireIntro(texte) {
+		if (!_introParle) return;
+		speechSynthesis.cancel();
+		const id = ++_lectureIntroId;
+		const phrases = String(texte || '').split(/\n+|(?<=[.!?…])\s+/).map(s => s.trim()).filter(Boolean);
+		if (!phrases.length) { _majBoutonLecture(false); return; }
+		const voix = _voixFrancaise();
+		phrases.forEach((phrase, i) => {
+			const u = new SpeechSynthesisUtterance(phrase);
+			u.lang = 'fr-FR';
+			u.rate = 0.95;
+			if (voix) u.voice = voix;
+			if (i === phrases.length - 1) u.onend = () => { if (id === _lectureIntroId) _majBoutonLecture(false); };
+			speechSynthesis.speak(u);
+		});
+		_majBoutonLecture(true);
+	}
+	function basculerLectureIntro() {
+		if (_introParle && (speechSynthesis.speaking || speechSynthesis.pending)) { taireIntro(); return; }
+		lireIntro(document.getElementById('intro-texte').textContent);
+	}
+	// Premier dialogue : 🎵 recochée d'office. Le coupe-musique est partagé avec le combat
+	// (`telluris.musique`) : une musique coupée un jour dans un donjon ferait sinon naître
+	// le personnage suivant dans une intro muette. Le joueur peut la recouper au menu ⚙️.
+	{% if intro %}if (INTRO_MUSIQUE && musiqueCoupee()) { basculerMusique(); _majMenuMusique(); }{% endif %}
+	demarrerMusique(INTRO_MUSIQUE);
 	async function choisirRaisonIntro(raisonId) {
 		try {
 			const res = await fetch('api/intro/raison', {
@@ -6546,10 +6629,14 @@ async function spendXp(statKey, useMaxBonus = false) {
 			document.getElementById('intro-texte').textContent = data.texte_suite || '';
 			document.getElementById('intro-raisons').innerHTML =
 				'<li><button class="sub-loc-btn" onclick="fermerIntro()">🛤 Prendre la route</button></li>';
+			taireIntro();   // l'écran change : la lecture du texte précédent s'arrête
 		} catch (err) { console.error('Erreur intro', err); }
 	}
 	function fermerIntro() {
 		document.getElementById('intro-overlay').classList.add('intro-hidden');
+		taireIntro();
+		// La conclusion fermée, la scène est finie : fondu de la musique de l'intro.
+		if (_introConclue) arreterMusique(2500);
 	}
 	// Réutilise l'overlay (toujours présent, masqué) pour afficher la conclusion —
 	// déclenchée par un pas (réponse move) ou rejouée après reload (sessionStorage).
@@ -6562,7 +6649,10 @@ async function spendXp(statKey, useMaxBonus = false) {
 		document.getElementById('intro-raisons').innerHTML =
 			'<li><button class="sub-loc-btn" onclick="fermerIntro()">✔ Continuer</button></li>';
 		ov.classList.remove('intro-hidden');
+		_introConclue = true;
+		taireIntro();
 	}
+	window.basculerLectureIntro = basculerLectureIntro;
 	window.choisirRaisonIntro = choisirRaisonIntro;
 	window.fermerIntro = fermerIntro;
 	window.showIntroConclusion = showIntroConclusion;

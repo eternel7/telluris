@@ -129,6 +129,26 @@ def test_payload_overlay_none_selon_etat():
     assert intro.payload_overlay(_character(), _ville()) is None
 
 
+def test_musique_tant_que_l_intro_est_en_cours_dans_sa_cite():
+    ville = _ville(_bloc_intro(musique="Soliloquy.mp3", musique_volume=0.3))
+    attendu = {"fichier": "Soliloquy.mp3", "volume": 0.3}
+    assert intro.musique(_character(), ville) == attendu
+    # Raison choisie : la marche vers le cœur de la cité garde sa musique.
+    assert intro.musique(_character(raison="secret"), ville) == attendu
+    # Intro terminée, absente, ou hors de sa cité : silence.
+    assert intro.musique(_character(statut="terminee"), ville) is None
+    assert intro.musique(_character(statut=None), ville) is None
+    assert intro.musique(_character(), _ville(_bloc_intro(musique="Soliloquy.mp3"),
+        _id="lieu:autre")) is None
+
+
+def test_musique_absente_ou_hors_du_dossier_des_sons():
+    assert intro.musique(_character(), _ville(_bloc_intro())) is None
+    assert intro.musique(_character(), _ville()) is None
+    # Même borne que la musique d'un donjon : aucun chemin dans l'URL /sounds/….
+    assert intro.musique(_character(), _ville(_bloc_intro(musique="../x.mp3"))) is None
+
+
 def test_raison_valide():
     ville = _ville(_bloc_intro())
     assert intro.raison_valide(ville, "secret")["texte_suite"] == "Soit."

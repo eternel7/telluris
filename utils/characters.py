@@ -605,6 +605,43 @@ def liberer_pour_deux_mains(slots: dict, item: dict, slot: str) -> str | None:
 	return autre_main(slot)
 
 
+def equiper_au_depart(character: dict, resolve_item_fn) -> list[str]:
+	"""Équipe à la création ce que l'inventaire de départ permet de porter : chaque objet
+	va dans le premier de SES `slots` libre, aux mêmes règles que l'équipement manuel
+	(`restriction_satisfaite` sur le BRUT, main bloquée par une arme à deux mains). Rien
+	n'est jamais délogé : ce qui ne trouve pas de place reste au sac. Les objets aux slots
+	les MOINS nombreux passent d'abord (tri stable) — une lame qui ne va qu'en main droite
+	n'y est pas devancée par une dague qui irait aussi en main gauche.
+	Mute `slots` et `inventaire`, NE SAUVEGARDE PAS ; l'appelant resynchronise les bonus
+	(`sync_equipment_bonus`). Renvoie les slots remplis, dans l'ordre de pose."""
+	slots = character.setdefault("slots", {})
+	inventaire = character.get("inventaire") or []
+	caracs = character.get("caracteristiques_current") or {}
+	candidats = []
+	for ref in inventaire:
+		item = resolve_item_fn(ref)
+		if not item:
+			continue
+		places = [s for s in item.get("slots") or [] if s in slots]
+		if places and restriction_satisfaite(item.get("restriction"), caracs)[0]:
+			candidats.append((ref, item, places))
+	candidats.sort(key=lambda c: len(c[2]))
+	poses = []
+	for ref, item, places in candidats:
+		for slot in places:
+			if slots.get(slot) or main_occupee_par_deux_mains(slots, resolve_item_fn, slot):
+				continue
+			autre = liberer_pour_deux_mains(slots, item, slot)
+			if autre and slots.get(autre):
+				continue
+			slots[slot] = ref
+			inventaire.remove(ref)
+			poses.append(slot)
+			break
+	character["inventaire"] = inventaire
+	return poses
+
+
 def grant_xp(character: dict, amount: int) -> dict:
 	"""Ajoute `amount` XP au personnage et attribue les points de montée de niveau.
 

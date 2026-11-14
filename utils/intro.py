@@ -3,7 +3,10 @@
 # rejoindre la sécurité de sa cité de départ. Les éléments de personnalisation vivent
 # sur le doc lieu de la cité, bloc `intro` :
 #   {titre, texte, texte_conclusion, xp_conclusion, position_depart:{x,y},
-#    zone_securite:"zone::coeur_ville", raisons:[{id, label, texte_suite}]}
+#    zone_securite:"zone::coeur_ville", raisons:[{id, label, texte_suite}],
+#    musique?:"<fichier de /sounds>", musique_volume?:[0,1]}
+# `musique` : jouée en boucle de l'écran-seuil jusqu'à la conclusion (même contrat que
+# la musique d'un donjon, `donjon.musique_du_donjon`). Absente ⇒ intro muette, comme avant.
 # État sur le personnage : character["intro"] = {"statut":"en_cours"|"terminee",
 # "raison": "<id>"?}. Clé absente (perso ancien / cité sans bloc intro) = aucun
 # comportement — rétro-compat par .get. La raison choisie sert aux dialogues PNJ
@@ -12,6 +15,7 @@
 # Logique pure, mute sans save — les appelants (add_character, move_character,
 # POST /api/intro/raison) persistent.
 
+from utils.donjon import musique_du_donjon
 from utils.zones import est_dans_zone
 
 
@@ -62,6 +66,17 @@ def payload_overlay(character: dict, lieu_doc: dict) -> dict | None:
 			for r in bloc.get("raisons") or [] if r.get("id")
 		],
 	}
+
+
+def musique(character: dict, lieu_doc: dict) -> dict | None:
+	"""`{fichier, volume}` de l'intro tant qu'elle est EN COURS dans SA cité — raison
+	choisie ou non : la marche jusqu'au cœur de la cité garde sa musique, rechargement
+	compris (reprise par `sons.js`). None sinon."""
+	if not intro_en_cours(character):
+		return None
+	if (lieu_doc or {}).get("_id") != character.get("cite"):
+		return None
+	return musique_du_donjon(lieu_doc.get("intro"))
 
 
 def raison_valide(lieu_doc: dict, raison_id: str) -> dict | None:

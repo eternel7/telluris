@@ -1247,6 +1247,8 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 	# Intro narrative : overlay au premier rendu (tant qu'aucune raison de fuite n'est
 	# choisie) — le bloc de personnalisation vit sur le doc lieu de la cité.
 	intro_payload = intro_util.payload_overlay(character, grid_doc)
+	# Musique de l'intro : de l'écran-seuil jusqu'à la conclusion, rechargements compris.
+	intro_musique = intro_util.musique(character, grid_doc)
 
 	return templates.TemplateResponse(
 		request=request,
@@ -1354,6 +1356,7 @@ def get_playground(request: Request, current_user: Annotated[User, Depends(get_c
 			],
 			"chambres_reprises": chambres_reprises,
 			"intro": intro_payload,
+			"intro_musique": intro_musique,
 			"ressource_recoltable": ressource_recoltable,
 			"relations_lieux": relations_lieux,
 			# Onglet 📖 : le carnet du personnage + son bestiaire. ⚠️ Clé de PREMIER NIVEAU et
