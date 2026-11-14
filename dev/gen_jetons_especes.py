@@ -41,7 +41,7 @@ RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SORTIE = "jsons/jetons_especes_a_importer.json"
 
 TAILLES = ("1x1", "2x1", "1x2", "2x2", "3x2", "4x3", "5x4", "2x5")
-FORMES = ("ellipse", "rectangle", "triangle")
+FORMES = ("ellipse", "rectangle", "triangle", "croix", "capsule", "losange", "chevron")
 
 # slug d'espèce → (taille, forme), ou None pour 1x1 sans champ.
 TABLE = {

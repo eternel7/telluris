@@ -520,6 +520,18 @@ html.vue-portrait #move-controls { transform: rotate(90deg); }
 .gabarit .jt-forme.triangle[data-cap="bas"], .gabarit .jt-forme.triangle[data-cap="bas"] .jt-fond { clip-path: url(#clip-jeton-bas); }
 .gabarit .jt-forme.triangle[data-cap="gauche"], .gabarit .jt-forme.triangle[data-cap="gauche"] .jt-fond { clip-path: url(#clip-jeton-gauche); }
 .gabarit .jt-forme.triangle[data-cap="droite"], .gabarit .jt-forme.triangle[data-cap="droite"] .jt-fond { clip-path: url(#clip-jeton-droite); }
+/* Croix (corps, ailes, queue) et chevron (ailes en V) : tête vers le `cap`. Losange :
+   symétrique, une seule découpe. Capsule : bouts arrondis du rayon du PETIT côté (`--jd`). */
+.gabarit .jt-forme.croix[data-cap="bas"], .gabarit .jt-forme.croix[data-cap="bas"] .jt-fond { clip-path: url(#clip-jeton-croix-bas); }
+.gabarit .jt-forme.croix[data-cap="haut"], .gabarit .jt-forme.croix[data-cap="haut"] .jt-fond { clip-path: url(#clip-jeton-croix-haut); }
+.gabarit .jt-forme.croix[data-cap="droite"], .gabarit .jt-forme.croix[data-cap="droite"] .jt-fond { clip-path: url(#clip-jeton-croix-droite); }
+.gabarit .jt-forme.croix[data-cap="gauche"], .gabarit .jt-forme.croix[data-cap="gauche"] .jt-fond { clip-path: url(#clip-jeton-croix-gauche); }
+.gabarit .jt-forme.chevron[data-cap="bas"], .gabarit .jt-forme.chevron[data-cap="bas"] .jt-fond { clip-path: url(#clip-jeton-chevron-bas); }
+.gabarit .jt-forme.chevron[data-cap="haut"], .gabarit .jt-forme.chevron[data-cap="haut"] .jt-fond { clip-path: url(#clip-jeton-chevron-haut); }
+.gabarit .jt-forme.chevron[data-cap="droite"], .gabarit .jt-forme.chevron[data-cap="droite"] .jt-fond { clip-path: url(#clip-jeton-chevron-droite); }
+.gabarit .jt-forme.chevron[data-cap="gauche"], .gabarit .jt-forme.chevron[data-cap="gauche"] .jt-fond { clip-path: url(#clip-jeton-chevron-gauche); }
+.gabarit .jt-forme.losange, .gabarit .jt-forme.losange .jt-fond { clip-path: url(#clip-jeton-losange); }
+.gabarit .jt-forme.capsule, .gabarit .jt-forme.capsule .jt-fond { border-radius: calc(var(--step) * var(--jd, 1) / 2); }
 .gabarit .jt-debout {
 	position: absolute; left: 50%; top: 50%;
 	width: calc(var(--step) * var(--jd, 1)); height: calc(var(--step) * var(--jd, 1));
@@ -1467,7 +1479,7 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 				<img id="bg-image" src="{{ url_for(combat.map_route or 'battle_maps', path=combat.map_image) }}" alt="Carte de combat">
 			</div>
 			<div id="tokens-layer"></div>
-			{# Découpes des jetons TRIANGLE (.gabarit .jt-forme.triangle) : en unités de la BOÎTE
+			{# Découpes des jetons TRIANGLE, CROIX, CHEVRON (une par cap) et LOSANGE (symétrique) : en unités de la BOÎTE
 			   (objectBoundingBox), donc une seule figure par cap quelle que soit la taille. Pointe
 			   vers le cap, sommets arrondis par des courbes. Taille nulle et non `display:none`,
 			   qui rendrait les découpes inopérantes dans certains navigateurs. #}
@@ -1477,6 +1489,15 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 					<clipPath id="clip-jeton-bas" clipPathUnits="objectBoundingBox"><path d="M0.43,0.88 Q0.5,1 0.57,0.88 L0.97,0.16 Q1,0 0.86,0 L0.14,0 Q0,0 0.03,0.16 Z"/></clipPath>
 					<clipPath id="clip-jeton-droite" clipPathUnits="objectBoundingBox"><path d="M0.88,0.43 Q1,0.5 0.88,0.57 L0.16,0.97 Q0,1 0,0.86 L0,0.14 Q0,0 0.16,0.03 Z"/></clipPath>
 					<clipPath id="clip-jeton-gauche" clipPathUnits="objectBoundingBox"><path d="M0.12,0.43 Q0,0.5 0.12,0.57 L0.84,0.97 Q1,1 1,0.86 L1,0.14 Q1,0 0.84,0.03 Z"/></clipPath>
+					<clipPath id="clip-jeton-croix-bas" clipPathUnits="objectBoundingBox"><path d="M0.45,0 L0.55,0 L0.6,0.22 L1,0.3 L1,0.42 L0.62,0.6 L0.64,0.9 L0.5,1 L0.36,0.9 L0.38,0.6 L0,0.42 L0,0.3 L0.4,0.22 Z"/></clipPath>
+					<clipPath id="clip-jeton-croix-haut" clipPathUnits="objectBoundingBox"><path d="M0.45,1 L0.55,1 L0.6,0.78 L1,0.7 L1,0.58 L0.62,0.4 L0.64,0.1 L0.5,0 L0.36,0.1 L0.38,0.4 L0,0.58 L0,0.7 L0.4,0.78 Z"/></clipPath>
+					<clipPath id="clip-jeton-croix-droite" clipPathUnits="objectBoundingBox"><path d="M0,0.45 L0,0.55 L0.22,0.6 L0.3,1 L0.42,1 L0.6,0.62 L0.9,0.64 L1,0.5 L0.9,0.36 L0.6,0.38 L0.42,0 L0.3,0 L0.22,0.4 Z"/></clipPath>
+					<clipPath id="clip-jeton-croix-gauche" clipPathUnits="objectBoundingBox"><path d="M1,0.45 L1,0.55 L0.78,0.6 L0.7,1 L0.58,1 L0.4,0.62 L0.1,0.64 L0,0.5 L0.1,0.36 L0.4,0.38 L0.58,0 L0.7,0 L0.78,0.4 Z"/></clipPath>
+					<clipPath id="clip-jeton-chevron-bas" clipPathUnits="objectBoundingBox"><path d="M0,0 L0.5,0.55 L1,0 L1,0.45 L0.5,1 L0,0.45 Z"/></clipPath>
+					<clipPath id="clip-jeton-chevron-haut" clipPathUnits="objectBoundingBox"><path d="M0,1 L0.5,0.45 L1,1 L1,0.55 L0.5,0 L0,0.55 Z"/></clipPath>
+					<clipPath id="clip-jeton-chevron-droite" clipPathUnits="objectBoundingBox"><path d="M0,0 L0.55,0.5 L0,1 L0.45,1 L1,0.5 L0.45,0 Z"/></clipPath>
+					<clipPath id="clip-jeton-chevron-gauche" clipPathUnits="objectBoundingBox"><path d="M1,0 L0.45,0.5 L1,1 L0.55,1 L0,0.5 L0.55,0 Z"/></clipPath>
+					<clipPath id="clip-jeton-losange" clipPathUnits="objectBoundingBox"><path d="M0.5,0 L1,0.5 L0.5,1 L0,0.5 Z"/></clipPath>
 				</defs>
 			</svg>
 			<div class="player-token">

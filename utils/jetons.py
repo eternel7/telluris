@@ -10,7 +10,7 @@
 #     2 de corps). Paliers des plus grands : 4x3 (boss légendaires), 5x4 (le seul Dragon
 #     Empereur, plus gros monstre du bestiaire) ; 2x5 pour un corps tout en LONGUEUR (Ver des
 #     sables : 2 de large, 5 dans le sens de la marche).
-#   • `forme` (ellipse / rectangle / triangle) n'habille que le DESSIN : les cases occupées
+#   • `forme` (ellipse / rectangle / triangle / croix / capsule / losange / chevron) n'habille que le DESSIN : les cases occupées
 #     sont toujours le rectangle plein.
 #
 # Sur un snapshot de combat, le bloc est normalisé en `jeton: {largeur, profondeur, forme}`
@@ -31,7 +31,7 @@ import heapq
 # Gabarits admis (largeur, profondeur). Une taille inconnue ⇒ 1x1 : on ne devine pas.
 TAILLES_JETON = {"1x1": (1, 1), "2x1": (2, 1), "1x2": (1, 2), "2x2": (2, 2), "3x2": (3, 2),
 				 "4x3": (4, 3), "5x4": (5, 4), "2x5": (2, 5)}
-FORMES_JETON = ("ellipse", "rectangle", "triangle")
+FORMES_JETON = ("ellipse", "rectangle", "triangle", "croix", "capsule", "losange", "chevron")
 FORME_DEFAUT = "ellipse"
 DIMENSION_MAX = 5  # = la plus grande dimension des gabarits (5x4)
 
