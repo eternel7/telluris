@@ -175,6 +175,9 @@ def borin(doc):
 	texte(doc, "secours_acceptee", "« C'est inscrit à votre nom, {prenom}. »",
 		  "« C'est inscrit à ton nom, {prenom}. »")
 	texte(doc, "secours_acceptee", "c'est à vous de les couvrir", "c'est à toi de les couvrir")
+	# 🔎 Renseignement (gen_renseignement_guilde, nœud commun aux comptoirs, au « vous ») : idem.
+	texte(doc, "renseignement_ouvre", "« Voyons ce qui a été consigné. Dites-moi ce que vous cherchez. »",
+		  "« Voyons ce qui a été consigné. Dis-moi ce que tu cherches. »")
 
 
 # ── Gautier : la scène du retour ne se rejoue plus après le départ du convoi ───────
@@ -212,9 +215,14 @@ def maelys(doc):
 	condition(doc, "accueil", "auxerre", {"quete_reussie": q_reussie(CONVOI)})
 	condition(doc, "accueil", "rang_c_offre", {"quete_reussie": q_reussie(CONVOI)})
 	base = noeud(doc, "rang_c_propose")
+	# Choix déjà en base : sa condition est GARDÉE et complétée (l'`offre` posée depuis par le
+	# système des offres écrites ne doit pas sauter à la réimport).
+	deja = next((c for c in noeud(doc, "accueil").get("choix", [])
+				 if c.get("id") == "rang_c_offre_inconnu"), {})
 	poser_choix(doc, "accueil", {
 		"id": "rang_c_offre_inconnu", "label": choix(doc, "accueil", "rang_c_offre")["label"],
-		"condition": {"transport_offert": True, "quete_reussie": q_reussie(CONVOI, False)},
+		"condition": {**(deja.get("condition") or {}),
+					  "transport_offert": True, "quete_reussie": q_reussie(CONVOI, False)},
 		"next": "rang_c_propose_inconnu"}, apres="rang_c_offre")
 	inconnu = copy.deepcopy(base)
 	ancien = "Aélis de Montfaucon. Je crois que vous la connaissez. Portez-lui"

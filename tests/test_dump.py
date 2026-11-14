@@ -12,10 +12,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import dump
 
 NOW = datetime.datetime(2026, 9, 21, 18, 8, 55)
-DOCS = [{"_id": "item:a"}, {"_id": "user:x@y.z", "hash": "h"}, {"_id": "_design/i"}]
+DOCS = [{"_id": "item:a"}, {"_id": "user:x@y.z", "hash": "h"}, {"_id": "_design/i"},
+		{"_id": "refresh:ab12", "type": "refresh", "user_id": "user:x@y.z"},
+		{"_id": "reset:cd34", "type": "reset", "user_id": "user:x@y.z"}]
 
 
-def test_payload_retire_les_users_sauf_demande():
+def test_payload_retire_users_sessions_et_sceaux_sauf_demande():
 	p = dump.payload(DOCS, NOW)
 	assert [d["_id"] for d in p["docs"]] == ["item:a", "_design/i"]
 	assert p["doc_count"] == 2 and p["db"] == "telluris"

@@ -517,7 +517,7 @@ def _dump_payload(now, avec_users: bool = False) -> dict:
 	"""Le dump complet — format et filtrage délégués à `utils.dump.payload` (SOURCE UNIQUE,
 	partagée avec les outils de dev/ et les générateurs lancés à la main).
 	`avec_users` : l'export téléchargé garde les `user:*` (restauration à l'identique) ;
-	le dump committable les exclut (hash de mot de passe, etc.)."""
+	le dump committable les exclut, avec `refresh:*` et `reset:*` (`dump.PREFIXES_PRIVES`)."""
 	return dump_util.payload(dump_all_docs(), now, avec_users=avec_users)
 
 

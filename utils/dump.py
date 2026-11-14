@@ -9,8 +9,9 @@ Trois consommateurs, un seul code :
 ⚠️ Un générateur relit un DUMP pour n'injecter que son champ (CLAUDE.md §11) : relu sur un dump
 périmé, son import (PUT complet) écraserait les retouches faites depuis. D'où le dump FRAIS.
 
-⚠️ Le dump ÉCRIT dans le dépôt exclut toujours les `user:*` (empreintes de mot de passe, jetons
-`reset:*`) : il est destiné à être committé. Seul le téléchargement complet les garde, pour
+⚠️ Le dump ÉCRIT dans le dépôt (et la PR de `/admin/exports`) exclut toujours les `user:*`
+(empreintes de mot de passe), les `refresh:*` (sessions) et les `reset:*` (sceaux oubliés) :
+il est destiné à être committé. Seul le téléchargement complet les garde, pour
 restaurer à l'identique.
 
 `db.config` est importé PARESSEUSEMENT (`dump_fn` injectable) : le module reste importable et
@@ -22,6 +23,9 @@ import json
 import os
 
 PREFIXE_USER = "user:"
+# Retirés de tout dump commitable avec les comptes : sessions (`refresh:*`, utils/session.py) et
+# sceaux oubliés (`reset:*`, utils/motdepasse.py) — empreintes seulement, mais `user_id` = courriel.
+PREFIXES_PRIVES = (PREFIXE_USER, "refresh:", "reset:")
 
 
 def maintenant() -> datetime.datetime:
@@ -30,9 +34,10 @@ def maintenant() -> datetime.datetime:
 
 
 def payload(docs, now, avec_users: bool = False) -> dict:
-	"""`{"db","exported_at","doc_count","docs"}`. `avec_users=False` retire les `user:*`."""
+	"""`{"db","exported_at","doc_count","docs"}`. `avec_users=False` retire les `user:*`,
+	`refresh:*` et `reset:*` (`PREFIXES_PRIVES`) ; `True` = restauration à l'identique."""
 	retenus = [d for d in (docs or [])
-			   if avec_users or not str((d or {}).get("_id", "")).startswith(PREFIXE_USER)]
+			   if avec_users or not str((d or {}).get("_id", "")).startswith(PREFIXES_PRIVES)]
 	return {
 		"db": "telluris",
 		"exported_at": now.isoformat() + "Z",
@@ -51,7 +56,7 @@ def _dump_all_docs():
 
 
 def ecrire_dump_frais(racine: str, dump_fn=None, now=None) -> str:
-	"""Écrit `jsons/telluris-dump-<horodatage>.json` (sans `user:*`) sous `racine` et rend son
+	"""Écrit `jsons/telluris-dump-<horodatage>.json` (sans `PREFIXES_PRIVES`) sous `racine` et rend son
 	chemin RELATIF à `racine`. Lève si la base est vide ou injoignable : un générateur qui
 	tournerait sur zéro doc écrirait un lot vide sans rien signaler."""
 	now = now or maintenant()
