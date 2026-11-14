@@ -1288,7 +1288,9 @@ html.vue-portrait .slot-edit-hint.ouverte { display: block; }
 	padding: 5px 8px; border-radius: 6px;
 	font-size: 14px; color: #e8e4dc;
 }
-.loot-item:hover { background: rgba(255,255,255,0.04); }
+/* Ligne survolée (elle ou ses boutons) : l'objet visé ressort, comme les listes de /play. */
+.loot-item:hover { background: rgba(255, 215, 0, 0.08); }
+.loot-item:hover .loot-nom { color: var(--gold2); }
 .loot-item .loot-nom { flex: 1 1 auto; }
 .loot-item .loot-poids { color: #9a8a66; font-size: 12px; }
 /* Sélecteur de bénéficiaire : une pastille-portrait par membre du groupe + « personne ».

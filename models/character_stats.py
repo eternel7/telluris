@@ -691,7 +691,8 @@ TRAVERSEE_PAS_MS: int = 900
 # --- Déplacement au clic de /play (mode ⚙️ « Déplacement au clic », scripts/deplacement.js) ---
 # PORTEE_MAX : nombre maximal de pas d'un trajet déclenché par un clic sur la carte ; au-delà
 #   (ou case injoignable), les cases joignables sont surlignées au lieu de marcher.
-CLIC_PORTEE_MAX: int = 5
+#   0 = AUCUNE limite : toute case de la carte joignable par la règle de marche (défaut).
+CLIC_PORTEE_MAX: int = 0
 
 # --- Portail de Notre-Dame : tableau des seuils (utils/portails.py) ---
 # FENETRE_MINUTES : durée d'une tranche — le tirage des seuils ouverts change à chaque
@@ -1628,7 +1629,7 @@ def load_world_variables() -> dict:
 	# Plancher à 150 ms : en dessous, l'animation de caméra (`--map-anim`) n'a plus le temps
 	# de montrer la case avant la suivante.
 	TRAVERSEE_PAS_MS = max(150, int(v.get("TRAVERSEE_PAS_MS", TRAVERSEE_PAS_MS)))
-	CLIC_PORTEE_MAX = max(1, int(v.get("CLIC_PORTEE_MAX", CLIC_PORTEE_MAX)))
+	CLIC_PORTEE_MAX = max(0, int(v.get("CLIC_PORTEE_MAX", CLIC_PORTEE_MAX)))   # 0 = toute la carte
 	PORTAIL_FENETRE_MINUTES = max(1, int(v.get("PORTAIL_FENETRE_MINUTES", PORTAIL_FENETRE_MINUTES)))
 	PORTAIL_SEUILS_OUVERTS = max(1, int(v.get("PORTAIL_SEUILS_OUVERTS", PORTAIL_SEUILS_OUVERTS)))
 	# Planchers : une période nulle diviserait par zéro ; la fenêtre reste dans la période.

@@ -1037,6 +1037,19 @@
 		.sh-inv-name {min-width: 10vw; }
 		.sh-inv-open { cursor: pointer; }
 		.sh-inv-name.sh-inv-open:hover { color: var(--accent-color); text-decoration: underline; }
+		/* Ligne SURVOLÉE (elle-même ou l'un de ses boutons : vendre, acheter, déplacer, passer à
+		   un compagnon…) : fond teinté + libellé à la couleur d'accent, pour savoir sur QUEL objet
+		   on agit. Vaut pour tous les sacs, rayons, coffres, catalogues et transferts (même
+		   `.sh-inv-item`) ; les lignes de propriété et d'implantation suivent (`.prop-ligne`).
+		   Pas de bordure ni de padding ajoutés : rien ne bouge (§17). Hors survol réel (tactile),
+		   `:hover` ne colle pas grâce au média `hover`. */
+		@media (hover: hover) {
+			.sh-inv-item, .prop-ligne, .grp-harn-ligne { transition: background-color .12s; }
+			.sh-inv-item:hover:not(.cmd-pending), .prop-ligne:hover, .grp-harn-ligne:hover { background-color: rgba(255, 215, 0, 0.08); }
+			.sh-inv-item:hover:not(.cmd-pending) .sh-inv-name,
+			.prop-ligne:hover .prop-txt > strong, .prop-ligne:hover .prop-txt > span:first-child,
+			.grp-harn-ligne:hover { color: var(--accent-color); }
+		}
 		.sh-paperdoll .sh-slot.occupied { cursor: pointer; }
 		.sh-inv-item>span.sh-rarity {text-align: center;}
 		.sh-inv-item:has(.sh-equip-row) {
@@ -2402,7 +2415,7 @@
 							<div class="sh-xp-bar">
 								<div class="sh-xp-fill" id="sh-xp-fill" style="width:{{ xp_bar_pct }}%"></div>
 							</div>
-							<div class="val-niveau">
+							<div class="val-niveau val-niveau-voc">
 								<span><span id="sh-voc-label">{{ vocation["label"] }}</span> : <strong id="sh-voc-niveau" class="voc-niveau niveau-nb">{% if voc_niveau %}Niv.{{ voc_niveau }}{% else %}Aspirant{% endif %}</strong></span>
 								<button class="sh-xp-btn" id="sh-btn-voc-niveau"
 										{% if attribute_points < voc_cout %}disabled{% endif %}
@@ -2410,10 +2423,11 @@
 										onclick="spendXpVocation()">
 									Monter — <span id="sh-voc-cout">{{ voc_cout }}</span> P<small>oints</small>
 								</button>
-							</div>
-							{# Changement de vocation (utils/vocations.py) : le porteur affiché, compagnon
-							   recruté compris (`_actionBody`) ; on repart aspirant, rien ne se perd. #}
-							<div class="val-niveau">
+								{# Changement de vocation (utils/vocations.py) : le porteur affiché, compagnon
+								   recruté compris (`_actionBody`) ; on repart aspirant, rien ne se perd.
+								   Même ligne que la vocation et « Monter », poussé tout à droite
+								   (`margin-left:auto`) ; trop étroit (mobile), la ligne passe à la ligne et
+								   il reste calé à droite. #}
 								<button type="button" class="sh-xp-btn" id="sh-btn-voc-changer"
 										onclick="ouvrirChangementVocation()">🔀 Changer de vocation</button>
 							</div>
@@ -3703,7 +3717,8 @@
 		.voc-choix-nom { flex: 1; min-width: 0; }
 		.voc-choix-nom small { display: block; color: var(--muted); font-size: .8rem; }
 		.voc-choix button { width: auto; margin: 0; white-space: nowrap; }
-		#sh-btn-voc-changer { width: auto; margin: 0; }
+		#sh-btn-voc-changer { width: auto; margin: 0 0 0 auto; white-space: nowrap; }
+		.val-niveau-voc { flex-wrap: wrap; row-gap: 6px; }
 		/* ── Commande auprès d'un artisan ──
 		   La troisième liste du panneau marchand réutilise .sh-inv-item / .sell-prix : c'est
 		   le même objet marchand, seule l'action change. */
@@ -4655,8 +4670,9 @@
 	// il n'y a aucune règle de marche côté serveur). Le trajet est une suite de pas ORDINAIRES
 	// (`move`), chacun avec son événement de zone et son tour de monde.
 	const CARTE_CLIC = {{ carte_clic | tojson | safe }};
-	// Pas maximal d'un trajet (variable de monde CLIC_PORTEE_MAX).
-	const CLIC_PORTEE = {{ clic_portee | tojson | safe }};
+	// Pas maximal d'un trajet (variable de monde CLIC_PORTEE_MAX) ; 0 = toute la carte (le BFS
+	// s'arrête de lui-même quand plus aucune case neuve n'est joignable).
+	const CLIC_PORTEE = ({{ clic_portee | tojson | safe }} > 0) ? {{ clic_portee | tojson | safe }} : Infinity;
 	// Durée du surlignage des cases joignables après un clic refusé.
 	const SURLIGNAGE_MS = 3000;
 	let _surlignageTimer = null;
@@ -4667,7 +4683,7 @@
 		cv.width = (cells[0] || []).length; cv.height = cells.length;
 		const ctx = cv.getContext('2d');
 		ctx.clearRect(0, 0, cv.width, cv.height);
-		ctx.fillStyle = 'rgba(120, 200, 255, 0.38)';
+		ctx.fillStyle = 'rgba(90, 210, 110, 0.38)';   // vert semi-transparent
 		joignables.forEach((n, cle) => {
 			if (n.d === 0) return;   // la case du joueur porte déjà le jeton
 			const [x, y] = cle.split(',').map(Number);
