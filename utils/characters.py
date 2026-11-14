@@ -252,6 +252,12 @@ def resolve_item_ref(ref):
 	if item_sous_categorie(doc) == scriptorium.SOUS_CATEGORIE_LIVRE_ECRIT and isinstance(ref, dict) and ref.get("texte"):
 		doc["description"] = ref.get("texte") or doc.get("description")
 		doc["nom"] = scriptorium.titre_livre(doc.get("nom") or item_id, ref)
+	# Note de renseignement (utils/renseignement.py) : la piste vit sur la RÉFÉRENCE.
+	from utils import renseignement
+	if renseignement.est_note(ref):
+		doc["description"] = ref["piste"].get("texte") or doc.get("description")
+		doc["nom"] = renseignement.titre_note(doc.get("nom") or item_id, ref)
+		doc["note_renseignement"] = True
 	# Contenant (utils/contenants.py) : capacité, charge et nombre d'objets rangés sur
 	# CETTE référence ; masqués hors marée. Import tardif : contenants dépend de ce module.
 	if doc.get("contenant"):
@@ -698,6 +704,10 @@ def item_sale_price_cuivre(item_doc: dict, ref) -> int:
 			return prix
 	# DÉPOUILLE (item à `source_espece`) : prix tiré de la dangerosité du spécimen, pas de son
 	# poids × rareté (cf. utils/xp_monstre). Import paresseux : xp_monstre → potentiel → combat.
+	# Note de renseignement : prix tiré du grade de la menace décrite (sur la référence).
+	from utils import renseignement
+	if renseignement.est_note(ref):
+		return renseignement.prix_note(ref)
 	from utils import xp_monstre
 	if xp_monstre.est_depouille(item_doc):
 		instance = ref if isinstance(ref, dict) else {}

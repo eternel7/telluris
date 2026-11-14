@@ -1250,6 +1250,12 @@ async def pnj_dialogue_choix(
 		contexte["placeholders"].update(dits)
 	elif action.get("service") == "traversee":
 		suivant = _resoudre_traversee(character, pnj_doc, lieu_doc, action.get("op"), reponse)
+	elif action.get("service") == "renseignement":
+		# 🔎 « Que sait-on de… ? » (réceptionniste de guilde) : rien ne bouge ici — le client
+		# ouvre le panneau de renseignement sur CE PNJ (routers/renseignement.py tranche tout).
+		conf_r = (pnj_doc.get("services") or {}).get("renseignement") or {}
+		reponse["renseignement"] = {"pnj": pnj_doc.get("_id")}
+		suivant = (conf_r.get("noeuds") or {}).get("ouvre")
 	elif action.get("service") == "enseignement":
 		suivant = _resoudre_enseignement(character, pnj_doc, action.get("op"), reponse)
 		# Le sort est appris : refiltrer les choix sur les nouveaux flags (`enseignement_connu`).

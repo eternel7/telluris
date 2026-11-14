@@ -199,6 +199,8 @@ NOEUDS_REQUIS = {
 	"portail": {"ouvert", "ferme", "refus_cristal"},
 	# Enseignement d'un maître : sort transmis, ou refus (règle d'apprentissage non remplie).
 	"enseignement": {"appris", "refus"},
+	# Renseignement (réceptionniste de guilde) : le nœud affiché pendant que le panneau 🔎 s'ouvre.
+	"renseignement": {"ouvre"},
 	# Vente à prix fixe : objet remis, bourse trop légère, ou sac trop lourd.
 	"vente": {"fait", "sans_fonds", "trop_charge"},
 	"rachat": {"fait", "sans_objet"},

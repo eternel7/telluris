@@ -86,6 +86,12 @@ CAPACITES = [
 				"recette en base). Prendre une commande de son catalogue ne demande rien : "
 				"tout atelier qui a des recettes le fait déjà.",
 	},
+	{
+		# Recopie de `renseignement.CATEGORIES_SALLE_D_ARMES` / `TAG_SALLE_D_ARMES`.
+		"id": "salle_d_armes", "label": "Salle d'armes", "tag": "salle_d_armes",
+		"categories": ["armurerie", "grand_arsenal"], "sous_categories": [],
+		"note": "🔎 Le duelliste y apprend où trouver une espèce (ragots d'escrimeurs).",
+	},
 ]
 
 PAR_ID = {c["id"]: c for c in CAPACITES}

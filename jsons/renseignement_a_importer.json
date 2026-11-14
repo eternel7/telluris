@@ -1,0 +1,494 @@
+[
+  {
+    "_id": "rules:renseignement",
+    "type": "rules",
+    "tags_nature": [
+      "foret",
+      "bois",
+      "clairiere",
+      "clariere",
+      "lande",
+      "montagne",
+      "gorge",
+      "desert",
+      "eau",
+      "humide",
+      "falaise",
+      "grotte",
+      "fleuve"
+    ],
+    "methodes": [
+      {
+        "id": "veterans",
+        "nom": "Payer une tournée aux vétérans",
+        "icon": "🍺",
+        "vocations": [
+          "guerrier"
+        ],
+        "lieu": {
+          "predicats": [
+            "taverne"
+          ]
+        },
+        "test": [
+          "cha",
+          "f"
+        ],
+        "cout": 12,
+        "sources": [
+          "zone",
+          "lieu",
+          "donjon"
+        ],
+        "cibles": {
+          "ressources": false
+        },
+        "repliques": {
+          "intro": "Une tournée offerte, et les vétérans comparent leurs cicatrices.",
+          "description": "Les mercenaires de la salle commune racontent ce qu'ils ont affronté."
+        }
+      },
+      {
+        "id": "bras_de_fer",
+        "nom": "Bras de fer",
+        "icon": "💪",
+        "vocations": [
+          "barbare"
+        ],
+        "lieu": {
+          "predicats": [
+            "taverne"
+          ]
+        },
+        "test": [
+          "f"
+        ],
+        "cout": 0,
+        "cout_pv": "monde",
+        "sources": [
+          "zone",
+          "lieu",
+          "donjon"
+        ],
+        "cibles": {
+          "ressources": false,
+          "grade_min": "D"
+        },
+        "repliques": {
+          "intro": "Coudes sur la table : le perdant dit ce qu'il a vu de pire.",
+          "description": "Un défi de force, payé en PV. Seules les bêtes vraiment dangereuses intéressent."
+        }
+      },
+      {
+        "id": "tableau",
+        "nom": "Lire le tableau des ordres",
+        "icon": "📌",
+        "vocations": [
+          "paladin",
+          "templier"
+        ],
+        "lieu": {
+          "predicats": [
+            "taverne"
+          ]
+        },
+        "test": [],
+        "cout": 5,
+        "niveau_fixe": "region",
+        "sources": [
+          "zone",
+          "lieu",
+          "donjon"
+        ],
+        "cibles": {
+          "ressources": false,
+          "tags_espece": [
+            "undead",
+            "non_mort",
+            "demon",
+            "infernal",
+            "monstre"
+          ]
+        },
+        "repliques": {
+          "intro": "Au tableau d'information, une menace signalée aux ordres.",
+          "description": "Sans jet : la région où une créature du Mal a été signalée."
+        }
+      },
+      {
+        "id": "salle_d_armes",
+        "nom": "Écouter les escrimeurs",
+        "icon": "🤺",
+        "vocations": [
+          "duelliste"
+        ],
+        "lieu": {
+          "predicats": [
+            "salle_d_armes"
+          ]
+        },
+        "test": [
+          "ag",
+          "cha"
+        ],
+        "cout": 10,
+        "sources": [
+          "zone",
+          "lieu",
+          "donjon"
+        ],
+        "cibles": {
+          "ressources": false
+        },
+        "repliques": {
+          "intro": "Entre deux assauts, les escrimeurs échangent leurs ragots.",
+          "description": "Les ragots de la salle d'armes."
+        }
+      },
+      {
+        "id": "registres",
+        "nom": "Compulser les registres",
+        "icon": "📜",
+        "vocations": [
+          "lettre"
+        ],
+        "lieu": {
+          "predicats": [
+            "scriptorium"
+          ]
+        },
+        "test": [
+          "int"
+        ],
+        "cout": 15,
+        "note": true,
+        "repliques": {
+          "intro": "Registres et bestiaires du scriptorium s'ouvrent sous vos doigts.",
+          "description": "Toutes les sources ; en cas de réussite, une note de renseignement."
+        }
+      },
+      {
+        "id": "ouvrages",
+        "nom": "Ouvrages de son école",
+        "icon": "📚",
+        "vocations": [
+          "elementaliste",
+          "mage",
+          "illusionniste"
+        ],
+        "lieu": {
+          "predicats": [
+            "scriptorium"
+          ]
+        },
+        "test": [
+          "int"
+        ],
+        "cout": 15,
+        "cibles": {
+          "tags_espece": [
+            "magique",
+            "elementaire"
+          ],
+          "sous_categories": [
+            "cristal"
+          ],
+          "ecole_vocation": true
+        },
+        "repliques": {
+          "intro": "Les traités de votre école citent leurs matières et leurs lieux.",
+          "description": "Composants des sorts de votre école, créatures magiques, cristaux."
+        }
+      },
+      {
+        "id": "chanson",
+        "nom": "Chanter pour la salle",
+        "icon": "🎶",
+        "vocations": [
+          "menestrel"
+        ],
+        "lieu": {
+          "predicats": [
+            "taverne"
+          ]
+        },
+        "test": [
+          "cha"
+        ],
+        "cout": 8,
+        "pourboire": true,
+        "sources": [
+          "zone",
+          "lieu",
+          "donjon"
+        ],
+        "cibles": {
+          "ressources": false
+        },
+        "repliques": {
+          "intro": "Votre chanson finie, la salle répond par ses propres histoires.",
+          "description": "Une belle réussite rapporte aussi un pourboire."
+        }
+      },
+      {
+        "id": "recits",
+        "nom": "Échanger des récits",
+        "icon": "🪕",
+        "vocations": [
+          "menestrel"
+        ],
+        "lieu": {
+          "predicats": [
+            "taverne"
+          ]
+        },
+        "test": [
+          "cha"
+        ],
+        "cout": 0,
+        "modes": [
+          "recit"
+        ],
+        "sources": [
+          "zone",
+          "lieu",
+          "donjon"
+        ],
+        "cibles": {
+          "ressources": false
+        },
+        "repliques": {
+          "intro": "Un récit contre un récit : on vous rend la pareille.",
+          "description": "Cédez un lieu vu de votre bestiaire contre une piste neuve de grade égal ou moindre."
+        }
+      },
+      {
+        "id": "receleurs",
+        "nom": "Interroger les receleurs",
+        "icon": "🗝️",
+        "vocations": [
+          "voleur"
+        ],
+        "lieu": {
+          "predicats": [
+            "taverne"
+          ],
+          "categories": [
+            "negociant"
+          ]
+        },
+        "test": [
+          "ag",
+          "cha"
+        ],
+        "cout": 12,
+        "sources": [
+          "boutique"
+        ],
+        "cibles": {
+          "especes": false
+        },
+        "repliques": {
+          "intro": "Un receleur baisse la voix.",
+          "description": "Quelle boutique a telle marchandise en rayon."
+        }
+      },
+      {
+        "id": "indicateurs",
+        "nom": "Payer ses indicateurs",
+        "icon": "🗡️",
+        "vocations": [
+          "assassin"
+        ],
+        "lieu": {
+          "predicats": [
+            "taverne"
+          ]
+        },
+        "test": [
+          "cha"
+        ],
+        "cout": 40,
+        "sources": [
+          "zone",
+          "lieu",
+          "donjon"
+        ],
+        "cibles": {
+          "ressources": false,
+          "elites": true
+        },
+        "repliques": {
+          "intro": "Votre réseau a fait son travail.",
+          "description": "Cher, mais précis ; l'élite d'une chasse est trouvée sans faute."
+        }
+      },
+      {
+        "id": "pistes",
+        "nom": "Suivre les pistes",
+        "icon": "🐾",
+        "vocations": [
+          "forestier"
+        ],
+        "lieu": {
+          "predicats": [
+            "sauvage"
+          ]
+        },
+        "test": [
+          "int",
+          "ag"
+        ],
+        "cout": 0,
+        "portee_max": 1,
+        "sources": [
+          "zone",
+          "lieu"
+        ],
+        "repliques": {
+          "intro": "Les traces mènent plus loin que ce que l'œil voit d'ici.",
+          "description": "Espèces et ressources d'ici et des lieux contigus."
+        }
+      },
+      {
+        "id": "chasseurs",
+        "nom": "Parler aux chasseurs",
+        "icon": "🏹",
+        "vocations": [
+          "forestier"
+        ],
+        "lieu": {
+          "predicats": [
+            "taverne"
+          ],
+          "categories": [
+            "boucherie"
+          ]
+        },
+        "test": [
+          "cha"
+        ],
+        "cout": 8,
+        "sources": [
+          "zone",
+          "lieu",
+          "donjon"
+        ],
+        "cibles": {
+          "ressources": false,
+          "tags_espece": [
+            "animal",
+            "proie",
+            "predateur"
+          ]
+        },
+        "repliques": {
+          "intro": "Chasseurs et trappeurs parlent volontiers de leur gibier.",
+          "description": "Où trouver bêtes et gibier."
+        }
+      },
+      {
+        "id": "betes_plantes",
+        "nom": "Interroger bêtes et plantes",
+        "icon": "🌿",
+        "vocations": [
+          "druide"
+        ],
+        "lieu": {
+          "predicats": [
+            "sauvage"
+          ]
+        },
+        "test": [
+          "int"
+        ],
+        "cout": 0,
+        "cout_pm": 6,
+        "sources": [
+          "zone",
+          "lieu"
+        ],
+        "cibles": {
+          "tags_espece": [
+            "animal",
+            "proie",
+            "predateur"
+          ],
+          "sous_categories": [
+            "herbe",
+            "baie",
+            "graines",
+            "fruit_sec",
+            "arbre",
+            "branche"
+          ]
+        },
+        "repliques": {
+          "intro": "Les bêtes et les plantes vous répondent à leur manière.",
+          "description": "Bêtes et végétaux, contre quelques PM."
+        }
+      },
+      {
+        "id": "faucon",
+        "nom": "L'œil du faucon",
+        "icon": "🦅",
+        "vocations": [
+          "chaman"
+        ],
+        "lieu": {
+          "predicats": [
+            "pays"
+          ]
+        },
+        "test": [
+          "int"
+        ],
+        "cout": 0,
+        "connait": "competence:il_du_faucon",
+        "portee_max": 0,
+        "sources": [
+          "zone"
+        ],
+        "cibles": {
+          "ressources": false
+        },
+        "repliques": {
+          "intro": "L'esprit du faucon survole la carte pour vous.",
+          "description": "Les zones de cette carte et leurs espèces ; coûte les PM d'Œil du faucon."
+        }
+      },
+      {
+        "id": "informateur",
+        "nom": "Payer l'informateur",
+        "icon": "🕵️",
+        "informateur": true,
+        "lieu": {
+          "predicats": [
+            "taverne"
+          ]
+        },
+        "test": [
+          "cha"
+        ],
+        "cout": 10,
+        "niveau_max": "region",
+        "repliques": {
+          "intro": "Contre quelques pièces, l'informateur de la taverne se penche vers vous.",
+          "description": "Plus cher et jamais précis au lieu près."
+        }
+      }
+    ]
+  },
+  {
+    "_id": "item:note_renseignement",
+    "type": "item",
+    "nom": "Note de renseignement",
+    "icon": "🗒️",
+    "categorie": "document",
+    "sous_categorie": "note_renseignement",
+    "rarete": "commun",
+    "slots": [],
+    "poids": 0.05,
+    "description": "Une note griffonnée : où trouver ce que l'on cherche."
+  }
+]

@@ -2147,7 +2147,7 @@
 				   déplacement et plein écran. ⚠️ Ce menu n'existe que sous la condition de cette
 				   ligne (`a_ligne_actions`) — hors d'elle, la pastille ⛶ flottante reste émise
 				   (bas de page), sans quoi le plein écran disparaîtrait de ces lieux. #}
-				{% set a_ligne_actions = dimensions or achat_sous_categories or est_negociant or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or est_propriete or proprietes_offre or est_implantation or colonie_offre or colonie_charte or colonie_maison_guilde or colonie_colons or pnjs_presents %}
+				{% set a_ligne_actions = dimensions or achat_sous_categories or est_negociant or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or renseignement_dispo or est_propriete or proprietes_offre or est_implantation or colonie_offre or colonie_charte or colonie_maison_guilde or colonie_colons or pnjs_presents %}
 				{% if a_ligne_actions %}
 				<h3 id="sub-actions-title"><span>Actions</span>
 					<span class="affichage-wrap">
@@ -2202,6 +2202,11 @@
 					{% endif %}
 					{% if est_scriptorium %}
 					<li><button class="sub-loc-btn" onclick="openScriptorium()">🖋️ Écrire</button></li>
+					{% endif %}
+					{# 🔎 Dès qu'une méthode du groupe s'exerce ici, ou que l'informateur est là
+					   (routers/renseignement.disponible). #}
+					{% if renseignement_dispo %}
+					<li><button class="sub-loc-btn" onclick="openRenseignement()">🔎 Se renseigner</button></li>
 					{% endif %}
 					{# Toujours émis, masqué hors offre : un pas ne recharge pas la page, `_majProprietesOffre`
 					   le bascule d'après la réponse de `move_character`. #}
@@ -3078,6 +3083,21 @@
 			</div>
 		</div>
 	</div><!-- /#scriptorium-panel -->
+	{# 🔎 Se renseigner (routers/renseignement.py) : rien n'est payé avant le clic sur une
+	   cible ; ⟵ Retour / Échap ferment sans rien engager. #}
+	<div id="rens-panel" class="panel-hidden panel-frame board-panel" aria-label="Se renseigner">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Se renseigner">
+			<h2>🔎 Se renseigner — <span id="rens-lieu"></span></h2>
+			</header>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeRenseignement()" role="button">⟵ Retour</button>
+		</div>
+		<div id="rens-resultat" class="rens-resultat" aria-live="polite"></div>
+		<div id="rens-methodes" class="rens-methodes"></div>
+		<div id="rens-modes" class="rens-modes"></div>
+		<input id="rens-recherche" class="aub-annonce-txt rens-recherche" type="search" placeholder="Nom d'une créature ou d'une matière…" maxlength="40" hidden>
+		<div id="rens-cibles" class="rens-cibles"></div>
+	</div><!-- /#rens-panel -->
 	<div id="aub-nuit-overlay" class="clauses-hidden" aria-label="La nuit passe">
 		<div class="item-detail-card">
 			<h3 style="margin:.2rem 0 .6rem">🌙 La nuit passe…</h3>
@@ -3259,6 +3279,19 @@
 			.mnt-offre-img { display: block; margin-left: auto; margin-right: auto; }
 			.mnt-offre-txt { flex-basis: 100%; }
 		}
+		/* ── 🔎 Se renseigner (#rens-panel) : méthodes en cartes (réutilise .aub-table),
+		   cibles en boutons, dernier résultat en tête. */
+		.rens-methodes { display: flex; flex-direction: column; gap: .5rem; }
+		.rens-methode { cursor: pointer; }
+		.rens-methode.choisie { border-color: var(--accent, #b98c4a); }
+		.rens-modes { display: flex; flex-wrap: wrap; gap: .3rem; margin: .6rem 0 .3rem; }
+		.rens-modes .sub-loc-btn.actif { outline: 2px solid var(--accent, #b98c4a); }
+		.rens-cibles { display: flex; flex-wrap: wrap; gap: .3rem; }
+		.rens-cibles .sub-loc-btn:disabled { opacity: .55; cursor: not-allowed; }
+		.rens-recherche { width: 100%; box-sizing: border-box; margin: .3rem 0; }
+		.rens-resultat { margin: .6rem 0; padding: .5rem .7rem; border-left: 3px solid var(--accent, #b98c4a);
+			background: rgba(0, 0, 0, .18); white-space: normal; }
+		.rens-resultat:empty { display: none; }
 		/* ── Salle commune d'une taverne ──────────────────────────────────────────
 		   Tables (chatrooms) + tableau d'information. */
 		.aub-nuit-cout { opacity: .7; font-size: .9em; }
@@ -5802,6 +5835,8 @@ document.addEventListener('keydown', e => {
 	if (auberge && !auberge.classList.contains('panel-hidden')) { closeAuberge(); return; }
 	const scriptorium = document.getElementById('scriptorium-panel');
 	if (scriptorium && !scriptorium.classList.contains('panel-hidden')) { closeScriptorium(); return; }
+	const rensPanel = document.getElementById('rens-panel');
+	if (rensPanel && !rensPanel.classList.contains('panel-hidden')) { closeRenseignement(); return; }
 	closeSheet();
 });
 
@@ -7152,6 +7187,9 @@ function _renderMono(st) {
 	const acts = [_carteBtn(item)].filter(Boolean);
 	if (st.source === 'sac') {
 		if (item.contenant) acts.push(`<button class="sh-equip-btn" onclick="_cardOuvrirContenant(${st.idx},'${item._id}')" title="Ranger et sortir des objets">👜 Ouvrir</button>`);
+		// Note de renseignement : la lire inscrit la piste au bestiaire et au carnet du
+		// PRINCIPAL (le carnet est le sien seul) — pas de bouton dans le sac d'un compagnon.
+		if (item.note_renseignement && porteurActifId() === PRINCIPAL_ID) acts.push(`<button class="sh-equip-btn" onclick="lireNote(${st.idx})" title="Inscrire la piste au bestiaire et au carnet">📖 Lire</button>`);
 		if (_estConsommable(item)) acts.push(`<button class="sh-equip-btn" onclick="_cardConsommer(${st.idx},'${item._id}')">🍽️ Consommer</button>`);
 		if (_estCoupable(item) || _estDecoupable(item)) acts.push(_cardCouperBtn(st.idx, item._id, 'sac', item));
 		acts.push(`<button class="sh-drop-btn" onclick="_cardDrop(${st.idx},'${item._id}')">Poser</button>`);
@@ -12406,6 +12444,197 @@ document.addEventListener('change', e => {
 	}
 });
 
+// ── 🔎 Se renseigner (routers/renseignement.py) ──────────────────────────────────
+// Le serveur choisit l'ACTEUR (meilleur membre du groupe) et tranche tout : le client ne fait
+// qu'afficher les méthodes, choisir un mode et une cible, puis appliquer les blocs renvoyés
+// (bourse, carnet, vitaux de l'acteur, sac, fiche — Convention §10). Tout texte venu du
+// serveur passe par `textContent` (Convention §9) ; les ids voyagent en propriétés JS, jamais
+// dans un `onclick`.
+let _rensEtat = null;
+let _rensMethode = '';
+let _rensMode = '';
+let _rensMinuteur = null;
+const RENS_MODES = { quete: '📜 Mes quêtes', bestiaire: '🐾 Mon bestiaire', libre: '🔤 Chercher un nom',
+	hasard: '🎲 Ce qui traîne', recit: '🪕 Céder un récit',
+	dangers: '⚠️ Dangers alentour', donjons: '🏰 Donjons du coin', ressources: '🌿 Ressources du coin' };
+
+function _rensEl(tag, cls, texte) {
+	const el = document.createElement(tag);
+	if (cls) el.className = cls;
+	if (texte !== undefined) el.textContent = texte;
+	return el;
+}
+
+function _rensCourante() {
+	const liste = (_rensEtat && _rensEtat.methodes) || [];
+	return liste.find(m => m.cle === _rensMethode) || liste[0] || null;
+}
+
+function _rensCout(m) {
+	const parts = [];
+	if (m.cout_max) parts.push(m.cout_max === m.cout_base ? `${m.cout_base} 🟤` : `${m.cout_base}–${m.cout_max} 🟤`);
+	if (m.cout_pv) parts.push('quelques PV');
+	if (m.cout_pm) parts.push(`${m.cout_pm} PM`);
+	return parts.length ? parts.join(' · ') : 'gratuit';
+}
+
+function _rensRenderMethodes() {
+	const box = document.getElementById('rens-methodes');
+	box.innerHTML = '';
+	for (const m of (_rensEtat.methodes || [])) {
+		const carte = _rensEl('div', 'aub-table rens-methode' + (m.cle === _rensMethode ? ' choisie' : ''));
+		const tete = _rensEl('div', 'aub-table-tete');
+		tete.appendChild(_rensEl('span', 'aub-table-titre', `${m.icon} ${m.nom}`));
+		tete.appendChild(_rensEl('span', 'aub-table-occ', `${m.acteur_nom}${m.sans_jet ? ' · sans jet' : ` · ${m.seuil} %`} · ${_rensCout(m)}`));
+		carte.appendChild(tete);
+		if (m.description) carte.appendChild(_rensEl('span', 'q-desc', m.description));
+		if (m.disponible_dans) carte.appendChild(_rensEl('span', 'q-desc', `⏳ De nouveau dans ${Math.ceil(m.disponible_dans / 60)} min.`));
+		carte.addEventListener('click', () => { _rensMethode = m.cle; _rensMode = ''; _rensRender(); });
+		box.appendChild(carte);
+	}
+}
+
+// Un sujet que borne le rang (`bloque` = la raison, dite par l'interlocuteur) reste VISIBLE mais
+// grisé : rien ne se paie, aucun délai ne court.
+function _rensBoutonCible(texte, body, bloque) {
+	const b = _rensEl('button', 'sub-loc-btn', texte);
+	if (bloque) {
+		b.disabled = true;
+		b.title = bloque;
+		b.appendChild(_rensEl('span', 'q-desc', bloque));
+		return b;
+	}
+	b.addEventListener('click', () => chercherRenseignement(body, b));
+	return b;
+}
+
+async function _rensSuggestions() {
+	const m = _rensCourante();
+	const champ = document.getElementById('rens-recherche');
+	const box = document.getElementById('rens-cibles');
+	if (!m || !champ || _rensMode !== 'libre') return;
+	const q = champ.value.trim();
+	box.innerHTML = '';
+	if (q.length < 2) { box.appendChild(_rensEl('span', 'q-desc', 'Deux lettres au moins.')); return; }
+	const data = await _aubFetch(`api/renseignement/catalogue?methode=${encodeURIComponent(m.id)}&q=${encodeURIComponent(q)}`);
+	if (!data || champ.value.trim() !== q) return;          // une frappe plus récente l'emporte
+	box.innerHTML = '';
+	if (!(data.suggestions || []).length) box.appendChild(_rensEl('span', 'q-desc', 'Rien de ce nom que cette méthode puisse chercher.'));
+	for (const s of data.suggestions || []) box.appendChild(_rensBoutonCible(s.nom, { mode: 'libre', cible: s.id }));
+}
+
+function _rensRenderCibles() {
+	const m = _rensCourante();
+	const modes = document.getElementById('rens-modes');
+	const box = document.getElementById('rens-cibles');
+	const champ = document.getElementById('rens-recherche');
+	modes.innerHTML = '';
+	box.innerHTML = '';
+	champ.hidden = true;
+	if (!m) return;
+	if (m.disponible_dans) return;
+	if (!m.modes.includes(_rensMode)) _rensMode = m.modes[0];
+	for (const mode of m.modes) {
+		const b = _rensEl('button', 'sub-loc-btn' + (mode === _rensMode ? ' actif' : ''), RENS_MODES[mode] || mode);
+		b.addEventListener('click', () => { _rensMode = mode; _rensRenderCibles(); });
+		modes.appendChild(b);
+	}
+	const c = m.cibles || {};
+	const vide = t => box.appendChild(_rensEl('span', 'q-desc', t));
+	if (_rensMode === 'quete') {
+		if (!(c.quetes || []).length) vide('Aucune quête active que cette méthode puisse éclairer.');
+		for (const q of c.quetes || []) box.appendChild(_rensBoutonCible((q.elite ? '🎯 ' : '') + q.titre, { mode: 'quete', quete_id: q.id }, q.bloque));
+	} else if (['dangers', 'donjons', 'ressources'].includes(_rensMode)) {
+		if (!(c[_rensMode] || []).length) vide('Rien de tel n\'a été signalé dans le pays.');
+		for (const s of c[_rensMode] || []) box.appendChild(_rensBoutonCible(s.nom, { mode: _rensMode, cible: s.id }, s.bloque));
+	} else if (_rensMode === 'bestiaire') {
+		if (!(c.bestiaire || []).length) vide('Aucune créature de votre bestiaire ne convient.');
+		for (const b of c.bestiaire || []) box.appendChild(_rensBoutonCible(b.nom, { mode: 'bestiaire', cible: b.id }));
+	} else if (_rensMode === 'libre') {
+		champ.hidden = false;
+		_rensSuggestions();
+	} else if (_rensMode === 'hasard') {
+		box.appendChild(_rensBoutonCible('🎲 Tendre l\'oreille', { mode: 'hasard' }));
+	} else if (_rensMode === 'recit') {
+		if (!(c.recits || []).length) vide('Aucun lieu vu de votre bestiaire qui ne soit déjà cédé ici.');
+		for (const r of c.recits || []) box.appendChild(_rensBoutonCible(r.texte, { mode: 'recit', recit: r.cle }));
+	}
+}
+
+function _rensRender() {
+	if (!_rensEtat) return;
+	document.getElementById('rens-lieu').textContent = _rensEtat.lieu || '';
+	if (!(_rensEtat.methodes || []).some(m => m.cle === _rensMethode)) _rensMethode = ((_rensEtat.methodes || [])[0] || {}).cle || '';
+	_rensRenderMethodes();
+	_rensRenderCibles();
+}
+
+// `pnjId` : ouvert par le dialogue d'un PNJ (service `renseignement`) — c'est lui qu'on présélectionne.
+async function openRenseignement(pnjId) {
+	const data = await _aubFetch('api/renseignement/offre');
+	if (!data) return;
+	_rensEtat = data;
+	document.getElementById('rens-resultat').textContent = '';
+	if (!(data.methodes || []).length) { showToast('Personne ici ne sait rien vous apprendre.'); return; }
+	const parPnj = pnjId ? (data.methodes || []).find(m => m.interlocuteur_id === pnjId) : null;
+	if (parPnj) { _rensMethode = parPnj.cle; _rensMode = ''; }
+	_rensRender();
+	document.getElementById('game-container').classList.add('panel-hidden');
+	document.getElementById('rens-panel').classList.remove('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function closeRenseignement() {
+	if (_rensMinuteur) { clearTimeout(_rensMinuteur); _rensMinuteur = null; }
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('rens-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function chercherRenseignement(body, bouton) {
+	const m = _rensCourante();
+	if (!m) return;
+	document.querySelectorAll('#rens-cibles button').forEach(b => { b.disabled = true; });
+	const data = await _aubFetch('api/renseignement/chercher',
+		Object.assign({ methode: m.id, interlocuteur: m.interlocuteur_id || '' }, body));
+	if (!data) { _rensRenderCibles(); return; }
+	const r = data.resultat || {};
+	const box = document.getElementById('rens-resultat');
+	box.textContent = r.texte || '';
+	const extras = [];
+	if (r.cout) extras.push(`−${r.cout} 🟤`);
+	if (r.pourboire) extras.push(`+${r.pourboire} 🟤 de pourboire`);
+	if (r.pv_perdus) extras.push(`${r.acteur} −${r.pv_perdus} PV`);
+	if (r.pm) extras.push(`${r.acteur} −${r.pm} PM`);
+	if (r.xp) extras.push(`${r.acteur} +${r.xp} XP`);
+	if (r.note) extras.push('🗒️ note de renseignement rédigée');
+	if (r.affinite) extras.push(`🤝 ${r.acteur} +${r.affinite} d'affinité`);
+	if (extras.length) box.appendChild(_rensEl('span', 'q-desc', extras.join(' · ')));
+	if (data.purse) updatePurse(data.purse);
+	if (data.journal) renderFicheJournal(data.journal);
+	if (data.vitaux) updateVitals(data.vitaux, data.vitaux.id);
+	if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
+	if (data.fiche) _appliquerFiche(data.fiche);
+	showToast(`🔎 ${r.niveau_label ? r.niveau_label.charAt(0).toUpperCase() + r.niveau_label.slice(1) : 'Rien'} — consigné au carnet.`);
+	_rensEtat = Object.assign({}, _rensEtat, { methodes: data.methodes, lieu: data.lieu });
+	_rensRender();
+}
+
+async function lireNote(index) {
+	closeItemDetail();
+	const data = await _aubFetch('api/renseignement/lire', { index });
+	if (!data) return;
+	if (data.journal) renderFicheJournal(data.journal);
+	showToast(data.appris ? '🗒️ Lu — consigné au carnet.' : '🗒️ Vous connaissiez déjà cette piste.');
+}
+
+document.addEventListener('input', e => {
+	if (e.target && e.target.id === 'rens-recherche') {
+		if (_rensMinuteur) clearTimeout(_rensMinuteur);
+		_rensMinuteur = setTimeout(_rensSuggestions, 250);
+	}
+});
+
 // ── La nuit ──────────────────────────────────────────────────────────────────────
 // Le log est déjà EN MAIN (payload de la salle) : on l'égrène pendant que le POST est en
 // vol. Le bouton « Au matin » ne s'arme que quand les DEUX sont finis — la révélation ne
@@ -14036,6 +14265,12 @@ async function choisirPnj(choixId, extra) {
 				// ville ne fait pas forcément remonter l'affichage si une autre était déjà meilleure.
 				updateRang(data.rang.meilleur, data.rang.detail);
 			}
+		}
+		if (data.renseignement) {
+			// Service `renseignement` (réceptionniste de guilde) : le panneau 🔎 s'ouvre sur CE PNJ.
+			closePnjPanel();
+			openRenseignement(data.renseignement.pnj);
+			return;
 		}
 		if (data.enseignement) {
 			// Service `enseignement` d'un maître : la fiche (⚡, points, barre) arrive par data.fiche.

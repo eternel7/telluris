@@ -261,6 +261,25 @@ CATALOGUE = [
 			"absent du dump le plus récent ou qui en diffère : régénération idempotente.",
 	},
 	{
+		"id": "gen_renseignement",
+		"label": "🔎 Renseignement : méthodes par vocation",
+		"argv": _py("gen_renseignement.py"),
+		"ecrit": "Écrit jsons/renseignement_a_importer.json.",
+		"description": "Doc `rules:renseignement` (méthodes 🔎 Se renseigner par vocation, informateur "
+			"de taverne) et item générique `item:note_renseignement`. Chaque méthode est validée "
+			"(caractéristique inconnue refusée). N'écrit que les docs absents du dump le plus récent "
+			"ou qui en diffèrent : régénération idempotente.",
+	},
+	{
+		"id": "gen_renseignement_guilde",
+		"label": "🔎 Renseignement : salle commune de guilde",
+		"argv": _py("gen_renseignement_guilde.py"),
+		"ecrit": "Écrit jsons/renseignement_guilde_a_importer.json.",
+		"description": "`rules:renseignement` à jour (recrues du tableau, réceptionniste) et service "
+			"`renseignement` + choix « Que sait-on de… ? » sur chaque PNJ de comptoir de guilde (doc "
+			"relu et fusionné, lint sans erreur). N'écrit que les docs qui diffèrent du dump le plus récent.",
+	},
+	{
 		"id": "gen_ambidextre",
 		"label": "⚔️ Passive Ambidextre (combat à deux armes)",
 		"argv": _py("gen_ambidextre.py"),

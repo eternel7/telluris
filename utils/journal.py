@@ -142,6 +142,9 @@ def noter_rencontres(character: dict, monstres: list, lieu_id: str = "",
 		lieux = list(fiche.get("lieux") or [])
 		if lieu_id and len(lieux) < lieux_max() and not any(l.get("id") == lieu_id for l in lieux):
 			lieux.append({"id": lieu_id, "label": str(lieu_label_txt or "")})
+		# Un lieu appris par ouï-dire (🔎 renseignement) passe en « vu » au premier combat.
+		lieux = [{k: v for k, v in l.items() if k != "oui_dire"} if l.get("id") == lieu_id else l
+				 for l in lieux]
 		fiche["lieux"] = lieux
 		fiches[eid] = fiche
 		change = True
@@ -149,6 +152,27 @@ def noter_rencontres(character: dict, monstres: list, lieu_id: str = "",
 	if change:
 		character[CHAMP_BESTIAIRE] = fiches
 	return change
+
+
+def noter_oui_dire(character: dict, espece_id: str, lieu_id: str, lieu_label_txt: str = "",
+				   now: int | None = None) -> bool:
+	"""Inscrit un lieu APPRIS (🔎 renseignement, note lue) au bestiaire, marqué `oui_dire`.
+	Mute sans sauver ; True si quelque chose a changé. Une espèce jamais croisée entre au
+	bestiaire avec 0 combat ; un lieu déjà connu (vu ou ouï-dire) ne bouge pas ; borné comme les
+	lieux vus (`JOURNAL_BESTIAIRE_LIEUX_MAX`)."""
+	if not espece_id or not lieu_id:
+		return False
+	instant = now_epoch() if now is None else int(now)
+	fiches = bestiaire_de(character)
+	fiche = dict(fiches.get(espece_id) or {"vu_at": instant, "combats": 0, "tues": 0, "lieux": []})
+	lieux = list(fiche.get("lieux") or [])
+	if any(l.get("id") == lieu_id for l in lieux) or len(lieux) >= lieux_max():
+		return False
+	lieux.append({"id": lieu_id, "label": str(lieu_label_txt or ""), "oui_dire": True})
+	fiche["lieux"] = lieux
+	fiches[espece_id] = fiche
+	character[CHAMP_BESTIAIRE] = fiches
+	return True
 
 
 def lieux_a_nommer(character: dict, monstres: list, lieu_id: str) -> bool:
@@ -164,6 +188,9 @@ def lieux_a_nommer(character: dict, monstres: list, lieu_id: str) -> bool:
 			continue
 		lieux = (fiches.get(eid) or {}).get("lieux") or []
 		if len(lieux) < lieux_max() and not any(l.get("id") == lieu_id for l in lieux):
+			return True
+		# Un ouï-dire à confirmer : le marqueur doit tomber, la passe doit avoir lieu.
+		if any(l.get("id") == lieu_id and l.get("oui_dire") for l in lieux):
 			return True
 	return False
 
@@ -192,8 +219,9 @@ def bestiaire_payload(character: dict, get_doc_fn) -> list:
 			"image": doc.get("image", ""),
 			"description": doc.get("description", ""),
 			"tags": list(doc.get("tags") or []),
-			"lieux": [str(l.get("label") or "") for l in (fiche.get("lieux") or [])
-					  if l.get("label")],
+			# 👂 = appris par ouï-dire (🔎 renseignement), pas encore vu de ses yeux.
+			"lieux": [("👂 " if l.get("oui_dire") else "") + str(l.get("label") or "")
+					  for l in (fiche.get("lieux") or []) if l.get("label")],
 			"combats": int(fiche.get("combats", 0) or 0),
 			"tues": int(fiche.get("tues", 0) or 0),
 			"vu_at": int(fiche.get("vu_at", 0) or 0),
