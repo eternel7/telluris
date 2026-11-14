@@ -45,11 +45,17 @@
 #     fondre à nouveau dans les ombres (`_se_dissimuler`, même effet que
 #     combat._activer_furtivite : l'adversaire doit réussir un nouveau jet).
 #
-# PLACEMENT — seul `hit_and_run` (tag `ia_hit_and_run[_<n>]`, figé au snapshot) est rejoué,
+# ARTILLEUR (tag `ia_artilleur[_<profil>]`) — comme `_run_monster_turn` : une capacité tentée
+# depuis sa case, puis il se tient à la plus grande portée de son arme et de ses capacités
+# payables et rechargées (`combat._portee_visee_monstre`) — il RECULE si on l'approche (coût
+# d'un pas ordinaire, tant qu'il a des actions et des cases), s'approche sinon jusqu'à cette
+# portée ; il ne frappe au contact que s'il n'a pas pu s'écarter. La ligne n'a pas de bord.
+#
+# PLACEMENT — `hit_and_run` (tag `ia_hit_and_run[_<n>]`, figé au snapshot) est rejoué,
 # comme `_run_monster_turn` : un coup d'ARME par tour (n avec `_<n>` ; une capacité innée,
 # souffle compris, ne compte pas), puis repli avec les cases qui restent (`_fuir`) — au plus
 # la moitié de son déplacement avec `_<n>` (`ia_monstre.repli_hit_and_run`). Ni berserker
-# (il ne recule jamais) ni autre placement (meute, embuscade, artilleur…) au banc d'essai.
+# (il ne recule jamais) ni autre placement (meute, embuscade, protecteur) au banc d'essai.
 #
 # Un CHARACTER est simulé à PLEINE FORME (currentPV/PM forcés aux max — un banc d'essai
 # ne mesure pas l'état de jeu du moment) et n'engage que ce que sa barre d'action porte
@@ -1074,12 +1080,55 @@ def _portee_visee(actor: dict, arsenal: dict) -> int:
 	return max(portees) if portees else 1
 
 
-def _avancer_d_une_case(actor: dict, arsenal: dict, etat: dict) -> bool:
+def _artilleur(actor: dict) -> bool:
+	"""Placement `artilleur` (tag figé au snapshot) — sauf berserker, qui ne recule jamais."""
+	ia = ia_monstre.ia_de(actor)
+	return ia.get("deplacement") == "artilleur" and not ia_monstre.berserker(ia)
+
+
+def _portee_artilleur(actor: dict, arsenal: dict) -> int:
+	"""Portée tenue par un artilleur : la plus grande entre son arme et ses capacités
+	OFFENSIVES payables et rechargées — même règle que `combat._portee_visee_monstre`, qui
+	ne regarde pas si une capacité a déjà été lancée ce tour."""
+	portees = [max(1, int(p.get("portee", 1) or 1)) for p in actor.get("attaque_profils") or []]
+	recharges = actor.get("recharges") or {}
+	for capa in list(arsenal.get("sorts") or []) + list(arsenal.get("competences") or []):
+		if recharges.get(capa.get("id"), 0) > 0:
+			continue
+		if combat._cout_pm_charge(actor, capa) <= actor.get("currentPM", 0) and capa["effets"].get("degats"):
+			portees.append(max(1, int(capa.get("portee", 1) or 1)))
+	return max(portees) if portees else 1
+
+
+def _meilleure_capacite(actor: dict, cible: dict, arsenal: dict, distance: int) -> dict | None:
+	"""Meilleure capacité (sort ou compétence, jamais l'arme) jouable d'ici — la tentative
+	du moteur avant tout déplacement (`combat._tenter_capacite_monstre`)."""
+	sans_arme = dict(actor, attaque_profils=[])
+	return _meilleure_offensive(sans_arme, cible, arsenal, distance)
+
+
+def _reculer(actor: dict, etat: dict, portee: int) -> int:
+	"""Artilleur trop près : recule case par case jusqu'à `portee`, tant qu'il a des actions
+	et des cases (`combat._deplacement_ia`). Rend le nombre de pas."""
+	pas = 0
+	while (etat["distance"] < portee and actor.get("actions_restantes", 0) > 0
+		   and actor.get("cells_moved", 0) < max(1, actor.get("deplacement", 1))):
+		actor["cells_moved"] = actor.get("cells_moved", 0) + 1
+		etat["distance"] += 1
+		combat._refresh_actions(actor)
+		pas += 1
+	if pas:
+		_log(etat["pseudo"], actor, "sys",
+			 f"{actor.get('nom', '?')} recule prudemment ({pas} case(s), distance {etat['distance']}).")
+	return pas
+
+
+def _avancer_d_une_case(actor: dict, arsenal: dict, etat: dict, portee: int | None = None) -> bool:
 	"""Un pas vers l'adversaire — même contrat que la boucle d'approche du moteur
 	(_run_monster_turn) : on avance tant que le budget d'actions le permet (le coût AP
 	est celui de _move_ap_used_for, recalculé par _refresh_actions), sans jamais
 	descendre sous 1 case (deux acteurs ne partagent pas une case)."""
-	if etat["distance"] <= _portee_visee(actor, arsenal):
+	if etat["distance"] <= (portee if portee is not None else _portee_visee(actor, arsenal)):
 		return False
 	if actor.get("cells_moved", 0) >= max(1, actor.get("deplacement", 1)):
 		return False
@@ -1165,6 +1214,16 @@ def _jouer_tour(actor: dict, adversaire: dict, arsenal: dict, etat: dict, round_
 		return
 	hit_and_run = _hit_and_run(actor)
 	coups_arme = 0
+	# ARTILLEUR : une capacité d'ici, puis il tient sa portée (recule si on l'a approché).
+	portee_tenue = None
+	if (_artilleur(actor) and _vivant(adversaire)
+			and not (adversaire.get("furtif") and not actor.get("detecte"))):
+		capa = _meilleure_capacite(actor, adversaire, arsenal, etat["distance"])
+		if capa is not None and actor.get("actions_restantes", 0) > 0:
+			_executer_attaque(actor, adversaire, capa, etat)
+		portee_tenue = _portee_artilleur(actor, arsenal)
+		_reculer(actor, etat, portee_tenue)
+		distance_avant = etat["distance"]
 	while _vivant(actor) and _vivant(adversaire) and actor.get("actions_restantes", 0) > 0:
 		if _tenter_soin(actor, arsenal, pseudo):
 			continue
@@ -1187,7 +1246,7 @@ def _jouer_tour(actor: dict, adversaire: dict, arsenal: dict, etat: dict, round_
 			if option["kind"] == "arme":
 				coups_arme += 1
 			continue
-		if not _avancer_d_une_case(actor, arsenal, etat):
+		if not _avancer_d_une_case(actor, arsenal, etat, portee_tenue):
 			break   # rien à faire : hors de portée et plus de jambes — tour fini
 	if etat["distance"] < distance_avant:
 		_log(pseudo, actor, "sys",
@@ -1306,7 +1365,7 @@ def _recap_arsenal(bel: dict) -> dict:
 		"sorts_possibles": list((bel.get("magie") or {}).get("possibles") or []),
 		"sorts_tires": int((bel.get("magie") or {}).get("tires") or 0),
 		# Placement rejoué par le banc d'essai (seul le hit-and-run l'est).
-		"placement": "hit_and_run" if _hit_and_run(snap) else "",
+		"placement": "hit_and_run" if _hit_and_run(snap) else ("artilleur" if _artilleur(snap) else ""),
 		"placement_coups": ia_monstre.coups_hit_and_run(ia_monstre.ia_de(snap)) if _hit_and_run(snap) else 0,
 		"placement_repli": (ia_monstre.repli_hit_and_run(ia_monstre.ia_de(snap), snap.get("deplacement", 1)) or 0)
 						   if _hit_and_run(snap) else 0,

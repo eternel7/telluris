@@ -567,6 +567,49 @@ def test_un_monstre_lance_ses_sorts_au_contact(jets_surs, magie):
 	assert len([l for l in _frappes(res["journal"], "A") if "Trait de" in l["texte"]]) == 1
 
 
+ESPECE_ARTILLEUR = dict(ESPECE_MAGE, _id="espece:ours_artilleur", tags=["monstre", "ia_artilleur"])
+DOCS_MAGIE[ESPECE_ARTILLEUR["_id"]] = ESPECE_ARTILLEUR
+
+
+def test_artilleur_lance_puis_recule_sans_frapper_au_contact(jets_surs, magie):
+	spec = {"type": "espece", "id": "espece:ours_artilleur", "profil": "profil:mage_test"}
+	snap = simulateur.construire_belligerant(spec, DOCS_MAGIE.get)["snapshot_reference"]
+	dep, act = snap["deplacement"], snap["actions_max"]
+	res = simulateur.simuler_duel(spec, {"type": "espece", "id": "espece:rat_test"},
+								  distance=1, passes=1, get_doc_fn=DOCS_MAGIE.get, plafond_rounds=1)
+	frappes = _frappes(res["journal"], "A")
+	assert len(frappes) == 1 and "Trait de" in frappes[0]["texte"]     # le sort, pas le contact
+	# Recul : un pas tant qu'il reste une action (1 dépensée par le sort, un pas coûte
+	# actions_max / deplacement), une case et de la portée à gagner — `combat._deplacement_ia`.
+	pas = 0
+	while (pas < dep and 1 + pas < SORT_TRAIT_A["portee"]
+		   and act - 1 - combat._move_ap_used_for(snap, pas) > 0):
+		pas += 1
+	assert pas >= 1
+	assert any(f"recule prudemment ({pas} case(s), distance {1 + pas})" in l["texte"]
+			   for l in res["journal"])
+	assert res["a"]["arsenal"]["placement"] == "artilleur"
+
+
+def test_artilleur_approche_jusqu_a_sa_portee_seulement(jets_surs, magie):
+	spec = {"type": "espece", "id": "espece:ours_artilleur", "profil": "profil:mage_test"}
+	res = simulateur.simuler_duel(spec, {"type": "espece", "id": "espece:rat_test"},
+								  distance=9, passes=1, get_doc_fn=DOCS_MAGIE.get, plafond_rounds=1)
+	# Il s'arrête à la portée de ses sorts (6) et lance, au lieu de foncer au contact.
+	assert any(f"avance de 3 case(s) (distance {SORT_TRAIT_A['portee']})" in l["texte"]
+			   for l in res["journal"] if l["acteur"].startswith("[A]"))
+	assert all("Trait de" in l["texte"] for l in _frappes(res["journal"], "A"))
+
+
+def test_artilleur_sans_capacite_payable_se_bat_au_contact(jets_surs, magie):
+	spec = {"type": "espece", "id": "espece:ours_artilleur", "profil": "profil:mage_test",
+			"stats": {"pm_max": 0}}
+	res = simulateur.simuler_duel(spec, {"type": "espece", "id": "espece:rat_test"},
+								  distance=1, passes=1, get_doc_fn=DOCS_MAGIE.get, plafond_rounds=1)
+	assert not any("recule" in l["texte"] for l in res["journal"])
+	assert any("Attaque naturelle" in l["texte"] for l in _frappes(res["journal"], "A"))
+
+
 def test_un_joueur_n_a_pas_la_limite_d_une_capacite():
 	assert simulateur._capacite_permise({"capacite_lancee": True})
 	assert not simulateur._capacite_permise({"capacite_lancee": True, "_sim_une_capacite": True})

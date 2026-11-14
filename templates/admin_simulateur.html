@@ -857,6 +857,9 @@ function renduArsenal(recap) {
 		const repli = recap.placement_repli ? `repli de ${recap.placement_repli} case(s)` : 'repli total';
 		lignes.push(`<span class="titre">🦅 placement</span> <b>hit-and-run</b> — ${coups} coup(s) d'arme par tour, puis ${repli}`);
 	}
+	if (recap.placement === 'artilleur') {
+		lignes.push(`<span class="titre">🏹 placement</span> <b>artilleur</b> — tient la portée de ses capacités, recule si on l'approche`);
+	}
 	return lignes.join('<br>') || '<i>rien</i>';
 }
 
