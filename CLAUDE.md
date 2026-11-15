@@ -108,7 +108,8 @@ utils/
                          #   rang / inconnu / ouvert / dans) → TEMPS NORMALISÉ `t` ; le client ne fait que projeter `t` ;
                          #   vue en FLEUVES (`entites` : cités/ordres, paliers de largeur, rattachement par tags
                          #   = `rattacher`), `bandeaux`, cartes d'ères ; vignettes : dev/gen_vignettes_chronologie.py
-  lore.py                # /admin/lore (pur) : liste blanche docs/lore + Document maître, rendu Markdown
+  lore.py                # /admin/lore (pur) : liste blanche docs/lore + Document maître + autres docs/*.md
+                         #   (section 🛠 Conception et prompts), rendu Markdown
                          #   stdlib (texte ÉCHAPPÉ avant balisage), liens .md réécrits vers leur page
   grimoires.py           # grimoires manquants (pur) : grimoire UNIQUE + recette de scriptorium par sort ;
                          #   règle de couverture partagée par dev/gen_grimoires.py et l'alerte de /admin

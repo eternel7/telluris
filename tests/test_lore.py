@@ -112,9 +112,24 @@ def test_liens_md_relatifs_reecrits_vers_la_page():
 def test_liste_blanche():
 	assert lore.chemin_de("Telluris_Document_Maitre.md") == "Telluris_Document_Maitre.md"
 	assert lore.chemin_de("README.md") == "lore/README.md"
-	for refuse in ("../SCHEMA.md", "SCHEMA.md", "competences_vocations_1_10.md",
-				   "lore/README.md", "../../main.py", "monde/../../SCHEMA.md", ""):
+	# Les autres docs/*.md : section Conception, clé = leur nom (comme le Document maître).
+	for n in ("SCHEMA.md", "competences_vocations_1_10.md"):
+		assert lore.chemin_de(n) == n
+		assert lore.section_de(n) == lore.CONCEPTION
+	assert lore.section_de("lore/README.md") == lore.REFERENCE
+	for refuse in ("../SCHEMA.md", "lore/README.md", "../../main.py", "monde/../../SCHEMA.md",
+				   "lore/SCHEMA.md", "../CLAUDE.md", ""):
 		assert lore.chemin_de(refuse) is None, refuse
+
+
+def test_conception_ecarte_un_nom_pris_par_le_lore(tmp_path):
+	"""Un docs/README.md aurait la clé du README du lore : il reste hors du périmètre."""
+	(tmp_path / "lore").mkdir()
+	for f in ("lore/README.md", "README.md", "a.md", "Telluris_Document_Maitre.md"):
+		(tmp_path / f).write_text("# t", encoding="utf-8")
+	assert lore.chemin_de("README.md", tmp_path) == "lore/README.md"
+	assert lore.chemin_de("a.md", tmp_path) == "a.md"
+	assert [e["section"] for e in lore.lister(tmp_path)] == [lore.REFERENCE, lore.REFERENCE, lore.CONCEPTION]
 
 
 # ── Vrai corpus ────────────────────────────────────────────────────────────────
@@ -123,7 +138,8 @@ def test_liste_blanche():
 def test_corpus_complet_rendu_et_liste():
 	entrees = lore.lister()
 	sur_disque = {p.relative_to(lore.RACINE).as_posix() for p in (lore.RACINE / "lore").rglob("*.md")}
-	assert {e["chemin"] for e in entrees} == sur_disque | {lore.DOCUMENT_MAITRE}
+	racine = {p.name for p in lore.RACINE.glob("*.md")}
+	assert {e["chemin"] for e in entrees} == sur_disque | racine
 	reference = [e for e in entrees if e["section"] == lore.REFERENCE]
 	assert reference[0]["chemin"] == lore.DOCUMENT_MAITRE and reference[0]["canon"]
 	for e in entrees:

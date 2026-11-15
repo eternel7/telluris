@@ -1,6 +1,7 @@
 """Lecture du lore dans l'administration (pur) : liste blanche des fichiers et rendu Markdown.
 
-Périmètre : `docs/lore/**/*.md` + `docs/Telluris_Document_Maitre.md` (la synthèse canonique).
+Périmètre : `docs/lore/**/*.md` + `docs/Telluris_Document_Maitre.md` (la synthèse canonique)
++ les autres `docs/*.md` (conception, propositions, prompts), section `CONCEPTION`.
 Le rendu est un convertisseur Markdown stdlib (aucune dépendance pip : en ajouter une
 exige de recréer le conteneur) qui couvre ce que le corpus utilise réellement : titres,
 `---`, blocs ``` ```, tableaux GFM, citations, listes imbriquées, gras/italique/code/liens.
@@ -26,6 +27,7 @@ URL_LORE = "/admin/lore/"
 # Un dossier absent d'ici s'affiche quand même, sous son nom capitalisé.
 REDIGE = "redige"
 REFERENCE = "reference"
+CONCEPTION = "conception"
 SECTIONS = {
 	REDIGE: "✒️ Le lore rédigé",
 	REFERENCE: "📜 Référence",
@@ -34,6 +36,7 @@ SECTIONS = {
 	"personnages": "🎭 Personnages, scénarios et quêtes",
 	"systemes": "⚙️ Systèmes de jeu",
 	"contenu": "📦 Contenu de jeu",
+	CONCEPTION: "🛠 Conception et prompts",
 }
 
 _RE_DATE_FICHIER = re.compile(r"^(\d{4})(\d{2})(\d{2})_")
@@ -55,6 +58,12 @@ def _chemins(racine: Path) -> list:
 		rel = Path(dossier).relative_to(racine).as_posix()
 		lieux.extend(f"{rel}/{nom}" for nom in fichiers if nom.endswith(".md"))
 	out.extend(sorted(lieux))
+	# Les autres `docs/*.md` gardent leur nom pour clé, comme le Document maître : un nom déjà
+	# pris par une clé de docs/lore (son README) resterait ambigu, il est écarté.
+	cles_lore = {cle_de(c) for c in lieux}
+	out.extend(sorted(n for n in os.listdir(racine)
+					  if n.endswith(".md") and n != DOCUMENT_MAITRE and n not in cles_lore
+					  and (racine / n).is_file()))
 	return out
 
 
@@ -66,8 +75,10 @@ def cle_de(chemin: str) -> str:
 
 def section_de(chemin: str) -> str:
 	parts = chemin.split("/")
-	if len(parts) <= 2:  # Document maître, lore/README.md
+	if chemin == DOCUMENT_MAITRE or (parts[0] == "lore" and len(parts) == 2):  # lore/README.md
 		return REFERENCE
+	if len(parts) == 1:  # autre docs/*.md
+		return CONCEPTION
 	return parts[1]
 
 

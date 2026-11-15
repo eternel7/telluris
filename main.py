@@ -2020,7 +2020,7 @@ def admin_competences(request: Request, current_user: Annotated[User, Depends(ge
 
 @app.get("/admin/lore", response_class=HTMLResponse)
 def admin_lore(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
-	"""Index du lore (docs/lore + Document maître), lu RENDU dans la page — utils/lore.py."""
+	"""Index du lore (docs/lore, Document maître, autres docs/*.md), lu RENDU dans la page — utils/lore.py."""
 	redirect = _require_admin_page(request, current_user)
 	if redirect:
 		return redirect
