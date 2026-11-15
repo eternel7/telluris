@@ -23,6 +23,7 @@ from utils import accord_espece, bois, marche
 # `recrutement` n'importe que characters/consommables/montures, jamais quetes.
 from utils import recrutement
 from utils import xp_monstre
+from utils import zones as zones_util
 
 
 def now_epoch() -> int:
@@ -147,7 +148,8 @@ def pays_relies(cite_doc: dict, connexions: list, get_doc_fn=None, rayon: int | 
 	for lid in ordre:
 		doc = get_doc_fn(lid)
 		if doc and doc.get("categorie") == "pays":
-			out.append(pays_a_portee(doc, ancrages[lid], rayon))
+			# Peuplé AVANT la réduction : les défauts des zones comptent dans la portée.
+			out.append(pays_a_portee(zones_util.peupler_lieu(doc, get_doc_fn), ancrages[lid], rayon))
 	return out
 
 
@@ -171,7 +173,7 @@ def pays_a_portee(pays_doc: dict, ancrages: list, rayon: int) -> dict:
 		return any(max(abs(x - ax), abs(y - ay)) <= rayon for ax, ay in ancrages)
 
 	placements = [p for p in pays_doc.get("zone_influences") or [] if _a_portee(p)]
-	zones = {p.get("zone") for p in placements}
+	zones = zones_util.cles_actives(placements)
 
 	def _reduire(entrees):
 		out = []
@@ -508,7 +510,8 @@ def remplir_tableau(guild_doc: dict) -> list:
 	nouvelles, et renvoie toutes les offres ouvertes (générées + authorées). Le nombre d'offres
 	générées est borné par le nombre de cibles distinctes du parent."""
 	parent_id = guild_doc.get("lieu_parent")
-	parent_doc = get_doc(parent_id) if parent_id else None
+	# Contenu EFFECTIF : les défauts des zones font des cibles kill / collect (`peupler_lieu`).
+	parent_doc = zones_util.peupler_lieu(get_doc(parent_id), get_doc) if parent_id else None
 
 	# Péremption PARESSEUSE (aucun tick de fond dans le jeu) : les places libérées sont
 	# aussitôt repeuplées par la complétion ci-dessous.
@@ -583,7 +586,8 @@ def _candidats_chasse(cite_id: str, get_doc_fn=None, find_docs_fn=None, lieux: l
 	if lieux is None:
 		lieux = chasse.lieux_chasse_de(cite_id, get_doc_fn, find_docs_fn)
 	else:
-		lieux = [L for L in lieux if L.get("rencontres") and L.get("zone_influences")]
+		lieux = [L for L in (zones_util.peupler_lieu(L, get_doc_fn) for L in lieux)
+				 if L.get("rencontres") and L.get("zone_influences")]
 	out = []
 	for L in lieux:
 		for eid in especes_du_parent(L):

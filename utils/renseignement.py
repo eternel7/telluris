@@ -16,6 +16,7 @@ import time
 
 from models import character_stats
 from utils.characters import lieu_label
+from utils.zones import zone_de_cle
 
 REGLES_ID = "rules:renseignement"
 ITEM_NOTE_ID = "item:note_renseignement"
@@ -535,7 +536,8 @@ def pistes_de(cible_id: str, sources: list, index: dict, donjons: list, boutique
 		for e in entrees:
 			zones = e.get("zones") or []
 			if zones and "zone" in sources:
-				for z in zones:
+				# Contenu d'un PLACEMENT (`<zone>@<i>`) : la piste nomme sa zone, comme les autres.
+				for z in dict.fromkeys(zone_de_cle(z) for z in zones):
 					pistes.append({"type": "zone", "porteur": lid, "lieu": lid, "zone": z, "cible": cible_id})
 			elif not zones and "lieu" in sources:
 				pistes.append({"type": "lieu", "porteur": lid, "lieu": lid, "cible": cible_id})
@@ -681,7 +683,7 @@ def rang_piste(p: dict, index: dict, donjons: list, rang_fn) -> str | None:
 	especes = set()
 	if p["type"] in ("lieu", "zone"):
 		for e in (index.get(p["porteur"]) or {}).get("rencontres") or []:
-			if p["type"] == "lieu" or p.get("zone") in (e.get("zones") or []):
+			if p["type"] == "lieu" or p.get("zone") in {zone_de_cle(z) for z in (e.get("zones") or [])}:
 				especes.add(e.get("espece"))
 	elif p["type"] == "donjon":
 		for d in donjons or []:

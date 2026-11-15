@@ -859,6 +859,13 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 					<div id="zone-pw-hint" style="font-size:.66rem;color:#888;margin-bottom:6px;">Sélectionnez une zone placée pour pondérer ses profils (vide = hérite du défaut du lieu).</div>
 					<div id="zone-profil-weights"></div>
 				</div>
+				{# Contenu PROPRE de l'instance (utils/zones.py, `peupler_lieu`) : valable dans SA forme
+				   seulement, en plus des défauts de la zone et des compléments du lieu. #}
+				<div id="zone-contenu-section" style="border-top:1px solid var(--border);margin-top:6px;padding-top:8px;margin-bottom:8px;">
+					<label style="font-size:.7rem;color:var(--accent);">🐾 Contenu propre de cette instance</label>
+					<div id="zone-contenu-hint" style="font-size:.66rem;color:#888;margin-bottom:6px;">Sélectionnez une zone placée : espèces et ressources posées ICI seulement (une bête précise, un gisement), en plus des défauts de la zone.</div>
+					<div id="zone-contenu" style="font-size:.68rem;"></div>
+				</div>
 				<div class="section-actions">
 					<button class="btn" id="save-zones-btn" style="width:100%;">💾 Sauvegarder les zones</button>
 				</div>
@@ -883,6 +890,7 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 				<div class="section-actions">
 					<button class="btn" id="save-rencontres-btn" style="width:100%;">💾 Sauvegarder les rencontres</button>
 				</div>
+				<div class="defauts-zones" data-champ="rencontres"></div>
 			</div>
 
 			<!-- Panneau Ressources -->
@@ -901,6 +909,7 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 				<div class="section-actions">
 					<button class="btn" id="save-ressources-btn" style="width:100%;">💾 Sauvegarder les ressources</button>
 				</div>
+				<div class="defauts-zones" data-champ="ressources"></div>
 			</div>
 
 			<!-- Panneau Navigation -->
@@ -1627,6 +1636,10 @@ let lieuProfilWeights = {}; // distribution de grades par défaut du lieu { prof
 // ── RESSOURCES STATE ───────────────────────────────────────────────────────────
 let itemsDefs = {};        // { "item:x": { nom, icon, ... } }
 let ressources = [];       // [ { ressource: "item:x", zones: ["zone::a", ...] } ]
+// Défauts des zones RETIRÉS de ce lieu (utils/zones.py) : [{espece|ressource, zones?}] — sans
+// `zones` = toutes ses zones ; `lieuSansDefauts` = tag `sans_defauts_zones` (plus aucun défaut).
+let lieuExclusions = [];
+let lieuSansDefauts = false;
 let ressourceItemsTries = [];          // items triés par nom, source du <select>
 const ressourceFiltreCat = new Set();  // vide = « Tout »
 const ressourceFiltreSc  = new Set();
@@ -1770,6 +1783,8 @@ lieuSelect.addEventListener('change', async (e) => {
 			renderZoneList();
 			rencontres = lieuData.rencontres ? JSON.parse(JSON.stringify(lieuData.rencontres)) : [];
 			ressources = lieuData.ressources ? JSON.parse(JSON.stringify(lieuData.ressources)) : [];
+			lieuExclusions = lieuData.exclusions ? JSON.parse(JSON.stringify(lieuData.exclusions)) : [];
+			lieuSansDefauts = (lieuData.tags || []).includes('sans_defauts_zones');
 			lieuProfilWeights = lieuData.profil_weights ? JSON.parse(JSON.stringify(lieuData.profil_weights)) : {};
 			renderLieuProfilWeights();
 			renderZoneProfilWeights();
@@ -6033,6 +6048,7 @@ function renderRencontreList() {
 	if (!rencontreListEl) return;
 	if (rencontres.length === 0) {
 		rencontreListEl.innerHTML = '<div style="color:#888;padding:4px;">Aucune espèce.</div>';
+		renderDefautsZones();
 		return;
 	}
 	const zoneDefList = usedZoneDefs();
@@ -6075,6 +6091,7 @@ function renderRencontreList() {
 			renderRencontreList();
 		});
 	});
+	renderDefautsZones();
 }
 
 function addEspece() {
@@ -6115,6 +6132,7 @@ function renderRessourceList() {
 	if (!ressourceListEl) return;
 	if (ressources.length === 0) {
 		ressourceListEl.innerHTML = '<div style="color:#888;padding:4px;">Aucune ressource.</div>';
+		renderDefautsZones();
 		return;
 	}
 	const zoneDefList = usedZoneDefs();
@@ -6155,6 +6173,7 @@ function renderRessourceList() {
 			renderRessourceList();
 		});
 	});
+	renderDefautsZones();
 }
 
 function addRessource() {
@@ -6229,6 +6248,136 @@ function renderZoneProfilWeights() {
 			if (Object.keys(p.profil_weights).length === 0) delete p.profil_weights;
 		},
 		!sel);
+	renderZoneContenu();
+}
+
+// ── CONTENU PAR DÉFAUT DES ZONES (utils/zones.py, `peupler_lieu`) ─────────────
+function _escZ(s) {
+	return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+const _CONTENU = {
+	rencontres: { cle: 'espece', defauts: 'defauts_rencontres', defs: () => especesDefs, vide: 'espèce' },
+	ressources: { cle: 'ressource', defauts: 'defauts_ressources', defs: () => itemsDefs, vide: 'ressource' },
+};
+function _nomContenu(champ, id) {
+	const d = _CONTENU[champ].defs()[id];
+	return d ? (d.nom || d._id) : id;
+}
+
+// Contenu PROPRE du placement sélectionné : listes d'ids, sauvées avec « Sauvegarder les zones ».
+function renderZoneContenu() {
+	const c = document.getElementById('zone-contenu');
+	if (!c) return;
+	const sel = selectedZoneIdx >= 0 && selectedZoneIdx < zonesPlacements.length;
+	const hint = document.getElementById('zone-contenu-hint');
+	if (hint) hint.style.display = sel ? 'none' : '';
+	if (!sel) { c.innerHTML = ''; return; }
+	const p = zonesPlacements[selectedZoneIdx];
+	c.innerHTML = Object.entries(_CONTENU).map(([champ, conf]) => {
+		const ids = p[champ] || [];
+		const puces = ids.map((id, i) => `<span class="zchip on" data-zc-champ="${champ}" data-zc-idx="${i}" title="Retirer">${_escZ(_nomContenu(champ, id))} ✕</span>`).join('')
+			|| `<span style="color:#888;">aucune ${conf.vide}</span>`;
+		const options = Object.values(conf.defs())
+			.slice().sort((a, b) => (a.nom || a._id).localeCompare(b.nom || b._id))
+			.map(d => `<option value="${_escZ(d._id)}">${_escZ(d.nom || d._id)}</option>`).join('');
+		return `<div style="margin-bottom:6px;">
+			<div style="font-size:.66rem;color:var(--muted);margin-bottom:2px;">${champ === 'rencontres' ? 'Espèces' : 'Ressources'}</div>
+			<div class="renc-zones">${puces}</div>
+			<select data-zc-ajout="${champ}" style="width:100%;margin-top:3px;background:#1c1c28;color:var(--text);border:1px solid var(--accent);border-radius:4px;padding:2px;font-size:.66rem;">
+				<option value="">+ ajouter une ${conf.vide}…</option>${options}
+			</select>
+		</div>`;
+	}).join('');
+	c.querySelectorAll('[data-zc-idx]').forEach(el => el.addEventListener('click', () => {
+		const liste = p[el.dataset.zcChamp] || [];
+		liste.splice(parseInt(el.dataset.zcIdx), 1);
+		if (!liste.length) delete p[el.dataset.zcChamp];
+		renderZoneContenu();
+	}));
+	c.querySelectorAll('[data-zc-ajout]').forEach(s => s.addEventListener('change', () => {
+		if (!s.value) return;
+		const liste = p[s.dataset.zcAjout] = p[s.dataset.zcAjout] || [];
+		if (!liste.includes(s.value)) liste.push(s.value);
+		renderZoneContenu();
+	}));
+}
+
+// Exclusions : un défaut est-il retiré de CETTE zone du lieu ?
+function estExcluDefaut(cle, id, zid) {
+	return lieuExclusions.some(e => e[cle] === id && (!(e.zones || []).length || e.zones.includes(zid)));
+}
+function basculerExclusion(cle, id, zid) {
+	const zonesLieu = usedZoneDefs().map(z => z._id);
+	const globale = lieuExclusions.find(e => e[cle] === id && !(e.zones || []).length);
+	if (globale) {
+		// « Toutes les zones » → la liste de toutes, moins celle qu'on rouvre.
+		globale.zones = zonesLieu.filter(z => z !== zid);
+		if (!globale.zones.length) lieuExclusions.splice(lieuExclusions.indexOf(globale), 1);
+		return;
+	}
+	let e = lieuExclusions.find(x => x[cle] === id);
+	if (e && e.zones.includes(zid)) {
+		e.zones.splice(e.zones.indexOf(zid), 1);
+		if (!e.zones.length) lieuExclusions.splice(lieuExclusions.indexOf(e), 1);
+	} else if (e) {
+		e.zones.push(zid);
+	} else {
+		lieuExclusions.push({ [cle]: id, zones: [zid] });
+	}
+}
+
+// Défauts des zones posées sur ce lieu, cliquables pour les EXCLURE (barrés). La région du lieu
+// filtre encore à la lecture : le contenu effectif se lit dans l'aperçu de /admin/zones.
+function renderDefautsZones() {
+	document.querySelectorAll('.defauts-zones').forEach(box => {
+		const champ = box.dataset.champ;
+		const conf = _CONTENU[champ];
+		const blocs = usedZoneDefs().map(z => {
+			const defauts = z[conf.defauts] || [];
+			if (!defauts.length) return '';
+			const puces = defauts.map(d => {
+				const exclu = estExcluDefaut(conf.cle, d[conf.cle], z._id);
+				const reg = (d.regions || []).length ? ` · ${_escZ(d.regions.join(', '))}` : '';
+				return `<span class="zchip ${exclu ? '' : 'on'}" data-dz-id="${_escZ(d[conf.cle])}" data-dz-zone="${_escZ(z._id)}"
+					style="${exclu ? 'text-decoration:line-through;opacity:.6;' : ''}" title="${exclu ? 'Exclu de ce lieu — cliquer pour le rétablir' : 'Cliquer pour exclure de ce lieu'}">${_escZ(_nomContenu(champ, d[conf.cle]))}${reg}</span>`;
+			}).join('');
+			return `<div style="margin-bottom:6px;"><div style="font-size:.66rem;color:var(--muted);">${_escZ(z.nom || z._id)}</div><div class="renc-zones">${puces}</div></div>`;
+		}).join('');
+		box.innerHTML = `<div style="border-top:1px solid var(--border);margin-top:10px;padding-top:8px;">
+			<label style="font-size:.7rem;color:var(--accent);">🗺️ Défauts des zones (<a href="/admin/zones" target="_blank" style="color:var(--accent2);">/admin/zones</a>)</label>
+			<div style="font-size:.66rem;color:#888;margin:4px 0 6px;">Reçus en plus des entrées ci-dessus, selon la région du lieu. Cliquer pour exclure (barré) de cette zone.</div>
+			<label style="font-size:.68rem;display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+				<input type="checkbox" data-dz-sans ${lieuSansDefauts ? 'checked' : ''}> Couper tous les défauts dans ce lieu</label>
+			<div style="${lieuSansDefauts ? 'opacity:.4;pointer-events:none;' : ''}">${blocs || '<span style="color:#888;font-size:.66rem;">Aucun défaut sur les zones posées.</span>'}</div>
+			<button class="btn" data-dz-sauver style="width:100%;margin-top:6px;">💾 Sauvegarder les exclusions</button>
+		</div>`;
+		box.querySelectorAll('[data-dz-id]').forEach(el => el.addEventListener('click', () => {
+			basculerExclusion(conf.cle, el.dataset.dzId, el.dataset.dzZone);
+			renderDefautsZones();
+		}));
+		box.querySelector('[data-dz-sans]').addEventListener('change', e => {
+			lieuSansDefauts = e.target.checked;
+			renderDefautsZones();
+		});
+		box.querySelector('[data-dz-sauver]').addEventListener('click', sauverExclusions);
+	});
+}
+
+async function sauverExclusions() {
+	if (!currentLocId) { setStatus('<span style="color:var(--danger)">Aucun lieu chargé.</span>'); return; }
+	try {
+		const res = await fetch(`/api/lieu/${encodeURIComponent(currentLocId)}/exclusions`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ exclusions: lieuExclusions, sans_defauts: lieuSansDefauts }),
+		});
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) { setStatus(`<span style="color:var(--danger)">Erreur : ${_escZ(data.detail || res.status)}</span>`); return; }
+		lieuExclusions = data.exclusions || [];
+		lieuSansDefauts = !!data.sans_defauts;
+		renderDefautsZones();
+		setStatus(`<span style="color:#80e580;">${lieuExclusions.length} exclusion(s) sauvegardée(s)${lieuSansDefauts ? ' — défauts coupés' : ''}.</span>`);
+	} catch (e) { setStatus('<span style="color:var(--danger)">Erreur réseau.</span>'); }
 }
 
 // Éditeur de la distribution par défaut du lieu.

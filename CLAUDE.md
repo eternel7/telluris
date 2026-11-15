@@ -29,7 +29,7 @@ node dev/check_js.js               # syntaxe du JS inline des templates ET de te
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte` · `conflit` · `partage` · `colonisation` · `exigence_arme`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
+Harnais : `vocation` · `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `donjon_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux` · `jetons` · `vue_combat` · `saut` · `charge_magie` · `proprietes` · `graphe_recettes` · `provocation` · `echange` · `chronologie` · `lecture_lore` · `passages` · `traversee` · `dos` · `fiche_objet` · `sons` · `session` · `guide` · `contenants` · `sorties` · `filtres_boutique` · `capacites_texte` · `conflit` · `partage` · `colonisation` · `exigence_arme` · `defauts_zones`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
 - ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
 - **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
@@ -42,12 +42,13 @@ La CouchDB live est distante, NON joignable en local. Valeurs réelles des docs 
 
 ```
 main.py                  # FastAPI app, page routes (/play, /combat/{id}, /reinitialisation, /admin*, /admin/simulateur, /admin/recettes-graphe,
-                         #   /admin/sorts, /admin/competences, /admin/lore (+ /chronologie), /admin/personnages-recents), static mounts
+                         #   /admin/sorts, /admin/competences, /admin/zones, /admin/lore (+ /chronologie), /admin/personnages-recents), static mounts
 routers/
   user.py                # /api/* : auth (dont sceau oublié : mot-de-passe/oubli + /reinitialiser),
                          #   character CRUD (dont renommer_personnage), movement, equip/unequip, drop/pickup, spend_xp
   combat.py              # /api/combat/* : start, get, action, collect (loot)
-  zones.py               # /api/* : zones d'influence + tables de rencontres/ressources par lieu + GET /api/items
+  zones.py               # /api/* : zones d'influence + tables de rencontres/ressources/exclusions par lieu + GET /api/items ;
+                         #   /api/zones-admin/* de /admin/zones (défauts, régions, aperçu d'un lieu)
   bestiaire.py           # /admin/* : CRUD espece:* / profil:* (+ éditeur)
   quetes.py              # /api/quetes/* : board, accepter, terminer, abandonner (guilde)
   recrutement.py         # /api/recrutement/* + /api/groupe/* : board de recrues, embaucher, congedier, engager
@@ -87,7 +88,10 @@ utils/
   derniers_joues.py      # /admin/personnages-recents (pur) : tri sur `dernier_jeu`, emplacement (lieu + parents, combat, mer)
   lieux.py               # lieu_router, movement logic, navigation bitmask
   combat.py              # logique de combat pure (snapshots, A*, résolution, loot, finalize)
-  zones.py               # géométrie des zones d'influence + tirage d'événements + resolve_profil_weights
+  zones.py               # géométrie des zones d'influence + tirage d'événements + resolve_profil_weights ;
+                         #   CONTENU PAR DÉFAUT des zones (par région, `rules:regions`) + compléments du lieu + contenu
+                         #   des placements − exclusions : ⚠️ `peupler_lieu` = SEUL lecteur de rencontres/ressources
+                         #   (copie jamais sauvée), placements comparés par `cles_actives`
   sorts.py               # sorts (pur) : normalisation, composants, écoles de magie, apprentissage,
                          #   familles exclues d'une vocation, bloc `invocation`, les TROIS notions
                          #   du temps magique (incantation PA / cout_pm / maintien), seuil de

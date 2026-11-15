@@ -1,0 +1,1052 @@
+[
+ {
+  "_id": "rules:regions",
+  "type": "rules",
+  "regions": {
+   "europe": {
+    "nom": "Europe",
+    "lieux": [
+     "lieu:france",
+     "lieu:europe",
+     "lieu:plaine_europeenne",
+     "lieu:angleterre",
+     "lieu:espagne",
+     "lieu:italie",
+     "lieu:pannonie",
+     "lieu:roumanie",
+     "lieu:balkans",
+     "lieu:pologne_ruthenie",
+     "lieu:baltique_orientale",
+     "lieu:scandinavie_meridionale",
+     "lieu:moscovie"
+    ]
+   },
+   "grand_nord": {
+    "nom": "Grand Nord",
+    "lieux": [
+     "lieu:grand_nord",
+     "lieu:islande",
+     "lieu:laponie"
+    ]
+   },
+   "steppes": {
+    "nom": "Steppes et Caucase",
+    "lieux": [
+     "lieu:steppe_pontique",
+     "lieu:basse_volga",
+     "lieu:volga_oural",
+     "lieu:caucase"
+    ]
+   },
+   "afrique_du_nord": {
+    "nom": "Afrique du Nord et Orient",
+    "lieux": [
+     "lieu:afrique_du_nord",
+     "lieu:maroc",
+     "lieu:ifriqiya",
+     "lieu:egypte",
+     "lieu:nubie",
+     "lieu:levant"
+    ]
+   },
+   "afrique": {
+    "nom": "Afrique subsaharienne",
+    "lieux": [
+     "lieu:afrique",
+     "lieu:abyssinie",
+     "lieu:senegambie",
+     "lieu:cote_de_guinee",
+     "lieu:bassin_du_congo",
+     "lieu:grands_lacs",
+     "lieu:lac_tchad",
+     "lieu:angola",
+     "lieu:zambeze",
+     "lieu:namib_kalahari",
+     "lieu:le_cap",
+     "lieu:madagascar"
+    ]
+   },
+   "oceanie": {
+    "nom": "Océanie",
+    "lieux": [
+     "lieu:australie"
+    ]
+   }
+  }
+ },
+ {
+  "_id": "zone:collines",
+  "type": "zone_influence",
+  "nom": "Collines",
+  "terrain_tags": [
+   "colline",
+   "herbe",
+   "pente",
+   "chemin"
+  ],
+  "intensite_max": 0.4,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 40,
+    "tags": [
+     "herbe",
+     "fleur",
+     "pierre",
+     "bois"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 20,
+    "tags": [
+     "loup",
+     "sanglier",
+     "bandit"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 25,
+    "tags": [
+     "berger",
+     "paysan",
+     "voyageur"
+    ]
+   },
+   {
+    "type": "meteo",
+    "poids": 10,
+    "tags": [
+     "brouillard",
+     "orage"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 1,
+   "visibilite": 1,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:loup",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:renard",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:lievre",
+    "regions": [
+     "europe"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Fleur_de_souci",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Herbes_a_bruler",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Merisier",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:graines",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:plumes",
+    "regions": [
+     "europe"
+    ]
+   }
+  ]
+ },
+ {
+  "_id": "zone:delta",
+  "type": "zone_influence",
+  "nom": "Delta fluvial",
+  "terrain_tags": [
+   "riviere",
+   "delta",
+   "eau",
+   "marais",
+   "berge"
+  ],
+  "intensite_max": 0.65,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 50,
+    "tags": [
+     "poisson",
+     "roseau",
+     "plante_aquatique",
+     "bois"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 20,
+    "tags": [
+     "pecheur",
+     "batelier",
+     "passeur"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 20,
+    "tags": [
+     "crocodile",
+     "serpent",
+     "monstre_aquatique"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 10
+   }
+  ],
+  "modificateurs": {
+   "danger": 2,
+   "visibilite": -1,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:crocodile",
+    "regions": [
+     "afrique_du_nord"
+    ]
+   }
+  ]
+ },
+ {
+  "_id": "zone:desert",
+  "type": "zone_influence",
+  "nom": "Désert",
+  "terrain_tags": [
+   "desert",
+   "sable",
+   "aride"
+  ],
+  "intensite_max": 0.8,
+  "table_evenements": [
+   {
+    "type": "malus",
+    "poids": 35,
+    "tags": [
+     "chaleur",
+     "soif",
+     "tempete_sable"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 25,
+    "tags": [
+     "minerai",
+     "pierre",
+     "plante_desertique"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 20,
+    "tags": [
+     "scorpion_geant",
+     "serpent",
+     "predateur_desert"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 10,
+    "tags": [
+     "nomade",
+     "marchand"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 10
+   }
+  ],
+  "modificateurs": {
+   "danger": 3,
+   "visibilite": 1,
+   "deplacement": -2
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:sphinx",
+    "regions": [
+     "afrique_du_nord"
+    ]
+   },
+   {
+    "espece": "espece:vers_des_sables",
+    "regions": [
+     "afrique_du_nord"
+    ]
+   }
+  ]
+ },
+ {
+  "_id": "zone:foret_dense",
+  "type": "zone_influence",
+  "nom": "Forêt dense",
+  "terrain_tags": [
+   "foret",
+   "bois",
+   "chemin"
+  ],
+  "intensite_max": 0.9,
+  "table_evenements": [
+   {
+    "type": "combat",
+    "poids": 50,
+    "tags": [
+     "loup",
+     "brigand"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 35,
+    "tags": [
+     "bois",
+     "herbe"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 10,
+    "tags": [
+     "ermite"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 2,
+   "visibilite": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:loup",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:petits_animaux_divers",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:gobelin",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:serpent",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:grand_sanglier",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:sanglier",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:cerf",
+    "regions": [
+     "europe"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Herbes_medicinales",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Herbes_a_bruler",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Aulne",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Chene",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Charme",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Hetre",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Frene",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:plumes",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Racine_de_mandragore",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:graines",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Graine_sacree",
+    "regions": [
+     "europe"
+    ]
+   }
+  ]
+ },
+ {
+  "_id": "zone:foret_feuillus",
+  "type": "zone_influence",
+  "nom": "Forêt de feuillus",
+  "terrain_tags": [
+   "foret",
+   "bois",
+   "clariere",
+   "chemin"
+  ],
+  "intensite_max": 0.5,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 50,
+    "tags": [
+     "bois",
+     "champignon",
+     "plante"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 25,
+    "tags": [
+     "voleur",
+     "faune_locale"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 5,
+    "tags": [
+     "marchand_ambulant",
+     "voyageur"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 10
+   }
+  ],
+  "modificateurs": {
+   "danger": 1,
+   "visibilite": 0
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:loup",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:petits_animaux_divers",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:serpent",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:sanglier",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:ecureuil",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:renard",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:lievre",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:cerf",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:gobelin",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:grand_sanglier",
+    "regions": [
+     "europe"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Herbes_medicinales",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Seve_de_chene",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Herbes_a_bruler",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Aulne",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Bouleau",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Chene",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Charme",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Hetre",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Frene",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:plumes",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Fleur_de_souci",
+    "regions": [
+     "europe"
+    ]
+   }
+  ]
+ },
+ {
+  "_id": "zone:foret_persistante",
+  "type": "zone_influence",
+  "nom": "Forêt à feuilles persistantes",
+  "terrain_tags": [
+   "foret",
+   "bois",
+   "conifere",
+   "chemin"
+  ],
+  "intensite_max": 0.6,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 50,
+    "tags": [
+     "pin_vert",
+     "buisson_vert",
+     "gibier"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 30,
+    "tags": [
+     "brigand",
+     "sanglier"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 15,
+    "tags": [
+     "garde_forestier"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 1,
+   "visibilite": 0
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:gobelin",
+    "regions": [
+     "europe"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Fleur_de_souci",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:graines",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Graine_sacree",
+    "regions": [
+     "europe"
+    ]
+   }
+  ]
+ },
+ {
+  "_id": "zone:lac",
+  "type": "zone_influence",
+  "nom": "Lac et rives",
+  "terrain_tags": [
+   "lac",
+   "eau",
+   "berge",
+   "roseau"
+  ],
+  "intensite_max": 0.45,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 45,
+    "tags": [
+     "poisson",
+     "eau_douce",
+     "roseau",
+     "plante_aquatique"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 25,
+    "tags": [
+     "pecheur",
+     "batelier",
+     "lavandiere"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 15,
+    "tags": [
+     "sangsue_geante",
+     "sirene",
+     "monstre_aquatique"
+    ]
+   },
+   {
+    "type": "meteo",
+    "poids": 10,
+    "tags": [
+     "brume",
+     "orage"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 1,
+   "visibilite": 1,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:crocodile",
+    "regions": [
+     "afrique_du_nord"
+    ]
+   }
+  ]
+ },
+ {
+  "_id": "zone:montagne",
+  "type": "zone_influence",
+  "nom": "Montagne escarpée",
+  "terrain_tags": [
+   "montagne",
+   "falaise",
+   "pierre",
+   "chemin"
+  ],
+  "intensite_max": 0.8,
+  "table_evenements": [
+   {
+    "type": "combat",
+    "poids": 40,
+    "tags": [
+     "aigle_geant",
+     "troll",
+     "brigand_montagnard"
+    ]
+   },
+   {
+    "type": "malus",
+    "poids": 20,
+    "tags": [
+     "chute_pierres",
+     "blizzard",
+     "altitude"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 30,
+    "tags": [
+     "minerai",
+     "pierre_precieuse",
+     "herbe_rare"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 5,
+    "tags": [
+     "nain",
+     "ascete"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 3,
+   "visibilite": 1,
+   "deplacement": -2
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:aigle_geant",
+    "regions": [
+     "afrique_du_nord",
+     "europe"
+    ]
+   }
+  ]
+ },
+ {
+  "_id": "zone:plaine_ouverte",
+  "type": "zone_influence",
+  "nom": "Plaine ouverte",
+  "terrain_tags": [
+   "plaine",
+   "herbe",
+   "champ",
+   "chemin"
+  ],
+  "intensite_max": 0.3,
+  "table_evenements": [
+   {
+    "type": "combat",
+    "poids": 20,
+    "tags": [
+     "bandit",
+     "animal_sauvage"
+    ]
+   },
+   {
+    "type": "ressource",
+    "poids": 40,
+    "tags": [
+     "herbe",
+     "fleur",
+     "pierre"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 25,
+    "tags": [
+     "paysan",
+     "berger",
+     "messager"
+    ]
+   },
+   {
+    "type": "meteo",
+    "poids": 10,
+    "tags": [
+     "tempete",
+     "brouillard"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 0,
+   "visibilite": 2
+  },
+  "defauts_ressources": [
+   {
+    "ressource": "item:Fleur_de_souci",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Herbes_a_bruler",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Herbes_medicinales",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:graines",
+    "regions": [
+     "europe"
+    ]
+   }
+  ]
+ },
+ {
+  "_id": "zone:riviere",
+  "type": "zone_influence",
+  "nom": "Rivière et berges",
+  "terrain_tags": [
+   "riviere",
+   "eau",
+   "berge",
+   "bois"
+  ],
+  "intensite_max": 0.5,
+  "table_evenements": [
+   {
+    "type": "ressource",
+    "poids": 45,
+    "tags": [
+     "poisson",
+     "eau_fraiche",
+     "plante_aquatique"
+    ]
+   },
+   {
+    "type": "combat",
+    "poids": 20,
+    "tags": [
+     "crocodile",
+     "sirene",
+     "sangsue_geante"
+    ]
+   },
+   {
+    "type": "pnj",
+    "poids": 25,
+    "tags": [
+     "pecheur",
+     "passeur",
+     "lavandiere"
+    ]
+   },
+   {
+    "type": "malus",
+    "poids": 5,
+    "tags": [
+     "noyade",
+     "courant_fort"
+    ]
+   },
+   {
+    "type": "rien",
+    "poids": 5
+   }
+  ],
+  "modificateurs": {
+   "danger": 1,
+   "visibilite": 0,
+   "deplacement": -1
+  },
+  "defauts_rencontres": [
+   {
+    "espece": "espece:petits_animaux_divers",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:serpent",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "espece": "espece:renard",
+    "regions": [
+     "europe"
+    ]
+   }
+  ],
+  "defauts_ressources": [
+   {
+    "ressource": "item:Aulne",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Eau_de_source",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Herbes_medicinales",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Peuplier",
+    "regions": [
+     "europe"
+    ]
+   },
+   {
+    "ressource": "item:Saule",
+    "regions": [
+     "europe"
+    ]
+   }
+  ]
+ }
+]

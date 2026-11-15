@@ -339,6 +339,19 @@ Verrouillé par `tests/test_tresor.py`.
 - ⚠️ **Seuls `combat` et `ressource` sont CONSOMMÉS** (par `/api/combat/start` et `ressource_recoltable`). `pnj`, `ambiance`, `quete`, `commerce`, `malus`, `tresor`, `meteo`, `piege`, `rien` n'ont **aucun code derrière** — `_zone_event_payload` ne publie plus que le combat.
 - ⚠️ **Ne PAS les retirer des docs `zone_influence` pour autant** : ils pèsent dans le tirage pondéré comme « il ne se passe rien » ; les enlever redistribuerait leur poids sur les deux autres et ferait **bondir la fréquence des combats aléatoires**. C'est de la dilution volontaire, pas du contenu mort.
 
+### Contenu par défaut des zones d'influence
+Une zone porte son propre contenu ; un lieu qui la pose le reçoit, en plus de ses `rencontres`/`ressources` (devenues des **compléments**, inchangées). Logique pure `utils/zones.py`, verrouillée par `tests/test_zones_defauts.py`.
+- **Zone** : `defauts_rencontres: [{espece, regions?}]`, `defauts_ressources: [{ressource, regions?}]`. Sans `regions` : partout ; sinon seulement dans un lieu de ces régions.
+- **`rules:regions`** : `{regions: {id: {nom, lieux:[pays]}}}`. Région d'un lieu = celle où il est listé, sinon celle de son `lieu_parent` (remonté) — d'où les seuls PAYS listés.
+- **Lieu** : `exclusions: [{espece|ressource, zones?}]` retire un DÉFAUT (sans `zones` : toutes ses zones ; le contenu écrit du lieu ou d'un placement n'est jamais exclu) ; tag `sans_defauts_zones` = plus aucun défaut.
+- **Placement** : `rencontres` / `ressources` = listes d'ids valables dans SA forme seule. Clé de localisation `<zone>@<index>` (`cle_placement`), posée en `_cle` sur la copie peuplée.
+- ⚠️ **Point de passage unique `peupler_lieu(lieu, get_doc)`** : COPIE du lieu, contenu effectif dans la forme d'avant (entrées écrites d'abord, intactes — l'ordre départage les ex æquo des traces), idempotente (`_peuple`). Branchée au combat, au déplacement (`routers/user._evenement_de_zone`), aux traces, à la chasse, au tableau de quêtes et aux pays d'une capitale (AVANT `pays_a_portee`), à 🔎, aux guides, à la colonisation. Placements actifs comparés par `cles_actives` / `placement_couvre`, **jamais** `p["zone"]` seul. Un nouveau lecteur de `rencontres`/`ressources` passe par lui et s'inscrit dans `LECTEURS` (`test_aucun_lecteur_ne_contourne_peupler_lieu`).
+- ⚠️ **Une copie peuplée ne se sauve jamais** : `db.config.save_doc`/`save_docs` la refusent (log + échec). Un appelant qui écrit le lieu garde le doc BRUT à côté (`move_character`).
+- 🔎 : une piste de placement porte le nom de sa zone (`zone_de_cle`).
+- Édition : `/admin/zones` (défauts, usage, doc zone, régions, aperçu lecture seule `apercu_lieu` — provenance défaut/lieu/placement, exclu barré, `doublon` = défaut qui recopie une entrée du lieu) ; éditeur de carte (contenu du placement sous ses grades, exclusions au bas des panneaux Rencontres/Ressources → `PUT /api/lieu/{id}/exclusions`). API `routers/zones.py` `/api/zones-admin/*` : fusion sur le doc relu, création refusée sur un `_id` pris, suppression refusée pour une zone posée.
+- **Une zone par BIOME, jamais par lieu** (Auteur, 16/11) : nom et `_id` génériques, sans référence à une région ou un lieu réels ; un milieu différent (forêt sèche vs feuillus tempérés) = une zone neuve, pas un filtre `regions` (gardé en réserve pour un endémique isolé, plus écrit par aucun amorçage). Catalogue : `docs/zones_biomes_proposition.md`. **Défauts = faune ordinaire seule** ; une créature des mythes se pose sur un placement.
+- Amorçage : `dev/gen_defauts_zones.py`, puis `dev/gen_zones_biomes.py` (cf. `telluris-admin-tools`).
+
 
 ### Découpe du bois
 Chaîne joueur, distincte des recettes PNJ. Logique pure `utils/bois.py`.

@@ -1991,6 +1991,20 @@ def admin_sorts(request: Request, current_user: Annotated[User, Depends(get_curr
 	)
 
 
+@app.get("/admin/zones", response_class=HTMLResponse)
+def admin_zones(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Zones d'influence : défauts (espèces, ressources, par région), usage, doc zone, régions,
+	aperçu lecture seule du contenu effectif d'un lieu (API : routers/zones.py /api/zones-admin/*)."""
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_zones.html",
+		context={"title": "Zones d'influence"}
+	)
+
+
 @app.get("/admin/competences", response_class=HTMLResponse)
 def admin_competences(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
 	"""Catalogue des compétences par vocation (même écran que les sorts)."""

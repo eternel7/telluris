@@ -30,13 +30,14 @@ from utils import montures
 from utils import quetes
 from utils import recrutement
 from utils import transport
+from utils.zones import peupler_lieu
 from utils.characters import lieu_label, tirer_poids
 
 REGLES_ID = "rules:guides"
 
 # Champs utiles d'un lieu : les docs `lieu:*` complets (grilles) sont les plus gros du jeu.
 CHAMPS_LIEU = ["_id", "label", "nom", "lieu_parent", "categorie", "sous_categorie",
-			   "tags", "rencontres", "ressources"]
+			   "tags", "rencontres", "ressources", "zone_influences", "exclusions"]
 
 CATEGORIES_TEMPLE = ("temple", "temple_portail", "temple_templier")
 
@@ -53,9 +54,13 @@ def metier_de(guide: dict, regles: dict) -> dict:
 
 # ── Géographie ───────────────────────────────────────────────────────────────────
 
-def index_lieux(find_docs_fn) -> dict:
-	"""{lieu_id: doc réduit à CHAMPS_LIEU}. Lu à l'ouverture d'un panneau, jamais à chaque pas."""
+def index_lieux(find_docs_fn, get_doc_fn=None) -> dict:
+	"""{lieu_id: doc réduit à CHAMPS_LIEU}. Lu à l'ouverture d'un panneau, jamais à chaque pas.
+	Avec `get_doc_fn`, chaque lieu est PEUPLÉ (`zones.peupler_lieu` : défauts des zones compris) —
+	ce que le guide sait des rencontres et des ressources."""
 	docs = find_docs_fn({"type": "lieu"}, fields=CHAMPS_LIEU) or []
+	if get_doc_fn:
+		docs = [peupler_lieu(d, get_doc_fn) for d in docs]
 	return {d["_id"]: d for d in docs if d.get("_id")}
 
 

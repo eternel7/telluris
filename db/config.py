@@ -343,6 +343,11 @@ def save_doc(doc: dict) -> dict:
 		# `espece:*`/`profil:*` sous /api, donc dans le cache.
 		cache.docs.pop((doc or {}).get("_id"), None)
 		cache.profonds.pop((doc or {}).get("_id"), None)
+	if (doc or {}).get("_peuple"):
+		# Copie PEUPLÉE (`utils.zones.peupler_lieu`) : la sauver figerait les défauts des zones
+		# dans le lieu. Erreur de programmation — refusée bruyamment, jamais écrite.
+		print(f"[save_doc] REFUS : lieu peuplé {(doc or {}).get('_id')} (sauver le doc brut)")
+		return None
 	debut = time.perf_counter()
 	try:
 		a_ecrire = sans_modele(doc)
@@ -367,6 +372,10 @@ def save_docs(docs: list) -> list[bool]:
 	le résultat dit, dans l'ordre, lesquels sont passés (False = conflit ou erreur). ⚠️ Pas de
 	transaction : un échec n'annule pas les autres — réservé aux docs ANNEXES, best-effort."""
 	docs = [d for d in (docs or []) if d]
+	if any(d.get("_peuple") for d in docs):
+		# Même refus que `save_doc` : une copie peuplée ne s'écrit jamais.
+		print("[save_docs] REFUS : lot contenant un lieu peuplé")
+		return [False] * len(docs)
 	if not docs:
 		return []
 	cache = _doc_cache.get()

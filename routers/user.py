@@ -35,7 +35,7 @@ from utils.lieux import get_lieu_links, get_lieu_directions, est_cite_de_depart,
 from utils import donjon
 from utils import tresor as tresor_util
 from utils.combat import instantiate_monsters, create_combat_doc, resolve_first_turns, finalize_combat
-from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_recolte
+from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_recolte, peupler_lieu
 from utils import quetes
 from utils import bois
 from utils import carcasse
@@ -552,6 +552,21 @@ def _set_ressource_recoltable(character: dict, zone_event: dict | None, lieu_doc
 	character["ressource_recoltable"] = {"item": item_id, "poids": poids}
 
 
+def _evenement_de_zone(character: dict, lieu_doc: dict, pos: dict) -> tuple:
+	"""`(zone_event, lieu_peuple)` à la case `pos`. Le tirage, le biais de focalisation et la
+	récolte lisent le contenu EFFECTIF du lieu (`zones.peupler_lieu` : défauts des zones
+	compris) ; ⚠️ `lieu_peuple` est une copie à ne jamais sauver — l'appelant garde `lieu_doc`
+	(brut) pour ses écritures (stock, location…)."""
+	if not lieu_doc.get("zone_influences"):
+		return None, lieu_doc
+	lieu_peuple = peupler_lieu(lieu_doc, get_doc)
+	zone_defs = load_zone_defs_for_lieu(lieu_peuple, get_doc)
+	zone_event = resolve_zone_event(
+		pos["x"], pos["y"], lieu_peuple["zone_influences"], zone_defs,
+		boost=focalisation.boost_zone_event(character, lieu_peuple))
+	return zone_event, lieu_peuple
+
+
 def _zone_event_payload(zone_event: dict | None) -> dict | None:
 	"""Événement de zone tel que le client le CONSOMME — c'est-à-dire le combat, et rien
 	d'autre. Le type « ressource » a déjà son canal (`ressource_recoltable`) ; tous les
@@ -667,15 +682,8 @@ def _effets_arrivee(character: dict, destination: str, destination_pos: dict,
 	character["objets_au_sol"] = []
 	character.pop("atelier_courant", None)
 	# Événement de zone résolu AVANT le save pour persister la ressource récoltable.
-	zone_event = None
-	if lieu_doc.get("zone_influences"):
-		zone_defs = load_zone_defs_for_lieu(lieu_doc, get_doc)
-		zone_event = resolve_zone_event(
-			destination_pos["x"], destination_pos["y"],
-			lieu_doc["zone_influences"], zone_defs,
-			boost=focalisation.boost_zone_event(character, lieu_doc)
-		)
-	_set_ressource_recoltable(character, zone_event, lieu_doc,
+	zone_event, lieu_peuple = _evenement_de_zone(character, lieu_doc, destination_pos)
+	_set_ressource_recoltable(character, zone_event, lieu_peuple,
 		favori=focalisation.favori_recolte(character))
 	# Intro : une arrivée par porte peut déposer directement en zone
 	# sûre de la cité (le reload affichera la conclusion via sessionStorage).
@@ -886,15 +894,8 @@ def move_character(
 					character_to_update["objets_au_sol"] = []
 				access = get_lieu_directions(current_user, lieu_doc, position)
 				# Événement de zone résolu AVANT le save pour persister la ressource récoltable.
-				zone_event = None
-				if lieu_doc.get("zone_influences"):
-					zone_defs = load_zone_defs_for_lieu(lieu_doc, get_doc)
-					zone_event = resolve_zone_event(
-						position["x"], position["y"],
-						lieu_doc["zone_influences"], zone_defs,
-						boost=focalisation.boost_zone_event(character_to_update, lieu_doc)
-					)
-				_set_ressource_recoltable(character_to_update, zone_event, lieu_doc,
+				zone_event, lieu_peuple = _evenement_de_zone(character_to_update, lieu_doc, position)
+				_set_ressource_recoltable(character_to_update, zone_event, lieu_peuple,
 					favori=focalisation.favori_recolte(character_to_update))
 				# Intro : conclusion quand le pas atteint la zone de sécurité de la cité.
 				intro_terminee = intro.conclure_si_en_securite(character_to_update, lieu_doc)

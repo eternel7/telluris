@@ -67,7 +67,7 @@ def _resync(character: dict) -> dict:
 
 def _tableau(character: dict, lieu_doc: dict) -> dict:
 	regles = guides.regles_de(get_doc)
-	index = guides.index_lieux(find_docs)
+	index = guides.index_lieux(find_docs, get_doc)
 	races = (get_doc("rules:races") or {}).get("value") or []
 	offres = guides.remplir_tableau(lieu_doc, index, regles, races, recrutement.portraits_disponibles(),
 									find_docs, save_doc, delete_doc, get_doc_fn=get_doc,
@@ -132,7 +132,7 @@ def dialogue(current_user: Annotated[dict, Depends(get_current_user)]):
 	character = _perso(current_user)
 	guide = _guide(character)
 	regles = guides.regles_de(get_doc)
-	sujets = guides.sujets(character, guide, guides.index_lieux(find_docs),
+	sujets = guides.sujets(character, guide, guides.index_lieux(find_docs, get_doc),
 						   focalisation.charger_graphe(find_docs), regles)
 	return {"replique": guides.replique(guide, regles, "accueil"), "sujets": sujets, **_resync(character)}
 
@@ -189,7 +189,7 @@ def demander(current_user: Annotated[dict, Depends(get_current_user)], body: dic
 	character = _perso(current_user)
 	guide = _guide(character)
 	regles = guides.regles_de(get_doc)
-	index = guides.index_lieux(find_docs)
+	index = guides.index_lieux(find_docs, get_doc)
 	graphe = focalisation.charger_graphe(find_docs)
 	if body.get("quete_id"):
 		texte, suggestions = _cap_quete(character, guide, regles, body["quete_id"], index, graphe)
