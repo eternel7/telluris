@@ -23,7 +23,7 @@ Décisions de l'Auteur : `docs/lore/systemes/20261112_voie_de_colonisation.md` (
 
 #### Fonder (§ 2, § 3)
 - **Charte** : achetée au bureau d'un maître de guilde (`categorie:"bureau_maitre_guilde"`, bouton « 📜 Charte de colonisation », `GET|POST /colonisation/charte[/acheter]`, `reglages.charte_cuivre`, rang `reglages.rang_min`), attachée à la CITÉ du bureau (`lieu_parent`) ; une à la fois. Elle ne vaut que sur une case dont cette cité est la plus proche (`charte_valable`, dernier test de `peut_fonder`) ; la fondation la consomme.
-- Bouton « 🏕️ Fonder une implantation » sur toute carte de pays à qui tient une charte ; la case est jugée à l'ouverture (`GET /colonisation/site`).
+- Bouton « 🏕️ Fonder une implantation » : `<li id="col-fonder-li">` émis sur une carte de pays à qui tient une charte, VISIBLE seulement si `offre_fonder` (= `peut_fonder`) — rendu de `/play`, `colonie_offre` de chaque pas (`move_character` → `_majColonieOffre`), panneau (`peut_fonder`).
 - `peut_fonder` : case marchable et sur AUCUN point de connexion (Auteur, 15/11 : lisibilité de la carte, capitale = ville), ≥ `distance_cite_min` (1 par défaut ⇒ rien de plus) de toute `categorie:"ville"`, ≥ `distance_implantation_min` d'une autre implantation, `implantations_par_pays` par personnage. Distances de Chebyshev, cités lues dans les connexions du pays (`lieux_relies`).
 - Le panneau nomme le maître de guilde des cités les plus proches (`cites_de_la_charte`, ex æquo tous).
 - `fiche_site` : six axes LUS à chaque fois (zones qui couvrent la case, tags du pays, cases d'eau, ressources, cités, donjons) — jamais stockés. Mots-clés et libellés : `site` des règles. Chaque bloc porte `note` et `max`.

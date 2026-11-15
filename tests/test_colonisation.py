@@ -172,6 +172,32 @@ def test_fonder_respecte_les_distances_et_la_case():
 	assert not col.peut_fonder(_perso(), {**_pays(), "categorie": "ville"}, SITE_POS, RELIES, [], reg)[0]
 
 
+def test_le_bouton_fonder_ne_s_offre_que_sur_une_case_fondable():
+	"""`offre_fonder` (rendu de /play + réponse de chaque pas) = le jugement de `peut_fonder` :
+	jamais sur un point de connexion, jamais sans charte ni hors d'un pays."""
+	pays = _pays()
+	docs = {col.REGLES_ID: copy.deepcopy(REGLES_DOC),
+			**{r["id"]: {"_id": r["id"], "label": r["label"], "categorie": r["categorie"]} for r in RELIES}}
+	connexions = [{"nodes": [{"lieu": pays["_id"], "pos": r["pos"]}, {"lieu": r["id"]}]} for r in RELIES]
+	lus = []
+
+	def find(q):
+		lus.append(q)
+		return []
+
+	def offre(perso, lieu, pos):
+		return col.offre_fonder(perso, lieu, pos, docs.get, find, lambda _id: connexions)
+
+	assert offre(_perso(), pays, SITE_POS)
+	for r in RELIES:                                      # cité, grotte : points de connexion
+		assert not offre(_perso(charte=r["id"]), pays, {"x": r["pos"][0], "y": r["pos"][1]})
+	assert not offre(_perso(charte="lieu:cite"), pays, SITE_POS)   # charte d'une cité trop lointaine
+	lus.clear()
+	assert not offre(_perso(charte=None), pays, SITE_POS)
+	assert not offre(_perso(), {**pays, "categorie": "ville"}, SITE_POS)
+	assert lus == []                                      # sans charte ou hors pays : aucune lecture
+
+
 def test_la_charte_va_aux_cites_les_plus_proches_a_egalite_toutes():
 	assert [c["id"] for c in col.cites_de_la_charte(RELIES, SITE_POS)] == ["lieu:autre"]
 	egal = [{"id": "a", "label": "A", "categorie": "ville", "pos": [0, 0]},

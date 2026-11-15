@@ -137,6 +137,7 @@ async function openColonieSite() {
 	if (!d) return;
 	_colVue = 'site';
 	updatePurse(d.purse);
+	if (typeof _majColonieOffre === 'function') _majColonieOffre(!!d.peut_fonder);
 	_colEcrire('🏕️ Fonder une implantation', colFonderHtml(d));
 	_colAfficher();
 }
@@ -148,6 +149,8 @@ async function colFonder() {
 	if (!d) return;
 	updatePurse(d.purse);
 	_majLiens(d);
+	// La case fondée devient un point de connexion : le bouton s'efface.
+	if (typeof _majColonieOffre === 'function') _majColonieOffre(!!d.peut_fonder);
 	if (d.fondee) showToast(`${d.fondee.label} est fondé.`, { major: true });
 	_colEcrire('🏕️ Fonder une implantation', colFonderHtml(d));
 }

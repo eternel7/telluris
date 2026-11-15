@@ -502,6 +502,18 @@ def peut_fonder(character: dict, pays_doc: dict, position, relies: list, implant
 	return charte_valable(character, relies, pos)
 
 
+def offre_fonder(character: dict, pays_doc: dict, position, get_doc_fn, find_docs_fn,
+				 connexions_fn) -> bool:
+	"""Le bouton « 🏕️ Fonder une implantation » n'apparaît que là où `peut_fonder` dit oui
+	(rendu de `/play` ET réponse de chaque pas). Sans charte ou hors d'un pays : aucune lecture."""
+	if (pays_doc or {}).get("categorie") != CATEGORIE_PAYS or not charte_de(character):
+		return False
+	pays_id = pays_doc.get("_id")
+	relies = lieux_relies(connexions_fn(pays_id), pays_id, get_doc_fn)
+	implantations = find_docs_fn({"type": TYPE_DOC, "lieu_parent": pays_id}) or []
+	return peut_fonder(character, pays_doc, position, relies, implantations, regles(get_doc_fn))[0]
+
+
 # ── La charte (§ 2) : achetée au bureau d'un maître de guilde ────────────────────────
 CATEGORIE_BUREAU = "bureau_maitre_guilde"
 CHAMP_CHARTE = "charte_colonie"
