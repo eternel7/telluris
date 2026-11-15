@@ -1078,6 +1078,25 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 			</div>
 			<div class="dim-msg" id="dim-msg"></div>
 		</div>
+		<!-- Entrées d'un LIEU MODÈLE de colonisation (tag `modele_colonie`) : 1 à 4 cases où l'on
+		     arrive dans l'implantation, la 1re étant celle du lien posé à la fondation. Une entrée
+		     sur une case ≠ 1 fait écarter le modèle EN SILENCE (`colonisation.modele_valide`).
+		     Hors des sous-panneaux de #mode-select, comme 📐. 💾 n'écrit que `entrees`. -->
+		<div class="card accordeon" id="entrees-card" hidden>
+			<div class="card-title">🚪 Entrées de colonie</div>
+			<div class="nav-info" style="margin-bottom:8px;">
+				Cases où l'on <b>arrive</b> dans une implantation bâtie sur ce modèle (4 au plus) ; la
+				<b>1re</b> reçoit le lien de la carte du pays. Chacune doit être en terrain <b>1</b>,
+				sinon le modèle n'est plus proposé à la fondation.
+			</div>
+			<div id="entrees-liste" style="margin-bottom:8px;"></div>
+			<button class="btn" id="entrees-ajouter-btn" style="margin-bottom:6px;">➕ Ajouter une entrée</button>
+			<div class="section-actions">
+				<button class="btn" id="entrees-save-btn" style="margin-bottom:6px;">💾 Enregistrer les entrées</button>
+				<button class="btn danger" id="entrees-annuler-btn">↺ Annuler</button>
+			</div>
+			<div class="dim-msg" id="entrees-msg"></div>
+		</div>
 		</div>
 	</div>
 
@@ -1259,6 +1278,18 @@ let voiesPerime = false;     // dernier état de péremption AFFICHÉ — le DOM
 // Visée A/B du tracé : null | 'A' | 'B'. ⚠️ Interceptée en TÊTE de mousedown/touchstart : armée,
 // un clic sur la carte ne peint pas, ne sélectionne rien, ne pose rien.
 let voiesVisee = null;
+// Entrées de colonie (carte 🚪, cf. § ENTRÉES DE COLONIE) — déclarées ICI : `renderGrid` les lit.
+const ENTREES_MAX = 4;
+const entreesCard  = document.getElementById('entrees-card');
+const entreesListeEl = document.getElementById('entrees-liste');
+const entreesMsgEl = document.getElementById('entrees-msg');
+let entrees = [];				// saisie en cours
+let entreesBase = '[]';			// JSON des entrées EN BASE (« modifié ? »)
+let entreesModele = false;		// le lieu porte le tag `modele_colonie`
+let entreesVisee = null;		// null | index visé (== entrees.length : nouvelle entrée)
+let entreesEnVol = false;
+let entreesListeHtml = '';		// dernier rendu de la liste : réécrite seulement si elle change
+
 
 // Color map for values
 const VALUE_COLORS = {
@@ -1796,6 +1827,7 @@ lieuSelect.addEventListener('change', async (e) => {
 			lieuxJsonDest = null;
 			lieuxRepos = null;
 			desarmerViseePnj();   // elle visait la grille qu'on quitte
+			_entreesCharger(lieuData);   // entrées du lieu RELU ; visée et saisie du précédent abandonnées
 			// La file du lot est faite de cases D'UNE grille : elle ne veut plus rien dire
 			// sur la suivante. Le lot ouvert se ferme avec elle, sans rien écrire.
 			lieuxFileCases = [];
@@ -1834,6 +1866,7 @@ lieuSelect.addEventListener('change', async (e) => {
 				updateLegend();
 				_dimMaj();
 				_grilleMaj();
+				_entreesMaj();
 				// ⚠️ `chargerLieu` remet à zéro grid/nav/cols/rows/lieuxConnections sans rien savoir
 				// du mode test : sans ce rappel, le jeton resterait à des coordonnées périmées sur
 				// une carte d'une autre taille. Il se pose à l'arrivée de la porte, sinon re-tire.
@@ -2115,6 +2148,8 @@ function renderGrid() {
 	// Voies tracées (carte 🛤️ Tracer les voies) : dans TOUS les modes tant qu'un tracé est actif,
 	// sous les bordures nav, les zones et les points de lieux, qui restent lisibles par-dessus.
 	if (voies) _voiesDessiner(cw, ch);
+	// Entrées de colonie (carte 🚪) : dans tous les modes tant que la carte est offerte.
+	_entreesDessiner(cw, ch);
 
 	// Aperçu de visée pendant un repositionnement : cadre VERT si la case est acceptée, ROUGE
 	// sinon. Branche à part et non détournement du survol de peinture ci-dessous, qui affiche
@@ -2513,6 +2548,8 @@ canvas.addEventListener('mousedown', e => {
 	if (!grid.length) return;
 	// Visée A/B du tracé des voies : AVANT tout le reste, le clic ne doit rien peindre ni poser.
 	if (voiesVisee) { e.preventDefault(); _voiesViser(e); return; }
+	// Visée 🚪 d'une entrée de colonie : même interception en tête.
+	if (entreesVisee !== null) { e.preventDefault(); _entreesViser(e); return; }
 	if (modeDeplacement && !editionPendantTest()) return;
 	isPainting = true;
 	paintEtTest(e);
@@ -2551,7 +2588,7 @@ canvas.addEventListener('mouseup',		() => { isPainting = false; });
 canvas.addEventListener('mouseleave', () => { isPainting = false; hoverCell = null; if (grid.length) renderGrid(); });
 
 // Touch support
-canvas.addEventListener('touchstart', e => { if (voiesVisee) { e.preventDefault(); _voiesViser(e.touches[0]); return; } if (modeDeplacement && !editionPendantTest()) return; e.preventDefault(); isPainting = true; paintEtTest(e.touches[0]); }, {passive:false});
+canvas.addEventListener('touchstart', e => { if (voiesVisee) { e.preventDefault(); _voiesViser(e.touches[0]); return; } if (entreesVisee !== null) { e.preventDefault(); _entreesViser(e.touches[0]); return; } if (modeDeplacement && !editionPendantTest()) return; e.preventDefault(); isPainting = true; paintEtTest(e.touches[0]); }, {passive:false});
 canvas.addEventListener('touchmove',	e => { if (modeDeplacement && !editionPendantTest()) return; e.preventDefault(); if (editMode === 'lieux' || editMode === 'zones') return; paintEtTest(e.touches[0]); }, {passive:false});
 canvas.addEventListener('touchend',	 () => { isPainting = false; });
 
@@ -2602,7 +2639,7 @@ function setMode(mode) {
 	// ⚠️ L'overlay JSON est fermé DANS LES DEUX SENS : il est en `position:fixed`, il flotterait
 	// donc au-dessus d'un mode où le panneau Lieux n'est même plus affiché. Le repositionnement
 	// part avec lui — armé, le clic du mode d'arrivée lui reviendrait.
-	lieuxRepos = null; voiesVisee = null; canvas.style.cursor = '';
+	lieuxRepos = null; voiesVisee = null; entreesVisee = null; canvas.style.cursor = '';
 	desarmerViseePnj();   // armée, le clic du mode d'arrivée peindrait, formulaire invisible
 	// Le formulaire de connexion part avec, et dans les deux sens : sa visée attend un clic
 	// sur une carte dont le mode ne peint plus le terrain.
@@ -4945,7 +4982,7 @@ function armerVoiesAB() {
 	}
 	if (voiesPerime) { _voiesMsg('⚠️ Grille modifiée depuis le tracé — ↻ Recalculer avant de viser.', true); return; }
 	// ⚠️ Deux visées armées se disputeraient le même clic : celle du tracé l'intercepte en tête.
-	if (lieuxRepos || cxVisee || ptVisee || nlpVisee !== null) {
+	if (lieuxRepos || cxVisee || ptVisee || nlpVisee !== null || entreesVisee !== null) {
 		_voiesMsg("✗ Une visée du mode Lieux est armée : terminez-la ou annulez-la d'abord.", true);
 		return;
 	}
@@ -5832,6 +5869,8 @@ document.addEventListener('keydown', (e) => {
 	if (_lotOuvert() && !lotEnVol) { closeLot(); return; }
 	// Visée 🎯 d'une case de PNJ : Échap y renonce et RAMÈNE le formulaire de lieu, sans le fermer.
 	if (nlpVisee !== null) { desarmerViseePnj(); return; }
+	// Visée 🚪 d'une entrée de colonie : Échap y renonce, la liste reste telle quelle.
+	if (entreesVisee !== null) { desarmerEntrees(); return; }
 	const add = document.getElementById('lieu-add-overlay');
 	if (add && !add.classList.contains('la-hidden')) { closeLieuAdd(); return; }
 	const ov = document.getElementById('lieu-fiche-overlay');
@@ -5853,6 +5892,200 @@ document.addEventListener('keydown', (e) => {
 	// sous l'éditeur JSON — c'est donc lui qu'on ferme quand il ne reste plus que lui.
 	if (modeDeplacement) fermerModeDeplacement();
 });
+
+// ── ENTRÉES DE COLONIE (carte 🚪) ───────────────────────────────────────────
+// `entrees` du lieu modèle : [[x, y], …], 4 au plus, la 1re reçoit le lien de la fondation.
+// ⚠️ Prédicat STRICT `=== 1` (`colonisation.case_marchable`), PAS `_caseAccessible` (>= 1) :
+// une entrée sur 3 ou 5 fait écarter le modèle sans un mot (« Aucun lieu modèle… »).
+function _entreeMarchable(x, y) {
+	return !!(grid[y] && grid[y][x] === 1);
+}
+
+function _entreesModifiees() {
+	return JSON.stringify(entrees) !== entreesBase;
+}
+
+function _entreesMsg(texte, erreur) {
+	if (!entreesMsgEl) return;
+	entreesMsgEl.textContent = texte || '';
+	entreesMsgEl.style.color = erreur ? 'var(--danger)' : 'var(--accent2)';
+}
+
+function _entreesCharger(lieuDoc) {
+	const brut = Array.isArray(lieuDoc && lieuDoc.entrees) ? lieuDoc.entrees : [];
+	entrees = brut.filter(e => Array.isArray(e) && e.length >= 2)
+		.map(e => [Number(e[0]), Number(e[1])]).slice(0, ENTREES_MAX);
+	entreesBase = JSON.stringify(entrees);
+	entreesModele = ((lieuDoc && lieuDoc.tags) || []).includes('modele_colonie');
+	entreesVisee = null;
+	entreesListeHtml = '';
+	_entreesMsg('', false);
+	if (entreesCard) entreesCard.hidden = true;   // rouverte par `_entreesMaj` une fois la grille posée
+}
+
+// Visibilité, liste et boutons. Appelée à chaque `renderGrid` (un coup de pinceau change la
+// validité d'une entrée) : la liste n'est réécrite que si son HTML change, sinon un clic sur
+// ses boutons serait avalé par un rendu en cours de geste.
+function _entreesMaj() {
+	if (!entreesCard) return;
+	entreesCard.hidden = !(currentLocId && grid.length && (entreesModele || entrees.length));
+	if (entreesCard.hidden) return;
+	const lignes = entrees.map(([x, y], i) => {
+		const ok = _entreeMarchable(x, y);
+		const vise = entreesVisee === i;
+		return `<div class="nav-info" style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+			<span style="flex:1;color:${ok ? 'var(--accent2)' : 'var(--danger)'}">${ok ? '✅' : '❌'} ${i + 1}${i === 0 ? ' (arrivée)' : ''} — [${x}, ${y}]${ok ? '' : ' : terrain ≠ 1'}</span>
+			<button class="btn btn-inline" onclick="armerEntree(${i})" title="Viser une autre case">${vise ? '✕' : '🎯'}</button>
+			${i > 0 ? `<button class="btn btn-inline" onclick="monterEntree(${i})" title="Faire de cette entrée l'arrivée">▲</button>` : ''}
+			<button class="btn btn-inline danger" onclick="retirerEntree(${i})" title="Retirer">🗑</button>
+		</div>`;
+	}).join('');
+	const vide = '<div class="nav-info" style="color:var(--danger)">Aucune entrée : le modèle n\'est pas proposé à la fondation.</div>';
+	const nouvelle = entreesVisee === entrees.length
+		? '<div class="nav-info">🎯 Cliquez la case de la nouvelle entrée (Échap pour renoncer).</div>' : '';
+	const html = (lignes || vide) + nouvelle;
+	if (html !== entreesListeHtml) { entreesListeEl.innerHTML = html; entreesListeHtml = html; }
+	const ajouter = document.getElementById('entrees-ajouter-btn');
+	ajouter.disabled = entrees.length >= ENTREES_MAX || entreesEnVol;
+	ajouter.textContent = entreesVisee === entrees.length ? '✕ Annuler la visée' : '➕ Ajouter une entrée';
+	const modif = _entreesModifiees();
+	document.getElementById('entrees-save-btn').disabled = !modif || entreesEnVol;
+	document.getElementById('entrees-annuler-btn').disabled = !modif || entreesEnVol;
+}
+
+function armerEntree(i) {
+	if (entreesVisee === i) { desarmerEntrees(); return; }   // second clic = annuler
+	// ⚠️ Deux visées armées se disputeraient le même clic.
+	if (voiesVisee || lieuxRepos || cxVisee || ptVisee || nlpVisee !== null) {
+		_entreesMsg("✗ Une autre visée est armée : terminez-la ou annulez-la d'abord.", true);
+		return;
+	}
+	if (i >= ENTREES_MAX) return;
+	entreesVisee = i;
+	canvas.style.cursor = 'crosshair';
+	_entreesMsg('', false);
+	_entreesMaj();
+	renderGrid();
+}
+
+function desarmerEntrees() {
+	if (entreesVisee === null) return;
+	entreesVisee = null;
+	canvas.style.cursor = '';
+	_entreesMaj();
+	renderGrid();
+}
+
+function _entreesViser(e) {
+	const c = cellAt(e);
+	if (!c) return;
+	if (!_entreeMarchable(c.cx, c.cy)) {
+		// Refusée, la visée RESTE armée : on vise une autre case.
+		_entreesMsg(`✗ [${c.cx},${c.cy}] n'est pas en terrain 1 : choisissez une autre case.`, true);
+		return;
+	}
+	const autre = entrees.findIndex(([x, y], j) => j !== entreesVisee && x === c.cx && y === c.cy);
+	if (autre >= 0) { _entreesMsg(`✗ [${c.cx},${c.cy}] est déjà l'entrée ${autre + 1}.`, true); return; }
+	entrees[entreesVisee] = [c.cx, c.cy];
+	entreesVisee = null;
+	canvas.style.cursor = '';
+	_entreesMsg('Entrée posée — 💾 pour l\'enregistrer.', false);
+	_entreesMaj();
+	renderGrid();
+}
+
+function monterEntree(i) {
+	if (i <= 0 || i >= entrees.length) return;
+	entreesVisee = null; canvas.style.cursor = '';
+	[entrees[i - 1], entrees[i]] = [entrees[i], entrees[i - 1]];
+	_entreesMaj();
+	renderGrid();
+}
+
+function retirerEntree(i) {
+	entreesVisee = null; canvas.style.cursor = '';
+	entrees.splice(i, 1);
+	_entreesMaj();
+	renderGrid();
+}
+
+function annulerEntrees() {
+	entrees = JSON.parse(entreesBase);
+	entreesVisee = null; canvas.style.cursor = '';
+	_entreesMsg('', false);
+	_entreesMaj();
+	renderGrid();
+}
+
+async function sauverEntrees() {
+	if (!currentLocId || entreesEnVol) return;
+	if (redimEnAttente) { _entreesMsg('✗ Redimensionnement en attente : 💾 ou ↺ de la carte 📐 d\'abord.', true); return; }
+	const fautives = entrees.filter(([x, y]) => !_entreeMarchable(x, y));
+	if (fautives.length) { _entreesMsg(`✗ Case(s) hors terrain 1 : ${fautives.map(e => `[${e}]`).join(' ')}.`, true); return; }
+	if (!entrees.length && !confirm('Aucune entrée : ce modèle ne sera plus proposé à la fondation. Enregistrer quand même ?')) return;
+	entreesVisee = null; canvas.style.cursor = '';
+	entreesEnVol = true;
+	_entreesMaj();
+	try {
+		// Le serveur éprouve les cases sur les `cells` EN BASE : un coup de pinceau encore en
+		// attente d'envoi (debounce) doit partir AVANT, sinon une case repeinte à 1 serait refusée.
+		if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; await sendGrid(); }
+		const res = await fetch(`/api/lieu/${encodeURIComponent(currentLocId)}/entrees`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ entrees }),
+		});
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) { _entreesMsg(`✗ ${data.detail || res.status}`, true); return; }
+		entrees = data.entrees || [];
+		entreesBase = JSON.stringify(entrees);
+		if (data._rev) currentRev = data._rev;
+		_entreesMsg(`✔ ${entrees.length} entrée(s) enregistrée(s).`, false);
+	} catch (err) {
+		_entreesMsg(`✗ ${err.message}`, true);
+	} finally {
+		entreesEnVol = false;
+		_entreesMaj();
+		renderGrid();
+	}
+}
+
+document.getElementById('entrees-ajouter-btn').addEventListener('click', () => armerEntree(entrees.length));
+document.getElementById('entrees-save-btn').addEventListener('click', sauverEntrees);
+document.getElementById('entrees-annuler-btn').addEventListener('click', annulerEntrees);
+
+// Pastilles numérotées sur la carte (vert = terrain 1, rouge = le modèle sera écarté), plus le
+// cadre de visée vert/rouge sous le curseur quand une visée est armée.
+function _entreesDessiner(cw, ch) {
+	_entreesMaj();
+	if (!entreesCard || entreesCard.hidden) return;
+	ctx.save();
+	entrees.forEach(([x, y], i) => {
+		const ok = _entreeMarchable(x, y);
+		const r = Math.max(6, Math.min(cw, ch) * 0.45);
+		ctx.beginPath();
+		ctx.arc((x + 0.5) * cw, (y + 0.5) * ch, r, 0, Math.PI * 2);
+		ctx.fillStyle = ok ? 'rgba(40,170,90,0.85)' : 'rgba(210,50,50,0.9)';
+		ctx.fill();
+		ctx.lineWidth = entreesVisee === i ? 3 : 1.5;
+		ctx.strokeStyle = entreesVisee === i ? 'rgba(255,225,40,1)' : 'rgba(255,255,255,0.9)';
+		ctx.stroke();
+		ctx.fillStyle = '#fff';
+		ctx.font = `bold ${Math.round(r * 1.1)}px sans-serif`;
+		ctx.textAlign = 'center';
+		ctx.textBaseline = 'middle';
+		ctx.fillText(String(i + 1), (x + 0.5) * cw, (y + 0.5) * ch + 1);
+	});
+	if (entreesVisee !== null && hoverCell) {
+		const { cx, cy } = hoverCell;
+		ctx.strokeStyle = _entreeMarchable(cx, cy) ? 'rgba(60,220,120,1)' : 'rgba(240,70,70,1)';
+		ctx.shadowColor = ctx.strokeStyle;
+		ctx.shadowBlur = 10;
+		ctx.lineWidth = 3;
+		ctx.strokeRect(cx * cw + 1.5, cy * ch + 1.5, cw - 3, ch - 3);
+	}
+	ctx.restore();
+}
 
 // ── ZONE PROPERTY EDITORS ──────────────────────────────────────────────────
 function updateSelectedZone(key, value) {

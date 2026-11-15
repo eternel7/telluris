@@ -19,7 +19,7 @@ Décisions de l'Auteur : `docs/lore/systemes/20261112_voie_de_colonisation.md` (
 - `lieu:*` tagué `modele_colonie` + l'id du palier + milieux éventuels + `pays_<slug>` éventuel ; champ `entrees [[x, y], …]` (1 à 4, la première = arrivée). Sans autre tag que ces deux-là ⇒ GÉNÉRIQUE.
 - `modeles_proposes` : recouvrement de tags décroissant, générique en dernier ; modèles propres au pays ⇒ seuls proposés (+ générique). Tags de référence : ceux du site à la fondation (`tags_site` : zone, pays, `pays_<slug>`), ceux du modèle ACTUEL à la montée.
 - Vignette écartée si le modèle est injouable (`modele_valide`) ou son image absente du disque.
-- Livrés : sept génériques `lieu:modele_colonie_<palier>` — images PROVISOIRES, grille ouverte sans mur. Vraie image + vraie grille : `/admin/lieux` ; `entrees` : `/admin/table`.
+- Livrés : sept génériques `lieu:modele_colonie_<palier>` — images PROVISOIRES, grille ouverte sans mur. Vraie image + vraie grille : `/admin/lieux` ; `entrees` : carte 🚪 de `/admin/editor` (cf. `telluris-editeur-carte`).
 
 #### Fonder (§ 2, § 3)
 - **Charte** : achetée au bureau d'un maître de guilde (`categorie:"bureau_maitre_guilde"`, bouton « 📜 Charte de colonisation », `GET|POST /colonisation/charte[/acheter]`, `reglages.charte_cuivre`, rang `reglages.rang_min`), attachée à la CITÉ du bureau (`lieu_parent`) ; une à la fois. Elle ne vaut que sur une case dont cette cité est la plus proche (`charte_valable`, dernier test de `peut_fonder`) ; la fondation la consomme.
@@ -80,5 +80,5 @@ Décisions de l'Auteur : `docs/lore/systemes/20261112_voie_de_colonisation.md` (
 - `tests/test_colonisation.py` (pur + générateur), `tests/test_colonisation_endpoints.py`, `dev/test_colonisation_client.js`.
 
 #### Images et limites
-- Lieux modèles génériques : prompts `docs/prompts_images.md` § 6 ; `colonie_<palier>_generique*` posé dans `towns/` ⇒ le générateur bascule l'image du modèle (champ `image` seul) ; grille à refaire dans `/admin/lieux`, `entrees` dans `/admin/table`.
+- Lieux modèles génériques : prompts `docs/prompts_images.md` § 6 ; `colonie_<palier>_generique*` posé dans `towns/` ⇒ le générateur bascule l'image du modèle (champ `image` seul) ; grille à refaire dans `/admin/lieux`, `entrees` par la carte 🚪 de `/admin/editor`. ⚠️ Une entrée sur une case ≠ 1 écarte le modèle EN SILENCE (« Aucun lieu modèle n'est disponible pour ce palier » : campement du 15/11, entrée `[11,11]` restée sur le feu après la vraie grille).
 - Boutiques et ateliers de colonie sont des boutiques de cité (recettes, flux du lieu) : pas d'atelier « confié » comme dans un bien urbain.

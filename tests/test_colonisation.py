@@ -353,6 +353,20 @@ def test_le_generateur_livre_un_modele_generique_valide_par_palier():
 	assert aires == sorted(aires) and len(set(aires)) == len(aires)      # le lieu grandit à chaque palier
 
 
+def test_normaliser_entrees_refuse_ce_qui_ecarterait_le_modele():
+	# Grille 3×2 : seule la valeur 1 est marchable (`case_marchable`), comme `modele_valide`.
+	m = {"cells": [[1, 0, 1], [3, 1, 5]], "dimensions": {"x": 3, "y": 2}}
+	assert col.normaliser_entrees(m, [[0, 0], [1, 1]]) == ([[0, 0], [1, 1]], "")
+	assert col.normaliser_entrees(m, []) == ([], "")
+	for brut in ([[1, 0]], [[0, 1]], [[2, 1]], [[3, 0]], [[0, -1]],    # 0, 3, 5, hors grille
+				 [[0, 0], [0, 0]], [[0, 0]] * 5, [["0", 0]], [[True, 0]], [[0]], None):
+		entrees, erreur = col.normaliser_entrees(m, brut)
+		assert entrees == [] and erreur, brut
+	# ce qui passe la normalisation passe `modele_valide`
+	m["entrees"] = col.normaliser_entrees(m, [[2, 0]])[0]
+	assert col.modele_valide(m)
+
+
 def test_le_generateur_n_ajoute_que_ce_qui_manque():
 	dump = {d["_id"]: copy.deepcopy(d) for d in DOCS}
 	assert gen.generer(dump) == []                                        # idempotent

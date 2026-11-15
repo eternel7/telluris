@@ -164,6 +164,11 @@ Règle de l'Auteur (22/10/2026) : **d'abord les cases** (0 / 1 / 5), **ensuite l
 - Ce que la lecture rate : l'arche, la porte, le **pont-levis** (bois sombre hachuré) → `passages`, ouverts à la main. Les ruelles très ombrées sortent en poches : `gen_calais_remparts.relier_rues` les rattache (chemin orthogonal le moins cher, coût = luminance), le CLI générique se contente de les lister.
 - Les portes restent un geste de l'éditeur (🔀 connexion interne, de préférence ; 🏰 paire) ou d'un générateur dédié : case extérieure SUR le pont-levis rendu praticable, case intérieure sur la rue la plus proche du débouché.
 
+### Entrées de colonie (carte 🚪)
+Offerte sur un lieu tagué `modele_colonie` (ou qui porte déjà `entrees`). 1 à 4 cases, la 1re = arrivée (lien de la fondation, cf. `telluris-colonisation`) : 🎯 par ligne / ➕ (visée interceptée en tête de `mousedown`, comme A/B des voies, exclusive des autres visées ; Échap, `setMode`, changement de lieu la désarment), ▲ fait de l'entrée l'arrivée, 🗑, ↺ relit la base. Pastilles numérotées sur la carte dans tous les modes.
+- ⚠️ Prédicat **`=== 1`** (`colonisation.case_marchable` / `modele_valide`), PAS `_caseAccessible` (`>= 1`) : une entrée sur 3/5 écarte le modèle sans un mot.
+- 💾 `PUT /api/lieu/{id}/entrees` (`routers/zones.py`) : n'écrit que `entrees` sur le doc relu, cases éprouvées sur les `cells` EN BASE (`colonisation.normaliser_entrees`, 422) — d'où l'envoi forcé d'un coup de pinceau encore en debounce avant l'appel. Liste vide ⇒ champ retiré (confirm).
+
 ### Redimensionner la grille (carte 📐)
 Rééchantillonnage **au plus proche voisin** de `dimensions`, `cells`, `nav`, zones d'influence et portes. Carte `#dim-card`, masquée sans grille chargée. Fonctions pures du template (`_resizeMatrice`, `_resizeNav`, `_resizeZones`, `_resizePos`, `_caseLibreProche`…) ; côté serveur `utils.lieux.dimensions_coherentes` (422, `tests/test_lieu_dimensions.py`).
 

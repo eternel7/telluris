@@ -785,6 +785,28 @@ def modele_valide(modele: dict) -> bool:
 				and all(case_marchable(modele, x, y) for x, y in e))
 
 
+def normaliser_entrees(lieu_doc: dict, brut) -> tuple[list, str]:
+	"""Entrées saisies dans l'éditeur → `(entrees, erreur)`. Refuse ce qui rendrait le modèle
+	injouable (`modele_valide`, qui l'écarterait en silence) : plus de 4, doublon, hors grille,
+	case ≠ 1. Liste vide permise (l'appelant retire le champ)."""
+	if not isinstance(brut, list):
+		return [], "Liste d'entrées attendue."
+	if len(brut) > 4:
+		return [], "Quatre entrées au plus."
+	out = []
+	for e in brut:
+		if not (isinstance(e, (list, tuple)) and len(e) == 2
+				and all(isinstance(v, int) and not isinstance(v, bool) for v in e)):
+			return [], f"Entrée illisible : {e!r}."
+		x, y = e
+		if [x, y] in out:
+			return [], f"Entrée [{x}, {y}] en double."
+		if not case_marchable(lieu_doc, x, y):
+			return [], f"La case [{x}, {y}] n'est pas marchable (terrain ≠ 1) ou hors de la grille."
+		out.append([x, y])
+	return out, ""
+
+
 # ── Fonder (§ 2) ─────────────────────────────────────────────────────────────────────
 
 def nettoyer_nom(nom) -> str:

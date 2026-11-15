@@ -203,6 +203,31 @@ async def update_lieu_exclusions(
             "sans_defauts": zones_util.TAG_SANS_DEFAUTS in (lieu_doc.get("tags") or [])}
 
 
+@zones_router.put("/lieu/{lieu_id:path}/entrees")
+async def update_lieu_entrees(
+    lieu_id: str,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    body: dict = Body(...),
+):
+    """Cases d'entrée d'un lieu modèle de colonisation (carte 🚪 de /admin/editor) : n'écrit
+    QUE `entrees`, sur le doc relu ; chaque case éprouvée sur les `cells` EN BASE (422)."""
+    from utils import colonisation
+    _require_admin(current_user)
+    lieu_doc = get_doc(unquote(lieu_id))
+    if not lieu_doc:
+        raise HTTPException(status_code=404, detail="Lieu not found")
+    entrees, erreur = colonisation.normaliser_entrees(lieu_doc, body.get("entrees"))
+    if erreur:
+        raise HTTPException(status_code=422, detail=erreur)
+    if entrees:
+        lieu_doc["entrees"] = entrees
+    else:
+        lieu_doc.pop("entrees", None)
+    if save_doc(lieu_doc) is None:
+        raise HTTPException(status_code=409, detail="Conflit de sauvegarde — rechargez et réessayez.")
+    return {"entrees": entrees, "_rev": lieu_doc.get("_rev")}
+
+
 # ── /admin/zones : défauts, usage, doc zone, régions, aperçu d'un lieu ─────────
 
 def _lieux_a_zones() -> list:
