@@ -97,9 +97,71 @@ def test_zone_sauvage_quatre_definitions_en_ou():
 	nature = {"clairiere"}
 	assert rens.est_sauvage(INDEX["lieu:france"], INDEX, nature)          # pays
 	assert rens.est_sauvage(INDEX["lieu:clairiere"], INDEX, nature)       # tag nature
-	assert rens.est_sauvage(INDEX["lieu:cite"], INDEX, set())             # rencontres
+	bois = {"_id": "lieu:bois", "categorie": "chemin", "lieu_parent": "lieu:cite",
+			"rencontres": [{"espece": "espece:loup"}]}
+	assert rens.est_sauvage(bois, INDEX, set())                           # rencontres
 	assert rens.est_sauvage(INDEX["lieu:loin"], INDEX, set())             # hors cité
 	assert not rens.est_sauvage(INDEX["lieu:auberge"], INDEX, nature)     # auberge en cité
+
+
+def test_une_carte_de_ville_n_est_pas_sauvage_pour_ses_rencontres():
+	"""Les rencontres d'une ville vivent dans ses zones de campagne : hors zone, ses rues ne
+	sont pas sauvages (le cœur de Lutecia proposait « Suivre les pistes »)."""
+	assert not rens.est_sauvage(INDEX["lieu:cite"], INDEX, {"foret"})
+
+
+NATURE, URBAINS = {"foret", "bois", "rural", "champ"}, {"ville", "urbain", "place"}
+COEUR = {"ville", "urbain", "rue", "place"}
+FORET = {"foret", "bois", "chemin"}
+
+
+def test_sauvage_se_juge_sur_les_zones_sous_les_pieds():
+	cite = INDEX["lieu:cite"]
+	assert rens.est_sauvage(cite, INDEX, NATURE, [FORET], URBAINS)
+	assert not rens.est_sauvage(cite, INDEX, NATURE, [COEUR], URBAINS)
+	assert not rens.est_sauvage(cite, INDEX, NATURE, [FORET, {"ville", "urbain"}], URBAINS)   # l'urbain ferme
+	assert not rens.est_sauvage(INDEX["lieu:france"], INDEX, NATURE, [{"roche"}], URBAINS)   # zone sans nature
+
+
+def test_rural_ouvert_sauf_le_coeur_de_village():
+	cite = INDEX["lieu:cite"]
+	assert rens.est_sauvage(cite, INDEX, NATURE, [{"village", "rural", "faubourg", "chemin"}], URBAINS)
+	assert rens.est_sauvage(cite, INDEX, NATURE, [{"rural", "ferme", "champ"}], URBAINS)
+	assert not rens.est_sauvage(cite, INDEX, NATURE, [{"village", "rural", "place", "chemin"}], URBAINS)
+
+
+def test_ciel_ouvert_hors_de_toute_zone_urbaine():
+	cite = INDEX["lieu:cite"]
+	assert rens.ciel_ouvert(cite, [FORET], URBAINS)
+	assert rens.ciel_ouvert(cite, [{"roche", "carriere"}], URBAINS)       # pas de nature exigée
+	assert not rens.ciel_ouvert(cite, [COEUR], URBAINS)
+	assert not rens.ciel_ouvert(cite, [], URBAINS)                        # hors zone : pays seul
+	assert rens.ciel_ouvert(INDEX["lieu:france"], [], URBAINS)
+	assert not rens.ciel_ouvert(INDEX["lieu:auberge"], [], URBAINS)
+
+
+def test_zones_sous_les_pieds_lit_les_terrain_tags_des_placements_actifs():
+	lieu = {"zone_influences": [
+		{"zone": "zone:foret", "x": 2, "y": 2, "w": 2, "h": 2, "forme": "rectangle"},
+		{"zone": "zone::coeur", "x": 10, "y": 10, "w": 2, "h": 2, "forme": "rectangle"},
+		{"zone": "zone:absente", "x": 2, "y": 2, "w": 2, "h": 2, "forme": "rectangle"}]}
+	defs = {"zone:foret": {"terrain_tags": ["foret", "bois"]}, "zone::coeur": {"terrain_tags": ["ville"]}}
+	assert rens.zones_sous_les_pieds(lieu, {"x": 2, "y": 2}, defs) == [{"foret", "bois"}]
+	assert rens.zones_sous_les_pieds(lieu, {"x": 10, "y": 10}, defs) == [{"ville"}]
+	assert rens.zones_sous_les_pieds(lieu, {"x": 30, "y": 30}, defs) == []
+	assert rens.zones_sous_les_pieds(lieu, None, defs) == []
+
+
+def test_pistes_et_faucon_suivent_les_zones():
+	regles = dict(REGLES, tags_nature=sorted(NATURE), tags_urbains=sorted(URBAINS), methodes=[
+		{"id": "pistes", "vocations": ["forestier"], "lieu": {"predicats": ["sauvage"]}, "test": ["int"]},
+		{"id": "faucon", "vocations": ["chaman"], "lieu": {"predicats": ["ciel_ouvert"]}, "test": ["int"]}])
+	cite, oui = INDEX["lieu:cite"], (lambda m, c: True)
+	membres = [perso("forestier"), perso("chaman")]
+	ids = lambda zones: [a["methode"]["id"] for a in rens.applicables(cite, INDEX, membres, regles, oui, zones=zones)]
+	assert ids([FORET]) == ["pistes", "faucon"]
+	assert ids([COEUR]) == []
+	assert ids([]) == []
 
 
 def test_lieu_ok_combine_predicats_categories_et_tags():

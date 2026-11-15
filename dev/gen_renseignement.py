@@ -96,7 +96,7 @@ METHODES = [
 	 "repliques": {"intro": "Les bêtes et les plantes vous répondent à leur manière.",
 				   "description": "Bêtes et végétaux, contre quelques PM."}},
 	{"id": "faucon", "nom": "L'œil du faucon", "icon": "🦅", "vocations": ["chaman"],
-	 "lieu": {"predicats": ["pays"]}, "test": ["int"], "cout": 0, "connait": "competence:il_du_faucon",
+	 "lieu": {"predicats": ["ciel_ouvert"]}, "test": ["int"], "cout": 0, "connait": "competence:il_du_faucon",
 	 "portee_max": 0, "sources": ["zone"], "cibles": {"ressources": False},
 	 "repliques": {"intro": "L'esprit du faucon survole la carte pour vous.",
 				   "description": "Les zones de cette carte et leurs espèces ; coûte les PM d'Œil du faucon."}},
@@ -118,10 +118,21 @@ METHODES = [
 				   "description": "Plus cher et jamais précis au lieu près."}},
 ]
 
+# Tags nature : lus sur le LIEU et sur les `terrain_tags` des zones d'influence sous les pieds
+# (prédicat `sauvage`). Le rural (faubourgs, champs, bocage, vergers) en est (Auteur, 15/11/2026).
 TAGS_NATURE = ["foret", "bois", "clairiere", "clariere", "lande", "montagne", "gorge", "desert",
-			   "eau", "humide", "falaise", "grotte", "fleuve"]
+			   "eau", "humide", "falaise", "grotte", "fleuve",
+			   "riviere", "lac", "marais", "tourbiere", "mangrove", "lagune", "delta", "estuaire", "cote",
+			   "plage", "mer", "fjord", "plaine", "colline", "vallee", "plateau", "alpage", "herbe",
+			   "steppe", "savane", "toundra", "jungle", "garrigue", "canyon", "volcan", "glacier",
+			   "banquise", "neige", "oasis", "dune", "karst", "rural", "champ", "ferme", "bocage",
+			   "verger", "culture"]
+# Une zone sous les pieds portant l'un de ces tags ferme `sauvage` et `ciel_ouvert` : la ville,
+# et le cœur d'un village (`place`).
+TAGS_URBAINS = ["ville", "urbain", "place"]
 
-REGLES = {"_id": renseignement.REGLES_ID, "type": "rules", "tags_nature": TAGS_NATURE, "methodes": METHODES}
+REGLES = {"_id": renseignement.REGLES_ID, "type": "rules", "tags_nature": TAGS_NATURE,
+		  "tags_urbains": TAGS_URBAINS, "methodes": METHODES}
 
 NOTE = {
 	"_id": renseignement.ITEM_NOTE_ID, "type": "item", "nom": "Note de renseignement", "icon": "🗒️",

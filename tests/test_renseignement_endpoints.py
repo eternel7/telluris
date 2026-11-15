@@ -111,6 +111,27 @@ def test_offre_du_guerrier_en_taverne(monde):
 	assert not monde["rr"].disponible(_perso("lettre"))     # aucune méthode, pas d'informateur
 
 
+def test_pistes_et_faucon_suivent_les_zones_sous_les_pieds(monde):
+	"""Carte de ville à rencontres : ni forestier ni chaman au cœur (zone urbaine), tous deux dans
+	sa forêt. Vrai doc du générateur (`tags_nature`, `tags_urbains`, `ciel_ouvert`)."""
+	rr, docs = monde["rr"], monde["docs"]
+	docs["zone::coeur"] = {"_id": "zone::coeur", "type": "zone_influence", "nom": "Cœur",
+						   "terrain_tags": ["ville", "urbain", "rue", "place"]}
+	cite = docs["lieu:cite"] = dict(docs["lieu:cite"])         # copie : LIEUX est partagé
+	cite["rencontres"] = [{"espece": "espece:loup", "zones": ["zone:foret"]}]
+	cite["zone_influences"] = [
+		{"zone": "zone::coeur", "x": 5, "y": 5, "w": 4, "h": 4, "forme": "rectangle"},
+		{"zone": "zone:foret", "x": 20, "y": 20, "w": 4, "h": 4, "forme": "rectangle"}]
+	oeil = ["competence:il_du_faucon"]
+	for voc, extra in (("forestier", {}), ("chaman", {"competences_connues": oeil})):
+		assert not rr.disponible(_perso(voc, lieu="lieu:cite", position={"x": 5, "y": 5}, **extra))
+		assert not rr.disponible(_perso(voc, lieu="lieu:cite", position={"x": 12, "y": 12}, **extra))
+	ids = [m["id"] for m in _appel(monde, _perso("forestier", lieu="lieu:cite", position={"x": 20, "y": 20}),
+								   rr.offre)["methodes"]]
+	assert ids == ["pistes"]
+	assert rr.disponible(_perso("chaman", lieu="lieu:cite", position={"x": 20, "y": 20}, competences_connues=oeil))
+
+
 def test_belle_reussite_du_guerrier_bestiaire_carnet_xp_cout_et_delai(monde):
 	rr, c = monde["rr"], _perso("guerrier")
 	data = _appel(monde, c, rr.chercher, {"methode": "veterans", "mode": "libre", "cible": "espece:loup"}, jets=[1])
