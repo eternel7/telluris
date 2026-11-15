@@ -346,6 +346,7 @@ Chaîne joueur, distincte des recettes PNJ. Logique pure `utils/bois.py`.
 - Item coupable = tag `a_couper` + sous-catégorie ∈ `BOIS_A_COUPER`, découpé en pièces au sol qui conservent le poids exact (`repartir_poids`, bornée par `COUPE_MAX_PIECES`).
 - Outil requis **partagé par le groupe** (`bois.a_outil_coupe` : sac + équipement, compagnons inclus).
 - `POST /api/couper` (409 sans outil, 422 non coupable), `/api/recolter` étendu. UI : 🪓 Couper / 🪓 Abattre.
+- Essences : tag `essence_<slug>`, une pièce par calibre, ids `item:<Nom>` / `item:Tronc_<Nom>` / `item:<Forme>_de_<Nom>`. 15 feuillus d'origine + 28 de `dev/gen_essences_bois.py` (conifères, Méditerranée, terres sèches, tropiques). Palmiers (tag `palmier`) : chaîne réduite arbre → stipe → tronçon TERMINAL (sans `a_couper`) + palme. Trait de chaque essence : table unique `gen_descriptions_items.ESSENCES` (+ `FORMES_PALMIER`).
 
 Verrouillé par `tests/test_bois.py`.
 

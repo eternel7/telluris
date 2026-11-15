@@ -44,6 +44,16 @@ def _trouver_item(find_docs_fn, essence: str, tier: str):
 	return None
 
 
+def essence_de(item_doc) -> str | None:
+	"""Essence d'un item de bois (tag `essence_<xxx>`), ou None."""
+	return _essence_de(item_doc)
+
+
+def item_de_l_essence(find_docs_fn, essence: str, tier: str):
+	"""Item de bois de cette essence au tier donné (ex. le rondin d'un arbre), ou None."""
+	return _trouver_item(find_docs_fn, essence, tier)
+
+
 def cible_coupe(item_doc, find_docs_fn):
 	"""Item du tier immédiatement plus petit (même essence), en sautant les tiers absents.
 	None si l'item n'est pas coupable ou si aucun tier inférieur n'existe."""
