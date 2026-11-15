@@ -118,3 +118,15 @@ def test_ancienne_sous_portion_signalee_comme_orpheline():
 			 "portion_de": "item:mammouth_corps", "poids": 50}
 	orphelins = gen.generer(DUMP + sortie + [vieux])[3]
 	assert orphelins == ["item:mammouth_corps_tete"]
+
+
+def test_portions_sans_tags_de_comportement_en_combat():
+	"""IA, magie innée et flair de l'espèce ne suivent pas la carcasse (15/11 : 287 portions
+	réécrites à chaque relance pour ces seuls tags)."""
+	espece = dict(MAMMOUTH_ESPECE, tags=["animal", "grande_taille", "ia_berserker", "ia_hit_and_run_2",
+										  "magie_nature_3_mage", "insensible_furtivite", "venin"])
+	sortie = gen.generer([espece, MAMMOUTH])[0]
+	portions = [d for d in sortie if d.get("portion_de")]
+	assert portions
+	for d in portions:
+		assert set(d["tags"]) - {"morceau"} == {"animal", "grande_taille", "venin", "partie_" + d["partie"]}

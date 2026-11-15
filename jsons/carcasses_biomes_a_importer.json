@@ -1,0 +1,5335 @@
+[
+ {
+  "_id": "item:antilopes_tete",
+  "type": "item",
+  "nom": "Tête d'Antilopes",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   2.4,
+   14.4
+  ],
+  "description": "Tête d'Antilopes, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_tete",
+   "proie"
+  ],
+  "source_espece": "espece:antilopes",
+  "portion_de": "item:antilopes",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:antilopes_corps",
+  "type": "item",
+  "nom": "Corps d'Antilopes",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   10.4,
+   62.4
+  ],
+  "description": "Corps d'Antilopes, débité sur place.",
+  "tags": [
+   "animal",
+   "partie_corps",
+   "proie"
+  ],
+  "source_espece": "espece:antilopes",
+  "portion_de": "item:antilopes",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:antilopes_patte",
+  "type": "item",
+  "nom": "Patte d'Antilopes",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   1.4,
+   8.4
+  ],
+  "description": "Patte d'Antilopes, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_patte",
+   "proie"
+  ],
+  "source_espece": "espece:antilopes",
+  "portion_de": "item:antilopes",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:antilopes_queue",
+  "type": "item",
+  "nom": "Queue d'Antilopes",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   1.6,
+   9.6
+  ],
+  "description": "Queue d'Antilopes, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_queue",
+   "proie"
+  ],
+  "source_espece": "espece:antilopes",
+  "portion_de": "item:antilopes",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:antilopes",
+  "type": "item",
+  "nom": "Carcasse d'Antilopes",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   20,
+   120
+  ],
+  "description": "Dépouille d'Antilopes récupérée à l'issue du combat.",
+  "source_espece": "espece:antilopes",
+  "loot_defaut": true,
+  "decoupe": [
+   {
+    "item": "item:antilopes_tete",
+    "quantite": 1,
+    "fraction": 0.12
+   },
+   {
+    "item": "item:antilopes_corps",
+    "quantite": 1,
+    "fraction": 0.52
+   },
+   {
+    "item": "item:antilopes_patte",
+    "quantite": 4,
+    "fraction": 0.28
+   },
+   {
+    "item": "item:antilopes_queue",
+    "quantite": 1,
+    "fraction": 0.08
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:autruches_tete",
+  "type": "item",
+  "nom": "Tête d'Autruches",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   6.0,
+   14.0
+  ],
+  "description": "Tête d'Autruches, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_tete",
+   "proie"
+  ],
+  "source_espece": "espece:autruches",
+  "portion_de": "item:autruches",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:autruches_corps",
+  "type": "item",
+  "nom": "Corps d'Autruches",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   27.0,
+   63.0
+  ],
+  "description": "Corps d'Autruches, débité sur place.",
+  "tags": [
+   "animal",
+   "partie_corps",
+   "proie"
+  ],
+  "source_espece": "espece:autruches",
+  "portion_de": "item:autruches",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:autruches_aile",
+  "type": "item",
+  "nom": "Aile d'Autruches",
+  "icon": "🪶",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   6.0,
+   14.0
+  ],
+  "description": "Aile d'Autruches, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_aile",
+   "proie"
+  ],
+  "source_espece": "espece:autruches",
+  "portion_de": "item:autruches",
+  "partie": "aile",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:autruches_patte",
+  "type": "item",
+  "nom": "Patte d'Autruches",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   4.2,
+   9.8
+  ],
+  "description": "Patte d'Autruches, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_patte",
+   "proie"
+  ],
+  "source_espece": "espece:autruches",
+  "portion_de": "item:autruches",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:autruches_queue",
+  "type": "item",
+  "nom": "Queue d'Autruches",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   6.6,
+   15.4
+  ],
+  "description": "Queue d'Autruches, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_queue",
+   "proie"
+  ],
+  "source_espece": "espece:autruches",
+  "portion_de": "item:autruches",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:autruches",
+  "type": "item",
+  "nom": "Carcasse d'Autruches",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   60,
+   140
+  ],
+  "description": "Dépouille d'Autruches récupérée à l'issue du combat.",
+  "source_espece": "espece:autruches",
+  "loot_defaut": true,
+  "decoupe": [
+   {
+    "item": "item:autruches_tete",
+    "quantite": 1,
+    "fraction": 0.1
+   },
+   {
+    "item": "item:autruches_corps",
+    "quantite": 1,
+    "fraction": 0.45
+   },
+   {
+    "item": "item:autruches_aile",
+    "quantite": 2,
+    "fraction": 0.2
+   },
+   {
+    "item": "item:autruches_patte",
+    "quantite": 2,
+    "fraction": 0.14
+   },
+   {
+    "item": "item:autruches_queue",
+    "quantite": 1,
+    "fraction": 0.11
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:bete_glatissante_tete",
+  "_rev": "2-ba7c342cb8925c7ff83ef60dced9aafc",
+  "type": "item",
+  "nom": "Tête de Bête glatissante",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "tres_rare",
+  "slots": [],
+  "poids": [
+   24.0,
+   48.0
+  ],
+  "description": "Tête de Bête glatissante, débitée sur place.",
+  "tags": [
+   "boss",
+   "hybride",
+   "legendaire",
+   "monstre",
+   "partie_tete",
+   "rapide",
+   "terreur",
+   "fabrication_arme",
+   "fabrication_armure"
+  ],
+  "source_espece": "espece:bete_glatissante",
+  "portion_de": "item:bete_glatissante",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "yeux",
+    1
+   ]
+  ],
+  "fabrication": {
+   "nom": "aux Crocs de la Bête glatissante",
+   "modificateurs": {
+    "bonus": {
+     "F": 3,
+     "Ag": 1
+    },
+    "effets": {
+     "buffs": {
+      "R": -1
+     },
+     "duree": 2
+    },
+    "bonus_degats": 6,
+    "valeur": {
+     "facteur": 2.5
+    },
+    "rarete": "tres_rare"
+   }
+  }
+ },
+ {
+  "_id": "item:bete_glatissante_corps",
+  "_rev": "2-c08bd490ccb601a1837c098f8404d678",
+  "type": "item",
+  "nom": "Corps de Bête glatissante",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "tres_rare",
+  "slots": [],
+  "poids": [
+   104.0,
+   208.0
+  ],
+  "description": "Corps de Bête glatissante, débité sur place.",
+  "tags": [
+   "boss",
+   "hybride",
+   "legendaire",
+   "monstre",
+   "partie_corps",
+   "rapide",
+   "terreur",
+   "fabrication_armure_cuir",
+   "fabrication_consommable"
+  ],
+  "source_espece": "espece:bete_glatissante",
+  "portion_de": "item:bete_glatissante",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:bete_glatissante_corps_morceau",
+    "quantite": 3,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0,
+  "fabrication": {
+   "nom": "au Cuir de la Bête glatissante",
+   "modificateurs": {
+    "bonus": {
+     "F": 3
+    },
+    "bonus_pv": 8,
+    "effets": {
+     "pv": 20
+    },
+    "valeur": {
+     "facteur": 2.5
+    },
+    "rarete": "tres_rare"
+   }
+  }
+ },
+ {
+  "_id": "item:bete_glatissante_corps_morceau",
+  "_rev": "2-61fc49f6014ea467df41512b4b8be7a4",
+  "type": "item",
+  "nom": "Morceau de corps de Bête glatissante",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "tres_rare",
+  "slots": [],
+  "poids": [
+   34.67,
+   69.33
+  ],
+  "description": "Morceau de corps de Bête glatissante, taillé pour être emporté.",
+  "tags": [
+   "boss",
+   "hybride",
+   "legendaire",
+   "monstre",
+   "morceau",
+   "partie_corps",
+   "rapide",
+   "terreur",
+   "fabrication_armure_cuir",
+   "fabrication_consommable"
+  ],
+  "source_espece": "espece:bete_glatissante",
+  "portion_de": "item:bete_glatissante_corps",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "fabrication": {
+   "nom": "au Cuir de la Bête glatissante",
+   "modificateurs": {
+    "bonus": {
+     "F": 3
+    },
+    "bonus_pv": 8,
+    "effets": {
+     "pv": 20
+    },
+    "valeur": {
+     "facteur": 2.5
+    },
+    "rarete": "tres_rare"
+   }
+  }
+ },
+ {
+  "_id": "item:bete_glatissante_patte",
+  "_rev": "2-3029a85f44a42ce393c516dcba088a0c",
+  "type": "item",
+  "nom": "Patte de Bête glatissante",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "tres_rare",
+  "slots": [],
+  "poids": [
+   14.0,
+   28.0
+  ],
+  "description": "Patte de Bête glatissante, débitée sur place.",
+  "tags": [
+   "boss",
+   "hybride",
+   "legendaire",
+   "monstre",
+   "partie_patte",
+   "rapide",
+   "terreur",
+   "fabrication_armure"
+  ],
+  "source_espece": "espece:bete_glatissante",
+  "portion_de": "item:bete_glatissante",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "fabrication": {
+   "nom": "de la Quête sans fin",
+   "modificateurs": {
+    "bonus_pv": 4,
+    "bonus": {
+     "V": 2,
+     "R": 3,
+     "Ag": 1
+    },
+    "effets": {
+     "esquive": 1
+    },
+    "valeur": {
+     "facteur": 2.5
+    },
+    "rarete": "tres_rare"
+   }
+  }
+ },
+ {
+  "_id": "item:bete_glatissante_queue",
+  "_rev": "2-7315be063fb037b88e586785f89b6361",
+  "type": "item",
+  "nom": "Queue de Bête glatissante",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "tres_rare",
+  "slots": [],
+  "poids": [
+   16.0,
+   32.0
+  ],
+  "description": "Queue de Bête glatissante, débitée sur place.",
+  "tags": [
+   "boss",
+   "hybride",
+   "legendaire",
+   "monstre",
+   "partie_queue",
+   "rapide",
+   "terreur",
+   "fabrication_arme"
+  ],
+  "source_espece": "espece:bete_glatissante",
+  "portion_de": "item:bete_glatissante",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ],
+  "fabrication": {
+   "nom": "à l'Épine de la Bête glatissante",
+   "modificateurs": {
+    "bonus_cd": 2,
+    "effets": {
+     "buffs": {
+      "R": -1
+     },
+     "duree": 2
+    },
+    "bonus": {
+     "Ag": 1
+    },
+    "bonus_degats": 7,
+    "valeur": {
+     "facteur": 2.5
+    },
+    "rarete": "tres_rare"
+   }
+  }
+ },
+ {
+  "_id": "item:bisons_tete",
+  "type": "item",
+  "nom": "Tête de Bisons",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   48.0,
+   120.0
+  ],
+  "description": "Tête de Bisons, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_tete"
+  ],
+  "source_espece": "espece:bisons",
+  "portion_de": "item:bisons",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:bisons_tete_morceau",
+    "quantite": 2,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:bisons_tete_morceau",
+  "type": "item",
+  "nom": "Morceau de tête de Bisons",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   24.0,
+   60.0
+  ],
+  "description": "Morceau de tête de Bisons, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "morceau",
+   "partie_tete"
+  ],
+  "source_espece": "espece:bisons",
+  "portion_de": "item:bisons_tete",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:bisons_corps",
+  "type": "item",
+  "nom": "Corps de Bisons",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   208.0,
+   520.0
+  ],
+  "description": "Corps de Bisons, débité sur place.",
+  "tags": [
+   "animal",
+   "partie_corps"
+  ],
+  "source_espece": "espece:bisons",
+  "portion_de": "item:bisons",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:bisons_corps_morceau",
+    "quantite": 6,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:bisons_corps_morceau",
+  "type": "item",
+  "nom": "Morceau de corps de Bisons",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   34.67,
+   86.67
+  ],
+  "description": "Morceau de corps de Bisons, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "morceau",
+   "partie_corps"
+  ],
+  "source_espece": "espece:bisons",
+  "portion_de": "item:bisons_corps",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:bisons_patte",
+  "type": "item",
+  "nom": "Patte de Bisons",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   28.0,
+   70.0
+  ],
+  "description": "Patte de Bisons, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_patte"
+  ],
+  "source_espece": "espece:bisons",
+  "portion_de": "item:bisons",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:bisons_queue",
+  "type": "item",
+  "nom": "Queue de Bisons",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   32.0,
+   80.0
+  ],
+  "description": "Queue de Bisons, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_queue"
+  ],
+  "source_espece": "espece:bisons",
+  "portion_de": "item:bisons",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:bisons",
+  "type": "item",
+  "nom": "Carcasse de Bisons",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   400,
+   1000
+  ],
+  "description": "Dépouille de Bisons récupérée à l'issue du combat.",
+  "source_espece": "espece:bisons",
+  "loot_defaut": true,
+  "decoupe": [
+   {
+    "item": "item:bisons_tete",
+    "quantite": 1,
+    "fraction": 0.12
+   },
+   {
+    "item": "item:bisons_corps",
+    "quantite": 1,
+    "fraction": 0.52
+   },
+   {
+    "item": "item:bisons_patte",
+    "quantite": 4,
+    "fraction": 0.28
+   },
+   {
+    "item": "item:bisons_queue",
+    "quantite": 1,
+    "fraction": 0.08
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:boeufs_musques_tete",
+  "type": "item",
+  "nom": "Tête de Bœufs musqués",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   21.6,
+   48.0
+  ],
+  "description": "Tête de Bœufs musqués, débitée sur place.",
+  "tags": [
+   "animal",
+   "froid",
+   "partie_tete"
+  ],
+  "source_espece": "espece:boeufs_musques",
+  "portion_de": "item:boeufs_musques",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:boeufs_musques_corps",
+  "type": "item",
+  "nom": "Corps de Bœufs musqués",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   93.6,
+   208.0
+  ],
+  "description": "Corps de Bœufs musqués, débité sur place.",
+  "tags": [
+   "animal",
+   "froid",
+   "partie_corps"
+  ],
+  "source_espece": "espece:boeufs_musques",
+  "portion_de": "item:boeufs_musques",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:boeufs_musques_corps_morceau",
+    "quantite": 3,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:boeufs_musques_corps_morceau",
+  "type": "item",
+  "nom": "Morceau de corps de Bœufs musqués",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   31.2,
+   69.33
+  ],
+  "description": "Morceau de corps de Bœufs musqués, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "froid",
+   "morceau",
+   "partie_corps"
+  ],
+  "source_espece": "espece:boeufs_musques",
+  "portion_de": "item:boeufs_musques_corps",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:boeufs_musques_patte",
+  "type": "item",
+  "nom": "Patte de Bœufs musqués",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   12.6,
+   28.0
+  ],
+  "description": "Patte de Bœufs musqués, débitée sur place.",
+  "tags": [
+   "animal",
+   "froid",
+   "partie_patte"
+  ],
+  "source_espece": "espece:boeufs_musques",
+  "portion_de": "item:boeufs_musques",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:boeufs_musques_queue",
+  "type": "item",
+  "nom": "Queue de Bœufs musqués",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   14.4,
+   32.0
+  ],
+  "description": "Queue de Bœufs musqués, débitée sur place.",
+  "tags": [
+   "animal",
+   "froid",
+   "partie_queue"
+  ],
+  "source_espece": "espece:boeufs_musques",
+  "portion_de": "item:boeufs_musques",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:boeufs_musques",
+  "type": "item",
+  "nom": "Carcasse de Bœufs musqués",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   180,
+   400
+  ],
+  "description": "Dépouille de Bœufs musqués récupérée à l'issue du combat.",
+  "source_espece": "espece:boeufs_musques",
+  "loot_defaut": true,
+  "decoupe": [
+   {
+    "item": "item:boeufs_musques_tete",
+    "quantite": 1,
+    "fraction": 0.12
+   },
+   {
+    "item": "item:boeufs_musques_corps",
+    "quantite": 1,
+    "fraction": 0.52
+   },
+   {
+    "item": "item:boeufs_musques_patte",
+    "quantite": 4,
+    "fraction": 0.28
+   },
+   {
+    "item": "item:boeufs_musques_queue",
+    "quantite": 1,
+    "fraction": 0.08
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:buffles_tete",
+  "type": "item",
+  "nom": "Tête de Buffles",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   48.0,
+   108.0
+  ],
+  "description": "Tête de Buffles, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_tete"
+  ],
+  "source_espece": "espece:buffles",
+  "portion_de": "item:buffles",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:buffles_tete_morceau",
+    "quantite": 2,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:buffles_tete_morceau",
+  "type": "item",
+  "nom": "Morceau de tête de Buffles",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   24.0,
+   54.0
+  ],
+  "description": "Morceau de tête de Buffles, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "morceau",
+   "partie_tete"
+  ],
+  "source_espece": "espece:buffles",
+  "portion_de": "item:buffles_tete",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:buffles_corps",
+  "type": "item",
+  "nom": "Corps de Buffles",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   208.0,
+   468.0
+  ],
+  "description": "Corps de Buffles, débité sur place.",
+  "tags": [
+   "animal",
+   "partie_corps"
+  ],
+  "source_espece": "espece:buffles",
+  "portion_de": "item:buffles",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:buffles_corps_morceau",
+    "quantite": 5,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:buffles_corps_morceau",
+  "type": "item",
+  "nom": "Morceau de corps de Buffles",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   41.6,
+   93.6
+  ],
+  "description": "Morceau de corps de Buffles, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "morceau",
+   "partie_corps"
+  ],
+  "source_espece": "espece:buffles",
+  "portion_de": "item:buffles_corps",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:buffles_patte",
+  "type": "item",
+  "nom": "Patte de Buffles",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   28.0,
+   63.0
+  ],
+  "description": "Patte de Buffles, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_patte"
+  ],
+  "source_espece": "espece:buffles",
+  "portion_de": "item:buffles",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:buffles_queue",
+  "type": "item",
+  "nom": "Queue de Buffles",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   32.0,
+   72.0
+  ],
+  "description": "Queue de Buffles, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_queue"
+  ],
+  "source_espece": "espece:buffles",
+  "portion_de": "item:buffles",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:buffles",
+  "type": "item",
+  "nom": "Carcasse de Buffles",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   400,
+   900
+  ],
+  "description": "Dépouille de Buffles récupérée à l'issue du combat.",
+  "source_espece": "espece:buffles",
+  "loot_defaut": true,
+  "decoupe": [
+   {
+    "item": "item:buffles_tete",
+    "quantite": 1,
+    "fraction": 0.12
+   },
+   {
+    "item": "item:buffles_corps",
+    "quantite": 1,
+    "fraction": 0.52
+   },
+   {
+    "item": "item:buffles_patte",
+    "quantite": 4,
+    "fraction": 0.28
+   },
+   {
+    "item": "item:buffles_queue",
+    "quantite": 1,
+    "fraction": 0.08
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:cwn_annwn_tete",
+  "_rev": "1-f83f8bd610f36092f5a0a10bd3ff5228",
+  "type": "item",
+  "nom": "Tête de Chien d'Annwn",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "peu_commun",
+  "slots": [],
+  "poids": [
+   7.2,
+   13.2
+  ],
+  "description": "Tête de Chien d'Annwn, débitée sur place.",
+  "tags": [
+   "feerique",
+   "monstre",
+   "nocturne",
+   "partie_tete",
+   "predateur",
+   "rapide",
+   "terreur"
+  ],
+  "source_espece": "espece:cwn_annwn",
+  "portion_de": "item:cwn_annwn",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:cwn_annwn_corps",
+  "_rev": "1-fe44d869115824c4830fa690ce09e8c3",
+  "type": "item",
+  "nom": "Corps de Chien d'Annwn",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "peu_commun",
+  "slots": [],
+  "poids": [
+   31.2,
+   57.2
+  ],
+  "description": "Corps de Chien d'Annwn, débité sur place.",
+  "tags": [
+   "feerique",
+   "monstre",
+   "nocturne",
+   "partie_corps",
+   "predateur",
+   "rapide",
+   "terreur"
+  ],
+  "source_espece": "espece:cwn_annwn",
+  "portion_de": "item:cwn_annwn",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:cwn_annwn_patte",
+  "_rev": "2-8a55ff526f00c9d652f638dd1fac6190",
+  "type": "item",
+  "nom": "Patte de Chien d'Annwn",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "rare",
+  "slots": [],
+  "poids": [
+   4.2,
+   7.7
+  ],
+  "description": "Patte de Chien d'Annwn, débitée sur place.",
+  "tags": [
+   "feerique",
+   "monstre",
+   "nocturne",
+   "partie_patte",
+   "predateur",
+   "rapide",
+   "terreur",
+   "fabrication_arme",
+   "fabrication_armure"
+  ],
+  "source_espece": "espece:cwn_annwn",
+  "portion_de": "item:cwn_annwn",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "fabrication": {
+   "nom": "de la Chasse sauvage",
+   "modificateurs": {
+    "bonus_degats": 1,
+    "bonus_initiative": 2,
+    "bonus": {
+     "V": 2,
+     "Ag": 1
+    },
+    "valeur": {
+     "facteur": 1.8
+    },
+    "rarete": "rare"
+   }
+  }
+ },
+ {
+  "_id": "item:cwn_annwn_queue",
+  "_rev": "1-15b633cb0a67f1d35167c6b727a304c1",
+  "type": "item",
+  "nom": "Queue de Chien d'Annwn",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "peu_commun",
+  "slots": [],
+  "poids": [
+   4.8,
+   8.8
+  ],
+  "description": "Queue de Chien d'Annwn, débitée sur place.",
+  "tags": [
+   "feerique",
+   "monstre",
+   "nocturne",
+   "partie_queue",
+   "predateur",
+   "rapide",
+   "terreur"
+  ],
+  "source_espece": "espece:cwn_annwn",
+  "portion_de": "item:cwn_annwn",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:elephants_tete",
+  "type": "item",
+  "nom": "Tête d'Éléphants",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   300.0,
+   720.0
+  ],
+  "description": "Tête d'Éléphants, débitée sur place.",
+  "tags": [
+   "animal",
+   "grande_taille",
+   "partie_tete"
+  ],
+  "source_espece": "espece:elephants",
+  "portion_de": "item:elephants",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:elephants_tete_morceau",
+    "quantite": 8,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:elephants_tete_morceau",
+  "type": "item",
+  "nom": "Morceau de tête d'Éléphants",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   37.5,
+   90.0
+  ],
+  "description": "Morceau de tête d'Éléphants, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "grande_taille",
+   "morceau",
+   "partie_tete"
+  ],
+  "source_espece": "espece:elephants",
+  "portion_de": "item:elephants_tete",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:elephants_corps",
+  "type": "item",
+  "nom": "Corps d'Éléphants",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   1300.0,
+   3120.0
+  ],
+  "description": "Corps d'Éléphants, débité sur place.",
+  "tags": [
+   "animal",
+   "grande_taille",
+   "partie_corps"
+  ],
+  "source_espece": "espece:elephants",
+  "portion_de": "item:elephants",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:elephants_corps_morceau",
+    "quantite": 32,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:elephants_corps_morceau",
+  "type": "item",
+  "nom": "Morceau de corps d'Éléphants",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   40.62,
+   97.5
+  ],
+  "description": "Morceau de corps d'Éléphants, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "grande_taille",
+   "morceau",
+   "partie_corps"
+  ],
+  "source_espece": "espece:elephants",
+  "portion_de": "item:elephants_corps",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:elephants_patte",
+  "type": "item",
+  "nom": "Patte d'Éléphants",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   175.0,
+   420.0
+  ],
+  "description": "Patte d'Éléphants, débitée sur place.",
+  "tags": [
+   "animal",
+   "grande_taille",
+   "partie_patte"
+  ],
+  "source_espece": "espece:elephants",
+  "portion_de": "item:elephants",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:elephants_patte_morceau",
+    "quantite": 5,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:elephants_patte_morceau",
+  "type": "item",
+  "nom": "Morceau de patte d'Éléphants",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   35.0,
+   84.0
+  ],
+  "description": "Morceau de patte d'Éléphants, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "grande_taille",
+   "morceau",
+   "partie_patte"
+  ],
+  "source_espece": "espece:elephants",
+  "portion_de": "item:elephants_patte",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:elephants_queue",
+  "type": "item",
+  "nom": "Queue d'Éléphants",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   200.0,
+   480.0
+  ],
+  "description": "Queue d'Éléphants, débitée sur place.",
+  "tags": [
+   "animal",
+   "grande_taille",
+   "partie_queue"
+  ],
+  "source_espece": "espece:elephants",
+  "portion_de": "item:elephants",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:elephants_queue_morceau",
+    "quantite": 5,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:elephants_queue_morceau",
+  "type": "item",
+  "nom": "Morceau de queue d'Éléphants",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   40.0,
+   96.0
+  ],
+  "description": "Morceau de queue d'Éléphants, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "grande_taille",
+   "morceau",
+   "partie_queue"
+  ],
+  "source_espece": "espece:elephants",
+  "portion_de": "item:elephants_queue",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:elephants",
+  "type": "item",
+  "nom": "Carcasse d'Éléphants",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   2500,
+   6000
+  ],
+  "description": "Dépouille d'Éléphants récupérée à l'issue du combat.",
+  "source_espece": "espece:elephants",
+  "loot_defaut": true,
+  "decoupe": [
+   {
+    "item": "item:elephants_tete",
+    "quantite": 1,
+    "fraction": 0.12
+   },
+   {
+    "item": "item:elephants_corps",
+    "quantite": 1,
+    "fraction": 0.52
+   },
+   {
+    "item": "item:elephants_patte",
+    "quantite": 4,
+    "fraction": 0.28
+   },
+   {
+    "item": "item:elephants_queue",
+    "quantite": 1,
+    "fraction": 0.08
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:grands_singes_tete",
+  "type": "item",
+  "nom": "Tête de Grands singes",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   9.6,
+   24.0
+  ],
+  "description": "Tête de Grands singes, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_tete"
+  ],
+  "source_espece": "espece:grands_singes",
+  "portion_de": "item:grands_singes",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:grands_singes_corps",
+  "type": "item",
+  "nom": "Corps de Grands singes",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   41.6,
+   104.0
+  ],
+  "description": "Corps de Grands singes, débité sur place.",
+  "tags": [
+   "animal",
+   "partie_corps"
+  ],
+  "source_espece": "espece:grands_singes",
+  "portion_de": "item:grands_singes",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:grands_singes_corps_morceau",
+    "quantite": 2,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:grands_singes_corps_morceau",
+  "type": "item",
+  "nom": "Morceau de corps de Grands singes",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   20.8,
+   52.0
+  ],
+  "description": "Morceau de corps de Grands singes, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "morceau",
+   "partie_corps"
+  ],
+  "source_espece": "espece:grands_singes",
+  "portion_de": "item:grands_singes_corps",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:grands_singes_patte",
+  "type": "item",
+  "nom": "Patte de Grands singes",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   5.6,
+   14.0
+  ],
+  "description": "Patte de Grands singes, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_patte"
+  ],
+  "source_espece": "espece:grands_singes",
+  "portion_de": "item:grands_singes",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:grands_singes_queue",
+  "type": "item",
+  "nom": "Queue de Grands singes",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   6.4,
+   16.0
+  ],
+  "description": "Queue de Grands singes, débitée sur place.",
+  "tags": [
+   "animal",
+   "partie_queue"
+  ],
+  "source_espece": "espece:grands_singes",
+  "portion_de": "item:grands_singes",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:grands_singes",
+  "type": "item",
+  "nom": "Carcasse de Grands singes",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   80,
+   200
+  ],
+  "description": "Dépouille de Grands singes récupérée à l'issue du combat.",
+  "source_espece": "espece:grands_singes",
+  "loot_defaut": true,
+  "decoupe": [
+   {
+    "item": "item:grands_singes_tete",
+    "quantite": 1,
+    "fraction": 0.12
+   },
+   {
+    "item": "item:grands_singes_corps",
+    "quantite": 1,
+    "fraction": 0.52
+   },
+   {
+    "item": "item:grands_singes_patte",
+    "quantite": 4,
+    "fraction": 0.28
+   },
+   {
+    "item": "item:grands_singes_queue",
+    "quantite": 1,
+    "fraction": 0.08
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:gwyn_ap_nudd_tete",
+  "_rev": "2-93bc5a758aa8359efbc8136fe9285bca",
+  "type": "item",
+  "nom": "Tête de Gwyn ap Nudd",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "legendaire",
+  "slots": [],
+  "poids": [
+   5.6,
+   8.8
+  ],
+  "description": "Tête de Gwyn ap Nudd, débitée sur place.",
+  "tags": [
+   "boss",
+   "feerique",
+   "humanoide",
+   "legendaire",
+   "magique",
+   "nocturne",
+   "partie_tete",
+   "fabrication_arme",
+   "fabrication_armure"
+  ],
+  "source_espece": "espece:gwyn_ap_nudd",
+  "portion_de": "item:gwyn_ap_nudd",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "yeux",
+    1
+   ]
+  ],
+  "fabrication": {
+   "nom": "aux Crocs de Gwyn ap Nudd",
+   "modificateurs": {
+    "bonus": {
+     "Int": 4,
+     "Cha": 2
+    },
+    "effets": {
+     "buffs": {
+      "Vol": -2
+     },
+     "duree": 2
+    },
+    "bonus_degats": 8,
+    "valeur": {
+     "facteur": 3.5
+    },
+    "rarete": "legendaire"
+   }
+  }
+ },
+ {
+  "_id": "item:gwyn_ap_nudd_corps",
+  "_rev": "2-d70096bd1ecc38d62bc3e752f723be69",
+  "type": "item",
+  "nom": "Corps de Gwyn ap Nudd",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "legendaire",
+  "slots": [],
+  "poids": [
+   35.0,
+   55.0
+  ],
+  "description": "Corps de Gwyn ap Nudd, débité sur place.",
+  "tags": [
+   "boss",
+   "feerique",
+   "humanoide",
+   "legendaire",
+   "magique",
+   "nocturne",
+   "partie_corps",
+   "fabrication_armure_tissu",
+   "fabrication_consommable"
+  ],
+  "source_espece": "espece:gwyn_ap_nudd",
+  "portion_de": "item:gwyn_ap_nudd",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "fabrication": {
+   "nom": "à la Brume de Gwyn ap Nudd",
+   "modificateurs": {
+    "bonus": {
+     "Int": 4
+    },
+    "bonus_pv": 10,
+    "effets": {
+     "pv": 25
+    },
+    "bonus_pa": 2,
+    "valeur": {
+     "facteur": 3.5
+    },
+    "rarete": "legendaire"
+   }
+  }
+ },
+ {
+  "_id": "item:gwyn_ap_nudd_bras",
+  "_rev": "2-59fea7fdaaab73821e87d66bed166518",
+  "type": "item",
+  "nom": "Bras de Gwyn ap Nudd",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "legendaire",
+  "slots": [],
+  "poids": [
+   4.2,
+   6.6
+  ],
+  "description": "Bras de Gwyn ap Nudd, débité sur place.",
+  "tags": [
+   "boss",
+   "feerique",
+   "humanoide",
+   "legendaire",
+   "magique",
+   "nocturne",
+   "partie_bras",
+   "fabrication_arme"
+  ],
+  "source_espece": "espece:gwyn_ap_nudd",
+  "portion_de": "item:gwyn_ap_nudd",
+  "partie": "bras",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "fabrication": {
+   "nom": "au Poing de Gwyn ap Nudd",
+   "modificateurs": {
+    "bonus": {
+     "Int": 4
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 10,
+    "valeur": {
+     "facteur": 3.5
+    },
+    "rarete": "legendaire"
+   }
+  }
+ },
+ {
+  "_id": "item:gwyn_ap_nudd_jambe",
+  "_rev": "2-d6c397f37374a14a8579cc46191ee6d4",
+  "type": "item",
+  "nom": "Jambe de Gwyn ap Nudd",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "legendaire",
+  "slots": [],
+  "poids": [
+   10.5,
+   16.5
+  ],
+  "description": "Jambe de Gwyn ap Nudd, débitée sur place.",
+  "tags": [
+   "boss",
+   "feerique",
+   "humanoide",
+   "legendaire",
+   "magique",
+   "nocturne",
+   "partie_jambe",
+   "fabrication_armure"
+  ],
+  "source_espece": "espece:gwyn_ap_nudd",
+  "portion_de": "item:gwyn_ap_nudd",
+  "partie": "jambe",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "fabrication": {
+   "nom": "à la Foulée de Gwyn ap Nudd",
+   "modificateurs": {
+    "bonus": {
+     "Int": 4,
+     "Cha": 2
+    },
+    "bonus_initiative": 1,
+    "bonus_pa": 9,
+    "valeur": {
+     "facteur": 3.5
+    },
+    "rarete": "legendaire"
+   }
+  }
+ },
+ {
+  "_id": "item:hippopotames_tete",
+  "type": "item",
+  "nom": "Tête d'Hippopotames",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   120.0,
+   360.0
+  ],
+  "description": "Tête d'Hippopotames, débitée sur place.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "partie_tete"
+  ],
+  "source_espece": "espece:hippopotames",
+  "portion_de": "item:hippopotames",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:hippopotames_tete_morceau",
+    "quantite": 4,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:hippopotames_tete_morceau",
+  "type": "item",
+  "nom": "Morceau de tête d'Hippopotames",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   30.0,
+   90.0
+  ],
+  "description": "Morceau de tête d'Hippopotames, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "morceau",
+   "partie_tete"
+  ],
+  "source_espece": "espece:hippopotames",
+  "portion_de": "item:hippopotames_tete",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:hippopotames_corps",
+  "type": "item",
+  "nom": "Corps d'Hippopotames",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   520.0,
+   1560.0
+  ],
+  "description": "Corps d'Hippopotames, débité sur place.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "partie_corps"
+  ],
+  "source_espece": "espece:hippopotames",
+  "portion_de": "item:hippopotames",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:hippopotames_corps_morceau",
+    "quantite": 16,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:hippopotames_corps_morceau",
+  "type": "item",
+  "nom": "Morceau de corps d'Hippopotames",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   32.5,
+   97.5
+  ],
+  "description": "Morceau de corps d'Hippopotames, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "morceau",
+   "partie_corps"
+  ],
+  "source_espece": "espece:hippopotames",
+  "portion_de": "item:hippopotames_corps",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:hippopotames_patte",
+  "type": "item",
+  "nom": "Patte d'Hippopotames",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   70.0,
+   210.0
+  ],
+  "description": "Patte d'Hippopotames, débitée sur place.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "partie_patte"
+  ],
+  "source_espece": "espece:hippopotames",
+  "portion_de": "item:hippopotames",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:hippopotames_patte_morceau",
+    "quantite": 3,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:hippopotames_patte_morceau",
+  "type": "item",
+  "nom": "Morceau de patte d'Hippopotames",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   23.33,
+   70.0
+  ],
+  "description": "Morceau de patte d'Hippopotames, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "morceau",
+   "partie_patte"
+  ],
+  "source_espece": "espece:hippopotames",
+  "portion_de": "item:hippopotames_patte",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:hippopotames_queue",
+  "type": "item",
+  "nom": "Queue d'Hippopotames",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   80.0,
+   240.0
+  ],
+  "description": "Queue d'Hippopotames, débitée sur place.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "partie_queue"
+  ],
+  "source_espece": "espece:hippopotames",
+  "portion_de": "item:hippopotames",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:hippopotames_queue_morceau",
+    "quantite": 3,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:hippopotames_queue_morceau",
+  "type": "item",
+  "nom": "Morceau de queue d'Hippopotames",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   26.67,
+   80.0
+  ],
+  "description": "Morceau de queue d'Hippopotames, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "morceau",
+   "partie_queue"
+  ],
+  "source_espece": "espece:hippopotames",
+  "portion_de": "item:hippopotames_queue",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:hippopotames",
+  "type": "item",
+  "nom": "Carcasse d'Hippopotames",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   1000,
+   3000
+  ],
+  "description": "Dépouille d'Hippopotames récupérée à l'issue du combat.",
+  "source_espece": "espece:hippopotames",
+  "loot_defaut": true,
+  "decoupe": [
+   {
+    "item": "item:hippopotames_tete",
+    "quantite": 1,
+    "fraction": 0.12
+   },
+   {
+    "item": "item:hippopotames_corps",
+    "quantite": 1,
+    "fraction": 0.52
+   },
+   {
+    "item": "item:hippopotames_patte",
+    "quantite": 4,
+    "fraction": 0.28
+   },
+   {
+    "item": "item:hippopotames_queue",
+    "quantite": 1,
+    "fraction": 0.08
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:ladon_tete",
+  "_rev": "3-851dc14d42cda776e75d622266f5b5e9",
+  "type": "item",
+  "nom": "Tête de Ladon",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "tres_rare",
+  "slots": [],
+  "poids": [
+   360.0,
+   1080.0
+  ],
+  "description": "Tête de Ladon, débitée sur place.",
+  "tags": [
+   "boss",
+   "gardien",
+   "legendaire",
+   "monstre",
+   "partie_tete",
+   "reptile",
+   "fabrication_arme"
+  ],
+  "source_espece": "espece:ladon",
+  "portion_de": "item:ladon",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "yeux",
+    1
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:ladon_tete_morceau",
+    "quantite": 11,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0,
+  "fabrication": {
+   "nom": "aux Crocs de Ladon",
+   "modificateurs": {
+    "bonus": {
+     "Ag": 3,
+     "R": 1
+    },
+    "effets": {
+     "regen_pv": -3,
+     "duree": 2
+    },
+    "bonus_degats": 4,
+    "valeur": {
+     "facteur": 2.5
+    },
+    "rarete": "tres_rare"
+   }
+  }
+ },
+ {
+  "_id": "item:ladon_tete_morceau",
+  "_rev": "3-20d8fb6677c6a1860b83e40c8b2715ba",
+  "type": "item",
+  "nom": "Morceau de tête de Ladon",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "tres_rare",
+  "slots": [],
+  "poids": [
+   32.73,
+   98.18
+  ],
+  "description": "Morceau de tête de Ladon, taillé pour être emporté.",
+  "tags": [
+   "boss",
+   "gardien",
+   "legendaire",
+   "monstre",
+   "morceau",
+   "partie_tete",
+   "reptile",
+   "fabrication_arme"
+  ],
+  "source_espece": "espece:ladon",
+  "portion_de": "item:ladon_tete",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "yeux",
+    1
+   ]
+  ],
+  "fabrication": {
+   "nom": "aux Crocs de Ladon",
+   "modificateurs": {
+    "bonus": {
+     "Ag": 3,
+     "R": 1
+    },
+    "effets": {
+     "regen_pv": -3,
+     "duree": 2
+    },
+    "bonus_degats": 4,
+    "valeur": {
+     "facteur": 2.5
+    },
+    "rarete": "tres_rare"
+   }
+  }
+ },
+ {
+  "_id": "item:ladon_corps",
+  "_rev": "3-3d02edbf6e3404f1769de14924fb79d6",
+  "type": "item",
+  "nom": "Corps de Ladon",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "tres_rare",
+  "slots": [],
+  "poids": [
+   1560.0,
+   4680.0
+  ],
+  "description": "Corps de Ladon, débité sur place.",
+  "tags": [
+   "boss",
+   "gardien",
+   "legendaire",
+   "monstre",
+   "partie_corps",
+   "reptile",
+   "fabrication_armure_cuir",
+   "fabrication_armure_metal",
+   "fabrication_consommable"
+  ],
+  "source_espece": "espece:ladon",
+  "portion_de": "item:ladon",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:ladon_corps_morceau",
+    "quantite": 47,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0,
+  "fabrication": {
+   "nom": "aux Écailles de Ladon",
+   "modificateurs": {
+    "bonus": {
+     "Ag": 3
+    },
+    "bonus_pv": 8,
+    "effets": {
+     "pv": 20
+    },
+    "valeur": {
+     "facteur": 2.5
+    },
+    "rarete": "tres_rare"
+   }
+  }
+ },
+ {
+  "_id": "item:ladon_corps_morceau",
+  "_rev": "3-74f882a1db13de68d0d10a3902b068cd",
+  "type": "item",
+  "nom": "Morceau de corps de Ladon",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "tres_rare",
+  "slots": [],
+  "poids": [
+   33.19,
+   99.57
+  ],
+  "description": "Morceau de corps de Ladon, taillé pour être emporté.",
+  "tags": [
+   "boss",
+   "gardien",
+   "legendaire",
+   "monstre",
+   "morceau",
+   "partie_corps",
+   "reptile",
+   "fabrication_armure_cuir",
+   "fabrication_armure_metal",
+   "fabrication_consommable"
+  ],
+  "source_espece": "espece:ladon",
+  "portion_de": "item:ladon_corps",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "fabrication": {
+   "nom": "aux Écailles de Ladon",
+   "modificateurs": {
+    "bonus": {
+     "Ag": 3
+    },
+    "bonus_pv": 8,
+    "effets": {
+     "pv": 20
+    },
+    "valeur": {
+     "facteur": 2.5
+    },
+    "rarete": "tres_rare"
+   }
+  }
+ },
+ {
+  "_id": "item:ladon_patte",
+  "_rev": "3-0e6e18d9f3188c6889181dc6456957e4",
+  "type": "item",
+  "nom": "Patte de Ladon",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "tres_rare",
+  "slots": [],
+  "poids": [
+   210.0,
+   630.0
+  ],
+  "description": "Patte de Ladon, débitée sur place.",
+  "tags": [
+   "boss",
+   "gardien",
+   "legendaire",
+   "monstre",
+   "partie_patte",
+   "reptile",
+   "fabrication_arme"
+  ],
+  "source_espece": "espece:ladon",
+  "portion_de": "item:ladon",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:ladon_patte_morceau",
+    "quantite": 7,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0,
+  "fabrication": {
+   "nom": "à la Griffe de Ladon",
+   "modificateurs": {
+    "bonus": {
+     "Ag": 3
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 6,
+    "valeur": {
+     "facteur": 2.5
+    },
+    "rarete": "tres_rare"
+   }
+  }
+ },
+ {
+  "_id": "item:ladon_patte_morceau",
+  "_rev": "3-b6fa4d39cdd53ae6f4a524ccc5a1cc25",
+  "type": "item",
+  "nom": "Morceau de patte de Ladon",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "tres_rare",
+  "slots": [],
+  "poids": [
+   30.0,
+   90.0
+  ],
+  "description": "Morceau de patte de Ladon, taillé pour être emporté.",
+  "tags": [
+   "boss",
+   "gardien",
+   "legendaire",
+   "monstre",
+   "morceau",
+   "partie_patte",
+   "reptile",
+   "fabrication_arme"
+  ],
+  "source_espece": "espece:ladon",
+  "portion_de": "item:ladon_patte",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "fabrication": {
+   "nom": "à la Griffe de Ladon",
+   "modificateurs": {
+    "bonus": {
+     "Ag": 3
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 6,
+    "valeur": {
+     "facteur": 2.5
+    },
+    "rarete": "tres_rare"
+   }
+  }
+ },
+ {
+  "_id": "item:ladon_queue",
+  "_rev": "3-83bc90f9b7aff8ea1024c0dd7d564cc8",
+  "type": "item",
+  "nom": "Queue de Ladon",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "tres_rare",
+  "slots": [],
+  "poids": [
+   240.0,
+   720.0
+  ],
+  "description": "Queue de Ladon, débitée sur place.",
+  "tags": [
+   "boss",
+   "gardien",
+   "legendaire",
+   "monstre",
+   "partie_queue",
+   "reptile",
+   "fabrication_arme"
+  ],
+  "source_espece": "espece:ladon",
+  "portion_de": "item:ladon",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:ladon_queue_morceau",
+    "quantite": 8,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0,
+  "fabrication": {
+   "nom": "à l'Épine de Ladon",
+   "modificateurs": {
+    "effets": {
+     "regen_pv": -4,
+     "duree": 3
+    },
+    "bonus_degats": 5,
+    "valeur": {
+     "facteur": 2.5
+    },
+    "rarete": "tres_rare"
+   }
+  }
+ },
+ {
+  "_id": "item:ladon_queue_morceau",
+  "_rev": "3-22cf503aad870e6de213652145401639",
+  "type": "item",
+  "nom": "Morceau de queue de Ladon",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "tres_rare",
+  "slots": [],
+  "poids": [
+   30.0,
+   90.0
+  ],
+  "description": "Morceau de queue de Ladon, taillé pour être emporté.",
+  "tags": [
+   "boss",
+   "gardien",
+   "legendaire",
+   "monstre",
+   "morceau",
+   "partie_queue",
+   "reptile",
+   "fabrication_arme"
+  ],
+  "source_espece": "espece:ladon",
+  "portion_de": "item:ladon_queue",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ],
+  "fabrication": {
+   "nom": "à l'Épine de Ladon",
+   "modificateurs": {
+    "effets": {
+     "regen_pv": -4,
+     "duree": 3
+    },
+    "bonus_degats": 5,
+    "valeur": {
+     "facteur": 2.5
+    },
+    "rarete": "tres_rare"
+   }
+  }
+ },
+ {
+  "_id": "item:phoques_et_morses_tete",
+  "type": "item",
+  "nom": "Tête de Phoques et morses",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   9.6,
+   144.0
+  ],
+  "description": "Tête de Phoques et morses, débitée sur place.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "froid",
+   "partie_tete"
+  ],
+  "source_espece": "espece:phoques_et_morses",
+  "portion_de": "item:phoques_et_morses",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:phoques_et_morses_tete_morceau",
+    "quantite": 2,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:phoques_et_morses_tete_morceau",
+  "type": "item",
+  "nom": "Morceau de tête de Phoques et morses",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   4.8,
+   72.0
+  ],
+  "description": "Morceau de tête de Phoques et morses, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "froid",
+   "morceau",
+   "partie_tete"
+  ],
+  "source_espece": "espece:phoques_et_morses",
+  "portion_de": "item:phoques_et_morses_tete",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:phoques_et_morses_corps",
+  "type": "item",
+  "nom": "Corps de Phoques et morses",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   41.6,
+   624.0
+  ],
+  "description": "Corps de Phoques et morses, débité sur place.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "froid",
+   "partie_corps"
+  ],
+  "source_espece": "espece:phoques_et_morses",
+  "portion_de": "item:phoques_et_morses",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:phoques_et_morses_corps_morceau",
+    "quantite": 7,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:phoques_et_morses_corps_morceau",
+  "type": "item",
+  "nom": "Morceau de corps de Phoques et morses",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   5.94,
+   89.14
+  ],
+  "description": "Morceau de corps de Phoques et morses, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "froid",
+   "morceau",
+   "partie_corps"
+  ],
+  "source_espece": "espece:phoques_et_morses",
+  "portion_de": "item:phoques_et_morses_corps",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:phoques_et_morses_patte",
+  "type": "item",
+  "nom": "Patte de Phoques et morses",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   5.6,
+   84.0
+  ],
+  "description": "Patte de Phoques et morses, débitée sur place.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "froid",
+   "partie_patte"
+  ],
+  "source_espece": "espece:phoques_et_morses",
+  "portion_de": "item:phoques_et_morses",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:phoques_et_morses_queue",
+  "type": "item",
+  "nom": "Queue de Phoques et morses",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   6.4,
+   96.0
+  ],
+  "description": "Queue de Phoques et morses, débitée sur place.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "froid",
+   "partie_queue"
+  ],
+  "source_espece": "espece:phoques_et_morses",
+  "portion_de": "item:phoques_et_morses",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:phoques_et_morses",
+  "type": "item",
+  "nom": "Carcasse de Phoques et morses",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   80,
+   1200
+  ],
+  "description": "Dépouille de Phoques et morses récupérée à l'issue du combat.",
+  "source_espece": "espece:phoques_et_morses",
+  "loot_defaut": true,
+  "decoupe": [
+   {
+    "item": "item:phoques_et_morses_tete",
+    "quantite": 1,
+    "fraction": 0.12
+   },
+   {
+    "item": "item:phoques_et_morses_corps",
+    "quantite": 1,
+    "fraction": 0.52
+   },
+   {
+    "item": "item:phoques_et_morses_patte",
+    "quantite": 4,
+    "fraction": 0.28
+   },
+   {
+    "item": "item:phoques_et_morses_queue",
+    "quantite": 1,
+    "fraction": 0.08
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:rennes_tete",
+  "type": "item",
+  "nom": "Tête de Rennes",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   8.4,
+   21.6
+  ],
+  "description": "Tête de Rennes, débitée sur place.",
+  "tags": [
+   "animal",
+   "froid",
+   "partie_tete",
+   "proie"
+  ],
+  "source_espece": "espece:rennes",
+  "portion_de": "item:rennes",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:rennes_corps",
+  "type": "item",
+  "nom": "Corps de Rennes",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   36.4,
+   93.6
+  ],
+  "description": "Corps de Rennes, débité sur place.",
+  "tags": [
+   "animal",
+   "froid",
+   "partie_corps",
+   "proie"
+  ],
+  "source_espece": "espece:rennes",
+  "portion_de": "item:rennes",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:rennes_patte",
+  "type": "item",
+  "nom": "Patte de Rennes",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   4.9,
+   12.6
+  ],
+  "description": "Patte de Rennes, débitée sur place.",
+  "tags": [
+   "animal",
+   "froid",
+   "partie_patte",
+   "proie"
+  ],
+  "source_espece": "espece:rennes",
+  "portion_de": "item:rennes",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:rennes_queue",
+  "type": "item",
+  "nom": "Queue de Rennes",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   5.6,
+   14.4
+  ],
+  "description": "Queue de Rennes, débitée sur place.",
+  "tags": [
+   "animal",
+   "froid",
+   "partie_queue",
+   "proie"
+  ],
+  "source_espece": "espece:rennes",
+  "portion_de": "item:rennes",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:rennes",
+  "type": "item",
+  "nom": "Carcasse de Rennes",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   70,
+   180
+  ],
+  "description": "Dépouille de Rennes récupérée à l'issue du combat.",
+  "source_espece": "espece:rennes",
+  "loot_defaut": true,
+  "decoupe": [
+   {
+    "item": "item:rennes_tete",
+    "quantite": 1,
+    "fraction": 0.12
+   },
+   {
+    "item": "item:rennes_corps",
+    "quantite": 1,
+    "fraction": 0.52
+   },
+   {
+    "item": "item:rennes_patte",
+    "quantite": 4,
+    "fraction": 0.28
+   },
+   {
+    "item": "item:rennes_queue",
+    "quantite": 1,
+    "fraction": 0.08
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:tortues_marines_tete",
+  "type": "item",
+  "nom": "Tête de Tortues marines",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   8.4,
+   24.0
+  ],
+  "description": "Tête de Tortues marines, débitée sur place.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "partie_tete",
+   "proie"
+  ],
+  "source_espece": "espece:tortues_marines",
+  "portion_de": "item:tortues_marines",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:tortues_marines_corps",
+  "type": "item",
+  "nom": "Corps de Tortues marines",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   36.4,
+   104.0
+  ],
+  "description": "Corps de Tortues marines, débité sur place.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "partie_corps",
+   "proie"
+  ],
+  "source_espece": "espece:tortues_marines",
+  "portion_de": "item:tortues_marines",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:tortues_marines_corps_morceau",
+    "quantite": 2,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:tortues_marines_corps_morceau",
+  "type": "item",
+  "nom": "Morceau de corps de Tortues marines",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   18.2,
+   52.0
+  ],
+  "description": "Morceau de corps de Tortues marines, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "morceau",
+   "partie_corps",
+   "proie"
+  ],
+  "source_espece": "espece:tortues_marines",
+  "portion_de": "item:tortues_marines_corps",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:tortues_marines_patte",
+  "type": "item",
+  "nom": "Patte de Tortues marines",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   4.9,
+   14.0
+  ],
+  "description": "Patte de Tortues marines, débitée sur place.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "partie_patte",
+   "proie"
+  ],
+  "source_espece": "espece:tortues_marines",
+  "portion_de": "item:tortues_marines",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:tortues_marines_queue",
+  "type": "item",
+  "nom": "Queue de Tortues marines",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   5.6,
+   16.0
+  ],
+  "description": "Queue de Tortues marines, débitée sur place.",
+  "tags": [
+   "animal",
+   "aquatique",
+   "partie_queue",
+   "proie"
+  ],
+  "source_espece": "espece:tortues_marines",
+  "portion_de": "item:tortues_marines",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:tortues_marines",
+  "type": "item",
+  "nom": "Carcasse de Tortues marines",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   70,
+   200
+  ],
+  "description": "Dépouille de Tortues marines récupérée à l'issue du combat.",
+  "source_espece": "espece:tortues_marines",
+  "loot_defaut": true,
+  "decoupe": [
+   {
+    "item": "item:tortues_marines_tete",
+    "quantite": 1,
+    "fraction": 0.12
+   },
+   {
+    "item": "item:tortues_marines_corps",
+    "quantite": 1,
+    "fraction": 0.52
+   },
+   {
+    "item": "item:tortues_marines_patte",
+    "quantite": 4,
+    "fraction": 0.28
+   },
+   {
+    "item": "item:tortues_marines_queue",
+    "quantite": 1,
+    "fraction": 0.08
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:yacks_tete",
+  "type": "item",
+  "nom": "Tête d'Yacks",
+  "icon": "💀",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   36.0,
+   96.0
+  ],
+  "description": "Tête d'Yacks, débitée sur place.",
+  "tags": [
+   "animal",
+   "froid",
+   "partie_tete"
+  ],
+  "source_espece": "espece:yacks",
+  "portion_de": "item:yacks",
+  "partie": "tete",
+  "depecage": [
+   [
+    "crane",
+    1
+   ],
+   [
+    "crocs",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:yacks_corps",
+  "type": "item",
+  "nom": "Corps d'Yacks",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   156.0,
+   416.0
+  ],
+  "description": "Corps d'Yacks, débité sur place.",
+  "tags": [
+   "animal",
+   "froid",
+   "partie_corps"
+  ],
+  "source_espece": "espece:yacks",
+  "portion_de": "item:yacks",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ],
+  "decoupe": [
+   {
+    "item": "item:yacks_corps_morceau",
+    "quantite": 5,
+    "fraction": 1.0
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:yacks_corps_morceau",
+  "type": "item",
+  "nom": "Morceau de corps d'Yacks",
+  "icon": "🥩",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   31.2,
+   83.2
+  ],
+  "description": "Morceau de corps d'Yacks, taillé pour être emporté.",
+  "tags": [
+   "animal",
+   "froid",
+   "morceau",
+   "partie_corps"
+  ],
+  "source_espece": "espece:yacks",
+  "portion_de": "item:yacks_corps",
+  "partie": "corps",
+  "depecage": [
+   [
+    "boyaux",
+    1
+   ],
+   [
+    "coeur",
+    1
+   ],
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "foie",
+    1
+   ],
+   [
+    "graisse",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "sang",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:yacks_patte",
+  "type": "item",
+  "nom": "Patte d'Yacks",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   21.0,
+   56.0
+  ],
+  "description": "Patte d'Yacks, débitée sur place.",
+  "tags": [
+   "animal",
+   "froid",
+   "partie_patte"
+  ],
+  "source_espece": "espece:yacks",
+  "portion_de": "item:yacks",
+  "partie": "patte",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ],
+   [
+    "viande",
+    2
+   ]
+  ]
+ },
+ {
+  "_id": "item:yacks_queue",
+  "type": "item",
+  "nom": "Queue d'Yacks",
+  "icon": "🦴",
+  "categorie": "composant",
+  "sous_categorie": "carcasse",
+  "rarete": "commun",
+  "slots": [],
+  "poids": [
+   24.0,
+   64.0
+  ],
+  "description": "Queue d'Yacks, débitée sur place.",
+  "tags": [
+   "animal",
+   "froid",
+   "partie_queue"
+  ],
+  "source_espece": "espece:yacks",
+  "portion_de": "item:yacks",
+  "partie": "queue",
+  "depecage": [
+   [
+    "cuir_brut",
+    1
+   ],
+   [
+    "os",
+    1
+   ],
+   [
+    "poils",
+    1
+   ],
+   [
+    "tendons",
+    1
+   ]
+  ]
+ },
+ {
+  "_id": "item:yacks",
+  "type": "item",
+  "nom": "Carcasse d'Yacks",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   300,
+   800
+  ],
+  "description": "Dépouille d'Yacks récupérée à l'issue du combat.",
+  "source_espece": "espece:yacks",
+  "loot_defaut": true,
+  "decoupe": [
+   {
+    "item": "item:yacks_tete",
+    "quantite": 1,
+    "fraction": 0.12
+   },
+   {
+    "item": "item:yacks_corps",
+    "quantite": 1,
+    "fraction": 0.52
+   },
+   {
+    "item": "item:yacks_patte",
+    "quantite": 4,
+    "fraction": 0.28
+   },
+   {
+    "item": "item:yacks_queue",
+    "quantite": 1,
+    "fraction": 0.08
+   }
+  ],
+  "decoupe_poids_min": 100.0
+ },
+ {
+  "_id": "item:singes",
+  "type": "item",
+  "nom": "Carcasse de Singes",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   10,
+   40
+  ],
+  "description": "Dépouille de Singes récupérée à l'issue du combat.",
+  "source_espece": "espece:singes",
+  "loot_defaut": true
+ },
+ {
+  "_id": "item:hyenes",
+  "type": "item",
+  "nom": "Carcasse de Hyènes",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   40,
+   80
+  ],
+  "description": "Dépouille de Hyènes récupérée à l'issue du combat.",
+  "source_espece": "espece:hyenes",
+  "loot_defaut": true
+ },
+ {
+  "_id": "item:flamants",
+  "type": "item",
+  "nom": "Carcasse de Flamants",
+  "sous_categorie": "carcasse",
+  "icon": "🥩",
+  "rarete": "commun",
+  "categorie": "composant",
+  "slots": [],
+  "poids": [
+   2,
+   4
+  ],
+  "description": "Dépouille de Flamants récupérée à l'issue du combat.",
+  "source_espece": "espece:flamants",
+  "loot_defaut": true
+ }
+]
