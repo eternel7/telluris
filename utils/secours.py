@@ -17,7 +17,9 @@
 # Le PÉRIMÈTRE est DÉRIVÉ de la carte (opt-out, aucune donnée à écrire par lieu) :
 #   · la cité et les lieux à UN saut de connexion, pour chaque zone placée à `danger > 0` —
 #     filtre STRICT, sans le repli « toutes les zones » de `escorte.zones_dangereuses` : un
-#     cœur de ville n'est pas un lieu de péril ;
+#     cœur de ville n'est pas un lieu de péril ; la zone doit en outre pouvoir faire SURGIR un
+#     monstre (`_monstres_possibles` : `combat` à sa table ET espèce rencontrable sur le lieu
+#     PEUPLÉ) — un faubourg ou un bas quartier « dangereux » sans rencontre est écarté ;
 #   · les salles des `donjon:*` joints à ce voisinage — un étage dont la connexion part de la
 #     cité ou d'un voisin (donjon à étages), ou dont le `portail` (donjon classique) y est ;
 #   · moins tout ce qui porte le tag `sans_secours` (lieu, salle ou doc donjon), les salles
@@ -33,7 +35,7 @@ import random
 import unicodedata
 
 from models import character_stats
-from utils import acces, donjon, quetes
+from utils import acces, donjon, quetes, zones
 
 
 TAG_SANS_SECOURS = "sans_secours"
@@ -98,6 +100,16 @@ def _danger(zone_doc: dict | None) -> float:
 		return float(((zone_doc or {}).get("modificateurs") or {}).get("danger", 0) or 0)
 	except (TypeError, ValueError):
 		return 0.0
+
+
+def _monstres_possibles(lieu_peuple: dict, zone_doc: dict | None, placements: list) -> bool:
+	"""Un monstre peut-il surgir dans cette zone ? Sa table tire un `combat` ET le pool du
+	combat de zone (`zones.especes_rencontrables`, sur le lieu PEUPLÉ) n'y est pas vide. Un
+	faubourg ou un bas quartier « dangereux » sans rencontre n'est pas un lieu de péril."""
+	if not any((e or {}).get("type") == "combat"
+			   for e in (zone_doc or {}).get("table_evenements") or []):
+		return False
+	return bool(zones.especes_rencontrables(lieu_peuple, zones.cles_actives(placements)))
 
 
 def _borner_niveau(n) -> int:
@@ -166,8 +178,10 @@ def candidats(cite_id: str, get_doc_fn, find_docs_fn, connexions_fn) -> list:
 				or not _porte_ouverte(doc)):
 			continue
 		rang_porte = _rang_des_portes(doc)
+		peuple = zones.peupler_lieu(doc, get_doc_fn) or doc
+		placements = peuple.get("zone_influences") or []
 		vus = []
-		for p in doc.get("zone_influences") or []:
+		for p in placements:
 			zid = p.get("zone")
 			if not zid or zid in vus:
 				continue
@@ -175,7 +189,8 @@ def candidats(cite_id: str, get_doc_fn, find_docs_fn, connexions_fn) -> list:
 			if zid not in zones_cache:
 				zones_cache[zid] = get_doc_fn(zid) or {}
 			danger = _danger(zones_cache[zid])
-			if danger > 0:
+			if danger > 0 and _monstres_possibles(peuple, zones_cache[zid],
+					[q for q in placements if q.get("zone") == zid]):
 				sortie.append({"lieu": lid, "zones": [zid], "niveau": _borner_niveau(round(danger)),
 							   "rang_porte": rang_porte})
 

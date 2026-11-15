@@ -22,21 +22,26 @@ RACES = {"_id": "rules:races", "value": [{"id": "humain", "stats": {
 CITE = {"_id": "lieu:lutecia", "type": "lieu", "label": "Lutecia", "categorie": "ville",
 		"dimensions": {"x": 10, "y": 10}, "cells": [[1] * 10 for _ in range(10)],
 		"zone_influences": [{"zone": "zone:coeur", "x": 2, "y": 2},
-							{"zone": "zone:foret", "x": 6, "y": 6}]}
+							{"zone": "zone:foret", "x": 6, "y": 6}],
+		"rencontres": [{"espece": "espece:loup", "zones": ["zone:foret"]}]}
 FORET_VOISINE = {"_id": "lieu:bois", "type": "lieu", "label": "Le bois de Vincennes",
 				 "categorie": "foret", "dimensions": {"x": 10, "y": 10},
 				 "cells": [[1] * 10 for _ in range(10)],
-				 "zone_influences": [{"zone": "zone:bois_profond", "x": 5, "y": 5}]}
+				 "zone_influences": [{"zone": "zone:bois_profond", "x": 5, "y": 5}],
+				 "rencontres": [{"espece": "espece:loup", "zones": ["zone:bois_profond"]}]}
 LOIN = {"_id": "lieu:loin", "type": "lieu", "label": "Très loin", "categorie": "foret",
 		"dimensions": {"x": 10, "y": 10}, "cells": [[1] * 10 for _ in range(10)],
-		"zone_influences": [{"zone": "zone:foret", "x": 5, "y": 5}]}
+		"zone_influences": [{"zone": "zone:foret", "x": 5, "y": 5}],
+		"rencontres": [{"espece": "espece:loup", "zones": ["zone:foret"]}]}
 COMPTOIR = {"_id": "lieu:comptoir", "type": "lieu", "label": "Le Grand Relais",
 			"categorie": "guilde_aventurier_comptoir", "lieu_parent": "lieu:lutecia"}
 
 ZONES = [
 	{"_id": "zone:coeur", "type": "zone", "modificateurs": {"danger": -3}},
-	{"_id": "zone:foret", "type": "zone", "modificateurs": {"danger": 1}},
-	{"_id": "zone:bois_profond", "type": "zone", "modificateurs": {"danger": 2}},
+	{"_id": "zone:foret", "type": "zone", "modificateurs": {"danger": 1},
+	 "table_evenements": [{"type": "combat", "poids": 1}]},
+	{"_id": "zone:bois_profond", "type": "zone", "modificateurs": {"danger": 2},
+	 "table_evenements": [{"type": "combat", "poids": 1}]},
 ]
 
 ETAGE_1 = {"_id": "lieu:cata1", "type": "lieu", "categorie": "battle_map",
@@ -155,6 +160,22 @@ def test_le_coeur_de_ville_n_est_pas_un_lieu_de_peril(db):
 	db["docs"]["zone:foret"]["modificateurs"]["danger"] = 0
 	cands = secours.candidats("lieu:lutecia", db["get"], db["find"], connexions_fn)
 	assert not [c for c in cands if c["lieu"] == "lieu:lutecia"]
+
+
+def test_une_zone_dangereuse_sans_combat_n_est_pas_un_lieu_de_peril(db):
+	"""Un faubourg à `danger > 0` dont la table ne tire jamais de combat : aucun monstre n'y surgit."""
+	db["docs"]["zone:foret"]["table_evenements"] = [{"type": "pnj", "poids": 1}]
+	cands = secours.candidats("lieu:lutecia", db["get"], db["find"], connexions_fn)
+	assert not [c for c in cands if c["lieu"] == "lieu:lutecia"]
+
+
+def test_une_zone_dangereuse_sans_espece_n_est_pas_un_lieu_de_peril(db):
+	"""Le bas quartier de Lutecia (danger 4, combat à sa table) mais aucune espèce rattachée :
+	le pool du combat de zone est vide, la zone est écartée."""
+	db["docs"]["lieu:lutecia"]["rencontres"] = []
+	cands = secours.candidats("lieu:lutecia", db["get"], db["find"], connexions_fn)
+	assert not [c for c in cands if c["lieu"] == "lieu:lutecia"]
+	assert [c for c in cands if c["lieu"] == "lieu:bois"]
 
 
 def test_niveau_suit_la_zone_ou_la_salle(db):
