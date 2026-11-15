@@ -417,13 +417,18 @@ def verifier(docs: list, base: dict) -> list:
 	return erreurs
 
 
-def delta(docs: list, base: dict, neufs: set) -> tuple:
+def delta(docs: list, base: dict, neufs: set, dump: dict | None = None) -> tuple:
 	"""(à émettre, refus) : un `_id` NEUF (préfixé item/espece/zone créé ici) déjà pris par un doc
-	DIFFÉRENT est refusé ; un doc identique à la base n'est pas réémis."""
+	DIFFÉRENT est refusé ; un doc identique à la base n'est pas réémis — ni un doc identique au
+	DUMP BRUT (`dump`) : une surcharge `--apres` déjà importée et dépassée (le `zone:lac` de
+	`defauts_zones`, 15/11) ne doit pas faire réémettre ce qui est déjà en base."""
 	emis, refus = [], []
 	for d in docs:
 		avant = base.get(d["_id"])
 		propre = {k: v for k, v in (avant or {}).items() if k != "_rev"}
+		brut = {k: v for k, v in ((dump or {}).get(d["_id"]) or {}).items() if k != "_rev"}
+		if brut and brut == d:
+			continue
 		if avant is None:
 			emis.append(d)
 		elif propre == d:
@@ -435,9 +440,13 @@ def delta(docs: list, base: dict, neufs: set) -> tuple:
 	return emis, refus
 
 
-def charger_base(dump: str, apres: list) -> dict:
+def charger_dump(dump: str) -> dict:
 	with open(dump, encoding="utf-8") as f:
-		base = {d["_id"]: d for d in json.load(f)["docs"]}
+		return {d["_id"]: d for d in json.load(f)["docs"]}
+
+
+def charger_base(dump: str, apres: list) -> dict:
+	base = charger_dump(dump)
 	for chemin in apres:
 		if os.path.exists(chemin):
 			with open(chemin, encoding="utf-8") as f:
@@ -465,7 +474,7 @@ def main(argv=None) -> int:
 		return 1
 	neufs = ({f"item:{p}{s}" for s in ESSENCES for _, p, _ in PALIERS}
 			 | {f"item:{r}" for r in RESSOURCES} | {f"espece:{s}" for s in ESPECES} | {f"zone:{s}" for s in ZONES})
-	emis, refus = delta(docs, base, neufs)
+	emis, refus = delta(docs, base, neufs, charger_dump(dump))
 	if refus:
 		print("✗ _id déjà pris par un doc différent : " + ", ".join(refus))
 		return 1

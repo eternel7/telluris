@@ -116,3 +116,12 @@ def test_references_du_lot_existent_dans_le_dernier_dump():
 	base = {d["_id"]: d for d in json.load(open(dumps[-1], encoding="utf-8"))["docs"]}
 	docs = gen.construire(base)
 	assert gen.verifier(docs, base) == []
+
+
+def test_delta_ne_reemet_pas_ce_que_le_dump_contient_deja():
+	"""Une surcharge `--apres` déjà importée (et dépassée) ne fait pas réémettre un doc en base."""
+	dump = {"zone:lac": {"_id": "zone:lac", "_rev": "4", "defauts_rencontres": []}}
+	base = {"zone:lac": {"_id": "zone:lac", "defauts_rencontres": [{"espece": "espece:crocodile"}]}}
+	docs = [{"_id": "zone:lac", "defauts_rencontres": []}]
+	assert gen.delta(docs, base, set(), dump) == ([], [])
+	assert gen.delta(docs, base, set()) == (docs, [])
