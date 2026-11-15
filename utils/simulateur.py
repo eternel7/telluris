@@ -315,6 +315,9 @@ def _equiper_snapshot(snap: dict, slots: dict) -> dict:
 	if not slots:
 		return snap
 	equipment = recompute_equipment_bonus(slots)
+	# Armure NATURELLE de l'espèce (posée par `combat.build_monster_snapshot`) : l'agrégat neuf
+	# l'oublierait — le potentiel d'une espèce armée sous-estimerait sa survie.
+	combat.avec_armure_naturelle(equipment, int(snap.get("armure_naturelle") or 0))
 	caracts = dict(snap.get("caracts_base") or {})
 	for code, delta in (equipment.buffs or {}).items():
 		if code in caracts:

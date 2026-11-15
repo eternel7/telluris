@@ -47,6 +47,17 @@ MONSTRE_DES_CC_NATURELS: int = 2
 # Probabilité, PAR item éligible de `espece["items"]`, qu'un monstre humanoïde
 # l'équipe à sa création (cf. `utils.combat.roll_monster_equipment`).
 MONSTRE_EQUIPEMENT_PROBA: float = 0.65
+# RENCONTRE GROUPÉE PAR ESPÈCE (`utils.combat.instantiate_groupes`) : une espèce principale
+# dépense un BUDGET de menace (`RENCONTRE_BUDGET` × intensité × (1 + `RENCONTRE_BUDGET_COMPAGNON`
+# par compagnon)), chaque spécimen coûtant son potentiel de menace (celui de l'XP) : plus la bête
+# est dangereuse, moins elle vient nombreuse. Au moins un monstre, jamais plus de
+# `RENCONTRE_PLAFOND` (planché à 1) ; `RENCONTRE_SECOND_GROUPE_PROBA` (bornée [0, 1]) = chance
+# qu'une seconde espèce du pool dépense le reste (au moins un spécimen). Calibrage (Auteur,
+# 15/11) : potentiel médian au grade combattant F 13 · E 38 · D 69 · C 126 · B 209.
+RENCONTRE_BUDGET: float = 240.0
+RENCONTRE_BUDGET_COMPAGNON: float = 0.5
+RENCONTRE_PLAFOND: int = 8
+RENCONTRE_SECOND_GROUPE_PROBA: float = 0.2
 
 # ── Facteur SIMULÉ (banc d'essai /admin/simulateur) ──────────────────────
 # Le simulateur doit pouvoir répondre à « et si le facteur valait 10 ? » SANS toucher ni
@@ -1075,6 +1086,10 @@ def current_world_variables() -> dict:
 		"FACTEUR_DEGATS_ARMURE": FACTEUR_DEGATS_ARMURE,
 		"MONSTRE_DES_CC_NATURELS": MONSTRE_DES_CC_NATURELS,
 		"MONSTRE_EQUIPEMENT_PROBA": MONSTRE_EQUIPEMENT_PROBA,
+		"RENCONTRE_BUDGET": RENCONTRE_BUDGET,
+		"RENCONTRE_BUDGET_COMPAGNON": RENCONTRE_BUDGET_COMPAGNON,
+		"RENCONTRE_PLAFOND": RENCONTRE_PLAFOND,
+		"RENCONTRE_SECOND_GROUPE_PROBA": RENCONTRE_SECOND_GROUPE_PROBA,
 		"LOCALISATION_TOUCHES": dict(LOCALISATION_TOUCHES),
 		"JET_PORTEE_F_DIV": JET_PORTEE_F_DIV,
 		"DEUX_ARMES_MALUS_SECOND": DEUX_ARMES_MALUS_SECOND,
@@ -1295,6 +1310,7 @@ def load_world_variables() -> dict:
 	Retourne le snapshot effectif.
 	"""
 	global MONSTRE_DES_CC_NATURELS, MONSTRE_EQUIPEMENT_PROBA
+	global RENCONTRE_BUDGET, RENCONTRE_BUDGET_COMPAGNON, RENCONTRE_PLAFOND, RENCONTRE_SECOND_GROUPE_PROBA
 	global FACTEUR_DEGATS_ARMURE, JET_PORTEE_F_DIV, DETECTION_DISTANCE_FACTEUR, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
 	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT, DEUX_ARMES_MALUS_SECOND, VOC_NIVEAU_MAX
 	global VOC_CHANGEMENT_BASE, VOC_CHANGEMENT_FACTEUR, VOC_RETOUR_COUT
@@ -1369,6 +1385,10 @@ def load_world_variables() -> dict:
 	# Plancher à 1 : une attaque naturelle sans le moindre dé ne serait plus une attaque.
 	MONSTRE_DES_CC_NATURELS = max(1, int(v.get("MONSTRE_DES_CC_NATURELS", MONSTRE_DES_CC_NATURELS)))
 	MONSTRE_EQUIPEMENT_PROBA = max(0.0, min(1.0, float(v.get("MONSTRE_EQUIPEMENT_PROBA", MONSTRE_EQUIPEMENT_PROBA))))
+	RENCONTRE_BUDGET = max(0.0, float(v.get("RENCONTRE_BUDGET", RENCONTRE_BUDGET)))
+	RENCONTRE_BUDGET_COMPAGNON = max(0.0, float(v.get("RENCONTRE_BUDGET_COMPAGNON", RENCONTRE_BUDGET_COMPAGNON)))
+	RENCONTRE_PLAFOND = max(1, int(v.get("RENCONTRE_PLAFOND", RENCONTRE_PLAFOND)))
+	RENCONTRE_SECOND_GROUPE_PROBA = max(0.0, min(1.0, float(v.get("RENCONTRE_SECOND_GROUPE_PROBA", RENCONTRE_SECOND_GROUPE_PROBA))))
 	JET_PORTEE_F_DIV           = max(1, int(v.get("JET_PORTEE_F_DIV", JET_PORTEE_F_DIV)))
 	DEUX_ARMES_MALUS_SECOND    = max(0, int(v.get("DEUX_ARMES_MALUS_SECOND", DEUX_ARMES_MALUS_SECOND)))
 	DETECTION_DISTANCE_FACTEUR = max(0, int(v.get("DETECTION_DISTANCE_FACTEUR", DETECTION_DISTANCE_FACTEUR)))
