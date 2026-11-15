@@ -1,0 +1,695 @@
+[
+  {
+    "_id": "espece:ange_de_la_justice",
+    "_rev": "7-964aff9f51e12091d8409e9c12317b5c",
+    "type": "espece",
+    "nom": "Ange de la Justice",
+    "genre": "m",
+    "image": "ange_de_la_justice_transparent.png",
+    "description": "Messager céleste incarnant l'équité absolue, son épée tranche le mensonge comme la chair.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 55,
+        "max": 85
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 40,
+        "max": 80
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "vol",
+      "humanoide",
+      "distance"
+    ],
+    "items": [
+      "item:Epee_une_main_benie",
+      "item:Masse_benie",
+      "item:Arc_long",
+      "item:Bouclier_sacre",
+      "item:Cotte_mailles_benie",
+      "item:Epaulieres_de_fer",
+      "item:Heaume_ouvert_grave"
+    ],
+    "proprietes": {},
+    "armure_naturelle": 3
+  },
+  {
+    "_id": "espece:archange_de_l_ordre",
+    "_rev": "11-68d0b33f501547cdc81f2f7d602b09bc",
+    "type": "espece",
+    "nom": "Archange de l Ordre",
+    "genre": "m",
+    "jeton": {
+      "taille": "2x1",
+      "forme": "triangle"
+    },
+    "image": "archange_de_l_ordre_transparent.png",
+    "description": "Haut commandant des armées célestes, garant de l'équilibre cosmique et de la discipline divine.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 60,
+        "max": 90
+      },
+      "R": {
+        "min": 60,
+        "max": 90
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 75,
+        "max": 110
+      },
+      "Int": {
+        "min": 50,
+        "max": 75
+      },
+      "Cha": {
+        "min": 50,
+        "max": 80
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "vol",
+      "boss",
+      "legendaire",
+      "humanoide",
+      "insensible_furtivite",
+      "ia_hit_and_run_2",
+      "distance"
+    ],
+    "items": [
+      "item:Epee_une_main_benie",
+      "item:Masse_benie",
+      "item:Arc_long",
+      "item:Bouclier_sacre",
+      "item:Cotte_mailles_benie",
+      "item:Epaulieres_benies",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates"
+    ],
+    "proprietes": {},
+    "armure_naturelle": 4
+  },
+  {
+    "_id": "espece:centaure",
+    "_rev": "5-c73125e77098ba2d9414260d2d0668be",
+    "type": "espece",
+    "nom": "Centaure",
+    "genre": "m",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "centaure_transparent.png",
+    "description": "Créature mi-homme mi-cheval, guerrier et chasseur d'une endurance et d'une force remarquables.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 35,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 25,
+        "max": 45
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 15,
+        "max": 30
+      },
+      "Ch": {
+        "min": 10,
+        "max": 25
+      }
+    },
+    "tags": [
+      "humanoide",
+      "hybride",
+      "humanoide",
+      "distance"
+    ],
+    "items": [
+      "item:Arc_long",
+      "item:Arc",
+      "item:Pique",
+      "item:Pourpoint_cuir_renf",
+      "item:Epaulieres_cuir_bouilli",
+      "item:Bandeau_de_cuir",
+      "item:Gants_archer"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:gnome",
+    "_rev": "5-015665583dcef671ae400dd31f3a6afe",
+    "type": "espece",
+    "nom": "Gnome",
+    "genre": "m",
+    "image": "gnome_transparent.png",
+    "description": "Petit humanoïde malicieux et inventif, doué pour l'artisanat et la manipulation de la magie mineure.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 10,
+        "max": 25
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 25,
+        "max": 50
+      },
+      "Vol": {
+        "min": 20,
+        "max": 40
+      },
+      "Int": {
+        "min": 40,
+        "max": 75
+      },
+      "Cha": {
+        "min": 20,
+        "max": 45
+      },
+      "Ch": {
+        "min": 20,
+        "max": 40
+      }
+    },
+    "tags": [
+      "humanoide",
+      "petite_taille",
+      "ia_fuyard_40",
+      "distance"
+    ],
+    "items": [
+      "item:Dague",
+      "item:Epee_courte",
+      "item:Arbalete_legere",
+      "item:Veste_cuir_souple",
+      "item:Chapeau_mou",
+      "item:Gants_cuir_epais",
+      "item:Souliers_cuir"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_gobelin_03"
+  },
+  {
+    "_id": "espece:gobelin",
+    "_rev": "7-40f4e2f565e7dc65ed5b2bd981799166",
+    "type": "espece",
+    "nom": "Gobelin",
+    "genre": "m",
+    "image": "gobelin_transparent.png",
+    "description": "Petit humanoïde chétif et rusé, compensant sa faiblesse physique par le nombre et l'embuscade.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 10,
+        "max": 25
+      },
+      "R": {
+        "min": 10,
+        "max": 25
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 10,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 25
+      }
+    },
+    "tags": [
+      "humanoide",
+      "petite_taille",
+      "proie",
+      "ia_meute",
+      "ia_fuyard_30",
+      "distance"
+    ],
+    "items": [
+      "item:Dague",
+      "item:Epee_courte",
+      "item:Arc_court",
+      "item:Sarbacane",
+      "item:Pourpoint_cuir_renf",
+      "item:Bandeau_de_cuir",
+      "item:Mocassins"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_gobelin_04"
+  },
+  {
+    "_id": "espece:gobelin_des_marais",
+    "_rev": "6-6b22b392164e6df1befc9dc59e00b6dc",
+    "type": "espece",
+    "nom": "Gobelin des Marais",
+    "genre": "m",
+    "image": "gobelin_des_marais_transparent.png",
+    "description": "Variante de gobelin adaptée aux zones humides et fétides, sa peau visqueuse sécrète une légère toxine et il se déplace avec aisance dans la vase.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 10,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 15,
+        "max": 30
+      }
+    },
+    "tags": [
+      "humanoide",
+      "petite_taille",
+      "marais",
+      "proie",
+      "ia_meute",
+      "ia_fuyard_30",
+      "distance"
+    ],
+    "items": [
+      "item:Couteau_de_chasse",
+      "item:Trident_barbele",
+      "item:Sarbacane",
+      "item:Jupe_de_chanvre",
+      "item:Bandeau_de_cuir",
+      "item:Sandales_de_corde"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_gobelin_01"
+  },
+  {
+    "_id": "espece:gwyn_ap_nudd",
+    "_rev": "4-896311c9a580b63a201d1799e887e6f8",
+    "type": "espece",
+    "nom": "Gwyn ap Nudd",
+    "genre": "m",
+    "nom_propre": true,
+    "image": "gwyn_ap_nudd_transparent.png",
+    "description": "Seigneur d'Annwn, qui mène la Chasse sauvage hors des portails par les nuits d'orage, son chien Dormarth au museau rouge à ses côtés. Chaque premier jour de mai il se bat contre Gwythyr pour la belle Creiddylad, et se battra ainsi jusqu'à la fin des temps sans qu'aucun ne l'emporte. Les uns disent qu'il demeure sous Glastonbury Tor ; ceux qui l'ont croisé disent qu'il leur a parlé avec courtoisie, puis a lâché ses chiens.",
+    "base_attributes": {
+      "V": {
+        "min": 8,
+        "max": 10
+      },
+      "F": {
+        "min": 65,
+        "max": 95
+      },
+      "R": {
+        "min": 60,
+        "max": 90
+      },
+      "Ag": {
+        "min": 55,
+        "max": 80
+      },
+      "Vol": {
+        "min": 85,
+        "max": 120
+      },
+      "Int": {
+        "min": 65,
+        "max": 90
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 55,
+        "max": 85
+      }
+    },
+    "tags": [
+      "humanoide",
+      "feerique",
+      "magique",
+      "nocturne",
+      "legendaire",
+      "boss",
+      "insensible_furtivite",
+      "magie_nature_8",
+      "magie_necromancie_6",
+      "ia_artilleur_mage",
+      "ia_artilleur_heros_mage",
+      "ia_artilleur_seigneur_mage",
+      "distance"
+    ],
+    "items": [
+      "item:Epee_batarde",
+      "item:Lance",
+      "item:Arc_du_grand_atelier",
+      "item:Manteau_de_cour_double",
+      "item:Mantelet_de_chasse",
+      "item:Gants_archer",
+      "item:Bottes_de_chasse"
+    ],
+    "proprietes": {},
+    "armure_naturelle": 4
+  },
+  {
+    "_id": "espece:orc",
+    "_rev": "5-ed97758bee3d99f019555e64c32a60f1",
+    "type": "espece",
+    "nom": "Orc",
+    "genre": "m",
+    "image": "orc_transparent.png",
+    "description": "Humanoïde guerrier brutal et endurant, vivant pour le combat et organisé en hordes redoutables.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 35,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 40
+      }
+    },
+    "tags": [
+      "humanoide",
+      "ia_meute",
+      "ia_berserker_champion",
+      "ia_berserker_seigneur",
+      "distance"
+    ],
+    "items": [
+      "item:Hache_de_guerre",
+      "item:Kanabo",
+      "item:Francisque",
+      "item:Arbalete",
+      "item:Targe",
+      "item:Cuirasse_cuir_brut",
+      "item:Heaume_de_fer",
+      "item:Epaulieres_d_os",
+      "item:Bottes_cuir_epais"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_ogre_02"
+  },
+  {
+    "_id": "espece:roi_des_tombes",
+    "_rev": "6-90ac1e450288ee4c39274dad55b3c12e",
+    "type": "espece",
+    "nom": "Roi des Tombes",
+    "genre": "m",
+    "image": "roi_des_tombes_transparent.png",
+    "description": "Souverain mort-vivant régnant sur une nécropole, commandant ses légions de squelettes et de zombies.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 45,
+        "max": 75
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "boss",
+      "humanoide",
+      "distance"
+    ],
+    "items": [
+      "item:Epee_longue",
+      "item:Morgenstern",
+      "item:Arbalete",
+      "item:Ecu",
+      "item:Cotte_de_mailles",
+      "item:Heaume_de_plates",
+      "item:Gantelets_de_plates",
+      "item:Jambières_de_plates"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_07",
+    "competences": [
+      "competence:monstre_malediction_du_tombeau"
+    ]
+  },
+  {
+    "_id": "espece:satyre",
+    "_rev": "4-e0795f5ee8696ff96adad477dc7888f1",
+    "type": "espece",
+    "nom": "Satyre",
+    "genre": "m",
+    "image": "satyre_transparent.png",
+    "description": "Humanoïde caprin facétieux et joueur, lié aux forêts et aux célébrations sauvages.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 25,
+        "max": 45
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "humanoide",
+      "hybride",
+      "foret",
+      "distance"
+    ],
+    "items": [
+      "item:Couteau_de_chasse",
+      "item:Baton_de_combat",
+      "item:Arc_court",
+      "item:Etole_de_fourrure",
+      "item:Couronne_branchages"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:squelette",
+    "_rev": "5-0b6bba5b16bc826abd84fd1a46ca7e95",
+    "type": "espece",
+    "nom": "Squelette",
+    "genre": "m",
+    "image": "squelette_transparent.png",
+    "description": "Ossature animée par une volonté nécromantique, dépourvue de chair, combattant sans relâche ni peur.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 0,
+        "max": 0
+      },
+      "Int": {
+        "min": 0,
+        "max": 5
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 25
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "humanoide",
+      "distance"
+    ],
+    "items": [
+      "item:Epee_courte",
+      "item:Gladius",
+      "item:Arc_court",
+      "item:Arbalete_legere",
+      "item:Rondache",
+      "item:Camail_de_mailles",
+      "item:Heaume_de_fer"
+    ],
+    "proprietes": {},
+    "animation": "animation:son_bete_15"
+  }
+]

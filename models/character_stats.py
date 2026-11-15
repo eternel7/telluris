@@ -54,10 +54,13 @@ MONSTRE_EQUIPEMENT_PROBA: float = 0.65
 # `RENCONTRE_PLAFOND` (planché à 1) ; `RENCONTRE_SECOND_GROUPE_PROBA` (bornée [0, 1]) = chance
 # qu'une seconde espèce du pool dépense le reste (au moins un spécimen). Calibrage (Auteur,
 # 15/11) : potentiel médian au grade combattant F 13 · E 38 · D 69 · C 126 · B 209.
+# Avec `rules:affinites_especes`, la chance est multipliée par la DIVERSITÉ du pool
+# (`composition_rencontre.proba_second`) et le second groupe est ASSOCIÉ au premier ; 0,35
+# (Auteur, 15/11 — 0,2 avant) compense ce que la diversité retire aux zones pauvres.
 RENCONTRE_BUDGET: float = 240.0
 RENCONTRE_BUDGET_COMPAGNON: float = 0.5
 RENCONTRE_PLAFOND: int = 8
-RENCONTRE_SECOND_GROUPE_PROBA: float = 0.2
+RENCONTRE_SECOND_GROUPE_PROBA: float = 0.35
 
 # ── Facteur SIMULÉ (banc d'essai /admin/simulateur) ──────────────────────
 # Le simulateur doit pouvoir répondre à « et si le facteur valait 10 ? » SANS toucher ni
