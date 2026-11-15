@@ -46,6 +46,7 @@ from utils.characters import lieu_label
 from utils import chasse
 from utils import apport
 from utils import xp_monstre
+from utils import composition_rencontre
 from models import character_stats
 
 combat_router = APIRouter()
@@ -282,6 +283,7 @@ def _demarrer_combat(body: StartCombatRequest, current_user: dict):
             lambda e, p: xp_monstre.potentiel_specimen(e["_id"], (p or {}).get("_id"), get_doc),
             profil_weights=profil_weights,
             espece_weights=focalisation.espece_weights_focus(character),
+            affinites=get_doc(composition_rencontre.DOC_ID),
         )
     if not monstres:
         return {"combat_id": None}

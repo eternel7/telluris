@@ -53,6 +53,7 @@ from utils import capacites_monstre
 from utils import ia_monstre
 from utils import chasse_signee
 from utils import exigence_arme
+from utils import composition_rencontre as composition
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -3973,7 +3974,7 @@ def instantiate_groupes(
 	especes: list, profils: list, budget: float, cout_fn,
 	plafond: int | None = None, proba_second: float | None = None,
 	profil_weights: dict | None = None, espece_weights: dict | None = None,
-	rand=None,
+	rand=None, affinites: dict | None = None,
 ) -> list:
 	"""Rencontre GROUPÉE PAR ESPÈCE (Auteur, 15/11) : une espèce principale tirée dans
 	`especes` (pondérée par `espece_weights`, la focalisation), dont les spécimens dépensent
@@ -3986,7 +3987,11 @@ def instantiate_groupes(
 	`RENCONTRE_SECOND_GROUPE_PROBA`. `rand` (défaut : module `random`) tire les espèces et le
 	second groupe — injecté par les tests ; le grade passe par `_pick_profil`, comme ailleurs.
 	Coût illisible (None) ou nul ⇒ le spécimen prend tout le reste du budget : une bête qu'on
-	ne sait pas mesurer ne doit pas venir en nuée."""
+	ne sait pas mesurer ne doit pas venir en nuée.
+
+	`affinites` = doc `rules:affinites_especes` : formes, hiérarchie, rôles et second groupe
+	ASSOCIÉ (`_instantiate_groupes_composes`, règles dans `utils/composition_rencontre`).
+	Absent ⇒ le comportement d'avant, à la lettre."""
 	rand = rand or random
 	plafond = max(1, int(plafond if plafond is not None else character_stats.RENCONTRE_PLAFOND))
 	if proba_second is None:
@@ -3994,6 +3999,11 @@ def instantiate_groupes(
 	pool = list(especes or [])
 	if not pool:
 		return []
+	regles = composition.regles(affinites)
+	if regles:
+		return _instantiate_groupes_composes(
+			pool, profils, budget, cout_fn, plafond, proba_second, profil_weights,
+			espece_weights, rand, regles)
 
 	def tirer(candidats):
 		if espece_weights:
@@ -4026,6 +4036,141 @@ def instantiate_groupes(
 	autres = [e for e in pool if e.get("_id") != principale.get("_id")]
 	if autres and len(monstres) < plafond and rand.random() < float(proba_second):
 		remplir(tirer(autres))
+	return monstres
+
+
+def _instantiate_groupes_composes(
+	pool: list, profils: list, budget: float, cout_fn, plafond: int, proba_base: float,
+	profil_weights: dict | None, espece_weights: dict | None, rand, r: dict,
+) -> list:
+	"""Rencontre COMPOSÉE (Auteur, 15/11) — `instantiate_groupes` avec `rules:affinites_especes`.
+
+	Groupe : un CHEF (grade tiré, relevé d'1 à `chef_crans_max` crans tant que le budget le
+	paie — groupe PRINCIPAL seulement : un charognard ou une proie ne mène rien), puis une SUITE tirée sous son niveau ; un humanoïde répartit sa suite entre les rôles
+	que ses profils compatibles offrent. SOLITAIRE : seul, le budget relève son grade cran par
+	cran. MEUTE : le chef descend jusqu'à ce que `meute_min` spécimens tiennent, et la meute
+	atteint toujours ce minimum. RÔDEUR : au plus `rodeur_max`. Second groupe (jamais derrière
+	un solitaire, jamais un solitaire) : `composition.proba_second`, association tirée parmi
+	celles qui ont un candidat, sinon espèce au hasard ; la proie d'une chasse fuit
+	(`fuite_pct`), les charognards plafonnent à `charognards.max`."""
+	monstres: list = []
+	restant = max(0.0, float(budget or 0))
+
+	def tirer(candidats):
+		if espece_weights:
+			poids = [max(0.0, espece_weights.get(e.get("_id"), 1.0)) for e in candidats]
+			if sum(poids) > 0:
+				return rand.choices(candidats, weights=poids, k=1)[0]
+		return rand.choice(candidats)
+
+	def cout(espece, profil):
+		c = cout_fn(espece, profil)
+		c = float(c) if c else 0.0
+		# Coût illisible : le spécimen prend tout le reste (même parti pris qu'avant).
+		return c if c > 0 else max(restant, 1.0)
+
+	def remplir(espece, max_n=None, fuite=None, meneur=True):
+		nonlocal restant
+		cands, poids = profils_candidats(profils_compatibles(profils, espece), profil_weights)
+		w = dict(zip([p["_id"] for p in cands], poids)) if poids else None
+		ech = composition.echelle(cands)
+
+		def tirer_profil(sous):
+			if not sous:
+				return None
+			if w:
+				pw = [w.get(p["_id"], 0) for p in sous]
+				if sum(pw) > 0:
+					return rand.choices(sous, weights=pw, k=1)[0]
+			return rand.choice(sous)
+
+		def au(niv):
+			return tirer_profil(composition.au_niveau(cands, niv))
+
+		def ajouter(profil):
+			nonlocal restant
+			c = cout(espece, profil)
+			snap = build_monster_snapshot(espece, profil, len(monstres))
+			if fuite:
+				snap["ia"] = {**ia_monstre.ia_de(snap), "fuite": max(fuite, ia_monstre.ia_de(snap)["fuite"])}
+			monstres.append(snap)
+			restant = max(0.0, restant - c)
+
+		limite = composition.effectif_max(espece, r)
+		if max_n is not None:
+			limite = max_n if limite is None else min(limite, max_n)
+		mini = composition.effectif_min(espece, r)
+
+		chef = tirer_profil(cands)
+		if composition.est_solitaire(espece, r):
+			# Le budget restant relève le grade, cran par cran, tant qu'il le paie.
+			while chef is not None:
+				suivant = composition.decaler(composition.niveau(chef), 1, ech)
+				if suivant == composition.niveau(chef):
+					break
+				mieux = au(suivant)
+				if mieux is None or cout(espece, mieux) > restant:
+					break
+				chef = mieux
+			ajouter(chef)
+			return
+		if chef is not None and meneur:
+			crans = 1 + int(rand.random() * max(1, int(r["hierarchie"].get("chef_crans_max") or 1)))
+			haut = composition.decaler(composition.niveau(chef), crans, ech)
+			while haut > composition.niveau(chef):
+				candidat = au(haut)
+				if candidat is not None and cout(espece, candidat) <= restant:
+					chef = candidat
+					break
+				haut = composition.decaler(haut, -1, ech)
+		if chef is not None and mini > 1 and ech:
+			# MEUTE : le chef descend jusqu'à laisser de quoi payer la suite minimale.
+			plus_bas = au(ech[0])
+			while (composition.niveau(chef) > ech[0]
+				   and cout(espece, chef) + (mini - 1) * cout(espece, plus_bas) > restant):
+				chef = au(composition.decaler(composition.niveau(chef), -1, ech))
+		ajouter(chef)
+		n = 1
+		roles = composition.joue_des_roles(espece, r)
+		comptes = {composition.role(chef): 1} if roles and chef is not None else {}
+		niv_chef = composition.niveau(chef)
+		while len(monstres) < plafond and (limite is None or n < limite):
+			sous = cands
+			if roles and cands:
+				# Rôles offerts SOUS le chef (sinon tous) : la suite reste au-dessous de lui.
+				offerts = ({composition.role(p) for p in cands if composition.niveau(p) < niv_chef}
+						   or {composition.role(p) for p in cands})
+				rl = composition.role_suivant(comptes, offerts)
+				sous = [p for p in cands if composition.role(p) == rl]
+			dessous = [p for p in sous if composition.niveau(p) < niv_chef]
+			if not dessous and sous:
+				bas = min(composition.niveau(p) for p in sous)
+				dessous = composition.au_niveau(sous, bas)
+			profil = tirer_profil(dessous)
+			if n >= mini and cout(espece, profil) > restant:
+				return
+			ajouter(profil)
+			n += 1
+			if roles and profil is not None:
+				comptes[composition.role(profil)] = comptes.get(composition.role(profil), 0) + 1
+
+	principale = tirer(pool)
+	remplir(principale)
+	if composition.est_solitaire(principale, r):
+		return monstres
+	autres = composition.candidats_second(principale, pool, r)
+	if not autres or len(monstres) >= plafond:
+		return monstres
+	if rand.random() >= composition.proba_second(proba_base, len(autres), r):
+		return monstres
+	assoc = composition.associations(principale, autres, r)
+	if assoc:
+		nom = rand.choice(sorted(assoc))
+		seconde = tirer(assoc[nom])
+	else:
+		nom, seconde = None, tirer(autres)
+	remplir(seconde, max_n=composition.plafond_association(nom, r),
+			fuite=composition.fuite_association(nom, r), meneur=False)
 	return monstres
 
 
