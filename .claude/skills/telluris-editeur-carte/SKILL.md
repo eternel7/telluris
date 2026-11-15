@@ -14,6 +14,11 @@ description: Map editor authoring at /admin/editor (admin_map_editor.html) — t
 - Mini-outils flottants : **seulement en mode test** (le panneau ne se replie plus).
 - Boutons d'écriture des sections (💾 Zones/Rencontres/Ressources, ✔ Appliquer de 🔍, 💾 de 📐) en `.section-actions` : `position:sticky; bottom:0` — collés au bas de la partie visible de leur **parent**, posés à sa fin. ⚠️ Un `overflow:hidden` ajouté sur un ancêtre (`.card`, `.panel-body`…) le casserait.
 
+### Aide « ? » — visite guidée
+Bouton `.aide-btn` de l'en-tête (recopie de /play, pouls jusqu'à la 1re ouverture, `localStorage['editeur-carte.aide_vue']`) → `#aide-ed-overlay` : une étape par section (`AIDE_ED_ETAPES` : `cible`, `titre`, `html`, `absent`), projecteur sur la cible, pastilles pour sauter, ✕ / Échap / clic hors carte pour arrêter.
+- ⚠️ **LECTURE SEULE** : ni réseau, ni `setMode`, ni section dépliée ; le calque avale les clics (rien ne peint pendant la visite). Cible masquée (pas de lieu, carte non offerte) ⇒ étape affichée avec l'avis `absent`. Une section ajoutée ou renommée ⇒ mettre l'étape à jour (verrouillé par `dev/test_aide_editeur_client.js`, dont les motifs d'écriture interdits).
+- Clavier en **capture** : pendant la visite, Échap ne ferme qu'elle ; ← / → changent d'étape.
+
 ### Parts partagées et contrat `LIEUX_HOTE`
 Ligne de liste, fiche 📄, éditeurs 🧾 JSON, formulaires ✏️ lieu et 🔗 connexion vivent dans **`part-lieux-{js,css,markup}.html`**, inclus (`include`, pas `import` : `url_for`) par `/admin/editor` et `/admin/lieux`. Porte de rempart, lot, repositionnement, voies restent dans l'éditeur.
 - ⚠️ La part ne lit **aucune** globale de page : tout passe par `const LIEUX_HOTE` que chaque page déclare (clés `LIEUX_HOTE_REQUIS`, doc en tête de la part). `visee`/`repositionnement` à `null` masquent 🎯 ; `caseCourante()` null interdit la création. Verrouillé par `test_gestion_lieux_client.js` (clés des deux pages, liste de globales interdites).
