@@ -57,12 +57,15 @@ Spécification validée par l'Auteur (13-14/11/2026), implémentée. Module pur 
 | `pistes` | forestier | sauvage | int, ag | — | ici + contigus |
 | `chasseurs` | forestier | taverne, `boucherie` | cha | 8 | bêtes |
 | `betes_plantes` | druide | sauvage | int | 6 PM | bêtes, végétaux |
-| `faucon` | chaman | pays + Œil du faucon | int | PM de la compétence | zones de la carte |
+| `faucon` | chaman | ciel ouvert + Œil du faucon | int | PM de la compétence | zones de la carte |
 | `informateur` | — | taverne | cha | 10 × 1,5 | ≤ région |
 | `recrues` | (chaque recrue) | réception de guilde | métier de la recrue | pourboire | quêtes, dangers, donjons, ressources |
 | `receptionniste` | (PNJ du comptoir) | comptoir, par son dialogue | cha du joueur | gratuit | idem |
 
-- **Zone sauvage** (`est_sauvage`) = pays OU `tags_nature` OU rencontres/ressources OU hors cité.
+- **Zones sous les pieds** (Auteur, 15/11/2026) : le router lit les `terrain_tags` des zones d'influence actives à `position` (`zones_sous_les_pieds`) et les passe à `applicables(..., zones=)`.
+  - **`sauvage`** (`est_sauvage`) : des zones actives ⇒ l'une porte un `tags_nature` ET aucune un `tags_urbains` (`ville`, `urbain`, `place` : le cœur d'un village ferme, ses faubourgs ruraux non). Hors zone ⇒ pays OU tag nature du lieu OU hors cité OU rencontres/ressources **sauf carte de ville** (le cœur de Lutecia passait pour sauvage).
+  - **`ciel_ouvert`** (faucon) : des zones actives ⇒ aucune urbaine (pas de nature exigée) ; hors zone ⇒ carte de pays seule.
+  - Accès seul : les tags ne modulent pas le jet.
 - **`salle_d_armes`** : recopié dans `utils/capacites.py` (case de l'éditeur), verrouillé par `tests/test_capacites.py`. ⚠️ Le prédicat `scriptorium` est recopié de `scriptorium.lieu_est_scriptorium` (verrouillé par `test_predicat_scriptorium_identique_au_vrai`).
 - Bouton 🔎 de `/play` : `routers/renseignement.disponible` (index réduit à la chaîne du lieu, pas les 700 lieux) ; panneau `#rens-panel` (⟵ / Échap ferment sans rien payer).
 

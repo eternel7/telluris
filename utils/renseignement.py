@@ -26,7 +26,7 @@ SOUS_CATEGORIE_NOTE = "note_renseignement"
 CLES_CARACS = {"v": "V", "f": "F", "r": "R", "ag": "Ag", "vol": "Vol", "int": "Int", "cha": "Cha", "ch": "Ch"}
 NIVEAUX = ("rumeur", "region", "exact")
 SOURCES = ("lieu", "zone", "donjon", "boutique")
-PREDICATS = ("taverne", "scriptorium", "salle_d_armes", "sauvage", "pays")
+PREDICATS = ("taverne", "scriptorium", "salle_d_armes", "sauvage", "pays", "ciel_ouvert")
 # Modes « du coin » (salle commune de guilde) : bornés au PAYS de la cité de la guilde.
 MODES_COIN = ("dangers", "donjons", "ressources")
 MODES_CIBLE = ("quete", "bestiaire", "libre", "hasard", "recit") + MODES_COIN
@@ -163,6 +163,24 @@ def tags_nature(regles: dict) -> set:
 	return set((regles or {}).get("tags_nature") or [])
 
 
+def tags_urbains(regles: dict) -> set:
+	return set((regles or {}).get("tags_urbains") or [])
+
+
+def zones_sous_les_pieds(lieu_doc: dict | None, position: dict | None, zone_defs: dict) -> list:
+	"""`terrain_tags` (un set par zone) des zones d'influence actives à la position. Liste vide
+	sans position, sans placement ou hors de toute zone : les prédicats retombent alors sur le lieu."""
+	from utils.zones import compute_zone_intensity
+	if not lieu_doc or not position or "x" not in position or "y" not in position:
+		return []
+	sortie = []
+	for placement in lieu_doc.get("zone_influences") or []:
+		zone = zone_defs.get(placement.get("zone"))
+		if zone and compute_zone_intensity(position["x"], position["y"], placement, {"intensite_max": 1.0}) > 0:
+			sortie.append(set(zone.get("terrain_tags") or []))
+	return sortie
+
+
 # ── Lieux ────────────────────────────────────────────────────────────────────────
 
 def chaine(lieu_id: str, index: dict) -> list:
@@ -193,17 +211,35 @@ def lieu_salle_d_armes(lieu_doc: dict | None) -> bool:
 			or TAG_SALLE_D_ARMES in (lieu_doc.get("tags") or []))
 
 
-def est_sauvage(lieu_doc: dict | None, index: dict, nature: set) -> bool:
-	"""Zone sauvage = carte de pays OU tag nature OU lieu à rencontres/ressources OU hors cité."""
+def est_sauvage(lieu_doc: dict | None, index: dict, nature: set, zones: list | None = None,
+				urbains: set = frozenset()) -> bool:
+	"""Zones actives sous les pieds (Auteur, 15/11/2026) : sauvage si l'une porte un tag nature
+	ET aucune un tag urbain. Hors de toute zone : carte de pays OU tag nature OU hors cité OU
+	lieu à rencontres/ressources — sauf une carte de VILLE, dont les rencontres vivent dans ses
+	zones de campagne (sinon le cœur de Lutecia passait pour sauvage)."""
 	if not lieu_doc:
 		return False
+	if zones:
+		return any(z & nature for z in zones) and not any(z & urbains for z in zones)
 	return (lieu_doc.get("categorie") == "pays"
 			or bool(set(lieu_doc.get("tags") or []) & nature)
-			or bool(lieu_doc.get("rencontres") or lieu_doc.get("ressources"))
+			or (bool(lieu_doc.get("rencontres") or lieu_doc.get("ressources"))
+				and lieu_doc.get("categorie") != "ville")
 			or cite_de(lieu_doc.get("_id", ""), index) is None)
 
 
-def predicat_ok(nom: str, lieu_doc: dict, index: dict, nature: set) -> bool:
+def ciel_ouvert(lieu_doc: dict | None, zones: list | None = None, urbains: set = frozenset()) -> bool:
+	"""Ciel ouvert (œil du faucon) : des zones sous les pieds, aucune urbaine ; hors de toute
+	zone, la seule carte de pays."""
+	if not lieu_doc:
+		return False
+	if zones:
+		return not any(z & urbains for z in zones)
+	return lieu_doc.get("categorie") == "pays"
+
+
+def predicat_ok(nom: str, lieu_doc: dict, index: dict, nature: set, zones: list | None = None,
+				urbains: set = frozenset()) -> bool:
 	if nom == "taverne":
 		from utils import auberge
 		return auberge.lieu_est_taverne(lieu_doc)
@@ -214,18 +250,22 @@ def predicat_ok(nom: str, lieu_doc: dict, index: dict, nature: set) -> bool:
 	if nom == "salle_d_armes":
 		return lieu_salle_d_armes(lieu_doc)
 	if nom == "sauvage":
-		return est_sauvage(lieu_doc, index, nature)
+		return est_sauvage(lieu_doc, index, nature, zones, urbains)
 	if nom == "pays":
 		return lieu_doc.get("categorie") == "pays"
+	if nom == "ciel_ouvert":
+		return ciel_ouvert(lieu_doc, zones, urbains)
 	return False
 
 
-def lieu_ok(methode: dict, lieu_doc: dict | None, index: dict, nature: set) -> bool:
-	"""La méthode s'exerce-t-elle ici ? OU entre prédicats, catégories et tags."""
+def lieu_ok(methode: dict, lieu_doc: dict | None, index: dict, nature: set, zones: list | None = None,
+			urbains: set = frozenset()) -> bool:
+	"""La méthode s'exerce-t-elle ici ? OU entre prédicats, catégories et tags. `zones` : les
+	`terrain_tags` des zones actives à la position (`zones_sous_les_pieds`)."""
 	if not lieu_doc:
 		return False
 	l = methode["lieu"]
-	return (any(predicat_ok(p, lieu_doc, index, nature) for p in l["predicats"])
+	return (any(predicat_ok(p, lieu_doc, index, nature, zones, urbains) for p in l["predicats"])
 			or lieu_doc.get("categorie") in l["categories"]
 			or bool(set(l["tags"]) & set(lieu_doc.get("tags") or [])))
 
@@ -269,7 +309,7 @@ def methode_de_vocation(voc: str, methodes: list) -> dict | None:
 
 def applicables(lieu_doc: dict | None, index: dict, membres: list, regles: dict, connait_fn,
 				relation_value: int | None = None, informateur_present: bool = False,
-				interlocuteurs: dict | None = None) -> list:
+				interlocuteurs: dict | None = None, zones: list | None = None) -> list:
 	"""[{methode, acteur, seuil, cle, interlocuteur}] des méthodes exerçables ici, dans l'ordre
 	du doc. Acteur = le membre éligible au plus haut seuil ; ex æquo : le premier (principal EN
 	TÊTE). Méthode à `interlocuteur` : une entrée PAR PNJ de `interlocuteurs[type]` (recrue :
@@ -277,10 +317,10 @@ def applicables(lieu_doc: dict | None, index: dict, membres: list, regles: dict,
 	de vocation, l'informateur de taverne (s'il est là) prend le relais. `cle` = identité de
 	l'entrée (méthode, ou méthode|PNJ) : c'est elle qui porte le délai."""
 	methodes, _ = methodes_de(regles)
-	nature = tags_nature(regles)
+	nature, urbains = tags_nature(regles), tags_urbains(regles)
 	sortie = []
 	for m in methodes:
-		if m["informateur"] or not lieu_ok(m, lieu_doc, index, nature):
+		if m["informateur"] or not lieu_ok(m, lieu_doc, index, nature, zones, urbains):
 			continue
 		if m["interlocuteur"]:
 			for pnj in (interlocuteurs or {}).get(m["interlocuteur"]) or []:
@@ -303,7 +343,7 @@ def applicables(lieu_doc: dict | None, index: dict, membres: list, regles: dict,
 			sortie.append(meilleur)
 	if not any(not a["interlocuteur"] for a in sortie) and informateur_present:
 		for m in methodes:
-			if m["informateur"] and lieu_ok(m, lieu_doc, index, nature) and membres:
+			if m["informateur"] and lieu_ok(m, lieu_doc, index, nature, zones, urbains) and membres:
 				sortie.append({"methode": m, "acteur": membres[0], "interlocuteur": None, "cle": m["id"],
 							   "seuil": seuil(m, membres[0], relation_value)})
 				break

@@ -20,6 +20,7 @@ from utils.characters import (
 	grant_xp, item_ref_weight, lieu_label, money_to_cuivre,
 )
 from utils.marche import debit_character
+from utils.zones import load_zone_defs_for_lieu
 from routers.user import _inventory_payload
 
 renseignement_router = APIRouter()
@@ -105,10 +106,14 @@ def _contexte(character: dict, complet=True) -> dict:
 	index = _index_complet() if complet is True else _index_chaine(lieu_doc)
 	membres = expedition.membres(character, get_doc)
 	relation = marche.relation_value(marche.get_relation(character, lieu_doc)) if lieu_doc else None
+	# Zones d'influence sous les pieds : `sauvage` et `ciel_ouvert` se jugent à la position.
+	zones = (rens.zones_sous_les_pieds(lieu_doc, character.get("position"),
+									   load_zone_defs_for_lieu(lieu_doc, get_doc))
+			 if lieu_doc.get("zone_influences") else [])
 	apps = rens.applicables(lieu_doc, index, membres, regles,
 							lambda m, cid: pouvoirs_objets.connait(m, cid, get_doc), relation,
 							rens.informateur_ici(character, lieu_doc.get("_id", "")),
-							_interlocuteurs(character, lieu_doc))
+							_interlocuteurs(character, lieu_doc), zones)
 	if complet == "auto" and any(a["interlocuteur"] for a in apps):
 		index = _index_complet()
 	return {"lieu": lieu_doc, "regles": regles, "index": index, "membres": membres, "apps": apps}

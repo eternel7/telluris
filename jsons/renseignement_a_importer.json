@@ -15,7 +15,49 @@
       "humide",
       "falaise",
       "grotte",
-      "fleuve"
+      "fleuve",
+      "riviere",
+      "lac",
+      "marais",
+      "tourbiere",
+      "mangrove",
+      "lagune",
+      "delta",
+      "estuaire",
+      "cote",
+      "plage",
+      "mer",
+      "fjord",
+      "plaine",
+      "colline",
+      "vallee",
+      "plateau",
+      "alpage",
+      "herbe",
+      "steppe",
+      "savane",
+      "toundra",
+      "jungle",
+      "garrigue",
+      "canyon",
+      "volcan",
+      "glacier",
+      "banquise",
+      "neige",
+      "oasis",
+      "dune",
+      "karst",
+      "rural",
+      "champ",
+      "ferme",
+      "bocage",
+      "verger",
+      "culture"
+    ],
+    "tags_urbains": [
+      "ville",
+      "urbain",
+      "place"
     ],
     "methodes": [
       {
@@ -437,7 +479,7 @@
         ],
         "lieu": {
           "predicats": [
-            "pays"
+            "ciel_ouvert"
           ]
         },
         "test": [
@@ -455,6 +497,57 @@
         "repliques": {
           "intro": "L'esprit du faucon survole la carte pour vous.",
           "description": "Les zones de cette carte et leurs espèces ; coûte les PM d'Œil du faucon."
+        }
+      },
+      {
+        "id": "recrues",
+        "nom": "Interroger une recrue",
+        "icon": "🧭",
+        "interlocuteur": "recrue",
+        "lieu": {
+          "categories": [
+            "guilde_aventurier"
+          ]
+        },
+        "test": [
+          "cha"
+        ],
+        "cout": 0,
+        "modes": [
+          "quete",
+          "dangers",
+          "donjons",
+          "ressources"
+        ],
+        "repliques": {
+          "intro": "Contre un pourboire, la recrue raconte ce qu'elle sait.",
+          "description": "Ce qu'elle a affronté, ce que dit son pays, ce que sait son métier."
+        }
+      },
+      {
+        "id": "receptionniste",
+        "nom": "Les registres de la Guilde",
+        "icon": "📒",
+        "interlocuteur": "receptionniste",
+        "via_pnj": true,
+        "lieu": {
+          "categories": [
+            "guilde_aventurier_comptoir"
+          ]
+        },
+        "test": [
+          "cha"
+        ],
+        "cout": 0,
+        "modes": [
+          "quete",
+          "dangers",
+          "donjons",
+          "ressources"
+        ],
+        "repliques": {
+          "intro": "Les registres de la Guilde s'ouvrent sur le comptoir.",
+          "description": "Gratuit : ce que la Guilde a consigné, selon votre rang."
         }
       },
       {
@@ -478,17 +571,5 @@
         }
       }
     ]
-  },
-  {
-    "_id": "item:note_renseignement",
-    "type": "item",
-    "nom": "Note de renseignement",
-    "icon": "🗒️",
-    "categorie": "document",
-    "sous_categorie": "note_renseignement",
-    "rarete": "commun",
-    "slots": [],
-    "poids": 0.05,
-    "description": "Une note griffonnée : où trouver ce que l'on cherche."
   }
 ]
