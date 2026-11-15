@@ -1,8 +1,9 @@
 """Image d'un monstre en combat (pur) : choix parmi les VARIANTES de son espèce.
 
 Convention de nommage, LUE dans le dossier, jamais déclarée dans la donnée :
-`<base>_transparent<suffixe>.webp` (ou `.png`, format d'avant), `<base>` tiré de `espece.image`.
+`<base>_transparent<suffixe>.webp` (ou `.png`, format d'avant, ou `.gif`), `<base>` tiré de `espece.image`.
 Le même nom présent en `.webp` ET en `.png` (transition) ne compte qu'une fois : le `.webp`.
+Un `.gif` compte TOUJOURS à part, même homonyme d'un `.webp` : une variante de plus au tirage.
 - suffixe vide ou numéroté (`01`, `02`…) → variante GÉNÉRIQUE ;
 - suffixe à mots (`_arc`, `_epee`, `_arc01`…) → variante SPÉCIALISÉE, choisie seulement
   si CHAQUE mot est porté par une arme équipée (id, `sous_categorie` ou tag). Un mot
@@ -15,7 +16,7 @@ from __future__ import annotations
 import random
 import re
 
-_MOTIF = re.compile(r"^(?P<base>.+?)_transparent(?P<suffixe>.*)\.(?:png|webp)$", re.IGNORECASE)
+_MOTIF = re.compile(r"^(?P<base>.+?)_transparent(?P<suffixe>.*)\.(?:png|webp|gif)$", re.IGNORECASE)
 
 
 def _jetons(suffixe: str) -> frozenset[str]:

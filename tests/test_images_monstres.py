@@ -69,3 +69,12 @@ def test_webp_reconnu_et_prefere_au_png_du_meme_nom():
 	choisir_image("loup_transparent.png", fichiers, [PIQUE], choix_fn=choix)
 	assert vus == [["loup_transparent.webp", "loup_transparent01.png"]]
 	assert choisir_image("loup_transparent.webp", fichiers, [ARC]) == "loup_transparent_arc.webp"
+
+
+def test_gif_reconnu_et_tire_a_cote_du_webp_du_meme_nom():
+	# Un .gif n'est pas une transition : homonyme d'un .webp, il reste une variante à part entière.
+	fichiers = ["hippogriffe_transparent.gif", "hippogriffe_transparent.webp", "hippogriffe_transparent_arc.gif"]
+	vus, choix = _candidats()
+	choisir_image("hippogriffe_transparent.gif", fichiers, [PIQUE], choix_fn=choix)
+	assert vus == [["hippogriffe_transparent.gif", "hippogriffe_transparent.webp"]]
+	assert choisir_image("hippogriffe_transparent.webp", fichiers, [ARC]) == "hippogriffe_transparent_arc.gif"

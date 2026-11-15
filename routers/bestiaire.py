@@ -8,7 +8,7 @@ from utils.auth import get_current_user
 bestiaire_router = APIRouter()
 
 MONSTERS_PATH = "templates/resources/monsters"
-VALID_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp")
+VALID_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".gif")
 
 
 def _require_admin(current_user: dict):
