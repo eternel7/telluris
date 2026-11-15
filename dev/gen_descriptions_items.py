@@ -52,6 +52,43 @@ ESSENCES = {
 	"saule": ("de saule", "Souple et léger, l'ami des vanniers et des faiseurs de paniers."),
 	"tilleul": ("de tilleul", "Tendre et presque sans nœuds : le bois que préfèrent les sculpteurs."),
 	"tremble": ("de tremble", "Bois blanc et léger qui ne se fend guère : bardeaux, écuelles et boîtes."),
+	# Essences ajoutées par dev/gen_essences_bois.py (conifères, Méditerranée, terres sèches, tropiques).
+	"pin_sylvestre": ("de pin sylvestre", "Résineux droit et sec : poutres, mâts légers et torches qui brûlent longtemps."),
+	"sapin": ("de sapin", "Bois blanc, léger et droit : planches, charpentes de toit et mâts de navire."),
+	"epicea": ("d'épicéa", "Bois clair à fibre régulière, que les luthiers choisissent pour leurs tables d'harmonie."),
+	"meleze": ("de mélèze", "Le plus dur des résineux, rouge et gorgé de résine : bardeaux et pilotis qui défient l'eau."),
+	"if": ("d'if", "Bois rouge, dense et vénéneux, qui plie et revient : le bois des grands arcs. On dit que certains morts le craignent."),
+	"pin_cembro": ("de pin cembro", "Résineux des hautes pentes, tendre et parfumé, cher aux sculpteurs des montagnes."),
+	"olivier": ("d'olivier", "Bois dur veiné de brun et de miel, lent à pousser : bols, manches et objets de prix."),
+	"chene_vert": ("de chêne vert", "Le chêne qui garde ses feuilles en hiver : bois lourd, très dur, excellent charbon."),
+	"chene_liege": ("de chêne-liège", "Son écorce épaisse se lève sans le tuer : bouchons, flotteurs et semelles."),
+	"pin_parasol": ("de pin parasol", "Pin à large couronne aux pignons recherchés ; bois résineux pour coques et charpentes."),
+	"cypres": ("de cyprès", "Bois odorant que les insectes fuient : coffres, portes et cercueils qui traversent les siècles."),
+	"cedre": ("de cèdre", "Bois rouge et parfumé qui ne pourrit pas : le bois des temples et des grands navires."),
+	"caroubier": ("de caroubier", "Bois dur et rougeâtre ; ses gousses sucrées nourrissent bêtes et voyageurs."),
+	"figuier": ("de figuier", "Bois tendre et spongieux, médiocre à brûler ; l'arbre, lui, donne ses figues deux fois l'an."),
+	"palmier_dattier": ("de dattier", "Stipe fibreux plutôt que bois : poutres légères, cordes, et nattes tressées de ses palmes."),
+	"doum": ("de doum", "Palmier fourchu des rives des fleuves, dont le fruit a le goût du pain d'épice."),
+	"acacia": ("d'acacia", "Bois dur, lourd et doré, qui brave l'eau : coffres, chevilles et coques de barque."),
+	"tamaris": ("de tamaris", "Arbre des sols salés au bois dur et noueux, bon pour les manches et le charbon."),
+	"sycomore": ("de sycomore", "Le figuier des sables : bois léger et durable, dont on taille statues et sarcophages."),
+	"baobab": ("de baobab", "Tronc énorme gorgé d'eau, au bois spongieux : on en tire des fibres plus que des planches."),
+	"arganier": ("d'arganier", "Bois si dur qu'il émousse les haches ; ses fruits donnent une huile précieuse."),
+	"eucalyptus": ("d'eucalyptus", "Bois lourd et odorant, vite poussé, qui brûle chaud ; ses feuilles dégagent la poitrine."),
+	"ebene": ("d'ébène", "Bois noir si dense qu'il coule : manches de dague, pièces de jeu et instruments de prix."),
+	"acajou": ("d'acajou", "Bois brun-rouge, stable et docile à l'outil : le bois des meubles et des coques fines."),
+	"iroko": ("d'iroko", "Bois doré qui brunit à l'air et ne pourrit pas : ponts, pilotis et quilles."),
+	"okoume": ("d'okoumé", "Bois rose, tendre et léger, aux fûts immenses : pirogues et planches légères."),
+	"palissandre": ("de palissandre", "Bois sombre veiné de violet, au parfum de rose : luths, coffrets et manches d'apparat."),
+	"santal": ("de santal", "Bois jaune au parfum tenace, brûlé en encens ou réduit en huile ; il se vend au poids."),
+}
+
+# Palmiers : leur « bois » est un stipe fibreux — tronc dit « stipe », branche dite « palme ».
+FORMES_PALMIER = {
+	"arbre": "Un palmier sur pied : il faut l'abattre avant d'en tirer quoi que ce soit.",
+	"tronc": "Stipe {de} abattu, fibreux et lourd : il reste à le tronçonner.",
+	"rondin": "Tronçon de stipe {de}, qui ne se refend pas : poteau, solive ou combustible.",
+	"branche": "Palme {de}, à tresser en nattes, en paniers ou en toiture.",
 }
 
 # sous-catégorie de découpe → gabarit (« {de} » = « d'alisier »…).
@@ -446,7 +483,8 @@ def description_de(doc: dict, items: dict, neuves: dict):
 					for m in fabrication.normaliser_matieres(fab.get("matieres"))]
 		return fabrication.description_variante(base, matieres)
 	essence = _essence(doc)
-	forme = FORMES_BOIS.get(doc.get("sous_categorie") or "")
+	formes = FORMES_PALMIER if "palmier" in (doc.get("tags") or []) else FORMES_BOIS
+	forme = formes.get(doc.get("sous_categorie") or "")
 	if essence in ESSENCES and forme:
 		de, trait = ESSENCES[essence]
 		return forme.format(de=de) + " " + trait

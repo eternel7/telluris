@@ -1,0 +1,3342 @@
+{
+ "docs": [
+  {
+   "_id": "item:Branche_de_Pin_sylvestre",
+   "type": "item",
+   "nom": "Branche de Pin sylvestre",
+   "sous_categorie": "branche",
+   "icon": "🌲",
+   "description": "Branche de pin sylvestre élaguée, bonne à fagoter ou à tailler. Résineux droit et sec : poutres, mâts légers et torches qui brûlent longtemps.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_pin_sylvestre"
+   ],
+   "poids": [
+    0.4,
+    1.8
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Pin_sylvestre",
+   "type": "item",
+   "nom": "Petit rondin de Pin sylvestre",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de pin sylvestre, de quoi tourner un manche ou nourrir un feu. Résineux droit et sec : poutres, mâts légers et torches qui brûlent longtemps.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_sylvestre"
+   ],
+   "poids": [
+    7,
+    15
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Pin_sylvestre",
+   "type": "item",
+   "nom": "Rondin de Pin sylvestre",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de pin sylvestre, la mesure courante du bûcheron et du charpentier. Résineux droit et sec : poutres, mâts légers et torches qui brûlent longtemps.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_sylvestre"
+   ],
+   "poids": [
+    18,
+    40
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Pin_sylvestre",
+   "type": "item",
+   "nom": "Gros rondin de Pin sylvestre",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de pin sylvestre scié dans le fût, à refendre avant de servir. Résineux droit et sec : poutres, mâts légers et torches qui brûlent longtemps.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_sylvestre"
+   ],
+   "poids": [
+    45,
+    92
+   ]
+  },
+  {
+   "_id": "item:Tronc_Pin_sylvestre",
+   "type": "item",
+   "nom": "Tronc de Pin sylvestre",
+   "sous_categorie": "tronc",
+   "icon": "🌲",
+   "description": "Tronc de pin sylvestre abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Résineux droit et sec : poutres, mâts légers et torches qui brûlent longtemps.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_sylvestre"
+   ],
+   "poids": [
+    150,
+    4500
+   ]
+  },
+  {
+   "_id": "item:Pin_sylvestre",
+   "type": "item",
+   "nom": "Pin sylvestre",
+   "sous_categorie": "arbre",
+   "icon": "🌲",
+   "description": "Un arbre de pin sylvestre sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Résineux droit et sec : poutres, mâts légers et torches qui brûlent longtemps.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_sylvestre"
+   ],
+   "poids": [
+    150,
+    9000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Sapin",
+   "type": "item",
+   "nom": "Branche de Sapin",
+   "sous_categorie": "branche",
+   "icon": "🌲",
+   "description": "Branche de sapin élaguée, bonne à fagoter ou à tailler. Bois blanc, léger et droit : planches, charpentes de toit et mâts de navire.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_sapin"
+   ],
+   "poids": [
+    0.4,
+    1.8
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Sapin",
+   "type": "item",
+   "nom": "Petit rondin de Sapin",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de sapin, de quoi tourner un manche ou nourrir un feu. Bois blanc, léger et droit : planches, charpentes de toit et mâts de navire.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_sapin"
+   ],
+   "poids": [
+    7,
+    15
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Sapin",
+   "type": "item",
+   "nom": "Rondin de Sapin",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de sapin, la mesure courante du bûcheron et du charpentier. Bois blanc, léger et droit : planches, charpentes de toit et mâts de navire.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_sapin"
+   ],
+   "poids": [
+    18,
+    40
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Sapin",
+   "type": "item",
+   "nom": "Gros rondin de Sapin",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de sapin scié dans le fût, à refendre avant de servir. Bois blanc, léger et droit : planches, charpentes de toit et mâts de navire.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_sapin"
+   ],
+   "poids": [
+    45,
+    92
+   ]
+  },
+  {
+   "_id": "item:Tronc_Sapin",
+   "type": "item",
+   "nom": "Tronc de Sapin",
+   "sous_categorie": "tronc",
+   "icon": "🌲",
+   "description": "Tronc de sapin abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois blanc, léger et droit : planches, charpentes de toit et mâts de navire.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_sapin"
+   ],
+   "poids": [
+    200,
+    6000
+   ]
+  },
+  {
+   "_id": "item:Sapin",
+   "type": "item",
+   "nom": "Sapin",
+   "sous_categorie": "arbre",
+   "icon": "🌲",
+   "description": "Un arbre de sapin sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois blanc, léger et droit : planches, charpentes de toit et mâts de navire.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_sapin"
+   ],
+   "poids": [
+    200,
+    12000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Epicea",
+   "type": "item",
+   "nom": "Branche d'Épicéa",
+   "sous_categorie": "branche",
+   "icon": "🌲",
+   "description": "Branche d'épicéa élaguée, bonne à fagoter ou à tailler. Bois clair à fibre régulière, que les luthiers choisissent pour leurs tables d'harmonie.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_epicea"
+   ],
+   "poids": [
+    0.3,
+    1.5
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Epicea",
+   "type": "item",
+   "nom": "Petit rondin d'Épicéa",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin d'épicéa, de quoi tourner un manche ou nourrir un feu. Bois clair à fibre régulière, que les luthiers choisissent pour leurs tables d'harmonie.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_epicea"
+   ],
+   "poids": [
+    6,
+    12
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Epicea",
+   "type": "item",
+   "nom": "Rondin d'Épicéa",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin d'épicéa, la mesure courante du bûcheron et du charpentier. Bois clair à fibre régulière, que les luthiers choisissent pour leurs tables d'harmonie.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_epicea"
+   ],
+   "poids": [
+    14,
+    32
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Epicea",
+   "type": "item",
+   "nom": "Gros rondin d'Épicéa",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin d'épicéa scié dans le fût, à refendre avant de servir. Bois clair à fibre régulière, que les luthiers choisissent pour leurs tables d'harmonie.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_epicea"
+   ],
+   "poids": [
+    35,
+    74
+   ]
+  },
+  {
+   "_id": "item:Tronc_Epicea",
+   "type": "item",
+   "nom": "Tronc d'Épicéa",
+   "sous_categorie": "tronc",
+   "icon": "🌲",
+   "description": "Tronc d'épicéa abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois clair à fibre régulière, que les luthiers choisissent pour leurs tables d'harmonie.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_epicea"
+   ],
+   "poids": [
+    166,
+    5000
+   ]
+  },
+  {
+   "_id": "item:Epicea",
+   "type": "item",
+   "nom": "Épicéa",
+   "sous_categorie": "arbre",
+   "icon": "🌲",
+   "description": "Un arbre d'épicéa sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois clair à fibre régulière, que les luthiers choisissent pour leurs tables d'harmonie.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_epicea"
+   ],
+   "poids": [
+    166,
+    10000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Meleze",
+   "type": "item",
+   "nom": "Branche de Mélèze",
+   "sous_categorie": "branche",
+   "icon": "🌲",
+   "description": "Branche de mélèze élaguée, bonne à fagoter ou à tailler. Le plus dur des résineux, rouge et gorgé de résine : bardeaux et pilotis qui défient l'eau.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_meleze"
+   ],
+   "poids": [
+    0.6,
+    2.2
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Meleze",
+   "type": "item",
+   "nom": "Petit rondin de Mélèze",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de mélèze, de quoi tourner un manche ou nourrir un feu. Le plus dur des résineux, rouge et gorgé de résine : bardeaux et pilotis qui défient l'eau.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_meleze"
+   ],
+   "poids": [
+    9,
+    18
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Meleze",
+   "type": "item",
+   "nom": "Rondin de Mélèze",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de mélèze, la mesure courante du bûcheron et du charpentier. Le plus dur des résineux, rouge et gorgé de résine : bardeaux et pilotis qui défient l'eau.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_meleze"
+   ],
+   "poids": [
+    22,
+    50
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Meleze",
+   "type": "item",
+   "nom": "Gros rondin de Mélèze",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de mélèze scié dans le fût, à refendre avant de servir. Le plus dur des résineux, rouge et gorgé de résine : bardeaux et pilotis qui défient l'eau.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_meleze"
+   ],
+   "poids": [
+    55,
+    115
+   ]
+  },
+  {
+   "_id": "item:Tronc_Meleze",
+   "type": "item",
+   "nom": "Tronc de Mélèze",
+   "sous_categorie": "tronc",
+   "icon": "🌲",
+   "description": "Tronc de mélèze abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Le plus dur des résineux, rouge et gorgé de résine : bardeaux et pilotis qui défient l'eau.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_meleze"
+   ],
+   "poids": [
+    150,
+    4500
+   ]
+  },
+  {
+   "_id": "item:Meleze",
+   "type": "item",
+   "nom": "Mélèze",
+   "sous_categorie": "arbre",
+   "icon": "🌲",
+   "description": "Un arbre de mélèze sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Le plus dur des résineux, rouge et gorgé de résine : bardeaux et pilotis qui défient l'eau.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_meleze"
+   ],
+   "poids": [
+    150,
+    9000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_If",
+   "type": "item",
+   "nom": "Branche d'If",
+   "sous_categorie": "branche",
+   "icon": "🌲",
+   "description": "Branche d'if élaguée, bonne à fagoter ou à tailler. Bois rouge, dense et vénéneux, qui plie et revient : le bois des grands arcs. On dit que certains morts le craignent.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_if"
+   ],
+   "poids": [
+    0.7,
+    2.5
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_If",
+   "type": "item",
+   "nom": "Petit rondin d'If",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin d'if, de quoi tourner un manche ou nourrir un feu. Bois rouge, dense et vénéneux, qui plie et revient : le bois des grands arcs. On dit que certains morts le craignent.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_if"
+   ],
+   "poids": [
+    10,
+    20
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_If",
+   "type": "item",
+   "nom": "Rondin d'If",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin d'if, la mesure courante du bûcheron et du charpentier. Bois rouge, dense et vénéneux, qui plie et revient : le bois des grands arcs. On dit que certains morts le craignent.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_if"
+   ],
+   "poids": [
+    25,
+    55
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_If",
+   "type": "item",
+   "nom": "Gros rondin d'If",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin d'if scié dans le fût, à refendre avant de servir. Bois rouge, dense et vénéneux, qui plie et revient : le bois des grands arcs. On dit que certains morts le craignent.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_if"
+   ],
+   "poids": [
+    62,
+    126
+   ]
+  },
+  {
+   "_id": "item:Tronc_If",
+   "type": "item",
+   "nom": "Tronc d'If",
+   "sous_categorie": "tronc",
+   "icon": "🌲",
+   "description": "Tronc d'if abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois rouge, dense et vénéneux, qui plie et revient : le bois des grands arcs. On dit que certains morts le craignent.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_if"
+   ],
+   "poids": [
+    80,
+    2000
+   ]
+  },
+  {
+   "_id": "item:If",
+   "type": "item",
+   "nom": "If",
+   "sous_categorie": "arbre",
+   "icon": "🌲",
+   "description": "Un arbre d'if sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois rouge, dense et vénéneux, qui plie et revient : le bois des grands arcs. On dit que certains morts le craignent.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_if"
+   ],
+   "poids": [
+    80,
+    4000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Pin_cembro",
+   "type": "item",
+   "nom": "Branche de Pin cembro",
+   "sous_categorie": "branche",
+   "icon": "🌲",
+   "description": "Branche de pin cembro élaguée, bonne à fagoter ou à tailler. Résineux des hautes pentes, tendre et parfumé, cher aux sculpteurs des montagnes.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_pin_cembro"
+   ],
+   "poids": [
+    0.4,
+    1.8
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Pin_cembro",
+   "type": "item",
+   "nom": "Petit rondin de Pin cembro",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de pin cembro, de quoi tourner un manche ou nourrir un feu. Résineux des hautes pentes, tendre et parfumé, cher aux sculpteurs des montagnes.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_cembro"
+   ],
+   "poids": [
+    7,
+    15
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Pin_cembro",
+   "type": "item",
+   "nom": "Rondin de Pin cembro",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de pin cembro, la mesure courante du bûcheron et du charpentier. Résineux des hautes pentes, tendre et parfumé, cher aux sculpteurs des montagnes.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_cembro"
+   ],
+   "poids": [
+    18,
+    40
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Pin_cembro",
+   "type": "item",
+   "nom": "Gros rondin de Pin cembro",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de pin cembro scié dans le fût, à refendre avant de servir. Résineux des hautes pentes, tendre et parfumé, cher aux sculpteurs des montagnes.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_cembro"
+   ],
+   "poids": [
+    45,
+    92
+   ]
+  },
+  {
+   "_id": "item:Tronc_Pin_cembro",
+   "type": "item",
+   "nom": "Tronc de Pin cembro",
+   "sous_categorie": "tronc",
+   "icon": "🌲",
+   "description": "Tronc de pin cembro abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Résineux des hautes pentes, tendre et parfumé, cher aux sculpteurs des montagnes.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_cembro"
+   ],
+   "poids": [
+    100,
+    3000
+   ]
+  },
+  {
+   "_id": "item:Pin_cembro",
+   "type": "item",
+   "nom": "Pin cembro",
+   "sous_categorie": "arbre",
+   "icon": "🌲",
+   "description": "Un arbre de pin cembro sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Résineux des hautes pentes, tendre et parfumé, cher aux sculpteurs des montagnes.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_cembro"
+   ],
+   "poids": [
+    100,
+    6000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Olivier",
+   "type": "item",
+   "nom": "Branche d'Olivier",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche d'olivier élaguée, bonne à fagoter ou à tailler. Bois dur veiné de brun et de miel, lent à pousser : bols, manches et objets de prix.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_olivier"
+   ],
+   "poids": [
+    1,
+    3
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Olivier",
+   "type": "item",
+   "nom": "Petit rondin d'Olivier",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin d'olivier, de quoi tourner un manche ou nourrir un feu. Bois dur veiné de brun et de miel, lent à pousser : bols, manches et objets de prix.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_olivier"
+   ],
+   "poids": [
+    14,
+    28
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Olivier",
+   "type": "item",
+   "nom": "Rondin d'Olivier",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin d'olivier, la mesure courante du bûcheron et du charpentier. Bois dur veiné de brun et de miel, lent à pousser : bols, manches et objets de prix.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_olivier"
+   ],
+   "poids": [
+    35,
+    75
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Olivier",
+   "type": "item",
+   "nom": "Gros rondin d'Olivier",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin d'olivier scié dans le fût, à refendre avant de servir. Bois dur veiné de brun et de miel, lent à pousser : bols, manches et objets de prix.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_olivier"
+   ],
+   "poids": [
+    88,
+    172
+   ]
+  },
+  {
+   "_id": "item:Tronc_Olivier",
+   "type": "item",
+   "nom": "Tronc d'Olivier",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc d'olivier abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois dur veiné de brun et de miel, lent à pousser : bols, manches et objets de prix.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_olivier"
+   ],
+   "poids": [
+    80,
+    2000
+   ]
+  },
+  {
+   "_id": "item:Olivier",
+   "type": "item",
+   "nom": "Olivier",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre d'olivier sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois dur veiné de brun et de miel, lent à pousser : bols, manches et objets de prix.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_olivier"
+   ],
+   "poids": [
+    80,
+    4000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Chene_vert",
+   "type": "item",
+   "nom": "Branche de Chêne vert",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche de chêne vert élaguée, bonne à fagoter ou à tailler. Le chêne qui garde ses feuilles en hiver : bois lourd, très dur, excellent charbon.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_chene_vert"
+   ],
+   "poids": [
+    1,
+    3
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Chene_vert",
+   "type": "item",
+   "nom": "Petit rondin de Chêne vert",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de chêne vert, de quoi tourner un manche ou nourrir un feu. Le chêne qui garde ses feuilles en hiver : bois lourd, très dur, excellent charbon.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_chene_vert"
+   ],
+   "poids": [
+    14,
+    28
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Chene_vert",
+   "type": "item",
+   "nom": "Rondin de Chêne vert",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de chêne vert, la mesure courante du bûcheron et du charpentier. Le chêne qui garde ses feuilles en hiver : bois lourd, très dur, excellent charbon.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_chene_vert"
+   ],
+   "poids": [
+    35,
+    75
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Chene_vert",
+   "type": "item",
+   "nom": "Gros rondin de Chêne vert",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de chêne vert scié dans le fût, à refendre avant de servir. Le chêne qui garde ses feuilles en hiver : bois lourd, très dur, excellent charbon.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_chene_vert"
+   ],
+   "poids": [
+    88,
+    172
+   ]
+  },
+  {
+   "_id": "item:Tronc_Chene_vert",
+   "type": "item",
+   "nom": "Tronc de Chêne vert",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc de chêne vert abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Le chêne qui garde ses feuilles en hiver : bois lourd, très dur, excellent charbon.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_chene_vert"
+   ],
+   "poids": [
+    100,
+    3000
+   ]
+  },
+  {
+   "_id": "item:Chene_vert",
+   "type": "item",
+   "nom": "Chêne vert",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre de chêne vert sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Le chêne qui garde ses feuilles en hiver : bois lourd, très dur, excellent charbon.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_chene_vert"
+   ],
+   "poids": [
+    100,
+    6000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Chene_liege",
+   "type": "item",
+   "nom": "Branche de Chêne-liège",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche de chêne-liège élaguée, bonne à fagoter ou à tailler. Son écorce épaisse se lève sans le tuer : bouchons, flotteurs et semelles.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_chene_liege"
+   ],
+   "poids": [
+    0.7,
+    2.5
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Chene_liege",
+   "type": "item",
+   "nom": "Petit rondin de Chêne-liège",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de chêne-liège, de quoi tourner un manche ou nourrir un feu. Son écorce épaisse se lève sans le tuer : bouchons, flotteurs et semelles.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_chene_liege"
+   ],
+   "poids": [
+    10,
+    20
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Chene_liege",
+   "type": "item",
+   "nom": "Rondin de Chêne-liège",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de chêne-liège, la mesure courante du bûcheron et du charpentier. Son écorce épaisse se lève sans le tuer : bouchons, flotteurs et semelles.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_chene_liege"
+   ],
+   "poids": [
+    25,
+    55
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Chene_liege",
+   "type": "item",
+   "nom": "Gros rondin de Chêne-liège",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de chêne-liège scié dans le fût, à refendre avant de servir. Son écorce épaisse se lève sans le tuer : bouchons, flotteurs et semelles.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_chene_liege"
+   ],
+   "poids": [
+    62,
+    126
+   ]
+  },
+  {
+   "_id": "item:Tronc_Chene_liege",
+   "type": "item",
+   "nom": "Tronc de Chêne-liège",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc de chêne-liège abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Son écorce épaisse se lève sans le tuer : bouchons, flotteurs et semelles.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_chene_liege"
+   ],
+   "poids": [
+    100,
+    3000
+   ]
+  },
+  {
+   "_id": "item:Chene_liege",
+   "type": "item",
+   "nom": "Chêne-liège",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre de chêne-liège sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Son écorce épaisse se lève sans le tuer : bouchons, flotteurs et semelles.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_chene_liege"
+   ],
+   "poids": [
+    100,
+    6000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Pin_parasol",
+   "type": "item",
+   "nom": "Branche de Pin parasol",
+   "sous_categorie": "branche",
+   "icon": "🌲",
+   "description": "Branche de pin parasol élaguée, bonne à fagoter ou à tailler. Pin à large couronne aux pignons recherchés ; bois résineux pour coques et charpentes.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_pin_parasol"
+   ],
+   "poids": [
+    0.4,
+    1.8
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Pin_parasol",
+   "type": "item",
+   "nom": "Petit rondin de Pin parasol",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de pin parasol, de quoi tourner un manche ou nourrir un feu. Pin à large couronne aux pignons recherchés ; bois résineux pour coques et charpentes.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_parasol"
+   ],
+   "poids": [
+    7,
+    15
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Pin_parasol",
+   "type": "item",
+   "nom": "Rondin de Pin parasol",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de pin parasol, la mesure courante du bûcheron et du charpentier. Pin à large couronne aux pignons recherchés ; bois résineux pour coques et charpentes.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_parasol"
+   ],
+   "poids": [
+    18,
+    40
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Pin_parasol",
+   "type": "item",
+   "nom": "Gros rondin de Pin parasol",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de pin parasol scié dans le fût, à refendre avant de servir. Pin à large couronne aux pignons recherchés ; bois résineux pour coques et charpentes.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_parasol"
+   ],
+   "poids": [
+    45,
+    92
+   ]
+  },
+  {
+   "_id": "item:Tronc_Pin_parasol",
+   "type": "item",
+   "nom": "Tronc de Pin parasol",
+   "sous_categorie": "tronc",
+   "icon": "🌲",
+   "description": "Tronc de pin parasol abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Pin à large couronne aux pignons recherchés ; bois résineux pour coques et charpentes.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_parasol"
+   ],
+   "poids": [
+    133,
+    4000
+   ]
+  },
+  {
+   "_id": "item:Pin_parasol",
+   "type": "item",
+   "nom": "Pin parasol",
+   "sous_categorie": "arbre",
+   "icon": "🌲",
+   "description": "Un arbre de pin parasol sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Pin à large couronne aux pignons recherchés ; bois résineux pour coques et charpentes.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_pin_parasol"
+   ],
+   "poids": [
+    133,
+    8000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Cypres",
+   "type": "item",
+   "nom": "Branche de Cyprès",
+   "sous_categorie": "branche",
+   "icon": "🌲",
+   "description": "Branche de cyprès élaguée, bonne à fagoter ou à tailler. Bois odorant que les insectes fuient : coffres, portes et cercueils qui traversent les siècles.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_cypres"
+   ],
+   "poids": [
+    0.6,
+    2.2
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Cypres",
+   "type": "item",
+   "nom": "Petit rondin de Cyprès",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de cyprès, de quoi tourner un manche ou nourrir un feu. Bois odorant que les insectes fuient : coffres, portes et cercueils qui traversent les siècles.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_cypres"
+   ],
+   "poids": [
+    9,
+    18
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Cypres",
+   "type": "item",
+   "nom": "Rondin de Cyprès",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de cyprès, la mesure courante du bûcheron et du charpentier. Bois odorant que les insectes fuient : coffres, portes et cercueils qui traversent les siècles.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_cypres"
+   ],
+   "poids": [
+    22,
+    50
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Cypres",
+   "type": "item",
+   "nom": "Gros rondin de Cyprès",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de cyprès scié dans le fût, à refendre avant de servir. Bois odorant que les insectes fuient : coffres, portes et cercueils qui traversent les siècles.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_cypres"
+   ],
+   "poids": [
+    55,
+    115
+   ]
+  },
+  {
+   "_id": "item:Tronc_Cypres",
+   "type": "item",
+   "nom": "Tronc de Cyprès",
+   "sous_categorie": "tronc",
+   "icon": "🌲",
+   "description": "Tronc de cyprès abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois odorant que les insectes fuient : coffres, portes et cercueils qui traversent les siècles.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_cypres"
+   ],
+   "poids": [
+    100,
+    3000
+   ]
+  },
+  {
+   "_id": "item:Cypres",
+   "type": "item",
+   "nom": "Cyprès",
+   "sous_categorie": "arbre",
+   "icon": "🌲",
+   "description": "Un arbre de cyprès sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois odorant que les insectes fuient : coffres, portes et cercueils qui traversent les siècles.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_cypres"
+   ],
+   "poids": [
+    100,
+    6000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Cedre",
+   "type": "item",
+   "nom": "Branche de Cèdre",
+   "sous_categorie": "branche",
+   "icon": "🌲",
+   "description": "Branche de cèdre élaguée, bonne à fagoter ou à tailler. Bois rouge et parfumé qui ne pourrit pas : le bois des temples et des grands navires.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_cedre"
+   ],
+   "poids": [
+    0.6,
+    2.2
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Cedre",
+   "type": "item",
+   "nom": "Petit rondin de Cèdre",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de cèdre, de quoi tourner un manche ou nourrir un feu. Bois rouge et parfumé qui ne pourrit pas : le bois des temples et des grands navires.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_cedre"
+   ],
+   "poids": [
+    9,
+    18
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Cedre",
+   "type": "item",
+   "nom": "Rondin de Cèdre",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de cèdre, la mesure courante du bûcheron et du charpentier. Bois rouge et parfumé qui ne pourrit pas : le bois des temples et des grands navires.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_cedre"
+   ],
+   "poids": [
+    22,
+    50
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Cedre",
+   "type": "item",
+   "nom": "Gros rondin de Cèdre",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de cèdre scié dans le fût, à refendre avant de servir. Bois rouge et parfumé qui ne pourrit pas : le bois des temples et des grands navires.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_cedre"
+   ],
+   "poids": [
+    55,
+    115
+   ]
+  },
+  {
+   "_id": "item:Tronc_Cedre",
+   "type": "item",
+   "nom": "Tronc de Cèdre",
+   "sous_categorie": "tronc",
+   "icon": "🌲",
+   "description": "Tronc de cèdre abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois rouge et parfumé qui ne pourrit pas : le bois des temples et des grands navires.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_cedre"
+   ],
+   "poids": [
+    333,
+    10000
+   ]
+  },
+  {
+   "_id": "item:Cedre",
+   "type": "item",
+   "nom": "Cèdre",
+   "sous_categorie": "arbre",
+   "icon": "🌲",
+   "description": "Un arbre de cèdre sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois rouge et parfumé qui ne pourrit pas : le bois des temples et des grands navires.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_cedre"
+   ],
+   "poids": [
+    333,
+    20000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Caroubier",
+   "type": "item",
+   "nom": "Branche de Caroubier",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche de caroubier élaguée, bonne à fagoter ou à tailler. Bois dur et rougeâtre ; ses gousses sucrées nourrissent bêtes et voyageurs.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_caroubier"
+   ],
+   "poids": [
+    0.7,
+    2.5
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Caroubier",
+   "type": "item",
+   "nom": "Petit rondin de Caroubier",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de caroubier, de quoi tourner un manche ou nourrir un feu. Bois dur et rougeâtre ; ses gousses sucrées nourrissent bêtes et voyageurs.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_caroubier"
+   ],
+   "poids": [
+    10,
+    20
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Caroubier",
+   "type": "item",
+   "nom": "Rondin de Caroubier",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de caroubier, la mesure courante du bûcheron et du charpentier. Bois dur et rougeâtre ; ses gousses sucrées nourrissent bêtes et voyageurs.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_caroubier"
+   ],
+   "poids": [
+    25,
+    55
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Caroubier",
+   "type": "item",
+   "nom": "Gros rondin de Caroubier",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de caroubier scié dans le fût, à refendre avant de servir. Bois dur et rougeâtre ; ses gousses sucrées nourrissent bêtes et voyageurs.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_caroubier"
+   ],
+   "poids": [
+    62,
+    126
+   ]
+  },
+  {
+   "_id": "item:Tronc_Caroubier",
+   "type": "item",
+   "nom": "Tronc de Caroubier",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc de caroubier abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois dur et rougeâtre ; ses gousses sucrées nourrissent bêtes et voyageurs.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_caroubier"
+   ],
+   "poids": [
+    83,
+    2500
+   ]
+  },
+  {
+   "_id": "item:Caroubier",
+   "type": "item",
+   "nom": "Caroubier",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre de caroubier sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois dur et rougeâtre ; ses gousses sucrées nourrissent bêtes et voyageurs.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_caroubier"
+   ],
+   "poids": [
+    83,
+    5000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Figuier",
+   "type": "item",
+   "nom": "Branche de Figuier",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche de figuier élaguée, bonne à fagoter ou à tailler. Bois tendre et spongieux, médiocre à brûler ; l'arbre, lui, donne ses figues deux fois l'an.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_figuier"
+   ],
+   "poids": [
+    0.3,
+    1.5
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Figuier",
+   "type": "item",
+   "nom": "Petit rondin de Figuier",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de figuier, de quoi tourner un manche ou nourrir un feu. Bois tendre et spongieux, médiocre à brûler ; l'arbre, lui, donne ses figues deux fois l'an.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_figuier"
+   ],
+   "poids": [
+    6,
+    12
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Figuier",
+   "type": "item",
+   "nom": "Rondin de Figuier",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de figuier, la mesure courante du bûcheron et du charpentier. Bois tendre et spongieux, médiocre à brûler ; l'arbre, lui, donne ses figues deux fois l'an.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_figuier"
+   ],
+   "poids": [
+    14,
+    32
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Figuier",
+   "type": "item",
+   "nom": "Gros rondin de Figuier",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de figuier scié dans le fût, à refendre avant de servir. Bois tendre et spongieux, médiocre à brûler ; l'arbre, lui, donne ses figues deux fois l'an.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_figuier"
+   ],
+   "poids": [
+    35,
+    74
+   ]
+  },
+  {
+   "_id": "item:Tronc_Figuier",
+   "type": "item",
+   "nom": "Tronc de Figuier",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc de figuier abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois tendre et spongieux, médiocre à brûler ; l'arbre, lui, donne ses figues deux fois l'an.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_figuier"
+   ],
+   "poids": [
+    80,
+    1250
+   ]
+  },
+  {
+   "_id": "item:Figuier",
+   "type": "item",
+   "nom": "Figuier",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre de figuier sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois tendre et spongieux, médiocre à brûler ; l'arbre, lui, donne ses figues deux fois l'an.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_figuier"
+   ],
+   "poids": [
+    80,
+    2500
+   ]
+  },
+  {
+   "_id": "item:Palmier_dattier",
+   "type": "item",
+   "nom": "Palmier dattier",
+   "sous_categorie": "arbre",
+   "icon": "🌴",
+   "description": "Un palmier sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Stipe fibreux plutôt que bois : poutres légères, cordes, et nattes tressées de ses palmes.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_palmier_dattier",
+    "palmier"
+   ],
+   "poids": [
+    80,
+    2500
+   ]
+  },
+  {
+   "_id": "item:Tronc_Palmier_dattier",
+   "type": "item",
+   "nom": "Stipe de Dattier",
+   "sous_categorie": "tronc",
+   "icon": "🌴",
+   "description": "Stipe de dattier abattu, fibreux et lourd : il reste à le tronçonner. Stipe fibreux plutôt que bois : poutres légères, cordes, et nattes tressées de ses palmes.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_palmier_dattier",
+    "palmier"
+   ],
+   "poids": [
+    80,
+    1250
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Palmier_dattier",
+   "type": "item",
+   "nom": "Tronçon de stipe de Dattier",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Tronçon de stipe de dattier, qui ne se refend pas : poteau, solive ou combustible. Stipe fibreux plutôt que bois : poutres légères, cordes, et nattes tressées de ses palmes.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_palmier_dattier",
+    "palmier"
+   ],
+   "poids": [
+    22,
+    50
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Palmier_dattier",
+   "type": "item",
+   "nom": "Palme de Dattier",
+   "sous_categorie": "branche",
+   "icon": "🌿",
+   "description": "Palme de dattier, à tresser en nattes, en paniers ou en toiture. Stipe fibreux plutôt que bois : poutres légères, cordes, et nattes tressées de ses palmes.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_palmier_dattier",
+    "palmier"
+   ],
+   "poids": [
+    0.6,
+    2.2
+   ]
+  },
+  {
+   "_id": "item:Doum",
+   "type": "item",
+   "nom": "Palmier doum",
+   "sous_categorie": "arbre",
+   "icon": "🌴",
+   "description": "Un palmier sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Palmier fourchu des rives des fleuves, dont le fruit a le goût du pain d'épice.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_doum",
+    "palmier"
+   ],
+   "poids": [
+    80,
+    2000
+   ]
+  },
+  {
+   "_id": "item:Tronc_Doum",
+   "type": "item",
+   "nom": "Stipe de Doum",
+   "sous_categorie": "tronc",
+   "icon": "🌴",
+   "description": "Stipe de doum abattu, fibreux et lourd : il reste à le tronçonner. Palmier fourchu des rives des fleuves, dont le fruit a le goût du pain d'épice.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_doum",
+    "palmier"
+   ],
+   "poids": [
+    80,
+    1000
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Doum",
+   "type": "item",
+   "nom": "Tronçon de stipe de Doum",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Tronçon de stipe de doum, qui ne se refend pas : poteau, solive ou combustible. Palmier fourchu des rives des fleuves, dont le fruit a le goût du pain d'épice.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_doum",
+    "palmier"
+   ],
+   "poids": [
+    22,
+    50
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Doum",
+   "type": "item",
+   "nom": "Palme de Doum",
+   "sous_categorie": "branche",
+   "icon": "🌿",
+   "description": "Palme de doum, à tresser en nattes, en paniers ou en toiture. Palmier fourchu des rives des fleuves, dont le fruit a le goût du pain d'épice.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_doum",
+    "palmier"
+   ],
+   "poids": [
+    0.6,
+    2.2
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Acacia",
+   "type": "item",
+   "nom": "Branche d'Acacia",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche d'acacia élaguée, bonne à fagoter ou à tailler. Bois dur, lourd et doré, qui brave l'eau : coffres, chevilles et coques de barque.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_acacia"
+   ],
+   "poids": [
+    1,
+    3
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Acacia",
+   "type": "item",
+   "nom": "Petit rondin d'Acacia",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin d'acacia, de quoi tourner un manche ou nourrir un feu. Bois dur, lourd et doré, qui brave l'eau : coffres, chevilles et coques de barque.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_acacia"
+   ],
+   "poids": [
+    14,
+    28
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Acacia",
+   "type": "item",
+   "nom": "Rondin d'Acacia",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin d'acacia, la mesure courante du bûcheron et du charpentier. Bois dur, lourd et doré, qui brave l'eau : coffres, chevilles et coques de barque.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_acacia"
+   ],
+   "poids": [
+    35,
+    75
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Acacia",
+   "type": "item",
+   "nom": "Gros rondin d'Acacia",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin d'acacia scié dans le fût, à refendre avant de servir. Bois dur, lourd et doré, qui brave l'eau : coffres, chevilles et coques de barque.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_acacia"
+   ],
+   "poids": [
+    88,
+    172
+   ]
+  },
+  {
+   "_id": "item:Tronc_Acacia",
+   "type": "item",
+   "nom": "Tronc d'Acacia",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc d'acacia abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois dur, lourd et doré, qui brave l'eau : coffres, chevilles et coques de barque.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_acacia"
+   ],
+   "poids": [
+    80,
+    1750
+   ]
+  },
+  {
+   "_id": "item:Acacia",
+   "type": "item",
+   "nom": "Acacia",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre d'acacia sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois dur, lourd et doré, qui brave l'eau : coffres, chevilles et coques de barque.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_acacia"
+   ],
+   "poids": [
+    80,
+    3500
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Tamaris",
+   "type": "item",
+   "nom": "Branche de Tamaris",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche de tamaris élaguée, bonne à fagoter ou à tailler. Arbre des sols salés au bois dur et noueux, bon pour les manches et le charbon.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_tamaris"
+   ],
+   "poids": [
+    0.7,
+    2.5
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Tamaris",
+   "type": "item",
+   "nom": "Petit rondin de Tamaris",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de tamaris, de quoi tourner un manche ou nourrir un feu. Arbre des sols salés au bois dur et noueux, bon pour les manches et le charbon.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_tamaris"
+   ],
+   "poids": [
+    10,
+    20
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Tamaris",
+   "type": "item",
+   "nom": "Rondin de Tamaris",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de tamaris, la mesure courante du bûcheron et du charpentier. Arbre des sols salés au bois dur et noueux, bon pour les manches et le charbon.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_tamaris"
+   ],
+   "poids": [
+    25,
+    55
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Tamaris",
+   "type": "item",
+   "nom": "Gros rondin de Tamaris",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de tamaris scié dans le fût, à refendre avant de servir. Arbre des sols salés au bois dur et noueux, bon pour les manches et le charbon.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_tamaris"
+   ],
+   "poids": [
+    62,
+    126
+   ]
+  },
+  {
+   "_id": "item:Tronc_Tamaris",
+   "type": "item",
+   "nom": "Tronc de Tamaris",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc de tamaris abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Arbre des sols salés au bois dur et noueux, bon pour les manches et le charbon.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_tamaris"
+   ],
+   "poids": [
+    80,
+    750
+   ]
+  },
+  {
+   "_id": "item:Tamaris",
+   "type": "item",
+   "nom": "Tamaris",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre de tamaris sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Arbre des sols salés au bois dur et noueux, bon pour les manches et le charbon.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_tamaris"
+   ],
+   "poids": [
+    80,
+    1500
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Sycomore",
+   "type": "item",
+   "nom": "Branche de Sycomore",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche de sycomore élaguée, bonne à fagoter ou à tailler. Le figuier des sables : bois léger et durable, dont on taille statues et sarcophages.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_sycomore"
+   ],
+   "poids": [
+    0.4,
+    1.8
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Sycomore",
+   "type": "item",
+   "nom": "Petit rondin de Sycomore",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de sycomore, de quoi tourner un manche ou nourrir un feu. Le figuier des sables : bois léger et durable, dont on taille statues et sarcophages.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_sycomore"
+   ],
+   "poids": [
+    7,
+    15
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Sycomore",
+   "type": "item",
+   "nom": "Rondin de Sycomore",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de sycomore, la mesure courante du bûcheron et du charpentier. Le figuier des sables : bois léger et durable, dont on taille statues et sarcophages.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_sycomore"
+   ],
+   "poids": [
+    18,
+    40
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Sycomore",
+   "type": "item",
+   "nom": "Gros rondin de Sycomore",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de sycomore scié dans le fût, à refendre avant de servir. Le figuier des sables : bois léger et durable, dont on taille statues et sarcophages.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_sycomore"
+   ],
+   "poids": [
+    45,
+    92
+   ]
+  },
+  {
+   "_id": "item:Tronc_Sycomore",
+   "type": "item",
+   "nom": "Tronc de Sycomore",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc de sycomore abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Le figuier des sables : bois léger et durable, dont on taille statues et sarcophages.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_sycomore"
+   ],
+   "poids": [
+    116,
+    3500
+   ]
+  },
+  {
+   "_id": "item:Sycomore",
+   "type": "item",
+   "nom": "Sycomore",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre de sycomore sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Le figuier des sables : bois léger et durable, dont on taille statues et sarcophages.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_sycomore"
+   ],
+   "poids": [
+    116,
+    7000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Baobab",
+   "type": "item",
+   "nom": "Branche de Baobab",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche de baobab élaguée, bonne à fagoter ou à tailler. Tronc énorme gorgé d'eau, au bois spongieux : on en tire des fibres plus que des planches.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_baobab"
+   ],
+   "poids": [
+    0.3,
+    1.5
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Baobab",
+   "type": "item",
+   "nom": "Petit rondin de Baobab",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de baobab, de quoi tourner un manche ou nourrir un feu. Tronc énorme gorgé d'eau, au bois spongieux : on en tire des fibres plus que des planches.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_baobab"
+   ],
+   "poids": [
+    6,
+    12
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Baobab",
+   "type": "item",
+   "nom": "Rondin de Baobab",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de baobab, la mesure courante du bûcheron et du charpentier. Tronc énorme gorgé d'eau, au bois spongieux : on en tire des fibres plus que des planches.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_baobab"
+   ],
+   "poids": [
+    14,
+    32
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Baobab",
+   "type": "item",
+   "nom": "Gros rondin de Baobab",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de baobab scié dans le fût, à refendre avant de servir. Tronc énorme gorgé d'eau, au bois spongieux : on en tire des fibres plus que des planches.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_baobab"
+   ],
+   "poids": [
+    35,
+    74
+   ]
+  },
+  {
+   "_id": "item:Tronc_Baobab",
+   "type": "item",
+   "nom": "Tronc de Baobab",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc de baobab abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Tronc énorme gorgé d'eau, au bois spongieux : on en tire des fibres plus que des planches.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_baobab"
+   ],
+   "poids": [
+    666,
+    20000
+   ]
+  },
+  {
+   "_id": "item:Baobab",
+   "type": "item",
+   "nom": "Baobab",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre de baobab sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Tronc énorme gorgé d'eau, au bois spongieux : on en tire des fibres plus que des planches.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_baobab"
+   ],
+   "poids": [
+    666,
+    40000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Arganier",
+   "type": "item",
+   "nom": "Branche d'Arganier",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche d'arganier élaguée, bonne à fagoter ou à tailler. Bois si dur qu'il émousse les haches ; ses fruits donnent une huile précieuse.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_arganier"
+   ],
+   "poids": [
+    1,
+    3
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Arganier",
+   "type": "item",
+   "nom": "Petit rondin d'Arganier",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin d'arganier, de quoi tourner un manche ou nourrir un feu. Bois si dur qu'il émousse les haches ; ses fruits donnent une huile précieuse.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_arganier"
+   ],
+   "poids": [
+    14,
+    28
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Arganier",
+   "type": "item",
+   "nom": "Rondin d'Arganier",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin d'arganier, la mesure courante du bûcheron et du charpentier. Bois si dur qu'il émousse les haches ; ses fruits donnent une huile précieuse.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_arganier"
+   ],
+   "poids": [
+    35,
+    75
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Arganier",
+   "type": "item",
+   "nom": "Gros rondin d'Arganier",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin d'arganier scié dans le fût, à refendre avant de servir. Bois si dur qu'il émousse les haches ; ses fruits donnent une huile précieuse.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_arganier"
+   ],
+   "poids": [
+    88,
+    172
+   ]
+  },
+  {
+   "_id": "item:Tronc_Arganier",
+   "type": "item",
+   "nom": "Tronc d'Arganier",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc d'arganier abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois si dur qu'il émousse les haches ; ses fruits donnent une huile précieuse.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_arganier"
+   ],
+   "poids": [
+    80,
+    1250
+   ]
+  },
+  {
+   "_id": "item:Arganier",
+   "type": "item",
+   "nom": "Arganier",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre d'arganier sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois si dur qu'il émousse les haches ; ses fruits donnent une huile précieuse.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_arganier"
+   ],
+   "poids": [
+    80,
+    2500
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Eucalyptus",
+   "type": "item",
+   "nom": "Branche d'Eucalyptus",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche d'eucalyptus élaguée, bonne à fagoter ou à tailler. Bois lourd et odorant, vite poussé, qui brûle chaud ; ses feuilles dégagent la poitrine.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_eucalyptus"
+   ],
+   "poids": [
+    0.7,
+    2.5
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Eucalyptus",
+   "type": "item",
+   "nom": "Petit rondin d'Eucalyptus",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin d'eucalyptus, de quoi tourner un manche ou nourrir un feu. Bois lourd et odorant, vite poussé, qui brûle chaud ; ses feuilles dégagent la poitrine.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_eucalyptus"
+   ],
+   "poids": [
+    10,
+    20
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Eucalyptus",
+   "type": "item",
+   "nom": "Rondin d'Eucalyptus",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin d'eucalyptus, la mesure courante du bûcheron et du charpentier. Bois lourd et odorant, vite poussé, qui brûle chaud ; ses feuilles dégagent la poitrine.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_eucalyptus"
+   ],
+   "poids": [
+    25,
+    55
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Eucalyptus",
+   "type": "item",
+   "nom": "Gros rondin d'Eucalyptus",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin d'eucalyptus scié dans le fût, à refendre avant de servir. Bois lourd et odorant, vite poussé, qui brûle chaud ; ses feuilles dégagent la poitrine.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_eucalyptus"
+   ],
+   "poids": [
+    62,
+    126
+   ]
+  },
+  {
+   "_id": "item:Tronc_Eucalyptus",
+   "type": "item",
+   "nom": "Tronc d'Eucalyptus",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc d'eucalyptus abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois lourd et odorant, vite poussé, qui brûle chaud ; ses feuilles dégagent la poitrine.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_eucalyptus"
+   ],
+   "poids": [
+    250,
+    7500
+   ]
+  },
+  {
+   "_id": "item:Eucalyptus",
+   "type": "item",
+   "nom": "Eucalyptus",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre d'eucalyptus sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois lourd et odorant, vite poussé, qui brûle chaud ; ses feuilles dégagent la poitrine.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_eucalyptus"
+   ],
+   "poids": [
+    250,
+    15000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Ebene",
+   "type": "item",
+   "nom": "Branche d'Ébène",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche d'ébène élaguée, bonne à fagoter ou à tailler. Bois noir si dense qu'il coule : manches de dague, pièces de jeu et instruments de prix.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_ebene"
+   ],
+   "poids": [
+    1,
+    3
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Ebene",
+   "type": "item",
+   "nom": "Petit rondin d'Ébène",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin d'ébène, de quoi tourner un manche ou nourrir un feu. Bois noir si dense qu'il coule : manches de dague, pièces de jeu et instruments de prix.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_ebene"
+   ],
+   "poids": [
+    14,
+    28
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Ebene",
+   "type": "item",
+   "nom": "Rondin d'Ébène",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin d'ébène, la mesure courante du bûcheron et du charpentier. Bois noir si dense qu'il coule : manches de dague, pièces de jeu et instruments de prix.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_ebene"
+   ],
+   "poids": [
+    35,
+    75
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Ebene",
+   "type": "item",
+   "nom": "Gros rondin d'Ébène",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin d'ébène scié dans le fût, à refendre avant de servir. Bois noir si dense qu'il coule : manches de dague, pièces de jeu et instruments de prix.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_ebene"
+   ],
+   "poids": [
+    88,
+    172
+   ]
+  },
+  {
+   "_id": "item:Tronc_Ebene",
+   "type": "item",
+   "nom": "Tronc d'Ébène",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc d'ébène abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois noir si dense qu'il coule : manches de dague, pièces de jeu et instruments de prix.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_ebene"
+   ],
+   "poids": [
+    83,
+    2500
+   ]
+  },
+  {
+   "_id": "item:Ebene",
+   "type": "item",
+   "nom": "Ébénier",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre d'ébène sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois noir si dense qu'il coule : manches de dague, pièces de jeu et instruments de prix.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_ebene"
+   ],
+   "poids": [
+    83,
+    5000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Acajou",
+   "type": "item",
+   "nom": "Branche d'Acajou",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche d'acajou élaguée, bonne à fagoter ou à tailler. Bois brun-rouge, stable et docile à l'outil : le bois des meubles et des coques fines.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_acajou"
+   ],
+   "poids": [
+    0.6,
+    2.2
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Acajou",
+   "type": "item",
+   "nom": "Petit rondin d'Acajou",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin d'acajou, de quoi tourner un manche ou nourrir un feu. Bois brun-rouge, stable et docile à l'outil : le bois des meubles et des coques fines.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_acajou"
+   ],
+   "poids": [
+    9,
+    18
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Acajou",
+   "type": "item",
+   "nom": "Rondin d'Acajou",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin d'acajou, la mesure courante du bûcheron et du charpentier. Bois brun-rouge, stable et docile à l'outil : le bois des meubles et des coques fines.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_acajou"
+   ],
+   "poids": [
+    22,
+    50
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Acajou",
+   "type": "item",
+   "nom": "Gros rondin d'Acajou",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin d'acajou scié dans le fût, à refendre avant de servir. Bois brun-rouge, stable et docile à l'outil : le bois des meubles et des coques fines.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_acajou"
+   ],
+   "poids": [
+    55,
+    115
+   ]
+  },
+  {
+   "_id": "item:Tronc_Acajou",
+   "type": "item",
+   "nom": "Tronc d'Acajou",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc d'acajou abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois brun-rouge, stable et docile à l'outil : le bois des meubles et des coques fines.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_acajou"
+   ],
+   "poids": [
+    333,
+    10000
+   ]
+  },
+  {
+   "_id": "item:Acajou",
+   "type": "item",
+   "nom": "Acajou",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre d'acajou sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois brun-rouge, stable et docile à l'outil : le bois des meubles et des coques fines.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_acajou"
+   ],
+   "poids": [
+    333,
+    20000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Iroko",
+   "type": "item",
+   "nom": "Branche d'Iroko",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche d'iroko élaguée, bonne à fagoter ou à tailler. Bois doré qui brunit à l'air et ne pourrit pas : ponts, pilotis et quilles.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_iroko"
+   ],
+   "poids": [
+    0.7,
+    2.5
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Iroko",
+   "type": "item",
+   "nom": "Petit rondin d'Iroko",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin d'iroko, de quoi tourner un manche ou nourrir un feu. Bois doré qui brunit à l'air et ne pourrit pas : ponts, pilotis et quilles.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_iroko"
+   ],
+   "poids": [
+    10,
+    20
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Iroko",
+   "type": "item",
+   "nom": "Rondin d'Iroko",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin d'iroko, la mesure courante du bûcheron et du charpentier. Bois doré qui brunit à l'air et ne pourrit pas : ponts, pilotis et quilles.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_iroko"
+   ],
+   "poids": [
+    25,
+    55
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Iroko",
+   "type": "item",
+   "nom": "Gros rondin d'Iroko",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin d'iroko scié dans le fût, à refendre avant de servir. Bois doré qui brunit à l'air et ne pourrit pas : ponts, pilotis et quilles.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_iroko"
+   ],
+   "poids": [
+    62,
+    126
+   ]
+  },
+  {
+   "_id": "item:Tronc_Iroko",
+   "type": "item",
+   "nom": "Tronc d'Iroko",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc d'iroko abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois doré qui brunit à l'air et ne pourrit pas : ponts, pilotis et quilles.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_iroko"
+   ],
+   "poids": [
+    416,
+    12500
+   ]
+  },
+  {
+   "_id": "item:Iroko",
+   "type": "item",
+   "nom": "Iroko",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre d'iroko sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois doré qui brunit à l'air et ne pourrit pas : ponts, pilotis et quilles.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_iroko"
+   ],
+   "poids": [
+    416,
+    25000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Okoume",
+   "type": "item",
+   "nom": "Branche d'Okoumé",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche d'okoumé élaguée, bonne à fagoter ou à tailler. Bois rose, tendre et léger, aux fûts immenses : pirogues et planches légères.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_okoume"
+   ],
+   "poids": [
+    0.3,
+    1.5
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Okoume",
+   "type": "item",
+   "nom": "Petit rondin d'Okoumé",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin d'okoumé, de quoi tourner un manche ou nourrir un feu. Bois rose, tendre et léger, aux fûts immenses : pirogues et planches légères.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_okoume"
+   ],
+   "poids": [
+    6,
+    12
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Okoume",
+   "type": "item",
+   "nom": "Rondin d'Okoumé",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin d'okoumé, la mesure courante du bûcheron et du charpentier. Bois rose, tendre et léger, aux fûts immenses : pirogues et planches légères.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_okoume"
+   ],
+   "poids": [
+    14,
+    32
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Okoume",
+   "type": "item",
+   "nom": "Gros rondin d'Okoumé",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin d'okoumé scié dans le fût, à refendre avant de servir. Bois rose, tendre et léger, aux fûts immenses : pirogues et planches légères.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_okoume"
+   ],
+   "poids": [
+    35,
+    74
+   ]
+  },
+  {
+   "_id": "item:Tronc_Okoume",
+   "type": "item",
+   "nom": "Tronc d'Okoumé",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc d'okoumé abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois rose, tendre et léger, aux fûts immenses : pirogues et planches légères.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_okoume"
+   ],
+   "poids": [
+    333,
+    10000
+   ]
+  },
+  {
+   "_id": "item:Okoume",
+   "type": "item",
+   "nom": "Okoumé",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre d'okoumé sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois rose, tendre et léger, aux fûts immenses : pirogues et planches légères.",
+   "rarete": "commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_okoume"
+   ],
+   "poids": [
+    333,
+    20000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Palissandre",
+   "type": "item",
+   "nom": "Branche de Palissandre",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche de palissandre élaguée, bonne à fagoter ou à tailler. Bois sombre veiné de violet, au parfum de rose : luths, coffrets et manches d'apparat.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_palissandre"
+   ],
+   "poids": [
+    1,
+    3
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Palissandre",
+   "type": "item",
+   "nom": "Petit rondin de Palissandre",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de palissandre, de quoi tourner un manche ou nourrir un feu. Bois sombre veiné de violet, au parfum de rose : luths, coffrets et manches d'apparat.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_palissandre"
+   ],
+   "poids": [
+    14,
+    28
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Palissandre",
+   "type": "item",
+   "nom": "Rondin de Palissandre",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de palissandre, la mesure courante du bûcheron et du charpentier. Bois sombre veiné de violet, au parfum de rose : luths, coffrets et manches d'apparat.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_palissandre"
+   ],
+   "poids": [
+    35,
+    75
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Palissandre",
+   "type": "item",
+   "nom": "Gros rondin de Palissandre",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de palissandre scié dans le fût, à refendre avant de servir. Bois sombre veiné de violet, au parfum de rose : luths, coffrets et manches d'apparat.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_palissandre"
+   ],
+   "poids": [
+    88,
+    172
+   ]
+  },
+  {
+   "_id": "item:Tronc_Palissandre",
+   "type": "item",
+   "nom": "Tronc de Palissandre",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc de palissandre abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois sombre veiné de violet, au parfum de rose : luths, coffrets et manches d'apparat.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_palissandre"
+   ],
+   "poids": [
+    133,
+    4000
+   ]
+  },
+  {
+   "_id": "item:Palissandre",
+   "type": "item",
+   "nom": "Palissandre",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre de palissandre sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois sombre veiné de violet, au parfum de rose : luths, coffrets et manches d'apparat.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_palissandre"
+   ],
+   "poids": [
+    133,
+    8000
+   ]
+  },
+  {
+   "_id": "item:Branche_de_Santal",
+   "type": "item",
+   "nom": "Branche de Santal",
+   "sous_categorie": "branche",
+   "icon": "🌳",
+   "description": "Branche de santal élaguée, bonne à fagoter ou à tailler. Bois jaune au parfum tenace, brûlé en encens ou réduit en huile ; il se vend au poids.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "essence_santal"
+   ],
+   "poids": [
+    0.7,
+    2.5
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Santal",
+   "type": "item",
+   "nom": "Petit rondin de Santal",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de santal, de quoi tourner un manche ou nourrir un feu. Bois jaune au parfum tenace, brûlé en encens ou réduit en huile ; il se vend au poids.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_santal"
+   ],
+   "poids": [
+    10,
+    20
+   ]
+  },
+  {
+   "_id": "item:Rondin_de_Santal",
+   "type": "item",
+   "nom": "Rondin de Santal",
+   "sous_categorie": "rondin",
+   "icon": "🪵",
+   "description": "Rondin de santal, la mesure courante du bûcheron et du charpentier. Bois jaune au parfum tenace, brûlé en encens ou réduit en huile ; il se vend au poids.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_santal"
+   ],
+   "poids": [
+    25,
+    55
+   ]
+  },
+  {
+   "_id": "item:Gros_rondin_de_Santal",
+   "type": "item",
+   "nom": "Gros rondin de Santal",
+   "sous_categorie": "gros_rondin",
+   "icon": "🪵",
+   "description": "Gros rondin de santal scié dans le fût, à refendre avant de servir. Bois jaune au parfum tenace, brûlé en encens ou réduit en huile ; il se vend au poids.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_santal"
+   ],
+   "poids": [
+    62,
+    126
+   ]
+  },
+  {
+   "_id": "item:Tronc_Santal",
+   "type": "item",
+   "nom": "Tronc de Santal",
+   "sous_categorie": "tronc",
+   "icon": "🌳",
+   "description": "Tronc de santal abattu et ébranché, trop lourd pour aller loin : il reste à le débiter. Bois jaune au parfum tenace, brûlé en encens ou réduit en huile ; il se vend au poids.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_santal"
+   ],
+   "poids": [
+    80,
+    750
+   ]
+  },
+  {
+   "_id": "item:Santal",
+   "type": "item",
+   "nom": "Santal",
+   "sous_categorie": "arbre",
+   "icon": "🌳",
+   "description": "Un arbre de santal sur pied : il faut l'abattre avant d'en tirer quoi que ce soit. Bois jaune au parfum tenace, brûlé en encens ou réduit en huile ; il se vend au poids.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_santal"
+   ],
+   "poids": [
+    80,
+    1500
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Alisier",
+   "type": "item",
+   "nom": "Petit rondin d'Alisier",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin d'alisier, de quoi tourner un manche ou nourrir un feu. Bois dense et rosé, au grain si fin que luthiers et graveurs se le disputent.",
+   "rarete": "rare",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_alisier"
+   ],
+   "poids": [
+    9,
+    18
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Aulne",
+   "type": "item",
+   "nom": "Petit rondin d'Aulne",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin d'aulne, de quoi tourner un manche ou nourrir un feu. Bois tendre qui rougit à la coupe ; sous l'eau, il ne pourrit pas — on en fait les pilotis.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_aulne"
+   ],
+   "poids": [
+    6,
+    12
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Orme",
+   "type": "item",
+   "nom": "Petit rondin d'Orme",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin d'orme, de quoi tourner un manche ou nourrir un feu. Ses fibres entrecroisées refusent la fente : on en tire moyeux de roue et quilles.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_orme"
+   ],
+   "poids": [
+    9,
+    18
+   ]
+  },
+  {
+   "_id": "item:Petit_rondin_de_Saule",
+   "type": "item",
+   "nom": "Petit rondin de Saule",
+   "sous_categorie": "petit_rondin",
+   "icon": "🪵",
+   "description": "Petit rondin de saule, de quoi tourner un manche ou nourrir un feu. Souple et léger, l'ami des vanniers et des faiseurs de paniers.",
+   "rarete": "peu commun",
+   "categorie": "composant",
+   "slots": [],
+   "tags": [
+    "bois",
+    "a_couper",
+    "essence_saule"
+   ],
+   "poids": [
+    6,
+    12
+   ]
+  }
+ ]
+}

@@ -602,6 +602,14 @@ CATALOGUE = [
 			"gros_rondin) — sans lui le prix retombe au plancher de 1 cu, sans aucune erreur.",
 	},
 	{
+		"id": "gen_essences_bois",
+		"label": "🌲 Générer les essences de bois (conifères, Méditerranée, terres sèches, tropiques)",
+		"argv": _py("gen_essences_bois.py"),
+		"ecrit": "Écrit jsons/essences_bois_a_importer.json.",
+		"description": "28 essences avec leur chaîne de découpe (palmiers : chaîne réduite) et le "
+			"petit rondin manquant de l'alisier, l'aulne, l'orme et le saule. N'émet que l'absent du dump.",
+	},
+	{
 		"id": "gen_loot_immateriel",
 		"label": "🦴 Donner un débouché aux butins immatériels",
 		"argv": _py("gen_loot_immateriel.py"),
