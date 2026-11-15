@@ -1,7 +1,8 @@
 """Image d'un monstre en combat (pur) : choix parmi les VARIANTES de son espèce.
 
 Convention de nommage, LUE dans le dossier, jamais déclarée dans la donnée :
-`<base>_transparent<suffixe>.png`, `<base>` tiré de `espece.image`.
+`<base>_transparent<suffixe>.webp` (ou `.png`, format d'avant), `<base>` tiré de `espece.image`.
+Le même nom présent en `.webp` ET en `.png` (transition) ne compte qu'une fois : le `.webp`.
 - suffixe vide ou numéroté (`01`, `02`…) → variante GÉNÉRIQUE ;
 - suffixe à mots (`_arc`, `_epee`, `_arc01`…) → variante SPÉCIALISÉE, choisie seulement
   si CHAQUE mot est porté par une arme équipée (id, `sous_categorie` ou tag). Un mot
@@ -14,7 +15,7 @@ from __future__ import annotations
 import random
 import re
 
-_MOTIF = re.compile(r"^(?P<base>.+?)_transparent(?P<suffixe>.*)\.png$", re.IGNORECASE)
+_MOTIF = re.compile(r"^(?P<base>.+?)_transparent(?P<suffixe>.*)\.(?:png|webp)$", re.IGNORECASE)
 
 
 def _jetons(suffixe: str) -> frozenset[str]:
@@ -44,8 +45,11 @@ def variantes(image: str, fichiers: list[str]) -> list[tuple[str, frozenset[str]
 	if not m:
 		return []
 	base = m.group("base").lower()
+	en_webp = {f[:-5].lower() for f in fichiers or [] if f.lower().endswith(".webp")}
 	res = []
 	for f in sorted(fichiers or []):
+		if f.lower().endswith(".png") and f[:-4].lower() in en_webp:
+			continue
 		mf = _MOTIF.match(f)
 		if mf and mf.group("base").lower() == base:
 			res.append((f, _jetons(mf.group("suffixe"))))

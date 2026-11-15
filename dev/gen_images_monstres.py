@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # dev/gen_images_monstres.py
-# Illustrations des espèces sans image : Gemini (lot, carré 1:1, fond uni) → détourage → monsters/<base>_transparent.png.
+# Illustrations des espèces sans image : Gemini (lot, carré 1:1, fond uni) → détourage → monsters/<base>_transparent.webp (sans perte).
 # Prompts : dev/batch/monstres/prompts.json ({base : {espece, champ_image, prompt}}), gabarit docs/prompts_images.md § 3.
 #
 #   python dev/gen_images_monstres.py compter
@@ -8,7 +8,7 @@
 #   python dev/gen_images_monstres.py refaire apep,lamie  → remet ces clés au prochain lot
 #
 # État : dev/batch/monstres/manifeste.json. Image brute gardée dans dev/batch/monstres/brutes/ (re-détourage à la main
-# avec dev/detourer_image.py si le fond résiste). Jamais d'écrasement : `<base>_transparent.png` pris → `…_transparent01.png`.
+# avec dev/detourer_image.py si le fond résiste). Jamais d'écrasement : `<base>_transparent.webp` (ou son ancien `.png`) pris → `…_transparent01.webp`.
 
 import base64
 import json
@@ -46,12 +46,15 @@ def _manifeste(nouveau=None):
 
 
 def nom_transparent(base):
-	"""PURE sur le dossier : `<base>_transparent.png`, sinon la première variante numérotée libre."""
-	nom, n = f"{base}_transparent.png", 0
-	while os.path.exists(os.path.join(MONSTRES, nom)):
+	"""`<base>_transparent.webp`, sinon la première variante numérotée libre ; un nom pris en `.png`
+	(format d'avant) compte comme pris."""
+	def pris(nom):
+		return any(os.path.exists(os.path.join(MONSTRES, nom + ext)) for ext in (".webp", ".png"))
+	nom, n = f"{base}_transparent", 0
+	while pris(nom):
 		n += 1
-		nom = f"{base}_transparent{n:02d}.png"
-	return nom
+		nom = f"{base}_transparent{n:02d}"
+	return nom + ".webp"
 
 
 def requete(prompt):

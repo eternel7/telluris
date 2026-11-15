@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # dev/detourer_image.py
 # Détoure une illustration de monstre générée sur fond UNI (docs/prompts_images.md § 3 :
-# magenta, vert vif ou bleu vif) → PNG transparent recadré au contenu.
+# magenta, vert vif ou bleu vif) → WebP SANS PERTE transparent recadré au contenu (`.png` si demandé).
 #
 # Méthode (Pillow + stdlib seuls, comme l'image Docker) :
 #   1. couleur du fond = médiane des pixels du cadre ;
@@ -17,9 +17,9 @@
 # ET clair ; si le décor reste, régénérer l'image (prompt : « aucun rocher, aucun sol… »).
 #
 # Usage :
-#   python dev/detourer_image.py source.jpg <slug_espece>      # → templates/resources/monsters/<slug>_transparent.png
-#   python dev/detourer_image.py source.jpg <slug>_transparent01.png  # variante tirée au sort en combat (utils/images_monstres.py)
-#   python dev/detourer_image.py source.jpg chemin/sortie.png [--dur 60] [--doux 110]
+#   python dev/detourer_image.py source.jpg <slug_espece>      # → templates/resources/monsters/<slug>_transparent.webp
+#   python dev/detourer_image.py source.jpg <slug>_transparent01.webp  # variante tirée au sort en combat (utils/images_monstres.py)
+#   python dev/detourer_image.py source.jpg chemin/sortie.webp [--dur 60] [--doux 110]
 
 import argparse
 import os
@@ -112,7 +112,10 @@ def detourer(source: str, sortie: str, dur: float = 60.0, doux: float = 110.0) -
 	out.putdata(sortie_px)
 	bbox = out.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
 	out = out.crop(bbox)
-	out.save(sortie, optimize=True)
+	if sortie.lower().endswith(".webp"):
+		out.save(sortie, "WEBP", lossless=True, method=6, exact=False)
+	else:
+		out.save(sortie, optimize=True)
 	part_fond = sum(fondu) / (w * h)
 	return fond, out.size, part_fond
 
@@ -120,18 +123,18 @@ def detourer(source: str, sortie: str, dur: float = 60.0, doux: float = 110.0) -
 def main() -> None:
 	p = argparse.ArgumentParser(description="Détoure une illustration de monstre sur fond uni.")
 	p.add_argument("source", help="image générée (jpg/png)")
-	p.add_argument("cible", help="slug d'espèce (→ templates/resources/monsters/<slug>_transparent.png), nom .png seul "
+	p.add_argument("cible", help="slug d'espèce (→ templates/resources/monsters/<slug>_transparent.webp), nom .webp/.png seul "
 					"(même dossier) ou chemin .png de sortie")
 	p.add_argument("--dur", type=float, default=60.0, help="distance au fond sous laquelle un pixel est effacé")
 	p.add_argument("--doux", type=float, default=110.0, help="distance au-delà de laquelle un pixel reste opaque")
 	args = p.parse_args()
 	if args.doux <= args.dur:
 		sys.exit("ERREUR : --doux doit dépasser --dur")
-	sortie = args.cible if args.cible.lower().endswith(".png") else f"{args.cible}_transparent.png"
+	sortie = args.cible if args.cible.lower().endswith((".webp", ".png")) else f"{args.cible}_transparent.webp"
 	if not os.path.dirname(sortie):
 		sortie = os.path.join(MONSTRES, sortie)  # nom seul (variante `…_transparent01.png`) : dossier des monstres
 	fond, taille, part = detourer(args.source, sortie, args.dur, args.doux)
-	print(f"{os.path.relpath(sortie, RACINE)} : fond {tuple(round(c) for c in fond)}, "
+	print(f"{sortie} : fond {tuple(round(c) for c in fond)}, "
 		  f"{taille[0]}x{taille[1]}, {part:.0%} de fond retiré")
 
 

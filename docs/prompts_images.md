@@ -36,7 +36,7 @@ Gabarits de prompts pour générer les illustrations du jeu (Gemini). Chaque gab
 |---|---|---|---|
 | Magasin | **paysage 16:9** (1408×768, comme 233 des 294 images de `towns/`) | `templates/resources/towns/` | `<categorie>_<region>NN.png` (ex. `fletcher_europe04.png`) ; propre à une cité : `<base>_<cite>NN.png` (ex. `archerie_europe_rhemi01.png`, cf. `auberge_europe_lutecia*`) |
 | Tenancier | **paysage 16:9** (comme les portraits existants, ~1408×768) | `templates/resources/pnj/` | `marchand_<race>_<m\|f>_<categorie>NN.png` |
-| Monstre | carré 1:1 | `templates/resources/monsters/` | `<slug_espece>_transparent.png` (fond retiré après génération) |
+| Monstre | carré 1:1 | `templates/resources/monsters/` | `<slug_espece>_transparent.webp` (fond retiré après génération, WebP sans perte) |
 | Porte (ext./int.) | paysage 16:9 | `templates/resources/towns/` | `<slug_porte>.png` |
 | Logement du joueur (§ 7) | paysage 16:9 | `templates/resources/towns/` | `<type>_<region>NN.jpg` (ex. `maison_grand_nord01.jpg`) — région obligatoire |
 
@@ -87,7 +87,7 @@ Un prompt qui renvoie à une image précédente (« le même tenancier », « la
 
 Chaque image générée est écrite **directement dans son dossier cible** (cf. 0.3), et **n'écrase jamais** un fichier existant : si `…01` est pris, on passe à `…02`, et ainsi de suite.
 
-**Format de fichier** : celui que rend le modèle, sans conversion (Flash Lite → `.jpg`). Seuls les **monstres** sont en **PNG**, pour la transparence du fond détouré. Les extensions `.png` du tableau 0.3 valent donc pour les monstres ; ailleurs, `.jpg` comme `.png` conviennent.
+**Format de fichier** : celui que rend le modèle, sans conversion (Flash Lite → `.jpg`). Seuls les **monstres** sont convertis : **WebP sans perte** (transparence du fond détouré, −40 % face au PNG ; tout le dossier converti le 15/11/2026). Ailleurs, `.jpg` comme `.png` conviennent.
 
 ---
 
@@ -160,7 +160,7 @@ Champs propres au tenancier (dérivés du métier, une ligne par catégorie à t
 
 > Illustration en pied d'un **{espece}** : {description}. {posture} La créature occupe environ 80 % de l'image, entière, sans membre coupé par le cadre, en vue de trois-quarts. Fond **parfaitement uni et plat, {couleur_fond} pur**, sans dégradé, sans décor, sans sol visible, sans ombre portée, sans halo — la créature ne doit contenir aucune touche de cette couleur. [0.1]
 
-`{couleur_fond}` = une couleur absente de la créature, pour que le fond se retire automatiquement (`python dev/detourer_image.py <image> <slug_espece>` : Pillow seul, remplissage depuis les bords + poches de fond enclavées, recadré ; ⚠️ une image avec décor collé à la créature ne se détoure pas — la régénérer) : **magenta** par défaut, **vert vif** si la créature est rose, violette ou rouge, **bleu vif** si elle est verte. Le fichier détouré s'enregistre en `<slug_espece>_transparent.png`.
+`{couleur_fond}` = une couleur absente de la créature, pour que le fond se retire automatiquement (`python dev/detourer_image.py <image> <slug_espece>` : Pillow seul, remplissage depuis les bords + poches de fond enclavées, recadré ; ⚠️ une image avec décor collé à la créature ne se détoure pas — la régénérer) : **magenta** par défaut, **vert vif** si la créature est rose, violette ou rouge, **bleu vif** si elle est verte. Le fichier détouré s'enregistre en `<slug_espece>_transparent.webp`.
 
 Traduction des tags en `{posture}` :
 
